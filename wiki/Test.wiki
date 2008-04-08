@@ -1,4 +1,4 @@
-#summary One-sentence summary of this page.
+#summary Tests how wiki works on code.google.com
 
 = Introduction =
 
