@@ -2,7 +2,7 @@
 
 = Introduction =
 
-Add your content here.
+Add your content here. Sometimes, you need {{{INLINE_CODE()}}}, to mention function names and such.
 
 {{{
 ASSERT_EQ(x.size(), y.size()) << "Vectors x and y are of unequal length";
