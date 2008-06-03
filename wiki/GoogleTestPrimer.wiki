@@ -1,29 +1,29 @@
-#summary Google Test Primer: Getting started with Google Test
+#summary Getting started with Google C++ Testing Framework
 
 = Google C++ Testing Framework Primer =
 
-== Introduction: Why The Google C++ Testing Framework? ==
+== Introduction: Why Google C++ Testing Framework? ==
 
-_The Google C++ Testing Framework_ helps you write better C++ tests.
+_Google C++ Testing Framework_ helps you write better C++ tests.
 
 No matter whether you work on Linux, Windows, or a Mac, if you write C++ code,
 Google Test can help you. And it supports _any_ kind of tests, not just unit
 tests.
 
-So what makes a good test, and how does the Google C++ Testing Framework fit in? We believe:
- # Tests should be _independent_ and _repeatable_. It's a pain to debug a test that succeeds or fails as a result of other tests. The Google C++ Testing Framework isolates the tests by running each of them on a different object. When a test fails, the Google C++ Testing Framework allows you to run it in isolation for quick debugging.
- # Tests should be well _organized_ and reflect the structure of the tested code. The Google C++ Testing Framework groups related tests into test cases that can share data and subroutines. This common pattern is easy to recognize and makes tests easy to maintain. Such consistency is especially helpful when people switch projects and start to work on a new code base.
- # Tests should be _portable_ and _reusable_. The open-source community has a lot of code that is platform-neutral, its tests should also be platform-neutral. The Google C++ Testing Framework works on different OSes, with different compilers (gcc, icc, and MSVC), with or without exceptions, so the Google C++ Testing Framework tests can easily work with a variety of configurations.
- # When tests fail, they should provide as much _information_ about the problem as possible. The Google C++ Testing Framework doesn't stop at the first test failure. Instead, it only stops the current test and continues with the next. You can also set up tests that report non-fatal failures after which the current test continues. Thus, you can detect and fix multiple bugs in a single run-edit-compile cycle.
- # The testing framework should liberate test writers from housekeeping chores and let them focus on the test _content_. The Google C++ Testing Framework automatically keeps track of all tests defined, and doesn't require the user to enumerate them in order to run them.
- # Tests should be _fast_. With the Google C++ Testing Framework, you can reuse shared resources across tests and pay for the set-up/tear-down only once, without making tests depend on each other.
+So what makes a good test, and how does Google C++ Testing Framework fit in? We believe:
+ # Tests should be _independent_ and _repeatable_. It's a pain to debug a test that succeeds or fails as a result of other tests.  Google C++ Testing Framework isolates the tests by running each of them on a different object. When a test fails, Google C++ Testing Framework allows you to run it in isolation for quick debugging.
+ # Tests should be well _organized_ and reflect the structure of the tested code.  Google C++ Testing Framework groups related tests into test cases that can share data and subroutines. This common pattern is easy to recognize and makes tests easy to maintain. Such consistency is especially helpful when people switch projects and start to work on a new code base.
+ # Tests should be _portable_ and _reusable_. The open-source community has a lot of code that is platform-neutral, its tests should also be platform-neutral.  Google C++ Testing Framework works on different OSes, with different compilers (gcc, icc, and MSVC), with or without exceptions, so Google C++ Testing Framework tests can easily work with a variety of configurations.
+ # When tests fail, they should provide as much _information_ about the problem as possible. Google C++ Testing Framework doesn't stop at the first test failure. Instead, it only stops the current test and continues with the next. You can also set up tests that report non-fatal failures after which the current test continues. Thus, you can detect and fix multiple bugs in a single run-edit-compile cycle.
+ # The testing framework should liberate test writers from housekeeping chores and let them focus on the test _content_.  Google C++ Testing Framework automatically keeps track of all tests defined, and doesn't require the user to enumerate them in order to run them.
+ # Tests should be _fast_. With Google C++ Testing Framework, you can reuse shared resources across tests and pay for the set-up/tear-down only once, without making tests depend on each other.
 
-Since the Google C++ Testing Framework is based on the popular xUnit
+Since Google C++ Testing Framework is based on the popular xUnit
 architecture, you'll feel right at home if you've used JUnit or PyUnit before.
 If not, it will take you about 10 minutes to learn the basics and get started.
 So let's go!
 
-_Note:_ We occasionally refer to the Google C++ Testing Framework informally as
+_Note:_ We occasionally refer to Google C++ Testing Framework informally as
 _Google Test_.
 
 == Basic Concepts ==
