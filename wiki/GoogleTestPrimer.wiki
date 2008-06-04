@@ -1,4 +1,5 @@
 #summary Getting started with Google C++ Testing Framework
+#labels Featured
 
 = Google C++ Testing Framework Primer =
 
