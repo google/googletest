@@ -128,7 +128,7 @@ message is formatted:
 
 The difference between this and the previous group of macros is that instead of
 a predicate, `(ASSERT|EXPECT)_PRED_FORMAT*` take a _predicate-formatter_
-(`_pred_formatn_`), which is a function or functor that has the signature:
+(_`pred_formatn`_), which is a function or functor that has the signature:
 
 `testing::AssertionResult PredicateFormattern(const char* `_`expr1`_`, const char* `_`expr2`_`, ... const char* `_`exprn`_`, T1 `_`val1`_`, T2 `_`val2`_`, ... Tn `_`valn`_`);`
 
@@ -640,7 +640,7 @@ This expression is `true` if the program exited normally with the given exit
 code.
 
 {{{
-testing::KilledBySignal(_signal_number_)
+testing::KilledBySignal(signal_number)
 }}}
 
 This expression is `true` if the program was killed by the given signal.
