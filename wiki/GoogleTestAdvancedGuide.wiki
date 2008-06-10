@@ -1,4 +1,5 @@
 #summary Google Test Advanced Guide
+#labels Featured
 = Google Test Advanced Guide =
 
 Now that you have read the Google Test Primer and learned how to write tests
