@@ -227,7 +227,7 @@ you can use a _test fixture_. It allows you to reuse the same configuration of
 objects for several different tests.
 
 To create a fixture, just:
- # Derive a class from `testing::Test` . Start its body with `protected:` as we'll want to access fixture members from sub-classes.
+ # Derive a class from `testing::Test` . Start its body with `protected:` or `public:` as we'll want to access fixture members from sub-classes.
  # Inside the class, declare any objects you plan to use.
  # If necessary, write a default constructor or `SetUp()` function to prepare the objects for each test. A common mistake is to spell `SetUp()` as `Setup()` with a small `u` - don't let that happen to you.
  # If necessary, write a destructor or `TearDown()` function to release any resources you allocated in `SetUp()` . To learn when you should use the constructor/destructor and when you should use `SetUp()/TearDown()`, read this FAQ entry.
@@ -265,7 +265,7 @@ has the following interface:
 {{{
 template <typename E> // E is the element type.
 class Queue {
-  public:
+ public:
   Queue();
   void Enqueue(const E& element);
   E* Dequeue(); // Returns NULL if the queue is empty.
@@ -278,7 +278,7 @@ First, define a fixture class. By convention, you should give it the name
 `FooTest` where `Foo` is the class being tested.
 {{{
 class QueueTest : public testing::Test {
-  protected:
+ protected:
   virtual void SetUp() {
   q1_.Enqueue(1);
   q2_.Enqueue(2);
@@ -383,7 +383,7 @@ namespace {
 
 // The fixture for testing class Foo.
 class FooTest : public testing::Test {
-  protected:
+ protected:
   // You can remove any or all of the following functions if its body
   // is empty.
 
