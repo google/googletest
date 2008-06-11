@@ -6,6 +6,58 @@ If you cannot find the answer to your question here, and you have read
 GoogleTestPrimer and GoogleTestAdvancedGuide, send it to
 googletestframework@googlegroups.com.
 
+===  Why aren't Google Test assertions implemented using exceptions? ===
+
+Our original motivation was to be able to use Google Test in projects
+that disable exceptions.  Later we realized some additional benefits
+of this approach:
+
+  # Throwing in a destructor is undefined behavior in C++.  Not using exceptions means Google Test's assertions are safe to use in destructors.
+  # The `EXPECT_*` family of macros will continue even after a failure, allowing multiple failures in a `TEST` to be reported in a single run. This is a popular feature, as in C++ the edit-compile-test cycle is usually quite long and being able to fixing more than one thing at a time is a blessing.
+  # If assertions are implemented using exceptions, a test may falsely ignore a failure if it's caught by user code:
+{{{
+   try { ... ASSERT_TRUE(...) ... }
+   catch (...) { ... }
+}}}
+The above code will pass even if the `ASSERT_TRUE` throws.  While it's unlikely for someone to write this in a test, it's possible to run into this pattern when you write assertions in callbacks that are called by the code under test.
+
+The downside of not using exceptions is that `ASSERT_*` (implemented
+using `return`) will only abort the current function, not the current
+`TEST`.
+
+===  Why do we use two different macros for tests with and without fixtures? ===
+
+Unfortunately, C++'s macro system doesn't allow us to use the same
+macro for both cases.  One possibility is to provide only one macro
+for tests with fixtures, and require the user to define an empty
+fixture sometimes:
+
+{{{
+class FooTest : public testing::Test {};
+
+TEST_F(FooTest, DoesThis) { ... }
+}}}
+or
+{{{
+typedef testing::Test FooTest;
+
+TEST_F(FooTest, DoesThat) { ... }
+}}}
+
+Yet, many people think this is one line too many. :-) Our goal was to
+make it really easy to write tests, so we tried to make simple tests
+trivial to create.  That means using a separate macro for such tests.
+
+We think neither approach is ideal, yet either of them is reasonable.
+In the end, it probably doesn't matter much either way.
+
+===  Why don't we use structs as test fixtures?  Since they are used only in tests and only as a bundle of member variables and functions, the encapsulation doesn't seem to buy much. ===
+
+We like to use structs only when representing passive data.  This
+distinction between structs and classes is good for documenting the
+intent of the code's author.  Since test fixtures have logic like
+`SetUp()` and `TearDown()`, they are better defined as classes.
+
 ===  My death test modifies some state, but the change seems lost after the death test finishes. Why? ===
 
 Death tests (`EXPECT_DEATH`, etc) are executed in a sub-process s.t. the
@@ -97,8 +149,7 @@ For a complete example using derived test fixtures, see
 ===  My compiler complains "void value not ignored as it ought to be." What does this mean?  ===
 
 You're probably using an `ASSERT_*()` in a function that doesn't return `void`.
-`ASSERT_*()` can only be used in `void` functions, due to exceptions being
-disabled by our build system. Please see more details here.
+`ASSERT_*()` can only be used in `void` functions.
 
 ===  My death test hangs (or seg-faults). How do I fix it?  ===
 
