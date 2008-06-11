@@ -1,0 +1,12 @@
+#summary Google C++ Testing Framework Samples
+
+= Google C++ Testing Framework Samples =
+
+If you're like us, you'd like to look at some Google Test sample code.  The
+'samples' folder has a number of well-commented samples showing how to use a
+variety of Google Test features.
+
+  * Sample #1 shows the basic steps of using Google Test to test C++ functions.
+  * Sample #2 shows a more complex unit test for a class with multiple member functions.
+  * Sample #3 uses a test fixture.
+  * Sample #4 puts shared testing logic in a base test fixture, and reuses it in derived fixtures.
