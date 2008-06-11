@@ -1,8 +1,8 @@
-#summary Google Test Advanced Guide
+#summary Advanced topics on using Google Test
 #labels Featured
-= Google Test Advanced Guide =
+= Google C++ Testing Framework Advanced Guide =
 
-Now that you have read the Google Test Primer and learned how to write tests
+Now that you have read GoogleTestPrimer and learned how to write tests
 using Google Test, it's time to learn some new tricks. This document will show you
 more assertions as well as how to construct complex failure messages, propagate
 fatal failures, reuse and speed up your test fixtures, and use various flags
@@ -18,9 +18,7 @@ This section covers some less frequently used, but still significant, assertions
 they generate a success or failure directly. Like the macros that actually
 perform a test, you may stream a custom failure message into the them.
 
-{{{
-SUCCEED();
-}}}
+|| `SUCCEED();` ||
 
 Generates a success. This does NOT make the overall test succeed. A test is
 considered successful only if none of its assertions fail during its execution.
@@ -51,14 +49,11 @@ _Availability_: Linux, Windows, Mac.
 
 These assertions test for `HRESULT` success or failure.
 
-|| `ASSERT_HRESULT_SUCCEEDED(`_`expression`_`);` || `EXPECT_HRESULT_SUCCEEDED(`_`expression`_`);` ||
-|| `ASSERT_HRESULT_FAILED(`_`expression`_`);`    || `EXPECT_HRESULT_FAILED(`_`expression`_`);`    ||
+|| *Fatal assertion* || *Nonfatal assertion* || *Verifies* ||
+|| `ASSERT_HRESULT_SUCCEEDED(`_expression_`);` || `EXPECT_HRESULT_SUCCEEDED(`_expression_`);` || _expression_ is a success `HRESULT` ||
+|| `ASSERT_HRESULT_FAILED(`_expression_`);`    || `EXPECT_HRESULT_FAILED(`_expression_`);`    || _expression_ is a failure `HRESULT` ||
 
-`ASSERT_HRESULT_SUCCEEDED` and `EXPECT_HRESULT_SUCCEEDED` fail if _`expression`_
-is a failure `HRESULT`. `ASSERT_HRESULT_FAILED` and `EXPECT_HRESULT_FAILED`
-fail if _`expression`_ is a success `HRESULT`.
-
-In either case, the generated output contains the human-readable error message
+The generated output contains the human-readable error message
 associated with the `HRESULT` code returned by _expression_.
 
 You might use them like this:
@@ -85,12 +80,13 @@ is awkward especially when the expression has side-effects or is expensive to
 evaluate.
 
 To solve this problem, we provide a family of generic _predicate assertions_:
-|| `ASSERT_PRED1(`_`pred1, val1`_`);`       || `EXPECT_PRED1(`_`pred1, val1`_`);` ||
-|| `ASSERT_PRED2(`_`pred2, val1, val2`_`);` || `EXPECT_PRED2(`_`pred2, val1, val2`_`);` ||
-||  ...  || ... ||
+|| *Fatal assertion* || *Nonfatal assertion* || *Verifies* ||
+|| `ASSERT_PRED1(`_pred1, val1_`);`       || `EXPECT_PRED1(`_pred1, val1_`);` || _pred1(val1)_ returns true ||
+|| `ASSERT_PRED2(`_pred2, val1, val2_`);` || `EXPECT_PRED2(`_pred2, val1, val2_`);` ||  _pred2(val1, val2)_ returns true ||
+||  ...  || ... || ... ||
 
-In the above, _`predn`_ is an _`n`_-ary predicate function or functor, where
-_`val1`_, _`val2`_, ..., and _`valn`_ are its arguments. The assertion succeeds
+In the above, _predn_ is an _n_-ary predicate function or functor, where
+_val1_, _val2_, ..., and _valn_ are its arguments. The assertion succeeds
 if the predicate returns true when applied on the given arguments, and fails
 otherwise. When the assertion fails, it prints the value of each arguments. In
 either case, the arguments are evaluated exactly once.
@@ -123,18 +119,19 @@ satisfactory, or some arguments to your predicate do not support streaming to
 `ostream`, you can instead use the following assertions to customize how the
 message is formatted:
 
-|| `ASSERT_PRED_FORMAT1(`_`pred_format1, val1`_);`        || `EXPECT_PRED_FORMAT1(`_`pred_format1, val1`_); ||
-|| `ASSERT_PRED_FORMAT2(`_`pred_format2, val1, val2`_`);` || `EXPECT_PRED_FORMAT2(`_`pred_format2, val1, val2`_); ||
+|| *Fatal assertion* || *Nonfatal assertion* || *Verifies* ||
+|| `ASSERT_PRED_FORMAT1(`_pred_format1, val1_);`        || `EXPECT_PRED_FORMAT1(`_pred_format1, val1_); || _pred_format1(val1)_ is successful ||
+|| `ASSERT_PRED_FORMAT2(`_pred_format2, val1, val2_`);` || `EXPECT_PRED_FORMAT2(`_pred_format2, val1, val2_); || _pred_format2(val1, val2)_ is successful ||
 || ...                                                    || ... ||
 
 The difference between this and the previous group of macros is that instead of
 a predicate, `(ASSERT|EXPECT)_PRED_FORMAT*` take a _predicate-formatter_
-(_`pred_formatn`_), which is a function or functor that has the signature:
+(_pred_formatn_), which is a function or functor that has the signature:
 
-`testing::AssertionResult PredicateFormattern(const char* `_`expr1`_`, const char* `_`expr2`_`, ... const char* `_`exprn`_`, T1 `_`val1`_`, T2 `_`val2`_`, ... Tn `_`valn`_`);`
+`testing::AssertionResult PredicateFormattern(const char* `_expr1_`, const char* `_expr2_`, ... const char* `_exprn_`, T1 `_val1_`, T2 `_val2_`, ... Tn `_valn_`);`
 
-where _`val1`_, _`val2`_, ..., and _`valn`_ are the values of the predicate
-arguments, and _`expr1`_, _`expr2`_, ..., and _`exprn`_ are the corresponding
+where _val1_, _val2_, ..., and _valn_ are the values of the predicate
+arguments, and _expr1_, _expr2_, ..., and _exprn_ are the corresponding
 expressions as they appear in the source code. The types `T1`, `T2`, ..., and
 `Tn` can be either value types or reference types. For example, if an
 argument has type `Foo`, you can declare it as either `Foo` or `const Foo&`,
@@ -211,18 +208,17 @@ article on float comparison].
 
 ====  Floating-Point Macros ====
 
-|| `ASSERT_FLOAT_EQ(`_`expected, actual`_`);`  || `EXPECT_FLOAT_EQ(`_`expected, actual`_`);` ||
-|| `ASSERT_DOUBLE_EQ(`_`expected, actual`_`);` || `EXPECT_DOUBLE_EQ(`_`expected, actual`_`);` ||
+|| *Fatal assertion* || *Nonfatal assertion* || *Verifies* ||
+|| `ASSERT_FLOAT_EQ(`_expected, actual_`);`  || `EXPECT_FLOAT_EQ(`_expected, actual_`);` || the two `float` values are almost equal ||
+|| `ASSERT_DOUBLE_EQ(`_expected, actual_`);` || `EXPECT_DOUBLE_EQ(`_expected, actual_`);` || the two `double` values are almost equal ||
 
-Verifies that two `float` or `double` values are almost equal, meaning they are
-within 4 ULP's from each other.
+By "almost equal", we mean the two values are within 4 ULP's from each
+other.
 
 The following assertions allow you to choose the acceptable error bound:
 
-|| `ASSERT_NEAR(`_`val1, val2, abs_error`_`);` || `EXPECT_NEAR`_`(val1, val2, abs_error`_`);` ||
-
-Verifies that the difference between _`val1`_ and _`val2`_ doesn't exceed the
-given absolute error.
+|| *Fatal assertion* || *Nonfatal assertion* || *Verifies* ||
+|| `ASSERT_NEAR(`_val1, val2, abs_error_`);` || `EXPECT_NEAR`_(val1, val2, abs_error_`);` || the difference between _val1_ and _val2_ doesn't exceed the given absolute error ||
 
 _Availability_: Linux, Windows, Mac.
 
@@ -238,7 +234,7 @@ EXPECT_PRED_FORMAT2(testing::FloatLE, val1, val2);
 EXPECT_PRED_FORMAT2(testing::DoubleLE, val1, val2);
 }}}
 
-Verifies that _`val1`_ is less than, or almost equal to, _`val2`_. You can
+Verifies that _val1_ is less than, or almost equal to, _val2_. You can
 replace `EXPECT_PRED_FORMAT2` in the above table with `ASSERT_PRED_FORMAT2`.
 
 _Availability_: Linux, Windows, Mac.
@@ -616,13 +612,14 @@ in an expected fashion is also a death test.
 
 Google Test has the following macros to support death tests:
 
-|| `ASSERT_DEATH(`_`statement, regex`_`);           || `EXPECT_DEATH(`_`statement, regex`_`); ||
-|| `ASSERT_EXIT(`_`statement, predicate, regex`_`); || `EXPECT_EXIT(`_`statement, predicate, regex`_`); ||
+|| *Fatal assertion* || *Nonfatal assertion* || *Verifies* ||
+|| `ASSERT_DEATH(`_statement, regex_`);           || `EXPECT_DEATH(`_statement, regex_`); || _statement_ crashes with the given error ||
+|| `ASSERT_EXIT(`_statement, predicate, regex_`); || `EXPECT_EXIT(`_statement, predicate, regex_`); ||_statement_ exits with the given error and its exit code matches _predicate_ ||
 
-where _`statement`_ is a statement that is expected to cause the process to
-die, _`predicate`_ is a function or function object that evaluates an integer
-exit status, and _`regex`_ is a regular expression that the stderr output of
-_`statement`_ is expected to match. Note that _`statement`_ can be _any valid
+where _statement_ is a statement that is expected to cause the process to
+die, _predicate_ is a function or function object that evaluates an integer
+exit status, and _regex_ is a regular expression that the stderr output of
+_statement_ is expected to match. Note that _statement_ can be _any valid
 statement_ (including _compound statement_) and doesn't have to be an
 expression.
 
@@ -762,13 +759,13 @@ int main(int argc, char** argv) {
 
 ===  Caveats  ===
 
-The _`statement`_ argument of `ASSERT_EXIT()` can be any valid C++ statement
+The _statement_ argument of `ASSERT_EXIT()` can be any valid C++ statement
 except that it can not return from the current function. This means
-_`statement`_ should not contain `return` or a macro that might return (e.g.
-`ASSERT_TRUE()` ). If _`statement`_ returns before it crashes, Google Test will
+_statement_ should not contain `return` or a macro that might return (e.g.
+`ASSERT_TRUE()` ). If _statement_ returns before it crashes, Google Test will
 print an error message, and the test will fail.
 
-Since _`statement`_ runs in the child process, any in-memory side effect (e.g.
+Since _statement_ runs in the child process, any in-memory side effect (e.g.
 modifying a variable, releasing memory, etc) it causes will _not_ be observable
 in the parent process. In particular, if you release memory in a death test,
 your program will fail the heap check as the parent process will never see the
