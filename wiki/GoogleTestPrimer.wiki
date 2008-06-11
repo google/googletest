@@ -87,13 +87,13 @@ streamed to an assertion, it will be translated to UTF-8 when printed.
 === Basic Assertions ===
 
 These assertions do basic true/false condition testing.
-|| `ASSERT_TRUE(`_condition_`)`;  || `EXPECT_TRUE(`_condition_`)`;   ||
-|| `ASSERT_FALSE(`_condition_`)`; || `EXPECT_FALSE(`_condition_`)`;  ||
+|| *Fatal assertion* || *Nonfatal assertion* || *Verifies* ||
+|| `ASSERT_TRUE(`_condition_`)`;  || `EXPECT_TRUE(`_condition_`)`;   || _condition_ is true ||
+|| `ASSERT_FALSE(`_condition_`)`; || `EXPECT_FALSE(`_condition_`)`;  || _condition_ is false ||
 
-Verifies that a condition, interpreted as a Boolean expression, is true or
-false depending on its name. Remember, when they fail, `ASSERT_*` yields a
-fatal failure and returns from the current function, while `EXPECT_*` yields a
-nonfatal failure, allowing the function to continue running. In either case, an
+Remember, when they fail, `ASSERT_*` yields a fatal failure and
+returns from the current function, while `EXPECT_*` yields a nonfatal
+failure, allowing the function to continue running. In either case, an
 assertion failure means its containing test fails.
 
 _Availability_: Linux, Windows, Mac.
@@ -102,20 +102,19 @@ _Availability_: Linux, Windows, Mac.
 
 This section describes assertions that compare two values.
 
-||`ASSERT_EQ(`_expected_`, `_actual_`);`||`EXPECT_EQ(`_expected_`, `_actual_`);`||
-||`ASSERT_NE(`_val1_`, `_val2_`);`      ||`EXPECT_NE(`_val1_`, `_val2_`);`      ||
-||`ASSERT_LT(`_val1_`, `_val2_`);`      ||`EXPECT_LT(`_val1_`, `_val2_`);`      ||
-||`ASSERT_LE(`_val1_`, `_val2_`);`      ||`EXPECT_LE(`_val1_`, `_val2_`);`      ||
-||`ASSERT_GT(`_val1_`, `_val2_`);`      ||`EXPECT_GT(`_val1_`, `_val2_`);`      ||
-||`ASSERT_GE(`_val1_`, `_val2_`);`      ||`EXPECT_GE(`_val1_`, `_val2_`);`      ||
+|| *Fatal assertion* || *Nonfatal assertion* || *Verifies* ||
+||`ASSERT_EQ(`_expected_`, `_actual_`);`||`EXPECT_EQ(`_expected_`, `_actual_`);`|| _expected_ `==` _actual_ ||
+||`ASSERT_NE(`_val1_`, `_val2_`);`      ||`EXPECT_NE(`_val1_`, `_val2_`);`      || _val1_ `!=` _val2_ ||
+||`ASSERT_LT(`_val1_`, `_val2_`);`      ||`EXPECT_LT(`_val1_`, `_val2_`);`      || _val1_ `<` _val2_ ||
+||`ASSERT_LE(`_val1_`, `_val2_`);`      ||`EXPECT_LE(`_val1_`, `_val2_`);`      || _val1_ `<=` _val2_ ||
+||`ASSERT_GT(`_val1_`, `_val2_`);`      ||`EXPECT_GT(`_val1_`, `_val2_`);`      || _val1_ `>` _val2_ ||
+||`ASSERT_GE(`_val1_`, `_val2_`);`      ||`EXPECT_GE(`_val1_`, `_val2_`);`      || _val1_ `>=` _val2_ ||
 
-Verifies that _expected_ `==` _actual_ , _val1_ `!=` _val2_ , _val1_ `<` _val2_
-, _val1_ `<=` _val2_ , _val1_ `>` _val2_ , or _val1_ `>=` _val2_ ,
-respectively. In the event of a failure, Google Test prints both _val1_ and
-_val2_ . In `ASSERT_EQ*` and `EXPECT_EQ*` (and all other equality assertions
-we'll introduce later), you should put the expression you want to test in the
-position of _actual_, and put its expected value in _expected_, as Google
-Test's failure messages are optimized for this convention.
+In the event of a failure, Google Test prints both _val1_ and _val2_
+. In `ASSERT_EQ*` and `EXPECT_EQ*` (and all other equality assertions
+we'll introduce later), you should put the expression you want to test
+in the position of _actual_, and put its expected value in _expected_,
+as Google Test's failure messages are optimized for this convention.
 
 Value arguments must be comparable by the assertion's comparison operator or
 you'll get a compiler error. Values must also support the `<<` operator for
@@ -149,14 +148,13 @@ _Availability_: Linux, Windows, Mac.
 The assertions in this group compare two *C strings*. If you want to compare
 two `string` objects, use `EXPECT_EQ`, `EXPECT_NE`, and etc instead.
 
-|| `ASSERT_STREQ(`_str1_`, `_str2_`);`    || `EXPECT_STREQ(`_str1_`, `_str2_`);`     ||
-|| `ASSERT_STRNE(`_str1_`, `_str2_`);`    || `EXPECT_STRNE(`_str1_`, `_str2_`);`     ||
-|| `ASSERT_STRCASEEQ(`_str1_`, `_str2_`);`|| `EXPECT_STRCASEEQ(`_str1_`, `_str2_`);` ||
-|| `ASSERT_STRCASENE(`_str1_`, `_str2_`);`|| `EXPECT_STRCASENE(`_str1_`, `_str2_`);` ||
+|| *Fatal assertion* || *Nonfatal assertion* || *Verifies* ||
+|| `ASSERT_STREQ(`_expected_str_`, `_actual_str_`);`    || `EXPECT_STREQ(`_expected_str_`, `_actual_str_`);`     || the two C strings have the same content ||
+|| `ASSERT_STRNE(`_str1_`, `_str2_`);`    || `EXPECT_STRNE(`_str1_`, `_str2_`);`     || the two C strings have different content ||
+|| `ASSERT_STRCASEEQ(`_expected_str_`, `_actual_str_`);`|| `EXPECT_STRCASEEQ(`_expected_str_`, `_actual_str_`);` || the two C strings have the same content, ignoring case ||
+|| `ASSERT_STRCASENE(`_str1_`, `_str2_`);`|| `EXPECT_STRCASENE(`_str1_`, `_str2_`);` || the two C strings have different content, ignoring case ||
 
-Verifies that two C strings have the same content, have different contents, have
-the same contents ignoring case, or have different contents ignoring case,
-respectively. Note that "CASE" in an assertion name means that case is ignored.
+Note that "CASE" in an assertion name means that case is ignored.
 
 `*STREQ*` and `*STRNE*` also accept wide C strings (`wchar_t*`). If a
 comparison of two wide strings fails, their values will be printed as UTF-8
