@@ -1,13 +1,660 @@
-#summary Google Test Frequently Asked Questions
+#summary Tips and Frequently-Asked Questions about Google C++ Testing Framework
 
-= Introduction =
+= Tips and Frequently-Asked Questions about Google C++ Testing Framework =
 
-Add your content here.
+If you cannot find the answer to your question here, and you have read
+GoogleTestPrimer and GoogleTestAdvanced, send it to
+googletestframework@googlegroups.com.
+
+===  My death test modifies some state, but the change seems lost after the death test finishes. Why? ===
+
+Death tests (`EXPECT_DEATH`, etc) are executed in a sub-process s.t. the
+expected crash won't kill the test program (i.e. the parent process). As a
+result, any in-memory side effects they incur are observable in their
+respective sub-processes, but not in the parent process. You can think of them
+as running in a parallel universe, more or less.
+
+===  The compiler complains about "undefined references" to some static const member variables, but I did define them in the class body. What's wrong?  ===
+
+If your class has a static data member:
+
+{{{
+// foo.h
+class Foo {
+  ...
+  static const int kBar = 100;
+};
+}}}
+
+You also need to define it _outside_ of the class body in `foo.cc`:
+
+{{{
+const int Foo::kBar;  // No initializer here.
+}}}
+
+Otherwise your code is *invalid C++*, and may break in unexpected ways. In
+particular, using it in Google Test comparison assertions (`EXPECT_EQ`, etc)
+will generate an "undefined reference" linker error.
+
+===  I have an interface that has several implementations. Can I write a set of tests once and repeat them over all the implementations?  ===
+
+Google Test doesn't yet have good support for this kind of tests, or
+data-driven tests in general. We hope to be able to make improvements in this
+area soon.
+
+===  Can I derive a test fixture from another?  ===
+
+Yes.
+
+Each test fixture has a corresponding and same named test case. This means only
+one test case can use a particular fixture. Sometimes, however, multiple test
+cases may want to use the same or slightly different fixtures. For example, you
+may want to make sure that all of a GUI library's test cases don't leak
+important system resources like fonts and brushes.
+
+In Google Test, you share a fixture among test cases by putting the shared
+logic in a base test fixture, then deriving from that base a separate fixture
+for each test case that wants to use this common logic. You then use `TEST_F()`
+to write tests using each derived fixture.
+
+Typically, your code looks like this:
+
+{{{
+// Defines a base test fixture.
+class BaseTest : public testing::Test {
+  protected:
+   ...
+};
+
+// Derives a fixture FooTest from BaseTest.
+class FooTest : public BaseTest {
+  protected:
+    virtual void SetUp() {
+      BaseTest::SetUp();  // Sets up the base fixture first.
+      ... additional set-up work ...
+    }
+    virtual void TearDown() {
+      ... clean-up work for FooTest ...
+      BaseTest::TearDown();  // Remember to tear down the base fixture
+                             // after cleaning up FooTest!
+    }
+    ... functions and variables for FooTest ...
+};
+
+// Tests that use the fixture FooTest.
+TEST_F(FooTest, Bar) { ... }
+TEST_F(FooTest, Baz) { ... }
+
+... additional fixtures derived from BaseTest ...
+}}}
+
+If necessary, you can continue to derive test fixtures from a derived fixture.
+Google Test has no limit on how deep the hierarchy can be.
+
+For a complete example using derived test fixtures, see
+`//depot/googletest_samples/sample5_unittest.cc`.
+
+===  My compiler complains "void value not ignored as it ought to be." What does this mean?  ===
+
+You're probably using an `ASSERT_*()` in a function that doesn't return `void`.
+`ASSERT_*()` can only be used in `void` functions, due to exceptions being
+disabled by our build system. Please see more details here.
+
+===  My death test hangs (or seg-faults). How do I fix it?  ===
+
+In Google Test, death tests are run in a child process and the way they work is
+delicate. To write death tests you really need to understand how they work.
+Please make sure you have read this.
+
+In particular, death tests don't like having multiple threads in the parent
+process. So the first thing you can try is to eliminate creating threads
+outside of `EXPECT_DEATH()`.
+
+Sometimes this is impossible as some library you must use may be creating
+threads before `main()` is even reached. In this case, you can try to minimize
+the chance of conflicts by either moving as many activities as possible inside
+`EXPECT_DEATH()` (in the extreme case, you want to move everything inside), or
+leaving as few things as possible in it. Also, you can try to set the death
+test style to `"threadsafe"`, which is safer but slower, and see if it helps.
+
+If you go with thread-safe death tests, remember that they rerun the test
+program from the beginning in the child process. Therefore make sure your
+program can run side-by-side with itself and is deterministic.
+
+In the end, this boils down to good concurrent programming. You have to make
+sure that there is no race conditions or dead locks in your program. No silver
+bullet - sorry!
+
+===  Should I use the constructor/destructor of the test fixture or `SetUp()`/`TearDown()`? ===
+
+The first thing to remember is that Google Test does not reuse the same test
+fixture object across multiple tests. For each `TEST_F`, Google Test will
+create a fresh test fixture object, immediately call `SetUp()`, run the test,
+call `TearDown()`, and then delete the test fixture object. Therefore, there is
+no need to write a `SetUp()` or `TearDown()` function if the constructor or
+destructor already does the job.
+
+You may still want to use `SetUp()/TearDown()` in the following cases:
+ * If the tear-down operation could throw an exception, you must use `TearDown()` as opposed to the destructor, as throwing in a destructor leads to undefined behavior and usually will kill your program right away. Note that many standard libraries (like STL) may throw when exceptions are enabled in the compiler. Therefore you should prefer `TearDown()` if you want to write portable tests that work with or without exceptions.
+ *  The Google Test team is considering making the assertion macros throw on platforms where exceptions are enabled (e.g. Windows, Mac OS, and Linux client-side), which will eliminate the need for the user to propagate failures from a subroutine to its caller. Therefore, you shouldn't use Google Test assertions in a destructor if your code could run on such a platform.
+ *  In a constructor or destructor, you cannot make a virtual function call on this object. (You can call a method declared as virtual, but it will be statically bound.) Therefore, if you need to call a method that will be overriden in a derived class, you have to use `SetUp()/TearDown()`.
+
+===   The compiler complains "no matching function to call" when I use `ASSERT_PRED*`. How do I fix it?  ===
+
+If the predicate function you use in `ASSERT_PRED*` or `EXPECT_PRED*` is
+overloaded or a template, the compiler will have trouble figuring out which
+overloaded version it should use. `ASSERT_PRED_FORMAT*` and
+`EXPECT_PRED_FORMAT*` don't have this problem.
+
+If you see this error, you might want to switch to
+`(ASSERT|EXPECT)_PRED_FORMAT*`, which will also give you a better failure
+message. If, however, that is not an option, you can resolve the problem by
+explicitly telling the compiler which version to pick.
+
+For example, suppose you have
+
+{{{
+bool IsPositive(int n) {
+  return n > 0;
+}
+bool IsPositive(double x) {
+  return x > 0;
+}
+}}}
+
+you will get a compiler error if you write
+
+{{{
+EXPECT_PRED1(IsPositive, 5);
+}}}
+
+However, this will work:
+
+{{{
+EXPECT_PRED1(*static_cast<bool (*)(int)>*(IsPositive), 5);
+}}}
+
+(The stuff inside the angled brackets for the `static_cast` operator is the
+type of the function pointer for the `int`-version of `IsPositive()`.)
+
+As another example, when you have a template function
+
+{{{
+template <typename T>
+bool IsNegative(T x) {
+  return x < 0;
+}
+}}}
+
+you can use it in a predicate assertion like this:
+
+{{{
+ASSERT_PRED1(IsNegative*<int>*, -5);
+}}}
+
+Things are more interesting if your template has more than one parameters. The
+following won't compile:
+
+{{{
+ASSERT_PRED2(*GreaterThan<int, int>*, 5, 0);
+}}}
 
 
-= Details =
+as the C++ pre-processor thinks you are giving `ASSERT_PRED2` 4 arguments,
+which is one more than expected. The workaround is to wrap the predicate
+function in parentheses:
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+{{{
+ASSERT_PRED2(*(GreaterThan<int, int>)*, 5, 0);
+}}}
+
+
+===   My compiler complains about "ignoring return value" when I call `RUN_ALL_TESTS()`. Why?  ===
+
+Some people had been ignoring the return value of `RUN_ALL_TESTS()`. That is,
+instead of
+
+{{{
+return RUN_ALL_TESTS();
+}}}
+
+they write
+
+{{{
+RUN_ALL_TESTS();
+}}}
+
+This is wrong and dangerous. A test runner needs to see the return value of
+`RUN_ALL_TESTS()` in order to determine if a test has passed. If your `main()`
+function ignores it, your test will be considered successful even if it has a
+Google Test assertion failure. Very bad.
+
+To help the users avoid this dangerous bug, the implementation of
+`RUN_ALL_TESTS()` causes gcc to raise this warning, when the return value is
+ignored. If you see this warning, the fix is simple: just make sure its value
+is used as the return value of `main()`.
+
+===  My compiler complains that a constructor (or destructor) cannot return a value. What's going on?  ===
+
+Due to a peculiarity of C++, in order to support the syntax for streaming
+messages to an `ASSERT_*`, e.g.
+
+{{{
+ASSERT_EQ(1, Foo()) << "blah blah" << foo;
+}}}
+
+we had to give up using `ASSERT*` and `FAIL*` (but not `EXPECT*` and
+`ADD_FAILURE*`) in constructors and destructors. The workaround is to move the
+content of your constructor/destructor to a private void member function, or
+switch to `EXPECT_*()` if that works. This section in the user's guide explains
+it.
+
+===  My `SetUp()` function is not called. Why?  ===
+
+C++ is case-sensitive. Did you spell it as `Setup()`?
+
+Similarly, sometimes people spell `SetUpTestCase()` as `SetupTestCase()` and
+wonder why it's never called.
+
+===  How do I jump to the line of a failure in Emacs directly?  ===
+
+Google Test's failure message format is understood by Emacs and many other
+IDEs, like acme and XCode. If a Google Test message is in a compilation buffer
+in Emacs, then it's clickable. You can now hit `enter` on a message to jump to
+the corresponding source code, or use `C-x `` to jump to the next failure.
+
+===  I have several test cases which share the same test fixture logic, do I have to define a new test fixture class for each of them? This seems pretty tedious.  ===
+
+You don't have to. Instead of
+
+{{{
+class FooTest : public BaseTest {};
+
+TEST_F(FooTest, Abc) { ... }
+TEST_F(FooTest, Def) { ... }
+
+class BarTest : public BaseTest {};
+
+TEST_F(BarTest, Abc) { ... }
+TEST_F(BarTest, Def) { ... }
+}}}
+
+you can simply `typedef` the test fixtures:
+{{{
+typedef BaseTest FooTest;
+
+TEST_F(FooTest, Abc) { ... }
+TEST_F(FooTest, Def) { ... }
+
+typedef BaseTest BarTest;
+
+TEST_F(BarTest, Abc) { ... }
+TEST_F(BarTest, Def) { ... }
+}}}
+
+===  The Google Test output is buried in a whole bunch of log messages. What do I do?  ===
+
+The Google Test output is meant to be a concise and human-friendly report. If
+your test generates textual output itself, it will mix with the Google Test
+output, making it hard to read. However, there is an easy solution to this
+problem.
+
+Since most log messages go to stderr, we decided to let Google Test output go
+to stdout. This way, you can easily separate the two using redirection. For
+example:
+{{{
+./my_test > googletest_output.txt
+}}}
+
+===  Why should I prefer test fixtures over global variables?  ===
+
+There are several good reasons:
+ #  It's likely your test needs to change the states of its global variables. This makes it difficult to keep side effects from escaping one test and contaminating others, making debugging difficult. By using fixtures, each test has a fresh set of variables that's different (but with the same names). Thus, tests are kept independent of each other.
+ #  Global variables pollute the global namespace.
+ #  Test fixtures can be reused via subclassing, which cannot be done easily with global variables. This is useful if many test cases have something in common.
+
+===   How do I test private class members without writing `FRIEND_TEST()`s?  ===
+
+You should try to write testable code, which means classes should be easily
+tested from their public interface. One way to achieve this is the Pimpl idiom:
+you move all private members of a class into a helper class, and make all
+members of the helper class public.
+
+You have several other options that don't require using `FRIEND_TEST`:
+ *  Write the tests as members of the fixture class:
+{{{
+class Foo {
+  friend class FooTest;
+  ...
+};
+
+class FooTest : public testing::Test {
+ protected:
+  ...
+  void Test1() {...} // This accesses private members of class Foo.
+  void Test2() {...} // So does this one.
+};
+
+TEST_F(FooTest, Test1) {
+  Test1();
+}
+
+TEST_F(FooTest, Test2) {
+  Test2();
+}
+}}}
+ *  In the fixture class, write accessors for the tested class' private members, then use the accessors in your tests:
+{{{
+class Foo {
+  friend class FooTest;
+  ...
+};
+
+class FooTest : public testing::Test {
+ protected:
+  ...
+  T1 get_private_member1(Foo* obj) {
+    return obj->private_member1_;
+  }
+};
+
+TEST_F(FooTest, Test1) {
+  ...
+  get_private_member1(x)
+  ...
+}
+}}}
+ *  If the methods are declared *protected*, you can change their access level in a test-only subclass:
+{{{
+class YourClass {
+  ...
+ protected: // protected access for testability.
+  int DoSomethingReturningInt();
+  ...
+};
+
+// in the your_class_test.cc file:
+class TestableYourClass : public YourClass {
+  ...
+ public: using YourClass::DoSomethingReturningInt; // changes access rights
+  ...
+};
+
+TEST_F(YourClassTest, DoSomethingTest) {
+  TestableYourClass obj;
+  assertEquals(expected_value, obj.DoSomethingReturningInt());
+}
+}}}
+
+===   How do I test private class static members without writing `FRIEND_TEST()`s?  ===
+
+We find private static methods clutter the header file.  They are
+implementation details and ideally should be kept out of a .h. So often I make
+them free functions instead.
+
+Instead of:
+{{{
+// foo.h
+class Foo {
+  ...
+ private:
+  static bool Func(int n);
+};
+
+// foo.cc
+bool Foo::Func(int n) { ... }
+
+// foo_test.cc
+EXPECT_TRUE(Foo::Func(12345));
+}}}
+
+You probably should better write:
+{{{
+// foo.h
+class Foo {
+  ...
+};
+
+// foo.cc
+namespace internal {
+  bool Func(int n) { ... }
+}
+
+// foo_test.cc
+namespace internal {
+  bool Func(int n);
+}
+
+EXPECT_TRUE(internal::Func(12345));
+}}}
+
+===  Can I templatize my tests?  ===
+
+When your code uses templates, you may want to test them for different
+instantiations. For example, you have a template class `Vector<T>` , with a
+`bool` specialization with only one bit for each vector element. You want to
+test `Vector` by instantiating it with `bool` and at least one other type.
+Unless you set up a templatized test fixture, you'll have to write tests that
+are exactly the same except for their template argument.
+
+To templatize a test fixture, do:
+{{{
+// First, define the fixture as a template class.
+template <typename T>
+class VectorTest : public testing::Test {
+ protected:
+  ...
+  // Write test subroutines that work for all instatiations of the template.
+  void TestSubroutine1() { ASSERT_EQ(0, v0_.size()); }
+  void TestSubroutine2() { ASSERT_TRUE(v0_.Equals(v1_)); }
+
+  // Inside the fixture, make reference to the template parameter.
+  Vector<T>v0_, v1_;
+};
+
+// Then, instantiate your fixture to get a test case.
+// Angled brackets cannot appear in test case names, so we need this typedef.
+typedef VectorTest<int> IntVectorTest;
+
+// In your tests, you can use the test subroutines defined in the fixture.
+// The same definition is reused across all test cases.
+TEST_F(IntVectorTest, Test1) {
+  TestSubroutine1();
+}
+
+TEST_F(IntVectorTest, Test2) {
+  TestSubroutine2();
+}
+
+// You can also add additional logic when you instantiate the fixture.
+// To do this, derive from the instantiated fixture.
+class BoolVectorTest : public VectorTest<bool> {
+ protected:
+  ... some stuff specific to Vector<bool> ...
+};
+
+// Again, you can use the test subroutines defined in VectorTest in your tests.
+
+TEST_F(BoolVectorTest, Test1) {
+  TestSubroutine1();
+}
+
+TEST_F(BoolVectorTest, Test2) {
+  TestSubroutine2();
+}
+
+// You can have additional tests for the Vector<bool> specialization.
+TEST_F(BoolVectorTest, Test3) {
+  ... ensure that only one bit is used per element ...
+}
+}}}
+
+===  How do I test a file that defines `main()`?  ===
+
+To test a `foo.cc` file, you need to compile and link it into your unit test
+program. However, when the file contains a definition for the `main()`
+function, it will clash with the `main()` of your unit test, and will result in
+a build error.
+
+The right solution is to split it into three files:
+ #  `foo.h` which contains the declarations,
+ #  `foo.cc` which contains the definitions except `main()`, and
+ #  `foo_main.cc` which contains nothing but the definition of `main()`.
+
+Then `foo.cc` can be easily tested.
+
+If you are adding tests to an existing file and don't want an intrusive change
+like this, there is a hack: just include the entire `foo.cc` file in your unit
+test. For example:
+{{{
+// File foo_unittest.cc
+
+// The headers section
+...
+
+// Renames main() in foo.cc to make room for the unit test main()
+#define main FooMain
+
+#include "a/b/foo.cc"
+
+// The tests start here.
+...
+}}}
+
+However, please remember this is a hack and should only be used as the last
+resort.
+
+===   What can the statement argument in `ASSERT_DEATH()` be?  ===
+
+`ASSERT_DEATH(_statement_, _regex_)` (or any death assertion macro) can be used
+wherever `_statement_` is valid. So basically `_statement_` can be any C++
+statement that makes sense in the current context. In particular, it can
+reference global and/or local variables, and can be:
+ *  a simple function call (often the case),
+ *  a complex expression, or
+ *  a compound statement.
+
+ Some examples are shown here:
+{{{
+// A death test can be a simple function call.
+TEST(MyDeathTest, FunctionCall) {
+  ASSERT_DEATH(Xyz(5), "Xyz failed");
+}
+
+// Or a complex expression that references variables and functions.
+TEST(MyDeathTest, ComplexExpression) {
+  const bool c = Condition();
+  ASSERT_DEATH((c ? Func1(0) : object2.Method("test")),
+               "(Func1|Method) failed");
+}
+
+// Death assertions can be used any where in a function. In
+// particular, they can be inside a loop.
+TEST(MyDeathTest, InsideLoop) {
+  // Verifies that Foo(0), Foo(1), ..., and Foo(4) all die.
+  for (int i = 0; i < 5; i++) {
+    EXPECT_DEATH_M(Foo(i), "Foo has \\d+ errors",
+                   testing::Message() << "where i is " << i);
+  }
+}
+
+// A death assertion can contain a compound statement.
+TEST(MyDeathTest, CompoundStatement) {
+  // Verifies that at lease one of Bar(0), Bar(1), ..., and
+  // Bar(4) dies.
+  ASSERT_DEATH({
+    for (int i = 0; i < 5; i++) {
+      Bar(i);
+    }
+  },
+  "Bar has \\d+ errors");}
+}}}
+
+`googletest_unittest.cc` contains more examples if you are interested.
+
+===   What syntax does the regular expression in `ASSERT_DEATH` use?  ===
+
+GoogleTest uses the POSIX Extended regular expression syntax
+(http://en.wikipedia.org/wiki/Regular_expression#POSIX_Extended_Regular_Expressions).
+
+===  I have a fixture class `FooTest`, but `TEST_F(FooTest, Bar)` gives me error "no matching function for call to `FooTest::FooTest()`". Why?  ===
+
+Google Test needs to be able to create objects of your test fixture class, so
+it must have a default constructor. Normally the compiler will define one for
+you. However, there are cases where you have to define your own:
+ * If you explicitly declare a non-default constructor for class `FooTest`, then you need to define a default constructor, even if it would be empty.
+ * If `FooTest` has a const non-static data member, then you have to define the default constructor _and_ initialize the const member in the initializer list of the constructor. (Early versions of `gcc` doesn't force you to initialize the const member. It's a bug that has been fixed in `gcc 4`.)
+
+===   Why does `ASSERT_DEATH` complain about previous threads that were already joined?  ===
+
+With the Linux pthread library, there is no turning back once you cross the
+line from single thread to multiple threads. The first time you create a
+thread, a manager thread is created in addition, so you get 3, not 2, threads.
+Later when the thread you create joins the main thread, the thread count
+decrements by 1, but the manager thread will never be killed, so you still have
+2 threads, which means you cannot safely run a death test.
+
+The new NPTL thread library doesn't suffer from this problem, as it doesn't
+create a manager thread. However, if you don't control which machine your test
+runs on, you shouldn't depend on this.
+
+===   Why does Google Test require the entire test case, instead of individual tests, to be named `*DeathTest` when it uses `ASSERT_DEATH`?  ===
+
+Google Test does not interleave tests from different test cases. That is, it
+runs all tests in one test case first, and then runs all tests in the next test
+case, and so on. Google Test does this because it needs to set up a test case
+before the first test in it is run, and tear it down afterwords. Splitting up
+the test case would require multiple set-up and tear-down processes, which is
+inefficient and makes the semantics unclean.
+
+If we were to determine the order of tests based on test name instead of test
+case name, then we would have a problem with the following situation:
+
+{{{
+TEST_F(FooTest, AbcDeathTest) { ... }
+TEST_F(FooTest, Uvw) { ... }
+
+TEST_F(BarTest, DefDeathTest) { ... }
+TEST_F(BarTest, Xyz) { ... }
+}}}
+
+Since `FooTest.AbcDeathTest` needs to run before `BarTest.Xyz`, and we don't
+interleave tests from different test cases, we need to run all tests in the
+`FooTest` case before running any test in the `BarTest` case. This contradicts
+with the requirement to run `BarTest.DefDeathTest` before `FooTest.Uvw`.
+
+===  But I don't like calling my entire test case `*DeathTest` when it contains both death tests and non-death tests. What do I do?  ===
+
+You don't have to, but if you like, you may split up the test case into
+`FooTest` and `FooDeathTest`, where the names make it clear that they are
+related:
+
+{{{
+class FooTest : public testing::Test { ... };
+
+TEST_F(FooTest, Abc) { ... }
+TEST_F(FooTest, Def) { ... }
+
+typedef FooTest FooDeathTest;
+
+TEST_F(FooDeathTest, Uvw) { ... EXPECT_DEATH(...) ... }
+TEST_F(FooDeathTest, Xyz) { ... ASSERT_DEATH(...) ... }
+}}}
+
+===  The compiler complains about "no match for 'operator<<'" when I use an assertion. What gives?  ===
+
+If you use a user-defined type `FooType` in an assertion, you must make sure
+there is an `std::ostream& operator<<(std::ostream&, const FooType&)` function
+defined such that we can print a value of `FooType`.
+
+In addition, if `FooType` is declared in a name space, the `<<` operator also
+needs to be defined in the _same_ name space.
+
+===  How do I suppress the memory leak messages on Windows?  ===
+
+Since the statically initialized Google Test singleton requires allocations on
+the heap, the Visual C++ memory leak detector will report memory leaks at the
+end of the program run. The easiest way to avoid this is to use the
+`_CrtMemCheckpoint` and `_CrtMemDumpAllObjectsSince` calls to not report any
+statically initialized heap objects. See MSDN for more details and additional
+heap check/debug routines.
