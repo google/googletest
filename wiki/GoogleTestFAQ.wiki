@@ -3,7 +3,7 @@
 = Tips and Frequently-Asked Questions about Google C++ Testing Framework =
 
 If you cannot find the answer to your question here, and you have read
-GoogleTestPrimer and GoogleTestAdvanced, send it to
+GoogleTestPrimer and GoogleTestAdvancedGuide, send it to
 googletestframework@googlegroups.com.
 
 ===  My death test modifies some state, but the change seems lost after the death test finishes. Why? ===
