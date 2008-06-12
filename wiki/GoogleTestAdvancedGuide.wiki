@@ -271,6 +271,71 @@ partially-destructed state. Use assertions carefully in these situations!
 
 ==  Using Assertions in Sub-routines  ==
 
+===  Adding Traces to Assertions  ===
+
+If a test sub-routine is called from several places, when an assertion
+inside it fails, it can be hard to tell which invocation of the
+sub-routine the failure is from.  You can alleviate this problem using
+extra logging or custom failure messages, but that usually clutters up
+your tests. A better solution is to use the `SCOPED_TRACE` macro:
+
+|| `SCOPED_TRACE(`_message_`);` ||
+
+where _message_ can be anything streamable to `std::ostream`. This
+macro will cause the current file name, line number, and the given
+message to be added in every failure message. The effect will be
+undone when the control leaves the current lexical scope.
+
+For example,
+
+{{{
+10: void Sub1(int n) {
+11:   EXPECT_EQ(1, Bar(n));
+12:   EXPECT_EQ(2, Bar(n + 1));
+13: }
+14: 
+15: TEST(FooTest, Bar) {
+16:   {
+17:     SCOPED_TRACE("A");  // This trace point will be included in
+18:                         // every failure in this scope.
+19:     Sub1(1);
+20:   }
+21:   // Now it won't.
+22:   Sub1(9);
+23: }
+}}}
+
+could result in messages like these:
+
+{{{
+path/to/foo_test.cc:11: Failure
+Value of: Bar(n)
+Expected: 1
+  Actual: 2
+   Trace:
+path/to/foo_test.cc:17: A
+
+path/to/foo_test.cc:12: Failure
+Value of: Bar(n + 1)
+Expected: 2
+  Actual: 3
+}}}
+
+Without the trace, it would've been difficult to know which invocation
+of `Sub1()` the two failures come from respectively. (You could add an
+extra message to each assertion in `Sub1()` to indicate the value of
+`n`, but that's tedious.)
+
+Some tips on using `SCOPED_TRACE`:
+
+  # With a suitable message, it's often enough to use `SCOPED_TRACE` at the beginning of a sub-routine, instead of at each call site.
+  # When calling sub-routines inside a loop, make the loop iterator part of the message in `SCOPED_TRACE` such that you can know which iteration the failure is from.
+  # Sometimes the line number of the trace point is enough for identifying the particular invocation of a sub-routine. In this case, you don't have to choose a unique message for `SCOPED_TRACE`. You can simply use `""`.
+  # You can use `SCOPED_TRACE` in an inner scope when there is one in the outer scope. In this case, all active trace points will be included in the failure messages, in reverse order they are encountered.
+  # The trace dump is clickable in Emacs' compilation buffer - hit return on a line number and you'll be taken to that line in the source file!
+
+_Availability:_ Linux, Windows, Mac.
+
 ===  Propagating Fatal Failures  ===
 
 A common pitfall when using `ASSERT_*` and `FAIL*` is not understanding that
