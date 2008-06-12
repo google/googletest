@@ -45,28 +45,6 @@ switch(expression) {
 
 _Availability_: Linux, Windows, Mac.
 
-===  Windows HRESULT assertions  ===
-
-These assertions test for `HRESULT` success or failure.
-
-|| *Fatal assertion* || *Nonfatal assertion* || *Verifies* ||
-|| `ASSERT_HRESULT_SUCCEEDED(`_expression_`);` || `EXPECT_HRESULT_SUCCEEDED(`_expression_`);` || _expression_ is a success `HRESULT` ||
-|| `ASSERT_HRESULT_FAILED(`_expression_`);`    || `EXPECT_HRESULT_FAILED(`_expression_`);`    || _expression_ is a failure `HRESULT` ||
-
-The generated output contains the human-readable error message
-associated with the `HRESULT` code returned by _expression_.
-
-You might use them like this:
-
-{{{
-CComPtr shell;
-ASSERT_HRESULT_SUCCEEDED(shell.CoCreateInstance(L"Shell.Application"));
-CComVariant empty;
-ASSERT_HRESULT_SUCCEEDED(shell->ShellExecute(CComBSTR(url), empty, empty, empty, empty));
-}}}
-
-_Availability_: Windows.
-
 ===  Predicate Assertions  ===
 
 Even though Google Test has a rich set of assertions, they can never be
@@ -238,6 +216,28 @@ Verifies that _val1_ is less than, or almost equal to, _val2_. You can
 replace `EXPECT_PRED_FORMAT2` in the above table with `ASSERT_PRED_FORMAT2`.
 
 _Availability_: Linux, Windows, Mac.
+
+===  Windows HRESULT assertions  ===
+
+These assertions test for `HRESULT` success or failure.
+
+|| *Fatal assertion* || *Nonfatal assertion* || *Verifies* ||
+|| `ASSERT_HRESULT_SUCCEEDED(`_expression_`);` || `EXPECT_HRESULT_SUCCEEDED(`_expression_`);` || _expression_ is a success `HRESULT` ||
+|| `ASSERT_HRESULT_FAILED(`_expression_`);`    || `EXPECT_HRESULT_FAILED(`_expression_`);`    || _expression_ is a failure `HRESULT` ||
+
+The generated output contains the human-readable error message
+associated with the `HRESULT` code returned by _expression_.
+
+You might use them like this:
+
+{{{
+CComPtr shell;
+ASSERT_HRESULT_SUCCEEDED(shell.CoCreateInstance(L"Shell.Application"));
+CComVariant empty;
+ASSERT_HRESULT_SUCCEEDED(shell->ShellExecute(CComBSTR(url), empty, empty, empty, empty));
+}}}
+
+_Availability_: Windows.
 
 === Assertion Placement  ===
 
