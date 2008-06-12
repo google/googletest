@@ -269,6 +269,201 @@ leaving your object in a partially-constructed state. Likewise, a fatal
 assertion failure in a destructor may leave your object in a
 partially-destructed state. Use assertions carefully in these situations!
 
+==  Death Tests  ==
+
+In many applications, there are assertions that can cause application failure
+if a condition is not met. These sanity checks, which ensure that the program
+is in a known good state, are there to fail at the earliest possible time after
+some program state is corrupted. If the assertion checks the wrong condition,
+then the program may proceed in an erroneous state, which could lead to memory
+corruption, security holes, or worse. Hence it is vitally important to test
+that such assertion statements work as expected.
+
+Since these precondition checks cause the processes to die, we call such tests
+_death tests_. More generally, any test that checks that a program terminates
+in an expected fashion is also a death test.
+
+===  How to Write a Death Test  ===
+
+Google Test has the following macros to support death tests:
+
+|| *Fatal assertion* || *Nonfatal assertion* || *Verifies* ||
+|| `ASSERT_DEATH(`_statement, regex_`);           || `EXPECT_DEATH(`_statement, regex_`); || _statement_ crashes with the given error ||
+|| `ASSERT_EXIT(`_statement, predicate, regex_`); || `EXPECT_EXIT(`_statement, predicate, regex_`); ||_statement_ exits with the given error and its exit code matches _predicate_ ||
+
+where _statement_ is a statement that is expected to cause the process to
+die, _predicate_ is a function or function object that evaluates an integer
+exit status, and _regex_ is a regular expression that the stderr output of
+_statement_ is expected to match. Note that _statement_ can be _any valid
+statement_ (including _compound statement_) and doesn't have to be an
+expression.
+
+As usual, the `ASSERT` variants abort the current test function, while the
+`EXPECT` variants do not.
+
+A predicate here must accept an `int` and return a `bool`. The death test
+succeeds only if the predicate returns `true`. Google Test defines a few
+predicates that handle the most common cases:
+
+{{{
+testing::ExitedWithCode(exit_code)
+}}}
+
+This expression is `true` if the program exited normally with the given exit
+code.
+
+{{{
+testing::KilledBySignal(signal_number)
+}}}
+
+This expression is `true` if the program was killed by the given signal.
+
+The `*_DEATH` macros are convenient wrappers for `*_EXIT` that use a predicate
+that verifies that the process either exited with a nonzero exit code or was
+killed by a signal.
+
+To write a death test, simply use one of the above macros inside your test
+function. For example,
+
+{{{
+TEST(My*DeathTest*, Foo) {
+  // This death test uses a compound statement.
+  ASSERT_DEATH({ int n = 5; Foo(&n); }, "Error on line .* of Foo()");
+}
+TEST(MyDeathTest, NormalExit) {
+  EXPECT_EXIT(NormalExit(), testing::ExitedWithCode(0), "Success");
+}
+TEST(MyDeathTest, KillMyself) {
+  EXPECT_EXIT(KillMyself(), testing::KilledBySignal(SIGKILL), "Sending myself unblockable signal");
+}
+}}}
+
+verifies that:
+
+ * calling `Foo(5)` causes the process to die with the given error message,
+ * calling `NormalExit()` causes the process to print `"Success"` to stderr and exit with exit code 0, and
+ * calling `KillMyself()` kills the process with signal `SIGKILL`.
+
+The test function body may contain other assertions and statements as well, if
+necessary.
+
+_Important:_ We strongly recommend you to follow the convention of naming your
+test case (not test) `*DeathTest` when it contains a death test, as
+demonstrated in the above example. The `Death Tests And Threads` section below
+explains why.
+
+_Availability:_ Linux
+
+===  How It Works  ===
+
+Under the hood, `ASSERT_EXIT()` calls `fork()` to spawn a new process. What
+happens next in the child process depends on the value of the variable
+`testing::FLAGS_gtest_death_test_style` (which is initialized from the
+command-line flag `--gtest_death_test_style`).
+
+ * If the variable's value is `"fast"`, the death test statement is immediately executed.
+ * If the variable's value is `"threadsafe"`, the child process re-executes the unit test binary just as it was originally invoked, but with some extra flags to cause just the single death test under consideration to be run.
+
+Other values for the variable are illegal and will cause the death test to
+fail. Currently, the flag's default value is `"fast"`. However, we reserve the
+right to change it in the future. Therefore, your tests should not depend on
+this.
+
+In either case, the parent process waits for the child process to complete, and checks that
+
+ #  the child's exit status satisfies the predicate, and
+ #  the child's stderr matches the regular expression.
+
+If the death test statement runs to completion without dying, the child
+process will nonetheless terminate, and the assertion fails.
+
+===  Death Tests And Threads  ===
+
+The reason for the two death test styles has to do with thread safety. Due to
+well-known problems with forking in the presence of threads, death tests should
+be run in a single-threaded context. Sometimes, however, it isn't feasible to
+arrange that kind of environment. For example, statically-initialized modules
+may start threads before main is ever reached. Once threads have been created,
+it may be difficult or impossible to clean them up.
+
+Google Test has two features intended to raise awareness of threading issues.
+
+ # A warning is emitted if multiple threads are running when a death test is encountered.
+ # Test cases with a name ending in "!DeathTest" are run before all other tests.
+
+It's perfectly fine to create threads inside a death test statement; they are
+executed in a separate process and cannot affect the parent.
+
+===  Death Test Styles  ===
+
+The "threadsafe" death test style was introduced in order to help mitigate the
+risks of testing in a possibly multithreaded environment. It trades increased
+test execution time (potentially dramatically so) for improved thread safety.
+We suggest using the faster, default "fast" style unless your test has specific
+problems with it.
+
+You can choose a particular style of death tests by setting the flag
+programmatically:
+
+{{{
+testing::FLAGS_gtest_death_test_style = "threadsafe";
+}}}
+
+You can do this in `main()` to set the style for all death tests in the
+binary, or in individual tests. Recall that flags are saved before running each
+test and restored afterwards, so you need not do that yourself. For example:
+
+{{{
+TEST(MyDeathTest, TestOne) {
+  testing::FLAGS_gtest_death_test_style = "threadsafe";
+  // This test is run in the "threadsafe" style:
+  ASSERT_DEATH(ThisShouldDie(), "");
+}
+
+TEST(MyDeathTest, TestTwo) {
+  // This test is run in the "fast" style:
+  ASSERT_DEATH(ThisShouldDie(), "");
+}
+
+int main(int argc, char** argv) {
+  ParseGTestFlags(argv[0], &argc, &argv, true);
+  testing::FLAGS_gtest_death_test_style = "fast";
+  return RUN_ALL_TESTS();
+}
+}}}
+
+===  Caveats  ===
+
+The _statement_ argument of `ASSERT_EXIT()` can be any valid C++ statement
+except that it can not return from the current function. This means
+_statement_ should not contain `return` or a macro that might return (e.g.
+`ASSERT_TRUE()` ). If _statement_ returns before it crashes, Google Test will
+print an error message, and the test will fail.
+
+Since _statement_ runs in the child process, any in-memory side effect (e.g.
+modifying a variable, releasing memory, etc) it causes will _not_ be observable
+in the parent process. In particular, if you release memory in a death test,
+your program will fail the heap check as the parent process will never see the
+memory reclaimed. To solve this problem, you can
+
+ #  try not to free memory in a death test;
+ #  free the memory again in the parent process; or
+ #  do not use the heap checker in your program.
+
+Due to an implementation detail, you cannot place multiple death test
+assertions on the same line; otherwise, compilation will fail with an unobvious
+error message.
+
+Despite the improved thread safety afforded by the "threadsafe" style of death
+test, thread problems such as deadlock are still possible in the presence of
+handlers registered with `pthread_atfork(3)`. A future implementation will
+address this.
+
+Because the child process in an threadsafe-style death test re-executes the
+test binary by passing `argv[0]` to `execve(2)`, the test binary may not be
+found if the program was executed via a relative path and any preceding program
+code changes the program's working directory.
+
 ==  Using Assertions in Sub-routines  ==
 
 ===  Adding Traces to Assertions  ===
@@ -658,201 +853,6 @@ TEST_F(FooTest, Baz) { ... }
 
 }  // namespace my_namespace
 }}}
-
-==  Death Tests  ==
-
-In many applications, there are assertions that can cause application failure
-if a condition is not met. These sanity checks, which ensure that the program
-is in a known good state, are there to fail at the earliest possible time after
-some program state is corrupted. If the assertion checks the wrong condition,
-then the program may proceed in an erroneous state, which could lead to memory
-corruption, security holes, or worse. Hence it is vitally important to test
-that such assertion statements work as expected.
-
-Since these precondition checks cause the processes to die, we call such tests
-_death tests_. More generally, any test that checks that a program terminates
-in an expected fashion is also a death test.
-
-===  How to Write a Death Test  ===
-
-Google Test has the following macros to support death tests:
-
-|| *Fatal assertion* || *Nonfatal assertion* || *Verifies* ||
-|| `ASSERT_DEATH(`_statement, regex_`);           || `EXPECT_DEATH(`_statement, regex_`); || _statement_ crashes with the given error ||
-|| `ASSERT_EXIT(`_statement, predicate, regex_`); || `EXPECT_EXIT(`_statement, predicate, regex_`); ||_statement_ exits with the given error and its exit code matches _predicate_ ||
-
-where _statement_ is a statement that is expected to cause the process to
-die, _predicate_ is a function or function object that evaluates an integer
-exit status, and _regex_ is a regular expression that the stderr output of
-_statement_ is expected to match. Note that _statement_ can be _any valid
-statement_ (including _compound statement_) and doesn't have to be an
-expression.
-
-As usual, the `ASSERT` variants abort the current test function, while the
-`EXPECT` variants do not.
-
-A predicate here must accept an `int` and return a `bool`. The death test
-succeeds only if the predicate returns `true`. Google Test defines a few
-predicates that handle the most common cases:
-
-{{{
-testing::ExitedWithCode(exit_code)
-}}}
-
-This expression is `true` if the program exited normally with the given exit
-code.
-
-{{{
-testing::KilledBySignal(signal_number)
-}}}
-
-This expression is `true` if the program was killed by the given signal.
-
-The `*_DEATH` macros are convenient wrappers for `*_EXIT` that use a predicate
-that verifies that the process either exited with a nonzero exit code or was
-killed by a signal.
-
-To write a death test, simply use one of the above macros inside your test
-function. For example,
-
-{{{
-TEST(My*DeathTest*, Foo) {
-  // This death test uses a compound statement.
-  ASSERT_DEATH({ int n = 5; Foo(&n); }, "Error on line .* of Foo()");
-}
-TEST(MyDeathTest, NormalExit) {
-  EXPECT_EXIT(NormalExit(), testing::ExitedWithCode(0), "Success");
-}
-TEST(MyDeathTest, KillMyself) {
-  EXPECT_EXIT(KillMyself(), testing::KilledBySignal(SIGKILL), "Sending myself unblockable signal");
-}
-}}}
-
-verifies that:
-
- * calling `Foo(5)` causes the process to die with the given error message,
- * calling `NormalExit()` causes the process to print `"Success"` to stderr and exit with exit code 0, and
- * calling `KillMyself()` kills the process with signal `SIGKILL`.
-
-The test function body may contain other assertions and statements as well, if
-necessary.
-
-_Important:_ We strongly recommend you to follow the convention of naming your
-test case (not test) `*DeathTest` when it contains a death test, as
-demonstrated in the above example. The `Death Tests And Threads` section below
-explains why.
-
-_Availability:_ Linux
-
-===  How It Works  ===
-
-Under the hood, `ASSERT_EXIT()` calls `fork()` to spawn a new process. What
-happens next in the child process depends on the value of the variable
-`testing::FLAGS_gtest_death_test_style` (which is initialized from the
-command-line flag `--gtest_death_test_style`).
-
- * If the variable's value is `"fast"`, the death test statement is immediately executed.
- * If the variable's value is `"threadsafe"`, the child process re-executes the unit test binary just as it was originally invoked, but with some extra flags to cause just the single death test under consideration to be run.
-
-Other values for the variable are illegal and will cause the death test to
-fail. Currently, the flag's default value is `"fast"`. However, we reserve the
-right to change it in the future. Therefore, your tests should not depend on
-this.
-
-In either case, the parent process waits for the child process to complete, and checks that
-
- #  the child's exit status satisfies the predicate, and
- #  the child's stderr matches the regular expression.
-
-If the death test statement runs to completion without dying, the child
-process will nonetheless terminate, and the assertion fails.
-
-===  Death Tests And Threads  ===
-
-The reason for the two death test styles has to do with thread safety. Due to
-well-known problems with forking in the presence of threads, death tests should
-be run in a single-threaded context. Sometimes, however, it isn't feasible to
-arrange that kind of environment. For example, statically-initialized modules
-may start threads before main is ever reached. Once threads have been created,
-it may be difficult or impossible to clean them up.
-
-Google Test has two features intended to raise awareness of threading issues.
-
- # A warning is emitted if multiple threads are running when a death test is encountered.
- # Test cases with a name ending in "!DeathTest" are run before all other tests.
-
-It's perfectly fine to create threads inside a death test statement; they are
-executed in a separate process and cannot affect the parent.
-
-===  Death Test Styles  ===
-
-The "threadsafe" death test style was introduced in order to help mitigate the
-risks of testing in a possibly multithreaded environment. It trades increased
-test execution time (potentially dramatically so) for improved thread safety.
-We suggest using the faster, default "fast" style unless your test has specific
-problems with it.
-
-You can choose a particular style of death tests by setting the flag
-programmatically:
-
-{{{
-testing::FLAGS_gtest_death_test_style = "threadsafe";
-}}}
-
-You can do this in `main()` to set the style for all death tests in the
-binary, or in individual tests. Recall that flags are saved before running each
-test and restored afterwards, so you need not do that yourself. For example:
-
-{{{
-TEST(MyDeathTest, TestOne) {
-  testing::FLAGS_gtest_death_test_style = "threadsafe";
-  // This test is run in the "threadsafe" style:
-  ASSERT_DEATH(ThisShouldDie(), "");
-}
-
-TEST(MyDeathTest, TestTwo) {
-  // This test is run in the "fast" style:
-  ASSERT_DEATH(ThisShouldDie(), "");
-}
-
-int main(int argc, char** argv) {
-  ParseGTestFlags(argv[0], &argc, &argv, true);
-  testing::FLAGS_gtest_death_test_style = "fast";
-  return RUN_ALL_TESTS();
-}
-}}}
-
-===  Caveats  ===
-
-The _statement_ argument of `ASSERT_EXIT()` can be any valid C++ statement
-except that it can not return from the current function. This means
-_statement_ should not contain `return` or a macro that might return (e.g.
-`ASSERT_TRUE()` ). If _statement_ returns before it crashes, Google Test will
-print an error message, and the test will fail.
-
-Since _statement_ runs in the child process, any in-memory side effect (e.g.
-modifying a variable, releasing memory, etc) it causes will _not_ be observable
-in the parent process. In particular, if you release memory in a death test,
-your program will fail the heap check as the parent process will never see the
-memory reclaimed. To solve this problem, you can
-
- #  try not to free memory in a death test;
- #  free the memory again in the parent process; or
- #  do not use the heap checker in your program.
-
-Due to an implementation detail, you cannot place multiple death test
-assertions on the same line; otherwise, compilation will fail with an unobvious
-error message.
-
-Despite the improved thread safety afforded by the "threadsafe" style of death
-test, thread problems such as deadlock are still possible in the presence of
-handlers registered with `pthread_atfork(3)`. A future implementation will
-address this.
-
-Because the child process in an threadsafe-style death test re-executes the
-test binary by passing `argv[0]` to `execve(2)`, the test binary may not be
-found if the program was executed via a relative path and any preceding program
-code changes the program's working directory.
 
 ==  Getting the Current Test's Name  ==
 
