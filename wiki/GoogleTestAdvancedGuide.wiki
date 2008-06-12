@@ -14,7 +14,7 @@ This section covers some less frequently used, but still significant, assertions
 
 ===  Explicit Success and Failure  ===
 
- These three assertions do not actually test a value or expression. Instead,
+These three assertions do not actually test a value or expression. Instead,
 they generate a success or failure directly. Like the macros that actually
 perform a test, you may stream a custom failure message into the them.
 
@@ -181,8 +181,7 @@ carefully choose the error bound. If they don't want or care to, comparing in
 terms of Units in the Last Place (ULPs) is a good default, and Google Test
 provides assertions to do this. Full details about ULPs are quite long; if you
 want to learn more, see
-[http://www.cygnus-software.com/papers/comparingfloats/comparingfloats.htm this
-article on float comparison].
+[http://www.cygnus-software.com/papers/comparingfloats/comparingfloats.htm this article on float comparison].
 
 ====  Floating-Point Macros ====
 
@@ -1036,7 +1035,7 @@ TEST(LogicTest, NonContradiction) { ... }
 could generate this report:
 
 {{{
-  <?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <testsuite tests="3" failures="1" errors="0" time="35" name="AllTests">
   <testsuite name="MathTest" tests="2" failures="1"* errors="0" time="15">
     <testcase name="Addition" status="run" time="7" classname="">
