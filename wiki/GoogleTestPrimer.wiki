@@ -278,9 +278,9 @@ First, define a fixture class. By convention, you should give it the name
 class QueueTest : public testing::Test {
  protected:
   virtual void SetUp() {
-  q1_.Enqueue(1);
-  q2_.Enqueue(2);
-  q2_.Enqueue(3);
+    q1_.Enqueue(1);
+    q2_.Enqueue(2);
+    q2_.Enqueue(3);
   }
 
   // virtual void TearDown() {}
@@ -386,24 +386,24 @@ class FooTest : public testing::Test {
   // is empty.
 
   FooTest() {
-  // You can do set-up work for each test here.
+    // You can do set-up work for each test here.
   }
 
   virtual ~FooTest() {
-  // You can do clean-up work that doesn't throw exceptions here.
+    // You can do clean-up work that doesn't throw exceptions here.
   }
 
   // If the constructor and destructor are not enough for setting up
   // and cleaning up each test, you can define the following methods:
 
   virtual void SetUp() {
-  // Code here will be called immediately after the constructor (right
-  // before each test).
+    // Code here will be called immediately after the constructor (right
+    // before each test).
   }
 
   virtual void TearDown() {
-  // Code here will be called immediately after each test (right
-  // before the destructor).
+    // Code here will be called immediately after each test (right
+    // before the destructor).
   }
 
   // Objects declared here can be used by all tests in the test case for Foo.
@@ -447,7 +447,10 @@ GoogleTestAdvancedGuide, which describes many more useful Google Test features.
 
 == Known Limitations ==
 
-It is _unsafe_ to use Google Test assertions from two threads concurrently. In
-most tests this is not an issue as usually the assertions are done in the main
-thread. If you want to see Google Test becoming thread-safe on the platform you
-work on, please volunteer to implement it.
+Google Test is designed to be thread-safe.  However, we haven't had
+time to implement the synchronization primitives on various platforms
+yet.  Therefore, it is currently _unsafe_ to use Google Test
+assertions from two threads concurrently.  In most tests this is not
+an issue as usually the assertions are done in the main thread. If you
+want to help, you can volunteer to implement the necessary
+synchronization primitives in `gtest-port.h`.
