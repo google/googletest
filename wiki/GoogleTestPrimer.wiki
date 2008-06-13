@@ -8,8 +8,7 @@
 _Google C++ Testing Framework_ helps you write better C++ tests.
 
 No matter whether you work on Linux, Windows, or a Mac, if you write C++ code,
-Google Test can help you. And it supports _any_ kind of tests, not just unit
-tests.
+Google Test can help you.
 
 So what makes a good test, and how does Google C++ Testing Framework fit in? We believe:
  # Tests should be _independent_ and _repeatable_. It's a pain to debug a test that succeeds or fails as a result of other tests.  Google C++ Testing Framework isolates the tests by running each of them on a different object. When a test fails, Google C++ Testing Framework allows you to run it in isolation for quick debugging.
