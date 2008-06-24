@@ -6,6 +6,30 @@ If you cannot find the answer to your question here, and you have read
 GoogleTestPrimer and GoogleTestAdvancedGuide, send it to
 googletestframework@googlegroups.com.
 
+=== Does Google Test support running tests in parallel? ===
+
+Test runners tend to be tightly coupled with the build/test
+environment, and Google Test doesn't try to solve the problem of
+running tests in parallel.  Instead, we tried to make Google Test work
+nicely with test runners.  For example, Google Test's XML report
+contains the time spent on each test, and its `gtest_list_tests` and
+`gtest_filter` flags can be used for splitting the execution of test
+methods into multiple processes.  These functionalities can help the
+test runner run the tests in parallel.
+
+=== Why don't Google Test run the tests in different threads to speed things up? ===
+
+It's difficult to write thread-safe code.  Most tests are not written
+with thread-safety in mind, and thus may not work correctly in a
+multi-threaded setting.
+
+If you think about it, it's already hard to make your code work when
+you know what other threads are doing.  It's much harder, and
+sometimes even impossible, to make your code work when you don't know
+what other threads are doing (remember that test methods can be added,
+deleted, or modified after your test was written).  If you want to run
+the tests in parallel, you'd better run them in different processes.
+
 ===  Why aren't Google Test assertions implemented using exceptions? ===
 
 Our original motivation was to be able to use Google Test in projects
@@ -57,6 +81,44 @@ We like to use structs only when representing passive data.  This
 distinction between structs and classes is good for documenting the
 intent of the code's author.  Since test fixtures have logic like
 `SetUp()` and `TearDown()`, they are better defined as classes.
+
+=== Why are death tests implemented as assertions instead of using a test runner? ===
+
+Our goal was to make death tests as convenient for a user as C++
+possibly allows.  In particular:
+
+  * The runner-style requires to split the information into two pieces: the definition of the death test itself, and the specification for the runner on how to run the death test and what to expect.  The death test would be written in C++, while the runner spec may or may not be.  A user needs to carefully keep the two in sync. `ASSERT_DEATH(statement, expected_message)` specifies all necessary information in one place, in one language, without boilerplate code. It is very declarative.
+  * `ASSERT_DEATH` has a similar syntax and error-reporting semantics as other Google Test assertions, and thus is easy to learn.
+  * `ASSERT_DEATH` can be mixed with other assertions and other logic at your will.  You are not limited to one death test per test method. For example, you can write something like:
+{{{
+    if (FooCondition()) {
+      ASSERT_DEATH(Bar(), "blah");
+    } else {
+      ASSERT_EQ(5, Bar());
+    }
+}}}
+If you prefer one death test per test method, you can write your tests in that style too, but we don't want to impose that on the users.  The fewer artificial limitations the better.
+  * `ASSERT_DEATH` can reference local variables in the current function, and you can decide how many death tests you want based on run-time information.  For example,
+{{{
+    const int count = GetCount();  // Only known at run time.
+    for (int i = 1; i <= count; i++) {
+      ASSERT_DEATH({
+        double* buffer = new double[i];
+        ... initializes buffer ...
+        Foo(buffer, i)
+      }, "blah blah");
+    }
+}}}
+The runner-based approach tends to be more static and less flexible, or requires more user effort to get this kind of flexibility.
+
+Another interesting thing about `ASSERT_DEATH` is that it calls `fork()`
+to create a child process to run the death test.  This is lightening
+fast, as `fork()` uses copy-on-write pages and incurs almost zero
+overhead, and the child process starts from the user-supplied
+statement directly, skipping all global and local initialization and
+any code leading to the given statement.  If you launch the child
+process from scratch, it can take seconds just to load everything and
+start running if the test links to many libraries dynamically.
 
 ===  My death test modifies some state, but the change seems lost after the death test finishes. Why? ===
 
@@ -178,12 +240,13 @@ bullet - sorry!
 
 ===  Should I use the constructor/destructor of the test fixture or `SetUp()`/`TearDown()`? ===
 
-The first thing to remember is that Google Test does not reuse the same test
-fixture object across multiple tests. For each `TEST_F`, Google Test will
-create a fresh test fixture object, immediately call `SetUp()`, run the test,
-call `TearDown()`, and then delete the test fixture object. Therefore, there is
-no need to write a `SetUp()` or `TearDown()` function if the constructor or
-destructor already does the job.
+The first thing to remember is that Google Test does not reuse the
+same test fixture object across multiple tests. For each `TEST_F`,
+Google Test will create a fresh test fixture object, _immediately_
+call `SetUp()`, run the test, call `TearDown()`, and then
+_immediately_ delete the test fixture object. Therefore, there is no
+need to write a `SetUp()` or `TearDown()` function if the constructor
+or destructor already does the job.
 
 You may still want to use `SetUp()/TearDown()` in the following cases:
  * If the tear-down operation could throw an exception, you must use `TearDown()` as opposed to the destructor, as throwing in a destructor leads to undefined behavior and usually will kill your program right away. Note that many standard libraries (like STL) may throw when exceptions are enabled in the compiler. Therefore you should prefer `TearDown()` if you want to write portable tests that work with or without exceptions.
