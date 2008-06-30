@@ -424,18 +424,18 @@ TEST_F(FooTest, DoesXyz) {
 }  // namespace
 
 int main(int argc, char **argv) {
-  testing::ParseGTestFlags(&argc, argv);
+  testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
 }}}
 
-The `testing::ParseGTestFlags()` function parses the command line for Google
+The `testing::InitGoogleTest()` function parses the command line for Google
 Test flags, and removes all recognized flags. This allows the user to control a
 test program's behavior via various flags, which we'll cover in GTestAdvanced.
 You must call this function before calling `RUN_ALL_TESTS()`, or the flags
 won't be properly initialized.
 
-On Windows, `ParseGTestFlags()` also works with wide strings, so it can be used
+On Windows, `InitGoogleTest()` also works with wide strings, so it can be used
 in programs compiled in `UNICODE` mode as well.
 
 == Where to Go from Here ==
