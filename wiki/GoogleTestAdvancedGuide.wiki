@@ -425,7 +425,7 @@ TEST(MyDeathTest, TestTwo) {
 }
 
 int main(int argc, char** argv) {
-  ParseGTestFlags(argv[0], &argc, &argv, true);
+  testing::InitGoogleTest(&argc, argv);
   testing::FLAGS_gtest_death_test_style = "fast";
   return RUN_ALL_TESTS();
 }
@@ -901,7 +901,7 @@ _Availability:_ Linux, Windows, Mac.
 Google Test test programs are ordinary executables. Once built, you can run
 them directly and affect their behavior via the following environment variables
 and/or command line flags. For the flags to work, your programs must call
-`testing::ParseGTestFlags()` before calling `RUN_ALL_TESTS()`.
+`testing::InitGoogleTest()` before calling `RUN_ALL_TESTS()`.
 
 If an option is specified both by an environment variable and by a flag, the
 latter takes precedence.
