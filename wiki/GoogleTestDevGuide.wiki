@@ -1,3 +1,5 @@
-#Google C++ Testing Framework Development Guide
+#summary How to contribute to Google C++ Testing Framework.
+
+= Google C++ Testing Framework Development Guide =
 
 Google C++ Testing Framework follows the coding style defined by the [http://code.google.com/p/google-styleguide/ google-styleguide] project.  Please read the [http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml C++ Style Guide] there for details.
