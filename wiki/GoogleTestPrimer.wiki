@@ -19,7 +19,7 @@ So what makes a good test, and how does Google C++ Testing Framework fit in? We 
  # Tests should be _fast_. With Google C++ Testing Framework, you can reuse shared resources across tests and pay for the set-up/tear-down only once, without making tests depend on each other.
 
 Since Google C++ Testing Framework is based on the popular xUnit
-architecture, you'll feel right at home if you've used JUnit or PyUnit before.
+architecture, you'll feel right at home if you've used JUnit or !PyUnit before.
 If not, it will take you about 10 minutes to learn the basics and get started.
 So let's go!
 
