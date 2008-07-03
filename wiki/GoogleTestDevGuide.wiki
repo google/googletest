@@ -1,4 +1,5 @@
 #summary How to contribute to Google C++ Testing Framework.
+#labels Phase-Implementation
 
 = Google C++ Testing Framework Development Guide =
 
