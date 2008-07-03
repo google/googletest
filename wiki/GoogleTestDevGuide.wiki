@@ -3,3 +3,5 @@
 = Google C++ Testing Framework Development Guide =
 
 Google C++ Testing Framework follows the coding style defined by the [http://code.google.com/p/google-styleguide/ google-styleguide] project.  Please read the [http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml C++ Style Guide] there for details.
+
+You will need to sign the [http://code.google.com/legal/individual-cla-v1.0.html Contributor License Agreement] before your patch can be committed.  You can do that on-line or by email / post mail / fax. 
