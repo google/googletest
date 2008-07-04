@@ -374,7 +374,7 @@ _Availability_: Linux, Windows, Mac.
 You can start from this boilerplate:
 {{{
 #include "this/package/foo.h"
-#include "testing/base/public/googletest.h"
+#include <gtest/gtest.h>
 
 namespace {
 
