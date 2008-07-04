@@ -1123,9 +1123,9 @@ _Note:_ This feature should only be used for temporary pain-relief. You still
 have to fix the disabled tests at a later date. As a reminder, Google Test will
 print a banner warning you if a test program contains any disabled tests.
 
-_Tip:_ You can easily count the number of disabled tests you have using `gsearch`
-and/or `grep`. This number can be used as a metric for improving your test
-quality.
+_Tip:_ You can easily count the number of disabled tests you have
+using `grep`. This number can be used as a metric for improving your
+test quality.
 
 _Availability:_ Linux, Windows, Mac.
 
