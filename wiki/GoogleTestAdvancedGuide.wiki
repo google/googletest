@@ -1133,4 +1133,4 @@ _Availability:_ Linux, Windows, Mac.
 
 Congratulations! You've now learned more advanced Google Test tools and are
 ready to tackle more complex testing tasks. If you want to dive even deeper, you
-can read the GoogleTestFAQ.
+can read the [http://code.google.com/p/googletest/wiki/GoogleTestFAQ GoogleTestFAQ].
