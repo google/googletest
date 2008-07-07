@@ -800,7 +800,7 @@ FRIEND_TEST(TestCaseName, TestName);
 For example,
 {{{
 // foo.h
-#include "testing/production_stub/public/gtest_prod.h"
+#include <gtest/gtest_prod.h>
 
 // Defines FRIEND_TEST.
 class Foo {
