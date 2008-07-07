@@ -7,6 +7,31 @@ If you cannot find the answer to your question here, and you have read
 GoogleTestPrimer and GoogleTestAdvancedGuide, send it to
 googletestframework@googlegroups.com.
 
+=== Why should I use Google Test instead of my favorite C++ testing framework? ===
+
+First, let's say clearly that we don't want to get into the debate of
+which C++ testing framework is *the best*.  There exist many fine
+frameworks for writing C++ tests, and we have tremendous respect for
+the developers and users of them.  We don't think there is (or will
+be) a single best framework - you have to pick the right tool for the
+particular task you are tackling.
+
+We created Google Test because we couldn't find the right combination
+of features and conveniences in an existing framework to satisfy _our_
+needs.  The following is a list of things that _we_ like about Google
+Test.  We don't claim them to be unique to Google Test - rather, the
+combination of them makes Google Test the choice for us.  We hope this
+list can help you decide whether it is for you too.
+
+  * Google Test is designed to be portable.  It works where many STL types (e.g. `std::string` and `std::vector`) don't compile.  It doesn't require exceptions or RTTI.  As a result, it runs on Linux, Mac OS X, Windows and several embedded operating systems.
+  * Nonfatal assertions (`EXPECT_*`) have proven to be great time savers, as they allow a test to report multiple failures in a single edit-compile-test cycle.
+  * It's easy to write assertions that generate informative messages: you just use the stream syntax to append any additional information, e.g. `ASSERT_EQ(5, Foo(i)) << " where i = " << i;`.  It doesn't require a new set of macros or special functions.
+  * Google Test automatically detects your tests and doesn't require you to enumerate them in order to run them.
+  * No framework can anticipate all your needs, so Google Test provides `EXPECT_PRED*` to make it easy to extend your assertion vocabulary.  For a nicer syntax, you can define your own assertion macros trivially in terms of `EXPECT_PRED*`.
+  * Death tests are pretty handy for ensuring that your asserts in production code are triggered by the right conditions.
+  * `SCOPED_TRACE` helps you understand the context of an assertion failure when it comes from inside a sub-routine or loop.
+  * You can decide which tests to run using name patterns.  This saves time when you want to quickly reproduce a test failure.
+
 === Does Google Test support running tests in parallel? ===
 
 Test runners tend to be tightly coupled with the build/test
