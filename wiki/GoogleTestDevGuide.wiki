@@ -117,5 +117,15 @@ procedures in this document, writing consistently great code, and
 demonstrating repeatedly that he or she truly gets the zen of Google
 Test.
 
+== Release Process ==
+
+We follow the typical release process for Subversion-based projects:
+
+  # A release branch named `release-X.Y` is created.
+  # Bugs are fixed and features are added in trunk; those individual patches are merged into the release branch until it's stable.
+  # An individual point release (the `Z` in `X.Y.Z`) is made by creating a tag from the branch.
+  # Repeat steps 2 and 3 throughout one release cycle (as determined by features or time).
+  # Go back to step 1 to create another release branch and so on.
+
 ----
 This page is based on the [http://code.google.com/webtoolkit/makinggwtbetter.html Making GWT Better] guide from the [http://code.google.com/webtoolkit/ Google Web Toolkit] project.  Except as otherwise [http://code.google.com/policies.html#restrictions noted], the content of this page is licensed under the [http://creativecommons.org/licenses/by/2.5/ Creative Commons Attribution 2.5 License].
