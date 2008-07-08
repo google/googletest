@@ -110,11 +110,13 @@ int g_death_test_count = 0;
 TEST(BarDeathTest, ThreadSafeAndFast) {
   g_death_test_count++;
 
+#ifdef GTEST_HAS_DEATH_TEST
   GTEST_FLAG(death_test_style) = "threadsafe";
   EXPECT_DEATH(abort(), "");
 
   GTEST_FLAG(death_test_style) = "fast";
   EXPECT_DEATH(abort(), "");
+#endif  // GTEST_HAS_DEATH_TEST
 }
 
 // Resets the count for each test.

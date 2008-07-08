@@ -62,26 +62,11 @@
 // Windows proper with Visual C++ and MS C library (_MSC_VER && !_WIN32_WCE) and
 // Windows Mobile with Visual C++ and no C library (_WIN32_WCE).
 
-#if defined(__APPLE__) && !defined(GTEST_NOT_MAC_FRAMEWORK_MODE)
-// When using Google Test on the Mac as a framework, all the includes
-// will be in the framework headers folder along with gtest.h.  Define
-// GTEST_NOT_MAC_FRAMEWORK_MODE if you are building Google Test on the
-// Mac and are not using it as a framework.  More info on frameworks
-// available here:
-// http://developer.apple.com/documentation/MacOSX/Conceptual/BPFrameworks/
-// Concepts/WhatAreFrameworks.html.
-#include "gtest-death-test.h"  // NOLINT
-#include "gtest-internal.h"  // NOLINT
-#include "gtest-message.h"  // NOLINT
-#include "gtest-string.h"  // NOLINT
-#include "gtest_prod.h"  // NOLINT
-#else
 #include <gtest/internal/gtest-internal.h>
 #include <gtest/internal/gtest-string.h>
 #include <gtest/gtest-death-test.h>
 #include <gtest/gtest-message.h>
 #include <gtest/gtest_prod.h>
-#endif  // defined(__APPLE__) && !defined(GTEST_NOT_MAC_FRAMEWORK_MODE)
 
 // Depending on the platform, different string classes are available.
 // On Windows, ::std::string compiles only when exceptions are
@@ -964,18 +949,7 @@ class AssertHelper {
 
 // Includes the auto-generated header that implements a family of
 // generic predicate assertion macros.
-#if defined(__APPLE__) && !defined(GTEST_NOT_MAC_FRAMEWORK_MODE)
-// When using Google Test on the Mac as a framework, all the includes will be
-// in the framework headers folder along with gtest.h.
-// Define GTEST_NOT_MAC_FRAMEWORK_MODE if you are building Google Test on
-// the Mac and are not using it as a framework.
-// More info on frameworks available here:
-// http://developer.apple.com/documentation/MacOSX/Conceptual/BPFrameworks/
-// Concepts/WhatAreFrameworks.html.
-#include "gtest_pred_impl.h"  // NOLINT
-#else
 #include <gtest/gtest_pred_impl.h>
-#endif  // defined(__APPLE__) && !defined(GTEST_NOT_MAC_FRAMEWORK_MODE)
 
 // Macros for testing equalities and inequalities.
 //

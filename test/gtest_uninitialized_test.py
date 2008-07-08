@@ -80,8 +80,15 @@ def GetOutput(command):
 def TestExitCodeAndOutput(command):
   """Runs the given command and verifies its exit code and output."""
 
-  # 256 corresponds to return code 0.
-  AssertEq(256, os.system(command))
+  # Verifies that 'command' exits with code 1.
+  if IS_WINDOWS:
+    # On Windows, os.system(command) returns the exit code of 'command'.
+    AssertEq(1, os.system(command))
+  else:
+    # On Unix-like system, os.system(command) returns 256 times the
+    # exit code of 'command'.
+    AssertEq(256, os.system(command))
+
   output = GetOutput(command)
   Assert('InitGoogleTest' in output)
 

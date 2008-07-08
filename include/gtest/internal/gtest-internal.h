@@ -37,18 +37,7 @@
 #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
 #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
 
-#if defined(__APPLE__) && !defined(GTEST_NOT_MAC_FRAMEWORK_MODE)
-// When using Google Test on the Mac as a framework, all the includes will be
-// in the framework headers folder along with gtest.h.
-// Define GTEST_NOT_MAC_FRAMEWORK_MODE if you are building Google Test on
-// the Mac and are not using it as a framework.
-// More info on frameworks available here:
-// http://developer.apple.com/documentation/MacOSX/Conceptual/BPFrameworks/
-// Concepts/WhatAreFrameworks.html.
-#include "gtest-port.h"  // NOLINT
-#else
 #include <gtest/internal/gtest-port.h>
-#endif  // defined(__APPLE__) && !defined(GTEST_NOT_MAC_FRAMEWORK_MODE)
 
 #ifdef GTEST_OS_LINUX
 #include <stdlib.h>
@@ -60,20 +49,8 @@
 #include <iomanip>  // NOLINT
 #include <limits>   // NOLINT
 
-#if defined(__APPLE__) && !defined(GTEST_NOT_MAC_FRAMEWORK_MODE)
-// When using Google Test on the Mac as a framework, all the includes will be
-// in the framework headers folder along with gtest.h.
-// Define GTEST_NOT_MAC_FRAMEWORK_MODE if you are building Google Test on
-// the Mac and are not using it as a framework.
-// More info on frameworks available here:
-// http://developer.apple.com/documentation/MacOSX/Conceptual/BPFrameworks/
-// Concepts/WhatAreFrameworks.html.
-#include "gtest-string.h"  // NOLINT
-#include "gtest-filepath.h"  // NOLINT
-#else
 #include <gtest/internal/gtest-string.h>
 #include <gtest/internal/gtest-filepath.h>
-#endif  // defined(__APPLE__) && !defined(GTEST_NOT_MAC_FRAMEWORK_MODE)
 
 // Due to C++ preprocessor weirdness, we need double indirection to
 // concatenate two tokens when one of them is __LINE__.  Writing
