@@ -54,7 +54,7 @@ This failure is expected, and shouldn't have a trace.
 gtest_output_test_.cc:#: Failure
 Failed
 This failure is expected, and should have a trace.
-gUnit trace:
+Google Test trace:
 gtest_output_test_.cc:#: Expected trace
 gtest_output_test_.cc:#: Failure
 Failed
@@ -66,13 +66,13 @@ gtest_output_test_.cc:#: Failure
 Value of: n
   Actual: 1
 Expected: 2
-gUnit trace:
+Google Test trace:
 gtest_output_test_.cc:#: i = 1
 gtest_output_test_.cc:#: Failure
 Value of: n
   Actual: 2
 Expected: 1
-gUnit trace:
+Google Test trace:
 gtest_output_test_.cc:#: i = 2
 [  FAILED  ] SCOPED_TRACETest.WorksInLoop
 [ RUN      ] SCOPED_TRACETest.WorksInSubroutine
@@ -81,13 +81,13 @@ gtest_output_test_.cc:#: Failure
 Value of: n
   Actual: 1
 Expected: 2
-gUnit trace:
+Google Test trace:
 gtest_output_test_.cc:#: n = 1
 gtest_output_test_.cc:#: Failure
 Value of: n
   Actual: 2
 Expected: 1
-gUnit trace:
+Google Test trace:
 gtest_output_test_.cc:#: n = 2
 [  FAILED  ] SCOPED_TRACETest.WorksInSubroutine
 [ RUN      ] SCOPED_TRACETest.CanBeNested
@@ -96,7 +96,7 @@ gtest_output_test_.cc:#: Failure
 Value of: n
   Actual: 2
 Expected: 1
-gUnit trace:
+Google Test trace:
 gtest_output_test_.cc:#: n = 2
 gtest_output_test_.cc:#: 
 [  FAILED  ] SCOPED_TRACETest.CanBeNested
@@ -105,25 +105,25 @@ gtest_output_test_.cc:#:
 gtest_output_test_.cc:#: Failure
 Failed
 This failure is expected, and should contain trace point A.
-gUnit trace:
+Google Test trace:
 gtest_output_test_.cc:#: A
 gtest_output_test_.cc:#: Failure
 Failed
 This failure is expected, and should contain trace point A and B.
-gUnit trace:
+Google Test trace:
 gtest_output_test_.cc:#: B
 gtest_output_test_.cc:#: A
 gtest_output_test_.cc:#: Failure
 Failed
 This failure is expected, and should contain trace point A, B, and C.
-gUnit trace:
+Google Test trace:
 gtest_output_test_.cc:#: C
 gtest_output_test_.cc:#: B
 gtest_output_test_.cc:#: A
 gtest_output_test_.cc:#: Failure
 Failed
 This failure is expected, and should contain trace point A, B, and D.
-gUnit trace:
+Google Test trace:
 gtest_output_test_.cc:#: D
 gtest_output_test_.cc:#: B
 gtest_output_test_.cc:#: A

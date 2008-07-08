@@ -124,8 +124,6 @@
 //   Int32FromGTestEnv()  - parses an Int32 environment variable.
 //   StringFromGTestEnv() - parses a string environment variable.
 
-#include <sys/types.h>
-
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -215,8 +213,9 @@
 #if GTEST_HAS_STD_STRING && defined(GTEST_OS_LINUX)
 #define GTEST_HAS_DEATH_TEST
 // On some platforms, <regex.h> needs someone to define size_t, and
-// won't compile if being #included first.  Therefore it's important
-// that we #include it after <sys/types.h>.
+// won't compile otherwise.  We can #include it here as we already
+// included <stdlib.h>, which is guaranteed to define size_t through
+// <stddef.h>.
 #include <regex.h>
 #include <vector>
 #include <fcntl.h>

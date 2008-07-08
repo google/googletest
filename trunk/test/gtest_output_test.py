@@ -158,7 +158,7 @@ def GetCommandOutput(cmd):
   """
 
   # Disables exception pop-ups on Windows.
-  os.environ['GUNIT_CATCH_EXCEPTIONS'] = '1'
+  os.environ['GTEST_CATCH_EXCEPTIONS'] = '1'
   return NormalizeOutput(GetShellCommandOutput(cmd, ''))
 
 
