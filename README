@@ -38,6 +38,15 @@ described below), there are further requirements:
   * Libtool / Libtoolize
   * Python version 2.4 or newer
 
+### Windows Requirements ###
+  * Microsoft Visual Studio 7.1 or newer
+
+### Cygwin Requirements ###
+  * Cygwin 1.5.25-14 or newer
+
+### Mac OS X Requirements ###
+  * Mac OS X 10.4 Tiger or newer
+
 Getting the Source
 ------------------
 There are two primary ways of getting Google Test's source code: you can
@@ -60,9 +69,10 @@ or for a release version X.Y.*'s branch:
 
   $ svn checkout http://googletest.googlecode.com/svn/branches/release-X.Y/ gtest-X.Y-svn
 
-Next you will need to prepare the GNU Autotools build system. Enter the
-target directory of the checkout command you used ('gtest-svn' or
-'gtest-X.Y-svn' above) and proceed with the following commands:
+Next you will need to prepare the GNU Autotools build system, if you
+are using Linux, Mac OS X, or Cygwin. Enter the target directory of
+the checkout command you used ('gtest-svn' or 'gtest-X.Y-svn' above)
+and proceed with the following commands:
 
   $ aclocal-1.9  # Where "1.9" must match the following automake command
   $ libtoolize -c
@@ -92,6 +102,8 @@ which contains all of the source code. Here are some examples in Linux:
 
 Building the Source
 -------------------
+
+### Linux, Mac OS X, and Cygwin ###
 There are two primary options for building the source at this point: build it
 inside the source code tree, or in a separate directory. We recommend building
 in a separate directory as that tends to produce both more consistent results
@@ -130,5 +142,10 @@ make sure you run this *before* updating your checkout of the source in order
 to uninstall the same version which you installed.
 
   $ sudo make uninstall  # Must be run against the exact same build as "install"
+
+### Windows ###
+Open the gtest.sln file in the msvc/ folder using Visual Studio, and
+you are ready to build Google Test the same way you build any Visual
+Studio project.
 
 Happy testing!

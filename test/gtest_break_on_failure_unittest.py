@@ -74,10 +74,14 @@ def SetEnvVar(env_var, value):
 
 
 def Run(command):
-  """Runs a command; returns 1 if it has a segmentation fault, or 0 otherwise.
+  """Runs a command; returns 1 if it was killed by a signal, or 0 otherwise.
   """
 
-  return os.system(command) == signal.SIGSEGV
+  exit_code = os.system(command)
+  # On Unix-like systems, the lowest 8 bits of the exit code is the
+  # signal number that killed the process (or 0 if it wasn't killed by
+  # a signal).
+  return (exit_code & 255) != 0
 
 
 # The unit test.
