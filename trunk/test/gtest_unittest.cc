@@ -157,10 +157,12 @@ TEST(ToUtf8StringTest, CanEncode12To16Bits) {
   EXPECT_STREQ("\xEC\x9D\x8D", ToUtf8String(L'\xC74D').c_str());
 }
 
-#if !defined(GTEST_OS_WINDOWS) && !defined(__SYMBIAN32__)
+#if !defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_CYGWIN) && \
+    !defined(__SYMBIAN32__)
 
 // Tests in this group require a wchar_t to hold > 16 bits, and thus
-// are skipped on Windows and Symbian, where a wchar_t is 16-bit wide.
+// are skipped on Windows, Cygwin, and Symbian, where a wchar_t is
+// 16-bit wide.
 
 // Tests that Unicode code-points that have 17 to 21 bits are encoded
 // as 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx.
@@ -178,7 +180,7 @@ TEST(ToUtf8StringTest, CanEncodeInvalidCodePoint) {
                ToUtf8String(L'\x1234ABCD').c_str());
 }
 
-#endif  // Windows or Symbian
+#endif  // Windows, Cygwin, or Symbian
 
 // Tests the List template class.
 

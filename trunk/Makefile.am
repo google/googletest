@@ -6,6 +6,19 @@ EXTRA_DIST = \
   CONTRIBUTORS \
   scripts/gen_gtest_pred_impl.py
 
+# MSVC project files
+EXTRA_DIST += \
+  msvc/gtest.sln \
+  msvc/gtest.vcproj \
+  msvc/gtest_color_test_.vcproj \
+  msvc/gtest_env_var_test_.vcproj \
+  msvc/gtest_environment_test.vcproj \
+  msvc/gtest_main.vcproj \
+  msvc/gtest_output_test_.vcproj \
+  msvc/gtest_prod_test.vcproj \
+  msvc/gtest_uninitialized_test_.vcproj \
+  msvc/gtest_unittest.vcproj
+
 # TODO(wan@google.com): integrate scripts/gen_gtest_pred_impl.py into
 #   the build system such that a user can specify the maximum predicate
 #   arity here and have the script automatically generate the

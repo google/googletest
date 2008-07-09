@@ -66,6 +66,7 @@
 //                             Test flag names share, in upper case.
 //
 // Macros indicating the current platform:
+//   GTEST_OS_CYGWIN   - defined iff compiled on Cygwin.
 //   GTEST_OS_LINUX    - defined iff compiled on Linux.
 //   GTEST_OS_MAC      - defined iff compiled on Mac OS X.
 //   GTEST_OS_WINDOWS  - defined iff compiled on Windows.
@@ -132,7 +133,9 @@
 #define GTEST_FLAG_PREFIX_UPPER "GTEST_"
 
 // Determines the platform on which Google Test is compiled.
-#ifdef _MSC_VER
+#ifdef __CYGWIN__
+#define GTEST_OS_CYGWIN
+#elif defined _MSC_VER
 // TODO(kenton@google.com): GTEST_OS_WINDOWS is currently used to mean
 //   both "The OS is Windows" and "The compiler is MSVC".  These
 //   meanings really should be separated in order to better support
