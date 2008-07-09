@@ -1,5 +1,5 @@
 AC_INIT([Google C++ Testing Framework],
-        [1.0.0],
+        [1.0.1],
         [googletestframework@googlegroups.com],
         [gtest])
 
