@@ -55,7 +55,7 @@ Checking out the Google Test source is most useful if you plan to
 tweak it yourself.  You check out the source for Google Test using a
 [http://subversion.tigris.org/ Subversion] client as you would for any
 other project hosted on Google Code.  Please see the instruction on
-the [http://code.google.com/p/googletest/source/checkoutproject source code access page] for how to do it.
+the [http://code.google.com/p/googletest/source/checkout source code access page] for how to do it.
 
 === Compiling from Source ===
 
