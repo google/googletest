@@ -74,10 +74,10 @@ are using Linux, Mac OS X, or Cygwin. Enter the target directory of
 the checkout command you used ('gtest-svn' or 'gtest-X.Y-svn' above)
 and proceed with the following commands:
 
-  $ aclocal-1.9  # Where "1.9" must match the following automake command
-  $ libtoolize -c
+  $ aclocal-1.9       # Where "1.9" must match the following automake command.
+  $ libtoolize -c     # Use "glibtoolize -c" instead on Mac OS X.
   $ autoheader
-  $ automake-1.9 -ac  # See Automake version requirements above
+  $ automake-1.9 -ac  # See Automake version requirements above.
   $ autoconf
 
 While this is a bit complicated, it will most often be automatically re-run by
