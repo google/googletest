@@ -241,11 +241,11 @@ String FormatForFailureMessage(wchar_t wchar);
 // This internal macro is used to avoid duplicated code.
 #define GTEST_FORMAT_IMPL(operand2_type, operand1_printer)\
 inline String FormatForComparisonFailureMessage(\
-    operand2_type::value_type* str, const operand2_type& operand2) {\
+    operand2_type::value_type* str, const operand2_type& /*operand2*/) {\
   return operand1_printer(str);\
 }\
 inline String FormatForComparisonFailureMessage(\
-    const operand2_type::value_type* str, const operand2_type& operand2) {\
+    const operand2_type::value_type* str, const operand2_type& /*operand2*/) {\
   return operand1_printer(str);\
 }
 

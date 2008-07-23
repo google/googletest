@@ -47,7 +47,7 @@
 // prevent a user from accidentally including gtest-internal-inl.h in
 // his code.
 #define GTEST_IMPLEMENTATION
-#include "gtest-internal-inl.h"
+#include "src/gtest-internal-inl.h"
 #undef GTEST_IMPLEMENTATION
 
 namespace testing {
@@ -688,7 +688,7 @@ static void SplitString(const ::std::string& str, char delimiter,
   ::std::vector< ::std::string> parsed;
   ::std::string::size_type pos = 0;
   while (true) {
-    const ::std::string::size_type colon = str.find(':', pos);
+    const ::std::string::size_type colon = str.find(delimiter, pos);
     if (colon == ::std::string::npos) {
       parsed.push_back(str.substr(pos));
       break;
