@@ -430,7 +430,7 @@ const ::std::vector<String>& GetArgvs();
 class Mutex {
  public:
   Mutex() {}
-  explicit Mutex(int unused) {}
+  explicit Mutex(int /*unused*/) {}
   void AssertHeld() const {}
   enum { NO_CONSTRUCTOR_NEEDED_FOR_STATIC_MUTEX = 0 };
 };
