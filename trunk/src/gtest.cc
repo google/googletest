@@ -2149,7 +2149,11 @@ static const char * TestPartResultTypeToString(TestPartResultType type) {
 
     case TPRT_NONFATAL_FAILURE:
     case TPRT_FATAL_FAILURE:
-      return "Failure";
+#ifdef _MSC_VER
+      return "error: ";
+#else
+      return "Failure\n";
+#endif
   }
 
   return "Unknown result type";
@@ -2162,9 +2166,13 @@ static void PrintTestPartResult(
 
   printf("%s", file_name == NULL ? "unknown file" : file_name);
   if (test_part_result.line_number() >= 0) {
+#ifdef _MSC_VER
+    printf("(%d)", test_part_result.line_number());
+#else
     printf(":%d", test_part_result.line_number());
+#endif
   }
-  printf(": %s\n", TestPartResultTypeToString(test_part_result.type()));
+  printf(": %s", TestPartResultTypeToString(test_part_result.type()));
   printf("%s\n", test_part_result.message());
   fflush(stdout);
 }

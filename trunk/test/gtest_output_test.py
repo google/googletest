@@ -78,11 +78,12 @@ def RemoveLocations(output):
 
   Returns:
        output with all file location info (in the form of
-       'DIRECTORY/FILE_NAME:LINE_NUMBER: ') replaced by
+       'DIRECTORY/FILE_NAME:LINE_NUMBER: 'or
+       'DIRECTORY\\FILE_NAME(LINE_NUMBER): ') replaced by
        'FILE_NAME:#: '.
   """
 
-  return re.sub(r'.*[/\\](.+)\:\d+\: ', r'\1:#: ', output)
+  return re.sub(r'.*[/\\](.+)(\:\d+|\(\d+\))\: ', r'\1:#: ', output)
 
 
 def RemoveStackTraces(output):
