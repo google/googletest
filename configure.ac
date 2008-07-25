@@ -1,3 +1,7 @@
+# At this point, the Xcode project assumes the version string will be three
+# integers separated by periods and surrounded by square brackets (e.g.
+# "[1.0.1]"). It also asumes that there won't be any closing parenthesis
+# between "AC_INIT(" and the closing ")" including comments and strings.
 AC_INIT([Google C++ Testing Framework],
         [1.0.1],
         [googletestframework@googlegroups.com],
