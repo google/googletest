@@ -1075,6 +1075,14 @@ non-Windows platforms) the `TERM` environment variable is set to `xterm` or
 
 _Availability:_ Linux, Windows, Mac.
 
+=== Printing the Elapsed Time: `--gtest_print_time` ===
+
+By default, Google Test does not show you the time it takes to run
+each test.  To see that, run the test program with the
+`--gtest_print_time` command line flag.
+
+_Availability:_ Linux, Windows, Mac.
+
 === Repeating the Tests: `GTEST_REPEAT` and `--gtest_repeat` ===
 
 Once in a while you'll run into a test whose result is hit-or-miss. Perhaps it
