@@ -81,6 +81,11 @@ void PrintFlag(const char* flag) {
     return;
   }
 
+  if (strcmp(flag, "print_time") == 0) {
+    cout << GTEST_FLAG(print_time);
+    return;
+  }
+
   if (strcmp(flag, "repeat") == 0) {
     cout << GTEST_FLAG(repeat);
     return;
