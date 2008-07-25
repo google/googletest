@@ -58,8 +58,10 @@ else:
   PROGRAM = 'gtest_output_test_'
   GOLDEN_NAME = 'gtest_output_test_golden_lin.txt'
 
-COMMAND = os.path.join(gtest_test_utils.GetBuildDir(),
-                       PROGRAM) + ' --gtest_color=yes'
+PROGRAM_PATH = os.path.join(gtest_test_utils.GetBuildDir(), PROGRAM)
+COMMAND_WITH_COLOR = PROGRAM_PATH + ' --gtest_color=yes'
+COMMAND_WITH_TIME = (PROGRAM_PATH + ' --gtest_print_time '
+                     + '--gtest_filter="FatalFailureTest.*:LoggingTest.*"')
 
 GOLDEN_PATH = os.path.join(gtest_test_utils.GetSourceDir(),
                            GOLDEN_NAME)
@@ -94,12 +96,19 @@ def RemoveStackTraces(output):
                 'Stack trace: (omitted)\n\n', output)
 
 
+def RemoveTime(output):
+  """Removes all time information from a Google Test program's output."""
+
+  return re.sub(r'\(\d+ ms', '(? ms', output)
+
+
 def NormalizeOutput(output):
   """Normalizes output (the output of gtest_output_test_.exe)."""
 
   output = ToUnixLineEnding(output)
   output = RemoveLocations(output)
   output = RemoveStackTraces(output)
+  output = RemoveTime(output)
   return output
 
 
@@ -165,8 +174,8 @@ def GetCommandOutput(cmd):
 
 class GTestOutputTest(unittest.TestCase):
   def testOutput(self):
-    output = GetCommandOutput(COMMAND)
-
+    output = (GetCommandOutput(COMMAND_WITH_COLOR) +
+              GetCommandOutput(COMMAND_WITH_TIME))
     golden_file = open(GOLDEN_PATH, 'rb')
     golden = golden_file.read()
     golden_file.close()
@@ -176,7 +185,8 @@ class GTestOutputTest(unittest.TestCase):
 
 if __name__ == '__main__':
   if sys.argv[1:] == [GENGOLDEN_FLAG]:
-    output = GetCommandOutput(COMMAND)
+    output = (GetCommandOutput(COMMAND_WITH_COLOR) +
+              GetCommandOutput(COMMAND_WITH_TIME))
     golden_file = open(GOLDEN_PATH, 'wb')
     golden_file.write(output)
     golden_file.close()

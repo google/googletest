@@ -808,6 +808,7 @@ class GTestFlagSaverTest : public testing::Test {
     testing::GTEST_FLAG(filter) = "";
     testing::GTEST_FLAG(list_tests) = false;
     testing::GTEST_FLAG(output) = "";
+    testing::GTEST_FLAG(print_time) = false;
     testing::GTEST_FLAG(repeat) = 1;
   }
 
@@ -827,6 +828,7 @@ class GTestFlagSaverTest : public testing::Test {
     EXPECT_STREQ("", testing::GTEST_FLAG(filter).c_str());
     EXPECT_FALSE(testing::GTEST_FLAG(list_tests));
     EXPECT_STREQ("", testing::GTEST_FLAG(output).c_str());
+    EXPECT_FALSE(testing::GTEST_FLAG(print_time));
     EXPECT_EQ(1, testing::GTEST_FLAG(repeat));
 
     testing::GTEST_FLAG(break_on_failure) = true;
@@ -835,6 +837,7 @@ class GTestFlagSaverTest : public testing::Test {
     testing::GTEST_FLAG(filter) = "abc";
     testing::GTEST_FLAG(list_tests) = true;
     testing::GTEST_FLAG(output) = "xml:foo.xml";
+    testing::GTEST_FLAG(print_time) = true;
     testing::GTEST_FLAG(repeat) = 100;
   }
  private:
@@ -3471,6 +3474,7 @@ struct Flags {
             filter(""),
             list_tests(false),
             output(""),
+            print_time(false),
             repeat(1) {}
 
   // Factory methods.
@@ -3515,6 +3519,14 @@ struct Flags {
     return flags;
   }
 
+  // Creates a Flags struct where the gtest_print_time flag has the given
+  // value.
+  static Flags PrintTime(bool print_time) {
+    Flags flags;
+    flags.print_time = print_time;
+    return flags;
+  }
+
   // Creates a Flags struct where the gtest_repeat flag has the given
   // value.
   static Flags Repeat(Int32 repeat) {
@@ -3529,6 +3541,7 @@ struct Flags {
   const char* filter;
   bool list_tests;
   const char* output;
+  bool print_time;
   Int32 repeat;
 };
 
@@ -3542,6 +3555,7 @@ class InitGoogleTestTest : public testing::Test {
     GTEST_FLAG(filter) = "";
     GTEST_FLAG(list_tests) = false;
     GTEST_FLAG(output) = "";
+    GTEST_FLAG(print_time) = false;
     GTEST_FLAG(repeat) = 1;
   }
 
@@ -3563,6 +3577,7 @@ class InitGoogleTestTest : public testing::Test {
     EXPECT_STREQ(expected.filter, GTEST_FLAG(filter).c_str());
     EXPECT_EQ(expected.list_tests, GTEST_FLAG(list_tests));
     EXPECT_STREQ(expected.output, GTEST_FLAG(output).c_str());
+    EXPECT_EQ(expected.print_time, GTEST_FLAG(print_time));
     EXPECT_EQ(expected.repeat, GTEST_FLAG(repeat));
   }
 
@@ -3948,6 +3963,86 @@ TEST_F(InitGoogleTestTest, OutputXmlDirectory) {
   };
 
   TEST_PARSING_FLAGS(argv, argv2, Flags::Output("xml:directory/path/"));
+}
+
+// Tests having a --gtest_print_time flag
+TEST_F(InitGoogleTestTest, PrintTimeFlag) {
+    const char* argv[] = {
+      "foo.exe",
+      "--gtest_print_time",
+      NULL
+    };
+
+    const char* argv2[] = {
+      "foo.exe",
+      NULL
+    };
+
+    TEST_PARSING_FLAGS(argv, argv2, Flags::PrintTime(true));
+}
+
+// Tests having a --gtest_print_time flag with a "true" value
+TEST_F(InitGoogleTestTest, PrintTimeTrue) {
+    const char* argv[] = {
+      "foo.exe",
+      "--gtest_print_time=1",
+      NULL
+    };
+
+    const char* argv2[] = {
+      "foo.exe",
+      NULL
+    };
+
+    TEST_PARSING_FLAGS(argv, argv2, Flags::PrintTime(true));
+}
+
+// Tests having a --gtest_print_time flag with a "false" value
+TEST_F(InitGoogleTestTest, PrintTimeFalse) {
+    const char* argv[] = {
+      "foo.exe",
+      "--gtest_print_time=0",
+      NULL
+    };
+
+    const char* argv2[] = {
+      "foo.exe",
+      NULL
+    };
+
+    TEST_PARSING_FLAGS(argv, argv2, Flags::PrintTime(false));
+}
+
+// Tests parsing --gtest_print_time=f.
+TEST_F(InitGoogleTestTest, PrintTimeFalse_f) {
+  const char* argv[] = {
+    "foo.exe",
+    "--gtest_print_time=f",
+    NULL
+  };
+
+  const char* argv2[] = {
+    "foo.exe",
+    NULL
+  };
+
+  TEST_PARSING_FLAGS(argv, argv2, Flags::PrintTime(false));
+}
+
+// Tests parsing --gtest_print_time=F.
+TEST_F(InitGoogleTestTest, PrintTimeFalse_F) {
+  const char* argv[] = {
+    "foo.exe",
+    "--gtest_print_time=F",
+    NULL
+  };
+
+  const char* argv2[] = {
+    "foo.exe",
+    NULL
+  };
+
+  TEST_PARSING_FLAGS(argv, argv2, Flags::PrintTime(false));
 }
 
 // Tests parsing --gtest_repeat=number
