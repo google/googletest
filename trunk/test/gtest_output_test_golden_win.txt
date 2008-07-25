@@ -358,3 +358,64 @@ Expected fatal failure.
 [  FAILED  ] ExpectFatalFailureTest.FailsWhenStatementReturns
 
 29 FAILED TESTS
+The non-test part of the code is expected to have 2 failures.
+
+gtest_output_test_.cc:#: error: Value of: false
+  Actual: false
+Expected: true
+gtest_output_test_.cc:#: error: Value of: 3
+Expected: 2
+Note: Google Test filter = FatalFailureTest.*:LoggingTest.*
+[==========] Running 4 tests from 2 test cases.
+[----------] Global test environment set-up.
+FooEnvironment::SetUp() called.
+BarEnvironment::SetUp() called.
+[----------] 3 tests from FatalFailureTest
+[ RUN      ] FatalFailureTest.FatalFailureInSubroutine
+(expecting a failure that x should be 1)
+gtest_output_test_.cc:#: error: Value of: x
+  Actual: 2
+Expected: 1
+[  FAILED  ] FatalFailureTest.FatalFailureInSubroutine (? ms)
+[ RUN      ] FatalFailureTest.FatalFailureInNestedSubroutine
+(expecting a failure that x should be 1)
+gtest_output_test_.cc:#: error: Value of: x
+  Actual: 2
+Expected: 1
+[  FAILED  ] FatalFailureTest.FatalFailureInNestedSubroutine (? ms)
+[ RUN      ] FatalFailureTest.NonfatalFailureInSubroutine
+(expecting a failure on false)
+gtest_output_test_.cc:#: error: Value of: false
+  Actual: false
+Expected: true
+[  FAILED  ] FatalFailureTest.NonfatalFailureInSubroutine (? ms)
+[----------] 3 tests from FatalFailureTest (? ms total)
+
+[----------] 1 test from LoggingTest
+[ RUN      ] LoggingTest.InterleavingLoggingAndAssertions
+(expecting 2 failures on (3) >= (a[i]))
+i == 0
+i == 1
+gtest_output_test_.cc:#: error: Expected: (3) >= (a[i]), actual: 3 vs 9
+i == 2
+i == 3
+gtest_output_test_.cc:#: error: Expected: (3) >= (a[i]), actual: 3 vs 6
+[  FAILED  ] LoggingTest.InterleavingLoggingAndAssertions (? ms)
+[----------] 1 test from LoggingTest (? ms total)
+
+[----------] Global test environment tear-down
+BarEnvironment::TearDown() called.
+gtest_output_test_.cc:#: error: Failed
+Expected non-fatal failure.
+FooEnvironment::TearDown() called.
+gtest_output_test_.cc:#: error: Failed
+Expected fatal failure.
+[==========] 4 tests from 2 test cases ran. (? ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 4 tests, listed below:
+[  FAILED  ] FatalFailureTest.FatalFailureInSubroutine
+[  FAILED  ] FatalFailureTest.FatalFailureInNestedSubroutine
+[  FAILED  ] FatalFailureTest.NonfatalFailureInSubroutine
+[  FAILED  ] LoggingTest.InterleavingLoggingAndAssertions
+
+ 4 FAILED TESTS

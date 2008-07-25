@@ -169,6 +169,12 @@ GTEST_DEFINE_string(
     "executable's name and, if necessary, made unique by adding "
     "digits.");
 
+GTEST_DEFINE_bool(
+    print_time,
+    internal::BoolFromGTestEnv("print_time", false),
+    "True iff " GTEST_NAME
+    " should display elapsed time in text output.");
+
 GTEST_DEFINE_int32(
     repeat,
     internal::Int32FromGTestEnv("repeat", 1),
@@ -2303,6 +2309,7 @@ class PrettyUnitTestResultPrinter : public UnitTestEventListenerInterface {
   virtual void OnUnitTestStart(const UnitTest * unit_test);
   virtual void OnGlobalSetUpStart(const UnitTest*);
   virtual void OnTestCaseStart(const TestCase * test_case);
+  virtual void OnTestCaseEnd(const TestCase * test_case);
   virtual void OnTestStart(const TestInfo * test_info);
   virtual void OnNewTestPartResult(const TestPartResult * result);
   virtual void OnTestEnd(const TestInfo * test_info);
@@ -2349,6 +2356,20 @@ void PrettyUnitTestResultPrinter::OnTestCaseStart(
   fflush(stdout);
 }
 
+void PrettyUnitTestResultPrinter::OnTestCaseEnd(
+    const TestCase * test_case) {
+  if (!GTEST_FLAG(print_time)) return;
+
+  test_case_name_ = test_case->name();
+  const internal::String counts =
+      FormatCountableNoun(test_case->test_to_run_count(), "test", "tests");
+  ColoredPrintf(COLOR_GREEN, "[----------] ");
+  printf("%s from %s (%s ms total)\n\n",
+         counts.c_str(), test_case_name_.c_str(),
+         internal::StreamableToString(test_case->elapsed_time()).c_str());
+  fflush(stdout);
+}
+
 void PrettyUnitTestResultPrinter::OnTestStart(const TestInfo * test_info) {
   ColoredPrintf(COLOR_GREEN,  "[ RUN      ] ");
   PrintTestName(test_case_name_.c_str(), test_info->name());
@@ -2363,7 +2384,12 @@ void PrettyUnitTestResultPrinter::OnTestEnd(const TestInfo * test_info) {
     ColoredPrintf(COLOR_RED, "[  FAILED  ] ");
   }
   PrintTestName(test_case_name_.c_str(), test_info->name());
-  printf("\n");
+  if (GTEST_FLAG(print_time)) {
+    printf(" (%s ms)\n", internal::StreamableToString(
+           test_info->result()->elapsed_time()).c_str());
+  } else {
+    printf("\n");
+  }
   fflush(stdout);
 }
 
@@ -2420,9 +2446,14 @@ void PrettyUnitTestResultPrinter::OnUnitTestEnd(
   const internal::UnitTestImpl* const impl = unit_test->impl();
 
   ColoredPrintf(COLOR_GREEN,  "[==========] ");
-  printf("%s from %s ran.\n",
+  printf("%s from %s ran.",
          FormatTestCount(impl->test_to_run_count()).c_str(),
          FormatTestCaseCount(impl->test_case_to_run_count()).c_str());
+  if (GTEST_FLAG(print_time)) {
+    printf(" (%s ms total)",
+           internal::StreamableToString(impl->elapsed_time()).c_str());
+  }
+  printf("\n");
   ColoredPrintf(COLOR_GREEN,  "[  PASSED  ] ");
   printf("%s.\n", FormatTestCount(impl->successful_test_count()).c_str());
 
@@ -3505,6 +3536,7 @@ void InitGoogleTestImpl(int* argc, CharType** argv) {
                         &GTEST_FLAG(internal_run_death_test)) ||
         ParseBoolFlag(arg, kListTestsFlag, &GTEST_FLAG(list_tests)) ||
         ParseStringFlag(arg, kOutputFlag, &GTEST_FLAG(output)) ||
+        ParseBoolFlag(arg, kPrintTimeFlag, &GTEST_FLAG(print_time)) ||
         ParseInt32Flag(arg, kRepeatFlag, &GTEST_FLAG(repeat))
         ) {
       // Yes.  Shift the remainder of the argv list left by one.  Note

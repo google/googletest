@@ -70,6 +70,7 @@ GTEST_DECLARE_string(color);
 GTEST_DECLARE_string(filter);
 GTEST_DECLARE_bool(list_tests);
 GTEST_DECLARE_string(output);
+GTEST_DECLARE_bool(print_time);
 GTEST_DECLARE_int32(repeat);
 GTEST_DECLARE_int32(stack_trace_depth);
 GTEST_DECLARE_bool(show_internal_stack_frames);
@@ -79,10 +80,11 @@ namespace internal {
 // Names of the flags (needed for parsing Google Test flags).
 const char kBreakOnFailureFlag[] = "break_on_failure";
 const char kCatchExceptionsFlag[] = "catch_exceptions";
+const char kColorFlag[] = "color";
 const char kFilterFlag[] = "filter";
 const char kListTestsFlag[] = "list_tests";
 const char kOutputFlag[] = "output";
-const char kColorFlag[] = "color";
+const char kPrintTimeFlag[] = "print_time";
 const char kRepeatFlag[] = "repeat";
 
 // This class saves the values of all Google Test flags in its c'tor, and
@@ -99,6 +101,7 @@ class GTestFlagSaver {
     internal_run_death_test_ = GTEST_FLAG(internal_run_death_test);
     list_tests_ = GTEST_FLAG(list_tests);
     output_ = GTEST_FLAG(output);
+    print_time_ = GTEST_FLAG(print_time);
     repeat_ = GTEST_FLAG(repeat);
   }
 
@@ -112,6 +115,7 @@ class GTestFlagSaver {
     GTEST_FLAG(internal_run_death_test) = internal_run_death_test_;
     GTEST_FLAG(list_tests) = list_tests_;
     GTEST_FLAG(output) = output_;
+    GTEST_FLAG(print_time) = print_time_;
     GTEST_FLAG(repeat) = repeat_;
   }
  private:
@@ -124,6 +128,7 @@ class GTestFlagSaver {
   String internal_run_death_test_;
   bool list_tests_;
   String output_;
+  bool print_time_;
   bool pretty_;
   internal::Int32 repeat_;
 } GTEST_ATTRIBUTE_UNUSED;
