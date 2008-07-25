@@ -46,6 +46,7 @@ described below), there are further requirements:
 
 ### Mac OS X Requirements ###
   * Mac OS X 10.4 Tiger or newer
+  * Developer Tools Installed
 
 Getting the Source
 ------------------
@@ -103,7 +104,7 @@ which contains all of the source code. Here are some examples in Linux:
 Building the Source
 -------------------
 
-### Linux, Mac OS X, and Cygwin ###
+### Linux, Mac OS X (without Xcode), and Cygwin ###
 There are two primary options for building the source at this point: build it
 inside the source code tree, or in a separate directory. We recommend building
 in a separate directory as that tends to produce both more consistent results
@@ -147,5 +148,28 @@ to uninstall the same version which you installed.
 Open the gtest.sln file in the msvc/ folder using Visual Studio, and
 you are ready to build Google Test the same way you build any Visual
 Studio project.
+
+### Mac OS X (universal-binary framework) ###
+Open the gtest.xcodeproj in the xcode/ folder using Xcode. Build the "gtest"
+target. The universal binary framework will end up in your selected build
+directory (selected in the Xcode "Preferences..." -> "Building" pane and
+defaults to xcode/build). 
+
+Alternatively, run "xcodebuild" from the command line in Terminal.app. This
+will build the "Release" configuration of the gtest.framework, but you can
+select the "Debug" configuration with a command line option. See the
+xcodebuild man page for more information.
+
+To use the gtest.framework, add the framework to your own project.
+Create a new executable target and add the framework to the "Link Binary With
+Libraries" build phase. Select "Edit Active Executable" from the "Project"
+menu. In the "Arguments" tab, add
+
+    "DYLD_FRAMEWORK_PATH" : "/real/framework/path"
+
+in the "Variables to be set in the environment:" list, where you replace
+"/real/framework/path" with the actual location of the gtest.framework. Now
+when you run your executable, it will load the framework and your test will
+run as expected. 
 
 Happy testing!
