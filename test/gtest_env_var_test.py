@@ -101,6 +101,7 @@ def TestEnvVarAffectsFlag(command):
   TestFlag(command, 'color', 'yes', 'auto')
   TestFlag(command, 'filter', 'FooTest.Bar', '*')
   TestFlag(command, 'output', 'tmp/foo.xml', '')
+  TestFlag(command, 'print_time', '1', '0')
   TestFlag(command, 'repeat', '999', '1')
 
   if IS_WINDOWS:
