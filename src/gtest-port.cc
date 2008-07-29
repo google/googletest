@@ -96,7 +96,10 @@ class CapturedStderr {
   CapturedStderr() {
     uncaptured_fd_ = dup(STDERR_FILENO);
 
-    char name_template[] = "captured_stderr.XXXXXX";
+    // There's no guarantee that a test has write access to the
+    // current directory, so we create the temporary file in the /tmp
+    // directory instead.
+    char name_template[] = "/tmp/captured_stderr.XXXXXX";
     const int captured_fd = mkstemp(name_template);
     filename_ = name_template;
     fflush(NULL);
