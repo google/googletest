@@ -34,9 +34,11 @@
 #include <gtest/gtest-death-test.h>
 #include <gtest/internal/gtest-port.h>
 
+#ifdef GTEST_HAS_DEATH_TEST
 #include <errno.h>
 #include <limits.h>
 #include <stdarg.h>
+#endif  // GTEST_HAS_DEATH_TEST
 
 #include <gtest/gtest-message.h>
 #include <gtest/internal/gtest-string.h>

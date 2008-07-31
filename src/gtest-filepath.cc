@@ -32,12 +32,15 @@
 #include <gtest/internal/gtest-filepath.h>
 #include <gtest/internal/gtest-port.h>
 
-#ifdef _WIN32
+#ifdef _WIN32_WCE
+#include <windows.h>
+#elif defined(_WIN32)
 #include <direct.h>
 #include <io.h>
-#endif  // _WIN32
-
 #include <sys/stat.h>
+#else
+#include <sys/stat.h>
+#endif // _WIN32_WCE or _WIN32
 
 #include <gtest/internal/gtest-string.h>
 
@@ -47,7 +50,16 @@ namespace internal {
 #ifdef GTEST_OS_WINDOWS
 const char kPathSeparator = '\\';
 const char kPathSeparatorString[] = "\\";
+#ifdef _WIN32_WCE
+// Windows CE doesn't have a current directory. You should not use
+// the current directory in tests on Windows CE, but this at least
+// provides a reasonable fallback.
+const char kCurrentDirectoryString[] = "\\";
+// Windows CE doesn't define INVALID_FILE_ATTRIBUTES
+const DWORD kInvalidFileAttributes = 0xffffffff;
+#else
 const char kCurrentDirectoryString[] = ".\\";
+#endif  // _WIN32_WCE
 #else
 const char kPathSeparator = '/';
 const char kPathSeparatorString[] = "/";
@@ -112,8 +124,15 @@ FilePath FilePath::MakeFileName(const FilePath& directory,
 // either a file, directory, or whatever.
 bool FilePath::FileOrDirectoryExists() const {
 #ifdef GTEST_OS_WINDOWS
+#ifdef _WIN32_WCE
+  LPCWSTR unicode = String::AnsiToUtf16(pathname_.c_str());
+  const DWORD attributes = GetFileAttributes(unicode);
+  delete [] unicode;
+  return attributes != kInvalidFileAttributes;
+#else
   struct _stat file_stat = {};
   return _stat(pathname_.c_str(), &file_stat) == 0;
+#endif  // _WIN32_WCE
 #else
   struct stat file_stat = {};
   return stat(pathname_.c_str(), &file_stat) == 0;
@@ -126,9 +145,19 @@ bool FilePath::DirectoryExists() const {
   bool result = false;
 #ifdef _WIN32
   FilePath removed_sep(this->RemoveTrailingPathSeparator());
+#ifdef _WIN32_WCE
+  LPCWSTR unicode = String::AnsiToUtf16(removed_sep.c_str());
+  const DWORD attributes = GetFileAttributes(unicode);
+  delete [] unicode;
+  if ((attributes != kInvalidFileAttributes) &&
+      (attributes & FILE_ATTRIBUTE_DIRECTORY)) {
+    result = true;
+  }
+#else
   struct _stat file_stat = {};
   result = _stat(removed_sep.c_str(), &file_stat) == 0 &&
       (_S_IFDIR & file_stat.st_mode) != 0;
+#endif  // _WIN32_WCE
 #else
   struct stat file_stat = {};
   result = stat(pathname_.c_str(), &file_stat) == 0 &&
@@ -185,7 +214,14 @@ bool FilePath::CreateDirectoriesRecursively() const {
 // exist. Not named "CreateDirectory" because that's a macro on Windows.
 bool FilePath::CreateFolder() const {
 #ifdef _WIN32
+#ifdef _WIN32_WCE
+  FilePath removed_sep(this->RemoveTrailingPathSeparator());
+  LPCWSTR unicode = String::AnsiToUtf16(removed_sep.c_str());
+  int result = CreateDirectory(unicode, NULL) ? 0 : -1;
+  delete [] unicode;
+#else
   int result = _mkdir(pathname_.c_str());
+#endif  // !WIN32_WCE
 #else
   int result = mkdir(pathname_.c_str(), 0777);
 #endif  // _WIN32

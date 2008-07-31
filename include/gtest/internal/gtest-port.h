@@ -582,6 +582,15 @@ inline const char* GetEnv(const char* name) {
 #endif
 }
 
+#ifdef _WIN32_WCE
+// Windows CE has no C library. The abort() function is used in
+// several places in Google Test. This implementation provides a reasonable
+// imitation of standard behaviour.
+void abort();
+#else
+inline void abort() { ::abort(); }
+#endif  // _WIN32_WCE
+
 // Macro for referencing flags.
 #define GTEST_FLAG(name) FLAGS_gtest_##name
 
