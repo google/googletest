@@ -235,16 +235,6 @@ static bool ShouldRunTestCase(const TestCase* test_case) {
   return test_case->should_run();
 }
 
-#ifdef _WIN32_WCE
-// Windows CE has no C library. The abort() function is used in
-// several places in Google Test. This implementation provides a reasonable
-// imitation of standard behaviour.
-static void abort() {
-  DebugBreak();
-  TerminateProcess(GetCurrentProcess(), 1);
-}
-#endif  // _WIN32_WCE
-
 // AssertHelper constructor.
 AssertHelper::AssertHelper(TestPartResultType type, const char* file,
                            int line, const char* message)
@@ -465,7 +455,7 @@ void TestPartResultArray::Append(const TestPartResult& result) {
 const TestPartResult& TestPartResultArray::GetTestPartResult(int index) const {
   if (index < 0 || index >= size()) {
     printf("\nInvalid index (%d) into TestPartResultArray.\n", index);
-    abort();
+    internal::abort();
   }
 
   const internal::ListNode<TestPartResult>* p = list_->Head();
@@ -738,6 +728,42 @@ const char * String::CloneCString(const char* c_str) {
   return (c_str == NULL) ?
                     NULL : CloneString(c_str, strlen(c_str));
 }
+
+#ifdef _WIN32_WCE
+// Creates a UTF-16 wide string from the given ANSI string, allocating
+// memory using new. The caller is responsible for deleting the return
+// value using delete[]. Returns the wide string, or NULL if the
+// input is NULL.
+LPCWSTR String::AnsiToUtf16(const char* ansi) {
+  if (!ansi) return NULL;
+  const int length = strlen(ansi);
+  const int unicode_length =
+      MultiByteToWideChar(CP_ACP, 0, ansi, length,
+                          NULL, 0);
+  WCHAR* unicode = new WCHAR[unicode_length + 1];
+  MultiByteToWideChar(CP_ACP, 0, ansi, length,
+                      unicode, unicode_length);
+  unicode[unicode_length] = 0;
+  return unicode;
+}
+
+// Creates an ANSI string from the given wide string, allocating
+// memory using new. The caller is responsible for deleting the return
+// value using delete[]. Returns the ANSI string, or NULL if the
+// input is NULL.
+const char* String::Utf16ToAnsi(LPCWSTR utf16_str)  {
+  if (!utf16_str) return NULL;
+  const int ansi_length =
+      WideCharToMultiByte(CP_ACP, 0, utf16_str, -1,
+                          NULL, 0, NULL, NULL);
+  char* ansi = new char[ansi_length + 1];
+  WideCharToMultiByte(CP_ACP, 0, utf16_str, -1,
+                      ansi, ansi_length, NULL, NULL);
+  ansi[ansi_length] = 0;
+  return ansi;
+}
+
+#endif  // _WIN32_WCE
 
 // Compares two C strings.  Returns true iff they have the same content.
 //
@@ -2193,7 +2219,7 @@ enum GTestColor {
   COLOR_YELLOW
 };
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN32_WCE)
 
 // Returns the character attribute for the given color.
 WORD GetColorAttribute(GTestColor color) {
@@ -2217,7 +2243,7 @@ const char* GetAnsiColorCode(GTestColor color) {
   return NULL;
 }
 
-#endif  // _WIN32
+#endif  // _WIN32 && !_WIN32_WCE
 
 // Returns true iff Google Test should use colors in the output.
 bool ShouldUseColor(bool stdout_is_tty) {
@@ -2256,7 +2282,11 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   va_list args;
   va_start(args, fmt);
 
+#ifdef _WIN32_WCE
+  static const bool use_color = false;
+#else
   static const bool use_color = ShouldUseColor(isatty(fileno(stdout)) != 0);
+#endif  // !_WIN32_WCE
   // The '!= 0' comparison is necessary to satisfy MSVC 7.1.
 
   if (!use_color) {
@@ -2265,7 +2295,7 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
     return;
   }
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WIN32_WCE)
   const HANDLE stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 
   // Gets the current text color.
@@ -2283,7 +2313,7 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   printf("\033[0;3%sm", GetAnsiColorCode(color));
   vprintf(fmt, args);
   printf("\033[m");  // Resets the terminal to default.
-#endif  // _WIN32
+#endif  // _WIN32 && !_WIN32_WCE
   va_end(args);
 }
 

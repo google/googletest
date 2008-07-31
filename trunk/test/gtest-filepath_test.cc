@@ -51,7 +51,11 @@
 #undef GTEST_IMPLEMENTATION
 
 #ifdef GTEST_OS_WINDOWS
+#ifdef _WIN32_WCE
+#include <windows.h>
+#else
 #include <direct.h>
+#endif  // _WIN32_WCE
 #define PATH_SEP "\\"
 #else
 #define PATH_SEP "/"
@@ -60,6 +64,32 @@
 namespace testing {
 namespace internal {
 namespace {
+
+#ifdef _WIN32_WCE
+// Windows CE doesn't have the remove C function.
+int remove(const char* path) {
+  LPCWSTR wpath = String::AnsiToUtf16(path);
+  int ret = DeleteFile(wpath) ? 0 : -1;
+  delete [] wpath;
+  return ret;
+}
+// Windows CE doesn't have the _rmdir C function.
+int _rmdir(const char* path) {
+  FilePath filepath(path);
+  LPCWSTR wpath = String::AnsiToUtf16(
+      filepath.RemoveTrailingPathSeparator().c_str());
+  int ret = RemoveDirectory(wpath) ? 0 : -1;
+  delete [] wpath;
+  return ret;
+}
+
+#elif defined(GTEST_LINUX_GOOGLE3_MODE)
+// Creates a temporary directory and returns its path.
+const char* MakeTempDir() {
+  static char dir_name[] = "gtest-filepath_test_tmpXXXXXX";
+  return mkdtemp(dir_name);
+}
+#endif  // _WIN32_WCE
 
 // FilePath's functions used by UnitTestOptions::GetOutputFile.
 
@@ -102,8 +132,14 @@ TEST(RemoveDirectoryNameTest, ShouldAlsoGiveFileName) {
 
 // RemoveFileName "" -> "./"
 TEST(RemoveFileNameTest, EmptyName) {
+#ifdef _WIN32_WCE
+  // On Windows CE, we use the root as the current directory.
+  EXPECT_STREQ(PATH_SEP,
+      FilePath("").RemoveFileName().c_str());
+#else
   EXPECT_STREQ("." PATH_SEP,
       FilePath("").RemoveFileName().c_str());
+#endif
 }
 
 // RemoveFileName "adir/" -> "adir/"

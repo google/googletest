@@ -295,7 +295,9 @@ TEST(ListTest, InsertAfterNotAtBeginning) {
 TEST(StringTest, Constructors) {
   // Default ctor.
   String s1;
-  EXPECT_EQ(NULL, s1.c_str());
+  // We aren't using EXPECT_EQ(NULL, s1.c_str()) because comparing
+  // pointers with NULL isn't supported on all platforms.
+  EXPECT_TRUE(NULL == s1.c_str());
 
   // Implicitly constructs from a C-string.
   String s2 = "Hi";
@@ -441,6 +443,31 @@ TEST(StringTest, ShowWideCStringQuoted) {
   EXPECT_STREQ("L\"foo\"",
                String::ShowWideCStringQuoted(L"foo").c_str());
 }
+
+#ifdef _WIN32_WCE
+TEST(StringTest, AnsiAndUtf16Null) {
+  EXPECT_EQ(NULL, String::AnsiToUtf16(NULL));
+  EXPECT_EQ(NULL, String::Utf16ToAnsi(NULL));
+}
+
+TEST(StringTest, AnsiAndUtf16ConvertBasic) {
+  const char* ansi = String::Utf16ToAnsi(L"str");
+  EXPECT_STREQ("str", ansi);
+  delete [] ansi;
+  const WCHAR* utf16 = String::AnsiToUtf16("str");
+  EXPECT_TRUE(wcsncmp(L"str", utf16, 3) == 0);
+  delete [] utf16;
+}
+
+TEST(StringTest, AnsiAndUtf16ConvertPathChars) {
+  const char* ansi = String::Utf16ToAnsi(L".:\\ \"*?");
+  EXPECT_STREQ(".:\\ \"*?", ansi);
+  delete [] ansi;
+  const WCHAR* utf16 = String::AnsiToUtf16(".:\\ \"*?");
+  EXPECT_TRUE(wcsncmp(L".:\\ \"*?", utf16, 3) == 0);
+  delete [] utf16;
+}
+#endif  // _WIN32_WCE
 
 #endif  // GTEST_OS_WINDOWS
 
@@ -2864,7 +2891,6 @@ TEST(StreamableTest, BasicIoManip) {
            << "A NUL char " << std::ends << std::flush << " in line 2.";
   }, "Line 1.\nA NUL char \\0 in line 2.");
 }
-
 
 // Tests the macros that haven't been covered so far.
 

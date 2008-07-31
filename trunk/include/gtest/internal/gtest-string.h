@@ -107,6 +107,32 @@ class String {
   // memory using malloc().
   static const char* CloneCString(const char* c_str);
 
+#ifdef _WIN32_WCE
+  // Windows CE does not have the 'ANSI' versions of Win32 APIs. To be
+  // able to pass strings to Win32 APIs on CE we need to convert them
+  // to 'Unicode', UTF-16.
+
+  // Creates a UTF-16 wide string from the given ANSI string, allocating
+  // memory using new. The caller is responsible for deleting the return
+  // value using delete[]. Returns the wide string, or NULL if the
+  // input is NULL.
+  //
+  // The wide string is created using the ANSI codepage (CP_ACP) to
+  // match the behaviour of the ANSI versions of Win32 calls and the
+  // C runtime.
+  static LPCWSTR AnsiToUtf16(const char* c_str);
+
+  // Creates an ANSI string from the given wide string, allocating
+  // memory using new. The caller is responsible for deleting the return
+  // value using delete[]. Returns the ANSI string, or NULL if the
+  // input is NULL.
+  //
+  // The returned string is created using the ANSI codepage (CP_ACP) to
+  // match the behaviour of the ANSI versions of Win32 calls and the
+  // C runtime.
+  static const char* Utf16ToAnsi(LPCWSTR utf16_str);
+#endif
+
   // Compares two C strings.  Returns true iff they have the same content.
   //
   // Unlike strcmp(), this function can handle NULL argument(s).  A

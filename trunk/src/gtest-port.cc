@@ -32,15 +32,21 @@
 #include <gtest/internal/gtest-port.h>
 
 #include <limits.h>
+#include <stdlib.h>
+#include <stdio.h>
+
 #ifdef GTEST_HAS_DEATH_TEST
 #include <regex.h>
 #endif  // GTEST_HAS_DEATH_TEST
-#include <stdlib.h>
-#include <stdio.h>
+
+#ifdef _WIN32_WCE
+#include <windows.h>  // For TerminateProcess()
+#endif  // _WIN32_WCE
 
 #include <gtest/gtest-spi.h>
 #include <gtest/gtest-message.h>
 #include <gtest/internal/gtest-string.h>
+
 
 namespace testing {
 namespace internal {
@@ -193,6 +199,13 @@ void CaptureStderr() {
 const ::std::vector<String>& GetArgvs() { return g_argvs; }
 
 #endif  // GTEST_HAS_DEATH_TEST
+
+#ifdef _WIN32_WCE
+void abort() {
+  DebugBreak();
+  TerminateProcess(GetCurrentProcess(), 1);
+}
+#endif  // _WIN32_WCE
 
 // Returns the name of the environment variable corresponding to the
 // given flag.  For example, FlagToEnvVar("foo") will return
