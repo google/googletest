@@ -467,31 +467,6 @@ TEST_F(TestForDeathTest, TestExpectDebugDeath) {
 #endif
 }
 
-// Tests that EXPECT_DEBUG_DEATH works as expected,
-// that is, in debug mode, it:
-// 1. Asserts on death.
-// 2. Has no side effect.
-//
-// And in opt mode, it:
-// 1. Has side effects and returns the expected value (12).
-TEST_F(TestForDeathTest, TestExpectDebugDeathM) {
-  int sideeffect = 0;
-  EXPECT_DEBUG_DEATH({  // NOLINT
-    // Tests that the return value is 12 in opt mode.
-    EXPECT_EQ(12, DieInDebugElse12(&sideeffect));
-    // Tests that the side effect occurrs in opt mode.
-    EXPECT_EQ(12, sideeffect);
-  }, "death.*DieInDebugElse12") << "In ExpectDebugDeathM";
-
-#ifdef NDEBUG
-  // Checks that the assignment occurs in opt mode (sideeffect).
-  EXPECT_EQ(12, sideeffect);
-#else
-  // Checks that the assignment does not occur in dbg mode (no sideeffect).
-  EXPECT_EQ(0, sideeffect);
-#endif
-}
-
 // Tests that ASSERT_DEBUG_DEATH works as expected
 // In debug mode:
 // 1. Asserts on debug death.
@@ -499,7 +474,7 @@ TEST_F(TestForDeathTest, TestExpectDebugDeathM) {
 //
 // In opt mode:
 // 1. Has side effects and returns the expected value (12).
-TEST_F(TestForDeathTest, TestAssertDebugDeathM) {
+TEST_F(TestForDeathTest, TestAssertDebugDeath) {
   int sideeffect = 0;
 
   ASSERT_DEBUG_DEATH({  // NOLINT
@@ -507,7 +482,7 @@ TEST_F(TestForDeathTest, TestAssertDebugDeathM) {
     EXPECT_EQ(12, DieInDebugElse12(&sideeffect));
     // Tests that the side effect occurred in opt mode.
     EXPECT_EQ(12, sideeffect);
-  }, "death.*DieInDebugElse12") << "In AssertDebugDeathM";
+  }, "death.*DieInDebugElse12");
 
 #ifdef NDEBUG
   // Checks that the assignment occurs in opt mode (sideeffect).

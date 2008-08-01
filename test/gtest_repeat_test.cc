@@ -58,6 +58,8 @@ using testing::GTEST_FLAG(repeat);
 
 namespace {
 
+// We need this when we are testing Google Test itself and therefore
+// cannot use Google Test assertions.
 #define GTEST_CHECK_INT_EQ_(expected, actual) \
   do {\
     const int expected_val = (expected);\
@@ -130,8 +132,6 @@ void ResetCounts() {
 
 // Checks that the count for each test is expected.
 void CheckCounts(int expected) {
-  // We cannot use Google Test assertions here since we are testing Google Test
-  // itself.
   GTEST_CHECK_INT_EQ_(expected, g_environment_set_up_count);
   GTEST_CHECK_INT_EQ_(expected, g_environment_tear_down_count);
   GTEST_CHECK_INT_EQ_(expected, g_should_fail_count);
