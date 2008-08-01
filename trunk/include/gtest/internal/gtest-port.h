@@ -249,11 +249,11 @@
 //   struct Foo {
 //     Foo() { ... }
 //   } GTEST_ATTRIBUTE_UNUSED;
-#if defined(GTEST_OS_WINDOWS) || (defined(GTEST_OS_LINUX) && defined(SWIG))
-#define GTEST_ATTRIBUTE_UNUSED
-#else
+#if defined(__GNUC__) && !defined(COMPILER_ICC)
 #define GTEST_ATTRIBUTE_UNUSED __attribute__ ((unused))
-#endif  // GTEST_OS_WINDOWS || (GTEST_OS_LINUX && SWIG)
+#else
+#define GTEST_ATTRIBUTE_UNUSED
+#endif
 
 // A macro to disallow the evil copy constructor and operator= functions
 // This should be used in the private: declarations for a class.
