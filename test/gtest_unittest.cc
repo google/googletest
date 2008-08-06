@@ -74,17 +74,38 @@ bool ShouldUseColor(bool stdout_is_tty);
 }  // namespace internal
 }  // namespace testing
 
+using testing::AssertionFailure;
+using testing::AssertionResult;
+using testing::AssertionSuccess;
+using testing::DoubleLE;
+using testing::FloatLE;
+using testing::GTEST_FLAG(break_on_failure);
+using testing::GTEST_FLAG(catch_exceptions);
 using testing::GTEST_FLAG(color);
+using testing::GTEST_FLAG(filter);
+using testing::GTEST_FLAG(list_tests);
+using testing::GTEST_FLAG(output);
+using testing::GTEST_FLAG(print_time);
+using testing::GTEST_FLAG(repeat);
+using testing::GTEST_FLAG(show_internal_stack_frames);
+using testing::GTEST_FLAG(stack_trace_depth);
+using testing::IsNotSubstring;
+using testing::IsSubstring;
+using testing::Message;
 using testing::ScopedFakeTestPartResultReporter;
+using testing::Test;
 using testing::TestPartResult;
 using testing::TestPartResultArray;
+using testing::TPRT_FATAL_FAILURE;
+using testing::TPRT_NONFATAL_FAILURE;
+using testing::TPRT_SUCCESS;
 using testing::UnitTest;
 using testing::internal::AppendUserMessage;
 using testing::internal::EqFailure;
+using testing::internal::FloatingPoint;
+using testing::internal::GTestFlagSaver;
 using testing::internal::Int32;
 using testing::internal::List;
-using testing::internal::OsStackTraceGetter;
-using testing::internal::OsStackTraceGetterInterface;
 using testing::internal::ShouldUseColor;
 using testing::internal::StreamableToString;
 using testing::internal::String;
@@ -92,7 +113,6 @@ using testing::internal::TestProperty;
 using testing::internal::TestResult;
 using testing::internal::ToUtf8String;
 using testing::internal::UnitTestImpl;
-using testing::internal::UnitTestOptions;
 
 // This line tests that we can define tests in an unnamed namespace.
 namespace {
@@ -489,30 +509,21 @@ TEST(TestPropertyTest, ReplaceStringValue) {
 // Tests the TestPartResult class.
 
 // The test fixture for testing TestPartResult.
-class TestPartResultTest : public testing::Test {
+class TestPartResultTest : public Test {
  protected:
   TestPartResultTest()
-      : r1_(testing::TPRT_SUCCESS,
-            "foo/bar.cc",
-            10,
-            "Success!"),
-        r2_(testing::TPRT_NONFATAL_FAILURE,
-            "foo/bar.cc",
-            -1,
-            "Failure!"),
-        r3_(testing::TPRT_FATAL_FAILURE,
-            NULL,
-            -1,
-            "Failure!") {}
+      : r1_(TPRT_SUCCESS, "foo/bar.cc", 10, "Success!"),
+        r2_(TPRT_NONFATAL_FAILURE, "foo/bar.cc", -1, "Failure!"),
+        r3_(TPRT_FATAL_FAILURE, NULL, -1, "Failure!") {}
 
   TestPartResult r1_, r2_, r3_;
 };
 
 // Tests TestPartResult::type()
 TEST_F(TestPartResultTest, type) {
-  EXPECT_EQ(testing::TPRT_SUCCESS, r1_.type());
-  EXPECT_EQ(testing::TPRT_NONFATAL_FAILURE, r2_.type());
-  EXPECT_EQ(testing::TPRT_FATAL_FAILURE, r3_.type());
+  EXPECT_EQ(TPRT_SUCCESS, r1_.type());
+  EXPECT_EQ(TPRT_NONFATAL_FAILURE, r2_.type());
+  EXPECT_EQ(TPRT_FATAL_FAILURE, r3_.type());
 }
 
 // Tests TestPartResult::file_name()
@@ -562,17 +573,11 @@ TEST_F(TestPartResultTest, NonfatallyFailed) {
 
 // Tests the TestPartResultArray class.
 
-class TestPartResultArrayTest : public testing::Test {
+class TestPartResultArrayTest : public Test {
  protected:
   TestPartResultArrayTest()
-      : r1_(testing::TPRT_NONFATAL_FAILURE,
-            "foo/bar.cc",
-            -1,
-            "Failure 1"),
-        r2_(testing::TPRT_FATAL_FAILURE,
-            "foo/bar.cc",
-            -1,
-            "Failure 2") {}
+      : r1_(TPRT_NONFATAL_FAILURE, "foo/bar.cc", -1, "Failure 1"),
+        r2_(TPRT_FATAL_FAILURE, "foo/bar.cc", -1, "Failure 2") {}
 
   const TestPartResult r1_, r2_;
 };
@@ -625,7 +630,7 @@ TEST(ScopedFakeTestPartResultReporterTest, InterceptsTestFailures) {
 // Tests the TestResult class
 
 // The test fixture for testing TestResult.
-class TestResultTest : public testing::Test {
+class TestResultTest : public Test {
  protected:
   typedef List<TestPartResult> TPRList;
 
@@ -637,16 +642,12 @@ class TestResultTest : public testing::Test {
 
   virtual void SetUp() {
     // pr1 is for success.
-    pr1 = new TestPartResult(testing::TPRT_SUCCESS,
-                                      "foo/bar.cc",
-                                      10,
-                                      "Success!");
+    pr1 = new TestPartResult(TPRT_SUCCESS, "foo/bar.cc", 10, "Success!");
 
     // pr2 is for fatal failure.
-    pr2 = new TestPartResult(testing::TPRT_FATAL_FAILURE,
-                                      "foo/bar.cc",
-                                      -1,  // This line number means "unknown"
-                                      "Failure!");
+    pr2 = new TestPartResult(TPRT_FATAL_FAILURE, "foo/bar.cc",
+                             -1,  // This line number means "unknown"
+                             "Failure!");
 
     // Creates the TestResult objects.
     r0 = new TestResult();
@@ -821,22 +822,22 @@ TEST(TestResultPropertyTest, AddFailureWhenUsingReservedKeyCalledClassname) {
 
 // Tests that GTestFlagSaver works on Windows and Mac.
 
-class GTestFlagSaverTest : public testing::Test {
+class GTestFlagSaverTest : public Test {
  protected:
   // Saves the Google Test flags such that we can restore them later, and
   // then sets them to their default values.  This will be called
   // before the first test in this test case is run.
   static void SetUpTestCase() {
-    saver_ = new testing::internal::GTestFlagSaver;
+    saver_ = new GTestFlagSaver;
 
-    testing::GTEST_FLAG(break_on_failure) = false;
-    testing::GTEST_FLAG(catch_exceptions) = false;
-    testing::GTEST_FLAG(color) = "auto";
-    testing::GTEST_FLAG(filter) = "";
-    testing::GTEST_FLAG(list_tests) = false;
-    testing::GTEST_FLAG(output) = "";
-    testing::GTEST_FLAG(print_time) = false;
-    testing::GTEST_FLAG(repeat) = 1;
+    GTEST_FLAG(break_on_failure) = false;
+    GTEST_FLAG(catch_exceptions) = false;
+    GTEST_FLAG(color) = "auto";
+    GTEST_FLAG(filter) = "";
+    GTEST_FLAG(list_tests) = false;
+    GTEST_FLAG(output) = "";
+    GTEST_FLAG(print_time) = false;
+    GTEST_FLAG(repeat) = 1;
   }
 
   // Restores the Google Test flags that the tests have modified.  This will
@@ -849,30 +850,30 @@ class GTestFlagSaverTest : public testing::Test {
   // Verifies that the Google Test flags have their default values, and then
   // modifies each of them.
   void VerifyAndModifyFlags() {
-    EXPECT_FALSE(testing::GTEST_FLAG(break_on_failure));
-    EXPECT_FALSE(testing::GTEST_FLAG(catch_exceptions));
-    EXPECT_STREQ("auto", testing::GTEST_FLAG(color).c_str());
-    EXPECT_STREQ("", testing::GTEST_FLAG(filter).c_str());
-    EXPECT_FALSE(testing::GTEST_FLAG(list_tests));
-    EXPECT_STREQ("", testing::GTEST_FLAG(output).c_str());
-    EXPECT_FALSE(testing::GTEST_FLAG(print_time));
-    EXPECT_EQ(1, testing::GTEST_FLAG(repeat));
+    EXPECT_FALSE(GTEST_FLAG(break_on_failure));
+    EXPECT_FALSE(GTEST_FLAG(catch_exceptions));
+    EXPECT_STREQ("auto", GTEST_FLAG(color).c_str());
+    EXPECT_STREQ("", GTEST_FLAG(filter).c_str());
+    EXPECT_FALSE(GTEST_FLAG(list_tests));
+    EXPECT_STREQ("", GTEST_FLAG(output).c_str());
+    EXPECT_FALSE(GTEST_FLAG(print_time));
+    EXPECT_EQ(1, GTEST_FLAG(repeat));
 
-    testing::GTEST_FLAG(break_on_failure) = true;
-    testing::GTEST_FLAG(catch_exceptions) = true;
-    testing::GTEST_FLAG(color) = "no";
-    testing::GTEST_FLAG(filter) = "abc";
-    testing::GTEST_FLAG(list_tests) = true;
-    testing::GTEST_FLAG(output) = "xml:foo.xml";
-    testing::GTEST_FLAG(print_time) = true;
-    testing::GTEST_FLAG(repeat) = 100;
+    GTEST_FLAG(break_on_failure) = true;
+    GTEST_FLAG(catch_exceptions) = true;
+    GTEST_FLAG(color) = "no";
+    GTEST_FLAG(filter) = "abc";
+    GTEST_FLAG(list_tests) = true;
+    GTEST_FLAG(output) = "xml:foo.xml";
+    GTEST_FLAG(print_time) = true;
+    GTEST_FLAG(repeat) = 100;
   }
  private:
   // For saving Google Test flags during this test case.
-  static testing::internal::GTestFlagSaver* saver_;
+  static GTestFlagSaver* saver_;
 };
 
-testing::internal::GTestFlagSaver* GTestFlagSaverTest::saver_ = NULL;
+GTestFlagSaver* GTestFlagSaverTest::saver_ = NULL;
 
 // Google Test doesn't guarantee the order of tests.  The following two
 // tests are designed to work regardless of their order.
@@ -896,7 +897,7 @@ static void SetEnv(const char* name, const char* value) {
   // Environment variables are not supported on Windows CE.
   return;
 #elif defined(GTEST_OS_WINDOWS)  // If we are on Windows proper.
-  _putenv((testing::Message() << name << "=" << value).GetString().c_str());
+  _putenv((Message() << name << "=" << value).GetString().c_str());
 #else
   if (*value == '\0') {
     unsetenv(name);
@@ -909,7 +910,7 @@ static void SetEnv(const char* name, const char* value) {
 #ifndef _WIN32_WCE
 // Environment variables are not supported on Windows CE.
 
-using ::testing::internal::Int32FromGTestEnv;
+using testing::internal::Int32FromGTestEnv;
 
 // Tests Int32FromGTestEnv().
 
@@ -1037,20 +1038,20 @@ struct IsEvenFunctor {
 
 // A predicate-formatter function that asserts the argument is an even
 // number.
-testing::AssertionResult AssertIsEven(const char* expr, int n) {
+AssertionResult AssertIsEven(const char* expr, int n) {
   if (IsEven(n)) {
-    return testing::AssertionSuccess();
+    return AssertionSuccess();
   }
 
-  testing::Message msg;
+  Message msg;
   msg << expr << " evaluates to " << n << ", which is not even.";
-  return testing::AssertionFailure(msg);
+  return AssertionFailure(msg);
 }
 
 // A predicate-formatter functor that asserts the argument is an even
 // number.
 struct AssertIsEvenFunctor {
-  testing::AssertionResult operator()(const char* expr, int n) {
+  AssertionResult operator()(const char* expr, int n) {
     return AssertIsEven(expr, n);
   }
 };
@@ -1070,50 +1071,38 @@ struct SumIsEven3Functor {
 
 // A predicate-formatter function that asserts the sum of the
 // arguments is an even number.
-testing::AssertionResult AssertSumIsEven4(const char* e1,
-                                          const char* e2,
-                                          const char* e3,
-                                          const char* e4,
-                                          int n1,
-                                          int n2,
-                                          int n3,
-                                          int n4) {
+AssertionResult AssertSumIsEven4(
+    const char* e1, const char* e2, const char* e3, const char* e4,
+    int n1, int n2, int n3, int n4) {
   const int sum = n1 + n2 + n3 + n4;
   if (IsEven(sum)) {
-    return testing::AssertionSuccess();
+    return AssertionSuccess();
   }
 
-  testing::Message msg;
+  Message msg;
   msg << e1 << " + " << e2 << " + " << e3 << " + " << e4
       << " (" << n1 << " + " << n2 << " + " << n3 << " + " << n4
       << ") evaluates to " << sum << ", which is not even.";
-  return testing::AssertionFailure(msg);
+  return AssertionFailure(msg);
 }
 
 // A predicate-formatter functor that asserts the sum of the arguments
 // is an even number.
 struct AssertSumIsEven5Functor {
-  testing::AssertionResult operator()(const char* e1,
-                                      const char* e2,
-                                      const char* e3,
-                                      const char* e4,
-                                      const char* e5,
-                                      int n1,
-                                      int n2,
-                                      int n3,
-                                      int n4,
-                                      int n5) {
+  AssertionResult operator()(
+      const char* e1, const char* e2, const char* e3, const char* e4,
+      const char* e5, int n1, int n2, int n3, int n4, int n5) {
     const int sum = n1 + n2 + n3 + n4 + n5;
     if (IsEven(sum)) {
-      return testing::AssertionSuccess();
+      return AssertionSuccess();
     }
 
-    testing::Message msg;
+    Message msg;
     msg << e1 << " + " << e2 << " + " << e3 << " + " << e4 << " + " << e5
         << " ("
         << n1 << " + " << n2 << " + " << n3 << " + " << n4 << " + " << n5
         << ") evaluates to " << sum << ", which is not even.";
-    return testing::AssertionFailure(msg);
+    return AssertionFailure(msg);
   }
 };
 
@@ -1294,27 +1283,27 @@ TEST(PredicateAssertionTest, AcceptsTemplateFunction) {
 // Some helper functions for testing using overloaded/template
 // functions with ASSERT_PRED_FORMATn and EXPECT_PRED_FORMATn.
 
-testing::AssertionResult IsPositiveFormat(const char* expr, int n) {
-  return n > 0 ? testing::AssertionSuccess() :
-      testing::AssertionFailure(testing::Message() << "Failure");
+AssertionResult IsPositiveFormat(const char* expr, int n) {
+  return n > 0 ? AssertionSuccess() :
+      AssertionFailure(Message() << "Failure");
 }
 
-testing::AssertionResult IsPositiveFormat(const char* expr, double x) {
-  return x > 0 ? testing::AssertionSuccess() :
-      testing::AssertionFailure(testing::Message() << "Failure");
+AssertionResult IsPositiveFormat(const char* expr, double x) {
+  return x > 0 ? AssertionSuccess() :
+      AssertionFailure(Message() << "Failure");
 }
 
 template <typename T>
-testing::AssertionResult IsNegativeFormat(const char* expr, T x) {
-  return x < 0 ? testing::AssertionSuccess() :
-      testing::AssertionFailure(testing::Message() << "Failure");
+AssertionResult IsNegativeFormat(const char* expr, T x) {
+  return x < 0 ? AssertionSuccess() :
+      AssertionFailure(Message() << "Failure");
 }
 
 template <typename T1, typename T2>
-testing::AssertionResult EqualsFormat(const char* expr1, const char* expr2,
-                                      const T1& x1, const T2& x2) {
-  return x1 == x2 ? testing::AssertionSuccess() :
-      testing::AssertionFailure(testing::Message() << "Failure");
+AssertionResult EqualsFormat(const char* expr1, const char* expr2,
+                             const T1& x1, const T2& x2) {
+  return x1 == x2 ? AssertionSuccess() :
+      AssertionFailure(Message() << "Failure");
 }
 
 // Tests that overloaded functions can be used in *_PRED_FORMAT*
@@ -1451,8 +1440,6 @@ TEST(StringAssertionTest, STRNE_Wide) {
 // Tests that IsSubstring() returns the correct result when the input
 // argument type is const char*.
 TEST(IsSubstringTest, ReturnsCorrectResultForCString) {
-  using ::testing::IsSubstring;
-
   EXPECT_FALSE(IsSubstring("", "", NULL, "a"));
   EXPECT_FALSE(IsSubstring("", "", "b", NULL));
   EXPECT_FALSE(IsSubstring("", "", "needle", "haystack"));
@@ -1464,8 +1451,6 @@ TEST(IsSubstringTest, ReturnsCorrectResultForCString) {
 // Tests that IsSubstring() returns the correct result when the input
 // argument type is const wchar_t*.
 TEST(IsSubstringTest, ReturnsCorrectResultForWideCString) {
-  using ::testing::IsSubstring;
-
   EXPECT_FALSE(IsSubstring("", "", NULL, L"a"));
   EXPECT_FALSE(IsSubstring("", "", L"b", NULL));
   EXPECT_FALSE(IsSubstring("", "", L"needle", L"haystack"));
@@ -1481,8 +1466,8 @@ TEST(IsSubstringTest, GeneratesCorrectMessageForCString) {
                "  Actual: \"needle\"\n"
                "Expected: a substring of haystack_expr\n"
                "Which is: \"haystack\"",
-               ::testing::IsSubstring("needle_expr", "haystack_expr",
-                                      "needle", "haystack").failure_message());
+               IsSubstring("needle_expr", "haystack_expr",
+                           "needle", "haystack").failure_message());
 }
 
 #if GTEST_HAS_STD_STRING
@@ -1490,8 +1475,8 @@ TEST(IsSubstringTest, GeneratesCorrectMessageForCString) {
 // Tests that IsSubstring returns the correct result when the input
 // argument type is ::std::string.
 TEST(IsSubstringTest, ReturnsCorrectResultsForStdString) {
-  EXPECT_TRUE(::testing::IsSubstring("", "", std::string("hello"), "ahellob"));
-  EXPECT_FALSE(::testing::IsSubstring("", "", "hello", std::string("world")));
+  EXPECT_TRUE(IsSubstring("", "", std::string("hello"), "ahellob"));
+  EXPECT_FALSE(IsSubstring("", "", "hello", std::string("world")));
 }
 
 #endif  // GTEST_HAS_STD_STRING
@@ -1500,8 +1485,6 @@ TEST(IsSubstringTest, ReturnsCorrectResultsForStdString) {
 // Tests that IsSubstring returns the correct result when the input
 // argument type is ::std::wstring.
 TEST(IsSubstringTest, ReturnsCorrectResultForStdWstring) {
-  using ::testing::IsSubstring;
-
   EXPECT_TRUE(IsSubstring("", "", ::std::wstring(L"needle"), L"two needles"));
   EXPECT_FALSE(IsSubstring("", "", L"needle", ::std::wstring(L"haystack")));
 }
@@ -1513,7 +1496,7 @@ TEST(IsSubstringTest, GeneratesCorrectMessageForWstring) {
                "  Actual: L\"needle\"\n"
                "Expected: a substring of haystack_expr\n"
                "Which is: L\"haystack\"",
-               ::testing::IsSubstring(
+               IsSubstring(
                    "needle_expr", "haystack_expr",
                    ::std::wstring(L"needle"), L"haystack").failure_message());
 }
@@ -1525,8 +1508,6 @@ TEST(IsSubstringTest, GeneratesCorrectMessageForWstring) {
 // Tests that IsNotSubstring() returns the correct result when the input
 // argument type is const char*.
 TEST(IsNotSubstringTest, ReturnsCorrectResultForCString) {
-  using ::testing::IsNotSubstring;
-
   EXPECT_TRUE(IsNotSubstring("", "", "needle", "haystack"));
   EXPECT_FALSE(IsNotSubstring("", "", "needle", "two needles"));
 }
@@ -1534,8 +1515,6 @@ TEST(IsNotSubstringTest, ReturnsCorrectResultForCString) {
 // Tests that IsNotSubstring() returns the correct result when the input
 // argument type is const wchar_t*.
 TEST(IsNotSubstringTest, ReturnsCorrectResultForWideCString) {
-  using ::testing::IsNotSubstring;
-
   EXPECT_TRUE(IsNotSubstring("", "", L"needle", L"haystack"));
   EXPECT_FALSE(IsNotSubstring("", "", L"needle", L"two needles"));
 }
@@ -1547,7 +1526,7 @@ TEST(IsNotSubstringTest, GeneratesCorrectMessageForWideCString) {
                "  Actual: L\"needle\"\n"
                "Expected: not a substring of haystack_expr\n"
                "Which is: L\"two needles\"",
-               ::testing::IsNotSubstring(
+               IsNotSubstring(
                    "needle_expr", "haystack_expr",
                    L"needle", L"two needles").failure_message());
 }
@@ -1557,8 +1536,6 @@ TEST(IsNotSubstringTest, GeneratesCorrectMessageForWideCString) {
 // Tests that IsNotSubstring returns the correct result when the input
 // argument type is ::std::string.
 TEST(IsNotSubstringTest, ReturnsCorrectResultsForStdString) {
-  using ::testing::IsNotSubstring;
-
   EXPECT_FALSE(IsNotSubstring("", "", std::string("hello"), "ahellob"));
   EXPECT_TRUE(IsNotSubstring("", "", "hello", std::string("world")));
 }
@@ -1570,7 +1547,7 @@ TEST(IsNotSubstringTest, GeneratesCorrectMessageForStdString) {
                "  Actual: \"needle\"\n"
                "Expected: not a substring of haystack_expr\n"
                "Which is: \"two needles\"",
-               ::testing::IsNotSubstring(
+               IsNotSubstring(
                    "needle_expr", "haystack_expr",
                    ::std::string("needle"), "two needles").failure_message());
 }
@@ -1582,8 +1559,6 @@ TEST(IsNotSubstringTest, GeneratesCorrectMessageForStdString) {
 // Tests that IsNotSubstring returns the correct result when the input
 // argument type is ::std::wstring.
 TEST(IsNotSubstringTest, ReturnsCorrectResultForStdWstring) {
-  using ::testing::IsNotSubstring;
-
   EXPECT_FALSE(
       IsNotSubstring("", "", ::std::wstring(L"needle"), L"two needles"));
   EXPECT_TRUE(IsNotSubstring("", "", L"needle", ::std::wstring(L"haystack")));
@@ -1594,7 +1569,7 @@ TEST(IsNotSubstringTest, ReturnsCorrectResultForStdWstring) {
 // Tests floating-point assertions.
 
 template <typename RawType>
-class FloatingPointTest : public testing::Test {
+class FloatingPointTest : public Test {
  protected:
   typedef typename testing::internal::FloatingPoint<RawType> Floating;
   typedef typename Floating::Bits Bits;
@@ -1801,34 +1776,34 @@ TEST_F(FloatTest, ASSERT_NEAR) {
 
 // Tests the cases where FloatLE() should succeed.
 TEST_F(FloatTest, FloatLESucceeds) {
-  EXPECT_PRED_FORMAT2(testing::FloatLE, 1.0f, 2.0f);  // When val1 < val2,
-  ASSERT_PRED_FORMAT2(testing::FloatLE, 1.0f, 1.0f);  // val1 == val2,
+  EXPECT_PRED_FORMAT2(FloatLE, 1.0f, 2.0f);  // When val1 < val2,
+  ASSERT_PRED_FORMAT2(FloatLE, 1.0f, 1.0f);  // val1 == val2,
 
   // or when val1 is greater than, but almost equals to, val2.
-  EXPECT_PRED_FORMAT2(testing::FloatLE, close_to_positive_zero_, 0.0f);
+  EXPECT_PRED_FORMAT2(FloatLE, close_to_positive_zero_, 0.0f);
 }
 
 // Tests the cases where FloatLE() should fail.
 TEST_F(FloatTest, FloatLEFails) {
   // When val1 is greater than val2 by a large margin,
-  EXPECT_NONFATAL_FAILURE(EXPECT_PRED_FORMAT2(testing::FloatLE, 2.0f, 1.0f),
+  EXPECT_NONFATAL_FAILURE(EXPECT_PRED_FORMAT2(FloatLE, 2.0f, 1.0f),
                           "(2.0f) <= (1.0f)");
 
   // or by a small yet non-negligible margin,
   EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_PRED_FORMAT2(testing::FloatLE, further_from_one_, 1.0f);
+    EXPECT_PRED_FORMAT2(FloatLE, further_from_one_, 1.0f);
   }, "(further_from_one_) <= (1.0f)");
 
   // or when either val1 or val2 is NaN.
   EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_PRED_FORMAT2(testing::FloatLE, nan1_, infinity_);
+    EXPECT_PRED_FORMAT2(FloatLE, nan1_, infinity_);
   }, "(nan1_) <= (infinity_)");
   EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_PRED_FORMAT2(testing::FloatLE, -infinity_, nan1_);
+    EXPECT_PRED_FORMAT2(FloatLE, -infinity_, nan1_);
   }, "(-infinity_) <= (nan1_)");
 
   EXPECT_FATAL_FAILURE({  // NOLINT
-    ASSERT_PRED_FORMAT2(testing::FloatLE, nan1_, nan1_);
+    ASSERT_PRED_FORMAT2(FloatLE, nan1_, nan1_);
   }, "(nan1_) <= (nan1_)");
 }
 
@@ -1958,33 +1933,33 @@ TEST_F(DoubleTest, ASSERT_NEAR) {
 
 // Tests the cases where DoubleLE() should succeed.
 TEST_F(DoubleTest, DoubleLESucceeds) {
-  EXPECT_PRED_FORMAT2(testing::DoubleLE, 1.0, 2.0);  // When val1 < val2,
-  ASSERT_PRED_FORMAT2(testing::DoubleLE, 1.0, 1.0);  // val1 == val2,
+  EXPECT_PRED_FORMAT2(DoubleLE, 1.0, 2.0);  // When val1 < val2,
+  ASSERT_PRED_FORMAT2(DoubleLE, 1.0, 1.0);  // val1 == val2,
 
   // or when val1 is greater than, but almost equals to, val2.
-  EXPECT_PRED_FORMAT2(testing::DoubleLE, close_to_positive_zero_, 0.0);
+  EXPECT_PRED_FORMAT2(DoubleLE, close_to_positive_zero_, 0.0);
 }
 
 // Tests the cases where DoubleLE() should fail.
 TEST_F(DoubleTest, DoubleLEFails) {
   // When val1 is greater than val2 by a large margin,
-  EXPECT_NONFATAL_FAILURE(EXPECT_PRED_FORMAT2(testing::DoubleLE, 2.0, 1.0),
+  EXPECT_NONFATAL_FAILURE(EXPECT_PRED_FORMAT2(DoubleLE, 2.0, 1.0),
                           "(2.0) <= (1.0)");
 
   // or by a small yet non-negligible margin,
   EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_PRED_FORMAT2(testing::DoubleLE, further_from_one_, 1.0);
+    EXPECT_PRED_FORMAT2(DoubleLE, further_from_one_, 1.0);
   }, "(further_from_one_) <= (1.0)");
 
   // or when either val1 or val2 is NaN.
   EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_PRED_FORMAT2(testing::DoubleLE, nan1_, infinity_);
+    EXPECT_PRED_FORMAT2(DoubleLE, nan1_, infinity_);
   }, "(nan1_) <= (infinity_)");
   EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_PRED_FORMAT2(testing::DoubleLE, -infinity_, nan1_);
+    EXPECT_PRED_FORMAT2(DoubleLE, -infinity_, nan1_);
   }, " (-infinity_) <= (nan1_)");
   EXPECT_FATAL_FAILURE({  // NOLINT
-    ASSERT_PRED_FORMAT2(testing::DoubleLE, nan1_, nan1_);
+    ASSERT_PRED_FORMAT2(DoubleLE, nan1_, nan1_);
   }, "(nan1_) <= (nan1_)");
 }
 
@@ -2018,7 +1993,7 @@ TEST(DISABLED_TestCase, DISABLED_TestShouldNotRun) {
 
 // Check that when all tests in a test case are disabled, SetupTestCase() and
 // TearDownTestCase() are not called.
-class DisabledTestsTest : public testing::Test {
+class DisabledTestsTest : public Test {
  protected:
   static void SetUpTestCase() {
     FAIL() << "Unexpected failure: All tests disabled in test case. "
@@ -2042,7 +2017,7 @@ TEST_F(DisabledTestsTest, DISABLED_TestShouldNotRun_2) {
 
 // Tests that assertion macros evaluate their arguments exactly once.
 
-class SingleEvaluationTest : public testing::Test {
+class SingleEvaluationTest : public Test {
  protected:
   SingleEvaluationTest() {
     p1_ = s1_;
@@ -2196,7 +2171,7 @@ TEST(AssertionTest, EqFailure) {
 TEST(AssertionTest, AppendUserMessage) {
   const String foo("foo");
 
-  testing::Message msg;
+  Message msg;
   EXPECT_STREQ("foo",
                AppendUserMessage(foo, msg).c_str());
 
@@ -2410,7 +2385,7 @@ enum {
   // On Linux, CASE_B and CASE_A have the same value when truncated to
   // int size.  We want to test whether this will confuse the
   // assertions.
-  CASE_B = ::testing::internal::kMaxBiggestInt,
+  CASE_B = testing::internal::kMaxBiggestInt,
 #else
   CASE_B = INT_MAX,
 #endif  // GTEST_OS_LINUX
@@ -3194,7 +3169,7 @@ TEST(FRIEND_TEST_Test, TEST) {
 }
 
 // The fixture needed to test using FRIEND_TEST with TEST_F.
-class FRIEND_TEST_Test2 : public testing::Test {
+class FRIEND_TEST_Test2 : public Test {
  protected:
   Foo foo;
 };
@@ -3211,7 +3186,7 @@ TEST_F(FRIEND_TEST_Test2, TEST_F) {
 //
 // This class counts the number of live test objects that uses this
 // fixture.
-class TestLifeCycleTest : public testing::Test {
+class TestLifeCycleTest : public Test {
  protected:
   // Constructor.  Increments the number of test objects that uses
   // this fixture.
@@ -3266,7 +3241,7 @@ std::ostream& operator<<(std::ostream& os,
 }
 
 TEST(MessageTest, CanStreamUserTypeInGlobalNameSpace) {
-  testing::Message msg;
+  Message msg;
   Base a(1);
 
   msg << a << &a;  // Uses ::operator<<.
@@ -3291,7 +3266,7 @@ std::ostream& operator<<(std::ostream& os,
 }  // namespace
 
 TEST(MessageTest, CanStreamUserTypeInUnnamedNameSpace) {
-  testing::Message msg;
+  Message msg;
   MyTypeInUnnamedNameSpace a(1);
 
   msg << a << &a;  // Uses <unnamed_namespace>::operator<<.
@@ -3316,7 +3291,7 @@ std::ostream& operator<<(std::ostream& os,
 }  // namespace namespace1
 
 TEST(MessageTest, CanStreamUserTypeInUserNameSpace) {
-  testing::Message msg;
+  Message msg;
   namespace1::MyTypeInNameSpace1 a(1);
 
   msg << a << &a;  // Uses namespace1::operator<<.
@@ -3341,7 +3316,7 @@ std::ostream& operator<<(std::ostream& os,
 }
 
 TEST(MessageTest, CanStreamUserTypeInUserNameSpaceWithStreamOperatorInGlobal) {
-  testing::Message msg;
+  Message msg;
   namespace2::MyTypeInNameSpace2 a(1);
 
   msg << a << &a;  // Uses ::operator<<.
@@ -3350,13 +3325,13 @@ TEST(MessageTest, CanStreamUserTypeInUserNameSpaceWithStreamOperatorInGlobal) {
 
 // Tests streaming NULL pointers to testing::Message.
 TEST(MessageTest, NullPointers) {
-  testing::Message msg;
+  Message msg;
   char* const p1 = NULL;
   unsigned char* const p2 = NULL;
   int* p3 = NULL;
   double* p4 = NULL;
   bool* p5 = NULL;
-  testing::Message* p6 = NULL;
+  Message* p6 = NULL;
 
   msg << p1 << p2 << p3 << p4 << p5 << p6;
   ASSERT_STREQ("(null)(null)(null)(null)(null)(null)",
@@ -3365,8 +3340,6 @@ TEST(MessageTest, NullPointers) {
 
 // Tests streaming wide strings to testing::Message.
 TEST(MessageTest, WideStrings) {
-  using testing::Message;
-
   // Streams a NULL of type const wchar_t*.
   const wchar_t* const_wstr = NULL;
   EXPECT_STREQ("(null)",
@@ -3394,7 +3367,7 @@ namespace testing {
 
 // Tests the TestInfo class.
 
-class TestInfoTest : public testing::Test {
+class TestInfoTest : public Test {
  protected:
   static TestInfo * GetTestInfo(const char* test_name) {
     return UnitTest::GetInstance()->impl()->
@@ -3403,7 +3376,7 @@ class TestInfoTest : public testing::Test {
   }
 
   static const TestResult* GetTestResult(
-      const testing::TestInfo* test_info) {
+      const TestInfo* test_info) {
     return test_info->result();
   }
 };
@@ -3429,7 +3402,7 @@ TEST_F(TestInfoTest, result) {
 
 // Tests setting up and tearing down a test case.
 
-class SetUpTestCaseTest : public testing::Test {
+class SetUpTestCaseTest : public Test {
  protected:
   // This will be called once before the first test in this test case
   // is run.
@@ -3572,7 +3545,7 @@ struct Flags {
 };
 
 // Fixture for testing InitGoogleTest().
-class InitGoogleTestTest : public testing::Test {
+class InitGoogleTestTest : public Test {
  protected:
   // Clears the flags before each test.
   virtual void SetUp() {
@@ -4203,13 +4176,13 @@ TEST(NestedTestingNamespaceTest, Failure) {
 // that is, that they are not private.
 // No tests are based on this fixture; the test "passes" if it compiles
 // successfully.
-class ProtectedFixtureMethodsTest : public testing::Test {
+class ProtectedFixtureMethodsTest : public Test {
  protected:
   virtual void SetUp() {
-    testing::Test::SetUp();
+    Test::SetUp();
   }
   virtual void TearDown() {
-    testing::Test::TearDown();
+    Test::TearDown();
   }
 };
 
