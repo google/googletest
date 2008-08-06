@@ -1882,13 +1882,14 @@ bool Test::HasFatalFailure() {
 
 // class TestInfo
 
-// Constructs a TestInfo object.
+// Constructs a TestInfo object. It assumes ownership of the test factory
+// object via impl_.
 TestInfo::TestInfo(const char* test_case_name,
                    const char* name,
                    internal::TypeId fixture_class_id,
-                   TestMaker maker) {
+                   internal::TestFactoryBase* factory) {
   impl_ = new internal::TestInfoImpl(this, test_case_name, name,
-                                     fixture_class_id, maker);
+                                     fixture_class_id, factory);
 }
 
 // Destructs a TestInfo object.
@@ -1905,16 +1906,17 @@ TestInfo::~TestInfo() {
 //   name:           name of the test
 //   set_up_tc:      pointer to the function that sets up the test case
 //   tear_down_tc:   pointer to the function that tears down the test case
-//   maker:          pointer to the function that creates a test object
+//   factory         factory object that creates a test object. The new
+//                   TestInfo instance assumes ownership of the factory object.
 TestInfo* TestInfo::MakeAndRegisterInstance(
     const char* test_case_name,
     const char* name,
     internal::TypeId fixture_class_id,
     Test::SetUpTestCaseFunc set_up_tc,
     Test::TearDownTestCaseFunc tear_down_tc,
-    TestMaker maker) {
+    internal::TestFactoryBase* factory) {
   TestInfo* const test_info =
-      new TestInfo(test_case_name, name, fixture_class_id, maker);
+      new TestInfo(test_case_name, name, fixture_class_id, factory);
   internal::GetUnitTestImpl()->AddTestInfo(set_up_tc, tear_down_tc, test_info);
   return test_info;
 }
@@ -2007,7 +2009,7 @@ void TestInfoImpl::Run() {
 
   __try {
     // Creates the test object.
-    test = (*maker_)();
+    test = factory_->CreateTest();
   } __except(internal::UnitTestOptions::GTestShouldProcessSEH(
       GetExceptionCode())) {
     AddExceptionThrownFailure(GetExceptionCode(),
@@ -2022,7 +2024,7 @@ void TestInfoImpl::Run() {
   // exception-safe.
 
   // Creates the test object.
-  Test* test = (*maker_)();
+  Test* test = factory_->CreateTest();
 #endif  // GTEST_OS_WINDOWS
 
   // Runs the test only if the constructor of the test fixture didn't
@@ -3417,23 +3419,25 @@ internal::TestResult* UnitTestImpl::current_test_result() {
     current_test_info_->impl()->result() : &ad_hoc_test_result_;
 }
 
-// TestInfoImpl constructor.
+// TestInfoImpl constructor. The new instance assumes ownership of the test
+// factory opbject.
 TestInfoImpl::TestInfoImpl(TestInfo* parent,
                            const char* test_case_name,
                            const char* name,
                            TypeId fixture_class_id,
-                           TestMaker maker) :
+                           internal::TestFactoryBase* factory) :
     parent_(parent),
     test_case_name_(String(test_case_name)),
     name_(String(name)),
     fixture_class_id_(fixture_class_id),
     should_run_(false),
     is_disabled_(false),
-    maker_(maker) {
+    factory_(factory) {
 }
 
 // TestInfoImpl destructor.
 TestInfoImpl::~TestInfoImpl() {
+  delete factory_;
 }
 
 }  // namespace internal

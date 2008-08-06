@@ -542,7 +542,7 @@ class TestInfoImpl {
  public:
   TestInfoImpl(TestInfo* parent, const char* test_case_name,
                const char* name, TypeId fixture_class_id,
-               TestMaker maker);
+               internal::TestFactoryBase* factory);
   ~TestInfoImpl();
 
   // Returns true if this test should run.
@@ -595,7 +595,8 @@ class TestInfoImpl {
   const TypeId fixture_class_id_;  // ID of the test fixture class
   bool should_run_;                // True iff this test should run
   bool is_disabled_;               // True iff this test is disabled
-  const TestMaker maker_;          // The function that creates the test object
+  internal::TestFactoryBase* const factory_;  // The factory that creates
+                                              // the test object
 
   // This field is mutable and needs to be reset before running the
   // test for the second time.

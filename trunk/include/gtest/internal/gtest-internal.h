@@ -98,6 +98,7 @@ namespace testing {
 // Forward declaration of classes.
 
 class Message;                         // Represents a failure message.
+class Test;                            // Represents a test.
 class TestCase;                        // A collection of related tests.
 class TestPartResult;                  // Result of a test part.
 class TestInfo;                        // Information about a test.
@@ -484,6 +485,31 @@ inline TypeId GetTypeId() {
   return &dummy;
 }
 
+// Defines the abstract factory interface that creates instances
+// of a Test object.
+class TestFactoryBase {
+ public:
+  virtual ~TestFactoryBase() {}
+
+  // Creates a test instance to run. The instance is both created and destroyed
+  // within TestInfoImpl::Run()
+  virtual Test* CreateTest() = 0;
+
+ protected:
+  TestFactoryBase() {}
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN(TestFactoryBase);
+};
+
+// This class provides implementation of TeastFactoryBase interface.
+// It is used in TEST and TEST_F macros.
+template <class TestClass>
+class TestFactoryImpl : public TestFactoryBase {
+ public:
+  virtual Test* CreateTest() { return new TestClass; }
+};
+
 #ifdef GTEST_OS_WINDOWS
 
 // Predicate-formatters for implementing the HRESULT checking macros
@@ -523,9 +549,6 @@ AssertionResult IsHRESULTFailure(const char* expr, long hr);  // NOLINT
 class test_case_name##_##test_name##_Test : public parent_class {\
  public:\
   test_case_name##_##test_name##_Test() {}\
-  static ::testing::Test* NewTest() {\
-    return new test_case_name##_##test_name##_Test;\
-  }\
  private:\
   virtual void TestBody();\
   static ::testing::TestInfo* const test_info_;\
@@ -533,13 +556,14 @@ class test_case_name##_##test_name##_Test : public parent_class {\
 };\
 \
 ::testing::TestInfo* const test_case_name##_##test_name##_Test::test_info_ =\
-  ::testing::TestInfo::MakeAndRegisterInstance(\
-    #test_case_name, \
-    #test_name, \
-    ::testing::internal::GetTypeId< parent_class >(), \
-    parent_class::SetUpTestCase, \
-    parent_class::TearDownTestCase, \
-    test_case_name##_##test_name##_Test::NewTest);\
+    ::testing::TestInfo::MakeAndRegisterInstance(\
+        #test_case_name, \
+        #test_name, \
+        ::testing::internal::GetTypeId< parent_class >(), \
+        parent_class::SetUpTestCase, \
+        parent_class::TearDownTestCase, \
+        new ::testing::internal::TestFactoryImpl<\
+            test_case_name##_##test_name##_Test>);\
 void test_case_name##_##test_name##_Test::TestBody()
 
 

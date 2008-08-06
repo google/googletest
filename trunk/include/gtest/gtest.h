@@ -310,11 +310,6 @@ class Test {
 };
 
 
-// Defines the type of a function pointer that creates a Test object
-// when invoked.
-typedef Test* (*TestMaker)();
-
-
 // A TestInfo object stores the following information about a test:
 //
 //   Test case name
@@ -342,7 +337,9 @@ class TestInfo {
   //   fixture_class_id: ID of the test fixture class
   //   set_up_tc:        pointer to the function that sets up the test case
   //   tear_down_tc:     pointer to the function that tears down the test case
-  //   maker:            pointer to the function that creates a test object
+  //   factory:          Pointer to the factory that creates a test object.
+  //                     The newly created TestInfo instance will assume
+  //                     ownershi pof the factory object.
   //
   // This is public only because it's needed by the TEST and TEST_F macros.
   // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
@@ -352,7 +349,7 @@ class TestInfo {
       internal::TypeId fixture_class_id,
       Test::SetUpTestCaseFunc set_up_tc,
       Test::TearDownTestCaseFunc tear_down_tc,
-      TestMaker maker);
+      internal::TestFactoryBase* factory);
 
   // Returns the test case name.
   const char* test_case_name() const;
@@ -395,9 +392,11 @@ class TestInfo {
   internal::TestInfoImpl* impl() { return impl_; }
   const internal::TestInfoImpl* impl() const { return impl_; }
 
-  // Constructs a TestInfo object.
+  // Constructs a TestInfo object. The newly constructed instance assumes
+  // ownership of the factory object.
   TestInfo(const char* test_case_name, const char* name,
-           internal::TypeId fixture_class_id, TestMaker maker);
+           internal::TypeId fixture_class_id,
+           internal::TestFactoryBase* factory);
 
   // An opaque implementation object.
   internal::TestInfoImpl* impl_;
