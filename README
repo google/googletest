@@ -47,6 +47,7 @@ described below), there are further requirements:
 ### Mac OS X Requirements ###
   * Mac OS X 10.4 Tiger or newer
   * Developer Tools Installed
+  * Optional: Xcode 2.5 or later for univeral-binary framework; see note below.
 
 Getting the Source
 ------------------
