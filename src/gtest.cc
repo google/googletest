@@ -784,16 +784,19 @@ bool String::CStringEquals(const char * lhs, const char * rhs) {
 // encoding, and streams the result to the given Message object.
 static void StreamWideCharsToMessage(const wchar_t* wstr, size_t len,
                                      Message* msg) {
-  for (size_t i = 0; i != len; i++) {
-    // TODO(wan): consider allowing a testing::String object to
-    // contain '\0'.  This will make it behave more like std::string,
-    // and will allow ToUtf8String() to return the correct encoding
-    // for '\0' s.t. we can get rid of the conditional here (and in
-    // several other places).
-    if (wstr[i]) {
-      *msg << internal::ToUtf8String(wstr[i]);
+  // TODO(wan): consider allowing a testing::String object to
+  // contain '\0'.  This will make it behave more like std::string,
+  // and will allow ToUtf8String() to return the correct encoding
+  // for '\0' s.t. we can get rid of the conditional here (and in
+  // several other places).
+  for (size_t i = 0; i != len; ) {  // NOLINT
+    if (wstr[i] != L'\0') {
+      *msg << WideStringToUtf8(wstr + i, len - i);
+      while (i != len && wstr[i] != L'\0')
+        i++;
     } else {
       *msg << '\0';
+      i++;
     }
   }
 }
@@ -852,8 +855,10 @@ String FormatForFailureMessage(wchar_t wchar) {
   Message msg;
   // A String object cannot contain '\0', so we print "\\0" when wchar is
   // L'\0'.
-  msg << "L'" << (wchar ? ToUtf8String(wchar).c_str() : "\\0") << "' ("
-      << wchar_as_uint64 << ", 0x" << ::std::setbase(16)
+  char buffer[32];  // CodePointToUtf8 requires a buffer that big.
+  msg << "L'"
+      << (wchar ? CodePointToUtf8(static_cast<UInt32>(wchar), buffer) : "\\0")
+      << "' (" << wchar_as_uint64 << ", 0x" << ::std::setbase(16)
       << wchar_as_uint64 << ")";
   return msg.GetString();
 }
@@ -1317,31 +1322,118 @@ inline UInt32 ChopLowBits(UInt32* bits, int n) {
   return low_bits;
 }
 
-// Converts a Unicode code-point to its UTF-8 encoding.
-String ToUtf8String(wchar_t wchar) {
-  char str[5] = {};  // Initializes str to all '\0' characters.
-
-  UInt32 code = static_cast<UInt32>(wchar);
-  if (code <= kMaxCodePoint1) {
-    str[0] = static_cast<char>(code);                          // 0xxxxxxx
-  } else if (code <= kMaxCodePoint2) {
-    str[1] = static_cast<char>(0x80 | ChopLowBits(&code, 6));  // 10xxxxxx
-    str[0] = static_cast<char>(0xC0 | code);                   // 110xxxxx
-  } else if (code <= kMaxCodePoint3) {
-    str[2] = static_cast<char>(0x80 | ChopLowBits(&code, 6));  // 10xxxxxx
-    str[1] = static_cast<char>(0x80 | ChopLowBits(&code, 6));  // 10xxxxxx
-    str[0] = static_cast<char>(0xE0 | code);                   // 1110xxxx
-  } else if (code <= kMaxCodePoint4) {
-    str[3] = static_cast<char>(0x80 | ChopLowBits(&code, 6));  // 10xxxxxx
-    str[2] = static_cast<char>(0x80 | ChopLowBits(&code, 6));  // 10xxxxxx
-    str[1] = static_cast<char>(0x80 | ChopLowBits(&code, 6));  // 10xxxxxx
-    str[0] = static_cast<char>(0xF0 | code);                   // 11110xxx
+// Converts a Unicode code point to a narrow string in UTF-8 encoding.
+// code_point parameter is of type UInt32 because wchar_t may not be
+// wide enough to contain a code point.
+// The output buffer str must containt at least 32 characters.
+// The function returns the address of the output buffer.
+// If the code_point is not a valid Unicode code point
+// (i.e. outside of Unicode range U+0 to U+10FFFF) it will be output
+// as '(Invalid Unicode 0xXXXXXXXX)'.
+char* CodePointToUtf8(UInt32 code_point, char* str) {
+  if (code_point <= kMaxCodePoint1) {
+    str[1] = '\0';
+    str[0] = static_cast<char>(code_point);                          // 0xxxxxxx
+  } else if (code_point <= kMaxCodePoint2) {
+    str[2] = '\0';
+    str[1] = static_cast<char>(0x80 | ChopLowBits(&code_point, 6));  // 10xxxxxx
+    str[0] = static_cast<char>(0xC0 | code_point);                   // 110xxxxx
+  } else if (code_point <= kMaxCodePoint3) {
+    str[3] = '\0';
+    str[2] = static_cast<char>(0x80 | ChopLowBits(&code_point, 6));  // 10xxxxxx
+    str[1] = static_cast<char>(0x80 | ChopLowBits(&code_point, 6));  // 10xxxxxx
+    str[0] = static_cast<char>(0xE0 | code_point);                   // 1110xxxx
+  } else if (code_point <= kMaxCodePoint4) {
+    str[4] = '\0';
+    str[3] = static_cast<char>(0x80 | ChopLowBits(&code_point, 6));  // 10xxxxxx
+    str[2] = static_cast<char>(0x80 | ChopLowBits(&code_point, 6));  // 10xxxxxx
+    str[1] = static_cast<char>(0x80 | ChopLowBits(&code_point, 6));  // 10xxxxxx
+    str[0] = static_cast<char>(0xF0 | code_point);                   // 11110xxx
   } else {
-    return String::Format("(Invalid Unicode 0x%llX)",
-                          static_cast<UInt64>(wchar));
+    // The longest string String::Format can produce when invoked
+    // with these parameters is 28 character long (not including
+    // the terminating nul character). We are asking for 32 character
+    // buffer just in case. This is also enough for strncpy to
+    // null-terminate the destination string.
+    // MSVC 8 deprecates strncpy(), so we want to suppress warning
+    // 4996 (deprecated function) there.
+#ifdef GTEST_OS_WINDOWS  // We are on Windows.
+#pragma warning(push)          // Saves the current warning state.
+#pragma warning(disable:4996)  // Temporarily disables warning 4996.
+#endif
+    strncpy(str, String::Format("(Invalid Unicode 0x%X)", code_point).c_str(),
+            32);
+#ifdef GTEST_OS_WINDOWS  // We are on Windows.
+#pragma warning(pop)           // Restores the warning state.
+#endif
+    str[31] = '\0';  // Makes sure no change in the format to strncpy leaves
+                     // the result unterminated.
   }
+  return str;
+}
 
-  return String(str);
+// The following two functions only make sense if the the system
+// uses UTF-16 for wide string encoding. All supported systems
+// with 16 bit wchar_t (Windows, Cygwin, Symbian OS) do use UTF-16.
+
+// Determines if the arguments constitute UTF-16 surrogate pair
+// and thus should be combined into a single Unicode code point
+// using CreateCodePointFromUtf16SurrogatePair.
+inline bool IsUtf16SurrogatePair(wchar_t first, wchar_t second) {
+  if (sizeof(wchar_t) == 2)
+    return (first & 0xFC00) == 0xD800 && (second & 0xFC00) == 0xDC00;
+  else
+    return false;
+}
+
+// Creates a Unicode code point from UTF16 surrogate pair.
+inline UInt32 CreateCodePointFromUtf16SurrogatePair(wchar_t first,
+                                                    wchar_t second) {
+  if (sizeof(wchar_t) == 2) {
+    const UInt32 mask = (1 << 10) - 1;
+    return (((first & mask) << 10) | (second & mask)) + 0x10000;
+  } else {
+    // This should not be called, but we provide a sensible default
+    // in case it is.
+    return static_cast<UInt32>(first);
+  }
+}
+
+// Converts a wide string to a narrow string in UTF-8 encoding.
+// The wide string is assumed to have the following encoding:
+//   UTF-16 if sizeof(wchar_t) == 2 (on Windows, Cygwin, Symbian OS)
+//   UTF-32 if sizeof(wchar_t) == 4 (on Linux)
+// Parameter str points to a null-terminated wide string.
+// Parameter num_chars may additionally limit the number
+// of wchar_t characters processed. -1 is used when the entire string
+// should be processed.
+// If the string contains code points that are not valid Unicode code points
+// (i.e. outside of Unicode range U+0 to U+10FFFF) they will be output
+// as '(Invalid Unicode 0xXXXXXXXX)'. If the string is in UTF16 encoding
+// and contains invalid UTF-16 surrogate pairs, values in those pairs
+// will be encoded as individual Unicode characters from Basic Normal Plane.
+String WideStringToUtf8(const wchar_t* str, int num_chars) {
+  if (num_chars == -1)
+    num_chars = wcslen(str);
+
+  StrStream stream;
+  for (int i = 0; i < num_chars; ++i) {
+    UInt32 unicode_code_point;
+
+    if (str[i] == L'\0') {
+      break;
+    } else if (i + 1 < num_chars && IsUtf16SurrogatePair(str[i], str[i + 1])) {
+      unicode_code_point = CreateCodePointFromUtf16SurrogatePair(str[i],
+                                                                 str[i + 1]);
+      i++;
+    } else {
+      unicode_code_point = static_cast<UInt32>(str[i]);
+    }
+
+    char buffer[32];  // CodePointToUtf8 requires a buffer this big.
+    stream << CodePointToUtf8(unicode_code_point, buffer);
+  }
+  return StrStreamToString(&stream);
 }
 
 // Converts a wide C string to a String using the UTF-8 encoding.
@@ -1349,12 +1441,7 @@ String ToUtf8String(wchar_t wchar) {
 String String::ShowWideCString(const wchar_t * wide_c_str) {
   if (wide_c_str == NULL) return String("(null)");
 
-  StrStream ss;
-  while (*wide_c_str) {
-    ss << internal::ToUtf8String(*wide_c_str++);
-  }
-
-  return internal::StrStreamToString(&ss);
+  return String(internal::WideStringToUtf8(wide_c_str, -1).c_str());
 }
 
 // Similar to ShowWideCString(), except that this function encloses
