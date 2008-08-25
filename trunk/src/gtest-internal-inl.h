@@ -133,8 +133,30 @@ class GTestFlagSaver {
   internal::Int32 repeat_;
 } GTEST_ATTRIBUTE_UNUSED;
 
-// Converts a Unicode code-point to its UTF-8 encoding.
-String ToUtf8String(wchar_t wchar);
+// Converts a Unicode code point to a narrow string in UTF-8 encoding.
+// code_point parameter is of type UInt32 because wchar_t may not be
+// wide enough to contain a code point.
+// The output buffer str must containt at least 32 characters.
+// The function returns the address of the output buffer.
+// If the code_point is not a valid Unicode code point
+// (i.e. outside of Unicode range U+0 to U+10FFFF) it will be output
+// as '(Invalid Unicode 0xXXXXXXXX)'.
+char* CodePointToUtf8(UInt32 code_point, char* str);
+
+// Converts a wide string to a narrow string in UTF-8 encoding.
+// The wide string is assumed to have the following encoding:
+//   UTF-16 if sizeof(wchar_t) == 2 (on Windows, Cygwin, Symbian OS)
+//   UTF-32 if sizeof(wchar_t) == 4 (on Linux)
+// Parameter str points to a null-terminated wide string.
+// Parameter num_chars may additionally limit the number
+// of wchar_t characters processed. -1 is used when the entire string
+// should be processed.
+// If the string contains code points that are not valid Unicode code points
+// (i.e. outside of Unicode range U+0 to U+10FFFF) they will be output
+// as '(Invalid Unicode 0xXXXXXXXX)'. If the string is in UTF16 encoding
+// and contains invalid UTF-16 surrogate pairs, values in those pairs
+// will be encoded as individual Unicode characters from Basic Normal Plane.
+String WideStringToUtf8(const wchar_t* str, int num_chars);
 
 // Returns the number of active threads, or 0 when there is an error.
 size_t GetThreadCount();

@@ -101,6 +101,7 @@ using testing::TPRT_NONFATAL_FAILURE;
 using testing::TPRT_SUCCESS;
 using testing::UnitTest;
 using testing::internal::AppendUserMessage;
+using testing::internal::CodePointToUtf8;
 using testing::internal::EqFailure;
 using testing::internal::FloatingPoint;
 using testing::internal::GTestFlagSaver;
@@ -111,8 +112,8 @@ using testing::internal::StreamableToString;
 using testing::internal::String;
 using testing::internal::TestProperty;
 using testing::internal::TestResult;
-using testing::internal::ToUtf8String;
 using testing::internal::UnitTestImpl;
+using testing::internal::WideStringToUtf8;
 
 // This line tests that we can define tests in an unnamed namespace.
 namespace {
@@ -142,65 +143,184 @@ TEST(NullLiteralTest, IsFalseForNonNullLiterals) {
 }
 
 #endif  // __SYMBIAN32__
-// Tests ToUtf8String().
+//
+// Tests CodePointToUtf8().
 
 // Tests that the NUL character L'\0' is encoded correctly.
-TEST(ToUtf8StringTest, CanEncodeNul) {
-  EXPECT_STREQ("", ToUtf8String(L'\0').c_str());
+TEST(CodePointToUtf8Test, CanEncodeNul) {
+  char buffer[32];
+  EXPECT_STREQ("", CodePointToUtf8(L'\0', buffer));
 }
 
 // Tests that ASCII characters are encoded correctly.
-TEST(ToUtf8StringTest, CanEncodeAscii) {
-  EXPECT_STREQ("a", ToUtf8String(L'a').c_str());
-  EXPECT_STREQ("Z", ToUtf8String(L'Z').c_str());
-  EXPECT_STREQ("&", ToUtf8String(L'&').c_str());
-  EXPECT_STREQ("\x7F", ToUtf8String(L'\x7F').c_str());
+TEST(CodePointToUtf8Test, CanEncodeAscii) {
+  char buffer[32];
+  EXPECT_STREQ("a", CodePointToUtf8(L'a', buffer));
+  EXPECT_STREQ("Z", CodePointToUtf8(L'Z', buffer));
+  EXPECT_STREQ("&", CodePointToUtf8(L'&', buffer));
+  EXPECT_STREQ("\x7F", CodePointToUtf8(L'\x7F', buffer));
 }
 
 // Tests that Unicode code-points that have 8 to 11 bits are encoded
 // as 110xxxxx 10xxxxxx.
-TEST(ToUtf8StringTest, CanEncode8To11Bits) {
+TEST(CodePointToUtf8Test, CanEncode8To11Bits) {
+  char buffer[32];
   // 000 1101 0011 => 110-00011 10-010011
-  EXPECT_STREQ("\xC3\x93", ToUtf8String(L'\xD3').c_str());
+  EXPECT_STREQ("\xC3\x93", CodePointToUtf8(L'\xD3', buffer));
 
   // 101 0111 0110 => 110-10101 10-110110
-  EXPECT_STREQ("\xD5\xB6", ToUtf8String(L'\x576').c_str());
+  EXPECT_STREQ("\xD5\xB6", CodePointToUtf8(L'\x576', buffer));
 }
 
 // Tests that Unicode code-points that have 12 to 16 bits are encoded
 // as 1110xxxx 10xxxxxx 10xxxxxx.
-TEST(ToUtf8StringTest, CanEncode12To16Bits) {
+TEST(CodePointToUtf8Test, CanEncode12To16Bits) {
+  char buffer[32];
   // 0000 1000 1101 0011 => 1110-0000 10-100011 10-010011
-  EXPECT_STREQ("\xE0\xA3\x93", ToUtf8String(L'\x8D3').c_str());
+  EXPECT_STREQ("\xE0\xA3\x93", CodePointToUtf8(L'\x8D3', buffer));
 
   // 1100 0111 0100 1101 => 1110-1100 10-011101 10-001101
-  EXPECT_STREQ("\xEC\x9D\x8D", ToUtf8String(L'\xC74D').c_str());
+  EXPECT_STREQ("\xEC\x9D\x8D", CodePointToUtf8(L'\xC74D', buffer));
 }
 
-#if !defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_CYGWIN) && \
-    !defined(__SYMBIAN32__)
-
+#ifndef GTEST_WIDE_STRING_USES_UTF16_
 // Tests in this group require a wchar_t to hold > 16 bits, and thus
 // are skipped on Windows, Cygwin, and Symbian, where a wchar_t is
-// 16-bit wide.
+// 16-bit wide. This code may not compile on those systems.
 
 // Tests that Unicode code-points that have 17 to 21 bits are encoded
 // as 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx.
-TEST(ToUtf8StringTest, CanEncode17To21Bits) {
+TEST(CodePointToUtf8Test, CanEncode17To21Bits) {
+  char buffer[32];
   // 0 0001 0000 1000 1101 0011 => 11110-000 10-010000 10-100011 10-010011
-  EXPECT_STREQ("\xF0\x90\xA3\x93", ToUtf8String(L'\x108D3').c_str());
+  EXPECT_STREQ("\xF0\x90\xA3\x93", CodePointToUtf8(L'\x108D3', buffer));
 
-  // 1 0111 1000 0110 0011 0100 => 11110-101 10-111000 10-011000 10-110100
-  EXPECT_STREQ("\xF5\xB8\x98\xB4", ToUtf8String(L'\x178634').c_str());
+  // 0 0001 0000 0100 0000 0000 => 11110-000 10-010000 10-010000 10-000000
+  EXPECT_STREQ("\xF0\x90\x90\x80", CodePointToUtf8(L'\x10400', buffer));
+
+  // 1 0000 1000 0110 0011 0100 => 11110-100 10-001000 10-011000 10-110100
+  EXPECT_STREQ("\xF4\x88\x98\xB4", CodePointToUtf8(L'\x108634', buffer));
 }
 
 // Tests that encoding an invalid code-point generates the expected result.
-TEST(ToUtf8StringTest, CanEncodeInvalidCodePoint) {
+TEST(CodePointToUtf8Test, CanEncodeInvalidCodePoint) {
+  char buffer[32];
   EXPECT_STREQ("(Invalid Unicode 0x1234ABCD)",
-               ToUtf8String(L'\x1234ABCD').c_str());
+               CodePointToUtf8(L'\x1234ABCD', buffer));
 }
 
-#endif  // Windows, Cygwin, or Symbian
+#endif  // GTEST_WIDE_STRING_USES_UTF16_
+
+// Tests WideStringToUtf8().
+
+// Tests that the NUL character L'\0' is encoded correctly.
+TEST(WideStringToUtf8Test, CanEncodeNul) {
+  EXPECT_STREQ("", WideStringToUtf8(L"", 0).c_str());
+  EXPECT_STREQ("", WideStringToUtf8(L"", -1).c_str());
+}
+
+// Tests that ASCII strings are encoded correctly.
+TEST(WideStringToUtf8Test, CanEncodeAscii) {
+  EXPECT_STREQ("a", WideStringToUtf8(L"a", 1).c_str());
+  EXPECT_STREQ("ab", WideStringToUtf8(L"ab", 2).c_str());
+  EXPECT_STREQ("a", WideStringToUtf8(L"a", -1).c_str());
+  EXPECT_STREQ("ab", WideStringToUtf8(L"ab", -1).c_str());
+}
+
+// Tests that Unicode code-points that have 8 to 11 bits are encoded
+// as 110xxxxx 10xxxxxx.
+TEST(WideStringToUtf8Test, CanEncode8To11Bits) {
+  // 000 1101 0011 => 110-00011 10-010011
+  EXPECT_STREQ("\xC3\x93", WideStringToUtf8(L"\xD3", 1).c_str());
+  EXPECT_STREQ("\xC3\x93", WideStringToUtf8(L"\xD3", -1).c_str());
+
+  // 101 0111 0110 => 110-10101 10-110110
+  EXPECT_STREQ("\xD5\xB6", WideStringToUtf8(L"\x576", 1).c_str());
+  EXPECT_STREQ("\xD5\xB6", WideStringToUtf8(L"\x576", -1).c_str());
+}
+
+// Tests that Unicode code-points that have 12 to 16 bits are encoded
+// as 1110xxxx 10xxxxxx 10xxxxxx.
+TEST(WideStringToUtf8Test, CanEncode12To16Bits) {
+  // 0000 1000 1101 0011 => 1110-0000 10-100011 10-010011
+  EXPECT_STREQ("\xE0\xA3\x93", WideStringToUtf8(L"\x8D3", 1).c_str());
+  EXPECT_STREQ("\xE0\xA3\x93", WideStringToUtf8(L"\x8D3", -1).c_str());
+
+  // 1100 0111 0100 1101 => 1110-1100 10-011101 10-001101
+  EXPECT_STREQ("\xEC\x9D\x8D", WideStringToUtf8(L"\xC74D", 1).c_str());
+  EXPECT_STREQ("\xEC\x9D\x8D", WideStringToUtf8(L"\xC74D", -1).c_str());
+}
+
+// Tests that the conversion stops when the function encounters \0 character.
+TEST(WideStringToUtf8Test, StopsOnNulCharacter) {
+  EXPECT_STREQ("ABC", WideStringToUtf8(L"ABC\0XYZ", 100).c_str());
+}
+
+// Tests that the conversion stops when the function reaches the limit
+// specified by the 'length' parameter.
+TEST(WideStringToUtf8Test, StopsWhenLengthLimitReached) {
+  EXPECT_STREQ("ABC", WideStringToUtf8(L"ABCDEF", 3).c_str());
+}
+
+
+#ifndef GTEST_WIDE_STRING_USES_UTF16_
+// Tests that Unicode code-points that have 17 to 21 bits are encoded
+// as 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx. This code may not compile
+// on the systems using UTF-16 encoding.
+TEST(WideStringToUtf8Test, CanEncode17To21Bits) {
+  // 0 0001 0000 1000 1101 0011 => 11110-000 10-010000 10-100011 10-010011
+  EXPECT_STREQ("\xF0\x90\xA3\x93", WideStringToUtf8(L"\x108D3", 1).c_str());
+  EXPECT_STREQ("\xF0\x90\xA3\x93", WideStringToUtf8(L"\x108D3", -1).c_str());
+
+  // 1 0000 1000 0110 0011 0100 => 11110-100 10-001000 10-011000 10-110100
+  EXPECT_STREQ("\xF4\x88\x98\xB4", WideStringToUtf8(L"\x108634", 1).c_str());
+  EXPECT_STREQ("\xF4\x88\x98\xB4", WideStringToUtf8(L"\x108634", -1).c_str());
+}
+
+// Tests that encoding an invalid code-point generates the expected result.
+TEST(WideStringToUtf8Test, CanEncodeInvalidCodePoint) {
+  EXPECT_STREQ("(Invalid Unicode 0xABCDFF)",
+               WideStringToUtf8(L"\xABCDFF", -1).c_str());
+}
+#else
+// Tests that surrogate pairs are encoded correctly on the systems using
+// UTF-16 encoding in the wide strings.
+TEST(WideStringToUtf8Test, CanEncodeValidUtf16SUrrogatePairs) {
+  EXPECT_STREQ("\xF0\x90\x90\x80",
+               WideStringToUtf8(L"\xD801\xDC00", -1).c_str());
+}
+
+// Tests that encoding an invalid UTF-16 surrogate pair
+// generates the expected result.
+TEST(WideStringToUtf8Test, CanEncodeInvalidUtf16SurrogatePair) {
+  // Leading surrogate is at the end of the string.
+  EXPECT_STREQ("\xED\xA0\x80", WideStringToUtf8(L"\xD800", -1).c_str());
+  // Leading surrogate is not followed by the trailing surrogate.
+  EXPECT_STREQ("\xED\xA0\x80$", WideStringToUtf8(L"\xD800$", -1).c_str());
+  // Trailing surrogate appearas without a leading surrogate.
+  EXPECT_STREQ("\xED\xB0\x80PQR", WideStringToUtf8(L"\xDC00PQR", -1).c_str());
+}
+#endif  // GTEST_WIDE_STRING_USES_UTF16_
+
+// Tests that codepoint concatenation works correctly.
+#ifndef GTEST_WIDE_STRING_USES_UTF16_
+TEST(WideStringToUtf8Test, ConcatenatesCodepointsCorrectly) {
+  EXPECT_STREQ(
+      "\xF4\x88\x98\xB4"
+          "\xEC\x9D\x8D"
+          "\n"
+          "\xD5\xB6"
+          "\xE0\xA3\x93"
+          "\xF4\x88\x98\xB4",
+      WideStringToUtf8(L"\x108634\xC74D\n\x576\x8D3\x108634", -1).c_str());
+}
+#else
+TEST(WideStringToUtf8Test, ConcatenatesCodepointsCorrectly) {
+  EXPECT_STREQ(
+      "\xEC\x9D\x8D" "\n" "\xD5\xB6" "\xE0\xA3\x93",
+      WideStringToUtf8(L"\xC74D\n\x576\x8D3", -1).c_str());
+}
+#endif  // GTEST_WIDE_STRING_USES_UTF16_
 
 // Tests the List template class.
 

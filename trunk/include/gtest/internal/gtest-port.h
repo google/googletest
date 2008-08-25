@@ -225,6 +225,12 @@
 #include <sys/mman.h>
 #endif  // GTEST_HAS_STD_STRING && defined(GTEST_OS_LINUX)
 
+// Determines whether the system compiler uses UTF-16 for encoding wide strings.
+#if defined(GTEST_OS_WINDOWS) || defined(GTEST_OS_CYGWIN) || \
+        defined(__SYMBIAN32__)
+#define GTEST_WIDE_STRING_USES_UTF16_ 1
+#endif
+
 // Defines some utility macros.
 
 // The GNU compiler emits a warning if nested "if" statements are followed by
