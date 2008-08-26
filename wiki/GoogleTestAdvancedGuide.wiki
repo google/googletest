@@ -1100,8 +1100,10 @@ you a chance to debug. Here's how to use it:
 || `$ foo_test --gtest_repeat=1000 --gtest_break_on_failure` || Repeat foo_test 1000 times, stopping at the first failure. This is especially useful when running under a debugger: when the testfails, it will drop into the debugger and you can then inspect variables and stacks. ||
 || `$ foo_test --gtest_repeat=1000 --gtest_filter=FooBar` || Repeat the tests whose name matches the filter 1000 times. ||
 
-You can also specify the repeat count by setting the `GTEST_REPEAT` environment
-variable.
+If your test program contains global set-up/tear-down code registered
+using `AddGlobalTestEnvironment()`, it will be repeated in each
+iteration as well, as the flakiness may be in it. You can also specify
+the repeat count by setting the `GTEST_REPEAT` environment variable.
 
 _Availability:_ Linux, Windows, Mac.
 
