@@ -853,6 +853,37 @@ TEST_F(FooTest, Baz) { ... }
 }  // namespace my_namespace
 }}}
 
+==  "Catching" Failures  ==
+
+If you are building a testing utility on top of Google Test, you'll
+want to test your utility.  What framework would you use to test it?
+Google Test, of course.
+
+The challenge is to verify that your testing utility reports failures
+correctly.  In frameworks that report a failure by throwing an
+exception, you could catch the exception and assert on it.  But Google
+Test doesn't use exceptions, so how do we test that a piece of code
+generates an expected failure?
+
+`include/gtest/gtest-spi.h` contains some constructs to do this (you
+don't have to `#include` this header yourself as `gtest.h` is
+guaranteed to pull it in).  In particular, you can use
+
+|| `EXPECT_FATAL_FAILURE(`_statement, substring_`);` ||
+
+to assert that _statement_ generates a fatal (e.g. `ASSERT_*`)
+failure whose message contains the given _substring_, or use
+
+|| `EXPECT_NONFATAL_FAILURE(`_statement, substring_`);` ||
+
+if you are expecting a non-fatal (e.g. `EXPECT_*`) failure.
+
+For technical reasons, there are some caveats:
+
+  # You cannot stream a failure message to either macro.
+  # _statement_ in `EXPECT_FATAL_FAILURE()` cannot reference local non-static variables or non-static members of `this` object.
+  # _statement_ in `EXPECT_FATAL_FAILURE()` cannot return a value.
+
 ==  Getting the Current Test's Name  ==
 
 Sometimes a function may need to know the name of the currently running test.
