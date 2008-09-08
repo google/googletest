@@ -32,6 +32,8 @@
 """Tests the text output of Google C++ Testing Framework.
 
 SYNOPSIS
+       gtest_output_test.py --gtest_build_dir=BUILD/DIR --gengolden
+         # where BUILD/DIR contains the built gtest_output_test_ file.
        gtest_output_test.py --gengolden
        gtest_output_test.py
 """

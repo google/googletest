@@ -699,6 +699,97 @@ TEST(ExpectFatalFailureTest, FailsWhenStatementThrows) {
 
 #endif  // GTEST_HAS_EXCEPTIONS
 
+// This #ifdef block tests the output of typed tests.
+#ifdef GTEST_HAS_TYPED_TEST
+
+template <typename T>
+class TypedTest : public testing::Test {
+};
+
+TYPED_TEST_CASE(TypedTest, testing::Types<int>);
+
+TYPED_TEST(TypedTest, Success) {
+  EXPECT_EQ(0, TypeParam());
+}
+
+TYPED_TEST(TypedTest, Failure) {
+  EXPECT_EQ(1, TypeParam()) << "Expected failure";
+}
+
+#endif  // GTEST_HAS_TYPED_TEST
+
+// This #ifdef block tests the output of type-parameterized tests.
+#ifdef GTEST_HAS_TYPED_TEST_P
+
+template <typename T>
+class TypedTestP : public testing::Test {
+};
+
+TYPED_TEST_CASE_P(TypedTestP);
+
+TYPED_TEST_P(TypedTestP, Success) {
+  EXPECT_EQ(0, TypeParam());
+}
+
+TYPED_TEST_P(TypedTestP, Failure) {
+  EXPECT_EQ(1, TypeParam()) << "Expected failure";
+}
+
+REGISTER_TYPED_TEST_CASE_P(TypedTestP, Success, Failure);
+
+typedef testing::Types<unsigned char, unsigned int> UnsignedTypes;
+INSTANTIATE_TYPED_TEST_CASE_P(Unsigned, TypedTestP, UnsignedTypes);
+
+#endif  // GTEST_HAS_TYPED_TEST_P
+
+#ifdef GTEST_HAS_DEATH_TEST
+
+// We rely on the golden file to verify that tests whose test case
+// name ends with DeathTest are run first.
+
+TEST(ADeathTest, ShouldRunFirst) {
+}
+
+#ifdef GTEST_HAS_TYPED_TEST
+
+// We rely on the golden file to verify that typed tests whose test
+// case name ends with DeathTest are run first.
+
+template <typename T>
+class ATypedDeathTest : public testing::Test {
+};
+
+typedef testing::Types<int, double> NumericTypes;
+TYPED_TEST_CASE(ATypedDeathTest, NumericTypes);
+
+TYPED_TEST(ATypedDeathTest, ShouldRunFirst) {
+}
+
+#endif  // GTEST_HAS_TYPED_TEST
+
+#ifdef GTEST_HAS_TYPED_TEST_P
+
+
+// We rely on the golden file to verify that type-parameterized tests
+// whose test case name ends with DeathTest are run first.
+
+template <typename T>
+class ATypeParamDeathTest : public testing::Test {
+};
+
+TYPED_TEST_CASE_P(ATypeParamDeathTest);
+
+TYPED_TEST_P(ATypeParamDeathTest, ShouldRunFirst) {
+}
+
+REGISTER_TYPED_TEST_CASE_P(ATypeParamDeathTest, ShouldRunFirst);
+
+INSTANTIATE_TYPED_TEST_CASE_P(My, ATypeParamDeathTest, NumericTypes);
+
+#endif  // GTEST_HAS_TYPED_TEST_P
+
+#endif  // GTEST_HAS_DEATH_TEST
+
 // Two test environments for testing testing::AddGlobalTestEnvironment().
 
 class FooEnvironment : public testing::Environment {

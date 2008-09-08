@@ -62,11 +62,13 @@
 // Windows proper with Visual C++ and MS C library (_MSC_VER && !_WIN32_WCE) and
 // Windows Mobile with Visual C++ and no C library (_WIN32_WCE).
 
+#include <limits>
 #include <gtest/internal/gtest-internal.h>
 #include <gtest/internal/gtest-string.h>
 #include <gtest/gtest-death-test.h>
 #include <gtest/gtest-message.h>
 #include <gtest/gtest_prod.h>
+#include <gtest/gtest-typed-test.h>
 
 // Depending on the platform, different string classes are available.
 // On Windows, ::std::string compiles only when exceptions are
@@ -217,11 +219,27 @@ class Test {
 
   // Defines types for pointers to functions that set up and tear down
   // a test case.
-  typedef void (*SetUpTestCaseFunc)();
-  typedef void (*TearDownTestCaseFunc)();
+  typedef internal::SetUpTestCaseFunc SetUpTestCaseFunc;
+  typedef internal::TearDownTestCaseFunc TearDownTestCaseFunc;
 
   // The d'tor is virtual as we intend to inherit from Test.
   virtual ~Test();
+
+  // Sets up the stuff shared by all tests in this test case.
+  //
+  // Google Test will call Foo::SetUpTestCase() before running the first
+  // test in test case Foo.  Hence a sub-class can define its own
+  // SetUpTestCase() method to shadow the one defined in the super
+  // class.
+  static void SetUpTestCase() {}
+
+  // Tears down the stuff shared by all tests in this test case.
+  //
+  // Google Test will call Foo::TearDownTestCase() after running the last
+  // test in test case Foo.  Hence a sub-class can define its own
+  // TearDownTestCase() method to shadow the one defined in the super
+  // class.
+  static void TearDownTestCase() {}
 
   // Returns true iff the current test has a fatal failure.
   static bool HasFatalFailure();
@@ -244,22 +262,6 @@ class Test {
  protected:
   // Creates a Test object.
   Test();
-
-  // Sets up the stuff shared by all tests in this test case.
-  //
-  // Google Test will call Foo::SetUpTestCase() before running the first
-  // test in test case Foo.  Hence a sub-class can define its own
-  // SetUpTestCase() method to shadow the one defined in the super
-  // class.
-  static void SetUpTestCase() {}
-
-  // Tears down the stuff shared by all tests in this test case.
-  //
-  // Google Test will call Foo::TearDownTestCase() after running the last
-  // test in test case Foo.  Hence a sub-class can define its own
-  // TearDownTestCase() method to shadow the one defined in the super
-  // class.
-  static void TearDownTestCase() {}
 
   // Sets up the test fixture.
   virtual void SetUp();
@@ -327,35 +329,17 @@ class TestInfo {
   // don't inherit from TestInfo.
   ~TestInfo();
 
-  // Creates a TestInfo object and registers it with the UnitTest
-  // singleton; returns the created object.
-  //
-  // Arguments:
-  //
-  //   test_case_name:   name of the test case
-  //   name:             name of the test
-  //   fixture_class_id: ID of the test fixture class
-  //   set_up_tc:        pointer to the function that sets up the test case
-  //   tear_down_tc:     pointer to the function that tears down the test case
-  //   factory:          Pointer to the factory that creates a test object.
-  //                     The newly created TestInfo instance will assume
-  //                     ownershi pof the factory object.
-  //
-  // This is public only because it's needed by the TEST and TEST_F macros.
-  // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
-  static TestInfo* MakeAndRegisterInstance(
-      const char* test_case_name,
-      const char* name,
-      internal::TypeId fixture_class_id,
-      Test::SetUpTestCaseFunc set_up_tc,
-      Test::TearDownTestCaseFunc tear_down_tc,
-      internal::TestFactoryBase* factory);
-
   // Returns the test case name.
   const char* test_case_name() const;
 
   // Returns the test name.
   const char* name() const;
+
+  // Returns the test case comment.
+  const char* test_case_comment() const;
+
+  // Returns the test comment.
+  const char* comment() const;
 
   // Returns true if this test should run.
   //
@@ -383,6 +367,13 @@ class TestInfo {
   friend class internal::UnitTestImpl;
   friend class Test;
   friend class TestCase;
+  friend TestInfo* internal::MakeAndRegisterTestInfo(
+      const char* test_case_name, const char* name,
+      const char* test_case_comment, const char* comment,
+      internal::TypeId fixture_class_id,
+      Test::SetUpTestCaseFunc set_up_tc,
+      Test::TearDownTestCaseFunc tear_down_tc,
+      internal::TestFactoryBase* factory);
 
   // Increments the number of death tests encountered in this test so
   // far.
@@ -395,6 +386,7 @@ class TestInfo {
   // Constructs a TestInfo object. The newly constructed instance assumes
   // ownership of the factory object.
   TestInfo(const char* test_case_name, const char* name,
+           const char* test_case_comment, const char* comment,
            internal::TypeId fixture_class_id,
            internal::TestFactoryBase* factory);
 
@@ -1118,9 +1110,10 @@ AssertionResult DoubleLE(const char* expr1, const char* expr2,
 //
 //    * {ASSERT|EXPECT}_HRESULT_{SUCCEEDED|FAILED}(expr)
 //
-// When expr unexpectedly fails or succeeds, Google Test prints the expected result
-// and the actual result with both a human-readable string representation of
-// the error, if available, as well as the hex result code.
+// When expr unexpectedly fails or succeeds, Google Test prints the
+// expected result and the actual result with both a human-readable
+// string representation of the error, if available, as well as the
+// hex result code.
 #define EXPECT_HRESULT_SUCCEEDED(expr) \
     EXPECT_PRED_FORMAT1(::testing::internal::IsHRESULTSuccess, (expr))
 

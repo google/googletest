@@ -46,11 +46,15 @@
 #include <unistd.h>
 #endif  // GTEST_OS_LINUX
 
-#include <iomanip>  // NOLINT
-#include <limits>   // NOLINT
+#include <ctype.h>
+#include <string.h>
+#include <iomanip>
+#include <limits>
+#include <set>
 
 #include <gtest/internal/gtest-string.h>
 #include <gtest/internal/gtest-filepath.h>
+#include <gtest/internal/gtest-type-util.h>
 
 // Due to C++ preprocessor weirdness, we need double indirection to
 // concatenate two tokens when one of them is __LINE__.  Writing
@@ -521,6 +525,182 @@ AssertionResult IsHRESULTFailure(const char* expr, long hr);  // NOLINT
 
 #endif  // GTEST_OS_WINDOWS
 
+// Formats a source file path and a line number as they would appear
+// in a compiler error message.
+inline String FormatFileLocation(const char* file, int line) {
+  const char* const file_name = file == NULL ? "unknown file" : file;
+  if (line < 0) {
+    return String::Format("%s:", file_name);
+  }
+#ifdef _MSC_VER
+  return String::Format("%s(%d):", file_name, line);
+#else
+  return String::Format("%s:%d:", file_name, line);
+#endif  // _MSC_VER
+}
+
+// Types of SetUpTestCase() and TearDownTestCase() functions.
+typedef void (*SetUpTestCaseFunc)();
+typedef void (*TearDownTestCaseFunc)();
+
+// Creates a new TestInfo object and registers it with Google Test;
+// returns the created object.
+//
+// Arguments:
+//
+//   test_case_name:   name of the test case
+//   name:             name of the test
+//   test_case_comment: a comment on the test case that will be included in
+//                      the test output
+//   comment:          a comment on the test that will be included in the
+//                     test output
+//   fixture_class_id: ID of the test fixture class
+//   set_up_tc:        pointer to the function that sets up the test case
+//   tear_down_tc:     pointer to the function that tears down the test case
+//   factory:          pointer to the factory that creates a test object.
+//                     The newly created TestInfo instance will assume
+//                     ownership of the factory object.
+TestInfo* MakeAndRegisterTestInfo(
+    const char* test_case_name, const char* name,
+    const char* test_case_comment, const char* comment,
+    TypeId fixture_class_id,
+    SetUpTestCaseFunc set_up_tc,
+    TearDownTestCaseFunc tear_down_tc,
+    TestFactoryBase* factory);
+
+#if defined(GTEST_HAS_TYPED_TEST) || defined(GTEST_HAS_TYPED_TEST_P)
+
+// State of the definition of a type-parameterized test case.
+class TypedTestCasePState {
+ public:
+  TypedTestCasePState() : registered_(false) {}
+
+  // Adds the given test name to defined_test_names_ and return true
+  // if the test case hasn't been registered; otherwise aborts the
+  // program.
+  bool AddTestName(const char* file, int line, const char* case_name,
+                   const char* test_name) {
+    if (registered_) {
+      fprintf(stderr, "%s Test %s must be defined before "
+              "REGISTER_TYPED_TEST_CASE_P(%s, ...).\n",
+              FormatFileLocation(file, line).c_str(), test_name, case_name);
+      abort();
+    }
+    defined_test_names_.insert(test_name);
+    return true;
+  }
+
+  // Verifies that registered_tests match the test names in
+  // defined_test_names_; returns registered_tests if successful, or
+  // aborts the program otherwise.
+  const char* VerifyRegisteredTestNames(
+      const char* file, int line, const char* registered_tests);
+
+ private:
+  bool registered_;
+  ::std::set<const char*> defined_test_names_;
+};
+
+// Skips to the first non-space char after the first comma in 'str';
+// returns NULL if no comma is found in 'str'.
+inline const char* SkipComma(const char* str) {
+  const char* comma = strchr(str, ',');
+  if (comma == NULL) {
+    return NULL;
+  }
+  while (isspace(*(++comma))) {}
+  return comma;
+}
+
+// Returns the prefix of 'str' before the first comma in it; returns
+// the entire string if it contains no comma.
+inline String GetPrefixUntilComma(const char* str) {
+  const char* comma = strchr(str, ',');
+  return comma == NULL ? String(str) : String(str, comma - str);
+}
+
+// TypeParameterizedTest<Fixture, TestSel, Types>::Register()
+// registers a list of type-parameterized tests with Google Test.  The
+// return value is insignificant - we just need to return something
+// such that we can call this function in a namespace scope.
+//
+// Implementation note: The GTEST_TEMPLATE_ macro declares a template
+// template parameter.  It's defined in gtest-type-util.h.
+template <GTEST_TEMPLATE_ Fixture, class TestSel, typename Types>
+class TypeParameterizedTest {
+ public:
+  // 'index' is the index of the test in the type list 'Types'
+  // specified in INSTANTIATE_TYPED_TEST_CASE_P(Prefix, TestCase,
+  // Types).  Valid values for 'index' are [0, N - 1] where N is the
+  // length of Types.
+  static bool Register(const char* prefix, const char* case_name,
+                       const char* test_names, int index) {
+    typedef typename Types::Head Type;
+    typedef Fixture<Type> FixtureClass;
+    typedef typename GTEST_BIND_(TestSel, Type) TestClass;
+
+    // First, registers the first type-parameterized test in the type
+    // list.
+    MakeAndRegisterTestInfo(
+        String::Format("%s%s%s/%d", prefix, prefix[0] == '\0' ? "" : "/",
+                       case_name, index).c_str(),
+        GetPrefixUntilComma(test_names).c_str(),
+        String::Format("TypeParam = %s", GetTypeName<Type>().c_str()).c_str(),
+        "",
+        GetTypeId<FixtureClass>(),
+        TestClass::SetUpTestCase,
+        TestClass::TearDownTestCase,
+        new TestFactoryImpl<TestClass>);
+
+    // Next, recurses (at compile time) with the tail of the type list.
+    return TypeParameterizedTest<Fixture, TestSel, typename Types::Tail>
+        ::Register(prefix, case_name, test_names, index + 1);
+  }
+};
+
+// The base case for the compile time recursion.
+template <GTEST_TEMPLATE_ Fixture, class TestSel>
+class TypeParameterizedTest<Fixture, TestSel, Types0> {
+ public:
+  static bool Register(const char* /*prefix*/, const char* /*case_name*/,
+                       const char* /*test_names*/, int /*index*/) {
+    return true;
+  }
+};
+
+// TypeParameterizedTestCase<Fixture, Tests, Types>::Register()
+// registers *all combinations* of 'Tests' and 'Types' with Google
+// Test.  The return value is insignificant - we just need to return
+// something such that we can call this function in a namespace scope.
+template <GTEST_TEMPLATE_ Fixture, typename Tests, typename Types>
+class TypeParameterizedTestCase {
+ public:
+  static bool Register(const char* prefix, const char* case_name,
+                       const char* test_names) {
+    typedef typename Tests::Head Head;
+
+    // First, register the first test in 'Test' for each type in 'Types'.
+    TypeParameterizedTest<Fixture, Head, Types>::Register(
+        prefix, case_name, test_names, 0);
+
+    // Next, recurses (at compile time) with the tail of the test list.
+    return TypeParameterizedTestCase<Fixture, typename Tests::Tail, Types>
+        ::Register(prefix, case_name, SkipComma(test_names));
+  }
+};
+
+// The base case for the compile time recursion.
+template <GTEST_TEMPLATE_ Fixture, typename Types>
+class TypeParameterizedTestCase<Fixture, Templates0, Types> {
+ public:
+  static bool Register(const char* prefix, const char* case_name,
+                       const char* test_names) {
+    return true;
+  }
+};
+
+#endif  // GTEST_HAS_TYPED_TEST || GTEST_HAS_TYPED_TEST_P
+
 }  // namespace internal
 }  // namespace testing
 
@@ -544,27 +724,32 @@ AssertionResult IsHRESULTFailure(const char* expr, long hr);  // NOLINT
   else \
     fail("Value of: " booltext "\n  Actual: " #actual "\nExpected: " #expected)
 
+// Expands to the name of the class that implements the given test.
+#define GTEST_TEST_CLASS_NAME_(test_case_name, test_name) \
+  test_case_name##_##test_name##_Test
+
 // Helper macro for defining tests.
 #define GTEST_TEST(test_case_name, test_name, parent_class)\
-class test_case_name##_##test_name##_Test : public parent_class {\
+class GTEST_TEST_CLASS_NAME_(test_case_name, test_name) : public parent_class {\
  public:\
-  test_case_name##_##test_name##_Test() {}\
+  GTEST_TEST_CLASS_NAME_(test_case_name, test_name)() {}\
  private:\
   virtual void TestBody();\
   static ::testing::TestInfo* const test_info_;\
-  GTEST_DISALLOW_COPY_AND_ASSIGN(test_case_name##_##test_name##_Test);\
+  GTEST_DISALLOW_COPY_AND_ASSIGN(\
+      GTEST_TEST_CLASS_NAME_(test_case_name, test_name));\
 };\
 \
-::testing::TestInfo* const test_case_name##_##test_name##_Test::test_info_ =\
-    ::testing::TestInfo::MakeAndRegisterInstance(\
-        #test_case_name, \
-        #test_name, \
+::testing::TestInfo* const GTEST_TEST_CLASS_NAME_(test_case_name, test_name)\
+  ::test_info_ =\
+    ::testing::internal::MakeAndRegisterTestInfo(\
+        #test_case_name, #test_name, "", "", \
         ::testing::internal::GetTypeId< parent_class >(), \
         parent_class::SetUpTestCase, \
         parent_class::TearDownTestCase, \
         new ::testing::internal::TestFactoryImpl<\
-            test_case_name##_##test_name##_Test>);\
-void test_case_name##_##test_name##_Test::TestBody()
+            GTEST_TEST_CLASS_NAME_(test_case_name, test_name)>);\
+void GTEST_TEST_CLASS_NAME_(test_case_name, test_name)::TestBody()
 
 
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_

@@ -66,6 +66,18 @@ class GTestNCTest(unittest.TestCase):
       ('CATCHES_CALLING_SETUP_IN_ENVIRONMENT_WITH_TYPO',
        [r'Setup_should_be_spelled_SetUp']),
 
+      ('CATCHES_WRONG_CASE_IN_TYPED_TEST_P',
+       [r'BarTest.*was not declared']),
+
+      ('CATCHES_WRONG_CASE_IN_REGISTER_TYPED_TEST_CASE_P',
+       [r'BarTest.*was not declared']),
+
+      ('CATCHES_WRONG_CASE_IN_INSTANTIATE_TYPED_TEST_CASE_P',
+       [r'BarTest.*not declared']),
+
+      ('CATCHES_INSTANTIATE_TYPED_TESET_CASE_P_WITH_SAME_NAME_PREFIX',
+       [r'redefinition of.*My.*FooTest']),
+
       ('SANITY',
        None)
       ]

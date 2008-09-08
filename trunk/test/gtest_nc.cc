@@ -103,6 +103,84 @@ class MyEnvironment : public testing::Environment {
   }
 };
 
+#elif defined(TEST_CATCHES_WRONG_CASE_IN_TYPED_TEST_P)
+// Tests that the compiler catches using the wrong test case name in
+// TYPED_TEST_P.
+
+#include <gtest/gtest.h>
+
+template <typename T>
+class FooTest : public testing::Test {
+};
+
+template <typename T>
+class BarTest : public testing::Test {
+};
+
+TYPED_TEST_CASE_P(FooTest);
+TYPED_TEST_P(BarTest, A) {}  // Wrong test case name.
+REGISTER_TYPED_TEST_CASE_P(FooTest, A);
+INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, testing::Types<int>);
+
+#elif defined(TEST_CATCHES_WRONG_CASE_IN_REGISTER_TYPED_TEST_CASE_P)
+// Tests that the compiler catches using the wrong test case name in
+// REGISTER_TYPED_TEST_CASE_P.
+
+#include <gtest/gtest.h>
+
+template <typename T>
+class FooTest : public testing::Test {
+};
+
+template <typename T>
+class BarTest : public testing::Test {
+};
+
+TYPED_TEST_CASE_P(FooTest);
+TYPED_TEST_P(FooTest, A) {}
+REGISTER_TYPED_TEST_CASE_P(BarTest, A);  // Wrong test case name.
+INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, testing::Types<int>);
+
+#elif defined(TEST_CATCHES_WRONG_CASE_IN_INSTANTIATE_TYPED_TEST_CASE_P)
+// Tests that the compiler catches using the wrong test case name in
+// INSTANTIATE_TYPED_TEST_CASE_P.
+
+#include <gtest/gtest.h>
+
+template <typename T>
+class FooTest : public testing::Test {
+};
+
+template <typename T>
+class BarTest : public testing::Test {
+};
+
+TYPED_TEST_CASE_P(FooTest);
+TYPED_TEST_P(FooTest, A) {}
+REGISTER_TYPED_TEST_CASE_P(FooTest, A);
+
+// Wrong test case name.
+INSTANTIATE_TYPED_TEST_CASE_P(My, BarTest, testing::Types<int>);
+
+#elif defined(TEST_CATCHES_INSTANTIATE_TYPED_TESET_CASE_P_WITH_SAME_NAME_PREFIX)
+// Tests that the compiler catches instantiating TYPED_TEST_CASE_P
+// twice with the same name prefix.
+
+#include <gtest/gtest.h>
+
+template <typename T>
+class FooTest : public testing::Test {
+};
+
+TYPED_TEST_CASE_P(FooTest);
+TYPED_TEST_P(FooTest, A) {}
+REGISTER_TYPED_TEST_CASE_P(FooTest, A);
+
+INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, testing::Types<int>);
+
+// Wrong name prefix: "My" has been used.
+INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, testing::Types<double>);
+
 #else
 // A sanity test.  This should compile.
 

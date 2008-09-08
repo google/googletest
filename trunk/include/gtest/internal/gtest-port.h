@@ -73,7 +73,10 @@
 // Note that it is possible that none of the GTEST_OS_ macros are defined.
 //
 // Macros indicating available Google Test features:
-//   GTEST_HAS_DEATH_TEST  - defined iff death tests are supported.
+//   GTEST_HAS_DEATH_TEST   - defined iff death tests are supported.
+//   GTEST_HAS_TYPED_TEST   - defined iff typed tests are supported.
+//   GTEST_HAS_TYPED_TEST_P - defined iff type-parameterized tests are
+//                            supported.
 //
 // Macros for basic C++ coding:
 //   GTEST_AMBIGUOUS_ELSE_BLOCKER - for disabling a gcc warning.
@@ -224,6 +227,15 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #endif  // GTEST_HAS_STD_STRING && defined(GTEST_OS_LINUX)
+
+// Determines whether to support type-driven tests.
+
+// Typed tests need <typeinfo> and variadic macros, which gcc and VC
+// 8.0+ support.
+#if defined(__GNUC__) || (_MSC_VER >= 1400)
+#define GTEST_HAS_TYPED_TEST
+#define GTEST_HAS_TYPED_TEST_P
+#endif  // defined(__GNUC__) || (_MSC_VER >= 1400)
 
 // Determines whether the system compiler uses UTF-16 for encoding wide strings.
 #if defined(GTEST_OS_WINDOWS) || defined(GTEST_OS_CYGWIN) || \

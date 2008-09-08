@@ -40,6 +40,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <wchar.h>
+#include <wctype.h>
 
 #ifdef GTEST_OS_LINUX
 
@@ -117,8 +119,14 @@ namespace testing {
 
 // Constants.
 
-// A test that matches this pattern is disabled and not run.
-static const char kDisableTestPattern[] = "DISABLED_*";
+// A test whose test case name or test name matches this filter is
+// disabled and not run.
+static const char kDisableTestFilter[] = "DISABLED_*:*/DISABLED_*";
+
+// A test case whose name matches this filter is considered a death
+// test case and will be run before test cases whose name doesn't
+// match this filter.
+static const char kDeathTestCaseFilter[] = "*DeathTest:*DeathTest/*";
 
 // A test filter that matches everything.
 static const char kUniversalFilter[] = "*";
@@ -1518,6 +1526,39 @@ bool String::CaseInsensitiveCStringEquals(const char * lhs, const char * rhs) {
 #endif  // GTEST_OS_WINDOWS
 }
 
+  // Compares two wide C strings, ignoring case.  Returns true iff they
+  // have the same content.
+  //
+  // Unlike wcscasecmp(), this function can handle NULL argument(s).
+  // A NULL C string is considered different to any non-NULL wide C string,
+  // including the empty string.
+  // NB: The implementations on different platforms slightly differ.
+  // On windows, this method uses _wcsicmp which compares according to LC_CTYPE
+  // environment variable. On GNU platform this method uses wcscasecmp
+  // which compares according to LC_CTYPE category of the current locale.
+  // On MacOS X, it uses towlower, which also uses LC_CTYPE category of the
+  // current locale.
+bool String::CaseInsensitiveWideCStringEquals(const wchar_t* lhs,
+                                              const wchar_t* rhs) {
+  if ( lhs == NULL ) return rhs == NULL;
+
+  if ( rhs == NULL ) return false;
+
+#ifdef GTEST_OS_WINDOWS
+  return _wcsicmp(lhs, rhs) == 0;
+#elif defined(GTEST_OS_MAC)
+  // Mac OS X doesn't define wcscasecmp.
+  wint_t left, right;
+  do {
+    left = towlower(*lhs++);
+    right = towlower(*rhs++);
+  } while (left && left == right);
+  return left == right;
+#else
+  return wcscasecmp(lhs, rhs) == 0;
+#endif // OS selector
+}
+
 // Constructs a String by copying a given number of chars from a
 // buffer.  E.g. String("hello", 3) will create the string "hel".
 String::String(const char * buffer, size_t len) {
@@ -1716,8 +1757,8 @@ void TestResult::RecordProperty(const TestProperty& test_property) {
   property_with_matching_key.SetValue(test_property.value());
 }
 
-// Adds a failure if the key is a reserved attribute of Google Test testcase tags.
-// Returns true if the property is valid.
+// Adds a failure if the key is a reserved attribute of Google Test
+// testcase tags.  Returns true if the property is valid.
 bool TestResult::ValidateTestProperty(const TestProperty& test_property) {
   String key(test_property.key());
   if (key == "name" || key == "status" || key == "time" || key == "classname") {
@@ -1973,9 +2014,12 @@ bool Test::HasFatalFailure() {
 // object via impl_.
 TestInfo::TestInfo(const char* test_case_name,
                    const char* name,
+                   const char* test_case_comment,
+                   const char* comment,
                    internal::TypeId fixture_class_id,
                    internal::TestFactoryBase* factory) {
   impl_ = new internal::TestInfoImpl(this, test_case_name, name,
+                                     test_case_comment, comment,
                                      fixture_class_id, factory);
 }
 
@@ -1984,29 +2028,40 @@ TestInfo::~TestInfo() {
   delete impl_;
 }
 
-// Creates a TestInfo object and registers it with the UnitTest
-// singleton; returns the created object.
+namespace internal {
+
+// Creates a new TestInfo object and registers it with Google Test;
+// returns the created object.
 //
 // Arguments:
 //
-//   test_case_name: name of the test case
-//   name:           name of the test
-//   set_up_tc:      pointer to the function that sets up the test case
-//   tear_down_tc:   pointer to the function that tears down the test case
-//   factory         factory object that creates a test object. The new
-//                   TestInfo instance assumes ownership of the factory object.
-TestInfo* TestInfo::MakeAndRegisterInstance(
-    const char* test_case_name,
-    const char* name,
-    internal::TypeId fixture_class_id,
-    Test::SetUpTestCaseFunc set_up_tc,
-    Test::TearDownTestCaseFunc tear_down_tc,
-    internal::TestFactoryBase* factory) {
+//   test_case_name:   name of the test case
+//   name:             name of the test
+//   test_case_comment: a comment on the test case that will be included in
+//                      the test output
+//   comment:          a comment on the test that will be included in the
+//                     test output
+//   fixture_class_id: ID of the test fixture class
+//   set_up_tc:        pointer to the function that sets up the test case
+//   tear_down_tc:     pointer to the function that tears down the test case
+//   factory:          pointer to the factory that creates a test object.
+//                     The newly created TestInfo instance will assume
+//                     ownership of the factory object.
+TestInfo* MakeAndRegisterTestInfo(
+    const char* test_case_name, const char* name,
+    const char* test_case_comment, const char* comment,
+    TypeId fixture_class_id,
+    SetUpTestCaseFunc set_up_tc,
+    TearDownTestCaseFunc tear_down_tc,
+    TestFactoryBase* factory) {
   TestInfo* const test_info =
-      new TestInfo(test_case_name, name, fixture_class_id, factory);
-  internal::GetUnitTestImpl()->AddTestInfo(set_up_tc, tear_down_tc, test_info);
+      new TestInfo(test_case_name, name, test_case_comment, comment,
+                   fixture_class_id, factory);
+  GetUnitTestImpl()->AddTestInfo(set_up_tc, tear_down_tc, test_info);
   return test_info;
 }
+
+}  // namespace internal
 
 // Returns the test case name.
 const char* TestInfo::test_case_name() const {
@@ -2016,6 +2071,16 @@ const char* TestInfo::test_case_name() const {
 // Returns the test name.
 const char* TestInfo::name() const {
   return impl_->name();
+}
+
+// Returns the test case comment.
+const char* TestInfo::test_case_comment() const {
+  return impl_->test_case_comment();
+}
+
+// Returns the test comment.
+const char* TestInfo::comment() const {
+  return impl_->comment();
 }
 
 // Returns true if this test should run.
@@ -2170,10 +2235,11 @@ int TestCase::total_test_count() const {
 //   name:         name of the test case
 //   set_up_tc:    pointer to the function that sets up the test case
 //   tear_down_tc: pointer to the function that tears down the test case
-TestCase::TestCase(const char* name,
+TestCase::TestCase(const char* name, const char* comment,
                    Test::SetUpTestCaseFunc set_up_tc,
                    Test::TearDownTestCaseFunc tear_down_tc)
     : name_(name),
+      comment_(comment),
       set_up_tc_(set_up_tc),
       tear_down_tc_(tear_down_tc),
       should_run_(false),
@@ -2283,18 +2349,11 @@ static const char * TestPartResultTypeToString(TestPartResultType type) {
 // Prints a TestPartResult.
 static void PrintTestPartResult(
     const TestPartResult & test_part_result) {
-  const char * const file_name = test_part_result.file_name();
-
-  printf("%s", file_name == NULL ? "unknown file" : file_name);
-  if (test_part_result.line_number() >= 0) {
-#ifdef _MSC_VER
-    printf("(%d)", test_part_result.line_number());
-#else
-    printf(":%d", test_part_result.line_number());
-#endif
-  }
-  printf(": %s", TestPartResultTypeToString(test_part_result.type()));
-  printf("%s\n", test_part_result.message());
+  printf("%s %s%s\n",
+         internal::FormatFileLocation(test_part_result.file_name(),
+                                      test_part_result.line_number()).c_str(),
+         TestPartResultTypeToString(test_part_result.type()),
+         test_part_result.message());
   fflush(stdout);
 }
 
@@ -2471,7 +2530,12 @@ void PrettyUnitTestResultPrinter::OnTestCaseStart(
   const internal::String counts =
       FormatCountableNoun(test_case->test_to_run_count(), "test", "tests");
   ColoredPrintf(COLOR_GREEN, "[----------] ");
-  printf("%s from %s\n", counts.c_str(), test_case_name_.c_str());
+  printf("%s from %s", counts.c_str(), test_case_name_.c_str());
+  if (test_case->comment()[0] == '\0') {
+    printf("\n");
+  } else {
+    printf(", where %s\n", test_case->comment());
+  }
   fflush(stdout);
 }
 
@@ -2492,7 +2556,11 @@ void PrettyUnitTestResultPrinter::OnTestCaseEnd(
 void PrettyUnitTestResultPrinter::OnTestStart(const TestInfo * test_info) {
   ColoredPrintf(COLOR_GREEN,  "[ RUN      ] ");
   PrintTestName(test_case_name_.c_str(), test_info->name());
-  printf("\n");
+  if (test_info->comment()[0] == '\0') {
+    printf("\n");
+  } else {
+    printf(", where %s\n", test_info->comment());
+  }
   fflush(stdout);
 }
 
@@ -2553,7 +2621,16 @@ static void PrintFailedTestsPretty(const UnitTestImpl* impl) {
         continue;
       }
       ColoredPrintf(COLOR_RED, "[  FAILED  ] ");
-      printf("%s.%s\n", ti->test_case_name(), ti->name());
+      printf("%s.%s", ti->test_case_name(), ti->name());
+      if (ti->test_case_comment()[0] != '\0' ||
+          ti->comment()[0] != '\0') {
+        printf(", where %s", ti->test_case_comment());
+        if (ti->test_case_comment()[0] != '\0' &&
+            ti->comment()[0] != '\0') {
+          printf(" and ");
+        }
+      }
+      printf("%s\n", ti->comment());
     }
   }
 }
@@ -3244,6 +3321,7 @@ class TestCaseNameIs {
 //   set_up_tc:      pointer to the function that sets up the test case
 //   tear_down_tc:   pointer to the function that tears down the test case
 TestCase* UnitTestImpl::GetTestCase(const char* test_case_name,
+                                    const char* comment,
                                     Test::SetUpTestCaseFunc set_up_tc,
                                     Test::TearDownTestCaseFunc tear_down_tc) {
   // Can we find a TestCase with the given name?
@@ -3253,10 +3331,11 @@ TestCase* UnitTestImpl::GetTestCase(const char* test_case_name,
   if (node == NULL) {
     // No.  Let's create one.
     TestCase* const test_case =
-      new TestCase(test_case_name, set_up_tc, tear_down_tc);
+      new TestCase(test_case_name, comment, set_up_tc, tear_down_tc);
 
     // Is this a death test case?
-    if (String(test_case_name).EndsWith("DeathTest")) {
+    if (internal::UnitTestOptions::MatchesFilter(String(test_case_name),
+                                                 kDeathTestCaseFilter)) {
       // Yes.  Inserts the test case after the last death test case
       // defined so far.
       node = test_cases_.InsertAfter(last_death_test_case_, test_case);
@@ -3389,12 +3468,12 @@ int UnitTestImpl::FilterTests() {
       TestInfo * const test_info = test_info_node->element();
       const String test_name(test_info->name());
       // A test is disabled if test case name or test name matches
-      // kDisableTestPattern.
+      // kDisableTestFilter.
       const bool is_disabled =
-        internal::UnitTestOptions::PatternMatchesString(kDisableTestPattern,
-            test_case_name.c_str()) ||
-        internal::UnitTestOptions::PatternMatchesString(kDisableTestPattern,
-            test_name.c_str());
+        internal::UnitTestOptions::MatchesFilter(test_case_name,
+                                                 kDisableTestFilter) ||
+        internal::UnitTestOptions::MatchesFilter(test_name,
+                                                 kDisableTestFilter);
       test_info->impl()->set_is_disabled(is_disabled);
 
       const bool should_run = !is_disabled &&
@@ -3511,11 +3590,15 @@ internal::TestResult* UnitTestImpl::current_test_result() {
 TestInfoImpl::TestInfoImpl(TestInfo* parent,
                            const char* test_case_name,
                            const char* name,
+                           const char* test_case_comment,
+                           const char* comment,
                            TypeId fixture_class_id,
                            internal::TestFactoryBase* factory) :
     parent_(parent),
     test_case_name_(String(test_case_name)),
     name_(String(name)),
+    test_case_comment_(String(test_case_comment)),
+    comment_(String(comment)),
     fixture_class_id_(fixture_class_id),
     should_run_(false),
     is_disabled_(false),
