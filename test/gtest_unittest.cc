@@ -529,6 +529,18 @@ TEST(StringTest, EndsWithCaseInsensitive) {
   EXPECT_FALSE(String("").EndsWithCaseInsensitive("foo"));
 }
 
+// Tests String::CaseInsensitiveWideCStringEquals
+TEST(StringTest, CaseInsensitiveWideCStringEquals) {
+  EXPECT_TRUE(String::CaseInsensitiveWideCStringEquals(NULL, NULL));
+  EXPECT_FALSE(String::CaseInsensitiveWideCStringEquals(NULL, L""));
+  EXPECT_FALSE(String::CaseInsensitiveWideCStringEquals(L"", NULL));
+  EXPECT_FALSE(String::CaseInsensitiveWideCStringEquals(NULL, L"foobar"));
+  EXPECT_FALSE(String::CaseInsensitiveWideCStringEquals(L"foobar", NULL));
+  EXPECT_TRUE(String::CaseInsensitiveWideCStringEquals(L"foobar", L"foobar"));
+  EXPECT_TRUE(String::CaseInsensitiveWideCStringEquals(L"foobar", L"FOOBAR"));
+  EXPECT_TRUE(String::CaseInsensitiveWideCStringEquals(L"FOOBAR", L"foobar"));
+}
+
 // Tests that NULL can be assigned to a String.
 TEST(StringTest, CanBeAssignedNULL) {
   const String src(NULL);
@@ -2134,6 +2146,68 @@ TEST_F(DisabledTestsTest, DISABLED_TestShouldNotRun_2) {
   FAIL() << "Unexpected failure: Disabled test should not be run.";
 }
 
+// Tests that disabled typed tests aren't run.
+
+#ifdef GTEST_HAS_TYPED_TEST
+
+template <typename T>
+class TypedTest : public Test {
+};
+
+typedef testing::Types<int, double> NumericTypes;
+TYPED_TEST_CASE(TypedTest, NumericTypes);
+
+TYPED_TEST(TypedTest, DISABLED_ShouldNotRun) {
+  FAIL() << "Unexpected failure: Disabled typed test should not run.";
+}
+
+template <typename T>
+class DISABLED_TypedTest : public Test {
+};
+
+TYPED_TEST_CASE(DISABLED_TypedTest, NumericTypes);
+
+TYPED_TEST(DISABLED_TypedTest, ShouldNotRun) {
+  FAIL() << "Unexpected failure: Disabled typed test should not run.";
+}
+
+#endif  // GTEST_HAS_TYPED_TEST
+
+// Tests that disabled type-parameterized tests aren't run.
+
+#ifdef GTEST_HAS_TYPED_TEST_P
+
+template <typename T>
+class TypedTestP : public Test {
+};
+
+TYPED_TEST_CASE_P(TypedTestP);
+
+TYPED_TEST_P(TypedTestP, DISABLED_ShouldNotRun) {
+  FAIL() << "Unexpected failure: "
+         << "Disabled type-parameterized test should not run.";
+}
+
+REGISTER_TYPED_TEST_CASE_P(TypedTestP, DISABLED_ShouldNotRun);
+
+INSTANTIATE_TYPED_TEST_CASE_P(My, TypedTestP, NumericTypes);
+
+template <typename T>
+class DISABLED_TypedTestP : public Test {
+};
+
+TYPED_TEST_CASE_P(DISABLED_TypedTestP);
+
+TYPED_TEST_P(DISABLED_TypedTestP, ShouldNotRun) {
+  FAIL() << "Unexpected failure: "
+         << "Disabled type-parameterized test should not run.";
+}
+
+REGISTER_TYPED_TEST_CASE_P(DISABLED_TypedTestP, ShouldNotRun);
+
+INSTANTIATE_TYPED_TEST_CASE_P(My, DISABLED_TypedTestP, NumericTypes);
+
+#endif  // GTEST_HAS_TYPED_TEST_P
 
 // Tests that assertion macros evaluate their arguments exactly once.
 
@@ -3491,7 +3565,7 @@ class TestInfoTest : public Test {
  protected:
   static TestInfo * GetTestInfo(const char* test_name) {
     return UnitTest::GetInstance()->impl()->
-      GetTestCase("TestInfoTest", NULL, NULL)->
+      GetTestCase("TestInfoTest", "", NULL, NULL)->
         GetTestInfo(test_name);
   }
 

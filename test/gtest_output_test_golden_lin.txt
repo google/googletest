@@ -7,10 +7,25 @@ Expected: true
 gtest_output_test_.cc:#: Failure
 Value of: 3
 Expected: 2
-[0;32m[==========] [mRunning 37 tests from 13 test cases.
+[0;32m[==========] [mRunning 48 tests from 21 test cases.
 [0;32m[----------] [mGlobal test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
+[0;32m[----------] [m1 test from ADeathTest
+[0;32m[ RUN      ] [mADeathTest.ShouldRunFirst
+[0;32m[       OK ] [mADeathTest.ShouldRunFirst
+[0;32m[----------] [m1 test from ATypedDeathTest/0, where TypeParam = int
+[0;32m[ RUN      ] [mATypedDeathTest/0.ShouldRunFirst
+[0;32m[       OK ] [mATypedDeathTest/0.ShouldRunFirst
+[0;32m[----------] [m1 test from ATypedDeathTest/1, where TypeParam = double
+[0;32m[ RUN      ] [mATypedDeathTest/1.ShouldRunFirst
+[0;32m[       OK ] [mATypedDeathTest/1.ShouldRunFirst
+[0;32m[----------] [m1 test from My/ATypeParamDeathTest/0, where TypeParam = int
+[0;32m[ RUN      ] [mMy/ATypeParamDeathTest/0.ShouldRunFirst
+[0;32m[       OK ] [mMy/ATypeParamDeathTest/0.ShouldRunFirst
+[0;32m[----------] [m1 test from My/ATypeParamDeathTest/1, where TypeParam = double
+[0;32m[ RUN      ] [mMy/ATypeParamDeathTest/1.ShouldRunFirst
+[0;32m[       OK ] [mMy/ATypeParamDeathTest/1.ShouldRunFirst
 [0;32m[----------] [m3 tests from FatalFailureTest
 [0;32m[ RUN      ] [mFatalFailureTest.FatalFailureInSubroutine
 (expecting a failure that x should be 1)
@@ -341,6 +356,36 @@ gtest.cc:#: Failure
 Expected: 1 fatal failure
   Actual: 0 failures
 [0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenStatementReturns
+[0;32m[----------] [m2 tests from TypedTest/0, where TypeParam = int
+[0;32m[ RUN      ] [mTypedTest/0.Success
+[0;32m[       OK ] [mTypedTest/0.Success
+[0;32m[ RUN      ] [mTypedTest/0.Failure
+gtest_output_test_.cc:#: Failure
+Value of: TypeParam()
+  Actual: 0
+Expected: 1
+Expected failure
+[0;31m[  FAILED  ] [mTypedTest/0.Failure
+[0;32m[----------] [m2 tests from Unsigned/TypedTestP/0, where TypeParam = unsigned char
+[0;32m[ RUN      ] [mUnsigned/TypedTestP/0.Success
+[0;32m[       OK ] [mUnsigned/TypedTestP/0.Success
+[0;32m[ RUN      ] [mUnsigned/TypedTestP/0.Failure
+gtest_output_test_.cc:#: Failure
+Value of: TypeParam()
+  Actual: \0
+Expected: 1
+Expected failure
+[0;31m[  FAILED  ] [mUnsigned/TypedTestP/0.Failure
+[0;32m[----------] [m2 tests from Unsigned/TypedTestP/1, where TypeParam = unsigned int
+[0;32m[ RUN      ] [mUnsigned/TypedTestP/1.Success
+[0;32m[       OK ] [mUnsigned/TypedTestP/1.Success
+[0;32m[ RUN      ] [mUnsigned/TypedTestP/1.Failure
+gtest_output_test_.cc:#: Failure
+Value of: TypeParam()
+  Actual: 0
+Expected: 1
+Expected failure
+[0;31m[  FAILED  ] [mUnsigned/TypedTestP/1.Failure
 [0;32m[----------] [mGlobal test environment tear-down
 BarEnvironment::TearDown() called.
 gtest_output_test_.cc:#: Failure
@@ -350,9 +395,9 @@ FooEnvironment::TearDown() called.
 gtest_output_test_.cc:#: Failure
 Failed
 Expected fatal failure.
-[0;32m[==========] [m37 tests from 13 test cases ran.
-[0;32m[  PASSED  ] [m11 tests.
-[0;31m[  FAILED  ] [m26 tests, listed below:
+[0;32m[==========] [m48 tests from 21 test cases ran.
+[0;32m[  PASSED  ] [m19 tests.
+[0;31m[  FAILED  ] [m29 tests, listed below:
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInSubroutine
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInNestedSubroutine
 [0;31m[  FAILED  ] [mFatalFailureTest.NonfatalFailureInSubroutine
@@ -379,8 +424,11 @@ Expected fatal failure.
 [0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenThereAreTwoFatalFailures
 [0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenThereIsOneNonfatalFailure
 [0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenStatementReturns
+[0;31m[  FAILED  ] [mTypedTest/0.Failure, where TypeParam = int
+[0;31m[  FAILED  ] [mUnsigned/TypedTestP/0.Failure, where TypeParam = unsigned char
+[0;31m[  FAILED  ] [mUnsigned/TypedTestP/1.Failure, where TypeParam = unsigned int
 
-26 FAILED TESTS
+29 FAILED TESTS
 The non-test part of the code is expected to have 2 failures.
 
 gtest_output_test_.cc:#: Failure

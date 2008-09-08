@@ -563,7 +563,8 @@ class TestResult {
 class TestInfoImpl {
  public:
   TestInfoImpl(TestInfo* parent, const char* test_case_name,
-               const char* name, TypeId fixture_class_id,
+               const char* name, const char* test_case_comment,
+               const char* comment, TypeId fixture_class_id,
                internal::TestFactoryBase* factory);
   ~TestInfoImpl();
 
@@ -584,6 +585,12 @@ class TestInfoImpl {
 
   // Returns the test name.
   const char* name() const { return name_.c_str(); }
+
+  // Returns the test case comment.
+  const char* test_case_comment() const { return test_case_comment_.c_str(); }
+
+  // Returns the test comment.
+  const char* comment() const { return comment_.c_str(); }
 
   // Returns the ID of the test fixture class.
   TypeId fixture_class_id() const { return fixture_class_id_; }
@@ -611,12 +618,14 @@ class TestInfoImpl {
 
  private:
   // These fields are immutable properties of the test.
-  TestInfo* const parent_;         // The owner of this object
-  const String test_case_name_;    // Test case name
-  const String name_;              // Test name
-  const TypeId fixture_class_id_;  // ID of the test fixture class
-  bool should_run_;                // True iff this test should run
-  bool is_disabled_;               // True iff this test is disabled
+  TestInfo* const parent_;          // The owner of this object
+  const String test_case_name_;     // Test case name
+  const String name_;               // Test name
+  const String test_case_comment_;  // Test case comment
+  const String comment_;            // Test comment
+  const TypeId fixture_class_id_;   // ID of the test fixture class
+  bool should_run_;                 // True iff this test should run
+  bool is_disabled_;                // True iff this test is disabled
   internal::TestFactoryBase* const factory_;  // The factory that creates
                                               // the test object
 
@@ -644,7 +653,7 @@ class TestCase {
   //   name:         name of the test case
   //   set_up_tc:    pointer to the function that sets up the test case
   //   tear_down_tc: pointer to the function that tears down the test case
-  TestCase(const char* name,
+  TestCase(const char* name, const char* comment,
            Test::SetUpTestCaseFunc set_up_tc,
            Test::TearDownTestCaseFunc tear_down_tc);
 
@@ -653,6 +662,9 @@ class TestCase {
 
   // Gets the name of the TestCase.
   const char* name() const { return name_.c_str(); }
+
+  // Returns the test case comment.
+  const char* comment() const { return comment_.c_str(); }
 
   // Returns true if any test in this test case should run.
   bool should_run() const { return should_run_; }
@@ -739,6 +751,8 @@ class TestCase {
  private:
   // Name of the test case.
   internal::String name_;
+  // Comment on the test case.
+  internal::String comment_;
   // List of TestInfos.
   internal::List<TestInfo*>* test_info_list_;
   // Pointer to the function that sets up the test case.
@@ -799,7 +813,7 @@ class UnitTestOptions {
   // This function is useful as an __except condition.
   static int GTestShouldProcessSEH(DWORD exception_code);
 #endif  // GTEST_OS_WINDOWS
- private:
+
   // Returns true if "name" matches the ':' separated list of glob-style
   // filters in "filter".
   static bool MatchesFilter(const String& name, const char* filter);
@@ -975,6 +989,7 @@ class UnitTestImpl : public TestPartResultReporterInterface {
   //   set_up_tc:      pointer to the function that sets up the test case
   //   tear_down_tc:   pointer to the function that tears down the test case
   TestCase* GetTestCase(const char* test_case_name,
+                        const char* comment,
                         Test::SetUpTestCaseFunc set_up_tc,
                         Test::TearDownTestCaseFunc tear_down_tc);
 
@@ -989,6 +1004,7 @@ class UnitTestImpl : public TestPartResultReporterInterface {
                    Test::TearDownTestCaseFunc tear_down_tc,
                    TestInfo * test_info) {
     GetTestCase(test_info->test_case_name(),
+                test_info->test_case_comment(),
                 set_up_tc,
                 tear_down_tc)->AddTestInfo(test_info);
   }

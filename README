@@ -104,7 +104,6 @@ which contains all of the source code. Here are some examples in Linux:
 
 Building the Source
 -------------------
-
 ### Linux, Mac OS X (without Xcode), and Cygwin ###
 There are two primary options for building the source at this point: build it
 inside the source code tree, or in a separate directory. We recommend building
@@ -172,5 +171,23 @@ in the "Variables to be set in the environment:" list, where you replace
 "/real/framework/path" with the actual location of the gtest.framework. Now
 when you run your executable, it will load the framework and your test will
 run as expected. 
+
+Regenerating Source Files
+-------------------------
+
+Some of Google Test's source files are generated from templates (not
+in the C++ sense) using a script.  A template file is named FOO.pump,
+where FOO is the name of the file it will generate.  For example, the
+file include/gtest/internal/gtest-type-util.h.pump is used to generate
+gtest-type-util.h in the same directory.
+
+Normally you don't need to worry about regenerating the source files,
+unless you need to modify them (e.g. if you are working on a patch for
+Google Test).  In that case, you should modify the corresponding .pump
+files instead and run the 'pump' script (for Pump is Useful for Meta
+Programming) to regenerate them.  We are still working on releasing
+the script and its documentation.  If you need it now, please email
+googletestframework@googlegroups.com such that we know to make it
+happen sooner.
 
 Happy testing!

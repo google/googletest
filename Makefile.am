@@ -1,9 +1,12 @@
 # Automake file
 
+# TODO(chandlerc@google.com): automate the generation of *.h from *.h.pump.
+
 # Nonstandard package files for distribution
 EXTRA_DIST = \
   CHANGES \
   CONTRIBUTORS \
+  include/gtest/internal/gtest-type-util.h.pump \
   scripts/gen_gtest_pred_impl.py
 
 # MSVC project files
@@ -18,6 +21,24 @@ EXTRA_DIST += \
   msvc/gtest_prod_test.vcproj \
   msvc/gtest_uninitialized_test_.vcproj \
   msvc/gtest_unittest.vcproj
+
+# xcode project files
+EXTRA_DIST += \
+  xcode/Config/DebugProject.xcconfig \
+  xcode/Config/FrameworkTarget.xcconfig \
+  xcode/Config/General.xcconfig \
+  xcode/Config/ReleaseProject.xcconfig \
+  xcode/Resources/Info.plist \
+  xcode/Scripts/versiongenerate.py \
+  xcode/gtest.xcodeproj/project.pbxproj
+
+# xcode sample files
+EXTRA_DIST += \
+  xcode/Samples/FrameworkSample/Info.plist \
+  xcode/Samples/FrameworkSample/widget_test.cc \
+  xcode/Samples/FrameworkSample/widget.cc \
+  xcode/Samples/FrameworkSample/widget.h \
+  xcode/Samples/FrameworkSample/WidgetFramework.xcodeproj/project.pbxproj
 
 # TODO(wan@google.com): integrate scripts/gen_gtest_pred_impl.py into
 #   the build system such that a user can specify the maximum predicate
@@ -44,14 +65,16 @@ lib_libgtest_la_SOURCES = src/gtest.cc \
                           src/gtest-death-test.cc \
                           src/gtest-filepath.cc \
                           src/gtest-internal-inl.h \
-                          src/gtest-port.cc
+                          src/gtest-port.cc \
+                          src/gtest-typed-test.cc
 
 pkginclude_HEADERS = include/gtest/gtest.h \
                      include/gtest/gtest-death-test.h \
                      include/gtest/gtest-message.h \
                      include/gtest/gtest-spi.h \
                      include/gtest/gtest_pred_impl.h \
-                     include/gtest/gtest_prod.h
+                     include/gtest/gtest_prod.h \
+                     include/gtest/gtest-typed-test.h
 
 pkginclude_internaldir = $(pkgincludedir)/internal
 pkginclude_internal_HEADERS = \
@@ -59,7 +82,8 @@ pkginclude_internal_HEADERS = \
   include/gtest/internal/gtest-filepath.h \
   include/gtest/internal/gtest-internal.h \
   include/gtest/internal/gtest-port.h \
-  include/gtest/internal/gtest-string.h
+  include/gtest/internal/gtest-string.h \
+  include/gtest/internal/gtest-type-util.h
 
 lib_libgtest_main_la_SOURCES = src/gtest_main.cc
 lib_libgtest_main_la_LIBADD = lib/libgtest.la
@@ -114,6 +138,12 @@ TESTS += samples/sample5_unittest
 check_PROGRAMS += samples/sample5_unittest
 samples_sample5_unittest_SOURCES = samples/sample5_unittest.cc
 samples_sample5_unittest_LDADD = lib/libgtest_main.la \
+                                 samples/libsamples.la
+
+TESTS += samples/sample6_unittest
+check_PROGRAMS += samples/sample6_unittest
+samples_sample6_unittest_SOURCES = samples/sample6_unittest.cc
+samples_sample6_unittest_LDADD = lib/libgtest_main.la \
                                  samples/libsamples.la
 
 TESTS += test/gtest_unittest
@@ -178,6 +208,13 @@ TESTS += test/gtest_stress_test
 check_PROGRAMS += test/gtest_stress_test
 test_gtest_stress_test_SOURCES = test/gtest_stress_test.cc
 test_gtest_stress_test_LDADD = lib/libgtest.la
+
+TESTS += test/gtest-typed-test_test
+check_PROGRAMS += test/gtest-typed-test_test
+test_gtest_typed_test_test_SOURCES = test/gtest-typed-test_test.cc \
+                                     test/gtest-typed-test2_test.cc \
+                                     test/gtest-typed-test_test.h
+test_gtest_typed_test_test_LDADD = lib/libgtest_main.la
 
 # The following tests depend on the presence of a Python installation and are
 # keyed off of it. TODO(chandlerc@google.com): While we currently only attempt

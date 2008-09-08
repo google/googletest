@@ -5,7 +5,7 @@ gtest_output_test_.cc:#: error: Value of: false
 Expected: true
 gtest_output_test_.cc:#: error: Value of: 3
 Expected: 2
-[==========] Running 40 tests from 16 test cases.
+[==========] Running 46 tests from 19 test cases.
 [----------] Global test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -317,6 +317,33 @@ Expected non-fatal failure.
 gtest.cc:#: error: Expected: 1 fatal failure
   Actual: 0 failures
 [  FAILED  ] ExpectFatalFailureTest.FailsWhenStatementReturns
+[----------] 2 tests from TypedTest/0, where TypeParam = int
+[ RUN      ] TypedTest/0.Success
+[       OK ] TypedTest/0.Success
+[ RUN      ] TypedTest/0.Failure
+gtest_output_test_.cc:#: error: Value of: TypeParam()
+  Actual: 0
+Expected: 1
+Expected failure
+[  FAILED  ] TypedTest/0.Failure
+[----------] 2 tests from Unsigned/TypedTestP/0, where TypeParam = unsigned char
+[ RUN      ] Unsigned/TypedTestP/0.Success
+[       OK ] Unsigned/TypedTestP/0.Success
+[ RUN      ] Unsigned/TypedTestP/0.Failure
+gtest_output_test_.cc:#: error: Value of: TypeParam()
+  Actual: \0
+Expected: 1
+Expected failure
+[  FAILED  ] Unsigned/TypedTestP/0.Failure
+[----------] 2 tests from Unsigned/TypedTestP/1, where TypeParam = unsigned int
+[ RUN      ] Unsigned/TypedTestP/1.Success
+[       OK ] Unsigned/TypedTestP/1.Success
+[ RUN      ] Unsigned/TypedTestP/1.Failure
+gtest_output_test_.cc:#: error: Value of: TypeParam()
+  Actual: 0
+Expected: 1
+Expected failure
+[  FAILED  ] Unsigned/TypedTestP/1.Failure
 [----------] Global test environment tear-down
 BarEnvironment::TearDown() called.
 gtest_output_test_.cc:#: error: Failed
@@ -324,9 +351,9 @@ Expected non-fatal failure.
 FooEnvironment::TearDown() called.
 gtest_output_test_.cc:#: error: Failed
 Expected fatal failure.
-[==========] 40 tests from 16 test cases ran.
-[  PASSED  ] 11 tests.
-[  FAILED  ] 29 tests, listed below:
+[==========] 46 tests from 19 test cases ran.
+[  PASSED  ] 14 tests.
+[  FAILED  ] 32 tests, listed below:
 [  FAILED  ] FatalFailureTest.FatalFailureInSubroutine
 [  FAILED  ] FatalFailureTest.FatalFailureInNestedSubroutine
 [  FAILED  ] FatalFailureTest.NonfatalFailureInSubroutine
@@ -356,8 +383,11 @@ Expected fatal failure.
 [  FAILED  ] ExpectFatalFailureTest.FailsWhenThereAreTwoFatalFailures
 [  FAILED  ] ExpectFatalFailureTest.FailsWhenThereIsOneNonfatalFailure
 [  FAILED  ] ExpectFatalFailureTest.FailsWhenStatementReturns
+[  FAILED  ] TypedTest/0.Failure, where TypeParam = int
+[  FAILED  ] Unsigned/TypedTestP/0.Failure, where TypeParam = unsigned char
+[  FAILED  ] Unsigned/TypedTestP/1.Failure, where TypeParam = unsigned int
 
-29 FAILED TESTS
+32 FAILED TESTS
 The non-test part of the code is expected to have 2 failures.
 
 gtest_output_test_.cc:#: error: Value of: false

@@ -167,6 +167,21 @@ class String {
   static bool CaseInsensitiveCStringEquals(const char* lhs,
                                            const char* rhs);
 
+  // Compares two wide C strings, ignoring case.  Returns true iff they
+  // have the same content.
+  //
+  // Unlike wcscasecmp(), this function can handle NULL argument(s).
+  // A NULL C string is considered different to any non-NULL wide C string,
+  // including the empty string.
+  // NB: The implementations on different platforms slightly differ.
+  // On windows, this method uses _wcsicmp which compares according to LC_CTYPE
+  // environment variable. On GNU platform this method uses wcscasecmp
+  // which compares according to LC_CTYPE category of the current locale.
+  // On MacOS X, it uses towlower, which also uses LC_CTYPE category of the
+  // current locale.
+  static bool CaseInsensitiveWideCStringEquals(const wchar_t* lhs,
+                                               const wchar_t* rhs);
+
   // Formats a list of arguments to a String, using the same format
   // spec string as for printf.
   //
@@ -217,6 +232,10 @@ class String {
   bool operator==(const char* c_str) const {
     return CStringEquals(c_str_, c_str);
   }
+
+  // Returns true iff this String is less than the given C string.  A NULL
+  // string is considered less than "".
+  bool operator<(const String& rhs) const { return Compare(rhs) < 0; }
 
   // Returns true iff this String doesn't equal the given C string.  A NULL
   // string and a non-NULL string are considered not equal.
