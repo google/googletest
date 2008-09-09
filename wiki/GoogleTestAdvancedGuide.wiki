@@ -745,6 +745,161 @@ are initialized).
 
 _Availability:_ Linux, Windows, Mac.
 
+==  Typed Tests  ==
+
+Suppose you have multiple implementations of the same interface and
+want to make sure that all of them satisfy some common requirements.
+Or, you may have defined several types that are supposed to conform to
+the same "concept" and you want to verify it.  In both cases, you want
+the same test logic repeated for different types.
+
+While you can write one `TEST` or `TEST_F` for each type you want to
+test (and you may even factor the test logic into a function template
+that you invoke from the `TEST`), it's tedious and doesn't scale:
+if you want _m_ tests over _n_ types, you'll end up writing _m*n_
+`TEST`s.
+
+_Typed tests_ allow you to repeat the same test logic over a list of
+types.  You only need to write the test logic once, although you must
+know the type list when writing typed tests.  Here's how you do it:
+
+First, define a fixture class template.  It should be parameterized
+by a type.  Remember to derive it from `testing::Test`:
+
+{{{
+template <typename T>
+class FooTest : public testing::Test {
+ public:
+  ...
+  typedef std::list<T> List;
+  static T shared_;
+  T value_;
+};
+}}}
+
+Next, associate a list of types with the test case, which will be
+repeated for each type in the list:
+
+{{{
+typedef testing::Types<char, int, unsigned int> MyTypes;
+TYPED_TEST_CASE(FooTest, MyTypes);
+}}}
+
+The `typedef` is necessary for the `TYPED_TEST_CASE` macro to parse
+correctly.  Otherwise the compiler will think that each comma in the
+type list introduces a new macro argument.
+
+Then, use `TYPED_TEST()` instead of `TEST_F()` to define a typed test
+for this test case.  You can repeat this as many times as you want:
+
+{{{
+TYPED_TEST(FooTest, DoesBlah) {
+  // Inside a test, refer to the special name TypeParam to get the type
+  // parameter.  Since we are inside a derived class template, C++ requires
+  // us to visit the members of FooTest via 'this'.
+  TypeParam n = this->value_;
+
+  // To visit static members of the fixture, add the 'TestFixture::'
+  // prefix.
+  n += TestFixture::shared_;
+
+  // To refer to typedefs in the fixture, add the 'typename TestFixture::'
+  // prefix.  The 'typename' is required to satisfy the compiler.
+  typename TestFixture::List values;
+  values.push_back(n);
+  ...
+}
+
+TYPED_TEST(FooTest, HasPropertyA) { ... }
+}}}
+
+You can see `samples/sample6_unittest.cc` for a complete example.
+
+_Availability:_ Linux, Windows (requires MSVC 8.0 or above), Mac;
+since version 1.1.0.
+
+==  Type-Parameterized Tests  ==
+
+_Type-parameterized tests_ are like typed tests, except that they
+don't require you to know the list of types ahead of time.  Instead,
+you can define the test logic first and instantiate it with different
+type lists later.  You can even instantiate it more than once in the
+same program.
+
+If you are designing an interface or concept, you can define a suite
+of type-parameterized tests to verify properties that any valid
+implementation of the interface/concept should have.  Then, the author
+of each implementation can just instantiate the test suite with his
+type to verify that it conforms to the requirements, without having to
+write similar tests repeatedly.  Here's an example:
+
+First, define a fixture class template, as we did with typed tests:
+
+{{{
+template <typename T>
+class FooTest : public testing::Test {
+  ...
+};
+}}}
+
+Next, declare that you will define a type-parameterized test case:
+
+{{{
+TYPED_TEST_CASE_P(FooTest);
+}}}
+
+The `_P` suffix is for "parameterized" or "pattern", whichever you
+prefer to think.
+
+Then, use `TYPED_TEST_P()` to define a type-parameterized test.  You
+can repeat this as many times as you want:
+
+{{{
+TYPED_TEST_P(FooTest, DoesBlah) {
+  // Inside a test, refer to TypeParam to get the type parameter.
+  TypeParam n = 0;
+  ...
+}
+
+TYPED_TEST_P(FooTest, HasPropertyA) { ... }
+}}}
+
+Now the tricky part: you need to register all test patterns using the
+`REGISTER_TYPED_TEST_CASE_P` macro before you can instantiate them.
+The first argument of the macro is the test case name; the rest are
+the names of the tests in this test case:
+
+{{{
+REGISTER_TYPED_TEST_CASE_P(FooTest,
+                           DoesBlah, HasPropertyA);
+}}}
+
+Finally, you are free to instantiate the pattern with the types you
+want.  If you put the above code in a header file, you can `#include`
+it in multiple C++ source files and instantiate it multiple times.
+
+{{{
+typedef testing::Types<char, int, unsigned int> MyTypes;
+INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
+}}}
+
+To distinguish different instances of the pattern, the first argument
+to the `INSTANTIATE_TYPED_TEST_CASE_P` macro is a prefix that will be
+added to the actual test case name.  Remember to pick unique prefixes
+for different instances.
+
+In the special case where the type list contains only one type, you
+can write that type directly without `testing::Types<...>`, like this:
+
+{{{
+INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, int);
+}}}
+
+You can see `samples/sample6_unittest.cc` for a complete example.
+
+_Availability:_ Linux, Windows (requires MSVC 8.0 or above), Mac;
+since version 1.1.0.
+
 ==  Testing Private Code  ==
 
 If you change your software's internal implementation, your tests should not
