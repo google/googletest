@@ -1142,13 +1142,19 @@ TEST(ParseInt32FlagTest, ParsesAndReturnsValidValue) {
 }
 
 // For the same reason we are not explicitly testing everything in the
-// Test class, there are no separate tests for the following classes:
+// Test class, there are no separate tests for the following classes
+// (except for some trivial cases):
 //
 //   TestCase, UnitTest, UnitTestResultPrinter.
 //
 // Similarly, there are no separate tests for the following macros:
 //
 //   TEST, TEST_F, RUN_ALL_TESTS
+
+TEST(UnitTestTest, CanGetOriginalWorkingDir) {
+  ASSERT_TRUE(UnitTest::GetInstance()->original_working_dir() != NULL);
+  EXPECT_STRNE(UnitTest::GetInstance()->original_working_dir(), "");
+}
 
 // This group of tests is for predicate assertions (ASSERT_PRED*, etc)
 // of various arities.  They do not attempt to be exhaustive.  Rather,

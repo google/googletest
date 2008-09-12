@@ -56,28 +56,18 @@ GTEST_DECLARE_string(death_test_style);
 // Here's what happens when an ASSERT_DEATH* or EXPECT_DEATH* is
 // executed:
 //
-//   1. The assertion fails immediately if there are more than one
-//   active threads.  This is because it's safe to fork() only when
-//   there is a single thread.
+//   1. It generates a warning if there is more than one active
+//   thread.  This is because it's safe to fork() or clone() only
+//   when there is a single thread.
 //
-//   2. The parent process forks a sub-process and runs the death test
-//   in it; the sub-process exits with code 0 at the end of the death
-//   test, if it hasn't exited already.
+//   2. The parent process clone()s a sub-process and runs the death
+//   test in it; the sub-process exits with code 0 at the end of the
+//   death test, if it hasn't exited already.
 //
 //   3. The parent process waits for the sub-process to terminate.
 //
 //   4. The parent process checks the exit code and error message of
 //   the sub-process.
-//
-// Note:
-//
-// It's not safe to call exit() if the current process is forked from
-// a multi-threaded process, so people usually call _exit() instead in
-// such a case.  However, we are not concerned with this as we run
-// death tests only when there is a single thread.  Since exit() has a
-// cleaner semantics (it also calls functions registered with atexit()
-// and on_exit()), this macro calls exit() instead of _exit() to
-// terminate the child process.
 //
 // Examples:
 //
@@ -95,6 +85,20 @@ GTEST_DECLARE_string(death_test_style);
 //   }
 //
 //   ASSERT_EXIT(client.HangUpServer(), KilledBySIGHUP, "Hanging up!");
+//
+// Known caveats:
+//
+//   A "threadsafe" style death test obtains the path to the test
+//   program from argv[0] and re-executes it in the sub-process.  For
+//   simplicity, the current implementation doesn't search the PATH
+//   when launching the sub-process.  This means that the user must
+//   invoke the test program via a path that contains at least one
+//   path separator (e.g. path/to/foo_test and
+//   /absolute/path/to/bar_test are fine, but foo_test is not).  This
+//   is rarely a problem as people usually don't put the test binary
+//   directory in PATH.
+//
+// TODO(wan@google.com): make thread-safe death tests search the PATH.
 
 // Asserts that a given statement causes the program to exit, with an
 // integer exit status that satisfies predicate, and emitting error output

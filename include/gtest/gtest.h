@@ -479,6 +479,10 @@ class UnitTest {
   // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
   int Run() GTEST_MUST_USE_RESULT;
 
+  // Returns the working directory when the first TEST() or TEST_F()
+  // was executed.  The UnitTest object owns the string.
+  const char* original_working_dir() const;
+
   // Returns the TestCase object for the test that's currently running,
   // or NULL if no test is running.
   const TestCase* current_test_case() const;

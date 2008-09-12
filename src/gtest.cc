@@ -3211,6 +3211,12 @@ int UnitTest::Run() {
 #endif  // GTEST_OS_WINDOWS
 }
 
+// Returns the working directory when the first TEST() or TEST_F() was
+// executed.
+const char* UnitTest::original_working_dir() const {
+  return impl_->original_working_dir_.c_str();
+}
+
 // Returns the TestCase object for the test that's currently running,
 // or NULL if no test is running.
 // L < mutex_

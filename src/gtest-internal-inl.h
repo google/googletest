@@ -1003,6 +1003,21 @@ class UnitTestImpl : public TestPartResultReporterInterface {
   void AddTestInfo(Test::SetUpTestCaseFunc set_up_tc,
                    Test::TearDownTestCaseFunc tear_down_tc,
                    TestInfo * test_info) {
+    // In order to support thread-safe death tests, we need to
+    // remember the original working directory when the test program
+    // was first invoked.  We cannot do this in RUN_ALL_TESTS(), as
+    // the user may have changed the current directory before calling
+    // RUN_ALL_TESTS().  Therefore we capture the current directory in
+    // AddTestInfo(), which is called to register a TEST or TEST_F
+    // before main() is reached.
+    if (original_working_dir_.IsEmpty()) {
+      original_working_dir_.Set(FilePath::GetCurrentDir());
+      if (original_working_dir_.IsEmpty()) {
+        printf("%s\n", "Failed to get the current working directory.");
+        abort();
+      }
+    }
+
     GetTestCase(test_info->test_case_name(),
                 test_info->test_case_comment(),
                 set_up_tc,
@@ -1083,8 +1098,14 @@ class UnitTestImpl : public TestPartResultReporterInterface {
 #endif  // GTEST_HAS_DEATH_TEST
 
  private:
+  friend class ::testing::UnitTest;
+
   // The UnitTest object that owns this implementation object.
   UnitTest* const parent_;
+
+  // The working directory when the first TEST() or TEST_F() was
+  // executed.
+  internal::FilePath original_working_dir_;
 
   // Points to (but doesn't own) the test part result reporter.
   TestPartResultReporterInterface* test_part_result_reporter_;

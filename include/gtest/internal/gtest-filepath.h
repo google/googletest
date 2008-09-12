@@ -70,6 +70,9 @@ class FilePath {
   String ToString() const { return pathname_; }
   const char* c_str() const { return pathname_.c_str(); }
 
+  // Returns the current working directory, or "" if unsuccessful.
+  static FilePath GetCurrentDir();
+
   // Given directory = "dir", base_name = "test", number = 0,
   // extension = "xml", returns "dir/test.xml". If number is greater
   // than zero (e.g., 12), returns "dir/test_12.xml".
@@ -90,6 +93,9 @@ class FilePath {
   static FilePath GenerateUniqueFileName(const FilePath& directory,
                                          const FilePath& base_name,
                                          const char* extension);
+
+  // Returns true iff the path is NULL or "".
+  bool IsEmpty() const { return c_str() == NULL || *c_str() == '\0'; }
 
   // If input name has a trailing separator character, removes it and returns
   // the name, otherwise return the name string unmodified.
