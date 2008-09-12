@@ -2314,6 +2314,56 @@ TEST_F(SingleEvaluationTest, OtherCases) {
   EXPECT_EQ(3, b_);
 }
 
+#if GTEST_HAS_EXCEPTIONS
+
+void ThrowAnInteger() {
+  throw 1;
+}
+
+// Tests that assertion arguments are evaluated exactly once.
+TEST_F(SingleEvaluationTest, ExceptionTests) {
+  // successful EXPECT_THROW
+  EXPECT_THROW({  // NOLINT
+    a_++;
+    ThrowAnInteger();
+  }, int);
+  EXPECT_EQ(1, a_);
+
+  // failed EXPECT_THROW, throws different
+  EXPECT_NONFATAL_FAILURE(EXPECT_THROW({  // NOLINT
+    a_++;
+    ThrowAnInteger();
+  }, bool), "throws a different type");
+  EXPECT_EQ(2, a_);
+
+  // failed EXPECT_THROW, throws nothing
+  EXPECT_NONFATAL_FAILURE(EXPECT_THROW(a_++, bool), "throws nothing");
+  EXPECT_EQ(3, a_);
+
+  // successful EXPECT_NO_THROW
+  EXPECT_NO_THROW(a_++);
+  EXPECT_EQ(4, a_);
+
+  // failed EXPECT_NO_THROW
+  EXPECT_NONFATAL_FAILURE(EXPECT_NO_THROW({  // NOLINT
+    a_++;
+    ThrowAnInteger();
+  }), "it throws");
+  EXPECT_EQ(5, a_);
+
+  // successful EXPECT_ANY_THROW
+  EXPECT_ANY_THROW({  // NOLINT
+    a_++;
+    ThrowAnInteger();
+  });
+  EXPECT_EQ(6, a_);
+
+  // failed EXPECT_ANY_THROW
+  EXPECT_NONFATAL_FAILURE(EXPECT_ANY_THROW(a_++), "it doesn't");
+  EXPECT_EQ(7, a_);
+}
+
+#endif  // GTEST_HAS_EXCEPTIONS
 
 // Tests non-string assertions.
 
@@ -2486,6 +2536,37 @@ TEST(AssertionTest, ASSERT_GT) {
   EXPECT_FATAL_FAILURE(ASSERT_GT(2, 2),
                        "Expected: (2) > (2), actual: 2 vs 2");
 }
+
+#if GTEST_HAS_EXCEPTIONS
+
+// Tests ASSERT_THROW.
+TEST(AssertionTest, ASSERT_THROW) {
+  ASSERT_THROW(ThrowAnInteger(), int);
+  EXPECT_FATAL_FAILURE(ASSERT_THROW(ThrowAnInteger(), bool),
+                       "Expected: ThrowAnInteger() throws an exception of type"\
+                       " bool.\n  Actual: it throws a different type.");
+  EXPECT_FATAL_FAILURE(ASSERT_THROW(1, bool),
+                       "Expected: 1 throws an exception of type bool.\n"\
+                       "  Actual: it throws nothing.");
+}
+
+// Tests ASSERT_NO_THROW.
+TEST(AssertionTest, ASSERT_NO_THROW) {
+  ASSERT_NO_THROW(1);
+  EXPECT_FATAL_FAILURE(ASSERT_NO_THROW(ThrowAnInteger()),
+                       "Expected: ThrowAnInteger() doesn't throw an exception."\
+                       "\n  Actual: it throws.");
+}
+
+// Tests ASSERT_ANY_THROW.
+TEST(AssertionTest, ASSERT_ANY_THROW) {
+  ASSERT_ANY_THROW(ThrowAnInteger());
+  EXPECT_FATAL_FAILURE(ASSERT_ANY_THROW(1),
+                       "Expected: 1 throws an exception.\n  Actual: it "\
+                       "doesn't.");
+}
+
+#endif  // GTEST_HAS_EXCEPTIONS
 
 // Makes sure we deal with the precedence of <<.  This test should
 // compile.
@@ -2764,6 +2845,32 @@ TEST(AssertionSyntaxTest, BehavesLikeSingleStatement) {
     ;
   else
     EXPECT_GT(3, 2) << "";
+
+#if GTEST_HAS_EXCEPTIONS
+  if (false)
+    EXPECT_THROW(1, bool);
+
+  if (true)
+    EXPECT_THROW(ThrowAnInteger(), int);
+  else
+    ;
+
+  if (false)
+    EXPECT_NO_THROW(ThrowAnInteger());
+
+  if (true)
+    EXPECT_NO_THROW(1);
+  else
+    ;
+
+  if (false)
+    EXPECT_ANY_THROW(1);
+
+  if (true)
+    EXPECT_ANY_THROW(ThrowAnInteger());
+  else
+    ;
+#endif  // GTEST_HAS_EXCEPTIONS
 }
 
 // Tests that the assertion macros work well with switch statements.
@@ -2791,6 +2898,22 @@ TEST(AssertionSyntaxTest, WorksWithSwitch) {
     case 0:
       EXPECT_NE(1, 2);
 }
+
+#if GTEST_HAS_EXCEPTIONS
+
+void ThrowAString() {
+    throw "String";
+}
+
+// Test that the exception assertion macros compile and work with const
+// type qualifier.
+TEST(AssertionSyntaxTest, WorksWithConst) {
+    ASSERT_THROW(ThrowAString(), const char*);
+
+    EXPECT_THROW(ThrowAString(), const char*);
+}
+
+#endif  // GTEST_HAS_EXCEPTIONS
 
 }  // namespace
 
@@ -2970,6 +3093,37 @@ TEST(ExpectTest, EXPECT_GT) {
   EXPECT_NONFATAL_FAILURE(EXPECT_GT(2, 3),
                           "(2) > (3)");
 }
+
+#if GTEST_HAS_EXCEPTIONS
+
+// Tests EXPECT_THROW.
+TEST(ExpectTest, EXPECT_THROW) {
+  EXPECT_THROW(ThrowAnInteger(), int);
+  EXPECT_NONFATAL_FAILURE(EXPECT_THROW(ThrowAnInteger(), bool),
+                          "Expected: ThrowAnInteger() throws an exception of "\
+                          "type bool.\n  Actual: it throws a different type.");
+  EXPECT_NONFATAL_FAILURE(EXPECT_THROW(1, bool),
+                          "Expected: 1 throws an exception of type bool.\n"\
+                          "  Actual: it throws nothing.");
+}
+
+// Tests EXPECT_NO_THROW.
+TEST(ExpectTest, EXPECT_NO_THROW) {
+  EXPECT_NO_THROW(1);
+  EXPECT_NONFATAL_FAILURE(EXPECT_NO_THROW(ThrowAnInteger()),
+                          "Expected: ThrowAnInteger() doesn't throw an "\
+                          "exception.\n  Actual: it throws.");
+}
+
+// Tests EXPECT_ANY_THROW.
+TEST(ExpectTest, EXPECT_ANY_THROW) {
+  EXPECT_ANY_THROW(ThrowAnInteger());
+  EXPECT_NONFATAL_FAILURE(EXPECT_ANY_THROW(1),
+                          "Expected: 1 throws an exception.\n  Actual: it "\
+                          "doesn't.");
+}
+
+#endif  // GTEST_HAS_EXCEPTIONS
 
 // Make sure we deal with the precedence of <<.
 TEST(ExpectTest, ExpectPrecedence) {
@@ -4476,6 +4630,37 @@ TEST(StreamingAssertionsTest, FloatingPointEquals) {
   EXPECT_FATAL_FAILURE(ASSERT_FLOAT_EQ(0.0, 1.0) << "expected failure",
                        "expected failure");
 }
+
+#if GTEST_HAS_EXCEPTIONS
+
+TEST(StreamingAssertionsTest, Throw) {
+  EXPECT_THROW(ThrowAnInteger(), int) << "unexpected failure";
+  ASSERT_THROW(ThrowAnInteger(), int) << "unexpected failure";
+  EXPECT_NONFATAL_FAILURE(EXPECT_THROW(ThrowAnInteger(), bool) <<
+                          "expected failure", "expected failure");
+  EXPECT_FATAL_FAILURE(ASSERT_THROW(ThrowAnInteger(), bool) <<
+                       "expected failure", "expected failure");
+}
+
+TEST(StreamingAssertionsTest, NoThrow) {
+  EXPECT_NO_THROW(1) << "unexpected failure";
+  ASSERT_NO_THROW(1) << "unexpected failure";
+  EXPECT_NONFATAL_FAILURE(EXPECT_NO_THROW(ThrowAnInteger()) <<
+                          "expected failure", "expected failure");
+  EXPECT_FATAL_FAILURE(ASSERT_NO_THROW(ThrowAnInteger()) <<
+                       "expected failure", "expected failure");
+}
+
+TEST(StreamingAssertionsTest, AnyThrow) {
+  EXPECT_ANY_THROW(ThrowAnInteger()) << "unexpected failure";
+  ASSERT_ANY_THROW(ThrowAnInteger()) << "unexpected failure";
+  EXPECT_NONFATAL_FAILURE(EXPECT_ANY_THROW(1) <<
+                          "expected failure", "expected failure");
+  EXPECT_FATAL_FAILURE(ASSERT_ANY_THROW(1) <<
+                       "expected failure", "expected failure");
+}
+
+#endif  // GTEST_HAS_EXCEPTIONS
 
 // Tests that Google Test correctly decides whether to use colors in the output.
 

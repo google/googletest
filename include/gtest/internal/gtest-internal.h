@@ -717,6 +717,67 @@ class TypeParameterizedTestCase<Fixture, Templates0, Types> {
 #define GTEST_SUCCESS(message) \
   GTEST_MESSAGE(message, ::testing::TPRT_SUCCESS)
 
+
+#define GTEST_TEST_THROW(statement, expected_exception, fail) \
+  GTEST_AMBIGUOUS_ELSE_BLOCKER \
+  if (const char* gtest_msg = "") { \
+    bool gtest_caught_expected = false; \
+    try { \
+      statement; \
+    } \
+    catch (expected_exception const&) { \
+      gtest_caught_expected = true; \
+    } \
+    catch (...) { \
+      gtest_msg = "Expected: " #statement " throws an exception of type " \
+                  #expected_exception ".\n  Actual: it throws a different " \
+                  "type."; \
+      goto GTEST_CONCAT_TOKEN(gtest_label_testthrow_, __LINE__); \
+    } \
+    if (!gtest_caught_expected) { \
+      gtest_msg = "Expected: " #statement " throws an exception of type " \
+                  #expected_exception ".\n  Actual: it throws nothing."; \
+      goto GTEST_CONCAT_TOKEN(gtest_label_testthrow_, __LINE__); \
+    } \
+  } else \
+    GTEST_CONCAT_TOKEN(gtest_label_testthrow_, __LINE__): \
+      fail(gtest_msg)
+
+#define GTEST_TEST_NO_THROW(statement, fail) \
+  GTEST_AMBIGUOUS_ELSE_BLOCKER \
+  if (const char* gtest_msg = "") { \
+    try { \
+      statement; \
+    } \
+    catch (...) { \
+      gtest_msg = "Expected: " #statement " doesn't throw an exception.\n" \
+                  "  Actual: it throws."; \
+      goto GTEST_CONCAT_TOKEN(gtest_label_testnothrow_, __LINE__); \
+    } \
+  } else \
+    GTEST_CONCAT_TOKEN(gtest_label_testnothrow_, __LINE__): \
+      fail(gtest_msg)
+
+#define GTEST_TEST_ANY_THROW(statement, fail) \
+  GTEST_AMBIGUOUS_ELSE_BLOCKER \
+  if (const char* gtest_msg = "") { \
+    bool gtest_caught_any = false; \
+    try { \
+      statement; \
+    } \
+    catch (...) { \
+      gtest_caught_any = true; \
+    } \
+    if (!gtest_caught_any) { \
+      gtest_msg = "Expected: " #statement " throws an exception.\n" \
+                  "  Actual: it doesn't."; \
+      goto GTEST_CONCAT_TOKEN(gtest_label_testanythrow_, __LINE__); \
+    } \
+  } else \
+    GTEST_CONCAT_TOKEN(gtest_label_testanythrow_, __LINE__): \
+      fail(gtest_msg)
+
+
 #define GTEST_TEST_BOOLEAN(boolexpr, booltext, actual, expected, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER \
   if (boolexpr) \

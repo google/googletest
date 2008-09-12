@@ -928,6 +928,28 @@ class AssertHelper {
 // Generates a success with a generic message.
 #define SUCCEED() GTEST_SUCCESS("Succeeded")
 
+// Macros for testing exceptions.
+//
+//    * {ASSERT|EXPECT}_THROW(statement, expected_exception):
+//         Tests that the statement throws the expected exception.
+//    * {ASSERT|EXPECT}_NO_THROW(statement):
+//         Tests that the statement doesn't throw any exception.
+//    * {ASSERT|EXPECT}_ANY_THROW(statement):
+//         Tests that the statement throws an exception.
+
+#define EXPECT_THROW(statement, expected_exception) \
+  GTEST_TEST_THROW(statement, expected_exception, GTEST_NONFATAL_FAILURE)
+#define EXPECT_NO_THROW(statement) \
+  GTEST_TEST_NO_THROW(statement, GTEST_NONFATAL_FAILURE)
+#define EXPECT_ANY_THROW(statement) \
+  GTEST_TEST_ANY_THROW(statement, GTEST_NONFATAL_FAILURE)
+#define ASSERT_THROW(statement, expected_exception) \
+  GTEST_TEST_THROW(statement, expected_exception, GTEST_FATAL_FAILURE)
+#define ASSERT_NO_THROW(statement) \
+  GTEST_TEST_NO_THROW(statement, GTEST_FATAL_FAILURE)
+#define ASSERT_ANY_THROW(statement) \
+  GTEST_TEST_ANY_THROW(statement, GTEST_FATAL_FAILURE)
+
 // Boolean assertions.
 #define EXPECT_TRUE(condition) \
   GTEST_TEST_BOOLEAN(condition, #condition, false, true, \
