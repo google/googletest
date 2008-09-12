@@ -36,6 +36,8 @@
 
 #ifdef GTEST_HAS_DEATH_TEST
 
+#include <stdio.h>
+#include <unistd.h>
 #include <gtest/gtest-spi.h>
 
 // Indicates that this translation unit is part of Google Test's
@@ -85,13 +87,19 @@ class TestForDeathTest : public testing::Test {
  protected:
   // A static member function that's expected to die.
   static void StaticMemberFunction() {
-    GTEST_LOG(FATAL, "death inside StaticMemberFunction().");
+    fprintf(stderr, "%s", "death inside StaticMemberFunction().");
+    // We call _exit() instead of exit(), as the former is a direct
+    // system call and thus safer in the presence of threads.  exit()
+    // will invoke user-defined exit-hooks, which may do dangerous
+    // things that conflict with death tests.
+    _exit(1);
   }
 
   // A method of the test fixture that may die.
   void MemberFunction() {
     if (should_die_) {
-      GTEST_LOG(FATAL, "death inside MemberFunction().");
+      fprintf(stderr, "%s", "death inside MemberFunction().");
+      _exit(1);
     }
   }
 
@@ -157,13 +165,13 @@ int DieInDebugElse12(int* sideeffect) {
   return 12;
 }
 
-// Returns the exit status of a process that calls exit(2) with a
+// Returns the exit status of a process that calls _exit(2) with a
 // given exit code.  This is a helper function for the
 // ExitStatusPredicateTest test suite.
 static int NormalExitStatus(int exit_code) {
   pid_t child_pid = fork();
   if (child_pid == 0) {
-    exit(exit_code);
+    _exit(exit_code);
   }
   int status;
   waitpid(child_pid, &status, 0);
@@ -179,7 +187,7 @@ static int KilledExitStatus(int signum) {
   pid_t child_pid = fork();
   if (child_pid == 0) {
     raise(signum);
-    exit(1);
+    _exit(1);
   }
   int status;
   waitpid(child_pid, &status, 0);
@@ -223,7 +231,7 @@ TEST_F(TestForDeathTest, SingleStatement) {
     ASSERT_DEATH(return, "");
 
   if (true)
-    EXPECT_DEATH(exit(1), "");
+    EXPECT_DEATH(_exit(1), "");
   else
     // This empty "else" branch is meant to ensure that EXPECT_DEATH
     // doesn't expand into an "if" statement without an "else"
@@ -235,12 +243,12 @@ TEST_F(TestForDeathTest, SingleStatement) {
   if (false)
     ;
   else
-    EXPECT_DEATH(exit(1), "") << 1 << 2 << 3;
+    EXPECT_DEATH(_exit(1), "") << 1 << 2 << 3;
 }
 
 void DieWithEmbeddedNul() {
   fprintf(stderr, "Hello%cworld.\n", '\0');
-  abort();
+  _exit(1);
 }
 
 // Tests that EXPECT_DEATH and ASSERT_DEATH work when the error
@@ -257,22 +265,38 @@ TEST_F(TestForDeathTest, DISABLED_EmbeddedNulInMessage) {
 TEST_F(TestForDeathTest, SwitchStatement) {
   switch (0)
     default:
-      ASSERT_DEATH(exit(1), "") << "exit in default switch handler";
+      ASSERT_DEATH(_exit(1), "") << "exit in default switch handler";
 
   switch (0)
     case 0:
-      EXPECT_DEATH(exit(1), "") << "exit in switch case";
+      EXPECT_DEATH(_exit(1), "") << "exit in switch case";
 }
 
-// Tests that a static member function can be used in a death test.
-TEST_F(TestForDeathTest, StaticMemberFunction) {
+// Tests that a static member function can be used in a "fast" style
+// death test.
+TEST_F(TestForDeathTest, StaticMemberFunctionFastStyle) {
+  testing::GTEST_FLAG(death_test_style) = "fast";
   ASSERT_DEATH(StaticMemberFunction(), "death.*StaticMember");
 }
 
-// Tests that a method of the test fixture can be used in a death test.
-TEST_F(TestForDeathTest, MemberFunction) {
+// Tests that a method of the test fixture can be used in a "fast"
+// style death test.
+TEST_F(TestForDeathTest, MemberFunctionFastStyle) {
+  testing::GTEST_FLAG(death_test_style) = "fast";
   should_die_ = true;
   EXPECT_DEATH(MemberFunction(), "inside.*MemberFunction");
+}
+
+// Tests that death tests work even if the current directory has been
+// changed.
+TEST_F(TestForDeathTest, FastDeathTestInChangedDir) {
+  testing::GTEST_FLAG(death_test_style) = "fast";
+
+  chdir("/");
+  EXPECT_EXIT(_exit(1), testing::ExitedWithCode(1), "");
+
+  chdir("/");
+  ASSERT_DEATH(_exit(1), "");
 }
 
 // Repeats a representative sample of death tests in the "threadsafe" style:
@@ -292,14 +316,24 @@ TEST_F(TestForDeathTest, ThreadsafeDeathTestInLoop) {
   testing::GTEST_FLAG(death_test_style) = "threadsafe";
 
   for (int i = 0; i < 3; ++i)
-    EXPECT_EXIT(exit(i), testing::ExitedWithCode(i), "") << ": i = " << i;
+    EXPECT_EXIT(_exit(i), testing::ExitedWithCode(i), "") << ": i = " << i;
+}
+
+TEST_F(TestForDeathTest, ThreadsafeDeathTestInChangedDir) {
+  testing::GTEST_FLAG(death_test_style) = "threadsafe";
+
+  chdir("/");
+  EXPECT_EXIT(_exit(1), testing::ExitedWithCode(1), "");
+
+  chdir("/");
+  ASSERT_DEATH(_exit(1), "");
 }
 
 TEST_F(TestForDeathTest, MixedStyles) {
   testing::GTEST_FLAG(death_test_style) = "threadsafe";
-  EXPECT_DEATH(exit(1), "");
+  EXPECT_DEATH(_exit(1), "");
   testing::GTEST_FLAG(death_test_style) = "fast";
-  EXPECT_DEATH(exit(1), "");
+  EXPECT_DEATH(_exit(1), "");
 }
 
 namespace {
@@ -316,7 +350,7 @@ TEST_F(TestForDeathTest, DoesNotExecuteAtforkHooks) {
   testing::GTEST_FLAG(death_test_style) = "threadsafe";
   pthread_flag = false;
   ASSERT_EQ(0, pthread_atfork(&SetPthreadFlag, NULL, NULL));
-  ASSERT_DEATH(exit(1), "");
+  ASSERT_DEATH(_exit(1), "");
   ASSERT_FALSE(pthread_flag);
 }
 
@@ -528,8 +562,8 @@ TEST_F(TestForDeathTest, AssertDebugDeathAborts) {
 
 // Tests the *_EXIT family of macros, using a variety of predicates.
 TEST_F(TestForDeathTest, ExitMacros) {
-  EXPECT_EXIT(exit(1),  testing::ExitedWithCode(1),  "");
-  ASSERT_EXIT(exit(42), testing::ExitedWithCode(42), "");
+  EXPECT_EXIT(_exit(1),  testing::ExitedWithCode(1),  "");
+  ASSERT_EXIT(_exit(42), testing::ExitedWithCode(42), "");
   EXPECT_EXIT(raise(SIGKILL), testing::KilledBySignal(SIGKILL), "") << "foo";
   ASSERT_EXIT(raise(SIGUSR2), testing::KilledBySignal(SIGUSR2), "") << "bar";
 
@@ -539,7 +573,7 @@ TEST_F(TestForDeathTest, ExitMacros) {
   }, "This failure is expected.");
 
   EXPECT_FATAL_FAILURE({  // NOLINT
-    ASSERT_EXIT(exit(0), testing::KilledBySignal(SIGSEGV), "")
+    ASSERT_EXIT(_exit(0), testing::KilledBySignal(SIGSEGV), "")
         << "This failure is expected, too.";
   }, "This failure is expected, too.");
 }
@@ -547,7 +581,7 @@ TEST_F(TestForDeathTest, ExitMacros) {
 TEST_F(TestForDeathTest, InvalidStyle) {
   testing::GTEST_FLAG(death_test_style) = "rococo";
   EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_DEATH(exit(0), "") << "This failure is expected.";
+    EXPECT_DEATH(_exit(0), "") << "This failure is expected.";
   }, "This failure is expected.");
 }
 
@@ -794,7 +828,7 @@ TEST_F(MacroLogicDeathTest, ChildDoesNotDie) {
   // This time there are two calls to Abort: one since the test didn't
   // die, and another from the ReturnSentinel when it's destroyed.  The
   // sentinel normally isn't destroyed if a test doesn't die, since
-  // exit(2) is called in that case by ForkingDeathTest, but not by
+  // _exit(2) is called in that case by ForkingDeathTest, but not by
   // our MockDeathTest.
   ASSERT_EQ(2, factory_->AbortCalls());
   EXPECT_EQ(DeathTest::TEST_DID_NOT_DIE,
@@ -813,18 +847,18 @@ static size_t GetSuccessfulTestPartCount() {
 // Tests that a successful death test does not register a successful
 // test part.
 TEST(SuccessRegistrationDeathTest, NoSuccessPart) {
-  EXPECT_DEATH(exit(1), "");
+  EXPECT_DEATH(_exit(1), "");
   EXPECT_EQ(0u, GetSuccessfulTestPartCount());
 }
 
 TEST(StreamingAssertionsDeathTest, DeathTest) {
-  EXPECT_DEATH(exit(1), "") << "unexpected failure";
-  ASSERT_DEATH(exit(1), "") << "unexpected failure";
+  EXPECT_DEATH(_exit(1), "") << "unexpected failure";
+  ASSERT_DEATH(_exit(1), "") << "unexpected failure";
   EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_DEATH(exit(0), "") << "expected failure";
+    EXPECT_DEATH(_exit(0), "") << "expected failure";
   }, "expected failure");
   EXPECT_FATAL_FAILURE({  // NOLINT
-    ASSERT_DEATH(exit(0), "") << "expected failure";
+    ASSERT_DEATH(_exit(0), "") << "expected failure";
   }, "expected failure");
 }
 

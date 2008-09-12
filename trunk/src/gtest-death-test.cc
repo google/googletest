@@ -546,11 +546,32 @@ struct ExecDeathTestArgs {
 };
 
 // The main function for a threadsafe-style death test child process.
+// This function is called in a clone()-ed process and thus must avoid
+// any potentially unsafe operations like malloc or libc functions.
 static int ExecDeathTestChildMain(void* child_arg) {
   ExecDeathTestArgs* const args = static_cast<ExecDeathTestArgs*>(child_arg);
   GTEST_DEATH_TEST_CHECK_SYSCALL(close(args->close_fd));
+
+  // We need to execute the test program in the same environment where
+  // it was originally invoked.  Therefore we change to the original
+  // working directory first.
+  const char* const original_dir =
+      UnitTest::GetInstance()->original_working_dir();
+  // We can safely call chdir() as it's a direct system call.
+  if (chdir(original_dir) != 0) {
+    DeathTestAbort("chdir(\"%s\") failed: %s",
+                   original_dir, strerror(errno));
+    return EXIT_FAILURE;
+  }
+
+  // We can safely call execve() as it's a direct system call.  We
+  // cannot use execvp() as it's a libc function and thus potentially
+  // unsafe.  Since execve() doesn't search the PATH, the user must
+  // invoke the test program via a valid path that contains at least
+  // one path separator.
   execve(args->argv[0], args->argv, environ);
-  DeathTestAbort("execve failed: %s", strerror(errno));
+  DeathTestAbort("execve(%s, ...) in %s failed: %s",
+                 args->argv[0], original_dir, strerror(errno));
   return EXIT_FAILURE;
 }
 

@@ -32,6 +32,8 @@
 #include <gtest/internal/gtest-filepath.h>
 #include <gtest/internal/gtest-port.h>
 
+#include <stdlib.h>
+
 #ifdef _WIN32_WCE
 #include <windows.h>
 #elif defined(_WIN32)
@@ -40,6 +42,7 @@
 #include <sys/stat.h>
 #else
 #include <sys/stat.h>
+#include <unistd.h>
 #endif // _WIN32_WCE or _WIN32
 
 #include <gtest/internal/gtest-string.h>
@@ -65,6 +68,21 @@ const char kPathSeparator = '/';
 const char kPathSeparatorString[] = "/";
 const char kCurrentDirectoryString[] = "./";
 #endif  // GTEST_OS_WINDOWS
+
+// Returns the current working directory, or "" if unsuccessful.
+FilePath FilePath::GetCurrentDir() {
+#ifdef _WIN32_WCE
+// Windows CE doesn't have a current directory, so we just return
+// something reasonable.
+  return FilePath(kCurrentDirectoryString);
+#elif defined(GTEST_OS_WINDOWS)
+  char cwd[_MAX_PATH + 1] = {};
+  return FilePath(_getcwd(cwd, sizeof(cwd)) == NULL ? "" : cwd);
+#else
+  char cwd[PATH_MAX + 1] = {};
+  return FilePath(getcwd(cwd, sizeof(cwd)) == NULL ? "" : cwd);
+#endif
+}
 
 // Returns a copy of the FilePath with the case-insensitive extension removed.
 // Example: FilePath("dir/file.exe").RemoveExtension("EXE") returns

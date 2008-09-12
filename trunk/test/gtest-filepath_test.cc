@@ -91,6 +91,38 @@ const char* MakeTempDir() {
 }
 #endif  // _WIN32_WCE
 
+#ifndef _WIN32_WCE
+
+TEST(GetCurrentDirTest, ReturnsCurrentDir) {
+  EXPECT_FALSE(FilePath::GetCurrentDir().IsEmpty());
+
+#ifdef GTEST_OS_WINDOWS
+  _chdir(PATH_SEP);
+  const FilePath cwd = FilePath::GetCurrentDir();
+  // Skips the ":".
+  const char* const cwd_without_drive = strchr(cwd.c_str(), ':');
+  ASSERT_TRUE(cwd_without_drive != NULL);
+  EXPECT_STREQ(PATH_SEP, cwd_without_drive + 1);
+#else
+  chdir(PATH_SEP);
+  EXPECT_STREQ(PATH_SEP, FilePath::GetCurrentDir().c_str());
+#endif
+}
+
+#endif  // _WIN32_WCE
+
+TEST(IsEmptyTest, ReturnsTrueForEmptyPath) {
+  EXPECT_TRUE(FilePath("").IsEmpty());
+  EXPECT_TRUE(FilePath(NULL).IsEmpty());
+}
+
+TEST(IsEmptyTest, ReturnsFalseForNonEmptyPath) {
+  EXPECT_FALSE(FilePath("a").IsEmpty());
+  EXPECT_FALSE(FilePath(".").IsEmpty());
+  EXPECT_FALSE(FilePath("a/b").IsEmpty());
+  EXPECT_FALSE(FilePath("a\\b\\").IsEmpty());
+}
+
 // FilePath's functions used by UnitTestOptions::GetOutputFile.
 
 // RemoveDirectoryName "" -> ""
