@@ -45,6 +45,29 @@ switch(expression) {
 
 _Availability_: Linux, Windows, Mac.
 
+===  Exception Assertions  ===
+
+These are for verifying that a piece of code throws (or does not
+throw) an exception of the given type:
+
+|| *Fatal assertion* || *Nonfatal assertion* || *Verifies* ||
+|| `ASSERT_THROW(`_statement_, _exception_type_`);`  || `EXPECT_THROW(`_statement_, _exception_type_`);`  || _statement_ throws an exception of the given type  ||
+|| `ASSERT_ANY_THROW(`_statement_`);`                || `EXPECT_ANY_THROW(`_statement_`);`                || _statement_ throws an exception of any type        ||
+|| `ASSERT_NO_THROW(`_statement_`);`                 || `EXPECT_NO_THROW(`_statement_`);`                 || _statement_ doesn't throw any exception            ||
+
+Examples:
+
+{{{
+ASSERT_THROW(Foo(5), bar_exception);
+
+EXPECT_NO_THROW({
+  int n = 5;
+  Bar(&n);
+});
+}}}
+
+_Availability_: Linux, Windows, Mac; since version 1.1.0.
+
 ===  Predicate Assertions  ===
 
 Even though Google Test has a rich set of assertions, they can never be
