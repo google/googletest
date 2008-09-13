@@ -2720,85 +2720,40 @@ TEST(HRESULTAssertionTest, EXPECT_HRESULT_SUCCEEDED) {
   EXPECT_HRESULT_SUCCEEDED(S_OK);
   EXPECT_HRESULT_SUCCEEDED(S_FALSE);
 
-#ifdef _WIN32_WCE
-  const char* expected =
-    "Expected: (UnexpectedHRESULTFailure()) succeeds.\n"
-    "  Actual: 0x8000FFFF";
-#else  // Windows proper
-  const char* expected =
-    "Expected: (UnexpectedHRESULTFailure()) succeeds.\n"
-    "  Actual: 0x8000FFFF Catastrophic failure";
-#endif  // _WIN32_WCE
   EXPECT_NONFATAL_FAILURE(EXPECT_HRESULT_SUCCEEDED(UnexpectedHRESULTFailure()),
-      expected);
+    "Expected: (UnexpectedHRESULTFailure()) succeeds.\n"
+    "  Actual: 0x8000FFFF");
 }
 
 TEST(HRESULTAssertionTest, ASSERT_HRESULT_SUCCEEDED) {
   ASSERT_HRESULT_SUCCEEDED(S_OK);
   ASSERT_HRESULT_SUCCEEDED(S_FALSE);
 
-#ifdef _WIN32_WCE
-  const char* expected =
-          "Expected: (UnexpectedHRESULTFailure()) succeeds.\n"
-          "  Actual: 0x8000FFFF";
-#else  // Windows proper
-  const char* expected =
-    "Expected: (UnexpectedHRESULTFailure()) succeeds.\n"
-    "  Actual: 0x8000FFFF Catastrophic failure";
-#endif  // _WIN32_WCE
-
   EXPECT_FATAL_FAILURE(ASSERT_HRESULT_SUCCEEDED(UnexpectedHRESULTFailure()),
-      expected);
+    "Expected: (UnexpectedHRESULTFailure()) succeeds.\n"
+    "  Actual: 0x8000FFFF");
 }
 
 TEST(HRESULTAssertionTest, EXPECT_HRESULT_FAILED) {
   EXPECT_HRESULT_FAILED(E_UNEXPECTED);
 
-#ifdef _WIN32_WCE
-  const char* expected_success =
-    "Expected: (OkHRESULTSuccess()) fails.\n"
-    "  Actual: 0x00000000";
-  const char* expected_incorrect_function =
-    "Expected: (FalseHRESULTSuccess()) fails.\n"
-    "  Actual: 0x00000001";
-#else  // Windows proper
-  const char* expected_success =
-    "Expected: (OkHRESULTSuccess()) fails.\n"
-    "  Actual: 0x00000000 The operation completed successfully";
-  const char* expected_incorrect_function =
-    "Expected: (FalseHRESULTSuccess()) fails.\n"
-    "  Actual: 0x00000001 Incorrect function.";
-#endif  // _WIN32_WCE
-
   EXPECT_NONFATAL_FAILURE(EXPECT_HRESULT_FAILED(OkHRESULTSuccess()),
-      expected_success);
+    "Expected: (OkHRESULTSuccess()) fails.\n"
+    "  Actual: 0x00000000");
   EXPECT_NONFATAL_FAILURE(EXPECT_HRESULT_FAILED(FalseHRESULTSuccess()),
-      expected_incorrect_function);
+    "Expected: (FalseHRESULTSuccess()) fails.\n"
+    "  Actual: 0x00000001");
 }
 
 TEST(HRESULTAssertionTest, ASSERT_HRESULT_FAILED) {
   ASSERT_HRESULT_FAILED(E_UNEXPECTED);
 
-#ifdef _WIN32_WCE
-  const char* expected_success =
-    "Expected: (OkHRESULTSuccess()) fails.\n"
-    "  Actual: 0x00000000";
-  const char* expected_incorrect_function =
-    "Expected: (FalseHRESULTSuccess()) fails.\n"
-    "  Actual: 0x00000001";
-#else  // Windows proper
-  const char* expected_success =
-    "Expected: (OkHRESULTSuccess()) fails.\n"
-    "  Actual: 0x00000000 The operation completed successfully";
-  const char* expected_incorrect_function =
-    "Expected: (FalseHRESULTSuccess()) fails.\n"
-    "  Actual: 0x00000001 Incorrect function.";
-#endif  // _WIN32_WCE
-
   EXPECT_FATAL_FAILURE(ASSERT_HRESULT_FAILED(OkHRESULTSuccess()),
-      expected_success);
+    "Expected: (OkHRESULTSuccess()) fails.\n"
+    "  Actual: 0x00000000");
   EXPECT_FATAL_FAILURE(ASSERT_HRESULT_FAILED(FalseHRESULTSuccess()),
-      expected_incorrect_function);
+    "Expected: (FalseHRESULTSuccess()) fails.\n"
+    "  Actual: 0x00000001");
 }
 
 // Tests that streaming to the HRESULT macros works.
