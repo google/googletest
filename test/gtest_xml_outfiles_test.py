@@ -103,7 +103,7 @@ class GTestXMLOutFilesTest(gtest_xml_test_utils.GTestXMLTestCase):
     command = "cd %s && %s --gtest_output=xml:%s &> /dev/null" % (
         tempfile.mkdtemp(), gtest_prog_path, self.output_dir_)
     status = os.system(command)
-    self.assertEquals(0, status)
+    self.assertEquals(0, gtest_test_utils.GetExitStatus(status))
 
     # TODO(wan@google.com): libtool causes the built test binary to be
     #   named lt-gtest_xml_outfiles_test_ instead of
