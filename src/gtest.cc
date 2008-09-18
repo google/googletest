@@ -1546,16 +1546,17 @@ bool String::CaseInsensitiveWideCStringEquals(const wchar_t* lhs,
 
 #ifdef GTEST_OS_WINDOWS
   return _wcsicmp(lhs, rhs) == 0;
-#elif defined(GTEST_OS_MAC)
-  // Mac OS X doesn't define wcscasecmp.
+#elif defined(GTEST_OS_LINUX)
+  return wcscasecmp(lhs, rhs) == 0;
+#else
+  // Mac OS X and Cygwin don't define wcscasecmp.  Other unknown OSes
+  // may not define it either.
   wint_t left, right;
   do {
     left = towlower(*lhs++);
     right = towlower(*rhs++);
   } while (left && left == right);
   return left == right;
-#else
-  return wcscasecmp(lhs, rhs) == 0;
 #endif // OS selector
 }
 

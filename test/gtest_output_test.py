@@ -104,6 +104,20 @@ def RemoveTime(output):
   return re.sub(r'\(\d+ ms', '(? ms', output)
 
 
+def RemoveTestCounts(output):
+  """Removes test counts from a Google Test program's output."""
+
+  output = re.sub(r'\d+ tests from \d+ test cases',
+                  '? tests from ? test cases', output)
+  return re.sub(r'\d+ tests\.', '? tests.', output)
+
+
+def RemoveDeathTests(output):
+  """Removes death test information from a Google Test program's output."""
+
+  return re.sub(r'\n.*DeathTest.*', '', output)
+
+
 def NormalizeOutput(output):
   """Normalizes output (the output of gtest_output_test_.exe)."""
 
@@ -182,7 +196,11 @@ class GTestOutputTest(unittest.TestCase):
     golden = golden_file.read()
     golden_file.close()
 
-    self.assertEquals(golden, output)
+    # We want the test to pass regardless of death tests being
+    # supported or not.
+    self.assert_(output == golden or
+                 RemoveTestCounts(output) ==
+                 RemoveTestCounts(RemoveDeathTests(golden)))
 
 
 if __name__ == '__main__':
