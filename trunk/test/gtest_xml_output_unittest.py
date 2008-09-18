@@ -128,7 +128,7 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     status = os.system("cd %s && %s %s=xml &> /dev/null"
                        % (temp_dir, gtest_prog_path,
                           GTEST_OUTPUT_FLAG))
-    self.assertEquals(0, status)
+    self.assertEquals(0, gtest_test_utils.GetExitStatus(status))
     self.assert_(os.path.isfile(output_file))
 
 
@@ -147,14 +147,16 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     command = ("%s %s=xml:%s &> /dev/null"
                % (gtest_prog_path, GTEST_OUTPUT_FLAG, xml_path))
     status = os.system(command)
-    signal = status & 0xff
-    self.assertEquals(0, signal,
-                      "%s was killed by signal %d" % (gtest_prog_name, signal))
-    exit_code = status >> 8
-    self.assertEquals(expected_exit_code, exit_code,
-                      "'%s' exited with code %s, which doesn't match "
-                      "the expected exit code %s."
-                      % (command, exit_code, expected_exit_code))
+    if os.WIFSIGNALED(status):
+      signal = os.WTERMSIG(status)
+      self.assert_(False,
+                   "%s was killed by signal %d" % (gtest_prog_name, signal))
+    else:
+      exit_code = gtest_test_utils.GetExitStatus(status)
+      self.assertEquals(expected_exit_code, exit_code,
+                        "'%s' exited with code %s, which doesn't match "
+                        "the expected exit code %s."
+                        % (command, exit_code, expected_exit_code))
 
     expected = minidom.parseString(expected_xml)
     actual   = minidom.parse(xml_path)

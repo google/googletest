@@ -78,10 +78,7 @@ def Run(command):
   """
 
   exit_code = os.system(command)
-  # On Unix-like systems, the lowest 8 bits of the exit code is the
-  # signal number that killed the process (or 0 if it wasn't killed by
-  # a signal).
-  return (exit_code & 255) != 0
+  return os.WIFSIGNALED(exit_code)
 
 
 # The unit test.

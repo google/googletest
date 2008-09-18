@@ -96,6 +96,26 @@ def GetBuildDir():
   return os.path.abspath(GetFlag('gtest_build_dir'))
 
 
+def GetExitStatus(exit_code):
+  """Returns the argument to exit(), or -1 if exit() wasn't called.
+
+  Args:
+    exit_code: the result value of os.system(command).
+  """
+
+  if os.name == 'nt':
+    # On Windows, os.WEXITSTATUS() doesn't work and os.system() returns
+    # the argument to exit() directly.
+    return exit_code
+  else:
+    # On Unix, os.WEXITSTATUS() must be used to extract the exit status
+    # from the result of os.system().
+    if os.WIFEXITED(exit_code):
+      return os.WEXITSTATUS(exit_code)
+    else:
+      return -1
+
+
 def Main():
   """Runs the unit test."""
 

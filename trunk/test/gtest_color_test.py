@@ -62,7 +62,7 @@ def UsesColor(term, color_env_var, color_flag):
   cmd = COMMAND
   if color_flag is not None:
     cmd += ' --%s=%s' % (COLOR_FLAG, color_flag)
-  return os.system(cmd)
+  return gtest_test_utils.GetExitStatus(os.system(cmd))
 
 
 class GTestColorTest(unittest.TestCase):
