@@ -161,10 +161,13 @@ bool FilePath::FileOrDirectoryExists() const {
 // that exists.
 bool FilePath::DirectoryExists() const {
   bool result = false;
-#ifdef _WIN32
-  FilePath removed_sep(this->RemoveTrailingPathSeparator());
+#ifdef GTEST_OS_WINDOWS
+  // Don't strip off trailing separator if path is a root directory on
+  // Windows (like "C:\\").
+  const FilePath& path(IsRootDirectory() ? *this :
+                                           RemoveTrailingPathSeparator());
 #ifdef _WIN32_WCE
-  LPCWSTR unicode = String::AnsiToUtf16(removed_sep.c_str());
+  LPCWSTR unicode = String::AnsiToUtf16(path.c_str());
   const DWORD attributes = GetFileAttributes(unicode);
   delete [] unicode;
   if ((attributes != kInvalidFileAttributes) &&
@@ -173,15 +176,30 @@ bool FilePath::DirectoryExists() const {
   }
 #else
   struct _stat file_stat = {};
-  result = _stat(removed_sep.c_str(), &file_stat) == 0 &&
+  result = _stat(path.c_str(), &file_stat) == 0 &&
       (_S_IFDIR & file_stat.st_mode) != 0;
 #endif  // _WIN32_WCE
 #else
   struct stat file_stat = {};
   result = stat(pathname_.c_str(), &file_stat) == 0 &&
       S_ISDIR(file_stat.st_mode);
-#endif  // _WIN32
+#endif  // GTEST_OS_WINDOWS
   return result;
+}
+
+// Returns true if pathname describes a root directory. (Windows has one
+// root directory per disk drive.)
+bool FilePath::IsRootDirectory() const {
+#ifdef GTEST_OS_WINDOWS
+  const char* const name = pathname_.c_str();
+  return pathname_.GetLength() == 3 &&
+     ((name[0] >= 'a' && name[0] <= 'z') ||
+      (name[0] >= 'A' && name[0] <= 'Z')) &&
+     name[1] == ':' &&
+     name[2] == kPathSeparator;
+#else
+  return pathname_ == kPathSeparatorString;
+#endif
 }
 
 // Returns a pathname for a file that does not currently exist. The pathname
@@ -256,6 +274,32 @@ FilePath FilePath::RemoveTrailingPathSeparator() const {
   return pathname_.EndsWith(kPathSeparatorString)
       ? FilePath(String(pathname_.c_str(), pathname_.GetLength() - 1))
       : *this;
+}
+
+// Normalize removes any redundant separators that might be in the pathname.
+// For example, "bar///foo" becomes "bar/foo". Does not eliminate other
+// redundancies that might be in a pathname involving "." or "..".
+void FilePath::Normalize() {
+  if (pathname_.c_str() == NULL) {
+    pathname_ = "";
+    return;
+  }
+  const char* src = pathname_.c_str();
+  char* const dest = new char[pathname_.GetLength() + 1];
+  char* dest_ptr = dest;
+  memset(dest_ptr, 0, pathname_.GetLength() + 1);
+
+  while (*src != '\0') {
+    *dest_ptr++ = *src;
+    if (*src != kPathSeparator)
+      src++;
+    else
+      while (*src == kPathSeparator)
+        src++;
+  }
+  *dest_ptr = '\0';
+  pathname_ = dest;
+  delete[] dest;
 }
 
 }  // namespace internal

@@ -55,6 +55,9 @@
 //                              is/isn't available (some systems define
 //                              ::wstring, which is different to std::wstring).
 //                              Leave it undefined to let Google Test define it.
+//   GTEST_HAS_RTTI           - Define it to 1/0 to indicate that RTTI is/isn't
+//                              enabled.  Leave it undefined to let Google
+//                              Test define it.
 
 // This header defines the following utilities:
 //
@@ -134,6 +137,13 @@
 #define GTEST_NAME "Google Test"
 #define GTEST_FLAG_PREFIX "gtest_"
 #define GTEST_FLAG_PREFIX_UPPER "GTEST_"
+
+// Determines the version of gcc that is used to compile this.
+#ifdef __GNUC__
+// 40302 means version 4.3.2.
+#define GTEST_GCC_VER_ \
+    (__GNUC__*10000 + __GNUC_MINOR__*100 + __GNUC_PATCHLEVEL__)
+#endif  // __GNUC__
 
 // Determines the platform on which Google Test is compiled.
 #ifdef __CYGWIN__
@@ -215,6 +225,42 @@
 #include <strstream>  // NOLINT
 #endif  // GTEST_HAS_STD_STRING
 
+// Determines whether RTTI is available.
+#ifndef GTEST_HAS_RTTI
+// The user didn't tell us whether RTTI is enabled, so we need to
+// figure it out.
+
+#ifdef _MSC_VER
+
+#ifdef _CPPRTTI  // MSVC defines this macro iff RTTI is enabled.
+#define GTEST_HAS_RTTI 1
+#else
+#define GTEST_HAS_RTTI 0
+#endif  // _CPPRTTI
+
+#elif defined(__GNUC__)
+
+// Starting with version 4.3.2, gcc defines __GXX_RTTI iff RTTI is enabled.
+#if GTEST_GCC_VER_ >= 40302
+#ifdef __GXX_RTTI
+#define GTEST_HAS_RTTI 1
+#else
+#define GTEST_HAS_RTTI 0
+#endif  // __GXX_RTTI
+#else
+// For gcc versions smaller than 4.3.2, we assume RTTI is enabled.
+#define GTEST_HAS_RTTI 1
+#endif  // GTEST_GCC_VER >= 40302
+
+#else
+
+// Unknown compiler - assume RTTI is enabled.
+#define GTEST_HAS_RTTI 1
+
+#endif  // _MSC_VER
+
+#endif  // GTEST_HAS_RTTI
+
 // Determines whether to support death tests.
 #if GTEST_HAS_STD_STRING && defined(GTEST_OS_LINUX)
 #define GTEST_HAS_DEATH_TEST
@@ -284,13 +330,11 @@
 // following the argument list:
 //
 //   Sprocket* AllocateSprocket() GTEST_MUST_USE_RESULT;
-#if defined(__GNUC__) \
-  && (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)) \
-  && !defined(COMPILER_ICC)
+#if defined(__GNUC__) && (GTEST_GCC_VER_ >= 30400) && !defined(COMPILER_ICC)
 #define GTEST_MUST_USE_RESULT __attribute__ ((warn_unused_result))
 #else
 #define GTEST_MUST_USE_RESULT
-#endif  // (__GNUC__ > 3 || __GNUC__ == 3 && __GNUC_MINOR__ >= 4)
+#endif  // __GNUC__ && (GTEST_GCC_VER_ >= 30400) && !COMPILER_ICC
 
 namespace testing {
 

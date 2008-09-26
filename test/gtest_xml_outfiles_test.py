@@ -122,9 +122,9 @@ class GTestXMLOutFilesTest(gtest_xml_test_utils.GTestXMLTestCase):
       actual = minidom.parse(output_file1)
     else:
       actual = minidom.parse(output_file2)
-    self._NormalizeXml(actual.documentElement)
-    self._AssertEquivalentElements(expected.documentElement,
-                                   actual.documentElement)
+    self.NormalizeXml(actual.documentElement)
+    self.AssertEquivalentNodes(expected.documentElement,
+                               actual.documentElement)
     expected.unlink()
     actual.unlink()
 

@@ -71,6 +71,8 @@ struct AssertTypeEq<T, T> {
 // GetTypeName<T>() returns a human-readable name of type T.
 template <typename T>
 String GetTypeName() {
+#if GTEST_HAS_RTTI
+
   const char* const name = typeid(T).name();
 #ifdef __GNUC__
   int status = 0;
@@ -83,6 +85,10 @@ String GetTypeName() {
 #else
   return name;
 #endif  // __GNUC__
+
+#else
+  return "<type>";
+#endif  // GTEST_HAS_RTTI
 }
 
 // A unique type used as the default value for the arguments of class

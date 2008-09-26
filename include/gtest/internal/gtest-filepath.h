@@ -60,8 +60,19 @@ class FilePath {
  public:
   FilePath() : pathname_("") { }
   FilePath(const FilePath& rhs) : pathname_(rhs.pathname_) { }
-  explicit FilePath(const char* pathname) : pathname_(pathname) { }
-  explicit FilePath(const String& pathname) : pathname_(pathname) { }
+
+  explicit FilePath(const char* pathname) : pathname_(pathname) {
+    Normalize();
+  }
+
+  explicit FilePath(const String& pathname) : pathname_(pathname) {
+    Normalize();
+  }
+
+  FilePath& operator=(const FilePath& rhs) {
+    Set(rhs);
+    return *this;
+  }
 
   void Set(const FilePath& rhs) {
     pathname_ = rhs.pathname_;
@@ -149,11 +160,30 @@ class FilePath {
   // This does NOT check that a directory (or file) actually exists.
   bool IsDirectory() const;
 
- private:
-  String pathname_;
+  // Returns true if pathname describes a root directory. (Windows has one
+  // root directory per disk drive.)
+  bool IsRootDirectory() const;
 
-  // Don't implement operator= because it is banned by the style guide.
-  FilePath& operator=(const FilePath& rhs);
+ private:
+  // Replaces multiple consecutive separators with a single separator.
+  // For example, "bar///foo" becomes "bar/foo". Does not eliminate other
+  // redundancies that might be in a pathname involving "." or "..".
+  //
+  // A pathname with multiple consecutive separators may occur either through
+  // user error or as a result of some scripts or APIs that generate a pathname
+  // with a trailing separator. On other platforms the same API or script
+  // may NOT generate a pathname with a trailing "/". Then elsewhere that
+  // pathname may have another "/" and pathname components added to it,
+  // without checking for the separator already being there.
+  // The script language and operating system may allow paths like "foo//bar"
+  // but some of the functions in FilePath will not handle that correctly. In
+  // particular, RemoveTrailingPathSeparator() only removes one separator, and
+  // it is called in CreateDirectoriesRecursively() assuming that it will change
+  // a pathname from directory syntax (trailing separator) to filename syntax.
+
+  void Normalize();
+
+  String pathname_;
 };  // class FilePath
 
 }  // namespace internal
