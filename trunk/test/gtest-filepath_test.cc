@@ -123,8 +123,6 @@ TEST(IsEmptyTest, ReturnsFalseForNonEmptyPath) {
   EXPECT_FALSE(FilePath("a\\b\\").IsEmpty());
 }
 
-// FilePath's functions used by UnitTestOptions::GetOutputFile.
-
 // RemoveDirectoryName "" -> ""
 TEST(RemoveDirectoryNameTest, WhenEmptyName) {
   EXPECT_STREQ("", FilePath("").RemoveDirectoryName().c_str());
@@ -257,6 +255,110 @@ TEST(RemoveTrailingPathSeparatorTest, ShouldReturnUnmodified) {
       FilePath("foo" PATH_SEP "bar").RemoveTrailingPathSeparator().c_str());
 }
 
+TEST(DirectoryTest, RootDirectoryExists) {
+#ifdef GTEST_OS_WINDOWS  // We are on Windows.
+  char current_drive[_MAX_PATH];
+  current_drive[0] = _getdrive() + 'A' - 1;
+  current_drive[1] = ':';
+  current_drive[2] = '\\';
+  current_drive[3] = '\0';
+  EXPECT_TRUE(FilePath(current_drive).DirectoryExists());
+#else
+  EXPECT_TRUE(FilePath("/").DirectoryExists());
+#endif  // GTEST_OS_WINDOWS
+}
+
+#ifdef GTEST_OS_WINDOWS
+TEST(DirectoryTest, RootOfWrongDriveDoesNotExists) {
+  const int saved_drive_ = _getdrive();
+  // Find a drive that doesn't exist. Start with 'Z' to avoid common ones.
+  for (char drive = 'Z'; drive >= 'A'; drive--)
+    if (_chdrive(drive - 'A' + 1) == -1) {
+      char non_drive[_MAX_PATH];
+      non_drive[0] = drive;
+      non_drive[1] = ':';
+      non_drive[2] = '\\';
+      non_drive[3] = '\0';
+      EXPECT_FALSE(FilePath(non_drive).DirectoryExists());
+      break;
+    }
+  _chdrive(saved_drive_);
+}
+#endif // GTEST_OS_WINDOWS
+
+TEST(DirectoryTest, EmptyPathDirectoryDoesNotExist) {
+  EXPECT_FALSE(FilePath("").DirectoryExists());
+}
+
+TEST(DirectoryTest, CurrentDirectoryExists) {
+#ifdef GTEST_OS_WINDOWS  // We are on Windows.
+#ifndef _WIN32_CE  // Windows CE doesn't have a current directory.
+  EXPECT_TRUE(FilePath(".").DirectoryExists());
+  EXPECT_TRUE(FilePath(".\\").DirectoryExists());
+#endif  // _WIN32_CE
+#else
+  EXPECT_TRUE(FilePath(".").DirectoryExists());
+  EXPECT_TRUE(FilePath("./").DirectoryExists());
+#endif  // GTEST_OS_WINDOWS
+}
+
+TEST(NormalizeTest, NullStringsEqualEmptyDirectory) {
+  EXPECT_STREQ("", FilePath(NULL).c_str());
+  EXPECT_STREQ("", FilePath(String(NULL)).c_str());
+}
+
+// "foo/bar" == foo//bar" == "foo///bar"
+TEST(NormalizeTest, MultipleConsecutiveSepaparatorsInMidstring) {
+  EXPECT_STREQ("foo" PATH_SEP "bar",
+    FilePath("foo" PATH_SEP "bar").c_str());
+  EXPECT_STREQ("foo" PATH_SEP "bar",
+    FilePath("foo" PATH_SEP PATH_SEP "bar").c_str());
+  EXPECT_STREQ("foo" PATH_SEP "bar",
+    FilePath("foo" PATH_SEP PATH_SEP PATH_SEP "bar").c_str());
+}
+
+// "/bar" == //bar" == "///bar"
+TEST(NormalizeTest, MultipleConsecutiveSepaparatorsAtStringStart) {
+  EXPECT_STREQ(PATH_SEP "bar",
+    FilePath(PATH_SEP "bar").c_str());
+  EXPECT_STREQ(PATH_SEP "bar",
+    FilePath(PATH_SEP PATH_SEP "bar").c_str());
+  EXPECT_STREQ(PATH_SEP "bar",
+    FilePath(PATH_SEP PATH_SEP PATH_SEP "bar").c_str());
+}
+
+// "foo/" == foo//" == "foo///"
+TEST(NormalizeTest, MultipleConsecutiveSepaparatorsAtStringEnd) {
+  EXPECT_STREQ("foo" PATH_SEP,
+    FilePath("foo" PATH_SEP).c_str());
+  EXPECT_STREQ("foo" PATH_SEP,
+    FilePath("foo" PATH_SEP PATH_SEP).c_str());
+  EXPECT_STREQ("foo" PATH_SEP,
+    FilePath("foo" PATH_SEP PATH_SEP PATH_SEP).c_str());
+}
+
+TEST(AssignmentOperatorTest, DefaultAssignedToNonDefault) {
+  FilePath default_path;
+  FilePath non_default_path("path");
+  non_default_path = default_path;
+  EXPECT_STREQ("", non_default_path.c_str());
+  EXPECT_STREQ("", default_path.c_str());  // RHS var is unchanged.
+}
+
+TEST(AssignmentOperatorTest, NonDefaultAssignedToDefault) {
+  FilePath non_default_path("path");
+  FilePath default_path;
+  default_path = non_default_path;
+  EXPECT_STREQ("path", default_path.c_str());
+  EXPECT_STREQ("path", non_default_path.c_str());  // RHS var is unchanged.
+}
+
+TEST(AssignmentOperatorTest, ConstAssignedToNonConst) {
+  const FilePath const_default_path("const_path");
+  FilePath non_default_path("path");
+  non_default_path = const_default_path;
+  EXPECT_STREQ("const_path", non_default_path.c_str());
+}
 
 class DirectoryCreationTest : public Test {
  protected:

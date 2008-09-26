@@ -54,14 +54,20 @@ EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
   </testsuite>
   <testsuite name="FailedTest" tests="1" failures="1" disabled="0" errors="0" time="*">
     <testcase name="Fails" status="run" time="*" classname="FailedTest">
-      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Value of: 2&#x0A;Expected: 1" type=""/>
+      <failure message="Value of: 2&#x0A;Expected: 1" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
+Value of: 2
+Expected: 1]]></failure>
     </testcase>
   </testsuite>
   <testsuite name="MixedResultTest" tests="3" failures="1" disabled="1" errors="0" time="*">
     <testcase name="Succeeds" status="run" time="*" classname="MixedResultTest"/>
     <testcase name="Fails" status="run" time="*" classname="MixedResultTest">
-      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Value of: 2&#x0A;Expected: 1" type=""/>
-      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Value of: 3&#x0A;Expected: 2" type=""/>
+      <failure message="Value of: 2&#x0A;Expected: 1" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
+Value of: 2
+Expected: 1]]></failure>
+      <failure message="Value of: 3&#x0A;Expected: 2" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
+Value of: 3
+Expected: 2]]></failure>
     </testcase>
     <testcase name="DISABLED_test" status="notrun" time="*" classname="MixedResultTest"/>
   </testsuite>
@@ -160,14 +166,14 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
 
     expected = minidom.parseString(expected_xml)
     actual   = minidom.parse(xml_path)
-    self._NormalizeXml(actual.documentElement)
-    self._AssertEquivalentElements(expected.documentElement,
-                                   actual.documentElement)
+    self.NormalizeXml(actual.documentElement)
+    self.AssertEquivalentNodes(expected.documentElement,
+                               actual.documentElement)
     expected.unlink()
     actual  .unlink()
 
 
 
 if __name__ == '__main__':
-  os.environ['GTEST_STACK_TRACE_DEPTH'] = '0'
+  os.environ['GTEST_STACK_TRACE_DEPTH'] = '1'
   gtest_test_utils.Main()

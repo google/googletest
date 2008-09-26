@@ -55,6 +55,7 @@ class TestPartResult {
       : type_(type),
         file_name_(file_name),
         line_number_(line_number),
+        summary_(ExtractSummary(message)),
         message_(message) {
   }
 
@@ -68,6 +69,9 @@ class TestPartResult {
   // Gets the line in the source file where the test part took place,
   // or -1 if it's unknown.
   int line_number() const { return line_number_; }
+
+  // Gets the summary of the failure message.
+  const char* summary() const { return summary_.c_str(); }
 
   // Gets the message associated with the test part.
   const char* message() const { return message_.c_str(); }
@@ -86,12 +90,17 @@ class TestPartResult {
  private:
   TestPartResultType type_;
 
+  // Gets the summary of the failure message by omitting the stack
+  // trace in it.
+  static internal::String ExtractSummary(const char* message);
+
   // The name of the source file where the test part took place, or
   // NULL if the source file is unknown.
   internal::String file_name_;
   // The line in the source file where the test part took place, or -1
   // if the line number is unknown.
   int line_number_;
+  internal::String summary_;  // The test failure summary.
   internal::String message_;  // The test failure message.
 };
 

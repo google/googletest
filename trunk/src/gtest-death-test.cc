@@ -416,6 +416,7 @@ bool ForkingDeathTest::Passed(bool status_ok) {
                << "            " << ExitSummary(status_) << "\n";
       }
       break;
+    case IN_PROGRESS:
     default:
       GTEST_LOG(FATAL,
                 "DeathTest::Passed somehow called before conclusion of test");

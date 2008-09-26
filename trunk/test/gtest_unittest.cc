@@ -58,10 +58,12 @@
 
 namespace testing {
 namespace internal {
+const char* FormatTimeInMillisAsSeconds(TimeInMillis ms);
 bool ParseInt32Flag(const char* str, const char* flag, Int32* value);
 }  // namespace internal
 }  // namespace testing
 
+using testing::internal::FormatTimeInMillisAsSeconds;
 using testing::internal::ParseInt32Flag;
 
 namespace testing {
@@ -117,6 +119,28 @@ using testing::internal::WideStringToUtf8;
 
 // This line tests that we can define tests in an unnamed namespace.
 namespace {
+
+// Tests FormatTimeInMillisAsSeconds().
+
+TEST(FormatTimeInMillisAsSecondsTest, FormatsZero) {
+  EXPECT_STREQ("0", FormatTimeInMillisAsSeconds(0));
+}
+
+TEST(FormatTimeInMillisAsSecondsTest, FormatsPositiveNumber) {
+  EXPECT_STREQ("0.003", FormatTimeInMillisAsSeconds(3));
+  EXPECT_STREQ("0.01", FormatTimeInMillisAsSeconds(10));
+  EXPECT_STREQ("0.2", FormatTimeInMillisAsSeconds(200));
+  EXPECT_STREQ("1.2", FormatTimeInMillisAsSeconds(1200));
+  EXPECT_STREQ("3", FormatTimeInMillisAsSeconds(3000));
+}
+
+TEST(FormatTimeInMillisAsSecondsTest, FormatsNegativeNumber) {
+  EXPECT_STREQ("-0.003", FormatTimeInMillisAsSeconds(-3));
+  EXPECT_STREQ("-0.01", FormatTimeInMillisAsSeconds(-10));
+  EXPECT_STREQ("-0.2", FormatTimeInMillisAsSeconds(-200));
+  EXPECT_STREQ("-1.2", FormatTimeInMillisAsSeconds(-1200));
+  EXPECT_STREQ("-3", FormatTimeInMillisAsSeconds(-3000));
+}
 
 #ifndef __SYMBIAN32__
 // NULL testing does not work with Symbian compilers.

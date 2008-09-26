@@ -134,6 +134,10 @@ static const char kUniversalFilter[] = "*";
 // The default output file for XML output.
 static const char kDefaultOutputFile[] = "test_detail.xml";
 
+// The text used in failure messages to indicate the start of the
+// stack trace.
+static const char kStackTraceMarker[] = "\nStack trace:\n";
+
 GTEST_DEFINE_bool(
     break_on_failure,
     internal::BoolFromGTestEnv("break_on_failure", false),
@@ -199,6 +203,14 @@ GTEST_DEFINE_bool(
     show_internal_stack_frames, false,
     "True iff " GTEST_NAME " should include internal stack frames when "
     "printing test failure stack traces.");
+
+// Gets the summary of the failure message by omitting the stack trace
+// in it.
+internal::String TestPartResult::ExtractSummary(const char* message) {
+  const char* const stack_trace = strstr(message, kStackTraceMarker);
+  return stack_trace == NULL ? internal::String(message) :
+      internal::String(message, stack_trace - message);
+}
 
 namespace internal {
 
@@ -2923,12 +2935,27 @@ internal::String XmlUnitTestResultPrinter::EscapeXml(const char* str,
 // <testsuite name="AllTests">         <-- corresponds to a UnitTest object
 //   <testsuite name="testcase-name">  <-- corresponds to a TestCase object
 //     <testcase name="test-name">     <-- corresponds to a TestInfo object
-//       <failure message="..." />
-//       <failure message="..." />     <-- individual assertion failures
-//       <failure message="..." />
+//       <failure message="...">...</failure>
+//       <failure message="...">...</failure>
+//       <failure message="...">...</failure>
+//                                     <-- individual assertion failures
 //     </testcase>
 //   </testsuite>
 // </testsuite>
+
+namespace internal {
+
+// Formats the given time in milliseconds as seconds.  The returned
+// C-string is owned by this function and cannot be released by the
+// caller.  Calling the function again invalidates the previous
+// result.
+const char* FormatTimeInMillisAsSeconds(TimeInMillis ms) {
+  static String str;
+  str = (Message() << (ms/1000.0)).GetString();
+  return str.c_str();
+}
+
+}  // namespace internal
 
 // Prints an XML representation of a TestInfo object.
 // TODO(wan): There is also value in printing properties with the plain printer.
@@ -2942,7 +2969,7 @@ void XmlUnitTestResultPrinter::PrintXmlTestInfo(FILE* out,
           "classname=\"%s\"%s",
           EscapeXmlAttribute(test_info->name()).c_str(),
           test_info->should_run() ? "run" : "notrun",
-          internal::StreamableToString(result->elapsed_time()).c_str(),
+          internal::FormatTimeInMillisAsSeconds(result->elapsed_time()),
           EscapeXmlAttribute(test_case_name).c_str(),
           TestPropertiesAsXmlAttributes(result).c_str());
 
@@ -2958,8 +2985,9 @@ void XmlUnitTestResultPrinter::PrintXmlTestInfo(FILE* out,
       if (++failures == 1)
         fprintf(out, ">\n");
       fprintf(out,
-              "      <failure message=\"%s\" type=\"\"/>\n",
-              EscapeXmlAttribute(message.c_str()).c_str());
+              "      <failure message=\"%s\" type=\"\"><![CDATA[%s]]>"
+              "</failure>\n",
+              EscapeXmlAttribute(part.summary()).c_str(), message.c_str());
     }
   }
 
@@ -2981,7 +3009,7 @@ void XmlUnitTestResultPrinter::PrintXmlTestCase(FILE* out,
           test_case->disabled_test_count());
   fprintf(out,
           "errors=\"0\" time=\"%s\">\n",
-          internal::StreamableToString(test_case->elapsed_time()).c_str());
+          internal::FormatTimeInMillisAsSeconds(test_case->elapsed_time()));
   for (const internal::ListNode<TestInfo*>* info_node =
          test_case->test_info_list().Head();
        info_node != NULL;
@@ -3002,7 +3030,7 @@ void XmlUnitTestResultPrinter::PrintXmlUnitTest(FILE* out,
           impl->total_test_count(),
           impl->failed_test_count(),
           impl->disabled_test_count(),
-          internal::StreamableToString(impl->elapsed_time()).c_str());
+          internal::FormatTimeInMillisAsSeconds(impl->elapsed_time()));
   fprintf(out, "name=\"AllTests\">\n");
   for (const internal::ListNode<TestCase*>* case_node =
        impl->test_cases()->Head();
@@ -3153,7 +3181,7 @@ void UnitTest::AddTestPartResult(TestPartResultType result_type,
   }
 
   if (os_stack_trace.c_str() != NULL && !os_stack_trace.empty()) {
-    msg << "\nStack trace:\n" << os_stack_trace;
+    msg << kStackTraceMarker << os_stack_trace;
   }
 
   const TestPartResult result =

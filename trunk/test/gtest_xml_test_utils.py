@@ -47,27 +47,35 @@ class GTestXMLTestCase(unittest.TestCase):
   """
 
 
-  def _AssertEquivalentElements(self, expected_element, actual_element):
+  def AssertEquivalentNodes(self, expected_node, actual_node):
     """
-    Asserts that actual_element (a DOM element object) is equivalent to
-    expected_element (another DOM element object), in that it meets all
-    of the following conditions:
-    *  It has the same tag name as expected_element.
-    *  It has the same set of attributes as expected_element, each with
-       the same value as the corresponding attribute of expected_element.
-       An exception is any attribute named "time", which need only be
-       convertible to a long integer.
-    *  Each child element is equivalent to a child element of
-       expected_element.  Child elements are matched according to an
-       attribute that varies depending on the element; "name" for
-       <testsuite> and <testcase> elements, "message" for <failure>
-       elements.  This matching is necessary because child elements are
-       not guaranteed to be ordered in any particular way.
-    """
-    self.assertEquals(expected_element.tagName, actual_element.tagName)
+    Asserts that actual_node (a DOM node object) is equivalent to
+    expected_node (another DOM node object), in that either both of
+    them are CDATA nodes and have the same value, or both are DOM
+    elements and actual_node meets all of the following conditions:
 
-    expected_attributes = expected_element.attributes
-    actual_attributes   = actual_element  .attributes
+    *  It has the same tag name as expected_node.
+    *  It has the same set of attributes as expected_node, each with
+       the same value as the corresponding attribute of expected_node.
+       An exception is any attribute named "time", which needs only be
+       convertible to a floating-point number.
+    *  It has an equivalent set of child nodes (including elements and
+       CDATA sections) as expected_node.  Note that we ignore the
+       order of the children as they are not guaranteed to be in any
+       particular order.
+    """
+
+    if expected_node.nodeType == Node.CDATA_SECTION_NODE:
+      self.assertEquals(Node.CDATA_SECTION_NODE, actual_node.nodeType)
+      self.assertEquals(expected_node.nodeValue, actual_node.nodeValue)
+      return
+
+    self.assertEquals(Node.ELEMENT_NODE, actual_node.nodeType)
+    self.assertEquals(Node.ELEMENT_NODE, expected_node.nodeType)
+    self.assertEquals(expected_node.tagName, actual_node.tagName)
+
+    expected_attributes = expected_node.attributes
+    actual_attributes   = actual_node  .attributes
     self.assertEquals(expected_attributes.length, actual_attributes.length)
     for i in range(expected_attributes.length):
       expected_attr = expected_attributes.item(i)
@@ -75,13 +83,13 @@ class GTestXMLTestCase(unittest.TestCase):
       self.assert_(actual_attr is not None)
       self.assertEquals(expected_attr.value, actual_attr.value)
 
-    expected_child = self._GetChildElements(expected_element)
-    actual_child   = self._GetChildElements(actual_element)
-    self.assertEquals(len(expected_child), len(actual_child))
-    for child_id, element in expected_child.iteritems():
-      self.assert_(child_id in actual_child,
-                   '<%s> is not in <%s>' % (child_id, actual_child))
-      self._AssertEquivalentElements(element, actual_child[child_id])
+    expected_children = self._GetChildren(expected_node)
+    actual_children = self._GetChildren(actual_node)
+    self.assertEquals(len(expected_children), len(actual_children))
+    for child_id, child in expected_children.iteritems():
+      self.assert_(child_id in actual_children,
+                   '<%s> is not in <%s>' % (child_id, actual_children))
+      self.AssertEquivalentNodes(child, actual_children[child_id])
 
   identifying_attribute = {
     "testsuite": "name",
@@ -89,18 +97,20 @@ class GTestXMLTestCase(unittest.TestCase):
     "failure":   "message",
     }
 
-  def _GetChildElements(self, element):
+  def _GetChildren(self, element):
     """
-    Fetches all of the Element type child nodes of element, a DOM
-    Element object.  Returns them as the values of a dictionary keyed by
-    the value of one of the node's attributes.  For <testsuite> and
-    <testcase> elements, the identifying attribute is "name"; for
-    <failure> elements, it is "message".  An exception is raised if
-    any element other than the above three is encountered, if two
-    child elements with the same identifying attributes are encountered,
-    or if any other type of node is encountered, other than Text nodes
-    containing only whitespace.
+    Fetches all of the child nodes of element, a DOM Element object.
+    Returns them as the values of a dictionary keyed by the IDs of the
+    children.  For <testsuite> and <testcase> elements, the ID is the
+    value of their "name" attribute; for <failure> elements, it is the
+    value of the "message" attribute; for CDATA section node, it is
+    "detail".  An exception is raised if any element other than the
+    above four is encountered, if two child elements with the same
+    identifying attributes are encountered, or if any other type of
+    node is encountered, other than Text nodes containing only
+    whitespace.
     """
+
     children = {}
     for child in element.childNodes:
       if child.nodeType == Node.ELEMENT_NODE:
@@ -111,11 +121,14 @@ class GTestXMLTestCase(unittest.TestCase):
         children[childID] = child
       elif child.nodeType == Node.TEXT_NODE:
         self.assert_(child.nodeValue.isspace())
+      elif child.nodeType == Node.CDATA_SECTION_NODE:
+        self.assert_("detail" not in children)
+        children["detail"] = child
       else:
         self.fail("Encountered unexpected node type %d" % child.nodeType)
     return children
 
-  def _NormalizeXml(self, element):
+  def NormalizeXml(self, element):
     """
     Normalizes Google Test's XML output to eliminate references to transient
     information that may change from run to run.
@@ -126,13 +139,20 @@ class GTestXMLTestCase(unittest.TestCase):
     *  The line number reported in the first line of the "message"
        attribute of <failure> elements is replaced with a single asterisk.
     *  The directory names in file paths are removed.
+    *  The stack traces are removed.
     """
+
     if element.tagName in ("testsuite", "testcase"):
       time = element.getAttributeNode("time")
-      time.value = re.sub(r"^\d+$", "*", time.value)
+      time.value = re.sub(r"^\d+(\.\d+)?$", "*", time.value)
     elif element.tagName == "failure":
-      message = element.getAttributeNode("message")
-      message.value = re.sub(r"^.*/(.*:)\d+\n", "\\1*\n", message.value)
+      for child in element.childNodes:
+        if child.nodeType == Node.CDATA_SECTION_NODE:
+          # Removes the source line number.
+          cdata = re.sub(r"^.*/(.*:)\d+\n", "\\1*\n", child.nodeValue)
+          # Removes the actual stack trace.
+          child.nodeValue = re.sub(r"\nStack trace:\n(.|\n)*",
+                                   "", cdata)
     for child in element.childNodes:
       if child.nodeType == Node.ELEMENT_NODE:
-        self._NormalizeXml(child)
+        self.NormalizeXml(child)
