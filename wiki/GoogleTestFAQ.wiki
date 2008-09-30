@@ -32,6 +32,25 @@ list can help you decide whether it is for you too.
   * `SCOPED_TRACE` helps you understand the context of an assertion failure when it comes from inside a sub-routine or loop.
   * You can decide which tests to run using name patterns.  This saves time when you want to quickly reproduce a test failure.
 
+=== Can I use Google Test on MinGW? ===
+
+We haven't tested this ourselves, but Per Abrahamsen reported that he
+was able to compile and install Google Test successfully when using
+MinGW from Cygwin.  You'll need to configure it with:
+
+{{{PATH/TO/configure CC="gcc -mno-cygwin" CXX="g++ -mno-cygwin"}}}
+
+You should be able to replace the `-mno-cygwin` option with direct links
+to the real MinGW binaries, but we haven't tried that.
+
+Caveats:
+
+  * There are many warnings when compiling.
+  * `make check` will produce some errors as not all tests for Google Test itself are compatible with MinGW.
+
+Please contact `googletestframework@googlegroups.com` if you are
+interested in improving the support for MinGW.
+
 === Does Google Test support running tests in parallel? ===
 
 Test runners tend to be tightly coupled with the build/test
