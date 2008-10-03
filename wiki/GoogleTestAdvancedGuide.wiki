@@ -1050,17 +1050,24 @@ guaranteed to pull it in).  In particular, you can use
 || `EXPECT_FATAL_FAILURE(`_statement, substring_`);` ||
 
 to assert that _statement_ generates a fatal (e.g. `ASSERT_*`)
-failure whose message contains the given _substring_, or use
+failure in the current thread whose message contains the given 
+_substring_, or use
 
 || `EXPECT_NONFATAL_FAILURE(`_statement, substring_`);` ||
 
 if you are expecting a non-fatal (e.g. `EXPECT_*`) failure.
+
+Only failures in the current thread are checked to determine the result
+of this type of expectations. If _statement_ creates new threads, failures
+in these threads are also ignored.
 
 For technical reasons, there are some caveats:
 
   # You cannot stream a failure message to either macro.
   # _statement_ in `EXPECT_FATAL_FAILURE()` cannot reference local non-static variables or non-static members of `this` object.
   # _statement_ in `EXPECT_FATAL_FAILURE()` cannot return a value.
+
+_Note:_ The current version of Google Test only supports single threaded usage.
 
 ==  Getting the Current Test's Name  ==
 
