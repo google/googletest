@@ -153,17 +153,52 @@ Studio project.
 Open the gtest.xcodeproj in the xcode/ folder using Xcode. Build the "gtest"
 target. The universal binary framework will end up in your selected build
 directory (selected in the Xcode "Preferences..." -> "Building" pane and
-defaults to xcode/build). 
+defaults to xcode/build). Alternatively, at the command line, enter:
 
-Alternatively, run "xcodebuild" from the command line in Terminal.app. This
-will build the "Release" configuration of the gtest.framework, but you can
+ $ xcodebuild
+ 
+This will build the "Release" configuration of the gtest.framework, but you can
 select the "Debug" configuration with a command line option. See the
-xcodebuild man page for more information.
+"xcodebuild" man page for more information.
 
-To use the gtest.framework, add the framework to your own project.
-Create a new executable target and add the framework to the "Link Binary With
-Libraries" build phase. Select "Edit Active Executable" from the "Project"
-menu. In the "Arguments" tab, add
+To test the gtest.framework in Xcode, change the active target to "Check" and
+then build. This target builds all of the tests and then runs them. Don't worry
+if you see some errors. Xcode reports all test failures (even the intentional
+ones) as errors. However, you should see a "Build succeeded" message at the end
+of the build log. To run all of the tests from the command line, enter:
+
+  $ xcodebuid -target Check
+
+It is also possible to build and execute individual tests within Xcode. Each
+test has its own Xcode "Target" and Xcode "Executable". To build any of the
+tests, change the active target and the active executable to the test of
+interest and then build and run.
+
+NOTE: many of the tests are executed from Python scripts. These tests are
+indicated by a trailing underscore "_" in the test name. These tests should not
+be executed directly. Instead a custom Xcode "Executable" was created to run the
+Python script from within Xcode. These custom executables do not have the
+trailing underscore in the name. For example, to run the gtest_color_test, set
+the active target to "gtest_color_test_" (with a trailing underscore). This
+target will build the gtest_color_test_, which should not be run directly.
+Then set the active executable to "gtest_color_test" (no trailing underscore).
+This executable will execute the gtest_color_test_ from within the
+gtest_color_test.py script).
+
+Individual tests can be built from the command line using:
+
+  $ xcodebuild -target <test_name>
+
+These tests can be executed from the command line by moving to the build
+directory and then (in bash)
+
+  $ export DYLD_FRAMEWORK_PATH=`pwd`
+  $ ./<test_name>  # (e.g. ./gtest_unittest or ./gtest_color_test.py)
+
+To use the gtest.framework for your own tests, first, add the framework to Xcode
+project. Next, create a new executable target and add the framework to the
+"Link Binary With Libraries" build phase. Select "Edit Active Executable" from
+the "Project" menu. In the "Arguments" tab, add
 
     "DYLD_FRAMEWORK_PATH" : "/real/framework/path"
 
