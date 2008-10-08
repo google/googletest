@@ -28,8 +28,11 @@ EXTRA_DIST += \
   xcode/Config/FrameworkTarget.xcconfig \
   xcode/Config/General.xcconfig \
   xcode/Config/ReleaseProject.xcconfig \
+  xcode/Config/TestTarget.xcconfig \
+  xcode/Config/InternalTestTarget.xcconfig \
   xcode/Resources/Info.plist \
   xcode/Scripts/versiongenerate.py \
+  xcode/Scripts/runtests.sh \
   xcode/gtest.xcodeproj/project.pbxproj
 
 # xcode sample files
@@ -225,7 +228,7 @@ test_gtest_typed_test_test_LDADD = lib/libgtest_main.la
 if HAVE_PYTHON
 check_SCRIPTS =
 
-# These two Python modules are used by multiple Pythong tests below.
+# These two Python modules are used by multiple Python tests below.
 check_SCRIPTS += test/gtest_test_utils.py \
                  test/gtest_xml_test_utils.py
 
