@@ -85,8 +85,8 @@ of this approach:
   # The `EXPECT_*` family of macros will continue even after a failure, allowing multiple failures in a `TEST` to be reported in a single run. This is a popular feature, as in C++ the edit-compile-test cycle is usually quite long and being able to fixing more than one thing at a time is a blessing.
   # If assertions are implemented using exceptions, a test may falsely ignore a failure if it's caught by user code:
 {{{
-   try { ... ASSERT_TRUE(...) ... }
-   catch (...) { ... }
+try { ... ASSERT_TRUE(...) ... }
+catch (...) { ... }
 }}}
 The above code will pass even if the `ASSERT_TRUE` throws.  While it's unlikely for someone to write this in a test, it's possible to run into this pattern when you write assertions in callbacks that are called by the code under test.
 
