@@ -112,6 +112,36 @@ TEST(StressTest, CanUseScopedTraceAndAssertionsInManyThreads) {
   // ManyAsserts() in many threads here.
 }
 
+TEST(NoFatalFailureTest, ExpectNoFatalFailureIgnoresFailuresInOtherThreads) {
+  // TODO(mheule@google.com): Test this works correctly when Google
+  // Test is made thread-safe.
+}
+
+TEST(NoFatalFailureTest, AssertNoFatalFailureIgnoresFailuresInOtherThreads) {
+  // TODO(mheule@google.com): Test this works correctly when Google
+  // Test is made thread-safe.
+}
+
+TEST(FatalFailureTest, ExpectFatalFailureIgnoresFailuresInOtherThreads) {
+  // TODO(mheule@google.com): Test this works correctly when Google
+  // Test is made thread-safe.
+}
+
+TEST(FatalFailureOnAllThreadsTest, ExpectFatalFailureOnAllThreads) {
+  // TODO(wan@google.com): Test this works correctly when Google Test
+  // is made thread-safe.
+}
+
+TEST(NonFatalFailureTest, ExpectNonFatalFailureIgnoresFailuresInOtherThreads) {
+  // TODO(mheule@google.com): Test this works correctly when Google
+  // Test is made thread-safe.
+}
+
+TEST(NonFatalFailureOnAllThreadsTest, ExpectNonFatalFailureOnAllThreads) {
+  // TODO(wan@google.com): Test this works correctly when Google Test
+  // is made thread-safe.
+}
+
 }  // namespace
 }  // namespace testing
 

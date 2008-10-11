@@ -64,8 +64,8 @@
 // will result in the token foo__LINE__, instead of foo followed by
 // the current line number.  For more details, see
 // http://www.parashift.com/c++-faq-lite/misc-technical-issues.html#faq-39.6
-#define GTEST_CONCAT_TOKEN(foo, bar) GTEST_CONCAT_TOKEN_IMPL(foo, bar)
-#define GTEST_CONCAT_TOKEN_IMPL(foo, bar) foo ## bar
+#define GTEST_CONCAT_TOKEN_(foo, bar) GTEST_CONCAT_TOKEN_IMPL_(foo, bar)
+#define GTEST_CONCAT_TOKEN_IMPL_(foo, bar) foo ## bar
 
 // Google Test defines the testing::Message class to allow construction of
 // test messages via the << operator.  The idea is that anything
@@ -121,6 +121,10 @@ class UnitTestImpl;                    // Opaque implementation of UnitTest
 template <typename E> class List;      // A generic list.
 template <typename E> class ListNode;  // A node in a generic list.
 
+// The text used in failure messages to indicate the start of the
+// stack trace.
+extern const char kStackTraceMarker[];
+
 // A secret type that Google Test users don't know about.  It has no
 // definition on purpose.  Therefore it's impossible to create a
 // Secret object, which is what we want.
@@ -151,11 +155,11 @@ char (&IsNullLiteralHelper(...))[2];  // NOLINT
 // The Nokia Symbian compiler tries to instantiate a copy constructor for
 // objects passed through ellipsis (...), failing for uncopyable objects.
 // Hence we define this to false (and lose support for NULL detection).
-#define GTEST_IS_NULL_LITERAL(x) false
-#else  // ! __SYMBIAN32__
-#define GTEST_IS_NULL_LITERAL(x) \
+#define GTEST_IS_NULL_LITERAL_(x) false
+#else  // ! GTEST_OS_SYMBIAN
+#define GTEST_IS_NULL_LITERAL_(x) \
     (sizeof(::testing::internal::IsNullLiteralHelper(x)) == 1)
-#endif  // __SYMBIAN32__
+#endif  // GTEST_OS_SYMBIAN
 
 // Appends the user-supplied message to the Google-Test-generated message.
 String AppendUserMessage(const String& gtest_msg,
@@ -175,10 +179,10 @@ class ScopedTrace {
   ~ScopedTrace();
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN(ScopedTrace);
-} GTEST_ATTRIBUTE_UNUSED;  // A ScopedTrace object does its job in its
-                           // c'tor and d'tor.  Therefore it doesn't
-                           // need to be used otherwise.
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(ScopedTrace);
+} GTEST_ATTRIBUTE_UNUSED_;  // A ScopedTrace object does its job in its
+                            // c'tor and d'tor.  Therefore it doesn't
+                            // need to be used otherwise.
 
 // Converts a streamable value to a String.  A NULL pointer is
 // converted to "(null)".  When the input value is a ::string,
@@ -192,7 +196,7 @@ String StreamableToString(const T& streamable);
 
 // Formats a value to be used in a failure message.
 
-#ifdef __SYMBIAN32__
+#ifdef GTEST_OS_SYMBIAN
 
 // These are needed as the Nokia Symbian Compiler cannot decide between
 // const T& and const T* in a function template. The Nokia compiler _can_
@@ -233,7 +237,7 @@ inline String FormatForFailureMessage(T* pointer) {
   return StreamableToString(static_cast<const void*>(pointer));
 }
 
-#endif  // __SYMBIAN32__
+#endif  // GTEST_OS_SYMBIAN
 
 // These overloaded versions handle narrow and wide characters.
 String FormatForFailureMessage(char ch);
@@ -244,7 +248,7 @@ String FormatForFailureMessage(wchar_t wchar);
 // rather than a pointer.  We do the same for wide strings.
 
 // This internal macro is used to avoid duplicated code.
-#define GTEST_FORMAT_IMPL(operand2_type, operand1_printer)\
+#define GTEST_FORMAT_IMPL_(operand2_type, operand1_printer)\
 inline String FormatForComparisonFailureMessage(\
     operand2_type::value_type* str, const operand2_type& /*operand2*/) {\
   return operand1_printer(str);\
@@ -255,20 +259,20 @@ inline String FormatForComparisonFailureMessage(\
 }
 
 #if GTEST_HAS_STD_STRING
-GTEST_FORMAT_IMPL(::std::string, String::ShowCStringQuoted)
+GTEST_FORMAT_IMPL_(::std::string, String::ShowCStringQuoted)
 #endif  // GTEST_HAS_STD_STRING
 #if GTEST_HAS_STD_WSTRING
-GTEST_FORMAT_IMPL(::std::wstring, String::ShowWideCStringQuoted)
+GTEST_FORMAT_IMPL_(::std::wstring, String::ShowWideCStringQuoted)
 #endif  // GTEST_HAS_STD_WSTRING
 
 #if GTEST_HAS_GLOBAL_STRING
-GTEST_FORMAT_IMPL(::string, String::ShowCStringQuoted)
+GTEST_FORMAT_IMPL_(::string, String::ShowCStringQuoted)
 #endif  // GTEST_HAS_GLOBAL_STRING
 #if GTEST_HAS_GLOBAL_WSTRING
-GTEST_FORMAT_IMPL(::wstring, String::ShowWideCStringQuoted)
+GTEST_FORMAT_IMPL_(::wstring, String::ShowWideCStringQuoted)
 #endif  // GTEST_HAS_GLOBAL_WSTRING
 
-#undef GTEST_FORMAT_IMPL
+#undef GTEST_FORMAT_IMPL_
 
 // Constructs and returns the message for an equality assertion
 // (e.g. ASSERT_EQ, EXPECT_STREQ, etc) failure.
@@ -503,7 +507,7 @@ class TestFactoryBase {
   TestFactoryBase() {}
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN(TestFactoryBase);
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(TestFactoryBase);
 };
 
 // This class provides implementation of TeastFactoryBase interface.
@@ -704,22 +708,22 @@ class TypeParameterizedTestCase<Fixture, Templates0, Types> {
 }  // namespace internal
 }  // namespace testing
 
-#define GTEST_MESSAGE(message, result_type) \
+#define GTEST_MESSAGE_(message, result_type) \
   ::testing::internal::AssertHelper(result_type, __FILE__, __LINE__, message) \
     = ::testing::Message()
 
-#define GTEST_FATAL_FAILURE(message) \
-  return GTEST_MESSAGE(message, ::testing::TPRT_FATAL_FAILURE)
+#define GTEST_FATAL_FAILURE_(message) \
+  return GTEST_MESSAGE_(message, ::testing::TPRT_FATAL_FAILURE)
 
-#define GTEST_NONFATAL_FAILURE(message) \
-  GTEST_MESSAGE(message, ::testing::TPRT_NONFATAL_FAILURE)
+#define GTEST_NONFATAL_FAILURE_(message) \
+  GTEST_MESSAGE_(message, ::testing::TPRT_NONFATAL_FAILURE)
 
-#define GTEST_SUCCESS(message) \
-  GTEST_MESSAGE(message, ::testing::TPRT_SUCCESS)
+#define GTEST_SUCCESS_(message) \
+  GTEST_MESSAGE_(message, ::testing::TPRT_SUCCESS)
 
 
-#define GTEST_TEST_THROW(statement, expected_exception, fail) \
-  GTEST_AMBIGUOUS_ELSE_BLOCKER \
+#define GTEST_TEST_THROW_(statement, expected_exception, fail) \
+  GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (const char* gtest_msg = "") { \
     bool gtest_caught_expected = false; \
     try { \
@@ -732,19 +736,19 @@ class TypeParameterizedTestCase<Fixture, Templates0, Types> {
       gtest_msg = "Expected: " #statement " throws an exception of type " \
                   #expected_exception ".\n  Actual: it throws a different " \
                   "type."; \
-      goto GTEST_CONCAT_TOKEN(gtest_label_testthrow_, __LINE__); \
+      goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
     } \
     if (!gtest_caught_expected) { \
       gtest_msg = "Expected: " #statement " throws an exception of type " \
                   #expected_exception ".\n  Actual: it throws nothing."; \
-      goto GTEST_CONCAT_TOKEN(gtest_label_testthrow_, __LINE__); \
+      goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
     } \
   } else \
-    GTEST_CONCAT_TOKEN(gtest_label_testthrow_, __LINE__): \
+    GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__): \
       fail(gtest_msg)
 
-#define GTEST_TEST_NO_THROW(statement, fail) \
-  GTEST_AMBIGUOUS_ELSE_BLOCKER \
+#define GTEST_TEST_NO_THROW_(statement, fail) \
+  GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (const char* gtest_msg = "") { \
     try { \
       statement; \
@@ -752,14 +756,14 @@ class TypeParameterizedTestCase<Fixture, Templates0, Types> {
     catch (...) { \
       gtest_msg = "Expected: " #statement " doesn't throw an exception.\n" \
                   "  Actual: it throws."; \
-      goto GTEST_CONCAT_TOKEN(gtest_label_testnothrow_, __LINE__); \
+      goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__); \
     } \
   } else \
-    GTEST_CONCAT_TOKEN(gtest_label_testnothrow_, __LINE__): \
+    GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__): \
       fail(gtest_msg)
 
-#define GTEST_TEST_ANY_THROW(statement, fail) \
-  GTEST_AMBIGUOUS_ELSE_BLOCKER \
+#define GTEST_TEST_ANY_THROW_(statement, fail) \
+  GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (const char* gtest_msg = "") { \
     bool gtest_caught_any = false; \
     try { \
@@ -771,33 +775,48 @@ class TypeParameterizedTestCase<Fixture, Templates0, Types> {
     if (!gtest_caught_any) { \
       gtest_msg = "Expected: " #statement " throws an exception.\n" \
                   "  Actual: it doesn't."; \
-      goto GTEST_CONCAT_TOKEN(gtest_label_testanythrow_, __LINE__); \
+      goto GTEST_CONCAT_TOKEN_(gtest_label_testanythrow_, __LINE__); \
     } \
   } else \
-    GTEST_CONCAT_TOKEN(gtest_label_testanythrow_, __LINE__): \
+    GTEST_CONCAT_TOKEN_(gtest_label_testanythrow_, __LINE__): \
       fail(gtest_msg)
 
 
-#define GTEST_TEST_BOOLEAN(boolexpr, booltext, actual, expected, fail) \
-  GTEST_AMBIGUOUS_ELSE_BLOCKER \
+#define GTEST_TEST_BOOLEAN_(boolexpr, booltext, actual, expected, fail) \
+  GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (boolexpr) \
     ; \
   else \
     fail("Value of: " booltext "\n  Actual: " #actual "\nExpected: " #expected)
+
+#define GTEST_TEST_NO_FATAL_FAILURE_(statement, fail) \
+  GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
+  if (const char* gtest_msg = "") { \
+    ::testing::internal::HasNewFatalFailureHelper gtest_fatal_failure_checker; \
+    { statement; } \
+    if (gtest_fatal_failure_checker.has_new_fatal_failure()) { \
+      gtest_msg = "Expected: " #statement " doesn't generate new fatal " \
+                  "failures in the current thread.\n" \
+                  "  Actual: it does."; \
+      goto GTEST_CONCAT_TOKEN_(gtest_label_testnofatal_, __LINE__); \
+    } \
+  } else \
+    GTEST_CONCAT_TOKEN_(gtest_label_testnofatal_, __LINE__): \
+      fail(gtest_msg)
 
 // Expands to the name of the class that implements the given test.
 #define GTEST_TEST_CLASS_NAME_(test_case_name, test_name) \
   test_case_name##_##test_name##_Test
 
 // Helper macro for defining tests.
-#define GTEST_TEST(test_case_name, test_name, parent_class)\
+#define GTEST_TEST_(test_case_name, test_name, parent_class)\
 class GTEST_TEST_CLASS_NAME_(test_case_name, test_name) : public parent_class {\
  public:\
   GTEST_TEST_CLASS_NAME_(test_case_name, test_name)() {}\
  private:\
   virtual void TestBody();\
   static ::testing::TestInfo* const test_info_;\
-  GTEST_DISALLOW_COPY_AND_ASSIGN(\
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(\
       GTEST_TEST_CLASS_NAME_(test_case_name, test_name));\
 };\
 \

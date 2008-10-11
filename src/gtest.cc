@@ -60,11 +60,16 @@
 #include <string>
 #include <vector>
 
+#elif defined(GTEST_OS_SYMBIAN)
+// No autoconf on Symbian
+#define GTEST_HAS_GETTIMEOFDAY
+#include <sys/time.h>  // NOLINT
+
 #elif defined(_WIN32_WCE)  // We are on Windows CE.
 
 #include <windows.h>  // NOLINT
 
-#elif defined(_WIN32)  // We are on Windows proper.
+#elif defined(GTEST_OS_WINDOWS)  // We are on Windows proper.
 
 #include <io.h>  // NOLINT
 #include <sys/timeb.h>  // NOLINT
@@ -134,22 +139,26 @@ static const char kUniversalFilter[] = "*";
 // The default output file for XML output.
 static const char kDefaultOutputFile[] = "test_detail.xml";
 
+namespace internal {
+
 // The text used in failure messages to indicate the start of the
 // stack trace.
-static const char kStackTraceMarker[] = "\nStack trace:\n";
+const char kStackTraceMarker[] = "\nStack trace:\n";
 
-GTEST_DEFINE_bool(
+}  // namespace internal
+
+GTEST_DEFINE_bool_(
     break_on_failure,
     internal::BoolFromGTestEnv("break_on_failure", false),
     "True iff a failed assertion should be a debugger break-point.");
 
-GTEST_DEFINE_bool(
+GTEST_DEFINE_bool_(
     catch_exceptions,
     internal::BoolFromGTestEnv("catch_exceptions", false),
     "True iff " GTEST_NAME
     " should catch exceptions and treat them as test failures.");
 
-GTEST_DEFINE_string(
+GTEST_DEFINE_string_(
     color,
     internal::StringFromGTestEnv("color", "auto"),
     "Whether to use colors in the output.  Valid values: yes, no, "
@@ -157,7 +166,7 @@ GTEST_DEFINE_string(
     "being sent to a terminal and the TERM environment variable "
     "is set to xterm or xterm-color.");
 
-GTEST_DEFINE_string(
+GTEST_DEFINE_string_(
     filter,
     internal::StringFromGTestEnv("filter", kUniversalFilter),
     "A colon-separated list of glob (not regex) patterns "
@@ -166,10 +175,10 @@ GTEST_DEFINE_string(
     "exclude).  A test is run if it matches one of the positive "
     "patterns and does not match any of the negative patterns.");
 
-GTEST_DEFINE_bool(list_tests, false,
-                  "List all tests without running them.");
+GTEST_DEFINE_bool_(list_tests, false,
+                   "List all tests without running them.");
 
-GTEST_DEFINE_string(
+GTEST_DEFINE_string_(
     output,
     internal::StringFromGTestEnv("output", ""),
     "A format (currently must be \"xml\"), optionally followed "
@@ -181,36 +190,28 @@ GTEST_DEFINE_string(
     "executable's name and, if necessary, made unique by adding "
     "digits.");
 
-GTEST_DEFINE_bool(
+GTEST_DEFINE_bool_(
     print_time,
     internal::BoolFromGTestEnv("print_time", false),
     "True iff " GTEST_NAME
     " should display elapsed time in text output.");
 
-GTEST_DEFINE_int32(
+GTEST_DEFINE_int32_(
     repeat,
     internal::Int32FromGTestEnv("repeat", 1),
     "How many times to repeat each test.  Specify a negative number "
     "for repeating forever.  Useful for shaking out flaky tests.");
 
-GTEST_DEFINE_int32(
+GTEST_DEFINE_int32_(
     stack_trace_depth,
         internal::Int32FromGTestEnv("stack_trace_depth", kMaxStackTraceDepth),
     "The maximum number of stack frames to print when an "
     "assertion fails.  The valid range is 0 through 100, inclusive.");
 
-GTEST_DEFINE_bool(
+GTEST_DEFINE_bool_(
     show_internal_stack_frames, false,
     "True iff " GTEST_NAME " should include internal stack frames when "
     "printing test failure stack traces.");
-
-// Gets the summary of the failure message by omitting the stack trace
-// in it.
-internal::String TestPartResult::ExtractSummary(const char* message) {
-  const char* const stack_trace = strstr(message, kStackTraceMarker);
-  return stack_trace == NULL ? internal::String(message) :
-      internal::String(message, stack_trace - message);
-}
 
 namespace internal {
 
@@ -280,11 +281,11 @@ String g_executable_path;
 FilePath GetCurrentExecutableName() {
   FilePath result;
 
-#if defined(_WIN32_WCE) || defined(_WIN32)
+#if defined(_WIN32_WCE) || defined(GTEST_OS_WINDOWS)
   result.Set(FilePath(g_executable_path).RemoveExtension("exe"));
 #else
   result.Set(FilePath(g_executable_path));
-#endif  // _WIN32_WCE || _WIN32
+#endif  // _WIN32_WCE || GTEST_OS_WINDOWS
 
   return result.RemoveDirectoryName();
 }
@@ -456,58 +457,46 @@ class UnitTestEventListenerInterface {
   virtual void OnNewTestPartResult(const TestPartResult*) {}
 };
 
-// Constructs an empty TestPartResultArray.
-TestPartResultArray::TestPartResultArray()
-    : list_(new internal::List<TestPartResult>) {
-}
-
-// Destructs a TestPartResultArray.
-TestPartResultArray::~TestPartResultArray() {
-  delete list_;
-}
-
-// Appends a TestPartResult to the array.
-void TestPartResultArray::Append(const TestPartResult& result) {
-  list_->PushBack(result);
-}
-
-// Returns the TestPartResult at the given index (0-based).
-const TestPartResult& TestPartResultArray::GetTestPartResult(int index) const {
-  if (index < 0 || index >= size()) {
-    printf("\nInvalid index (%d) into TestPartResultArray.\n", index);
-    internal::abort();
-  }
-
-  const internal::ListNode<TestPartResult>* p = list_->Head();
-  for (int i = 0; i < index; i++) {
-    p = p->next();
-  }
-
-  return p->element();
-}
-
-// Returns the number of TestPartResult objects in the array.
-int TestPartResultArray::size() const {
-  return list_->size();
+// The c'tor sets this object as the test part result reporter used by
+// Google Test.  The 'result' parameter specifies where to report the
+// results. Intercepts only failures from the current thread.
+ScopedFakeTestPartResultReporter::ScopedFakeTestPartResultReporter(
+    TestPartResultArray* result)
+    : intercept_mode_(INTERCEPT_ONLY_CURRENT_THREAD),
+      result_(result) {
+  Init();
 }
 
 // The c'tor sets this object as the test part result reporter used by
 // Google Test.  The 'result' parameter specifies where to report the
 // results.
 ScopedFakeTestPartResultReporter::ScopedFakeTestPartResultReporter(
-    TestPartResultArray* result)
-    : old_reporter_(UnitTest::GetInstance()->impl()->
-                    test_part_result_reporter()),
+    InterceptMode intercept_mode, TestPartResultArray* result)
+    : intercept_mode_(intercept_mode),
       result_(result) {
+  Init();
+}
+
+void ScopedFakeTestPartResultReporter::Init() {
   internal::UnitTestImpl* const impl = UnitTest::GetInstance()->impl();
-  impl->set_test_part_result_reporter(this);
+  if (intercept_mode_ == INTERCEPT_ALL_THREADS) {
+    old_reporter_ = impl->GetGlobalTestPartResultReporter();
+    impl->SetGlobalTestPartResultReporter(this);
+  } else {
+    old_reporter_ = impl->GetTestPartResultReporterForCurrentThread();
+    impl->SetTestPartResultReporterForCurrentThread(this);
+  }
 }
 
 // The d'tor restores the test part result reporter used by Google Test
 // before.
 ScopedFakeTestPartResultReporter::~ScopedFakeTestPartResultReporter() {
-  UnitTest::GetInstance()->impl()->
-      set_test_part_result_reporter(old_reporter_);
+  internal::UnitTestImpl* const impl = UnitTest::GetInstance()->impl();
+  if (intercept_mode_ == INTERCEPT_ALL_THREADS) {
+    impl->SetGlobalTestPartResultReporter(old_reporter_);
+  } else {
+    impl->SetTestPartResultReporterForCurrentThread(old_reporter_);
+  }
 }
 
 // Increments the test part result count and remembers the result.
@@ -579,21 +568,47 @@ SingleFailureChecker::~SingleFailureChecker() {
   EXPECT_PRED_FORMAT3(HasOneFailure, *results_, type_, substr_.c_str());
 }
 
-// Reports a test part result.
-void UnitTestImpl::ReportTestPartResult(const TestPartResult& result) {
-  current_test_result()->AddTestPartResult(result);
-  result_printer()->OnNewTestPartResult(&result);
+DefaultGlobalTestPartResultReporter::DefaultGlobalTestPartResultReporter(
+    UnitTestImpl* unit_test) : unit_test_(unit_test) {}
+
+void DefaultGlobalTestPartResultReporter::ReportTestPartResult(
+    const TestPartResult& result) {
+  unit_test_->current_test_result()->AddTestPartResult(result);
+  unit_test_->result_printer()->OnNewTestPartResult(&result);
 }
 
-// Returns the current test part result reporter.
-TestPartResultReporterInterface* UnitTestImpl::test_part_result_reporter() {
-  return test_part_result_reporter_;
+DefaultPerThreadTestPartResultReporter::DefaultPerThreadTestPartResultReporter(
+    UnitTestImpl* unit_test) : unit_test_(unit_test) {}
+
+void DefaultPerThreadTestPartResultReporter::ReportTestPartResult(
+    const TestPartResult& result) {
+  unit_test_->GetGlobalTestPartResultReporter()->ReportTestPartResult(result);
 }
 
-// Sets the current test part result reporter.
-void UnitTestImpl::set_test_part_result_reporter(
+// Returns the global test part result reporter.
+TestPartResultReporterInterface*
+UnitTestImpl::GetGlobalTestPartResultReporter() {
+  internal::MutexLock lock(&global_test_part_result_reporter_mutex_);
+  return global_test_part_result_repoter_;
+}
+
+// Sets the global test part result reporter.
+void UnitTestImpl::SetGlobalTestPartResultReporter(
     TestPartResultReporterInterface* reporter) {
-  test_part_result_reporter_ = reporter;
+  internal::MutexLock lock(&global_test_part_result_reporter_mutex_);
+  global_test_part_result_repoter_ = reporter;
+}
+
+// Returns the test part result reporter for the current thread.
+TestPartResultReporterInterface*
+UnitTestImpl::GetTestPartResultReporterForCurrentThread() {
+  return per_thread_test_part_result_reporter_.get();
+}
+
+// Sets the test part result reporter for the current thread.
+void UnitTestImpl::SetTestPartResultReporterForCurrentThread(
+    TestPartResultReporterInterface* reporter) {
+  per_thread_test_part_result_reporter_.set(reporter);
 }
 
 // Gets the number of successful test cases.
@@ -678,7 +693,7 @@ static TimeInMillis GetTimeInMillis() {
     return now_int64.QuadPart;
   }
   return 0;
-#elif defined(_WIN32) && !defined(GTEST_HAS_GETTIMEOFDAY)
+#elif defined(GTEST_OS_WINDOWS) && !defined(GTEST_HAS_GETTIMEOFDAY)
   __timeb64 now;
 #ifdef _MSC_VER
   // MSVC 8 deprecates _ftime64(), so we want to suppress warning 4996
@@ -1039,7 +1054,7 @@ AssertionResult CmpHelperEQ(const char* expected_expression,
 // A macro for implementing the helper functions needed to implement
 // ASSERT_?? and EXPECT_?? with integer or enum arguments.  It is here
 // just to avoid copy-and-paste of similar code.
-#define GTEST_IMPL_CMP_HELPER(op_name, op)\
+#define GTEST_IMPL_CMP_HELPER_(op_name, op)\
 AssertionResult CmpHelper##op_name(const char* expr1, const char* expr2, \
                                    BiggestInt val1, BiggestInt val2) {\
   if (val1 op val2) {\
@@ -1055,21 +1070,21 @@ AssertionResult CmpHelper##op_name(const char* expr1, const char* expr2, \
 
 // Implements the helper function for {ASSERT|EXPECT}_NE with int or
 // enum arguments.
-GTEST_IMPL_CMP_HELPER(NE, !=)
+GTEST_IMPL_CMP_HELPER_(NE, !=)
 // Implements the helper function for {ASSERT|EXPECT}_LE with int or
 // enum arguments.
-GTEST_IMPL_CMP_HELPER(LE, <=)
+GTEST_IMPL_CMP_HELPER_(LE, <=)
 // Implements the helper function for {ASSERT|EXPECT}_LT with int or
 // enum arguments.
-GTEST_IMPL_CMP_HELPER(LT, < )
+GTEST_IMPL_CMP_HELPER_(LT, < )
 // Implements the helper function for {ASSERT|EXPECT}_GE with int or
 // enum arguments.
-GTEST_IMPL_CMP_HELPER(GE, >=)
+GTEST_IMPL_CMP_HELPER_(GE, >=)
 // Implements the helper function for {ASSERT|EXPECT}_GT with int or
 // enum arguments.
-GTEST_IMPL_CMP_HELPER(GT, > )
+GTEST_IMPL_CMP_HELPER_(GT, > )
 
-#undef GTEST_IMPL_CMP_HELPER
+#undef GTEST_IMPL_CMP_HELPER_
 
 // The helper function for {ASSERT|EXPECT}_STREQ.
 AssertionResult CmpHelperSTREQ(const char* expected_expression,
@@ -1722,19 +1737,6 @@ String AppendUserMessage(const String& gtest_msg,
   return msg.GetString();
 }
 
-}  // namespace internal
-
-// Prints a TestPartResult object.
-std::ostream& operator<<(std::ostream& os, const TestPartResult& result) {
-  return os << result.file_name() << ":"
-            << result.line_number() << ": "
-            << (result.type() == TPRT_SUCCESS ? "Success" :
-                result.type() == TPRT_FATAL_FAILURE ? "Fatal failure" :
-                "Non-fatal failure") << ":\n"
-            << result.message() << std::endl;
-}
-
-namespace internal {
 // class TestResult
 
 // Creates an empty TestResult.
@@ -2380,7 +2382,7 @@ enum GTestColor {
   COLOR_YELLOW
 };
 
-#if defined(_WIN32) && !defined(_WIN32_WCE)
+#if defined(GTEST_OS_WINDOWS) && !defined(_WIN32_WCE)
 
 // Returns the character attribute for the given color.
 WORD GetColorAttribute(GTestColor color) {
@@ -2404,14 +2406,14 @@ const char* GetAnsiColorCode(GTestColor color) {
   return NULL;
 }
 
-#endif  // _WIN32 && !_WIN32_WCE
+#endif  // GTEST_OS_WINDOWS && !_WIN32_WCE
 
 // Returns true iff Google Test should use colors in the output.
 bool ShouldUseColor(bool stdout_is_tty) {
   const char* const gtest_color = GTEST_FLAG(color).c_str();
 
   if (String::CaseInsensitiveCStringEquals(gtest_color, "auto")) {
-#ifdef _WIN32
+#ifdef GTEST_OS_WINDOWS
     // On Windows the TERM variable is usually not set, but the
     // console there does support colors.
     return stdout_is_tty;
@@ -2423,7 +2425,7 @@ bool ShouldUseColor(bool stdout_is_tty) {
         String::CStringEquals(term, "xterm-color") ||
         String::CStringEquals(term, "cygwin");
     return stdout_is_tty && term_supports_color;
-#endif  // _WIN32
+#endif  // GTEST_OS_WINDOWS
   }
 
   return String::CaseInsensitiveCStringEquals(gtest_color, "yes") ||
@@ -2443,7 +2445,7 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   va_list args;
   va_start(args, fmt);
 
-#ifdef _WIN32_WCE
+#if defined(_WIN32_WCE) || defined(GTEST_OS_SYMBIAN)
   static const bool use_color = false;
 #else
   static const bool use_color = ShouldUseColor(isatty(fileno(stdout)) != 0);
@@ -2456,7 +2458,7 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
     return;
   }
 
-#if defined(_WIN32) && !defined(_WIN32_WCE)
+#if defined(GTEST_OS_WINDOWS) && !defined(_WIN32_WCE)
   const HANDLE stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 
   // Gets the current text color.
@@ -2474,7 +2476,7 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   printf("\033[0;3%sm", GetAnsiColorCode(color));
   vprintf(fmt, args);
   printf("\033[m");  // Resets the terminal to default.
-#endif  // _WIN32 && !_WIN32_WCE
+#endif  // GTEST_OS_WINDOWS && !_WIN32_WCE
   va_end(args);
 }
 
@@ -2718,7 +2720,7 @@ class UnitTestEventsRepeater : public UnitTestEventListenerInterface {
  private:
   Listeners listeners_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN(UnitTestEventsRepeater);
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(UnitTestEventsRepeater);
 };
 
 UnitTestEventsRepeater::~UnitTestEventsRepeater() {
@@ -2736,7 +2738,7 @@ void UnitTestEventsRepeater::AddListener(
 
 // Since the methods are identical, use a macro to reduce boilerplate.
 // This defines a member that repeats the call to all listeners.
-#define GTEST_REPEATER_METHOD(Name, Type) \
+#define GTEST_REPEATER_METHOD_(Name, Type) \
 void UnitTestEventsRepeater::Name(const Type* parameter) { \
   for (ListenersNode* listener = listeners_.Head(); \
        listener != NULL; \
@@ -2745,19 +2747,19 @@ void UnitTestEventsRepeater::Name(const Type* parameter) { \
   } \
 }
 
-GTEST_REPEATER_METHOD(OnUnitTestStart, UnitTest)
-GTEST_REPEATER_METHOD(OnUnitTestEnd, UnitTest)
-GTEST_REPEATER_METHOD(OnGlobalSetUpStart, UnitTest)
-GTEST_REPEATER_METHOD(OnGlobalSetUpEnd, UnitTest)
-GTEST_REPEATER_METHOD(OnGlobalTearDownStart, UnitTest)
-GTEST_REPEATER_METHOD(OnGlobalTearDownEnd, UnitTest)
-GTEST_REPEATER_METHOD(OnTestCaseStart, TestCase)
-GTEST_REPEATER_METHOD(OnTestCaseEnd, TestCase)
-GTEST_REPEATER_METHOD(OnTestStart, TestInfo)
-GTEST_REPEATER_METHOD(OnTestEnd, TestInfo)
-GTEST_REPEATER_METHOD(OnNewTestPartResult, TestPartResult)
+GTEST_REPEATER_METHOD_(OnUnitTestStart, UnitTest)
+GTEST_REPEATER_METHOD_(OnUnitTestEnd, UnitTest)
+GTEST_REPEATER_METHOD_(OnGlobalSetUpStart, UnitTest)
+GTEST_REPEATER_METHOD_(OnGlobalSetUpEnd, UnitTest)
+GTEST_REPEATER_METHOD_(OnGlobalTearDownStart, UnitTest)
+GTEST_REPEATER_METHOD_(OnGlobalTearDownEnd, UnitTest)
+GTEST_REPEATER_METHOD_(OnTestCaseStart, TestCase)
+GTEST_REPEATER_METHOD_(OnTestCaseEnd, TestCase)
+GTEST_REPEATER_METHOD_(OnTestStart, TestInfo)
+GTEST_REPEATER_METHOD_(OnTestEnd, TestInfo)
+GTEST_REPEATER_METHOD_(OnNewTestPartResult, TestPartResult)
 
-#undef GTEST_REPEATER_METHOD
+#undef GTEST_REPEATER_METHOD_
 
 // End PrettyUnitTestResultPrinter
 
@@ -2818,7 +2820,7 @@ class XmlUnitTestResultPrinter : public UnitTestEventListenerInterface {
   // The output file.
   const internal::String output_file_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN(XmlUnitTestResultPrinter);
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(XmlUnitTestResultPrinter);
 };
 
 // Creates a new XmlUnitTestResultPrinter.
@@ -3181,13 +3183,14 @@ void UnitTest::AddTestPartResult(TestPartResultType result_type,
   }
 
   if (os_stack_trace.c_str() != NULL && !os_stack_trace.empty()) {
-    msg << kStackTraceMarker << os_stack_trace;
+    msg << internal::kStackTraceMarker << os_stack_trace;
   }
 
   const TestPartResult result =
     TestPartResult(result_type, file_name, line_number,
                    msg.GetString().c_str());
-  impl_->test_part_result_reporter()->ReportTestPartResult(result);
+  impl_->GetTestPartResultReporterForCurrentThread()->
+      ReportTestPartResult(result);
 
   // If this is a failure and the user wants the debugger to break on
   // failures ...
@@ -3291,6 +3294,21 @@ namespace internal {
 
 UnitTestImpl::UnitTestImpl(UnitTest* parent)
     : parent_(parent),
+#ifdef _MSC_VER
+#pragma warning(push)                    // Saves the current warning state.
+#pragma warning(disable:4355)            // Temporarily disables warning 4355
+                                         // (using this in initializer).
+      default_global_test_part_result_reporter_(this),
+      default_per_thread_test_part_result_reporter_(this),
+#pragma warning(pop)                     // Restores the warning state again.
+#else
+      default_global_test_part_result_reporter_(this),
+      default_per_thread_test_part_result_reporter_(this),
+#endif  // _MSC_VER
+      global_test_part_result_repoter_(
+          &default_global_test_part_result_reporter_),
+      per_thread_test_part_result_reporter_(
+          &default_per_thread_test_part_result_reporter_),
       test_cases_(),
       last_death_test_case_(NULL),
       current_test_case_(NULL),
@@ -3305,10 +3323,6 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
 #else
       elapsed_time_(0) {
 #endif  // GTEST_HAS_DEATH_TEST
-  // We do the assignment here instead of in the initializer list, as
-  // doing that latter causes MSVC to issue a warning about using
-  // 'this' in initializers.
-  test_part_result_reporter_ = this;
 }
 
 UnitTestImpl::~UnitTestImpl() {

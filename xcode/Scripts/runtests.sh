@@ -24,7 +24,9 @@ test_executables=("$BUILT_PRODUCTS_DIR/sample1_unittest"
                   "$BUILT_PRODUCTS_DIR/gtest_main_unittest"
                   "$BUILT_PRODUCTS_DIR/gtest_prod_test"
                   "$BUILT_PRODUCTS_DIR/gtest_repeat_test"
+                  "$BUILT_PRODUCTS_DIR/gtest_sole_header_test"
                   "$BUILT_PRODUCTS_DIR/gtest_stress_test"
+                  "$BUILT_PRODUCTS_DIR/gtest_test_part_test"
                   "$BUILT_PRODUCTS_DIR/gtest-typed-test_test"
 
                   "$BUILT_PRODUCTS_DIR/gtest_output_test.py"
@@ -41,6 +43,7 @@ test_executables=("$BUILT_PRODUCTS_DIR/sample1_unittest"
 # Now execute each one in turn keeping track of how many succeeded and failed. 
 succeeded=0
 failed=0
+failed_list=()
 for test in ${test_executables[*]}; do
   "$test"
   result=$?
@@ -48,9 +51,14 @@ for test in ${test_executables[*]}; do
     succeeded=$(( $succeeded + 1 ))
   else
     failed=$(( failed + 1 ))
+    failed_list="$failed_list $test"
   fi
 done
 
 # Report the successes and failures to the console
 echo "Tests complete with $succeeded successes and $failed failures."
+if [ $failed -ne 0 ]; then
+  echo "The following tests failed:"
+  echo $failed_list
+fi
 exit $failed

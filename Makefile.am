@@ -7,7 +7,8 @@ EXTRA_DIST = \
   CHANGES \
   CONTRIBUTORS \
   include/gtest/internal/gtest-type-util.h.pump \
-  scripts/gen_gtest_pred_impl.py
+  scripts/gen_gtest_pred_impl.py \
+  src/gtest-all.cc
 
 # MSVC project files
 EXTRA_DIST += \
@@ -69,6 +70,7 @@ lib_libgtest_la_SOURCES = src/gtest.cc \
                           src/gtest-filepath.cc \
                           src/gtest-internal-inl.h \
                           src/gtest-port.cc \
+                          src/gtest-test-part.cc \
                           src/gtest-typed-test.cc
 
 pkginclude_HEADERS = include/gtest/gtest.h \
@@ -77,6 +79,7 @@ pkginclude_HEADERS = include/gtest/gtest.h \
                      include/gtest/gtest-spi.h \
                      include/gtest/gtest_pred_impl.h \
                      include/gtest/gtest_prod.h \
+                     include/gtest/gtest-test-part.h \
                      include/gtest/gtest-typed-test.h
 
 pkginclude_internaldir = $(pkgincludedir)/internal
@@ -207,10 +210,20 @@ check_PROGRAMS += test/gtest_repeat_test
 test_gtest_repeat_test_SOURCES = test/gtest_repeat_test.cc
 test_gtest_repeat_test_LDADD = lib/libgtest.la
 
+TESTS += test/gtest_sole_header_test
+check_PROGRAMS += test/gtest_sole_header_test
+test_gtest_sole_header_test_SOURCES = test/gtest_sole_header_test.cc
+test_gtest_sole_header_test_LDADD = lib/libgtest_main.la
+
 TESTS += test/gtest_stress_test
 check_PROGRAMS += test/gtest_stress_test
 test_gtest_stress_test_SOURCES = test/gtest_stress_test.cc
 test_gtest_stress_test_LDADD = lib/libgtest.la
+
+TESTS += test/gtest-test-part_test
+check_PROGRAMS += test/gtest-test-part_test
+test_gtest_test_part_test_SOURCES = test/gtest-test-part_test.cc
+test_gtest_test_part_test_LDADD = lib/libgtest_main.la
 
 TESTS += test/gtest-typed-test_test
 check_PROGRAMS += test/gtest-typed-test_test

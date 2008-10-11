@@ -47,7 +47,7 @@ namespace testing {
 // from the start, running only a single death test, or "fast",
 // meaning that the child process will execute the test logic immediately
 // after forking.
-GTEST_DECLARE_string(death_test_style);
+GTEST_DECLARE_string_(death_test_style);
 
 #ifdef GTEST_HAS_DEATH_TEST
 
@@ -104,12 +104,12 @@ GTEST_DECLARE_string(death_test_style);
 // integer exit status that satisfies predicate, and emitting error output
 // that matches regex.
 #define ASSERT_EXIT(statement, predicate, regex) \
-  GTEST_DEATH_TEST(statement, predicate, regex, GTEST_FATAL_FAILURE)
+  GTEST_DEATH_TEST_(statement, predicate, regex, GTEST_FATAL_FAILURE_)
 
 // Like ASSERT_EXIT, but continues on to successive tests in the
 // test case, if any:
 #define EXPECT_EXIT(statement, predicate, regex) \
-  GTEST_DEATH_TEST(statement, predicate, regex, GTEST_NONFATAL_FAILURE)
+  GTEST_DEATH_TEST_(statement, predicate, regex, GTEST_NONFATAL_FAILURE_)
 
 // Asserts that a given statement causes the program to exit, either by
 // explicitly exiting with a nonzero exit code or being killed by a

@@ -53,7 +53,6 @@
 
 // The following platform macros are used throughout Google Test:
 //   _WIN32_WCE      Windows CE     (set in project files)
-//   __SYMBIAN32__   Symbian        (set by Symbian tool chain)
 //
 // Note that even though _MSC_VER and _WIN32_WCE really indicate a compiler
 // and a Win32 implementation, respectively, we use them to indicate the
@@ -68,6 +67,7 @@
 #include <gtest/gtest-death-test.h>
 #include <gtest/gtest-message.h>
 #include <gtest/gtest_prod.h>
+#include <gtest/gtest-test-part.h>
 #include <gtest/gtest-typed-test.h>
 
 // Depending on the platform, different string classes are available.
@@ -97,19 +97,11 @@ const int kMaxStackTraceDepth = 100;
 
 // This flag specifies the maximum number of stack frames to be
 // printed in a failure message.
-GTEST_DECLARE_int32(stack_trace_depth);
+GTEST_DECLARE_int32_(stack_trace_depth);
 
 // This flag controls whether Google Test includes Google Test internal
 // stack frames in failure stack traces.
-GTEST_DECLARE_bool(show_internal_stack_frames);
-
-// The possible outcomes of a test part (i.e. an assertion or an
-// explicit SUCCEED(), FAIL(), or ADD_FAILURE()).
-enum TestPartResultType {
-  TPRT_SUCCESS,           // Succeeded.
-  TPRT_NONFATAL_FAILURE,  // Failed but the test can continue.
-  TPRT_FATAL_FAILURE      // Failed and the test should be terminated.
-};
+GTEST_DECLARE_bool_(show_internal_stack_frames);
 
 namespace internal {
 
@@ -308,7 +300,7 @@ class Test {
   virtual Setup_should_be_spelled_SetUp* Setup() { return NULL; }
 
   // We disallow copying Tests.
-  GTEST_DISALLOW_COPY_AND_ASSIGN(Test);
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(Test);
 };
 
 
@@ -393,7 +385,7 @@ class TestInfo {
   // An opaque implementation object.
   internal::TestInfoImpl* impl_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN(TestInfo);
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(TestInfo);
 };
 
 // An Environment object is capable of setting up and tearing down an
@@ -477,7 +469,7 @@ class UnitTest {
   // This method can only be called from the main thread.
   //
   // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
-  int Run() GTEST_MUST_USE_RESULT;
+  int Run() GTEST_MUST_USE_RESULT_;
 
   // Returns the working directory when the first TEST() or TEST_F()
   // was executed.  The UnitTest object owns the string.
@@ -523,7 +515,7 @@ class UnitTest {
   internal::UnitTestImpl* impl_;
 
   // We disallow copying UnitTest.
-  GTEST_DISALLOW_COPY_AND_ASSIGN(UnitTest);
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(UnitTest);
 };
 
 // A convenient wrapper for adding an environment for the test
@@ -707,7 +699,7 @@ class EqHelper<true> {
 // with gcc 4.
 //
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
-#define GTEST_IMPL_CMP_HELPER(op_name, op)\
+#define GTEST_IMPL_CMP_HELPER_(op_name, op)\
 template <typename T1, typename T2>\
 AssertionResult CmpHelper##op_name(const char* expr1, const char* expr2, \
                                    const T1& val1, const T2& val2) {\
@@ -727,17 +719,17 @@ AssertionResult CmpHelper##op_name(const char* expr1, const char* expr2, \
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
 
 // Implements the helper function for {ASSERT|EXPECT}_NE
-GTEST_IMPL_CMP_HELPER(NE, !=)
+GTEST_IMPL_CMP_HELPER_(NE, !=)
 // Implements the helper function for {ASSERT|EXPECT}_LE
-GTEST_IMPL_CMP_HELPER(LE, <=)
+GTEST_IMPL_CMP_HELPER_(LE, <=)
 // Implements the helper function for {ASSERT|EXPECT}_LT
-GTEST_IMPL_CMP_HELPER(LT, < )
+GTEST_IMPL_CMP_HELPER_(LT, < )
 // Implements the helper function for {ASSERT|EXPECT}_GE
-GTEST_IMPL_CMP_HELPER(GE, >=)
+GTEST_IMPL_CMP_HELPER_(GE, >=)
 // Implements the helper function for {ASSERT|EXPECT}_GT
-GTEST_IMPL_CMP_HELPER(GT, > )
+GTEST_IMPL_CMP_HELPER_(GT, > )
 
-#undef GTEST_IMPL_CMP_HELPER
+#undef GTEST_IMPL_CMP_HELPER_
 
 // The helper function for {ASSERT|EXPECT}_STREQ.
 //
@@ -881,7 +873,7 @@ class AssertHelper {
   AssertHelper(TestPartResultType type, const char* file, int line,
                const char* message);
   // Message assignment is a semantic trick to enable assertion
-  // streaming; see the GTEST_MESSAGE macro below.
+  // streaming; see the GTEST_MESSAGE_ macro below.
   void operator=(const Message& message) const;
  private:
   TestPartResultType const type_;
@@ -889,7 +881,7 @@ class AssertHelper {
   int                const line_;
   String             const message_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN(AssertHelper);
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(AssertHelper);
 };
 
 }  // namespace internal
@@ -920,13 +912,13 @@ class AssertHelper {
 //       << "There are still pending requests " << "on port " << port;
 
 // Generates a nonfatal failure with a generic message.
-#define ADD_FAILURE() GTEST_NONFATAL_FAILURE("Failed")
+#define ADD_FAILURE() GTEST_NONFATAL_FAILURE_("Failed")
 
 // Generates a fatal failure with a generic message.
-#define FAIL() GTEST_FATAL_FAILURE("Failed")
+#define FAIL() GTEST_FATAL_FAILURE_("Failed")
 
 // Generates a success with a generic message.
-#define SUCCEED() GTEST_SUCCESS("Succeeded")
+#define SUCCEED() GTEST_SUCCESS_("Succeeded")
 
 // Macros for testing exceptions.
 //
@@ -938,31 +930,31 @@ class AssertHelper {
 //         Tests that the statement throws an exception.
 
 #define EXPECT_THROW(statement, expected_exception) \
-  GTEST_TEST_THROW(statement, expected_exception, GTEST_NONFATAL_FAILURE)
+  GTEST_TEST_THROW_(statement, expected_exception, GTEST_NONFATAL_FAILURE_)
 #define EXPECT_NO_THROW(statement) \
-  GTEST_TEST_NO_THROW(statement, GTEST_NONFATAL_FAILURE)
+  GTEST_TEST_NO_THROW_(statement, GTEST_NONFATAL_FAILURE_)
 #define EXPECT_ANY_THROW(statement) \
-  GTEST_TEST_ANY_THROW(statement, GTEST_NONFATAL_FAILURE)
+  GTEST_TEST_ANY_THROW_(statement, GTEST_NONFATAL_FAILURE_)
 #define ASSERT_THROW(statement, expected_exception) \
-  GTEST_TEST_THROW(statement, expected_exception, GTEST_FATAL_FAILURE)
+  GTEST_TEST_THROW_(statement, expected_exception, GTEST_FATAL_FAILURE_)
 #define ASSERT_NO_THROW(statement) \
-  GTEST_TEST_NO_THROW(statement, GTEST_FATAL_FAILURE)
+  GTEST_TEST_NO_THROW_(statement, GTEST_FATAL_FAILURE_)
 #define ASSERT_ANY_THROW(statement) \
-  GTEST_TEST_ANY_THROW(statement, GTEST_FATAL_FAILURE)
+  GTEST_TEST_ANY_THROW_(statement, GTEST_FATAL_FAILURE_)
 
 // Boolean assertions.
 #define EXPECT_TRUE(condition) \
-  GTEST_TEST_BOOLEAN(condition, #condition, false, true, \
-                     GTEST_NONFATAL_FAILURE)
+  GTEST_TEST_BOOLEAN_(condition, #condition, false, true, \
+                      GTEST_NONFATAL_FAILURE_)
 #define EXPECT_FALSE(condition) \
-  GTEST_TEST_BOOLEAN(!(condition), #condition, true, false, \
-                     GTEST_NONFATAL_FAILURE)
+  GTEST_TEST_BOOLEAN_(!(condition), #condition, true, false, \
+                      GTEST_NONFATAL_FAILURE_)
 #define ASSERT_TRUE(condition) \
-  GTEST_TEST_BOOLEAN(condition, #condition, false, true, \
-                     GTEST_FATAL_FAILURE)
+  GTEST_TEST_BOOLEAN_(condition, #condition, false, true, \
+                      GTEST_FATAL_FAILURE_)
 #define ASSERT_FALSE(condition) \
-  GTEST_TEST_BOOLEAN(!(condition), #condition, true, false, \
-                     GTEST_FATAL_FAILURE)
+  GTEST_TEST_BOOLEAN_(!(condition), #condition, true, false, \
+                      GTEST_FATAL_FAILURE_)
 
 // Includes the auto-generated header that implements a family of
 // generic predicate assertion macros.
@@ -1016,7 +1008,7 @@ class AssertHelper {
 
 #define EXPECT_EQ(expected, actual) \
   EXPECT_PRED_FORMAT2(::testing::internal:: \
-                      EqHelper<GTEST_IS_NULL_LITERAL(expected)>::Compare, \
+                      EqHelper<GTEST_IS_NULL_LITERAL_(expected)>::Compare, \
                       expected, actual)
 #define EXPECT_NE(expected, actual) \
   EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperNE, expected, actual)
@@ -1031,7 +1023,7 @@ class AssertHelper {
 
 #define ASSERT_EQ(expected, actual) \
   ASSERT_PRED_FORMAT2(::testing::internal:: \
-                      EqHelper<GTEST_IS_NULL_LITERAL(expected)>::Compare, \
+                      EqHelper<GTEST_IS_NULL_LITERAL_(expected)>::Compare, \
                       expected, actual)
 #define ASSERT_NE(val1, val2) \
   ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperNE, val1, val2)
@@ -1154,6 +1146,20 @@ AssertionResult DoubleLE(const char* expr1, const char* expr2,
 
 #endif  // GTEST_OS_WINDOWS
 
+// Macros that execute statement and check that it doesn't generate new fatal
+// failures in the current thread.
+//
+//   * {ASSERT|EXPECT}_NO_FATAL_FAILURE(statement);
+//
+// Examples:
+//
+//   EXPECT_NO_FATAL_FAILURE(Process());
+//   ASSERT_NO_FATAL_FAILURE(Process()) << "Process() failed";
+//
+#define ASSERT_NO_FATAL_FAILURE(statement) \
+    GTEST_TEST_NO_FATAL_FAILURE_(statement, GTEST_FATAL_FAILURE_)
+#define EXPECT_NO_FATAL_FAILURE(statement) \
+    GTEST_TEST_NO_FATAL_FAILURE_(statement, GTEST_NONFATAL_FAILURE_)
 
 // Causes a trace (including the source file path, the current line
 // number, and the given message) to be included in every test failure
@@ -1167,7 +1173,7 @@ AssertionResult DoubleLE(const char* expr1, const char* expr2,
 // to appear in the same block - as long as they are on different
 // lines.
 #define SCOPED_TRACE(message) \
-  ::testing::internal::ScopedTrace GTEST_CONCAT_TOKEN(gtest_trace_, __LINE__)(\
+  ::testing::internal::ScopedTrace GTEST_CONCAT_TOKEN_(gtest_trace_, __LINE__)(\
     __FILE__, __LINE__, ::testing::Message() << (message))
 
 
@@ -1188,7 +1194,7 @@ AssertionResult DoubleLE(const char* expr1, const char* expr2,
 //   }
 
 #define TEST(test_case_name, test_name)\
-  GTEST_TEST(test_case_name, test_name, ::testing::Test)
+  GTEST_TEST_(test_case_name, test_name, ::testing::Test)
 
 
 // Defines a test that uses a test fixture.
@@ -1218,7 +1224,7 @@ AssertionResult DoubleLE(const char* expr1, const char* expr2,
 //   }
 
 #define TEST_F(test_fixture, test_name)\
-  GTEST_TEST(test_fixture, test_name, test_fixture)
+  GTEST_TEST_(test_fixture, test_name, test_fixture)
 
 // Use this macro in main() to run all tests.  It returns 0 if all
 // tests are successful, or 1 otherwise.

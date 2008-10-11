@@ -39,123 +39,33 @@
 
 namespace testing {
 
-// A copyable object representing the result of a test part (i.e. an
-// assertion or an explicit FAIL(), ADD_FAILURE(), or SUCCESS()).
-//
-// Don't inherit from TestPartResult as its destructor is not virtual.
-class TestPartResult {
- public:
-  // C'tor.  TestPartResult does NOT have a default constructor.
-  // Always use this constructor (with parameters) to create a
-  // TestPartResult object.
-  TestPartResult(TestPartResultType type,
-                 const char* file_name,
-                 int line_number,
-                 const char* message)
-      : type_(type),
-        file_name_(file_name),
-        line_number_(line_number),
-        summary_(ExtractSummary(message)),
-        message_(message) {
-  }
-
-  // Gets the outcome of the test part.
-  TestPartResultType type() const { return type_; }
-
-  // Gets the name of the source file where the test part took place, or
-  // NULL if it's unknown.
-  const char* file_name() const { return file_name_.c_str(); }
-
-  // Gets the line in the source file where the test part took place,
-  // or -1 if it's unknown.
-  int line_number() const { return line_number_; }
-
-  // Gets the summary of the failure message.
-  const char* summary() const { return summary_.c_str(); }
-
-  // Gets the message associated with the test part.
-  const char* message() const { return message_.c_str(); }
-
-  // Returns true iff the test part passed.
-  bool passed() const { return type_ == TPRT_SUCCESS; }
-
-  // Returns true iff the test part failed.
-  bool failed() const { return type_ != TPRT_SUCCESS; }
-
-  // Returns true iff the test part non-fatally failed.
-  bool nonfatally_failed() const { return type_ == TPRT_NONFATAL_FAILURE; }
-
-  // Returns true iff the test part fatally failed.
-  bool fatally_failed() const { return type_ == TPRT_FATAL_FAILURE; }
- private:
-  TestPartResultType type_;
-
-  // Gets the summary of the failure message by omitting the stack
-  // trace in it.
-  static internal::String ExtractSummary(const char* message);
-
-  // The name of the source file where the test part took place, or
-  // NULL if the source file is unknown.
-  internal::String file_name_;
-  // The line in the source file where the test part took place, or -1
-  // if the line number is unknown.
-  int line_number_;
-  internal::String summary_;  // The test failure summary.
-  internal::String message_;  // The test failure message.
-};
-
-// Prints a TestPartResult object.
-std::ostream& operator<<(std::ostream& os, const TestPartResult& result);
-
-// An array of TestPartResult objects.
-//
-// We define this class as we cannot use STL containers when compiling
-// Google Test with MSVC 7.1 and exceptions disabled.
-//
-// Don't inherit from TestPartResultArray as its destructor is not
-// virtual.
-class TestPartResultArray {
- public:
-  TestPartResultArray();
-  ~TestPartResultArray();
-
-  // Appends the given TestPartResult to the array.
-  void Append(const TestPartResult& result);
-
-  // Returns the TestPartResult at the given index (0-based).
-  const TestPartResult& GetTestPartResult(int index) const;
-
-  // Returns the number of TestPartResult objects in the array.
-  int size() const;
- private:
-  // Internally we use a list to simulate the array.  Yes, this means
-  // that random access is O(N) in time, but it's OK for its purpose.
-  internal::List<TestPartResult>* const list_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN(TestPartResultArray);
-};
-
-// This interface knows how to report a test part result.
-class TestPartResultReporterInterface {
- public:
-  virtual ~TestPartResultReporterInterface() {}
-
-  virtual void ReportTestPartResult(const TestPartResult& result) = 0;
-};
-
 // This helper class can be used to mock out Google Test failure reporting
 // so that we can test Google Test or code that builds on Google Test.
 //
 // An object of this class appends a TestPartResult object to the
-// TestPartResultArray object given in the constructor whenever a
-// Google Test failure is reported.
+// TestPartResultArray object given in the constructor whenever a Google Test
+// failure is reported. It can either intercept only failures that are
+// generated in the same thread that created this object or it can intercept
+// all generated failures. The scope of this mock object can be controlled with
+// the second argument to the two arguments constructor.
 class ScopedFakeTestPartResultReporter
     : public TestPartResultReporterInterface {
  public:
+  // The two possible mocking modes of this object.
+  enum InterceptMode {
+    INTERCEPT_ONLY_CURRENT_THREAD,  // Intercepts only thread local failures.
+    INTERCEPT_ALL_THREADS           // Intercepts all failures.
+  };
+
   // The c'tor sets this object as the test part result reporter used
   // by Google Test.  The 'result' parameter specifies where to report the
-  // results.
+  // results. This reporter will only catch failures generated in the current
+  // thread. DEPRECATED
   explicit ScopedFakeTestPartResultReporter(TestPartResultArray* result);
+
+  // Same as above, but you can choose the interception scope of this object.
+  ScopedFakeTestPartResultReporter(InterceptMode intercept_mode,
+                                   TestPartResultArray* result);
 
   // The d'tor restores the previous test part result reporter.
   virtual ~ScopedFakeTestPartResultReporter();
@@ -167,10 +77,13 @@ class ScopedFakeTestPartResultReporter
   // interface.
   virtual void ReportTestPartResult(const TestPartResult& result);
  private:
-  TestPartResultReporterInterface* const old_reporter_;
+  void Init();
+
+  const InterceptMode intercept_mode_;
+  TestPartResultReporterInterface* old_reporter_;
   TestPartResultArray* const result_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN(ScopedFakeTestPartResultReporter);
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(ScopedFakeTestPartResultReporter);
 };
 
 namespace internal {
@@ -192,28 +105,53 @@ class SingleFailureChecker {
   const TestPartResultType type_;
   const String substr_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN(SingleFailureChecker);
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(SingleFailureChecker);
 };
+
+// Helper macro to test that statement generates exactly one fatal failure,
+// which contains the substring 'substr' in its failure message, when a scoped
+// test result reporter of the given interception mode is used.
+#define GTEST_EXPECT_NONFATAL_FAILURE_(statement, substr, intercept_mode)\
+  do {\
+    ::testing::TestPartResultArray gtest_failures;\
+    ::testing::internal::SingleFailureChecker gtest_checker(\
+        &gtest_failures, ::testing::TPRT_NONFATAL_FAILURE, (substr));\
+    {\
+      ::testing::ScopedFakeTestPartResultReporter gtest_reporter(\
+          intercept_mode, &gtest_failures);\
+      statement;\
+    }\
+  } while (false)
 
 }  // namespace internal
 
 }  // namespace testing
 
-// A macro for testing Google Test assertions or code that's expected to
-// generate Google Test fatal failures.  It verifies that the given
+// A set of macros for testing Google Test assertions or code that's expected
+// to generate Google Test fatal failures.  It verifies that the given
 // statement will cause exactly one fatal Google Test failure with 'substr'
 // being part of the failure message.
 //
-// Implementation note: The verification is done in the destructor of
-// SingleFailureChecker, to make sure that it's done even when
-// 'statement' throws an exception.
+// There are two different versions of this macro. EXPECT_FATAL_FAILURE only
+// affects and considers failures generated in the current thread and
+// EXPECT_FATAL_FAILURE_ON_ALL_THREADS does the same but for all threads.
+//
+// The verification of the assertion is done correctly even when the statement
+// throws an exception or aborts the current function.
 //
 // Known restrictions:
 //   - 'statement' cannot reference local non-static variables or
 //     non-static members of the current object.
 //   - 'statement' cannot return a value.
 //   - You cannot stream a failure message to this macro.
-#define EXPECT_FATAL_FAILURE(statement, substr) do {\
+//
+// Note that even though the implementations of the following two
+// macros are much alike, we cannot refactor them to use a common
+// helper macro, due to some peculiarity in how the preprocessor
+// works.  The AcceptsMacroThatExpandsToUnprotectedComma test in
+// gtest_unittest.cc will fail to compile if we do that.
+#define EXPECT_FATAL_FAILURE(statement, substr) \
+  do { \
     class GTestExpectFatalFailureHelper {\
      public:\
       static void Execute() { statement; }\
@@ -223,31 +161,73 @@ class SingleFailureChecker {
         &gtest_failures, ::testing::TPRT_FATAL_FAILURE, (substr));\
     {\
       ::testing::ScopedFakeTestPartResultReporter gtest_reporter(\
-          &gtest_failures);\
+          ::testing::ScopedFakeTestPartResultReporter:: \
+          INTERCEPT_ONLY_CURRENT_THREAD, &gtest_failures);\
+      GTestExpectFatalFailureHelper::Execute();\
+    }\
+  } while (false)
+
+#define EXPECT_FATAL_FAILURE_ON_ALL_THREADS(statement, substr) \
+  do { \
+    class GTestExpectFatalFailureHelper {\
+     public:\
+      static void Execute() { statement; }\
+    };\
+    ::testing::TestPartResultArray gtest_failures;\
+    ::testing::internal::SingleFailureChecker gtest_checker(\
+        &gtest_failures, ::testing::TPRT_FATAL_FAILURE, (substr));\
+    {\
+      ::testing::ScopedFakeTestPartResultReporter gtest_reporter(\
+          ::testing::ScopedFakeTestPartResultReporter:: \
+          INTERCEPT_ALL_THREADS, &gtest_failures);\
       GTestExpectFatalFailureHelper::Execute();\
     }\
   } while (false)
 
 // A macro for testing Google Test assertions or code that's expected to
 // generate Google Test non-fatal failures.  It asserts that the given
-// statement will cause exactly one non-fatal Google Test failure with
-// 'substr' being part of the failure message.
+// statement will cause exactly one non-fatal Google Test failure with 'substr'
+// being part of the failure message.
+//
+// There are two different versions of this macro. EXPECT_NONFATAL_FAILURE only
+// affects and considers failures generated in the current thread and
+// EXPECT_NONFATAL_FAILURE_ON_ALL_THREADS does the same but for all threads.
 //
 // 'statement' is allowed to reference local variables and members of
 // the current object.
 //
-// Implementation note: The verification is done in the destructor of
-// SingleFailureChecker, to make sure that it's done even when
-// 'statement' throws an exception or aborts the function.
+// The verification of the assertion is done correctly even when the statement
+// throws an exception or aborts the current function.
 //
 // Known restrictions:
 //   - You cannot stream a failure message to this macro.
-#define EXPECT_NONFATAL_FAILURE(statement, substr) do {\
+//
+// Note that even though the implementations of the following two
+// macros are much alike, we cannot refactor them to use a common
+// helper macro, due to some peculiarity in how the preprocessor
+// works.  The AcceptsMacroThatExpandsToUnprotectedComma test in
+// gtest_unittest.cc will fail to compile if we do that.
+#define EXPECT_NONFATAL_FAILURE(statement, substr) \
+  do {\
     ::testing::TestPartResultArray gtest_failures;\
     ::testing::internal::SingleFailureChecker gtest_checker(\
         &gtest_failures, ::testing::TPRT_NONFATAL_FAILURE, (substr));\
     {\
       ::testing::ScopedFakeTestPartResultReporter gtest_reporter(\
+          ::testing::ScopedFakeTestPartResultReporter:: \
+          INTERCEPT_ONLY_CURRENT_THREAD, &gtest_failures);\
+      statement;\
+    }\
+  } while (false)
+
+#define EXPECT_NONFATAL_FAILURE_ON_ALL_THREADS(statement, substr) \
+  do {\
+    ::testing::TestPartResultArray gtest_failures;\
+    ::testing::internal::SingleFailureChecker gtest_checker(\
+        &gtest_failures, ::testing::TPRT_NONFATAL_FAILURE, (substr));\
+    {\
+      ::testing::ScopedFakeTestPartResultReporter gtest_reporter(\
+          ::testing::ScopedFakeTestPartResultReporter::INTERCEPT_ALL_THREADS,\
           &gtest_failures);\
       statement;\
     }\

@@ -172,7 +172,7 @@ static ::std::string ReadEntireFile(FILE * file) {
 // Starts capturing stderr.
 void CaptureStderr() {
   if (g_captured_stderr != NULL) {
-    GTEST_LOG(FATAL, "Only one stderr capturer can exist at one time.");
+    GTEST_LOG_(FATAL, "Only one stderr capturer can exist at one time.");
   }
   g_captured_stderr = new CapturedStderr;
 }

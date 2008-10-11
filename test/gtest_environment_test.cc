@@ -36,7 +36,7 @@
 #include <gtest/gtest.h>
 
 namespace testing {
-GTEST_DECLARE_string(filter);
+GTEST_DECLARE_string_(filter);
 }
 
 namespace {

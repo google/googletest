@@ -59,7 +59,7 @@ namespace testing {
 // The default death test style.
 static const char kDefaultDeathTestStyle[] = "fast";
 
-GTEST_DEFINE_string(
+GTEST_DEFINE_string_(
     death_test_style,
     internal::StringFromGTestEnv("death_test_style", kDefaultDeathTestStyle),
     "Indicates how to run a death test in a forked child process: "
@@ -69,7 +69,7 @@ GTEST_DEFINE_string(
     "after forking).");
 
 namespace internal {
-GTEST_DEFINE_string(
+GTEST_DEFINE_string_(
     internal_run_death_test, "",
     "Indicates the file, line number, temporal index of "
     "the single death test to run, and a file descriptor to "
@@ -188,7 +188,7 @@ void DeathTestAbort(const char* format, ...) {
 
 // A replacement for CHECK that calls DeathTestAbort if the assertion
 // fails.
-#define GTEST_DEATH_TEST_CHECK(expression) \
+#define GTEST_DEATH_TEST_CHECK_(expression) \
   do { \
     if (!(expression)) { \
       DeathTestAbort("CHECK failed: File %s, line %d: %s", \
@@ -196,14 +196,14 @@ void DeathTestAbort(const char* format, ...) {
     } \
   } while (0)
 
-// This macro is similar to GTEST_DEATH_TEST_CHECK, but it is meant for
+// This macro is similar to GTEST_DEATH_TEST_CHECK_, but it is meant for
 // evaluating any system call that fulfills two conditions: it must return
 // -1 on failure, and set errno to EINTR when it is interrupted and
 // should be tried again.  The macro expands to a loop that repeatedly
 // evaluates the expression as long as it evaluates to -1 and sets
 // errno to EINTR.  If the expression evaluates to -1 but errno is
 // something other than EINTR, DeathTestAbort is called.
-#define GTEST_DEATH_TEST_CHECK_SYSCALL(expression) \
+#define GTEST_DEATH_TEST_CHECK_SYSCALL_(expression) \
   do { \
     int retval; \
     do { \
@@ -303,11 +303,11 @@ static void FailFromInternalError(int fd) {
 
   // TODO(smcafee):  Maybe just FAIL the test instead?
   if (num_read == 0) {
-    GTEST_LOG(FATAL, error);
+    GTEST_LOG_(FATAL, error);
   } else {
-    GTEST_LOG(FATAL,
-              Message() << "Error while reading death test internal: "
-              << strerror(errno) << " [" << errno << "]");
+    GTEST_LOG_(FATAL,
+               Message() << "Error while reading death test internal: "
+               << strerror(errno) << " [" << errno << "]");
   }
 }
 
@@ -343,19 +343,19 @@ int ForkingDeathTest::Wait() {
         FailFromInternalError(read_fd_);  // Does not return.
         break;
       default:
-        GTEST_LOG(FATAL,
-                  Message() << "Death test child process reported unexpected "
-                  << "status byte (" << static_cast<unsigned int>(flag)
-                  << ")");
+        GTEST_LOG_(FATAL,
+                   Message() << "Death test child process reported unexpected "
+                   << "status byte (" << static_cast<unsigned int>(flag)
+                   << ")");
     }
   } else {
-    GTEST_LOG(FATAL,
-              Message() << "Read from death test child process failed: "
-              << strerror(errno));
+    GTEST_LOG_(FATAL,
+               Message() << "Read from death test child process failed: "
+               << strerror(errno));
   }
 
-  GTEST_DEATH_TEST_CHECK_SYSCALL(close(read_fd_));
-  GTEST_DEATH_TEST_CHECK_SYSCALL(waitpid(child_pid_, &status_, 0));
+  GTEST_DEATH_TEST_CHECK_SYSCALL_(close(read_fd_));
+  GTEST_DEATH_TEST_CHECK_SYSCALL_(waitpid(child_pid_, &status_, 0));
   return status_;
 }
 
@@ -418,8 +418,8 @@ bool ForkingDeathTest::Passed(bool status_ok) {
       break;
     case IN_PROGRESS:
     default:
-      GTEST_LOG(FATAL,
-                "DeathTest::Passed somehow called before conclusion of test");
+      GTEST_LOG_(FATAL,
+                 "DeathTest::Passed somehow called before conclusion of test");
   }
 
   last_death_test_message = buffer.GetString();
@@ -436,8 +436,8 @@ void ForkingDeathTest::Abort(AbortReason reason) {
   // to the pipe, then exit.
   const char flag =
       reason == TEST_DID_NOT_DIE ? kDeathTestLived : kDeathTestReturned;
-  GTEST_DEATH_TEST_CHECK_SYSCALL(write(write_fd_, &flag, 1));
-  GTEST_DEATH_TEST_CHECK_SYSCALL(close(write_fd_));
+  GTEST_DEATH_TEST_CHECK_SYSCALL_(write(write_fd_, &flag, 1));
+  GTEST_DEATH_TEST_CHECK_SYSCALL_(close(write_fd_));
   _exit(1);  // Exits w/o any normal exit hooks (we were supposed to crash)
 }
 
@@ -455,11 +455,11 @@ class NoExecDeathTest : public ForkingDeathTest {
 DeathTest::TestRole NoExecDeathTest::AssumeRole() {
   const size_t thread_count = GetThreadCount();
   if (thread_count != 1) {
-    GTEST_LOG(WARNING, DeathTestThreadWarning(thread_count));
+    GTEST_LOG_(WARNING, DeathTestThreadWarning(thread_count));
   }
 
   int pipe_fd[2];
-  GTEST_DEATH_TEST_CHECK(pipe(pipe_fd) != -1);
+  GTEST_DEATH_TEST_CHECK_(pipe(pipe_fd) != -1);
 
   last_death_test_message = "";
   CaptureStderr();
@@ -473,10 +473,10 @@ DeathTest::TestRole NoExecDeathTest::AssumeRole() {
   FlushInfoLog();
 
   const pid_t child_pid = fork();
-  GTEST_DEATH_TEST_CHECK(child_pid != -1);
+  GTEST_DEATH_TEST_CHECK_(child_pid != -1);
   set_child_pid(child_pid);
   if (child_pid == 0) {
-    GTEST_DEATH_TEST_CHECK_SYSCALL(close(pipe_fd[0]));
+    GTEST_DEATH_TEST_CHECK_SYSCALL_(close(pipe_fd[0]));
     set_write_fd(pipe_fd[1]);
     // Redirects all logging to stderr in the child process to prevent
     // concurrent writes to the log files.  We capture stderr in the parent
@@ -484,7 +484,7 @@ DeathTest::TestRole NoExecDeathTest::AssumeRole() {
     LogToStderr();
     return EXECUTE_TEST;
   } else {
-    GTEST_DEATH_TEST_CHECK_SYSCALL(close(pipe_fd[1]));
+    GTEST_DEATH_TEST_CHECK_SYSCALL_(close(pipe_fd[1]));
     set_read_fd(pipe_fd[0]);
     set_forked(true);
     return OVERSEE_TEST;
@@ -551,7 +551,7 @@ struct ExecDeathTestArgs {
 // any potentially unsafe operations like malloc or libc functions.
 static int ExecDeathTestChildMain(void* child_arg) {
   ExecDeathTestArgs* const args = static_cast<ExecDeathTestArgs*>(child_arg);
-  GTEST_DEATH_TEST_CHECK_SYSCALL(close(args->close_fd));
+  GTEST_DEATH_TEST_CHECK_SYSCALL_(close(args->close_fd));
 
   // We need to execute the test program in the same environment where
   // it was originally invoked.  Therefore we change to the original
@@ -599,14 +599,14 @@ static pid_t ExecDeathTestFork(char* const* argv, int close_fd) {
   const size_t stack_size = getpagesize();
   void* const stack = mmap(NULL, stack_size, PROT_READ | PROT_WRITE,
                            MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
-  GTEST_DEATH_TEST_CHECK(stack != MAP_FAILED);
+  GTEST_DEATH_TEST_CHECK_(stack != MAP_FAILED);
   void* const stack_top =
       static_cast<char*>(stack) + (stack_grows_down ? stack_size : 0);
   ExecDeathTestArgs args = { argv, close_fd };
   const pid_t child_pid = clone(&ExecDeathTestChildMain, stack_top,
                                 SIGCHLD, &args);
-  GTEST_DEATH_TEST_CHECK(child_pid != -1);
-  GTEST_DEATH_TEST_CHECK(munmap(stack, stack_size) != -1);
+  GTEST_DEATH_TEST_CHECK_(child_pid != -1);
+  GTEST_DEATH_TEST_CHECK_(munmap(stack, stack_size) != -1);
   return child_pid;
 }
 
@@ -627,10 +627,10 @@ DeathTest::TestRole ExecDeathTest::AssumeRole() {
   }
 
   int pipe_fd[2];
-  GTEST_DEATH_TEST_CHECK(pipe(pipe_fd) != -1);
+  GTEST_DEATH_TEST_CHECK_(pipe(pipe_fd) != -1);
   // Clear the close-on-exec flag on the write end of the pipe, lest
   // it be closed when the child process does an exec:
-  GTEST_DEATH_TEST_CHECK(fcntl(pipe_fd[1], F_SETFD, 0) != -1);
+  GTEST_DEATH_TEST_CHECK_(fcntl(pipe_fd[1], F_SETFD, 0) != -1);
 
   const String filter_flag =
       String::Format("--%s%s=%s.%s",
@@ -654,7 +654,7 @@ DeathTest::TestRole ExecDeathTest::AssumeRole() {
   FlushInfoLog();
 
   const pid_t child_pid = ExecDeathTestFork(args.Argv(), pipe_fd[0]);
-  GTEST_DEATH_TEST_CHECK_SYSCALL(close(pipe_fd[1]));
+  GTEST_DEATH_TEST_CHECK_SYSCALL_(close(pipe_fd[1]));
   set_child_pid(child_pid);
   set_read_fd(pipe_fd[0]);
   set_forked(true);

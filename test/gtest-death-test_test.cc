@@ -115,7 +115,7 @@ class MayDie {
   // A member function that may die.
   void MemberFunction() const {
     if (should_die_) {
-      GTEST_LOG(FATAL, "death inside MayDie::MemberFunction().");
+      GTEST_LOG_(FATAL, "death inside MayDie::MemberFunction().");
     }
   }
 
@@ -126,26 +126,26 @@ class MayDie {
 
 // A global function that's expected to die.
 void GlobalFunction() {
-  GTEST_LOG(FATAL, "death inside GlobalFunction().");
+  GTEST_LOG_(FATAL, "death inside GlobalFunction().");
 }
 
 // A non-void function that's expected to die.
 int NonVoidFunction() {
-  GTEST_LOG(FATAL, "death inside NonVoidFunction().");
+  GTEST_LOG_(FATAL, "death inside NonVoidFunction().");
   return 1;
 }
 
 // A unary function that may die.
 void DieIf(bool should_die) {
   if (should_die) {
-    GTEST_LOG(FATAL, "death inside DieIf().");
+    GTEST_LOG_(FATAL, "death inside DieIf().");
   }
 }
 
 // A binary function that may die.
 bool DieIfLessThan(int x, int y) {
   if (x < y) {
-    GTEST_LOG(FATAL, "death inside DieIfLessThan().");
+    GTEST_LOG_(FATAL, "death inside DieIfLessThan().");
   }
   return true;
 }
@@ -160,7 +160,7 @@ void DeathTestSubroutine() {
 int DieInDebugElse12(int* sideeffect) {
   if (sideeffect) *sideeffect = 12;
 #ifndef NDEBUG
-  GTEST_LOG(FATAL, "debug death inside DieInDebugElse12()");
+  GTEST_LOG_(FATAL, "debug death inside DieInDebugElse12()");
 #endif  // NDEBUG
   return 12;
 }
@@ -717,7 +717,7 @@ bool MockDeathTestFactory::Create(const char* statement,
   return true;
 }
 
-// A test fixture for testing the logic of the GTEST_DEATH_TEST macro.
+// A test fixture for testing the logic of the GTEST_DEATH_TEST_ macro.
 // It installs a MockDeathTestFactory that is used for the duration
 // of the test case.
 class MacroLogicDeathTest : public testing::Test {

@@ -46,9 +46,9 @@
 
 namespace testing {
 
-GTEST_DECLARE_string(death_test_style);
-GTEST_DECLARE_string(filter);
-GTEST_DECLARE_int32(repeat);
+GTEST_DECLARE_string_(death_test_style);
+GTEST_DECLARE_string_(filter);
+GTEST_DECLARE_int32_(repeat);
 
 }  // namespace testing
 

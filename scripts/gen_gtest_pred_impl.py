@@ -149,11 +149,11 @@ def HeaderPreamble(n):
 // Please email googletestframework@googlegroups.com if you need
 // support for higher arities.
 
-// GTEST_ASSERT is the basic statement to which all of the assertions
+// GTEST_ASSERT_ is the basic statement to which all of the assertions
 // in this file reduce.  Don't use this in your code.
 
-#define GTEST_ASSERT(expression, on_failure) \\
-  GTEST_AMBIGUOUS_ELSE_BLOCKER \\
+#define GTEST_ASSERT_(expression, on_failure) \\
+  GTEST_AMBIGUOUS_ELSE_BLOCKER_ \\
   if (const ::testing::AssertionResult gtest_ar = (expression)) \\
     ; \\
   else \\
@@ -257,35 +257,35 @@ AssertionResult AssertPred%(n)sHelper(const char* pred_text""" % DEFS
 
 // Internal macro for implementing {EXPECT|ASSERT}_PRED_FORMAT%(n)s.
 // Don't use this in your code.
-#define GTEST_PRED_FORMAT%(n)s(pred_format, %(vs)s, on_failure)\\
-  GTEST_ASSERT(pred_format(%(vts)s, %(vs)s),\\
-               on_failure)
+#define GTEST_PRED_FORMAT%(n)s_(pred_format, %(vs)s, on_failure)\\
+  GTEST_ASSERT_(pred_format(%(vts)s, %(vs)s),\\
+                on_failure)
 
 // Internal macro for implementing {EXPECT|ASSERT}_PRED%(n)s.  Don't use
 // this in your code.
-#define GTEST_PRED%(n)s(pred, %(vs)s, on_failure)\\
-  GTEST_ASSERT(::testing::AssertPred%(n)sHelper(#pred""" % DEFS
+#define GTEST_PRED%(n)s_(pred, %(vs)s, on_failure)\\
+  GTEST_ASSERT_(::testing::AssertPred%(n)sHelper(#pred""" % DEFS
 
   impl += Iter(n, """, \\
-                                 #v%s""")
+                                             #v%s""")
 
   impl += """, \\
-                                 pred"""
+                                             pred"""
 
   impl += Iter(n, """, \\
-                                 v%s""")
+                                             v%s""")
 
   impl += """), on_failure)
 
 // %(Arity)s predicate assertion macros.
 #define EXPECT_PRED_FORMAT%(n)s(pred_format, %(vs)s) \\
-  GTEST_PRED_FORMAT%(n)s(pred_format, %(vs)s, GTEST_NONFATAL_FAILURE)
+  GTEST_PRED_FORMAT%(n)s_(pred_format, %(vs)s, GTEST_NONFATAL_FAILURE_)
 #define EXPECT_PRED%(n)s(pred, %(vs)s) \\
-  GTEST_PRED%(n)s(pred, %(vs)s, GTEST_NONFATAL_FAILURE)
+  GTEST_PRED%(n)s_(pred, %(vs)s, GTEST_NONFATAL_FAILURE_)
 #define ASSERT_PRED_FORMAT%(n)s(pred_format, %(vs)s) \\
-  GTEST_PRED_FORMAT%(n)s(pred_format, %(vs)s, GTEST_FATAL_FAILURE)
+  GTEST_PRED_FORMAT%(n)s_(pred_format, %(vs)s, GTEST_FATAL_FAILURE_)
 #define ASSERT_PRED%(n)s(pred, %(vs)s) \\
-  GTEST_PRED%(n)s(pred, %(vs)s, GTEST_FATAL_FAILURE)
+  GTEST_PRED%(n)s_(pred, %(vs)s, GTEST_FATAL_FAILURE_)
 
 """ % DEFS
 
