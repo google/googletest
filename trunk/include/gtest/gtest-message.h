@@ -102,7 +102,7 @@ class Message {
   }
 
   ~Message() { delete ss_; }
-#ifdef __SYMBIAN32__
+#ifdef GTEST_OS_SYMBIAN
   // Streams a value (either a pointer or not) to this object.
   template <typename T>
   inline Message& operator <<(const T& value) {
@@ -139,7 +139,7 @@ class Message {
     }
     return *this;
   }
-#endif  // __SYMBIAN32__
+#endif  // GTEST_OS_SYMBIAN
 
   // Since the basic IO manipulators are overloaded for both narrow
   // and wide streams, we have to provide this specialized definition
@@ -187,7 +187,7 @@ class Message {
   }
 
  private:
-#ifdef __SYMBIAN32__
+#ifdef GTEST_OS_SYMBIAN
   // These are needed as the Nokia Symbian Compiler cannot decide between
   // const T& and const T* in a function template. The Nokia compiler _can_
   // decide between class template specializations for T and T*, so a
@@ -204,7 +204,7 @@ class Message {
   inline void StreamHelper(internal::false_type dummy, const T& value) {
     ::GTestStreamToHelper(ss_, value);
   }
-#endif  // __SYMBIAN32__
+#endif  // GTEST_OS_SYMBIAN
 
   // We'll hold the text streamed to this object here.
   internal::StrStream* const ss_;

@@ -46,13 +46,19 @@
 
 #include <stdlib.h>
 
+#if GTEST_HAS_PTHREAD
+#include <pthread.h>
+#endif  // GTEST_HAS_PTHREAD
+
 #ifdef GTEST_OS_LINUX
 #include <string.h>
 #include <signal.h>
-#include <pthread.h>
 #include <string>
 #include <vector>
 #endif  // GTEST_OS_LINUX
+
+using testing::ScopedFakeTestPartResultReporter;
+using testing::TestPartResultArray;
 
 // Tests catching fatal failures.
 
@@ -789,6 +795,134 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, ATypeParamDeathTest, NumericTypes);
 #endif  // GTEST_HAS_TYPED_TEST_P
 
 #endif  // GTEST_HAS_DEATH_TEST
+
+// Tests various failure conditions of
+// EXPECT_{,NON}FATAL_FAILURE{,_ON_ALL_THREADS}.
+class ExpectFailureTest : public testing::Test {
+ protected:
+  enum FailureMode {
+    FATAL_FAILURE,
+    NONFATAL_FAILURE
+  };
+  static void AddFailure(FailureMode failure) {
+    if (failure == FATAL_FAILURE) {
+      FAIL() << "Expected fatal failure.";
+    } else {
+      ADD_FAILURE() << "Expected non-fatal failure.";
+    }
+  }
+};
+
+TEST_F(ExpectFailureTest, ExpectFatalFailure) {
+  // Expected fatal failure, but succeeds.
+  printf("(expecting 1 failure)\n");
+  EXPECT_FATAL_FAILURE(SUCCEED(), "Expected fatal failure.");
+  // Expected fatal failure, but got a non-fatal failure.
+  printf("(expecting 1 failure)\n");
+  EXPECT_FATAL_FAILURE(AddFailure(NONFATAL_FAILURE), "Expected non-fatal "
+                       "failure.");
+  // Wrong message.
+  printf("(expecting 1 failure)\n");
+  EXPECT_FATAL_FAILURE(AddFailure(FATAL_FAILURE), "Some other fatal failure "
+                       "expected.");
+}
+
+TEST_F(ExpectFailureTest, ExpectNonFatalFailure) {
+  // Expected non-fatal failure, but succeeds.
+  printf("(expecting 1 failure)\n");
+  EXPECT_NONFATAL_FAILURE(SUCCEED(), "Expected non-fatal failure.");
+  // Expected non-fatal failure, but got a fatal failure.
+  printf("(expecting 1 failure)\n");
+  EXPECT_NONFATAL_FAILURE(AddFailure(FATAL_FAILURE), "Expected fatal failure.");
+  // Wrong message.
+  printf("(expecting 1 failure)\n");
+  EXPECT_NONFATAL_FAILURE(AddFailure(NONFATAL_FAILURE), "Some other non-fatal "
+                          "failure.");
+}
+
+#if GTEST_IS_THREADSAFE && GTEST_HAS_PTHREAD
+
+class ExpectFailureWithThreadsTest : public ExpectFailureTest {
+ protected:
+  static void AddFailureInOtherThread(FailureMode failure) {
+    pthread_t tid;
+    pthread_create(&tid,
+                   NULL,
+                   ExpectFailureWithThreadsTest::FailureThread,
+                   &failure);
+    pthread_join(tid, NULL);
+  }
+ private:
+  static void* FailureThread(void* attr) {
+    FailureMode* failure = static_cast<FailureMode*>(attr);
+    AddFailure(*failure);
+    return NULL;
+  }
+};
+
+TEST_F(ExpectFailureWithThreadsTest, ExpectFatalFailure) {
+  // We only intercept the current thread.
+  printf("(expecting 2 failures)\n");
+  EXPECT_FATAL_FAILURE(AddFailureInOtherThread(FATAL_FAILURE),
+                       "Expected fatal failure.");
+}
+
+TEST_F(ExpectFailureWithThreadsTest, ExpectNonFatalFailure) {
+  // We only intercept the current thread.
+  printf("(expecting 2 failures)\n");
+  EXPECT_NONFATAL_FAILURE(AddFailureInOtherThread(NONFATAL_FAILURE),
+                          "Expected non-fatal failure.");
+}
+
+typedef ExpectFailureWithThreadsTest ScopedFakeTestPartResultReporterTest;
+
+// Tests that the ScopedFakeTestPartResultReporter only catches failures from
+// the current thread if it is instantiated with INTERCEPT_ONLY_CURRENT_THREAD.
+TEST_F(ScopedFakeTestPartResultReporterTest, InterceptOnlyCurrentThread) {
+  printf("(expecting 2 failures)\n");
+  TestPartResultArray results;
+  {
+    ScopedFakeTestPartResultReporter reporter(
+        ScopedFakeTestPartResultReporter::INTERCEPT_ONLY_CURRENT_THREAD,
+        &results);
+    AddFailureInOtherThread(FATAL_FAILURE);
+    AddFailureInOtherThread(NONFATAL_FAILURE);
+  }
+  // The two failures should not have been intercepted.
+  EXPECT_EQ(0, results.size()) << "This shouldn't fail.";
+}
+
+#endif  // GTEST_IS_THREADSAFE && GTEST_HAS_PTHREAD
+
+TEST_F(ExpectFailureTest, ExpectFatalFailureOnAllThreads) {
+  // Expected fatal failure, but succeeds.
+  printf("(expecting 1 failure)\n");
+  EXPECT_FATAL_FAILURE_ON_ALL_THREADS(SUCCEED(), "Expected fatal failure.");
+  // Expected fatal failure, but got a non-fatal failure.
+  printf("(expecting 1 failure)\n");
+  EXPECT_FATAL_FAILURE_ON_ALL_THREADS(AddFailure(NONFATAL_FAILURE),
+                                      "Expected non-fatal failure.");
+  // Wrong message.
+  printf("(expecting 1 failure)\n");
+  EXPECT_FATAL_FAILURE_ON_ALL_THREADS(AddFailure(FATAL_FAILURE),
+                                      "Some other fatal failure expected.");
+}
+
+TEST_F(ExpectFailureTest, ExpectNonFatalFailureOnAllThreads) {
+  // Expected non-fatal failure, but succeeds.
+  printf("(expecting 1 failure)\n");
+  EXPECT_NONFATAL_FAILURE_ON_ALL_THREADS(SUCCEED(), "Expected non-fatal "
+                                         "failure.");
+  // Expected non-fatal failure, but got a fatal failure.
+  printf("(expecting 1 failure)\n");
+  EXPECT_NONFATAL_FAILURE_ON_ALL_THREADS(AddFailure(FATAL_FAILURE),
+                                         "Expected fatal failure.");
+  // Wrong message.
+  printf("(expecting 1 failure)\n");
+  EXPECT_NONFATAL_FAILURE_ON_ALL_THREADS(AddFailure(NONFATAL_FAILURE),
+                                         "Some other non-fatal failure.");
+}
+
 
 // Two test environments for testing testing::AddGlobalTestEnvironment().
 

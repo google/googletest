@@ -7,7 +7,7 @@ Expected: true
 gtest_output_test_.cc:#: Failure
 Value of: 3
 Expected: 2
-[0;32m[==========] [mRunning 48 tests from 21 test cases.
+[0;32m[==========] [mRunning 52 tests from 22 test cases.
 [0;32m[----------] [mGlobal test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -386,6 +386,107 @@ Value of: TypeParam()
 Expected: 1
 Expected failure
 [0;31m[  FAILED  ] [mUnsigned/TypedTestP/1.Failure
+[0;32m[----------] [m4 tests from ExpectFailureTest
+[0;32m[ RUN      ] [mExpectFailureTest.ExpectFatalFailure
+(expecting 1 failure)
+gtest.cc:#: Failure
+Expected: 1 fatal failure
+  Actual:
+gtest_output_test_.cc:#: Success:
+Succeeded
+
+(expecting 1 failure)
+gtest.cc:#: Failure
+Expected: 1 fatal failure
+  Actual:
+gtest_output_test_.cc:#: Non-fatal failure:
+Failed
+Expected non-fatal failure.
+
+(expecting 1 failure)
+gtest.cc:#: Failure
+Expected: 1 fatal failure containing "Some other fatal failure expected."
+  Actual:
+gtest_output_test_.cc:#: Fatal failure:
+Failed
+Expected fatal failure.
+
+[0;31m[  FAILED  ] [mExpectFailureTest.ExpectFatalFailure
+[0;32m[ RUN      ] [mExpectFailureTest.ExpectNonFatalFailure
+(expecting 1 failure)
+gtest.cc:#: Failure
+Expected: 1 non-fatal failure
+  Actual:
+gtest_output_test_.cc:#: Success:
+Succeeded
+
+(expecting 1 failure)
+gtest.cc:#: Failure
+Expected: 1 non-fatal failure
+  Actual:
+gtest_output_test_.cc:#: Fatal failure:
+Failed
+Expected fatal failure.
+
+(expecting 1 failure)
+gtest.cc:#: Failure
+Expected: 1 non-fatal failure containing "Some other non-fatal failure."
+  Actual:
+gtest_output_test_.cc:#: Non-fatal failure:
+Failed
+Expected non-fatal failure.
+
+[0;31m[  FAILED  ] [mExpectFailureTest.ExpectNonFatalFailure
+[0;32m[ RUN      ] [mExpectFailureTest.ExpectFatalFailureOnAllThreads
+(expecting 1 failure)
+gtest.cc:#: Failure
+Expected: 1 fatal failure
+  Actual:
+gtest_output_test_.cc:#: Success:
+Succeeded
+
+(expecting 1 failure)
+gtest.cc:#: Failure
+Expected: 1 fatal failure
+  Actual:
+gtest_output_test_.cc:#: Non-fatal failure:
+Failed
+Expected non-fatal failure.
+
+(expecting 1 failure)
+gtest.cc:#: Failure
+Expected: 1 fatal failure containing "Some other fatal failure expected."
+  Actual:
+gtest_output_test_.cc:#: Fatal failure:
+Failed
+Expected fatal failure.
+
+[0;31m[  FAILED  ] [mExpectFailureTest.ExpectFatalFailureOnAllThreads
+[0;32m[ RUN      ] [mExpectFailureTest.ExpectNonFatalFailureOnAllThreads
+(expecting 1 failure)
+gtest.cc:#: Failure
+Expected: 1 non-fatal failure
+  Actual:
+gtest_output_test_.cc:#: Success:
+Succeeded
+
+(expecting 1 failure)
+gtest.cc:#: Failure
+Expected: 1 non-fatal failure
+  Actual:
+gtest_output_test_.cc:#: Fatal failure:
+Failed
+Expected fatal failure.
+
+(expecting 1 failure)
+gtest.cc:#: Failure
+Expected: 1 non-fatal failure containing "Some other non-fatal failure."
+  Actual:
+gtest_output_test_.cc:#: Non-fatal failure:
+Failed
+Expected non-fatal failure.
+
+[0;31m[  FAILED  ] [mExpectFailureTest.ExpectNonFatalFailureOnAllThreads
 [0;32m[----------] [mGlobal test environment tear-down
 BarEnvironment::TearDown() called.
 gtest_output_test_.cc:#: Failure
@@ -395,9 +496,9 @@ FooEnvironment::TearDown() called.
 gtest_output_test_.cc:#: Failure
 Failed
 Expected fatal failure.
-[0;32m[==========] [m48 tests from 21 test cases ran.
+[0;32m[==========] [m52 tests from 22 test cases ran.
 [0;32m[  PASSED  ] [m19 tests.
-[0;31m[  FAILED  ] [m29 tests, listed below:
+[0;31m[  FAILED  ] [m33 tests, listed below:
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInSubroutine
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInNestedSubroutine
 [0;31m[  FAILED  ] [mFatalFailureTest.NonfatalFailureInSubroutine
@@ -427,8 +528,12 @@ Expected fatal failure.
 [0;31m[  FAILED  ] [mTypedTest/0.Failure, where TypeParam = int
 [0;31m[  FAILED  ] [mUnsigned/TypedTestP/0.Failure, where TypeParam = unsigned char
 [0;31m[  FAILED  ] [mUnsigned/TypedTestP/1.Failure, where TypeParam = unsigned int
+[0;31m[  FAILED  ] [mExpectFailureTest.ExpectFatalFailure
+[0;31m[  FAILED  ] [mExpectFailureTest.ExpectNonFatalFailure
+[0;31m[  FAILED  ] [mExpectFailureTest.ExpectFatalFailureOnAllThreads
+[0;31m[  FAILED  ] [mExpectFailureTest.ExpectNonFatalFailureOnAllThreads
 
-29 FAILED TESTS
+33 FAILED TESTS
 The non-test part of the code is expected to have 2 failures.
 
 gtest_output_test_.cc:#: Failure

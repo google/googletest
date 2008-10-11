@@ -37,27 +37,25 @@
 #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
 
 // The user can define the following macros in the build script to
-// control Google Test's behavior:
+// control Google Test's behavior.  If the user doesn't define a macro
+// in this list, Google Test will define it.
 //
 //   GTEST_HAS_STD_STRING     - Define it to 1/0 to indicate that
 //                              std::string does/doesn't work (Google Test can
 //                              be used where std::string is unavailable).
-//                              Leave it undefined to let Google Test define it.
 //   GTEST_HAS_GLOBAL_STRING  - Define it to 1/0 to indicate that ::string
 //                              is/isn't available (some systems define
 //                              ::string, which is different to std::string).
-//                              Leave it undefined to let Google Test define it.
 //   GTEST_HAS_STD_WSTRING    - Define it to 1/0 to indicate that
 //                              std::wstring does/doesn't work (Google Test can
 //                              be used where std::wstring is unavailable).
-//                              Leave it undefined to let Google Test define it.
 //   GTEST_HAS_GLOBAL_WSTRING - Define it to 1/0 to indicate that ::string
 //                              is/isn't available (some systems define
 //                              ::wstring, which is different to std::wstring).
-//                              Leave it undefined to let Google Test define it.
 //   GTEST_HAS_RTTI           - Define it to 1/0 to indicate that RTTI is/isn't
-//                              enabled.  Leave it undefined to let Google
-//                              Test define it.
+//                              enabled.
+//   GTEST_HAS_PTHREAD        - Define it to 1/0 to indicate that <pthread.h>
+//                              is/isn't available.
 
 // This header defines the following utilities:
 //
@@ -72,6 +70,7 @@
 //   GTEST_OS_CYGWIN   - defined iff compiled on Cygwin.
 //   GTEST_OS_LINUX    - defined iff compiled on Linux.
 //   GTEST_OS_MAC      - defined iff compiled on Mac OS X.
+//   GTEST_OS_SYMBIAN  - defined iff compiled for Symbian.
 //   GTEST_OS_WINDOWS  - defined iff compiled on Windows.
 // Note that it is possible that none of the GTEST_OS_ macros are defined.
 //
@@ -82,15 +81,18 @@
 //                            supported.
 //
 // Macros for basic C++ coding:
-//   GTEST_AMBIGUOUS_ELSE_BLOCKER - for disabling a gcc warning.
-//   GTEST_ATTRIBUTE_UNUSED  - declares that a class' instances don't have to
-//                             be used.
-//   GTEST_DISALLOW_COPY_AND_ASSIGN()  - disables copy ctor and operator=.
-//   GTEST_MUST_USE_RESULT   - declares that a function's result must be used.
+//   GTEST_AMBIGUOUS_ELSE_BLOCKER_ - for disabling a gcc warning.
+//   GTEST_ATTRIBUTE_UNUSED_  - declares that a class' instances don't have to
+//                              be used.
+//   GTEST_DISALLOW_COPY_AND_ASSIGN_ - disables copy ctor and operator=.
+//   GTEST_MUST_USE_RESULT_   - declares that a function's result must be used.
 //
 // Synchronization:
 //   Mutex, MutexLock, ThreadLocal, GetThreadCount()
 //                  - synchronization primitives.
+//   GTEST_IS_THREADSAFE - defined to 1 to indicate that the above
+//                         synchronization primitives have real implementations
+//                         and Google Test is thread-safe; or 0 otherwise.
 //
 // Template meta programming:
 //   is_pointer     - as in TR1; needed on Symbian only.
@@ -104,7 +106,7 @@
 //                    Windows.
 //
 // Logging:
-//   GTEST_LOG()    - logs messages at the specified severity level.
+//   GTEST_LOG_()   - logs messages at the specified severity level.
 //   LogToStderr()  - directs all log messages to stderr.
 //   FlushInfoLog() - flushes informational log messages.
 //
@@ -148,6 +150,8 @@
 // Determines the platform on which Google Test is compiled.
 #ifdef __CYGWIN__
 #define GTEST_OS_CYGWIN
+#elif __SYMBIAN32__
+#define GTEST_OS_SYMBIAN
 #elif defined _MSC_VER
 // TODO(kenton@google.com): GTEST_OS_WINDOWS is currently used to mean
 //   both "The OS is Windows" and "The compiler is MSVC".  These
@@ -261,6 +265,18 @@
 
 #endif  // GTEST_HAS_RTTI
 
+// Determines whether <pthread.h> is available.
+#ifndef GTEST_HAS_PTHREAD
+// The user didn't tell us, so we need to figure it out.
+
+#if defined(GTEST_OS_LINUX) || defined(GTEST_OS_MAC)
+#define GTEST_HAS_PTHREAD 1
+#else
+#define GTEST_HAS_PTHREAD 0
+#endif  // GTEST_OS_LINUX || GTEST_OS_MAC
+
+#endif  // GTEST_HAS_PTHREAD
+
 // Determines whether to support death tests.
 #if GTEST_HAS_STD_STRING && defined(GTEST_OS_LINUX)
 #define GTEST_HAS_DEATH_TEST
@@ -285,7 +301,7 @@
 
 // Determines whether the system compiler uses UTF-16 for encoding wide strings.
 #if defined(GTEST_OS_WINDOWS) || defined(GTEST_OS_CYGWIN) || \
-        defined(__SYMBIAN32__)
+        defined(GTEST_OS_SYMBIAN)
 #define GTEST_WIDE_STRING_USES_UTF16_ 1
 #endif
 
@@ -300,9 +316,9 @@
 //
 // The "switch (0) case 0:" idiom is used to suppress this.
 #ifdef __INTEL_COMPILER
-#define GTEST_AMBIGUOUS_ELSE_BLOCKER
+#define GTEST_AMBIGUOUS_ELSE_BLOCKER_
 #else
-#define GTEST_AMBIGUOUS_ELSE_BLOCKER switch (0) case 0:  // NOLINT
+#define GTEST_AMBIGUOUS_ELSE_BLOCKER_ switch (0) case 0:  // NOLINT
 #endif
 
 // Use this annotation at the end of a struct / class definition to
@@ -312,16 +328,16 @@
 //
 //   struct Foo {
 //     Foo() { ... }
-//   } GTEST_ATTRIBUTE_UNUSED;
+//   } GTEST_ATTRIBUTE_UNUSED_;
 #if defined(__GNUC__) && !defined(COMPILER_ICC)
-#define GTEST_ATTRIBUTE_UNUSED __attribute__ ((unused))
+#define GTEST_ATTRIBUTE_UNUSED_ __attribute__ ((unused))
 #else
-#define GTEST_ATTRIBUTE_UNUSED
+#define GTEST_ATTRIBUTE_UNUSED_
 #endif
 
 // A macro to disallow the evil copy constructor and operator= functions
 // This should be used in the private: declarations for a class.
-#define GTEST_DISALLOW_COPY_AND_ASSIGN(type)\
+#define GTEST_DISALLOW_COPY_AND_ASSIGN_(type)\
   type(const type &);\
   void operator=(const type &)
 
@@ -329,11 +345,11 @@
 // with this macro.  The macro should be used on function declarations
 // following the argument list:
 //
-//   Sprocket* AllocateSprocket() GTEST_MUST_USE_RESULT;
+//   Sprocket* AllocateSprocket() GTEST_MUST_USE_RESULT_;
 #if defined(__GNUC__) && (GTEST_GCC_VER_ >= 30400) && !defined(COMPILER_ICC)
-#define GTEST_MUST_USE_RESULT __attribute__ ((warn_unused_result))
+#define GTEST_MUST_USE_RESULT_ __attribute__ ((warn_unused_result))
 #else
-#define GTEST_MUST_USE_RESULT
+#define GTEST_MUST_USE_RESULT_
 #endif  // __GNUC__ && (GTEST_GCC_VER_ >= 30400) && !COMPILER_ICC
 
 namespace testing {
@@ -385,7 +401,7 @@ class scoped_ptr {
  private:
   T* ptr_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN(scoped_ptr);
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(scoped_ptr);
 };
 
 #ifdef GTEST_HAS_DEATH_TEST
@@ -444,7 +460,7 @@ class RE {
 #endif  // GTEST_HAS_DEATH_TEST
 
 // Defines logging utilities:
-//   GTEST_LOG()    - logs messages at the specified severity level.
+//   GTEST_LOG_()   - logs messages at the specified severity level.
 //   LogToStderr()  - directs all log messages to stderr.
 //   FlushInfoLog() - flushes informational log messages.
 
@@ -458,7 +474,7 @@ enum GTestLogSeverity {
 void GTestLog(GTestLogSeverity severity, const char* file,
               int line, const char* msg);
 
-#define GTEST_LOG(severity, msg)\
+#define GTEST_LOG_(severity, msg)\
     ::testing::internal::GTestLog(\
         ::testing::internal::GTEST_##severity, __FILE__, __LINE__, \
         (::testing::Message() << (msg)).GetString().c_str())
@@ -510,6 +526,8 @@ typedef GTestMutexLock MutexLock;
 template <typename T>
 class ThreadLocal {
  public:
+  ThreadLocal() : value_() {}
+  explicit ThreadLocal(const T& value) : value_(value) {}
   T* pointer() { return &value_; }
   const T* pointer() const { return &value_; }
   const T& get() const { return value_; }
@@ -521,6 +539,10 @@ class ThreadLocal {
 // There's no portable way to detect the number of threads, so we just
 // return 0 to indicate that we cannot detect it.
 inline size_t GetThreadCount() { return 0; }
+
+// The above synchronization primitives have dummy implementations.
+// Therefore Google Test is not thread-safe.
+#define GTEST_IS_THREADSAFE 0
 
 // Defines tr1::is_pointer (only needed for Symbian).
 
@@ -657,18 +679,18 @@ inline void abort() { ::abort(); }
 #define GTEST_FLAG(name) FLAGS_gtest_##name
 
 // Macros for declaring flags.
-#define GTEST_DECLARE_bool(name) extern bool GTEST_FLAG(name)
-#define GTEST_DECLARE_int32(name) \
+#define GTEST_DECLARE_bool_(name) extern bool GTEST_FLAG(name)
+#define GTEST_DECLARE_int32_(name) \
     extern ::testing::internal::Int32 GTEST_FLAG(name)
-#define GTEST_DECLARE_string(name) \
+#define GTEST_DECLARE_string_(name) \
     extern ::testing::internal::String GTEST_FLAG(name)
 
 // Macros for defining flags.
-#define GTEST_DEFINE_bool(name, default_val, doc) \
+#define GTEST_DEFINE_bool_(name, default_val, doc) \
     bool GTEST_FLAG(name) = (default_val)
-#define GTEST_DEFINE_int32(name, default_val, doc) \
+#define GTEST_DEFINE_int32_(name, default_val, doc) \
     ::testing::internal::Int32 GTEST_FLAG(name) = (default_val)
-#define GTEST_DEFINE_string(name, default_val, doc) \
+#define GTEST_DEFINE_string_(name, default_val, doc) \
     ::testing::internal::String GTEST_FLAG(name) = (default_val)
 
 // Parses 'str' for a 32-bit signed integer.  If successful, writes the result

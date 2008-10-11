@@ -36,10 +36,14 @@
 
 #ifdef _WIN32_WCE
 #include <windows.h>
-#elif defined(_WIN32)
+#elif defined(GTEST_OS_WINDOWS)
 #include <direct.h>
 #include <io.h>
 #include <sys/stat.h>
+#elif defined(GTEST_OS_SYMBIAN)
+// Symbian OpenC has PATH_MAX in sys/syslimits.h
+#include <sys/syslimits.h>
+#include <unistd.h>
 #else
 #include <sys/stat.h>
 #include <unistd.h>
@@ -249,7 +253,7 @@ bool FilePath::CreateDirectoriesRecursively() const {
 // directory for any reason, including if the parent directory does not
 // exist. Not named "CreateDirectory" because that's a macro on Windows.
 bool FilePath::CreateFolder() const {
-#ifdef _WIN32
+#ifdef GTEST_OS_WINDOWS
 #ifdef _WIN32_WCE
   FilePath removed_sep(this->RemoveTrailingPathSeparator());
   LPCWSTR unicode = String::AnsiToUtf16(removed_sep.c_str());

@@ -64,16 +64,16 @@ namespace testing {
 // We don't want the users to modify these flags in the code, but want
 // Google Test's own unit tests to be able to access them.  Therefore we
 // declare them here as opposed to in gtest.h.
-GTEST_DECLARE_bool(break_on_failure);
-GTEST_DECLARE_bool(catch_exceptions);
-GTEST_DECLARE_string(color);
-GTEST_DECLARE_string(filter);
-GTEST_DECLARE_bool(list_tests);
-GTEST_DECLARE_string(output);
-GTEST_DECLARE_bool(print_time);
-GTEST_DECLARE_int32(repeat);
-GTEST_DECLARE_int32(stack_trace_depth);
-GTEST_DECLARE_bool(show_internal_stack_frames);
+GTEST_DECLARE_bool_(break_on_failure);
+GTEST_DECLARE_bool_(catch_exceptions);
+GTEST_DECLARE_string_(color);
+GTEST_DECLARE_string_(filter);
+GTEST_DECLARE_bool_(list_tests);
+GTEST_DECLARE_string_(output);
+GTEST_DECLARE_bool_(print_time);
+GTEST_DECLARE_int32_(repeat);
+GTEST_DECLARE_int32_(stack_trace_depth);
+GTEST_DECLARE_bool_(show_internal_stack_frames);
 
 namespace internal {
 
@@ -131,7 +131,7 @@ class GTestFlagSaver {
   bool print_time_;
   bool pretty_;
   internal::Int32 repeat_;
-} GTEST_ATTRIBUTE_UNUSED;
+} GTEST_ATTRIBUTE_UNUSED_;
 
 // Converts a Unicode code point to a narrow string in UTF-8 encoding.
 // code_point parameter is of type UInt32 because wchar_t may not be
@@ -200,7 +200,7 @@ class ListNode {
   explicit ListNode(const E & element) : element_(element), next_(NULL) {}
 
   // We disallow copying ListNode
-  GTEST_DISALLOW_COPY_AND_ASSIGN(ListNode);
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(ListNode);
 
  public:
 
@@ -399,7 +399,7 @@ class List {
   int size_;           // The number of elements in the list.
 
   // We disallow copying List.
-  GTEST_DISALLOW_COPY_AND_ASSIGN(List);
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(List);
 };
 
 // The virtual destructor of List.
@@ -557,7 +557,7 @@ class TestResult {
   TimeInMillis elapsed_time_;
 
   // We disallow copying TestResult.
-  GTEST_DISALLOW_COPY_AND_ASSIGN(TestResult);
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(TestResult);
 };  // class TestResult
 
 class TestInfoImpl {
@@ -633,7 +633,7 @@ class TestInfoImpl {
   // test for the second time.
   internal::TestResult result_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN(TestInfoImpl);
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(TestInfoImpl);
 };
 
 }  // namespace internal
@@ -765,7 +765,7 @@ class TestCase {
   internal::TimeInMillis elapsed_time_;
 
   // We disallow copying TestCases.
-  GTEST_DISALLOW_COPY_AND_ASSIGN(TestCase);
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(TestCase);
 };
 
 namespace internal {
@@ -843,7 +843,7 @@ class OsStackTraceGetterInterface {
   virtual void UponLeavingGTest() = 0;
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN(OsStackTraceGetterInterface);
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(OsStackTraceGetterInterface);
 };
 
 // A working implemenation of the OsStackTraceGetterInterface interface.
@@ -866,7 +866,7 @@ class OsStackTraceGetter : public OsStackTraceGetterInterface {
   // and any calls to CurrentStackTrace() from within the user code.
   void* caller_frame_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN(OsStackTraceGetter);
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(OsStackTraceGetter);
 };
 
 // Information about a Google Test trace point.
@@ -876,24 +876,63 @@ struct TraceInfo {
   String message;
 };
 
+// This is the default global test part result reporter used in UnitTestImpl.
+// This class should only be used by UnitTestImpl.
+class DefaultGlobalTestPartResultReporter
+  : public TestPartResultReporterInterface {
+ public:
+  explicit DefaultGlobalTestPartResultReporter(UnitTestImpl* unit_test);
+  // Implements the TestPartResultReporterInterface. Reports the test part
+  // result in the current test.
+  virtual void ReportTestPartResult(const TestPartResult& result);
+
+ private:
+  UnitTestImpl* const unit_test_;
+};
+
+// This is the default per thread test part result reporter used in
+// UnitTestImpl. This class should only be used by UnitTestImpl.
+class DefaultPerThreadTestPartResultReporter
+    : public TestPartResultReporterInterface {
+ public:
+  explicit DefaultPerThreadTestPartResultReporter(UnitTestImpl* unit_test);
+  // Implements the TestPartResultReporterInterface. The implementation just
+  // delegates to the current global test part result reporter of *unit_test_.
+  virtual void ReportTestPartResult(const TestPartResult& result);
+
+ private:
+  UnitTestImpl* const unit_test_;
+};
+
 // The private implementation of the UnitTest class.  We don't protect
 // the methods under a mutex, as this class is not accessible by a
 // user and the UnitTest class that delegates work to this class does
 // proper locking.
-class UnitTestImpl : public TestPartResultReporterInterface {
+class UnitTestImpl {
  public:
   explicit UnitTestImpl(UnitTest* parent);
   virtual ~UnitTestImpl();
 
-  // Reports a test part result.  This method is from the
-  // TestPartResultReporterInterface interface.
-  virtual void ReportTestPartResult(const TestPartResult& result);
+  // There are two different ways to register your own TestPartResultReporter.
+  // You can register your own repoter to listen either only for test results
+  // from the current thread or for results from all threads.
+  // By default, each per-thread test result repoter just passes a new
+  // TestPartResult to the global test result reporter, which registers the
+  // test part result for the currently running test.
 
-  // Returns the current test part result reporter.
-  TestPartResultReporterInterface* test_part_result_reporter();
+  // Returns the global test part result reporter.
+  TestPartResultReporterInterface* GetGlobalTestPartResultReporter();
 
-  // Sets the current test part result reporter.
-  void set_test_part_result_reporter(TestPartResultReporterInterface* reporter);
+  // Sets the global test part result reporter.
+  void SetGlobalTestPartResultReporter(
+      TestPartResultReporterInterface* reporter);
+
+  // Returns the test part result reporter for the current thread.
+  TestPartResultReporterInterface* GetTestPartResultReporterForCurrentThread();
+
+  // Sets the test part result reporter for the current thread.
+  void SetTestPartResultReporterForCurrentThread(
+      TestPartResultReporterInterface* reporter);
 
   // Gets the number of successful test cases.
   int successful_test_case_count() const;
@@ -1107,8 +1146,20 @@ class UnitTestImpl : public TestPartResultReporterInterface {
   // executed.
   internal::FilePath original_working_dir_;
 
-  // Points to (but doesn't own) the test part result reporter.
-  TestPartResultReporterInterface* test_part_result_reporter_;
+  // The default test part result reporters.
+  DefaultGlobalTestPartResultReporter default_global_test_part_result_reporter_;
+  DefaultPerThreadTestPartResultReporter
+      default_per_thread_test_part_result_reporter_;
+
+  // Points to (but doesn't own) the global test part result reporter.
+  TestPartResultReporterInterface* global_test_part_result_repoter_;
+
+  // Protects read and write access to global_test_part_result_reporter_.
+  internal::Mutex global_test_part_result_reporter_mutex_;
+
+  // Points to (but doesn't own) the per-thread test part result reporter.
+  internal::ThreadLocal<TestPartResultReporterInterface*>
+      per_thread_test_part_result_reporter_;
 
   // The list of environments that need to be set-up/torn-down
   // before/after the tests are run.  environments_in_reverse_order_
@@ -1168,7 +1219,7 @@ class UnitTestImpl : public TestPartResultReporterInterface {
   // A per-thread stack of traces created by the SCOPED_TRACE() macro.
   internal::ThreadLocal<internal::List<TraceInfo> > gtest_trace_stack_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN(UnitTestImpl);
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(UnitTestImpl);
 };  // class UnitTestImpl
 
 // Convenience function for accessing the global UnitTest

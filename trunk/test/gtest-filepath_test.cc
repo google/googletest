@@ -286,9 +286,12 @@ TEST(DirectoryTest, RootOfWrongDriveDoesNotExists) {
 }
 #endif // GTEST_OS_WINDOWS
 
+#ifndef _WIN32_WCE
+// Windows CE _does_ consider an empty directory to exist.
 TEST(DirectoryTest, EmptyPathDirectoryDoesNotExist) {
   EXPECT_FALSE(FilePath("").DirectoryExists());
 }
+#endif // ! _WIN32_WCE
 
 TEST(DirectoryTest, CurrentDirectoryExists) {
 #ifdef GTEST_OS_WINDOWS  // We are on Windows.
