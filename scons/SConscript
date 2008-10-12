@@ -96,10 +96,11 @@ __author__ = 'joi@google.com (Joi Sigurdsson)'
 Import('env')
 env = env.Clone()
 
-# Include paths to gtest headers are relative to a directory two above
-# the gtest directory itself, and this SConscript file is one
-# directory deeper than the gtest directory.
-env.Prepend(CPPPATH = ['../../..'])
+# Include paths to gtest headers are relative to either the gtest
+# directory or the 'include' subdirectory of it, and this SConscript
+# file is one directory deeper than the gtest directory.
+env.Prepend(CPPPATH = ['..',
+                       '../include'])
 
 # TODO(joi@google.com) Fix the code that causes this warning so that
 # we see all warnings from the compiler about possible 64-bit porting

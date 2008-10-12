@@ -7,6 +7,7 @@ EXTRA_DIST = \
   CHANGES \
   CONTRIBUTORS \
   include/gtest/internal/gtest-type-util.h.pump \
+  scons/SConscript \
   scripts/gen_gtest_pred_impl.py \
   src/gtest-all.cc
 
