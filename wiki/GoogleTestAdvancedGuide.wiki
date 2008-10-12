@@ -577,13 +577,49 @@ TEST(FooTest, Bar) {
 }
 }}}
 
-Since we don't use exceptions, it is technically impossible to implement the
-intended behavior here.
+Since we don't use exceptions, it is technically impossible to
+implement the intended behavior here.  To alleviate this, Google Test
+provides two solutions.  You could use either the
+`(ASSERT|EXPECT)_NO_FATAL_FAILURE` assertions or the
+`HasFatalFailure()` function.  They are described in the following two
+subsections.
 
-To alleviate this, Google Test provides the `HasFatalFailure()` function in the
-`testing::Test` class, which returns `true` if an assertion in the current test
-has suffered a fatal failure. This allows functions to catch fatal failures in
-a sub-routine and return early.
+==== Asserting on Subroutines ====
+
+As shown above, if your test calls a subroutine that has an `ASSERT_*`
+failure in it, the test will continue after the subroutine
+returns. This may not be what you want.
+
+Often people want fatal failures to propagate like exceptions.  For
+that Google Test offers the following macros:
+
+|| *Fatal assertion* || *Nonfatal assertion* || *Verifies* ||
+|| `ASSERT_NO_FATAL_FAILURE(`_statement_`);` || `EXPECT_NO_FATAL_FAILURE(`_statement_`);` || _statement_ doesn't generate any new fatal failures in the current thread. ||
+
+Only failures in the thread that executes the assertion are checked to
+determine the result of this type of assertions.  If _statement_
+creates new threads, failures in these threads are ignored.
+
+Examples:
+
+{{{
+ASSERT_NO_FATAL_FAILURE(Foo());
+
+int i;
+EXPECT_NO_FATAL_FAILURE({
+  i = Bar();
+});
+}}}
+
+_Availability:_ Linux, Windows, Mac. Assertions from multiple threads
+are currently not supported.
+
+==== Checking for Fatal Failures in the Current Test ====
+
+`HasFatalFailure()` in the `testing::Test` class returns `true` if an
+assertion in the current test has suffered a fatal failure. This
+allows functions to catch fatal failures in a sub-routine and return
+early.
 
 {{{
 class Test {
