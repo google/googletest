@@ -3,14 +3,15 @@
 = Google C++ Testing Framework Advanced Guide =
 
 Now that you have read GoogleTestPrimer and learned how to write tests
-using Google Test, it's time to learn some new tricks. This document will show you
-more assertions as well as how to construct complex failure messages, propagate
-fatal failures, reuse and speed up your test fixtures, and use various flags
-with your tests.
+using Google Test, it's time to learn some new tricks. This document
+will show you more assertions as well as how to construct complex
+failure messages, propagate fatal failures, reuse and speed up your
+test fixtures, and use various flags with your tests.
 
 ==  More Assertions  ==
 
-This section covers some less frequently used, but still significant, assertions.
+This section covers some less frequently used, but still significant,
+assertions.
 
 ===  Explicit Success and Failure  ===
 
@@ -1043,23 +1044,17 @@ exception, you could catch the exception and assert on it.  But Google
 Test doesn't use exceptions, so how do we test that a piece of code
 generates an expected failure?
 
-`include/gtest/gtest-spi.h` contains some constructs to do this (you
-don't have to `#include` this header yourself as `gtest.h` is
-guaranteed to pull it in).  In particular, you can use
+`<gtest/gtest-spi.h>` contains some constructs to do this.  After
+#including this header, you can use
 
 || `EXPECT_FATAL_FAILURE(`_statement, substring_`);` ||
 
-to assert that _statement_ generates a fatal (e.g. `ASSERT_*`)
-failure in the current thread whose message contains the given 
-_substring_, or use
+to assert that _statement_ generates a fatal (e.g. `ASSERT_*`) failure
+whose message contains the given _substring_, or use
 
 || `EXPECT_NONFATAL_FAILURE(`_statement, substring_`);` ||
 
 if you are expecting a non-fatal (e.g. `EXPECT_*`) failure.
-
-Only failures in the current thread are checked to determine the result
-of this type of expectations. If _statement_ creates new threads, failures
-in these threads are also ignored.
 
 For technical reasons, there are some caveats:
 
@@ -1067,7 +1062,19 @@ For technical reasons, there are some caveats:
   # _statement_ in `EXPECT_FATAL_FAILURE()` cannot reference local non-static variables or non-static members of `this` object.
   # _statement_ in `EXPECT_FATAL_FAILURE()` cannot return a value.
 
-_Note:_ The current version of Google Test only supports single threaded usage.
+_Note:_ Google Test is designed with threads in mind.  Once the
+synchronization primitives in `<gtest/internal/gtest-port.h>` have
+been implemented, Google Test will become thread-safe, meaning that
+you can then use assertions in multiple threads concurrently.  Before
+that, however, Google Test only supports single-threaded usage.  Once
+thread-safe, `EXPECT_FATAL_FAILURE()` and `EXPECT_NONFATAL_FAILURE()`
+will capture failures in the current thread only. If _statement_
+creates new threads, failures in these threads will be ignored.  If
+you want to capture failures from all threads instead, you should use
+the following macros:
+
+|| `EXPECT_FATAL_FAILURE_ON_ALL_THREADS(`_statement, substring_`);` ||
+|| `EXPECT_NONFATAL_FAILURE_ON_ALL_THREADS(`_statement, substring_`);` ||
 
 ==  Getting the Current Test's Name  ==
 
