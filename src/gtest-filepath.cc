@@ -45,6 +45,7 @@
 #include <sys/syslimits.h>
 #include <unistd.h>
 #else
+#include <limits.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #endif // _WIN32_WCE or _WIN32
