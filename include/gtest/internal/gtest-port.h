@@ -70,8 +70,11 @@
 //   GTEST_OS_CYGWIN   - defined iff compiled on Cygwin.
 //   GTEST_OS_LINUX    - defined iff compiled on Linux.
 //   GTEST_OS_MAC      - defined iff compiled on Mac OS X.
+//   GTEST_OS_SOLARIS  - defined iff compiled on Sun Solaris.
 //   GTEST_OS_SYMBIAN  - defined iff compiled for Symbian.
 //   GTEST_OS_WINDOWS  - defined iff compiled on Windows.
+//   GTEST_OS_ZOS      - defined iff compiled on IBM z/OS.
+//
 // Note that it is possible that none of the GTEST_OS_ macros are defined.
 //
 // Macros indicating available Google Test features:
@@ -95,7 +98,7 @@
 //                         and Google Test is thread-safe; or 0 otherwise.
 //
 // Template meta programming:
-//   is_pointer     - as in TR1; needed on Symbian only.
+//   is_pointer     - as in TR1; needed on Symbian and IBM XL C/C++ only.
 //
 // Smart pointers:
 //   scoped_ptr     - as in TR2.
@@ -162,6 +165,10 @@
 #define GTEST_OS_MAC
 #elif defined __linux__
 #define GTEST_OS_LINUX
+#elif defined __MVS__
+#define GTEST_OS_ZOS
+#elif defined(__sun) && defined(__SVR4)
+#define GTEST_OS_SOLARIS
 #endif  // _MSC_VER
 
 // Determines whether ::std::string and ::string are available.
@@ -202,12 +209,13 @@
 // TODO(wan@google.com): uses autoconf to detect whether ::std::wstring
 //   is available.
 
-#ifdef GTEST_OS_CYGWIN
-// At least some versions of cygwin doesn't support ::std::wstring.
+#if defined(GTEST_OS_CYGWIN) || defined(GTEST_OS_SOLARIS)
+// At least some versions of cygwin don't support ::std::wstring.
+// Solaris' libc++ doesn't support it either.
 #define GTEST_HAS_STD_WSTRING 0
 #else
 #define GTEST_HAS_STD_WSTRING GTEST_HAS_STD_STRING
-#endif  // GTEST_OS_CYGWIN
+#endif  // defined(GTEST_OS_CYGWIN) || defined(GTEST_OS_SOLARIS)
 
 #endif  // GTEST_HAS_STD_WSTRING
 
@@ -544,13 +552,22 @@ inline size_t GetThreadCount() { return 0; }
 // Therefore Google Test is not thread-safe.
 #define GTEST_IS_THREADSAFE 0
 
-// Defines tr1::is_pointer (only needed for Symbian).
+#if defined(__SYMBIAN32__) || defined(__IBMCPP__)
 
-#ifdef __SYMBIAN32__
+// Passing non-POD classes through ellipsis (...) crashes the ARM
+// compiler.  The Nokia Symbian and the IBM XL C/C++ compiler try to
+// instantiate a copy constructor for objects passed through ellipsis
+// (...), failing for uncopyable objects.  We define this to indicate
+// the fact.
+#define GTEST_ELLIPSIS_NEEDS_COPY_ 1
 
-// Symbian does not have tr1::type_traits, so we define our own is_pointer
-// These are needed as the Nokia Symbian Compiler cannot decide between
-// const T& and const T* in a function template.
+// The Nokia Symbian and IBM XL C/C++ compilers cannot decide between
+// const T& and const T* in a function template.  These compilers
+// _can_ decide between class template specializations for T and T*,
+// so a tr1::type_traits-like is_pointer works.
+#define GTEST_NEEDS_IS_POINTER_ 1
+
+#endif  // defined(__SYMBIAN32__) || defined(__IBMCPP__)
 
 template <bool bool_value>
 struct bool_constant {
@@ -567,8 +584,6 @@ struct is_pointer : public false_type {};
 
 template <typename T>
 struct is_pointer<T*> : public true_type {};
-
-#endif  // __SYMBIAN32__
 
 // Defines BiggestInt as the biggest signed integer type the compiler
 // supports.
