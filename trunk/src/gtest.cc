@@ -65,6 +65,10 @@
 #define GTEST_HAS_GETTIMEOFDAY
 #include <sys/time.h>  // NOLINT
 
+#elif defined(GTEST_OS_ZOS)
+// On z/OS we additionally need strings.h for strcasecmp.
+#include <strings.h>
+
 #elif defined(_WIN32_WCE)  // We are on Windows CE.
 
 #include <windows.h>  // NOLINT
@@ -2445,7 +2449,7 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   va_list args;
   va_start(args, fmt);
 
-#if defined(_WIN32_WCE) || defined(GTEST_OS_SYMBIAN)
+#if defined(_WIN32_WCE) || defined(GTEST_OS_SYMBIAN) || defined(GTEST_OS_ZOS)
   static const bool use_color = false;
 #else
   static const bool use_color = ShouldUseColor(isatty(fileno(stdout)) != 0);

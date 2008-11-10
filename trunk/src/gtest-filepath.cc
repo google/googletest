@@ -48,7 +48,17 @@
 #include <limits.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#endif // _WIN32_WCE or _WIN32
+#endif  // _WIN32_WCE or _WIN32
+
+#ifdef GTEST_OS_WINDOWS
+#define GTEST_PATH_MAX_ _MAX_PATH
+#elif defined(PATH_MAX)
+#define GTEST_PATH_MAX_ PATH_MAX
+#elif defined(_XOPEN_PATH_MAX)
+#define GTEST_PATH_MAX_ _XOPEN_PATH_MAX
+#else
+#define GTEST_PATH_MAX_ _POSIX_PATH_MAX
+#endif  // GTEST_OS_WINDOWS
 
 #include <gtest/internal/gtest-string.h>
 
@@ -81,10 +91,10 @@ FilePath FilePath::GetCurrentDir() {
 // something reasonable.
   return FilePath(kCurrentDirectoryString);
 #elif defined(GTEST_OS_WINDOWS)
-  char cwd[_MAX_PATH + 1] = {};
+  char cwd[GTEST_PATH_MAX_ + 1] = {};
   return FilePath(_getcwd(cwd, sizeof(cwd)) == NULL ? "" : cwd);
 #else
-  char cwd[PATH_MAX + 1] = {};
+  char cwd[GTEST_PATH_MAX_ + 1] = {};
   return FilePath(getcwd(cwd, sizeof(cwd)) == NULL ? "" : cwd);
 #endif
 }

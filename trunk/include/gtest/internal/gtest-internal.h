@@ -150,16 +150,17 @@ char (&IsNullLiteralHelper(...))[2];  // NOLINT
 // A compile-time bool constant that is true if and only if x is a
 // null pointer literal (i.e. NULL or any 0-valued compile-time
 // integral constant).
-#ifdef __SYMBIAN32__  // Symbian
-// Passing non-POD classes through ellipsis (...) crashes the ARM compiler.
-// The Nokia Symbian compiler tries to instantiate a copy constructor for
-// objects passed through ellipsis (...), failing for uncopyable objects.
-// Hence we define this to false (and lose support for NULL detection).
+#ifdef GTEST_ELLIPSIS_NEEDS_COPY_
+// Passing non-POD classes through ellipsis (...) crashes the ARM
+// compiler.  The Nokia Symbian and the IBM XL C/C++ compiler try to
+// instantiate a copy constructor for objects passed through ellipsis
+// (...), failing for uncopyable objects.  Hence we define this to
+// false (and lose support for NULL detection).
 #define GTEST_IS_NULL_LITERAL_(x) false
-#else  // ! GTEST_OS_SYMBIAN
+#else
 #define GTEST_IS_NULL_LITERAL_(x) \
     (sizeof(::testing::internal::IsNullLiteralHelper(x)) == 1)
-#endif  // GTEST_OS_SYMBIAN
+#endif  // GTEST_ELLIPSIS_NEEDS_COPY_
 
 // Appends the user-supplied message to the Google-Test-generated message.
 String AppendUserMessage(const String& gtest_msg,
@@ -196,12 +197,13 @@ String StreamableToString(const T& streamable);
 
 // Formats a value to be used in a failure message.
 
-#ifdef GTEST_OS_SYMBIAN
+#ifdef GTEST_NEEDS_IS_POINTER_
 
-// These are needed as the Nokia Symbian Compiler cannot decide between
-// const T& and const T* in a function template. The Nokia compiler _can_
-// decide between class template specializations for T and T*, so a
-// tr1::type_traits-like is_pointer works, and we can overload on that.
+// These are needed as the Nokia Symbian and IBM XL C/C++ compilers
+// cannot decide between const T& and const T* in a function template.
+// These compilers _can_ decide between class template specializations
+// for T and T*, so a tr1::type_traits-like is_pointer works, and we
+// can overload on that.
 
 // This overload makes sure that all pointers (including
 // those to char or wchar_t) are printed as raw pointers.
@@ -225,6 +227,10 @@ inline String FormatForFailureMessage(const T& value) {
 
 #else
 
+// These are needed as the above solution using is_pointer has the
+// limitation that T cannot be a type without external linkage, when
+// compiled using MSVC.
+
 template <typename T>
 inline String FormatForFailureMessage(const T& value) {
   return StreamableToString(value);
@@ -237,7 +243,7 @@ inline String FormatForFailureMessage(T* pointer) {
   return StreamableToString(static_cast<const void*>(pointer));
 }
 
-#endif  // GTEST_OS_SYMBIAN
+#endif  // GTEST_NEEDS_IS_POINTER_
 
 // These overloaded versions handle narrow and wide characters.
 String FormatForFailureMessage(char ch);
