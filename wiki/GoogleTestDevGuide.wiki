@@ -85,7 +85,7 @@ You must sign a Contributor License Agreement (CLA) before we can
 accept any code.  The CLA protects you and us.
 
   * If you are an individual writing original source code and you're sure you own the intellectual property, then you'll need to sign an [http://code.google.com/legal/individual-cla-v1.0.html individual CLA].
-  * If you work for a company that wants to allow you to contribute your work to GWT, then you'll need to sign a [http://code.google.com/legal/corporate-cla-v1.0.html corporate CLA].
+  * If you work for a company that wants to allow you to contribute your work to Google Test, then you'll need to sign a [http://code.google.com/legal/corporate-cla-v1.0.html corporate CLA].
 
 Follow either of the two links above to access the appropriate CLA and
 instructions for how to sign and return it.
