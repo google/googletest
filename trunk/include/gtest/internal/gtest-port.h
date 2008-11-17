@@ -75,6 +75,13 @@
 //   GTEST_OS_WINDOWS  - defined iff compiled on Windows.
 //   GTEST_OS_ZOS      - defined iff compiled on IBM z/OS.
 //
+// Among the platforms, Cygwin, Linux, Max OS X, and Windows have the
+// most stable support.  Since core members of the Google Test project
+// don't have access to other platforms, support for them may be less
+// stable.  If you notice any problems on your platform, please notify
+// googletestframework@googlegroups.com (patches for fixing them are
+// even more welcome!).
+//
 // Note that it is possible that none of the GTEST_OS_ macros are defined.
 //
 // Macros indicating available Google Test features:
