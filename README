@@ -5,7 +5,7 @@ http://code.google.com/p/googletest/
 Overview
 --------
 Google's framework for writing C++ tests on a variety of platforms (Linux, Mac
-OS X, Windows, Windows CE, and Symbian). Based on the xUnit architecture.
+OS X, Windows, Windows CE, Symbian, and etc). Based on the xUnit architecture.
 Supports automatic test discovery, a rich set of assertions, user-defined
 assertions, death tests, fatal and non-fatal failures, various options for
 running the tests, and XML test report generation.
@@ -16,12 +16,15 @@ OFTC (irc.oftc.net) #gtest available. Please join us!
 
 Requirements
 ------------
-Google Test is designed to have fairly minimal requirements to build and use
-with your projects, but there are some. Currently, the only Operating System
-(OS) on which Google Test is known to build properly is Linux, but we are
-actively working on Windows and Mac support as well. The source code itself is
-already portable across many other platforms, but we are still developing
-robust build systems for each.
+Google Test is designed to have fairly minimal requirements to build
+and use with your projects, but there are some. Currently, we support
+building Google Test on Linux, Windows, Mac OS X, and Cygwin.  We will
+also make our best effort to support other platforms (e.g. Solaris and
+IBM z/OS).  However, since core members of the Google Test project
+have no access to them, Google Test may have outstanding issues on
+these platforms.  If you notice any problems on your platform, please
+notify googletestframework@googlegroups.com (patches for fixing them
+are even more welcome!).
 
 ### Linux Requirements ###
 These are the base requirements to build and use Google Test from a source
@@ -207,9 +210,19 @@ in the "Variables to be set in the environment:" list, where you replace
 when you run your executable, it will load the framework and your test will
 run as expected. 
 
+### Using Your Own Build System ###
+If none of the build solutions we provide works for you, or if you
+prefer your own build system, you just need to compile
+src/gtest-all.cc into a library and link your tests with it.  Assuming
+a Linux-like system and gcc, something like the following will do:
+
+  $ cd ${SRCDIR}
+  $ g++ -I. -I./include -c src/gtest-all.cc
+  $ ar -rv libgtest.a gtest-all.o
+  $ g++ -I. -I./include path/to/your_test.cc libgtest.a -o your_test
+
 Regenerating Source Files
 -------------------------
-
 Some of Google Test's source files are generated from templates (not
 in the C++ sense) using a script.  A template file is named FOO.pump,
 where FOO is the name of the file it will generate.  For example, the
