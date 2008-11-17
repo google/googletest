@@ -1,28 +1,28 @@
-#summary How to contribute to Google C++ Testing Framework.
+#summary How to contribute to Google C++ Testing Framework
 #labels Phase-Implementation,Featured
 
-= Google C++ Testing Framework Development Guide =
+<wiki:toc max_depth="3" />
 
 If you are interested in understanding the internals of Google Test,
 building from source, or contributing ideas or modifications to the
 project, then this document is for you.
 
-== Introduction ==
+= Introduction =
 
 First, let's give you some background of the project.
 
-=== Licensing ===
+== Licensing ==
 
 All Google Test source and pre-built packages are provided under the [http://www.opensource.org/licenses/bsd-license.php New BSD License].
 
-=== The Google Test Community ===
+== The Google Test Community ==
 
 The Google Test community exists primarily through the [http://groups.google.com/group/googletestframework discussion group], the
 [http://code.google.com/p/googletest/issues/list issue tracker] and, to a lesser extent, the [http://code.google.com/p/googletest/source/checkout source control repository]. You are definitely encouraged to contribute to the
 discussion and you can also help us to keep the effectiveness of the
 group high by following and promoting the guidelines listed here.
 
-==== Please Be Friendly ====
+=== Please Be Friendly ===
 
 Showing courtesy and respect to others is a vital part of the Google
 culture, and we strongly encourage everyone participating in Google
@@ -38,18 +38,18 @@ Sure, C++ testing is serious business and all that, but it's also
 a lot of fun. Let's keep it that way. Let's strive to be one of the
 friendliest communities in all of open source.
 
-==== Where to Discuss Google Test ====
+=== Where to Discuss Google Test ===
 
 As always, discuss Google Test in the official [http://groups.google.com/group/googletestframework Google C++ Testing Framework discussion group].  You don't have to actually submit
 code in order to sign up. Your participation itself is a valuable
 contribution.
 
-== Working with the Code ==
+= Working with the Code =
 
 If you want to get your hands dirty with the code inside Google Test,
 this is the section for you.
 
-=== Checking Out the Source from Subversion ===
+== Checking Out the Source from Subversion ==
 
 Checking out the Google Test source is most useful if you plan to
 tweak it yourself.  You check out the source for Google Test using a
@@ -57,12 +57,12 @@ tweak it yourself.  You check out the source for Google Test using a
 other project hosted on Google Code.  Please see the instruction on
 the [http://code.google.com/p/googletest/source/checkout source code access page] for how to do it.
 
-=== Compiling from Source ===
+== Compiling from Source ==
 
 Once you check out the code, you can find instructions on how to
 compile it in the [http://code.google.com/p/googletest/source/browse/trunk/README README] file.
 
-=== Testing ===
+== Testing ==
 
 A testing framework is of no good if itself is not thoroughly tested.
 Tests should be written for any new code, and changes should be
@@ -70,7 +70,7 @@ verified to not break existing tests before they are submitted for
 review. To perform the tests, follow the instructions in [http://code.google.com/p/googletest/source/browse/trunk/README README] and
 verify that there are no failures.
 
-== Contributing Code ==
+= Contributing Code =
 
 We are excited that Google Test is now open source, and hope to get
 great patches from the community. Before you fire up your favorite IDE
@@ -79,7 +79,7 @@ time to read this section and understand the process. While it seems
 rigorous, we want to keep a high standard of quality in the code
 base.
 
-=== Contributor License Agreements ===
+== Contributor License Agreements ==
 
 You must sign a Contributor License Agreement (CLA) before we can
 accept any code.  The CLA protects you and us.
@@ -90,13 +90,13 @@ accept any code.  The CLA protects you and us.
 Follow either of the two links above to access the appropriate CLA and
 instructions for how to sign and return it.
 
-=== Coding Style ===
+== Coding Style ==
 
 To keep the source consistent, readable, diffable and easy to merge,
 we use a fairly rigid coding style, as defined by the [http://code.google.com/p/google-styleguide/ google-styleguide] project.  All patches will be expected
 to conform to the style outlined [http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml here].
 
-=== Submitting Patches ===
+== Submitting Patches ==
 
 Please do submit code. Here's what you need to do:
 
@@ -109,7 +109,7 @@ Please do submit code. Here's what you need to do:
   # Create a patch file using `svn diff`.
   # We use [http://codereview.appspot.com/ Rietveld] to do web-based code reviews.  You can read about the tool [http://code.google.com/p/rietveld/wiki/CodeReviewHelp here].  When you are ready, upload your patch via Rietveld and notify `googletestframework@googlegroups.com` to review it.  There are several ways to upload the patch.  We recommend using the [http://codereview.appspot.com/static/upload.py upload.py] script.
 
-=== Google Test Committers ===
+== Google Test Committers ==
 
 The current members of the Google Test engineering team are the only
 committers at present. In the great tradition of eating one's own
@@ -119,7 +119,7 @@ procedures in this document, writing consistently great code, and
 demonstrating repeatedly that he or she truly gets the zen of Google
 Test.
 
-== Release Process ==
+= Release Process =
 
 We follow the typical release process for Subversion-based projects:
 
