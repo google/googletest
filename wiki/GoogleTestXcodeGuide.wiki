@@ -1,9 +1,11 @@
-#summary A guide for using the Google Testing Framework with Xcode on Mac OS X.
+#summary A guide for using the Google Testing Framework with Xcode on Mac OS X
 #labels Featured,Phase-Deploy
+
+<wiki:toc max_depth="3" />
 
 This guide will explain how to use the Google Testing Framework in your Xcode projects on Mac OS X. This tutorial begins by quickly explaining what to do for experienced users. After the quick start, the guide goes provides additional explanation about each step.
     
-==Quick Start==
+=Quick Start=
 
 Here is the quick guide for using Google Test in your Xcode project.
     
@@ -17,7 +19,7 @@ Here is the quick guide for using Google Test in your Xcode project.
   
 The following sections further explain each of the steps listed above in depth, describing in more detail how to complete it including some variations.
     
-==Get the Source==
+=Get the Source=
 
 Currently, the gtest.framework discussed here isn't available in a tagged release of Google Test, it is only available in the trunk. As explained at the Google Test [http://code.google.com/p/googletest/source/checkout">svn site], you can get the code from anonymous SVN with this command:
     
@@ -38,14 +40,14 @@ Here is an example of using the svn:externals properties on a trunk (read via `s
 externals/src/googletest http://googletest.googlecode.com/svn/trunk
 }}}
 
-==Add the Framework to Your Project==
+=Add the Framework to Your Project=
 
 The next step is to build and add the gtest.framework to your own project. This guide describes two common ways below.
 
   * *Option 1* --- The simplest way to add Google Test to your own project, is to open gtest.xcodeproj (found in the xcode/ directory of the Google Test trunk) and build the framework manually. Then, add the built framework into your project using the "Add->Existing Framework..." from the context menu or "Project->Add..." from the main menu. The gtest.framework is relocatable and contains the headers and object code that you'll need to make tests. This method requires rebuilding every time you upgrade Google Test in your project.
   * *Option 2* --- If you are going to be living off the trunk of Google Test, incorporating its latest features into your unit tests (or are a Google Test developer yourself). You'll want to rebuild the framework every time the source updates. to do this, you'll need to add the gtest.xcodeproj file, not the framework itself, to your own Xcode project. Then, from the build products that are revealed by the project's disclosure triangle, you can find the gtest.framework, which can be added to your targets (discussed below).
 
-==Make a Test Target==
+=Make a Test Target=
 
 To start writing tests, make a new "Shell Tool" target. This target template is available under BSD, Cocoa, or Carbon. Add your unit test source code to the "Compile Sources" build phase of the target.
 
@@ -54,7 +56,7 @@ Next, you'll want to add gtest.framework in two different ways, depending upon w
   * *Option 1* --- During compilation, Xcode will need to know that you are linking against the gtest.framework. Add the gtest.framework to the "Link Binary with Libraries" build phase of your test target. This will include the Google Test headers in your header search path, and will tell the linker where to find the library.
   * *Option 2* --- If your working out of the trunk, you'll also want to add gtest.framework to your "Link Binary with Libraries" build phase of your test target. In addition, you'll  want to add the gtest.framework as a dependency to your unit test target. This way, Xcode will make sure that gtest.framework is up to date, every time your build your target. Finally, if you don't share build directories with Google Test, you'll have to copy the gtest.framework into your own build products directory using a "Run Script" build phase.
 
-==Set Up the Executable Run Environment==
+=Set Up the Executable Run Environment=
 
 Since the unit test executable is a shell tool, it doesn't have a bundle with a `Contents/Frameworks` directory, in which to place gtest.framework. Instead, the dynamic linker must be told at runtime to search for the framework in another location. This can be accomplished by setting the "DYLD_FRAMEWORK_PATH" environment variable in the "Edit Active Executable ..." Arguments tab, under "Variables to be set in the environment:". The path for this value is the path (relative or absolute) of the directory containing the gtest.framework.
 
@@ -69,7 +71,7 @@ If you haven't set up the DYLD_FRAMEWORK_PATH, correctly, you might get a messag
 
 To correct this problem, got to the directory containing the executable named in "Referenced from:" value in the error message above. Then, with the terminal in this location, find the relative path to the directory containing the gtest.framework. That is the value you'll need to set as the DYLD_FRAMEWORK_PATH.
 
-==Build and Go==
+=Build and Go=
 
 Now, when you click "Build and Go", the test will be executed. Dumping out something like this:
 
@@ -89,6 +91,6 @@ Now, when you click "Build and Go", the test will be executed. Dumping out somet
 The Debugger has exited with status 0.  
 }}}
 
-==Summary==
+=Summary=
 
 Unit testing is a valuable way to ensure your data model stays valid even during rapid development or refactoring. The Google Testing Framework is a great unit testing framework for C and C++ which integrates well with an Xcode development environment.
