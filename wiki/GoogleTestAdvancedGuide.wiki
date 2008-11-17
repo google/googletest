@@ -1,6 +1,7 @@
-#summary Advanced topics on using Google Test
+#summary Advanced topics on using Google C++ Testing Framework
 #labels Featured
-= Google C++ Testing Framework Advanced Guide =
+
+<wiki:toc max_depth="3" />
 
 Now that you have read GoogleTestPrimer and learned how to write tests
 using Google Test, it's time to learn some new tricks. This document
@@ -8,12 +9,12 @@ will show you more assertions as well as how to construct complex
 failure messages, propagate fatal failures, reuse and speed up your
 test fixtures, and use various flags with your tests.
 
-==  More Assertions  ==
+=  More Assertions  =
 
 This section covers some less frequently used, but still significant,
 assertions.
 
-===  Explicit Success and Failure  ===
+==  Explicit Success and Failure  ==
 
 These three assertions do not actually test a value or expression. Instead,
 they generate a success or failure directly. Like the macros that actually
@@ -46,7 +47,7 @@ switch(expression) {
 
 _Availability_: Linux, Windows, Mac.
 
-===  Exception Assertions  ===
+==  Exception Assertions  ==
 
 These are for verifying that a piece of code throws (or does not
 throw) an exception of the given type:
@@ -69,7 +70,7 @@ EXPECT_NO_THROW({
 
 _Availability_: Linux, Windows, Mac; since version 1.1.0.
 
-===  Predicate Assertions  ===
+==  Predicate Assertions  ==
 
 Even though Google Test has a rich set of assertions, they can never be
 complete, as it's impossible (nor a good idea) to anticipate all the scenarios
@@ -191,7 +192,7 @@ resolve it.
 _Availability_: Linux, Windows, Mac.
 
 
-===  Floating-Point Comparison  ===
+==  Floating-Point Comparison  ==
 
 Comparing floating-point numbers is tricky. Due to round-off errors, it is
 very unlikely that two floating-points will match exactly. Therefore,
@@ -207,7 +208,7 @@ provides assertions to do this. Full details about ULPs are quite long; if you
 want to learn more, see
 [http://www.cygnus-software.com/papers/comparingfloats/comparingfloats.htm this article on float comparison].
 
-====  Floating-Point Macros ====
+===  Floating-Point Macros ===
 
 || *Fatal assertion* || *Nonfatal assertion* || *Verifies* ||
 || `ASSERT_FLOAT_EQ(`_expected, actual_`);`  || `EXPECT_FLOAT_EQ(`_expected, actual_`);` || the two `float` values are almost equal ||
@@ -223,7 +224,7 @@ The following assertions allow you to choose the acceptable error bound:
 
 _Availability_: Linux, Windows, Mac.
 
-====  Floating-Point Predicate-Format Functions  ====
+===  Floating-Point Predicate-Format Functions  ===
 
 Some floating-point operations are useful, but not that often used. In order
 to avoid an explosion of new macros, we provide them as predicate-format
@@ -240,7 +241,7 @@ replace `EXPECT_PRED_FORMAT2` in the above table with `ASSERT_PRED_FORMAT2`.
 
 _Availability_: Linux, Windows, Mac.
 
-===  Windows HRESULT assertions  ===
+==  Windows HRESULT assertions  ==
 
 These assertions test for `HRESULT` success or failure.
 
@@ -262,7 +263,7 @@ ASSERT_HRESULT_SUCCEEDED(shell->ShellExecute(CComBSTR(url), empty, empty, empty,
 
 _Availability_: Windows.
 
-=== Assertion Placement  ===
+== Assertion Placement  ==
 
 You can include assertions in any C++ function's code. The one constraint is
 that assertions that generate a fatal failure (`FAIL*` and `ASSERT_*`) can only
@@ -292,7 +293,7 @@ leaving your object in a partially-constructed state. Likewise, a fatal
 assertion failure in a destructor may leave your object in a
 partially-destructed state. Use assertions carefully in these situations!
 
-==  Death Tests  ==
+=  Death Tests  =
 
 In many applications, there are assertions that can cause application failure
 if a condition is not met. These sanity checks, which ensure that the program
@@ -306,7 +307,7 @@ Since these precondition checks cause the processes to die, we call such tests
 _death tests_. More generally, any test that checks that a program terminates
 in an expected fashion is also a death test.
 
-===  How to Write a Death Test  ===
+==  How to Write a Death Test  ==
 
 Google Test has the following macros to support death tests:
 
@@ -377,7 +378,7 @@ explains why.
 
 _Availability:_ Linux
 
-===  How It Works  ===
+==  How It Works  ==
 
 Under the hood, `ASSERT_EXIT()` calls `fork()` to spawn a new process. What
 happens next in the child process depends on the value of the variable
@@ -400,7 +401,7 @@ In either case, the parent process waits for the child process to complete, and 
 If the death test statement runs to completion without dying, the child
 process will nonetheless terminate, and the assertion fails.
 
-===  Death Tests And Threads  ===
+==  Death Tests And Threads  ==
 
 The reason for the two death test styles has to do with thread safety. Due to
 well-known problems with forking in the presence of threads, death tests should
@@ -417,7 +418,7 @@ Google Test has two features intended to raise awareness of threading issues.
 It's perfectly fine to create threads inside a death test statement; they are
 executed in a separate process and cannot affect the parent.
 
-===  Death Test Styles  ===
+==  Death Test Styles  ==
 
 The "threadsafe" death test style was introduced in order to help mitigate the
 risks of testing in a possibly multithreaded environment. It trades increased
@@ -455,7 +456,7 @@ int main(int argc, char** argv) {
 }
 }}}
 
-===  Caveats  ===
+==  Caveats  ==
 
 The _statement_ argument of `ASSERT_EXIT()` can be any valid C++ statement
 except that it can not return from the current function. This means
@@ -487,9 +488,9 @@ test binary by passing `argv[0]` to `execve(2)`, the test binary may not be
 found if the program was executed via a relative path and any preceding program
 code changes the program's working directory.
 
-==  Using Assertions in Sub-routines  ==
+=  Using Assertions in Sub-routines  =
 
-===  Adding Traces to Assertions  ===
+==  Adding Traces to Assertions  ==
 
 If a test sub-routine is called from several places, when an assertion
 inside it fails, it can be hard to tell which invocation of the
@@ -554,7 +555,7 @@ Some tips on using `SCOPED_TRACE`:
 
 _Availability:_ Linux, Windows, Mac.
 
-===  Propagating Fatal Failures  ===
+==  Propagating Fatal Failures  ==
 
 A common pitfall when using `ASSERT_*` and `FAIL*` is not understanding that
 when they fail they only abort the _current function_, not the entire test. For
@@ -584,7 +585,7 @@ provides two solutions.  You could use either the
 `HasFatalFailure()` function.  They are described in the following two
 subsections.
 
-==== Asserting on Subroutines ====
+=== Asserting on Subroutines ===
 
 As shown above, if your test calls a subroutine that has an `ASSERT_*`
 failure in it, the test will continue after the subroutine
@@ -614,7 +615,7 @@ EXPECT_NO_FATAL_FAILURE({
 _Availability:_ Linux, Windows, Mac. Assertions from multiple threads
 are currently not supported.
 
-==== Checking for Fatal Failures in the Current Test ====
+=== Checking for Fatal Failures in the Current Test ===
 
 `HasFatalFailure()` in the `testing::Test` class returns `true` if an
 assertion in the current test has suffered a fatal failure. This
@@ -654,7 +655,7 @@ if (testing::Test::HasFatalFailure())
 
 _Availability:_ Linux, Windows, Mac.
 
-== Logging Additional Information  ==
+= Logging Additional Information  =
 
 In your test code, you can call `RecordProperty("key", value)` to log
 additional information, where `value` can be either a C string or a 32-bit
@@ -684,7 +685,7 @@ _Note_:
 
 _Availability_: Linux, Windows, Mac.
 
-==  Sharing Resources Between Tests in the Same Test Case  ==
+=  Sharing Resources Between Tests in the Same Test Case  =
 
 Google Test creates a new test fixture object for each test in order to make
 tests independent and easier to debug. However, sometimes tests use resources
@@ -749,7 +750,7 @@ TEST_F(FooTest, Test2) {
 
 _Availability:_ Linux, Windows, Mac.
 
-== Global Set-Up and Tear-Down ==
+= Global Set-Up and Tear-Down =
 
 Just as you can do set-up and tear-down at the test level and the test case
 level, you can also do it at the test program level. Here's how.
@@ -805,7 +806,7 @@ are initialized).
 
 _Availability:_ Linux, Windows, Mac.
 
-==  Typed Tests  ==
+=  Typed Tests  =
 
 Suppose you have multiple implementations of the same interface and
 want to make sure that all of them satisfy some common requirements.
@@ -878,7 +879,7 @@ You can see `samples/sample6_unittest.cc` for a complete example.
 _Availability:_ Linux, Windows (requires MSVC 8.0 or above), Mac;
 since version 1.1.0.
 
-==  Type-Parameterized Tests  ==
+=  Type-Parameterized Tests  =
 
 _Type-parameterized tests_ are like typed tests, except that they
 don't require you to know the list of types ahead of time.  Instead,
@@ -960,7 +961,7 @@ You can see `samples/sample6_unittest.cc` for a complete example.
 _Availability:_ Linux, Windows (requires MSVC 8.0 or above), Mac;
 since version 1.1.0.
 
-==  Testing Private Code  ==
+=  Testing Private Code  =
 
 If you change your software's internal implementation, your tests should not
 break as long as the change is not observable by users. Therefore, per the
@@ -975,7 +976,7 @@ two cases to consider:
  * Static functions (_not_ the same as static member functions!) or unnamed namespaces, and
  * Private or protected class members
 
-=== Static functions ===
+== Static functions ==
 
 Both static functions and definitions/declarations in an unnamed namespace are
 only visible within the same translation unit. To test them, you can `#include`
@@ -990,7 +991,7 @@ production `.cc` files and your tests are allowed to include this internal
 header, but your clients are not. This way, you can fully test your internal
 implementation without leaking it to your clients.
 
-=== Private class members ===
+== Private class members ==
 
 Private class members are only accessible from within the class or by friends.
 To access a class' private members, you can declare your test fixture as a
@@ -1068,7 +1069,7 @@ TEST_F(FooTest, Baz) { ... }
 }  // namespace my_namespace
 }}}
 
-==  "Catching" Failures  ==
+=  "Catching" Failures  =
 
 If you are building a testing utility on top of Google Test, you'll
 want to test your utility.  What framework would you use to test it?
@@ -1112,7 +1113,7 @@ the following macros:
 || `EXPECT_FATAL_FAILURE_ON_ALL_THREADS(`_statement, substring_`);` ||
 || `EXPECT_NONFATAL_FAILURE_ON_ALL_THREADS(`_statement, substring_`);` ||
 
-==  Getting the Current Test's Name  ==
+=  Getting the Current Test's Name  =
 
 Sometimes a function may need to know the name of the currently running test.
 For example, you may be using the `SetUp()` method of your test fixture to set
@@ -1155,7 +1156,7 @@ functions called from them.
 
 _Availability:_ Linux, Windows, Mac.
 
-==  Running Test Programs: Advanced Options  ==
+=  Running Test Programs: Advanced Options  =
 
 Google Test test programs are ordinary executables. Once built, you can run
 them directly and affect their behavior via the following environment variables
@@ -1165,7 +1166,7 @@ and/or command line flags. For the flags to work, your programs must call
 If an option is specified both by an environment variable and by a flag, the
 latter takes precedence.
 
-=== Turning Assertion Failures into Break-Points: `GTEST_BREAK_ON_FAILURE` and `--gtest_break_on_failure` ===
+== Turning Assertion Failures into Break-Points: `GTEST_BREAK_ON_FAILURE` and `--gtest_break_on_failure` ==
 
 When running test programs under a debugger, it's very convenient if the
 debugger can catch an assertion failure and automatically drop into interactive
@@ -1177,7 +1178,7 @@ command line flag.
 
 _Availability:_ Linux, Windows, Mac.
 
-=== Suppressing Pop-ups Caused by Exceptions: `GTEST_CATCH_EXCEPTIONS` and `--gtest_catch_exceptions` ===
+== Suppressing Pop-ups Caused by Exceptions: `GTEST_CATCH_EXCEPTIONS` and `--gtest_catch_exceptions` ==
 
 On Windows, Google Test may be used with exceptions enabled. Even when
 exceptions are disabled, an application can still throw structured exceptions
@@ -1195,7 +1196,7 @@ _Availability:_ Windows. `GTEST_CATCH_EXCEPTIONS` and
 Mac, even if exceptions are enabled. It is possible to add support for catching
 exceptions on these platforms, but it is not implemented yet.
 
-===   Running a Subset of the Tests: `GTEST_FILTER` and `--gtest_filter`  ===
+==   Running a Subset of the Tests: `GTEST_FILTER` and `--gtest_filter`  ==
 
 By default, a Google Test program runs all tests the user has defined.
 Sometimes, you want to run only a subset of the tests (e.g. for debugging or
@@ -1225,7 +1226,7 @@ For example:
 
 _Availability:_ Linux, Windows, Mac.
 
-=== Listing Test Names: `--gtest_list_tests`  ===
+== Listing Test Names: `--gtest_list_tests`  ==
 
 Sometimes it is necessary to list the available tests in a program before
 running them so that a filter may be applied if needed. Including the flag
@@ -1244,7 +1245,7 @@ corresponding environment variable for this flag.
 
 _Availability:_ Linux, Windows, Mac.
 
-===  Generating an XML Report: GTEST_OUTPUT and `--gtest_output`  ===
+==  Generating an XML Report: GTEST_OUTPUT and `--gtest_output`  ==
 
 Google Test can emit a detailed XML report to a file in addition to its normal
 textual output. The report contains the duration of each test, and thus can
@@ -1320,7 +1321,7 @@ Things to note:
 
 _Availability:_ Linux, Windows, Mac.
 
-=== Colored Terminal Output: `GTEST_COLOR` and `--gtest_color` ===
+== Colored Terminal Output: `GTEST_COLOR` and `--gtest_color` ==
 
 Google Test can use colors in its terminal output to make it easier to spot
 the separation between tests, and whether tests passed.
@@ -1334,7 +1335,7 @@ non-Windows platforms) the `TERM` environment variable is set to `xterm` or
 
 _Availability:_ Linux, Windows, Mac.
 
-=== Printing the Elapsed Time: `GTEST_PRINT_TIME` and `--gtest_print_time` ===
+== Printing the Elapsed Time: `GTEST_PRINT_TIME` and `--gtest_print_time` ==
 
 By default, Google Test does not show you the time it takes to run
 each test.  To see that, run the test program with the
@@ -1344,7 +1345,7 @@ same effect.
 
 _Availability:_ Linux, Windows, Mac.
 
-=== Repeating the Tests: `GTEST_REPEAT` and `--gtest_repeat` ===
+== Repeating the Tests: `GTEST_REPEAT` and `--gtest_repeat` ==
 
 Once in a while you'll run into a test whose result is hit-or-miss. Perhaps it
 will fail only 1% of the time, making it rather hard to reproduce the bug under
@@ -1366,7 +1367,7 @@ the repeat count by setting the `GTEST_REPEAT` environment variable.
 
 _Availability:_ Linux, Windows, Mac.
 
-=== Temporarily Disabling Tests ===
+== Temporarily Disabling Tests ==
 
 If you have a broken test that you cannot fix right away, you can add the
 `DISABLED_` prefix to its name. This will exclude it from execution. This is
@@ -1400,7 +1401,7 @@ test quality.
 
 _Availability:_ Linux, Windows, Mac.
 
-== Where to Go from Here ==
+= Where to Go from Here =
 
 Congratulations! You've now learned more advanced Google Test tools and are
 ready to tackle more complex testing tasks. If you want to dive even deeper, you
