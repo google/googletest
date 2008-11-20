@@ -174,56 +174,46 @@ samples_sample8_unittest_SOURCES = samples/prime_tables.h \
 samples_sample8_unittest_LDADD = lib/libgtest_main.la \
                                  samples/libsamples.la
 
-TESTS += test/gtest_unittest
-check_PROGRAMS += test/gtest_unittest
-test_gtest_unittest_SOURCES = test/gtest_unittest.cc
-test_gtest_unittest_LDADD = lib/libgtest.la
-
 TESTS += test/gtest-death-test_test
 check_PROGRAMS += test/gtest-death-test_test
 test_gtest_death_test_test_SOURCES = test/gtest-death-test_test.cc
 test_gtest_death_test_test_CXXFLAGS = $(AM_CXXFLAGS) -pthread
 test_gtest_death_test_test_LDADD = -lpthread lib/libgtest_main.la
 
-TESTS += test/gtest-filepath_test
-check_PROGRAMS += test/gtest-filepath_test
-test_gtest_filepath_test_SOURCES = test/gtest-filepath_test.cc
-test_gtest_filepath_test_LDADD = lib/libgtest_main.la
-
-TESTS += test/gtest-message_test
-check_PROGRAMS += test/gtest-message_test
-test_gtest_message_test_SOURCES = test/gtest-message_test.cc
-test_gtest_message_test_LDADD = lib/libgtest_main.la
-
-TESTS += test/gtest-options_test
-check_PROGRAMS += test/gtest-options_test
-test_gtest_options_test_SOURCES = test/gtest-options_test.cc
-test_gtest_options_test_LDADD = lib/libgtest_main.la
-
-TESTS += test/gtest_pred_impl_unittest
-check_PROGRAMS += test/gtest_pred_impl_unittest
-test_gtest_pred_impl_unittest_SOURCES = test/gtest_pred_impl_unittest.cc
-test_gtest_pred_impl_unittest_LDADD = lib/libgtest_main.la
-
 TESTS += test/gtest_environment_test
 check_PROGRAMS += test/gtest_environment_test
 test_gtest_environment_test_SOURCES = test/gtest_environment_test.cc
 test_gtest_environment_test_LDADD = lib/libgtest.la
+
+TESTS += test/gtest-filepath_test
+check_PROGRAMS += test/gtest-filepath_test
+test_gtest_filepath_test_SOURCES = test/gtest-filepath_test.cc
+test_gtest_filepath_test_LDADD = lib/libgtest_main.la
 
 TESTS += test/gtest-linked_ptr_test
 check_PROGRAMS += test/gtest-linked_ptr_test
 test_gtest_linked_ptr_test_SOURCES = test/gtest-linked_ptr_test.cc
 test_gtest_linked_ptr_test_LDADD = lib/libgtest_main.la
 
+TESTS += test/gtest_main_unittest
+check_PROGRAMS += test/gtest_main_unittest
+test_gtest_main_unittest_SOURCES = test/gtest_main_unittest.cc
+test_gtest_main_unittest_LDADD = lib/libgtest_main.la
+
+TESTS += test/gtest-message_test
+check_PROGRAMS += test/gtest-message_test
+test_gtest_message_test_SOURCES = test/gtest-message_test.cc
+test_gtest_message_test_LDADD = lib/libgtest_main.la
+
 TESTS += test/gtest_no_test_unittest
 check_PROGRAMS += test/gtest_no_test_unittest
 test_gtest_no_test_unittest_SOURCES = test/gtest_no_test_unittest.cc
 test_gtest_no_test_unittest_LDADD = lib/libgtest.la
 
-TESTS += test/gtest_main_unittest
-check_PROGRAMS += test/gtest_main_unittest
-test_gtest_main_unittest_SOURCES = test/gtest_main_unittest.cc
-test_gtest_main_unittest_LDADD = lib/libgtest_main.la
+TESTS += test/gtest-options_test
+check_PROGRAMS += test/gtest-options_test
+test_gtest_options_test_SOURCES = test/gtest-options_test.cc
+test_gtest_options_test_LDADD = lib/libgtest_main.la
 
 TESTS += test/gtest-param-test_test
 check_PROGRAMS += test/gtest-param-test_test
@@ -236,6 +226,11 @@ TESTS += test/gtest-port_test
 check_PROGRAMS += test/gtest-port_test
 test_gtest_port_test_SOURCES = test/gtest-port_test.cc
 test_gtest_port_test_LDADD = lib/libgtest_main.la
+
+TESTS += test/gtest_pred_impl_unittest
+check_PROGRAMS += test/gtest_pred_impl_unittest
+test_gtest_pred_impl_unittest_SOURCES = test/gtest_pred_impl_unittest.cc
+test_gtest_pred_impl_unittest_LDADD = lib/libgtest_main.la
 
 TESTS += test/gtest_prod_test
 check_PROGRAMS += test/gtest_prod_test
@@ -271,6 +266,11 @@ test_gtest_typed_test_test_SOURCES = test/gtest-typed-test_test.cc \
                                      test/gtest-typed-test_test.h
 test_gtest_typed_test_test_LDADD = lib/libgtest_main.la
 
+TESTS += test/gtest_unittest
+check_PROGRAMS += test/gtest_unittest
+test_gtest_unittest_SOURCES = test/gtest_unittest.cc
+test_gtest_unittest_LDADD = lib/libgtest.la
+
 # The following tests depend on the presence of a Python installation and are
 # keyed off of it. TODO(chandlerc@google.com): While we currently only attempt
 # to build and execute these tests if Autoconf has found Python v2.4 on the
@@ -284,13 +284,12 @@ check_SCRIPTS =
 check_SCRIPTS += test/gtest_test_utils.py \
                  test/gtest_xml_test_utils.py
 
-check_PROGRAMS += test/gtest_output_test_
-test_gtest_output_test__SOURCES = test/gtest_output_test_.cc
-test_gtest_output_test__LDADD = lib/libgtest.la
-check_SCRIPTS += test/gtest_output_test.py
-EXTRA_DIST += test/gtest_output_test_golden_lin.txt \
-              test/gtest_output_test_golden_win.txt
-TESTS += test/gtest_output_test.py
+check_PROGRAMS += test/gtest_break_on_failure_unittest_
+test_gtest_break_on_failure_unittest__SOURCES = \
+  test/gtest_break_on_failure_unittest_.cc
+test_gtest_break_on_failure_unittest__LDADD = lib/libgtest.la
+check_SCRIPTS += test/gtest_break_on_failure_unittest.py
+TESTS += test/gtest_break_on_failure_unittest.py
 
 check_PROGRAMS += test/gtest_color_test_
 test_gtest_color_test__SOURCES = test/gtest_color_test_.cc
@@ -310,24 +309,25 @@ test_gtest_filter_unittest__LDADD = lib/libgtest.la
 check_SCRIPTS += test/gtest_filter_unittest.py
 TESTS += test/gtest_filter_unittest.py
 
-check_PROGRAMS += test/gtest_break_on_failure_unittest_
-test_gtest_break_on_failure_unittest__SOURCES = \
-  test/gtest_break_on_failure_unittest_.cc
-test_gtest_break_on_failure_unittest__LDADD = lib/libgtest.la
-check_SCRIPTS += test/gtest_break_on_failure_unittest.py
-TESTS += test/gtest_break_on_failure_unittest.py
-
 check_PROGRAMS += test/gtest_list_tests_unittest_
 test_gtest_list_tests_unittest__SOURCES = test/gtest_list_tests_unittest_.cc
 test_gtest_list_tests_unittest__LDADD = lib/libgtest.la
 check_SCRIPTS += test/gtest_list_tests_unittest.py
 TESTS += test/gtest_list_tests_unittest.py
 
-check_PROGRAMS += test/gtest_xml_output_unittest_
-test_gtest_xml_output_unittest__SOURCES = test/gtest_xml_output_unittest_.cc
-test_gtest_xml_output_unittest__LDADD = lib/libgtest_main.la
-check_SCRIPTS += test/gtest_xml_output_unittest.py
-TESTS += test/gtest_xml_output_unittest.py
+check_PROGRAMS += test/gtest_output_test_
+test_gtest_output_test__SOURCES = test/gtest_output_test_.cc
+test_gtest_output_test__LDADD = lib/libgtest.la
+check_SCRIPTS += test/gtest_output_test.py
+EXTRA_DIST += test/gtest_output_test_golden_lin.txt \
+              test/gtest_output_test_golden_win.txt
+TESTS += test/gtest_output_test.py
+
+check_PROGRAMS += test/gtest_uninitialized_test_
+test_gtest_uninitialized_test__SOURCES = test/gtest_uninitialized_test_.cc
+test_gtest_uninitialized_test__LDADD = lib/libgtest.la
+check_SCRIPTS += test/gtest_uninitialized_test.py
+TESTS += test/gtest_uninitialized_test.py
 
 check_PROGRAMS += test/gtest_xml_outfile1_test_
 test_gtest_xml_outfile1_test__SOURCES = test/gtest_xml_outfile1_test_.cc
@@ -338,11 +338,11 @@ test_gtest_xml_outfile2_test__LDADD = lib/libgtest_main.la
 check_SCRIPTS += test/gtest_xml_outfiles_test.py
 TESTS += test/gtest_xml_outfiles_test.py
 
-check_PROGRAMS += test/gtest_uninitialized_test_
-test_gtest_uninitialized_test__SOURCES = test/gtest_uninitialized_test_.cc
-test_gtest_uninitialized_test__LDADD = lib/libgtest.la
-check_SCRIPTS += test/gtest_uninitialized_test.py
-TESTS += test/gtest_uninitialized_test.py
+check_PROGRAMS += test/gtest_xml_output_unittest_
+test_gtest_xml_output_unittest__SOURCES = test/gtest_xml_output_unittest_.cc
+test_gtest_xml_output_unittest__LDADD = lib/libgtest_main.la
+check_SCRIPTS += test/gtest_xml_output_unittest.py
+TESTS += test/gtest_xml_output_unittest.py
 
 # TODO(wan@google.com): make the build script compile and run the
 #   negative-compilation tests.  (The test/gtest_nc* files are unfinished
