@@ -43,6 +43,7 @@ __author__ = 'wan@google.com (Zhanyong Wan)'
 import gtest_test_utils
 import os
 import re
+import sets
 import sys
 import unittest
 
@@ -58,26 +59,41 @@ FILTER_FLAG = 'gtest_filter'
 COMMAND = os.path.join(gtest_test_utils.GetBuildDir(),
                        'gtest_filter_unittest_')
 
+# Regex for determining whether parameterized tests are enabled in the binary.
+PARAM_TEST_REGEX = re.compile(r'/ParamTest')
+
 # Regex for parsing test case names from Google Test's output.
-TEST_CASE_REGEX = re.compile(r'^\[\-+\] \d+ test.* from (\w+)')
+TEST_CASE_REGEX = re.compile(r'^\[\-+\] \d+ tests? from (\w+(/\w+)?)')
 
 # Regex for parsing test names from Google Test's output.
-TEST_REGEX = re.compile(r'^\[\s*RUN\s*\].*\.(\w+)')
+TEST_REGEX = re.compile(r'^\[\s*RUN\s*\].*\.(\w+(/\w+)?)')
 
 # Full names of all tests in gtest_filter_unittests_.
+PARAM_TESTS = [
+    'SeqP/ParamTest.TestX/0',
+    'SeqP/ParamTest.TestX/1',
+    'SeqP/ParamTest.TestY/0',
+    'SeqP/ParamTest.TestY/1',
+    'SeqQ/ParamTest.TestX/0',
+    'SeqQ/ParamTest.TestX/1',
+    'SeqQ/ParamTest.TestY/0',
+    'SeqQ/ParamTest.TestY/1',
+    ]
+
 ALL_TESTS = [
     'FooTest.Abc',
     'FooTest.Xyz',
 
-    'BarTest.Test1',
-    'BarTest.Test2',
-    'BarTest.Test3',
+    'BarTest.TestOne',
+    'BarTest.TestTwo',
+    'BarTest.TestThree',
 
-    'BazTest.Test1',
+    'BazTest.TestOne',
     'BazTest.TestA',
     'BazTest.TestB',
-    ]
+    ] + PARAM_TESTS
 
+param_tests_present = None
 
 # Utilities.
 
@@ -136,6 +152,11 @@ class GTestFilterUnitTest(unittest.TestCase):
     """Runs gtest_flag_unittest_ with the given filter, and verifies
     that the right set of tests were run.
     """
+    # Adjust tests_to_run in case value parameterized tests are disabled
+    # in the binary.
+    global param_tests_present
+    if not param_tests_present:
+      tests_to_run = list(sets.Set(tests_to_run) - sets.Set(PARAM_TESTS))
 
     # First, tests using GTEST_FILTER.
 
@@ -154,6 +175,15 @@ class GTestFilterUnitTest(unittest.TestCase):
 
     tests_run = Run(command)
     self.AssertSetEqual(tests_run, tests_to_run)
+
+  def setUp(self):
+    """Sets up test case. Determines whether value-parameterized tests are
+    enabled in the binary and sets flags accordingly.
+    """
+    global param_tests_present
+    if param_tests_present is None:
+      param_tests_present = PARAM_TEST_REGEX.search(
+          '\n'.join(os.popen(COMMAND, 'r').readlines())) is not None
 
   def testDefaultBehavior(self):
     """Tests the behavior of not specifying the filter."""
@@ -189,20 +219,19 @@ class GTestFilterUnitTest(unittest.TestCase):
   def testFilterByTest(self):
     """Tests filtering by test name."""
 
-    self.RunAndVerify('*.Test1', ['BarTest.Test1', 'BazTest.Test1'])
+    self.RunAndVerify('*.TestOne', ['BarTest.TestOne', 'BazTest.TestOne'])
 
   def testWildcardInTestCaseName(self):
     """Tests using wildcard in the test case name."""
 
     self.RunAndVerify('*a*.*', [
-        'BarTest.Test1',
-        'BarTest.Test2',
-        'BarTest.Test3',
+        'BarTest.TestOne',
+        'BarTest.TestTwo',
+        'BarTest.TestThree',
 
-        'BazTest.Test1',
+        'BazTest.TestOne',
         'BazTest.TestA',
-        'BazTest.TestB',
-        ])
+        'BazTest.TestB',] + PARAM_TESTS)
 
   def testWildcardInTestName(self):
     """Tests using wildcard in the test name."""
@@ -215,7 +244,7 @@ class GTestFilterUnitTest(unittest.TestCase):
     self.RunAndVerify('*z*', [
         'FooTest.Xyz',
 
-        'BazTest.Test1',
+        'BazTest.TestOne',
         'BazTest.TestA',
         'BazTest.TestB',
         ])
@@ -236,24 +265,24 @@ class GTestFilterUnitTest(unittest.TestCase):
   def testThreePatterns(self):
     """Tests filters that consist of three patterns."""
 
-    self.RunAndVerify('*oo*:*A*:*1', [
+    self.RunAndVerify('*oo*:*A*:*One', [
         'FooTest.Abc',
         'FooTest.Xyz',
 
-        'BarTest.Test1',
+        'BarTest.TestOne',
 
-        'BazTest.Test1',
+        'BazTest.TestOne',
         'BazTest.TestA',
         ])
 
     # The 2nd pattern is empty.
-    self.RunAndVerify('*oo*::*1', [
+    self.RunAndVerify('*oo*::*One', [
         'FooTest.Abc',
         'FooTest.Xyz',
 
-        'BarTest.Test1',
+        'BarTest.TestOne',
 
-        'BazTest.Test1',
+        'BazTest.TestOne',
         ])
 
     # The last 2 patterns are empty.
@@ -266,49 +295,69 @@ class GTestFilterUnitTest(unittest.TestCase):
     self.RunAndVerify('*-FooTest.Abc', [
         'FooTest.Xyz',
 
-        'BarTest.Test1',
-        'BarTest.Test2',
-        'BarTest.Test3',
+        'BarTest.TestOne',
+        'BarTest.TestTwo',
+        'BarTest.TestThree',
 
-        'BazTest.Test1',
+        'BazTest.TestOne',
         'BazTest.TestA',
         'BazTest.TestB',
-        ])
+        ] + PARAM_TESTS)
 
     self.RunAndVerify('*-FooTest.Abc:BazTest.*', [
         'FooTest.Xyz',
 
-        'BarTest.Test1',
-        'BarTest.Test2',
-        'BarTest.Test3',
-        ])
+        'BarTest.TestOne',
+        'BarTest.TestTwo',
+        'BarTest.TestThree',
+        ] + PARAM_TESTS)
 
-    self.RunAndVerify('BarTest.*-BarTest.Test1', [
-        'BarTest.Test2',
-        'BarTest.Test3',
+    self.RunAndVerify('BarTest.*-BarTest.TestOne', [
+        'BarTest.TestTwo',
+        'BarTest.TestThree',
         ])
 
     # Tests without leading '*'.
     self.RunAndVerify('-FooTest.Abc:FooTest.Xyz', [
-        'BarTest.Test1',
-        'BarTest.Test2',
-        'BarTest.Test3',
+        'BarTest.TestOne',
+        'BarTest.TestTwo',
+        'BarTest.TestThree',
 
-        'BazTest.Test1',
+        'BazTest.TestOne',
         'BazTest.TestA',
         'BazTest.TestB',
+        ] + PARAM_TESTS)
+
+    # Value parameterized tests.
+    self.RunAndVerify('*/*', PARAM_TESTS)
+
+    # Value parameterized tests filtering by the sequence name.
+    self.RunAndVerify('SeqP/*', [
+        'SeqP/ParamTest.TestX/0',
+        'SeqP/ParamTest.TestX/1',
+        'SeqP/ParamTest.TestY/0',
+        'SeqP/ParamTest.TestY/1',
+        ])
+
+    # Value parameterized tests filtering by the test name.
+    self.RunAndVerify('*/0', [
+        'SeqP/ParamTest.TestX/0',
+        'SeqP/ParamTest.TestY/0',
+        'SeqQ/ParamTest.TestX/0',
+        'SeqQ/ParamTest.TestY/0',
         ])
 
   def testFlagOverridesEnvVar(self):
     """Tests that the --gtest_filter flag overrides the GTEST_FILTER
-    environment variable."""
+    environment variable.
+    """
 
     SetEnvVar(FILTER_ENV_VAR, 'Foo*')
-    command = '%s --%s=%s' % (COMMAND, FILTER_FLAG, '*1')
+    command = '%s --%s=%s' % (COMMAND, FILTER_FLAG, '*One')
     tests_run = Run(command)
     SetEnvVar(FILTER_ENV_VAR, None)
 
-    self.AssertSetEqual(tests_run, ['BarTest.Test1', 'BazTest.Test1'])
+    self.AssertSetEqual(tests_run, ['BarTest.TestOne', 'BazTest.TestOne'])
 
 
 if __name__ == '__main__':

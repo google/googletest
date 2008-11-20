@@ -1,4 +1,4 @@
-// Copyright 2005, Google Inc.
+// Copyright 2008, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -26,31 +26,30 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-// A sample program demonstrating using Google C++ testing framework.
 //
-// Author: wan@google.com (Zhanyong Wan)
+// Authors: vladl@google.com (Vlad Losev)
+//
+// The Google C++ Testing Framework (Google Test)
+//
+// This header file provides classes and functions used internally
+// for testing Google Test itself.
 
-#include "sample2.h"
+#ifndef GTEST_TEST_GTEST_PARAM_TEST_TEST_H_
+#define GTEST_TEST_GTEST_PARAM_TEST_TEST_H_
 
-#include <string.h>
+#include <gtest/gtest.h>
 
-// Clones a 0-terminated C string, allocating memory using new.
-const char * MyString::CloneCString(const char * c_string) {
-  if (c_string == NULL) return NULL;
+#ifdef GTEST_HAS_PARAM_TEST
 
-  const size_t len = strlen(c_string);
-  char * const clone = new char[ len + 1 ];
-  memcpy(clone, c_string, len + 1);
+// Test fixture for testing definition and instantiation of a test
+// in separate translation units.
+class ExternalInstantiationTest : public ::testing::TestWithParam<int> {};
 
-  return clone;
-}
+// Test fixture for testing instantiation of a test in multiple
+// translation units.
+class InstantiationInMultipleTranslaionUnitsTest
+    : public ::testing::TestWithParam<int> {};
 
-// Sets the 0-terminated C string this MyString object
-// represents.
-void MyString::Set(const char * c_string) {
-  // Makes sure this works when c_string == c_string_
-  const char * const temp = MyString::CloneCString(c_string);
-  delete[] c_string_;
-  c_string_ = temp;
-}
+#endif  // GTEST_HAS_PARAM_TEST
+
+#endif  // GTEST_TEST_GTEST_PARAM_TEST_TEST_H_

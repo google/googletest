@@ -56,25 +56,49 @@ namespace internal {
 // Implements RE.  Currently only needed for death tests.
 
 RE::~RE() {
-  regfree(&regex_);
+  regfree(&partial_regex_);
+  regfree(&full_regex_);
   free(const_cast<char*>(pattern_));
 }
 
-// Returns true iff str contains regular expression re.
+// Returns true iff regular expression re matches the entire str.
+bool RE::FullMatch(const char* str, const RE& re) {
+  if (!re.is_valid_) return false;
+
+  regmatch_t match;
+  return regexec(&re.full_regex_, str, 1, &match, 0) == 0;
+}
+
+// Returns true iff regular expression re matches a substring of str
+// (including str itself).
 bool RE::PartialMatch(const char* str, const RE& re) {
   if (!re.is_valid_) return false;
 
   regmatch_t match;
-  return regexec(&re.regex_, str, 1, &match, 0) == 0;
+  return regexec(&re.partial_regex_, str, 1, &match, 0) == 0;
 }
 
 // Initializes an RE from its string representation.
 void RE::Init(const char* regex) {
   pattern_ = strdup(regex);
-  is_valid_ = regcomp(&regex_, regex, REG_EXTENDED) == 0;
+
+  // Reserves enough bytes to hold the regular expression used for a
+  // full match.
+  const size_t full_regex_len = strlen(regex) + 10;
+  char* const full_pattern = new char[full_regex_len];
+
+  snprintf(full_pattern, full_regex_len, "^(%s)$", regex);
+  is_valid_ = regcomp(&full_regex_, full_pattern, REG_EXTENDED) == 0;
+  // We want to call regcomp(&partial_regex_, ...) even if the
+  // previous expression returns false.  Otherwise partial_regex_ may
+  // not be properly initialized can may cause trouble when it's
+  // freed.
+  is_valid_ = (regcomp(&partial_regex_, regex, REG_EXTENDED) == 0) && is_valid_;
   EXPECT_TRUE(is_valid_)
       << "Regular expression \"" << regex
       << "\" is not a valid POSIX Extended regular expression.";
+
+  delete[] full_pattern;
 }
 
 #endif  // GTEST_HAS_DEATH_TEST

@@ -6,7 +6,9 @@
 EXTRA_DIST = \
   CHANGES \
   CONTRIBUTORS \
+  include/gtest/gtest-param-test.h.pump \
   include/gtest/internal/gtest-type-util.h.pump \
+  include/gtest/internal/gtest-param-util-generated.h.pump \
   scons/SConscript \
   scripts/gen_gtest_pred_impl.py \
   src/gtest-all.cc
@@ -77,9 +79,10 @@ lib_libgtest_la_SOURCES = src/gtest.cc \
 pkginclude_HEADERS = include/gtest/gtest.h \
                      include/gtest/gtest-death-test.h \
                      include/gtest/gtest-message.h \
-                     include/gtest/gtest-spi.h \
+                     include/gtest/gtest-param-test.h \
                      include/gtest/gtest_pred_impl.h \
                      include/gtest/gtest_prod.h \
+                     include/gtest/gtest-spi.h \
                      include/gtest/gtest-test-part.h \
                      include/gtest/gtest-typed-test.h
 
@@ -88,6 +91,9 @@ pkginclude_internal_HEADERS = \
   include/gtest/internal/gtest-death-test-internal.h \
   include/gtest/internal/gtest-filepath.h \
   include/gtest/internal/gtest-internal.h \
+  include/gtest/internal/gtest-linked_ptr.h \
+  include/gtest/internal/gtest-param-util-generated.h \
+  include/gtest/internal/gtest-param-util.h \
   include/gtest/internal/gtest-port.h \
   include/gtest/internal/gtest-string.h \
   include/gtest/internal/gtest-type-util.h
@@ -149,8 +155,23 @@ samples_sample5_unittest_LDADD = lib/libgtest_main.la \
 
 TESTS += samples/sample6_unittest
 check_PROGRAMS += samples/sample6_unittest
-samples_sample6_unittest_SOURCES = samples/sample6_unittest.cc
+samples_sample6_unittest_SOURCES = samples/prime_tables.h \
+                                   samples/sample6_unittest.cc
 samples_sample6_unittest_LDADD = lib/libgtest_main.la \
+                                 samples/libsamples.la
+
+TESTS += samples/sample7_unittest
+check_PROGRAMS += samples/sample7_unittest
+samples_sample7_unittest_SOURCES = samples/prime_tables.h \
+                                   samples/sample7_unittest.cc
+samples_sample7_unittest_LDADD = lib/libgtest_main.la \
+                                 samples/libsamples.la
+
+TESTS += samples/sample8_unittest
+check_PROGRAMS += samples/sample8_unittest
+samples_sample8_unittest_SOURCES = samples/prime_tables.h \
+                                   samples/sample8_unittest.cc
+samples_sample8_unittest_LDADD = lib/libgtest_main.la \
                                  samples/libsamples.la
 
 TESTS += test/gtest_unittest
@@ -189,6 +210,11 @@ check_PROGRAMS += test/gtest_environment_test
 test_gtest_environment_test_SOURCES = test/gtest_environment_test.cc
 test_gtest_environment_test_LDADD = lib/libgtest.la
 
+TESTS += test/gtest-linked_ptr_test
+check_PROGRAMS += test/gtest-linked_ptr_test
+test_gtest_linked_ptr_test_SOURCES = test/gtest-linked_ptr_test.cc
+test_gtest_linked_ptr_test_LDADD = lib/libgtest_main.la
+
 TESTS += test/gtest_no_test_unittest
 check_PROGRAMS += test/gtest_no_test_unittest
 test_gtest_no_test_unittest_SOURCES = test/gtest_no_test_unittest.cc
@@ -198,6 +224,18 @@ TESTS += test/gtest_main_unittest
 check_PROGRAMS += test/gtest_main_unittest
 test_gtest_main_unittest_SOURCES = test/gtest_main_unittest.cc
 test_gtest_main_unittest_LDADD = lib/libgtest_main.la
+
+TESTS += test/gtest-param-test_test
+check_PROGRAMS += test/gtest-param-test_test
+test_gtest_param_test_test_SOURCES = test/gtest-param-test_test.cc \
+                                     test/gtest-param-test2_test.cc \
+                                     test/gtest-param-test_test.h
+test_gtest_param_test_test_LDADD = lib/libgtest.la
+
+TESTS += test/gtest-port_test
+check_PROGRAMS += test/gtest-port_test
+test_gtest_port_test_SOURCES = test/gtest-port_test.cc
+test_gtest_port_test_LDADD = lib/libgtest_main.la
 
 TESTS += test/gtest_prod_test
 check_PROGRAMS += test/gtest_prod_test

@@ -30,91 +30,12 @@
 // Author: wan@google.com (Zhanyong Wan)
 
 // This sample shows how to test common properties of multiple
-// implementations of the same interface (aka interface tests).  We
-// put the code to be tested and the tests in the same file for
-// simplicity.
+// implementations of the same interface (aka interface tests).
 
-#include <vector>
+// The interface and its implementations are in this header.
+#include "prime_tables.h"
+
 #include <gtest/gtest.h>
-
-// Section 1. the interface and its implementations.
-
-// The prime table interface.
-class PrimeTable {
- public:
-  virtual ~PrimeTable() {}
-
-  // Returns true iff n is a prime number.
-  virtual bool IsPrime(int n) const = 0;
-
-  // Returns the smallest prime number greater than p; or returns -1
-  // if the next prime is beyond the capacity of the table.
-  virtual int GetNextPrime(int p) const = 0;
-};
-
-// Implementation #1 calculates the primes on-the-fly.
-class OnTheFlyPrimeTable : public PrimeTable {
- public:
-  virtual bool IsPrime(int n) const {
-    if (n <= 1) return false;
-
-    for (int i = 2; i*i <= n; i++) {
-      // n is divisible by an integer other than 1 and itself.
-      if ((n % i) == 0) return false;
-    }
-
-    return true;
-  }
-
-  virtual int GetNextPrime(int p) const {
-    for (int n = p + 1; n > 0; n++) {
-      if (IsPrime(n)) return n;
-    }
-
-    return -1;
-  }
-};
-
-// Implementation #2 pre-calculates the primes and stores the result
-// in a vector.
-class PreCalculatedPrimeTable : public PrimeTable {
- public:
-  // 'max' specifies the maximum number the prime table holds.
-  explicit PreCalculatedPrimeTable(int max) : is_prime_(max + 1) {
-    CalculatePrimesUpTo(max);
-  }
-
-  virtual bool IsPrime(int n) const {
-    return 0 <= n && n < is_prime_.size() && is_prime_[n];
-  }
-
-  virtual int GetNextPrime(int p) const {
-    for (int n = p + 1; n < is_prime_.size(); n++) {
-      if (is_prime_[n]) return n;
-    }
-
-    return -1;
-  }
-
- private:
-  void CalculatePrimesUpTo(int max) {
-    fill(is_prime_.begin(), is_prime_.end(), true);
-    is_prime_[0] = is_prime_[1] = false;
-
-    for (int i = 2; i <= max; i++) {
-      if (!is_prime_[i]) continue;
-
-      // Marks all multiples of i (except i itself) as non-prime.
-      for (int j = 2*i; j <= max; j += i) {
-        is_prime_[j] = false;
-      }
-    }
-  }
-
-  std::vector<bool> is_prime_;
-};
-
-// Sections 2. the tests.
 
 // First, we define some factory functions for creating instances of
 // the implementations.  You may be able to skip this step if all your
@@ -153,9 +74,9 @@ class PrimeTableTest : public testing::Test {
   PrimeTable* const table_;
 };
 
-using testing::Types;
-
 #ifdef GTEST_HAS_TYPED_TEST
+
+using testing::Types;
 
 // Google Test offers two ways for reusing tests for different types.
 // The first is called "typed tests".  You should use it if you
@@ -217,6 +138,8 @@ TYPED_TEST(PrimeTableTest, CanGetNextPrime) {
 #endif  // GTEST_HAS_TYPED_TEST
 
 #ifdef GTEST_HAS_TYPED_TEST_P
+
+using testing::Types;
 
 // Sometimes, however, you don't yet know all the types that you want
 // to test when you write the tests.  For example, if you are the

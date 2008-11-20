@@ -109,6 +109,8 @@ using testing::internal::AppendUserMessage;
 using testing::internal::CodePointToUtf8;
 using testing::internal::EqFailure;
 using testing::internal::FloatingPoint;
+using testing::internal::GetCurrentOsStackTraceExceptTop;
+using testing::internal::GetFailedPartCount;
 using testing::internal::GTestFlagSaver;
 using testing::internal::Int32;
 using testing::internal::List;
@@ -897,6 +899,13 @@ TEST_F(TestResultTest, failed_part_count) {
   ASSERT_EQ(0u, r0->failed_part_count());
   ASSERT_EQ(0u, r1->failed_part_count());
   ASSERT_EQ(1u, r2->failed_part_count());
+}
+
+// Tests testing::internal::GetFailedPartCount().
+TEST_F(TestResultTest, GetFailedPartCount) {
+  ASSERT_EQ(0u, GetFailedPartCount(r0));
+  ASSERT_EQ(0u, GetFailedPartCount(r1));
+  ASSERT_EQ(1u, GetFailedPartCount(r2));
 }
 
 // Tests TestResult::total_part_count()
@@ -4912,6 +4921,14 @@ TEST(ThreadLocalTest, Init) {
   int i = 0;
   ThreadLocal<int*> t2(&i);
   EXPECT_EQ(&i, t2.get());
+}
+
+TEST(GetCurrentOsStackTraceExceptTopTest, ReturnsTheStackTrace) {
+  testing::UnitTest* const unit_test = testing::UnitTest::GetInstance();
+
+  // We don't have a stack walker in Google Test yet.
+  EXPECT_STREQ("", GetCurrentOsStackTraceExceptTop(unit_test, 0).c_str());
+  EXPECT_STREQ("", GetCurrentOsStackTraceExceptTop(unit_test, 1).c_str());
 }
 
 #ifndef GTEST_OS_SYMBIAN

@@ -83,12 +83,6 @@ int _rmdir(const char* path) {
   return ret;
 }
 
-#elif defined(GTEST_LINUX_GOOGLE3_MODE)
-// Creates a temporary directory and returns its path.
-const char* MakeTempDir() {
-  static char dir_name[] = "gtest-filepath_test_tmpXXXXXX";
-  return mkdtemp(dir_name);
-}
 #endif  // _WIN32_WCE
 
 #ifndef _WIN32_WCE

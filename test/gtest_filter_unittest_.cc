@@ -58,19 +58,19 @@ TEST_F(FooTest, Xyz) {
 
 // Test case BarTest.
 
-TEST(BarTest, Test1) {
+TEST(BarTest, TestOne) {
 }
 
-TEST(BarTest, Test2) {
+TEST(BarTest, TestTwo) {
 }
 
-TEST(BarTest, Test3) {
+TEST(BarTest, TestThree) {
 }
 
 
 // Test case BazTest.
 
-TEST(BazTest, Test1) {
+TEST(BazTest, TestOne) {
   FAIL() << "Expected failure.";
 }
 
@@ -79,6 +79,20 @@ TEST(BazTest, TestA) {
 
 TEST(BazTest, TestB) {
 }
+
+#ifdef GTEST_HAS_PARAM_TEST
+class ParamTest : public testing::TestWithParam<int> {
+};
+
+TEST_P(ParamTest, TestX) {
+}
+
+TEST_P(ParamTest, TestY) {
+}
+
+INSTANTIATE_TEST_CASE_P(SeqP, ParamTest, testing::Values(1, 2));
+INSTANTIATE_TEST_CASE_P(SeqQ, ParamTest, testing::Values(5, 6));
+#endif  // GTEST_HAS_PARAM_TEST
 
 }  // namespace
 

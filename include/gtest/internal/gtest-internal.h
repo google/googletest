@@ -711,6 +711,21 @@ class TypeParameterizedTestCase<Fixture, Templates0, Types> {
 
 #endif  // GTEST_HAS_TYPED_TEST || GTEST_HAS_TYPED_TEST_P
 
+// Returns the current OS stack trace as a String.
+//
+// The maximum number of stack frames to be included is specified by
+// the gtest_stack_trace_depth flag.  The skip_count parameter
+// specifies the number of top frames to be skipped, which doesn't
+// count against the number of frames to be included.
+//
+// For example, if Foo() calls Bar(), which in turn calls
+// GetCurrentOsStackTraceExceptTop(..., 1), Foo() will be included in
+// the trace but Bar() and GetCurrentOsStackTraceExceptTop() won't.
+String GetCurrentOsStackTraceExceptTop(UnitTest* unit_test, int skip_count);
+
+// Returns the number of failed test parts in the given test result object.
+int GetFailedPartCount(const TestResult* result);
+
 }  // namespace internal
 }  // namespace testing
 
@@ -726,7 +741,6 @@ class TypeParameterizedTestCase<Fixture, Templates0, Types> {
 
 #define GTEST_SUCCESS_(message) \
   GTEST_MESSAGE_(message, ::testing::TPRT_SUCCESS)
-
 
 #define GTEST_TEST_THROW_(statement, expected_exception, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
@@ -836,6 +850,5 @@ class GTEST_TEST_CLASS_NAME_(test_case_name, test_name) : public parent_class {\
         new ::testing::internal::TestFactoryImpl<\
             GTEST_TEST_CLASS_NAME_(test_case_name, test_name)>);\
 void GTEST_TEST_CLASS_NAME_(test_case_name, test_name)::TestBody()
-
 
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
