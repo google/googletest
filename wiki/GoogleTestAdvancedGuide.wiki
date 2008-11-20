@@ -807,7 +807,7 @@ are initialized).
 _Availability:_ Linux, Windows, Mac.
 
 
-= Value-Parameterized Tests =
+= Value Parameterized Tests =
 
 _Value-parameterized tests_ allow you to test your code with different
 parameters without writing multiple copies of the same test.  This is
