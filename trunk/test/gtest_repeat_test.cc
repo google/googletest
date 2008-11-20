@@ -121,6 +121,24 @@ TEST(BarDeathTest, ThreadSafeAndFast) {
 #endif  // GTEST_HAS_DEATH_TEST
 }
 
+#ifdef GTEST_HAS_PARAM_TEST
+int g_param_test_count = 0;
+
+const int kNumberOfParamTests = 10;
+
+class MyParamTest : public testing::TestWithParam<int> {};
+
+TEST_P(MyParamTest, ShouldPass) {
+  // TODO(vladl@google.com): Make parameter value checking robust
+  //                         WRT order of tests.
+  GTEST_CHECK_INT_EQ_(g_param_test_count % kNumberOfParamTests, GetParam());
+  g_param_test_count++;
+}
+INSTANTIATE_TEST_CASE_P(MyParamSequence,
+                        MyParamTest,
+                        testing::Range(0, kNumberOfParamTests));
+#endif  // GTEST_HAS_PARAM_TEST
+
 // Resets the count for each test.
 void ResetCounts() {
   g_environment_set_up_count = 0;
@@ -128,6 +146,9 @@ void ResetCounts() {
   g_should_fail_count = 0;
   g_should_pass_count = 0;
   g_death_test_count = 0;
+#ifdef GTEST_HAS_PARAM_TEST
+  g_param_test_count = 0;
+#endif  // GTEST_HAS_PARAM_TEST
 }
 
 // Checks that the count for each test is expected.
@@ -137,6 +158,9 @@ void CheckCounts(int expected) {
   GTEST_CHECK_INT_EQ_(expected, g_should_fail_count);
   GTEST_CHECK_INT_EQ_(expected, g_should_pass_count);
   GTEST_CHECK_INT_EQ_(expected, g_death_test_count);
+#ifdef GTEST_HAS_PARAM_TEST
+  GTEST_CHECK_INT_EQ_(expected * kNumberOfParamTests, g_param_test_count);
+#endif  // GTEST_HAS_PARAM_TEST
 }
 
 // Tests the behavior of Google Test when --gtest_repeat is not specified.
@@ -179,6 +203,9 @@ void TestRepeatWithFilterForSuccessfulTests(int repeat) {
   GTEST_CHECK_INT_EQ_(0, g_should_fail_count);
   GTEST_CHECK_INT_EQ_(repeat, g_should_pass_count);
   GTEST_CHECK_INT_EQ_(repeat, g_death_test_count);
+#ifdef GTEST_HAS_PARAM_TEST
+  GTEST_CHECK_INT_EQ_(repeat * kNumberOfParamTests, g_param_test_count);
+#endif  // GTEST_HAS_PARAM_TEST
 }
 
 // Tests using --gtest_repeat when --gtest_filter specifies a set of
@@ -194,6 +221,9 @@ void TestRepeatWithFilterForFailedTests(int repeat) {
   GTEST_CHECK_INT_EQ_(repeat, g_should_fail_count);
   GTEST_CHECK_INT_EQ_(0, g_should_pass_count);
   GTEST_CHECK_INT_EQ_(0, g_death_test_count);
+#ifdef GTEST_HAS_PARAM_TEST
+  GTEST_CHECK_INT_EQ_(0, g_param_test_count);
+#endif  // GTEST_HAS_PARAM_TEST
 }
 
 }  // namespace

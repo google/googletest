@@ -66,6 +66,7 @@
 #include <gtest/internal/gtest-string.h>
 #include <gtest/gtest-death-test.h>
 #include <gtest/gtest-message.h>
+#include <gtest/gtest-param-test.h>
 #include <gtest/gtest_prod.h>
 #include <gtest/gtest-test-part.h>
 #include <gtest/gtest-typed-test.h>
@@ -483,6 +484,12 @@ class UnitTest {
   // or NULL if no test is running.
   const TestInfo* current_test_info() const;
 
+#ifdef GTEST_HAS_PARAM_TEST
+  // Returns the ParameterizedTestCaseRegistry object used to keep track of
+  // value-parameterized tests and instantiate and register them.
+  internal::ParameterizedTestCaseRegistry& parameterized_test_registry();
+#endif  // GTEST_HAS_PARAM_TEST
+
   // Accessors for the implementation object.
   internal::UnitTestImpl* impl() { return impl_; }
   const internal::UnitTestImpl* impl() const { return impl_; }
@@ -885,6 +892,65 @@ class AssertHelper {
 };
 
 }  // namespace internal
+
+#ifdef GTEST_HAS_PARAM_TEST
+// The abstract base class that all value-parameterized tests inherit from.
+//
+// This class adds support for accessing the test parameter value via
+// the GetParam() method.
+//
+// Use it with one of the parameter generator defining functions, like Range(),
+// Values(), ValuesIn(), Bool(), and Combine().
+//
+// class FooTest : public ::testing::TestWithParam<int> {
+//  protected:
+//   FooTest() {
+//     // Can use GetParam() here.
+//   }
+//   virtual ~FooTest() {
+//     // Can use GetParam() here.
+//   }
+//   virtual void SetUp() {
+//     // Can use GetParam() here.
+//   }
+//   virtual void TearDown {
+//     // Can use GetParam() here.
+//   }
+// };
+// TEST_P(FooTest, DoesBar) {
+//   // Can use GetParam() method here.
+//   Foo foo;
+//   ASSERT_TRUE(foo.DoesBar(GetParam()));
+// }
+// INSTANTIATE_TEST_CASE_P(OneToTenRange, FooTest, ::testing::Range(1, 10));
+
+template <typename T>
+class TestWithParam : public Test {
+ public:
+  typedef T ParamType;
+
+  // The current parameter value. Is also available in the test fixture's
+  // constructor.
+  const ParamType& GetParam() const { return *parameter_; }
+
+ private:
+  // Sets parameter value. The caller is responsible for making sure the value
+  // remains alive and unchanged throughout the current test.
+  static void SetParam(const ParamType* parameter) {
+    parameter_ = parameter;
+  }
+
+  // Static value used for accessing parameter during a test lifetime.
+  static const ParamType* parameter_;
+
+  // TestClass must be a subclass of TestWithParam<T>.
+  template <class TestClass> friend class internal::ParameterizedTestFactory;
+};
+
+template <typename T>
+const T* TestWithParam<T>::parameter_ = NULL;
+
+#endif  // GTEST_HAS_PARAM_TEST
 
 // Macros for indicating success/failure in test code.
 

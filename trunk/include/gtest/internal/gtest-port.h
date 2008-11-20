@@ -56,6 +56,8 @@
 //                              enabled.
 //   GTEST_HAS_PTHREAD        - Define it to 1/0 to indicate that <pthread.h>
 //                              is/isn't available.
+//   GTEST_HAS_TR1_TUPLE 1    - Define it to 1/0 to indicate tr1::tuple
+//                              is/isn't available.
 
 // This header defines the following utilities:
 //
@@ -85,7 +87,11 @@
 // Note that it is possible that none of the GTEST_OS_ macros are defined.
 //
 // Macros indicating available Google Test features:
+//   GTEST_HAS_COMBINE      - defined iff Combine construct is supported
+//                            in value-parameterized tests.
 //   GTEST_HAS_DEATH_TEST   - defined iff death tests are supported.
+//   GTEST_HAS_PARAM_TEST   - defined iff value-parameterized tests are
+//                            supported.
 //   GTEST_HAS_TYPED_TEST   - defined iff typed tests are supported.
 //   GTEST_HAS_TYPED_TEST_P - defined iff type-parameterized tests are
 //                            supported.
@@ -145,6 +151,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <iostream>  // Used for GTEST_CHECK_
 
 #define GTEST_NAME "Google Test"
 #define GTEST_FLAG_PREFIX "gtest_"
@@ -292,6 +299,22 @@
 
 #endif  // GTEST_HAS_PTHREAD
 
+// Determines whether <tr1/tuple> is available.  If you have <tr1/tuple>
+// on your platform, define GTEST_HAS_TR1_TUPLE=1 for both the Google
+// Test project and your tests. If you would like Google Test to detect
+// <tr1/tuple> on your platform automatically, please open an issue
+// ticket at http://code.google.com/p/googletest.
+#ifndef GTEST_HAS_TR1_TUPLE
+// The user didn't tell us, so we need to figure it out.
+
+// GCC provides <tr1/tuple> since 4.0.0.
+#if defined(__GNUC__) && (GTEST_GCC_VER_ >= 40000)
+#define GTEST_HAS_TR1_TUPLE 1
+#else
+#define GTEST_HAS_TR1_TUPLE 0
+#endif  // __GNUC__
+#endif  // GTEST_HAS_TR1_TUPLE
+
 // Determines whether to support death tests.
 #if GTEST_HAS_STD_STRING && defined(GTEST_OS_LINUX)
 #define GTEST_HAS_DEATH_TEST
@@ -305,6 +328,14 @@
 #include <sys/mman.h>
 #endif  // GTEST_HAS_STD_STRING && defined(GTEST_OS_LINUX)
 
+// Determines whether to support value-parameterized tests.
+
+#if defined(__GNUC__) || (_MSC_VER >= 1400)
+// TODO(vladl@google.com): get the implementation rid of vector and list
+// to compile on MSVC 7.1.
+#define GTEST_HAS_PARAM_TEST
+#endif  // defined(__GNUC__) || (_MSC_VER >= 1400)
+
 // Determines whether to support type-driven tests.
 
 // Typed tests need <typeinfo> and variadic macros, which gcc and VC
@@ -313,6 +344,12 @@
 #define GTEST_HAS_TYPED_TEST
 #define GTEST_HAS_TYPED_TEST_P
 #endif  // defined(__GNUC__) || (_MSC_VER >= 1400)
+
+// Determines whether to support Combine(). This only makes sense when
+// value-parameterized tests are enabled.
+#if defined(GTEST_HAS_PARAM_TEST) && GTEST_HAS_TR1_TUPLE
+#define GTEST_HAS_COMBINE
+#endif  // defined(GTEST_HAS_PARAM_TEST) && GTEST_HAS_TR1_TUPLE
 
 // Determines whether the system compiler uses UTF-16 for encoding wide strings.
 #if defined(GTEST_OS_WINDOWS) || defined(GTEST_OS_CYGWIN) || \
@@ -421,7 +458,7 @@ class scoped_ptr {
 
 #ifdef GTEST_HAS_DEATH_TEST
 
-// Defines RE.  Currently only needed for death tests.
+// Defines RE.
 
 // A simple C++ wrapper for <regex.h>.  It uses the POSIX Enxtended
 // Regular Expression syntax.
@@ -442,22 +479,32 @@ class RE {
   // Returns the string representation of the regex.
   const char* pattern() const { return pattern_; }
 
-  // Returns true iff str contains regular expression re.
-
-  // TODO(wan): make PartialMatch() work when str contains NUL
-  // characters.
+  // FullMatch(str, re) returns true iff regular expression re matches
+  // the entire str.
+  // PartialMatch(str, re) returns true iff regular expression re
+  // matches a substring of str (including str itself).
+  //
+  // TODO(wan@google.com): make FullMatch() and PartialMatch() work
+  // when str contains NUL characters.
 #if GTEST_HAS_STD_STRING
+  static bool FullMatch(const ::std::string& str, const RE& re) {
+    return FullMatch(str.c_str(), re);
+  }
   static bool PartialMatch(const ::std::string& str, const RE& re) {
     return PartialMatch(str.c_str(), re);
   }
 #endif  // GTEST_HAS_STD_STRING
 
 #if GTEST_HAS_GLOBAL_STRING
+  static bool FullMatch(const ::string& str, const RE& re) {
+    return FullMatch(str.c_str(), re);
+  }
   static bool PartialMatch(const ::string& str, const RE& re) {
     return PartialMatch(str.c_str(), re);
   }
 #endif  // GTEST_HAS_GLOBAL_STRING
 
+  static bool FullMatch(const char* str, const RE& re);
   static bool PartialMatch(const char* str, const RE& re);
 
  private:
@@ -468,7 +515,8 @@ class RE {
   // String type here, in order to simplify dependencies between the
   // files.
   const char* pattern_;
-  regex_t regex_;
+  regex_t full_regex_;     // For FullMatch().
+  regex_t partial_regex_;  // For PartialMatch().
   bool is_valid_;
 };
 
@@ -696,6 +744,53 @@ void abort();
 #else
 inline void abort() { ::abort(); }
 #endif  // _WIN32_WCE
+
+// INTERNAL IMPLEMENTATION - DO NOT USE.
+//
+// GTEST_CHECK_ is an all-mode assert. It aborts the program if the condition
+// is not satisfied.
+//  Synopsys:
+//    GTEST_CHECK_(boolean_condition);
+//     or
+//    GTEST_CHECK_(boolean_condition) << "Additional message";
+//
+//    This checks the condition and if the condition is not satisfied
+//    it prints message about the condition violation, including the
+//    condition itself, plus additional message streamed into it, if any,
+//    and then it aborts the program. It aborts the program irrespective of
+//    whether it is built in the debug mode or not.
+class GTestCheckProvider {
+ public:
+  GTestCheckProvider(const char* condition, const char* file, int line) {
+    FormatFileLocation(file, line);
+    ::std::cerr << " ERROR: Condition " << condition << " failed. ";
+  }
+  ~GTestCheckProvider() {
+    ::std::cerr << ::std::endl;
+    abort();
+  }
+  void FormatFileLocation(const char* file, int line) {
+    if (file == NULL)
+      file = "unknown file";
+    if (line < 0) {
+      ::std::cerr << file << ":";
+    } else {
+#if _MSC_VER
+      ::std::cerr << file << "(" << line << "):";
+#else
+      ::std::cerr << file << ":" << line << ":";
+#endif
+    }
+  }
+  ::std::ostream& GetStream() { return ::std::cerr; }
+};
+#define GTEST_CHECK_(condition) \
+    GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
+    if (condition) \
+      ; \
+    else \
+      ::testing::internal::GTestCheckProvider(\
+          #condition, __FILE__, __LINE__).GetStream()
 
 // Macro for referencing flags.
 #define GTEST_FLAG(name) FLAGS_gtest_##name

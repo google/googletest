@@ -277,6 +277,9 @@ void AssertHelper::operator=(const Message& message) const {
                       );  // NOLINT
 }
 
+// Mutex for linked pointers.
+Mutex g_linked_ptr_mutex(Mutex::NO_CONSTRUCTOR_NEEDED_FOR_STATIC_MUTEX);
+
 // Application pathname gotten in InitGoogleTest.
 String g_executable_path;
 
@@ -830,7 +833,7 @@ static void StreamWideCharsToMessage(const wchar_t* wstr, size_t len,
   // several other places).
   for (size_t i = 0; i != len; ) {  // NOLINT
     if (wstr[i] != L'\0') {
-      *msg << WideStringToUtf8(wstr + i, len - i);
+      *msg << WideStringToUtf8(wstr + i, static_cast<int>(len - i));
       while (i != len && wstr[i] != L'\0')
         i++;
     } else {
@@ -1453,7 +1456,7 @@ inline UInt32 CreateCodePointFromUtf16SurrogatePair(wchar_t first,
 // will be encoded as individual Unicode characters from Basic Normal Plane.
 String WideStringToUtf8(const wchar_t* str, int num_chars) {
   if (num_chars == -1)
-    num_chars = wcslen(str);
+    num_chars = static_cast<int>(wcslen(str));
 
   StrStream stream;
   for (int i = 0; i < num_chars; ++i) {
@@ -2080,6 +2083,25 @@ TestInfo* MakeAndRegisterTestInfo(
   return test_info;
 }
 
+#ifdef GTEST_HAS_PARAM_TEST
+void ReportInvalidTestCaseType(const char* test_case_name,
+                               const char* file, int line) {
+  Message errors;
+  errors
+      << "Attempted redefinition of test case " << test_case_name << ".\n"
+      << "All tests in the same test case must use the same test fixture\n"
+      << "class.  However, in test case " << test_case_name << ", you tried\n"
+      << "to define a test using a fixture class different from the one\n"
+      << "used earlier. This can happen if the two fixture classes are\n"
+      << "from different namespaces and have the same name. You should\n"
+      << "probably rename one of the classes to put the tests into different\n"
+      << "test cases.";
+
+  fprintf(stderr, "%s %s", FormatFileLocation(file, line).c_str(),
+          errors.GetString().c_str());
+}
+#endif  // GTEST_HAS_PARAM_TEST
+
 }  // namespace internal
 
 // Returns the test case name.
@@ -2155,6 +2177,18 @@ TestInfo * TestCase::GetTestInfo(const char* test_name) {
 }
 
 namespace internal {
+
+// This method expands all parameterized tests registered with macros TEST_P
+// and INSTANTIATE_TEST_CASE_P into regular tests and registers those.
+// This will be done just once during the program runtime.
+void UnitTestImpl::RegisterParameterizedTests() {
+#ifdef GTEST_HAS_PARAM_TEST
+  if (!parameterized_tests_registered_) {
+    parameterized_test_registry_.RegisterTests();
+    parameterized_tests_registered_ = true;
+  }
+#endif
+}
 
 // Creates the test object, runs it, records its result, and then
 // deletes it.
@@ -3269,6 +3303,16 @@ const TestInfo* UnitTest::current_test_info() const {
   return impl_->current_test_info();
 }
 
+#ifdef GTEST_HAS_PARAM_TEST
+// Returns ParameterizedTestCaseRegistry object used to keep track of
+// value-parameterized tests and instantiate and register them.
+// L < mutex_
+internal::ParameterizedTestCaseRegistry&
+    UnitTest::parameterized_test_registry() {
+  return impl_->parameterized_test_registry();
+}
+#endif  // GTEST_HAS_PARAM_TEST
+
 // Creates an empty UnitTest.
 UnitTest::UnitTest() {
   impl_ = new internal::UnitTestImpl(this);
@@ -3314,6 +3358,10 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
       per_thread_test_part_result_reporter_(
           &default_per_thread_test_part_result_reporter_),
       test_cases_(),
+#ifdef GTEST_HAS_PARAM_TEST
+      parameterized_test_registry_(),
+      parameterized_tests_registered_(false),
+#endif  // GTEST_HAS_PARAM_TEST
       last_death_test_case_(NULL),
       current_test_case_(NULL),
       current_test_info_(NULL),
@@ -3415,6 +3463,10 @@ static void TearDownEnvironment(Environment* env) { env->TearDown(); }
 // considered to be failed, but the rest of the tests will still be
 // run.  (We disable exceptions on Linux and Mac OS X, so the issue
 // doesn't apply there.)
+// When parameterized tests are enabled, it explands and registers
+// parameterized tests first in RegisterParameterizedTests().
+// All other functions called from RunAllTests() may safely assume that
+// parameterized tests are ready to be counted and run.
 int UnitTestImpl::RunAllTests() {
   // Makes sure InitGoogleTest() was called.
   if (!GTestIsInitialized()) {
@@ -3423,6 +3475,8 @@ int UnitTestImpl::RunAllTests() {
            "before calling RUN_ALL_TESTS().  Please fix it.\n");
     return 1;
   }
+
+  RegisterParameterizedTests();
 
   // Lists all the tests and exits if the --gtest_list_tests
   // flag was specified.
@@ -3639,7 +3693,7 @@ internal::TestResult* UnitTestImpl::current_test_result() {
 }
 
 // TestInfoImpl constructor. The new instance assumes ownership of the test
-// factory opbject.
+// factory object.
 TestInfoImpl::TestInfoImpl(TestInfo* parent,
                            const char* test_case_name,
                            const char* name,
@@ -3662,10 +3716,6 @@ TestInfoImpl::TestInfoImpl(TestInfo* parent,
 TestInfoImpl::~TestInfoImpl() {
   delete factory_;
 }
-
-}  // namespace internal
-
-namespace internal {
 
 // Parses a string as a command line flag.  The string should have
 // the format "--flag=value".  When def_optional is true, the "=value"
@@ -3812,6 +3862,27 @@ void InitGoogleTestImpl(int* argc, CharType** argv) {
       i--;
     }
   }
+}
+
+// Returns the current OS stack trace as a String.
+//
+// The maximum number of stack frames to be included is specified by
+// the gtest_stack_trace_depth flag.  The skip_count parameter
+// specifies the number of top frames to be skipped, which doesn't
+// count against the number of frames to be included.
+//
+// For example, if Foo() calls Bar(), which in turn calls
+// GetCurrentOsStackTraceExceptTop(..., 1), Foo() will be included in
+// the trace but Bar() and GetCurrentOsStackTraceExceptTop() won't.
+String GetCurrentOsStackTraceExceptTop(UnitTest* unit_test, int skip_count) {
+  // We pass skip_count + 1 to skip this wrapper function in addition
+  // to what the user really wants to skip.
+  return unit_test->impl()->CurrentOsStackTraceExceptTop(skip_count + 1);
+}
+
+// Returns the number of failed test parts in the given test result object.
+int GetFailedPartCount(const TestResult* result) {
+  return result->failed_part_count();
 }
 
 }  // namespace internal

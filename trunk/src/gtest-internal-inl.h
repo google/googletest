@@ -53,7 +53,6 @@
 #include <windows.h>  // NOLINT
 #endif  // GTEST_OS_WINDOWS
 
-#include <ostream>  // NOLINT
 #include <gtest/gtest.h>
 #include <gtest/gtest-spi.h>
 
@@ -846,7 +845,7 @@ class OsStackTraceGetterInterface {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(OsStackTraceGetterInterface);
 };
 
-// A working implemenation of the OsStackTraceGetterInterface interface.
+// A working implementation of the OsStackTraceGetterInterface interface.
 class OsStackTraceGetter : public OsStackTraceGetterInterface {
  public:
   OsStackTraceGetter() {}
@@ -1063,6 +1062,14 @@ class UnitTestImpl {
                 tear_down_tc)->AddTestInfo(test_info);
   }
 
+#ifdef GTEST_HAS_PARAM_TEST
+  // Returns ParameterizedTestCaseRegistry object used to keep track of
+  // value-parameterized tests and instantiate and register them.
+  internal::ParameterizedTestCaseRegistry& parameterized_test_registry() {
+    return parameterized_test_registry_;
+  }
+#endif  // GTEST_HAS_PARAM_TEST
+
   // Sets the TestCase object for the test that's currently running.
   void set_current_test_case(TestCase* current_test_case) {
     current_test_case_ = current_test_case;
@@ -1074,6 +1081,14 @@ class UnitTestImpl {
   void set_current_test_info(TestInfo* current_test_info) {
     current_test_info_ = current_test_info;
   }
+
+  // Registers all parameterized tests defined using TEST_P and
+  // INSTANTIATE_TEST_P, creating regular tests for each test/parameter
+  // combination. This method can be called more then once; it has
+  // guards protecting from registering the tests more then once.
+  // If value-parameterized tests are disabled, RegisterParameterizedTests
+  // is present but does nothing.
+  void RegisterParameterizedTests();
 
   // Runs all tests in this UnitTest object, prints the result, and
   // returns 0 if all tests are successful, or 1 otherwise.  If any
@@ -1168,6 +1183,15 @@ class UnitTestImpl {
   internal::List<Environment*> environments_in_reverse_order_;
 
   internal::List<TestCase*> test_cases_;  // The list of TestCases.
+
+#ifdef GTEST_HAS_PARAM_TEST
+  // ParameterizedTestRegistry object used to register value-parameterized
+  // tests.
+  internal::ParameterizedTestCaseRegistry parameterized_test_registry_;
+
+  // Indicates whether RegisterParameterizedTests() has been called already.
+  bool parameterized_tests_registered_;
+#endif  // GTEST_HAS_PARAM_TEST
 
   // Points to the last death test case registered.  Initially NULL.
   internal::ListNode<TestCase*>* last_death_test_case_;

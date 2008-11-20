@@ -108,21 +108,6 @@ class SingleFailureChecker {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(SingleFailureChecker);
 };
 
-// Helper macro to test that statement generates exactly one fatal failure,
-// which contains the substring 'substr' in its failure message, when a scoped
-// test result reporter of the given interception mode is used.
-#define GTEST_EXPECT_NONFATAL_FAILURE_(statement, substr, intercept_mode)\
-  do {\
-    ::testing::TestPartResultArray gtest_failures;\
-    ::testing::internal::SingleFailureChecker gtest_checker(\
-        &gtest_failures, ::testing::TPRT_NONFATAL_FAILURE, (substr));\
-    {\
-      ::testing::ScopedFakeTestPartResultReporter gtest_reporter(\
-          intercept_mode, &gtest_failures);\
-      statement;\
-    }\
-  } while (false)
-
 }  // namespace internal
 
 }  // namespace testing

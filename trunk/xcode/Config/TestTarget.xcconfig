@@ -5,3 +5,4 @@
 //  is set in the "Based On:" dropdown in the "Target" info dialog.
 
 PRODUCT_NAME = $(TARGET_NAME)
+HEADER_SEARCH_PATHS = ../include
