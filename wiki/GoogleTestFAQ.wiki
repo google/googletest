@@ -590,7 +590,7 @@ EXPECT_TRUE(internal::Func(12345));
 == I would like to run a test several times with different parameters. Do I need to write several similar copies of it? ==
 
 No. You can use a feature called [GoogleTestAdvancedGuide#Value_Parameterized_Tests value-parameterized tests] which
-lets you repeat your tests with a number of different parameters.
+lets you repeat your tests with different parameters, without defining it more than once.
 
 ==  How do I test a file that defines main()?  ==
 
