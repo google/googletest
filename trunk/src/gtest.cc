@@ -3717,6 +3717,27 @@ TestInfoImpl::~TestInfoImpl() {
   delete factory_;
 }
 
+// Returns the current OS stack trace as a String.
+//
+// The maximum number of stack frames to be included is specified by
+// the gtest_stack_trace_depth flag.  The skip_count parameter
+// specifies the number of top frames to be skipped, which doesn't
+// count against the number of frames to be included.
+//
+// For example, if Foo() calls Bar(), which in turn calls
+// GetCurrentOsStackTraceExceptTop(..., 1), Foo() will be included in
+// the trace but Bar() and GetCurrentOsStackTraceExceptTop() won't.
+String GetCurrentOsStackTraceExceptTop(UnitTest* unit_test, int skip_count) {
+  // We pass skip_count + 1 to skip this wrapper function in addition
+  // to what the user really wants to skip.
+  return unit_test->impl()->CurrentOsStackTraceExceptTop(skip_count + 1);
+}
+
+// Returns the number of failed test parts in the given test result object.
+int GetFailedPartCount(const TestResult* result) {
+  return result->failed_part_count();
+}
+
 // Parses a string as a command line flag.  The string should have
 // the format "--flag=value".  When def_optional is true, the "=value"
 // part can be omitted.
@@ -3862,27 +3883,6 @@ void InitGoogleTestImpl(int* argc, CharType** argv) {
       i--;
     }
   }
-}
-
-// Returns the current OS stack trace as a String.
-//
-// The maximum number of stack frames to be included is specified by
-// the gtest_stack_trace_depth flag.  The skip_count parameter
-// specifies the number of top frames to be skipped, which doesn't
-// count against the number of frames to be included.
-//
-// For example, if Foo() calls Bar(), which in turn calls
-// GetCurrentOsStackTraceExceptTop(..., 1), Foo() will be included in
-// the trace but Bar() and GetCurrentOsStackTraceExceptTop() won't.
-String GetCurrentOsStackTraceExceptTop(UnitTest* unit_test, int skip_count) {
-  // We pass skip_count + 1 to skip this wrapper function in addition
-  // to what the user really wants to skip.
-  return unit_test->impl()->CurrentOsStackTraceExceptTop(skip_count + 1);
-}
-
-// Returns the number of failed test parts in the given test result object.
-int GetFailedPartCount(const TestResult* result) {
-  return result->failed_part_count();
 }
 
 }  // namespace internal
