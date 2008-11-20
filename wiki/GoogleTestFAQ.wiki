@@ -1,5 +1,4 @@
 #summary Tips and Frequently-Asked Questions about Google C++ Testing Framework
-#labels Featured
 
 <wiki:toc max_depth="3" />
 
@@ -587,6 +586,48 @@ namespace internal {
 
 EXPECT_TRUE(internal::Func(12345));
 }}}
+
+== I have an existing C++ Google Test test that I now would like to run twice with two values of an external variable. Is there a good way to test it without defining the test twice? ==
+
+Yes! You can use a feature in Google Test called value-parameterized tests
+which lets you repeat your tests with a number of different parameters.
+
+First, define your fixture. Derive it from `testing::TestWithParam<T>`,
+where `T` is your parameter type. In `SetUp()` or the fixture constructor, you
+initialize your flag with the parameter value obtained from the
+`GetParam()` method:
+
+{{{
+class FooTest : public testing::TestWithParam<int32> {
+ protected:
+  virtual void SetUp() { external_parameter = GetParam(); }
+};
+}}}
+
+Now, define your tests as usual. The only difference is you'll be
+using the `TEST_P` macro instead of `TEST_F` (P stands for
+"parameterized".):
+
+{{{
+TEST_P(FooTest, TestBlah) {
+  ... // Tested code that depends on external_parameter goes here.
+}
+}}}
+
+And finally, instantiate tests in the `FooTest` test case with the
+values you want:
+
+{{{
+INSTANTIATE_TEST_CASE_P(InstantiationName, FooTest, testing::Values(1, 2, 3));
+}}}
+
+`InstantiationName` is used to identify this particular instantiation
+(you can instantiate a test case many times with different value lists).
+
+Each test in your test case will be run with each parameter value you
+have specified, and the results will be reported separately for each
+test/parameter combination.
+
 
 ==  How do I test a file that defines main()?  ==
 
