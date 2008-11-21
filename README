@@ -177,16 +177,12 @@ test has its own Xcode "Target" and Xcode "Executable". To build any of the
 tests, change the active target and the active executable to the test of
 interest and then build and run.
 
-NOTE: many of the tests are executed from Python scripts. These tests are
-indicated by a trailing underscore "_" in the test name. These tests should not
-be executed directly. Instead a custom Xcode "Executable" was created to run the
-Python script from within Xcode. These custom executables do not have the
-trailing underscore in the name. For example, to run the gtest_color_test, set
-the active target to "gtest_color_test_" (with a trailing underscore). This
-target will build the gtest_color_test_, which should not be run directly.
-Then set the active executable to "gtest_color_test" (no trailing underscore).
-This executable will execute the gtest_color_test_ from within the
-gtest_color_test.py script).
+NOTE: Several tests use a Python script to run the test executable. They require
+a separate custom "Xcode Executable" to run the Python script within Xcode.
+These "Xcode Executables" are named with "run_" prepended to the test name.
+Also, the gtest_xml_outfiles_test requres two executable tests to be built.
+These executables are built in separate targets with a trailing underscore in
+the name.
 
 Individual tests can be built from the command line using:
 
@@ -196,7 +192,9 @@ These tests can be executed from the command line by moving to the build
 directory and then (in bash)
 
   $ export DYLD_FRAMEWORK_PATH=`pwd`
-  $ ./<test_name>  # (e.g. ./gtest_unittest or ./gtest_color_test.py)
+  $ ./<test_name>  # (if it is not a python test, e.g. ./gtest_unittest)
+    OR
+  $ ./<test_name>.py  # (if it is a python test, e.g. ./gtest_color_test.py)
 
 To use the gtest.framework for your own tests, first, add the framework to Xcode
 project. Next, create a new executable target and add the framework to the
