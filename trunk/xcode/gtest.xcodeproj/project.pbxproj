@@ -23,37 +23,49 @@
 				4539C94C0EC2823500A70F4C /* PBXTargetDependency */,
 				4539C94A0EC2823500A70F4C /* PBXTargetDependency */,
 				3B238F6F0E828B7100846E11 /* PBXTargetDependency */,
-				3B238F710E828B7100846E11 /* PBXTargetDependency */,
-				3B238F730E828B7100846E11 /* PBXTargetDependency */,
-				3B238F750E828B7100846E11 /* PBXTargetDependency */,
-				3B238F790E828B7100846E11 /* PBXTargetDependency */,
-				4539C95F0EC2833100A70F4C /* PBXTargetDependency */,
-				3B238F7B0E828B7100846E11 /* PBXTargetDependency */,
-				3B238F7D0E828B7100846E11 /* PBXTargetDependency */,
-				3B238F7F0E828B7100846E11 /* PBXTargetDependency */,
 				3B238F810E828B7100846E11 /* PBXTargetDependency */,
-				3B238F830E828B7100846E11 /* PBXTargetDependency */,
-				3B238F850E828B7100846E11 /* PBXTargetDependency */,
+				3B238F710E828B7100846E11 /* PBXTargetDependency */,
+				4539C9B10EC284C300A70F4C /* PBXTargetDependency */,
 				3B238F870E828B7100846E11 /* PBXTargetDependency */,
-				3B238F890E828B7100846E11 /* PBXTargetDependency */,
+				3B238F730E828B7100846E11 /* PBXTargetDependency */,
 				3B238F8B0E828B7100846E11 /* PBXTargetDependency */,
-				3B238F8D0E828B7100846E11 /* PBXTargetDependency */,
+				3B238F750E828B7100846E11 /* PBXTargetDependency */,
+				4539C95F0EC2833100A70F4C /* PBXTargetDependency */,
+				4539C9B30EC284C300A70F4C /* PBXTargetDependency */,
 				3B238F8F0E828B7100846E11 /* PBXTargetDependency */,
 				3B238F910E828B7100846E11 /* PBXTargetDependency */,
 				3B238F930E828B7100846E11 /* PBXTargetDependency */,
 				22C44F370E9EB800004F2913 /* PBXTargetDependency */,
 				3B238F950E828B7100846E11 /* PBXTargetDependency */,
 				22C44F390E9EB808004F2913 /* PBXTargetDependency */,
-				3B238F970E828B7100846E11 /* PBXTargetDependency */,
+				3B238F790E828B7100846E11 /* PBXTargetDependency */,
 				3B238F990E828B7100846E11 /* PBXTargetDependency */,
-				3B238F9B0E828B7100846E11 /* PBXTargetDependency */,
-				3B238F9D0E828B7100846E11 /* PBXTargetDependency */,
-				3B238F9F0E828B7100846E11 /* PBXTargetDependency */,
-				4539C9B30EC284C300A70F4C /* PBXTargetDependency */,
-				4539C9B10EC284C300A70F4C /* PBXTargetDependency */,
+				409A76D00ED73CA300E08B81 /* PBXTargetDependency */,
+				409A76D20ED73CA300E08B81 /* PBXTargetDependency */,
+				409A76D40ED73CA300E08B81 /* PBXTargetDependency */,
+				409A76D60ED73CA300E08B81 /* PBXTargetDependency */,
+				409A76D80ED73CA300E08B81 /* PBXTargetDependency */,
+				409A76DA0ED73CA300E08B81 /* PBXTargetDependency */,
+				40538A450ED71D2200AF209A /* PBXTargetDependency */,
+				409A76DC0ED73CA300E08B81 /* PBXTargetDependency */,
+				409A76DE0ED73CA300E08B81 /* PBXTargetDependency */,
 			);
 			name = Check;
 			productName = Check;
+		};
+		40538A0A0ED71AF200AF209A /* gtest_xml_outfiles_test */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 40538A110ED71AF200AF209A /* Build configuration list for PBXAggregateTarget "gtest_xml_outfiles_test" */;
+			buildPhases = (
+				40538A0F0ED71AF200AF209A /* CopyFiles */,
+			);
+			dependencies = (
+				40538A0B0ED71AF200AF209A /* PBXTargetDependency */,
+				40538A150ED71B1900AF209A /* PBXTargetDependency */,
+				40538A170ED71B1B00AF209A /* PBXTargetDependency */,
+			);
+			name = gtest_xml_outfiles_test;
+			productName = gtest_output_test;
 		};
 		408454310E96D39000AC66C2 /* Setup Python */ = {
 			isa = PBXAggregateTarget;
@@ -81,9 +93,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		222ECC950E9EB33A00BEED94 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
 		222ECCA60E9EB47B00BEED94 /* gtest-test-part_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3B238C0E0E7FE13C00846E11 /* gtest-test-part_test.cc */; };
-		222ECCA80E9EB47B00BEED94 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
 		224A12A00E9EAD8F00BD17FD /* gtest-test-part.cc in Sources */ = {isa = PBXBuildFile; fileRef = 224A129F0E9EAD8F00BD17FD /* gtest-test-part.cc */; };
 		224A12A30E9EADCC00BD17FD /* gtest-test-part.h in Headers */ = {isa = PBXBuildFile; fileRef = 224A12A20E9EADCC00BD17FD /* gtest-test-part.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		22A865FD0E70A35700F7AE6E /* gtest-typed-test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 22A865FC0E70A35700F7AE6E /* gtest-typed-test.cc */; };
@@ -112,36 +122,6 @@
 		3B238F570E828B2700846E11 /* gtest_xml_outfile2_test_.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3B238C140E7FE13C00846E11 /* gtest_xml_outfile2_test_.cc */; };
 		3B238F580E828B2C00846E11 /* gtest_xml_output_unittest_.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3B238C170E7FE13C00846E11 /* gtest_xml_output_unittest_.cc */; };
 		3B238FF90E828C7E00846E11 /* production.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3B238C190E7FE13C00846E11 /* production.cc */; };
-		3B87D22E0E96C038000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D2310E96C038000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D2340E96C038000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D2370E96C038000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D23A0E96C038000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D23D0E96C038000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D2400E96C038000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D2430E96C038000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D2460E96C038000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D2490E96C038000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D24C0E96C038000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D24F0E96C038000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D2520E96C038000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D2550E96C038000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D2580E96C038000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D25B0E96C038000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D25E0E96C038000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D2610E96C038000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D2640E96C038000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D2670E96C039000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D26A0E96C039000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D26D0E96C039000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D2700E96C039000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D2730E96C039000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D2790E96C039000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D27C0E96C039000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D27F0E96C039000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D2820E96C039000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D2850E96C039000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		3B87D2880E96C039000D1852 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
 		3BF6F2A00E79B5AD000F2EEE /* gtest-type-util.h in Copy Headers Internal */ = {isa = PBXBuildFile; fileRef = 3BF6F29F0E79B5AD000F2EEE /* gtest-type-util.h */; };
 		3BF6F2A50E79B616000F2EEE /* gtest-typed-test.h in Headers */ = {isa = PBXBuildFile; fileRef = 3BF6F2A40E79B616000F2EEE /* gtest-typed-test.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		404884380E2F799B00CF7658 /* gtest-death-test.h in Headers */ = {isa = PBXBuildFile; fileRef = 404883DB0E2F799B00CF7658 /* gtest-death-test.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -173,36 +153,68 @@
 		404886090E2F840300CF7658 /* sample4_unittest.cc in Sources */ = {isa = PBXBuildFile; fileRef = 404884020E2F799B00CF7658 /* sample4_unittest.cc */; };
 		4048860C0E2F840E00CF7658 /* sample5_unittest.cc in Sources */ = {isa = PBXBuildFile; fileRef = 404884030E2F799B00CF7658 /* sample5_unittest.cc */; };
 		404886140E2F849100CF7658 /* sample1.cc in Sources */ = {isa = PBXBuildFile; fileRef = 404883F80E2F799B00CF7658 /* sample1.cc */; };
-		406B542C0E9CD54B0041F37C /* gtest_xml_outfiles_test.py in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238C150E7FE13C00846E11 /* gtest_xml_outfiles_test.py */; };
-		4084541B0E96D2A100AC66C2 /* gtest_break_on_failure_unittest.py in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238BF80E7FE13B00846E11 /* gtest_break_on_failure_unittest.py */; };
+		40538A180ED71B2E00AF209A /* gtest_xml_outfiles_test.py in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238C150E7FE13C00846E11 /* gtest_xml_outfiles_test.py */; };
+		4060FDBF0ED5C5C6008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDC00ED5C5C7008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDC10ED5C5C7008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDC20ED5C5C8008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDC30ED5C5C8008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDC40ED5C5C9008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDC50ED5C5CA008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDC60ED5C5CB008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDC70ED5C5CB008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDC80ED5C5CC008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDC90ED5C5CC008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDCA0ED5C5CD008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDCB0ED5C5CE008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDCC0ED5C5CF008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDCD0ED5C5D0008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDCE0ED5C5D0008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDCF0ED5C5D1008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDD00ED5C5D2008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDD10ED5C5D3008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDD20ED5C5D6008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDD90ED5C5ED008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDDA0ED5C5EE008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDDB0ED5C5EF008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDDC0ED5C5EF008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDDD0ED5C5F1008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDDE0ED5C5F1008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDDF0ED5C5F2008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDE00ED5C5F3008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDE10ED5C5F3008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDE20ED5C5F4008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDE30ED5C5F5008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDE40ED5C5F6008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDE50ED5C5F9008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDE60ED5C5F9008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDE70ED5C5FA008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDE80ED5C5FB008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
+		4060FDE90ED5C5FB008BAC1E /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
 		408454350E96D3F600AC66C2 /* gtest_test_utils.py in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238C0F0E7FE13C00846E11 /* gtest_test_utils.py */; };
-		408454740E96DBC300AC66C2 /* gtest_output_test.py in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238C070E7FE13B00846E11 /* gtest_output_test.py */; };
-		408454750E96DBD100AC66C2 /* gtest_output_test_golden_lin.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238C090E7FE13B00846E11 /* gtest_output_test_golden_lin.txt */; };
-		408454780E96DC1100AC66C2 /* gtest_color_test.py in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238BFA0E7FE13B00846E11 /* gtest_color_test.py */; };
-		4084547A0E96DC3E00AC66C2 /* gtest_env_var_test.py in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238BFC0E7FE13B00846E11 /* gtest_env_var_test.py */; };
-		4084547C0E96DC6100AC66C2 /* gtest_filter_unittest.py in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238BFF0E7FE13B00846E11 /* gtest_filter_unittest.py */; };
-		4084547E0E96DC8D00AC66C2 /* gtest_list_tests_unittest.py in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238C010E7FE13B00846E11 /* gtest_list_tests_unittest.py */; };
-		408454850E96DCEC00AC66C2 /* gtest_xml_output_unittest.py in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238C160E7FE13C00846E11 /* gtest_xml_output_unittest.py */; };
-		408454870E96DD1500AC66C2 /* gtest_uninitialized_test.py in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238C100E7FE13C00846E11 /* gtest_uninitialized_test.py */; };
 		4084548A0E96DD8200AC66C2 /* gtest_nc_test.py in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238C050E7FE13B00846E11 /* gtest_nc_test.py */; };
 		4084548F0E97066B00AC66C2 /* gtest_xml_test_utils.py in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238C180E7FE13C00846E11 /* gtest_xml_test_utils.py */; };
 		408454BC0E97098200AC66C2 /* gtest-typed-test2_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3B238BF50E7FE13B00846E11 /* gtest-typed-test2_test.cc */; };
+		409A76910ED73AF200E08B81 /* gtest_uninitialized_test.py in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238C100E7FE13C00846E11 /* gtest_uninitialized_test.py */; };
+		409A76940ED73B0500E08B81 /* gtest_xml_output_unittest.py in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238C160E7FE13C00846E11 /* gtest_xml_output_unittest.py */; };
+		409A76970ED73B2500E08B81 /* gtest_output_test.py in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238C070E7FE13B00846E11 /* gtest_output_test.py */; };
+		409A76980ED73B2500E08B81 /* gtest_output_test_golden_lin.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238C090E7FE13B00846E11 /* gtest_output_test_golden_lin.txt */; };
+		409A769B0ED73B2E00E08B81 /* gtest_list_tests_unittest.py in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238C010E7FE13B00846E11 /* gtest_list_tests_unittest.py */; };
+		409A769E0ED73B3800E08B81 /* gtest_filter_unittest.py in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238BFF0E7FE13B00846E11 /* gtest_filter_unittest.py */; };
+		409A76A10ED73B4600E08B81 /* gtest_env_var_test.py in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238BFC0E7FE13B00846E11 /* gtest_env_var_test.py */; };
+		409A76A20ED73B4D00E08B81 /* gtest_color_test.py in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238BFA0E7FE13B00846E11 /* gtest_color_test.py */; };
+		409A76A30ED73B5500E08B81 /* gtest_break_on_failure_unittest.py in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3B238BF80E7FE13B00846E11 /* gtest_break_on_failure_unittest.py */; };
 		40D2095B0E9FFBE500191629 /* gtest_sole_header_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 40D209590E9FFBAA00191629 /* gtest_sole_header_test.cc */; };
 		40D2095C0E9FFC0700191629 /* gtest_stress_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 40D2095A0E9FFBAA00191629 /* gtest_stress_test.cc */; };
-		4539C90B0EC27FBC00A70F4C /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
-		4539C9170EC27FC000A70F4C /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
 		4539C91E0EC2800600A70F4C /* sample7_unittest.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4539C91D0EC2800600A70F4C /* sample7_unittest.cc */; };
 		4539C9200EC2801E00A70F4C /* sample8_unittest.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4539C91F0EC2801E00A70F4C /* sample8_unittest.cc */; };
 		4539C9340EC280AE00A70F4C /* gtest-param-test.h in Headers */ = {isa = PBXBuildFile; fileRef = 4539C9330EC280AE00A70F4C /* gtest-param-test.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4539C9380EC280E200A70F4C /* gtest-linked_ptr.h in Copy Headers Internal */ = {isa = PBXBuildFile; fileRef = 4539C9350EC280E200A70F4C /* gtest-linked_ptr.h */; };
 		4539C9390EC280E200A70F4C /* gtest-param-util-generated.h in Copy Headers Internal */ = {isa = PBXBuildFile; fileRef = 4539C9360EC280E200A70F4C /* gtest-param-util-generated.h */; };
 		4539C93A0EC280E200A70F4C /* gtest-param-util.h in Copy Headers Internal */ = {isa = PBXBuildFile; fileRef = 4539C9370EC280E200A70F4C /* gtest-param-util.h */; };
-		4539C9540EC282D400A70F4C /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
 		4539C95C0EC2830E00A70F4C /* gtest-param-test2_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4539C95A0EC2830E00A70F4C /* gtest-param-test2_test.cc */; };
 		4539C95D0EC2830E00A70F4C /* gtest-param-test_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4539C95B0EC2830E00A70F4C /* gtest-param-test_test.cc */; };
-		4539C99A0EC283A800A70F4C /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
 		4539C9A10EC283E400A70F4C /* gtest-port_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4539C9A00EC283E400A70F4C /* gtest-port_test.cc */; };
-		4539C9A80EC2840700A70F4C /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B87D22D0E96C038000D1852 /* gtest.framework */; };
 		4539C9AF0EC2843000A70F4C /* gtest-linked_ptr_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4539C9AE0EC2843000A70F4C /* gtest-linked_ptr_test.cc */; };
 /* End PBXBuildFile section */
 
@@ -487,47 +499,12 @@
 			remoteGlobalIDString = 3B238E0F0E82887E00846E11;
 			remoteInfo = "gtest-typed-test_test";
 		};
-		3B238F7A0E828B7100846E11 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 3B238E1A0E82888500846E11;
-			remoteInfo = gtest_break_on_failure_unittest_;
-		};
-		3B238F7C0E828B7100846E11 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 3B238E270E82888800846E11;
-			remoteInfo = gtest_color_test_;
-		};
-		3B238F7E0E828B7100846E11 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 3B238E360E82889000846E11;
-			remoteInfo = gtest_env_var_test_;
-		};
 		3B238F800E828B7100846E11 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 3B238E410E82889500846E11;
 			remoteInfo = gtest_enviroment_test;
-		};
-		3B238F820E828B7100846E11 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 3B238E4E0E82889800846E11;
-			remoteInfo = gtest_filter_unittest_;
-		};
-		3B238F840E828B7100846E11 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 3B238E5B0E82889B00846E11;
-			remoteInfo = gtest_list_tests_unittest_;
 		};
 		3B238F860E828B7100846E11 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -536,26 +513,12 @@
 			remoteGlobalIDString = 3B238E7A0E82894300846E11;
 			remoteInfo = gtest_main_unittest;
 		};
-		3B238F880E828B7100846E11 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 3B238E850E82894800846E11;
-			remoteInfo = gtest_nc;
-		};
 		3B238F8A0E828B7100846E11 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 3B238E920E82894A00846E11;
 			remoteInfo = gtest_no_test_unittest;
-		};
-		3B238F8C0E828B7100846E11 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 3B238E9F0E82894D00846E11;
-			remoteInfo = gtest_output_test;
 		};
 		3B238F8E0E828B7100846E11 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -585,40 +548,12 @@
 			remoteGlobalIDString = 3B238EDB0E8289C700846E11;
 			remoteInfo = gtest_stress_test;
 		};
-		3B238F960E828B7100846E11 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 3B238EE60E8289C900846E11;
-			remoteInfo = gtest_uninitialized_test_;
-		};
 		3B238F980E828B7100846E11 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 3B238EF30E8289CE00846E11;
 			remoteInfo = gtest_unittest;
-		};
-		3B238F9A0E828B7100846E11 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 3B238F0A0E828A3800846E11;
-			remoteInfo = gtest_xml_outfile1_test_;
-		};
-		3B238F9C0E828B7100846E11 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 3B238F150E828A3B00846E11;
-			remoteInfo = gtest_xml_outfile2_test_;
-		};
-		3B238F9E0E828B7100846E11 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 3B238F220E828A3D00846E11;
-			remoteInfo = gtest_xml_output_unittest_;
 		};
 		404885A70E2F824900CF7658 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -655,89 +590,33 @@
 			remoteGlobalIDString = 8D07F2BC0486CC7A007CD1D0;
 			remoteInfo = gtest;
 		};
-		406B54230E9CD3440041F37C /* PBXContainerItemProxy */ = {
+		40538A0C0ED71AF200AF209A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 3B238E920E82894A00846E11;
-			remoteInfo = gtest_no_test_unittest;
+			remoteGlobalIDString = 408454310E96D39000AC66C2;
+			remoteInfo = "Setup Python";
 		};
-		406B54280E9CD4D70041F37C /* PBXContainerItemProxy */ = {
+		40538A140ED71B1900AF209A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 3B238F0A0E828A3800846E11;
 			remoteInfo = gtest_xml_outfile1_test_;
 		};
-		408454360E96D40600AC66C2 /* PBXContainerItemProxy */ = {
+		40538A160ED71B1B00AF209A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 408454310E96D39000AC66C2;
-			remoteInfo = "Setup Python";
+			remoteGlobalIDString = 3B238F150E828A3B00846E11;
+			remoteInfo = gtest_xml_outfile2_test_;
 		};
-		4084545A0E96D61D00AC66C2 /* PBXContainerItemProxy */ = {
+		40538A440ED71D2200AF209A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 408454310E96D39000AC66C2;
-			remoteInfo = "Setup Python";
-		};
-		4084545C0E96D63000AC66C2 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 408454310E96D39000AC66C2;
-			remoteInfo = "Setup Python";
-		};
-		4084545E0E96D63F00AC66C2 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 408454310E96D39000AC66C2;
-			remoteInfo = "Setup Python";
-		};
-		408454600E96D65100AC66C2 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 408454310E96D39000AC66C2;
-			remoteInfo = "Setup Python";
-		};
-		408454620E96D65D00AC66C2 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 408454310E96D39000AC66C2;
-			remoteInfo = "Setup Python";
-		};
-		408454640E96D66700AC66C2 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 408454310E96D39000AC66C2;
-			remoteInfo = "Setup Python";
-		};
-		408454660E96D67000AC66C2 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 408454310E96D39000AC66C2;
-			remoteInfo = "Setup Python";
-		};
-		408454680E96D67800AC66C2 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 408454310E96D39000AC66C2;
-			remoteInfo = "Setup Python";
-		};
-		4084546A0E96D68100AC66C2 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 408454310E96D39000AC66C2;
-			remoteInfo = "Setup Python";
+			remoteGlobalIDString = 40538A0A0ED71AF200AF209A;
+			remoteInfo = gtest_xml_outfiles_test;
 		};
 		4084546C0E96D70C00AC66C2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -745,6 +624,111 @@
 			proxyType = 1;
 			remoteGlobalIDString = 408454310E96D39000AC66C2;
 			remoteInfo = "Setup Python";
+		};
+		409A76530ED7393100E08B81 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 408454310E96D39000AC66C2 /* Setup Python */;
+			remoteInfo = "Setup Python";
+		};
+		409A76570ED7393800E08B81 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 408454310E96D39000AC66C2 /* Setup Python */;
+			remoteInfo = "Setup Python";
+		};
+		409A765B0ED7393D00E08B81 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 408454310E96D39000AC66C2 /* Setup Python */;
+			remoteInfo = "Setup Python";
+		};
+		409A765F0ED7394200E08B81 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 408454310E96D39000AC66C2 /* Setup Python */;
+			remoteInfo = "Setup Python";
+		};
+		409A76630ED7394500E08B81 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 408454310E96D39000AC66C2 /* Setup Python */;
+			remoteInfo = "Setup Python";
+		};
+		409A766F0ED7395000E08B81 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 408454310E96D39000AC66C2 /* Setup Python */;
+			remoteInfo = "Setup Python";
+		};
+		409A76730ED7395400E08B81 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 408454310E96D39000AC66C2 /* Setup Python */;
+			remoteInfo = "Setup Python";
+		};
+		409A76CF0ED73CA300E08B81 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3B238E1A0E82888500846E11 /* gtest_break_on_failure_unittest */;
+			remoteInfo = gtest_break_on_failure_unittest;
+		};
+		409A76D10ED73CA300E08B81 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3B238E270E82888800846E11 /* gtest_color_test */;
+			remoteInfo = gtest_color_test;
+		};
+		409A76D30ED73CA300E08B81 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3B238E360E82889000846E11 /* gtest_env_var_test */;
+			remoteInfo = gtest_env_var_test;
+		};
+		409A76D50ED73CA300E08B81 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3B238E4E0E82889800846E11 /* gtest_filter_unittest */;
+			remoteInfo = gtest_filter_unittest;
+		};
+		409A76D70ED73CA300E08B81 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3B238E5B0E82889B00846E11 /* gtest_list_tests_unittest */;
+			remoteInfo = gtest_list_tests_unittest;
+		};
+		409A76D90ED73CA300E08B81 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3B238E9F0E82894D00846E11 /* gtest_output_test */;
+			remoteInfo = gtest_output_test;
+		};
+		409A76DB0ED73CA300E08B81 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3B238F220E828A3D00846E11 /* gtest_xml_output_unittest */;
+			remoteInfo = gtest_xml_output_unittest;
+		};
+		409A76DD0ED73CA300E08B81 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3B238EE60E8289C900846E11 /* gtest_uninitialized_test */;
+			remoteInfo = gtest_uninitialized_test;
 		};
 		40C44AE50E379922008FCC51 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -845,23 +829,13 @@
 			name = "Copy Headers Internal";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		406B542B0E9CD52B0041F37C /* CopyFiles */ = {
+		40538A0F0ED71AF200AF209A /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 16;
 			files = (
-				406B542C0E9CD54B0041F37C /* gtest_xml_outfiles_test.py in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		408453F80E96CF7300AC66C2 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 16;
-			files = (
-				4084541B0E96D2A100AC66C2 /* gtest_break_on_failure_unittest.py in CopyFiles */,
+				40538A180ED71B2E00AF209A /* gtest_xml_outfiles_test.py in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -876,77 +850,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		408454730E96DBC200AC66C2 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 16;
-			files = (
-				408454740E96DBC300AC66C2 /* gtest_output_test.py in CopyFiles */,
-				408454750E96DBD100AC66C2 /* gtest_output_test_golden_lin.txt in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		408454800E96DCC800AC66C2 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 16;
-			files = (
-				408454780E96DC1100AC66C2 /* gtest_color_test.py in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		408454810E96DCC800AC66C2 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 16;
-			files = (
-				4084547A0E96DC3E00AC66C2 /* gtest_env_var_test.py in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		408454820E96DCC800AC66C2 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 16;
-			files = (
-				4084547C0E96DC6100AC66C2 /* gtest_filter_unittest.py in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		408454830E96DCC800AC66C2 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 16;
-			files = (
-				4084547E0E96DC8D00AC66C2 /* gtest_list_tests_unittest.py in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		408454840E96DCC800AC66C2 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 16;
-			files = (
-				408454850E96DCEC00AC66C2 /* gtest_xml_output_unittest.py in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		408454880E96DD3300AC66C2 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 16;
-			files = (
-				408454870E96DD1500AC66C2 /* gtest_uninitialized_test.py in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		4084548E0E96DDBD00AC66C2 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -954,6 +857,87 @@
 			dstSubfolderSpec = 16;
 			files = (
 				4084548A0E96DD8200AC66C2 /* gtest_nc_test.py in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		409A767D0ED7398700E08B81 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				409A76A30ED73B5500E08B81 /* gtest_break_on_failure_unittest.py in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		409A76AA0ED73BC100E08B81 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				409A76A20ED73B4D00E08B81 /* gtest_color_test.py in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		409A76AB0ED73BC100E08B81 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				409A76A10ED73B4600E08B81 /* gtest_env_var_test.py in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		409A76AC0ED73BC100E08B81 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				409A769E0ED73B3800E08B81 /* gtest_filter_unittest.py in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		409A76AD0ED73BC100E08B81 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				409A769B0ED73B2E00E08B81 /* gtest_list_tests_unittest.py in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		409A76AE0ED73BC100E08B81 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				409A76970ED73B2500E08B81 /* gtest_output_test.py in CopyFiles */,
+				409A76980ED73B2500E08B81 /* gtest_output_test_golden_lin.txt in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		409A76AF0ED73BC100E08B81 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				409A76940ED73B0500E08B81 /* gtest_xml_output_unittest.py in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		409A76B00ED73BC100E08B81 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				409A76910ED73AF200E08B81 /* gtest_uninitialized_test.py in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1012,7 +996,6 @@
 		3B238D190E82837D00846E11 /* InternalTestTarget.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = InternalTestTarget.xcconfig; sourceTree = "<group>"; };
 		3B23903C0E830EA800846E11 /* TestTarget.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = TestTarget.xcconfig; sourceTree = "<group>"; };
 		3B87D2100E96B92E000D1852 /* runtests.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = runtests.sh; sourceTree = "<group>"; };
-		3B87D22D0E96C038000D1852 /* gtest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = gtest.framework; path = build/Debug/gtest.framework; sourceTree = "<group>"; };
 		3B87D22F0E96C038000D1852 /* sample1_unittest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = sample1_unittest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B87D2320E96C038000D1852 /* sample3_unittest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = sample3_unittest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B87D2350E96C038000D1852 /* sample2_unittest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = sample2_unittest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1079,6 +1062,7 @@
 		404884A90E2F7CD900CF7658 /* CHANGES */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = CHANGES; path = ../CHANGES; sourceTree = SOURCE_ROOT; };
 		404884AA0E2F7CD900CF7658 /* CONTRIBUTORS */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = CONTRIBUTORS; path = ../CONTRIBUTORS; sourceTree = SOURCE_ROOT; };
 		404884AB0E2F7CD900CF7658 /* COPYING */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = COPYING; path = ../COPYING; sourceTree = SOURCE_ROOT; };
+		409A75E10ED7380300E08B81 /* InternalPythonTestTarget.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = InternalPythonTestTarget.xcconfig; sourceTree = "<group>"; };
 		40D209590E9FFBAA00191629 /* gtest_sole_header_test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gtest_sole_header_test.cc; sourceTree = "<group>"; };
 		40D2095A0E9FFBAA00191629 /* gtest_stress_test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gtest_stress_test.cc; sourceTree = "<group>"; };
 		40D4CDF10E30E07400294801 /* DebugProject.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = DebugProject.xcconfig; sourceTree = "<group>"; };
@@ -1110,7 +1094,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				222ECC950E9EB33A00BEED94 /* gtest.framework in Frameworks */,
+				4060FDD00ED5C5D2008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1118,7 +1102,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				222ECCA80E9EB47B00BEED94 /* gtest.framework in Frameworks */,
+				4060FDCE0ED5C5D0008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1126,7 +1110,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D2820E96C039000D1852 /* gtest.framework in Frameworks */,
+				4060FDE40ED5C5F6008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1134,7 +1118,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D2850E96C039000D1852 /* gtest.framework in Frameworks */,
+				4060FDE00ED5C5F3008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1142,7 +1126,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D2880E96C039000D1852 /* gtest.framework in Frameworks */,
+				4060FDDF0ED5C5F2008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1150,7 +1134,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D27C0E96C039000D1852 /* gtest.framework in Frameworks */,
+				4060FDDE0ED5C5F1008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1158,7 +1142,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D2790E96C039000D1852 /* gtest.framework in Frameworks */,
+				4060FDDD0ED5C5F1008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1166,7 +1150,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D2730E96C039000D1852 /* gtest.framework in Frameworks */,
+				4060FDCD0ED5C5D0008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1174,7 +1158,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D2700E96C039000D1852 /* gtest.framework in Frameworks */,
+				4060FDC80ED5C5CC008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1182,7 +1166,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D26D0E96C039000D1852 /* gtest.framework in Frameworks */,
+				4060FDCB0ED5C5CE008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1190,7 +1174,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D26A0E96C039000D1852 /* gtest.framework in Frameworks */,
+				4060FDCA0ED5C5CD008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1198,7 +1182,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D2670E96C039000D1852 /* gtest.framework in Frameworks */,
+				4060FDDB0ED5C5EF008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1206,7 +1190,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D2640E96C038000D1852 /* gtest.framework in Frameworks */,
+				4060FDC90ED5C5CC008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1214,7 +1198,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D2610E96C038000D1852 /* gtest.framework in Frameworks */,
+				4060FDC70ED5C5CB008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1222,7 +1206,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D25E0E96C038000D1852 /* gtest.framework in Frameworks */,
+				4060FDD90ED5C5ED008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1230,7 +1214,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D25B0E96C038000D1852 /* gtest.framework in Frameworks */,
+				4060FDC20ED5C5C8008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1238,7 +1222,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D2580E96C038000D1852 /* gtest.framework in Frameworks */,
+				4060FDDA0ED5C5EE008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1246,7 +1230,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D2550E96C038000D1852 /* gtest.framework in Frameworks */,
+				4060FDCC0ED5C5CF008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1254,7 +1238,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D2520E96C038000D1852 /* gtest.framework in Frameworks */,
+				4060FDDC0ED5C5EF008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1262,7 +1246,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D24F0E96C038000D1852 /* gtest.framework in Frameworks */,
+				4060FDD20ED5C5D6008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1270,7 +1254,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D24C0E96C038000D1852 /* gtest.framework in Frameworks */,
+				4060FDD10ED5C5D3008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1278,7 +1262,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D2490E96C038000D1852 /* gtest.framework in Frameworks */,
+				4060FDCF0ED5C5D1008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1286,7 +1270,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D2460E96C038000D1852 /* gtest.framework in Frameworks */,
+				4060FDC30ED5C5C8008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1294,7 +1278,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D2430E96C038000D1852 /* gtest.framework in Frameworks */,
+				4060FDE10ED5C5F3008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1302,7 +1286,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D2400E96C038000D1852 /* gtest.framework in Frameworks */,
+				4060FDC50ED5C5CA008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1310,7 +1294,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D23D0E96C038000D1852 /* gtest.framework in Frameworks */,
+				4060FDC40ED5C5C9008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1318,7 +1302,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D23A0E96C038000D1852 /* gtest.framework in Frameworks */,
+				4060FDC60ED5C5CB008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1326,7 +1310,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D22E0E96C038000D1852 /* gtest.framework in Frameworks */,
+				4060FDE90ED5C5FB008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1334,7 +1318,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D2340E96C038000D1852 /* gtest.framework in Frameworks */,
+				4060FDE80ED5C5FB008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1342,7 +1326,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D2310E96C038000D1852 /* gtest.framework in Frameworks */,
+				4060FDE70ED5C5FA008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1350,7 +1334,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D2370E96C038000D1852 /* gtest.framework in Frameworks */,
+				4060FDE60ED5C5F9008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1358,7 +1342,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B87D27F0E96C039000D1852 /* gtest.framework in Frameworks */,
+				4060FDE50ED5C5F9008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1366,7 +1350,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4539C90B0EC27FBC00A70F4C /* gtest.framework in Frameworks */,
+				4060FDE30ED5C5F5008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1374,7 +1358,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4539C9170EC27FC000A70F4C /* gtest.framework in Frameworks */,
+				4060FDE20ED5C5F4008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1382,7 +1366,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4539C9540EC282D400A70F4C /* gtest.framework in Frameworks */,
+				4060FDC10ED5C5C7008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1390,7 +1374,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4539C99A0EC283A800A70F4C /* gtest.framework in Frameworks */,
+				4060FDC00ED5C5C7008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1398,7 +1382,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4539C9A80EC2840700A70F4C /* gtest.framework in Frameworks */,
+				4060FDBF0ED5C5C6008BAC1E /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1408,7 +1392,7 @@
 		034768DDFF38A45A11DB9C8B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				3B87D22D0E96C038000D1852 /* gtest.framework */,
+				4539C8FF0EC27F6400A70F4C /* gtest.framework */,
 				3B87D22F0E96C038000D1852 /* sample1_unittest */,
 				3B87D2350E96C038000D1852 /* sample2_unittest */,
 				3B87D2320E96C038000D1852 /* sample3_unittest */,
@@ -1417,36 +1401,35 @@
 				3B87D2830E96C039000D1852 /* sample6_unittest */,
 				4539C90F0EC27FBC00A70F4C /* sample7_unittest */,
 				4539C91B0EC27FC000A70F4C /* sample8_unittest */,
-				3B87D23B0E96C038000D1852 /* gtest_xml_output_unittest_ */,
-				3B87D23E0E96C038000D1852 /* gtest_xml_outfile2_test_ */,
-				3B87D2410E96C038000D1852 /* gtest_xml_outfile1_test_ */,
-				3B87D2440E96C038000D1852 /* gtest_unittest */,
-				3B87D2470E96C038000D1852 /* gtest_uninitialized_test_ */,
+				3B87D2860E96C039000D1852 /* gtest-death-test_test */,
+				3B87D2680E96C039000D1852 /* gtest_environment_test */,
+				3B87D2890E96C039000D1852 /* gtest-filepath_test */,
+				4539C9AC0EC2840700A70F4C /* gtest-linked_ptr_test */,
+				3B87D25F0E96C038000D1852 /* gtest_main_unittest */,
+				3B87D27D0E96C039000D1852 /* gtest-message_test */,
+				3B87D2590E96C038000D1852 /* gtest_no_test_unittest */,
+				3B87D27A0E96C039000D1852 /* gtest-options_test */,
+				4539C9580EC282D400A70F4C /* gtest-param-test_test */,
+				4539C99E0EC283A800A70F4C /* gtest-port_test */,
+				3B87D2530E96C038000D1852 /* gtest_pred_impl_unittest */,
+				3B87D2500E96C038000D1852 /* gtest_prod_test */,
+				3B87D24D0E96C038000D1852 /* gtest_repeat_test */,
 				222ECC990E9EB33A00BEED94 /* gtest_sole_header_test */,
 				3B87D24A0E96C038000D1852 /* gtest_stress_test */,
 				222ECCAC0E9EB47B00BEED94 /* gtest_test_part_test */,
-				3B87D24D0E96C038000D1852 /* gtest_repeat_test */,
-				3B87D2500E96C038000D1852 /* gtest_prod_test */,
-				3B87D2530E96C038000D1852 /* gtest_pred_impl_unittest */,
-				3B87D2560E96C038000D1852 /* gtest_output_test_ */,
-				3B87D2590E96C038000D1852 /* gtest_no_test_unittest */,
-				3B87D25C0E96C038000D1852 /* gtest_nc */,
-				3B87D25F0E96C038000D1852 /* gtest_main_unittest */,
-				3B87D2620E96C038000D1852 /* gtest_list_tests_unittest_ */,
-				3B87D2650E96C039000D1852 /* gtest_filter_unittest_ */,
-				3B87D2680E96C039000D1852 /* gtest_environment_test */,
-				3B87D26B0E96C039000D1852 /* gtest_env_var_test_ */,
-				3B87D26E0E96C039000D1852 /* gtest_color_test_ */,
-				3B87D2710E96C039000D1852 /* gtest_break_on_failure_unittest_ */,
 				3B87D2740E96C039000D1852 /* gtest-typed-test_test */,
-				3B87D27A0E96C039000D1852 /* gtest-options_test */,
-				3B87D27D0E96C039000D1852 /* gtest-message_test */,
-				3B87D2860E96C039000D1852 /* gtest-death-test_test */,
-				3B87D2890E96C039000D1852 /* gtest-filepath_test */,
-				4539C9580EC282D400A70F4C /* gtest-param-test_test */,
-				4539C99E0EC283A800A70F4C /* gtest-port_test */,
-				4539C9AC0EC2840700A70F4C /* gtest-linked_ptr_test */,
-				4539C8FF0EC27F6400A70F4C /* gtest.framework */,
+				3B87D2440E96C038000D1852 /* gtest_unittest */,
+				3B87D2710E96C039000D1852 /* gtest_break_on_failure_unittest_ */,
+				3B87D26E0E96C039000D1852 /* gtest_color_test_ */,
+				3B87D26B0E96C039000D1852 /* gtest_env_var_test_ */,
+				3B87D2650E96C039000D1852 /* gtest_filter_unittest_ */,
+				3B87D2620E96C038000D1852 /* gtest_list_tests_unittest_ */,
+				3B87D2560E96C038000D1852 /* gtest_output_test_ */,
+				3B87D2410E96C038000D1852 /* gtest_xml_outfile1_test_ */,
+				3B87D23E0E96C038000D1852 /* gtest_xml_outfile2_test_ */,
+				3B87D23B0E96C038000D1852 /* gtest_xml_output_unittest_ */,
+				3B87D2470E96C038000D1852 /* gtest_uninitialized_test_ */,
+				3B87D25C0E96C038000D1852 /* gtest_nc */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1632,8 +1615,9 @@
 				40D4CDF10E30E07400294801 /* DebugProject.xcconfig */,
 				40D4CDF20E30E07400294801 /* FrameworkTarget.xcconfig */,
 				40D4CDF30E30E07400294801 /* General.xcconfig */,
-				40D4CDF40E30E07400294801 /* ReleaseProject.xcconfig */,
+				409A75E10ED7380300E08B81 /* InternalPythonTestTarget.xcconfig */,
 				3B238D190E82837D00846E11 /* InternalTestTarget.xcconfig */,
+				40D4CDF40E30E07400294801 /* ReleaseProject.xcconfig */,
 				3B23903C0E830EA800846E11 /* TestTarget.xcconfig */,
 			);
 			path = Config;
@@ -1805,59 +1789,59 @@
 			productReference = 3B87D2740E96C039000D1852 /* gtest-typed-test_test */;
 			productType = "com.apple.product-type.tool";
 		};
-		3B238E1A0E82888500846E11 /* gtest_break_on_failure_unittest_ */ = {
+		3B238E1A0E82888500846E11 /* gtest_break_on_failure_unittest */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3B238E200E82888500846E11 /* Build configuration list for PBXNativeTarget "gtest_break_on_failure_unittest_" */;
+			buildConfigurationList = 3B238E200E82888500846E11 /* Build configuration list for PBXNativeTarget "gtest_break_on_failure_unittest" */;
 			buildPhases = (
 				3B238E1D0E82888500846E11 /* Sources */,
 				3B238E1E0E82888500846E11 /* Frameworks */,
-				408453F80E96CF7300AC66C2 /* CopyFiles */,
+				409A767D0ED7398700E08B81 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				408454370E96D40600AC66C2 /* PBXTargetDependency */,
+				409A76540ED7393100E08B81 /* PBXTargetDependency */,
 				3B238E1B0E82888500846E11 /* PBXTargetDependency */,
 			);
-			name = gtest_break_on_failure_unittest_;
+			name = gtest_break_on_failure_unittest;
 			productName = TypedTest2;
 			productReference = 3B87D2710E96C039000D1852 /* gtest_break_on_failure_unittest_ */;
 			productType = "com.apple.product-type.tool";
 		};
-		3B238E270E82888800846E11 /* gtest_color_test_ */ = {
+		3B238E270E82888800846E11 /* gtest_color_test */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3B238E2D0E82888800846E11 /* Build configuration list for PBXNativeTarget "gtest_color_test_" */;
+			buildConfigurationList = 3B238E2D0E82888800846E11 /* Build configuration list for PBXNativeTarget "gtest_color_test" */;
 			buildPhases = (
 				3B238E2A0E82888800846E11 /* Sources */,
 				3B238E2B0E82888800846E11 /* Frameworks */,
-				408454800E96DCC800AC66C2 /* CopyFiles */,
+				409A76AA0ED73BC100E08B81 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				4084545B0E96D61D00AC66C2 /* PBXTargetDependency */,
+				409A76580ED7393800E08B81 /* PBXTargetDependency */,
 				3B238E280E82888800846E11 /* PBXTargetDependency */,
 			);
-			name = gtest_color_test_;
+			name = gtest_color_test;
 			productName = TypedTest2;
 			productReference = 3B87D26E0E96C039000D1852 /* gtest_color_test_ */;
 			productType = "com.apple.product-type.tool";
 		};
-		3B238E360E82889000846E11 /* gtest_env_var_test_ */ = {
+		3B238E360E82889000846E11 /* gtest_env_var_test */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3B238E3C0E82889000846E11 /* Build configuration list for PBXNativeTarget "gtest_env_var_test_" */;
+			buildConfigurationList = 3B238E3C0E82889000846E11 /* Build configuration list for PBXNativeTarget "gtest_env_var_test" */;
 			buildPhases = (
 				3B238E390E82889000846E11 /* Sources */,
 				3B238E3A0E82889000846E11 /* Frameworks */,
-				408454810E96DCC800AC66C2 /* CopyFiles */,
+				409A76AB0ED73BC100E08B81 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				4084545D0E96D63000AC66C2 /* PBXTargetDependency */,
+				409A765C0ED7393D00E08B81 /* PBXTargetDependency */,
 				3B238E370E82889000846E11 /* PBXTargetDependency */,
 			);
-			name = gtest_env_var_test_;
+			name = gtest_env_var_test;
 			productName = TypedTest2;
 			productReference = 3B87D26B0E96C039000D1852 /* gtest_env_var_test_ */;
 			productType = "com.apple.product-type.tool";
@@ -1879,40 +1863,39 @@
 			productReference = 3B87D2680E96C039000D1852 /* gtest_environment_test */;
 			productType = "com.apple.product-type.tool";
 		};
-		3B238E4E0E82889800846E11 /* gtest_filter_unittest_ */ = {
+		3B238E4E0E82889800846E11 /* gtest_filter_unittest */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3B238E540E82889800846E11 /* Build configuration list for PBXNativeTarget "gtest_filter_unittest_" */;
+			buildConfigurationList = 3B238E540E82889800846E11 /* Build configuration list for PBXNativeTarget "gtest_filter_unittest" */;
 			buildPhases = (
 				3B238E510E82889800846E11 /* Sources */,
 				3B238E520E82889800846E11 /* Frameworks */,
-				408454820E96DCC800AC66C2 /* CopyFiles */,
+				409A76AC0ED73BC100E08B81 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				4084545F0E96D63F00AC66C2 /* PBXTargetDependency */,
 				3B238E4F0E82889800846E11 /* PBXTargetDependency */,
 			);
-			name = gtest_filter_unittest_;
+			name = gtest_filter_unittest;
 			productName = TypedTest2;
 			productReference = 3B87D2650E96C039000D1852 /* gtest_filter_unittest_ */;
 			productType = "com.apple.product-type.tool";
 		};
-		3B238E5B0E82889B00846E11 /* gtest_list_tests_unittest_ */ = {
+		3B238E5B0E82889B00846E11 /* gtest_list_tests_unittest */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3B238E610E82889B00846E11 /* Build configuration list for PBXNativeTarget "gtest_list_tests_unittest_" */;
+			buildConfigurationList = 3B238E610E82889B00846E11 /* Build configuration list for PBXNativeTarget "gtest_list_tests_unittest" */;
 			buildPhases = (
 				3B238E5E0E82889B00846E11 /* Sources */,
 				3B238E5F0E82889B00846E11 /* Frameworks */,
-				408454830E96DCC800AC66C2 /* CopyFiles */,
+				409A76AD0ED73BC100E08B81 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				408454610E96D65100AC66C2 /* PBXTargetDependency */,
+				409A76600ED7394200E08B81 /* PBXTargetDependency */,
 				3B238E5C0E82889B00846E11 /* PBXTargetDependency */,
 			);
-			name = gtest_list_tests_unittest_;
+			name = gtest_list_tests_unittest;
 			productName = TypedTest2;
 			productReference = 3B87D2620E96C038000D1852 /* gtest_list_tests_unittest_ */;
 			productType = "com.apple.product-type.tool";
@@ -1970,21 +1953,21 @@
 			productReference = 3B87D2590E96C038000D1852 /* gtest_no_test_unittest */;
 			productType = "com.apple.product-type.tool";
 		};
-		3B238E9F0E82894D00846E11 /* gtest_output_test_ */ = {
+		3B238E9F0E82894D00846E11 /* gtest_output_test */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3B238EA50E82894D00846E11 /* Build configuration list for PBXNativeTarget "gtest_output_test_" */;
+			buildConfigurationList = 3B238EA50E82894D00846E11 /* Build configuration list for PBXNativeTarget "gtest_output_test" */;
 			buildPhases = (
 				3B238EA20E82894D00846E11 /* Sources */,
 				3B238EA30E82894D00846E11 /* Frameworks */,
-				408454730E96DBC200AC66C2 /* CopyFiles */,
+				409A76AE0ED73BC100E08B81 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				408454630E96D65D00AC66C2 /* PBXTargetDependency */,
+				409A76640ED7394500E08B81 /* PBXTargetDependency */,
 				3B238EA00E82894D00846E11 /* PBXTargetDependency */,
 			);
-			name = gtest_output_test_;
+			name = gtest_output_test;
 			productName = TypedTest2;
 			productReference = 3B87D2560E96C038000D1852 /* gtest_output_test_ */;
 			productType = "com.apple.product-type.tool";
@@ -2057,21 +2040,21 @@
 			productReference = 3B87D24A0E96C038000D1852 /* gtest_stress_test */;
 			productType = "com.apple.product-type.tool";
 		};
-		3B238EE60E8289C900846E11 /* gtest_uninitialized_test_ */ = {
+		3B238EE60E8289C900846E11 /* gtest_uninitialized_test */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3B238EEC0E8289C900846E11 /* Build configuration list for PBXNativeTarget "gtest_uninitialized_test_" */;
+			buildConfigurationList = 3B238EEC0E8289C900846E11 /* Build configuration list for PBXNativeTarget "gtest_uninitialized_test" */;
 			buildPhases = (
 				3B238EE90E8289C900846E11 /* Sources */,
 				3B238EEA0E8289C900846E11 /* Frameworks */,
-				408454880E96DD3300AC66C2 /* CopyFiles */,
+				409A76B00ED73BC100E08B81 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				408454650E96D66700AC66C2 /* PBXTargetDependency */,
+				409A76740ED7395400E08B81 /* PBXTargetDependency */,
 				3B238EE70E8289C900846E11 /* PBXTargetDependency */,
 			);
-			name = gtest_uninitialized_test_;
+			name = gtest_uninitialized_test;
 			productName = TypedTest2;
 			productReference = 3B87D2470E96C038000D1852 /* gtest_uninitialized_test_ */;
 			productType = "com.apple.product-type.tool";
@@ -2103,7 +2086,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				408454670E96D67000AC66C2 /* PBXTargetDependency */,
 				3B238F0B0E828A3800846E11 /* PBXTargetDependency */,
 			);
 			name = gtest_xml_outfile1_test_;
@@ -2117,36 +2099,32 @@
 			buildPhases = (
 				3B238F180E828A3B00846E11 /* Sources */,
 				3B238F190E828A3B00846E11 /* Frameworks */,
-				406B542B0E9CD52B0041F37C /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				408454690E96D67800AC66C2 /* PBXTargetDependency */,
 				3B238F160E828A3B00846E11 /* PBXTargetDependency */,
-				406B54290E9CD4D70041F37C /* PBXTargetDependency */,
 			);
 			name = gtest_xml_outfile2_test_;
 			productName = TypedTest2;
 			productReference = 3B87D23E0E96C038000D1852 /* gtest_xml_outfile2_test_ */;
 			productType = "com.apple.product-type.tool";
 		};
-		3B238F220E828A3D00846E11 /* gtest_xml_output_unittest_ */ = {
+		3B238F220E828A3D00846E11 /* gtest_xml_output_unittest */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3B238F280E828A3D00846E11 /* Build configuration list for PBXNativeTarget "gtest_xml_output_unittest_" */;
+			buildConfigurationList = 3B238F280E828A3D00846E11 /* Build configuration list for PBXNativeTarget "gtest_xml_output_unittest" */;
 			buildPhases = (
 				3B238F250E828A3D00846E11 /* Sources */,
 				3B238F260E828A3D00846E11 /* Frameworks */,
-				408454840E96DCC800AC66C2 /* CopyFiles */,
+				409A76AF0ED73BC100E08B81 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				4084546B0E96D68100AC66C2 /* PBXTargetDependency */,
+				409A76700ED7395000E08B81 /* PBXTargetDependency */,
 				3B238F230E828A3D00846E11 /* PBXTargetDependency */,
-				406B54240E9CD3440041F37C /* PBXTargetDependency */,
 			);
-			name = gtest_xml_output_unittest_;
+			name = gtest_xml_output_unittest;
 			productName = TypedTest2;
 			productReference = 3B87D23B0E96C038000D1852 /* gtest_xml_output_unittest_ */;
 			productType = "com.apple.product-type.tool";
@@ -2372,35 +2350,36 @@
 				22A866010E70A39900F7AE6E /* sample6_unittest */,
 				4539C9050EC27FBC00A70F4C /* sample7_unittest */,
 				4539C9110EC27FC000A70F4C /* sample8_unittest */,
-				3B238EF30E8289CE00846E11 /* gtest_unittest */,
 				3B238C660E81B8B500846E11 /* gtest-death-test_test */,
-				3B238D520E82855F00846E11 /* gtest-filepath_test */,
-				3B238D690E8285DA00846E11 /* gtest-message_test */,
-				3B238D790E82868F00846E11 /* gtest-options_test */,
-				3B238EAC0E82894F00846E11 /* gtest_pred_impl_unittest */,
 				3B238E410E82889500846E11 /* gtest_environment_test */,
-				3B238E920E82894A00846E11 /* gtest_no_test_unittest */,
+				3B238D520E82855F00846E11 /* gtest-filepath_test */,
+				4539C9A20EC2840700A70F4C /* gtest-linked_ptr_test */,
 				3B238E7A0E82894300846E11 /* gtest_main_unittest */,
+				3B238D690E8285DA00846E11 /* gtest-message_test */,
+				3B238E920E82894A00846E11 /* gtest_no_test_unittest */,
+				3B238D790E82868F00846E11 /* gtest-options_test */,
+				4539C94D0EC282D400A70F4C /* gtest-param-test_test */,
+				4539C9930EC283A800A70F4C /* gtest-port_test */,
+				3B238EAC0E82894F00846E11 /* gtest_pred_impl_unittest */,
 				3B238EC30E8289C100846E11 /* gtest_prod_test */,
 				3B238ECE0E8289C300846E11 /* gtest_repeat_test */,
 				222ECC8F0E9EB33A00BEED94 /* gtest_sole_header_test */,
 				3B238EDB0E8289C700846E11 /* gtest_stress_test */,
 				222ECCA20E9EB47B00BEED94 /* gtest_test_part_test */,
 				3B238E0F0E82887E00846E11 /* gtest-typed-test_test */,
-				3B238E9F0E82894D00846E11 /* gtest_output_test_ */,
-				3B238E270E82888800846E11 /* gtest_color_test_ */,
-				3B238E360E82889000846E11 /* gtest_env_var_test_ */,
-				3B238E4E0E82889800846E11 /* gtest_filter_unittest_ */,
-				3B238E1A0E82888500846E11 /* gtest_break_on_failure_unittest_ */,
-				3B238E5B0E82889B00846E11 /* gtest_list_tests_unittest_ */,
-				3B238F220E828A3D00846E11 /* gtest_xml_output_unittest_ */,
+				3B238EF30E8289CE00846E11 /* gtest_unittest */,
+				3B238E1A0E82888500846E11 /* gtest_break_on_failure_unittest */,
+				3B238E270E82888800846E11 /* gtest_color_test */,
+				3B238E360E82889000846E11 /* gtest_env_var_test */,
+				3B238E4E0E82889800846E11 /* gtest_filter_unittest */,
+				3B238E5B0E82889B00846E11 /* gtest_list_tests_unittest */,
+				3B238E9F0E82894D00846E11 /* gtest_output_test */,
 				3B238F0A0E828A3800846E11 /* gtest_xml_outfile1_test_ */,
 				3B238F150E828A3B00846E11 /* gtest_xml_outfile2_test_ */,
-				3B238EE60E8289C900846E11 /* gtest_uninitialized_test_ */,
+				40538A0A0ED71AF200AF209A /* gtest_xml_outfiles_test */,
+				3B238F220E828A3D00846E11 /* gtest_xml_output_unittest */,
+				3B238EE60E8289C900846E11 /* gtest_uninitialized_test */,
 				3B238E850E82894800846E11 /* gtest_nc */,
-				4539C94D0EC282D400A70F4C /* gtest-param-test_test */,
-				4539C9930EC283A800A70F4C /* gtest-port_test */,
-				4539C9A20EC2840700A70F4C /* gtest-linked_ptr_test */,
 				40C44ADC0E3798F4008FCC51 /* Version Info */,
 				408454310E96D39000AC66C2 /* Setup Python */,
 			);
@@ -2985,55 +2964,20 @@
 			target = 3B238E0F0E82887E00846E11 /* gtest-typed-test_test */;
 			targetProxy = 3B238F780E828B7100846E11 /* PBXContainerItemProxy */;
 		};
-		3B238F7B0E828B7100846E11 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 3B238E1A0E82888500846E11 /* gtest_break_on_failure_unittest_ */;
-			targetProxy = 3B238F7A0E828B7100846E11 /* PBXContainerItemProxy */;
-		};
-		3B238F7D0E828B7100846E11 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 3B238E270E82888800846E11 /* gtest_color_test_ */;
-			targetProxy = 3B238F7C0E828B7100846E11 /* PBXContainerItemProxy */;
-		};
-		3B238F7F0E828B7100846E11 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 3B238E360E82889000846E11 /* gtest_env_var_test_ */;
-			targetProxy = 3B238F7E0E828B7100846E11 /* PBXContainerItemProxy */;
-		};
 		3B238F810E828B7100846E11 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 3B238E410E82889500846E11 /* gtest_environment_test */;
 			targetProxy = 3B238F800E828B7100846E11 /* PBXContainerItemProxy */;
-		};
-		3B238F830E828B7100846E11 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 3B238E4E0E82889800846E11 /* gtest_filter_unittest_ */;
-			targetProxy = 3B238F820E828B7100846E11 /* PBXContainerItemProxy */;
-		};
-		3B238F850E828B7100846E11 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 3B238E5B0E82889B00846E11 /* gtest_list_tests_unittest_ */;
-			targetProxy = 3B238F840E828B7100846E11 /* PBXContainerItemProxy */;
 		};
 		3B238F870E828B7100846E11 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 3B238E7A0E82894300846E11 /* gtest_main_unittest */;
 			targetProxy = 3B238F860E828B7100846E11 /* PBXContainerItemProxy */;
 		};
-		3B238F890E828B7100846E11 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 3B238E850E82894800846E11 /* gtest_nc */;
-			targetProxy = 3B238F880E828B7100846E11 /* PBXContainerItemProxy */;
-		};
 		3B238F8B0E828B7100846E11 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 3B238E920E82894A00846E11 /* gtest_no_test_unittest */;
 			targetProxy = 3B238F8A0E828B7100846E11 /* PBXContainerItemProxy */;
-		};
-		3B238F8D0E828B7100846E11 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 3B238E9F0E82894D00846E11 /* gtest_output_test_ */;
-			targetProxy = 3B238F8C0E828B7100846E11 /* PBXContainerItemProxy */;
 		};
 		3B238F8F0E828B7100846E11 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3055,30 +2999,10 @@
 			target = 3B238EDB0E8289C700846E11 /* gtest_stress_test */;
 			targetProxy = 3B238F940E828B7100846E11 /* PBXContainerItemProxy */;
 		};
-		3B238F970E828B7100846E11 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 3B238EE60E8289C900846E11 /* gtest_uninitialized_test_ */;
-			targetProxy = 3B238F960E828B7100846E11 /* PBXContainerItemProxy */;
-		};
 		3B238F990E828B7100846E11 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 3B238EF30E8289CE00846E11 /* gtest_unittest */;
 			targetProxy = 3B238F980E828B7100846E11 /* PBXContainerItemProxy */;
-		};
-		3B238F9B0E828B7100846E11 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 3B238F0A0E828A3800846E11 /* gtest_xml_outfile1_test_ */;
-			targetProxy = 3B238F9A0E828B7100846E11 /* PBXContainerItemProxy */;
-		};
-		3B238F9D0E828B7100846E11 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 3B238F150E828A3B00846E11 /* gtest_xml_outfile2_test_ */;
-			targetProxy = 3B238F9C0E828B7100846E11 /* PBXContainerItemProxy */;
-		};
-		3B238F9F0E828B7100846E11 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 3B238F220E828A3D00846E11 /* gtest_xml_output_unittest_ */;
-			targetProxy = 3B238F9E0E828B7100846E11 /* PBXContainerItemProxy */;
 		};
 		404885A80E2F824900CF7658 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3105,70 +3029,105 @@
 			target = 8D07F2BC0486CC7A007CD1D0 /* gtest */;
 			targetProxy = 404885F00E2F833400CF7658 /* PBXContainerItemProxy */;
 		};
-		406B54240E9CD3440041F37C /* PBXTargetDependency */ = {
+		40538A0B0ED71AF200AF209A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 3B238E920E82894A00846E11 /* gtest_no_test_unittest */;
-			targetProxy = 406B54230E9CD3440041F37C /* PBXContainerItemProxy */;
+			target = 408454310E96D39000AC66C2 /* Setup Python */;
+			targetProxy = 40538A0C0ED71AF200AF209A /* PBXContainerItemProxy */;
 		};
-		406B54290E9CD4D70041F37C /* PBXTargetDependency */ = {
+		40538A150ED71B1900AF209A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 3B238F0A0E828A3800846E11 /* gtest_xml_outfile1_test_ */;
-			targetProxy = 406B54280E9CD4D70041F37C /* PBXContainerItemProxy */;
+			targetProxy = 40538A140ED71B1900AF209A /* PBXContainerItemProxy */;
 		};
-		408454370E96D40600AC66C2 /* PBXTargetDependency */ = {
+		40538A170ED71B1B00AF209A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 408454310E96D39000AC66C2 /* Setup Python */;
-			targetProxy = 408454360E96D40600AC66C2 /* PBXContainerItemProxy */;
+			target = 3B238F150E828A3B00846E11 /* gtest_xml_outfile2_test_ */;
+			targetProxy = 40538A160ED71B1B00AF209A /* PBXContainerItemProxy */;
 		};
-		4084545B0E96D61D00AC66C2 /* PBXTargetDependency */ = {
+		40538A450ED71D2200AF209A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 408454310E96D39000AC66C2 /* Setup Python */;
-			targetProxy = 4084545A0E96D61D00AC66C2 /* PBXContainerItemProxy */;
-		};
-		4084545D0E96D63000AC66C2 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 408454310E96D39000AC66C2 /* Setup Python */;
-			targetProxy = 4084545C0E96D63000AC66C2 /* PBXContainerItemProxy */;
-		};
-		4084545F0E96D63F00AC66C2 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 408454310E96D39000AC66C2 /* Setup Python */;
-			targetProxy = 4084545E0E96D63F00AC66C2 /* PBXContainerItemProxy */;
-		};
-		408454610E96D65100AC66C2 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 408454310E96D39000AC66C2 /* Setup Python */;
-			targetProxy = 408454600E96D65100AC66C2 /* PBXContainerItemProxy */;
-		};
-		408454630E96D65D00AC66C2 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 408454310E96D39000AC66C2 /* Setup Python */;
-			targetProxy = 408454620E96D65D00AC66C2 /* PBXContainerItemProxy */;
-		};
-		408454650E96D66700AC66C2 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 408454310E96D39000AC66C2 /* Setup Python */;
-			targetProxy = 408454640E96D66700AC66C2 /* PBXContainerItemProxy */;
-		};
-		408454670E96D67000AC66C2 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 408454310E96D39000AC66C2 /* Setup Python */;
-			targetProxy = 408454660E96D67000AC66C2 /* PBXContainerItemProxy */;
-		};
-		408454690E96D67800AC66C2 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 408454310E96D39000AC66C2 /* Setup Python */;
-			targetProxy = 408454680E96D67800AC66C2 /* PBXContainerItemProxy */;
-		};
-		4084546B0E96D68100AC66C2 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 408454310E96D39000AC66C2 /* Setup Python */;
-			targetProxy = 4084546A0E96D68100AC66C2 /* PBXContainerItemProxy */;
+			target = 40538A0A0ED71AF200AF209A /* gtest_xml_outfiles_test */;
+			targetProxy = 40538A440ED71D2200AF209A /* PBXContainerItemProxy */;
 		};
 		4084546D0E96D70C00AC66C2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 408454310E96D39000AC66C2 /* Setup Python */;
 			targetProxy = 4084546C0E96D70C00AC66C2 /* PBXContainerItemProxy */;
+		};
+		409A76540ED7393100E08B81 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 408454310E96D39000AC66C2 /* Setup Python */;
+			targetProxy = 409A76530ED7393100E08B81 /* PBXContainerItemProxy */;
+		};
+		409A76580ED7393800E08B81 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 408454310E96D39000AC66C2 /* Setup Python */;
+			targetProxy = 409A76570ED7393800E08B81 /* PBXContainerItemProxy */;
+		};
+		409A765C0ED7393D00E08B81 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 408454310E96D39000AC66C2 /* Setup Python */;
+			targetProxy = 409A765B0ED7393D00E08B81 /* PBXContainerItemProxy */;
+		};
+		409A76600ED7394200E08B81 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 408454310E96D39000AC66C2 /* Setup Python */;
+			targetProxy = 409A765F0ED7394200E08B81 /* PBXContainerItemProxy */;
+		};
+		409A76640ED7394500E08B81 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 408454310E96D39000AC66C2 /* Setup Python */;
+			targetProxy = 409A76630ED7394500E08B81 /* PBXContainerItemProxy */;
+		};
+		409A76700ED7395000E08B81 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 408454310E96D39000AC66C2 /* Setup Python */;
+			targetProxy = 409A766F0ED7395000E08B81 /* PBXContainerItemProxy */;
+		};
+		409A76740ED7395400E08B81 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 408454310E96D39000AC66C2 /* Setup Python */;
+			targetProxy = 409A76730ED7395400E08B81 /* PBXContainerItemProxy */;
+		};
+		409A76D00ED73CA300E08B81 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3B238E1A0E82888500846E11 /* gtest_break_on_failure_unittest */;
+			targetProxy = 409A76CF0ED73CA300E08B81 /* PBXContainerItemProxy */;
+		};
+		409A76D20ED73CA300E08B81 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3B238E270E82888800846E11 /* gtest_color_test */;
+			targetProxy = 409A76D10ED73CA300E08B81 /* PBXContainerItemProxy */;
+		};
+		409A76D40ED73CA300E08B81 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3B238E360E82889000846E11 /* gtest_env_var_test */;
+			targetProxy = 409A76D30ED73CA300E08B81 /* PBXContainerItemProxy */;
+		};
+		409A76D60ED73CA300E08B81 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3B238E4E0E82889800846E11 /* gtest_filter_unittest */;
+			targetProxy = 409A76D50ED73CA300E08B81 /* PBXContainerItemProxy */;
+		};
+		409A76D80ED73CA300E08B81 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3B238E5B0E82889B00846E11 /* gtest_list_tests_unittest */;
+			targetProxy = 409A76D70ED73CA300E08B81 /* PBXContainerItemProxy */;
+		};
+		409A76DA0ED73CA300E08B81 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3B238E9F0E82894D00846E11 /* gtest_output_test */;
+			targetProxy = 409A76D90ED73CA300E08B81 /* PBXContainerItemProxy */;
+		};
+		409A76DC0ED73CA300E08B81 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3B238F220E828A3D00846E11 /* gtest_xml_output_unittest */;
+			targetProxy = 409A76DB0ED73CA300E08B81 /* PBXContainerItemProxy */;
+		};
+		409A76DE0ED73CA300E08B81 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3B238EE60E8289C900846E11 /* gtest_uninitialized_test */;
+			targetProxy = 409A76DD0ED73CA300E08B81 /* PBXContainerItemProxy */;
 		};
 		40C44AE60E379922008FCC51 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3454,7 +3413,7 @@
 		};
 		3B238E210E82888500846E11 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B238D190E82837D00846E11 /* InternalTestTarget.xcconfig */;
+			baseConfigurationReference = 409A75E10ED7380300E08B81 /* InternalPythonTestTarget.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3468,7 +3427,7 @@
 		};
 		3B238E220E82888500846E11 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B238D190E82837D00846E11 /* InternalTestTarget.xcconfig */;
+			baseConfigurationReference = 409A75E10ED7380300E08B81 /* InternalPythonTestTarget.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3482,7 +3441,7 @@
 		};
 		3B238E2E0E82888800846E11 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B238D190E82837D00846E11 /* InternalTestTarget.xcconfig */;
+			baseConfigurationReference = 409A75E10ED7380300E08B81 /* InternalPythonTestTarget.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3496,7 +3455,7 @@
 		};
 		3B238E2F0E82888800846E11 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B238D190E82837D00846E11 /* InternalTestTarget.xcconfig */;
+			baseConfigurationReference = 409A75E10ED7380300E08B81 /* InternalPythonTestTarget.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3510,7 +3469,7 @@
 		};
 		3B238E3D0E82889000846E11 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B238D190E82837D00846E11 /* InternalTestTarget.xcconfig */;
+			baseConfigurationReference = 409A75E10ED7380300E08B81 /* InternalPythonTestTarget.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3524,7 +3483,7 @@
 		};
 		3B238E3E0E82889000846E11 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B238D190E82837D00846E11 /* InternalTestTarget.xcconfig */;
+			baseConfigurationReference = 409A75E10ED7380300E08B81 /* InternalPythonTestTarget.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3566,7 +3525,7 @@
 		};
 		3B238E550E82889800846E11 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B238D190E82837D00846E11 /* InternalTestTarget.xcconfig */;
+			baseConfigurationReference = 409A75E10ED7380300E08B81 /* InternalPythonTestTarget.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3580,7 +3539,7 @@
 		};
 		3B238E560E82889800846E11 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B238D190E82837D00846E11 /* InternalTestTarget.xcconfig */;
+			baseConfigurationReference = 409A75E10ED7380300E08B81 /* InternalPythonTestTarget.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3594,7 +3553,7 @@
 		};
 		3B238E620E82889B00846E11 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B238D190E82837D00846E11 /* InternalTestTarget.xcconfig */;
+			baseConfigurationReference = 409A75E10ED7380300E08B81 /* InternalPythonTestTarget.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3608,7 +3567,7 @@
 		};
 		3B238E630E82889B00846E11 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B238D190E82837D00846E11 /* InternalTestTarget.xcconfig */;
+			baseConfigurationReference = 409A75E10ED7380300E08B81 /* InternalPythonTestTarget.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3706,7 +3665,7 @@
 		};
 		3B238EA60E82894D00846E11 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B238D190E82837D00846E11 /* InternalTestTarget.xcconfig */;
+			baseConfigurationReference = 409A75E10ED7380300E08B81 /* InternalPythonTestTarget.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3720,7 +3679,7 @@
 		};
 		3B238EA70E82894D00846E11 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B238D190E82837D00846E11 /* InternalTestTarget.xcconfig */;
+			baseConfigurationReference = 409A75E10ED7380300E08B81 /* InternalPythonTestTarget.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3846,7 +3805,7 @@
 		};
 		3B238EED0E8289C900846E11 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B238D190E82837D00846E11 /* InternalTestTarget.xcconfig */;
+			baseConfigurationReference = 409A75E10ED7380300E08B81 /* InternalPythonTestTarget.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3860,7 +3819,7 @@
 		};
 		3B238EEE0E8289C900846E11 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B238D190E82837D00846E11 /* InternalTestTarget.xcconfig */;
+			baseConfigurationReference = 409A75E10ED7380300E08B81 /* InternalPythonTestTarget.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3958,7 +3917,7 @@
 		};
 		3B238F290E828A3D00846E11 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B238D190E82837D00846E11 /* InternalTestTarget.xcconfig */;
+			baseConfigurationReference = 409A75E10ED7380300E08B81 /* InternalPythonTestTarget.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3972,7 +3931,7 @@
 		};
 		3B238F2A0E828A3D00846E11 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B238D190E82837D00846E11 /* InternalTestTarget.xcconfig */;
+			baseConfigurationReference = 409A75E10ED7380300E08B81 /* InternalPythonTestTarget.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -4142,6 +4101,27 @@
 				);
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/build/Debug\"";
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SRCROOT)/build/Debug\"";
+			};
+			name = Release;
+		};
+		40538A120ED71AF200AF209A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = gtest_output_test;
+			};
+			name = Debug;
+		};
+		40538A130ED71AF200AF209A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = gtest_output_test;
+				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
@@ -4440,7 +4420,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3B238E200E82888500846E11 /* Build configuration list for PBXNativeTarget "gtest_break_on_failure_unittest_" */ = {
+		3B238E200E82888500846E11 /* Build configuration list for PBXNativeTarget "gtest_break_on_failure_unittest" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3B238E210E82888500846E11 /* Debug */,
@@ -4449,7 +4429,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3B238E2D0E82888800846E11 /* Build configuration list for PBXNativeTarget "gtest_color_test_" */ = {
+		3B238E2D0E82888800846E11 /* Build configuration list for PBXNativeTarget "gtest_color_test" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3B238E2E0E82888800846E11 /* Debug */,
@@ -4458,7 +4438,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3B238E3C0E82889000846E11 /* Build configuration list for PBXNativeTarget "gtest_env_var_test_" */ = {
+		3B238E3C0E82889000846E11 /* Build configuration list for PBXNativeTarget "gtest_env_var_test" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3B238E3D0E82889000846E11 /* Debug */,
@@ -4476,7 +4456,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3B238E540E82889800846E11 /* Build configuration list for PBXNativeTarget "gtest_filter_unittest_" */ = {
+		3B238E540E82889800846E11 /* Build configuration list for PBXNativeTarget "gtest_filter_unittest" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3B238E550E82889800846E11 /* Debug */,
@@ -4485,7 +4465,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3B238E610E82889B00846E11 /* Build configuration list for PBXNativeTarget "gtest_list_tests_unittest_" */ = {
+		3B238E610E82889B00846E11 /* Build configuration list for PBXNativeTarget "gtest_list_tests_unittest" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3B238E620E82889B00846E11 /* Debug */,
@@ -4521,7 +4501,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3B238EA50E82894D00846E11 /* Build configuration list for PBXNativeTarget "gtest_output_test_" */ = {
+		3B238EA50E82894D00846E11 /* Build configuration list for PBXNativeTarget "gtest_output_test" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3B238EA60E82894D00846E11 /* Debug */,
@@ -4566,7 +4546,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3B238EEC0E8289C900846E11 /* Build configuration list for PBXNativeTarget "gtest_uninitialized_test_" */ = {
+		3B238EEC0E8289C900846E11 /* Build configuration list for PBXNativeTarget "gtest_uninitialized_test" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3B238EED0E8289C900846E11 /* Debug */,
@@ -4602,7 +4582,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3B238F280E828A3D00846E11 /* Build configuration list for PBXNativeTarget "gtest_xml_output_unittest_" */ = {
+		3B238F280E828A3D00846E11 /* Build configuration list for PBXNativeTarget "gtest_xml_output_unittest" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3B238F290E828A3D00846E11 /* Debug */,
@@ -4661,6 +4641,15 @@
 			buildConfigurations = (
 				404885F70E2F833400CF7658 /* Debug */,
 				404885F80E2F833400CF7658 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		40538A110ED71AF200AF209A /* Build configuration list for PBXAggregateTarget "gtest_xml_outfiles_test" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				40538A120ED71AF200AF209A /* Debug */,
+				40538A130ED71AF200AF209A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
