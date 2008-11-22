@@ -131,9 +131,9 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
       if e.errno != errno.ENOENT:
         raise
 
-    status = os.system("cd %s && %s %s=xml &> /dev/null"
-                       % (temp_dir, gtest_prog_path,
-                          GTEST_OUTPUT_FLAG))
+    status = gtest_test_utils.RunCommandSuppressOutput(
+        "%s %s=xml" % (gtest_prog_path, GTEST_OUTPUT_FLAG),
+	working_dir=temp_dir)
     self.assertEquals(0, gtest_test_utils.GetExitStatus(status))
     self.assert_(os.path.isfile(output_file))
 
@@ -150,9 +150,8 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     gtest_prog_path = os.path.join(gtest_test_utils.GetBuildDir(),
                                    gtest_prog_name)
 
-    command = ("%s %s=xml:%s &> /dev/null"
-               % (gtest_prog_path, GTEST_OUTPUT_FLAG, xml_path))
-    status = os.system(command)
+    command = ("%s %s=xml:%s" % (gtest_prog_path, GTEST_OUTPUT_FLAG, xml_path))
+    status = gtest_test_utils.RunCommandSuppressOutput(command)
     if os.WIFSIGNALED(status):
       signal = os.WTERMSIG(status)
       self.assert_(False,

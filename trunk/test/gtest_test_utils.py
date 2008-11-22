@@ -116,6 +116,31 @@ def GetExitStatus(exit_code):
       return -1
 
 
+def RunCommandSuppressOutput(command, working_dir=None):
+  """Changes into a specified directory, if provided, and executes a command.
+  Restores the old directory afterwards.
+
+  Args:
+    command: A command to run.
+    working_dir: A directory to change into.
+  """
+
+  old_dir = None
+  try:
+    if working_dir is not None:
+      old_dir = os.getcwd()
+      os.chdir(working_dir)
+    f = os.popen(command, 'r')
+    f.read()
+    ret_code = f.close()
+  finally:
+    if old_dir is not None:
+      os.chdir(old_dir)
+  if ret_code is None:
+    ret_code = 0
+  return ret_code
+
+
 def Main():
   """Runs the unit test."""
 
