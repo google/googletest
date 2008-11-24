@@ -485,19 +485,38 @@ typedef FloatingPoint<double> Double;
 // used to hold such IDs.  The user should treat TypeId as an opaque
 // type: the only operation allowed on TypeId values is to compare
 // them for equality using the == operator.
-typedef void* TypeId;
+typedef const void* TypeId;
+
+template <typename T>
+class TypeIdHelper {
+ public:
+  // dummy_ must not have a const type.  Otherwise an overly eager
+  // compiler (e.g. MSVC 7.1 & 8.0) may try to merge
+  // TypeIdHelper<T>::dummy_ for different Ts as an "optimization".
+  static bool dummy_;
+};
+
+template <typename T>
+bool TypeIdHelper<T>::dummy_ = false;
 
 // GetTypeId<T>() returns the ID of type T.  Different values will be
 // returned for different types.  Calling the function twice with the
 // same type argument is guaranteed to return the same ID.
 template <typename T>
-inline TypeId GetTypeId() {
-  static bool dummy = false;
-  // The compiler is required to create an instance of the static
-  // variable dummy for each T used to instantiate the template.
-  // Therefore, the address of dummy is guaranteed to be unique.
-  return &dummy;
+TypeId GetTypeId() {
+  // The compiler is required to allocate a different
+  // TypeIdHelper<T>::dummy_ variable for each T used to instantiate
+  // the template.  Therefore, the address of dummy_ is guaranteed to
+  // be unique.
+  return &(TypeIdHelper<T>::dummy_);
 }
+
+// Returns the type ID of ::testing::Test.  Always call this instead
+// of GetTypeId< ::testing::Test>() to get the type ID of
+// ::testing::Test, as the latter may give the wrong result due to a
+// suspected linker bug when compiling Google Test as a Mac OS X
+// framework.
+TypeId GetTestTypeId();
 
 // Defines the abstract factory interface that creates instances
 // of a Test object.
@@ -829,7 +848,7 @@ int GetFailedPartCount(const TestResult* result);
   test_case_name##_##test_name##_Test
 
 // Helper macro for defining tests.
-#define GTEST_TEST_(test_case_name, test_name, parent_class)\
+#define GTEST_TEST_(test_case_name, test_name, parent_class, parent_id)\
 class GTEST_TEST_CLASS_NAME_(test_case_name, test_name) : public parent_class {\
  public:\
   GTEST_TEST_CLASS_NAME_(test_case_name, test_name)() {}\
@@ -844,7 +863,7 @@ class GTEST_TEST_CLASS_NAME_(test_case_name, test_name) : public parent_class {\
   ::test_info_ =\
     ::testing::internal::MakeAndRegisterTestInfo(\
         #test_case_name, #test_name, "", "", \
-        ::testing::internal::GetTypeId< parent_class >(), \
+        (parent_id), \
         parent_class::SetUpTestCase, \
         parent_class::TearDownTestCase, \
         new ::testing::internal::TestFactoryImpl<\

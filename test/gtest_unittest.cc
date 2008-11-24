@@ -105,12 +105,15 @@ using testing::TPRT_FATAL_FAILURE;
 using testing::TPRT_NONFATAL_FAILURE;
 using testing::TPRT_SUCCESS;
 using testing::UnitTest;
+using testing::internal::kTestTypeIdInGoogleTest;
 using testing::internal::AppendUserMessage;
 using testing::internal::CodePointToUtf8;
 using testing::internal::EqFailure;
 using testing::internal::FloatingPoint;
 using testing::internal::GetCurrentOsStackTraceExceptTop;
 using testing::internal::GetFailedPartCount;
+using testing::internal::GetTestTypeId;
+using testing::internal::GetTypeId;
 using testing::internal::GTestFlagSaver;
 using testing::internal::Int32;
 using testing::internal::List;
@@ -125,6 +128,31 @@ using testing::internal::WideStringToUtf8;
 
 // This line tests that we can define tests in an unnamed namespace.
 namespace {
+
+// Tests GetTypeId.
+
+TEST(GetTypeIdTest, ReturnsSameValueForSameType) {
+  EXPECT_EQ(GetTypeId<int>(), GetTypeId<int>());
+  EXPECT_EQ(GetTypeId<Test>(), GetTypeId<Test>());
+}
+
+class SubClassOfTest : public Test {};
+class AnotherSubClassOfTest : public Test {};
+
+TEST(GetTypeIdTest, ReturnsDifferentValuesForDifferentTypes) {
+  EXPECT_NE(GetTypeId<int>(), GetTypeId<const int>());
+  EXPECT_NE(GetTypeId<int>(), GetTypeId<char>());
+  EXPECT_NE(GetTypeId<int>(), GetTestTypeId());
+  EXPECT_NE(GetTypeId<SubClassOfTest>(), GetTestTypeId());
+  EXPECT_NE(GetTypeId<AnotherSubClassOfTest>(), GetTestTypeId());
+  EXPECT_NE(GetTypeId<AnotherSubClassOfTest>(), GetTypeId<SubClassOfTest>());
+}
+
+// Verifies that GetTestTypeId() returns the same value, no matter it
+// is called from inside Google Test or outside of it.
+TEST(GetTestTypeIdTest, ReturnsTheSameValueInsideOrOutsideOfGoogleTest) {
+  EXPECT_EQ(kTestTypeIdInGoogleTest, GetTestTypeId());
+}
 
 // Tests FormatTimeInMillisAsSeconds().
 

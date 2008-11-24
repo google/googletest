@@ -1259,8 +1259,18 @@ AssertionResult DoubleLE(const char* expr1, const char* expr2,
 //     EXPECT_TRUE(foo.StatusIsOK());
 //   }
 
+// Note that we call GetTestTypeId() instead of GetTypeId<
+// ::testing::Test>() here to get the type ID of testing::Test.  This
+// is to work around a suspected linker bug when using Google Test as
+// a framework on Mac OS X.  The bug causes GetTypeId<
+// ::testing::Test>() to return different values depending on whether
+// the call is from the Google Test framework itself or from user test
+// code.  GetTestTypeId() is guaranteed to always return the same
+// value, as it always calls GetTypeId<>() from the Google Test
+// framework.
 #define TEST(test_case_name, test_name)\
-  GTEST_TEST_(test_case_name, test_name, ::testing::Test)
+  GTEST_TEST_(test_case_name, test_name,\
+              ::testing::Test, ::testing::internal::GetTestTypeId())
 
 
 // Defines a test that uses a test fixture.
@@ -1290,7 +1300,8 @@ AssertionResult DoubleLE(const char* expr1, const char* expr2,
 //   }
 
 #define TEST_F(test_fixture, test_name)\
-  GTEST_TEST_(test_fixture, test_name, test_fixture)
+  GTEST_TEST_(test_fixture, test_name, test_fixture,\
+              ::testing::internal::GetTypeId<test_fixture>())
 
 // Use this macro in main() to run all tests.  It returns 0 if all
 // tests are successful, or 1 otherwise.

@@ -515,6 +515,23 @@ void ScopedFakeTestPartResultReporter::ReportTestPartResult(
 
 namespace internal {
 
+// Returns the type ID of ::testing::Test.  We should always call this
+// instead of GetTypeId< ::testing::Test>() to get the type ID of
+// testing::Test.  This is to work around a suspected linker bug when
+// using Google Test as a framework on Mac OS X.  The bug causes
+// GetTypeId< ::testing::Test>() to return different values depending
+// on whether the call is from the Google Test framework itself or
+// from user test code.  GetTestTypeId() is guaranteed to always
+// return the same value, as it always calls GetTypeId<>() from the
+// gtest.cc, which is within the Google Test framework.
+TypeId GetTestTypeId() {
+  return GetTypeId<Test>();
+}
+
+// The value of GetTestTypeId() as seen from within the Google Test
+// library.  This is solely for testing GetTestTypeId().
+extern const TypeId kTestTypeIdInGoogleTest = GetTestTypeId();
+
 // This predicate-formatter checks that 'results' contains a test part
 // failure of the given type and that the failure message contains the
 // given substring.
@@ -1924,9 +1941,9 @@ bool Test::HasSameFixtureClass() {
 
   if (this_fixture_id != first_fixture_id) {
     // Is the first test defined using TEST?
-    const bool first_is_TEST = first_fixture_id == internal::GetTypeId<Test>();
+    const bool first_is_TEST = first_fixture_id == internal::GetTestTypeId();
     // Is this test defined using TEST?
-    const bool this_is_TEST = this_fixture_id == internal::GetTypeId<Test>();
+    const bool this_is_TEST = this_fixture_id == internal::GetTestTypeId();
 
     if (first_is_TEST || this_is_TEST) {
       // The user mixed TEST and TEST_F in this test case - we'll tell
