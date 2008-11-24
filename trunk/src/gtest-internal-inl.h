@@ -76,6 +76,10 @@ GTEST_DECLARE_bool_(show_internal_stack_frames);
 
 namespace internal {
 
+// The value of GetTestTypeId() as seen from within the Google Test
+// library.  This is solely for testing GetTestTypeId().
+extern const TypeId kTestTypeIdInGoogleTest;
+
 // Names of the flags (needed for parsing Google Test flags).
 const char kBreakOnFailureFlag[] = "break_on_failure";
 const char kCatchExceptionsFlag[] = "catch_exceptions";
