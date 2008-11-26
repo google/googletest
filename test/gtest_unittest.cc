@@ -510,6 +510,72 @@ TEST(StringTest, Constructors) {
   EXPECT_STREQ("hel", s4.c_str());
 }
 
+#if GTEST_HAS_STD_STRING
+
+TEST(StringTest, ConvertsFromStdString) {
+  // An empty std::string.
+  const std::string src1("");
+  const String dest1 = src1;
+  EXPECT_STREQ("", dest1.c_str());
+
+  // A normal std::string.
+  const std::string src2("Hi");
+  const String dest2 = src2;
+  EXPECT_STREQ("Hi", dest2.c_str());
+
+  // An std::string with an embedded NUL character.
+  const char src3[] = "Hello\0world.";
+  const String dest3 = std::string(src3, sizeof(src3));
+  EXPECT_STREQ("Hello", dest3.c_str());
+}
+
+TEST(StringTest, ConvertsToStdString) {
+  // An empty String.
+  const String src1("");
+  const std::string dest1 = src1;
+  EXPECT_EQ("", dest1);
+
+  // A normal String.
+  const String src2("Hi");
+  const std::string dest2 = src2;
+  EXPECT_EQ("Hi", dest2);
+}
+
+#endif  // GTEST_HAS_STD_STRING
+
+#if GTEST_HAS_GLOBAL_STRING
+
+TEST(StringTest, ConvertsFromGlobalString) {
+  // An empty ::string.
+  const ::string src1("");
+  const String dest1 = src1;
+  EXPECT_STREQ("", dest1.c_str());
+
+  // A normal ::string.
+  const ::string src2("Hi");
+  const String dest2 = src2;
+  EXPECT_STREQ("Hi", dest2.c_str());
+
+  // An ::string with an embedded NUL character.
+  const char src3[] = "Hello\0world.";
+  const String dest3 = ::string(src3, sizeof(src3));
+  EXPECT_STREQ("Hello", dest3.c_str());
+}
+
+TEST(StringTest, ConvertsToGlobalString) {
+  // An empty String.
+  const String src1("");
+  const ::string dest1 = src1;
+  EXPECT_EQ("", dest1);
+
+  // A normal String.
+  const String src2("Hi");
+  const ::string dest2 = src2;
+  EXPECT_EQ("Hi", dest2);
+}
+
+#endif  // GTEST_HAS_GLOBAL_STRING
+
 // Tests String::ShowCString().
 TEST(StringTest, ShowCString) {
   EXPECT_STREQ("(null)", String::ShowCString(NULL));
@@ -4116,7 +4182,7 @@ class InitGoogleTestTest : public Test {
                                int argc2, const CharType** argv2,
                                const Flags& expected) {
     // Parses the command line.
-    InitGoogleTest(&argc1, const_cast<CharType**>(argv1));
+    internal::ParseGoogleTestFlagsOnly(&argc1, const_cast<CharType**>(argv1));
 
     // Verifies the flag values.
     CheckFlags(expected);

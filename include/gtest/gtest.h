@@ -554,13 +554,13 @@ inline Environment* AddGlobalTestEnvironment(Environment* env) {
 //
 // No value is returned.  Instead, the Google Test flag variables are
 // updated.
+//
+// Calling the function for the second time has no user-visible effect.
 void InitGoogleTest(int* argc, char** argv);
 
 // This overloaded version can be used in Windows programs compiled in
 // UNICODE mode.
-#ifdef GTEST_OS_WINDOWS
 void InitGoogleTest(int* argc, wchar_t** argv);
-#endif  // GTEST_OS_WINDOWS
 
 namespace internal {
 
