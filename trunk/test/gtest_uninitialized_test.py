@@ -67,24 +67,14 @@ def AssertEq(expected, actual):
     raise AssertionError
 
 
-def GetOutput(command):
-  """Runs the given command and returns its output."""
-
-  stdin, stdout = os.popen2(command, 't')
-  stdin.close()
-  output = stdout.read()
-  stdout.close()
-  return output
-
-
 def TestExitCodeAndOutput(command):
   """Runs the given command and verifies its exit code and output."""
 
   # Verifies that 'command' exits with code 1.
-  AssertEq(1, gtest_test_utils.GetExitStatus(os.system(command)))
-
-  output = GetOutput(command)
-  Assert('InitGoogleTest' in output)
+  p = gtest_test_utils.Subprocess(command)
+  Assert(p.exited)
+  AssertEq(1, p.exit_code)
+  Assert('InitGoogleTest' in p.output)
 
 
 if IS_WINDOWS:
