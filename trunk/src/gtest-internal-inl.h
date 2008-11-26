@@ -1256,6 +1256,11 @@ inline UnitTestImpl* GetUnitTestImpl() {
   return UnitTest::GetInstance()->impl();
 }
 
+// Parses the command line for Google Test flags, without initializing
+// other parts of Google Test.
+void ParseGoogleTestFlagsOnly(int* argc, char** argv);
+void ParseGoogleTestFlagsOnly(int* argc, wchar_t** argv);
+
 }  // namespace internal
 }  // namespace testing
 

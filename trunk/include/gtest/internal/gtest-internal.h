@@ -121,6 +121,9 @@ class UnitTestImpl;                    // Opaque implementation of UnitTest
 template <typename E> class List;      // A generic list.
 template <typename E> class ListNode;  // A node in a generic list.
 
+// How many times InitGoogleTest() has been called.
+extern int g_init_gtest_count;
+
 // The text used in failure messages to indicate the start of the
 // stack trace.
 extern const char kStackTraceMarker[];

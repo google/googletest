@@ -44,6 +44,10 @@
 #include <string.h>
 #include <gtest/internal/gtest-port.h>
 
+#if GTEST_HAS_GLOBAL_STRING || GTEST_HAS_STD_STRING
+#include <string>
+#endif  // GTEST_HAS_GLOBAL_STRING || GTEST_HAS_STD_STRING
+
 namespace testing {
 namespace internal {
 
@@ -216,6 +220,24 @@ class String {
   // D'tor.  String is intended to be a final class, so the d'tor
   // doesn't need to be virtual.
   ~String() { delete[] c_str_; }
+
+  // Allows a String to be implicitly converted to an ::std::string or
+  // ::string, and vice versa.  Converting a String containing a NULL
+  // pointer to ::std::string or ::string is undefined behavior.
+  // Converting a ::std::string or ::string containing an embedded NUL
+  // character to a String will result in the prefix up to the first
+  // NUL character.
+#if GTEST_HAS_STD_STRING
+  String(const ::std::string& str) : c_str_(NULL) { *this = str.c_str(); }
+
+  operator ::std::string() const { return ::std::string(c_str_); }
+#endif  // GTEST_HAS_STD_STRING
+
+#if GTEST_HAS_GLOBAL_STRING
+  String(const ::string& str) : c_str_(NULL) { *this = str.c_str(); }
+
+  operator ::string() const { return ::string(c_str_); }
+#endif  // GTEST_HAS_GLOBAL_STRING
 
   // Returns true iff this is an empty string (i.e. "").
   bool empty() const {

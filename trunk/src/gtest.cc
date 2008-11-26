@@ -222,13 +222,13 @@ namespace internal {
 // GTestIsInitialized() returns true iff the user has initialized
 // Google Test.  Useful for catching the user mistake of not initializing
 // Google Test before calling RUN_ALL_TESTS().
-
+//
 // A user must call testing::InitGoogleTest() to initialize Google
-// Test.  g_parse_gtest_flags_called is set to true iff
+// Test.  g_init_gtest_count is set to the number of times
 // InitGoogleTest() has been called.  We don't protect this variable
 // under a mutex as it is only accessed in the main thread.
-static bool g_parse_gtest_flags_called = false;
-static bool GTestIsInitialized() { return g_parse_gtest_flags_called; }
+int g_init_gtest_count = 0;
+static bool GTestIsInitialized() { return g_init_gtest_count != 0; }
 
 // Iterates over a list of TestCases, keeping a running sum of the
 // results of calling a given int-returning method on each.
@@ -3844,23 +3844,12 @@ bool ParseStringFlag(const char* str, const char* flag, String* value) {
   return true;
 }
 
-// The internal implementation of InitGoogleTest().
-//
-// The type parameter CharType can be instantiated to either char or
-// wchar_t.
+// Parses the command line for Google Test flags, without initializing
+// other parts of Google Test.  The type parameter CharType can be
+// instantiated to either char or wchar_t.
 template <typename CharType>
-void InitGoogleTestImpl(int* argc, CharType** argv) {
-  g_parse_gtest_flags_called = true;
-  if (*argc <= 0) return;
-
-#ifdef GTEST_HAS_DEATH_TEST
-  g_argvs.clear();
-  for (int i = 0; i != *argc; i++) {
-    g_argvs.push_back(StreamableToString(argv[i]));
-  }
-#endif  // GTEST_HAS_DEATH_TEST
-
-  for (int i = 1; i != *argc; i++) {
+void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
+  for (int i = 1; i < *argc; i++) {
     const String arg_string = StreamableToString(argv[i]);
     const char* const arg = arg_string.c_str();
 
@@ -3902,6 +3891,40 @@ void InitGoogleTestImpl(int* argc, CharType** argv) {
   }
 }
 
+// Parses the command line for Google Test flags, without initializing
+// other parts of Google Test.
+void ParseGoogleTestFlagsOnly(int* argc, char** argv) {
+  ParseGoogleTestFlagsOnlyImpl(argc, argv);
+}
+void ParseGoogleTestFlagsOnly(int* argc, wchar_t** argv) {
+  ParseGoogleTestFlagsOnlyImpl(argc, argv);
+}
+
+// The internal implementation of InitGoogleTest().
+//
+// The type parameter CharType can be instantiated to either char or
+// wchar_t.
+template <typename CharType>
+void InitGoogleTestImpl(int* argc, CharType** argv) {
+  g_init_gtest_count++;
+
+  // We don't want to run the initialization code twice.
+  if (g_init_gtest_count != 1) return;
+
+  if (*argc <= 0) return;
+
+  internal::g_executable_path = internal::StreamableToString(argv[0]);
+
+#ifdef GTEST_HAS_DEATH_TEST
+  g_argvs.clear();
+  for (int i = 0; i != *argc; i++) {
+    g_argvs.push_back(StreamableToString(argv[i]));
+  }
+#endif  // GTEST_HAS_DEATH_TEST
+
+  ParseGoogleTestFlagsOnly(argc, argv);
+}
+
 }  // namespace internal
 
 // Initializes Google Test.  This must be called before calling
@@ -3911,20 +3934,16 @@ void InitGoogleTestImpl(int* argc, CharType** argv) {
 //
 // No value is returned.  Instead, the Google Test flag variables are
 // updated.
+//
+// Calling the function for the second time has no user-visible effect.
 void InitGoogleTest(int* argc, char** argv) {
-  internal::g_executable_path = argv[0];
   internal::InitGoogleTestImpl(argc, argv);
 }
 
 // This overloaded version can be used in Windows programs compiled in
 // UNICODE mode.
-#ifdef GTEST_OS_WINDOWS
 void InitGoogleTest(int* argc, wchar_t** argv) {
-  // g_executable_path uses normal characters rather than wide chars, so call
-  // StreamableToString to convert argv[0] to normal characters (utf8 encoding).
-  internal::g_executable_path = internal::StreamableToString(argv[0]);
   internal::InitGoogleTestImpl(argc, argv);
 }
-#endif  // GTEST_OS_WINDOWS
 
 }  // namespace testing
