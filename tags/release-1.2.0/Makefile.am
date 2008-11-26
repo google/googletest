@@ -34,6 +34,7 @@ EXTRA_DIST += \
   xcode/Config/ReleaseProject.xcconfig \
   xcode/Config/TestTarget.xcconfig \
   xcode/Config/InternalTestTarget.xcconfig \
+  xcode/Config/InternalPythonTestTarget.xcconfig \
   xcode/Resources/Info.plist \
   xcode/Scripts/versiongenerate.py \
   xcode/Scripts/runtests.sh \
