@@ -41,6 +41,9 @@
 
 #include <gtest/gtest.h>
 
+#ifdef GTEST_OS_WINDOWS
+#include <windows.h>
+#endif
 
 namespace {
 
@@ -53,6 +56,11 @@ TEST(Foo, Bar) {
 
 
 int main(int argc, char **argv) {
+#ifdef GTEST_OS_WINDOWS
+  // Suppresses display of the Windows error dialog upon encountering
+  // a general protection fault (segment violation).
+  SetErrorMode(SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS);
+#endif
   testing::InitGoogleTest(&argc, argv);
 
   return RUN_ALL_TESTS();

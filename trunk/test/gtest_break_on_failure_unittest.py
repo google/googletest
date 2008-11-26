@@ -77,8 +77,11 @@ def Run(command):
   """Runs a command; returns 1 if it was killed by a signal, or 0 otherwise.
   """
 
-  exit_code = os.system(command)
-  return os.WIFSIGNALED(exit_code)
+  p = gtest_test_utils.Subprocess(command)
+  if p.terminated_by_signal:
+    return 1
+  else:
+    return 0
 
 
 # The unit test.
@@ -112,11 +115,13 @@ class GTestBreakOnFailureUnitTest(unittest.TestCase):
     if flag_value is None:
       flag = ''
     elif flag_value == '0':
-      flag = ' --%s=0' % BREAK_ON_FAILURE_FLAG
+      flag = '--%s=0' % BREAK_ON_FAILURE_FLAG
     else:
-      flag = ' --%s' % BREAK_ON_FAILURE_FLAG
+      flag = '--%s' % BREAK_ON_FAILURE_FLAG
 
-    command = EXE_PATH + flag
+    command = [EXE_PATH]
+    if flag:
+      command.append(flag)
 
     if expect_seg_fault:
       should_or_not = 'should'
@@ -128,7 +133,8 @@ class GTestBreakOnFailureUnitTest(unittest.TestCase):
     SetEnvVar(BREAK_ON_FAILURE_ENV_VAR, None)
 
     msg = ('when %s%s, an assertion failure in "%s" %s cause a seg-fault.' %
-           (BREAK_ON_FAILURE_ENV_VAR, env_var_value_msg, command, should_or_not))
+           (BREAK_ON_FAILURE_ENV_VAR, env_var_value_msg, ' '.join(command),
+            should_or_not))
     self.assert_(has_seg_fault == expect_seg_fault, msg)
 
   def testDefaultBehavior(self):
