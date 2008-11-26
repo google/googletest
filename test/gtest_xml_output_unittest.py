@@ -131,10 +131,11 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
       if e.errno != errno.ENOENT:
         raise
 
-    status = gtest_test_utils.RunCommandSuppressOutput(
-        "%s %s=xml" % (gtest_prog_path, GTEST_OUTPUT_FLAG),
-	working_dir=temp_dir)
-    self.assertEquals(0, gtest_test_utils.GetExitStatus(status))
+    p = gtest_test_utils.Subprocess(
+        [gtest_prog_path, "%s=xml" % GTEST_OUTPUT_FLAG],
+        working_dir=temp_dir)
+    self.assert_(p.exited)
+    self.assertEquals(0, p.exit_code)
     self.assert_(os.path.isfile(output_file))
 
 
@@ -150,18 +151,17 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     gtest_prog_path = os.path.join(gtest_test_utils.GetBuildDir(),
                                    gtest_prog_name)
 
-    command = ("%s %s=xml:%s" % (gtest_prog_path, GTEST_OUTPUT_FLAG, xml_path))
-    status = gtest_test_utils.RunCommandSuppressOutput(command)
-    if os.WIFSIGNALED(status):
-      signal = os.WTERMSIG(status)
+    command = [gtest_prog_path, "%s=xml:%s" % (GTEST_OUTPUT_FLAG, xml_path)]
+    p = gtest_test_utils.Subprocess(command)
+    if p.terminated_by_signal:
       self.assert_(False,
-                   "%s was killed by signal %d" % (gtest_prog_name, signal))
+                   "%s was killed by signal %d" % (gtest_prog_name, p.signal))
     else:
-      exit_code = gtest_test_utils.GetExitStatus(status)
-      self.assertEquals(expected_exit_code, exit_code,
+      self.assert_(p.exited)
+      self.assertEquals(expected_exit_code, p.exit_code,
                         "'%s' exited with code %s, which doesn't match "
                         "the expected exit code %s."
-                        % (command, exit_code, expected_exit_code))
+                        % (command, p.exit_code, expected_exit_code))
 
     expected = minidom.parseString(expected_xml)
     actual   = minidom.parse(xml_path)

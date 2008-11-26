@@ -37,6 +37,13 @@ import os
 import sys
 import unittest
 
+try:
+  import subprocess
+  _SUBPROCESS_MODULE_AVAILABLE = True
+except:
+  import popen2
+  _SUBPROCESS_MODULE_AVAILABLE = False
+
 
 # Initially maps a flag to its default value.  After
 # _ParseAndStripGTestFlags() is called, maps a flag to its actual
@@ -116,29 +123,65 @@ def GetExitStatus(exit_code):
       return -1
 
 
-def RunCommandSuppressOutput(command, working_dir=None):
-  """Changes into a specified directory, if provided, and executes a command.
-  Restores the old directory afterwards.
+class Subprocess:
+  def __init__(this, command, working_dir=None):
+    """Changes into a specified directory, if provided, and executes a command.
+    Restores the old directory afterwards. Execution results are returned
+    via the following attributes:
+      terminated_by_sygnal   True iff the child process has been terminated
+                             by a signal.
+      signal                 Sygnal that terminated the child process.
+      exited                 True iff the child process exited normally.
+      exit_code              The code with which the child proces exited.
+      output                 Child process's stdout and stderr output
+                             combined in a string.
 
-  Args:
-    command: A command to run.
-    working_dir: A directory to change into.
-  """
+    Args:
+      command: A command to run.
+      working_dir: A directory to change into.
+    """
 
-  old_dir = None
-  try:
-    if working_dir is not None:
+    # The subprocess module is the preferrable way of running programs
+    # since it is available and behaves consistently on all platforms,
+    # including Windows. But it is only available starting in python 2.4.
+    # In earlier python versions, we revert to the popen2 module, which is
+    # available in python 2.0 and later but doesn't provide required
+    # functionality (Popen4) under Windows. This allows us to support Mac
+    # OS X 10.4 Tiger, which has python 2.3 installed.
+    if _SUBPROCESS_MODULE_AVAILABLE:
+      p = subprocess.Popen(command,
+                           stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                           cwd=working_dir, universal_newlines=True)
+      # communicate returns a tuple with the file obect for the child's
+      # output.
+      this.output = p.communicate()[0]
+      this._return_code = p.returncode
+    else:
       old_dir = os.getcwd()
-      os.chdir(working_dir)
-    f = os.popen(command, 'r')
-    f.read()
-    ret_code = f.close()
-  finally:
-    if old_dir is not None:
-      os.chdir(old_dir)
-  if ret_code is None:
-    ret_code = 0
-  return ret_code
+      try:
+        if working_dir is not None:
+          os.chdir(working_dir)
+        p = popen2.Popen4(command)
+        p.tochild.close()
+        this.output = p.fromchild.read()
+        ret_code = p.wait()
+      finally:
+        os.chdir(old_dir)
+      # Converts ret_code to match the semantics of
+      # subprocess.Popen.returncode.
+      if os.WIFSIGNALED(ret_code):
+        this._return_code = -os.WTERMSIG(ret_code)
+      else:  # os.WIFEXITED(ret_code) should return True here.
+        this._return_code = os.WEXITSTATUS(ret_code)
+
+    if this._return_code < 0:
+      this.terminated_by_signal = True
+      this.exited = False
+      this.signal = -this._return_code
+    else:
+      this.terminated_by_signal = False
+      this.exited = True
+      this.exit_code = this._return_code
 
 
 def Main():

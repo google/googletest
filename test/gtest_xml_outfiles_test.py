@@ -100,11 +100,10 @@ class GTestXMLOutFilesTest(gtest_xml_test_utils.GTestXMLTestCase):
   def _TestOutFile(self, test_name, expected_xml):
     gtest_prog_path = os.path.join(gtest_test_utils.GetBuildDir(),
                                    test_name)
-    command = "%s --gtest_output=xml:%s" % (gtest_prog_path, self.output_dir_)
-    status = gtest_test_utils.RunCommandSuppressOutput(
-        command,
-        working_dir=tempfile.mkdtemp())
-    self.assertEquals(0, gtest_test_utils.GetExitStatus(status))
+    command = [gtest_prog_path, "--gtest_output=xml:%s" % self.output_dir_]
+    p = gtest_test_utils.Subprocess(command, working_dir=tempfile.mkdtemp())
+    self.assert_(p.exited)
+    self.assertEquals(0, p.exit_code)
 
     # TODO(wan@google.com): libtool causes the built test binary to be
     #   named lt-gtest_xml_outfiles_test_ instead of
