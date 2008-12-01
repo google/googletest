@@ -105,7 +105,6 @@ Please do submit code. Here's what you need to do:
   # Ensure that your code adheres to the [#Coding_Style Google Test source code style].
   # Ensure that there are unit tests for your code.
   # Sign a Contributor License Agreement.
-  # Make sure there is an issue in the issue tracker that your change addresses.  If necessary, create a new issue.
   # Create a patch file using `svn diff`.
   # We use [http://codereview.appspot.com/ Rietveld] to do web-based code reviews.  You can read about the tool [http://code.google.com/p/rietveld/wiki/CodeReviewHelp here].  When you are ready, upload your patch via Rietveld and notify `googletestframework@googlegroups.com` to review it.  There are several ways to upload the patch.  We recommend using the [http://codereview.appspot.com/static/upload.py upload.py] script.
 
