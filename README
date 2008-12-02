@@ -208,6 +208,24 @@ in the "Variables to be set in the environment:" list, where you replace
 when you run your executable, it will load the framework and your test will
 run as expected. 
 
+### Using GNU Make ###
+The make/ directory contains a Makefile that you can use to build
+Google Test on systems where GNU make is available (e.g. Linux, Mac OS
+X, and Cygwin).  It doesn't try to build Google Test's own tests.
+Instead, it just builds the Google Test library and a sample test.
+You can use it as a starting point for your own Makefile.
+
+If the default settings are correct for your environment, the
+following commands should succeed:
+
+  $ cd ${SRCDIR}/make
+  $ make
+  $ ./sample1_unittest
+
+If you see errors, try to tweak the contents of make/Makefile to make
+them go away.  There are instructions in make/Makefile on how to do
+it.
+
 ### Using Your Own Build System ###
 If none of the build solutions we provide works for you, or if you
 prefer your own build system, you just need to compile
