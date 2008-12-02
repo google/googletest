@@ -61,11 +61,13 @@
 #include <vector>
 
 #elif defined(GTEST_OS_SYMBIAN)
-// No autoconf on Symbian
 #define GTEST_HAS_GETTIMEOFDAY
 #include <sys/time.h>  // NOLINT
 
 #elif defined(GTEST_OS_ZOS)
+#define GTEST_HAS_GETTIMEOFDAY
+#include <sys/time.h>  // NOLINT
+
 // On z/OS we additionally need strings.h for strcasecmp.
 #include <strings.h>
 
