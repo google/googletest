@@ -177,12 +177,13 @@ test has its own Xcode "Target" and Xcode "Executable". To build any of the
 tests, change the active target and the active executable to the test of
 interest and then build and run.
 
-NOTE: Several tests use a Python script to run the test executable. They require
-a separate custom "Xcode Executable" to run the Python script within Xcode.
-These "Xcode Executables" are named with "run_" prepended to the test name.
-Also, the gtest_xml_outfiles_test requres two executable tests to be built.
-These executables are built in separate targets with a trailing underscore in
-the name.
+NOTE: Several tests use a Python script to run the test executable. These can be
+run from Xcode by creating a "Custom Executable". For example, to run the Python
+script which executes the gtest_color_test, select the Project->New Custom
+Executable... menu item. When prompted, set the "Executable Name" to something
+like "run_gtest_color_test" and set the "Executable Path" to the path of the
+gtest_color_test.py script. Finally, choose "Run" from the Run menu and check
+the Console for the results.
 
 Individual tests can be built from the command line using:
 
