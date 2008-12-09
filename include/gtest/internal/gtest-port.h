@@ -301,10 +301,10 @@
 
 #endif  // GTEST_HAS_PTHREAD
 
-// Determines whether <tr1/tuple> is available.  If you have <tr1/tuple>
+// Determines whether tr1/tuple is available.  If you have tr1/tuple
 // on your platform, define GTEST_HAS_TR1_TUPLE=1 for both the Google
 // Test project and your tests. If you would like Google Test to detect
-// <tr1/tuple> on your platform automatically, please open an issue
+// tr1/tuple on your platform automatically, please open an issue
 // ticket at http://code.google.com/p/googletest.
 #ifndef GTEST_HAS_TR1_TUPLE
 // The user didn't tell us, so we need to figure it out.
@@ -314,6 +314,21 @@
 #define GTEST_HAS_TR1_TUPLE 1
 #else
 #define GTEST_HAS_TR1_TUPLE 0
+#endif  // __GNUC__
+#endif  // GTEST_HAS_TR1_TUPLE
+
+// To avoid conditional compilation everywhere, we make it
+// gtest-port.h's responsibility to #include the header implementing
+// tr1/tuple.
+#if GTEST_HAS_TR1_TUPLE
+#if defined(__GNUC__)
+// GCC implements tr1/tuple in the <tr1/tuple> header.  This does not
+// conform to the TR1 spec, which requires the header to be <tuple>.
+#include <tr1/tuple>
+#else
+// If the compiler is not GCC, we assume the user is using a
+// spec-conforming TR1 implementation.
+#include <tuple>
 #endif  // __GNUC__
 #endif  // GTEST_HAS_TR1_TUPLE
 

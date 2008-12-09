@@ -48,10 +48,6 @@
 
 #ifdef GTEST_HAS_PARAM_TEST
 
-#ifdef GTEST_HAS_COMBINE
-#include <tr1/tuple>
-#endif  // GTEST_HAS_COMBINE
-
 #include <gtest/internal/gtest-param-util.h>
 
 namespace testing {
