@@ -178,9 +178,39 @@ TODO(chandlerc@google.com): Fixes the above instructions to match the
 actual implementation.
 
 ### Windows ###
-We don't have the Visual Studio project files for Google Mock ready
-yet.  Please see the next two sections on how you can integrate Google
-Mock into your project's build system.
+The msvc/ directory contains VC++ 2005 projects for building Google Mock and
+selected tests. In order to build Google Mock you must have an implementation
+of TR1 tuple. One library that provides such implementation is Boost. If you
+choose to use Boost, download it from www.boost.org and install it on your
+system. After that you have two options: either configure Boost as a system
+library or modify the Google Mock project to point to your copy of Boost. The
+former solution will let all your tests use the same copy of Boost while the
+latter one will let each of your projects use its own copy of Boost. You can
+also use a hybrid solution: your project settings will override the system-wide
+one.
+
+For example, if you unpacked boost v1.36.0 into C:\boost:
+To configure Boost as a system library.
+ * Assuming you are using the Visual Studio 2008 IDE, select Tools |
+   Options | Projects And Solutions | VC++ Directories.
+ * In the "Show directories for" drop-down select Include Files.  Add
+ * C:\boost\boost_1_36_0\boost\tr1\tr1 and C:\boost\boost_1_36_0
+   to the list of directories.
+
+To configure your project to point to that version of Boost, replace
+the value of the BoostDir user macro with C:\boost\boost_1_36_0 in the
+msvc/gtest_dep.vsprops file. You can use any text editor to edit that file.
+
+If you want to use a version of Google Test other then the one bundled with
+Google Mock, change the value of the GTestDir macro in gmock_config.vsprop
+to point to the new location.
+
+After configuring Boost, just open msvc/gmock.sln and build the library and
+tests. If you want to create your own project to use with Google Mock, you'll
+have to configure it to use the gmock_config propety sheet. For that:
+ * Open the Property Manager window (View/Other Windows/Property Manager)
+ * Right-click on your project and select "Add Existing Property Sheet..."
+ * Navigate to gmock_config.vsprops and select it.
 
 ### Using GNU Make ###
 The make/ directory contains a Makefile that you can use to build

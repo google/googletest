@@ -178,4 +178,12 @@ EXTRA_DIST += \
     scripts/generator/cpp/utils.py \
     scripts/generator/gmock_gen.py
 
-# TODO(wan@google.com): add the MSVC projects to EXTRA_DIST.
+# Microsoft Visual Studio 2005 projects.
+EXTRA_DIST += \
+    msvc/gmock.sln \
+    msvc/gmock.vcproj \
+    msvc/gmock_config.vsprops \
+    msvc/gmock_link_test.vcproj \
+    msvc/gmock_main.vcproj \
+    msvc/gmock_output_test_.vcproj \
+    msvc/gmock_test.vcproj
