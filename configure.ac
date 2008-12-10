@@ -48,8 +48,14 @@ AC_ARG_WITH([gtest],
                             that prefix will be used.])],
             [],
             [with_gtest=yes])
+AC_ARG_ENABLE([external-gtest],
+              [AS_HELP_STRING([--disable-external-gtest],
+                              [Disables any detection or use of a system
+                              installed or user provided gtest. Any option to
+                              '--with-gtest' is ignored. (Default is enabled.)])
+              ], [], [enable_external_gtest=yes])
 AS_IF([test "x$with_gtest" == "xno"],
-      [AC_MSG_ERROR([
+      [AC_MSG_ERROR([dnl
 Support for GoogleTest was explicitly disabled. Currently GoogleMock has a hard
 dependency upon GoogleTest to build, please provide a version, or allow
 GoogleMock to use any installed version and fall back upon its internal
@@ -78,35 +84,39 @@ HAVE_BUILT_GTEST="no"
 # at that point it will become more meaningful.
 GTEST_MIN_VERSION="1.0.0"
 
-# Begin filling in variables as we are able.
-AS_IF([test "x${with_gtest}" != "xyes"],
-      [AS_IF([test -x "${with_gtest}/scripts/gtest-config"],
-             [GTEST_CONFIG="${with_gtest}/scripts/gtest-config"],
-             [GTEST_CONFIG="${with_gtest}/bin/gtest-config"])
-      AS_IF([test -x "${GTEST_CONFIG}"], [],
-            [AC_MSG_ERROR([
+AS_IF([test "x${enable_external_gtest}" = "xyes"],
+      [# Begin filling in variables as we are able.
+      AS_IF([test "x${with_gtest}" != "xyes"],
+            [AS_IF([test -x "${with_gtest}/scripts/gtest-config"],
+                   [GTEST_CONFIG="${with_gtest}/scripts/gtest-config"],
+                   [GTEST_CONFIG="${with_gtest}/bin/gtest-config"])
+            AS_IF([test -x "${GTEST_CONFIG}"], [],
+                  [AC_MSG_ERROR([dnl
 Unable to locate either a built or installed Google Test at '${with_gtest}'.])
-            ])])
+                  ])])
 
-AS_IF([test -x "${GTEST_CONFIG}"], [],
-      [AC_PATH_PROG([GTEST_CONFIG], [gtest-config])])
-AS_IF([test -x "${GTEST_CONFIG}"],
-      [AC_MSG_CHECKING([for Google Test with version >= ${GTEST_MIN_VERSION}])
-      AS_IF([${GTEST_CONFIG} --min-version=${GTEST_MIN_VERSION}],
-            [AC_MSG_RESULT([yes])
-            HAVE_BUILT_GTEST="yes"],
-            [AC_MSG_RESULT([no])])])
+      AS_IF([test -x "${GTEST_CONFIG}"], [],
+            [AC_PATH_PROG([GTEST_CONFIG], [gtest-config])])
+      AS_IF([test -x "${GTEST_CONFIG}"],
+            [AC_MSG_CHECKING([for Google Test version >= ${GTEST_MIN_VERSION}])
+            AS_IF([${GTEST_CONFIG} --min-version=${GTEST_MIN_VERSION}],
+                  [AC_MSG_RESULT([yes])
+                  HAVE_BUILT_GTEST="yes"],
+                  [AC_MSG_RESULT([no])])])])
 
-# TODO(chandlerc@google.com): Need to add support for passing a custom prefix
-# into the gtest-config script..
 AS_IF([test "x${HAVE_BUILT_GTEST}" = "xyes"],
       [GTEST_CPPFLAGS=`${GTEST_CONFIG} --cppflags`
       GTEST_CXXFLAGS=`${GTEST_CONFIG} --cxxflags`
       GTEST_LDFLAGS=`${GTEST_CONFIG} --ldflags`
       GTEST_LIBS=`${GTEST_CONFIG} --libs`
       GTEST_VERSION=`${GTEST_CONFIG} --version`],
-      [AC_MSG_ERROR([TODO(chandlerc@google.com): Need to add support for
-                    building the internal gtest.])])
+      [AC_CONFIG_SUBDIRS([gtest])
+      GTEST_CONFIG='$(builddir)/gtest/scripts/gtest-config'
+      GTEST_CPPFLAGS='-I$(srcdir)/gtest/include -I$(srcdir)/gtest'
+      GTEST_CXXFLAGS='-g'
+      GTEST_LDFLAGS=''
+      GTEST_LIBS='$(builddir)/gtest/lib/libgtest.la'
+      GTEST_VERSION="${GTEST_MIN_VERSION}"])
 
 # TODO(chandlerc@google.com) Check the types, structures, and other compiler
 # and architecture characteristics.

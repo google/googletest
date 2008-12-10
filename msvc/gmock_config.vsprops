@@ -15,6 +15,6 @@
 	/>
 	<UserMacro
 		Name="BoostDir"
-		Value="../boost/v1_36_0"
+		Value="../boost"
 	/>
 </VisualStudioPropertySheet>

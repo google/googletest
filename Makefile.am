@@ -1,6 +1,10 @@
 # Nonstandard package files for distribution.
 EXTRA_DIST =
 
+# We may need to build our internally packaged gtest. If so, it will be
+# included in the 'subdirs' variable.
+SUBDIRS = $(subdirs)
+
 # Scripts and utilities to be installed by 'make install'.
 dist_bin_SCRIPTS = scripts/gmock_doctor.py
 
