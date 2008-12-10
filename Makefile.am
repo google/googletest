@@ -1,0 +1,181 @@
+# Nonstandard package files for distribution.
+EXTRA_DIST =
+
+# Scripts and utilities to be installed by 'make install'.
+dist_bin_SCRIPTS = scripts/gmock_doctor.py
+
+# We define the global AM_CPPFLAGS as everything we compile includes from these
+# directories.
+AM_CPPFLAGS = $(GTEST_CPPFLAGS) -I$(srcdir)/include
+
+# Build rules for libraries.
+lib_LTLIBRARIES = lib/libgmock.la lib/libgmock_main.la
+
+lib_libgmock_la_SOURCES = src/gmock.cc \
+                          src/gmock-cardinalities.cc \
+                          src/gmock-internal-utils.cc \
+                          src/gmock-matchers.cc \
+                          src/gmock-printers.cc \
+                          src/gmock-spec-builders.cc
+
+pkginclude_HEADERS = include/gmock/gmock.h \
+                     include/gmock/gmock-actions.h \
+                     include/gmock/gmock-cardinalities.h \
+                     include/gmock/gmock-generated-actions.h \
+                     include/gmock/gmock-generated-function-mockers.h \
+                     include/gmock/gmock-generated-matchers.h \
+                     include/gmock/gmock-generated-nice-strict.h \
+                     include/gmock/gmock-matchers.h \
+                     include/gmock/gmock-printers.h \
+                     include/gmock/gmock-spec-builders.h
+
+pkginclude_internaldir = $(pkgincludedir)/internal
+pkginclude_internal_HEADERS = \
+  include/gmock/internal/gmock-generated-internal-utils.h \
+  include/gmock/internal/gmock-internal-utils.h \
+  include/gmock/internal/gmock-port.h
+
+lib_libgmock_main_la_SOURCES = src/gmock_main.cc
+lib_libgmock_main_la_LIBADD = lib/libgmock.la
+
+# Build rules for tests. Automake's naming for some of these variables isn't
+# terribly obvious, so this is a brief reference:
+#
+# TESTS -- Programs run automatically by "make check"
+# check_PROGRAMS -- Programs built by "make check" but not necessarily run
+
+TESTS=
+TESTS_ENVIRONMENT = GMOCK_SOURCE_DIR="$(srcdir)/test" \
+                    GMOCK_BUILD_DIR="$(top_builddir)/test"
+check_PROGRAMS=
+AM_LDFLAGS = $(GTEST_LDFLAGS)
+
+TESTS += test/gmock-actions_test
+check_PROGRAMS += test/gmock-actions_test
+test_gmock_actions_test_SOURCES = test/gmock-actions_test.cc
+test_gmock_actions_test_LDADD = $(GTEST_LIBS) lib/libgmock_main.la
+
+TESTS += test/gmock-cardinalities_test
+check_PROGRAMS += test/gmock-cardinalities_test
+test_gmock_cardinalities_test_SOURCES = test/gmock-cardinalities_test.cc
+test_gmock_cardinalities_test_LDADD = $(GTEST_LIBS) lib/libgmock_main.la
+
+TESTS += test/gmock-generated-actions_test
+check_PROGRAMS += test/gmock-generated-actions_test
+test_gmock_generated_actions_test_SOURCES = test/gmock-generated-actions_test.cc
+test_gmock_generated_actions_test_LDADD = $(GTEST_LIBS) lib/libgmock_main.la
+
+TESTS += test/gmock-generated-function-mockers_test
+check_PROGRAMS += test/gmock-generated-function-mockers_test
+test_gmock_generated_function_mockers_test_SOURCES = \
+  test/gmock-generated-function-mockers_test.cc
+test_gmock_generated_function_mockers_test_LDADD = $(GTEST_LIBS) \
+                                                   lib/libgmock_main.la
+
+TESTS += test/gmock-generated-internal-utils_test
+check_PROGRAMS += test/gmock-generated-internal-utils_test
+test_gmock_generated_internal_utils_test_SOURCES = \
+  test/gmock-generated-internal-utils_test.cc
+test_gmock_generated_internal_utils_test_LDADD = $(GTEST_LIBS) \
+                                                 lib/libgmock_main.la
+
+TESTS += test/gmock-generated-matchers_test
+check_PROGRAMS += test/gmock-generated-matchers_test
+test_gmock_generated_matchers_test_SOURCES = \
+  test/gmock-generated-matchers_test.cc
+test_gmock_generated_matchers_test_LDADD = $(GTEST_LIBS) lib/libgmock_main.la
+
+TESTS += test/gmock-internal-utils_test
+check_PROGRAMS += test/gmock-internal-utils_test
+test_gmock_internal_utils_test_SOURCES = test/gmock-internal-utils_test.cc
+test_gmock_internal_utils_test_LDADD = $(GTEST_LIBS) lib/libgmock_main.la
+
+TESTS += test/gmock_link_test
+check_PROGRAMS += test/gmock_link_test
+test_gmock_link_test_SOURCES = test/gmock_link_test.cc \
+                               test/gmock-sample.cc \
+                               test/gmock-sample.h
+test_gmock_link_test_LDADD = $(GTEST_LIBS) lib/libgmock_main.la
+
+TESTS += test/gmock-matchers_test
+check_PROGRAMS += test/gmock-matchers_test
+test_gmock_matchers_test_SOURCES = test/gmock-matchers_test.cc
+test_gmock_matchers_test_LDADD = $(GTEST_LIBS) lib/libgmock_main.la
+
+TESTS += test/gmock-nice-strict_test
+check_PROGRAMS += test/gmock-nice-strict_test
+test_gmock_nice_strict_test_SOURCES = test/gmock-nice-strict_test.cc
+test_gmock_nice_strict_test_LDADD = $(GTEST_LIBS) lib/libgmock_main.la
+
+TESTS += test/gmock-port_test
+check_PROGRAMS += test/gmock-port_test
+test_gmock_port_test_SOURCES = test/gmock-port_test.cc
+test_gmock_port_test_LDADD = $(GTEST_LIBS) lib/libgmock_main.la
+
+TESTS += test/gmock-printers_test
+check_PROGRAMS += test/gmock-printers_test
+test_gmock_printers_test_SOURCES = test/gmock-printers_test.cc
+test_gmock_printers_test_LDADD = $(GTEST_LIBS) lib/libgmock_main.la
+
+TESTS += test/gmock-spec-builders_test
+check_PROGRAMS += test/gmock-spec-builders_test
+test_gmock_spec_builders_test_SOURCES = test/gmock-spec-builders_test.cc
+test_gmock_spec_builders_test_LDADD = $(GTEST_LIBS) lib/libgmock_main.la
+
+TESTS += test/gmock_test
+check_PROGRAMS += test/gmock_test
+test_gmock_test_SOURCES = test/gmock_test.cc
+test_gmock_test_LDADD = $(GTEST_LIBS) lib/libgmock_main.la
+
+# The following tests depend on the presence of a Python installation and are
+# keyed off of it. We only add them to the TESTS variable when a Python
+# interpreter is available. TODO(chandlerc@google.com): While we currently only
+# attempt to build and execute these tests if Autoconf has found Python v2.3 on
+# the system, we don't use the PYTHON variable it specified as the valid
+# interpreter. The problem is that TESTS_ENVIRONMENT is a global variable, and
+# thus we cannot distinguish between C++ unit tests and Python unit tests.
+dist_check_SCRIPTS =
+
+# Python modules used by multiple Python tests below.
+dist_check_SCRIPTS += test/gmock_test_utils.py
+
+check_PROGRAMS += test/gmock_output_test_
+test_gmock_output_test__SOURCES = test/gmock_output_test_.cc
+test_gmock_output_test__LDADD = $(GTEST_LIBS) lib/libgmock_main.la
+dist_check_SCRIPTS += test/gmock_output_test.py
+EXTRA_DIST += test/gmock_output_test_golden.txt
+
+# Enable all the python driven tests when we can run them.
+if HAVE_PYTHON
+TESTS += test/gmock_output_test.py
+endif
+
+# Nonstandard package files for distribution.
+EXTRA_DIST += \
+  CHANGES \
+  CONTRIBUTORS \
+  make/Makefile \
+  src/gmock-all.cc
+
+# Pump scripts for generating Google Mock headers.
+# TODO(chandlerc@google.com): automate the generation of *.h from *.h.pump.
+EXTRA_DIST += include/gmock/gmock-generated-actions.h.pump \
+              include/gmock/gmock-generated-function-mockers.h.pump \
+              include/gmock/gmock-generated-matchers.h.pump \
+              include/gmock/gmock-generated-nice-strict.h.pump \
+              include/gmock/internal/gmock-generated-internal-utils.h.pump
+
+# The Google Mock Generator tool from the cppclean project.
+EXTRA_DIST += \
+    scripts/generator/COPYING \
+    scripts/generator/README \
+    scripts/generator/README.cppclean \
+    scripts/generator/cpp/__init__.py \
+    scripts/generator/cpp/ast.py \
+    scripts/generator/cpp/gmock_class.py \
+    scripts/generator/cpp/keywords.py \
+    scripts/generator/cpp/tokenize.py \
+    scripts/generator/cpp/utils.py \
+    scripts/generator/gmock_gen.py
+
+# TODO(wan@google.com): add the MSVC projects to EXTRA_DIST.

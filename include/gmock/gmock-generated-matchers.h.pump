@@ -1,0 +1,303 @@
+$$ -*- mode: c++; -*-
+$$ This is a Pump source file.  Please use Pump to convert it to
+$$ gmock-generated-variadic-actions.h.
+$$
+$var n = 10  $$ The maximum arity we support.
+// Copyright 2008, Google Inc.
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+//     * Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+//     * Neither the name of Google Inc. nor the names of its
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+// Google Mock - a framework for writing C++ mock classes.
+//
+// This file implements some commonly used variadic matchers.
+
+#ifndef GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_MATCHERS_H_
+#define GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_MATCHERS_H_
+
+#include <sstream>
+#include <string>
+#include <vector>
+#include <gmock/gmock-matchers.h>
+
+namespace testing {
+namespace internal {
+
+// Implements ElementsAre() and ElementsAreArray().
+template <typename Container>
+class ElementsAreMatcherImpl : public MatcherInterface<Container> {
+ public:
+  typedef GMOCK_REMOVE_CONST(GMOCK_REMOVE_REFERENCE(Container)) RawContainer;
+  typedef typename RawContainer::value_type Element;
+
+  // Constructs the matcher from a sequence of element values or
+  // element matchers.
+  template <typename InputIter>
+  ElementsAreMatcherImpl(InputIter first, size_t count) {
+    matchers_.reserve(count);
+    InputIter it = first;
+    for (size_t i = 0; i != count; ++i, ++it) {
+      matchers_.push_back(MatcherCast<const Element&>(*it));
+    }
+  }
+
+  // Returns true iff 'container' matches.
+  virtual bool Matches(Container container) const {
+    if (container.size() != count())
+      return false;
+
+    typename RawContainer::const_iterator container_iter = container.begin();
+    for (size_t i = 0; i != count();  ++container_iter, ++i) {
+      if (!matchers_[i].Matches(*container_iter))
+        return false;
+    }
+
+    return true;
+  }
+
+  // Describes what this matcher does.
+  virtual void DescribeTo(::std::ostream* os) const {
+    if (count() == 0) {
+      *os << "is empty";
+    } else if (count() == 1) {
+      *os << "has 1 element that ";
+      matchers_[0].DescribeTo(os);
+    } else {
+      *os << "has " << Elements(count()) << " where\n";
+      for (size_t i = 0; i != count(); ++i) {
+        *os << "element " << i << " ";
+        matchers_[i].DescribeTo(os);
+        if (i + 1 < count()) {
+          *os << ",\n";
+        }
+      }
+    }
+  }
+
+  // Describes what the negation of this matcher does.
+  virtual void DescribeNegationTo(::std::ostream* os) const {
+    if (count() == 0) {
+      *os << "is not empty";
+      return;
+    }
+
+    *os << "does not have " << Elements(count()) << ", or\n";
+    for (size_t i = 0; i != count(); ++i) {
+      *os << "element " << i << " ";
+      matchers_[i].DescribeNegationTo(os);
+      if (i + 1 < count()) {
+        *os << ", or\n";
+      }
+    }
+  }
+
+  // Explains why 'container' matches, or doesn't match, this matcher.
+  virtual void ExplainMatchResultTo(Container container,
+                                    ::std::ostream* os) const {
+    if (Matches(container)) {
+      // We need to explain why *each* element matches (the obvious
+      // ones can be skipped).
+
+      bool reason_printed = false;
+      typename RawContainer::const_iterator container_iter = container.begin();
+      for (size_t i = 0; i != count(); ++container_iter, ++i) {
+        ::std::stringstream ss;
+        matchers_[i].ExplainMatchResultTo(*container_iter, &ss);
+
+        const string s = ss.str();
+        if (!s.empty()) {
+          if (reason_printed) {
+            *os << ",\n";
+          }
+          *os << "element " << i << " " << s;
+          reason_printed = true;
+        }
+      }
+    } else {
+      // We need to explain why the container doesn't match.
+      const size_t actual_count = container.size();
+      if (actual_count != count()) {
+        // The element count doesn't match.  If the container is
+        // empty, there's no need to explain anything as Google Mock
+        // already prints the empty container.  Otherwise we just need
+        // to show how many elements there actually are.
+        if (actual_count != 0) {
+          *os << "has " << Elements(actual_count);
+        }
+        return;
+      }
+
+      // The container has the right size but at least one element
+      // doesn't match expectation.  We need to find this element and
+      // explain why it doesn't match.
+      typename RawContainer::const_iterator container_iter = container.begin();
+      for (size_t i = 0; i != count(); ++container_iter, ++i) {
+        if (matchers_[i].Matches(*container_iter)) {
+          continue;
+        }
+
+        *os << "element " << i << " doesn't match";
+
+        ::std::stringstream ss;
+        matchers_[i].ExplainMatchResultTo(*container_iter, &ss);
+        const string s = ss.str();
+        if (!s.empty()) {
+          *os << " (" << s << ")";
+        }
+        return;
+      }
+    }
+  }
+
+ private:
+  static Message Elements(size_t count) {
+    return Message() << count << (count == 1 ? " element" : " elements");
+  }
+
+  size_t count() const { return matchers_.size(); }
+  std::vector<Matcher<const Element&> > matchers_;
+};
+
+// Implements ElementsAre() of 0-10 arguments.
+
+class ElementsAreMatcher0 {
+ public:
+  ElementsAreMatcher0() {}
+
+  template <typename Container>
+  operator Matcher<Container>() const {
+    typedef GMOCK_REMOVE_CONST(GMOCK_REMOVE_REFERENCE(Container)) RawContainer;
+    typedef typename RawContainer::value_type Element;
+
+    const Matcher<const Element&>* const matchers = NULL;
+    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers, 0));
+  }
+};
+
+
+$range i 1..n
+$for i [[
+$range j 1..i
+template <$for j, [[typename T$j]]>
+class ElementsAreMatcher$i {
+ public:
+  $if i==1 [[explicit ]]ElementsAreMatcher$i($for j, [[const T$j& e$j]])$if i > 0 [[ : ]]
+      $for j, [[e$j[[]]_(e$j)]] {}
+
+  template <typename Container>
+  operator Matcher<Container>() const {
+    typedef GMOCK_REMOVE_CONST(GMOCK_REMOVE_REFERENCE(Container)) RawContainer;
+    typedef typename RawContainer::value_type Element;
+
+    const Matcher<const Element&> matchers[] = {
+
+$for j [[
+      MatcherCast<const Element&>(e$j[[]]_),
+
+]]
+    };
+
+    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers, $i));
+  }
+
+ private:
+
+$for j [[
+  const T$j& e$j[[]]_;
+
+]]
+};
+
+
+]]
+// Implements ElementsAreArray().
+template <typename T>
+class ElementsAreArrayMatcher {
+ public:
+  ElementsAreArrayMatcher(const T* first, size_t count) :
+      first_(first), count_(count) {}
+
+  template <typename Container>
+  operator Matcher<Container>() const {
+    typedef GMOCK_REMOVE_CONST(GMOCK_REMOVE_REFERENCE(Container)) RawContainer;
+    typedef typename RawContainer::value_type Element;
+
+    return MakeMatcher(new ElementsAreMatcherImpl<Container>(first_, count_));
+  }
+
+ private:
+  const T* const first_;
+  const size_t count_;
+};
+
+}  // namespace internal
+
+// ElementsAre(e0, e1, ..., e_n) matches an STL-style container with
+// (n + 1) elements, where the i-th element in the container must
+// match the i-th argument in the list.  Each argument of
+// ElementsAre() can be either a value or a matcher.  We support up to
+// $n arguments.
+//
+// NOTE: Since ElementsAre() cares about the order of the elements, it
+// must not be used with containers whose elements's order is
+// undefined (e.g. hash_map).
+
+inline internal::ElementsAreMatcher0 ElementsAre() {
+  return internal::ElementsAreMatcher0();
+}
+
+$for i [[
+$range j 1..i
+
+template <$for j, [[typename T$j]]>
+inline internal::ElementsAreMatcher$i<$for j, [[T$j]]> ElementsAre($for j, [[const T$j& e$j]]) {
+  return internal::ElementsAreMatcher$i<$for j, [[T$j]]>($for j, [[e$j]]);
+}
+
+]]
+
+// ElementsAreArray(array) and ElementAreArray(array, count) are like
+// ElementsAre(), except that they take an array of values or
+// matchers.  The former form infers the size of 'array', which must
+// be a static C-style array.  In the latter form, 'array' can either
+// be a static array or a pointer to a dynamically created array.
+
+template <typename T>
+inline internal::ElementsAreArrayMatcher<T> ElementsAreArray(
+    const T* first, size_t count) {
+  return internal::ElementsAreArrayMatcher<T>(first, count);
+}
+
+template <typename T, size_t N>
+inline internal::ElementsAreArrayMatcher<T>
+ElementsAreArray(const T (&array)[N]) {
+  return internal::ElementsAreArrayMatcher<T>(array, N);
+}
+
+}  // namespace testing
+
+#endif  // GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_MATCHERS_H_
