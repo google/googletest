@@ -9,6 +9,7 @@ EXTRA_DIST = \
   include/gtest/gtest-param-test.h.pump \
   include/gtest/internal/gtest-type-util.h.pump \
   include/gtest/internal/gtest-param-util-generated.h.pump \
+  make/Makefile \
   scons/SConscript \
   scripts/gen_gtest_pred_impl.py \
   src/gtest-all.cc
