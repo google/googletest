@@ -77,17 +77,16 @@ or for a release version X.Y.*'s branch:
 Next you will need to prepare the GNU Autotools build system, if you
 are using Linux, Mac OS X, or Cygwin. Enter the target directory of
 the checkout command you used ('gtest-svn' or 'gtest-X.Y-svn' above)
-and proceed with the following commands:
+and proceed with the following command to bootstrap the build system:
 
-  $ aclocal-1.9       # Where "1.9" must match the following automake command.
-  $ libtoolize -c     # Use "glibtoolize -c" instead on Mac OS X.
-  $ autoheader
-  $ automake-1.9 -ac  # See Automake version requirements above.
-  $ autoconf
+  $ ACLOCAL=aclocal-1.9 AUTOMAKE=automake-1.9 autoreconf -fiv
 
-While this is a bit complicated, it will most often be automatically re-run by
-your "make" invocations, so in practice you shouldn't need to worry too much.
-Once you have completed these steps, you are ready to build the library. 
+You can substitute newer versions of 'aclocal' and 'automake', but be aware
+that older versions are known not to work, and autoreconf may or may not
+correctly detect the required version. Also, the versions must match for both
+commands. However, this entire process will be automatically re-run by your
+"make" invocations, so in practice you shouldn't need to worry too much. Once
+you have completed these steps, you are ready to build the library.
 
 ### Source Package: ###
 Google Test is also released in source packages which can be downloaded from
