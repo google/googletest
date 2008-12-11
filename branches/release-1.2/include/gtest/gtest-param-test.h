@@ -156,9 +156,6 @@ INSTANTIATE_TEST_CASE_P(AnotherInstantiationName, FooTest, ValuesIn(pets));
 #include <gtest/internal/gtest-internal.h>
 #include <gtest/internal/gtest-param-util.h>
 #include <gtest/internal/gtest-param-util-generated.h>
-#ifdef GTEST_HAS_COMBINE
-#include <tr1/tuple>
-#endif  // GTEST_HAS_COMBINE
 
 namespace testing {
 

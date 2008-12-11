@@ -42,10 +42,6 @@
 #include <list>
 #include <vector>
 
-#ifdef GTEST_HAS_COMBINE
-#include <tr1/tuple>
-#endif  // GTEST_HAS_COMBINE
-
 // To include gtest-internal-inl.h.
 #define GTEST_IMPLEMENTATION
 #include "src/gtest-internal-inl.h"  // for UnitTestOptions

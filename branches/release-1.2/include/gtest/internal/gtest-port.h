@@ -40,22 +40,24 @@
 // control Google Test's behavior.  If the user doesn't define a macro
 // in this list, Google Test will define it.
 //
-//   GTEST_HAS_STD_STRING     - Define it to 1/0 to indicate that
-//                              std::string does/doesn't work (Google Test can
-//                              be used where std::string is unavailable).
+//   GTEST_HAS_CLONE          - Define it to 1/0 to indicate that clone(2)
+//                              is/isn't available.
 //   GTEST_HAS_GLOBAL_STRING  - Define it to 1/0 to indicate that ::string
 //                              is/isn't available (some systems define
 //                              ::string, which is different to std::string).
-//   GTEST_HAS_STD_WSTRING    - Define it to 1/0 to indicate that
-//                              std::wstring does/doesn't work (Google Test can
-//                              be used where std::wstring is unavailable).
 //   GTEST_HAS_GLOBAL_WSTRING - Define it to 1/0 to indicate that ::string
 //                              is/isn't available (some systems define
 //                              ::wstring, which is different to std::wstring).
-//   GTEST_HAS_RTTI           - Define it to 1/0 to indicate that RTTI is/isn't
-//                              enabled.
 //   GTEST_HAS_PTHREAD        - Define it to 1/0 to indicate that <pthread.h>
 //                              is/isn't available.
+//   GTEST_HAS_RTTI           - Define it to 1/0 to indicate that RTTI is/isn't
+//                              enabled.
+//   GTEST_HAS_STD_STRING     - Define it to 1/0 to indicate that
+//                              std::string does/doesn't work (Google Test can
+//                              be used where std::string is unavailable).
+//   GTEST_HAS_STD_WSTRING    - Define it to 1/0 to indicate that
+//                              std::wstring does/doesn't work (Google Test can
+//                              be used where std::wstring is unavailable).
 //   GTEST_HAS_TR1_TUPLE 1    - Define it to 1/0 to indicate tr1::tuple
 //                              is/isn't available.
 
@@ -299,10 +301,10 @@
 
 #endif  // GTEST_HAS_PTHREAD
 
-// Determines whether <tr1/tuple> is available.  If you have <tr1/tuple>
+// Determines whether tr1/tuple is available.  If you have tr1/tuple
 // on your platform, define GTEST_HAS_TR1_TUPLE=1 for both the Google
 // Test project and your tests. If you would like Google Test to detect
-// <tr1/tuple> on your platform automatically, please open an issue
+// tr1/tuple on your platform automatically, please open an issue
 // ticket at http://code.google.com/p/googletest.
 #ifndef GTEST_HAS_TR1_TUPLE
 // The user didn't tell us, so we need to figure it out.
@@ -315,8 +317,38 @@
 #endif  // __GNUC__
 #endif  // GTEST_HAS_TR1_TUPLE
 
+// To avoid conditional compilation everywhere, we make it
+// gtest-port.h's responsibility to #include the header implementing
+// tr1/tuple.
+#if GTEST_HAS_TR1_TUPLE
+#if defined(__GNUC__)
+// GCC implements tr1/tuple in the <tr1/tuple> header.  This does not
+// conform to the TR1 spec, which requires the header to be <tuple>.
+#include <tr1/tuple>
+#else
+// If the compiler is not GCC, we assume the user is using a
+// spec-conforming TR1 implementation.
+#include <tuple>
+#endif  // __GNUC__
+#endif  // GTEST_HAS_TR1_TUPLE
+
+// Determines whether clone(2) is supported.
+// Usually it will only be available on Linux, excluding
+// Linux on the Itanium architecture.
+// Also see http://linux.die.net/man/2/clone.
+#ifndef GTEST_HAS_CLONE
+// The user didn't tell us, so we need to figure it out.
+
+#if defined(GTEST_OS_LINUX) && !defined(__ia64__)
+#define GTEST_HAS_CLONE 1
+#else
+#define GTEST_HAS_CLONE 0
+#endif  // defined(GTEST_OS_LINUX) && !defined(__ia64__)
+
+#endif  // GTEST_HAS_CLONE
+
 // Determines whether to support death tests.
-#if GTEST_HAS_STD_STRING && defined(GTEST_OS_LINUX)
+#if GTEST_HAS_STD_STRING && GTEST_HAS_CLONE
 #define GTEST_HAS_DEATH_TEST
 // On some platforms, <regex.h> needs someone to define size_t, and
 // won't compile otherwise.  We can #include it here as we already
@@ -326,7 +358,7 @@
 #include <vector>
 #include <fcntl.h>
 #include <sys/mman.h>
-#endif  // GTEST_HAS_STD_STRING && defined(GTEST_OS_LINUX)
+#endif  // GTEST_HAS_STD_STRING && GTEST_HAS_CLONE
 
 // Determines whether to support value-parameterized tests.
 
