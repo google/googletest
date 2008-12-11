@@ -40,10 +40,8 @@ testing framework for writing tests. Currently Google Mock only works
 with Google Test (http://code.google.com/p/googletest/), although
 eventually we plan to support other C++ testing frameworks. You can
 use either the copy of Google Test that comes with Google Mock, or a
-compatible version you already have.
-
-TODO(wan@google.com): describe which Google Test versions are
-compatible with the latest Google Mock release.
+compatible version you already have.  This version of Google Mock
+requires Google Test 1.2.1.
 
 Google Mock depends on advanced C++ features and thus requires a more
 modern compiler.  The following are needed to use Google Mock:
@@ -101,20 +99,23 @@ or for a release version X.Y.*'s branch:
 Next you will need to prepare the GNU Autotools build system, if you
 are using Linux or Mac OS X. Enter the target directory of the
 checkout command you used ('gmock-svn' or 'gmock-X.Y-svn' above) and
-proceed with the following commands:
+proceed with the following command:
 
-  $ aclocal-1.9       # Where "1.9" must match the following automake command.
-  $ libtoolize -c     # Use "glibtoolize -c" instead on Mac OS X.
-  $ autoheader
-  $ automake-1.9 -ac  # See Automake version requirements above.
-  $ autoconf
+  $ autoreconf -fvi
 
-While this is a bit complicated, it will most often be automatically re-run by
-your "make" invocations, so in practice you shouldn't need to worry too much.
-Once you have completed these steps, you are ready to build the library. 
+Once you have completed this step, you are ready to build the library.
+Note that you should need to complete this step only once.  The sub-
+sequent `make' invocations will automatically re-generate the bits of
+the build system that need to be changed.
 
-TODO(chandlerc@google.com): Update the above with instructions on
-preparing the build system for Google Test.
+If your system uses older versions of the autotools, the above command will
+fail.  You may need to explicitly specify a version to use.  For instance, if
+you have both GNU Automake 1.4 and 1.9 installed and `automake' would invoke
+the 1.4, use instead:
+
+  $ AUTOMAKE=automake-1.9 ACLOCAL=aclocal-1.9 autoreconf -fvi
+
+Make sure you're using the same version of automake and aclocal.
 
 ### Source Package: ###
 Google Mock is also released in source packages which can be downloaded from

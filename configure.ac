@@ -9,6 +9,7 @@ AC_CONFIG_SRCDIR([./COPYING])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_HEADERS([build-aux/config.h])
 AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([scripts/gmock-config], [chmod +x scripts/gmock-config])
 
 # Initialize Automake with various options. We require at least v1.9, prevent
 # pedantic complaints about package files, and enable various distribution
@@ -79,10 +80,7 @@ AC_ARG_VAR([GTEST_VERSION],
            [The version of Google Test available.])
 HAVE_BUILT_GTEST="no"
 
-# TODO(chandlerc@google.com): This is arbitrary, but we will need to introduce
-# some features to the GoogleTest build system to help support GoogleMock, and
-# at that point it will become more meaningful.
-GTEST_MIN_VERSION="1.0.0"
+GTEST_MIN_VERSION="1.2.1"
 
 AS_IF([test "x${enable_external_gtest}" = "xyes"],
       [# Begin filling in variables as we are able.
@@ -111,11 +109,13 @@ AS_IF([test "x${HAVE_BUILT_GTEST}" = "xyes"],
       GTEST_LIBS=`${GTEST_CONFIG} --libs`
       GTEST_VERSION=`${GTEST_CONFIG} --version`],
       [AC_CONFIG_SUBDIRS([gtest])
-      GTEST_CONFIG='$(builddir)/gtest/scripts/gtest-config'
-      GTEST_CPPFLAGS='-I$(srcdir)/gtest/include -I$(srcdir)/gtest'
+      # GTEST_CONFIG needs to be executable both in a Makefile environmont and
+      # in a shell script environment, so resolve an absolute path for it here.
+      GTEST_CONFIG="`pwd -P`/gtest/scripts/gtest-config"
+      GTEST_CPPFLAGS='-I$(top_srcdir)/gtest/include'
       GTEST_CXXFLAGS='-g'
       GTEST_LDFLAGS=''
-      GTEST_LIBS='$(builddir)/gtest/lib/libgtest.la'
+      GTEST_LIBS='$(top_builddir)/gtest/lib/libgtest.la'
       GTEST_VERSION="${GTEST_MIN_VERSION}"])
 
 # TODO(chandlerc@google.com) Check the types, structures, and other compiler
