@@ -1,3 +1,12 @@
+Changes for 1.2.1:
+
+ * Compatibility fixes for Linux IA-64 and IBM z/OS.
+ * Added support for using Boost and other TR1 implementations.
+ * Changes to the build scripts to support upcoming release of Google C++
+   Mocking Framework.
+ * Added Makefile to the distribution package.
+ * Improved build instructions in README.
+
 Changes for 1.2.0:
 
  * New feature: value-parameterized tests.
