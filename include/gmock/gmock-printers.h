@@ -365,19 +365,85 @@ struct TuplePrefixPrinter<1> {
   }
 };
 
-// We support tuples of up-to 10 fields.  Note that an N-tuple type is
-// just an (N + 1)-tuple type where the last field has a special,
-// unused type.
+// Helper function for printing a tuple.  T must be instantiated with
+// a tuple type.
+template <typename T>
+void PrintTupleTo(const T& t, ::std::ostream* os) {
+  *os << "(";
+  TuplePrefixPrinter< ::std::tr1::tuple_size<T>::value>::
+      PrintPrefixTo(t, os);
+  *os << ")";
+}
+
+// Overloaded PrintTo() for tuples of various arities.  We support
+// tuples of up-to 10 fields.  The following implementation works
+// regardless of whether tr1::tuple is implemented using the
+// non-standard variadic template feature or not.
+
+inline void PrintTo(const ::std::tr1::tuple<>& t, ::std::ostream* os) {
+  PrintTupleTo(t, os);
+}
+
+template <typename T1>
+void PrintTo(const ::std::tr1::tuple<T1>& t, ::std::ostream* os) {
+  PrintTupleTo(t, os);
+}
+
+template <typename T1, typename T2>
+void PrintTo(const ::std::tr1::tuple<T1, T2>& t, ::std::ostream* os) {
+  PrintTupleTo(t, os);
+}
+
+template <typename T1, typename T2, typename T3>
+void PrintTo(const ::std::tr1::tuple<T1, T2, T3>& t, ::std::ostream* os) {
+  PrintTupleTo(t, os);
+}
+
+template <typename T1, typename T2, typename T3, typename T4>
+void PrintTo(const ::std::tr1::tuple<T1, T2, T3, T4>& t, ::std::ostream* os) {
+  PrintTupleTo(t, os);
+}
+
+template <typename T1, typename T2, typename T3, typename T4, typename T5>
+void PrintTo(const ::std::tr1::tuple<T1, T2, T3, T4, T5>& t,
+             ::std::ostream* os) {
+  PrintTupleTo(t, os);
+}
+
+template <typename T1, typename T2, typename T3, typename T4, typename T5,
+          typename T6>
+void PrintTo(const ::std::tr1::tuple<T1, T2, T3, T4, T5, T6>& t,
+             ::std::ostream* os) {
+  PrintTupleTo(t, os);
+}
+
+template <typename T1, typename T2, typename T3, typename T4, typename T5,
+          typename T6, typename T7>
+void PrintTo(const ::std::tr1::tuple<T1, T2, T3, T4, T5, T6, T7>& t,
+             ::std::ostream* os) {
+  PrintTupleTo(t, os);
+}
+
+template <typename T1, typename T2, typename T3, typename T4, typename T5,
+          typename T6, typename T7, typename T8>
+void PrintTo(const ::std::tr1::tuple<T1, T2, T3, T4, T5, T6, T7, T8>& t,
+             ::std::ostream* os) {
+  PrintTupleTo(t, os);
+}
+
+template <typename T1, typename T2, typename T3, typename T4, typename T5,
+          typename T6, typename T7, typename T8, typename T9>
+void PrintTo(const ::std::tr1::tuple<T1, T2, T3, T4, T5, T6, T7, T8, T9>& t,
+             ::std::ostream* os) {
+  PrintTupleTo(t, os);
+}
+
 template <typename T1, typename T2, typename T3, typename T4, typename T5,
           typename T6, typename T7, typename T8, typename T9, typename T10>
 void PrintTo(
     const ::std::tr1::tuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>& t,
     ::std::ostream* os) {
-  typedef ::std::tr1::tuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> Tuple;
-  *os << "(";
-  TuplePrefixPrinter< ::std::tr1::tuple_size<Tuple>::value>::
-      PrintPrefixTo(t, os);
-  *os << ")";
+  PrintTupleTo(t, os);
 }
 
 // Overload for std::pair.

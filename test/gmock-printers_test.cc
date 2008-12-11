@@ -754,6 +754,29 @@ TEST(PrintTupleTest, VariousSizes) {
   tuple<char, bool> t2('a', true);
   EXPECT_EQ("('a' (97), true)", Print(t2));
 
+  tuple<bool, int, int> t3(false, 2, 3);
+  EXPECT_EQ("(false, 2, 3)", Print(t3));
+
+  tuple<bool, int, int, int> t4(false, 2, 3, 4);
+  EXPECT_EQ("(false, 2, 3, 4)", Print(t4));
+
+  tuple<bool, int, int, int, bool> t5(false, 2, 3, 4, true);
+  EXPECT_EQ("(false, 2, 3, 4, true)", Print(t5));
+
+  tuple<bool, int, int, int, bool, int> t6(false, 2, 3, 4, true, 6);
+  EXPECT_EQ("(false, 2, 3, 4, true, 6)", Print(t6));
+
+  tuple<bool, int, int, int, bool, int, int> t7(false, 2, 3, 4, true, 6, 7);
+  EXPECT_EQ("(false, 2, 3, 4, true, 6, 7)", Print(t7));
+
+  tuple<bool, int, int, int, bool, int, int, bool> t8(
+      false, 2, 3, 4, true, 6, 7, true);
+  EXPECT_EQ("(false, 2, 3, 4, true, 6, 7, true)", Print(t8));
+
+  tuple<bool, int, int, int, bool, int, int, bool, int> t9(
+      false, 2, 3, 4, true, 6, 7, true, 9);
+  EXPECT_EQ("(false, 2, 3, 4, true, 6, 7, true, 9)", Print(t9));
+
   const char* const str = "8";
   tuple<bool, char, short, testing::internal::Int32,  // NOLINT
       testing::internal::Int64, float, double, const char*, void*, string>
