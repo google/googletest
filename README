@@ -248,8 +248,9 @@ To configure Boost as a system library.
    directories.
 
 To configure your project to point to that version of Boost, replace
-the value of the BoostDir user macro with C:\boost\boost_1_36_0 in the
-msvc/gtest_dep.vsprops file. You can use any text editor to edit that file.
+the value of the BoostDir user macro with C:\boost\v_1_36_0 in the
+msvc/gmock_config.vsprops file. You can use any text editor to edit
+that file.
 
 If you want to use a version of Google Test other then the one bundled with
 Google Mock, change the value of the GTestDir macro in gmock_config.vsprop
