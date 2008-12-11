@@ -34,7 +34,7 @@ Compiler flag queries output the union of the sets of flags when combined.
   g++ $(gmock-config --ldflags --libs) -o foo foo.o
 
   # When using a built but not installed Google Mock:
-  g++ $(../../my_gmock_build/scripts/gtest-config ...) ...
+  g++ $(../../my_gmock_build/scripts/gmock-config ...) ...
 
   # When using an installed Google Mock, but with installation overrides:
   export GMOCK_PREFIX="/opt"
