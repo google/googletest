@@ -68,18 +68,19 @@ much more active and have the latest features, but the latter provides much
 more stability and predictability. Choose whichever fits your needs best, and
 proceed with the following Subversion commands:
 
-  $ svn checkout http://googletest.googlecode.com/svn/trunk/ gtest-svn
+  svn checkout http://googletest.googlecode.com/svn/trunk/ gtest-svn
 
 or for a release version X.Y.*'s branch:
 
-  $ svn checkout http://googletest.googlecode.com/svn/branches/release-X.Y/ gtest-X.Y-svn
+  svn checkout http://googletest.googlecode.com/svn/branches/release-X.Y/ \
+    gtest-X.Y-svn
 
 Next you will need to prepare the GNU Autotools build system, if you
 are using Linux, Mac OS X, or Cygwin. Enter the target directory of
 the checkout command you used ('gtest-svn' or 'gtest-X.Y-svn' above)
 and proceed with the following command:
 
-  $ autoreconf -fvi
+  autoreconf -fvi
 
 Once you have completed this step, you are ready to build the library. Note
 that you should only need to complete this step once. The subsequent `make'
@@ -91,7 +92,7 @@ fail. You may need to explicitly specify a version to use. For instance, if you
 have both GNU Automake 1.4 and 1.9 installed and `automake' would invoke the
 1.4, use instead:
 
-  $ AUTOMAKE=automake-1.9 ACLOCAL=aclocal-1.9 autoreconf -fvi
+  AUTOMAKE=automake-1.9 ACLOCAL=aclocal-1.9 autoreconf -fvi
 
 Make sure you're using the same version of automake and aclocal.
 
@@ -107,9 +108,9 @@ Once downloaded expand the archive using whichever tools you prefer for that
 type. This will always result in a new directory with the name "gtest-X.Y.Z"
 which contains all of the source code. Here are some examples in Linux:
 
-  $ tar -xvzf gtest-X.Y.Z.tar.gz
-  $ tar -xvjf gtest-X.Y.Z.tar.bz2
-  $ unzip gtest-X.Y.Z.zip
+  tar -xvzf gtest-X.Y.Z.tar.gz
+  tar -xvjf gtest-X.Y.Z.tar.bz2
+  unzip gtest-X.Y.Z.zip
 
 Building the Source
 -------------------
@@ -126,9 +127,9 @@ either approach by simply substituting the shell variable SRCDIR with "." for
 building inside the source directory, and the relative path to the source
 directory otherwise.
 
-  $ ${SRCDIR}/configure  # Standard GNU configure script, --help for more info
-  $ make  # Standard makefile following GNU conventions
-  $ make check  # Builds and runs all tests - all should pass
+  ${SRCDIR}/configure  # Standard GNU configure script, --help for more info
+  make  # Standard makefile following GNU conventions
+  make check  # Builds and runs all tests - all should pass
 
 Other programs will only be able to use Google Test's functionality if you
 install it in a location which they can access, in Linux this is typically
@@ -136,7 +137,7 @@ under '/usr/local'. The following command will install all of the Google Test
 libraries, public headers, and utilities necessary for other programs and
 libraries to leverage it:
 
-  $ sudo make install  # Not necessary, but allows use by other programs
+  sudo make install  # Not necessary, but allows use by other programs
 
 Should you need to remove Google Test from your system after having installed
 it, run the following command, and it will back out its changes.  However, note
@@ -146,7 +147,7 @@ Google Test on your system, and are working from a VCS checkout, make sure you
 run this *before* updating your checkout of the source in order to uninstall
 the same version which you installed.
 
-  $ sudo make uninstall  # Must be run against the exact same build as "install"
+  sudo make uninstall  # Must be run against the exact same build as "install"
 
 Your project can build against Google Test simply by leveraging the
 'gtest-config' script. This script can be invoked directly out of the 'scripts'
@@ -154,13 +155,13 @@ subdirectory of the build tree, and it will be installed in the binary
 directory specified during the 'configure'. Here are some examples of its use,
 see 'gtest-config --help' for more detailed information.
 
-  $ gtest-config --min-version=1.0 || echo "Insufficient Google Test version."
+  gtest-config --min-version=1.0 || echo "Insufficient Google Test version."
 
-  $ g++ $(gtest-config --cppflags --cxxflags) -o foo.o -c foo.cpp
-  $ g++ $(gtest-config --ldflags --libs) -o foo foo.o
+  g++ $(gtest-config --cppflags --cxxflags) -o foo.o -c foo.cpp
+  g++ $(gtest-config --ldflags --libs) -o foo foo.o
 
-    # When using a built but not installed Google Test:
-  $ g++ $(../../my_gtest_build/scripts/gtest-config ...) ...
+  # When using a built but not installed Google Test:
+  g++ $(../../my_gtest_build/scripts/gtest-config ...) ...
 
 ### Windows ###
 Open the gtest.sln file in the msvc/ folder using Visual Studio, and
@@ -173,7 +174,7 @@ target. The universal binary framework will end up in your selected build
 directory (selected in the Xcode "Preferences..." -> "Building" pane and
 defaults to xcode/build). Alternatively, at the command line, enter:
 
- $ xcodebuild
+  xcodebuild
  
 This will build the "Release" configuration of the gtest.framework, but you can
 select the "Debug" configuration with a command line option. See the
@@ -185,7 +186,7 @@ if you see some errors. Xcode reports all test failures (even the intentional
 ones) as errors. However, you should see a "Build succeeded" message at the end
 of the build log. To run all of the tests from the command line, enter:
 
-  $ xcodebuid -target Check
+  xcodebuid -target Check
 
 It is also possible to build and execute individual tests within Xcode. Each
 test has its own Xcode "Target" and Xcode "Executable". To build any of the
@@ -202,15 +203,15 @@ the Console for the results.
 
 Individual tests can be built from the command line using:
 
-  $ xcodebuild -target <test_name>
+  xcodebuild -target <test_name>
 
 These tests can be executed from the command line by moving to the build
 directory and then (in bash)
 
-  $ export DYLD_FRAMEWORK_PATH=`pwd`
-  $ ./<test_name>  # (if it is not a python test, e.g. ./gtest_unittest)
-    OR
-  $ ./<test_name>.py  # (if it is a python test, e.g. ./gtest_color_test.py)
+  export DYLD_FRAMEWORK_PATH=`pwd`
+  ./<test_name>  # (if it is not a python test, e.g. ./gtest_unittest)
+  # OR
+  ./<test_name>.py  # (if it is a python test, e.g. ./gtest_color_test.py)
 
 To use the gtest.framework for your own tests, first, add the framework to Xcode
 project. Next, create a new executable target and add the framework to the
@@ -234,9 +235,9 @@ You can use it as a starting point for your own Makefile.
 If the default settings are correct for your environment, the
 following commands should succeed:
 
-  $ cd ${SRCDIR}/make
-  $ make
-  $ ./sample1_unittest
+  cd ${SRCDIR}/make
+  make
+  ./sample1_unittest
 
 If you see errors, try to tweak the contents of make/Makefile to make
 them go away.  There are instructions in make/Makefile on how to do
@@ -248,10 +249,10 @@ prefer your own build system, you just need to compile
 src/gtest-all.cc into a library and link your tests with it.  Assuming
 a Linux-like system and gcc, something like the following will do:
 
-  $ cd ${SRCDIR}
-  $ g++ -I. -I./include -c src/gtest-all.cc
-  $ ar -rv libgtest.a gtest-all.o
-  $ g++ -I. -I./include path/to/your_test.cc libgtest.a -o your_test
+  cd ${SRCDIR}
+  g++ -I. -I./include -c src/gtest-all.cc
+  ar -rv libgtest.a gtest-all.o
+  g++ -I. -I./include path/to/your_test.cc libgtest.a -o your_test
 
 Regenerating Source Files
 -------------------------
