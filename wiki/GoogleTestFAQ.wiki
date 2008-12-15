@@ -762,3 +762,5 @@ end of the program run. The easiest way to avoid this is to use the
 `_CrtMemCheckpoint` and `_CrtMemDumpAllObjectsSince` calls to not report any
 statically initialized heap objects. See MSDN for more details and additional
 heap check/debug routines.
+
+== I am building my project with Google Test in Visual Studio and all I'm getting is a bunch of linker errors (or warnings). Help! ==
