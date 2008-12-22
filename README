@@ -228,27 +228,32 @@ against Google Test as well. There is no need to configure Google Test
 separately.
 
 ### Windows ###
-The msvc/ directory contains VC++ 2005 projects for building Google Mock and
-selected tests. In order to build Google Mock you must have an implementation
-of TR1 tuple. One library that provides such implementation is Boost. If you
-choose to use Boost, download it from www.boost.org and install it on your
-system. After that you have two options: either configure Boost as a system
-library or modify the Google Mock project to point to your copy of Boost. The
-former solution will let all your tests use the same copy of Boost while the
-latter one will let each of your projects use its own copy of Boost. You can
-also use a hybrid solution: your project settings will override the system-wide
-one.
+The msvc/ directory contains VC++ 2005 projects for building Google
+Mock and selected tests. In order to build Google Mock you must have
+an implementation of TR1 tuple. One library that provides such
+implementation is Boost. If you choose to use Boost, download it from
+www.boost.org and install it on your system. Note that Boost TR1 tuple
+is a header-only library, so the installation only involves unpacking
+it to a suitable location - you don't need to compile it or download a
+pre-compiled Boost binary.
+
+After that you have two options: either set up Boost globally or
+modify the Google Mock project to point to your copy of Boost. The
+former will let all your tests use the same Boost library while the
+latter will allow each of your projects use its own copy. You can also
+use a hybrid solution: your project settings will override the
+system-wide one.
 
 For example, if you unpacked boost v1.36.0 into C:\boost:
-To configure Boost as a system library.
+To set up Boost such that all projects can use it:
  * Assuming you are using the Visual Studio 2005 IDE, select Tools |
    Options | Projects And Solutions | VC++ Directories.
  * In the "Show directories for" drop-down select Include Files.  Add
-   C:\boost\v_1_36_0\boost\tr1\tr1 and C:\boost\v_1_36_0 to the list of
-   directories.
+   C:\boost\boost_1_36_0\boost\tr1\tr1 and C:\boost\boost_1_36_0 to the
+   list of directories.
 
 To configure your project to point to that version of Boost, replace
-the value of the BoostDir user macro with C:\boost\v_1_36_0 in the
+the value of the BoostDir user macro with C:\boost\boost_1_36_0 in the
 msvc/gmock_config.vsprops file. You can use any text editor to edit
 that file.
 
