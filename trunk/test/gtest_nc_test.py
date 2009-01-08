@@ -78,6 +78,18 @@ class GTestNCTest(unittest.TestCase):
       ('CATCHES_INSTANTIATE_TYPED_TESET_CASE_P_WITH_SAME_NAME_PREFIX',
        [r'redefinition of.*My.*FooTest']),
 
+      ('STATIC_ASSERT_TYPE_EQ_IS_NOT_A_TYPE',
+       [r'StaticAssertTypeEq.* does not name a type']),
+
+      ('STATIC_ASSERT_TYPE_EQ_WORKS_IN_NAMESPACE',
+       [r'StaticAssertTypeEq.*int.*const int']),
+
+      ('STATIC_ASSERT_TYPE_EQ_WORKS_IN_CLASS',
+       [r'StaticAssertTypeEq.*int.*bool']),
+
+      ('STATIC_ASSERT_TYPE_EQ_WORKS_IN_FUNCTION',
+       [r'StaticAssertTypeEq.*const int.*int']),
+
       ('SANITY',
        None)
       ]

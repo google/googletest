@@ -1242,6 +1242,52 @@ AssertionResult DoubleLE(const char* expr1, const char* expr2,
   ::testing::internal::ScopedTrace GTEST_CONCAT_TOKEN_(gtest_trace_, __LINE__)(\
     __FILE__, __LINE__, ::testing::Message() << (message))
 
+namespace internal {
+
+// This template is declared, but intentionally undefined.
+template <typename T1, typename T2>
+struct StaticAssertTypeEqHelper;
+
+template <typename T>
+struct StaticAssertTypeEqHelper<T, T> {};
+
+}  // namespace internal
+
+// Compile-time assertion for type equality.
+// StaticAssertTypeEq<type1, type2>() compiles iff type1 and type2 are
+// the same type.  The value it returns is not interesting.
+//
+// Instead of making StaticAssertTypeEq a class template, we make it a
+// function template that invokes a helper class template.  This
+// prevents a user from misusing StaticAssertTypeEq<T1, T2> by
+// defining objects of that type.
+//
+// CAVEAT:
+//
+// When used inside a method of a class template,
+// StaticAssertTypeEq<T1, T2>() is effective ONLY IF the method is
+// instantiated.  For example, given:
+//
+//   template <typename T> class Foo {
+//    public:
+//     void Bar() { testing::StaticAssertTypeEq<int, T>(); }
+//   };
+//
+// the code:
+//
+//   void Test1() { Foo<bool> foo; }
+//
+// will NOT generate a compiler error, as Foo<bool>::Bar() is never
+// actually instantiated.  Instead, you need:
+//
+//   void Test2() { Foo<bool> foo; foo.Bar(); }
+//
+// to cause a compiler error.
+template <typename T1, typename T2>
+bool StaticAssertTypeEq() {
+  internal::StaticAssertTypeEqHelper<T1, T2>();
+  return true;
+}
 
 // Defines a test.
 //

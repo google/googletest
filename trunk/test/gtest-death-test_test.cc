@@ -347,11 +347,13 @@ void SetPthreadFlag() {
 }  // namespace
 
 TEST_F(TestForDeathTest, DoesNotExecuteAtforkHooks) {
-  testing::GTEST_FLAG(death_test_style) = "threadsafe";
-  pthread_flag = false;
-  ASSERT_EQ(0, pthread_atfork(&SetPthreadFlag, NULL, NULL));
-  ASSERT_DEATH(_exit(1), "");
-  ASSERT_FALSE(pthread_flag);
+  if (!testing::GTEST_FLAG(death_test_use_fork)) {
+    testing::GTEST_FLAG(death_test_style) = "threadsafe";
+    pthread_flag = false;
+    ASSERT_EQ(0, pthread_atfork(&SetPthreadFlag, NULL, NULL));
+    ASSERT_DEATH(_exit(1), "");
+    ASSERT_FALSE(pthread_flag);
+  }
 }
 
 // Tests that a method of another class can be used in a death test.
@@ -561,7 +563,7 @@ TEST_F(TestForDeathTest, AssertDebugDeathAborts) {
 #endif  // _NDEBUG
 
 // Tests the *_EXIT family of macros, using a variety of predicates.
-TEST_F(TestForDeathTest, ExitMacros) {
+static void TestExitMacros() {
   EXPECT_EXIT(_exit(1),  testing::ExitedWithCode(1),  "");
   ASSERT_EXIT(_exit(42), testing::ExitedWithCode(42), "");
   EXPECT_EXIT(raise(SIGKILL), testing::KilledBySignal(SIGKILL), "") << "foo";
@@ -576,6 +578,15 @@ TEST_F(TestForDeathTest, ExitMacros) {
     ASSERT_EXIT(_exit(0), testing::KilledBySignal(SIGSEGV), "")
         << "This failure is expected, too.";
   }, "This failure is expected, too.");
+}
+
+TEST_F(TestForDeathTest, ExitMacros) {
+  TestExitMacros();
+}
+
+TEST_F(TestForDeathTest, ExitMacrosUsingFork) {
+  testing::GTEST_FLAG(death_test_use_fork) = true;
+  TestExitMacros();
 }
 
 TEST_F(TestForDeathTest, InvalidStyle) {

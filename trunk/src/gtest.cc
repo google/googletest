@@ -3867,6 +3867,8 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
         ParseStringFlag(arg, kColorFlag, &GTEST_FLAG(color)) ||
         ParseStringFlag(arg, kDeathTestStyleFlag,
                         &GTEST_FLAG(death_test_style)) ||
+        ParseBoolFlag(arg, kDeathTestUseFork,
+                      &GTEST_FLAG(death_test_use_fork)) ||
         ParseStringFlag(arg, kFilterFlag, &GTEST_FLAG(filter)) ||
         ParseStringFlag(arg, kInternalRunDeathTestFlag,
                         &GTEST_FLAG(internal_run_death_test)) ||
