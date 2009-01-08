@@ -86,6 +86,7 @@ using testing::DoubleLE;
 using testing::FloatLE;
 using testing::GTEST_FLAG(break_on_failure);
 using testing::GTEST_FLAG(catch_exceptions);
+using testing::GTEST_FLAG(death_test_use_fork);
 using testing::GTEST_FLAG(color);
 using testing::GTEST_FLAG(filter);
 using testing::GTEST_FLAG(list_tests);
@@ -98,6 +99,7 @@ using testing::IsNotSubstring;
 using testing::IsSubstring;
 using testing::Message;
 using testing::ScopedFakeTestPartResultReporter;
+using testing::StaticAssertTypeEq;
 using testing::Test;
 using testing::TestPartResult;
 using testing::TestPartResultArray;
@@ -1128,6 +1130,7 @@ class GTestFlagSaverTest : public Test {
 
     GTEST_FLAG(break_on_failure) = false;
     GTEST_FLAG(catch_exceptions) = false;
+    GTEST_FLAG(death_test_use_fork) = false;
     GTEST_FLAG(color) = "auto";
     GTEST_FLAG(filter) = "";
     GTEST_FLAG(list_tests) = false;
@@ -1149,6 +1152,7 @@ class GTestFlagSaverTest : public Test {
     EXPECT_FALSE(GTEST_FLAG(break_on_failure));
     EXPECT_FALSE(GTEST_FLAG(catch_exceptions));
     EXPECT_STREQ("auto", GTEST_FLAG(color).c_str());
+    EXPECT_FALSE(GTEST_FLAG(death_test_use_fork));
     EXPECT_STREQ("", GTEST_FLAG(filter).c_str());
     EXPECT_FALSE(GTEST_FLAG(list_tests));
     EXPECT_STREQ("", GTEST_FLAG(output).c_str());
@@ -1158,6 +1162,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG(break_on_failure) = true;
     GTEST_FLAG(catch_exceptions) = true;
     GTEST_FLAG(color) = "no";
+    GTEST_FLAG(death_test_use_fork) = true;
     GTEST_FLAG(filter) = "abc";
     GTEST_FLAG(list_tests) = true;
     GTEST_FLAG(output) = "xml:foo.xml";
@@ -4064,6 +4069,7 @@ struct Flags {
   // Constructs a Flags struct where each flag has its default value.
   Flags() : break_on_failure(false),
             catch_exceptions(false),
+            death_test_use_fork(false),
             filter(""),
             list_tests(false),
             output(""),
@@ -4085,6 +4091,14 @@ struct Flags {
   static Flags CatchExceptions(bool catch_exceptions) {
     Flags flags;
     flags.catch_exceptions = catch_exceptions;
+    return flags;
+  }
+
+  // Creates a Flags struct where the gtest_death_test_use_fork flag has
+  // the given value.
+  static Flags DeathTestUseFork(bool death_test_use_fork) {
+    Flags flags;
+    flags.death_test_use_fork = death_test_use_fork;
     return flags;
   }
 
@@ -4131,6 +4145,7 @@ struct Flags {
   // These fields store the flag values.
   bool break_on_failure;
   bool catch_exceptions;
+  bool death_test_use_fork;
   const char* filter;
   bool list_tests;
   const char* output;
@@ -4145,6 +4160,7 @@ class InitGoogleTestTest : public Test {
   virtual void SetUp() {
     GTEST_FLAG(break_on_failure) = false;
     GTEST_FLAG(catch_exceptions) = false;
+    GTEST_FLAG(death_test_use_fork) = false;
     GTEST_FLAG(filter) = "";
     GTEST_FLAG(list_tests) = false;
     GTEST_FLAG(output) = "";
@@ -4167,6 +4183,7 @@ class InitGoogleTestTest : public Test {
   static void CheckFlags(const Flags& expected) {
     EXPECT_EQ(expected.break_on_failure, GTEST_FLAG(break_on_failure));
     EXPECT_EQ(expected.catch_exceptions, GTEST_FLAG(catch_exceptions));
+    EXPECT_EQ(expected.death_test_use_fork, GTEST_FLAG(death_test_use_fork));
     EXPECT_STREQ(expected.filter, GTEST_FLAG(filter).c_str());
     EXPECT_EQ(expected.list_tests, GTEST_FLAG(list_tests));
     EXPECT_STREQ(expected.output, GTEST_FLAG(output).c_str());
@@ -4371,6 +4388,22 @@ TEST_F(InitGoogleTestTest, CatchExceptions) {
   };
 
   TEST_PARSING_FLAGS(argv, argv2, Flags::CatchExceptions(true));
+}
+
+// Tests parsing --gtest_death_test_use_fork.
+TEST_F(InitGoogleTestTest, DeathTestUseFork) {
+  const char* argv[] = {
+    "foo.exe",
+    "--gtest_death_test_use_fork",
+    NULL
+  };
+
+  const char* argv2[] = {
+    "foo.exe",
+    NULL
+  };
+
+  TEST_PARSING_FLAGS(argv, argv2, Flags::DeathTestUseFork(true));
 }
 
 // Tests having the same flag twice with different values.  The
@@ -4998,6 +5031,32 @@ TEST(ColoredOutputTest, UsesColorsWhenTermSupportsColors) {
   SetEnv("TERM", "xterm-color");  // TERM supports colors.
   EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
 #endif  // GTEST_OS_WINDOWS
+}
+
+// Verifies that StaticAssertTypeEq works in a namespace scope.
+
+static bool dummy1 = StaticAssertTypeEq<bool, bool>();
+static bool dummy2 = StaticAssertTypeEq<const int, const int>();
+
+// Verifies that StaticAssertTypeEq works in a class.
+
+template <typename T>
+class StaticAssertTypeEqTestHelper {
+ public:
+  StaticAssertTypeEqTestHelper() { StaticAssertTypeEq<bool, T>(); }
+};
+
+TEST(StaticAssertTypeEqTest, WorksInClass) {
+  StaticAssertTypeEqTestHelper<bool>();
+}
+
+// Verifies that StaticAssertTypeEq works inside a function.
+
+typedef int IntAlias;
+
+TEST(StaticAssertTypeEqTest, CompilesForEqualTypes) {
+  StaticAssertTypeEq<int, IntAlias>();
+  StaticAssertTypeEq<int*, IntAlias*>();
 }
 
 TEST(ThreadLocalTest, DefaultConstructor) {

@@ -66,6 +66,7 @@ namespace testing {
 GTEST_DECLARE_bool_(break_on_failure);
 GTEST_DECLARE_bool_(catch_exceptions);
 GTEST_DECLARE_string_(color);
+GTEST_DECLARE_bool_(death_test_use_fork);
 GTEST_DECLARE_string_(filter);
 GTEST_DECLARE_bool_(list_tests);
 GTEST_DECLARE_string_(output);
@@ -100,6 +101,7 @@ class GTestFlagSaver {
     catch_exceptions_ = GTEST_FLAG(catch_exceptions);
     color_ = GTEST_FLAG(color);
     death_test_style_ = GTEST_FLAG(death_test_style);
+    death_test_use_fork_ = GTEST_FLAG(death_test_use_fork);
     filter_ = GTEST_FLAG(filter);
     internal_run_death_test_ = GTEST_FLAG(internal_run_death_test);
     list_tests_ = GTEST_FLAG(list_tests);
@@ -114,6 +116,7 @@ class GTestFlagSaver {
     GTEST_FLAG(catch_exceptions) = catch_exceptions_;
     GTEST_FLAG(color) = color_;
     GTEST_FLAG(death_test_style) = death_test_style_;
+    GTEST_FLAG(death_test_use_fork) = death_test_use_fork_;
     GTEST_FLAG(filter) = filter_;
     GTEST_FLAG(internal_run_death_test) = internal_run_death_test_;
     GTEST_FLAG(list_tests) = list_tests_;
@@ -127,6 +130,7 @@ class GTestFlagSaver {
   bool catch_exceptions_;
   String color_;
   String death_test_style_;
+  bool death_test_use_fork_;
   String filter_;
   String internal_run_death_test_;
   bool list_tests_;

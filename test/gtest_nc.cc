@@ -181,6 +181,47 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, testing::Types<int>);
 // Wrong name prefix: "My" has been used.
 INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, testing::Types<double>);
 
+#elif defined(TEST_STATIC_ASSERT_TYPE_EQ_IS_NOT_A_TYPE)
+
+#include <gtest/gtest.h>
+
+// Tests that StaticAssertTypeEq<T1, T2> cannot be used as a type.
+testing::StaticAssertTypeEq<int, int> dummy;
+
+#elif defined(TEST_STATIC_ASSERT_TYPE_EQ_WORKS_IN_NAMESPACE)
+
+#include <gtest/gtest.h>
+
+// Tests that StaticAssertTypeEq<T1, T2> works in a namespace scope.
+static bool dummy = testing::StaticAssertTypeEq<int, const int>();
+
+#elif defined(TEST_STATIC_ASSERT_TYPE_EQ_WORKS_IN_CLASS)
+
+#include <gtest/gtest.h>
+
+template <typename T>
+class Helper {
+ public:
+  // Tests that StaticAssertTypeEq<T1, T2> works in a class.
+  Helper() { testing::StaticAssertTypeEq<int, T>(); }
+
+  void DoSomething() {}
+};
+
+void Test() {
+  Helper<bool> h;
+  h.DoSomething();  // To avoid the "unused variable" warning.
+}
+
+#elif defined(TEST_STATIC_ASSERT_TYPE_EQ_WORKS_IN_FUNCTION)
+
+#include <gtest/gtest.h>
+
+void Test() {
+  // Tests that StaticAssertTypeEq<T1, T2> works inside a function.
+  testing::StaticAssertTypeEq<const int, int>();
+}
+
 #else
 // A sanity test.  This should compile.
 

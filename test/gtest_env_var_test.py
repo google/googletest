@@ -109,6 +109,7 @@ def TestEnvVarAffectsFlag(command):
   if IS_LINUX:
     TestFlag(command, 'stack_trace_depth', '0', '100')
     TestFlag(command, 'death_test_style', 'thread-safe', 'fast')
+    TestFlag(command, 'death_test_use_fork', '1', '0')
 
 
 if IS_WINDOWS:

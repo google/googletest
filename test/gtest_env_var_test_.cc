@@ -71,6 +71,11 @@ void PrintFlag(const char* flag) {
     return;
   }
 
+  if (strcmp(flag, "death_test_use_fork") == 0) {
+    cout << GTEST_FLAG(death_test_use_fork);
+    return;
+  }
+
   if (strcmp(flag, "filter") == 0) {
     cout << GTEST_FLAG(filter);
     return;

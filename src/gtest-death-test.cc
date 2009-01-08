@@ -68,6 +68,17 @@ GTEST_DEFINE_string_(
     "\"fast\" (child process runs the death test immediately "
     "after forking).");
 
+GTEST_DEFINE_bool_(
+    death_test_use_fork,
+    internal::BoolFromGTestEnv("death_test_use_fork", false),
+    "Instructs to use fork()/_exit() instead of clone() in death tests. "
+    "Useful when running under valgrind or similar tools if those "
+    "do not support clone(). Valgrind 3.3.1 will just fail if "
+    "it sees an unsupported combination of clone() flags. "
+    "It is not recommended to use this flag w/o valgrind though it will "
+    "work in 99% of the cases. Once valgrind is fixed, this flag will "
+    "most likely be removed.");
+
 namespace internal {
 GTEST_DEFINE_string_(
     internal_run_death_test, "",
@@ -603,8 +614,18 @@ static pid_t ExecDeathTestFork(char* const* argv, int close_fd) {
   void* const stack_top =
       static_cast<char*>(stack) + (stack_grows_down ? stack_size : 0);
   ExecDeathTestArgs args = { argv, close_fd };
-  const pid_t child_pid = clone(&ExecDeathTestChildMain, stack_top,
-                                SIGCHLD, &args);
+  pid_t child_pid;
+  if (GTEST_FLAG(death_test_use_fork)) {
+    // Valgrind-friendly version. As of valgrind 3.3.1 the clone() call below
+    // is not supported (valgrind will fail with an error message).
+    if ((child_pid = fork()) == 0) {
+      ExecDeathTestChildMain(&args);
+      _exit(0);
+    }
+  } else {
+    child_pid = clone(&ExecDeathTestChildMain, stack_top,
+                      SIGCHLD, &args);
+  }
   GTEST_DEATH_TEST_CHECK_(child_pid != -1);
   GTEST_DEATH_TEST_CHECK_(munmap(stack, stack_size) != -1);
   return child_pid;
