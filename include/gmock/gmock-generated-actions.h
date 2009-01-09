@@ -971,6 +971,126 @@ class DoBothAction {
   Action2 action2_;
 };
 
+// A macro from the ACTION* family (defined later in this file)
+// defines an action that can be used in a mock function.  Typically,
+// these actions only care about a subset of the arguments of the mock
+// function.  For example, if such an action only uses the second
+// argument, it can be used in any mock function that takes >= 2
+// arguments where the type of the second argument is compatible.
+//
+// Therefore, the action implementation must be prepared to take more
+// arguments than it needs.  The ExcessiveArg type is used to
+// represent those excessive arguments.  In order to keep the compiler
+// error messages tractable, we define it in the testing namespace
+// instead of testing::internal.  However, this is an INTERNAL TYPE
+// and subject to change without notice, so a user MUST NOT USE THIS
+// TYPE DIRECTLY.
+struct ExcessiveArg {};
+
+// A helper class needed for implementing the ACTION* macros.
+template <typename Result, class Impl>
+class ActionHelper {
+ public:
+  static Result Perform(Impl* impl, const ::std::tr1::tuple<>& args) {
+    using ::std::tr1::get;
+    return impl->gmock_PerformImpl(args, ExcessiveArg(), ExcessiveArg(),
+        ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg(),
+        ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg());
+  }
+
+  template <typename A0>
+  static Result Perform(Impl* impl, const ::std::tr1::tuple<A0>& args) {
+    using ::std::tr1::get;
+    return impl->gmock_PerformImpl(args, get<0>(args), ExcessiveArg(),
+        ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg(),
+        ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg());
+  }
+
+  template <typename A0, typename A1>
+  static Result Perform(Impl* impl, const ::std::tr1::tuple<A0, A1>& args) {
+    using ::std::tr1::get;
+    return impl->gmock_PerformImpl(args, get<0>(args), get<1>(args),
+        ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg(),
+        ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg());
+  }
+
+  template <typename A0, typename A1, typename A2>
+  static Result Perform(Impl* impl, const ::std::tr1::tuple<A0, A1, A2>& args) {
+    using ::std::tr1::get;
+    return impl->gmock_PerformImpl(args, get<0>(args), get<1>(args),
+        get<2>(args), ExcessiveArg(), ExcessiveArg(), ExcessiveArg(),
+        ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg());
+  }
+
+  template <typename A0, typename A1, typename A2, typename A3>
+  static Result Perform(Impl* impl, const ::std::tr1::tuple<A0, A1, A2,
+      A3>& args) {
+    using ::std::tr1::get;
+    return impl->gmock_PerformImpl(args, get<0>(args), get<1>(args),
+        get<2>(args), get<3>(args), ExcessiveArg(), ExcessiveArg(),
+        ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg());
+  }
+
+  template <typename A0, typename A1, typename A2, typename A3, typename A4>
+  static Result Perform(Impl* impl, const ::std::tr1::tuple<A0, A1, A2, A3,
+      A4>& args) {
+    using ::std::tr1::get;
+    return impl->gmock_PerformImpl(args, get<0>(args), get<1>(args),
+        get<2>(args), get<3>(args), get<4>(args), ExcessiveArg(),
+        ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg());
+  }
+
+  template <typename A0, typename A1, typename A2, typename A3, typename A4,
+      typename A5>
+  static Result Perform(Impl* impl, const ::std::tr1::tuple<A0, A1, A2, A3, A4,
+      A5>& args) {
+    using ::std::tr1::get;
+    return impl->gmock_PerformImpl(args, get<0>(args), get<1>(args),
+        get<2>(args), get<3>(args), get<4>(args), get<5>(args), ExcessiveArg(),
+        ExcessiveArg(), ExcessiveArg(), ExcessiveArg());
+  }
+
+  template <typename A0, typename A1, typename A2, typename A3, typename A4,
+      typename A5, typename A6>
+  static Result Perform(Impl* impl, const ::std::tr1::tuple<A0, A1, A2, A3, A4,
+      A5, A6>& args) {
+    using ::std::tr1::get;
+    return impl->gmock_PerformImpl(args, get<0>(args), get<1>(args),
+        get<2>(args), get<3>(args), get<4>(args), get<5>(args), get<6>(args),
+        ExcessiveArg(), ExcessiveArg(), ExcessiveArg());
+  }
+
+  template <typename A0, typename A1, typename A2, typename A3, typename A4,
+      typename A5, typename A6, typename A7>
+  static Result Perform(Impl* impl, const ::std::tr1::tuple<A0, A1, A2, A3, A4,
+      A5, A6, A7>& args) {
+    using ::std::tr1::get;
+    return impl->gmock_PerformImpl(args, get<0>(args), get<1>(args),
+        get<2>(args), get<3>(args), get<4>(args), get<5>(args), get<6>(args),
+        get<7>(args), ExcessiveArg(), ExcessiveArg());
+  }
+
+  template <typename A0, typename A1, typename A2, typename A3, typename A4,
+      typename A5, typename A6, typename A7, typename A8>
+  static Result Perform(Impl* impl, const ::std::tr1::tuple<A0, A1, A2, A3, A4,
+      A5, A6, A7, A8>& args) {
+    using ::std::tr1::get;
+    return impl->gmock_PerformImpl(args, get<0>(args), get<1>(args),
+        get<2>(args), get<3>(args), get<4>(args), get<5>(args), get<6>(args),
+        get<7>(args), get<8>(args), ExcessiveArg());
+  }
+
+  template <typename A0, typename A1, typename A2, typename A3, typename A4,
+      typename A5, typename A6, typename A7, typename A8, typename A9>
+  static Result Perform(Impl* impl, const ::std::tr1::tuple<A0, A1, A2, A3, A4,
+      A5, A6, A7, A8, A9>& args) {
+    using ::std::tr1::get;
+    return impl->gmock_PerformImpl(args, get<0>(args), get<1>(args),
+        get<2>(args), get<3>(args), get<4>(args), get<5>(args), get<6>(args),
+        get<7>(args), get<8>(args), get<9>(args));
+  }
+};
+
 }  // namespace internal
 
 // Various overloads for Invoke().
@@ -1325,5 +1445,857 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
 }
 
 }  // namespace testing
+
+// The ACTION* family of macros can be used in a namespace scope to
+// define custom actions easily.  The syntax:
+//
+//   ACTION(name) { statements; }
+//
+// will define an action with the given name that executes the
+// statements.  The value returned by the statements will be used as
+// the return value of the action.  Inside the statements, you can
+// refer to the K-th (0-based) argument of the mock function by
+// 'argK', and refer to its type by 'argK_type'.  For example:
+//
+//   ACTION(IncrementArg1) {
+//     arg1_type temp = arg1;
+//     return ++(*temp);
+//   }
+//
+// allows you to write
+//
+//   ...WillOnce(IncrementArg1());
+//
+// You can also refer to the entire argument tuple and its type by
+// 'args' and 'args_type', and refer to the mock function type and its
+// return type by 'function_type' and 'return_type'.
+//
+// Note that you don't need to specify the types of the mock function
+// arguments.  However rest assured that your code is still type-safe:
+// you'll get a compiler error if *arg1 doesn't support the ++
+// operator, or if the type of ++(*arg1) isn't compatible with the
+// mock function's return type, for example.
+//
+// Sometimes you'll want to parameterize the action.   For that you can use
+// another macro:
+//
+//   ACTION_P(name, param_name) { statements; }
+//
+// For example:
+//
+//   ACTION_P(Add, n) { return arg0 + n; }
+//
+// will allow you to write:
+//
+//   ...WillOnce(Add(5));
+//
+// Note that you don't need to provide the type of the parameter
+// either.  If you need to reference the type of a parameter named
+// 'foo', you can write 'foo_type'.  For example, in the body of
+// ACTION_P(Add, n) above, you can write 'n_type' to refer to the type
+// of 'n'.
+//
+// We also provide ACTION_P2, ACTION_P3, ..., up to ACTION_P10 to support
+// multi-parameter actions.
+//
+// For the purpose of typing, you can view
+//
+//   ACTION_Pk(Foo, p1, ..., pk) { ... }
+//
+// as shorthand for
+//
+//   template <typename p1_type, ..., typename pk_type>
+//   FooActionPk<p1_type, ..., pk_type> Foo(p1_type p1, ..., pk_type pk) { ... }
+//
+// In particular, you can provide the template type arguments
+// explicitly when invoking Foo(), as in Foo<long, bool>(5, false);
+// although usually you can rely on the compiler to infer the types
+// for you automatically.  You can assign the result of expression
+// Foo(p1, ..., pk) to a variable of type FooActionPk<p1_type, ...,
+// pk_type>.  This can be useful when composing actions.
+//
+// You can also overload actions with different numbers of parameters:
+//
+//   ACTION_P(Plus, a) { ... }
+//   ACTION_P2(Plus, a, b) { ... }
+//
+// While it's tempting to always use the ACTION* macros when defining
+// a new action, you should also consider implementing ActionInterface
+// or using MakePolymorphicAction() instead, especially if you need to
+// use the action a lot.  While these approaches require more work,
+// they give you more control on the types of the mock function
+// arguments and the action parameters, which in general leads to
+// better compiler error messages that pay off in the long run.  They
+// also allow overloading actions based on parameter types (as opposed
+// to just based on the number of parameters).
+//
+// CAVEAT:
+//
+// ACTION*() can only be used in a namespace scope.  The reason is
+// that C++ doesn't yet allow function-local types to be used to
+// instantiate templates.  The up-coming C++0x standard will fix this.
+// Once that's done, we'll consider supporting using ACTION*() inside
+// a function.
+//
+// MORE INFORMATION:
+//
+// To learn more about using these macros, please search for 'ACTION'
+// on http://code.google.com/p/googlemock/wiki/CookBook.
+
+#define ACTION(name)\
+  class name##Action {\
+   public:\
+    name##Action() {}\
+    template <typename F>\
+    class gmock_Impl : public ::testing::ActionInterface<F> {\
+     public:\
+      typedef F function_type;\
+      typedef typename ::testing::internal::Function<F>::Result return_type;\
+      typedef typename ::testing::internal::Function<F>::ArgumentTuple\
+          args_type;\
+      gmock_Impl() {}\
+      virtual return_type Perform(const args_type& args) {\
+        return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
+            Perform(this, args);\
+      }\
+      template <typename arg0_type, typename arg1_type, typename arg2_type, \
+          typename arg3_type, typename arg4_type, typename arg5_type, \
+          typename arg6_type, typename arg7_type, typename arg8_type, \
+          typename arg9_type>\
+      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
+          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
+          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
+          arg9_type arg9) const;\
+    };\
+    template <typename F> operator ::testing::Action<F>() const {\
+      return ::testing::Action<F>(new gmock_Impl<F>());\
+    }\
+  };\
+  inline name##Action name() {\
+    return name##Action();\
+  }\
+  template <typename F>\
+  template <typename arg0_type, typename arg1_type, typename arg2_type, \
+      typename arg3_type, typename arg4_type, typename arg5_type, \
+      typename arg6_type, typename arg7_type, typename arg8_type, \
+      typename arg9_type>\
+  typename ::testing::internal::Function<F>::Result\
+      name##Action::\
+          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, \
+              arg0_type arg0, arg1_type arg1, arg2_type arg2, arg3_type arg3, \
+              arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
+              arg8_type arg8, arg9_type arg9) const
+
+#define ACTION_P(name, p0)\
+  template <typename p0##_type>\
+  class name##ActionP {\
+   public:\
+    name##ActionP(p0##_type gmock_p0) : p0(gmock_p0) {}\
+    template <typename F>\
+    class gmock_Impl : public ::testing::ActionInterface<F> {\
+     public:\
+      typedef F function_type;\
+      typedef typename ::testing::internal::Function<F>::Result return_type;\
+      typedef typename ::testing::internal::Function<F>::ArgumentTuple\
+          args_type;\
+      explicit gmock_Impl(p0##_type gmock_p0) : p0(gmock_p0) {}\
+      virtual return_type Perform(const args_type& args) {\
+        return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
+            Perform(this, args);\
+      }\
+      template <typename arg0_type, typename arg1_type, typename arg2_type, \
+          typename arg3_type, typename arg4_type, typename arg5_type, \
+          typename arg6_type, typename arg7_type, typename arg8_type, \
+          typename arg9_type>\
+      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
+          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
+          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
+          arg9_type arg9) const;\
+      const p0##_type p0;\
+    };\
+    template <typename F> operator ::testing::Action<F>() const {\
+      return ::testing::Action<F>(new gmock_Impl<F>(p0));\
+    }\
+    const p0##_type p0;\
+  };\
+  template <typename p0##_type>\
+  inline name##ActionP<p0##_type> name(p0##_type p0) {\
+    return name##ActionP<p0##_type>(p0);\
+  }\
+  template <typename p0##_type>\
+  template <typename F>\
+  template <typename arg0_type, typename arg1_type, typename arg2_type, \
+      typename arg3_type, typename arg4_type, typename arg5_type, \
+      typename arg6_type, typename arg7_type, typename arg8_type, \
+      typename arg9_type>\
+  typename ::testing::internal::Function<F>::Result\
+      name##ActionP<p0##_type>::\
+          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, \
+              arg0_type arg0, arg1_type arg1, arg2_type arg2, arg3_type arg3, \
+              arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
+              arg8_type arg8, arg9_type arg9) const
+
+#define ACTION_P2(name, p0, p1)\
+  template <typename p0##_type, typename p1##_type>\
+  class name##ActionP2 {\
+   public:\
+    name##ActionP2(p0##_type gmock_p0, p1##_type gmock_p1) : p0(gmock_p0), \
+        p1(gmock_p1) {}\
+    template <typename F>\
+    class gmock_Impl : public ::testing::ActionInterface<F> {\
+     public:\
+      typedef F function_type;\
+      typedef typename ::testing::internal::Function<F>::Result return_type;\
+      typedef typename ::testing::internal::Function<F>::ArgumentTuple\
+          args_type;\
+      gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1) : p0(gmock_p0), \
+          p1(gmock_p1) {}\
+      virtual return_type Perform(const args_type& args) {\
+        return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
+            Perform(this, args);\
+      }\
+      template <typename arg0_type, typename arg1_type, typename arg2_type, \
+          typename arg3_type, typename arg4_type, typename arg5_type, \
+          typename arg6_type, typename arg7_type, typename arg8_type, \
+          typename arg9_type>\
+      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
+          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
+          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
+          arg9_type arg9) const;\
+      const p0##_type p0;\
+      const p1##_type p1;\
+    };\
+    template <typename F> operator ::testing::Action<F>() const {\
+      return ::testing::Action<F>(new gmock_Impl<F>(p0, p1));\
+    }\
+    const p0##_type p0;\
+    const p1##_type p1;\
+  };\
+  template <typename p0##_type, typename p1##_type>\
+  inline name##ActionP2<p0##_type, p1##_type> name(p0##_type p0, \
+      p1##_type p1) {\
+    return name##ActionP2<p0##_type, p1##_type>(p0, p1);\
+  }\
+  template <typename p0##_type, typename p1##_type>\
+  template <typename F>\
+  template <typename arg0_type, typename arg1_type, typename arg2_type, \
+      typename arg3_type, typename arg4_type, typename arg5_type, \
+      typename arg6_type, typename arg7_type, typename arg8_type, \
+      typename arg9_type>\
+  typename ::testing::internal::Function<F>::Result\
+      name##ActionP2<p0##_type, p1##_type>::\
+          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, \
+              arg0_type arg0, arg1_type arg1, arg2_type arg2, arg3_type arg3, \
+              arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
+              arg8_type arg8, arg9_type arg9) const
+
+#define ACTION_P3(name, p0, p1, p2)\
+  template <typename p0##_type, typename p1##_type, typename p2##_type>\
+  class name##ActionP3 {\
+   public:\
+    name##ActionP3(p0##_type gmock_p0, p1##_type gmock_p1, \
+        p2##_type gmock_p2) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2) {}\
+    template <typename F>\
+    class gmock_Impl : public ::testing::ActionInterface<F> {\
+     public:\
+      typedef F function_type;\
+      typedef typename ::testing::internal::Function<F>::Result return_type;\
+      typedef typename ::testing::internal::Function<F>::ArgumentTuple\
+          args_type;\
+      gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, \
+          p2##_type gmock_p2) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2) {}\
+      virtual return_type Perform(const args_type& args) {\
+        return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
+            Perform(this, args);\
+      }\
+      template <typename arg0_type, typename arg1_type, typename arg2_type, \
+          typename arg3_type, typename arg4_type, typename arg5_type, \
+          typename arg6_type, typename arg7_type, typename arg8_type, \
+          typename arg9_type>\
+      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
+          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
+          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
+          arg9_type arg9) const;\
+      const p0##_type p0;\
+      const p1##_type p1;\
+      const p2##_type p2;\
+    };\
+    template <typename F> operator ::testing::Action<F>() const {\
+      return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2));\
+    }\
+    const p0##_type p0;\
+    const p1##_type p1;\
+    const p2##_type p2;\
+  };\
+  template <typename p0##_type, typename p1##_type, typename p2##_type>\
+  inline name##ActionP3<p0##_type, p1##_type, p2##_type> name(p0##_type p0, \
+      p1##_type p1, p2##_type p2) {\
+    return name##ActionP3<p0##_type, p1##_type, p2##_type>(p0, p1, p2);\
+  }\
+  template <typename p0##_type, typename p1##_type, typename p2##_type>\
+  template <typename F>\
+  template <typename arg0_type, typename arg1_type, typename arg2_type, \
+      typename arg3_type, typename arg4_type, typename arg5_type, \
+      typename arg6_type, typename arg7_type, typename arg8_type, \
+      typename arg9_type>\
+  typename ::testing::internal::Function<F>::Result\
+      name##ActionP3<p0##_type, p1##_type, p2##_type>::\
+          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, \
+              arg0_type arg0, arg1_type arg1, arg2_type arg2, arg3_type arg3, \
+              arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
+              arg8_type arg8, arg9_type arg9) const
+
+#define ACTION_P4(name, p0, p1, p2, p3)\
+  template <typename p0##_type, typename p1##_type, typename p2##_type, \
+      typename p3##_type>\
+  class name##ActionP4 {\
+   public:\
+    name##ActionP4(p0##_type gmock_p0, p1##_type gmock_p1, \
+        p2##_type gmock_p2, p3##_type gmock_p3) : p0(gmock_p0), p1(gmock_p1), \
+        p2(gmock_p2), p3(gmock_p3) {}\
+    template <typename F>\
+    class gmock_Impl : public ::testing::ActionInterface<F> {\
+     public:\
+      typedef F function_type;\
+      typedef typename ::testing::internal::Function<F>::Result return_type;\
+      typedef typename ::testing::internal::Function<F>::ArgumentTuple\
+          args_type;\
+      gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
+          p3##_type gmock_p3) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), \
+          p3(gmock_p3) {}\
+      virtual return_type Perform(const args_type& args) {\
+        return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
+            Perform(this, args);\
+      }\
+      template <typename arg0_type, typename arg1_type, typename arg2_type, \
+          typename arg3_type, typename arg4_type, typename arg5_type, \
+          typename arg6_type, typename arg7_type, typename arg8_type, \
+          typename arg9_type>\
+      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
+          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
+          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
+          arg9_type arg9) const;\
+      const p0##_type p0;\
+      const p1##_type p1;\
+      const p2##_type p2;\
+      const p3##_type p3;\
+    };\
+    template <typename F> operator ::testing::Action<F>() const {\
+      return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3));\
+    }\
+    const p0##_type p0;\
+    const p1##_type p1;\
+    const p2##_type p2;\
+    const p3##_type p3;\
+  };\
+  template <typename p0##_type, typename p1##_type, typename p2##_type, \
+      typename p3##_type>\
+  inline name##ActionP4<p0##_type, p1##_type, p2##_type, \
+      p3##_type> name(p0##_type p0, p1##_type p1, p2##_type p2, \
+      p3##_type p3) {\
+    return name##ActionP4<p0##_type, p1##_type, p2##_type, p3##_type>(p0, p1, \
+        p2, p3);\
+  }\
+  template <typename p0##_type, typename p1##_type, typename p2##_type, \
+      typename p3##_type>\
+  template <typename F>\
+  template <typename arg0_type, typename arg1_type, typename arg2_type, \
+      typename arg3_type, typename arg4_type, typename arg5_type, \
+      typename arg6_type, typename arg7_type, typename arg8_type, \
+      typename arg9_type>\
+  typename ::testing::internal::Function<F>::Result\
+      name##ActionP4<p0##_type, p1##_type, p2##_type, p3##_type>::\
+          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, \
+              arg0_type arg0, arg1_type arg1, arg2_type arg2, arg3_type arg3, \
+              arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
+              arg8_type arg8, arg9_type arg9) const
+
+#define ACTION_P5(name, p0, p1, p2, p3, p4)\
+  template <typename p0##_type, typename p1##_type, typename p2##_type, \
+      typename p3##_type, typename p4##_type>\
+  class name##ActionP5 {\
+   public:\
+    name##ActionP5(p0##_type gmock_p0, p1##_type gmock_p1, \
+        p2##_type gmock_p2, p3##_type gmock_p3, \
+        p4##_type gmock_p4) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), \
+        p3(gmock_p3), p4(gmock_p4) {}\
+    template <typename F>\
+    class gmock_Impl : public ::testing::ActionInterface<F> {\
+     public:\
+      typedef F function_type;\
+      typedef typename ::testing::internal::Function<F>::Result return_type;\
+      typedef typename ::testing::internal::Function<F>::ArgumentTuple\
+          args_type;\
+      gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
+          p3##_type gmock_p3, p4##_type gmock_p4) : p0(gmock_p0), \
+          p1(gmock_p1), p2(gmock_p2), p3(gmock_p3), p4(gmock_p4) {}\
+      virtual return_type Perform(const args_type& args) {\
+        return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
+            Perform(this, args);\
+      }\
+      template <typename arg0_type, typename arg1_type, typename arg2_type, \
+          typename arg3_type, typename arg4_type, typename arg5_type, \
+          typename arg6_type, typename arg7_type, typename arg8_type, \
+          typename arg9_type>\
+      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
+          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
+          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
+          arg9_type arg9) const;\
+      const p0##_type p0;\
+      const p1##_type p1;\
+      const p2##_type p2;\
+      const p3##_type p3;\
+      const p4##_type p4;\
+    };\
+    template <typename F> operator ::testing::Action<F>() const {\
+      return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4));\
+    }\
+    const p0##_type p0;\
+    const p1##_type p1;\
+    const p2##_type p2;\
+    const p3##_type p3;\
+    const p4##_type p4;\
+  };\
+  template <typename p0##_type, typename p1##_type, typename p2##_type, \
+      typename p3##_type, typename p4##_type>\
+  inline name##ActionP5<p0##_type, p1##_type, p2##_type, p3##_type, \
+      p4##_type> name(p0##_type p0, p1##_type p1, p2##_type p2, p3##_type p3, \
+      p4##_type p4) {\
+    return name##ActionP5<p0##_type, p1##_type, p2##_type, p3##_type, \
+        p4##_type>(p0, p1, p2, p3, p4);\
+  }\
+  template <typename p0##_type, typename p1##_type, typename p2##_type, \
+      typename p3##_type, typename p4##_type>\
+  template <typename F>\
+  template <typename arg0_type, typename arg1_type, typename arg2_type, \
+      typename arg3_type, typename arg4_type, typename arg5_type, \
+      typename arg6_type, typename arg7_type, typename arg8_type, \
+      typename arg9_type>\
+  typename ::testing::internal::Function<F>::Result\
+      name##ActionP5<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type>::\
+          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, \
+              arg0_type arg0, arg1_type arg1, arg2_type arg2, arg3_type arg3, \
+              arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
+              arg8_type arg8, arg9_type arg9) const
+
+#define ACTION_P6(name, p0, p1, p2, p3, p4, p5)\
+  template <typename p0##_type, typename p1##_type, typename p2##_type, \
+      typename p3##_type, typename p4##_type, typename p5##_type>\
+  class name##ActionP6 {\
+   public:\
+    name##ActionP6(p0##_type gmock_p0, p1##_type gmock_p1, \
+        p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
+        p5##_type gmock_p5) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), \
+        p3(gmock_p3), p4(gmock_p4), p5(gmock_p5) {}\
+    template <typename F>\
+    class gmock_Impl : public ::testing::ActionInterface<F> {\
+     public:\
+      typedef F function_type;\
+      typedef typename ::testing::internal::Function<F>::Result return_type;\
+      typedef typename ::testing::internal::Function<F>::ArgumentTuple\
+          args_type;\
+      gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
+          p3##_type gmock_p3, p4##_type gmock_p4, \
+          p5##_type gmock_p5) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), \
+          p3(gmock_p3), p4(gmock_p4), p5(gmock_p5) {}\
+      virtual return_type Perform(const args_type& args) {\
+        return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
+            Perform(this, args);\
+      }\
+      template <typename arg0_type, typename arg1_type, typename arg2_type, \
+          typename arg3_type, typename arg4_type, typename arg5_type, \
+          typename arg6_type, typename arg7_type, typename arg8_type, \
+          typename arg9_type>\
+      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
+          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
+          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
+          arg9_type arg9) const;\
+      const p0##_type p0;\
+      const p1##_type p1;\
+      const p2##_type p2;\
+      const p3##_type p3;\
+      const p4##_type p4;\
+      const p5##_type p5;\
+    };\
+    template <typename F> operator ::testing::Action<F>() const {\
+      return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4, p5));\
+    }\
+    const p0##_type p0;\
+    const p1##_type p1;\
+    const p2##_type p2;\
+    const p3##_type p3;\
+    const p4##_type p4;\
+    const p5##_type p5;\
+  };\
+  template <typename p0##_type, typename p1##_type, typename p2##_type, \
+      typename p3##_type, typename p4##_type, typename p5##_type>\
+  inline name##ActionP6<p0##_type, p1##_type, p2##_type, p3##_type, \
+      p4##_type, p5##_type> name(p0##_type p0, p1##_type p1, p2##_type p2, \
+      p3##_type p3, p4##_type p4, p5##_type p5) {\
+    return name##ActionP6<p0##_type, p1##_type, p2##_type, p3##_type, \
+        p4##_type, p5##_type>(p0, p1, p2, p3, p4, p5);\
+  }\
+  template <typename p0##_type, typename p1##_type, typename p2##_type, \
+      typename p3##_type, typename p4##_type, typename p5##_type>\
+  template <typename F>\
+  template <typename arg0_type, typename arg1_type, typename arg2_type, \
+      typename arg3_type, typename arg4_type, typename arg5_type, \
+      typename arg6_type, typename arg7_type, typename arg8_type, \
+      typename arg9_type>\
+  typename ::testing::internal::Function<F>::Result\
+      name##ActionP6<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
+          p5##_type>::\
+          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, \
+              arg0_type arg0, arg1_type arg1, arg2_type arg2, arg3_type arg3, \
+              arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
+              arg8_type arg8, arg9_type arg9) const
+
+#define ACTION_P7(name, p0, p1, p2, p3, p4, p5, p6)\
+  template <typename p0##_type, typename p1##_type, typename p2##_type, \
+      typename p3##_type, typename p4##_type, typename p5##_type, \
+      typename p6##_type>\
+  class name##ActionP7 {\
+   public:\
+    name##ActionP7(p0##_type gmock_p0, p1##_type gmock_p1, \
+        p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
+        p5##_type gmock_p5, p6##_type gmock_p6) : p0(gmock_p0), p1(gmock_p1), \
+        p2(gmock_p2), p3(gmock_p3), p4(gmock_p4), p5(gmock_p5), \
+        p6(gmock_p6) {}\
+    template <typename F>\
+    class gmock_Impl : public ::testing::ActionInterface<F> {\
+     public:\
+      typedef F function_type;\
+      typedef typename ::testing::internal::Function<F>::Result return_type;\
+      typedef typename ::testing::internal::Function<F>::ArgumentTuple\
+          args_type;\
+      gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
+          p3##_type gmock_p3, p4##_type gmock_p4, p5##_type gmock_p5, \
+          p6##_type gmock_p6) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), \
+          p3(gmock_p3), p4(gmock_p4), p5(gmock_p5), p6(gmock_p6) {}\
+      virtual return_type Perform(const args_type& args) {\
+        return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
+            Perform(this, args);\
+      }\
+      template <typename arg0_type, typename arg1_type, typename arg2_type, \
+          typename arg3_type, typename arg4_type, typename arg5_type, \
+          typename arg6_type, typename arg7_type, typename arg8_type, \
+          typename arg9_type>\
+      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
+          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
+          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
+          arg9_type arg9) const;\
+      const p0##_type p0;\
+      const p1##_type p1;\
+      const p2##_type p2;\
+      const p3##_type p3;\
+      const p4##_type p4;\
+      const p5##_type p5;\
+      const p6##_type p6;\
+    };\
+    template <typename F> operator ::testing::Action<F>() const {\
+      return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4, p5, \
+          p6));\
+    }\
+    const p0##_type p0;\
+    const p1##_type p1;\
+    const p2##_type p2;\
+    const p3##_type p3;\
+    const p4##_type p4;\
+    const p5##_type p5;\
+    const p6##_type p6;\
+  };\
+  template <typename p0##_type, typename p1##_type, typename p2##_type, \
+      typename p3##_type, typename p4##_type, typename p5##_type, \
+      typename p6##_type>\
+  inline name##ActionP7<p0##_type, p1##_type, p2##_type, p3##_type, \
+      p4##_type, p5##_type, p6##_type> name(p0##_type p0, p1##_type p1, \
+      p2##_type p2, p3##_type p3, p4##_type p4, p5##_type p5, \
+      p6##_type p6) {\
+    return name##ActionP7<p0##_type, p1##_type, p2##_type, p3##_type, \
+        p4##_type, p5##_type, p6##_type>(p0, p1, p2, p3, p4, p5, p6);\
+  }\
+  template <typename p0##_type, typename p1##_type, typename p2##_type, \
+      typename p3##_type, typename p4##_type, typename p5##_type, \
+      typename p6##_type>\
+  template <typename F>\
+  template <typename arg0_type, typename arg1_type, typename arg2_type, \
+      typename arg3_type, typename arg4_type, typename arg5_type, \
+      typename arg6_type, typename arg7_type, typename arg8_type, \
+      typename arg9_type>\
+  typename ::testing::internal::Function<F>::Result\
+      name##ActionP7<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
+          p5##_type, p6##_type>::\
+          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, \
+              arg0_type arg0, arg1_type arg1, arg2_type arg2, arg3_type arg3, \
+              arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
+              arg8_type arg8, arg9_type arg9) const
+
+#define ACTION_P8(name, p0, p1, p2, p3, p4, p5, p6, p7)\
+  template <typename p0##_type, typename p1##_type, typename p2##_type, \
+      typename p3##_type, typename p4##_type, typename p5##_type, \
+      typename p6##_type, typename p7##_type>\
+  class name##ActionP8 {\
+   public:\
+    name##ActionP8(p0##_type gmock_p0, p1##_type gmock_p1, \
+        p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
+        p5##_type gmock_p5, p6##_type gmock_p6, \
+        p7##_type gmock_p7) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), \
+        p3(gmock_p3), p4(gmock_p4), p5(gmock_p5), p6(gmock_p6), \
+        p7(gmock_p7) {}\
+    template <typename F>\
+    class gmock_Impl : public ::testing::ActionInterface<F> {\
+     public:\
+      typedef F function_type;\
+      typedef typename ::testing::internal::Function<F>::Result return_type;\
+      typedef typename ::testing::internal::Function<F>::ArgumentTuple\
+          args_type;\
+      gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
+          p3##_type gmock_p3, p4##_type gmock_p4, p5##_type gmock_p5, \
+          p6##_type gmock_p6, p7##_type gmock_p7) : p0(gmock_p0), \
+          p1(gmock_p1), p2(gmock_p2), p3(gmock_p3), p4(gmock_p4), \
+          p5(gmock_p5), p6(gmock_p6), p7(gmock_p7) {}\
+      virtual return_type Perform(const args_type& args) {\
+        return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
+            Perform(this, args);\
+      }\
+      template <typename arg0_type, typename arg1_type, typename arg2_type, \
+          typename arg3_type, typename arg4_type, typename arg5_type, \
+          typename arg6_type, typename arg7_type, typename arg8_type, \
+          typename arg9_type>\
+      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
+          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
+          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
+          arg9_type arg9) const;\
+      const p0##_type p0;\
+      const p1##_type p1;\
+      const p2##_type p2;\
+      const p3##_type p3;\
+      const p4##_type p4;\
+      const p5##_type p5;\
+      const p6##_type p6;\
+      const p7##_type p7;\
+    };\
+    template <typename F> operator ::testing::Action<F>() const {\
+      return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4, p5, \
+          p6, p7));\
+    }\
+    const p0##_type p0;\
+    const p1##_type p1;\
+    const p2##_type p2;\
+    const p3##_type p3;\
+    const p4##_type p4;\
+    const p5##_type p5;\
+    const p6##_type p6;\
+    const p7##_type p7;\
+  };\
+  template <typename p0##_type, typename p1##_type, typename p2##_type, \
+      typename p3##_type, typename p4##_type, typename p5##_type, \
+      typename p6##_type, typename p7##_type>\
+  inline name##ActionP8<p0##_type, p1##_type, p2##_type, p3##_type, \
+      p4##_type, p5##_type, p6##_type, p7##_type> name(p0##_type p0, \
+      p1##_type p1, p2##_type p2, p3##_type p3, p4##_type p4, p5##_type p5, \
+      p6##_type p6, p7##_type p7) {\
+    return name##ActionP8<p0##_type, p1##_type, p2##_type, p3##_type, \
+        p4##_type, p5##_type, p6##_type, p7##_type>(p0, p1, p2, p3, p4, p5, \
+        p6, p7);\
+  }\
+  template <typename p0##_type, typename p1##_type, typename p2##_type, \
+      typename p3##_type, typename p4##_type, typename p5##_type, \
+      typename p6##_type, typename p7##_type>\
+  template <typename F>\
+  template <typename arg0_type, typename arg1_type, typename arg2_type, \
+      typename arg3_type, typename arg4_type, typename arg5_type, \
+      typename arg6_type, typename arg7_type, typename arg8_type, \
+      typename arg9_type>\
+  typename ::testing::internal::Function<F>::Result\
+      name##ActionP8<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
+          p5##_type, p6##_type, p7##_type>::\
+          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, \
+              arg0_type arg0, arg1_type arg1, arg2_type arg2, arg3_type arg3, \
+              arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
+              arg8_type arg8, arg9_type arg9) const
+
+#define ACTION_P9(name, p0, p1, p2, p3, p4, p5, p6, p7, p8)\
+  template <typename p0##_type, typename p1##_type, typename p2##_type, \
+      typename p3##_type, typename p4##_type, typename p5##_type, \
+      typename p6##_type, typename p7##_type, typename p8##_type>\
+  class name##ActionP9 {\
+   public:\
+    name##ActionP9(p0##_type gmock_p0, p1##_type gmock_p1, \
+        p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
+        p5##_type gmock_p5, p6##_type gmock_p6, p7##_type gmock_p7, \
+        p8##_type gmock_p8) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), \
+        p3(gmock_p3), p4(gmock_p4), p5(gmock_p5), p6(gmock_p6), p7(gmock_p7), \
+        p8(gmock_p8) {}\
+    template <typename F>\
+    class gmock_Impl : public ::testing::ActionInterface<F> {\
+     public:\
+      typedef F function_type;\
+      typedef typename ::testing::internal::Function<F>::Result return_type;\
+      typedef typename ::testing::internal::Function<F>::ArgumentTuple\
+          args_type;\
+      gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
+          p3##_type gmock_p3, p4##_type gmock_p4, p5##_type gmock_p5, \
+          p6##_type gmock_p6, p7##_type gmock_p7, \
+          p8##_type gmock_p8) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), \
+          p3(gmock_p3), p4(gmock_p4), p5(gmock_p5), p6(gmock_p6), \
+          p7(gmock_p7), p8(gmock_p8) {}\
+      virtual return_type Perform(const args_type& args) {\
+        return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
+            Perform(this, args);\
+      }\
+      template <typename arg0_type, typename arg1_type, typename arg2_type, \
+          typename arg3_type, typename arg4_type, typename arg5_type, \
+          typename arg6_type, typename arg7_type, typename arg8_type, \
+          typename arg9_type>\
+      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
+          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
+          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
+          arg9_type arg9) const;\
+      const p0##_type p0;\
+      const p1##_type p1;\
+      const p2##_type p2;\
+      const p3##_type p3;\
+      const p4##_type p4;\
+      const p5##_type p5;\
+      const p6##_type p6;\
+      const p7##_type p7;\
+      const p8##_type p8;\
+    };\
+    template <typename F> operator ::testing::Action<F>() const {\
+      return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4, p5, \
+          p6, p7, p8));\
+    }\
+    const p0##_type p0;\
+    const p1##_type p1;\
+    const p2##_type p2;\
+    const p3##_type p3;\
+    const p4##_type p4;\
+    const p5##_type p5;\
+    const p6##_type p6;\
+    const p7##_type p7;\
+    const p8##_type p8;\
+  };\
+  template <typename p0##_type, typename p1##_type, typename p2##_type, \
+      typename p3##_type, typename p4##_type, typename p5##_type, \
+      typename p6##_type, typename p7##_type, typename p8##_type>\
+  inline name##ActionP9<p0##_type, p1##_type, p2##_type, p3##_type, \
+      p4##_type, p5##_type, p6##_type, p7##_type, \
+      p8##_type> name(p0##_type p0, p1##_type p1, p2##_type p2, p3##_type p3, \
+      p4##_type p4, p5##_type p5, p6##_type p6, p7##_type p7, \
+      p8##_type p8) {\
+    return name##ActionP9<p0##_type, p1##_type, p2##_type, p3##_type, \
+        p4##_type, p5##_type, p6##_type, p7##_type, p8##_type>(p0, p1, p2, \
+        p3, p4, p5, p6, p7, p8);\
+  }\
+  template <typename p0##_type, typename p1##_type, typename p2##_type, \
+      typename p3##_type, typename p4##_type, typename p5##_type, \
+      typename p6##_type, typename p7##_type, typename p8##_type>\
+  template <typename F>\
+  template <typename arg0_type, typename arg1_type, typename arg2_type, \
+      typename arg3_type, typename arg4_type, typename arg5_type, \
+      typename arg6_type, typename arg7_type, typename arg8_type, \
+      typename arg9_type>\
+  typename ::testing::internal::Function<F>::Result\
+      name##ActionP9<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
+          p5##_type, p6##_type, p7##_type, p8##_type>::\
+          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, \
+              arg0_type arg0, arg1_type arg1, arg2_type arg2, arg3_type arg3, \
+              arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
+              arg8_type arg8, arg9_type arg9) const
+
+#define ACTION_P10(name, p0, p1, p2, p3, p4, p5, p6, p7, p8, p9)\
+  template <typename p0##_type, typename p1##_type, typename p2##_type, \
+      typename p3##_type, typename p4##_type, typename p5##_type, \
+      typename p6##_type, typename p7##_type, typename p8##_type, \
+      typename p9##_type>\
+  class name##ActionP10 {\
+   public:\
+    name##ActionP10(p0##_type gmock_p0, p1##_type gmock_p1, \
+        p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
+        p5##_type gmock_p5, p6##_type gmock_p6, p7##_type gmock_p7, \
+        p8##_type gmock_p8, p9##_type gmock_p9) : p0(gmock_p0), p1(gmock_p1), \
+        p2(gmock_p2), p3(gmock_p3), p4(gmock_p4), p5(gmock_p5), p6(gmock_p6), \
+        p7(gmock_p7), p8(gmock_p8), p9(gmock_p9) {}\
+    template <typename F>\
+    class gmock_Impl : public ::testing::ActionInterface<F> {\
+     public:\
+      typedef F function_type;\
+      typedef typename ::testing::internal::Function<F>::Result return_type;\
+      typedef typename ::testing::internal::Function<F>::ArgumentTuple\
+          args_type;\
+      gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
+          p3##_type gmock_p3, p4##_type gmock_p4, p5##_type gmock_p5, \
+          p6##_type gmock_p6, p7##_type gmock_p7, p8##_type gmock_p8, \
+          p9##_type gmock_p9) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), \
+          p3(gmock_p3), p4(gmock_p4), p5(gmock_p5), p6(gmock_p6), \
+          p7(gmock_p7), p8(gmock_p8), p9(gmock_p9) {}\
+      virtual return_type Perform(const args_type& args) {\
+        return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
+            Perform(this, args);\
+      }\
+      template <typename arg0_type, typename arg1_type, typename arg2_type, \
+          typename arg3_type, typename arg4_type, typename arg5_type, \
+          typename arg6_type, typename arg7_type, typename arg8_type, \
+          typename arg9_type>\
+      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
+          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
+          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
+          arg9_type arg9) const;\
+      const p0##_type p0;\
+      const p1##_type p1;\
+      const p2##_type p2;\
+      const p3##_type p3;\
+      const p4##_type p4;\
+      const p5##_type p5;\
+      const p6##_type p6;\
+      const p7##_type p7;\
+      const p8##_type p8;\
+      const p9##_type p9;\
+    };\
+    template <typename F> operator ::testing::Action<F>() const {\
+      return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4, p5, \
+          p6, p7, p8, p9));\
+    }\
+    const p0##_type p0;\
+    const p1##_type p1;\
+    const p2##_type p2;\
+    const p3##_type p3;\
+    const p4##_type p4;\
+    const p5##_type p5;\
+    const p6##_type p6;\
+    const p7##_type p7;\
+    const p8##_type p8;\
+    const p9##_type p9;\
+  };\
+  template <typename p0##_type, typename p1##_type, typename p2##_type, \
+      typename p3##_type, typename p4##_type, typename p5##_type, \
+      typename p6##_type, typename p7##_type, typename p8##_type, \
+      typename p9##_type>\
+  inline name##ActionP10<p0##_type, p1##_type, p2##_type, p3##_type, \
+      p4##_type, p5##_type, p6##_type, p7##_type, p8##_type, \
+      p9##_type> name(p0##_type p0, p1##_type p1, p2##_type p2, p3##_type p3, \
+      p4##_type p4, p5##_type p5, p6##_type p6, p7##_type p7, p8##_type p8, \
+      p9##_type p9) {\
+    return name##ActionP10<p0##_type, p1##_type, p2##_type, p3##_type, \
+        p4##_type, p5##_type, p6##_type, p7##_type, p8##_type, p9##_type>(p0, \
+        p1, p2, p3, p4, p5, p6, p7, p8, p9);\
+  }\
+  template <typename p0##_type, typename p1##_type, typename p2##_type, \
+      typename p3##_type, typename p4##_type, typename p5##_type, \
+      typename p6##_type, typename p7##_type, typename p8##_type, \
+      typename p9##_type>\
+  template <typename F>\
+  template <typename arg0_type, typename arg1_type, typename arg2_type, \
+      typename arg3_type, typename arg4_type, typename arg5_type, \
+      typename arg6_type, typename arg7_type, typename arg8_type, \
+      typename arg9_type>\
+  typename ::testing::internal::Function<F>::Result\
+      name##ActionP10<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
+          p5##_type, p6##_type, p7##_type, p8##_type, p9##_type>::\
+          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, \
+              arg0_type arg0, arg1_type arg1, arg2_type arg2, arg3_type arg3, \
+              arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
+              arg8_type arg8, arg9_type arg9) const
 
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_ACTIONS_H_

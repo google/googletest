@@ -395,6 +395,49 @@ class DoBothAction {
   Action2 action2_;
 };
 
+// A macro from the ACTION* family (defined later in this file)
+// defines an action that can be used in a mock function.  Typically,
+// these actions only care about a subset of the arguments of the mock
+// function.  For example, if such an action only uses the second
+// argument, it can be used in any mock function that takes >= 2
+// arguments where the type of the second argument is compatible.
+//
+// Therefore, the action implementation must be prepared to take more
+// arguments than it needs.  The ExcessiveArg type is used to
+// represent those excessive arguments.  In order to keep the compiler
+// error messages tractable, we define it in the testing namespace
+// instead of testing::internal.  However, this is an INTERNAL TYPE
+// and subject to change without notice, so a user MUST NOT USE THIS
+// TYPE DIRECTLY.
+struct ExcessiveArg {};
+
+// A helper class needed for implementing the ACTION* macros.
+template <typename Result, class Impl>
+class ActionHelper {
+ public:
+$range i 0..n
+$for i
+
+[[
+$var template = [[$if i==0 [[]] $else [[
+$range j 0..i-1
+  template <$for j, [[typename A$j]]>
+]]]]
+$range j 0..i-1
+$var As = [[$for j, [[A$j]]]]
+$var as = [[$for j, [[get<$j>(args)]]]]
+$range k 1..n-i
+$var eas = [[$for k, [[ExcessiveArg()]]]]
+$var arg_list = [[$if (i==0) | (i==n) [[$as$eas]] $else [[$as, $eas]]]]
+$template
+  static Result Perform(Impl* impl, const ::std::tr1::tuple<$As>& args) {
+    using ::std::tr1::get;
+    return impl->gmock_PerformImpl(args, $arg_list);
+  }
+
+]]
+};
+
 }  // namespace internal
 
 // Various overloads for Invoke().
@@ -563,5 +606,170 @@ $range j2 2..i
 ]]
 
 }  // namespace testing
+
+// The ACTION* family of macros can be used in a namespace scope to
+// define custom actions easily.  The syntax:
+//
+//   ACTION(name) { statements; }
+//
+// will define an action with the given name that executes the
+// statements.  The value returned by the statements will be used as
+// the return value of the action.  Inside the statements, you can
+// refer to the K-th (0-based) argument of the mock function by
+// 'argK', and refer to its type by 'argK_type'.  For example:
+//
+//   ACTION(IncrementArg1) {
+//     arg1_type temp = arg1;
+//     return ++(*temp);
+//   }
+//
+// allows you to write
+//
+//   ...WillOnce(IncrementArg1());
+//
+// You can also refer to the entire argument tuple and its type by
+// 'args' and 'args_type', and refer to the mock function type and its
+// return type by 'function_type' and 'return_type'.
+//
+// Note that you don't need to specify the types of the mock function
+// arguments.  However rest assured that your code is still type-safe:
+// you'll get a compiler error if *arg1 doesn't support the ++
+// operator, or if the type of ++(*arg1) isn't compatible with the
+// mock function's return type, for example.
+//
+// Sometimes you'll want to parameterize the action.   For that you can use
+// another macro:
+//
+//   ACTION_P(name, param_name) { statements; }
+//
+// For example:
+//
+//   ACTION_P(Add, n) { return arg0 + n; }
+//
+// will allow you to write:
+//
+//   ...WillOnce(Add(5));
+//
+// Note that you don't need to provide the type of the parameter
+// either.  If you need to reference the type of a parameter named
+// 'foo', you can write 'foo_type'.  For example, in the body of
+// ACTION_P(Add, n) above, you can write 'n_type' to refer to the type
+// of 'n'.
+//
+// We also provide ACTION_P2, ACTION_P3, ..., up to ACTION_P$n to support
+// multi-parameter actions.
+//
+// For the purpose of typing, you can view
+//
+//   ACTION_Pk(Foo, p1, ..., pk) { ... }
+//
+// as shorthand for
+//
+//   template <typename p1_type, ..., typename pk_type>
+//   FooActionPk<p1_type, ..., pk_type> Foo(p1_type p1, ..., pk_type pk) { ... }
+//
+// In particular, you can provide the template type arguments
+// explicitly when invoking Foo(), as in Foo<long, bool>(5, false);
+// although usually you can rely on the compiler to infer the types
+// for you automatically.  You can assign the result of expression
+// Foo(p1, ..., pk) to a variable of type FooActionPk<p1_type, ...,
+// pk_type>.  This can be useful when composing actions.
+//
+// You can also overload actions with different numbers of parameters:
+//
+//   ACTION_P(Plus, a) { ... }
+//   ACTION_P2(Plus, a, b) { ... }
+//
+// While it's tempting to always use the ACTION* macros when defining
+// a new action, you should also consider implementing ActionInterface
+// or using MakePolymorphicAction() instead, especially if you need to
+// use the action a lot.  While these approaches require more work,
+// they give you more control on the types of the mock function
+// arguments and the action parameters, which in general leads to
+// better compiler error messages that pay off in the long run.  They
+// also allow overloading actions based on parameter types (as opposed
+// to just based on the number of parameters).
+//
+// CAVEAT:
+//
+// ACTION*() can only be used in a namespace scope.  The reason is
+// that C++ doesn't yet allow function-local types to be used to
+// instantiate templates.  The up-coming C++0x standard will fix this.
+// Once that's done, we'll consider supporting using ACTION*() inside
+// a function.
+//
+// MORE INFORMATION:
+//
+// To learn more about using these macros, please search for 'ACTION'
+// on http://code.google.com/p/googlemock/wiki/CookBook.
+
+$range i 0..n
+$for i
+
+[[
+$var template = [[$if i==0 [[]] $else [[
+$range j 0..i-1
+
+  template <$for j, [[typename p$j##_type]]>\
+]]]]
+$var class_name = [[name##Action[[$if i==0 [[]] $elif i==1 [[P]]
+                                                $else [[P$i]]]]]]
+$range j 0..i-1
+$var ctor_param_list = [[$for j, [[p$j##_type gmock_p$j]]]]
+$var param_types_and_names = [[$for j, [[p$j##_type p$j]]]]
+$var inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(gmock_p$j)]]]]]]
+$var const_param_field_decls = [[$for j
+[[
+
+      const p$j##_type p$j;\
+]]]]
+$var const_param_field_decls2 = [[$for j
+[[
+
+    const p$j##_type p$j;\
+]]]]
+$var params = [[$for j, [[p$j]]]]
+$var param_types = [[$if i==0 [[]] $else [[<$for j, [[p$j##_type]]>]]]]
+$range k 0..n-1
+$var typename_arg_types = [[$for k, [[typename arg$k[[]]_type]]]]
+$var arg_types_and_names = [[$for k, [[arg$k[[]]_type arg$k]]]]
+$var macro_name = [[$if i==0 [[ACTION]] $elif i==1 [[ACTION_P]]
+                                        $else [[ACTION_P$i]]]]
+
+#define $macro_name(name$for j [[, p$j]])\$template
+  class $class_name {\
+   public:\
+    $class_name($ctor_param_list)$inits {}\
+    template <typename F>\
+    class gmock_Impl : public ::testing::ActionInterface<F> {\
+     public:\
+      typedef F function_type;\
+      typedef typename ::testing::internal::Function<F>::Result return_type;\
+      typedef typename ::testing::internal::Function<F>::ArgumentTuple\
+          args_type;\
+      [[$if i==1 [[explicit ]]]]gmock_Impl($ctor_param_list)$inits {}\
+      virtual return_type Perform(const args_type& args) {\
+        return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
+            Perform(this, args);\
+      }\
+      template <$typename_arg_types>\
+      return_type gmock_PerformImpl(const args_type& args, [[]]
+$arg_types_and_names) const;\$const_param_field_decls
+    };\
+    template <typename F> operator ::testing::Action<F>() const {\
+      return ::testing::Action<F>(new gmock_Impl<F>($params));\
+    }\$const_param_field_decls2
+  };\$template
+  inline $class_name$param_types name($param_types_and_names) {\
+    return $class_name$param_types($params);\
+  }\$template
+  template <typename F>\
+  template <$typename_arg_types>\
+  typename ::testing::internal::Function<F>::Result\
+      $class_name$param_types::\
+          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, [[]]
+$arg_types_and_names) const
+]]
+
 
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_ACTIONS_H_

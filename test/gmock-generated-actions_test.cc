@@ -58,6 +58,7 @@ using testing::Invoke;
 using testing::InvokeArgument;
 using testing::Return;
 using testing::SetArgumentPointee;
+using testing::StaticAssertTypeEq;
 using testing::Unused;
 using testing::WithArg;
 using testing::WithArgs;
@@ -940,6 +941,343 @@ TEST(DoAllTest, TenActions) {
   EXPECT_EQ('e', e);
   EXPECT_EQ('f', f);
   EXPECT_EQ('g', g);
+}
+
+// Tests the ACTION*() macro family.
+
+// Tests that ACTION() can define an action that doesn't reference the
+// mock function arguments.
+ACTION(Return5) { return 5; }
+
+TEST(ActionMacroTest, WorksWhenNotReferencingArguments) {
+  Action<double()> a1 = Return5();
+  EXPECT_DOUBLE_EQ(5, a1.Perform(make_tuple()));
+
+  Action<int(double, bool)> a2 = Return5();
+  EXPECT_EQ(5, a2.Perform(make_tuple(1, true)));
+}
+
+// Tests that ACTION() can define an action that returns void.
+ACTION(IncrementArg1) { (*arg1)++; }
+
+TEST(ActionMacroTest, WorksWhenReturningVoid) {
+  Action<void(int, int*)> a1 = IncrementArg1();
+  int n = 0;
+  a1.Perform(make_tuple(5, &n));
+  EXPECT_EQ(1, n);
+}
+
+// Tests that the body of ACTION() can reference the type of the
+// argument.
+ACTION(IncrementArg2) {
+  StaticAssertTypeEq<int*, arg2_type>();
+  arg2_type temp = arg2;
+  (*temp)++;
+}
+
+TEST(ActionMacroTest, CanReferenceArgumentType) {
+  Action<void(int, bool, int*)> a1 = IncrementArg2();
+  int n = 0;
+  a1.Perform(make_tuple(5, false, &n));
+  EXPECT_EQ(1, n);
+}
+
+// Tests that the body of ACTION() can reference the argument tuple
+// via args_type and args.
+ACTION(Sum2) {
+  StaticAssertTypeEq< ::std::tr1::tuple<int, char, int*>, args_type>();
+  args_type args_copy = args;
+  return get<0>(args_copy) + get<1>(args_copy);
+}
+
+TEST(ActionMacroTest, CanReferenceArgumentTuple) {
+  Action<int(int, char, int*)> a1 = Sum2();
+  int dummy = 0;
+  EXPECT_EQ(11, a1.Perform(make_tuple(5, static_cast<char>(6), &dummy)));
+}
+
+// Tests that the body of ACTION() can reference the mock function
+// type.
+int Dummy(bool flag) { return flag? 1 : 0; }
+
+ACTION(InvokeDummy) {
+  StaticAssertTypeEq<int(bool), function_type>();
+  function_type* fp = &Dummy;
+  return (*fp)(true);
+}
+
+TEST(ActionMacroTest, CanReferenceMockFunctionType) {
+  Action<int(bool)> a1 = InvokeDummy();
+  EXPECT_EQ(1, a1.Perform(make_tuple(true)));
+  EXPECT_EQ(1, a1.Perform(make_tuple(false)));
+}
+
+// Tests that the body of ACTION() can reference the mock function's
+// return type.
+ACTION(InvokeDummy2) {
+  StaticAssertTypeEq<int, return_type>();
+  return_type result = Dummy(true);
+  return result;
+}
+
+TEST(ActionMacroTest, CanReferenceMockFunctionReturnType) {
+  Action<int(bool)> a1 = InvokeDummy2();
+  EXPECT_EQ(1, a1.Perform(make_tuple(true)));
+  EXPECT_EQ(1, a1.Perform(make_tuple(false)));
+}
+
+// Tests that ACTION() can be used in a namespace.
+namespace action_test {
+ACTION(Sum) { return arg0 + arg1; }
+}  // namespace action_test
+
+TEST(ActionMacroTest, WorksInNamespace) {
+  Action<int(int, int)> a1 = action_test::Sum();
+  EXPECT_EQ(3, a1.Perform(make_tuple(1, 2)));
+}
+
+// Tests that the same ACTION definition works for mock functions with
+// different argument numbers.
+ACTION(PlusTwo) { return arg0 + 2; }
+
+TEST(ActionMacroTest, WorksForDifferentArgumentNumbers) {
+  Action<int(int)> a1 = PlusTwo();
+  EXPECT_EQ(4, a1.Perform(make_tuple(2)));
+
+  Action<double(float, void*)> a2 = PlusTwo();
+  int dummy;
+  EXPECT_DOUBLE_EQ(6, a2.Perform(make_tuple(4.0f, &dummy)));
+}
+
+// Tests that ACTION_P can define a parameterized action.
+ACTION_P(Plus, n) { return arg0 + n; }
+
+TEST(ActionPMacroTest, DefinesParameterizedAction) {
+  Action<int(int m, bool t)> a1 = Plus(9);
+  EXPECT_EQ(10, a1.Perform(make_tuple(1, true)));
+}
+
+// Tests that the body of ACTION_P can reference the argument types
+// and the parameter type.
+ACTION_P(TypedPlus, n) {
+  arg0_type t1 = arg0;
+  n_type t2 = n;
+  return t1 + t2;
+}
+
+TEST(ActionPMacroTest, CanReferenceArgumentAndParameterTypes) {
+  Action<int(char m, bool t)> a1 = TypedPlus(9);
+  EXPECT_EQ(10, a1.Perform(make_tuple(static_cast<char>(1), true)));
+}
+
+// Tests that a parameterized action can be used in any mock function
+// whose type is compatible.
+TEST(ActionPMacroTest, WorksInCompatibleMockFunction) {
+  Action<std::string(const std::string& s)> a1 = Plus("tail");
+  const std::string re = "re";
+  EXPECT_EQ("retail", a1.Perform(make_tuple(re)));
+}
+
+// Tests that we can use ACTION*() to define actions overloaded on the
+// number of parameters.
+
+ACTION(OverloadedAction) { return arg0 ? arg1 : "hello"; }
+
+ACTION_P(OverloadedAction, default_value) {
+  return arg0 ? arg1 : default_value;
+}
+
+ACTION_P2(OverloadedAction, true_value, false_value) {
+  return arg0 ? true_value : false_value;
+}
+
+TEST(ActionMacroTest, CanDefineOverloadedActions) {
+  typedef Action<const char*(bool, const char*)> MyAction;
+
+  const MyAction a1 = OverloadedAction();
+  EXPECT_STREQ("hello", a1.Perform(make_tuple(false, "world")));
+  EXPECT_STREQ("world", a1.Perform(make_tuple(true, "world")));
+
+  const MyAction a2 = OverloadedAction("hi");
+  EXPECT_STREQ("hi", a2.Perform(make_tuple(false, "world")));
+  EXPECT_STREQ("world", a2.Perform(make_tuple(true, "world")));
+
+  const MyAction a3 = OverloadedAction("hi", "you");
+  EXPECT_STREQ("hi", a3.Perform(make_tuple(true, "world")));
+  EXPECT_STREQ("you", a3.Perform(make_tuple(false, "world")));
+}
+
+// Tests ACTION_Pn where n >= 3.
+
+ACTION_P3(Plus, m, n, k) { return arg0 + m + n + k; }
+
+TEST(ActionPnMacroTest, WorksFor3Parameters) {
+  Action<double(int m, bool t)> a1 = Plus(100, 20, 3.4);
+  EXPECT_DOUBLE_EQ(3123.4, a1.Perform(make_tuple(3000, true)));
+
+  Action<std::string(const std::string& s)> a2 = Plus("tail", "-", ">");
+  const std::string re = "re";
+  EXPECT_EQ("retail->", a2.Perform(make_tuple(re)));
+}
+
+ACTION_P4(Plus, p0, p1, p2, p3) { return arg0 + p0 + p1 + p2 + p3; }
+
+TEST(ActionPnMacroTest, WorksFor4Parameters) {
+  Action<int(int)> a1 = Plus(1, 2, 3, 4);
+  EXPECT_EQ(10 + 1 + 2 + 3 + 4, a1.Perform(make_tuple(10)));
+}
+
+ACTION_P5(Plus, p0, p1, p2, p3, p4) { return arg0 + p0 + p1 + p2 + p3 + p4; }
+
+TEST(ActionPnMacroTest, WorksFor5Parameters) {
+  Action<int(int)> a1 = Plus(1, 2, 3, 4, 5);
+  EXPECT_EQ(10 + 1 + 2 + 3 + 4 + 5, a1.Perform(make_tuple(10)));
+}
+
+ACTION_P6(Plus, p0, p1, p2, p3, p4, p5) {
+  return arg0 + p0 + p1 + p2 + p3 + p4 + p5;
+}
+
+TEST(ActionPnMacroTest, WorksFor6Parameters) {
+  Action<int(int)> a1 = Plus(1, 2, 3, 4, 5, 6);
+  EXPECT_EQ(10 + 1 + 2 + 3 + 4 + 5 + 6, a1.Perform(make_tuple(10)));
+}
+
+ACTION_P7(Plus, p0, p1, p2, p3, p4, p5, p6) {
+  return arg0 + p0 + p1 + p2 + p3 + p4 + p5 + p6;
+}
+
+TEST(ActionPnMacroTest, WorksFor7Parameters) {
+  Action<int(int)> a1 = Plus(1, 2, 3, 4, 5, 6, 7);
+  EXPECT_EQ(10 + 1 + 2 + 3 + 4 + 5 + 6 + 7, a1.Perform(make_tuple(10)));
+}
+
+ACTION_P8(Plus, p0, p1, p2, p3, p4, p5, p6, p7) {
+  return arg0 + p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7;
+}
+
+TEST(ActionPnMacroTest, WorksFor8Parameters) {
+  Action<int(int)> a1 = Plus(1, 2, 3, 4, 5, 6, 7, 8);
+  EXPECT_EQ(10 + 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8, a1.Perform(make_tuple(10)));
+}
+
+ACTION_P9(Plus, p0, p1, p2, p3, p4, p5, p6, p7, p8) {
+  return arg0 + p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8;
+}
+
+TEST(ActionPnMacroTest, WorksFor9Parameters) {
+  Action<int(int)> a1 = Plus(1, 2, 3, 4, 5, 6, 7, 8, 9);
+  EXPECT_EQ(10 + 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9, a1.Perform(make_tuple(10)));
+}
+
+ACTION_P10(Plus, p0, p1, p2, p3, p4, p5, p6, p7, p8, last_param) {
+  arg0_type t0 = arg0;
+  last_param_type t9 = last_param;
+  return t0 + p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + t9;
+}
+
+TEST(ActionPnMacroTest, WorksFor10Parameters) {
+  Action<int(int)> a1 = Plus(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+  EXPECT_EQ(10 + 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10,
+            a1.Perform(make_tuple(10)));
+}
+
+// Tests that the action body can promote the parameter types.
+
+ACTION_P2(PadArgument, prefix, suffix) {
+  // The following lines promote the two parameters to desired types.
+  std::string prefix_str(prefix);
+  char suffix_char(suffix);
+  return prefix_str + arg0 + suffix_char;
+}
+
+TEST(ActionPnMacroTest, SimpleTypePromotion) {
+  Action<std::string(const char*)> no_promo =
+      PadArgument(std::string("foo"), 'r');
+  Action<std::string(const char*)> promo =
+      PadArgument("foo", static_cast<int>('r'));
+  EXPECT_EQ("foobar", no_promo.Perform(make_tuple("ba")));
+  EXPECT_EQ("foobar", promo.Perform(make_tuple("ba")));
+}
+
+// Tests that we can partially restrict parameter types using a
+// straight-forward pattern.
+
+// Defines a generic action that doesn't restrict the types of its
+// parameters.
+ACTION_P3(ConcatImpl, a, b, c) {
+  std::stringstream ss;
+  ss << a << b << c;
+  return ss.str();
+}
+
+// Next, we try to restrict that either the first parameter is a
+// string, or the second parameter is an int.
+
+// Defines a partially specialized wrapper that restricts the first
+// parameter to std::string.
+template <typename T1, typename T2>
+// ConcatImplActionP3 is the class template ACTION_P3 uses to
+// implement ConcatImpl.  We shouldn't change the name as this
+// pattern requires the user to use it directly.
+ConcatImplActionP3<std::string, T1, T2>
+Concat(const std::string& a, T1 b, T2 c) {
+  if (true) {
+    // This branch verifies that ConcatImpl() can be invoked without
+    // explicit template arguments.
+    return ConcatImpl(a, b, c);
+  } else {
+    // This branch verifies that ConcatImpl() can also be invoked with
+    // explicit template arguments.  It doesn't really need to be
+    // executed as this is a compile-time verification.
+    return ConcatImpl<std::string, T1, T2>(a, b, c);
+  }
+}
+
+// Defines another partially specialized wrapper that restricts the
+// second parameter to int.
+template <typename T1, typename T2>
+ConcatImplActionP3<T1, int, T2>
+Concat(T1 a, int b, T2 c) {
+  return ConcatImpl(a, b, c);
+}
+
+TEST(ActionPnMacroTest, CanPartiallyRestrictParameterTypes) {
+  Action<const std::string()> a1 = Concat("Hello", "1", 2);
+  EXPECT_EQ("Hello12", a1.Perform(make_tuple()));
+
+  a1 = Concat(1, 2, 3);
+  EXPECT_EQ("123", a1.Perform(make_tuple()));
+}
+
+// Verifies the type of an ACTION*.
+
+ACTION(DoFoo) {}
+ACTION_P(DoFoo, p) {}
+ACTION_P2(DoFoo, p0, p1) {}
+
+TEST(ActionPnMacroTest, TypesAreCorrect) {
+  // DoFoo() must be assignable to a DoFooAction variable.
+  DoFooAction a0 = DoFoo();
+
+  // DoFoo(1) must be assignable to a DoFooActionP variable.
+  DoFooActionP<int> a1 = DoFoo(1);
+
+  // DoFoo(p1, ..., pk) must be assignable to a DoFooActionPk
+  // variable, and so on.
+  DoFooActionP2<int, char> a2 = DoFoo(1, '2');
+  PlusActionP3<int, int, char> a3 = Plus(1, 2, '3');
+  PlusActionP4<int, int, int, char> a4 = Plus(1, 2, 3, '4');
+  PlusActionP5<int, int, int, int, char> a5 = Plus(1, 2, 3, 4, '5');
+  PlusActionP6<int, int, int, int, int, char> a6 = Plus(1, 2, 3, 4, 5, '6');
+  PlusActionP7<int, int, int, int, int, int, char> a7 =
+      Plus(1, 2, 3, 4, 5, 6, '7');
+  PlusActionP8<int, int, int, int, int, int, int, char> a8 =
+      Plus(1, 2, 3, 4, 5, 6, 7, '8');
+  PlusActionP9<int, int, int, int, int, int, int, int, char> a9 =
+      Plus(1, 2, 3, 4, 5, 6, 7, 8, '9');
+  PlusActionP10<int, int, int, int, int, int, int, int, int, char> a10 =
+      Plus(1, 2, 3, 4, 5, 6, 7, 8, 9, '0');
 }
 
 }  // namespace gmock_generated_actions_test
