@@ -63,6 +63,7 @@ namespace testing {
 // We don't want the users to modify these flags in the code, but want
 // Google Test's own unit tests to be able to access them.  Therefore we
 // declare them here as opposed to in gtest.h.
+GTEST_DECLARE_bool_(also_run_disabled_tests);
 GTEST_DECLARE_bool_(break_on_failure);
 GTEST_DECLARE_bool_(catch_exceptions);
 GTEST_DECLARE_string_(color);
@@ -72,8 +73,8 @@ GTEST_DECLARE_bool_(list_tests);
 GTEST_DECLARE_string_(output);
 GTEST_DECLARE_bool_(print_time);
 GTEST_DECLARE_int32_(repeat);
-GTEST_DECLARE_int32_(stack_trace_depth);
 GTEST_DECLARE_bool_(show_internal_stack_frames);
+GTEST_DECLARE_int32_(stack_trace_depth);
 
 namespace internal {
 
@@ -82,6 +83,7 @@ namespace internal {
 extern const TypeId kTestTypeIdInGoogleTest;
 
 // Names of the flags (needed for parsing Google Test flags).
+const char kAlsoRunDisabledTestsFlag[] = "also_run_disabled_tests";
 const char kBreakOnFailureFlag[] = "break_on_failure";
 const char kCatchExceptionsFlag[] = "catch_exceptions";
 const char kColorFlag[] = "color";
@@ -97,6 +99,7 @@ class GTestFlagSaver {
  public:
   // The c'tor.
   GTestFlagSaver() {
+    also_run_disabled_tests_ = GTEST_FLAG(also_run_disabled_tests);
     break_on_failure_ = GTEST_FLAG(break_on_failure);
     catch_exceptions_ = GTEST_FLAG(catch_exceptions);
     color_ = GTEST_FLAG(color);
@@ -112,6 +115,7 @@ class GTestFlagSaver {
 
   // The d'tor is not virtual.  DO NOT INHERIT FROM THIS CLASS.
   ~GTestFlagSaver() {
+    GTEST_FLAG(also_run_disabled_tests) = also_run_disabled_tests_;
     GTEST_FLAG(break_on_failure) = break_on_failure_;
     GTEST_FLAG(catch_exceptions) = catch_exceptions_;
     GTEST_FLAG(color) = color_;
@@ -126,6 +130,7 @@ class GTestFlagSaver {
   }
  private:
   // Fields for saving the original values of flags.
+  bool also_run_disabled_tests_;
   bool break_on_failure_;
   bool catch_exceptions_;
   String color_;

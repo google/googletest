@@ -67,6 +67,13 @@ TEST(BarTest, TestTwo) {
 TEST(BarTest, TestThree) {
 }
 
+TEST(BarTest, DISABLED_TestFour) {
+  FAIL() << "Expected failure.";
+}
+
+TEST(BarTest, DISABLED_TestFive) {
+  FAIL() << "Expected failure.";
+}
 
 // Test case BazTest.
 
@@ -78,6 +85,26 @@ TEST(BazTest, TestA) {
 }
 
 TEST(BazTest, TestB) {
+}
+
+TEST(BazTest, DISABLED_TestC) {
+  FAIL() << "Expected failure.";
+}
+
+// Test case FoobarTest
+
+TEST(DISABLED_FoobarTest, Test1) {
+  FAIL() << "Expected failure.";
+}
+
+TEST(DISABLED_FoobarTest, DISABLED_Test2) {
+  FAIL() << "Expected failure.";
+}
+
+// Test case FoobarbazTest
+
+TEST(DISABLED_FoobarbazTest, TestA) {
+  FAIL() << "Expected failure.";
 }
 
 #ifdef GTEST_HAS_PARAM_TEST

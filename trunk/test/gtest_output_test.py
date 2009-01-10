@@ -40,12 +40,12 @@ SYNOPSIS
 
 __author__ = 'wan@google.com (Zhanyong Wan)'
 
-import gtest_test_utils
 import os
 import re
 import string
 import sys
 import unittest
+import gtest_test_utils
 
 
 # The flag for generating the golden file
@@ -64,9 +64,12 @@ PROGRAM_PATH = os.path.join(gtest_test_utils.GetBuildDir(), PROGRAM)
 COMMAND_WITH_COLOR = PROGRAM_PATH + ' --gtest_color=yes'
 COMMAND_WITH_TIME = (PROGRAM_PATH + ' --gtest_print_time '
                      + '--gtest_filter="FatalFailureTest.*:LoggingTest.*"')
+COMMAND_WITH_DISABLED = (PROGRAM_PATH + ' --gtest_also_run_disabled_tests '
+                         + '--gtest_filter="*DISABLED_*"')
 
 GOLDEN_PATH = os.path.join(gtest_test_utils.GetSourceDir(),
                            GOLDEN_NAME)
+
 
 def ToUnixLineEnding(s):
   """Changes all Windows/Mac line endings in s to UNIX line endings."""
@@ -191,7 +194,8 @@ def GetCommandOutput(cmd):
 class GTestOutputTest(unittest.TestCase):
   def testOutput(self):
     output = (GetCommandOutput(COMMAND_WITH_COLOR) +
-              GetCommandOutput(COMMAND_WITH_TIME))
+              GetCommandOutput(COMMAND_WITH_TIME) +
+              GetCommandOutput(COMMAND_WITH_DISABLED))
     golden_file = open(GOLDEN_PATH, 'rb')
     golden = golden_file.read()
     golden_file.close()
@@ -206,7 +210,8 @@ class GTestOutputTest(unittest.TestCase):
 if __name__ == '__main__':
   if sys.argv[1:] == [GENGOLDEN_FLAG]:
     output = (GetCommandOutput(COMMAND_WITH_COLOR) +
-              GetCommandOutput(COMMAND_WITH_TIME))
+              GetCommandOutput(COMMAND_WITH_TIME) +
+              GetCommandOutput(COMMAND_WITH_DISABLED))
     golden_file = open(GOLDEN_PATH, 'wb')
     golden_file.write(output)
     golden_file.close()
