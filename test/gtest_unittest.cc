@@ -84,6 +84,7 @@ using testing::AssertionResult;
 using testing::AssertionSuccess;
 using testing::DoubleLE;
 using testing::FloatLE;
+using testing::GTEST_FLAG(also_run_disabled_tests);
 using testing::GTEST_FLAG(break_on_failure);
 using testing::GTEST_FLAG(catch_exceptions);
 using testing::GTEST_FLAG(death_test_use_fork);
@@ -1128,6 +1129,7 @@ class GTestFlagSaverTest : public Test {
   static void SetUpTestCase() {
     saver_ = new GTestFlagSaver;
 
+    GTEST_FLAG(also_run_disabled_tests) = false;
     GTEST_FLAG(break_on_failure) = false;
     GTEST_FLAG(catch_exceptions) = false;
     GTEST_FLAG(death_test_use_fork) = false;
@@ -1149,6 +1151,7 @@ class GTestFlagSaverTest : public Test {
   // Verifies that the Google Test flags have their default values, and then
   // modifies each of them.
   void VerifyAndModifyFlags() {
+    EXPECT_FALSE(GTEST_FLAG(also_run_disabled_tests));
     EXPECT_FALSE(GTEST_FLAG(break_on_failure));
     EXPECT_FALSE(GTEST_FLAG(catch_exceptions));
     EXPECT_STREQ("auto", GTEST_FLAG(color).c_str());
@@ -1159,6 +1162,7 @@ class GTestFlagSaverTest : public Test {
     EXPECT_FALSE(GTEST_FLAG(print_time));
     EXPECT_EQ(1, GTEST_FLAG(repeat));
 
+    GTEST_FLAG(also_run_disabled_tests) = true;
     GTEST_FLAG(break_on_failure) = true;
     GTEST_FLAG(catch_exceptions) = true;
     GTEST_FLAG(color) = "no";
@@ -4067,7 +4071,8 @@ TEST_F(SetUpTestCaseTest, Test2) {
 // The Flags struct stores a copy of all Google Test flags.
 struct Flags {
   // Constructs a Flags struct where each flag has its default value.
-  Flags() : break_on_failure(false),
+  Flags() : also_run_disabled_tests(false),
+            break_on_failure(false),
             catch_exceptions(false),
             death_test_use_fork(false),
             filter(""),
@@ -4077,6 +4082,14 @@ struct Flags {
             repeat(1) {}
 
   // Factory methods.
+
+  // Creates a Flags struct where the gtest_also_run_disabled_tests flag has
+  // the given value.
+  static Flags AlsoRunDisabledTests(bool also_run_disabled_tests) {
+    Flags flags;
+    flags.also_run_disabled_tests = also_run_disabled_tests;
+    return flags;
+  }
 
   // Creates a Flags struct where the gtest_break_on_failure flag has
   // the given value.
@@ -4143,6 +4156,7 @@ struct Flags {
   }
 
   // These fields store the flag values.
+  bool also_run_disabled_tests;
   bool break_on_failure;
   bool catch_exceptions;
   bool death_test_use_fork;
@@ -4158,6 +4172,7 @@ class InitGoogleTestTest : public Test {
  protected:
   // Clears the flags before each test.
   virtual void SetUp() {
+    GTEST_FLAG(also_run_disabled_tests) = false;
     GTEST_FLAG(break_on_failure) = false;
     GTEST_FLAG(catch_exceptions) = false;
     GTEST_FLAG(death_test_use_fork) = false;
@@ -4181,6 +4196,8 @@ class InitGoogleTestTest : public Test {
 
   // Verifies that the flag values match the expected values.
   static void CheckFlags(const Flags& expected) {
+    EXPECT_EQ(expected.also_run_disabled_tests,
+              GTEST_FLAG(also_run_disabled_tests));
     EXPECT_EQ(expected.break_on_failure, GTEST_FLAG(break_on_failure));
     EXPECT_EQ(expected.catch_exceptions, GTEST_FLAG(catch_exceptions));
     EXPECT_EQ(expected.death_test_use_fork, GTEST_FLAG(death_test_use_fork));
@@ -4685,6 +4702,54 @@ TEST_F(InitGoogleTestTest, Repeat) {
   };
 
   TEST_PARSING_FLAGS(argv, argv2, Flags::Repeat(1000));
+}
+
+// Tests having a --gtest_also_run_disabled_tests flag
+TEST_F(InitGoogleTestTest, AlsoRunDisabledTestsFlag) {
+    const char* argv[] = {
+      "foo.exe",
+      "--gtest_also_run_disabled_tests",
+      NULL
+    };
+
+    const char* argv2[] = {
+      "foo.exe",
+      NULL
+    };
+
+    TEST_PARSING_FLAGS(argv, argv2, Flags::AlsoRunDisabledTests(true));
+}
+
+// Tests having a --gtest_also_run_disabled_tests flag with a "true" value
+TEST_F(InitGoogleTestTest, AlsoRunDisabledTestsTrue) {
+    const char* argv[] = {
+      "foo.exe",
+      "--gtest_also_run_disabled_tests=1",
+      NULL
+    };
+
+    const char* argv2[] = {
+      "foo.exe",
+      NULL
+    };
+
+    TEST_PARSING_FLAGS(argv, argv2, Flags::AlsoRunDisabledTests(true));
+}
+
+// Tests having a --gtest_also_run_disabled_tests flag with a "false" value
+TEST_F(InitGoogleTestTest, AlsoRunDisabledTestsFalse) {
+    const char* argv[] = {
+      "foo.exe",
+      "--gtest_also_run_disabled_tests=0",
+      NULL
+    };
+
+    const char* argv2[] = {
+      "foo.exe",
+      NULL
+    };
+
+    TEST_PARSING_FLAGS(argv, argv2, Flags::AlsoRunDisabledTests(false));
 }
 
 #ifdef GTEST_OS_WINDOWS

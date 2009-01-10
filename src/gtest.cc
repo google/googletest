@@ -154,6 +154,11 @@ const char kStackTraceMarker[] = "\nStack trace:\n";
 }  // namespace internal
 
 GTEST_DEFINE_bool_(
+    also_run_disabled_tests,
+    internal::BoolFromGTestEnv("also_run_disabled_tests", false),
+    "Run disabled tests too, in addition to the tests normally being run.");
+
+GTEST_DEFINE_bool_(
     break_on_failure,
     internal::BoolFromGTestEnv("break_on_failure", false),
     "True iff a failed assertion should be a debugger break-point.");
@@ -1610,7 +1615,7 @@ bool String::CaseInsensitiveWideCStringEquals(const wchar_t* lhs,
     right = towlower(*rhs++);
   } while (left && left == right);
   return left == right;
-#endif // OS selector
+#endif  // OS selector
 }
 
 // Constructs a String by copying a given number of chars from a
@@ -2736,7 +2741,7 @@ void PrettyUnitTestResultPrinter::OnUnitTestEnd(
   }
 
   int num_disabled = impl->disabled_test_count();
-  if (num_disabled) {
+  if (num_disabled && !GTEST_FLAG(also_run_disabled_tests)) {
     if (!num_failures) {
       printf("\n");  // Add a spacer if no FAILURE banner is displayed.
     }
@@ -3602,7 +3607,8 @@ int UnitTestImpl::FilterTests() {
                                                  kDisableTestFilter);
       test_info->impl()->set_is_disabled(is_disabled);
 
-      const bool should_run = !is_disabled &&
+      const bool should_run =
+          (GTEST_FLAG(also_run_disabled_tests) || !is_disabled) &&
           internal::UnitTestOptions::FilterMatchesTest(test_case_name,
                                                        test_name);
       test_info->impl()->set_should_run(should_run);
@@ -3860,7 +3866,9 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
     using internal::ParseStringFlag;
 
     // Do we see a Google Test flag?
-    if (ParseBoolFlag(arg, kBreakOnFailureFlag,
+    if (ParseBoolFlag(arg, kAlsoRunDisabledTestsFlag,
+                      &GTEST_FLAG(also_run_disabled_tests)) ||
+        ParseBoolFlag(arg, kBreakOnFailureFlag,
                       &GTEST_FLAG(break_on_failure)) ||
         ParseBoolFlag(arg, kCatchExceptionsFlag,
                       &GTEST_FLAG(catch_exceptions)) ||

@@ -481,6 +481,8 @@ Expected fatal failure.
 [  FAILED  ] ExpectFailureTest.ExpectNonFatalFailureOnAllThreads
 
 36 FAILED TESTS
+  YOU HAVE 1 DISABLED TEST
+
 The non-test part of the code is expected to have 2 failures.
 
 gtest_output_test_.cc:#: error: Value of: false
@@ -542,3 +544,32 @@ Expected fatal failure.
 [  FAILED  ] LoggingTest.InterleavingLoggingAndAssertions
 
  4 FAILED TESTS
+  YOU HAVE 1 DISABLED TEST
+
+The non-test part of the code is expected to have 2 failures.
+
+gtest_output_test_.cc:#: error: Value of: false
+  Actual: false
+Expected: true
+gtest_output_test_.cc:#: error: Value of: 3
+Expected: 2
+Note: Google Test filter = *DISABLED_*
+[==========] Running 1 test from 1 test case.
+[----------] Global test environment set-up.
+FooEnvironment::SetUp() called.
+BarEnvironment::SetUp() called.
+[----------] 1 test from DisabledTestsWarningTest
+[ RUN      ] DisabledTestsWarningTest.DISABLED_AlsoRunDisabledTestsFlagSuppressesWarning
+[       OK ] DisabledTestsWarningTest.DISABLED_AlsoRunDisabledTestsFlagSuppressesWarning
+[----------] Global test environment tear-down
+BarEnvironment::TearDown() called.
+gtest_output_test_.cc:#: error: Failed
+Expected non-fatal failure.
+FooEnvironment::TearDown() called.
+gtest_output_test_.cc:#: error: Failed
+Expected fatal failure.
+[==========] 1 test from 1 test case ran.
+[  PASSED  ] 1 test.
+[  FAILED  ] 0 tests, listed below:
+
+ 0 FAILED TESTS

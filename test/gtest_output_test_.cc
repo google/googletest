@@ -212,6 +212,14 @@ TEST(SCOPED_TRACETest, CanBeRepeated) {
                 << "trace point A, B, and D.";
 }
 
+TEST(DisabledTestsWarningTest,
+     DISABLED_AlsoRunDisabledTestsFlagSuppressesWarning) {
+  // This test body is intentionally empty.  Its sole purpose is for
+  // verifying that the --gtest_also_run_disabled_tests flag
+  // suppresses the "YOU HAVE 12 DISABLED TESTS" warning at the end of
+  // the test output.
+}
+
 // Tests using assertions outside of TEST and TEST_F.
 //
 // This function creates two failures intentionally.

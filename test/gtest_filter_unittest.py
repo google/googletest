@@ -40,12 +40,11 @@ environments and command line flags.
 
 __author__ = 'wan@google.com (Zhanyong Wan)'
 
-import gtest_test_utils
 import os
 import re
 import sets
-import sys
 import unittest
+import gtest_test_utils
 
 # Constants.
 
@@ -54,6 +53,9 @@ FILTER_ENV_VAR = 'GTEST_FILTER'
 
 # The command line flag for specifying the test filters.
 FILTER_FLAG = 'gtest_filter'
+
+# The command line flag for including disabled tests.
+ALSO_RUN_DISABED_TESTS_FLAG = 'gtest_also_run_disabled_tests'
 
 # Command to run the gtest_filter_unittest_ program.
 COMMAND = os.path.join(gtest_test_utils.GetBuildDir(),
@@ -80,7 +82,17 @@ PARAM_TESTS = [
     'SeqQ/ParamTest.TestY/1',
     ]
 
-ALL_TESTS = [
+DISABLED_TESTS = [
+    'BarTest.DISABLED_TestFour',
+    'BarTest.DISABLED_TestFive',
+    'BazTest.DISABLED_TestC',
+    'DISABLED_FoobarTest.Test1',
+    'DISABLED_FoobarTest.DISABLED_Test2',
+    'DISABLED_FoobarbazTest.TestA',
+    ]
+
+# All the non-disabled tests.
+ACTIVE_TESTS = [
     'FooTest.Abc',
     'FooTest.Xyz',
 
@@ -176,6 +188,18 @@ class GTestFilterUnitTest(unittest.TestCase):
     tests_run = Run(command)
     self.AssertSetEqual(tests_run, tests_to_run)
 
+  def RunAndVerifyAllowingDisabled(self, gtest_filter, tests_to_run):
+    """Runs gtest_flag_unittest_ with the given filter, and enables
+    disabled tests. Verifies that the right set of tests were run.
+    """
+    # Construct the command line.
+    command = '%s --%s' % (COMMAND, ALSO_RUN_DISABED_TESTS_FLAG)
+    if gtest_filter is not None:
+      command = '%s --%s=%s' % (command, FILTER_FLAG, gtest_filter)
+
+    tests_run = Run(command)
+    self.AssertSetEqual(tests_run, tests_to_run)
+
   def setUp(self):
     """Sets up test case. Determines whether value-parameterized tests are
     enabled in the binary and sets flags accordingly.
@@ -188,7 +212,7 @@ class GTestFilterUnitTest(unittest.TestCase):
   def testDefaultBehavior(self):
     """Tests the behavior of not specifying the filter."""
 
-    self.RunAndVerify(None, ALL_TESTS)
+    self.RunAndVerify(None, ACTIVE_TESTS)
 
   def testEmptyFilter(self):
     """Tests an empty filter."""
@@ -199,27 +223,61 @@ class GTestFilterUnitTest(unittest.TestCase):
     """Tests a filter that matches nothing."""
 
     self.RunAndVerify('BadFilter', [])
+    self.RunAndVerifyAllowingDisabled('BadFilter', [])
 
   def testFullName(self):
     """Tests filtering by full name."""
 
     self.RunAndVerify('FooTest.Xyz', ['FooTest.Xyz'])
+    self.RunAndVerifyAllowingDisabled('FooTest.Xyz', ['FooTest.Xyz'])
 
   def testUniversalFilters(self):
     """Tests filters that match everything."""
 
-    self.RunAndVerify('*', ALL_TESTS)
-    self.RunAndVerify('*.*', ALL_TESTS)
+    self.RunAndVerify('*', ACTIVE_TESTS)
+    self.RunAndVerify('*.*', ACTIVE_TESTS)
+    self.RunAndVerifyAllowingDisabled('*', ACTIVE_TESTS + DISABLED_TESTS)
+    self.RunAndVerifyAllowingDisabled('*.*', ACTIVE_TESTS + DISABLED_TESTS)
 
   def testFilterByTestCase(self):
     """Tests filtering by test case name."""
 
     self.RunAndVerify('FooTest.*', ['FooTest.Abc', 'FooTest.Xyz'])
 
+    BAZ_TESTS = ['BazTest.TestOne', 'BazTest.TestA', 'BazTest.TestB']
+    self.RunAndVerify('BazTest.*', BAZ_TESTS)
+    self.RunAndVerifyAllowingDisabled('BazTest.*',
+                                      BAZ_TESTS + ['BazTest.DISABLED_TestC'])
+
   def testFilterByTest(self):
     """Tests filtering by test name."""
 
     self.RunAndVerify('*.TestOne', ['BarTest.TestOne', 'BazTest.TestOne'])
+
+  def testFilterDisabledTests(self):
+    """Select only the disabled tests to run."""
+
+    self.RunAndVerify('DISABLED_FoobarTest.Test1', [])
+    self.RunAndVerifyAllowingDisabled('DISABLED_FoobarTest.Test1',
+                                      ['DISABLED_FoobarTest.Test1'])
+
+    self.RunAndVerify('*DISABLED_*', [])
+    self.RunAndVerifyAllowingDisabled('*DISABLED_*', DISABLED_TESTS)
+
+    self.RunAndVerify('*.DISABLED_*', [])
+    self.RunAndVerifyAllowingDisabled('*.DISABLED_*', [
+        'BarTest.DISABLED_TestFour',
+        'BarTest.DISABLED_TestFive',
+        'BazTest.DISABLED_TestC',
+        'DISABLED_FoobarTest.DISABLED_Test2',
+        ])
+
+    self.RunAndVerify('DISABLED_*', [])
+    self.RunAndVerifyAllowingDisabled('DISABLED_*', [
+        'DISABLED_FoobarTest.Test1',
+        'DISABLED_FoobarTest.DISABLED_Test2',
+        'DISABLED_FoobarbazTest.TestA',
+        ])
 
   def testWildcardInTestCaseName(self):
     """Tests using wildcard in the test case name."""
@@ -231,7 +289,7 @@ class GTestFilterUnitTest(unittest.TestCase):
 
         'BazTest.TestOne',
         'BazTest.TestA',
-        'BazTest.TestB',] + PARAM_TESTS)
+        'BazTest.TestB' ] + PARAM_TESTS)
 
   def testWildcardInTestName(self):
     """Tests using wildcard in the test name."""
