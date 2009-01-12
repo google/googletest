@@ -263,6 +263,40 @@ ASSERT_HRESULT_SUCCEEDED(shell->ShellExecute(CComBSTR(url), empty, empty, empty,
 
 _Availability_: Windows.
 
+== Type Assertions ==
+
+You can call the function
+{{{
+testing::StaticAssertTypeEq<T1, T2>();
+}}}
+to assert that types `T1` and `T2` are the same.  The function does
+nothing if the assertion is satisfied.  If the types are different,
+the function call will fail to compile, and the compiler error message
+will likely (depending on the compiler) show you the actual values of
+`T1` and `T2`.  This is mainly useful inside template code.
+
+_Caveat:_ When used inside a member function of a class template or a
+function template, `StaticAssertTypeEq<T1, T2>()` is effective _only if_
+the function is instantiated.  For example, given:
+{{{
+template <typename T> class Foo {
+ public:
+  void Bar() { testing::StaticAssertTypeEq<int, T>(); }
+};
+}}}
+the code:
+{{{
+void Test1() { Foo<bool> foo; }
+}}}
+will _not_ generate a compiler error, as `Foo<bool>::Bar()` is never
+actually instantiated.  Instead, you need:
+{{{
+void Test2() { Foo<bool> foo; foo.Bar(); }
+}}}
+to cause a compiler error.
+
+_Availability:_ Linux, Windows, Mac; since version 1.3.0.
+
 == Assertion Placement  ==
 
 You can include assertions in any C++ function's code. The one constraint is
