@@ -1534,6 +1534,18 @@ test quality.
 
 _Availability:_ Linux, Windows, Mac.
 
+== Temporarily Enabling Disabled Tests ==
+
+To include [#Temporarily_Disabling_Tests disabled tests] in test
+execution, just invoke the test program with the
+`--gtest_also_run_disabled_tests` flag or set the
+`GTEST_ALSO_RUN_DISABLED_TESTS` environment variable to a value other
+than `0`.  You can combine this with the
+[#Running_a_Subset_of_the_Tests --gtest_filter] flag to further select
+which disabled tests to run.
+
+_Availability:_ Linux, Windows, Mac; since version 1.3.0.
+
 = Where to Go from Here =
 
 Congratulations! You've now learned more advanced Google Test tools and are
