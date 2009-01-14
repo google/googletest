@@ -52,7 +52,8 @@ package (as described below):
   * GNU-compatible Make or "gmake"
   * POSIX-standard shell
   * POSIX(-2) Regular Expressions (regex.h)
-  * gcc 4.0 or newer
+  * gcc 4.0 or newer, or gcc 3.4 or newer with the tr1 tuple library
+    (from Boost or other vendors).
 
 Furthermore, if you are building Google Mock from a VCS Checkout (also
 described below), there are further requirements:
@@ -63,11 +64,12 @@ described below), there are further requirements:
 
 ### Windows Requirements ###
   * Microsoft Visual C++ 8.0 SP1 or newer
-  * An implementation of the tr1 C++ library (You can get it for free
-    from http://www.boost.org/.  We have verified that version 1.36.0
-    works.  One caveat is this implementation exposes a bug in Visual
-    C++'s <type_info> header when exceptions are disabled.  Therefore
-    your project must enable exceptions for this configuration to work.)
+  * An implementation of the tr1 tuple C++ library (You can get it for
+    free from http://www.boost.org/.  We have verified that version
+    1.36.0 works.  One caveat is this implementation exposes a bug in
+    Visual C++'s <type_info> header when exceptions are disabled.
+    Therefore your project must enable exceptions for this
+    configuration to work.)
 
 ### Mac OS X Requirements ###
   * Mac OS X 10.4 Tiger or newer
@@ -236,6 +238,11 @@ www.boost.org and install it on your system. Note that Boost TR1 tuple
 is a header-only library, so the installation only involves unpacking
 it to a suitable location - you don't need to compile it or download a
 pre-compiled Boost binary.
+
+Since Boost is quite large, you may prefer to only install the files
+actually needed by Google Mock.  If so, you can download TR1 tuple
+without other parts of Boost from
+http://code.google.com/p/googlemock/downloads/list.
 
 After that you have two options: either set up Boost globally or
 modify the Google Mock project to point to your copy of Boost. The
