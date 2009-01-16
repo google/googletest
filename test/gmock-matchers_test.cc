@@ -37,8 +37,12 @@
 
 #include <string.h>
 #include <functional>
-#include <string>
+#include <list>
+#include <map>
+#include <set>
 #include <sstream>
+#include <string>
+#include <vector>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <gtest/gtest-spi.h>
@@ -2623,6 +2627,146 @@ TEST(ByRefTest, AllowsNotCopyableValueInMatchers) {
   NotCopyable n1(1), n2(2);
   EXPECT_FALSE(m.Matches(n1));
   EXPECT_TRUE(m.Matches(n2));
+}
+
+// Tests ContainerEq with different container types, and
+// different element types.
+
+template <typename T>
+class ContainerEqTest : public testing::Test {
+ public:
+};
+
+typedef testing::Types<
+    std::set<int>,
+    std::vector<size_t>,
+    std::multiset<size_t>,
+    std::list<int> >
+    ContainerEqTestTypes;
+
+TYPED_TEST_CASE(ContainerEqTest, ContainerEqTestTypes);
+
+// Tests that the filled container is equal to itself.
+TYPED_TEST(ContainerEqTest, EqualsSelf) {
+  static const int vals[] = {1, 1, 2, 3, 5, 8};
+  TypeParam my_set(vals, vals + 6);
+  const Matcher<TypeParam> m = ContainerEq(my_set);
+  EXPECT_TRUE(m.Matches(my_set));
+  EXPECT_EQ("", Explain(m, my_set));
+}
+
+// Tests that missing values are reported.
+TYPED_TEST(ContainerEqTest, ValueMissing) {
+  static const int vals[] = {1, 1, 2, 3, 5, 8};
+  static const int test_vals[] = {2, 1, 8, 5};
+  TypeParam my_set(vals, vals + 6);
+  TypeParam test_set(test_vals, test_vals + 4);
+  const Matcher<TypeParam> m = ContainerEq(my_set);
+  EXPECT_FALSE(m.Matches(test_set));
+  EXPECT_EQ("Not in actual: 3", Explain(m, test_set));
+}
+
+// Tests that added values are reported.
+TYPED_TEST(ContainerEqTest, ValueAdded) {
+  static const int vals[] = {1, 1, 2, 3, 5, 8};
+  static const int test_vals[] = {1, 2, 3, 5, 8, 46};
+  TypeParam my_set(vals, vals + 6);
+  TypeParam test_set(test_vals, test_vals + 6);
+  const Matcher<const TypeParam&> m = ContainerEq(my_set);
+  EXPECT_FALSE(m.Matches(test_set));
+  EXPECT_EQ("Only in actual: 46", Explain(m, test_set));
+}
+
+// Tests that added and missing values are reported together.
+TYPED_TEST(ContainerEqTest, ValueAddedAndRemoved) {
+  static const int vals[] = {1, 1, 2, 3, 5, 8};
+  static const int test_vals[] = {1, 2, 3, 8, 46};
+  TypeParam my_set(vals, vals + 6);
+  TypeParam test_set(test_vals, test_vals + 5);
+  const Matcher<TypeParam> m = ContainerEq(my_set);
+  EXPECT_FALSE(m.Matches(test_set));
+  EXPECT_EQ("Only in actual: 46; not in actual: 5", Explain(m, test_set));
+}
+
+// Tests duplicated value -- expect no explanation.
+TYPED_TEST(ContainerEqTest, DuplicateDifference) {
+  static const int vals[] = {1, 1, 2, 3, 5, 8};
+  static const int test_vals[] = {1, 2, 3, 5, 8};
+  TypeParam my_set(vals, vals + 6);
+  TypeParam test_set(test_vals, test_vals + 5);
+  const Matcher<const TypeParam&> m = ContainerEq(my_set);
+  // Depending on the container, match may be true or false
+  // But in any case there should be no explanation.
+  EXPECT_EQ("", Explain(m, test_set));
+}
+
+// Tests that mutliple missing values are reported.
+// Using just vector here, so order is predicatble.
+TEST(ContainerEqExtraTest, MultipleValuesMissing) {
+  static const int vals[] = {1, 1, 2, 3, 5, 8};
+  static const int test_vals[] = {2, 1, 5};
+  std::vector<int> my_set(vals, vals + 6);
+  std::vector<int> test_set(test_vals, test_vals + 3);
+  const Matcher<std::vector<int> > m = ContainerEq(my_set);
+  EXPECT_FALSE(m.Matches(test_set));
+  EXPECT_EQ("Not in actual: 3, 8", Explain(m, test_set));
+}
+
+// Tests that added values are reported.
+// Using just vector here, so order is predicatble.
+TEST(ContainerEqExtraTest, MultipleValuesAdded) {
+  static const int vals[] = {1, 1, 2, 3, 5, 8};
+  static const int test_vals[] = {1, 2, 92, 3, 5, 8, 46};
+  std::list<size_t> my_set(vals, vals + 6);
+  std::list<size_t> test_set(test_vals, test_vals + 7);
+  const Matcher<const std::list<size_t>&> m = ContainerEq(my_set);
+  EXPECT_FALSE(m.Matches(test_set));
+  EXPECT_EQ("Only in actual: 92, 46", Explain(m, test_set));
+}
+
+// Tests that added and missing values are reported together.
+TEST(ContainerEqExtraTest, MultipleValuesAddedAndRemoved) {
+  static const int vals[] = {1, 1, 2, 3, 5, 8};
+  static const int test_vals[] = {1, 2, 3, 92, 46};
+  std::list<size_t> my_set(vals, vals + 6);
+  std::list<size_t> test_set(test_vals, test_vals + 5);
+  const Matcher<const std::list<size_t> > m = ContainerEq(my_set);
+  EXPECT_FALSE(m.Matches(test_set));
+  EXPECT_EQ("Only in actual: 92, 46; not in actual: 5, 8",
+            Explain(m, test_set));
+}
+
+// Tests to see that duplicate elements are detected,
+// but (as above) not reported in the explanation.
+TEST(ContainerEqExtraTest, MultiSetOfIntDuplicateDifference) {
+  static const int vals[] = {1, 1, 2, 3, 5, 8};
+  static const int test_vals[] = {1, 2, 3, 5, 8};
+  std::vector<int> my_set(vals, vals + 6);
+  std::vector<int> test_set(test_vals, test_vals + 5);
+  const Matcher<std::vector<int> > m = ContainerEq(my_set);
+  EXPECT_TRUE(m.Matches(my_set));
+  EXPECT_FALSE(m.Matches(test_set));
+  // There is nothing to report when both sets contain all the same values.
+  EXPECT_EQ("", Explain(m, test_set));
+}
+
+// Tests that ContainerEq works for non-trivial associative containers,
+// like maps.
+TEST(ContainerEqExtraTest, WorksForMaps) {
+  std::map<int, std::string> my_map;
+  my_map[0] = "a";
+  my_map[1] = "b";
+
+  std::map<int, std::string> test_map;
+  test_map[0] = "aa";
+  test_map[1] = "b";
+
+  const Matcher<const std::map<int, std::string>&> m = ContainerEq(my_map);
+  EXPECT_TRUE(m.Matches(my_map));
+  EXPECT_FALSE(m.Matches(test_map));
+
+  EXPECT_EQ("Only in actual: (0, \"aa\"); not in actual: (0, \"a\")",
+            Explain(m, test_map));
 }
 
 }  // namespace gmock_matchers_test

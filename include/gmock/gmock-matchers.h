@@ -38,6 +38,7 @@
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_MATCHERS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_MATCHERS_H_
 
+#include <algorithm>
 #include <ostream>  // NOLINT
 #include <sstream>
 #include <string>
@@ -1635,6 +1636,73 @@ void ExplainMatchResultTo(const ResultOfMatcher<Callable>& matcher,
   matcher.ExplainMatchResultTo(obj, os);
 }
 
+// Implements an equality matcher for any STL-style container whose elements
+// support ==. This matcher is like Eq(), but its failure explanations provide
+// more detailed information that is useful when the container is used as a set.
+// The failure message reports elements that are in one of the operands but not
+// the other. The failure messages do not report duplicate or out-of-order
+// elements in the containers (which don't properly matter to sets, but can
+// occur if the containers are vectors or lists, for example).
+//
+// Uses the container's const_iterator, value_type, operator ==,
+// begin(), and end().
+template <typename Container>
+class ContainerEqMatcher {
+ public:
+  explicit ContainerEqMatcher(const Container& rhs) : rhs_(rhs) {}
+  bool Matches(const Container& lhs) const { return lhs == rhs_; }
+  void DescribeTo(::std::ostream* os) const {
+    *os << "equals ";
+    UniversalPrinter<Container>::Print(rhs_, os);
+  }
+  void DescribeNegationTo(::std::ostream* os) const {
+    *os << "does not equal ";
+    UniversalPrinter<Container>::Print(rhs_, os);
+  }
+
+  void ExplainMatchResultTo(const Container& lhs,
+                            ::std::ostream* os) const {
+    // Something is different. Check for missing values first.
+    bool printed_header = false;
+    for (typename Container::const_iterator it = lhs.begin();
+         it != lhs.end(); ++it) {
+      if (std::find(rhs_.begin(), rhs_.end(), *it) == rhs_.end()) {
+        if (printed_header) {
+          *os << ", ";
+        } else {
+          *os << "Only in actual: ";
+          printed_header = true;
+        }
+        UniversalPrinter<typename Container::value_type>::Print(*it, os);
+      }
+    }
+
+    // Now check for extra values.
+    bool printed_header2 = false;
+    for (typename Container::const_iterator it = rhs_.begin();
+         it != rhs_.end(); ++it) {
+      if (std::find(lhs.begin(), lhs.end(), *it) == lhs.end()) {
+        if (printed_header2) {
+          *os << ", ";
+        } else {
+          *os << (printed_header ? "; not" : "Not") << " in actual: ";
+          printed_header2 = true;
+        }
+        UniversalPrinter<typename Container::value_type>::Print(*it, os);
+      }
+    }
+  }
+ private:
+  const Container rhs_;
+};
+
+template <typename Container>
+void ExplainMatchResultTo(const ContainerEqMatcher<Container>& matcher,
+                          const Container& lhs,
+                          ::std::ostream* os) {
+  matcher.ExplainMatchResultTo(lhs, os);
+}
+
 }  // namespace internal
 
 // Implements MatcherCast().
@@ -2071,6 +2139,16 @@ template <typename Predicate>
 inline PolymorphicMatcher<internal::TrulyMatcher<Predicate> >
 Truly(Predicate pred) {
   return MakePolymorphicMatcher(internal::TrulyMatcher<Predicate>(pred));
+}
+
+// Returns a matcher that matches an equal container.
+// This matcher behaves like Eq(), but in the event of mismatch lists the
+// values that are included in one container but not the other. (Duplicate
+// values and order differences are not explained.)
+template <typename Container>
+inline PolymorphicMatcher<internal::ContainerEqMatcher<Container> >
+    ContainerEq(const Container& rhs) {
+  return MakePolymorphicMatcher(internal::ContainerEqMatcher<Container>(rhs));
 }
 
 // Returns a predicate that is satisfied by anything that matches the
