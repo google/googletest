@@ -1330,8 +1330,23 @@ them directly and affect their behavior via the following environment variables
 and/or command line flags. For the flags to work, your programs must call
 `testing::InitGoogleTest()` before calling `RUN_ALL_TESTS()`.
 
-If an option is specified both by an environment variable and by a flag, the
-latter takes precedence.
+If an option is specified both by an environment variable and by a
+flag, the latter takes precedence.  Most of the options can also be
+set/read in code: to access the value of command line flag
+`--gtest_foo`, write `testing::GTEST_FLAG(foo)`.  A common pattern is
+to set the value of a flag before calling `testing::InitGoogleTest()`
+to change the default value of the flag:
+{{{
+int main(int argc, char** argv) {
+  // Prints elapsed time by default.
+  testing::GTEST_FLAG(print_time) = true;
+
+  // This allows the user to override the flag on the command line.
+  testing::InitGoogleTest(&argc, argv);
+
+  return RUN_ALL_TESTS();
+}
+}}}
 
 == Turning Assertion Failures into Break-Points ==
 
