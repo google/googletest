@@ -226,7 +226,8 @@
 //   is available.
 
 #if defined(GTEST_OS_CYGWIN) || defined(GTEST_OS_SOLARIS)
-// At least some versions of cygwin don't support ::std::wstring.
+// Cygwin 1.5 and below doesn't support ::std::wstring.
+// Cygwin 1.7 might add wstring support; this should be updated when clear.
 // Solaris' libc++ doesn't support it either.
 #define GTEST_HAS_STD_WSTRING 0
 #else
@@ -238,7 +239,8 @@
 #ifndef GTEST_HAS_GLOBAL_WSTRING
 // The user didn't tell us whether ::wstring is available, so we need
 // to figure it out.
-#define GTEST_HAS_GLOBAL_WSTRING GTEST_HAS_GLOBAL_STRING
+#define GTEST_HAS_GLOBAL_WSTRING \
+    (GTEST_HAS_STD_WSTRING && GTEST_HAS_GLOBAL_STRING)
 #endif  // GTEST_HAS_GLOBAL_WSTRING
 
 #if GTEST_HAS_STD_STRING || GTEST_HAS_GLOBAL_STRING || \
