@@ -1601,7 +1601,7 @@ Google Test's implementation consists of ~30 files (excluding its own
 tests).  Sometimes you may want them to be packaged up in two files (a
 `.h` and a `.cc`) instead, such that you can easily copy them to a new
 machine and start hacking there.  For this we provide an experimental
-Python script `fuse_gtest_files.py` in the `scripts/` directory.
+Python script `fuse_gtest_files.py` in the `scripts/` directory (starting with release 1.3.0).
 Assuming you have Python 2.4 or above installed on your machine, just
 go to that directory and run
 {{{
