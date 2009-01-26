@@ -799,9 +799,10 @@ class UnitTestOptions {
   // Returns the output format, or "" for normal printed output.
   static String GetOutputFormat();
 
-  // Returns the name of the requested output file, or the default if none
-  // was explicitly specified.
-  static String GetOutputFile();
+  // Returns the absolute path of the requested output file, or the
+  // default (test_detail.xml in the original working directory) if
+  // none was explicitly specified.
+  static String GetAbsolutePathToOutputFile();
 
   // Functions for processing the gtest_filter flag.
 

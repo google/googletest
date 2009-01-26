@@ -52,9 +52,9 @@
 
 #ifdef GTEST_OS_WINDOWS
 #ifdef _WIN32_WCE
-#include <windows.h>
+#include <windows.h>  // NOLINT
 #else
-#include <direct.h>
+#include <direct.h>  // NOLINT
 #endif  // _WIN32_WCE
 #define PATH_SEP "\\"
 #else
@@ -217,6 +217,65 @@ TEST(MakeFileNameTest, GenerateFileNameWithSlashNumberGtZero) {
   EXPECT_STREQ("foo" PATH_SEP "bar_12.xml", actual.c_str());
 }
 
+TEST(MakeFileNameTest, GenerateWhenNumberIsZeroAndDirIsEmpty) {
+  FilePath actual = FilePath::MakeFileName(FilePath(""), FilePath("bar"),
+      0, "xml");
+  EXPECT_STREQ("bar.xml", actual.c_str());
+}
+
+TEST(MakeFileNameTest, GenerateWhenNumberIsNotZeroAndDirIsEmpty) {
+  FilePath actual = FilePath::MakeFileName(FilePath(""), FilePath("bar"),
+      14, "xml");
+  EXPECT_STREQ("bar_14.xml", actual.c_str());
+}
+
+TEST(ConcatPathsTest, WorksWhenDirDoesNotEndWithPathSep) {
+  FilePath actual = FilePath::ConcatPaths(FilePath("foo"),
+                                          FilePath("bar.xml"));
+  EXPECT_STREQ("foo" PATH_SEP "bar.xml", actual.c_str());
+}
+
+TEST(ConcatPathsTest, WorksWhenPath1EndsWithPathSep) {
+  FilePath actual = FilePath::ConcatPaths(FilePath("foo" PATH_SEP),
+                                          FilePath("bar.xml"));
+  EXPECT_STREQ("foo" PATH_SEP "bar.xml", actual.c_str());
+}
+
+TEST(ConcatPathsTest, Path1BeingEmpty) {
+  FilePath actual = FilePath::ConcatPaths(FilePath(""),
+                                          FilePath("bar.xml"));
+  EXPECT_STREQ("bar.xml", actual.c_str());
+}
+
+TEST(ConcatPathsTest, Path2BeingEmpty) {
+  FilePath actual = FilePath::ConcatPaths(FilePath("foo"),
+                                          FilePath(""));
+  EXPECT_STREQ("foo" PATH_SEP, actual.c_str());
+}
+
+TEST(ConcatPathsTest, BothPathBeingEmpty) {
+  FilePath actual = FilePath::ConcatPaths(FilePath(""),
+                                          FilePath(""));
+  EXPECT_STREQ("", actual.c_str());
+}
+
+TEST(ConcatPathsTest, Path1ContainsPathSep) {
+  FilePath actual = FilePath::ConcatPaths(FilePath("foo" PATH_SEP "bar"),
+                                          FilePath("foobar.xml"));
+  EXPECT_STREQ("foo" PATH_SEP "bar" PATH_SEP "foobar.xml", actual.c_str());
+}
+
+TEST(ConcatPathsTest, Path2ContainsPathSep) {
+  FilePath actual = FilePath::ConcatPaths(FilePath("foo" PATH_SEP),
+                                          FilePath("bar" PATH_SEP "bar.xml"));
+  EXPECT_STREQ("foo" PATH_SEP "bar" PATH_SEP "bar.xml", actual.c_str());
+}
+
+TEST(ConcatPathsTest, Path2EndsWithPathSep) {
+  FilePath actual = FilePath::ConcatPaths(FilePath("foo"),
+                                          FilePath("bar" PATH_SEP));
+  EXPECT_STREQ("foo" PATH_SEP "bar" PATH_SEP, actual.c_str());
+}
 
 // RemoveTrailingPathSeparator "" -> ""
 TEST(RemoveTrailingPathSeparatorTest, EmptyString) {
@@ -251,7 +310,7 @@ TEST(RemoveTrailingPathSeparatorTest, ShouldReturnUnmodified) {
 
 TEST(DirectoryTest, RootDirectoryExists) {
 #ifdef GTEST_OS_WINDOWS  // We are on Windows.
-  char current_drive[_MAX_PATH];
+  char current_drive[_MAX_PATH];  // NOLINT
   current_drive[0] = _getdrive() + 'A' - 1;
   current_drive[1] = ':';
   current_drive[2] = '\\';
@@ -268,7 +327,7 @@ TEST(DirectoryTest, RootOfWrongDriveDoesNotExists) {
   // Find a drive that doesn't exist. Start with 'Z' to avoid common ones.
   for (char drive = 'Z'; drive >= 'A'; drive--)
     if (_chdrive(drive - 'A' + 1) == -1) {
-      char non_drive[_MAX_PATH];
+      char non_drive[_MAX_PATH];  // NOLINT
       non_drive[0] = drive;
       non_drive[1] = ':';
       non_drive[2] = '\\';
@@ -278,14 +337,14 @@ TEST(DirectoryTest, RootOfWrongDriveDoesNotExists) {
     }
   _chdrive(saved_drive_);
 }
-#endif // GTEST_OS_WINDOWS
+#endif  // GTEST_OS_WINDOWS
 
 #ifndef _WIN32_WCE
 // Windows CE _does_ consider an empty directory to exist.
 TEST(DirectoryTest, EmptyPathDirectoryDoesNotExist) {
   EXPECT_FALSE(FilePath("").DirectoryExists());
 }
-#endif // ! _WIN32_WCE
+#endif  // ! _WIN32_WCE
 
 TEST(DirectoryTest, CurrentDirectoryExists) {
 #ifdef GTEST_OS_WINDOWS  // We are on Windows.
@@ -527,6 +586,19 @@ TEST(FilePathTest, RemoveExtensionWhenThereIsNoExtension) {
 TEST(FilePathTest, IsDirectory) {
   EXPECT_FALSE(FilePath("cola").IsDirectory());
   EXPECT_TRUE(FilePath("koala" PATH_SEP).IsDirectory());
+}
+
+TEST(FilePathTest, IsAbsolutePath) {
+  EXPECT_FALSE(FilePath("is" PATH_SEP "relative").IsAbsolutePath());
+  EXPECT_FALSE(FilePath("").IsAbsolutePath());
+#ifdef GTEST_OS_WINDOWS
+    EXPECT_TRUE(FilePath("c:\\" PATH_SEP "is_not" PATH_SEP "relative")
+                .IsAbsolutePath());
+    EXPECT_FALSE(FilePath("c:foo" PATH_SEP "bar").IsAbsolutePath());
+#else
+  EXPECT_TRUE(FilePath(PATH_SEP "is_not" PATH_SEP "relative")
+              .IsAbsolutePath());
+#endif  // GTEST_OS_WINDOWS
 }
 
 }  // namespace

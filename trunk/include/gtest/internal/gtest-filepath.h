@@ -93,6 +93,12 @@ class FilePath {
                                int number,
                                const char* extension);
 
+  // Given directory = "dir", relative_path = "test.xml",
+  // returns "dir/test.xml".
+  // On Windows, uses \ as the separator rather than /.
+  static FilePath ConcatPaths(const FilePath& directory,
+                              const FilePath& relative_path);
+
   // Returns a pathname for a file that does not currently exist. The pathname
   // will be directory/base_name.extension or
   // directory/base_name_<number>.extension if directory/base_name.extension
@@ -163,6 +169,9 @@ class FilePath {
   // Returns true if pathname describes a root directory. (Windows has one
   // root directory per disk drive.)
   bool IsRootDirectory() const;
+
+  // Returns true if pathname describes an absolute path.
+  bool IsAbsolutePath() const;
 
  private:
   // Replaces multiple consecutive separators with a single separator.

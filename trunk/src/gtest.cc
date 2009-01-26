@@ -69,7 +69,7 @@
 #include <sys/time.h>  // NOLINT
 
 // On z/OS we additionally need strings.h for strcasecmp.
-#include <strings.h>
+#include <strings.h>  // NOLINT
 
 #elif defined(_WIN32_WCE)  // We are on Windows CE.
 
@@ -289,6 +289,7 @@ Mutex g_linked_ptr_mutex(Mutex::NO_CONSTRUCTOR_NEEDED_FOR_STATIC_MUTEX);
 
 // Application pathname gotten in InitGoogleTest.
 String g_executable_path;
+String g_original_working_dir;
 
 // Returns the current application's name, removing directory path if that
 // is present.
@@ -319,16 +320,27 @@ String UnitTestOptions::GetOutputFormat() {
 
 // Returns the name of the requested output file, or the default if none
 // was explicitly specified.
-String UnitTestOptions::GetOutputFile() {
+String UnitTestOptions::GetAbsolutePathToOutputFile() {
   const char* const gtest_output_flag = GTEST_FLAG(output).c_str();
   if (gtest_output_flag == NULL)
     return String("");
 
   const char* const colon = strchr(gtest_output_flag, ':');
   if (colon == NULL)
-    return String(kDefaultOutputFile);
+    return String(internal::FilePath::ConcatPaths(
+               internal::FilePath(g_original_working_dir),
+               internal::FilePath(kDefaultOutputFile)).ToString() );
 
   internal::FilePath output_name(colon + 1);
+  if (!output_name.IsAbsolutePath())
+    // TODO(wan@google.com): on Windows \some\path is not an absolute
+    // path (as its meaning depends on the current drive), yet the
+    // following logic for turning it into an absolute path is wrong.
+    // Fix it.
+    output_name = internal::FilePath::ConcatPaths(
+                    internal::FilePath(g_original_working_dir),
+                    internal::FilePath(colon + 1));
+
   if (!output_name.IsDirectory())
     return output_name.ToString();
 
@@ -3675,7 +3687,7 @@ UnitTestEventListenerInterface* UnitTestImpl::result_printer() {
   const String& output_format = internal::UnitTestOptions::GetOutputFormat();
   if (output_format == "xml") {
     repeater->AddListener(new XmlUnitTestResultPrinter(
-        internal::UnitTestOptions::GetOutputFile().c_str()));
+        internal::UnitTestOptions::GetAbsolutePathToOutputFile().c_str()));
   } else if (output_format != "") {
       printf("WARNING: unrecognized output format \"%s\" ignored.\n",
              output_format.c_str());
@@ -3926,6 +3938,8 @@ void InitGoogleTestImpl(int* argc, CharType** argv) {
   if (*argc <= 0) return;
 
   internal::g_executable_path = internal::StreamableToString(argv[0]);
+  internal::g_original_working_dir =
+      internal::FilePath::GetCurrentDir().ToString();
 
 #ifdef GTEST_HAS_DEATH_TEST
   g_argvs.clear();

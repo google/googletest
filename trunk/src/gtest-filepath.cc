@@ -46,8 +46,8 @@
 #include <unistd.h>
 #else
 #include <limits.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#include <sys/stat.h>  // NOLINT
+#include <unistd.h>  // NOLINT
 #endif  // _WIN32_WCE or _WIN32
 
 #ifdef GTEST_OS_WINDOWS
@@ -144,13 +144,22 @@ FilePath FilePath::MakeFileName(const FilePath& directory,
                                 const FilePath& base_name,
                                 int number,
                                 const char* extension) {
-  FilePath dir(directory.RemoveTrailingPathSeparator());
-  if (number == 0) {
-    return FilePath(String::Format("%s%c%s.%s", dir.c_str(), kPathSeparator,
-                                   base_name.c_str(), extension));
-  }
-  return FilePath(String::Format("%s%c%s_%d.%s", dir.c_str(), kPathSeparator,
-                                 base_name.c_str(), number, extension));
+  const FilePath file_name(
+      (number == 0) ?
+      String::Format("%s.%s", base_name.c_str(), extension) :
+      String::Format("%s_%d.%s", base_name.c_str(), number, extension));
+  return ConcatPaths(directory, file_name);
+}
+
+// Given directory = "dir", relative_path = "test.xml", returns "dir/test.xml".
+// On Windows, uses \ as the separator rather than /.
+FilePath FilePath::ConcatPaths(const FilePath& directory,
+                               const FilePath& relative_path) {
+  if (directory.IsEmpty())
+    return relative_path;
+  const FilePath dir(directory.RemoveTrailingPathSeparator());
+  return FilePath(String::Format("%s%c%s", dir.c_str(), kPathSeparator,
+                                 relative_path.c_str()));
 }
 
 // Returns true if pathname describes something findable in the file-system,
@@ -207,13 +216,26 @@ bool FilePath::DirectoryExists() const {
 bool FilePath::IsRootDirectory() const {
 #ifdef GTEST_OS_WINDOWS
   const char* const name = pathname_.c_str();
-  return pathname_.GetLength() == 3 &&
+  // TODO(wan@google.com): on Windows a network share like
+  // \\server\share can be a root directory, although it cannot be the
+  // current directory.  Handle this properly.
+  return pathname_.GetLength() == 3 && IsAbsolutePath();
+#else
+  return pathname_ == kPathSeparatorString;
+#endif
+}
+
+// Returns true if pathname describes an absolute path.
+bool FilePath::IsAbsolutePath() const {
+  const char* const name = pathname_.c_str();
+#ifdef GTEST_OS_WINDOWS
+  return pathname_.GetLength() >= 3 &&
      ((name[0] >= 'a' && name[0] <= 'z') ||
       (name[0] >= 'A' && name[0] <= 'Z')) &&
      name[1] == ':' &&
      name[2] == kPathSeparator;
 #else
-  return pathname_ == kPathSeparatorString;
+  return name[0] == kPathSeparator;
 #endif
 }
 
