@@ -289,7 +289,6 @@ Mutex g_linked_ptr_mutex(Mutex::NO_CONSTRUCTOR_NEEDED_FOR_STATIC_MUTEX);
 
 // Application pathname gotten in InitGoogleTest.
 String g_executable_path;
-String g_original_working_dir;
 
 // Returns the current application's name, removing directory path if that
 // is present.
@@ -328,7 +327,8 @@ String UnitTestOptions::GetAbsolutePathToOutputFile() {
   const char* const colon = strchr(gtest_output_flag, ':');
   if (colon == NULL)
     return String(internal::FilePath::ConcatPaths(
-               internal::FilePath(g_original_working_dir),
+               internal::FilePath(
+                   UnitTest::GetInstance()->original_working_dir()),
                internal::FilePath(kDefaultOutputFile)).ToString() );
 
   internal::FilePath output_name(colon + 1);
@@ -338,8 +338,8 @@ String UnitTestOptions::GetAbsolutePathToOutputFile() {
     // following logic for turning it into an absolute path is wrong.
     // Fix it.
     output_name = internal::FilePath::ConcatPaths(
-                    internal::FilePath(g_original_working_dir),
-                    internal::FilePath(colon + 1));
+        internal::FilePath(UnitTest::GetInstance()->original_working_dir()),
+        internal::FilePath(colon + 1));
 
   if (!output_name.IsDirectory())
     return output_name.ToString();
@@ -3938,8 +3938,6 @@ void InitGoogleTestImpl(int* argc, CharType** argv) {
   if (*argc <= 0) return;
 
   internal::g_executable_path = internal::StreamableToString(argv[0]);
-  internal::g_original_working_dir =
-      internal::FilePath::GetCurrentDir().ToString();
 
 #ifdef GTEST_HAS_DEATH_TEST
   g_argvs.clear();
