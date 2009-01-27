@@ -55,6 +55,7 @@ _COMMON_GMOCK_SYMBOLS = [
     'Ge',
     'Gt',
     'HasSubstr',
+    'IsInitializedProto',
     'Le',
     'Lt',
     'MatcherCast',
@@ -63,6 +64,7 @@ _COMMON_GMOCK_SYMBOLS = [
     'Not',
     'NotNull',
     'Pointee',
+    'PointeeIsInitializedProto',
     'Property',
     'Ref',
     'StartsWith',
@@ -307,12 +309,29 @@ Did you forget to write
       yield ('NUS', 'Need to Use Symbol', diagnosis % m.groupdict())
 
 
+def _NeedToUseReturnNullDiagnoser(msg):
+  """Diagnoses the NRNULL disease, given the error messages by gcc."""
+
+  regex = (r'(?P<file>.*):(?P<line>\d+):\s+instantiated from here\n'
+           r'.*gmock-actions\.h.*error: invalid conversion from '
+           r'\'long int\' to \'(?P<type>.+\*)')
+
+  diagnosis = """%(file)s:%(line)s:
+You are probably calling Return(NULL) and the compiler isn't sure how to turn
+NULL into a %(type)s*. Use ReturnNull() instead.
+Note: the line number may be off; please fix all instances of Return(NULL)."""
+  return _GenericDiagnoser('NRNULL', 'Need to use ReturnNull',
+                           regex, diagnosis, msg)
+
+
+
 _DIAGNOSERS = [
     _IncompleteByReferenceArgumentDiagnoser,
     _MockObjectPointerDiagnoser,
     _NeedToReturnNothingDiagnoser,
     _NeedToReturnReferenceDiagnoser,
     _NeedToReturnSomethingDiagnoser,
+    _NeedToUseReturnNullDiagnoser,
     _NeedToUseSymbolDiagnoser,
     _OverloadedFunctionActionDiagnoser,
     _OverloadedFunctionMatcherDiagnoser,

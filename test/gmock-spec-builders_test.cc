@@ -987,6 +987,18 @@ TEST(UnexpectedCallTest, UnsatisifiedPrerequisites) {
 
 #endif  // GMOCK_HAS_REGEX
 
+#ifdef GTEST_HAS_DEATH_TEST
+
+TEST(UndefinedReturnValueTest, ReturnValueIsMandatory) {
+  MockA a;
+  // TODO(wan@google.com): We should really verify the output message,
+  // but we cannot yet due to that EXPECT_DEATH only captures stderr
+  // while Google Mock logs to stdout.
+  EXPECT_DEATH(a.ReturnResult(1), "");
+}
+
+#endif  // GTEST_HAS_DEATH_TEST
+
 // Tests that an excessive call (one whose arguments match the
 // matchers but is called too many times) performs the default action.
 TEST(ExcessiveCallTest, DoesDefaultAction) {

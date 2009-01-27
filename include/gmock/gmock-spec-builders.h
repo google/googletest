@@ -1061,15 +1061,21 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
     return NULL;
   }
 
-  // Performs the default action of this mock function on the given
-  // arguments and returns the result. This method doesn't depend on
-  // the mutable state of this object, and thus can be called
-  // concurrently without locking.
+  // Performs the default action of this mock function on the given arguments
+  // and returns the result. Asserts with a helpful call descrption if there is
+  // no valid return value. This method doesn't depend on the mutable state of
+  // this object, and thus can be called concurrently without locking.
   // L = *
-  Result PerformDefaultAction(const ArgumentTuple& args) const {
+  Result PerformDefaultAction(const ArgumentTuple& args,
+                              const string& call_description) const {
     const DefaultActionSpec<F>* const spec = FindDefaultActionSpec(args);
-    return (spec != NULL) ? spec->GetAction().Perform(args)
-        : DefaultValue<Result>::Get();
+    if (spec != NULL) {
+      return spec->GetAction().Perform(args);
+    }
+    Assert(DefaultValue<Result>::Exists(), "", -1,
+           call_description + "\n    The mock function has no default action "
+           "set, and its return type has no default value set.");
+    return DefaultValue<Result>::Get();
   }
 
   // Registers this function mocker and the mock object owning it;
@@ -1407,7 +1413,7 @@ class InvokeWithHelper {
           Mock::GetReactionOnUninterestingCalls(mocker->MockObject());
 
       // Calculates the function result.
-      Result result = mocker->PerformDefaultAction(args);
+      Result result = mocker->PerformDefaultAction(args, ss.str());
 
       // Prints the function result.
       ss << "\n          Returns: ";
@@ -1429,8 +1435,8 @@ class InvokeWithHelper {
         args, &exp, &action, &is_excessive, &ss, &why);
     ss << "    Function call: " << mocker->Name();
     UniversalPrinter<ArgumentTuple>::Print(args, &ss);
-    Result result =
-        action.IsDoDefault() ? mocker->PerformDefaultAction(args)
+    Result result = action.IsDoDefault() ?
+        mocker->PerformDefaultAction(args, ss.str())
         : action.Perform(args);
     ss << "\n          Returns: ";
     UniversalPrinter<Result>::Print(result, &ss);
@@ -1480,7 +1486,7 @@ class InvokeWithHelper<void, F> {
       const CallReaction reaction =
           Mock::GetReactionOnUninterestingCalls(mocker->MockObject());
 
-      mocker->PerformDefaultAction(args);
+      mocker->PerformDefaultAction(args, ss.str());
       ReportUninterestingCall(reaction, ss.str());
       return;
     }
@@ -1499,7 +1505,7 @@ class InvokeWithHelper<void, F> {
     UniversalPrinter<ArgumentTuple>::Print(args, &ss);
     ss << "\n" << why.str();
     if (action.IsDoDefault()) {
-      mocker->PerformDefaultAction(args);
+      mocker->PerformDefaultAction(args, ss.str());
     } else {
       action.Perform(args);
     }

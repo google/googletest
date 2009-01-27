@@ -69,6 +69,8 @@ class ActionAdaptor;
 template <typename T>
 class BuiltInDefaultValue {
  public:
+  // This function returns true iff type T has a built-in default value.
+  static bool Exists() { return false; }
   static T Get() {
     Assert(false, __FILE__, __LINE__,
            "Default action undefined for the function return type.");
@@ -83,6 +85,7 @@ class BuiltInDefaultValue {
 template <typename T>
 class BuiltInDefaultValue<const T> {
  public:
+  static bool Exists() { return BuiltInDefaultValue<T>::Exists(); }
   static T Get() { return BuiltInDefaultValue<T>::Get(); }
 };
 
@@ -91,6 +94,7 @@ class BuiltInDefaultValue<const T> {
 template <typename T>
 class BuiltInDefaultValue<T*> {
  public:
+  static bool Exists() { return true; }
   static T* Get() { return NULL; }
 };
 
@@ -100,6 +104,7 @@ class BuiltInDefaultValue<T*> {
   template <> \
   class BuiltInDefaultValue<type> { \
    public: \
+    static bool Exists() { return true; } \
     static type Get() { return value; } \
   }
 
@@ -191,6 +196,12 @@ class DefaultValue {
   // Returns true iff the user has set the default value for type T.
   static bool IsSet() { return value_ != NULL; }
 
+  // Returns true if T has a default return value set by the user or there
+  // exists a built-in default value.
+  static bool Exists() {
+    return IsSet() || internal::BuiltInDefaultValue<T>::Exists();
+  }
+
   // Returns the default value for type T if the user has set one;
   // otherwise returns the built-in default value if there is one;
   // otherwise aborts the process.
@@ -220,6 +231,12 @@ class DefaultValue<T&> {
   // Returns true iff the user has set the default value for type T&.
   static bool IsSet() { return address_ != NULL; }
 
+  // Returns true if T has a default return value set by the user or there
+  // exists a built-in default value.
+  static bool Exists() {
+    return IsSet() || internal::BuiltInDefaultValue<T&>::Exists();
+  }
+
   // Returns the default value for type T& if the user has set one;
   // otherwise returns the built-in default value if there is one;
   // otherwise aborts the process.
@@ -236,6 +253,7 @@ class DefaultValue<T&> {
 template <>
 class DefaultValue<void> {
  public:
+  static bool Exists() { return true; }
   static void Get() {}
 };
 

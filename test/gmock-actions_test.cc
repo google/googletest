@@ -82,6 +82,13 @@ TEST(BuiltInDefaultValueTest, IsNullForPointerTypes) {
   EXPECT_TRUE(BuiltInDefaultValue<void*>::Get() == NULL);
 }
 
+// Tests that BuiltInDefaultValue<T*>::Exists() return true.
+TEST(BuiltInDefaultValueTest, ExistsForPointerTypes) {
+  EXPECT_TRUE(BuiltInDefaultValue<int*>::Exists());
+  EXPECT_TRUE(BuiltInDefaultValue<const char*>::Exists());
+  EXPECT_TRUE(BuiltInDefaultValue<void*>::Exists());
+}
+
 // Tests that BuiltInDefaultValue<T>::Get() returns 0 when T is a
 // built-in numeric type.
 TEST(BuiltInDefaultValueTest, IsZeroForNumericTypes) {
@@ -108,9 +115,40 @@ TEST(BuiltInDefaultValueTest, IsZeroForNumericTypes) {
   EXPECT_EQ(0, BuiltInDefaultValue<double>::Get());
 }
 
+// Tests that BuiltInDefaultValue<T>::Exists() returns true when T is a
+// built-in numeric type.
+TEST(BuiltInDefaultValueTest, ExistsForNumericTypes) {
+  EXPECT_TRUE(BuiltInDefaultValue<unsigned char>::Exists());
+  EXPECT_TRUE(BuiltInDefaultValue<signed char>::Exists());
+  EXPECT_TRUE(BuiltInDefaultValue<char>::Exists());
+#ifndef GTEST_OS_WINDOWS
+  EXPECT_TRUE(BuiltInDefaultValue<unsigned wchar_t>::Exists());
+  EXPECT_TRUE(BuiltInDefaultValue<signed wchar_t>::Exists());
+#endif  // GTEST_OS_WINDOWS
+  EXPECT_TRUE(BuiltInDefaultValue<wchar_t>::Exists());
+  EXPECT_TRUE(BuiltInDefaultValue<unsigned short>::Exists());  // NOLINT
+  EXPECT_TRUE(BuiltInDefaultValue<signed short>::Exists());  // NOLINT
+  EXPECT_TRUE(BuiltInDefaultValue<short>::Exists());  // NOLINT
+  EXPECT_TRUE(BuiltInDefaultValue<unsigned int>::Exists());
+  EXPECT_TRUE(BuiltInDefaultValue<signed int>::Exists());
+  EXPECT_TRUE(BuiltInDefaultValue<int>::Exists());
+  EXPECT_TRUE(BuiltInDefaultValue<unsigned long>::Exists());  // NOLINT
+  EXPECT_TRUE(BuiltInDefaultValue<signed long>::Exists());  // NOLINT
+  EXPECT_TRUE(BuiltInDefaultValue<long>::Exists());  // NOLINT
+  EXPECT_TRUE(BuiltInDefaultValue<UInt64>::Exists());
+  EXPECT_TRUE(BuiltInDefaultValue<Int64>::Exists());
+  EXPECT_TRUE(BuiltInDefaultValue<float>::Exists());
+  EXPECT_TRUE(BuiltInDefaultValue<double>::Exists());
+}
+
 // Tests that BuiltInDefaultValue<bool>::Get() returns false.
 TEST(BuiltInDefaultValueTest, IsFalseForBool) {
   EXPECT_FALSE(BuiltInDefaultValue<bool>::Get());
+}
+
+// Tests that BuiltInDefaultValue<bool>::Exists() returns true.
+TEST(BuiltInDefaultValueTest, BoolExists) {
+  EXPECT_TRUE(BuiltInDefaultValue<bool>::Exists());
 }
 
 // Tests that BuiltInDefaultValue<T>::Get() returns "" when T is a
@@ -122,6 +160,18 @@ TEST(BuiltInDefaultValueTest, IsEmptyStringForString) {
 
 #if GTEST_HAS_STD_STRING
   EXPECT_EQ("", BuiltInDefaultValue< ::std::string>::Get());
+#endif  // GTEST_HAS_STD_STRING
+}
+
+// Tests that BuiltInDefaultValue<T>::Exists() returns true when T is a
+// string type.
+TEST(BuiltInDefaultValueTest, ExistsForString) {
+#if GTEST_HAS_GLOBAL_STRING
+  EXPECT_TRUE(BuiltInDefaultValue< ::string>::Exists());
+#endif  // GTEST_HAS_GLOBAL_STRING
+
+#if GTEST_HAS_STD_STRING
+  EXPECT_TRUE(BuiltInDefaultValue< ::std::string>::Exists());
 #endif  // GTEST_HAS_STD_STRING
 }
 
@@ -141,6 +191,10 @@ struct UserType {
 
   int value;
 };
+
+TEST(BuiltInDefaultValueTest, UserTypeHasNoDefault) {
+  EXPECT_FALSE(BuiltInDefaultValue<UserType>::Exists());
+}
 
 #ifdef GTEST_HAS_DEATH_TEST
 
@@ -170,17 +224,26 @@ TEST(DefaultValueTest, IsInitiallyUnset) {
 
 // Tests that DefaultValue<T> can be set and then unset.
 TEST(DefaultValueTest, CanBeSetAndUnset) {
+  EXPECT_TRUE(DefaultValue<int>::Exists());
+  EXPECT_FALSE(DefaultValue<const UserType>::Exists());
+
   DefaultValue<int>::Set(1);
   DefaultValue<const UserType>::Set(UserType());
 
   EXPECT_EQ(1, DefaultValue<int>::Get());
   EXPECT_EQ(0, DefaultValue<const UserType>::Get().value);
 
+  EXPECT_TRUE(DefaultValue<int>::Exists());
+  EXPECT_TRUE(DefaultValue<const UserType>::Exists());
+
   DefaultValue<int>::Clear();
   DefaultValue<const UserType>::Clear();
 
   EXPECT_FALSE(DefaultValue<int>::IsSet());
   EXPECT_FALSE(DefaultValue<const UserType>::IsSet());
+
+  EXPECT_TRUE(DefaultValue<int>::Exists());
+  EXPECT_FALSE(DefaultValue<const UserType>::Exists());
 }
 
 // Tests that DefaultValue<T>::Get() returns the
@@ -188,7 +251,9 @@ TEST(DefaultValueTest, CanBeSetAndUnset) {
 // false.
 TEST(DefaultValueDeathTest, GetReturnsBuiltInDefaultValueWhenUnset) {
   EXPECT_FALSE(DefaultValue<int>::IsSet());
+  EXPECT_TRUE(DefaultValue<int>::Exists());
   EXPECT_FALSE(DefaultValue<UserType>::IsSet());
+  EXPECT_FALSE(DefaultValue<UserType>::Exists());
 
   EXPECT_EQ(0, DefaultValue<int>::Get());
 
@@ -212,6 +277,12 @@ TEST(DefaultValueOfReferenceTest, IsInitiallyUnset) {
   EXPECT_FALSE(DefaultValue<UserType&>::IsSet());
 }
 
+// Tests that DefaultValue<T&>::Exists is false initiallly.
+TEST(DefaultValueOfReferenceTest, IsInitiallyNotExisting) {
+  EXPECT_FALSE(DefaultValue<int&>::Exists());
+  EXPECT_FALSE(DefaultValue<UserType&>::Exists());
+}
+
 // Tests that DefaultValue<T&> can be set and then unset.
 TEST(DefaultValueOfReferenceTest, CanBeSetAndUnset) {
   int n = 1;
@@ -219,11 +290,17 @@ TEST(DefaultValueOfReferenceTest, CanBeSetAndUnset) {
   UserType u;
   DefaultValue<UserType&>::Set(u);
 
+  EXPECT_TRUE(DefaultValue<const int&>::Exists());
+  EXPECT_TRUE(DefaultValue<UserType&>::Exists());
+
   EXPECT_EQ(&n, &(DefaultValue<const int&>::Get()));
   EXPECT_EQ(&u, &(DefaultValue<UserType&>::Get()));
 
   DefaultValue<const int&>::Clear();
   DefaultValue<UserType&>::Clear();
+
+  EXPECT_FALSE(DefaultValue<const int&>::Exists());
+  EXPECT_FALSE(DefaultValue<UserType&>::Exists());
 
   EXPECT_FALSE(DefaultValue<const int&>::IsSet());
   EXPECT_FALSE(DefaultValue<UserType&>::IsSet());
