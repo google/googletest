@@ -97,6 +97,9 @@
 //   GTEST_HAS_TYPED_TEST   - defined iff typed tests are supported.
 //   GTEST_HAS_TYPED_TEST_P - defined iff type-parameterized tests are
 //                            supported.
+//   GTEST_USES_POSIX_RE    - defined iff enhanced POSIX regex is used.
+//   GTEST_USES_SIMPLE_RE   - defined iff our own simple regex is used;
+//                            the above two are mutually exclusive.
 //
 // Macros for basic C++ coding:
 //   GTEST_AMBIGUOUS_ELSE_BLOCKER_ - for disabling a gcc warning.
@@ -186,6 +189,23 @@
 #elif defined(__sun) && defined(__SVR4)
 #define GTEST_OS_SOLARIS
 #endif  // _MSC_VER
+
+#if defined(GTEST_OS_LINUX)
+
+// On some platforms, <regex.h> needs someone to define size_t, and
+// won't compile otherwise.  We can #include it here as we already
+// included <stdlib.h>, which is guaranteed to define size_t through
+// <stddef.h>.
+#include <regex.h>  // NOLINT
+#define GTEST_USES_POSIX_RE 1
+
+#else
+
+// We are not on Linux, so <regex.h> may not be available.  Use our
+// own simple regex implementation instead.
+#define GTEST_USES_SIMPLE_RE 1
+
+#endif  // GTEST_OS_LINUX
 
 // Determines whether ::std::string and ::string are available.
 
@@ -352,11 +372,6 @@
 // Determines whether to support death tests.
 #if GTEST_HAS_STD_STRING && GTEST_HAS_CLONE
 #define GTEST_HAS_DEATH_TEST
-// On some platforms, <regex.h> needs someone to define size_t, and
-// won't compile otherwise.  We can #include it here as we already
-// included <stdlib.h>, which is guaranteed to define size_t through
-// <stddef.h>.
-#include <regex.h>
 #include <vector>
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -375,8 +390,8 @@
 // Typed tests need <typeinfo> and variadic macros, which gcc and VC
 // 8.0+ support.
 #if defined(__GNUC__) || (_MSC_VER >= 1400)
-#define GTEST_HAS_TYPED_TEST
-#define GTEST_HAS_TYPED_TEST_P
+#define GTEST_HAS_TYPED_TEST 1
+#define GTEST_HAS_TYPED_TEST_P 1
 #endif  // defined(__GNUC__) || (_MSC_VER >= 1400)
 
 // Determines whether to support Combine(). This only makes sense when
@@ -490,8 +505,6 @@ class scoped_ptr {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(scoped_ptr);
 };
 
-#ifdef GTEST_HAS_DEATH_TEST
-
 // Defines RE.
 
 // A simple C++ wrapper for <regex.h>.  It uses the POSIX Enxtended
@@ -549,12 +562,16 @@ class RE {
   // String type here, in order to simplify dependencies between the
   // files.
   const char* pattern_;
+  bool is_valid_;
+#if GTEST_USES_POSIX_RE
   regex_t full_regex_;     // For FullMatch().
   regex_t partial_regex_;  // For PartialMatch().
-  bool is_valid_;
-};
+#else  // GTEST_USES_SIMPLE_RE
+  const char* full_pattern_;  // For FullMatch();
+#endif
 
-#endif  // GTEST_HAS_DEATH_TEST
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(RE);
+};
 
 // Defines logging utilities:
 //   GTEST_LOG_()   - logs messages at the specified severity level.
