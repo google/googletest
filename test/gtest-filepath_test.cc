@@ -311,7 +311,7 @@ TEST(RemoveTrailingPathSeparatorTest, ShouldReturnUnmodified) {
 TEST(DirectoryTest, RootDirectoryExists) {
 #ifdef GTEST_OS_WINDOWS  // We are on Windows.
   char current_drive[_MAX_PATH];  // NOLINT
-  current_drive[0] = _getdrive() + 'A' - 1;
+  current_drive[0] = static_cast<char>(_getdrive() + 'A' - 1);
   current_drive[1] = ':';
   current_drive[2] = '\\';
   current_drive[3] = '\0';

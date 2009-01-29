@@ -1090,7 +1090,7 @@ TEST(TestResultPropertyTest, OverridesValuesForDuplicateKeys) {
 // property is not recorded.
 void ExpectNonFatalFailureRecordingPropertyWithReservedKey(const char* key) {
   TestResult test_result;
-  TestProperty property("name", "1");
+  TestProperty property(key, "1");
   EXPECT_NONFATAL_FAILURE(test_result.RecordProperty(property), "Reserved key");
   ASSERT_TRUE(test_result.test_properties().IsEmpty()) << "Not recorded";
 }
@@ -1594,31 +1594,31 @@ TEST(PredicateAssertionTest, AcceptsTemplateFunction) {
 // Some helper functions for testing using overloaded/template
 // functions with ASSERT_PRED_FORMATn and EXPECT_PRED_FORMATn.
 
-AssertionResult IsPositiveFormat(const char* expr, int n) {
+AssertionResult IsPositiveFormat(const char* /* expr */, int n) {
   return n > 0 ? AssertionSuccess() :
       AssertionFailure(Message() << "Failure");
 }
 
-AssertionResult IsPositiveFormat(const char* expr, double x) {
+AssertionResult IsPositiveFormat(const char* /* expr */, double x) {
   return x > 0 ? AssertionSuccess() :
       AssertionFailure(Message() << "Failure");
 }
 
 template <typename T>
-AssertionResult IsNegativeFormat(const char* expr, T x) {
+AssertionResult IsNegativeFormat(const char* /* expr */, T x) {
   return x < 0 ? AssertionSuccess() :
       AssertionFailure(Message() << "Failure");
 }
 
 template <typename T1, typename T2>
-AssertionResult EqualsFormat(const char* expr1, const char* expr2,
+AssertionResult EqualsFormat(const char* /* expr1 */, const char* /* expr2 */,
                              const T1& x1, const T2& x2) {
   return x1 == x2 ? AssertionSuccess() :
       AssertionFailure(Message() << "Failure");
 }
 
 // Tests that overloaded functions can be used in *_PRED_FORMAT*
-// without explictly specifying their types.
+// without explicitly specifying their types.
 TEST(PredicateFormatAssertionTest, AcceptsOverloadedFunction) {
   EXPECT_PRED_FORMAT1(IsPositiveFormat, 5);
   ASSERT_PRED_FORMAT1(IsPositiveFormat, 6.0);

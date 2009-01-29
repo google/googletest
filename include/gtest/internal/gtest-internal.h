@@ -748,6 +748,9 @@ String GetCurrentOsStackTraceExceptTop(UnitTest* unit_test, int skip_count);
 // Returns the number of failed test parts in the given test result object.
 int GetFailedPartCount(const TestResult* result);
 
+// A helper for suppressing warnings on unreachable code in some macros.
+inline bool True() { return true; }
+
 }  // namespace internal
 }  // namespace testing
 
@@ -835,7 +838,7 @@ int GetFailedPartCount(const TestResult* result);
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (const char* gtest_msg = "") { \
     ::testing::internal::HasNewFatalFailureHelper gtest_fatal_failure_checker; \
-    { statement; } \
+    if (::testing::internal::True()) { statement; } \
     if (gtest_fatal_failure_checker.has_new_fatal_failure()) { \
       gtest_msg = "Expected: " #statement " doesn't generate new fatal " \
                   "failures in the current thread.\n" \

@@ -901,6 +901,8 @@ class DefaultGlobalTestPartResultReporter
 
  private:
   UnitTestImpl* const unit_test_;
+
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(DefaultGlobalTestPartResultReporter);
 };
 
 // This is the default per thread test part result reporter used in
@@ -915,6 +917,8 @@ class DefaultPerThreadTestPartResultReporter
 
  private:
   UnitTestImpl* const unit_test_;
+
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(DefaultPerThreadTestPartResultReporter);
 };
 
 // The private implementation of the UnitTest class.  We don't protect
