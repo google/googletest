@@ -215,7 +215,6 @@ bool FilePath::DirectoryExists() const {
 // root directory per disk drive.)
 bool FilePath::IsRootDirectory() const {
 #ifdef GTEST_OS_WINDOWS
-  const char* const name = pathname_.c_str();
   // TODO(wan@google.com): on Windows a network share like
   // \\server\share can be a root directory, although it cannot be the
   // current directory.  Handle this properly.

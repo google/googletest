@@ -1266,6 +1266,22 @@ inline UnitTestImpl* GetUnitTestImpl() {
   return UnitTest::GetInstance()->impl();
 }
 
+// Internal helper functions for implementing the simple regular
+// expression matcher.
+bool IsInSet(char ch, const char* str);
+bool IsDigit(char ch);
+bool IsPunct(char ch);
+bool IsRepeat(char ch);
+bool IsWhiteSpace(char ch);
+bool IsWordChar(char ch);
+bool IsValidEscape(char ch);
+bool AtomMatchesChar(bool escaped, char pattern, char ch);
+bool ValidateRegex(const char* regex);
+bool MatchRegexAtHead(const char* regex, const char* str);
+bool MatchRepetitionAndRegexAtHead(
+    bool escaped, char ch, char repeat, const char* regex, const char* str);
+bool MatchRegexAnywhere(const char* regex, const char* str);
+
 // Parses the command line for Google Test flags, without initializing
 // other parts of Google Test.
 void ParseGoogleTestFlagsOnly(int* argc, char** argv);
