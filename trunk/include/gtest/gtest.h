@@ -614,9 +614,19 @@ AssertionResult CmpHelperEQ(const char* expected_expression,
                             const char* actual_expression,
                             const T1& expected,
                             const T2& actual) {
+#ifdef _MSC_VER
+#pragma warning(push)          // Saves the current warning state.
+#pragma warning(disable:4389)  // Temporarily disables warning on
+                               // signed/unsigned mismatch.
+#endif
+
   if (expected == actual) {
     return AssertionSuccess();
   }
+
+#ifdef _MSC_VER
+#pragma warning(pop)          // Restores the warning state.
+#endif
 
   return EqFailure(expected_expression,
                    actual_expression,
@@ -688,7 +698,7 @@ class EqHelper<true> {
   template <typename T1, typename T2>
   static AssertionResult Compare(const char* expected_expression,
                                  const char* actual_expression,
-                                 const T1& expected,
+                                 const T1& /* expected */,
                                  T2* actual) {
     // We already know that 'expected' is a null pointer.
     return CmpHelperEQ(expected_expression, actual_expression,
@@ -1315,7 +1325,7 @@ bool StaticAssertTypeEq() {
 // value, as it always calls GetTypeId<>() from the Google Test
 // framework.
 #define TEST(test_case_name, test_name)\
-  GTEST_TEST_(test_case_name, test_name,\
+  GTEST_TEST_(test_case_name, test_name, \
               ::testing::Test, ::testing::internal::GetTestTypeId())
 
 
@@ -1346,7 +1356,7 @@ bool StaticAssertTypeEq() {
 //   }
 
 #define TEST_F(test_fixture, test_name)\
-  GTEST_TEST_(test_fixture, test_name, test_fixture,\
+  GTEST_TEST_(test_fixture, test_name, test_fixture, \
               ::testing::internal::GetTypeId<test_fixture>())
 
 // Use this macro in main() to run all tests.  It returns 0 if all

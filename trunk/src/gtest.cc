@@ -374,7 +374,7 @@ bool UnitTestOptions::PatternMatchesString(const char *pattern,
 
 bool UnitTestOptions::MatchesFilter(const String& name, const char* filter) {
   const char *cur_pattern = filter;
-  while (true) {
+  for (;;) {
     if (PatternMatchesString(cur_pattern, name.c_str())) {
       return true;
     }
@@ -1458,23 +1458,19 @@ char* CodePointToUtf8(UInt32 code_point, char* str) {
 // and thus should be combined into a single Unicode code point
 // using CreateCodePointFromUtf16SurrogatePair.
 inline bool IsUtf16SurrogatePair(wchar_t first, wchar_t second) {
-  if (sizeof(wchar_t) == 2)
-    return (first & 0xFC00) == 0xD800 && (second & 0xFC00) == 0xDC00;
-  else
-    return false;
+  return sizeof(wchar_t) == 2 &&
+      (first & 0xFC00) == 0xD800 && (second & 0xFC00) == 0xDC00;
 }
 
 // Creates a Unicode code point from UTF16 surrogate pair.
 inline UInt32 CreateCodePointFromUtf16SurrogatePair(wchar_t first,
                                                     wchar_t second) {
-  if (sizeof(wchar_t) == 2) {
-    const UInt32 mask = (1 << 10) - 1;
-    return (((first & mask) << 10) | (second & mask)) + 0x10000;
-  } else {
-    // This should not be called, but we provide a sensible default
-    // in case it is.
-    return static_cast<UInt32>(first);
-  }
+  const UInt32 mask = (1 << 10) - 1;
+  return (sizeof(wchar_t) == 2) ?
+      (((first & mask) << 10) | (second & mask)) + 0x10000 :
+      // This function should not be called when the condition is
+      // false, but we provide a sensible default in case it is.
+      static_cast<UInt32>(first);
 }
 
 // Converts a wide string to a narrow string in UTF-8 encoding.
