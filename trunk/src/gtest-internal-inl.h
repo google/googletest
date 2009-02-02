@@ -60,21 +60,10 @@ namespace testing {
 
 // Declares the flags.
 //
-// We don't want the users to modify these flags in the code, but want
-// Google Test's own unit tests to be able to access them.  Therefore we
-// declare them here as opposed to in gtest.h.
-GTEST_DECLARE_bool_(also_run_disabled_tests);
-GTEST_DECLARE_bool_(break_on_failure);
-GTEST_DECLARE_bool_(catch_exceptions);
-GTEST_DECLARE_string_(color);
+// We don't want the users to modify this flag in the code, but want
+// Google Test's own unit tests to be able to access it. Therefore we
+// declare it here as opposed to in gtest.h.
 GTEST_DECLARE_bool_(death_test_use_fork);
-GTEST_DECLARE_string_(filter);
-GTEST_DECLARE_bool_(list_tests);
-GTEST_DECLARE_string_(output);
-GTEST_DECLARE_bool_(print_time);
-GTEST_DECLARE_int32_(repeat);
-GTEST_DECLARE_bool_(show_internal_stack_frames);
-GTEST_DECLARE_int32_(stack_trace_depth);
 
 namespace internal {
 
