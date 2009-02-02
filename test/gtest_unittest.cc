@@ -33,6 +33,25 @@
 // Google Test work.
 
 #include <gtest/gtest.h>
+
+// Verifies that the command line flag variables can be accessed
+// in code once <gtest/gtest.h> has been #included.
+// Do not move it after other #includes.
+TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
+  bool dummy = testing::GTEST_FLAG(also_run_disabled_tests)
+      || testing::GTEST_FLAG(break_on_failure)
+      || testing::GTEST_FLAG(catch_exceptions)
+      || testing::GTEST_FLAG(color) != "unknown"
+      || testing::GTEST_FLAG(filter) != "unknown"
+      || testing::GTEST_FLAG(list_tests)
+      || testing::GTEST_FLAG(output) != "unknown"
+      || testing::GTEST_FLAG(print_time)
+      || testing::GTEST_FLAG(repeat) > 0
+      || testing::GTEST_FLAG(show_internal_stack_frames)
+      || testing::GTEST_FLAG(stack_trace_depth) > 0;
+  EXPECT_TRUE(dummy || !dummy);  // Suppresses warning that dummy is unused.
+}
+
 #include <gtest/gtest-spi.h>
 
 // Indicates that this translation unit is part of Google Test's

@@ -93,16 +93,53 @@
 
 namespace testing {
 
-// The upper limit for valid stack trace depths.
-const int kMaxStackTraceDepth = 100;
+// Declares the flags.
+
+// This flag temporary enables the disabled tests.
+GTEST_DECLARE_bool_(also_run_disabled_tests);
+
+// This flag brings the debugger on an assertion failure.
+GTEST_DECLARE_bool_(break_on_failure);
+
+// This flag controls whether Google Test catches all test-thrown exceptions 
+// and logs them as failures. 
+GTEST_DECLARE_bool_(catch_exceptions);
+
+// This flag enables using colors in terminal output. Available values are 
+// "yes" to enable colors, "no" (disable colors), or "auto" (the default) 
+// to let Google Test decide.
+GTEST_DECLARE_string_(color);
+
+// This flag sets up the filter to select by name using a glob pattern 
+// the tests to run. If the filter is not given all tests are executed.
+GTEST_DECLARE_string_(filter);
+
+// This flag causes the Google Test to list tests. None of the tests listed 
+// are actually run if the flag is provided.
+GTEST_DECLARE_bool_(list_tests);
+
+// This flag controls whether Google Test emits a detailed XML report to a file
+// in addition to its normal textual output.
+GTEST_DECLARE_string_(output);
+
+// This flags control whether Google Test prints the elapsed time for each 
+// test.
+GTEST_DECLARE_bool_(print_time);
+
+// This flag sets how many times the tests are repeated. The default value 
+// is 1. If the value is -1 the tests are repeating forever.
+GTEST_DECLARE_int32_(repeat);
+
+// This flag controls whether Google Test includes Google Test internal
+// stack frames in failure stack traces.
+GTEST_DECLARE_bool_(show_internal_stack_frames);
 
 // This flag specifies the maximum number of stack frames to be
 // printed in a failure message.
 GTEST_DECLARE_int32_(stack_trace_depth);
 
-// This flag controls whether Google Test includes Google Test internal
-// stack frames in failure stack traces.
-GTEST_DECLARE_bool_(show_internal_stack_frames);
+// The upper limit for valid stack trace depths.
+const int kMaxStackTraceDepth = 100;
 
 namespace internal {
 
