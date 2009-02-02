@@ -1280,5 +1280,35 @@ TEST(ActionPnMacroTest, TypesAreCorrect) {
       Plus(1, 2, 3, 4, 5, 6, 7, 8, 9, '0');
 }
 
+// Tests that an ACTION_P*() action can be explicitly instantiated
+// with reference-typed parameters.
+
+ACTION_P(Plus1, x) { return x; }
+ACTION_P2(Plus2, x, y) { return x + y; }
+ACTION_P3(Plus3, x, y, z) { return x + y + z; }
+ACTION_P10(Plus10, a0, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+  return a0 + a1 + a2 + a3 + a4 + a5 + a6 + a7 + a8 + a9;
+}
+
+TEST(ActionPnMacroTest, CanExplicitlyInstantiateWithReferenceTypes) {
+  int x = 1, y = 2, z = 3;
+  const tuple<> empty = make_tuple();
+
+  Action<int()> a = Plus1<int&>(x);
+  EXPECT_EQ(1, a.Perform(empty));
+
+  a = Plus2<const int&, int&>(x, y);
+  EXPECT_EQ(3, a.Perform(empty));
+
+  a = Plus3<int&, const int&, int&>(x, y, z);
+  EXPECT_EQ(6, a.Perform(empty));
+
+  int n[10] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+  a = Plus10<const int&, int&, const int&, int&, const int&, int&, const int&,
+      int&, const int&, int&>(n[0], n[1], n[2], n[3], n[4], n[5], n[6], n[7],
+                              n[8], n[9]);
+  EXPECT_EQ(55, a.Perform(empty));
+}
+
 }  // namespace gmock_generated_actions_test
 }  // namespace testing

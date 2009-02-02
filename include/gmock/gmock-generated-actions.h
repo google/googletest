@@ -1611,12 +1611,12 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
           arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
           arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
           arg9_type arg9) const;\
-      const p0##_type p0;\
+      p0##_type p0;\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>(p0));\
     }\
-    const p0##_type p0;\
+    p0##_type p0;\
   };\
   template <typename p0##_type>\
   inline name##ActionP<p0##_type> name(p0##_type p0) {\
@@ -1662,14 +1662,14 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
           arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
           arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
           arg9_type arg9) const;\
-      const p0##_type p0;\
-      const p1##_type p1;\
+      p0##_type p0;\
+      p1##_type p1;\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>(p0, p1));\
     }\
-    const p0##_type p0;\
-    const p1##_type p1;\
+    p0##_type p0;\
+    p1##_type p1;\
   };\
   template <typename p0##_type, typename p1##_type>\
   inline name##ActionP2<p0##_type, p1##_type> name(p0##_type p0, \
@@ -1716,16 +1716,16 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
           arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
           arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
           arg9_type arg9) const;\
-      const p0##_type p0;\
-      const p1##_type p1;\
-      const p2##_type p2;\
+      p0##_type p0;\
+      p1##_type p1;\
+      p2##_type p2;\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2));\
     }\
-    const p0##_type p0;\
-    const p1##_type p1;\
-    const p2##_type p2;\
+    p0##_type p0;\
+    p1##_type p1;\
+    p2##_type p2;\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type>\
   inline name##ActionP3<p0##_type, p1##_type, p2##_type> name(p0##_type p0, \
@@ -1775,18 +1775,18 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
           arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
           arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
           arg9_type arg9) const;\
-      const p0##_type p0;\
-      const p1##_type p1;\
-      const p2##_type p2;\
-      const p3##_type p3;\
+      p0##_type p0;\
+      p1##_type p1;\
+      p2##_type p2;\
+      p3##_type p3;\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3));\
     }\
-    const p0##_type p0;\
-    const p1##_type p1;\
-    const p2##_type p2;\
-    const p3##_type p3;\
+    p0##_type p0;\
+    p1##_type p1;\
+    p2##_type p2;\
+    p3##_type p3;\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type>\
@@ -1841,20 +1841,20 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
           arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
           arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
           arg9_type arg9) const;\
-      const p0##_type p0;\
-      const p1##_type p1;\
-      const p2##_type p2;\
-      const p3##_type p3;\
-      const p4##_type p4;\
+      p0##_type p0;\
+      p1##_type p1;\
+      p2##_type p2;\
+      p3##_type p3;\
+      p4##_type p4;\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4));\
     }\
-    const p0##_type p0;\
-    const p1##_type p1;\
-    const p2##_type p2;\
-    const p3##_type p3;\
-    const p4##_type p4;\
+    p0##_type p0;\
+    p1##_type p1;\
+    p2##_type p2;\
+    p3##_type p3;\
+    p4##_type p4;\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type>\
@@ -1910,22 +1910,22 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
           arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
           arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
           arg9_type arg9) const;\
-      const p0##_type p0;\
-      const p1##_type p1;\
-      const p2##_type p2;\
-      const p3##_type p3;\
-      const p4##_type p4;\
-      const p5##_type p5;\
+      p0##_type p0;\
+      p1##_type p1;\
+      p2##_type p2;\
+      p3##_type p3;\
+      p4##_type p4;\
+      p5##_type p5;\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4, p5));\
     }\
-    const p0##_type p0;\
-    const p1##_type p1;\
-    const p2##_type p2;\
-    const p3##_type p3;\
-    const p4##_type p4;\
-    const p5##_type p5;\
+    p0##_type p0;\
+    p1##_type p1;\
+    p2##_type p2;\
+    p3##_type p3;\
+    p4##_type p4;\
+    p5##_type p5;\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type>\
@@ -1984,25 +1984,25 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
           arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
           arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
           arg9_type arg9) const;\
-      const p0##_type p0;\
-      const p1##_type p1;\
-      const p2##_type p2;\
-      const p3##_type p3;\
-      const p4##_type p4;\
-      const p5##_type p5;\
-      const p6##_type p6;\
+      p0##_type p0;\
+      p1##_type p1;\
+      p2##_type p2;\
+      p3##_type p3;\
+      p4##_type p4;\
+      p5##_type p5;\
+      p6##_type p6;\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4, p5, \
           p6));\
     }\
-    const p0##_type p0;\
-    const p1##_type p1;\
-    const p2##_type p2;\
-    const p3##_type p3;\
-    const p4##_type p4;\
-    const p5##_type p5;\
-    const p6##_type p6;\
+    p0##_type p0;\
+    p1##_type p1;\
+    p2##_type p2;\
+    p3##_type p3;\
+    p4##_type p4;\
+    p5##_type p5;\
+    p6##_type p6;\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
@@ -2066,27 +2066,27 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
           arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
           arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
           arg9_type arg9) const;\
-      const p0##_type p0;\
-      const p1##_type p1;\
-      const p2##_type p2;\
-      const p3##_type p3;\
-      const p4##_type p4;\
-      const p5##_type p5;\
-      const p6##_type p6;\
-      const p7##_type p7;\
+      p0##_type p0;\
+      p1##_type p1;\
+      p2##_type p2;\
+      p3##_type p3;\
+      p4##_type p4;\
+      p5##_type p5;\
+      p6##_type p6;\
+      p7##_type p7;\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4, p5, \
           p6, p7));\
     }\
-    const p0##_type p0;\
-    const p1##_type p1;\
-    const p2##_type p2;\
-    const p3##_type p3;\
-    const p4##_type p4;\
-    const p5##_type p5;\
-    const p6##_type p6;\
-    const p7##_type p7;\
+    p0##_type p0;\
+    p1##_type p1;\
+    p2##_type p2;\
+    p3##_type p3;\
+    p4##_type p4;\
+    p5##_type p5;\
+    p6##_type p6;\
+    p7##_type p7;\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
@@ -2152,29 +2152,29 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
           arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
           arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
           arg9_type arg9) const;\
-      const p0##_type p0;\
-      const p1##_type p1;\
-      const p2##_type p2;\
-      const p3##_type p3;\
-      const p4##_type p4;\
-      const p5##_type p5;\
-      const p6##_type p6;\
-      const p7##_type p7;\
-      const p8##_type p8;\
+      p0##_type p0;\
+      p1##_type p1;\
+      p2##_type p2;\
+      p3##_type p3;\
+      p4##_type p4;\
+      p5##_type p5;\
+      p6##_type p6;\
+      p7##_type p7;\
+      p8##_type p8;\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4, p5, \
           p6, p7, p8));\
     }\
-    const p0##_type p0;\
-    const p1##_type p1;\
-    const p2##_type p2;\
-    const p3##_type p3;\
-    const p4##_type p4;\
-    const p5##_type p5;\
-    const p6##_type p6;\
-    const p7##_type p7;\
-    const p8##_type p8;\
+    p0##_type p0;\
+    p1##_type p1;\
+    p2##_type p2;\
+    p3##_type p3;\
+    p4##_type p4;\
+    p5##_type p5;\
+    p6##_type p6;\
+    p7##_type p7;\
+    p8##_type p8;\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
@@ -2242,31 +2242,31 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
           arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
           arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
           arg9_type arg9) const;\
-      const p0##_type p0;\
-      const p1##_type p1;\
-      const p2##_type p2;\
-      const p3##_type p3;\
-      const p4##_type p4;\
-      const p5##_type p5;\
-      const p6##_type p6;\
-      const p7##_type p7;\
-      const p8##_type p8;\
-      const p9##_type p9;\
+      p0##_type p0;\
+      p1##_type p1;\
+      p2##_type p2;\
+      p3##_type p3;\
+      p4##_type p4;\
+      p5##_type p5;\
+      p6##_type p6;\
+      p7##_type p7;\
+      p8##_type p8;\
+      p9##_type p9;\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4, p5, \
           p6, p7, p8, p9));\
     }\
-    const p0##_type p0;\
-    const p1##_type p1;\
-    const p2##_type p2;\
-    const p3##_type p3;\
-    const p4##_type p4;\
-    const p5##_type p5;\
-    const p6##_type p6;\
-    const p7##_type p7;\
-    const p8##_type p8;\
-    const p9##_type p9;\
+    p0##_type p0;\
+    p1##_type p1;\
+    p2##_type p2;\
+    p3##_type p3;\
+    p4##_type p4;\
+    p5##_type p5;\
+    p6##_type p6;\
+    p7##_type p7;\
+    p8##_type p8;\
+    p9##_type p9;\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \

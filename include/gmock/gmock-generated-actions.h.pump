@@ -718,15 +718,15 @@ $range j 0..i-1
 $var ctor_param_list = [[$for j, [[p$j##_type gmock_p$j]]]]
 $var param_types_and_names = [[$for j, [[p$j##_type p$j]]]]
 $var inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(gmock_p$j)]]]]]]
-$var const_param_field_decls = [[$for j
+$var param_field_decls = [[$for j
 [[
 
-      const p$j##_type p$j;\
+      p$j##_type p$j;\
 ]]]]
-$var const_param_field_decls2 = [[$for j
+$var param_field_decls2 = [[$for j
 [[
 
-    const p$j##_type p$j;\
+    p$j##_type p$j;\
 ]]]]
 $var params = [[$for j, [[p$j]]]]
 $var param_types = [[$if i==0 [[]] $else [[<$for j, [[p$j##_type]]>]]]]
@@ -754,11 +754,11 @@ $var macro_name = [[$if i==0 [[ACTION]] $elif i==1 [[ACTION_P]]
       }\
       template <$typename_arg_types>\
       return_type gmock_PerformImpl(const args_type& args, [[]]
-$arg_types_and_names) const;\$const_param_field_decls
+$arg_types_and_names) const;\$param_field_decls
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>($params));\
-    }\$const_param_field_decls2
+    }\$param_field_decls2
   };\$template
   inline $class_name$param_types name($param_types_and_names) {\
     return $class_name$param_types($params);\
