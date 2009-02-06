@@ -483,18 +483,9 @@ Expected fatal failure.
 36 FAILED TESTS
   YOU HAVE 1 DISABLED TEST
 
-The non-test part of the code is expected to have 2 failures.
-
-gtest_output_test_.cc:#: error: Value of: false
-  Actual: false
-Expected: true
-gtest_output_test_.cc:#: error: Value of: 3
-Expected: 2
 Note: Google Test filter = FatalFailureTest.*:LoggingTest.*
 [==========] Running 4 tests from 2 test cases.
 [----------] Global test environment set-up.
-FooEnvironment::SetUp() called.
-BarEnvironment::SetUp() called.
 [----------] 3 tests from FatalFailureTest
 [ RUN      ] FatalFailureTest.FatalFailureInSubroutine
 (expecting a failure that x should be 1)
@@ -529,12 +520,6 @@ gtest_output_test_.cc:#: error: Expected: (3) >= (a[i]), actual: 3 vs 6
 [----------] 1 test from LoggingTest (? ms total)
 
 [----------] Global test environment tear-down
-BarEnvironment::TearDown() called.
-gtest_output_test_.cc:#: error: Failed
-Expected non-fatal failure.
-FooEnvironment::TearDown() called.
-gtest_output_test_.cc:#: error: Failed
-Expected fatal failure.
 [==========] 4 tests from 2 test cases ran. (? ms total)
 [  PASSED  ] 0 tests.
 [  FAILED  ] 4 tests, listed below:
@@ -546,30 +531,12 @@ Expected fatal failure.
  4 FAILED TESTS
   YOU HAVE 1 DISABLED TEST
 
-The non-test part of the code is expected to have 2 failures.
-
-gtest_output_test_.cc:#: error: Value of: false
-  Actual: false
-Expected: true
-gtest_output_test_.cc:#: error: Value of: 3
-Expected: 2
 Note: Google Test filter = *DISABLED_*
 [==========] Running 1 test from 1 test case.
 [----------] Global test environment set-up.
-FooEnvironment::SetUp() called.
-BarEnvironment::SetUp() called.
 [----------] 1 test from DisabledTestsWarningTest
 [ RUN      ] DisabledTestsWarningTest.DISABLED_AlsoRunDisabledTestsFlagSuppressesWarning
 [       OK ] DisabledTestsWarningTest.DISABLED_AlsoRunDisabledTestsFlagSuppressesWarning
 [----------] Global test environment tear-down
-BarEnvironment::TearDown() called.
-gtest_output_test_.cc:#: error: Failed
-Expected non-fatal failure.
-FooEnvironment::TearDown() called.
-gtest_output_test_.cc:#: error: Failed
-Expected fatal failure.
 [==========] 1 test from 1 test case ran.
 [  PASSED  ] 1 test.
-[  FAILED  ] 0 tests, listed below:
-
- 0 FAILED TESTS

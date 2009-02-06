@@ -60,6 +60,8 @@
 using testing::ScopedFakeTestPartResultReporter;
 using testing::TestPartResultArray;
 
+using testing::internal::String;
+
 // Tests catching fatal failures.
 
 // A subroutine used by the following test.
@@ -958,6 +960,10 @@ class BarEnvironment : public testing::Environment {
   }
 };
 
+GTEST_DEFINE_bool_(internal_skip_environment_and_ad_hoc_tests, false,
+                   "This flag causes the program to skip test environment "
+                   "tests and ad hoc tests.");
+
 // The main function.
 //
 // The idea is to use Google Test to run all the tests we have defined (some
@@ -968,6 +974,9 @@ int main(int argc, char **argv) {
   // We will use a separate Python script to compare the output of
   // this program with the golden file.
   testing::InitGoogleTest(&argc, argv);
+  if (argc >= 2 &&
+      String(argv[1]) == "--gtest_internal_skip_environment_and_ad_hoc_tests")
+    GTEST_FLAG(internal_skip_environment_and_ad_hoc_tests) = true;
 
 #ifdef GTEST_HAS_DEATH_TEST
   if (testing::internal::GTEST_FLAG(internal_run_death_test) != "") {
@@ -977,6 +986,9 @@ int main(int argc, char **argv) {
     return RUN_ALL_TESTS();
   }
 #endif  // GTEST_HAS_DEATH_TEST
+
+  if (GTEST_FLAG(internal_skip_environment_and_ad_hoc_tests))
+    return RUN_ALL_TESTS();
 
   // Registers two global test environments.
   // The golden file verifies that they are set up in the order they

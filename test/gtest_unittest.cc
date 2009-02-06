@@ -869,37 +869,58 @@ TEST_F(ScopedFakeTestPartResultReporterWithThreadsTest,
 
 #endif  // GTEST_IS_THREADSAFE && GTEST_HAS_PTHREAD
 
-// Tests EXPECT_{,NON}FATAL_FAILURE{,ON_ALL_THREADS}.
+// Tests EXPECT_FATAL_FAILURE{,ON_ALL_THREADS}.
 
-typedef ScopedFakeTestPartResultReporterTest ExpectFailureTest;
+typedef ScopedFakeTestPartResultReporterTest ExpectFatalFailureTest;
 
-TEST_F(ExpectFailureTest, ExpectFatalFaliure) {
+TEST_F(ExpectFatalFailureTest, CatchesFatalFaliure) {
   EXPECT_FATAL_FAILURE(AddFailure(FATAL_FAILURE), "Expected fatal failure.");
 }
 
-TEST_F(ExpectFailureTest, ExpectNonFatalFailure) {
-  EXPECT_NONFATAL_FAILURE(AddFailure(NONFATAL_FAILURE),
-                          "Expected non-fatal failure.");
-}
-
-TEST_F(ExpectFailureTest, ExpectFatalFailureOnAllThreads) {
+TEST_F(ExpectFatalFailureTest, CatchesFatalFailureOnAllThreads) {
+  // We have another test below to verify that the macro catches fatal
+  // failures generated on another thread.
   EXPECT_FATAL_FAILURE_ON_ALL_THREADS(AddFailure(FATAL_FAILURE),
                                       "Expected fatal failure.");
 }
 
-TEST_F(ExpectFailureTest, ExpectNonFatalFailureOnAllThreads) {
-  EXPECT_NONFATAL_FAILURE_ON_ALL_THREADS(AddFailure(NONFATAL_FAILURE),
-                                         "Expected non-fatal failure.");
+// Tests that EXPECT_FATAL_FAILURE() can be used in a non-void
+// function even when the statement in it contains ASSERT_*.
+
+int NonVoidFunction() {
+  EXPECT_FATAL_FAILURE(ASSERT_TRUE(false), "");
+  EXPECT_FATAL_FAILURE_ON_ALL_THREADS(FAIL(), "");
+  return 0;
 }
 
-// Tests that the EXPECT_{,NON}FATAL_FAILURE{,_ON_ALL_THREADS} accepts
-// a statement that contains a macro which expands to code containing
-// an unprotected comma.
+TEST_F(ExpectFatalFailureTest, CanBeUsedInNonVoidFunction) {
+  NonVoidFunction();
+}
+
+// Tests that EXPECT_FATAL_FAILURE(statement, ...) doesn't abort the
+// current function even though 'statement' generates a fatal failure.
+
+void DoesNotAbortHelper(bool* aborted) {
+  EXPECT_FATAL_FAILURE(ASSERT_TRUE(false), "");
+  EXPECT_FATAL_FAILURE_ON_ALL_THREADS(FAIL(), "");
+
+  *aborted = false;
+}
+
+TEST_F(ExpectFatalFailureTest, DoesNotAbort) {
+  bool aborted = true;
+  DoesNotAbortHelper(&aborted);
+  EXPECT_FALSE(aborted);
+}
+
+// Tests that the EXPECT_FATAL_FAILURE{,_ON_ALL_THREADS} accepts a
+// statement that contains a macro which expands to code containing an
+// unprotected comma.
 
 static int global_var = 0;
 #define GTEST_USE_UNPROTECTED_COMMA_ global_var++, global_var++
 
-TEST_F(ExpectFailureTest, AcceptsMacroThatExpandsToUnprotectedComma) {
+TEST_F(ExpectFatalFailureTest, AcceptsMacroThatExpandsToUnprotectedComma) {
   EXPECT_FATAL_FAILURE({
     GTEST_USE_UNPROTECTED_COMMA_;
     AddFailure(FATAL_FAILURE);
@@ -909,7 +930,28 @@ TEST_F(ExpectFailureTest, AcceptsMacroThatExpandsToUnprotectedComma) {
     GTEST_USE_UNPROTECTED_COMMA_;
     AddFailure(FATAL_FAILURE);
   }, "");
+}
 
+// Tests EXPECT_NONFATAL_FAILURE{,ON_ALL_THREADS}.
+
+typedef ScopedFakeTestPartResultReporterTest ExpectNonfatalFailureTest;
+
+TEST_F(ExpectNonfatalFailureTest, CatchesNonfatalFailure) {
+  EXPECT_NONFATAL_FAILURE(AddFailure(NONFATAL_FAILURE),
+                          "Expected non-fatal failure.");
+}
+
+TEST_F(ExpectNonfatalFailureTest, CatchesNonfatalFailureOnAllThreads) {
+  // We have another test below to verify that the macro catches
+  // non-fatal failures generated on another thread.
+  EXPECT_NONFATAL_FAILURE_ON_ALL_THREADS(AddFailure(NONFATAL_FAILURE),
+                                         "Expected non-fatal failure.");
+}
+
+// Tests that the EXPECT_NONFATAL_FAILURE{,_ON_ALL_THREADS} accepts a
+// statement that contains a macro which expands to code containing an
+// unprotected comma.
+TEST_F(ExpectNonfatalFailureTest, AcceptsMacroThatExpandsToUnprotectedComma) {
   EXPECT_NONFATAL_FAILURE({
     GTEST_USE_UNPROTECTED_COMMA_;
     AddFailure(NONFATAL_FAILURE);
@@ -3091,6 +3133,20 @@ TEST(AssertionSyntaxTest, BasicAssertionsBehavesLikeSingleStatement) {
 }
 
 #if GTEST_HAS_EXCEPTIONS
+// Tests that the compiler will not complain about unreachable code in the
+// EXPECT_THROW/EXPECT_ANY_THROW/EXPECT_NO_THROW macros.
+TEST(ExpectThrowTest, DoesNotGenerateUnreachableCodeWarning) {
+  int n = 0;
+
+  EXPECT_THROW(throw 1, int);
+  EXPECT_NONFATAL_FAILURE(EXPECT_THROW(n++, int), "");
+  EXPECT_NONFATAL_FAILURE(EXPECT_THROW(throw 1, const char*), "");
+  EXPECT_NO_THROW(n++);
+  EXPECT_NONFATAL_FAILURE(EXPECT_NO_THROW(throw 1), "");
+  EXPECT_ANY_THROW(throw 1);
+  EXPECT_NONFATAL_FAILURE(EXPECT_ANY_THROW(n++), "");
+}
+
 TEST(AssertionSyntaxTest, ExceptionAssertionsBehavesLikeSingleStatement) {
   if (false)
     EXPECT_THROW(1, bool);

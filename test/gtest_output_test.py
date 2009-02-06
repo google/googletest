@@ -61,11 +61,16 @@ else:
   GOLDEN_NAME = 'gtest_output_test_golden_lin.txt'
 
 PROGRAM_PATH = os.path.join(gtest_test_utils.GetBuildDir(), PROGRAM)
+
+# At least one command we exercise must not have the
+# --gtest_internal_skip_environment_and_ad_hoc_tests flag.
 COMMAND_WITH_COLOR = PROGRAM_PATH + ' --gtest_color=yes'
 COMMAND_WITH_TIME = (PROGRAM_PATH + ' --gtest_print_time '
-                     + '--gtest_filter="FatalFailureTest.*:LoggingTest.*"')
+                     '--gtest_internal_skip_environment_and_ad_hoc_tests '
+                     '--gtest_filter="FatalFailureTest.*:LoggingTest.*"')
 COMMAND_WITH_DISABLED = (PROGRAM_PATH + ' --gtest_also_run_disabled_tests '
-                         + '--gtest_filter="*DISABLED_*"')
+                         '--gtest_internal_skip_environment_and_ad_hoc_tests '
+                         '--gtest_filter="*DISABLED_*"')
 
 GOLDEN_PATH = os.path.join(gtest_test_utils.GetSourceDir(),
                            GOLDEN_NAME)
