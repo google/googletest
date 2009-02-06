@@ -2298,4 +2298,14 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
               arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
               arg8_type arg8, arg9_type arg9) const
 
+namespace testing {
+
+// Action Throw(exception) can be used in a mock function of any type
+// to throw the given exception.  Any copyable value can be thrown.
+#if GTEST_HAS_EXCEPTIONS
+ACTION_P(Throw, exception) { throw exception; }
+#endif  // GTEST_HAS_EXCEPTIONS
+
+}  // namespace testing
+
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_ACTIONS_H_

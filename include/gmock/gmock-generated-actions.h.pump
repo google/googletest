@@ -772,4 +772,14 @@ $arg_types_and_names) const
 ]]
 
 
+namespace testing {
+
+// Action Throw(exception) can be used in a mock function of any type
+// to throw the given exception.  Any copyable value can be thrown.
+#if GTEST_HAS_EXCEPTIONS
+ACTION_P(Throw, exception) { throw exception; }
+#endif  // GTEST_HAS_EXCEPTIONS
+
+}  // namespace testing
+
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_ACTIONS_H_

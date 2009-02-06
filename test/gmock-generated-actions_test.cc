@@ -1310,5 +1310,26 @@ TEST(ActionPnMacroTest, CanExplicitlyInstantiateWithReferenceTypes) {
   EXPECT_EQ(55, a.Perform(empty));
 }
 
+#if GTEST_HAS_EXCEPTIONS
+
+TEST(ThrowActionTest, ThrowsGivenExceptionInVoidFunction) {
+  const Action<void(int n)> a = Throw('a');
+  EXPECT_THROW(a.Perform(make_tuple(0)), char);
+}
+
+class MyException {};
+
+TEST(ThrowActionTest, ThrowsGivenExceptionInNonVoidFunction) {
+  const Action<double(char ch)> a = Throw(MyException());
+  EXPECT_THROW(a.Perform(make_tuple('0')), MyException);
+}
+
+TEST(ThrowActionTest, ThrowsGivenExceptionInNullaryFunction) {
+  const Action<double()> a = Throw(MyException());
+  EXPECT_THROW(a.Perform(make_tuple()), MyException);
+}
+
+#endif  // GTEST_HAS_EXCEPTIONS
+
 }  // namespace gmock_generated_actions_test
 }  // namespace testing
