@@ -3771,6 +3771,22 @@ int GetFailedPartCount(const TestResult* result) {
   return result->failed_part_count();
 }
 
+// Used by the GTEST_HIDE_UNREACHABLE_CODE_ macro to suppress unreachable
+// code warnings.
+namespace {
+class ClassUniqueToAlwaysTrue {};
+}
+
+bool AlwaysTrue() {
+#if GTEST_HAS_EXCEPTIONS
+  // This condition is always false so AlwaysTrue() never actually throws,
+  // but it makes the compiler think that it may throw.
+  if (atoi("42") == 36)  // NOLINT
+    throw ClassUniqueToAlwaysTrue();
+#endif  // GTEST_HAS_EXCEPTIONS
+  return true;
+}
+
 // Parses a string as a command line flag.  The string should have
 // the format "--flag=value".  When def_optional is true, the "=value"
 // part can be omitted.

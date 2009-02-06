@@ -749,7 +749,7 @@ String GetCurrentOsStackTraceExceptTop(UnitTest* unit_test, int skip_count);
 int GetFailedPartCount(const TestResult* result);
 
 // A helper for suppressing warnings on unreachable code in some macros.
-inline bool True() { return true; }
+bool AlwaysTrue();
 
 }  // namespace internal
 }  // namespace testing
@@ -767,12 +767,18 @@ inline bool True() { return true; }
 #define GTEST_SUCCESS_(message) \
   GTEST_MESSAGE_(message, ::testing::TPRT_SUCCESS)
 
+// Suppresses MSVC warnings 4072 (unreachable code) for the code following
+// statement if it returns or throws (or doesn't return or throw in some
+// situations).
+#define GTEST_HIDE_UNREACHABLE_CODE_(statement) \
+  if (::testing::internal::AlwaysTrue()) { statement; }
+
 #define GTEST_TEST_THROW_(statement, expected_exception, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (const char* gtest_msg = "") { \
     bool gtest_caught_expected = false; \
     try { \
-      statement; \
+      GTEST_HIDE_UNREACHABLE_CODE_(statement); \
     } \
     catch (expected_exception const&) { \
       gtest_caught_expected = true; \
@@ -796,7 +802,7 @@ inline bool True() { return true; }
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (const char* gtest_msg = "") { \
     try { \
-      statement; \
+      GTEST_HIDE_UNREACHABLE_CODE_(statement); \
     } \
     catch (...) { \
       gtest_msg = "Expected: " #statement " doesn't throw an exception.\n" \
@@ -812,7 +818,7 @@ inline bool True() { return true; }
   if (const char* gtest_msg = "") { \
     bool gtest_caught_any = false; \
     try { \
-      statement; \
+      GTEST_HIDE_UNREACHABLE_CODE_(statement); \
     } \
     catch (...) { \
       gtest_caught_any = true; \
@@ -838,7 +844,7 @@ inline bool True() { return true; }
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (const char* gtest_msg = "") { \
     ::testing::internal::HasNewFatalFailureHelper gtest_fatal_failure_checker; \
-    if (::testing::internal::True()) { statement; } \
+    GTEST_HIDE_UNREACHABLE_CODE_(statement); \
     if (gtest_fatal_failure_checker.has_new_fatal_failure()) { \
       gtest_msg = "Expected: " #statement " doesn't generate new fatal " \
                   "failures in the current thread.\n" \
