@@ -7,7 +7,7 @@ Expected: true
 gtest_output_test_.cc:#: Failure
 Value of: 3
 Expected: 2
-[0;32m[==========] [mRunning 52 tests from 22 test cases.
+[0;32m[==========] [mRunning 54 tests from 22 test cases.
 [0;32m[----------] [mGlobal test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -270,7 +270,7 @@ test DefinedUsingTEST is defined using TEST.  You probably
 want to change the TEST to TEST_F or move it to another test
 case.
 [0;31m[  FAILED  ] [mTEST_before_TEST_F_in_same_test_case.DefinedUsingTEST_FAndShouldFail
-[0;32m[----------] [m7 tests from ExpectNonfatalFailureTest
+[0;32m[----------] [m8 tests from ExpectNonfatalFailureTest
 [0;32m[ RUN      ] [mExpectNonfatalFailureTest.CanReferenceGlobalVariables
 [0;32m[       OK ] [mExpectNonfatalFailureTest.CanReferenceGlobalVariables
 [0;32m[ RUN      ] [mExpectNonfatalFailureTest.CanReferenceLocalVariables
@@ -313,7 +313,13 @@ gtest.cc:#: Failure
 Expected: 1 non-fatal failure
   Actual: 0 failures
 [0;31m[  FAILED  ] [mExpectNonfatalFailureTest.FailsWhenStatementReturns
-[0;32m[----------] [m7 tests from ExpectFatalFailureTest
+[0;32m[ RUN      ] [mExpectNonfatalFailureTest.FailsWhenStatementThrows
+(expecting a failure)
+gtest.cc:#: Failure
+Expected: 1 non-fatal failure
+  Actual: 0 failures
+[0;31m[  FAILED  ] [mExpectNonfatalFailureTest.FailsWhenStatementThrows
+[0;32m[----------] [m8 tests from ExpectFatalFailureTest
 [0;32m[ RUN      ] [mExpectFatalFailureTest.CanReferenceGlobalVariables
 [0;32m[       OK ] [mExpectFatalFailureTest.CanReferenceGlobalVariables
 [0;32m[ RUN      ] [mExpectFatalFailureTest.CanReferenceLocalStaticVariables
@@ -356,6 +362,12 @@ gtest.cc:#: Failure
 Expected: 1 fatal failure
   Actual: 0 failures
 [0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenStatementReturns
+[0;32m[ RUN      ] [mExpectFatalFailureTest.FailsWhenStatementThrows
+(expecting a failure)
+gtest.cc:#: Failure
+Expected: 1 fatal failure
+  Actual: 0 failures
+[0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenStatementThrows
 [0;32m[----------] [m2 tests from TypedTest/0, where TypeParam = int
 [0;32m[ RUN      ] [mTypedTest/0.Success
 [0;32m[       OK ] [mTypedTest/0.Success
@@ -496,9 +508,9 @@ FooEnvironment::TearDown() called.
 gtest_output_test_.cc:#: Failure
 Failed
 Expected fatal failure.
-[0;32m[==========] [m52 tests from 22 test cases ran.
+[0;32m[==========] [m54 tests from 22 test cases ran.
 [0;32m[  PASSED  ] [m19 tests.
-[0;31m[  FAILED  ] [m33 tests, listed below:
+[0;31m[  FAILED  ] [m35 tests, listed below:
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInSubroutine
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInNestedSubroutine
 [0;31m[  FAILED  ] [mFatalFailureTest.NonfatalFailureInSubroutine
@@ -521,10 +533,12 @@ Expected fatal failure.
 [0;31m[  FAILED  ] [mExpectNonfatalFailureTest.FailsWhenThereAreTwoNonfatalFailures
 [0;31m[  FAILED  ] [mExpectNonfatalFailureTest.FailsWhenThereIsOneFatalFailure
 [0;31m[  FAILED  ] [mExpectNonfatalFailureTest.FailsWhenStatementReturns
+[0;31m[  FAILED  ] [mExpectNonfatalFailureTest.FailsWhenStatementThrows
 [0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenThereIsNoFatalFailure
 [0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenThereAreTwoFatalFailures
 [0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenThereIsOneNonfatalFailure
 [0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenStatementReturns
+[0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenStatementThrows
 [0;31m[  FAILED  ] [mTypedTest/0.Failure, where TypeParam = int
 [0;31m[  FAILED  ] [mUnsigned/TypedTestP/0.Failure, where TypeParam = unsigned char
 [0;31m[  FAILED  ] [mUnsigned/TypedTestP/1.Failure, where TypeParam = unsigned int
@@ -533,7 +547,7 @@ Expected fatal failure.
 [0;31m[  FAILED  ] [mExpectFailureTest.ExpectFatalFailureOnAllThreads
 [0;31m[  FAILED  ] [mExpectFailureTest.ExpectNonFatalFailureOnAllThreads
 
-33 FAILED TESTS
+35 FAILED TESTS
 [0;33m  YOU HAVE 1 DISABLED TEST
 
 [mNote: Google Test filter = FatalFailureTest.*:LoggingTest.*
