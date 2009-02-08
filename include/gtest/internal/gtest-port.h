@@ -207,28 +207,31 @@
 
 #endif  // GTEST_OS_LINUX
 
+// Defines GTEST_HAS_EXCEPTIONS to 1 if exceptions are enabled, or 0
+// otherwise.
+
+#ifdef _MSC_VER  // Compiled by MSVC?
+// Assumes that exceptions are enabled by default.
+#ifndef _HAS_EXCEPTIONS  // MSVC uses this macro to enable exceptions.
+#define _HAS_EXCEPTIONS 1
+#endif  // _HAS_EXCEPTIONS
+#define GTEST_HAS_EXCEPTIONS _HAS_EXCEPTIONS
+#else  // The compiler is not MSVC.
+// gcc defines __EXCEPTIONS to 1 iff exceptions are enabled.  For
+// other compilers, we assume exceptions are disabled to be
+// conservative.
+#define GTEST_HAS_EXCEPTIONS (defined(__GNUC__) && __EXCEPTIONS)
+#endif  // _MSC_VER
+
 // Determines whether ::std::string and ::string are available.
 
 #ifndef GTEST_HAS_STD_STRING
 // The user didn't tell us whether ::std::string is available, so we
-// need to figure it out.
-
-#ifdef GTEST_OS_WINDOWS
-// Assumes that exceptions are enabled by default.
-#ifndef _HAS_EXCEPTIONS
-#define _HAS_EXCEPTIONS 1
-#endif  // _HAS_EXCEPTIONS
-// GTEST_HAS_EXCEPTIONS is non-zero iff exceptions are enabled.  It is
-// always defined, while _HAS_EXCEPTIONS is defined only on Windows.
-#define GTEST_HAS_EXCEPTIONS _HAS_EXCEPTIONS
-// On Windows, we can use ::std::string if the compiler version is VS
-// 2005 or above, or if exceptions are enabled.
-#define GTEST_HAS_STD_STRING ((_MSC_VER >= 1400) || GTEST_HAS_EXCEPTIONS)
-#else  // We are on Linux or Mac OS.
-#define GTEST_HAS_EXCEPTIONS 0
-#define GTEST_HAS_STD_STRING 1
-#endif  // GTEST_OS_WINDOWS
-
+// need to figure it out.  The only environment that we know
+// ::std::string is not available is MSVC 7.1 or lower with exceptions
+// disabled.
+#define GTEST_HAS_STD_STRING \
+    (!(defined(_MSC_VER) && (_MSC_VER < 1400) && !GTEST_HAS_EXCEPTIONS))
 #endif  // GTEST_HAS_STD_STRING
 
 #ifndef GTEST_HAS_GLOBAL_STRING
