@@ -7,7 +7,7 @@ Expected: true
 gtest_output_test_.cc:#: Failure
 Value of: 3
 Expected: 2
-[0;32m[==========] [mRunning 54 tests from 22 test cases.
+[0;32m[==========] [mRunning 56 tests from 23 test cases.
 [0;32m[----------] [mGlobal test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -26,6 +26,11 @@ BarEnvironment::SetUp() called.
 [0;32m[----------] [m1 test from My/ATypeParamDeathTest/1, where TypeParam = double
 [0;32m[ RUN      ] [mMy/ATypeParamDeathTest/1.ShouldRunFirst
 [0;32m[       OK ] [mMy/ATypeParamDeathTest/1.ShouldRunFirst
+[0;32m[----------] [m2 tests from PassingTest
+[0;32m[ RUN      ] [mPassingTest.PassingTest1
+[0;32m[       OK ] [mPassingTest.PassingTest1
+[0;32m[ RUN      ] [mPassingTest.PassingTest2
+[0;32m[       OK ] [mPassingTest.PassingTest2
 [0;32m[----------] [m3 tests from FatalFailureTest
 [0;32m[ RUN      ] [mFatalFailureTest.FatalFailureInSubroutine
 (expecting a failure that x should be 1)
@@ -508,8 +513,8 @@ FooEnvironment::TearDown() called.
 gtest_output_test_.cc:#: Failure
 Failed
 Expected fatal failure.
-[0;32m[==========] [m54 tests from 22 test cases ran.
-[0;32m[  PASSED  ] [m19 tests.
+[0;32m[==========] [m56 tests from 23 test cases ran.
+[0;32m[  PASSED  ] [m21 tests.
 [0;31m[  FAILED  ] [m35 tests, listed below:
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInSubroutine
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInNestedSubroutine
@@ -612,3 +617,16 @@ Note: Google Test filter = *DISABLED_*
 [----------] Global test environment tear-down
 [==========] 1 test from 1 test case ran.
 [  PASSED  ] 1 test.
+Note: Google Test filter = PassingTest.*
+Note: This is test shard 1 of 2.
+[==========] Running 1 test from 1 test case.
+[----------] Global test environment set-up.
+[----------] 1 test from PassingTest
+[ RUN      ] PassingTest.PassingTest2
+[       OK ] PassingTest.PassingTest2
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test case ran.
+[  PASSED  ] 1 test.
+
+  YOU HAVE 1 DISABLED TEST
+

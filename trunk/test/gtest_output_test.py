@@ -64,13 +64,17 @@ PROGRAM_PATH = os.path.join(gtest_test_utils.GetBuildDir(), PROGRAM)
 
 # At least one command we exercise must not have the
 # --gtest_internal_skip_environment_and_ad_hoc_tests flag.
-COMMAND_WITH_COLOR = PROGRAM_PATH + ' --gtest_color=yes'
-COMMAND_WITH_TIME = (PROGRAM_PATH + ' --gtest_print_time '
+COMMAND_WITH_COLOR = ({}, PROGRAM_PATH + ' --gtest_color=yes')
+COMMAND_WITH_TIME = ({}, PROGRAM_PATH + ' --gtest_print_time '
                      '--gtest_internal_skip_environment_and_ad_hoc_tests '
                      '--gtest_filter="FatalFailureTest.*:LoggingTest.*"')
-COMMAND_WITH_DISABLED = (PROGRAM_PATH + ' --gtest_also_run_disabled_tests '
+COMMAND_WITH_DISABLED = ({}, PROGRAM_PATH + ' --gtest_also_run_disabled_tests '
                          '--gtest_internal_skip_environment_and_ad_hoc_tests '
                          '--gtest_filter="*DISABLED_*"')
+COMMAND_WITH_SHARDING = ({'GTEST_SHARD_INDEX': '1', 'GTEST_TOTAL_SHARDS': '2'},
+                         PROGRAM_PATH +
+                         ' --gtest_internal_skip_environment_and_ad_hoc_tests '
+                         ' --gtest_filter="PassingTest.*"')
 
 GOLDEN_PATH = os.path.join(gtest_test_utils.GetSourceDir(),
                            GOLDEN_NAME)
@@ -136,19 +140,26 @@ def NormalizeOutput(output):
   return output
 
 
-def IterShellCommandOutput(cmd, stdin_string=None):
+def IterShellCommandOutput(env_cmd, stdin_string=None):
   """Runs a command in a sub-process, and iterates the lines in its STDOUT.
 
   Args:
 
-    cmd:           The shell command.
-    stdin_string:  The string to be fed to the STDIN of the sub-process;
-                   If None, the sub-process will inherit the STDIN
-                   from the parent process.
+    env_cmd:           The shell command. A 2-tuple where element 0 is a dict
+                       of extra environment variables to set, and element 1
+                       is a string with the command and any flags.
+    stdin_string:      The string to be fed to the STDIN of the sub-process;
+                       If None, the sub-process will inherit the STDIN
+                       from the parent process.
   """
 
   # Spawns cmd in a sub-process, and gets its standard I/O file objects.
-  stdin_file, stdout_file = os.popen2(cmd, 'b')
+  # Set and save the environment properly.
+  old_env_vars = dict(os.environ)
+  os.environ.update(env_cmd[0])
+  stdin_file, stdout_file = os.popen2(env_cmd[1], 'b')
+  os.environ.clear()
+  os.environ.update(old_env_vars)
 
   # If the caller didn't specify a string for STDIN, gets it from the
   # parent process.
@@ -168,39 +179,50 @@ def IterShellCommandOutput(cmd, stdin_string=None):
     yield line
 
 
-def GetShellCommandOutput(cmd, stdin_string=None):
+def GetShellCommandOutput(env_cmd, stdin_string=None):
   """Runs a command in a sub-process, and returns its STDOUT in a string.
 
   Args:
 
-    cmd:           The shell command.
-    stdin_string:  The string to be fed to the STDIN of the sub-process;
-                   If None, the sub-process will inherit the STDIN
-                   from the parent process.
+    env_cmd:           The shell command. A 2-tuple where element 0 is a dict
+                       of extra environment variables to set, and element 1
+                       is a string with the command and any flags.
+    stdin_string:      The string to be fed to the STDIN of the sub-process;
+                       If None, the sub-process will inherit the STDIN
+                       from the parent process.
   """
 
-  lines = list(IterShellCommandOutput(cmd, stdin_string))
+  lines = list(IterShellCommandOutput(env_cmd, stdin_string))
   return string.join(lines, '')
 
 
-def GetCommandOutput(cmd):
+def GetCommandOutput(env_cmd):
   """Runs a command and returns its output with all file location
   info stripped off.
 
   Args:
-    cmd:  the shell command.
+    env_cmd:  The shell command. A 2-tuple where element 0 is a dict of extra
+              environment variables to set, and element 1 is a string with
+              the command and any flags.
   """
 
   # Disables exception pop-ups on Windows.
   os.environ['GTEST_CATCH_EXCEPTIONS'] = '1'
-  return NormalizeOutput(GetShellCommandOutput(cmd, ''))
+  return NormalizeOutput(GetShellCommandOutput(env_cmd, ''))
+
+
+def GetOutputOfAllCommands():
+  """Returns concatenated output from several representative commands."""
+
+  return (GetCommandOutput(COMMAND_WITH_COLOR) +
+          GetCommandOutput(COMMAND_WITH_TIME) +
+          GetCommandOutput(COMMAND_WITH_DISABLED) +
+          GetCommandOutput(COMMAND_WITH_SHARDING))
 
 
 class GTestOutputTest(unittest.TestCase):
   def testOutput(self):
-    output = (GetCommandOutput(COMMAND_WITH_COLOR) +
-              GetCommandOutput(COMMAND_WITH_TIME) +
-              GetCommandOutput(COMMAND_WITH_DISABLED))
+    output = GetOutputOfAllCommands()
     golden_file = open(GOLDEN_PATH, 'rb')
     golden = golden_file.read()
     golden_file.close()
@@ -214,9 +236,7 @@ class GTestOutputTest(unittest.TestCase):
 
 if __name__ == '__main__':
   if sys.argv[1:] == [GENGOLDEN_FLAG]:
-    output = (GetCommandOutput(COMMAND_WITH_COLOR) +
-              GetCommandOutput(COMMAND_WITH_TIME) +
-              GetCommandOutput(COMMAND_WITH_DISABLED))
+    output = GetOutputOfAllCommands()
     golden_file = open(GOLDEN_PATH, 'wb')
     golden_file.write(output)
     golden_file.close()

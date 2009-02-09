@@ -162,6 +162,32 @@ String WideStringToUtf8(const wchar_t* str, int num_chars);
 // Returns the number of active threads, or 0 when there is an error.
 size_t GetThreadCount();
 
+// Reads the GTEST_SHARD_STATUS_FILE environment variable, and creates the file
+// if the variable is present. If a file already exists at this location, this
+// function will write over it. If the variable is present, but the file cannot
+// be created, prints an error and exits.
+void WriteToShardStatusFileIfNeeded();
+
+// Checks whether sharding is enabled by examining the relevant
+// environment variable values. If the variables are present,
+// but inconsistent (e.g., shard_index >= total_shards), prints
+// an error and exits. If in_subprocess_for_death_test, sharding is
+// disabled because it must only be applied to the original test
+// process. Otherwise, we could filter out death tests we intended to execute.
+bool ShouldShard(const char* total_shards_str, const char* shard_index_str,
+                 bool in_subprocess_for_death_test);
+
+// Parses the environment variable var as an Int32. If it is unset,
+// returns default_val. If it is not an Int32, prints an error and
+// and aborts.
+Int32 Int32FromEnvOrDie(const char* env_var, Int32 default_val);
+
+// Given the total number of shards, the shard index, and the test id,
+// returns true iff the test should be run on this shard. The test id is
+// some arbitrary but unique non-negative integer assigned to each test
+// method. Assumes that 0 <= shard_index < total_shards.
+bool ShouldRunTestOnShard(int total_shards, int shard_index, int test_id);
+
 // List is a simple singly-linked list container.
 //
 // We cannot use std::list as Microsoft's implementation of STL has
@@ -1111,11 +1137,18 @@ class UnitTestImpl {
     ad_hoc_test_result_.Clear();
   }
 
+  enum ReactionToSharding {
+    HONOR_SHARDING_PROTOCOL,
+    IGNORE_SHARDING_PROTOCOL
+  };
+
   // Matches the full name of each test against the user-specified
   // filter to decide whether the test should run, then records the
   // result in each TestCase and TestInfo object.
+  // If shard_tests == HONOR_SHARDING_PROTOCOL, further filters tests
+  // based on sharding variables in the environment.
   // Returns the number of tests that should run.
-  int FilterTests();
+  int FilterTests(ReactionToSharding shard_tests);
 
   // Lists all the tests by name.
   void ListAllTests();

@@ -138,7 +138,10 @@ using testing::internal::GetTestTypeId;
 using testing::internal::GetTypeId;
 using testing::internal::GTestFlagSaver;
 using testing::internal::Int32;
+using testing::internal::Int32FromEnvOrDie;
 using testing::internal::List;
+using testing::internal::ShouldRunTestOnShard;
+using testing::internal::ShouldShard;
 using testing::internal::ShouldUseColor;
 using testing::internal::StreamableToString;
 using testing::internal::String;
@@ -1373,6 +1376,161 @@ TEST(ParseInt32FlagTest, ParsesAndReturnsValidValue) {
 
   EXPECT_TRUE(ParseInt32Flag("--" GTEST_FLAG_PREFIX "abc=-789", "abc", &value));
   EXPECT_EQ(-789, value);
+}
+
+// Tests that Int32FromEnvOrDie() parses the value of the var or
+// returns the correct default.
+TEST(Int32FromEnvOrDieTest, ParsesAndReturnsValidValue) {
+  EXPECT_EQ(333, Int32FromEnvOrDie(GTEST_FLAG_PREFIX_UPPER "UnsetVar", 333));
+  SetEnv(GTEST_FLAG_PREFIX_UPPER "UnsetVar", "123");
+  EXPECT_EQ(123, Int32FromEnvOrDie(GTEST_FLAG_PREFIX_UPPER "UnsetVar", 333));
+  SetEnv(GTEST_FLAG_PREFIX_UPPER "UnsetVar", "-123");
+  EXPECT_EQ(-123, Int32FromEnvOrDie(GTEST_FLAG_PREFIX_UPPER "UnsetVar", 333));
+}
+
+#ifdef GTEST_HAS_DEATH_TEST
+
+// Tests that Int32FromEnvOrDie() aborts with an error message
+// if the variable is not an Int32.
+TEST(Int32FromEnvOrDieDeathTest, AbortsOnFailure) {
+  SetEnv(GTEST_FLAG_PREFIX_UPPER "VAR", "xxx");
+  EXPECT_DEATH({Int32FromEnvOrDie(GTEST_FLAG_PREFIX_UPPER "VAR", 123);},
+               ".*");
+}
+
+// Tests that Int32FromEnvOrDie() aborts with an error message
+// if the variable cannot be represnted by an Int32.
+TEST(Int32FromEnvOrDieDeathTest, AbortsOnInt32Overflow) {
+  SetEnv(GTEST_FLAG_PREFIX_UPPER "VAR", "1234567891234567891234");
+  EXPECT_DEATH({Int32FromEnvOrDie(GTEST_FLAG_PREFIX_UPPER "VAR", 123);},
+               ".*");
+}
+
+#endif  // GTEST_HAS_DEATH_TEST
+
+
+// Tests that ShouldRunTestOnShard() selects all tests
+// where there is 1 shard.
+TEST(ShouldRunTestOnShardTest, IsPartitionWhenThereIsOneShard) {
+  EXPECT_TRUE(ShouldRunTestOnShard(1, 0, 0));
+  EXPECT_TRUE(ShouldRunTestOnShard(1, 0, 1));
+  EXPECT_TRUE(ShouldRunTestOnShard(1, 0, 2));
+  EXPECT_TRUE(ShouldRunTestOnShard(1, 0, 3));
+  EXPECT_TRUE(ShouldRunTestOnShard(1, 0, 4));
+}
+
+class ShouldShardTest : public testing::Test {
+ protected:
+  virtual void SetUp() {
+    index_var_ = GTEST_FLAG_PREFIX_UPPER "INDEX";
+    total_var_ = GTEST_FLAG_PREFIX_UPPER "TOTAL";
+  }
+
+  virtual void TearDown() {
+    SetEnv(index_var_, "");
+    SetEnv(total_var_, "");
+  }
+
+  const char* index_var_;
+  const char* total_var_;
+};
+
+// Tests that sharding is disabled if neither of the environment variables
+// are set.
+TEST_F(ShouldShardTest, ReturnsFalseWhenNeitherEnvVarIsSet) {
+  SetEnv(index_var_, "");
+  SetEnv(total_var_, "");
+
+  EXPECT_FALSE(ShouldShard(total_var_, index_var_, false));
+  EXPECT_FALSE(ShouldShard(total_var_, index_var_, true));
+}
+
+// Tests that sharding is not enabled if total_shards  == 1.
+TEST_F(ShouldShardTest, ReturnsFalseWhenTotalShardIsOne) {
+  SetEnv(index_var_, "0");
+  SetEnv(total_var_, "1");
+  EXPECT_FALSE(ShouldShard(total_var_, index_var_, false));
+  EXPECT_FALSE(ShouldShard(total_var_, index_var_, true));
+}
+
+// Tests that sharding is enabled if total_shards > 1 and
+// we are not in a death test subprocess.
+TEST_F(ShouldShardTest, WorksWhenShardEnvVarsAreValid) {
+  SetEnv(index_var_, "4");
+  SetEnv(total_var_, "22");
+  EXPECT_TRUE(ShouldShard(total_var_, index_var_, false));
+  EXPECT_FALSE(ShouldShard(total_var_, index_var_, true));
+
+  SetEnv(index_var_, "8");
+  SetEnv(total_var_, "9");
+  EXPECT_TRUE(ShouldShard(total_var_, index_var_, false));
+  EXPECT_FALSE(ShouldShard(total_var_, index_var_, true));
+
+  SetEnv(index_var_, "0");
+  SetEnv(total_var_, "9");
+  EXPECT_TRUE(ShouldShard(total_var_, index_var_, false));
+  EXPECT_FALSE(ShouldShard(total_var_, index_var_, true));
+}
+
+#ifdef GTEST_HAS_DEATH_TEST
+
+// Tests that we exit in error if the sharding values are not valid.
+TEST_F(ShouldShardTest, AbortsWhenShardingEnvVarsAreInvalid) {
+  SetEnv(index_var_, "4");
+  SetEnv(total_var_, "4");
+  EXPECT_DEATH({ShouldShard(total_var_, index_var_, false);},
+               ".*");
+
+  SetEnv(index_var_, "4");
+  SetEnv(total_var_, "-2");
+  EXPECT_DEATH({ShouldShard(total_var_, index_var_, false);},
+               ".*");
+
+  SetEnv(index_var_, "5");
+  SetEnv(total_var_, "");
+  EXPECT_DEATH({ShouldShard(total_var_, index_var_, false);},
+               ".*");
+
+  SetEnv(index_var_, "");
+  SetEnv(total_var_, "5");
+  EXPECT_DEATH({ShouldShard(total_var_, index_var_, false);},
+               ".*");
+}
+
+#endif  // GTEST_HAS_DEATH_TEST
+
+// Tests that ShouldRunTestOnShard is a partition when 5
+// shards are used.
+TEST(ShouldRunTestOnShardTest, IsPartitionWhenThereAreFiveShards) {
+  // Choose an arbitrary number of tests and shards.
+  const int num_tests = 17;
+  const int num_shards = 5;
+
+  // Check partitioning: each test should be on exactly 1 shard.
+  for (int test_id = 0; test_id < num_tests; test_id++) {
+    int prev_selected_shard_index = -1;
+    for (int shard_index = 0; shard_index < num_shards; shard_index++) {
+      if (ShouldRunTestOnShard(num_shards, shard_index, test_id)) {
+        if (prev_selected_shard_index < 0) {
+          prev_selected_shard_index = shard_index;
+        } else {
+          ADD_FAILURE() << "Shard " << prev_selected_shard_index << " and "
+            << shard_index << " are both selected to run test " << test_id;
+        }
+      }
+    }
+  }
+
+  // Check balance: This is not required by the sharding protocol, but is a
+  // desirable property for performance.
+  for (int shard_index = 0; shard_index < num_shards; shard_index++) {
+    int num_tests_on_shard = 0;
+    for (int test_id = 0; test_id < num_tests; test_id++) {
+      num_tests_on_shard +=
+        ShouldRunTestOnShard(num_shards, shard_index, test_id);
+    }
+    EXPECT_GE(num_tests_on_shard, num_tests / num_shards);
+  }
 }
 
 // For the same reason we are not explicitly testing everything in the

@@ -145,6 +145,13 @@ static const char kUniversalFilter[] = "*";
 // The default output file for XML output.
 static const char kDefaultOutputFile[] = "test_detail.xml";
 
+// The environment variable name for the test shard index.
+static const char kTestShardIndex[] = "GTEST_SHARD_INDEX";
+// The environment variable name for the total number of test shards.
+static const char kTestTotalShards[] = "GTEST_TOTAL_SHARDS";
+// The environment variable name for the test shard status file.
+static const char kTestShardStatusFile[] = "GTEST_SHARD_STATUS_FILE";
+
 namespace internal {
 
 // The text used in failure messages to indicate the start of the
@@ -2595,6 +2602,13 @@ void PrettyUnitTestResultPrinter::OnUnitTestStart(
                   "Note: %s filter = %s\n", GTEST_NAME, filter);
   }
 
+  if (internal::ShouldShard(kTestTotalShards, kTestShardIndex, false)) {
+    ColoredPrintf(COLOR_YELLOW,
+                  "Note: This is test shard %s of %s.\n",
+                  internal::GetEnv(kTestShardIndex),
+                  internal::GetEnv(kTestTotalShards));
+  }
+
   const internal::UnitTestImpl* const impl = unit_test->impl();
   ColoredPrintf(COLOR_GREEN,  "[==========] ");
   printf("Running %s from %s.\n",
@@ -3510,6 +3524,11 @@ int UnitTestImpl::RunAllTests() {
 
   RegisterParameterizedTests();
 
+  // Even if sharding is not on, test runners may want to use the
+  // GTEST_SHARD_STATUS_FILE to query whether the test supports the sharding
+  // protocol.
+  internal::WriteToShardStatusFileIfNeeded();
+
   // Lists all the tests and exits if the --gtest_list_tests
   // flag was specified.
   if (GTEST_FLAG(list_tests)) {
@@ -3528,9 +3547,15 @@ int UnitTestImpl::RunAllTests() {
 
   UnitTestEventListenerInterface * const printer = result_printer();
 
+  const bool should_shard = ShouldShard(kTestTotalShards, kTestShardIndex,
+                                        in_subprocess_for_death_test);
+
   // Compares the full test names with the filter to decide which
   // tests to run.
-  const bool has_tests_to_run = FilterTests() > 0;
+  const bool has_tests_to_run = FilterTests(should_shard
+                                              ? HONOR_SHARDING_PROTOCOL
+                                              : IGNORE_SHARDING_PROTOCOL) > 0;
+
   // True iff at least one test has failed.
   bool failed = false;
 
@@ -3586,12 +3611,126 @@ int UnitTestImpl::RunAllTests() {
   return failed ? 1 : 0;
 }
 
+// Reads the GTEST_SHARD_STATUS_FILE environment variable, and creates the file
+// if the variable is present. If a file already exists at this location, this
+// function will write over it. If the variable is present, but the file cannot
+// be created, prints an error and exits.
+void WriteToShardStatusFileIfNeeded() {
+  const char* const test_shard_file = GetEnv(kTestShardStatusFile);
+  if (test_shard_file != NULL) {
+#ifdef _MSC_VER  // MSVC 8 deprecates fopen().
+#pragma warning(push)          // Saves the current warning state.
+#pragma warning(disable:4996)  // Temporarily disables warning on
+                               // deprecated functions.
+#endif
+    FILE* const file = fopen(test_shard_file, "w");
+#ifdef _MSC_VER
+#pragma warning(pop)           // Restores the warning state.
+#endif
+    if (file == NULL) {
+      ColoredPrintf(COLOR_RED,
+                    "Could not write to the test shard status file \"%s\" "
+                    "specified by the %s environment variable.\n",
+                    test_shard_file, kTestShardStatusFile);
+      fflush(stdout);
+      exit(EXIT_FAILURE);
+    }
+    fclose(file);
+  }
+}
+
+// Checks whether sharding is enabled by examining the relevant
+// environment variable values. If the variables are present,
+// but inconsistent (i.e., shard_index >= total_shards), prints
+// an error and exits. If in_subprocess_for_death_test, sharding is
+// disabled because it must only be applied to the original test
+// process. Otherwise, we could filter out death tests we intended to execute.
+bool ShouldShard(const char* total_shards_env,
+                 const char* shard_index_env,
+                 bool in_subprocess_for_death_test) {
+  if (in_subprocess_for_death_test) {
+    return false;
+  }
+
+  const Int32 total_shards = Int32FromEnvOrDie(total_shards_env, -1);
+  const Int32 shard_index = Int32FromEnvOrDie(shard_index_env, -1);
+
+  if (total_shards == -1 && shard_index == -1) {
+    return false;
+  } else if (total_shards == -1 && shard_index != -1) {
+    const Message msg = Message()
+      << "Invalid environment variables: you have "
+      << kTestShardIndex << " = " << shard_index
+      << ", but have left " << kTestTotalShards << " unset.\n";
+    ColoredPrintf(COLOR_RED, msg.GetString().c_str());
+    fflush(stdout);
+    exit(EXIT_FAILURE);
+  } else if (total_shards != -1 && shard_index == -1) {
+    const Message msg = Message()
+      << "Invalid environment variables: you have "
+      << kTestTotalShards << " = " << total_shards
+      << ", but have left " << kTestShardIndex << " unset.\n";
+    ColoredPrintf(COLOR_RED, msg.GetString().c_str());
+    fflush(stdout);
+    exit(EXIT_FAILURE);
+  } else if (shard_index < 0 || shard_index >= total_shards) {
+    const Message msg = Message()
+      << "Invalid environment variables: we require 0 <= "
+      << kTestShardIndex << " < " << kTestTotalShards
+      << ", but you have " << kTestShardIndex << "=" << shard_index
+      << ", " << kTestTotalShards << "=" << total_shards << ".\n";
+    ColoredPrintf(COLOR_RED, msg.GetString().c_str());
+    fflush(stdout);
+    exit(EXIT_FAILURE);
+  }
+
+  return total_shards > 1;
+}
+
+// Parses the environment variable var as an Int32. If it is unset,
+// returns default_val. If it is not an Int32, prints an error
+// and aborts.
+Int32 Int32FromEnvOrDie(const char* const var, Int32 default_val) {
+  const char* str_val = GetEnv(var);
+  if (str_val == NULL) {
+    return default_val;
+  }
+
+  Int32 result;
+  if (!ParseInt32(Message() << "The value of environment variable " << var,
+                  str_val, &result)) {
+    exit(EXIT_FAILURE);
+  }
+  return result;
+}
+
+// Given the total number of shards, the shard index, and the test id,
+// returns true iff the test should be run on this shard. The test id is
+// some arbitrary but unique non-negative integer assigned to each test
+// method. Assumes that 0 <= shard_index < total_shards.
+bool ShouldRunTestOnShard(int total_shards, int shard_index, int test_id) {
+  return (test_id % total_shards) == shard_index;
+}
+
 // Compares the name of each test with the user-specified filter to
 // decide whether the test should be run, then records the result in
 // each TestCase and TestInfo object.
+// If shard_tests == true, further filters tests based on sharding
+// variables in the environment - see
+// http://code.google.com/p/googletest/wiki/GoogleTestAdvancedGuide.
 // Returns the number of tests that should run.
-int UnitTestImpl::FilterTests() {
+int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
+  const Int32 total_shards = shard_tests == HONOR_SHARDING_PROTOCOL ?
+    Int32FromEnvOrDie(kTestTotalShards, -1) : -1;
+  const Int32 shard_index = shard_tests == HONOR_SHARDING_PROTOCOL ?
+    Int32FromEnvOrDie(kTestShardIndex, -1) : -1;
+
+  // num_runnable_tests are the number of tests that will
+  // run across all shards (i.e., match filter and are not disabled).
+  // num_selected_tests are the number of tests to be run on
+  // this shard.
   int num_runnable_tests = 0;
+  int num_selected_tests = 0;
   for (const internal::ListNode<TestCase *> *test_case_node =
        test_cases_.Head();
        test_case_node != NULL;
@@ -3615,18 +3754,24 @@ int UnitTestImpl::FilterTests() {
                                                  kDisableTestFilter);
       test_info->impl()->set_is_disabled(is_disabled);
 
-      const bool should_run =
+      const bool is_runnable =
           (GTEST_FLAG(also_run_disabled_tests) || !is_disabled) &&
           internal::UnitTestOptions::FilterMatchesTest(test_case_name,
                                                        test_name);
-      test_info->impl()->set_should_run(should_run);
-      test_case->set_should_run(test_case->should_run() || should_run);
-      if (should_run) {
-        num_runnable_tests++;
-      }
+
+      const bool is_selected = is_runnable &&
+          (shard_tests == IGNORE_SHARDING_PROTOCOL ||
+           ShouldRunTestOnShard(total_shards, shard_index,
+                                num_runnable_tests));
+
+      num_runnable_tests += is_runnable;
+      num_selected_tests += is_selected;
+
+      test_info->impl()->set_should_run(is_selected);
+      test_case->set_should_run(test_case->should_run() || is_selected);
     }
   }
-  return num_runnable_tests;
+  return num_selected_tests;
 }
 
 // Lists all tests by name.
