@@ -512,17 +512,6 @@ static String FlagToEnvVar(const char* flag) {
   return env_var.GetString();
 }
 
-// Reads and returns the Boolean environment variable corresponding to
-// the given flag; if it's not set, returns default_value.
-//
-// The value is considered true iff it's not "0".
-bool BoolFromGTestEnv(const char* flag, bool default_value) {
-  const String env_var = FlagToEnvVar(flag);
-  const char* const string_value = GetEnv(env_var.c_str());
-  return string_value == NULL ?
-      default_value : strcmp(string_value, "0") != 0;
-}
-
 // Parses 'str' for a 32-bit signed integer.  If successful, writes
 // the result to *value and returns true; otherwise leaves *value
 // unchanged and returns false.
@@ -562,6 +551,17 @@ bool ParseInt32(const Message& src_text, const char* str, Int32* value) {
 
   *value = result;
   return true;
+}
+
+// Reads and returns the Boolean environment variable corresponding to
+// the given flag; if it's not set, returns default_value.
+//
+// The value is considered true iff it's not "0".
+bool BoolFromGTestEnv(const char* flag, bool default_value) {
+  const String env_var = FlagToEnvVar(flag);
+  const char* const string_value = GetEnv(env_var.c_str());
+  return string_value == NULL ?
+      default_value : strcmp(string_value, "0") != 0;
 }
 
 // Reads and returns a 32-bit integer stored in the environment

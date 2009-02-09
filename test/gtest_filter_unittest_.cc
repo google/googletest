@@ -91,6 +91,25 @@ TEST(BazTest, DISABLED_TestC) {
   FAIL() << "Expected failure.";
 }
 
+// Test case HasDeathTest
+
+TEST(HasDeathTest, Test1) {
+#ifdef GTEST_HAS_DEATH_TEST
+  EXPECT_DEATH({exit(1);},
+    ".*");
+#endif  // GTEST_HAS_DEATH_TEST
+}
+
+// We need at least two death tests to make sure that the all death tests
+// aren't on the first shard.
+TEST(HasDeathTest, Test2) {
+#ifdef GTEST_HAS_DEATH_TEST
+  EXPECT_DEATH({exit(1);},
+    ".*");
+#endif  // GTEST_HAS_DEATH_TEST
+}
+
+
 // Test case FoobarTest
 
 TEST(DISABLED_FoobarTest, Test1) {

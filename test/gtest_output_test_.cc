@@ -85,6 +85,12 @@ void TryTestSubroutine() {
   FAIL() << "This should never be reached.";
 }
 
+TEST(PassingTest, PassingTest1) {
+}
+
+TEST(PassingTest, PassingTest2) {
+}
+
 // Tests catching a fatal failure in a subroutine.
 TEST(FatalFailureTest, FatalFailureInSubroutine) {
   printf("(expecting a failure that x should be 1)\n");

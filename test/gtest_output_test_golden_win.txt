@@ -5,10 +5,15 @@ gtest_output_test_.cc:#: error: Value of: false
 Expected: true
 gtest_output_test_.cc:#: error: Value of: 3
 Expected: 2
-[==========] Running 50 tests from 20 test cases.
+[==========] Running 52 tests from 21 test cases.
 [----------] Global test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
+[----------] 2 tests from PassingTest
+[ RUN      ] PassingTest.PassingTest1
+[       OK ] PassingTest.PassingTest1
+[ RUN      ] PassingTest.PassingTest2
+[       OK ] PassingTest.PassingTest2
 [----------] 3 tests from FatalFailureTest
 [ RUN      ] FatalFailureTest.FatalFailureInSubroutine
 (expecting a failure that x should be 1)
@@ -440,8 +445,8 @@ Expected non-fatal failure.
 FooEnvironment::TearDown() called.
 gtest_output_test_.cc:#: error: Failed
 Expected fatal failure.
-[==========] 50 tests from 20 test cases ran.
-[  PASSED  ] 14 tests.
+[==========] 52 tests from 21 test cases ran.
+[  PASSED  ] 16 tests.
 [  FAILED  ] 36 tests, listed below:
 [  FAILED  ] FatalFailureTest.FatalFailureInSubroutine
 [  FAILED  ] FatalFailureTest.FatalFailureInNestedSubroutine
@@ -540,3 +545,16 @@ Note: Google Test filter = *DISABLED_*
 [----------] Global test environment tear-down
 [==========] 1 test from 1 test case ran.
 [  PASSED  ] 1 test.
+Note: Google Test filter = PassingTest.*
+Note: This is test shard 1 of 2.
+[==========] Running 1 test from 1 test case.
+[----------] Global test environment set-up.
+[----------] 1 test from PassingTest
+[ RUN      ] PassingTest.PassingTest2
+[       OK ] PassingTest.PassingTest2
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test case ran.
+[  PASSED  ] 1 test.
+
+  YOU HAVE 1 DISABLED TEST
+
