@@ -107,8 +107,8 @@
 	</Configurations>
 	<References>
 		<ProjectReference
-			ReferencedProjectIdentifier="{C8F6C172-56F2-4E76-B5FA-C3B423B31BE7}"
-			Name="gtest"/>
+			ReferencedProjectIdentifier="{3AF54C8A-10BF-4332-9147-F68ED9862032}"
+			Name="gtest_main"/>
 	</References>
 	<Files>
 		<Filter

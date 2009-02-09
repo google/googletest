@@ -13,7 +13,8 @@ EXTRA_DIST = \
   scons/SConscript \
   scripts/fuse_gtest_files.py \
   scripts/gen_gtest_pred_impl.py \
-  src/gtest-all.cc
+  src/gtest-all.cc \
+  test/gtest_all_test.cc
 
 # MSVC project files
 EXTRA_DIST += \
@@ -272,7 +273,7 @@ test_gtest_typed_test_test_LDADD = lib/libgtest_main.la
 TESTS += test/gtest_unittest
 check_PROGRAMS += test/gtest_unittest
 test_gtest_unittest_SOURCES = test/gtest_unittest.cc
-test_gtest_unittest_LDADD = lib/libgtest.la
+test_gtest_unittest_LDADD = lib/libgtest_main.la
 
 # The following tests depend on the presence of a Python installation and are
 # keyed off of it. TODO(chandlerc@google.com): While we currently only attempt
