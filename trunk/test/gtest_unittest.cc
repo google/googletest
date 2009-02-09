@@ -5389,22 +5389,3 @@ TEST(GetCurrentOsStackTraceExceptTopTest, ReturnsTheStackTrace) {
   EXPECT_STREQ("", GetCurrentOsStackTraceExceptTop(unit_test, 0).c_str());
   EXPECT_STREQ("", GetCurrentOsStackTraceExceptTop(unit_test, 1).c_str());
 }
-
-#ifndef GTEST_OS_SYMBIAN
-// We will want to integrate running the unittests to a different
-// main application on Symbian.
-int main(int argc, char** argv) {
-  testing::InitGoogleTest(&argc, argv);
-
-#ifdef GTEST_HAS_DEATH_TEST
-  if (!testing::internal::GTEST_FLAG(internal_run_death_test).empty()) {
-    // Skip the usual output capturing if we're running as the child
-    // process of an threadsafe-style death test.
-    freopen("/dev/null", "w", stdout);
-  }
-#endif  // GTEST_HAS_DEATH_TEST
-
-  // Runs all tests using Google Test.
-  return RUN_ALL_TESTS();
-}
-#endif  // GTEST_OS_SYMBIAN

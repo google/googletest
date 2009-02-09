@@ -163,7 +163,7 @@ GtestUnitTest(env, 'gtest-typed-test_test', gtest_main,
               additional_sources=['../test/gtest-typed-test2_test.cc'])
 GtestUnitTest(env, 'gtest-param-test_test', gtest,
               additional_sources=['../test/gtest-param-test2_test.cc'])
-GtestUnitTest(env, 'gtest_unittest', gtest)
+GtestUnitTest(env, 'gtest_unittest', gtest_main)
 GtestUnitTest(env, 'gtest_output_test_', gtest)
 GtestUnitTest(env, 'gtest_color_test_', gtest)
 GtestUnitTest(env, 'gtest-linked_ptr_test', gtest_main)
