@@ -597,6 +597,64 @@ TEST(PrintWideStringTest, StringInStdNamespace) {
 }
 #endif  // GTEST_HAS_STD_WSTRING
 
+// Tests printing types that support generic streaming (i.e. streaming
+// to std::basic_ostream<Char, CharTraits> for any valid Char and
+// CharTraits types).
+
+// Tests printing a non-template type that supports generic streaming.
+
+class AllowsGenericStreaming {};
+
+template <typename Char, typename CharTraits>
+std::basic_ostream<Char, CharTraits>& operator<<(
+    std::basic_ostream<Char, CharTraits>& os,
+    const AllowsGenericStreaming& a) {
+  return os << "AllowsGenericStreaming";
+}
+
+TEST(PrintTypeWithGenericStreamingTest, NonTemplateType) {
+  AllowsGenericStreaming a;
+  EXPECT_EQ("AllowsGenericStreaming", Print(a));
+}
+
+// Tests printing a template type that supports generic streaming.
+
+template <typename T>
+class AllowsGenericStreamingTemplate {};
+
+template <typename Char, typename CharTraits, typename T>
+std::basic_ostream<Char, CharTraits>& operator<<(
+    std::basic_ostream<Char, CharTraits>& os,
+    const AllowsGenericStreamingTemplate<T>& a) {
+  return os << "AllowsGenericStreamingTemplate";
+}
+
+TEST(PrintTypeWithGenericStreamingTest, TemplateType) {
+  AllowsGenericStreamingTemplate<int> a;
+  EXPECT_EQ("AllowsGenericStreamingTemplate", Print(a));
+}
+
+// Tests printing a type that supports generic streaming and can be
+// implicitly converted to another printable type.
+
+template <typename T>
+class AllowsGenericStreamingAndImplicitConversionTemplate {
+ public:
+  operator bool() const { return false; }
+};
+
+template <typename Char, typename CharTraits, typename T>
+std::basic_ostream<Char, CharTraits>& operator<<(
+    std::basic_ostream<Char, CharTraits>& os,
+    const AllowsGenericStreamingAndImplicitConversionTemplate<T>& a) {
+  return os << "AllowsGenericStreamingAndImplicitConversionTemplate";
+}
+
+TEST(PrintTypeWithGenericStreamingTest, TypeImplicitlyConvertible) {
+  AllowsGenericStreamingAndImplicitConversionTemplate<int> a;
+  EXPECT_EQ("AllowsGenericStreamingAndImplicitConversionTemplate", Print(a));
+}
+
 // Tests printing STL containers.
 
 TEST(PrintStlContainerTest, EmptyDeque) {

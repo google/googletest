@@ -116,8 +116,19 @@ class TypeWithoutFormatter<T, true> {
 // to simplify the implementation, as much code in 'internal' needs to
 // use << in STL, which would conflict with our own << were it defined
 // in 'internal'.
-template <typename T>
-::std::ostream& operator<<(::std::ostream& os, const T& x) {
+//
+// Note that this operator<< takes a generic std::basic_ostream<Char,
+// CharTraits> type instead of the more restricted std::ostream.  If
+// we define it to take an std::ostream instead, we'll get an
+// "ambiguous overloads" compiler error when trying to print a type
+// Foo that supports streaming to std::basic_ostream<Char,
+// CharTraits>, as the compiler cannot tell whether
+// operator<<(std::ostream&, const T&) or
+// operator<<(std::basic_stream<Char, CharTraits>, const Foo&) is more
+// specific.
+template <typename Char, typename CharTraits, typename T>
+::std::basic_ostream<Char, CharTraits>& operator<<(
+    ::std::basic_ostream<Char, CharTraits>& os, const T& x) {
   TypeWithoutFormatter<T, ::testing::internal::IsAProtocolMessage<T>::value>::
       PrintValue(x, &os);
   return os;
