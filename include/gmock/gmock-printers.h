@@ -44,9 +44,12 @@
 // When T is a reference type, the address of the value is also
 // printed.
 //
-// We also provide a convenient wrapper
+// We also provide some convenient wrappers:
 //
+//   // Prints to a string.
 //   string ::testing::internal::UniversalPrinter<T>::PrintAsString(value);
+//   // Prints a value using its inferred type.
+//   void ::testing::internal::UniversalPrint(const T& value, ostream*);
 
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_PRINTERS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_PRINTERS_H_
@@ -584,6 +587,16 @@ class UniversalPrinter<T&> {
 #pragma warning(pop)           // Restores the warning state.
 #endif  // _MSC_VER
 };
+
+// Prints a value using its inferred type.  In particular, if the
+// original type of the value is a reference, the *referenced* type
+// (as opposed to the reference type) will be used, as C++ doesn't
+// infer reference types.  This is useful when you just want to know
+// what the value is and don't care if it's a reference or not.
+template <typename T>
+void UniversalPrint(const T& value, ::std::ostream* os) {
+  UniversalPrinter<T>::Print(value, os);
+}
 
 }  // namespace internal
 }  // namespace testing

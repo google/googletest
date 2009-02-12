@@ -152,6 +152,7 @@ using ::std::tr1::make_tuple;
 using ::std::tr1::tuple;
 using ::std::vector;
 using ::testing::StartsWith;
+using ::testing::internal::UniversalPrint;
 using ::testing::internal::UniversalPrinter;
 using ::testing::internal::string;
 
@@ -978,6 +979,29 @@ TEST(PrintReferenceTest, HandlesMemberVariablePointer) {
   EXPECT_THAT(PrintByRef(p),
               StartsWith("@" + PrintPointer(&p)
                          + " " + Print(sizeof(p)) + "-byte object "));
+}
+
+TEST(PrintAsStringTest, WorksForNonReference) {
+  EXPECT_EQ("123", UniversalPrinter<int>::PrintAsString(123));
+}
+
+TEST(PrintAsStringTest, WorksForReference) {
+  int n = 123;
+  EXPECT_EQ("@" + PrintPointer(&n) + " 123",
+            UniversalPrinter<const int&>::PrintAsString(n));
+}
+
+TEST(UniversalPrintTest, WorksForNonReference) {
+  ::std::stringstream ss;
+  UniversalPrint(123, &ss);
+  EXPECT_EQ("123", ss.str());
+}
+
+TEST(UniversalPrintTest, WorksForReference) {
+  const int& n = 123;
+  ::std::stringstream ss;
+  UniversalPrint(n, &ss);
+  EXPECT_EQ("123", ss.str());
 }
 
 }  // namespace gmock_printers_test

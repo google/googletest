@@ -37,6 +37,7 @@
 
 #include <gmock/internal/gmock-internal-utils.h>
 
+#include <ctype.h>
 #include <ostream>  // NOLINT
 #include <string>
 #include <gmock/gmock.h>
@@ -45,6 +46,29 @@
 
 namespace testing {
 namespace internal {
+
+// Converts an identifier name to a space-separated list of lower-case
+// words.  Each maximum substring of the form [A-Za-z][a-z]*|\d+ is
+// treated as one word.  For example, both "FooBar123" and
+// "foo_bar_123" are converted to "foo bar 123".
+string ConvertIdentifierNameToWords(const char* id_name) {
+  string result;
+  char prev_char = '\0';
+  for (const char* p = id_name; *p != '\0'; prev_char = *(p++)) {
+    // We don't care about the current locale as the input is
+    // guaranteed to be a valid C++ identifier name.
+    const bool starts_new_word = isupper(*p) ||
+        (!isalpha(prev_char) && islower(*p)) ||
+        (!isdigit(prev_char) && isdigit(*p));
+
+    if (isalnum(*p)) {
+      if (starts_new_word && result != "")
+        result += ' ';
+      result += tolower(*p);
+    }
+  }
+  return result;
+}
 
 // This class reports Google Mock failures as Google Test failures.  A
 // user can define another class in a similar fashion if he intends to

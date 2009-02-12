@@ -50,6 +50,40 @@ namespace {
 
 using ::std::tr1::tuple;
 
+TEST(ConvertIdentifierNameToWordsTest, WorksWhenNameContainsNoWord) {
+  EXPECT_EQ("", ConvertIdentifierNameToWords(""));
+  EXPECT_EQ("", ConvertIdentifierNameToWords("_"));
+  EXPECT_EQ("", ConvertIdentifierNameToWords("__"));
+}
+
+TEST(ConvertIdentifierNameToWordsTest, WorksWhenNameContainsDigits) {
+  EXPECT_EQ("1", ConvertIdentifierNameToWords("_1"));
+  EXPECT_EQ("2", ConvertIdentifierNameToWords("2_"));
+  EXPECT_EQ("34", ConvertIdentifierNameToWords("_34_"));
+  EXPECT_EQ("34 56", ConvertIdentifierNameToWords("_34_56"));
+}
+
+TEST(ConvertIdentifierNameToWordsTest, WorksWhenNameContainsCamelCaseWords) {
+  EXPECT_EQ("a big word", ConvertIdentifierNameToWords("ABigWord"));
+  EXPECT_EQ("foo bar", ConvertIdentifierNameToWords("FooBar"));
+  EXPECT_EQ("foo", ConvertIdentifierNameToWords("Foo_"));
+  EXPECT_EQ("foo bar", ConvertIdentifierNameToWords("_Foo_Bar_"));
+  EXPECT_EQ("foo and bar", ConvertIdentifierNameToWords("_Foo__And_Bar"));
+}
+
+TEST(ConvertIdentifierNameToWordsTest, WorksWhenNameContains_SeparatedWords) {
+  EXPECT_EQ("foo bar", ConvertIdentifierNameToWords("foo_bar"));
+  EXPECT_EQ("foo", ConvertIdentifierNameToWords("_foo_"));
+  EXPECT_EQ("foo bar", ConvertIdentifierNameToWords("_foo_bar_"));
+  EXPECT_EQ("foo and bar", ConvertIdentifierNameToWords("_foo__and_bar"));
+}
+
+TEST(ConvertIdentifierNameToWordsTest, WorksWhenNameIsMixture) {
+  EXPECT_EQ("foo bar 123", ConvertIdentifierNameToWords("Foo_bar123"));
+  EXPECT_EQ("chapter 11 section 1",
+            ConvertIdentifierNameToWords("_Chapter11Section_1_"));
+}
+
 // Tests that CompileAssertTypesEqual compiles when the type arguments are
 // equal.
 TEST(CompileAssertTypesEqual, CompilesWhenTypesAreEqual) {

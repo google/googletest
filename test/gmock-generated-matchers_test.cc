@@ -40,6 +40,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <gtest/gtest-spi.h>
 
 namespace {
 
@@ -59,6 +60,7 @@ using testing::Ne;
 using testing::Not;
 using testing::Pointee;
 using testing::Ref;
+using testing::StaticAssertTypeEq;
 using testing::StrEq;
 using testing::internal::string;
 
@@ -368,6 +370,342 @@ TEST(ElementsAreArrayTest, CanBeCreatedWithMatcherArray) {
 
   test_vector.push_back("three");
   EXPECT_THAT(test_vector, Not(ElementsAreArray(kMatcherArray)));
+}
+
+// Tests for the MATCHER*() macro family.
+
+// Tests that a simple MATCHER() definition works.
+
+MATCHER(IsEven, "") { return (arg % 2) == 0; }
+
+TEST(MatcherMacroTest, Works) {
+  const Matcher<int> m = IsEven();
+  EXPECT_TRUE(m.Matches(6));
+  EXPECT_FALSE(m.Matches(7));
+
+  EXPECT_EQ("is even", Describe(m));
+  EXPECT_EQ("not (is even)", DescribeNegation(m));
+  EXPECT_EQ("", Explain(m, 6));
+  EXPECT_EQ("", Explain(m, 7));
+}
+
+// Tests that the description string supplied to MATCHER() must be
+// empty.
+
+MATCHER(HasBadDescription, "not empty?") {
+  return true;
+}
+
+TEST(MatcherMacroTest,
+     CreatingMatcherWithBadDescriptionGeneratesNonfatalFailure) {
+  EXPECT_NONFATAL_FAILURE(HasBadDescription(),
+                          "The description string in a MATCHER*() macro "
+                          "must be \"\" at this moment");
+}
+
+// Tests that the body of MATCHER() can reference the type of the
+// value being matched.
+
+MATCHER(IsEmptyString, "") {
+  StaticAssertTypeEq< ::std::string, arg_type>();
+  return arg == "";
+}
+
+MATCHER(IsEmptyStringByRef, "") {
+  StaticAssertTypeEq<const ::std::string&, arg_type>();
+  return arg == "";
+}
+
+TEST(MatcherMacroTest, CanReferenceArgType) {
+  const Matcher< ::std::string> m1 = IsEmptyString();
+  EXPECT_TRUE(m1.Matches(""));
+
+  const Matcher<const ::std::string&> m2 = IsEmptyStringByRef();
+  EXPECT_TRUE(m2.Matches(""));
+}
+
+// Tests that MATCHER() can be used in a namespace.
+
+namespace matcher_test {
+MATCHER(IsOdd, "") { return (arg % 2) != 0; }
+}  // namespace matcher_test
+
+TEST(MatcherTest, WorksInNamespace) {
+  Matcher<int> m = matcher_test::IsOdd();
+  EXPECT_FALSE(m.Matches(4));
+  EXPECT_TRUE(m.Matches(5));
+}
+
+// Tests that a simple MATCHER_P() definition works.
+
+MATCHER_P(IsGreaterThan32And, n, "") { return arg > 32 && arg > n; }
+
+TEST(MatcherPMacroTest, Works) {
+  const Matcher<int> m = IsGreaterThan32And(5);
+  EXPECT_TRUE(m.Matches(36));
+  EXPECT_FALSE(m.Matches(5));
+
+  EXPECT_EQ("is greater than 32 and 5", Describe(m));
+  EXPECT_EQ("not (is greater than 32 and 5)", DescribeNegation(m));
+  EXPECT_EQ("", Explain(m, 36));
+  EXPECT_EQ("", Explain(m, 5));
+}
+
+// Tests that the description string supplied to MATCHER_P() must be
+// empty.
+
+MATCHER_P(HasBadDescription1, n, "not empty?") {
+  return arg > n;
+}
+
+TEST(MatcherPMacroTest,
+     CreatingMatcherWithBadDescriptionGeneratesNonfatalFailure) {
+  EXPECT_NONFATAL_FAILURE(HasBadDescription1(2),
+                          "The description string in a MATCHER*() macro "
+                          "must be \"\" at this moment");
+}
+
+// Tests that the description is calculated correctly from the matcher name.
+MATCHER_P(_is_Greater_Than32and_, n, "") { return arg > 32 && arg > n; }
+
+TEST(MatcherPMacroTest, GeneratesCorrectDescription) {
+  const Matcher<int> m = _is_Greater_Than32and_(5);
+
+  EXPECT_EQ("is greater than 32 and 5", Describe(m));
+  EXPECT_EQ("not (is greater than 32 and 5)", DescribeNegation(m));
+  EXPECT_EQ("", Explain(m, 36));
+  EXPECT_EQ("", Explain(m, 5));
+}
+
+// Tests that a MATCHER_P matcher can be explicitly instantiated with
+// a reference parameter type.
+
+class UncopyableFoo {
+ public:
+  explicit UncopyableFoo(char value) : value_(value) {}
+ private:
+  UncopyableFoo(const UncopyableFoo&);
+  void operator=(const UncopyableFoo&);
+
+  char value_;
+};
+
+MATCHER_P(ReferencesUncopyable, variable, "") { return &arg == &variable; }
+
+TEST(MatcherPMacroTest, WorksWhenExplicitlyInstantiatedWithReference) {
+  UncopyableFoo foo1('1'), foo2('2');
+  const Matcher<const UncopyableFoo&> m =
+      ReferencesUncopyable<const UncopyableFoo&>(foo1);
+
+  EXPECT_TRUE(m.Matches(foo1));
+  EXPECT_FALSE(m.Matches(foo2));
+
+  // We don't want the address of the parameter printed, as most
+  // likely it will just annoy the user.  If the address is
+  // interesting, the user should consider passing the parameter by
+  // pointer instead.
+  EXPECT_EQ("references uncopyable 1-byte object <31>", Describe(m));
+}
+
+
+// Tests that the description string supplied to MATCHER_Pn() must be
+// empty.
+
+MATCHER_P2(HasBadDescription2, m, n, "not empty?") {
+  return arg > m + n;
+}
+
+TEST(MatcherPnMacroTest,
+     CreatingMatcherWithBadDescriptionGeneratesNonfatalFailure) {
+  EXPECT_NONFATAL_FAILURE(HasBadDescription2(3, 4),
+                          "The description string in a MATCHER*() macro "
+                          "must be \"\" at this moment");
+}
+
+// Tests that the body of MATCHER_Pn() can reference the parameter
+// types.
+
+MATCHER_P3(ParamTypesAreIntLongAndChar, foo, bar, baz, "") {
+  StaticAssertTypeEq<int, foo_type>();
+  StaticAssertTypeEq<long, bar_type>();  // NOLINT
+  StaticAssertTypeEq<char, baz_type>();
+  return arg == 0;
+}
+
+TEST(MatcherPnMacroTest, CanReferenceParamTypes) {
+  EXPECT_THAT(0, ParamTypesAreIntLongAndChar(10, 20L, 'a'));
+}
+
+// Tests that a MATCHER_Pn matcher can be explicitly instantiated with
+// reference parameter types.
+
+MATCHER_P2(ReferencesAnyOf, variable1, variable2, "") {
+  return &arg == &variable1 || &arg == &variable2;
+}
+
+TEST(MatcherPnMacroTest, WorksWhenExplicitlyInstantiatedWithReferences) {
+  UncopyableFoo foo1('1'), foo2('2'), foo3('3');
+  const Matcher<const UncopyableFoo&> m =
+      ReferencesAnyOf<const UncopyableFoo&, const UncopyableFoo&>(foo1, foo2);
+
+  EXPECT_TRUE(m.Matches(foo1));
+  EXPECT_TRUE(m.Matches(foo2));
+  EXPECT_FALSE(m.Matches(foo3));
+}
+
+TEST(MatcherPnMacroTest,
+     GeneratesCorretDescriptionWhenExplicitlyInstantiatedWithReferences) {
+  UncopyableFoo foo1('1'), foo2('2');
+  const Matcher<const UncopyableFoo&> m =
+      ReferencesAnyOf<const UncopyableFoo&, const UncopyableFoo&>(foo1, foo2);
+
+  // We don't want the addresses of the parameters printed, as most
+  // likely they will just annoy the user.  If the addresses are
+  // interesting, the user should consider passing the parameters by
+  // pointers instead.
+  EXPECT_EQ("references any of (1-byte object <31>, 1-byte object <32>)",
+            Describe(m));
+}
+
+// Tests that a simple MATCHER_P2() definition works.
+
+MATCHER_P2(IsNotInClosedRange, low, hi, "") { return arg < low || arg > hi; }
+
+TEST(MatcherPnMacroTest, Works) {
+  const Matcher<const long&> m = IsNotInClosedRange(10, 20);  // NOLINT
+  EXPECT_TRUE(m.Matches(36L));
+  EXPECT_FALSE(m.Matches(15L));
+
+  EXPECT_EQ("is not in closed range (10, 20)", Describe(m));
+  EXPECT_EQ("not (is not in closed range (10, 20))", DescribeNegation(m));
+  EXPECT_EQ("", Explain(m, 36L));
+  EXPECT_EQ("", Explain(m, 15L));
+}
+
+// Tests that MATCHER*() definitions can be overloaded on the number
+// of parameters; also tests MATCHER_Pn() where n >= 3.
+
+MATCHER(EqualsSumOf, "") { return arg == 0; }
+MATCHER_P(EqualsSumOf, a, "") { return arg == a; }
+MATCHER_P2(EqualsSumOf, a, b, "") { return arg == a + b; }
+MATCHER_P3(EqualsSumOf, a, b, c, "") { return arg == a + b + c; }
+MATCHER_P4(EqualsSumOf, a, b, c, d, "") { return arg == a + b + c + d; }
+MATCHER_P5(EqualsSumOf, a, b, c, d, e, "") { return arg == a + b + c + d + e; }
+MATCHER_P6(EqualsSumOf, a, b, c, d, e, f, "") {
+  return arg == a + b + c + d + e + f;
+}
+MATCHER_P7(EqualsSumOf, a, b, c, d, e, f, g, "") {
+  return arg == a + b + c + d + e + f + g;
+}
+MATCHER_P8(EqualsSumOf, a, b, c, d, e, f, g, h, "") {
+  return arg == a + b + c + d + e + f + g + h;
+}
+MATCHER_P9(EqualsSumOf, a, b, c, d, e, f, g, h, i, "") {
+  return arg == a + b + c + d + e + f + g + h + i;
+}
+MATCHER_P10(EqualsSumOf, a, b, c, d, e, f, g, h, i, j, "") {
+  return arg == a + b + c + d + e + f + g + h + i + j;
+}
+
+TEST(MatcherPnMacroTest, CanBeOverloadedOnNumberOfParameters) {
+  EXPECT_THAT(0, EqualsSumOf());
+  EXPECT_THAT(1, EqualsSumOf(1));
+  EXPECT_THAT(12, EqualsSumOf(10, 2));
+  EXPECT_THAT(123, EqualsSumOf(100, 20, 3));
+  EXPECT_THAT(1234, EqualsSumOf(1000, 200, 30, 4));
+  EXPECT_THAT(12345, EqualsSumOf(10000, 2000, 300, 40, 5));
+  EXPECT_THAT("abcdef",
+              EqualsSumOf(::std::string("a"), 'b', 'c', "d", "e", 'f'));
+  EXPECT_THAT("abcdefg",
+              EqualsSumOf(::std::string("a"), 'b', 'c', "d", "e", 'f', 'g'));
+  EXPECT_THAT("abcdefgh",
+              EqualsSumOf(::std::string("a"), 'b', 'c', "d", "e", 'f', 'g',
+                          "h"));
+  EXPECT_THAT("abcdefghi",
+              EqualsSumOf(::std::string("a"), 'b', 'c', "d", "e", 'f', 'g',
+                          "h", 'i'));
+  EXPECT_THAT("abcdefghij",
+              EqualsSumOf(::std::string("a"), 'b', 'c', "d", "e", 'f', 'g',
+                          "h", 'i', ::std::string("j")));
+
+  EXPECT_THAT(1, Not(EqualsSumOf()));
+  EXPECT_THAT(-1, Not(EqualsSumOf(1)));
+  EXPECT_THAT(-12, Not(EqualsSumOf(10, 2)));
+  EXPECT_THAT(-123, Not(EqualsSumOf(100, 20, 3)));
+  EXPECT_THAT(-1234, Not(EqualsSumOf(1000, 200, 30, 4)));
+  EXPECT_THAT(-12345, Not(EqualsSumOf(10000, 2000, 300, 40, 5)));
+  EXPECT_THAT("abcdef ",
+              Not(EqualsSumOf(::std::string("a"), 'b', 'c', "d", "e", 'f')));
+  EXPECT_THAT("abcdefg ",
+              Not(EqualsSumOf(::std::string("a"), 'b', 'c', "d", "e", 'f',
+                              'g')));
+  EXPECT_THAT("abcdefgh ",
+              Not(EqualsSumOf(::std::string("a"), 'b', 'c', "d", "e", 'f', 'g',
+                              "h")));
+  EXPECT_THAT("abcdefghi ",
+              Not(EqualsSumOf(::std::string("a"), 'b', 'c', "d", "e", 'f', 'g',
+                              "h", 'i')));
+  EXPECT_THAT("abcdefghij ",
+              Not(EqualsSumOf(::std::string("a"), 'b', 'c', "d", "e", 'f', 'g',
+                              "h", 'i', ::std::string("j"))));
+}
+
+// Tests that a MATCHER_Pn() definition can be instantiated with any
+// compatible parameter types.
+TEST(MatcherPnMacroTest, WorksForDifferentParameterTypes) {
+  EXPECT_THAT(123, EqualsSumOf(100L, 20, static_cast<char>(3)));
+  EXPECT_THAT("abcd", EqualsSumOf(::std::string("a"), "b", 'c', "d"));
+
+  EXPECT_THAT(124, Not(EqualsSumOf(100L, 20, static_cast<char>(3))));
+  EXPECT_THAT("abcde", Not(EqualsSumOf(::std::string("a"), "b", 'c', "d")));
+}
+
+// Tests that the matcher body can promote the parameter types.
+
+MATCHER_P2(EqConcat, prefix, suffix, "") {
+  // The following lines promote the two parameters to desired types.
+  std::string prefix_str(prefix);
+  char suffix_char(suffix);
+  return arg == prefix_str + suffix_char;
+}
+
+TEST(MatcherPnMacroTest, SimpleTypePromotion) {
+  Matcher<std::string> no_promo =
+      EqConcat(std::string("foo"), 't');
+  Matcher<const std::string&> promo =
+      EqConcat("foo", static_cast<int>('t'));
+  EXPECT_FALSE(no_promo.Matches("fool"));
+  EXPECT_FALSE(promo.Matches("fool"));
+  EXPECT_TRUE(no_promo.Matches("foot"));
+  EXPECT_TRUE(promo.Matches("foot"));
+}
+
+// Verifies the type of a MATCHER*.
+
+TEST(MatcherPnMacroTest, TypesAreCorrect) {
+  // EqualsSumOf() must be assignable to a EqualsSumOfMatcher variable.
+  EqualsSumOfMatcher a0 = EqualsSumOf();
+
+  // EqualsSumOf(1) must be assignable to a EqualsSumOfMatcherP variable.
+  EqualsSumOfMatcherP<int> a1 = EqualsSumOf(1);
+
+  // EqualsSumOf(p1, ..., pk) must be assignable to a EqualsSumOfMatcherPk
+  // variable, and so on.
+  EqualsSumOfMatcherP2<int, char> a2 = EqualsSumOf(1, '2');
+  EqualsSumOfMatcherP3<int, int, char> a3 = EqualsSumOf(1, 2, '3');
+  EqualsSumOfMatcherP4<int, int, int, char> a4 = EqualsSumOf(1, 2, 3, '4');
+  EqualsSumOfMatcherP5<int, int, int, int, char> a5 =
+      EqualsSumOf(1, 2, 3, 4, '5');
+  EqualsSumOfMatcherP6<int, int, int, int, int, char> a6 =
+      EqualsSumOf(1, 2, 3, 4, 5, '6');
+  EqualsSumOfMatcherP7<int, int, int, int, int, int, char> a7 =
+      EqualsSumOf(1, 2, 3, 4, 5, 6, '7');
+  EqualsSumOfMatcherP8<int, int, int, int, int, int, int, char> a8 =
+      EqualsSumOf(1, 2, 3, 4, 5, 6, 7, '8');
+  EqualsSumOfMatcherP9<int, int, int, int, int, int, int, int, char> a9 =
+      EqualsSumOf(1, 2, 3, 4, 5, 6, 7, 8, '9');
+  EqualsSumOfMatcherP10<int, int, int, int, int, int, int, int, int, char> a10 =
+      EqualsSumOf(1, 2, 3, 4, 5, 6, 7, 8, 9, '0');
 }
 
 }  // namespace

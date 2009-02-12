@@ -63,6 +63,12 @@ namespace proto2 { class Message; }
 namespace testing {
 namespace internal {
 
+// Converts an identifier name to a space-separated list of lower-case
+// words.  Each maximum substring of the form [A-Za-z][a-z]*|\d+ is
+// treated as one word.  For example, both "FooBar123" and
+// "foo_bar_123" are converted to "foo bar 123".
+string ConvertIdentifierNameToWords(const char* id_name);
+
 // Defining a variable of type CompileAssertTypesEqual<T1, T2> will cause a
 // compiler error iff T1 and T2 are different types.
 template <typename T1, typename T2>
