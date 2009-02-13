@@ -106,7 +106,7 @@ Please do submit code. Here's what you need to do:
   # Ensure that there are unit tests for your code.
   # Sign a Contributor License Agreement.
   # Create a patch file using `svn diff`.
-  # We use [http://codereview.appspot.com/ Rietveld] to do web-based code reviews.  You can read about the tool [http://code.google.com/p/rietveld/wiki/CodeReviewHelp here].  When you are ready, upload your patch via Rietveld and notify `googletestframework@googlegroups.com` to review it.  There are several ways to upload the patch.  We recommend using the [http://codereview.appspot.com/static/upload.py upload.py] script.
+  # We use [http://codereview.appspot.com/ Rietveld] to do web-based code reviews.  You can read about the tool [http://code.google.com/p/rietveld/wiki/CodeReviewHelp here].  When you are ready, upload your patch via Rietveld and notify `googletestframework@googlegroups.com` to review it.  There are several ways to upload the patch.  We recommend using the [http://code.google.com/p/googletest/source/browse/trunk/scripts/upload_gtest.py upload_gtest.py] script, which you can find in the `scripts/` folder in the SVN trunk.
 
 == Google Test Committers ==
 
