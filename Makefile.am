@@ -173,6 +173,11 @@ EXTRA_DIST += include/gmock/gmock-generated-actions.h.pump \
               include/gmock/gmock-generated-nice-strict.h.pump \
               include/gmock/internal/gmock-generated-internal-utils.h.pump
 
+# Scripts for uploading a patch for review.
+EXTRA_DIST += \
+    scripts/upload.py \
+    scripts/upload_gmock.py
+
 # The Google Mock Generator tool from the cppclean project.
 EXTRA_DIST += \
     scripts/generator/COPYING \
