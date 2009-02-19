@@ -100,7 +100,7 @@ class BuiltInDefaultValue<T*> {
 
 // The following specializations define the default values for
 // specific types we care about.
-#define GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE(type, value) \
+#define GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(type, value) \
   template <> \
   class BuiltInDefaultValue<type> { \
    public: \
@@ -108,17 +108,17 @@ class BuiltInDefaultValue<T*> {
     static type Get() { return value; } \
   }
 
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE(void, );  // NOLINT
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(void, );  // NOLINT
 #if GTEST_HAS_GLOBAL_STRING
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE(::string, "");
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(::string, "");
 #endif  // GTEST_HAS_GLOBAL_STRING
 #if GTEST_HAS_STD_STRING
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE(::std::string, "");
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(::std::string, "");
 #endif  // GTEST_HAS_STD_STRING
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE(bool, false);
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE(unsigned char, '\0');
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE(signed char, '\0');
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE(char, '\0');
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(bool, false);
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(unsigned char, '\0');
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(signed char, '\0');
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(char, '\0');
 
 // signed wchar_t and unsigned wchar_t are NOT in the C++ standard.
 // Using them is a bad practice and not portable.  So don't use them.
@@ -146,21 +146,21 @@ GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE(char, '\0');
 // that type is the same as unsigned int for gcc, and invalid for
 // MSVC.
 #if defined(__GNUC__) || defined(_NATIVE_WCHAR_T_DEFINED)
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE(wchar_t, 0U);  // NOLINT
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(wchar_t, 0U);  // NOLINT
 #endif
 
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE(unsigned short, 0U);  // NOLINT
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE(signed short, 0);     // NOLINT
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE(unsigned int, 0U);
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE(signed int, 0);
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE(unsigned long, 0UL);  // NOLINT
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE(signed long, 0L);     // NOLINT
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE(UInt64, 0);
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE(Int64, 0);
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE(float, 0);
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE(double, 0);
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(unsigned short, 0U);  // NOLINT
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(signed short, 0);     // NOLINT
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(unsigned int, 0U);
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(signed int, 0);
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(unsigned long, 0UL);  // NOLINT
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(signed long, 0L);     // NOLINT
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(UInt64, 0);
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(Int64, 0);
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(float, 0);
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(double, 0);
 
-#undef GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE
+#undef GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_
 
 }  // namespace internal
 
@@ -460,8 +460,9 @@ class ReturnAction {
     // and put the typedef both here (for use in assert statement) and
     // in the Impl class. But both definitions must be the same.
     typedef typename Function<F>::Result Result;
-    GMOCK_COMPILE_ASSERT(!internal::is_reference<Result>::value,
-                         use_ReturnRef_instead_of_Return_to_return_a_reference);
+    GMOCK_COMPILE_ASSERT_(
+        !internal::is_reference<Result>::value,
+        use_ReturnRef_instead_of_Return_to_return_a_reference);
     return Action<F>(new Impl<F>(value_));
   }
  private:
@@ -489,8 +490,8 @@ class ReturnNullAction {
   // Allows ReturnNull() to be used in any pointer-returning function.
   template <typename Result, typename ArgumentTuple>
   static Result Perform(const ArgumentTuple&) {
-    GMOCK_COMPILE_ASSERT(internal::is_pointer<Result>::value,
-                   ReturnNull_can_be_used_to_return_a_pointer_only);
+    GMOCK_COMPILE_ASSERT_(internal::is_pointer<Result>::value,
+                          ReturnNull_can_be_used_to_return_a_pointer_only);
     return NULL;
   }
 };
@@ -522,8 +523,8 @@ class ReturnRefAction {
     // Asserts that the function return type is a reference.  This
     // catches the user error of using ReturnRef(x) when Return(x)
     // should be used, and generates some helpful error message.
-    GMOCK_COMPILE_ASSERT(internal::is_reference<Result>::value,
-                   use_Return_instead_of_ReturnRef_to_return_a_value);
+    GMOCK_COMPILE_ASSERT_(internal::is_reference<Result>::value,
+                          use_Return_instead_of_ReturnRef_to_return_a_value);
     return Action<F>(new Impl<F>(ref_));
   }
  private:

@@ -48,13 +48,13 @@
 
 // Concatenates two pre-processor symbols; works for concatenating
 // built-in macros like __FILE__ and __LINE__.
-#define GMOCK_CONCAT_TOKEN_IMPL(foo, bar) foo##bar
-#define GMOCK_CONCAT_TOKEN(foo, bar) GMOCK_CONCAT_TOKEN_IMPL(foo, bar)
+#define GMOCK_CONCAT_TOKEN_IMPL_(foo, bar) foo##bar
+#define GMOCK_CONCAT_TOKEN_(foo, bar) GMOCK_CONCAT_TOKEN_IMPL_(foo, bar)
 
 #ifdef __GNUC__
-#define GMOCK_ATTRIBUTE_UNUSED __attribute__ ((unused))
+#define GMOCK_ATTRIBUTE_UNUSED_ __attribute__ ((unused))
 #else
-#define GMOCK_ATTRIBUTE_UNUSED
+#define GMOCK_ATTRIBUTE_UNUSED_
 #endif  // __GNUC__
 
 class ProtocolMessage;
@@ -88,7 +88,7 @@ struct RemoveReference<T&> { typedef T type; };  // NOLINT
 
 // A handy wrapper around RemoveReference that works when the argument
 // T depends on template parameters.
-#define GMOCK_REMOVE_REFERENCE(T) \
+#define GMOCK_REMOVE_REFERENCE_(T) \
     typename ::testing::internal::RemoveReference<T>::type
 
 // Removes const from a type if it is a const type, otherwise leaves
@@ -101,7 +101,7 @@ struct RemoveConst<const T> { typedef T type; };  // NOLINT
 
 // A handy wrapper around RemoveConst that works when the argument
 // T depends on template parameters.
-#define GMOCK_REMOVE_CONST(T) \
+#define GMOCK_REMOVE_CONST_(T) \
     typename ::testing::internal::RemoveConst<T>::type
 
 // Adds reference to a type if it is not a reference type,
@@ -114,7 +114,7 @@ struct AddReference<T&> { typedef T& type; };  // NOLINT
 
 // A handy wrapper around AddReference that works when the argument T
 // depends on template parameters.
-#define GMOCK_ADD_REFERENCE(T) \
+#define GMOCK_ADD_REFERENCE_(T) \
     typename ::testing::internal::AddReference<T>::type
 
 // Adds a reference to const on top of T as necessary.  For example,
@@ -126,8 +126,8 @@ struct AddReference<T&> { typedef T& type; };  // NOLINT
 //   const char&  ==> const char&
 //
 // The argument T must depend on some template parameters.
-#define GMOCK_REFERENCE_TO_CONST(T) \
-    GMOCK_ADD_REFERENCE(const GMOCK_REMOVE_REFERENCE(T))
+#define GMOCK_REFERENCE_TO_CONST_(T) \
+    GMOCK_ADD_REFERENCE_(const GMOCK_REMOVE_REFERENCE_(T))
 
 // PointeeOf<Pointer>::type is the type of a value pointed to by a
 // Pointer, which can be either a smart pointer or a raw pointer.  The

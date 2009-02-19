@@ -68,7 +68,7 @@
 namespace testing {
 
 // Declares Google Mock flags that we want a user to use programmatically.
-GMOCK_DECLARE_string(verbose);
+GMOCK_DECLARE_string_(verbose);
 
 // Initializes Google Mock.  This must be called before running the
 // tests.  In particular, it parses the command line for the flags

@@ -103,11 +103,11 @@ TEST(RemoveReferenceTest, RemovesReference) {
   CompileAssertTypesEqual<const char, RemoveReference<const char&>::type>();
 }
 
-// Tests GMOCK_REMOVE_REFERENCE.
+// Tests GMOCK_REMOVE_REFERENCE_.
 
 template <typename T1, typename T2>
 void TestGMockRemoveReference() {
-  CompileAssertTypesEqual<T1, GMOCK_REMOVE_REFERENCE(T2)>();
+  CompileAssertTypesEqual<T1, GMOCK_REMOVE_REFERENCE_(T2)>();
 }
 
 TEST(RemoveReferenceTest, MacroVersion) {
@@ -127,11 +127,11 @@ TEST(RemoveConstTest, RemovesConst) {
   CompileAssertTypesEqual<int, RemoveConst<const int>::type>();
 }
 
-// Tests GMOCK_REMOVE_CONST.
+// Tests GMOCK_REMOVE_CONST_.
 
 template <typename T1, typename T2>
 void TestGMockRemoveConst() {
-  CompileAssertTypesEqual<T1, GMOCK_REMOVE_CONST(T2)>();
+  CompileAssertTypesEqual<T1, GMOCK_REMOVE_CONST_(T2)>();
 }
 
 TEST(RemoveConstTest, MacroVersion) {
@@ -152,11 +152,11 @@ TEST(AddReferenceTest, AddsReference) {
   CompileAssertTypesEqual<const char&, AddReference<const char>::type>();
 }
 
-// Tests GMOCK_ADD_REFERENCE.
+// Tests GMOCK_ADD_REFERENCE_.
 
 template <typename T1, typename T2>
 void TestGMockAddReference() {
-  CompileAssertTypesEqual<T1, GMOCK_ADD_REFERENCE(T2)>();
+  CompileAssertTypesEqual<T1, GMOCK_ADD_REFERENCE_(T2)>();
 }
 
 TEST(AddReferenceTest, MacroVersion) {
@@ -164,11 +164,11 @@ TEST(AddReferenceTest, MacroVersion) {
   TestGMockAddReference<const char&, const char&>();
 }
 
-// Tests GMOCK_REFERENCE_TO_CONST.
+// Tests GMOCK_REFERENCE_TO_CONST_.
 
 template <typename T1, typename T2>
 void TestGMockReferenceToConst() {
-  CompileAssertTypesEqual<T1, GMOCK_REFERENCE_TO_CONST(T2)>();
+  CompileAssertTypesEqual<T1, GMOCK_REFERENCE_TO_CONST_(T2)>();
 }
 
 TEST(GMockReferenceToConstTest, Works) {
@@ -207,8 +207,9 @@ class Derived : public Base {};
 
 // Tests that ImplicitlyConvertible<T1, T2>::value is a compile-time constant.
 TEST(ImplicitlyConvertibleTest, ValueIsCompileTimeConstant) {
-  GMOCK_COMPILE_ASSERT((ImplicitlyConvertible<int, int>::value), const_true);
-  GMOCK_COMPILE_ASSERT((!ImplicitlyConvertible<void*, int*>::value), const_false);
+  GMOCK_COMPILE_ASSERT_((ImplicitlyConvertible<int, int>::value), const_true);
+  GMOCK_COMPILE_ASSERT_((!ImplicitlyConvertible<void*, int*>::value),
+                        const_false);
 }
 
 // Tests that ImplicitlyConvertible<T1, T2>::value is true when T1 can
@@ -233,8 +234,8 @@ TEST(ImplicitlyConvertibleTest, ValueIsFalseWhenNotConvertible) {
 
 // Tests that IsAProtocolMessage<T>::value is a compile-time constant.
 TEST(IsAProtocolMessageTest, ValueIsCompileTimeConstant) {
-  GMOCK_COMPILE_ASSERT(IsAProtocolMessage<ProtocolMessage>::value, const_true);
-  GMOCK_COMPILE_ASSERT(!IsAProtocolMessage<int>::value, const_false);
+  GMOCK_COMPILE_ASSERT_(IsAProtocolMessage<ProtocolMessage>::value, const_true);
+  GMOCK_COMPILE_ASSERT_(!IsAProtocolMessage<int>::value, const_false);
 }
 
 // Tests that IsAProtocolMessage<T>::value is true when T is

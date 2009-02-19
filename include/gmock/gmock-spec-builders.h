@@ -378,7 +378,7 @@ class InSequence {
   bool sequence_created_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(InSequence);  // NOLINT
-} GMOCK_ATTRIBUTE_UNUSED;
+} GMOCK_ATTRIBUTE_UNUSED_;
 
 namespace internal {
 
@@ -1562,13 +1562,13 @@ inline const T& Const(const T& x) { return x; }
 // of the method used in call is a result of macro expansion.
 // See CompilesWithMethodNameExpandedFromMacro tests in
 // internal/gmock-spec-builders_test.cc for more details.
-#define ON_CALL_IMPL_(obj, call) \
+#define GMOCK_ON_CALL_IMPL_(obj, call) \
     ((obj).gmock_##call).InternalDefaultActionSetAt(__FILE__, __LINE__, \
                                                     #obj, #call)
-#define ON_CALL(obj, call) ON_CALL_IMPL_(obj, call)
+#define ON_CALL(obj, call) GMOCK_ON_CALL_IMPL_(obj, call)
 
-#define EXPECT_CALL_IMPL_(obj, call) \
+#define GMOCK_EXPECT_CALL_IMPL_(obj, call) \
     ((obj).gmock_##call).InternalExpectedAt(__FILE__, __LINE__, #obj, #call)
-#define EXPECT_CALL(obj, call) EXPECT_CALL_IMPL_(obj, call)
+#define EXPECT_CALL(obj, call) GMOCK_EXPECT_CALL_IMPL_(obj, call)
 
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_

@@ -183,18 +183,18 @@ template <bool>
 struct CompileAssert {
 };
 
-#define GMOCK_COMPILE_ASSERT(expr, msg) \
+#define GMOCK_COMPILE_ASSERT_(expr, msg) \
   typedef ::testing::internal::CompileAssert<(bool(expr))> \
       msg[bool(expr) ? 1 : -1]
 
-// Implementation details of GMOCK_COMPILE_ASSERT:
+// Implementation details of GMOCK_COMPILE_ASSERT_:
 //
-// - GMOCK_COMPILE_ASSERT works by defining an array type that has -1
+// - GMOCK_COMPILE_ASSERT_ works by defining an array type that has -1
 //   elements (and thus is invalid) when the expression is false.
 //
 // - The simpler definition
 //
-//     #define GMOCK_COMPILE_ASSERT(expr, msg) typedef char msg[(expr) ? 1 : -1]
+//    #define GMOCK_COMPILE_ASSERT_(expr, msg) typedef char msg[(expr) ? 1 : -1]
 //
 //   does not work, as gcc supports variable-length arrays whose sizes
 //   are determined at run-time (this is gcc's extension and not part
@@ -202,8 +202,8 @@ struct CompileAssert {
 //   following code with the simple definition:
 //
 //     int foo;
-//     GMOCK_COMPILE_ASSERT(foo, msg); // not supposed to compile as foo is
-//                                     // not a compile-time constant.
+//     GMOCK_COMPILE_ASSERT_(foo, msg); // not supposed to compile as foo is
+//                                      // not a compile-time constant.
 //
 // - By using the type CompileAssert<(bool(expr))>, we ensures that
 //   expr is a compile-time constant.  (Template arguments must be
@@ -216,7 +216,7 @@ struct CompileAssert {
 //
 //   instead, these compilers will refuse to compile
 //
-//     GMOCK_COMPILE_ASSERT(5 > 0, some_message);
+//     GMOCK_COMPILE_ASSERT_(5 > 0, some_message);
 //
 //   (They seem to think the ">" in "5 > 0" marks the end of the
 //   template argument list.)
@@ -293,22 +293,23 @@ class GMockCheckProvider {
 }  // namespace internal
 }  // namespace testing
 
-// Macro for referencing flags.
+// Macro for referencing flags.  This is public as we want the user to
+// use this syntax to reference Google Mock flags.
 #define GMOCK_FLAG(name) FLAGS_gmock_##name
 
 // Macros for declaring flags.
-#define GMOCK_DECLARE_bool(name) extern bool GMOCK_FLAG(name)
-#define GMOCK_DECLARE_int32(name) \
+#define GMOCK_DECLARE_bool_(name) extern bool GMOCK_FLAG(name)
+#define GMOCK_DECLARE_int32_(name) \
     extern ::testing::internal::Int32 GMOCK_FLAG(name)
-#define GMOCK_DECLARE_string(name) \
+#define GMOCK_DECLARE_string_(name) \
     extern ::testing::internal::String GMOCK_FLAG(name)
 
 // Macros for defining flags.
-#define GMOCK_DEFINE_bool(name, default_val, doc) \
+#define GMOCK_DEFINE_bool_(name, default_val, doc) \
     bool GMOCK_FLAG(name) = (default_val)
-#define GMOCK_DEFINE_int32(name, default_val, doc) \
+#define GMOCK_DEFINE_int32_(name, default_val, doc) \
     ::testing::internal::Int32 GMOCK_FLAG(name) = (default_val)
-#define GMOCK_DEFINE_string(name, default_val, doc) \
+#define GMOCK_DEFINE_string_(name, default_val, doc) \
     ::testing::internal::String GMOCK_FLAG(name) = (default_val)
 
 #endif  // GMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_PORT_H_

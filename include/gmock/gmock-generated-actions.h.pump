@@ -270,7 +270,7 @@ $for j [[
 
 // An INTERNAL macro for extracting the type of a tuple field.  It's
 // subject to change without notice - DO NOT USE IN USER CODE!
-#define GMOCK_FIELD(Tuple, N) \
+#define GMOCK_FIELD_(Tuple, N) \
     typename ::std::tr1::tuple_element<N, Tuple>::type
 
 $range i 1..n
@@ -296,7 +296,7 @@ $range i 1..n
 template <typename Result, typename ArgumentTuple, $for i, [[int k$i]]>
 class SelectArgs {
  public:
-  typedef Result type($for i, [[GMOCK_FIELD(ArgumentTuple, k$i)]]);
+  typedef Result type($for i, [[GMOCK_FIELD_(ArgumentTuple, k$i)]]);
   typedef typename Function<type>::ArgumentTuple SelectedArgs;
   static SelectedArgs Select(const ArgumentTuple& args) {
     using ::std::tr1::get;
@@ -312,7 +312,7 @@ template <typename Result, typename ArgumentTuple$for j1[[, int k$j1]]>
 class SelectArgs<Result, ArgumentTuple,
                  $for j, [[$if j <= i-1 [[k$j]] $else [[-1]]]]> {
  public:
-  typedef Result type($for j1, [[GMOCK_FIELD(ArgumentTuple, k$j1)]]);
+  typedef Result type($for j1, [[GMOCK_FIELD_(ArgumentTuple, k$j1)]]);
   typedef typename Function<type>::ArgumentTuple SelectedArgs;
   static SelectedArgs Select(const ArgumentTuple& args) {
     using ::std::tr1::get;
@@ -322,7 +322,7 @@ class SelectArgs<Result, ArgumentTuple,
 
 
 ]]
-#undef GMOCK_FIELD
+#undef GMOCK_FIELD_
 
 $var ks = [[$for i, [[k$i]]]]
 

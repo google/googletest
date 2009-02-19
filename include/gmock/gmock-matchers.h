@@ -377,7 +377,7 @@ class TuplePrefix {
       // isn't interesting to the user most of the time.  The
       // matcher's ExplainMatchResultTo() method handles the case when
       // the address is interesting.
-      internal::UniversalPrinter<GMOCK_REMOVE_REFERENCE(Value)>::
+      internal::UniversalPrinter<GMOCK_REMOVE_REFERENCE_(Value)>::
           Print(value, os);
       ExplainMatchResultAsNeededTo<Value>(matcher, value, os);
       *os << "\n";
@@ -412,9 +412,9 @@ bool TupleMatches(const MatcherTuple& matcher_tuple,
   using ::std::tr1::tuple_size;
   // Makes sure that matcher_tuple and value_tuple have the same
   // number of fields.
-  GMOCK_COMPILE_ASSERT(tuple_size<MatcherTuple>::value ==
-                       tuple_size<ValueTuple>::value,
-                       matcher_and_value_have_different_numbers_of_fields);
+  GMOCK_COMPILE_ASSERT_(tuple_size<MatcherTuple>::value ==
+                        tuple_size<ValueTuple>::value,
+                        matcher_and_value_have_different_numbers_of_fields);
   return TuplePrefix<tuple_size<ValueTuple>::value>::
       Matches(matcher_tuple, value_tuple);
 }
@@ -528,7 +528,7 @@ class AnythingMatcher {
 //
 // The following template definition assumes that the Rhs parameter is
 // a "bare" type (i.e. neither 'const T' nor 'T&').
-#define GMOCK_IMPLEMENT_COMPARISON_MATCHER(name, op, relation) \
+#define GMOCK_IMPLEMENT_COMPARISON_MATCHER_(name, op, relation) \
   template <typename Rhs> class name##Matcher { \
    public: \
     explicit name##Matcher(const Rhs& rhs) : rhs_(rhs) {} \
@@ -558,14 +558,14 @@ class AnythingMatcher {
 
 // Implements Eq(v), Ge(v), Gt(v), Le(v), Lt(v), and Ne(v)
 // respectively.
-GMOCK_IMPLEMENT_COMPARISON_MATCHER(Eq, ==, "equal to");
-GMOCK_IMPLEMENT_COMPARISON_MATCHER(Ge, >=, "greater than or equal to");
-GMOCK_IMPLEMENT_COMPARISON_MATCHER(Gt, >, "greater than");
-GMOCK_IMPLEMENT_COMPARISON_MATCHER(Le, <=, "less than or equal to");
-GMOCK_IMPLEMENT_COMPARISON_MATCHER(Lt, <, "less than");
-GMOCK_IMPLEMENT_COMPARISON_MATCHER(Ne, !=, "not equal to");
+GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Eq, ==, "equal to");
+GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Ge, >=, "greater than or equal to");
+GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Gt, >, "greater than");
+GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Le, <=, "less than or equal to");
+GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Lt, <, "less than");
+GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Ne, !=, "not equal to");
 
-#undef GMOCK_IMPLEMENT_COMPARISON_MATCHER
+#undef GMOCK_IMPLEMENT_COMPARISON_MATCHER_
 
 // Implements the polymorphic NotNull() matcher, which matches any
 // pointer that is not NULL.
@@ -893,7 +893,7 @@ class MatchesRegexMatcher {
 //
 // We define this as a macro in order to eliminate duplicated source
 // code.
-#define GMOCK_IMPLEMENT_COMPARISON2_MATCHER(name, op, relation) \
+#define GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(name, op, relation) \
   class name##2Matcher { \
    public: \
     template <typename T1, typename T2> \
@@ -917,14 +917,14 @@ class MatchesRegexMatcher {
   }
 
 // Implements Eq(), Ge(), Gt(), Le(), Lt(), and Ne() respectively.
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER(Eq, ==, "equal to");
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER(Ge, >=, "greater than or equal to");
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER(Gt, >, "greater than");
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER(Le, <=, "less than or equal to");
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER(Lt, <, "less than");
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER(Ne, !=, "not equal to");
+GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Eq, ==, "equal to");
+GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Ge, >=, "greater than or equal to");
+GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Gt, >, "greater than");
+GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Le, <=, "less than or equal to");
+GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Lt, <, "less than");
+GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Ne, !=, "not equal to");
 
-#undef GMOCK_IMPLEMENT_COMPARISON2_MATCHER
+#undef GMOCK_IMPLEMENT_COMPARISON2_MATCHER_
 
 // Implements the Not(m) matcher, which matches a value that doesn't
 // match matcher m.
@@ -1364,8 +1364,8 @@ class PointeeMatcher {
   template <typename Pointer>
   class Impl : public MatcherInterface<Pointer> {
    public:
-    typedef typename PointeeOf<GMOCK_REMOVE_CONST(  // NOLINT
-        GMOCK_REMOVE_REFERENCE(Pointer))>::type Pointee;
+    typedef typename PointeeOf<GMOCK_REMOVE_CONST_(  // NOLINT
+        GMOCK_REMOVE_REFERENCE_(Pointer))>::type Pointee;
 
     explicit Impl(const InnerMatcher& matcher)
         : matcher_(MatcherCast<const Pointee&>(matcher)) {}
@@ -1474,7 +1474,7 @@ class PropertyMatcher {
   // may cause double references and fail to compile.  That's why we
   // need GMOCK_REFERENCE_TO_CONST, which works regardless of
   // PropertyType being a reference or not.
-  typedef GMOCK_REFERENCE_TO_CONST(PropertyType) RefToConstProperty;
+  typedef GMOCK_REFERENCE_TO_CONST_(PropertyType) RefToConstProperty;
 
   PropertyMatcher(PropertyType (Class::*property)() const,
                   const Matcher<RefToConstProperty>& matcher)
@@ -1859,7 +1859,7 @@ inline PolymorphicMatcher<
   return MakePolymorphicMatcher(
       internal::PropertyMatcher<Class, PropertyType>(
           property,
-          MatcherCast<GMOCK_REFERENCE_TO_CONST(PropertyType)>(matcher)));
+          MatcherCast<GMOCK_REFERENCE_TO_CONST_(PropertyType)>(matcher)));
   // The call to MatcherCast() is required for supporting inner
   // matchers of compatible types.  For example, it allows
   //   Property(&Foo::bar, m)

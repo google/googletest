@@ -56,7 +56,7 @@ inline void ValidateMatcherDescription(const char* description) {
 template <typename Container>
 class ElementsAreMatcherImpl : public MatcherInterface<Container> {
  public:
-  typedef GMOCK_REMOVE_CONST(GMOCK_REMOVE_REFERENCE(Container)) RawContainer;
+  typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container)) RawContainer;
   typedef typename RawContainer::value_type Element;
 
   // Constructs the matcher from a sequence of element values or
@@ -195,7 +195,8 @@ class ElementsAreMatcher0 {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    typedef GMOCK_REMOVE_CONST(GMOCK_REMOVE_REFERENCE(Container)) RawContainer;
+    typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
+        RawContainer;
     typedef typename RawContainer::value_type Element;
 
     const Matcher<const Element&>* const matchers = NULL;
@@ -210,7 +211,8 @@ class ElementsAreMatcher1 {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    typedef GMOCK_REMOVE_CONST(GMOCK_REMOVE_REFERENCE(Container)) RawContainer;
+    typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
+        RawContainer;
     typedef typename RawContainer::value_type Element;
 
     const Matcher<const Element&> matchers[] = {
@@ -231,7 +233,8 @@ class ElementsAreMatcher2 {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    typedef GMOCK_REMOVE_CONST(GMOCK_REMOVE_REFERENCE(Container)) RawContainer;
+    typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
+        RawContainer;
     typedef typename RawContainer::value_type Element;
 
     const Matcher<const Element&> matchers[] = {
@@ -255,7 +258,8 @@ class ElementsAreMatcher3 {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    typedef GMOCK_REMOVE_CONST(GMOCK_REMOVE_REFERENCE(Container)) RawContainer;
+    typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
+        RawContainer;
     typedef typename RawContainer::value_type Element;
 
     const Matcher<const Element&> matchers[] = {
@@ -281,7 +285,8 @@ class ElementsAreMatcher4 {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    typedef GMOCK_REMOVE_CONST(GMOCK_REMOVE_REFERENCE(Container)) RawContainer;
+    typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
+        RawContainer;
     typedef typename RawContainer::value_type Element;
 
     const Matcher<const Element&> matchers[] = {
@@ -309,7 +314,8 @@ class ElementsAreMatcher5 {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    typedef GMOCK_REMOVE_CONST(GMOCK_REMOVE_REFERENCE(Container)) RawContainer;
+    typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
+        RawContainer;
     typedef typename RawContainer::value_type Element;
 
     const Matcher<const Element&> matchers[] = {
@@ -341,7 +347,8 @@ class ElementsAreMatcher6 {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    typedef GMOCK_REMOVE_CONST(GMOCK_REMOVE_REFERENCE(Container)) RawContainer;
+    typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
+        RawContainer;
     typedef typename RawContainer::value_type Element;
 
     const Matcher<const Element&> matchers[] = {
@@ -375,7 +382,8 @@ class ElementsAreMatcher7 {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    typedef GMOCK_REMOVE_CONST(GMOCK_REMOVE_REFERENCE(Container)) RawContainer;
+    typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
+        RawContainer;
     typedef typename RawContainer::value_type Element;
 
     const Matcher<const Element&> matchers[] = {
@@ -411,7 +419,8 @@ class ElementsAreMatcher8 {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    typedef GMOCK_REMOVE_CONST(GMOCK_REMOVE_REFERENCE(Container)) RawContainer;
+    typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
+        RawContainer;
     typedef typename RawContainer::value_type Element;
 
     const Matcher<const Element&> matchers[] = {
@@ -450,7 +459,8 @@ class ElementsAreMatcher9 {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    typedef GMOCK_REMOVE_CONST(GMOCK_REMOVE_REFERENCE(Container)) RawContainer;
+    typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
+        RawContainer;
     typedef typename RawContainer::value_type Element;
 
     const Matcher<const Element&> matchers[] = {
@@ -491,7 +501,8 @@ class ElementsAreMatcher10 {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    typedef GMOCK_REMOVE_CONST(GMOCK_REMOVE_REFERENCE(Container)) RawContainer;
+    typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
+        RawContainer;
     typedef typename RawContainer::value_type Element;
 
     const Matcher<const Element&> matchers[] = {
@@ -532,7 +543,8 @@ class ElementsAreArrayMatcher {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    typedef GMOCK_REMOVE_CONST(GMOCK_REMOVE_REFERENCE(Container)) RawContainer;
+    typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
+        RawContainer;
     typedef typename RawContainer::value_type Element;
 
     return MakeMatcher(new ElementsAreMatcherImpl<Container>(first_, count_));

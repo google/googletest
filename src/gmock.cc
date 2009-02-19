@@ -34,12 +34,12 @@
 
 namespace testing {
 
-GMOCK_DEFINE_string(verbose, internal::kWarningVerbosity,
-                    "Controls how verbose Google Mock's output is."
-                    "  Valid values:\n"
-                    "  info    - prints all messages.\n"
-                    "  warning - prints warnings and errors.\n"
-                    "  error   - prints errors only.");
+GMOCK_DEFINE_string_(verbose, internal::kWarningVerbosity,
+                     "Controls how verbose Google Mock's output is."
+                     "  Valid values:\n"
+                     "  info    - prints all messages.\n"
+                     "  warning - prints warnings and errors.\n"
+                     "  error   - prints errors only.");
 
 namespace internal {
 

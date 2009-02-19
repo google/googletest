@@ -703,7 +703,7 @@ class InvokeArgumentAction10 {
 
 // An INTERNAL macro for extracting the type of a tuple field.  It's
 // subject to change without notice - DO NOT USE IN USER CODE!
-#define GMOCK_FIELD(Tuple, N) \
+#define GMOCK_FIELD_(Tuple, N) \
     typename ::std::tr1::tuple_element<N, Tuple>::type
 
 // SelectArgs<Result, ArgumentTuple, k1, k2, ..., k_n>::type is the
@@ -728,12 +728,12 @@ template <typename Result, typename ArgumentTuple, int k1, int k2, int k3,
     int k4, int k5, int k6, int k7, int k8, int k9, int k10>
 class SelectArgs {
  public:
-  typedef Result type(GMOCK_FIELD(ArgumentTuple, k1),
-      GMOCK_FIELD(ArgumentTuple, k2), GMOCK_FIELD(ArgumentTuple, k3),
-      GMOCK_FIELD(ArgumentTuple, k4), GMOCK_FIELD(ArgumentTuple, k5),
-      GMOCK_FIELD(ArgumentTuple, k6), GMOCK_FIELD(ArgumentTuple, k7),
-      GMOCK_FIELD(ArgumentTuple, k8), GMOCK_FIELD(ArgumentTuple, k9),
-      GMOCK_FIELD(ArgumentTuple, k10));
+  typedef Result type(GMOCK_FIELD_(ArgumentTuple, k1),
+      GMOCK_FIELD_(ArgumentTuple, k2), GMOCK_FIELD_(ArgumentTuple, k3),
+      GMOCK_FIELD_(ArgumentTuple, k4), GMOCK_FIELD_(ArgumentTuple, k5),
+      GMOCK_FIELD_(ArgumentTuple, k6), GMOCK_FIELD_(ArgumentTuple, k7),
+      GMOCK_FIELD_(ArgumentTuple, k8), GMOCK_FIELD_(ArgumentTuple, k9),
+      GMOCK_FIELD_(ArgumentTuple, k10));
   typedef typename Function<type>::ArgumentTuple SelectedArgs;
   static SelectedArgs Select(const ArgumentTuple& args) {
     using ::std::tr1::get;
@@ -759,7 +759,7 @@ template <typename Result, typename ArgumentTuple, int k1>
 class SelectArgs<Result, ArgumentTuple,
                  k1, -1, -1, -1, -1, -1, -1, -1, -1, -1> {
  public:
-  typedef Result type(GMOCK_FIELD(ArgumentTuple, k1));
+  typedef Result type(GMOCK_FIELD_(ArgumentTuple, k1));
   typedef typename Function<type>::ArgumentTuple SelectedArgs;
   static SelectedArgs Select(const ArgumentTuple& args) {
     using ::std::tr1::get;
@@ -771,8 +771,8 @@ template <typename Result, typename ArgumentTuple, int k1, int k2>
 class SelectArgs<Result, ArgumentTuple,
                  k1, k2, -1, -1, -1, -1, -1, -1, -1, -1> {
  public:
-  typedef Result type(GMOCK_FIELD(ArgumentTuple, k1),
-      GMOCK_FIELD(ArgumentTuple, k2));
+  typedef Result type(GMOCK_FIELD_(ArgumentTuple, k1),
+      GMOCK_FIELD_(ArgumentTuple, k2));
   typedef typename Function<type>::ArgumentTuple SelectedArgs;
   static SelectedArgs Select(const ArgumentTuple& args) {
     using ::std::tr1::get;
@@ -784,8 +784,8 @@ template <typename Result, typename ArgumentTuple, int k1, int k2, int k3>
 class SelectArgs<Result, ArgumentTuple,
                  k1, k2, k3, -1, -1, -1, -1, -1, -1, -1> {
  public:
-  typedef Result type(GMOCK_FIELD(ArgumentTuple, k1),
-      GMOCK_FIELD(ArgumentTuple, k2), GMOCK_FIELD(ArgumentTuple, k3));
+  typedef Result type(GMOCK_FIELD_(ArgumentTuple, k1),
+      GMOCK_FIELD_(ArgumentTuple, k2), GMOCK_FIELD_(ArgumentTuple, k3));
   typedef typename Function<type>::ArgumentTuple SelectedArgs;
   static SelectedArgs Select(const ArgumentTuple& args) {
     using ::std::tr1::get;
@@ -798,9 +798,9 @@ template <typename Result, typename ArgumentTuple, int k1, int k2, int k3,
 class SelectArgs<Result, ArgumentTuple,
                  k1, k2, k3, k4, -1, -1, -1, -1, -1, -1> {
  public:
-  typedef Result type(GMOCK_FIELD(ArgumentTuple, k1),
-      GMOCK_FIELD(ArgumentTuple, k2), GMOCK_FIELD(ArgumentTuple, k3),
-      GMOCK_FIELD(ArgumentTuple, k4));
+  typedef Result type(GMOCK_FIELD_(ArgumentTuple, k1),
+      GMOCK_FIELD_(ArgumentTuple, k2), GMOCK_FIELD_(ArgumentTuple, k3),
+      GMOCK_FIELD_(ArgumentTuple, k4));
   typedef typename Function<type>::ArgumentTuple SelectedArgs;
   static SelectedArgs Select(const ArgumentTuple& args) {
     using ::std::tr1::get;
@@ -814,9 +814,9 @@ template <typename Result, typename ArgumentTuple, int k1, int k2, int k3,
 class SelectArgs<Result, ArgumentTuple,
                  k1, k2, k3, k4, k5, -1, -1, -1, -1, -1> {
  public:
-  typedef Result type(GMOCK_FIELD(ArgumentTuple, k1),
-      GMOCK_FIELD(ArgumentTuple, k2), GMOCK_FIELD(ArgumentTuple, k3),
-      GMOCK_FIELD(ArgumentTuple, k4), GMOCK_FIELD(ArgumentTuple, k5));
+  typedef Result type(GMOCK_FIELD_(ArgumentTuple, k1),
+      GMOCK_FIELD_(ArgumentTuple, k2), GMOCK_FIELD_(ArgumentTuple, k3),
+      GMOCK_FIELD_(ArgumentTuple, k4), GMOCK_FIELD_(ArgumentTuple, k5));
   typedef typename Function<type>::ArgumentTuple SelectedArgs;
   static SelectedArgs Select(const ArgumentTuple& args) {
     using ::std::tr1::get;
@@ -830,10 +830,10 @@ template <typename Result, typename ArgumentTuple, int k1, int k2, int k3,
 class SelectArgs<Result, ArgumentTuple,
                  k1, k2, k3, k4, k5, k6, -1, -1, -1, -1> {
  public:
-  typedef Result type(GMOCK_FIELD(ArgumentTuple, k1),
-      GMOCK_FIELD(ArgumentTuple, k2), GMOCK_FIELD(ArgumentTuple, k3),
-      GMOCK_FIELD(ArgumentTuple, k4), GMOCK_FIELD(ArgumentTuple, k5),
-      GMOCK_FIELD(ArgumentTuple, k6));
+  typedef Result type(GMOCK_FIELD_(ArgumentTuple, k1),
+      GMOCK_FIELD_(ArgumentTuple, k2), GMOCK_FIELD_(ArgumentTuple, k3),
+      GMOCK_FIELD_(ArgumentTuple, k4), GMOCK_FIELD_(ArgumentTuple, k5),
+      GMOCK_FIELD_(ArgumentTuple, k6));
   typedef typename Function<type>::ArgumentTuple SelectedArgs;
   static SelectedArgs Select(const ArgumentTuple& args) {
     using ::std::tr1::get;
@@ -847,10 +847,10 @@ template <typename Result, typename ArgumentTuple, int k1, int k2, int k3,
 class SelectArgs<Result, ArgumentTuple,
                  k1, k2, k3, k4, k5, k6, k7, -1, -1, -1> {
  public:
-  typedef Result type(GMOCK_FIELD(ArgumentTuple, k1),
-      GMOCK_FIELD(ArgumentTuple, k2), GMOCK_FIELD(ArgumentTuple, k3),
-      GMOCK_FIELD(ArgumentTuple, k4), GMOCK_FIELD(ArgumentTuple, k5),
-      GMOCK_FIELD(ArgumentTuple, k6), GMOCK_FIELD(ArgumentTuple, k7));
+  typedef Result type(GMOCK_FIELD_(ArgumentTuple, k1),
+      GMOCK_FIELD_(ArgumentTuple, k2), GMOCK_FIELD_(ArgumentTuple, k3),
+      GMOCK_FIELD_(ArgumentTuple, k4), GMOCK_FIELD_(ArgumentTuple, k5),
+      GMOCK_FIELD_(ArgumentTuple, k6), GMOCK_FIELD_(ArgumentTuple, k7));
   typedef typename Function<type>::ArgumentTuple SelectedArgs;
   static SelectedArgs Select(const ArgumentTuple& args) {
     using ::std::tr1::get;
@@ -864,11 +864,11 @@ template <typename Result, typename ArgumentTuple, int k1, int k2, int k3,
 class SelectArgs<Result, ArgumentTuple,
                  k1, k2, k3, k4, k5, k6, k7, k8, -1, -1> {
  public:
-  typedef Result type(GMOCK_FIELD(ArgumentTuple, k1),
-      GMOCK_FIELD(ArgumentTuple, k2), GMOCK_FIELD(ArgumentTuple, k3),
-      GMOCK_FIELD(ArgumentTuple, k4), GMOCK_FIELD(ArgumentTuple, k5),
-      GMOCK_FIELD(ArgumentTuple, k6), GMOCK_FIELD(ArgumentTuple, k7),
-      GMOCK_FIELD(ArgumentTuple, k8));
+  typedef Result type(GMOCK_FIELD_(ArgumentTuple, k1),
+      GMOCK_FIELD_(ArgumentTuple, k2), GMOCK_FIELD_(ArgumentTuple, k3),
+      GMOCK_FIELD_(ArgumentTuple, k4), GMOCK_FIELD_(ArgumentTuple, k5),
+      GMOCK_FIELD_(ArgumentTuple, k6), GMOCK_FIELD_(ArgumentTuple, k7),
+      GMOCK_FIELD_(ArgumentTuple, k8));
   typedef typename Function<type>::ArgumentTuple SelectedArgs;
   static SelectedArgs Select(const ArgumentTuple& args) {
     using ::std::tr1::get;
@@ -883,11 +883,11 @@ template <typename Result, typename ArgumentTuple, int k1, int k2, int k3,
 class SelectArgs<Result, ArgumentTuple,
                  k1, k2, k3, k4, k5, k6, k7, k8, k9, -1> {
  public:
-  typedef Result type(GMOCK_FIELD(ArgumentTuple, k1),
-      GMOCK_FIELD(ArgumentTuple, k2), GMOCK_FIELD(ArgumentTuple, k3),
-      GMOCK_FIELD(ArgumentTuple, k4), GMOCK_FIELD(ArgumentTuple, k5),
-      GMOCK_FIELD(ArgumentTuple, k6), GMOCK_FIELD(ArgumentTuple, k7),
-      GMOCK_FIELD(ArgumentTuple, k8), GMOCK_FIELD(ArgumentTuple, k9));
+  typedef Result type(GMOCK_FIELD_(ArgumentTuple, k1),
+      GMOCK_FIELD_(ArgumentTuple, k2), GMOCK_FIELD_(ArgumentTuple, k3),
+      GMOCK_FIELD_(ArgumentTuple, k4), GMOCK_FIELD_(ArgumentTuple, k5),
+      GMOCK_FIELD_(ArgumentTuple, k6), GMOCK_FIELD_(ArgumentTuple, k7),
+      GMOCK_FIELD_(ArgumentTuple, k8), GMOCK_FIELD_(ArgumentTuple, k9));
   typedef typename Function<type>::ArgumentTuple SelectedArgs;
   static SelectedArgs Select(const ArgumentTuple& args) {
     using ::std::tr1::get;
@@ -897,7 +897,7 @@ class SelectArgs<Result, ArgumentTuple,
   }
 };
 
-#undef GMOCK_FIELD
+#undef GMOCK_FIELD_
 
 // Implements the WithArgs action.
 template <typename InnerAction, int k1 = -1, int k2 = -1, int k3 = -1,
