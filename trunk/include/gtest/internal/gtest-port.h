@@ -220,7 +220,11 @@
 // gcc defines __EXCEPTIONS to 1 iff exceptions are enabled.  For
 // other compilers, we assume exceptions are disabled to be
 // conservative.
-#define GTEST_HAS_EXCEPTIONS (defined(__GNUC__) && __EXCEPTIONS)
+#if defined(__GNUC__) && __EXCEPTIONS
+#define GTEST_HAS_EXCEPTIONS 1
+#else
+#define GTEST_HAS_EXCEPTIONS 0
+#endif  // defined(__GNUC__) && __EXCEPTIONS
 #endif  // _MSC_VER
 
 // Determines whether ::std::string and ::string are available.
@@ -230,8 +234,11 @@
 // need to figure it out.  The only environment that we know
 // ::std::string is not available is MSVC 7.1 or lower with exceptions
 // disabled.
-#define GTEST_HAS_STD_STRING \
-    (!(defined(_MSC_VER) && (_MSC_VER < 1400) && !GTEST_HAS_EXCEPTIONS))
+#if defined(_MSC_VER) && (_MSC_VER < 1400) && !GTEST_HAS_EXCEPTIONS
+#define GTEST_HAS_STD_STRING 0
+#else
+#define GTEST_HAS_STD_STRING 1
+#endif
 #endif  // GTEST_HAS_STD_STRING
 
 #ifndef GTEST_HAS_GLOBAL_STRING
