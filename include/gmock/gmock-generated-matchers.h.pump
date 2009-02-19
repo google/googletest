@@ -43,17 +43,10 @@ $var n = 10  $$ The maximum arity we support.
 #include <string>
 #include <vector>
 #include <gmock/gmock-matchers.h>
+#include <gmock/gmock-printers.h>
 
 namespace testing {
 namespace internal {
-
-// Generates a non-fatal failure iff 'description' is not a valid
-// matcher description.
-inline void ValidateMatcherDescription(const char* description) {
-  EXPECT_STREQ("", description)
-      << "The description string in a MATCHER*() macro must be \"\" "
-         "at this moment.  We will implement custom description string soon.";
-}
 
 // Implements ElementsAre() and ElementsAreArray().
 template <typename Container>
@@ -310,6 +303,9 @@ ElementsAreArray(const T (&array)[N]) {
 }
 
 }  // namespace testing
+$$ } // This Pump meta comment fixes auto-indentation in Emacs. It will not
+$$   // show up in the generated code.
+
 
 // The MATCHER* family of macros can be used in a namespace scope to
 // define custom matchers easily.  The syntax:
@@ -318,10 +314,18 @@ ElementsAreArray(const T (&array)[N]) {
 //
 // will define a matcher with the given name that executes the
 // statements, which must return a bool to indicate if the match
-// succeeds.  For now, the description_string must be "", but we'll
-// allow other values soon.  Inside the statements, you can refer to
-// the value being matched by 'arg', and refer to its type by
-// 'arg_type'.  For example:
+// succeeds.  Inside the statements, you can refer to the value being
+// matched by 'arg', and refer to its type by 'arg_type'.
+//
+// The description string documents what the matcher does, and is used
+// to generate the failure message when the match fails.  Since a
+// MATCHER() is usually defined in a header file shared by multiple
+// C++ source files, we require the description to be a C-string
+// literal to avoid possible side effects.  It can be empty, in which
+// case we'll use the sequence of words in the matcher name as the
+// description.
+//
+// For example:
 //
 //   MATCHER(IsEven, "") { return (arg % 2) == 0; }
 //
@@ -384,6 +388,38 @@ ElementsAreArray(const T (&array)[N]) {
 // We also provide MATCHER_P2, MATCHER_P3, ..., up to MATCHER_P$n to
 // support multi-parameter matchers.
 //
+// When defining a parameterized matcher, you can use Python-style
+// interpolations in the description string to refer to the parameter
+// values.  We support the following syntax currently:
+//
+//   %%       a single '%' character
+//   %(*)s    all parameters of the matcher printed as a tuple
+//   %(foo)s  value of the matcher parameter named 'foo'
+//
+// For example,
+//
+//   MATCHER_P2(InClosedRange, low, hi, "is in range [%(low)s, %(hi)s]") {
+//     return low <= arg && arg <= hi;
+//   }
+//   ...
+//   EXPECT_THAT(3, InClosedRange(4, 6));
+//
+// would generate a failure that contains the message:
+//
+//   Expected: is in range [4, 6]
+//
+// If you specify "" as the description, the failure message will
+// contain the sequence of words in the matcher name followed by the
+// parameter values printed as a tuple.  For example,
+//
+//   MATCHER_P2(InClosedRange, low, hi, "") { ... }
+//   ...
+//   EXPECT_THAT(3, InClosedRange(4, 6));
+//
+// would generate a failure that contains the text:
+//
+//   Expected: in closed range (4, 6)
+//
 // For the purpose of typing, you can view
 //
 //   MATCHER_Pk(Foo, p1, ..., pk, description_string) { ... }
@@ -440,6 +476,48 @@ ElementsAreArray(const T (&array)[N]) {
 // To learn more about using these macros, please search for 'MATCHER'
 // on http://code.google.com/p/googlemock/wiki/CookBook.
 
+namespace testing {
+namespace internal {
+
+// Constants denoting interpolations in a matcher description string.
+const int kTupleInterpolation = -1;    // "%(*)s"
+const int kPercentInterpolation = -2;  // "%%"
+const int kInvalidInterpolation = -3;  // "%" followed by invalid text
+
+// Records the location and content of an interpolation.
+struct Interpolation {
+  Interpolation(const char* start, const char* end, int param)
+      : start_pos(start), end_pos(end), param_index(param) {}
+
+  // Points to the start of the interpolation (the '%' character).
+  const char* start_pos;
+  // Points to the first character after the interpolation.
+  const char* end_pos;
+  // 0-based index of the interpolated matcher parameter;
+  // kTupleInterpolation for "%(*)s"; kPercentInterpolation for "%%".
+  int param_index;
+};
+
+typedef ::std::vector<Interpolation> Interpolations;
+
+// Parses a matcher description string and returns a vector of
+// interpolations that appear in the string; generates non-fatal
+// failures iff 'description' is an invalid matcher description.
+// 'param_names' is a NULL-terminated array of parameter names in the
+// order they appear in the MATCHER_P*() parameter list.
+Interpolations ValidateMatcherDescription(
+    const char* param_names[], const char* description);
+
+// Returns the actual matcher description, given the matcher name,
+// user-supplied description template string, interpolations in the
+// string, and the printed values of the matcher parameters.
+string FormatMatcherDescription(
+    const char* matcher_name, const char* description,
+    const Interpolations& interp, const Strings& param_values);
+
+}  // namespace internal
+}  // namespace testing
+
 $range i 0..n
 $for i
 
@@ -454,7 +532,11 @@ $var template = [[$if i==0 [[]] $else [[
   template <$for j, [[typename p$j##_type]]>\
 ]]]]
 $var ctor_param_list = [[$for j, [[p$j##_type gmock_p$j]]]]
+$var impl_ctor_param_list = [[$for j [[p$j##_type gmock_p$j, ]]
+const ::testing::internal::Interpolations& gmock_interp]]
+$var impl_inits = [[ : $for j [[p$j(gmock_p$j), ]]gmock_interp_(gmock_interp)]]
 $var inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(gmock_p$j)]]]]]]
+$var params_and_interp = [[$for j [[p$j, ]]gmock_interp_]]
 $var params = [[$for j, [[p$j]]]]
 $var param_types = [[$if i==0 [[]] $else [[<$for j, [[p$j##_type]]>]]]]
 $var param_types_and_names = [[$for j, [[p$j##_type p$j]]]]
@@ -475,34 +557,29 @@ $var param_field_decls2 = [[$for j
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<arg_type> {\
      public:\
-      [[$if i==1 [[explicit ]]]]gmock_Impl($ctor_param_list)$inits {}\
+      [[$if i==1 [[explicit ]]]]gmock_Impl($impl_ctor_param_list)\
+          $impl_inits {}\
       virtual bool Matches(arg_type arg) const;\
-      virtual void DescribeTo(::std::ostream* os) const {\
-        *os << ::testing::internal::ConvertIdentifierNameToWords(#name);\
-[[$if i==1 [[        *os << " ";\
-        ::testing::internal::UniversalPrint(p0, os);\
-
-]] $elif i>=2 [[        *os << " (";\
-        ::testing::internal::UniversalPrint(p0, os);\
-$range k 1..i-1
-$for k [[
-
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p$k, os);\
-]]
-
-        *os << ")";\
-
-]]]]
+      virtual void DescribeTo(::std::ostream* gmock_os) const {\
+        const ::testing::internal::Strings& gmock_printed_params = \
+            ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
+                ::std::tr1::tuple<$for j, [[p$j##_type]]>($for j, [[p$j]]));\
+        *gmock_os << ::testing::internal::FormatMatcherDescription(\
+                     #name, description, gmock_interp_, gmock_printed_params);\
       }\$param_field_decls
+      const ::testing::internal::Interpolations gmock_interp_;\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(new gmock_Impl<arg_type>($params));\
+      return ::testing::Matcher<arg_type>(\
+          new gmock_Impl<arg_type>($params_and_interp));\
     }\
     $class_name($ctor_param_list)$inits {\
-      ::testing::internal::ValidateMatcherDescription(description);\
+      const char* gmock_param_names[] = { $for j [[#p$j, ]]NULL };\
+      gmock_interp_ = ::testing::internal::ValidateMatcherDescription(\
+          gmock_param_names, ("" description ""));\
     }\$param_field_decls2
+    ::testing::internal::Interpolations gmock_interp_;\
   };\$template
   inline $class_name$param_types name($param_types_and_names) {\
     return $class_name$param_types($params);\

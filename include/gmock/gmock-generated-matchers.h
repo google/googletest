@@ -40,17 +40,10 @@
 #include <string>
 #include <vector>
 #include <gmock/gmock-matchers.h>
+#include <gmock/gmock-printers.h>
 
 namespace testing {
 namespace internal {
-
-// Generates a non-fatal failure iff 'description' is not a valid
-// matcher description.
-inline void ValidateMatcherDescription(const char* description) {
-  EXPECT_STREQ("", description)
-      << "The description string in a MATCHER*() macro must be \"\" "
-         "at this moment.  We will implement custom description string soon.";
-}
 
 // Implements ElementsAre() and ElementsAreArray().
 template <typename Container>
@@ -674,10 +667,18 @@ ElementsAreArray(const T (&array)[N]) {
 //
 // will define a matcher with the given name that executes the
 // statements, which must return a bool to indicate if the match
-// succeeds.  For now, the description_string must be "", but we'll
-// allow other values soon.  Inside the statements, you can refer to
-// the value being matched by 'arg', and refer to its type by
-// 'arg_type'.  For example:
+// succeeds.  Inside the statements, you can refer to the value being
+// matched by 'arg', and refer to its type by 'arg_type'.
+//
+// The description string documents what the matcher does, and is used
+// to generate the failure message when the match fails.  Since a
+// MATCHER() is usually defined in a header file shared by multiple
+// C++ source files, we require the description to be a C-string
+// literal to avoid possible side effects.  It can be empty, in which
+// case we'll use the sequence of words in the matcher name as the
+// description.
+//
+// For example:
 //
 //   MATCHER(IsEven, "") { return (arg % 2) == 0; }
 //
@@ -740,6 +741,38 @@ ElementsAreArray(const T (&array)[N]) {
 // We also provide MATCHER_P2, MATCHER_P3, ..., up to MATCHER_P10 to
 // support multi-parameter matchers.
 //
+// When defining a parameterized matcher, you can use Python-style
+// interpolations in the description string to refer to the parameter
+// values.  We support the following syntax currently:
+//
+//   %%       a single '%' character
+//   %(*)s    all parameters of the matcher printed as a tuple
+//   %(foo)s  value of the matcher parameter named 'foo'
+//
+// For example,
+//
+//   MATCHER_P2(InClosedRange, low, hi, "is in range [%(low)s, %(hi)s]") {
+//     return low <= arg && arg <= hi;
+//   }
+//   ...
+//   EXPECT_THAT(3, InClosedRange(4, 6));
+//
+// would generate a failure that contains the message:
+//
+//   Expected: is in range [4, 6]
+//
+// If you specify "" as the description, the failure message will
+// contain the sequence of words in the matcher name followed by the
+// parameter values printed as a tuple.  For example,
+//
+//   MATCHER_P2(InClosedRange, low, hi, "") { ... }
+//   ...
+//   EXPECT_THAT(3, InClosedRange(4, 6));
+//
+// would generate a failure that contains the text:
+//
+//   Expected: in closed range (4, 6)
+//
 // For the purpose of typing, you can view
 //
 //   MATCHER_Pk(Foo, p1, ..., pk, description_string) { ... }
@@ -796,25 +829,77 @@ ElementsAreArray(const T (&array)[N]) {
 // To learn more about using these macros, please search for 'MATCHER'
 // on http://code.google.com/p/googlemock/wiki/CookBook.
 
+namespace testing {
+namespace internal {
+
+// Constants denoting interpolations in a matcher description string.
+const int kTupleInterpolation = -1;    // "%(*)s"
+const int kPercentInterpolation = -2;  // "%%"
+const int kInvalidInterpolation = -3;  // "%" followed by invalid text
+
+// Records the location and content of an interpolation.
+struct Interpolation {
+  Interpolation(const char* start, const char* end, int param)
+      : start_pos(start), end_pos(end), param_index(param) {}
+
+  // Points to the start of the interpolation (the '%' character).
+  const char* start_pos;
+  // Points to the first character after the interpolation.
+  const char* end_pos;
+  // 0-based index of the interpolated matcher parameter;
+  // kTupleInterpolation for "%(*)s"; kPercentInterpolation for "%%".
+  int param_index;
+};
+
+typedef ::std::vector<Interpolation> Interpolations;
+
+// Parses a matcher description string and returns a vector of
+// interpolations that appear in the string; generates non-fatal
+// failures iff 'description' is an invalid matcher description.
+// 'param_names' is a NULL-terminated array of parameter names in the
+// order they appear in the MATCHER_P*() parameter list.
+Interpolations ValidateMatcherDescription(
+    const char* param_names[], const char* description);
+
+// Returns the actual matcher description, given the matcher name,
+// user-supplied description template string, interpolations in the
+// string, and the printed values of the matcher parameters.
+string FormatMatcherDescription(
+    const char* matcher_name, const char* description,
+    const Interpolations& interp, const Strings& param_values);
+
+}  // namespace internal
+}  // namespace testing
+
 #define MATCHER(name, description)\
   class name##Matcher {\
    public:\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<arg_type> {\
      public:\
-      gmock_Impl() {}\
+      gmock_Impl(const ::testing::internal::Interpolations& gmock_interp)\
+           : gmock_interp_(gmock_interp) {}\
       virtual bool Matches(arg_type arg) const;\
-      virtual void DescribeTo(::std::ostream* os) const {\
-        *os << ::testing::internal::ConvertIdentifierNameToWords(#name);\
+      virtual void DescribeTo(::std::ostream* gmock_os) const {\
+        const ::testing::internal::Strings& gmock_printed_params = \
+            ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
+                ::std::tr1::tuple<>());\
+        *gmock_os << ::testing::internal::FormatMatcherDescription(\
+                     #name, description, gmock_interp_, gmock_printed_params);\
       }\
+      const ::testing::internal::Interpolations gmock_interp_;\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(new gmock_Impl<arg_type>());\
+      return ::testing::Matcher<arg_type>(\
+          new gmock_Impl<arg_type>(gmock_interp_));\
     }\
     name##Matcher() {\
-      ::testing::internal::ValidateMatcherDescription(description);\
+      const char* gmock_param_names[] = { NULL };\
+      gmock_interp_ = ::testing::internal::ValidateMatcherDescription(\
+          gmock_param_names, ("" description ""));\
     }\
+    ::testing::internal::Interpolations gmock_interp_;\
   };\
   inline name##Matcher name() {\
     return name##Matcher();\
@@ -830,23 +915,32 @@ ElementsAreArray(const T (&array)[N]) {
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<arg_type> {\
      public:\
-      explicit gmock_Impl(p0##_type gmock_p0) : p0(gmock_p0) {}\
+      explicit gmock_Impl(p0##_type gmock_p0, \
+          const ::testing::internal::Interpolations& gmock_interp)\
+           : p0(gmock_p0), gmock_interp_(gmock_interp) {}\
       virtual bool Matches(arg_type arg) const;\
-      virtual void DescribeTo(::std::ostream* os) const {\
-        *os << ::testing::internal::ConvertIdentifierNameToWords(#name);\
-        *os << " ";\
-        ::testing::internal::UniversalPrint(p0, os);\
+      virtual void DescribeTo(::std::ostream* gmock_os) const {\
+        const ::testing::internal::Strings& gmock_printed_params = \
+            ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
+                ::std::tr1::tuple<p0##_type>(p0));\
+        *gmock_os << ::testing::internal::FormatMatcherDescription(\
+                     #name, description, gmock_interp_, gmock_printed_params);\
       }\
       p0##_type p0;\
+      const ::testing::internal::Interpolations gmock_interp_;\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(new gmock_Impl<arg_type>(p0));\
+      return ::testing::Matcher<arg_type>(\
+          new gmock_Impl<arg_type>(p0, gmock_interp_));\
     }\
     name##MatcherP(p0##_type gmock_p0) : p0(gmock_p0) {\
-      ::testing::internal::ValidateMatcherDescription(description);\
+      const char* gmock_param_names[] = { #p0, NULL };\
+      gmock_interp_ = ::testing::internal::ValidateMatcherDescription(\
+          gmock_param_names, ("" description ""));\
     }\
     p0##_type p0;\
+    ::testing::internal::Interpolations gmock_interp_;\
   };\
   template <typename p0##_type>\
   inline name##MatcherP<p0##_type> name(p0##_type p0) {\
@@ -864,30 +958,35 @@ ElementsAreArray(const T (&array)[N]) {
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<arg_type> {\
      public:\
-      gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1) : p0(gmock_p0), \
-          p1(gmock_p1) {}\
+      gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, \
+          const ::testing::internal::Interpolations& gmock_interp)\
+           : p0(gmock_p0), p1(gmock_p1), gmock_interp_(gmock_interp) {}\
       virtual bool Matches(arg_type arg) const;\
-      virtual void DescribeTo(::std::ostream* os) const {\
-        *os << ::testing::internal::ConvertIdentifierNameToWords(#name);\
-        *os << " (";\
-        ::testing::internal::UniversalPrint(p0, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p1, os);\
-        *os << ")";\
+      virtual void DescribeTo(::std::ostream* gmock_os) const {\
+        const ::testing::internal::Strings& gmock_printed_params = \
+            ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
+                ::std::tr1::tuple<p0##_type, p1##_type>(p0, p1));\
+        *gmock_os << ::testing::internal::FormatMatcherDescription(\
+                     #name, description, gmock_interp_, gmock_printed_params);\
       }\
       p0##_type p0;\
       p1##_type p1;\
+      const ::testing::internal::Interpolations gmock_interp_;\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(new gmock_Impl<arg_type>(p0, p1));\
+      return ::testing::Matcher<arg_type>(\
+          new gmock_Impl<arg_type>(p0, p1, gmock_interp_));\
     }\
     name##MatcherP2(p0##_type gmock_p0, p1##_type gmock_p1) : p0(gmock_p0), \
         p1(gmock_p1) {\
-      ::testing::internal::ValidateMatcherDescription(description);\
+      const char* gmock_param_names[] = { #p0, #p1, NULL };\
+      gmock_interp_ = ::testing::internal::ValidateMatcherDescription(\
+          gmock_param_names, ("" description ""));\
     }\
     p0##_type p0;\
     p1##_type p1;\
+    ::testing::internal::Interpolations gmock_interp_;\
   };\
   template <typename p0##_type, typename p1##_type>\
   inline name##MatcherP2<p0##_type, p1##_type> name(p0##_type p0, \
@@ -906,35 +1005,39 @@ ElementsAreArray(const T (&array)[N]) {
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<arg_type> {\
      public:\
-      gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, \
-          p2##_type gmock_p2) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2) {}\
+      gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
+          const ::testing::internal::Interpolations& gmock_interp)\
+           : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), \
+               gmock_interp_(gmock_interp) {}\
       virtual bool Matches(arg_type arg) const;\
-      virtual void DescribeTo(::std::ostream* os) const {\
-        *os << ::testing::internal::ConvertIdentifierNameToWords(#name);\
-        *os << " (";\
-        ::testing::internal::UniversalPrint(p0, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p1, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p2, os);\
-        *os << ")";\
+      virtual void DescribeTo(::std::ostream* gmock_os) const {\
+        const ::testing::internal::Strings& gmock_printed_params = \
+            ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
+                ::std::tr1::tuple<p0##_type, p1##_type, p2##_type>(p0, p1, \
+                    p2));\
+        *gmock_os << ::testing::internal::FormatMatcherDescription(\
+                     #name, description, gmock_interp_, gmock_printed_params);\
       }\
       p0##_type p0;\
       p1##_type p1;\
       p2##_type p2;\
+      const ::testing::internal::Interpolations gmock_interp_;\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(new gmock_Impl<arg_type>(p0, p1, \
-          p2));\
+      return ::testing::Matcher<arg_type>(\
+          new gmock_Impl<arg_type>(p0, p1, p2, gmock_interp_));\
     }\
     name##MatcherP3(p0##_type gmock_p0, p1##_type gmock_p1, \
         p2##_type gmock_p2) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2) {\
-      ::testing::internal::ValidateMatcherDescription(description);\
+      const char* gmock_param_names[] = { #p0, #p1, #p2, NULL };\
+      gmock_interp_ = ::testing::internal::ValidateMatcherDescription(\
+          gmock_param_names, ("" description ""));\
     }\
     p0##_type p0;\
     p1##_type p1;\
     p2##_type p2;\
+    ::testing::internal::Interpolations gmock_interp_;\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type>\
   inline name##MatcherP3<p0##_type, p1##_type, p2##_type> name(p0##_type p0, \
@@ -955,40 +1058,42 @@ ElementsAreArray(const T (&array)[N]) {
     class gmock_Impl : public ::testing::MatcherInterface<arg_type> {\
      public:\
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
-          p3##_type gmock_p3) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), \
-          p3(gmock_p3) {}\
+          p3##_type gmock_p3, \
+          const ::testing::internal::Interpolations& gmock_interp)\
+           : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), p3(gmock_p3), \
+               gmock_interp_(gmock_interp) {}\
       virtual bool Matches(arg_type arg) const;\
-      virtual void DescribeTo(::std::ostream* os) const {\
-        *os << ::testing::internal::ConvertIdentifierNameToWords(#name);\
-        *os << " (";\
-        ::testing::internal::UniversalPrint(p0, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p1, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p2, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p3, os);\
-        *os << ")";\
+      virtual void DescribeTo(::std::ostream* gmock_os) const {\
+        const ::testing::internal::Strings& gmock_printed_params = \
+            ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
+                ::std::tr1::tuple<p0##_type, p1##_type, p2##_type, \
+                    p3##_type>(p0, p1, p2, p3));\
+        *gmock_os << ::testing::internal::FormatMatcherDescription(\
+                     #name, description, gmock_interp_, gmock_printed_params);\
       }\
       p0##_type p0;\
       p1##_type p1;\
       p2##_type p2;\
       p3##_type p3;\
+      const ::testing::internal::Interpolations gmock_interp_;\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(new gmock_Impl<arg_type>(p0, p1, \
-          p2, p3));\
+      return ::testing::Matcher<arg_type>(\
+          new gmock_Impl<arg_type>(p0, p1, p2, p3, gmock_interp_));\
     }\
     name##MatcherP4(p0##_type gmock_p0, p1##_type gmock_p1, \
         p2##_type gmock_p2, p3##_type gmock_p3) : p0(gmock_p0), p1(gmock_p1), \
         p2(gmock_p2), p3(gmock_p3) {\
-      ::testing::internal::ValidateMatcherDescription(description);\
+      const char* gmock_param_names[] = { #p0, #p1, #p2, #p3, NULL };\
+      gmock_interp_ = ::testing::internal::ValidateMatcherDescription(\
+          gmock_param_names, ("" description ""));\
     }\
     p0##_type p0;\
     p1##_type p1;\
     p2##_type p2;\
     p3##_type p3;\
+    ::testing::internal::Interpolations gmock_interp_;\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type>\
@@ -1013,45 +1118,45 @@ ElementsAreArray(const T (&array)[N]) {
     class gmock_Impl : public ::testing::MatcherInterface<arg_type> {\
      public:\
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
-          p3##_type gmock_p3, p4##_type gmock_p4) : p0(gmock_p0), \
-          p1(gmock_p1), p2(gmock_p2), p3(gmock_p3), p4(gmock_p4) {}\
+          p3##_type gmock_p3, p4##_type gmock_p4, \
+          const ::testing::internal::Interpolations& gmock_interp)\
+           : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), p3(gmock_p3), \
+               p4(gmock_p4), gmock_interp_(gmock_interp) {}\
       virtual bool Matches(arg_type arg) const;\
-      virtual void DescribeTo(::std::ostream* os) const {\
-        *os << ::testing::internal::ConvertIdentifierNameToWords(#name);\
-        *os << " (";\
-        ::testing::internal::UniversalPrint(p0, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p1, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p2, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p3, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p4, os);\
-        *os << ")";\
+      virtual void DescribeTo(::std::ostream* gmock_os) const {\
+        const ::testing::internal::Strings& gmock_printed_params = \
+            ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
+                ::std::tr1::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
+                    p4##_type>(p0, p1, p2, p3, p4));\
+        *gmock_os << ::testing::internal::FormatMatcherDescription(\
+                     #name, description, gmock_interp_, gmock_printed_params);\
       }\
       p0##_type p0;\
       p1##_type p1;\
       p2##_type p2;\
       p3##_type p3;\
       p4##_type p4;\
+      const ::testing::internal::Interpolations gmock_interp_;\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(new gmock_Impl<arg_type>(p0, p1, \
-          p2, p3, p4));\
+      return ::testing::Matcher<arg_type>(\
+          new gmock_Impl<arg_type>(p0, p1, p2, p3, p4, gmock_interp_));\
     }\
     name##MatcherP5(p0##_type gmock_p0, p1##_type gmock_p1, \
         p2##_type gmock_p2, p3##_type gmock_p3, \
         p4##_type gmock_p4) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), \
         p3(gmock_p3), p4(gmock_p4) {\
-      ::testing::internal::ValidateMatcherDescription(description);\
+      const char* gmock_param_names[] = { #p0, #p1, #p2, #p3, #p4, NULL };\
+      gmock_interp_ = ::testing::internal::ValidateMatcherDescription(\
+          gmock_param_names, ("" description ""));\
     }\
     p0##_type p0;\
     p1##_type p1;\
     p2##_type p2;\
     p3##_type p3;\
     p4##_type p4;\
+    ::testing::internal::Interpolations gmock_interp_;\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type>\
@@ -1076,25 +1181,18 @@ ElementsAreArray(const T (&array)[N]) {
     class gmock_Impl : public ::testing::MatcherInterface<arg_type> {\
      public:\
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
-          p3##_type gmock_p3, p4##_type gmock_p4, \
-          p5##_type gmock_p5) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), \
-          p3(gmock_p3), p4(gmock_p4), p5(gmock_p5) {}\
+          p3##_type gmock_p3, p4##_type gmock_p4, p5##_type gmock_p5, \
+          const ::testing::internal::Interpolations& gmock_interp)\
+           : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), p3(gmock_p3), \
+               p4(gmock_p4), p5(gmock_p5), gmock_interp_(gmock_interp) {}\
       virtual bool Matches(arg_type arg) const;\
-      virtual void DescribeTo(::std::ostream* os) const {\
-        *os << ::testing::internal::ConvertIdentifierNameToWords(#name);\
-        *os << " (";\
-        ::testing::internal::UniversalPrint(p0, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p1, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p2, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p3, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p4, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p5, os);\
-        *os << ")";\
+      virtual void DescribeTo(::std::ostream* gmock_os) const {\
+        const ::testing::internal::Strings& gmock_printed_params = \
+            ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
+                ::std::tr1::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
+                    p4##_type, p5##_type>(p0, p1, p2, p3, p4, p5));\
+        *gmock_os << ::testing::internal::FormatMatcherDescription(\
+                     #name, description, gmock_interp_, gmock_printed_params);\
       }\
       p0##_type p0;\
       p1##_type p1;\
@@ -1102,17 +1200,20 @@ ElementsAreArray(const T (&array)[N]) {
       p3##_type p3;\
       p4##_type p4;\
       p5##_type p5;\
+      const ::testing::internal::Interpolations gmock_interp_;\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(new gmock_Impl<arg_type>(p0, p1, \
-          p2, p3, p4, p5));\
+      return ::testing::Matcher<arg_type>(\
+          new gmock_Impl<arg_type>(p0, p1, p2, p3, p4, p5, gmock_interp_));\
     }\
     name##MatcherP6(p0##_type gmock_p0, p1##_type gmock_p1, \
         p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
         p5##_type gmock_p5) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), \
         p3(gmock_p3), p4(gmock_p4), p5(gmock_p5) {\
-      ::testing::internal::ValidateMatcherDescription(description);\
+      const char* gmock_param_names[] = { #p0, #p1, #p2, #p3, #p4, #p5, NULL };\
+      gmock_interp_ = ::testing::internal::ValidateMatcherDescription(\
+          gmock_param_names, ("" description ""));\
     }\
     p0##_type p0;\
     p1##_type p1;\
@@ -1120,6 +1221,7 @@ ElementsAreArray(const T (&array)[N]) {
     p3##_type p3;\
     p4##_type p4;\
     p5##_type p5;\
+    ::testing::internal::Interpolations gmock_interp_;\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type>\
@@ -1147,26 +1249,20 @@ ElementsAreArray(const T (&array)[N]) {
      public:\
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
           p3##_type gmock_p3, p4##_type gmock_p4, p5##_type gmock_p5, \
-          p6##_type gmock_p6) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), \
-          p3(gmock_p3), p4(gmock_p4), p5(gmock_p5), p6(gmock_p6) {}\
+          p6##_type gmock_p6, \
+          const ::testing::internal::Interpolations& gmock_interp)\
+           : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), p3(gmock_p3), \
+               p4(gmock_p4), p5(gmock_p5), p6(gmock_p6), \
+               gmock_interp_(gmock_interp) {}\
       virtual bool Matches(arg_type arg) const;\
-      virtual void DescribeTo(::std::ostream* os) const {\
-        *os << ::testing::internal::ConvertIdentifierNameToWords(#name);\
-        *os << " (";\
-        ::testing::internal::UniversalPrint(p0, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p1, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p2, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p3, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p4, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p5, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p6, os);\
-        *os << ")";\
+      virtual void DescribeTo(::std::ostream* gmock_os) const {\
+        const ::testing::internal::Strings& gmock_printed_params = \
+            ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
+                ::std::tr1::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
+                    p4##_type, p5##_type, p6##_type>(p0, p1, p2, p3, p4, p5, \
+                    p6));\
+        *gmock_os << ::testing::internal::FormatMatcherDescription(\
+                     #name, description, gmock_interp_, gmock_printed_params);\
       }\
       p0##_type p0;\
       p1##_type p1;\
@@ -1175,18 +1271,22 @@ ElementsAreArray(const T (&array)[N]) {
       p4##_type p4;\
       p5##_type p5;\
       p6##_type p6;\
+      const ::testing::internal::Interpolations gmock_interp_;\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(new gmock_Impl<arg_type>(p0, p1, \
-          p2, p3, p4, p5, p6));\
+      return ::testing::Matcher<arg_type>(\
+          new gmock_Impl<arg_type>(p0, p1, p2, p3, p4, p5, p6, gmock_interp_));\
     }\
     name##MatcherP7(p0##_type gmock_p0, p1##_type gmock_p1, \
         p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
         p5##_type gmock_p5, p6##_type gmock_p6) : p0(gmock_p0), p1(gmock_p1), \
         p2(gmock_p2), p3(gmock_p3), p4(gmock_p4), p5(gmock_p5), \
         p6(gmock_p6) {\
-      ::testing::internal::ValidateMatcherDescription(description);\
+      const char* gmock_param_names[] = { #p0, #p1, #p2, #p3, #p4, #p5, #p6, \
+          NULL };\
+      gmock_interp_ = ::testing::internal::ValidateMatcherDescription(\
+          gmock_param_names, ("" description ""));\
     }\
     p0##_type p0;\
     p1##_type p1;\
@@ -1195,6 +1295,7 @@ ElementsAreArray(const T (&array)[N]) {
     p4##_type p4;\
     p5##_type p5;\
     p6##_type p6;\
+    ::testing::internal::Interpolations gmock_interp_;\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
@@ -1225,29 +1326,20 @@ ElementsAreArray(const T (&array)[N]) {
      public:\
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
           p3##_type gmock_p3, p4##_type gmock_p4, p5##_type gmock_p5, \
-          p6##_type gmock_p6, p7##_type gmock_p7) : p0(gmock_p0), \
-          p1(gmock_p1), p2(gmock_p2), p3(gmock_p3), p4(gmock_p4), \
-          p5(gmock_p5), p6(gmock_p6), p7(gmock_p7) {}\
+          p6##_type gmock_p6, p7##_type gmock_p7, \
+          const ::testing::internal::Interpolations& gmock_interp)\
+           : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), p3(gmock_p3), \
+               p4(gmock_p4), p5(gmock_p5), p6(gmock_p6), p7(gmock_p7), \
+               gmock_interp_(gmock_interp) {}\
       virtual bool Matches(arg_type arg) const;\
-      virtual void DescribeTo(::std::ostream* os) const {\
-        *os << ::testing::internal::ConvertIdentifierNameToWords(#name);\
-        *os << " (";\
-        ::testing::internal::UniversalPrint(p0, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p1, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p2, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p3, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p4, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p5, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p6, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p7, os);\
-        *os << ")";\
+      virtual void DescribeTo(::std::ostream* gmock_os) const {\
+        const ::testing::internal::Strings& gmock_printed_params = \
+            ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
+                ::std::tr1::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
+                    p4##_type, p5##_type, p6##_type, p7##_type>(p0, p1, p2, \
+                    p3, p4, p5, p6, p7));\
+        *gmock_os << ::testing::internal::FormatMatcherDescription(\
+                     #name, description, gmock_interp_, gmock_printed_params);\
       }\
       p0##_type p0;\
       p1##_type p1;\
@@ -1257,11 +1349,13 @@ ElementsAreArray(const T (&array)[N]) {
       p5##_type p5;\
       p6##_type p6;\
       p7##_type p7;\
+      const ::testing::internal::Interpolations gmock_interp_;\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(new gmock_Impl<arg_type>(p0, p1, \
-          p2, p3, p4, p5, p6, p7));\
+      return ::testing::Matcher<arg_type>(\
+          new gmock_Impl<arg_type>(p0, p1, p2, p3, p4, p5, p6, p7, \
+              gmock_interp_));\
     }\
     name##MatcherP8(p0##_type gmock_p0, p1##_type gmock_p1, \
         p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
@@ -1269,7 +1363,10 @@ ElementsAreArray(const T (&array)[N]) {
         p7##_type gmock_p7) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), \
         p3(gmock_p3), p4(gmock_p4), p5(gmock_p5), p6(gmock_p6), \
         p7(gmock_p7) {\
-      ::testing::internal::ValidateMatcherDescription(description);\
+      const char* gmock_param_names[] = { #p0, #p1, #p2, #p3, #p4, #p5, #p6, \
+          #p7, NULL };\
+      gmock_interp_ = ::testing::internal::ValidateMatcherDescription(\
+          gmock_param_names, ("" description ""));\
     }\
     p0##_type p0;\
     p1##_type p1;\
@@ -1279,6 +1376,7 @@ ElementsAreArray(const T (&array)[N]) {
     p5##_type p5;\
     p6##_type p6;\
     p7##_type p7;\
+    ::testing::internal::Interpolations gmock_interp_;\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
@@ -1310,32 +1408,20 @@ ElementsAreArray(const T (&array)[N]) {
      public:\
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
           p3##_type gmock_p3, p4##_type gmock_p4, p5##_type gmock_p5, \
-          p6##_type gmock_p6, p7##_type gmock_p7, \
-          p8##_type gmock_p8) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), \
-          p3(gmock_p3), p4(gmock_p4), p5(gmock_p5), p6(gmock_p6), \
-          p7(gmock_p7), p8(gmock_p8) {}\
+          p6##_type gmock_p6, p7##_type gmock_p7, p8##_type gmock_p8, \
+          const ::testing::internal::Interpolations& gmock_interp)\
+           : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), p3(gmock_p3), \
+               p4(gmock_p4), p5(gmock_p5), p6(gmock_p6), p7(gmock_p7), \
+               p8(gmock_p8), gmock_interp_(gmock_interp) {}\
       virtual bool Matches(arg_type arg) const;\
-      virtual void DescribeTo(::std::ostream* os) const {\
-        *os << ::testing::internal::ConvertIdentifierNameToWords(#name);\
-        *os << " (";\
-        ::testing::internal::UniversalPrint(p0, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p1, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p2, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p3, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p4, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p5, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p6, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p7, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p8, os);\
-        *os << ")";\
+      virtual void DescribeTo(::std::ostream* gmock_os) const {\
+        const ::testing::internal::Strings& gmock_printed_params = \
+            ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
+                ::std::tr1::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
+                    p4##_type, p5##_type, p6##_type, p7##_type, \
+                    p8##_type>(p0, p1, p2, p3, p4, p5, p6, p7, p8));\
+        *gmock_os << ::testing::internal::FormatMatcherDescription(\
+                     #name, description, gmock_interp_, gmock_printed_params);\
       }\
       p0##_type p0;\
       p1##_type p1;\
@@ -1346,11 +1432,13 @@ ElementsAreArray(const T (&array)[N]) {
       p6##_type p6;\
       p7##_type p7;\
       p8##_type p8;\
+      const ::testing::internal::Interpolations gmock_interp_;\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(new gmock_Impl<arg_type>(p0, p1, \
-          p2, p3, p4, p5, p6, p7, p8));\
+      return ::testing::Matcher<arg_type>(\
+          new gmock_Impl<arg_type>(p0, p1, p2, p3, p4, p5, p6, p7, p8, \
+              gmock_interp_));\
     }\
     name##MatcherP9(p0##_type gmock_p0, p1##_type gmock_p1, \
         p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
@@ -1358,7 +1446,10 @@ ElementsAreArray(const T (&array)[N]) {
         p8##_type gmock_p8) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), \
         p3(gmock_p3), p4(gmock_p4), p5(gmock_p5), p6(gmock_p6), p7(gmock_p7), \
         p8(gmock_p8) {\
-      ::testing::internal::ValidateMatcherDescription(description);\
+      const char* gmock_param_names[] = { #p0, #p1, #p2, #p3, #p4, #p5, #p6, \
+          #p7, #p8, NULL };\
+      gmock_interp_ = ::testing::internal::ValidateMatcherDescription(\
+          gmock_param_names, ("" description ""));\
     }\
     p0##_type p0;\
     p1##_type p1;\
@@ -1369,6 +1460,7 @@ ElementsAreArray(const T (&array)[N]) {
     p6##_type p6;\
     p7##_type p7;\
     p8##_type p8;\
+    ::testing::internal::Interpolations gmock_interp_;\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
@@ -1403,33 +1495,20 @@ ElementsAreArray(const T (&array)[N]) {
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
           p3##_type gmock_p3, p4##_type gmock_p4, p5##_type gmock_p5, \
           p6##_type gmock_p6, p7##_type gmock_p7, p8##_type gmock_p8, \
-          p9##_type gmock_p9) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), \
-          p3(gmock_p3), p4(gmock_p4), p5(gmock_p5), p6(gmock_p6), \
-          p7(gmock_p7), p8(gmock_p8), p9(gmock_p9) {}\
+          p9##_type gmock_p9, \
+          const ::testing::internal::Interpolations& gmock_interp)\
+           : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), p3(gmock_p3), \
+               p4(gmock_p4), p5(gmock_p5), p6(gmock_p6), p7(gmock_p7), \
+               p8(gmock_p8), p9(gmock_p9), gmock_interp_(gmock_interp) {}\
       virtual bool Matches(arg_type arg) const;\
-      virtual void DescribeTo(::std::ostream* os) const {\
-        *os << ::testing::internal::ConvertIdentifierNameToWords(#name);\
-        *os << " (";\
-        ::testing::internal::UniversalPrint(p0, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p1, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p2, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p3, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p4, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p5, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p6, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p7, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p8, os);\
-        *os << ", ";\
-        ::testing::internal::UniversalPrint(p9, os);\
-        *os << ")";\
+      virtual void DescribeTo(::std::ostream* gmock_os) const {\
+        const ::testing::internal::Strings& gmock_printed_params = \
+            ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
+                ::std::tr1::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
+                    p4##_type, p5##_type, p6##_type, p7##_type, p8##_type, \
+                    p9##_type>(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9));\
+        *gmock_os << ::testing::internal::FormatMatcherDescription(\
+                     #name, description, gmock_interp_, gmock_printed_params);\
       }\
       p0##_type p0;\
       p1##_type p1;\
@@ -1441,11 +1520,13 @@ ElementsAreArray(const T (&array)[N]) {
       p7##_type p7;\
       p8##_type p8;\
       p9##_type p9;\
+      const ::testing::internal::Interpolations gmock_interp_;\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(new gmock_Impl<arg_type>(p0, p1, \
-          p2, p3, p4, p5, p6, p7, p8, p9));\
+      return ::testing::Matcher<arg_type>(\
+          new gmock_Impl<arg_type>(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, \
+              gmock_interp_));\
     }\
     name##MatcherP10(p0##_type gmock_p0, p1##_type gmock_p1, \
         p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
@@ -1453,7 +1534,10 @@ ElementsAreArray(const T (&array)[N]) {
         p8##_type gmock_p8, p9##_type gmock_p9) : p0(gmock_p0), p1(gmock_p1), \
         p2(gmock_p2), p3(gmock_p3), p4(gmock_p4), p5(gmock_p5), p6(gmock_p6), \
         p7(gmock_p7), p8(gmock_p8), p9(gmock_p9) {\
-      ::testing::internal::ValidateMatcherDescription(description);\
+      const char* gmock_param_names[] = { #p0, #p1, #p2, #p3, #p4, #p5, #p6, \
+          #p7, #p8, #p9, NULL };\
+      gmock_interp_ = ::testing::internal::ValidateMatcherDescription(\
+          gmock_param_names, ("" description ""));\
     }\
     p0##_type p0;\
     p1##_type p1;\
@@ -1465,6 +1549,7 @@ ElementsAreArray(const T (&array)[N]) {
     p7##_type p7;\
     p8##_type p8;\
     p9##_type p9;\
+    ::testing::internal::Interpolations gmock_interp_;\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \

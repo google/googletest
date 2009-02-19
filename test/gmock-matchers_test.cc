@@ -48,6 +48,15 @@
 #include <gtest/gtest-spi.h>
 
 namespace testing {
+
+namespace internal {
+string FormatMatcherDescriptionSyntaxError(const char* description,
+                                           const char* error_pos);
+int GetParamIndex(const char* param_names[], const string& param_name);
+string JoinAsTuple(const Strings& fields);
+bool SkipPrefix(const char* prefix, const char** pstr);
+}  // namespace internal
+
 namespace gmock_matchers_test {
 
 using std::stringstream;
@@ -91,7 +100,18 @@ using testing::Truly;
 using testing::TypedEq;
 using testing::_;
 using testing::internal::FloatingEqMatcher;
+using testing::internal::FormatMatcherDescriptionSyntaxError;
+using testing::internal::GetParamIndex;
+using testing::internal::Interpolation;
+using testing::internal::Interpolations;
+using testing::internal::JoinAsTuple;
+using testing::internal::SkipPrefix;
 using testing::internal::String;
+using testing::internal::Strings;
+using testing::internal::ValidateMatcherDescription;
+using testing::internal::kInvalidInterpolation;
+using testing::internal::kPercentInterpolation;
+using testing::internal::kTupleInterpolation;
 using testing::internal::string;
 
 #ifdef GMOCK_HAS_REGEX
@@ -2767,6 +2787,300 @@ TEST(ContainerEqExtraTest, WorksForMaps) {
 
   EXPECT_EQ("Only in actual: (0, \"aa\"); not in actual: (0, \"a\")",
             Explain(m, test_map));
+}
+
+// Tests GetParamIndex().
+
+TEST(GetParamIndexTest, WorksForEmptyParamList) {
+  const char* params[] = { NULL };
+  EXPECT_EQ(kTupleInterpolation, GetParamIndex(params, "*"));
+  EXPECT_EQ(kInvalidInterpolation, GetParamIndex(params, "a"));
+}
+
+TEST(GetParamIndexTest, RecognizesStar) {
+  const char* params[] = { "a", "b", NULL };
+  EXPECT_EQ(kTupleInterpolation, GetParamIndex(params, "*"));
+}
+
+TEST(GetParamIndexTest, RecognizesKnownParam) {
+  const char* params[] = { "foo", "bar", NULL };
+  EXPECT_EQ(0, GetParamIndex(params, "foo"));
+  EXPECT_EQ(1, GetParamIndex(params, "bar"));
+}
+
+TEST(GetParamIndexTest, RejectsUnknownParam) {
+  const char* params[] = { "foo", "bar", NULL };
+  EXPECT_EQ(kInvalidInterpolation, GetParamIndex(params, "foobar"));
+}
+
+// Tests SkipPrefix().
+
+TEST(SkipPrefixTest, SkipsWhenPrefixMatches) {
+  const char* const str = "hello";
+
+  const char* p = str;
+  EXPECT_TRUE(SkipPrefix("", &p));
+  EXPECT_EQ(str, p);
+
+  p = str;
+  EXPECT_TRUE(SkipPrefix("hell", &p));
+  EXPECT_EQ(str + 4, p);
+}
+
+TEST(SkipPrefixTest, DoesNotSkipWhenPrefixDoesNotMatch) {
+  const char* const str = "world";
+
+  const char* p = str;
+  EXPECT_FALSE(SkipPrefix("W", &p));
+  EXPECT_EQ(str, p);
+
+  p = str;
+  EXPECT_FALSE(SkipPrefix("world!", &p));
+  EXPECT_EQ(str, p);
+}
+
+// Tests FormatMatcherDescriptionSyntaxError().
+TEST(FormatMatcherDescriptionSyntaxErrorTest, FormatsCorrectly) {
+  const char* const description = "hello%world";
+  EXPECT_EQ("Syntax error at index 5 in matcher description \"hello%world\": ",
+            FormatMatcherDescriptionSyntaxError(description, description + 5));
+}
+
+// Tests ValidateMatcherDescription().
+
+TEST(ValidateMatcherDescriptionTest, AcceptsEmptyDescription) {
+  const char* params[] = { "foo", "bar", NULL };
+  EXPECT_THAT(ValidateMatcherDescription(params, ""),
+              ElementsAre());
+}
+
+TEST(ValidateMatcherDescriptionTest,
+     AcceptsNonEmptyDescriptionWithNoInterpolation) {
+  const char* params[] = { "foo", "bar", NULL };
+  EXPECT_THAT(ValidateMatcherDescription(params, "a simple description"),
+              ElementsAre());
+}
+
+// We use MATCHER_P3() to define a matcher for testing
+// ValidateMatcherDescription(); otherwise we'll end up with much
+// plumbing code.  This is not circular as
+// ValidateMatcherDescription() doesn't affect whether the matcher
+// matches a value or not.
+MATCHER_P3(EqInterpolation, start, end, index, "equals Interpolation%(*)s") {
+  return arg.start_pos == start && arg.end_pos == end &&
+      arg.param_index == index;
+}
+
+TEST(ValidateMatcherDescriptionTest, AcceptsPercentInterpolation) {
+  const char* params[] = { "foo", NULL };
+  const char* const desc = "one %%";
+  EXPECT_THAT(ValidateMatcherDescription(params, desc),
+              ElementsAre(EqInterpolation(desc + 4, desc + 6,
+                                          kPercentInterpolation)));
+}
+
+TEST(ValidateMatcherDescriptionTest, AcceptsTupleInterpolation) {
+  const char* params[] = { "foo", "bar", "baz", NULL };
+  const char* const desc = "%(*)s after";
+  EXPECT_THAT(ValidateMatcherDescription(params, desc),
+              ElementsAre(EqInterpolation(desc, desc + 5,
+                                          kTupleInterpolation)));
+}
+
+TEST(ValidateMatcherDescriptionTest, AcceptsParamInterpolation) {
+  const char* params[] = { "foo", "bar", "baz", NULL };
+  const char* const desc = "a %(bar)s.";
+  EXPECT_THAT(ValidateMatcherDescription(params, desc),
+              ElementsAre(EqInterpolation(desc + 2, desc + 9, 1)));
+}
+
+TEST(ValidateMatcherDescriptionTest, AcceptsMultiplenterpolations) {
+  const char* params[] = { "foo", "bar", "baz", NULL };
+  const char* const desc = "%(baz)s %(foo)s %(bar)s";
+  EXPECT_THAT(ValidateMatcherDescription(params, desc),
+              ElementsAre(EqInterpolation(desc, desc + 7, 2),
+                          EqInterpolation(desc + 8, desc + 15, 0),
+                          EqInterpolation(desc + 16, desc + 23, 1)));
+}
+
+TEST(ValidateMatcherDescriptionTest, AcceptsRepeatedParams) {
+  const char* params[] = { "foo", "bar", NULL };
+  const char* const desc = "%(foo)s and %(foo)s";
+  EXPECT_THAT(ValidateMatcherDescription(params, desc),
+              ElementsAre(EqInterpolation(desc, desc + 7, 0),
+                          EqInterpolation(desc + 12, desc + 19, 0)));
+}
+
+TEST(ValidateMatcherDescriptionTest, RejectsUnknownParam) {
+  const char* params[] = { "a", "bar", NULL };
+  EXPECT_NONFATAL_FAILURE({
+    EXPECT_THAT(ValidateMatcherDescription(params, "%(foo)s"),
+                ElementsAre());
+  }, "Syntax error at index 2 in matcher description \"%(foo)s\": "
+     "\"foo\" is an invalid parameter name.");
+}
+
+TEST(ValidateMatcherDescriptionTest, RejectsUnfinishedParam) {
+  const char* params[] = { "a", "bar", NULL };
+  EXPECT_NONFATAL_FAILURE({
+    EXPECT_THAT(ValidateMatcherDescription(params, "%(foo)"),
+                ElementsAre());
+  }, "Syntax error at index 0 in matcher description \"%(foo)\": "
+     "an interpolation must end with \")s\", but \"%(foo)\" does not.");
+
+  EXPECT_NONFATAL_FAILURE({
+    EXPECT_THAT(ValidateMatcherDescription(params, "x%(a"),
+                ElementsAre());
+  }, "Syntax error at index 1 in matcher description \"x%(a\": "
+     "an interpolation must end with \")s\", but \"%(a\" does not.");
+}
+
+TEST(ValidateMatcherDescriptionTest, RejectsSinglePercent) {
+  const char* params[] = { "a", NULL };
+  EXPECT_NONFATAL_FAILURE({
+    EXPECT_THAT(ValidateMatcherDescription(params, "a %."),
+                ElementsAre());
+  }, "Syntax error at index 2 in matcher description \"a %.\": "
+     "use \"%%\" instead of \"%\" to print \"%\".");
+
+}
+
+// Tests JoinAsTuple().
+
+TEST(JoinAsTupleTest, JoinsEmptyTuple) {
+  EXPECT_EQ("", JoinAsTuple(Strings()));
+}
+
+TEST(JoinAsTupleTest, JoinsOneTuple) {
+  const char* fields[] = { "1" };
+  EXPECT_EQ("1", JoinAsTuple(Strings(fields, fields + 1)));
+}
+
+TEST(JoinAsTupleTest, JoinsTwoTuple) {
+  const char* fields[] = { "1", "a" };
+  EXPECT_EQ("(1, a)", JoinAsTuple(Strings(fields, fields + 2)));
+}
+
+TEST(JoinAsTupleTest, JoinsTenTuple) {
+  const char* fields[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
+  EXPECT_EQ("(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)",
+            JoinAsTuple(Strings(fields, fields + 10)));
+}
+
+// Tests FormatMatcherDescription().
+
+TEST(FormatMatcherDescriptionTest, WorksForEmptyDescription) {
+  EXPECT_EQ("is even",
+            FormatMatcherDescription("IsEven", "", Interpolations(),
+                                     Strings()));
+
+  const char* params[] = { "5" };
+  EXPECT_EQ("equals 5",
+            FormatMatcherDescription("Equals", "", Interpolations(),
+                                     Strings(params, params + 1)));
+
+  const char* params2[] = { "5", "8" };
+  EXPECT_EQ("is in range (5, 8)",
+            FormatMatcherDescription("IsInRange", "", Interpolations(),
+                                     Strings(params2, params2 + 2)));
+}
+
+TEST(FormatMatcherDescriptionTest, WorksForDescriptionWithNoInterpolation) {
+  EXPECT_EQ("is positive",
+            FormatMatcherDescription("Gt0", "is positive", Interpolations(),
+                                     Strings()));
+
+  const char* params[] = { "5", "6" };
+  EXPECT_EQ("is negative",
+            FormatMatcherDescription("Lt0", "is negative", Interpolations(),
+                                     Strings(params, params + 2)));
+}
+
+TEST(FormatMatcherDescriptionTest,
+     WorksWhenDescriptionStartsWithInterpolation) {
+  const char* params[] = { "5" };
+  const char* const desc = "%(num)s times bigger";
+  const Interpolation interp[] = { Interpolation(desc, desc + 7, 0) };
+  EXPECT_EQ("5 times bigger",
+            FormatMatcherDescription("Foo", desc,
+                                     Interpolations(interp, interp + 1),
+                                     Strings(params, params + 1)));
+}
+
+TEST(FormatMatcherDescriptionTest,
+     WorksWhenDescriptionEndsWithInterpolation) {
+  const char* params[] = { "5", "6" };
+  const char* const desc = "is bigger than %(y)s";
+  const Interpolation interp[] = { Interpolation(desc + 15, desc + 20, 1) };
+  EXPECT_EQ("is bigger than 6",
+            FormatMatcherDescription("Foo", desc,
+                                     Interpolations(interp, interp + 1),
+                                     Strings(params, params + 2)));
+}
+
+TEST(FormatMatcherDescriptionTest,
+     WorksWhenDescriptionStartsAndEndsWithInterpolation) {
+  const char* params[] = { "5", "6" };
+  const char* const desc = "%(x)s <= arg <= %(y)s";
+  const Interpolation interp[] = {
+    Interpolation(desc, desc + 5, 0),
+    Interpolation(desc + 16, desc + 21, 1)
+  };
+  EXPECT_EQ("5 <= arg <= 6",
+            FormatMatcherDescription("Foo", desc,
+                                     Interpolations(interp, interp + 2),
+                                     Strings(params, params + 2)));
+}
+
+TEST(FormatMatcherDescriptionTest,
+     WorksWhenDescriptionDoesNotStartOrEndWithInterpolation) {
+  const char* params[] = { "5.2" };
+  const char* const desc = "has %(x)s cents";
+  const Interpolation interp[] = { Interpolation(desc + 4, desc + 9, 0) };
+  EXPECT_EQ("has 5.2 cents",
+            FormatMatcherDescription("Foo", desc,
+                                     Interpolations(interp, interp + 1),
+                                     Strings(params, params + 1)));
+}
+
+TEST(FormatMatcherDescriptionTest,
+     WorksWhenDescriptionContainsMultipleInterpolations) {
+  const char* params[] = { "5", "6" };
+  const char* const desc = "in %(*)s or [%(x)s, %(y)s]";
+  const Interpolation interp[] = {
+    Interpolation(desc + 3, desc + 8, kTupleInterpolation),
+    Interpolation(desc + 13, desc + 18, 0),
+    Interpolation(desc + 20, desc + 25, 1)
+  };
+  EXPECT_EQ("in (5, 6) or [5, 6]",
+            FormatMatcherDescription("Foo", desc,
+                                     Interpolations(interp, interp + 3),
+                                     Strings(params, params + 2)));
+}
+
+TEST(FormatMatcherDescriptionTest,
+     WorksWhenDescriptionContainsRepeatedParams) {
+  const char* params[] = { "9" };
+  const char* const desc = "in [-%(x)s, %(x)s]";
+  const Interpolation interp[] = {
+    Interpolation(desc + 5, desc + 10, 0),
+    Interpolation(desc + 12, desc + 17, 0)
+  };
+  EXPECT_EQ("in [-9, 9]",
+            FormatMatcherDescription("Foo", desc,
+                                     Interpolations(interp, interp + 2),
+                                     Strings(params, params + 1)));
+}
+
+TEST(FormatMatcherDescriptionTest,
+     WorksForDescriptionWithInvalidInterpolation) {
+  const char* params[] = { "9" };
+  const char* const desc = "> %(x)s %(x)";
+  const Interpolation interp[] = { Interpolation(desc + 2, desc + 7, 0)  };
+  EXPECT_EQ("> 9 %(x)",
+            FormatMatcherDescription("Foo", desc,
+                                     Interpolations(interp, interp + 1),
+                                     Strings(params, params + 1)));
 }
 
 }  // namespace gmock_matchers_test

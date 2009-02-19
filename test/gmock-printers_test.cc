@@ -47,6 +47,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <gmock/gmock-generated-matchers.h>
 #include <gmock/gmock-matchers.h>
 #include <gmock/internal/gmock-port.h>
 #include <gtest/gtest.h>
@@ -151,8 +152,11 @@ using ::std::set;
 using ::std::tr1::make_tuple;
 using ::std::tr1::tuple;
 using ::std::vector;
+using ::testing::ElementsAre;
 using ::testing::StartsWith;
-using ::testing::internal::UniversalPrint;
+using ::testing::internal::Strings;
+using ::testing::internal::UniversalTersePrint;
+using ::testing::internal::UniversalTersePrintTupleFieldsToStrings;
 using ::testing::internal::UniversalPrinter;
 using ::testing::internal::string;
 
@@ -981,27 +985,66 @@ TEST(PrintReferenceTest, HandlesMemberVariablePointer) {
                          + " " + Print(sizeof(p)) + "-byte object "));
 }
 
-TEST(PrintAsStringTest, WorksForNonReference) {
-  EXPECT_EQ("123", UniversalPrinter<int>::PrintAsString(123));
+TEST(PrintToStringTest, WorksForNonReference) {
+  EXPECT_EQ("123", UniversalPrinter<int>::PrintToString(123));
 }
 
-TEST(PrintAsStringTest, WorksForReference) {
+TEST(PrintToStringTest, WorksForReference) {
   int n = 123;
   EXPECT_EQ("@" + PrintPointer(&n) + " 123",
-            UniversalPrinter<const int&>::PrintAsString(n));
+            UniversalPrinter<const int&>::PrintToString(n));
 }
 
-TEST(UniversalPrintTest, WorksForNonReference) {
+TEST(UniversalTersePrintTest, WorksForNonReference) {
   ::std::stringstream ss;
-  UniversalPrint(123, &ss);
+  UniversalTersePrint(123, &ss);
   EXPECT_EQ("123", ss.str());
 }
 
-TEST(UniversalPrintTest, WorksForReference) {
+TEST(UniversalTersePrintTest, WorksForReference) {
   const int& n = 123;
   ::std::stringstream ss;
-  UniversalPrint(n, &ss);
+  UniversalTersePrint(n, &ss);
   EXPECT_EQ("123", ss.str());
+}
+
+TEST(UniversalTersePrintTest, WorksForCString) {
+  const char* s1 = "abc";
+  ::std::stringstream ss1;
+  UniversalTersePrint(s1, &ss1);
+  EXPECT_EQ("\"abc\"", ss1.str());
+
+  char* s2 = const_cast<char*>(s1);
+  ::std::stringstream ss2;
+  UniversalTersePrint(s2, &ss2);
+  EXPECT_EQ("\"abc\"", ss2.str());
+
+  const char* s3 = NULL;
+  ::std::stringstream ss3;
+  UniversalTersePrint(s3, &ss3);
+  EXPECT_EQ("NULL", ss3.str());
+}
+
+TEST(UniversalTersePrintTupleFieldsToStringsTest, PrintsEmptyTuple) {
+  EXPECT_THAT(UniversalTersePrintTupleFieldsToStrings(make_tuple()),
+              ElementsAre());
+}
+
+TEST(UniversalTersePrintTupleFieldsToStringsTest, PrintsOneTuple) {
+  EXPECT_THAT(UniversalTersePrintTupleFieldsToStrings(make_tuple(1)),
+              ElementsAre("1"));
+}
+
+TEST(UniversalTersePrintTupleFieldsToStringsTest, PrintsTwoTuple) {
+  EXPECT_THAT(UniversalTersePrintTupleFieldsToStrings(make_tuple(1, 'a')),
+              ElementsAre("1", "'a' (97)"));
+}
+
+TEST(UniversalTersePrintTupleFieldsToStringsTest, PrintsTersely) {
+  const int n = 1;
+  EXPECT_THAT(UniversalTersePrintTupleFieldsToStrings(
+                  tuple<const int&, const char*>(n, "a")),
+              ElementsAre("1", "\"a\""));
 }
 
 }  // namespace gmock_printers_test

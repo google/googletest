@@ -390,17 +390,23 @@ TEST(MatcherMacroTest, Works) {
 }
 
 // Tests that the description string supplied to MATCHER() must be
-// empty.
+// valid.
 
-MATCHER(HasBadDescription, "not empty?") {
-  return true;
-}
+MATCHER(HasBadDescription, "Invalid%") { return true; }
 
 TEST(MatcherMacroTest,
      CreatingMatcherWithBadDescriptionGeneratesNonfatalFailure) {
-  EXPECT_NONFATAL_FAILURE(HasBadDescription(),
-                          "The description string in a MATCHER*() macro "
-                          "must be \"\" at this moment");
+  EXPECT_NONFATAL_FAILURE(
+      HasBadDescription(),
+      "Syntax error at index 7 in matcher description \"Invalid%\": "
+      "use \"%%\" instead of \"%\" to print \"%\".");
+}
+
+MATCHER(HasGoodDescription, "good") { return true; }
+
+TEST(MatcherMacroTest, AcceptsValidDescription) {
+  const Matcher<int> m = HasGoodDescription();
+  EXPECT_EQ("good", Describe(m));
 }
 
 // Tests that the body of MATCHER() can reference the type of the
@@ -452,17 +458,26 @@ TEST(MatcherPMacroTest, Works) {
 }
 
 // Tests that the description string supplied to MATCHER_P() must be
-// empty.
+// valid.
 
-MATCHER_P(HasBadDescription1, n, "not empty?") {
+MATCHER_P(HasBadDescription1, n, "not %(m)s good") {
   return arg > n;
 }
 
 TEST(MatcherPMacroTest,
      CreatingMatcherWithBadDescriptionGeneratesNonfatalFailure) {
-  EXPECT_NONFATAL_FAILURE(HasBadDescription1(2),
-                          "The description string in a MATCHER*() macro "
-                          "must be \"\" at this moment");
+  EXPECT_NONFATAL_FAILURE(
+      HasBadDescription1(2),
+      "Syntax error at index 6 in matcher description \"not %(m)s good\": "
+      "\"m\" is an invalid parameter name.");
+}
+
+
+MATCHER_P(HasGoodDescription1, n, "good %(n)s") { return true; }
+
+TEST(MatcherPMacroTest, AcceptsValidDescription) {
+  const Matcher<int> m = HasGoodDescription1(5);
+  EXPECT_EQ("good 5", Describe(m));
 }
 
 // Tests that the description is calculated correctly from the matcher name.
@@ -509,17 +524,29 @@ TEST(MatcherPMacroTest, WorksWhenExplicitlyInstantiatedWithReference) {
 
 
 // Tests that the description string supplied to MATCHER_Pn() must be
-// empty.
+// valid.
 
-MATCHER_P2(HasBadDescription2, m, n, "not empty?") {
+MATCHER_P2(HasBadDescription2, m, n, "not %(good") {
   return arg > m + n;
 }
 
 TEST(MatcherPnMacroTest,
      CreatingMatcherWithBadDescriptionGeneratesNonfatalFailure) {
-  EXPECT_NONFATAL_FAILURE(HasBadDescription2(3, 4),
-                          "The description string in a MATCHER*() macro "
-                          "must be \"\" at this moment");
+  EXPECT_NONFATAL_FAILURE(
+      HasBadDescription2(3, 4),
+      "Syntax error at index 4 in matcher description \"not %(good\": "
+      "an interpolation must end with \")s\", but \"%(good\" does not.");
+}
+
+MATCHER_P2(HasComplexDescription, foo, bar,
+           "is as complex as %(foo)s %(bar)s (i.e. %(*)s or %%%(foo)s!)") {
+  return true;
+}
+
+TEST(MatcherPnMacroTest, AcceptsValidDescription) {
+  Matcher<int> m = HasComplexDescription(100, "ducks");
+  EXPECT_EQ("is as complex as 100 \"ducks\" (i.e. (100, \"ducks\") or %100!)",
+            Describe(m));
 }
 
 // Tests that the body of MATCHER_Pn() can reference the parameter
