@@ -436,7 +436,7 @@ $var arg_list = [[$if (i==0) | (i==n) [[$as$eas]] $else [[$as, $eas]]]]
 $template
   static Result Perform(Impl* impl, const ::std::tr1::tuple<$As>& args) {
     using ::std::tr1::get;
-    return impl->gmock_PerformImpl(args, $arg_list);
+    return impl->template gmock_PerformImpl<$As>(args, $arg_list);
   }
 
 ]]
@@ -774,9 +774,47 @@ $arg_types_and_names) const;\$param_field_decls
           gmock_Impl<F>::gmock_PerformImpl(const args_type& args, [[]]
 $arg_types_and_names) const
 ]]
+$$ }  // This meta comment fixes auto-indentation in Emacs.  It won't
+$$    // show up in the generated code.
 
 
+// TODO(wan@google.com): move the following to a different .h file
+// such that we don't have to run 'pump' every time the code is
+// updated.
 namespace testing {
+
+namespace internal {
+
+// Saves argument #0 to where the pointer points.
+ACTION_P(SaveArg0, pointer) { *pointer = arg0; }
+
+// Assigns 'value' to the variable referenced by argument #0.
+ACTION_P(SetArg0Referee, value) {
+  // Ensures that argument #0 is a reference.  If you get a compiler
+  // error on the next line, you are using SetArgReferee<k>(value) in
+  // a mock function whose k-th (0-based) argument is not a reference.
+  GMOCK_COMPILE_ASSERT_(internal::is_reference<arg0_type>::value,
+                        SetArgReferee_must_be_used_with_a_reference_argument);
+  arg0 = value;
+}
+
+}  // namespace internal
+
+// Action SaveArg<k>(pointer) saves the k-th (0-based) argument of the
+// mock function to *pointer.
+template <int k, typename Pointer>
+inline internal::WithArgsAction<internal::SaveArg0ActionP<Pointer>, k>
+SaveArg(const Pointer& pointer) {
+  return WithArg<k>(internal::SaveArg0(pointer));
+}
+
+// Action SetArgReferee<k>(value) assigns 'value' to the variable
+// referenced by the k-th (0-based) argument of the mock function.
+template <int k, typename Value>
+inline internal::WithArgsAction<internal::SetArg0RefereeActionP<Value>, k>
+SetArgReferee(const Value& value) {
+  return WithArg<k>(internal::SetArg0Referee(value));
+}
 
 // Action Throw(exception) can be used in a mock function of any type
 // to throw the given exception.  Any copyable value can be thrown.

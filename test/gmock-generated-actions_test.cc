@@ -57,6 +57,8 @@ using testing::DoAll;
 using testing::Invoke;
 using testing::InvokeArgument;
 using testing::Return;
+using testing::SaveArg;
+using testing::SetArgReferee;
 using testing::SetArgumentPointee;
 using testing::StaticAssertTypeEq;
 using testing::Unused;
@@ -1026,6 +1028,30 @@ TEST(ActionMacroTest, CanReferenceMockFunctionReturnType) {
   EXPECT_EQ(1, a1.Perform(make_tuple(false)));
 }
 
+// Tests that ACTION() works for arguments passed by const reference.
+ACTION(ReturnAddrOfConstBoolReferenceArg) {
+  StaticAssertTypeEq<const bool&, arg1_type>();
+  return &arg1;
+}
+
+TEST(ActionMacroTest, WorksForConstReferenceArg) {
+  Action<const bool*(int, const bool&)> a = ReturnAddrOfConstBoolReferenceArg();
+  const bool b = false;
+  EXPECT_EQ(&b, a.Perform(tuple<int, const bool&>(0, b)));
+}
+
+// Tests that ACTION() works for arguments passed by non-const reference.
+ACTION(ReturnAddrOfIntReferenceArg) {
+  StaticAssertTypeEq<int&, arg0_type>();
+  return &arg0;
+}
+
+TEST(ActionMacroTest, WorksForNonConstReferenceArg) {
+  Action<int*(int&, bool, int)> a = ReturnAddrOfIntReferenceArg();
+  int n = 0;
+  EXPECT_EQ(&n, a.Perform(tuple<int&, bool, int>(n, true, 1)));
+}
+
 // Tests that ACTION() can be used in a namespace.
 namespace action_test {
 ACTION(Sum) { return arg0 + arg1; }
@@ -1308,6 +1334,41 @@ TEST(ActionPnMacroTest, CanExplicitlyInstantiateWithReferenceTypes) {
       int&, const int&, int&>(n[0], n[1], n[2], n[3], n[4], n[5], n[6], n[7],
                               n[8], n[9]);
   EXPECT_EQ(55, a.Perform(empty));
+}
+
+TEST(SaveArgActionTest, WorksForSameType) {
+  int result = 0;
+  const Action<void(int n)> a1 = SaveArg<0>(&result);
+  a1.Perform(make_tuple(5));
+  EXPECT_EQ(5, result);
+}
+
+TEST(SaveArgActionTest, WorksForCompatibleType) {
+  int result = 0;
+  const Action<void(bool, char)> a1 = SaveArg<1>(&result);
+  a1.Perform(make_tuple(true, 'a'));
+  EXPECT_EQ('a', result);
+}
+
+TEST(SetArgRefereeActionTest, WorksForSameType) {
+  int value = 0;
+  const Action<void(int&)> a1 = SetArgReferee<0>(1);
+  a1.Perform(tuple<int&>(value));
+  EXPECT_EQ(1, value);
+}
+
+TEST(SetArgRefereeActionTest, WorksForCompatibleType) {
+  int value = 0;
+  const Action<void(int, int&)> a1 = SetArgReferee<1>('a');
+  a1.Perform(tuple<int, int&>(0, value));
+  EXPECT_EQ('a', value);
+}
+
+TEST(SetArgRefereeActionTest, WorksWithExtraArguments) {
+  int value = 0;
+  const Action<void(bool, int, int&, const char*)> a1 = SetArgReferee<2>('a');
+  a1.Perform(tuple<bool, int, int&, const char*>(true, 0, value, "hi"));
+  EXPECT_EQ('a', value);
 }
 
 #if GTEST_HAS_EXCEPTIONS

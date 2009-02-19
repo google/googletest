@@ -998,51 +998,57 @@ class ActionHelper {
  public:
   static Result Perform(Impl* impl, const ::std::tr1::tuple<>& args) {
     using ::std::tr1::get;
-    return impl->gmock_PerformImpl(args, ExcessiveArg(), ExcessiveArg(),
+    return impl->template gmock_PerformImpl<>(args, ExcessiveArg(),
         ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg(),
-        ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg());
+        ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg(),
+        ExcessiveArg());
   }
 
   template <typename A0>
   static Result Perform(Impl* impl, const ::std::tr1::tuple<A0>& args) {
     using ::std::tr1::get;
-    return impl->gmock_PerformImpl(args, get<0>(args), ExcessiveArg(),
+    return impl->template gmock_PerformImpl<A0>(args, get<0>(args),
         ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg(),
-        ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg());
+        ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg(),
+        ExcessiveArg());
   }
 
   template <typename A0, typename A1>
   static Result Perform(Impl* impl, const ::std::tr1::tuple<A0, A1>& args) {
     using ::std::tr1::get;
-    return impl->gmock_PerformImpl(args, get<0>(args), get<1>(args),
+    return impl->template gmock_PerformImpl<A0, A1>(args, get<0>(args),
+        get<1>(args), ExcessiveArg(), ExcessiveArg(), ExcessiveArg(),
         ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg(),
-        ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg());
+        ExcessiveArg());
   }
 
   template <typename A0, typename A1, typename A2>
   static Result Perform(Impl* impl, const ::std::tr1::tuple<A0, A1, A2>& args) {
     using ::std::tr1::get;
-    return impl->gmock_PerformImpl(args, get<0>(args), get<1>(args),
-        get<2>(args), ExcessiveArg(), ExcessiveArg(), ExcessiveArg(),
-        ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg());
+    return impl->template gmock_PerformImpl<A0, A1, A2>(args, get<0>(args),
+        get<1>(args), get<2>(args), ExcessiveArg(), ExcessiveArg(),
+        ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg(),
+        ExcessiveArg());
   }
 
   template <typename A0, typename A1, typename A2, typename A3>
   static Result Perform(Impl* impl, const ::std::tr1::tuple<A0, A1, A2,
       A3>& args) {
     using ::std::tr1::get;
-    return impl->gmock_PerformImpl(args, get<0>(args), get<1>(args),
-        get<2>(args), get<3>(args), ExcessiveArg(), ExcessiveArg(),
-        ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg());
+    return impl->template gmock_PerformImpl<A0, A1, A2, A3>(args, get<0>(args),
+        get<1>(args), get<2>(args), get<3>(args), ExcessiveArg(),
+        ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg(),
+        ExcessiveArg());
   }
 
   template <typename A0, typename A1, typename A2, typename A3, typename A4>
   static Result Perform(Impl* impl, const ::std::tr1::tuple<A0, A1, A2, A3,
       A4>& args) {
     using ::std::tr1::get;
-    return impl->gmock_PerformImpl(args, get<0>(args), get<1>(args),
-        get<2>(args), get<3>(args), get<4>(args), ExcessiveArg(),
-        ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg());
+    return impl->template gmock_PerformImpl<A0, A1, A2, A3, A4>(args,
+        get<0>(args), get<1>(args), get<2>(args), get<3>(args), get<4>(args),
+        ExcessiveArg(), ExcessiveArg(), ExcessiveArg(), ExcessiveArg(),
+        ExcessiveArg());
   }
 
   template <typename A0, typename A1, typename A2, typename A3, typename A4,
@@ -1050,9 +1056,10 @@ class ActionHelper {
   static Result Perform(Impl* impl, const ::std::tr1::tuple<A0, A1, A2, A3, A4,
       A5>& args) {
     using ::std::tr1::get;
-    return impl->gmock_PerformImpl(args, get<0>(args), get<1>(args),
-        get<2>(args), get<3>(args), get<4>(args), get<5>(args), ExcessiveArg(),
-        ExcessiveArg(), ExcessiveArg(), ExcessiveArg());
+    return impl->template gmock_PerformImpl<A0, A1, A2, A3, A4, A5>(args,
+        get<0>(args), get<1>(args), get<2>(args), get<3>(args), get<4>(args),
+        get<5>(args), ExcessiveArg(), ExcessiveArg(), ExcessiveArg(),
+        ExcessiveArg());
   }
 
   template <typename A0, typename A1, typename A2, typename A3, typename A4,
@@ -1060,9 +1067,10 @@ class ActionHelper {
   static Result Perform(Impl* impl, const ::std::tr1::tuple<A0, A1, A2, A3, A4,
       A5, A6>& args) {
     using ::std::tr1::get;
-    return impl->gmock_PerformImpl(args, get<0>(args), get<1>(args),
-        get<2>(args), get<3>(args), get<4>(args), get<5>(args), get<6>(args),
-        ExcessiveArg(), ExcessiveArg(), ExcessiveArg());
+    return impl->template gmock_PerformImpl<A0, A1, A2, A3, A4, A5, A6>(args,
+        get<0>(args), get<1>(args), get<2>(args), get<3>(args), get<4>(args),
+        get<5>(args), get<6>(args), ExcessiveArg(), ExcessiveArg(),
+        ExcessiveArg());
   }
 
   template <typename A0, typename A1, typename A2, typename A3, typename A4,
@@ -1070,9 +1078,10 @@ class ActionHelper {
   static Result Perform(Impl* impl, const ::std::tr1::tuple<A0, A1, A2, A3, A4,
       A5, A6, A7>& args) {
     using ::std::tr1::get;
-    return impl->gmock_PerformImpl(args, get<0>(args), get<1>(args),
-        get<2>(args), get<3>(args), get<4>(args), get<5>(args), get<6>(args),
-        get<7>(args), ExcessiveArg(), ExcessiveArg());
+    return impl->template gmock_PerformImpl<A0, A1, A2, A3, A4, A5, A6,
+        A7>(args, get<0>(args), get<1>(args), get<2>(args), get<3>(args),
+        get<4>(args), get<5>(args), get<6>(args), get<7>(args), ExcessiveArg(),
+        ExcessiveArg());
   }
 
   template <typename A0, typename A1, typename A2, typename A3, typename A4,
@@ -1080,9 +1089,10 @@ class ActionHelper {
   static Result Perform(Impl* impl, const ::std::tr1::tuple<A0, A1, A2, A3, A4,
       A5, A6, A7, A8>& args) {
     using ::std::tr1::get;
-    return impl->gmock_PerformImpl(args, get<0>(args), get<1>(args),
-        get<2>(args), get<3>(args), get<4>(args), get<5>(args), get<6>(args),
-        get<7>(args), get<8>(args), ExcessiveArg());
+    return impl->template gmock_PerformImpl<A0, A1, A2, A3, A4, A5, A6, A7,
+        A8>(args, get<0>(args), get<1>(args), get<2>(args), get<3>(args),
+        get<4>(args), get<5>(args), get<6>(args), get<7>(args), get<8>(args),
+        ExcessiveArg());
   }
 
   template <typename A0, typename A1, typename A2, typename A3, typename A4,
@@ -1090,9 +1100,10 @@ class ActionHelper {
   static Result Perform(Impl* impl, const ::std::tr1::tuple<A0, A1, A2, A3, A4,
       A5, A6, A7, A8, A9>& args) {
     using ::std::tr1::get;
-    return impl->gmock_PerformImpl(args, get<0>(args), get<1>(args),
-        get<2>(args), get<3>(args), get<4>(args), get<5>(args), get<6>(args),
-        get<7>(args), get<8>(args), get<9>(args));
+    return impl->template gmock_PerformImpl<A0, A1, A2, A3, A4, A5, A6, A7, A8,
+        A9>(args, get<0>(args), get<1>(args), get<2>(args), get<3>(args),
+        get<4>(args), get<5>(args), get<6>(args), get<7>(args), get<8>(args),
+        get<9>(args));
   }
 };
 
@@ -2303,7 +2314,43 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
               arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
               arg8_type arg8, arg9_type arg9) const
 
+// TODO(wan@google.com): move the following to a different .h file
+// such that we don't have to run 'pump' every time the code is
+// updated.
 namespace testing {
+
+namespace internal {
+
+// Saves argument #0 to where the pointer points.
+ACTION_P(SaveArg0, pointer) { *pointer = arg0; }
+
+// Assigns 'value' to the variable referenced by argument #0.
+ACTION_P(SetArg0Referee, value) {
+  // Ensures that argument #0 is a reference.  If you get a compiler
+  // error on the next line, you are using SetArgReferee<k>(value) in
+  // a mock function whose k-th (0-based) argument is not a reference.
+  GMOCK_COMPILE_ASSERT_(internal::is_reference<arg0_type>::value,
+                        SetArgReferee_must_be_used_with_a_reference_argument);
+  arg0 = value;
+}
+
+}  // namespace internal
+
+// Action SaveArg<k>(pointer) saves the k-th (0-based) argument of the
+// mock function to *pointer.
+template <int k, typename Pointer>
+inline internal::WithArgsAction<internal::SaveArg0ActionP<Pointer>, k>
+SaveArg(const Pointer& pointer) {
+  return WithArg<k>(internal::SaveArg0(pointer));
+}
+
+// Action SetArgReferee<k>(value) assigns 'value' to the variable
+// referenced by the k-th (0-based) argument of the mock function.
+template <int k, typename Value>
+inline internal::WithArgsAction<internal::SetArg0RefereeActionP<Value>, k>
+SetArgReferee(const Value& value) {
+  return WithArg<k>(internal::SetArg0Referee(value));
+}
 
 // Action Throw(exception) can be used in a mock function of any type
 // to throw the given exception.  Any copyable value can be thrown.
