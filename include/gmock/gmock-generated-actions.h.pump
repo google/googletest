@@ -333,27 +333,28 @@ class WithArgsAction {
   explicit WithArgsAction(const InnerAction& action) : action_(action) {}
 
   template <typename F>
-  operator Action<F>() const {
+  operator Action<F>() const { return MakeAction(new Impl<F>(action_)); }
+
+ private:
+  template <typename F>
+  class Impl : public ActionInterface<F> {
+   public:
     typedef typename Function<F>::Result Result;
     typedef typename Function<F>::ArgumentTuple ArgumentTuple;
+
+    explicit Impl(const InnerAction& action) : action_(action) {}
+
+    virtual Result Perform(const ArgumentTuple& args) {
+      return action_.Perform(SelectArgs<Result, ArgumentTuple, $ks>::Select(args));
+    }
+
+   private:
     typedef typename SelectArgs<Result, ArgumentTuple,
-        $ks>::type
-            InnerFunctionType;
+        $ks>::type InnerFunctionType;
 
-    class Impl : public ActionInterface<F> {
-     public:
-      explicit Impl(const InnerAction& action) : action_(action) {}
+    Action<InnerFunctionType> action_;
+  };
 
-      virtual Result Perform(const ArgumentTuple& args) {
-        return action_.Perform(SelectArgs<Result, ArgumentTuple, $ks>::Select(args));
-      }
-     private:
-      Action<InnerFunctionType> action_;
-    };
-
-    return MakeAction(new Impl(action_));
-  }
- private:
   const InnerAction action_;
 };
 
@@ -369,28 +370,31 @@ class DoBothAction {
   // to be used in ANY function of compatible type.
   template <typename F>
   operator Action<F>() const {
+    return Action<F>(new Impl<F>(action1_, action2_));
+  }
+
+ private:
+  // Implements the DoAll(...) action for a particular function type F.
+  template <typename F>
+  class Impl : public ActionInterface<F> {
+   public:
     typedef typename Function<F>::Result Result;
     typedef typename Function<F>::ArgumentTuple ArgumentTuple;
     typedef typename Function<F>::MakeResultVoid VoidResult;
 
-    // Implements the DoAll(...) action for a particular function type F.
-    class Impl : public ActionInterface<F> {
-     public:
-      Impl(const Action<VoidResult>& action1, const Action<F>& action2)
-          : action1_(action1), action2_(action2) {}
+    Impl(const Action<VoidResult>& action1, const Action<F>& action2)
+        : action1_(action1), action2_(action2) {}
 
-      virtual Result Perform(const ArgumentTuple& args) {
-        action1_.Perform(args);
-        return action2_.Perform(args);
-      }
-     private:
-      const Action<VoidResult> action1_;
-      const Action<F> action2_;
-    };
+    virtual Result Perform(const ArgumentTuple& args) {
+      action1_.Perform(args);
+      return action2_.Perform(args);
+    }
 
-    return Action<F>(new Impl(action1_, action2_));
-  }
- private:
+   private:
+    const Action<VoidResult> action1_;
+    const Action<F> action2_;
+  };
+
   Action1 action1_;
   Action2 action2_;
 };

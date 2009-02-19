@@ -27,11 +27,14 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Author: wan@google.com (Zhanyong Wan)
+// Author: wan@google.com (Zhanyong Wan), vladl@google.com (Vlad Losev)
 
-// This file is for verifying that a header file defining a mock class
-// can be included in multiple translation units without causing a
-// link error.  It doesn't have to actually do anything - we are only
-// checking that the test links correctly.
+// Google Mock - a framework for writing C++ mock classes.
+//
+// This file is for verifying that various Google Mock constructs do not
+// produce linker errors when instantiated in different translation units.
+// Please see gmock_link_test.h for details.
 
-#include "test/gmock-sample.h"
+#define LinkTest LinkTest1
+
+#include  "test/gmock_link_test.h"

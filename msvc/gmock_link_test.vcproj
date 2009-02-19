@@ -183,7 +183,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\test\gmock-sample.cc"
+				RelativePath="..\test\gmock_link2_test.cc"
 				>
 			</File>
 			<File

@@ -101,8 +101,8 @@ test_gmock_internal_utils_test_LDADD = $(GTEST_LIBS) lib/libgmock_main.la
 TESTS += test/gmock_link_test
 check_PROGRAMS += test/gmock_link_test
 test_gmock_link_test_SOURCES = test/gmock_link_test.cc \
-                               test/gmock-sample.cc \
-                               test/gmock-sample.h
+                               test/gmock_link2_test.cc \
+                               test/gmock_link_test.h
 test_gmock_link_test_LDADD = $(GTEST_LIBS) lib/libgmock_main.la
 
 TESTS += test/gmock-matchers_test

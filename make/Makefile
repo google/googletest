@@ -89,15 +89,15 @@ gmock_main.a : gmock-all.o gtest-all.o gmock_main.o
 
 # Builds a sample test.
 
-gmock-sample.o : $(USER_DIR)/gmock-sample.cc $(USER_DIR)/gmock-sample.h \
-                 $(GMOCK_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/gmock-sample.cc
-
 gmock_link_test.o : $(USER_DIR)/gmock_link_test.cc \
-                    $(USER_DIR)/gmock-sample.h $(GMOCK_HEADERS)
+                    $(USER_DIR)/gmock_link_test.h $(GMOCK_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/gmock_link_test.cc
 
-gmock_link_test : gmock-sample.o gmock_link_test.o gmock_main.a
+gmock_link2_test.o : $(USER_DIR)/gmock_link2_test.cc \
+                     $(USER_DIR)/gmock_link_test.h $(GMOCK_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/gmock_link2_test.cc
+
+gmock_link_test : gmock_link_test.o gmock_link2_test.o gmock_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@
 
 # Builds another sample test.

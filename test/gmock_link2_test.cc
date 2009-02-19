@@ -27,23 +27,14 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Author: wan@google.com (Zhanyong Wan)
+// Author: wan@google.com (Zhanyong Wan), vladl@google.com (Vlad Losev)
 
-#ifndef GMOCK_TEST_GMOCK_SAMPLE_H_
-#define GMOCK_TEST_GMOCK_SAMPLE_H_
+// Google Mock - a framework for writing C++ mock classes.
+//
+// This file is for verifying that various Google Mock constructs do not
+// produce linker errors when instantiated in different translation units.
+// Please see gmock_link_test.h for details.
 
-#include <gmock/gmock.h>
+#define LinkTest LinkTest2
 
-class Sample {
- public:
-  virtual ~Sample() {}
-
-  virtual bool Foo(int n) = 0;
-};
-
-class MockSample : public Sample {
- public:
-  MOCK_METHOD1(Foo, bool(int n));
-};
-
-#endif  // GMOCK_TEST_GMOCK_SAMPLE_H_
+#include  "test/gmock_link_test.h"
