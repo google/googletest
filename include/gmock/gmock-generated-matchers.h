@@ -1573,4 +1573,45 @@ string FormatMatcherDescription(
       p4##_type, p5##_type, p6##_type, p7##_type, p8##_type, p9##_type>::\
       gmock_Impl<arg_type>::Matches(arg_type arg) const
 
+namespace testing {
+namespace internal {
+
+// Returns true iff element is in the STL-style container.
+template <typename Container, typename Element>
+inline bool Contains(const Container& container, const Element& element) {
+  return ::std::find(container.begin(), container.end(), element) !=
+      container.end();
+}
+
+// Returns true iff element is in the C-style array.
+template <typename ArrayElement, size_t N, typename Element>
+inline bool Contains(const ArrayElement (&array)[N], const Element& element) {
+  return ::std::find(array, array + N, element) != array + N;
+}
+
+}  // namespace internal
+
+// Matches an STL-style container or a C-style array that contains the given
+// element.
+//
+// Examples:
+//   ::std::set<int> page_ids;
+//   page_ids.insert(3);
+//   page_ids.insert(1);
+//   EXPECT_THAT(page_ids, Contains(1));
+//   EXPECT_THAT(page_ids, Contains(3.0));
+//   EXPECT_THAT(page_ids, Not(Contains(4)));
+//
+//   ::std::map<int, size_t> page_lengths;
+//   page_lengths[1] = 100;
+//   EXPECT_THAT(map_int, Contains(::std::pair<const int, size_t>(1, 100)));
+//
+//   const char* user_ids[] = { "joe", "mike", "tom" };
+//   EXPECT_THAT(user_ids, Contains(::std::string("tom")));
+MATCHER_P(Contains, element, "") {
+  return internal::Contains(arg, element);
+}
+
+}  // namespace testing
+
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_MATCHERS_H_

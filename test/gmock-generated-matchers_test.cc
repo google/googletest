@@ -34,8 +34,11 @@
 #include <gmock/gmock-generated-matchers.h>
 
 #include <list>
+#include <map>
+#include <set>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <gmock/gmock.h>
@@ -45,9 +48,13 @@
 namespace {
 
 using std::list;
+using std::map;
+using std::pair;
+using std::set;
 using std::stringstream;
 using std::vector;
 using testing::_;
+using testing::Contains;
 using testing::ElementsAre;
 using testing::ElementsAreArray;
 using testing::Eq;
@@ -733,6 +740,95 @@ TEST(MatcherPnMacroTest, TypesAreCorrect) {
       EqualsSumOf(1, 2, 3, 4, 5, 6, 7, 8, '9');
   EqualsSumOfMatcherP10<int, int, int, int, int, int, int, int, int, char> a10 =
       EqualsSumOf(1, 2, 3, 4, 5, 6, 7, 8, 9, '0');
+}
+
+TEST(ContainsTest, ListMatchesWhenElementIsInContainer) {
+  list<int> some_list;
+  some_list.push_back(3);
+  some_list.push_back(1);
+  some_list.push_back(2);
+  EXPECT_THAT(some_list, Contains(1));
+  EXPECT_THAT(some_list, Contains(3.0));
+  EXPECT_THAT(some_list, Contains(2.0f));
+
+  list<string> another_list;
+  another_list.push_back("fee");
+  another_list.push_back("fie");
+  another_list.push_back("foe");
+  another_list.push_back("fum");
+  EXPECT_THAT(another_list, Contains(string("fee")));
+}
+
+TEST(ContainsTest, ListDoesNotMatchWhenElementIsNotInContainer) {
+  list<int> some_list;
+  some_list.push_back(3);
+  some_list.push_back(1);
+  EXPECT_THAT(some_list, Not(Contains(4)));
+}
+
+TEST(ContainsTest, SetMatchesWhenElementIsInContainer) {
+  set<int> some_set;
+  some_set.insert(3);
+  some_set.insert(1);
+  some_set.insert(2);
+  EXPECT_THAT(some_set, Contains(1.0));
+  EXPECT_THAT(some_set, Contains(3.0f));
+  EXPECT_THAT(some_set, Contains(2));
+
+  set<const char*> another_set;
+  another_set.insert("fee");
+  another_set.insert("fie");
+  another_set.insert("foe");
+  another_set.insert("fum");
+  EXPECT_THAT(another_set, Contains(string("fum")));
+}
+
+TEST(ContainsTest, SetDoesNotMatchWhenElementIsNotInContainer) {
+  set<int> some_set;
+  some_set.insert(3);
+  some_set.insert(1);
+  EXPECT_THAT(some_set, Not(Contains(4)));
+
+  set<const char*> c_string_set;
+  c_string_set.insert("hello");
+  EXPECT_THAT(c_string_set, Not(Contains(string("hello").c_str())));
+}
+
+TEST(ContainsTest, DescribesItselfCorrectly) {
+  Matcher<vector<int> > m = Contains(1);
+  EXPECT_EQ("contains 1", Describe(m));
+}
+
+TEST(ContainsTest, MapMatchesWhenElementIsInContainer) {
+  map<const char*, int> my_map;
+  const char* bar = "a string";
+  my_map[bar] = 2;
+  EXPECT_THAT(my_map, Contains(pair<const char* const, int>(bar, 2)));
+
+  map<string, int> another_map;
+  another_map["fee"] = 1;
+  another_map["fie"] = 2;
+  another_map["foe"] = 3;
+  another_map["fum"] = 4;
+  EXPECT_THAT(another_map, Contains(pair<const string, int>(string("fee"), 1)));
+  EXPECT_THAT(another_map, Contains(pair<const string, int>("fie", 2)));
+}
+
+TEST(ContainsTest, MapDoesNotMatchWhenElementIsNotInContainer) {
+  map<int, int> some_map;
+  some_map[1] = 11;
+  some_map[2] = 22;
+  EXPECT_THAT(some_map, Not(Contains(pair<const int, int>(2, 23))));
+}
+
+TEST(ContainsTest, ArrayMatchesWhenElementIsInContainer) {
+  const char* string_array[] = { "fee", "fie", "foe", "fum" };
+  EXPECT_THAT(string_array, Contains(string("fum")));
+}
+
+TEST(ContainsTest, ArrayDoesNotMatchWhenElementIsNotInContainer) {
+  int int_array[] = { 1, 2, 3, 4 };
+  EXPECT_THAT(int_array, Not(Contains(5)));
 }
 
 }  // namespace
