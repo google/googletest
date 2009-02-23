@@ -2462,7 +2462,7 @@ TEST(ResultOfTest, WorksForCompatibleMatcherTypes) {
   EXPECT_FALSE(matcher.Matches(42));
 }
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 // Tests that the program aborts when ResultOf is passed
 // a NULL function pointer.
 TEST(ResultOfDeathTest, DiesOnNullFunctionPointers) {

@@ -65,7 +65,7 @@ TEST(GmockCheckSyntaxTest, WorksWithSwitch) {
       GMOCK_CHECK_(true) << "Check failed in switch case";
 }
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 
 TEST(GmockCheckDeathTest, DiesWithCorrectOutputOnFailure) {
   const bool a_false_condition = false;

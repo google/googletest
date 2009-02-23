@@ -678,12 +678,12 @@ class SetArrayArgumentAction {
 
     // Microsoft compiler deprecates ::std::copy, so we want to suppress warning
     // 4996 (Function call with parameters that may be unsafe) there.
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 #pragma warning(push)          // Saves the current warning state.
 #pragma warning(disable:4996)  // Temporarily disables warning 4996.
 #endif  // GTEST_OS_WINDOWS
     ::std::copy(first_, last_, ::std::tr1::get<N>(args));
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 #pragma warning(pop)           // Restores the warning state.
 #endif  // GTEST_OS_WINDOWS
   }

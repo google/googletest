@@ -40,7 +40,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 // MSDN says the header file to be included for STDMETHOD is BaseTyps.h but
 // we are getting compiler errors if we use basetyps.h, hence including
 // objbase.h for definition of STDMETHOD.
@@ -50,9 +50,9 @@
 // There is a bug in MSVC (fixed in VS 2008) that prevents creating a
 // mock for a function with const arguments, so we don't test such
 // cases for MSVC versions older than 2008.
-#if !defined(GTEST_OS_WINDOWS) || (_MSC_VER >= 1500)
+#if !GTEST_OS_WINDOWS || (_MSC_VER >= 1500)
 #define GMOCK_ALLOWS_CONST_PARAM_FUNCTIONS
-#endif  // !defined(GTEST_OS_WINDOWS) || (_MSC_VER >= 1500)
+#endif  // !GTEST_OS_WINDOWS || (_MSC_VER >= 1500)
 
 namespace testing {
 namespace gmock_generated_function_mockers_test {
@@ -102,7 +102,7 @@ class FooInterface {
   virtual int TypeWithHole(int (*func)()) = 0;
   virtual int TypeWithComma(const std::map<int, string>& a_map) = 0;
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   STDMETHOD_(int, CTNullary)() = 0;
   STDMETHOD_(bool, CTUnary)(int x) = 0;
   STDMETHOD_(int, CTDecimal)(bool b, char c, short d, int e, long f,  // NOLINT
@@ -140,7 +140,7 @@ class MockFoo : public FooInterface {
 
   MOCK_METHOD1(TypeWithHole, int(int (*)()));  // NOLINT
   MOCK_METHOD1(TypeWithComma, int(const std::map<int, string>&));  // NOLINT
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   MOCK_METHOD0_WITH_CALLTYPE(STDMETHODCALLTYPE, CTNullary, int());
   MOCK_METHOD1_WITH_CALLTYPE(STDMETHODCALLTYPE, CTUnary, bool(int));
   MOCK_METHOD10_WITH_CALLTYPE(STDMETHODCALLTYPE, CTDecimal, int(bool b, char c,
@@ -261,7 +261,7 @@ TEST_F(FunctionMockerTest, MocksFunctionsOverloadedOnConstnessOfThis) {
   EXPECT_EQ('a', Const(*foo_).OverloadedOnConstness());
 }
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 // Tests mocking a nullary function with calltype.
 TEST_F(FunctionMockerTest, MocksNullaryFunctionWithCallType) {
   EXPECT_CALL(mock_foo_, CTNullary())
@@ -373,7 +373,7 @@ TEST(TemplateMockTest, Works) {
   EXPECT_EQ(0, mock.GetSize());
 }
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 // Tests mocking template interfaces with calltype.
 
 template <typename T>

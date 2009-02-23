@@ -53,11 +53,11 @@
 #include <gtest/gtest.h>
 
 // hash_map and hash_set are available on Windows.
-#ifdef GTEST_OS_WINDOWS
-#define GMOCK_HAS_HASH_MAP_  // Indicates that hash_map is available.
-#include <hash_map>          // NOLINT
-#define GMOCK_HAS_HASH_SET_  // Indicates that hash_set is available.
-#include <hash_set>          // NOLINT
+#if GTEST_OS_WINDOWS
+#define GMOCK_HAS_HASH_MAP_ 1  // Indicates that hash_map is available.
+#include <hash_map>            // NOLINT
+#define GMOCK_HAS_HASH_SET_ 1  // Indicates that hash_set is available.
+#include <hash_set>            // NOLINT
 #endif  // GTEST_OS_WINDOWS
 
 // Some user-defined types for testing the universal value printer.
@@ -160,7 +160,7 @@ using ::testing::internal::UniversalTersePrintTupleFieldsToStrings;
 using ::testing::internal::UniversalPrinter;
 using ::testing::internal::string;
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 // MSVC defines the following classes in the ::stdext namespace while
 // gcc defines them in the :: namespace.  Note that they are not part
 // of the C++ standard.
@@ -279,10 +279,10 @@ TEST(PrintBuiltInTypeTest, Integer) {
 // Size types.
 TEST(PrintBuiltInTypeTest, Size_t) {
   EXPECT_EQ("1", Print(sizeof('a')));  // size_t.
-#ifndef GTEST_OS_WINDOWS
+#if !GTEST_OS_WINDOWS
   // Windows has no ssize_t type.
   EXPECT_EQ("-2", Print(static_cast<ssize_t>(-2)));  // ssize_t.
-#endif  // GTEST_OS_WINDOWS
+#endif  // !GTEST_OS_WINDOWS
 }
 
 // Floating-points.
@@ -674,7 +674,7 @@ TEST(PrintStlContainerTest, NonEmptyDeque) {
   EXPECT_EQ("{ 1, 3 }", Print(non_empty));
 }
 
-#ifdef GMOCK_HAS_HASH_MAP_
+#if GMOCK_HAS_HASH_MAP_
 
 TEST(PrintStlContainerTest, OneElementHashMap) {
   hash_map<int, char> map1;
@@ -696,7 +696,7 @@ TEST(PrintStlContainerTest, HashMultiMap) {
 
 #endif  // GMOCK_HAS_HASH_MAP_
 
-#ifdef GMOCK_HAS_HASH_SET_
+#if GMOCK_HAS_HASH_SET_
 
 TEST(PrintStlContainerTest, HashSet) {
   hash_set<string> set1;

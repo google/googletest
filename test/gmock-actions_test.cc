@@ -95,10 +95,10 @@ TEST(BuiltInDefaultValueTest, IsZeroForNumericTypes) {
   EXPECT_EQ(0, BuiltInDefaultValue<unsigned char>::Get());
   EXPECT_EQ(0, BuiltInDefaultValue<signed char>::Get());
   EXPECT_EQ(0, BuiltInDefaultValue<char>::Get());
-#ifndef GTEST_OS_WINDOWS
+#if !GTEST_OS_WINDOWS
   EXPECT_EQ(0, BuiltInDefaultValue<unsigned wchar_t>::Get());
   EXPECT_EQ(0, BuiltInDefaultValue<signed wchar_t>::Get());
-#endif  // GTEST_OS_WINDOWS
+#endif  // !GTEST_OS_WINDOWS
   EXPECT_EQ(0, BuiltInDefaultValue<wchar_t>::Get());
   EXPECT_EQ(0, BuiltInDefaultValue<unsigned short>::Get());  // NOLINT
   EXPECT_EQ(0, BuiltInDefaultValue<signed short>::Get());  // NOLINT
@@ -121,10 +121,10 @@ TEST(BuiltInDefaultValueTest, ExistsForNumericTypes) {
   EXPECT_TRUE(BuiltInDefaultValue<unsigned char>::Exists());
   EXPECT_TRUE(BuiltInDefaultValue<signed char>::Exists());
   EXPECT_TRUE(BuiltInDefaultValue<char>::Exists());
-#ifndef GTEST_OS_WINDOWS
+#if !GTEST_OS_WINDOWS
   EXPECT_TRUE(BuiltInDefaultValue<unsigned wchar_t>::Exists());
   EXPECT_TRUE(BuiltInDefaultValue<signed wchar_t>::Exists());
-#endif  // GTEST_OS_WINDOWS
+#endif  // !GTEST_OS_WINDOWS
   EXPECT_TRUE(BuiltInDefaultValue<wchar_t>::Exists());
   EXPECT_TRUE(BuiltInDefaultValue<unsigned short>::Exists());  // NOLINT
   EXPECT_TRUE(BuiltInDefaultValue<signed short>::Exists());  // NOLINT
@@ -196,7 +196,7 @@ TEST(BuiltInDefaultValueTest, UserTypeHasNoDefault) {
   EXPECT_FALSE(BuiltInDefaultValue<UserType>::Exists());
 }
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 
 // Tests that BuiltInDefaultValue<T&>::Get() aborts the program.
 TEST(BuiltInDefaultValueDeathTest, IsUndefinedForReferences) {
@@ -257,7 +257,7 @@ TEST(DefaultValueDeathTest, GetReturnsBuiltInDefaultValueWhenUnset) {
 
   EXPECT_EQ(0, DefaultValue<int>::Get());
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
   EXPECT_DEATH({  // NOLINT
     DefaultValue<UserType>::Get();
   }, "");
@@ -313,7 +313,7 @@ TEST(DefaultValueOfReferenceDeathTest, GetReturnsBuiltInDefaultValueWhenUnset) {
   EXPECT_FALSE(DefaultValue<int&>::IsSet());
   EXPECT_FALSE(DefaultValue<UserType&>::IsSet());
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
   EXPECT_DEATH({  // NOLINT
     DefaultValue<int&>::Get();
   }, "");
@@ -556,7 +556,7 @@ TEST(DoDefaultTest, ReturnsBuiltInDefaultValueByDefault) {
   EXPECT_EQ(0, mock.IntFunc(true));
 }
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 
 // Tests that DoDefault() aborts the process when there is no built-in
 // default value for the return type.

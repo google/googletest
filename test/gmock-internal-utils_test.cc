@@ -320,7 +320,7 @@ TEST(AssertTest, SucceedsOnTrue) {
   Assert(true, __FILE__, __LINE__);  // This should succeed too.
 }
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 
 // Tests that Assert(false, ...) generates a fatal failure.
 TEST(AssertTest, FailsFatallyOnFalse) {

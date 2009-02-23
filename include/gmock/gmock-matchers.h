@@ -1141,13 +1141,13 @@ class TrulyMatcher {
   // interested in the address of the argument.
   template <typename T>
   bool Matches(T& x) const {
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
     // MSVC warns about converting a value into bool (warning 4800).
 #pragma warning(push)          // Saves the current warning state.
 #pragma warning(disable:4800)  // Temporarily disables warning 4800.
 #endif  // GTEST_OS_WINDOWS
     return predicate_(x);
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 #pragma warning(pop)           // Restores the warning state.
 #endif  // GTEST_OS_WINDOWS
   }

@@ -55,7 +55,7 @@ namespace {
 
 using ::std::ostream;
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 #define snprintf _snprintf_s
 #endif
 

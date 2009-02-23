@@ -192,7 +192,7 @@ TEST(OnCallSyntaxTest, WithArgumentsCanAppearAtMostOnce) {
   }, ".WithArguments() cannot appear more than once in an ON_CALL()");
 }
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 
 TEST(OnCallSyntaxTest, WillByDefaultIsMandatory) {
   MockA a;
@@ -987,7 +987,7 @@ TEST(UnexpectedCallTest, UnsatisifiedPrerequisites) {
 
 #endif  // GMOCK_HAS_REGEX
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 
 TEST(UndefinedReturnValueTest, ReturnValueIsMandatory) {
   MockA a;
@@ -1143,7 +1143,7 @@ TEST(SequenceTest, AnyOrderIsOkByDefault) {
   }
 }
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 
 // Tests that the calls must be in strict order when a complete order
 // is specified.

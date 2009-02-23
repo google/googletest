@@ -58,7 +58,7 @@
 #include <tuple>
 #endif  // __GNUC__
 
-#ifdef GTEST_OS_LINUX
+#if GTEST_OS_LINUX
 
 // On some platforms, <regex.h> needs someone to define size_t, and
 // won't compile otherwise.  We can #include it here as we already
@@ -85,7 +85,7 @@ namespace internal {
 
 // For Windows, check the compiler version. At least VS 2005 SP1 is
 // required to compile Google Mock.
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 
 #if _MSC_VER < 1400
 #error "At least Visual Studio 2005 SP1 is required to compile Google Mock."
