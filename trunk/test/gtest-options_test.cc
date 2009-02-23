@@ -42,7 +42,7 @@
 
 #ifdef _WIN32_WCE
 #include <windows.h>
-#elif defined(GTEST_OS_WINDOWS)
+#elif GTEST_OS_WINDOWS
 #include <direct.h>
 #endif  // _WIN32_WCE
 
@@ -51,9 +51,9 @@
 // included, or there will be a compiler error.  This trick is to
 // prevent a user from accidentally including gtest-internal-inl.h in
 // his code.
-#define GTEST_IMPLEMENTATION
+#define GTEST_IMPLEMENTATION_ 1
 #include "src/gtest-internal-inl.h"
-#undef GTEST_IMPLEMENTATION
+#undef GTEST_IMPLEMENTATION_
 
 namespace testing {
 namespace internal {
@@ -89,7 +89,7 @@ TEST(XmlOutputTest, GetOutputFileSingleFile) {
 }
 
 TEST(XmlOutputTest, GetOutputFileFromDirectoryPath) {
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   GTEST_FLAG(output) = "xml:path\\";
   const String& output_file = UnitTestOptions::GetAbsolutePathToOutputFile();
   EXPECT_TRUE(
@@ -121,7 +121,7 @@ TEST(XmlOutputTest, GetOutputFileFromDirectoryPath) {
 TEST(OutputFileHelpersTest, GetCurrentExecutableName) {
   const FilePath executable = GetCurrentExecutableName();
   const char* const exe_str = executable.c_str();
-#if defined(_WIN32_WCE) || defined(GTEST_OS_WINDOWS)
+#if defined(_WIN32_WCE) || GTEST_OS_WINDOWS
   ASSERT_TRUE(_strcmpi("gtest-options_test", exe_str) == 0 ||
               _strcmpi("gtest-options-ex_test", exe_str) == 0)
               << "GetCurrentExecutableName() returns " << exe_str;
@@ -149,7 +149,7 @@ class XmlOutputChangeDirTest : public Test {
   }
 
   void ChDir(const char* dir) {
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
     _chdir(dir);
 #else
     chdir(dir);
@@ -181,7 +181,7 @@ TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithRelativeFile) {
 }
 
 TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithRelativePath) {
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   GTEST_FLAG(output) = "xml:path\\";
   const String& output_file = UnitTestOptions::GetAbsolutePathToOutputFile();
   EXPECT_TRUE(
@@ -211,7 +211,7 @@ TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithRelativePath) {
 }
 
 TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithAbsoluteFile) {
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   GTEST_FLAG(output) = "xml:c:\\tmp\\filename.abc";
   EXPECT_STREQ(FilePath("c:\\tmp\\filename.abc").c_str(),
                UnitTestOptions::GetAbsolutePathToOutputFile().c_str());
@@ -223,7 +223,7 @@ TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithAbsoluteFile) {
 }
 
 TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithAbsolutePath) {
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   GTEST_FLAG(output) = "xml:c:\\tmp\\";
   const String& output_file = UnitTestOptions::GetAbsolutePathToOutputFile();
   EXPECT_TRUE(

@@ -82,7 +82,7 @@ template <typename T>
 T* CommonTest<T>::shared_ = NULL;
 
 // This #ifdef block tests typed tests.
-#ifdef GTEST_HAS_TYPED_TEST
+#if GTEST_HAS_TYPED_TEST
 
 using testing::Types;
 
@@ -166,7 +166,7 @@ TYPED_TEST(NumericTest, DefaultIsZero) {
 #endif  // GTEST_HAS_TYPED_TEST
 
 // This #ifdef block tests type-parameterized tests.
-#ifdef GTEST_HAS_TYPED_TEST_P
+#if GTEST_HAS_TYPED_TEST_P
 
 using testing::Types;
 using testing::internal::TypedTestCasePState;
@@ -198,7 +198,7 @@ TEST_F(TypedTestCasePStateTest, IgnoresOrderAndSpaces) {
             state_.VerifyRegisteredTestNames("foo.cc", 1, tests));
 }
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 
 typedef TypedTestCasePStateTest TypedTestCasePStateDeathTest;
 

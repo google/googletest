@@ -102,7 +102,7 @@ class Message {
   }
 
   ~Message() { delete ss_; }
-#ifdef GTEST_OS_SYMBIAN
+#if GTEST_OS_SYMBIAN
   // Streams a value (either a pointer or not) to this object.
   template <typename T>
   inline Message& operator <<(const T& value) {
@@ -187,7 +187,7 @@ class Message {
   }
 
  private:
-#ifdef GTEST_OS_SYMBIAN
+#if GTEST_OS_SYMBIAN
   // These are needed as the Nokia Symbian Compiler cannot decide between
   // const T& and const T* in a function template. The Nokia compiler _can_
   // decide between class template specializations for T and T*, so a

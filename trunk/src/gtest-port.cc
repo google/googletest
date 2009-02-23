@@ -35,7 +35,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 #include <regex.h>
 #endif  // GTEST_HAS_DEATH_TEST
 
@@ -56,9 +56,9 @@
 // included, or there will be a compiler error.  This trick is to
 // prevent a user from accidentally including gtest-internal-inl.h in
 // his code.
-#define GTEST_IMPLEMENTATION
+#define GTEST_IMPLEMENTATION_ 1
 #include "src/gtest-internal-inl.h"
-#undef GTEST_IMPLEMENTATION
+#undef GTEST_IMPLEMENTATION_
 
 namespace testing {
 namespace internal {
@@ -334,7 +334,7 @@ bool RE::PartialMatch(const char* str, const RE& re) {
 void RE::Init(const char* regex) {
   pattern_ = full_pattern_ = NULL;
   if (regex != NULL) {
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
     pattern_ = _strdup(regex);
 #else
     pattern_ = strdup(regex);
@@ -383,7 +383,7 @@ void GTestLog(GTestLogSeverity severity, const char* file,
   }
 }
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 
 // Defines the stderr capturer.
 
@@ -502,7 +502,8 @@ void abort() {
 // given flag.  For example, FlagToEnvVar("foo") will return
 // "GTEST_FOO" in the open-source version.
 static String FlagToEnvVar(const char* flag) {
-  const String full_flag = (Message() << GTEST_FLAG_PREFIX << flag).GetString();
+  const String full_flag =
+      (Message() << GTEST_FLAG_PREFIX_ << flag).GetString();
 
   Message env_var;
   for (int i = 0; i != full_flag.GetLength(); i++) {

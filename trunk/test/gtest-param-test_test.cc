@@ -35,7 +35,7 @@
 
 #include <gtest/gtest.h>
 
-#ifdef GTEST_HAS_PARAM_TEST
+#if GTEST_HAS_PARAM_TEST
 
 #include <algorithm>
 #include <iostream>
@@ -43,9 +43,9 @@
 #include <vector>
 
 // To include gtest-internal-inl.h.
-#define GTEST_IMPLEMENTATION
+#define GTEST_IMPLEMENTATION_ 1
 #include "src/gtest-internal-inl.h"  // for UnitTestOptions
-#undef GTEST_IMPLEMENTATION
+#undef GTEST_IMPLEMENTATION_
 
 #include "test/gtest-param-test_test.h"
 
@@ -60,7 +60,7 @@ using ::testing::TestWithParam;
 using ::testing::Values;
 using ::testing::ValuesIn;
 
-#ifdef GTEST_HAS_COMBINE
+#if GTEST_HAS_COMBINE
 using ::testing::Combine;
 using ::std::tr1::get;
 using ::std::tr1::make_tuple;
@@ -398,7 +398,7 @@ TEST(BoolTest, BoolWorks) {
   VerifyGenerator(gen, expected_values);
 }
 
-#ifdef GTEST_HAS_COMBINE
+#if GTEST_HAS_COMBINE
 
 template <typename T1, typename T2>
 ::std::ostream& operator<<(::std::ostream& stream, const tuple<T1, T2>& value) {
@@ -774,13 +774,13 @@ INSTANTIATE_TEST_CASE_P(ZeroToFiveSequence, NamingTest, Range(0, 5));
 #endif  // GTEST_HAS_PARAM_TEST
 
 TEST(CompileTest, CombineIsDefinedOnlyWhenGtestHasParamTestIsDefined) {
-#if defined(GTEST_HAS_COMBINE) && !defined(GTEST_HAS_PARAM_TEST)
+#if GTEST_HAS_COMBINE && !GTEST_HAS_PARAM_TEST
   FAIL() << "GTEST_HAS_COMBINE is defined while GTEST_HAS_PARAM_TEST is not\n"
 #endif
 }
 
 int main(int argc, char **argv) {
-#ifdef GTEST_HAS_PARAM_TEST
+#if GTEST_HAS_PARAM_TEST
   // Used in TestGenerationTest test case.
   AddGlobalTestEnvironment(TestGenerationTest::Environment::Instance());
   // Used in GeneratorEvaluationTest test case.

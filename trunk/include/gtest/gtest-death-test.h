@@ -49,7 +49,7 @@ namespace testing {
 // after forking.
 GTEST_DECLARE_string_(death_test_style);
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 
 // The following macros are useful for writing death tests.
 

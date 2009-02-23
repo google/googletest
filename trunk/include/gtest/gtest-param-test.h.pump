@@ -152,7 +152,7 @@ INSTANTIATE_TEST_CASE_P(AnotherInstantiationName, FooTest, ValuesIn(pets));
 
 #include <gtest/internal/gtest-port.h>
 
-#ifdef GTEST_HAS_PARAM_TEST
+#if GTEST_HAS_PARAM_TEST
 
 #include <gtest/internal/gtest-internal.h>
 #include <gtest/internal/gtest-param-util.h>
@@ -344,7 +344,7 @@ inline internal::ParamGenerator<bool> Bool() {
   return Values(false, true);
 }
 
-#ifdef GTEST_HAS_COMBINE
+#if GTEST_HAS_COMBINE
 // Combine() allows the user to combine two or more sequences to produce
 // values of a Cartesian product of those sequences' elements.
 //

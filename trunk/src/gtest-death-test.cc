@@ -34,7 +34,7 @@
 #include <gtest/gtest-death-test.h>
 #include <gtest/internal/gtest-port.h>
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 #include <errno.h>
 #include <limits.h>
 #include <stdarg.h>
@@ -48,9 +48,9 @@
 // included, or there will be a compiler error.  This trick is to
 // prevent a user from accidentally including gtest-internal-inl.h in
 // his code.
-#define GTEST_IMPLEMENTATION
+#define GTEST_IMPLEMENTATION_ 1
 #include "src/gtest-internal-inl.h"
-#undef GTEST_IMPLEMENTATION
+#undef GTEST_IMPLEMENTATION_
 
 namespace testing {
 
@@ -90,7 +90,7 @@ GTEST_DEFINE_string_(
     "death test.  FOR INTERNAL USE ONLY.");
 }  // namespace internal
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 
 // ExitedWithCode constructor.
 ExitedWithCode::ExitedWithCode(int exit_code) : exit_code_(exit_code) {
@@ -144,7 +144,7 @@ bool ExitedUnsuccessfully(int exit_status) {
 static String DeathTestThreadWarning(size_t thread_count) {
   Message msg;
   msg << "Death tests use fork(), which is unsafe particularly"
-      << " in a threaded context. For this test, " << GTEST_NAME << " ";
+      << " in a threaded context. For this test, " << GTEST_NAME_ << " ";
   if (thread_count == 0)
     msg << "couldn't detect the number of threads.";
   else
@@ -655,11 +655,11 @@ DeathTest::TestRole ExecDeathTest::AssumeRole() {
 
   const String filter_flag =
       String::Format("--%s%s=%s.%s",
-                     GTEST_FLAG_PREFIX, kFilterFlag,
+                     GTEST_FLAG_PREFIX_, kFilterFlag,
                      info->test_case_name(), info->name());
   const String internal_flag =
       String::Format("--%s%s=%s:%d:%d:%d",
-                     GTEST_FLAG_PREFIX, kInternalRunDeathTestFlag, file_, line_,
+                     GTEST_FLAG_PREFIX_, kInternalRunDeathTestFlag, file_, line_,
                      death_test_index, pipe_fd[1]);
   Arguments args;
   args.AddArguments(GetArgvs());

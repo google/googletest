@@ -40,9 +40,9 @@
 // included, or there will be a compiler error.  This trick is to
 // prevent a user from accidentally including gtest-internal-inl.h in
 // his code.
-#define GTEST_IMPLEMENTATION
+#define GTEST_IMPLEMENTATION_ 1
 #include "src/gtest-internal-inl.h"
-#undef GTEST_IMPLEMENTATION
+#undef GTEST_IMPLEMENTATION_
 
 namespace testing {
 
@@ -112,7 +112,7 @@ int g_death_test_count = 0;
 TEST(BarDeathTest, ThreadSafeAndFast) {
   g_death_test_count++;
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
   GTEST_FLAG(death_test_style) = "threadsafe";
   EXPECT_DEATH(abort(), "");
 
@@ -121,7 +121,7 @@ TEST(BarDeathTest, ThreadSafeAndFast) {
 #endif  // GTEST_HAS_DEATH_TEST
 }
 
-#ifdef GTEST_HAS_PARAM_TEST
+#if GTEST_HAS_PARAM_TEST
 int g_param_test_count = 0;
 
 const int kNumberOfParamTests = 10;
@@ -146,7 +146,7 @@ void ResetCounts() {
   g_should_fail_count = 0;
   g_should_pass_count = 0;
   g_death_test_count = 0;
-#ifdef GTEST_HAS_PARAM_TEST
+#if GTEST_HAS_PARAM_TEST
   g_param_test_count = 0;
 #endif  // GTEST_HAS_PARAM_TEST
 }
@@ -158,7 +158,7 @@ void CheckCounts(int expected) {
   GTEST_CHECK_INT_EQ_(expected, g_should_fail_count);
   GTEST_CHECK_INT_EQ_(expected, g_should_pass_count);
   GTEST_CHECK_INT_EQ_(expected, g_death_test_count);
-#ifdef GTEST_HAS_PARAM_TEST
+#if GTEST_HAS_PARAM_TEST
   GTEST_CHECK_INT_EQ_(expected * kNumberOfParamTests, g_param_test_count);
 #endif  // GTEST_HAS_PARAM_TEST
 }
@@ -203,7 +203,7 @@ void TestRepeatWithFilterForSuccessfulTests(int repeat) {
   GTEST_CHECK_INT_EQ_(0, g_should_fail_count);
   GTEST_CHECK_INT_EQ_(repeat, g_should_pass_count);
   GTEST_CHECK_INT_EQ_(repeat, g_death_test_count);
-#ifdef GTEST_HAS_PARAM_TEST
+#if GTEST_HAS_PARAM_TEST
   GTEST_CHECK_INT_EQ_(repeat * kNumberOfParamTests, g_param_test_count);
 #endif  // GTEST_HAS_PARAM_TEST
 }
@@ -221,7 +221,7 @@ void TestRepeatWithFilterForFailedTests(int repeat) {
   GTEST_CHECK_INT_EQ_(repeat, g_should_fail_count);
   GTEST_CHECK_INT_EQ_(0, g_should_pass_count);
   GTEST_CHECK_INT_EQ_(0, g_death_test_count);
-#ifdef GTEST_HAS_PARAM_TEST
+#if GTEST_HAS_PARAM_TEST
   GTEST_CHECK_INT_EQ_(0, g_param_test_count);
 #endif  // GTEST_HAS_PARAM_TEST
 }

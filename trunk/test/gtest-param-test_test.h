@@ -39,7 +39,7 @@
 
 #include <gtest/gtest.h>
 
-#ifdef GTEST_HAS_PARAM_TEST
+#if GTEST_HAS_PARAM_TEST
 
 // Test fixture for testing definition and instantiation of a test
 // in separate translation units.

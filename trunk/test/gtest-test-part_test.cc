@@ -117,7 +117,7 @@ TEST_F(TestPartResultArrayTest, ContainsGivenResultsAfterTwoAppends) {
   EXPECT_STREQ("Failure 2", results.GetTestPartResult(1).message());
 }
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 
 typedef TestPartResultArrayTest TestPartResultArrayDeathTest;
 

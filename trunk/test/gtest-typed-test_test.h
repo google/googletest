@@ -34,7 +34,7 @@
 
 #include <gtest/gtest.h>
 
-#ifdef GTEST_HAS_TYPED_TEST_P
+#if GTEST_HAS_TYPED_TEST_P
 
 using testing::Test;
 

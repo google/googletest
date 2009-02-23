@@ -36,11 +36,11 @@
 
 #ifdef _WIN32_WCE
 #include <windows.h>
-#elif defined(GTEST_OS_WINDOWS)
+#elif GTEST_OS_WINDOWS
 #include <direct.h>
 #include <io.h>
 #include <sys/stat.h>
-#elif defined(GTEST_OS_SYMBIAN)
+#elif GTEST_OS_SYMBIAN
 // Symbian OpenC has PATH_MAX in sys/syslimits.h
 #include <sys/syslimits.h>
 #include <unistd.h>
@@ -50,7 +50,7 @@
 #include <unistd.h>  // NOLINT
 #endif  // _WIN32_WCE or _WIN32
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 #define GTEST_PATH_MAX_ _MAX_PATH
 #elif defined(PATH_MAX)
 #define GTEST_PATH_MAX_ PATH_MAX
@@ -65,7 +65,7 @@
 namespace testing {
 namespace internal {
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 const char kPathSeparator = '\\';
 const char kPathSeparatorString[] = "\\";
 #ifdef _WIN32_WCE
@@ -90,7 +90,7 @@ FilePath FilePath::GetCurrentDir() {
 // Windows CE doesn't have a current directory, so we just return
 // something reasonable.
   return FilePath(kCurrentDirectoryString);
-#elif defined(GTEST_OS_WINDOWS)
+#elif GTEST_OS_WINDOWS
   char cwd[GTEST_PATH_MAX_ + 1] = {};
   return FilePath(_getcwd(cwd, sizeof(cwd)) == NULL ? "" : cwd);
 #else
@@ -165,7 +165,7 @@ FilePath FilePath::ConcatPaths(const FilePath& directory,
 // Returns true if pathname describes something findable in the file-system,
 // either a file, directory, or whatever.
 bool FilePath::FileOrDirectoryExists() const {
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 #ifdef _WIN32_WCE
   LPCWSTR unicode = String::AnsiToUtf16(pathname_.c_str());
   const DWORD attributes = GetFileAttributes(unicode);
@@ -185,7 +185,7 @@ bool FilePath::FileOrDirectoryExists() const {
 // that exists.
 bool FilePath::DirectoryExists() const {
   bool result = false;
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   // Don't strip off trailing separator if path is a root directory on
   // Windows (like "C:\\").
   const FilePath& path(IsRootDirectory() ? *this :
@@ -214,7 +214,7 @@ bool FilePath::DirectoryExists() const {
 // Returns true if pathname describes a root directory. (Windows has one
 // root directory per disk drive.)
 bool FilePath::IsRootDirectory() const {
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   // TODO(wan@google.com): on Windows a network share like
   // \\server\share can be a root directory, although it cannot be the
   // current directory.  Handle this properly.
@@ -227,7 +227,7 @@ bool FilePath::IsRootDirectory() const {
 // Returns true if pathname describes an absolute path.
 bool FilePath::IsAbsolutePath() const {
   const char* const name = pathname_.c_str();
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   return pathname_.GetLength() >= 3 &&
      ((name[0] >= 'a' && name[0] <= 'z') ||
       (name[0] >= 'A' && name[0] <= 'Z')) &&
@@ -285,7 +285,7 @@ bool FilePath::CreateDirectoriesRecursively() const {
 // directory for any reason, including if the parent directory does not
 // exist. Not named "CreateDirectory" because that's a macro on Windows.
 bool FilePath::CreateFolder() const {
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 #ifdef _WIN32_WCE
   FilePath removed_sep(this->RemoveTrailingPathSeparator());
   LPCWSTR unicode = String::AnsiToUtf16(removed_sep.c_str());

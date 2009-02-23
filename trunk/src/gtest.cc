@@ -43,11 +43,11 @@
 #include <wchar.h>
 #include <wctype.h>
 
-#ifdef GTEST_OS_LINUX
+#if GTEST_OS_LINUX
 
 // TODO(kenton@google.com): Use autoconf to detect availability of
 // gettimeofday().
-#define GTEST_HAS_GETTIMEOFDAY
+#define GTEST_HAS_GETTIMEOFDAY_ 1
 
 #include <fcntl.h>
 #include <limits.h>
@@ -60,12 +60,12 @@
 #include <string>
 #include <vector>
 
-#elif defined(GTEST_OS_SYMBIAN)
-#define GTEST_HAS_GETTIMEOFDAY
+#elif GTEST_OS_SYMBIAN
+#define GTEST_HAS_GETTIMEOFDAY_ 1
 #include <sys/time.h>  // NOLINT
 
-#elif defined(GTEST_OS_ZOS)
-#define GTEST_HAS_GETTIMEOFDAY
+#elif GTEST_OS_ZOS
+#define GTEST_HAS_GETTIMEOFDAY_ 1
 #include <sys/time.h>  // NOLINT
 
 // On z/OS we additionally need strings.h for strcasecmp.
@@ -75,7 +75,7 @@
 
 #include <windows.h>  // NOLINT
 
-#elif defined(GTEST_OS_WINDOWS)  // We are on Windows proper.
+#elif GTEST_OS_WINDOWS  // We are on Windows proper.
 
 #include <io.h>  // NOLINT
 #include <sys/timeb.h>  // NOLINT
@@ -89,9 +89,9 @@
 // TODO(kenton@google.com): There are other ways to get the time on
 //   Windows, like GetTickCount() or GetSystemTimeAsFileTime().  MinGW
 //   supports these.  consider using them instead.
-#define GTEST_HAS_GETTIMEOFDAY
+#define GTEST_HAS_GETTIMEOFDAY_ 1
 #include <sys/time.h>  // NOLINT
-#endif
+#endif  // defined(__MINGW__) || defined(__MINGW32__)
 
 // cpplint thinks that the header is already included, so we want to
 // silence it.
@@ -102,25 +102,25 @@
 // Assume other platforms have gettimeofday().
 // TODO(kenton@google.com): Use autoconf to detect availability of
 //   gettimeofday().
-#define GTEST_HAS_GETTIMEOFDAY
+#define GTEST_HAS_GETTIMEOFDAY_ 1
 
 // cpplint thinks that the header is already included, so we want to
 // silence it.
 #include <sys/time.h>  // NOLINT
 #include <unistd.h>  // NOLINT
 
-#endif
+#endif  // GTEST_OS_LINUX
 
 // Indicates that this translation unit is part of Google Test's
 // implementation.  It must come before gtest-internal-inl.h is
 // included, or there will be a compiler error.  This trick is to
 // prevent a user from accidentally including gtest-internal-inl.h in
 // his code.
-#define GTEST_IMPLEMENTATION
+#define GTEST_IMPLEMENTATION_ 1
 #include "src/gtest-internal-inl.h"
-#undef GTEST_IMPLEMENTATION
+#undef GTEST_IMPLEMENTATION_
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 #define fileno _fileno
 #define isatty _isatty
 #define vsnprintf _vsnprintf
@@ -173,7 +173,7 @@ GTEST_DEFINE_bool_(
 GTEST_DEFINE_bool_(
     catch_exceptions,
     internal::BoolFromGTestEnv("catch_exceptions", false),
-    "True iff " GTEST_NAME
+    "True iff " GTEST_NAME_
     " should catch exceptions and treat them as test failures.");
 
 GTEST_DEFINE_string_(
@@ -211,7 +211,7 @@ GTEST_DEFINE_string_(
 GTEST_DEFINE_bool_(
     print_time,
     internal::BoolFromGTestEnv("print_time", false),
-    "True iff " GTEST_NAME
+    "True iff " GTEST_NAME_
     " should display elapsed time in text output.");
 
 GTEST_DEFINE_int32_(
@@ -228,7 +228,7 @@ GTEST_DEFINE_int32_(
 
 GTEST_DEFINE_bool_(
     show_internal_stack_frames, false,
-    "True iff " GTEST_NAME " should include internal stack frames when "
+    "True iff " GTEST_NAME_ " should include internal stack frames when "
     "printing test failure stack traces.");
 
 namespace internal {
@@ -302,7 +302,7 @@ String g_executable_path;
 FilePath GetCurrentExecutableName() {
   FilePath result;
 
-#if defined(_WIN32_WCE) || defined(GTEST_OS_WINDOWS)
+#if defined(_WIN32_WCE) || GTEST_OS_WINDOWS
   result.Set(FilePath(g_executable_path).RemoveExtension("exe"));
 #else
   result.Set(FilePath(g_executable_path));
@@ -433,7 +433,7 @@ bool UnitTestOptions::FilterMatchesTest(const String &test_case_name,
           !MatchesFilter(full_name, negative.c_str()));
 }
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 // Returns EXCEPTION_EXECUTE_HANDLER if Google Test should handle the
 // given SEH exception, or EXCEPTION_CONTINUE_SEARCH otherwise.
 // This function is useful as an __except condition.
@@ -743,7 +743,7 @@ static TimeInMillis GetTimeInMillis() {
     return now_int64.QuadPart;
   }
   return 0;
-#elif defined(GTEST_OS_WINDOWS) && !defined(GTEST_HAS_GETTIMEOFDAY)
+#elif GTEST_OS_WINDOWS && !GTEST_HAS_GETTIMEOFDAY_
   __timeb64 now;
 #ifdef _MSC_VER
   // MSVC 8 deprecates _ftime64(), so we want to suppress warning 4996
@@ -758,7 +758,7 @@ static TimeInMillis GetTimeInMillis() {
   _ftime64(&now);
 #endif  // _MSC_VER
   return static_cast<TimeInMillis>(now.time) * 1000 + now.millitm;
-#elif defined(GTEST_HAS_GETTIMEOFDAY)
+#elif GTEST_HAS_GETTIMEOFDAY_
   struct timeval now;
   gettimeofday(&now, NULL);
   return static_cast<TimeInMillis>(now.tv_sec) * 1000 + now.tv_usec / 1000;
@@ -793,7 +793,7 @@ static char* CloneString(const char* str, size_t length) {
     char* const clone = new char[length + 1];
     // MSVC 8 deprecates strncpy(), so we want to suppress warning
     // 4996 (deprecated function) there.
-#ifdef GTEST_OS_WINDOWS  // We are on Windows.
+#if GTEST_OS_WINDOWS  // We are on Windows.
 #pragma warning(push)          // Saves the current warning state.
 #pragma warning(disable:4996)  // Temporarily disables warning 4996.
     strncpy(clone, str, length);
@@ -1314,7 +1314,7 @@ AssertionResult IsNotSubstring(
 
 namespace internal {
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 
 namespace {
 
@@ -1442,14 +1442,14 @@ char* CodePointToUtf8(UInt32 code_point, char* str) {
     // null-terminate the destination string.
     // MSVC 8 deprecates strncpy(), so we want to suppress warning
     // 4996 (deprecated function) there.
-#ifdef GTEST_OS_WINDOWS  // We are on Windows.
+#if GTEST_OS_WINDOWS  // We are on Windows.
 #pragma warning(push)          // Saves the current warning state.
 #pragma warning(disable:4996)  // Temporarily disables warning 4996.
 #endif
     strncpy(str, String::Format("(Invalid Unicode 0x%X)", code_point).c_str(),
             32);
-#ifdef GTEST_OS_WINDOWS  // We are on Windows.
-#pragma warning(pop)           // Restores the warning state.
+#if GTEST_OS_WINDOWS  // We are on Windows.
+#pragma warning(pop)  // Restores the warning state.
 #endif
     str[31] = '\0';  // Makes sure no change in the format to strncpy leaves
                      // the result unterminated.
@@ -1592,7 +1592,7 @@ bool String::CaseInsensitiveCStringEquals(const char * lhs, const char * rhs) {
 
   if ( rhs == NULL ) return false;
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   return _stricmp(lhs, rhs) == 0;
 #else  // GTEST_OS_WINDOWS
   return strcasecmp(lhs, rhs) == 0;
@@ -1617,9 +1617,9 @@ bool String::CaseInsensitiveWideCStringEquals(const wchar_t* lhs,
 
   if ( rhs == NULL ) return false;
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   return _wcsicmp(lhs, rhs) == 0;
-#elif defined(GTEST_OS_LINUX)
+#elif GTEST_OS_LINUX
   return wcscasecmp(lhs, rhs) == 0;
 #else
   // Mac OS X and Cygwin don't define wcscasecmp.  Other unknown OSes
@@ -1720,7 +1720,7 @@ String String::Format(const char * format, ...) {
   char buffer[4096];
   // MSVC 8 deprecates vsnprintf(), so we want to suppress warning
   // 4996 (deprecated function) there.
-#ifdef GTEST_OS_WINDOWS  // We are on Windows.
+#if GTEST_OS_WINDOWS  // We are on Windows.
 #pragma warning(push)          // Saves the current warning state.
 #pragma warning(disable:4996)  // Temporarily disables warning 4996.
   const int size =
@@ -1827,7 +1827,7 @@ bool TestResult::ValidateTestProperty(const TestProperty& test_property) {
         << "Reserved key used in RecordProperty(): "
         << key
         << " ('name', 'status', 'time', and 'classname' are reserved by "
-        << GTEST_NAME << ")";
+        << GTEST_NAME_ << ")";
     return false;
   }
   return true;
@@ -1917,7 +1917,7 @@ void Test::RecordProperty(const char* key, int value) {
   RecordProperty(key, value_message.GetString().c_str());
 }
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 // We are on Windows.
 
 // Adds an "exception thrown" fatal failure to the current test.
@@ -2013,7 +2013,7 @@ void Test::Run() {
   if (!HasSameFixtureClass()) return;
 
   internal::UnitTestImpl* const impl = internal::GetUnitTestImpl();
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   // We are on Windows.
   impl->os_stack_trace_getter()->UponLeavingGTest();
   __try {
@@ -2122,7 +2122,7 @@ TestInfo* MakeAndRegisterTestInfo(
   return test_info;
 }
 
-#ifdef GTEST_HAS_PARAM_TEST
+#if GTEST_HAS_PARAM_TEST
 void ReportInvalidTestCaseType(const char* test_case_name,
                                const char* file, int line) {
   Message errors;
@@ -2221,7 +2221,7 @@ namespace internal {
 // and INSTANTIATE_TEST_CASE_P into regular tests and registers those.
 // This will be done just once during the program runtime.
 void UnitTestImpl::RegisterParameterizedTests() {
-#ifdef GTEST_HAS_PARAM_TEST
+#if GTEST_HAS_PARAM_TEST
   if (!parameterized_tests_registered_) {
     parameterized_test_registry_.RegisterTests();
     parameterized_tests_registered_ = true;
@@ -2247,7 +2247,7 @@ void TestInfoImpl::Run() {
   const TimeInMillis start = GetTimeInMillis();
 
   impl->os_stack_trace_getter()->UponLeavingGTest();
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   // We are on Windows.
   Test* test = NULL;
 
@@ -2459,7 +2459,7 @@ enum GTestColor {
   COLOR_YELLOW
 };
 
-#if defined(GTEST_OS_WINDOWS) && !defined(_WIN32_WCE)
+#if GTEST_OS_WINDOWS && !defined(_WIN32_WCE)
 
 // Returns the character attribute for the given color.
 WORD GetColorAttribute(GTestColor color) {
@@ -2490,7 +2490,7 @@ bool ShouldUseColor(bool stdout_is_tty) {
   const char* const gtest_color = GTEST_FLAG(color).c_str();
 
   if (String::CaseInsensitiveCStringEquals(gtest_color, "auto")) {
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
     // On Windows the TERM variable is usually not set, but the
     // console there does support colors.
     return stdout_is_tty;
@@ -2522,11 +2522,11 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   va_list args;
   va_start(args, fmt);
 
-#if defined(_WIN32_WCE) || defined(GTEST_OS_SYMBIAN) || defined(GTEST_OS_ZOS)
+#if defined(_WIN32_WCE) || GTEST_OS_SYMBIAN || GTEST_OS_ZOS
   static const bool use_color = false;
 #else
   static const bool use_color = ShouldUseColor(isatty(fileno(stdout)) != 0);
-#endif  // !_WIN32_WCE
+#endif  // defined(_WIN32_WCE) || GTEST_OS_SYMBIAN || GTEST_OS_ZOS
   // The '!= 0' comparison is necessary to satisfy MSVC 7.1.
 
   if (!use_color) {
@@ -2535,7 +2535,7 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
     return;
   }
 
-#if defined(GTEST_OS_WINDOWS) && !defined(_WIN32_WCE)
+#if GTEST_OS_WINDOWS && !defined(_WIN32_WCE)
   const HANDLE stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 
   // Gets the current text color.
@@ -2553,7 +2553,7 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   printf("\033[0;3%sm", GetAnsiColorCode(color));
   vprintf(fmt, args);
   printf("\033[m");  // Resets the terminal to default.
-#endif  // GTEST_OS_WINDOWS && !_WIN32_WCE
+#endif  // GTEST_OS_WINDOWS && !defined(_WIN32_WCE)
   va_end(args);
 }
 
@@ -2599,7 +2599,7 @@ void PrettyUnitTestResultPrinter::OnUnitTestStart(
   // tests may be skipped.
   if (!internal::String::CStringEquals(filter, kUniversalFilter)) {
     ColoredPrintf(COLOR_YELLOW,
-                  "Note: %s filter = %s\n", GTEST_NAME, filter);
+                  "Note: %s filter = %s\n", GTEST_NAME_, filter);
   }
 
   if (internal::ShouldShard(kTestTotalShards, kTestShardIndex, false)) {
@@ -2926,7 +2926,7 @@ void XmlUnitTestResultPrinter::OnUnitTestEnd(const UnitTest* unit_test) {
   if (output_dir.CreateDirectoriesRecursively()) {
   // MSVC 8 deprecates fopen(), so we want to suppress warning 4996
   // (deprecated function) there.
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   // We are on Windows.
 #pragma warning(push)          // Saves the current warning state.
 #pragma warning(disable:4996)  // Temporarily disables warning 4996.
@@ -3191,7 +3191,7 @@ void OsStackTraceGetter::UponLeavingGTest() {
 
 const char* const
 OsStackTraceGetter::kElidedFramesMarker =
-    "... " GTEST_NAME " internal frames ...";
+    "... " GTEST_NAME_ " internal frames ...";
 
 }  // namespace internal
 
@@ -3255,7 +3255,7 @@ void UnitTest::AddTestPartResult(TestPartResultType result_type,
 
   internal::MutexLock lock(&mutex_);
   if (impl_->gtest_trace_stack()->size() > 0) {
-    msg << "\n" << GTEST_NAME << " trace:";
+    msg << "\n" << GTEST_NAME_ << " trace:";
 
     for (internal::ListNode<internal::TraceInfo>* node =
          impl_->gtest_trace_stack()->Head();
@@ -3298,7 +3298,7 @@ void UnitTest::RecordPropertyForCurrentTest(const char* key,
 // We don't protect this under mutex_, as we only support calling it
 // from the main thread.
 int UnitTest::Run() {
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 
 #if !defined(_WIN32_WCE)
   // SetErrorMode doesn't exist on CE.
@@ -3349,7 +3349,7 @@ const TestInfo* UnitTest::current_test_info() const {
   return impl_->current_test_info();
 }
 
-#ifdef GTEST_HAS_PARAM_TEST
+#if GTEST_HAS_PARAM_TEST
 // Returns ParameterizedTestCaseRegistry object used to keep track of
 // value-parameterized tests and instantiate and register them.
 // L < mutex_
@@ -3404,7 +3404,7 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
       per_thread_test_part_result_reporter_(
           &default_per_thread_test_part_result_reporter_),
       test_cases_(),
-#ifdef GTEST_HAS_PARAM_TEST
+#if GTEST_HAS_PARAM_TEST
       parameterized_test_registry_(),
       parameterized_tests_registered_(false),
 #endif  // GTEST_HAS_PARAM_TEST
@@ -3414,7 +3414,7 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
       ad_hoc_test_result_(),
       result_printer_(NULL),
       os_stack_trace_getter_(NULL),
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
       elapsed_time_(0),
       internal_run_death_test_flag_(NULL),
       death_test_factory_(new DefaultDeathTestFactory) {
@@ -3540,7 +3540,7 @@ int UnitTestImpl::RunAllTests() {
   // death test.
   bool in_subprocess_for_death_test = false;
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
   internal_run_death_test_flag_.reset(ParseInternalRunDeathTestFlag());
   in_subprocess_for_death_test = (internal_run_death_test_flag_.get() != NULL);
 #endif  // GTEST_HAS_DEATH_TEST
@@ -3817,7 +3817,7 @@ UnitTestEventListenerInterface* UnitTestImpl::result_printer() {
     return result_printer_;
   }
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
   if (internal_run_death_test_flag_.get() != NULL) {
     result_printer_ = new NullUnitTestResultPrinter;
     return result_printer_;
@@ -3943,8 +3943,8 @@ const char* ParseFlagValue(const char* str,
   // str and flag must not be NULL.
   if (str == NULL || flag == NULL) return NULL;
 
-  // The flag must start with "--" followed by GTEST_FLAG_PREFIX.
-  const String flag_str = String::Format("--%s%s", GTEST_FLAG_PREFIX, flag);
+  // The flag must start with "--" followed by GTEST_FLAG_PREFIX_.
+  const String flag_str = String::Format("--%s%s", GTEST_FLAG_PREFIX_, flag);
   const size_t flag_len = flag_str.GetLength();
   if (strncmp(str, flag_str.c_str(), flag_len) != 0) return NULL;
 
@@ -4096,7 +4096,7 @@ void InitGoogleTestImpl(int* argc, CharType** argv) {
 
   internal::g_executable_path = internal::StreamableToString(argv[0]);
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
   g_argvs.clear();
   for (int i = 0; i != *argc; i++) {
     g_argvs.push_back(StreamableToString(argv[i]));

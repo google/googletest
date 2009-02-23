@@ -390,7 +390,7 @@ class TestInfo {
   // Returns the result of the test.
   const internal::TestResult* result() const;
  private:
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
   friend class internal::DefaultDeathTestFactory;
 #endif  // GTEST_HAS_DEATH_TEST
   friend class internal::TestInfoImpl;
@@ -521,7 +521,7 @@ class UnitTest {
   // or NULL if no test is running.
   const TestInfo* current_test_info() const;
 
-#ifdef GTEST_HAS_PARAM_TEST
+#if GTEST_HAS_PARAM_TEST
   // Returns the ParameterizedTestCaseRegistry object used to keep track of
   // value-parameterized tests and instantiate and register them.
   internal::ParameterizedTestCaseRegistry& parameterized_test_registry();
@@ -940,7 +940,7 @@ class AssertHelper {
 
 }  // namespace internal
 
-#ifdef GTEST_HAS_PARAM_TEST
+#if GTEST_HAS_PARAM_TEST
 // The abstract base class that all value-parameterized tests inherit from.
 //
 // This class adds support for accessing the test parameter value via
@@ -1234,7 +1234,7 @@ AssertionResult DoubleLE(const char* expr1, const char* expr2,
                          double val1, double val2);
 
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 
 // Macros that test for HRESULT failure and success, these are only useful
 // on Windows, and rely on Windows SDK macros and APIs to compile.
