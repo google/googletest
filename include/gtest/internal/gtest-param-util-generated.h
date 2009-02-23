@@ -46,7 +46,7 @@
 
 #include <gtest/internal/gtest-port.h>
 
-#ifdef GTEST_HAS_PARAM_TEST
+#if GTEST_HAS_PARAM_TEST
 
 #include <gtest/internal/gtest-param-util.h>
 
@@ -2659,7 +2659,7 @@ class ValueArray50 {
   const T50 v50_;
 };
 
-#ifdef GTEST_HAS_COMBINE
+#if GTEST_HAS_COMBINE
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 //
 // Generates values from the Cartesian product of values produced

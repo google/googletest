@@ -41,7 +41,7 @@
 
 #include <gtest/gtest.h>
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 #include <windows.h>
 #endif
 
@@ -56,7 +56,7 @@ TEST(Foo, Bar) {
 
 
 int main(int argc, char **argv) {
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   // Suppresses display of the Windows error dialog upon encountering
   // a general protection fault (segment violation).
   SetErrorMode(SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS);

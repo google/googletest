@@ -36,7 +36,7 @@
 
 #include "test/gtest-param-test_test.h"
 
-#ifdef GTEST_HAS_PARAM_TEST
+#if GTEST_HAS_PARAM_TEST
 
 using ::testing::Values;
 using ::testing::internal::ParamGenerator;

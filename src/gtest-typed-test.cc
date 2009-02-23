@@ -35,7 +35,7 @@
 namespace testing {
 namespace internal {
 
-#ifdef GTEST_HAS_TYPED_TEST_P
+#if GTEST_HAS_TYPED_TEST_P
 
 // Verifies that registered_tests match the test names in
 // defined_test_names_; returns registered_tests if successful, or

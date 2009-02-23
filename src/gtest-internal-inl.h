@@ -37,19 +37,19 @@
 #ifndef GTEST_SRC_GTEST_INTERNAL_INL_H_
 #define GTEST_SRC_GTEST_INTERNAL_INL_H_
 
-// GTEST_IMPLEMENTATION is defined iff the current translation unit is
-// part of Google Test's implementation.
-#ifndef GTEST_IMPLEMENTATION
+// GTEST_IMPLEMENTATION_ is defined to 1 iff the current translation unit is
+// part of Google Test's implementation; otherwise it's undefined.
+#if !GTEST_IMPLEMENTATION_
 // A user is trying to include this from his code - just say no.
 #error "gtest-internal-inl.h is part of Google Test's internal implementation."
 #error "It must not be included except by Google Test itself."
-#endif  // GTEST_IMPLEMENTATION
+#endif  // GTEST_IMPLEMENTATION_
 
 #include <stddef.h>
 
 #include <gtest/internal/gtest-port.h>
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 #include <windows.h>  // NOLINT
 #endif  // GTEST_OS_WINDOWS
 
@@ -833,7 +833,7 @@ class UnitTestOptions {
   static bool FilterMatchesTest(const String &test_case_name,
                                 const String &test_name);
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   // Function for supporting the gtest_catch_exception flag.
 
   // Returns EXCEPTION_EXECUTE_HANDLER if Google Test should handle the
@@ -1095,7 +1095,7 @@ class UnitTestImpl {
                 tear_down_tc)->AddTestInfo(test_info);
   }
 
-#ifdef GTEST_HAS_PARAM_TEST
+#if GTEST_HAS_PARAM_TEST
   // Returns ParameterizedTestCaseRegistry object used to keep track of
   // value-parameterized tests and instantiate and register them.
   internal::ParameterizedTestCaseRegistry& parameterized_test_registry() {
@@ -1175,7 +1175,7 @@ class UnitTestImpl {
     return gtest_trace_stack_.pointer();
   }
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
   // Returns a pointer to the parsed --gtest_internal_run_death_test
   // flag, or NULL if that flag was not specified.
   // This information is useful only in a death test child process.
@@ -1224,7 +1224,7 @@ class UnitTestImpl {
 
   internal::List<TestCase*> test_cases_;  // The list of TestCases.
 
-#ifdef GTEST_HAS_PARAM_TEST
+#if GTEST_HAS_PARAM_TEST
   // ParameterizedTestRegistry object used to register value-parameterized
   // tests.
   internal::ParameterizedTestCaseRegistry parameterized_test_registry_;
@@ -1273,7 +1273,7 @@ class UnitTestImpl {
   // How long the test took to run, in milliseconds.
   TimeInMillis elapsed_time_;
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
   // The decomposed components of the gtest_internal_run_death_test flag,
   // parsed when RUN_ALL_TESTS is called.
   internal::scoped_ptr<InternalRunDeathTestFlag> internal_run_death_test_flag_;

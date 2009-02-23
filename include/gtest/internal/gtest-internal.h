@@ -39,7 +39,7 @@
 
 #include <gtest/internal/gtest-port.h>
 
-#ifdef GTEST_OS_LINUX
+#if GTEST_OS_LINUX
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -546,7 +546,7 @@ class TestFactoryImpl : public TestFactoryBase {
   virtual Test* CreateTest() { return new TestClass; }
 };
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 
 // Predicate-formatters for implementing the HRESULT checking macros
 // {ASSERT|EXPECT}_HRESULT_{SUCCEEDED|FAILED}
@@ -600,7 +600,7 @@ TestInfo* MakeAndRegisterTestInfo(
     TearDownTestCaseFunc tear_down_tc,
     TestFactoryBase* factory);
 
-#if defined(GTEST_HAS_TYPED_TEST) || defined(GTEST_HAS_TYPED_TEST_P)
+#if GTEST_HAS_TYPED_TEST || GTEST_HAS_TYPED_TEST_P
 
 // State of the definition of a type-parameterized test case.
 class TypedTestCasePState {

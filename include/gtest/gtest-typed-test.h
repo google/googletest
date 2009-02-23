@@ -151,7 +151,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
 
 // Implements typed tests.
 
-#ifdef GTEST_HAS_TYPED_TEST
+#if GTEST_HAS_TYPED_TEST
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 //
@@ -186,7 +186,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
 
 // Implements type-parameterized tests.
 
-#ifdef GTEST_HAS_TYPED_TEST_P
+#if GTEST_HAS_TYPED_TEST_P
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 //

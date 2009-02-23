@@ -49,7 +49,7 @@ const char kDeathTestStyleFlag[] = "death_test_style";
 const char kDeathTestUseFork[] = "death_test_use_fork";
 const char kInternalRunDeathTestFlag[] = "internal_run_death_test";
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 
 // DeathTest is a class that hides much of the complexity of the
 // GTEST_DEATH_TEST_ macro.  It is abstract; its static Create method

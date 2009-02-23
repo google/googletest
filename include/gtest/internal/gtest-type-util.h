@@ -45,7 +45,7 @@
 #include <gtest/internal/gtest-port.h>
 #include <gtest/internal/gtest-string.h>
 
-#if defined(GTEST_HAS_TYPED_TEST) || defined(GTEST_HAS_TYPED_TEST_P)
+#if GTEST_HAS_TYPED_TEST || GTEST_HAS_TYPED_TEST_P
 
 #ifdef __GNUC__
 #include <cxxabi.h>

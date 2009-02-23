@@ -74,7 +74,7 @@ class PrimeTableTest : public testing::Test {
   PrimeTable* const table_;
 };
 
-#ifdef GTEST_HAS_TYPED_TEST
+#if GTEST_HAS_TYPED_TEST
 
 using testing::Types;
 
@@ -137,7 +137,7 @@ TYPED_TEST(PrimeTableTest, CanGetNextPrime) {
 
 #endif  // GTEST_HAS_TYPED_TEST
 
-#ifdef GTEST_HAS_TYPED_TEST_P
+#if GTEST_HAS_TYPED_TEST_P
 
 using testing::Types;
 

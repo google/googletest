@@ -40,9 +40,9 @@
 // included, or there will be a compiler error.  This trick is to
 // prevent a user from accidentally including gtest-internal-inl.h in
 // his code.
-#define GTEST_IMPLEMENTATION
+#define GTEST_IMPLEMENTATION_ 1
 #include "src/gtest-internal-inl.h"
-#undef GTEST_IMPLEMENTATION
+#undef GTEST_IMPLEMENTATION_
 
 #include <stdlib.h>
 
@@ -50,7 +50,7 @@
 #include <pthread.h>
 #endif  // GTEST_HAS_PTHREAD
 
-#ifdef GTEST_OS_LINUX
+#if GTEST_OS_LINUX
 #include <string.h>
 #include <signal.h>
 #include <string>
@@ -355,7 +355,7 @@ TEST_F(FatalFailureInSetUpTest, FailureInSetUp) {
          << "We should never get here, as SetUp() failed.";
 }
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 
 // This group of tests verifies that Google Test handles SEH and C++
 // exceptions correctly.
@@ -722,7 +722,7 @@ TEST(ExpectFatalFailureTest, FailsWhenStatementThrows) {
 #endif  // GTEST_HAS_EXCEPTIONS
 
 // This #ifdef block tests the output of typed tests.
-#ifdef GTEST_HAS_TYPED_TEST
+#if GTEST_HAS_TYPED_TEST
 
 template <typename T>
 class TypedTest : public testing::Test {
@@ -741,7 +741,7 @@ TYPED_TEST(TypedTest, Failure) {
 #endif  // GTEST_HAS_TYPED_TEST
 
 // This #ifdef block tests the output of type-parameterized tests.
-#ifdef GTEST_HAS_TYPED_TEST_P
+#if GTEST_HAS_TYPED_TEST_P
 
 template <typename T>
 class TypedTestP : public testing::Test {
@@ -764,7 +764,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(Unsigned, TypedTestP, UnsignedTypes);
 
 #endif  // GTEST_HAS_TYPED_TEST_P
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 
 // We rely on the golden file to verify that tests whose test case
 // name ends with DeathTest are run first.
@@ -772,7 +772,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(Unsigned, TypedTestP, UnsignedTypes);
 TEST(ADeathTest, ShouldRunFirst) {
 }
 
-#ifdef GTEST_HAS_TYPED_TEST
+#if GTEST_HAS_TYPED_TEST
 
 // We rely on the golden file to verify that typed tests whose test
 // case name ends with DeathTest are run first.
@@ -789,7 +789,7 @@ TYPED_TEST(ATypedDeathTest, ShouldRunFirst) {
 
 #endif  // GTEST_HAS_TYPED_TEST
 
-#ifdef GTEST_HAS_TYPED_TEST_P
+#if GTEST_HAS_TYPED_TEST_P
 
 
 // We rely on the golden file to verify that type-parameterized tests
@@ -984,7 +984,7 @@ int main(int argc, char **argv) {
       String(argv[1]) == "--gtest_internal_skip_environment_and_ad_hoc_tests")
     GTEST_FLAG(internal_skip_environment_and_ad_hoc_tests) = true;
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
   if (testing::internal::GTEST_FLAG(internal_run_death_test) != "") {
     // Skip the usual output capturing if we're running as the child
     // process of an threadsafe-style death test.

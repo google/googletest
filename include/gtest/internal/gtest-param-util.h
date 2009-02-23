@@ -40,7 +40,7 @@
 
 #include <gtest/internal/gtest-port.h>
 
-#ifdef GTEST_HAS_PARAM_TEST
+#if GTEST_HAS_PARAM_TEST
 
 #if GTEST_HAS_RTTI
 #include <typeinfo>

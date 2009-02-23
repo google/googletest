@@ -40,7 +40,7 @@
 
 #include <gtest/gtest.h>
 
-#ifdef GTEST_HAS_PARAM_TEST
+#if GTEST_HAS_PARAM_TEST
 
 using ::testing::TestWithParam;
 using ::testing::Values;

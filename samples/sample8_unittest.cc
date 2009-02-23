@@ -38,7 +38,7 @@
 
 #include <gtest/gtest.h>
 
-#ifdef GTEST_HAS_COMBINE
+#if GTEST_HAS_COMBINE
 
 // Suppose we want to introduce a new, improved implementation of PrimeTable
 // which combines speed of PrecalcPrimeTable and versatility of

@@ -34,7 +34,7 @@
 #include "test/gtest-typed-test_test.h"
 #include <gtest/gtest.h>
 
-#ifdef GTEST_HAS_TYPED_TEST_P
+#if GTEST_HAS_TYPED_TEST_P
 
 // Tests that the same type-parameterized test case can be
 // instantiated in different translation units linked together.
