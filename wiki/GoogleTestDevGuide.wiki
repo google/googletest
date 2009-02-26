@@ -100,6 +100,7 @@ to conform to the style outlined [http://google-styleguide.googlecode.com/svn/tr
 
 Please do submit code. Here's what you need to do:
 
+  # Normally you should make your change against the SVN trunk instead of a branch or a tag, as the latter two are for release control and should be treated mostly as read-only.
   # Decide which code you want to submit. A submission should be a set of changes that addresses one issue in the [http://code.google.com/p/googletest/issues/list Google Test issue tracker]. Please don't mix more than one logical change per submittal, because it makes the history hard to follow. If you want to make a change that doesn't have a corresponding issue in the issue tracker, please create one.
   # Also, coordinate with team members that are listed on the issue in question. This ensures that work isn't being duplicated and communicating your plan early also generally leads to better patches.
   # Ensure that your code adheres to the [#Coding_Style Google Test source code style].
