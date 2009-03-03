@@ -1304,7 +1304,24 @@ TEST(DeletingMockEarlyTest, Success2) {
   delete b2;
 }
 
-// Tests that calls that violates the original spec yield failures.
+// Tests that it's OK to delete a mock object itself in its action.
+
+ACTION_P(Delete, ptr) { delete ptr; }
+
+TEST(DeletingMockEarlyTest, CanDeleteSelfInActionReturningVoid) {
+  MockA* const a = new MockA;
+  EXPECT_CALL(*a, DoA(_)).WillOnce(Delete(a));
+  a->DoA(42);  // This will cause a to be deleted.
+}
+
+TEST(DeletingMockEarlyTest, CanDeleteSelfInActionReturningValue) {
+  MockA* const a = new MockA;
+  EXPECT_CALL(*a, ReturnResult(_))
+      .WillOnce(DoAll(Delete(a), Return(Result())));
+  a->ReturnResult(42);  // This will cause a to be deleted.
+}
+
+// Tests that calls that violate the original spec yield failures.
 TEST(DeletingMockEarlyTest, Failure1) {
   MockB* const b1 = new MockB;
   MockA* const a = new MockA;
@@ -1330,7 +1347,7 @@ TEST(DeletingMockEarlyTest, Failure1) {
   delete b2;
 }
 
-// Tests that calls that violates the original spec yield failures.
+// Tests that calls that violate the original spec yield failures.
 TEST(DeletingMockEarlyTest, Failure2) {
   MockB* const b1 = new MockB;
   MockA* const a = new MockA;

@@ -1426,6 +1426,7 @@ class InvokeWithHelper {
     bool is_excessive = false;
     ::std::stringstream ss;
     ::std::stringstream why;
+    ::std::stringstream loc;
     Action<F> action;
     Expectation<F>* exp;
 
@@ -1435,6 +1436,11 @@ class InvokeWithHelper {
         args, &exp, &action, &is_excessive, &ss, &why);
     ss << "    Function call: " << mocker->Name();
     UniversalPrinter<ArgumentTuple>::Print(args, &ss);
+    // In case the action deletes a piece of the expectation, we
+    // generate the message beforehand.
+    if (found && !is_excessive) {
+      exp->DescribeLocationTo(&loc);
+    }
     Result result = action.IsDoDefault() ?
         mocker->PerformDefaultAction(args, ss.str())
         : action.Perform(args);
@@ -1449,8 +1455,6 @@ class InvokeWithHelper {
       } else {
         // We had an expected call and the matching expectation is
         // described in ss.
-        ::std::stringstream loc;
-        exp->DescribeLocationTo(&loc);
         Log(INFO, loc.str() + ss.str(), 3);
       }
     } else {
@@ -1494,6 +1498,7 @@ class InvokeWithHelper<void, F> {
     bool is_excessive = false;
     ::std::stringstream ss;
     ::std::stringstream why;
+    ::std::stringstream loc;
     Action<F> action;
     Expectation<F>* exp;
 
@@ -1504,6 +1509,11 @@ class InvokeWithHelper<void, F> {
     ss << "    Function call: " << mocker->Name();
     UniversalPrinter<ArgumentTuple>::Print(args, &ss);
     ss << "\n" << why.str();
+    // In case the action deletes a piece of the expectation, we
+    // generate the message beforehand.
+    if (found && !is_excessive) {
+      exp->DescribeLocationTo(&loc);
+    }
     if (action.IsDoDefault()) {
       mocker->PerformDefaultAction(args, ss.str());
     } else {
@@ -1518,8 +1528,6 @@ class InvokeWithHelper<void, F> {
       } else {
         // We had an expected call and the matching expectation is
         // described in ss.
-        ::std::stringstream loc;
-        exp->DescribeLocationTo(&loc);
         Log(INFO, loc.str() + ss.str(), 3);
       }
     } else {
