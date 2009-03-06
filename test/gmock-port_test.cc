@@ -69,19 +69,19 @@ TEST(GmockCheckSyntaxTest, WorksWithSwitch) {
 
 TEST(GmockCheckDeathTest, DiesWithCorrectOutputOnFailure) {
   const bool a_false_condition = false;
-  EXPECT_DEATH(GMOCK_CHECK_(a_false_condition) << "Extra info",
-               // MSVC and gcc use different formats to print source
-               // file locations.  Google Mock's failure messages use
-               // the same format as used by the compiler, in order
-               // for the IDE to recognize them.  Therefore we look
-               // for different patterns here depending on the
-               // compiler.
+  // MSVC and gcc use different formats to print source file locations.
+  // Google Mock's failure messages use the same format as used by the
+  // compiler, in order for the IDE to recognize them.  Therefore we look
+  // for different patterns here depending on the compiler.
+  const char regex[] =
 #ifdef _MSC_VER
-               "gmock-port_test\\.cc\\([0-9]+\\):"
+     "gmock-port_test\\.cc\\(\\d+\\):"
 #else
-               "gmock-port_test\\.cc:[0-9]+"
+     "gmock-port_test\\.cc:[0-9]+"
 #endif  // _MSC_VER
-               ".*a_false_condition.*Extra info");
+     ".*a_false_condition.*Extra info";
+
+  EXPECT_DEATH(GMOCK_CHECK_(a_false_condition) << "Extra info", regex);
 }
 
 TEST(GmockCheckDeathTest, LivesSilentlyOnSuccess) {
