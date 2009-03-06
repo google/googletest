@@ -36,8 +36,16 @@
 
 #if GTEST_HAS_DEATH_TEST
 
-#include <stdio.h>
+#if GTEST_OS_WINDOWS
+#include <direct.h>          // For chdir().
+#else
 #include <unistd.h>
+#include <limits>            // For std::numeric_limits.
+#endif  // GTEST_OS_WINDOWS
+
+#include <limits.h>
+#include <signal.h>
+#include <stdio.h>
 #include <gtest/gtest-spi.h>
 
 // Indicates that this translation unit is part of Google Test's
@@ -49,8 +57,13 @@
 #include "src/gtest-internal-inl.h"
 #undef GTEST_IMPLEMENTATION_
 
+using testing::Message;
+
 using testing::internal::DeathTest;
 using testing::internal::DeathTestFactory;
+using testing::internal::GetLastSystemErrorMessage;
+using testing::internal::ParseNaturalNumber;
+using testing::internal::String;
 
 namespace testing {
 namespace internal {
@@ -88,6 +101,7 @@ class TestForDeathTest : public testing::Test {
   // A static member function that's expected to die.
   static void StaticMemberFunction() {
     fprintf(stderr, "%s", "death inside StaticMemberFunction().");
+    fflush(stderr);
     // We call _exit() instead of exit(), as the former is a direct
     // system call and thus safer in the presence of threads.  exit()
     // will invoke user-defined exit-hooks, which may do dangerous
@@ -99,6 +113,7 @@ class TestForDeathTest : public testing::Test {
   void MemberFunction() {
     if (should_die_) {
       fprintf(stderr, "%s", "death inside MemberFunction().");
+      fflush(stderr);
       _exit(1);
     }
   }
@@ -165,6 +180,21 @@ int DieInDebugElse12(int* sideeffect) {
   return 12;
 }
 
+#if GTEST_OS_WINDOWS
+
+// Tests the ExitedWithCode predicate.
+TEST(ExitStatusPredicateTest, ExitedWithCode) {
+  // On Windows, the process's exit code is the same as its exit status,
+  // so the predicate just compares the its input with its parameter.
+  EXPECT_TRUE(testing::ExitedWithCode(0)(0));
+  EXPECT_TRUE(testing::ExitedWithCode(1)(1));
+  EXPECT_TRUE(testing::ExitedWithCode(42)(42));
+  EXPECT_FALSE(testing::ExitedWithCode(0)(1));
+  EXPECT_FALSE(testing::ExitedWithCode(1)(0));
+}
+
+#else
+
 // Returns the exit status of a process that calls _exit(2) with a
 // given exit code.  This is a helper function for the
 // ExitStatusPredicateTest test suite.
@@ -222,6 +252,8 @@ TEST(ExitStatusPredicateTest, KilledBySignal) {
   EXPECT_FALSE(pred_kill(status_segv));
 }
 
+#endif  // GTEST_OS_WINDOWS
+
 // Tests that the death test macros expand to code which may or may not
 // be followed by operator<<, and that in either case the complete text
 // comprises only a single C++ statement.
@@ -248,6 +280,7 @@ TEST_F(TestForDeathTest, SingleStatement) {
 
 void DieWithEmbeddedNul() {
   fprintf(stderr, "Hello%cworld.\n", '\0');
+  fflush(stderr);
   _exit(1);
 }
 
@@ -263,6 +296,13 @@ TEST_F(TestForDeathTest, DISABLED_EmbeddedNulInMessage) {
 // Tests that death test macros expand to code which interacts well with switch
 // statements.
 TEST_F(TestForDeathTest, SwitchStatement) {
+// Microsoft compiler usually complains about switch statements without
+// case labels. We suppress that warning for this test.
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4065)
+#endif  // _MSC_VER
+
   switch (0)
     default:
       ASSERT_DEATH(_exit(1), "") << "exit in default switch handler";
@@ -270,6 +310,10 @@ TEST_F(TestForDeathTest, SwitchStatement) {
   switch (0)
     case 0:
       EXPECT_DEATH(_exit(1), "") << "exit in switch case";
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif  // _MSC_VER
 }
 
 // Tests that a static member function can be used in a "fast" style
@@ -287,15 +331,23 @@ TEST_F(TestForDeathTest, MemberFunctionFastStyle) {
   EXPECT_DEATH(MemberFunction(), "inside.*MemberFunction");
 }
 
+void ChangeToRootDir() {
+#if GTEST_OS_WINDOWS
+  _chdir("\\");
+#else
+  chdir("/");
+#endif  // GTEST_OS_WINDOWS
+}
+
 // Tests that death tests work even if the current directory has been
 // changed.
 TEST_F(TestForDeathTest, FastDeathTestInChangedDir) {
   testing::GTEST_FLAG(death_test_style) = "fast";
 
-  chdir("/");
+  ChangeToRootDir();
   EXPECT_EXIT(_exit(1), testing::ExitedWithCode(1), "");
 
-  chdir("/");
+  ChangeToRootDir();
   ASSERT_DEATH(_exit(1), "");
 }
 
@@ -322,10 +374,10 @@ TEST_F(TestForDeathTest, ThreadsafeDeathTestInLoop) {
 TEST_F(TestForDeathTest, ThreadsafeDeathTestInChangedDir) {
   testing::GTEST_FLAG(death_test_style) = "threadsafe";
 
-  chdir("/");
+  ChangeToRootDir();
   EXPECT_EXIT(_exit(1), testing::ExitedWithCode(1), "");
 
-  chdir("/");
+  ChangeToRootDir();
   ASSERT_DEATH(_exit(1), "");
 }
 
@@ -346,6 +398,8 @@ void SetPthreadFlag() {
 
 }  // namespace
 
+#if !GTEST_OS_WINDOWS
+
 TEST_F(TestForDeathTest, DoesNotExecuteAtforkHooks) {
   if (!testing::GTEST_FLAG(death_test_use_fork)) {
     testing::GTEST_FLAG(death_test_style) = "threadsafe";
@@ -355,6 +409,8 @@ TEST_F(TestForDeathTest, DoesNotExecuteAtforkHooks) {
     ASSERT_FALSE(pthread_flag);
   }
 }
+
+#endif  // !GTEST_OS_WINDOWS
 
 // Tests that a method of another class can be used in a death test.
 TEST_F(TestForDeathTest, MethodOfAnotherClass) {
@@ -537,6 +593,30 @@ void ExpectDebugDeathHelper(bool* aborted) {
   *aborted = false;
 }
 
+#if GTEST_OS_WINDOWS
+TEST(TestForPopUps, DoesNotShowPopUpOnAbort) {
+  printf("This test should be considered failing if it shows "
+         "any pop-up dialogs.\n");
+  fflush(stdout);
+
+  EXPECT_DEATH({
+    testing::GTEST_FLAG(catch_exceptions) = false;
+    abort();
+  }, "");
+}
+
+TEST(TestForPopUps, DoesNotShowPopUpOnThrow) {
+  printf("This test should be considered failing if it shows "
+         "any pop-up dialogs.\n");
+  fflush(stdout);
+
+  EXPECT_DEATH({
+    testing::GTEST_FLAG(catch_exceptions) = false;
+    throw 1;
+  }, "");
+}
+#endif  // GTEST_OS_WINDOWS
+
 // Tests that EXPECT_DEBUG_DEATH in debug mode does not abort
 // the function.
 TEST_F(TestForDeathTest, ExpectDebugDeathDoesNotAbort) {
@@ -566,18 +646,38 @@ TEST_F(TestForDeathTest, AssertDebugDeathAborts) {
 static void TestExitMacros() {
   EXPECT_EXIT(_exit(1),  testing::ExitedWithCode(1),  "");
   ASSERT_EXIT(_exit(42), testing::ExitedWithCode(42), "");
-  EXPECT_EXIT(raise(SIGKILL), testing::KilledBySignal(SIGKILL), "") << "foo";
-  ASSERT_EXIT(raise(SIGUSR2), testing::KilledBySignal(SIGUSR2), "") << "bar";
+
+#if GTEST_OS_WINDOWS
+  EXPECT_EXIT({
+    testing::GTEST_FLAG(catch_exceptions) = false;
+    *static_cast<int*>(NULL) = 1;
+  }, testing::ExitedWithCode(0xC0000005), "") << "foo";
 
   EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_EXIT(raise(SIGSEGV), testing::ExitedWithCode(0), "")
-        << "This failure is expected.";
+    EXPECT_EXIT({
+      testing::GTEST_FLAG(catch_exceptions) = false;
+      *static_cast<int*>(NULL) = 1;
+    }, testing::ExitedWithCode(0), "") << "This failure is expected.";
   }, "This failure is expected.");
+
+  // Of all signals effects on the process exit code, only those of SIGABRT
+  // are documented on Windows.
+  // See http://msdn.microsoft.com/en-us/library/dwwzkt4c(VS.71).aspx.
+  EXPECT_EXIT(raise(SIGABRT), testing::ExitedWithCode(3), "");
+#else
+  EXPECT_EXIT(raise(SIGKILL), testing::KilledBySignal(SIGKILL), "") << "foo";
+  ASSERT_EXIT(raise(SIGUSR2), testing::KilledBySignal(SIGUSR2), "") << "bar";
 
   EXPECT_FATAL_FAILURE({  // NOLINT
     ASSERT_EXIT(_exit(0), testing::KilledBySignal(SIGSEGV), "")
         << "This failure is expected, too.";
   }, "This failure is expected, too.");
+#endif  // GTEST_OS_WINDOWS
+
+  EXPECT_NONFATAL_FAILURE({  // NOLINT
+    EXPECT_EXIT(raise(SIGSEGV), testing::ExitedWithCode(0), "")
+        << "This failure is expected.";
+  }, "This failure is expected.");
 }
 
 TEST_F(TestForDeathTest, ExitMacros) {
@@ -872,6 +972,156 @@ TEST(StreamingAssertionsDeathTest, DeathTest) {
     ASSERT_DEATH(_exit(0), "") << "expected failure";
   }, "expected failure");
 }
+
+// Tests that GetLastSystemErrorMessage returns an empty string when the
+// last error is 0 and non-empty string when it is non-zero.
+TEST(GetLastSystemErrorMessageTest, GetLastSystemErrorMessageWorks) {
+#if GTEST_OS_WINDOWS
+  ::SetLastError(ERROR_FILE_NOT_FOUND);
+  EXPECT_STRNE("", GetLastSystemErrorMessage().c_str());
+  ::SetLastError(0);
+  EXPECT_STREQ("", GetLastSystemErrorMessage().c_str());
+#else
+  errno = ENOENT;
+  EXPECT_STRNE("", GetLastSystemErrorMessage().c_str());
+  errno = 0;
+  EXPECT_STREQ("", GetLastSystemErrorMessage().c_str());
+#endif
+}
+
+#if GTEST_OS_WINDOWS
+TEST(AutoHandleTest, AutoHandleWorks) {
+  HANDLE handle = ::CreateEvent(NULL, FALSE, FALSE, NULL);
+  ASSERT_NE(INVALID_HANDLE_VALUE, handle);
+
+  // Tests that the AutoHandle is correctly initialized with a handle.
+  testing::internal::AutoHandle auto_handle(handle);
+  EXPECT_EQ(handle, auto_handle.Get());
+
+  // Tests that Reset assigns INVALID_HANDLE_VALUE.
+  // Note that this cannot verify whether the original handle is closed.
+  auto_handle.Reset();
+  EXPECT_EQ(INVALID_HANDLE_VALUE, auto_handle.Get());
+
+  // Tests that Reset assigns the new handle.
+  // Note that this cannot verify whether the original handle is closed.
+  handle = ::CreateEvent(NULL, FALSE, FALSE, NULL);
+  ASSERT_NE(INVALID_HANDLE_VALUE, handle);
+  auto_handle.Reset(handle);
+  EXPECT_EQ(handle, auto_handle.Get());
+
+  // Tests that AutoHandle contains INVALID_HANDLE_VALUE by default.
+  testing::internal::AutoHandle auto_handle2;
+  EXPECT_EQ(INVALID_HANDLE_VALUE, auto_handle2.Get());
+}
+#endif  // GTEST_OS_WINDOWS
+
+#if GTEST_OS_WINDOWS
+typedef unsigned __int64 BiggestParsable;
+typedef signed __int64 BiggestSignedParsable;
+const BiggestParsable kBiggestParsableMax = ULLONG_MAX;
+const BiggestParsable kBiggestSignedParsableMax = LLONG_MAX;
+#else
+typedef unsigned long long BiggestParsable;
+typedef signed long long BiggestSignedParsable;
+const BiggestParsable kBiggestParsableMax =
+    ::std::numeric_limits<BiggestParsable>::max();
+const BiggestSignedParsable kBiggestSignedParsableMax =
+    ::std::numeric_limits<BiggestSignedParsable>::max();
+#endif  // GTEST_OS_WINDOWS
+
+TEST(ParseNaturalNumberTest, RejectsInvalidFormat) {
+  BiggestParsable result = 0;
+
+  // Rejects non-numbers.
+  EXPECT_FALSE(ParseNaturalNumber(String("non-number string"), &result));
+
+  // Rejects numbers with whitespace prefix.
+  EXPECT_FALSE(ParseNaturalNumber(String(" 123"), &result));
+
+  // Rejects negative numbers.
+  EXPECT_FALSE(ParseNaturalNumber(String("-123"), &result));
+
+  // Rejects numbers starting with a plus sign.
+  EXPECT_FALSE(ParseNaturalNumber(String("+123"), &result));
+  errno = 0;
+}
+
+TEST(ParseNaturalNumberTest, RejectsOverflownNumbers) {
+  BiggestParsable result = 0;
+
+  EXPECT_FALSE(ParseNaturalNumber(String("99999999999999999999999"), &result));
+
+  signed char char_result = 0;
+  EXPECT_FALSE(ParseNaturalNumber(String("200"), &char_result));
+  errno = 0;
+}
+
+TEST(ParseNaturalNumberTest, AcceptsValidNumbers) {
+  BiggestParsable result = 0;
+
+  result = 0;
+  ASSERT_TRUE(ParseNaturalNumber(String("123"), &result));
+  EXPECT_EQ(123, result);
+
+  // Check 0 as an edge case.
+  result = 1;
+  ASSERT_TRUE(ParseNaturalNumber(String("0"), &result));
+  EXPECT_EQ(0, result);
+
+  result = 1;
+  ASSERT_TRUE(ParseNaturalNumber(String("00000"), &result));
+  EXPECT_EQ(0, result);
+}
+
+TEST(ParseNaturalNumberTest, AcceptsTypeLimits) {
+  Message msg;
+  msg << kBiggestParsableMax;
+
+  BiggestParsable result = 0;
+  EXPECT_TRUE(ParseNaturalNumber(msg.GetString(), &result));
+  EXPECT_EQ(kBiggestParsableMax, result);
+
+  Message msg2;
+  msg2 << kBiggestSignedParsableMax;
+
+  BiggestSignedParsable signed_result = 0;
+  EXPECT_TRUE(ParseNaturalNumber(msg2.GetString(), &signed_result));
+  EXPECT_EQ(kBiggestSignedParsableMax, signed_result);
+
+  Message msg3;
+  msg3 << INT_MAX;
+
+  int int_result = 0;
+  EXPECT_TRUE(ParseNaturalNumber(msg3.GetString(), &int_result));
+  EXPECT_EQ(INT_MAX, int_result);
+
+  Message msg4;
+  msg4 << UINT_MAX;
+
+  unsigned int uint_result = 0;
+  EXPECT_TRUE(ParseNaturalNumber(msg4.GetString(), &uint_result));
+  EXPECT_EQ(UINT_MAX, uint_result);
+}
+
+TEST(ParseNaturalNumberTest, WorksForShorterIntegers) {
+  short short_result = 0;
+  ASSERT_TRUE(ParseNaturalNumber(String("123"), &short_result));
+  EXPECT_EQ(123, short_result);
+
+  signed char char_result = 0;
+  ASSERT_TRUE(ParseNaturalNumber(String("123"), &char_result));
+  EXPECT_EQ(123, char_result);
+}
+
+#if GTEST_OS_WINDOWS
+TEST(EnvironmentTest, HandleFitsIntoSizeT) {
+  // TODO(vladl@google.com): Remove this test after this condition is verified
+  // in a static assertion in gtest-death-test.cc in the function
+  // GetStatusFileDescriptor.
+  ASSERT_TRUE(sizeof(HANDLE) <= sizeof(size_t));
+}
+#endif  // GTEST_OS_WINDOWS
 
 #endif  // GTEST_HAS_DEATH_TEST
 

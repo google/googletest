@@ -39,6 +39,10 @@
 
 #include <gtest/internal/gtest-internal.h>
 
+#if GTEST_HAS_DEATH_TEST && GTEST_OS_WINDOWS
+#include <io.h>
+#endif  // GTEST_HAS_DEATH_TEST && GTEST_OS_WINDOWS
+
 namespace testing {
 namespace internal {
 
@@ -121,7 +125,12 @@ class DeathTest {
   // the last death test.
   static const char* LastMessage();
 
+  static void set_last_death_test_message(const String& message);
+
  private:
+  // A string containing a description of the outcome of the last death test.
+  static String last_death_test_message_;
+
   GTEST_DISALLOW_COPY_AND_ASSIGN_(DeathTest);
 };
 
@@ -167,7 +176,7 @@ bool ExitedUnsuccessfully(int exit_status);
         case ::testing::internal::DeathTest::EXECUTE_TEST: { \
           ::testing::internal::DeathTest::ReturnSentinel \
               gtest_sentinel(gtest_dt); \
-          { statement; } \
+          GTEST_HIDE_UNREACHABLE_CODE_(statement); \
           gtest_dt->Abort(::testing::internal::DeathTest::TEST_DID_NOT_DIE); \
           break; \
         } \
@@ -179,14 +188,42 @@ bool ExitedUnsuccessfully(int exit_status);
 // The symbol "fail" here expands to something into which a message
 // can be streamed.
 
-// A struct representing the parsed contents of the
+// A class representing the parsed contents of the
 // --gtest_internal_run_death_test flag, as it existed when
 // RUN_ALL_TESTS was called.
-struct InternalRunDeathTestFlag {
-  String file;
-  int line;
-  int index;
-  int status_fd;
+class InternalRunDeathTestFlag {
+ public:
+  InternalRunDeathTestFlag(const String& file,
+                           int line,
+                           int index,
+                           int status_fd)
+      : file_(file), line_(line), index_(index), status_fd_(status_fd) {}
+
+  ~InternalRunDeathTestFlag() {
+    if (status_fd_ >= 0)
+// Suppress MSVC complaints about POSIX functions.
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4996)
+#endif  // _MSC_VER
+      close(status_fd_);
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif  // _MSC_VER
+  }
+
+  String file() const { return file_; }
+  int line() const { return line_; }
+  int index() const { return index_; }
+  int status_fd() const { return status_fd_; }
+
+ private:
+  String file_;
+  int line_;
+  int index_;
+  int status_fd_;
+
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(InternalRunDeathTestFlag);
 };
 
 // Returns a newly created InternalRunDeathTestFlag object with fields

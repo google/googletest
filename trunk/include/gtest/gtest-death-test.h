@@ -184,6 +184,7 @@ class ExitedWithCode {
   const int exit_code_;
 };
 
+#if !GTEST_OS_WINDOWS
 // Tests that an exit code describes an exit due to termination by a
 // given signal.
 class KilledBySignal {
@@ -193,6 +194,7 @@ class KilledBySignal {
  private:
   const int signum_;
 };
+#endif  // !GTEST_OS_WINDOWS
 
 // EXPECT_DEBUG_DEATH asserts that the given statements die in debug mode.
 // The death testing framework causes this to have interesting semantics,

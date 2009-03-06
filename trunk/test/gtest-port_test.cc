@@ -80,13 +80,15 @@ TEST(GtestCheckSyntaxTest, WorksWithSwitch) {
 
 TEST(GtestCheckDeathTest, DiesWithCorrectOutputOnFailure) {
   const bool a_false_condition = false;
-  EXPECT_DEATH(GTEST_CHECK_(a_false_condition) << "Extra info",
+  const char regex[] =
 #ifdef _MSC_VER
-               "gtest-port_test\\.cc\\([0-9]+\\):"
+     "gtest-port_test\\.cc\\(\\d+\\):"
 #else
-               "gtest-port_test\\.cc:[0-9]+"
+     "gtest-port_test\\.cc:[0-9]+"
 #endif  // _MSC_VER
-                   ".*a_false_condition.*Extra info.*");
+     ".*a_false_condition.*Extra info.*";
+
+  EXPECT_DEATH(GTEST_CHECK_(a_false_condition) << "Extra info", regex);
 }
 
 TEST(GtestCheckDeathTest, LivesSilentlyOnSuccess) {
@@ -575,25 +577,25 @@ TEST(MatchRegexAnywhereTest, ReturnsTrueWhenMatchingNonPrefix) {
 
 // Tests RE's implicit constructors.
 TEST(RETest, ImplicitConstructorWorks) {
-  const RE empty = "";
+  const RE empty("");
   EXPECT_STREQ("", empty.pattern());
 
-  const RE simple = "hello";
+  const RE simple("hello");
   EXPECT_STREQ("hello", simple.pattern());
 }
 
 // Tests that RE's constructors reject invalid regular expressions.
 TEST(RETest, RejectsInvalidRegex) {
   EXPECT_NONFATAL_FAILURE({
-    const RE normal = NULL;
+    const RE normal(NULL);
   }, "NULL is not a valid simple regular expression");
 
   EXPECT_NONFATAL_FAILURE({
-    const RE normal = ".*(\\w+";
+    const RE normal(".*(\\w+");
   }, "'(' is unsupported");
 
   EXPECT_NONFATAL_FAILURE({
-    const RE invalid = "^?";
+    const RE invalid("^?");
   }, "'?' can only follow a repeatable token");
 }
 
@@ -603,10 +605,10 @@ TEST(RETest, FullMatchWorks) {
   EXPECT_TRUE(RE::FullMatch("", empty));
   EXPECT_FALSE(RE::FullMatch("a", empty));
 
-  const RE re1 = "a";
+  const RE re1("a");
   EXPECT_TRUE(RE::FullMatch("a", re1));
 
-  const RE re = "a.*z";
+  const RE re("a.*z");
   EXPECT_TRUE(RE::FullMatch("az", re));
   EXPECT_TRUE(RE::FullMatch("axyz", re));
   EXPECT_FALSE(RE::FullMatch("baz", re));
@@ -615,11 +617,11 @@ TEST(RETest, FullMatchWorks) {
 
 // Tests RE::PartialMatch().
 TEST(RETest, PartialMatchWorks) {
-  const RE empty = "";
+  const RE empty("");
   EXPECT_TRUE(RE::PartialMatch("", empty));
   EXPECT_TRUE(RE::PartialMatch("a", empty));
 
-  const RE re = "a.*z";
+  const RE re("a.*z");
   EXPECT_TRUE(RE::PartialMatch("az", re));
   EXPECT_TRUE(RE::PartialMatch("axyz", re));
   EXPECT_TRUE(RE::PartialMatch("baz", re));
@@ -628,6 +630,16 @@ TEST(RETest, PartialMatchWorks) {
 }
 
 #endif  // GTEST_USES_POSIX_RE
+
+#if GTEST_HAS_STD_STRING
+
+TEST(CaptureStderrTest, CapturesStdErr) {
+  CaptureStderr();
+  fprintf(stderr, "abc");
+  ASSERT_EQ("abc", GetCapturedStderr());
+}
+
+#endif  // GTEST_HAS_STD_STRING
 
 }  // namespace internal
 }  // namespace testing

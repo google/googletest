@@ -5,10 +5,25 @@ gtest_output_test_.cc:#: error: Value of: false
 Expected: true
 gtest_output_test_.cc:#: error: Value of: 3
 Expected: 2
-[==========] Running 52 tests from 21 test cases.
+[==========] Running 57 tests from 26 test cases.
 [----------] Global test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
+[----------] 1 test from ADeathTest
+[ RUN      ] ADeathTest.ShouldRunFirst
+[       OK ] ADeathTest.ShouldRunFirst
+[----------] 1 test from ATypedDeathTest/0, where TypeParam = int
+[ RUN      ] ATypedDeathTest/0.ShouldRunFirst
+[       OK ] ATypedDeathTest/0.ShouldRunFirst
+[----------] 1 test from ATypedDeathTest/1, where TypeParam = double
+[ RUN      ] ATypedDeathTest/1.ShouldRunFirst
+[       OK ] ATypedDeathTest/1.ShouldRunFirst
+[----------] 1 test from My/ATypeParamDeathTest/0, where TypeParam = int
+[ RUN      ] My/ATypeParamDeathTest/0.ShouldRunFirst
+[       OK ] My/ATypeParamDeathTest/0.ShouldRunFirst
+[----------] 1 test from My/ATypeParamDeathTest/1, where TypeParam = double
+[ RUN      ] My/ATypeParamDeathTest/1.ShouldRunFirst
+[       OK ] My/ATypeParamDeathTest/1.ShouldRunFirst
 [----------] 2 tests from PassingTest
 [ RUN      ] PassingTest.PassingTest1
 [       OK ] PassingTest.PassingTest1
@@ -445,8 +460,8 @@ Expected non-fatal failure.
 FooEnvironment::TearDown() called.
 gtest_output_test_.cc:#: error: Failed
 Expected fatal failure.
-[==========] 52 tests from 21 test cases ran.
-[  PASSED  ] 16 tests.
+[==========] 57 tests from 26 test cases ran.
+[  PASSED  ] 21 tests.
 [  FAILED  ] 36 tests, listed below:
 [  FAILED  ] FatalFailureTest.FatalFailureInSubroutine
 [  FAILED  ] FatalFailureTest.FatalFailureInNestedSubroutine
