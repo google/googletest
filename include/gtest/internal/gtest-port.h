@@ -183,7 +183,7 @@
 #define GTEST_OS_SOLARIS 1
 #endif  // _MSC_VER
 
-#if GTEST_OS_LINUX
+#if GTEST_OS_CYGWIN || GTEST_OS_LINUX || GTEST_OS_MAC
 
 // On some platforms, <regex.h> needs someone to define size_t, and
 // won't compile otherwise.  We can #include it here as we already
@@ -194,8 +194,8 @@
 
 #else
 
-// We are not on Linux, so <regex.h> may not be available.  Use our
-// own simple regex implementation instead.
+// <regex.h> may not be available on this platform.  Use our own
+// simple regex implementation instead.
 #define GTEST_USES_SIMPLE_RE 1
 
 #endif  // GTEST_OS_LINUX
@@ -367,12 +367,19 @@
 #endif  // GTEST_HAS_CLONE
 
 // Determines whether to support death tests.
-#if GTEST_HAS_STD_STRING && GTEST_HAS_CLONE
+// Google Test does not support death tests for VC 7.1 and earlier for
+// these reasons:
+//   1. std::vector does not build in VC 7.1 when exceptions are disabled.
+//   2. std::string does not build in VC 7.1 when exceptions are disabled
+//      (this is covered by GTEST_HAS_STD_STRING guard).
+//   3. abort() in a VC 7.1 application compiled as GUI in debug config
+//      pops up a dialog window that cannot be suppressed programmatically.
+#if GTEST_HAS_STD_STRING && (GTEST_HAS_CLONE || \
+                             GTEST_OS_WINDOWS && _MSC_VER >= 1400)
 #define GTEST_HAS_DEATH_TEST 1
 #include <vector>
-#include <fcntl.h>
-#include <sys/mman.h>
-#endif  // GTEST_HAS_STD_STRING && GTEST_HAS_CLONE
+#endif  // GTEST_HAS_STD_STRING && (GTEST_HAS_CLONE ||
+        //                          GTEST_OS_WINDOWS && _MSC_VER >= 1400)
 
 // Determines whether to support value-parameterized tests.
 
@@ -595,14 +602,17 @@ inline void FlushInfoLog() { fflush(NULL); }
 //   CaptureStderr     - starts capturing stderr.
 //   GetCapturedStderr - stops capturing stderr and returns the captured string.
 
+#if GTEST_HAS_STD_STRING
+void CaptureStderr();
+::std::string GetCapturedStderr();
+#endif  // GTEST_HAS_STD_STRING
+
 #if GTEST_HAS_DEATH_TEST
 
 // A copy of all command line arguments.  Set by InitGoogleTest().
 extern ::std::vector<String> g_argvs;
 
-void CaptureStderr();
 // GTEST_HAS_DEATH_TEST implies we have ::std::string.
-::std::string GetCapturedStderr();
 const ::std::vector<String>& GetArgvs();
 
 #endif  // GTEST_HAS_DEATH_TEST
@@ -692,7 +702,7 @@ struct is_pointer<T*> : public true_type {};
 #if GTEST_OS_WINDOWS
 typedef __int64 BiggestInt;
 #else
-typedef long long BiggestInt;  // NOLINT
+typedef long long BiggestInt;            // NOLINT
 #endif  // GTEST_OS_WINDOWS
 
 // The maximum number a BiggestInt can represent.  This definition

@@ -48,6 +48,7 @@
 #include <limits.h>
 #include <sys/stat.h>  // NOLINT
 #include <unistd.h>  // NOLINT
+#include <climits>  // Some Linux distributions define PATH_MAX here.
 #endif  // _WIN32_WCE or _WIN32
 
 #if GTEST_OS_WINDOWS

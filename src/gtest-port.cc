@@ -35,9 +35,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#if GTEST_HAS_DEATH_TEST
-#include <regex.h>
-#endif  // GTEST_HAS_DEATH_TEST
+#if !GTEST_OS_WINDOWS
+#include <unistd.h>
+#endif  // GTEST_OS_WINDOWS
 
 #if GTEST_USES_SIMPLE_RE
 #include <string.h>
@@ -62,6 +62,13 @@
 
 namespace testing {
 namespace internal {
+
+#if GTEST_OS_WINDOWS
+// Microsoft does not provide a definition of STDERR_FILENO.
+const int kStdErrFileno = 2;
+#else
+const int kStdErrFileno = STDERR_FILENO;
+#endif  // GTEST_OS_WINDOWS
 
 #if GTEST_USES_POSIX_RE
 
@@ -105,7 +112,13 @@ void RE::Init(const char* regex) {
   // previous expression returns false.  Otherwise partial_regex_ may
   // not be properly initialized can may cause trouble when it's
   // freed.
-  is_valid_ = (regcomp(&partial_regex_, regex, REG_EXTENDED) == 0) && is_valid_;
+  //
+  // Some implementation of POSIX regex (e.g. on at least some
+  // versions of Cygwin) doesn't accept the empty string as a valid
+  // regex.  We change it to an equivalent form "()" to be safe.
+  const char* const partial_regex = (*regex == '\0') ? "()" : regex;
+  is_valid_ = (regcomp(&partial_regex_, partial_regex, REG_EXTENDED) == 0)
+      && is_valid_;
   EXPECT_TRUE(is_valid_)
       << "Regular expression \"" << regex
       << "\" is not a valid POSIX Extended regular expression.";
@@ -379,11 +392,19 @@ void GTestLog(GTestLogSeverity severity, const char* file,
       severity == GTEST_ERROR ?   "[ ERROR ]" : "[ FATAL ]";
   fprintf(stderr, "\n%s %s:%d: %s\n", marker, file, line, msg);
   if (severity == GTEST_FATAL) {
+    fflush(NULL);  // abort() is not guaranteed to flush open file streams.
     abort();
   }
 }
 
-#if GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_STD_STRING
+
+// Disable Microsoft deprecation warnings for POSIX functions called from
+// this class (creat, dup, dup2, and close)
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4996)
+#endif  // _MSC_VER
 
 // Defines the stderr capturer.
 
@@ -391,16 +412,26 @@ class CapturedStderr {
  public:
   // The ctor redirects stderr to a temporary file.
   CapturedStderr() {
-    uncaptured_fd_ = dup(STDERR_FILENO);
+    uncaptured_fd_ = dup(kStdErrFileno);
 
+#if GTEST_OS_WINDOWS
+    char temp_dir_path[MAX_PATH + 1] = { '\0' };  // NOLINT
+    char temp_file_path[MAX_PATH + 1] = { '\0' };  // NOLINT
+
+    ::GetTempPathA(sizeof(temp_dir_path), temp_dir_path);
+    ::GetTempFileNameA(temp_dir_path, "gtest_redir", 0, temp_file_path);
+    const int captured_fd = creat(temp_file_path, _S_IREAD | _S_IWRITE);
+    filename_ = temp_file_path;
+#else
     // There's no guarantee that a test has write access to the
     // current directory, so we create the temporary file in the /tmp
     // directory instead.
     char name_template[] = "/tmp/captured_stderr.XXXXXX";
     const int captured_fd = mkstemp(name_template);
     filename_ = name_template;
+#endif  // GTEST_OS_WINDOWS
     fflush(NULL);
-    dup2(captured_fd, STDERR_FILENO);
+    dup2(captured_fd, kStdErrFileno);
     close(captured_fd);
   }
 
@@ -412,7 +443,7 @@ class CapturedStderr {
   void StopCapture() {
     // Restores the original stream.
     fflush(NULL);
-    dup2(uncaptured_fd_, STDERR_FILENO);
+    dup2(uncaptured_fd_, kStdErrFileno);
     close(uncaptured_fd_);
     uncaptured_fd_ = -1;
   }
@@ -427,6 +458,10 @@ class CapturedStderr {
   ::std::string filename_;
 };
 
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif  // _MSC_VER
+
 static CapturedStderr* g_captured_stderr = NULL;
 
 // Returns the size (in bytes) of a file.
@@ -436,8 +471,6 @@ static size_t GetFileSize(FILE * file) {
 }
 
 // Reads the entire content of a file as a string.
-// GTEST_HAS_DEATH_TEST implies that we have ::std::string, so we can
-// use it here.
 static ::std::string ReadEntireFile(FILE * file) {
   const size_t file_size = GetFileSize(file);
   char* const buffer = new char[file_size];
@@ -473,15 +506,28 @@ void CaptureStderr() {
 // use it here.
 ::std::string GetCapturedStderr() {
   g_captured_stderr->StopCapture();
+
+// Disables Microsoft deprecation warning for fopen and fclose.
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4996)
+#endif  // _MSC_VER
   FILE* const file = fopen(g_captured_stderr->filename().c_str(), "r");
   const ::std::string content = ReadEntireFile(file);
   fclose(file);
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif  // _MSC_VER
 
   delete g_captured_stderr;
   g_captured_stderr = NULL;
 
   return content;
 }
+
+#endif  // GTEST_HAS_STD_STRING
+
+#if GTEST_HAS_DEATH_TEST
 
 // A copy of all command line arguments.  Set by InitGoogleTest().
 ::std::vector<String> g_argvs;

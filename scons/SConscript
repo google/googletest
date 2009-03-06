@@ -102,38 +102,65 @@ env = env.Clone()
 env.Prepend(CPPPATH = ['..',
                        '../include'])
 
-# Sources shared by base library and library that includes main.
-gtest_sources = ['../src/gtest-all.cc']
+# Sources used by base library and library that includes main.
+gtest_source = '../src/gtest-all.cc'
+gtest_main_source = '../src/gtest_main.cc'
 
 # gtest.lib to be used by most apps (if you have your own main
 # function)
 gtest = env.StaticLibrary(target='gtest',
-                          source=gtest_sources)
+                          source=[gtest_source])
 
 # gtest_main.lib can be used if you just want a basic main function;
 # it is also used by the tests for Google Test itself.
 gtest_main = env.StaticLibrary(target='gtest_main',
-                               source=gtest_sources + ['../src/gtest_main.cc'])
+                               source=[gtest_source, gtest_main_source])
+
+env_with_exceptions = env.Clone()
+platform = env_with_exceptions['PLATFORM']
+if platform == 'win32':
+  env_with_exceptions.Append(CCFLAGS = ['/EHsc'])
+  env_with_exceptions.Append(CPPDEFINES = '_HAS_EXCEPTIONS=1')
+
+gtest_ex_obj = env_with_exceptions.Object(target='gtest_ex',
+                                          source=gtest_source)
+gtest_main_ex_obj = env_with_exceptions.Object(target='gtest_main_ex',
+                                               source=gtest_main_source)
+
+gtest_ex_main = env_with_exceptions.StaticLibrary(
+    target='gtest_ex_main',
+    source=gtest_ex_obj + gtest_main_ex_obj)
 
 # Install the libraries if needed.
 if 'LIB_OUTPUT' in env.Dictionary():
-  env.Install('$LIB_OUTPUT', source=[gtest, gtest_main])
+  env.Install('$LIB_OUTPUT', source=[gtest, gtest_main, gtest_ex_main])
 
 
-def GtestBinary(env, target, dir_prefix, gtest_lib, additional_sources=None):
+def ConstructSourceList(target, dir_prefix, additional_sources=None):
+  """Helper to create source file list for gtest binaries.
+
+  Args:
+    target: The basename of the target's main source file.
+    dir_prefix: The path to prefix the main source file.
+    gtest_lib: The gtest lib to use.
+    additional_sources: A list of additional source files in the target.
+  """
+  source = [env.File('%s.cc' % target, env.Dir(dir_prefix))]
+  if additional_sources:
+    source += additional_sources
+  return source
+
+def GtestBinary(env, target, gtest_lib, sources):
   """Helper to create gtest binaries: tests, samples, etc.
 
   Args:
     env: The SCons construction environment to use to build.
     target: The basename of the target's main source file, also used as target
             name.
-    dir_prefix: The path to prefix the main source file.
     gtest_lib: The gtest lib to use.
+    sources: A list of source files in the target.
   """
-  source = [env.File('%s.cc' % target, env.Dir(dir_prefix))]
-  if additional_sources:
-    source += additional_sources
-  unit_test = env.Program(target=target, source=source, LIBS=[gtest_lib])
+  unit_test = env.Program(target=target, source=sources, LIBS=[gtest_lib])
   if 'EXE_OUTPUT' in env.Dictionary():
     env.Install('$EXE_OUTPUT', source=[unit_test])
 
@@ -144,8 +171,13 @@ def GtestUnitTest(env, target, gtest_lib, additional_sources=None):
     env: The SCons construction environment to use to build.
     target: The basename of the target unit test .cc file.
     gtest_lib: The gtest lib to use.
+    additional_sources: A list of additional source files in the target.
   """
-  GtestBinary(env, target, "../test", gtest_lib, additional_sources)
+  GtestBinary(env,
+              target,
+              gtest_lib,
+              ConstructSourceList(target, "../test",
+                                  additional_sources=additional_sources))
 
 GtestUnitTest(env, 'gtest-filepath_test', gtest_main)
 GtestUnitTest(env, 'gtest-message_test', gtest_main)
@@ -168,6 +200,15 @@ GtestUnitTest(env, 'gtest_output_test_', gtest)
 GtestUnitTest(env, 'gtest_color_test_', gtest)
 GtestUnitTest(env, 'gtest-linked_ptr_test', gtest_main)
 GtestUnitTest(env, 'gtest-port_test', gtest_main)
+GtestUnitTest(env, 'gtest-death-test_test', gtest_main)
+
+gtest_unittest_ex_obj = env_with_exceptions.Object(
+    target='gtest_unittest_ex',
+    source='../test/gtest_unittest.cc')
+GtestBinary(env_with_exceptions,
+            'gtest_ex_unittest',
+            gtest_ex_main,
+            gtest_unittest_ex_obj)
 
 # TODO(wan@google.com) Add these unit tests:
 # - gtest_break_on_failure_unittest_
@@ -195,8 +236,13 @@ def GtestSample(env, target, gtest_lib, additional_sources=None):
     env: The SCons construction environment to use to build.
     target: The basename of the target unit test .cc file.
     gtest_lib: The gtest lib to use.
+    additional_sources: A list of additional source files in the target.
   """
-  GtestBinary(env, target, "../samples", gtest_lib, additional_sources)
+  GtestBinary(env,
+              target,
+              gtest_lib,
+              ConstructSourceList(target, "../samples",
+                                  additional_sources=additional_sources))
 
 # Use the GTEST_BUILD_SAMPLES build variable to control building of samples.
 # In your SConstruct file, add

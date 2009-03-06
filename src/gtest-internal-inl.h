@@ -45,16 +45,19 @@
 #error "It must not be included except by Google Test itself."
 #endif  // GTEST_IMPLEMENTATION_
 
+#include <errno.h>
 #include <stddef.h>
-
-#include <gtest/internal/gtest-port.h>
+#include <stdlib.h>   // For strtoll/_strtoul64.
 
 #if GTEST_OS_WINDOWS
-#include <windows.h>  // NOLINT
+#include <windows.h>  // For DWORD.
 #endif  // GTEST_OS_WINDOWS
 
+#include <gtest/internal/gtest-port.h>
 #include <gtest/gtest.h>
 #include <gtest/gtest-spi.h>
+
+#include <string>
 
 namespace testing {
 
@@ -1312,6 +1315,77 @@ bool MatchRegexAnywhere(const char* regex, const char* str);
 // other parts of Google Test.
 void ParseGoogleTestFlagsOnly(int* argc, char** argv);
 void ParseGoogleTestFlagsOnly(int* argc, wchar_t** argv);
+
+#if GTEST_HAS_DEATH_TEST
+
+// Returns the message describing the last system error, regardless of the
+// platform.
+String GetLastSystemErrorMessage();
+
+#if GTEST_OS_WINDOWS
+// Provides leak-safe Windows kernel handle ownership.
+class AutoHandle {
+ public:
+  AutoHandle() : handle_(INVALID_HANDLE_VALUE) {}
+  explicit AutoHandle(HANDLE handle) : handle_(handle) {}
+
+  ~AutoHandle() { Reset(); }
+
+  HANDLE Get() const { return handle_; }
+  void Reset() { Reset(INVALID_HANDLE_VALUE); }
+  void Reset(HANDLE handle) {
+    if (handle != handle_) {
+      if (handle_ != INVALID_HANDLE_VALUE)
+        ::CloseHandle(handle_);
+      handle_ = handle;
+    }
+  }
+
+ private:
+  HANDLE handle_;
+
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(AutoHandle);
+};
+#endif  // GTEST_OS_WINDOWS
+
+// Attempts to parse a string into a positive integer pointed to by the
+// number parameter.  Returns true if that is possible.
+// GTEST_HAS_DEATH_TEST implies that we have ::std::string, so we can use
+// it here.
+template <typename Integer>
+bool ParseNaturalNumber(const ::std::string& str, Integer* number) {
+  // Fail fast if the given string does not begin with a digit;
+  // this bypasses strtoXXX's "optional leading whitespace and plus
+  // or minus sign" semantics, which are undesirable here.
+  if (str.empty() || !isdigit(str[0])) {
+    return false;
+  }
+  errno = 0;
+
+  char* end;
+  // BiggestConvertible is the largest integer type that system-provided
+  // string-to-number conversion routines can return.
+#if GTEST_OS_WINDOWS
+  typedef unsigned __int64 BiggestConvertible;
+  const BiggestConvertible parsed = _strtoui64(str.c_str(), &end, 10);
+#else
+  typedef unsigned long long BiggestConvertible;  // NOLINT
+  const BiggestConvertible parsed = strtoull(str.c_str(), &end, 10);
+#endif  // GTEST_OS_WINDOWS
+  const bool parse_success = *end == '\0' && errno == 0;
+
+  // TODO(vladl@google.com): Convert this to compile time assertion when it is
+  // available.
+  GTEST_CHECK_(sizeof(Integer) <= sizeof(parsed));
+
+  const Integer result = static_cast<Integer>(parsed);
+  if (parse_success && static_cast<BiggestConvertible>(result) == parsed) {
+    *number = result;
+    return true;
+  }
+  return false;
+}
+#endif  // GTEST_HAS_DEATH_TEST
 
 }  // namespace internal
 }  // namespace testing

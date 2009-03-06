@@ -3300,16 +3300,42 @@ void UnitTest::RecordPropertyForCurrentTest(const char* key,
 int UnitTest::Run() {
 #if GTEST_OS_WINDOWS
 
-#if !defined(_WIN32_WCE)
-  // SetErrorMode doesn't exist on CE.
-  if (GTEST_FLAG(catch_exceptions)) {
-    // The user wants Google Test to catch exceptions thrown by the tests.
+  const bool in_death_test_child_process =
+      internal::GTEST_FLAG(internal_run_death_test).GetLength() > 0;
 
-    // This lets fatal errors be handled by us, instead of causing pop-ups.
+  // Either the user wants Google Test to catch exceptions thrown by the
+  // tests or this is executing in the context of death test child
+  // process. In either case the user does not want to see pop-up dialogs
+  // about crashes - they are expected..
+  if (GTEST_FLAG(catch_exceptions) || in_death_test_child_process) {
+#if !defined(_WIN32_WCE)
+    // SetErrorMode doesn't exist on CE.
     SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOALIGNMENTFAULTEXCEPT |
                  SEM_NOGPFAULTERRORBOX | SEM_NOOPENFILEERRORBOX);
-  }
 #endif  // _WIN32_WCE
+
+    // Death test children can be terminated with _abort().  On Windows,
+    // _abort() can show a dialog with a warning message.  This forces the
+    // abort message to go to stderr instead.
+    _set_error_mode(_OUT_TO_STDERR);
+
+    // In the debug version, Visual Studio pops up a separate dialog
+    // offering a choice to debug the aborted program. We need to suppress
+    // this dialog or it will pop up for every EXPECT/ASSERT_DEATH statement
+    // executed. Google Test will notify the user of any unexpected
+    // failure via stderr.
+#if _MSC_VER >= 1400
+    // VC++ doesn't define _set_abort_behavior() prior to the version 8.0.
+    // Users of prior VC versions shall suffer the agony and pain of
+    // clicking through the countless debug dialogs.
+    // TODO(vladl@google.com): find a way to suppress the abort dialog() in the
+    // debug mode when compiled with VC 7.1 or lower.
+    if (!GTEST_FLAG(break_on_failure))
+      _set_abort_behavior(
+          0x0,                                    // Clear the following flags:
+          _WRITE_ABORT_MSG | _CALL_REPORTFAULT);  // pop-up window, core dump.
+#endif  // _MSC_VER >= 1400
+  }
 
   __try {
     return impl_->RunAllTests();
