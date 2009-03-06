@@ -13,7 +13,6 @@ EXTRA_DIST = \
   scons/SConscript \
   scripts/fuse_gtest_files.py \
   scripts/gen_gtest_pred_impl.py \
-  src/gtest-all.cc \
   test/gtest_all_test.cc
 
 # MSVC project files
@@ -263,6 +262,13 @@ check_PROGRAMS += test/gtest-test-part_test
 test_gtest_test_part_test_SOURCES = test/gtest-test-part_test.cc
 test_gtest_test_part_test_LDADD = lib/libgtest_main.la
 
+TESTS += test/gtest_throw_on_failure_ex_test
+check_PROGRAMS += test/gtest_throw_on_failure_ex_test
+test_gtest_throw_on_failure_ex_test_SOURCES = \
+    test/gtest_throw_on_failure_ex_test.cc \
+    src/gtest-all.cc
+test_gtest_throw_on_failure_ex_test_CXXFLAGS = $(AM_CXXFLAGS) -fexceptions
+
 TESTS += test/gtest-typed-test_test
 check_PROGRAMS += test/gtest-typed-test_test
 test_gtest_typed_test_test_SOURCES = test/gtest-typed-test_test.cc \
@@ -326,6 +332,14 @@ check_SCRIPTS += test/gtest_output_test.py
 EXTRA_DIST += test/gtest_output_test_golden_lin.txt \
               test/gtest_output_test_golden_win.txt
 TESTS += test/gtest_output_test.py
+
+check_PROGRAMS += test/gtest_throw_on_failure_test_
+test_gtest_throw_on_failure_test__SOURCES = \
+  test/gtest_throw_on_failure_test_.cc \
+  src/gtest-all.cc
+test_gtest_throw_on_failure_test__CXXFLAGS = $(AM_CXXFLAGS) -fno-exceptions
+check_SCRIPTS += test/gtest_throw_on_failure_test.py
+TESTS += test/gtest_throw_on_failure_test.py
 
 check_PROGRAMS += test/gtest_uninitialized_test_
 test_gtest_uninitialized_test__SOURCES = test/gtest_uninitialized_test_.cc

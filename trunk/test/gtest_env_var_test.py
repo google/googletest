@@ -103,6 +103,7 @@ def TestEnvVarAffectsFlag(command):
   TestFlag(command, 'output', 'tmp/foo.xml', '')
   TestFlag(command, 'print_time', '1', '0')
   TestFlag(command, 'repeat', '999', '1')
+  TestFlag(command, 'throw_on_failure', '1', '0')
 
   if IS_WINDOWS:
     TestFlag(command, 'catch_exceptions', '1', '0')

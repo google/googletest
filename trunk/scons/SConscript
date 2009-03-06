@@ -214,6 +214,8 @@ GtestBinary(env_with_exceptions,
 # - gtest_break_on_failure_unittest_
 # - gtest_filter_unittest_
 # - gtest_list_tests_unittest_
+# - gtest_throw_on_failure_ex_test
+# - gtest_throw_on_failure_test_
 # - gtest_xml_outfile1_test_
 # - gtest_xml_outfile2_test_
 # - gtest_xml_output_unittest_

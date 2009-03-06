@@ -1,4 +1,4 @@
-// Copyright 2006, Google Inc.
+// Copyright 2009, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,38 +29,28 @@
 //
 // Author: wan@google.com (Zhanyong Wan)
 
-// Unit test for Google Test's break-on-failure mode.
+// Tests Google Test's throw-on-failure mode with exceptions disabled.
 //
-// A user can ask Google Test to seg-fault when an assertion fails, using
-// either the GTEST_BREAK_ON_FAILURE environment variable or the
-// --gtest_break_on_failure flag.  This file is used for testing such
-// functionality.
-//
-// This program will be invoked from a Python unit test.  It is
-// expected to fail.  Don't run it directly.
+// This program must be compiled with exceptions disabled.  It will be
+// invoked by gtest_throw_on_failure_test.py, and is expected to exit
+// with non-zero in the throw-on-failure mode or 0 otherwise.
 
 #include <gtest/gtest.h>
 
-#if GTEST_OS_WINDOWS
-#include <windows.h>
-#endif
-
-namespace {
-
-// A test that's expected to fail.
-TEST(Foo, Bar) {
-  EXPECT_EQ(2, 3);
-}
-
-}  // namespace
-
-int main(int argc, char **argv) {
-#if GTEST_OS_WINDOWS
-  // Suppresses display of the Windows error dialog upon encountering
-  // a general protection fault (segment violation).
-  SetErrorMode(SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS);
-#endif
+int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
 
-  return RUN_ALL_TESTS();
+  // We want to ensure that people can use Google Test assertions in
+  // other testing frameworks, as long as they initialize Google Test
+  // properly and set the thrown-on-failure mode.  Therefore, we don't
+  // use Google Test's constructs for defining and running tests
+  // (e.g. TEST and RUN_ALL_TESTS) here.
+
+  // In the throw-on-failure mode with exceptions disabled, this
+  // assertion will cause the program to exit with a non-zero code.
+  EXPECT_EQ(2, 3);
+
+  // When not in the throw-on-failure mode, the control will reach
+  // here.
+  return 0;
 }

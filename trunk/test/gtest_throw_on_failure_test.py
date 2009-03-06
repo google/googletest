@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/python2.4
 #
-# Copyright 2006, Google Inc.
+# Copyright 2009, Google Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,12 +29,9 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-"""Unit test for Google Test's break-on-failure mode.
+"""Tests Google Test's throw-on-failure mode with exceptions disabled.
 
-A user can ask Google Test to seg-fault when an assertion fails, using
-either the GTEST_BREAK_ON_FAILURE environment variable or the
---gtest_break_on_failure flag.  This script tests such functionality
-by invoking gtest_break_on_failure_unittest_ (a program written with
+This script invokes gtest_throw_on_failure_test_ (a program written with
 Google Test) with different environments and command line flags.
 """
 
@@ -42,24 +39,18 @@ __author__ = 'wan@google.com (Zhanyong Wan)'
 
 import gtest_test_utils
 import os
-import sys
 import unittest
 
 
 # Constants.
 
-# The environment variable for enabling/disabling the break-on-failure mode.
-BREAK_ON_FAILURE_ENV_VAR = 'GTEST_BREAK_ON_FAILURE'
+# The command line flag for enabling/disabling the throw-on-failure mode.
+THROW_ON_FAILURE = 'gtest_throw_on_failure'
 
-# The command line flag for enabling/disabling the break-on-failure mode.
-BREAK_ON_FAILURE_FLAG = 'gtest_break_on_failure'
-
-# The environment variable for enabling/disabling the throw-on-failure mode.
-THROW_ON_FAILURE_ENV_VAR = 'GTEST_THROW_ON_FAILURE'
-
-# Path to the gtest_break_on_failure_unittest_ program.
+# Path to the gtest_throw_on_failure_test_ program, compiled with
+# exceptions disabled.
 EXE_PATH = os.path.join(gtest_test_utils.GetBuildDir(),
-                        'gtest_break_on_failure_unittest_')
+                        'gtest_throw_on_failure_test_')
 
 
 # Utilities.
@@ -70,6 +61,7 @@ def SetEnvVar(env_var, value):
   given value is None.
   """
 
+  env_var = env_var.upper()
   if value is not None:
     os.environ[env_var] = value
   elif env_var in os.environ:
@@ -77,38 +69,30 @@ def SetEnvVar(env_var, value):
 
 
 def Run(command):
-  """Runs a command; returns 1 if it was killed by a signal, or 0 otherwise."""
+  """Runs a command; returns True/False if its exit code is/isn't 0."""
 
-  p = gtest_test_utils.Subprocess(command)
-  if p.terminated_by_signal:
-    return 1
-  else:
-    return 0
+  print 'Running "%s". . .' % ' '.join(command)
+  return gtest_test_utils.Subprocess(command).exit_code == 0
 
 
-# The tests.
+# The tests.  TODO(wan@google.com): refactor the class to share common
+# logic with code in gtest_break_on_failure_unittest.py.
+class ThrowOnFailureTest(unittest.TestCase):
+  """Tests the throw-on-failure mode."""
 
-
-class GTestBreakOnFailureUnitTest(unittest.TestCase):
-  """Tests using the GTEST_BREAK_ON_FAILURE environment variable or
-  the --gtest_break_on_failure flag to turn assertion failures into
-  segmentation faults.
-  """
-
-  def RunAndVerify(self, env_var_value, flag_value, expect_seg_fault):
-    """Runs gtest_break_on_failure_unittest_ and verifies that it does
-    (or does not) have a seg-fault.
+  def RunAndVerify(self, env_var_value, flag_value, should_fail):
+    """Runs gtest_throw_on_failure_test_ and verifies that it does
+    (or does not) exit with a non-zero code.
 
     Args:
       env_var_value:    value of the GTEST_BREAK_ON_FAILURE environment
                         variable; None if the variable should be unset.
       flag_value:       value of the --gtest_break_on_failure flag;
                         None if the flag should not be present.
-      expect_seg_fault: 1 if the program is expected to generate a seg-fault;
-                        0 otherwise.
+      should_fail:      True iff the program is expected to fail.
     """
 
-    SetEnvVar(BREAK_ON_FAILURE_ENV_VAR, env_var_value)
+    SetEnvVar(THROW_ON_FAILURE, env_var_value)
 
     if env_var_value is None:
       env_var_value_msg = ' is not set'
@@ -118,81 +102,70 @@ class GTestBreakOnFailureUnitTest(unittest.TestCase):
     if flag_value is None:
       flag = ''
     elif flag_value == '0':
-      flag = '--%s=0' % BREAK_ON_FAILURE_FLAG
+      flag = '--%s=0' % THROW_ON_FAILURE
     else:
-      flag = '--%s' % BREAK_ON_FAILURE_FLAG
+      flag = '--%s' % THROW_ON_FAILURE
 
     command = [EXE_PATH]
     if flag:
       command.append(flag)
 
-    if expect_seg_fault:
+    if should_fail:
       should_or_not = 'should'
     else:
       should_or_not = 'should not'
 
-    has_seg_fault = Run(command)
+    failed = not Run(command)
 
-    SetEnvVar(BREAK_ON_FAILURE_ENV_VAR, None)
+    SetEnvVar(THROW_ON_FAILURE, None)
 
-    msg = ('when %s%s, an assertion failure in "%s" %s cause a seg-fault.' %
-           (BREAK_ON_FAILURE_ENV_VAR, env_var_value_msg, ' '.join(command),
+    msg = ('when %s%s, an assertion failure in "%s" %s cause a non-zero '
+           'exit code.' %
+           (THROW_ON_FAILURE, env_var_value_msg, ' '.join(command),
             should_or_not))
-    self.assert_(has_seg_fault == expect_seg_fault, msg)
+    self.assert_(failed == should_fail, msg)
 
   def testDefaultBehavior(self):
     """Tests the behavior of the default mode."""
 
-    self.RunAndVerify(env_var_value=None,
-                      flag_value=None,
-                      expect_seg_fault=0)
+    self.RunAndVerify(env_var_value=None, flag_value=None, should_fail=False)
 
-  def testEnvVar(self):
-    """Tests using the GTEST_BREAK_ON_FAILURE environment variable."""
+  def testThrowOnFailureEnvVar(self):
+    """Tests using the GTEST_THROW_ON_FAILURE environment variable."""
 
     self.RunAndVerify(env_var_value='0',
                       flag_value=None,
-                      expect_seg_fault=0)
+                      should_fail=False)
     self.RunAndVerify(env_var_value='1',
                       flag_value=None,
-                      expect_seg_fault=1)
+                      should_fail=True)
 
-  def testFlag(self):
-    """Tests using the --gtest_break_on_failure flag."""
+  def testThrowOnFailureFlag(self):
+    """Tests using the --gtest_throw_on_failure flag."""
 
     self.RunAndVerify(env_var_value=None,
                       flag_value='0',
-                      expect_seg_fault=0)
+                      should_fail=False)
     self.RunAndVerify(env_var_value=None,
                       flag_value='1',
-                      expect_seg_fault=1)
+                      should_fail=True)
 
-  def testFlagOverridesEnvVar(self):
-    """Tests that the flag overrides the environment variable."""
+  def testThrowOnFailureFlagOverridesEnvVar(self):
+    """Tests that --gtest_throw_on_failure overrides GTEST_THROW_ON_FAILURE."""
 
     self.RunAndVerify(env_var_value='0',
                       flag_value='0',
-                      expect_seg_fault=0)
+                      should_fail=False)
     self.RunAndVerify(env_var_value='0',
                       flag_value='1',
-                      expect_seg_fault=1)
+                      should_fail=True)
     self.RunAndVerify(env_var_value='1',
                       flag_value='0',
-                      expect_seg_fault=0)
+                      should_fail=False)
     self.RunAndVerify(env_var_value='1',
                       flag_value='1',
-                      expect_seg_fault=1)
+                      should_fail=True)
 
-  def testBreakOnFailureOverridesThrowOnFailure(self):
-    """Tests that gtest_break_on_failure overrides gtest_throw_on_failure."""
-
-    SetEnvVar(THROW_ON_FAILURE_ENV_VAR, '1')
-    try:
-      self.RunAndVerify(env_var_value=None,
-                        flag_value='1',
-                        expect_seg_fault=1)
-    finally:
-      SetEnvVar(THROW_ON_FAILURE_ENV_VAR, None)
 
 if __name__ == '__main__':
   gtest_test_utils.Main()

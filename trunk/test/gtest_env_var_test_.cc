@@ -101,6 +101,11 @@ void PrintFlag(const char* flag) {
     return;
   }
 
+  if (strcmp(flag, "throw_on_failure") == 0) {
+    cout << GTEST_FLAG(throw_on_failure);
+    return;
+  }
+
   cout << "Invalid flag name " << flag
        << ".  Valid names are break_on_failure, color, filter, etc.\n";
   exit(1);

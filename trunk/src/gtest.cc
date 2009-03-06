@@ -111,6 +111,10 @@
 
 #endif  // GTEST_OS_LINUX
 
+#if GTEST_HAS_EXCEPTIONS
+#include <stdexcept>
+#endif
+
 // Indicates that this translation unit is part of Google Test's
 // implementation.  It must come before gtest-internal-inl.h is
 // included, or there will be a compiler error.  This trick is to
@@ -230,6 +234,13 @@ GTEST_DEFINE_bool_(
     show_internal_stack_frames, false,
     "True iff " GTEST_NAME_ " should include internal stack frames when "
     "printing test failure stack traces.");
+
+GTEST_DEFINE_bool_(
+    throw_on_failure,
+    internal::BoolFromGTestEnv("throw_on_failure", false),
+    "When this flag is specified, a failed assertion will throw an exception "
+    "if exceptions are enabled or exit the program with a non-zero code "
+    "otherwise.");
 
 namespace internal {
 
@@ -2438,14 +2449,20 @@ static const char * TestPartResultTypeToString(TestPartResultType type) {
   return "Unknown result type";
 }
 
+// Prints a TestPartResult to a String.
+static internal::String PrintTestPartResultToString(
+    const TestPartResult& test_part_result) {
+  return (Message()
+          << internal::FormatFileLocation(test_part_result.file_name(),
+                                          test_part_result.line_number())
+          << " " << TestPartResultTypeToString(test_part_result.type())
+          << test_part_result.message()).GetString();
+}
+
 // Prints a TestPartResult.
 static void PrintTestPartResult(
-    const TestPartResult & test_part_result) {
-  printf("%s %s%s\n",
-         internal::FormatFileLocation(test_part_result.file_name(),
-                                      test_part_result.line_number()).c_str(),
-         TestPartResultTypeToString(test_part_result.type()),
-         test_part_result.message());
+    const TestPartResult& test_part_result) {
+  printf("%s\n", PrintTestPartResultToString(test_part_result).c_str());
   fflush(stdout);
 }
 
@@ -3240,6 +3257,19 @@ Environment* UnitTest::AddEnvironment(Environment* env) {
   return env;
 }
 
+#if GTEST_HAS_EXCEPTIONS
+// A failed Google Test assertion will throw an exception of this type
+// when exceptions are enabled.  We derive it from std::runtime_error,
+// which is for errors presumably detectable only at run time.  Since
+// std::runtime_error inherits from std::exception, many testing
+// frameworks know how to extract and print the message inside it.
+class GoogleTestFailureException : public ::std::runtime_error {
+ public:
+  explicit GoogleTestFailureException(const TestPartResult& failure)
+      : runtime_error(PrintTestPartResultToString(failure).c_str()) {}
+};
+#endif
+
 // Adds a TestPartResult to the current TestResult object.  All Google Test
 // assertion macros (e.g. ASSERT_TRUE, EXPECT_EQ, etc) eventually call
 // this to report their results.  The user code should use the
@@ -3276,11 +3306,23 @@ void UnitTest::AddTestPartResult(TestPartResultType result_type,
   impl_->GetTestPartResultReporterForCurrentThread()->
       ReportTestPartResult(result);
 
-  // If this is a failure and the user wants the debugger to break on
-  // failures ...
-  if (result_type != TPRT_SUCCESS && GTEST_FLAG(break_on_failure)) {
-    // ... then we generate a seg fault.
-    *static_cast<int*>(NULL) = 1;
+  if (result_type != TPRT_SUCCESS) {
+    // gunit_break_on_failure takes precedence over
+    // gunit_throw_on_failure.  This allows a user to set the latter
+    // in the code (perhaps in order to use Google Test assertions
+    // with another testing framework) and specify the former on the
+    // command line for debugging.
+    if (GTEST_FLAG(break_on_failure)) {
+      *static_cast<int*>(NULL) = 1;
+    } else if (GTEST_FLAG(throw_on_failure)) {
+#if GTEST_HAS_EXCEPTIONS
+      throw GoogleTestFailureException(result);
+#else
+      // We cannot call abort() as it generates a pop-up in debug mode
+      // that cannot be suppressed in VC 7.1 or below.
+      exit(1);
+#endif
+    }
   }
 }
 
@@ -4078,7 +4120,8 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
         ParseBoolFlag(arg, kListTestsFlag, &GTEST_FLAG(list_tests)) ||
         ParseStringFlag(arg, kOutputFlag, &GTEST_FLAG(output)) ||
         ParseBoolFlag(arg, kPrintTimeFlag, &GTEST_FLAG(print_time)) ||
-        ParseInt32Flag(arg, kRepeatFlag, &GTEST_FLAG(repeat))
+        ParseInt32Flag(arg, kRepeatFlag, &GTEST_FLAG(repeat)) ||
+        ParseBoolFlag(arg, kThrowOnFailureFlag, &GTEST_FLAG(throw_on_failure))
         ) {
       // Yes.  Shift the remainder of the argv list left by one.  Note
       // that argv has (*argc + 1) elements, the last one always being

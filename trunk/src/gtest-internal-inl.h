@@ -84,6 +84,7 @@ const char kListTestsFlag[] = "list_tests";
 const char kOutputFlag[] = "output";
 const char kPrintTimeFlag[] = "print_time";
 const char kRepeatFlag[] = "repeat";
+const char kThrowOnFailureFlag[] = "throw_on_failure";
 
 // This class saves the values of all Google Test flags in its c'tor, and
 // restores them in its d'tor.
@@ -103,6 +104,7 @@ class GTestFlagSaver {
     output_ = GTEST_FLAG(output);
     print_time_ = GTEST_FLAG(print_time);
     repeat_ = GTEST_FLAG(repeat);
+    throw_on_failure_ = GTEST_FLAG(throw_on_failure);
   }
 
   // The d'tor is not virtual.  DO NOT INHERIT FROM THIS CLASS.
@@ -119,6 +121,7 @@ class GTestFlagSaver {
     GTEST_FLAG(output) = output_;
     GTEST_FLAG(print_time) = print_time_;
     GTEST_FLAG(repeat) = repeat_;
+    GTEST_FLAG(throw_on_failure) = throw_on_failure_;
   }
  private:
   // Fields for saving the original values of flags.
@@ -135,6 +138,7 @@ class GTestFlagSaver {
   bool print_time_;
   bool pretty_;
   internal::Int32 repeat_;
+  bool throw_on_failure_;
 } GTEST_ATTRIBUTE_UNUSED_;
 
 // Converts a Unicode code point to a narrow string in UTF-8 encoding.
