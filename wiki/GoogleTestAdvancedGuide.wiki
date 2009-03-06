@@ -1557,6 +1557,51 @@ the repeat count by setting the `GTEST_REPEAT` environment variable.
 
 _Availability:_ Linux, Windows, Mac.
 
+== Letting Another Testing Framework Drive ==
+
+If you work on a project that has already been using another testing
+framework and is not ready to completely switch to Google Test yet,
+you can get much of Google Test's benefit by using its assertions in
+your existing tests.  Just change your `main()` function to look
+like:
+
+{{{
+#include <gtest/gtest.h>
+
+int main(int argc, char** argv) {
+  testing::GTEST_FLAG(throw_on_failure) = true;
+  // Important: Google Test must be initialized.
+  testing::InitGoogleTest(&argc, argv);
+
+  ... whatever your existing testing framework requires ...
+}
+}}}
+
+With that, you can use Google Test assertions in addition to the
+native assertions your testing framework provides, for example:
+
+{{{
+void TestFooDoesBar() {
+  Foo foo;
+  EXPECT_LE(foo.Bar(1), 100);     // A Google Test assertion.
+  CPPUNIT_ASSERT(foo.IsEmpty());  // A native assertion.
+}
+}}}
+
+If a Google Test assertion fails, it will print an error message and
+throw an exception, which will be treated as a failure by your host
+testing framework.  If you compile your code with exceptions disabled,
+a failed Google Test assertion will instead exit your program with a
+non-zero code, which will also signal a test failure to your test
+runner.
+
+If you don't write `testing::GTEST_FLAG(throw_on_failure) = true;` in
+your `main()`, you can alternatively enable this feature by specifying
+the `--gtest_throw_on_failure` flag on the command-line or setting the
+`GTEST_THROW_ON_FAILURE` environment variable to a non-zero value.
+
+_Availability:_ Linux, Windows, Mac; starting with v1.3.0.
+
 == Temporarily Disabling Tests ==
 
 If you have a broken test that you cannot fix right away, you can add the
