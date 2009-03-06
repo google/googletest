@@ -48,7 +48,8 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
       || testing::GTEST_FLAG(print_time)
       || testing::GTEST_FLAG(repeat) > 0
       || testing::GTEST_FLAG(show_internal_stack_frames)
-      || testing::GTEST_FLAG(stack_trace_depth) > 0;
+      || testing::GTEST_FLAG(stack_trace_depth) > 0
+      || testing::GTEST_FLAG(throw_on_failure);
   EXPECT_TRUE(dummy || !dummy);  // Suppresses warning that dummy is unused.
 }
 
@@ -115,6 +116,7 @@ using testing::GTEST_FLAG(print_time);
 using testing::GTEST_FLAG(repeat);
 using testing::GTEST_FLAG(show_internal_stack_frames);
 using testing::GTEST_FLAG(stack_trace_depth);
+using testing::GTEST_FLAG(throw_on_failure);
 using testing::IsNotSubstring;
 using testing::IsSubstring;
 using testing::Message;
@@ -1203,6 +1205,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG(output) = "";
     GTEST_FLAG(print_time) = false;
     GTEST_FLAG(repeat) = 1;
+    GTEST_FLAG(throw_on_failure) = false;
   }
 
   // Restores the Google Test flags that the tests have modified.  This will
@@ -1225,6 +1228,7 @@ class GTestFlagSaverTest : public Test {
     EXPECT_STREQ("", GTEST_FLAG(output).c_str());
     EXPECT_FALSE(GTEST_FLAG(print_time));
     EXPECT_EQ(1, GTEST_FLAG(repeat));
+    EXPECT_FALSE(GTEST_FLAG(throw_on_failure));
 
     GTEST_FLAG(also_run_disabled_tests) = true;
     GTEST_FLAG(break_on_failure) = true;
@@ -1236,6 +1240,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG(output) = "xml:foo.xml";
     GTEST_FLAG(print_time) = true;
     GTEST_FLAG(repeat) = 100;
+    GTEST_FLAG(throw_on_failure) = true;
   }
  private:
   // For saving Google Test flags during this test case.
@@ -4320,7 +4325,8 @@ struct Flags {
             list_tests(false),
             output(""),
             print_time(false),
-            repeat(1) {}
+            repeat(1),
+            throw_on_failure(false) {}
 
   // Factory methods.
 
@@ -4396,6 +4402,14 @@ struct Flags {
     return flags;
   }
 
+  // Creates a Flags struct where the gtest_throw_on_failure flag has
+  // the given value.
+  static Flags ThrowOnFailure(bool throw_on_failure) {
+    Flags flags;
+    flags.throw_on_failure = throw_on_failure;
+    return flags;
+  }
+
   // These fields store the flag values.
   bool also_run_disabled_tests;
   bool break_on_failure;
@@ -4406,6 +4420,7 @@ struct Flags {
   const char* output;
   bool print_time;
   Int32 repeat;
+  bool throw_on_failure;
 };
 
 // Fixture for testing InitGoogleTest().
@@ -4422,6 +4437,7 @@ class InitGoogleTestTest : public Test {
     GTEST_FLAG(output) = "";
     GTEST_FLAG(print_time) = false;
     GTEST_FLAG(repeat) = 1;
+    GTEST_FLAG(throw_on_failure) = false;
   }
 
   // Asserts that two narrow or wide string arrays are equal.
@@ -4447,6 +4463,7 @@ class InitGoogleTestTest : public Test {
     EXPECT_STREQ(expected.output, GTEST_FLAG(output).c_str());
     EXPECT_EQ(expected.print_time, GTEST_FLAG(print_time));
     EXPECT_EQ(expected.repeat, GTEST_FLAG(repeat));
+    EXPECT_EQ(expected.throw_on_failure, GTEST_FLAG(throw_on_failure));
   }
 
   // Parses a command line (specified by argc1 and argv1), then
@@ -4991,6 +5008,56 @@ TEST_F(InitGoogleTestTest, AlsoRunDisabledTestsFalse) {
     };
 
     GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::AlsoRunDisabledTests(false));
+}
+
+
+// Tests parsing --gtest_throw_on_failure.
+TEST_F(InitGoogleTestTest, ThrowOnFailureNoDef) {
+  const char* argv[] = {
+    "foo.exe",
+    "--gtest_throw_on_failure",
+    NULL
+};
+
+  const char* argv2[] = {
+    "foo.exe",
+    NULL
+  };
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ThrowOnFailure(true));
+}
+
+// Tests parsing --gtest_throw_on_failure=0.
+TEST_F(InitGoogleTestTest, ThrowOnFailureFalse_0) {
+  const char* argv[] = {
+    "foo.exe",
+    "--gtest_throw_on_failure=0",
+    NULL
+  };
+
+  const char* argv2[] = {
+    "foo.exe",
+    NULL
+  };
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ThrowOnFailure(false));
+}
+
+// Tests parsing a --gtest_throw_on_failure flag that has a "true"
+// definition.
+TEST_F(InitGoogleTestTest, ThrowOnFailureTrue) {
+  const char* argv[] = {
+    "foo.exe",
+    "--gtest_throw_on_failure=1",
+    NULL
+  };
+
+  const char* argv2[] = {
+    "foo.exe",
+    NULL
+  };
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ThrowOnFailure(true));
 }
 
 #if GTEST_OS_WINDOWS
