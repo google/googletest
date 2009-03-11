@@ -27,7 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Author: wan@google.com (Zhanyong Wan), vladl@losev.com (Vlad Losev)
+// Author: wan@google.com (Zhanyong Wan), vladl@google.com (Vlad Losev)
 //
 // This file implements death tests.
 
