@@ -55,7 +55,9 @@ namespace {
 
 using ::std::ostream;
 
-#if GTEST_OS_WINDOWS
+#ifdef _WIN32_WCE
+#define snprintf _snprintf
+#elif GTEST_OS_WINDOWS
 #define snprintf _snprintf_s
 #endif
 
@@ -157,9 +159,11 @@ static void PrintAsWideCharLiteralTo(wchar_t c, ostream* os) {
       *os << "\\v";
       break;
     default:
-      // isprint() takes an int and requires it to be either EOF or in
-      // the range [0, 255]. We check that c is in this range before calling it.
-      if ((c & 0xFF) == c && isprint(c)) {
+      // Checks whether c is printable or not. Printable characters are in
+      // the range [0x20,0x7E].
+      // We test the value of c directly instead of calling isprint(), as
+      // isprint() is buggy on Windows mobile.
+      if (0x20 <= c && c <= 0x7E) {
         *os << static_cast<char>(c);
       } else {
         // Buffer size enough for the maximum number of digits and \0.

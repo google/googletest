@@ -116,7 +116,10 @@
 
 #include <gmock/gmock.h>
 
+#ifndef _WIN32_WCE
 #include <errno.h>
+#endif
+
 #include <gtest/gtest.h>
 #include <iostream>
 #include <vector>
@@ -161,7 +164,6 @@ using testing::ReturnNull;
 using testing::ReturnRef;
 using testing::SetArgumentPointee;
 using testing::SetArrayArgument;
-using testing::SetErrnoAndReturn;
 using testing::StartsWith;
 using testing::StrCaseEq;
 using testing::StrCaseNe;
@@ -172,6 +174,10 @@ using testing::TypedEq;
 using testing::WithArg;
 using testing::WithArgs;
 using testing::WithoutArgs;
+
+#ifndef _WIN32_WCE
+using testing::SetErrnoAndReturn;
+#endif  // _WIN32_WCE
 
 #if GTEST_HAS_EXCEPTIONS
 using testing::Throw;
@@ -290,6 +296,8 @@ TEST(LinkTest, TestSetArrayArgument) {
   mock.VoidFromString(&ch);
 }
 
+#ifndef _WIN32_WCE
+
 // Tests the linkage of the SetErrnoAndReturn action.
 TEST(LinkTest, TestSetErrnoAndReturn) {
   Mock mock;
@@ -299,6 +307,8 @@ TEST(LinkTest, TestSetErrnoAndReturn) {
   mock.IntFromString(NULL);
   errno = saved_errno;
 }
+
+#endif  // _WIN32_WCE
 
 // Tests the linkage of the Invoke(function) and Invoke(object, method) actions.
 TEST(LinkTest, TestInvoke) {

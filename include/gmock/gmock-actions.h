@@ -38,7 +38,11 @@
 
 #include <algorithm>
 #include <string>
+
+#ifndef _WIN32_WCE
 #include <errno.h>
+#endif
+
 #include <gmock/internal/gmock-internal-utils.h>
 #include <gmock/internal/gmock-port.h>
 
@@ -601,6 +605,8 @@ class AssignAction {
   const T2 value_;
 };
 
+#ifndef _WIN32_WCE
+
 // Implements the SetErrnoAndReturn action to simulate return from
 // various system calls and libc functions.
 template <typename T>
@@ -618,6 +624,8 @@ class SetErrnoAndReturnAction {
   const int errno_;
   const T result_;
 };
+
+#endif  // _WIN32_WCE
 
 // Implements the SetArgumentPointee<N>(x) action for any function
 // whose N-th argument (0-based) is a pointer to x's type.  The
@@ -878,6 +886,8 @@ PolymorphicAction<internal::AssignAction<T1, T2> > Assign(T1* ptr, T2 val) {
   return MakePolymorphicAction(internal::AssignAction<T1, T2>(ptr, val));
 }
 
+#ifndef _WIN32_WCE
+
 // Creates an action that sets errno and returns the appropriate error.
 template <typename T>
 PolymorphicAction<internal::SetErrnoAndReturnAction<T> >
@@ -885,6 +895,8 @@ SetErrnoAndReturn(int errval, T result) {
   return MakePolymorphicAction(
       internal::SetErrnoAndReturnAction<T>(errval, result));
 }
+
+#endif  // _WIN32_WCE
 
 // Various overloads for InvokeWithoutArgs().
 

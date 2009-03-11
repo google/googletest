@@ -69,7 +69,10 @@ using testing::ReturnNull;
 using testing::ReturnRef;
 using testing::SetArgumentPointee;
 using testing::SetArrayArgument;
+
+#ifndef _WIN32_WCE
 using testing::SetErrnoAndReturn;
+#endif  // _WIN32_WCE
 
 #if GMOCK_HAS_PROTOBUF_
 using testing::internal::TestMessage;
@@ -951,6 +954,8 @@ TEST(AssignTest, CompatibleTypes) {
   EXPECT_DOUBLE_EQ(5, x);
 }
 
+#ifndef _WIN32_WCE
+
 class SetErrnoAndReturnTest : public testing::Test {
  protected:
   virtual void SetUp() { errno = 0; }
@@ -975,5 +980,7 @@ TEST_F(SetErrnoAndReturnTest, CompatibleTypes) {
   EXPECT_DOUBLE_EQ(5.0, a.Perform(make_tuple()));
   EXPECT_EQ(EINVAL, errno);
 }
+
+#endif  // _WIN32_WCE
 
 }  // Unnamed namespace
