@@ -33,6 +33,7 @@
 
 #include <gtest/gtest-death-test.h>
 #include <gtest/gtest.h>
+#include <gtest/internal/gtest-filepath.h>
 
 #if GTEST_HAS_DEATH_TEST
 
@@ -62,6 +63,7 @@ using testing::Message;
 
 using testing::internal::DeathTest;
 using testing::internal::DeathTestFactory;
+using testing::internal::FilePath;
 using testing::internal::GetLastSystemErrorMessage;
 using testing::internal::ParseNaturalNumber;
 using testing::internal::String;
@@ -99,6 +101,16 @@ class ReplaceDeathTestFactory {
 
 class TestForDeathTest : public testing::Test {
  protected:
+  TestForDeathTest() : original_dir_(FilePath::GetCurrentDir()) {}
+
+  virtual ~TestForDeathTest() {
+#if GTEST_OS_WINDOWS
+    _chdir(original_dir_.c_str());
+#else
+    chdir(original_dir_.c_str());
+#endif
+  }
+
   // A static member function that's expected to die.
   static void StaticMemberFunction() {
     fprintf(stderr, "%s", "death inside StaticMemberFunction().");
@@ -121,6 +133,7 @@ class TestForDeathTest : public testing::Test {
 
   // True iff MemberFunction() should die.
   bool should_die_;
+  const FilePath original_dir_;
 };
 
 // A class with a member function that may die.

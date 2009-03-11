@@ -124,7 +124,7 @@ def GetExitStatus(exit_code):
 
 
 class Subprocess:
-  def __init__(this, command, working_dir=None):
+  def __init__(self, command, working_dir=None):
     """Changes into a specified directory, if provided, and executes a command.
     Restores the old directory afterwards. Execution results are returned
     via the following attributes:
@@ -137,7 +137,7 @@ class Subprocess:
                              combined in a string.
 
     Args:
-      command: A command to run.
+      command: A command to run, in the form of sys.argv.
       working_dir: A directory to change into.
     """
 
@@ -154,8 +154,8 @@ class Subprocess:
                            cwd=working_dir, universal_newlines=True)
       # communicate returns a tuple with the file obect for the child's
       # output.
-      this.output = p.communicate()[0]
-      this._return_code = p.returncode
+      self.output = p.communicate()[0]
+      self._return_code = p.returncode
     else:
       old_dir = os.getcwd()
       try:
@@ -163,25 +163,25 @@ class Subprocess:
           os.chdir(working_dir)
         p = popen2.Popen4(command)
         p.tochild.close()
-        this.output = p.fromchild.read()
+        self.output = p.fromchild.read()
         ret_code = p.wait()
       finally:
         os.chdir(old_dir)
       # Converts ret_code to match the semantics of
       # subprocess.Popen.returncode.
       if os.WIFSIGNALED(ret_code):
-        this._return_code = -os.WTERMSIG(ret_code)
+        self._return_code = -os.WTERMSIG(ret_code)
       else:  # os.WIFEXITED(ret_code) should return True here.
-        this._return_code = os.WEXITSTATUS(ret_code)
+        self._return_code = os.WEXITSTATUS(ret_code)
 
-    if this._return_code < 0:
-      this.terminated_by_signal = True
-      this.exited = False
-      this.signal = -this._return_code
+    if self._return_code < 0:
+      self.terminated_by_signal = True
+      self.exited = False
+      self.signal = -self._return_code
     else:
-      this.terminated_by_signal = False
-      this.exited = True
-      this.exit_code = this._return_code
+      self.terminated_by_signal = False
+      self.exited = True
+      self.exit_code = self._return_code
 
 
 def Main():

@@ -28,20 +28,15 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: wan@google.com (Zhanyong Wan)
-//
-// Tests for Google C++ Testing Framework (Google Test)
-//
-// Sometimes it's desirable to build most of Google Test's own tests
-// by compiling a single file.  This file serves this purpose.
-#include "test/gtest-filepath_test.cc"
-#include "test/gtest-linked_ptr_test.cc"
-#include "test/gtest-message_test.cc"
-#include "test/gtest-options_test.cc"
-#include "test/gtest-port_test.cc"
-#include "test/gtest_pred_impl_unittest.cc"
-#include "test/gtest_prod_test.cc"
-#include "test/gtest-test-part_test.cc"
-#include "test/gtest-typed-test_test.cc"
-#include "test/gtest-typed-test2_test.cc"
-#include "test/gtest_unittest.cc"
-#include "test/production.cc"
+
+// This program is meant to be run by gtest_help_test.py.  Do not run
+// it directly.
+
+#include <gtest/gtest.h>
+
+// When a help flag is specified, this program should skip the tests
+// and exit with 0; otherwise the following test will be executed,
+// causing this program to exit with a non-zero code.
+TEST(HelpFlagTest, ShouldNotBeRun) {
+  ASSERT_TRUE(false) << "Tests shouldn't be run when --help is specified.";
+}

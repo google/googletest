@@ -213,6 +213,7 @@ GtestBinary(env_with_exceptions,
 # TODO(wan@google.com) Add these unit tests:
 # - gtest_break_on_failure_unittest_
 # - gtest_filter_unittest_
+# - gtest_help_test_
 # - gtest_list_tests_unittest_
 # - gtest_throw_on_failure_ex_test
 # - gtest_throw_on_failure_test_

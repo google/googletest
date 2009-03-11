@@ -244,6 +244,10 @@ GTEST_DEFINE_bool_(
 
 namespace internal {
 
+// g_help_flag is true iff the --help flag or an equivalent form is
+// specified on the command line.
+static bool g_help_flag = false;
+
 // GTestIsInitialized() returns true iff the user has initialized
 // Google Test.  Useful for catching the user mistake of not initializing
 // Google Test before calling RUN_ALL_TESTS().
@@ -2471,6 +2475,7 @@ static void PrintTestPartResult(
 namespace internal {
 
 enum GTestColor {
+  COLOR_DEFAULT,
   COLOR_RED,
   COLOR_GREEN,
   COLOR_YELLOW
@@ -2484,20 +2489,21 @@ WORD GetColorAttribute(GTestColor color) {
     case COLOR_RED:    return FOREGROUND_RED;
     case COLOR_GREEN:  return FOREGROUND_GREEN;
     case COLOR_YELLOW: return FOREGROUND_RED | FOREGROUND_GREEN;
+    default:           return 0;
   }
-  return 0;
 }
 
 #else
 
-// Returns the ANSI color code for the given color.
+// Returns the ANSI color code for the given color.  COLOR_DEFAULT is
+// an invalid input.
 const char* GetAnsiColorCode(GTestColor color) {
   switch (color) {
     case COLOR_RED:     return "1";
     case COLOR_GREEN:   return "2";
     case COLOR_YELLOW:  return "3";
+    default:            return NULL;
   };
-  return NULL;
 }
 
 #endif  // GTEST_OS_WINDOWS && !_WIN32_WCE
@@ -2540,9 +2546,11 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   va_start(args, fmt);
 
 #if defined(_WIN32_WCE) || GTEST_OS_SYMBIAN || GTEST_OS_ZOS
-  static const bool use_color = false;
+  const bool use_color = false;
 #else
-  static const bool use_color = ShouldUseColor(isatty(fileno(stdout)) != 0);
+  static const bool in_color_mode =
+      ShouldUseColor(isatty(fileno(stdout)) != 0);
+  const bool use_color = in_color_mode && (color != COLOR_DEFAULT);
 #endif  // defined(_WIN32_WCE) || GTEST_OS_SYMBIAN || GTEST_OS_ZOS
   // The '!= 0' comparison is necessary to satisfy MSVC 7.1.
 
@@ -2577,6 +2585,7 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
 }  // namespace internal
 
 using internal::ColoredPrintf;
+using internal::COLOR_DEFAULT;
 using internal::COLOR_RED;
 using internal::COLOR_GREEN;
 using internal::COLOR_YELLOW;
@@ -3590,6 +3599,10 @@ int UnitTestImpl::RunAllTests() {
     return 1;
   }
 
+  // Do not run any test if the --help flag was specified.
+  if (g_help_flag)
+    return 0;
+
   RegisterParameterizedTests();
 
   // Even if sharding is not on, test runners may want to use the
@@ -3789,9 +3802,9 @@ bool ShouldRunTestOnShard(int total_shards, int shard_index, int test_id) {
 // Returns the number of tests that should run.
 int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
   const Int32 total_shards = shard_tests == HONOR_SHARDING_PROTOCOL ?
-    Int32FromEnvOrDie(kTestTotalShards, -1) : -1;
+      Int32FromEnvOrDie(kTestTotalShards, -1) : -1;
   const Int32 shard_index = shard_tests == HONOR_SHARDING_PROTOCOL ?
-    Int32FromEnvOrDie(kTestShardIndex, -1) : -1;
+      Int32FromEnvOrDie(kTestShardIndex, -1) : -1;
 
   // num_runnable_tests are the number of tests that will
   // run across all shards (i.e., match filter and are not disabled).
@@ -3800,7 +3813,7 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
   int num_runnable_tests = 0;
   int num_selected_tests = 0;
   for (const internal::ListNode<TestCase *> *test_case_node =
-       test_cases_.Head();
+           test_cases_.Head();
        test_case_node != NULL;
        test_case_node = test_case_node->next()) {
     TestCase * const test_case = test_case_node->element();
@@ -3808,7 +3821,7 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
     test_case->set_should_run(false);
 
     for (const internal::ListNode<TestInfo *> *test_info_node =
-           test_case->test_info_list().Head();
+             test_case->test_info_list().Head();
          test_info_node != NULL;
          test_info_node = test_info_node->next()) {
       TestInfo * const test_info = test_info_node->element();
@@ -3816,10 +3829,10 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
       // A test is disabled if test case name or test name matches
       // kDisableTestFilter.
       const bool is_disabled =
-        internal::UnitTestOptions::MatchesFilter(test_case_name,
-                                                 kDisableTestFilter) ||
-        internal::UnitTestOptions::MatchesFilter(test_name,
-                                                 kDisableTestFilter);
+          internal::UnitTestOptions::MatchesFilter(test_case_name,
+                                                   kDisableTestFilter) ||
+          internal::UnitTestOptions::MatchesFilter(test_name,
+                                                   kDisableTestFilter);
       test_info->impl()->set_is_disabled(is_disabled);
 
       const bool is_runnable =
@@ -4089,6 +4102,102 @@ bool ParseStringFlag(const char* str, const char* flag, String* value) {
   return true;
 }
 
+// Prints a string containing code-encoded text.  The following escape
+// sequences can be used in the string to control the text color:
+//
+//   @@    prints a single '@' character.
+//   @R    changes the color to red.
+//   @G    changes the color to green.
+//   @Y    changes the color to yellow.
+//   @D    changes to the default terminal text color.
+//
+// TODO(wan@google.com): Write tests for this once we add stdout
+// capturing to Google Test.
+static void PrintColorEncoded(const char* str) {
+  GTestColor color = COLOR_DEFAULT;  // The current color.
+
+  // Conceptually, we split the string into segments divided by escape
+  // sequences.  Then we print one segment at a time.  At the end of
+  // each iteration, the str pointer advances to the beginning of the
+  // next segment.
+  for (;;) {
+    const char* p = strchr(str, '@');
+    if (p == NULL) {
+      ColoredPrintf(color, "%s", str);
+      return;
+    }
+
+    ColoredPrintf(color, "%s", String(str, p - str).c_str());
+
+    const char ch = p[1];
+    str = p + 2;
+    if (ch == '@') {
+      ColoredPrintf(color, "@");
+    } else if (ch == 'D') {
+      color = COLOR_DEFAULT;
+    } else if (ch == 'R') {
+      color = COLOR_RED;
+    } else if (ch == 'G') {
+      color = COLOR_GREEN;
+    } else if (ch == 'Y') {
+      color = COLOR_YELLOW;
+    } else {
+      --str;
+    }
+  }
+}
+
+static const char kColorEncodedHelpMessage[] =
+"This program contains tests written using " GTEST_NAME_ ". You can use the\n"
+"following command line flags to control its behavior:\n"
+"\n"
+"Test Selection:\n"
+"  @G--" GTEST_FLAG_PREFIX_ "list_tests@D\n"
+"      List the names of all tests instead of running them. The name of\n"
+"      TEST(Foo, Bar) is \"Foo.Bar\".\n"
+"  @G--" GTEST_FLAG_PREFIX_ "filter=@YPOSTIVE_PATTERNS"
+    "[@G-@YNEGATIVE_PATTERNS]@D\n"
+"      Run only the tests whose name matches one of the positive patterns but\n"
+"      none of the negative patterns. '?' matches any single character; '*'\n"
+"      matches any substring; ':' separates two patterns.\n"
+"  @G--" GTEST_FLAG_PREFIX_ "also_run_disabled_tests@D\n"
+"      Run all disabled tests too.\n"
+"  @G--" GTEST_FLAG_PREFIX_ "repeat=@Y[COUNT]@D\n"
+"      Run the tests repeatedly; use a negative count to repeat forever.\n"
+"\n"
+"Test Output:\n"
+"  @G--" GTEST_FLAG_PREFIX_ "color=@Y(@Gyes@Y|@Gno@Y|@Gauto@Y)@D\n"
+"      Enable/disable colored output. The default is @Gauto@D.\n"
+"  -@G-" GTEST_FLAG_PREFIX_ "print_time@D\n"
+"      Print the elapsed time of each test.\n"
+"  @G--" GTEST_FLAG_PREFIX_ "output=xml@Y[@G:@YDIRECTORY_PATH@G"
+    GTEST_PATH_SEP_ "@Y|@G:@YFILE_PATH]@D\n"
+"      Generate an XML report in the given directory or with the given file\n"
+"      name. @YFILE_PATH@D defaults to @Gtest_details.xml@D.\n"
+"\n"
+"Failure Behavior:\n"
+"  @G--" GTEST_FLAG_PREFIX_ "break_on_failure@D\n"
+"      Turn assertion failures into debugger break-points.\n"
+"  @G--" GTEST_FLAG_PREFIX_ "throw_on_failure@D\n"
+"      Turn assertion failures into C++ exceptions.\n"
+#if GTEST_OS_WINDOWS
+"  @G--" GTEST_FLAG_PREFIX_ "catch_exceptions@D\n"
+"      Suppress pop-ups caused by exceptions.\n"
+#endif  // GTEST_OS_WINDOWS
+"\n"
+"Except for @G--" GTEST_FLAG_PREFIX_ "list_tests@D, you can alternatively set "
+    "the corresponding\n"
+"environment variable of a flag (all letters in upper-case). For example, to\n"
+"print the elapsed time, you can either specify @G--" GTEST_FLAG_PREFIX_
+    "print_time@D or set the\n"
+"@G" GTEST_FLAG_PREFIX_UPPER_ "PRINT_TIME@D environment variable to a "
+    "non-zero value.\n"
+"\n"
+"For more information, please read the " GTEST_NAME_ " documentation at\n"
+"@G" GTEST_PROJECT_URL_ "@D. If you find a bug in " GTEST_NAME_ "\n"
+"(not one in your own code or tests), please report it to\n"
+"@G<" GTEST_DEV_EMAIL_ ">@D.\n";
+
 // Parses the command line for Google Test flags, without initializing
 // other parts of Google Test.  The type parameter CharType can be
 // instantiated to either char or wchar_t.
@@ -4137,7 +4246,17 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
       // We also need to decrement the iterator as we just removed
       // an element.
       i--;
+    } else if (arg_string == "--help" || arg_string == "-h" ||
+               arg_string == "-?" || arg_string == "/?") {
+      g_help_flag = true;
     }
+  }
+
+  if (g_help_flag) {
+    // We print the help here instead of in RUN_ALL_TESTS(), as the
+    // latter may not be called at all if the user is using Google
+    // Test with another testing framework.
+    PrintColorEncoded(kColorEncodedHelpMessage);
   }
 }
 
