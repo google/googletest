@@ -49,15 +49,16 @@
 #include <stddef.h>
 #include <stdlib.h>   // For strtoll/_strtoul64.
 
+#include <string>
+
+#include <gtest/internal/gtest-port.h>
+
 #if GTEST_OS_WINDOWS
 #include <windows.h>  // For DWORD.
 #endif  // GTEST_OS_WINDOWS
 
-#include <gtest/internal/gtest-port.h>
 #include <gtest/gtest.h>
 #include <gtest/gtest-spi.h>
-
-#include <string>
 
 namespace testing {
 

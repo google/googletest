@@ -85,6 +85,7 @@ const char* TypedTestCasePState::VerifyRegisteredTestNames(
   if (errors_str != "") {
     fprintf(stderr, "%s %s", FormatFileLocation(file, line).c_str(),
             errors_str.c_str());
+    fflush(stderr);
     abort();
   }
 
