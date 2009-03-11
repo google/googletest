@@ -98,7 +98,10 @@ TEST(XmlOutputTest, GetOutputFileFromDirectoryPath) {
                    FilePath("path\\gtest-options_test.xml")).c_str()) == 0 ||
       _strcmpi(output_file.c_str(),
                GetAbsolutePathOf(
-                   FilePath("path\\gtest-options-ex_test.xml")).c_str()) == 0)
+                   FilePath("path\\gtest-options-ex_test.xml")).c_str()) == 0 ||
+      _strcmpi(output_file.c_str(),
+               GetAbsolutePathOf(
+                   FilePath("path\\gtest_all_test.xml")).c_str()) == 0)
                        << " output_file = " << output_file;
 #else
   GTEST_FLAG(output) = "xml:path/";
@@ -113,7 +116,13 @@ TEST(XmlOutputTest, GetOutputFileFromDirectoryPath) {
                   FilePath("path/gtest-options_test.xml")).c_str() ||
               output_file ==
               GetAbsolutePathOf(
-                  FilePath("path/lt-gtest-options_test.xml")).c_str())
+                  FilePath("path/lt-gtest-options_test.xml")).c_str() ||
+              output_file ==
+              GetAbsolutePathOf(
+                  FilePath("path/gtest_all_test.xml")).c_str() ||
+              output_file ==
+              GetAbsolutePathOf(
+                  FilePath("path/lt-gtest_all_test.xml")).c_str())
                       << " output_file = " << output_file;
 #endif
 }
@@ -123,13 +132,16 @@ TEST(OutputFileHelpersTest, GetCurrentExecutableName) {
   const char* const exe_str = executable.c_str();
 #if defined(_WIN32_WCE) || GTEST_OS_WINDOWS
   ASSERT_TRUE(_strcmpi("gtest-options_test", exe_str) == 0 ||
-              _strcmpi("gtest-options-ex_test", exe_str) == 0)
+              _strcmpi("gtest-options-ex_test", exe_str) == 0 ||
+              _strcmpi("gtest_all_test", exe_str) == 0)
               << "GetCurrentExecutableName() returns " << exe_str;
 #else
   // TODO(wan@google.com): remove the hard-coded "lt-" prefix when
   //   Chandler Carruth's libtool replacement is ready.
   EXPECT_TRUE(String(exe_str) == "gtest-options_test" ||
-              String(exe_str) == "lt-gtest-options_test")
+              String(exe_str) == "lt-gtest-options_test" ||
+              String(exe_str) == "gtest_all_test" ||
+              String(exe_str) == "lt-gtest_all_test")
                   << "GetCurrentExecutableName() returns " << exe_str;
 #endif
 }
@@ -192,7 +204,11 @@ TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithRelativePath) {
       _strcmpi(output_file.c_str(),
                FilePath::ConcatPaths(
                    original_working_dir_,
-                   FilePath("path\\gtest-options-ex_test.xml")).c_str()) == 0)
+                   FilePath("path\\gtest-options-ex_test.xml")).c_str()) == 0 ||
+      _strcmpi(output_file.c_str(),
+               FilePath::ConcatPaths(
+                   original_working_dir_,
+                   FilePath("path\\gtest_all_test.xml")).c_str()) == 0)
                        << " output_file = " << output_file;
 #else
   GTEST_FLAG(output) = "xml:path/";
@@ -205,7 +221,11 @@ TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithRelativePath) {
   EXPECT_TRUE(output_file == FilePath::ConcatPaths(original_working_dir_,
                       FilePath("path/gtest-options_test.xml")).c_str() ||
               output_file == FilePath::ConcatPaths(original_working_dir_,
-                      FilePath("path/lt-gtest-options_test.xml")).c_str())
+                      FilePath("path/lt-gtest-options_test.xml")).c_str() ||
+              output_file == FilePath::ConcatPaths(original_working_dir_,
+                      FilePath("path/gtest_all_test.xml")).c_str() ||
+              output_file == FilePath::ConcatPaths(original_working_dir_,
+                      FilePath("path/lt-gtest_all_test.xml")).c_str())
                   << " output_file = " << output_file;
 #endif
 }
@@ -230,7 +250,9 @@ TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithAbsolutePath) {
       _strcmpi(output_file.c_str(),
                FilePath("c:\\tmp\\gtest-options_test.xml").c_str()) == 0 ||
       _strcmpi(output_file.c_str(),
-               FilePath("c:\\tmp\\gtest-options-ex_test.xml").c_str()) == 0)
+               FilePath("c:\\tmp\\gtest-options-ex_test.xml").c_str()) == 0 ||
+      _strcmpi(output_file.c_str(),
+               FilePath("c:\\tmp\\gtest_all_test.xml").c_str()) == 0)
                    << " output_file = " << output_file;
 #else
   GTEST_FLAG(output) = "xml:/tmp/";
@@ -241,7 +263,9 @@ TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithAbsolutePath) {
   //   hard-coded logic when Chandler Carruth's libtool replacement is
   //   ready.
   EXPECT_TRUE(output_file == "/tmp/gtest-options_test.xml" ||
-              output_file == "/tmp/lt-gtest-options_test.xml")
+              output_file == "/tmp/lt-gtest-options_test.xml" ||
+              output_file == "/tmp/gtest_all_test.xml" ||
+              output_file == "/tmp/lt-gtest_all_test.xml")
                   << " output_file = " << output_file;
 #endif
 }

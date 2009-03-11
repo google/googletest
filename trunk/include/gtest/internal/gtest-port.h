@@ -151,9 +151,11 @@
 #include <stdio.h>
 #include <iostream>  // Used for GTEST_CHECK_
 
-#define GTEST_NAME_ "Google Test"
+#define GTEST_DEV_EMAIL_ "googletestframework@@googlegroups.com"
 #define GTEST_FLAG_PREFIX_ "gtest_"
 #define GTEST_FLAG_PREFIX_UPPER_ "GTEST_"
+#define GTEST_NAME_ "Google Test"
+#define GTEST_PROJECT_URL_ "http://code.google.com/p/googletest/"
 
 // Determines the version of gcc that is used to compile this.
 #ifdef __GNUC__
@@ -696,13 +698,18 @@ struct is_pointer : public false_type {};
 template <typename T>
 struct is_pointer<T*> : public true_type {};
 
+#if GTEST_OS_WINDOWS
+#define GTEST_PATH_SEP_ "\\"
+#else
+#define GTEST_PATH_SEP_ "/"
+#endif  // GTEST_OS_WINDOWS
+
 // Defines BiggestInt as the biggest signed integer type the compiler
 // supports.
-
 #if GTEST_OS_WINDOWS
 typedef __int64 BiggestInt;
 #else
-typedef long long BiggestInt;            // NOLINT
+typedef long long BiggestInt;  // NOLINT
 #endif  // GTEST_OS_WINDOWS
 
 // The maximum number a BiggestInt can represent.  This definition

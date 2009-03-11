@@ -50,16 +50,11 @@
 #include "src/gtest-internal-inl.h"
 #undef GTEST_IMPLEMENTATION_
 
-#if GTEST_OS_WINDOWS
 #ifdef _WIN32_WCE
 #include <windows.h>  // NOLINT
-#else
+#elif GTEST_OS_WINDOWS
 #include <direct.h>  // NOLINT
 #endif  // _WIN32_WCE
-#define GTEST_PATH_SEP_ "\\"
-#else
-#define GTEST_PATH_SEP_ "/"
-#endif  // GTEST_OS_WINDOWS
 
 namespace testing {
 namespace internal {
@@ -88,11 +83,13 @@ int _rmdir(const char* path) {
 #ifndef _WIN32_WCE
 
 TEST(GetCurrentDirTest, ReturnsCurrentDir) {
-  EXPECT_FALSE(FilePath::GetCurrentDir().IsEmpty());
+  const FilePath original_dir = FilePath::GetCurrentDir();
+  EXPECT_FALSE(original_dir.IsEmpty());
 
 #if GTEST_OS_WINDOWS
   _chdir(GTEST_PATH_SEP_);
   const FilePath cwd = FilePath::GetCurrentDir();
+  _chdir(original_dir.c_str());
   // Skips the ":".
   const char* const cwd_without_drive = strchr(cwd.c_str(), ':');
   ASSERT_TRUE(cwd_without_drive != NULL);
@@ -100,6 +97,7 @@ TEST(GetCurrentDirTest, ReturnsCurrentDir) {
 #else
   chdir(GTEST_PATH_SEP_);
   EXPECT_STREQ(GTEST_PATH_SEP_, FilePath::GetCurrentDir().c_str());
+  chdir(original_dir.c_str());
 #endif
 }
 

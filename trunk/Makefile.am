@@ -319,6 +319,12 @@ test_gtest_filter_unittest__LDADD = lib/libgtest.la
 check_SCRIPTS += test/gtest_filter_unittest.py
 TESTS += test/gtest_filter_unittest.py
 
+check_PROGRAMS += test/gtest_help_test_
+test_gtest_help_test__SOURCES = test/gtest_help_test_.cc
+test_gtest_help_test__LDADD = lib/libgtest_main.la
+check_SCRIPTS += test/gtest_help_test.py
+TESTS += test/gtest_help_test.py
+
 check_PROGRAMS += test/gtest_list_tests_unittest_
 test_gtest_list_tests_unittest__SOURCES = test/gtest_list_tests_unittest_.cc
 test_gtest_list_tests_unittest__LDADD = lib/libgtest.la
