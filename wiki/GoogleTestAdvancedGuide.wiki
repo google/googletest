@@ -729,6 +729,7 @@ _Availability_: Linux, Windows, Mac.
 
 =  Sharing Resources Between Tests in the Same Test Case  =
 
+
 Google Test creates a new test fixture object for each test in order to make
 tests independent and easier to debug. However, sometimes tests use resources
 that are expensive to set up, making the one-copy-per-test model prohibitively
@@ -1356,37 +1357,28 @@ int main(int argc, char** argv) {
 }
 }}}
 
-== Turning Assertion Failures into Break-Points ==
+== Selecting Tests ==
 
-When running test programs under a debugger, it's very convenient if the
-debugger can catch an assertion failure and automatically drop into interactive
-mode. Google Test's _break-on-failure_ mode supports this behavior.
+=== Listing Test Names ===
 
-To enable it, set the `GTEST_BREAK_ON_FAILURE` environment variable to a value
-other than `0` . Alternatively, you can use the `--gtest_break_on_failure`
-command line flag.
+Sometimes it is necessary to list the available tests in a program before
+running them so that a filter may be applied if needed. Including the flag
+`--gtest_list_tests` overrides all other flags and lists tests in the following
+format:
+{{{
+TestCase1.
+  TestName1
+  TestName2
+TestCase2.
+  TestName
+}}}
+
+None of the tests listed are actually run if the flag is provided. There is no
+corresponding environment variable for this flag.
 
 _Availability:_ Linux, Windows, Mac.
 
-== Suppressing Pop-ups Caused by Exceptions ==
-
-On Windows, Google Test may be used with exceptions enabled. Even when
-exceptions are disabled, an application can still throw structured exceptions
-(SEH's). If a test throws an exception, by default Google Test doesn't try to
-catch it. Instead, you'll see a pop-up dialog, at which point you can attach
-the process to a debugger and easily find out what went wrong.
-
-However, if you don't want to see the pop-ups (for example, if you run the
-tests in a batch job), set the `GTEST_CATCH_EXCEPTIONS` environment variable to
-a non- `0` value, or use the `--gtest_catch_exceptions` flag. Google Test now
-catches all test-thrown exceptions and logs them as failures.
-
-_Availability:_ Windows. `GTEST_CATCH_EXCEPTIONS` and
-`--gtest_catch_exceptions` have no effect on Google Test's behavior on Linux or
-Mac, even if exceptions are enabled. It is possible to add support for catching
-exceptions on these platforms, but it is not implemented yet.
-
-== Running a Subset of the Tests  ==
+=== Running a Subset of the Tests  ===
 
 By default, a Google Test program runs all tests the user has defined.
 Sometimes, you want to run only a subset of the tests (e.g. for debugging or
@@ -1416,26 +1408,101 @@ For example:
 
 _Availability:_ Linux, Windows, Mac.
 
-== Listing Test Names ==
+=== Temporarily Disabling Tests ===
 
-Sometimes it is necessary to list the available tests in a program before
-running them so that a filter may be applied if needed. Including the flag
-`--gtest_list_tests` overrides all other flags and lists tests in the following
-format:
+If you have a broken test that you cannot fix right away, you can add the
+`DISABLED_` prefix to its name. This will exclude it from execution. This is
+better than commenting out the code or using `#if 0`, as disabled tests are
+still compiled (and thus won't rot).
+
+If you need to disable all tests in a test case, you can either add `DISABLED_`
+to the front of the name of each test, or alternatively add it to the front of
+the test case name.
+
+For example, the following tests won't be run by Google Test, even though they
+will still be compiled:
+
 {{{
-TestCase1.
-  TestName1
-  TestName2
-TestCase2.
-  TestName
+// Tests that Foo does Abc.
+TEST(FooTest, DISABLED_DoesAbc) { ... }
+
+class DISABLED_BarTest : public testing::Test { ... };
+
+// Tests that Bar does Xyz.
+TEST_F(DISABLED_BarTest, DoesXyz) { ... }
 }}}
 
-None of the tests listed are actually run if the flag is provided. There is no
-corresponding environment variable for this flag.
+_Note:_ This feature should only be used for temporary pain-relief. You still
+have to fix the disabled tests at a later date. As a reminder, Google Test will
+print a banner warning you if a test program contains any disabled tests.
+
+_Tip:_ You can easily count the number of disabled tests you have
+using `grep`. This number can be used as a metric for improving your
+test quality.
 
 _Availability:_ Linux, Windows, Mac.
 
-==  Generating an XML Report  ==
+=== Temporarily Enabling Disabled Tests ===
+
+To include [#Temporarily_Disabling_Tests disabled tests] in test
+execution, just invoke the test program with the
+`--gtest_also_run_disabled_tests` flag or set the
+`GTEST_ALSO_RUN_DISABLED_TESTS` environment variable to a value other
+than `0`.  You can combine this with the
+[#Running_a_Subset_of_the_Tests --gtest_filter] flag to further select
+which disabled tests to run.
+
+_Availability:_ Linux, Windows, Mac; since version 1.3.0.
+
+=== Repeating the Tests ===
+
+Once in a while you'll run into a test whose result is hit-or-miss. Perhaps it
+will fail only 1% of the time, making it rather hard to reproduce the bug under
+a debugger. This can be a major source of frustration.
+
+The `--gtest_repeat` flag allows you to repeat all (or selected) test methods
+in a program many times. Hopefully, a flaky test will eventually fail and give
+you a chance to debug. Here's how to use it:
+
+|| `$ foo_test --gtest_repeat=1000` || Repeat foo_test 1000 times and don't stop at failures. ||
+|| `$ foo_test --gtest_repeat=-1` || A negative count means repeating forever. ||
+|| `$ foo_test --gtest_repeat=1000 --gtest_break_on_failure` || Repeat foo_test 1000 times, stopping at the first failure. This is especially useful when running under a debugger: when the testfails, it will drop into the debugger and you can then inspect variables and stacks. ||
+|| `$ foo_test --gtest_repeat=1000 --gtest_filter=FooBar` || Repeat the tests whose name matches the filter 1000 times. ||
+
+If your test program contains global set-up/tear-down code registered
+using `AddGlobalTestEnvironment()`, it will be repeated in each
+iteration as well, as the flakiness may be in it. You can also specify
+the repeat count by setting the `GTEST_REPEAT` environment variable.
+
+_Availability:_ Linux, Windows, Mac.
+
+== Controlling Test Output ==
+
+=== Colored Terminal Output ===
+
+Google Test can use colors in its terminal output to make it easier to spot
+the separation between tests, and whether tests passed.
+
+You can set the GTEST_COLOR environment variable or set the `--gtest_color`
+command line flag to `yes`, `no`, or `auto` (the default) to enable colors,
+disable colors, or let Google Test decide. When the value is `auto`, Google
+Test will use colors if and only if the output goes to a terminal and (on
+non-Windows platforms) the `TERM` environment variable is set to `xterm` or
+`xterm-color`.
+
+_Availability:_ Linux, Windows, Mac.
+
+=== Printing the Elapsed Time ===
+
+By default, Google Test does not show you the time it takes to run
+each test.  To see that, run the test program with the
+`--gtest_print_time` command line flag.  Setting the
+`GTEST_PRINT_TIME` environment variable to a non-zero value has the
+same effect.
+
+_Availability:_ Linux, Windows, Mac.
+
+=== Generating an XML Report  ===
 
 Google Test can emit a detailed XML report to a file in addition to its normal
 textual output. The report contains the duration of each test, and thus can
@@ -1511,53 +1578,39 @@ Things to note:
 
 _Availability:_ Linux, Windows, Mac.
 
-== Colored Terminal Output ==
+== Controlling How Failures Are Reported ==
 
-Google Test can use colors in its terminal output to make it easier to spot
-the separation between tests, and whether tests passed.
+=== Turning Assertion Failures into Break-Points ===
 
-You can set the GTEST_COLOR environment variable or set the `--gtest_color`
-command line flag to `yes`, `no`, or `auto` (the default) to enable colors,
-disable colors, or let Google Test decide. When the value is `auto`, Google
-Test will use colors if and only if the output goes to a terminal and (on
-non-Windows platforms) the `TERM` environment variable is set to `xterm` or
-`xterm-color`.
+When running test programs under a debugger, it's very convenient if the
+debugger can catch an assertion failure and automatically drop into interactive
+mode. Google Test's _break-on-failure_ mode supports this behavior.
 
-_Availability:_ Linux, Windows, Mac.
-
-== Printing the Elapsed Time ==
-
-By default, Google Test does not show you the time it takes to run
-each test.  To see that, run the test program with the
-`--gtest_print_time` command line flag.  Setting the
-`GTEST_PRINT_TIME` environment variable to a non-zero value has the
-same effect.
+To enable it, set the `GTEST_BREAK_ON_FAILURE` environment variable to a value
+other than `0` . Alternatively, you can use the `--gtest_break_on_failure`
+command line flag.
 
 _Availability:_ Linux, Windows, Mac.
 
-== Repeating the Tests ==
+=== Suppressing Pop-ups Caused by Exceptions ===
 
-Once in a while you'll run into a test whose result is hit-or-miss. Perhaps it
-will fail only 1% of the time, making it rather hard to reproduce the bug under
-a debugger. This can be a major source of frustration.
+On Windows, Google Test may be used with exceptions enabled. Even when
+exceptions are disabled, an application can still throw structured exceptions
+(SEH's). If a test throws an exception, by default Google Test doesn't try to
+catch it. Instead, you'll see a pop-up dialog, at which point you can attach
+the process to a debugger and easily find out what went wrong.
 
-The `--gtest_repeat` flag allows you to repeat all (or selected) test methods
-in a program many times. Hopefully, a flaky test will eventually fail and give
-you a chance to debug. Here's how to use it:
+However, if you don't want to see the pop-ups (for example, if you run the
+tests in a batch job), set the `GTEST_CATCH_EXCEPTIONS` environment variable to
+a non- `0` value, or use the `--gtest_catch_exceptions` flag. Google Test now
+catches all test-thrown exceptions and logs them as failures.
 
-|| `$ foo_test --gtest_repeat=1000` || Repeat foo_test 1000 times and don't stop at failures. ||
-|| `$ foo_test --gtest_repeat=-1` || A negative count means repeating forever. ||
-|| `$ foo_test --gtest_repeat=1000 --gtest_break_on_failure` || Repeat foo_test 1000 times, stopping at the first failure. This is especially useful when running under a debugger: when the testfails, it will drop into the debugger and you can then inspect variables and stacks. ||
-|| `$ foo_test --gtest_repeat=1000 --gtest_filter=FooBar` || Repeat the tests whose name matches the filter 1000 times. ||
+_Availability:_ Windows. `GTEST_CATCH_EXCEPTIONS` and
+`--gtest_catch_exceptions` have no effect on Google Test's behavior on Linux or
+Mac, even if exceptions are enabled. It is possible to add support for catching
+exceptions on these platforms, but it is not implemented yet.
 
-If your test program contains global set-up/tear-down code registered
-using `AddGlobalTestEnvironment()`, it will be repeated in each
-iteration as well, as the flakiness may be in it. You can also specify
-the repeat count by setting the `GTEST_REPEAT` environment variable.
-
-_Availability:_ Linux, Windows, Mac.
-
-== Letting Another Testing Framework Drive ==
+=== Letting Another Testing Framework Drive ===
 
 If you work on a project that has already been using another testing
 framework and is not ready to completely switch to Google Test yet,
@@ -1601,52 +1654,6 @@ the `--gtest_throw_on_failure` flag on the command-line or setting the
 `GTEST_THROW_ON_FAILURE` environment variable to a non-zero value.
 
 _Availability:_ Linux, Windows, Mac; starting with v1.3.0.
-
-== Temporarily Disabling Tests ==
-
-If you have a broken test that you cannot fix right away, you can add the
-`DISABLED_` prefix to its name. This will exclude it from execution. This is
-better than commenting out the code or using `#if 0`, as disabled tests are
-still compiled (and thus won't rot).
-
-If you need to disable all tests in a test case, you can either add `DISABLED_`
-to the front of the name of each test, or alternatively add it to the front of
-the test case name.
-
-For example, the following tests won't be run by Google Test, even though they
-will still be compiled:
-
-{{{
-// Tests that Foo does Abc.
-TEST(FooTest, DISABLED_DoesAbc) { ... }
-
-class DISABLED_BarTest : public testing::Test { ... };
-
-// Tests that Bar does Xyz.
-TEST_F(DISABLED_BarTest, DoesXyz) { ... }
-}}}
-
-_Note:_ This feature should only be used for temporary pain-relief. You still
-have to fix the disabled tests at a later date. As a reminder, Google Test will
-print a banner warning you if a test program contains any disabled tests.
-
-_Tip:_ You can easily count the number of disabled tests you have
-using `grep`. This number can be used as a metric for improving your
-test quality.
-
-_Availability:_ Linux, Windows, Mac.
-
-== Temporarily Enabling Disabled Tests ==
-
-To include [#Temporarily_Disabling_Tests disabled tests] in test
-execution, just invoke the test program with the
-`--gtest_also_run_disabled_tests` flag or set the
-`GTEST_ALSO_RUN_DISABLED_TESTS` environment variable to a value other
-than `0`.  You can combine this with the
-[#Running_a_Subset_of_the_Tests --gtest_filter] flag to further select
-which disabled tests to run.
-
-_Availability:_ Linux, Windows, Mac; since version 1.3.0.
 
 == Distributing Test Functions to Multiple Machines ==
 
