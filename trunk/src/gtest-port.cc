@@ -35,7 +35,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#if !GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
+#include <io.h>
+#include <sys/stat.h>
+#else
 #include <unistd.h>
 #endif  // GTEST_OS_WINDOWS
 
