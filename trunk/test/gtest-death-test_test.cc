@@ -46,6 +46,7 @@
 #include <limits.h>
 #include <signal.h>
 #include <stdio.h>
+
 #include <gtest/gtest-spi.h>
 
 // Indicates that this translation unit is part of Google Test's
@@ -284,14 +285,16 @@ void DieWithEmbeddedNul() {
   _exit(1);
 }
 
+#if GTEST_USES_PCRE
 // Tests that EXPECT_DEATH and ASSERT_DEATH work when the error
 // message has a NUL character in it.
-TEST_F(TestForDeathTest, DISABLED_EmbeddedNulInMessage) {
+TEST_F(TestForDeathTest, EmbeddedNulInMessage) {
   // TODO(wan@google.com): <regex.h> doesn't support matching strings
   // with embedded NUL characters - find a way to workaround it.
   EXPECT_DEATH(DieWithEmbeddedNul(), "w.*ld");
   ASSERT_DEATH(DieWithEmbeddedNul(), "w.*ld");
 }
+#endif  // GTEST_USES_PCRE
 
 // Tests that death test macros expand to code which interacts well with switch
 // statements.
@@ -594,7 +597,7 @@ void ExpectDebugDeathHelper(bool* aborted) {
 }
 
 #if GTEST_OS_WINDOWS
-TEST(TestForPopUps, DoesNotShowPopUpOnAbort) {
+TEST(PopUpDeathTest, DoesNotShowPopUpOnAbort) {
   printf("This test should be considered failing if it shows "
          "any pop-up dialogs.\n");
   fflush(stdout);
@@ -605,7 +608,7 @@ TEST(TestForPopUps, DoesNotShowPopUpOnAbort) {
   }, "");
 }
 
-TEST(TestForPopUps, DoesNotShowPopUpOnThrow) {
+TEST(PopUpDeathTest, DoesNotShowPopUpOnThrow) {
   printf("This test should be considered failing if it shows "
          "any pop-up dialogs.\n");
   fflush(stdout);

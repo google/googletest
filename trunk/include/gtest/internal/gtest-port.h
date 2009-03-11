@@ -198,7 +198,7 @@
 // simple regex implementation instead.
 #define GTEST_USES_SIMPLE_RE 1
 
-#endif  // GTEST_OS_LINUX
+#endif  // GTEST_OS_CYGWIN || GTEST_OS_LINUX || GTEST_OS_MAC
 
 // Defines GTEST_HAS_EXCEPTIONS to 1 if exceptions are enabled, or 0
 // otherwise.
