@@ -35,6 +35,11 @@
 #include <gtest/internal/gtest-port.h>
 
 #if GTEST_HAS_DEATH_TEST
+
+#if GTEST_OS_MAC
+#include <crt_externs.h>
+#endif  // GTEST_OS_MAC
+
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -44,6 +49,7 @@
 #include <windows.h>
 #else
 #include <sys/mman.h>
+#include <sys/wait.h>
 #endif  // GTEST_OS_WINDOWS
 
 #endif  // GTEST_HAS_DEATH_TEST
@@ -80,8 +86,9 @@ GTEST_DEFINE_bool_(
     death_test_use_fork,
     internal::BoolFromGTestEnv("death_test_use_fork", false),
     "Instructs to use fork()/_exit() instead of clone() in death tests. "
-    "Useful when running under valgrind or similar tools if those "
-    "do not support clone(). Valgrind 3.3.1 will just fail if "
+    "Ignored and always uses fork() on POSIX systems where clone() is not "
+    "implemented. Useful when running under valgrind or similar tools if "
+    "those do not support clone(). Valgrind 3.3.1 will just fail if "
     "it sees an unsupported combination of clone() flags. "
     "It is not recommended to use this flag w/o valgrind though it will "
     "work in 99% of the cases. Once valgrind is fixed, this flag will "
@@ -963,6 +970,22 @@ struct ExecDeathTestArgs {
   int close_fd;       // File descriptor to close; the read end of a pipe
 };
 
+#if GTEST_OS_MAC
+inline char** GetEnviron() {
+  // When Google Test is built as a framework on MacOS X, the environ variable
+  // is unavailable. Apple's documentation (man environ) recommends using
+  // _NSGetEnviron() instead.
+  return *_NSGetEnviron();
+}
+#else
+extern "C" char** environ;        // Some POSIX platforms expect you
+                                  // to declare environ. extern "C" makes
+                                  // it reside in the global namespace.
+inline char** GetEnviron() {
+  return environ;
+}
+#endif  // GTEST_OS_MAC
+
 // The main function for a threadsafe-style death test child process.
 // This function is called in a clone()-ed process and thus must avoid
 // any potentially unsafe operations like malloc or libc functions.
@@ -988,7 +1011,7 @@ static int ExecDeathTestChildMain(void* child_arg) {
   // unsafe.  Since execve() doesn't search the PATH, the user must
   // invoke the test program via a valid path that contains at least
   // one path separator.
-  execve(args->argv[0], args->argv, environ);
+  execve(args->argv[0], args->argv, GetEnviron());
   DeathTestAbort(String::Format("execve(%s, ...) in %s failed: %s",
                                 args->argv[0],
                                 original_dir,
@@ -1001,12 +1024,12 @@ static int ExecDeathTestChildMain(void* child_arg) {
 // This could be accomplished more elegantly by a single recursive
 // function, but we want to guard against the unlikely possibility of
 // a smart compiler optimizing the recursion away.
-static bool StackLowerThanAddress(const void* ptr) {
+bool StackLowerThanAddress(const void* ptr) {
   int dummy;
   return &dummy < ptr;
 }
 
-static bool StackGrowsDown() {
+bool StackGrowsDown() {
   int dummy;
   return StackLowerThanAddress(&dummy);
 }
@@ -1015,28 +1038,36 @@ static bool StackGrowsDown() {
 // that uses clone(2).  It dies with an error message if anything goes
 // wrong.
 static pid_t ExecDeathTestFork(char* const* argv, int close_fd) {
-  static const bool stack_grows_down = StackGrowsDown();
-  const size_t stack_size = getpagesize();
-  void* const stack = mmap(NULL, stack_size, PROT_READ | PROT_WRITE,
-                           MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
-  GTEST_DEATH_TEST_CHECK_(stack != MAP_FAILED);
-  void* const stack_top =
-      static_cast<char*>(stack) + (stack_grows_down ? stack_size : 0);
   ExecDeathTestArgs args = { argv, close_fd };
   pid_t child_pid;
-  if (GTEST_FLAG(death_test_use_fork)) {
-    // Valgrind-friendly version. As of valgrind 3.3.1 the clone() call below
-    // is not supported (valgrind will fail with an error message).
-    if ((child_pid = fork()) == 0) {
+
+#if GTEST_HAS_CLONE
+  const bool use_fork = GTEST_FLAG(death_test_use_fork);
+
+  if (!use_fork) {
+    static const bool stack_grows_down = StackGrowsDown();
+    const size_t stack_size = getpagesize();
+    // MMAP_ANONYMOUS is not defined on Mac, so we use MAP_ANON instead.
+    void* const stack = mmap(NULL, stack_size, PROT_READ | PROT_WRITE,
+                             MAP_ANON | MAP_PRIVATE, -1, 0);
+    GTEST_DEATH_TEST_CHECK_(stack != MAP_FAILED);
+    void* const stack_top =
+        static_cast<char*>(stack) + (stack_grows_down ? stack_size : 0);
+
+    child_pid = clone(&ExecDeathTestChildMain, stack_top, SIGCHLD, &args);
+
+    GTEST_DEATH_TEST_CHECK_(munmap(stack, stack_size) != -1);
+  }
+#else
+  const bool use_fork = true;
+#endif  // GTEST_HAS_CLONE
+
+  if (use_fork && (child_pid = fork()) == 0) {
       ExecDeathTestChildMain(&args);
       _exit(0);
-    }
-  } else {
-    child_pid = clone(&ExecDeathTestChildMain, stack_top,
-                      SIGCHLD, &args);
   }
+
   GTEST_DEATH_TEST_CHECK_(child_pid != -1);
-  GTEST_DEATH_TEST_CHECK_(munmap(stack, stack_size) != -1);
   return child_pid;
 }
 

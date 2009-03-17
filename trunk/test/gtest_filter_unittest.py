@@ -202,7 +202,7 @@ class GTestFilterUnitTest(unittest.TestCase):
     for slice_var in list_of_sets:
       full_partition.extend(slice_var)
     self.assertEqual(len(set_var), len(full_partition))
-    self.assertEqual(sorted(set_var), sorted(full_partition))
+    self.assertEqual(sets.Set(set_var), sets.Set(full_partition))
 
   def RunAndVerify(self, gtest_filter, tests_to_run):
     """Runs gtest_flag_unittest_ with the given filter, and verifies
