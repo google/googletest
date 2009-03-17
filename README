@@ -41,7 +41,7 @@ with Google Test (http://code.google.com/p/googletest/), although
 eventually we plan to support other C++ testing frameworks. You can
 use either the copy of Google Test that comes with Google Mock, or a
 compatible version you already have.  This version of Google Mock
-requires Google Test 1.2.1.
+requires Google Test 1.3.0.
 
 Google Mock depends on advanced C++ features and thus requires a more
 modern compiler.  The following are needed to use Google Mock:

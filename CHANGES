@@ -1,3 +1,14 @@
+Changes for 1.1.0:
+
+ * New feature: ability to use Google Mock with any testing framework.
+ * New feature: macros for easily defining new matchers
+ * New feature: macros for easily defining new actions.
+ * New feature: more container matchers.
+ * New feature: actions for accessing function arguments and throwing
+   exceptions.
+ * Improved the Google Mock doctor script for diagnosing compiler errors.
+ * Bug fixes and implementation clean-up.
+
 Changes for 1.0.0:
 
  * Initial Open Source release of Google Mock

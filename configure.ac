@@ -1,5 +1,5 @@
 AC_INIT([Google C++ Mocking Framework],
-        [1.0.0],
+        [1.1.0],
         [googlemock@googlegroups.com],
         [gmock])
 
