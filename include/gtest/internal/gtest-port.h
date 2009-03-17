@@ -376,12 +376,13 @@
 //      (this is covered by GTEST_HAS_STD_STRING guard).
 //   3. abort() in a VC 7.1 application compiled as GUI in debug config
 //      pops up a dialog window that cannot be suppressed programmatically.
-#if GTEST_HAS_STD_STRING && (GTEST_HAS_CLONE || \
-                             GTEST_OS_WINDOWS && _MSC_VER >= 1400)
+#if GTEST_HAS_STD_STRING && (GTEST_OS_LINUX || \
+                             GTEST_OS_MAC || \
+                             GTEST_OS_CYGWIN || \
+                             (GTEST_OS_WINDOWS && _MSC_VER >= 1400))
 #define GTEST_HAS_DEATH_TEST 1
 #include <vector>
-#endif  // GTEST_HAS_STD_STRING && (GTEST_HAS_CLONE ||
-        //                          GTEST_OS_WINDOWS && _MSC_VER >= 1400)
+#endif
 
 // Determines whether to support value-parameterized tests.
 

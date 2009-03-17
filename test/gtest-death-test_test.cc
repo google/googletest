@@ -41,6 +41,7 @@
 #include <direct.h>          // For chdir().
 #else
 #include <unistd.h>
+#include <sys/wait.h>        // For waitpid.
 #include <limits>            // For std::numeric_limits.
 #endif  // GTEST_OS_WINDOWS
 
@@ -414,7 +415,7 @@ void SetPthreadFlag() {
 
 }  // namespace
 
-#if !GTEST_OS_WINDOWS
+#if GTEST_HAS_CLONE
 
 TEST_F(TestForDeathTest, DoesNotExecuteAtforkHooks) {
   if (!testing::GTEST_FLAG(death_test_use_fork)) {
@@ -426,7 +427,7 @@ TEST_F(TestForDeathTest, DoesNotExecuteAtforkHooks) {
   }
 }
 
-#endif  // !GTEST_OS_WINDOWS
+#endif  // GTEST_HAS_CLONE
 
 // Tests that a method of another class can be used in a death test.
 TEST_F(TestForDeathTest, MethodOfAnotherClass) {
