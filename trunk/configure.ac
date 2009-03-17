@@ -3,7 +3,7 @@
 # "[1.0.1]"). It also asumes that there won't be any closing parenthesis
 # between "AC_INIT(" and the closing ")" including comments and strings.
 AC_INIT([Google C++ Testing Framework],
-        [1.2.1],
+        [1.3.0],
         [googletestframework@googlegroups.com],
         [gtest])
 

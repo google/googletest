@@ -1,3 +1,18 @@
+Changes for 1.3.0:
+
+ * New feature: death tests on Windows, Cygwin, and Mac.
+ * New feature: ability to use Google Test assertions in other testing
+   frameworks.
+ * New feature: ability to run disabled test via
+   --gtest_also_run_disabled_tests.
+ * New feature: the --help flag for printing the usage.
+ * New feature: access to Google Test flag values in user code.
+ * New feature: a script that packs Google Test into one .h and one
+   .cc file for easy deployment.
+ * New feature: support for distributing test functions to multiple
+   machines (requires support from the test runner).
+ * Bug fixes and implementation clean-up.
+
 Changes for 1.2.1:
 
  * Compatibility fixes for Linux IA-64 and IBM z/OS.
