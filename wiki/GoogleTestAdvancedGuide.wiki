@@ -371,7 +371,7 @@ This expression is `true` if the program exited normally with the given exit
 code.
 
 {{{
-testing::KilledBySignal(signal_number)
+testing::KilledBySignal(signal_number)  // Not available on Windows.
 }}}
 
 This expression is `true` if the program was killed by the given signal.
@@ -418,17 +418,39 @@ test case (not test) `*DeathTest` when it contains a death test, as
 demonstrated in the above example. The `Death Tests And Threads` section below
 explains why.
 
-_Availability:_ Linux
+_Availability:_ Linux, Windows (requires MSVC 8.0 or above), Mac
+
+== Regular Expression Portability ==
+
+On POSIX systems, Google Test uses [POSIX extended regular expressions
+http://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap09.html#tag_09_04]
+syntax to verify child process output. GCC users please note that while
+the POSIX standard specifies `\d` and `\D` character classes, glibc and hence
+Google Test _do not_ support them.
+
+On Windows, Google Test uses its own simple regular expression implementation
+with a reduced syntax. This syntax supports only a limited subset of a normal
+regular expression syntax:
+  * Concatenaion
+  * Alteraion with `|`
+  * Basic quanifiers `*`, `+`, and `?`
+  * Character matcherrs `.`, `\d`, `\D`, `\s`, `\S`, `\w`, `\W`, and special
+This syntax _does not_ support grouping with ()'s or any advanced features.
+
+To help you determine which caability is available on a given system, Google
+Test will define preprocessor symbol `GTEST_USES_POSIX_RE=1` when it uses POSIX
+resular expressions. When it uses simple regular expressions it will define
+`GTEST_USES_SIMPLE_RE=1`. To write portable death tests, use only the features
+of the WIndows syntax.
 
 ==  How It Works  ==
 
-Under the hood, `ASSERT_EXIT()` calls `fork()` to spawn a new process. What
-happens next in the child process depends on the value of the variable
-`testing::FLAGS_gtest_death_test_style` (which is initialized from the
-command-line flag `--gtest_death_test_style`).
+Under the hood, `ASSERT_EXIT()` spawns a new process and executes the death test statement in that process. The details of of how precisely that happens depend on the platform and on the value of the variable `testing::GTEST_FLAG(death_test_style)` (which is initialized from the command-line flag `--gtest_death_test_style`).
 
- * If the variable's value is `"fast"`, the death test statement is immediately executed.
- * If the variable's value is `"threadsafe"`, the child process re-executes the unit test binary just as it was originally invoked, but with some extra flags to cause just the single death test under consideration to be run.
+  * On POSIX systems, the `fork()` call (`clone()` on Linux systems) is used to spawn the child, after which:
+   * If the variable's value is `"fast"`, the death test statement is immediately executed.
+   * If the variable's value is `"threadsafe"`, the child process re-executes the unit test binary just as it was originally invoked, but with some extra flags to cause just the single death test under consideration to be run.
+  * On Windows, the child is spawned using the `CreateProcess()` API, and re-executes the binary to cause just the single death test under consideration to be run - much like on Linux with "threadsafe" flag.
 
 Other values for the variable are illegal and will cause the death test to
 fail. Currently, the flag's default value is `"fast"`. However, we reserve the
@@ -456,6 +478,7 @@ Google Test has two features intended to raise awareness of threading issues.
 
  # A warning is emitted if multiple threads are running when a death test is encountered.
  # Test cases with a name ending in "!DeathTest" are run before all other tests.
+ # On systems that have the `clone()` call (most Linux systems) Google Test uses `clone()` call instead of `fork()`  to spawn a new process. `fork()` may cause the child process to hang in the presence of threads.
 
 It's perfectly fine to create threads inside a death test statement; they are
 executed in a separate process and cannot affect the parent.
