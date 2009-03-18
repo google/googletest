@@ -13,6 +13,7 @@ EXTRA_DIST = \
   scons/SConscript \
   scripts/fuse_gtest_files.py \
   scripts/gen_gtest_pred_impl.py \
+  scripts/test/Makefile \
   test/gtest_all_test.cc
 
 # MSVC project files
