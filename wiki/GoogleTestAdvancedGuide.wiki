@@ -418,38 +418,62 @@ test case (not test) `*DeathTest` when it contains a death test, as
 demonstrated in the above example. The `Death Tests And Threads` section below
 explains why.
 
-_Availability:_ Linux, Windows (requires MSVC 8.0 or above), Mac
+_Availability:_ Linux, Windows (requires MSVC 8.0 or above), Cygwin, and Mac (the latter three are supported since v1.3.0)
 
-== Regular Expression Portability ==
+== Regular Expression Syntax ==
 
-On POSIX systems, Google Test uses [http://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap09.html#tag_09_04 POSIX extended regular expressions]
-syntax to verify child process output. GCC users please note that while
-the POSIX standard specifies `\d` and `\D` character classes, glibc and hence
-Google Test _do not_ support them.
+On POSIX systems (e.g. Linux, Cygwin, and Mac), Google Test uses the
+[http://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap09.html#tag_09_04 POSIX extended regular expression]
+syntax in death tests. To learn about this syntax, you may want to read this [http://en.wikipedia.org/wiki/Regular_expression#POSIX_Extended_Regular_Expressions Wikipedia entry]. 
 
-On Windows, Google Test uses its own simple regular expression implementation
-with a reduced syntax. This syntax supports only a limited subset of a normal
-regular expression syntax:
-  * Concatenaion
-  * Alteraion with `|`
-  * Basic quanifiers `*`, `+`, and `?`
-  * Character matcherrs `.`, `\d`, `\D`, `\s`, `\S`, `\w`, `\W`, and special
-This syntax _does not_ support grouping with ()'s or any advanced features.
+On Windows, Google Test uses its own simple regular expression
+implementation. It lacks many features you can find in POSIX extended
+regular expressions.  For example, we don't support union (`"x|y"`),
+grouping (`"(xy)"`), brackets (`"[xy]"`), and repetition count
+(`"x{5,7}"`), among others. Below is what we do support (`A` denotes a
+literal character, period (`.`), or a single `\\` escape sequence; `x`
+and `y` denote regular expressions.):
 
-To help you determine which caability is available on a given system, Google
-Test will define preprocessor symbol `GTEST_USES_POSIX_RE=1` when it uses POSIX
-resular expressions. When it uses simple regular expressions it will define
-`GTEST_USES_SIMPLE_RE=1`. To write portable death tests, use only the features
-of the WIndows syntax.
+|| `c` || matches any literal character `c` ||
+|| `\\d` || matches any decimal digit ||
+|| `\\D` || matches any character that's not a decimal digit ||
+|| `\\f` || matches `\f` ||
+|| `\\n` || matches `\n` ||
+|| `\\r` || matches `\r` ||
+|| `\\s` || matches any ASCII whitespace, including `\n` ||
+|| `\\S` || matches any character that's not a whitespace ||
+|| `\\t` || matches `\t` ||
+|| `\\v` || matches `\v` ||
+|| `\\w` || matches any letter, `_`, or decimal digit ||
+|| `\\W` || matches any character that `\\w` doesn't match ||
+|| `\\c` || matches any literal character `c`, which must be a punctuation ||
+|| `.` || matches any single character except `\n` ||
+|| `A?` || matches 0 or 1 occurrences of `A` ||
+|| `A*` || matches 0 or many occurrences of `A` ||
+|| `A+` || matches 1 or many occurrences of `A` ||
+|| `^` || matches the beginning of a string (not that of each line) ||
+|| `$` || matches the end of a string (not that of each line) ||
+|| `xy` || matches `x` followed by `y` ||
+
+To help you determine which capability is available on your system,
+Google Test defines macro `GTEST_USES_POSIX_RE=1` when it uses POSIX
+extended regular expressions, or `GTEST_USES_SIMPLE_RE=1` when it uses
+the simple version.  If you want your death tests to work in both
+cases, you can either `#if` on these macros or use the more limited
+syntax only.
 
 ==  How It Works  ==
 
-Under the hood, `ASSERT_EXIT()` spawns a new process and executes the death test statement in that process. The details of of how precisely that happens depend on the platform and on the value of the variable `testing::GTEST_FLAG(death_test_style)` (which is initialized from the command-line flag `--gtest_death_test_style`).
+Under the hood, `ASSERT_EXIT()` spawns a new process and executes the
+death test statement in that process. The details of of how precisely
+that happens depend on the platform and the variable
+`testing::GTEST_FLAG(death_test_style)` (which is initialized from the
+command-line flag `--gtest_death_test_style`).
 
-  * On POSIX systems, the `fork()` call (`clone()` on Linux systems) is used to spawn the child, after which:
+  * On POSIX systems, `fork()` (or `clone()` on Linux) is used to spawn the child, after which:
    * If the variable's value is `"fast"`, the death test statement is immediately executed.
    * If the variable's value is `"threadsafe"`, the child process re-executes the unit test binary just as it was originally invoked, but with some extra flags to cause just the single death test under consideration to be run.
-  * On Windows, the child is spawned using the `CreateProcess()` API, and re-executes the binary to cause just the single death test under consideration to be run - much like on Linux with "threadsafe" flag.
+  * On Windows, the child is spawned using the `CreateProcess()` API, and re-executes the binary to cause just the single death test under consideration to be run - much like the `threadsafe` mode on POSIX.
 
 Other values for the variable are illegal and will cause the death test to
 fail. Currently, the flag's default value is `"fast"`. However, we reserve the
@@ -473,11 +497,11 @@ arrange that kind of environment. For example, statically-initialized modules
 may start threads before main is ever reached. Once threads have been created,
 it may be difficult or impossible to clean them up.
 
-Google Test has two features intended to raise awareness of threading issues.
+Google Test has three features intended to raise awareness of threading issues.
 
  # A warning is emitted if multiple threads are running when a death test is encountered.
  # Test cases with a name ending in "!DeathTest" are run before all other tests.
- # On systems that have the `clone()` call (most Linux systems) Google Test uses `clone()` call instead of `fork()`  to spawn a new process. `fork()` may cause the child process to hang in the presence of threads.
+ # It uses `clone()` instead of `fork()` to spawn the child process on Linux (`clone()` is not available on Cygwin and Mac), as `fork()` is more likely to cause the child to hang when the parent process has multiple threads.
 
 It's perfectly fine to create threads inside a death test statement; they are
 executed in a separate process and cannot affect the parent.
