@@ -422,8 +422,7 @@ _Availability:_ Linux, Windows (requires MSVC 8.0 or above), Mac
 
 == Regular Expression Portability ==
 
-On POSIX systems, Google Test uses [POSIX extended regular expressions
-http://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap09.html#tag_09_04]
+On POSIX systems, Google Test uses [http://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap09.html#tag_09_04 POSIX extended regular expressions]
 syntax to verify child process output. GCC users please note that while
 the POSIX standard specifies `\d` and `\D` character classes, glibc and hence
 Google Test _do not_ support them.
