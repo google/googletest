@@ -36,12 +36,17 @@ License, which is different from Google Mock's license.
 Requirements
 ------------
 Google Mock is not a testing framework itself. Instead, it needs a
-testing framework for writing tests. Currently Google Mock only works
-with Google Test (http://code.google.com/p/googletest/), although
-eventually we plan to support other C++ testing frameworks. You can
-use either the copy of Google Test that comes with Google Mock, or a
+testing framework for writing tests. It works with Google Test
+(http://code.google.com/p/googletest/) out of the box. You can use
+either the copy of Google Test that comes with Google Mock, or a
 compatible version you already have.  This version of Google Mock
 requires Google Test 1.3.0.
+
+You can also easily configure Google Mock to work with another testing
+framework of your choice; although it will still need Google Test as
+an internal dependency.  Please read
+http://code.google.com/p/googlemock/wiki/ForDummies#Using_Google_Mock_with_Any_Testing_Framework
+for how to do it.
 
 Google Mock depends on advanced C++ features and thus requires a more
 modern compiler.  The following are needed to use Google Mock:
