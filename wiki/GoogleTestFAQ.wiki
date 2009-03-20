@@ -775,8 +775,8 @@ The Google Test project (gtest.vcproj) has the Runtime Library option set to /MT
 
 To update this setting open the project properties in the Visual Studio IDE then select the branch Configuration Properties | C/C++ | Code Generation and change the option "Runtime Library".
 
-== I define my tests in a library (.lib) and Google Test doesn't run them. ==
-This happens when you use Microsoft Visual C++ and define your main() function in your .exe file and define your tests in a static (.lib) library. MSVC linker sees that your main() function doesn't use any symbols defined in the library and throws the library out. To force the linker keep you library, use the /OPT:NOREF linker option. If you use MSVC++ IDE, go to your .exe project properties/Configuration Properties/Linker/Optimization and set References setting to "Keep Unreferenced Data (/OPT:NOREF)".
+== I put my tests in a library and Google Test doesn't run them. What's happening? ==
+Have you read a [http:GoogleTestPrimer#Important_note_for_Visual_C++_users warning] on the Google Test Primer page?
 
 == My question is not covered in your FAQ! ==
 Ask it on our mailing list! Just mail [googletestframework@googlegroups.com] and someone will answer it. You might also want to search the mailing list [http://groups.google.com/group/googletestframework/topics archives] but by all means let us know if you believe your question should belong to this FAQ!
