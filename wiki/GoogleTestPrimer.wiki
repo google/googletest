@@ -441,8 +441,19 @@ in programs compiled in `UNICODE` mode as well.
 But maybe you think that writing all those main() functions is too much work? We agree with you completely and that's why Google Test provides a basic implementation of main(). If it fits your needs, then just link your test with gtest_main library and you are good to go.
 
 == Important note for Visual C++ users ==
-If you put your tests into a library and your `main()` function is in a different library or in your .exe file, those tests will not run. To prevent this from happening, use the `/OPT:NOREF` linker option. If you use MSVC++ IDE, go to your .exe project properties/Configuration Properties/Linker/Optimization and set References setting to `Keep Unreferenced Data (/OPT:NOREF)`. What happens is, when you define your tests, Google Test creates certain static objects to represent them. These objects are not referenced from elsewhere but their constructors are still supposed to run. When Visual C++ linker sees that nothing in the library is referenced from other places it throws the library out. The `/OPT:NOREF` option forces it to keep unreferenced libraries.  
+If you put your tests into a library and your `main()` function is in a different library or in your .exe file, those tests will not run. The reason is a [https://connect.microsoft.com/feedback/viewfeedback.aspx?FeedbackID=244410&siteid=210 bug] in Visual C++. When you define your tests, Google Test creates certain static objects to register them. These objects are not referenced from elsewhere but their constructors are still supposed to run. When Visual C++ linker sees that nothing in the library is referenced from other places it throws the library out. You have to reference your library with tests from your main program to keep the linker from discarding it. Here is how to do it. Somewhere in your library code declare a function:
+{{{
+__declspec(dllimport) int PullInMyLibrary() { return 0; }
+}}}
+If you put your tests in a static library (not DLL) then `__declspec(dllexport)` is not required. Now, in your main program, write a code that invokes that function:
+{{{
+int PullInMyLibrary();
+static int dummy = PullInMyLibrary();
+}}}
+This will keep your tests referenced and will make them register themselves at startup.
 
+There is one more pitfall, though. If you use Google Test as a static library (that's how it is defined in gtest.vcproj) your tests must also reside in a static library. If you have to have them in a DLL, you _must_ change Google Test to build into a DLL as well. Otherwise your tests will not run correctly or will not run at all. The general conclusion here is make your life easier - do not write your tests in libraries!
+ 
 = Where to Go from Here =
 
 Congratulations! You've learned the Google Test basics. You can start writing
