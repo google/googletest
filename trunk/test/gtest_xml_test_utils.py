@@ -92,6 +92,7 @@ class GTestXMLTestCase(unittest.TestCase):
       self.AssertEquivalentNodes(child, actual_children[child_id])
 
   identifying_attribute = {
+    "testsuites": "name",
     "testsuite": "name",
     "testcase":  "name",
     "failure":   "message",
@@ -101,14 +102,14 @@ class GTestXMLTestCase(unittest.TestCase):
     """
     Fetches all of the child nodes of element, a DOM Element object.
     Returns them as the values of a dictionary keyed by the IDs of the
-    children.  For <testsuite> and <testcase> elements, the ID is the
-    value of their "name" attribute; for <failure> elements, it is the
-    value of the "message" attribute; for CDATA section node, it is
-    "detail".  An exception is raised if any element other than the
-    above four is encountered, if two child elements with the same
-    identifying attributes are encountered, or if any other type of
-    node is encountered, other than Text nodes containing only
-    whitespace.
+    children.  For <testsuites>, <testsuite> and <testcase> elements,
+    the ID is the value of their "name" attribute; for <failure>
+    elements, it is the value of the "message" attribute; for CDATA
+    section node, it is "detail".  An exception is raised if any
+    element other than the above four is encountered, if two child
+    elements with the same identifying attributes are encountered, or
+    if any other type of node is encountered, other than Text nodes
+    containing only whitespace.
     """
 
     children = {}
@@ -133,16 +134,16 @@ class GTestXMLTestCase(unittest.TestCase):
     Normalizes Google Test's XML output to eliminate references to transient
     information that may change from run to run.
 
-    *  The "time" attribute of <testsuite> and <testcase> elements is
-       replaced with a single asterisk, if it contains only digit
-       characters.
+    *  The "time" attribute of <testsuites>, <testsuite> and <testcase>
+       elements is replaced with a single asterisk, if it contains
+       only digit characters.
     *  The line number reported in the first line of the "message"
        attribute of <failure> elements is replaced with a single asterisk.
     *  The directory names in file paths are removed.
     *  The stack traces are removed.
     """
 
-    if element.tagName in ("testsuite", "testcase"):
+    if element.tagName in ("testsuites", "testsuite", "testcase"):
       time = element.getAttributeNode("time")
       time.value = re.sub(r"^\d+(\.\d+)?$", "*", time.value)
     elif element.tagName == "failure":

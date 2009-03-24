@@ -65,7 +65,7 @@ using testing::Message;
 using testing::internal::DeathTest;
 using testing::internal::DeathTestFactory;
 using testing::internal::FilePath;
-using testing::internal::GetLastSystemErrorMessage;
+using testing::internal::GetLastErrnoDescription;
 using testing::internal::ParseNaturalNumber;
 using testing::internal::String;
 
@@ -990,20 +990,13 @@ TEST(StreamingAssertionsDeathTest, DeathTest) {
   }, "expected failure");
 }
 
-// Tests that GetLastSystemErrorMessage returns an empty string when the
+// Tests that GetLastErrnoDescription returns an empty string when the
 // last error is 0 and non-empty string when it is non-zero.
-TEST(GetLastSystemErrorMessageTest, GetLastSystemErrorMessageWorks) {
-#if GTEST_OS_WINDOWS
-  ::SetLastError(ERROR_FILE_NOT_FOUND);
-  EXPECT_STRNE("", GetLastSystemErrorMessage().c_str());
-  ::SetLastError(0);
-  EXPECT_STREQ("", GetLastSystemErrorMessage().c_str());
-#else
+TEST(GetLastErrnoDescription, GetLastErrnoDescriptionWorks) {
   errno = ENOENT;
-  EXPECT_STRNE("", GetLastSystemErrorMessage().c_str());
+  EXPECT_STRNE("", GetLastErrnoDescription().c_str());
   errno = 0;
-  EXPECT_STREQ("", GetLastSystemErrorMessage().c_str());
-#endif
+  EXPECT_STREQ("", GetLastErrnoDescription().c_str());
 }
 
 #if GTEST_OS_WINDOWS

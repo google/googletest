@@ -1325,7 +1325,7 @@ void ParseGoogleTestFlagsOnly(int* argc, wchar_t** argv);
 
 // Returns the message describing the last system error, regardless of the
 // platform.
-String GetLastSystemErrorMessage();
+String GetLastErrnoDescription();
 
 #if GTEST_OS_WINDOWS
 // Provides leak-safe Windows kernel handle ownership.
