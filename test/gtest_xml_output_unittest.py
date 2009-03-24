@@ -48,7 +48,7 @@ GTEST_OUTPUT_FLAG         = "--gtest_output"
 GTEST_DEFAULT_OUTPUT_FILE = "test_detail.xml"
 
 EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
-<testsuite tests="13" failures="2" disabled="2" errors="0" time="*" name="AllTests">
+<testsuites tests="13" failures="2" disabled="2" errors="0" time="*" name="AllTests">
   <testsuite name="SuccessfulTest" tests="1" failures="0" disabled="0" errors="0" time="*">
     <testcase name="Succeeds" status="run" time="*" classname="SuccessfulTest"/>
   </testsuite>
@@ -85,12 +85,12 @@ Expected: 2]]></failure>
      <testcase name="ExternalUtilityThatCallsRecordIntValuedProperty" status="run" time="*" classname="NoFixtureTest" key_for_utility_int="1"/>
      <testcase name="ExternalUtilityThatCallsRecordStringValuedProperty" status="run" time="*" classname="NoFixtureTest" key_for_utility_string="1"/>
   </testsuite>
-</testsuite>"""
+</testsuites>"""
 
 
 EXPECTED_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
-<testsuite tests="0" failures="0" disabled="0" errors="0" time="*" name="AllTests">
-</testsuite>"""
+<testsuites tests="0" failures="0" disabled="0" errors="0" time="*" name="AllTests">
+</testsuites>"""
 
 
 class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):

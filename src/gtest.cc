@@ -3044,7 +3044,7 @@ internal::String XmlUnitTestResultPrinter::EscapeXml(const char* str,
 //
 // This is how Google Test concepts map to the DTD:
 //
-// <testsuite name="AllTests">         <-- corresponds to a UnitTest object
+// <testsuites name="AllTests">        <-- corresponds to a UnitTest object
 //   <testsuite name="testcase-name">  <-- corresponds to a TestCase object
 //     <testcase name="test-name">     <-- corresponds to a TestInfo object
 //       <failure message="...">...</failure>
@@ -3053,7 +3053,7 @@ internal::String XmlUnitTestResultPrinter::EscapeXml(const char* str,
 //                                     <-- individual assertion failures
 //     </testcase>
 //   </testsuite>
-// </testsuite>
+// </testsuites>
 
 namespace internal {
 
@@ -3137,7 +3137,7 @@ void XmlUnitTestResultPrinter::PrintXmlUnitTest(FILE* out,
   const internal::UnitTestImpl* const impl = unit_test->impl();
   fprintf(out, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
   fprintf(out,
-          "<testsuite tests=\"%d\" failures=\"%d\" disabled=\"%d\" "
+          "<testsuites tests=\"%d\" failures=\"%d\" disabled=\"%d\" "
           "errors=\"0\" time=\"%s\" ",
           impl->total_test_count(),
           impl->failed_test_count(),
@@ -3150,7 +3150,7 @@ void XmlUnitTestResultPrinter::PrintXmlUnitTest(FILE* out,
        case_node = case_node->next()) {
     PrintXmlTestCase(out, case_node->element());
   }
-  fprintf(out, "</testsuite>\n");
+  fprintf(out, "</testsuites>\n");
 }
 
 // Produces a string representing the test properties in a result as space
