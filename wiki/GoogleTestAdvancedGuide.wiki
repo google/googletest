@@ -1574,12 +1574,14 @@ program `foo_test` or `foo_test.exe`). If the file already exists (perhaps left
 over from a previous run), Google Test will pick a different name (e.g.
 `foo_test_1.xml`) to avoid overwriting it.
 
-The report uses the format described here. Since that format was originally
-intended for Java, a little interpretation is required to make it apply to
-Google Test tests, as shown here:
+The report uses the format described here.  It is based on the
+`junitreport` Ant task and can be parsed by popular continuous build
+systems like [https://hudson.dev.java.net/ Hudson]. Since that format
+was originally intended for Java, a little interpretation is required
+to make it apply to Google Test tests, as shown here:
 
 {{{
-<testsuite name="AllTests" ...>
+<testsuites name="AllTests" ...>
   <testsuite name="test_case_name" ...>
     <testcase name="test_name" ...>
       <failure message="..."/>
@@ -1587,12 +1589,12 @@ Google Test tests, as shown here:
       <failure message="..."/>
     </testcase>
   </testsuite>
-</testsuite>
+</testsuites>
 }}}
 
- * The unnamed outer `<testsuite>` element corresponds to the entire test program.
- * Inner <testsuite> elements correspond to Google Test test cases.
- * <testcase> elements correspond to Google Test tests.
+ * The root `<testsuites>` element corresponds to the entire test program.
+ * `<testsuite>` elements correspond to Google Test test cases.
+ * `<testcase>` elements correspond to Google Test test functions.
 
 For instance, the following program
 
@@ -1606,7 +1608,7 @@ could generate this report:
 
 {{{
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite tests="3" failures="1" errors="0" time="35" name="AllTests">
+<testsuites tests="3" failures="1" errors="0" time="35" name="AllTests">
   <testsuite name="MathTest" tests="2" failures="1"* errors="0" time="15">
     <testcase name="Addition" status="run" time="7" classname="">
       <failure message="Value of: add(1, 1)&#x0A; Actual: 3&#x0A;Expected: 2" type=""/>
@@ -1619,12 +1621,12 @@ could generate this report:
     <testcase name="NonContradiction" status="run" time="5" classname="">
     </testcase>
   </testsuite>
-</testsuite>
+</testsuites>
 }}}
 
 Things to note:
 
- * The `tests` attribute of a `<testsuite>` element tells how many tests the Google Test test case or program contains, while the `failures` attribute tells how many of them failed.
+ * The `tests` attribute of a `<testsuites>` or `<testsuite>` element tells how many test functions the Google Test program or test case contains, while the `failures` attribute tells how many of them failed.
  * The `time` attribute expresses the duration of the test, test case, or entire test program in milliseconds.
  * Each `<failure>` element corresponds to a single failed Google Test assertion.
  * Some JUnit concepts don't apply to Google Test, yet we have to conform to the DTD. Therefore you'll see some dummy elements and attributes in the report. You can safely ignore these parts.
