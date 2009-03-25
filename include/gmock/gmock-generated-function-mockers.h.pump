@@ -118,7 +118,8 @@ using internal::FunctionMocker;
 
 // The variable for mocking the given method.
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
-#define GMOCK_MOCKER_(Method) GMOCK_CONCAT_TOKEN_(gmock_##Method##_, __LINE__)
+#define GMOCK_MOCKER_(arity, constness, Method) \
+    GMOCK_CONCAT_TOKEN_(gmock##constness##arity##_##Method##_, __LINE__)
 
 
 $for i [[
@@ -134,14 +135,14 @@ $var matcher_as = [[$for j, \
     GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == $i, \
         this_method_does_not_take_$i[[]]_argument[[$if i != 1 [[s]]]]); \
-    GMOCK_MOCKER_(Method).SetOwnerAndName(this, #Method); \
-    return GMOCK_MOCKER_(Method).Invoke($as); \
+    GMOCK_MOCKER_($i, constness, Method).SetOwnerAndName(this, #Method); \
+    return GMOCK_MOCKER_($i, constness, Method).Invoke($as); \
   } \
   ::testing::MockSpec<F>& \
       gmock_##Method($matcher_as) constness { \
-    return GMOCK_MOCKER_(Method).RegisterOwner(this).With($as); \
+    return GMOCK_MOCKER_($i, constness, Method).RegisterOwner(this).With($as); \
   } \
-  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(Method)
+  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_($i, constness, Method)
 
 
 ]]

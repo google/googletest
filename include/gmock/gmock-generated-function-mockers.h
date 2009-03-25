@@ -297,7 +297,8 @@ using internal::FunctionMocker;
 
 // The variable for mocking the given method.
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
-#define GMOCK_MOCKER_(Method) GMOCK_CONCAT_TOKEN_(gmock_##Method##_, __LINE__)
+#define GMOCK_MOCKER_(arity, constness, Method) \
+    GMOCK_CONCAT_TOKEN_(gmock##constness##arity##_##Method##_, __LINE__)
 
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
 #define GMOCK_METHOD0_(tn, constness, ct, Method, F) \
@@ -305,14 +306,14 @@ using internal::FunctionMocker;
     GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == 0, \
         this_method_does_not_take_0_arguments); \
-    GMOCK_MOCKER_(Method).SetOwnerAndName(this, #Method); \
-    return GMOCK_MOCKER_(Method).Invoke(); \
+    GMOCK_MOCKER_(0, constness, Method).SetOwnerAndName(this, #Method); \
+    return GMOCK_MOCKER_(0, constness, Method).Invoke(); \
   } \
   ::testing::MockSpec<F>& \
       gmock_##Method() constness { \
-    return GMOCK_MOCKER_(Method).RegisterOwner(this).With(); \
+    return GMOCK_MOCKER_(0, constness, Method).RegisterOwner(this).With(); \
   } \
-  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(Method)
+  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(0, constness, Method)
 
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
 #define GMOCK_METHOD1_(tn, constness, ct, Method, F) \
@@ -320,14 +321,15 @@ using internal::FunctionMocker;
     GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == 1, \
         this_method_does_not_take_1_argument); \
-    GMOCK_MOCKER_(Method).SetOwnerAndName(this, #Method); \
-    return GMOCK_MOCKER_(Method).Invoke(gmock_a1); \
+    GMOCK_MOCKER_(1, constness, Method).SetOwnerAndName(this, #Method); \
+    return GMOCK_MOCKER_(1, constness, Method).Invoke(gmock_a1); \
   } \
   ::testing::MockSpec<F>& \
       gmock_##Method(GMOCK_MATCHER_(tn, F, 1) gmock_a1) constness { \
-    return GMOCK_MOCKER_(Method).RegisterOwner(this).With(gmock_a1); \
+    return GMOCK_MOCKER_(1, constness, \
+        Method).RegisterOwner(this).With(gmock_a1); \
   } \
-  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(Method)
+  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(1, constness, Method)
 
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
 #define GMOCK_METHOD2_(tn, constness, ct, Method, F) \
@@ -336,15 +338,16 @@ using internal::FunctionMocker;
     GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == 2, \
         this_method_does_not_take_2_arguments); \
-    GMOCK_MOCKER_(Method).SetOwnerAndName(this, #Method); \
-    return GMOCK_MOCKER_(Method).Invoke(gmock_a1, gmock_a2); \
+    GMOCK_MOCKER_(2, constness, Method).SetOwnerAndName(this, #Method); \
+    return GMOCK_MOCKER_(2, constness, Method).Invoke(gmock_a1, gmock_a2); \
   } \
   ::testing::MockSpec<F>& \
       gmock_##Method(GMOCK_MATCHER_(tn, F, 1) gmock_a1, \
                      GMOCK_MATCHER_(tn, F, 2) gmock_a2) constness { \
-    return GMOCK_MOCKER_(Method).RegisterOwner(this).With(gmock_a1, gmock_a2); \
+    return GMOCK_MOCKER_(2, constness, \
+        Method).RegisterOwner(this).With(gmock_a1, gmock_a2); \
   } \
-  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(Method)
+  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(2, constness, Method)
 
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
 #define GMOCK_METHOD3_(tn, constness, ct, Method, F) \
@@ -354,17 +357,18 @@ using internal::FunctionMocker;
     GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == 3, \
         this_method_does_not_take_3_arguments); \
-    GMOCK_MOCKER_(Method).SetOwnerAndName(this, #Method); \
-    return GMOCK_MOCKER_(Method).Invoke(gmock_a1, gmock_a2, gmock_a3); \
+    GMOCK_MOCKER_(3, constness, Method).SetOwnerAndName(this, #Method); \
+    return GMOCK_MOCKER_(3, constness, Method).Invoke(gmock_a1, gmock_a2, \
+        gmock_a3); \
   } \
   ::testing::MockSpec<F>& \
       gmock_##Method(GMOCK_MATCHER_(tn, F, 1) gmock_a1, \
                      GMOCK_MATCHER_(tn, F, 2) gmock_a2, \
                      GMOCK_MATCHER_(tn, F, 3) gmock_a3) constness { \
-    return GMOCK_MOCKER_(Method).RegisterOwner(this).With(gmock_a1, gmock_a2, \
-        gmock_a3); \
+    return GMOCK_MOCKER_(3, constness, \
+        Method).RegisterOwner(this).With(gmock_a1, gmock_a2, gmock_a3); \
   } \
-  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(Method)
+  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(3, constness, Method)
 
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
 #define GMOCK_METHOD4_(tn, constness, ct, Method, F) \
@@ -375,19 +379,20 @@ using internal::FunctionMocker;
     GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == 4, \
         this_method_does_not_take_4_arguments); \
-    GMOCK_MOCKER_(Method).SetOwnerAndName(this, #Method); \
-    return GMOCK_MOCKER_(Method).Invoke(gmock_a1, gmock_a2, gmock_a3, \
-        gmock_a4); \
+    GMOCK_MOCKER_(4, constness, Method).SetOwnerAndName(this, #Method); \
+    return GMOCK_MOCKER_(4, constness, Method).Invoke(gmock_a1, gmock_a2, \
+        gmock_a3, gmock_a4); \
   } \
   ::testing::MockSpec<F>& \
       gmock_##Method(GMOCK_MATCHER_(tn, F, 1) gmock_a1, \
                      GMOCK_MATCHER_(tn, F, 2) gmock_a2, \
                      GMOCK_MATCHER_(tn, F, 3) gmock_a3, \
                      GMOCK_MATCHER_(tn, F, 4) gmock_a4) constness { \
-    return GMOCK_MOCKER_(Method).RegisterOwner(this).With(gmock_a1, gmock_a2, \
-        gmock_a3, gmock_a4); \
+    return GMOCK_MOCKER_(4, constness, \
+        Method).RegisterOwner(this).With(gmock_a1, gmock_a2, gmock_a3, \
+        gmock_a4); \
   } \
-  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(Method)
+  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(4, constness, Method)
 
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
 #define GMOCK_METHOD5_(tn, constness, ct, Method, F) \
@@ -399,9 +404,9 @@ using internal::FunctionMocker;
     GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == 5, \
         this_method_does_not_take_5_arguments); \
-    GMOCK_MOCKER_(Method).SetOwnerAndName(this, #Method); \
-    return GMOCK_MOCKER_(Method).Invoke(gmock_a1, gmock_a2, gmock_a3, \
-        gmock_a4, gmock_a5); \
+    GMOCK_MOCKER_(5, constness, Method).SetOwnerAndName(this, #Method); \
+    return GMOCK_MOCKER_(5, constness, Method).Invoke(gmock_a1, gmock_a2, \
+        gmock_a3, gmock_a4, gmock_a5); \
   } \
   ::testing::MockSpec<F>& \
       gmock_##Method(GMOCK_MATCHER_(tn, F, 1) gmock_a1, \
@@ -409,10 +414,11 @@ using internal::FunctionMocker;
                      GMOCK_MATCHER_(tn, F, 3) gmock_a3, \
                      GMOCK_MATCHER_(tn, F, 4) gmock_a4, \
                      GMOCK_MATCHER_(tn, F, 5) gmock_a5) constness { \
-    return GMOCK_MOCKER_(Method).RegisterOwner(this).With(gmock_a1, gmock_a2, \
-        gmock_a3, gmock_a4, gmock_a5); \
+    return GMOCK_MOCKER_(5, constness, \
+        Method).RegisterOwner(this).With(gmock_a1, gmock_a2, gmock_a3, \
+        gmock_a4, gmock_a5); \
   } \
-  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(Method)
+  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(5, constness, Method)
 
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
 #define GMOCK_METHOD6_(tn, constness, ct, Method, F) \
@@ -425,9 +431,9 @@ using internal::FunctionMocker;
     GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == 6, \
         this_method_does_not_take_6_arguments); \
-    GMOCK_MOCKER_(Method).SetOwnerAndName(this, #Method); \
-    return GMOCK_MOCKER_(Method).Invoke(gmock_a1, gmock_a2, gmock_a3, \
-        gmock_a4, gmock_a5, gmock_a6); \
+    GMOCK_MOCKER_(6, constness, Method).SetOwnerAndName(this, #Method); \
+    return GMOCK_MOCKER_(6, constness, Method).Invoke(gmock_a1, gmock_a2, \
+        gmock_a3, gmock_a4, gmock_a5, gmock_a6); \
   } \
   ::testing::MockSpec<F>& \
       gmock_##Method(GMOCK_MATCHER_(tn, F, 1) gmock_a1, \
@@ -436,10 +442,11 @@ using internal::FunctionMocker;
                      GMOCK_MATCHER_(tn, F, 4) gmock_a4, \
                      GMOCK_MATCHER_(tn, F, 5) gmock_a5, \
                      GMOCK_MATCHER_(tn, F, 6) gmock_a6) constness { \
-    return GMOCK_MOCKER_(Method).RegisterOwner(this).With(gmock_a1, gmock_a2, \
-        gmock_a3, gmock_a4, gmock_a5, gmock_a6); \
+    return GMOCK_MOCKER_(6, constness, \
+        Method).RegisterOwner(this).With(gmock_a1, gmock_a2, gmock_a3, \
+        gmock_a4, gmock_a5, gmock_a6); \
   } \
-  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(Method)
+  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(6, constness, Method)
 
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
 #define GMOCK_METHOD7_(tn, constness, ct, Method, F) \
@@ -453,9 +460,9 @@ using internal::FunctionMocker;
     GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == 7, \
         this_method_does_not_take_7_arguments); \
-    GMOCK_MOCKER_(Method).SetOwnerAndName(this, #Method); \
-    return GMOCK_MOCKER_(Method).Invoke(gmock_a1, gmock_a2, gmock_a3, \
-        gmock_a4, gmock_a5, gmock_a6, gmock_a7); \
+    GMOCK_MOCKER_(7, constness, Method).SetOwnerAndName(this, #Method); \
+    return GMOCK_MOCKER_(7, constness, Method).Invoke(gmock_a1, gmock_a2, \
+        gmock_a3, gmock_a4, gmock_a5, gmock_a6, gmock_a7); \
   } \
   ::testing::MockSpec<F>& \
       gmock_##Method(GMOCK_MATCHER_(tn, F, 1) gmock_a1, \
@@ -465,10 +472,11 @@ using internal::FunctionMocker;
                      GMOCK_MATCHER_(tn, F, 5) gmock_a5, \
                      GMOCK_MATCHER_(tn, F, 6) gmock_a6, \
                      GMOCK_MATCHER_(tn, F, 7) gmock_a7) constness { \
-    return GMOCK_MOCKER_(Method).RegisterOwner(this).With(gmock_a1, gmock_a2, \
-        gmock_a3, gmock_a4, gmock_a5, gmock_a6, gmock_a7); \
+    return GMOCK_MOCKER_(7, constness, \
+        Method).RegisterOwner(this).With(gmock_a1, gmock_a2, gmock_a3, \
+        gmock_a4, gmock_a5, gmock_a6, gmock_a7); \
   } \
-  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(Method)
+  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(7, constness, Method)
 
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
 #define GMOCK_METHOD8_(tn, constness, ct, Method, F) \
@@ -483,9 +491,9 @@ using internal::FunctionMocker;
     GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == 8, \
         this_method_does_not_take_8_arguments); \
-    GMOCK_MOCKER_(Method).SetOwnerAndName(this, #Method); \
-    return GMOCK_MOCKER_(Method).Invoke(gmock_a1, gmock_a2, gmock_a3, \
-        gmock_a4, gmock_a5, gmock_a6, gmock_a7, gmock_a8); \
+    GMOCK_MOCKER_(8, constness, Method).SetOwnerAndName(this, #Method); \
+    return GMOCK_MOCKER_(8, constness, Method).Invoke(gmock_a1, gmock_a2, \
+        gmock_a3, gmock_a4, gmock_a5, gmock_a6, gmock_a7, gmock_a8); \
   } \
   ::testing::MockSpec<F>& \
       gmock_##Method(GMOCK_MATCHER_(tn, F, 1) gmock_a1, \
@@ -496,10 +504,11 @@ using internal::FunctionMocker;
                      GMOCK_MATCHER_(tn, F, 6) gmock_a6, \
                      GMOCK_MATCHER_(tn, F, 7) gmock_a7, \
                      GMOCK_MATCHER_(tn, F, 8) gmock_a8) constness { \
-    return GMOCK_MOCKER_(Method).RegisterOwner(this).With(gmock_a1, gmock_a2, \
-        gmock_a3, gmock_a4, gmock_a5, gmock_a6, gmock_a7, gmock_a8); \
+    return GMOCK_MOCKER_(8, constness, \
+        Method).RegisterOwner(this).With(gmock_a1, gmock_a2, gmock_a3, \
+        gmock_a4, gmock_a5, gmock_a6, gmock_a7, gmock_a8); \
   } \
-  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(Method)
+  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(8, constness, Method)
 
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
 #define GMOCK_METHOD9_(tn, constness, ct, Method, F) \
@@ -515,9 +524,10 @@ using internal::FunctionMocker;
     GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == 9, \
         this_method_does_not_take_9_arguments); \
-    GMOCK_MOCKER_(Method).SetOwnerAndName(this, #Method); \
-    return GMOCK_MOCKER_(Method).Invoke(gmock_a1, gmock_a2, gmock_a3, \
-        gmock_a4, gmock_a5, gmock_a6, gmock_a7, gmock_a8, gmock_a9); \
+    GMOCK_MOCKER_(9, constness, Method).SetOwnerAndName(this, #Method); \
+    return GMOCK_MOCKER_(9, constness, Method).Invoke(gmock_a1, gmock_a2, \
+        gmock_a3, gmock_a4, gmock_a5, gmock_a6, gmock_a7, gmock_a8, \
+        gmock_a9); \
   } \
   ::testing::MockSpec<F>& \
       gmock_##Method(GMOCK_MATCHER_(tn, F, 1) gmock_a1, \
@@ -529,11 +539,11 @@ using internal::FunctionMocker;
                      GMOCK_MATCHER_(tn, F, 7) gmock_a7, \
                      GMOCK_MATCHER_(tn, F, 8) gmock_a8, \
                      GMOCK_MATCHER_(tn, F, 9) gmock_a9) constness { \
-    return GMOCK_MOCKER_(Method).RegisterOwner(this).With(gmock_a1, gmock_a2, \
-        gmock_a3, gmock_a4, gmock_a5, gmock_a6, gmock_a7, gmock_a8, \
-        gmock_a9); \
+    return GMOCK_MOCKER_(9, constness, \
+        Method).RegisterOwner(this).With(gmock_a1, gmock_a2, gmock_a3, \
+        gmock_a4, gmock_a5, gmock_a6, gmock_a7, gmock_a8, gmock_a9); \
   } \
-  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(Method)
+  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(9, constness, Method)
 
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
 #define GMOCK_METHOD10_(tn, constness, ct, Method, F) \
@@ -550,9 +560,9 @@ using internal::FunctionMocker;
     GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == 10, \
         this_method_does_not_take_10_arguments); \
-    GMOCK_MOCKER_(Method).SetOwnerAndName(this, #Method); \
-    return GMOCK_MOCKER_(Method).Invoke(gmock_a1, gmock_a2, gmock_a3, \
-        gmock_a4, gmock_a5, gmock_a6, gmock_a7, gmock_a8, gmock_a9, \
+    GMOCK_MOCKER_(10, constness, Method).SetOwnerAndName(this, #Method); \
+    return GMOCK_MOCKER_(10, constness, Method).Invoke(gmock_a1, gmock_a2, \
+        gmock_a3, gmock_a4, gmock_a5, gmock_a6, gmock_a7, gmock_a8, gmock_a9, \
         gmock_a10); \
   } \
   ::testing::MockSpec<F>& \
@@ -566,11 +576,12 @@ using internal::FunctionMocker;
                      GMOCK_MATCHER_(tn, F, 8) gmock_a8, \
                      GMOCK_MATCHER_(tn, F, 9) gmock_a9, \
                      GMOCK_MATCHER_(tn, F, 10) gmock_a10) constness { \
-    return GMOCK_MOCKER_(Method).RegisterOwner(this).With(gmock_a1, gmock_a2, \
-        gmock_a3, gmock_a4, gmock_a5, gmock_a6, gmock_a7, gmock_a8, gmock_a9, \
+    return GMOCK_MOCKER_(10, constness, \
+        Method).RegisterOwner(this).With(gmock_a1, gmock_a2, gmock_a3, \
+        gmock_a4, gmock_a5, gmock_a6, gmock_a7, gmock_a8, gmock_a9, \
         gmock_a10); \
   } \
-  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(Method)
+  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_(10, constness, Method)
 
 #define MOCK_METHOD0(m, F) GMOCK_METHOD0_(, , , m, F)
 #define MOCK_METHOD1(m, F) GMOCK_METHOD1_(, , , m, F)

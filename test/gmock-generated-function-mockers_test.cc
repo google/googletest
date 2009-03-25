@@ -422,5 +422,45 @@ TEST(TemplateMockTestWithCallType, Works) {
 }
 #endif  // GTEST_OS_WINDOWS
 
+#define MY_MOCK_METHODS1_ \
+    MOCK_METHOD0(Overloaded, void()); \
+    MOCK_CONST_METHOD1(Overloaded, int(int n)); \
+    MOCK_METHOD2(Overloaded, bool(bool f, int n))
+
+class MockOverloadedOnArgNumber {
+ public:
+  MY_MOCK_METHODS1_;
+};
+
+TEST(OverloadedMockMethodTest, CanOverloadOnArgNumberInMacroBody) {
+  MockOverloadedOnArgNumber mock;
+  EXPECT_CALL(mock, Overloaded());
+  EXPECT_CALL(mock, Overloaded(1)).WillOnce(Return(2));
+  EXPECT_CALL(mock, Overloaded(true, 1)).WillOnce(Return(true));
+
+  mock.Overloaded();
+  EXPECT_EQ(2, mock.Overloaded(1));
+  EXPECT_TRUE(mock.Overloaded(true, 1));
+}
+
+#define MY_MOCK_METHODS2_ \
+    MOCK_CONST_METHOD1(Overloaded, int(int n)); \
+    MOCK_METHOD1(Overloaded, int(int n));
+
+class MockOverloadedOnConstness {
+ public:
+  MY_MOCK_METHODS2_;
+};
+
+TEST(OverloadedMockMethodTest, CanOverloadOnConstnessInMacroBody) {
+  MockOverloadedOnConstness mock;
+  const MockOverloadedOnConstness* const_mock = &mock;
+  EXPECT_CALL(mock, Overloaded(1)).WillOnce(Return(2));
+  EXPECT_CALL(*const_mock, Overloaded(1)).WillOnce(Return(3));
+
+  EXPECT_EQ(2, mock.Overloaded(1));
+  EXPECT_EQ(3, const_mock->Overloaded(1));
+}
+
 }  // namespace gmock_generated_function_mockers_test
 }  // namespace testing
