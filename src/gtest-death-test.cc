@@ -945,7 +945,7 @@ bool StackGrowsDown() {
 // wrong.
 static pid_t ExecDeathTestFork(char* const* argv, int close_fd) {
   ExecDeathTestArgs args = { argv, close_fd };
-  pid_t child_pid;
+  pid_t child_pid = -1;
 
 #if GTEST_HAS_CLONE
   const bool use_fork = GTEST_FLAG(death_test_use_fork);

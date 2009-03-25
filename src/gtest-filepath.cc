@@ -33,6 +33,7 @@
 #include <gtest/internal/gtest-port.h>
 
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef _WIN32_WCE
 #include <windows.h>
@@ -166,20 +167,19 @@ FilePath FilePath::ConcatPaths(const FilePath& directory,
 // Returns true if pathname describes something findable in the file-system,
 // either a file, directory, or whatever.
 bool FilePath::FileOrDirectoryExists() const {
-#if GTEST_OS_WINDOWS
 #ifdef _WIN32_WCE
   LPCWSTR unicode = String::AnsiToUtf16(pathname_.c_str());
   const DWORD attributes = GetFileAttributes(unicode);
   delete [] unicode;
   return attributes != kInvalidFileAttributes;
-#else
+#elif GTEST_OS_WINDOWS
   struct _stat file_stat = {};
   return _stat(pathname_.c_str(), &file_stat) == 0;
-#endif  // _WIN32_WCE
 #else
-  struct stat file_stat = {};
+  struct stat file_stat;
+  memset(&file_stat, 0, sizeof(file_stat));
   return stat(pathname_.c_str(), &file_stat) == 0;
-#endif  // GTEST_OS_WINDOWS
+#endif  // _WIN32_WCE
 }
 
 // Returns true if pathname describes a directory in the file-system
@@ -205,7 +205,8 @@ bool FilePath::DirectoryExists() const {
       (_S_IFDIR & file_stat.st_mode) != 0;
 #endif  // _WIN32_WCE
 #else
-  struct stat file_stat = {};
+  struct stat file_stat;
+  memset(&file_stat, 0, sizeof(file_stat));
   result = stat(pathname_.c_str(), &file_stat) == 0 &&
       S_ISDIR(file_stat.st_mode);
 #endif  // GTEST_OS_WINDOWS
