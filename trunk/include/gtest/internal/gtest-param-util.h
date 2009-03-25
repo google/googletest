@@ -483,8 +483,8 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
   // about a generator.
   int AddTestCaseInstantiation(const char* instantiation_name,
                                GeneratorCreationFunc* func,
-                               const char* file,
-                               int line) {
+                               const char* /* file */,
+                               int /* line */) {
     instantiations_.push_back(::std::make_pair(instantiation_name, func));
     return 0;  // Return value used only to run this method in namespace scope.
   }
