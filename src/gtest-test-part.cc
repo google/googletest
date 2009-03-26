@@ -81,7 +81,7 @@ void TestPartResultArray::Append(const TestPartResult& result) {
 const TestPartResult& TestPartResultArray::GetTestPartResult(int index) const {
   if (index < 0 || index >= size()) {
     printf("\nInvalid index (%d) into TestPartResultArray.\n", index);
-    internal::abort();
+    internal::posix::abort();
   }
 
   const internal::ListNode<TestPartResult>* p = list_->Head();

@@ -48,7 +48,6 @@
 #if GTEST_OS_WINDOWS
 #include <windows.h>
 #else
-#include <unistd.h>
 #include <sys/mman.h>
 #include <sys/wait.h>
 #endif  // GTEST_OS_WINDOWS
@@ -205,15 +204,7 @@ void DeathTestAbort(const String& message) {
   const InternalRunDeathTestFlag* const flag =
       GetUnitTestImpl()->internal_run_death_test_flag();
   if (flag != NULL) {
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4996)  // Suppresses deprecation warning
-                                // about POSIX functions in MSVC.
-#endif  // _MSC_VER
-    FILE* parent = fdopen(flag->write_fd(), "w");
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif  // _MSC_VER
+    FILE* parent = posix::fdopen(flag->write_fd(), "w");
     fputc(kDeathTestInternalError, parent);
     fprintf(parent, "%s", message.c_str());
     fflush(parent);
@@ -258,15 +249,7 @@ void DeathTestAbort(const String& message) {
 
 // Returns the message describing the last system error in errno.
 String GetLastErrnoDescription() {
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4996)  // Suppresses deprecation warning
-                                // about POSIX functions in MSVC.
-#endif  // _MSC_VER
-    return String(errno == 0 ? "" : strerror(errno));
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif  // _MSC_VER
+    return String(errno == 0 ? "" : posix::strerror(errno));
 }
 
 // This is called from a death test parent process to read a failure
@@ -279,15 +262,7 @@ static void FailFromInternalError(int fd) {
   int num_read;
 
   do {
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4996)  // Suppresses deprecation warning
-                                // about POSIX functions in MSVC.
-#endif  // _MSC_VER
-    while ((num_read = static_cast<int>(read(fd, buffer, 255))) > 0) {
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif  // _MSC_VER
+    while ((num_read = posix::read(fd, buffer, 255)) > 0) {
       buffer[num_read] = '\0';
       error << buffer;
     }
@@ -397,11 +372,6 @@ class DeathTestImpl : public DeathTest {
 // member, and closes read_fd_.  Outputs diagnostics and terminates in
 // case of unexpected codes.
 void DeathTestImpl::ReadAndInterpretStatusByte() {
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4996)  // Suppresses deprecation warning
-                                // about POSIX functions in MSVC.
-#endif  // _MSC_VER
   char flag;
   int bytes_read;
 
@@ -410,7 +380,7 @@ void DeathTestImpl::ReadAndInterpretStatusByte() {
   // its success), so it's okay to call this in the parent before
   // the child process has exited.
   do {
-    bytes_read = static_cast<int>(read(read_fd(), &flag, 1));
+    bytes_read = posix::read(read_fd(), &flag, 1);
   } while (bytes_read == -1 && errno == EINTR);
 
   if (bytes_read == 0) {
@@ -437,11 +407,8 @@ void DeathTestImpl::ReadAndInterpretStatusByte() {
                Message() << "Read from death test child process failed: "
                          << GetLastErrnoDescription());
   }
-  GTEST_DEATH_TEST_CHECK_SYSCALL_(close(read_fd()));
+  GTEST_DEATH_TEST_CHECK_SYSCALL_(posix::close(read_fd()));
   set_read_fd(-1);
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif  // _MSC_VER
 }
 
 // Signals that the death test code which should have exited, didn't.
@@ -454,18 +421,8 @@ void DeathTestImpl::Abort(AbortReason reason) {
   // to the pipe, then exit.
   const char status_ch =
       reason == TEST_DID_NOT_DIE ? kDeathTestLived : kDeathTestReturned;
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4996)  // Suppresses deprecation warning
-                                // about POSIX functions.
-#endif  // _MSC_VER
-  GTEST_DEATH_TEST_CHECK_SYSCALL_(write(write_fd(), &status_ch, 1));
-  GTEST_DEATH_TEST_CHECK_SYSCALL_(close(write_fd()));
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif  // _MSC_VER
-
+  GTEST_DEATH_TEST_CHECK_SYSCALL_(posix::write(write_fd(), &status_ch, 1));
+  GTEST_DEATH_TEST_CHECK_SYSCALL_(posix::close(write_fd()));
   _exit(1);  // Exits w/o any normal exit hooks (we were supposed to crash)
 }
 

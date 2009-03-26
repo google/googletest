@@ -39,12 +39,6 @@
 
 #include <gtest/internal/gtest-internal.h>
 
-#if GTEST_HAS_DEATH_TEST && GTEST_OS_WINDOWS
-#include <io.h>
-#elif GTEST_HAS_DEATH_TEST
-#include <unistd.h>
-#endif  // GTEST_HAS_DEATH_TEST && GTEST_OS_WINDOWS
-
 namespace testing {
 namespace internal {
 
@@ -203,15 +197,7 @@ class InternalRunDeathTestFlag {
 
   ~InternalRunDeathTestFlag() {
     if (write_fd_ >= 0)
-// Suppress MSVC complaints about POSIX functions.
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4996)
-#endif  // _MSC_VER
-      close(write_fd_);
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif  // _MSC_VER
+      posix::close(write_fd_);
   }
 
   String file() const { return file_; }

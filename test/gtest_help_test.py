@@ -55,6 +55,7 @@ else:
 PROGRAM_PATH = os.path.join(gtest_test_utils.GetBuildDir(), PROGRAM)
 FLAG_PREFIX = '--gtest_'
 CATCH_EXCEPTIONS_FLAG = FLAG_PREFIX + 'catch_exceptions'
+DEATH_TEST_STYLE_FLAG = FLAG_PREFIX + 'death_test_style'
 
 # The help message must match this regex.
 HELP_REGEX = re.compile(
@@ -99,8 +100,10 @@ class GTestHelpTest(unittest.TestCase):
     self.assert_(HELP_REGEX.search(output), output)
     if IS_WINDOWS:
       self.assert_(CATCH_EXCEPTIONS_FLAG in output, output)
+      self.assert_(DEATH_TEST_STYLE_FLAG not in output, output)
     else:
       self.assert_(CATCH_EXCEPTIONS_FLAG not in output, output)
+      self.assert_(DEATH_TEST_STYLE_FLAG in output, output)
 
   def testPrintsHelpWithFullFlag(self):
     self.TestHelpFlag('--help')

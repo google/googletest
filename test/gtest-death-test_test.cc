@@ -60,8 +60,9 @@
 #include "src/gtest-internal-inl.h"
 #undef GTEST_IMPLEMENTATION_
 
-using testing::Message;
+namespace posix = ::testing::internal::posix;
 
+using testing::Message;
 using testing::internal::DeathTest;
 using testing::internal::DeathTestFactory;
 using testing::internal::FilePath;
@@ -105,11 +106,7 @@ class TestForDeathTest : public testing::Test {
   TestForDeathTest() : original_dir_(FilePath::GetCurrentDir()) {}
 
   virtual ~TestForDeathTest() {
-#if GTEST_OS_WINDOWS
-    _chdir(original_dir_.c_str());
-#else
-    chdir(original_dir_.c_str());
-#endif
+    posix::chdir(original_dir_.c_str());
   }
 
   // A static member function that's expected to die.
@@ -348,13 +345,7 @@ TEST_F(TestForDeathTest, MemberFunctionFastStyle) {
   EXPECT_DEATH(MemberFunction(), "inside.*MemberFunction");
 }
 
-void ChangeToRootDir() {
-#if GTEST_OS_WINDOWS
-  _chdir("\\");
-#else
-  chdir("/");
-#endif  // GTEST_OS_WINDOWS
-}
+void ChangeToRootDir() { posix::chdir(GTEST_PATH_SEP_); }
 
 // Tests that death tests work even if the current directory has been
 // changed.

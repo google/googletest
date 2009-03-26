@@ -149,7 +149,10 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <iostream>  // Used for GTEST_CHECK_
+#include <string.h>
+#include <sys/stat.h>
+
+#include <iostream>  // NOLINT
 
 #define GTEST_DEV_EMAIL_ "googletestframework@@googlegroups.com"
 #define GTEST_FLAG_PREFIX_ "gtest_"
@@ -192,7 +195,20 @@
 // included <stdlib.h>, which is guaranteed to define size_t through
 // <stddef.h>.
 #include <regex.h>  // NOLINT
+#include <strings.h>  // NOLINT
+#include <sys/types.h>  // NOLINT
+#include <unistd.h>  // NOLINT
+
 #define GTEST_USES_POSIX_RE 1
+
+#elif GTEST_OS_WINDOWS
+
+#include <direct.h>  // NOLINT
+#include <io.h>  // NOLINT
+
+// <regex.h> is not available on Windows.  Use our own simple regex
+// implementation instead.
+#define GTEST_USES_SIMPLE_RE 1
 
 #else
 
@@ -381,7 +397,7 @@
                              GTEST_OS_CYGWIN || \
                              (GTEST_OS_WINDOWS && _MSC_VER >= 1400))
 #define GTEST_HAS_DEATH_TEST 1
-#include <vector>
+#include <vector>  // NOLINT
 #endif
 
 // Determines whether to support value-parameterized tests.
@@ -701,17 +717,107 @@ struct is_pointer<T*> : public true_type {};
 
 #if GTEST_OS_WINDOWS
 #define GTEST_PATH_SEP_ "\\"
-#else
-#define GTEST_PATH_SEP_ "/"
-#endif  // GTEST_OS_WINDOWS
-
-// Defines BiggestInt as the biggest signed integer type the compiler
-// supports.
-#if GTEST_OS_WINDOWS
+// The biggest signed integer type the compiler supports.
 typedef __int64 BiggestInt;
 #else
+#define GTEST_PATH_SEP_ "/"
 typedef long long BiggestInt;  // NOLINT
 #endif  // GTEST_OS_WINDOWS
+
+// The testing::internal::posix namespace holds wrappers for common
+// POSIX functions.  These wrappers hide the differences between
+// Windows/MSVC and POSIX systems.
+namespace posix {
+
+// Functions with a different name on Windows.
+
+#if GTEST_OS_WINDOWS
+
+typedef struct _stat stat_struct;
+
+inline int chdir(const char* dir) { return ::_chdir(dir); }
+inline int fileno(FILE* file) { return _fileno(file); }
+inline int isatty(int fd) { return ::_isatty(fd); }
+inline int stat(const char* path, stat_struct* buf) { return ::_stat(path, buf); }
+inline int strcasecmp(const char* s1, const char* s2) {
+  return ::_stricmp(s1, s2);
+}
+inline const char* strdup(const char* src) { return ::_strdup(src); }
+inline int rmdir(const char* dir) { return ::_rmdir(dir); }
+inline bool IsDir(const stat_struct& st) {
+  return (_S_IFDIR & st.st_mode) != 0;
+}
+
+#else
+
+typedef struct stat stat_struct;
+
+using ::chdir;
+using ::fileno;
+using ::isatty;
+using ::stat;
+using ::strcasecmp;
+using ::strdup;
+using ::rmdir;
+inline bool IsDir(const stat_struct& st) { return S_ISDIR(st.st_mode); }
+
+#endif  // GTEST_OS_WINDOWS
+
+// Functions deprecated by MSVC 8.0.
+
+#ifdef _MSC_VER
+// Temporarily disable warning 4996 (deprecated function).
+#pragma warning(push)
+#pragma warning(disable:4996)
+#endif
+
+inline const char* strncpy(char* dest, const char* src, size_t n) {
+  return ::strncpy(dest, src, n);
+}
+
+inline FILE* fopen(const char* path, const char* mode) {
+  return ::fopen(path, mode);
+}
+inline FILE *freopen(const char *path, const char *mode, FILE *stream) {
+  return ::freopen(path, mode, stream);
+}
+inline FILE* fdopen(int fd, const char* mode) {
+  return ::fdopen(fd, mode);
+}
+inline int fclose(FILE *fp) { return ::fclose(fp); }
+
+inline int read(int fd, void* buf, size_t count) {
+  return static_cast<int>(::read(fd, buf, count));
+}
+inline int write(int fd, const void* buf, size_t count) {
+  return static_cast<int>(::write(fd, buf, count));
+}
+inline int close(int fd) { return ::close(fd); }
+
+inline const char* strerror(int errnum) { return ::strerror(errnum); }
+
+inline const char* getenv(const char* name) {
+#ifdef _WIN32_WCE  // We are on Windows CE, which has no environment variables.
+  return NULL;
+#else
+  return ::getenv(name);
+#endif
+}
+
+#ifdef _MSC_VER
+#pragma warning(pop)  // Restores the warning state.
+#endif
+
+#ifdef _WIN32_WCE
+// Windows CE has no C library. The abort() function is used in
+// several places in Google Test. This implementation provides a reasonable
+// imitation of standard behaviour.
+void abort();
+#else
+using ::abort;
+#endif  // _WIN32_WCE
+
+}  // namespace posix
 
 // The maximum number a BiggestInt can represent.  This definition
 // works no matter BiggestInt is represented in one's complement or
@@ -782,32 +888,6 @@ typedef TypeWithSize<8>::UInt UInt64;
 typedef TypeWithSize<8>::Int TimeInMillis;  // Represents time in milliseconds.
 
 // Utilities for command line flags and environment variables.
-
-// A wrapper for getenv() that works on Linux, Windows, and Mac OS.
-inline const char* GetEnv(const char* name) {
-#ifdef _WIN32_WCE  // We are on Windows CE.
-  // CE has no environment variables.
-  return NULL;
-#elif GTEST_OS_WINDOWS  // We are on Windows proper.
-  // MSVC 8 deprecates getenv(), so we want to suppress warning 4996
-  // (deprecated function) there.
-#pragma warning(push)          // Saves the current warning state.
-#pragma warning(disable:4996)  // Temporarily disables warning 4996.
-  return getenv(name);
-#pragma warning(pop)           // Restores the warning state.
-#else  // We are on Linux or Mac OS.
-  return getenv(name);
-#endif
-}
-
-#ifdef _WIN32_WCE
-// Windows CE has no C library. The abort() function is used in
-// several places in Google Test. This implementation provides a reasonable
-// imitation of standard behaviour.
-void abort();
-#else
-inline void abort() { ::abort(); }
-#endif  // _WIN32_WCE
 
 // INTERNAL IMPLEMENTATION - DO NOT USE.
 //
