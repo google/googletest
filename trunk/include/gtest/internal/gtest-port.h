@@ -736,13 +736,18 @@ namespace posix {
 typedef struct _stat stat_struct;
 
 inline int chdir(const char* dir) { return ::_chdir(dir); }
+// We cannot write ::_fileno() as MSVC defines it as a macro.
 inline int fileno(FILE* file) { return _fileno(file); }
 inline int isatty(int fd) { return ::_isatty(fd); }
-inline int stat(const char* path, stat_struct* buf) { return ::_stat(path, buf); }
+inline int stat(const char* path, stat_struct* buf) {
+  return ::_stat(path, buf);
+}
 inline int strcasecmp(const char* s1, const char* s2) {
   return ::_stricmp(s1, s2);
 }
-inline const char* strdup(const char* src) { return ::_strdup(src); }
+// We cannot define the function as strdup(const char* src), since
+// MSVC defines strdup as a macro.
+inline char* StrDup(const char* src) { return ::_strdup(src); }
 inline int rmdir(const char* dir) { return ::_rmdir(dir); }
 inline bool IsDir(const stat_struct& st) {
   return (_S_IFDIR & st.st_mode) != 0;
@@ -757,7 +762,7 @@ using ::fileno;
 using ::isatty;
 using ::stat;
 using ::strcasecmp;
-using ::strdup;
+inline char* StrDup(const char* src) { return ::strdup(src); }
 using ::rmdir;
 inline bool IsDir(const stat_struct& st) { return S_ISDIR(st.st_mode); }
 

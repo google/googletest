@@ -810,7 +810,7 @@ class Arguments {
     }
   }
   void AddArgument(const char* argument) {
-    args_.insert(args_.end() - 1, strdup(argument));
+    args_.insert(args_.end() - 1, posix::StrDup(argument));
   }
 
   template <typename Str>
@@ -818,7 +818,7 @@ class Arguments {
     for (typename ::std::vector<Str>::const_iterator i = arguments.begin();
          i != arguments.end();
          ++i) {
-      args_.insert(args_.end() - 1, strdup(i->c_str()));
+      args_.insert(args_.end() - 1, posix::StrDup(i->c_str()));
     }
   }
   char* const* Argv() {

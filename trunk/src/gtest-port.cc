@@ -98,7 +98,7 @@ bool RE::PartialMatch(const char* str, const RE& re) {
 
 // Initializes an RE from its string representation.
 void RE::Init(const char* regex) {
-  pattern_ = strdup(regex);
+  pattern_ = posix::StrDup(regex);
 
   // Reserves enough bytes to hold the regular expression used for a
   // full match.
@@ -346,7 +346,7 @@ bool RE::PartialMatch(const char* str, const RE& re) {
 void RE::Init(const char* regex) {
   pattern_ = full_pattern_ = NULL;
   if (regex != NULL) {
-    pattern_ = posix::strdup(regex);
+    pattern_ = posix::StrDup(regex);
   }
 
   is_valid_ = ValidateRegex(regex);
