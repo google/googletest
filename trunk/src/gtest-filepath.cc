@@ -33,22 +33,17 @@
 #include <gtest/internal/gtest-port.h>
 
 #include <stdlib.h>
-#include <string.h>
 
 #ifdef _WIN32_WCE
 #include <windows.h>
 #elif GTEST_OS_WINDOWS
 #include <direct.h>
 #include <io.h>
-#include <sys/stat.h>
 #elif GTEST_OS_SYMBIAN
 // Symbian OpenC has PATH_MAX in sys/syslimits.h
 #include <sys/syslimits.h>
-#include <unistd.h>
 #else
 #include <limits.h>
-#include <sys/stat.h>  // NOLINT
-#include <unistd.h>  // NOLINT
 #include <climits>  // Some Linux distributions define PATH_MAX here.
 #endif  // _WIN32_WCE or _WIN32
 
@@ -172,13 +167,9 @@ bool FilePath::FileOrDirectoryExists() const {
   const DWORD attributes = GetFileAttributes(unicode);
   delete [] unicode;
   return attributes != kInvalidFileAttributes;
-#elif GTEST_OS_WINDOWS
-  struct _stat file_stat = {};
-  return _stat(pathname_.c_str(), &file_stat) == 0;
 #else
-  struct stat file_stat;
-  memset(&file_stat, 0, sizeof(file_stat));
-  return stat(pathname_.c_str(), &file_stat) == 0;
+  posix::stat_struct file_stat;
+  return posix::stat(pathname_.c_str(), &file_stat) == 0;
 #endif  // _WIN32_WCE
 }
 
@@ -191,6 +182,10 @@ bool FilePath::DirectoryExists() const {
   // Windows (like "C:\\").
   const FilePath& path(IsRootDirectory() ? *this :
                                            RemoveTrailingPathSeparator());
+#else
+  const FilePath& path(*this);
+#endif
+
 #ifdef _WIN32_WCE
   LPCWSTR unicode = String::AnsiToUtf16(path.c_str());
   const DWORD attributes = GetFileAttributes(unicode);
@@ -200,16 +195,11 @@ bool FilePath::DirectoryExists() const {
     result = true;
   }
 #else
-  struct _stat file_stat = {};
-  result = _stat(path.c_str(), &file_stat) == 0 &&
-      (_S_IFDIR & file_stat.st_mode) != 0;
+  posix::stat_struct file_stat;
+  result = posix::stat(path.c_str(), &file_stat) == 0 &&
+      posix::IsDir(file_stat);
 #endif  // _WIN32_WCE
-#else
-  struct stat file_stat;
-  memset(&file_stat, 0, sizeof(file_stat));
-  result = stat(pathname_.c_str(), &file_stat) == 0 &&
-      S_ISDIR(file_stat.st_mode);
-#endif  // GTEST_OS_WINDOWS
+
   return result;
 }
 

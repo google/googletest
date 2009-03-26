@@ -60,6 +60,7 @@
 using testing::ScopedFakeTestPartResultReporter;
 using testing::TestPartResultArray;
 
+namespace posix = ::testing::internal::posix;
 using testing::internal::String;
 
 // Tests catching fatal failures.
@@ -989,16 +990,9 @@ int main(int argc, char **argv) {
     // Skip the usual output capturing if we're running as the child
     // process of an threadsafe-style death test.
 #if GTEST_OS_WINDOWS
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4996)
-#endif  // _MSC_VER
-    freopen("nul:", "w", stdout);
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif  // _MSC_VER
+    posix::freopen("nul:", "w", stdout);
 #else
-    freopen("/dev/null", "w", stdout);
+    posix::freopen("/dev/null", "w", stdout);
 #endif  // GTEST_OS_WINDOWS
     return RUN_ALL_TESTS();
   }

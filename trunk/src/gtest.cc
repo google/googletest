@@ -39,7 +39,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <wchar.h>
 #include <wctype.h>
 
@@ -125,8 +124,6 @@
 #undef GTEST_IMPLEMENTATION_
 
 #if GTEST_OS_WINDOWS
-#define fileno _fileno
-#define isatty _isatty
 #define vsnprintf _vsnprintf
 #endif  // GTEST_OS_WINDOWS
 
@@ -806,16 +803,7 @@ static char* CloneString(const char* str, size_t length) {
     return NULL;
   } else {
     char* const clone = new char[length + 1];
-    // MSVC 8 deprecates strncpy(), so we want to suppress warning
-    // 4996 (deprecated function) there.
-#if GTEST_OS_WINDOWS  // We are on Windows.
-#pragma warning(push)          // Saves the current warning state.
-#pragma warning(disable:4996)  // Temporarily disables warning 4996.
-    strncpy(clone, str, length);
-#pragma warning(pop)           // Restores the warning state.
-#else  // We are on Linux or Mac OS.
-    strncpy(clone, str, length);
-#endif  // GTEST_OS_WINDOWS
+    posix::strncpy(clone, str, length);
     clone[length] = '\0';
     return clone;
   }
@@ -1455,17 +1443,8 @@ char* CodePointToUtf8(UInt32 code_point, char* str) {
     // the terminating nul character). We are asking for 32 character
     // buffer just in case. This is also enough for strncpy to
     // null-terminate the destination string.
-    // MSVC 8 deprecates strncpy(), so we want to suppress warning
-    // 4996 (deprecated function) there.
-#if GTEST_OS_WINDOWS  // We are on Windows.
-#pragma warning(push)          // Saves the current warning state.
-#pragma warning(disable:4996)  // Temporarily disables warning 4996.
-#endif
-    strncpy(str, String::Format("(Invalid Unicode 0x%X)", code_point).c_str(),
-            32);
-#if GTEST_OS_WINDOWS  // We are on Windows.
-#pragma warning(pop)  // Restores the warning state.
-#endif
+    posix::strncpy(
+        str, String::Format("(Invalid Unicode 0x%X)", code_point).c_str(), 32);
     str[31] = '\0';  // Makes sure no change in the format to strncpy leaves
                      // the result unterminated.
   }
@@ -1603,15 +1582,11 @@ AssertionResult CmpHelperSTRNE(const char* s1_expression,
 // NULL C string is considered different to any non-NULL C string,
 // including the empty string.
 bool String::CaseInsensitiveCStringEquals(const char * lhs, const char * rhs) {
-  if ( lhs == NULL ) return rhs == NULL;
-
-  if ( rhs == NULL ) return false;
-
-#if GTEST_OS_WINDOWS
-  return _stricmp(lhs, rhs) == 0;
-#else  // GTEST_OS_WINDOWS
-  return strcasecmp(lhs, rhs) == 0;
-#endif  // GTEST_OS_WINDOWS
+  if (lhs == NULL)
+    return rhs == NULL;
+  if (rhs == NULL)
+    return false;
+  return posix::strcasecmp(lhs, rhs) == 0;
 }
 
   // Compares two wide C strings, ignoring case.  Returns true iff they
@@ -2519,7 +2494,7 @@ bool ShouldUseColor(bool stdout_is_tty) {
     return stdout_is_tty;
 #else
     // On non-Windows platforms, we rely on the TERM variable.
-    const char* const term = GetEnv("TERM");
+    const char* const term = posix::getenv("TERM");
     const bool term_supports_color =
         String::CStringEquals(term, "xterm") ||
         String::CStringEquals(term, "xterm-color") ||
@@ -2549,7 +2524,7 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   const bool use_color = false;
 #else
   static const bool in_color_mode =
-      ShouldUseColor(isatty(fileno(stdout)) != 0);
+      ShouldUseColor(posix::isatty(posix::fileno(stdout)) != 0);
   const bool use_color = in_color_mode && (color != COLOR_DEFAULT);
 #endif  // defined(_WIN32_WCE) || GTEST_OS_SYMBIAN || GTEST_OS_ZOS
   // The '!= 0' comparison is necessary to satisfy MSVC 7.1.
@@ -2631,8 +2606,8 @@ void PrettyUnitTestResultPrinter::OnUnitTestStart(
   if (internal::ShouldShard(kTestTotalShards, kTestShardIndex, false)) {
     ColoredPrintf(COLOR_YELLOW,
                   "Note: This is test shard %s of %s.\n",
-                  internal::GetEnv(kTestShardIndex),
-                  internal::GetEnv(kTestTotalShards));
+                  internal::posix::getenv(kTestShardIndex),
+                  internal::posix::getenv(kTestTotalShards));
   }
 
   const internal::UnitTestImpl* const impl = unit_test->impl();
@@ -2950,17 +2925,7 @@ void XmlUnitTestResultPrinter::OnUnitTestEnd(const UnitTest* unit_test) {
   internal::FilePath output_dir(output_file.RemoveFileName());
 
   if (output_dir.CreateDirectoriesRecursively()) {
-  // MSVC 8 deprecates fopen(), so we want to suppress warning 4996
-  // (deprecated function) there.
-#if GTEST_OS_WINDOWS
-  // We are on Windows.
-#pragma warning(push)          // Saves the current warning state.
-#pragma warning(disable:4996)  // Temporarily disables warning 4996.
-    xmlout = fopen(output_file_.c_str(), "w");
-#pragma warning(pop)           // Restores the warning state.
-#else  // We are on Linux or Mac OS.
-    xmlout = fopen(output_file_.c_str(), "w");
-#endif  // GTEST_OS_WINDOWS
+    xmlout = internal::posix::fopen(output_file_.c_str(), "w");
   }
   if (xmlout == NULL) {
     // TODO(wan): report the reason of the failure.
@@ -3697,17 +3662,9 @@ int UnitTestImpl::RunAllTests() {
 // function will write over it. If the variable is present, but the file cannot
 // be created, prints an error and exits.
 void WriteToShardStatusFileIfNeeded() {
-  const char* const test_shard_file = GetEnv(kTestShardStatusFile);
+  const char* const test_shard_file = posix::getenv(kTestShardStatusFile);
   if (test_shard_file != NULL) {
-#ifdef _MSC_VER  // MSVC 8 deprecates fopen().
-#pragma warning(push)          // Saves the current warning state.
-#pragma warning(disable:4996)  // Temporarily disables warning on
-                               // deprecated functions.
-#endif
-    FILE* const file = fopen(test_shard_file, "w");
-#ifdef _MSC_VER
-#pragma warning(pop)           // Restores the warning state.
-#endif
+    FILE* const file = posix::fopen(test_shard_file, "w");
     if (file == NULL) {
       ColoredPrintf(COLOR_RED,
                     "Could not write to the test shard status file \"%s\" "
@@ -3772,7 +3729,7 @@ bool ShouldShard(const char* total_shards_env,
 // returns default_val. If it is not an Int32, prints an error
 // and aborts.
 Int32 Int32FromEnvOrDie(const char* const var, Int32 default_val) {
-  const char* str_val = GetEnv(var);
+  const char* str_val = posix::getenv(var);
   if (str_val == NULL) {
     return default_val;
   }
@@ -4175,7 +4132,11 @@ static const char kColorEncodedHelpMessage[] =
 "      Generate an XML report in the given directory or with the given file\n"
 "      name. @YFILE_PATH@D defaults to @Gtest_details.xml@D.\n"
 "\n"
-"Failure Behavior:\n"
+"Assertion Behavior:\n"
+#if GTEST_HAS_DEATH_TEST && !GTEST_OS_WINDOWS
+"  @G--" GTEST_FLAG_PREFIX_ "death_test_style=@Y(@Gfast@Y|@Gthreadsafe@Y)@D\n"
+"      Set the default death test style.\n"
+#endif  // GTEST_HAS_DEATH_TEST && !GTEST_OS_WINDOWS
 "  @G--" GTEST_FLAG_PREFIX_ "break_on_failure@D\n"
 "      Turn assertion failures into debugger break-points.\n"
 "  @G--" GTEST_FLAG_PREFIX_ "throw_on_failure@D\n"

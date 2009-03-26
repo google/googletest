@@ -86,18 +86,17 @@ TEST(GetCurrentDirTest, ReturnsCurrentDir) {
   const FilePath original_dir = FilePath::GetCurrentDir();
   EXPECT_FALSE(original_dir.IsEmpty());
 
-#if GTEST_OS_WINDOWS
-  _chdir(GTEST_PATH_SEP_);
+  posix::chdir(GTEST_PATH_SEP_);
   const FilePath cwd = FilePath::GetCurrentDir();
-  _chdir(original_dir.c_str());
+  posix::chdir(original_dir.c_str());
+
+#if GTEST_OS_WINDOWS
   // Skips the ":".
   const char* const cwd_without_drive = strchr(cwd.c_str(), ':');
   ASSERT_TRUE(cwd_without_drive != NULL);
   EXPECT_STREQ(GTEST_PATH_SEP_, cwd_without_drive + 1);
 #else
-  chdir(GTEST_PATH_SEP_);
-  EXPECT_STREQ(GTEST_PATH_SEP_, FilePath::GetCurrentDir().c_str());
-  chdir(original_dir.c_str());
+  EXPECT_STREQ(GTEST_PATH_SEP_, cwd.c_str());
 #endif
 }
 
@@ -436,22 +435,14 @@ class DirectoryCreationTest : public Test {
     remove(testdata_file_.c_str());
     remove(unique_file0_.c_str());
     remove(unique_file1_.c_str());
-#if GTEST_OS_WINDOWS
-    _rmdir(testdata_path_.c_str());
-#else
-    rmdir(testdata_path_.c_str());
-#endif  // GTEST_OS_WINDOWS
+    posix::rmdir(testdata_path_.c_str());
   }
 
   virtual void TearDown() {
     remove(testdata_file_.c_str());
     remove(unique_file0_.c_str());
     remove(unique_file1_.c_str());
-#if GTEST_OS_WINDOWS
-    _rmdir(testdata_path_.c_str());
-#else
-    rmdir(testdata_path_.c_str());
-#endif  // GTEST_OS_WINDOWS
+    posix::rmdir(testdata_path_.c_str());
   }
 
   String TempDir() const {
@@ -459,13 +450,7 @@ class DirectoryCreationTest : public Test {
     return String("\\temp\\");
 
 #elif GTEST_OS_WINDOWS
-    // MSVC 8 deprecates getenv(), so we want to suppress warning 4996
-    // (deprecated function) there.
-#pragma warning(push)          // Saves the current warning state.
-#pragma warning(disable:4996)  // Temporarily disables warning 4996.
-    const char* temp_dir = getenv("TEMP");
-#pragma warning(pop)           // Restores the warning state.
-
+    const char* temp_dir = posix::getenv("TEMP");
     if (temp_dir == NULL || temp_dir[0] == '\0')
       return String("\\temp\\");
     else if (String(temp_dir).EndsWith("\\"))
@@ -478,16 +463,7 @@ class DirectoryCreationTest : public Test {
   }
 
   void CreateTextFile(const char* filename) {
-#if GTEST_OS_WINDOWS
-    // MSVC 8 deprecates fopen(), so we want to suppress warning 4996
-    // (deprecated function) there.#pragma warning(push)
-#pragma warning(push)          // Saves the current warning state.
-#pragma warning(disable:4996)  // Temporarily disables warning 4996.
-    FILE* f = fopen(filename, "w");
-#pragma warning(pop)           // Restores the warning state.
-#else  // We are on Linux or Mac OS.
-    FILE* f = fopen(filename, "w");
-#endif  // GTEST_OS_WINDOWS
+    FILE* f = posix::fopen(filename, "w");
     fprintf(f, "text\n");
     fclose(f);
   }
