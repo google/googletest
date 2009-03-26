@@ -501,7 +501,7 @@ TEST(LinkTest, TestMatcherRef) {
 // Tests the linkage of the TypedEq matcher.
 TEST(LinkTest, TestMatcherTypedEq) {
   Mock mock;
-  unsigned long a = 0;
+  long a = 0;
 
   ON_CALL(mock, VoidFromIntRef(TypedEq<int&>(a))).WillByDefault(Return());
 }

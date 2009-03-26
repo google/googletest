@@ -90,7 +90,7 @@ class MatcherInterface {
   // Explains why x matches, or doesn't match, the matcher.  Override
   // this to provide any additional information that helps a user
   // understand the match result.
-  virtual void ExplainMatchResultTo(T x, ::std::ostream* os) const {
+  virtual void ExplainMatchResultTo(T /* x */, ::std::ostream* /* os */) const {
     // By default, nothing more needs to be explained, as Google Mock
     // has already printed the value of x when this function is
     // called.
@@ -146,8 +146,9 @@ class MatcherBase {
 // The default implementation of ExplainMatchResultTo() for
 // polymorphic matchers.
 template <typename PolymorphicMatcherImpl, typename T>
-inline void ExplainMatchResultTo(const PolymorphicMatcherImpl& impl, const T& x,
-                                 ::std::ostream* os) {
+inline void ExplainMatchResultTo(const PolymorphicMatcherImpl& /* impl */,
+                                 const T& /* x */,
+                                 ::std::ostream* /* os */) {
   // By default, nothing more needs to be said, as Google Mock already
   // prints the value of x elsewhere.
 }
@@ -390,15 +391,15 @@ template <>
 class TuplePrefix<0> {
  public:
   template <typename MatcherTuple, typename ValueTuple>
-  static bool Matches(const MatcherTuple& matcher_tuple,
-                      const ValueTuple& value_tuple) {
+  static bool Matches(const MatcherTuple& /* matcher_tuple */,
+                      const ValueTuple& /* value_tuple */) {
     return true;
   }
 
   template <typename MatcherTuple, typename ValueTuple>
-  static void DescribeMatchFailuresTo(const MatcherTuple& matchers,
-                                      const ValueTuple& values,
-                                      ::std::ostream* os) {}
+  static void DescribeMatchFailuresTo(const MatcherTuple& /* matchers */,
+                                      const ValueTuple& /* values */,
+                                      ::std::ostream* /* os */) {}
 };
 
 // TupleMatches(matcher_tuple, value_tuple) returns true iff all
@@ -495,7 +496,7 @@ class MatcherCastImpl<T, Matcher<T> > {
 template <typename T>
 class AnyMatcherImpl : public MatcherInterface<T> {
  public:
-  virtual bool Matches(T x) const { return true; }
+  virtual bool Matches(T /* x */) const { return true; }
   virtual void DescribeTo(::std::ostream* os) const { *os << "is anything"; }
   virtual void DescribeNegationTo(::std::ostream* os) const {
     // This is mostly for completeness' safe, as it's not very useful

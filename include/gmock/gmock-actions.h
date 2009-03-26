@@ -597,7 +597,7 @@ class AssignAction {
   AssignAction(T1* ptr, T2 value) : ptr_(ptr), value_(value) {}
 
   template <typename Result, typename ArgumentTuple>
-  void Perform(const ArgumentTuple &args) const {
+  void Perform(const ArgumentTuple& /* args */) const {
     *ptr_ = value_;
   }
  private:
@@ -616,7 +616,7 @@ class SetErrnoAndReturnAction {
       : errno_(errno_value),
         result_(result) {}
   template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple &args) const {
+  Result Perform(const ArgumentTuple& /* args */) const {
     errno = errno_;
     return result_;
   }

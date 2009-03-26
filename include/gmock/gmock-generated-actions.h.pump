@@ -314,7 +314,8 @@ class SelectArgs<Result, ArgumentTuple,
  public:
   typedef Result type($for j1, [[GMOCK_FIELD_(ArgumentTuple, k$j1)]]);
   typedef typename Function<type>::ArgumentTuple SelectedArgs;
-  static SelectedArgs Select(const ArgumentTuple& args) {
+  static SelectedArgs Select(const ArgumentTuple& [[]]
+$if i == 1 [[/* args */]] $else [[args]]) {
     using ::std::tr1::get;
     return SelectedArgs($for j1, [[get<k$j1>(args)]]);
   }

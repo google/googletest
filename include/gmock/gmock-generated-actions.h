@@ -749,7 +749,7 @@ class SelectArgs<Result, ArgumentTuple,
  public:
   typedef Result type();
   typedef typename Function<type>::ArgumentTuple SelectedArgs;
-  static SelectedArgs Select(const ArgumentTuple& args) {
+  static SelectedArgs Select(const ArgumentTuple& /* args */) {
     using ::std::tr1::get;
     return SelectedArgs();
   }
@@ -933,7 +933,6 @@ class WithArgsAction {
 
   const InnerAction action_;
 };
-
 
 // Does two actions sequentially.  Used for implementing the DoAll(a1,
 // a2, ...) action.
