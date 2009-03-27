@@ -791,10 +791,10 @@ inline FILE* fdopen(int fd, const char* mode) {
 }
 inline int fclose(FILE *fp) { return ::fclose(fp); }
 
-inline int read(int fd, void* buf, size_t count) {
+inline int read(int fd, void* buf, unsigned int count) {
   return static_cast<int>(::read(fd, buf, count));
 }
-inline int write(int fd, const void* buf, size_t count) {
+inline int write(int fd, const void* buf, unsigned int count) {
   return static_cast<int>(::write(fd, buf, count));
 }
 inline int close(int fd) { return ::close(fd); }
