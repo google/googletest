@@ -1710,16 +1710,16 @@ String String::Format(const char * format, ...) {
   char buffer[4096];
   // MSVC 8 deprecates vsnprintf(), so we want to suppress warning
   // 4996 (deprecated function) there.
-#if GTEST_OS_WINDOWS  // We are on Windows.
+#ifdef _MSC_VER  // We are using MSVC.
 #pragma warning(push)          // Saves the current warning state.
 #pragma warning(disable:4996)  // Temporarily disables warning 4996.
   const int size =
     vsnprintf(buffer, sizeof(buffer)/sizeof(buffer[0]) - 1, format, args);
 #pragma warning(pop)           // Restores the warning state.
-#else  // We are on Linux or Mac OS.
+#else  // We are not using MSVC.
   const int size =
     vsnprintf(buffer, sizeof(buffer)/sizeof(buffer[0]) - 1, format, args);
-#endif  // GTEST_OS_WINDOWS
+#endif  // _MSC_VER
   va_end(args);
 
   return String(size >= 0 ? buffer : "<buffer exceeded>");

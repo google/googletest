@@ -51,15 +51,8 @@
 #ifndef GTEST_INCLUDE_GTEST_GTEST_H_
 #define GTEST_INCLUDE_GTEST_GTEST_H_
 
-// The following platform macros are used throughout Google Test:
+// The following platform macro is used throughout Google Test:
 //   _WIN32_WCE      Windows CE     (set in project files)
-//
-// Note that even though _MSC_VER and _WIN32_WCE really indicate a compiler
-// and a Win32 implementation, respectively, we use them to indicate the
-// combination of compiler - Win 32 API - C library, since the code currently
-// only supports:
-// Windows proper with Visual C++ and MS C library (_MSC_VER && !_WIN32_WCE) and
-// Windows Mobile with Visual C++ and no C library (_WIN32_WCE).
 
 #include <limits>
 #include <gtest/internal/gtest-internal.h>

@@ -62,12 +62,12 @@
 namespace testing {
 namespace internal {
 
-#if GTEST_OS_WINDOWS
-// Microsoft does not provide a definition of STDERR_FILENO.
+#ifdef _MSC_VER
+// MSVC does not provide a definition of STDERR_FILENO.
 const int kStdErrFileno = 2;
 #else
 const int kStdErrFileno = STDERR_FILENO;
-#endif  // GTEST_OS_WINDOWS
+#endif  // _MSC_VER
 
 #if GTEST_USES_POSIX_RE
 
