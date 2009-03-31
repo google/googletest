@@ -1723,7 +1723,7 @@ the following:
 
   # Allocate a number of machines (shards) to run the tests.
   # On each shard, set the `GTEST_TOTAL_SHARDS` environment variable to the total number of shards.  It must be the same for all shards.
-  # On each shard, set the `GTEST_SHARD_INDEX` environment variable to the index of the shard.  Different shards must be assigned different indices, which must be in the range [0, `GTEST_TOTAL_SHARDS` - 1].
+  # On each shard, set the `GTEST_SHARD_INDEX` environment variable to the index of the shard.  Different shards must be assigned different indices, which must be in the range `[0, GTEST_TOTAL_SHARDS - 1]`.
   # Run the same test program on all shards.  When Google Test sees the above two environment variables, it will select a subset of the test functions to run.  Across all shards, each test function in the program will be run exactly once.
   # Wait for all shards to finish, then collect and report the results.
 
