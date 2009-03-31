@@ -1083,7 +1083,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   // called by the ON_CALL() and EXPECT_CALL() macros.
   FunctionMocker<F>& RegisterOwner(const void* mock_obj) {
     Mock::Register(mock_obj, this);
-    return *down_cast<FunctionMocker<F>*>(this);
+    return *::testing::internal::down_cast<FunctionMocker<F>*>(this);
   }
 
   // The following two functions are from UntypedFunctionMockerBase.
