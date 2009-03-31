@@ -36,11 +36,19 @@
 //
 //   void ::testing::internal::UniversalPrinter<T>::Print(value, ostream_ptr);
 //
-// It uses the << operator when possible, and prints the bytes in the
-// object otherwise.  A user can override its behavior for a class
-// type Foo by defining either operator<<(::std::ostream&, const Foo&)
-// or void PrintTo(const Foo&, ::std::ostream*) in the namespace that
-// defines Foo.  If both are defined, PrintTo() takes precedence.
+// A user can teach this function how to print a class type T by
+// defining either operator<<() or PrintTo() in the namespace that
+// defines T.  More specifically, the FIRST defined function in the
+// following list will be used (assuming T is defined in namespace
+// foo):
+//
+//   1. foo::PrintTo(const T&, ostream*)
+//   2. operator<<(ostream&, const T&) defined in either foo or the
+//      global namespace.
+//
+// If none of the above is defined, it will print the debug string of
+// the value if it is a protocol buffer, or print the raw bytes in the
+// value otherwise.
 //
 // To aid debugging: when T is a reference type, the address of the
 // value is also printed; when T is a (const) char pointer, both the
@@ -75,12 +83,6 @@
 #include <gmock/internal/gmock-internal-utils.h>
 #include <gmock/internal/gmock-port.h>
 #include <gtest/gtest.h>
-
-// Makes sure there is at least one << operator declared in the global
-// namespace.  This has no implementation and won't be called
-// anywhere.  We just need the declaration such that we can say "using
-// ::operator <<;" in the definition of PrintTo() below.
-void operator<<(::testing::internal::Unused, int);
 
 namespace testing {
 
@@ -152,7 +154,48 @@ template <typename Char, typename CharTraits, typename T>
 }
 
 }  // namespace internal2
+}  // namespace testing
 
+// This namespace MUST NOT BE NESTED IN ::testing, or the name look-up
+// magic needed for implementing UniversalPrinter won't work.
+namespace testing_internal {
+
+// Used to print a value that is not an STL-style container when the
+// user doesn't define PrintTo() for it.
+template <typename T>
+void DefaultPrintNonContainerTo(const T& value, ::std::ostream* os) {
+  // With the following statement, during unqualified name lookup,
+  // testing::internal2::operator<< appears as if it was declared in
+  // the nearest enclosing namespace that contains both
+  // ::testing_internal and ::testing::internal2, i.e. the global
+  // namespace.  For more details, refer to the C++ Standard section
+  // 7.3.4-1 [namespace.udir].  This allows us to fall back onto
+  // testing::internal2::operator<< in case T doesn't come with a <<
+  // operator.
+  //
+  // We cannot write 'using ::testing::internal2::operator<<;', which
+  // gcc 3.3 fails to compile due to a compiler bug.
+  using namespace ::testing::internal2;  // NOLINT
+
+  // Assuming T is defined in namespace foo, in the next statement,
+  // the compiler will consider all of:
+  //
+  //   1. foo::operator<< (thanks to Koenig look-up),
+  //   2. ::operator<< (as the current namespace is enclosed in ::),
+  //   3. testing::internal2::operator<< (thanks to the using statement above).
+  //
+  // The operator<< whose type matches T best will be picked.
+  //
+  // We deliberately allow #2 to be a candidate, as sometimes it's
+  // impossible to define #1 (e.g. when foo is ::std, defining
+  // anything in it is undefined behavior unless you are a compiler
+  // vendor.).
+  *os << value;
+}
+
+}  // namespace testing_internal
+
+namespace testing {
 namespace internal {
 
 // UniversalPrinter<T>::Print(value, ostream_ptr) prints the given
@@ -194,27 +237,7 @@ void DefaultPrintTo(IsContainer, const C& container, ::std::ostream* os) {
 // Used to print a value when the user doesn't define PrintTo() for it.
 template <typename T>
 void DefaultPrintTo(IsNotContainer, const T& value, ::std::ostream* os) {
-  // If T has its << operator defined in the global namespace, which
-  // is not recommended but sometimes unavoidable (as in
-  // util/gtl/stl_logging-inl.h), the following statement makes it
-  // visible in this function.
-  //
-  // Without the statement, << in the global namespace would be hidden
-  // by the one in ::testing::internal2, due to the next using
-  // statement.
-  using ::operator <<;
-
-  // When T doesn't come with a << operator, we want to fall back to
-  // the one defined in ::testing::internal2, which prints the bytes in
-  // the value.
-  using ::testing::internal2::operator <<;
-
-  // Thanks to Koenig look-up, if type T has its own << operator
-  // defined in its namespace, which is the recommended way, that
-  // operator will be visible here.  Since it is more specific than
-  // the generic one, it will be picked by the compiler in the
-  // following statement - exactly what we want.
-  *os << value;
+  ::testing_internal::DefaultPrintNonContainerTo(value, os);
 }
 
 // Prints the given value using the << operator if it has one;
