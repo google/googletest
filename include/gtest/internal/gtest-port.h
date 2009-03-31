@@ -172,11 +172,7 @@
 #define GTEST_OS_CYGWIN 1
 #elif __SYMBIAN32__
 #define GTEST_OS_SYMBIAN 1
-#elif defined _MSC_VER
-// TODO(kenton@google.com): GTEST_OS_WINDOWS is currently used to mean
-//   both "The OS is Windows" and "The compiler is MSVC".  These
-//   meanings really should be separated in order to better support
-//   Windows compilers other than MSVC.
+#elif defined _WIN32
 #define GTEST_OS_WINDOWS 1
 #elif defined __APPLE__
 #define GTEST_OS_MAC 1
@@ -186,7 +182,7 @@
 #define GTEST_OS_ZOS 1
 #elif defined(__sun) && defined(__SVR4)
 #define GTEST_OS_SOLARIS 1
-#endif  // _MSC_VER
+#endif  // __CYGWIN__
 
 #if GTEST_OS_CYGWIN || GTEST_OS_LINUX || GTEST_OS_MAC
 

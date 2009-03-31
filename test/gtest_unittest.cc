@@ -3148,9 +3148,9 @@ TEST(AssertionTest, ExpectWorksWithUncopyableObject) {
 
 
 // The version of gcc used in XCode 2.2 has a bug and doesn't allow
-// anonymous enums in assertions.  Therefore the following test is
-// done only on Linux and Windows.
-#if GTEST_OS_LINUX || GTEST_OS_WINDOWS
+// anonymous enums in assertions.  Therefore the following test is not
+// done on Mac.
+#if !GTEST_OS_MAC
 
 // Tests using assertions with anonymous enums.
 enum {
@@ -3195,7 +3195,7 @@ TEST(AssertionTest, AnonymousEnum) {
                        "Value of: CASE_B");
 }
 
-#endif  // GTEST_OS_LINUX || GTEST_OS_WINDOWS
+#endif  // !GTEST_OS_MAC
 
 #if GTEST_OS_WINDOWS
 
