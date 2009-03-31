@@ -238,7 +238,6 @@ void AdHocTest() {
   EXPECT_EQ(2, 3);
 }
 
-
 // Runs all TESTs, all TEST_Fs, and the ad hoc test.
 int RunAllTests() {
   AdHocTest();

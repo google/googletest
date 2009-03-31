@@ -735,7 +735,6 @@ namespace posix {
 
 typedef struct _stat stat_struct;
 
-inline int chdir(const char* dir) { return ::_chdir(dir); }
 // We cannot write ::_fileno() as MSVC defines it as a macro.
 inline int fileno(FILE* file) { return _fileno(file); }
 inline int isatty(int fd) { return ::_isatty(fd); }
@@ -757,7 +756,6 @@ inline bool IsDir(const stat_struct& st) {
 
 typedef struct stat stat_struct;
 
-using ::chdir;
 using ::fileno;
 using ::isatty;
 using ::stat;
@@ -779,6 +777,8 @@ inline bool IsDir(const stat_struct& st) { return S_ISDIR(st.st_mode); }
 inline const char* strncpy(char* dest, const char* src, size_t n) {
   return ::strncpy(dest, src, n);
 }
+
+inline int chdir(const char* dir) { return ::chdir(dir); }
 
 inline FILE* fopen(const char* path, const char* mode) {
   return ::fopen(path, mode);

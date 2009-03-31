@@ -121,6 +121,11 @@ platform = env_with_exceptions['PLATFORM']
 if platform == 'win32':
   env_with_exceptions.Append(CCFLAGS = ['/EHsc'])
   env_with_exceptions.Append(CPPDEFINES = '_HAS_EXCEPTIONS=1')
+  # Undoes the _TYPEINFO_ hack, which is unnecessary and only creates
+  # trouble when exceptions are enabled.
+  cppdefines = env_with_exceptions['CPPDEFINES']
+  if '_TYPEINFO_' in cppdefines:
+    cppdefines.remove('_TYPEINFO_')
 
 gtest_ex_obj = env_with_exceptions.Object(target='gtest_ex',
                                           source=gtest_source)
