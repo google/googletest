@@ -99,8 +99,8 @@ env = env.Clone()
 # Include paths to gtest headers are relative to either the gtest
 # directory or the 'include' subdirectory of it, and this SConscript
 # file is one directory deeper than the gtest directory.
-env.Prepend(CPPPATH = ['..',
-                       '../include'])
+env.Prepend(CPPPATH = ['#/..',
+                       '#/../include'])
 
 # Sources used by base library and library that includes main.
 gtest_source = '../src/gtest-all.cc'
@@ -117,8 +117,7 @@ gtest_main = env.StaticLibrary(target='gtest_main',
                                source=[gtest_source, gtest_main_source])
 
 env_with_exceptions = env.Clone()
-platform = env_with_exceptions['PLATFORM']
-if platform == 'win32':
+if env_with_exceptions['PLATFORM'] == 'win32':
   env_with_exceptions.Append(CCFLAGS = ['/EHsc'])
   env_with_exceptions.Append(CPPDEFINES = '_HAS_EXCEPTIONS=1')
   # Undoes the _TYPEINFO_ hack, which is unnecessary and only creates
@@ -205,7 +204,14 @@ GtestUnitTest(env, 'gtest_output_test_', gtest)
 GtestUnitTest(env, 'gtest_color_test_', gtest)
 GtestUnitTest(env, 'gtest-linked_ptr_test', gtest_main)
 GtestUnitTest(env, 'gtest-port_test', gtest_main)
-GtestUnitTest(env, 'gtest-death-test_test', gtest_main)
+
+env_with_pthread = env.Clone()
+if env_with_pthread['PLATFORM'] not in ['win32', 'darwin']:
+  # Assuming POSIX-like environment with GCC.
+  env_with_pthread.Append(CCFLAGS = ['-pthread'])
+  env_with_pthread.Append(LINKFLAGS = ['-pthread'])
+
+GtestUnitTest(env_with_pthread, 'gtest-death-test_test', gtest_main)
 
 gtest_unittest_ex_obj = env_with_exceptions.Object(
     target='gtest_unittest_ex',
@@ -226,16 +232,17 @@ GtestBinary(env_with_exceptions,
 # - gtest_xml_outfile2_test_
 # - gtest_xml_output_unittest_
 
-# We need to disable some optimization flags for a couple of tests,
-# otherwise the redirection of stdout does not work (apparently
-# because of a compiler bug).
-special_env = env.Clone()
-linker_flags = special_env['LINKFLAGS']
-for flag in ["/O1", "/Os", "/Og", "/Oy"]:
-  if flag in linker_flags:
-    linker_flags.remove(flag)
-GtestUnitTest(special_env, 'gtest_env_var_test_', gtest)
-GtestUnitTest(special_env, 'gtest_uninitialized_test_', gtest)
+# We need to disable some optimization flags for some tests on
+# Windows; otherwise the redirection of stdout does not work
+# (apparently because of a compiler bug).
+env_with_less_optimization = env.Clone()
+if env_with_less_optimization['PLATFORM'] == 'win32':
+  linker_flags = env_with_less_optimization['LINKFLAGS']
+  for flag in ["/O1", "/Os", "/Og", "/Oy"]:
+    if flag in linker_flags:
+      linker_flags.remove(flag)
+GtestUnitTest(env_with_less_optimization, 'gtest_env_var_test_', gtest)
+GtestUnitTest(env_with_less_optimization, 'gtest_uninitialized_test_', gtest)
 
 def GtestSample(env, target, gtest_lib, additional_sources=None):
   """Helper to create gtest samples.
