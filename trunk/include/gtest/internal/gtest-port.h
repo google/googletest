@@ -96,8 +96,8 @@
 //
 // Macros for basic C++ coding:
 //   GTEST_AMBIGUOUS_ELSE_BLOCKER_ - for disabling a gcc warning.
-//   GTEST_ATTRIBUTE_UNUSED_  - declares that a class' instances don't have to
-//                              be used.
+//   GTEST_ATTRIBUTE_UNUSED_  - declares that a class' instances or a
+//                              variable don't have to be used.
 //   GTEST_DISALLOW_COPY_AND_ASSIGN_ - disables copy ctor and operator=.
 //   GTEST_MUST_USE_RESULT_   - declares that a function's result must be used.
 //
@@ -439,7 +439,7 @@
 #define GTEST_AMBIGUOUS_ELSE_BLOCKER_ switch (0) case 0:  // NOLINT
 #endif
 
-// Use this annotation at the end of a struct / class definition to
+// Use this annotation at the end of a struct/class definition to
 // prevent the compiler from optimizing away instances that are never
 // used.  This is useful when all interesting logic happens inside the
 // c'tor and / or d'tor.  Example:
@@ -447,6 +447,9 @@
 //   struct Foo {
 //     Foo() { ... }
 //   } GTEST_ATTRIBUTE_UNUSED_;
+//
+// Also use it after a variable or parameter declaration to tell the
+// compiler the variable/parameter does not have to be used.
 #if defined(__GNUC__) && !defined(COMPILER_ICC)
 #define GTEST_ATTRIBUTE_UNUSED_ __attribute__ ((unused))
 #else
