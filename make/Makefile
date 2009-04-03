@@ -31,7 +31,7 @@ CPPFLAGS += -I$(GMOCK_DIR) -I$(GMOCK_DIR)/include \
             -I$(GTEST_DIR) -I$(GTEST_DIR)/include
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -g -Wall -Wextra -Wno-unused-parameter
+CXXFLAGS += -g -Wall -Wextra
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.

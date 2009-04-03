@@ -709,6 +709,15 @@ $range j2 2..i
 // on http://code.google.com/p/googlemock/wiki/CookBook.
 
 $range i 0..n
+$range k 0..n-1
+
+// An internal macro needed for implementing ACTION*().
+#define GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_\
+    const args_type& args GTEST_ATTRIBUTE_UNUSED_
+$for k [[,\
+    arg$k[[]]_type arg$k GTEST_ATTRIBUTE_UNUSED_]]
+
+
 $for i
 
 [[
@@ -735,7 +744,6 @@ $var param_field_decls2 = [[$for j
 ]]]]
 $var params = [[$for j, [[p$j]]]]
 $var param_types = [[$if i==0 [[]] $else [[<$for j, [[p$j##_type]]>]]]]
-$range k 0..n-1
 $var typename_arg_types = [[$for k, [[typename arg$k[[]]_type]]]]
 $var arg_types_and_names = [[$for k, [[arg$k[[]]_type arg$k]]]]
 $var macro_name = [[$if i==0 [[ACTION]] $elif i==1 [[ACTION_P]]
@@ -771,9 +779,8 @@ $arg_types_and_names) const;\$param_field_decls
   template <typename F>\
   template <$typename_arg_types>\
   typename ::testing::internal::Function<F>::Result\
-      $class_name$param_types::\
-          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, [[]]
-$arg_types_and_names) const
+      $class_name$param_types::gmock_Impl<F>::gmock_PerformImpl(\
+          GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
 ]]
 $$ }  // This meta comment fixes auto-indentation in Emacs.  It won't
 $$    // show up in the generated code.

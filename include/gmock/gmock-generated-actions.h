@@ -1557,6 +1557,20 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
 // To learn more about using these macros, please search for 'ACTION'
 // on http://code.google.com/p/googlemock/wiki/CookBook.
 
+// An internal macro needed for implementing ACTION*().
+#define GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_\
+    const args_type& args GTEST_ATTRIBUTE_UNUSED_,\
+    arg0_type arg0 GTEST_ATTRIBUTE_UNUSED_,\
+    arg1_type arg1 GTEST_ATTRIBUTE_UNUSED_,\
+    arg2_type arg2 GTEST_ATTRIBUTE_UNUSED_,\
+    arg3_type arg3 GTEST_ATTRIBUTE_UNUSED_,\
+    arg4_type arg4 GTEST_ATTRIBUTE_UNUSED_,\
+    arg5_type arg5 GTEST_ATTRIBUTE_UNUSED_,\
+    arg6_type arg6 GTEST_ATTRIBUTE_UNUSED_,\
+    arg7_type arg7 GTEST_ATTRIBUTE_UNUSED_,\
+    arg8_type arg8 GTEST_ATTRIBUTE_UNUSED_,\
+    arg9_type arg9 GTEST_ATTRIBUTE_UNUSED_
+
 #define ACTION(name)\
   class name##Action {\
    public:\
@@ -1595,11 +1609,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       typename arg6_type, typename arg7_type, typename arg8_type, \
       typename arg9_type>\
   typename ::testing::internal::Function<F>::Result\
-      name##Action::\
-          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, \
-              arg0_type arg0, arg1_type arg1, arg2_type arg2, arg3_type arg3, \
-              arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
-              arg8_type arg8, arg9_type arg9) const
+      name##Action::gmock_Impl<F>::gmock_PerformImpl(\
+          GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
 
 #define ACTION_P(name, p0)\
   template <typename p0##_type>\
@@ -1644,11 +1655,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       typename arg6_type, typename arg7_type, typename arg8_type, \
       typename arg9_type>\
   typename ::testing::internal::Function<F>::Result\
-      name##ActionP<p0##_type>::\
-          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, \
-              arg0_type arg0, arg1_type arg1, arg2_type arg2, arg3_type arg3, \
-              arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
-              arg8_type arg8, arg9_type arg9) const
+      name##ActionP<p0##_type>::gmock_Impl<F>::gmock_PerformImpl(\
+          GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
 
 #define ACTION_P2(name, p0, p1)\
   template <typename p0##_type, typename p1##_type>\
@@ -1698,11 +1706,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       typename arg6_type, typename arg7_type, typename arg8_type, \
       typename arg9_type>\
   typename ::testing::internal::Function<F>::Result\
-      name##ActionP2<p0##_type, p1##_type>::\
-          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, \
-              arg0_type arg0, arg1_type arg1, arg2_type arg2, arg3_type arg3, \
-              arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
-              arg8_type arg8, arg9_type arg9) const
+      name##ActionP2<p0##_type, p1##_type>::gmock_Impl<F>::gmock_PerformImpl(\
+          GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
 
 #define ACTION_P3(name, p0, p1, p2)\
   template <typename p0##_type, typename p1##_type, typename p2##_type>\
@@ -1754,11 +1759,9 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       typename arg6_type, typename arg7_type, typename arg8_type, \
       typename arg9_type>\
   typename ::testing::internal::Function<F>::Result\
-      name##ActionP3<p0##_type, p1##_type, p2##_type>::\
-          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, \
-              arg0_type arg0, arg1_type arg1, arg2_type arg2, arg3_type arg3, \
-              arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
-              arg8_type arg8, arg9_type arg9) const
+      name##ActionP3<p0##_type, p1##_type, \
+          p2##_type>::gmock_Impl<F>::gmock_PerformImpl(\
+          GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
 
 #define ACTION_P4(name, p0, p1, p2, p3)\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
@@ -1819,11 +1822,9 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       typename arg6_type, typename arg7_type, typename arg8_type, \
       typename arg9_type>\
   typename ::testing::internal::Function<F>::Result\
-      name##ActionP4<p0##_type, p1##_type, p2##_type, p3##_type>::\
-          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, \
-              arg0_type arg0, arg1_type arg1, arg2_type arg2, arg3_type arg3, \
-              arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
-              arg8_type arg8, arg9_type arg9) const
+      name##ActionP4<p0##_type, p1##_type, p2##_type, \
+          p3##_type>::gmock_Impl<F>::gmock_PerformImpl(\
+          GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
 
 #define ACTION_P5(name, p0, p1, p2, p3, p4)\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
@@ -1887,11 +1888,9 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       typename arg6_type, typename arg7_type, typename arg8_type, \
       typename arg9_type>\
   typename ::testing::internal::Function<F>::Result\
-      name##ActionP5<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type>::\
-          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, \
-              arg0_type arg0, arg1_type arg1, arg2_type arg2, arg3_type arg3, \
-              arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
-              arg8_type arg8, arg9_type arg9) const
+      name##ActionP5<p0##_type, p1##_type, p2##_type, p3##_type, \
+          p4##_type>::gmock_Impl<F>::gmock_PerformImpl(\
+          GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
 
 #define ACTION_P6(name, p0, p1, p2, p3, p4, p5)\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
@@ -1959,11 +1958,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       typename arg9_type>\
   typename ::testing::internal::Function<F>::Result\
       name##ActionP6<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
-          p5##_type>::\
-          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, \
-              arg0_type arg0, arg1_type arg1, arg2_type arg2, arg3_type arg3, \
-              arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
-              arg8_type arg8, arg9_type arg9) const
+          p5##_type>::gmock_Impl<F>::gmock_PerformImpl(\
+          GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
 
 #define ACTION_P7(name, p0, p1, p2, p3, p4, p5, p6)\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
@@ -2039,11 +2035,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       typename arg9_type>\
   typename ::testing::internal::Function<F>::Result\
       name##ActionP7<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
-          p5##_type, p6##_type>::\
-          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, \
-              arg0_type arg0, arg1_type arg1, arg2_type arg2, arg3_type arg3, \
-              arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
-              arg8_type arg8, arg9_type arg9) const
+          p5##_type, p6##_type>::gmock_Impl<F>::gmock_PerformImpl(\
+          GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
 
 #define ACTION_P8(name, p0, p1, p2, p3, p4, p5, p6, p7)\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
@@ -2124,11 +2117,9 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       typename arg9_type>\
   typename ::testing::internal::Function<F>::Result\
       name##ActionP8<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
-          p5##_type, p6##_type, p7##_type>::\
-          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, \
-              arg0_type arg0, arg1_type arg1, arg2_type arg2, arg3_type arg3, \
-              arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
-              arg8_type arg8, arg9_type arg9) const
+          p5##_type, p6##_type, \
+          p7##_type>::gmock_Impl<F>::gmock_PerformImpl(\
+          GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
 
 #define ACTION_P9(name, p0, p1, p2, p3, p4, p5, p6, p7, p8)\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
@@ -2213,11 +2204,9 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       typename arg9_type>\
   typename ::testing::internal::Function<F>::Result\
       name##ActionP9<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
-          p5##_type, p6##_type, p7##_type, p8##_type>::\
-          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, \
-              arg0_type arg0, arg1_type arg1, arg2_type arg2, arg3_type arg3, \
-              arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
-              arg8_type arg8, arg9_type arg9) const
+          p5##_type, p6##_type, p7##_type, \
+          p8##_type>::gmock_Impl<F>::gmock_PerformImpl(\
+          GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
 
 #define ACTION_P10(name, p0, p1, p2, p3, p4, p5, p6, p7, p8, p9)\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
@@ -2307,11 +2296,9 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       typename arg9_type>\
   typename ::testing::internal::Function<F>::Result\
       name##ActionP10<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
-          p5##_type, p6##_type, p7##_type, p8##_type, p9##_type>::\
-          gmock_Impl<F>::gmock_PerformImpl(const args_type& args, \
-              arg0_type arg0, arg1_type arg1, arg2_type arg2, arg3_type arg3, \
-              arg4_type arg4, arg5_type arg5, arg6_type arg6, arg7_type arg7, \
-              arg8_type arg8, arg9_type arg9) const
+          p5##_type, p6##_type, p7##_type, p8##_type, \
+          p9##_type>::gmock_Impl<F>::gmock_PerformImpl(\
+          GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
 
 // TODO(wan@google.com): move the following to a different .h file
 // such that we don't have to run 'pump' every time the code is
