@@ -273,6 +273,8 @@ if env.get('GTEST_BUILD_SAMPLES', False):
   GtestSample(env, 'sample2_unittest', gtest_main,
               additional_sources=['../samples/sample2.cc'])
   GtestSample(env, 'sample3_unittest', gtest_main)
+  GtestSample(env, 'sample4_unittest', gtest_main,
+              additional_sources=['../samples/sample4.cc'])
   GtestSample(env, 'sample5_unittest', gtest_main,
               additional_sources=[sample1_obj])
   GtestSample(env, 'sample6_unittest', gtest_main)

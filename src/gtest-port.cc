@@ -42,6 +42,11 @@
 #include <unistd.h>
 #endif  // GTEST_OS_WINDOWS
 
+#if GTEST_OS_MAC
+#include <mach/mach_init.h>
+#include <mach/task.h>
+#endif  // GTEST_OS_MAC
+
 #ifdef _WIN32_WCE
 #include <windows.h>  // For TerminateProcess()
 #endif  // _WIN32_WCE
@@ -68,6 +73,22 @@ const int kStdErrFileno = 2;
 #else
 const int kStdErrFileno = STDERR_FILENO;
 #endif  // _MSC_VER
+
+// Returns the number of threads running in the process, or 0 to indicate that
+// we cannot detect it.
+size_t GetThreadCount() {
+#if GTEST_OS_MAC
+  mach_msg_type_number_t thread_count;
+  thread_act_port_array_t thread_list;
+  kern_return_t status = task_threads(mach_task_self(),
+                                      &thread_list, &thread_count);
+  return status == KERN_SUCCESS ? static_cast<size_t>(thread_count) : 0;
+#else
+  // There's no portable way to detect the number of threads, so we just
+  // return 0 to indicate that we cannot detect it.
+  return 0;
+#endif  // GTEST_OS_MAC
+}
 
 #if GTEST_USES_POSIX_RE
 

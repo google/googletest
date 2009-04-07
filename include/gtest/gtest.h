@@ -272,6 +272,13 @@ class Test {
   // Returns true iff the current test has a fatal failure.
   static bool HasFatalFailure();
 
+  // Returns true iff the current test has a non-fatal failure.
+  static bool HasNonfatalFailure();
+
+  // Returns true iff the current test has a (either fatal or
+  // non-fatal) failure.
+  static bool HasFailure() { return HasFatalFailure() || HasNonfatalFailure(); }
+
   // Logs a property for the current test.  Only the last value for a given
   // key is remembered.
   // These are public static so they can be called from utility functions

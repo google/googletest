@@ -131,6 +131,7 @@ using testing::TPRT_SUCCESS;
 using testing::UnitTest;
 using testing::internal::kTestTypeIdInGoogleTest;
 using testing::internal::AppendUserMessage;
+using testing::internal::ClearCurrentTestPartResults;
 using testing::internal::CodePointToUtf8;
 using testing::internal::EqFailure;
 using testing::internal::FloatingPoint;
@@ -5455,4 +5456,88 @@ TEST(GetCurrentOsStackTraceExceptTopTest, ReturnsTheStackTrace) {
   // We don't have a stack walker in Google Test yet.
   EXPECT_STREQ("", GetCurrentOsStackTraceExceptTop(unit_test, 0).c_str());
   EXPECT_STREQ("", GetCurrentOsStackTraceExceptTop(unit_test, 1).c_str());
+}
+
+TEST(HasNonfatalFailureTest, ReturnsFalseWhenThereIsNoFailure) {
+  EXPECT_FALSE(HasNonfatalFailure());
+}
+
+static void FailFatally() { FAIL(); }
+
+TEST(HasNonfatalFailureTest, ReturnsFalseWhenThereIsOnlyFatalFailure) {
+  FailFatally();
+  const bool has_nonfatal_failure = HasNonfatalFailure();
+  ClearCurrentTestPartResults();
+  EXPECT_FALSE(has_nonfatal_failure);
+}
+
+TEST(HasNonfatalFailureTest, ReturnsTrueWhenThereIsNonfatalFailure) {
+  ADD_FAILURE();
+  const bool has_nonfatal_failure = HasNonfatalFailure();
+  ClearCurrentTestPartResults();
+  EXPECT_TRUE(has_nonfatal_failure);
+}
+
+TEST(HasNonfatalFailureTest, ReturnsTrueWhenThereAreFatalAndNonfatalFailures) {
+  FailFatally();
+  ADD_FAILURE();
+  const bool has_nonfatal_failure = HasNonfatalFailure();
+  ClearCurrentTestPartResults();
+  EXPECT_TRUE(has_nonfatal_failure);
+}
+
+// A wrapper for calling HasNonfatalFailure outside of a test body.
+static bool HasNonfatalFailureHelper() {
+  return testing::Test::HasNonfatalFailure();
+}
+
+TEST(HasNonfatalFailureTest, WorksOutsideOfTestBody) {
+  EXPECT_FALSE(HasNonfatalFailureHelper());
+}
+
+TEST(HasNonfatalFailureTest, WorksOutsideOfTestBody2) {
+  ADD_FAILURE();
+  const bool has_nonfatal_failure = HasNonfatalFailureHelper();
+  ClearCurrentTestPartResults();
+  EXPECT_TRUE(has_nonfatal_failure);
+}
+
+TEST(HasFailureTest, ReturnsFalseWhenThereIsNoFailure) {
+  EXPECT_FALSE(HasFailure());
+}
+
+TEST(HasFailureTest, ReturnsTrueWhenThereIsFatalFailure) {
+  FailFatally();
+  const bool has_failure = HasFailure();
+  ClearCurrentTestPartResults();
+  EXPECT_TRUE(has_failure);
+}
+
+TEST(HasFailureTest, ReturnsTrueWhenThereIsNonfatalFailure) {
+  ADD_FAILURE();
+  const bool has_failure = HasFailure();
+  ClearCurrentTestPartResults();
+  EXPECT_TRUE(has_failure);
+}
+
+TEST(HasFailureTest, ReturnsTrueWhenThereAreFatalAndNonfatalFailures) {
+  FailFatally();
+  ADD_FAILURE();
+  const bool has_failure = HasFailure();
+  ClearCurrentTestPartResults();
+  EXPECT_TRUE(has_failure);
+}
+
+// A wrapper for calling HasFailure outside of a test body.
+static bool HasFailureHelper() { return testing::Test::HasFailure(); }
+
+TEST(HasFailureTest, WorksOutsideOfTestBody) {
+  EXPECT_FALSE(HasFailureHelper());
+}
+
+TEST(HasFailureTest, WorksOutsideOfTestBody2) {
+  ADD_FAILURE();
+  const bool has_failure = HasFailureHelper();
+  ClearCurrentTestPartResults();
+  EXPECT_TRUE(has_failure);
 }
