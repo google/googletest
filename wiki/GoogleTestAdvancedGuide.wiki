@@ -673,6 +673,7 @@ provides two solutions.  You could use either the
 `HasFatalFailure()` function.  They are described in the following two
 subsections.
 
+
 === Asserting on Subroutines ===
 
 As shown above, if your test calls a subroutine that has an `ASSERT_*`
@@ -703,7 +704,7 @@ EXPECT_NO_FATAL_FAILURE({
 _Availability:_ Linux, Windows, Mac. Assertions from multiple threads
 are currently not supported.
 
-=== Checking for Fatal Failures in the Current Test ===
+=== Checking for Failures in the Current Test ===
 
 `HasFatalFailure()` in the `testing::Test` class returns `true` if an
 assertion in the current test has suffered a fatal failure. This
@@ -740,8 +741,12 @@ if (testing::Test::HasFatalFailure())
   return;
 }}}
 
+Similarly, `HasNonfatalFailure()` returns `true` if the current test
+has at least one non-fatal failure, and `HasFailure()` returns `true`
+if the current test has at least one failure of either kind.
 
-_Availability:_ Linux, Windows, Mac.
+_Availability:_ Linux, Windows, Mac.  `HasNonfatalFailure()` and
+`HasFailure()` are available since version 1.4.0.
 
 = Logging Additional Information  =
 
