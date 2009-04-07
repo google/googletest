@@ -673,9 +673,9 @@ class ThreadLocal {
   T value_;
 };
 
-// There's no portable way to detect the number of threads, so we just
-// return 0 to indicate that we cannot detect it.
-inline size_t GetThreadCount() { return 0; }
+// Returns the number of threads running in the process, or 0 to indicate that
+// we cannot detect it.
+size_t GetThreadCount();
 
 // The above synchronization primitives have dummy implementations.
 // Therefore Google Test is not thread-safe.

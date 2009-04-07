@@ -1852,13 +1852,23 @@ int TestResult::failed_part_count() const {
 }
 
 // Returns true iff the test part fatally failed.
-static bool TestPartFatallyFailed(const TestPartResult & result) {
+static bool TestPartFatallyFailed(const TestPartResult& result) {
   return result.fatally_failed();
 }
 
 // Returns true iff the test fatally failed.
 bool TestResult::HasFatalFailure() const {
   return test_part_results_.CountIf(TestPartFatallyFailed) > 0;
+}
+
+// Returns true iff the test part non-fatally failed.
+static bool TestPartNonfatallyFailed(const TestPartResult& result) {
+  return result.nonfatally_failed();
+}
+
+// Returns true iff the test has a non-fatal failure.
+bool TestResult::HasNonfatalFailure() const {
+  return test_part_results_.CountIf(TestPartNonfatallyFailed) > 0;
 }
 
 // Gets the number of all test parts.  This is the sum of the number
@@ -2057,6 +2067,12 @@ void Test::Run() {
 // Returns true iff the current test has a fatal failure.
 bool Test::HasFatalFailure() {
   return internal::GetUnitTestImpl()->current_test_result()->HasFatalFailure();
+}
+
+// Returns true iff the current test has a non-fatal failure.
+bool Test::HasNonfatalFailure() {
+  return internal::GetUnitTestImpl()->current_test_result()->
+      HasNonfatalFailure();
 }
 
 // class TestInfo

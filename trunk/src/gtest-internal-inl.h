@@ -548,6 +548,9 @@ class TestResult {
   // Returns true iff the test fatally failed.
   bool HasFatalFailure() const;
 
+  // Returns true iff the test has a non-fatal failure.
+  bool HasNonfatalFailure() const;
+
   // Returns the elapsed time, in milliseconds.
   TimeInMillis elapsed_time() const { return elapsed_time_; }
 
@@ -574,6 +577,9 @@ class TestResult {
 
   // Increments the death test count, returning the new count.
   int increment_death_test_count() { return ++death_test_count_; }
+
+  // Clears the test part results.
+  void ClearTestPartResults() { test_part_results_.Clear(); }
 
   // Clears the object.
   void Clear();
@@ -1298,6 +1304,11 @@ class UnitTestImpl {
 // implementation object.
 inline UnitTestImpl* GetUnitTestImpl() {
   return UnitTest::GetInstance()->impl();
+}
+
+// Clears all test part results of the current test.
+inline void ClearCurrentTestPartResults() {
+  GetUnitTestImpl()->current_test_result()->ClearTestPartResults();
 }
 
 // Internal helper functions for implementing the simple regular

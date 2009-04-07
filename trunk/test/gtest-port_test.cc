@@ -32,6 +32,11 @@
 // This file tests the internal cross-platform support utilities.
 
 #include <gtest/internal/gtest-port.h>
+
+#if GTEST_OS_MAC
+#include <pthread.h>
+#endif  // GTEST_OS_MAC
+
 #include <gtest/gtest.h>
 #include <gtest/gtest-spi.h>
 
@@ -75,6 +80,44 @@ TEST(GtestCheckSyntaxTest, WorksWithSwitch) {
     case 0:
       GTEST_CHECK_(true) << "Check failed in switch case";
 }
+
+#if GTEST_OS_MAC
+void* ThreadFunc(void* data) {
+  pthread_mutex_t* mutex = reinterpret_cast<pthread_mutex_t*>(data);
+  pthread_mutex_lock(mutex);
+  pthread_mutex_unlock(mutex);
+  return NULL;
+}
+
+TEST(GetThreadCountTest, ReturnsCorrectValue) {
+  EXPECT_EQ(1, GetThreadCount());
+  pthread_mutex_t mutex;
+  pthread_attr_t  attr;
+  pthread_t       thread_id;
+
+  // TODO(vladl@google.com): turn mutex into internal::Mutex for automatic
+  // destruction.
+  pthread_mutex_init(&mutex, NULL);
+  pthread_mutex_lock(&mutex);
+  ASSERT_EQ(0, pthread_attr_init(&attr));
+  ASSERT_EQ(0, pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE));
+
+  const int status = pthread_create(&thread_id, &attr, &ThreadFunc, &mutex);
+  ASSERT_EQ(0, pthread_attr_destroy(&attr));
+  ASSERT_EQ(0, status);
+  EXPECT_EQ(2, GetThreadCount());
+  pthread_mutex_unlock(&mutex);
+
+  void* dummy;
+  ASSERT_EQ(0, pthread_join(thread_id, &dummy));
+  EXPECT_EQ(1, GetThreadCount());
+  pthread_mutex_destroy(&mutex);
+}
+#else
+TEST(GetThreadCountTest, ReturnsZeroWhenUnableToCountThreads) {
+  EXPECT_EQ(0, GetThreadCount());
+}
+#endif  // GTEST_OS_MAC
 
 #if GTEST_HAS_DEATH_TEST
 
