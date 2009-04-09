@@ -52,8 +52,7 @@ import unittest
 LIST_TESTS_FLAG = 'gtest_list_tests'
 
 # Path to the gtest_list_tests_unittest_ program.
-EXE_PATH = os.path.join(gtest_test_utils.GetBuildDir(),
-                        'gtest_list_tests_unittest_');
+EXE_PATH = gtest_test_utils.GetTestExecutablePath('gtest_list_tests_unittest_')
 
 # The expected output when running gtest_list_tests_unittest_ with
 # --gtest_list_tests

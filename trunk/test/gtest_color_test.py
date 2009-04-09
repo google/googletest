@@ -38,11 +38,11 @@ import os
 import sys
 import unittest
 
+IS_WINDOWS = os.name = 'nt'
 
 COLOR_ENV_VAR = 'GTEST_COLOR'
 COLOR_FLAG = 'gtest_color'
-COMMAND = os.path.join(gtest_test_utils.GetBuildDir(),
-                       'gtest_color_test_')
+COMMAND = gtest_test_utils.GetTestExecutablePath('gtest_color_test_')
 
 
 def SetEnvVar(env_var, value):
@@ -69,11 +69,12 @@ class GTestColorTest(unittest.TestCase):
   def testNoEnvVarNoFlag(self):
     """Tests the case when there's neither GTEST_COLOR nor --gtest_color."""
 
-    self.assert_(not UsesColor('dumb', None, None))
-    self.assert_(not UsesColor('emacs', None, None))
-    self.assert_(not UsesColor('xterm-mono', None, None))
-    self.assert_(not UsesColor('unknown', None, None))
-    self.assert_(not UsesColor(None, None, None))
+    if not IS_WINDOWS:
+      self.assert_(not UsesColor('dumb', None, None))
+      self.assert_(not UsesColor('emacs', None, None))
+      self.assert_(not UsesColor('xterm-mono', None, None))
+      self.assert_(not UsesColor('unknown', None, None))
+      self.assert_(not UsesColor(None, None, None))
     self.assert_(UsesColor('cygwin', None, None))
     self.assert_(UsesColor('xterm', None, None))
     self.assert_(UsesColor('xterm-color', None, None))
@@ -83,7 +84,8 @@ class GTestColorTest(unittest.TestCase):
 
     self.assert_(not UsesColor('dumb', None, 'no'))
     self.assert_(not UsesColor('xterm-color', None, 'no'))
-    self.assert_(not UsesColor('emacs', None, 'auto'))
+    if not IS_WINDOWS:
+      self.assert_(not UsesColor('emacs', None, 'auto'))
     self.assert_(UsesColor('xterm', None, 'auto'))
     self.assert_(UsesColor('dumb', None, 'yes'))
     self.assert_(UsesColor('xterm', None, 'yes'))
@@ -93,7 +95,8 @@ class GTestColorTest(unittest.TestCase):
 
     self.assert_(not UsesColor('dumb', 'no', None))
     self.assert_(not UsesColor('xterm-color', 'no', None))
-    self.assert_(not UsesColor('dumb', 'auto', None))
+    if not IS_WINDOWS:
+      self.assert_(not UsesColor('dumb', 'auto', None))
     self.assert_(UsesColor('xterm-color', 'auto', None))
     self.assert_(UsesColor('dumb', 'yes', None))
     self.assert_(UsesColor('xterm-color', 'yes', None))

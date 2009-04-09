@@ -150,7 +150,7 @@ class GTestXMLTestCase(unittest.TestCase):
       for child in element.childNodes:
         if child.nodeType == Node.CDATA_SECTION_NODE:
           # Removes the source line number.
-          cdata = re.sub(r"^.*/(.*:)\d+\n", "\\1*\n", child.nodeValue)
+          cdata = re.sub(r"^.*[/\\](.*:)\d+\n", "\\1*\n", child.nodeValue)
           # Removes the actual stack trace.
           child.nodeValue = re.sub(r"\nStack trace:\n(.|\n)*",
                                    "", cdata)

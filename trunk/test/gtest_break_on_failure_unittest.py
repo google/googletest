@@ -58,8 +58,8 @@ BREAK_ON_FAILURE_FLAG = 'gtest_break_on_failure'
 THROW_ON_FAILURE_ENV_VAR = 'GTEST_THROW_ON_FAILURE'
 
 # Path to the gtest_break_on_failure_unittest_ program.
-EXE_PATH = os.path.join(gtest_test_utils.GetBuildDir(),
-                        'gtest_break_on_failure_unittest_')
+EXE_PATH = gtest_test_utils.GetTestExecutablePath(
+    'gtest_break_on_failure_unittest_')
 
 
 # Utilities.

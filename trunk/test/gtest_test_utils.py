@@ -44,10 +44,10 @@ except:
   import popen2
   _SUBPROCESS_MODULE_AVAILABLE = False
 
+IS_WINDOWS = os.name == 'nt'
 
-# Initially maps a flag to its default value.  After
-# _ParseAndStripGTestFlags() is called, maps a flag to its actual
-# value.
+# Initially maps a flag to its default value. After
+# _ParseAndStripGTestFlags() is called, maps a flag to its actual value.
 _flag_map = {'gtest_source_dir': os.path.dirname(sys.argv[0]),
              'gtest_build_dir': os.path.dirname(sys.argv[0])}
 _gtest_flags_are_parsed = False
@@ -101,6 +101,38 @@ def GetBuildDir():
   """Returns the absolute path of the directory where the test binaries are."""
 
   return os.path.abspath(GetFlag('gtest_build_dir'))
+
+
+def GetTestExecutablePath(executable_name):
+  """Returns the absolute path of the test binary given its name.
+
+  The function will print a message and abort the program if the resulting file
+  doesn't exist.
+
+  Args:
+    executable_name: name of the test binary that the test script runs.
+
+  Returns:
+    The absolute path of the test binary.
+  """
+
+  path = os.path.abspath(os.path.join(GetBuildDir(), executable_name))
+  if IS_WINDOWS and not path.endswith('.exe'):
+    path += '.exe'
+
+  if not os.path.exists(path):
+    message = (
+        'Unable to find the test binary. Please make sure to provide path\n'
+        'to the binary via the --gtest_build_dir flag or the GTEST_BUILD_DIR\n'
+        'environment variable. For convenient use, invoke this script via\n'
+        'mk_test.py.\n'
+        # TODO(vladl@google.com): change mk_test.py to test.py after renaming
+        # the file.
+        'Please run mk_test.py -h for help.')
+    print >> sys.stderr, message
+    sys.exit(1)
+
+  return path
 
 
 def GetExitStatus(exit_code):

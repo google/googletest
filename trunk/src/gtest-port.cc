@@ -45,6 +45,7 @@
 #if GTEST_OS_MAC
 #include <mach/mach_init.h>
 #include <mach/task.h>
+#include <mach/vm_map.h>
 #endif  // GTEST_OS_MAC
 
 #ifdef _WIN32_WCE
@@ -74,21 +75,36 @@ const int kStdErrFileno = 2;
 const int kStdErrFileno = STDERR_FILENO;
 #endif  // _MSC_VER
 
+#if GTEST_OS_MAC
+
 // Returns the number of threads running in the process, or 0 to indicate that
 // we cannot detect it.
 size_t GetThreadCount() {
-#if GTEST_OS_MAC
+  const task_t task = mach_task_self();
   mach_msg_type_number_t thread_count;
-  thread_act_port_array_t thread_list;
-  kern_return_t status = task_threads(mach_task_self(),
-                                      &thread_list, &thread_count);
-  return status == KERN_SUCCESS ? static_cast<size_t>(thread_count) : 0;
+  thread_act_array_t thread_list;
+  const kern_return_t status = task_threads(task, &thread_list, &thread_count);
+  if (status == KERN_SUCCESS) {
+    // task_threads allocates resources in thread_list and we need to free them
+    // to avoid leaks.
+    vm_deallocate(task,
+                  reinterpret_cast<vm_address_t>(thread_list),
+                  sizeof(thread_t) * thread_count);
+    return static_cast<size_t>(thread_count);
+  } else {
+    return 0;
+  }
+}
+
 #else
+
+size_t GetThreadCount() {
   // There's no portable way to detect the number of threads, so we just
   // return 0 to indicate that we cannot detect it.
   return 0;
-#endif  // GTEST_OS_MAC
 }
+
+#endif  // GTEST_OS_MAC
 
 #if GTEST_USES_POSIX_RE
 

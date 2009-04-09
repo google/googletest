@@ -41,18 +41,7 @@ import unittest
 IS_WINDOWS = os.name == 'nt'
 IS_LINUX = os.name == 'posix'
 
-if IS_WINDOWS:
-  BUILD_DIRS = [
-      'build.dbg\\',
-      'build.opt\\',
-      'build.dbg8\\',
-      'build.opt8\\',
-      ]
-  COMMAND = 'gtest_env_var_test_.exe'
-
-if IS_LINUX:
-  COMMAND = os.path.join(gtest_test_utils.GetBuildDir(),
-                         'gtest_env_var_test_')
+COMMAND = gtest_test_utils.GetTestExecutablePath('gtest_env_var_test_')
 
 
 def AssertEq(expected, actual):
@@ -104,34 +93,19 @@ def TestEnvVarAffectsFlag(command):
   TestFlag(command, 'print_time', '1', '0')
   TestFlag(command, 'repeat', '999', '1')
   TestFlag(command, 'throw_on_failure', '1', '0')
+  TestFlag(command, 'death_test_style', 'threadsafe', 'fast')
 
   if IS_WINDOWS:
     TestFlag(command, 'catch_exceptions', '1', '0')
   if IS_LINUX:
     TestFlag(command, 'stack_trace_depth', '0', '100')
-    TestFlag(command, 'death_test_style', 'thread-safe', 'fast')
     TestFlag(command, 'death_test_use_fork', '1', '0')
 
 
-if IS_WINDOWS:
-
-  def main():
-    for build_dir in BUILD_DIRS:
-      command = build_dir + COMMAND
-      print 'Testing with %s . . .' % (command,)
-      TestEnvVarAffectsFlag(command)
-    return 0
-
-  if __name__ == '__main__':
-    main()
+class GTestEnvVarTest(unittest.TestCase):
+  def testEnvVarAffectsFlag(self):
+    TestEnvVarAffectsFlag(COMMAND)
 
 
-if IS_LINUX:
-
-  class GTestEnvVarTest(unittest.TestCase):
-    def testEnvVarAffectsFlag(self):
-      TestEnvVarAffectsFlag(COMMAND)
-
-
-  if __name__ == '__main__':
-    gtest_test_utils.Main()
+if __name__ == '__main__':
+  gtest_test_utils.Main()

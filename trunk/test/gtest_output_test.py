@@ -54,16 +54,15 @@ GENGOLDEN_FLAG = '--gengolden'
 IS_WINDOWS = os.name == 'nt'
 
 if IS_WINDOWS:
-  PROGRAM = r'..\build.dbg8\gtest_output_test_.exe'
   GOLDEN_NAME = 'gtest_output_test_golden_win.txt'
 else:
-  PROGRAM = 'gtest_output_test_'
   GOLDEN_NAME = 'gtest_output_test_golden_lin.txt'
 
-PROGRAM_PATH = os.path.join(gtest_test_utils.GetBuildDir(), PROGRAM)
+PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath('gtest_output_test_')
 
 # At least one command we exercise must not have the
 # --gtest_internal_skip_environment_and_ad_hoc_tests flag.
+COMMAND_LIST_TESTS = ({}, PROGRAM_PATH + ' --gtest_list_tests')
 COMMAND_WITH_COLOR = ({}, PROGRAM_PATH + ' --gtest_color=yes')
 COMMAND_WITH_TIME = ({}, PROGRAM_PATH + ' --gtest_print_time '
                      '--gtest_internal_skip_environment_and_ad_hoc_tests '
@@ -76,8 +75,7 @@ COMMAND_WITH_SHARDING = ({'GTEST_SHARD_INDEX': '1', 'GTEST_TOTAL_SHARDS': '2'},
                          ' --gtest_internal_skip_environment_and_ad_hoc_tests '
                          ' --gtest_filter="PassingTest.*"')
 
-GOLDEN_PATH = os.path.join(gtest_test_utils.GetSourceDir(),
-                           GOLDEN_NAME)
+GOLDEN_PATH = os.path.join(gtest_test_utils.GetSourceDir(), GOLDEN_NAME)
 
 
 def ToUnixLineEnding(s):
@@ -119,15 +117,35 @@ def RemoveTime(output):
 def RemoveTestCounts(output):
   """Removes test counts from a Google Test program's output."""
 
+  output = re.sub(r'\d+ tests, listed below',
+                  '? tests, listed below', output)
+  output = re.sub(r'\d+ FAILED TESTS',
+                  '? FAILED TESTS', output)
   output = re.sub(r'\d+ tests from \d+ test cases',
                   '? tests from ? test cases', output)
   return re.sub(r'\d+ tests\.', '? tests.', output)
 
 
-def RemoveDeathTests(output):
-  """Removes death test information from a Google Test program's output."""
+def RemoveMatchingTests(test_output, pattern):
+  """Removes typed test information from a Google Test program's output.
 
-  return re.sub(r'\n.*DeathTest.*', '', output)
+  This function strips not only the beginning and the end of a test but also all
+  output in between.
+
+  Args:
+    test_output:       A string containing the test output.
+    pattern:           A string that matches names of test cases to remove.
+
+  Returns:
+    Contents of test_output with removed test case whose names match pattern.
+  """
+
+  test_output = re.sub(
+      r'\[ RUN      \] .*%s(.|\n)*?\[(  FAILED  |       OK )\] .*%s.*\n' % (
+          pattern, pattern),
+      '',
+      test_output)
+  return re.sub(r'.*%s.*\n' % pattern, '', test_output)
 
 
 def NormalizeOutput(output):
@@ -220,7 +238,19 @@ def GetOutputOfAllCommands():
           GetCommandOutput(COMMAND_WITH_SHARDING))
 
 
+test_list = GetShellCommandOutput(COMMAND_LIST_TESTS, '')
+SUPPORTS_DEATH_TESTS = 'DeathTest' in test_list
+SUPPORTS_TYPED_TESTS = 'TypedTest' in test_list
+
+
 class GTestOutputTest(unittest.TestCase):
+  def RemoveUnsupportedTests(self, test_output):
+    if not SUPPORTS_DEATH_TESTS:
+      test_output = RemoveMatchingTests(test_output, 'DeathTest')
+    if not SUPPORTS_TYPED_TESTS:
+      test_output = RemoveMatchingTests(test_output, 'TypedTest')
+    return test_output
+
   def testOutput(self):
     output = GetOutputOfAllCommands()
     golden_file = open(GOLDEN_PATH, 'rb')
@@ -229,16 +259,25 @@ class GTestOutputTest(unittest.TestCase):
 
     # We want the test to pass regardless of death tests being
     # supported or not.
-    self.assert_(output == golden or
-                 RemoveTestCounts(output) ==
-                 RemoveTestCounts(RemoveDeathTests(golden)))
+    if SUPPORTS_DEATH_TESTS and SUPPORTS_TYPED_TESTS:
+      self.assert_(golden == output)
+    else:
+      print RemoveTestCounts(self.RemoveUnsupportedTests(golden))
+      self.assert_(RemoveTestCounts(self.RemoveUnsupportedTests(golden)) ==
+                   RemoveTestCounts(output))
 
 
 if __name__ == '__main__':
   if sys.argv[1:] == [GENGOLDEN_FLAG]:
-    output = GetOutputOfAllCommands()
-    golden_file = open(GOLDEN_PATH, 'wb')
-    golden_file.write(output)
-    golden_file.close()
+    if SUPPORTS_DEATH_TESTS and SUPPORTS_TYPED_TESTS:
+      output = GetOutputOfAllCommands()
+      golden_file = open(GOLDEN_PATH, 'wb')
+      golden_file.write(output)
+      golden_file.close()
+    else:
+      print >> sys.stderr, ('Unable to write a golden file when compiled in an '
+                            'environment that does not support death tests and '
+                            'typed tests. Are you using VC 7.1?')
+      sys.exit(1)
   else:
     gtest_test_utils.Main()
