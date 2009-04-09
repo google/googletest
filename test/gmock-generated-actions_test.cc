@@ -53,10 +53,12 @@ using testing::_;
 using testing::Action;
 using testing::ActionInterface;
 using testing::ByRef;
+using testing::DeleteArg;
 using testing::DoAll;
 using testing::Invoke;
 using testing::InvokeArgument;
 using testing::Return;
+using testing::ReturnNew;
 using testing::SaveArg;
 using testing::SetArgReferee;
 using testing::SetArgumentPointee;
@@ -1369,6 +1371,107 @@ TEST(SetArgRefereeActionTest, WorksWithExtraArguments) {
   const Action<void(bool, int, int&, const char*)> a1 = SetArgReferee<2>('a');
   a1.Perform(tuple<bool, int, int&, const char*>(true, 0, value, "hi"));
   EXPECT_EQ('a', value);
+}
+
+class NullaryConstructorClass {
+ public:
+  NullaryConstructorClass() : value_(123) {}
+  int value_;
+};
+
+// Tests using ReturnNew() with a nullary constructor.
+TEST(ReturnNewTest, NoArgs) {
+  Action<NullaryConstructorClass*()> a = ReturnNew<NullaryConstructorClass>();
+  NullaryConstructorClass* c = a.Perform(make_tuple());
+  EXPECT_EQ(123, c->value_);
+  delete c;
+}
+
+class UnaryConstructorClass {
+ public:
+  explicit UnaryConstructorClass(int value) : value_(value) {}
+  int value_;
+};
+
+// Tests using ReturnNew() with a unary constructor.
+TEST(ReturnNewTest, Unary) {
+  Action<UnaryConstructorClass*()> a = ReturnNew<UnaryConstructorClass>(4000);
+  UnaryConstructorClass* c = a.Perform(make_tuple());
+  EXPECT_EQ(4000, c->value_);
+  delete c;
+}
+
+TEST(ReturnNewTest, UnaryWorksWhenMockMethodHasArgs) {
+  Action<UnaryConstructorClass*(bool, int)> a =
+      ReturnNew<UnaryConstructorClass>(4000);
+  UnaryConstructorClass* c = a.Perform(make_tuple(false, 5));
+  EXPECT_EQ(4000, c->value_);
+  delete c;
+}
+
+TEST(ReturnNewTest, UnaryWorksWhenMockMethodReturnsPointerToConst) {
+  Action<const UnaryConstructorClass*()> a =
+      ReturnNew<UnaryConstructorClass>(4000);
+  const UnaryConstructorClass* c = a.Perform(make_tuple());
+  EXPECT_EQ(4000, c->value_);
+  delete c;
+}
+
+class TenArgConstructorClass {
+ public:
+  TenArgConstructorClass(int a1, int a2, int a3, int a4, int a5,
+                         int a6, int a7, int a8, int a9, int a10)
+    : value_(a1 + a2 + a3 + a4 + a5 + a6 + a7 + a8 + a9 + a10) {
+  }
+  int value_;
+};
+
+// Tests using ReturnNew() with a 10-argument constructor.
+TEST(ReturnNewTest, ConstructorThatTakes10Arguments) {
+  Action<TenArgConstructorClass*()> a =
+      ReturnNew<TenArgConstructorClass>(1000000000, 200000000, 30000000,
+                                        4000000, 500000, 60000,
+                                        7000, 800, 90, 0);
+  TenArgConstructorClass* c = a.Perform(make_tuple());
+  EXPECT_EQ(1234567890, c->value_);
+  delete c;
+}
+
+// A class that can be used to verify that its destructor is called: it will set
+// the bool provided to the constructor to true when destroyed.
+class DeletionTester {
+ public:
+  explicit DeletionTester(bool* is_deleted)
+    : is_deleted_(is_deleted) {
+    // Make sure the bit is set to false.
+    *is_deleted_ = false;
+  }
+
+  ~DeletionTester() {
+    *is_deleted_ = true;
+  }
+
+ private:
+  bool* is_deleted_;
+};
+
+TEST(DeleteArgActionTest, OneArg) {
+  bool is_deleted = false;
+  DeletionTester* t = new DeletionTester(&is_deleted);
+  const Action<void(DeletionTester*)> a1 = DeleteArg<0>();      // NOLINT
+  EXPECT_FALSE(is_deleted);
+  a1.Perform(make_tuple(t));
+  EXPECT_TRUE(is_deleted);
+}
+
+TEST(DeleteArgActionTest, TenArgs) {
+  bool is_deleted = false;
+  DeletionTester* t = new DeletionTester(&is_deleted);
+  const Action<void(bool, int, int, const char*, bool,
+                    int, int, int, int, DeletionTester*)> a1 = DeleteArg<9>();
+  EXPECT_FALSE(is_deleted);
+  a1.Perform(make_tuple(true, 5, 6, "hi", false, 7, 8, 9, 10, t));
+  EXPECT_TRUE(is_deleted);
 }
 
 #if GTEST_HAS_EXCEPTIONS

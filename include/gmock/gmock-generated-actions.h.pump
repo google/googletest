@@ -806,6 +806,45 @@ ACTION_P(SetArg0Referee, value) {
   arg0 = value;
 }
 
+// ReturnNewAction<T> creates and returns a new instance of an object each time
+// it is performed. It is overloaded to work with constructors that take
+// different numbers of arguments.
+$range i 0..n
+$for i [[
+$var arity = [[ $if i==0 [[nullary]]
+                $elif i==1 [[unary]]
+                $elif i==2 [[binary]]
+                $elif i==3 [[ternary]]
+                $else [[$i-ary]]]]
+$range j 1..i
+$var typename_As = [[$for j [[, typename A$j]]]]
+$var args_ = [[$for j, [[arg$j[[]]_]]]]
+
+// Returns a new instance of T using a $arity constructor with the given
+// arguments.
+template <typename T$typename_As>
+class ReturnNewAction$i {
+ public:
+  $if i==1 [[explicit ]]ReturnNewAction$i($for j, [[A$j a$j]])$if i>0 [[ : ]]
+$for j, [[arg$j[[]]_(a$j)]] {}
+
+  template <typename Result, typename ArgumentTuple>
+  Result Perform(const ArgumentTuple& /* args */) {
+    return new T($args_);
+  }
+ private:
+$for j [[
+
+  const A$j arg$j[[]]_;
+]]
+
+};
+
+]]
+
+// Deletes the object pointed to by argument #0.
+ACTION(DeleteArg0) { delete arg0; }
+
 }  // namespace internal
 
 // Action SaveArg<k>(pointer) saves the k-th (0-based) argument of the
@@ -822,6 +861,36 @@ template <int k, typename Value>
 inline internal::WithArgsAction<internal::SetArg0RefereeActionP<Value>, k>
 SetArgReferee(const Value& value) {
   return WithArg<k>(internal::SetArg0Referee(value));
+}
+
+// Various overloads for ReturnNew<T>().
+//
+// The ReturnNew<T>(a1, a2, ..., a_k) action returns a pointer to a new
+// instance of type T, constructed on the heap with constructor arguments
+// a1, a2, ..., and a_k. The caller assumes ownership of the returned value.
+$range i 0..n
+$for i [[
+$range j 1..i
+$var typename_As = [[$for j [[, typename A$j]]]]
+$var As = [[$for j [[, A$j]]]]
+$var Aas = [[$for j, [[A$j a$j]]]]
+$var as = [[$for j, [[a$j]]]]
+
+template <typename T$typename_As>
+inline PolymorphicAction<internal::ReturnNewAction$i<T$As> >
+ReturnNew($Aas) {
+  return MakePolymorphicAction(
+      internal::ReturnNewAction$i<T$As>($as));
+}
+
+]]
+
+// Action DeleteArg<k>() deletes the k-th (0-based) argument of the mock
+// function.
+template <int k>
+inline internal::WithArgsAction<internal::DeleteArg0Action, k>
+DeleteArg() {
+  return WithArg<k>(internal::DeleteArg0());
 }
 
 // Action Throw(exception) can be used in a mock function of any type

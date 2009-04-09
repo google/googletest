@@ -2320,6 +2320,240 @@ ACTION_P(SetArg0Referee, value) {
   arg0 = value;
 }
 
+// ReturnNewAction<T> creates and returns a new instance of an object each time
+// it is performed. It is overloaded to work with constructors that take
+// different numbers of arguments.
+// Returns a new instance of T using a  nullary constructor with the given
+// arguments.
+template <typename T>
+class ReturnNewAction0 {
+ public:
+  ReturnNewAction0() {}
+
+  template <typename Result, typename ArgumentTuple>
+  Result Perform(const ArgumentTuple& /* args */) {
+    return new T();
+  }
+ private:
+};
+
+// Returns a new instance of T using a  unary constructor with the given
+// arguments.
+template <typename T, typename A1>
+class ReturnNewAction1 {
+ public:
+  explicit ReturnNewAction1(A1 a1) : arg1_(a1) {}
+
+  template <typename Result, typename ArgumentTuple>
+  Result Perform(const ArgumentTuple& /* args */) {
+    return new T(arg1_);
+  }
+ private:
+  const A1 arg1_;
+};
+
+// Returns a new instance of T using a  binary constructor with the given
+// arguments.
+template <typename T, typename A1, typename A2>
+class ReturnNewAction2 {
+ public:
+  ReturnNewAction2(A1 a1, A2 a2) : arg1_(a1), arg2_(a2) {}
+
+  template <typename Result, typename ArgumentTuple>
+  Result Perform(const ArgumentTuple& /* args */) {
+    return new T(arg1_, arg2_);
+  }
+ private:
+  const A1 arg1_;
+  const A2 arg2_;
+};
+
+// Returns a new instance of T using a  ternary constructor with the given
+// arguments.
+template <typename T, typename A1, typename A2, typename A3>
+class ReturnNewAction3 {
+ public:
+  ReturnNewAction3(A1 a1, A2 a2, A3 a3) : arg1_(a1), arg2_(a2), arg3_(a3) {}
+
+  template <typename Result, typename ArgumentTuple>
+  Result Perform(const ArgumentTuple& /* args */) {
+    return new T(arg1_, arg2_, arg3_);
+  }
+ private:
+  const A1 arg1_;
+  const A2 arg2_;
+  const A3 arg3_;
+};
+
+// Returns a new instance of T using a  4-ary constructor with the given
+// arguments.
+template <typename T, typename A1, typename A2, typename A3, typename A4>
+class ReturnNewAction4 {
+ public:
+  ReturnNewAction4(A1 a1, A2 a2, A3 a3, A4 a4) : arg1_(a1), arg2_(a2),
+      arg3_(a3), arg4_(a4) {}
+
+  template <typename Result, typename ArgumentTuple>
+  Result Perform(const ArgumentTuple& /* args */) {
+    return new T(arg1_, arg2_, arg3_, arg4_);
+  }
+ private:
+  const A1 arg1_;
+  const A2 arg2_;
+  const A3 arg3_;
+  const A4 arg4_;
+};
+
+// Returns a new instance of T using a  5-ary constructor with the given
+// arguments.
+template <typename T, typename A1, typename A2, typename A3, typename A4,
+    typename A5>
+class ReturnNewAction5 {
+ public:
+  ReturnNewAction5(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) : arg1_(a1), arg2_(a2),
+      arg3_(a3), arg4_(a4), arg5_(a5) {}
+
+  template <typename Result, typename ArgumentTuple>
+  Result Perform(const ArgumentTuple& /* args */) {
+    return new T(arg1_, arg2_, arg3_, arg4_, arg5_);
+  }
+ private:
+  const A1 arg1_;
+  const A2 arg2_;
+  const A3 arg3_;
+  const A4 arg4_;
+  const A5 arg5_;
+};
+
+// Returns a new instance of T using a  6-ary constructor with the given
+// arguments.
+template <typename T, typename A1, typename A2, typename A3, typename A4,
+    typename A5, typename A6>
+class ReturnNewAction6 {
+ public:
+  ReturnNewAction6(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) : arg1_(a1),
+      arg2_(a2), arg3_(a3), arg4_(a4), arg5_(a5), arg6_(a6) {}
+
+  template <typename Result, typename ArgumentTuple>
+  Result Perform(const ArgumentTuple& /* args */) {
+    return new T(arg1_, arg2_, arg3_, arg4_, arg5_, arg6_);
+  }
+ private:
+  const A1 arg1_;
+  const A2 arg2_;
+  const A3 arg3_;
+  const A4 arg4_;
+  const A5 arg5_;
+  const A6 arg6_;
+};
+
+// Returns a new instance of T using a  7-ary constructor with the given
+// arguments.
+template <typename T, typename A1, typename A2, typename A3, typename A4,
+    typename A5, typename A6, typename A7>
+class ReturnNewAction7 {
+ public:
+  ReturnNewAction7(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
+      A7 a7) : arg1_(a1), arg2_(a2), arg3_(a3), arg4_(a4), arg5_(a5),
+      arg6_(a6), arg7_(a7) {}
+
+  template <typename Result, typename ArgumentTuple>
+  Result Perform(const ArgumentTuple& /* args */) {
+    return new T(arg1_, arg2_, arg3_, arg4_, arg5_, arg6_, arg7_);
+  }
+ private:
+  const A1 arg1_;
+  const A2 arg2_;
+  const A3 arg3_;
+  const A4 arg4_;
+  const A5 arg5_;
+  const A6 arg6_;
+  const A7 arg7_;
+};
+
+// Returns a new instance of T using a  8-ary constructor with the given
+// arguments.
+template <typename T, typename A1, typename A2, typename A3, typename A4,
+    typename A5, typename A6, typename A7, typename A8>
+class ReturnNewAction8 {
+ public:
+  ReturnNewAction8(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
+      A8 a8) : arg1_(a1), arg2_(a2), arg3_(a3), arg4_(a4), arg5_(a5),
+      arg6_(a6), arg7_(a7), arg8_(a8) {}
+
+  template <typename Result, typename ArgumentTuple>
+  Result Perform(const ArgumentTuple& /* args */) {
+    return new T(arg1_, arg2_, arg3_, arg4_, arg5_, arg6_, arg7_, arg8_);
+  }
+ private:
+  const A1 arg1_;
+  const A2 arg2_;
+  const A3 arg3_;
+  const A4 arg4_;
+  const A5 arg5_;
+  const A6 arg6_;
+  const A7 arg7_;
+  const A8 arg8_;
+};
+
+// Returns a new instance of T using a  9-ary constructor with the given
+// arguments.
+template <typename T, typename A1, typename A2, typename A3, typename A4,
+    typename A5, typename A6, typename A7, typename A8, typename A9>
+class ReturnNewAction9 {
+ public:
+  ReturnNewAction9(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8,
+      A9 a9) : arg1_(a1), arg2_(a2), arg3_(a3), arg4_(a4), arg5_(a5),
+      arg6_(a6), arg7_(a7), arg8_(a8), arg9_(a9) {}
+
+  template <typename Result, typename ArgumentTuple>
+  Result Perform(const ArgumentTuple& /* args */) {
+    return new T(arg1_, arg2_, arg3_, arg4_, arg5_, arg6_, arg7_, arg8_, arg9_);
+  }
+ private:
+  const A1 arg1_;
+  const A2 arg2_;
+  const A3 arg3_;
+  const A4 arg4_;
+  const A5 arg5_;
+  const A6 arg6_;
+  const A7 arg7_;
+  const A8 arg8_;
+  const A9 arg9_;
+};
+
+// Returns a new instance of T using a  10-ary constructor with the given
+// arguments.
+template <typename T, typename A1, typename A2, typename A3, typename A4,
+    typename A5, typename A6, typename A7, typename A8, typename A9,
+    typename A10>
+class ReturnNewAction10 {
+ public:
+  ReturnNewAction10(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8,
+      A9 a9, A10 a10) : arg1_(a1), arg2_(a2), arg3_(a3), arg4_(a4), arg5_(a5),
+      arg6_(a6), arg7_(a7), arg8_(a8), arg9_(a9), arg10_(a10) {}
+
+  template <typename Result, typename ArgumentTuple>
+  Result Perform(const ArgumentTuple& /* args */) {
+    return new T(arg1_, arg2_, arg3_, arg4_, arg5_, arg6_, arg7_, arg8_, arg9_,
+        arg10_);
+  }
+ private:
+  const A1 arg1_;
+  const A2 arg2_;
+  const A3 arg3_;
+  const A4 arg4_;
+  const A5 arg5_;
+  const A6 arg6_;
+  const A7 arg7_;
+  const A8 arg8_;
+  const A9 arg9_;
+  const A10 arg10_;
+};
+
+// Deletes the object pointed to by argument #0.
+ACTION(DeleteArg0) { delete arg0; }
+
 }  // namespace internal
 
 // Action SaveArg<k>(pointer) saves the k-th (0-based) argument of the
@@ -2336,6 +2570,113 @@ template <int k, typename Value>
 inline internal::WithArgsAction<internal::SetArg0RefereeActionP<Value>, k>
 SetArgReferee(const Value& value) {
   return WithArg<k>(internal::SetArg0Referee(value));
+}
+
+// Various overloads for ReturnNew<T>().
+//
+// The ReturnNew<T>(a1, a2, ..., a_k) action returns a pointer to a new
+// instance of type T, constructed on the heap with constructor arguments
+// a1, a2, ..., and a_k. The caller assumes ownership of the returned value.
+template <typename T>
+inline PolymorphicAction<internal::ReturnNewAction0<T> >
+ReturnNew() {
+  return MakePolymorphicAction(
+      internal::ReturnNewAction0<T>());
+}
+
+template <typename T, typename A1>
+inline PolymorphicAction<internal::ReturnNewAction1<T, A1> >
+ReturnNew(A1 a1) {
+  return MakePolymorphicAction(
+      internal::ReturnNewAction1<T, A1>(a1));
+}
+
+template <typename T, typename A1, typename A2>
+inline PolymorphicAction<internal::ReturnNewAction2<T, A1, A2> >
+ReturnNew(A1 a1, A2 a2) {
+  return MakePolymorphicAction(
+      internal::ReturnNewAction2<T, A1, A2>(a1, a2));
+}
+
+template <typename T, typename A1, typename A2, typename A3>
+inline PolymorphicAction<internal::ReturnNewAction3<T, A1, A2, A3> >
+ReturnNew(A1 a1, A2 a2, A3 a3) {
+  return MakePolymorphicAction(
+      internal::ReturnNewAction3<T, A1, A2, A3>(a1, a2, a3));
+}
+
+template <typename T, typename A1, typename A2, typename A3, typename A4>
+inline PolymorphicAction<internal::ReturnNewAction4<T, A1, A2, A3, A4> >
+ReturnNew(A1 a1, A2 a2, A3 a3, A4 a4) {
+  return MakePolymorphicAction(
+      internal::ReturnNewAction4<T, A1, A2, A3, A4>(a1, a2, a3, a4));
+}
+
+template <typename T, typename A1, typename A2, typename A3, typename A4,
+    typename A5>
+inline PolymorphicAction<internal::ReturnNewAction5<T, A1, A2, A3, A4, A5> >
+ReturnNew(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+  return MakePolymorphicAction(
+      internal::ReturnNewAction5<T, A1, A2, A3, A4, A5>(a1, a2, a3, a4, a5));
+}
+
+template <typename T, typename A1, typename A2, typename A3, typename A4,
+    typename A5, typename A6>
+inline PolymorphicAction<internal::ReturnNewAction6<T, A1, A2, A3, A4, A5, A6> >
+ReturnNew(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+  return MakePolymorphicAction(
+      internal::ReturnNewAction6<T, A1, A2, A3, A4, A5, A6>(a1, a2, a3, a4, a5,
+          a6));
+}
+
+template <typename T, typename A1, typename A2, typename A3, typename A4,
+    typename A5, typename A6, typename A7>
+inline PolymorphicAction<internal::ReturnNewAction7<T, A1, A2, A3, A4, A5, A6,
+    A7> >
+ReturnNew(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
+  return MakePolymorphicAction(
+      internal::ReturnNewAction7<T, A1, A2, A3, A4, A5, A6, A7>(a1, a2, a3, a4,
+          a5, a6, a7));
+}
+
+template <typename T, typename A1, typename A2, typename A3, typename A4,
+    typename A5, typename A6, typename A7, typename A8>
+inline PolymorphicAction<internal::ReturnNewAction8<T, A1, A2, A3, A4, A5, A6,
+    A7, A8> >
+ReturnNew(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
+  return MakePolymorphicAction(
+      internal::ReturnNewAction8<T, A1, A2, A3, A4, A5, A6, A7, A8>(a1, a2, a3,
+          a4, a5, a6, a7, a8));
+}
+
+template <typename T, typename A1, typename A2, typename A3, typename A4,
+    typename A5, typename A6, typename A7, typename A8, typename A9>
+inline PolymorphicAction<internal::ReturnNewAction9<T, A1, A2, A3, A4, A5, A6,
+    A7, A8, A9> >
+ReturnNew(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
+  return MakePolymorphicAction(
+      internal::ReturnNewAction9<T, A1, A2, A3, A4, A5, A6, A7, A8, A9>(a1, a2,
+          a3, a4, a5, a6, a7, a8, a9));
+}
+
+template <typename T, typename A1, typename A2, typename A3, typename A4,
+    typename A5, typename A6, typename A7, typename A8, typename A9,
+    typename A10>
+inline PolymorphicAction<internal::ReturnNewAction10<T, A1, A2, A3, A4, A5, A6,
+    A7, A8, A9, A10> >
+ReturnNew(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9,
+    A10 a10) {
+  return MakePolymorphicAction(
+      internal::ReturnNewAction10<T, A1, A2, A3, A4, A5, A6, A7, A8, A9,
+          A10>(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10));
+}
+
+// Action DeleteArg<k>() deletes the k-th (0-based) argument of the mock
+// function.
+template <int k>
+inline internal::WithArgsAction<internal::DeleteArg0Action, k>
+DeleteArg() {
+  return WithArg<k>(internal::DeleteArg0());
 }
 
 // Action Throw(exception) can be used in a mock function of any type
