@@ -121,10 +121,9 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     default name if no name is explicitly specified.
     """
     temp_dir = tempfile.mkdtemp()
-    output_file     = os.path.join(temp_dir,
-                                   GTEST_DEFAULT_OUTPUT_FILE)
-    gtest_prog_path = os.path.join(gtest_test_utils.GetBuildDir(),
-                                   "gtest_no_test_unittest")
+    output_file     = os.path.join(temp_dir, GTEST_DEFAULT_OUTPUT_FILE)
+    gtest_prog_path = gtest_test_utils.GetTestExecutablePath(
+        "gtest_no_test_unittest")
     try:
       os.remove(output_file)
     except OSError, e:
@@ -148,8 +147,7 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     """
 
     xml_path = os.path.join(tempfile.mkdtemp(), gtest_prog_name + "out.xml")
-    gtest_prog_path = os.path.join(gtest_test_utils.GetBuildDir(),
-                                   gtest_prog_name)
+    gtest_prog_path = gtest_test_utils.GetTestExecutablePath(gtest_prog_name)
 
     command = [gtest_prog_path, "%s=xml:%s" % (GTEST_OUTPUT_FLAG, xml_path)]
     p = gtest_test_utils.Subprocess(command)

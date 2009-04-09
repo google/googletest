@@ -49,8 +49,8 @@ THROW_ON_FAILURE = 'gtest_throw_on_failure'
 
 # Path to the gtest_throw_on_failure_test_ program, compiled with
 # exceptions disabled.
-EXE_PATH = os.path.join(gtest_test_utils.GetBuildDir(),
-                        'gtest_throw_on_failure_test_')
+EXE_PATH = gtest_test_utils.GetTestExecutablePath(
+    'gtest_throw_on_failure_test_')
 
 
 # Utilities.

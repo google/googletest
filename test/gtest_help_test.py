@@ -47,12 +47,7 @@ import unittest
 
 IS_WINDOWS = os.name == 'nt'
 
-if IS_WINDOWS:
-  PROGRAM = 'gtest_help_test_.exe'
-else:
-  PROGRAM = 'gtest_help_test_'
-
-PROGRAM_PATH = os.path.join(gtest_test_utils.GetBuildDir(), PROGRAM)
+PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath('gtest_help_test_')
 FLAG_PREFIX = '--gtest_'
 CATCH_EXCEPTIONS_FLAG = FLAG_PREFIX + 'catch_exceptions'
 DEATH_TEST_STYLE_FLAG = FLAG_PREFIX + 'death_test_style'

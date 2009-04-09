@@ -29,7 +29,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-"""fuse_gtest_files.py v0.1.0
+"""fuse_gtest_files.py v0.2.0
 Fuses Google Test source code into a .h file and a .cc file.
 
 SYNOPSIS
@@ -42,8 +42,8 @@ SYNOPSIS
        two files contain everything you need to use Google Test.  Hence
        you can "install" Google Test by copying them to wherever you want.
 
-       GTEST_ROOT_DIR can be omitted and defaults to the parent directory
-       of the directory holding the fuse_gtest_files.py script.
+       GTEST_ROOT_DIR can be omitted and defaults to the parent
+       directory of the directory holding this script.
 
 EXAMPLES
        ./fuse_gtest_files.py fused_gtest
@@ -63,13 +63,17 @@ import re
 import sets
 import sys
 
+# We assume that this file is in the scripts/ directory in the Google
+# Test root directory.
+DEFAULT_GTEST_ROOT_DIR = os.path.join(os.path.dirname(__file__), '..')
+
 # Regex for matching '#include <gtest/...>'.
 INCLUDE_GTEST_FILE_REGEX = re.compile(r'^\s*#\s*include\s*<(gtest/.+)>')
 
 # Regex for matching '#include "src/..."'.
 INCLUDE_SRC_FILE_REGEX = re.compile(r'^\s*#\s*include\s*"(src/.+)"')
 
-# Where to find the source files.
+# Where to find the source seed files.
 GTEST_H_SEED = 'include/gtest/gtest.h'
 GTEST_SPI_H_SEED = 'include/gtest/gtest-spi.h'
 GTEST_ALL_CC_SEED = 'src/gtest-all.cc'
@@ -79,18 +83,18 @@ GTEST_H_OUTPUT = 'gtest/gtest.h'
 GTEST_ALL_CC_OUTPUT = 'gtest/gtest-all.cc'
 
 
-def GetGTestRootDir():
-  """Returns the absolute path to the Google Test root directory.
+def VerifyFileExists(directory, relative_path):
+  """Verifies that the given file exists; aborts on failure.
 
-  We assume that this script is in a sub-directory of the Google Test root.
+  relative_path is the file path relative to the given directory.
   """
 
-  my_path = sys.argv[0]  # Path to this script.
-  my_dir = os.path.dirname(my_path)
-  if not my_dir:
-    my_dir = '.'
-
-  return os.path.abspath(os.path.join(my_dir, '..'))
+  if not os.path.isfile(os.path.join(directory, relative_path)):
+    print 'ERROR: Cannot find %s in directory %s.' % (relative_path,
+                                                      directory)
+    print ('Please either specify a valid project root directory '
+           'or omit it on the command line.')
+    sys.exit(1)
 
 
 def ValidateGTestRootDir(gtest_root):
@@ -99,21 +103,34 @@ def ValidateGTestRootDir(gtest_root):
   The function aborts the program on failure.
   """
 
-  def VerifyFileExists(relative_path):
-    """Verifies that the given file exists; aborts on failure.
+  VerifyFileExists(gtest_root, GTEST_H_SEED)
+  VerifyFileExists(gtest_root, GTEST_ALL_CC_SEED)
 
-    relative_path is the file path relative to the gtest root.
-    """
 
-    if not os.path.isfile(os.path.join(gtest_root, relative_path)):
-      print 'ERROR: Cannot find %s in directory %s.' % (relative_path,
-                                                        gtest_root)
-      print ('Please either specify a valid Google Test root directory '
-             'or omit it on the command line.')
+def VerifyOutputFile(output_dir, relative_path):
+  """Verifies that the given output file path is valid.
+
+  relative_path is relative to the output_dir directory.
+  """
+
+  # Makes sure the output file either doesn't exist or can be overwritten.
+  output_file = os.path.join(output_dir, relative_path)
+  if os.path.exists(output_file):
+    # TODO(wan@google.com): The following user-interaction doesn't
+    # work with automated processes.  We should provide a way for the
+    # Makefile to force overwriting the files.
+    print ('%s already exists in directory %s - overwrite it? (y/N) ' %
+           (relative_path, output_dir))
+    answer = sys.stdin.readline().strip()
+    if answer not in ['y', 'Y']:
+      print 'ABORTED.'
       sys.exit(1)
 
-  VerifyFileExists(GTEST_H_SEED)
-  VerifyFileExists(GTEST_ALL_CC_SEED)
+  # Makes sure the directory holding the output file exists; creates
+  # it and all its ancestors if necessary.
+  parent_directory = os.path.dirname(output_file)
+  if not os.path.isdir(parent_directory):
+    os.makedirs(parent_directory)
 
 
 def ValidateOutputDir(output_dir):
@@ -122,30 +139,8 @@ def ValidateOutputDir(output_dir):
   The function aborts the program on failure.
   """
 
-  def VerifyOutputFile(relative_path):
-    """Verifies that the given output file path is valid.
-
-    relative_path is relative to the output_dir directory.
-    """
-
-    # Makes sure the output file either doesn't exist or can be overwritten.
-    output_file = os.path.join(output_dir, relative_path)
-    if os.path.exists(output_file):
-      print ('%s already exists in directory %s - overwrite it? (y/N) ' %
-             (relative_path, output_dir))
-      answer = sys.stdin.readline().strip()
-      if answer not in ['y', 'Y']:
-        print 'ABORTED.'
-        sys.exit(1)
-
-    # Makes sure the directory holding the output file exists; creates
-    # it and all its ancestors if necessary.
-    parent_directory = os.path.dirname(output_file)
-    if not os.path.isdir(parent_directory):
-      os.makedirs(parent_directory)
-
-  VerifyOutputFile(GTEST_H_OUTPUT)
-  VerifyOutputFile(GTEST_ALL_CC_OUTPUT)
+  VerifyOutputFile(output_dir, GTEST_H_OUTPUT)
+  VerifyOutputFile(output_dir, GTEST_ALL_CC_OUTPUT)
 
 
 def FuseGTestH(gtest_root, output_dir):
@@ -177,10 +172,9 @@ def FuseGTestH(gtest_root, output_dir):
   output_file.close()
 
 
-def FuseGTestAllCc(gtest_root, output_dir):
-  """Scans folder gtest_root to generate gtest/gtest-all.cc in output_dir."""
+def FuseGTestAllCcToFile(gtest_root, output_file):
+  """Scans folder gtest_root to generate gtest/gtest-all.cc in output_file."""
 
-  output_file = file(os.path.join(output_dir, GTEST_ALL_CC_OUTPUT), 'w')
   processed_files = sets.Set()
 
   def ProcessFile(gtest_source_file):
@@ -219,10 +213,19 @@ def FuseGTestAllCc(gtest_root, output_dir):
           output_file.write(line)
 
   ProcessFile(GTEST_ALL_CC_SEED)
+
+
+def FuseGTestAllCc(gtest_root, output_dir):
+  """Scans folder gtest_root to generate gtest/gtest-all.cc in output_dir."""
+
+  output_file = file(os.path.join(output_dir, GTEST_ALL_CC_OUTPUT), 'w')
+  FuseGTestAllCcToFile(gtest_root, output_file)
   output_file.close()
 
 
 def FuseGTest(gtest_root, output_dir):
+  """Fuses gtest.h and gtest-all.cc."""
+
   ValidateGTestRootDir(gtest_root)
   ValidateOutputDir(output_dir)
 
@@ -234,7 +237,7 @@ def main():
   argc = len(sys.argv)
   if argc == 2:
     # fuse_gtest_files.py OUTPUT_DIR
-    FuseGTest(GetGTestRootDir(), sys.argv[1])
+    FuseGTest(DEFAULT_GTEST_ROOT_DIR, sys.argv[1])
   elif argc == 3:
     # fuse_gtest_files.py GTEST_ROOT_DIR OUTPUT_DIR
     FuseGTest(sys.argv[1], sys.argv[2])

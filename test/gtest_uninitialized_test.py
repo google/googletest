@@ -34,25 +34,11 @@
 __author__ = 'wan@google.com (Zhanyong Wan)'
 
 import gtest_test_utils
-import os
 import sys
 import unittest
 
-IS_WINDOWS = os.name == 'nt'
-IS_LINUX = os.name == 'posix'
 
-if IS_WINDOWS:
-  BUILD_DIRS = [
-      'build.dbg\\',
-      'build.opt\\',
-      'build.dbg8\\',
-      'build.opt8\\',
-      ]
-  COMMAND = 'gtest_uninitialized_test_.exe'
-
-if IS_LINUX:
-  COMMAND = os.path.join(gtest_test_utils.GetBuildDir(),
-                         'gtest_uninitialized_test_')
+COMMAND = gtest_test_utils.GetTestExecutablePath('gtest_uninitialized_test_')
 
 
 def Assert(condition):
@@ -77,25 +63,10 @@ def TestExitCodeAndOutput(command):
   Assert('InitGoogleTest' in p.output)
 
 
-if IS_WINDOWS:
-
-  def main():
-    for build_dir in BUILD_DIRS:
-      command = build_dir + COMMAND
-      print 'Testing with %s . . .' % (command,)
-      TestExitCodeAndOutput(command)
-    return 0
-
-  if __name__ == '__main__':
-    main()
+class GTestUninitializedTest(unittest.TestCase):
+  def testExitCodeAndOutput(self):
+    TestExitCodeAndOutput(COMMAND)
 
 
-if IS_LINUX:
-
-  class GTestUninitializedTest(unittest.TestCase):
-    def testExitCodeAndOutput(self):
-      TestExitCodeAndOutput(COMMAND)
-
-
-  if __name__ == '__main__':
-    gtest_test_utils.Main()
+if __name__ == '__main__':
+  gtest_test_utils.Main()

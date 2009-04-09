@@ -52,6 +52,8 @@ import gtest_test_utils
 
 # Constants.
 
+IS_WINDOWS = os.name == 'nt'
+
 # The environment variable for specifying the test filters.
 FILTER_ENV_VAR = 'GTEST_FILTER'
 
@@ -67,8 +69,7 @@ FILTER_FLAG = 'gtest_filter'
 ALSO_RUN_DISABED_TESTS_FLAG = 'gtest_also_run_disabled_tests'
 
 # Command to run the gtest_filter_unittest_ program.
-COMMAND = os.path.join(gtest_test_utils.GetBuildDir(),
-                       'gtest_filter_unittest_')
+COMMAND = gtest_test_utils.GetTestExecutablePath('gtest_filter_unittest_')
 
 # Regex for determining whether parameterized tests are enabled in the binary.
 PARAM_TEST_REGEX = re.compile(r'/ParamTest')
@@ -204,23 +205,36 @@ class GTestFilterUnitTest(unittest.TestCase):
     self.assertEqual(len(set_var), len(full_partition))
     self.assertEqual(sets.Set(set_var), sets.Set(full_partition))
 
+  def AdjustForParameterizedTests(self, tests_to_run):
+    """Adjust tests_to_run in case value parameterized tests are disabled
+    in the binary.
+    """
+    global param_tests_present
+    if not param_tests_present:
+      return list(sets.Set(tests_to_run) - sets.Set(PARAM_TESTS))
+    else:
+      return tests_to_run
+
   def RunAndVerify(self, gtest_filter, tests_to_run):
     """Runs gtest_flag_unittest_ with the given filter, and verifies
     that the right set of tests were run.
     """
-    # Adjust tests_to_run in case value parameterized tests are disabled
-    # in the binary.
-    global param_tests_present
-    if not param_tests_present:
-      tests_to_run = list(sets.Set(tests_to_run) - sets.Set(PARAM_TESTS))
+    tests_to_run = self.AdjustForParameterizedTests(tests_to_run)
 
     # First, tests using GTEST_FILTER.
 
-    SetEnvVar(FILTER_ENV_VAR, gtest_filter)
-    tests_run = Run(COMMAND)[0]
-    SetEnvVar(FILTER_ENV_VAR, None)
-
-    self.AssertSetEqual(tests_run, tests_to_run)
+    # Windows removes empty variables from the environment when passing it
+    # to a new process. This means it is impossible to pass an empty filter
+    # into a process using the GTEST_FILTER environment variable. However,
+    # we can still test the case when the variable is not supplied (i.e.,
+    # gtest_filter is None).
+    # pylint: disable-msg=C6403
+    if not IS_WINDOWS or gtest_filter != '':
+      SetEnvVar(FILTER_ENV_VAR, gtest_filter)
+      tests_run = Run(COMMAND)[0]
+      SetEnvVar(FILTER_ENV_VAR, None)
+      self.AssertSetEqual(tests_run, tests_to_run)
+    # pylint: enable-msg=C6403
 
     # Next, tests using --gtest_filter.
 
@@ -239,21 +253,33 @@ class GTestFilterUnitTest(unittest.TestCase):
     on each shard should be identical to tests_to_run, without duplicates.
     If check_exit_0, make sure that all shards returned 0.
     """
-    SetEnvVar(FILTER_ENV_VAR, gtest_filter)
-    partition = []
-    for i in range(0, total_shards):
-      (tests_run, exit_code) = RunWithSharding(total_shards, i, command)
-      if check_exit_0:
-        self.assert_(exit_code is None)
-      partition.append(tests_run)
+    tests_to_run = self.AdjustForParameterizedTests(tests_to_run)
 
-    self.AssertPartitionIsValid(tests_to_run, partition)
-    SetEnvVar(FILTER_ENV_VAR, None)
+    # Windows removes empty variables from the environment when passing it
+    # to a new process. This means it is impossible to pass an empty filter
+    # into a process using the GTEST_FILTER environment variable. However,
+    # we can still test the case when the variable is not supplied (i.e.,
+    # gtest_filter is None).
+    # pylint: disable-msg=C6403
+    if not IS_WINDOWS or gtest_filter != '':
+      SetEnvVar(FILTER_ENV_VAR, gtest_filter)
+      partition = []
+      for i in range(0, total_shards):
+        (tests_run, exit_code) = RunWithSharding(total_shards, i, command)
+        if check_exit_0:
+          self.assert_(exit_code is None)
+        partition.append(tests_run)
+
+      self.AssertPartitionIsValid(tests_to_run, partition)
+      SetEnvVar(FILTER_ENV_VAR, None)
+    # pylint: enable-msg=C6403
 
   def RunAndVerifyAllowingDisabled(self, gtest_filter, tests_to_run):
     """Runs gtest_flag_unittest_ with the given filter, and enables
     disabled tests. Verifies that the right set of tests were run.
     """
+    tests_to_run = self.AdjustForParameterizedTests(tests_to_run)
+
     # Construct the command line.
     command = '%s --%s' % (COMMAND, ALSO_RUN_DISABED_TESTS_FLAG)
     if gtest_filter is not None:
@@ -263,8 +289,10 @@ class GTestFilterUnitTest(unittest.TestCase):
     self.AssertSetEqual(tests_run, tests_to_run)
 
   def setUp(self):
-    """Sets up test case. Determines whether value-parameterized tests are
-    enabled in the binary and sets flags accordingly.
+    """Sets up test case.
+
+    Determines whether value-parameterized tests are enabled in the binary and
+    sets the flags accordingly.
     """
     global param_tests_present
     if param_tests_present is None:
