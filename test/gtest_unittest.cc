@@ -1204,7 +1204,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG(filter) = "";
     GTEST_FLAG(list_tests) = false;
     GTEST_FLAG(output) = "";
-    GTEST_FLAG(print_time) = false;
+    GTEST_FLAG(print_time) = true;
     GTEST_FLAG(repeat) = 1;
     GTEST_FLAG(throw_on_failure) = false;
   }
@@ -1227,7 +1227,7 @@ class GTestFlagSaverTest : public Test {
     EXPECT_STREQ("", GTEST_FLAG(filter).c_str());
     EXPECT_FALSE(GTEST_FLAG(list_tests));
     EXPECT_STREQ("", GTEST_FLAG(output).c_str());
-    EXPECT_FALSE(GTEST_FLAG(print_time));
+    EXPECT_TRUE(GTEST_FLAG(print_time));
     EXPECT_EQ(1, GTEST_FLAG(repeat));
     EXPECT_FALSE(GTEST_FLAG(throw_on_failure));
 
@@ -1239,7 +1239,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG(filter) = "abc";
     GTEST_FLAG(list_tests) = true;
     GTEST_FLAG(output) = "xml:foo.xml";
-    GTEST_FLAG(print_time) = true;
+    GTEST_FLAG(print_time) = false;
     GTEST_FLAG(repeat) = 100;
     GTEST_FLAG(throw_on_failure) = true;
   }
@@ -4325,7 +4325,7 @@ struct Flags {
             filter(""),
             list_tests(false),
             output(""),
-            print_time(false),
+            print_time(true),
             repeat(1),
             throw_on_failure(false) {}
 
@@ -4436,7 +4436,7 @@ class InitGoogleTestTest : public Test {
     GTEST_FLAG(filter) = "";
     GTEST_FLAG(list_tests) = false;
     GTEST_FLAG(output) = "";
-    GTEST_FLAG(print_time) = false;
+    GTEST_FLAG(print_time) = true;
     GTEST_FLAG(repeat) = 1;
     GTEST_FLAG(throw_on_failure) = false;
   }

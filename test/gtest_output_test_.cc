@@ -976,6 +976,8 @@ GTEST_DEFINE_bool_(internal_skip_environment_and_ad_hoc_tests, false,
 // of them are intended to fail), and then compare the test results
 // with the "golden" file.
 int main(int argc, char **argv) {
+  testing::GTEST_FLAG(print_time) = false;
+
   // We just run the tests, knowing some of them are intended to fail.
   // We will use a separate Python script to compare the output of
   // this program with the golden file.
