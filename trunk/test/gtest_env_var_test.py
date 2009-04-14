@@ -90,7 +90,7 @@ def TestEnvVarAffectsFlag(command):
   TestFlag(command, 'color', 'yes', 'auto')
   TestFlag(command, 'filter', 'FooTest.Bar', '*')
   TestFlag(command, 'output', 'tmp/foo.xml', '')
-  TestFlag(command, 'print_time', '1', '0')
+  TestFlag(command, 'print_time', '0', '1')
   TestFlag(command, 'repeat', '999', '1')
   TestFlag(command, 'throw_on_failure', '1', '0')
   TestFlag(command, 'death_test_style', 'threadsafe', 'fast')

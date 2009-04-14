@@ -211,7 +211,7 @@ GTEST_DEFINE_string_(
 
 GTEST_DEFINE_bool_(
     print_time,
-    internal::BoolFromGTestEnv("print_time", false),
+    internal::BoolFromGTestEnv("print_time", true),
     "True iff " GTEST_NAME_
     " should display elapsed time in text output.");
 
@@ -4141,8 +4141,8 @@ static const char kColorEncodedHelpMessage[] =
 "Test Output:\n"
 "  @G--" GTEST_FLAG_PREFIX_ "color=@Y(@Gyes@Y|@Gno@Y|@Gauto@Y)@D\n"
 "      Enable/disable colored output. The default is @Gauto@D.\n"
-"  -@G-" GTEST_FLAG_PREFIX_ "print_time@D\n"
-"      Print the elapsed time of each test.\n"
+"  -@G-" GTEST_FLAG_PREFIX_ "print_time=0@D\n"
+"      Don't print the elapsed time of each test.\n"
 "  @G--" GTEST_FLAG_PREFIX_ "output=xml@Y[@G:@YDIRECTORY_PATH@G"
     GTEST_PATH_SEP_ "@Y|@G:@YFILE_PATH]@D\n"
 "      Generate an XML report in the given directory or with the given file\n"
@@ -4165,10 +4165,9 @@ static const char kColorEncodedHelpMessage[] =
 "Except for @G--" GTEST_FLAG_PREFIX_ "list_tests@D, you can alternatively set "
     "the corresponding\n"
 "environment variable of a flag (all letters in upper-case). For example, to\n"
-"print the elapsed time, you can either specify @G--" GTEST_FLAG_PREFIX_
-    "print_time@D or set the\n"
-"@G" GTEST_FLAG_PREFIX_UPPER_ "PRINT_TIME@D environment variable to a "
-    "non-zero value.\n"
+"disable colored text output, you can either specify @G--" GTEST_FLAG_PREFIX_
+    "color=no@D or set\n"
+"the @G" GTEST_FLAG_PREFIX_UPPER_ "COLOR@D environment variable to @Gno@D.\n"
 "\n"
 "For more information, please read the " GTEST_NAME_ " documentation at\n"
 "@G" GTEST_PROJECT_URL_ "@D. If you find a bug in " GTEST_NAME_ "\n"
