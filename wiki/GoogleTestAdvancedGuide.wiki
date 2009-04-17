@@ -131,7 +131,7 @@ The difference between this and the previous group of macros is that instead of
 a predicate, `(ASSERT|EXPECT)_PRED_FORMAT*` take a _predicate-formatter_
 (_pred_formatn_), which is a function or functor that has the signature:
 
-`testing::AssertionResult PredicateFormattern(const char* `_expr1_`, const char* `_expr2_`, ... const char* `_exprn_`, T1 `_val1_`, T2 `_val2_`, ... Tn `_valn_`);`
+`::testing::AssertionResult PredicateFormattern(const char* `_expr1_`, const char* `_expr2_`, ... const char* `_exprn_`, T1 `_val1_`, T2 `_val2_`, ... Tn `_valn_`);`
 
 where _val1_, _val2_, ..., and _valn_ are the values of the predicate
 arguments, and _expr1_, _expr2_, ..., and _exprn_ are the corresponding
@@ -140,7 +140,7 @@ expressions as they appear in the source code. The types `T1`, `T2`, ..., and
 argument has type `Foo`, you can declare it as either `Foo` or `const Foo&`,
 whichever is appropriate.
 
-A predicate-formatter returns a `testing::AssertionResult` object to indicate
+A predicate-formatter returns a `::testing::AssertionResult` object to indicate
 whether the assertion has succeeded or not. The only way to create such an
 object is to call one of these factory functions:
 
@@ -166,14 +166,14 @@ As an example, let's improve the failure message in the previous example, which 
 int SmallestPrimeCommonDivisor(int m, int n) { ... }
 
 // A predicate-formatter for asserting that two integers are mutually prime.
-testing::AssertionResult AssertMutuallyPrime(const char* m_expr, const char* n_expr, int m, int n) {
+::testing::AssertionResult AssertMutuallyPrime(const char* m_expr, const char* n_expr, int m, int n) {
   if (MutuallyPrime(m, n))
-    return testing::AssertionSuccess();
-  testing::Message msg;
+    return ::testing::AssertionSuccess();
+  ::testing::Message msg;
   msg << m_expr << " and " << n_expr << " (" << m << " and " << n
       << ") are not mutually prime, " << "as they have a common divisor "
       << SmallestPrimeCommonDivisor(m, n);
-  return testing::AssertionFailure(msg);
+  return ::testing::AssertionFailure(msg);
 }
 }}}
 
@@ -232,8 +232,8 @@ functions that can be used in predicate assertion macros (e.g.
 `EXPECT_PRED_FORMAT2`, etc).
 
 {{{
-EXPECT_PRED_FORMAT2(testing::FloatLE, val1, val2);
-EXPECT_PRED_FORMAT2(testing::DoubleLE, val1, val2);
+EXPECT_PRED_FORMAT2(::testing::FloatLE, val1, val2);
+EXPECT_PRED_FORMAT2(::testing::DoubleLE, val1, val2);
 }}}
 
 Verifies that _val1_ is less than, or almost equal to, _val2_. You can
@@ -267,7 +267,7 @@ _Availability_: Windows.
 
 You can call the function
 {{{
-testing::StaticAssertTypeEq<T1, T2>();
+::testing::StaticAssertTypeEq<T1, T2>();
 }}}
 to assert that types `T1` and `T2` are the same.  The function does
 nothing if the assertion is satisfied.  If the types are different,
@@ -281,7 +281,7 @@ the function is instantiated.  For example, given:
 {{{
 template <typename T> class Foo {
  public:
-  void Bar() { testing::StaticAssertTypeEq<int, T>(); }
+  void Bar() { ::testing::StaticAssertTypeEq<int, T>(); }
 };
 }}}
 the code:
@@ -364,14 +364,14 @@ succeeds only if the predicate returns `true`. Google Test defines a few
 predicates that handle the most common cases:
 
 {{{
-testing::ExitedWithCode(exit_code)
+::testing::ExitedWithCode(exit_code)
 }}}
 
 This expression is `true` if the program exited normally with the given exit
 code.
 
 {{{
-testing::KilledBySignal(signal_number)  // Not available on Windows.
+::testing::KilledBySignal(signal_number)  // Not available on Windows.
 }}}
 
 This expression is `true` if the program was killed by the given signal.
@@ -397,10 +397,10 @@ TEST(My*DeathTest*, Foo) {
   ASSERT_DEATH({ int n = 5; Foo(&n); }, "Error on line .* of Foo()");
 }
 TEST(MyDeathTest, NormalExit) {
-  EXPECT_EXIT(NormalExit(), testing::ExitedWithCode(0), "Success");
+  EXPECT_EXIT(NormalExit(), ::testing::ExitedWithCode(0), "Success");
 }
 TEST(MyDeathTest, KillMyself) {
-  EXPECT_EXIT(KillMyself(), testing::KilledBySignal(SIGKILL), "Sending myself unblockable signal");
+  EXPECT_EXIT(KillMyself(), ::testing::KilledBySignal(SIGKILL), "Sending myself unblockable signal");
 }
 }}}
 
@@ -467,7 +467,7 @@ syntax only.
 Under the hood, `ASSERT_EXIT()` spawns a new process and executes the
 death test statement in that process. The details of of how precisely
 that happens depend on the platform and the variable
-`testing::GTEST_FLAG(death_test_style)` (which is initialized from the
+`::testing::GTEST_FLAG(death_test_style)` (which is initialized from the
 command-line flag `--gtest_death_test_style`).
 
   * On POSIX systems, `fork()` (or `clone()` on Linux) is used to spawn the child, after which:
@@ -518,7 +518,7 @@ You can choose a particular style of death tests by setting the flag
 programmatically:
 
 {{{
-testing::FLAGS_gtest_death_test_style = "threadsafe";
+::testing::FLAGS_gtest_death_test_style = "threadsafe";
 }}}
 
 You can do this in `main()` to set the style for all death tests in the
@@ -527,7 +527,7 @@ test and restored afterwards, so you need not do that yourself. For example:
 
 {{{
 TEST(MyDeathTest, TestOne) {
-  testing::FLAGS_gtest_death_test_style = "threadsafe";
+  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   // This test is run in the "threadsafe" style:
   ASSERT_DEATH(ThisShouldDie(), "");
 }
@@ -538,8 +538,8 @@ TEST(MyDeathTest, TestTwo) {
 }
 
 int main(int argc, char** argv) {
-  testing::InitGoogleTest(&argc, argv);
-  testing::FLAGS_gtest_death_test_style = "fast";
+  ::testing::InitGoogleTest(&argc, argv);
+  ::testing::FLAGS_gtest_death_test_style = "fast";
   return RUN_ALL_TESTS();
 }
 }}}
@@ -707,7 +707,7 @@ are currently not supported.
 
 === Checking for Failures in the Current Test ===
 
-`HasFatalFailure()` in the `testing::Test` class returns `true` if an
+`HasFatalFailure()` in the `::testing::Test` class returns `true` if an
 assertion in the current test has suffered a fatal failure. This
 allows functions to catch fatal failures in a sub-routine and return
 early.
@@ -735,10 +735,10 @@ TEST(FooTest, Bar) {
 }}}
 
 If `HasFatalFailure()` is used outside of `TEST()` , `TEST_F()` , or a test
-fixture, you must add the `testing::Test::` prefix, as in:
+fixture, you must add the `::testing::Test::` prefix, as in:
 
 {{{
-if (testing::Test::HasFatalFailure())
+if (::testing::Test::HasFatalFailure())
   return;
 }}}
 
@@ -774,7 +774,7 @@ will output XML like this:
 }}}
 
 _Note_:
- *  `RecordProperty()` is a static member of the `Test` class. Therefore it needs to be prefixed with `testing::Test::` if used outside of the `TEST` body and the test fixture class.
+ *  `RecordProperty()` is a static member of the `Test` class. Therefore it needs to be prefixed with `::testing::Test::` if used outside of the `TEST` body and the test fixture class.
  *  `key` must be a valid XML attribute name, and cannot conflict with the ones already used by Google Test (`name`, `status`,     `time`, and `classname`).
 
 _Availability_: Linux, Windows, Mac.
@@ -809,7 +809,7 @@ test.
 
 Here's an example of per-test-case set-up and tear-down:
 {{{
-class FooTest : public testing::Test {
+class FooTest : public ::testing::Test {
  protected:
   // Per-test-case set-up.
   // Called before the first test in this test case.
@@ -851,7 +851,7 @@ _Availability:_ Linux, Windows, Mac.
 Just as you can do set-up and tear-down at the test level and the test case
 level, you can also do it at the test program level. Here's how.
 
-First, you subclass the `testing::Environment` class to define a test
+First, you subclass the `::testing::Environment` class to define a test
 environment, which knows how to set-up and tear-down:
 
 {{{
@@ -866,7 +866,7 @@ class Environment {
 }}}
 
 Then, you register an instance of your environment class with Google Test by
-calling the `testing::AddGlobalTestEnvironment()` function:
+calling the `::testing::AddGlobalTestEnvironment()` function:
 
 {{{
 Environment* AddGlobalTestEnvironment(Environment* env);
@@ -889,7 +889,7 @@ this before `main()` starts for it to take effect. One way to do this is to
 define a global variable like this:
 
 {{{
-testing::Environment* const foo_env = testing::AddGlobalTestEnvironment(new FooEnvironment);
+::testing::Environment* const foo_env = ::testing::AddGlobalTestEnvironment(new FooEnvironment);
 }}}
 
 However, we strongly recommend you to write your own `main()` and call
@@ -940,14 +940,14 @@ Here are some other situations when value-parameterized tests come handy:
    * You want to test your code over various inputs (a.k.a. data-driven testing). This feature is easy to abuse, so please exercise your good sense when doing it!
 
 To write value-parameterized tests, first you should define a fixture
-class. It must be derived from `testing::TestWithParam<T>`, where `T`
+class. It must be derived from `::testing::TestWithParam<T>`, where `T`
 is the type of your parameter values. `TestWithParam<T>` is itself
-derived from `testing::Test`. `T` can be any copyable type. If it's
+derived from `::testing::Test`. `T` can be any copyable type. If it's
 a raw pointer, you are responsible for managing the lifespan of the
 pointed values.
 
 {{{
-class FooTest : public testing::TestWithParam<const char*> {
+class FooTest : public ::testing::TestWithParam<const char*> {
   // You can implement all the usual fixture class members here.
 };
 }}}
@@ -989,7 +989,7 @@ each with parameter values `"meeny"`, `"miny"`, and `"moe"`.
 {{{
 INSTANTIATE_TEST_CASE_P(InstantiationName,
                         FooTest,
-                        testing::Values("meeny", "miny", "moe"));
+                        ::testing::Values("meeny", "miny", "moe"));
 }}}
 
 To distinguish different instances of the pattern (yes, you can
@@ -1014,7 +1014,7 @@ with parameter values `"cat"` and `"dog"`:
 {{{
 const char* pets[] = {"cat", "dog"};
 INSTANTIATE_TEST_CASE_P(AnotherInstantiationName, FooTest,
-                        testing::ValuesIn(pets));
+                        ::testing::ValuesIn(pets));
 }}}
 
 The tests from the instantiation above will have these names:
@@ -1054,11 +1054,11 @@ types.  You only need to write the test logic once, although you must
 know the type list when writing typed tests.  Here's how you do it:
 
 First, define a fixture class template.  It should be parameterized
-by a type.  Remember to derive it from `testing::Test`:
+by a type.  Remember to derive it from `::testing::Test`:
 
 {{{
 template <typename T>
-class FooTest : public testing::Test {
+class FooTest : public ::testing::Test {
  public:
   ...
   typedef std::list<T> List;
@@ -1071,7 +1071,7 @@ Next, associate a list of types with the test case, which will be
 repeated for each type in the list:
 
 {{{
-typedef testing::Types<char, int, unsigned int> MyTypes;
+typedef ::testing::Types<char, int, unsigned int> MyTypes;
 TYPED_TEST_CASE(FooTest, MyTypes);
 }}}
 
@@ -1127,7 +1127,7 @@ First, define a fixture class template, as we did with typed tests:
 
 {{{
 template <typename T>
-class FooTest : public testing::Test {
+class FooTest : public ::testing::Test {
   ...
 };
 }}}
@@ -1169,7 +1169,7 @@ want.  If you put the above code in a header file, you can `#include`
 it in multiple C++ source files and instantiate it multiple times.
 
 {{{
-typedef testing::Types<char, int, unsigned int> MyTypes;
+typedef ::testing::Types<char, int, unsigned int> MyTypes;
 INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
 }}}
 
@@ -1179,7 +1179,7 @@ added to the actual test case name.  Remember to pick unique prefixes
 for different instances.
 
 In the special case where the type list contains only one type, you
-can write that type directly without `testing::Types<...>`, like this:
+can write that type directly without `::testing::Types<...>`, like this:
 
 {{{
 INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, int);
@@ -1287,7 +1287,7 @@ Your test code should be something like:
 
 {{{
 namespace my_namespace {
-class FooTest : public testing::Test {
+class FooTest : public ::testing::Test {
  protected:
   ...
 };
@@ -1347,7 +1347,7 @@ the following macros:
 
 Sometimes a function may need to know the name of the currently running test.
 For example, you may be using the `SetUp()` method of your test fixture to set
-the golden file name based on which test is running. The `testing::TestInfo`
+the golden file name based on which test is running. The `::testing::TestInfo`
 class has this information:
 
 {{{
@@ -1373,8 +1373,8 @@ class TestInfo {
 {{{
 // Gets information about the currently running test.
 // Do NOT delete the returned object - it's managed by the UnitTest class.
-const testing::TestInfo* const test_info =
-  testing::UnitTest::GetInstance()->current_test_info();
+const ::testing::TestInfo* const test_info =
+  ::testing::UnitTest::GetInstance()->current_test_info();
 printf("We are in test %s of test case %s.\n",
        test_info->name(), test_info->test_case_name());
 }}}
@@ -1391,7 +1391,7 @@ _Availability:_ Linux, Windows, Mac.
 Google Test test programs are ordinary executables. Once built, you can run
 them directly and affect their behavior via the following environment variables
 and/or command line flags. For the flags to work, your programs must call
-`testing::InitGoogleTest()` before calling `RUN_ALL_TESTS()`.
+`::testing::InitGoogleTest()` before calling `RUN_ALL_TESTS()`.
 
 To see a list of supported flags and their usage, please run your test
 program with the `--help` flag.  You can also use `-h`, `-?`, or `/?`
@@ -1400,16 +1400,16 @@ for short.  This feature is added in version 1.3.0.
 If an option is specified both by an environment variable and by a
 flag, the latter takes precedence.  Most of the options can also be
 set/read in code: to access the value of command line flag
-`--gtest_foo`, write `testing::GTEST_FLAG(foo)`.  A common pattern is
-to set the value of a flag before calling `testing::InitGoogleTest()`
+`--gtest_foo`, write `::testing::GTEST_FLAG(foo)`.  A common pattern is
+to set the value of a flag before calling `::testing::InitGoogleTest()`
 to change the default value of the flag:
 {{{
 int main(int argc, char** argv) {
   // Disables elapsed time by default.
-  testing::GTEST_FLAG(print_time) = false;
+  ::testing::GTEST_FLAG(print_time) = false;
 
   // This allows the user to override the flag on the command line.
-  testing::InitGoogleTest(&argc, argv);
+  ::testing::InitGoogleTest(&argc, argv);
 
   return RUN_ALL_TESTS();
 }
@@ -1484,7 +1484,7 @@ will still be compiled:
 // Tests that Foo does Abc.
 TEST(FooTest, DISABLED_DoesAbc) { ... }
 
-class DISABLED_BarTest : public testing::Test { ... };
+class DISABLED_BarTest : public ::testing::Test { ... };
 
 // Tests that Bar does Xyz.
 TEST_F(DISABLED_BarTest, DoesXyz) { ... }
@@ -1683,9 +1683,9 @@ like:
 #include <gtest/gtest.h>
 
 int main(int argc, char** argv) {
-  testing::GTEST_FLAG(throw_on_failure) = true;
+  ::testing::GTEST_FLAG(throw_on_failure) = true;
   // Important: Google Test must be initialized.
-  testing::InitGoogleTest(&argc, argv);
+  ::testing::InitGoogleTest(&argc, argv);
 
   ... whatever your existing testing framework requires ...
 }
@@ -1709,7 +1709,7 @@ a failed Google Test assertion will instead exit your program with a
 non-zero code, which will also signal a test failure to your test
 runner.
 
-If you don't write `testing::GTEST_FLAG(throw_on_failure) = true;` in
+If you don't write `::testing::GTEST_FLAG(throw_on_failure) = true;` in
 your `main()`, you can alternatively enable this feature by specifying
 the `--gtest_throw_on_failure` flag on the command-line or setting the
 `GTEST_THROW_ON_FAILURE` environment variable to a non-zero value.

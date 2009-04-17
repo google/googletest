@@ -101,13 +101,13 @@ for tests with fixtures, and require the user to define an empty
 fixture sometimes:
 
 {{{
-class FooTest : public testing::Test {};
+class FooTest : public ::testing::Test {};
 
 TEST_F(FooTest, DoesThis) { ... }
 }}}
 or
 {{{
-typedef testing::Test FooTest;
+typedef ::testing::Test FooTest;
 
 TEST_F(FooTest, DoesThat) { ... }
 }}}
@@ -219,7 +219,7 @@ Typically, your code looks like this:
 
 {{{
 // Defines a base test fixture.
-class BaseTest : public testing::Test {
+class BaseTest : public ::testing::Test {
   protected:
    ...
 };
@@ -487,7 +487,7 @@ class Foo {
   ...
 };
 
-class FooTest : public testing::Test {
+class FooTest : public ::testing::Test {
  protected:
   ...
   void Test1() {...} // This accesses private members of class Foo.
@@ -509,7 +509,7 @@ class Foo {
   ...
 };
 
-class FooTest : public testing::Test {
+class FooTest : public ::testing::Test {
  protected:
   ...
   T1 get_private_member1(Foo* obj) {
@@ -658,7 +658,7 @@ TEST(MyDeathTest, InsideLoop) {
   // Verifies that Foo(0), Foo(1), ..., and Foo(4) all die.
   for (int i = 0; i < 5; i++) {
     EXPECT_DEATH_M(Foo(i), "Foo has \\d+ errors",
-                   testing::Message() << "where i is " << i);
+                   ::testing::Message() << "where i is " << i);
   }
 }
 
@@ -734,7 +734,7 @@ You don't have to, but if you like, you may split up the test case into
 related:
 
 {{{
-class FooTest : public testing::Test { ... };
+class FooTest : public ::testing::Test { ... };
 
 TEST_F(FooTest, Abc) { ... }
 TEST_F(FooTest, Def) { ... }
