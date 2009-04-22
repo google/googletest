@@ -1,4 +1,3 @@
-Running main() from gmock_main.cc
 [ RUN      ] GMockOutputTest.ExpectedCall
 
 FILE:#: EXPECT_CALL(foo_, Bar2(0, _)) invoked
@@ -280,6 +279,8 @@ Called 2 times, but only 1 WillOnce() is specified - taking default action speci
 FILE:#:
 Stack trace:
 [       OK ] GMockOutputTest.ExplicitActionsRunOutWithDefaultAction
+[ RUN      ] GMockOutputTest.CatchesLeakedMocks
+[       OK ] GMockOutputTest.CatchesLeakedMocks
 [  FAILED  ] GMockOutputTest.UnexpectedCall
 [  FAILED  ] GMockOutputTest.UnexpectedCallToVoidFunction
 [  FAILED  ] GMockOutputTest.ExcessiveCall
@@ -294,3 +295,7 @@ Stack trace:
 [  FAILED  ] GMockOutputTest.UnexpectedCallWithDefaultAction
 [  FAILED  ] GMockOutputTest.ExcessiveCallWithDefaultAction
 
+
+FILE:#: ERROR: this mock object should be deleted but never is. Its address is @0x#.
+FILE:#: ERROR: this mock object should be deleted but never is. Its address is @0x#.
+ERROR: 2 leaked mock objects found at program exit.

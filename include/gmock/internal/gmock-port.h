@@ -242,6 +242,21 @@ typedef ::wstring wstring;
 typedef ::std::wstring wstring;
 #endif  // GTEST_HAS_GLOBAL_WSTRING
 
+// Prints the file location in the format native to the compiler.
+inline void FormatFileLocation(const char* file, int line, ::std::ostream* os) {
+  if (file == NULL)
+    file = "unknown file";
+  if (line < 0) {
+    *os << file << ":";
+  } else {
+#if _MSC_VER
+    *os << file << "(" << line << "):";
+#else
+    *os << file << ":" << line << ":";
+#endif
+  }
+}
+
 // INTERNAL IMPLEMENTATION - DO NOT USE.
 //
 // GMOCK_CHECK_ is an all mode assert. It aborts the program if the condition
@@ -260,25 +275,12 @@ typedef ::std::wstring wstring;
 class GMockCheckProvider {
  public:
   GMockCheckProvider(const char* condition, const char* file, int line) {
-    FormatFileLocation(file, line);
+    FormatFileLocation(file, line, &::std::cerr);
     ::std::cerr << " ERROR: Condition " << condition << " failed. ";
   }
   ~GMockCheckProvider() {
     ::std::cerr << ::std::endl;
     abort();
-  }
-  void FormatFileLocation(const char* file, int line) {
-    if (file == NULL)
-      file = "unknown file";
-    if (line < 0) {
-      ::std::cerr << file << ":";
-    } else {
-#if _MSC_VER
-      ::std::cerr << file << "(" << line << "):";
-#else
-      ::std::cerr << file << ":" << line << ":";
-#endif
-    }
   }
   ::std::ostream& GetStream() { return ::std::cerr; }
 };

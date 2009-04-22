@@ -34,6 +34,15 @@
 
 namespace testing {
 
+// TODO(wan@google.com): support using environment variables to
+// control the flag values, like what Google Test does.
+
+// TODO(wan@google.com): change the default value to true after people
+// have a chance to fix their leaked mocks.
+GMOCK_DEFINE_bool_(catch_leaked_mocks, false,
+                   "true iff Google Mock should report leaked mock objects "
+                   "as failures.");
+
 GMOCK_DEFINE_string_(verbose, internal::kWarningVerbosity,
                      "Controls how verbose Google Mock's output is."
                      "  Valid values:\n"
@@ -76,6 +85,24 @@ static const char* ParseGoogleMockFlagValue(const char* str,
   return flag_end + 1;
 }
 
+// Parses a string for a Google Mock bool flag, in the form of
+// "--gmock_flag=value".
+//
+// On success, stores the value of the flag in *value, and returns
+// true.  On failure, returns false without changing *value.
+static bool ParseGoogleMockBoolFlag(const char* str, const char* flag,
+                                    bool* value) {
+  // Gets the value of the flag as a string.
+  const char* const value_str = ParseGoogleMockFlagValue(str, flag, true);
+
+  // Aborts if the parsing failed.
+  if (value_str == NULL) return false;
+
+  // Converts the string value to a bool.
+  *value = !(*value_str == '0' || *value_str == 'f' || *value_str == 'F');
+  return true;
+}
+
 // Parses a string for a Google Mock string flag, in the form of
 // "--gmock_flag=value".
 //
@@ -110,7 +137,9 @@ void InitGoogleMockImpl(int* argc, CharType** argv) {
     const char* const arg = arg_string.c_str();
 
     // Do we see a Google Mock flag?
-    if (ParseGoogleMockStringFlag(arg, "verbose", &GMOCK_FLAG(verbose))) {
+    if (ParseGoogleMockBoolFlag(arg, "catch_leaked_mocks",
+                                &GMOCK_FLAG(catch_leaked_mocks)) ||
+        ParseGoogleMockStringFlag(arg, "verbose", &GMOCK_FLAG(verbose))) {
       // Yes.  Shift the remainder of the argv list left by one.  Note
       // that argv has (*argc + 1) elements, the last one always being
       // NULL.  The following loop moves the trailing NULL element as

@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gmock_output_test_", "gmock
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gmock_main", "gmock_main.vcproj", "{E4EF614B-30DF-4954-8C53-580A0BF6B589}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gmock-spec-builders_test", "gmock-spec-builders_test.vcproj", "{46972604-5BE0-4493-BAE3-878DB825FDCB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -37,6 +39,10 @@ Global
 		{E4EF614B-30DF-4954-8C53-580A0BF6B589}.Debug|Win32.Build.0 = Debug|Win32
 		{E4EF614B-30DF-4954-8C53-580A0BF6B589}.Release|Win32.ActiveCfg = Release|Win32
 		{E4EF614B-30DF-4954-8C53-580A0BF6B589}.Release|Win32.Build.0 = Release|Win32
+		{46972604-5BE0-4493-BAE3-878DB825FDCB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{46972604-5BE0-4493-BAE3-878DB825FDCB}.Debug|Win32.Build.0 = Debug|Win32
+		{46972604-5BE0-4493-BAE3-878DB825FDCB}.Release|Win32.ActiveCfg = Release|Win32
+		{46972604-5BE0-4493-BAE3-878DB825FDCB}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

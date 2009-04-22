@@ -59,7 +59,7 @@ else:
   PROGRAM = 'gmock_output_test_'
 
 PROGRAM_PATH = os.path.join(gmock_test_utils.GetBuildDir(), PROGRAM)
-COMMAND = PROGRAM_PATH + ' --gtest_stack_trace_depth=0'
+COMMAND = PROGRAM_PATH + ' --gtest_stack_trace_depth=0 --gtest_print_time=0'
 GOLDEN_NAME = 'gmock_output_test_golden.txt'
 GOLDEN_PATH = os.path.join(gmock_test_utils.GetSourceDir(),
                            GOLDEN_NAME)

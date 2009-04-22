@@ -1612,6 +1612,43 @@ TEST_F(GMockVerboseFlagTest, InvalidFlagIsTreatedAsWarning) {
 
 #endif  // 0
 
+TEST(AllowLeakTest, AllowsLeakingUnusedMockObject) {
+  MockA* a = new MockA;
+  Mock::AllowLeak(a);
+}
+
+TEST(AllowLeakTest, CanBeCalledBeforeOnCall) {
+  MockA* a = new MockA;
+  Mock::AllowLeak(a);
+  ON_CALL(*a, DoA(_)).WillByDefault(Return());
+  a->DoA(0);
+}
+
+TEST(AllowLeakTest, CanBeCalledAfterOnCall) {
+  MockA* a = new MockA;
+  ON_CALL(*a, DoA(_)).WillByDefault(Return());
+  Mock::AllowLeak(a);
+}
+
+TEST(AllowLeakTest, CanBeCalledBeforeExpectCall) {
+  MockA* a = new MockA;
+  Mock::AllowLeak(a);
+  EXPECT_CALL(*a, DoA(_));
+  a->DoA(0);
+}
+
+TEST(AllowLeakTest, CanBeCalledAfterExpectCall) {
+  MockA* a = new MockA;
+  EXPECT_CALL(*a, DoA(_)).Times(AnyNumber());
+  Mock::AllowLeak(a);
+}
+
+TEST(AllowLeakTest, WorksWhenBothOnCallAndExpectCallArePresent) {
+  MockA* a = new MockA;
+  ON_CALL(*a, DoA(_)).WillByDefault(Return());
+  EXPECT_CALL(*a, DoA(_)).Times(AnyNumber());
+  Mock::AllowLeak(a);
+}
 
 // Tests that we can verify and clear a mock object's expectations
 // when none of its methods has expectations.
@@ -1916,3 +1953,14 @@ void Helper(MockC* c) {
 }
 
 }  // namespace
+
+int main(int argc, char **argv) {
+  testing::InitGoogleMock(&argc, argv);
+
+  // Ensures that the tests pass no matter what value of
+  // --gmock_catch_leaked_mocks and --gmock_verbose the user specifies.
+  testing::GMOCK_FLAG(catch_leaked_mocks) = true;
+  testing::GMOCK_FLAG(verbose) = testing::internal::kWarningVerbosity;
+
+  return RUN_ALL_TESTS();
+}

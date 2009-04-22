@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="gmock_test"
-	ProjectGUID="{F10D22F8-AC7B-4213-8720-608E7D878CD2}"
-	RootNamespace="gmock_test"
+	Name="gmock-spec-builders_test"
+	ProjectGUID="{46972604-5BE0-4493-BAE3-878DB825FDCB}"
+	RootNamespace="gmockspecbuilders_test"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -18,7 +18,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(OutDir)\$(ProjectName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets=".\gmock_config.vsprops"
 			CharacterSet="1"
@@ -49,7 +49,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
-				DebugInformationFormat="3"
+				DebugInformationFormat="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -95,7 +95,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(OutDir)\$(ProjectName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets=".\gmock_config.vsprops"
 			CharacterSet="1"
@@ -172,8 +172,8 @@
 	</Configurations>
 	<References>
 		<ProjectReference
-			ReferencedProjectIdentifier="{E4EF614B-30DF-4954-8C53-580A0BF6B589}"
-			RelativePathToProject=".\gmock_main.vcproj"
+			ReferencedProjectIdentifier="{34681F0D-CE45-415D-B5F2-5C662DFE3BD5}"
+			RelativePathToProject=".\gmock.vcproj"
 		/>
 	</References>
 	<Files>
@@ -183,51 +183,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\test\gmock-actions_test.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\test\gmock-cardinalities_test.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\test\gmock-generated-actions_test.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\test\gmock-generated-function-mockers_test.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\test\gmock-generated-internal-utils_test.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\test\gmock-generated-matchers_test.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\test\gmock-internal-utils_test.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\test\gmock-matchers_test.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\test\gmock-nice-strict_test.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\test\gmock-port_test.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\test\gmock-printers_test.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\test\gmock_test.cc"
+				RelativePath="..\test\gmock-spec-builders_test.cc"
 				>
 			</File>
 		</Filter>
@@ -235,6 +191,12 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
+		</Filter>
+		<Filter
+			Name="Resource Files"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 		</Filter>
 	</Files>

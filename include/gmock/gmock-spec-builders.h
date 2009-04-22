@@ -246,6 +246,10 @@ class Mock {
  public:
   // The following public methods can be called concurrently.
 
+  // Tells Google Mock to ignore mock_obj when checking for leaked
+  // mock objects.
+  static void AllowLeak(const void* mock_obj);
+
   // Verifies and clears all expectations on the given mock object.
   // If the expectations aren't satisfied, generates one or more
   // Google Test non-fatal failures and returns false.
@@ -310,6 +314,13 @@ class Mock {
   // L < g_gmock_mutex
   static void Register(const void* mock_obj,
                        internal::UntypedFunctionMockerBase* mocker);
+
+  // Tells Google Mock where in the source code mock_obj is used in an
+  // ON_CALL or EXPECT_CALL.  In case mock_obj is leaked, this
+  // information helps the user identify which object it is.
+  // L < g_gmock_mutex
+  static void RegisterUseByOnCallOrExpectCall(
+      const void* mock_obj, const char* file, int line);
 
   // Unregisters a mock method; removes the owning mock object from
   // the registry when the last mock method associated with it has
@@ -1081,7 +1092,12 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   // Registers this function mocker and the mock object owning it;
   // returns a reference to the function mocker object.  This is only
   // called by the ON_CALL() and EXPECT_CALL() macros.
+  // L < g_gmock_mutex
   FunctionMocker<F>& RegisterOwner(const void* mock_obj) {
+    {
+      MutexLock l(&g_gmock_mutex);
+      mock_obj_ = mock_obj;
+    }
     Mock::Register(mock_obj, this);
     return *::testing::internal::down_cast<FunctionMocker<F>*>(this);
   }
@@ -1155,17 +1171,21 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   }
 
   // Adds and returns a default action spec for this mock function.
+  // L < g_gmock_mutex
   DefaultActionSpec<F>& AddNewDefaultActionSpec(
       const char* file, int line,
       const ArgumentMatcherTuple& m) {
+    Mock::RegisterUseByOnCallOrExpectCall(MockObject(), file, line);
     default_actions_.push_back(DefaultActionSpec<F>(file, line, m));
     return default_actions_.back();
   }
 
   // Adds and returns an expectation spec for this mock function.
+  // L < g_gmock_mutex
   Expectation<F>& AddNewExpectation(
       const char* file, int line,
       const ArgumentMatcherTuple& m) {
+    Mock::RegisterUseByOnCallOrExpectCall(MockObject(), file, line);
     const linked_ptr<Expectation<F> > expectation(
         new Expectation<F>(this, file, line, m));
     expectations_.push_back(expectation);
@@ -1314,10 +1334,13 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
     }
   }
 
-  // Address of the mock object this mock method belongs to.
+  // Address of the mock object this mock method belongs to.  Only
+  // valid after this mock method has been called or
+  // ON_CALL/EXPECT_CALL has been invoked on it.
   const void* mock_obj_;  // Protected by g_gmock_mutex.
 
-  // Name of the function being mocked.
+  // Name of the function being mocked.  Only valid after this mock
+  // method has been called.
   const char* name_;  // Protected by g_gmock_mutex.
 
   // The current spec (either default action spec or expectation spec)

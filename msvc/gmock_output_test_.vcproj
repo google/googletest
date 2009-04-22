@@ -172,8 +172,8 @@
 	</Configurations>
 	<References>
 		<ProjectReference
-			ReferencedProjectIdentifier="{E4EF614B-30DF-4954-8C53-580A0BF6B589}"
-			RelativePathToProject=".\gmock_main.vcproj"
+			ReferencedProjectIdentifier="{34681F0D-CE45-415D-B5F2-5C662DFE3BD5}"
+			RelativePathToProject=".\gmock.vcproj"
 		/>
 	</References>
 	<Files>

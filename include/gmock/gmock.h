@@ -68,6 +68,7 @@
 namespace testing {
 
 // Declares Google Mock flags that we want a user to use programmatically.
+GMOCK_DECLARE_bool_(catch_leaked_mocks);
 GMOCK_DECLARE_string_(verbose);
 
 // Initializes Google Mock.  This must be called before running the

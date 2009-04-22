@@ -128,7 +128,7 @@ test_gmock_printers_test_LDADD = $(GTEST_LIBS) lib/libgmock_main.la
 TESTS += test/gmock-spec-builders_test
 check_PROGRAMS += test/gmock-spec-builders_test
 test_gmock_spec_builders_test_SOURCES = test/gmock-spec-builders_test.cc
-test_gmock_spec_builders_test_LDADD = $(GTEST_LIBS) lib/libgmock_main.la
+test_gmock_spec_builders_test_LDADD = $(GTEST_LIBS) lib/libgmock.la
 
 TESTS += test/gmock_test
 check_PROGRAMS += test/gmock_test
@@ -147,6 +147,11 @@ dist_check_SCRIPTS =
 # Python modules used by multiple Python tests below.
 dist_check_SCRIPTS += test/gmock_test_utils.py
 
+check_PROGRAMS += test/gmock_leak_test_
+test_gmock_leak_test__SOURCES = test/gmock_leak_test_.cc
+test_gmock_leak_test__LDADD = $(GTEST_LIBS) lib/libgmock_main.la
+dist_check_SCRIPTS += test/gmock_leak_test.py
+
 check_PROGRAMS += test/gmock_output_test_
 test_gmock_output_test__SOURCES = test/gmock_output_test_.cc
 test_gmock_output_test__LDADD = $(GTEST_LIBS) lib/libgmock_main.la
@@ -155,15 +160,17 @@ EXTRA_DIST += test/gmock_output_test_golden.txt
 
 # Enable all the python driven tests when we can run them.
 if HAVE_PYTHON
-TESTS += test/gmock_output_test.py
+TESTS += \
+    test/gmock_leak_test.py \
+    test/gmock_output_test.py
 endif
 
 # Nonstandard package files for distribution.
 EXTRA_DIST += \
-  CHANGES \
-  CONTRIBUTORS \
-  make/Makefile \
-  src/gmock-all.cc
+    CHANGES \
+    CONTRIBUTORS \
+    make/Makefile \
+    src/gmock-all.cc
 
 # Pump scripts for generating Google Mock headers.
 # TODO(chandlerc@google.com): automate the generation of *.h from *.h.pump.
@@ -199,4 +206,5 @@ EXTRA_DIST += \
     msvc/gmock_link_test.vcproj \
     msvc/gmock_main.vcproj \
     msvc/gmock_output_test_.vcproj \
+    msvc/gmock-spec-builders_test.vcproj \
     msvc/gmock_test.vcproj

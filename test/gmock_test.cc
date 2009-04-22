@@ -246,3 +246,10 @@ TEST(WideInitGoogleMockTest, CallsInitGoogleTest) {
   TestInitGoogleMock(argv, new_argv, "error");
   EXPECT_EQ(old_init_gtest_count + 1, g_init_gtest_count);
 }
+
+// Makes sure Google Mock flags can be accessed in code.
+TEST(FlagTest, IsAccessibleInCode) {
+  bool dummy = testing::GMOCK_FLAG(catch_leaked_mocks) &&
+      testing::GMOCK_FLAG(verbose) == "";
+  dummy = dummy;  // Avoids the "unused local variable" warning.
+}
