@@ -50,7 +50,7 @@ TEST(Foo, Bar1) {
 TEST(Foo, Bar2) {
 }
 
-TEST(Foo, Bar3) {
+TEST(Foo, DISABLED_Bar3) {
 }
 
 TEST(Abc, Xyz) {
@@ -68,7 +68,7 @@ class FooTest : public testing::Test {
 TEST_F(FooTest, Test1) {
 }
 
-TEST_F(FooTest, Test2) {
+TEST_F(FooTest, DISABLED_Test2) {
 }
 
 TEST_F(FooTest, Test3) {

@@ -376,7 +376,12 @@ class TestInfo {
   // Returns the test comment.
   const char* comment() const;
 
-  // Returns true if this test should run.
+  // Returns true if this test matches the user-specified filter.
+  bool matches_filter() const;
+
+  // Returns true if this test should run, that is if the test is not disabled
+  // (or it is disabled but the also_run_disabled_tests flag has been specified)
+  // and its full name matches the user-specified filter.
   //
   // Google Test allows the user to filter the tests by their full names.
   // The full name of a test Bar in test case Foo is defined as

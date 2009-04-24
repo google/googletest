@@ -2172,6 +2172,9 @@ const char* TestInfo::comment() const {
 // Returns true if this test should run.
 bool TestInfo::should_run() const { return impl_->should_run(); }
 
+// Returns true if this test matches the user-specified filter.
+bool TestInfo::matches_filter() const { return impl_->matches_filter(); }
+
 // Returns the result of the test.
 const internal::TestResult* TestInfo::result() const { return impl_->result(); }
 
@@ -3297,8 +3300,8 @@ void UnitTest::AddTestPartResult(TestPartResultType result_type,
       ReportTestPartResult(result);
 
   if (result_type != TPRT_SUCCESS) {
-    // gunit_break_on_failure takes precedence over
-    // gunit_throw_on_failure.  This allows a user to set the latter
+    // gtest_break_on_failure takes precedence over
+    // gtest_throw_on_failure.  This allows a user to set the latter
     // in the code (perhaps in order to use Google Test assertions
     // with another testing framework) and specify the former on the
     // command line for debugging.
@@ -3591,13 +3594,6 @@ int UnitTestImpl::RunAllTests() {
   // protocol.
   internal::WriteToShardStatusFileIfNeeded();
 
-  // Lists all the tests and exits if the --gtest_list_tests
-  // flag was specified.
-  if (GTEST_FLAG(list_tests)) {
-    ListAllTests();
-    return 0;
-  }
-
   // True iff we are in a subprocess for running a thread-safe-style
   // death test.
   bool in_subprocess_for_death_test = false;
@@ -3617,6 +3613,13 @@ int UnitTestImpl::RunAllTests() {
   const bool has_tests_to_run = FilterTests(should_shard
                                               ? HONOR_SHARDING_PROTOCOL
                                               : IGNORE_SHARDING_PROTOCOL) > 0;
+
+  // List the tests and exit if the --gtest_list_tests flag was specified.
+  if (GTEST_FLAG(list_tests)) {
+    // This must be called *after* FilterTests() has been called.
+    ListTestsMatchingFilter();
+    return 0;
+  }
 
   // True iff at least one test has failed.
   bool failed = false;
@@ -3808,10 +3811,14 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
                                                    kDisableTestFilter);
       test_info->impl()->set_is_disabled(is_disabled);
 
-      const bool is_runnable =
-          (GTEST_FLAG(also_run_disabled_tests) || !is_disabled) &&
+      const bool matches_filter =
           internal::UnitTestOptions::FilterMatchesTest(test_case_name,
                                                        test_name);
+      test_info->impl()->set_matches_filter(matches_filter);
+
+      const bool is_runnable =
+          (GTEST_FLAG(also_run_disabled_tests) || !is_disabled) &&
+          matches_filter;
 
       const bool is_selected = is_runnable &&
           (shard_tests == IGNORE_SHARDING_PROTOCOL ||
@@ -3828,23 +3835,26 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
   return num_selected_tests;
 }
 
-// Lists all tests by name.
-void UnitTestImpl::ListAllTests() {
+// Prints the names of the tests matching the user-specified filter flag.
+void UnitTestImpl::ListTestsMatchingFilter() {
   for (const internal::ListNode<TestCase*>* test_case_node = test_cases_.Head();
        test_case_node != NULL;
        test_case_node = test_case_node->next()) {
     const TestCase* const test_case = test_case_node->element();
-
-    // Prints the test case name following by an indented list of test nodes.
-    printf("%s.\n", test_case->name());
+    bool printed_test_case_name = false;
 
     for (const internal::ListNode<TestInfo*>* test_info_node =
          test_case->test_info_list().Head();
          test_info_node != NULL;
          test_info_node = test_info_node->next()) {
       const TestInfo* const test_info = test_info_node->element();
-
-      printf("  %s\n", test_info->name());
+      if (test_info->matches_filter()) {
+        if (!printed_test_case_name) {
+          printed_test_case_name = true;
+          printf("%s.\n", test_case->name());
+        }
+        printf("  %s\n", test_info->name());
+      }
     }
   }
   fflush(stdout);
@@ -3941,6 +3951,7 @@ TestInfoImpl::TestInfoImpl(TestInfo* parent,
     fixture_class_id_(fixture_class_id),
     should_run_(false),
     is_disabled_(false),
+    matches_filter_(false),
     factory_(factory) {
 }
 
