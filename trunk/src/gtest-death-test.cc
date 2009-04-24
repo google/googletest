@@ -204,7 +204,7 @@ void DeathTestAbort(const String& message) {
   const InternalRunDeathTestFlag* const flag =
       GetUnitTestImpl()->internal_run_death_test_flag();
   if (flag != NULL) {
-    FILE* parent = posix::fdopen(flag->write_fd(), "w");
+    FILE* parent = posix::FDOpen(flag->write_fd(), "w");
     fputc(kDeathTestInternalError, parent);
     fprintf(parent, "%s", message.c_str());
     fflush(parent);
@@ -249,7 +249,7 @@ void DeathTestAbort(const String& message) {
 
 // Returns the message describing the last system error in errno.
 String GetLastErrnoDescription() {
-    return String(errno == 0 ? "" : posix::strerror(errno));
+    return String(errno == 0 ? "" : posix::StrError(errno));
 }
 
 // This is called from a death test parent process to read a failure
@@ -262,7 +262,7 @@ static void FailFromInternalError(int fd) {
   int num_read;
 
   do {
-    while ((num_read = posix::read(fd, buffer, 255)) > 0) {
+    while ((num_read = posix::Read(fd, buffer, 255)) > 0) {
       buffer[num_read] = '\0';
       error << buffer;
     }
@@ -380,7 +380,7 @@ void DeathTestImpl::ReadAndInterpretStatusByte() {
   // its success), so it's okay to call this in the parent before
   // the child process has exited.
   do {
-    bytes_read = posix::read(read_fd(), &flag, 1);
+    bytes_read = posix::Read(read_fd(), &flag, 1);
   } while (bytes_read == -1 && errno == EINTR);
 
   if (bytes_read == 0) {
@@ -407,7 +407,7 @@ void DeathTestImpl::ReadAndInterpretStatusByte() {
                Message() << "Read from death test child process failed: "
                          << GetLastErrnoDescription());
   }
-  GTEST_DEATH_TEST_CHECK_SYSCALL_(posix::close(read_fd()));
+  GTEST_DEATH_TEST_CHECK_SYSCALL_(posix::Close(read_fd()));
   set_read_fd(-1);
 }
 
@@ -421,8 +421,8 @@ void DeathTestImpl::Abort(AbortReason reason) {
   // to the pipe, then exit.
   const char status_ch =
       reason == TEST_DID_NOT_DIE ? kDeathTestLived : kDeathTestReturned;
-  GTEST_DEATH_TEST_CHECK_SYSCALL_(posix::write(write_fd(), &status_ch, 1));
-  GTEST_DEATH_TEST_CHECK_SYSCALL_(posix::close(write_fd()));
+  GTEST_DEATH_TEST_CHECK_SYSCALL_(posix::Write(write_fd(), &status_ch, 1));
+  GTEST_DEATH_TEST_CHECK_SYSCALL_(posix::Close(write_fd()));
   _exit(1);  // Exits w/o any normal exit hooks (we were supposed to crash)
 }
 

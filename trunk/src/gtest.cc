@@ -803,7 +803,7 @@ static char* CloneString(const char* str, size_t length) {
     return NULL;
   } else {
     char* const clone = new char[length + 1];
-    posix::strncpy(clone, str, length);
+    posix::StrNCpy(clone, str, length);
     clone[length] = '\0';
     return clone;
   }
@@ -1443,7 +1443,7 @@ char* CodePointToUtf8(UInt32 code_point, char* str) {
     // the terminating nul character). We are asking for 32 character
     // buffer just in case. This is also enough for strncpy to
     // null-terminate the destination string.
-    posix::strncpy(
+    posix::StrNCpy(
         str, String::Format("(Invalid Unicode 0x%X)", code_point).c_str(), 32);
     str[31] = '\0';  // Makes sure no change in the format to strncpy leaves
                      // the result unterminated.
@@ -1586,7 +1586,7 @@ bool String::CaseInsensitiveCStringEquals(const char * lhs, const char * rhs) {
     return rhs == NULL;
   if (rhs == NULL)
     return false;
-  return posix::strcasecmp(lhs, rhs) == 0;
+  return posix::StrCaseCmp(lhs, rhs) == 0;
 }
 
   // Compares two wide C strings, ignoring case.  Returns true iff they
@@ -2510,7 +2510,7 @@ bool ShouldUseColor(bool stdout_is_tty) {
     return stdout_is_tty;
 #else
     // On non-Windows platforms, we rely on the TERM variable.
-    const char* const term = posix::getenv("TERM");
+    const char* const term = posix::GetEnv("TERM");
     const bool term_supports_color =
         String::CStringEquals(term, "xterm") ||
         String::CStringEquals(term, "xterm-color") ||
@@ -2540,7 +2540,7 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   const bool use_color = false;
 #else
   static const bool in_color_mode =
-      ShouldUseColor(posix::isatty(posix::fileno(stdout)) != 0);
+      ShouldUseColor(posix::IsATTY(posix::FileNo(stdout)) != 0);
   const bool use_color = in_color_mode && (color != COLOR_DEFAULT);
 #endif  // defined(_WIN32_WCE) || GTEST_OS_SYMBIAN || GTEST_OS_ZOS
   // The '!= 0' comparison is necessary to satisfy MSVC 7.1.
@@ -2622,8 +2622,8 @@ void PrettyUnitTestResultPrinter::OnUnitTestStart(
   if (internal::ShouldShard(kTestTotalShards, kTestShardIndex, false)) {
     ColoredPrintf(COLOR_YELLOW,
                   "Note: This is test shard %s of %s.\n",
-                  internal::posix::getenv(kTestShardIndex),
-                  internal::posix::getenv(kTestTotalShards));
+                  internal::posix::GetEnv(kTestShardIndex),
+                  internal::posix::GetEnv(kTestTotalShards));
   }
 
   const internal::UnitTestImpl* const impl = unit_test->impl();
@@ -2941,7 +2941,7 @@ void XmlUnitTestResultPrinter::OnUnitTestEnd(const UnitTest* unit_test) {
   internal::FilePath output_dir(output_file.RemoveFileName());
 
   if (output_dir.CreateDirectoriesRecursively()) {
-    xmlout = internal::posix::fopen(output_file_.c_str(), "w");
+    xmlout = internal::posix::FOpen(output_file_.c_str(), "w");
   }
   if (xmlout == NULL) {
     // TODO(wan): report the reason of the failure.
@@ -3678,9 +3678,9 @@ int UnitTestImpl::RunAllTests() {
 // function will write over it. If the variable is present, but the file cannot
 // be created, prints an error and exits.
 void WriteToShardStatusFileIfNeeded() {
-  const char* const test_shard_file = posix::getenv(kTestShardStatusFile);
+  const char* const test_shard_file = posix::GetEnv(kTestShardStatusFile);
   if (test_shard_file != NULL) {
-    FILE* const file = posix::fopen(test_shard_file, "w");
+    FILE* const file = posix::FOpen(test_shard_file, "w");
     if (file == NULL) {
       ColoredPrintf(COLOR_RED,
                     "Could not write to the test shard status file \"%s\" "
@@ -3745,7 +3745,7 @@ bool ShouldShard(const char* total_shards_env,
 // returns default_val. If it is not an Int32, prints an error
 // and aborts.
 Int32 Int32FromEnvOrDie(const char* const var, Int32 default_val) {
-  const char* str_val = posix::getenv(var);
+  const char* str_val = posix::GetEnv(var);
   if (str_val == NULL) {
     return default_val;
   }

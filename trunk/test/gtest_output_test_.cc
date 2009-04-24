@@ -991,9 +991,9 @@ int main(int argc, char **argv) {
     // Skip the usual output capturing if we're running as the child
     // process of an threadsafe-style death test.
 #if GTEST_OS_WINDOWS
-    posix::freopen("nul:", "w", stdout);
+    posix::FReopen("nul:", "w", stdout);
 #else
-    posix::freopen("/dev/null", "w", stdout);
+    posix::FReopen("/dev/null", "w", stdout);
 #endif  // GTEST_OS_WINDOWS
     return RUN_ALL_TESTS();
   }

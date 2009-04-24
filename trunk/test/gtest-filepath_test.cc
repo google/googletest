@@ -86,9 +86,9 @@ TEST(GetCurrentDirTest, ReturnsCurrentDir) {
   const FilePath original_dir = FilePath::GetCurrentDir();
   EXPECT_FALSE(original_dir.IsEmpty());
 
-  posix::chdir(GTEST_PATH_SEP_);
+  posix::ChDir(GTEST_PATH_SEP_);
   const FilePath cwd = FilePath::GetCurrentDir();
-  posix::chdir(original_dir.c_str());
+  posix::ChDir(original_dir.c_str());
 
 #if GTEST_OS_WINDOWS
   // Skips the ":".
@@ -435,14 +435,14 @@ class DirectoryCreationTest : public Test {
     remove(testdata_file_.c_str());
     remove(unique_file0_.c_str());
     remove(unique_file1_.c_str());
-    posix::rmdir(testdata_path_.c_str());
+    posix::RmDir(testdata_path_.c_str());
   }
 
   virtual void TearDown() {
     remove(testdata_file_.c_str());
     remove(unique_file0_.c_str());
     remove(unique_file1_.c_str());
-    posix::rmdir(testdata_path_.c_str());
+    posix::RmDir(testdata_path_.c_str());
   }
 
   String TempDir() const {
@@ -450,7 +450,7 @@ class DirectoryCreationTest : public Test {
     return String("\\temp\\");
 
 #elif GTEST_OS_WINDOWS
-    const char* temp_dir = posix::getenv("TEMP");
+    const char* temp_dir = posix::GetEnv("TEMP");
     if (temp_dir == NULL || temp_dir[0] == '\0')
       return String("\\temp\\");
     else if (String(temp_dir).EndsWith("\\"))
@@ -463,7 +463,7 @@ class DirectoryCreationTest : public Test {
   }
 
   void CreateTextFile(const char* filename) {
-    FILE* f = posix::fopen(filename, "w");
+    FILE* f = posix::FOpen(filename, "w");
     fprintf(f, "text\n");
     fclose(f);
   }

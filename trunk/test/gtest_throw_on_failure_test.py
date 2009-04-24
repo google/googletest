@@ -72,7 +72,8 @@ def Run(command):
   """Runs a command; returns True/False if its exit code is/isn't 0."""
 
   print 'Running "%s". . .' % ' '.join(command)
-  return gtest_test_utils.Subprocess(command).exit_code == 0
+  p = gtest_test_utils.Subprocess(command)
+  return p.exited and p.exit_code == 0
 
 
 # The tests.  TODO(wan@google.com): refactor the class to share common

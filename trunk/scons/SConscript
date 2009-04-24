@@ -131,6 +131,10 @@ gtest_ex_obj = env_with_exceptions.Object(target='gtest_ex',
 gtest_main_ex_obj = env_with_exceptions.Object(target='gtest_main_ex',
                                                source=gtest_main_source)
 
+gtest_ex = env_with_exceptions.StaticLibrary(
+    target='gtest_ex',
+    source=gtest_ex_obj)
+
 gtest_ex_main = env_with_exceptions.StaticLibrary(
     target='gtest_ex_main',
     source=gtest_ex_obj + gtest_main_ex_obj)
@@ -204,14 +208,24 @@ GtestUnitTest(env, 'gtest_output_test_', gtest)
 GtestUnitTest(env, 'gtest_color_test_', gtest)
 GtestUnitTest(env, 'gtest-linked_ptr_test', gtest_main)
 GtestUnitTest(env, 'gtest-port_test', gtest_main)
+GtestUnitTest(env, 'gtest_break_on_failure_unittest_', gtest)
+GtestUnitTest(env, 'gtest_filter_unittest_', gtest)
+GtestUnitTest(env, 'gtest_help_test_', gtest_main)
+GtestUnitTest(env, 'gtest_list_tests_unittest_', gtest)
+GtestUnitTest(env, 'gtest_throw_on_failure_test_', gtest)
+GtestUnitTest(env_with_exceptions, 'gtest_throw_on_failure_ex_test', gtest_ex)
+GtestUnitTest(env, 'gtest_xml_outfile1_test_', gtest_main)
+GtestUnitTest(env, 'gtest_xml_outfile2_test_', gtest_main)
+GtestUnitTest(env, 'gtest_xml_output_unittest_', gtest_main)
 
-env_with_pthread = env.Clone()
-if env_with_pthread['PLATFORM'] not in ['win32', 'darwin']:
-  # Assuming POSIX-like environment with GCC.
-  env_with_pthread.Append(CCFLAGS = ['-pthread'])
-  env_with_pthread.Append(LINKFLAGS = ['-pthread'])
-
-GtestUnitTest(env_with_pthread, 'gtest-death-test_test', gtest_main)
+# Assuming POSIX-like environment with GCC.
+# TODO(vladl@google.com): sniff presence of pthread_atfork instead of
+# selecting on a platform.
+env_with_threads = env.Clone()
+if env_with_threads['PLATFORM'] != 'win32':
+  env_with_threads.Append(CCFLAGS = ['-pthread'])
+  env_with_threads.Append(LINKFLAGS = ['-pthread'])
+GtestUnitTest(env_with_threads, 'gtest-death-test_test', gtest_main)
 
 gtest_unittest_ex_obj = env_with_exceptions.Object(
     target='gtest_unittest_ex',
@@ -220,17 +234,6 @@ GtestBinary(env_with_exceptions,
             'gtest_ex_unittest',
             gtest_ex_main,
             gtest_unittest_ex_obj)
-
-# TODO(wan@google.com) Add these unit tests:
-# - gtest_break_on_failure_unittest_
-# - gtest_filter_unittest_
-# - gtest_help_test_
-# - gtest_list_tests_unittest_
-# - gtest_throw_on_failure_ex_test
-# - gtest_throw_on_failure_test_
-# - gtest_xml_outfile1_test_
-# - gtest_xml_outfile2_test_
-# - gtest_xml_output_unittest_
 
 # We need to disable some optimization flags for some tests on
 # Windows; otherwise the redirection of stdout does not work

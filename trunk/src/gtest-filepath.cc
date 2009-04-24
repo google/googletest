@@ -168,8 +168,8 @@ bool FilePath::FileOrDirectoryExists() const {
   delete [] unicode;
   return attributes != kInvalidFileAttributes;
 #else
-  posix::stat_struct file_stat;
-  return posix::stat(pathname_.c_str(), &file_stat) == 0;
+  posix::StatStruct file_stat;
+  return posix::Stat(pathname_.c_str(), &file_stat) == 0;
 #endif  // _WIN32_WCE
 }
 
@@ -195,8 +195,8 @@ bool FilePath::DirectoryExists() const {
     result = true;
   }
 #else
-  posix::stat_struct file_stat;
-  result = posix::stat(path.c_str(), &file_stat) == 0 &&
+  posix::StatStruct file_stat;
+  result = posix::Stat(path.c_str(), &file_stat) == 0 &&
       posix::IsDir(file_stat);
 #endif  // _WIN32_WCE
 
