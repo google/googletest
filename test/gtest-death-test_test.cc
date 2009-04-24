@@ -106,7 +106,7 @@ class TestForDeathTest : public testing::Test {
   TestForDeathTest() : original_dir_(FilePath::GetCurrentDir()) {}
 
   virtual ~TestForDeathTest() {
-    posix::chdir(original_dir_.c_str());
+    posix::ChDir(original_dir_.c_str());
   }
 
   // A static member function that's expected to die.
@@ -345,7 +345,7 @@ TEST_F(TestForDeathTest, MemberFunctionFastStyle) {
   EXPECT_DEATH(MemberFunction(), "inside.*MemberFunction");
 }
 
-void ChangeToRootDir() { posix::chdir(GTEST_PATH_SEP_); }
+void ChangeToRootDir() { posix::ChDir(GTEST_PATH_SEP_); }
 
 // Tests that death tests work even if the current directory has been
 // changed.

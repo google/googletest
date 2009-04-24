@@ -539,9 +539,9 @@ void CaptureStderr() {
 ::std::string GetCapturedStderr() {
   g_captured_stderr->StopCapture();
 
-  FILE* const file = posix::fopen(g_captured_stderr->filename().c_str(), "r");
+  FILE* const file = posix::FOpen(g_captured_stderr->filename().c_str(), "r");
   const ::std::string content = ReadEntireFile(file);
-  posix::fclose(file);
+  posix::FClose(file);
 
   delete g_captured_stderr;
   g_captured_stderr = NULL;
@@ -563,7 +563,7 @@ const ::std::vector<String>& GetArgvs() { return g_argvs; }
 
 #ifdef _WIN32_WCE
 namespace posix {
-void abort() {
+void Abort() {
   DebugBreak();
   TerminateProcess(GetCurrentProcess(), 1);
 }
@@ -632,7 +632,7 @@ bool ParseInt32(const Message& src_text, const char* str, Int32* value) {
 // The value is considered true iff it's not "0".
 bool BoolFromGTestEnv(const char* flag, bool default_value) {
   const String env_var = FlagToEnvVar(flag);
-  const char* const string_value = posix::getenv(env_var.c_str());
+  const char* const string_value = posix::GetEnv(env_var.c_str());
   return string_value == NULL ?
       default_value : strcmp(string_value, "0") != 0;
 }
@@ -642,7 +642,7 @@ bool BoolFromGTestEnv(const char* flag, bool default_value) {
 // doesn't represent a valid 32-bit integer, returns default_value.
 Int32 Int32FromGTestEnv(const char* flag, Int32 default_value) {
   const String env_var = FlagToEnvVar(flag);
-  const char* const string_value = posix::getenv(env_var.c_str());
+  const char* const string_value = posix::GetEnv(env_var.c_str());
   if (string_value == NULL) {
     // The environment variable is not set.
     return default_value;
@@ -664,7 +664,7 @@ Int32 Int32FromGTestEnv(const char* flag, Int32 default_value) {
 // the given flag; if it's not set, returns default_value.
 const char* StringFromGTestEnv(const char* flag, const char* default_value) {
   const String env_var = FlagToEnvVar(flag);
-  const char* const value = posix::getenv(env_var.c_str());
+  const char* const value = posix::GetEnv(env_var.c_str());
   return value == NULL ? default_value : value;
 }
 

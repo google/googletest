@@ -725,43 +725,43 @@ typedef long long BiggestInt;  // NOLINT
 
 // The testing::internal::posix namespace holds wrappers for common
 // POSIX functions.  These wrappers hide the differences between
-// Windows/MSVC and POSIX systems.
+// Windows/MSVC and POSIX systems.  Since some compilers define these
+// standard functions as macros, the wrapper cannot have the same name
+// as the wrapped function.
+
 namespace posix {
 
 // Functions with a different name on Windows.
 
 #if GTEST_OS_WINDOWS
 
-typedef struct _stat stat_struct;
+typedef struct _stat StatStruct;
 
-// We cannot write ::_fileno() as MSVC defines it as a macro.
-inline int fileno(FILE* file) { return _fileno(file); }
-inline int isatty(int fd) { return ::_isatty(fd); }
-inline int stat(const char* path, stat_struct* buf) {
-  return ::_stat(path, buf);
+inline int FileNo(FILE* file) { return _fileno(file); }
+inline int IsATTY(int fd) { return _isatty(fd); }
+inline int Stat(const char* path, StatStruct* buf) { return _stat(path, buf); }
+inline int StrCaseCmp(const char* s1, const char* s2) {
+  return _stricmp(s1, s2);
 }
-inline int strcasecmp(const char* s1, const char* s2) {
-  return ::_stricmp(s1, s2);
-}
-// We cannot define the function as strdup(const char* src), since
-// MSVC defines strdup as a macro.
-inline char* StrDup(const char* src) { return ::_strdup(src); }
-inline int rmdir(const char* dir) { return ::_rmdir(dir); }
-inline bool IsDir(const stat_struct& st) {
+inline char* StrDup(const char* src) { return _strdup(src); }
+inline int RmDir(const char* dir) { return _rmdir(dir); }
+inline bool IsDir(const StatStruct& st) {
   return (_S_IFDIR & st.st_mode) != 0;
 }
 
 #else
 
-typedef struct stat stat_struct;
+typedef struct stat StatStruct;
 
-using ::fileno;
-using ::isatty;
-using ::stat;
-using ::strcasecmp;
+inline int FileNo(FILE* file) { return fileno(file); }
+inline int IsATTY(int fd) { return isatty(fd); }
+inline int Stat(const char* path, StatStruct* buf) { return stat(path, buf); }
+inline int StrCaseCmp(const char* s1, const char* s2) {
+  return strcasecmp(s1, s2);
+}
 inline char* StrDup(const char* src) { return ::strdup(src); }
-using ::rmdir;
-inline bool IsDir(const stat_struct& st) { return S_ISDIR(st.st_mode); }
+inline int RmDir(const char* dir) { return rmdir(dir); }
+inline bool IsDir(const StatStruct& st) { return S_ISDIR(st.st_mode); }
 
 #endif  // GTEST_OS_WINDOWS
 
@@ -773,38 +773,31 @@ inline bool IsDir(const stat_struct& st) { return S_ISDIR(st.st_mode); }
 #pragma warning(disable:4996)
 #endif
 
-inline const char* strncpy(char* dest, const char* src, size_t n) {
-  return ::strncpy(dest, src, n);
+inline const char* StrNCpy(char* dest, const char* src, size_t n) {
+  return strncpy(dest, src, n);
 }
-
-inline int chdir(const char* dir) { return ::chdir(dir); }
-
-inline FILE* fopen(const char* path, const char* mode) {
-  return ::fopen(path, mode);
+inline int ChDir(const char* dir) { return chdir(dir); }
+inline FILE* FOpen(const char* path, const char* mode) {
+  return fopen(path, mode);
 }
-inline FILE *freopen(const char *path, const char *mode, FILE *stream) {
-  return ::freopen(path, mode, stream);
+inline FILE *FReopen(const char* path, const char* mode, FILE* stream) {
+  return freopen(path, mode, stream);
 }
-inline FILE* fdopen(int fd, const char* mode) {
-  return ::fdopen(fd, mode);
+inline FILE* FDOpen(int fd, const char* mode) { return fdopen(fd, mode); }
+inline int FClose(FILE* fp) { return fclose(fp); }
+inline int Read(int fd, void* buf, unsigned int count) {
+  return static_cast<int>(read(fd, buf, count));
 }
-inline int fclose(FILE *fp) { return ::fclose(fp); }
-
-inline int read(int fd, void* buf, unsigned int count) {
-  return static_cast<int>(::read(fd, buf, count));
+inline int Write(int fd, const void* buf, unsigned int count) {
+  return static_cast<int>(write(fd, buf, count));
 }
-inline int write(int fd, const void* buf, unsigned int count) {
-  return static_cast<int>(::write(fd, buf, count));
-}
-inline int close(int fd) { return ::close(fd); }
-
-inline const char* strerror(int errnum) { return ::strerror(errnum); }
-
-inline const char* getenv(const char* name) {
+inline int Close(int fd) { return close(fd); }
+inline const char* StrError(int errnum) { return strerror(errnum); }
+inline const char* GetEnv(const char* name) {
 #ifdef _WIN32_WCE  // We are on Windows CE, which has no environment variables.
   return NULL;
 #else
-  return ::getenv(name);
+  return getenv(name);
 #endif
 }
 
@@ -816,9 +809,9 @@ inline const char* getenv(const char* name) {
 // Windows CE has no C library. The abort() function is used in
 // several places in Google Test. This implementation provides a reasonable
 // imitation of standard behaviour.
-void abort();
+void Abort();
 #else
-using ::abort;
+inline void Abort() { abort(); }
 #endif  // _WIN32_WCE
 
 }  // namespace posix

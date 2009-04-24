@@ -197,7 +197,7 @@ class InternalRunDeathTestFlag {
 
   ~InternalRunDeathTestFlag() {
     if (write_fd_ >= 0)
-      posix::close(write_fd_);
+      posix::Close(write_fd_);
   }
 
   String file() const { return file_; }
