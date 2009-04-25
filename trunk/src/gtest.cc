@@ -2013,8 +2013,8 @@ void Test::Run() {
   if (!HasSameFixtureClass()) return;
 
   internal::UnitTestImpl* const impl = internal::GetUnitTestImpl();
-#if GTEST_OS_WINDOWS
-  // We are on Windows.
+#if GTEST_HAS_SEH
+  // Catch SEH-style exceptions.
   impl->os_stack_trace_getter()->UponLeavingGTest();
   __try {
     SetUp();
@@ -2045,7 +2045,7 @@ void Test::Run() {
     AddExceptionThrownFailure(GetExceptionCode(), "TearDown()");
   }
 
-#else  // We are on Linux or Mac - exceptions are disabled.
+#else  // We are on a compiler or platform that doesn't support SEH.
   impl->os_stack_trace_getter()->UponLeavingGTest();
   SetUp();
 
@@ -2060,7 +2060,7 @@ void Test::Run() {
   // failed.
   impl->os_stack_trace_getter()->UponLeavingGTest();
   TearDown();
-#endif  // GTEST_OS_WINDOWS
+#endif  // GTEST_HAS_SEH
 }
 
 
@@ -2256,8 +2256,8 @@ void TestInfoImpl::Run() {
   const TimeInMillis start = GetTimeInMillis();
 
   impl->os_stack_trace_getter()->UponLeavingGTest();
-#if GTEST_OS_WINDOWS
-  // We are on Windows.
+#if GTEST_HAS_SEH
+  // Catch SEH-style exceptions.
   Test* test = NULL;
 
   __try {
@@ -2269,7 +2269,7 @@ void TestInfoImpl::Run() {
                               "the test fixture's constructor");
     return;
   }
-#else  // We are on Linux or Mac OS - exceptions are disabled.
+#else  // We are on a compiler or platform that doesn't support SEH.
 
   // TODO(wan): If test->Run() throws, test won't be deleted.  This is
   // not a problem now as we don't use exceptions.  If we were to
@@ -2278,7 +2278,7 @@ void TestInfoImpl::Run() {
 
   // Creates the test object.
   Test* test = factory_->CreateTest();
-#endif  // GTEST_OS_WINDOWS
+#endif  // GTEST_HAS_SEH
 
   // Runs the test only if the constructor of the test fixture didn't
   // generate a fatal failure.
@@ -3333,7 +3333,8 @@ void UnitTest::RecordPropertyForCurrentTest(const char* key,
 // We don't protect this under mutex_, as we only support calling it
 // from the main thread.
 int UnitTest::Run() {
-#if GTEST_OS_WINDOWS
+#if GTEST_HAS_SEH
+  // Catch SEH-style exceptions.
 
   const bool in_death_test_child_process =
       internal::GTEST_FLAG(internal_run_death_test).GetLength() > 0;
@@ -3381,11 +3382,10 @@ int UnitTest::Run() {
     return 1;
   }
 
-#else
-  // We are on Linux or Mac OS.  There is no exception of any kind.
+#else  // We are on a compiler or platform that doesn't support SEH.
 
   return impl_->RunAllTests();
-#endif  // GTEST_OS_WINDOWS
+#endif  // GTEST_HAS_SEH
 }
 
 // Returns the working directory when the first TEST() or TEST_F() was

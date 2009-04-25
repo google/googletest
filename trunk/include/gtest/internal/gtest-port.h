@@ -60,6 +60,9 @@
 //                              be used where std::wstring is unavailable).
 //   GTEST_HAS_TR1_TUPLE 1    - Define it to 1/0 to indicate tr1::tuple
 //                              is/isn't available.
+//   GTEST_HAS_SEH            - Define it to 1/0 to indicate whether the
+//                              compiler supports Microsoft's "Structured
+//                              Exception Handling".
 
 // This header defines the following utilities:
 //
@@ -472,6 +475,22 @@
 #else
 #define GTEST_MUST_USE_RESULT_
 #endif  // __GNUC__ && (GTEST_GCC_VER_ >= 30400) && !COMPILER_ICC
+
+// Determine whether the compiler supports Microsoft's Structured Exception
+// Handling.  This is supported by several Windows compilers but generally
+// does not exist on any other system.
+#ifndef GTEST_HAS_SEH
+// The user didn't tell us, so we need to figure it out.
+
+#if defined(_MSC_VER) || defined(__BORLANDC__)
+// These two compilers are known to support SEH.
+#define GTEST_HAS_SEH 1
+#else
+// Assume no SEH.
+#define GTEST_HAS_SEH 0
+#endif
+
+#endif  // GTEST_HAS_SEH
 
 namespace testing {
 

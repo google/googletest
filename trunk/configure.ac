@@ -1,3 +1,5 @@
+m4_include(m4/acx_pthread.m4)
+
 # At this point, the Xcode project assumes the version string will be three
 # integers separated by periods and surrounded by square brackets (e.g.
 # "[1.0.1]"). It also asumes that there won't be any closing parenthesis
@@ -36,6 +38,9 @@ AC_PATH_PROG([PYTHON],[python],[:])
 AS_IF([test "$PYTHON" != ":"],
       [AM_PYTHON_CHECK_VERSION([$PYTHON],[2.3],[:],[PYTHON=":"])])
 AM_CONDITIONAL([HAVE_PYTHON],[test "$PYTHON" != ":"])
+
+# Check for pthreads.
+ACX_PTHREAD
 
 # TODO(chandlerc@google.com) Check for the necessary system headers.
 
