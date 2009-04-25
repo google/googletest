@@ -181,8 +181,9 @@ samples_sample8_unittest_LDADD = lib/libgtest_main.la \
 TESTS += test/gtest-death-test_test
 check_PROGRAMS += test/gtest-death-test_test
 test_gtest_death_test_test_SOURCES = test/gtest-death-test_test.cc
-test_gtest_death_test_test_CXXFLAGS = $(AM_CXXFLAGS) -pthread
-test_gtest_death_test_test_LDADD = -lpthread lib/libgtest_main.la
+test_gtest_death_test_test_CXXFLAGS = $(AM_CXXFLAGS) $(PTHREAD_CFLAGS)
+test_gtest_death_test_test_LDADD = $(PTHREAD_LIBS) $(PTHREAD_CFLAGS) \
+                                   lib/libgtest_main.la
 
 TESTS += test/gtest_environment_test
 check_PROGRAMS += test/gtest_environment_test
