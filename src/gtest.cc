@@ -735,10 +735,11 @@ String UnitTestImpl::CurrentOsStackTraceExceptTop(int skip_count) {
 }
 
 static TimeInMillis GetTimeInMillis() {
-#ifdef _WIN32_WCE  // We are on Windows CE
+#if defined(_WIN32_WCE) || defined(__BORLANDC__)
   // Difference between 1970-01-01 and 1601-01-01 in miliseconds.
   // http://analogous.blogspot.com/2005/04/epoch.html
-  const TimeInMillis kJavaEpochToWinFileTimeDelta = 11644473600000UL;
+  const TimeInMillis kJavaEpochToWinFileTimeDelta =
+    static_cast<TimeInMillis>(116444736UL) * 100000UL;
   const DWORD kTenthMicrosInMilliSecond = 10000;
 
   SYSTEMTIME now_systime;
@@ -3221,13 +3222,18 @@ UnitTest * UnitTest::GetInstance() {
   // different implementation in this case to bypass the compiler bug.
   // This implementation makes the compiler happy, at the cost of
   // leaking the UnitTest object.
-#if _MSC_VER == 1310 && !defined(_DEBUG)  // MSVC 7.1 and optimized build.
+
+  // CodeGear C++Builder insists on a public destructor for the
+  // default implementation.  Use this implementation to keep good OO
+  // design with private destructor.
+
+#if (_MSC_VER == 1310 && !defined(_DEBUG)) || defined(__BORLANDC__)
   static UnitTest* const instance = new UnitTest;
   return instance;
 #else
   static UnitTest instance;
   return &instance;
-#endif  // _MSC_VER==1310 && !defined(_DEBUG)
+#endif  // (_MSC_VER == 1310 && !defined(_DEBUG)) || defined(__BORLANDC__)
 }
 
 // Registers and returns a global test environment.  When a test
@@ -3259,7 +3265,7 @@ Environment* UnitTest::AddEnvironment(Environment* env) {
 class GoogleTestFailureException : public ::std::runtime_error {
  public:
   explicit GoogleTestFailureException(const TestPartResult& failure)
-      : runtime_error(PrintTestPartResultToString(failure).c_str()) {}
+      : ::std::runtime_error(PrintTestPartResultToString(failure).c_str()) {}
 };
 #endif
 
@@ -3350,17 +3356,20 @@ int UnitTest::Run() {
                  SEM_NOGPFAULTERRORBOX | SEM_NOOPENFILEERRORBOX);
 #endif  // _WIN32_WCE
 
+#if defined(_MSC_VER) || defined(__MINGW32__)
     // Death test children can be terminated with _abort().  On Windows,
     // _abort() can show a dialog with a warning message.  This forces the
     // abort message to go to stderr instead.
     _set_error_mode(_OUT_TO_STDERR);
+#endif
 
+#if _MSC_VER >= 1400
     // In the debug version, Visual Studio pops up a separate dialog
     // offering a choice to debug the aborted program. We need to suppress
     // this dialog or it will pop up for every EXPECT/ASSERT_DEATH statement
     // executed. Google Test will notify the user of any unexpected
     // failure via stderr.
-#if _MSC_VER >= 1400
+    //
     // VC++ doesn't define _set_abort_behavior() prior to the version 8.0.
     // Users of prior VC versions shall suffer the agony and pain of
     // clicking through the countless debug dialogs.

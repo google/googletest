@@ -88,10 +88,10 @@ FilePath FilePath::GetCurrentDir() {
 // something reasonable.
   return FilePath(kCurrentDirectoryString);
 #elif GTEST_OS_WINDOWS
-  char cwd[GTEST_PATH_MAX_ + 1] = {};
+  char cwd[GTEST_PATH_MAX_ + 1] = { '\0' };
   return FilePath(_getcwd(cwd, sizeof(cwd)) == NULL ? "" : cwd);
 #else
-  char cwd[GTEST_PATH_MAX_ + 1] = {};
+  char cwd[GTEST_PATH_MAX_ + 1] = { '\0' };
   return FilePath(getcwd(cwd, sizeof(cwd)) == NULL ? "" : cwd);
 #endif
 }
@@ -127,8 +127,13 @@ FilePath FilePath::RemoveDirectoryName() const {
 // On Windows platform, '\' is the path separator, otherwise it is '/'.
 FilePath FilePath::RemoveFileName() const {
   const char* const last_sep = strrchr(c_str(), kPathSeparator);
-  return FilePath(last_sep ? String(c_str(), last_sep + 1 - c_str())
-                           : String(kCurrentDirectoryString));
+  String dir;
+  if (last_sep) {
+    dir = String(c_str(), last_sep + 1 - c_str());
+  } else {
+    dir = kCurrentDirectoryString;
+  }
+  return FilePath(dir);
 }
 
 // Helper functions for naming files in a directory for xml output.
@@ -141,11 +146,13 @@ FilePath FilePath::MakeFileName(const FilePath& directory,
                                 const FilePath& base_name,
                                 int number,
                                 const char* extension) {
-  const FilePath file_name(
-      (number == 0) ?
-      String::Format("%s.%s", base_name.c_str(), extension) :
-      String::Format("%s_%d.%s", base_name.c_str(), number, extension));
-  return ConcatPaths(directory, file_name);
+  String file;
+  if (number == 0) {
+    file = String::Format("%s.%s", base_name.c_str(), extension);
+  } else {
+    file = String::Format("%s_%d.%s", base_name.c_str(), number, extension);
+  }
+  return ConcatPaths(directory, FilePath(file));
 }
 
 // Given directory = "dir", relative_path = "test.xml", returns "dir/test.xml".

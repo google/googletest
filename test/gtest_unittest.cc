@@ -65,6 +65,7 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 #undef GTEST_IMPLEMENTATION_
 
 #include <stdlib.h>
+#include <time.h>
 
 #if GTEST_HAS_PTHREAD
 #include <pthread.h>
@@ -78,6 +79,10 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 #include <string>
 #include <vector>
 #endif  // GTEST_OS_LINUX
+
+#ifdef __BORLANDC__
+#include <map>
+#endif
 
 namespace testing {
 namespace internal {
@@ -207,16 +212,26 @@ TEST(FormatTimeInMillisAsSecondsTest, FormatsNegativeNumber) {
 #if !GTEST_OS_SYMBIAN
 // NULL testing does not work with Symbian compilers.
 
+#ifdef __BORLANDC__
+// Silences warnings: "Condition is always true", "Unreachable code"
+#pragma option push -w-ccc -w-rch
+#endif
+
 // Tests that GTEST_IS_NULL_LITERAL_(x) is true when x is a null
 // pointer literal.
 TEST(NullLiteralTest, IsTrueForNullLiterals) {
   EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(NULL));
   EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(0));
-  EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(1 - 1));
   EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(0U));
   EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(0L));
   EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(false));
+#ifndef __BORLANDC__
+  // Some compilers may fail to detect some null pointer literals;
+  // as long as users of the framework don't use such literals, this
+  // is harmless.
+  EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(1 - 1));
   EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(true && false));
+#endif
 }
 
 // Tests that GTEST_IS_NULL_LITERAL_(x) is false when x is not a null
@@ -227,6 +242,11 @@ TEST(NullLiteralTest, IsFalseForNonNullLiterals) {
   EXPECT_FALSE(GTEST_IS_NULL_LITERAL_('a'));
   EXPECT_FALSE(GTEST_IS_NULL_LITERAL_(static_cast<void*>(NULL)));
 }
+
+#ifdef __BORLANDC__
+// Restores warnings after previous "#pragma option push" supressed them
+#pragma option pop
+#endif
 
 #endif  // !GTEST_OS_SYMBIAN
 //
@@ -681,13 +701,18 @@ TEST(StringTest, EndsWithCaseInsensitive) {
   EXPECT_FALSE(String("").EndsWithCaseInsensitive("foo"));
 }
 
+// C++Builder's preprocessor is buggy; it fails to expand macros that
+// appear in macro parameters after wide char literals.  Provide an alias
+// for NULL as a workaround.
+static const wchar_t* const kNull = NULL;
+
 // Tests String::CaseInsensitiveWideCStringEquals
 TEST(StringTest, CaseInsensitiveWideCStringEquals) {
   EXPECT_TRUE(String::CaseInsensitiveWideCStringEquals(NULL, NULL));
-  EXPECT_FALSE(String::CaseInsensitiveWideCStringEquals(NULL, L""));
-  EXPECT_FALSE(String::CaseInsensitiveWideCStringEquals(L"", NULL));
-  EXPECT_FALSE(String::CaseInsensitiveWideCStringEquals(NULL, L"foobar"));
-  EXPECT_FALSE(String::CaseInsensitiveWideCStringEquals(L"foobar", NULL));
+  EXPECT_FALSE(String::CaseInsensitiveWideCStringEquals(kNull, L""));
+  EXPECT_FALSE(String::CaseInsensitiveWideCStringEquals(L"", kNull));
+  EXPECT_FALSE(String::CaseInsensitiveWideCStringEquals(kNull, L"foobar"));
+  EXPECT_FALSE(String::CaseInsensitiveWideCStringEquals(L"foobar", kNull));
   EXPECT_TRUE(String::CaseInsensitiveWideCStringEquals(L"foobar", L"foobar"));
   EXPECT_TRUE(String::CaseInsensitiveWideCStringEquals(L"foobar", L"FOOBAR"));
   EXPECT_TRUE(String::CaseInsensitiveWideCStringEquals(L"FOOBAR", L"foobar"));
@@ -790,6 +815,17 @@ TEST(TestPropertyTest, ReplaceStringValue) {
   EXPECT_STREQ("2", property.value());
 }
 
+// AddFatalFailure() and AddNonfatalFailure() must be stand-alone
+// functions (i.e. their definitions cannot be inlined at the call
+// sites), or C++Builder won't compile the code.
+static void AddFatalFailure() {
+  FAIL() << "Expected fatal failure.";
+}
+
+static void AddNonfatalFailure() {
+  ADD_FAILURE() << "Expected non-fatal failure.";
+}
+
 class ScopedFakeTestPartResultReporterTest : public Test {
  protected:
   enum FailureMode {
@@ -798,9 +834,9 @@ class ScopedFakeTestPartResultReporterTest : public Test {
   };
   static void AddFailure(FailureMode failure) {
     if (failure == FATAL_FAILURE) {
-      FAIL() << "Expected fatal failure.";
+      AddFatalFailure();
     } else {
-      ADD_FAILURE() << "Expected non-fatal failure.";
+      AddNonfatalFailure();
     }
   }
 };
@@ -875,20 +911,27 @@ TEST_F(ScopedFakeTestPartResultReporterWithThreadsTest,
 
 #endif  // GTEST_IS_THREADSAFE && GTEST_HAS_PTHREAD
 
-// Tests EXPECT_FATAL_FAILURE{,ON_ALL_THREADS}.
+// Tests EXPECT_FATAL_FAILURE{,ON_ALL_THREADS}.  Makes sure that they
+// work even if the failure is generated in a called function rather than
+// the current context.
 
 typedef ScopedFakeTestPartResultReporterTest ExpectFatalFailureTest;
 
 TEST_F(ExpectFatalFailureTest, CatchesFatalFaliure) {
-  EXPECT_FATAL_FAILURE(AddFailure(FATAL_FAILURE), "Expected fatal failure.");
+  EXPECT_FATAL_FAILURE(AddFatalFailure(), "Expected fatal failure.");
 }
 
 TEST_F(ExpectFatalFailureTest, CatchesFatalFailureOnAllThreads) {
   // We have another test below to verify that the macro catches fatal
   // failures generated on another thread.
-  EXPECT_FATAL_FAILURE_ON_ALL_THREADS(AddFailure(FATAL_FAILURE),
+  EXPECT_FATAL_FAILURE_ON_ALL_THREADS(AddFatalFailure(),
                                       "Expected fatal failure.");
 }
+
+#ifdef __BORLANDC__
+// Silences warnings: "Condition is always true"
+#pragma option push -w-ccc
+#endif
 
 // Tests that EXPECT_FATAL_FAILURE() can be used in a non-void
 // function even when the statement in it contains ASSERT_*.
@@ -913,6 +956,11 @@ void DoesNotAbortHelper(bool* aborted) {
   *aborted = false;
 }
 
+#ifdef __BORLANDC__
+// Restores warnings after previous "#pragma option push" supressed them
+#pragma option pop
+#endif
+
 TEST_F(ExpectFatalFailureTest, DoesNotAbort) {
   bool aborted = true;
   DoesNotAbortHelper(&aborted);
@@ -927,14 +975,17 @@ static int global_var = 0;
 #define GTEST_USE_UNPROTECTED_COMMA_ global_var++, global_var++
 
 TEST_F(ExpectFatalFailureTest, AcceptsMacroThatExpandsToUnprotectedComma) {
+#ifndef __BORLANDC__
+  // ICE's in C++Builder 2007.
   EXPECT_FATAL_FAILURE({
     GTEST_USE_UNPROTECTED_COMMA_;
-    AddFailure(FATAL_FAILURE);
+    AddFatalFailure();
   }, "");
+#endif
 
   EXPECT_FATAL_FAILURE_ON_ALL_THREADS({
     GTEST_USE_UNPROTECTED_COMMA_;
-    AddFailure(FATAL_FAILURE);
+    AddFatalFailure();
   }, "");
 }
 
@@ -943,14 +994,14 @@ TEST_F(ExpectFatalFailureTest, AcceptsMacroThatExpandsToUnprotectedComma) {
 typedef ScopedFakeTestPartResultReporterTest ExpectNonfatalFailureTest;
 
 TEST_F(ExpectNonfatalFailureTest, CatchesNonfatalFailure) {
-  EXPECT_NONFATAL_FAILURE(AddFailure(NONFATAL_FAILURE),
+  EXPECT_NONFATAL_FAILURE(AddNonfatalFailure(),
                           "Expected non-fatal failure.");
 }
 
 TEST_F(ExpectNonfatalFailureTest, CatchesNonfatalFailureOnAllThreads) {
   // We have another test below to verify that the macro catches
   // non-fatal failures generated on another thread.
-  EXPECT_NONFATAL_FAILURE_ON_ALL_THREADS(AddFailure(NONFATAL_FAILURE),
+  EXPECT_NONFATAL_FAILURE_ON_ALL_THREADS(AddNonfatalFailure(),
                                          "Expected non-fatal failure.");
 }
 
@@ -960,12 +1011,12 @@ TEST_F(ExpectNonfatalFailureTest, CatchesNonfatalFailureOnAllThreads) {
 TEST_F(ExpectNonfatalFailureTest, AcceptsMacroThatExpandsToUnprotectedComma) {
   EXPECT_NONFATAL_FAILURE({
     GTEST_USE_UNPROTECTED_COMMA_;
-    AddFailure(NONFATAL_FAILURE);
+    AddNonfatalFailure();
   }, "");
 
   EXPECT_NONFATAL_FAILURE_ON_ALL_THREADS({
     GTEST_USE_UNPROTECTED_COMMA_;
-    AddFailure(NONFATAL_FAILURE);
+    AddNonfatalFailure();
   }, "");
 }
 
@@ -1271,6 +1322,22 @@ static void SetEnv(const char* name, const char* value) {
 #ifdef _WIN32_WCE
   // Environment variables are not supported on Windows CE.
   return;
+#elif defined(__BORLANDC__)
+  // C++Builder's putenv only stores a pointer to its parameter; we have to
+  // ensure that the string remains valid as long as it might be needed.
+  // We use an std::map to do so.
+  static std::map<String, String*> added_env;
+
+  // Because putenv stores a pointer to the string buffer, we can't delete the
+  // previous string (if present) until after it's replaced.
+  String *prev_env = NULL;
+  if (added_env.find(name) != added_env.end()) {
+    prev_env = added_env[name];
+  }
+  added_env[name] = new String((Message() << name << "=" << value).GetString());
+  putenv(added_env[name]->c_str());
+  delete prev_env;
+
 #elif GTEST_OS_WINDOWS  // If we are on Windows proper.
   _putenv((Message() << name << "=" << value).GetString().c_str());
 #else
@@ -1380,7 +1447,8 @@ TEST(ParseInt32FlagTest, ParsesAndReturnsValidValue) {
   EXPECT_TRUE(ParseInt32Flag("--" GTEST_FLAG_PREFIX_ "abc=456", "abc", &value));
   EXPECT_EQ(456, value);
 
-  EXPECT_TRUE(ParseInt32Flag("--" GTEST_FLAG_PREFIX_ "abc=-789", "abc", &value));
+  EXPECT_TRUE(ParseInt32Flag("--" GTEST_FLAG_PREFIX_ "abc=-789",
+                             "abc", &value));
   EXPECT_EQ(-789, value);
 }
 
@@ -1802,8 +1870,9 @@ bool GreaterThan(T1 x1, T2 x2) {
 // Tests that overloaded functions can be used in *_PRED* as long as
 // their types are explicitly specified.
 TEST(PredicateAssertionTest, AcceptsOverloadedFunction) {
-  EXPECT_PRED1(static_cast<bool (*)(int)>(IsPositive), 5);  // NOLINT
-  ASSERT_PRED1(static_cast<bool (*)(double)>(IsPositive), 6.0);  // NOLINT
+  // C++Builder requires C-style casts rather than static_cast.
+  EXPECT_PRED1((bool (*)(int))(IsPositive), 5);  // NOLINT
+  ASSERT_PRED1((bool (*)(double))(IsPositive), 6.0);  // NOLINT
 }
 
 // Tests that template functions can be used in *_PRED* as long as
@@ -1987,8 +2056,8 @@ TEST(IsSubstringTest, ReturnsCorrectResultForCString) {
 // Tests that IsSubstring() returns the correct result when the input
 // argument type is const wchar_t*.
 TEST(IsSubstringTest, ReturnsCorrectResultForWideCString) {
-  EXPECT_FALSE(IsSubstring("", "", NULL, L"a"));
-  EXPECT_FALSE(IsSubstring("", "", L"b", NULL));
+  EXPECT_FALSE(IsSubstring("", "", kNull, L"a"));
+  EXPECT_FALSE(IsSubstring("", "", L"b", kNull));
   EXPECT_FALSE(IsSubstring("", "", L"needle", L"haystack"));
 
   EXPECT_TRUE(IsSubstring("", "", static_cast<const wchar_t*>(NULL), NULL));
@@ -2107,6 +2176,24 @@ TEST(IsNotSubstringTest, ReturnsCorrectResultForStdWstring) {
 template <typename RawType>
 class FloatingPointTest : public Test {
  protected:
+
+  // Pre-calculated numbers to be used by the tests.
+  struct TestValues {
+    RawType close_to_positive_zero;
+    RawType close_to_negative_zero;
+    RawType further_from_negative_zero;
+
+    RawType close_to_one;
+    RawType further_from_one;
+
+    RawType infinity;
+    RawType close_to_infinity;
+    RawType further_from_infinity;
+
+    RawType nan1;
+    RawType nan2;
+  };
+
   typedef typename testing::internal::FloatingPoint<RawType> Floating;
   typedef typename Floating::Bits Bits;
 
@@ -2117,85 +2204,52 @@ class FloatingPointTest : public Test {
     const Bits zero_bits = Floating(0).bits();
 
     // Makes some numbers close to 0.0.
-    close_to_positive_zero_ = Floating::ReinterpretBits(zero_bits + max_ulps/2);
-    close_to_negative_zero_ = -Floating::ReinterpretBits(
+    values_.close_to_positive_zero = Floating::ReinterpretBits(
+        zero_bits + max_ulps/2);
+    values_.close_to_negative_zero = -Floating::ReinterpretBits(
         zero_bits + max_ulps - max_ulps/2);
-    further_from_negative_zero_ = -Floating::ReinterpretBits(
+    values_.further_from_negative_zero = -Floating::ReinterpretBits(
         zero_bits + max_ulps + 1 - max_ulps/2);
 
     // The bits that represent 1.0.
     const Bits one_bits = Floating(1).bits();
 
     // Makes some numbers close to 1.0.
-    close_to_one_ = Floating::ReinterpretBits(one_bits + max_ulps);
-    further_from_one_ = Floating::ReinterpretBits(one_bits + max_ulps + 1);
+    values_.close_to_one = Floating::ReinterpretBits(one_bits + max_ulps);
+    values_.further_from_one = Floating::ReinterpretBits(
+        one_bits + max_ulps + 1);
 
     // +infinity.
-    infinity_ = Floating::Infinity();
+    values_.infinity = Floating::Infinity();
 
     // The bits that represent +infinity.
-    const Bits infinity_bits = Floating(infinity_).bits();
+    const Bits infinity_bits = Floating(values_.infinity).bits();
 
     // Makes some numbers close to infinity.
-    close_to_infinity_ = Floating::ReinterpretBits(infinity_bits - max_ulps);
-    further_from_infinity_ = Floating::ReinterpretBits(
+    values_.close_to_infinity = Floating::ReinterpretBits(
+        infinity_bits - max_ulps);
+    values_.further_from_infinity = Floating::ReinterpretBits(
         infinity_bits - max_ulps - 1);
 
-    // Makes some NAN's.
-    nan1_ = Floating::ReinterpretBits(Floating::kExponentBitMask | 1);
-    nan2_ = Floating::ReinterpretBits(Floating::kExponentBitMask | 200);
+    // Makes some NAN's.  Sets the most significant bit of the fraction so that
+    // our NaN's are quiet; trying to process a signaling NaN would raise an
+    // exception if our environment enables floating point exceptions.
+    values_.nan1 = Floating::ReinterpretBits(Floating::kExponentBitMask
+        | (static_cast<Bits>(1) << (Floating::kFractionBitCount - 1)) | 1);
+    values_.nan2 = Floating::ReinterpretBits(Floating::kExponentBitMask
+        | (static_cast<Bits>(1) << (Floating::kFractionBitCount - 1)) | 200);
   }
 
   void TestSize() {
     EXPECT_EQ(sizeof(RawType), sizeof(Bits));
   }
 
-  // Pre-calculated numbers to be used by the tests.
-
-  static RawType close_to_positive_zero_;
-  static RawType close_to_negative_zero_;
-  static RawType further_from_negative_zero_;
-
-  static RawType close_to_one_;
-  static RawType further_from_one_;
-
-  static RawType infinity_;
-  static RawType close_to_infinity_;
-  static RawType further_from_infinity_;
-
-  static RawType nan1_;
-  static RawType nan2_;
+  static TestValues values_;
 };
 
 template <typename RawType>
-RawType FloatingPointTest<RawType>::close_to_positive_zero_;
-
-template <typename RawType>
-RawType FloatingPointTest<RawType>::close_to_negative_zero_;
-
-template <typename RawType>
-RawType FloatingPointTest<RawType>::further_from_negative_zero_;
-
-template <typename RawType>
-RawType FloatingPointTest<RawType>::close_to_one_;
-
-template <typename RawType>
-RawType FloatingPointTest<RawType>::further_from_one_;
-
-template <typename RawType>
-RawType FloatingPointTest<RawType>::infinity_;
-
-template <typename RawType>
-RawType FloatingPointTest<RawType>::close_to_infinity_;
-
-template <typename RawType>
-RawType FloatingPointTest<RawType>::further_from_infinity_;
-
-template <typename RawType>
-RawType FloatingPointTest<RawType>::nan1_;
-
-template <typename RawType>
-RawType FloatingPointTest<RawType>::nan2_;
+typename FloatingPointTest<RawType>::TestValues
+    FloatingPointTest<RawType>::values_;
 
 // Instantiates FloatingPointTest for testing *_FLOAT_EQ.
 typedef FloatingPointTest<float> FloatTest;
@@ -2220,20 +2274,26 @@ TEST_F(FloatTest, Zeros) {
 // overflow occurs when comparing numbers whose absolute value is very
 // small.
 TEST_F(FloatTest, AlmostZeros) {
-  EXPECT_FLOAT_EQ(0.0, close_to_positive_zero_);
-  EXPECT_FLOAT_EQ(-0.0, close_to_negative_zero_);
-  EXPECT_FLOAT_EQ(close_to_positive_zero_, close_to_negative_zero_);
+  // In C++Builder, names within local classes (such as used by
+  // EXPECT_FATAL_FAILURE) cannot be resolved against static members of the
+  // scoping class.  Use a static local alias as a workaround.
+  static const FloatTest::TestValues& v(this->values_);
+
+  EXPECT_FLOAT_EQ(0.0, v.close_to_positive_zero);
+  EXPECT_FLOAT_EQ(-0.0, v.close_to_negative_zero);
+  EXPECT_FLOAT_EQ(v.close_to_positive_zero, v.close_to_negative_zero);
 
   EXPECT_FATAL_FAILURE({  // NOLINT
-    ASSERT_FLOAT_EQ(close_to_positive_zero_, further_from_negative_zero_);
-  }, "further_from_negative_zero_");
+    ASSERT_FLOAT_EQ(v.close_to_positive_zero,
+                    v.further_from_negative_zero);
+  }, "v.further_from_negative_zero");
 }
 
 // Tests comparing numbers close to each other.
 TEST_F(FloatTest, SmallDiff) {
-  EXPECT_FLOAT_EQ(1.0, close_to_one_);
-  EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(1.0, further_from_one_),
-                          "further_from_one_");
+  EXPECT_FLOAT_EQ(1.0, values_.close_to_one);
+  EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(1.0, values_.further_from_one),
+                          "values_.further_from_one");
 }
 
 // Tests comparing numbers far apart.
@@ -2247,17 +2307,17 @@ TEST_F(FloatTest, LargeDiff) {
 // This ensures that no overflow occurs when comparing numbers whose
 // absolute value is very large.
 TEST_F(FloatTest, Infinity) {
-  EXPECT_FLOAT_EQ(infinity_, close_to_infinity_);
-  EXPECT_FLOAT_EQ(-infinity_, -close_to_infinity_);
+  EXPECT_FLOAT_EQ(values_.infinity, values_.close_to_infinity);
+  EXPECT_FLOAT_EQ(-values_.infinity, -values_.close_to_infinity);
 #if !GTEST_OS_SYMBIAN
   // Nokia's STLport crashes if we try to output infinity or NaN.
-  EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(infinity_, -infinity_),
-                          "-infinity_");
+  EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(values_.infinity, -values_.infinity),
+                          "-values_.infinity");
 
-  // This is interesting as the representations of infinity_ and nan1_
+  // This is interesting as the representations of infinity and nan1
   // are only 1 DLP apart.
-  EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(infinity_, nan1_),
-                          "nan1_");
+  EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(values_.infinity, values_.nan1),
+                          "values_.nan1");
 #endif  // !GTEST_OS_SYMBIAN
 }
 
@@ -2265,15 +2325,21 @@ TEST_F(FloatTest, Infinity) {
 TEST_F(FloatTest, NaN) {
 #if !GTEST_OS_SYMBIAN
 // Nokia's STLport crashes if we try to output infinity or NaN.
-  EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(nan1_, nan1_),
-                          "nan1_");
-  EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(nan1_, nan2_),
-                          "nan2_");
-  EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(1.0, nan1_),
-                          "nan1_");
 
-  EXPECT_FATAL_FAILURE(ASSERT_FLOAT_EQ(nan1_, infinity_),
-                       "infinity_");
+  // In C++Builder, names within local classes (such as used by
+  // EXPECT_FATAL_FAILURE) cannot be resolved against static members of the
+  // scoping class.  Use a static local alias as a workaround.
+  static const FloatTest::TestValues& v(this->values_);
+
+  EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(v.nan1, v.nan1),
+                          "v.nan1");
+  EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(v.nan1, v.nan2),
+                          "v.nan2");
+  EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(1.0, v.nan1),
+                          "v.nan1");
+
+  EXPECT_FATAL_FAILURE(ASSERT_FLOAT_EQ(v.nan1, v.infinity),
+                       "v.infinity");
 #endif  // !GTEST_OS_SYMBIAN
 }
 
@@ -2281,16 +2347,16 @@ TEST_F(FloatTest, NaN) {
 TEST_F(FloatTest, Reflexive) {
   EXPECT_FLOAT_EQ(0.0, 0.0);
   EXPECT_FLOAT_EQ(1.0, 1.0);
-  ASSERT_FLOAT_EQ(infinity_, infinity_);
+  ASSERT_FLOAT_EQ(values_.infinity, values_.infinity);
 }
 
 // Tests that *_FLOAT_EQ are commutative.
 TEST_F(FloatTest, Commutative) {
-  // We already tested EXPECT_FLOAT_EQ(1.0, close_to_one_).
-  EXPECT_FLOAT_EQ(close_to_one_, 1.0);
+  // We already tested EXPECT_FLOAT_EQ(1.0, values_.close_to_one).
+  EXPECT_FLOAT_EQ(values_.close_to_one, 1.0);
 
-  // We already tested EXPECT_FLOAT_EQ(1.0, further_from_one_).
-  EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(further_from_one_, 1.0),
+  // We already tested EXPECT_FLOAT_EQ(1.0, values_.further_from_one).
+  EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(values_.further_from_one, 1.0),
                           "1.0");
 }
 
@@ -2322,7 +2388,7 @@ TEST_F(FloatTest, FloatLESucceeds) {
   ASSERT_PRED_FORMAT2(FloatLE, 1.0f, 1.0f);  // val1 == val2,
 
   // or when val1 is greater than, but almost equals to, val2.
-  EXPECT_PRED_FORMAT2(FloatLE, close_to_positive_zero_, 0.0f);
+  EXPECT_PRED_FORMAT2(FloatLE, values_.close_to_positive_zero, 0.0f);
 }
 
 // Tests the cases where FloatLE() should fail.
@@ -2333,23 +2399,23 @@ TEST_F(FloatTest, FloatLEFails) {
 
   // or by a small yet non-negligible margin,
   EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_PRED_FORMAT2(FloatLE, further_from_one_, 1.0f);
-  }, "(further_from_one_) <= (1.0f)");
+    EXPECT_PRED_FORMAT2(FloatLE, values_.further_from_one, 1.0f);
+  }, "(values_.further_from_one) <= (1.0f)");
 
-#if !GTEST_OS_SYMBIAN
+#if !GTEST_OS_SYMBIAN && !defined(__BORLANDC__)
   // Nokia's STLport crashes if we try to output infinity or NaN.
-  // or when either val1 or val2 is NaN.
+  // C++Builder gives bad results for ordered comparisons involving NaNs
+  // due to compiler bugs.
   EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_PRED_FORMAT2(FloatLE, nan1_, infinity_);
-  }, "(nan1_) <= (infinity_)");
+    EXPECT_PRED_FORMAT2(FloatLE, values_.nan1, values_.infinity);
+  }, "(values_.nan1) <= (values_.infinity)");
   EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_PRED_FORMAT2(FloatLE, -infinity_, nan1_);
-  }, "(-infinity_) <= (nan1_)");
-
+    EXPECT_PRED_FORMAT2(FloatLE, -values_.infinity, values_.nan1);
+  }, "(-values_.infinity) <= (values_.nan1)");
   EXPECT_FATAL_FAILURE({  // NOLINT
-    ASSERT_PRED_FORMAT2(FloatLE, nan1_, nan1_);
-  }, "(nan1_) <= (nan1_)");
-#endif  // !GTEST_OS_SYMBIAN
+    ASSERT_PRED_FORMAT2(FloatLE, values_.nan1, values_.nan1);
+  }, "(values_.nan1) <= (values_.nan1)");
+#endif  // !GTEST_OS_SYMBIAN && !defined(__BORLANDC__)
 }
 
 // Instantiates FloatingPointTest for testing *_DOUBLE_EQ.
@@ -2375,20 +2441,26 @@ TEST_F(DoubleTest, Zeros) {
 // overflow occurs when comparing numbers whose absolute value is very
 // small.
 TEST_F(DoubleTest, AlmostZeros) {
-  EXPECT_DOUBLE_EQ(0.0, close_to_positive_zero_);
-  EXPECT_DOUBLE_EQ(-0.0, close_to_negative_zero_);
-  EXPECT_DOUBLE_EQ(close_to_positive_zero_, close_to_negative_zero_);
+  // In C++Builder, names within local classes (such as used by
+  // EXPECT_FATAL_FAILURE) cannot be resolved against static members of the
+  // scoping class.  Use a static local alias as a workaround.
+  static const DoubleTest::TestValues& v(this->values_);
+
+  EXPECT_DOUBLE_EQ(0.0, v.close_to_positive_zero);
+  EXPECT_DOUBLE_EQ(-0.0, v.close_to_negative_zero);
+  EXPECT_DOUBLE_EQ(v.close_to_positive_zero, v.close_to_negative_zero);
 
   EXPECT_FATAL_FAILURE({  // NOLINT
-    ASSERT_DOUBLE_EQ(close_to_positive_zero_, further_from_negative_zero_);
-  }, "further_from_negative_zero_");
+    ASSERT_DOUBLE_EQ(v.close_to_positive_zero,
+                     v.further_from_negative_zero);
+  }, "v.further_from_negative_zero");
 }
 
 // Tests comparing numbers close to each other.
 TEST_F(DoubleTest, SmallDiff) {
-  EXPECT_DOUBLE_EQ(1.0, close_to_one_);
-  EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(1.0, further_from_one_),
-                          "further_from_one_");
+  EXPECT_DOUBLE_EQ(1.0, values_.close_to_one);
+  EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(1.0, values_.further_from_one),
+                          "values_.further_from_one");
 }
 
 // Tests comparing numbers far apart.
@@ -2402,29 +2474,35 @@ TEST_F(DoubleTest, LargeDiff) {
 // This ensures that no overflow occurs when comparing numbers whose
 // absolute value is very large.
 TEST_F(DoubleTest, Infinity) {
-  EXPECT_DOUBLE_EQ(infinity_, close_to_infinity_);
-  EXPECT_DOUBLE_EQ(-infinity_, -close_to_infinity_);
+  EXPECT_DOUBLE_EQ(values_.infinity, values_.close_to_infinity);
+  EXPECT_DOUBLE_EQ(-values_.infinity, -values_.close_to_infinity);
 #if !GTEST_OS_SYMBIAN
   // Nokia's STLport crashes if we try to output infinity or NaN.
-  EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(infinity_, -infinity_),
-                          "-infinity_");
+  EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(values_.infinity, -values_.infinity),
+                          "-values_.infinity");
 
   // This is interesting as the representations of infinity_ and nan1_
   // are only 1 DLP apart.
-  EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(infinity_, nan1_),
-                          "nan1_");
+  EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(values_.infinity, values_.nan1),
+                          "values_.nan1");
 #endif  // !GTEST_OS_SYMBIAN
 }
 
 // Tests that comparing with NAN always returns false.
 TEST_F(DoubleTest, NaN) {
 #if !GTEST_OS_SYMBIAN
+  // In C++Builder, names within local classes (such as used by
+  // EXPECT_FATAL_FAILURE) cannot be resolved against static members of the
+  // scoping class.  Use a static local alias as a workaround.
+  static const DoubleTest::TestValues& v(this->values_);
+
   // Nokia's STLport crashes if we try to output infinity or NaN.
-  EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(nan1_, nan1_),
-                          "nan1_");
-  EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(nan1_, nan2_), "nan2_");
-  EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(1.0, nan1_), "nan1_");
-  EXPECT_FATAL_FAILURE(ASSERT_DOUBLE_EQ(nan1_, infinity_), "infinity_");
+  EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(v.nan1, v.nan1),
+                          "v.nan1");
+  EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(v.nan1, v.nan2), "v.nan2");
+  EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(1.0, v.nan1), "v.nan1");
+  EXPECT_FATAL_FAILURE(ASSERT_DOUBLE_EQ(v.nan1, v.infinity),
+                       "v.infinity");
 #endif  // !GTEST_OS_SYMBIAN
 }
 
@@ -2434,17 +2512,18 @@ TEST_F(DoubleTest, Reflexive) {
   EXPECT_DOUBLE_EQ(1.0, 1.0);
 #if !GTEST_OS_SYMBIAN
   // Nokia's STLport crashes if we try to output infinity or NaN.
-  ASSERT_DOUBLE_EQ(infinity_, infinity_);
+  ASSERT_DOUBLE_EQ(values_.infinity, values_.infinity);
 #endif  // !GTEST_OS_SYMBIAN
 }
 
 // Tests that *_DOUBLE_EQ are commutative.
 TEST_F(DoubleTest, Commutative) {
-  // We already tested EXPECT_DOUBLE_EQ(1.0, close_to_one_).
-  EXPECT_DOUBLE_EQ(close_to_one_, 1.0);
+  // We already tested EXPECT_DOUBLE_EQ(1.0, values_.close_to_one).
+  EXPECT_DOUBLE_EQ(values_.close_to_one, 1.0);
 
-  // We already tested EXPECT_DOUBLE_EQ(1.0, further_from_one_).
-  EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(further_from_one_, 1.0), "1.0");
+  // We already tested EXPECT_DOUBLE_EQ(1.0, values_.further_from_one).
+  EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(values_.further_from_one, 1.0),
+                          "1.0");
 }
 
 // Tests EXPECT_NEAR.
@@ -2475,7 +2554,7 @@ TEST_F(DoubleTest, DoubleLESucceeds) {
   ASSERT_PRED_FORMAT2(DoubleLE, 1.0, 1.0);  // val1 == val2,
 
   // or when val1 is greater than, but almost equals to, val2.
-  EXPECT_PRED_FORMAT2(DoubleLE, close_to_positive_zero_, 0.0);
+  EXPECT_PRED_FORMAT2(DoubleLE, values_.close_to_positive_zero, 0.0);
 }
 
 // Tests the cases where DoubleLE() should fail.
@@ -2486,22 +2565,23 @@ TEST_F(DoubleTest, DoubleLEFails) {
 
   // or by a small yet non-negligible margin,
   EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_PRED_FORMAT2(DoubleLE, further_from_one_, 1.0);
-  }, "(further_from_one_) <= (1.0)");
+    EXPECT_PRED_FORMAT2(DoubleLE, values_.further_from_one, 1.0);
+  }, "(values_.further_from_one) <= (1.0)");
 
-#if !GTEST_OS_SYMBIAN
+#if !GTEST_OS_SYMBIAN && !defined(__BORLANDC__)
   // Nokia's STLport crashes if we try to output infinity or NaN.
-  // or when either val1 or val2 is NaN.
+  // C++Builder gives bad results for ordered comparisons involving NaNs
+  // due to compiler bugs.
   EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_PRED_FORMAT2(DoubleLE, nan1_, infinity_);
-  }, "(nan1_) <= (infinity_)");
+    EXPECT_PRED_FORMAT2(DoubleLE, values_.nan1, values_.infinity);
+  }, "(values_.nan1) <= (values_.infinity)");
   EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_PRED_FORMAT2(DoubleLE, -infinity_, nan1_);
-  }, " (-infinity_) <= (nan1_)");
+    EXPECT_PRED_FORMAT2(DoubleLE, -values_.infinity, values_.nan1);
+  }, " (-values_.infinity) <= (values_.nan1)");
   EXPECT_FATAL_FAILURE({  // NOLINT
-    ASSERT_PRED_FORMAT2(DoubleLE, nan1_, nan1_);
-  }, "(nan1_) <= (nan1_)");
-#endif  // !GTEST_OS_SYMBIAN
+    ASSERT_PRED_FORMAT2(DoubleLE, values_.nan1, values_.nan1);
+  }, "(values_.nan1) <= (values_.nan1)");
+#endif  // !GTEST_OS_SYMBIAN && !defined(__BORLANDC__)
 }
 
 
@@ -2621,23 +2701,26 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, DISABLED_TypedTestP, NumericTypes);
 // Tests that assertion macros evaluate their arguments exactly once.
 
 class SingleEvaluationTest : public Test {
+ public:
+  // This helper function is needed by the FailedASSERT_STREQ test
+  // below.  It's public to work around C++Builder's bug with scoping local
+  // classes.
+  static void CompareAndIncrementCharPtrs() {
+    ASSERT_STREQ(p1_++, p2_++);
+  }
+
+  // This helper function is needed by the FailedASSERT_NE test below.  It's
+  // public to work around C++Builder's bug with scoping local classes.
+  static void CompareAndIncrementInts() {
+    ASSERT_NE(a_++, b_++);
+  }
+
  protected:
   SingleEvaluationTest() {
     p1_ = s1_;
     p2_ = s2_;
     a_ = 0;
     b_ = 0;
-  }
-
-  // This helper function is needed by the FailedASSERT_STREQ test
-  // below.
-  static void CompareAndIncrementCharPtrs() {
-    ASSERT_STREQ(p1_++, p2_++);
-  }
-
-  // This helper function is needed by the FailedASSERT_NE test below.
-  static void CompareAndIncrementInts() {
-    ASSERT_NE(a_++, b_++);
   }
 
   static const char* const s1_;
@@ -2659,7 +2742,7 @@ int SingleEvaluationTest::b_;
 // Tests that when ASSERT_STREQ fails, it evaluates its arguments
 // exactly once.
 TEST_F(SingleEvaluationTest, FailedASSERT_STREQ) {
-  EXPECT_FATAL_FAILURE(CompareAndIncrementCharPtrs(),
+  EXPECT_FATAL_FAILURE(SingleEvaluationTest::CompareAndIncrementCharPtrs(),
                        "p2_++");
   EXPECT_EQ(s1_ + 1, p1_);
   EXPECT_EQ(s2_ + 1, p2_);
@@ -2682,7 +2765,8 @@ TEST_F(SingleEvaluationTest, ASSERT_STR) {
 // Tests that when ASSERT_NE fails, it evaluates its arguments exactly
 // once.
 TEST_F(SingleEvaluationTest, FailedASSERT_NE) {
-  EXPECT_FATAL_FAILURE(CompareAndIncrementInts(), "(a_++) != (b_++)");
+  EXPECT_FATAL_FAILURE(SingleEvaluationTest::CompareAndIncrementInts(),
+                       "(a_++) != (b_++)");
   EXPECT_EQ(1, a_);
   EXPECT_EQ(1, b_);
 }
@@ -2924,6 +3008,11 @@ TEST(AssertionTest, AppendUserMessage) {
                AppendUserMessage(foo, msg).c_str());
 }
 
+#ifdef __BORLANDC__
+// Silences warnings: "Condition is always true", "Unreachable code"
+#pragma option push -w-ccc -w-rch
+#endif
+
 // Tests ASSERT_TRUE.
 TEST(AssertionTest, ASSERT_TRUE) {
   ASSERT_TRUE(2 > 1);  // NOLINT
@@ -2939,6 +3028,11 @@ TEST(AssertionTest, ASSERT_FALSE) {
                        "  Actual: true\n"
                        "Expected: false");
 }
+
+#ifdef __BORLANDC__
+// Restores warnings after previous "#pragma option push" supressed them
+#pragma option pop
+#endif
 
 // Tests using ASSERT_EQ on double values.  The purpose is to make
 // sure that the specialization we did for integer and anonymous enums
@@ -3035,14 +3129,16 @@ TEST(AssertionTest, ASSERT_GT) {
 
 void ThrowNothing() {}
 
-
 // Tests ASSERT_THROW.
 TEST(AssertionTest, ASSERT_THROW) {
   ASSERT_THROW(ThrowAnInteger(), int);
+#if !defined(__BORLANDC__) || __BORLANDC__ >= 0x600 || defined(_DEBUG)
+  // ICE's in C++Builder 2007 (Release build).
   EXPECT_FATAL_FAILURE(
       ASSERT_THROW(ThrowAnInteger(), bool),
       "Expected: ThrowAnInteger() throws an exception of type bool.\n"
       "  Actual: it throws a different type.");
+#endif
   EXPECT_FATAL_FAILURE(
       ASSERT_THROW(ThrowNothing(), bool),
       "Expected: ThrowNothing() throws an exception of type bool.\n"
@@ -3248,9 +3344,12 @@ TEST(HRESULTAssertionTest, EXPECT_HRESULT_FAILED) {
 TEST(HRESULTAssertionTest, ASSERT_HRESULT_FAILED) {
   ASSERT_HRESULT_FAILED(E_UNEXPECTED);
 
+#ifndef __BORLANDC__
+  // ICE's in C++Builder 2007 and 2009.
   EXPECT_FATAL_FAILURE(ASSERT_HRESULT_FAILED(OkHRESULTSuccess()),
     "Expected: (OkHRESULTSuccess()) fails.\n"
     "  Actual: 0x00000000");
+#endif
   EXPECT_FATAL_FAILURE(ASSERT_HRESULT_FAILED(FalseHRESULTSuccess()),
     "Expected: (FalseHRESULTSuccess()) fails.\n"
     "  Actual: 0x00000001");
@@ -3267,9 +3366,12 @@ TEST(HRESULTAssertionTest, Streaming) {
       EXPECT_HRESULT_SUCCEEDED(E_UNEXPECTED) << "expected failure",
       "expected failure");
 
+#ifndef __BORLANDC__
+  // ICE's in C++Builder 2007 and 2009.
   EXPECT_FATAL_FAILURE(
       ASSERT_HRESULT_SUCCEEDED(E_UNEXPECTED) << "expected failure",
       "expected failure");
+#endif
 
   EXPECT_NONFATAL_FAILURE(
       EXPECT_HRESULT_FAILED(S_OK) << "expected failure",
@@ -3281,6 +3383,11 @@ TEST(HRESULTAssertionTest, Streaming) {
 }
 
 #endif  // GTEST_OS_WINDOWS
+
+#ifdef __BORLANDC__
+// Silences warnings: "Condition is always true", "Unreachable code"
+#pragma option push -w-ccc -w-rch
+#endif
 
 // Tests that the assertion macros behave like single statements.
 TEST(AssertionSyntaxTest, BasicAssertionsBehavesLikeSingleStatement) {
@@ -3475,6 +3582,11 @@ TEST(ExpectTest, EXPECT_FALSE) {
   EXPECT_NONFATAL_FAILURE(EXPECT_FALSE(2 < 3),
                           "2 < 3");
 }
+
+#ifdef __BORLANDC__
+// Restores warnings after previous "#pragma option push" supressed them
+#pragma option pop
+#endif
 
 // Tests EXPECT_EQ.
 TEST(ExpectTest, EXPECT_EQ) {
@@ -5197,6 +5309,11 @@ TEST(StreamingAssertionsTest, Unconditional) {
                        "expected failure");
 }
 
+#ifdef __BORLANDC__
+// Silences warnings: "Condition is always true", "Unreachable code"
+#pragma option push -w-ccc -w-rch
+#endif
+
 TEST(StreamingAssertionsTest, Truth) {
   EXPECT_TRUE(true) << "unexpected failure";
   ASSERT_TRUE(true) << "unexpected failure";
@@ -5214,6 +5331,11 @@ TEST(StreamingAssertionsTest, Truth2) {
   EXPECT_FATAL_FAILURE(ASSERT_FALSE(true) << "expected failure",
                        "expected failure");
 }
+
+#ifdef __BORLANDC__
+// Restores warnings after previous "#pragma option push" supressed them
+#pragma option pop
+#endif
 
 TEST(StreamingAssertionsTest, IntegerEquals) {
   EXPECT_EQ(1, 1) << "unexpected failure";
