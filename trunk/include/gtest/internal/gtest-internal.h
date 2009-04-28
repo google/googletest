@@ -383,7 +383,7 @@ class FloatingPoint {
   // around may change its bits, although the new value is guaranteed
   // to be also a NAN.  Therefore, don't expect this constructor to
   // preserve the bits in x when x is a NAN.
-  explicit FloatingPoint(const RawType& x) : value_(x) {}
+  explicit FloatingPoint(const RawType& x) { u_.value_ = x; }
 
   // Static methods
 
@@ -392,8 +392,8 @@ class FloatingPoint {
   // This function is needed to test the AlmostEquals() method.
   static RawType ReinterpretBits(const Bits bits) {
     FloatingPoint fp(0);
-    fp.bits_ = bits;
-    return fp.value_;
+    fp.u_.bits_ = bits;
+    return fp.u_.value_;
   }
 
   // Returns the floating-point number that represent positive infinity.
@@ -404,16 +404,16 @@ class FloatingPoint {
   // Non-static methods
 
   // Returns the bits that represents this number.
-  const Bits &bits() const { return bits_; }
+  const Bits &bits() const { return u_.bits_; }
 
   // Returns the exponent bits of this number.
-  Bits exponent_bits() const { return kExponentBitMask & bits_; }
+  Bits exponent_bits() const { return kExponentBitMask & u_.bits_; }
 
   // Returns the fraction bits of this number.
-  Bits fraction_bits() const { return kFractionBitMask & bits_; }
+  Bits fraction_bits() const { return kFractionBitMask & u_.bits_; }
 
   // Returns the sign bit of this number.
-  Bits sign_bit() const { return kSignBitMask & bits_; }
+  Bits sign_bit() const { return kSignBitMask & u_.bits_; }
 
   // Returns true iff this is NAN (not a number).
   bool is_nan() const {
@@ -433,10 +433,17 @@ class FloatingPoint {
     // a NAN must return false.
     if (is_nan() || rhs.is_nan()) return false;
 
-    return DistanceBetweenSignAndMagnitudeNumbers(bits_, rhs.bits_) <= kMaxUlps;
+    return DistanceBetweenSignAndMagnitudeNumbers(u_.bits_, rhs.u_.bits_)
+        <= kMaxUlps;
   }
 
  private:
+  // The data type used to store the actual floating-point number.
+  union FloatingPointUnion {
+    RawType value_;  // The raw floating-point number.
+    Bits bits_;      // The bits that represent the number.
+  };
+
   // Converts an integer from the sign-and-magnitude representation to
   // the biased representation.  More precisely, let N be 2 to the
   // power of (kBitCount - 1), an integer x is represented by the
@@ -471,10 +478,7 @@ class FloatingPoint {
     return (biased1 >= biased2) ? (biased1 - biased2) : (biased2 - biased1);
   }
 
-  union {
-    RawType value_;  // The raw floating-point number.
-    Bits bits_;      // The bits that represent the number.
-  };
+  FloatingPointUnion u_;
 };
 
 // Typedefs the instances of the FloatingPoint template class that we

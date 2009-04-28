@@ -51,6 +51,15 @@ EXTRA_DIST += \
   xcode/Samples/FrameworkSample/widget.h \
   xcode/Samples/FrameworkSample/WidgetFramework.xcodeproj/project.pbxproj
 
+# C++Builder project files
+EXTRA_DIST += \
+  codegear/gtest_all.cc \
+  codegear/gtest_link.cc \
+  codegear/gtest.cbproj \
+  codegear/gtest_main.cbproj \
+  codegear/gtest_unittest.cbproj \
+  codegear/gtest.groupproj
+
 # TODO(wan@google.com): integrate scripts/gen_gtest_pred_impl.py into
 #   the build system such that a user can specify the maximum predicate
 #   arity here and have the script automatically generate the

@@ -220,13 +220,15 @@
 // Defines GTEST_HAS_EXCEPTIONS to 1 if exceptions are enabled, or 0
 // otherwise.
 
-#ifdef _MSC_VER  // Compiled by MSVC?
+#if defined(_MSC_VER) || defined(__BORLANDC__)
+// MSVC's and C++Builder's implementations of the STL use the _HAS_EXCEPTIONS
+// macro to enable exceptions, so we'll do the same.
 // Assumes that exceptions are enabled by default.
-#ifndef _HAS_EXCEPTIONS  // MSVC uses this macro to enable exceptions.
+#ifndef _HAS_EXCEPTIONS
 #define _HAS_EXCEPTIONS 1
 #endif  // _HAS_EXCEPTIONS
 #define GTEST_HAS_EXCEPTIONS _HAS_EXCEPTIONS
-#else  // The compiler is not MSVC.
+#else  // The compiler is not MSVC or C++Builder.
 // gcc defines __EXCEPTIONS to 1 iff exceptions are enabled.  For
 // other compilers, we assume exceptions are disabled to be
 // conservative.
@@ -235,7 +237,7 @@
 #else
 #define GTEST_HAS_EXCEPTIONS 0
 #endif  // defined(__GNUC__) && __EXCEPTIONS
-#endif  // _MSC_VER
+#endif  // defined(_MSC_VER) || defined(__BORLANDC__)
 
 // Determines whether ::std::string and ::string are available.
 
@@ -756,13 +758,22 @@ namespace posix {
 
 typedef struct _stat StatStruct;
 
-inline int FileNo(FILE* file) { return _fileno(file); }
+#ifdef __BORLANDC__
+inline int IsATTY(int fd) { return isatty(fd); }
+inline int StrCaseCmp(const char* s1, const char* s2) {
+  return stricmp(s1, s2);
+}
+inline char* StrDup(const char* src) { return strdup(src); }
+#else
 inline int IsATTY(int fd) { return _isatty(fd); }
-inline int Stat(const char* path, StatStruct* buf) { return _stat(path, buf); }
 inline int StrCaseCmp(const char* s1, const char* s2) {
   return _stricmp(s1, s2);
 }
 inline char* StrDup(const char* src) { return _strdup(src); }
+#endif  // __BORLANDC__
+
+inline int FileNo(FILE* file) { return _fileno(file); }
+inline int Stat(const char* path, StatStruct* buf) { return _stat(path, buf); }
 inline int RmDir(const char* dir) { return _rmdir(dir); }
 inline bool IsDir(const StatStruct& st) {
   return (_S_IFDIR & st.st_mode) != 0;
@@ -778,7 +789,7 @@ inline int Stat(const char* path, StatStruct* buf) { return stat(path, buf); }
 inline int StrCaseCmp(const char* s1, const char* s2) {
   return strcasecmp(s1, s2);
 }
-inline char* StrDup(const char* src) { return ::strdup(src); }
+inline char* StrDup(const char* src) { return strdup(src); }
 inline int RmDir(const char* dir) { return rmdir(dir); }
 inline bool IsDir(const StatStruct& st) { return S_ISDIR(st.st_mode); }
 
@@ -815,6 +826,11 @@ inline const char* StrError(int errnum) { return strerror(errnum); }
 inline const char* GetEnv(const char* name) {
 #ifdef _WIN32_WCE  // We are on Windows CE, which has no environment variables.
   return NULL;
+#elif defined(__BORLANDC__)
+  // Environment variables which we programmatically clear will be set to the
+  // empty string rather than unset (NULL).  Handle that case.
+  const char* const env = getenv(name);
+  return (env != NULL && env[0] != '\0') ? env : NULL;
 #else
   return getenv(name);
 #endif
