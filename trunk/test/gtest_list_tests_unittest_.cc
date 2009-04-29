@@ -40,7 +40,6 @@
 
 #include <gtest/gtest.h>
 
-
 namespace {
 
 // Several different test cases and tests that will be listed.
@@ -78,7 +77,6 @@ TEST(FooDeathTest, Test1) {
 }
 
 }  // namespace
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

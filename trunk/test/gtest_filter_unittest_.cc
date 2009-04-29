@@ -40,7 +40,6 @@
 
 #include <gtest/gtest.h>
 
-
 namespace {
 
 // Test case FooTest.
@@ -54,7 +53,6 @@ TEST_F(FooTest, Abc) {
 TEST_F(FooTest, Xyz) {
   FAIL() << "Expected failure.";
 }
-
 
 // Test case BarTest.
 
@@ -109,7 +107,6 @@ TEST(HasDeathTest, Test2) {
 #endif  // GTEST_HAS_DEATH_TEST
 }
 
-
 // Test case FoobarTest
 
 TEST(DISABLED_FoobarTest, Test1) {
@@ -141,7 +138,6 @@ INSTANTIATE_TEST_CASE_P(SeqQ, ParamTest, testing::Values(5, 6));
 #endif  // GTEST_HAS_PARAM_TEST
 
 }  // namespace
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
