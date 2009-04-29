@@ -37,9 +37,7 @@ namespace testing {
 // TODO(wan@google.com): support using environment variables to
 // control the flag values, like what Google Test does.
 
-// TODO(wan@google.com): change the default value to true after people
-// have a chance to fix their leaked mocks.
-GMOCK_DEFINE_bool_(catch_leaked_mocks, false,
+GMOCK_DEFINE_bool_(catch_leaked_mocks, true,
                    "true iff Google Mock should report leaked mock objects "
                    "as failures.");
 

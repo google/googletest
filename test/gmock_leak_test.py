@@ -55,9 +55,9 @@ TEST_MULTIPLE_LEAKS = PROGRAM_PATH + ' --gtest_filter=*MultipleLeaked*'
 
 class GMockLeakTest(unittest.TestCase):
 
-  def testDoesNotCatchLeakedMockByDefault(self):
-    self.assertEquals(0, os.system(TEST_WITH_EXPECT_CALL))
-    self.assertEquals(0, os.system(TEST_WITH_ON_CALL))
+  def testCatchesLeakedMockByDefault(self):
+    self.assertNotEqual(os.system(TEST_WITH_EXPECT_CALL), 0)
+    self.assertNotEqual(os.system(TEST_WITH_ON_CALL), 0)
 
   def testDoesNotCatchLeakedMockWhenDisabled(self):
     self.assertEquals(
