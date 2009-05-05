@@ -3312,7 +3312,14 @@ void UnitTest::AddTestPartResult(TestPartResultType result_type,
     // with another testing framework) and specify the former on the
     // command line for debugging.
     if (GTEST_FLAG(break_on_failure)) {
+#if GTEST_OS_WINDOWS
+      // Using DebugBreak on Windows allows gtest to still break into a debugger
+      // when a failure happens and both the --gtest_break_on_failure and
+      // the --gtest_catch_exceptions flags are specified.
+      DebugBreak();
+#else
       *static_cast<int*>(NULL) = 1;
+#endif  // GTEST_OS_WINDOWS
     } else if (GTEST_FLAG(throw_on_failure)) {
 #if GTEST_HAS_EXCEPTIONS
       throw GoogleTestFailureException(result);
