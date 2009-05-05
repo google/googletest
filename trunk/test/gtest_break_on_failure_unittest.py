@@ -57,6 +57,9 @@ BREAK_ON_FAILURE_FLAG = 'gtest_break_on_failure'
 # The environment variable for enabling/disabling the throw-on-failure mode.
 THROW_ON_FAILURE_ENV_VAR = 'GTEST_THROW_ON_FAILURE'
 
+# The environment variable for enabling/disabling the catch-exceptions mode.
+CATCH_EXCEPTIONS_ENV_VAR = 'GTEST_CATCH_EXCEPTIONS'
+
 # Path to the gtest_break_on_failure_unittest_ program.
 EXE_PATH = gtest_test_utils.GetTestExecutablePath(
     'gtest_break_on_failure_unittest_')
@@ -193,6 +196,19 @@ class GTestBreakOnFailureUnitTest(unittest.TestCase):
                         expect_seg_fault=1)
     finally:
       SetEnvVar(THROW_ON_FAILURE_ENV_VAR, None)
+
+  if IS_WINDOWS:
+    def testCatchExceptionsDoesNotInterfere(self):
+      """Tests that gtest_catch_exceptions doesn't interfere."""
+
+      SetEnvVar(CATCH_EXCEPTIONS_ENV_VAR, '1')
+      try:
+        self.RunAndVerify(env_var_value='1',
+                          flag_value='1',
+                          expect_seg_fault=1)
+      finally:
+        SetEnvVar(CATCH_EXCEPTIONS_ENV_VAR, None)
+
 
 if __name__ == '__main__':
   gtest_test_utils.Main()
