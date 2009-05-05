@@ -166,16 +166,16 @@ inline To down_cast(From* f) {  // so we only accept pointers
   return static_cast<To>(f);
 }
 
-// The GMOCK_COMPILE_ASSERT macro can be used to verify that a compile time
+// The GMOCK_COMPILE_ASSERT_ macro can be used to verify that a compile time
 // expression is true. For example, you could use it to verify the
 // size of a static array:
 //
-//   GMOCK_COMPILE_ASSERT(ARRAYSIZE(content_type_names) == CONTENT_NUM_TYPES,
-//                        content_type_names_incorrect_size);
+//   GMOCK_COMPILE_ASSERT_(ARRAYSIZE(content_type_names) == CONTENT_NUM_TYPES,
+//                         content_type_names_incorrect_size);
 //
 // or to make sure a struct is smaller than a certain size:
 //
-//   GMOCK_COMPILE_ASSERT(sizeof(foo) < 128, foo_too_large);
+//   GMOCK_COMPILE_ASSERT_(sizeof(foo) < 128, foo_too_large);
 //
 // The second argument to the macro is the name of the variable. If
 // the expression is false, most compilers will issue a warning/error

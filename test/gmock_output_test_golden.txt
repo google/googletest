@@ -298,4 +298,5 @@ Stack trace:
 
 FILE:#: ERROR: this mock object should be deleted but never is. Its address is @0x#.
 FILE:#: ERROR: this mock object should be deleted but never is. Its address is @0x#.
-ERROR: 2 leaked mock objects found at program exit.
+FILE:#: ERROR: this mock object should be deleted but never is. Its address is @0x#.
+ERROR: 3 leaked mock objects found at program exit.

@@ -64,6 +64,7 @@ GOLDEN_NAME = 'gmock_output_test_golden.txt'
 GOLDEN_PATH = os.path.join(gmock_test_utils.GetSourceDir(),
                            GOLDEN_NAME)
 
+
 def ToUnixLineEnding(s):
   """Changes all Windows/Mac line endings in s to UNIX line endings."""
 
@@ -109,15 +110,38 @@ def RemoveMemoryAddresses(output):
   return re.sub(r'@\w+', '@0x#', output)
 
 
-def NormalizeOutput(output):
-  """Normalizes output (the output of gmock_output_test_.exe)."""
+def RemoveTestNamesOfLeakedMocks(output):
+  """Removes the test names of leaked mock objects from the test output."""
+
+  return re.sub(r'\(used in test .+\) ', '', output)
+
+
+def GetLeakyTests(output):
+  """Returns a list of test names that leak mock objects."""
+
+  # findall() returns a list of all matches of the regex in output.
+  # For example, if '(used in test FooTest.Bar)' is in output, the
+  # list will contain 'FooTest.Bar'.
+  return re.findall(r'\(used in test (.+)\)', output)
+
+
+def GetNormalizedOutputAndLeakyTests(output):
+  """Normalizes the output of gmock_output_test_.
+
+  Args:
+    output: The test output.
+
+  Returns:
+    A tuple (the normalized test output, the list of test names that have
+    leaked mocks).
+  """
 
   output = ToUnixLineEnding(output)
   output = RemoveReportHeaderAndFooter(output)
   output = NormalizeErrorMarker(output)
   output = RemoveLocations(output)
   output = RemoveMemoryAddresses(output)
-  return output
+  return (RemoveTestNamesOfLeakedMocks(output), GetLeakyTests(output))
 
 
 def IterShellCommandOutput(cmd, stdin_string=None):
@@ -167,9 +191,8 @@ def GetShellCommandOutput(cmd, stdin_string=None):
   return string.join(lines, '')
 
 
-def GetCommandOutput(cmd):
-  """Runs a command and returns its output with all file location
-  info stripped off.
+def GetNormalizedCommandOutputAndLeakyTests(cmd):
+  """Runs a command and returns its normalized output and a list of leaky tests.
 
   Args:
     cmd:  the shell command.
@@ -177,22 +200,29 @@ def GetCommandOutput(cmd):
 
   # Disables exception pop-ups on Windows.
   os.environ['GTEST_CATCH_EXCEPTIONS'] = '1'
-  return NormalizeOutput(GetShellCommandOutput(cmd, ''))
+  return GetNormalizedOutputAndLeakyTests(GetShellCommandOutput(cmd, ''))
 
 
 class GMockOutputTest(unittest.TestCase):
   def testOutput(self):
-    output = GetCommandOutput(COMMAND)
+    (output, leaky_tests) = GetNormalizedCommandOutputAndLeakyTests(COMMAND)
     golden_file = open(GOLDEN_PATH, 'rb')
     golden = golden_file.read()
     golden_file.close()
 
+    # The normalized output should match the golden file.
     self.assertEquals(golden, output)
+
+    # The raw output should contain 2 leaked mock object errors for
+    # test GMockOutputTest.CatchesLeakedMocks.
+    self.assertEquals(['GMockOutputTest.CatchesLeakedMocks',
+                       'GMockOutputTest.CatchesLeakedMocks'],
+                      leaky_tests)
 
 
 if __name__ == '__main__':
   if sys.argv[1:] == [GENGOLDEN_FLAG]:
-    output = GetCommandOutput(COMMAND)
+    (output, _) = GetNormalizedCommandOutputAndLeakyTests(COMMAND)
     golden_file = open(GOLDEN_PATH, 'wb')
     golden_file.write(output)
     golden_file.close()

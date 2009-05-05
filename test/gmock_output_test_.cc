@@ -258,6 +258,16 @@ TEST_F(GMockOutputTest, CatchesLeakedMocks) {
   // Both foo1 and foo2 are deliberately leaked.
 }
 
+void TestCatchesLeakedMocksInAdHocTests() {
+  MockFoo* foo = new MockFoo;
+
+  // Invokes EXPECT_CALL on foo.
+  EXPECT_CALL(*foo, Bar2(_, _));
+  foo->Bar2(2, 1);
+
+  // foo is deliberately leaked.
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleMock(&argc, argv);
 
@@ -266,5 +276,6 @@ int main(int argc, char **argv) {
   testing::GMOCK_FLAG(catch_leaked_mocks) = true;
   testing::GMOCK_FLAG(verbose) = "warning";
 
+  TestCatchesLeakedMocksInAdHocTests();
   return RUN_ALL_TESTS();
 }

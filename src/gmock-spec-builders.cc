@@ -168,6 +168,8 @@ struct MockObjectState {
   // invoked on this mock object.
   const char* first_used_file;
   int first_used_line;
+  ::std::string first_used_test_case;
+  ::std::string first_used_test;
   bool leakable;  // true iff it's OK to leak the object.
   FunctionMockers function_mockers;  // All registered methods of the object.
 };
@@ -203,8 +205,13 @@ class MockObjectRegistry {
       const MockObjectState& state = it->second;
       internal::FormatFileLocation(
           state.first_used_file, state.first_used_line, &cout);
-      cout << " ERROR: this mock object should be deleted but never is. "
-           << "Its address is @" << it->first << ".";
+      cout << " ERROR: this mock object";
+      if (state.first_used_test != "") {
+        cout << " (used in test " << state.first_used_test_case << "."
+             << state.first_used_test << ")";
+      }
+      cout << " should be deleted but never is. Its address is @"
+           << it->first << ".";
       leaked_count++;
     }
     if (leaked_count > 0) {
@@ -357,6 +364,15 @@ void Mock::RegisterUseByOnCallOrExpectCall(
   if (state.first_used_file == NULL) {
     state.first_used_file = file;
     state.first_used_line = line;
+    const TestInfo* const test_info =
+        UnitTest::GetInstance()->current_test_info();
+    if (test_info != NULL) {
+      // TODO(wan@google.com): record the test case name when the
+      // ON_CALL or EXPECT_CALL is invoked from SetUpTestCase() or
+      // TearDownTestCase().
+      state.first_used_test_case = test_info->test_case_name();
+      state.first_used_test = test_info->name();
+    }
   }
 }
 
