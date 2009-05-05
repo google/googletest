@@ -359,12 +359,12 @@
 // gtest-port.h's responsibility to #include the header implementing
 // tr1/tuple.
 #if GTEST_HAS_TR1_TUPLE
-#if defined(__GNUC__)
-// GCC implements tr1/tuple in the <tr1/tuple> header.  This does not
-// conform to the TR1 spec, which requires the header to be <tuple>.
+#if defined(__GNUC__) && (GTEST_GCC_VER_ >= 40000)
+// GCC 4.0+ implements tr1/tuple in the <tr1/tuple> header.  This does
+// not conform to the TR1 spec, which requires the header to be <tuple>.
 #include <tr1/tuple>
 #else
-// If the compiler is not GCC, we assume the user is using a
+// If the compiler is not GCC 4.0+, we assume the user is using a
 // spec-conforming TR1 implementation.
 #include <tuple>
 #endif  // __GNUC__

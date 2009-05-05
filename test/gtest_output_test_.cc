@@ -50,13 +50,6 @@
 #include <pthread.h>
 #endif  // GTEST_HAS_PTHREAD
 
-#if GTEST_OS_LINUX
-#include <string.h>
-#include <signal.h>
-#include <string>
-#include <vector>
-#endif  // GTEST_OS_LINUX
-
 using testing::ScopedFakeTestPartResultReporter;
 using testing::TestPartResultArray;
 

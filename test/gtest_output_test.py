@@ -262,7 +262,6 @@ class GTestOutputTest(unittest.TestCase):
     if SUPPORTS_DEATH_TESTS and SUPPORTS_TYPED_TESTS:
       self.assert_(golden == output)
     else:
-      print RemoveTestCounts(self.RemoveUnsupportedTests(golden))
       self.assert_(RemoveTestCounts(self.RemoveUnsupportedTests(golden)) ==
                    RemoveTestCounts(output))
 
