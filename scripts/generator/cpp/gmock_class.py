@@ -20,7 +20,7 @@ This program will read in a C++ source file and output the Google Mock class
 for the specified class.
 
 Usage:
-  gmock_class.py header-file.h ClassName
+  gmock_class.py header-file.h [ClassName1] [ClassName2] ...
 
 Output is sent to stdout.
 """
@@ -79,10 +79,12 @@ def _GenerateMethods(output_lines, source, class_node):
       output_lines.append(line)
 
 
-def _GenerateMock(filename, source, ast_list, class_name):
+def _GenerateMock(filename, source, ast_list, desired_class_names):
   lines = []
   for node in ast_list:
-    if isinstance(node, ast.Class) and node.body and node.name == class_name:
+    if (isinstance(node, ast.Class) and node.body and 
+        (desired_class_names is None or node.name in desired_class_names)):
+      class_name = node.name
       class_node = node
       # Add namespace before the class.
       if class_node.namespace:
@@ -115,11 +117,15 @@ def _GenerateMock(filename, source, ast_list, class_name):
   if lines:
     sys.stdout.write('\n'.join(lines))
   else:
-    sys.stderr.write('Class %s not found\n' % class_name)
+    if desired_class_names is None:
+      sys.stderr.write('No classes not found\n')
+    else:
+      class_names = ', '.join(sorted(desired_class_names))
+      sys.stderr.write('Class(es) not found: %s\n' % class_names)
 
 
 def main(argv=sys.argv):
-  if len(argv) != 3:
+  if len(argv) < 2:
     sys.stdout.write(__doc__)
     return 1
 
@@ -131,7 +137,10 @@ def main(argv=sys.argv):
   except:
     sys.stderr.write('Unable to use indent of %s\n' % os.environ.get('INDENT'))
 
-  filename, class_name = argv[1:]
+  filename = argv[1]
+  class_name = None
+  if len(argv) >= 3:
+    class_name = set(argv[2:])
   source = utils.ReadFile(filename)
   if source is None:
     return 1
