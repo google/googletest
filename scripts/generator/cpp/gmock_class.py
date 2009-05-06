@@ -54,7 +54,11 @@ def _GenerateMethods(output_lines, source, class_node):
         const = 'CONST_'
       return_type = 'void'
       if node.return_type:
-        return_type = node.return_type.name
+        # Add modifier bits like const.
+        modifiers = ''
+        if node.return_type.modifiers:
+          modifiers = ' '.join(node.return_type.modifiers) + ' '
+        return_type = modifiers + node.return_type.name
         if node.return_type.pointer:
           return_type += '*'
         if node.return_type.reference:
