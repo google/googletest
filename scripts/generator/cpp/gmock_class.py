@@ -35,7 +35,7 @@ import sys
 from cpp import ast
 from cpp import utils
 
-# How many spaces to indent.  Can me set with INDENT environment variable.
+# How many spaces to indent.  Can set me with INDENT environment variable.
 _INDENT = 2
 
 
