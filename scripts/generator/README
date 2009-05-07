@@ -14,7 +14,7 @@ to generate a Google Mock class.
 Make sure to install the scripts somewhere in your path.  Then you can
 run the program.
 
-  gmock_gen.py header-file.h [ClassName1] [ClassName2] ...
+  gmock_gen.py header-file.h [ClassName]...
 
 If no ClassNames are specified, all classes in the file are emitted.
 
