@@ -31,6 +31,7 @@ __author__ = 'nnorwitz@google.com (Neal Norwitz)'
 
 import os
 import re
+import sets
 import sys
 
 from cpp import ast
@@ -82,7 +83,7 @@ def _GenerateMethods(output_lines, source, class_node):
 
 
 def _GenerateMocks(filename, source, ast_list, desired_class_names):
-  processed_class_names = set()
+  processed_class_names = sets.Set()
   lines = []
   for node in ast_list:
     if (isinstance(node, ast.Class) and node.body and
@@ -122,11 +123,11 @@ def _GenerateMocks(filename, source, ast_list, desired_class_names):
   sys.stdout.write('\n'.join(lines))
 
   if desired_class_names:
-    missing_class_names = ', '.join(
-        sorted(desired_class_names - processed_class_names))
-    if missing_class_names:
+    missing_class_name_list = list(desired_class_names - processed_class_names)
+    if missing_class_name_list:
+      missing_class_name_list.sort()
       sys.stderr.write('Class(es) not found in %s: %s\n' %
-                       (filename, missing_class_names))
+                       (filename, ', '.join(missing_class_name_list)))
   elif not processed_class_names:
       sys.stderr.write('No class found in %s\n' % filename)
 
@@ -149,7 +150,7 @@ def main(argv=sys.argv):
   filename = argv[1]
   desired_class_names = None  # None means all classes in the source file.
   if len(argv) >= 3:
-    desired_class_names = set(argv[2:])
+    desired_class_names = sets.Set(argv[2:])
   source = utils.ReadFile(filename)
   if source is None:
     return 1

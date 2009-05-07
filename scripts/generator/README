@@ -3,7 +3,7 @@ The Google Mock class generator is an application that is part of cppclean.
 For more information about cppclean, see the README.cppclean file or
 visit http://code.google.com/p/cppclean/
 
-cppclean requires Python 2.4 or later.  If you don't have Python installed
+cppclean requires Python 2.3.5 or later.  If you don't have Python installed
 on your system, you will also need to install it.  You can download Python
 from:  http://www.python.org/download/releases/
 
