@@ -48,6 +48,8 @@ import unittest
 
 # Constants.
 
+IS_WINDOWS = os.name == 'nt'
+
 # The environment variable for enabling/disabling the break-on-failure mode.
 BREAK_ON_FAILURE_ENV_VAR = 'GTEST_BREAK_ON_FAILURE'
 
