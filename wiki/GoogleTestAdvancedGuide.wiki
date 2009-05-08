@@ -418,6 +418,23 @@ test case (not test) `*DeathTest` when it contains a death test, as
 demonstrated in the above example. The `Death Tests And Threads` section below
 explains why.
 
+If a test fixture class is shared by normal tests and death tests, you
+can use typedef to introduce an alias for the fixture class and avoid
+duplicating its code:
+{{{
+class FooTest : public ::testing::Test { ... };
+
+typedef FooTest FooDeathTest;
+
+TEST_F(FooTest, DoesThis) {
+  // normal test
+}
+
+TEST_F(FooDeathTest, DoesThat) {
+  // death test
+}
+}}}
+
 _Availability:_ Linux, Windows (requires MSVC 8.0 or above), Cygwin, and Mac (the latter three are supported since v1.3.0)
 
 == Regular Expression Syntax ==
