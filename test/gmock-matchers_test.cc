@@ -366,6 +366,76 @@ TEST(MatcherCastTest, FromSameType) {
   EXPECT_FALSE(m2.Matches(1));
 }
 
+class Base {};
+class Derived : public Base {};
+
+// Tests that SafeMatcherCast<T>(m) works when m is a polymorphic matcher.
+TEST(SafeMatcherCastTest, FromPolymorphicMatcher) {
+  Matcher<char> m2 = SafeMatcherCast<char>(Eq(32));
+  EXPECT_TRUE(m2.Matches(' '));
+  EXPECT_FALSE(m2.Matches('\n'));
+}
+
+// Tests that SafeMatcherCast<T>(m) works when m is a Matcher<U> where T
+// can be implicitly converted to U.
+TEST(SafeMatcherCastTest, FromImplicitlyConvertibleType) {
+  Matcher<double> m1 = DoubleEq(1.0);
+  Matcher<int> m2 = SafeMatcherCast<int>(m1);
+  EXPECT_TRUE(m2.Matches(1));
+  EXPECT_FALSE(m2.Matches(2));
+}
+
+// Tests that SafeMatcherCast<T>(m) works when m is a Matcher<U> where T and U
+// are pointers or references to a derived and a base class, correspondingly.
+TEST(SafeMatcherCastTest, FromBaseClass) {
+  Derived d, d2;
+  Matcher<Base*> m1 = Eq(&d);
+  Matcher<Derived*> m2 = SafeMatcherCast<Derived*>(m1);
+  EXPECT_TRUE(m2.Matches(&d));
+  EXPECT_FALSE(m2.Matches(&d2));
+
+  Matcher<Base&> m3 = Ref(d);
+  Matcher<Derived&> m4 = SafeMatcherCast<Derived&>(m3);
+  EXPECT_TRUE(m4.Matches(d));
+  EXPECT_FALSE(m4.Matches(d2));
+}
+
+// Tests that SafeMatcherCast<T&>(m) works when m is a Matcher<const T&>.
+TEST(SafeMatcherCastTest, FromConstReferenceToReference) {
+  int n = 0;
+  Matcher<const int&> m1 = Ref(n);
+  Matcher<int&> m2 = SafeMatcherCast<int&>(m1);
+  int n1 = 0;
+  EXPECT_TRUE(m2.Matches(n));
+  EXPECT_FALSE(m2.Matches(n1));
+}
+
+// Tests that MatcherCast<const T&>(m) works when m is a Matcher<T>.
+TEST(SafeMatcherCastTest, FromNonReferenceToConstReference) {
+  Matcher<int> m1 = Eq(0);
+  Matcher<const int&> m2 = SafeMatcherCast<const int&>(m1);
+  EXPECT_TRUE(m2.Matches(0));
+  EXPECT_FALSE(m2.Matches(1));
+}
+
+// Tests that SafeMatcherCast<T&>(m) works when m is a Matcher<T>.
+TEST(SafeMatcherCastTest, FromNonReferenceToReference) {
+  Matcher<int> m1 = Eq(0);
+  Matcher<int&> m2 = SafeMatcherCast<int&>(m1);
+  int n = 0;
+  EXPECT_TRUE(m2.Matches(n));
+  n = 1;
+  EXPECT_FALSE(m2.Matches(n));
+}
+
+// Tests that SafeMatcherCast<T>(m) works when m is a Matcher<T>.
+TEST(SafeMatcherCastTest, FromSameType) {
+  Matcher<int> m1 = Eq(0);
+  Matcher<int> m2 = SafeMatcherCast<int>(m1);
+  EXPECT_TRUE(m2.Matches(0));
+  EXPECT_FALSE(m2.Matches(1));
+}
+
 // Tests that A<T>() matches any value of type T.
 TEST(ATest, MatchesAnyValue) {
   // Tests a matcher for a value type.
@@ -625,9 +695,6 @@ TEST(RefTest, CanBeUsedAsMatcherForConstReference) {
 // Tests that Ref(variable) is covariant, i.e. Ref(derived) can be
 // used wherever Ref(base) can be used (Ref(derived) is a sub-type
 // of Ref(base), but not vice versa.
-
-class Base {};
-class Derived : public Base {};
 
 TEST(RefTest, IsCovariant) {
   Base base, base2;
@@ -1355,6 +1422,16 @@ TEST(NotTest, CanDescribeSelf) {
   EXPECT_EQ("is not equal to 5", Describe(m));
 }
 
+// Tests that monomorphic matchers are safely cast by the Not matcher.
+TEST(NotTest, NotMatcherSafelyCastsMonomorphicMatchers) {
+  // greater_than_5 is a monomorphic matcher.
+  Matcher<int> greater_than_5 = Gt(5);
+
+  Matcher<const int&> m = Not(greater_than_5);
+  Matcher<int&> m2 = Not(greater_than_5);
+  Matcher<int&> m3 = Not(m);
+}
+
 // Tests that AllOf(m1, ..., mn) matches any value that matches all of
 // the given matchers.
 TEST(AllOfTest, MatchesWhenAllMatch) {
@@ -1415,6 +1492,21 @@ TEST(AllOfTest, CanDescribeSelf) {
             "(is not equal to 7))))", Describe(m));
 }
 
+// Tests that monomorphic matchers are safely cast by the AllOf matcher.
+TEST(AllOfTest, AllOfMatcherSafelyCastsMonomorphicMatchers) {
+  // greater_than_5 and less_than_10 are monomorphic matchers.
+  Matcher<int> greater_than_5 = Gt(5);
+  Matcher<int> less_than_10 = Lt(10);
+
+  Matcher<const int&> m = AllOf(greater_than_5, less_than_10);
+  Matcher<int&> m2 = AllOf(greater_than_5, less_than_10);
+  Matcher<int&> m3 = AllOf(greater_than_5, m2);
+
+  // Tests that BothOf works when composing itself.
+  Matcher<const int&> m4 = AllOf(greater_than_5, less_than_10, less_than_10);
+  Matcher<int&> m5 = AllOf(greater_than_5, less_than_10, less_than_10);
+}
+
 // Tests that AnyOf(m1, ..., mn) matches any value that matches at
 // least one of the given matchers.
 TEST(AnyOfTest, MatchesWhenAnyMatches) {
@@ -1471,6 +1563,21 @@ TEST(AnyOfTest, CanDescribeSelf) {
             "((is equal to 5) or "
             "(is equal to 7))))",
             Describe(m));
+}
+
+// Tests that monomorphic matchers are safely cast by the AnyOf matcher.
+TEST(AnyOfTest, AnyOfMatcherSafelyCastsMonomorphicMatchers) {
+  // greater_than_5 and less_than_10 are monomorphic matchers.
+  Matcher<int> greater_than_5 = Gt(5);
+  Matcher<int> less_than_10 = Lt(10);
+
+  Matcher<const int&> m = AnyOf(greater_than_5, less_than_10);
+  Matcher<int&> m2 = AnyOf(greater_than_5, less_than_10);
+  Matcher<int&> m3 = AnyOf(greater_than_5, m2);
+
+  // Tests that EitherOf works when composing itself.
+  Matcher<const int&> m4 = AnyOf(greater_than_5, less_than_10, less_than_10);
+  Matcher<int&> m5 = AnyOf(greater_than_5, less_than_10, less_than_10);
 }
 
 // The following predicate function and predicate functor are for

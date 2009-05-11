@@ -143,7 +143,11 @@ class DefaultActionSpec {
       : file_(file),
         line_(line),
         matchers_(matchers),
-        extra_matcher_(_),
+        // By default, extra_matcher_ should match anything.  However,
+        // we cannot initialize it with _ as that triggers a compiler
+        // bug in Symbian's C++ compiler (cannot decide between two
+        // overloaded constructors of Matcher<const ArgumentTuple&>).
+        extra_matcher_(A<const ArgumentTuple&>()),
         last_clause_(NONE) {
   }
 
@@ -576,7 +580,11 @@ class Expectation : public ExpectationBase {
       : ExpectationBase(file, line),
         owner_(owner),
         matchers_(m),
-        extra_matcher_(_),
+        // By default, extra_matcher_ should match anything.  However,
+        // we cannot initialize it with _ as that triggers a compiler
+        // bug in Symbian's C++ compiler (cannot decide between two
+        // overloaded constructors of Matcher<const ArgumentTuple&>).
+        extra_matcher_(A<const ArgumentTuple&>()),
         repeated_action_specified_(false),
         repeated_action_(DoDefault()),
         retires_on_saturation_(false),

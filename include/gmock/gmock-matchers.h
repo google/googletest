@@ -171,7 +171,7 @@ class Matcher : public internal::MatcherBase<T> {
   explicit Matcher(const MatcherInterface<T>* impl)
       : internal::MatcherBase<T>(impl) {}
 
-  // Implicit constructor here allows ipeople to write
+  // Implicit constructor here allows people to write
   // EXPECT_CALL(foo, Bar(5)) instead of EXPECT_CALL(foo, Bar(Eq(5))) sometimes
   Matcher(T value);  // NOLINT
 };
@@ -309,6 +309,39 @@ inline PolymorphicMatcher<Impl> MakePolymorphicMatcher(const Impl& impl) {
 // statically converted to the argument type of m.
 template <typename T, typename M>
 Matcher<T> MatcherCast(M m);
+
+// TODO(vladl@google.com): Modify the implementation to reject casting
+// Matcher<int> to Matcher<double>.
+// Implements SafeMatcherCast().
+//
+// This overload handles polymorphic matchers only since monomorphic
+// matchers are handled by the next one.
+template <typename T, typename M>
+inline Matcher<T> SafeMatcherCast(M polymorphic_matcher) {
+  return Matcher<T>(polymorphic_matcher);
+}
+
+// This overload handles monomorphic matchers.
+//
+// In general, if type T can be implicitly converted to type U, we can
+// safely convert a Matcher<U> to a Matcher<T> (i.e. Matcher is
+// contravariant): just keep a copy of the original Matcher<U>, convert the
+// argument from type T to U, and then pass it to the underlying Matcher<U>.
+// The only exception is when U is a reference and T is not, as the
+// underlying Matcher<U> may be interested in the argument's address, which
+// is not preserved in the conversion from T to U.
+template <typename T, typename U>
+Matcher<T> SafeMatcherCast(const Matcher<U>& matcher) {
+  // Enforce that T can be implicitly converted to U.
+  GMOCK_COMPILE_ASSERT_((internal::ImplicitlyConvertible<T, U>::value),
+                        T_must_be_implicitly_convertible_to_U);
+  // Enforce that we are not converting a non-reference type T to a reference
+  // type U.
+  GMOCK_COMPILE_ASSERT_(
+      internal::is_reference<T>::value || !internal::is_reference<U>::value,
+      cannot_convert_non_referentce_arg_to_reference);
+  return MatcherCast<T>(matcher);
+}
 
 // A<T>() returns a matcher that matches any value of type T.
 template <typename T>
@@ -927,6 +960,10 @@ GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Ne, !=, "not equal to");
 
 #undef GMOCK_IMPLEMENT_COMPARISON2_MATCHER_
 
+// TODO(vladl@google.com): Move Impl outside of NotMatcher and rename it
+// NotMatcherImpl to reduce compilation overhead and the size of the binary.
+// This also applies to BothOfMatcher::Impl and EitherOfMatcher::Impl.
+//
 // Implements the Not(m) matcher, which matches a value that doesn't
 // match matcher m.
 template <typename InnerMatcher>
@@ -945,7 +982,8 @@ class NotMatcher {
   template <typename T>
   class Impl : public MatcherInterface<T> {
    public:
-    explicit Impl(const Matcher<T>& matcher) : matcher_(matcher) {}
+    explicit Impl(InnerMatcher matcher)
+        : matcher_(SafeMatcherCast<T>(matcher)) {}
 
     virtual bool Matches(T x) const {
       return !matcher_.Matches(x);
@@ -990,8 +1028,9 @@ class BothOfMatcher {
   template <typename T>
   class Impl : public MatcherInterface<T> {
    public:
-    Impl(const Matcher<T>& matcher1, const Matcher<T>& matcher2)
-        : matcher1_(matcher1), matcher2_(matcher2) {}
+    Impl(Matcher1 matcher1, Matcher2 matcher2)
+        : matcher1_(SafeMatcherCast<T>(matcher1)),
+          matcher2_(SafeMatcherCast<T>(matcher2)) {}
 
     virtual bool Matches(T x) const {
       return matcher1_.Matches(x) && matcher2_.Matches(x);
@@ -1071,8 +1110,9 @@ class EitherOfMatcher {
   template <typename T>
   class Impl : public MatcherInterface<T> {
    public:
-    Impl(const Matcher<T>& matcher1, const Matcher<T>& matcher2)
-        : matcher1_(matcher1), matcher2_(matcher2) {}
+    Impl(Matcher1 matcher1, Matcher2 matcher2)
+        : matcher1_(SafeMatcherCast<T>(matcher1)),
+          matcher2_(SafeMatcherCast<T>(matcher2)) {}
 
     virtual bool Matches(T x) const {
       return matcher1_.Matches(x) || matcher2_.Matches(x);
@@ -1433,7 +1473,11 @@ class FieldMatcher {
     matcher_.DescribeNegationTo(os);
   }
 
-  void ExplainMatchResultTo(const Class& obj, ::std::ostream* os) const {
+  // The first argument of ExplainMatchResultTo() is needed to help
+  // Symbian's C++ compiler choose which overload to use.  Its type is
+  // true_type iff the Field() matcher is used to match a pointer.
+  void ExplainMatchResultTo(false_type /* is_not_pointer */, const Class& obj,
+                            ::std::ostream* os) const {
     ::std::stringstream ss;
     matcher_.ExplainMatchResultTo(obj.*field_, &ss);
     const internal::string s = ss.str();
@@ -1442,9 +1486,13 @@ class FieldMatcher {
     }
   }
 
-  void ExplainMatchResultTo(const Class* p, ::std::ostream* os) const {
+  void ExplainMatchResultTo(true_type /* is_pointer */, const Class* p,
+                            ::std::ostream* os) const {
     if (p != NULL) {
-      ExplainMatchResultTo(*p, os);
+      // Since *p has a field, it must be a class/struct/union type
+      // and thus cannot be a pointer.  Therefore we pass false_type()
+      // as the first argument.
+      ExplainMatchResultTo(false_type(), *p, os);
     }
   }
  private:
@@ -1452,18 +1500,12 @@ class FieldMatcher {
   const Matcher<const FieldType&> matcher_;
 };
 
-// Explains the result of matching an object against a field matcher.
-template <typename Class, typename FieldType>
+// Explains the result of matching an object or pointer against a field matcher.
+template <typename Class, typename FieldType, typename T>
 void ExplainMatchResultTo(const FieldMatcher<Class, FieldType>& matcher,
-                          const Class& obj, ::std::ostream* os) {
-  matcher.ExplainMatchResultTo(obj, os);
-}
-
-// Explains the result of matching a pointer against a field matcher.
-template <typename Class, typename FieldType>
-void ExplainMatchResultTo(const FieldMatcher<Class, FieldType>& matcher,
-                          const Class* p, ::std::ostream* os) {
-  matcher.ExplainMatchResultTo(p, os);
+                          const T& value, ::std::ostream* os) {
+  matcher.ExplainMatchResultTo(
+      typename ::testing::internal::is_pointer<T>::type(), value, os);
 }
 
 // Implements the Property() matcher for matching a property
@@ -1501,7 +1543,11 @@ class PropertyMatcher {
     matcher_.DescribeNegationTo(os);
   }
 
-  void ExplainMatchResultTo(const Class& obj, ::std::ostream* os) const {
+  // The first argument of ExplainMatchResultTo() is needed to help
+  // Symbian's C++ compiler choose which overload to use.  Its type is
+  // true_type iff the Property() matcher is used to match a pointer.
+  void ExplainMatchResultTo(false_type /* is_not_pointer */, const Class& obj,
+                            ::std::ostream* os) const {
     ::std::stringstream ss;
     matcher_.ExplainMatchResultTo((obj.*property_)(), &ss);
     const internal::string s = ss.str();
@@ -1510,9 +1556,13 @@ class PropertyMatcher {
     }
   }
 
-  void ExplainMatchResultTo(const Class* p, ::std::ostream* os) const {
+  void ExplainMatchResultTo(true_type /* is_pointer */, const Class* p,
+                            ::std::ostream* os) const {
     if (p != NULL) {
-      ExplainMatchResultTo(*p, os);
+      // Since *p has a property method, it must be a
+      // class/struct/union type and thus cannot be a pointer.
+      // Therefore we pass false_type() as the first argument.
+      ExplainMatchResultTo(false_type(), *p, os);
     }
   }
  private:
@@ -1520,18 +1570,13 @@ class PropertyMatcher {
   const Matcher<RefToConstProperty> matcher_;
 };
 
-// Explains the result of matching an object against a property matcher.
-template <typename Class, typename PropertyType>
+// Explains the result of matching an object or pointer against a
+// property matcher.
+template <typename Class, typename PropertyType, typename T>
 void ExplainMatchResultTo(const PropertyMatcher<Class, PropertyType>& matcher,
-                          const Class& obj, ::std::ostream* os) {
-  matcher.ExplainMatchResultTo(obj, os);
-}
-
-// Explains the result of matching a pointer against a property matcher.
-template <typename Class, typename PropertyType>
-void ExplainMatchResultTo(const PropertyMatcher<Class, PropertyType>& matcher,
-                          const Class* p, ::std::ostream* os) {
-  matcher.ExplainMatchResultTo(p, os);
+                          const T& value, ::std::ostream* os) {
+  matcher.ExplainMatchResultTo(
+      typename ::testing::internal::is_pointer<T>::type(), value, os);
 }
 
 // Type traits specifying various features of different functors for ResultOf.

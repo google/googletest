@@ -1495,5 +1495,157 @@ TEST(ThrowActionTest, ThrowsGivenExceptionInNullaryFunction) {
 
 #endif  // GTEST_HAS_EXCEPTIONS
 
+// Tests that ACTION_TEMPLATE works when there is no value parameter.
+ACTION_TEMPLATE(CreateNew,
+                HAS_1_TEMPLATE_PARAMS(typename, T),
+                AND_0_VALUE_PARAMS()) {
+  return new T;
+}
+
+TEST(ActionTemplateTest, WorksWithoutValueParam) {
+  const Action<int*()> a = CreateNew<int>();
+  int* p = a.Perform(make_tuple());
+  delete p;
+}
+
+// Tests that ACTION_TEMPLATE works when there are value parameters.
+ACTION_TEMPLATE(CreateNew,
+                HAS_1_TEMPLATE_PARAMS(typename, T),
+                AND_1_VALUE_PARAMS(a0)) {
+  return new T(a0);
+}
+
+TEST(ActionTemplateTest, WorksWithValueParams) {
+  const Action<int*()> a = CreateNew<int>(42);
+  int* p = a.Perform(make_tuple());
+  EXPECT_EQ(42, *p);
+  delete p;
+}
+
+// Tests that ACTION_TEMPLATE works for integral template parameters.
+ACTION_TEMPLATE(MyDeleteArg,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_0_VALUE_PARAMS()) {
+  delete std::tr1::get<k>(args);
+}
+
+// Resets a bool variable in the destructor.
+class BoolResetter {
+ public:
+  explicit BoolResetter(bool* value) : value_(value) {}
+  ~BoolResetter() { *value_ = false; }
+ private:
+  bool* const value_;
+};
+
+TEST(ActionTemplateTest, WorksForIntegralTemplateParams) {
+  const Action<void(int*, BoolResetter*)> a = MyDeleteArg<1>();
+  int n = 0;
+  bool b = true;
+  BoolResetter* resetter = new BoolResetter(&b);
+  a.Perform(make_tuple(&n, resetter));
+  EXPECT_FALSE(b);  // Verifies that resetter is deleted.
+}
+
+// Tests that ACTION_TEMPLATES works for template template parameters.
+ACTION_TEMPLATE(ReturnSmartPointer,
+                HAS_1_TEMPLATE_PARAMS(template <typename Pointee> class,
+                                      Pointer),
+                AND_1_VALUE_PARAMS(pointee)) {
+  return Pointer<pointee_type>(new pointee_type(pointee));
+}
+
+TEST(ActionTemplateTest, WorksForTemplateTemplateParameters) {
+  using ::testing::internal::linked_ptr;
+  const Action<linked_ptr<int>()> a = ReturnSmartPointer<linked_ptr>(42);
+  linked_ptr<int> p = a.Perform(make_tuple());
+  EXPECT_EQ(42, *p);
+}
+
+// Tests that ACTION_TEMPLATE works for 10 template parameters.
+template <typename T1, typename T2, typename T3, int k4, bool k5,
+          unsigned int k6, typename T7, typename T8, typename T9>
+struct GiantTemplate {
+ public:
+  explicit GiantTemplate(int a_value) : value(a_value) {}
+  int value;
+};
+
+ACTION_TEMPLATE(ReturnGiant,
+                HAS_10_TEMPLATE_PARAMS(
+                    typename, T1,
+                    typename, T2,
+                    typename, T3,
+                    int, k4,
+                    bool, k5,
+                    unsigned int, k6,
+                    class, T7,
+                    class, T8,
+                    class, T9,
+                    template <typename T> class, T10),
+                AND_1_VALUE_PARAMS(value)) {
+  return GiantTemplate<T10<T1>, T2, T3, k4, k5, k6, T7, T8, T9>(value);
+}
+
+TEST(ActionTemplateTest, WorksFor10TemplateParameters) {
+  using ::testing::internal::linked_ptr;
+  typedef GiantTemplate<linked_ptr<int>, bool, double, 5,
+      true, 6, char, unsigned, int> Giant;
+  const Action<Giant()> a = ReturnGiant<
+      int, bool, double, 5, true, 6, char, unsigned, int, linked_ptr>(42);
+  Giant giant = a.Perform(make_tuple());
+  EXPECT_EQ(42, giant.value);
+}
+
+// Tests that ACTION_TEMPLATE works for 10 value parameters.
+ACTION_TEMPLATE(ReturnSum,
+                HAS_1_TEMPLATE_PARAMS(typename, Number),
+                AND_10_VALUE_PARAMS(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10)) {
+  return static_cast<Number>(v1) + v2 + v3 + v4 + v5 + v6 + v7 + v8 + v9 + v10;
+}
+
+TEST(ActionTemplateTest, WorksFor10ValueParameters) {
+  const Action<int()> a = ReturnSum<int>(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+  EXPECT_EQ(55, a.Perform(make_tuple()));
+}
+
+// Tests that ACTION_TEMPLATE and ACTION/ACTION_P* can be overloaded
+// on the number of value parameters.
+
+ACTION(ReturnSum) { return 0; }
+
+ACTION_P(ReturnSum, x) { return x; }
+
+ACTION_TEMPLATE(ReturnSum,
+                HAS_1_TEMPLATE_PARAMS(typename, Number),
+                AND_2_VALUE_PARAMS(v1, v2)) {
+  return static_cast<Number>(v1) + v2;
+}
+
+ACTION_TEMPLATE(ReturnSum,
+                HAS_1_TEMPLATE_PARAMS(typename, Number),
+                AND_3_VALUE_PARAMS(v1, v2, v3)) {
+  return static_cast<Number>(v1) + v2 + v3;
+}
+
+ACTION_TEMPLATE(ReturnSum,
+                HAS_2_TEMPLATE_PARAMS(typename, Number, int, k),
+                AND_4_VALUE_PARAMS(v1, v2, v3, v4)) {
+  return static_cast<Number>(v1) + v2 + v3 + v4 + k;
+}
+
+TEST(ActionTemplateTest, CanBeOverloadedOnNumberOfValueParameters) {
+  const Action<int()> a0 = ReturnSum();
+  const Action<int()> a1 = ReturnSum(1);
+  const Action<int()> a2 = ReturnSum<int>(1, 2);
+  const Action<int()> a3 = ReturnSum<int>(1, 2, 3);
+  const Action<int()> a4 = ReturnSum<int, 10000>(2000, 300, 40, 5);
+  EXPECT_EQ(0, a0.Perform(make_tuple()));
+  EXPECT_EQ(1, a1.Perform(make_tuple()));
+  EXPECT_EQ(3, a2.Perform(make_tuple()));
+  EXPECT_EQ(6, a3.Perform(make_tuple()));
+  EXPECT_EQ(12345, a4.Perform(make_tuple()));
+}
+
 }  // namespace gmock_generated_actions_test
 }  // namespace testing

@@ -3,6 +3,7 @@ $$ This is a Pump source file.  Please use Pump to convert it to
 $$ gmock-generated-variadic-actions.h.
 $$
 $var n = 10  $$ The maximum arity we support.
+$$}} This meta comment fixes auto-indentation in editors.
 // Copyright 2007, Google Inc.
 // All rights reserved.
 //
@@ -717,6 +718,239 @@ $range k 0..n-1
 $for k [[,\
     arg$k[[]]_type arg$k GTEST_ATTRIBUTE_UNUSED_]]
 
+
+// Sometimes you want to give an action explicit template parameters
+// that cannot be inferred from its value parameters.  ACTION() and
+// ACTION_P*() don't support that.  ACTION_TEMPLATE() remedies that
+// and can be viewed as an extension to ACTION() and ACTION_P*().
+//
+// The syntax:
+//
+//   ACTION_TEMPLATE(ActionName,
+//                   HAS_m_TEMPLATE_PARAMS(kind1, name1, ..., kind_m, name_m),
+//                   AND_n_VALUE_PARAMS(p1, ..., p_n)) { statements; }
+//
+// defines an action template that takes m explicit template
+// parameters and n value parameters.  name_i is the name of the i-th
+// template parameter, and kind_i specifies whether it's a typename,
+// an integral constant, or a template.  p_i is the name of the i-th
+// value parameter.
+//
+// Example:
+//
+//   // DuplicateArg<k, T>(output) converts the k-th argument of the mock
+//   // function to type T and copies it to *output.
+//   ACTION_TEMPLATE(DuplicateArg,
+//                   HAS_2_TEMPLATE_PARAMS(int, k, typename, T),
+//                   AND_1_VALUE_PARAMS(output)) {
+//     *output = T(std::tr1::get<k>(args));
+//   }
+//   ...
+//     int n;
+//     EXPECT_CALL(mock, Foo(_, _))
+//         .WillOnce(DuplicateArg<1, unsigned char>(&n));
+//
+// To create an instance of an action template, write:
+//
+//   ActionName<t1, ..., t_m>(v1, ..., v_n)
+//
+// where the ts are the template arguments and the vs are the value
+// arguments.  The value argument types are inferred by the compiler.
+// If you want to explicitly specify the value argument types, you can
+// provide additional template arguments:
+//
+//   ActionName<t1, ..., t_m, u1, ..., u_k>(v1, ..., v_n)
+//
+// where u_i is the desired type of v_i.
+//
+// ACTION_TEMPLATE and ACTION/ACTION_P* can be overloaded on the
+// number of value parameters, but not on the number of template
+// parameters.  Without the restriction, the meaning of the following
+// is unclear:
+//
+//   OverloadedAction<int, bool>(x);
+//
+// Are we using a single-template-parameter action where 'bool' refers
+// to the type of x, or are we using a two-template-parameter action
+// where the compiler is asked to infer the type of x?
+//
+// Implementation notes:
+//
+// GMOCK_INTERNAL_*_HAS_m_TEMPLATE_PARAMS and
+// GMOCK_INTERNAL_*_AND_n_VALUE_PARAMS are internal macros for
+// implementing ACTION_TEMPLATE.  The main trick we use is to create
+// new macro invocations when expanding a macro.  For example, we have
+//
+//   #define ACTION_TEMPLATE(name, template_params, value_params)
+//       ... GMOCK_INTERNAL_DECL_##template_params ...
+//
+// which causes ACTION_TEMPLATE(..., HAS_1_TEMPLATE_PARAMS(typename, T), ...)
+// to expand to
+//
+//       ... GMOCK_INTERNAL_DECL_HAS_1_TEMPLATE_PARAMS(typename, T) ...
+//
+// Since GMOCK_INTERNAL_DECL_HAS_1_TEMPLATE_PARAMS is a macro, the
+// preprocessor will continue to expand it to
+//
+//       ... typename T ...
+//
+// This technique conforms to the C++ standard and is portable.  It
+// allows us to implement action templates using O(N) code, where N is
+// the maximum number of template/value parameters supported.  Without
+// using it, we'd have to devote O(N^2) amount of code to implement all
+// combinations of m and n.
+
+// Declares the template parameters.
+
+$range j 1..n
+$for j [[
+$range m 0..j-1
+#define GMOCK_INTERNAL_DECL_HAS_$j[[]]
+_TEMPLATE_PARAMS($for m, [[kind$m, name$m]]) $for m, [[kind$m name$m]]
+
+
+]]
+
+// Lists the template parameters.
+
+$for j [[
+$range m 0..j-1
+#define GMOCK_INTERNAL_LIST_HAS_$j[[]]
+_TEMPLATE_PARAMS($for m, [[kind$m, name$m]]) $for m, [[name$m]]
+
+
+]]
+
+// Declares the types of value parameters.
+
+$for i [[
+$range j 0..i-1
+#define GMOCK_INTERNAL_DECL_TYPE_AND_$i[[]]
+_VALUE_PARAMS($for j, [[p$j]]) $for j [[, typename p$j##_type]]
+
+
+]]
+
+// Initializes the value parameters.
+
+$for i [[
+$range j 0..i-1
+#define GMOCK_INTERNAL_INIT_AND_$i[[]]_VALUE_PARAMS($for j, [[p$j]])\
+    ($for j, [[p$j##_type gmock_p$j]])$if i>0 [[ : ]]$for j, [[p$j(gmock_p$j)]]
+
+
+]]
+
+// Declares the fields for storing the value parameters.
+
+$for i [[
+$range j 0..i-1
+#define GMOCK_INTERNAL_DEFN_AND_$i[[]]
+_VALUE_PARAMS($for j, [[p$j]]) $for j [[p$j##_type p$j; ]]
+
+
+]]
+
+// Lists the value parameters.
+
+$for i [[
+$range j 0..i-1
+#define GMOCK_INTERNAL_LIST_AND_$i[[]]
+_VALUE_PARAMS($for j, [[p$j]]) $for j, [[p$j]]
+
+
+]]
+
+// Lists the value parameter types.
+
+$for i [[
+$range j 0..i-1
+#define GMOCK_INTERNAL_LIST_TYPE_AND_$i[[]]
+_VALUE_PARAMS($for j, [[p$j]]) $for j [[, p$j##_type]]
+
+
+]]
+
+// Declares the value parameters.
+
+$for i [[
+$range j 0..i-1
+#define GMOCK_INTERNAL_DECL_AND_$i[[]]_VALUE_PARAMS($for j, [[p$j]]) [[]]
+$for j, [[p$j##_type p$j]]
+
+
+]]
+
+// The suffix of the class template implementing the action template.
+$for i [[
+
+
+$range j 0..i-1
+#define GMOCK_INTERNAL_COUNT_AND_$i[[]]_VALUE_PARAMS($for j, [[p$j]]) [[]]
+$if i==1 [[P]] $elif i>=2 [[P$i]]
+]]
+
+
+// The name of the class template implementing the action template.
+#define GMOCK_ACTION_CLASS_(name, value_params)\
+    GMOCK_CONCAT_TOKEN_(name##Action, GMOCK_INTERNAL_COUNT_##value_params)
+
+$range k 0..n-1
+
+#define ACTION_TEMPLATE(name, template_params, value_params)\
+  template <GMOCK_INTERNAL_DECL_##template_params\
+            GMOCK_INTERNAL_DECL_TYPE_##value_params>\
+  class GMOCK_ACTION_CLASS_(name, value_params) {\
+   public:\
+    GMOCK_ACTION_CLASS_(name, value_params)\
+        GMOCK_INTERNAL_INIT_##value_params {}\
+    template <typename F>\
+    class gmock_Impl : public ::testing::ActionInterface<F> {\
+     public:\
+      typedef F function_type;\
+      typedef typename ::testing::internal::Function<F>::Result return_type;\
+      typedef typename ::testing::internal::Function<F>::ArgumentTuple\
+          args_type;\
+      explicit gmock_Impl GMOCK_INTERNAL_INIT_##value_params {}\
+      virtual return_type Perform(const args_type& args) {\
+        return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
+            Perform(this, args);\
+      }\
+      template <$for k, [[typename arg$k[[]]_type]]>\
+      return_type gmock_PerformImpl(const args_type& args[[]]
+$for k [[, arg$k[[]]_type arg$k]]) const;\
+      GMOCK_INTERNAL_DEFN_##value_params\
+    };\
+    template <typename F> operator ::testing::Action<F>() const {\
+      return ::testing::Action<F>(\
+          new gmock_Impl<F>(GMOCK_INTERNAL_LIST_##value_params));\
+    }\
+    GMOCK_INTERNAL_DEFN_##value_params\
+  };\
+  template <GMOCK_INTERNAL_DECL_##template_params\
+            GMOCK_INTERNAL_DECL_TYPE_##value_params>\
+  inline GMOCK_ACTION_CLASS_(name, value_params)<\
+      GMOCK_INTERNAL_LIST_##template_params\
+      GMOCK_INTERNAL_LIST_TYPE_##value_params> name(\
+          GMOCK_INTERNAL_DECL_##value_params) {\
+    return GMOCK_ACTION_CLASS_(name, value_params)<\
+        GMOCK_INTERNAL_LIST_##template_params\
+        GMOCK_INTERNAL_LIST_TYPE_##value_params>(\
+            GMOCK_INTERNAL_LIST_##value_params);\
+  }\
+  template <GMOCK_INTERNAL_DECL_##template_params\
+            GMOCK_INTERNAL_DECL_TYPE_##value_params>\
+  template <typename F>\
+  template <typename arg0_type, typename arg1_type, typename arg2_type,\
+      typename arg3_type, typename arg4_type, typename arg5_type,\
+      typename arg6_type, typename arg7_type, typename arg8_type,\
+      typename arg9_type>\
+  typename ::testing::internal::Function<F>::Result\
+      GMOCK_ACTION_CLASS_(name, value_params)<\
+          GMOCK_INTERNAL_LIST_##template_params\
+          GMOCK_INTERNAL_LIST_TYPE_##value_params>::gmock_Impl<F>::\
+              gmock_PerformImpl(\
+          GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
 
 $for i
 

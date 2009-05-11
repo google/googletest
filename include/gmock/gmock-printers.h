@@ -263,11 +263,10 @@ void PrintTo(const T& value, ::std::ostream* os) {
   //
   // For protocol messages, we want to give people a chance to
   // override Google Mock's format by defining a PrintTo() or
-  // operator<<.  For STL containers, we believe the Google Mock's
-  // format is superior to what util/gtl/stl-logging.h offers.
-  // Therefore we don't want it to be accidentally overridden by the
-  // latter (even if the user includes stl-logging.h through other
-  // headers indirectly, Google Mock's format will still be used).
+  // operator<<.  For STL containers, other formats can be
+  // incompatible with Google Mock's format for the container
+  // elements; therefore we check for container types here to ensure
+  // that our format is used.
   DefaultPrintTo(IsContainerTest<T>(0), value, os);
 }
 
