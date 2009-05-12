@@ -341,7 +341,7 @@ Since these precondition checks cause the processes to die, we call such tests
 _death tests_. More generally, any test that checks that a program terminates
 in an expected fashion is also a death test.
 
-If you want to test `EXPECT_*()/ASSERT_*()` failures in your test code, see [#"Catching"_Failures Catching Failures]. 
+If you want to test `EXPECT_*()/ASSERT_*()` failures in your test code, see [#Catching_Failures Catching Failures]. 
 
 ==  How to Write a Death Test  ==
 
@@ -1317,7 +1317,7 @@ TEST_F(FooTest, Baz) { ... }
 }  // namespace my_namespace
 }}}
 
-=  "Catching" Failures  =
+=  Catching Failures  =
 
 If you are building a testing utility on top of Google Test, you'll
 want to test your utility.  What framework would you use to test it?
