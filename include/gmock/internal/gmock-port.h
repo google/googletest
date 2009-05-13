@@ -162,7 +162,9 @@ inline To down_cast(From* f) {  // so we only accept pointers
     implicit_cast<From*, To>(0);
   }
 
+#if GTEST_HAS_RTTI
   assert(f == NULL || dynamic_cast<To>(f) != NULL);  // RTTI: debug mode only!
+#endif
   return static_cast<To>(f);
 }
 
