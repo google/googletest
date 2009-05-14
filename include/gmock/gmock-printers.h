@@ -341,12 +341,11 @@ inline void PrintTo(char* s, ::std::ostream* os) {
   PrintTo(implicit_cast<const char*>(s), os);
 }
 
-// MSVC compiler can be configured to define whar_t as a typedef
-// of unsigned short. Defining an overload for const wchar_t* in that case
-// would cause pointers to unsigned shorts be printed as wide strings,
-// possibly accessing more memory than intended and causing invalid
-// memory accesses. MSVC defines _NATIVE_WCHAR_T_DEFINED symbol when
-// wchar_t is implemented as a native type.
+// MSVC can be configured to define wchar_t as a typedef of unsigned
+// short.  It defines _NATIVE_WCHAR_T_DEFINED when wchar_t is a native
+// type.  When wchar_t is a typedef, defining an overload for const
+// wchar_t* would cause unsigned short* be printed as a wide string,
+// possibly causing invalid memory accesses.
 #if !defined(_MSC_VER) || defined(_NATIVE_WCHAR_T_DEFINED)
 // Overloads for wide C strings
 void PrintTo(const wchar_t* s, ::std::ostream* os);

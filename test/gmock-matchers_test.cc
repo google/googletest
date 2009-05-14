@@ -376,13 +376,18 @@ TEST(SafeMatcherCastTest, FromPolymorphicMatcher) {
   EXPECT_FALSE(m2.Matches('\n'));
 }
 
-// Tests that SafeMatcherCast<T>(m) works when m is a Matcher<U> where T
-// can be implicitly converted to U.
-TEST(SafeMatcherCastTest, FromImplicitlyConvertibleType) {
+// Tests that SafeMatcherCast<T>(m) works when m is a Matcher<U> where
+// T and U are arithmetic types and T can be losslessly converted to
+// U.
+TEST(SafeMatcherCastTest, FromLosslesslyConvertibleArithmeticType) {
   Matcher<double> m1 = DoubleEq(1.0);
-  Matcher<int> m2 = SafeMatcherCast<int>(m1);
-  EXPECT_TRUE(m2.Matches(1));
-  EXPECT_FALSE(m2.Matches(2));
+  Matcher<float> m2 = SafeMatcherCast<float>(m1);
+  EXPECT_TRUE(m2.Matches(1.0f));
+  EXPECT_FALSE(m2.Matches(2.0f));
+
+  Matcher<char> m3 = SafeMatcherCast<char>(TypedEq<int>('a'));
+  EXPECT_TRUE(m3.Matches('a'));
+  EXPECT_FALSE(m3.Matches('b'));
 }
 
 // Tests that SafeMatcherCast<T>(m) works when m is a Matcher<U> where T and U

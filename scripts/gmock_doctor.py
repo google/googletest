@@ -36,7 +36,7 @@ __author__ = 'wan@google.com (Zhanyong Wan)'
 import re
 import sys
 
-_VERSION = '0.1.0.80421'
+_VERSION = '1.0.0'
 
 _COMMON_GMOCK_SYMBOLS = [
     # Matchers
@@ -148,11 +148,14 @@ Please use ReturnRef() instead."""
 def _NeedToReturnSomethingDiagnoser(msg):
   """Diagnoses the NRS disease, given the error messages by gcc."""
 
-  regex = (r'(?P<file>.*):(?P<line>\d+):\s+instantiated from here\n'
-           r'.*gmock-actions\.h.*error: void value not ignored')
+  regex = (r'(?P<file>.*):(?P<line>\d+):\s+'
+           r'(instantiated from here\n.'
+           r'*gmock-actions\.h.*error: void value not ignored)'
+           r'|(error: control reaches end of non-void function)')
   diagnosis = """%(file)s:%(line)s:
 You are using an action that returns void, but it needs to return
-*something*.  Please tell it *what* to return."""
+*something*.  Please tell it *what* to return.  Perhaps you can use
+the pattern DoAll(some_action, Return(some_value))?"""
   return _GenericDiagnoser('NRS', 'Need to Return Something',
                            regex, diagnosis, msg)
 
@@ -324,6 +327,23 @@ Note: the line number may be off; please fix all instances of Return(NULL)."""
                            regex, diagnosis, msg)
 
 
+def _WrongMockMethodMacroDiagnoser(msg):
+  """Diagnoses the WMM disease, given the error messages by gcc."""
+
+  regex = (r'(?P<file>.*):(?P<line>\d+):\s+'
+           r'.*this_method_does_not_take_(?P<wrong_args>\d+)_argument.*\n'
+           r'.*\n'
+           r'.*candidates are.*FunctionMocker<[^>]+A(?P<args>\d+)\)>'
+           )
+
+  diagnosis = """%(file)s:%(line)s:
+You are using MOCK_METHOD%(wrong_args)s to define a mock method that has
+%(args)s arguments. Use MOCK_METHOD%(args)s (or MOCK_CONST_METHOD%(args)s,
+MOCK_METHOD%(args)s_T, MOCK_CONST_METHOD%(args)s_T as appropriate) instead."""
+  return _GenericDiagnoser('WMM', 'Wrong MOCK_METHODn macro',
+                           regex, diagnosis, msg)
+
+
 
 _DIAGNOSERS = [
     _IncompleteByReferenceArgumentDiagnoser,
@@ -337,6 +357,7 @@ _DIAGNOSERS = [
     _OverloadedFunctionMatcherDiagnoser,
     _OverloadedMethodActionDiagnoser1,
     _OverloadedMethodActionDiagnoser2,
+    _WrongMockMethodMacroDiagnoser,
     ]
 
 

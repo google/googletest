@@ -443,264 +443,6 @@ class CallableHelper {
 
 };  // class CallableHelper
 
-// Invokes a nullary callable argument.
-template <size_t N>
-class InvokeArgumentAction0 {
- public:
-  template <typename Result, typename ArgumentTuple>
-  static Result Perform(const ArgumentTuple& args) {
-    return CallableHelper<Result>::Call(::std::tr1::get<N>(args));
-  }
-};
-
-// Invokes a unary callable argument with the given argument.
-template <size_t N, typename A1>
-class InvokeArgumentAction1 {
- public:
-  // We deliberately pass a1 by value instead of const reference here
-  // in case it is a C-string literal.
-  //
-  // Since this function is defined inline, the compiler can get rid
-  // of the copying of the arguments.  Therefore the performance won't
-  // be hurt.
-  explicit InvokeArgumentAction1(A1 a1) : arg1_(a1) {}
-
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& args) {
-    return CallableHelper<Result>::Call(::std::tr1::get<N>(args), arg1_);
-  }
- private:
-  const A1 arg1_;
-};
-
-// Invokes a binary callable argument with the given arguments.
-template <size_t N, typename A1, typename A2>
-class InvokeArgumentAction2 {
- public:
-  InvokeArgumentAction2(A1 a1, A2 a2) :
-      arg1_(a1), arg2_(a2) {}
-
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& args) {
-    return CallableHelper<Result>::Call(::std::tr1::get<N>(args), arg1_, arg2_);
-  }
- private:
-  const A1 arg1_;
-  const A2 arg2_;
-};
-
-// Invokes a ternary callable argument with the given arguments.
-template <size_t N, typename A1, typename A2, typename A3>
-class InvokeArgumentAction3 {
- public:
-  InvokeArgumentAction3(A1 a1, A2 a2, A3 a3) :
-      arg1_(a1), arg2_(a2), arg3_(a3) {}
-
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& args) {
-    return CallableHelper<Result>::Call(::std::tr1::get<N>(args), arg1_, arg2_,
-        arg3_);
-  }
- private:
-  const A1 arg1_;
-  const A2 arg2_;
-  const A3 arg3_;
-};
-
-// Invokes a 4-ary callable argument with the given arguments.
-template <size_t N, typename A1, typename A2, typename A3, typename A4>
-class InvokeArgumentAction4 {
- public:
-  InvokeArgumentAction4(A1 a1, A2 a2, A3 a3, A4 a4) :
-      arg1_(a1), arg2_(a2), arg3_(a3), arg4_(a4) {}
-
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& args) {
-    return CallableHelper<Result>::Call(::std::tr1::get<N>(args), arg1_, arg2_,
-        arg3_, arg4_);
-  }
- private:
-  const A1 arg1_;
-  const A2 arg2_;
-  const A3 arg3_;
-  const A4 arg4_;
-};
-
-// Invokes a 5-ary callable argument with the given arguments.
-template <size_t N, typename A1, typename A2, typename A3, typename A4,
-    typename A5>
-class InvokeArgumentAction5 {
- public:
-  InvokeArgumentAction5(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) :
-      arg1_(a1), arg2_(a2), arg3_(a3), arg4_(a4), arg5_(a5) {}
-
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& args) {
-    // We extract the callable to a variable before invoking it, in
-    // case it is a functor passed by value and its operator() is not
-    // const.
-    typename ::std::tr1::tuple_element<N, ArgumentTuple>::type function =
-        ::std::tr1::get<N>(args);
-    return function(arg1_, arg2_, arg3_, arg4_, arg5_);
-  }
- private:
-  const A1 arg1_;
-  const A2 arg2_;
-  const A3 arg3_;
-  const A4 arg4_;
-  const A5 arg5_;
-};
-
-// Invokes a 6-ary callable argument with the given arguments.
-template <size_t N, typename A1, typename A2, typename A3, typename A4,
-    typename A5, typename A6>
-class InvokeArgumentAction6 {
- public:
-  InvokeArgumentAction6(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) :
-      arg1_(a1), arg2_(a2), arg3_(a3), arg4_(a4), arg5_(a5), arg6_(a6) {}
-
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& args) {
-    // We extract the callable to a variable before invoking it, in
-    // case it is a functor passed by value and its operator() is not
-    // const.
-    typename ::std::tr1::tuple_element<N, ArgumentTuple>::type function =
-        ::std::tr1::get<N>(args);
-    return function(arg1_, arg2_, arg3_, arg4_, arg5_, arg6_);
-  }
- private:
-  const A1 arg1_;
-  const A2 arg2_;
-  const A3 arg3_;
-  const A4 arg4_;
-  const A5 arg5_;
-  const A6 arg6_;
-};
-
-// Invokes a 7-ary callable argument with the given arguments.
-template <size_t N, typename A1, typename A2, typename A3, typename A4,
-    typename A5, typename A6, typename A7>
-class InvokeArgumentAction7 {
- public:
-  InvokeArgumentAction7(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) :
-      arg1_(a1), arg2_(a2), arg3_(a3), arg4_(a4), arg5_(a5), arg6_(a6),
-          arg7_(a7) {}
-
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& args) {
-    // We extract the callable to a variable before invoking it, in
-    // case it is a functor passed by value and its operator() is not
-    // const.
-    typename ::std::tr1::tuple_element<N, ArgumentTuple>::type function =
-        ::std::tr1::get<N>(args);
-    return function(arg1_, arg2_, arg3_, arg4_, arg5_, arg6_, arg7_);
-  }
- private:
-  const A1 arg1_;
-  const A2 arg2_;
-  const A3 arg3_;
-  const A4 arg4_;
-  const A5 arg5_;
-  const A6 arg6_;
-  const A7 arg7_;
-};
-
-// Invokes a 8-ary callable argument with the given arguments.
-template <size_t N, typename A1, typename A2, typename A3, typename A4,
-    typename A5, typename A6, typename A7, typename A8>
-class InvokeArgumentAction8 {
- public:
-  InvokeArgumentAction8(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
-      A8 a8) :
-      arg1_(a1), arg2_(a2), arg3_(a3), arg4_(a4), arg5_(a5), arg6_(a6),
-          arg7_(a7), arg8_(a8) {}
-
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& args) {
-    // We extract the callable to a variable before invoking it, in
-    // case it is a functor passed by value and its operator() is not
-    // const.
-    typename ::std::tr1::tuple_element<N, ArgumentTuple>::type function =
-        ::std::tr1::get<N>(args);
-    return function(arg1_, arg2_, arg3_, arg4_, arg5_, arg6_, arg7_, arg8_);
-  }
- private:
-  const A1 arg1_;
-  const A2 arg2_;
-  const A3 arg3_;
-  const A4 arg4_;
-  const A5 arg5_;
-  const A6 arg6_;
-  const A7 arg7_;
-  const A8 arg8_;
-};
-
-// Invokes a 9-ary callable argument with the given arguments.
-template <size_t N, typename A1, typename A2, typename A3, typename A4,
-    typename A5, typename A6, typename A7, typename A8, typename A9>
-class InvokeArgumentAction9 {
- public:
-  InvokeArgumentAction9(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8,
-      A9 a9) :
-      arg1_(a1), arg2_(a2), arg3_(a3), arg4_(a4), arg5_(a5), arg6_(a6),
-          arg7_(a7), arg8_(a8), arg9_(a9) {}
-
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& args) {
-    // We extract the callable to a variable before invoking it, in
-    // case it is a functor passed by value and its operator() is not
-    // const.
-    typename ::std::tr1::tuple_element<N, ArgumentTuple>::type function =
-        ::std::tr1::get<N>(args);
-    return function(arg1_, arg2_, arg3_, arg4_, arg5_, arg6_, arg7_, arg8_,
-        arg9_);
-  }
- private:
-  const A1 arg1_;
-  const A2 arg2_;
-  const A3 arg3_;
-  const A4 arg4_;
-  const A5 arg5_;
-  const A6 arg6_;
-  const A7 arg7_;
-  const A8 arg8_;
-  const A9 arg9_;
-};
-
-// Invokes a 10-ary callable argument with the given arguments.
-template <size_t N, typename A1, typename A2, typename A3, typename A4,
-    typename A5, typename A6, typename A7, typename A8, typename A9,
-    typename A10>
-class InvokeArgumentAction10 {
- public:
-  InvokeArgumentAction10(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
-      A8 a8, A9 a9, A10 a10) :
-      arg1_(a1), arg2_(a2), arg3_(a3), arg4_(a4), arg5_(a5), arg6_(a6),
-          arg7_(a7), arg8_(a8), arg9_(a9), arg10_(a10) {}
-
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& args) {
-    // We extract the callable to a variable before invoking it, in
-    // case it is a functor passed by value and its operator() is not
-    // const.
-    typename ::std::tr1::tuple_element<N, ArgumentTuple>::type function =
-        ::std::tr1::get<N>(args);
-    return function(arg1_, arg2_, arg3_, arg4_, arg5_, arg6_, arg7_, arg8_,
-        arg9_, arg10_);
-  }
- private:
-  const A1 arg1_;
-  const A2 arg2_;
-  const A3 arg3_;
-  const A4 arg4_;
-  const A5 arg5_;
-  const A6 arg6_;
-  const A7 arg7_;
-  const A8 arg8_;
-  const A9 arg9_;
-  const A10 arg10_;
-};
-
 // An INTERNAL macro for extracting the type of a tuple field.  It's
 // subject to change without notice - DO NOT USE IN USER CODE!
 #define GMOCK_FIELD_(Tuple, N) \
@@ -1138,140 +880,6 @@ PolymorphicAction<internal::InvokeMethodAction<Class, MethodPtr> > Invoke(
 template <typename T>
 inline internal::ReferenceWrapper<T> ByRef(T& l_value) {  // NOLINT
   return internal::ReferenceWrapper<T>(l_value);
-}
-
-// Various overloads for InvokeArgument<N>().
-//
-// The InvokeArgument<N>(a1, a2, ..., a_k) action invokes the N-th
-// (0-based) argument, which must be a k-ary callable, of the mock
-// function, with arguments a1, a2, ..., a_k.
-//
-// Notes:
-//
-//   1. The arguments are passed by value by default.  If you need to
-//   pass an argument by reference, wrap it inside ByRef().  For
-//   example,
-//
-//     InvokeArgument<1>(5, string("Hello"), ByRef(foo))
-//
-//   passes 5 and string("Hello") by value, and passes foo by
-//   reference.
-//
-//   2. If the callable takes an argument by reference but ByRef() is
-//   not used, it will receive the reference to a copy of the value,
-//   instead of the original value.  For example, when the 0-th
-//   argument of the mock function takes a const string&, the action
-//
-//     InvokeArgument<0>(string("Hello"))
-//
-//   makes a copy of the temporary string("Hello") object and passes a
-//   reference of the copy, instead of the original temporary object,
-//   to the callable.  This makes it easy for a user to define an
-//   InvokeArgument action from temporary values and have it performed
-//   later.
-template <size_t N>
-inline PolymorphicAction<internal::InvokeArgumentAction0<N> > InvokeArgument() {
-  return MakePolymorphicAction(internal::InvokeArgumentAction0<N>());
-}
-
-// We deliberately pass a1 by value instead of const reference here in
-// case it is a C-string literal.  If we had declared the parameter as
-// 'const A1& a1' and write InvokeArgument<0>("Hi"), the compiler
-// would've thought A1 is 'char[3]', which causes trouble as the
-// implementation needs to copy a value of type A1.  By declaring the
-// parameter as 'A1 a1', the compiler will correctly infer that A1 is
-// 'const char*' when it sees InvokeArgument<0>("Hi").
-//
-// Since this function is defined inline, the compiler can get rid of
-// the copying of the arguments.  Therefore the performance won't be
-// hurt.
-template <size_t N, typename A1>
-inline PolymorphicAction<internal::InvokeArgumentAction1<N, A1> >
-InvokeArgument(A1 a1) {
-  return MakePolymorphicAction(internal::InvokeArgumentAction1<N, A1>(a1));
-}
-
-template <size_t N, typename A1, typename A2>
-inline PolymorphicAction<internal::InvokeArgumentAction2<N, A1, A2> >
-InvokeArgument(A1 a1, A2 a2) {
-  return MakePolymorphicAction(
-      internal::InvokeArgumentAction2<N, A1, A2>(a1, a2));
-}
-
-template <size_t N, typename A1, typename A2, typename A3>
-inline PolymorphicAction<internal::InvokeArgumentAction3<N, A1, A2, A3> >
-InvokeArgument(A1 a1, A2 a2, A3 a3) {
-  return MakePolymorphicAction(
-      internal::InvokeArgumentAction3<N, A1, A2, A3>(a1, a2, a3));
-}
-
-template <size_t N, typename A1, typename A2, typename A3, typename A4>
-inline PolymorphicAction<internal::InvokeArgumentAction4<N, A1, A2, A3, A4> >
-InvokeArgument(A1 a1, A2 a2, A3 a3, A4 a4) {
-  return MakePolymorphicAction(
-      internal::InvokeArgumentAction4<N, A1, A2, A3, A4>(a1, a2, a3, a4));
-}
-
-template <size_t N, typename A1, typename A2, typename A3, typename A4,
-    typename A5>
-inline PolymorphicAction<internal::InvokeArgumentAction5<N, A1, A2, A3, A4,
-    A5> >
-InvokeArgument(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-  return MakePolymorphicAction(
-      internal::InvokeArgumentAction5<N, A1, A2, A3, A4, A5>(a1, a2, a3, a4,
-          a5));
-}
-
-template <size_t N, typename A1, typename A2, typename A3, typename A4,
-    typename A5, typename A6>
-inline PolymorphicAction<internal::InvokeArgumentAction6<N, A1, A2, A3, A4, A5,
-    A6> >
-InvokeArgument(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
-  return MakePolymorphicAction(
-      internal::InvokeArgumentAction6<N, A1, A2, A3, A4, A5, A6>(a1, a2, a3,
-          a4, a5, a6));
-}
-
-template <size_t N, typename A1, typename A2, typename A3, typename A4,
-    typename A5, typename A6, typename A7>
-inline PolymorphicAction<internal::InvokeArgumentAction7<N, A1, A2, A3, A4, A5,
-    A6, A7> >
-InvokeArgument(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
-  return MakePolymorphicAction(
-      internal::InvokeArgumentAction7<N, A1, A2, A3, A4, A5, A6, A7>(a1, a2,
-          a3, a4, a5, a6, a7));
-}
-
-template <size_t N, typename A1, typename A2, typename A3, typename A4,
-    typename A5, typename A6, typename A7, typename A8>
-inline PolymorphicAction<internal::InvokeArgumentAction8<N, A1, A2, A3, A4, A5,
-    A6, A7, A8> >
-InvokeArgument(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
-  return MakePolymorphicAction(
-      internal::InvokeArgumentAction8<N, A1, A2, A3, A4, A5, A6, A7, A8>(a1,
-          a2, a3, a4, a5, a6, a7, a8));
-}
-
-template <size_t N, typename A1, typename A2, typename A3, typename A4,
-    typename A5, typename A6, typename A7, typename A8, typename A9>
-inline PolymorphicAction<internal::InvokeArgumentAction9<N, A1, A2, A3, A4, A5,
-    A6, A7, A8, A9> >
-InvokeArgument(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
-  return MakePolymorphicAction(
-      internal::InvokeArgumentAction9<N, A1, A2, A3, A4, A5, A6, A7, A8,
-          A9>(a1, a2, a3, a4, a5, a6, a7, a8, a9));
-}
-
-template <size_t N, typename A1, typename A2, typename A3, typename A4,
-    typename A5, typename A6, typename A7, typename A8, typename A9,
-    typename A10>
-inline PolymorphicAction<internal::InvokeArgumentAction10<N, A1, A2, A3, A4,
-    A5, A6, A7, A8, A9, A10> >
-InvokeArgument(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9,
-    A10 a10) {
-  return MakePolymorphicAction(
-      internal::InvokeArgumentAction10<N, A1, A2, A3, A4, A5, A6, A7, A8, A9,
-          A10>(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10));
 }
 
 // WithoutArgs(inner_action) can be used in a mock function with a
@@ -2715,271 +2323,153 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
 // updated.
 namespace testing {
 
-namespace internal {
+// Various overloads for InvokeArgument<N>().
+//
+// The InvokeArgument<N>(a1, a2, ..., a_k) action invokes the N-th
+// (0-based) argument, which must be a k-ary callable, of the mock
+// function, with arguments a1, a2, ..., a_k.
+//
+// Notes:
+//
+//   1. The arguments are passed by value by default.  If you need to
+//   pass an argument by reference, wrap it inside ByRef().  For
+//   example,
+//
+//     InvokeArgument<1>(5, string("Hello"), ByRef(foo))
+//
+//   passes 5 and string("Hello") by value, and passes foo by
+//   reference.
+//
+//   2. If the callable takes an argument by reference but ByRef() is
+//   not used, it will receive the reference to a copy of the value,
+//   instead of the original value.  For example, when the 0-th
+//   argument of the mock function takes a const string&, the action
+//
+//     InvokeArgument<0>(string("Hello"))
+//
+//   makes a copy of the temporary string("Hello") object and passes a
+//   reference of the copy, instead of the original temporary object,
+//   to the callable.  This makes it easy for a user to define an
+//   InvokeArgument action from temporary values and have it performed
+//   later.
 
-// Saves argument #0 to where the pointer points.
-ACTION_P(SaveArg0, pointer) { *pointer = arg0; }
-
-// Assigns 'value' to the variable referenced by argument #0.
-ACTION_P(SetArg0Referee, value) {
-  // Ensures that argument #0 is a reference.  If you get a compiler
-  // error on the next line, you are using SetArgReferee<k>(value) in
-  // a mock function whose k-th (0-based) argument is not a reference.
-  GMOCK_COMPILE_ASSERT_(internal::is_reference<arg0_type>::value,
-                        SetArgReferee_must_be_used_with_a_reference_argument);
-  arg0 = value;
+ACTION_TEMPLATE(InvokeArgument,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_0_VALUE_PARAMS()) {
+  return internal::CallableHelper<return_type>::Call(
+      ::std::tr1::get<k>(args));
 }
 
-// ReturnNewAction<T> creates and returns a new instance of an object each time
-// it is performed. It is overloaded to work with constructors that take
-// different numbers of arguments.
-// Returns a new instance of T using a  nullary constructor with the given
-// arguments.
-template <typename T>
-class ReturnNewAction0 {
- public:
-  ReturnNewAction0() {}
+ACTION_TEMPLATE(InvokeArgument,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_1_VALUE_PARAMS(p0)) {
+  return internal::CallableHelper<return_type>::Call(
+      ::std::tr1::get<k>(args), p0);
+}
 
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& /* args */) {
-    return new T();
-  }
- private:
-};
+ACTION_TEMPLATE(InvokeArgument,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_2_VALUE_PARAMS(p0, p1)) {
+  return internal::CallableHelper<return_type>::Call(
+      ::std::tr1::get<k>(args), p0, p1);
+}
 
-// Returns a new instance of T using a  unary constructor with the given
-// arguments.
-template <typename T, typename A1>
-class ReturnNewAction1 {
- public:
-  explicit ReturnNewAction1(A1 a1) : arg1_(a1) {}
+ACTION_TEMPLATE(InvokeArgument,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_3_VALUE_PARAMS(p0, p1, p2)) {
+  return internal::CallableHelper<return_type>::Call(
+      ::std::tr1::get<k>(args), p0, p1, p2);
+}
 
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& /* args */) {
-    return new T(arg1_);
-  }
- private:
-  const A1 arg1_;
-};
+ACTION_TEMPLATE(InvokeArgument,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_4_VALUE_PARAMS(p0, p1, p2, p3)) {
+  return internal::CallableHelper<return_type>::Call(
+      ::std::tr1::get<k>(args), p0, p1, p2, p3);
+}
 
-// Returns a new instance of T using a  binary constructor with the given
-// arguments.
-template <typename T, typename A1, typename A2>
-class ReturnNewAction2 {
- public:
-  ReturnNewAction2(A1 a1, A2 a2) : arg1_(a1), arg2_(a2) {}
+ACTION_TEMPLATE(InvokeArgument,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_5_VALUE_PARAMS(p0, p1, p2, p3, p4)) {
+  return internal::CallableHelper<return_type>::Call(
+      ::std::tr1::get<k>(args), p0, p1, p2, p3, p4);
+}
 
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& /* args */) {
-    return new T(arg1_, arg2_);
-  }
- private:
-  const A1 arg1_;
-  const A2 arg2_;
-};
+ACTION_TEMPLATE(InvokeArgument,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_6_VALUE_PARAMS(p0, p1, p2, p3, p4, p5)) {
+  return internal::CallableHelper<return_type>::Call(
+      ::std::tr1::get<k>(args), p0, p1, p2, p3, p4, p5);
+}
 
-// Returns a new instance of T using a  ternary constructor with the given
-// arguments.
-template <typename T, typename A1, typename A2, typename A3>
-class ReturnNewAction3 {
- public:
-  ReturnNewAction3(A1 a1, A2 a2, A3 a3) : arg1_(a1), arg2_(a2), arg3_(a3) {}
+ACTION_TEMPLATE(InvokeArgument,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_7_VALUE_PARAMS(p0, p1, p2, p3, p4, p5, p6)) {
+  return internal::CallableHelper<return_type>::Call(
+      ::std::tr1::get<k>(args), p0, p1, p2, p3, p4, p5, p6);
+}
 
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& /* args */) {
-    return new T(arg1_, arg2_, arg3_);
-  }
- private:
-  const A1 arg1_;
-  const A2 arg2_;
-  const A3 arg3_;
-};
+ACTION_TEMPLATE(InvokeArgument,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_8_VALUE_PARAMS(p0, p1, p2, p3, p4, p5, p6, p7)) {
+  return internal::CallableHelper<return_type>::Call(
+      ::std::tr1::get<k>(args), p0, p1, p2, p3, p4, p5, p6, p7);
+}
 
-// Returns a new instance of T using a  4-ary constructor with the given
-// arguments.
-template <typename T, typename A1, typename A2, typename A3, typename A4>
-class ReturnNewAction4 {
- public:
-  ReturnNewAction4(A1 a1, A2 a2, A3 a3, A4 a4) : arg1_(a1), arg2_(a2),
-      arg3_(a3), arg4_(a4) {}
+ACTION_TEMPLATE(InvokeArgument,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_9_VALUE_PARAMS(p0, p1, p2, p3, p4, p5, p6, p7, p8)) {
+  return internal::CallableHelper<return_type>::Call(
+      ::std::tr1::get<k>(args), p0, p1, p2, p3, p4, p5, p6, p7, p8);
+}
 
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& /* args */) {
-    return new T(arg1_, arg2_, arg3_, arg4_);
-  }
- private:
-  const A1 arg1_;
-  const A2 arg2_;
-  const A3 arg3_;
-  const A4 arg4_;
-};
-
-// Returns a new instance of T using a  5-ary constructor with the given
-// arguments.
-template <typename T, typename A1, typename A2, typename A3, typename A4,
-    typename A5>
-class ReturnNewAction5 {
- public:
-  ReturnNewAction5(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) : arg1_(a1), arg2_(a2),
-      arg3_(a3), arg4_(a4), arg5_(a5) {}
-
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& /* args */) {
-    return new T(arg1_, arg2_, arg3_, arg4_, arg5_);
-  }
- private:
-  const A1 arg1_;
-  const A2 arg2_;
-  const A3 arg3_;
-  const A4 arg4_;
-  const A5 arg5_;
-};
-
-// Returns a new instance of T using a  6-ary constructor with the given
-// arguments.
-template <typename T, typename A1, typename A2, typename A3, typename A4,
-    typename A5, typename A6>
-class ReturnNewAction6 {
- public:
-  ReturnNewAction6(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) : arg1_(a1),
-      arg2_(a2), arg3_(a3), arg4_(a4), arg5_(a5), arg6_(a6) {}
-
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& /* args */) {
-    return new T(arg1_, arg2_, arg3_, arg4_, arg5_, arg6_);
-  }
- private:
-  const A1 arg1_;
-  const A2 arg2_;
-  const A3 arg3_;
-  const A4 arg4_;
-  const A5 arg5_;
-  const A6 arg6_;
-};
-
-// Returns a new instance of T using a  7-ary constructor with the given
-// arguments.
-template <typename T, typename A1, typename A2, typename A3, typename A4,
-    typename A5, typename A6, typename A7>
-class ReturnNewAction7 {
- public:
-  ReturnNewAction7(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
-      A7 a7) : arg1_(a1), arg2_(a2), arg3_(a3), arg4_(a4), arg5_(a5),
-      arg6_(a6), arg7_(a7) {}
-
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& /* args */) {
-    return new T(arg1_, arg2_, arg3_, arg4_, arg5_, arg6_, arg7_);
-  }
- private:
-  const A1 arg1_;
-  const A2 arg2_;
-  const A3 arg3_;
-  const A4 arg4_;
-  const A5 arg5_;
-  const A6 arg6_;
-  const A7 arg7_;
-};
-
-// Returns a new instance of T using a  8-ary constructor with the given
-// arguments.
-template <typename T, typename A1, typename A2, typename A3, typename A4,
-    typename A5, typename A6, typename A7, typename A8>
-class ReturnNewAction8 {
- public:
-  ReturnNewAction8(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
-      A8 a8) : arg1_(a1), arg2_(a2), arg3_(a3), arg4_(a4), arg5_(a5),
-      arg6_(a6), arg7_(a7), arg8_(a8) {}
-
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& /* args */) {
-    return new T(arg1_, arg2_, arg3_, arg4_, arg5_, arg6_, arg7_, arg8_);
-  }
- private:
-  const A1 arg1_;
-  const A2 arg2_;
-  const A3 arg3_;
-  const A4 arg4_;
-  const A5 arg5_;
-  const A6 arg6_;
-  const A7 arg7_;
-  const A8 arg8_;
-};
-
-// Returns a new instance of T using a  9-ary constructor with the given
-// arguments.
-template <typename T, typename A1, typename A2, typename A3, typename A4,
-    typename A5, typename A6, typename A7, typename A8, typename A9>
-class ReturnNewAction9 {
- public:
-  ReturnNewAction9(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8,
-      A9 a9) : arg1_(a1), arg2_(a2), arg3_(a3), arg4_(a4), arg5_(a5),
-      arg6_(a6), arg7_(a7), arg8_(a8), arg9_(a9) {}
-
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& /* args */) {
-    return new T(arg1_, arg2_, arg3_, arg4_, arg5_, arg6_, arg7_, arg8_, arg9_);
-  }
- private:
-  const A1 arg1_;
-  const A2 arg2_;
-  const A3 arg3_;
-  const A4 arg4_;
-  const A5 arg5_;
-  const A6 arg6_;
-  const A7 arg7_;
-  const A8 arg8_;
-  const A9 arg9_;
-};
-
-// Returns a new instance of T using a  10-ary constructor with the given
-// arguments.
-template <typename T, typename A1, typename A2, typename A3, typename A4,
-    typename A5, typename A6, typename A7, typename A8, typename A9,
-    typename A10>
-class ReturnNewAction10 {
- public:
-  ReturnNewAction10(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8,
-      A9 a9, A10 a10) : arg1_(a1), arg2_(a2), arg3_(a3), arg4_(a4), arg5_(a5),
-      arg6_(a6), arg7_(a7), arg8_(a8), arg9_(a9), arg10_(a10) {}
-
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& /* args */) {
-    return new T(arg1_, arg2_, arg3_, arg4_, arg5_, arg6_, arg7_, arg8_, arg9_,
-        arg10_);
-  }
- private:
-  const A1 arg1_;
-  const A2 arg2_;
-  const A3 arg3_;
-  const A4 arg4_;
-  const A5 arg5_;
-  const A6 arg6_;
-  const A7 arg7_;
-  const A8 arg8_;
-  const A9 arg9_;
-  const A10 arg10_;
-};
-
-// Deletes the object pointed to by argument #0.
-ACTION(DeleteArg0) { delete arg0; }
-
-}  // namespace internal
+ACTION_TEMPLATE(InvokeArgument,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_10_VALUE_PARAMS(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9)) {
+  return internal::CallableHelper<return_type>::Call(
+      ::std::tr1::get<k>(args), p0, p1, p2, p3, p4, p5, p6, p7, p8, p9);
+}
 
 // Action SaveArg<k>(pointer) saves the k-th (0-based) argument of the
 // mock function to *pointer.
-template <int k, typename Pointer>
-inline internal::WithArgsAction<internal::SaveArg0ActionP<Pointer>, k>
-SaveArg(const Pointer& pointer) {
-  return WithArg<k>(internal::SaveArg0(pointer));
+ACTION_TEMPLATE(SaveArg,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_1_VALUE_PARAMS(pointer)) {
+  *pointer = ::std::tr1::get<k>(args);
 }
 
 // Action SetArgReferee<k>(value) assigns 'value' to the variable
 // referenced by the k-th (0-based) argument of the mock function.
-template <int k, typename Value>
-inline internal::WithArgsAction<internal::SetArg0RefereeActionP<Value>, k>
-SetArgReferee(const Value& value) {
-  return WithArg<k>(internal::SetArg0Referee(value));
+ACTION_TEMPLATE(SetArgReferee,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_1_VALUE_PARAMS(value)) {
+  typedef typename ::std::tr1::tuple_element<k, args_type>::type argk_type;
+  // Ensures that argument #k is a reference.  If you get a compiler
+  // error on the next line, you are using SetArgReferee<k>(value) in
+  // a mock function whose k-th (0-based) argument is not a reference.
+  GMOCK_COMPILE_ASSERT_(internal::is_reference<argk_type>::value,
+                        SetArgReferee_must_be_used_with_a_reference_argument);
+  ::std::tr1::get<k>(args) = value;
+}
+
+// Action SetArrayArgument<k>(first, last) copies the elements in
+// source range [first, last) to the array pointed to by the k-th
+// (0-based) argument, which can be either a pointer or an
+// iterator. The action does not take ownership of the elements in the
+// source range.
+ACTION_TEMPLATE(SetArrayArgument,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_2_VALUE_PARAMS(first, last)) {
+  // Microsoft compiler deprecates ::std::copy, so we want to suppress warning
+  // 4996 (Function call with parameters that may be unsafe) there.
+#ifdef _MSC_VER
+#pragma warning(push)          // Saves the current warning state.
+#pragma warning(disable:4996)  // Temporarily disables warning 4996.
+#endif
+  ::std::copy(first, last, ::std::tr1::get<k>(args));
+#ifdef _MSC_VER
+#pragma warning(pop)           // Restores the warning state.
+#endif
 }
 
 // Various overloads for ReturnNew<T>().
@@ -2987,106 +2477,78 @@ SetArgReferee(const Value& value) {
 // The ReturnNew<T>(a1, a2, ..., a_k) action returns a pointer to a new
 // instance of type T, constructed on the heap with constructor arguments
 // a1, a2, ..., and a_k. The caller assumes ownership of the returned value.
-template <typename T>
-inline PolymorphicAction<internal::ReturnNewAction0<T> >
-ReturnNew() {
-  return MakePolymorphicAction(
-      internal::ReturnNewAction0<T>());
+ACTION_TEMPLATE(ReturnNew,
+                HAS_1_TEMPLATE_PARAMS(typename, T),
+                AND_0_VALUE_PARAMS()) {
+  return new T();
 }
 
-template <typename T, typename A1>
-inline PolymorphicAction<internal::ReturnNewAction1<T, A1> >
-ReturnNew(A1 a1) {
-  return MakePolymorphicAction(
-      internal::ReturnNewAction1<T, A1>(a1));
+ACTION_TEMPLATE(ReturnNew,
+                HAS_1_TEMPLATE_PARAMS(typename, T),
+                AND_1_VALUE_PARAMS(p0)) {
+  return new T(p0);
 }
 
-template <typename T, typename A1, typename A2>
-inline PolymorphicAction<internal::ReturnNewAction2<T, A1, A2> >
-ReturnNew(A1 a1, A2 a2) {
-  return MakePolymorphicAction(
-      internal::ReturnNewAction2<T, A1, A2>(a1, a2));
+ACTION_TEMPLATE(ReturnNew,
+                HAS_1_TEMPLATE_PARAMS(typename, T),
+                AND_2_VALUE_PARAMS(p0, p1)) {
+  return new T(p0, p1);
 }
 
-template <typename T, typename A1, typename A2, typename A3>
-inline PolymorphicAction<internal::ReturnNewAction3<T, A1, A2, A3> >
-ReturnNew(A1 a1, A2 a2, A3 a3) {
-  return MakePolymorphicAction(
-      internal::ReturnNewAction3<T, A1, A2, A3>(a1, a2, a3));
+ACTION_TEMPLATE(ReturnNew,
+                HAS_1_TEMPLATE_PARAMS(typename, T),
+                AND_3_VALUE_PARAMS(p0, p1, p2)) {
+  return new T(p0, p1, p2);
 }
 
-template <typename T, typename A1, typename A2, typename A3, typename A4>
-inline PolymorphicAction<internal::ReturnNewAction4<T, A1, A2, A3, A4> >
-ReturnNew(A1 a1, A2 a2, A3 a3, A4 a4) {
-  return MakePolymorphicAction(
-      internal::ReturnNewAction4<T, A1, A2, A3, A4>(a1, a2, a3, a4));
+ACTION_TEMPLATE(ReturnNew,
+                HAS_1_TEMPLATE_PARAMS(typename, T),
+                AND_4_VALUE_PARAMS(p0, p1, p2, p3)) {
+  return new T(p0, p1, p2, p3);
 }
 
-template <typename T, typename A1, typename A2, typename A3, typename A4,
-    typename A5>
-inline PolymorphicAction<internal::ReturnNewAction5<T, A1, A2, A3, A4, A5> >
-ReturnNew(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-  return MakePolymorphicAction(
-      internal::ReturnNewAction5<T, A1, A2, A3, A4, A5>(a1, a2, a3, a4, a5));
+ACTION_TEMPLATE(ReturnNew,
+                HAS_1_TEMPLATE_PARAMS(typename, T),
+                AND_5_VALUE_PARAMS(p0, p1, p2, p3, p4)) {
+  return new T(p0, p1, p2, p3, p4);
 }
 
-template <typename T, typename A1, typename A2, typename A3, typename A4,
-    typename A5, typename A6>
-inline PolymorphicAction<internal::ReturnNewAction6<T, A1, A2, A3, A4, A5, A6> >
-ReturnNew(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
-  return MakePolymorphicAction(
-      internal::ReturnNewAction6<T, A1, A2, A3, A4, A5, A6>(a1, a2, a3, a4, a5,
-          a6));
+ACTION_TEMPLATE(ReturnNew,
+                HAS_1_TEMPLATE_PARAMS(typename, T),
+                AND_6_VALUE_PARAMS(p0, p1, p2, p3, p4, p5)) {
+  return new T(p0, p1, p2, p3, p4, p5);
 }
 
-template <typename T, typename A1, typename A2, typename A3, typename A4,
-    typename A5, typename A6, typename A7>
-inline PolymorphicAction<internal::ReturnNewAction7<T, A1, A2, A3, A4, A5, A6,
-    A7> >
-ReturnNew(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
-  return MakePolymorphicAction(
-      internal::ReturnNewAction7<T, A1, A2, A3, A4, A5, A6, A7>(a1, a2, a3, a4,
-          a5, a6, a7));
+ACTION_TEMPLATE(ReturnNew,
+                HAS_1_TEMPLATE_PARAMS(typename, T),
+                AND_7_VALUE_PARAMS(p0, p1, p2, p3, p4, p5, p6)) {
+  return new T(p0, p1, p2, p3, p4, p5, p6);
 }
 
-template <typename T, typename A1, typename A2, typename A3, typename A4,
-    typename A5, typename A6, typename A7, typename A8>
-inline PolymorphicAction<internal::ReturnNewAction8<T, A1, A2, A3, A4, A5, A6,
-    A7, A8> >
-ReturnNew(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
-  return MakePolymorphicAction(
-      internal::ReturnNewAction8<T, A1, A2, A3, A4, A5, A6, A7, A8>(a1, a2, a3,
-          a4, a5, a6, a7, a8));
+ACTION_TEMPLATE(ReturnNew,
+                HAS_1_TEMPLATE_PARAMS(typename, T),
+                AND_8_VALUE_PARAMS(p0, p1, p2, p3, p4, p5, p6, p7)) {
+  return new T(p0, p1, p2, p3, p4, p5, p6, p7);
 }
 
-template <typename T, typename A1, typename A2, typename A3, typename A4,
-    typename A5, typename A6, typename A7, typename A8, typename A9>
-inline PolymorphicAction<internal::ReturnNewAction9<T, A1, A2, A3, A4, A5, A6,
-    A7, A8, A9> >
-ReturnNew(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
-  return MakePolymorphicAction(
-      internal::ReturnNewAction9<T, A1, A2, A3, A4, A5, A6, A7, A8, A9>(a1, a2,
-          a3, a4, a5, a6, a7, a8, a9));
+ACTION_TEMPLATE(ReturnNew,
+                HAS_1_TEMPLATE_PARAMS(typename, T),
+                AND_9_VALUE_PARAMS(p0, p1, p2, p3, p4, p5, p6, p7, p8)) {
+  return new T(p0, p1, p2, p3, p4, p5, p6, p7, p8);
 }
 
-template <typename T, typename A1, typename A2, typename A3, typename A4,
-    typename A5, typename A6, typename A7, typename A8, typename A9,
-    typename A10>
-inline PolymorphicAction<internal::ReturnNewAction10<T, A1, A2, A3, A4, A5, A6,
-    A7, A8, A9, A10> >
-ReturnNew(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9,
-    A10 a10) {
-  return MakePolymorphicAction(
-      internal::ReturnNewAction10<T, A1, A2, A3, A4, A5, A6, A7, A8, A9,
-          A10>(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10));
+ACTION_TEMPLATE(ReturnNew,
+                HAS_1_TEMPLATE_PARAMS(typename, T),
+                AND_10_VALUE_PARAMS(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9)) {
+  return new T(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9);
 }
 
 // Action DeleteArg<k>() deletes the k-th (0-based) argument of the mock
 // function.
-template <int k>
-inline internal::WithArgsAction<internal::DeleteArg0Action, k>
-DeleteArg() {
-  return WithArg<k>(internal::DeleteArg0());
+ACTION_TEMPLATE(DeleteArg,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_0_VALUE_PARAMS()) {
+  delete ::std::tr1::get<k>(args);
 }
 
 // Action Throw(exception) can be used in a mock function of any type

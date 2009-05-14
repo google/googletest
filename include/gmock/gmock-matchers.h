@@ -39,6 +39,7 @@
 #define GMOCK_INCLUDE_GMOCK_GMOCK_MATCHERS_H_
 
 #include <algorithm>
+#include <limits>
 #include <ostream>  // NOLINT
 #include <sstream>
 #include <string>
@@ -340,6 +341,16 @@ Matcher<T> SafeMatcherCast(const Matcher<U>& matcher) {
   GMOCK_COMPILE_ASSERT_(
       internal::is_reference<T>::value || !internal::is_reference<U>::value,
       cannot_convert_non_referentce_arg_to_reference);
+  // In case both T and U are arithmetic types, enforce that the
+  // conversion is not lossy.
+  typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(T)) RawT;
+  typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(U)) RawU;
+  const bool kTIsOther = GMOCK_KIND_OF_(RawT) == internal::kOther;
+  const bool kUIsOther = GMOCK_KIND_OF_(RawU) == internal::kOther;
+  GMOCK_COMPILE_ASSERT_(
+      kTIsOther || kUIsOther ||
+      (internal::LosslessArithmeticConvertible<RawT, RawU>::value),
+      conversion_of_arithmetic_types_must_be_lossless);
   return MatcherCast<T>(matcher);
 }
 
@@ -1164,8 +1175,8 @@ class EitherOfMatcher {
   // both Matcher1 and Matcher2 can match.
   template <typename T>
   operator Matcher<T>() const {
-    return Matcher<T>(new EitherOfMatcherImpl<T>(SafeMatcherCast<T>(matcher1_),
-                                                 SafeMatcherCast<T>(matcher2_)));
+    return Matcher<T>(new EitherOfMatcherImpl<T>(
+        SafeMatcherCast<T>(matcher1_), SafeMatcherCast<T>(matcher2_)));
   }
  private:
   Matcher1 matcher1_;
@@ -1184,7 +1195,7 @@ class TrulyMatcher {
   // argument is passed by reference as the predicate may be
   // interested in the address of the argument.
   template <typename T>
-  bool Matches(T& x) const {
+  bool Matches(T& x) const {  // NOLINT
 #if GTEST_OS_WINDOWS
     // MSVC warns about converting a value into bool (warning 4800).
 #pragma warning(push)          // Saves the current warning state.

@@ -34,6 +34,7 @@
 // This file tests the internal utilities.
 
 #include <gmock/internal/gmock-internal-utils.h>
+#include <stdlib.h>
 #include <map>
 #include <string>
 #include <sstream>
@@ -42,6 +43,10 @@
 #include <gmock/internal/gmock-port.h>
 #include <gtest/gtest.h>
 #include <gtest/gtest-spi.h>
+
+#if GTEST_OS_CYGWIN
+#include <sys/types.h>  // For ssize_t. NOLINT
+#endif
 
 namespace testing {
 namespace internal {
@@ -232,6 +237,141 @@ TEST(ImplicitlyConvertibleTest, ValueIsFalseWhenNotConvertible) {
   EXPECT_FALSE((ImplicitlyConvertible<Base&, Derived&>::value));
 }
 
+// Tests KindOf<T>.
+
+TEST(KindOfTest, Bool) {
+  EXPECT_EQ(kBool, GMOCK_KIND_OF_(bool));  // NOLINT
+}
+
+TEST(KindOfTest, Integer) {
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(char));  // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(signed char));  // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(unsigned char));  // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(short));  // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(unsigned short));  // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(int));  // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(unsigned int));  // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(long));  // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(unsigned long));  // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(wchar_t));  // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(Int64));  // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(UInt64));  // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(size_t));  // NOLINT
+#if GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_CYGWIN
+  // ssize_t is not defined on Windows and possibly some other OSes.
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(ssize_t));  // NOLINT
+#endif
+}
+
+TEST(KindOfTest, FloatingPoint) {
+  EXPECT_EQ(kFloatingPoint, GMOCK_KIND_OF_(float));  // NOLINT
+  EXPECT_EQ(kFloatingPoint, GMOCK_KIND_OF_(double));  // NOLINT
+  EXPECT_EQ(kFloatingPoint, GMOCK_KIND_OF_(long double));  // NOLINT
+}
+
+TEST(KindOfTest, Other) {
+  EXPECT_EQ(kOther, GMOCK_KIND_OF_(void*));  // NOLINT
+  EXPECT_EQ(kOther, GMOCK_KIND_OF_(char**));  // NOLINT
+  EXPECT_EQ(kOther, GMOCK_KIND_OF_(Base));  // NOLINT
+}
+
+// Tests LosslessArithmeticConvertible<T, U>.
+
+TEST(LosslessArithmeticConvertibleTest, BoolToBool) {
+  EXPECT_TRUE((LosslessArithmeticConvertible<bool, bool>::value));
+}
+
+TEST(LosslessArithmeticConvertibleTest, BoolToInteger) {
+  EXPECT_TRUE((LosslessArithmeticConvertible<bool, char>::value));
+  EXPECT_TRUE((LosslessArithmeticConvertible<bool, int>::value));
+  EXPECT_TRUE(
+      (LosslessArithmeticConvertible<bool, unsigned long>::value));  // NOLINT
+}
+
+TEST(LosslessArithmeticConvertibleTest, BoolToFloatingPoint) {
+  EXPECT_TRUE((LosslessArithmeticConvertible<bool, float>::value));
+  EXPECT_TRUE((LosslessArithmeticConvertible<bool, double>::value));
+}
+
+TEST(LosslessArithmeticConvertibleTest, IntegerToBool) {
+  EXPECT_FALSE((LosslessArithmeticConvertible<unsigned char, bool>::value));
+  EXPECT_FALSE((LosslessArithmeticConvertible<int, bool>::value));
+}
+
+TEST(LosslessArithmeticConvertibleTest, IntegerToInteger) {
+  // Unsigned => larger signed is fine.
+  EXPECT_TRUE((LosslessArithmeticConvertible<unsigned char, int>::value));
+
+  // Unsigned => larger unsigned is fine.
+  EXPECT_TRUE(
+      (LosslessArithmeticConvertible<unsigned short, UInt64>::value)); // NOLINT
+
+  // Signed => unsigned is not fine.
+  EXPECT_FALSE((LosslessArithmeticConvertible<short, UInt64>::value)); // NOLINT
+  EXPECT_FALSE((LosslessArithmeticConvertible<
+      signed char, unsigned int>::value));  // NOLINT
+
+  // Same size and same signedness: fine too.
+  EXPECT_TRUE((LosslessArithmeticConvertible<
+               unsigned char, unsigned char>::value));
+  EXPECT_TRUE((LosslessArithmeticConvertible<int, int>::value));
+  EXPECT_TRUE((LosslessArithmeticConvertible<wchar_t, wchar_t>::value));
+  EXPECT_TRUE((LosslessArithmeticConvertible<
+               unsigned long, unsigned long>::value));  // NOLINT
+
+  // Same size, different signedness: not fine.
+  EXPECT_FALSE((LosslessArithmeticConvertible<
+                unsigned char, signed char>::value));
+  EXPECT_FALSE((LosslessArithmeticConvertible<int, unsigned int>::value));
+  EXPECT_FALSE((LosslessArithmeticConvertible<UInt64, Int64>::value));
+
+  // Larger size => smaller size is not fine.
+  EXPECT_FALSE((LosslessArithmeticConvertible<long, char>::value));  // NOLINT
+  EXPECT_FALSE((LosslessArithmeticConvertible<int, signed char>::value));
+  EXPECT_FALSE((LosslessArithmeticConvertible<Int64, unsigned int>::value));
+}
+
+TEST(LosslessArithmeticConvertibleTest, IntegerToFloatingPoint) {
+  // Integers cannot be losslessly converted to floating-points, as
+  // the format of the latter is implementation-defined.
+  EXPECT_FALSE((LosslessArithmeticConvertible<char, float>::value));
+  EXPECT_FALSE((LosslessArithmeticConvertible<int, double>::value));
+  EXPECT_FALSE((LosslessArithmeticConvertible<
+                short, long double>::value));  // NOLINT
+}
+
+TEST(LosslessArithmeticConvertibleTest, FloatingPointToBool) {
+  EXPECT_FALSE((LosslessArithmeticConvertible<float, bool>::value));
+  EXPECT_FALSE((LosslessArithmeticConvertible<double, bool>::value));
+}
+
+TEST(LosslessArithmeticConvertibleTest, FloatingPointToInteger) {
+  EXPECT_FALSE((LosslessArithmeticConvertible<float, long>::value));  // NOLINT
+  EXPECT_FALSE((LosslessArithmeticConvertible<double, Int64>::value));
+  EXPECT_FALSE((LosslessArithmeticConvertible<long double, int>::value));
+}
+
+TEST(LosslessArithmeticConvertibleTest, FloatingPointToFloatingPoint) {
+  // Smaller size => larger size is fine.
+  EXPECT_TRUE((LosslessArithmeticConvertible<float, double>::value));
+  EXPECT_TRUE((LosslessArithmeticConvertible<float, long double>::value));
+  EXPECT_TRUE((LosslessArithmeticConvertible<double, long double>::value));
+
+  // Same size: fine.
+  EXPECT_TRUE((LosslessArithmeticConvertible<float, float>::value));
+  EXPECT_TRUE((LosslessArithmeticConvertible<double, double>::value));
+
+  // Larger size => smaller size is not fine.
+  EXPECT_FALSE((LosslessArithmeticConvertible<double, float>::value));
+  if (sizeof(double) == sizeof(long double)) {  // NOLINT
+    // In some implementations (e.g. MSVC), double and long double
+    // have the same size.
+    EXPECT_TRUE((LosslessArithmeticConvertible<long double, double>::value));
+  } else {
+    EXPECT_FALSE((LosslessArithmeticConvertible<long double, double>::value));
+  }
+}
+
 // Tests that IsAProtocolMessage<T>::value is a compile-time constant.
 TEST(IsAProtocolMessageTest, ValueIsCompileTimeConstant) {
   GMOCK_COMPILE_ASSERT_(IsAProtocolMessage<ProtocolMessage>::value, const_true);
@@ -265,8 +405,10 @@ TEST(IsContainerTestTest, WorksForNonContainer) {
 }
 
 TEST(IsContainerTestTest, WorksForContainer) {
-  EXPECT_EQ(sizeof(IsContainer), sizeof(IsContainerTest<std::vector<bool> >(0)));
-  EXPECT_EQ(sizeof(IsContainer), sizeof(IsContainerTest<std::map<int, double> >(0)));
+  EXPECT_EQ(sizeof(IsContainer),
+            sizeof(IsContainerTest<std::vector<bool> >(0)));
+  EXPECT_EQ(sizeof(IsContainer),
+            sizeof(IsContainerTest<std::map<int, double> >(0)));
 }
 
 // Tests the TupleMatches() template function.

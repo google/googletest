@@ -157,7 +157,7 @@ inline Element* GetRawPointer(Element* p) { return p; }
 // This comparator allows linked_ptr to be stored in sets.
 template <typename T>
 struct LinkedPtrLessThan {
-  bool operator()(const ::testing::internal::linked_ptr<T>& lhs, 
+  bool operator()(const ::testing::internal::linked_ptr<T>& lhs,
                   const ::testing::internal::linked_ptr<T>& rhs) const {
     return lhs.get() < rhs.get();
   }
@@ -210,17 +210,154 @@ class ImplicitlyConvertible {
 template <typename From, typename To>
 const bool ImplicitlyConvertible<From, To>::value;
 
+// In what follows, we use the term "kind" to indicate whether a type
+// is bool, an integer type (excluding bool), a floating-point type,
+// or none of them.  This categorization is useful for determining
+// when a matcher argument type can be safely converted to another
+// type in the implementation of SafeMatcherCast.
+enum TypeKind {
+  kBool, kInteger, kFloatingPoint, kOther
+};
+
+// KindOf<T>::value is the kind of type T.
+template <typename T> struct KindOf {
+  enum { value = kOther };  // The default kind.
+};
+
+// This macro declares that the kind of 'type' is 'kind'.
+#define GMOCK_DECLARE_KIND_(type, kind) \
+  template <> struct KindOf<type> { enum { value = kind }; }
+
+GMOCK_DECLARE_KIND_(bool, kBool);
+
+// All standard integer types.
+GMOCK_DECLARE_KIND_(char, kInteger);
+GMOCK_DECLARE_KIND_(signed char, kInteger);
+GMOCK_DECLARE_KIND_(unsigned char, kInteger);
+GMOCK_DECLARE_KIND_(short, kInteger);  // NOLINT
+GMOCK_DECLARE_KIND_(unsigned short, kInteger);  // NOLINT
+GMOCK_DECLARE_KIND_(int, kInteger);
+GMOCK_DECLARE_KIND_(unsigned int, kInteger);
+GMOCK_DECLARE_KIND_(long, kInteger);  // NOLINT
+GMOCK_DECLARE_KIND_(unsigned long, kInteger);  // NOLINT
+
+// MSVC can be configured to define wchar_t as a typedef of unsigned
+// short. It defines _NATIVE_WCHAR_T_DEFINED symbol when wchar_t is a
+// native type.
+#if !defined(_MSC_VER) || defined(_NATIVE_WCHAR_T_DEFINED)
+GMOCK_DECLARE_KIND_(wchar_t, kInteger);
+#endif
+
+// Non-standard integer types.
+GMOCK_DECLARE_KIND_(Int64, kInteger);
+GMOCK_DECLARE_KIND_(UInt64, kInteger);
+
+// All standard floating-point types.
+GMOCK_DECLARE_KIND_(float, kFloatingPoint);
+GMOCK_DECLARE_KIND_(double, kFloatingPoint);
+GMOCK_DECLARE_KIND_(long double, kFloatingPoint);
+
+#undef GMOCK_DECLARE_KIND_
+
+// Evaluates to the kind of 'type'.
+#define GMOCK_KIND_OF_(type) \
+  static_cast< ::testing::internal::TypeKind>( \
+      ::testing::internal::KindOf<type>::value)
+
+// Evaluates to true iff integer type T is signed.
+#define GMOCK_IS_SIGNED_(T) (static_cast<T>(-1) < 0)
+
+// LosslessArithmeticConvertibleImpl<kFromKind, From, kToKind, To>::value
+// is true iff arithmetic type From can be losslessly converted to
+// arithmetic type To.
+//
+// It's the user's responsibility to ensure that both From and To are
+// raw (i.e. has no CV modifier, is not a pointer, and is not a
+// reference) built-in arithmetic types, kFromKind is the kind of
+// From, and kToKind is the kind of To; the value is
+// implementation-defined when the above pre-condition is violated.
+template <TypeKind kFromKind, typename From, TypeKind kToKind, typename To>
+struct LosslessArithmeticConvertibleImpl : public false_type {};
+
+// Converting bool to bool is lossless.
+template <>
+struct LosslessArithmeticConvertibleImpl<kBool, bool, kBool, bool>
+    : public true_type {};  // NOLINT
+
+// Converting bool to any integer type is lossless.
+template <typename To>
+struct LosslessArithmeticConvertibleImpl<kBool, bool, kInteger, To>
+    : public true_type {};  // NOLINT
+
+// Converting bool to any floating-point type is lossless.
+template <typename To>
+struct LosslessArithmeticConvertibleImpl<kBool, bool, kFloatingPoint, To>
+    : public true_type {};  // NOLINT
+
+// Converting an integer to bool is lossy.
+template <typename From>
+struct LosslessArithmeticConvertibleImpl<kInteger, From, kBool, bool>
+    : public false_type {};  // NOLINT
+
+// Converting an integer to another non-bool integer is lossless iff
+// the target type's range encloses the source type's range.
+template <typename From, typename To>
+struct LosslessArithmeticConvertibleImpl<kInteger, From, kInteger, To>
+    : public bool_constant<
+      // When converting from a smaller size to a larger size, we are
+      // fine as long as we are not converting from signed to unsigned.
+      ((sizeof(From) < sizeof(To)) &&
+       (!GMOCK_IS_SIGNED_(From) || GMOCK_IS_SIGNED_(To))) ||
+      // When converting between the same size, the signedness must match.
+      ((sizeof(From) == sizeof(To)) &&
+       (GMOCK_IS_SIGNED_(From) == GMOCK_IS_SIGNED_(To)))> {};  // NOLINT
+
+#undef GMOCK_IS_SIGNED_
+
+// Converting an integer to a floating-point type may be lossy, since
+// the format of a floating-point number is implementation-defined.
+template <typename From, typename To>
+struct LosslessArithmeticConvertibleImpl<kInteger, From, kFloatingPoint, To>
+    : public false_type {};  // NOLINT
+
+// Converting a floating-point to bool is lossy.
+template <typename From>
+struct LosslessArithmeticConvertibleImpl<kFloatingPoint, From, kBool, bool>
+    : public false_type {};  // NOLINT
+
+// Converting a floating-point to an integer is lossy.
+template <typename From, typename To>
+struct LosslessArithmeticConvertibleImpl<kFloatingPoint, From, kInteger, To>
+    : public false_type {};  // NOLINT
+
+// Converting a floating-point to another floating-point is lossless
+// iff the target type is at least as big as the source type.
+template <typename From, typename To>
+struct LosslessArithmeticConvertibleImpl<
+  kFloatingPoint, From, kFloatingPoint, To>
+    : public bool_constant<sizeof(From) <= sizeof(To)> {};  // NOLINT
+
+// LosslessArithmeticConvertible<From, To>::value is true iff arithmetic
+// type From can be losslessly converted to arithmetic type To.
+//
+// It's the user's responsibility to ensure that both From and To are
+// raw (i.e. has no CV modifier, is not a pointer, and is not a
+// reference) built-in arithmetic types; the value is
+// implementation-defined when the above pre-condition is violated.
+template <typename From, typename To>
+struct LosslessArithmeticConvertible
+    : public LosslessArithmeticConvertibleImpl<
+  GMOCK_KIND_OF_(From), From, GMOCK_KIND_OF_(To), To> {};  // NOLINT
+
 // IsAProtocolMessage<T>::value is a compile-time bool constant that's
 // true iff T is type ProtocolMessage, proto2::Message, or a subclass
 // of those.
 template <typename T>
-struct IsAProtocolMessage {
-  static const bool value =
-      ImplicitlyConvertible<const T*, const ::ProtocolMessage*>::value ||
-      ImplicitlyConvertible<const T*, const ::proto2::Message*>::value;
+struct IsAProtocolMessage
+    : public bool_constant<
+  ImplicitlyConvertible<const T*, const ::ProtocolMessage*>::value ||
+  ImplicitlyConvertible<const T*, const ::proto2::Message*>::value> {
 };
-template <typename T>
-const bool IsAProtocolMessage<T>::value;
 
 // When the compiler sees expression IsContainerTest<C>(0), the first
 // overload of IsContainerTest will be picked if C is an STL-style
@@ -314,6 +451,8 @@ void Log(LogSeverity severity, const string& message, int stack_frames_to_skip);
 // to declare an unused << operator in the global namespace.
 struct Unused {};
 
+// TODO(wan@google.com): group all type utilities together.
+
 // Type traits.
 
 // is_reference<T>::value is non-zero iff T is a reference type.
@@ -325,8 +464,8 @@ template <typename T1, typename T2> struct type_equals : public false_type {};
 template <typename T> struct type_equals<T, T> : public true_type {};
 
 // remove_reference<T>::type removes the reference from type T, if any.
-template <typename T> struct remove_reference { typedef T type; };
-template <typename T> struct remove_reference<T&> { typedef T type; };
+template <typename T> struct remove_reference { typedef T type; };  // NOLINT
+template <typename T> struct remove_reference<T&> { typedef T type; }; // NOLINT
 
 // Invalid<T>() returns an invalid value of type T.  This is useful
 // when a value of type T is needed for compilation, but the statement

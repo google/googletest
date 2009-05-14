@@ -198,77 +198,6 @@ $var Ts = [[$for j, [[T$j]]]]
 
 };  // class CallableHelper
 
-// Invokes a nullary callable argument.
-template <size_t N>
-class InvokeArgumentAction0 {
- public:
-  template <typename Result, typename ArgumentTuple>
-  static Result Perform(const ArgumentTuple& args) {
-    return CallableHelper<Result>::Call(::std::tr1::get<N>(args));
-  }
-};
-
-// Invokes a unary callable argument with the given argument.
-template <size_t N, typename A1>
-class InvokeArgumentAction1 {
- public:
-  // We deliberately pass a1 by value instead of const reference here
-  // in case it is a C-string literal.
-  //
-  // Since this function is defined inline, the compiler can get rid
-  // of the copying of the arguments.  Therefore the performance won't
-  // be hurt.
-  explicit InvokeArgumentAction1(A1 a1) : arg1_(a1) {}
-
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& args) {
-    return CallableHelper<Result>::Call(::std::tr1::get<N>(args), arg1_);
-  }
- private:
-  const A1 arg1_;
-};
-
-$range i 2..n
-$for i [[
-$var arity = [[$if i==2 [[binary]] $elif i==3 [[ternary]] $else [[$i-ary]]]]
-$range j 1..i
-$var typename_As = [[$for j, [[typename A$j]]]]
-$var args_ = [[$for j, [[arg$j[[]]_]]]]
-
-// Invokes a $arity callable argument with the given arguments.
-template <size_t N, $typename_As>
-class InvokeArgumentAction$i {
- public:
-  InvokeArgumentAction$i($for j, [[A$j a$j]]) :
-      $for j, [[arg$j[[]]_(a$j)]] {}
-
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& args) {
-$if i <= 4 [[
-
-    return CallableHelper<Result>::Call(::std::tr1::get<N>(args), $args_);
-
-]] $else [[
-
-    // We extract the callable to a variable before invoking it, in
-    // case it is a functor passed by value and its operator() is not
-    // const.
-    typename ::std::tr1::tuple_element<N, ArgumentTuple>::type function =
-        ::std::tr1::get<N>(args);
-    return function($args_);
-
-]]
-  }
- private:
-$for j [[
-
-  const A$j arg$j[[]]_;
-]]
-
-};
-
-]]
-
 // An INTERNAL macro for extracting the type of a tuple field.  It's
 // subject to change without notice - DO NOT USE IN USER CODE!
 #define GMOCK_FIELD_(Tuple, N) \
@@ -477,74 +406,6 @@ template <typename T>
 inline internal::ReferenceWrapper<T> ByRef(T& l_value) {  // NOLINT
   return internal::ReferenceWrapper<T>(l_value);
 }
-
-// Various overloads for InvokeArgument<N>().
-//
-// The InvokeArgument<N>(a1, a2, ..., a_k) action invokes the N-th
-// (0-based) argument, which must be a k-ary callable, of the mock
-// function, with arguments a1, a2, ..., a_k.
-//
-// Notes:
-//
-//   1. The arguments are passed by value by default.  If you need to
-//   pass an argument by reference, wrap it inside ByRef().  For
-//   example,
-//
-//     InvokeArgument<1>(5, string("Hello"), ByRef(foo))
-//
-//   passes 5 and string("Hello") by value, and passes foo by
-//   reference.
-//
-//   2. If the callable takes an argument by reference but ByRef() is
-//   not used, it will receive the reference to a copy of the value,
-//   instead of the original value.  For example, when the 0-th
-//   argument of the mock function takes a const string&, the action
-//
-//     InvokeArgument<0>(string("Hello"))
-//
-//   makes a copy of the temporary string("Hello") object and passes a
-//   reference of the copy, instead of the original temporary object,
-//   to the callable.  This makes it easy for a user to define an
-//   InvokeArgument action from temporary values and have it performed
-//   later.
-template <size_t N>
-inline PolymorphicAction<internal::InvokeArgumentAction0<N> > InvokeArgument() {
-  return MakePolymorphicAction(internal::InvokeArgumentAction0<N>());
-}
-
-// We deliberately pass a1 by value instead of const reference here in
-// case it is a C-string literal.  If we had declared the parameter as
-// 'const A1& a1' and write InvokeArgument<0>("Hi"), the compiler
-// would've thought A1 is 'char[3]', which causes trouble as the
-// implementation needs to copy a value of type A1.  By declaring the
-// parameter as 'A1 a1', the compiler will correctly infer that A1 is
-// 'const char*' when it sees InvokeArgument<0>("Hi").
-//
-// Since this function is defined inline, the compiler can get rid of
-// the copying of the arguments.  Therefore the performance won't be
-// hurt.
-template <size_t N, typename A1>
-inline PolymorphicAction<internal::InvokeArgumentAction1<N, A1> >
-InvokeArgument(A1 a1) {
-  return MakePolymorphicAction(internal::InvokeArgumentAction1<N, A1>(a1));
-}
-
-$range i 2..n
-$for i [[
-$range j 1..i
-$var typename_As = [[$for j, [[typename A$j]]]]
-$var As = [[$for j, [[A$j]]]]
-$var Aas = [[$for j, [[A$j a$j]]]]
-$var as = [[$for j, [[a$j]]]]
-
-template <size_t N, $typename_As>
-inline PolymorphicAction<internal::InvokeArgumentAction$i<N, $As> >
-InvokeArgument($Aas) {
-  return MakePolymorphicAction(
-      internal::InvokeArgumentAction$i<N, $As>($as));
-}
-
-]]
 
 // WithoutArgs(inner_action) can be used in a mock function with a
 // non-empty argument list to perform inner_action, which takes no
@@ -1025,76 +886,89 @@ $$    // show up in the generated code.
 // updated.
 namespace testing {
 
-namespace internal {
+// Various overloads for InvokeArgument<N>().
+//
+// The InvokeArgument<N>(a1, a2, ..., a_k) action invokes the N-th
+// (0-based) argument, which must be a k-ary callable, of the mock
+// function, with arguments a1, a2, ..., a_k.
+//
+// Notes:
+//
+//   1. The arguments are passed by value by default.  If you need to
+//   pass an argument by reference, wrap it inside ByRef().  For
+//   example,
+//
+//     InvokeArgument<1>(5, string("Hello"), ByRef(foo))
+//
+//   passes 5 and string("Hello") by value, and passes foo by
+//   reference.
+//
+//   2. If the callable takes an argument by reference but ByRef() is
+//   not used, it will receive the reference to a copy of the value,
+//   instead of the original value.  For example, when the 0-th
+//   argument of the mock function takes a const string&, the action
+//
+//     InvokeArgument<0>(string("Hello"))
+//
+//   makes a copy of the temporary string("Hello") object and passes a
+//   reference of the copy, instead of the original temporary object,
+//   to the callable.  This makes it easy for a user to define an
+//   InvokeArgument action from temporary values and have it performed
+//   later.
 
-// Saves argument #0 to where the pointer points.
-ACTION_P(SaveArg0, pointer) { *pointer = arg0; }
-
-// Assigns 'value' to the variable referenced by argument #0.
-ACTION_P(SetArg0Referee, value) {
-  // Ensures that argument #0 is a reference.  If you get a compiler
-  // error on the next line, you are using SetArgReferee<k>(value) in
-  // a mock function whose k-th (0-based) argument is not a reference.
-  GMOCK_COMPILE_ASSERT_(internal::is_reference<arg0_type>::value,
-                        SetArgReferee_must_be_used_with_a_reference_argument);
-  arg0 = value;
-}
-
-// ReturnNewAction<T> creates and returns a new instance of an object each time
-// it is performed. It is overloaded to work with constructors that take
-// different numbers of arguments.
 $range i 0..n
 $for i [[
-$var arity = [[ $if i==0 [[nullary]]
-                $elif i==1 [[unary]]
-                $elif i==2 [[binary]]
-                $elif i==3 [[ternary]]
-                $else [[$i-ary]]]]
-$range j 1..i
-$var typename_As = [[$for j [[, typename A$j]]]]
-$var args_ = [[$for j, [[arg$j[[]]_]]]]
+$range j 0..i-1
 
-// Returns a new instance of T using a $arity constructor with the given
-// arguments.
-template <typename T$typename_As>
-class ReturnNewAction$i {
- public:
-  $if i==1 [[explicit ]]ReturnNewAction$i($for j, [[A$j a$j]])$if i>0 [[ : ]]
-$for j, [[arg$j[[]]_(a$j)]] {}
-
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& /* args */) {
-    return new T($args_);
-  }
- private:
-$for j [[
-
-  const A$j arg$j[[]]_;
-]]
-
-};
+ACTION_TEMPLATE(InvokeArgument,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_$i[[]]_VALUE_PARAMS($for j, [[p$j]])) {
+  return internal::CallableHelper<return_type>::Call(
+      ::std::tr1::get<k>(args)$for j [[, p$j]]);
+}
 
 ]]
-
-// Deletes the object pointed to by argument #0.
-ACTION(DeleteArg0) { delete arg0; }
-
-}  // namespace internal
 
 // Action SaveArg<k>(pointer) saves the k-th (0-based) argument of the
 // mock function to *pointer.
-template <int k, typename Pointer>
-inline internal::WithArgsAction<internal::SaveArg0ActionP<Pointer>, k>
-SaveArg(const Pointer& pointer) {
-  return WithArg<k>(internal::SaveArg0(pointer));
+ACTION_TEMPLATE(SaveArg,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_1_VALUE_PARAMS(pointer)) {
+  *pointer = ::std::tr1::get<k>(args);
 }
 
 // Action SetArgReferee<k>(value) assigns 'value' to the variable
 // referenced by the k-th (0-based) argument of the mock function.
-template <int k, typename Value>
-inline internal::WithArgsAction<internal::SetArg0RefereeActionP<Value>, k>
-SetArgReferee(const Value& value) {
-  return WithArg<k>(internal::SetArg0Referee(value));
+ACTION_TEMPLATE(SetArgReferee,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_1_VALUE_PARAMS(value)) {
+  typedef typename ::std::tr1::tuple_element<k, args_type>::type argk_type;
+  // Ensures that argument #k is a reference.  If you get a compiler
+  // error on the next line, you are using SetArgReferee<k>(value) in
+  // a mock function whose k-th (0-based) argument is not a reference.
+  GMOCK_COMPILE_ASSERT_(internal::is_reference<argk_type>::value,
+                        SetArgReferee_must_be_used_with_a_reference_argument);
+  ::std::tr1::get<k>(args) = value;
+}
+
+// Action SetArrayArgument<k>(first, last) copies the elements in
+// source range [first, last) to the array pointed to by the k-th
+// (0-based) argument, which can be either a pointer or an
+// iterator. The action does not take ownership of the elements in the
+// source range.
+ACTION_TEMPLATE(SetArrayArgument,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_2_VALUE_PARAMS(first, last)) {
+  // Microsoft compiler deprecates ::std::copy, so we want to suppress warning
+  // 4996 (Function call with parameters that may be unsafe) there.
+#ifdef _MSC_VER
+#pragma warning(push)          // Saves the current warning state.
+#pragma warning(disable:4996)  // Temporarily disables warning 4996.
+#endif
+  ::std::copy(first, last, ::std::tr1::get<k>(args));
+#ifdef _MSC_VER
+#pragma warning(pop)           // Restores the warning state.
+#endif
 }
 
 // Various overloads for ReturnNew<T>().
@@ -1104,27 +978,23 @@ SetArgReferee(const Value& value) {
 // a1, a2, ..., and a_k. The caller assumes ownership of the returned value.
 $range i 0..n
 $for i [[
-$range j 1..i
-$var typename_As = [[$for j [[, typename A$j]]]]
-$var As = [[$for j [[, A$j]]]]
-$var Aas = [[$for j, [[A$j a$j]]]]
-$var as = [[$for j, [[a$j]]]]
+$range j 0..i-1
+$var ps = [[$for j, [[p$j]]]]
 
-template <typename T$typename_As>
-inline PolymorphicAction<internal::ReturnNewAction$i<T$As> >
-ReturnNew($Aas) {
-  return MakePolymorphicAction(
-      internal::ReturnNewAction$i<T$As>($as));
+ACTION_TEMPLATE(ReturnNew,
+                HAS_1_TEMPLATE_PARAMS(typename, T),
+                AND_$i[[]]_VALUE_PARAMS($ps)) {
+  return new T($ps);
 }
 
 ]]
 
 // Action DeleteArg<k>() deletes the k-th (0-based) argument of the mock
 // function.
-template <int k>
-inline internal::WithArgsAction<internal::DeleteArg0Action, k>
-DeleteArg() {
-  return WithArg<k>(internal::DeleteArg0());
+ACTION_TEMPLATE(DeleteArg,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_0_VALUE_PARAMS()) {
+  delete ::std::tr1::get<k>(args);
 }
 
 // Action Throw(exception) can be used in a mock function of any type

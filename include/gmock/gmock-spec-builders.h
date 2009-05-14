@@ -1359,6 +1359,20 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   std::vector<DefaultActionSpec<F> > default_actions_;
   // All expectations for this function mocker.
   Expectations expectations_;
+
+  // There is no generally useful and implementable semantics of
+  // copying a mock object, so copying a mock is usually a user error.
+  // Thus we disallow copying function mockers.  If the user really
+  // wants to copy a mock object, he should implement his own copy
+  // operation, for example:
+  //
+  //   class MockFoo : public Foo {
+  //    public:
+  //     // Defines a copy constructor explicitly.
+  //     MockFoo(const MockFoo& src) {}
+  //     ...
+  //   };
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(FunctionMockerBase);
 };  // class FunctionMockerBase
 
 #ifdef _MSC_VER
