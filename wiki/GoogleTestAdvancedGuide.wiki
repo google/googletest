@@ -958,6 +958,8 @@ Here are some other situations when value-parameterized tests come handy:
    * You wan to test different implementations of an OO interface.
    * You want to test your code over various inputs (a.k.a. data-driven testing). This feature is easy to abuse, so please exercise your good sense when doing it!
 
+== How to Write Value-Parameterized Tests ==
+
 To write value-parameterized tests, first you should define a fixture
 class. It must be derived from `::testing::TestWithParam<T>`, where `T`
 is the type of your parameter values. `TestWithParam<T>` is itself
@@ -1053,6 +1055,27 @@ You can see
 
 _Availability_: Linux, Windows (requires MSVC 8.0 or above), Mac; since version 1.2.0.
 
+== Creating Value-Parameterized Abstract Tests ==
+
+In the above, we define and instantiate `FooTest` in the same source
+file. Sometimes you may want to define value-parameterized tests in a
+library and let other people instantiate them later. This pattern is
+known as <i>abstract tests</i>. As an example of its application, when you
+are designing an interface you can write a standard suite of abstract
+tests (perhaps using a factory function as the test parameter) that
+all implementations of the interface are expected to pass. When
+someone implements the interface, he can instantiate your suite to get
+all the interface-conformance tests for free.
+
+To define abstract tests, you should organize your code like this:
+
+  # Put the definition of the parameterized test fixture class (e.g. `FooTest`) in a header file, say `foo_param_test.h`. Think of this as _declaring_ your abstract tests.
+  # Put the `TEST_P` definitions in `foo_param_test.cc`, which includes `foo_param_test.h`. Think of this as _implementing_ your abstract tests.
+
+Once they are defined, you can instantiate them by including
+`foo_param_test.h`, invoking `INSTANTIATE_TEST_CASE_P()`, and linking
+with `foo_param_test.cc`. You can instantiate the same abstract test
+case multiple times, possibly in different source files.
 
 =  Typed Tests  =
 
