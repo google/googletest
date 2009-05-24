@@ -587,13 +587,7 @@ error message.
 
 Despite the improved thread safety afforded by the "threadsafe" style of death
 test, thread problems such as deadlock are still possible in the presence of
-handlers registered with `pthread_atfork(3)`. A future implementation will
-address this.
-
-Because the child process in an threadsafe-style death test re-executes the
-test binary by passing `argv[0]` to `execve(2)`, the test binary may not be
-found if the program was executed via a relative path and any preceding program
-code changes the program's working directory.
+handlers registered with `pthread_atfork(3)`.
 
 =  Using Assertions in Sub-routines  =
 
