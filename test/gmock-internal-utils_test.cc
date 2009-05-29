@@ -494,6 +494,34 @@ TEST(ExpectTest, FailsNonfatallyOnFalse) {
   }, "Expectation failed");
 }
 
+// Tests LogIsVisible().
+
+class LogIsVisibleTest : public ::testing::Test {
+ protected:
+  virtual void SetUp() { original_verbose_ = GMOCK_FLAG(verbose); }
+  virtual void TearDown() { GMOCK_FLAG(verbose) = original_verbose_; }
+
+  string original_verbose_;
+};
+
+TEST_F(LogIsVisibleTest, AlwaysReturnsTrueIfVerbosityIsInfo) {
+  GMOCK_FLAG(verbose) = kInfoVerbosity;
+  EXPECT_TRUE(LogIsVisible(INFO));
+  EXPECT_TRUE(LogIsVisible(WARNING));
+}
+
+TEST_F(LogIsVisibleTest, AlwaysReturnsFalseIfVerbosityIsError) {
+  GMOCK_FLAG(verbose) = kErrorVerbosity;
+  EXPECT_FALSE(LogIsVisible(INFO));
+  EXPECT_FALSE(LogIsVisible(WARNING));
+}
+
+TEST_F(LogIsVisibleTest, WorksWhenVerbosityIsWarning) {
+  GMOCK_FLAG(verbose) = kWarningVerbosity;
+  EXPECT_FALSE(LogIsVisible(INFO));
+  EXPECT_TRUE(LogIsVisible(WARNING));
+}
+
 // TODO(wan@google.com): find a way to re-enable these tests.
 #if 0
 

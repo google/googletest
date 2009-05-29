@@ -139,10 +139,10 @@ ThreadLocal<Sequence*> g_gmock_implicit_sequence;
 void ReportUninterestingCall(CallReaction reaction, const string& msg) {
   switch (reaction) {
     case ALLOW:
-      Log(INFO, msg, 4);
+      Log(INFO, msg, 3);
       break;
     case WARN:
-      Log(WARNING, msg, 4);
+      Log(WARNING, msg, 3);
       break;
     default:  // FAIL
       Expect(false, NULL, -1, msg);

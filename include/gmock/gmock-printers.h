@@ -580,6 +580,41 @@ class UniversalPrinter {
 #endif  // _MSC_VER
 };
 
+// UniversalPrintArray(begin, len, os) prints an array of 'len'
+// elements, starting at address 'begin'.
+template <typename T>
+void UniversalPrintArray(const T* begin, size_t len, ::std::ostream* os) {
+  if (len == 0) {
+    *os << "{}";
+  } else {
+    *os << "{ ";
+    const size_t kThreshold = 18;
+    const size_t kChunkSize = 8;
+    // If the array has more than kThreshold elements, we'll have to
+    // omit some details by printing only the first and the last
+    // kChunkSize elements.
+    // TODO(wan@google.com): let the user control the threshold using a flag.
+    if (len <= kThreshold) {
+      PrintRawArrayTo(begin, len, os);
+    } else {
+      PrintRawArrayTo(begin, kChunkSize, os);
+      *os << ", ..., ";
+      PrintRawArrayTo(begin + len - kChunkSize, kChunkSize, os);
+    }
+    *os << " }";
+  }
+}
+// This overload prints a (const) char array compactly.
+void UniversalPrintArray(const char* begin, size_t len, ::std::ostream* os);
+
+// Prints an array of 'len' elements, starting at address 'begin', to a string.
+template <typename T>
+string UniversalPrintArrayToString(const T* begin, size_t len) {
+  ::std::stringstream ss;
+  UniversalPrintArray(begin, len, &ss);
+  return ss.str();
+}
+
 // Implements printing an array type T[N].
 template <typename T, size_t N>
 class UniversalPrinter<T[N]> {
@@ -587,41 +622,13 @@ class UniversalPrinter<T[N]> {
   // Prints the given array, omitting some elements when there are too
   // many.
   static void Print(const T (&a)[N], ::std::ostream* os) {
-    // Prints a char array as a C string.  Note that we compare 'const
-    // T' with 'const char' instead of comparing T with char, in case
-    // that T is already a const type.
-    if (internal::type_equals<const T, const char>::value) {
-      UniversalPrinter<const T*>::Print(a, os);
-      return;
-    }
-
-    if (N == 0) {
-      *os << "{}";
-    } else {
-      *os << "{ ";
-      const size_t kThreshold = 18;
-      const size_t kChunkSize = 8;
-      // If the array has more than kThreshold elements, we'll have to
-      // omit some details by printing only the first and the last
-      // kChunkSize elements.
-      // TODO(wan): let the user control the threshold using a flag.
-      if (N <= kThreshold) {
-        PrintRawArrayTo(a, N, os);
-      } else {
-        PrintRawArrayTo(a, kChunkSize, os);
-        *os << ", ..., ";
-        PrintRawArrayTo(a + N - kChunkSize, kChunkSize, os);
-      }
-      *os << " }";
-    }
+    UniversalPrintArray(a, N, os);
   }
 
   // A convenient wrapper for Print() that returns the print-out as a
   // string.
   static string PrintToString(const T (&a)[N]) {
-    ::std::stringstream ss;
-    Print(a, &ss);
-    return ss.str();
+    return UniversalPrintArrayToString(a, N);
   }
 };
 

@@ -101,6 +101,22 @@ FailureReporterInterface* GetFailureReporter() {
 // Protects global resources (stdout in particular) used by Log().
 static Mutex g_log_mutex(Mutex::NO_CONSTRUCTOR_NEEDED_FOR_STATIC_MUTEX);
 
+// Returns true iff a log with the given severity is visible according
+// to the --gmock_verbose flag.
+bool LogIsVisible(LogSeverity severity) {
+  if (GMOCK_FLAG(verbose) == kInfoVerbosity) {
+    // Always show the log if --gmock_verbose=info.
+    return true;
+  } else if (GMOCK_FLAG(verbose) == kErrorVerbosity) {
+    // Always hide it if --gmock_verbose=error.
+    return false;
+  } else {
+    // If --gmock_verbose is neither "info" nor "error", we treat it
+    // as "warning" (its default value).
+    return severity == WARNING;
+  }
+}
+
 // Prints the given message to stdout iff 'severity' >= the level
 // specified by the --gmock_verbose flag.  If stack_frames_to_skip >=
 // 0, also prints the stack trace excluding the top
@@ -110,17 +126,8 @@ static Mutex g_log_mutex(Mutex::NO_CONSTRUCTOR_NEEDED_FOR_STATIC_MUTEX);
 // conservative.
 void Log(LogSeverity severity, const string& message,
          int stack_frames_to_skip) {
-  if (GMOCK_FLAG(verbose) == kErrorVerbosity) {
-    // The user is not interested in logs.
+  if (!LogIsVisible(severity))
     return;
-  } else if (GMOCK_FLAG(verbose) != kInfoVerbosity) {
-    // The user is interested in warnings but not informational logs.
-    // Note that invalid values of GMOCK_FLAG(verbose) are treated as
-    // "warning", which is the default value of the flag.
-    if (severity == INFO) {
-      return;
-    }
-  }
 
   // Ensures that logs from different threads don't interleave.
   MutexLock l(&g_log_mutex);

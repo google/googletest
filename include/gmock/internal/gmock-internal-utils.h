@@ -438,6 +438,10 @@ const char kWarningVerbosity[] = "warning";
 // No logs are printed.
 const char kErrorVerbosity[] = "error";
 
+// Returns true iff a log with the given severity is visible according
+// to the --gmock_verbose flag.
+bool LogIsVisible(LogSeverity severity);
+
 // Prints the given message to stdout iff 'severity' >= the level
 // specified by the --gmock_verbose flag.  If stack_frames_to_skip >=
 // 0, also prints the stack trace excluding the top

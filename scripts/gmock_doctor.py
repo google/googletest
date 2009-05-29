@@ -36,7 +36,7 @@ __author__ = 'wan@google.com (Zhanyong Wan)'
 import re
 import sys
 
-_VERSION = '1.0.0'
+_VERSION = '1.0.1'
 
 _COMMON_GMOCK_SYMBOLS = [
     # Matchers
@@ -46,8 +46,12 @@ _COMMON_GMOCK_SYMBOLS = [
     'AllOf',
     'An',
     'AnyOf',
+    'ContainerEq',
+    'Contains',
     'ContainsRegex',
     'DoubleEq',
+    'ElementsAre',
+    'ElementsAreArray',
     'EndsWith',
     'Eq',
     'Field',
@@ -60,6 +64,8 @@ _COMMON_GMOCK_SYMBOLS = [
     'Lt',
     'MatcherCast',
     'MatchesRegex',
+    'NanSensitiveDoubleEq',
+    'NanSensitiveFloatEq',
     'Ne',
     'Not',
     'NotNull',
@@ -67,6 +73,8 @@ _COMMON_GMOCK_SYMBOLS = [
     'PointeeIsInitializedProto',
     'Property',
     'Ref',
+    'ResultOf',
+    'SafeMatcherCast',
     'StartsWith',
     'StrCaseEq',
     'StrCaseNe',
@@ -76,7 +84,9 @@ _COMMON_GMOCK_SYMBOLS = [
     'TypedEq',
 
     # Actions
+    'Assign',
     'ByRef',
+    'DeleteArg',
     'DoAll',
     'DoDefault',
     'IgnoreResult',
@@ -84,11 +94,18 @@ _COMMON_GMOCK_SYMBOLS = [
     'InvokeArgument',
     'InvokeWithoutArgs',
     'Return',
+    'ReturnNew',
     'ReturnNull',
     'ReturnRef',
+    'SaveArg',
+    'SetArgReferee',
     'SetArgumentPointee',
     'SetArrayArgument',
+    'SetErrnoAndReturn',
+    'Throw',
+    'WithArg',
     'WithArgs',
+    'WithoutArgs',
 
     # Cardinalities
     'AnyNumber',
@@ -105,6 +122,9 @@ _COMMON_GMOCK_SYMBOLS = [
     'DefaultValue',
     'Mock',
     ]
+
+# Regex for matching source file path and line number in gcc's errors.
+_FILE_LINE_RE = r'(?P<file>.*):(?P<line>\d+):\s+'
 
 
 def _FindAllMatches(regex, s):
@@ -128,6 +148,7 @@ def _GenericDiagnoser(short_name, long_name, regex, diagnosis, msg):
       (short name of disease, long name of disease, diagnosis).
   """
 
+  diagnosis = '%(file)s:%(line)s:' + diagnosis
   for m in _FindAllMatches(regex, msg):
     yield (short_name, long_name, diagnosis % m.groupdict())
 
@@ -136,9 +157,9 @@ def _NeedToReturnReferenceDiagnoser(msg):
   """Diagnoses the NRR disease, given the error messages by gcc."""
 
   regex = (r'In member function \'testing::internal::ReturnAction<R>.*\n'
-           r'(?P<file>.*):(?P<line>\d+):\s+instantiated from here\n'
+           + _FILE_LINE_RE + r'instantiated from here\n'
            r'.*gmock-actions\.h.*error: creating array with negative size')
-  diagnosis = """%(file)s:%(line)s:
+  diagnosis = """
 You are using an Return() action in a function that returns a reference.
 Please use ReturnRef() instead."""
   return _GenericDiagnoser('NRR', 'Need to Return Reference',
@@ -148,11 +169,11 @@ Please use ReturnRef() instead."""
 def _NeedToReturnSomethingDiagnoser(msg):
   """Diagnoses the NRS disease, given the error messages by gcc."""
 
-  regex = (r'(?P<file>.*):(?P<line>\d+):\s+'
+  regex = (_FILE_LINE_RE +
            r'(instantiated from here\n.'
            r'*gmock-actions\.h.*error: void value not ignored)'
            r'|(error: control reaches end of non-void function)')
-  diagnosis = """%(file)s:%(line)s:
+  diagnosis = """
 You are using an action that returns void, but it needs to return
 *something*.  Please tell it *what* to return.  Perhaps you can use
 the pattern DoAll(some_action, Return(some_value))?"""
@@ -163,10 +184,10 @@ the pattern DoAll(some_action, Return(some_value))?"""
 def _NeedToReturnNothingDiagnoser(msg):
   """Diagnoses the NRN disease, given the error messages by gcc."""
 
-  regex = (r'(?P<file>.*):(?P<line>\d+):\s+instantiated from here\n'
+  regex = (_FILE_LINE_RE + r'instantiated from here\n'
            r'.*gmock-actions\.h.*error: return-statement with a value, '
            r'in function returning \'void\'')
-  diagnosis = """%(file)s:%(line)s:
+  diagnosis = """
 You are using an action that returns *something*, but it needs to return
 void.  Please use a void-returning action instead.
 
@@ -179,10 +200,10 @@ to re-arrange the order of actions in a DoAll(), if you are using one?"""
 def _IncompleteByReferenceArgumentDiagnoser(msg):
   """Diagnoses the IBRA disease, given the error messages by gcc."""
 
-  regex = (r'(?P<file>.*):(?P<line>\d+):\s+instantiated from here\n'
+  regex = (_FILE_LINE_RE + r'instantiated from here\n'
            r'.*gmock-printers\.h.*error: invalid application of '
            r'\'sizeof\' to incomplete type \'(?P<type>.*)\'')
-  diagnosis = """%(file)s:%(line)s:
+  diagnosis = """
 In order to mock this function, Google Mock needs to see the definition
 of type "%(type)s" - declaration alone is not enough.  Either #include
 the header that defines it, or change the argument to be passed
@@ -194,9 +215,9 @@ by pointer."""
 def _OverloadedFunctionMatcherDiagnoser(msg):
   """Diagnoses the OFM disease, given the error messages by gcc."""
 
-  regex = (r'(?P<file>.*):(?P<line>\d+): error: no matching function for '
+  regex = (_FILE_LINE_RE + r'error: no matching function for '
            r'call to \'Truly\(<unresolved overloaded function type>\)')
-  diagnosis = """%(file)s:%(line)s:
+  diagnosis = """
 The argument you gave to Truly() is an overloaded function.  Please tell
 gcc which overloaded version you want to use.
 
@@ -211,10 +232,9 @@ you should write
 def _OverloadedFunctionActionDiagnoser(msg):
   """Diagnoses the OFA disease, given the error messages by gcc."""
 
-  regex = (r'(?P<file>.*):(?P<line>\d+): error: '
-           r'no matching function for call to \'Invoke\('
+  regex = (_FILE_LINE_RE + r'error: no matching function for call to \'Invoke\('
            r'<unresolved overloaded function type>')
-  diagnosis = """%(file)s:%(line)s:
+  diagnosis = """
 You are passing an overloaded function to Invoke().  Please tell gcc
 which overloaded version you want to use.
 
@@ -229,10 +249,10 @@ you should write something like
 def _OverloadedMethodActionDiagnoser1(msg):
   """Diagnoses the OMA disease, given the error messages by gcc."""
 
-  regex = (r'(?P<file>.*):(?P<line>\d+): error: '
+  regex = (_FILE_LINE_RE + r'error: '
            r'.*no matching function for call to \'Invoke\(.*, '
            r'unresolved overloaded function type>')
-  diagnosis = """%(file)s:%(line)s:
+  diagnosis = """
 The second argument you gave to Invoke() is an overloaded method.  Please
 tell gcc which overloaded version you want to use.
 
@@ -250,10 +270,10 @@ you should write something like
 def _MockObjectPointerDiagnoser(msg):
   """Diagnoses the MOP disease, given the error messages by gcc."""
 
-  regex = (r'(?P<file>.*):(?P<line>\d+): error: request for member '
+  regex = (_FILE_LINE_RE + r'error: request for member '
            r'\'gmock_(?P<method>.+)\' in \'(?P<mock_object>.+)\', '
            r'which is of non-class type \'(.*::)*(?P<class_name>.+)\*\'')
-  diagnosis = """%(file)s:%(line)s:
+  diagnosis = """
 The first argument to ON_CALL() and EXPECT_CALL() must be a mock *object*,
 not a *pointer* to it.  Please write '*(%(mock_object)s)' instead of
 '%(mock_object)s' as your first argument.
@@ -279,9 +299,9 @@ you should use the EXPECT_CALL like this:
 def _OverloadedMethodActionDiagnoser2(msg):
   """Diagnoses the OMA disease, given the error messages by gcc."""
 
-  regex = (r'(?P<file>.*):(?P<line>\d+): error: no matching function for '
+  regex = (_FILE_LINE_RE + r'error: no matching function for '
            r'call to \'Invoke\(.+, <unresolved overloaded function type>\)')
-  diagnosis = """%(file)s:%(line)s:
+  diagnosis = """
 The second argument you gave to Invoke() is an overloaded method.  Please
 tell gcc which overloaded version you want to use.
 
@@ -299,9 +319,9 @@ you should write something like
 def _NeedToUseSymbolDiagnoser(msg):
   """Diagnoses the NUS disease, given the error messages by gcc."""
 
-  regex = (r'(?P<file>.*):(?P<line>\d+): error: \'(?P<symbol>.+)\' '
+  regex = (_FILE_LINE_RE + r'error: \'(?P<symbol>.+)\' '
            r'(was not declared in this scope|has not been declared)')
-  diagnosis = """%(file)s:%(line)s:
+  diagnosis = """
 '%(symbol)s' is defined by Google Mock in the testing namespace.
 Did you forget to write
   using testing::%(symbol)s;
@@ -315,11 +335,10 @@ Did you forget to write
 def _NeedToUseReturnNullDiagnoser(msg):
   """Diagnoses the NRNULL disease, given the error messages by gcc."""
 
-  regex = (r'(?P<file>.*):(?P<line>\d+):\s+instantiated from here\n'
+  regex = (_FILE_LINE_RE + r'instantiated from here\n'
            r'.*gmock-actions\.h.*error: invalid conversion from '
            r'\'long int\' to \'(?P<type>.+\*)')
-
-  diagnosis = """%(file)s:%(line)s:
+  diagnosis = """
 You are probably calling Return(NULL) and the compiler isn't sure how to turn
 NULL into a %(type)s*. Use ReturnNull() instead.
 Note: the line number may be off; please fix all instances of Return(NULL)."""
@@ -330,19 +349,32 @@ Note: the line number may be off; please fix all instances of Return(NULL)."""
 def _WrongMockMethodMacroDiagnoser(msg):
   """Diagnoses the WMM disease, given the error messages by gcc."""
 
-  regex = (r'(?P<file>.*):(?P<line>\d+):\s+'
+  regex = (_FILE_LINE_RE +
            r'.*this_method_does_not_take_(?P<wrong_args>\d+)_argument.*\n'
            r'.*\n'
-           r'.*candidates are.*FunctionMocker<[^>]+A(?P<args>\d+)\)>'
-           )
-
-  diagnosis = """%(file)s:%(line)s:
+           r'.*candidates are.*FunctionMocker<[^>]+A(?P<args>\d+)\)>')
+  diagnosis = """
 You are using MOCK_METHOD%(wrong_args)s to define a mock method that has
 %(args)s arguments. Use MOCK_METHOD%(args)s (or MOCK_CONST_METHOD%(args)s,
 MOCK_METHOD%(args)s_T, MOCK_CONST_METHOD%(args)s_T as appropriate) instead."""
   return _GenericDiagnoser('WMM', 'Wrong MOCK_METHODn macro',
                            regex, diagnosis, msg)
 
+
+def _WrongParenPositionDiagnoser(msg):
+  """Diagnoses the WPP disease, given the error messages by gcc."""
+
+  regex = (_FILE_LINE_RE +
+           r'error:.*testing::internal::MockSpec<.* has no member named \''
+           r'(?P<method>\w+)\'')
+  diagnosis = """
+The closing parenthesis of ON_CALL or EXPECT_CALL should be *before*
+".%(method)s".  For example, you should write:
+  EXPECT_CALL(my_mock, Foo(_)).%(method)s(...);
+instead of:
+  EXPECT_CALL(my_mock, Foo(_).%(method)s(...));"""
+  return _GenericDiagnoser('WPP', 'Wrong parenthesis position',
+                           regex, diagnosis, msg)
 
 
 _DIAGNOSERS = [
@@ -358,6 +390,7 @@ _DIAGNOSERS = [
     _OverloadedMethodActionDiagnoser1,
     _OverloadedMethodActionDiagnoser2,
     _WrongMockMethodMacroDiagnoser,
+    _WrongParenPositionDiagnoser,
     ]
 
 

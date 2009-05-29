@@ -242,6 +242,11 @@ static void PrintCharsAsStringTo(const char* begin, size_t len, ostream* os) {
   *os << "\"";
 }
 
+// Prints a (const) char array of 'len' elements, starting at address 'begin'.
+void UniversalPrintArray(const char* begin, size_t len, ostream* os) {
+  PrintCharsAsStringTo(begin, len, os);
+}
+
 // Prints the given array of wide characters to the ostream.
 // The array starts at *begin, the length is len, it may include L'\0'
 // characters and may not be null-terminated.
