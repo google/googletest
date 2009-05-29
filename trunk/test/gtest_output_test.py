@@ -253,8 +253,13 @@ class GTestOutputTest(unittest.TestCase):
 
   def testOutput(self):
     output = GetOutputOfAllCommands()
+
     golden_file = open(GOLDEN_PATH, 'rb')
-    golden = golden_file.read()
+    # A mis-configured source control system can cause \r appear in EOL
+    # sequences when we read the golden file irrespective of an operating
+    # system used. Therefore, we need to strip those \r's from newlines
+    # unconditionally.
+    golden = ToUnixLineEnding(golden_file.read())
     golden_file.close()
 
     # We want the test to pass regardless of death tests being

@@ -787,6 +787,6 @@ int main(int argc, char **argv) {
   GeneratorEvaluationTest::set_param_value(1);
 #endif  // GTEST_HAS_PARAM_TEST
 
-  testing::InitGoogleTest(&argc, argv);
+  ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
