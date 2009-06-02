@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2008 Google Inc.
+# Copyright 2008 Google Inc.  All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -73,7 +73,13 @@ def _GenerateMethods(output_lines, source, class_node):
         # of the first parameter to the end of the last parameter.
         start = node.parameters[0].start
         end = node.parameters[-1].end
-        args = re.sub('  +', ' ', source[start:end].replace('\n', ''))
+        # Remove // comments.
+        args_strings = re.sub(r'//.*', '', source[start:end])
+        # Condense multiple spaces and eliminate newlines putting the
+        # parameters together on a single line.  Ensure there is a
+        # space in an argument which is split by a newline without
+        # intervening whitespace, e.g.: int\nBar
+        args = re.sub('  +', ' ', args_strings.replace('\n', ' '))
 
       # Create the prototype.
       indent = ' ' * _INDENT
@@ -120,8 +126,6 @@ def _GenerateMocks(filename, source, ast_list, desired_class_names):
           lines.append('}  // namespace %s' % class_node.namespace[i])
         lines.append('')  # Add an extra newline.
 
-  sys.stdout.write('\n'.join(lines))
-
   if desired_class_names:
     missing_class_name_list = list(desired_class_names - processed_class_names)
     if missing_class_name_list:
@@ -129,7 +133,9 @@ def _GenerateMocks(filename, source, ast_list, desired_class_names):
       sys.stderr.write('Class(es) not found in %s: %s\n' %
                        (filename, ', '.join(missing_class_name_list)))
   elif not processed_class_names:
-      sys.stderr.write('No class found in %s\n' % filename)
+    sys.stderr.write('No class found in %s\n' % filename)
+
+  return lines
 
 
 def main(argv=sys.argv):
@@ -164,7 +170,8 @@ def main(argv=sys.argv):
     # An error message was already printed since we couldn't parse.
     pass
   else:
-    _GenerateMocks(filename, source, entire_ast, desired_class_names)
+    lines = _GenerateMocks(filename, source, entire_ast, desired_class_names)
+    sys.stdout.write('\n'.join(lines))
 
 
 if __name__ == '__main__':

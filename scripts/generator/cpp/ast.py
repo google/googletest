@@ -782,7 +782,7 @@ class AstBuilder(object):
                 parts = self.converter.DeclarationToParts(temp_tokens, True)
                 (name, type_name, templated_types, modifiers, default,
                  unused_other_tokens) = parts
-                      
+
                 t0 = temp_tokens[0]
                 names = [t.name for t in temp_tokens]
                 if templated_types:
@@ -1551,18 +1551,22 @@ class AstBuilder(object):
             token = self._GetNextToken()
         self.namespace_stack.append(name)
         assert token.token_type == tokenize.SYNTAX, token
+        # Create an internal token that denotes when the namespace is complete.
+        internal_token = tokenize.Token(_INTERNAL_TOKEN, _NAMESPACE_POP,
+                                        None, None)
+        internal_token.whence = token.whence
         if token.name == '=':
             # TODO(nnorwitz): handle aliasing namespaces.
             name, next_token = self.GetName()
             assert next_token.name == ';', next_token
+            self._AddBackToken(internal_token)
         else:
             assert token.name == '{', token
             tokens = list(self.GetScope())
-            del tokens[-1]              # Remove trailing '}'.
+            # Replace the trailing } with the internal namespace pop token.
+            tokens[-1] = internal_token
             # Handle namespace with nothing in it.
             self._AddBackTokens(tokens)
-        token = tokenize.Token(_INTERNAL_TOKEN, _NAMESPACE_POP, None, None)
-        self._AddBackToken(token)
         return None
 
     def handle_using(self):
@@ -1672,7 +1676,7 @@ def PrintIndentifiers(filename, should_print):
             if should_print(node):
                 print(node.name)
     except KeyboardInterrupt:
-      return
+        return
     except:
         pass
 
