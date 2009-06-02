@@ -1797,7 +1797,7 @@ across the shards, but here's one possible scenario:
 
   * Machine #0 runs `A.V` and `B.X`.
   * Machine #1 runs `A.W` and `B.Y`.
-  * Machine #2 runs `B.X`.
+  * Machine #2 runs `B.Z`.
 
 _Availability:_ Linux, Windows, Mac; since version 1.3.0.
 
