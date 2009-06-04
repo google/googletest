@@ -50,7 +50,10 @@ template <typename Container>
 class ElementsAreMatcherImpl : public MatcherInterface<Container> {
  public:
   typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container)) RawContainer;
-  typedef typename RawContainer::value_type Element;
+  typedef internal::StlContainerView<RawContainer> View;
+  typedef typename View::type StlContainer;
+  typedef typename View::const_reference StlContainerReference;
+  typedef typename StlContainer::value_type Element;
 
   // Constructs the matcher from a sequence of element values or
   // element matchers.
@@ -65,12 +68,13 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
 
   // Returns true iff 'container' matches.
   virtual bool Matches(Container container) const {
-    if (container.size() != count())
+    StlContainerReference stl_container = View::ConstReference(container);
+    if (stl_container.size() != count())
       return false;
 
-    typename RawContainer::const_iterator container_iter = container.begin();
-    for (size_t i = 0; i != count();  ++container_iter, ++i) {
-      if (!matchers_[i].Matches(*container_iter))
+    typename StlContainer::const_iterator it = stl_container.begin();
+    for (size_t i = 0; i != count();  ++it, ++i) {
+      if (!matchers_[i].Matches(*it))
         return false;
     }
 
@@ -116,15 +120,16 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
   // Explains why 'container' matches, or doesn't match, this matcher.
   virtual void ExplainMatchResultTo(Container container,
                                     ::std::ostream* os) const {
+    StlContainerReference stl_container = View::ConstReference(container);
     if (Matches(container)) {
       // We need to explain why *each* element matches (the obvious
       // ones can be skipped).
 
       bool reason_printed = false;
-      typename RawContainer::const_iterator container_iter = container.begin();
-      for (size_t i = 0; i != count(); ++container_iter, ++i) {
+      typename StlContainer::const_iterator it = stl_container.begin();
+      for (size_t i = 0; i != count(); ++it, ++i) {
         ::std::stringstream ss;
-        matchers_[i].ExplainMatchResultTo(*container_iter, &ss);
+        matchers_[i].ExplainMatchResultTo(*it, &ss);
 
         const string s = ss.str();
         if (!s.empty()) {
@@ -137,7 +142,7 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
       }
     } else {
       // We need to explain why the container doesn't match.
-      const size_t actual_count = container.size();
+      const size_t actual_count = stl_container.size();
       if (actual_count != count()) {
         // The element count doesn't match.  If the container is
         // empty, there's no need to explain anything as Google Mock
@@ -152,16 +157,16 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
       // The container has the right size but at least one element
       // doesn't match expectation.  We need to find this element and
       // explain why it doesn't match.
-      typename RawContainer::const_iterator container_iter = container.begin();
-      for (size_t i = 0; i != count(); ++container_iter, ++i) {
-        if (matchers_[i].Matches(*container_iter)) {
+      typename StlContainer::const_iterator it = stl_container.begin();
+      for (size_t i = 0; i != count(); ++it, ++i) {
+        if (matchers_[i].Matches(*it)) {
           continue;
         }
 
         *os << "element " << i << " doesn't match";
 
         ::std::stringstream ss;
-        matchers_[i].ExplainMatchResultTo(*container_iter, &ss);
+        matchers_[i].ExplainMatchResultTo(*it, &ss);
         const string s = ss.str();
         if (!s.empty()) {
           *os << " (" << s << ")";
@@ -190,7 +195,8 @@ class ElementsAreMatcher0 {
   operator Matcher<Container>() const {
     typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
         RawContainer;
-    typedef typename RawContainer::value_type Element;
+    typedef typename internal::StlContainerView<RawContainer>::type::value_type
+        Element;
 
     const Matcher<const Element&>* const matchers = NULL;
     return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers, 0));
@@ -206,7 +212,8 @@ class ElementsAreMatcher1 {
   operator Matcher<Container>() const {
     typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
         RawContainer;
-    typedef typename RawContainer::value_type Element;
+    typedef typename internal::StlContainerView<RawContainer>::type::value_type
+        Element;
 
     const Matcher<const Element&> matchers[] = {
       MatcherCast<const Element&>(e1_),
@@ -228,7 +235,8 @@ class ElementsAreMatcher2 {
   operator Matcher<Container>() const {
     typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
         RawContainer;
-    typedef typename RawContainer::value_type Element;
+    typedef typename internal::StlContainerView<RawContainer>::type::value_type
+        Element;
 
     const Matcher<const Element&> matchers[] = {
       MatcherCast<const Element&>(e1_),
@@ -253,7 +261,8 @@ class ElementsAreMatcher3 {
   operator Matcher<Container>() const {
     typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
         RawContainer;
-    typedef typename RawContainer::value_type Element;
+    typedef typename internal::StlContainerView<RawContainer>::type::value_type
+        Element;
 
     const Matcher<const Element&> matchers[] = {
       MatcherCast<const Element&>(e1_),
@@ -280,7 +289,8 @@ class ElementsAreMatcher4 {
   operator Matcher<Container>() const {
     typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
         RawContainer;
-    typedef typename RawContainer::value_type Element;
+    typedef typename internal::StlContainerView<RawContainer>::type::value_type
+        Element;
 
     const Matcher<const Element&> matchers[] = {
       MatcherCast<const Element&>(e1_),
@@ -309,7 +319,8 @@ class ElementsAreMatcher5 {
   operator Matcher<Container>() const {
     typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
         RawContainer;
-    typedef typename RawContainer::value_type Element;
+    typedef typename internal::StlContainerView<RawContainer>::type::value_type
+        Element;
 
     const Matcher<const Element&> matchers[] = {
       MatcherCast<const Element&>(e1_),
@@ -342,7 +353,8 @@ class ElementsAreMatcher6 {
   operator Matcher<Container>() const {
     typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
         RawContainer;
-    typedef typename RawContainer::value_type Element;
+    typedef typename internal::StlContainerView<RawContainer>::type::value_type
+        Element;
 
     const Matcher<const Element&> matchers[] = {
       MatcherCast<const Element&>(e1_),
@@ -377,7 +389,8 @@ class ElementsAreMatcher7 {
   operator Matcher<Container>() const {
     typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
         RawContainer;
-    typedef typename RawContainer::value_type Element;
+    typedef typename internal::StlContainerView<RawContainer>::type::value_type
+        Element;
 
     const Matcher<const Element&> matchers[] = {
       MatcherCast<const Element&>(e1_),
@@ -414,7 +427,8 @@ class ElementsAreMatcher8 {
   operator Matcher<Container>() const {
     typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
         RawContainer;
-    typedef typename RawContainer::value_type Element;
+    typedef typename internal::StlContainerView<RawContainer>::type::value_type
+        Element;
 
     const Matcher<const Element&> matchers[] = {
       MatcherCast<const Element&>(e1_),
@@ -454,7 +468,8 @@ class ElementsAreMatcher9 {
   operator Matcher<Container>() const {
     typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
         RawContainer;
-    typedef typename RawContainer::value_type Element;
+    typedef typename internal::StlContainerView<RawContainer>::type::value_type
+        Element;
 
     const Matcher<const Element&> matchers[] = {
       MatcherCast<const Element&>(e1_),
@@ -496,7 +511,8 @@ class ElementsAreMatcher10 {
   operator Matcher<Container>() const {
     typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
         RawContainer;
-    typedef typename RawContainer::value_type Element;
+    typedef typename internal::StlContainerView<RawContainer>::type::value_type
+        Element;
 
     const Matcher<const Element&> matchers[] = {
       MatcherCast<const Element&>(e1_),
@@ -538,7 +554,8 @@ class ElementsAreArrayMatcher {
   operator Matcher<Container>() const {
     typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
         RawContainer;
-    typedef typename RawContainer::value_type Element;
+    typedef typename internal::StlContainerView<RawContainer>::type::value_type
+        Element;
 
     return MakeMatcher(new ElementsAreMatcherImpl<Container>(first_, count_));
   }
@@ -1572,46 +1589,5 @@ string FormatMatcherDescription(
   bool name##MatcherP10<p0##_type, p1##_type, p2##_type, p3##_type, \
       p4##_type, p5##_type, p6##_type, p7##_type, p8##_type, p9##_type>::\
       gmock_Impl<arg_type>::Matches(arg_type arg) const
-
-namespace testing {
-namespace internal {
-
-// Returns true iff element is in the STL-style container.
-template <typename Container, typename Element>
-inline bool Contains(const Container& container, const Element& element) {
-  return ::std::find(container.begin(), container.end(), element) !=
-      container.end();
-}
-
-// Returns true iff element is in the C-style array.
-template <typename ArrayElement, size_t N, typename Element>
-inline bool Contains(const ArrayElement (&array)[N], const Element& element) {
-  return ::std::find(array, array + N, element) != array + N;
-}
-
-}  // namespace internal
-
-// Matches an STL-style container or a C-style array that contains the given
-// element.
-//
-// Examples:
-//   ::std::set<int> page_ids;
-//   page_ids.insert(3);
-//   page_ids.insert(1);
-//   EXPECT_THAT(page_ids, Contains(1));
-//   EXPECT_THAT(page_ids, Contains(3.0));
-//   EXPECT_THAT(page_ids, Not(Contains(4)));
-//
-//   ::std::map<int, size_t> page_lengths;
-//   page_lengths[1] = 100;
-//   EXPECT_THAT(map_int, Contains(::std::pair<const int, size_t>(1, 100)));
-//
-//   const char* user_ids[] = { "joe", "mike", "tom" };
-//   EXPECT_THAT(user_ids, Contains(::std::string("tom")));
-MATCHER_P(Contains, element, "") {
-  return internal::Contains(arg, element);
-}
-
-}  // namespace testing
 
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_MATCHERS_H_

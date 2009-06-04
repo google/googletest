@@ -53,6 +53,7 @@ namespace internal {
 
 namespace {
 
+using ::std::tr1::make_tuple;
 using ::std::tr1::tuple;
 
 TEST(ConvertIdentifierNameToWordsTest, WorksWhenNameContainsNoWord) {
@@ -130,6 +131,8 @@ TEST(RemoveConstTest, DoesNotAffectNonConstType) {
 // Tests that RemoveConst removes const from const types.
 TEST(RemoveConstTest, RemovesConst) {
   CompileAssertTypesEqual<int, RemoveConst<const int>::type>();
+  CompileAssertTypesEqual<char[2], RemoveConst<const char[2]>::type>();
+  CompileAssertTypesEqual<char[2][3], RemoveConst<const char[2][3]>::type>();
 }
 
 // Tests GMOCK_REMOVE_CONST_.
@@ -720,6 +723,234 @@ TEST(OnCallTest, LogsAnythingArgument) {
 }
 
 #endif  // 0
+
+// Tests ArrayEq().
+
+TEST(ArrayEqTest, WorksForDegeneratedArrays) {
+  EXPECT_TRUE(ArrayEq(5, 5L));
+  EXPECT_FALSE(ArrayEq('a', 0));
+}
+
+TEST(ArrayEqTest, WorksForOneDimensionalArrays) {
+  const int a[] = { 0, 1 };
+  long b[] = { 0, 1 };
+  EXPECT_TRUE(ArrayEq(a, b));
+  EXPECT_TRUE(ArrayEq(a, 2, b));
+
+  b[0] = 2;
+  EXPECT_FALSE(ArrayEq(a, b));
+  EXPECT_FALSE(ArrayEq(a, 1, b));
+}
+
+TEST(ArrayEqTest, WorksForTwoDimensionalArrays) {
+  const char a[][3] = { "hi", "lo" };
+  const char b[][3] = { "hi", "lo" };
+  const char c[][3] = { "hi", "li" };
+
+  EXPECT_TRUE(ArrayEq(a, b));
+  EXPECT_TRUE(ArrayEq(a, 2, b));
+
+  EXPECT_FALSE(ArrayEq(a, c));
+  EXPECT_FALSE(ArrayEq(a, 2, c));
+}
+
+// Tests ArrayAwareFind().
+
+TEST(ArrayAwareFindTest, WorksForOneDimensionalArray) {
+  const char a[] = "hello";
+  EXPECT_EQ(a + 4, ArrayAwareFind(a, a + 5, 'o'));
+  EXPECT_EQ(a + 5, ArrayAwareFind(a, a + 5, 'x'));
+}
+
+TEST(ArrayAwareFindTest, WorksForTwoDimensionalArray) {
+  int a[][2] = { { 0, 1 }, { 2, 3 }, { 4, 5 } };
+  const int b[2] = { 2, 3 };
+  EXPECT_EQ(a + 1, ArrayAwareFind(a, a + 3, b));
+
+  const int c[2] = { 6, 7 };
+  EXPECT_EQ(a + 3, ArrayAwareFind(a, a + 3, c));
+}
+
+// Tests CopyArray().
+
+TEST(CopyArrayTest, WorksForDegeneratedArrays) {
+  int n = 0;
+  CopyArray('a', &n);
+  EXPECT_EQ('a', n);
+}
+
+TEST(CopyArrayTest, WorksForOneDimensionalArrays) {
+  const char a[3] = "hi";
+  int b[3];
+  CopyArray(a, &b);
+  EXPECT_TRUE(ArrayEq(a, b));
+
+  int c[3];
+  CopyArray(a, 3, c);
+  EXPECT_TRUE(ArrayEq(a, c));
+}
+
+TEST(CopyArrayTest, WorksForTwoDimensionalArrays) {
+  const int a[2][3] = { { 0, 1, 2 }, { 3, 4, 5 } };
+  int b[2][3];
+  CopyArray(a, &b);
+  EXPECT_TRUE(ArrayEq(a, b));
+
+  int c[2][3];
+  CopyArray(a, 2, c);
+  EXPECT_TRUE(ArrayEq(a, c));
+}
+
+// Tests NativeArray.
+
+TEST(NativeArrayTest, ConstructorFromArrayReferenceWorks) {
+  const int a[3] = { 0, 1, 2 };
+  NativeArray<int> na(a, kReference);
+  EXPECT_EQ(3, na.size());
+  EXPECT_EQ(a, na.begin());
+}
+
+TEST(NativeArrayTest, ConstructorFromTupleWorks) {
+  int a[3] = { 0, 1, 2 };
+  // Tests with a plain pointer.
+  NativeArray<int> na(make_tuple(a, 3U), kReference);
+  EXPECT_EQ(a, na.begin());
+
+  const linked_ptr<char> b(new char);
+  *b = 'a';
+  // Tests with a smart pointer.
+  NativeArray<char> nb(make_tuple(b, 1), kCopy);
+  EXPECT_NE(b.get(), nb.begin());
+  EXPECT_EQ('a', nb.begin()[0]);
+}
+
+TEST(NativeArrayTest, CreatesAndDeletesCopyOfArrayWhenAskedTo) {
+  typedef int Array[2];
+  Array* a = new Array[1];
+  (*a)[0] = 0;
+  (*a)[1] = 1;
+  NativeArray<int> na(*a, kCopy);
+  EXPECT_NE(*a, na.begin());
+  delete[] a;
+  EXPECT_EQ(0, na.begin()[0]);
+  EXPECT_EQ(1, na.begin()[1]);
+
+  // We rely on the heap checker to verify that na deletes the copy of
+  // array.
+}
+
+TEST(NativeArrayTest, TypeMembersAreCorrect) {
+  StaticAssertTypeEq<char, NativeArray<char>::value_type>();
+  StaticAssertTypeEq<int[2], NativeArray<int[2]>::value_type>();
+
+  StaticAssertTypeEq<const char*, NativeArray<char>::const_iterator>();
+  StaticAssertTypeEq<const bool(*)[2], NativeArray<bool[2]>::const_iterator>();
+}
+
+TEST(NativeArrayTest, MethodsWork) {
+  const int a[] = { 0, 1, 2 };
+  NativeArray<int> na(a, kCopy);
+  ASSERT_EQ(3, na.size());
+  EXPECT_EQ(3, na.end() - na.begin());
+
+  NativeArray<int>::const_iterator it = na.begin();
+  EXPECT_EQ(0, *it);
+  ++it;
+  EXPECT_EQ(1, *it);
+  it++;
+  EXPECT_EQ(2, *it);
+  ++it;
+  EXPECT_EQ(na.end(), it);
+
+  EXPECT_THAT(na, Eq(na));
+
+  NativeArray<int> na2(a, kReference);
+  EXPECT_THAT(na, Eq(na2));
+
+  const int b1[] = { 0, 1, 1 };
+  const int b2[] = { 0, 1, 2, 3 };
+  EXPECT_THAT(na, Not(Eq(NativeArray<int>(b1, kReference))));
+  EXPECT_THAT(na, Not(Eq(NativeArray<int>(b2, kCopy))));
+}
+
+TEST(NativeArrayTest, WorksForTwoDimensionalArray) {
+  const char a[2][3] = { "hi", "lo" };
+  NativeArray<char[3]> na(a, kReference);
+  ASSERT_EQ(2, na.size());
+  EXPECT_EQ(a, na.begin());
+}
+
+// Tests StlContainerView.
+
+TEST(StlContainerViewTest, WorksForStlContainer) {
+  StaticAssertTypeEq<std::vector<int>,
+      StlContainerView<std::vector<int> >::type>();
+  StaticAssertTypeEq<const std::vector<double>&,
+      StlContainerView<std::vector<double> >::const_reference>();
+
+  typedef std::vector<char> Chars;
+  Chars v1;
+  const Chars& v2(StlContainerView<Chars>::ConstReference(v1));
+  EXPECT_EQ(&v1, &v2);
+
+  v1.push_back('a');
+  Chars v3 = StlContainerView<Chars>::Copy(v1);
+  EXPECT_THAT(v3, Eq(v3));
+}
+
+TEST(StlContainerViewTest, WorksForStaticNativeArray) {
+  StaticAssertTypeEq<NativeArray<int>,
+      StlContainerView<int[3]>::type>();
+  StaticAssertTypeEq<NativeArray<double>,
+      StlContainerView<const double[4]>::type>();
+  StaticAssertTypeEq<NativeArray<char[3]>,
+      StlContainerView<const char[2][3]>::type>();
+
+  StaticAssertTypeEq<const NativeArray<int>,
+      StlContainerView<int[2]>::const_reference>();
+
+  int a1[3] = { 0, 1, 2 };
+  NativeArray<int> a2 = StlContainerView<int[3]>::ConstReference(a1);
+  EXPECT_EQ(3, a2.size());
+  EXPECT_EQ(a1, a2.begin());
+
+  const NativeArray<int> a3 = StlContainerView<int[3]>::Copy(a1);
+  ASSERT_EQ(3, a3.size());
+  EXPECT_EQ(0, a3.begin()[0]);
+  EXPECT_EQ(1, a3.begin()[1]);
+  EXPECT_EQ(2, a3.begin()[2]);
+
+  // Makes sure a1 and a3 aren't aliases.
+  a1[0] = 3;
+  EXPECT_EQ(0, a3.begin()[0]);
+}
+
+TEST(StlContainerViewTest, WorksForDynamicNativeArray) {
+  StaticAssertTypeEq<NativeArray<int>,
+      StlContainerView<tuple<const int*, size_t> >::type>();
+  StaticAssertTypeEq<NativeArray<double>,
+      StlContainerView<tuple<linked_ptr<double>, int> >::type>();
+
+  StaticAssertTypeEq<const NativeArray<int>,
+      StlContainerView<tuple<const int*, int> >::const_reference>();
+
+  int a1[3] = { 0, 1, 2 };
+  NativeArray<int> a2 = StlContainerView<tuple<const int*, int> >::
+      ConstReference(make_tuple(a1, 3));
+  EXPECT_EQ(3, a2.size());
+  EXPECT_EQ(a1, a2.begin());
+
+  const NativeArray<int> a3 = StlContainerView<tuple<int*, size_t> >::
+      Copy(make_tuple(a1, 3));
+  ASSERT_EQ(3, a3.size());
+  EXPECT_EQ(0, a3.begin()[0]);
+  EXPECT_EQ(1, a3.begin()[1]);
+  EXPECT_EQ(2, a3.begin()[2]);
+
+  // Makes sure a1 and a3 aren't aliases.
+  a1[0] = 3;
+  EXPECT_EQ(0, a3.begin()[0]);
+}
 
 }  // namespace
 }  // namespace internal

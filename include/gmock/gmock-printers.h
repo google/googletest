@@ -66,10 +66,28 @@
 //   // printed.
 //   void ::testing::internal::UniversalTersePrint(const T& value, ostream*);
 //
+//   // Prints value using the type inferred by the compiler.  The difference
+//   // from UniversalTersePrint() is that this function prints both the
+//   // pointer and the NUL-terminated string for a (const) char pointer.
+//   void ::testing::internal::UniversalPrint(const T& value, ostream*);
+//
 //   // Prints the fields of a tuple tersely to a string vector, one
 //   // element for each field.
 //   std::vector<string> UniversalTersePrintTupleFieldsToStrings(
 //       const Tuple& value);
+//
+// Known limitation:
+//
+// The print primitives print the elements of an STL-style container
+// using the compiler-inferred type of *iter where iter is a
+// const_iterator of the container.  When const_iterator is an input
+// iterator but not a forward iterator, this inferred type may not
+// match value_type, and the print output may be incorrect.  In
+// practice, this is rarely a problem as for most containers
+// const_iterator is a forward iterator.  We'll fix this if there's an
+// actual need for it.  Note that this fix cannot rely on value_type
+// being defined as many user-defined container types don't have
+// value_type.
 
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_PRINTERS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_PRINTERS_H_
@@ -208,6 +226,9 @@ namespace internal {
 template <typename T>
 class UniversalPrinter;
 
+template <typename T>
+void UniversalPrint(const T& value, ::std::ostream* os);
+
 // Used to print an STL-style container when the user doesn't define
 // a PrintTo() for it.
 template <typename C>
@@ -227,7 +248,9 @@ void DefaultPrintTo(IsContainer /* dummy */,
       }
     }
     *os << ' ';
-    PrintTo(*it, os);
+    // We cannot call PrintTo(*it, os) here as PrintTo() doesn't
+    // handle *it being a native array.
+    internal::UniversalPrint(*it, os);
   }
 
   if (count > 0) {
@@ -681,6 +704,15 @@ inline void UniversalTersePrint(const char* str, ::std::ostream* os) {
 }
 inline void UniversalTersePrint(char* str, ::std::ostream* os) {
   UniversalTersePrint(static_cast<const char*>(str), os);
+}
+
+// Prints a value using the type inferred by the compiler.  The
+// difference between this and UniversalTersePrint() is that for a
+// (const) char pointer, this prints both the pointer and the
+// NUL-terminated string.
+template <typename T>
+void UniversalPrint(const T& value, ::std::ostream* os) {
+  UniversalPrinter<T>::Print(value, os);
 }
 
 // Prints the fields of a tuple tersely to a string vector, one

@@ -25,7 +25,7 @@ import sys
 import unittest
 
 # Allow the cpp imports below to work when run as a standalone script.
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from cpp import ast
 from cpp import gmock_class

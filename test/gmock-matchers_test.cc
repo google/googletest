@@ -60,6 +60,7 @@ bool SkipPrefix(const char* prefix, const char** pstr);
 namespace gmock_matchers_test {
 
 using std::stringstream;
+using std::tr1::make_tuple;
 using testing::A;
 using testing::AllOf;
 using testing::An;
@@ -98,6 +99,7 @@ using testing::StrEq;
 using testing::StrNe;
 using testing::Truly;
 using testing::TypedEq;
+using testing::Value;
 using testing::_;
 using testing::internal::FloatingEqMatcher;
 using testing::internal::FormatMatcherDescriptionSyntaxError;
@@ -1670,6 +1672,25 @@ TEST(MatchesTest, WorksWithMatcherOnNonRefType) {
   EXPECT_FALSE(Matches(eq5)(2));
 }
 
+// Tests Value(value, matcher).  Since Value() is a simple wrapper for
+// Matches(), which has been tested already, we don't spend a lot of
+// effort on testing Value().
+TEST(ValueTest, WorksWithPolymorphicMatcher) {
+  EXPECT_TRUE(Value("hi", StartsWith("h")));
+  EXPECT_FALSE(Value(5, Gt(10)));
+}
+
+TEST(ValueTest, WorksWithMonomorphicMatcher) {
+  const Matcher<int> is_zero = Eq(0);
+  EXPECT_TRUE(Value(0, is_zero));
+  EXPECT_FALSE(Value('a', is_zero));
+
+  int n = 0;
+  const Matcher<const int&> ref_n = Ref(n);
+  EXPECT_TRUE(Value(n, ref_n));
+  EXPECT_FALSE(Value(1, ref_n));
+}
+
 // Tests that ASSERT_THAT() and EXPECT_THAT() work when the value
 // matches the matcher.
 TEST(MatcherAssertionTest, WorksWhenMatcherIsSatisfied) {
@@ -2765,9 +2786,7 @@ TEST(ByRefTest, AllowsNotCopyableValueInMatchers) {
 // different element types.
 
 template <typename T>
-class ContainerEqTest : public testing::Test {
- public:
-};
+class ContainerEqTest : public testing::Test {};
 
 typedef testing::Types<
     std::set<int>,
@@ -2899,6 +2918,59 @@ TEST(ContainerEqExtraTest, WorksForMaps) {
 
   EXPECT_EQ("Only in actual: (0, \"aa\"); not in actual: (0, \"a\")",
             Explain(m, test_map));
+}
+
+TEST(ContainerEqExtraTest, WorksForNativeArray) {
+  int a1[] = { 1, 2, 3 };
+  int a2[] = { 1, 2, 3 };
+  int b[] = { 1, 2, 4 };
+
+  EXPECT_THAT(a1, ContainerEq(a2));
+  EXPECT_THAT(a1, Not(ContainerEq(b)));
+}
+
+TEST(ContainerEqExtraTest, WorksForTwoDimensionalNativeArray) {
+  const char a1[][3] = { "hi", "lo" };
+  const char a2[][3] = { "hi", "lo" };
+  const char b[][3] = { "lo", "hi" };
+
+  // Tests using ContainerEq() in the first dimension.
+  EXPECT_THAT(a1, ContainerEq(a2));
+  EXPECT_THAT(a1, Not(ContainerEq(b)));
+
+  // Tests using ContainerEq() in the second dimension.
+  EXPECT_THAT(a1, ElementsAre(ContainerEq(a2[0]), ContainerEq(a2[1])));
+  EXPECT_THAT(a1, ElementsAre(Not(ContainerEq(b[0])), ContainerEq(a2[1])));
+}
+
+TEST(ContainerEqExtraTest, WorksForNativeArrayAsTuple) {
+  const int a1[] = { 1, 2, 3 };
+  const int a2[] = { 1, 2, 3 };
+  const int b[] = { 1, 2, 3, 4 };
+
+  EXPECT_THAT(make_tuple(a1, 3), ContainerEq(a2));
+  EXPECT_THAT(make_tuple(a1, 3), Not(ContainerEq(b)));
+
+  const int c[] = { 1, 3, 2 };
+  EXPECT_THAT(make_tuple(a1, 3), Not(ContainerEq(c)));
+}
+
+TEST(ContainerEqExtraTest, CopiesNativeArrayParameter) {
+  std::string a1[][3] = {
+    { "hi", "hello", "ciao" },
+    { "bye", "see you", "ciao" }
+  };
+
+  std::string a2[][3] = {
+    { "hi", "hello", "ciao" },
+    { "bye", "see you", "ciao" }
+  };
+
+  const Matcher<const std::string(&)[2][3]> m = ContainerEq(a2);
+  EXPECT_THAT(a1, m);
+
+  a2[0][0] = "ha";
+  EXPECT_THAT(a1, m);
 }
 
 // Tests GetParamIndex().

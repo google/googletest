@@ -23,7 +23,7 @@ the environment.  For example to use an indent of 4 spaces:
 
 INDENT=4 gmock_gen.py header-file.h ClassName
 
-This version was made from SVN revision 279 in the cppclean repository.
+This version was made from SVN revision 281 in the cppclean repository.
 
 Known Limitations
 -----------------

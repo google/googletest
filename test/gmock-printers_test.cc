@@ -154,10 +154,13 @@ using ::std::tr1::tuple;
 using ::std::vector;
 using ::testing::ElementsAre;
 using ::testing::StartsWith;
+using ::testing::internal::NativeArray;
 using ::testing::internal::Strings;
 using ::testing::internal::UniversalTersePrint;
+using ::testing::internal::UniversalPrint;
 using ::testing::internal::UniversalTersePrintTupleFieldsToStrings;
 using ::testing::internal::UniversalPrinter;
+using ::testing::internal::kReference;
 using ::testing::internal::string;
 
 #if GTEST_OS_WINDOWS
@@ -786,6 +789,17 @@ TEST(PrintStlContainerTest, NestedContainer) {
   EXPECT_EQ("{ { 1, 2 }, { 3, 4, 5 } }", Print(v));
 }
 
+TEST(PrintStlContainerTest, OneDimensionalNativeArray) {
+  const int a[] = { 1, 2, 3 };
+  NativeArray<int> b(a, kReference);
+  EXPECT_EQ("{ 1, 2, 3 }", Print(b));
+}
+
+TEST(PrintStlContainerTest, TwoDimensionalNativeArray) {
+  const int a[][3] = { { 1, 2, 3 }, { 4, 5, 6 } };
+  NativeArray<int[3]> b(a, kReference);
+  EXPECT_EQ("{ { 1, 2, 3 }, { 4, 5, 6 } }", Print(b));
+}
 
 // Tests printing tuples.
 
@@ -1012,6 +1026,37 @@ TEST(UniversalTersePrintTest, WorksForCString) {
   UniversalTersePrint(s3, &ss3);
   EXPECT_EQ("NULL", ss3.str());
 }
+
+TEST(UniversalPrintTest, WorksForNonReference) {
+  ::std::stringstream ss;
+  UniversalPrint(123, &ss);
+  EXPECT_EQ("123", ss.str());
+}
+
+TEST(UniversalPrintTest, WorksForReference) {
+  const int& n = 123;
+  ::std::stringstream ss;
+  UniversalPrint(n, &ss);
+  EXPECT_EQ("123", ss.str());
+}
+
+TEST(UniversalPrintTest, WorksForCString) {
+  const char* s1 = "abc";
+  ::std::stringstream ss1;
+  UniversalPrint(s1, &ss1);
+  EXPECT_EQ(PrintPointer(s1) + " pointing to \"abc\"", string(ss1.str()));
+
+  char* s2 = const_cast<char*>(s1);
+  ::std::stringstream ss2;
+  UniversalPrint(s2, &ss2);
+  EXPECT_EQ(PrintPointer(s2) + " pointing to \"abc\"", string(ss2.str()));
+
+  const char* s3 = NULL;
+  ::std::stringstream ss3;
+  UniversalPrint(s3, &ss3);
+  EXPECT_EQ("NULL", ss3.str());
+}
+
 
 TEST(UniversalTersePrintTupleFieldsToStringsTest, PrintsEmptyTuple) {
   EXPECT_THAT(UniversalTersePrintTupleFieldsToStrings(make_tuple()),

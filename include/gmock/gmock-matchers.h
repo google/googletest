@@ -1709,59 +1709,163 @@ void ExplainMatchResultTo(const ResultOfMatcher<Callable>& matcher,
 template <typename Container>
 class ContainerEqMatcher {
  public:
-  explicit ContainerEqMatcher(const Container& rhs) : rhs_(rhs) {}
-  bool Matches(const Container& lhs) const { return lhs == rhs_; }
+  typedef internal::StlContainerView<Container> View;
+  typedef typename View::type StlContainer;
+  typedef typename View::const_reference StlContainerReference;
+
+  // We make a copy of rhs in case the elements in it are modified
+  // after this matcher is created.
+  explicit ContainerEqMatcher(const Container& rhs) : rhs_(View::Copy(rhs)) {
+    // Makes sure the user doesn't instantiate this class template
+    // with a const or reference type.
+    testing::StaticAssertTypeEq<Container,
+        GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))>();
+  }
+
+  template <typename LhsContainer>
+  bool Matches(const LhsContainer& lhs) const {
+    // GMOCK_REMOVE_CONST_() is needed to work around an MSVC 8.0 bug
+    // that causes LhsContainer to be a const type sometimes.
+    typedef internal::StlContainerView<GMOCK_REMOVE_CONST_(LhsContainer)>
+        LhsView;
+    StlContainerReference lhs_stl_container = LhsView::ConstReference(lhs);
+    return lhs_stl_container == rhs_;
+  }
   void DescribeTo(::std::ostream* os) const {
     *os << "equals ";
-    UniversalPrinter<Container>::Print(rhs_, os);
+    UniversalPrinter<StlContainer>::Print(rhs_, os);
   }
   void DescribeNegationTo(::std::ostream* os) const {
     *os << "does not equal ";
-    UniversalPrinter<Container>::Print(rhs_, os);
+    UniversalPrinter<StlContainer>::Print(rhs_, os);
   }
 
-  void ExplainMatchResultTo(const Container& lhs,
+  template <typename LhsContainer>
+  void ExplainMatchResultTo(const LhsContainer& lhs,
                             ::std::ostream* os) const {
+    // GMOCK_REMOVE_CONST_() is needed to work around an MSVC 8.0 bug
+    // that causes LhsContainer to be a const type sometimes.
+    typedef internal::StlContainerView<GMOCK_REMOVE_CONST_(LhsContainer)>
+        LhsView;
+    typedef typename LhsView::type LhsStlContainer;
+    StlContainerReference lhs_stl_container = LhsView::ConstReference(lhs);
+
     // Something is different. Check for missing values first.
     bool printed_header = false;
-    for (typename Container::const_iterator it = lhs.begin();
-         it != lhs.end(); ++it) {
-      if (std::find(rhs_.begin(), rhs_.end(), *it) == rhs_.end()) {
+    for (typename LhsStlContainer::const_iterator it =
+             lhs_stl_container.begin();
+         it != lhs_stl_container.end(); ++it) {
+      if (internal::ArrayAwareFind(rhs_.begin(), rhs_.end(), *it) ==
+          rhs_.end()) {
         if (printed_header) {
           *os << ", ";
         } else {
           *os << "Only in actual: ";
           printed_header = true;
         }
-        UniversalPrinter<typename Container::value_type>::Print(*it, os);
+        UniversalPrinter<typename LhsStlContainer::value_type>::Print(*it, os);
       }
     }
 
     // Now check for extra values.
     bool printed_header2 = false;
-    for (typename Container::const_iterator it = rhs_.begin();
+    for (typename StlContainer::const_iterator it = rhs_.begin();
          it != rhs_.end(); ++it) {
-      if (std::find(lhs.begin(), lhs.end(), *it) == lhs.end()) {
+      if (internal::ArrayAwareFind(
+              lhs_stl_container.begin(), lhs_stl_container.end(), *it) ==
+          lhs_stl_container.end()) {
         if (printed_header2) {
           *os << ", ";
         } else {
           *os << (printed_header ? "; not" : "Not") << " in actual: ";
           printed_header2 = true;
         }
-        UniversalPrinter<typename Container::value_type>::Print(*it, os);
+        UniversalPrinter<typename StlContainer::value_type>::Print(*it, os);
       }
     }
   }
  private:
-  const Container rhs_;
+  const StlContainer rhs_;
 };
 
-template <typename Container>
+template <typename LhsContainer, typename Container>
 void ExplainMatchResultTo(const ContainerEqMatcher<Container>& matcher,
-                          const Container& lhs,
+                          const LhsContainer& lhs,
                           ::std::ostream* os) {
   matcher.ExplainMatchResultTo(lhs, os);
 }
+
+// Implements Contains(element_matcher) for the given argument type Container.
+template <typename Container>
+class ContainsMatcherImpl : public MatcherInterface<Container> {
+ public:
+  typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container)) RawContainer;
+  typedef StlContainerView<RawContainer> View;
+  typedef typename View::type StlContainer;
+  typedef typename View::const_reference StlContainerReference;
+  typedef typename StlContainer::value_type Element;
+
+  template <typename InnerMatcher>
+  explicit ContainsMatcherImpl(InnerMatcher inner_matcher)
+      : inner_matcher_(
+          testing::SafeMatcherCast<const Element&>(inner_matcher)) {}
+
+  // Returns true iff 'container' matches.
+  virtual bool Matches(Container container) const {
+    StlContainerReference stl_container = View::ConstReference(container);
+    for (typename StlContainer::const_iterator it = stl_container.begin();
+         it != stl_container.end(); ++it) {
+      if (inner_matcher_.Matches(*it))
+        return true;
+    }
+    return false;
+  }
+
+  // Describes what this matcher does.
+  virtual void DescribeTo(::std::ostream* os) const {
+    *os << "contains at least one element that ";
+    inner_matcher_.DescribeTo(os);
+  }
+
+  // Describes what the negation of this matcher does.
+  virtual void DescribeNegationTo(::std::ostream* os) const {
+    *os << "doesn't contain any element that ";
+    inner_matcher_.DescribeTo(os);
+  }
+
+  // Explains why 'container' matches, or doesn't match, this matcher.
+  virtual void ExplainMatchResultTo(Container container,
+                                    ::std::ostream* os) const {
+    StlContainerReference stl_container = View::ConstReference(container);
+
+    // We need to explain which (if any) element matches inner_matcher_.
+    typename StlContainer::const_iterator it = stl_container.begin();
+    for (size_t i = 0; it != stl_container.end(); ++it, ++i) {
+      if (inner_matcher_.Matches(*it)) {
+        *os << "element " << i << " matches";
+        return;
+      }
+    }
+  }
+
+ private:
+  const Matcher<const Element&> inner_matcher_;
+};
+
+// Implements polymorphic Contains(element_matcher).
+template <typename M>
+class ContainsMatcher {
+ public:
+  explicit ContainsMatcher(M m) : inner_matcher_(m) {}
+
+  template <typename Container>
+  operator Matcher<Container>() const {
+    return MakeMatcher(new ContainsMatcherImpl<Container>(inner_matcher_));
+  }
+
+ private:
+  const M inner_matcher_;
+};
 
 }  // namespace internal
 
@@ -2206,9 +2310,35 @@ Truly(Predicate pred) {
 // values that are included in one container but not the other. (Duplicate
 // values and order differences are not explained.)
 template <typename Container>
-inline PolymorphicMatcher<internal::ContainerEqMatcher<Container> >
+inline PolymorphicMatcher<internal::ContainerEqMatcher<
+                            GMOCK_REMOVE_CONST_(Container)> >
     ContainerEq(const Container& rhs) {
-  return MakePolymorphicMatcher(internal::ContainerEqMatcher<Container>(rhs));
+  // This following line is for working around a bug in MSVC 8.0,
+  // which causes Container to be a const type sometimes.
+  typedef GMOCK_REMOVE_CONST_(Container) RawContainer;
+  return MakePolymorphicMatcher(internal::ContainerEqMatcher<RawContainer>(rhs));
+}
+
+// Matches an STL-style container or a native array that contains at
+// least one element matching the given value or matcher.
+//
+// Examples:
+//   ::std::set<int> page_ids;
+//   page_ids.insert(3);
+//   page_ids.insert(1);
+//   EXPECT_THAT(page_ids, Contains(1));
+//   EXPECT_THAT(page_ids, Contains(Gt(2)));
+//   EXPECT_THAT(page_ids, Not(Contains(4)));
+//
+//   ::std::map<int, size_t> page_lengths;
+//   page_lengths[1] = 100;
+//   EXPECT_THAT(map_int, Contains(::std::pair<const int, size_t>(1, 100)));
+//
+//   const char* user_ids[] = { "joe", "mike", "tom" };
+//   EXPECT_THAT(user_ids, Contains(Eq(::std::string("tom"))));
+template <typename M>
+inline internal::ContainsMatcher<M> Contains(M matcher) {
+  return internal::ContainsMatcher<M>(matcher);
 }
 
 // Returns a predicate that is satisfied by anything that matches the
@@ -2216,6 +2346,12 @@ inline PolymorphicMatcher<internal::ContainerEqMatcher<Container> >
 template <typename M>
 inline internal::MatcherAsPredicate<M> Matches(M matcher) {
   return internal::MatcherAsPredicate<M>(matcher);
+}
+
+// Returns true iff the value matches the matcher.
+template <typename T, typename M>
+inline bool Value(const T& value, M matcher) {
+  return testing::Matches(matcher)(value);
 }
 
 // These macros allow using matchers to check values in Google Test

@@ -36,7 +36,7 @@ __author__ = 'wan@google.com (Zhanyong Wan)'
 import re
 import sys
 
-_VERSION = '1.0.1'
+_VERSION = '1.0.3'
 
 _COMMON_GMOCK_SYMBOLS = [
     # Matchers
@@ -63,6 +63,7 @@ _COMMON_GMOCK_SYMBOLS = [
     'Le',
     'Lt',
     'MatcherCast',
+    'Matches',
     'MatchesRegex',
     'NanSensitiveDoubleEq',
     'NanSensitiveFloatEq',
@@ -82,6 +83,7 @@ _COMMON_GMOCK_SYMBOLS = [
     'StrNe',
     'Truly',
     'TypedEq',
+    'Value',
 
     # Actions
     'Assign',
@@ -171,7 +173,7 @@ def _NeedToReturnSomethingDiagnoser(msg):
 
   regex = (_FILE_LINE_RE +
            r'(instantiated from here\n.'
-           r'*gmock-actions\.h.*error: void value not ignored)'
+           r'*gmock.*actions\.h.*error: void value not ignored)'
            r'|(error: control reaches end of non-void function)')
   diagnosis = """
 You are using an action that returns void, but it needs to return
@@ -346,6 +348,60 @@ Note: the line number may be off; please fix all instances of Return(NULL)."""
                            regex, diagnosis, msg)
 
 
+_TTB_DIAGNOSIS = """
+In a mock class template, types or typedefs defined in the base class
+template are *not* automatically visible.  This is how C++ works.  Before
+you can use a type or typedef named %(type)s defined in base class Base<T>, you
+need to make it visible.  One way to do it is:
+
+  typedef typename Base<T>::%(type)s %(type)s;"""
+
+
+def _TypeInTemplatedBaseDiagnoser1(msg):
+  """Diagnoses the TTB disease, given the error messages by gcc.
+
+  This version works when the type is used as the mock function's return
+  type.
+  """
+
+  regex = (r'In member function \'int .*\n' + _FILE_LINE_RE +
+           r'error: a function call cannot appear in a constant-expression')
+  diagnosis = _TTB_DIAGNOSIS % {'type': 'Foo'}
+  return _GenericDiagnoser('TTB', 'Type in Template Base',
+                           regex, diagnosis, msg)
+
+
+def _TypeInTemplatedBaseDiagnoser2(msg):
+  """Diagnoses the TTB disease, given the error messages by gcc.
+
+  This version works when the type is used as the mock function's sole
+  parameter type.
+  """
+
+  regex = (r'In member function \'int .*\n'
+           + _FILE_LINE_RE +
+           r'error: \'(?P<type>.+)\' was not declared in this scope\n'
+           r'.*error: template argument 1 is invalid\n')
+  return _GenericDiagnoser('TTB', 'Type in Template Base',
+                           regex, _TTB_DIAGNOSIS, msg)
+
+
+def _TypeInTemplatedBaseDiagnoser3(msg):
+  """Diagnoses the TTB disease, given the error messages by gcc.
+
+  This version works when the type is used as a parameter of a mock
+  function that has multiple parameters.
+  """
+
+  regex = (r'error: expected `;\' before \'::\' token\n'
+           + _FILE_LINE_RE +
+           r'error: \'(?P<type>.+)\' was not declared in this scope\n'
+           r'.*error: template argument 1 is invalid\n'
+           r'.*error: \'.+\' was not declared in this scope')
+  return _GenericDiagnoser('TTB', 'Type in Template Base',
+                           regex, _TTB_DIAGNOSIS, msg)
+
+
 def _WrongMockMethodMacroDiagnoser(msg):
   """Diagnoses the WMM disease, given the error messages by gcc."""
 
@@ -357,7 +413,7 @@ def _WrongMockMethodMacroDiagnoser(msg):
 You are using MOCK_METHOD%(wrong_args)s to define a mock method that has
 %(args)s arguments. Use MOCK_METHOD%(args)s (or MOCK_CONST_METHOD%(args)s,
 MOCK_METHOD%(args)s_T, MOCK_CONST_METHOD%(args)s_T as appropriate) instead."""
-  return _GenericDiagnoser('WMM', 'Wrong MOCK_METHODn macro',
+  return _GenericDiagnoser('WMM', 'Wrong MOCK_METHODn Macro',
                            regex, diagnosis, msg)
 
 
@@ -373,7 +429,7 @@ The closing parenthesis of ON_CALL or EXPECT_CALL should be *before*
   EXPECT_CALL(my_mock, Foo(_)).%(method)s(...);
 instead of:
   EXPECT_CALL(my_mock, Foo(_).%(method)s(...));"""
-  return _GenericDiagnoser('WPP', 'Wrong parenthesis position',
+  return _GenericDiagnoser('WPP', 'Wrong Parenthesis Position',
                            regex, diagnosis, msg)
 
 
@@ -389,6 +445,9 @@ _DIAGNOSERS = [
     _OverloadedFunctionMatcherDiagnoser,
     _OverloadedMethodActionDiagnoser1,
     _OverloadedMethodActionDiagnoser2,
+    _TypeInTemplatedBaseDiagnoser1,
+    _TypeInTemplatedBaseDiagnoser2,
+    _TypeInTemplatedBaseDiagnoser3,
     _WrongMockMethodMacroDiagnoser,
     _WrongParenPositionDiagnoser,
     ]
