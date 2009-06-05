@@ -1,0 +1,10 @@
+This directory contains a copy of Google Test for use by users of
+Microsoft Visual C++ 6.
+
+This copy contains code specific to VC 6 that we don't intend to
+integrate back to the trunk, as we want to keep the code there clean.
+
+This copy is *not* supported by the Google Test team.  If you see a
+bug, you are welcome to submit a patch to fix it yourself.  Read
+http://code.google.com/p/googletest/wiki/GoogleTestDevGuide for
+details.

@@ -1,0 +1,575 @@
+The non-test part of the code is expected to have 2 failures.
+
+gtest_output_test_.cc:#: error: Value of: false
+  Actual: false
+Expected: true
+gtest_output_test_.cc:#: error: Value of: 3
+Expected: 2
+[==========] Running 57 tests from 26 test cases.
+[----------] Global test environment set-up.
+FooEnvironment::SetUp() called.
+BarEnvironment::SetUp() called.
+[----------] 1 test from ADeathTest
+[ RUN      ] ADeathTest.ShouldRunFirst
+[       OK ] ADeathTest.ShouldRunFirst
+[----------] 1 test from ATypedDeathTest/0, where TypeParam = int
+[ RUN      ] ATypedDeathTest/0.ShouldRunFirst
+[       OK ] ATypedDeathTest/0.ShouldRunFirst
+[----------] 1 test from ATypedDeathTest/1, where TypeParam = double
+[ RUN      ] ATypedDeathTest/1.ShouldRunFirst
+[       OK ] ATypedDeathTest/1.ShouldRunFirst
+[----------] 1 test from My/ATypeParamDeathTest/0, where TypeParam = int
+[ RUN      ] My/ATypeParamDeathTest/0.ShouldRunFirst
+[       OK ] My/ATypeParamDeathTest/0.ShouldRunFirst
+[----------] 1 test from My/ATypeParamDeathTest/1, where TypeParam = double
+[ RUN      ] My/ATypeParamDeathTest/1.ShouldRunFirst
+[       OK ] My/ATypeParamDeathTest/1.ShouldRunFirst
+[----------] 2 tests from PassingTest
+[ RUN      ] PassingTest.PassingTest1
+[       OK ] PassingTest.PassingTest1
+[ RUN      ] PassingTest.PassingTest2
+[       OK ] PassingTest.PassingTest2
+[----------] 3 tests from FatalFailureTest
+[ RUN      ] FatalFailureTest.FatalFailureInSubroutine
+(expecting a failure that x should be 1)
+gtest_output_test_.cc:#: error: Value of: x
+  Actual: 2
+Expected: 1
+[  FAILED  ] FatalFailureTest.FatalFailureInSubroutine
+[ RUN      ] FatalFailureTest.FatalFailureInNestedSubroutine
+(expecting a failure that x should be 1)
+gtest_output_test_.cc:#: error: Value of: x
+  Actual: 2
+Expected: 1
+[  FAILED  ] FatalFailureTest.FatalFailureInNestedSubroutine
+[ RUN      ] FatalFailureTest.NonfatalFailureInSubroutine
+(expecting a failure on false)
+gtest_output_test_.cc:#: error: Value of: false
+  Actual: false
+Expected: true
+[  FAILED  ] FatalFailureTest.NonfatalFailureInSubroutine
+[----------] 1 test from LoggingTest
+[ RUN      ] LoggingTest.InterleavingLoggingAndAssertions
+(expecting 2 failures on (3) >= (a[i]))
+i == 0
+i == 1
+gtest_output_test_.cc:#: error: Expected: (3) >= (a[i]), actual: 3 vs 9
+i == 2
+i == 3
+gtest_output_test_.cc:#: error: Expected: (3) >= (a[i]), actual: 3 vs 6
+[  FAILED  ] LoggingTest.InterleavingLoggingAndAssertions
+[----------] 5 tests from SCOPED_TRACETest
+[ RUN      ] SCOPED_TRACETest.ObeysScopes
+(expected to fail)
+gtest_output_test_.cc:#: error: Failed
+This failure is expected, and shouldn't have a trace.
+gtest_output_test_.cc:#: error: Failed
+This failure is expected, and should have a trace.
+Google Test trace:
+gtest_output_test_.cc:#: Expected trace
+gtest_output_test_.cc:#: error: Failed
+This failure is expected, and shouldn't have a trace.
+[  FAILED  ] SCOPED_TRACETest.ObeysScopes
+[ RUN      ] SCOPED_TRACETest.WorksInLoop
+(expected to fail)
+gtest_output_test_.cc:#: error: Value of: n
+  Actual: 1
+Expected: 2
+Google Test trace:
+gtest_output_test_.cc:#: i = 1
+gtest_output_test_.cc:#: error: Value of: n
+  Actual: 2
+Expected: 1
+Google Test trace:
+gtest_output_test_.cc:#: i = 2
+[  FAILED  ] SCOPED_TRACETest.WorksInLoop
+[ RUN      ] SCOPED_TRACETest.WorksInSubroutine
+(expected to fail)
+gtest_output_test_.cc:#: error: Value of: n
+  Actual: 1
+Expected: 2
+Google Test trace:
+gtest_output_test_.cc:#: n = 1
+gtest_output_test_.cc:#: error: Value of: n
+  Actual: 2
+Expected: 1
+Google Test trace:
+gtest_output_test_.cc:#: n = 2
+[  FAILED  ] SCOPED_TRACETest.WorksInSubroutine
+[ RUN      ] SCOPED_TRACETest.CanBeNested
+(expected to fail)
+gtest_output_test_.cc:#: error: Value of: n
+  Actual: 2
+Expected: 1
+Google Test trace:
+gtest_output_test_.cc:#: n = 2
+gtest_output_test_.cc:#: 
+[  FAILED  ] SCOPED_TRACETest.CanBeNested
+[ RUN      ] SCOPED_TRACETest.CanBeRepeated
+(expected to fail)
+gtest_output_test_.cc:#: error: Failed
+This failure is expected, and should contain trace point A.
+Google Test trace:
+gtest_output_test_.cc:#: A
+gtest_output_test_.cc:#: error: Failed
+This failure is expected, and should contain trace point A and B.
+Google Test trace:
+gtest_output_test_.cc:#: B
+gtest_output_test_.cc:#: A
+gtest_output_test_.cc:#: error: Failed
+This failure is expected, and should contain trace point A, B, and C.
+Google Test trace:
+gtest_output_test_.cc:#: C
+gtest_output_test_.cc:#: B
+gtest_output_test_.cc:#: A
+gtest_output_test_.cc:#: error: Failed
+This failure is expected, and should contain trace point A, B, and D.
+Google Test trace:
+gtest_output_test_.cc:#: D
+gtest_output_test_.cc:#: B
+gtest_output_test_.cc:#: A
+[  FAILED  ] SCOPED_TRACETest.CanBeRepeated
+[----------] 1 test from NonFatalFailureInFixtureConstructorTest
+[ RUN      ] NonFatalFailureInFixtureConstructorTest.FailureInConstructor
+(expecting 5 failures)
+gtest_output_test_.cc:#: error: Failed
+Expected failure #1, in the test fixture c'tor.
+gtest_output_test_.cc:#: error: Failed
+Expected failure #2, in SetUp().
+gtest_output_test_.cc:#: error: Failed
+Expected failure #3, in the test body.
+gtest_output_test_.cc:#: error: Failed
+Expected failure #4, in TearDown.
+gtest_output_test_.cc:#: error: Failed
+Expected failure #5, in the test fixture d'tor.
+[  FAILED  ] NonFatalFailureInFixtureConstructorTest.FailureInConstructor
+[----------] 1 test from FatalFailureInFixtureConstructorTest
+[ RUN      ] FatalFailureInFixtureConstructorTest.FailureInConstructor
+(expecting 2 failures)
+gtest_output_test_.cc:#: error: Failed
+Expected failure #1, in the test fixture c'tor.
+gtest_output_test_.cc:#: error: Failed
+Expected failure #2, in the test fixture d'tor.
+[  FAILED  ] FatalFailureInFixtureConstructorTest.FailureInConstructor
+[----------] 1 test from NonFatalFailureInSetUpTest
+[ RUN      ] NonFatalFailureInSetUpTest.FailureInSetUp
+(expecting 4 failures)
+gtest_output_test_.cc:#: error: Failed
+Expected failure #1, in SetUp().
+gtest_output_test_.cc:#: error: Failed
+Expected failure #2, in the test function.
+gtest_output_test_.cc:#: error: Failed
+Expected failure #3, in TearDown().
+gtest_output_test_.cc:#: error: Failed
+Expected failure #4, in the test fixture d'tor.
+[  FAILED  ] NonFatalFailureInSetUpTest.FailureInSetUp
+[----------] 1 test from FatalFailureInSetUpTest
+[ RUN      ] FatalFailureInSetUpTest.FailureInSetUp
+(expecting 3 failures)
+gtest_output_test_.cc:#: error: Failed
+Expected failure #1, in SetUp().
+gtest_output_test_.cc:#: error: Failed
+Expected failure #2, in TearDown().
+gtest_output_test_.cc:#: error: Failed
+Expected failure #3, in the test fixture d'tor.
+[  FAILED  ] FatalFailureInSetUpTest.FailureInSetUp
+[----------] 1 test from ExceptionInFixtureCtorTest
+[ RUN      ] ExceptionInFixtureCtorTest.ExceptionInFixtureCtor
+(expecting a failure on thrown exception in the test fixture's constructor)
+unknown file: error: Exception thrown with code 0xc0000005 in the test fixture's constructor.
+[----------] 1 test from ExceptionInSetUpTest
+[ RUN      ] ExceptionInSetUpTest.ExceptionInSetUp
+(expecting 3 failures)
+unknown file: error: Exception thrown with code 0xc0000005 in SetUp().
+gtest_output_test_.cc:#: error: Failed
+Expected failure #2, in TearDown().
+gtest_output_test_.cc:#: error: Failed
+Expected failure #3, in the test fixture d'tor.
+[  FAILED  ] ExceptionInSetUpTest.ExceptionInSetUp
+[----------] 1 test from ExceptionInTestFunctionTest
+[ RUN      ] ExceptionInTestFunctionTest.SEH
+(expecting 3 failures)
+unknown file: error: Exception thrown with code 0xc0000005 in the test body.
+gtest_output_test_.cc:#: error: Failed
+Expected failure #2, in TearDown().
+gtest_output_test_.cc:#: error: Failed
+Expected failure #3, in the test fixture d'tor.
+[  FAILED  ] ExceptionInTestFunctionTest.SEH
+[----------] 4 tests from MixedUpTestCaseTest
+[ RUN      ] MixedUpTestCaseTest.FirstTestFromNamespaceFoo
+[       OK ] MixedUpTestCaseTest.FirstTestFromNamespaceFoo
+[ RUN      ] MixedUpTestCaseTest.SecondTestFromNamespaceFoo
+[       OK ] MixedUpTestCaseTest.SecondTestFromNamespaceFoo
+[ RUN      ] MixedUpTestCaseTest.ThisShouldFail
+gtest.cc:#: error: Failed
+All tests in the same test case must use the same test fixture
+class.  However, in test case MixedUpTestCaseTest,
+you defined test FirstTestFromNamespaceFoo and test ThisShouldFail
+using two different test fixture classes.  This can happen if
+the two classes are from different namespaces or translation
+units and have the same name.  You should probably rename one
+of the classes to put the tests into different test cases.
+[  FAILED  ] MixedUpTestCaseTest.ThisShouldFail
+[ RUN      ] MixedUpTestCaseTest.ThisShouldFailToo
+gtest.cc:#: error: Failed
+All tests in the same test case must use the same test fixture
+class.  However, in test case MixedUpTestCaseTest,
+you defined test FirstTestFromNamespaceFoo and test ThisShouldFailToo
+using two different test fixture classes.  This can happen if
+the two classes are from different namespaces or translation
+units and have the same name.  You should probably rename one
+of the classes to put the tests into different test cases.
+[  FAILED  ] MixedUpTestCaseTest.ThisShouldFailToo
+[----------] 2 tests from MixedUpTestCaseWithSameTestNameTest
+[ RUN      ] MixedUpTestCaseWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
+[       OK ] MixedUpTestCaseWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
+[ RUN      ] MixedUpTestCaseWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
+gtest.cc:#: error: Failed
+All tests in the same test case must use the same test fixture
+class.  However, in test case MixedUpTestCaseWithSameTestNameTest,
+you defined test TheSecondTestWithThisNameShouldFail and test TheSecondTestWithThisNameShouldFail
+using two different test fixture classes.  This can happen if
+the two classes are from different namespaces or translation
+units and have the same name.  You should probably rename one
+of the classes to put the tests into different test cases.
+[  FAILED  ] MixedUpTestCaseWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
+[----------] 2 tests from TEST_F_before_TEST_in_same_test_case
+[ RUN      ] TEST_F_before_TEST_in_same_test_case.DefinedUsingTEST_F
+[       OK ] TEST_F_before_TEST_in_same_test_case.DefinedUsingTEST_F
+[ RUN      ] TEST_F_before_TEST_in_same_test_case.DefinedUsingTESTAndShouldFail
+gtest.cc:#: error: Failed
+All tests in the same test case must use the same test fixture
+class, so mixing TEST_F and TEST in the same test case is
+illegal.  In test case TEST_F_before_TEST_in_same_test_case,
+test DefinedUsingTEST_F is defined using TEST_F but
+test DefinedUsingTESTAndShouldFail is defined using TEST.  You probably
+want to change the TEST to TEST_F or move it to another test
+case.
+[  FAILED  ] TEST_F_before_TEST_in_same_test_case.DefinedUsingTESTAndShouldFail
+[----------] 2 tests from TEST_before_TEST_F_in_same_test_case
+[ RUN      ] TEST_before_TEST_F_in_same_test_case.DefinedUsingTEST
+[       OK ] TEST_before_TEST_F_in_same_test_case.DefinedUsingTEST
+[ RUN      ] TEST_before_TEST_F_in_same_test_case.DefinedUsingTEST_FAndShouldFail
+gtest.cc:#: error: Failed
+All tests in the same test case must use the same test fixture
+class, so mixing TEST_F and TEST in the same test case is
+illegal.  In test case TEST_before_TEST_F_in_same_test_case,
+test DefinedUsingTEST_FAndShouldFail is defined using TEST_F but
+test DefinedUsingTEST is defined using TEST.  You probably
+want to change the TEST to TEST_F or move it to another test
+case.
+[  FAILED  ] TEST_before_TEST_F_in_same_test_case.DefinedUsingTEST_FAndShouldFail
+[----------] 7 tests from ExpectNonfatalFailureTest
+[ RUN      ] ExpectNonfatalFailureTest.CanReferenceGlobalVariables
+[       OK ] ExpectNonfatalFailureTest.CanReferenceGlobalVariables
+[ RUN      ] ExpectNonfatalFailureTest.CanReferenceLocalVariables
+[       OK ] ExpectNonfatalFailureTest.CanReferenceLocalVariables
+[ RUN      ] ExpectNonfatalFailureTest.SucceedsWhenThereIsOneNonfatalFailure
+[       OK ] ExpectNonfatalFailureTest.SucceedsWhenThereIsOneNonfatalFailure
+[ RUN      ] ExpectNonfatalFailureTest.FailsWhenThereIsNoNonfatalFailure
+(expecting a failure)
+gtest.cc:#: error: Expected: 1 non-fatal failure
+  Actual: 0 failures
+[  FAILED  ] ExpectNonfatalFailureTest.FailsWhenThereIsNoNonfatalFailure
+[ RUN      ] ExpectNonfatalFailureTest.FailsWhenThereAreTwoNonfatalFailures
+(expecting a failure)
+gtest.cc:#: error: Expected: 1 non-fatal failure
+  Actual: 2 failures
+gtest_output_test_.cc:#: Non-fatal failure:
+Failed
+Expected non-fatal failure 1.
+
+gtest_output_test_.cc:#: Non-fatal failure:
+Failed
+Expected non-fatal failure 2.
+
+[  FAILED  ] ExpectNonfatalFailureTest.FailsWhenThereAreTwoNonfatalFailures
+[ RUN      ] ExpectNonfatalFailureTest.FailsWhenThereIsOneFatalFailure
+(expecting a failure)
+gtest.cc:#: error: Expected: 1 non-fatal failure
+  Actual:
+gtest_output_test_.cc:#: Fatal failure:
+Failed
+Expected fatal failure.
+
+[  FAILED  ] ExpectNonfatalFailureTest.FailsWhenThereIsOneFatalFailure
+[ RUN      ] ExpectNonfatalFailureTest.FailsWhenStatementReturns
+(expecting a failure)
+gtest.cc:#: error: Expected: 1 non-fatal failure
+  Actual: 0 failures
+[  FAILED  ] ExpectNonfatalFailureTest.FailsWhenStatementReturns
+[----------] 7 tests from ExpectFatalFailureTest
+[ RUN      ] ExpectFatalFailureTest.CanReferenceGlobalVariables
+[       OK ] ExpectFatalFailureTest.CanReferenceGlobalVariables
+[ RUN      ] ExpectFatalFailureTest.CanReferenceLocalStaticVariables
+[       OK ] ExpectFatalFailureTest.CanReferenceLocalStaticVariables
+[ RUN      ] ExpectFatalFailureTest.SucceedsWhenThereIsOneFatalFailure
+[       OK ] ExpectFatalFailureTest.SucceedsWhenThereIsOneFatalFailure
+[ RUN      ] ExpectFatalFailureTest.FailsWhenThereIsNoFatalFailure
+(expecting a failure)
+gtest.cc:#: error: Expected: 1 fatal failure
+  Actual: 0 failures
+[  FAILED  ] ExpectFatalFailureTest.FailsWhenThereIsNoFatalFailure
+[ RUN      ] ExpectFatalFailureTest.FailsWhenThereAreTwoFatalFailures
+(expecting a failure)
+gtest.cc:#: error: Expected: 1 fatal failure
+  Actual: 2 failures
+gtest_output_test_.cc:#: Fatal failure:
+Failed
+Expected fatal failure.
+
+gtest_output_test_.cc:#: Fatal failure:
+Failed
+Expected fatal failure.
+
+[  FAILED  ] ExpectFatalFailureTest.FailsWhenThereAreTwoFatalFailures
+[ RUN      ] ExpectFatalFailureTest.FailsWhenThereIsOneNonfatalFailure
+(expecting a failure)
+gtest.cc:#: error: Expected: 1 fatal failure
+  Actual:
+gtest_output_test_.cc:#: Non-fatal failure:
+Failed
+Expected non-fatal failure.
+
+[  FAILED  ] ExpectFatalFailureTest.FailsWhenThereIsOneNonfatalFailure
+[ RUN      ] ExpectFatalFailureTest.FailsWhenStatementReturns
+(expecting a failure)
+gtest.cc:#: error: Expected: 1 fatal failure
+  Actual: 0 failures
+[  FAILED  ] ExpectFatalFailureTest.FailsWhenStatementReturns
+[----------] 2 tests from TypedTest/0, where TypeParam = int
+[ RUN      ] TypedTest/0.Success
+[       OK ] TypedTest/0.Success
+[ RUN      ] TypedTest/0.Failure
+gtest_output_test_.cc:#: error: Value of: TypeParam()
+  Actual: 0
+Expected: 1
+Expected failure
+[  FAILED  ] TypedTest/0.Failure
+[----------] 2 tests from Unsigned/TypedTestP/0, where TypeParam = unsigned char
+[ RUN      ] Unsigned/TypedTestP/0.Success
+[       OK ] Unsigned/TypedTestP/0.Success
+[ RUN      ] Unsigned/TypedTestP/0.Failure
+gtest_output_test_.cc:#: error: Value of: TypeParam()
+  Actual: \0
+Expected: 1
+Expected failure
+[  FAILED  ] Unsigned/TypedTestP/0.Failure
+[----------] 2 tests from Unsigned/TypedTestP/1, where TypeParam = unsigned int
+[ RUN      ] Unsigned/TypedTestP/1.Success
+[       OK ] Unsigned/TypedTestP/1.Success
+[ RUN      ] Unsigned/TypedTestP/1.Failure
+gtest_output_test_.cc:#: error: Value of: TypeParam()
+  Actual: 0
+Expected: 1
+Expected failure
+[  FAILED  ] Unsigned/TypedTestP/1.Failure
+[----------] 4 tests from ExpectFailureTest
+[ RUN      ] ExpectFailureTest.ExpectFatalFailure
+(expecting 1 failure)
+gtest.cc:#: error: Expected: 1 fatal failure
+  Actual:
+gtest_output_test_.cc:#: Success:
+Succeeded
+
+(expecting 1 failure)
+gtest.cc:#: error: Expected: 1 fatal failure
+  Actual:
+gtest_output_test_.cc:#: Non-fatal failure:
+Failed
+Expected non-fatal failure.
+
+(expecting 1 failure)
+gtest.cc:#: error: Expected: 1 fatal failure containing "Some other fatal failure expected."
+  Actual:
+gtest_output_test_.cc:#: Fatal failure:
+Failed
+Expected fatal failure.
+
+[  FAILED  ] ExpectFailureTest.ExpectFatalFailure
+[ RUN      ] ExpectFailureTest.ExpectNonFatalFailure
+(expecting 1 failure)
+gtest.cc:#: error: Expected: 1 non-fatal failure
+  Actual:
+gtest_output_test_.cc:#: Success:
+Succeeded
+
+(expecting 1 failure)
+gtest.cc:#: error: Expected: 1 non-fatal failure
+  Actual:
+gtest_output_test_.cc:#: Fatal failure:
+Failed
+Expected fatal failure.
+
+(expecting 1 failure)
+gtest.cc:#: error: Expected: 1 non-fatal failure containing "Some other non-fatal failure."
+  Actual:
+gtest_output_test_.cc:#: Non-fatal failure:
+Failed
+Expected non-fatal failure.
+
+[  FAILED  ] ExpectFailureTest.ExpectNonFatalFailure
+[ RUN      ] ExpectFailureTest.ExpectFatalFailureOnAllThreads
+(expecting 1 failure)
+gtest.cc:#: error: Expected: 1 fatal failure
+  Actual:
+gtest_output_test_.cc:#: Success:
+Succeeded
+
+(expecting 1 failure)
+gtest.cc:#: error: Expected: 1 fatal failure
+  Actual:
+gtest_output_test_.cc:#: Non-fatal failure:
+Failed
+Expected non-fatal failure.
+
+(expecting 1 failure)
+gtest.cc:#: error: Expected: 1 fatal failure containing "Some other fatal failure expected."
+  Actual:
+gtest_output_test_.cc:#: Fatal failure:
+Failed
+Expected fatal failure.
+
+[  FAILED  ] ExpectFailureTest.ExpectFatalFailureOnAllThreads
+[ RUN      ] ExpectFailureTest.ExpectNonFatalFailureOnAllThreads
+(expecting 1 failure)
+gtest.cc:#: error: Expected: 1 non-fatal failure
+  Actual:
+gtest_output_test_.cc:#: Success:
+Succeeded
+
+(expecting 1 failure)
+gtest.cc:#: error: Expected: 1 non-fatal failure
+  Actual:
+gtest_output_test_.cc:#: Fatal failure:
+Failed
+Expected fatal failure.
+
+(expecting 1 failure)
+gtest.cc:#: error: Expected: 1 non-fatal failure containing "Some other non-fatal failure."
+  Actual:
+gtest_output_test_.cc:#: Non-fatal failure:
+Failed
+Expected non-fatal failure.
+
+[  FAILED  ] ExpectFailureTest.ExpectNonFatalFailureOnAllThreads
+[----------] Global test environment tear-down
+BarEnvironment::TearDown() called.
+gtest_output_test_.cc:#: error: Failed
+Expected non-fatal failure.
+FooEnvironment::TearDown() called.
+gtest_output_test_.cc:#: error: Failed
+Expected fatal failure.
+[==========] 57 tests from 26 test cases ran.
+[  PASSED  ] 21 tests.
+[  FAILED  ] 36 tests, listed below:
+[  FAILED  ] FatalFailureTest.FatalFailureInSubroutine
+[  FAILED  ] FatalFailureTest.FatalFailureInNestedSubroutine
+[  FAILED  ] FatalFailureTest.NonfatalFailureInSubroutine
+[  FAILED  ] LoggingTest.InterleavingLoggingAndAssertions
+[  FAILED  ] SCOPED_TRACETest.ObeysScopes
+[  FAILED  ] SCOPED_TRACETest.WorksInLoop
+[  FAILED  ] SCOPED_TRACETest.WorksInSubroutine
+[  FAILED  ] SCOPED_TRACETest.CanBeNested
+[  FAILED  ] SCOPED_TRACETest.CanBeRepeated
+[  FAILED  ] NonFatalFailureInFixtureConstructorTest.FailureInConstructor
+[  FAILED  ] FatalFailureInFixtureConstructorTest.FailureInConstructor
+[  FAILED  ] NonFatalFailureInSetUpTest.FailureInSetUp
+[  FAILED  ] FatalFailureInSetUpTest.FailureInSetUp
+[  FAILED  ] ExceptionInFixtureCtorTest.ExceptionInFixtureCtor
+[  FAILED  ] ExceptionInSetUpTest.ExceptionInSetUp
+[  FAILED  ] ExceptionInTestFunctionTest.SEH
+[  FAILED  ] MixedUpTestCaseTest.ThisShouldFail
+[  FAILED  ] MixedUpTestCaseTest.ThisShouldFailToo
+[  FAILED  ] MixedUpTestCaseWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
+[  FAILED  ] TEST_F_before_TEST_in_same_test_case.DefinedUsingTESTAndShouldFail
+[  FAILED  ] TEST_before_TEST_F_in_same_test_case.DefinedUsingTEST_FAndShouldFail
+[  FAILED  ] ExpectNonfatalFailureTest.FailsWhenThereIsNoNonfatalFailure
+[  FAILED  ] ExpectNonfatalFailureTest.FailsWhenThereAreTwoNonfatalFailures
+[  FAILED  ] ExpectNonfatalFailureTest.FailsWhenThereIsOneFatalFailure
+[  FAILED  ] ExpectNonfatalFailureTest.FailsWhenStatementReturns
+[  FAILED  ] ExpectFatalFailureTest.FailsWhenThereIsNoFatalFailure
+[  FAILED  ] ExpectFatalFailureTest.FailsWhenThereAreTwoFatalFailures
+[  FAILED  ] ExpectFatalFailureTest.FailsWhenThereIsOneNonfatalFailure
+[  FAILED  ] ExpectFatalFailureTest.FailsWhenStatementReturns
+[  FAILED  ] TypedTest/0.Failure, where TypeParam = int
+[  FAILED  ] Unsigned/TypedTestP/0.Failure, where TypeParam = unsigned char
+[  FAILED  ] Unsigned/TypedTestP/1.Failure, where TypeParam = unsigned int
+[  FAILED  ] ExpectFailureTest.ExpectFatalFailure
+[  FAILED  ] ExpectFailureTest.ExpectNonFatalFailure
+[  FAILED  ] ExpectFailureTest.ExpectFatalFailureOnAllThreads
+[  FAILED  ] ExpectFailureTest.ExpectNonFatalFailureOnAllThreads
+
+36 FAILED TESTS
+  YOU HAVE 1 DISABLED TEST
+
+Note: Google Test filter = FatalFailureTest.*:LoggingTest.*
+[==========] Running 4 tests from 2 test cases.
+[----------] Global test environment set-up.
+[----------] 3 tests from FatalFailureTest
+[ RUN      ] FatalFailureTest.FatalFailureInSubroutine
+(expecting a failure that x should be 1)
+gtest_output_test_.cc:#: error: Value of: x
+  Actual: 2
+Expected: 1
+[  FAILED  ] FatalFailureTest.FatalFailureInSubroutine (? ms)
+[ RUN      ] FatalFailureTest.FatalFailureInNestedSubroutine
+(expecting a failure that x should be 1)
+gtest_output_test_.cc:#: error: Value of: x
+  Actual: 2
+Expected: 1
+[  FAILED  ] FatalFailureTest.FatalFailureInNestedSubroutine (? ms)
+[ RUN      ] FatalFailureTest.NonfatalFailureInSubroutine
+(expecting a failure on false)
+gtest_output_test_.cc:#: error: Value of: false
+  Actual: false
+Expected: true
+[  FAILED  ] FatalFailureTest.NonfatalFailureInSubroutine (? ms)
+[----------] 3 tests from FatalFailureTest (? ms total)
+
+[----------] 1 test from LoggingTest
+[ RUN      ] LoggingTest.InterleavingLoggingAndAssertions
+(expecting 2 failures on (3) >= (a[i]))
+i == 0
+i == 1
+gtest_output_test_.cc:#: error: Expected: (3) >= (a[i]), actual: 3 vs 9
+i == 2
+i == 3
+gtest_output_test_.cc:#: error: Expected: (3) >= (a[i]), actual: 3 vs 6
+[  FAILED  ] LoggingTest.InterleavingLoggingAndAssertions (? ms)
+[----------] 1 test from LoggingTest (? ms total)
+
+[----------] Global test environment tear-down
+[==========] 4 tests from 2 test cases ran. (? ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 4 tests, listed below:
+[  FAILED  ] FatalFailureTest.FatalFailureInSubroutine
+[  FAILED  ] FatalFailureTest.FatalFailureInNestedSubroutine
+[  FAILED  ] FatalFailureTest.NonfatalFailureInSubroutine
+[  FAILED  ] LoggingTest.InterleavingLoggingAndAssertions
+
+ 4 FAILED TESTS
+  YOU HAVE 1 DISABLED TEST
+
+Note: Google Test filter = *DISABLED_*
+[==========] Running 1 test from 1 test case.
+[----------] Global test environment set-up.
+[----------] 1 test from DisabledTestsWarningTest
+[ RUN      ] DisabledTestsWarningTest.DISABLED_AlsoRunDisabledTestsFlagSuppressesWarning
+[       OK ] DisabledTestsWarningTest.DISABLED_AlsoRunDisabledTestsFlagSuppressesWarning
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test case ran.
+[  PASSED  ] 1 test.
+Note: Google Test filter = PassingTest.*
+Note: This is test shard 1 of 2.
+[==========] Running 1 test from 1 test case.
+[----------] Global test environment set-up.
+[----------] 1 test from PassingTest
+[ RUN      ] PassingTest.PassingTest2
+[       OK ] PassingTest.PassingTest2
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test case ran.
+[  PASSED  ] 1 test.
+
+  YOU HAVE 1 DISABLED TEST
+
