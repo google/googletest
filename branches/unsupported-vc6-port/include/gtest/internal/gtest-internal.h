@@ -92,10 +92,71 @@
 // ::operator<<;" in the definition of Message's operator<<.  That fix
 // doesn't require a helper function, but unfortunately doesn't
 // compile with MSVC.
+
+#if (defined(_MSC_VER) && _MSC_VER <= 1200)
+
+// VC6 does not have std::ostream::operator<< which takes 64 bits integer.
+// For workaround, we should have own implementation.
+// See http://support.microsoft.com/?scid=kb;en-us;168440&x=4&y=7
+// note:The workaround above has buffer-overrun bug.
+// (in case of 0x8000000000000000("-9223372036854775808" ),
+//  buf[20] is not enough! required 21 chars(with null trailor).
+//  and also hex case (by setbase(16) or << ios::hex) seems not supported.
+inline std::ostream & operator << (std::ostream &ostream , __int64 val) { //NOLINT  
+  if (ostream.flags() & std::ios_base::dec) {
+    char buf[21];
+    _snprintf(buf, sizeof(buf), "%I64d", val);
+    ostream << buf;
+  } else if (ostream.flags() & std::ios_base::hex) {
+    char buf[21];
+    _snprintf(buf, sizeof(buf), "%I64x", val);
+    ostream << buf;
+  } else {
+    ostream << "(oct output for 64 bit val not supported on VC6";
+  }
+  return ostream;
+}
+
+inline std::ostream & operator << (std::ostream &ostream, unsigned __int64 val) { //NOLINT
+  if (ostream.flags() & std::ios_base::dec) {
+    char buf[21];
+    _snprintf(buf, sizeof(buf) , "%I64u", val);
+    ostream << buf;
+  } else if (ostream.flags() & std::ios_base::hex) {
+    char buf[21];
+    _snprintf(buf, sizeof(buf), "%I64x", val);
+    ostream << buf;
+  } else {
+    ostream << "(oct output for 64 bit val not supported on VC6";
+  }
+  return ostream;
+}
+#endif  //  (defined(_MSC_VER) && _MSC_VER <= 1200)
+
 template <typename T>
 inline void GTestStreamToHelper(std::ostream* os, const T& val) {
   *os << val;
 }
+
+#if (defined(_MSC_VER) && _MSC_VER <= 1200)
+// On MSVCV6, we should have special implemenation for std::string and
+// std::wstring.
+// Because implementation of operator <<(ostream &, string/wstring) does not
+// stream whole contents of string, in case of string includes null character.
+template <>
+inline void GTestStreamToHelper(std::ostream* os, const std::string &str) {
+  for (size_t i = 0 ; i < str.size() ; i++) {
+    os->put(str[i]);
+  }
+}
+template <>
+inline void GTestStreamToHelper(std::ostream* os, const std::wstring &str) {
+  for (size_t i = 0 ; i < str.size() ; i++) {
+    os->put(str[i]);
+  }
+}
+
+#endif  // (defined(_MSC_VER) && _MSC_VER <= 1200)
 
 namespace testing {
 
@@ -224,8 +285,10 @@ inline String FormatValueForFailureMessage(internal::false_type dummy,
 
 template <typename T>
 inline String FormatForFailureMessage(const T& value) {
+  typename internal::is_pointer<T>::type true_or_false;
+
   return FormatValueForFailureMessage(
-      typename internal::is_pointer<T>::type(), value);
+      true_or_false, value);
 }
 
 #else
@@ -343,25 +406,29 @@ class FloatingPoint {
 
   // Constants.
 
+  // MSVC6 does not support initialization of  static const member
+  // in class difinition. so initializer are go out.
   // # of bits in a number.
-  static const size_t kBitCount = 8*sizeof(RawType);
+  static const size_t kBitCount;  // = 8*sizeof(RawType);
 
   // # of fraction bits in a number.
-  static const size_t kFractionBitCount =
-    std::numeric_limits<RawType>::digits - 1;
+  // //VC6 does not support initialize static const here!
+  static const size_t kFractionBitCount;  // =
+    // std::numeric_limits<RawType>::digits - 1;
 
   // # of exponent bits in a number.
-  static const size_t kExponentBitCount = kBitCount - 1 - kFractionBitCount;
+  static const size_t kExponentBitCount;  // =
+    // kBitCount - 1 - kFractionBitCount;
 
   // The mask for the sign bit.
-  static const Bits kSignBitMask = static_cast<Bits>(1) << (kBitCount - 1);
+  static const Bits kSignBitMask;  // = static_cast<Bits>(1) << (kBitCount - 1);
 
   // The mask for the fraction bits.
-  static const Bits kFractionBitMask =
-    ~static_cast<Bits>(0) >> (kExponentBitCount + 1);
+  static const Bits kFractionBitMask;  // =
+    // ~static_cast<Bits>(0) >> (kExponentBitCount + 1);
 
   // The mask for the exponent bits.
-  static const Bits kExponentBitMask = ~(kSignBitMask | kFractionBitMask);
+  static const Bits kExponentBitMask;  // = ~(kSignBitMask | kFractionBitMask);
 
   // How many ULP's (Units in the Last Place) we want to tolerate when
   // comparing two numbers.  The larger the value, the more error we
@@ -375,7 +442,7 @@ class FloatingPoint {
   //
   // See the following article for more details on ULP:
   // http://www.cygnus-software.com/papers/comparingfloats/comparingfloats.htm.
-  static const size_t kMaxUlps = 4;
+  static const size_t kMaxUlps;  // = 4;
 
   // Constructs a FloatingPoint from a raw floating-point number.
   //
@@ -481,6 +548,66 @@ class FloatingPoint {
   FloatingPointUnion u_;
 };
 
+template <typename RawType> const size_t FloatingPoint<RawType>::kBitCount
+                                    = getBitCount<RawType>();
+template <typename RawType>
+    const size_t FloatingPoint<RawType>::kFractionBitCount
+                                    = getFractionBitCount<RawType>();
+template <typename RawType>
+    const size_t FloatingPoint<RawType>::kExponentBitCount
+                                    = getExponentBitCount<RawType>();
+
+template <typename RawType> const typename FloatingPoint<RawType>::Bits
+      FloatingPoint<RawType>::kSignBitMask = getSignBitMask<RawType>();
+
+template <typename RawType> const typename FloatingPoint<RawType>::Bits
+      FloatingPoint<RawType>::kFractionBitMask = getFractionBitMask<RawType>();
+
+template <typename RawType> const typename FloatingPoint<RawType>::Bits
+      FloatingPoint<RawType>::kExponentBitMask = getExponentBitMask<RawType>();
+
+template <typename RawType> const size_t FloatingPoint<RawType>::kMaxUlps = 4;
+
+// prevent "static initialization order fiasco"
+template <typename RawType> size_t getBitCount() {
+  static size_t bitCount = 8 * sizeof(RawType);
+  return bitCount;
+}
+template <typename RawType> size_t getFractionBitCount() {
+  static size_t fractionBitCount = std::numeric_limits<RawType>::digits - 1;
+  return fractionBitCount;
+}
+template <typename RawType> size_t getExponentBitCount() {
+  static size_t exponentBitCount
+        = getBitCount<RawType>() - 1 - getFractionBitCount<RawType>();
+  return exponentBitCount;
+}
+
+template <typename RawType> typename
+FloatingPoint<RawType>::Bits getSignBitMask() {
+  typedef typename FloatingPoint<RawType>::Bits MyBits;
+  static MyBits signBits
+        = static_cast<MyBits>(1) << (getBitCount<RawType>() - 1);
+  return signBits;
+}
+
+template <typename RawType> typename
+FloatingPoint<RawType>::Bits getFractionBitMask() {
+  typedef typename FloatingPoint<RawType>::Bits MyBits;
+  static MyBits fractionBits
+        = ~static_cast<MyBits>(0) >> (getExponentBitCount<RawType>() + 1);
+  return fractionBits;
+}
+
+template <typename RawType> typename
+FloatingPoint<RawType>::Bits getExponentBitMask() {
+  typedef typename FloatingPoint<RawType>::Bits MyBits;
+  static MyBits exponentBits
+        = ~(getSignBitMask<RawType>() | getFractionBitMask<RawType>());
+  return exponentBits;
+}
+
+
 // Typedefs the instances of the FloatingPoint template class that we
 // care to use.
 typedef FloatingPoint<float> Float;
@@ -509,8 +636,11 @@ bool TypeIdHelper<T>::dummy_ = false;
 // GetTypeId<T>() returns the ID of type T.  Different values will be
 // returned for different types.  Calling the function twice with the
 // same type argument is guaranteed to return the same ID.
+
+// Parameter "T *unused" is unused but required for workaround for MSVC6.
+// see http://support.microsoft.com/?scid=kb;en-us;240871&x=8&y=9
 template <typename T>
-TypeId GetTypeId() {
+TypeId GetTypeId(T *unused = NULL) {
   // The compiler is required to allocate a different
   // TypeIdHelper<T>::dummy_ variable for each T used to instantiate
   // the template.  Therefore, the address of dummy_ is guaranteed to
@@ -763,8 +893,22 @@ bool AlwaysTrue();
   ::testing::internal::AssertHelper(result_type, __FILE__, __LINE__, message) \
     = ::testing::Message()
 
+#if defined(_MSC_VER) && _MSC_VER <=1200
+// MSVC6 does not allow to return from void function
+// with calling void function.
+#define GTEST_FATAL_FAILURE_(message) \
+  if (int count=1) \
+    while (true) \
+      if (0 == count--) \
+        return; \
+      else GTEST_MESSAGE_(message, ::testing::TPRT_FATAL_FAILURE) //NOLINT
+
+
+#else  // defined(_MSC_VER) && _MSC_VER <=1200
 #define GTEST_FATAL_FAILURE_(message) \
   return GTEST_MESSAGE_(message, ::testing::TPRT_FATAL_FAILURE)
+
+#endif  // defined(_MSC_VER) && _MSC_VER <=1200
 
 #define GTEST_NONFATAL_FAILURE_(message) \
   GTEST_MESSAGE_(message, ::testing::TPRT_NONFATAL_FAILURE)
@@ -778,6 +922,42 @@ bool AlwaysTrue();
 #define GTEST_HIDE_UNREACHABLE_CODE_(statement) \
   if (::testing::internal::AlwaysTrue()) { statement; }
 
+#if defined(_MSC_VER) && (_MSC_VER <= 1200)
+// MSVC6 seems can't handle goto and GTEST_CONCAT_TOKEN well..
+// So below is non-goto version.
+#define GTEST_TEST_THROW_(statement, expected_exception, fail) \
+  if (const char* gtest_msg = "")\
+    if (bool not_caught_expected = true) \
+      if (int count = 2) \
+        while ((count--) && (not_caught_expected) ) \
+          if ((count == 1) && not_caught_expected) { \
+            bool caught_unexpected_exception = false; \
+            try { \
+              statement; \
+            } \
+            catch(expected_exception const&) { \
+              not_caught_expected = false; \
+            } \
+            catch(...) { \
+              gtest_msg = "Expected: " #statement \
+                          " throws an exception of type " \
+                          #expected_exception \
+                          ".\n  Actual: it throws a different " \
+                          "type."; \
+              caught_unexpected_exception = true; \
+            } \
+            if (not_caught_expected && (!caught_unexpected_exception)) { \
+              gtest_msg = "Expected: " #statement \
+                          " throws an exception of type " \
+                          #expected_exception \
+                          ".\n  Actual: it throws nothing."; \
+            } \
+          } else \
+            if (not_caught_expected) \
+              fail(gtest_msg)
+
+#else  // _defined(_MSC_VER) && (_MSC_VER <= 1200)
+
 #define GTEST_TEST_THROW_(statement, expected_exception, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (const char* gtest_msg = "") { \
@@ -785,10 +965,10 @@ bool AlwaysTrue();
     try { \
       GTEST_HIDE_UNREACHABLE_CODE_(statement); \
     } \
-    catch (expected_exception const&) { \
+    catch(expected_exception const&) { \
       gtest_caught_expected = true; \
     } \
-    catch (...) { \
+    catch(...) { \
       gtest_msg = "Expected: " #statement " throws an exception of type " \
                   #expected_exception ".\n  Actual: it throws a different " \
                   "type."; \
@@ -803,13 +983,39 @@ bool AlwaysTrue();
     GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__): \
       fail(gtest_msg)
 
+#endif  // _defined(_MSC_VER) && (_MSC_VER <= 1200)
+
+
+#if defined(_MSC_VER) && (_MSC_VER <= 1200)
+#define GTEST_TEST_NO_THROW_(statement, fail) \
+  if (const char* gtest_msg="")\
+    if (bool not_caught = true) \
+      if (int count = 2) \
+        while ( count-- ) \
+          if ((count == 1) && not_caught) { \
+            try { \
+              statement; \
+            } \
+            catch(...) { \
+               gtest_msg = "Expected: " #statement \
+                  " doesn't throw an exception.\n" \
+                  "  Actual: it throws."; \
+                not_caught = false; \
+            } \
+          } else \
+            if (!not_caught) \
+              fail(gtest_msg)
+
+#else  // _defined(_MSC_VER) && (_MSC_VER <= 1200)
+
+
 #define GTEST_TEST_NO_THROW_(statement, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (const char* gtest_msg = "") { \
     try { \
       GTEST_HIDE_UNREACHABLE_CODE_(statement); \
     } \
-    catch (...) { \
+    catch(...) { \
       gtest_msg = "Expected: " #statement " doesn't throw an exception.\n" \
                   "  Actual: it throws."; \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__); \
@@ -818,6 +1024,31 @@ bool AlwaysTrue();
     GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__): \
       fail(gtest_msg)
 
+#endif  // _defined(_MSC_VER) && (_MSC_VER <= 1200)
+
+
+#if defined(_MSC_VER) && (_MSC_VER <= 1200)
+#define GTEST_TEST_ANY_THROW_(statement, fail) \
+  if (const char* gtest_msg="")\
+    if (bool not_caught = true) \
+      if (int count = 2) \
+        while ( count-- ) \
+          if ((count == 1) && not_caught) { \
+            try { \
+              statement; \
+            } \
+            catch(...) { \
+              not_caught = false; \
+            } \
+            if (not_caught) { \
+                gtest_msg = "Expected: " #statement " throws an exception.\n" \
+                         "  Actual: it doesn't."; \
+            } \
+          } else \
+            if (not_caught) \
+              fail(gtest_msg)
+
+#else  // _defined(_MSC_VER) && (_MSC_VER <= 1200)
 #define GTEST_TEST_ANY_THROW_(statement, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (const char* gtest_msg = "") { \
@@ -825,7 +1056,7 @@ bool AlwaysTrue();
     try { \
       GTEST_HIDE_UNREACHABLE_CODE_(statement); \
     } \
-    catch (...) { \
+    catch(...) { \
       gtest_caught_any = true; \
     } \
     if (!gtest_caught_any) { \
@@ -836,7 +1067,7 @@ bool AlwaysTrue();
   } else \
     GTEST_CONCAT_TOKEN_(gtest_label_testanythrow_, __LINE__): \
       fail(gtest_msg)
-
+#endif // _defined(_MSC_VER) && (_MSC_VER <= 1200)
 
 #define GTEST_TEST_BOOLEAN_(boolexpr, booltext, actual, expected, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
@@ -844,6 +1075,30 @@ bool AlwaysTrue();
     ; \
   else \
     fail("Value of: " booltext "\n  Actual: " #actual "\nExpected: " #expected)
+
+
+#if defined(_MSC_VER) && (_MSC_VER <= 1200)
+
+#define GTEST_TEST_NO_FATAL_FAILURE_(statement, fail) \
+  if (const char* gtest_msg="")\
+    if (bool has_no_new_fatal_failure = true) \
+      if (int count = 2) \
+        while ( count-- ) \
+          if ((count == 1) && has_no_new_fatal_failure) { \
+            ::testing::internal::HasNewFatalFailureHelper \
+                  gtest_fatal_failure_checker; \
+            { statement; } \
+            if (gtest_fatal_failure_checker.has_new_fatal_failure()) { \
+              gtest_msg = "Expected: " #statement " doesn't generate new fatal " \
+                          "failures in the current thread.\n" \
+                          "  Actual: it does."; \
+              has_no_new_fatal_failure = false; \
+            } \
+          } else \
+            if (!has_no_new_fatal_failure) \
+              fail(gtest_msg)
+
+#else  // _defined(_MSC_VER) && (_MSC_VER <= 1200)
 
 #define GTEST_TEST_NO_FATAL_FAILURE_(statement, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
@@ -859,6 +1114,8 @@ bool AlwaysTrue();
   } else \
     GTEST_CONCAT_TOKEN_(gtest_label_testnofatal_, __LINE__): \
       fail(gtest_msg)
+
+#endif  // _defined(_MSC_VER) && (_MSC_VER <= 1200)
 
 // Expands to the name of the class that implements the given test.
 #define GTEST_TEST_CLASS_NAME_(test_case_name, test_name) \

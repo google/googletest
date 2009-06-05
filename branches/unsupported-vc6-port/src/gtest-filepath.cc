@@ -187,8 +187,9 @@ bool FilePath::DirectoryExists() const {
 #if GTEST_OS_WINDOWS
   // Don't strip off trailing separator if path is a root directory on
   // Windows (like "C:\\").
-  const FilePath& path(IsRootDirectory() ? *this :
-                                           RemoveTrailingPathSeparator());
+  const FilePath& path = IsRootDirectory() ? *this :
+              FilePath(RemoveTrailingPathSeparator());
+
 #else
   const FilePath& path(*this);
 #endif

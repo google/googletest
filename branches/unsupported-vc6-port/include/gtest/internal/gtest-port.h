@@ -684,7 +684,14 @@ typedef GTestMutexLock MutexLock;
 template <typename T>
 class ThreadLocal {
  public:
-  ThreadLocal() : value_() {}
+  ThreadLocal() : value_()  {
+#if defined(_MSC_VER) && (_MSC_VER <= 1200)
+    // in MSVC6, initialize value_ again, because MSVC6 can't
+    // call default initializer correctly for member if in initialisor list
+    // like ThreadLocal() : value_()
+    value_ = T();
+#endif
+  }
   explicit ThreadLocal(const T& value) : value_(value) {}
   T* pointer() { return &value_; }
   const T* pointer() const { return &value_; }
@@ -718,22 +725,52 @@ size_t GetThreadCount();
 #define GTEST_NEEDS_IS_POINTER_ 1
 
 #endif  // defined(__SYMBIAN32__) || defined(__IBMCPP__)
+#if defined(_MSC_VER) && (_MSC_VER <= 1200)
+  // in MSVC6, template specializer for decide T and T *does not work,
+  // so here are workarounds.
+#define GTEST_NEEDS_IS_POINTER_ 1
 
-template <bool bool_value>
-struct bool_constant {
-  typedef bool_constant<bool_value> type;
-  static const bool value = bool_value;
-};
-template <bool bool_value> const bool bool_constant<bool_value>::value;
+  template <bool bool_value> struct bool_type {};
+  template <typename T> struct is_pointer {
+    typedef char yestype;
+    typedef struct {
+      char dummy[2];
+    }notype;
 
-typedef bool_constant<false> false_type;
-typedef bool_constant<true> true_type;
+    inline static yestype tester(const volatile void *);
+    inline static notype tester(...);
 
-template <typename T>
-struct is_pointer : public false_type {};
+    inline static T& make_t();
+    enum {
+      value = sizeof(tester(make_t())) == sizeof(yestype)
+    };
 
-template <typename T>
-struct is_pointer<T*> : public true_type {};
+    typedef bool_type<value> type;
+  };
+  template <> struct is_pointer<void> {
+    enum {value =0};
+  };
+  typedef bool_type<false> false_type;
+  typedef bool_type<true> true_type;
+#else
+
+  template <bool bool_value>
+  struct bool_constant {
+    typedef bool_constant<bool_value> type;
+    static const bool value = bool_value;
+  };
+  template <bool bool_value> const bool bool_constant<bool_value>::value;
+
+  typedef bool_constant<false> false_type;
+  typedef bool_constant<true> true_type;
+
+  template <typename T>
+  struct is_pointer : public false_type {};
+
+  template <typename T>
+  struct is_pointer<T*> : public true_type {};
+
+#endif  // defined(_MSC_VER) && (_MSC_VER <= 1200)
 
 #if GTEST_OS_WINDOWS
 #define GTEST_PATH_SEP_ "\\"

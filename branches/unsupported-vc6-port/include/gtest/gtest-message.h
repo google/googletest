@@ -109,6 +109,14 @@ class Message {
     StreamHelper(typename internal::is_pointer<T>::type(), value);
     return *this;
   }
+
+#elif defined(_MSC_VER) && (_MSC_VER <= 1200)
+  template <typename T>
+  inline Message& operator <<(const T& value) {
+    internal::is_pointer<T>::type b;
+    StreamHelper(b, value);
+    return *this;
+  }
 #else
   // Streams a non-pointer value to this object.
   template <typename T>
@@ -154,7 +162,8 @@ class Message {
 
   // Instead of 1/0, we want to see true/false for bool values.
   Message& operator <<(bool b) {
-    return *this << (b ? "true" : "false");
+    *ss_ << (b ? "true" : "false");
+    return *this;
   }
 
   // These two overloads allow streaming a wide C string to a Message
@@ -204,6 +213,21 @@ class Message {
   inline void StreamHelper(internal::false_type dummy, const T& value) {
     ::GTestStreamToHelper(ss_, value);
   }
+
+#elif defined(_MSC_VER) && (_MSC_VER <= 1200)
+  template <typename T>
+    inline void StreamHelper(internal::true_type dummy, T* pointer) {
+    if (pointer == NULL) {
+      *ss_ << "(null)";
+    } else {
+      ::GTestStreamToHelper(ss_, pointer);
+    }
+  }
+  template <typename T>
+    inline void StreamHelper(internal::false_type dummy, const T& value) {
+    ::GTestStreamToHelper(ss_, value);
+  }
+
 #endif  // GTEST_OS_SYMBIAN
 
   // We'll hold the text streamed to this object here.

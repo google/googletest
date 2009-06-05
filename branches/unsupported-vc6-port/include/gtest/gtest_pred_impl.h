@@ -100,7 +100,7 @@ AssertionResult AssertPred1Helper(const char* pred_text,
 // Internal macro for implementing {EXPECT|ASSERT}_PRED_FORMAT1.
 // Don't use this in your code.
 #define GTEST_PRED_FORMAT1_(pred_format, v1, on_failure)\
-  GTEST_ASSERT_(pred_format(#v1, v1),\
+  GTEST_ASSERT_(pred_format(#v1, v1), \
                 on_failure)
 
 // Internal macro for implementing {EXPECT|ASSERT}_PRED1.  Don't use
@@ -148,7 +148,11 @@ AssertionResult AssertPred2Helper(const char* pred_text,
 // Internal macro for implementing {EXPECT|ASSERT}_PRED_FORMAT2.
 // Don't use this in your code.
 #define GTEST_PRED_FORMAT2_(pred_format, v1, v2, on_failure)\
-  GTEST_ASSERT_(pred_format(#v1, #v2, v1, v2),\
+  GTEST_ASSERT_(pred_format(#v1, #v2, v1, v2), \
+                on_failure)
+
+#define GTEST_PRED_FORMAT2_USE_ESCAPED_(pred_format, v1, v2, on_failure)\
+  GTEST_ASSERT_(pred_format(v1, v2, v1, v2), \
                 on_failure)
 
 // Internal macro for implementing {EXPECT|ASSERT}_PRED2.  Don't use
@@ -164,13 +168,18 @@ AssertionResult AssertPred2Helper(const char* pred_text,
 // Binary predicate assertion macros.
 #define EXPECT_PRED_FORMAT2(pred_format, v1, v2) \
   GTEST_PRED_FORMAT2_(pred_format, v1, v2, GTEST_NONFATAL_FAILURE_)
+#define EXPECT_PRED_FORMAT2_USE_ESCAPED(pred_format, v1, v2) \
+  GTEST_PRED_FORMAT2_USE_ESCAPED_(pred_format, v1, v2, GTEST_NONFATAL_FAILURE_)
+
+
 #define EXPECT_PRED2(pred, v1, v2) \
   GTEST_PRED2_(pred, v1, v2, GTEST_NONFATAL_FAILURE_)
 #define ASSERT_PRED_FORMAT2(pred_format, v1, v2) \
   GTEST_PRED_FORMAT2_(pred_format, v1, v2, GTEST_FATAL_FAILURE_)
+#define ASSERT_PRED_FORMAT2_USE_ESCAPED(pred_format, v1, v2) \
+  GTEST_PRED_FORMAT2_USE_ESCAPED_(pred_format, v1, v2, GTEST_FATAL_FAILURE_)
 #define ASSERT_PRED2(pred, v1, v2) \
   GTEST_PRED2_(pred, v1, v2, GTEST_FATAL_FAILURE_)
-
 
 
 // Helper function for implementing {EXPECT|ASSERT}_PRED3.  Don't use
@@ -203,7 +212,7 @@ AssertionResult AssertPred3Helper(const char* pred_text,
 // Internal macro for implementing {EXPECT|ASSERT}_PRED_FORMAT3.
 // Don't use this in your code.
 #define GTEST_PRED_FORMAT3_(pred_format, v1, v2, v3, on_failure)\
-  GTEST_ASSERT_(pred_format(#v1, #v2, #v3, v1, v2, v3),\
+  GTEST_ASSERT_(pred_format(#v1, #v2, #v3, v1, v2, v3), \
                 on_failure)
 
 // Internal macro for implementing {EXPECT|ASSERT}_PRED3.  Don't use
@@ -265,7 +274,7 @@ AssertionResult AssertPred4Helper(const char* pred_text,
 // Internal macro for implementing {EXPECT|ASSERT}_PRED_FORMAT4.
 // Don't use this in your code.
 #define GTEST_PRED_FORMAT4_(pred_format, v1, v2, v3, v4, on_failure)\
-  GTEST_ASSERT_(pred_format(#v1, #v2, #v3, #v4, v1, v2, v3, v4),\
+  GTEST_ASSERT_(pred_format(#v1, #v2, #v3, #v4, v1, v2, v3, v4), \
                 on_failure)
 
 // Internal macro for implementing {EXPECT|ASSERT}_PRED4.  Don't use
@@ -334,7 +343,7 @@ AssertionResult AssertPred5Helper(const char* pred_text,
 // Internal macro for implementing {EXPECT|ASSERT}_PRED_FORMAT5.
 // Don't use this in your code.
 #define GTEST_PRED_FORMAT5_(pred_format, v1, v2, v3, v4, v5, on_failure)\
-  GTEST_ASSERT_(pred_format(#v1, #v2, #v3, #v4, #v5, v1, v2, v3, v4, v5),\
+  GTEST_ASSERT_(pred_format(#v1, #v2, #v3, #v4, #v5, v1, v2, v3, v4, v5), \
                 on_failure)
 
 // Internal macro for implementing {EXPECT|ASSERT}_PRED5.  Don't use

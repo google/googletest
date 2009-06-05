@@ -219,7 +219,7 @@ class String {
 
   // D'tor.  String is intended to be a final class, so the d'tor
   // doesn't need to be virtual.
-  ~String() { delete[] c_str_; }
+  ~String() { delete[] const_cast<char *>(c_str_); }
 
   // Allows a String to be implicitly converted to an ::std::string or
   // ::string, and vice versa.  Converting a String containing a NULL

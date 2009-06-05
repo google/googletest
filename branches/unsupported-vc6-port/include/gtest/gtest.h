@@ -548,9 +548,14 @@ class UnitTest {
   // Creates an empty UnitTest.
   UnitTest();
 
+
   // D'tor
+#if defined(_MSC_VER) && _MSC_VER <= 1200
+ public:
+#endif
   virtual ~UnitTest();
 
+ private:
   // Pushes a trace defined by SCOPED_TRACE() on to the per-thread
   // Google Test trace stack.
   void PushGTestTrace(const internal::TraceInfo& trace);
@@ -1193,6 +1198,56 @@ const T* TestWithParam<T>::parameter_ = NULL;
 #define ASSERT_STRCASENE(s1, s2)\
   ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperSTRCASENE, s1, s2)
 
+#if defined(_MSC_VER) && (_MSC_VER <= 1200)
+// MSVC6's preprocessor can't stringize some string literal which include
+// escape sequence(like "\"\"").
+// so EXPECT_STRXXX and ASSERT_STRXX don't compile for some cases like below,
+//
+//   std::string twoDoubleQuates = std::string("\"") + std::string("\"");
+//   EXPECT_STREQ("\"\"", twoDoubleQuates.c_str());  // compile error!
+//
+// if you should support MSVC6, it's better to use
+// (EXPECT|ASSERT)_STRXX_USE_ESCAPED in these cases.
+// XX_USE_ESCAPED does not use stringize(#). Failure message will be poor,
+// but it does work.
+#define EXPECT_STREQ_USE_ESCAPED(expected, actual) \
+  EXPECT_PRED_FORMAT2_USE_ESCAPED(::testing::internal::CmpHelperSTREQ, \
+                                   expected, actual)
+#define EXPECT_STRNE_USE_ESCAPED(s1, s2) \
+  EXPECT_PRED_FORMAT2_USE_ESCAPED(::testing::internal::CmpHelperSTRNE, s1, s2)
+#define EXPECT_STRCASEEQ_USE_ESCAPED(expected, actual) \
+  EXPECT_PRED_FORMAT2_USE_ESCAPED(::testing::internal::CmpHelperSTRCASEEQ, \
+                                   expected, actual)
+#define EXPECT_STRCASEN_USE_ESCAPEDE(s1, s2)\
+  EXPECT_PRED_FORMAT2_USE_ESCAPED(::testing::internal::CmpHelperSTRCASENE, \
+                                   s1, s2)
+
+#define ASSERT_STREQ_USE_ESCAPED(expected, actual) \
+  ASSERT_PRED_FORMAT2_USE_ESCAPED(::testing::internal::CmpHelperSTREQ, \
+                                   expected, actual)
+#define ASSERT_STRNE_USE_ESCAPED(s1, s2) \
+  ASSERT_PRED_FORMAT2_USE_ESCAPED(::testing::internal::CmpHelperSTRNE, s1, s2)
+#define ASSERT_STRCASEEQ_USE_ESCAPED(expected, actual) \
+  ASSERT_PRED_FORMAT2_USE_ESCAPED(::testing::internal::CmpHelperSTRCASEEQ, \
+                                   expected, actual)
+#define ASSERT_STRCASENE_USE_ESCAPED(s1, s2)\
+  ASSERT_PRED_FORMAT2_USE_ESCAPED(::testing::internal::CmpHelperSTRCASENE, \
+                                   s1, s2)
+
+#else
+
+#define EXPECT_STREQ_USE_ESCAPED      EXPECT_STREQ
+#define EXPECT_STRNE_USE_ESCAPED      EXPECT_STRNE
+#define EXPECT_STRCASEEQ_USE_ESCAPED  EXPECT_STRCASEEQ
+#define EXPECT_STRCASENE_USE_ESCAPED  EXPECT_STRCASENE
+#define ASSERT_STREQ_USE_ESCAPED      ASSERT_STREQ
+#define ASSERT_STRNE_USE_ESCAPED      ASSERT_STRNE
+#define ASSERT_STRCASEEQ_USE_ESCAPED  ASSERT_STRCASEEQ
+#define ASSERT_STRCASENE_USE_ESCAPED  ASSERT_STRCASENE
+
+#endif  //  defined(_MSC_VER) && (_MSC_VER <= 1200)
+
+
 // Macros for comparing floating-point numbers.
 //
 //    * {ASSERT|EXPECT}_FLOAT_EQ(expected, actual):
@@ -1299,14 +1354,41 @@ AssertionResult DoubleLE(const char* expr1, const char* expr2,
   ::testing::internal::ScopedTrace GTEST_CONCAT_TOKEN_(gtest_trace_, __LINE__)(\
     __FILE__, __LINE__, ::testing::Message() << (message))
 
+
 namespace internal {
 
+#if defined(_MSC_VER) && (_MSC_VER <= 1200)
+// implementation borrowed from boost::is_same.
+template<typename T1>
+struct is_same_part_1 {
+  template<typename T2>  struct part_2 {
+    enum { value = false };
+  };
+  template<> struct part_2<T1> {
+    enum { value = true };
+  };
+};
+
+template<typename T1, typename T2>
+struct is_same {
+    enum { value = is_same_part_1<T1>::part_2<T2>::value };
+};
+
 // This template is declared, but intentionally undefined.
+template <bool b> struct StaticAssertTypeHelper;
+
+template <> struct StaticAssertTypeHelper<true> {};
+
+
+#else  // defined(_MSC_VER) && (_MSC_VER <= 1200)
+
 template <typename T1, typename T2>
 struct StaticAssertTypeEqHelper;
 
 template <typename T>
 struct StaticAssertTypeEqHelper<T, T> {};
+
+#endif  // defined(_MSC_VER) && (_MSC_VER <= 1200)
 
 }  // namespace internal
 
@@ -1340,12 +1422,23 @@ struct StaticAssertTypeEqHelper<T, T> {};
 //   void Test2() { Foo<bool> foo; foo.Bar(); }
 //
 // to cause a compiler error.
+#if defined(_MSC_VER) && (_MSC_VER <= 1200)
+
+template<typename T1, typename T2>
+bool StaticAssertTypeEq() {
+  internal::StaticAssertTypeHelper<internal::is_same<T1, T2>::value>();
+  return true;
+}
+
+#else  // defined(_MSC_VER) && (_MSC_VER <= 1200)
+
 template <typename T1, typename T2>
 bool StaticAssertTypeEq() {
   internal::StaticAssertTypeEqHelper<T1, T2>();
   return true;
 }
 
+#endif  // defined(_MSC_VER) && (_MSC_VER <= 1200)
 // Defines a test.
 //
 // The first parameter is the name of the test case, and the second

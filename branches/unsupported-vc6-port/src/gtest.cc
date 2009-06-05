@@ -735,7 +735,7 @@ String UnitTestImpl::CurrentOsStackTraceExceptTop(int skip_count) {
 }
 
 static TimeInMillis GetTimeInMillis() {
-#if defined(_WIN32_WCE) || defined(__BORLANDC__)
+#if defined(_WIN32_WCE) || defined(__BORLANDC__) || (defined(_MSC_VER) && _MSC_VER <= 1200)
   // Difference between 1970-01-01 and 1601-01-01 in miliseconds.
   // http://analogous.blogspot.com/2005/04/epoch.html
   const TimeInMillis kJavaEpochToWinFileTimeDelta =
@@ -1681,7 +1681,11 @@ bool String::EndsWithCaseInsensitive(const char* suffix) const {
 void String::Set(const char * c_str, size_t length) {
   // Makes sure this works when c_str == c_str_
   const char* const temp = CloneString(c_str, length);
-  delete[] c_str_;
+
+  // const_cast is used for workaround for MSVC6.
+  // See [delete-const-pointer] Deleting const X * does not work in
+  // http://docs.huihoo.com/boost/1-33-1/more/microsoft_vcpp.html
+  delete[] const_cast<char *>(c_str_);
   c_str_ = temp;
 }
 
@@ -1689,7 +1693,10 @@ void String::Set(const char * c_str, size_t length) {
 const String& String::operator=(const char* c_str) {
   // Makes sure this works when c_str == c_str_
   if (c_str != c_str_) {
-    delete[] c_str_;
+    // const_cast is used for workaround for MSVC6.
+    // See [delete-const-pointer] Deleting const X * does not work in
+    // http://docs.huihoo.com/boost/1-33-1/more/microsoft_vcpp.html
+    delete[] const_cast<char *>(c_str_);
     c_str_ = CloneCString(c_str);
   }
   return *this;
@@ -2352,7 +2359,7 @@ TestCase::TestCase(const char* name, const char* comment,
 // Destructor of TestCase.
 TestCase::~TestCase() {
   // Deletes every Test in the collection.
-  test_info_list_->ForEach(internal::Delete<TestInfo>);
+  test_info_list_->ForEach(internal::Delete<TestInfo>());
 
   // Then deletes the Test collection.
   delete test_info_list_;
@@ -3502,10 +3509,10 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
 
 UnitTestImpl::~UnitTestImpl() {
   // Deletes every TestCase.
-  test_cases_.ForEach(internal::Delete<TestCase>);
+  test_cases_.ForEach(internal::Delete<TestCase>());
 
   // Deletes every Environment.
-  environments_.ForEach(internal::Delete<Environment>);
+  environments_.ForEach(internal::Delete<Environment>());
 
   // Deletes the current test result printer.
   delete result_printer_;

@@ -434,7 +434,10 @@ class List {
   int size_;           // The number of elements in the list.
 
   // We disallow copying List.
+#if defined(_MSC_VER) && (_MSC_VER <= 1200)
+#else
   GTEST_DISALLOW_COPY_AND_ASSIGN_(List);
+#endif
 };
 
 // The virtual destructor of List.
@@ -443,12 +446,15 @@ List<E>::~List() {
   Clear();
 }
 
-// A function for deleting an object.  Handy for being used as a
-// functor.
+// A functor for deleting an object.
+// Function does not work on MSVC6.
 template <typename T>
-static void Delete(T * x) {
-  delete x;
-}
+struct Delete {
+  void operator()(T *x) {
+    delete x;
+  }
+};
+
 
 // A copyable object representing a user specified test property which can be
 // output as a key/value string pair.

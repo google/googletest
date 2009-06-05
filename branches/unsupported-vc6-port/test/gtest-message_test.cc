@@ -125,6 +125,35 @@ TEST(MessageTest, StreamsInt) {
   EXPECT_STREQ("123", ToCString(Message() << 123));
 }
 
+// Tests streaming int64.
+TEST(MessageTest, StreamInt64) {
+  testing::Message msg;
+  msg << __int64(100);
+  EXPECT_STREQ("100", msg.GetString().c_str());
+}
+
+// Tests streaming int64 as Hex.
+TEST(MessageTest , StreamInt64AsHex) {
+  testing::Message msg;
+  msg << "0x" << std::setbase(16) <<  __int64(100);
+  EXPECT_STREQ("0x64", msg.GetString().c_str());
+}
+
+// Tests streaming uint64.
+TEST(MessageTest , StreamUInt64) {
+  testing::Message msg;
+  msg << unsigned __int64(100);
+  EXPECT_STREQ("100", msg.GetString().c_str());
+}
+
+// Tests streaming uint64 as Hex
+TEST(MessageTest , StreamUInt64AsHex) {
+  testing::Message msg;
+  msg << "0x" << std::setbase(16) << unsigned __int64(100) << ",L\'x\'=0x"
+      << L'x';
+  EXPECT_STREQ("0x64,L\'x\'=0x78", msg.GetString().c_str());
+}
+
 // Tests that basic IO manipulators (endl, ends, and flush) can be
 // streamed to Message.
 TEST(MessageTest, StreamsBasicIoManip) {
