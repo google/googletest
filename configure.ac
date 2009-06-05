@@ -80,7 +80,7 @@ AC_ARG_VAR([GTEST_VERSION],
            [The version of Google Test available.])
 HAVE_BUILT_GTEST="no"
 
-GTEST_MIN_VERSION="1.2.1"
+GTEST_MIN_VERSION="1.3.0"
 
 AS_IF([test "x${enable_external_gtest}" = "xyes"],
       [# Begin filling in variables as we are able.

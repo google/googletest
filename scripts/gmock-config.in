@@ -259,7 +259,7 @@ fi
 # Add the necessary Google Test bits into the various flag variables
 gmock_cppflags="${gmock_cppflags} `${gtest_config} --cppflags`"
 gmock_cxxflags="${gmock_cxxflags} `${gtest_config} --cxxflags`"
-gmock_ldflags="${gmock_ldflags}`${gtest_config} --ldflags`"
+gmock_ldflags="${gmock_ldflags} `${gtest_config} --ldflags`"
 gmock_libs="${gmock_libs} `${gtest_config} --libs`"
 
 # Do an installation query if requested.
