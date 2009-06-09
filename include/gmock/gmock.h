@@ -39,14 +39,14 @@
 // This file implements the following syntax:
 //
 //   ON_CALL(mock_object.Method(...))
-//     .WithArguments(...) ?
+//     .With(...) ?
 //     .WillByDefault(...);
 //
-// where WithArguments() is optional and WillByDefault() must appear
-// exactly once.
+// where With() is optional and WillByDefault() must appear exactly
+// once.
 //
 //   EXPECT_CALL(mock_object.Method(...))
-//     .WithArguments(...) ?
+//     .With(...) ?
 //     .Times(...) ?
 //     .InSequence(...) *
 //     .WillOnce(...) *

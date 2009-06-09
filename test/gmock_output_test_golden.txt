@@ -174,7 +174,7 @@ FILE:#:
          Expected: to be called once
            Actual: never called - unsatisfied and active
 [  FAILED  ] GMockOutputTest.MismatchArguments
-[ RUN      ] GMockOutputTest.MismatchWithArguments
+[ RUN      ] GMockOutputTest.MismatchWith
 unknown file: Failure
 
 Unexpected mock function call - returning default value.
@@ -187,8 +187,8 @@ FILE:#:
            Actual: don't match
          Expected: to be called once
            Actual: never called - unsatisfied and active
-[  FAILED  ] GMockOutputTest.MismatchWithArguments
-[ RUN      ] GMockOutputTest.MismatchArgumentsAndWithArguments
+[  FAILED  ] GMockOutputTest.MismatchWith
+[ RUN      ] GMockOutputTest.MismatchArgumentsAndWith
 unknown file: Failure
 
 Unexpected mock function call - returning default value.
@@ -203,7 +203,7 @@ FILE:#:
            Actual: don't match
          Expected: to be called once
            Actual: never called - unsatisfied and active
-[  FAILED  ] GMockOutputTest.MismatchArgumentsAndWithArguments
+[  FAILED  ] GMockOutputTest.MismatchArgumentsAndWith
 [ RUN      ] GMockOutputTest.UnexpectedCallWithDefaultAction
 unknown file: Failure
 
@@ -290,8 +290,8 @@ Stack trace:
 [  FAILED  ] GMockOutputTest.UnsatisfiedPrerequisites
 [  FAILED  ] GMockOutputTest.UnsatisfiedExpectation
 [  FAILED  ] GMockOutputTest.MismatchArguments
-[  FAILED  ] GMockOutputTest.MismatchWithArguments
-[  FAILED  ] GMockOutputTest.MismatchArgumentsAndWithArguments
+[  FAILED  ] GMockOutputTest.MismatchWith
+[  FAILED  ] GMockOutputTest.MismatchArgumentsAndWith
 [  FAILED  ] GMockOutputTest.UnexpectedCallWithDefaultAction
 [  FAILED  ] GMockOutputTest.ExcessiveCallWithDefaultAction
 

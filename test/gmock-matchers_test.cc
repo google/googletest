@@ -62,6 +62,7 @@ namespace gmock_matchers_test {
 using std::stringstream;
 using std::tr1::make_tuple;
 using testing::A;
+using testing::AllArgs;
 using testing::AllOf;
 using testing::An;
 using testing::AnyOf;
@@ -1687,6 +1688,35 @@ TEST(ValueTest, WorksWithMonomorphicMatcher) {
   const Matcher<const int&> ref_n = Ref(n);
   EXPECT_TRUE(Value(n, ref_n));
   EXPECT_FALSE(Value(1, ref_n));
+}
+
+TEST(AllArgsTest, WorksForTuple) {
+  EXPECT_THAT(make_tuple(1, 2L), AllArgs(Lt()));
+  EXPECT_THAT(make_tuple(2L, 1), Not(AllArgs(Lt())));
+}
+
+TEST(AllArgsTest, WorksForNonTuple) {
+  EXPECT_THAT(42, AllArgs(Gt(0)));
+  EXPECT_THAT('a', Not(AllArgs(Eq('b'))));
+}
+
+class AllArgsHelper {
+ public:
+  MOCK_METHOD2(Helper, int(char x, int y));
+};
+
+TEST(AllArgsTest, WorksInWithClause) {
+  AllArgsHelper helper;
+  ON_CALL(helper, Helper(_, _))
+      .With(AllArgs(Lt()))
+      .WillByDefault(Return(1));
+  EXPECT_CALL(helper, Helper(_, _));
+  EXPECT_CALL(helper, Helper(_, _))
+      .With(AllArgs(Gt()))
+      .WillOnce(Return(2));
+
+  EXPECT_EQ(1, helper.Helper('\1', 2));
+  EXPECT_EQ(2, helper.Helper('a', 1));
 }
 
 // Tests that ASSERT_THAT() and EXPECT_THAT() work when the value

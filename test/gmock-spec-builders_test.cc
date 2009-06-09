@@ -72,6 +72,7 @@ using testing::Const;
 using testing::DoAll;
 using testing::DoDefault;
 using testing::GMOCK_FLAG(verbose);
+using testing::Gt;
 using testing::InSequence;
 using testing::Invoke;
 using testing::InvokeWithoutArgs;
@@ -96,6 +97,7 @@ class MockA {
   MOCK_METHOD1(DoA, void(int n));  // NOLINT
   MOCK_METHOD1(ReturnResult, Result(int n));  // NOLINT
   MOCK_METHOD2(Binary, bool(int x, int y));  // NOLINT
+  MOCK_METHOD2(ReturnInt, int(int x, int y));  // NOLINT
 };
 
 class MockB {
@@ -171,25 +173,40 @@ TEST(OnCallSyntaxTest, EvaluatesSecondArgumentOnce) {
 
 // Tests that the syntax of ON_CALL() is enforced at run time.
 
-TEST(OnCallSyntaxTest, WithArgumentsIsOptional) {
+TEST(OnCallSyntaxTest, WithIsOptional) {
   MockA a;
 
   ON_CALL(a, DoA(5))
       .WillByDefault(Return());
   ON_CALL(a, DoA(_))
-      .WithArguments(_)
+      .With(_)
       .WillByDefault(Return());
 }
 
-TEST(OnCallSyntaxTest, WithArgumentsCanAppearAtMostOnce) {
+TEST(OnCallSyntaxTest, WithCanAppearAtMostOnce) {
   MockA a;
 
   EXPECT_NONFATAL_FAILURE({  // NOLINT
     ON_CALL(a, ReturnResult(_))
-        .WithArguments(_)
-        .WithArguments(_)
+        .With(_)
+        .With(_)
         .WillByDefault(Return(Result()));
-  }, ".WithArguments() cannot appear more than once in an ON_CALL()");
+  }, ".With() cannot appear more than once in an ON_CALL()");
+}
+
+TEST(OnCallSyntaxTest, WithArgumentsIsSynonymOfWith) {
+  MockA a;
+  ON_CALL(a, ReturnInt(_, _))
+      .WithArguments(Lt())
+      .WillByDefault(Return(1));
+  ON_CALL(a, ReturnInt(_, _))
+      .WithArguments(Gt())
+      .WillByDefault(Return(2));
+  EXPECT_CALL(a, ReturnInt(_, _))
+      .Times(AnyNumber());
+
+  EXPECT_EQ(1, a.ReturnInt(1, 2));
+  EXPECT_EQ(2, a.ReturnInt(2, 1));
 }
 
 #if GTEST_HAS_DEATH_TEST
@@ -237,49 +254,59 @@ TEST(ExpectCallSyntaxTest, EvaluatesSecondArgumentOnce) {
 
 // Tests that the syntax of EXPECT_CALL() is enforced at run time.
 
-TEST(ExpectCallSyntaxTest, WithArgumentsIsOptional) {
+TEST(ExpectCallSyntaxTest, WithIsOptional) {
   MockA a;
 
   EXPECT_CALL(a, DoA(5))
       .Times(0);
   EXPECT_CALL(a, DoA(6))
-      .WithArguments(_)
+      .With(_)
       .Times(0);
 }
 
-TEST(ExpectCallSyntaxTest, WithArgumentsCanAppearAtMostOnce) {
+TEST(ExpectCallSyntaxTest, WithCanAppearAtMostOnce) {
   MockA a;
 
   EXPECT_NONFATAL_FAILURE({  // NOLINT
     EXPECT_CALL(a, DoA(6))
-        .WithArguments(_)
-        .WithArguments(_);
-  }, ".WithArguments() cannot appear more than once in "
-     "an EXPECT_CALL()");
+        .With(_)
+        .With(_);
+  }, ".With() cannot appear more than once in an EXPECT_CALL()");
 
   a.DoA(6);
 }
 
-TEST(ExpectCallSyntaxTest, WithArgumentsMustBeFirstClause) {
+TEST(ExpectCallSyntaxTest, WithMustBeFirstClause) {
   MockA a;
 
   EXPECT_NONFATAL_FAILURE({  // NOLINT
     EXPECT_CALL(a, DoA(1))
         .Times(1)
-        .WithArguments(_);
-  }, ".WithArguments() must be the first clause in an "
-     "EXPECT_CALL()");
+        .With(_);
+  }, ".With() must be the first clause in an EXPECT_CALL()");
 
   a.DoA(1);
 
   EXPECT_NONFATAL_FAILURE({  // NOLINT
     EXPECT_CALL(a, DoA(2))
         .WillOnce(Return())
-        .WithArguments(_);
-  }, ".WithArguments() must be the first clause in an "
-     "EXPECT_CALL()");
+        .With(_);
+  }, ".With() must be the first clause in an EXPECT_CALL()");
 
   a.DoA(2);
+}
+
+TEST(ExpectCallSyntaxTest, WithArgumentsIsSynonymOfWith) {
+  MockA a;
+  EXPECT_CALL(a, ReturnInt(_, _))
+      .WithArguments(Lt())
+      .WillOnce(Return(1));
+  EXPECT_CALL(a, ReturnInt(_, _))
+      .WithArguments(Gt())
+      .WillOnce(Return(2));
+
+  EXPECT_EQ(1, a.ReturnInt(1, 2));
+  EXPECT_EQ(2, a.ReturnInt(2, 1));
 }
 
 TEST(ExpectCallSyntaxTest, TimesCanBeInferred) {

@@ -2354,6 +2354,16 @@ inline bool Value(const T& value, M matcher) {
   return testing::Matches(matcher)(value);
 }
 
+// AllArgs(m) is a synonym of m.  This is useful in
+//
+//   EXPECT_CALL(foo, Bar(_, _)).With(AllArgs(Eq()));
+//
+// which is easier to read than
+//
+//   EXPECT_CALL(foo, Bar(_, _)).With(Eq());
+template <typename InnerMatcher>
+inline InnerMatcher AllArgs(const InnerMatcher& matcher) { return matcher; }
+
 // These macros allow using matchers to check values in Google Test
 // tests.  ASSERT_THAT(value, matcher) and EXPECT_THAT(value, matcher)
 // succeed iff the value matches the matcher.  If the assertion fails,

@@ -177,19 +177,19 @@ TEST_F(GMockOutputTest, MismatchArguments) {
   foo_.Bar(s, 0, 0);
 }
 
-TEST_F(GMockOutputTest, MismatchWithArguments) {
+TEST_F(GMockOutputTest, MismatchWith) {
   EXPECT_CALL(foo_, Bar2(Ge(2), Ge(1)))
-      .WithArguments(Ge());
+      .With(Ge());
 
-  foo_.Bar2(2, 3);  // Mismatch WithArguments()
+  foo_.Bar2(2, 3);  // Mismatch With()
   foo_.Bar2(2, 1);
 }
 
-TEST_F(GMockOutputTest, MismatchArgumentsAndWithArguments) {
+TEST_F(GMockOutputTest, MismatchArgumentsAndWith) {
   EXPECT_CALL(foo_, Bar2(Ge(2), Ge(1)))
-      .WithArguments(Ge());
+      .With(Ge());
 
-  foo_.Bar2(1, 3);  // Mismatch arguments and mismatch WithArguments()
+  foo_.Bar2(1, 3);  // Mismatch arguments and mismatch With()
   foo_.Bar2(2, 1);
 }
 

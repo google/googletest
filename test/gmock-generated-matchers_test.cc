@@ -457,7 +457,7 @@ TEST(ElementsAreTest, WorksWithNativeArrayPassedAsPointerAndSize) {
 
   NativeArrayPassedAsPointerAndSize helper;
   EXPECT_CALL(helper, Helper(_, _))
-      .WithArguments(ElementsAre(0, 1));
+      .With(ElementsAre(0, 1));
   helper.Helper(array, 2);
 }
 

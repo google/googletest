@@ -131,16 +131,19 @@ void Log(LogSeverity severity, const string& message,
 
   // Ensures that logs from different threads don't interleave.
   MutexLock l(&g_log_mutex);
-  using ::std::cout;
+
+  // "using ::std::cout;" doesn't work with Symbian's STLport, where cout is a
+  // macro.
+
   if (severity == WARNING) {
     // Prints a GMOCK WARNING marker to make the warnings easily searchable.
-    cout << "\nGMOCK WARNING:";
+    std::cout << "\nGMOCK WARNING:";
   }
   // Pre-pends a new-line to message if it doesn't start with one.
   if (message.empty() || message[0] != '\n') {
-    cout << "\n";
+    std::cout << "\n";
   }
-  cout << message;
+  std::cout << message;
   if (stack_frames_to_skip >= 0) {
 #ifdef NDEBUG
     // In opt mode, we have to be conservative and skip no stack frame.
@@ -153,13 +156,13 @@ void Log(LogSeverity severity, const string& message,
 
     // Appends a new-line to message if it doesn't end with one.
     if (!message.empty() && *message.rbegin() != '\n') {
-      cout << "\n";
+      std::cout << "\n";
     }
-    cout << "Stack trace:\n"
+    std::cout << "Stack trace:\n"
          << ::testing::internal::GetCurrentOsStackTraceExceptTop(
              ::testing::UnitTest::GetInstance(), actual_to_skip);
   }
-  cout << ::std::flush;
+  std::cout << ::std::flush;
 }
 
 }  // namespace internal

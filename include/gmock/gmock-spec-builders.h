@@ -37,16 +37,16 @@
 // a mock method.  The syntax is:
 //
 //   ON_CALL(mock_object, Method(argument-matchers))
-//       .WithArguments(multi-argument-matcher)
+//       .With(multi-argument-matcher)
 //       .WillByDefault(action);
 //
-//  where the .WithArguments() clause is optional.
+//  where the .With() clause is optional.
 //
 // A user can use the EXPECT_CALL() macro to specify an expectation on
 // a mock method.  The syntax is:
 //
 //   EXPECT_CALL(mock_object, Method(argument-matchers))
-//       .WithArguments(multi-argument-matchers)
+//       .With(multi-argument-matchers)
 //       .Times(cardinality)
 //       .InSequence(sequences)
 //       .WillOnce(action)
@@ -144,31 +144,39 @@ class DefaultActionSpec {
         // bug in Symbian's C++ compiler (cannot decide between two
         // overloaded constructors of Matcher<const ArgumentTuple&>).
         extra_matcher_(A<const ArgumentTuple&>()),
-        last_clause_(NONE) {
+        last_clause_(kNone) {
   }
 
   // Where in the source file was the default action spec defined?
   const char* file() const { return file_; }
   int line() const { return line_; }
 
-  // Implements the .WithArguments() clause.
-  DefaultActionSpec& WithArguments(const Matcher<const ArgumentTuple&>& m) {
+  // Implements the .With() clause.
+  DefaultActionSpec& With(const Matcher<const ArgumentTuple&>& m) {
     // Makes sure this is called at most once.
-    ExpectSpecProperty(last_clause_ < WITH_ARGUMENTS,
-                       ".WithArguments() cannot appear "
+    ExpectSpecProperty(last_clause_ < kWith,
+                       ".With() cannot appear "
                        "more than once in an ON_CALL().");
-    last_clause_ = WITH_ARGUMENTS;
+    last_clause_ = kWith;
 
     extra_matcher_ = m;
     return *this;
   }
 
+  // Implements the .WithArguments() clause as a synonym of .With()
+  // for backward compatibility.  WithArguments() is deprecated and
+  // new code should always use With(), as .With(Args<1, 2>(m)) is
+  // clearer than .WithArguments(Args<1, 2>(m)).
+  DefaultActionSpec& WithArguments(const Matcher<const ArgumentTuple&>& m) {
+    return With(m);
+  }
+
   // Implements the .WillByDefault() clause.
   DefaultActionSpec& WillByDefault(const Action<F>& action) {
-    ExpectSpecProperty(last_clause_ < WILL_BY_DEFAULT,
+    ExpectSpecProperty(last_clause_ < kWillByDefault,
                        ".WillByDefault() must appear "
                        "exactly once in an ON_CALL().");
-    last_clause_ = WILL_BY_DEFAULT;
+    last_clause_ = kWillByDefault;
 
     ExpectSpecProperty(!action.IsDoDefault(),
                        "DoDefault() cannot be used in ON_CALL().");
@@ -183,7 +191,7 @@ class DefaultActionSpec {
 
   // Returns the action specified by the user.
   const Action<F>& GetAction() const {
-    AssertSpecProperty(last_clause_ == WILL_BY_DEFAULT,
+    AssertSpecProperty(last_clause_ == kWillByDefault,
                        ".WillByDefault() must appear exactly "
                        "once in an ON_CALL().");
     return action_;
@@ -193,9 +201,9 @@ class DefaultActionSpec {
   enum Clause {
     // Do not change the order of the enum members!  The run-time
     // syntax checking relies on it.
-    NONE,
-    WITH_ARGUMENTS,
-    WILL_BY_DEFAULT,
+    kNone,
+    kWith,
+    kWillByDefault,
   };
 
   // Asserts that the ON_CALL() statement has a certain property.
@@ -211,7 +219,7 @@ class DefaultActionSpec {
   // The information in statement
   //
   //   ON_CALL(mock_object, Method(matchers))
-  //       .WithArguments(multi-argument-matcher)
+  //       .With(multi-argument-matcher)
   //       .WillByDefault(action);
   //
   // is recorded in the data members like this:
@@ -228,7 +236,7 @@ class DefaultActionSpec {
   Action<F> action_;
 
   // The last clause in the ON_CALL() statement as seen so far.
-  // Initially NONE and changes as the statement is parsed.
+  // Initially kNone and changes as the statement is parsed.
   Clause last_clause_;
 };  // class DefaultActionSpec
 
@@ -437,13 +445,13 @@ class ExpectationBase {
 
   enum Clause {
     // Don't change the order of the enum members!
-    NONE,
-    WITH_ARGUMENTS,
-    TIMES,
-    IN_SEQUENCE,
-    WILL_ONCE,
-    WILL_REPEATEDLY,
-    RETIRES_ON_SATURATION,
+    kNone,
+    kWith,
+    kTimes,
+    kInSequence,
+    kWillOnce,
+    kWillRepeatedly,
+    kRetiresOnSaturation,
   };
 
   // Asserts that the EXPECT_CALL() statement has the given property.
@@ -581,7 +589,7 @@ class Expectation : public ExpectationBase {
         repeated_action_specified_(false),
         repeated_action_(DoDefault()),
         retires_on_saturation_(false),
-        last_clause_(NONE),
+        last_clause_(kNone),
         action_count_checked_(false) {}
 
   virtual ~Expectation() {
@@ -590,36 +598,42 @@ class Expectation : public ExpectationBase {
     CheckActionCountIfNotDone();
   }
 
-  // Implements the .WithArguments() clause.
-  Expectation& WithArguments(const Matcher<const ArgumentTuple&>& m) {
-    if (last_clause_ == WITH_ARGUMENTS) {
+  // Implements the .With() clause.
+  Expectation& With(const Matcher<const ArgumentTuple&>& m) {
+    if (last_clause_ == kWith) {
       ExpectSpecProperty(false,
-                         ".WithArguments() cannot appear "
+                         ".With() cannot appear "
                          "more than once in an EXPECT_CALL().");
     } else {
-      ExpectSpecProperty(last_clause_ < WITH_ARGUMENTS,
-                         ".WithArguments() must be the first "
+      ExpectSpecProperty(last_clause_ < kWith,
+                         ".With() must be the first "
                          "clause in an EXPECT_CALL().");
     }
-    last_clause_ = WITH_ARGUMENTS;
+    last_clause_ = kWith;
 
     extra_matcher_ = m;
     return *this;
   }
 
+  // Implements the .WithArguments() clause as a synonym of .With().
+  // This is deprecated and new code should always use With().
+  Expectation& WithArguments(const Matcher<const ArgumentTuple&>& m) {
+    return With(m);
+  }
+
   // Implements the .Times() clause.
   Expectation& Times(const Cardinality& cardinality) {
-    if (last_clause_ ==TIMES) {
+    if (last_clause_ ==kTimes) {
       ExpectSpecProperty(false,
                          ".Times() cannot appear "
                          "more than once in an EXPECT_CALL().");
     } else {
-      ExpectSpecProperty(last_clause_ < TIMES,
+      ExpectSpecProperty(last_clause_ < kTimes,
                          ".Times() cannot appear after "
                          ".InSequence(), .WillOnce(), .WillRepeatedly(), "
                          "or .RetiresOnSaturation().");
     }
-    last_clause_ = TIMES;
+    last_clause_ = kTimes;
 
     ExpectationBase::SpecifyCardinality(cardinality);
     return *this;
@@ -632,11 +646,11 @@ class Expectation : public ExpectationBase {
 
   // Implements the .InSequence() clause.
   Expectation& InSequence(const Sequence& s) {
-    ExpectSpecProperty(last_clause_ <= IN_SEQUENCE,
+    ExpectSpecProperty(last_clause_ <= kInSequence,
                        ".InSequence() cannot appear after .WillOnce(),"
                        " .WillRepeatedly(), or "
                        ".RetiresOnSaturation().");
-    last_clause_ = IN_SEQUENCE;
+    last_clause_ = kInSequence;
 
     s.AddExpectation(owner_->GetLinkedExpectationBase(this));
     return *this;
@@ -660,10 +674,10 @@ class Expectation : public ExpectationBase {
 
   // Implements the .WillOnce() clause.
   Expectation& WillOnce(const Action<F>& action) {
-    ExpectSpecProperty(last_clause_ <= WILL_ONCE,
+    ExpectSpecProperty(last_clause_ <= kWillOnce,
                        ".WillOnce() cannot appear after "
                        ".WillRepeatedly() or .RetiresOnSaturation().");
-    last_clause_ = WILL_ONCE;
+    last_clause_ = kWillOnce;
 
     actions_.push_back(action);
     if (!cardinality_specified()) {
@@ -674,16 +688,16 @@ class Expectation : public ExpectationBase {
 
   // Implements the .WillRepeatedly() clause.
   Expectation& WillRepeatedly(const Action<F>& action) {
-    if (last_clause_ == WILL_REPEATEDLY) {
+    if (last_clause_ == kWillRepeatedly) {
       ExpectSpecProperty(false,
                          ".WillRepeatedly() cannot appear "
                          "more than once in an EXPECT_CALL().");
     } else {
-      ExpectSpecProperty(last_clause_ < WILL_REPEATEDLY,
+      ExpectSpecProperty(last_clause_ < kWillRepeatedly,
                          ".WillRepeatedly() cannot appear "
                          "after .RetiresOnSaturation().");
     }
-    last_clause_ = WILL_REPEATEDLY;
+    last_clause_ = kWillRepeatedly;
     repeated_action_specified_ = true;
 
     repeated_action_ = action;
@@ -699,10 +713,10 @@ class Expectation : public ExpectationBase {
 
   // Implements the .RetiresOnSaturation() clause.
   Expectation& RetiresOnSaturation() {
-    ExpectSpecProperty(last_clause_ < RETIRES_ON_SATURATION,
+    ExpectSpecProperty(last_clause_ < kRetiresOnSaturation,
                        ".RetiresOnSaturation() cannot appear "
                        "more than once.");
-    last_clause_ = RETIRES_ON_SATURATION;
+    last_clause_ = kRetiresOnSaturation;
     retires_on_saturation_ = true;
 
     // Now that no more action clauses can be specified, we check
@@ -717,7 +731,7 @@ class Expectation : public ExpectationBase {
     return matchers_;
   }
 
-  // Returns the matcher specified by the .WithArguments() clause.
+  // Returns the matcher specified by the .With() clause.
   const Matcher<const ArgumentTuple&>& extra_matcher() const {
     return extra_matcher_;
   }
