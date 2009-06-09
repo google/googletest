@@ -45,6 +45,251 @@
 namespace testing {
 namespace internal {
 
+// The type of the i-th (0-based) field of Tuple.
+#define GMOCK_FIELD_TYPE_(Tuple, i) \
+    typename ::std::tr1::tuple_element<i, Tuple>::type
+
+// TupleFields<Tuple, k0, ..., kn> is for selecting fields from a
+// tuple of type Tuple.  It has two members:
+//
+//   type: a tuple type whose i-th field is the ki-th field of Tuple.
+//   GetSelectedFields(t): returns fields k0, ..., and kn of t as a tuple.
+//
+// For example, in class TupleFields<tuple<bool, char, int>, 2, 0>, we have:
+//
+//   type is tuple<int, bool>, and
+//   GetSelectedFields(make_tuple(true, 'a', 42)) is (42, true).
+
+template <class Tuple, int k0 = -1, int k1 = -1, int k2 = -1, int k3 = -1,
+    int k4 = -1, int k5 = -1, int k6 = -1, int k7 = -1, int k8 = -1,
+    int k9 = -1>
+class TupleFields;
+
+// This generic version is used when there are 10 selectors.
+template <class Tuple, int k0, int k1, int k2, int k3, int k4, int k5, int k6,
+    int k7, int k8, int k9>
+class TupleFields {
+ public:
+  typedef ::std::tr1::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
+      GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2),
+      GMOCK_FIELD_TYPE_(Tuple, k3), GMOCK_FIELD_TYPE_(Tuple, k4),
+      GMOCK_FIELD_TYPE_(Tuple, k5), GMOCK_FIELD_TYPE_(Tuple, k6),
+      GMOCK_FIELD_TYPE_(Tuple, k7), GMOCK_FIELD_TYPE_(Tuple, k8),
+      GMOCK_FIELD_TYPE_(Tuple, k9)> type;
+  static type GetSelectedFields(const Tuple& t) {
+    using ::std::tr1::get;
+    return type(get<k0>(t), get<k1>(t), get<k2>(t), get<k3>(t), get<k4>(t),
+        get<k5>(t), get<k6>(t), get<k7>(t), get<k8>(t), get<k9>(t));
+  }
+};
+
+// The following specialization is used for 0 ~ 9 selectors.
+
+template <class Tuple>
+class TupleFields<Tuple, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1> {
+ public:
+  typedef ::std::tr1::tuple<> type;
+  static type GetSelectedFields(const Tuple& t) {
+    using ::std::tr1::get;
+    return type();
+  }
+};
+
+template <class Tuple, int k0>
+class TupleFields<Tuple, k0, -1, -1, -1, -1, -1, -1, -1, -1, -1> {
+ public:
+  typedef ::std::tr1::tuple<GMOCK_FIELD_TYPE_(Tuple, k0)> type;
+  static type GetSelectedFields(const Tuple& t) {
+    using ::std::tr1::get;
+    return type(get<k0>(t));
+  }
+};
+
+template <class Tuple, int k0, int k1>
+class TupleFields<Tuple, k0, k1, -1, -1, -1, -1, -1, -1, -1, -1> {
+ public:
+  typedef ::std::tr1::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
+      GMOCK_FIELD_TYPE_(Tuple, k1)> type;
+  static type GetSelectedFields(const Tuple& t) {
+    using ::std::tr1::get;
+    return type(get<k0>(t), get<k1>(t));
+  }
+};
+
+template <class Tuple, int k0, int k1, int k2>
+class TupleFields<Tuple, k0, k1, k2, -1, -1, -1, -1, -1, -1, -1> {
+ public:
+  typedef ::std::tr1::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
+      GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2)> type;
+  static type GetSelectedFields(const Tuple& t) {
+    using ::std::tr1::get;
+    return type(get<k0>(t), get<k1>(t), get<k2>(t));
+  }
+};
+
+template <class Tuple, int k0, int k1, int k2, int k3>
+class TupleFields<Tuple, k0, k1, k2, k3, -1, -1, -1, -1, -1, -1> {
+ public:
+  typedef ::std::tr1::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
+      GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2),
+      GMOCK_FIELD_TYPE_(Tuple, k3)> type;
+  static type GetSelectedFields(const Tuple& t) {
+    using ::std::tr1::get;
+    return type(get<k0>(t), get<k1>(t), get<k2>(t), get<k3>(t));
+  }
+};
+
+template <class Tuple, int k0, int k1, int k2, int k3, int k4>
+class TupleFields<Tuple, k0, k1, k2, k3, k4, -1, -1, -1, -1, -1> {
+ public:
+  typedef ::std::tr1::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
+      GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2),
+      GMOCK_FIELD_TYPE_(Tuple, k3), GMOCK_FIELD_TYPE_(Tuple, k4)> type;
+  static type GetSelectedFields(const Tuple& t) {
+    using ::std::tr1::get;
+    return type(get<k0>(t), get<k1>(t), get<k2>(t), get<k3>(t), get<k4>(t));
+  }
+};
+
+template <class Tuple, int k0, int k1, int k2, int k3, int k4, int k5>
+class TupleFields<Tuple, k0, k1, k2, k3, k4, k5, -1, -1, -1, -1> {
+ public:
+  typedef ::std::tr1::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
+      GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2),
+      GMOCK_FIELD_TYPE_(Tuple, k3), GMOCK_FIELD_TYPE_(Tuple, k4),
+      GMOCK_FIELD_TYPE_(Tuple, k5)> type;
+  static type GetSelectedFields(const Tuple& t) {
+    using ::std::tr1::get;
+    return type(get<k0>(t), get<k1>(t), get<k2>(t), get<k3>(t), get<k4>(t),
+        get<k5>(t));
+  }
+};
+
+template <class Tuple, int k0, int k1, int k2, int k3, int k4, int k5, int k6>
+class TupleFields<Tuple, k0, k1, k2, k3, k4, k5, k6, -1, -1, -1> {
+ public:
+  typedef ::std::tr1::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
+      GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2),
+      GMOCK_FIELD_TYPE_(Tuple, k3), GMOCK_FIELD_TYPE_(Tuple, k4),
+      GMOCK_FIELD_TYPE_(Tuple, k5), GMOCK_FIELD_TYPE_(Tuple, k6)> type;
+  static type GetSelectedFields(const Tuple& t) {
+    using ::std::tr1::get;
+    return type(get<k0>(t), get<k1>(t), get<k2>(t), get<k3>(t), get<k4>(t),
+        get<k5>(t), get<k6>(t));
+  }
+};
+
+template <class Tuple, int k0, int k1, int k2, int k3, int k4, int k5, int k6,
+    int k7>
+class TupleFields<Tuple, k0, k1, k2, k3, k4, k5, k6, k7, -1, -1> {
+ public:
+  typedef ::std::tr1::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
+      GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2),
+      GMOCK_FIELD_TYPE_(Tuple, k3), GMOCK_FIELD_TYPE_(Tuple, k4),
+      GMOCK_FIELD_TYPE_(Tuple, k5), GMOCK_FIELD_TYPE_(Tuple, k6),
+      GMOCK_FIELD_TYPE_(Tuple, k7)> type;
+  static type GetSelectedFields(const Tuple& t) {
+    using ::std::tr1::get;
+    return type(get<k0>(t), get<k1>(t), get<k2>(t), get<k3>(t), get<k4>(t),
+        get<k5>(t), get<k6>(t), get<k7>(t));
+  }
+};
+
+template <class Tuple, int k0, int k1, int k2, int k3, int k4, int k5, int k6,
+    int k7, int k8>
+class TupleFields<Tuple, k0, k1, k2, k3, k4, k5, k6, k7, k8, -1> {
+ public:
+  typedef ::std::tr1::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
+      GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2),
+      GMOCK_FIELD_TYPE_(Tuple, k3), GMOCK_FIELD_TYPE_(Tuple, k4),
+      GMOCK_FIELD_TYPE_(Tuple, k5), GMOCK_FIELD_TYPE_(Tuple, k6),
+      GMOCK_FIELD_TYPE_(Tuple, k7), GMOCK_FIELD_TYPE_(Tuple, k8)> type;
+  static type GetSelectedFields(const Tuple& t) {
+    using ::std::tr1::get;
+    return type(get<k0>(t), get<k1>(t), get<k2>(t), get<k3>(t), get<k4>(t),
+        get<k5>(t), get<k6>(t), get<k7>(t), get<k8>(t));
+  }
+};
+
+#undef GMOCK_FIELD_TYPE_
+
+// Implements the Args() matcher.
+template <class ArgsTuple, int k0 = -1, int k1 = -1, int k2 = -1, int k3 = -1,
+    int k4 = -1, int k5 = -1, int k6 = -1, int k7 = -1, int k8 = -1,
+    int k9 = -1>
+class ArgsMatcherImpl : public MatcherInterface<ArgsTuple> {
+ public:
+  // ArgsTuple may have top-level const or reference modifiers.
+  typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(ArgsTuple)) RawArgsTuple;
+  typedef typename internal::TupleFields<RawArgsTuple, k0, k1, k2, k3, k4, k5,
+      k6, k7, k8, k9>::type SelectedArgs;
+  typedef Matcher<const SelectedArgs&> MonomorphicInnerMatcher;
+
+  template <typename InnerMatcher>
+  explicit ArgsMatcherImpl(const InnerMatcher& inner_matcher)
+      : inner_matcher_(SafeMatcherCast<const SelectedArgs&>(inner_matcher)) {}
+
+  virtual bool Matches(ArgsTuple args) const {
+    return inner_matcher_.Matches(GetSelectedArgs(args));
+  }
+
+  virtual void DescribeTo(::std::ostream* os) const {
+    PrintIndices(os);
+    inner_matcher_.DescribeTo(os);
+  }
+
+  virtual void DescribeNegationTo(::std::ostream* os) const {
+    PrintIndices(os);
+    inner_matcher_.DescribeNegationTo(os);
+  }
+
+  virtual void ExplainMatchResultTo(ArgsTuple args,
+                                    ::std::ostream* os) const {
+    inner_matcher_.ExplainMatchResultTo(GetSelectedArgs(args), os);
+  }
+
+ private:
+  static SelectedArgs GetSelectedArgs(ArgsTuple args) {
+    return TupleFields<RawArgsTuple, k0, k1, k2, k3, k4, k5, k6, k7, k8,
+        k9>::GetSelectedFields(args);
+  }
+
+  // Prints the indices of the selected fields.
+  static void PrintIndices(::std::ostream* os) {
+    *os << "are a tuple whose fields (";
+    const int indices[10] = { k0, k1, k2, k3, k4, k5, k6, k7, k8, k9 };
+    for (int i = 0; i < 10; i++) {
+      if (indices[i] < 0)
+        break;
+
+      if (i >= 1)
+        *os << ", ";
+
+      *os << "#" << indices[i];
+    }
+    *os << ") ";
+  }
+
+  const MonomorphicInnerMatcher inner_matcher_;
+};
+
+template <class InnerMatcher, int k0 = -1, int k1 = -1, int k2 = -1,
+    int k3 = -1, int k4 = -1, int k5 = -1, int k6 = -1, int k7 = -1,
+    int k8 = -1, int k9 = -1>
+class ArgsMatcher {
+ public:
+  explicit ArgsMatcher(const InnerMatcher& inner_matcher)
+      : inner_matcher_(inner_matcher) {}
+
+  template <typename ArgsTuple>
+  operator Matcher<ArgsTuple>() const {
+    return MakeMatcher(new ArgsMatcherImpl<ArgsTuple, k0, k1, k2, k3, k4, k5,
+        k6, k7, k8, k9>(inner_matcher_));
+  }
+
+  const InnerMatcher inner_matcher_;
+};
+
 // Implements ElementsAre() and ElementsAreArray().
 template <typename Container>
 class ElementsAreMatcherImpl : public MatcherInterface<Container> {
@@ -566,6 +811,84 @@ class ElementsAreArrayMatcher {
 };
 
 }  // namespace internal
+
+// Args<N1, N2, ..., Nk>(a_matcher) matches a tuple if the selected
+// fields of it matches a_matcher.  C++ doesn't support default
+// arguments for function templates, so we have to overload it.
+template <typename InnerMatcher>
+inline internal::ArgsMatcher<InnerMatcher>
+Args(const InnerMatcher& matcher) {
+  return internal::ArgsMatcher<InnerMatcher>(matcher);
+}
+
+template <int k1, typename InnerMatcher>
+inline internal::ArgsMatcher<InnerMatcher, k1>
+Args(const InnerMatcher& matcher) {
+  return internal::ArgsMatcher<InnerMatcher, k1>(matcher);
+}
+
+template <int k1, int k2, typename InnerMatcher>
+inline internal::ArgsMatcher<InnerMatcher, k1, k2>
+Args(const InnerMatcher& matcher) {
+  return internal::ArgsMatcher<InnerMatcher, k1, k2>(matcher);
+}
+
+template <int k1, int k2, int k3, typename InnerMatcher>
+inline internal::ArgsMatcher<InnerMatcher, k1, k2, k3>
+Args(const InnerMatcher& matcher) {
+  return internal::ArgsMatcher<InnerMatcher, k1, k2, k3>(matcher);
+}
+
+template <int k1, int k2, int k3, int k4, typename InnerMatcher>
+inline internal::ArgsMatcher<InnerMatcher, k1, k2, k3, k4>
+Args(const InnerMatcher& matcher) {
+  return internal::ArgsMatcher<InnerMatcher, k1, k2, k3, k4>(matcher);
+}
+
+template <int k1, int k2, int k3, int k4, int k5, typename InnerMatcher>
+inline internal::ArgsMatcher<InnerMatcher, k1, k2, k3, k4, k5>
+Args(const InnerMatcher& matcher) {
+  return internal::ArgsMatcher<InnerMatcher, k1, k2, k3, k4, k5>(matcher);
+}
+
+template <int k1, int k2, int k3, int k4, int k5, int k6, typename InnerMatcher>
+inline internal::ArgsMatcher<InnerMatcher, k1, k2, k3, k4, k5, k6>
+Args(const InnerMatcher& matcher) {
+  return internal::ArgsMatcher<InnerMatcher, k1, k2, k3, k4, k5, k6>(matcher);
+}
+
+template <int k1, int k2, int k3, int k4, int k5, int k6, int k7,
+    typename InnerMatcher>
+inline internal::ArgsMatcher<InnerMatcher, k1, k2, k3, k4, k5, k6, k7>
+Args(const InnerMatcher& matcher) {
+  return internal::ArgsMatcher<InnerMatcher, k1, k2, k3, k4, k5, k6,
+      k7>(matcher);
+}
+
+template <int k1, int k2, int k3, int k4, int k5, int k6, int k7, int k8,
+    typename InnerMatcher>
+inline internal::ArgsMatcher<InnerMatcher, k1, k2, k3, k4, k5, k6, k7, k8>
+Args(const InnerMatcher& matcher) {
+  return internal::ArgsMatcher<InnerMatcher, k1, k2, k3, k4, k5, k6, k7,
+      k8>(matcher);
+}
+
+template <int k1, int k2, int k3, int k4, int k5, int k6, int k7, int k8,
+    int k9, typename InnerMatcher>
+inline internal::ArgsMatcher<InnerMatcher, k1, k2, k3, k4, k5, k6, k7, k8, k9>
+Args(const InnerMatcher& matcher) {
+  return internal::ArgsMatcher<InnerMatcher, k1, k2, k3, k4, k5, k6, k7, k8,
+      k9>(matcher);
+}
+
+template <int k1, int k2, int k3, int k4, int k5, int k6, int k7, int k8,
+    int k9, int k10, typename InnerMatcher>
+inline internal::ArgsMatcher<InnerMatcher, k1, k2, k3, k4, k5, k6, k7, k8, k9,
+    k10>
+Args(const InnerMatcher& matcher) {
+  return internal::ArgsMatcher<InnerMatcher, k1, k2, k3, k4, k5, k6, k7, k8,
+      k9, k10>(matcher);
+}
 
 // ElementsAre(e0, e1, ..., e_n) matches an STL-style container with
 // (n + 1) elements, where the i-th element in the container must

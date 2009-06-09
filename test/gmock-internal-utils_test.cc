@@ -941,7 +941,7 @@ TEST(StlContainerViewTest, WorksForDynamicNativeArray) {
   EXPECT_EQ(a1, a2.begin());
 
   const NativeArray<int> a3 = StlContainerView<tuple<int*, size_t> >::
-      Copy(make_tuple(a1, 3));
+      Copy(make_tuple(static_cast<int*>(a1), 3));
   ASSERT_EQ(3, a3.size());
   EXPECT_EQ(0, a3.begin()[0]);
   EXPECT_EQ(1, a3.begin()[1]);

@@ -1335,7 +1335,7 @@ TEST(Eq2Test, MatchesEqualArguments) {
 // Tests that Eq() describes itself properly.
 TEST(Eq2Test, CanDescribeSelf) {
   Matcher<const Tuple2&> m = Eq();
-  EXPECT_EQ("argument #0 is equal to argument #1", Describe(m));
+  EXPECT_EQ("are a pair (x, y) where x == y", Describe(m));
 }
 
 // Tests that Ge() matches a 2-tuple where the first field >= the
@@ -1350,8 +1350,7 @@ TEST(Ge2Test, MatchesGreaterThanOrEqualArguments) {
 // Tests that Ge() describes itself properly.
 TEST(Ge2Test, CanDescribeSelf) {
   Matcher<const Tuple2&> m = Ge();
-  EXPECT_EQ("argument #0 is greater than or equal to argument #1",
-            Describe(m));
+  EXPECT_EQ("are a pair (x, y) where x >= y", Describe(m));
 }
 
 // Tests that Gt() matches a 2-tuple where the first field > the
@@ -1366,7 +1365,7 @@ TEST(Gt2Test, MatchesGreaterThanArguments) {
 // Tests that Gt() describes itself properly.
 TEST(Gt2Test, CanDescribeSelf) {
   Matcher<const Tuple2&> m = Gt();
-  EXPECT_EQ("argument #0 is greater than argument #1", Describe(m));
+  EXPECT_EQ("are a pair (x, y) where x > y", Describe(m));
 }
 
 // Tests that Le() matches a 2-tuple where the first field <= the
@@ -1381,8 +1380,7 @@ TEST(Le2Test, MatchesLessThanOrEqualArguments) {
 // Tests that Le() describes itself properly.
 TEST(Le2Test, CanDescribeSelf) {
   Matcher<const Tuple2&> m = Le();
-  EXPECT_EQ("argument #0 is less than or equal to argument #1",
-            Describe(m));
+  EXPECT_EQ("are a pair (x, y) where x <= y", Describe(m));
 }
 
 // Tests that Lt() matches a 2-tuple where the first field < the
@@ -1397,7 +1395,7 @@ TEST(Lt2Test, MatchesLessThanArguments) {
 // Tests that Lt() describes itself properly.
 TEST(Lt2Test, CanDescribeSelf) {
   Matcher<const Tuple2&> m = Lt();
-  EXPECT_EQ("argument #0 is less than argument #1", Describe(m));
+  EXPECT_EQ("are a pair (x, y) where x < y", Describe(m));
 }
 
 // Tests that Ne() matches a 2-tuple where the first field != the
@@ -1412,7 +1410,7 @@ TEST(Ne2Test, MatchesUnequalArguments) {
 // Tests that Ne() describes itself properly.
 TEST(Ne2Test, CanDescribeSelf) {
   Matcher<const Tuple2&> m = Ne();
-  EXPECT_EQ("argument #0 is not equal to argument #1", Describe(m));
+  EXPECT_EQ("are a pair (x, y) where x != y", Describe(m));
 }
 
 // Tests that Not(m) matches any value that doesn't match m.
@@ -2948,11 +2946,12 @@ TEST(ContainerEqExtraTest, WorksForNativeArrayAsTuple) {
   const int a2[] = { 1, 2, 3 };
   const int b[] = { 1, 2, 3, 4 };
 
-  EXPECT_THAT(make_tuple(a1, 3), ContainerEq(a2));
-  EXPECT_THAT(make_tuple(a1, 3), Not(ContainerEq(b)));
+  const int* const p1 = a1;
+  EXPECT_THAT(make_tuple(p1, 3), ContainerEq(a2));
+  EXPECT_THAT(make_tuple(p1, 3), Not(ContainerEq(b)));
 
   const int c[] = { 1, 3, 2 };
-  EXPECT_THAT(make_tuple(a1, 3), Not(ContainerEq(c)));
+  EXPECT_THAT(make_tuple(p1, 3), Not(ContainerEq(c)));
 }
 
 TEST(ContainerEqExtraTest, CopiesNativeArrayParameter) {

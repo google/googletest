@@ -3,6 +3,7 @@ $$ This is a Pump source file.  Please use Pump to convert it to
 $$ gmock-generated-variadic-actions.h.
 $$
 $var n = 10  $$ The maximum arity we support.
+$$ }} This line fixes auto-indentation of the following code in Emacs.
 // Copyright 2008, Google Inc.
 // All rights reserved.
 //
@@ -47,6 +48,130 @@ $var n = 10  $$ The maximum arity we support.
 
 namespace testing {
 namespace internal {
+
+$range i 0..n-1
+
+// The type of the i-th (0-based) field of Tuple.
+#define GMOCK_FIELD_TYPE_(Tuple, i) \
+    typename ::std::tr1::tuple_element<i, Tuple>::type
+
+// TupleFields<Tuple, k0, ..., kn> is for selecting fields from a
+// tuple of type Tuple.  It has two members:
+//
+//   type: a tuple type whose i-th field is the ki-th field of Tuple.
+//   GetSelectedFields(t): returns fields k0, ..., and kn of t as a tuple.
+//
+// For example, in class TupleFields<tuple<bool, char, int>, 2, 0>, we have:
+//
+//   type is tuple<int, bool>, and
+//   GetSelectedFields(make_tuple(true, 'a', 42)) is (42, true).
+
+template <class Tuple$for i [[, int k$i = -1]]>
+class TupleFields;
+
+// This generic version is used when there are $n selectors.
+template <class Tuple$for i [[, int k$i]]>
+class TupleFields {
+ public:
+  typedef ::std::tr1::tuple<$for i, [[GMOCK_FIELD_TYPE_(Tuple, k$i)]]> type;
+  static type GetSelectedFields(const Tuple& t) {
+    using ::std::tr1::get;
+    return type($for i, [[get<k$i>(t)]]);
+  }
+};
+
+// The following specialization is used for 0 ~ $(n-1) selectors.
+
+$for i [[
+$$ }}}
+$range j 0..i-1
+$range k 0..n-1
+
+template <class Tuple$for j [[, int k$j]]>
+class TupleFields<Tuple, $for k, [[$if k < i [[k$k]] $else [[-1]]]]> {
+ public:
+  typedef ::std::tr1::tuple<$for j, [[GMOCK_FIELD_TYPE_(Tuple, k$j)]]> type;
+  static type GetSelectedFields(const Tuple& t) {
+    using ::std::tr1::get;
+    return type($for j, [[get<k$j>(t)]]);
+  }
+};
+
+]]
+
+#undef GMOCK_FIELD_TYPE_
+
+// Implements the Args() matcher.
+
+$var ks = [[$for i, [[k$i]]]]
+template <class ArgsTuple$for i [[, int k$i = -1]]>
+class ArgsMatcherImpl : public MatcherInterface<ArgsTuple> {
+ public:
+  // ArgsTuple may have top-level const or reference modifiers.
+  typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(ArgsTuple)) RawArgsTuple;
+  typedef typename internal::TupleFields<RawArgsTuple, $ks>::type SelectedArgs;
+  typedef Matcher<const SelectedArgs&> MonomorphicInnerMatcher;
+
+  template <typename InnerMatcher>
+  explicit ArgsMatcherImpl(const InnerMatcher& inner_matcher)
+      : inner_matcher_(SafeMatcherCast<const SelectedArgs&>(inner_matcher)) {}
+
+  virtual bool Matches(ArgsTuple args) const {
+    return inner_matcher_.Matches(GetSelectedArgs(args));
+  }
+
+  virtual void DescribeTo(::std::ostream* os) const {
+    PrintIndices(os);
+    inner_matcher_.DescribeTo(os);
+  }
+
+  virtual void DescribeNegationTo(::std::ostream* os) const {
+    PrintIndices(os);
+    inner_matcher_.DescribeNegationTo(os);
+  }
+
+  virtual void ExplainMatchResultTo(ArgsTuple args,
+                                    ::std::ostream* os) const {
+    inner_matcher_.ExplainMatchResultTo(GetSelectedArgs(args), os);
+  }
+
+ private:
+  static SelectedArgs GetSelectedArgs(ArgsTuple args) {
+    return TupleFields<RawArgsTuple, $ks>::GetSelectedFields(args);
+  }
+
+  // Prints the indices of the selected fields.
+  static void PrintIndices(::std::ostream* os) {
+    *os << "are a tuple whose fields (";
+    const int indices[$n] = { $ks };
+    for (int i = 0; i < $n; i++) {
+      if (indices[i] < 0)
+        break;
+
+      if (i >= 1)
+        *os << ", ";
+
+      *os << "#" << indices[i];
+    }
+    *os << ") ";
+  }
+
+  const MonomorphicInnerMatcher inner_matcher_;
+};
+
+template <class InnerMatcher$for i [[, int k$i = -1]]>
+class ArgsMatcher {
+ public:
+  explicit ArgsMatcher(const InnerMatcher& inner_matcher)
+      : inner_matcher_(inner_matcher) {}
+
+  template <typename ArgsTuple>
+  operator Matcher<ArgsTuple>() const {
+    return MakeMatcher(new ArgsMatcherImpl<ArgsTuple, $ks>(inner_matcher_));
+  }
+
+  const InnerMatcher inner_matcher_;
+};
 
 // Implements ElementsAre() and ElementsAreArray().
 template <typename Container>
@@ -268,6 +393,21 @@ class ElementsAreArrayMatcher {
 
 }  // namespace internal
 
+// Args<N1, N2, ..., Nk>(a_matcher) matches a tuple if the selected
+// fields of it matches a_matcher.  C++ doesn't support default
+// arguments for function templates, so we have to overload it.
+
+$range i 0..n
+$for i [[
+$range j 1..i
+template <$for j [[int k$j, ]]typename InnerMatcher>
+inline internal::ArgsMatcher<InnerMatcher$for j [[, k$j]]>
+Args(const InnerMatcher& matcher) {
+  return internal::ArgsMatcher<InnerMatcher$for j [[, k$j]]>(matcher);
+}
+
+
+]]
 // ElementsAre(e0, e1, ..., e_n) matches an STL-style container with
 // (n + 1) elements, where the i-th element in the container must
 // match the i-th argument in the list.  Each argument of
@@ -282,6 +422,7 @@ inline internal::ElementsAreMatcher0 ElementsAre() {
   return internal::ElementsAreMatcher0();
 }
 
+$range i 1..n
 $for i [[
 $range j 1..i
 

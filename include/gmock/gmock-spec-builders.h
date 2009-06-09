@@ -795,9 +795,9 @@ class Expectation : public ExpectationBase {
         DescribeMatchFailureTupleTo(matchers_, args, os);
       }
       if (!extra_matcher_.Matches(args)) {
-        *os << "         Expected: ";
+        *os << "    Expected args: ";
         extra_matcher_.DescribeTo(os);
-        *os << "\n           Actual: false";
+        *os << "\n           Actual: don't match";
 
         internal::ExplainMatchResultAsNeededTo<const ArgumentTuple&>(
             extra_matcher_, args, os);

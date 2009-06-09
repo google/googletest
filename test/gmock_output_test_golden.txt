@@ -183,8 +183,8 @@ Unexpected mock function call - returning default value.
 Google Mock tried the following 1 expectation, but it didn't match:
 
 FILE:#: 
-         Expected: argument #0 is greater than or equal to argument #1
-           Actual: false
+    Expected args: are a pair (x, y) where x >= y
+           Actual: don't match
          Expected: to be called once
            Actual: never called - unsatisfied and active
 [  FAILED  ] GMockOutputTest.MismatchWithArguments
@@ -199,8 +199,8 @@ Google Mock tried the following 1 expectation, but it didn't match:
 FILE:#: 
   Expected arg #0: is greater than or equal to 2
            Actual: 1
-         Expected: argument #0 is greater than or equal to argument #1
-           Actual: false
+    Expected args: are a pair (x, y) where x >= y
+           Actual: don't match
          Expected: to be called once
            Actual: never called - unsatisfied and active
 [  FAILED  ] GMockOutputTest.MismatchArgumentsAndWithArguments

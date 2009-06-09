@@ -53,8 +53,11 @@ using std::pair;
 using std::set;
 using std::stringstream;
 using std::vector;
+using std::tr1::get;
 using std::tr1::make_tuple;
+using std::tr1::tuple;
 using testing::_;
+using testing::Args;
 using testing::Contains;
 using testing::ElementsAre;
 using testing::ElementsAreArray;
@@ -96,6 +99,107 @@ string Explain(const MatcherType& m, const Value& x) {
   stringstream ss;
   m.ExplainMatchResultTo(x, &ss);
   return ss.str();
+}
+
+// Tests Args<k0, ..., kn>(m).
+
+TEST(ArgsTest, AcceptsZeroTemplateArg) {
+  const tuple<int, bool> t(5, true);
+  EXPECT_THAT(t, Args<>(Eq(tuple<>())));
+  EXPECT_THAT(t, Not(Args<>(Ne(tuple<>()))));
+}
+
+TEST(ArgsTest, AcceptsOneTemplateArg) {
+  const tuple<int, bool> t(5, true);
+  EXPECT_THAT(t, Args<0>(Eq(make_tuple(5))));
+  EXPECT_THAT(t, Args<1>(Eq(make_tuple(true))));
+  EXPECT_THAT(t, Not(Args<1>(Eq(make_tuple(false)))));
+}
+
+TEST(ArgsTest, AcceptsTwoTemplateArgs) {
+  const tuple<short, int, long> t(4, 5, 6L);  // NOLINT
+
+  EXPECT_THAT(t, (Args<0, 1>(Lt())));
+  EXPECT_THAT(t, (Args<1, 2>(Lt())));
+  EXPECT_THAT(t, Not(Args<0, 2>(Gt())));
+}
+
+TEST(ArgsTest, AcceptsRepeatedTemplateArgs) {
+  const tuple<short, int, long> t(4, 5, 6L);  // NOLINT
+  EXPECT_THAT(t, (Args<0, 0>(Eq())));
+  EXPECT_THAT(t, Not(Args<1, 1>(Ne())));
+}
+
+TEST(ArgsTest, AcceptsDecreasingTemplateArgs) {
+  const tuple<short, int, long> t(4, 5, 6L);  // NOLINT
+  EXPECT_THAT(t, (Args<2, 0>(Gt())));
+  EXPECT_THAT(t, Not(Args<2, 1>(Lt())));
+}
+
+MATCHER(SumIsZero, "") {
+  return get<0>(arg) + get<1>(arg) + get<2>(arg) == 0;
+}
+
+TEST(ArgsTest, AcceptsMoreTemplateArgsThanArityOfOriginalTuple) {
+  EXPECT_THAT(make_tuple(-1, 2), (Args<0, 0, 1>(SumIsZero())));
+  EXPECT_THAT(make_tuple(1, 2), Not(Args<0, 0, 1>(SumIsZero())));
+}
+
+TEST(ArgsTest, CanBeNested) {
+  const tuple<short, int, long, int> t(4, 5, 6L, 6);  // NOLINT
+  EXPECT_THAT(t, (Args<1, 2, 3>(Args<1, 2>(Eq()))));
+  EXPECT_THAT(t, (Args<0, 1, 3>(Args<0, 2>(Lt()))));
+}
+
+TEST(ArgsTest, CanMatchTupleByValue) {
+  typedef tuple<char, int, int> Tuple3;
+  const Matcher<Tuple3> m = Args<1, 2>(Lt());
+  EXPECT_TRUE(m.Matches(Tuple3('a', 1, 2)));
+  EXPECT_FALSE(m.Matches(Tuple3('b', 2, 2)));
+}
+
+TEST(ArgsTest, CanMatchTupleByReference) {
+  typedef tuple<char, char, int> Tuple3;
+  const Matcher<const Tuple3&> m = Args<0, 1>(Lt());
+  EXPECT_TRUE(m.Matches(Tuple3('a', 'b', 2)));
+  EXPECT_FALSE(m.Matches(Tuple3('b', 'b', 2)));
+}
+
+// Validates that arg is printed as str.
+MATCHER_P(PrintsAs, str, "") {
+  typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(arg_type)) RawTuple;
+  return
+      testing::internal::UniversalPrinter<RawTuple>::PrintToString(arg) == str;
+}
+
+TEST(ArgsTest, AcceptsTenTemplateArgs) {
+  EXPECT_THAT(make_tuple(0, 1L, 2, 3L, 4, 5, 6, 7, 8, 9),
+              (Args<9, 8, 7, 6, 5, 4, 3, 2, 1, 0>(
+                  PrintsAs("(9, 8, 7, 6, 5, 4, 3, 2, 1, 0)"))));
+  EXPECT_THAT(make_tuple(0, 1L, 2, 3L, 4, 5, 6, 7, 8, 9),
+              Not(Args<9, 8, 7, 6, 5, 4, 3, 2, 1, 0>(
+                      PrintsAs("(0, 8, 7, 6, 5, 4, 3, 2, 1, 0)"))));
+}
+
+TEST(ArgsTest, DescirbesSelfCorrectly) {
+  const Matcher<tuple<int, bool, char> > m = Args<2, 0>(Lt());
+  EXPECT_EQ("are a tuple whose fields (#2, #0) are a pair (x, y) where x < y",
+            Describe(m));
+}
+
+TEST(ArgsTest, DescirbesNestedArgsCorrectly) {
+  const Matcher<const tuple<int, bool, char, int>&> m =
+      Args<0, 2, 3>(Args<2, 0>(Lt()));
+  EXPECT_EQ("are a tuple whose fields (#0, #2, #3) are a tuple "
+            "whose fields (#2, #0) are a pair (x, y) where x < y",
+            Describe(m));
+}
+
+TEST(ArgsTest, DescribesNegationCorrectly) {
+  const Matcher<tuple<int, char> > m = Args<1, 0>(Gt());
+  EXPECT_EQ("are a tuple whose fields (#1, #0) are a pair (x, y) "
+            "where x > y is false",
+            DescribeNegation(m));
 }
 
 // For testing ExplainMatchResultTo().
@@ -926,8 +1030,9 @@ TEST(ContainsTest, AcceptsMatcher) {
 
 TEST(ContainsTest, WorksForNativeArrayAsTuple) {
   const int a[] = { 1, 2 };
-  EXPECT_THAT(make_tuple(a, 2), Contains(1));
-  EXPECT_THAT(make_tuple(a, 2), Not(Contains(Gt(3))));
+  const int* const pointer = a;
+  EXPECT_THAT(make_tuple(pointer, 2), Contains(1));
+  EXPECT_THAT(make_tuple(pointer, 2), Not(Contains(Gt(3))));
 }
 
 TEST(ContainsTest, WorksForTwoDimensionalNativeArray) {

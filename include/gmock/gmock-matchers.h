@@ -938,7 +938,7 @@ class MatchesRegexMatcher {
 //
 // We define this as a macro in order to eliminate duplicated source
 // code.
-#define GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(name, op, relation) \
+#define GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(name, op) \
   class name##2Matcher { \
    public: \
     template <typename T1, typename T2> \
@@ -953,21 +953,21 @@ class MatchesRegexMatcher {
         return ::std::tr1::get<0>(args) op ::std::tr1::get<1>(args); \
       } \
       virtual void DescribeTo(::std::ostream* os) const { \
-        *os << "argument #0 is " relation " argument #1"; \
+        *os << "are a pair (x, y) where x " #op " y"; \
       } \
       virtual void DescribeNegationTo(::std::ostream* os) const { \
-        *os << "argument #0 is not " relation " argument #1"; \
+        *os << "are a pair (x, y) where x " #op " y is false"; \
       } \
     }; \
   }
 
 // Implements Eq(), Ge(), Gt(), Le(), Lt(), and Ne() respectively.
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Eq, ==, "equal to");
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Ge, >=, "greater than or equal to");
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Gt, >, "greater than");
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Le, <=, "less than or equal to");
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Lt, <, "less than");
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Ne, !=, "not equal to");
+GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Eq, ==);
+GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Ge, >=);
+GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Gt, >);
+GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Le, <=);
+GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Lt, <);
+GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Ne, !=);
 
 #undef GMOCK_IMPLEMENT_COMPARISON2_MATCHER_
 
