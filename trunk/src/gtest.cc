@@ -183,7 +183,7 @@ GTEST_DEFINE_string_(
     "Whether to use colors in the output.  Valid values: yes, no, "
     "and auto.  'auto' means to use colors if the output is "
     "being sent to a terminal and the TERM environment variable "
-    "is set to xterm or xterm-color.");
+    "is set to xterm, xterm-color, xterm-256color or cygwin.");
 
 GTEST_DEFINE_string_(
     filter,
@@ -2518,6 +2518,7 @@ bool ShouldUseColor(bool stdout_is_tty) {
     const bool term_supports_color =
         String::CStringEquals(term, "xterm") ||
         String::CStringEquals(term, "xterm-color") ||
+        String::CStringEquals(term, "xterm-256color") ||
         String::CStringEquals(term, "cygwin");
     return stdout_is_tty && term_supports_color;
 #endif  // GTEST_OS_WINDOWS

@@ -78,6 +78,7 @@ class GTestColorTest(unittest.TestCase):
     self.assert_(UsesColor('cygwin', None, None))
     self.assert_(UsesColor('xterm', None, None))
     self.assert_(UsesColor('xterm-color', None, None))
+    self.assert_(UsesColor('xterm-256color', None, None))
 
   def testFlagOnly(self):
     """Tests the case when there's --gtest_color but not GTEST_COLOR."""
