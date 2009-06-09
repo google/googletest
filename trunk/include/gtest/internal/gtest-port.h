@@ -359,7 +359,24 @@
 // gtest-port.h's responsibility to #include the header implementing
 // tr1/tuple.
 #if GTEST_HAS_TR1_TUPLE
-#if defined(__GNUC__) && (GTEST_GCC_VER_ >= 40000)
+
+#if GTEST_OS_SYMBIAN
+
+// On Symbian, BOOST_HAS_TR1_TUPLE causes Boost's TR1 tuple library to
+// use STLport's tuple implementation, which unfortunately doesn't
+// work as the copy of STLport distributed with Symbian is incomplete.
+// By making sure BOOST_HAS_TR1_TUPLE is undefined, we force Boost to
+// use its own tuple implementation.
+#ifdef BOOST_HAS_TR1_TUPLE
+#undef BOOST_HAS_TR1_TUPLE
+#endif  // BOOST_HAS_TR1_TUPLE
+
+// This prevents <boost/tr1/detail/config.hpp>, which defines
+// BOOST_HAS_TR1_TUPLE, from being #included by Boost's <tuple>.
+#define BOOST_TR1_DETAIL_CONFIG_HPP_INCLUDED
+#include <tuple>
+
+#elif defined(__GNUC__) && (GTEST_GCC_VER_ >= 40000)
 // GCC 4.0+ implements tr1/tuple in the <tr1/tuple> header.  This does
 // not conform to the TR1 spec, which requires the header to be <tuple>.
 #include <tr1/tuple>
@@ -367,7 +384,8 @@
 // If the compiler is not GCC 4.0+, we assume the user is using a
 // spec-conforming TR1 implementation.
 #include <tuple>
-#endif  // __GNUC__
+#endif  // GTEST_OS_SYMBIAN
+
 #endif  // GTEST_HAS_TR1_TUPLE
 
 // Determines whether clone(2) is supported.
