@@ -126,6 +126,13 @@ if env_with_exceptions['PLATFORM'] == 'win32':
   if '_TYPEINFO_' in cppdefines:
     cppdefines.remove('_TYPEINFO_')
 
+env_without_rtti = env.Clone()
+if env_without_rtti['PLATFORM'] == 'win32':
+  env_without_rtti.Append(CCFLAGS = ['/GR-'])
+else:
+  env_without_rtti.Append(CCFLAGS = ['-fno-rtti'])
+  env_without_rtti.Append(CPPDEFINES = 'GTEST_HAS_RTTI=0')
+
 gtest_ex_obj = env_with_exceptions.Object(target='gtest_ex',
                                           source=gtest_source)
 gtest_main_ex_obj = env_with_exceptions.Object(target='gtest_main_ex',
@@ -158,19 +165,19 @@ def ConstructSourceList(target, dir_prefix, additional_sources=None):
     source += additional_sources
   return source
 
-def GtestBinary(env, target, gtest_lib, sources):
+def GtestBinary(env, target, gtest_libs, sources):
   """Helper to create gtest binaries: tests, samples, etc.
 
   Args:
     env: The SCons construction environment to use to build.
     target: The basename of the target's main source file, also used as target
             name.
-    gtest_lib: The gtest lib to use.
+    gtest_libs: A list of gtest libraries to use.
     sources: A list of source files in the target.
   """
-  unit_test = env.Program(target=target, source=sources, LIBS=[gtest_lib])
+  binary = env.Program(target=target, source=sources, LIBS=gtest_libs)
   if 'EXE_OUTPUT' in env.Dictionary():
-    env.Install('$EXE_OUTPUT', source=[unit_test])
+    env.Install('$EXE_OUTPUT', source=[binary])
 
 def GtestUnitTest(env, target, gtest_lib, additional_sources=None):
   """Helper to create gtest unit tests.
@@ -183,7 +190,7 @@ def GtestUnitTest(env, target, gtest_lib, additional_sources=None):
   """
   GtestBinary(env,
               target,
-              gtest_lib,
+              [gtest_lib],
               ConstructSourceList(target, "../test",
                                   additional_sources=additional_sources))
 
@@ -232,8 +239,24 @@ gtest_unittest_ex_obj = env_with_exceptions.Object(
     source='../test/gtest_unittest.cc')
 GtestBinary(env_with_exceptions,
             'gtest_ex_unittest',
-            gtest_ex_main,
+            [gtest_ex_main],
             gtest_unittest_ex_obj)
+
+gtest_unittest_no_rtti_obj = env_without_rtti.Object(
+    target='gtest_unittest_no_rtti',
+    source='../test/gtest_unittest.cc')
+gtest_all_no_rtti_obj = env_without_rtti.Object(
+    target='gtest_all_no_rtti',
+    source='../src/gtest-all.cc')
+gtest_main_no_rtti_obj = env_without_rtti.Object(
+    target='gtest_main_no_rtti',
+    source='../src/gtest_main.cc')
+GtestBinary(env_without_rtti,
+            'gtest_no_rtti_test',
+            [],
+            gtest_unittest_no_rtti_obj +
+            gtest_all_no_rtti_obj +
+            gtest_main_no_rtti_obj)
 
 # We need to disable some optimization flags for some tests on
 # Windows; otherwise the redirection of stdout does not work
@@ -258,7 +281,7 @@ def GtestSample(env, target, gtest_lib, additional_sources=None):
   """
   GtestBinary(env,
               target,
-              gtest_lib,
+              [gtest_lib],
               ConstructSourceList(target, "../samples",
                                   additional_sources=additional_sources))
 

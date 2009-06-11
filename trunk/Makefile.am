@@ -292,6 +292,14 @@ check_PROGRAMS += test/gtest_unittest
 test_gtest_unittest_SOURCES = test/gtest_unittest.cc
 test_gtest_unittest_LDADD = lib/libgtest_main.la
 
+# Verifies that Google Test works when RTTI is disabled.
+TESTS += test/gtest_no_rtti_test
+check_PROGRAMS += test/gtest_no_rtti_test
+test_gtest_no_rtti_test_SOURCES = test/gtest_unittest.cc \
+                                  src/gtest-all.cc \
+                                  src/gtest_main.cc
+test_gtest_no_rtti_test_CXXFLAGS = $(AM_CXXFLAGS) -fno-rtti -DGTEST_HAS_RTTI=0
+
 # The following tests depend on the presence of a Python installation and are
 # keyed off of it. TODO(chandlerc@google.com): While we currently only attempt
 # to build and execute these tests if Autoconf has found Python v2.4 on the
