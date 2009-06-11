@@ -194,21 +194,6 @@ TEST(OnCallSyntaxTest, WithCanAppearAtMostOnce) {
   }, ".With() cannot appear more than once in an ON_CALL()");
 }
 
-TEST(OnCallSyntaxTest, WithArgumentsIsSynonymOfWith) {
-  MockA a;
-  ON_CALL(a, ReturnInt(_, _))
-      .WithArguments(Lt())
-      .WillByDefault(Return(1));
-  ON_CALL(a, ReturnInt(_, _))
-      .WithArguments(Gt())
-      .WillByDefault(Return(2));
-  EXPECT_CALL(a, ReturnInt(_, _))
-      .Times(AnyNumber());
-
-  EXPECT_EQ(1, a.ReturnInt(1, 2));
-  EXPECT_EQ(2, a.ReturnInt(2, 1));
-}
-
 #if GTEST_HAS_DEATH_TEST
 
 TEST(OnCallSyntaxTest, WillByDefaultIsMandatory) {
@@ -294,19 +279,6 @@ TEST(ExpectCallSyntaxTest, WithMustBeFirstClause) {
   }, ".With() must be the first clause in an EXPECT_CALL()");
 
   a.DoA(2);
-}
-
-TEST(ExpectCallSyntaxTest, WithArgumentsIsSynonymOfWith) {
-  MockA a;
-  EXPECT_CALL(a, ReturnInt(_, _))
-      .WithArguments(Lt())
-      .WillOnce(Return(1));
-  EXPECT_CALL(a, ReturnInt(_, _))
-      .WithArguments(Gt())
-      .WillOnce(Return(2));
-
-  EXPECT_EQ(1, a.ReturnInt(1, 2));
-  EXPECT_EQ(2, a.ReturnInt(2, 1));
 }
 
 TEST(ExpectCallSyntaxTest, TimesCanBeInferred) {

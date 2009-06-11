@@ -163,14 +163,6 @@ class DefaultActionSpec {
     return *this;
   }
 
-  // Implements the .WithArguments() clause as a synonym of .With()
-  // for backward compatibility.  WithArguments() is deprecated and
-  // new code should always use With(), as .With(Args<1, 2>(m)) is
-  // clearer than .WithArguments(Args<1, 2>(m)).
-  DefaultActionSpec& WithArguments(const Matcher<const ArgumentTuple&>& m) {
-    return With(m);
-  }
-
   // Implements the .WillByDefault() clause.
   DefaultActionSpec& WillByDefault(const Action<F>& action) {
     ExpectSpecProperty(last_clause_ < kWillByDefault,
@@ -613,12 +605,6 @@ class Expectation : public ExpectationBase {
 
     extra_matcher_ = m;
     return *this;
-  }
-
-  // Implements the .WithArguments() clause as a synonym of .With().
-  // This is deprecated and new code should always use With().
-  Expectation& WithArguments(const Matcher<const ArgumentTuple&>& m) {
-    return With(m);
   }
 
   // Implements the .Times() clause.
