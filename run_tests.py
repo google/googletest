@@ -191,7 +191,7 @@ class TestRunner(object):
     if self.subprocess:
       return self.subprocess.Popen(args).wait()
     else:
-      return self.os.spawn(self.os.P_WAIT, args[0], args)
+      return self.os.spawnv(self.os.P_WAIT, args[0], args)
 
   def RunBinaryTest(self, test):
     """Runs the binary test script given its path relative to the gtest root.

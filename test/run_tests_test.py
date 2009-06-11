@@ -124,7 +124,7 @@ class FakeOs(object):
     assert self.path.isdir(path)
     return self.path.PathElement(path).iterkeys()
 
-  def spawn(self, wait, executable, *kargs):
+  def spawnv(self, wait, executable, *kargs):
     assert wait == FakeOs.P_WAIT
     return self.spawn_impl(executable, kargs)
 
