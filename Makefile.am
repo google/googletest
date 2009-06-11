@@ -135,6 +135,16 @@ check_PROGRAMS += test/gmock_test
 test_gmock_test_SOURCES = test/gmock_test.cc
 test_gmock_test_LDADD = $(GTEST_LIBS) lib/libgmock_main.la
 
+# A sanity test for verifying that Google Mock works when RTTI is
+# disabled.  We pick gmock-spec-builders_test.cc as it exercises all
+# components of Google Mock.
+TESTS += test/gmock_no_rtti_test
+check_PROGRAMS += test/gmock_no_rtti_test
+test_gmock_no_rtti_test_SOURCES = test/gmock-spec-builders_test.cc \
+                                  src/gmock-all.cc
+test_gmock_no_rtti_test_CXXFLAGS = $(AM_CXXFLAGS) -fno-rtti -DGTEST_HAS_RTTI=0
+test_gmock_no_rtti_test_LDADD = $(GTEST_LIBS)
+
 # The following tests depend on the presence of a Python installation and are
 # keyed off of it. We only add them to the TESTS variable when a Python
 # interpreter is available. TODO(chandlerc@google.com): While we currently only
