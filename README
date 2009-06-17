@@ -40,7 +40,7 @@ testing framework for writing tests. It works with Google Test
 (http://code.google.com/p/googletest/) out of the box. You can use
 either the copy of Google Test that comes with Google Mock, or a
 compatible version you already have.  This version of Google Mock
-requires Google Test 1.3.0.
+requires Google Test 1.4.0.
 
 You can also easily configure Google Mock to work with another testing
 framework of your choice; although it will still need Google Test as
@@ -57,8 +57,7 @@ package (as described below):
   * GNU-compatible Make or "gmake"
   * POSIX-standard shell
   * POSIX(-2) Regular Expressions (regex.h)
-  * gcc 4.0 or newer, or gcc 3.4 or newer with the tr1 tuple library
-    (from Boost or other vendors).
+  * gcc 3.4 or newer.
 
 Furthermore, if you are building Google Mock from a VCS Checkout (also
 described below), there are further requirements:
@@ -69,12 +68,6 @@ described below), there are further requirements:
 
 ### Windows Requirements ###
   * Microsoft Visual C++ 8.0 SP1 or newer
-  * An implementation of the tr1 tuple C++ library (You can get it for
-    free from http://www.boost.org/.  We have verified that version
-    1.36.0 works.  One caveat is this implementation exposes a bug in
-    Visual C++'s <type_info> header when exceptions are disabled.
-    Therefore your project must enable exceptions for this
-    configuration to work.)
 
 ### Mac OS X Requirements ###
   * Mac OS X 10.4 Tiger or newer
@@ -140,6 +133,32 @@ which contains all of the source code. Here are some examples in Linux:
   tar -xvzf gmock-X.Y.Z.tar.gz
   tar -xvjf gmock-X.Y.Z.tar.bz2
   unzip gmock-X.Y.Z.zip
+
+Choosing a TR1 Tuple Library
+----------------------------
+Google Mock uses the C++ Technical Report 1 (TR1) tuple library
+heavily.  Unfortunately TR1 tuple is not yet widely available with all
+compilers.  The good news is that Google Test 1.4.0+ implements a
+subset of TR1 tuple that's enough for Google Mock's need.  Google Mock
+will automatically use that implementation when the compiler doesn't
+provide TR1 tuple.
+
+Usually you don't need to care about which tuple library Google Test
+and Google Mock use.  However, if your project already uses TR1 tuple,
+you need to tell Google Test and Google Mock to use the same TR1 tuple
+library the rest of your project uses (this requirement is new in
+Google Test 1.4.0 and Google Mock 1.2.0, so you may need to take care
+of it when upgrading from an earlier version), or the two tuple
+implementations will clash.  To do that, add
+
+  -DGTEST_USE_OWN_TR1_TUPLE=0
+
+to the compiler flags while compiling Google Test, Google Mock, and
+your tests.
+
+If you want to use Boost's TR1 tuple library with Google Mock, please
+refer to the Boost website (http://www.boost.org/) for how to obtain
+it and set it up.
 
 Building the Source
 -------------------
@@ -236,46 +255,15 @@ separately.
 
 ### Windows ###
 The msvc/ directory contains VC++ 2005 projects for building Google
-Mock and selected tests. In order to build Google Mock you must have
-an implementation of TR1 tuple. One library that provides such
-implementation is Boost. If you choose to use Boost, download it from
-www.boost.org and install it on your system. Note that Boost TR1 tuple
-is a header-only library, so the installation only involves unpacking
-it to a suitable location - you don't need to compile it or download a
-pre-compiled Boost binary.
-
-Since Boost is quite large, you may prefer to only install the files
-actually needed by Google Mock.  If so, you can download TR1 tuple
-without other parts of Boost from
-http://code.google.com/p/googlemock/downloads/list.
-
-After that you have two options: either set up Boost globally or
-modify the Google Mock project to point to your copy of Boost. The
-former will let all your tests use the same Boost library while the
-latter will allow each of your projects use its own copy. You can also
-use a hybrid solution: your project settings will override the
-system-wide one.
-
-For example, if you unpacked boost v1.36.0 into C:\boost:
-To set up Boost such that all projects can use it:
- * Assuming you are using the Visual Studio 2005 IDE, select Tools |
-   Options | Projects And Solutions | VC++ Directories.
- * In the "Show directories for" drop-down select Include Files.  Add
-   C:\boost\boost_1_36_0\boost\tr1\tr1 and C:\boost\boost_1_36_0 to the
-   list of directories.
-
-To configure your project to point to that version of Boost, replace
-the value of the BoostDir user macro with C:\boost\boost_1_36_0 in the
-msvc/gmock_config.vsprops file. You can use any text editor to edit
-that file.
+Mock and selected tests.
 
 If you want to use a version of Google Test other then the one bundled with
 Google Mock, change the value of the GTestDir macro in gmock_config.vsprop
 to point to the new location.
 
-After configuring Boost, just open msvc/gmock.sln and build the library and
-tests. If you want to create your own project to use with Google Mock, you'll
-have to configure it to use the gmock_config propety sheet. For that:
+Open msvc/gmock.sln and build the library and tests. If you want to
+create your own project to use with Google Mock, you'll have to
+configure it to use the gmock_config propety sheet. For that:
  * Open the Property Manager window (View | Other Windows | Property Manager)
  * Right-click on your project and select "Add Existing Property Sheet..."
  * Navigate to gmock_config.vsprops and select it.
@@ -319,11 +307,6 @@ something like the following will do:
   ar -rv libgmock.a gtest-all.o gmock-all.o
   g++ -I. -I./include -I${GTEST_SRCDIR} -I${GTEST_SRCDIR}/include \
     path/to/your_test.cc libgmock.a -o your_test
-
-On Windows, you'll also need to add the include path for the boost
-headers to the compiler command line.  See
-http://www.boost.org/doc/libs/1_36_0/doc/html/boost_tr1/usage.html for
-how to do it.
 
 Regenerating Source Files
 -------------------------

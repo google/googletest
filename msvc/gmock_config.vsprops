@@ -6,15 +6,10 @@
 	>
 	<Tool
 		Name="VCCLCompilerTool"
-		AdditionalIncludeDirectories="&quot;$(BoostDir)/boost/tr1/tr1&quot;;&quot;$(BoostDir)&quot;;&quot;$(GTestDir)/include&quot;"
-		PreprocessorDefinitions="GTEST_HAS_TR1_TUPLE=1"
+		AdditionalIncludeDirectories="&quot;$(GTestDir)/include&quot;"
 	/>
 	<UserMacro
 		Name="GTestDir"
 		Value="../gtest"
-	/>
-	<UserMacro
-		Name="BoostDir"
-		Value="../boost"
 	/>
 </VisualStudioPropertySheet>

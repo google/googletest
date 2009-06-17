@@ -269,13 +269,19 @@ TEST(InvokeTest, FunctionThatTakes6Arguments) {
   EXPECT_EQ(123456, a.Perform(make_tuple(100000, 20000, 3000, 400, 50, 6)));
 }
 
+// A helper that turns the type of a C-string literal from const
+// char[N] to const char*.
+inline const char* CharPtr(const char* s) { return s; }
+
 // Tests using Invoke() with a 7-argument function.
 TEST(InvokeTest, FunctionThatTakes7Arguments) {
   Action<string(const char*, const char*, const char*, const char*,
                 const char*, const char*, const char*)> a =
       Invoke(Concat7);
   EXPECT_EQ("1234567",
-            a.Perform(make_tuple("1", "2", "3", "4", "5", "6", "7")));
+            a.Perform(make_tuple(CharPtr("1"), CharPtr("2"), CharPtr("3"),
+                                 CharPtr("4"), CharPtr("5"), CharPtr("6"),
+                                 CharPtr("7"))));
 }
 
 // Tests using Invoke() with a 8-argument function.
@@ -284,7 +290,9 @@ TEST(InvokeTest, FunctionThatTakes8Arguments) {
                 const char*, const char*, const char*, const char*)> a =
       Invoke(Concat8);
   EXPECT_EQ("12345678",
-            a.Perform(make_tuple("1", "2", "3", "4", "5", "6", "7", "8")));
+            a.Perform(make_tuple(CharPtr("1"), CharPtr("2"), CharPtr("3"),
+                                 CharPtr("4"), CharPtr("5"), CharPtr("6"),
+                                 CharPtr("7"), CharPtr("8"))));
 }
 
 // Tests using Invoke() with a 9-argument function.
@@ -293,7 +301,9 @@ TEST(InvokeTest, FunctionThatTakes9Arguments) {
                 const char*, const char*, const char*, const char*,
                 const char*)> a = Invoke(Concat9);
   EXPECT_EQ("123456789",
-            a.Perform(make_tuple("1", "2", "3", "4", "5", "6", "7", "8", "9")));
+            a.Perform(make_tuple(CharPtr("1"), CharPtr("2"), CharPtr("3"),
+                                 CharPtr("4"), CharPtr("5"), CharPtr("6"),
+                                 CharPtr("7"), CharPtr("8"), CharPtr("9"))));
 }
 
 // Tests using Invoke() with a 10-argument function.
@@ -301,15 +311,18 @@ TEST(InvokeTest, FunctionThatTakes10Arguments) {
   Action<string(const char*, const char*, const char*, const char*,
                 const char*, const char*, const char*, const char*,
                 const char*, const char*)> a = Invoke(Concat10);
-  EXPECT_EQ("1234567890", a.Perform(make_tuple("1", "2", "3", "4", "5", "6",
-                                               "7", "8", "9", "0")));
+  EXPECT_EQ("1234567890",
+            a.Perform(make_tuple(CharPtr("1"), CharPtr("2"), CharPtr("3"),
+                                 CharPtr("4"), CharPtr("5"), CharPtr("6"),
+                                 CharPtr("7"), CharPtr("8"), CharPtr("9"),
+                                 CharPtr("0"))));
 }
 
 // Tests using Invoke() with functions with parameters declared as Unused.
 TEST(InvokeTest, FunctionWithUnusedParameters) {
   Action<int(int, int, double, const string&)> a1 =
       Invoke(SumOfFirst2);
-  EXPECT_EQ(12, a1.Perform(make_tuple(10, 2, 5.6, "hi")));
+  EXPECT_EQ(12, a1.Perform(make_tuple(10, 2, 5.6, CharPtr("hi"))));
 
   Action<int(int, int, bool, int*)> a2 =
       Invoke(SumOfFirst2);
@@ -321,7 +334,7 @@ TEST(InvokeTest, MethodWithUnusedParameters) {
   Foo foo;
   Action<int(string, bool, int, int)> a1 =
       Invoke(&foo, &Foo::SumOfLast2);
-  EXPECT_EQ(12, a1.Perform(make_tuple("hi", true, 10, 2)));
+  EXPECT_EQ(12, a1.Perform(make_tuple(CharPtr("hi"), true, 10, 2)));
 
   Action<int(char, double, int, int)> a2 =
       Invoke(&foo, &Foo::SumOfLast2);
@@ -400,7 +413,9 @@ TEST(InvokeMethodTest, MethodThatTakes7Arguments) {
                 const char*, const char*, const char*)> a =
       Invoke(&foo, &Foo::Concat7);
   EXPECT_EQ("1234567",
-            a.Perform(make_tuple("1", "2", "3", "4", "5", "6", "7")));
+            a.Perform(make_tuple(CharPtr("1"), CharPtr("2"), CharPtr("3"),
+                                 CharPtr("4"), CharPtr("5"), CharPtr("6"),
+                                 CharPtr("7"))));
 }
 
 // Tests using Invoke() with a 8-argument method.
@@ -410,7 +425,9 @@ TEST(InvokeMethodTest, MethodThatTakes8Arguments) {
                 const char*, const char*, const char*, const char*)> a =
       Invoke(&foo, &Foo::Concat8);
   EXPECT_EQ("12345678",
-            a.Perform(make_tuple("1", "2", "3", "4", "5", "6", "7", "8")));
+            a.Perform(make_tuple(CharPtr("1"), CharPtr("2"), CharPtr("3"),
+                                 CharPtr("4"), CharPtr("5"), CharPtr("6"),
+                                 CharPtr("7"), CharPtr("8"))));
 }
 
 // Tests using Invoke() with a 9-argument method.
@@ -420,7 +437,9 @@ TEST(InvokeMethodTest, MethodThatTakes9Arguments) {
                 const char*, const char*, const char*, const char*,
                 const char*)> a = Invoke(&foo, &Foo::Concat9);
   EXPECT_EQ("123456789",
-            a.Perform(make_tuple("1", "2", "3", "4", "5", "6", "7", "8", "9")));
+            a.Perform(make_tuple(CharPtr("1"), CharPtr("2"), CharPtr("3"),
+                                 CharPtr("4"), CharPtr("5"), CharPtr("6"),
+                                 CharPtr("7"), CharPtr("8"), CharPtr("9"))));
 }
 
 // Tests using Invoke() with a 10-argument method.
@@ -429,8 +448,11 @@ TEST(InvokeMethodTest, MethodThatTakes10Arguments) {
   Action<string(const char*, const char*, const char*, const char*,
                 const char*, const char*, const char*, const char*,
                 const char*, const char*)> a = Invoke(&foo, &Foo::Concat10);
-  EXPECT_EQ("1234567890", a.Perform(make_tuple("1", "2", "3", "4", "5", "6",
-                                               "7", "8", "9", "0")));
+  EXPECT_EQ("1234567890",
+            a.Perform(make_tuple(CharPtr("1"), CharPtr("2"), CharPtr("3"),
+                                 CharPtr("4"), CharPtr("5"), CharPtr("6"),
+                                 CharPtr("7"), CharPtr("8"), CharPtr("9"),
+                                 CharPtr("0"))));
 }
 
 // Tests using Invoke(f) as an action of a compatible type.
@@ -665,7 +687,7 @@ TEST(WithArgsTest, TwoArgs) {
   Action<const char*(const char* s, double x, int n)> a =
       WithArgs<0, 2>(Invoke(Binary));
   const char s[] = "Hello";
-  EXPECT_EQ(s + 2, a.Perform(make_tuple(s, 0.5, 2)));
+  EXPECT_EQ(s + 2, a.Perform(make_tuple(CharPtr(s), 0.5, 2)));
 }
 
 // Tests using WithArgs with an action that takes 3 arguments.
@@ -679,7 +701,8 @@ TEST(WithArgsTest, ThreeArgs) {
 TEST(WithArgsTest, FourArgs) {
   Action<string(const char*, const char*, double, const char*, const char*)> a =
       WithArgs<4, 3, 1, 0>(Invoke(Concat4));
-  EXPECT_EQ("4310", a.Perform(make_tuple("0", "1", 2.5, "3", "4")));
+  EXPECT_EQ("4310", a.Perform(make_tuple(CharPtr("0"), CharPtr("1"), 2.5,
+                                         CharPtr("3"), CharPtr("4"))));
 }
 
 // Tests using WithArgs with an action that takes 5 arguments.
@@ -687,42 +710,53 @@ TEST(WithArgsTest, FiveArgs) {
   Action<string(const char*, const char*, const char*,
                 const char*, const char*)> a =
       WithArgs<4, 3, 2, 1, 0>(Invoke(Concat5));
-  EXPECT_EQ("43210", a.Perform(make_tuple("0", "1", "2", "3", "4")));
+  EXPECT_EQ("43210",
+            a.Perform(make_tuple(CharPtr("0"), CharPtr("1"), CharPtr("2"),
+                                 CharPtr("3"), CharPtr("4"))));
 }
 
 // Tests using WithArgs with an action that takes 6 arguments.
 TEST(WithArgsTest, SixArgs) {
   Action<string(const char*, const char*, const char*)> a =
       WithArgs<0, 1, 2, 2, 1, 0>(Invoke(Concat6));
-  EXPECT_EQ("012210", a.Perform(make_tuple("0", "1", "2")));
+  EXPECT_EQ("012210",
+            a.Perform(make_tuple(CharPtr("0"), CharPtr("1"), CharPtr("2"))));
 }
 
 // Tests using WithArgs with an action that takes 7 arguments.
 TEST(WithArgsTest, SevenArgs) {
   Action<string(const char*, const char*, const char*, const char*)> a =
       WithArgs<0, 1, 2, 3, 2, 1, 0>(Invoke(Concat7));
-  EXPECT_EQ("0123210", a.Perform(make_tuple("0", "1", "2", "3")));
+  EXPECT_EQ("0123210",
+            a.Perform(make_tuple(CharPtr("0"), CharPtr("1"), CharPtr("2"),
+                                 CharPtr("3"))));
 }
 
 // Tests using WithArgs with an action that takes 8 arguments.
 TEST(WithArgsTest, EightArgs) {
   Action<string(const char*, const char*, const char*, const char*)> a =
       WithArgs<0, 1, 2, 3, 0, 1, 2, 3>(Invoke(Concat8));
-  EXPECT_EQ("01230123", a.Perform(make_tuple("0", "1", "2", "3")));
+  EXPECT_EQ("01230123",
+            a.Perform(make_tuple(CharPtr("0"), CharPtr("1"), CharPtr("2"),
+                                 CharPtr("3"))));
 }
 
 // Tests using WithArgs with an action that takes 9 arguments.
 TEST(WithArgsTest, NineArgs) {
   Action<string(const char*, const char*, const char*, const char*)> a =
       WithArgs<0, 1, 2, 3, 1, 2, 3, 2, 3>(Invoke(Concat9));
-  EXPECT_EQ("012312323", a.Perform(make_tuple("0", "1", "2", "3")));
+  EXPECT_EQ("012312323",
+            a.Perform(make_tuple(CharPtr("0"), CharPtr("1"), CharPtr("2"),
+                                 CharPtr("3"))));
 }
 
 // Tests using WithArgs with an action that takes 10 arguments.
 TEST(WithArgsTest, TenArgs) {
   Action<string(const char*, const char*, const char*, const char*)> a =
       WithArgs<0, 1, 2, 3, 2, 1, 0, 1, 2, 3>(Invoke(Concat10));
-  EXPECT_EQ("0123210123", a.Perform(make_tuple("0", "1", "2", "3")));
+  EXPECT_EQ("0123210123",
+            a.Perform(make_tuple(CharPtr("0"), CharPtr("1"), CharPtr("2"),
+                                 CharPtr("3"))));
 }
 
 // Tests using WithArgs with an action that is not Invoke().
@@ -736,7 +770,7 @@ class SubstractAction : public ActionInterface<int(int, int)> {  // NOLINT
 TEST(WithArgsTest, NonInvokeAction) {
   Action<int(const string&, int, int)> a =  // NOLINT
       WithArgs<2, 1>(MakeAction(new SubstractAction));
-  EXPECT_EQ(8, a.Perform(make_tuple("hi", 2, 10)));
+  EXPECT_EQ(8, a.Perform(make_tuple(CharPtr("hi"), 2, 10)));
 }
 
 // Tests using WithArgs to pass all original arguments in the original order.
@@ -758,7 +792,7 @@ TEST(WithArgsTest, ReversedArgumentOrder) {
   Action<const char*(short n, const char* input)> a =  // NOLINT
       WithArgs<1, 0>(Invoke(Binary));
   const char s[] = "Hello";
-  EXPECT_EQ(s + 2, a.Perform(make_tuple(2, s)));
+  EXPECT_EQ(s + 2, a.Perform(make_tuple(2, CharPtr(s))));
 }
 
 // Tests using WithArgs with compatible, but not identical, argument types.
@@ -1123,16 +1157,16 @@ TEST(ActionMacroTest, CanDefineOverloadedActions) {
   typedef Action<const char*(bool, const char*)> MyAction;
 
   const MyAction a1 = OverloadedAction();
-  EXPECT_STREQ("hello", a1.Perform(make_tuple(false, "world")));
-  EXPECT_STREQ("world", a1.Perform(make_tuple(true, "world")));
+  EXPECT_STREQ("hello", a1.Perform(make_tuple(false, CharPtr("world"))));
+  EXPECT_STREQ("world", a1.Perform(make_tuple(true, CharPtr("world"))));
 
   const MyAction a2 = OverloadedAction("hi");
-  EXPECT_STREQ("hi", a2.Perform(make_tuple(false, "world")));
-  EXPECT_STREQ("world", a2.Perform(make_tuple(true, "world")));
+  EXPECT_STREQ("hi", a2.Perform(make_tuple(false, CharPtr("world"))));
+  EXPECT_STREQ("world", a2.Perform(make_tuple(true, CharPtr("world"))));
 
   const MyAction a3 = OverloadedAction("hi", "you");
-  EXPECT_STREQ("hi", a3.Perform(make_tuple(true, "world")));
-  EXPECT_STREQ("you", a3.Perform(make_tuple(false, "world")));
+  EXPECT_STREQ("hi", a3.Perform(make_tuple(true, CharPtr("world"))));
+  EXPECT_STREQ("you", a3.Perform(make_tuple(false, CharPtr("world"))));
 }
 
 // Tests ACTION_Pn where n >= 3.
@@ -1224,8 +1258,8 @@ TEST(ActionPnMacroTest, SimpleTypePromotion) {
       PadArgument(std::string("foo"), 'r');
   Action<std::string(const char*)> promo =
       PadArgument("foo", static_cast<int>('r'));
-  EXPECT_EQ("foobar", no_promo.Perform(make_tuple("ba")));
-  EXPECT_EQ("foobar", promo.Perform(make_tuple("ba")));
+  EXPECT_EQ("foobar", no_promo.Perform(make_tuple(CharPtr("ba"))));
+  EXPECT_EQ("foobar", promo.Perform(make_tuple(CharPtr("ba"))));
 }
 
 // Tests that we can partially restrict parameter types using a
@@ -1470,7 +1504,7 @@ TEST(DeleteArgActionTest, TenArgs) {
   const Action<void(bool, int, int, const char*, bool,
                     int, int, int, int, DeletionTester*)> a1 = DeleteArg<9>();
   EXPECT_FALSE(is_deleted);
-  a1.Perform(make_tuple(true, 5, 6, "hi", false, 7, 8, 9, 10, t));
+  a1.Perform(make_tuple(true, 5, 6, CharPtr("hi"), false, 7, 8, 9, 10, t));
   EXPECT_TRUE(is_deleted);
 }
 

@@ -812,8 +812,9 @@ TEST(NativeArrayTest, ConstructorFromArrayReferenceWorks) {
 
 TEST(NativeArrayTest, ConstructorFromTupleWorks) {
   int a[3] = { 0, 1, 2 };
+  int* const p = a;
   // Tests with a plain pointer.
-  NativeArray<int> na(make_tuple(a, 3U), kReference);
+  NativeArray<int> na(make_tuple(p, 3U), kReference);
   EXPECT_EQ(a, na.begin());
 
   const linked_ptr<char> b(new char);
@@ -935,8 +936,9 @@ TEST(StlContainerViewTest, WorksForDynamicNativeArray) {
       StlContainerView<tuple<const int*, int> >::const_reference>();
 
   int a1[3] = { 0, 1, 2 };
+  const int* const p1 = a1;
   NativeArray<int> a2 = StlContainerView<tuple<const int*, int> >::
-      ConstReference(make_tuple(a1, 3));
+      ConstReference(make_tuple(p1, 3));
   EXPECT_EQ(3, a2.size());
   EXPECT_EQ(a1, a2.begin());
 
