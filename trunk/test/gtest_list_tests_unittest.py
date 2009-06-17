@@ -39,11 +39,8 @@ Google Test) the command line flags.
 
 __author__ = 'phanna@google.com (Patrick Hanna)'
 
-import gtest_test_utils
 import os
-import re
-import sys
-import unittest
+import gtest_test_utils
 
 
 # Constants.
@@ -105,7 +102,7 @@ def Run(command):
 
 # The unit test.
 
-class GTestListTestsUnitTest(unittest.TestCase):
+class GTestListTestsUnitTest(gtest_test_utils.TestCase):
   """Tests using the --gtest_list_tests flag to list all tests."""
 
   def RunAndVerify(self, flag_value, expected_output, other_flag):

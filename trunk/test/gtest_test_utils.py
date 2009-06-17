@@ -33,18 +33,31 @@
 
 __author__ = 'wan@google.com (Zhanyong Wan)'
 
+import atexit
 import os
+import shutil
 import sys
+import tempfile
 import unittest
+_test_module = unittest
 
+# Suppresses the 'Import not at the top of the file' lint complaint.
+# pylint: disable-msg=C6204
 try:
   import subprocess
   _SUBPROCESS_MODULE_AVAILABLE = True
 except:
   import popen2
   _SUBPROCESS_MODULE_AVAILABLE = False
+# pylint: enable-msg=C6204
+
 
 IS_WINDOWS = os.name == 'nt'
+
+# Here we expose a class from a particular module, depending on the
+# environment. The comment suppresses the 'Invalid variable name' lint
+# complaint.
+TestCase = _test_module.TestCase  # pylint: disable-msg=C6409
 
 # Initially maps a flag to its default value. After
 # _ParseAndStripGTestFlags() is called, maps a flag to its actual value.
@@ -56,7 +69,9 @@ _gtest_flags_are_parsed = False
 def _ParseAndStripGTestFlags(argv):
   """Parses and strips Google Test flags from argv.  This is idempotent."""
 
-  global _gtest_flags_are_parsed
+  # Suppresses the lint complaint about a global variable since we need it
+  # here to maintain module-wide state.
+  global _gtest_flags_are_parsed  # pylint: disable-msg=W0603
   if _gtest_flags_are_parsed:
     return
 
@@ -101,6 +116,24 @@ def GetBuildDir():
   """Returns the absolute path of the directory where the test binaries are."""
 
   return os.path.abspath(GetFlag('gtest_build_dir'))
+
+
+_temp_dir = None
+
+def _RemoveTempDir():
+  if _temp_dir:
+    shutil.rmtree(_temp_dir, ignore_errors=True)
+
+atexit.register(_RemoveTempDir)
+
+
+def GetTempDir():
+  """Returns a directory for temporary files."""
+
+  global _temp_dir
+  if not _temp_dir:
+    _temp_dir = tempfile.mkdtemp()
+  return _temp_dir
 
 
 def GetTestExecutablePath(executable_name):
@@ -223,4 +256,4 @@ def Main():
   # unittest.main().  Otherwise the latter will be confused by the
   # --gtest_* flags.
   _ParseAndStripGTestFlags(sys.argv)
-  unittest.main()
+  _test_module.main()

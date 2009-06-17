@@ -151,31 +151,30 @@ else:
 
 GTEST_BUILD_DIR = 'GTEST_BUILD_DIR'
 
-def ScriptDir():
-  """Returns the directory containing this script file."""
 
-  my_path = sys.argv[0]
-  my_dir = os.path.dirname(my_path)
-  if not my_dir or __name__ != '__main__':
-    my_dir = '.'
-  return my_dir
-
-
-MY_DIR = ScriptDir()
-
-
-def GetBuildDirForConfig(config):
-  """Returns the build directory for a given configuration."""
-
-  return 'scons/build/%s/scons' % config
-
-
+# All paths in this script are either absolute or relative to the current
+# working directory, unless otherwise specified.
 class TestRunner(object):
   """Provides facilities for running Python and binary tests for Google Test."""
 
-  def __init__(self, injected_os=os, injected_subprocess=subprocess):
+  def __init__(self,
+               injected_os=os,
+               injected_subprocess=subprocess,
+               injected_script_dir=os.path.dirname(__file__)):
     self.os = injected_os
     self.subprocess = injected_subprocess
+    # If a program using this file is invoked via a relative path, the
+    # script directory will be relative to the path of the main program
+    # file.  It may be '.' when this script is invoked directly or '..' when
+    # it is imported for testing.  To simplify testing we inject the script
+    # directory into TestRunner.
+    self.script_dir = injected_script_dir
+
+  def GetBuildDirForConfig(self, config):
+    """Returns the build directory for a given configuration."""
+
+    return self.os.path.normpath(
+        self.os.path.join(self.script_dir, 'scons/build/%s/scons' % config))
 
   def Run(self, args):
     """Runs the executable with given args (args[0] is the executable name).
@@ -194,23 +193,23 @@ class TestRunner(object):
       return self.os.spawnv(self.os.P_WAIT, args[0], args)
 
   def RunBinaryTest(self, test):
-    """Runs the binary test script given its path relative to the gtest root.
+    """Runs the binary test given its path.
 
     Args:
-      test: Path to the test binary relative to the location of this script.
+      test: Path to the test binary.
 
     Returns:
       Process's exit code if it exits normally, or -signal if the process is
       killed by a signal.
     """
 
-    return self.Run([self.os.path.abspath(self.os.path.join(MY_DIR, test))])
+    return self.Run([test])
 
   def RunPythonTest(self, test, build_dir):
     """Runs the Python test script with the specified build directory.
 
     Args:
-      test: Name of the test's Python script.
+      test: Path to the test's Python script.
       build_dir: Path to the directory where the test binary is to be found.
 
     Returns:
@@ -226,9 +225,8 @@ class TestRunner(object):
       # If this script is run on a Windows machine that has no association
       # between the .py extension and a python interpreter, simply passing
       # the script name into subprocess.Popen/os.spawn will not work.
-      script = self.os.path.join(MY_DIR, test)
-      print 'Running %s . . .' % (script,)
-      return self.Run([sys.executable, script])
+      print 'Running %s . . .' % (test,)
+      return self.Run([sys.executable, test])
 
     finally:
       if old_build_dir is None:
@@ -277,28 +275,29 @@ class TestRunner(object):
     if named_configurations == 'all':
       named_configurations = ','.join(available_configurations)
 
+    normalized_args = [self.os.path.normpath(arg) for arg in args]
+
     # A final list of build directories which will be searched for the test
     # binaries. First, add directories specified directly on the command
     # line.
-    build_dirs = [arg for arg in args if self.os.path.isdir(arg)]
+    build_dirs = filter(self.os.path.isdir, normalized_args)
 
     # Adds build directories specified via their build configurations using
     # the -c or -a options.
     if named_configurations:
-      build_dirs += [GetBuildDirForConfig(config)
+      build_dirs += [self.GetBuildDirForConfig(config)
                      for config in named_configurations.split(',')]
 
     # Adds KNOWN BUILD DIRECTORIES if -b is specified.
     if built_configurations:
-      build_dirs += [GetBuildDirForConfig(config)
+      build_dirs += [self.GetBuildDirForConfig(config)
                      for config in available_configurations
-                     if self.os.path.isdir(GetBuildDirForConfig(config))]
+                     if self.os.path.isdir(self.GetBuildDirForConfig(config))]
 
     # If no directories were specified either via -a, -b, -c, or directly, use
     # the default configuration.
     elif not build_dirs:
-      build_dirs = [GetBuildDirForConfig(config)
-                    for config in available_configurations[0:1]]
+      build_dirs = [self.GetBuildDirForConfig(available_configurations[0])]
 
     # Makes sure there are no duplications.
     build_dirs = sets.Set(build_dirs)
@@ -309,10 +308,12 @@ class TestRunner(object):
 
     # Sifts through non-directory arguments fishing for any Python or binary
     # tests and detecting errors.
-    for argument in sets.Set(args) - build_dirs:
+    for argument in sets.Set(normalized_args) - build_dirs:
       if re.search(PYTHON_TEST_REGEX, argument):
-        python_path = self.os.path.join('test', self.os.path.basename(argument))
-        if self.os.path.isfile(self.os.path.join(MY_DIR, python_path)):
+        python_path = self.os.path.join(self.script_dir,
+                                        'test',
+                                        self.os.path.basename(argument))
+        if self.os.path.isfile(python_path):
           listed_python_tests.append(python_path)
         else:
           sys.stderr.write('Unable to find Python test %s' % argument)
@@ -334,7 +335,9 @@ class TestRunner(object):
     if user_has_listed_tests:
       selected_python_tests = listed_python_tests
     else:
-      selected_python_tests = self.FindFilesByRegex('test', PYTHON_TEST_REGEX)
+      selected_python_tests = self.FindFilesByRegex(
+          self.os.path.join(self.script_dir, 'test'),
+          PYTHON_TEST_REGEX)
 
     # TODO(vladl@google.com): skip unbuilt Python tests when -b is specified.
     python_test_pairs = []
@@ -355,7 +358,7 @@ class TestRunner(object):
     return (python_test_pairs, binary_test_pairs)
 
   def RunTests(self, python_tests, binary_tests):
-    """Runs Python and binary tests represented as pairs (work_dir, binary).
+    """Runs Python and binary tests and reports results to the standard output.
 
     Args:
       python_tests: List of Python tests to run in the form of tuples

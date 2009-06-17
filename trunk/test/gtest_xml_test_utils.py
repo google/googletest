@@ -34,14 +34,15 @@
 __author__ = 'eefacm@gmail.com (Sean Mcafee)'
 
 import re
-import unittest
-
 from xml.dom import minidom, Node
+
+import gtest_test_utils
+
 
 GTEST_OUTPUT_FLAG         = "--gtest_output"
 GTEST_DEFAULT_OUTPUT_FILE = "test_detail.xml"
 
-class GTestXMLTestCase(unittest.TestCase):
+class GTestXMLTestCase(gtest_test_utils.TestCase):
   """
   Base class for tests of Google Test's XML output functionality.
   """

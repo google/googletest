@@ -33,13 +33,12 @@
 
 __author__ = 'wan@google.com (Zhanyong Wan)'
 
-import gtest_test_utils
 import os
-import sys
-import unittest
+import gtest_test_utils
+
 
 IS_WINDOWS = os.name == 'nt'
-IS_LINUX = os.name == 'posix'
+IS_LINUX = os.name == 'posix' and os.uname()[0] == 'Linux'
 
 COMMAND = gtest_test_utils.GetTestExecutablePath('gtest_env_var_test_')
 
@@ -97,12 +96,13 @@ def TestEnvVarAffectsFlag(command):
 
   if IS_WINDOWS:
     TestFlag(command, 'catch_exceptions', '1', '0')
+
   if IS_LINUX:
-    TestFlag(command, 'stack_trace_depth', '0', '100')
     TestFlag(command, 'death_test_use_fork', '1', '0')
+    TestFlag(command, 'stack_trace_depth', '0', '100')
 
 
-class GTestEnvVarTest(unittest.TestCase):
+class GTestEnvVarTest(gtest_test_utils.TestCase):
   def testEnvVarAffectsFlag(self):
     TestEnvVarAffectsFlag(COMMAND)
 

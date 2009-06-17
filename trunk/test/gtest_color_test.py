@@ -33,10 +33,9 @@
 
 __author__ = 'wan@google.com (Zhanyong Wan)'
 
-import gtest_test_utils
 import os
-import sys
-import unittest
+import gtest_test_utils
+
 
 IS_WINDOWS = os.name = 'nt'
 
@@ -65,7 +64,7 @@ def UsesColor(term, color_env_var, color_flag):
   return gtest_test_utils.GetExitStatus(os.system(cmd))
 
 
-class GTestColorTest(unittest.TestCase):
+class GTestColorTest(gtest_test_utils.TestCase):
   def testNoEnvVarNoFlag(self):
     """Tests the case when there's neither GTEST_COLOR nor --gtest_color."""
 
