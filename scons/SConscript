@@ -125,6 +125,11 @@ if env_with_exceptions['PLATFORM'] == 'win32':
   cppdefines = env_with_exceptions['CPPDEFINES']
   if '_TYPEINFO_' in cppdefines:
     cppdefines.remove('_TYPEINFO_')
+else:
+  env_with_exceptions.Append(CCFLAGS='-fexceptions')
+  ccflags = env_with_exceptions['CCFLAGS']
+  if '-fno-exceptions' in ccflags:
+    ccflags.remove('-fno-exceptions')
 
 env_without_rtti = env.Clone()
 if env_without_rtti['PLATFORM'] == 'win32':
@@ -132,6 +137,9 @@ if env_without_rtti['PLATFORM'] == 'win32':
 else:
   env_without_rtti.Append(CCFLAGS = ['-fno-rtti'])
   env_without_rtti.Append(CPPDEFINES = 'GTEST_HAS_RTTI=0')
+
+env_use_own_tuple = env.Clone()
+env_use_own_tuple.Append(CPPDEFINES = 'GTEST_USE_OWN_TR1_TUPLE=1')
 
 gtest_ex_obj = env_with_exceptions.Object(target='gtest_ex',
                                           source=gtest_source)
@@ -257,6 +265,37 @@ GtestBinary(env_without_rtti,
             gtest_unittest_no_rtti_obj +
             gtest_all_no_rtti_obj +
             gtest_main_no_rtti_obj)
+
+# Builds a test for gtest's own TR1 tuple implementation.
+gtest_all_use_own_tuple_obj = env_use_own_tuple.Object(
+    target='gtest_all_use_own_tuple',
+    source='../src/gtest-all.cc')
+gtest_main_use_own_tuple_obj = env_use_own_tuple.Object(
+    target='gtest_main_use_own_tuple',
+    source='../src/gtest_main.cc')
+GtestBinary(env_use_own_tuple,
+            'gtest-tuple_test',
+            [],
+            ['../test/gtest-tuple_test.cc',
+             gtest_all_use_own_tuple_obj,
+             gtest_main_use_own_tuple_obj])
+
+# Builds a test for gtest features that use tuple.
+gtest_param_test_test_use_own_tuple_obj = env_use_own_tuple.Object(
+    target='gtest_param_test_test_use_own_tuple',
+    source='../test/gtest-param-test_test.cc')
+gtest_param_test2_test_use_own_tuple_obj = env_use_own_tuple.Object(
+    target='gtest_param_test2_test_use_own_tuple',
+    source='../test/gtest-param-test2_test.cc')
+GtestBinary(env_use_own_tuple,
+            'gtest_use_own_tuple_test',
+            [],
+            gtest_param_test_test_use_own_tuple_obj +
+            gtest_param_test2_test_use_own_tuple_obj +
+            gtest_all_use_own_tuple_obj)
+
+# TODO(wan@google.com): simplify the definition of build targets that
+# use alternative environments.
 
 # We need to disable some optimization flags for some tests on
 # Windows; otherwise the redirection of stdout does not work

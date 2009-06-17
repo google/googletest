@@ -48,6 +48,8 @@ class FakePath(object):
     self.tree = {}
     self.path_separator = os.sep
 
+    # known_paths contains either absolute or relative paths. Relative paths
+    # are absolutized with self.current_dir.
     if known_paths:
       self._AddPaths(known_paths)
 
@@ -91,8 +93,11 @@ class FakePath(object):
 
     return tree
 
+  def normpath(self, path):
+    return os.path.normpath(path)
+
   def abspath(self, path):
-    return os.path.normpath(os.path.join(self.current_dir, path))
+    return self.normpath(os.path.join(self.current_dir, path))
 
   def isfile(self, path):
     return self.PathElement(self.abspath(path)) == 1
@@ -157,7 +162,8 @@ class GetTestsToRunTest(unittest.TestCase):
                      'test/gtest_color_test.py']))
     self.fake_configurations = ['dbg', 'opt']
     self.test_runner = run_tests.TestRunner(injected_os=self.fake_os,
-                                            injected_subprocess=None)
+                                            injected_subprocess=None,
+                                            injected_script_dir='.')
 
   def testBinaryTestsOnly(self):
     """Exercises GetTestsToRun with parameters designating binary tests only."""
@@ -388,7 +394,8 @@ class GetTestsToRunTest(unittest.TestCase):
                      'scons/build/opt/scons/gtest_nontest.exe',
                      'test/']))
     self.test_runner = run_tests.TestRunner(injected_os=self.fake_os,
-                                            injected_subprocess=None)
+                                            injected_subprocess=None,
+                                            injected_script_dir='.')
     self.AssertResultsEqual(
         self.test_runner.GetTestsToRun(
             [],
@@ -396,6 +403,43 @@ class GetTestsToRunTest(unittest.TestCase):
             True,
             available_configurations=self.fake_configurations),
         ([], []))
+
+  def testWorksFromDifferentDir(self):
+    """Exercises GetTestsToRun from a directory different from run_test.py's."""
+
+    # Here we simulate an test script in directory /d/ called from the
+    # directory /a/b/c/.
+    self.fake_os = FakeOs(FakePath(
+        current_dir=os.path.abspath('/a/b/c'),
+        known_paths=['/a/b/c/',
+                     '/d/scons/build/dbg/scons/gtest_unittest',
+                     '/d/scons/build/opt/scons/gtest_unittest',
+                     '/d/test/gtest_color_test.py']))
+    self.fake_configurations = ['dbg', 'opt']
+    self.test_runner = run_tests.TestRunner(injected_os=self.fake_os,
+                                            injected_subprocess=None,
+                                            injected_script_dir='/d/')
+    # A binary test.
+    self.AssertResultsEqual(
+        self.test_runner.GetTestsToRun(
+            ['gtest_unittest'],
+            '',
+            False,
+            available_configurations=self.fake_configurations),
+        ([],
+         [('/d/scons/build/dbg/scons',
+           '/d/scons/build/dbg/scons/gtest_unittest')]))
+
+    # A Python test.
+    self.AssertResultsEqual(
+        self.test_runner.GetTestsToRun(
+            ['gtest_color_test.py'],
+            '',
+            False,
+            available_configurations=self.fake_configurations),
+        ([('/d/scons/build/dbg/scons', '/d/test/gtest_color_test.py')],
+         []))
+
 
   def testNonTestBinary(self):
     """Exercises GetTestsToRun with a non-test parameter."""

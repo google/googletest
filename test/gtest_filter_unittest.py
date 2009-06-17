@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2005, Google Inc.
-# All rights reserved.
+# Copyright 2005 Google Inc. All Rights Reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -46,8 +45,6 @@ __author__ = 'wan@google.com (Zhanyong Wan)'
 import os
 import re
 import sets
-import tempfile
-import unittest
 import gtest_test_utils
 
 # Constants.
@@ -133,9 +130,7 @@ def SetEnvVar(env_var, value):
 
 
 def Run(command):
-  """Runs a Google Test program and returns a list of full names of the
-  tests that were run along with the test exit code.
-  """
+  """Runs a test program and returns its exit code and a list of tests run."""
 
   stdout_file = os.popen(command, 'r')
   tests_run = []
@@ -169,9 +164,7 @@ def InvokeWithModifiedEnv(extra_env, function, *args, **kwargs):
 
 
 def RunWithSharding(total_shards, shard_index, command):
-  """Runs the Google Test program shard and returns a list of full names of the
-  tests that were run along with the exit code.
-  """
+  """Runs a test program shard and returns exit code and a list of tests run."""
 
   extra_env = {SHARD_INDEX_ENV_VAR: str(shard_index),
                TOTAL_SHARDS_ENV_VAR: str(total_shards)}
@@ -180,10 +173,8 @@ def RunWithSharding(total_shards, shard_index, command):
 # The unit test.
 
 
-class GTestFilterUnitTest(unittest.TestCase):
-  """Tests using the GTEST_FILTER environment variable or the
-  --gtest_filter flag to filter tests.
-  """
+class GTestFilterUnitTest(gtest_test_utils.TestCase):
+  """Tests GTEST_FILTER env variable or --gtest_filter flag to filter tests."""
 
   # Utilities.
 
@@ -206,9 +197,8 @@ class GTestFilterUnitTest(unittest.TestCase):
     self.assertEqual(sets.Set(set_var), sets.Set(full_partition))
 
   def AdjustForParameterizedTests(self, tests_to_run):
-    """Adjust tests_to_run in case value parameterized tests are disabled
-    in the binary.
-    """
+    """Adjust tests_to_run in case value parameterized tests are disabled."""
+
     global param_tests_present
     if not param_tests_present:
       return list(sets.Set(tests_to_run) - sets.Set(PARAM_TESTS))
@@ -216,9 +206,8 @@ class GTestFilterUnitTest(unittest.TestCase):
       return tests_to_run
 
   def RunAndVerify(self, gtest_filter, tests_to_run):
-    """Runs gtest_flag_unittest_ with the given filter, and verifies
-    that the right set of tests were run.
-    """
+    """Checks that the binary runs correct set of tests for the given filter."""
+
     tests_to_run = self.AdjustForParameterizedTests(tests_to_run)
 
     # First, tests using GTEST_FILTER.
@@ -248,11 +237,21 @@ class GTestFilterUnitTest(unittest.TestCase):
 
   def RunAndVerifyWithSharding(self, gtest_filter, total_shards, tests_to_run,
                                command=COMMAND, check_exit_0=False):
-    """Runs all shards of gtest_flag_unittest_ with the given filter, and
+    """Checks that binary runs correct tests for the given filter and shard.
+
+    Runs all shards of gtest_filter_unittest_ with the given filter, and
     verifies that the right set of tests were run. The union of tests run
     on each shard should be identical to tests_to_run, without duplicates.
-    If check_exit_0, make sure that all shards returned 0.
+
+    Args:
+      gtest_filter: A filter to apply to the tests.
+      total_shards: A total number of shards to split test run into.
+      tests_to_run: A set of tests expected to run.
+      command:      A command to invoke the test binary.
+      check_exit_0: When set to a true value, make sure that all shards
+                    return 0.
     """
+
     tests_to_run = self.AdjustForParameterizedTests(tests_to_run)
 
     # Windows removes empty variables from the environment when passing it
@@ -275,9 +274,16 @@ class GTestFilterUnitTest(unittest.TestCase):
     # pylint: enable-msg=C6403
 
   def RunAndVerifyAllowingDisabled(self, gtest_filter, tests_to_run):
-    """Runs gtest_flag_unittest_ with the given filter, and enables
+    """Checks that the binary runs correct set of tests for the given filter.
+
+    Runs gtest_filter_unittest_ with the given filter, and enables
     disabled tests. Verifies that the right set of tests were run.
+
+    Args:
+      gtest_filter: A filter to apply to the tests.
+      tests_to_run: A set of tests expected to run.
     """
+
     tests_to_run = self.AdjustForParameterizedTests(tests_to_run)
 
     # Construct the command line.
@@ -294,6 +300,7 @@ class GTestFilterUnitTest(unittest.TestCase):
     Determines whether value-parameterized tests are enabled in the binary and
     sets the flags accordingly.
     """
+
     global param_tests_present
     if param_tests_present is None:
       param_tests_present = PARAM_TEST_REGEX.search(
@@ -305,9 +312,8 @@ class GTestFilterUnitTest(unittest.TestCase):
     self.RunAndVerify(None, ACTIVE_TESTS)
 
   def testDefaultBehaviorWithShards(self):
-    """Tests the behavior of not specifying the filter, with sharding
-    enabled.
-    """
+    """Tests the behavior without the filter, with sharding enabled."""
+
     self.RunAndVerifyWithSharding(None, 1, ACTIVE_TESTS)
     self.RunAndVerifyWithSharding(None, 2, ACTIVE_TESTS)
     self.RunAndVerifyWithSharding(None, len(ACTIVE_TESTS) - 1, ACTIVE_TESTS)
@@ -520,9 +526,7 @@ class GTestFilterUnitTest(unittest.TestCase):
         ])
 
   def testFlagOverridesEnvVar(self):
-    """Tests that the --gtest_filter flag overrides the GTEST_FILTER
-    environment variable.
-    """
+    """Tests that the filter flag overrides the filtering env. variable."""
 
     SetEnvVar(FILTER_ENV_VAR, 'Foo*')
     command = '%s --%s=%s' % (COMMAND, FILTER_FLAG, '*One')
@@ -534,8 +538,8 @@ class GTestFilterUnitTest(unittest.TestCase):
   def testShardStatusFileIsCreated(self):
     """Tests that the shard file is created if specified in the environment."""
 
-    test_tmpdir = tempfile.mkdtemp()
-    shard_status_file = os.path.join(test_tmpdir, 'shard_status_file')
+    shard_status_file = os.path.join(gtest_test_utils.GetTempDir(),
+                                     'shard_status_file')
     self.assert_(not os.path.exists(shard_status_file))
 
     extra_env = {SHARD_STATUS_FILE_ENV_VAR: shard_status_file}
@@ -546,13 +550,12 @@ class GTestFilterUnitTest(unittest.TestCase):
       stdout_file.close()
       self.assert_(os.path.exists(shard_status_file))
       os.remove(shard_status_file)
-      os.removedirs(test_tmpdir)
 
   def testShardStatusFileIsCreatedWithListTests(self):
     """Tests that the shard file is created with --gtest_list_tests."""
 
-    test_tmpdir = tempfile.mkdtemp()
-    shard_status_file = os.path.join(test_tmpdir, 'shard_status_file2')
+    shard_status_file = os.path.join(gtest_test_utils.GetTempDir(),
+                                     'shard_status_file2')
     self.assert_(not os.path.exists(shard_status_file))
 
     extra_env = {SHARD_STATUS_FILE_ENV_VAR: shard_status_file}
@@ -564,7 +567,6 @@ class GTestFilterUnitTest(unittest.TestCase):
       stdout_file.close()
       self.assert_(os.path.exists(shard_status_file))
       os.remove(shard_status_file)
-      os.removedirs(test_tmpdir)
 
   def testShardingWorksWithDeathTests(self):
     """Tests integration with death tests and sharding."""

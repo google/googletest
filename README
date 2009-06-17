@@ -112,6 +112,32 @@ which contains all of the source code. Here are some examples in Linux:
   tar -xvjf gtest-X.Y.Z.tar.bz2
   unzip gtest-X.Y.Z.zip
 
+Choosing a TR1 Tuple Library
+----------------------------
+Some Google Test features require the C++ Technical Report 1 (TR1)
+tuple library, which is not yet widely available with all compilers.
+The good news is that Google Test implements a subset of TR1 tuple
+that's enough for its own need, and will automatically use this when
+the compiler doesn't provide TR1 tuple.
+
+Usually you don't need to care about which tuple library Google Test
+uses.  However, if your project already uses TR1 tuple, you need to
+tell Google Test to use the same TR1 tuple library the rest of your
+project uses (this requirement is new in Google Test 1.4.0, so you may
+need to take care of it when upgrading from an earlier version), or
+the two tuple implementations will clash.  To do that, add
+
+  -DGTEST_USE_OWN_TR1_TUPLE=0
+
+to the compiler flags while compiling Google Test and your tests.
+
+If you don't want Google Test to use tuple at all, add
+
+  -DGTEST_HAS_TR1_TUPLE=0
+
+to the compiler flags.  All features using tuple will be disabled in
+this mode.
+
 Building the Source
 -------------------
 ### Linux, Mac OS X (without Xcode), and Cygwin ###

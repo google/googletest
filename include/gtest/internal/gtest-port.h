@@ -58,11 +58,15 @@
 //   GTEST_HAS_STD_WSTRING    - Define it to 1/0 to indicate that
 //                              std::wstring does/doesn't work (Google Test can
 //                              be used where std::wstring is unavailable).
-//   GTEST_HAS_TR1_TUPLE 1    - Define it to 1/0 to indicate tr1::tuple
+//   GTEST_HAS_TR1_TUPLE      - Define it to 1/0 to indicate tr1::tuple
 //                              is/isn't available.
 //   GTEST_HAS_SEH            - Define it to 1/0 to indicate whether the
 //                              compiler supports Microsoft's "Structured
 //                              Exception Handling".
+//   GTEST_USE_OWN_TR1_TUPLE  - Define it to 1/0 to indicate whether Google
+//                              Test's own tr1 tuple implementation should be
+//                              used.  Unused when the user sets
+//                              GTEST_HAS_TR1_TUPLE to 0.
 
 // This header defines the following utilities:
 //
@@ -339,28 +343,41 @@
 #define GTEST_HAS_PTHREAD (GTEST_OS_LINUX || GTEST_OS_MAC)
 #endif  // GTEST_HAS_PTHREAD
 
-// Determines whether tr1/tuple is available.  If you have tr1/tuple
-// on your platform, define GTEST_HAS_TR1_TUPLE=1 for both the Google
-// Test project and your tests. If you would like Google Test to detect
-// tr1/tuple on your platform automatically, please open an issue
-// ticket at http://code.google.com/p/googletest.
+// Determines whether Google Test can use tr1/tuple.  You can define
+// this macro to 0 to prevent Google Test from using tuple (any
+// feature depending on tuple with be disabled in this mode).
 #ifndef GTEST_HAS_TR1_TUPLE
+// The user didn't tell us not to do it, so we assume it's OK.
+#define GTEST_HAS_TR1_TUPLE 1
+#endif  // GTEST_HAS_TR1_TUPLE
+
+// Determines whether Google Test's own tr1 tuple implementation
+// should be used.
+#ifndef GTEST_USE_OWN_TR1_TUPLE
 // The user didn't tell us, so we need to figure it out.
 
-// GCC provides <tr1/tuple> since 4.0.0.
+// We use our own tr1 tuple if we aren't sure the user has an
+// implementation of it already.  At this time, GCC 4.0.0+ is the only
+// mainstream compiler that comes with a TR1 tuple implementation.
+// MSVC 2008 (9.0) provides TR1 tuple in a 323 MB Feature Pack
+// download, which we cannot assume the user has.  MSVC 2010 isn't
+// released yet.
 #if defined(__GNUC__) && (GTEST_GCC_VER_ >= 40000)
-#define GTEST_HAS_TR1_TUPLE 1
+#define GTEST_USE_OWN_TR1_TUPLE 0
 #else
-#define GTEST_HAS_TR1_TUPLE 0
-#endif  // __GNUC__
-#endif  // GTEST_HAS_TR1_TUPLE
+#define GTEST_USE_OWN_TR1_TUPLE 1
+#endif  // defined(__GNUC__) && (GTEST_GCC_VER_ >= 40000)
+
+#endif  // GTEST_USE_OWN_TR1_TUPLE
 
 // To avoid conditional compilation everywhere, we make it
 // gtest-port.h's responsibility to #include the header implementing
 // tr1/tuple.
 #if GTEST_HAS_TR1_TUPLE
 
-#if GTEST_OS_SYMBIAN
+#if GTEST_USE_OWN_TR1_TUPLE
+#include <gtest/internal/gtest-tuple.h>
+#elif GTEST_OS_SYMBIAN
 
 // On Symbian, BOOST_HAS_TR1_TUPLE causes Boost's TR1 tuple library to
 // use STLport's tuple implementation, which unfortunately doesn't
@@ -398,7 +415,7 @@
 // If the compiler is not GCC 4.0+, we assume the user is using a
 // spec-conforming TR1 implementation.
 #include <tuple>
-#endif  // GTEST_OS_SYMBIAN
+#endif  // GTEST_USE_OWN_TR1_TUPLE
 
 #endif  // GTEST_HAS_TR1_TUPLE
 

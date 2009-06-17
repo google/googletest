@@ -37,9 +37,8 @@ Google Test) with different environments and command line flags.
 
 __author__ = 'wan@google.com (Zhanyong Wan)'
 
-import gtest_test_utils
 import os
-import unittest
+import gtest_test_utils
 
 
 # Constants.
@@ -78,7 +77,7 @@ def Run(command):
 
 # The tests.  TODO(wan@google.com): refactor the class to share common
 # logic with code in gtest_break_on_failure_unittest.py.
-class ThrowOnFailureTest(unittest.TestCase):
+class ThrowOnFailureTest(gtest_test_utils.TestCase):
   """Tests the throw-on-failure mode."""
 
   def RunAndVerify(self, env_var_value, flag_value, should_fail):

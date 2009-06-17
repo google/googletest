@@ -39,10 +39,9 @@ SYNOPSIS
 
 __author__ = 'wan@google.com (Zhanyong Wan)'
 
-import gtest_test_utils
 import os
 import re
-import unittest
+import gtest_test_utils
 
 
 IS_WINDOWS = os.name == 'nt'
@@ -83,7 +82,7 @@ def RunWithFlag(flag):
   return child.exit_code, child.output
 
 
-class GTestHelpTest(unittest.TestCase):
+class GTestHelpTest(gtest_test_utils.TestCase):
   """Tests the --help flag and its equivalent forms."""
 
   def TestHelpFlag(self, flag):

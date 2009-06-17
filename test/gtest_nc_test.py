@@ -38,6 +38,11 @@ import sys
 import unittest
 
 
+IS_LINUX = os.name == 'posix' and os.uname()[0] == 'Linux'
+if not IS_LINUX:
+  sys.exit(0)  # Negative compilation tests are not supported on Windows & Mac.
+
+
 class GTestNCTest(unittest.TestCase):
   """Negative compilation test for Google Test."""
 

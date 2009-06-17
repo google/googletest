@@ -34,8 +34,6 @@
 __author__ = 'wan@google.com (Zhanyong Wan)'
 
 import gtest_test_utils
-import sys
-import unittest
 
 
 COMMAND = gtest_test_utils.GetTestExecutablePath('gtest_uninitialized_test_')
@@ -63,7 +61,7 @@ def TestExitCodeAndOutput(command):
   Assert('InitGoogleTest' in p.output)
 
 
-class GTestUninitializedTest(unittest.TestCase):
+class GTestUninitializedTest(gtest_test_utils.TestCase):
   def testExitCodeAndOutput(self):
     TestExitCodeAndOutput(COMMAND)
 

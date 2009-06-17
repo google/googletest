@@ -34,18 +34,23 @@
 __author__ = 'eefacm@gmail.com (Sean Mcafee)'
 
 import errno
-import gtest_test_utils
 import os
 import sys
-import tempfile
-import unittest
-
 from xml.dom import minidom, Node
 
+import gtest_test_utils
 import gtest_xml_test_utils
+
 
 GTEST_OUTPUT_FLAG         = "--gtest_output"
 GTEST_DEFAULT_OUTPUT_FILE = "test_detail.xml"
+
+SUPPORTS_STACK_TRACES = False
+
+if SUPPORTS_STACK_TRACES:
+  STACK_TRACE_TEMPLATE = "\nStack trace:\n*"
+else:
+  STACK_TRACE_TEMPLATE = ""
 
 EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="13" failures="2" disabled="2" errors="0" time="*" name="AllTests">
@@ -56,7 +61,7 @@ EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
     <testcase name="Fails" status="run" time="*" classname="FailedTest">
       <failure message="Value of: 2&#x0A;Expected: 1" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
 Value of: 2
-Expected: 1]]></failure>
+Expected: 1%(stack)s]]></failure>
     </testcase>
   </testsuite>
   <testsuite name="MixedResultTest" tests="3" failures="1" disabled="1" errors="0" time="*">
@@ -64,10 +69,10 @@ Expected: 1]]></failure>
     <testcase name="Fails" status="run" time="*" classname="MixedResultTest">
       <failure message="Value of: 2&#x0A;Expected: 1" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
 Value of: 2
-Expected: 1]]></failure>
+Expected: 1%(stack)s]]></failure>
       <failure message="Value of: 3&#x0A;Expected: 2" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
 Value of: 3
-Expected: 2]]></failure>
+Expected: 2%(stack)s]]></failure>
     </testcase>
     <testcase name="DISABLED_test" status="notrun" time="*" classname="MixedResultTest"/>
   </testsuite>
@@ -85,7 +90,7 @@ Expected: 2]]></failure>
      <testcase name="ExternalUtilityThatCallsRecordIntValuedProperty" status="run" time="*" classname="NoFixtureTest" key_for_utility_int="1"/>
      <testcase name="ExternalUtilityThatCallsRecordStringValuedProperty" status="run" time="*" classname="NoFixtureTest" key_for_utility_string="1"/>
   </testsuite>
-</testsuites>"""
+</testsuites>""" % {'stack': STACK_TRACE_TEMPLATE}
 
 
 EXPECTED_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
@@ -120,8 +125,8 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     Confirms that Google Test produces an XML output file with the expected
     default name if no name is explicitly specified.
     """
-    temp_dir = tempfile.mkdtemp()
-    output_file     = os.path.join(temp_dir, GTEST_DEFAULT_OUTPUT_FILE)
+    output_file = os.path.join(gtest_test_utils.GetTempDir(),
+                               GTEST_DEFAULT_OUTPUT_FILE)
     gtest_prog_path = gtest_test_utils.GetTestExecutablePath(
         "gtest_no_test_unittest")
     try:
@@ -132,7 +137,7 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
 
     p = gtest_test_utils.Subprocess(
         [gtest_prog_path, "%s=xml" % GTEST_OUTPUT_FLAG],
-        working_dir=temp_dir)
+        working_dir=gtest_test_utils.GetTempDir())
     self.assert_(p.exited)
     self.assertEquals(0, p.exit_code)
     self.assert_(os.path.isfile(output_file))
@@ -145,8 +150,8 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     XML document.  Furthermore, the program's exit code must be
     expected_exit_code.
     """
-
-    xml_path = os.path.join(tempfile.mkdtemp(), gtest_prog_name + "out.xml")
+    xml_path = os.path.join(gtest_test_utils.GetTempDir(),
+                            gtest_prog_name + "out.xml")
     gtest_prog_path = gtest_test_utils.GetTestExecutablePath(gtest_prog_name)
 
     command = [gtest_prog_path, "%s=xml:%s" % (GTEST_OUTPUT_FLAG, xml_path)]

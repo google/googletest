@@ -44,7 +44,6 @@ import os
 import re
 import string
 import sys
-import unittest
 import gtest_test_utils
 
 
@@ -84,11 +83,11 @@ def ToUnixLineEnding(s):
   return s.replace('\r\n', '\n').replace('\r', '\n')
 
 
-def RemoveLocations(output):
+def RemoveLocations(test_output):
   """Removes all file location info from a Google Test program's output.
 
   Args:
-       output:  the output of a Google Test program.
+       test_output:  the output of a Google Test program.
 
   Returns:
        output with all file location info (in the form of
@@ -97,15 +96,22 @@ def RemoveLocations(output):
        'FILE_NAME:#: '.
   """
 
-  return re.sub(r'.*[/\\](.+)(\:\d+|\(\d+\))\: ', r'\1:#: ', output)
+  return re.sub(r'.*[/\\](.+)(\:\d+|\(\d+\))\: ', r'\1:#: ', test_output)
 
 
-def RemoveStackTraces(output):
+def RemoveStackTraceDetails(output):
   """Removes all stack traces from a Google Test program's output."""
 
   # *? means "find the shortest string that matches".
   return re.sub(r'Stack trace:(.|\n)*?\n\n',
                 'Stack trace: (omitted)\n\n', output)
+
+
+def RemoveStackTraces(output):
+  """Removes all traces of stack traces from a Google Test program's output."""
+
+  # *? means "find the shortest string that matches".
+  return re.sub(r'Stack trace:(.|\n)*?\n\n', '', output)
 
 
 def RemoveTime(output):
@@ -123,25 +129,28 @@ def RemoveTestCounts(output):
                   '? FAILED TESTS', output)
   output = re.sub(r'\d+ tests from \d+ test cases',
                   '? tests from ? test cases', output)
+  output = re.sub(r'\d+ tests from ([a-zA-Z_])',
+                  r'? tests from \1', output)
   return re.sub(r'\d+ tests\.', '? tests.', output)
 
 
 def RemoveMatchingTests(test_output, pattern):
-  """Removes typed test information from a Google Test program's output.
+  """Removes output of specified tests from a Google Test program's output.
 
-  This function strips not only the beginning and the end of a test but also all
-  output in between.
+  This function strips not only the beginning and the end of a test but also
+  all output in between.
 
   Args:
     test_output:       A string containing the test output.
-    pattern:           A string that matches names of test cases to remove.
+    pattern:           A regex string that matches names of test cases or
+                       tests to remove.
 
   Returns:
-    Contents of test_output with removed test case whose names match pattern.
+    Contents of test_output with tests whose names match pattern removed.
   """
 
   test_output = re.sub(
-      r'\[ RUN      \] .*%s(.|\n)*?\[(  FAILED  |       OK )\] .*%s.*\n' % (
+      r'.*\[ RUN      \] .*%s(.|\n)*?\[(  FAILED  |       OK )\] .*%s.*\n' % (
           pattern, pattern),
       '',
       test_output)
@@ -153,7 +162,7 @@ def NormalizeOutput(output):
 
   output = ToUnixLineEnding(output)
   output = RemoveLocations(output)
-  output = RemoveStackTraces(output)
+  output = RemoveStackTraceDetails(output)
   output = RemoveTime(output)
   return output
 
@@ -241,14 +250,28 @@ def GetOutputOfAllCommands():
 test_list = GetShellCommandOutput(COMMAND_LIST_TESTS, '')
 SUPPORTS_DEATH_TESTS = 'DeathTest' in test_list
 SUPPORTS_TYPED_TESTS = 'TypedTest' in test_list
+SUPPORTS_THREADS = 'ExpectFailureWithThreadsTest' in test_list
+SUPPORTS_STACK_TRACES = False
+
+CAN_GENERATE_GOLDEN_FILE = SUPPORTS_DEATH_TESTS and SUPPORTS_TYPED_TESTS
 
 
-class GTestOutputTest(unittest.TestCase):
+class GTestOutputTest(gtest_test_utils.TestCase):
   def RemoveUnsupportedTests(self, test_output):
     if not SUPPORTS_DEATH_TESTS:
       test_output = RemoveMatchingTests(test_output, 'DeathTest')
     if not SUPPORTS_TYPED_TESTS:
       test_output = RemoveMatchingTests(test_output, 'TypedTest')
+    if not SUPPORTS_THREADS:
+      test_output = RemoveMatchingTests(test_output,
+                                        'ExpectFailureWithThreadsTest')
+      test_output = RemoveMatchingTests(test_output,
+                                        'ScopedFakeTestPartResultReporterTest')
+      test_output = RemoveMatchingTests(test_output,
+                                        'WorksConcurrently')
+    if not SUPPORTS_STACK_TRACES:
+      test_output = RemoveStackTraces(test_output)
+
     return test_output
 
   def testOutput(self):
@@ -262,26 +285,48 @@ class GTestOutputTest(unittest.TestCase):
     golden = ToUnixLineEnding(golden_file.read())
     golden_file.close()
 
-    # We want the test to pass regardless of death tests being
+    # We want the test to pass regardless of certain features being
     # supported or not.
-    if SUPPORTS_DEATH_TESTS and SUPPORTS_TYPED_TESTS:
+    if CAN_GENERATE_GOLDEN_FILE:
       self.assert_(golden == output)
     else:
-      self.assert_(RemoveTestCounts(self.RemoveUnsupportedTests(golden)) ==
-                   RemoveTestCounts(output))
+      normalized_actual = RemoveTestCounts(output)
+      normalized_golden = RemoveTestCounts(self.RemoveUnsupportedTests(golden))
+
+      # This code is very handy when debugging test differences so I left it
+      # here, commented.
+      # open(os.path.join(
+      #     gtest_test_utils.GetSourceDir(),
+      #     '_gtest_output_test_normalized_actual.txt'), 'wb').write(
+      #         normalized_actual)
+      # open(os.path.join(
+      #     gtest_test_utils.GetSourceDir(),
+      #     '_gtest_output_test_normalized_golden.txt'), 'wb').write(
+      #         normalized_golden)
+
+      self.assert_(normalized_golden == normalized_actual)
 
 
 if __name__ == '__main__':
   if sys.argv[1:] == [GENGOLDEN_FLAG]:
-    if SUPPORTS_DEATH_TESTS and SUPPORTS_TYPED_TESTS:
+    if CAN_GENERATE_GOLDEN_FILE:
       output = GetOutputOfAllCommands()
       golden_file = open(GOLDEN_PATH, 'wb')
       golden_file.write(output)
       golden_file.close()
     else:
-      print >> sys.stderr, ('Unable to write a golden file when compiled in an '
-                            'environment that does not support death tests and '
-                            'typed tests. Are you using VC 7.1?')
+      message = (
+          """Unable to write a golden file when compiled in an environment
+that does not support all the required features (death tests""")
+      if IS_WINDOWS:
+        message += (
+            """\nand typed tests). Please check that you are using VC++ 8.0 SP1
+or higher as your compiler.""")
+      else:
+        message += """\nand typed tests).  Please generate the golden file
+using a binary built with those features enabled."""
+
+      sys.stderr.write(message)
       sys.exit(1)
   else:
     gtest_test_utils.Main()

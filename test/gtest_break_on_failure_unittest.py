@@ -43,7 +43,6 @@ __author__ = 'wan@google.com (Zhanyong Wan)'
 import gtest_test_utils
 import os
 import sys
-import unittest
 
 
 # Constants.
@@ -94,7 +93,7 @@ def Run(command):
 # The tests.
 
 
-class GTestBreakOnFailureUnitTest(unittest.TestCase):
+class GTestBreakOnFailureUnitTest(gtest_test_utils.TestCase):
   """Tests using the GTEST_BREAK_ON_FAILURE environment variable or
   the --gtest_break_on_failure flag to turn assertion failures into
   segmentation faults.
