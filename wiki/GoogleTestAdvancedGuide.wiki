@@ -964,6 +964,8 @@ pointed values.
 {{{
 class FooTest : public ::testing::TestWithParam<const char*> {
   // You can implement all the usual fixture class members here.
+  // To access the test parameter, call GetParam() from class
+  // TestWithParam<T>.
 };
 }}}
 
