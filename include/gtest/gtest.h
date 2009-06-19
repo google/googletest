@@ -383,6 +383,102 @@ class TestProperty {
   String value_;
 };
 
+// The result of a single Test.  This includes a list of
+// TestPartResults, a list of TestProperties, a count of how many
+// death tests there are in the Test, and how much time it took to run
+// the Test.
+//
+// TestResult is not copyable.
+class TestResult {
+ public:
+  // Creates an empty TestResult.
+  TestResult();
+
+  // D'tor.  Do not inherit from TestResult.
+  ~TestResult();
+
+  // Gets the list of TestPartResults.
+  const internal::List<TestPartResult>& test_part_results() const {
+    return *test_part_results_;
+  }
+
+  // Gets the list of TestProperties.
+  const internal::List<internal::TestProperty>& test_properties() const {
+    return *test_properties_;
+  }
+
+  // Gets the number of successful test parts.
+  int successful_part_count() const;
+
+  // Gets the number of failed test parts.
+  int failed_part_count() const;
+
+  // Gets the number of all test parts.  This is the sum of the number
+  // of successful test parts and the number of failed test parts.
+  int total_part_count() const;
+
+  // Returns true iff the test passed (i.e. no test part failed).
+  bool Passed() const { return !Failed(); }
+
+  // Returns true iff the test failed.
+  bool Failed() const { return failed_part_count() > 0; }
+
+  // Returns true iff the test fatally failed.
+  bool HasFatalFailure() const;
+
+  // Returns true iff the test has a non-fatal failure.
+  bool HasNonfatalFailure() const;
+
+  // Returns the elapsed time, in milliseconds.
+  TimeInMillis elapsed_time() const { return elapsed_time_; }
+
+  // Sets the elapsed time.
+  void set_elapsed_time(TimeInMillis elapsed) { elapsed_time_ = elapsed; }
+
+  // Adds a test part result to the list.
+  void AddTestPartResult(const TestPartResult& test_part_result);
+
+  // Adds a test property to the list. The property is validated and may add
+  // a non-fatal failure if invalid (e.g., if it conflicts with reserved
+  // key names). If a property is already recorded for the same key, the
+  // value will be updated, rather than storing multiple values for the same
+  // key.
+  void RecordProperty(const internal::TestProperty& test_property);
+
+  // Adds a failure if the key is a reserved attribute of Google Test
+  // testcase tags.  Returns true if the property is valid.
+  // TODO(russr): Validate attribute names are legal and human readable.
+  static bool ValidateTestProperty(const internal::TestProperty& test_property);
+
+  // Returns the death test count.
+  int death_test_count() const { return death_test_count_; }
+
+  // Increments the death test count, returning the new count.
+  int increment_death_test_count() { return ++death_test_count_; }
+
+  // Clears the test part results.
+  void ClearTestPartResults();
+
+  // Clears the object.
+  void Clear();
+ private:
+  // Protects mutable state of the property list and of owned properties, whose
+  // values may be updated.
+  internal::Mutex test_properites_mutex_;
+
+  // The list of TestPartResults
+  scoped_ptr<internal::List<TestPartResult> > test_part_results_;
+  // The list of TestProperties
+  scoped_ptr<internal::List<internal::TestProperty> > test_properties_;
+  // Running count of death tests.
+  int death_test_count_;
+  // The elapsed time, in milliseconds.
+  TimeInMillis elapsed_time_;
+
+  // We disallow copying TestResult.
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(TestResult);
+};  // class TestResult
+
 }  // namespace internal
 
 // A TestInfo object stores the following information about a test:
