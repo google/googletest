@@ -61,6 +61,9 @@ namespace internal {
 namespace {
 
 #ifdef _WIN32_WCE
+// TODO(wan@google.com): Move these to the POSIX adapter section in
+// gtest-port.h.
+
 // Windows CE doesn't have the remove C function.
 int remove(const char* path) {
   LPCWSTR wpath = String::AnsiToUtf16(path);

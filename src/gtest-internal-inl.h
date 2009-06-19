@@ -45,7 +45,9 @@
 #error "It must not be included except by Google Test itself."
 #endif  // GTEST_IMPLEMENTATION_
 
+#ifndef _WIN32_WCE
 #include <errno.h>
+#endif  // !_WIN32_WCE
 #include <stddef.h>
 #include <stdlib.h>   // For strtoll/_strtoul64.
 
@@ -1072,7 +1074,7 @@ class UnitTestImpl {
       original_working_dir_.Set(FilePath::GetCurrentDir());
       if (original_working_dir_.IsEmpty()) {
         printf("%s\n", "Failed to get the current working directory.");
-        abort();
+        posix::Abort();
       }
     }
 

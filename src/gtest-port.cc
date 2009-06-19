@@ -36,8 +36,10 @@
 #include <stdio.h>
 
 #if GTEST_OS_WINDOWS
+#ifndef _WIN32_WCE
 #include <io.h>
 #include <sys/stat.h>
+#endif  // _WIN32_WCE
 #else
 #include <unistd.h>
 #endif  // GTEST_OS_WINDOWS
@@ -425,7 +427,7 @@ void GTestLog(GTestLogSeverity severity, const char* file,
   fprintf(stderr, "\n%s %s:%d: %s\n", marker, file, line, msg);
   if (severity == GTEST_FATAL) {
     fflush(NULL);  // abort() is not guaranteed to flush open file streams.
-    abort();
+    posix::Abort();
   }
 }
 
@@ -444,6 +446,10 @@ class CapturedStderr {
  public:
   // The ctor redirects stderr to a temporary file.
   CapturedStderr() {
+#ifdef _WIN32_WCE
+    // Not supported on Windows CE.
+    posix::Abort();
+#else
     uncaptured_fd_ = dup(kStdErrFileno);
 
 #if GTEST_OS_WINDOWS
@@ -465,19 +471,24 @@ class CapturedStderr {
     fflush(NULL);
     dup2(captured_fd, kStdErrFileno);
     close(captured_fd);
+#endif  // _WIN32_WCE
   }
 
   ~CapturedStderr() {
+#ifndef _WIN32_WCE
     remove(filename_.c_str());
+#endif  // _WIN32_WCE
   }
 
   // Stops redirecting stderr.
   void StopCapture() {
+#ifndef _WIN32_WCE
     // Restores the original stream.
     fflush(NULL);
     dup2(uncaptured_fd_, kStdErrFileno);
     close(uncaptured_fd_);
     uncaptured_fd_ = -1;
+#endif  // !_WIN32_WCE
   }
 
   // Returns the name of the temporary file holding the stderr output.

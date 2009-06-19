@@ -33,8 +33,8 @@
 
 // Implements a subset of TR1 tuple needed by Google Test and Google Mock.
 
-#ifndef GTEST_INCLUDE_GTEST_INTERAL_GTEST_TUPLE_H_
-#define GTEST_INCLUDE_GTEST_INTERAL_GTEST_TUPLE_H_
+#ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_TUPLE_H_
+#define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_TUPLE_H_
 
 #include <utility>  // For ::std::pair.
 
@@ -942,4 +942,4 @@ inline bool operator!=(const GTEST_10_TUPLE_(T)& t,
 #undef GTEST_ADD_REF_
 #undef GTEST_TUPLE_ELEMENT_
 
-#endif  // GTEST_INCLUDE_GTEST_INTERAL_GTEST_TUPLE_H_
+#endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_TUPLE_H_

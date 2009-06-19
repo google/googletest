@@ -146,10 +146,11 @@ INSTANTIATE_TEST_CASE_P(AnotherInstantiationName, FooTest, ValuesIn(pets));
 
 #endif  // 0
 
-
-#include <utility>
-
 #include <gtest/internal/gtest-port.h>
+
+#if !GTEST_OS_SYMBIAN
+#include <utility>
+#endif
 
 #if GTEST_HAS_PARAM_TEST
 
