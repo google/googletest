@@ -64,21 +64,13 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 #include "src/gtest-internal-inl.h"
 #undef GTEST_IMPLEMENTATION_
 
+#include <limits.h>  // For INT_MAX.
 #include <stdlib.h>
 #include <time.h>
 
 #if GTEST_HAS_PTHREAD
 #include <pthread.h>
 #endif  // GTEST_HAS_PTHREAD
-
-#if GTEST_OS_LINUX
-#include <string.h>
-#include <signal.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <string>
-#include <vector>
-#endif  // GTEST_OS_LINUX
 
 #ifdef __BORLANDC__
 #include <map>
@@ -784,7 +776,7 @@ TEST(StringTest, AnsiAndUtf16ConvertBasic) {
   EXPECT_STREQ("str", ansi);
   delete [] ansi;
   const WCHAR* utf16 = String::AnsiToUtf16("str");
-  EXPECT_TRUE(wcsncmp(L"str", utf16, 3) == 0);
+  EXPECT_EQ(0, wcsncmp(L"str", utf16, 3));
   delete [] utf16;
 }
 
@@ -793,7 +785,7 @@ TEST(StringTest, AnsiAndUtf16ConvertPathChars) {
   EXPECT_STREQ(".:\\ \"*?", ansi);
   delete [] ansi;
   const WCHAR* utf16 = String::AnsiToUtf16(".:\\ \"*?");
-  EXPECT_TRUE(wcsncmp(L".:\\ \"*?", utf16, 3) == 0);
+  EXPECT_EQ(0, wcsncmp(L".:\\ \"*?", utf16, 3));
   delete [] utf16;
 }
 #endif  // _WIN32_WCE
@@ -3398,13 +3390,13 @@ TEST(AssertionSyntaxTest, BasicAssertionsBehavesLikeSingleStatement) {
   if (true)
     EXPECT_FALSE(false);
   else
-    ;
+    ;  // NOLINT
 
   if (false)
     ASSERT_LT(1, 3);
 
   if (false)
-    ;
+    ;  // NOLINT
   else
     EXPECT_GT(3, 2) << "";
 }
@@ -3431,7 +3423,7 @@ TEST(AssertionSyntaxTest, ExceptionAssertionsBehavesLikeSingleStatement) {
   if (true)
     EXPECT_THROW(ThrowAnInteger(), int);
   else
-    ;
+    ;  // NOLINT
 
   if (false)
     EXPECT_NO_THROW(ThrowAnInteger());
@@ -3439,7 +3431,7 @@ TEST(AssertionSyntaxTest, ExceptionAssertionsBehavesLikeSingleStatement) {
   if (true)
     EXPECT_NO_THROW(ThrowNothing());
   else
-    ;
+    ;  // NOLINT
 
   if (false)
     EXPECT_ANY_THROW(ThrowNothing());
@@ -3447,7 +3439,7 @@ TEST(AssertionSyntaxTest, ExceptionAssertionsBehavesLikeSingleStatement) {
   if (true)
     EXPECT_ANY_THROW(ThrowAnInteger());
   else
-    ;
+    ;  // NOLINT
 }
 #endif  // GTEST_HAS_EXCEPTIONS
 
@@ -3456,20 +3448,20 @@ TEST(AssertionSyntaxTest, NoFatalFailureAssertionsBehavesLikeSingleStatement) {
     EXPECT_NO_FATAL_FAILURE(FAIL()) << "This should never be executed. "
                                     << "It's a compilation test only.";
   else
-    ;
+    ;  // NOLINT
 
   if (false)
     ASSERT_NO_FATAL_FAILURE(FAIL()) << "";
   else
-    ;
+    ;  // NOLINT
 
   if (true)
     EXPECT_NO_FATAL_FAILURE(SUCCEED());
   else
-    ;
+    ;  // NOLINT
 
   if (false)
-    ;
+    ;  // NOLINT
   else
     ASSERT_NO_FATAL_FAILURE(SUCCEED());
 }

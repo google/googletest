@@ -450,41 +450,6 @@ static void Delete(T * x) {
   delete x;
 }
 
-// A copyable object representing a user specified test property which can be
-// output as a key/value string pair.
-//
-// Don't inherit from TestProperty as its destructor is not virtual.
-class TestProperty {
- public:
-  // C'tor.  TestProperty does NOT have a default constructor.
-  // Always use this constructor (with parameters) to create a
-  // TestProperty object.
-  TestProperty(const char* key, const char* value) :
-    key_(key), value_(value) {
-  }
-
-  // Gets the user supplied key.
-  const char* key() const {
-    return key_.c_str();
-  }
-
-  // Gets the user supplied value.
-  const char* value() const {
-    return value_.c_str();
-  }
-
-  // Sets a new value, overriding the one supplied in the constructor.
-  void SetValue(const char* new_value) {
-    value_ = new_value;
-  }
-
- private:
-  // The key supplied by the user.
-  String key_;
-  // The value supplied by the user.
-  String value_;
-};
-
 // A predicate that checks the key of a TestProperty against a known key.
 //
 // TestPropertyKeyIs is copyable.
