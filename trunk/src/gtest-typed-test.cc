@@ -86,7 +86,7 @@ const char* TypedTestCasePState::VerifyRegisteredTestNames(
     fprintf(stderr, "%s %s", FormatFileLocation(file, line).c_str(),
             errors_str.c_str());
     fflush(stderr);
-    abort();
+    posix::Abort();
   }
 
   return registered_tests;

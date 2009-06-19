@@ -154,10 +154,13 @@
 //   Int32FromGTestEnv()  - parses an Int32 environment variable.
 //   StringFromGTestEnv() - parses a string environment variable.
 
+#include <stddef.h>  // For ptrdiff_t
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#ifndef _WIN32_WCE
 #include <sys/stat.h>
+#endif  // !_WIN32_WCE
 
 #include <iostream>  // NOLINT
 
@@ -191,7 +194,7 @@
 #define GTEST_OS_SOLARIS 1
 #endif  // __CYGWIN__
 
-#if GTEST_OS_CYGWIN || GTEST_OS_LINUX || GTEST_OS_MAC
+#if GTEST_OS_CYGWIN || GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_SYMBIAN
 
 // On some platforms, <regex.h> needs someone to define size_t, and
 // won't compile otherwise.  We can #include it here as we already
@@ -206,8 +209,10 @@
 
 #elif GTEST_OS_WINDOWS
 
+#ifndef _WIN32_WCE
 #include <direct.h>  // NOLINT
 #include <io.h>  // NOLINT
+#endif  // !_WIN32_WCE
 
 // <regex.h> is not available on Windows.  Use our own simple regex
 // implementation instead.
@@ -445,7 +450,8 @@
 #if GTEST_HAS_STD_STRING && (GTEST_OS_LINUX || \
                              GTEST_OS_MAC || \
                              GTEST_OS_CYGWIN || \
-                             (GTEST_OS_WINDOWS && _MSC_VER >= 1400))
+                             (GTEST_OS_WINDOWS && (_MSC_VER >= 1400) && \
+                              !defined(_WIN32_WCE)))
 #define GTEST_HAS_DEATH_TEST 1
 #include <vector>  // NOLINT
 #endif
@@ -813,20 +819,30 @@ inline int StrCaseCmp(const char* s1, const char* s2) {
   return stricmp(s1, s2);
 }
 inline char* StrDup(const char* src) { return strdup(src); }
-#else
+#else  // !__BORLANDC__
+#ifdef _WIN32_WCE
+inline int IsATTY(int /* fd */) { return 0; }
+#else  // !_WIN32_WCE
 inline int IsATTY(int fd) { return _isatty(fd); }
+#endif  // _WIN32_WCE
 inline int StrCaseCmp(const char* s1, const char* s2) {
   return _stricmp(s1, s2);
 }
 inline char* StrDup(const char* src) { return _strdup(src); }
 #endif  // __BORLANDC__
 
+#ifdef _WIN32_WCE
+inline int FileNo(FILE* file) { return reinterpret_cast<int>(_fileno(file)); }
+// Stat(), RmDir(), and IsDir() are not needed on Windows CE at this
+// time and thus not defined there.
+#else  // !_WIN32_WCE
 inline int FileNo(FILE* file) { return _fileno(file); }
 inline int Stat(const char* path, StatStruct* buf) { return _stat(path, buf); }
 inline int RmDir(const char* dir) { return _rmdir(dir); }
 inline bool IsDir(const StatStruct& st) {
   return (_S_IFDIR & st.st_mode) != 0;
 }
+#endif  // _WIN32_WCE
 
 #else
 
@@ -855,15 +871,25 @@ inline bool IsDir(const StatStruct& st) { return S_ISDIR(st.st_mode); }
 inline const char* StrNCpy(char* dest, const char* src, size_t n) {
   return strncpy(dest, src, n);
 }
+
+// ChDir(), FReopen(), FDOpen(), Read(), Write(), Close(), and
+// StrError() aren't needed on Windows CE at this time and thus not
+// defined there.
+
+#ifndef _WIN32_WCE
 inline int ChDir(const char* dir) { return chdir(dir); }
+#endif
 inline FILE* FOpen(const char* path, const char* mode) {
   return fopen(path, mode);
 }
+#ifndef _WIN32_WCE
 inline FILE *FReopen(const char* path, const char* mode, FILE* stream) {
   return freopen(path, mode, stream);
 }
 inline FILE* FDOpen(int fd, const char* mode) { return fdopen(fd, mode); }
+#endif
 inline int FClose(FILE* fp) { return fclose(fp); }
+#ifndef _WIN32_WCE
 inline int Read(int fd, void* buf, unsigned int count) {
   return static_cast<int>(read(fd, buf, count));
 }
@@ -872,6 +898,7 @@ inline int Write(int fd, const void* buf, unsigned int count) {
 }
 inline int Close(int fd) { return close(fd); }
 inline const char* StrError(int errnum) { return strerror(errnum); }
+#endif
 inline const char* GetEnv(const char* name) {
 #ifdef _WIN32_WCE  // We are on Windows CE, which has no environment variables.
   return NULL;
@@ -992,7 +1019,7 @@ class GTestCheckProvider {
   }
   ~GTestCheckProvider() {
     ::std::cerr << ::std::endl;
-    abort();
+    posix::Abort();
   }
   void FormatFileLocation(const char* file, int line) {
     if (file == NULL)

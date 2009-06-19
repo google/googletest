@@ -3364,14 +3364,14 @@ int UnitTest::Run() {
                  SEM_NOGPFAULTERRORBOX | SEM_NOOPENFILEERRORBOX);
 #endif  // _WIN32_WCE
 
-#if defined(_MSC_VER) || defined(__MINGW32__)
+#if (defined(_MSC_VER) || defined(__MINGW32__)) && !defined(_WIN32_WCE)
     // Death test children can be terminated with _abort().  On Windows,
     // _abort() can show a dialog with a warning message.  This forces the
     // abort message to go to stderr instead.
     _set_error_mode(_OUT_TO_STDERR);
 #endif
 
-#if _MSC_VER >= 1400
+#if _MSC_VER >= 1400 && !defined(_WIN32_WCE)
     // In the debug version, Visual Studio pops up a separate dialog
     // offering a choice to debug the aborted program. We need to suppress
     // this dialog or it will pop up for every EXPECT/ASSERT_DEATH statement
@@ -3387,7 +3387,7 @@ int UnitTest::Run() {
       _set_abort_behavior(
           0x0,                                    // Clear the following flags:
           _WRITE_ABORT_MSG | _CALL_REPORTFAULT);  // pop-up window, core dump.
-#endif  // _MSC_VER >= 1400
+#endif
   }
 
   __try {

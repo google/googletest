@@ -621,7 +621,7 @@ class TypedTestCasePState {
               "REGISTER_TYPED_TEST_CASE_P(%s, ...).\n",
               FormatFileLocation(file, line).c_str(), test_name, case_name);
       fflush(stderr);
-      abort();
+      posix::Abort();
     }
     defined_test_names_.insert(test_name);
     return true;
