@@ -132,6 +132,7 @@ except ImportError:
 
 IS_WINDOWS = os.name == 'nt'
 IS_MAC = os.name == 'posix' and os.uname()[0] == 'Darwin'
+IS_CYGWIN = os.name == 'posix' and 'CYGWIN' in os.uname()[0]
 
 # Definition of CONFIGS must match that of the build directory names in the
 # SConstruct script. The first list item is the default build configuration.
@@ -142,12 +143,14 @@ elif IS_MAC:
 else:
   CONFIGS = ('dbg', 'opt')
 
-if IS_WINDOWS:
+if IS_WINDOWS or IS_CYGWIN:
   PYTHON_TEST_REGEX = re.compile(r'_(unit)?test\.py$', re.IGNORECASE)
   BINARY_TEST_REGEX = re.compile(r'_(unit)?test(\.exe)?$', re.IGNORECASE)
+  BINARY_TEST_SEARCH_REGEX = re.compile(r'_(unit)?test\.exe$', re.IGNORECASE)
 else:
   PYTHON_TEST_REGEX = re.compile(r'_(unit)?test\.py$')
   BINARY_TEST_REGEX = re.compile(r'_(unit)?test$')
+  BINARY_TEST_SEARCH_REGEX = BINARY_TEST_REGEX
 
 GTEST_BUILD_DIR = 'GTEST_BUILD_DIR'
 
@@ -306,12 +309,13 @@ class TestRunner(object):
     listed_python_tests = []  # All Python tests listed on the command line.
     listed_binary_tests = []  # All binary tests listed on the command line.
 
+    test_dir = self.os.path.normpath(self.os.path.join(self.script_dir, 'test'))
+
     # Sifts through non-directory arguments fishing for any Python or binary
     # tests and detecting errors.
     for argument in sets.Set(normalized_args) - build_dirs:
       if re.search(PYTHON_TEST_REGEX, argument):
-        python_path = self.os.path.join(self.script_dir,
-                                        'test',
+        python_path = self.os.path.join(test_dir,
                                         self.os.path.basename(argument))
         if self.os.path.isfile(python_path):
           listed_python_tests.append(python_path)
@@ -335,9 +339,7 @@ class TestRunner(object):
     if user_has_listed_tests:
       selected_python_tests = listed_python_tests
     else:
-      selected_python_tests = self.FindFilesByRegex(
-          self.os.path.join(self.script_dir, 'test'),
-          PYTHON_TEST_REGEX)
+      selected_python_tests = self.FindFilesByRegex(test_dir, PYTHON_TEST_REGEX)
 
     # TODO(vladl@google.com): skip unbuilt Python tests when -b is specified.
     python_test_pairs = []
@@ -352,7 +354,7 @@ class TestRunner(object):
             [(directory, self.os.path.join(directory, test))
              for test in listed_binary_tests])
       else:
-        tests = self.FindFilesByRegex(directory, BINARY_TEST_REGEX)
+        tests = self.FindFilesByRegex(directory, BINARY_TEST_SEARCH_REGEX)
         binary_test_pairs.extend([(directory, test) for test in tests])
 
     return (python_test_pairs, binary_test_pairs)

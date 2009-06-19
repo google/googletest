@@ -53,6 +53,7 @@ except:
 
 
 IS_WINDOWS = os.name == 'nt'
+IS_CYGWIN = os.name == 'posix' and 'CYGWIN' in os.uname()[0]
 
 # Here we expose a class from a particular module, depending on the
 # environment. The comment suppresses the 'Invalid variable name' lint
@@ -150,7 +151,7 @@ def GetTestExecutablePath(executable_name):
   """
 
   path = os.path.abspath(os.path.join(GetBuildDir(), executable_name))
-  if IS_WINDOWS and not path.endswith('.exe'):
+  if (IS_WINDOWS or IS_CYGWIN) and not path.endswith('.exe'):
     path += '.exe'
 
   if not os.path.exists(path):

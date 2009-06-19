@@ -33,11 +33,21 @@
 __author__ = 'vladl@google.com (Vlad Losev)'
 
 import os
+import re
+import sets
 import sys
 import unittest
 
 sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), os.pardir))
 import run_tests
+
+def AddExeExtension(path):
+  """Appends .exe to the path on Windows or Cygwin."""
+
+  if run_tests.IS_WINDOWS or run_tests.IS_CYGWIN:
+    return path + '.exe'
+  else:
+    return path
 
 
 class FakePath(object):
@@ -137,28 +147,43 @@ class FakeOs(object):
 class GetTestsToRunTest(unittest.TestCase):
   """Exercises TestRunner.GetTestsToRun."""
 
+  def NormalizeGetTestsToRunResults(self, results):
+    """Normalizes path data returned from GetTestsToRun for comparison."""
+
+    def NormalizePythonTestPair(pair):
+      """Normalizes path data in the (directory, python_script) pair."""
+
+      return (os.path.normpath(pair[0]), os.path.normpath(pair[1]))
+
+    def NormalizeBinaryTestPair(pair):
+      """Normalizes path data in the (directory, binary_executable) pair."""
+
+      directory, executable = map(os.path.normpath, pair)
+
+      # On Windows and Cygwin, the test file names have the .exe extension, but
+      # they can be invoked either by name or by name+extension. Our test must
+      # accommodate both situations.
+      if run_tests.IS_WINDOWS or run_tests.IS_CYGWIN:
+        executable = re.sub(r'\.exe$', '', executable)
+      return (directory, executable)
+
+    python_tests = sets.Set(map(NormalizePythonTestPair, results[0]))
+    binary_tests = sets.Set(map(NormalizeBinaryTestPair, results[1]))
+    return (python_tests, binary_tests)
+
   def AssertResultsEqual(self, results, expected):
     """Asserts results returned by GetTestsToRun equal to expected results."""
 
-    def NormalizeResultPaths(paths):
-      """Normalizes values returned by GetTestsToRun for comparison."""
-
-      def NormalizeResultPair(pair):
-        return (os.path.normpath(pair[0]), os.path.normpath(pair[1]))
-
-      return (sorted(map(NormalizeResultPair, paths[0])),
-              sorted(map(NormalizeResultPair, paths[1])))
-
-    self.assertEqual(NormalizeResultPaths(results),
-                     NormalizeResultPaths(expected),
-                     'Incorrect set of tests %s returned vs %s expected' %
+    self.assertEqual(self.NormalizeGetTestsToRunResults(results),
+                     self.NormalizeGetTestsToRunResults(expected),
+                     'Incorrect set of tests returned:\n%s\nexpected:\n%s' %
                      (results, expected))
 
   def setUp(self):
     self.fake_os = FakeOs(FakePath(
         current_dir=os.path.abspath(os.path.dirname(run_tests.__file__)),
-        known_paths=['scons/build/dbg/scons/gtest_unittest',
-                     'scons/build/opt/scons/gtest_unittest',
+        known_paths=[AddExeExtension('scons/build/dbg/scons/gtest_unittest'),
+                     AddExeExtension('scons/build/opt/scons/gtest_unittest'),
                      'test/gtest_color_test.py']))
     self.fake_configurations = ['dbg', 'opt']
     self.test_runner = run_tests.TestRunner(injected_os=self.fake_os,
@@ -390,8 +415,7 @@ class GetTestsToRunTest(unittest.TestCase):
 
     self.fake_os = FakeOs(FakePath(
         current_dir=os.path.abspath(os.path.dirname(run_tests.__file__)),
-        known_paths=['scons/build/dbg/scons/gtest_nontest',
-                     'scons/build/opt/scons/gtest_nontest.exe',
+        known_paths=[AddExeExtension('scons/build/dbg/scons/gtest_nontest'),
                      'test/']))
     self.test_runner = run_tests.TestRunner(injected_os=self.fake_os,
                                             injected_subprocess=None,
@@ -412,8 +436,8 @@ class GetTestsToRunTest(unittest.TestCase):
     self.fake_os = FakeOs(FakePath(
         current_dir=os.path.abspath('/a/b/c'),
         known_paths=['/a/b/c/',
-                     '/d/scons/build/dbg/scons/gtest_unittest',
-                     '/d/scons/build/opt/scons/gtest_unittest',
+                     AddExeExtension('/d/scons/build/dbg/scons/gtest_unittest'),
+                     AddExeExtension('/d/scons/build/opt/scons/gtest_unittest'),
                      '/d/test/gtest_color_test.py']))
     self.fake_configurations = ['dbg', 'opt']
     self.test_runner = run_tests.TestRunner(injected_os=self.fake_os,
@@ -461,6 +485,24 @@ class GetTestsToRunTest(unittest.TestCase):
             False,
             available_configurations=self.fake_configurations))
 
+  if run_tests.IS_WINDOWS or run_tests.IS_CYGWIN:
+    def testDoesNotPickNonExeFilesOnWindows(self):
+      """Verifies that GetTestsToRun does not find _test files on Windows."""
+
+      self.fake_os = FakeOs(FakePath(
+          current_dir=os.path.abspath(os.path.dirname(run_tests.__file__)),
+          known_paths=['scons/build/dbg/scons/gtest_test', 'test/']))
+      self.test_runner = run_tests.TestRunner(injected_os=self.fake_os,
+                                              injected_subprocess=None,
+                                              injected_script_dir='.')
+      self.AssertResultsEqual(
+          self.test_runner.GetTestsToRun(
+              [],
+              '',
+              True,
+              available_configurations=self.fake_configurations),
+          ([], []))
+
 
 class RunTestsTest(unittest.TestCase):
   """Exercises TestRunner.RunTests."""
@@ -480,8 +522,8 @@ class RunTestsTest(unittest.TestCase):
   def setUp(self):
     self.fake_os = FakeOs(FakePath(
         current_dir=os.path.abspath(os.path.dirname(run_tests.__file__)),
-        known_paths=['scons/build/dbg/scons/gtest_unittest',
-                     'scons/build/opt/scons/gtest_unittest',
+        known_paths=[AddExeExtension('scons/build/dbg/scons/gtest_unittest'),
+                     AddExeExtension('scons/build/opt/scons/gtest_unittest'),
                      'test/gtest_color_test.py']))
     self.fake_configurations = ['dbg', 'opt']
     self.test_runner = run_tests.TestRunner(injected_os=self.fake_os,
