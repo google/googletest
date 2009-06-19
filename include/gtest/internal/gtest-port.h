@@ -177,7 +177,7 @@
 // Determines the platform on which Google Test is compiled.
 #ifdef __CYGWIN__
 #define GTEST_OS_CYGWIN 1
-#elif __SYMBIAN32__
+#elif defined __SYMBIAN32__
 #define GTEST_OS_SYMBIAN 1
 #elif defined _WIN32
 #define GTEST_OS_WINDOWS 1

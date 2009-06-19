@@ -185,7 +185,11 @@ def IterShellCommandOutput(env_cmd, stdin_string=None):
   old_env_vars = dict(os.environ)
   os.environ.update(env_cmd[0])
   stdin_file, stdout_file = os.popen2(env_cmd[1], 'b')
-  os.environ.clear()
+  # Changes made by os.environ.clear are not inheritable by child processes
+  # until Python 2.6. To produce inheritable changes we have to delete
+  # environment items with the del statement.
+  for key in os.environ.keys():
+    del os.environ[key]
   os.environ.update(old_env_vars)
 
   # If the caller didn't specify a string for STDIN, gets it from the
