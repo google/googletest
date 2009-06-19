@@ -1778,7 +1778,9 @@ String AppendUserMessage(const String& gtest_msg,
 
 // Creates an empty TestResult.
 TestResult::TestResult()
-    : death_test_count_(0),
+    : test_part_results_(new List<TestPartResult>),
+      test_properties_(new List<TestProperty>),
+      death_test_count_(0),
       elapsed_time_(0) {
 }
 
@@ -1786,9 +1788,14 @@ TestResult::TestResult()
 TestResult::~TestResult() {
 }
 
+// Clears the test part results.
+void TestResult::ClearTestPartResults() {
+  test_part_results_->Clear();
+}
+
 // Adds a test part result to the list.
 void TestResult::AddTestPartResult(const TestPartResult& test_part_result) {
-  test_part_results_.PushBack(test_part_result);
+  test_part_results_->PushBack(test_part_result);
 }
 
 // Adds a test property to the list. If a property with the same key as the
@@ -1800,9 +1807,9 @@ void TestResult::RecordProperty(const TestProperty& test_property) {
   }
   MutexLock lock(&test_properites_mutex_);
   ListNode<TestProperty>* const node_with_matching_key =
-      test_properties_.FindIf(TestPropertyKeyIs(test_property.key()));
+      test_properties_->FindIf(TestPropertyKeyIs(test_property.key()));
   if (node_with_matching_key == NULL) {
-    test_properties_.PushBack(test_property);
+    test_properties_->PushBack(test_property);
     return;
   }
   TestProperty& property_with_matching_key = node_with_matching_key->element();
@@ -1826,8 +1833,8 @@ bool TestResult::ValidateTestProperty(const TestProperty& test_property) {
 
 // Clears the object.
 void TestResult::Clear() {
-  test_part_results_.Clear();
-  test_properties_.Clear();
+  test_part_results_->Clear();
+  test_properties_->Clear();
   death_test_count_ = 0;
   elapsed_time_ = 0;
 }
@@ -1839,7 +1846,7 @@ static bool TestPartPassed(const TestPartResult & result) {
 
 // Gets the number of successful test parts.
 int TestResult::successful_part_count() const {
-  return test_part_results_.CountIf(TestPartPassed);
+  return test_part_results_->CountIf(TestPartPassed);
 }
 
 // Returns true iff the test part failed.
@@ -1849,7 +1856,7 @@ static bool TestPartFailed(const TestPartResult & result) {
 
 // Gets the number of failed test parts.
 int TestResult::failed_part_count() const {
-  return test_part_results_.CountIf(TestPartFailed);
+  return test_part_results_->CountIf(TestPartFailed);
 }
 
 // Returns true iff the test part fatally failed.
@@ -1859,7 +1866,7 @@ static bool TestPartFatallyFailed(const TestPartResult& result) {
 
 // Returns true iff the test fatally failed.
 bool TestResult::HasFatalFailure() const {
-  return test_part_results_.CountIf(TestPartFatallyFailed) > 0;
+  return test_part_results_->CountIf(TestPartFatallyFailed) > 0;
 }
 
 // Returns true iff the test part non-fatally failed.
@@ -1869,13 +1876,13 @@ static bool TestPartNonfatallyFailed(const TestPartResult& result) {
 
 // Returns true iff the test has a non-fatal failure.
 bool TestResult::HasNonfatalFailure() const {
-  return test_part_results_.CountIf(TestPartNonfatallyFailed) > 0;
+  return test_part_results_->CountIf(TestPartNonfatallyFailed) > 0;
 }
 
 // Gets the number of all test parts.  This is the sum of the number
 // of successful test parts and the number of failed test parts.
 int TestResult::total_part_count() const {
-  return test_part_results_.size();
+  return test_part_results_->size();
 }
 
 }  // namespace internal
