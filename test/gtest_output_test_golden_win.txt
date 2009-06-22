@@ -5,7 +5,7 @@ gtest_output_test_.cc:#: error: Value of: false
 Expected: true
 gtest_output_test_.cc:#: error: Value of: 3
 Expected: 2
-[==========] Running 57 tests from 26 test cases.
+[==========] Running 61 tests from 27 test cases.
 [----------] Global test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -186,7 +186,7 @@ Expected failure #2, in TearDown().
 gtest_output_test_.cc:#: error: Failed
 Expected failure #3, in the test fixture d'tor.
 [  FAILED  ] ExceptionInSetUpTest.ExceptionInSetUp
-[----------] 1 test from ExceptionInTestFunctionTest
+[----------] 2 tests from ExceptionInTestFunctionTest
 [ RUN      ] ExceptionInTestFunctionTest.SEH
 (expecting 3 failures)
 unknown file: error: Exception thrown with code 0xc0000005 in the test body.
@@ -195,6 +195,20 @@ Expected failure #2, in TearDown().
 gtest_output_test_.cc:#: error: Failed
 Expected failure #3, in the test fixture d'tor.
 [  FAILED  ] ExceptionInTestFunctionTest.SEH
+[ RUN      ] ExceptionInTestFunctionTest.CppException
+unknown file: error: Exception thrown with code 0xe06d7363 in the test body.
+gtest_output_test_.cc:#: error: Failed
+Expected failure #2, in TearDown().
+gtest_output_test_.cc:#: error: Failed
+Expected failure #3, in the test fixture d'tor.
+[  FAILED  ] ExceptionInTestFunctionTest.CppException
+[----------] 1 test from ExceptionInTearDownTest
+[ RUN      ] ExceptionInTearDownTest.ExceptionInTearDown
+(expecting 2 failures)
+unknown file: error: Exception thrown with code 0xe06d7363 in TearDown().
+gtest_output_test_.cc:#: error: Failed
+Expected failure #2, in the test fixture d'tor.
+[  FAILED  ] ExceptionInTearDownTest.ExceptionInTearDown
 [----------] 4 tests from MixedUpTestCaseTest
 [ RUN      ] MixedUpTestCaseTest.FirstTestFromNamespaceFoo
 [       OK ] MixedUpTestCaseTest.FirstTestFromNamespaceFoo
@@ -259,7 +273,7 @@ test DefinedUsingTEST is defined using TEST.  You probably
 want to change the TEST to TEST_F or move it to another test
 case.
 [  FAILED  ] TEST_before_TEST_F_in_same_test_case.DefinedUsingTEST_FAndShouldFail
-[----------] 7 tests from ExpectNonfatalFailureTest
+[----------] 8 tests from ExpectNonfatalFailureTest
 [ RUN      ] ExpectNonfatalFailureTest.CanReferenceGlobalVariables
 [       OK ] ExpectNonfatalFailureTest.CanReferenceGlobalVariables
 [ RUN      ] ExpectNonfatalFailureTest.CanReferenceLocalVariables
@@ -298,7 +312,12 @@ Expected fatal failure.
 gtest.cc:#: error: Expected: 1 non-fatal failure
   Actual: 0 failures
 [  FAILED  ] ExpectNonfatalFailureTest.FailsWhenStatementReturns
-[----------] 7 tests from ExpectFatalFailureTest
+[ RUN      ] ExpectNonfatalFailureTest.FailsWhenStatementThrows
+(expecting a failure)
+gtest.cc:#: error: Expected: 1 non-fatal failure
+  Actual: 0 failures
+[  FAILED  ] ExpectNonfatalFailureTest.FailsWhenStatementThrows
+[----------] 8 tests from ExpectFatalFailureTest
 [ RUN      ] ExpectFatalFailureTest.CanReferenceGlobalVariables
 [       OK ] ExpectFatalFailureTest.CanReferenceGlobalVariables
 [ RUN      ] ExpectFatalFailureTest.CanReferenceLocalStaticVariables
@@ -337,6 +356,11 @@ Expected non-fatal failure.
 gtest.cc:#: error: Expected: 1 fatal failure
   Actual: 0 failures
 [  FAILED  ] ExpectFatalFailureTest.FailsWhenStatementReturns
+[ RUN      ] ExpectFatalFailureTest.FailsWhenStatementThrows
+(expecting a failure)
+gtest.cc:#: error: Expected: 1 fatal failure
+  Actual: 0 failures
+[  FAILED  ] ExpectFatalFailureTest.FailsWhenStatementThrows
 [----------] 2 tests from TypedTest/0, where TypeParam = int
 [ RUN      ] TypedTest/0.Success
 [       OK ] TypedTest/0.Success
@@ -460,9 +484,9 @@ Expected non-fatal failure.
 FooEnvironment::TearDown() called.
 gtest_output_test_.cc:#: error: Failed
 Expected fatal failure.
-[==========] 57 tests from 26 test cases ran.
+[==========] 61 tests from 27 test cases ran.
 [  PASSED  ] 21 tests.
-[  FAILED  ] 36 tests, listed below:
+[  FAILED  ] 40 tests, listed below:
 [  FAILED  ] FatalFailureTest.FatalFailureInSubroutine
 [  FAILED  ] FatalFailureTest.FatalFailureInNestedSubroutine
 [  FAILED  ] FatalFailureTest.NonfatalFailureInSubroutine
@@ -479,6 +503,8 @@ Expected fatal failure.
 [  FAILED  ] ExceptionInFixtureCtorTest.ExceptionInFixtureCtor
 [  FAILED  ] ExceptionInSetUpTest.ExceptionInSetUp
 [  FAILED  ] ExceptionInTestFunctionTest.SEH
+[  FAILED  ] ExceptionInTestFunctionTest.CppException
+[  FAILED  ] ExceptionInTearDownTest.ExceptionInTearDown
 [  FAILED  ] MixedUpTestCaseTest.ThisShouldFail
 [  FAILED  ] MixedUpTestCaseTest.ThisShouldFailToo
 [  FAILED  ] MixedUpTestCaseWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
@@ -488,10 +514,12 @@ Expected fatal failure.
 [  FAILED  ] ExpectNonfatalFailureTest.FailsWhenThereAreTwoNonfatalFailures
 [  FAILED  ] ExpectNonfatalFailureTest.FailsWhenThereIsOneFatalFailure
 [  FAILED  ] ExpectNonfatalFailureTest.FailsWhenStatementReturns
+[  FAILED  ] ExpectNonfatalFailureTest.FailsWhenStatementThrows
 [  FAILED  ] ExpectFatalFailureTest.FailsWhenThereIsNoFatalFailure
 [  FAILED  ] ExpectFatalFailureTest.FailsWhenThereAreTwoFatalFailures
 [  FAILED  ] ExpectFatalFailureTest.FailsWhenThereIsOneNonfatalFailure
 [  FAILED  ] ExpectFatalFailureTest.FailsWhenStatementReturns
+[  FAILED  ] ExpectFatalFailureTest.FailsWhenStatementThrows
 [  FAILED  ] TypedTest/0.Failure, where TypeParam = int
 [  FAILED  ] Unsigned/TypedTestP/0.Failure, where TypeParam = unsigned char
 [  FAILED  ] Unsigned/TypedTestP/1.Failure, where TypeParam = unsigned int
@@ -500,7 +528,7 @@ Expected fatal failure.
 [  FAILED  ] ExpectFailureTest.ExpectFatalFailureOnAllThreads
 [  FAILED  ] ExpectFailureTest.ExpectNonFatalFailureOnAllThreads
 
-36 FAILED TESTS
+40 FAILED TESTS
   YOU HAVE 1 DISABLED TEST
 
 Note: Google Test filter = FatalFailureTest.*:LoggingTest.*
