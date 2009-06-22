@@ -113,11 +113,13 @@ env_with_exceptions = env.Clone()
 if env_with_exceptions['PLATFORM'] == 'win32':
   env_with_exceptions.Append(CCFLAGS=['/EHsc'])
   env_with_exceptions.Append(CPPDEFINES='_HAS_EXCEPTIONS=1')
+  cppdefines = env_with_exceptions['CPPDEFINES']
   # Undoes the _TYPEINFO_ hack, which is unnecessary and only creates
   # trouble when exceptions are enabled.
-  cppdefines = env_with_exceptions['CPPDEFINES']
   if '_TYPEINFO_' in cppdefines:
     cppdefines.remove('_TYPEINFO_')
+  if '_HAS_EXCEPTIONS=0' in cppdefines:
+    cppdefines.remove('_HAS_EXCEPTIONS=0')
 else:
   env_with_exceptions.Append(CCFLAGS='-fexceptions')
   ccflags = env_with_exceptions['CCFLAGS']
@@ -287,7 +289,6 @@ GtestTest(env, 'gtest-typed-test_test', gtest_main,
           additional_sources=['../test/gtest-typed-test2_test.cc'])
 GtestTest(env, 'gtest-param-test_test', gtest,
           additional_sources=['../test/gtest-param-test2_test.cc'])
-GtestTest(env, 'gtest_output_test_', gtest)
 GtestTest(env, 'gtest_color_test_', gtest)
 GtestTest(env, 'gtest-linked_ptr_test', gtest_main)
 GtestTest(env, 'gtest-port_test', gtest_main)
@@ -305,6 +306,7 @@ GtestBinary(env, 'gtest_unittest', gtest_main, [gtest_unittest_obj])
 ############################################################
 # Tests targets using custom environments.
 
+GtestTest(env_with_exceptions, 'gtest_output_test_', gtest_ex)
 GtestTest(env_with_exceptions, 'gtest_throw_on_failure_ex_test', gtest_ex)
 GtestTest(env_with_threads, 'gtest-death-test_test', gtest_main)
 GtestTest(env_with_less_optimization, 'gtest_env_var_test_', gtest)

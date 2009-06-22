@@ -142,6 +142,7 @@ const int kMaxStackTraceDepth = 100;
 namespace internal {
 
 class GTestFlagSaver;
+class TestCase;                        // A collection of related tests.
 
 // Converts a streamable value to a String.  A NULL pointer is
 // converted to "(null)".  When the input value is a ::string,
@@ -540,7 +541,7 @@ class TestInfo {
   friend class internal::TestInfoImpl;
   friend class internal::UnitTestImpl;
   friend class Test;
-  friend class TestCase;
+  friend class internal::TestCase;
   friend TestInfo* internal::MakeAndRegisterTestInfo(
       const char* test_case_name, const char* name,
       const char* test_case_comment, const char* comment,
@@ -569,6 +570,130 @@ class TestInfo {
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(TestInfo);
 };
+
+namespace internal {
+
+// A test case, which consists of a list of TestInfos.
+//
+// TestCase is not copyable.
+class TestCase {
+ public:
+  // Creates a TestCase with the given name.
+  //
+  // TestCase does NOT have a default constructor.  Always use this
+  // constructor to create a TestCase object.
+  //
+  // Arguments:
+  //
+  //   name:         name of the test case
+  //   set_up_tc:    pointer to the function that sets up the test case
+  //   tear_down_tc: pointer to the function that tears down the test case
+  TestCase(const char* name, const char* comment,
+           Test::SetUpTestCaseFunc set_up_tc,
+           Test::TearDownTestCaseFunc tear_down_tc);
+
+  // Destructor of TestCase.
+  virtual ~TestCase();
+
+  // Gets the name of the TestCase.
+  const char* name() const { return name_.c_str(); }
+
+  // Returns the test case comment.
+  const char* comment() const { return comment_.c_str(); }
+
+  // Returns true if any test in this test case should run.
+  bool should_run() const { return should_run_; }
+
+  // Sets the should_run member.
+  void set_should_run(bool should) { should_run_ = should; }
+
+  // Gets the (mutable) list of TestInfos in this TestCase.
+  internal::List<TestInfo*>& test_info_list() { return *test_info_list_; }
+
+  // Gets the (immutable) list of TestInfos in this TestCase.
+  const internal::List<TestInfo *> & test_info_list() const {
+    return *test_info_list_;
+  }
+
+  // Gets the number of successful tests in this test case.
+  int successful_test_count() const;
+
+  // Gets the number of failed tests in this test case.
+  int failed_test_count() const;
+
+  // Gets the number of disabled tests in this test case.
+  int disabled_test_count() const;
+
+  // Get the number of tests in this test case that should run.
+  int test_to_run_count() const;
+
+  // Gets the number of all tests in this test case.
+  int total_test_count() const;
+
+  // Returns true iff the test case passed.
+  bool Passed() const { return !Failed(); }
+
+  // Returns true iff the test case failed.
+  bool Failed() const { return failed_test_count() > 0; }
+
+  // Returns the elapsed time, in milliseconds.
+  internal::TimeInMillis elapsed_time() const { return elapsed_time_; }
+
+  // Adds a TestInfo to this test case.  Will delete the TestInfo upon
+  // destruction of the TestCase object.
+  void AddTestInfo(TestInfo * test_info);
+
+  // Finds and returns a TestInfo with the given name.  If one doesn't
+  // exist, returns NULL.
+  TestInfo* GetTestInfo(const char* test_name);
+
+  // Clears the results of all tests in this test case.
+  void ClearResult();
+
+  // Clears the results of all tests in the given test case.
+  static void ClearTestCaseResult(TestCase* test_case) {
+    test_case->ClearResult();
+  }
+
+  // Runs every test in this TestCase.
+  void Run();
+
+  // Runs every test in the given TestCase.
+  static void RunTestCase(TestCase * test_case) { test_case->Run(); }
+
+  // Returns true iff test passed.
+  static bool TestPassed(const TestInfo * test_info);
+
+  // Returns true iff test failed.
+  static bool TestFailed(const TestInfo * test_info);
+
+  // Returns true iff test is disabled.
+  static bool TestDisabled(const TestInfo * test_info);
+
+  // Returns true if the given test should run.
+  static bool ShouldRunTest(const TestInfo *test_info);
+
+ private:
+  // Name of the test case.
+  internal::String name_;
+  // Comment on the test case.
+  internal::String comment_;
+  // List of TestInfos.
+  internal::List<TestInfo*>* test_info_list_;
+  // Pointer to the function that sets up the test case.
+  Test::SetUpTestCaseFunc set_up_tc_;
+  // Pointer to the function that tears down the test case.
+  Test::TearDownTestCaseFunc tear_down_tc_;
+  // True iff any test in this test case should run.
+  bool should_run_;
+  // Elapsed time, in milliseconds.
+  internal::TimeInMillis elapsed_time_;
+
+  // We disallow copying TestCases.
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(TestCase);
+};
+
+}  // namespace internal
 
 // An Environment object is capable of setting up and tearing down an
 // environment.  The user should subclass this to define his own
@@ -659,7 +784,7 @@ class UnitTest {
 
   // Returns the TestCase object for the test that's currently running,
   // or NULL if no test is running.
-  const TestCase* current_test_case() const;
+  const internal::TestCase* current_test_case() const;
 
   // Returns the TestInfo object for the test that's currently running,
   // or NULL if no test is running.

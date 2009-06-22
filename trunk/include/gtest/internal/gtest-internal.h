@@ -103,7 +103,6 @@ namespace testing {
 
 class Message;                         // Represents a failure message.
 class Test;                            // Represents a test.
-class TestCase;                        // A collection of related tests.
 class TestPartResult;                  // Result of a test part.
 class TestInfo;                        // Information about a test.
 class UnitTest;                        // A collection of test cases.

@@ -129,6 +129,8 @@
 
 namespace testing {
 
+using internal::TestCase;
+
 // Constants.
 
 // A test whose test case name or test name matches this filter is
@@ -2309,8 +2311,6 @@ void TestInfoImpl::Run() {
   impl->set_current_test_info(NULL);
 }
 
-}  // namespace internal
-
 // class TestCase
 
 // Gets the number of successful tests in this test case.
@@ -2401,6 +2401,29 @@ void TestCase::ClearResult() {
   test_info_list_->ForEach(internal::TestInfoImpl::ClearTestResult);
 }
 
+// Returns true iff test passed.
+bool TestCase::TestPassed(const TestInfo * test_info) {
+  const internal::TestInfoImpl* const impl = test_info->impl();
+  return impl->should_run() && impl->result()->Passed();
+}
+
+// Returns true iff test failed.
+bool TestCase::TestFailed(const TestInfo * test_info) {
+  const internal::TestInfoImpl* const impl = test_info->impl();
+  return impl->should_run() && impl->result()->Failed();
+}
+
+// Returns true iff test is disabled.
+bool TestCase::TestDisabled(const TestInfo * test_info) {
+  return test_info->impl()->is_disabled();
+}
+
+// Returns true if the given test should run.
+bool TestCase::ShouldRunTest(const TestInfo *test_info) {
+  return test_info->impl()->should_run();
+}
+
+}  // namespace internal
 
 // class UnitTestEventListenerInterface
 
