@@ -501,7 +501,16 @@ TEST(ExpectTest, FailsNonfatallyOnFalse) {
 
 class LogIsVisibleTest : public ::testing::Test {
  protected:
-  virtual void SetUp() { original_verbose_ = GMOCK_FLAG(verbose); }
+  virtual void SetUp() {
+    // The code needs to work when both ::string and ::std::string are
+    // defined and the flag is implemented as a
+    // testing::internal::String.  In this case, without the call to
+    // c_str(), the compiler will complain that it cannot figure out
+    // whether the String flag should be converted to a ::string or an
+    // ::std::string before being assigned to original_verbose_.
+    original_verbose_ = GMOCK_FLAG(verbose).c_str();
+  }
+
   virtual void TearDown() { GMOCK_FLAG(verbose) = original_verbose_; }
 
   string original_verbose_;
