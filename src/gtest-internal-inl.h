@@ -430,6 +430,26 @@ class List {
     return NULL;
   }
 
+  // Returns a pointer to the i-th element of the list, or NULL if i is not
+  // in range [0, size()).
+  const E* GetElement(int i) const {
+    if (i < 0 || i >= size())
+      return NULL;
+
+    const ListNode<E>* node = Head();
+    for (int index = 0; index < i && node != NULL; ++index, node = node->next())
+      continue;
+
+    return node ? &(node->element()) : NULL;
+  }
+
+  // Returns the i-th element of the list, or default_value if i is not
+  // in range [0, size()).
+  E GetElementOr(int i, E default_value) const {
+    const E* element = GetElement(i);
+    return element ? *element : default_value;
+  }
+
  private:
   ListNode<E>* head_;  // The first node of the list.
   ListNode<E>* last_;  // The last node of the list.
@@ -763,6 +783,12 @@ class UnitTestImpl {
   // or something outside of all tests failed).
   bool Failed() const {
     return failed_test_case_count() > 0 || ad_hoc_test_result()->Failed();
+  }
+
+  // Gets the i-th test case among all the test cases. i can range from 0 to
+  // total_test_case_count() - 1. If i is not in that range, returns NULL.
+  const TestCase* GetTestCase(int i) const {
+    return test_cases_.GetElementOr(i, NULL);
   }
 
   // Returns the TestResult for the test that's currently running, or

@@ -468,40 +468,80 @@ int UnitTestOptions::GTestShouldProcessSEH(DWORD exception_code) {
 class UnitTestEventListenerInterface {
  public:
   // The d'tor is pure virtual as this is an abstract class.
-  virtual ~UnitTestEventListenerInterface() = 0;
+  virtual ~UnitTestEventListenerInterface() {}
 
   // Called before the unit test starts.
-  virtual void OnUnitTestStart(const UnitTest*) {}
+  virtual void OnUnitTestStart(const UnitTest& unit_test) = 0;
 
   // Called after the unit test ends.
-  virtual void OnUnitTestEnd(const UnitTest*) {}
+  virtual void OnUnitTestEnd(const UnitTest& unit_test) = 0;
 
   // Called before the test case starts.
-  virtual void OnTestCaseStart(const TestCase*) {}
+  virtual void OnTestCaseStart(const TestCase& test_case) = 0;
 
   // Called after the test case ends.
-  virtual void OnTestCaseEnd(const TestCase*) {}
+  virtual void OnTestCaseEnd(const TestCase& test_case) = 0;
 
   // Called before the global set-up starts.
-  virtual void OnGlobalSetUpStart(const UnitTest*) {}
+  virtual void OnGlobalSetUpStart(const UnitTest& unit_test) = 0;
 
   // Called after the global set-up ends.
-  virtual void OnGlobalSetUpEnd(const UnitTest*) {}
+  virtual void OnGlobalSetUpEnd(const UnitTest& unit_test) = 0;
 
   // Called before the global tear-down starts.
-  virtual void OnGlobalTearDownStart(const UnitTest*) {}
+  virtual void OnGlobalTearDownStart(const UnitTest& unit_test) = 0;
 
   // Called after the global tear-down ends.
-  virtual void OnGlobalTearDownEnd(const UnitTest*) {}
+  virtual void OnGlobalTearDownEnd(const UnitTest& unit_test) = 0;
 
   // Called before the test starts.
-  virtual void OnTestStart(const TestInfo*) {}
+  virtual void OnTestStart(const TestInfo& test_info) = 0;
 
   // Called after the test ends.
-  virtual void OnTestEnd(const TestInfo*) {}
+  virtual void OnTestEnd(const TestInfo& test_info) = 0;
 
   // Called after an assertion.
-  virtual void OnNewTestPartResult(const TestPartResult*) {}
+  virtual void OnNewTestPartResult(const TestPartResult& test_part_result) = 0;
+};
+
+// The convenience class for users who need to override just one or two
+// methods and are not concerned that a possible change to a signature of
+// the methods they override will not be caught during the build.
+class EmptyTestEventListener : public UnitTestEventListenerInterface {
+ public:
+  // Called before the unit test starts.
+  virtual void OnUnitTestStart(const UnitTest& /*unit_test*/) {}
+
+  // Called after the unit test ends.
+  virtual void OnUnitTestEnd(const UnitTest& /*unit_test*/) {}
+
+  // Called before the test case starts.
+  virtual void OnTestCaseStart(const TestCase& /*test_case*/) {}
+
+  // Called after the test case ends.
+  virtual void OnTestCaseEnd(const TestCase& /*test_case&*/) {}
+
+  // Called before the global set-up starts.
+  virtual void OnGlobalSetUpStart(const UnitTest& /*unit_test*/) {}
+
+  // Called after the global set-up ends.
+  virtual void OnGlobalSetUpEnd(const UnitTest& /*unit_test*/) {}
+
+  // Called before the global tear-down starts.
+  virtual void OnGlobalTearDownStart(const UnitTest& /*unit_test*/) {}
+
+  // Called after the global tear-down ends.
+  virtual void OnGlobalTearDownEnd(const UnitTest& /*unit_test*/) {}
+
+  // Called before the test starts.
+  virtual void OnTestStart(const TestInfo& /*test_info*/) {}
+
+  // Called after the test ends.
+  virtual void OnTestEnd(const TestInfo& /*test_info*/) {}
+
+  // Called after an assertion.
+  virtual void OnNewTestPartResult(const TestPartResult& /*test_part_result*/) {
+  }
 };
 
 // The c'tor sets this object as the test part result reporter used by
@@ -638,7 +678,7 @@ DefaultGlobalTestPartResultReporter::DefaultGlobalTestPartResultReporter(
 void DefaultGlobalTestPartResultReporter::ReportTestPartResult(
     const TestPartResult& result) {
   unit_test_->current_test_result()->AddTestPartResult(result);
-  unit_test_->result_printer()->OnNewTestPartResult(&result);
+  unit_test_->result_printer()->OnNewTestPartResult(result);
 }
 
 DefaultPerThreadTestPartResultReporter::DefaultPerThreadTestPartResultReporter(
@@ -1790,6 +1830,19 @@ TestResult::TestResult()
 TestResult::~TestResult() {
 }
 
+// Returns the i-th test part result among all the results. i can range
+// from 0 to total_part_count() - 1. If i is not in that range, returns
+// NULL.
+const TestPartResult* TestResult::GetTestPartResult(int i) const {
+  return test_part_results_->GetElement(i);
+}
+
+// Returns the i-th test property. i can range from 0 to
+// test_property_count() - 1. If i is not in that range, returns NULL.
+const TestProperty* TestResult::GetTestProperty(int i) const {
+  return test_properties_->GetElement(i);
+}
+
 // Clears the test part results.
 void TestResult::ClearTestPartResults() {
   test_part_results_->Clear();
@@ -1885,6 +1938,11 @@ bool TestResult::HasNonfatalFailure() const {
 // of successful test parts and the number of failed test parts.
 int TestResult::total_part_count() const {
   return test_part_results_->size();
+}
+
+// Returns the number of the test properties.
+int TestResult::test_property_count() const {
+  return test_properties_->size();
 }
 
 }  // namespace internal
@@ -2261,7 +2319,7 @@ void TestInfoImpl::Run() {
   // start.
   UnitTestEventListenerInterface* const result_printer =
     impl->result_printer();
-  result_printer->OnTestStart(parent_);
+  result_printer->OnTestStart(*parent_);
 
   const TimeInMillis start = GetTimeInMillis();
 
@@ -2304,7 +2362,7 @@ void TestInfoImpl::Run() {
   result_.set_elapsed_time(GetTimeInMillis() - start);
 
   // Notifies the unit test event listener that a test has just finished.
-  result_printer->OnTestEnd(parent_);
+  result_printer->OnTestEnd(*parent_);
 
   // Tells UnitTest to stop associating assertion results to this
   // test.
@@ -2366,6 +2424,12 @@ TestCase::~TestCase() {
   test_info_list_ = NULL;
 }
 
+// Returns the i-th test among all the tests. i can range from 0 to
+// total_test_count() - 1. If i is not in that range, returns NULL.
+const TestInfo* TestCase::GetTestInfo(int i) const {
+  return test_info_list_->GetElementOr(i, NULL);
+}
+
 // Adds a test to this test case.  Will delete the test upon
 // destruction of the TestCase object.
 void TestCase::AddTestInfo(TestInfo * test_info) {
@@ -2382,7 +2446,7 @@ void TestCase::Run() {
   UnitTestEventListenerInterface * const result_printer =
       impl->result_printer();
 
-  result_printer->OnTestCaseStart(this);
+  result_printer->OnTestCaseStart(*this);
   impl->os_stack_trace_getter()->UponLeavingGTest();
   set_up_tc_();
 
@@ -2392,7 +2456,7 @@ void TestCase::Run() {
 
   impl->os_stack_trace_getter()->UponLeavingGTest();
   tear_down_tc_();
-  result_printer->OnTestCaseEnd(this);
+  result_printer->OnTestCaseEnd(*this);
   impl->set_current_test_case(NULL);
 }
 
@@ -2425,15 +2489,9 @@ bool TestCase::ShouldRunTest(const TestInfo *test_info) {
 
 }  // namespace internal
 
-// class UnitTestEventListenerInterface
-
-// The virtual d'tor.
-UnitTestEventListenerInterface::~UnitTestEventListenerInterface() {
-}
-
 // A result printer that never prints anything.  Used in the child process
 // of an exec-style death test to avoid needless output clutter.
-class NullUnitTestResultPrinter : public UnitTestEventListenerInterface {};
+class NullUnitTestResultPrinter : public EmptyTestEventListener {};
 
 // Formats a countable noun.  Depending on its quantity, either the
 // singular form or the plural form is used. e.g.
@@ -2628,24 +2686,25 @@ class PrettyUnitTestResultPrinter : public UnitTestEventListenerInterface {
 
   // The following methods override what's in the
   // UnitTestEventListenerInterface class.
-  virtual void OnUnitTestStart(const UnitTest * unit_test);
-  virtual void OnGlobalSetUpStart(const UnitTest*);
-  virtual void OnTestCaseStart(const TestCase * test_case);
-  virtual void OnTestCaseEnd(const TestCase * test_case);
-  virtual void OnTestStart(const TestInfo * test_info);
-  virtual void OnNewTestPartResult(const TestPartResult * result);
-  virtual void OnTestEnd(const TestInfo * test_info);
-  virtual void OnGlobalTearDownStart(const UnitTest*);
-  virtual void OnUnitTestEnd(const UnitTest * unit_test);
+  virtual void OnUnitTestStart(const UnitTest& unit_test);
+  virtual void OnGlobalSetUpStart(const UnitTest& unit_test);
+  virtual void OnGlobalSetUpEnd(const UnitTest& /*unit_test*/) {}
+  virtual void OnTestCaseStart(const TestCase& test_case);
+  virtual void OnTestCaseEnd(const TestCase& test_case);
+  virtual void OnTestStart(const TestInfo& test_info);
+  virtual void OnNewTestPartResult(const TestPartResult& result);
+  virtual void OnTestEnd(const TestInfo& test_info);
+  virtual void OnGlobalTearDownStart(const UnitTest& unit_test);
+  virtual void OnGlobalTearDownEnd(const UnitTest& /*unit_test*/) {}
+  virtual void OnUnitTestEnd(const UnitTest& unit_test);
 
  private:
   internal::String test_case_name_;
 };
 
 // Called before the unit test starts.
-void PrettyUnitTestResultPrinter::OnUnitTestStart(
-    const UnitTest * unit_test) {
-  const char * const filter = GTEST_FLAG(filter).c_str();
+void PrettyUnitTestResultPrinter::OnUnitTestStart(const UnitTest& unit_test) {
+  const char* const filter = GTEST_FLAG(filter).c_str();
 
   // Prints the filter if it's not *.  This reminds the user that some
   // tests may be skipped.
@@ -2661,7 +2720,7 @@ void PrettyUnitTestResultPrinter::OnUnitTestStart(
                   internal::posix::GetEnv(kTestTotalShards));
   }
 
-  const internal::UnitTestImpl* const impl = unit_test->impl();
+  const internal::UnitTestImpl* const impl = unit_test.impl();
   ColoredPrintf(COLOR_GREEN,  "[==========] ");
   printf("Running %s from %s.\n",
          FormatTestCount(impl->test_to_run_count()).c_str(),
@@ -2669,62 +2728,61 @@ void PrettyUnitTestResultPrinter::OnUnitTestStart(
   fflush(stdout);
 }
 
-void PrettyUnitTestResultPrinter::OnGlobalSetUpStart(const UnitTest*) {
+void PrettyUnitTestResultPrinter::OnGlobalSetUpStart(
+    const UnitTest& /*unit_test*/) {
   ColoredPrintf(COLOR_GREEN,  "[----------] ");
   printf("Global test environment set-up.\n");
   fflush(stdout);
 }
 
-void PrettyUnitTestResultPrinter::OnTestCaseStart(
-    const TestCase * test_case) {
-  test_case_name_ = test_case->name();
+void PrettyUnitTestResultPrinter::OnTestCaseStart(const TestCase& test_case) {
+  test_case_name_ = test_case.name();
   const internal::String counts =
-      FormatCountableNoun(test_case->test_to_run_count(), "test", "tests");
+      FormatCountableNoun(test_case.test_to_run_count(), "test", "tests");
   ColoredPrintf(COLOR_GREEN, "[----------] ");
   printf("%s from %s", counts.c_str(), test_case_name_.c_str());
-  if (test_case->comment()[0] == '\0') {
+  if (test_case.comment()[0] == '\0') {
     printf("\n");
   } else {
-    printf(", where %s\n", test_case->comment());
+    printf(", where %s\n", test_case.comment());
   }
   fflush(stdout);
 }
 
-void PrettyUnitTestResultPrinter::OnTestCaseEnd(
-    const TestCase * test_case) {
+void PrettyUnitTestResultPrinter::OnTestCaseEnd(const TestCase& test_case) {
   if (!GTEST_FLAG(print_time)) return;
 
-  test_case_name_ = test_case->name();
+  test_case_name_ = test_case.name();
   const internal::String counts =
-      FormatCountableNoun(test_case->test_to_run_count(), "test", "tests");
+      FormatCountableNoun(test_case.test_to_run_count(), "test", "tests");
   ColoredPrintf(COLOR_GREEN, "[----------] ");
   printf("%s from %s (%s ms total)\n\n",
          counts.c_str(), test_case_name_.c_str(),
-         internal::StreamableToString(test_case->elapsed_time()).c_str());
+         internal::StreamableToString(test_case.elapsed_time()).c_str());
   fflush(stdout);
 }
 
-void PrettyUnitTestResultPrinter::OnTestStart(const TestInfo * test_info) {
+void PrettyUnitTestResultPrinter::OnTestStart(const TestInfo& test_info) {
   ColoredPrintf(COLOR_GREEN,  "[ RUN      ] ");
-  PrintTestName(test_case_name_.c_str(), test_info->name());
-  if (test_info->comment()[0] == '\0') {
+  PrintTestName(test_case_name_.c_str(), test_info.name());
+  if (test_info.comment()[0] == '\0') {
     printf("\n");
   } else {
-    printf(", where %s\n", test_info->comment());
+    printf(", where %s\n", test_info.comment());
   }
   fflush(stdout);
 }
 
-void PrettyUnitTestResultPrinter::OnTestEnd(const TestInfo * test_info) {
-  if (test_info->result()->Passed()) {
+void PrettyUnitTestResultPrinter::OnTestEnd(const TestInfo& test_info) {
+  if (test_info.result()->Passed()) {
     ColoredPrintf(COLOR_GREEN, "[       OK ] ");
   } else {
     ColoredPrintf(COLOR_RED, "[  FAILED  ] ");
   }
-  PrintTestName(test_case_name_.c_str(), test_info->name());
+  PrintTestName(test_case_name_.c_str(), test_info.name());
   if (GTEST_FLAG(print_time)) {
     printf(" (%s ms)\n", internal::StreamableToString(
-           test_info->result()->elapsed_time()).c_str());
+           test_info.result()->elapsed_time()).c_str());
   } else {
     printf("\n");
   }
@@ -2733,17 +2791,18 @@ void PrettyUnitTestResultPrinter::OnTestEnd(const TestInfo * test_info) {
 
 // Called after an assertion failure.
 void PrettyUnitTestResultPrinter::OnNewTestPartResult(
-    const TestPartResult * result) {
+    const TestPartResult& result) {
   // If the test part succeeded, we don't need to do anything.
-  if (result->type() == TPRT_SUCCESS)
+  if (result.type() == TPRT_SUCCESS)
     return;
 
   // Print failure message from the assertion (e.g. expected this and got that).
-  PrintTestPartResult(*result);
+  PrintTestPartResult(result);
   fflush(stdout);
 }
 
-void PrettyUnitTestResultPrinter::OnGlobalTearDownStart(const UnitTest*) {
+void PrettyUnitTestResultPrinter::OnGlobalTearDownStart(
+    const UnitTest& /*unit_test*/) {
   ColoredPrintf(COLOR_GREEN,  "[----------] ");
   printf("Global test environment tear-down\n");
   fflush(stdout);
@@ -2788,9 +2847,8 @@ static void PrintFailedTestsPretty(const UnitTestImpl* impl) {
 
 }  // namespace internal
 
-void PrettyUnitTestResultPrinter::OnUnitTestEnd(
-    const UnitTest * unit_test) {
-  const internal::UnitTestImpl* const impl = unit_test->impl();
+void PrettyUnitTestResultPrinter::OnUnitTestEnd(const UnitTest& unit_test) {
+  const internal::UnitTestImpl* const impl = unit_test.impl();
 
   ColoredPrintf(COLOR_GREEN,  "[==========] ");
   printf("%s from %s ran.",
@@ -2841,17 +2899,17 @@ class UnitTestEventsRepeater : public UnitTestEventListenerInterface {
   virtual ~UnitTestEventsRepeater();
   void AddListener(UnitTestEventListenerInterface *listener);
 
-  virtual void OnUnitTestStart(const UnitTest* unit_test);
-  virtual void OnUnitTestEnd(const UnitTest* unit_test);
-  virtual void OnGlobalSetUpStart(const UnitTest* unit_test);
-  virtual void OnGlobalSetUpEnd(const UnitTest* unit_test);
-  virtual void OnGlobalTearDownStart(const UnitTest* unit_test);
-  virtual void OnGlobalTearDownEnd(const UnitTest* unit_test);
-  virtual void OnTestCaseStart(const TestCase* test_case);
-  virtual void OnTestCaseEnd(const TestCase* test_case);
-  virtual void OnTestStart(const TestInfo* test_info);
-  virtual void OnTestEnd(const TestInfo* test_info);
-  virtual void OnNewTestPartResult(const TestPartResult* result);
+  virtual void OnUnitTestStart(const UnitTest& unit_test);
+  virtual void OnUnitTestEnd(const UnitTest& unit_test);
+  virtual void OnGlobalSetUpStart(const UnitTest& unit_test);
+  virtual void OnGlobalSetUpEnd(const UnitTest& unit_test);
+  virtual void OnGlobalTearDownStart(const UnitTest& unit_test);
+  virtual void OnGlobalTearDownEnd(const UnitTest& unit_test);
+  virtual void OnTestCaseStart(const TestCase& test_case);
+  virtual void OnTestCaseEnd(const TestCase& test_case);
+  virtual void OnTestStart(const TestInfo& test_info);
+  virtual void OnTestEnd(const TestInfo& test_info);
+  virtual void OnNewTestPartResult(const TestPartResult& result);
 
  private:
   Listeners listeners_;
@@ -2875,7 +2933,7 @@ void UnitTestEventsRepeater::AddListener(
 // Since the methods are identical, use a macro to reduce boilerplate.
 // This defines a member that repeats the call to all listeners.
 #define GTEST_REPEATER_METHOD_(Name, Type) \
-void UnitTestEventsRepeater::Name(const Type* parameter) { \
+void UnitTestEventsRepeater::Name(const Type& parameter) { \
   for (ListenersNode* listener = listeners_.Head(); \
        listener != NULL; \
        listener = listener->next()) { \
@@ -2900,11 +2958,11 @@ GTEST_REPEATER_METHOD_(OnNewTestPartResult, TestPartResult)
 // End PrettyUnitTestResultPrinter
 
 // This class generates an XML output file.
-class XmlUnitTestResultPrinter : public UnitTestEventListenerInterface {
+class XmlUnitTestResultPrinter : public EmptyTestEventListener {
  public:
   explicit XmlUnitTestResultPrinter(const char* output_file);
 
-  virtual void OnUnitTestEnd(const UnitTest* unit_test);
+  virtual void OnUnitTestEnd(const UnitTest& unit_test);
 
  private:
   // Is c a whitespace character that is normalized to a space character
@@ -2944,7 +3002,7 @@ class XmlUnitTestResultPrinter : public UnitTestEventListenerInterface {
   static void PrintXmlTestCase(FILE* out, const TestCase* test_case);
 
   // Prints an XML summary of unit_test to output stream out.
-  static void PrintXmlUnitTest(FILE* out, const UnitTest* unit_test);
+  static void PrintXmlUnitTest(FILE* out, const UnitTest& unit_test);
 
   // Produces a string representing the test properties in a result as space
   // delimited XML attributes based on the property key="value" pairs.
@@ -2970,7 +3028,7 @@ XmlUnitTestResultPrinter::XmlUnitTestResultPrinter(const char* output_file)
 }
 
 // Called after the unit test ends.
-void XmlUnitTestResultPrinter::OnUnitTestEnd(const UnitTest* unit_test) {
+void XmlUnitTestResultPrinter::OnUnitTestEnd(const UnitTest& unit_test) {
   FILE* xmlout = NULL;
   internal::FilePath output_file(output_file_);
   internal::FilePath output_dir(output_file.RemoveFileName());
@@ -3149,8 +3207,8 @@ void XmlUnitTestResultPrinter::PrintXmlTestCase(FILE* out,
 
 // Prints an XML summary of unit_test to output stream out.
 void XmlUnitTestResultPrinter::PrintXmlUnitTest(FILE* out,
-                                                const UnitTest* unit_test) {
-  const internal::UnitTestImpl* const impl = unit_test->impl();
+                                                const UnitTest& unit_test) {
+  const internal::UnitTestImpl* const impl = unit_test.impl();
   fprintf(out, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
   fprintf(out,
           "<testsuites tests=\"%d\" failures=\"%d\" disabled=\"%d\" "
@@ -3265,6 +3323,64 @@ UnitTest * UnitTest::GetInstance() {
   static UnitTest instance;
   return &instance;
 #endif  // (_MSC_VER == 1310 && !defined(_DEBUG)) || defined(__BORLANDC__)
+}
+
+// Gets the number of successful test cases.
+int UnitTest::successful_test_case_count() const {
+  return impl()->successful_test_case_count();
+}
+
+// Gets the number of failed test cases.
+int UnitTest::failed_test_case_count() const {
+  return impl()->failed_test_case_count();
+}
+
+// Gets the number of all test cases.
+int UnitTest::total_test_case_count() const {
+  return impl()->total_test_case_count();
+}
+
+// Gets the number of all test cases that contain at least one test
+// that should run.
+int UnitTest::test_case_to_run_count() const {
+  return impl()->test_case_to_run_count();
+}
+
+// Gets the number of successful tests.
+int UnitTest::successful_test_count() const {
+  return impl()->successful_test_count();
+}
+
+// Gets the number of failed tests.
+int UnitTest::failed_test_count() const { return impl()->failed_test_count(); }
+
+// Gets the number of disabled tests.
+int UnitTest::disabled_test_count() const {
+  return impl()->disabled_test_count();
+}
+
+// Gets the number of all tests.
+int UnitTest::total_test_count() const { return impl()->total_test_count(); }
+
+// Gets the number of tests that should run.
+int UnitTest::test_to_run_count() const { return impl()->test_to_run_count(); }
+
+// Gets the elapsed time, in milliseconds.
+internal::TimeInMillis UnitTest::elapsed_time() const {
+  return impl()->elapsed_time();
+}
+
+// Returns true iff the unit test passed (i.e. all test cases passed).
+bool UnitTest::Passed() const { return impl()->Passed(); }
+
+// Returns true iff the unit test failed (i.e. some test case failed
+// or something outside of all tests failed).
+bool UnitTest::Failed() const { return impl()->Failed(); }
+
+// Gets the i-th test case among all the test cases. i can range from 0 to
+// total_test_case_count() - 1. If i is not in that range, returns NULL.
+const TestCase* UnitTest::GetTestCase(int i) const {
+  return impl()->GetTestCase(i);
 }
 
 // Registers and returns a global test environment.  When a test
@@ -3683,16 +3799,16 @@ int UnitTestImpl::RunAllTests() {
 
     // Tells the unit test event listener that the tests are about to
     // start.
-    printer->OnUnitTestStart(parent_);
+    printer->OnUnitTestStart(*parent_);
 
     const TimeInMillis start = GetTimeInMillis();
 
     // Runs each test case if there is at least one test to run.
     if (has_tests_to_run) {
       // Sets up all environments beforehand.
-      printer->OnGlobalSetUpStart(parent_);
+      printer->OnGlobalSetUpStart(*parent_);
       environments_.ForEach(SetUpEnvironment);
-      printer->OnGlobalSetUpEnd(parent_);
+      printer->OnGlobalSetUpEnd(*parent_);
 
       // Runs the tests only if there was no fatal failure during global
       // set-up.
@@ -3701,16 +3817,16 @@ int UnitTestImpl::RunAllTests() {
       }
 
       // Tears down all environments in reverse order afterwards.
-      printer->OnGlobalTearDownStart(parent_);
+      printer->OnGlobalTearDownStart(*parent_);
       environments_in_reverse_order_.ForEach(TearDownEnvironment);
-      printer->OnGlobalTearDownEnd(parent_);
+      printer->OnGlobalTearDownEnd(*parent_);
     }
 
     elapsed_time_ = GetTimeInMillis() - start;
 
     // Tells the unit test event listener that the tests have just
     // finished.
-    printer->OnUnitTestEnd(parent_);
+    printer->OnUnitTestEnd(*parent_);
 
     // Gets the result and clears it.
     if (!Passed()) {

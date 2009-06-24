@@ -148,7 +148,6 @@ using testing::internal::String;
 using testing::internal::TestProperty;
 using testing::internal::TestResult;
 using testing::internal::ThreadLocal;
-using testing::internal::UnitTestImpl;
 using testing::internal::WideStringToUtf8;
 
 // This line tests that we can define tests in an unnamed namespace.
@@ -526,6 +525,19 @@ TEST(ListTest, InsertAfterNotAtBeginning) {
   EXPECT_EQ(3, a.Last()->element());
 }
 
+// Tests the GetElement accessor.
+TEST(ListTest, GetElement) {
+  List<int> a;
+  a.PushBack(0);
+  a.PushBack(1);
+  a.PushBack(2);
+
+  EXPECT_EQ(&(a.Head()->element()), a.GetElement(0));
+  EXPECT_EQ(&(a.Head()->next()->element()), a.GetElement(1));
+  EXPECT_EQ(&(a.Head()->next()->next()->element()), a.GetElement(2));
+  EXPECT_TRUE(a.GetElement(3) == NULL);
+  EXPECT_TRUE(a.GetElement(-1) == NULL);
+}
 
 // Tests the String class.
 
@@ -1085,23 +1097,38 @@ class TestResultTest : public Test {
     delete r1;
     delete r2;
   }
+
+  // Helper that compares two two TestPartResults.
+  static void CompareTestPartResult(const TestPartResult* expected,
+                                    const TestPartResult* actual) {
+    ASSERT_TRUE(actual != NULL);
+    EXPECT_EQ(expected->type(), actual->type());
+    EXPECT_STREQ(expected->file_name(), actual->file_name());
+    EXPECT_EQ(expected->line_number(), actual->line_number());
+    EXPECT_STREQ(expected->summary(), actual->summary());
+    EXPECT_STREQ(expected->message(), actual->message());
+    EXPECT_EQ(expected->passed(), actual->passed());
+    EXPECT_EQ(expected->failed(), actual->failed());
+    EXPECT_EQ(expected->nonfatally_failed(), actual->nonfatally_failed());
+    EXPECT_EQ(expected->fatally_failed(), actual->fatally_failed());
+  }
 };
 
-// Tests TestResult::test_part_results()
+// Tests TestResult::test_part_results().
 TEST_F(TestResultTest, test_part_results) {
   ASSERT_EQ(0u, r0->test_part_results().size());
   ASSERT_EQ(1u, r1->test_part_results().size());
   ASSERT_EQ(2u, r2->test_part_results().size());
 }
 
-// Tests TestResult::successful_part_count()
+// Tests TestResult::successful_part_count().
 TEST_F(TestResultTest, successful_part_count) {
   ASSERT_EQ(0u, r0->successful_part_count());
   ASSERT_EQ(1u, r1->successful_part_count());
   ASSERT_EQ(1u, r2->successful_part_count());
 }
 
-// Tests TestResult::failed_part_count()
+// Tests TestResult::failed_part_count().
 TEST_F(TestResultTest, failed_part_count) {
   ASSERT_EQ(0u, r0->failed_part_count());
   ASSERT_EQ(0u, r1->failed_part_count());
@@ -1115,25 +1142,33 @@ TEST_F(TestResultTest, GetFailedPartCount) {
   ASSERT_EQ(1u, GetFailedPartCount(r2));
 }
 
-// Tests TestResult::total_part_count()
+// Tests TestResult::total_part_count().
 TEST_F(TestResultTest, total_part_count) {
   ASSERT_EQ(0u, r0->total_part_count());
   ASSERT_EQ(1u, r1->total_part_count());
   ASSERT_EQ(2u, r2->total_part_count());
 }
 
-// Tests TestResult::Passed()
+// Tests TestResult::Passed().
 TEST_F(TestResultTest, Passed) {
   ASSERT_TRUE(r0->Passed());
   ASSERT_TRUE(r1->Passed());
   ASSERT_FALSE(r2->Passed());
 }
 
-// Tests TestResult::Failed()
+// Tests TestResult::Failed().
 TEST_F(TestResultTest, Failed) {
   ASSERT_FALSE(r0->Failed());
   ASSERT_FALSE(r1->Failed());
   ASSERT_TRUE(r2->Failed());
+}
+
+// Tests TestResult::GetTestPartResult().
+TEST_F(TestResultTest, GetTestPartResult) {
+  CompareTestPartResult(pr1, r2->GetTestPartResult(0));
+  CompareTestPartResult(pr2, r2->GetTestPartResult(1));
+  EXPECT_TRUE(r2->GetTestPartResult(2) == NULL);
+  EXPECT_TRUE(r2->GetTestPartResult(-1) == NULL);
 }
 
 // Tests TestResult::test_properties() has no properties when none are added.
@@ -1193,6 +1228,49 @@ TEST(TestResultPropertyTest, OverridesValuesForDuplicateKeys) {
   TestProperty actual_property_2 = properties.Last()->element();
   EXPECT_STREQ("key_2", actual_property_2.key());
   EXPECT_STREQ("22", actual_property_2.value());
+}
+
+// Tests TestResult::test_property_count().
+TEST(TestResultPropertyTest, TestPropertyCount) {
+  TestResult test_result;
+  TestProperty property_1("key_1", "1");
+  TestProperty property_2("key_2", "2");
+
+  ASSERT_EQ(0, test_result.test_property_count());
+  test_result.RecordProperty(property_1);
+  ASSERT_EQ(1, test_result.test_property_count());
+  test_result.RecordProperty(property_2);
+  ASSERT_EQ(2, test_result.test_property_count());
+}
+
+// Tests TestResult::GetTestProperty().
+TEST(TestResultPropertyTest, GetTestProperty) {
+  TestResult test_result;
+  TestProperty property_1("key_1", "1");
+  TestProperty property_2("key_2", "2");
+  TestProperty property_3("key_3", "3");
+  test_result.RecordProperty(property_1);
+  test_result.RecordProperty(property_2);
+  test_result.RecordProperty(property_3);
+
+  const TestProperty* fetched_property_1 = test_result.GetTestProperty(0);
+  const TestProperty* fetched_property_2 = test_result.GetTestProperty(1);
+  const TestProperty* fetched_property_3 = test_result.GetTestProperty(2);
+
+  ASSERT_TRUE(fetched_property_1 != NULL);
+  EXPECT_STREQ("key_1", fetched_property_1->key());
+  EXPECT_STREQ("1", fetched_property_1->value());
+
+  ASSERT_TRUE(fetched_property_2 != NULL);
+  EXPECT_STREQ("key_2", fetched_property_2->key());
+  EXPECT_STREQ("2", fetched_property_2->value());
+
+  ASSERT_TRUE(fetched_property_3 != NULL);
+  EXPECT_STREQ("key_3", fetched_property_3->key());
+  EXPECT_STREQ("3", fetched_property_3->value());
+
+  ASSERT_TRUE(test_result.GetTestProperty(3) == NULL);
+  ASSERT_TRUE(test_result.GetTestProperty(-1) == NULL);
 }
 
 // When a property using a reserved key is supplied to this function, it tests
@@ -3061,6 +3139,10 @@ TEST(AssertionTest, ASSERT_EQ) {
 TEST(AssertionTest, ASSERT_EQ_NULL) {
   // A success.
   const char* p = NULL;
+  // Some older GCC versions may issue a spurious waring in this or the next
+  // assertion statement. This warning should not be suppressed with
+  // static_cast since the test verifies the ability to use bare NULL as the
+  // expected parameter to the macro.
   ASSERT_EQ(NULL, p);
 
   // A failure.
@@ -3614,6 +3696,10 @@ TEST(ExpectTest, EXPECT_EQ_Double) {
 TEST(ExpectTest, EXPECT_EQ_NULL) {
   // A success.
   const char* p = NULL;
+  // Some older GCC versions may issue a spurious waring in this or the next
+  // assertion statement. This warning should not be suppressed with
+  // static_cast since the test verifies the ability to use bare NULL as the
+  // expected parameter to the macro.
   EXPECT_EQ(NULL, p);
 
   // A failure.
@@ -5207,7 +5293,7 @@ class CurrentTestInfoTest : public Test {
     // There should be no tests running at this point.
     const TestInfo* test_info =
       UnitTest::GetInstance()->current_test_info();
-    EXPECT_EQ(NULL, test_info)
+    EXPECT_TRUE(test_info == NULL)
         << "There should be no tests running at this point.";
   }
 
@@ -5216,7 +5302,7 @@ class CurrentTestInfoTest : public Test {
   static void TearDownTestCase() {
     const TestInfo* test_info =
       UnitTest::GetInstance()->current_test_info();
-    EXPECT_EQ(NULL, test_info)
+    EXPECT_TRUE(test_info == NULL)
         << "There should be no tests running at this point.";
   }
 };

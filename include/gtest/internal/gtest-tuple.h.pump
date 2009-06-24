@@ -39,15 +39,29 @@ $$ This meta comment fixes auto-indentation in Emacs. }}
 
 #include <utility>  // For ::std::pair.
 
+// The compiler used in Symbian 5th Edition (__S60_50__) has a bug
+// that prevents us from declaring the tuple template as a friend (it
+// complains that tuple is redefined).  This hack bypasses the bug by
+// declaring the members that should otherwise be private as public.
+#if defined(__SYMBIAN32__) && __S60_50__
+#define GTEST_DECLARE_TUPLE_AS_FRIEND_ public:
+#else
+#define GTEST_DECLARE_TUPLE_AS_FRIEND_ \
+    template <GTEST_$(n)_TYPENAMES_(U)> friend class tuple; \
+   private:
+#endif
+
 
 $range i 0..n-1
 $range j 0..n
 $range k 1..n
 // GTEST_n_TUPLE_(T) is the type of an n-tuple.
+#define GTEST_0_TUPLE_(T) tuple<>
 
-$for j [[
-$range m 0..j-1
-#define GTEST_$(j)_TUPLE_(T) tuple<$for m, [[T##$m]]>
+$for k [[
+$range m 0..k-1
+$range m2 k..n-1
+#define GTEST_$(k)_TUPLE_(T) tuple<$for m, [[T##$m]]$for m2 [[, void]]>
 
 ]]
 
@@ -125,7 +139,6 @@ template <GTEST_$(k)_TYPENAMES_(T)>
 class $if k < n [[GTEST_$(k)_TUPLE_(T)]] $else [[tuple]] {
  public:
   template <int k> friend class gtest_internal::Get;
-  template <GTEST_$(n)_TYPENAMES_(U)> friend class tuple;
 
   tuple() {}
 
@@ -160,7 +173,8 @@ $if k == 2 [[
 
 ]]
 
- private:
+  GTEST_DECLARE_TUPLE_AS_FRIEND_
+
   template <GTEST_$(k)_TYPENAMES_(U)>
   tuple& CopyFrom(const GTEST_$(k)_TUPLE_(U)& t) {
 
@@ -313,6 +327,7 @@ $for j [[
 
 ]]
 
+#undef GTEST_DECLARE_TUPLE_AS_FRIEND_
 #undef GTEST_BY_REF_
 #undef GTEST_ADD_REF_
 #undef GTEST_TUPLE_ELEMENT_
