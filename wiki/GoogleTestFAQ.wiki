@@ -50,6 +50,39 @@ Caveats:
 Please contact `googletestframework@googlegroups.com` if you are
 interested in improving the support for MinGW.
 
+== Why does Google Test support EXPECT_EQ(NULL, ptr) but not EXPECT_NE(NULL, ptr)? ==
+
+Due to some peculiarity of C++, it requires some non-trivial template
+meta programming tricks to support using `NULL` as an argument of the
+`EXPECT_XX()` and `ASSERT_XX()` macros. Therefore we only do it where
+it's most needed (otherwise we make the implementation of Google Test
+harder to maintain and more error-prone than necessary).
+
+The `EXPECT_EQ()` macro takes the _expected_ value as its first
+argument and the _actual_ value as the second. It's reasonable that
+someone wants to write `EXPECT_EQ(NULL, some_expression)`, and this
+indeed was requested several times. Therefore we implemented it.
+
+The need for `EXPECT_NE(NULL, ptr)` isn't nearly as strong. When the
+assertion fails, you already know that `ptr` must be `NULL`, so it
+doesn't add any information to print ptr in this case. That means
+`EXPECT_TRUE(ptr ! NULL)` works just as well.
+
+If we were to support `EXPECT_NE(NULL, ptr)`, for consistency we'll
+have to support `EXPECT_NE(ptr, NULL)` as well, as unlike `EXPECT_EQ`,
+we don't have a convention on the order of the two arguments for
+`EXPECT_NE`. This means using the template meta programming tricks
+twice in the implementation, making it even harder to understand and
+maintain. We believe the benefit doesn't justify the cost.
+
+Finally, with the growth of Google Mock's [http://code.google.com/p/googlemock/wiki/CookBook#Using_Matchers_in_Google_Test_Assertions matcher] library, we are
+encouraging people to use the unified `EXPECT_THAT(value, matcher)`
+syntax more often in tests. One significant advantage of the matcher
+approach is that matchers can be easily combined to form new matchers,
+while the `EXPECT_NE`, etc, macros cannot be easily
+combined. Therefore we want to invest more in the matchers than in the
+`EXPECT_XX()` macros.
+
 == Does Google Test support running tests in parallel? ==
 
 Test runners tend to be tightly coupled with the build/test
