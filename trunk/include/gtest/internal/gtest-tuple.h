@@ -38,18 +38,38 @@
 
 #include <utility>  // For ::std::pair.
 
+// The compiler used in Symbian 5th Edition (__S60_50__) has a bug
+// that prevents us from declaring the tuple template as a friend (it
+// complains that tuple is redefined).  This hack bypasses the bug by
+// declaring the members that should otherwise be private as public.
+#if defined(__SYMBIAN32__) && __S60_50__
+#define GTEST_DECLARE_TUPLE_AS_FRIEND_ public:
+#else
+#define GTEST_DECLARE_TUPLE_AS_FRIEND_ \
+    template <GTEST_10_TYPENAMES_(U)> friend class tuple; \
+   private:
+#endif
+
 // GTEST_n_TUPLE_(T) is the type of an n-tuple.
 #define GTEST_0_TUPLE_(T) tuple<>
-#define GTEST_1_TUPLE_(T) tuple<T##0>
-#define GTEST_2_TUPLE_(T) tuple<T##0, T##1>
-#define GTEST_3_TUPLE_(T) tuple<T##0, T##1, T##2>
-#define GTEST_4_TUPLE_(T) tuple<T##0, T##1, T##2, T##3>
-#define GTEST_5_TUPLE_(T) tuple<T##0, T##1, T##2, T##3, T##4>
-#define GTEST_6_TUPLE_(T) tuple<T##0, T##1, T##2, T##3, T##4, T##5>
-#define GTEST_7_TUPLE_(T) tuple<T##0, T##1, T##2, T##3, T##4, T##5, T##6>
-#define GTEST_8_TUPLE_(T) tuple<T##0, T##1, T##2, T##3, T##4, T##5, T##6, T##7>
+#define GTEST_1_TUPLE_(T) tuple<T##0, void, void, void, void, void, void, \
+    void, void, void>
+#define GTEST_2_TUPLE_(T) tuple<T##0, T##1, void, void, void, void, void, \
+    void, void, void>
+#define GTEST_3_TUPLE_(T) tuple<T##0, T##1, T##2, void, void, void, void, \
+    void, void, void>
+#define GTEST_4_TUPLE_(T) tuple<T##0, T##1, T##2, T##3, void, void, void, \
+    void, void, void>
+#define GTEST_5_TUPLE_(T) tuple<T##0, T##1, T##2, T##3, T##4, void, void, \
+    void, void, void>
+#define GTEST_6_TUPLE_(T) tuple<T##0, T##1, T##2, T##3, T##4, T##5, void, \
+    void, void, void>
+#define GTEST_7_TUPLE_(T) tuple<T##0, T##1, T##2, T##3, T##4, T##5, T##6, \
+    void, void, void>
+#define GTEST_8_TUPLE_(T) tuple<T##0, T##1, T##2, T##3, T##4, T##5, T##6, \
+    T##7, void, void>
 #define GTEST_9_TUPLE_(T) tuple<T##0, T##1, T##2, T##3, T##4, T##5, T##6, \
-    T##7, T##8>
+    T##7, T##8, void>
 #define GTEST_10_TUPLE_(T) tuple<T##0, T##1, T##2, T##3, T##4, T##5, T##6, \
     T##7, T##8, T##9>
 
@@ -162,7 +182,6 @@ template <GTEST_1_TYPENAMES_(T)>
 class GTEST_1_TUPLE_(T) {
  public:
   template <int k> friend class gtest_internal::Get;
-  template <GTEST_10_TYPENAMES_(U)> friend class tuple;
 
   tuple() {}
 
@@ -180,7 +199,8 @@ class GTEST_1_TUPLE_(T) {
     return CopyFrom(t);
   }
 
- private:
+  GTEST_DECLARE_TUPLE_AS_FRIEND_
+
   template <GTEST_1_TYPENAMES_(U)>
   tuple& CopyFrom(const GTEST_1_TUPLE_(U)& t) {
     f0_ = t.f0_;
@@ -194,7 +214,6 @@ template <GTEST_2_TYPENAMES_(T)>
 class GTEST_2_TUPLE_(T) {
  public:
   template <int k> friend class gtest_internal::Get;
-  template <GTEST_10_TYPENAMES_(U)> friend class tuple;
 
   tuple() {}
 
@@ -221,7 +240,8 @@ class GTEST_2_TUPLE_(T) {
     return *this;
   }
 
- private:
+  GTEST_DECLARE_TUPLE_AS_FRIEND_
+
   template <GTEST_2_TYPENAMES_(U)>
   tuple& CopyFrom(const GTEST_2_TUPLE_(U)& t) {
     f0_ = t.f0_;
@@ -237,7 +257,6 @@ template <GTEST_3_TYPENAMES_(T)>
 class GTEST_3_TUPLE_(T) {
  public:
   template <int k> friend class gtest_internal::Get;
-  template <GTEST_10_TYPENAMES_(U)> friend class tuple;
 
   tuple() {}
 
@@ -256,7 +275,8 @@ class GTEST_3_TUPLE_(T) {
     return CopyFrom(t);
   }
 
- private:
+  GTEST_DECLARE_TUPLE_AS_FRIEND_
+
   template <GTEST_3_TYPENAMES_(U)>
   tuple& CopyFrom(const GTEST_3_TUPLE_(U)& t) {
     f0_ = t.f0_;
@@ -274,7 +294,6 @@ template <GTEST_4_TYPENAMES_(T)>
 class GTEST_4_TUPLE_(T) {
  public:
   template <int k> friend class gtest_internal::Get;
-  template <GTEST_10_TYPENAMES_(U)> friend class tuple;
 
   tuple() {}
 
@@ -295,7 +314,8 @@ class GTEST_4_TUPLE_(T) {
     return CopyFrom(t);
   }
 
- private:
+  GTEST_DECLARE_TUPLE_AS_FRIEND_
+
   template <GTEST_4_TYPENAMES_(U)>
   tuple& CopyFrom(const GTEST_4_TUPLE_(U)& t) {
     f0_ = t.f0_;
@@ -315,7 +335,6 @@ template <GTEST_5_TYPENAMES_(T)>
 class GTEST_5_TUPLE_(T) {
  public:
   template <int k> friend class gtest_internal::Get;
-  template <GTEST_10_TYPENAMES_(U)> friend class tuple;
 
   tuple() {}
 
@@ -337,7 +356,8 @@ class GTEST_5_TUPLE_(T) {
     return CopyFrom(t);
   }
 
- private:
+  GTEST_DECLARE_TUPLE_AS_FRIEND_
+
   template <GTEST_5_TYPENAMES_(U)>
   tuple& CopyFrom(const GTEST_5_TUPLE_(U)& t) {
     f0_ = t.f0_;
@@ -359,7 +379,6 @@ template <GTEST_6_TYPENAMES_(T)>
 class GTEST_6_TUPLE_(T) {
  public:
   template <int k> friend class gtest_internal::Get;
-  template <GTEST_10_TYPENAMES_(U)> friend class tuple;
 
   tuple() {}
 
@@ -382,7 +401,8 @@ class GTEST_6_TUPLE_(T) {
     return CopyFrom(t);
   }
 
- private:
+  GTEST_DECLARE_TUPLE_AS_FRIEND_
+
   template <GTEST_6_TYPENAMES_(U)>
   tuple& CopyFrom(const GTEST_6_TUPLE_(U)& t) {
     f0_ = t.f0_;
@@ -406,7 +426,6 @@ template <GTEST_7_TYPENAMES_(T)>
 class GTEST_7_TUPLE_(T) {
  public:
   template <int k> friend class gtest_internal::Get;
-  template <GTEST_10_TYPENAMES_(U)> friend class tuple;
 
   tuple() {}
 
@@ -429,7 +448,8 @@ class GTEST_7_TUPLE_(T) {
     return CopyFrom(t);
   }
 
- private:
+  GTEST_DECLARE_TUPLE_AS_FRIEND_
+
   template <GTEST_7_TYPENAMES_(U)>
   tuple& CopyFrom(const GTEST_7_TUPLE_(U)& t) {
     f0_ = t.f0_;
@@ -455,7 +475,6 @@ template <GTEST_8_TYPENAMES_(T)>
 class GTEST_8_TUPLE_(T) {
  public:
   template <int k> friend class gtest_internal::Get;
-  template <GTEST_10_TYPENAMES_(U)> friend class tuple;
 
   tuple() {}
 
@@ -479,7 +498,8 @@ class GTEST_8_TUPLE_(T) {
     return CopyFrom(t);
   }
 
- private:
+  GTEST_DECLARE_TUPLE_AS_FRIEND_
+
   template <GTEST_8_TYPENAMES_(U)>
   tuple& CopyFrom(const GTEST_8_TUPLE_(U)& t) {
     f0_ = t.f0_;
@@ -507,7 +527,6 @@ template <GTEST_9_TYPENAMES_(T)>
 class GTEST_9_TUPLE_(T) {
  public:
   template <int k> friend class gtest_internal::Get;
-  template <GTEST_10_TYPENAMES_(U)> friend class tuple;
 
   tuple() {}
 
@@ -531,7 +550,8 @@ class GTEST_9_TUPLE_(T) {
     return CopyFrom(t);
   }
 
- private:
+  GTEST_DECLARE_TUPLE_AS_FRIEND_
+
   template <GTEST_9_TYPENAMES_(U)>
   tuple& CopyFrom(const GTEST_9_TUPLE_(U)& t) {
     f0_ = t.f0_;
@@ -561,7 +581,6 @@ template <GTEST_10_TYPENAMES_(T)>
 class tuple {
  public:
   template <int k> friend class gtest_internal::Get;
-  template <GTEST_10_TYPENAMES_(U)> friend class tuple;
 
   tuple() {}
 
@@ -586,7 +605,8 @@ class tuple {
     return CopyFrom(t);
   }
 
- private:
+  GTEST_DECLARE_TUPLE_AS_FRIEND_
+
   template <GTEST_10_TYPENAMES_(U)>
   tuple& CopyFrom(const GTEST_10_TUPLE_(U)& t) {
     f0_ = t.f0_;
@@ -938,6 +958,7 @@ inline bool operator!=(const GTEST_10_TUPLE_(T)& t,
 #undef GTEST_9_TYPENAMES_
 #undef GTEST_10_TYPENAMES_
 
+#undef GTEST_DECLARE_TUPLE_AS_FRIEND_
 #undef GTEST_BY_REF_
 #undef GTEST_ADD_REF_
 #undef GTEST_TUPLE_ELEMENT_
