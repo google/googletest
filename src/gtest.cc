@@ -565,7 +565,7 @@ ScopedFakeTestPartResultReporter::ScopedFakeTestPartResultReporter(
 }
 
 void ScopedFakeTestPartResultReporter::Init() {
-  internal::UnitTestImpl* const impl = UnitTest::GetInstance()->impl();
+  internal::UnitTestImpl* const impl = internal::GetUnitTestImpl();
   if (intercept_mode_ == INTERCEPT_ALL_THREADS) {
     old_reporter_ = impl->GetGlobalTestPartResultReporter();
     impl->SetGlobalTestPartResultReporter(this);
@@ -578,7 +578,7 @@ void ScopedFakeTestPartResultReporter::Init() {
 // The d'tor restores the test part result reporter used by Google Test
 // before.
 ScopedFakeTestPartResultReporter::~ScopedFakeTestPartResultReporter() {
-  internal::UnitTestImpl* const impl = UnitTest::GetInstance()->impl();
+  internal::UnitTestImpl* const impl = internal::GetUnitTestImpl();
   if (intercept_mode_ == INTERCEPT_ALL_THREADS) {
     impl->SetGlobalTestPartResultReporter(old_reporter_);
   } else {
@@ -1985,6 +1985,22 @@ void Test::RecordProperty(const char* key, int value) {
   RecordProperty(key, value_message.GetString().c_str());
 }
 
+namespace internal {
+
+void ReportFailureInUnknownLocation(TestPartResultType result_type,
+                                    const String& message) {
+  // This function is a friend of UnitTest and as such has access to
+  // AddTestPartResult.
+  UnitTest::GetInstance()->AddTestPartResult(
+      result_type,
+      NULL,  // No info about the source file where the exception occurred.
+      -1,    // We have no info on which line caused the exception.
+      message,
+      String());  // No stack trace, either.
+}
+
+}  // namespace internal
+
 #if GTEST_OS_WINDOWS
 // We are on Windows.
 
@@ -1995,15 +2011,8 @@ static void AddExceptionThrownFailure(DWORD exception_code,
   message << "Exception thrown with code 0x" << std::setbase(16) <<
     exception_code << std::setbase(10) << " in " << location << ".";
 
-  UnitTest* const unit_test = UnitTest::GetInstance();
-  unit_test->AddTestPartResult(
-      TPRT_FATAL_FAILURE,
-      static_cast<const char *>(NULL),
-           // We have no info about the source file where the exception
-           // occurred.
-      -1,  // We have no info on which line caused the exception.
-      message.GetString(),
-      internal::String(""));
+  internal::ReportFailureInUnknownLocation(TPRT_FATAL_FAILURE,
+                                           message.GetString());
 }
 
 #endif  // GTEST_OS_WINDOWS
@@ -2699,6 +2708,8 @@ class PrettyUnitTestResultPrinter : public UnitTestEventListenerInterface {
   virtual void OnUnitTestEnd(const UnitTest& unit_test);
 
  private:
+  static void PrintFailedTests(const UnitTest& unit_test);
+
   internal::String test_case_name_;
 };
 
@@ -2720,11 +2731,10 @@ void PrettyUnitTestResultPrinter::OnUnitTestStart(const UnitTest& unit_test) {
                   internal::posix::GetEnv(kTestTotalShards));
   }
 
-  const internal::UnitTestImpl* const impl = unit_test.impl();
   ColoredPrintf(COLOR_GREEN,  "[==========] ");
   printf("Running %s from %s.\n",
-         FormatTestCount(impl->test_to_run_count()).c_str(),
-         FormatTestCaseCount(impl->test_case_to_run_count()).c_str());
+         FormatTestCount(unit_test.test_to_run_count()).c_str(),
+         FormatTestCaseCount(unit_test.test_case_to_run_count()).c_str());
   fflush(stdout);
 }
 
@@ -2808,71 +2818,62 @@ void PrettyUnitTestResultPrinter::OnGlobalTearDownStart(
   fflush(stdout);
 }
 
-namespace internal {
-
 // Internal helper for printing the list of failed tests.
-static void PrintFailedTestsPretty(const UnitTestImpl* impl) {
-  const int failed_test_count = impl->failed_test_count();
+void PrettyUnitTestResultPrinter::PrintFailedTests(const UnitTest& unit_test) {
+  const int failed_test_count = unit_test.failed_test_count();
   if (failed_test_count == 0) {
     return;
   }
 
-  for (const internal::ListNode<TestCase*>* node = impl->test_cases()->Head();
-       node != NULL; node = node->next()) {
-    const TestCase* const tc = node->element();
-    if (!tc->should_run() || (tc->failed_test_count() == 0)) {
+  for (int i = 0; i < unit_test.total_test_case_count(); ++i) {
+    const TestCase& test_case = *unit_test.GetTestCase(i);
+    if (!test_case.should_run() || (test_case.failed_test_count() == 0)) {
       continue;
     }
-    for (const internal::ListNode<TestInfo*>* tinode =
-         tc->test_info_list().Head();
-         tinode != NULL; tinode = tinode->next()) {
-      const TestInfo* const ti = tinode->element();
-      if (!tc->ShouldRunTest(ti) || tc->TestPassed(ti)) {
+    for (int j = 0; j < test_case.total_test_count(); ++j) {
+      const TestInfo& test_info = *test_case.GetTestInfo(j);
+      if (!test_info.should_run() || test_info.result()->Passed()) {
         continue;
       }
       ColoredPrintf(COLOR_RED, "[  FAILED  ] ");
-      printf("%s.%s", ti->test_case_name(), ti->name());
-      if (ti->test_case_comment()[0] != '\0' ||
-          ti->comment()[0] != '\0') {
-        printf(", where %s", ti->test_case_comment());
-        if (ti->test_case_comment()[0] != '\0' &&
-            ti->comment()[0] != '\0') {
+      printf("%s.%s", test_case.name(), test_info.name());
+      if (test_case.comment()[0] != '\0' ||
+          test_info.comment()[0] != '\0') {
+        printf(", where %s", test_case.comment());
+        if (test_case.comment()[0] != '\0' &&
+            test_info.comment()[0] != '\0') {
           printf(" and ");
         }
       }
-      printf("%s\n", ti->comment());
+      printf("%s\n", test_info.comment());
     }
   }
 }
 
-}  // namespace internal
-
 void PrettyUnitTestResultPrinter::OnUnitTestEnd(const UnitTest& unit_test) {
-  const internal::UnitTestImpl* const impl = unit_test.impl();
-
   ColoredPrintf(COLOR_GREEN,  "[==========] ");
   printf("%s from %s ran.",
-         FormatTestCount(impl->test_to_run_count()).c_str(),
-         FormatTestCaseCount(impl->test_case_to_run_count()).c_str());
+         FormatTestCount(unit_test.test_to_run_count()).c_str(),
+         FormatTestCaseCount(unit_test.test_case_to_run_count()).c_str());
   if (GTEST_FLAG(print_time)) {
     printf(" (%s ms total)",
-           internal::StreamableToString(impl->elapsed_time()).c_str());
+           internal::StreamableToString(unit_test.elapsed_time()).c_str());
   }
   printf("\n");
   ColoredPrintf(COLOR_GREEN,  "[  PASSED  ] ");
-  printf("%s.\n", FormatTestCount(impl->successful_test_count()).c_str());
+  printf("%s.\n", FormatTestCount(unit_test.successful_test_count()).c_str());
 
-  int num_failures = impl->failed_test_count();
-  if (!impl->Passed()) {
-    const int failed_test_count = impl->failed_test_count();
+  int num_failures = unit_test.failed_test_count();
+  if (!unit_test.Passed()) {
+    const int failed_test_count = unit_test.failed_test_count();
     ColoredPrintf(COLOR_RED,  "[  FAILED  ] ");
     printf("%s, listed below:\n", FormatTestCount(failed_test_count).c_str());
-    internal::PrintFailedTestsPretty(impl);
+    PrintFailedTests(unit_test);
     printf("\n%2d FAILED %s\n", num_failures,
                         num_failures == 1 ? "TEST" : "TESTS");
   }
 
-  int num_disabled = impl->disabled_test_count();
+  int num_disabled = unit_test.disabled_test_count();
   if (num_disabled && !GTEST_FLAG(also_run_disabled_tests)) {
     if (!num_failures) {
       printf("\n");  // Add a spacer if no FAILURE banner is displayed.
@@ -2996,10 +2997,10 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
   // Prints an XML representation of a TestInfo object.
   static void PrintXmlTestInfo(FILE* out,
                                const char* test_case_name,
-                               const TestInfo* test_info);
+                               const TestInfo& test_info);
 
   // Prints an XML representation of a TestCase object
-  static void PrintXmlTestCase(FILE* out, const TestCase* test_case);
+  static void PrintXmlTestCase(FILE* out, const TestCase& test_case);
 
   // Prints an XML summary of unit_test to output stream out.
   static void PrintXmlUnitTest(FILE* out, const UnitTest& unit_test);
@@ -3009,7 +3010,7 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
   // When the String is not empty, it includes a space at the beginning,
   // to delimit this attribute from prior attributes.
   static internal::String TestPropertiesAsXmlAttributes(
-      const internal::TestResult* result);
+      const internal::TestResult& result);
 
   // The output file.
   const internal::String output_file_;
@@ -3147,23 +3148,20 @@ const char* FormatTimeInMillisAsSeconds(TimeInMillis ms) {
 // TODO(wan): There is also value in printing properties with the plain printer.
 void XmlUnitTestResultPrinter::PrintXmlTestInfo(FILE* out,
                                                 const char* test_case_name,
-                                                const TestInfo* test_info) {
-  const internal::TestResult * const result = test_info->result();
-  const internal::List<TestPartResult> &results = result->test_part_results();
+                                                const TestInfo& test_info) {
+  const internal::TestResult& result = *test_info.result();
   fprintf(out,
           "    <testcase name=\"%s\" status=\"%s\" time=\"%s\" "
           "classname=\"%s\"%s",
-          EscapeXmlAttribute(test_info->name()).c_str(),
-          test_info->should_run() ? "run" : "notrun",
-          internal::FormatTimeInMillisAsSeconds(result->elapsed_time()),
+          EscapeXmlAttribute(test_info.name()).c_str(),
+          test_info.should_run() ? "run" : "notrun",
+          internal::FormatTimeInMillisAsSeconds(result.elapsed_time()),
           EscapeXmlAttribute(test_case_name).c_str(),
           TestPropertiesAsXmlAttributes(result).c_str());
 
   int failures = 0;
-  for (const internal::ListNode<TestPartResult>* part_node = results.Head();
-       part_node != NULL;
-       part_node = part_node->next()) {
-    const TestPartResult& part = part_node->element();
+  for (int i = 0; i < result.total_part_count(); ++i) {
+    const TestPartResult& part = *result.GetTestPartResult(i);
     if (part.failed()) {
       const internal::String message =
           internal::String::Format("%s:%d\n%s", part.file_name(),
@@ -3185,60 +3183,47 @@ void XmlUnitTestResultPrinter::PrintXmlTestInfo(FILE* out,
 
 // Prints an XML representation of a TestCase object
 void XmlUnitTestResultPrinter::PrintXmlTestCase(FILE* out,
-                                                const TestCase* test_case) {
+                                                const TestCase& test_case) {
   fprintf(out,
           "  <testsuite name=\"%s\" tests=\"%d\" failures=\"%d\" "
           "disabled=\"%d\" ",
-          EscapeXmlAttribute(test_case->name()).c_str(),
-          test_case->total_test_count(),
-          test_case->failed_test_count(),
-          test_case->disabled_test_count());
+          EscapeXmlAttribute(test_case.name()).c_str(),
+          test_case.total_test_count(),
+          test_case.failed_test_count(),
+          test_case.disabled_test_count());
   fprintf(out,
           "errors=\"0\" time=\"%s\">\n",
-          internal::FormatTimeInMillisAsSeconds(test_case->elapsed_time()));
-  for (const internal::ListNode<TestInfo*>* info_node =
-         test_case->test_info_list().Head();
-       info_node != NULL;
-       info_node = info_node->next()) {
-    PrintXmlTestInfo(out, test_case->name(), info_node->element());
-  }
+          internal::FormatTimeInMillisAsSeconds(test_case.elapsed_time()));
+  for (int i = 0; i < test_case.total_test_count(); ++i)
+    PrintXmlTestInfo(out, test_case.name(), *test_case.GetTestInfo(i));
   fprintf(out, "  </testsuite>\n");
 }
 
 // Prints an XML summary of unit_test to output stream out.
 void XmlUnitTestResultPrinter::PrintXmlUnitTest(FILE* out,
                                                 const UnitTest& unit_test) {
-  const internal::UnitTestImpl* const impl = unit_test.impl();
   fprintf(out, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
   fprintf(out,
           "<testsuites tests=\"%d\" failures=\"%d\" disabled=\"%d\" "
           "errors=\"0\" time=\"%s\" ",
-          impl->total_test_count(),
-          impl->failed_test_count(),
-          impl->disabled_test_count(),
-          internal::FormatTimeInMillisAsSeconds(impl->elapsed_time()));
+          unit_test.total_test_count(),
+          unit_test.failed_test_count(),
+          unit_test.disabled_test_count(),
+          internal::FormatTimeInMillisAsSeconds(unit_test.elapsed_time()));
   fprintf(out, "name=\"AllTests\">\n");
-  for (const internal::ListNode<TestCase*>* case_node =
-       impl->test_cases()->Head();
-       case_node != NULL;
-       case_node = case_node->next()) {
-    PrintXmlTestCase(out, case_node->element());
-  }
+  for (int i = 0; i < unit_test.total_test_case_count(); ++i)
+    PrintXmlTestCase(out, *unit_test.GetTestCase(i));
   fprintf(out, "</testsuites>\n");
 }
 
 // Produces a string representing the test properties in a result as space
 // delimited XML attributes based on the property key="value" pairs.
 internal::String XmlUnitTestResultPrinter::TestPropertiesAsXmlAttributes(
-    const internal::TestResult* result) {
+    const internal::TestResult& result) {
   using internal::TestProperty;
   Message attributes;
-  const internal::List<TestProperty>& properties = result->test_properties();
-  for (const internal::ListNode<TestProperty>* property_node =
-       properties.Head();
-       property_node != NULL;
-       property_node = property_node->next()) {
-    const TestProperty& property = property_node->element();
+  for (int i = 0; i < result.test_property_count(); ++i) {
+    const TestProperty& property = *result.GetTestProperty(i);
     attributes << " " << property.key() << "="
         << "\"" << EscapeXmlAttribute(property.value()) << "\"";
   }
@@ -4136,7 +4121,7 @@ TestInfoImpl::~TestInfoImpl() {
 String GetCurrentOsStackTraceExceptTop(UnitTest* unit_test, int skip_count) {
   // We pass skip_count + 1 to skip this wrapper function in addition
   // to what the user really wants to skip.
-  return unit_test->impl()->CurrentOsStackTraceExceptTop(skip_count + 1);
+  return GetUnitTestImpl()->CurrentOsStackTraceExceptTop(skip_count + 1);
 }
 
 // Returns the number of failed test parts in the given test result object.

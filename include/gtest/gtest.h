@@ -141,8 +141,12 @@ const int kMaxStackTraceDepth = 100;
 
 namespace internal {
 
+class AssertHelper;
 class GTestFlagSaver;
 class TestCase;                        // A collection of related tests.
+class UnitTestImpl* GetUnitTestImpl();
+void ReportFailureInUnknownLocation(TestPartResultType result_type,
+                                    const String& message);
 
 // Converts a streamable value to a String.  A NULL pointer is
 // converted to "(null)".  When the input value is a ::string,
@@ -759,33 +763,6 @@ class UnitTest {
   // Consecutive calls will return the same object.
   static UnitTest* GetInstance();
 
-  // Registers and returns a global test environment.  When a test
-  // program is run, all global test environments will be set-up in
-  // the order they were registered.  After all tests in the program
-  // have finished, all global test environments will be torn-down in
-  // the *reverse* order they were registered.
-  //
-  // The UnitTest object takes ownership of the given environment.
-  //
-  // This method can only be called from the main thread.
-  Environment* AddEnvironment(Environment* env);
-
-  // Adds a TestPartResult to the current TestResult object.  All
-  // Google Test assertion macros (e.g. ASSERT_TRUE, EXPECT_EQ, etc)
-  // eventually call this to report their results.  The user code
-  // should use the assertion macros instead of calling this directly.
-  //
-  // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
-  void AddTestPartResult(TestPartResultType result_type,
-                         const char* file_name,
-                         int line_number,
-                         const internal::String& message,
-                         const internal::String& os_stack_trace);
-
-  // Adds a TestProperty to the current TestResult object. If the result already
-  // contains a property with the same key, the value will be updated.
-  void RecordPropertyForCurrentTest(const char* key, const char* value);
-
   // Runs all tests in this UnitTest object and prints the result.
   // Returns 0 if successful, or 1 otherwise.
   //
@@ -809,14 +786,41 @@ class UnitTest {
 #if GTEST_HAS_PARAM_TEST
   // Returns the ParameterizedTestCaseRegistry object used to keep track of
   // value-parameterized tests and instantiate and register them.
+  //
+  // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
   internal::ParameterizedTestCaseRegistry& parameterized_test_registry();
 #endif  // GTEST_HAS_PARAM_TEST
+
+ private:
+  // Registers and returns a global test environment.  When a test
+  // program is run, all global test environments will be set-up in
+  // the order they were registered.  After all tests in the program
+  // have finished, all global test environments will be torn-down in
+  // the *reverse* order they were registered.
+  //
+  // The UnitTest object takes ownership of the given environment.
+  //
+  // This method can only be called from the main thread.
+  Environment* AddEnvironment(Environment* env);
+
+  // Adds a TestPartResult to the current TestResult object.  All
+  // Google Test assertion macros (e.g. ASSERT_TRUE, EXPECT_EQ, etc)
+  // eventually call this to report their results.  The user code
+  // should use the assertion macros instead of calling this directly.
+  void AddTestPartResult(TestPartResultType result_type,
+                         const char* file_name,
+                         int line_number,
+                         const internal::String& message,
+                         const internal::String& os_stack_trace);
+
+  // Adds a TestProperty to the current TestResult object. If the result already
+  // contains a property with the same key, the value will be updated.
+  void RecordPropertyForCurrentTest(const char* key, const char* value);
 
   // Accessors for the implementation object.
   internal::UnitTestImpl* impl() { return impl_; }
   const internal::UnitTestImpl* impl() const { return impl_; }
 
- private:
   // Gets the number of successful test cases.
   int successful_test_case_count() const;
 
@@ -861,7 +865,20 @@ class UnitTest {
 
   // ScopedTrace is a friend as it needs to modify the per-thread
   // trace stack, which is a private member of UnitTest.
+  // TODO(vladl@google.com): Order all declarations according to the style
+  // guide after publishing of the above methods is done.
   friend class internal::ScopedTrace;
+  friend Environment* AddGlobalTestEnvironment(Environment* env);
+  friend internal::UnitTestImpl* internal::GetUnitTestImpl();
+  friend class internal::AssertHelper;
+  friend class Test;
+  friend void internal::ReportFailureInUnknownLocation(
+      TestPartResultType result_type,
+      const internal::String& message);
+  // TODO(vladl@google.com): Remove these when publishing the new accessors.
+  friend class PrettyUnitTestResultPrinter;
+  friend class XmlUnitTestResultPrinter;
+
 
   // Creates an empty UnitTest.
   UnitTest();
