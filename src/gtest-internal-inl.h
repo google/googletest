@@ -257,7 +257,8 @@ class List {
  public:
 
   // Creates an empty list.
-  List() : head_(NULL), last_(NULL), size_(0) {}
+  List() : head_(NULL), last_(NULL), size_(0),
+           last_read_index_(-1), last_read_(NULL) {}
 
   // D'tor.
   virtual ~List();
@@ -276,8 +277,9 @@ class List {
       }
 
       // 2. Resets the member variables.
-      head_ = last_ = NULL;
+      last_read_ = head_ = last_ = NULL;
       size_ = 0;
+      last_read_index_ = -1;
     }
   }
 
@@ -298,7 +300,8 @@ class List {
   // Adds an element to the end of the list.  A copy of the element is
   // created using the copy constructor, and then stored in the list.
   // Changes made to the element in the list doesn't affect the source
-  // object, and vice versa.
+  // object, and vice versa.  This does not affect the "last read"
+  // index.
   void PushBack(const E & element) {
     ListNode<E> * new_node = new ListNode<E>(element);
 
@@ -312,7 +315,8 @@ class List {
     }
   }
 
-  // Adds an element to the beginning of this list.
+  // Adds an element to the beginning of this list.  The "last read"
+  // index is adjusted accordingly.
   void PushFront(const E& element) {
     ListNode<E>* const new_node = new ListNode<E>(element);
 
@@ -324,12 +328,18 @@ class List {
       head_ = new_node;
       size_++;
     }
+
+    if (last_read_index_ >= 0) {
+      // A new element at the head bumps up an existing index by 1.
+      last_read_index_++;
+    }
   }
 
   // Removes an element from the beginning of this list.  If the
   // result argument is not NULL, the removed element is stored in the
   // memory it points to.  Otherwise the element is thrown away.
-  // Returns true iff the list wasn't empty before the operation.
+  // Returns true iff the list wasn't empty before the operation.  The
+  // "last read" index is adjusted accordingly.
   bool PopFront(E* result) {
     if (size_ == 0) return false;
 
@@ -346,13 +356,21 @@ class List {
     }
     delete old_head;
 
+    if (last_read_index_ > 0) {
+      last_read_index_--;
+    } else if (last_read_index_ == 0) {
+      last_read_index_ = -1;
+      last_read_ = NULL;
+    }
+
     return true;
   }
 
   // Inserts an element after a given node in the list.  It's the
   // caller's responsibility to ensure that the given node is in the
   // list.  If the given node is NULL, inserts the element at the
-  // front of the list.
+  // front of the list.  The "last read" index is adjusted
+  // accordingly.
   ListNode<E>* InsertAfter(ListNode<E>* node, const E& element) {
     if (node == NULL) {
       PushFront(element);
@@ -366,6 +384,11 @@ class List {
     if (node == last_) {
       last_ = new_node;
     }
+
+    // We aren't sure whether this insertion will affect the last read
+    // index, so we invalidate it to be safe.
+    last_read_index_ = -1;
+    last_read_ = NULL;
 
     return new_node;
   }
@@ -431,20 +454,27 @@ class List {
   }
 
   // Returns a pointer to the i-th element of the list, or NULL if i is not
-  // in range [0, size()).
+  // in range [0, size()).  The "last read" index is adjusted accordingly.
   const E* GetElement(int i) const {
     if (i < 0 || i >= size())
       return NULL;
 
-    const ListNode<E>* node = Head();
-    for (int index = 0; index < i && node != NULL; ++index, node = node->next())
-      continue;
+    if (last_read_index_ < 0 || last_read_index_ > i) {
+      // We have to count from the start.
+      last_read_index_ = 0;
+      last_read_ = Head();
+    }
 
-    return node ? &(node->element()) : NULL;
+    while (last_read_index_ < i) {
+      last_read_ = last_read_->next();
+      last_read_index_++;
+    }
+
+    return &(last_read_->element());
   }
 
   // Returns the i-th element of the list, or default_value if i is not
-  // in range [0, size()).
+  // in range [0, size()).  The "last read" index is adjusted accordingly.
   E GetElementOr(int i, E default_value) const {
     const E* element = GetElement(i);
     return element ? *element : default_value;
@@ -454,6 +484,15 @@ class List {
   ListNode<E>* head_;  // The first node of the list.
   ListNode<E>* last_;  // The last node of the list.
   int size_;           // The number of elements in the list.
+
+  // These fields point to the last element read via GetElement(i) or
+  // GetElementOr(i).  They are used to speed up list traversal as
+  // often they allow us to find the wanted element by looking from
+  // the last visited one instead of the list head.  This means a
+  // sequential traversal of the list can be done in O(N) time instead
+  // of O(N^2).
+  mutable int last_read_index_;
+  mutable const ListNode<E>* last_read_;
 
   // We disallow copying List.
   GTEST_DISALLOW_COPY_AND_ASSIGN_(List);
