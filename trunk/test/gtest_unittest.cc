@@ -136,6 +136,7 @@ using testing::internal::GetCurrentOsStackTraceExceptTop;
 using testing::internal::GetFailedPartCount;
 using testing::internal::GetTestTypeId;
 using testing::internal::GetTypeId;
+using testing::internal::GetUnitTestImpl;
 using testing::internal::GTestFlagSaver;
 using testing::internal::Int32;
 using testing::internal::Int32FromEnvOrDie;
@@ -3600,8 +3601,7 @@ TEST(AssertionSyntaxTest, WorksWithConst) {
 
 // Returns the number of successful parts in the current test.
 static size_t GetSuccessfulPartCount() {
-  return UnitTest::GetInstance()->impl()->current_test_result()->
-    successful_part_count();
+  return GetUnitTestImpl()->current_test_result()->successful_part_count();
 }
 
 namespace testing {
@@ -4416,8 +4416,7 @@ namespace testing {
 class TestInfoTest : public Test {
  protected:
   static TestInfo * GetTestInfo(const char* test_name) {
-    return UnitTest::GetInstance()->impl()->
-      GetTestCase("TestInfoTest", "", NULL, NULL)->
+    return GetUnitTestImpl()->GetTestCase("TestInfoTest", "", NULL, NULL)->
         GetTestInfo(test_name);
   }
 

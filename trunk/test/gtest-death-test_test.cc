@@ -67,6 +67,7 @@ using testing::internal::DeathTest;
 using testing::internal::DeathTestFactory;
 using testing::internal::FilePath;
 using testing::internal::GetLastErrnoDescription;
+using testing::internal::GetUnitTestImpl;
 using testing::internal::ParseNaturalNumber;
 using testing::internal::String;
 
@@ -77,22 +78,22 @@ namespace internal {
 // single UnitTest object during their lifetimes.
 class ReplaceDeathTestFactory {
  public:
-  ReplaceDeathTestFactory(UnitTest* parent, DeathTestFactory* new_factory)
-      : parent_impl_(parent->impl()) {
-    old_factory_ = parent_impl_->death_test_factory_.release();
-    parent_impl_->death_test_factory_.reset(new_factory);
+  explicit ReplaceDeathTestFactory(DeathTestFactory* new_factory)
+      : unit_test_impl_(GetUnitTestImpl()) {
+    old_factory_ = unit_test_impl_->death_test_factory_.release();
+    unit_test_impl_->death_test_factory_.reset(new_factory);
   }
 
   ~ReplaceDeathTestFactory() {
-    parent_impl_->death_test_factory_.release();
-    parent_impl_->death_test_factory_.reset(old_factory_);
+    unit_test_impl_->death_test_factory_.release();
+    unit_test_impl_->death_test_factory_.reset(old_factory_);
   }
  private:
   // Prevents copying ReplaceDeathTestFactory objects.
   ReplaceDeathTestFactory(const ReplaceDeathTestFactory&);
   void operator=(const ReplaceDeathTestFactory&);
 
-  UnitTestImpl* parent_impl_;
+  UnitTestImpl* unit_test_impl_;
   DeathTestFactory* old_factory_;
 };
 
@@ -846,8 +847,7 @@ class MacroLogicDeathTest : public testing::Test {
 
   static void SetUpTestCase() {
     factory_ = new MockDeathTestFactory;
-    replacer_ = new testing::internal::ReplaceDeathTestFactory(
-        testing::UnitTest::GetInstance(), factory_);
+    replacer_ = new testing::internal::ReplaceDeathTestFactory(factory_);
   }
 
   static void TearDownTestCase() {
@@ -959,8 +959,7 @@ TEST_F(MacroLogicDeathTest, ChildDoesNotDie) {
 
 // Returns the number of successful parts in the current test.
 static size_t GetSuccessfulTestPartCount() {
-  return testing::UnitTest::GetInstance()->impl()->current_test_result()->
-    successful_part_count();
+  return GetUnitTestImpl()->current_test_result()->successful_part_count();
 }
 
 // Tests that a successful death test does not register a successful

@@ -44,6 +44,8 @@
 
 namespace testing {
 
+using internal::GetUnitTestImpl;
+
 // Gets the summary of the failure message by omitting the stack trace
 // in it.
 internal::String TestPartResult::ExtractSummary(const char* message) {
@@ -101,14 +103,13 @@ namespace internal {
 
 HasNewFatalFailureHelper::HasNewFatalFailureHelper()
     : has_new_fatal_failure_(false),
-      original_reporter_(UnitTest::GetInstance()->impl()->
+      original_reporter_(GetUnitTestImpl()->
                          GetTestPartResultReporterForCurrentThread()) {
-  UnitTest::GetInstance()->impl()->SetTestPartResultReporterForCurrentThread(
-      this);
+  GetUnitTestImpl()->SetTestPartResultReporterForCurrentThread(this);
 }
 
 HasNewFatalFailureHelper::~HasNewFatalFailureHelper() {
-  UnitTest::GetInstance()->impl()->SetTestPartResultReporterForCurrentThread(
+  GetUnitTestImpl()->SetTestPartResultReporterForCurrentThread(
       original_reporter_);
 }
 
