@@ -23,8 +23,32 @@ architecture, you'll feel right at home if you've used JUnit or !PyUnit before.
 If not, it will take you about 10 minutes to learn the basics and get started.
 So let's go!
 
-_Note:_ We occasionally refer to Google C++ Testing Framework informally as
-_Google Test_.
+_Note:_ We sometimes refer to Google C++ Testing Framework informally
+as _Google Test_.
+
+= Setting up a New Test Project =
+
+To write a test program using Google Test, you need to compile Google
+Test into a library and link your test with it.  We provide build
+files for some popular build systems (`msvc/` for Visual Studio,
+`xcode/` for Mac Xcode, `make/` for GNU make, `codegear/` for Borland
+C++ Builder, `scons/` for Scons, and the autotools script in the
+Google Test root directory).  If your build system is not on this
+list, you can take a look at `make/Makefile` to learn how Google Test
+should be compiled (basically you want to compile `src/gtest-all.cc`
+with `GTEST_ROOT` and `GTEST_ROOT/include` in the header search path,
+where `GTEST_ROOT` is the Google Test root directory).
+
+Once you are able to compile the Google Test library, you should
+create a project or build target for your test program.  Make sure you
+have `GTEST_ROOT/include` in the header search path such that the
+compiler can find `<gtest/gtest.h>` when compiling your test.  Set up
+your test project to link with the Google Test library (for example,
+in Visual Studio, this is done by adding a dependency on
+`gtest.vcproj`).
+
+If you still have questions, take a look at how Google Test's own
+tests are built and use them as examples.
 
 = Basic Concepts =
 
