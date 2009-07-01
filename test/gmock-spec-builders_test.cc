@@ -71,6 +71,9 @@ using testing::CardinalityInterface;
 using testing::Const;
 using testing::DoAll;
 using testing::DoDefault;
+using testing::Eq;
+using testing::Expectation;
+using testing::ExpectationSet;
 using testing::GMOCK_FLAG(verbose);
 using testing::Gt;
 using testing::InSequence;
@@ -80,13 +83,13 @@ using testing::IsSubstring;
 using testing::Lt;
 using testing::Message;
 using testing::Mock;
+using testing::Ne;
 using testing::Return;
 using testing::Sequence;
 using testing::internal::g_gmock_mutex;
 using testing::internal::kErrorVerbosity;
 using testing::internal::kInfoVerbosity;
 using testing::internal::kWarningVerbosity;
-using testing::internal::Expectation;
 using testing::internal::ExpectationTester;
 using testing::internal::string;
 
@@ -345,7 +348,22 @@ TEST(ExpectCallSyntaxTest, InSequenceCanAppearMultipleTimes) {
   a.DoA(1);
 }
 
-TEST(ExpectCallSyntaxTest, InSequenceMustBeBeforeWill) {
+TEST(ExpectCallSyntaxTest, InSequenceMustBeBeforeAfter) {
+  MockA a;
+  Sequence s;
+
+  Expectation e = EXPECT_CALL(a, DoA(1))
+      .Times(AnyNumber());
+  EXPECT_NONFATAL_FAILURE({  // NOLINT
+    EXPECT_CALL(a, DoA(2))
+        .After(e)
+        .InSequence(s);
+  }, ".InSequence() cannot appear after ");
+
+  a.DoA(2);
+}
+
+TEST(ExpectCallSyntaxTest, InSequenceMustBeBeforeWillOnce) {
   MockA a;
   Sequence s;
 
@@ -356,6 +374,20 @@ TEST(ExpectCallSyntaxTest, InSequenceMustBeBeforeWill) {
   }, ".InSequence() cannot appear after ");
 
   a.DoA(1);
+}
+
+TEST(ExpectCallSyntaxTest, AfterMustBeBeforeWillOnce) {
+  MockA a;
+
+  Expectation e = EXPECT_CALL(a, DoA(1));
+  EXPECT_NONFATAL_FAILURE({
+    EXPECT_CALL(a, DoA(2))
+        .WillOnce(Return())
+        .After(e);
+  }, ".After() cannot appear after ");
+
+  a.DoA(1);
+  a.DoA(2);
 }
 
 TEST(ExpectCallSyntaxTest, WillIsOptional) {
@@ -1246,6 +1278,292 @@ TEST(SequenceTest, Retirement) {
   a.DoA(1);
   a.DoA(2);
   a.DoA(1);
+}
+
+// Tests Expectation.
+
+TEST(ExpectationTest, ConstrutorsWork) {
+  MockA a;
+  Expectation e1;  // Default ctor.
+  Expectation e2 = EXPECT_CALL(a, DoA(1));  // Ctor from EXPECT_CALL.
+  Expectation e3 = e2;  // Copy ctor.
+
+  EXPECT_THAT(e1, Ne(e2));
+  EXPECT_THAT(e2, Eq(e3));
+  a.DoA(1);
+}
+
+TEST(ExpectationTest, AssignmentWorks) {
+  MockA a;
+  Expectation e1;
+  Expectation e2 = EXPECT_CALL(a, DoA(1));
+
+  EXPECT_THAT(e1, Ne(e2));
+
+  e1 = e2;
+  EXPECT_THAT(e1, Eq(e2));
+
+  a.DoA(1);
+}
+
+// Tests ExpectationSet.
+
+TEST(ExpectationSetTest, MemberTypesAreCorrect) {
+  ::testing::StaticAssertTypeEq<Expectation, ExpectationSet::value_type>();
+}
+
+TEST(ExpectationSetTest, ConstructorsWork) {
+  MockA a;
+
+  Expectation e1;
+  const Expectation e2;
+  ExpectationSet es1;  // Default ctor.
+  ExpectationSet es2 = EXPECT_CALL(a, DoA(1));  // Ctor from EXPECT_CALL.
+  ExpectationSet es3 = e1;  // Ctor from Expectation.
+  ExpectationSet es4(e1);   // Ctor from Expectation; alternative syntax.
+  ExpectationSet es5 = e2;  // Ctor from const Expectation.
+  ExpectationSet es6(e2);   // Ctor from const Expectation; alternative syntax.
+  ExpectationSet es7 = es2;  // Copy ctor.
+
+  EXPECT_EQ(0, es1.size());
+  EXPECT_EQ(1, es2.size());
+  EXPECT_EQ(1, es3.size());
+  EXPECT_EQ(1, es4.size());
+  EXPECT_EQ(1, es5.size());
+  EXPECT_EQ(1, es6.size());
+  EXPECT_EQ(1, es7.size());
+
+  EXPECT_THAT(es3, Ne(es2));
+  EXPECT_THAT(es4, Eq(es3));
+  EXPECT_THAT(es5, Eq(es4));
+  EXPECT_THAT(es6, Eq(es5));
+  EXPECT_THAT(es7, Eq(es2));
+  a.DoA(1);
+}
+
+TEST(ExpectationSetTest, AssignmentWorks) {
+  ExpectationSet es1;
+  ExpectationSet es2 = Expectation();
+
+  es1 = es2;
+  EXPECT_EQ(1, es1.size());
+  EXPECT_THAT(*(es1.begin()), Eq(Expectation()));
+  EXPECT_THAT(es1, Eq(es2));
+}
+
+TEST(ExpectationSetTest, InsertionWorks) {
+  ExpectationSet es1;
+  Expectation e1;
+  es1 += e1;
+  EXPECT_EQ(1, es1.size());
+  EXPECT_THAT(*(es1.begin()), Eq(e1));
+
+  MockA a;
+  Expectation e2 = EXPECT_CALL(a, DoA(1));
+  es1 += e2;
+  EXPECT_EQ(2, es1.size());
+
+  ExpectationSet::const_iterator it1 = es1.begin();
+  ExpectationSet::const_iterator it2 = it1;
+  ++it2;
+  EXPECT_TRUE(*it1 == e1 || *it2 == e1);  // e1 must be in the set.
+  EXPECT_TRUE(*it1 == e2 || *it2 == e2);  // e2 must be in the set too.
+  a.DoA(1);
+}
+
+TEST(ExpectationSetTest, SizeWorks) {
+  ExpectationSet es;
+  EXPECT_EQ(0, es.size());
+
+  es += Expectation();
+  EXPECT_EQ(1, es.size());
+
+  MockA a;
+  es += EXPECT_CALL(a, DoA(1));
+  EXPECT_EQ(2, es.size());
+
+  a.DoA(1);
+}
+
+TEST(ExpectationSetTest, IsEnumerable) {
+  ExpectationSet es;
+  EXPECT_THAT(es.begin(), Eq(es.end()));
+
+  es += Expectation();
+  ExpectationSet::const_iterator it = es.begin();
+  EXPECT_THAT(it, Ne(es.end()));
+  EXPECT_THAT(*it, Eq(Expectation()));
+  ++it;
+  EXPECT_THAT(it, Eq(es.end()));
+}
+
+// Tests the .After() clause.
+
+TEST(AfterTest, SucceedsWhenPartialOrderIsSatisfied) {
+  MockA a;
+  ExpectationSet es;
+  es += EXPECT_CALL(a, DoA(1));
+  es += EXPECT_CALL(a, DoA(2));
+  EXPECT_CALL(a, DoA(3))
+      .After(es);
+
+  a.DoA(1);
+  a.DoA(2);
+  a.DoA(3);
+}
+
+TEST(AfterTest, SucceedsWhenTotalOrderIsSatisfied) {
+  MockA a;
+  MockB b;
+  // The following also verifies that const Expectation objects work
+  // too.  Do not remove the const modifiers.
+  const Expectation e1 = EXPECT_CALL(a, DoA(1));
+  const Expectation e2 = EXPECT_CALL(b, DoB())
+      .Times(2)
+      .After(e1);
+  EXPECT_CALL(a, DoA(2)).After(e2);
+
+  a.DoA(1);
+  b.DoB();
+  b.DoB();
+  a.DoA(2);
+}
+
+// Calls must be in strict order when specified so.
+TEST(AfterTest, CallsMustBeInStrictOrderWhenSpecifiedSo) {
+  MockA a;
+  MockB b;
+  Expectation e1 = EXPECT_CALL(a, DoA(1));
+  Expectation e2 = EXPECT_CALL(b, DoB())
+      .Times(2)
+      .After(e1);
+  EXPECT_CALL(a, ReturnResult(2))
+      .After(e2)
+      .WillOnce(Return(Result()));
+
+  a.DoA(1);
+  // If a call to ReturnResult() violates the specified order, no
+  // matching expectation will be found, and thus the default action
+  // will be done.  Since the return type of ReturnResult() is not a
+  // built-in type, gmock won't know what to return and will thus
+  // abort the program.  Therefore a death test can tell us whether
+  // gmock catches the order violation correctly.
+  //
+  // gtest and gmock print messages to stdout, which isn't captured by
+  // death tests.  Therefore we have to match with an empty regular
+  // expression in all the EXPECT_DEATH()s.
+  EXPECT_DEATH(a.ReturnResult(2), "");
+
+  b.DoB();
+  EXPECT_DEATH(a.ReturnResult(2), "");
+
+  b.DoB();
+  a.ReturnResult(2);
+}
+
+// Calls must satisfy the partial order when specified so.
+TEST(AfterTest, CallsMustSatisfyPartialOrderWhenSpecifiedSo) {
+  MockA a;
+  Expectation e = EXPECT_CALL(a, DoA(1));
+  const ExpectationSet es = EXPECT_CALL(a, DoA(2));
+  EXPECT_CALL(a, ReturnResult(3))
+      .After(e, es)
+      .WillOnce(Return(Result()));
+
+  EXPECT_DEATH(a.ReturnResult(3), "");
+
+  a.DoA(2);
+  EXPECT_DEATH(a.ReturnResult(3), "");
+
+  a.DoA(1);
+  a.ReturnResult(3);
+}
+
+// .After() can be combined with .InSequence().
+TEST(AfterTest, CanBeUsedWithInSequence) {
+  MockA a;
+  Sequence s;
+  Expectation e = EXPECT_CALL(a, DoA(1));
+  EXPECT_CALL(a, DoA(2)).InSequence(s);
+  EXPECT_CALL(a, ReturnResult(3))
+      .InSequence(s).After(e)
+      .WillOnce(Return(Result()));
+
+  a.DoA(1);
+  EXPECT_DEATH(a.ReturnResult(3), "");
+
+  a.DoA(2);
+  a.ReturnResult(3);
+}
+
+// .After() can be called multiple times.
+TEST(AfterTest, CanBeCalledManyTimes) {
+  MockA a;
+  Expectation e1 = EXPECT_CALL(a, DoA(1));
+  Expectation e2 = EXPECT_CALL(a, DoA(2));
+  Expectation e3 = EXPECT_CALL(a, DoA(3));
+  EXPECT_CALL(a, DoA(4))
+      .After(e1)
+      .After(e2)
+      .After(e3);
+
+  a.DoA(3);
+  a.DoA(1);
+  a.DoA(2);
+  a.DoA(4);
+}
+
+// .After() accepts up to 5 arguments.
+TEST(AfterTest, AcceptsUpToFiveArguments) {
+  MockA a;
+  Expectation e1 = EXPECT_CALL(a, DoA(1));
+  Expectation e2 = EXPECT_CALL(a, DoA(2));
+  Expectation e3 = EXPECT_CALL(a, DoA(3));
+  ExpectationSet es1 = EXPECT_CALL(a, DoA(4));
+  ExpectationSet es2 = EXPECT_CALL(a, DoA(5));
+  EXPECT_CALL(a, DoA(6))
+      .After(e1, e2, e3, es1, es2);
+
+  a.DoA(5);
+  a.DoA(2);
+  a.DoA(4);
+  a.DoA(1);
+  a.DoA(3);
+  a.DoA(6);
+}
+
+// .After() allows input to contain duplicated Expectations.
+TEST(AfterTest, AcceptsDuplicatedInput) {
+  MockA a;
+  Expectation e1 = EXPECT_CALL(a, DoA(1));
+  Expectation e2 = EXPECT_CALL(a, DoA(2));
+  ExpectationSet es;
+  es += e1;
+  es += e2;
+  EXPECT_CALL(a, ReturnResult(3))
+      .After(e1, e2, es, e1)
+      .WillOnce(Return(Result()));
+
+  a.DoA(1);
+  EXPECT_DEATH(a.ReturnResult(3), "");
+
+  a.DoA(2);
+  a.ReturnResult(3);
+}
+
+// An Expectation added to an ExpectationSet after it has been used in
+// an .After() has no effect.
+TEST(AfterTest, ChangesToExpectationSetHaveNoEffectAfterwards) {
+  MockA a;
+  ExpectationSet es1 = EXPECT_CALL(a, DoA(1));
+  Expectation e2 = EXPECT_CALL(a, DoA(2));
+  EXPECT_CALL(a, DoA(3))
+      .After(es1);
+  es1 += e2;
+
+  a.DoA(1);
+  a.DoA(3);
+  a.DoA(2);
 }
 
 // Tests that Google Mock correctly handles calls to mock functions

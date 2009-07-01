@@ -49,13 +49,13 @@
 //       .With(multi-argument-matchers)
 //       .Times(cardinality)
 //       .InSequence(sequences)
+//       .After(expectations)
 //       .WillOnce(action)
 //       .WillRepeatedly(action)
 //       .RetiresOnSaturation();
 //
-// where all clauses are optional, .InSequence() and .WillOnce() can
-// appear any number of times, and .Times() can be omitted only if
-// .WillOnce() or .WillRepeatedly() is present.
+// where all clauses are optional, and .InSequence()/.After()/
+// .WillOnce() can appear any number of times.
 
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_
@@ -76,22 +76,30 @@
 
 namespace testing {
 
+// An abstract handle of an expectation.
+class Expectation;
+
+// A set of expectation handles.
+class ExpectationSet;
+
 // Anything inside the 'internal' namespace IS INTERNAL IMPLEMENTATION
 // and MUST NOT BE USED IN USER CODE!!!
 namespace internal {
 
-template <typename F>
-class FunctionMocker;
+// Implements a mock function.
+template <typename F> class FunctionMocker;
 
 // Base class for expectations.
 class ExpectationBase;
+
+// Implements an expectation.
+template <typename F> class TypedExpectation;
 
 // Helper class for testing the Expectation class template.
 class ExpectationTester;
 
 // Base class for function mockers.
-template <typename F>
-class FunctionMockerBase;
+template <typename F> class FunctionMockerBase;
 
 // Protects the mock object registry (in class Mock), all function
 // mockers, and all expectations.
@@ -232,7 +240,8 @@ class DefaultActionSpec {
   Clause last_clause_;
 };  // class DefaultActionSpec
 
-// Possible reactions on uninteresting calls.
+// Possible reactions on uninteresting calls.  TODO(wan@google.com):
+// rename the enum values to the kFoo style.
 enum CallReaction {
   ALLOW,
   WARN,
@@ -327,31 +336,166 @@ class Mock {
   static void UnregisterLocked(internal::UntypedFunctionMockerBase* mocker);
 };  // class Mock
 
+// An abstract handle of an expectation.  Useful in the .After()
+// clause of EXPECT_CALL() for setting the (partial) order of
+// expectations.  The syntax:
+//
+//   Expectation e1 = EXPECT_CALL(...)...;
+//   EXPECT_CALL(...).After(e1)...;
+//
+// sets two expectations where the latter can only be matched after
+// the former has been satisfied.
+//
+// Notes:
+//   - This class is copyable and has value semantics.
+//   - Constness is shallow: a const Expectation object itself cannot
+//     be modified, but the mutable methods of the ExpectationBase
+//     object it references can be called via expectation_base().
+class Expectation {
+ public:
+  // Constructs a null object that doesn't reference any expectation.
+  Expectation() {}
+
+  // This single-argument ctor must not be explicit, in order to support the
+  //   Expectation e = EXPECT_CALL(...);
+  // syntax.
+  //
+  // A TypedExpectation object stores its pre-requisites as
+  // Expectation objects, and needs to call the non-const Retire()
+  // method on the ExpectationBase objects they reference.  Therefore
+  // Expectation must receive a *non-const* reference to the
+  // ExpectationBase object.
+  Expectation(internal::ExpectationBase& exp);  // NOLINT
+
+  // The compiler-generated copy ctor and operator= work exactly as
+  // intended, so we don't need to define our own.
+
+  // Returns true iff rhs references the same expectation as this object does.
+  bool operator==(const Expectation& rhs) const {
+    return expectation_base_ == rhs.expectation_base_;
+  }
+
+  bool operator!=(const Expectation& rhs) const { return !(*this == rhs); }
+
+ private:
+  friend class ExpectationSet;
+  friend class Sequence;
+  friend class ::testing::internal::ExpectationBase;
+
+  template <typename F>
+  friend class ::testing::internal::FunctionMockerBase;
+
+  template <typename F>
+  friend class ::testing::internal::TypedExpectation;
+
+  // This comparator is needed for putting Expectation objects into a set.
+  class Less {
+   public:
+    bool operator()(const Expectation& lhs, const Expectation& rhs) const {
+      return lhs.expectation_base_.get() < rhs.expectation_base_.get();
+    }
+  };
+
+  typedef ::std::set<Expectation, Less> Set;
+
+  Expectation(
+      const internal::linked_ptr<internal::ExpectationBase>& expectation_base) :
+      expectation_base_(expectation_base) {}
+
+  // Returns the expectation this object references.
+  const internal::linked_ptr<internal::ExpectationBase>&
+  expectation_base() const {
+    return expectation_base_;
+  }
+
+  // A linked_ptr that co-owns the expectation this handle references.
+  internal::linked_ptr<internal::ExpectationBase> expectation_base_;
+};
+
+// A set of expectation handles.  Useful in the .After() clause of
+// EXPECT_CALL() for setting the (partial) order of expectations.  The
+// syntax:
+//
+//   ExpectationSet es;
+//   es += EXPECT_CALL(...)...;
+//   es += EXPECT_CALL(...)...;
+//   EXPECT_CALL(...).After(es)...;
+//
+// sets three expectations where the last one can only be matched
+// after the first two have both been satisfied.
+//
+// This class is copyable and has value semantics.
+class ExpectationSet {
+ public:
+  // A bidirectional iterator that can read a const element in the set.
+  typedef Expectation::Set::const_iterator const_iterator;
+
+  // An object stored in the set.  This is an alias of Expectation.
+  typedef Expectation::Set::value_type value_type;
+
+  // Constructs an empty set.
+  ExpectationSet() {}
+
+  // This single-argument ctor must not be explicit, in order to support the
+  //   ExpectationSet es = EXPECT_CALL(...);
+  // syntax.
+  ExpectationSet(internal::ExpectationBase& exp) {  // NOLINT
+    *this += Expectation(exp);
+  }
+
+  // This single-argument ctor implements implicit conversion from
+  // Expectation and thus must not be explicit.  This allows either an
+  // Expectation or an ExpectationSet to be used in .After().
+  ExpectationSet(const Expectation& e) {  // NOLINT
+    *this += e;
+  }
+
+  // The compiler-generator ctor and operator= works exactly as
+  // intended, so we don't need to define our own.
+
+  // Returns true iff rhs contains the same set of Expectation objects
+  // as this does.
+  bool operator==(const ExpectationSet& rhs) const {
+    return expectations_ == rhs.expectations_;
+  }
+
+  bool operator!=(const ExpectationSet& rhs) const { return !(*this == rhs); }
+
+  // Implements the syntax
+  //   expectation_set += EXPECT_CALL(...);
+  ExpectationSet& operator+=(const Expectation& e) {
+    expectations_.insert(e);
+    return *this;
+  }
+
+  int size() const { return static_cast<int>(expectations_.size()); }
+
+  const_iterator begin() const { return expectations_.begin(); }
+  const_iterator end() const { return expectations_.end(); }
+
+ private:
+  Expectation::Set expectations_;
+};
+
+
 // Sequence objects are used by a user to specify the relative order
 // in which the expectations should match.  They are copyable (we rely
 // on the compiler-defined copy constructor and assignment operator).
 class Sequence {
  public:
   // Constructs an empty sequence.
-  Sequence()
-      : last_expectation_(
-          new internal::linked_ptr<internal::ExpectationBase>(NULL)) {}
+  Sequence() : last_expectation_(new Expectation) {}
 
   // Adds an expectation to this sequence.  The caller must ensure
   // that no other thread is accessing this Sequence object.
-  void AddExpectation(
-      const internal::linked_ptr<internal::ExpectationBase>& expectation) const;
+  void AddExpectation(const Expectation& expectation) const;
+
  private:
-  // The last expectation in this sequence.  We use a nested
-  // linked_ptr here because:
-  //   - Sequence objects are copyable, and we want the copies to act
-  //     as aliases.  The outer linked_ptr allows the copies to co-own
-  //     and share the same state.
-  //   - An Expectation object is co-owned (via linked_ptr) by its
-  //     FunctionMocker and its successors (other Expectation objects).
-  //     Hence the inner linked_ptr.
-  internal::linked_ptr<internal::linked_ptr<internal::ExpectationBase> >
-      last_expectation_;
+  // The last expectation in this sequence.  We use a linked_ptr here
+  // because Sequence objects are copyable and we want the copies to
+  // be aliases.  The linked_ptr allows the copies to co-own and share
+  // the same Expectation object.
+  internal::linked_ptr<Expectation> last_expectation_;
 };  // class Sequence
 
 // An object of this type causes all EXPECT_CALL() statements
@@ -431,9 +575,7 @@ class ExpectationBase {
   // L >= g_gmock_mutex
   virtual void DescribeCallCountTo(::std::ostream* os) const = 0;
  protected:
-  typedef std::set<linked_ptr<ExpectationBase>,
-                   LinkedPtrLessThan<ExpectationBase> >
-      ExpectationBaseSet;
+  friend class ::testing::Expectation;
 
   enum Clause {
     // Don't change the order of the enum members!
@@ -441,10 +583,15 @@ class ExpectationBase {
     kWith,
     kTimes,
     kInSequence,
+    kAfter,
     kWillOnce,
     kWillRepeatedly,
     kRetiresOnSaturation,
   };
+
+  // Returns an Expectation object that references and co-owns this
+  // expectation.
+  virtual Expectation GetHandle() = 0;
 
   // Asserts that the EXPECT_CALL() statement has the given property.
   void AssertSpecProperty(bool property, const string& failure_message) const {
@@ -518,7 +665,7 @@ class ExpectationBase {
 
   // Adds unsatisfied pre-requisites of this expectation to 'result'.
   // L >= g_gmock_mutex
-  void FindUnsatisfiedPrerequisites(ExpectationBaseSet* result) const;
+  void FindUnsatisfiedPrerequisites(ExpectationSet* result) const;
 
   // Returns the number this expectation has been invoked.
   // L >= g_gmock_mutex
@@ -539,7 +686,7 @@ class ExpectationBase {
   friend class ::testing::internal::ExpectationTester;
 
   template <typename Function>
-  friend class Expectation;
+  friend class TypedExpectation;
 
   // This group of fields are part of the spec and won't change after
   // an EXPECT_CALL() statement finishes.
@@ -548,11 +695,13 @@ class ExpectationBase {
   // True iff the cardinality is specified explicitly.
   bool cardinality_specified_;
   Cardinality cardinality_;            // The cardinality of the expectation.
-  // The immediate pre-requisites of this expectation.  We use
-  // linked_ptr in the set because we want an Expectation object to be
-  // co-owned by its FunctionMocker and its successors.  This allows
-  // multiple mock objects to be deleted at different times.
-  ExpectationBaseSet immediate_prerequisites_;
+  // The immediate pre-requisites (i.e. expectations that must be
+  // satisfied before this expectation can be matched) of this
+  // expectation.  We use linked_ptr in the set because we want an
+  // Expectation object to be co-owned by its FunctionMocker and its
+  // successors.  This allows multiple mock objects to be deleted at
+  // different times.
+  ExpectationSet immediate_prerequisites_;
 
   // This group of fields are the current state of the expectation,
   // and can change as the mock function is called.
@@ -562,14 +711,14 @@ class ExpectationBase {
 
 // Impements an expectation for the given function type.
 template <typename F>
-class Expectation : public ExpectationBase {
+class TypedExpectation : public ExpectationBase {
  public:
   typedef typename Function<F>::ArgumentTuple ArgumentTuple;
   typedef typename Function<F>::ArgumentMatcherTuple ArgumentMatcherTuple;
   typedef typename Function<F>::Result Result;
 
-  Expectation(FunctionMockerBase<F>* owner, const char* file, int line,
-              const ArgumentMatcherTuple& m)
+  TypedExpectation(FunctionMockerBase<F>* owner, const char* file, int line,
+                   const ArgumentMatcherTuple& m)
       : ExpectationBase(file, line),
         owner_(owner),
         matchers_(m),
@@ -584,14 +733,14 @@ class Expectation : public ExpectationBase {
         last_clause_(kNone),
         action_count_checked_(false) {}
 
-  virtual ~Expectation() {
+  virtual ~TypedExpectation() {
     // Check the validity of the action count if it hasn't been done
     // yet (for example, if the expectation was never used).
     CheckActionCountIfNotDone();
   }
 
   // Implements the .With() clause.
-  Expectation& With(const Matcher<const ArgumentTuple&>& m) {
+  TypedExpectation& With(const Matcher<const ArgumentTuple&>& m) {
     if (last_clause_ == kWith) {
       ExpectSpecProperty(false,
                          ".With() cannot appear "
@@ -608,7 +757,7 @@ class Expectation : public ExpectationBase {
   }
 
   // Implements the .Times() clause.
-  Expectation& Times(const Cardinality& cardinality) {
+  TypedExpectation& Times(const Cardinality& cardinality) {
     if (last_clause_ ==kTimes) {
       ExpectSpecProperty(false,
                          ".Times() cannot appear "
@@ -626,40 +775,70 @@ class Expectation : public ExpectationBase {
   }
 
   // Implements the .Times() clause.
-  Expectation& Times(int n) {
+  TypedExpectation& Times(int n) {
     return Times(Exactly(n));
   }
 
   // Implements the .InSequence() clause.
-  Expectation& InSequence(const Sequence& s) {
+  TypedExpectation& InSequence(const Sequence& s) {
     ExpectSpecProperty(last_clause_ <= kInSequence,
-                       ".InSequence() cannot appear after .WillOnce(),"
-                       " .WillRepeatedly(), or "
+                       ".InSequence() cannot appear after .After(),"
+                       " .WillOnce(), .WillRepeatedly(), or "
                        ".RetiresOnSaturation().");
     last_clause_ = kInSequence;
 
-    s.AddExpectation(owner_->GetLinkedExpectationBase(this));
+    s.AddExpectation(GetHandle());
     return *this;
   }
-  Expectation& InSequence(const Sequence& s1, const Sequence& s2) {
+  TypedExpectation& InSequence(const Sequence& s1, const Sequence& s2) {
     return InSequence(s1).InSequence(s2);
   }
-  Expectation& InSequence(const Sequence& s1, const Sequence& s2,
-                              const Sequence& s3) {
+  TypedExpectation& InSequence(const Sequence& s1, const Sequence& s2,
+                               const Sequence& s3) {
     return InSequence(s1, s2).InSequence(s3);
   }
-  Expectation& InSequence(const Sequence& s1, const Sequence& s2,
-                              const Sequence& s3, const Sequence& s4) {
+  TypedExpectation& InSequence(const Sequence& s1, const Sequence& s2,
+                               const Sequence& s3, const Sequence& s4) {
     return InSequence(s1, s2, s3).InSequence(s4);
   }
-  Expectation& InSequence(const Sequence& s1, const Sequence& s2,
-                              const Sequence& s3, const Sequence& s4,
-                              const Sequence& s5) {
+  TypedExpectation& InSequence(const Sequence& s1, const Sequence& s2,
+                               const Sequence& s3, const Sequence& s4,
+                               const Sequence& s5) {
     return InSequence(s1, s2, s3, s4).InSequence(s5);
   }
 
+  // Implements that .After() clause.
+  TypedExpectation& After(const ExpectationSet& s) {
+    ExpectSpecProperty(last_clause_ <= kAfter,
+                       ".After() cannot appear after .WillOnce(),"
+                       " .WillRepeatedly(), or "
+                       ".RetiresOnSaturation().");
+    last_clause_ = kAfter;
+
+    for (ExpectationSet::const_iterator it = s.begin(); it != s.end(); ++it) {
+      immediate_prerequisites_ += *it;
+    }
+    return *this;
+  }
+  TypedExpectation& After(const ExpectationSet& s1, const ExpectationSet& s2) {
+    return After(s1).After(s2);
+  }
+  TypedExpectation& After(const ExpectationSet& s1, const ExpectationSet& s2,
+                          const ExpectationSet& s3) {
+    return After(s1, s2).After(s3);
+  }
+  TypedExpectation& After(const ExpectationSet& s1, const ExpectationSet& s2,
+                          const ExpectationSet& s3, const ExpectationSet& s4) {
+    return After(s1, s2, s3).After(s4);
+  }
+  TypedExpectation& After(const ExpectationSet& s1, const ExpectationSet& s2,
+                          const ExpectationSet& s3, const ExpectationSet& s4,
+                          const ExpectationSet& s5) {
+    return After(s1, s2, s3, s4).After(s5);
+  }
+
   // Implements the .WillOnce() clause.
-  Expectation& WillOnce(const Action<F>& action) {
+  TypedExpectation& WillOnce(const Action<F>& action) {
     ExpectSpecProperty(last_clause_ <= kWillOnce,
                        ".WillOnce() cannot appear after "
                        ".WillRepeatedly() or .RetiresOnSaturation().");
@@ -673,7 +852,7 @@ class Expectation : public ExpectationBase {
   }
 
   // Implements the .WillRepeatedly() clause.
-  Expectation& WillRepeatedly(const Action<F>& action) {
+  TypedExpectation& WillRepeatedly(const Action<F>& action) {
     if (last_clause_ == kWillRepeatedly) {
       ExpectSpecProperty(false,
                          ".WillRepeatedly() cannot appear "
@@ -698,7 +877,7 @@ class Expectation : public ExpectationBase {
   }
 
   // Implements the .RetiresOnSaturation() clause.
-  Expectation& RetiresOnSaturation() {
+  TypedExpectation& RetiresOnSaturation() {
     ExpectSpecProperty(last_clause_ < kRetiresOnSaturation,
                        ".RetiresOnSaturation() cannot appear "
                        "more than once.");
@@ -756,6 +935,12 @@ class Expectation : public ExpectationBase {
   template <typename Function>
   friend class FunctionMockerBase;
 
+  // Returns an Expectation object that references and co-owns this
+  // expectation.
+  virtual Expectation GetHandle() {
+    return owner_->GetHandleOf(this);
+  }
+
   // The following methods will be called only after the EXPECT_CALL()
   // statement finishes and when the current thread holds
   // g_gmock_mutex.
@@ -807,12 +992,12 @@ class Expectation : public ExpectationBase {
       *os << "         Expected: all pre-requisites are satisfied\n"
           << "           Actual: the following immediate pre-requisites "
           << "are not satisfied:\n";
-      ExpectationBaseSet unsatisfied_prereqs;
+      ExpectationSet unsatisfied_prereqs;
       FindUnsatisfiedPrerequisites(&unsatisfied_prereqs);
       int i = 0;
-      for (ExpectationBaseSet::const_iterator it = unsatisfied_prereqs.begin();
+      for (ExpectationSet::const_iterator it = unsatisfied_prereqs.begin();
            it != unsatisfied_prereqs.end(); ++it) {
-        (*it)->DescribeLocationTo(os);
+        it->expectation_base()->DescribeLocationTo(os);
         *os << "pre-requisite #" << i++ << "\n";
       }
       *os << "                   (end of pre-requisites)\n";
@@ -957,7 +1142,7 @@ class Expectation : public ExpectationBase {
   Clause last_clause_;
   mutable bool action_count_checked_;  // Under mutex_.
   mutable Mutex mutex_;  // Protects action_count_checked_.
-};  // class Expectation
+};  // class TypedExpectation
 
 // A MockSpec object is used by ON_CALL() or EXPECT_CALL() for
 // specifying the default behavior of, or expectation on, a mock
@@ -992,7 +1177,7 @@ class MockSpec {
 
   // Adds a new expectation spec to the function mocker and returns
   // the newly created spec.
-  internal::Expectation<F>& InternalExpectedAt(
+  internal::TypedExpectation<F>& InternalExpectedAt(
       const char* file, int line, const char* obj, const char* call) {
     LogWithLocation(internal::INFO, file, line,
         string("EXPECT_CALL(") + obj + ", " + call + ") invoked");
@@ -1247,18 +1432,18 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
 
   // Adds and returns an expectation spec for this mock function.
   // L < g_gmock_mutex
-  Expectation<F>& AddNewExpectation(
+  TypedExpectation<F>& AddNewExpectation(
       const char* file, int line,
       const ArgumentMatcherTuple& m) {
     Mock::RegisterUseByOnCallOrExpectCall(MockObject(), file, line);
-    const linked_ptr<Expectation<F> > expectation(
-        new Expectation<F>(this, file, line, m));
+    const linked_ptr<TypedExpectation<F> > expectation(
+        new TypedExpectation<F>(this, file, line, m));
     expectations_.push_back(expectation);
 
     // Adds this expectation into the implicit sequence if there is one.
     Sequence* const implicit_sequence = g_gmock_implicit_sequence.get();
     if (implicit_sequence != NULL) {
-      implicit_sequence->AddExpectation(expectation);
+      implicit_sequence->AddExpectation(Expectation(expectation));
     }
 
     return *expectation;
@@ -1268,22 +1453,23 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   // being described on this function mocker.
   MockSpec<F>& current_spec() { return current_spec_; }
  private:
-  template <typename Func> friend class Expectation;
+  template <typename Func> friend class TypedExpectation;
 
-  typedef std::vector<internal::linked_ptr<Expectation<F> > > Expectations;
+  typedef std::vector<internal::linked_ptr<TypedExpectation<F> > >
+  TypedExpectations;
 
-  // Gets the internal::linked_ptr<ExpectationBase> object that co-owns 'exp'.
-  internal::linked_ptr<ExpectationBase> GetLinkedExpectationBase(
-      Expectation<F>* exp) {
-    for (typename Expectations::const_iterator it = expectations_.begin();
+  // Returns an Expectation object that references and co-owns exp,
+  // which must be an expectation on this mock function.
+  Expectation GetHandleOf(TypedExpectation<F>* exp) {
+    for (typename TypedExpectations::const_iterator it = expectations_.begin();
          it != expectations_.end(); ++it) {
       if (it->get() == exp) {
-        return *it;
+        return Expectation(*it);
       }
     }
 
     Assert(false, __FILE__, __LINE__, "Cannot find expectation.");
-    return internal::linked_ptr<ExpectationBase>(NULL);
+    return Expectation();
     // The above statement is just to make the code compile, and will
     // never be executed.
   }
@@ -1330,7 +1516,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   // mock function) and excessive locking could cause a dead lock.
   // L < g_gmock_mutex
   bool FindMatchingExpectationAndAction(
-      const ArgumentTuple& args, Expectation<F>** exp, Action<F>* action,
+      const ArgumentTuple& args, TypedExpectation<F>** exp, Action<F>* action,
       bool* is_excessive, ::std::ostream* what, ::std::ostream* why) {
     MutexLock l(&g_gmock_mutex);
     *exp = this->FindMatchingExpectationLocked(args);
@@ -1351,13 +1537,13 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   // Returns the expectation that matches the arguments, or NULL if no
   // expectation matches them.
   // L >= g_gmock_mutex
-  Expectation<F>* FindMatchingExpectationLocked(
+  TypedExpectation<F>* FindMatchingExpectationLocked(
       const ArgumentTuple& args) const {
     g_gmock_mutex.AssertHeld();
-    for (typename Expectations::const_reverse_iterator it =
+    for (typename TypedExpectations::const_reverse_iterator it =
              expectations_.rbegin();
          it != expectations_.rend(); ++it) {
-      Expectation<F>* const exp = it->get();
+      TypedExpectation<F>* const exp = it->get();
       if (exp->ShouldHandleArguments(args)) {
         return exp;
       }
@@ -1415,7 +1601,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   // All default action specs for this function mocker.
   std::vector<DefaultActionSpec<F> > default_actions_;
   // All expectations for this function mocker.
-  Expectations expectations_;
+  TypedExpectations expectations_;
 
   // There is no generally useful and implementable semantics of
   // copying a mock object, so copying a mock is usually a user error.
@@ -1446,9 +1632,9 @@ template <typename F>
 bool FunctionMockerBase<F>::VerifyAndClearExpectationsLocked() {
   g_gmock_mutex.AssertHeld();
   bool expectations_met = true;
-  for (typename Expectations::const_iterator it = expectations_.begin();
+  for (typename TypedExpectations::const_iterator it = expectations_.begin();
        it != expectations_.end(); ++it) {
-    Expectation<F>* const exp = it->get();
+    TypedExpectation<F>* const exp = it->get();
 
     if (exp->IsOverSaturated()) {
       // There was an upper-bound violation.  Since the error was
@@ -1532,7 +1718,7 @@ typename Function<F>::Result FunctionMockerBase<F>::InvokeWith(
   ::std::stringstream why;
   ::std::stringstream loc;
   Action<F> action;
-  Expectation<F>* exp;
+  TypedExpectation<F>* exp;
 
   // The FindMatchingExpectationAndAction() function acquires and
   // releases g_gmock_mutex.
@@ -1604,6 +1790,10 @@ using internal::MockSpec;
 //   EXPECT_CALL(Const(foo), Bar());
 template <typename T>
 inline const T& Const(const T& x) { return x; }
+
+// Constructs an Expectation object that references and co-owns exp.
+inline Expectation::Expectation(internal::ExpectationBase& exp)  // NOLINT
+    : expectation_base_(exp.GetHandle().expectation_base()) {}
 
 }  // namespace testing
 
