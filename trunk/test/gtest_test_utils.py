@@ -190,7 +190,7 @@ def GetExitStatus(exit_code):
 
 
 class Subprocess:
-  def __init__(self, command, working_dir=None):
+  def __init__(self, command, working_dir=None, capture_stderr=True):
     """Changes into a specified directory, if provided, and executes a command.
     Restores the old directory afterwards. Execution results are returned
     via the following attributes:
@@ -203,8 +203,10 @@ class Subprocess:
                              combined in a string.
 
     Args:
-      command: A command to run, in the form of sys.argv.
-      working_dir: A directory to change into.
+      command:        The command to run, in the form of sys.argv.
+      working_dir:    The directory to change into.
+      capture_stderr: Determines whether to capture stderr in the output member
+                      or to discard it.
     """
 
     # The subprocess module is the preferrable way of running programs
@@ -215,8 +217,13 @@ class Subprocess:
     # functionality (Popen4) under Windows. This allows us to support Mac
     # OS X 10.4 Tiger, which has python 2.3 installed.
     if _SUBPROCESS_MODULE_AVAILABLE:
+      if capture_stderr:
+        stderr = subprocess.STDOUT
+      else:
+        stderr = subprocess.PIPE
+
       p = subprocess.Popen(command,
-                           stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                           stdout=subprocess.PIPE, stderr=stderr,
                            cwd=working_dir, universal_newlines=True)
       # communicate returns a tuple with the file obect for the child's
       # output.
@@ -227,7 +234,10 @@ class Subprocess:
       try:
         if working_dir is not None:
           os.chdir(working_dir)
-        p = popen2.Popen4(command)
+        if capture_stderr:
+          p = popen2.Popen4(command)
+        else:
+          p = popen2.Popen3(command)
         p.tochild.close()
         self.output = p.fromchild.read()
         ret_code = p.wait()

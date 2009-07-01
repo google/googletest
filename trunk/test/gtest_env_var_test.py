@@ -59,52 +59,44 @@ def SetEnvVar(env_var, value):
     del os.environ[env_var]
 
 
-def GetFlag(command, flag):
+def GetFlag(flag):
   """Runs gtest_env_var_test_ and returns its output."""
 
-  cmd = command
+  args = [COMMAND]
   if flag is not None:
-    cmd += ' %s' % (flag,)
-  stdin, stdout = os.popen2(cmd, 'b')
-  stdin.close()
-  line = stdout.readline()
-  stdout.close()
-  return line
+    args += [flag]
+  return gtest_test_utils.Subprocess(args).output
 
 
-def TestFlag(command, flag, test_val, default_val):
+def TestFlag(flag, test_val, default_val):
   """Verifies that the given flag is affected by the corresponding env var."""
 
   env_var = 'GTEST_' + flag.upper()
   SetEnvVar(env_var, test_val)
-  AssertEq(test_val, GetFlag(command, flag))
+  AssertEq(test_val, GetFlag(flag))
   SetEnvVar(env_var, None)
-  AssertEq(default_val, GetFlag(command, flag))
-
-
-def TestEnvVarAffectsFlag(command):
-  """An environment variable should affect the corresponding flag."""
-
-  TestFlag(command, 'break_on_failure', '1', '0')
-  TestFlag(command, 'color', 'yes', 'auto')
-  TestFlag(command, 'filter', 'FooTest.Bar', '*')
-  TestFlag(command, 'output', 'tmp/foo.xml', '')
-  TestFlag(command, 'print_time', '0', '1')
-  TestFlag(command, 'repeat', '999', '1')
-  TestFlag(command, 'throw_on_failure', '1', '0')
-  TestFlag(command, 'death_test_style', 'threadsafe', 'fast')
-
-  if IS_WINDOWS:
-    TestFlag(command, 'catch_exceptions', '1', '0')
-
-  if IS_LINUX:
-    TestFlag(command, 'death_test_use_fork', '1', '0')
-    TestFlag(command, 'stack_trace_depth', '0', '100')
+  AssertEq(default_val, GetFlag(flag))
 
 
 class GTestEnvVarTest(gtest_test_utils.TestCase):
   def testEnvVarAffectsFlag(self):
-    TestEnvVarAffectsFlag(COMMAND)
+    """Tests that environment variable should affect the corresponding flag."""
+
+    TestFlag('break_on_failure', '1', '0')
+    TestFlag('color', 'yes', 'auto')
+    TestFlag('filter', 'FooTest.Bar', '*')
+    TestFlag('output', 'tmp/foo.xml', '')
+    TestFlag('print_time', '0', '1')
+    TestFlag('repeat', '999', '1')
+    TestFlag('throw_on_failure', '1', '0')
+    TestFlag('death_test_style', 'threadsafe', 'fast')
+
+    if IS_WINDOWS:
+      TestFlag('catch_exceptions', '1', '0')
+
+    if IS_LINUX:
+      TestFlag('death_test_use_fork', '1', '0')
+      TestFlag('stack_trace_depth', '0', '100')
 
 
 if __name__ == '__main__':

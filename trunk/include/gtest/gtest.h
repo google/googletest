@@ -142,8 +142,11 @@ const int kMaxStackTraceDepth = 100;
 namespace internal {
 
 class AssertHelper;
+class DefaultGlobalTestPartResultReporter;
+class ExecDeathTest;
 class GTestFlagSaver;
 class TestCase;                        // A collection of related tests.
+class TestInfoImpl;
 class UnitTestImpl* GetUnitTestImpl();
 void ReportFailureInUnknownLocation(TestPartResultType result_type,
                                     const String& message);
@@ -402,16 +405,6 @@ class TestResult {
   // D'tor.  Do not inherit from TestResult.
   ~TestResult();
 
-  // Gets the list of TestPartResults.
-  const internal::List<TestPartResult>& test_part_results() const {
-    return *test_part_results_;
-  }
-
-  // Gets the list of TestProperties.
-  const internal::List<internal::TestProperty>& test_properties() const {
-    return *test_properties_;
-  }
-
   // Gets the number of successful test parts.
   int successful_part_count() const;
 
@@ -440,9 +433,6 @@ class TestResult {
   // Returns the elapsed time, in milliseconds.
   TimeInMillis elapsed_time() const { return elapsed_time_; }
 
-  // Sets the elapsed time.
-  void set_elapsed_time(TimeInMillis elapsed) { elapsed_time_ = elapsed; }
-
   // Returns the i-th test part result among all the results. i can range
   // from 0 to test_property_count() - 1. If i is not in that range, returns
   // NULL.
@@ -452,8 +442,28 @@ class TestResult {
   // test_property_count() - 1. If i is not in that range, returns NULL.
   const TestProperty* GetTestProperty(int i) const;
 
-  // Adds a test part result to the list.
-  void AddTestPartResult(const TestPartResult& test_part_result);
+ private:
+  friend class DefaultGlobalTestPartResultReporter;
+  friend class ExecDeathTest;
+  friend class TestInfoImpl;
+  friend class TestResultAccessor;
+  friend class UnitTestImpl;
+  friend class WindowsDeathTest;
+  friend class testing::TestInfo;
+  friend class testing::UnitTest;
+
+  // Gets the list of TestPartResults.
+  const internal::List<TestPartResult>& test_part_results() const {
+    return *test_part_results_;
+  }
+
+  // Gets the list of TestProperties.
+  const internal::List<internal::TestProperty>& test_properties() const {
+    return *test_properties_;
+  }
+
+  // Sets the elapsed time.
+  void set_elapsed_time(TimeInMillis elapsed) { elapsed_time_ = elapsed; }
 
   // Adds a test property to the list. The property is validated and may add
   // a non-fatal failure if invalid (e.g., if it conflicts with reserved
@@ -467,6 +477,9 @@ class TestResult {
   // TODO(russr): Validate attribute names are legal and human readable.
   static bool ValidateTestProperty(const internal::TestProperty& test_property);
 
+  // Adds a test part result to the list.
+  void AddTestPartResult(const TestPartResult& test_part_result);
+
   // Returns the death test count.
   int death_test_count() const { return death_test_count_; }
 
@@ -478,7 +491,7 @@ class TestResult {
 
   // Clears the object.
   void Clear();
- private:
+
   // Protects mutable state of the property list and of owned properties, whose
   // values may be updated.
   internal::Mutex test_properites_mutex_;
@@ -527,9 +540,6 @@ class TestInfo {
   // Returns the test comment.
   const char* comment() const;
 
-  // Returns true if this test matches the user-specified filter.
-  bool matches_filter() const;
-
   // Returns true if this test should run, that is if the test is not disabled
   // (or it is disabled but the also_run_disabled_tests flag has been specified)
   // and its full name matches the user-specified filter.
@@ -550,6 +560,7 @@ class TestInfo {
 
   // Returns the result of the test.
   const internal::TestResult* result() const;
+
  private:
 #if GTEST_HAS_DEATH_TEST
   friend class internal::DefaultDeathTestFactory;
@@ -565,6 +576,9 @@ class TestInfo {
       Test::SetUpTestCaseFunc set_up_tc,
       Test::TearDownTestCaseFunc tear_down_tc,
       internal::TestFactoryBase* factory);
+
+  // Returns true if this test matches the user-specified filter.
+  bool matches_filter() const;
 
   // Increments the number of death tests encountered in this test so
   // far.
@@ -620,17 +634,6 @@ class TestCase {
   // Returns true if any test in this test case should run.
   bool should_run() const { return should_run_; }
 
-  // Sets the should_run member.
-  void set_should_run(bool should) { should_run_ = should; }
-
-  // Gets the (mutable) list of TestInfos in this TestCase.
-  internal::List<TestInfo*>& test_info_list() { return *test_info_list_; }
-
-  // Gets the (immutable) list of TestInfos in this TestCase.
-  const internal::List<TestInfo *> & test_info_list() const {
-    return *test_info_list_;
-  }
-
   // Gets the number of successful tests in this test case.
   int successful_test_count() const;
 
@@ -659,13 +662,24 @@ class TestCase {
   // total_test_count() - 1. If i is not in that range, returns NULL.
   const TestInfo* GetTestInfo(int i) const;
 
+ private:
+  friend class testing::Test;
+  friend class UnitTestImpl;
+
+  // Gets the (mutable) list of TestInfos in this TestCase.
+  internal::List<TestInfo*>& test_info_list() { return *test_info_list_; }
+
+  // Gets the (immutable) list of TestInfos in this TestCase.
+  const internal::List<TestInfo *> & test_info_list() const {
+    return *test_info_list_;
+  }
+
+  // Sets the should_run member.
+  void set_should_run(bool should) { should_run_ = should; }
+
   // Adds a TestInfo to this test case.  Will delete the TestInfo upon
   // destruction of the TestCase object.
   void AddTestInfo(TestInfo * test_info);
-
-  // Finds and returns a TestInfo with the given name.  If one doesn't
-  // exist, returns NULL.
-  TestInfo* GetTestInfo(const char* test_name);
 
   // Clears the results of all tests in this test case.
   void ClearResult();
@@ -693,7 +707,6 @@ class TestCase {
   // Returns true if the given test should run.
   static bool ShouldRunTest(const TestInfo *test_info);
 
- private:
   // Name of the test case.
   internal::String name_;
   // Comment on the test case.

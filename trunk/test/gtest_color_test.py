@@ -58,10 +58,13 @@ def UsesColor(term, color_env_var, color_flag):
 
   SetEnvVar('TERM', term)
   SetEnvVar(COLOR_ENV_VAR, color_env_var)
-  cmd = COMMAND
-  if color_flag is not None:
-    cmd += ' --%s=%s' % (COLOR_FLAG, color_flag)
-  return gtest_test_utils.GetExitStatus(os.system(cmd))
+
+  if color_flag is None:
+    args = []
+  else:
+    args = ['--%s=%s' % (COLOR_FLAG, color_flag)]
+  p = gtest_test_utils.Subprocess([COMMAND] + args)
+  return not p.exited or p.exit_code
 
 
 class GTestColorTest(gtest_test_utils.TestCase):

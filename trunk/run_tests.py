@@ -98,10 +98,10 @@ KNOWN BUILD DIRECTORIES
       defines them as follows (the default build directory is the first one
       listed in each group):
       On Windows:
-              <gtest root>/scons/build/win-dbg/scons/
-              <gtest root>/scons/build/win-opt/scons/
               <gtest root>/scons/build/win-dbg8/scons/
               <gtest root>/scons/build/win-opt8/scons/
+              <gtest root>/scons/build/win-dbg/scons/
+              <gtest root>/scons/build/win-opt/scons/
       On Mac:
               <gtest root>/scons/build/mac-dbg/scons/
               <gtest root>/scons/build/mac-opt/scons/
@@ -137,7 +137,7 @@ IS_CYGWIN = os.name == 'posix' and 'CYGWIN' in os.uname()[0]
 # Definition of CONFIGS must match that of the build directory names in the
 # SConstruct script. The first list item is the default build configuration.
 if IS_WINDOWS:
-  CONFIGS = ('win-dbg', 'win-dbg8', 'win-opt', 'win-opt8')
+  CONFIGS = ('win-dbg8', 'win-opt8', 'win-dbg', 'win-opt')
 elif IS_MAC:
   CONFIGS = ('mac-dbg', 'mac-opt')
 else:

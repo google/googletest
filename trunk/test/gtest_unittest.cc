@@ -79,7 +79,29 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 namespace testing {
 namespace internal {
 const char* FormatTimeInMillisAsSeconds(TimeInMillis ms);
+
 bool ParseInt32Flag(const char* str, const char* flag, Int32* value);
+
+// TestResult contains some private methods that should be hidden from
+// Google Test user but are required for testing. This class allow our tests
+// to access them.
+class TestResultAccessor {
+ public:
+  static void RecordProperty(TestResult* test_result,
+                             const TestProperty& property) {
+    test_result->RecordProperty(property);
+  }
+
+  static void ClearTestPartResults(TestResult* test_result) {
+    test_result->ClearTestPartResults();
+  }
+
+  static const List<testing::TestPartResult>& test_part_results(
+      const TestResult& test_result) {
+    return test_result.test_part_results();
+  }
+};
+
 }  // namespace internal
 }  // namespace testing
 
@@ -128,7 +150,6 @@ using testing::TPRT_SUCCESS;
 using testing::UnitTest;
 using testing::internal::kTestTypeIdInGoogleTest;
 using testing::internal::AppendUserMessage;
-using testing::internal::ClearCurrentTestPartResults;
 using testing::internal::CodePointToUtf8;
 using testing::internal::EqFailure;
 using testing::internal::FloatingPoint;
@@ -146,13 +167,20 @@ using testing::internal::ShouldShard;
 using testing::internal::ShouldUseColor;
 using testing::internal::StreamableToString;
 using testing::internal::String;
+using testing::internal::TestCase;
 using testing::internal::TestProperty;
 using testing::internal::TestResult;
+using testing::internal::TestResultAccessor;
 using testing::internal::ThreadLocal;
 using testing::internal::WideStringToUtf8;
 
 // This line tests that we can define tests in an unnamed namespace.
 namespace {
+
+static void ClearCurrentTestPartResults() {
+  TestResultAccessor::ClearTestPartResults(
+      GetUnitTestImpl()->current_test_result());
+}
 
 // Tests GetTypeId.
 
@@ -1076,9 +1104,9 @@ class TestResultTest : public Test {
     // this is a hack).
     TPRList * list1, * list2;
     list1 = const_cast<List<TestPartResult> *>(
-        & r1->test_part_results());
+        &TestResultAccessor::test_part_results(*r1));
     list2 = const_cast<List<TestPartResult> *>(
-        & r2->test_part_results());
+        &TestResultAccessor::test_part_results(*r2));
 
     // r0 is an empty TestResult.
 
@@ -1115,39 +1143,39 @@ class TestResultTest : public Test {
   }
 };
 
-// Tests TestResult::test_part_results().
+// Tests TestResult::total_part_count().
 TEST_F(TestResultTest, test_part_results) {
-  ASSERT_EQ(0u, r0->test_part_results().size());
-  ASSERT_EQ(1u, r1->test_part_results().size());
-  ASSERT_EQ(2u, r2->test_part_results().size());
+  ASSERT_EQ(0, r0->total_part_count());
+  ASSERT_EQ(1, r1->total_part_count());
+  ASSERT_EQ(2, r2->total_part_count());
 }
 
 // Tests TestResult::successful_part_count().
 TEST_F(TestResultTest, successful_part_count) {
-  ASSERT_EQ(0u, r0->successful_part_count());
-  ASSERT_EQ(1u, r1->successful_part_count());
-  ASSERT_EQ(1u, r2->successful_part_count());
+  ASSERT_EQ(0, r0->successful_part_count());
+  ASSERT_EQ(1, r1->successful_part_count());
+  ASSERT_EQ(1, r2->successful_part_count());
 }
 
 // Tests TestResult::failed_part_count().
 TEST_F(TestResultTest, failed_part_count) {
-  ASSERT_EQ(0u, r0->failed_part_count());
-  ASSERT_EQ(0u, r1->failed_part_count());
-  ASSERT_EQ(1u, r2->failed_part_count());
+  ASSERT_EQ(0, r0->failed_part_count());
+  ASSERT_EQ(0, r1->failed_part_count());
+  ASSERT_EQ(1, r2->failed_part_count());
 }
 
 // Tests testing::internal::GetFailedPartCount().
 TEST_F(TestResultTest, GetFailedPartCount) {
-  ASSERT_EQ(0u, GetFailedPartCount(r0));
-  ASSERT_EQ(0u, GetFailedPartCount(r1));
-  ASSERT_EQ(1u, GetFailedPartCount(r2));
+  ASSERT_EQ(0, GetFailedPartCount(r0));
+  ASSERT_EQ(0, GetFailedPartCount(r1));
+  ASSERT_EQ(1, GetFailedPartCount(r2));
 }
 
 // Tests TestResult::total_part_count().
 TEST_F(TestResultTest, total_part_count) {
-  ASSERT_EQ(0u, r0->total_part_count());
-  ASSERT_EQ(1u, r1->total_part_count());
-  ASSERT_EQ(2u, r2->total_part_count());
+  ASSERT_EQ(0, r0->total_part_count());
+  ASSERT_EQ(1, r1->total_part_count());
+  ASSERT_EQ(2, r2->total_part_count());
 }
 
 // Tests TestResult::Passed().
@@ -1172,76 +1200,60 @@ TEST_F(TestResultTest, GetTestPartResult) {
   EXPECT_TRUE(r2->GetTestPartResult(-1) == NULL);
 }
 
-// Tests TestResult::test_properties() has no properties when none are added.
+// Tests TestResult has no properties when none are added.
 TEST(TestResultPropertyTest, NoPropertiesFoundWhenNoneAreAdded) {
   TestResult test_result;
-  ASSERT_EQ(0u, test_result.test_properties().size());
+  ASSERT_EQ(0, test_result.test_property_count());
 }
 
-// Tests TestResult::test_properties() has the expected property when added.
+// Tests TestResult has the expected property when added.
 TEST(TestResultPropertyTest, OnePropertyFoundWhenAdded) {
   TestResult test_result;
   TestProperty property("key_1", "1");
-  test_result.RecordProperty(property);
-  const List<TestProperty>& properties = test_result.test_properties();
-  ASSERT_EQ(1u, properties.size());
-  TestProperty actual_property = properties.Head()->element();
-  EXPECT_STREQ("key_1", actual_property.key());
-  EXPECT_STREQ("1", actual_property.value());
+  TestResultAccessor::RecordProperty(&test_result, property);
+  ASSERT_EQ(1, test_result.test_property_count());
+  const TestProperty* actual_property = test_result.GetTestProperty(0);
+  EXPECT_STREQ("key_1", actual_property->key());
+  EXPECT_STREQ("1", actual_property->value());
 }
 
-// Tests TestResult::test_properties() has multiple properties when added.
+// Tests TestResult has multiple properties when added.
 TEST(TestResultPropertyTest, MultiplePropertiesFoundWhenAdded) {
   TestResult test_result;
   TestProperty property_1("key_1", "1");
   TestProperty property_2("key_2", "2");
-  test_result.RecordProperty(property_1);
-  test_result.RecordProperty(property_2);
-  const List<TestProperty>& properties = test_result.test_properties();
-  ASSERT_EQ(2u, properties.size());
-  TestProperty actual_property_1 = properties.Head()->element();
-  EXPECT_STREQ("key_1", actual_property_1.key());
-  EXPECT_STREQ("1", actual_property_1.value());
+  TestResultAccessor::RecordProperty(&test_result, property_1);
+  TestResultAccessor::RecordProperty(&test_result, property_2);
+  ASSERT_EQ(2, test_result.test_property_count());
+  const TestProperty* actual_property_1 = test_result.GetTestProperty(0);
+  EXPECT_STREQ("key_1", actual_property_1->key());
+  EXPECT_STREQ("1", actual_property_1->value());
 
-  TestProperty actual_property_2 = properties.Last()->element();
-  EXPECT_STREQ("key_2", actual_property_2.key());
-  EXPECT_STREQ("2", actual_property_2.value());
+  const TestProperty* actual_property_2 = test_result.GetTestProperty(1);
+  EXPECT_STREQ("key_2", actual_property_2->key());
+  EXPECT_STREQ("2", actual_property_2->value());
 }
 
-// Tests TestResult::test_properties() overrides values for duplicate keys.
+// Tests TestResult::RecordProperty() overrides values for duplicate keys.
 TEST(TestResultPropertyTest, OverridesValuesForDuplicateKeys) {
   TestResult test_result;
   TestProperty property_1_1("key_1", "1");
   TestProperty property_2_1("key_2", "2");
   TestProperty property_1_2("key_1", "12");
   TestProperty property_2_2("key_2", "22");
-  test_result.RecordProperty(property_1_1);
-  test_result.RecordProperty(property_2_1);
-  test_result.RecordProperty(property_1_2);
-  test_result.RecordProperty(property_2_2);
+  TestResultAccessor::RecordProperty(&test_result, property_1_1);
+  TestResultAccessor::RecordProperty(&test_result, property_2_1);
+  TestResultAccessor::RecordProperty(&test_result, property_1_2);
+  TestResultAccessor::RecordProperty(&test_result, property_2_2);
 
-  const List<TestProperty>& properties = test_result.test_properties();
-  ASSERT_EQ(2u, properties.size());
-  TestProperty actual_property_1 = properties.Head()->element();
-  EXPECT_STREQ("key_1", actual_property_1.key());
-  EXPECT_STREQ("12", actual_property_1.value());
-
-  TestProperty actual_property_2 = properties.Last()->element();
-  EXPECT_STREQ("key_2", actual_property_2.key());
-  EXPECT_STREQ("22", actual_property_2.value());
-}
-
-// Tests TestResult::test_property_count().
-TEST(TestResultPropertyTest, TestPropertyCount) {
-  TestResult test_result;
-  TestProperty property_1("key_1", "1");
-  TestProperty property_2("key_2", "2");
-
-  ASSERT_EQ(0, test_result.test_property_count());
-  test_result.RecordProperty(property_1);
-  ASSERT_EQ(1, test_result.test_property_count());
-  test_result.RecordProperty(property_2);
   ASSERT_EQ(2, test_result.test_property_count());
+  const TestProperty* actual_property_1 = test_result.GetTestProperty(0);
+  EXPECT_STREQ("key_1", actual_property_1->key());
+  EXPECT_STREQ("12", actual_property_1->value());
+
+  const TestProperty* actual_property_2 = test_result.GetTestProperty(1);
+  EXPECT_STREQ("key_2", actual_property_2->key());
+  EXPECT_STREQ("22", actual_property_2->value());
 }
 
 // Tests TestResult::GetTestProperty().
@@ -1250,9 +1262,9 @@ TEST(TestResultPropertyTest, GetTestProperty) {
   TestProperty property_1("key_1", "1");
   TestProperty property_2("key_2", "2");
   TestProperty property_3("key_3", "3");
-  test_result.RecordProperty(property_1);
-  test_result.RecordProperty(property_2);
-  test_result.RecordProperty(property_3);
+  TestResultAccessor::RecordProperty(&test_result, property_1);
+  TestResultAccessor::RecordProperty(&test_result, property_2);
+  TestResultAccessor::RecordProperty(&test_result, property_3);
 
   const TestProperty* fetched_property_1 = test_result.GetTestProperty(0);
   const TestProperty* fetched_property_2 = test_result.GetTestProperty(1);
@@ -1280,8 +1292,10 @@ TEST(TestResultPropertyTest, GetTestProperty) {
 void ExpectNonFatalFailureRecordingPropertyWithReservedKey(const char* key) {
   TestResult test_result;
   TestProperty property(key, "1");
-  EXPECT_NONFATAL_FAILURE(test_result.RecordProperty(property), "Reserved key");
-  ASSERT_TRUE(test_result.test_properties().IsEmpty()) << "Not recorded";
+  EXPECT_NONFATAL_FAILURE(
+      TestResultAccessor::RecordProperty(&test_result, property),
+      "Reserved key");
+  ASSERT_EQ(0, test_result.test_property_count()) << "Not recorded";
 }
 
 // Attempting to recording a property with the Reserved literal "name"
@@ -4415,9 +4429,16 @@ namespace testing {
 
 class TestInfoTest : public Test {
  protected:
-  static TestInfo * GetTestInfo(const char* test_name) {
-    return GetUnitTestImpl()->GetTestCase("TestInfoTest", "", NULL, NULL)->
-        GetTestInfo(test_name);
+  static const TestInfo* GetTestInfo(const char* test_name) {
+    const TestCase* const test_case = GetUnitTestImpl()->
+        GetTestCase("TestInfoTest", "", NULL, NULL);
+
+    for (int i = 0; i < test_case->total_test_count(); ++i) {
+      const TestInfo* const test_info = test_case->GetTestInfo(i);
+      if (strcmp(test_name, test_info->name()) == 0)
+        return test_info;
+    }
+    return NULL;
   }
 
   static const TestResult* GetTestResult(
@@ -4428,7 +4449,7 @@ class TestInfoTest : public Test {
 
 // Tests TestInfo::test_case_name() and TestInfo::name().
 TEST_F(TestInfoTest, Names) {
-  TestInfo * const test_info = GetTestInfo("Names");
+  const TestInfo* const test_info = GetTestInfo("Names");
 
   ASSERT_STREQ("TestInfoTest", test_info->test_case_name());
   ASSERT_STREQ("Names", test_info->name());
@@ -4436,13 +4457,13 @@ TEST_F(TestInfoTest, Names) {
 
 // Tests TestInfo::result().
 TEST_F(TestInfoTest, result) {
-  TestInfo * const test_info = GetTestInfo("result");
+  const TestInfo* const test_info = GetTestInfo("result");
 
   // Initially, there is no TestPartResult for this test.
-  ASSERT_EQ(0u, GetTestResult(test_info)->total_part_count());
+  ASSERT_EQ(0, GetTestResult(test_info)->total_part_count());
 
   // After the previous assertion, there is still none.
-  ASSERT_EQ(0u, GetTestResult(test_info)->total_part_count());
+  ASSERT_EQ(0, GetTestResult(test_info)->total_part_count());
 }
 
 // Tests setting up and tearing down a test case.

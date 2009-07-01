@@ -1116,11 +1116,6 @@ inline UnitTestImpl* GetUnitTestImpl() {
   return UnitTest::GetInstance()->impl();
 }
 
-// Clears all test part results of the current test.
-inline void ClearCurrentTestPartResults() {
-  GetUnitTestImpl()->current_test_result()->ClearTestPartResults();
-}
-
 // Internal helper functions for implementing the simple regular
 // expression matcher.
 bool IsInSet(char ch, const char* str);

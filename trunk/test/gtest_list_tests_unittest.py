@@ -39,7 +39,6 @@ Google Test) the command line flags.
 
 __author__ = 'phanna@google.com (Patrick Hanna)'
 
-import os
 import gtest_test_utils
 
 
@@ -89,15 +88,11 @@ FooTest.
 # Utilities.
 
 
-def Run(command):
-  """Runs a command and returns the list of tests printed."""
+def Run(args):
+  """Runs gtest_list_tests_unittest_ and returns the list of tests printed."""
 
-  stdout_file = os.popen(command, 'r')
-
-  output = stdout_file.read()
-
-  stdout_file.close()
-  return output
+  return gtest_test_utils.Subprocess([EXE_PATH] + args,
+                                     capture_stderr=False).output
 
 
 # The unit test.
@@ -122,23 +117,23 @@ class GTestListTestsUnitTest(gtest_test_utils.TestCase):
 
     if flag_value is None:
       flag = ''
-      flag_expression = "not set"
+      flag_expression = 'not set'
     elif flag_value == '0':
-      flag = ' --%s=0' % LIST_TESTS_FLAG
-      flag_expression = "0"
+      flag = '--%s=0' % LIST_TESTS_FLAG
+      flag_expression = '0'
     else:
-      flag = ' --%s' % LIST_TESTS_FLAG
-      flag_expression = "1"
+      flag = '--%s' % LIST_TESTS_FLAG
+      flag_expression = '1'
 
-    command = EXE_PATH + flag
+    args = [flag]
 
     if other_flag is not None:
-      command += " " + other_flag
+      args += [other_flag]
 
-    output = Run(command)
+    output = Run(args)
 
     msg = ('when %s is %s, the output of "%s" is "%s".' %
-           (LIST_TESTS_FLAG, flag_expression, command, output))
+           (LIST_TESTS_FLAG, flag_expression, ' '.join(args), output))
 
     if expected_output is not None:
       self.assert_(output == expected_output, msg)
@@ -165,17 +160,17 @@ class GTestListTestsUnitTest(gtest_test_utils.TestCase):
   def testOverrideNonFilterFlags(self):
     """Tests that --gtest_list_tests overrides the non-filter flags."""
 
-    self.RunAndVerify(flag_value="1",
+    self.RunAndVerify(flag_value='1',
                       expected_output=EXPECTED_OUTPUT_NO_FILTER,
-                      other_flag="--gtest_break_on_failure")
+                      other_flag='--gtest_break_on_failure')
 
   def testWithFilterFlags(self):
     """Tests that --gtest_list_tests takes into account the
     --gtest_filter flag."""
 
-    self.RunAndVerify(flag_value="1",
+    self.RunAndVerify(flag_value='1',
                       expected_output=EXPECTED_OUTPUT_FILTER_FOO,
-                      other_flag="--gtest_filter=Foo*")
+                      other_flag='--gtest_filter=Foo*')
 
 
 if __name__ == '__main__':
