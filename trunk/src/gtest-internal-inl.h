@@ -49,7 +49,8 @@
 #include <errno.h>
 #endif  // !_WIN32_WCE
 #include <stddef.h>
-#include <stdlib.h>   // For strtoll/_strtoul64.
+#include <stdlib.h>  // For strtoll/_strtoul64/malloc/free.
+#include <string.h>  // For memmove.
 
 #include <string>
 
@@ -198,199 +199,74 @@ Int32 Int32FromEnvOrDie(const char* env_var, Int32 default_val);
 // method. Assumes that 0 <= shard_index < total_shards.
 bool ShouldRunTestOnShard(int total_shards, int shard_index, int test_id);
 
-// List is a simple singly-linked list container.
+// List is an ordered container that supports random access to the
+// elements.
 //
-// We cannot use std::list as Microsoft's implementation of STL has
-// problems when exception is disabled.  There is a hack to work
-// around this, but we've seen cases where the hack fails to work.
+// We cannot use std::vector, as Visual C++ 7.1's implementation of
+// STL has problems compiling when exceptions are disabled.  There is
+// a hack to work around the problems, but we've seen cases where the
+// hack fails to work.
 //
-// TODO(wan): switch to std::list when we have a reliable fix for the
-// STL problem, e.g. when we upgrade to the next version of Visual
-// C++, or (more likely) switch to STLport.
-//
-// The element type must support copy constructor.
-
-// Forward declare List
-template <typename E>  // E is the element type.
-class List;
-
-// ListNode is a node in a singly-linked list.  It consists of an
-// element and a pointer to the next node.  The last node in the list
-// has a NULL value for its next pointer.
-template <typename E>  // E is the element type.
-class ListNode {
-  friend class List<E>;
-
- private:
-
-  E element_;
-  ListNode * next_;
-
-  // The c'tor is private s.t. only in the ListNode class and in its
-  // friend class List we can create a ListNode object.
-  //
-  // Creates a node with a given element value.  The next pointer is
-  // set to NULL.
-  //
-  // ListNode does NOT have a default constructor.  Always use this
-  // constructor (with parameter) to create a ListNode object.
-  explicit ListNode(const E & element) : element_(element), next_(NULL) {}
-
-  // We disallow copying ListNode
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ListNode);
-
- public:
-
-  // Gets the element in this node.
-  E & element() { return element_; }
-  const E & element() const { return element_; }
-
-  // Gets the next node in the list.
-  ListNode * next() { return next_; }
-  const ListNode * next() const { return next_; }
-};
-
-
-// List is a simple singly-linked list container.
+// The element type must support copy constructor and operator=.
 template <typename E>  // E is the element type.
 class List {
  public:
-
   // Creates an empty list.
-  List() : head_(NULL), last_(NULL), size_(0),
-           last_read_index_(-1), last_read_(NULL) {}
+  List() : elements_(NULL), capacity_(0), size_(0) {}
 
   // D'tor.
-  virtual ~List();
+  virtual ~List() { Clear(); }
 
   // Clears the list.
   void Clear() {
-    if ( size_ > 0 ) {
-      // 1. Deletes every node.
-      ListNode<E> * node = head_;
-      ListNode<E> * next = node->next();
-      for ( ; ; ) {
-        delete node;
-        node = next;
-        if ( node == NULL ) break;
-        next = node->next();
+    if (elements_ != NULL) {
+      for (int i = 0; i < size_; i++) {
+        delete elements_[i];
       }
 
-      // 2. Resets the member variables.
-      last_read_ = head_ = last_ = NULL;
-      size_ = 0;
-      last_read_index_ = -1;
+      free(elements_);
+      elements_ = NULL;
+      capacity_ = size_ = 0;
     }
   }
 
   // Gets the number of elements.
   int size() const { return size_; }
 
-  // Returns true if the list is empty.
-  bool IsEmpty() const { return size() == 0; }
-
-  // Gets the first element of the list, or NULL if the list is empty.
-  ListNode<E> * Head() { return head_; }
-  const ListNode<E> * Head() const { return head_; }
-
-  // Gets the last element of the list, or NULL if the list is empty.
-  ListNode<E> * Last() { return last_; }
-  const ListNode<E> * Last() const { return last_; }
-
   // Adds an element to the end of the list.  A copy of the element is
   // created using the copy constructor, and then stored in the list.
   // Changes made to the element in the list doesn't affect the source
-  // object, and vice versa.  This does not affect the "last read"
-  // index.
-  void PushBack(const E & element) {
-    ListNode<E> * new_node = new ListNode<E>(element);
+  // object, and vice versa.
+  void PushBack(const E & element) { Insert(element, size_); }
 
-    if ( size_ == 0 ) {
-      head_ = last_ = new_node;
-      size_ = 1;
-    } else {
-      last_->next_ = new_node;
-      last_ = new_node;
-      size_++;
-    }
-  }
-
-  // Adds an element to the beginning of this list.  The "last read"
-  // index is adjusted accordingly.
-  void PushFront(const E& element) {
-    ListNode<E>* const new_node = new ListNode<E>(element);
-
-    if ( size_ == 0 ) {
-      head_ = last_ = new_node;
-      size_ = 1;
-    } else {
-      new_node->next_ = head_;
-      head_ = new_node;
-      size_++;
-    }
-
-    if (last_read_index_ >= 0) {
-      // A new element at the head bumps up an existing index by 1.
-      last_read_index_++;
-    }
-  }
+  // Adds an element to the beginning of this list.
+  void PushFront(const E& element) { Insert(element, 0); }
 
   // Removes an element from the beginning of this list.  If the
   // result argument is not NULL, the removed element is stored in the
   // memory it points to.  Otherwise the element is thrown away.
-  // Returns true iff the list wasn't empty before the operation.  The
-  // "last read" index is adjusted accordingly.
+  // Returns true iff the list wasn't empty before the operation.
   bool PopFront(E* result) {
-    if (size_ == 0) return false;
+    if (size_ == 0)
+      return false;
 
-    if (result != NULL) {
-      *result = head_->element_;
-    }
+    if (result != NULL)
+      *result = *(elements_[0]);
 
-    ListNode<E>* const old_head = head_;
+    delete elements_[0];
     size_--;
-    if (size_ == 0) {
-      head_ = last_ = NULL;
-    } else {
-      head_ = head_->next_;
-    }
-    delete old_head;
-
-    if (last_read_index_ > 0) {
-      last_read_index_--;
-    } else if (last_read_index_ == 0) {
-      last_read_index_ = -1;
-      last_read_ = NULL;
-    }
-
+    MoveElements(1, size_, 0);
     return true;
   }
 
-  // Inserts an element after a given node in the list.  It's the
-  // caller's responsibility to ensure that the given node is in the
-  // list.  If the given node is NULL, inserts the element at the
-  // front of the list.  The "last read" index is adjusted
-  // accordingly.
-  ListNode<E>* InsertAfter(ListNode<E>* node, const E& element) {
-    if (node == NULL) {
-      PushFront(element);
-      return Head();
-    }
-
-    ListNode<E>* const new_node = new ListNode<E>(element);
-    new_node->next_ = node->next_;
-    node->next_ = new_node;
+  // Inserts an element at the given index.  It's the caller's
+  // responsibility to ensure that the given index is in the range [0,
+  // size()].
+  void Insert(const E& element, int index) {
+    GrowIfNeeded();
+    MoveElements(index, size_ - index, index + 1);
+    elements_[index] = new E(element);
     size_++;
-    if (node == last_) {
-      last_ = new_node;
-    }
-
-    // We aren't sure whether this insertion will affect the last read
-    // index, so we invalidate it to be safe.
-    last_read_index_ = -1;
-    last_read_ = NULL;
-
-    return new_node;
   }
 
   // Returns the number of elements that satisfy a given predicate.
@@ -399,10 +275,8 @@ class List {
   template <typename P>  // P is the type of the predicate function/functor
   int CountIf(P predicate) const {
     int count = 0;
-    for ( const ListNode<E> * node = Head();
-          node != NULL;
-          node = node->next() ) {
-      if ( predicate(node->element()) ) {
+    for (int i = 0; i < size_; i++) {
+      if (predicate(*(elements_[i]))) {
         count++;
       }
     }
@@ -416,10 +290,8 @@ class List {
   // the elements.
   template <typename F>  // F is the type of the function/functor
   void ForEach(F functor) const {
-    for ( const ListNode<E> * node = Head();
-          node != NULL;
-          node = node->next() ) {
-      functor(node->element());
+    for (int i = 0; i < size_; i++) {
+      functor(*(elements_[i]));
     }
   }
 
@@ -428,81 +300,70 @@ class List {
   // function/functor that accepts a 'const E &', where E is the
   // element type.  This method does not change the elements.
   template <typename P>  // P is the type of the predicate function/functor.
-  const ListNode<E> * FindIf(P predicate) const {
-    for ( const ListNode<E> * node = Head();
-          node != NULL;
-          node = node->next() ) {
-      if ( predicate(node->element()) ) {
-        return node;
+  const E* FindIf(P predicate) const {
+    for (int i = 0; i < size_; i++) {
+      if (predicate(*elements_[i])) {
+        return elements_[i];
       }
     }
-
     return NULL;
   }
 
   template <typename P>
-  ListNode<E> * FindIf(P predicate) {
-    for ( ListNode<E> * node = Head();
-          node != NULL;
-          node = node->next() ) {
-      if ( predicate(node->element() ) ) {
-        return node;
+  E* FindIf(P predicate) {
+    for (int i = 0; i < size_; i++) {
+      if (predicate(*elements_[i])) {
+        return elements_[i];
       }
     }
-
     return NULL;
   }
 
-  // Returns a pointer to the i-th element of the list, or NULL if i is not
-  // in range [0, size()).  The "last read" index is adjusted accordingly.
-  const E* GetElement(int i) const {
-    if (i < 0 || i >= size())
-      return NULL;
+  // Returns the i-th element of the list, or aborts the program if i
+  // is not in range [0, size()).
+  const E& GetElement(int i) const {
+    GTEST_CHECK_(0 <= i && i < size_)
+        << "Invalid list index " << i << ": must be in range [0, "
+        << (size_ - 1) << "].";
 
-    if (last_read_index_ < 0 || last_read_index_ > i) {
-      // We have to count from the start.
-      last_read_index_ = 0;
-      last_read_ = Head();
-    }
-
-    while (last_read_index_ < i) {
-      last_read_ = last_read_->next();
-      last_read_index_++;
-    }
-
-    return &(last_read_->element());
+    return *(elements_[i]);
   }
 
   // Returns the i-th element of the list, or default_value if i is not
-  // in range [0, size()).  The "last read" index is adjusted accordingly.
+  // in range [0, size()).
   E GetElementOr(int i, E default_value) const {
-    const E* element = GetElement(i);
-    return element ? *element : default_value;
+    return (i < 0 || i >= size_) ? default_value : *(elements_[i]);
   }
 
  private:
-  ListNode<E>* head_;  // The first node of the list.
-  ListNode<E>* last_;  // The last node of the list.
-  int size_;           // The number of elements in the list.
+  // Grows the buffer if it is not big enough to hold one more element.
+  void GrowIfNeeded() {
+    if (size_ < capacity_)
+      return;
 
-  // These fields point to the last element read via GetElement(i) or
-  // GetElementOr(i).  They are used to speed up list traversal as
-  // often they allow us to find the wanted element by looking from
-  // the last visited one instead of the list head.  This means a
-  // sequential traversal of the list can be done in O(N) time instead
-  // of O(N^2).
-  mutable int last_read_index_;
-  mutable const ListNode<E>* last_read_;
+    // Exponential bump-up is necessary to ensure that inserting N
+    // elements is O(N) instead of O(N^2).  The factor 3/2 means that
+    // no more than 1/3 of the slots are wasted.
+    const int new_capacity = 3*(capacity_/2 + 1);
+    GTEST_CHECK_(new_capacity > capacity_)  // Does the new capacity overflow?
+        << "Cannot grow a list with " << capacity_ << " elements already.";
+    capacity_ = new_capacity;
+    elements_ = static_cast<E**>(
+        realloc(elements_, capacity_*sizeof(elements_[0])));
+  }
+
+  // Moves the give consecutive elements to a new index in the list.
+  void MoveElements(int source, int count, int dest) {
+    memmove(elements_ + dest, elements_ + source, count*sizeof(elements_[0]));
+  }
+
+  E** elements_;
+  int capacity_;  // The number of elements allocated for elements_.
+  int size_;      // The number of elements; in the range [0, capacity_].
 
   // We disallow copying List.
   GTEST_DISALLOW_COPY_AND_ASSIGN_(List);
-};
-
-// The virtual destructor of List.
-template <typename E>
-List<E>::~List() {
-  Clear();
-}
+};  // class List
 
 // A function for deleting an object.  Handy for being used as a
 // functor.
@@ -907,10 +768,8 @@ class UnitTestImpl {
     // before main() is reached.
     if (original_working_dir_.IsEmpty()) {
       original_working_dir_.Set(FilePath::GetCurrentDir());
-      if (original_working_dir_.IsEmpty()) {
-        printf("%s\n", "Failed to get the current working directory.");
-        posix::Abort();
-      }
+      GTEST_CHECK_(!original_working_dir_.IsEmpty())
+          << "Failed to get the current working directory.";
     }
 
     GetTestCase(test_info->test_case_name(),
@@ -1057,8 +916,8 @@ class UnitTestImpl {
   bool parameterized_tests_registered_;
 #endif  // GTEST_HAS_PARAM_TEST
 
-  // Points to the last death test case registered.  Initially NULL.
-  internal::ListNode<TestCase*>* last_death_test_case_;
+  // Index of the last death test case registered.  Initially -1.
+  int last_death_test_case_;
 
   // This points to the TestCase for the currently running test.  It
   // changes as Google Test goes through one test case after another.

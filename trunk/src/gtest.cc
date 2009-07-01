@@ -264,10 +264,8 @@ static bool GTestIsInitialized() { return g_init_gtest_count != 0; }
 static int SumOverTestCaseList(const internal::List<TestCase*>& case_list,
                                int (TestCase::*method)() const) {
   int sum = 0;
-  for (const internal::ListNode<TestCase*>* node = case_list.Head();
-       node != NULL;
-       node = node->next()) {
-    sum += (node->element()->*method)();
+  for (int i = 0; i < case_list.size(); i++) {
+    sum += (case_list.GetElement(i)->*method)();
   }
   return sum;
 }
@@ -1830,16 +1828,17 @@ TestResult::TestResult()
 TestResult::~TestResult() {
 }
 
-// Returns the i-th test part result among all the results. i can range
-// from 0 to total_part_count() - 1. If i is not in that range, returns
-// NULL.
-const TestPartResult* TestResult::GetTestPartResult(int i) const {
+// Returns the i-th test part result among all the results. i can
+// range from 0 to total_part_count() - 1. If i is not in that range,
+// aborts the program.
+const TestPartResult& TestResult::GetTestPartResult(int i) const {
   return test_part_results_->GetElement(i);
 }
 
 // Returns the i-th test property. i can range from 0 to
-// test_property_count() - 1. If i is not in that range, returns NULL.
-const TestProperty* TestResult::GetTestProperty(int i) const {
+// test_property_count() - 1. If i is not in that range, aborts the
+// program.
+const TestProperty& TestResult::GetTestProperty(int i) const {
   return test_properties_->GetElement(i);
 }
 
@@ -1861,14 +1860,13 @@ void TestResult::RecordProperty(const TestProperty& test_property) {
     return;
   }
   MutexLock lock(&test_properites_mutex_);
-  ListNode<TestProperty>* const node_with_matching_key =
+  TestProperty* const property_with_matching_key =
       test_properties_->FindIf(TestPropertyKeyIs(test_property.key()));
-  if (node_with_matching_key == NULL) {
+  if (property_with_matching_key == NULL) {
     test_properties_->PushBack(test_property);
     return;
   }
-  TestProperty& property_with_matching_key = node_with_matching_key->element();
-  property_with_matching_key.SetValue(test_property.value());
+  property_with_matching_key->SetValue(test_property.value());
 }
 
 // Adds a failure if the key is a reserved attribute of Google Test
@@ -2028,7 +2026,7 @@ bool Test::HasSameFixtureClass() {
 
   // Info about the first test in the current test case.
   const internal::TestInfoImpl* const first_test_info =
-      test_case->test_info_list().Head()->element()->impl();
+      test_case->test_info_list().GetElement(0)->impl();
   const internal::TypeId first_fixture_id = first_test_info->fixture_class_id();
   const char* const first_test_name = first_test_info->name();
 
@@ -2884,7 +2882,6 @@ void PrettyUnitTestResultPrinter::OnUnitTestEnd(const UnitTest& unit_test) {
 class UnitTestEventsRepeater : public UnitTestEventListenerInterface {
  public:
   typedef internal::List<UnitTestEventListenerInterface *> Listeners;
-  typedef internal::ListNode<UnitTestEventListenerInterface *> ListenersNode;
   UnitTestEventsRepeater() {}
   virtual ~UnitTestEventsRepeater();
   void AddListener(UnitTestEventListenerInterface *listener);
@@ -2908,10 +2905,8 @@ class UnitTestEventsRepeater : public UnitTestEventListenerInterface {
 };
 
 UnitTestEventsRepeater::~UnitTestEventsRepeater() {
-  for (ListenersNode* listener = listeners_.Head();
-       listener != NULL;
-       listener = listener->next()) {
-    delete listener->element();
+  for (int i = 0; i < listeners_.size(); i++) {
+    delete listeners_.GetElement(i);
   }
 }
 
@@ -2924,10 +2919,8 @@ void UnitTestEventsRepeater::AddListener(
 // This defines a member that repeats the call to all listeners.
 #define GTEST_REPEATER_METHOD_(Name, Type) \
 void UnitTestEventsRepeater::Name(const Type& parameter) { \
-  for (ListenersNode* listener = listeners_.Head(); \
-       listener != NULL; \
-       listener = listener->next()) { \
-    listener->element()->Name(parameter); \
+  for (int i = 0; i < listeners_.size(); i++) { \
+    listeners_.GetElement(i)->Name(parameter); \
   } \
 }
 
@@ -3150,7 +3143,7 @@ void XmlUnitTestResultPrinter::PrintXmlTestInfo(FILE* out,
 
   int failures = 0;
   for (int i = 0; i < result.total_part_count(); ++i) {
-    const TestPartResult& part = *result.GetTestPartResult(i);
+    const TestPartResult& part = result.GetTestPartResult(i);
     if (part.failed()) {
       const internal::String message =
           internal::String::Format("%s:%d\n%s", part.file_name(),
@@ -3212,7 +3205,7 @@ internal::String XmlUnitTestResultPrinter::TestPropertiesAsXmlAttributes(
   using internal::TestProperty;
   Message attributes;
   for (int i = 0; i < result.test_property_count(); ++i) {
-    const TestProperty& property = *result.GetTestProperty(i);
+    const TestProperty& property = result.GetTestProperty(i);
     attributes << " " << property.key() << "="
         << "\"" << EscapeXmlAttribute(property.value()) << "\"";
   }
@@ -3407,11 +3400,9 @@ void UnitTest::AddTestPartResult(TestPartResultType result_type,
   if (impl_->gtest_trace_stack()->size() > 0) {
     msg << "\n" << GTEST_NAME_ << " trace:";
 
-    for (internal::ListNode<internal::TraceInfo>* node =
-         impl_->gtest_trace_stack()->Head();
-         node != NULL;
-         node = node->next()) {
-      const internal::TraceInfo& trace = node->element();
+    for (int i = 0; i < impl_->gtest_trace_stack()->size(); i++) {
+      const internal::TraceInfo& trace =
+          impl_->gtest_trace_stack()->GetElement(i);
       msg << "\n" << trace.file << ":" << trace.line << ": " << trace.message;
     }
   }
@@ -3606,7 +3597,7 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
       parameterized_test_registry_(),
       parameterized_tests_registered_(false),
 #endif  // GTEST_HAS_PARAM_TEST
-      last_death_test_case_(NULL),
+      last_death_test_case_(-1),
       current_test_case_(NULL),
       current_test_info_(NULL),
       ad_hoc_test_result_(),
@@ -3670,30 +3661,27 @@ TestCase* UnitTestImpl::GetTestCase(const char* test_case_name,
                                     Test::SetUpTestCaseFunc set_up_tc,
                                     Test::TearDownTestCaseFunc tear_down_tc) {
   // Can we find a TestCase with the given name?
-  internal::ListNode<TestCase*>* node = test_cases_.FindIf(
-      TestCaseNameIs(test_case_name));
+  TestCase** test_case = test_cases_.FindIf(TestCaseNameIs(test_case_name));
 
-  if (node == NULL) {
-    // No.  Let's create one.
-    TestCase* const test_case =
+  if (test_case != NULL)
+    return *test_case;
+
+  // No.  Let's create one.
+  TestCase* const new_test_case =
       new TestCase(test_case_name, comment, set_up_tc, tear_down_tc);
 
-    // Is this a death test case?
-    if (internal::UnitTestOptions::MatchesFilter(String(test_case_name),
-                                                 kDeathTestCaseFilter)) {
-      // Yes.  Inserts the test case after the last death test case
-      // defined so far.
-      node = test_cases_.InsertAfter(last_death_test_case_, test_case);
-      last_death_test_case_ = node;
-    } else {
-      // No.  Appends to the end of the list.
-      test_cases_.PushBack(test_case);
-      node = test_cases_.Last();
-    }
+  // Is this a death test case?
+  if (internal::UnitTestOptions::MatchesFilter(String(test_case_name),
+                                               kDeathTestCaseFilter)) {
+    // Yes.  Inserts the test case after the last death test case
+    // defined so far.
+    test_cases_.Insert(new_test_case, ++last_death_test_case_);
+  } else {
+    // No.  Appends to the end of the list.
+    test_cases_.PushBack(new_test_case);
   }
 
-  // Returns the TestCase found.
-  return node->element();
+  return new_test_case;
 }
 
 // Helpers for setting up / tearing down the given environment.  They
@@ -3925,19 +3913,13 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
   // this shard.
   int num_runnable_tests = 0;
   int num_selected_tests = 0;
-  for (const internal::ListNode<TestCase *> *test_case_node =
-           test_cases_.Head();
-       test_case_node != NULL;
-       test_case_node = test_case_node->next()) {
-    TestCase * const test_case = test_case_node->element();
+  for (int i = 0; i < test_cases_.size(); i++) {
+    TestCase* const test_case = test_cases_.GetElement(i);
     const String &test_case_name = test_case->name();
     test_case->set_should_run(false);
 
-    for (const internal::ListNode<TestInfo *> *test_info_node =
-             test_case->test_info_list().Head();
-         test_info_node != NULL;
-         test_info_node = test_info_node->next()) {
-      TestInfo * const test_info = test_info_node->element();
+    for (int j = 0; j < test_case->test_info_list().size(); j++) {
+      TestInfo* const test_info = test_case->test_info_list().GetElement(j);
       const String test_name(test_info->name());
       // A test is disabled if test case name or test name matches
       // kDisableTestFilter.
@@ -3974,17 +3956,13 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
 
 // Prints the names of the tests matching the user-specified filter flag.
 void UnitTestImpl::ListTestsMatchingFilter() {
-  for (const internal::ListNode<TestCase*>* test_case_node = test_cases_.Head();
-       test_case_node != NULL;
-       test_case_node = test_case_node->next()) {
-    const TestCase* const test_case = test_case_node->element();
+  for (int i = 0; i < test_cases_.size(); i++) {
+    const TestCase* const test_case = test_cases_.GetElement(i);
     bool printed_test_case_name = false;
 
-    for (const internal::ListNode<TestInfo*>* test_info_node =
-         test_case->test_info_list().Head();
-         test_info_node != NULL;
-         test_info_node = test_info_node->next()) {
-      const TestInfo* const test_info = test_info_node->element();
+    for (int j = 0; j < test_case->test_info_list().size(); j++) {
+      const TestInfo* const test_info =
+          test_case->test_info_list().GetElement(j);
       if (test_info->matches_filter()) {
         if (!printed_test_case_name) {
           printed_test_case_name = true;
