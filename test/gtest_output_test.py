@@ -42,7 +42,6 @@ __author__ = 'wan@google.com (Zhanyong Wan)'
 
 import os
 import re
-import string
 import sys
 import gtest_test_utils
 
@@ -61,18 +60,22 @@ PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath('gtest_output_test_')
 
 # At least one command we exercise must not have the
 # --gtest_internal_skip_environment_and_ad_hoc_tests flag.
-COMMAND_LIST_TESTS = ({}, PROGRAM_PATH + ' --gtest_list_tests')
-COMMAND_WITH_COLOR = ({}, PROGRAM_PATH + ' --gtest_color=yes')
-COMMAND_WITH_TIME = ({}, PROGRAM_PATH + ' --gtest_print_time '
-                     '--gtest_internal_skip_environment_and_ad_hoc_tests '
-                     '--gtest_filter="FatalFailureTest.*:LoggingTest.*"')
-COMMAND_WITH_DISABLED = ({}, PROGRAM_PATH + ' --gtest_also_run_disabled_tests '
-                         '--gtest_internal_skip_environment_and_ad_hoc_tests '
-                         '--gtest_filter="*DISABLED_*"')
-COMMAND_WITH_SHARDING = ({'GTEST_SHARD_INDEX': '1', 'GTEST_TOTAL_SHARDS': '2'},
-                         PROGRAM_PATH +
-                         ' --gtest_internal_skip_environment_and_ad_hoc_tests '
-                         ' --gtest_filter="PassingTest.*"')
+COMMAND_LIST_TESTS = ({}, [PROGRAM_PATH, '--gtest_list_tests'])
+COMMAND_WITH_COLOR = ({}, [PROGRAM_PATH, '--gtest_color=yes'])
+COMMAND_WITH_TIME = ({}, [PROGRAM_PATH,
+                          '--gtest_print_time',
+                          '--gtest_internal_skip_environment_and_ad_hoc_tests',
+                          '--gtest_filter=FatalFailureTest.*:LoggingTest.*'])
+COMMAND_WITH_DISABLED = (
+    {}, [PROGRAM_PATH,
+         '--gtest_also_run_disabled_tests',
+         '--gtest_internal_skip_environment_and_ad_hoc_tests',
+         '--gtest_filter=*DISABLED_*'])
+COMMAND_WITH_SHARDING = (
+    {'GTEST_SHARD_INDEX': '1', 'GTEST_TOTAL_SHARDS': '2'},
+    [PROGRAM_PATH,
+     '--gtest_internal_skip_environment_and_ad_hoc_tests',
+     '--gtest_filter=PassingTest.*'])
 
 GOLDEN_PATH = os.path.join(gtest_test_utils.GetSourceDir(), GOLDEN_NAME)
 
@@ -167,24 +170,24 @@ def NormalizeOutput(output):
   return output
 
 
-def IterShellCommandOutput(env_cmd, stdin_string=None):
-  """Runs a command in a sub-process, and iterates the lines in its STDOUT.
+def GetShellCommandOutput(env_cmd):
+  """Runs a command in a sub-process, and returns its output in a string.
 
   Args:
+    env_cmd: The shell command. A 2-tuple where element 0 is a dict of extra
+             environment variables to set, and element 1 is a string with
+             the command and any flags.
 
-    env_cmd:           The shell command. A 2-tuple where element 0 is a dict
-                       of extra environment variables to set, and element 1
-                       is a string with the command and any flags.
-    stdin_string:      The string to be fed to the STDIN of the sub-process;
-                       If None, the sub-process will inherit the STDIN
-                       from the parent process.
+  Returns:
+    A string with the command's combined standard and diagnostic output.
   """
 
   # Spawns cmd in a sub-process, and gets its standard I/O file objects.
   # Set and save the environment properly.
   old_env_vars = dict(os.environ)
   os.environ.update(env_cmd[0])
-  stdin_file, stdout_file = os.popen2(env_cmd[1], 'b')
+  p = gtest_test_utils.Subprocess(env_cmd[1])
+
   # Changes made by os.environ.clear are not inheritable by child processes
   # until Python 2.6. To produce inheritable changes we have to delete
   # environment items with the del statement.
@@ -192,39 +195,7 @@ def IterShellCommandOutput(env_cmd, stdin_string=None):
     del os.environ[key]
   os.environ.update(old_env_vars)
 
-  # If the caller didn't specify a string for STDIN, gets it from the
-  # parent process.
-  if stdin_string is None:
-    stdin_string = sys.stdin.read()
-
-  # Feeds the STDIN string to the sub-process.
-  stdin_file.write(stdin_string)
-  stdin_file.close()
-
-  while True:
-    line = stdout_file.readline()
-    if not line:  # EOF
-      stdout_file.close()
-      break
-
-    yield line
-
-
-def GetShellCommandOutput(env_cmd, stdin_string=None):
-  """Runs a command in a sub-process, and returns its STDOUT in a string.
-
-  Args:
-
-    env_cmd:           The shell command. A 2-tuple where element 0 is a dict
-                       of extra environment variables to set, and element 1
-                       is a string with the command and any flags.
-    stdin_string:      The string to be fed to the STDIN of the sub-process;
-                       If None, the sub-process will inherit the STDIN
-                       from the parent process.
-  """
-
-  lines = list(IterShellCommandOutput(env_cmd, stdin_string))
-  return string.join(lines, '')
+  return p.output
 
 
 def GetCommandOutput(env_cmd):
@@ -239,7 +210,7 @@ def GetCommandOutput(env_cmd):
 
   # Disables exception pop-ups on Windows.
   os.environ['GTEST_CATCH_EXCEPTIONS'] = '1'
-  return NormalizeOutput(GetShellCommandOutput(env_cmd, ''))
+  return NormalizeOutput(GetShellCommandOutput(env_cmd))
 
 
 def GetOutputOfAllCommands():
@@ -251,7 +222,7 @@ def GetOutputOfAllCommands():
           GetCommandOutput(COMMAND_WITH_SHARDING))
 
 
-test_list = GetShellCommandOutput(COMMAND_LIST_TESTS, '')
+test_list = GetShellCommandOutput(COMMAND_LIST_TESTS)
 SUPPORTS_DEATH_TESTS = 'DeathTest' in test_list
 SUPPORTS_TYPED_TESTS = 'TypedTest' in test_list
 SUPPORTS_THREADS = 'ExpectFailureWithThreadsTest' in test_list

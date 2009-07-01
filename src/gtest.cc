@@ -2290,17 +2290,6 @@ class TestNameIs {
 
 }  // namespace
 
-// Finds and returns a TestInfo with the given name.  If one doesn't
-// exist, returns NULL.
-TestInfo * TestCase::GetTestInfo(const char* test_name) {
-  // Can we find a TestInfo with the given name?
-  internal::ListNode<TestInfo *> * const node = test_info_list_->FindIf(
-      TestNameIs(test_name));
-
-  // Returns the TestInfo found.
-  return node ? node->element() : NULL;
-}
-
 namespace internal {
 
 // This method expands all parameterized tests registered with macros TEST_P

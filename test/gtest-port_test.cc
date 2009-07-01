@@ -35,6 +35,7 @@
 
 #if GTEST_OS_MAC
 #include <pthread.h>
+#include <time.h>
 #endif  // GTEST_OS_MAC
 
 #include <gtest/gtest.h>
@@ -110,6 +111,19 @@ TEST(GetThreadCountTest, ReturnsCorrectValue) {
 
   void* dummy;
   ASSERT_EQ(0, pthread_join(thread_id, &dummy));
+
+  // MacOS X may not immediately report the updated thread count after
+  // joining a thread, causing flakiness in this test. To counter that, we
+  // wait for up to .5 seconds for the OS to report the correct value.
+  for (int i = 0; i < 5; ++i) {
+    if (GetThreadCount() == 1)
+      break;
+
+    timespec time;
+    time.tv_sec = 0;
+    time.tv_nsec = 100L * 1000 * 1000;  // .1 seconds.
+    nanosleep(&time, NULL);
+  }
   EXPECT_EQ(1, GetThreadCount());
   pthread_mutex_destroy(&mutex);
 }
