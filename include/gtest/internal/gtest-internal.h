@@ -116,9 +116,7 @@ class ScopedTrace;                     // Implements scoped trace.
 class TestInfoImpl;                    // Opaque implementation of TestInfo
 class TestResult;                      // Result of a single Test.
 class UnitTestImpl;                    // Opaque implementation of UnitTest
-
 template <typename E> class List;      // A generic list.
-template <typename E> class ListNode;  // A node in a generic list.
 
 // How many times InitGoogleTest() has been called.
 extern int g_init_gtest_count;

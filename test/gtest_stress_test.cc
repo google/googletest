@@ -46,7 +46,6 @@ namespace testing {
 namespace {
 
 using internal::List;
-using internal::ListNode;
 using internal::String;
 using internal::TestProperty;
 using internal::TestPropertyKeyIs;
@@ -70,9 +69,10 @@ void ExpectKeyAndValueWereRecordedForId(const List<TestProperty>& properties,
                                         int id,
                                         const char* suffix) {
   TestPropertyKeyIs matches_key(IdToKey(id, suffix).c_str());
-  const ListNode<TestProperty>* node = properties.FindIf(matches_key);
-  EXPECT_TRUE(node != NULL) << "expecting " << suffix << " node for id " << id;
-  EXPECT_STREQ(IdToString(id).c_str(), node->element().value());
+  const TestProperty* property = properties.FindIf(matches_key);
+  ASSERT_TRUE(property != NULL)
+      << "expecting " << suffix << " value for id " << id;
+  EXPECT_STREQ(IdToString(id).c_str(), property->value());
 }
 
 // Calls a large number of Google Test assertions, where exactly one of them

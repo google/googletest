@@ -434,13 +434,14 @@ class TestResult {
   TimeInMillis elapsed_time() const { return elapsed_time_; }
 
   // Returns the i-th test part result among all the results. i can range
-  // from 0 to test_property_count() - 1. If i is not in that range, returns
-  // NULL.
-  const TestPartResult* GetTestPartResult(int i) const;
+  // from 0 to test_property_count() - 1. If i is not in that range, aborts
+  // the program.
+  const TestPartResult& GetTestPartResult(int i) const;
 
   // Returns the i-th test property. i can range from 0 to
-  // test_property_count() - 1. If i is not in that range, returns NULL.
-  const TestProperty* GetTestProperty(int i) const;
+  // test_property_count() - 1. If i is not in that range, aborts the
+  // program.
+  const TestProperty& GetTestProperty(int i) const;
 
  private:
   friend class DefaultGlobalTestPartResultReporter;
