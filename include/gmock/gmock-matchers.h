@@ -2332,7 +2332,8 @@ inline PolymorphicMatcher<internal::ContainerEqMatcher<
 //
 //   ::std::map<int, size_t> page_lengths;
 //   page_lengths[1] = 100;
-//   EXPECT_THAT(map_int, Contains(::std::pair<const int, size_t>(1, 100)));
+//   EXPECT_THAT(page_lengths,
+//               Contains(::std::pair<const int, size_t>(1, 100)));
 //
 //   const char* user_ids[] = { "joe", "mike", "tom" };
 //   EXPECT_THAT(user_ids, Contains(Eq(::std::string("tom"))));
