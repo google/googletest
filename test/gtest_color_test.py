@@ -77,6 +77,7 @@ class GTestColorTest(gtest_test_utils.TestCase):
       self.assert_(not UsesColor('xterm-mono', None, None))
       self.assert_(not UsesColor('unknown', None, None))
       self.assert_(not UsesColor(None, None, None))
+    self.assert_(UsesColor('linux', None, None))
     self.assert_(UsesColor('cygwin', None, None))
     self.assert_(UsesColor('xterm', None, None))
     self.assert_(UsesColor('xterm-color', None, None))

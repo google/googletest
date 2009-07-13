@@ -193,7 +193,7 @@ class Message {
   // decide between class template specializations for T and T*, so a
   // tr1::type_traits-like is_pointer works, and we can overload on that.
   template <typename T>
-  inline void StreamHelper(internal::true_type dummy, T* pointer) {
+  inline void StreamHelper(internal::true_type /*dummy*/, T* pointer) {
     if (pointer == NULL) {
       *ss_ << "(null)";
     } else {
@@ -201,7 +201,7 @@ class Message {
     }
   }
   template <typename T>
-  inline void StreamHelper(internal::false_type dummy, const T& value) {
+  inline void StreamHelper(internal::false_type /*dummy*/, const T& value) {
     ::GTestStreamToHelper(ss_, value);
   }
 #endif  // GTEST_OS_SYMBIAN

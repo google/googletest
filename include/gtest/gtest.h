@@ -453,13 +453,13 @@ class TestResult {
   friend class testing::TestInfo;
   friend class testing::UnitTest;
 
-  // Gets the list of TestPartResults.
-  const internal::List<TestPartResult>& test_part_results() const {
+  // Gets the vector of TestPartResults.
+  const internal::Vector<TestPartResult>& test_part_results() const {
     return *test_part_results_;
   }
 
-  // Gets the list of TestProperties.
-  const internal::List<internal::TestProperty>& test_properties() const {
+  // Gets the vector of TestProperties.
+  const internal::Vector<internal::TestProperty>& test_properties() const {
     return *test_properties_;
   }
 
@@ -493,14 +493,15 @@ class TestResult {
   // Clears the object.
   void Clear();
 
-  // Protects mutable state of the property list and of owned properties, whose
-  // values may be updated.
+  // Protects mutable state of the property vector and of owned
+  // properties, whose values may be updated.
   internal::Mutex test_properites_mutex_;
 
-  // The list of TestPartResults
-  scoped_ptr<internal::List<TestPartResult> > test_part_results_;
-  // The list of TestProperties
-  scoped_ptr<internal::List<internal::TestProperty> > test_properties_;
+  // The vector of TestPartResults
+  internal::scoped_ptr<internal::Vector<TestPartResult> > test_part_results_;
+  // The vector of TestProperties
+  internal::scoped_ptr<internal::Vector<internal::TestProperty> >
+      test_properties_;
   // Running count of death tests.
   int death_test_count_;
   // The elapsed time, in milliseconds.
@@ -604,7 +605,7 @@ class TestInfo {
 
 namespace internal {
 
-// A test case, which consists of a list of TestInfos.
+// A test case, which consists of a vector of TestInfos.
 //
 // TestCase is not copyable.
 class TestCase {
@@ -667,11 +668,11 @@ class TestCase {
   friend class testing::Test;
   friend class UnitTestImpl;
 
-  // Gets the (mutable) list of TestInfos in this TestCase.
-  internal::List<TestInfo*>& test_info_list() { return *test_info_list_; }
+  // Gets the (mutable) vector of TestInfos in this TestCase.
+  internal::Vector<TestInfo*>& test_info_list() { return *test_info_list_; }
 
-  // Gets the (immutable) list of TestInfos in this TestCase.
-  const internal::List<TestInfo *> & test_info_list() const {
+  // Gets the (immutable) vector of TestInfos in this TestCase.
+  const internal::Vector<TestInfo *> & test_info_list() const {
     return *test_info_list_;
   }
 
@@ -712,8 +713,8 @@ class TestCase {
   internal::String name_;
   // Comment on the test case.
   internal::String comment_;
-  // List of TestInfos.
-  internal::List<TestInfo*>* test_info_list_;
+  // Vector of TestInfos.
+  internal::Vector<TestInfo*>* test_info_list_;
   // Pointer to the function that sets up the test case.
   Test::SetUpTestCaseFunc set_up_tc_;
   // Pointer to the function that tears down the test case.
@@ -760,7 +761,7 @@ class Environment {
   virtual Setup_should_be_spelled_SetUp* Setup() { return NULL; }
 };
 
-// A UnitTest consists of a list of TestCases.
+// A UnitTest consists of a vector of TestCases.
 //
 // This is a singleton class.  The only instance of UnitTest is
 // created when UnitTest::GetInstance() is first called.  This
