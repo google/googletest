@@ -185,7 +185,7 @@ GTEST_DEFINE_string_(
     "Whether to use colors in the output.  Valid values: yes, no, "
     "and auto.  'auto' means to use colors if the output is "
     "being sent to a terminal and the TERM environment variable "
-    "is set to xterm, xterm-color, xterm-256color or cygwin.");
+    "is set to xterm, xterm-color, xterm-256color, linux or cygwin.");
 
 GTEST_DEFINE_string_(
     filter,
@@ -258,10 +258,10 @@ static bool g_help_flag = false;
 int g_init_gtest_count = 0;
 static bool GTestIsInitialized() { return g_init_gtest_count != 0; }
 
-// Iterates over a list of TestCases, keeping a running sum of the
+// Iterates over a vector of TestCases, keeping a running sum of the
 // results of calling a given int-returning method on each.
 // Returns the sum.
-static int SumOverTestCaseList(const internal::List<TestCase*>& case_list,
+static int SumOverTestCaseList(const internal::Vector<TestCase*>& case_list,
                                int (TestCase::*method)() const) {
   int sum = 0;
   for (int i = 0; i < case_list.size(); i++) {
@@ -1818,8 +1818,8 @@ String AppendUserMessage(const String& gtest_msg,
 
 // Creates an empty TestResult.
 TestResult::TestResult()
-    : test_part_results_(new List<TestPartResult>),
-      test_properties_(new List<TestProperty>),
+    : test_part_results_(new Vector<TestPartResult>),
+      test_properties_(new Vector<TestProperty>),
       death_test_count_(0),
       elapsed_time_(0) {
 }
@@ -2407,7 +2407,7 @@ TestCase::TestCase(const char* name, const char* comment,
       tear_down_tc_(tear_down_tc),
       should_run_(false),
       elapsed_time_(0) {
-  test_info_list_ = new internal::List<TestInfo *>;
+  test_info_list_ = new internal::Vector<TestInfo *>;
 }
 
 // Destructor of TestCase.
@@ -2603,6 +2603,7 @@ bool ShouldUseColor(bool stdout_is_tty) {
         String::CStringEquals(term, "xterm") ||
         String::CStringEquals(term, "xterm-color") ||
         String::CStringEquals(term, "xterm-256color") ||
+        String::CStringEquals(term, "linux") ||
         String::CStringEquals(term, "cygwin");
     return stdout_is_tty && term_supports_color;
 #endif  // GTEST_OS_WINDOWS
@@ -2881,7 +2882,7 @@ void PrettyUnitTestResultPrinter::OnUnitTestEnd(const UnitTest& unit_test) {
 // This class forwards events to other event listeners.
 class UnitTestEventsRepeater : public UnitTestEventListenerInterface {
  public:
-  typedef internal::List<UnitTestEventListenerInterface *> Listeners;
+  typedef internal::Vector<UnitTestEventListenerInterface *> Listeners;
   UnitTestEventsRepeater() {}
   virtual ~UnitTestEventsRepeater();
   void AddListener(UnitTestEventListenerInterface *listener);
@@ -3685,7 +3686,7 @@ TestCase* UnitTestImpl::GetTestCase(const char* test_case_name,
 }
 
 // Helpers for setting up / tearing down the given environment.  They
-// are for use in the List::ForEach() method.
+// are for use in the Vector::ForEach() method.
 static void SetUpEnvironment(Environment* env) { env->SetUp(); }
 static void TearDownEnvironment(Environment* env) { env->TearDown(); }
 
@@ -3739,7 +3740,7 @@ int UnitTestImpl::RunAllTests() {
                                               ? HONOR_SHARDING_PROTOCOL
                                               : IGNORE_SHARDING_PROTOCOL) > 0;
 
-  // List the tests and exit if the --gtest_list_tests flag was specified.
+  // Lists the tests and exits if the --gtest_list_tests flag was specified.
   if (GTEST_FLAG(list_tests)) {
     // This must be called *after* FilterTests() has been called.
     ListTestsMatchingFilter();

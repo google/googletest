@@ -199,7 +199,7 @@ Int32 Int32FromEnvOrDie(const char* env_var, Int32 default_val);
 // method. Assumes that 0 <= shard_index < total_shards.
 bool ShouldRunTestOnShard(int total_shards, int shard_index, int test_id);
 
-// List is an ordered container that supports random access to the
+// Vector is an ordered container that supports random access to the
 // elements.
 //
 // We cannot use std::vector, as Visual C++ 7.1's implementation of
@@ -209,15 +209,15 @@ bool ShouldRunTestOnShard(int total_shards, int shard_index, int test_id);
 //
 // The element type must support copy constructor and operator=.
 template <typename E>  // E is the element type.
-class List {
+class Vector {
  public:
-  // Creates an empty list.
-  List() : elements_(NULL), capacity_(0), size_(0) {}
+  // Creates an empty Vector.
+  Vector() : elements_(NULL), capacity_(0), size_(0) {}
 
   // D'tor.
-  virtual ~List() { Clear(); }
+  virtual ~Vector() { Clear(); }
 
-  // Clears the list.
+  // Clears the Vector.
   void Clear() {
     if (elements_ != NULL) {
       for (int i = 0; i < size_; i++) {
@@ -233,29 +233,27 @@ class List {
   // Gets the number of elements.
   int size() const { return size_; }
 
-  // Adds an element to the end of the list.  A copy of the element is
-  // created using the copy constructor, and then stored in the list.
-  // Changes made to the element in the list doesn't affect the source
-  // object, and vice versa.
+  // Adds an element to the end of the Vector.  A copy of the element
+  // is created using the copy constructor, and then stored in the
+  // Vector.  Changes made to the element in the Vector doesn't affect
+  // the source object, and vice versa.
   void PushBack(const E & element) { Insert(element, size_); }
 
-  // Adds an element to the beginning of this list.
+  // Adds an element to the beginning of this Vector.
   void PushFront(const E& element) { Insert(element, 0); }
 
-  // Removes an element from the beginning of this list.  If the
+  // Removes an element from the beginning of this Vector.  If the
   // result argument is not NULL, the removed element is stored in the
   // memory it points to.  Otherwise the element is thrown away.
-  // Returns true iff the list wasn't empty before the operation.
+  // Returns true iff the vector wasn't empty before the operation.
   bool PopFront(E* result) {
     if (size_ == 0)
       return false;
 
     if (result != NULL)
-      *result = *(elements_[0]);
+      *result = GetElement(0);
 
-    delete elements_[0];
-    size_--;
-    MoveElements(1, size_, 0);
+    Erase(0);
     return true;
   }
 
@@ -267,6 +265,18 @@ class List {
     MoveElements(index, size_ - index, index + 1);
     elements_[index] = new E(element);
     size_++;
+  }
+
+  // Erases the element at the specified index, or aborts the program if the
+  // index is not in range [0, size()).
+  void Erase(int index) {
+    GTEST_CHECK_(0 <= index && index < size_)
+        << "Invalid Vector index " << index << ": must be in range [0, "
+        << (size_ - 1) << "].";
+
+    delete elements_[index];
+    MoveElements(index + 1, size_ - index - 1, index);
+    size_--;
   }
 
   // Returns the number of elements that satisfy a given predicate.
@@ -284,7 +294,7 @@ class List {
     return count;
   }
 
-  // Applies a function/functor to each element in the list.  The
+  // Applies a function/functor to each element in the Vector.  The
   // parameter 'functor' is a function/functor that accepts a 'const
   // E &', where E is the element type.  This method does not change
   // the elements.
@@ -323,7 +333,7 @@ class List {
   // is not in range [0, size()).
   const E& GetElement(int i) const {
     GTEST_CHECK_(0 <= i && i < size_)
-        << "Invalid list index " << i << ": must be in range [0, "
+        << "Invalid Vector index " << i << ": must be in range [0, "
         << (size_ - 1) << "].";
 
     return *(elements_[i]);
@@ -346,13 +356,13 @@ class List {
     // no more than 1/3 of the slots are wasted.
     const int new_capacity = 3*(capacity_/2 + 1);
     GTEST_CHECK_(new_capacity > capacity_)  // Does the new capacity overflow?
-        << "Cannot grow a list with " << capacity_ << " elements already.";
+        << "Cannot grow a Vector with " << capacity_ << " elements already.";
     capacity_ = new_capacity;
     elements_ = static_cast<E**>(
         realloc(elements_, capacity_*sizeof(elements_[0])));
   }
 
-  // Moves the give consecutive elements to a new index in the list.
+  // Moves the give consecutive elements to a new index in the Vector.
   void MoveElements(int source, int count, int dest) {
     memmove(elements_ + dest, elements_ + source, count*sizeof(elements_[0]));
   }
@@ -361,9 +371,9 @@ class List {
   int capacity_;  // The number of elements allocated for elements_.
   int size_;      // The number of elements; in the range [0, capacity_].
 
-  // We disallow copying List.
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(List);
-};  // class List
+  // We disallow copying Vector.
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(Vector);
+};  // class Vector
 
 // A function for deleting an object.  Handy for being used as a
 // functor.
@@ -840,21 +850,21 @@ class UnitTestImpl {
   TestInfo* current_test_info() { return current_test_info_; }
   const TestInfo* current_test_info() const { return current_test_info_; }
 
-  // Returns the list of environments that need to be set-up/torn-down
+  // Returns the vector of environments that need to be set-up/torn-down
   // before/after the tests are run.
-  internal::List<Environment*>* environments() { return &environments_; }
-  internal::List<Environment*>* environments_in_reverse_order() {
+  internal::Vector<Environment*>* environments() { return &environments_; }
+  internal::Vector<Environment*>* environments_in_reverse_order() {
     return &environments_in_reverse_order_;
   }
 
-  internal::List<TestCase*>* test_cases() { return &test_cases_; }
-  const internal::List<TestCase*>* test_cases() const { return &test_cases_; }
+  internal::Vector<TestCase*>* test_cases() { return &test_cases_; }
+  const internal::Vector<TestCase*>* test_cases() const { return &test_cases_; }
 
   // Getters for the per-thread Google Test trace stack.
-  internal::List<TraceInfo>* gtest_trace_stack() {
+  internal::Vector<TraceInfo>* gtest_trace_stack() {
     return gtest_trace_stack_.pointer();
   }
-  const internal::List<TraceInfo>* gtest_trace_stack() const {
+  const internal::Vector<TraceInfo>* gtest_trace_stack() const {
     return gtest_trace_stack_.pointer();
   }
 
@@ -899,13 +909,13 @@ class UnitTestImpl {
   internal::ThreadLocal<TestPartResultReporterInterface*>
       per_thread_test_part_result_reporter_;
 
-  // The list of environments that need to be set-up/torn-down
+  // The vector of environments that need to be set-up/torn-down
   // before/after the tests are run.  environments_in_reverse_order_
   // simply mirrors environments_ in reverse order.
-  internal::List<Environment*> environments_;
-  internal::List<Environment*> environments_in_reverse_order_;
+  internal::Vector<Environment*> environments_;
+  internal::Vector<Environment*> environments_in_reverse_order_;
 
-  internal::List<TestCase*> test_cases_;  // The list of TestCases.
+  internal::Vector<TestCase*> test_cases_;  // The vector of TestCases.
 
 #if GTEST_HAS_PARAM_TEST
   // ParameterizedTestRegistry object used to register value-parameterized
@@ -964,7 +974,7 @@ class UnitTestImpl {
 #endif  // GTEST_HAS_DEATH_TEST
 
   // A per-thread stack of traces created by the SCOPED_TRACE() macro.
-  internal::ThreadLocal<internal::List<TraceInfo> > gtest_trace_stack_;
+  internal::ThreadLocal<internal::Vector<TraceInfo> > gtest_trace_stack_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(UnitTestImpl);
 };  // class UnitTestImpl

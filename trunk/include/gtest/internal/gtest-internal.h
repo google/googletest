@@ -116,7 +116,7 @@ class ScopedTrace;                     // Implements scoped trace.
 class TestInfoImpl;                    // Opaque implementation of TestInfo
 class TestResult;                      // Result of a single Test.
 class UnitTestImpl;                    // Opaque implementation of UnitTest
-template <typename E> class List;      // A generic list.
+template <typename E> class Vector;    // A generic vector.
 
 // How many times InitGoogleTest() has been called.
 extern int g_init_gtest_count;
@@ -208,13 +208,13 @@ String StreamableToString(const T& streamable);
 // This overload makes sure that all pointers (including
 // those to char or wchar_t) are printed as raw pointers.
 template <typename T>
-inline String FormatValueForFailureMessage(internal::true_type dummy,
+inline String FormatValueForFailureMessage(internal::true_type /*dummy*/,
                                            T* pointer) {
   return StreamableToString(static_cast<const void*>(pointer));
 }
 
 template <typename T>
-inline String FormatValueForFailureMessage(internal::false_type dummy,
+inline String FormatValueForFailureMessage(internal::false_type /*dummy*/,
                                            const T& value) {
   return StreamableToString(value);
 }

@@ -106,7 +106,7 @@ class TestResultAccessor {
     test_result->ClearTestPartResults();
   }
 
-  static const List<testing::TestPartResult>& test_part_results(
+  static const Vector<testing::TestPartResult>& test_part_results(
       const TestResult& test_result) {
     return test_result.test_part_results();
   }
@@ -171,7 +171,6 @@ using testing::internal::GetUnitTestImpl;
 using testing::internal::GTestFlagSaver;
 using testing::internal::Int32;
 using testing::internal::Int32FromEnvOrDie;
-using testing::internal::List;
 using testing::internal::ShouldRunTestOnShard;
 using testing::internal::ShouldShard;
 using testing::internal::ShouldUseColor;
@@ -182,6 +181,7 @@ using testing::internal::TestProperty;
 using testing::internal::TestResult;
 using testing::internal::TestResultAccessor;
 using testing::internal::ThreadLocal;
+using testing::internal::Vector;
 using testing::internal::WideStringToUtf8;
 
 // This line tests that we can define tests in an unnamed namespace.
@@ -458,11 +458,11 @@ TEST(WideStringToUtf8Test, ConcatenatesCodepointsCorrectly) {
 }
 #endif  // !GTEST_WIDE_STRING_USES_UTF16_
 
-// Tests the List class template.
+// Tests the Vector class template.
 
-// Tests List::Clear().
-TEST(ListTest, Clear) {
-  List<int> a;
+// Tests Vector::Clear().
+TEST(VectorTest, Clear) {
+  Vector<int> a;
   a.PushBack(1);
   a.Clear();
   EXPECT_EQ(0, a.size());
@@ -473,9 +473,9 @@ TEST(ListTest, Clear) {
   EXPECT_EQ(0, a.size());
 }
 
-// Tests List::PushBack().
-TEST(ListTest, PushBack) {
-  List<char> a;
+// Tests Vector::PushBack().
+TEST(VectorTest, PushBack) {
+  Vector<char> a;
   a.PushBack('a');
   ASSERT_EQ(1, a.size());
   EXPECT_EQ('a', a.GetElement(0));
@@ -486,23 +486,23 @@ TEST(ListTest, PushBack) {
   EXPECT_EQ('b', a.GetElement(1));
 }
 
-// Tests List::PushFront().
-TEST(ListTest, PushFront) {
-  List<int> a;
+// Tests Vector::PushFront().
+TEST(VectorTest, PushFront) {
+  Vector<int> a;
   ASSERT_EQ(0, a.size());
 
-  // Calls PushFront() on an empty list.
+  // Calls PushFront() on an empty Vector.
   a.PushFront(1);
   ASSERT_EQ(1, a.size());
   EXPECT_EQ(1, a.GetElement(0));
 
-  // Calls PushFront() on a singleton list.
+  // Calls PushFront() on a singleton Vector.
   a.PushFront(2);
   ASSERT_EQ(2, a.size());
   EXPECT_EQ(2, a.GetElement(0));
   EXPECT_EQ(1, a.GetElement(1));
 
-  // Calls PushFront() on a list with more than one elements.
+  // Calls PushFront() on a Vector with more than one elements.
   a.PushFront(3);
   ASSERT_EQ(3, a.size());
   EXPECT_EQ(3, a.GetElement(0));
@@ -510,14 +510,14 @@ TEST(ListTest, PushFront) {
   EXPECT_EQ(1, a.GetElement(2));
 }
 
-// Tests List::PopFront().
-TEST(ListTest, PopFront) {
-  List<int> a;
+// Tests Vector::PopFront().
+TEST(VectorTest, PopFront) {
+  Vector<int> a;
 
-  // Popping on an empty list should fail.
+  // Popping on an empty Vector should fail.
   EXPECT_FALSE(a.PopFront(NULL));
 
-  // Popping again on an empty list should fail, and the result element
+  // Popping again on an empty Vector should fail, and the result element
   // shouldn't be overwritten.
   int element = 1;
   EXPECT_FALSE(a.PopFront(&element));
@@ -526,32 +526,32 @@ TEST(ListTest, PopFront) {
   a.PushFront(2);
   a.PushFront(3);
 
-  // PopFront() should pop the element in the front of the list.
+  // PopFront() should pop the element in the front of the Vector.
   EXPECT_TRUE(a.PopFront(&element));
   EXPECT_EQ(3, element);
 
-  // After popping the last element, the list should be empty.
+  // After popping the last element, the Vector should be empty.
   EXPECT_TRUE(a.PopFront(NULL));
   EXPECT_EQ(0, a.size());
 }
 
-// Tests inserting at the beginning using List::Insert().
-TEST(ListTest, InsertAtBeginning) {
-  List<int> a;
+// Tests inserting at the beginning using Vector::Insert().
+TEST(VectorTest, InsertAtBeginning) {
+  Vector<int> a;
   ASSERT_EQ(0, a.size());
 
-  // Inserts into an empty list.
+  // Inserts into an empty Vector.
   a.Insert(1, 0);
   ASSERT_EQ(1, a.size());
   EXPECT_EQ(1, a.GetElement(0));
 
-  // Inserts at the beginning of a singleton list.
+  // Inserts at the beginning of a singleton Vector.
   a.Insert(2, 0);
   ASSERT_EQ(2, a.size());
   EXPECT_EQ(2, a.GetElement(0));
   EXPECT_EQ(1, a.GetElement(1));
 
-  // Inserts at the beginning of a list with more than one elements.
+  // Inserts at the beginning of a Vector with more than one elements.
   a.Insert(3, 0);
   ASSERT_EQ(3, a.size());
   EXPECT_EQ(3, a.GetElement(0));
@@ -560,26 +560,26 @@ TEST(ListTest, InsertAtBeginning) {
 }
 
 // Tests inserting at a location other than the beginning using
-// List::Insert().
-TEST(ListTest, InsertNotAtBeginning) {
-  // Prepares a singleton list.
-  List<int> a;
+// Vector::Insert().
+TEST(VectorTest, InsertNotAtBeginning) {
+  // Prepares a singleton Vector.
+  Vector<int> a;
   a.PushBack(1);
 
-  // Inserts at the end of a singleton list.
+  // Inserts at the end of a singleton Vector.
   a.Insert(2, a.size());
   ASSERT_EQ(2, a.size());
   EXPECT_EQ(1, a.GetElement(0));
   EXPECT_EQ(2, a.GetElement(1));
 
-  // Inserts at the end of a list with more than one elements.
+  // Inserts at the end of a Vector with more than one elements.
   a.Insert(3, a.size());
   ASSERT_EQ(3, a.size());
   EXPECT_EQ(1, a.GetElement(0));
   EXPECT_EQ(2, a.GetElement(1));
   EXPECT_EQ(3, a.GetElement(2));
 
-  // Inserts in the middle of a list.
+  // Inserts in the middle of a Vector.
   a.Insert(4, 1);
   ASSERT_EQ(4, a.size());
   EXPECT_EQ(1, a.GetElement(0));
@@ -588,9 +588,9 @@ TEST(ListTest, InsertNotAtBeginning) {
   EXPECT_EQ(3, a.GetElement(3));
 }
 
-// Tests List::GetElementOr().
-TEST(ListTest, GetElementOr) {
-  List<char> a;
+// Tests Vector::GetElementOr().
+TEST(VectorTest, GetElementOr) {
+  Vector<char> a;
   EXPECT_EQ('x', a.GetElementOr(0, 'x'));
 
   a.PushBack('a');
@@ -601,9 +601,71 @@ TEST(ListTest, GetElementOr) {
   EXPECT_EQ('x', a.GetElementOr(2, 'x'));
 }
 
+// Tests Vector::Erase().
+TEST(VectorDeathTest, Erase) {
+  Vector<int> a;
+
+  // Tests erasing from an empty vector.
+  GTEST_EXPECT_DEATH_IF_SUPPORTED_(
+      a.Erase(0),
+      "Invalid Vector index 0: must be in range \\[0, -1\\]\\.");
+
+  // Tests erasing from a singleton vector.
+  a.PushBack(0);
+
+  a.Erase(0);
+  EXPECT_EQ(0, a.size());
+
+  // Tests Erase parameters beyond the bounds of the vector.
+  Vector<int> a1;
+  a1.PushBack(0);
+  a1.PushBack(1);
+  a1.PushBack(2);
+
+  GTEST_EXPECT_DEATH_IF_SUPPORTED_(
+      a1.Erase(3),
+      "Invalid Vector index 3: must be in range \\[0, 2\\]\\.");
+  GTEST_EXPECT_DEATH_IF_SUPPORTED_(
+      a1.Erase(-1),
+      "Invalid Vector index -1: must be in range \\[0, 2\\]\\.");
+
+  // Tests erasing at the end of the vector.
+  Vector<int> a2;
+  a2.PushBack(0);
+  a2.PushBack(1);
+  a2.PushBack(2);
+
+  a2.Erase(2);
+  ASSERT_EQ(2, a2.size());
+  EXPECT_EQ(0, a2.GetElement(0));
+  EXPECT_EQ(1, a2.GetElement(1));
+
+  // Tests erasing in the middle of the vector.
+  Vector<int> a3;
+  a3.PushBack(0);
+  a3.PushBack(1);
+  a3.PushBack(2);
+
+  a3.Erase(1);
+  ASSERT_EQ(2, a3.size());
+  EXPECT_EQ(0, a3.GetElement(0));
+  EXPECT_EQ(2, a3.GetElement(1));
+
+  // Tests erasing at the beginning of the vector.
+  Vector<int> a4;
+  a4.PushBack(0);
+  a4.PushBack(1);
+  a4.PushBack(2);
+
+  a4.Erase(0);
+  ASSERT_EQ(2, a4.size());
+  EXPECT_EQ(1, a4.GetElement(0));
+  EXPECT_EQ(2, a4.GetElement(1));
+}
+
 // Tests the GetElement accessor.
 TEST(ListDeathTest, GetElement) {
-  List<int> a;
+  Vector<int> a;
   a.PushBack(0);
   a.PushBack(1);
   a.PushBack(2);
@@ -613,10 +675,10 @@ TEST(ListDeathTest, GetElement) {
   EXPECT_EQ(2, a.GetElement(2));
   GTEST_EXPECT_DEATH_IF_SUPPORTED_(
       a.GetElement(3),
-      "Invalid list index 3: must be in range \\[0, 2\\]\\.");
+      "Invalid Vector index 3: must be in range \\[0, 2\\]\\.");
   GTEST_EXPECT_DEATH_IF_SUPPORTED_(
       a.GetElement(-1),
-      "Invalid list index -1: must be in range \\[0, 2\\]\\.");
+      "Invalid Vector index -1: must be in range \\[0, 2\\]\\.");
 }
 
 // Tests the String class.
@@ -1126,7 +1188,7 @@ TEST_F(ExpectFailureWithThreadsTest, ExpectNonFatalFailureOnAllThreads) {
 // The test fixture for testing TestResult.
 class TestResultTest : public Test {
  protected:
-  typedef List<TestPartResult> TPRList;
+  typedef Vector<TestPartResult> TPRVector;
 
   // We make use of 2 TestPartResult objects,
   TestPartResult * pr1, * pr2;
@@ -1149,24 +1211,23 @@ class TestResultTest : public Test {
     r2 = new TestResult();
 
     // In order to test TestResult, we need to modify its internal
-    // state, in particular the TestPartResult list it holds.
-    // test_part_results() returns a const reference to this list.
+    // state, in particular the TestPartResult Vector it holds.
+    // test_part_results() returns a const reference to this Vector.
     // We cast it to a non-const object s.t. it can be modified (yes,
     // this is a hack).
-    TPRList * list1, * list2;
-    list1 = const_cast<List<TestPartResult> *>(
+    TPRVector* results1 = const_cast<Vector<TestPartResult> *>(
         &TestResultAccessor::test_part_results(*r1));
-    list2 = const_cast<List<TestPartResult> *>(
+    TPRVector* results2 = const_cast<Vector<TestPartResult> *>(
         &TestResultAccessor::test_part_results(*r2));
 
     // r0 is an empty TestResult.
 
     // r1 contains a single SUCCESS TestPartResult.
-    list1->PushBack(*pr1);
+    results1->PushBack(*pr1);
 
     // r2 contains a SUCCESS, and a FAILURE.
-    list2->PushBack(*pr1);
-    list2->PushBack(*pr2);
+    results2->PushBack(*pr1);
+    results2->PushBack(*pr2);
   }
 
   virtual void TearDown() {
@@ -1251,10 +1312,10 @@ TEST_F(TestResultDeathTest, GetTestPartResult) {
   CompareTestPartResult(*pr2, r2->GetTestPartResult(1));
   GTEST_EXPECT_DEATH_IF_SUPPORTED_(
       r2->GetTestPartResult(2),
-      "Invalid list index 2: must be in range \\[0, 1\\]\\.");
+      "Invalid Vector index 2: must be in range \\[0, 1\\]\\.");
   GTEST_EXPECT_DEATH_IF_SUPPORTED_(
       r2->GetTestPartResult(-1),
-      "Invalid list index -1: must be in range \\[0, 1\\]\\.");
+      "Invalid Vector index -1: must be in range \\[0, 1\\]\\.");
 }
 
 // Tests TestResult has no properties when none are added.
@@ -1338,10 +1399,10 @@ TEST(TestResultPropertyDeathTest, GetTestProperty) {
 
   GTEST_EXPECT_DEATH_IF_SUPPORTED_(
       test_result.GetTestProperty(3),
-      "Invalid list index 3: must be in range \\[0, 2\\]\\.");
+      "Invalid Vector index 3: must be in range \\[0, 2\\]\\.");
   GTEST_EXPECT_DEATH_IF_SUPPORTED_(
       test_result.GetTestProperty(-1),
-      "Invalid list index -1: must be in range \\[0, 2\\]\\.");
+      "Invalid Vector index -1: must be in range \\[0, 2\\]\\.");
 }
 
 // When a property using a reserved key is supplied to this function, it tests
@@ -5683,6 +5744,9 @@ TEST(ColoredOutputTest, UsesColorsWhenTermSupportsColors) {
   EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
 
   SetEnv("TERM", "xterm-color");  // TERM supports colors.
+  EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
+
+  SetEnv("TERM", "linux");  // TERM supports colors.
   EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
 #endif  // GTEST_OS_WINDOWS
 }

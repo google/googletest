@@ -45,10 +45,10 @@
 namespace testing {
 namespace {
 
-using internal::List;
 using internal::String;
 using internal::TestProperty;
 using internal::TestPropertyKeyIs;
+using internal::Vector;
 
 // How many threads to create?
 const int kThreadCount = 50;
@@ -65,7 +65,7 @@ String IdToString(int id) {
   return id_message.GetString();
 }
 
-void ExpectKeyAndValueWereRecordedForId(const List<TestProperty>& properties,
+void ExpectKeyAndValueWereRecordedForId(const Vector<TestProperty>& properties,
                                         int id,
                                         const char* suffix) {
   TestPropertyKeyIs matches_key(IdToKey(id, suffix).c_str());

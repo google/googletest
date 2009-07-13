@@ -136,9 +136,8 @@ class TestPartResultArray {
   // Returns the number of TestPartResult objects in the array.
   int size() const;
  private:
-  // Internally we use a list to simulate the array.  Yes, this means
-  // that random access is O(N) in time, but it's OK for its purpose.
-  internal::List<TestPartResult>* const list_;
+  // Internally we use a Vector to implement the array.
+  internal::Vector<TestPartResult>* const array_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(TestPartResultArray);
 };

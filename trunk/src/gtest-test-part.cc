@@ -66,17 +66,17 @@ std::ostream& operator<<(std::ostream& os, const TestPartResult& result) {
 
 // Constructs an empty TestPartResultArray.
 TestPartResultArray::TestPartResultArray()
-    : list_(new internal::List<TestPartResult>) {
+    : array_(new internal::Vector<TestPartResult>) {
 }
 
 // Destructs a TestPartResultArray.
 TestPartResultArray::~TestPartResultArray() {
-  delete list_;
+  delete array_;
 }
 
 // Appends a TestPartResult to the array.
 void TestPartResultArray::Append(const TestPartResult& result) {
-  list_->PushBack(result);
+  array_->PushBack(result);
 }
 
 // Returns the TestPartResult at the given index (0-based).
@@ -86,12 +86,12 @@ const TestPartResult& TestPartResultArray::GetTestPartResult(int index) const {
     internal::posix::Abort();
   }
 
-  return list_->GetElement(index);
+  return array_->GetElement(index);
 }
 
 // Returns the number of TestPartResult objects in the array.
 int TestPartResultArray::size() const {
-  return list_->size();
+  return array_->size();
 }
 
 namespace internal {
