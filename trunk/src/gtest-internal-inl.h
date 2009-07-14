@@ -87,8 +87,41 @@ const char kFilterFlag[] = "filter";
 const char kListTestsFlag[] = "list_tests";
 const char kOutputFlag[] = "output";
 const char kPrintTimeFlag[] = "print_time";
+const char kRandomSeedFlag[] = "random_seed";
 const char kRepeatFlag[] = "repeat";
+const char kShuffleFlag[] = "shuffle";
 const char kThrowOnFailureFlag[] = "throw_on_failure";
+
+// A valid random seed must be in [1, kMaxRandomSeed].
+const unsigned int kMaxRandomSeed = 99999;
+
+// Returns the current time in milliseconds.
+TimeInMillis GetTimeInMillis();
+
+// Returns a random seed in range [1, kMaxRandomSeed] based on the
+// given --gtest_random_seed flag value.
+inline int GetRandomSeedFromFlag(Int32 random_seed_flag) {
+  const unsigned int raw_seed = (random_seed_flag == 0) ?
+      static_cast<unsigned int>(GetTimeInMillis()) :
+      static_cast<unsigned int>(random_seed_flag);
+
+  // Normalizes the actual seed to range [1, kMaxRandomSeed] such that
+  // it's easy to type.
+  const int normalized_seed =
+      static_cast<int>((raw_seed - 1U) % kMaxRandomSeed) + 1;
+  return normalized_seed;
+}
+
+// Returns the first valid random seed after 'seed'.  The behavior is
+// undefined if 'seed' is invalid.  The seed after kMaxRandomSeed is
+// considered to be 1.
+inline int GetNextRandomSeed(int seed) {
+  GTEST_CHECK_(1 <= seed && seed <= kMaxRandomSeed)
+      << "Invalid random seed " << seed << " - must be in [1, "
+      << kMaxRandomSeed << "].";
+  const int next_seed = seed + 1;
+  return (next_seed > kMaxRandomSeed) ? 1 : next_seed;
+}
 
 // This class saves the values of all Google Test flags in its c'tor, and
 // restores them in its d'tor.
@@ -107,7 +140,9 @@ class GTestFlagSaver {
     list_tests_ = GTEST_FLAG(list_tests);
     output_ = GTEST_FLAG(output);
     print_time_ = GTEST_FLAG(print_time);
+    random_seed_ = GTEST_FLAG(random_seed);
     repeat_ = GTEST_FLAG(repeat);
+    shuffle_ = GTEST_FLAG(shuffle);
     throw_on_failure_ = GTEST_FLAG(throw_on_failure);
   }
 
@@ -124,7 +159,9 @@ class GTestFlagSaver {
     GTEST_FLAG(list_tests) = list_tests_;
     GTEST_FLAG(output) = output_;
     GTEST_FLAG(print_time) = print_time_;
+    GTEST_FLAG(random_seed) = random_seed_;
     GTEST_FLAG(repeat) = repeat_;
+    GTEST_FLAG(shuffle) = shuffle_;
     GTEST_FLAG(throw_on_failure) = throw_on_failure_;
   }
  private:
@@ -141,7 +178,9 @@ class GTestFlagSaver {
   String output_;
   bool print_time_;
   bool pretty_;
+  internal::Int32 random_seed_;
   internal::Int32 repeat_;
+  bool shuffle_;
   bool throw_on_failure_;
 } GTEST_ATTRIBUTE_UNUSED_;
 
@@ -884,6 +923,9 @@ class UnitTestImpl {
   friend class ReplaceDeathTestFactory;
 #endif  // GTEST_HAS_DEATH_TEST
 
+  // Gets the random seed used at the start of the current test run.
+  int random_seed() const { return random_seed_; }
+
  private:
   friend class ::testing::UnitTest;
 
@@ -932,7 +974,7 @@ class UnitTestImpl {
   // This points to the TestCase for the currently running test.  It
   // changes as Google Test goes through one test case after another.
   // When no test is running, this is set to NULL and Google Test
-  // stores assertion results in ad_hoc_test_result_.  Initally NULL.
+  // stores assertion results in ad_hoc_test_result_.  Initially NULL.
   TestCase* current_test_case_;
 
   // This points to the TestInfo for the currently running test.  It
@@ -962,6 +1004,9 @@ class UnitTestImpl {
   // but the user can set this field to use a custom getter if that is
   // desired.
   OsStackTraceGetterInterface* os_stack_trace_getter_;
+
+  // The random number seed used at the beginning of the test run.
+  int random_seed_;
 
   // How long the test took to run, in milliseconds.
   TimeInMillis elapsed_time_;

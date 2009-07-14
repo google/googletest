@@ -218,21 +218,33 @@ GTEST_DEFINE_bool_(
     " should display elapsed time in text output.");
 
 GTEST_DEFINE_int32_(
+    random_seed,
+    internal::Int32FromGTestEnv("random_seed", 0),
+    "Random number seed to use when shuffling test orders.  Must be in range "
+    "[1, 99999], or 0 to use a seed based on the current time.");
+
+GTEST_DEFINE_int32_(
     repeat,
     internal::Int32FromGTestEnv("repeat", 1),
     "How many times to repeat each test.  Specify a negative number "
     "for repeating forever.  Useful for shaking out flaky tests.");
+
+GTEST_DEFINE_bool_(
+    show_internal_stack_frames, false,
+    "True iff " GTEST_NAME_ " should include internal stack frames when "
+    "printing test failure stack traces.");
+
+GTEST_DEFINE_bool_(
+    shuffle,
+    internal::BoolFromGTestEnv("shuffle", false),
+    "True iff " GTEST_NAME_
+    " should randomize tests' order on every run.");
 
 GTEST_DEFINE_int32_(
     stack_trace_depth,
         internal::Int32FromGTestEnv("stack_trace_depth", kMaxStackTraceDepth),
     "The maximum number of stack frames to print when an "
     "assertion fails.  The valid range is 0 through 100, inclusive.");
-
-GTEST_DEFINE_bool_(
-    show_internal_stack_frames, false,
-    "True iff " GTEST_NAME_ " should include internal stack frames when "
-    "printing test failure stack traces.");
 
 GTEST_DEFINE_bool_(
     throw_on_failure,
@@ -774,9 +786,10 @@ String UnitTestImpl::CurrentOsStackTraceExceptTop(int skip_count) {
   return String("");
 }
 
-static TimeInMillis GetTimeInMillis() {
+// Returns the current time in milliseconds.
+TimeInMillis GetTimeInMillis() {
 #if defined(_WIN32_WCE) || defined(__BORLANDC__)
-  // Difference between 1970-01-01 and 1601-01-01 in miliseconds.
+  // Difference between 1970-01-01 and 1601-01-01 in milliseconds.
   // http://analogous.blogspot.com/2005/04/epoch.html
   const TimeInMillis kJavaEpochToWinFileTimeDelta =
     static_cast<TimeInMillis>(116444736UL) * 100000UL;
@@ -2719,6 +2732,12 @@ void PrettyUnitTestResultPrinter::OnUnitTestStart(const UnitTest& unit_test) {
                   internal::posix::GetEnv(kTestTotalShards));
   }
 
+  if (GTEST_FLAG(shuffle)) {
+    ColoredPrintf(COLOR_YELLOW,
+                  "Note: Randomizing tests' orders with a seed of %d .\n",
+                  unit_test.random_seed());
+  }
+
   ColoredPrintf(COLOR_GREEN,  "[==========] ");
   printf("Running %s from %s.\n",
          FormatTestCount(unit_test.test_to_run_count()).c_str(),
@@ -3193,6 +3212,9 @@ void XmlUnitTestResultPrinter::PrintXmlUnitTest(FILE* out,
           unit_test.failed_test_count(),
           unit_test.disabled_test_count(),
           internal::FormatTimeInMillisAsSeconds(unit_test.elapsed_time()));
+  if (GTEST_FLAG(shuffle)) {
+    fprintf(out, "random_seed=\"%d\" ", unit_test.random_seed());
+  }
   fprintf(out, "name=\"AllTests\">\n");
   for (int i = 0; i < unit_test.total_test_case_count(); ++i)
     PrintXmlTestCase(out, *unit_test.GetTestCase(i));
@@ -3539,6 +3561,9 @@ const TestInfo* UnitTest::current_test_info() const {
   return impl_->current_test_info();
 }
 
+// Returns the random seed used at the start of the current test run.
+int UnitTest::random_seed() const { return impl_->random_seed(); }
+
 #if GTEST_HAS_PARAM_TEST
 // Returns ParameterizedTestCaseRegistry object used to keep track of
 // value-parameterized tests and instantiate and register them.
@@ -3604,6 +3629,7 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
       ad_hoc_test_result_(),
       result_printer_(NULL),
       os_stack_trace_getter_(NULL),
+      random_seed_(0),
 #if GTEST_HAS_DEATH_TEST
       elapsed_time_(0),
       internal_run_death_test_flag_(NULL),
@@ -3747,6 +3773,9 @@ int UnitTestImpl::RunAllTests() {
     return 0;
   }
 
+  random_seed_ = GTEST_FLAG(shuffle) ?
+      GetRandomSeedFromFlag(GTEST_FLAG(random_seed)) : 0;
+
   // True iff at least one test has failed.
   bool failed = false;
 
@@ -3796,6 +3825,11 @@ int UnitTestImpl::RunAllTests() {
       failed = true;
     }
     ClearResult();
+
+    if (GTEST_FLAG(shuffle)) {
+      // Picks a new random seed for each run.
+      random_seed_ = GetNextRandomSeed(random_seed_);
+    }
   }
 
   // Returns 0 if all tests passed, or 1 other wise.
@@ -4262,8 +4296,15 @@ static const char kColorEncodedHelpMessage[] =
 "      matches any substring; ':' separates two patterns.\n"
 "  @G--" GTEST_FLAG_PREFIX_ "also_run_disabled_tests@D\n"
 "      Run all disabled tests too.\n"
+"\n"
+"Test Execution:\n"
 "  @G--" GTEST_FLAG_PREFIX_ "repeat=@Y[COUNT]@D\n"
 "      Run the tests repeatedly; use a negative count to repeat forever.\n"
+"  @G--" GTEST_FLAG_PREFIX_ "shuffle\n"
+"      Randomize tests' orders on every run.  To be implemented.\n"
+"  @G--" GTEST_FLAG_PREFIX_ "random_seed=@Y[NUMBER]@D\n"
+"      Random number seed to use for shuffling test orders (between 1 and\n"
+"      99999, or 0 to use a seed based on the current time).\n"
 "\n"
 "Test Output:\n"
 "  @G--" GTEST_FLAG_PREFIX_ "color=@Y(@Gyes@Y|@Gno@Y|@Gauto@Y)@D\n"
@@ -4332,7 +4373,9 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
         ParseBoolFlag(arg, kListTestsFlag, &GTEST_FLAG(list_tests)) ||
         ParseStringFlag(arg, kOutputFlag, &GTEST_FLAG(output)) ||
         ParseBoolFlag(arg, kPrintTimeFlag, &GTEST_FLAG(print_time)) ||
+        ParseInt32Flag(arg, kRandomSeedFlag, &GTEST_FLAG(random_seed)) ||
         ParseInt32Flag(arg, kRepeatFlag, &GTEST_FLAG(repeat)) ||
+        ParseBoolFlag(arg, kShuffleFlag, &GTEST_FLAG(shuffle)) ||
         ParseBoolFlag(arg, kThrowOnFailureFlag, &GTEST_FLAG(throw_on_failure))
         ) {
       // Yes.  Shift the remainder of the argv list left by one.  Note
