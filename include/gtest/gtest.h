@@ -119,6 +119,9 @@ GTEST_DECLARE_string_(output);
 // test.
 GTEST_DECLARE_bool_(print_time);
 
+// This flag specifies the random number seed.
+GTEST_DECLARE_int32_(random_seed);
+
 // This flag sets how many times the tests are repeated. The default value
 // is 1. If the value is -1 the tests are repeating forever.
 GTEST_DECLARE_int32_(repeat);
@@ -126,6 +129,9 @@ GTEST_DECLARE_int32_(repeat);
 // This flag controls whether Google Test includes Google Test internal
 // stack frames in failure stack traces.
 GTEST_DECLARE_bool_(show_internal_stack_frames);
+
+// When this flag is specified, tests' order is randomized on every run.
+GTEST_DECLARE_bool_(shuffle);
 
 // This flag specifies the maximum number of stack frames to be
 // printed in a failure message.
@@ -797,6 +803,9 @@ class UnitTest {
   // Returns the TestInfo object for the test that's currently running,
   // or NULL if no test is running.
   const TestInfo* current_test_info() const;
+
+  // Returns the random seed used at the start of the current test run.
+  int random_seed() const;
 
 #if GTEST_HAS_PARAM_TEST
   // Returns the ParameterizedTestCaseRegistry object used to keep track of

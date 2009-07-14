@@ -332,7 +332,7 @@ GtestBinary(env_without_rtti, 'gtest_no_rtti_test', None,
 # Use the GTEST_BUILD_SAMPLES build variable to control building of samples.
 # In your SConstruct file, add
 #   vars = Variables()
-#   vars.Add(BoolVariable('GTEST_BUILD_SAMPLES', 'Build samples', True))
+#   vars.Add(BoolVariable('GTEST_BUILD_SAMPLES', 'Build samples', False))
 #   my_environment = Environment(variables = vars, ...)
 # Then, in the command line use GTEST_BUILD_SAMPLES=true to enable them.
 if env.get('GTEST_BUILD_SAMPLES', False):
