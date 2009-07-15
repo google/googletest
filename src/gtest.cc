@@ -2556,10 +2556,19 @@ static internal::String PrintTestPartResultToString(
 }
 
 // Prints a TestPartResult.
-static void PrintTestPartResult(
-    const TestPartResult& test_part_result) {
-  printf("%s\n", PrintTestPartResultToString(test_part_result).c_str());
+static void PrintTestPartResult(const TestPartResult& test_part_result) {
+  const internal::String& result =
+      PrintTestPartResultToString(test_part_result);
+  printf("%s\n", result.c_str());
   fflush(stdout);
+#if GTEST_OS_WINDOWS
+  // If the test program runs in Visual Studio or a debugger, the
+  // following states add the test part result message to the Output
+  // window such that the user can double-click on it to jump to the
+  // corresponding source code location; otherwise they do nothing.
+  ::OutputDebugStringA(result.c_str());
+  ::OutputDebugStringA("\n");
+#endif
 }
 
 // class PrettyUnitTestResultPrinter
@@ -3426,7 +3435,8 @@ void UnitTest::AddTestPartResult(TestPartResultType result_type,
     for (int i = 0; i < impl_->gtest_trace_stack()->size(); i++) {
       const internal::TraceInfo& trace =
           impl_->gtest_trace_stack()->GetElement(i);
-      msg << "\n" << trace.file << ":" << trace.line << ": " << trace.message;
+      msg << "\n" << internal::FormatFileLocation(trace.file, trace.line)
+          << " " << trace.message;
     }
   }
 
