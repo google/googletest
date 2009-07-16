@@ -483,8 +483,8 @@ class TestInfoImpl {
   TypeId fixture_class_id() const { return fixture_class_id_; }
 
   // Returns the test result.
-  internal::TestResult* result() { return &result_; }
-  const internal::TestResult* result() const { return &result_; }
+  TestResult* result() { return &result_; }
+  const TestResult* result() const { return &result_; }
 
   // Creates the test object, runs it, records its result, and then
   // deletes it.
@@ -520,7 +520,7 @@ class TestInfoImpl {
 
   // This field is mutable and needs to be reset before running the
   // test for the second time.
-  internal::TestResult result_;
+  TestResult result_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(TestInfoImpl);
 };
@@ -742,19 +742,17 @@ class UnitTestImpl {
 
   // Returns the TestResult for the test that's currently running, or
   // the TestResult for the ad hoc test if no test is running.
-  internal::TestResult* current_test_result();
+  TestResult* current_test_result();
 
   // Returns the TestResult for the ad hoc test.
-  const internal::TestResult* ad_hoc_test_result() const {
-    return &ad_hoc_test_result_;
-  }
+  const TestResult* ad_hoc_test_result() const { return &ad_hoc_test_result_; }
 
   // Sets the unit test result printer.
   //
   // Does nothing if the input and the current printer object are the
   // same; otherwise, deletes the old printer object and makes the
   // input the current printer.
-  void set_result_printer(UnitTestEventListenerInterface * result_printer);
+  void set_result_printer(UnitTestEventListenerInterface* result_printer);
 
   // Returns the current unit test result printer if it is not NULL;
   // otherwise, creates an appropriate result printer, makes it the
@@ -991,7 +989,7 @@ class UnitTestImpl {
   // If an assertion is encountered when no TEST or TEST_F is running,
   // Google Test attributes the assertion result to an imaginary "ad hoc"
   // test, and records the result in ad_hoc_test_result_.
-  internal::TestResult ad_hoc_test_result_;
+  TestResult ad_hoc_test_result_;
 
   // The unit test result printer.  Will be deleted when the UnitTest
   // object is destructed.  By default, a plain text printer is used,
@@ -1121,6 +1119,28 @@ bool ParseNaturalNumber(const ::std::string& str, Integer* number) {
   return false;
 }
 #endif  // GTEST_HAS_DEATH_TEST
+
+// TestResult contains some private methods that should be hidden from
+// Google Test user but are required for testing. This class allow our tests
+// to access them.
+class TestResultAccessor {
+ public:
+  static void RecordProperty(TestResult* test_result,
+                             const TestProperty& property) {
+    test_result->RecordProperty(property);
+  }
+
+  static bool Passed(const TestResult& result) { return result.Passed(); }
+
+  static void ClearTestPartResults(TestResult* test_result) {
+    test_result->ClearTestPartResults();
+  }
+
+  static const Vector<testing::TestPartResult>& test_part_results(
+      const TestResult& test_result) {
+    return test_result.test_part_results();
+  }
+};
 
 }  // namespace internal
 }  // namespace testing

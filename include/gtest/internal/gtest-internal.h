@@ -101,20 +101,19 @@ namespace testing {
 
 // Forward declaration of classes.
 
+class AssertionResult;                 // Result of an assertion.
 class Message;                         // Represents a failure message.
 class Test;                            // Represents a test.
-class TestPartResult;                  // Result of a test part.
 class TestInfo;                        // Information about a test.
+class TestPartResult;                  // Result of a test part.
 class UnitTest;                        // A collection of test cases.
 class UnitTestEventListenerInterface;  // Listens to Google Test events.
-class AssertionResult;                 // Result of an assertion.
 
 namespace internal {
 
 struct TraceInfo;                      // Information about a trace point.
 class ScopedTrace;                     // Implements scoped trace.
 class TestInfoImpl;                    // Opaque implementation of TestInfo
-class TestResult;                      // Result of a single Test.
 class UnitTestImpl;                    // Opaque implementation of UnitTest
 template <typename E> class Vector;    // A generic vector.
 
@@ -746,9 +745,6 @@ class TypeParameterizedTestCase<Fixture, Templates0, Types> {
 // GetCurrentOsStackTraceExceptTop(..., 1), Foo() will be included in
 // the trace but Bar() and GetCurrentOsStackTraceExceptTop() won't.
 String GetCurrentOsStackTraceExceptTop(UnitTest* unit_test, int skip_count);
-
-// Returns the number of failed test parts in the given test result object.
-int GetFailedPartCount(const TestResult* result);
 
 // A helper for suppressing warnings on unreachable code in some macros.
 bool AlwaysTrue();

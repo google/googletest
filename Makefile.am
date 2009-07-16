@@ -292,6 +292,11 @@ check_PROGRAMS += test/gtest_unittest
 test_gtest_unittest_SOURCES = test/gtest_unittest.cc
 test_gtest_unittest_LDADD = lib/libgtest_main.la
 
+TESTS += test/gtest-unittest-api_test
+check_PROGRAMS += test/gtest-unittest-api_test
+test_gtest_unittest_api_test_SOURCES = test/gtest-unittest-api_test.cc
+test_gtest_unittest_api_test_LDADD = lib/libgtest_main.la
+
 # Verifies that Google Test works when RTTI is disabled.
 TESTS += test/gtest_no_rtti_test
 check_PROGRAMS += test/gtest_no_rtti_test
