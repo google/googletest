@@ -94,26 +94,6 @@ const char* FormatTimeInMillisAsSeconds(TimeInMillis ms);
 
 bool ParseInt32Flag(const char* str, const char* flag, Int32* value);
 
-// TestResult contains some private methods that should be hidden from
-// Google Test user but are required for testing. This class allow our tests
-// to access them.
-class TestResultAccessor {
- public:
-  static void RecordProperty(TestResult* test_result,
-                             const TestProperty& property) {
-    test_result->RecordProperty(property);
-  }
-
-  static void ClearTestPartResults(TestResult* test_result) {
-    test_result->ClearTestPartResults();
-  }
-
-  static const Vector<testing::TestPartResult>& test_part_results(
-      const TestResult& test_result) {
-    return test_result.test_part_results();
-  }
-};
-
 }  // namespace internal
 }  // namespace testing
 
@@ -138,8 +118,8 @@ using testing::FloatLE;
 using testing::GTEST_FLAG(also_run_disabled_tests);
 using testing::GTEST_FLAG(break_on_failure);
 using testing::GTEST_FLAG(catch_exceptions);
-using testing::GTEST_FLAG(death_test_use_fork);
 using testing::GTEST_FLAG(color);
+using testing::GTEST_FLAG(death_test_use_fork);
 using testing::GTEST_FLAG(filter);
 using testing::GTEST_FLAG(list_tests);
 using testing::GTEST_FLAG(output);
@@ -155,12 +135,12 @@ using testing::IsSubstring;
 using testing::Message;
 using testing::ScopedFakeTestPartResultReporter;
 using testing::StaticAssertTypeEq;
-using testing::Test;
-using testing::TestPartResult;
-using testing::TestPartResultArray;
 using testing::TPRT_FATAL_FAILURE;
 using testing::TPRT_NONFATAL_FAILURE;
 using testing::TPRT_SUCCESS;
+using testing::Test;
+using testing::TestPartResult;
+using testing::TestPartResultArray;
 using testing::UnitTest;
 using testing::internal::kMaxRandomSeed;
 using testing::internal::kTestTypeIdInGoogleTest;
@@ -168,14 +148,13 @@ using testing::internal::AppendUserMessage;
 using testing::internal::CodePointToUtf8;
 using testing::internal::EqFailure;
 using testing::internal::FloatingPoint;
+using testing::internal::GTestFlagSaver;
 using testing::internal::GetCurrentOsStackTraceExceptTop;
-using testing::internal::GetFailedPartCount;
 using testing::internal::GetNextRandomSeed;
 using testing::internal::GetRandomSeedFromFlag;
 using testing::internal::GetTestTypeId;
 using testing::internal::GetTypeId;
 using testing::internal::GetUnitTestImpl;
-using testing::internal::GTestFlagSaver;
 using testing::internal::Int32;
 using testing::internal::Int32FromEnvOrDie;
 using testing::internal::ShouldRunTestOnShard;
@@ -190,6 +169,7 @@ using testing::internal::TestResultAccessor;
 using testing::internal::ThreadLocal;
 using testing::internal::Vector;
 using testing::internal::WideStringToUtf8;
+using testing::internal::kTestTypeIdInGoogleTest;
 
 // This line tests that we can define tests in an unnamed namespace.
 namespace {
@@ -1227,6 +1207,68 @@ TEST_F(ExpectFailureWithThreadsTest, ExpectNonFatalFailureOnAllThreads) {
 
 #endif  // GTEST_IS_THREADSAFE && GTEST_HAS_PTHREAD
 
+// Tests the TestProperty class.
+
+TEST(TestPropertyTest, ConstructorWorks) {
+  const TestProperty property("key", "value");
+  EXPECT_STREQ("key", property.key());
+  EXPECT_STREQ("value", property.value());
+}
+
+TEST(TestPropertyTest, SetValue) {
+  TestProperty property("key", "value_1");
+  EXPECT_STREQ("key", property.key());
+  property.SetValue("value_2");
+  EXPECT_STREQ("key", property.key());
+  EXPECT_STREQ("value_2", property.value());
+}
+
+// Tests the TestPartResult class.
+
+TEST(TestPartResultTest, ConstructorWorks) {
+  Message message;
+  message << "something is terribly wrong";
+  message << static_cast<const char*>(testing::internal::kStackTraceMarker);
+  message << "some unimportant stack trace";
+
+  const TestPartResult result(TPRT_NONFATAL_FAILURE,
+                              "some_file.cc",
+                              42,
+                              message.GetString().c_str());
+
+  EXPECT_EQ(TPRT_NONFATAL_FAILURE, result.type());
+  EXPECT_STREQ("some_file.cc", result.file_name());
+  EXPECT_EQ(42, result.line_number());
+  EXPECT_STREQ(message.GetString().c_str(), result.message());
+  EXPECT_STREQ("something is terribly wrong", result.summary());
+}
+
+TEST(TestPartResultTest, ResultAccessorsWork) {
+  const TestPartResult success(TPRT_SUCCESS, "file.cc", 42, "message");
+  EXPECT_TRUE(success.passed());
+  EXPECT_FALSE(success.failed());
+  EXPECT_FALSE(success.nonfatally_failed());
+  EXPECT_FALSE(success.fatally_failed());
+
+  const TestPartResult nonfatal_failure(TPRT_NONFATAL_FAILURE,
+                                        "file.cc",
+                                        42,
+                                        "message");
+  EXPECT_FALSE(nonfatal_failure.passed());
+  EXPECT_TRUE(nonfatal_failure.failed());
+  EXPECT_TRUE(nonfatal_failure.nonfatally_failed());
+  EXPECT_FALSE(nonfatal_failure.fatally_failed());
+
+  const TestPartResult fatal_failure(TPRT_FATAL_FAILURE,
+                                     "file.cc",
+                                     42,
+                                     "message");
+  EXPECT_FALSE(fatal_failure.passed());
+  EXPECT_TRUE(fatal_failure.failed());
+  EXPECT_FALSE(fatal_failure.nonfatally_failed());
+  EXPECT_TRUE(fatal_failure.fatally_failed());
+}
+
 // Tests the TestResult class
 
 // The test fixture for testing TestResult.
@@ -1297,34 +1339,6 @@ class TestResultTest : public Test {
     EXPECT_EQ(expected.fatally_failed(), actual.fatally_failed());
   }
 };
-
-// Tests TestResult::total_part_count().
-TEST_F(TestResultTest, test_part_results) {
-  ASSERT_EQ(0, r0->total_part_count());
-  ASSERT_EQ(1, r1->total_part_count());
-  ASSERT_EQ(2, r2->total_part_count());
-}
-
-// Tests TestResult::successful_part_count().
-TEST_F(TestResultTest, successful_part_count) {
-  ASSERT_EQ(0, r0->successful_part_count());
-  ASSERT_EQ(1, r1->successful_part_count());
-  ASSERT_EQ(1, r2->successful_part_count());
-}
-
-// Tests TestResult::failed_part_count().
-TEST_F(TestResultTest, failed_part_count) {
-  ASSERT_EQ(0, r0->failed_part_count());
-  ASSERT_EQ(0, r1->failed_part_count());
-  ASSERT_EQ(1, r2->failed_part_count());
-}
-
-// Tests testing::internal::GetFailedPartCount().
-TEST_F(TestResultTest, GetFailedPartCount) {
-  ASSERT_EQ(0, GetFailedPartCount(r0));
-  ASSERT_EQ(0, GetFailedPartCount(r1));
-  ASSERT_EQ(1, GetFailedPartCount(r2));
-}
 
 // Tests TestResult::total_part_count().
 TEST_F(TestResultTest, total_part_count) {
@@ -3778,42 +3792,37 @@ TEST(AssertionSyntaxTest, WorksWithConst) {
 
 }  // namespace
 
-// Returns the number of successful parts in the current test.
-static size_t GetSuccessfulPartCount() {
-  return GetUnitTestImpl()->current_test_result()->successful_part_count();
-}
-
 namespace testing {
 
 // Tests that Google Test tracks SUCCEED*.
 TEST(SuccessfulAssertionTest, SUCCEED) {
   SUCCEED();
   SUCCEED() << "OK";
-  EXPECT_EQ(2, GetSuccessfulPartCount());
+  EXPECT_EQ(2, GetUnitTestImpl()->current_test_result()->total_part_count());
 }
 
 // Tests that Google Test doesn't track successful EXPECT_*.
 TEST(SuccessfulAssertionTest, EXPECT) {
   EXPECT_TRUE(true);
-  EXPECT_EQ(0, GetSuccessfulPartCount());
+  EXPECT_EQ(0, GetUnitTestImpl()->current_test_result()->total_part_count());
 }
 
 // Tests that Google Test doesn't track successful EXPECT_STR*.
 TEST(SuccessfulAssertionTest, EXPECT_STR) {
   EXPECT_STREQ("", "");
-  EXPECT_EQ(0, GetSuccessfulPartCount());
+  EXPECT_EQ(0, GetUnitTestImpl()->current_test_result()->total_part_count());
 }
 
 // Tests that Google Test doesn't track successful ASSERT_*.
 TEST(SuccessfulAssertionTest, ASSERT) {
   ASSERT_TRUE(true);
-  EXPECT_EQ(0, GetSuccessfulPartCount());
+  EXPECT_EQ(0, GetUnitTestImpl()->current_test_result()->total_part_count());
 }
 
 // Tests that Google Test doesn't track successful ASSERT_STR*.
 TEST(SuccessfulAssertionTest, ASSERT_STR) {
   ASSERT_STREQ("", "");
-  EXPECT_EQ(0, GetSuccessfulPartCount());
+  EXPECT_EQ(0, GetUnitTestImpl()->current_test_result()->total_part_count());
 }
 
 }  // namespace testing

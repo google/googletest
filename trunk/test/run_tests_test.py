@@ -182,9 +182,10 @@ class GetTestsToRunTest(unittest.TestCase):
   def setUp(self):
     self.fake_os = FakeOs(FakePath(
         current_dir=os.path.abspath(os.path.dirname(run_tests.__file__)),
-        known_paths=[AddExeExtension('scons/build/dbg/scons/gtest_unittest'),
-                     AddExeExtension('scons/build/opt/scons/gtest_unittest'),
-                     'test/gtest_color_test.py']))
+        known_paths=[
+            AddExeExtension('scons/build/dbg/gtest/scons/gtest_unittest'),
+            AddExeExtension('scons/build/opt/gtest/scons/gtest_unittest'),
+            'test/gtest_color_test.py']))
     self.fake_configurations = ['dbg', 'opt']
     self.test_runner = run_tests.TestRunner(injected_os=self.fake_os,
                                             injected_subprocess=None,
@@ -201,17 +202,19 @@ class GetTestsToRunTest(unittest.TestCase):
             False,
             available_configurations=self.fake_configurations),
         ([],
-         [('scons/build/dbg/scons', 'scons/build/dbg/scons/gtest_unittest')]))
+         [('scons/build/dbg/gtest/scons',
+           'scons/build/dbg/gtest/scons/gtest_unittest')]))
 
     # An explicitly specified directory.
     self.AssertResultsEqual(
         self.test_runner.GetTestsToRun(
-            ['scons/build/dbg/scons', 'gtest_unittest'],
+            ['scons/build/dbg/gtest/scons', 'gtest_unittest'],
             '',
             False,
             available_configurations=self.fake_configurations),
         ([],
-         [('scons/build/dbg/scons', 'scons/build/dbg/scons/gtest_unittest')]))
+         [('scons/build/dbg/gtest/scons',
+           'scons/build/dbg/gtest/scons/gtest_unittest')]))
 
     # A particular configuration.
     self.AssertResultsEqual(
@@ -221,8 +224,8 @@ class GetTestsToRunTest(unittest.TestCase):
             False,
             available_configurations=self.fake_configurations),
         ([],
-         [('scons/build/other/scons',
-           'scons/build/other/scons/gtest_unittest')]))
+         [('scons/build/other/gtest/scons',
+           'scons/build/other/gtest/scons/gtest_unittest')]))
 
     # All available configurations
     self.AssertResultsEqual(
@@ -232,8 +235,10 @@ class GetTestsToRunTest(unittest.TestCase):
             False,
             available_configurations=self.fake_configurations),
         ([],
-         [('scons/build/dbg/scons', 'scons/build/dbg/scons/gtest_unittest'),
-          ('scons/build/opt/scons', 'scons/build/opt/scons/gtest_unittest')]))
+         [('scons/build/dbg/gtest/scons',
+           'scons/build/dbg/gtest/scons/gtest_unittest'),
+          ('scons/build/opt/gtest/scons',
+           'scons/build/opt/gtest/scons/gtest_unittest')]))
 
     # All built configurations (unbuilt don't cause failure).
     self.AssertResultsEqual(
@@ -243,40 +248,47 @@ class GetTestsToRunTest(unittest.TestCase):
             True,
             available_configurations=self.fake_configurations + ['unbuilt']),
         ([],
-         [('scons/build/dbg/scons', 'scons/build/dbg/scons/gtest_unittest'),
-          ('scons/build/opt/scons', 'scons/build/opt/scons/gtest_unittest')]))
+         [('scons/build/dbg/gtest/scons',
+           'scons/build/dbg/gtest/scons/gtest_unittest'),
+          ('scons/build/opt/gtest/scons',
+           'scons/build/opt/gtest/scons/gtest_unittest')]))
 
     # A combination of an explicit directory and a configuration.
     self.AssertResultsEqual(
         self.test_runner.GetTestsToRun(
-            ['scons/build/dbg/scons', 'gtest_unittest'],
+            ['scons/build/dbg/gtest/scons', 'gtest_unittest'],
             'opt',
             False,
             available_configurations=self.fake_configurations),
         ([],
-         [('scons/build/dbg/scons', 'scons/build/dbg/scons/gtest_unittest'),
-          ('scons/build/opt/scons', 'scons/build/opt/scons/gtest_unittest')]))
+         [('scons/build/dbg/gtest/scons',
+           'scons/build/dbg/gtest/scons/gtest_unittest'),
+          ('scons/build/opt/gtest/scons',
+           'scons/build/opt/gtest/scons/gtest_unittest')]))
 
     # Same test specified in an explicit directory and via a configuration.
     self.AssertResultsEqual(
         self.test_runner.GetTestsToRun(
-            ['scons/build/dbg/scons', 'gtest_unittest'],
+            ['scons/build/dbg/gtest/scons', 'gtest_unittest'],
             'dbg',
             False,
             available_configurations=self.fake_configurations),
         ([],
-         [('scons/build/dbg/scons', 'scons/build/dbg/scons/gtest_unittest')]))
+         [('scons/build/dbg/gtest/scons',
+           'scons/build/dbg/gtest/scons/gtest_unittest')]))
 
     # All built configurations + explicit directory + explicit configuration.
     self.AssertResultsEqual(
         self.test_runner.GetTestsToRun(
-            ['scons/build/dbg/scons', 'gtest_unittest'],
+            ['scons/build/dbg/gtest/scons', 'gtest_unittest'],
             'opt',
             True,
             available_configurations=self.fake_configurations),
         ([],
-         [('scons/build/dbg/scons', 'scons/build/dbg/scons/gtest_unittest'),
-          ('scons/build/opt/scons', 'scons/build/opt/scons/gtest_unittest')]))
+         [('scons/build/dbg/gtest/scons',
+           'scons/build/dbg/gtest/scons/gtest_unittest'),
+          ('scons/build/opt/gtest/scons',
+           'scons/build/opt/gtest/scons/gtest_unittest')]))
 
   def testPythonTestsOnly(self):
     """Exercises GetTestsToRun with parameters designating Python tests only."""
@@ -288,17 +300,17 @@ class GetTestsToRunTest(unittest.TestCase):
             '',
             False,
             available_configurations=self.fake_configurations),
-        ([('scons/build/dbg/scons', 'test/gtest_color_test.py')],
+        ([('scons/build/dbg/gtest/scons', 'test/gtest_color_test.py')],
          []))
 
     # An explicitly specified directory.
     self.AssertResultsEqual(
         self.test_runner.GetTestsToRun(
-            ['scons/build/dbg/scons', 'test/gtest_color_test.py'],
+            ['scons/build/dbg/gtest/scons', 'test/gtest_color_test.py'],
             '',
             False,
             available_configurations=self.fake_configurations),
-        ([('scons/build/dbg/scons', 'test/gtest_color_test.py')],
+        ([('scons/build/dbg/gtest/scons', 'test/gtest_color_test.py')],
          []))
 
     # A particular configuration.
@@ -308,7 +320,7 @@ class GetTestsToRunTest(unittest.TestCase):
             'other',
             False,
             available_configurations=self.fake_configurations),
-        ([('scons/build/other/scons', 'test/gtest_color_test.py')],
+        ([('scons/build/other/gtest/scons', 'test/gtest_color_test.py')],
          []))
 
     # All available configurations
@@ -318,8 +330,8 @@ class GetTestsToRunTest(unittest.TestCase):
             'all',
             False,
             available_configurations=self.fake_configurations),
-        ([('scons/build/dbg/scons', 'test/gtest_color_test.py'),
-          ('scons/build/opt/scons', 'test/gtest_color_test.py')],
+        ([('scons/build/dbg/gtest/scons', 'test/gtest_color_test.py'),
+          ('scons/build/opt/gtest/scons', 'test/gtest_color_test.py')],
          []))
 
     # All built configurations (unbuilt don't cause failure).
@@ -329,40 +341,40 @@ class GetTestsToRunTest(unittest.TestCase):
             '',
             True,
             available_configurations=self.fake_configurations + ['unbuilt']),
-        ([('scons/build/dbg/scons', 'test/gtest_color_test.py'),
-          ('scons/build/opt/scons', 'test/gtest_color_test.py')],
+        ([('scons/build/dbg/gtest/scons', 'test/gtest_color_test.py'),
+          ('scons/build/opt/gtest/scons', 'test/gtest_color_test.py')],
          []))
 
     # A combination of an explicit directory and a configuration.
     self.AssertResultsEqual(
         self.test_runner.GetTestsToRun(
-            ['scons/build/dbg/scons', 'gtest_color_test.py'],
+            ['scons/build/dbg/gtest/scons', 'gtest_color_test.py'],
             'opt',
             False,
             available_configurations=self.fake_configurations),
-        ([('scons/build/dbg/scons', 'test/gtest_color_test.py'),
-          ('scons/build/opt/scons', 'test/gtest_color_test.py')],
+        ([('scons/build/dbg/gtest/scons', 'test/gtest_color_test.py'),
+          ('scons/build/opt/gtest/scons', 'test/gtest_color_test.py')],
          []))
 
     # Same test specified in an explicit directory and via a configuration.
     self.AssertResultsEqual(
         self.test_runner.GetTestsToRun(
-            ['scons/build/dbg/scons', 'gtest_color_test.py'],
+            ['scons/build/dbg/gtest/scons', 'gtest_color_test.py'],
             'dbg',
             False,
             available_configurations=self.fake_configurations),
-        ([('scons/build/dbg/scons', 'test/gtest_color_test.py')],
+        ([('scons/build/dbg/gtest/scons', 'test/gtest_color_test.py')],
          []))
 
     # All built configurations + explicit directory + explicit configuration.
     self.AssertResultsEqual(
         self.test_runner.GetTestsToRun(
-            ['scons/build/dbg/scons', 'gtest_color_test.py'],
+            ['scons/build/dbg/gtest/scons', 'gtest_color_test.py'],
             'opt',
             True,
             available_configurations=self.fake_configurations),
-        ([('scons/build/dbg/scons', 'test/gtest_color_test.py'),
-          ('scons/build/opt/scons', 'test/gtest_color_test.py')],
+        ([('scons/build/dbg/gtest/scons', 'test/gtest_color_test.py'),
+          ('scons/build/opt/gtest/scons', 'test/gtest_color_test.py')],
          []))
 
   def testCombinationOfBinaryAndPythonTests(self):
@@ -377,8 +389,9 @@ class GetTestsToRunTest(unittest.TestCase):
             '',
             False,
             available_configurations=self.fake_configurations),
-        ([('scons/build/dbg/scons', 'test/gtest_color_test.py')],
-         [('scons/build/dbg/scons', 'scons/build/dbg/scons/gtest_unittest')]))
+        ([('scons/build/dbg/gtest/scons', 'test/gtest_color_test.py')],
+         [('scons/build/dbg/gtest/scons',
+           'scons/build/dbg/gtest/scons/gtest_unittest')]))
 
     # Specifying both binary and Python tests.
     self.AssertResultsEqual(
@@ -387,8 +400,9 @@ class GetTestsToRunTest(unittest.TestCase):
             '',
             False,
             available_configurations=self.fake_configurations),
-        ([('scons/build/dbg/scons', 'test/gtest_color_test.py')],
-         [('scons/build/dbg/scons', 'scons/build/dbg/scons/gtest_unittest')]))
+        ([('scons/build/dbg/gtest/scons', 'test/gtest_color_test.py')],
+         [('scons/build/dbg/gtest/scons',
+           'scons/build/dbg/gtest/scons/gtest_unittest')]))
 
     # Specifying binary tests suppresses Python tests.
     self.AssertResultsEqual(
@@ -398,7 +412,8 @@ class GetTestsToRunTest(unittest.TestCase):
             False,
             available_configurations=self.fake_configurations),
         ([],
-         [('scons/build/dbg/scons', 'scons/build/dbg/scons/gtest_unittest')]))
+         [('scons/build/dbg/gtest/scons',
+           'scons/build/dbg/gtest/scons/gtest_unittest')]))
 
    # Specifying Python tests suppresses binary tests.
     self.AssertResultsEqual(
@@ -407,7 +422,7 @@ class GetTestsToRunTest(unittest.TestCase):
             '',
             False,
             available_configurations=self.fake_configurations),
-        ([('scons/build/dbg/scons', 'test/gtest_color_test.py')],
+        ([('scons/build/dbg/gtest/scons', 'test/gtest_color_test.py')],
          []))
 
   def testIgnoresNonTestFiles(self):
@@ -415,8 +430,9 @@ class GetTestsToRunTest(unittest.TestCase):
 
     self.fake_os = FakeOs(FakePath(
         current_dir=os.path.abspath(os.path.dirname(run_tests.__file__)),
-        known_paths=[AddExeExtension('scons/build/dbg/scons/gtest_nontest'),
-                     'test/']))
+        known_paths=[
+            AddExeExtension('scons/build/dbg/gtest/scons/gtest_nontest'),
+            'test/']))
     self.test_runner = run_tests.TestRunner(injected_os=self.fake_os,
                                             injected_subprocess=None,
                                             injected_script_dir='.')
@@ -435,10 +451,11 @@ class GetTestsToRunTest(unittest.TestCase):
     # directory /a/b/c/.
     self.fake_os = FakeOs(FakePath(
         current_dir=os.path.abspath('/a/b/c'),
-        known_paths=['/a/b/c/',
-                     AddExeExtension('/d/scons/build/dbg/scons/gtest_unittest'),
-                     AddExeExtension('/d/scons/build/opt/scons/gtest_unittest'),
-                     '/d/test/gtest_color_test.py']))
+        known_paths=[
+            '/a/b/c/',
+            AddExeExtension('/d/scons/build/dbg/gtest/scons/gtest_unittest'),
+            AddExeExtension('/d/scons/build/opt/gtest/scons/gtest_unittest'),
+            '/d/test/gtest_color_test.py']))
     self.fake_configurations = ['dbg', 'opt']
     self.test_runner = run_tests.TestRunner(injected_os=self.fake_os,
                                             injected_subprocess=None,
@@ -451,8 +468,8 @@ class GetTestsToRunTest(unittest.TestCase):
             False,
             available_configurations=self.fake_configurations),
         ([],
-         [('/d/scons/build/dbg/scons',
-           '/d/scons/build/dbg/scons/gtest_unittest')]))
+         [('/d/scons/build/dbg/gtest/scons',
+           '/d/scons/build/dbg/gtest/scons/gtest_unittest')]))
 
     # A Python test.
     self.AssertResultsEqual(
@@ -461,7 +478,7 @@ class GetTestsToRunTest(unittest.TestCase):
             '',
             False,
             available_configurations=self.fake_configurations),
-        ([('/d/scons/build/dbg/scons', '/d/test/gtest_color_test.py')],
+        ([('/d/scons/build/dbg/gtest/scons', '/d/test/gtest_color_test.py')],
          []))
 
 
@@ -491,7 +508,7 @@ class GetTestsToRunTest(unittest.TestCase):
 
       self.fake_os = FakeOs(FakePath(
           current_dir=os.path.abspath(os.path.dirname(run_tests.__file__)),
-          known_paths=['scons/build/dbg/scons/gtest_test', 'test/']))
+          known_paths=['scons/build/dbg/gtest/scons/gtest_test', 'test/']))
       self.test_runner = run_tests.TestRunner(injected_os=self.fake_os,
                                               injected_subprocess=None,
                                               injected_script_dir='.')
@@ -522,9 +539,10 @@ class RunTestsTest(unittest.TestCase):
   def setUp(self):
     self.fake_os = FakeOs(FakePath(
         current_dir=os.path.abspath(os.path.dirname(run_tests.__file__)),
-        known_paths=[AddExeExtension('scons/build/dbg/scons/gtest_unittest'),
-                     AddExeExtension('scons/build/opt/scons/gtest_unittest'),
-                     'test/gtest_color_test.py']))
+        known_paths=[
+            AddExeExtension('scons/build/dbg/gtest/scons/gtest_unittest'),
+            AddExeExtension('scons/build/opt/gtest/scons/gtest_unittest'),
+            'test/gtest_color_test.py']))
     self.fake_configurations = ['dbg', 'opt']
     self.test_runner = run_tests.TestRunner(injected_os=self.fake_os,
                                             injected_subprocess=None)
@@ -536,7 +554,7 @@ class RunTestsTest(unittest.TestCase):
     self.fake_os.spawn_impl = self.SpawnSuccess
     self.assertEqual(
         self.test_runner.RunTests(
-            [('scons/build/dbg/scons', 'test/gtest_color_test.py')],
+            [('scons/build/dbg/gtest/scons', 'test/gtest_color_test.py')],
             []),
         0)
     self.assertEqual(self.num_spawn_calls, 1)
@@ -548,8 +566,8 @@ class RunTestsTest(unittest.TestCase):
     self.assertEqual(
         self.test_runner.RunTests(
             [],
-            [('scons/build/dbg/scons',
-              'scons/build/dbg/scons/gtest_unittest')]),
+            [('scons/build/dbg/gtest/scons',
+              'scons/build/dbg/gtest/scons/gtest_unittest')]),
         0)
     self.assertEqual(self.num_spawn_calls, 1)
 
@@ -559,7 +577,7 @@ class RunTestsTest(unittest.TestCase):
     self.fake_os.spawn_impl = self.SpawnFailure
     self.assertEqual(
         self.test_runner.RunTests(
-            [('scons/build/dbg/scons', 'test/gtest_color_test.py')],
+            [('scons/build/dbg/gtest/scons', 'test/gtest_color_test.py')],
             []),
         1)
     self.assertEqual(self.num_spawn_calls, 1)
@@ -571,8 +589,8 @@ class RunTestsTest(unittest.TestCase):
     self.assertEqual(
         self.test_runner.RunTests(
             [],
-            [('scons/build/dbg/scons',
-              'scons/build/dbg/scons/gtest_unittest')]),
+            [('scons/build/dbg/gtest/scons',
+              'scons/build/dbg/gtest/scons/gtest_unittest')]),
         1)
     self.assertEqual(self.num_spawn_calls, 1)
 
@@ -582,9 +600,10 @@ class RunTestsTest(unittest.TestCase):
     self.fake_os.spawn_impl = self.SpawnSuccess
     self.assertEqual(
         self.test_runner.RunTests(
-            [('scons/build/dbg/scons', 'scons/build/dbg/scons/gtest_unittest')],
-            [('scons/build/dbg/scons',
-              'scons/build/dbg/scons/gtest_unittest')]),
+            [('scons/build/dbg/gtest/scons',
+              'scons/build/dbg/gtest/scons/gtest_unittest')],
+            [('scons/build/dbg/gtest/scons',
+              'scons/build/dbg/gtest/scons/gtest_unittest')]),
         0)
     self.assertEqual(self.num_spawn_calls, 2)
 
@@ -602,9 +621,10 @@ class RunTestsTest(unittest.TestCase):
     self.fake_os.spawn_impl = SpawnImpl
     self.assertEqual(
         self.test_runner.RunTests(
-            [('scons/build/dbg/scons', 'scons/build/dbg/scons/gtest_unittest')],
-            [('scons/build/dbg/scons',
-              'scons/build/dbg/scons/gtest_unittest')]),
+            [('scons/build/dbg/gtest/scons',
+              'scons/build/dbg/gtest/scons/gtest_unittest')],
+            [('scons/build/dbg/gtest/scons',
+              'scons/build/dbg/gtest/scons/gtest_unittest')]),
         0)
     self.assertEqual(self.num_spawn_calls, 2)
 

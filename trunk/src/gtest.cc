@@ -130,6 +130,8 @@
 namespace testing {
 
 using internal::TestCase;
+using internal::TestProperty;
+using internal::TestResult;
 
 // Constants.
 
@@ -1831,8 +1833,8 @@ String AppendUserMessage(const String& gtest_msg,
 
 // Creates an empty TestResult.
 TestResult::TestResult()
-    : test_part_results_(new Vector<TestPartResult>),
-      test_properties_(new Vector<TestProperty>),
+    : test_part_results_(new internal::Vector<TestPartResult>),
+      test_properties_(new internal::Vector<TestProperty>),
       death_test_count_(0),
       elapsed_time_(0) {
 }
@@ -1872,9 +1874,10 @@ void TestResult::RecordProperty(const TestProperty& test_property) {
   if (!ValidateTestProperty(test_property)) {
     return;
   }
-  MutexLock lock(&test_properites_mutex_);
+  internal::MutexLock lock(&test_properites_mutex_);
   TestProperty* const property_with_matching_key =
-      test_properties_->FindIf(TestPropertyKeyIs(test_property.key()));
+      test_properties_->FindIf(
+          internal::TestPropertyKeyIs(test_property.key()));
   if (property_with_matching_key == NULL) {
     test_properties_->PushBack(test_property);
     return;
@@ -1885,7 +1888,7 @@ void TestResult::RecordProperty(const TestProperty& test_property) {
 // Adds a failure if the key is a reserved attribute of Google Test
 // testcase tags.  Returns true if the property is valid.
 bool TestResult::ValidateTestProperty(const TestProperty& test_property) {
-  String key(test_property.key());
+  internal::String key(test_property.key());
   if (key == "name" || key == "status" || key == "time" || key == "classname") {
     ADD_FAILURE()
         << "Reserved key used in RecordProperty(): "
@@ -1905,24 +1908,13 @@ void TestResult::Clear() {
   elapsed_time_ = 0;
 }
 
-// Returns true iff the test part passed.
-static bool TestPartPassed(const TestPartResult & result) {
-  return result.passed();
-}
-
-// Gets the number of successful test parts.
-int TestResult::successful_part_count() const {
-  return test_part_results_->CountIf(TestPartPassed);
-}
-
-// Returns true iff the test part failed.
-static bool TestPartFailed(const TestPartResult & result) {
-  return result.failed();
-}
-
-// Gets the number of failed test parts.
-int TestResult::failed_part_count() const {
-  return test_part_results_->CountIf(TestPartFailed);
+// Returns true iff the test failed.
+bool TestResult::Failed() const {
+  for (int i = 0; i < total_part_count(); ++i) {
+    if (GetTestPartResult(i).failed())
+      return true;
+  }
+  return false;
 }
 
 // Returns true iff the test part fatally failed.
@@ -2264,7 +2256,7 @@ bool TestInfo::should_run() const { return impl_->should_run(); }
 bool TestInfo::matches_filter() const { return impl_->matches_filter(); }
 
 // Returns the result of the test.
-const internal::TestResult* TestInfo::result() const { return impl_->result(); }
+const TestResult* TestInfo::result() const { return impl_->result(); }
 
 // Increments the number of death tests encountered in this test so
 // far.
@@ -3021,7 +3013,7 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
   // When the String is not empty, it includes a space at the beginning,
   // to delimit this attribute from prior attributes.
   static internal::String TestPropertiesAsXmlAttributes(
-      const internal::TestResult& result);
+      const TestResult& result);
 
   // The output file.
   const internal::String output_file_;
@@ -3160,7 +3152,7 @@ const char* FormatTimeInMillisAsSeconds(TimeInMillis ms) {
 void XmlUnitTestResultPrinter::PrintXmlTestInfo(FILE* out,
                                                 const char* test_case_name,
                                                 const TestInfo& test_info) {
-  const internal::TestResult& result = *test_info.result();
+  const TestResult& result = *test_info.result();
   fprintf(out,
           "    <testcase name=\"%s\" status=\"%s\" time=\"%s\" "
           "classname=\"%s\"%s",
@@ -3233,8 +3225,7 @@ void XmlUnitTestResultPrinter::PrintXmlUnitTest(FILE* out,
 // Produces a string representing the test properties in a result as space
 // delimited XML attributes based on the property key="value" pairs.
 internal::String XmlUnitTestResultPrinter::TestPropertiesAsXmlAttributes(
-    const internal::TestResult& result) {
-  using internal::TestProperty;
+    const TestResult& result) {
   Message attributes;
   for (int i = 0; i < result.test_property_count(); ++i) {
     const TestProperty& property = result.GetTestProperty(i);
@@ -3481,7 +3472,7 @@ void UnitTest::AddTestPartResult(TestPartResultType result_type,
 // the supplied value already exists, updates its value instead.
 void UnitTest::RecordPropertyForCurrentTest(const char* key,
                                             const char* value) {
-  const internal::TestProperty test_property(key, value);
+  const TestProperty test_property(key, value);
   impl_->current_test_result()->RecordProperty(test_property);
 }
 
@@ -4089,7 +4080,7 @@ OsStackTraceGetterInterface* UnitTestImpl::os_stack_trace_getter() {
 
 // Returns the TestResult for the test that's currently running, or
 // the TestResult for the ad hoc test if no test is running.
-internal::TestResult* UnitTestImpl::current_test_result() {
+TestResult* UnitTestImpl::current_test_result() {
   return current_test_info_ ?
     current_test_info_->impl()->result() : &ad_hoc_test_result_;
 }
@@ -4134,11 +4125,6 @@ String GetCurrentOsStackTraceExceptTop(UnitTest* unit_test, int skip_count) {
   // We pass skip_count + 1 to skip this wrapper function in addition
   // to what the user really wants to skip.
   return GetUnitTestImpl()->CurrentOsStackTraceExceptTop(skip_count + 1);
-}
-
-// Returns the number of failed test parts in the given test result object.
-int GetFailedPartCount(const TestResult* result) {
-  return result->failed_part_count();
 }
 
 // Used by the GTEST_HIDE_UNREACHABLE_CODE_ macro to suppress unreachable

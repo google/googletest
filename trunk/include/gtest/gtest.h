@@ -150,9 +150,13 @@ namespace internal {
 class AssertHelper;
 class DefaultGlobalTestPartResultReporter;
 class ExecDeathTest;
+class FinalSuccessChecker;
 class GTestFlagSaver;
-class TestCase;                        // A collection of related tests.
+class TestCase;
 class TestInfoImpl;
+class TestResultAccessor;
+class UnitTestAccessor;
+class WindowsDeathTest;
 class UnitTestImpl* GetUnitTestImpl();
 void ReportFailureInUnknownLocation(TestPartResultType result_type,
                                     const String& message);
@@ -360,6 +364,8 @@ class Test {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(Test);
 };
 
+typedef internal::TimeInMillis TimeInMillis;
+
 namespace internal {
 
 // A copyable object representing a user specified test property which can be
@@ -392,9 +398,9 @@ class TestProperty {
 
  private:
   // The key supplied by the user.
-  String key_;
+  internal::String key_;
   // The value supplied by the user.
-  String value_;
+  internal::String value_;
 };
 
 // The result of a single Test.  This includes a list of
@@ -411,12 +417,6 @@ class TestResult {
   // D'tor.  Do not inherit from TestResult.
   ~TestResult();
 
-  // Gets the number of successful test parts.
-  int successful_part_count() const;
-
-  // Gets the number of failed test parts.
-  int failed_part_count() const;
-
   // Gets the number of all test parts.  This is the sum of the number
   // of successful test parts and the number of failed test parts.
   int total_part_count() const;
@@ -428,7 +428,7 @@ class TestResult {
   bool Passed() const { return !Failed(); }
 
   // Returns true iff the test failed.
-  bool Failed() const { return failed_part_count() > 0; }
+  bool Failed() const;
 
   // Returns true iff the test fatally failed.
   bool HasFatalFailure() const;
@@ -450,12 +450,12 @@ class TestResult {
   const TestProperty& GetTestProperty(int i) const;
 
  private:
-  friend class DefaultGlobalTestPartResultReporter;
-  friend class ExecDeathTest;
-  friend class TestInfoImpl;
-  friend class TestResultAccessor;
-  friend class UnitTestImpl;
-  friend class WindowsDeathTest;
+  friend class internal::DefaultGlobalTestPartResultReporter;
+  friend class internal::ExecDeathTest;
+  friend class internal::TestInfoImpl;
+  friend class internal::TestResultAccessor;
+  friend class internal::UnitTestImpl;
+  friend class internal::WindowsDeathTest;
   friend class testing::TestInfo;
   friend class testing::UnitTest;
 
@@ -465,7 +465,7 @@ class TestResult {
   }
 
   // Gets the vector of TestProperties.
-  const internal::Vector<internal::TestProperty>& test_properties() const {
+  const internal::Vector<TestProperty>& test_properties() const {
     return *test_properties_;
   }
 
@@ -477,12 +477,12 @@ class TestResult {
   // key names). If a property is already recorded for the same key, the
   // value will be updated, rather than storing multiple values for the same
   // key.
-  void RecordProperty(const internal::TestProperty& test_property);
+  void RecordProperty(const TestProperty& test_property);
 
   // Adds a failure if the key is a reserved attribute of Google Test
   // testcase tags.  Returns true if the property is valid.
   // TODO(russr): Validate attribute names are legal and human readable.
-  static bool ValidateTestProperty(const internal::TestProperty& test_property);
+  static bool ValidateTestProperty(const TestProperty& test_property);
 
   // Adds a test part result to the list.
   void AddTestPartResult(const TestPartResult& test_part_result);
@@ -506,8 +506,7 @@ class TestResult {
   // The vector of TestPartResults
   internal::scoped_ptr<internal::Vector<TestPartResult> > test_part_results_;
   // The vector of TestProperties
-  internal::scoped_ptr<internal::Vector<internal::TestProperty> >
-      test_properties_;
+  internal::scoped_ptr<internal::Vector<TestProperty> > test_properties_;
   // Running count of death tests.
   int death_test_count_;
   // The elapsed time, in milliseconds.
@@ -664,7 +663,7 @@ class TestCase {
   bool Failed() const { return failed_test_count() > 0; }
 
   // Returns the elapsed time, in milliseconds.
-  internal::TimeInMillis elapsed_time() const { return elapsed_time_; }
+  TimeInMillis elapsed_time() const { return elapsed_time_; }
 
   // Returns the i-th test among all the tests. i can range from 0 to
   // total_test_count() - 1. If i is not in that range, returns NULL.
@@ -672,7 +671,7 @@ class TestCase {
 
  private:
   friend class testing::Test;
-  friend class UnitTestImpl;
+  friend class internal::UnitTestImpl;
 
   // Gets the (mutable) vector of TestInfos in this TestCase.
   internal::Vector<TestInfo*>& test_info_list() { return *test_info_list_; }
@@ -728,7 +727,7 @@ class TestCase {
   // True iff any test in this test case should run.
   bool should_run_;
   // Elapsed time, in milliseconds.
-  internal::TimeInMillis elapsed_time_;
+  TimeInMillis elapsed_time_;
 
   // We disallow copying TestCases.
   GTEST_DISALLOW_COPY_AND_ASSIGN_(TestCase);
@@ -874,7 +873,7 @@ class UnitTest {
   int test_to_run_count() const;
 
   // Gets the elapsed time, in milliseconds.
-  internal::TimeInMillis elapsed_time() const;
+  TimeInMillis elapsed_time() const;
 
   // Returns true iff the unit test passed (i.e. all test cases passed).
   bool Passed() const;
@@ -902,6 +901,11 @@ class UnitTest {
   // TODO(vladl@google.com): Remove these when publishing the new accessors.
   friend class PrettyUnitTestResultPrinter;
   friend class XmlUnitTestResultPrinter;
+  friend class internal::UnitTestAccessor;
+  friend class FinalSuccessChecker;
+  FRIEND_TEST(ApiTest, UnitTestImmutableAccessorsWork);
+  FRIEND_TEST(ApiTest, TestCaseImmutableAccessorsWork);
+  FRIEND_TEST(ApiTest, DisabledTestCaseAccessorsWork);
 
 
   // Creates an empty UnitTest.

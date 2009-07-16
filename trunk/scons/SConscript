@@ -29,10 +29,9 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-"""Builds the Google Test (gtest) lib; this is for Windows projects
-using SCons and can probably be easily extended for cross-platform
-SCons builds. The compilation settings from your project will be used,
-with some specific flags required for gtest added.
+"""Builds the Google Test (gtest) lib. This has been tested on Windows,
+Linux, Mac OS X, and Cygwin.  The compilation settings from your project
+will be used, with some specific flags required for gtest added.
 
 You should be able to call this file from more or less any SConscript
 file.
@@ -97,19 +96,35 @@ import os
 ############################################################
 # Environments for building the targets, sorted by name.
 
+def NewEnvironment(env, type):
+  """Copies environment and gives it suffix for names of targets built in it."""
+
+  if type:
+    suffix = '_' + type
+  else:
+    suffix = ''
+
+  new_env = env.Clone()
+  new_env['OBJ_SUFFIX'] = suffix
+  return new_env;
+
+
 Import('env')
-env = env.Clone()
+env = NewEnvironment(env, '')
+
+# Note: The relative paths in SConscript files are relative to the location of
+# the SConscript file itself. To make a path relative to the location of the
+# main SConstruct file, prepend the path with the # sign.
 
 # Include paths to gtest headers are relative to either the gtest
 # directory or the 'include' subdirectory of it, and this SConscript
 # file is one directory deeper than the gtest directory.
-env.Prepend(CPPPATH = ['#/..',
-                       '#/../include'])
+env.Prepend(CPPPATH = ['..', '../include'])
 
-env_use_own_tuple = env.Clone()
+env_use_own_tuple = NewEnvironment(env, 'use_own_tuple')
 env_use_own_tuple.Append(CPPDEFINES = 'GTEST_USE_OWN_TR1_TUPLE=1')
 
-env_with_exceptions = env.Clone()
+env_with_exceptions = NewEnvironment(env, 'ex')
 if env_with_exceptions['PLATFORM'] == 'win32':
   env_with_exceptions.Append(CCFLAGS=['/EHsc'])
   env_with_exceptions.Append(CPPDEFINES='_HAS_EXCEPTIONS=1')
@@ -129,9 +144,9 @@ else:
 # We need to disable some optimization flags for some tests on
 # Windows; otherwise the redirection of stdout does not work
 # (apparently because of a compiler bug).
-env_with_less_optimization = env.Clone()
-if env_with_less_optimization['PLATFORM'] == 'win32':
-  linker_flags = env_with_less_optimization['LINKFLAGS']
+env_less_optimized = NewEnvironment(env, 'less_optimized')
+if env_less_optimized['PLATFORM'] == 'win32':
+  linker_flags = env_less_optimized['LINKFLAGS']
   for flag in ['/O1', '/Os', '/Og', '/Oy']:
     if flag in linker_flags:
       linker_flags.remove(flag)
@@ -139,12 +154,12 @@ if env_with_less_optimization['PLATFORM'] == 'win32':
 # Assuming POSIX-like environment with GCC.
 # TODO(vladl@google.com): sniff presence of pthread_atfork instead of
 # selecting on a platform.
-env_with_threads = env.Clone()
+env_with_threads = NewEnvironment(env, 'with_threads')
 if env_with_threads['PLATFORM'] != 'win32':
   env_with_threads.Append(CCFLAGS=['-pthread'])
   env_with_threads.Append(LINKFLAGS=['-pthread'])
 
-env_without_rtti = env.Clone()
+env_without_rtti = NewEnvironment(env, 'no_rtti')
 if env_without_rtti['PLATFORM'] == 'win32':
   env_without_rtti.Append(CCFLAGS=['/GR-'])
 else:
@@ -154,121 +169,106 @@ else:
 ############################################################
 # Helpers for creating build targets.
 
-
-def GtestObject(build_env, source, obj_suffix=None):
-  """Returns a target to build an object file from the given .cc source file.
-
-  When obj_suffix is provided, appends it to the end of the object
-  file base name.
-  """
-  if obj_suffix:
-    obj_suffix = '_' + obj_suffix
-  else:
-    obj_suffix = ''
+def GtestObject(build_env, source):
+  """Returns a target to build an object file from the given .cc source file."""
 
   return build_env.Object(
-      target=os.path.basename(source).rstrip('.cc') + obj_suffix,
+      target=os.path.basename(source).rstrip('.cc') + build_env['OBJ_SUFFIX'],
       source=source)
 
 
-def GtestStaticLibrary(build_env, lib_target, sources, obj_suffix=None):
-  """Returns a target to build the given static library from sources."""
-  if obj_suffix:
-    srcs = [GtestObject(build_env, src, obj_suffix) for src in sources]
-  else:
-    srcs = sources
-  return build_env.StaticLibrary(target=lib_target, source=srcs)
+def GtestStaticLibraries(build_env):
+  """Builds static libraries for gtest and gtest_main in build_env.
+
+  Args:
+    build_env: An environment in which to build libraries.
+
+  Returns:
+    A pair (gtest library, gtest_main library) built in the given environment.
+  """
+
+  gtest_object = GtestObject(build_env, '../src/gtest-all.cc')
+  gtest_main_object = GtestObject(build_env, '../src/gtest_main.cc')
+
+  return (build_env.StaticLibrary(target='gtest' + build_env['OBJ_SUFFIX'],
+                                  source=[gtest_object]),
+          build_env.StaticLibrary(target='gtest_main' + build_env['OBJ_SUFFIX'],
+                                  source=[gtest_object, gtest_main_object]))
 
 
-def GtestBinary(build_env, target, gtest_lib, sources, obj_suffix=None):
+def GtestBinary(build_env, target, gtest_libs, sources):
   """Creates a target to build a binary (either test or sample).
 
   Args:
     build_env:  The SCons construction environment to use to build.
     target:     The basename of the target's main source file, also used as the
                 target name.
-    gtest_lib:  The gtest library to use.
+    gtest_libs: The gtest library or the list of libraries to link.
     sources:    A list of source files in the target.
-    obj_suffix: A suffix to append to all object file's basenames.
   """
-  if obj_suffix:
+  if build_env['OBJ_SUFFIX']:
     srcs = []  # The object targets corresponding to sources.
     for src in sources:
       if type(src) is str:
-        srcs.append(GtestObject(build_env, src, obj_suffix))
+        srcs.append(GtestObject(build_env, src))
       else:
         srcs.append(src)
   else:
     srcs = sources
 
-  if gtest_lib:
-    gtest_libs=[gtest_lib]
-  else:
-    gtest_libs=[]
+  if type(gtest_libs) != type(list()):
+    gtest_libs = [gtest_libs]
   binary = build_env.Program(target=target, source=srcs, LIBS=gtest_libs)
   if 'EXE_OUTPUT' in build_env.Dictionary():
     build_env.Install('$EXE_OUTPUT', source=[binary])
 
 
-def GtestTest(build_env, target, gtest_lib, additional_sources=None):
+def GtestTest(build_env, target, gtest_libs, additional_sources=None):
   """Creates a target to build the given test.
 
   Args:
     build_env:  The SCons construction environment to use to build.
     target:     The basename of the target test .cc file.
-    gtest_lib:  The gtest lib to use.
+    gtest_libs: The gtest library or the list of libraries to use.
     additional_sources: A list of additional source files in the target.
   """
-  GtestBinary(build_env, target, gtest_lib,
+
+  GtestBinary(build_env, target, gtest_libs,
               ['../test/%s.cc' % target] + (additional_sources or []))
 
 
-def GtestSample(build_env, target, gtest_lib, additional_sources=None):
+def GtestSample(build_env, target, additional_sources=None):
   """Creates a target to build the given sample.
 
   Args:
     build_env:  The SCons construction environment to use to build.
     target:     The basename of the target sample .cc file.
-    gtest_lib:  The gtest lib to use.
+    gtest_libs: The gtest library or the list of libraries to use.
     additional_sources: A list of additional source files in the target.
   """
-  GtestBinary(build_env, target, gtest_lib,
-	      ['../samples/%s.cc' % target] + (additional_sources or []))
+  GtestBinary(build_env, target, gtest_main,
+              ['../samples/%s.cc' % target] + (additional_sources or []))
+
 
 ############################################################
 # Object and library targets.
 
-# Sources used by base library and library that includes main.
-gtest_source = '../src/gtest-all.cc'
-gtest_main_source = '../src/gtest_main.cc'
-
-gtest_main_obj = GtestObject(env, gtest_main_source)
-gtest_unittest_obj = GtestObject(env, '../test/gtest_unittest.cc')
-
-# gtest.lib to be used by most apps (if you have your own main
-# function).
-gtest = env.StaticLibrary(target='gtest',
-                          source=[gtest_source])
-
-# gtest_main.lib can be used if you just want a basic main function;
-# it is also used by some tests for Google Test itself.
-gtest_main = env.StaticLibrary(target='gtest_main',
-                               source=[gtest_source, gtest_main_obj])
-
-gtest_ex = GtestStaticLibrary(
-    env_with_exceptions, 'gtest_ex', [gtest_source], obj_suffix='ex')
-gtest_ex_main = GtestStaticLibrary(
-    env_with_exceptions, 'gtest_ex_main', [gtest_source, gtest_main_source],
-    obj_suffix='ex')
-
-gtest_use_own_tuple_main = GtestStaticLibrary(
-    env_use_own_tuple, 'gtest_use_own_tuple_main',
-    [gtest_source, gtest_main_source],
-    obj_suffix='use_own_tuple')
+# gtest.lib to be used by most apps (if you have your own main function).
+# gtest_main.lib can be used if you just want a basic main function; it is also
+# used by some tests for Google Test itself.
+gtest, gtest_main = GtestStaticLibraries(env)
+gtest_ex, gtest_main_ex = GtestStaticLibraries(env_with_exceptions)
+gtest_no_rtti, gtest_main_no_rtti = GtestStaticLibraries(env_without_rtti)
+gtest_use_own_tuple, gtest_use_own_tuple_main = GtestStaticLibraries(
+    env_use_own_tuple)
 
 # Install the libraries if needed.
 if 'LIB_OUTPUT' in env.Dictionary():
-  env.Install('$LIB_OUTPUT', source=[gtest, gtest_main, gtest_ex_main])
+  env.Install('$LIB_OUTPUT', source=[gtest, gtest_main,
+                                     gtest_ex, gtest_main_ex,
+                                     gtest_no_rtti, gtest_main_no_rtti,
+                                     gtest_use_own_tuple,
+                                     gtest_use_own_tuple_main])
 
 ############################################################
 # Test targets using the standard environment.
@@ -300,8 +300,8 @@ GtestTest(env, 'gtest_throw_on_failure_test_', gtest)
 GtestTest(env, 'gtest_xml_outfile1_test_', gtest_main)
 GtestTest(env, 'gtest_xml_outfile2_test_', gtest_main)
 GtestTest(env, 'gtest_xml_output_unittest_', gtest_main)
-
-GtestBinary(env, 'gtest_unittest', gtest_main, [gtest_unittest_obj])
+GtestTest(env, 'gtest-unittest-api_test', gtest)
+GtestTest(env, 'gtest_unittest', gtest_main)
 
 ############################################################
 # Tests targets using custom environments.
@@ -309,22 +309,18 @@ GtestBinary(env, 'gtest_unittest', gtest_main, [gtest_unittest_obj])
 GtestTest(env_with_exceptions, 'gtest_output_test_', gtest_ex)
 GtestTest(env_with_exceptions, 'gtest_throw_on_failure_ex_test', gtest_ex)
 GtestTest(env_with_threads, 'gtest-death-test_test', gtest_main)
-GtestTest(env_with_less_optimization, 'gtest_env_var_test_', gtest)
-GtestTest(env_with_less_optimization, 'gtest_uninitialized_test_', gtest)
-
-GtestBinary(env_use_own_tuple, 'gtest-tuple_test', gtest_use_own_tuple_main,
-            ['../test/gtest-tuple_test.cc'],
-            obj_suffix='use_own_tuple')
-GtestBinary(env_use_own_tuple, 'gtest_use_own_tuple_test',
+GtestTest(env_less_optimized, 'gtest_env_var_test_', gtest)
+GtestTest(env_less_optimized, 'gtest_uninitialized_test_', gtest)
+GtestTest(env_use_own_tuple, 'gtest-tuple_test', gtest_use_own_tuple_main)
+GtestBinary(env_use_own_tuple,
+            'gtest_use_own_tuple_test',
             gtest_use_own_tuple_main,
             ['../test/gtest-param-test_test.cc',
-             '../test/gtest-param-test2_test.cc'],
-            obj_suffix='use_own_tuple')
-GtestBinary(env_with_exceptions, 'gtest_ex_unittest', gtest_ex_main,
-            ['../test/gtest_unittest.cc'], obj_suffix='ex')
-GtestBinary(env_without_rtti, 'gtest_no_rtti_test', None,
-            ['../test/gtest_unittest.cc', gtest_source, gtest_main_source],
-            obj_suffix='no_rtti')
+             '../test/gtest-param-test2_test.cc'])
+GtestBinary(env_with_exceptions, 'gtest_ex_unittest', gtest_main_ex,
+            ['../test/gtest_unittest.cc'])
+GtestBinary(env_without_rtti, 'gtest_no_rtti_test', gtest_main_no_rtti,
+            ['../test/gtest_unittest.cc'])
 
 ############################################################
 # Sample targets.
@@ -337,15 +333,25 @@ GtestBinary(env_without_rtti, 'gtest_no_rtti_test', None,
 # Then, in the command line use GTEST_BUILD_SAMPLES=true to enable them.
 if env.get('GTEST_BUILD_SAMPLES', False):
   sample1_obj = env.Object('../samples/sample1.cc')
-  GtestSample(env, 'sample1_unittest', gtest_main,
-              additional_sources=[sample1_obj])
-  GtestSample(env, 'sample2_unittest', gtest_main,
+  GtestSample(env, 'sample1_unittest', additional_sources=[sample1_obj])
+  GtestSample(env, 'sample2_unittest',
               additional_sources=['../samples/sample2.cc'])
-  GtestSample(env, 'sample3_unittest', gtest_main)
-  GtestSample(env, 'sample4_unittest', gtest_main,
+  GtestSample(env, 'sample3_unittest')
+  GtestSample(env, 'sample4_unittest',
               additional_sources=['../samples/sample4.cc'])
-  GtestSample(env, 'sample5_unittest', gtest_main,
-              additional_sources=[sample1_obj])
-  GtestSample(env, 'sample6_unittest', gtest_main)
-  GtestSample(env, 'sample7_unittest', gtest_main)
-  GtestSample(env, 'sample8_unittest', gtest_main)
+  GtestSample(env, 'sample5_unittest', additional_sources=[sample1_obj])
+  GtestSample(env, 'sample6_unittest')
+  GtestSample(env, 'sample7_unittest')
+  GtestSample(env, 'sample8_unittest')
+
+# These exports are used by Google Mock.
+gtest_exports = {'gtest': gtest,
+                 'gtest_ex': gtest_ex,
+                 'gtest_no_rtti': gtest_no_rtti,
+                 'gtest_use_own_tuple': gtest_use_own_tuple,
+                 'NewEnvironment': NewEnvironment,
+                 'GtestObject': GtestObject,
+                 'GtestBinary': GtestBinary,
+                 'GtestTest': GtestTest}
+# Makes the gtest_exports dictionary available to the invoking SConstruct.
+Return('gtest_exports')

@@ -957,16 +957,11 @@ TEST_F(MacroLogicDeathTest, ChildDoesNotDie) {
   EXPECT_TRUE(factory_->TestDeleted());
 }
 
-// Returns the number of successful parts in the current test.
-static size_t GetSuccessfulTestPartCount() {
-  return GetUnitTestImpl()->current_test_result()->successful_part_count();
-}
-
 // Tests that a successful death test does not register a successful
 // test part.
 TEST(SuccessRegistrationDeathTest, NoSuccessPart) {
   EXPECT_DEATH(_exit(1), "");
-  EXPECT_EQ(0u, GetSuccessfulTestPartCount());
+  EXPECT_EQ(0, GetUnitTestImpl()->current_test_result()->total_part_count());
 }
 
 TEST(StreamingAssertionsDeathTest, DeathTest) {
