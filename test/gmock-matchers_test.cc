@@ -59,6 +59,8 @@ bool SkipPrefix(const char* prefix, const char** pstr);
 
 namespace gmock_matchers_test {
 
+using std::map;
+using std::multimap;
 using std::stringstream;
 using std::tr1::make_tuple;
 using testing::A;
@@ -75,6 +77,7 @@ using testing::FloatEq;
 using testing::Ge;
 using testing::Gt;
 using testing::HasSubstr;
+using testing::Key;
 using testing::Le;
 using testing::Lt;
 using testing::MakeMatcher;
@@ -848,6 +851,52 @@ TEST(HasSubstrTest, WorksForCStrings) {
 TEST(HasSubstrTest, CanDescribeSelf) {
   Matcher<string> m = HasSubstr("foo\n\"");
   EXPECT_EQ("has substring \"foo\\n\\\"\"", Describe(m));
+}
+
+TEST(KeyTest, CanDescribeSelf) {
+  Matcher<const std::pair<std::string, int>&> m = Key("foo");
+  EXPECT_EQ("has a key that is equal to \"foo\"", Describe(m));
+}
+
+TEST(KeyTest, MatchesCorrectly) {
+  std::pair<int, std::string> p(25, "foo");
+  EXPECT_THAT(p, Key(25));
+  EXPECT_THAT(p, Not(Key(42)));
+  EXPECT_THAT(p, Key(Ge(20)));
+  EXPECT_THAT(p, Not(Key(Lt(25))));
+}
+
+TEST(KeyTest, SafelyCastsInnerMatcher) {
+  Matcher<int> is_positive = Gt(0);
+  Matcher<int> is_negative = Lt(0);
+  std::pair<char, bool> p('a', true);
+  EXPECT_THAT(p, Key(is_positive));
+  EXPECT_THAT(p, Not(Key(is_negative)));
+}
+
+TEST(KeyTest, InsideContainsUsingMap) {
+  std::map<int, std::string> container;
+  container.insert(std::make_pair(1, "foo"));
+  container.insert(std::make_pair(2, "bar"));
+  container.insert(std::make_pair(4, "baz"));
+  EXPECT_THAT(container, Contains(Key(1)));
+  EXPECT_THAT(container, Not(Contains(Key(3))));
+}
+
+TEST(KeyTest, InsideContainsUsingMultimap) {
+  std::multimap<int, std::string> container;
+  container.insert(std::make_pair(1, "foo"));
+  container.insert(std::make_pair(2, "bar"));
+  container.insert(std::make_pair(4, "baz"));
+
+  EXPECT_THAT(container, Not(Contains(Key(25))));
+  container.insert(std::make_pair(25, "more foo"));
+  EXPECT_THAT(container, Contains(Key(25)));
+  container.insert(std::make_pair(25, "more bar"));
+  EXPECT_THAT(container, Contains(Key(25)));
+
+  EXPECT_THAT(container, Contains(Key(1)));
+  EXPECT_THAT(container, Not(Contains(Key(3))));
 }
 
 // Tests StartsWith(s).

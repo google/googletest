@@ -1867,6 +1867,64 @@ class ContainsMatcher {
   const M inner_matcher_;
 };
 
+// Implements Key(inner_matcher) for the given argument pair type.
+// Key(inner_matcher) matches an std::pair whose 'first' field matches
+// inner_matcher.  For example, Contains(Key(Ge(5))) can be used to match an
+// std::map that contains at least one element whose key is >= 5.
+template <typename PairType>
+class KeyMatcherImpl : public MatcherInterface<PairType> {
+ public:
+  typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(PairType)) RawPairType;
+  typedef typename RawPairType::first_type KeyType;
+
+  template <typename InnerMatcher>
+  explicit KeyMatcherImpl(InnerMatcher inner_matcher)
+      : inner_matcher_(
+          testing::SafeMatcherCast<const KeyType&>(inner_matcher)) {
+  }
+
+  // Returns true iff 'key_value.first' (the key) matches the inner matcher.
+  virtual bool Matches(PairType key_value) const {
+    return inner_matcher_.Matches(key_value.first);
+  }
+
+  // Describes what this matcher does.
+  virtual void DescribeTo(::std::ostream* os) const {
+    *os << "has a key that ";
+    inner_matcher_.DescribeTo(os);
+  }
+
+  // Describes what the negation of this matcher does.
+  virtual void DescribeNegationTo(::std::ostream* os) const {
+    *os << "doesn't have a key that ";
+    inner_matcher_.DescribeTo(os);
+  }
+
+  // Explains why 'key_value' matches, or doesn't match, this matcher.
+  virtual void ExplainMatchResultTo(PairType key_value,
+                                    ::std::ostream* os) const {
+    inner_matcher_.ExplainMatchResultTo(key_value.first, os);
+  }
+
+ private:
+  const Matcher<const KeyType&> inner_matcher_;
+};
+
+// Implements polymorphic Key(matcher_for_key).
+template <typename M>
+class KeyMatcher {
+ public:
+  explicit KeyMatcher(M m) : matcher_for_key_(m) {}
+
+  template <typename PairType>
+  operator Matcher<PairType>() const {
+    return MakeMatcher(new KeyMatcherImpl<PairType>(matcher_for_key_));
+  }
+
+ private:
+  const M matcher_for_key_;
+};
+
 }  // namespace internal
 
 // Implements MatcherCast().
@@ -2340,6 +2398,14 @@ inline PolymorphicMatcher<internal::ContainerEqMatcher<
 template <typename M>
 inline internal::ContainsMatcher<M> Contains(M matcher) {
   return internal::ContainsMatcher<M>(matcher);
+}
+
+// Key(inner_matcher) matches an std::pair whose 'first' field matches
+// inner_matcher.  For example, Contains(Key(Ge(5))) can be used to match an
+// std::map that contains at least one element whose key is >= 5.
+template <typename M>
+inline internal::KeyMatcher<M> Key(M inner_matcher) {
+  return internal::KeyMatcher<M>(inner_matcher);
 }
 
 // Returns a predicate that is satisfied by anything that matches the
