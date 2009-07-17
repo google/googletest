@@ -711,8 +711,8 @@ TEST(MyDeathTest, CompoundStatement) {
 
 ==   What syntax does the regular expression in ASSERT_DEATH use?  ==
 
-GoogleTest uses the POSIX Extended regular expression syntax
-(http://en.wikipedia.org/wiki/Regular_expression#POSIX_Extended_Regular_Expressions).
+On POSIX systems, Google Test uses the POSIX Extended regular expression syntax
+(http://en.wikipedia.org/wiki/Regular_expression#POSIX_Extended_Regular_Expressions). On Windows, it uses a limited variant of regular expression syntax. For more details, see [GoogleTestAdvancedGuide#Regular_Expression_Syntax].
 
 ==  I have a fixture class Foo, but TEST_F(Foo, Bar) gives me error "no matching function for call to Foo::Foo()". Why?  ==
 
