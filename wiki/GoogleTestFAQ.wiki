@@ -813,3 +813,6 @@ Have you read a [http:GoogleTestPrimer#Important_note_for_Visual_C++_users warni
 
 == My question is not covered in your FAQ! ==
 Ask it on our mailing list! Just mail [googletestframework@googlegroups.com] and someone will answer it. You might also want to search the mailing list [http://groups.google.com/group/googletestframework/topics archives] but by all means let us know if you believe your question should belong to this FAQ!
+
+== I want to use Google Test with Visual Studio but don't know where to start. ==
+Many people are in your position and one of the posted his solution to our mailing list. Here is his link: http://hassanjamilahmad.blogspot.com/2009/07/gtest-starters-help.html.
