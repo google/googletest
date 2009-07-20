@@ -71,7 +71,6 @@ _COMMON_GMOCK_SYMBOLS = [
     'Not',
     'NotNull',
     'Pointee',
-    'PointeeIsInitializedProto',
     'Property',
     'Ref',
     'ResultOf',

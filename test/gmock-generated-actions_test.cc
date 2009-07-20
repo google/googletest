@@ -36,6 +36,7 @@
 #include <gmock/gmock-generated-actions.h>
 
 #include <functional>
+#include <sstream>
 #include <string>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -544,6 +545,15 @@ TEST(ByRefTest, ExplicitType) {
   //
   // Base b;
   // ByRef<Derived>(b);
+}
+
+// Tests that Google Mock prints expression ByRef(x) as a reference to x.
+TEST(ByRefTest, PrintsCorrectly) {
+  int n = 42;
+  ::std::stringstream expected, actual;
+  testing::internal::UniversalPrinter<const int&>::Print(n, &expected);
+  testing::internal::UniversalPrint(ByRef(n), &actual);
+  EXPECT_EQ(expected.str(), actual.str());
 }
 
 // Tests InvokeArgument<N>(...).

@@ -39,6 +39,7 @@
 #define GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_ACTIONS_H_
 
 #include <gmock/gmock-actions.h>
+#include <gmock/gmock-printers.h>
 #include <gmock/internal/gmock-port.h>
 
 namespace testing {
@@ -321,6 +322,9 @@ class InvokeMethodAction {
   const MethodPtr method_ptr_;
 };
 
+// TODO(wan@google.com): ReferenceWrapper and ByRef() are neither
+// action-specific nor variadic.  Move them to a better place.
+
 // A ReferenceWrapper<T> object represents a reference to type T,
 // which can be either const or not.  It can be explicitly converted
 // from, and implicitly converted to, a T&.  Unlike a reference,
@@ -340,6 +344,13 @@ class ReferenceWrapper {
  private:
   T* pointer_;
 };
+
+// Allows the expression ByRef(x) to be printed as a reference to x.
+template <typename T>
+void PrintTo(const ReferenceWrapper<T>& ref, ::std::ostream* os) {
+  T& value = ref;
+  UniversalPrinter<T&>::Print(value, os);
+}
 
 // CallableHelper has static methods for invoking "callables",
 // i.e. function pointers and functors.  It uses overloading to
