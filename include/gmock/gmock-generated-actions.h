@@ -2441,6 +2441,13 @@ ACTION_TEMPLATE(InvokeArgument,
       ::std::tr1::get<k>(args), p0, p1, p2, p3, p4, p5, p6, p7, p8, p9);
 }
 
+// Action ReturnArg<k>() returns the k-th argument of the mock function.
+ACTION_TEMPLATE(ReturnArg,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_0_VALUE_PARAMS()) {
+  return std::tr1::get<k>(args);
+}
+
 // Action SaveArg<k>(pointer) saves the k-th (0-based) argument of the
 // mock function to *pointer.
 ACTION_TEMPLATE(SaveArg,

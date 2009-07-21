@@ -59,6 +59,7 @@ using testing::DoAll;
 using testing::Invoke;
 using testing::InvokeArgument;
 using testing::Return;
+using testing::ReturnArg;
 using testing::ReturnNew;
 using testing::SaveArg;
 using testing::SetArgReferee;
@@ -1380,6 +1381,21 @@ TEST(ActionPnMacroTest, CanExplicitlyInstantiateWithReferenceTypes) {
       int&, const int&, int&>(n[0], n[1], n[2], n[3], n[4], n[5], n[6], n[7],
                               n[8], n[9]);
   EXPECT_EQ(55, a.Perform(empty));
+}
+
+TEST(ReturnArgActionTest, WorksForOneArgIntArg0) {
+  const Action<int(int)> a = ReturnArg<0>();
+  EXPECT_EQ(5, a.Perform(make_tuple(5)));
+}
+
+TEST(ReturnArgActionTest, WorksForMultiArgBoolArg0) {
+  const Action<bool(bool, bool, bool)> a = ReturnArg<0>();
+  EXPECT_TRUE(a.Perform(make_tuple(true, false, false)));
+}
+
+TEST(ReturnArgActionTest, WorksForMultiArgStringArg2) {
+  const Action<string(int, int, string, int)> a = ReturnArg<2>();
+  EXPECT_EQ("seven", a.Perform(make_tuple(5, 6, string("seven"), 8)));
 }
 
 TEST(SaveArgActionTest, WorksForSameType) {
