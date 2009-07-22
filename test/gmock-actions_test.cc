@@ -56,6 +56,7 @@ using testing::_;
 using testing::Action;
 using testing::ActionInterface;
 using testing::Assign;
+using testing::ByRef;
 using testing::DefaultValue;
 using testing::DoDefault;
 using testing::IgnoreResult;
@@ -68,7 +69,6 @@ using testing::Return;
 using testing::ReturnNull;
 using testing::ReturnRef;
 using testing::SetArgumentPointee;
-using testing::SetArrayArgument;
 
 #ifndef _WIN32_WCE
 using testing::SetErrnoAndReturn;
@@ -743,85 +743,6 @@ TEST(SetArgumentPointeeTest, SetsTheNthPointeeOfProto2BufferBaseType) {
 
 #endif  // GMOCK_HAS_PROTOBUF_
 
-// Tests that SetArrayArgument<N>(first, last) sets the elements of the array
-// pointed to by the N-th (0-based) argument to values in range [first, last).
-TEST(SetArrayArgumentTest, SetsTheNthArray) {
-  typedef void MyFunction(bool, int*, char*);
-  int numbers[] = { 1, 2, 3 };
-  Action<MyFunction> a = SetArrayArgument<1>(numbers, numbers + 3);
-
-  int n[4] = {};
-  int* pn = n;
-  char ch[4] = {};
-  char* pch = ch;
-  a.Perform(make_tuple(true, pn, pch));
-  EXPECT_EQ(1, n[0]);
-  EXPECT_EQ(2, n[1]);
-  EXPECT_EQ(3, n[2]);
-  EXPECT_EQ(0, n[3]);
-  EXPECT_EQ('\0', ch[0]);
-  EXPECT_EQ('\0', ch[1]);
-  EXPECT_EQ('\0', ch[2]);
-  EXPECT_EQ('\0', ch[3]);
-
-  // Tests first and last are iterators.
-  std::string letters = "abc";
-  a = SetArrayArgument<2>(letters.begin(), letters.end());
-  std::fill_n(n, 4, 0);
-  std::fill_n(ch, 4, '\0');
-  a.Perform(make_tuple(true, pn, pch));
-  EXPECT_EQ(0, n[0]);
-  EXPECT_EQ(0, n[1]);
-  EXPECT_EQ(0, n[2]);
-  EXPECT_EQ(0, n[3]);
-  EXPECT_EQ('a', ch[0]);
-  EXPECT_EQ('b', ch[1]);
-  EXPECT_EQ('c', ch[2]);
-  EXPECT_EQ('\0', ch[3]);
-}
-
-// Tests SetArrayArgument<N>(first, last) where first == last.
-TEST(SetArrayArgumentTest, SetsTheNthArrayWithEmptyRange) {
-  typedef void MyFunction(bool, int*);
-  int numbers[] = { 1, 2, 3 };
-  Action<MyFunction> a = SetArrayArgument<1>(numbers, numbers);
-
-  int n[4] = {};
-  int* pn = n;
-  a.Perform(make_tuple(true, pn));
-  EXPECT_EQ(0, n[0]);
-  EXPECT_EQ(0, n[1]);
-  EXPECT_EQ(0, n[2]);
-  EXPECT_EQ(0, n[3]);
-}
-
-// Tests SetArrayArgument<N>(first, last) where *first is convertible
-// (but not equal) to the argument type.
-TEST(SetArrayArgumentTest, SetsTheNthArrayWithConvertibleType) {
-  typedef void MyFunction(bool, char*);
-  int codes[] = { 97, 98, 99 };
-  Action<MyFunction> a = SetArrayArgument<1>(codes, codes + 3);
-
-  char ch[4] = {};
-  char* pch = ch;
-  a.Perform(make_tuple(true, pch));
-  EXPECT_EQ('a', ch[0]);
-  EXPECT_EQ('b', ch[1]);
-  EXPECT_EQ('c', ch[2]);
-  EXPECT_EQ('\0', ch[3]);
-}
-
-// Test SetArrayArgument<N>(first, last) with iterator as argument.
-TEST(SetArrayArgumentTest, SetsTheNthArrayWithIteratorArgument) {
-  typedef void MyFunction(bool, std::back_insert_iterator<std::string>);
-  std::string letters = "abc";
-  Action<MyFunction> a = SetArrayArgument<1>(letters.begin(), letters.end());
-
-  std::string s;
-  a.Perform(make_tuple(true, back_inserter(s)));
-  EXPECT_EQ(letters, s);
-}
-
 // Sample functions and functors for testing Invoke() and etc.
 int Nullary() { return 1; }
 
@@ -1030,5 +951,88 @@ TEST_F(SetErrnoAndReturnTest, CompatibleTypes) {
 }
 
 #endif  // _WIN32_WCE
+
+// Tests ByRef().
+
+// Tests that ReferenceWrapper<T> is copyable.
+TEST(ByRefTest, IsCopyable) {
+  const std::string s1 = "Hi";
+  const std::string s2 = "Hello";
+
+  ::testing::internal::ReferenceWrapper<const std::string> ref_wrapper = ByRef(s1);
+  const std::string& r1 = ref_wrapper;
+  EXPECT_EQ(&s1, &r1);
+
+  // Assigns a new value to ref_wrapper.
+  ref_wrapper = ByRef(s2);
+  const std::string& r2 = ref_wrapper;
+  EXPECT_EQ(&s2, &r2);
+
+  ::testing::internal::ReferenceWrapper<const std::string> ref_wrapper1 = ByRef(s1);
+  // Copies ref_wrapper1 to ref_wrapper.
+  ref_wrapper = ref_wrapper1;
+  const std::string& r3 = ref_wrapper;
+  EXPECT_EQ(&s1, &r3);
+}
+
+// Tests using ByRef() on a const value.
+TEST(ByRefTest, ConstValue) {
+  const int n = 0;
+  // int& ref = ByRef(n);  // This shouldn't compile - we have a
+                           // negative compilation test to catch it.
+  const int& const_ref = ByRef(n);
+  EXPECT_EQ(&n, &const_ref);
+}
+
+// Tests using ByRef() on a non-const value.
+TEST(ByRefTest, NonConstValue) {
+  int n = 0;
+
+  // ByRef(n) can be used as either an int&,
+  int& ref = ByRef(n);
+  EXPECT_EQ(&n, &ref);
+
+  // or a const int&.
+  const int& const_ref = ByRef(n);
+  EXPECT_EQ(&n, &const_ref);
+}
+
+// Tests explicitly specifying the type when using ByRef().
+TEST(ByRefTest, ExplicitType) {
+  int n = 0;
+  const int& r1 = ByRef<const int>(n);
+  EXPECT_EQ(&n, &r1);
+
+  // ByRef<char>(n);  // This shouldn't compile - we have a negative
+                      // compilation test to catch it.
+
+  Derived d;
+  Derived& r2 = ByRef<Derived>(d);
+  EXPECT_EQ(&d, &r2);
+
+  const Derived& r3 = ByRef<const Derived>(d);
+  EXPECT_EQ(&d, &r3);
+
+  Base& r4 = ByRef<Base>(d);
+  EXPECT_EQ(&d, &r4);
+
+  const Base& r5 = ByRef<const Base>(d);
+  EXPECT_EQ(&d, &r5);
+
+  // The following shouldn't compile - we have a negative compilation
+  // test for it.
+  //
+  // Base b;
+  // ByRef<Derived>(b);
+}
+
+// Tests that Google Mock prints expression ByRef(x) as a reference to x.
+TEST(ByRefTest, PrintsCorrectly) {
+  int n = 42;
+  ::std::stringstream expected, actual;
+  testing::internal::UniversalPrinter<const int&>::Print(n, &expected);
+  testing::internal::UniversalPrint(ByRef(n), &actual);
+  EXPECT_EQ(expected.str(), actual.str());
+}
 
 }  // Unnamed namespace

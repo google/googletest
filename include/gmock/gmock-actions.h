@@ -43,6 +43,7 @@
 #include <errno.h>
 #endif
 
+#include <gmock/gmock-printers.h>
 #include <gmock/internal/gmock-internal-utils.h>
 #include <gmock/internal/gmock-port.h>
 
@@ -787,6 +788,74 @@ class IgnoreResultAction {
   const A action_;
 };
 
+// A ReferenceWrapper<T> object represents a reference to type T,
+// which can be either const or not.  It can be explicitly converted
+// from, and implicitly converted to, a T&.  Unlike a reference,
+// ReferenceWrapper<T> can be copied and can survive template type
+// inference.  This is used to support by-reference arguments in the
+// InvokeArgument<N>(...) action.  The idea was from "reference
+// wrappers" in tr1, which we don't have in our source tree yet.
+template <typename T>
+class ReferenceWrapper {
+ public:
+  // Constructs a ReferenceWrapper<T> object from a T&.
+  explicit ReferenceWrapper(T& l_value) : pointer_(&l_value) {}  // NOLINT
+
+  // Allows a ReferenceWrapper<T> object to be implicitly converted to
+  // a T&.
+  operator T&() const { return *pointer_; }
+ private:
+  T* pointer_;
+};
+
+// Allows the expression ByRef(x) to be printed as a reference to x.
+template <typename T>
+void PrintTo(const ReferenceWrapper<T>& ref, ::std::ostream* os) {
+  T& value = ref;
+  UniversalPrinter<T&>::Print(value, os);
+}
+
+// Does two actions sequentially.  Used for implementing the DoAll(a1,
+// a2, ...) action.
+template <typename Action1, typename Action2>
+class DoBothAction {
+ public:
+  DoBothAction(Action1 action1, Action2 action2)
+      : action1_(action1), action2_(action2) {}
+
+  // This template type conversion operator allows DoAll(a1, ..., a_n)
+  // to be used in ANY function of compatible type.
+  template <typename F>
+  operator Action<F>() const {
+    return Action<F>(new Impl<F>(action1_, action2_));
+  }
+
+ private:
+  // Implements the DoAll(...) action for a particular function type F.
+  template <typename F>
+  class Impl : public ActionInterface<F> {
+   public:
+    typedef typename Function<F>::Result Result;
+    typedef typename Function<F>::ArgumentTuple ArgumentTuple;
+    typedef typename Function<F>::MakeResultVoid VoidResult;
+
+    Impl(const Action<VoidResult>& action1, const Action<F>& action2)
+        : action1_(action1), action2_(action2) {}
+
+    virtual Result Perform(const ArgumentTuple& args) {
+      action1_.Perform(args);
+      return action2_.Perform(args);
+    }
+
+   private:
+    const Action<VoidResult> action1_;
+    const Action<F> action2_;
+  };
+
+  Action1 action1_;
+  Action2 action2_;
+};
+
 }  // namespace internal
 
 // An Unused object can be implicitly constructed from ANY value.
@@ -924,6 +993,18 @@ InvokeWithoutArgs(Class* obj_ptr, MethodPtr method_ptr) {
 template <typename A>
 inline internal::IgnoreResultAction<A> IgnoreResult(const A& an_action) {
   return internal::IgnoreResultAction<A>(an_action);
+}
+
+// Creates a reference wrapper for the given L-value.  If necessary,
+// you can explicitly specify the type of the reference.  For example,
+// suppose 'derived' is an object of type Derived, ByRef(derived)
+// would wrap a Derived&.  If you want to wrap a const Base& instead,
+// where Base is a base class of Derived, just write:
+//
+//   ByRef<const Base>(derived)
+template <typename T>
+inline internal::ReferenceWrapper<T> ByRef(T& l_value) {  // NOLINT
+  return internal::ReferenceWrapper<T>(l_value);
 }
 
 }  // namespace testing
