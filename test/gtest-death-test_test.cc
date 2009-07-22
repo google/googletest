@@ -1057,16 +1057,16 @@ TEST(ParseNaturalNumberTest, AcceptsValidNumbers) {
 
   result = 0;
   ASSERT_TRUE(ParseNaturalNumber(String("123"), &result));
-  EXPECT_EQ(123, result);
+  EXPECT_EQ(123U, result);
 
   // Check 0 as an edge case.
   result = 1;
   ASSERT_TRUE(ParseNaturalNumber(String("0"), &result));
-  EXPECT_EQ(0, result);
+  EXPECT_EQ(0U, result);
 
   result = 1;
   ASSERT_TRUE(ParseNaturalNumber(String("00000"), &result));
-  EXPECT_EQ(0, result);
+  EXPECT_EQ(0U, result);
 }
 
 TEST(ParseNaturalNumberTest, AcceptsTypeLimits) {

@@ -376,7 +376,8 @@ Expected failure
 [ RUN      ] Unsigned/TypedTestP/0.Failure
 gtest_output_test_.cc:#: error: Value of: TypeParam()
   Actual: \0
-Expected: 1
+Expected: 1U
+Which is: 1
 Expected failure
 [  FAILED  ] Unsigned/TypedTestP/0.Failure
 [----------] 2 tests from Unsigned/TypedTestP/1, where TypeParam = unsigned int
@@ -385,7 +386,8 @@ Expected failure
 [ RUN      ] Unsigned/TypedTestP/1.Failure
 gtest_output_test_.cc:#: error: Value of: TypeParam()
   Actual: 0
-Expected: 1
+Expected: 1U
+Which is: 1
 Expected failure
 [  FAILED  ] Unsigned/TypedTestP/1.Failure
 [----------] 4 tests from ExpectFailureTest

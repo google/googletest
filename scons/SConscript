@@ -109,13 +109,25 @@ def NewEnvironment(env, type):
   return new_env;
 
 
+def Remove(env, attribute, value):
+  """Removes the given attribute value from the environment."""
+
+  attribute_values = env[attribute]
+  if value in attribute_values:
+    attribute_values.remove(value)
+
+
 Import('env')
 env = NewEnvironment(env, '')
 
-# Note: The relative paths in SConscript files are relative to the location of
-# the SConscript file itself. To make a path relative to the location of the
-# main SConstruct file, prepend the path with the # sign.
-
+# Note: The relative paths in SConscript files are relative to the location
+# of the SConscript file itself. To make a path relative to the location of
+# the main SConstruct file, prepend the path with the # sign.
+#
+# But if a project uses variant builds without source duplication, the above
+# rule gets muddied a bit. In that case the paths must be counted from the
+# location of the copy of the SConscript file in scons/build/<config>/scons.
+#
 # Include paths to gtest headers are relative to either the gtest
 # directory or the 'include' subdirectory of it, and this SConscript
 # file is one directory deeper than the gtest directory.
@@ -124,32 +136,33 @@ env.Prepend(CPPPATH = ['..', '../include'])
 env_use_own_tuple = NewEnvironment(env, 'use_own_tuple')
 env_use_own_tuple.Append(CPPDEFINES = 'GTEST_USE_OWN_TR1_TUPLE=1')
 
-env_with_exceptions = NewEnvironment(env, 'ex')
+# Needed to allow gtest_unittest.cc, which triggers a gcc warning when
+# testing EXPECT_EQ(NULL, ptr), to compile.
+env_warning_ok = NewEnvironment(env, 'warning_ok')
+if env_warning_ok['PLATFORM'] == 'win32':
+  Remove(env_warning_ok, 'CCFLAGS', '-WX')
+else:
+  Remove(env_warning_ok, 'CCFLAGS', '-Werror')
+
+env_with_exceptions = NewEnvironment(env_warning_ok, 'ex')
 if env_with_exceptions['PLATFORM'] == 'win32':
   env_with_exceptions.Append(CCFLAGS=['/EHsc'])
   env_with_exceptions.Append(CPPDEFINES='_HAS_EXCEPTIONS=1')
-  cppdefines = env_with_exceptions['CPPDEFINES']
   # Undoes the _TYPEINFO_ hack, which is unnecessary and only creates
   # trouble when exceptions are enabled.
-  if '_TYPEINFO_' in cppdefines:
-    cppdefines.remove('_TYPEINFO_')
-  if '_HAS_EXCEPTIONS=0' in cppdefines:
-    cppdefines.remove('_HAS_EXCEPTIONS=0')
+  Remove(env_with_exceptions, 'CPPDEFINES', '_TYPEINFO_')
+  Remove(env_with_exceptions, 'CPPDEFINES', '_HAS_EXCEPTIONS=0')
 else:
   env_with_exceptions.Append(CCFLAGS='-fexceptions')
-  ccflags = env_with_exceptions['CCFLAGS']
-  if '-fno-exceptions' in ccflags:
-    ccflags.remove('-fno-exceptions')
+  Remove(env_with_exceptions, 'CCFLAGS', '-fno-exceptions')
 
 # We need to disable some optimization flags for some tests on
 # Windows; otherwise the redirection of stdout does not work
 # (apparently because of a compiler bug).
 env_less_optimized = NewEnvironment(env, 'less_optimized')
 if env_less_optimized['PLATFORM'] == 'win32':
-  linker_flags = env_less_optimized['LINKFLAGS']
   for flag in ['/O1', '/Os', '/Og', '/Oy']:
-    if flag in linker_flags:
-      linker_flags.remove(flag)
+    Remove(env_less_optimized, 'LINKFLAGS', flag)
 
 # Assuming POSIX-like environment with GCC.
 # TODO(vladl@google.com): sniff presence of pthread_atfork instead of
@@ -159,7 +172,7 @@ if env_with_threads['PLATFORM'] != 'win32':
   env_with_threads.Append(CCFLAGS=['-pthread'])
   env_with_threads.Append(LINKFLAGS=['-pthread'])
 
-env_without_rtti = NewEnvironment(env, 'no_rtti')
+env_without_rtti = NewEnvironment(env_warning_ok, 'no_rtti')
 if env_without_rtti['PLATFORM'] == 'win32':
   env_without_rtti.Append(CCFLAGS=['/GR-'])
 else:
@@ -169,12 +182,19 @@ else:
 ############################################################
 # Helpers for creating build targets.
 
+# Caches object file targets built by GtestObject to allow passing the
+# same source file with the same environment twice into the function as a
+# convenience.
+_all_objects = {}
+
 def GtestObject(build_env, source):
   """Returns a target to build an object file from the given .cc source file."""
 
-  return build_env.Object(
-      target=os.path.basename(source).rstrip('.cc') + build_env['OBJ_SUFFIX'],
-      source=source)
+  object_name = os.path.basename(source).rstrip('.cc') + build_env['OBJ_SUFFIX']
+  if object_name not in _all_objects:
+    _all_objects[object_name] = build_env.Object(target=object_name,
+                                                 source=source)
+  return _all_objects[object_name]
 
 
 def GtestStaticLibraries(build_env):
@@ -206,17 +226,16 @@ def GtestBinary(build_env, target, gtest_libs, sources):
     gtest_libs: The gtest library or the list of libraries to link.
     sources:    A list of source files in the target.
   """
-  if build_env['OBJ_SUFFIX']:
-    srcs = []  # The object targets corresponding to sources.
-    for src in sources:
-      if type(src) is str:
-        srcs.append(GtestObject(build_env, src))
-      else:
-        srcs.append(src)
-  else:
-    srcs = sources
+  srcs = []  # The object targets corresponding to sources.
+  for src in sources:
+    if type(src) is str:
+      srcs.append(GtestObject(build_env, src))
+    else:
+      srcs.append(src)
 
-  if type(gtest_libs) != type(list()):
+  if not gtest_libs:
+    gtest_libs = []
+  elif type(gtest_libs) != type(list()):
     gtest_libs = [gtest_libs]
   binary = build_env.Program(target=target, source=srcs, LIBS=gtest_libs)
   if 'EXE_OUTPUT' in build_env.Dictionary():
@@ -301,11 +320,11 @@ GtestTest(env, 'gtest_xml_outfile1_test_', gtest_main)
 GtestTest(env, 'gtest_xml_outfile2_test_', gtest_main)
 GtestTest(env, 'gtest_xml_output_unittest_', gtest_main)
 GtestTest(env, 'gtest-unittest-api_test', gtest)
-GtestTest(env, 'gtest_unittest', gtest_main)
 
 ############################################################
 # Tests targets using custom environments.
 
+GtestTest(env_warning_ok, 'gtest_unittest', gtest_main)
 GtestTest(env_with_exceptions, 'gtest_output_test_', gtest_ex)
 GtestTest(env_with_exceptions, 'gtest_throw_on_failure_ex_test', gtest_ex)
 GtestTest(env_with_threads, 'gtest-death-test_test', gtest_main)
@@ -332,14 +351,15 @@ GtestBinary(env_without_rtti, 'gtest_no_rtti_test', gtest_main_no_rtti,
 #   my_environment = Environment(variables = vars, ...)
 # Then, in the command line use GTEST_BUILD_SAMPLES=true to enable them.
 if env.get('GTEST_BUILD_SAMPLES', False):
-  sample1_obj = env.Object('../samples/sample1.cc')
-  GtestSample(env, 'sample1_unittest', additional_sources=[sample1_obj])
+  GtestSample(env, 'sample1_unittest',
+              additional_sources=['../samples/sample1.cc'])
   GtestSample(env, 'sample2_unittest',
               additional_sources=['../samples/sample2.cc'])
   GtestSample(env, 'sample3_unittest')
   GtestSample(env, 'sample4_unittest',
               additional_sources=['../samples/sample4.cc'])
-  GtestSample(env, 'sample5_unittest', additional_sources=[sample1_obj])
+  GtestSample(env, 'sample5_unittest',
+              additional_sources=['../samples/sample1.cc'])
   GtestSample(env, 'sample6_unittest')
   GtestSample(env, 'sample7_unittest')
   GtestSample(env, 'sample8_unittest')
