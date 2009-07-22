@@ -743,11 +743,11 @@ class TypedTestP : public testing::Test {
 TYPED_TEST_CASE_P(TypedTestP);
 
 TYPED_TEST_P(TypedTestP, Success) {
-  EXPECT_EQ(0, TypeParam());
+  EXPECT_EQ(0U, TypeParam());
 }
 
 TYPED_TEST_P(TypedTestP, Failure) {
-  EXPECT_EQ(1, TypeParam()) << "Expected failure";
+  EXPECT_EQ(1U, TypeParam()) << "Expected failure";
 }
 
 REGISTER_TYPED_TEST_CASE_P(TypedTestP, Success, Failure);

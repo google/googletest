@@ -93,7 +93,7 @@ const char kShuffleFlag[] = "shuffle";
 const char kThrowOnFailureFlag[] = "throw_on_failure";
 
 // A valid random seed must be in [1, kMaxRandomSeed].
-const unsigned int kMaxRandomSeed = 99999;
+const int kMaxRandomSeed = 99999;
 
 // Returns the current time in milliseconds.
 TimeInMillis GetTimeInMillis();
@@ -108,7 +108,8 @@ inline int GetRandomSeedFromFlag(Int32 random_seed_flag) {
   // Normalizes the actual seed to range [1, kMaxRandomSeed] such that
   // it's easy to type.
   const int normalized_seed =
-      static_cast<int>((raw_seed - 1U) % kMaxRandomSeed) + 1;
+      static_cast<int>((raw_seed - 1U) %
+                       static_cast<unsigned int>(kMaxRandomSeed)) + 1;
   return normalized_seed;
 }
 

@@ -91,7 +91,7 @@ void* ThreadFunc(void* data) {
 }
 
 TEST(GetThreadCountTest, ReturnsCorrectValue) {
-  EXPECT_EQ(1, GetThreadCount());
+  EXPECT_EQ(1U, GetThreadCount());
   pthread_mutex_t mutex;
   pthread_attr_t  attr;
   pthread_t       thread_id;
@@ -106,7 +106,7 @@ TEST(GetThreadCountTest, ReturnsCorrectValue) {
   const int status = pthread_create(&thread_id, &attr, &ThreadFunc, &mutex);
   ASSERT_EQ(0, pthread_attr_destroy(&attr));
   ASSERT_EQ(0, status);
-  EXPECT_EQ(2, GetThreadCount());
+  EXPECT_EQ(2U, GetThreadCount());
   pthread_mutex_unlock(&mutex);
 
   void* dummy;
@@ -124,12 +124,12 @@ TEST(GetThreadCountTest, ReturnsCorrectValue) {
     time.tv_nsec = 100L * 1000 * 1000;  // .1 seconds.
     nanosleep(&time, NULL);
   }
-  EXPECT_EQ(1, GetThreadCount());
+  EXPECT_EQ(1U, GetThreadCount());
   pthread_mutex_destroy(&mutex);
 }
 #else
 TEST(GetThreadCountTest, ReturnsZeroWhenUnableToCountThreads) {
-  EXPECT_EQ(0, GetThreadCount());
+  EXPECT_EQ(0U, GetThreadCount());
 }
 #endif  // GTEST_OS_MAC
 

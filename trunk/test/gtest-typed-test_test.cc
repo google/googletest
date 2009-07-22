@@ -100,10 +100,10 @@ TYPED_TEST(CommonTest, ValuesAreCorrect) {
   // Typedefs in the fixture class template can be visited via the
   // "typename TestFixture::" prefix.
   typename TestFixture::List empty;
-  EXPECT_EQ(0, empty.size());
+  EXPECT_EQ(0U, empty.size());
 
   typename TestFixture::IntSet empty2;
-  EXPECT_EQ(0, empty2.size());
+  EXPECT_EQ(0U, empty2.size());
 
   // Non-static members of the fixture class must be visited via
   // 'this', as required by C++ for class templates.

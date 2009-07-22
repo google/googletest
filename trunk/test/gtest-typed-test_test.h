@@ -55,7 +55,7 @@ TYPED_TEST_P(ContainerTest, CanBeDefaultConstructed) {
 
 TYPED_TEST_P(ContainerTest, InitialSizeIsZero) {
   TypeParam container;
-  EXPECT_EQ(0, container.size());
+  EXPECT_EQ(0U, container.size());
 }
 
 REGISTER_TYPED_TEST_CASE_P(ContainerTest,
