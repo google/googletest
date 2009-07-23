@@ -2553,11 +2553,16 @@ static void PrintTestPartResult(const TestPartResult& test_part_result) {
       PrintTestPartResultToString(test_part_result);
   printf("%s\n", result.c_str());
   fflush(stdout);
-#if GTEST_OS_WINDOWS
   // If the test program runs in Visual Studio or a debugger, the
-  // following states add the test part result message to the Output
+  // following statements add the test part result message to the Output
   // window such that the user can double-click on it to jump to the
   // corresponding source code location; otherwise they do nothing.
+#ifdef _WIN32_WCE
+  // Windows Mobile doesn't support the ANSI version of OutputDebugString,
+  // it works only with UTF16 strings.
+  ::OutputDebugString(internal::String::AnsiToUtf16(result.c_str()));
+  ::OutputDebugString(L"\n");
+#elif GTEST_OS_WINDOWS
   ::OutputDebugStringA(result.c_str());
   ::OutputDebugStringA("\n");
 #endif
