@@ -688,15 +688,11 @@ TEST(RETest, PartialMatchWorks) {
 
 #endif  // GTEST_USES_POSIX_RE
 
-#if GTEST_HAS_STD_STRING
-
 TEST(CaptureStderrTest, CapturesStdErr) {
   CaptureStderr();
   fprintf(stderr, "abc");
-  ASSERT_EQ("abc", GetCapturedStderr());
+  ASSERT_STREQ("abc", GetCapturedStderr().c_str());
 }
-
-#endif  // GTEST_HAS_STD_STRING
 
 }  // namespace internal
 }  // namespace testing

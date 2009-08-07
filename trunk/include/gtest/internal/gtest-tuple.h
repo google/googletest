@@ -38,11 +38,11 @@
 
 #include <utility>  // For ::std::pair.
 
-// The compiler used in Symbian 5th Edition (__S60_50__) has a bug
-// that prevents us from declaring the tuple template as a friend (it
-// complains that tuple is redefined).  This hack bypasses the bug by
-// declaring the members that should otherwise be private as public.
-#if defined(__SYMBIAN32__) && __S60_50__
+// The compiler used in Symbian has a bug that prevents us from declaring the
+// tuple template as a friend (it complains that tuple is redefined).  This
+// hack bypasses the bug by declaring the members that should otherwise be
+// private as public.
+#if defined(__SYMBIAN32__)
 #define GTEST_DECLARE_TUPLE_AS_FRIEND_ public:
 #else
 #define GTEST_DECLARE_TUPLE_AS_FRIEND_ \
