@@ -186,7 +186,9 @@ class MockObjectRegistry {
   // object alive.  Therefore we report any living object as test
   // failure, unless the user explicitly asked us to ignore it.
   ~MockObjectRegistry() {
-    using ::std::cout;
+
+    // "using ::std::cout;" doesn't work with Symbian's STLport, where cout is
+    // a macro.
 
     if (!GMOCK_FLAG(catch_leaked_mocks))
       return;
@@ -199,24 +201,24 @@ class MockObjectRegistry {
 
       // TODO(wan@google.com): Print the type of the leaked object.
       // This can help the user identify the leaked object.
-      cout << "\n";
+      std::cout << "\n";
       const MockObjectState& state = it->second;
       internal::FormatFileLocation(
-          state.first_used_file, state.first_used_line, &cout);
-      cout << " ERROR: this mock object";
+          state.first_used_file, state.first_used_line, &std::cout);
+      std::cout << " ERROR: this mock object";
       if (state.first_used_test != "") {
-        cout << " (used in test " << state.first_used_test_case << "."
+        std::cout << " (used in test " << state.first_used_test_case << "."
              << state.first_used_test << ")";
       }
-      cout << " should be deleted but never is. Its address is @"
+      std::cout << " should be deleted but never is. Its address is @"
            << it->first << ".";
       leaked_count++;
     }
     if (leaked_count > 0) {
-      cout << "\nERROR: " << leaked_count
+      std::cout << "\nERROR: " << leaked_count
            << " leaked mock " << (leaked_count == 1 ? "object" : "objects")
            << " found at program exit.\n";
-      cout.flush();
+      std::cout.flush();
       ::std::cerr.flush();
       // RUN_ALL_TESTS() has already returned when this destructor is
       // called.  Therefore we cannot use the normal Google Test

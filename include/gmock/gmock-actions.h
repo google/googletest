@@ -669,39 +669,6 @@ class SetArgumentPointeeAction<N, Proto, true> {
   const internal::linked_ptr<Proto> proto_;
 };
 
-// Implements the SetArrayArgument<N>(first, last) action for any function
-// whose N-th argument (0-based) is a pointer or iterator to a type that can be
-// implicitly converted from *first.
-template <size_t N, typename InputIterator>
-class SetArrayArgumentAction {
- public:
-  // Constructs an action that sets the variable pointed to by the
-  // N-th function argument to 'value'.
-  explicit SetArrayArgumentAction(InputIterator first, InputIterator last)
-      : first_(first), last_(last) {
-  }
-
-  template <typename Result, typename ArgumentTuple>
-  void Perform(const ArgumentTuple& args) const {
-    CompileAssertTypesEqual<void, Result>();
-
-    // Microsoft compiler deprecates ::std::copy, so we want to suppress warning
-    // 4996 (Function call with parameters that may be unsafe) there.
-#if GTEST_OS_WINDOWS
-#pragma warning(push)          // Saves the current warning state.
-#pragma warning(disable:4996)  // Temporarily disables warning 4996.
-#endif  // GTEST_OS_WINDOWS
-    ::std::copy(first_, last_, ::std::tr1::get<N>(args));
-#if GTEST_OS_WINDOWS
-#pragma warning(pop)           // Restores the warning state.
-#endif  // GTEST_OS_WINDOWS
-  }
-
- private:
-  const InputIterator first_;
-  const InputIterator last_;
-};
-
 // Implements the InvokeWithoutArgs(f) action.  The template argument
 // FunctionImpl is the implementation type of f, which can be either a
 // function pointer or a functor.  InvokeWithoutArgs(f) can be used as an
@@ -937,16 +904,6 @@ PolymorphicAction<
 SetArgumentPointee(const T& x) {
   return MakePolymorphicAction(internal::SetArgumentPointeeAction<
       N, T, internal::IsAProtocolMessage<T>::value>(x));
-}
-
-// Creates an action that sets the elements of the array pointed to by the N-th
-// (0-based) function argument, which can be either a pointer or an iterator,
-// to the values of the elements in the source range [first, last).
-template <size_t N, typename InputIterator>
-PolymorphicAction<internal::SetArrayArgumentAction<N, InputIterator> >
-SetArrayArgument(InputIterator first, InputIterator last) {
-  return MakePolymorphicAction(internal::SetArrayArgumentAction<
-      N, InputIterator>(first, last));
 }
 
 // Creates an action that sets a pointer referent to a given value.

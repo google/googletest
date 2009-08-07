@@ -1429,6 +1429,8 @@ TEST(AfterTest, SucceedsWhenTotalOrderIsSatisfied) {
   a.DoA(2);
 }
 
+#if GTEST_HAS_DEATH_TEST
+
 // Calls must be in strict order when specified so.
 TEST(AfterTest, CallsMustBeInStrictOrderWhenSpecifiedSo) {
   MockA a;
@@ -1496,6 +1498,8 @@ TEST(AfterTest, CanBeUsedWithInSequence) {
   a.ReturnResult(3);
 }
 
+#endif  // GTEST_HAS_DEATH_TEST
+
 // .After() can be called multiple times.
 TEST(AfterTest, CanBeCalledManyTimes) {
   MockA a;
@@ -1532,6 +1536,8 @@ TEST(AfterTest, AcceptsUpToFiveArguments) {
   a.DoA(6);
 }
 
+#if GTEST_HAS_DEATH_TEST
+
 // .After() allows input to contain duplicated Expectations.
 TEST(AfterTest, AcceptsDuplicatedInput) {
   MockA a;
@@ -1550,6 +1556,8 @@ TEST(AfterTest, AcceptsDuplicatedInput) {
   a.DoA(2);
   a.ReturnResult(3);
 }
+
+#endif  // GTEST_HAS_DEATH_TEST
 
 // An Expectation added to an ExpectationSet after it has been used in
 // an .After() has no effect.
@@ -2327,7 +2335,14 @@ void Helper(MockC* c) {
 
 }  // namespace
 
+// Allows the user to define his own main and then invoke gmock_main
+// from it. This might be necessary on some platforms which require
+// specific setup and teardown.
+#if GMOCK_RENAME_MAIN
+int gmock_main(int argc, char **argv) {
+#else
 int main(int argc, char **argv) {
+#endif  // GMOCK_RENAME_MAIN
   testing::InitGoogleMock(&argc, argv);
 
   // Ensures that the tests pass no matter what value of

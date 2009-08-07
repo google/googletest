@@ -80,7 +80,7 @@ class GoogleTestFailureReporter : public FailureReporterInterface {
     AssertHelper(type == FATAL ? TPRT_FATAL_FAILURE : TPRT_NONFATAL_FAILURE,
                  file, line, message.c_str()) = Message();
     if (type == FATAL) {
-      abort();
+      posix::Abort();
     }
   }
 };

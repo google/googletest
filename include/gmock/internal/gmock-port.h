@@ -274,7 +274,7 @@ class GMockCheckProvider {
   }
   ~GMockCheckProvider() {
     ::std::cerr << ::std::endl;
-    abort();
+    posix::Abort();
   }
   ::std::ostream& GetStream() { return ::std::cerr; }
 };
