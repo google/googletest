@@ -257,6 +257,28 @@ class KilledBySignal {
 
 #endif  // NDEBUG for EXPECT_DEBUG_DEATH
 #endif  // GTEST_HAS_DEATH_TEST
+
+// EXPECT_DEATH_IF_SUPPORTED(statement, regex) and
+// ASSERT_DEATH_IF_SUPPORTED(statement, regex) expand to real death tests if
+// death tests are supported; otherwise they expand to empty.  This is
+// useful when you are combining death test assertions with normal test
+// assertions in one test.
+#if GTEST_HAS_DEATH_TEST
+#define EXPECT_DEATH_IF_SUPPORTED(statement, regex) \
+    EXPECT_DEATH(statement, regex)
+#define ASSERT_DEATH_IF_SUPPORTED(statement, regex) \
+    ASSERT_DEATH(statement, regex)
+#else
+#define EXPECT_DEATH_IF_SUPPORTED(statement, regex) \
+    GTEST_LOG_(WARNING, \
+               "Death tests are not supported on this platform. The statement" \
+               " '" #statement "' can not be verified")
+#define ASSERT_DEATH_IF_SUPPORTED(statement, regex) \
+    GTEST_LOG_(WARNING, \
+               "Death tests are not supported on this platform. The statement" \
+               " '" #statement "' can not be verified")
+#endif
+
 }  // namespace testing
 
 #endif  // GTEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_

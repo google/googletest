@@ -1118,6 +1118,44 @@ TEST(EnvironmentTest, HandleFitsIntoSizeT) {
 }
 #endif  // GTEST_OS_WINDOWS
 
+// Tests that EXPECT_DEATH_IF_SUPPORTED/ASSERT_DEATH_IF_SUPPORTED trigger
+// failures when death tests are available on the system.
+TEST(ConditionalDeathMacrosDeathTest, ExpectsDeathWhenDeathTestsAvailable) {
+  EXPECT_DEATH_IF_SUPPORTED(GTEST_CHECK_(false) << "failure", "false.*failure");
+  ASSERT_DEATH_IF_SUPPORTED(GTEST_CHECK_(false) << "failure", "false.*failure");
+
+  // Empty statement will not crash, which must trigger a failure.
+  EXPECT_NONFATAL_FAILURE(EXPECT_DEATH_IF_SUPPORTED(;, ""), "");
+  EXPECT_FATAL_FAILURE(ASSERT_DEATH_IF_SUPPORTED(;, ""), "");
+}
+
+#else
+
+using testing::internal::CaptureStderr;
+using testing::internal::GetCapturedStderr;
+using testing::internal::String;
+
+// Tests that EXPECT_DEATH_IF_SUPPORTED/ASSERT_DEATH_IF_SUPPORTED are still
+// defined but do not rigger failures when death tests are not available on
+// the system.
+TEST(ConditionalDeathMacrosTest, WarnsWhenDeathTestsNotAvailable) {
+  // Empty statement will not crash, but that should not trigger a failure
+  // when death tests are not supported.
+  CaptureStderr();
+  EXPECT_DEATH_IF_SUPPORTED(;, "");
+  String output = GetCapturedStderr();
+  ASSERT_TRUE(NULL != strstr(output.c_str(),
+                             "Death tests are not supported on this platform"));
+  ASSERT_TRUE(NULL != strstr(output.c_str(), ";"));
+
+  CaptureStderr();
+  ASSERT_DEATH_IF_SUPPORTED(;, "");
+  output = GetCapturedStderr();
+  ASSERT_TRUE(NULL != strstr(output.c_str(),
+                             "Death tests are not supported on this platform"));
+  ASSERT_TRUE(NULL != strstr(output.c_str(), ";"));
+}
+
 #endif  // GTEST_HAS_DEATH_TEST
 
 // Tests that a test case whose name ends with "DeathTest" works fine

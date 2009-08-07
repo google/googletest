@@ -696,10 +696,8 @@ inline void FlushInfoLog() { fflush(NULL); }
 //   CaptureStderr     - starts capturing stderr.
 //   GetCapturedStderr - stops capturing stderr and returns the captured string.
 
-#if GTEST_HAS_STD_STRING
 void CaptureStderr();
-::std::string GetCapturedStderr();
-#endif  // GTEST_HAS_STD_STRING
+String GetCapturedStderr();
 
 #if GTEST_HAS_DEATH_TEST
 

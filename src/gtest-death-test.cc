@@ -452,11 +452,7 @@ bool DeathTestImpl::Passed(bool status_ok) {
   if (!spawned())
     return false;
 
-#if GTEST_HAS_GLOBAL_STRING
-  const ::string error_message = GetCapturedStderr();
-#else
-  const ::std::string error_message = GetCapturedStderr();
-#endif  // GTEST_HAS_GLOBAL_STRING
+  const String error_message = GetCapturedStderr();
 
   bool success = false;
   Message buffer;
@@ -473,7 +469,7 @@ bool DeathTestImpl::Passed(bool status_ok) {
       break;
     case DIED:
       if (status_ok) {
-        if (RE::PartialMatch(error_message, *regex())) {
+        if (RE::PartialMatch(error_message.c_str(), *regex())) {
           success = true;
         } else {
           buffer << "    Result: died but not with expected error.\n"

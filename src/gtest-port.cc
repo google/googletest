@@ -431,8 +431,6 @@ void GTestLog(GTestLogSeverity severity, const char* file,
   }
 }
 
-#if GTEST_HAS_STD_STRING
-
 // Disable Microsoft deprecation warnings for POSIX functions called from
 // this class (creat, dup, dup2, and close)
 #ifdef _MSC_VER
@@ -514,7 +512,7 @@ static size_t GetFileSize(FILE * file) {
 }
 
 // Reads the entire content of a file as a string.
-static ::std::string ReadEntireFile(FILE * file) {
+static String ReadEntireFile(FILE * file) {
   const size_t file_size = GetFileSize(file);
   char* const buffer = new char[file_size];
 
@@ -530,7 +528,7 @@ static ::std::string ReadEntireFile(FILE * file) {
     bytes_read += bytes_last_read;
   } while (bytes_last_read > 0 && bytes_read < file_size);
 
-  const ::std::string content(buffer, buffer+bytes_read);
+  const String content(buffer, bytes_read);
   delete[] buffer;
 
   return content;
@@ -547,11 +545,11 @@ void CaptureStderr() {
 // Stops capturing stderr and returns the captured string.
 // GTEST_HAS_DEATH_TEST implies that we have ::std::string, so we can
 // use it here.
-::std::string GetCapturedStderr() {
+String GetCapturedStderr() {
   g_captured_stderr->StopCapture();
 
   FILE* const file = posix::FOpen(g_captured_stderr->filename().c_str(), "r");
-  const ::std::string content = ReadEntireFile(file);
+  const String content = ReadEntireFile(file);
   posix::FClose(file);
 
   delete g_captured_stderr;
@@ -559,8 +557,6 @@ void CaptureStderr() {
 
   return content;
 }
-
-#endif  // GTEST_HAS_STD_STRING
 
 #if GTEST_HAS_DEATH_TEST
 
