@@ -194,7 +194,8 @@
 #define GTEST_OS_SOLARIS 1
 #endif  // __CYGWIN__
 
-#if GTEST_OS_CYGWIN || GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_SYMBIAN
+#if GTEST_OS_CYGWIN || GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_SYMBIAN || \
+    GTEST_OS_SOLARIS
 
 // On some platforms, <regex.h> needs someone to define size_t, and
 // won't compile otherwise.  We can #include it here as we already
@@ -224,7 +225,8 @@
 // simple regex implementation instead.
 #define GTEST_USES_SIMPLE_RE 1
 
-#endif  // GTEST_OS_CYGWIN || GTEST_OS_LINUX || GTEST_OS_MAC
+#endif  // GTEST_OS_CYGWIN || GTEST_OS_LINUX || GTEST_OS_MAC ||
+        // GTEST_OS_SYMBIAN || GTEST_OS_SOLARIS
 
 // Defines GTEST_HAS_EXCEPTIONS to 1 if exceptions are enabled, or 0
 // otherwise.
