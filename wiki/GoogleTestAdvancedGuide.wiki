@@ -299,11 +299,13 @@ _Availability:_ Linux, Windows, Mac; since version 1.3.0.
 
 == Assertion Placement  ==
 
-You can include assertions in any C++ function's code. The one constraint is
-that assertions that generate a fatal failure (`FAIL*` and `ASSERT_*`) can only
-be used by void-returning functions. This is a consequence of Google Test not
-using exceptions. By placing it in a non-void function you'll get a confusing
-compile error like `"error: void value not ignored as it ought to be"`.
+You can use assertions in any C++ function. In particular, it doesn't
+have to be a method of the test fixture class. The one constraint is
+that assertions that generate a fatal failure (`FAIL*` and `ASSERT_*`)
+can only be used in void-returning functions. This is a consequence of
+Google Test not using exceptions. By placing it in a non-void function
+you'll get a confusing compile error like
+`"error: void value not ignored as it ought to be"`.
 
 If you need to use assertions in a function that returns non-void, one option
 is to make the function return the value in an out parameter instead. For
