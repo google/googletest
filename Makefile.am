@@ -7,6 +7,7 @@ EXTRA_DIST = \
   CHANGES \
   CONTRIBUTORS \
   include/gtest/gtest-param-test.h.pump \
+  include/gtest/internal/gtest-tuple.h.pump \
   include/gtest/internal/gtest-type-util.h.pump \
   include/gtest/internal/gtest-param-util-generated.h.pump \
   make/Makefile \
@@ -109,6 +110,7 @@ pkginclude_internal_HEADERS = \
   include/gtest/internal/gtest-param-util.h \
   include/gtest/internal/gtest-port.h \
   include/gtest/internal/gtest-string.h \
+  include/gtest/internal/gtest-tuple.h \
   include/gtest/internal/gtest-type-util.h
 
 lib_libgtest_main_la_SOURCES = src/gtest_main.cc
