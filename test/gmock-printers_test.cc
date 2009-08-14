@@ -919,12 +919,31 @@ TEST(PrintProtocolMessageTest, PrintsShortDebugString) {
   EXPECT_EQ("<member:\"yes\">", Print(msg));
 }
 
-// Tests printing a proto2 message.
-TEST(PrintProto2MessageTest, PrintsShortDebugString) {
+// Tests printing a short proto2 message.
+TEST(PrintProto2MessageTest, PrintsShortDebugStringWhenItIsShort) {
   testing::internal::FooMessage msg;
   msg.set_int_field(2);
+  msg.set_string_field("hello");
   EXPECT_PRED2(RE::FullMatch, Print(msg),
-               "<int_field:\\s*2\\s*>");
+               "<int_field:\\s*2\\s+string_field:\\s*\"hello\">");
+}
+
+// Tests printing a long proto2 message.
+TEST(PrintProto2MessageTest, PrintsDebugStringWhenItIsLong) {
+  testing::internal::FooMessage msg;
+  msg.set_int_field(2);
+  msg.set_string_field("hello");
+  msg.add_names("peter");
+  msg.add_names("paul");
+  msg.add_names("mary");
+  EXPECT_PRED2(RE::FullMatch, Print(msg),
+               "<\n"
+               "int_field:\\s*2\n"
+               "string_field:\\s*\"hello\"\n"
+               "names:\\s*\"peter\"\n"
+               "names:\\s*\"paul\"\n"
+               "names:\\s*\"mary\"\n"
+               ">");
 }
 
 #endif  // GMOCK_HAS_PROTOBUF_

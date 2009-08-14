@@ -129,14 +129,21 @@ class TypeWithoutFormatter {
                          sizeof(value), os);
   }
 };
+
+// We print a protobuf using its ShortDebugString() when the string
+// doesn't exceed this many characters; otherwise we print it using
+// DebugString() for better readability.
+const size_t kProtobufOneLinerMaxLength = 50;
+
 template <typename T>
 class TypeWithoutFormatter<T, true> {
  public:
   static void PrintValue(const T& value, ::std::ostream* os) {
-    // Both ProtocolMessage and proto2::Message have the
-    // ShortDebugString() method, so the same implementation works for
-    // both.
-    ::std::operator<<(*os, "<" + value.ShortDebugString() + ">");
+    const ::testing::internal::string short_str = value.ShortDebugString();
+    const ::testing::internal::string pretty_str =
+        short_str.length() <= kProtobufOneLinerMaxLength ?
+        short_str : ("\n" + value.DebugString());
+    ::std::operator<<(*os, "<" + pretty_str + ">");
   }
 };
 

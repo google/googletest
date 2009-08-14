@@ -48,6 +48,12 @@
 #include <sys/types.h>  // For ssize_t. NOLINT
 #endif
 
+class ProtocolMessage;
+
+namespace proto2 {
+class Message;
+}  // namespace proto2
+
 namespace testing {
 namespace internal {
 
@@ -384,6 +390,7 @@ TEST(IsAProtocolMessageTest, ValueIsCompileTimeConstant) {
 // Tests that IsAProtocolMessage<T>::value is true when T is
 // ProtocolMessage or a sub-class of it.
 TEST(IsAProtocolMessageTest, ValueIsTrueWhenTypeIsAProtocolMessage) {
+  EXPECT_TRUE(IsAProtocolMessage< ::proto2::Message>::value);
   EXPECT_TRUE(IsAProtocolMessage<ProtocolMessage>::value);
 #if GMOCK_HAS_PROTOBUF_
   EXPECT_TRUE(IsAProtocolMessage<const TestMessage>::value);
