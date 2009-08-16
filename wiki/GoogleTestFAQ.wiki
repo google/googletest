@@ -1,4 +1,5 @@
 #summary Tips and Frequently-Asked Questions about Google C++ Testing Framework
+#labels Featured
 
 <wiki:toc max_depth="3" />
 
