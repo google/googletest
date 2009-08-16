@@ -799,21 +799,56 @@ heap check/debug routines.
 
 == I am building my project with Google Test in Visual Studio and all I'm getting is a bunch of linker errors (or warnings). Help! ==
 
-You may get a number of the following linker error or warnings if you attempt to link your test project with the Google Test library when your project and the are not built using the same compiler settings.
+You may get a number of the following linker error or warnings if you
+attempt to link your test project with the Google Test library when
+your project and the are not built using the same compiler settings.
 
   * LNK2005: symbol already defined in object
   * LNK4217: locally defined symbol 'symbol' imported in function 'function'
   * LNK4049: locally defined symbol 'symbol' imported
 
-The Google Test project (gtest.vcproj) has the Runtime Library option set to /MT (use multi-threaded static libraries, /MTd for debug). If your project uses something else, for example /MD (use multi-threaded DLLs, /MDd for debug), you need to change the setting in the Google Test project to match your project's.
+The Google Test project (gtest.vcproj) has the Runtime Library option
+set to /MT (use multi-threaded static libraries, /MTd for debug). If
+your project uses something else, for example /MD (use multi-threaded
+DLLs, /MDd for debug), you need to change the setting in the Google
+Test project to match your project's.
 
-To update this setting open the project properties in the Visual Studio IDE then select the branch Configuration Properties | C/C++ | Code Generation and change the option "Runtime Library".
+To update this setting open the project properties in the Visual
+Studio IDE then select the branch Configuration Properties | C/C++ |
+Code Generation and change the option "Runtime Library".
 
 == I put my tests in a library and Google Test doesn't run them. What's happening? ==
-Have you read a [http:GoogleTestPrimer#Important_note_for_Visual_C++_users warning] on the Google Test Primer page?
-
-== My question is not covered in your FAQ! ==
-Ask it on our mailing list! Just mail [googletestframework@googlegroups.com] and someone will answer it. You might also want to search the mailing list [http://groups.google.com/group/googletestframework/topics archives] but by all means let us know if you believe your question should belong to this FAQ!
+Have you read a
+[http:GoogleTestPrimer#Important_note_for_Visual_C++_users warning] on
+the Google Test Primer page?
 
 == I want to use Google Test with Visual Studio but don't know where to start. ==
-Many people are in your position and one of the posted his solution to our mailing list. Here is his link: http://hassanjamilahmad.blogspot.com/2009/07/gtest-starters-help.html.
+Many people are in your position and one of the posted his solution to
+our mailing list. Here is his link:
+http://hassanjamilahmad.blogspot.com/2009/07/gtest-starters-help.html.
+
+== My question is not covered in your FAQ! ==
+
+If you cannot find the answer to your question in this FAQ, there are
+some other resources you can use:
+
+  # read other [http://code.google.com/p/googletest/w/list wiki pages],
+  # search the mailing list [http://groups.google.com/group/googletestframework/topics archive],
+  # ask it on [mailto:googletestframework@googlegroups.com googletestframework@googlegroups.com] and someone will answer it (to prevent spam, we require you to join the [http://groups.google.com/group/googletestframework discussion group] before you can post.).
+
+Please note that creating an issue in the
+[http://code.google.com/p/googletest/issues/list issue tracker] is _not_
+a good way to get your answer, as it is monitored infrequently by a
+very small number of people.
+
+When asking a question, it's helpful to provide as much of the
+following information as possible (people cannot help you if there's
+not enough information in your question):
+
+  * the version (or the revision number if you check out from SVN directly) of Google Test you use (Google Test is under active development, so it's possible that your problem has been solved in a later version),
+  * your operating system,
+  * the name and version of your compiler,
+  * the complete command line flags you give to your compiler,
+  * the complete compiler error messages (if the question is about compilation),
+  * the _actual_ code (ideally, a minimal but complete program) that has the problem you encounter.
+
