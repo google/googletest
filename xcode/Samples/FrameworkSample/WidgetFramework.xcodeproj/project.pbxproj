@@ -12,6 +12,9 @@
 		3B7EB1280E5AEE4600C7F239 /* widget_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3B7EB1270E5AEE4600C7F239 /* widget_test.cc */; };
 		3B7EB1480E5AF3B400C7F239 /* Widget.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8D07F2C80486CC7A007CD1D0 /* Widget.framework */; };
 		3B7F0C8D0E567CC5009CA236 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BA867DC0E561B7C00326077 /* gtest.framework */; };
+		40C849E8101A426E0083642A /* libgtest_main.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 40C849E7101A426E0083642A /* libgtest_main.a */; };
+		40C849EF101A42C80083642A /* gtest.framework in Copy Test Framework */ = {isa = PBXBuildFile; fileRef = 3BA867DC0E561B7C00326077 /* gtest.framework */; };
+		40C849F2101A42CC0083642A /* libgtest_main.a in Copy Test Framework */ = {isa = PBXBuildFile; fileRef = 40C849E7101A426E0083642A /* libgtest_main.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -24,12 +27,28 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		40C849F5101A42EA0083642A /* Copy Test Framework */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				40C849F2101A42CC0083642A /* libgtest_main.a in Copy Test Framework */,
+				40C849EF101A42C80083642A /* gtest.framework in Copy Test Framework */,
+			);
+			name = "Copy Test Framework";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		3B07BDEA0E3F3F9E00647869 /* WidgetFrameworkTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = WidgetFrameworkTest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B7EB1230E5AEE3500C7F239 /* widget.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = widget.cc; sourceTree = "<group>"; };
 		3B7EB1240E5AEE3500C7F239 /* widget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = widget.h; sourceTree = "<group>"; };
 		3B7EB1270E5AEE4600C7F239 /* widget_test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = widget_test.cc; sourceTree = "<group>"; };
 		3BA867DC0E561B7C00326077 /* gtest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = gtest.framework; path = ../../build/Debug/gtest.framework; sourceTree = "<group>"; };
+		40C849E7101A426E0083642A /* libgtest_main.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest_main.a; path = ../../build/Debug/gtest.framework/Versions/A/Resources/libgtest_main.a; sourceTree = SOURCE_ROOT; };
 		8D07F2C70486CC7A007CD1D0 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D07F2C80486CC7A007CD1D0 /* Widget.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Widget.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -41,6 +60,7 @@
 			files = (
 				3B7EB1480E5AF3B400C7F239 /* Widget.framework in Frameworks */,
 				3B7F0C8D0E567CC5009CA236 /* gtest.framework in Frameworks */,
+				40C849E8101A426E0083642A /* libgtest_main.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,6 +99,7 @@
 			isa = PBXGroup;
 			children = (
 				3BA867DC0E561B7C00326077 /* gtest.framework */,
+				40C849E7101A426E0083642A /* libgtest_main.a */,
 			);
 			name = "External Frameworks and Libraries";
 			sourceTree = "<group>";
@@ -128,6 +149,7 @@
 			buildPhases = (
 				3B07BDE70E3F3F9E00647869 /* Sources */,
 				3B07BDE80E3F3F9E00647869 /* Frameworks */,
+				40C849F5101A42EA0083642A /* Copy Test Framework */,
 			);
 			buildRules = (
 			);
@@ -235,6 +257,10 @@
 					"\"$(SRCROOT)/../../build/Debug\"",
 				);
 				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../build/Debug/gtest.framework/Versions/A/Resources\"",
+				);
 				PRODUCT_NAME = WidgetFrameworkTest;
 			};
 			name = Debug;
@@ -248,6 +274,10 @@
 					"\"$(SRCROOT)/../../build/Debug\"",
 				);
 				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../build/Debug/gtest.framework/Versions/A/Resources\"",
+				);
 				PRODUCT_NAME = WidgetFrameworkTest;
 			};
 			name = Release;
