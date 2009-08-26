@@ -606,7 +606,7 @@ class OsStackTraceGetterInterface {
 // A working implementation of the OsStackTraceGetterInterface interface.
 class OsStackTraceGetter : public OsStackTraceGetterInterface {
  public:
-  OsStackTraceGetter() {}
+  OsStackTraceGetter() : caller_frame_(NULL) {}
   virtual String CurrentStackTrace(int max_depth, int skip_count);
   virtual void UponLeavingGTest();
 
