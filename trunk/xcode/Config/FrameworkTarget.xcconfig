@@ -13,5 +13,5 @@ GCC_DYNAMIC_NO_PIC = NO
 // Dynamic libs should not have their external symbols stripped.
 STRIP_STYLE = non-global
 
-// Installation Directory
-INSTALL_PATH = @loader_path/../Frameworks
+// Let the user install by specifying the $DSTROOT with xcodebuild
+SKIP_INSTALL = NO

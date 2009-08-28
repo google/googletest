@@ -95,6 +95,13 @@
 			remoteGlobalIDString = 4089A0120FFACEFC000B29AE;
 			remoteInfo = sample1_unittest;
 		};
+		408BEC0F1046CFE900DEF522 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 40C848F9101A209C0083642A;
+			remoteInfo = "gtest-static";
+		};
 		40C44AE50E379922008FCC51 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
@@ -555,6 +562,7 @@
 			);
 			dependencies = (
 				40C44AE60E379922008FCC51 /* PBXTargetDependency */,
+				408BEC101046CFE900DEF522 /* PBXTargetDependency */,
 				40C8499C101A36DC0083642A /* PBXTargetDependency */,
 			);
 			name = "gtest-framework";
@@ -715,6 +723,11 @@
 			isa = PBXTargetDependency;
 			target = 4089A0120FFACEFC000B29AE /* sample1_unittest-framework */;
 			targetProxy = 4089A0970FFAD34A000B29AE /* PBXContainerItemProxy */;
+		};
+		408BEC101046CFE900DEF522 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 40C848F9101A209C0083642A /* gtest-static */;
+			targetProxy = 408BEC0F1046CFE900DEF522 /* PBXContainerItemProxy */;
 		};
 		40C44AE60E379922008FCC51 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
