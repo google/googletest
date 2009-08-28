@@ -202,9 +202,9 @@ defaults to xcode/build). Alternatively, at the command line, enter:
 
   xcodebuild
  
-This will build the "Release" configuration of the gtest.framework, but you can
-select the "Debug" configuration with a command line option. See the
-"xcodebuild" man page for more information.
+This will build the "Release" configuration of gtest.framework in your
+default build location. See the "xcodebuild" man page for more information about
+building different configurations and building in different locations.
 
 To test the gtest.framework in Xcode, change the active target to "Check" and
 then build. This target builds all of the tests and then runs them. Don't worry
@@ -212,20 +212,38 @@ if you see some errors. Xcode reports all test failures (even the intentional
 ones) as errors. However, you should see a "Build succeeded" message at the end
 of the build log. To run all of the tests from the command line, enter:
 
-  xcodebuid -target Check
+  xcodebuild -target Check
+  
+Installation with xcodebuild requires specifying an installation desitination
+directory, known as the DSTROOT. Three items will be installed when using
+xcodebuild:
+
+  $DSTROOT/Library/Frameworks/gtest.framework
+  $DSTROOT/usr/local/lib/libgtest.a
+  $DSTROOT/usr/local/lib/libgtest_main.a
+  
+You specify the installation directory on the command line with the other
+xcodebuild options. Here's how you would install in a user-visible location:
+
+  xcodebuild install DSTROOT=~
+  
+To perform a system-wide inistall, escalate to an administrator and specify
+the file system root as the DSTROOT:
+
+  sudo xcodebuild install DSTROOT=/
+
+To uninstall gtest.framework via the command line, you need to delete the three
+items listed above. Remember to escalate to an administrator if deleting these
+from the system-wide location using the commands listed below:
+
+  sudo rm -r /Library/Frameworks/gtest.framework
+  sudo rm /usr/local/lib/libgtest.a
+  sudo rm /usr/local/lib/libgtest_main.a
 
 It is also possible to build and execute individual tests within Xcode. Each
 test has its own Xcode "Target" and Xcode "Executable". To build any of the
 tests, change the active target and the active executable to the test of
 interest and then build and run.
-
-NOTE: Several tests use a Python script to run the test executable. These can be
-run from Xcode by creating a "Custom Executable". For example, to run the Python
-script which executes the gtest_color_test, select the Project->New Custom
-Executable... menu item. When prompted, set the "Executable Name" to something
-like "run_gtest_color_test" and set the "Executable Path" to the path of the
-gtest_color_test.py script. Finally, choose "Run" from the Run menu and check
-the Console for the results.
 
 Individual tests can be built from the command line using:
 
@@ -235,21 +253,14 @@ These tests can be executed from the command line by moving to the build
 directory and then (in bash)
 
   export DYLD_FRAMEWORK_PATH=`pwd`
-  ./<test_name>  # (if it is not a python test, e.g. ./gtest_unittest)
-  # OR
-  ./<test_name>.py  # (if it is a python test, e.g. ./gtest_color_test.py)
+  ./<test_name>  # (e.g. ./gtest_unittest)
 
-To use the gtest.framework for your own tests, first, add the framework to Xcode
-project. Next, create a new executable target and add the framework to the
-"Link Binary With Libraries" build phase. Select "Edit Active Executable" from
-the "Project" menu. In the "Arguments" tab, add
-
-    "DYLD_FRAMEWORK_PATH" : "/real/framework/path"
-
-in the "Variables to be set in the environment:" list, where you replace
-"/real/framework/path" with the actual location of the gtest.framework. Now
-when you run your executable, it will load the framework and your test will
-run as expected. 
+To use gtest.framework for your own tests, first, install the framework using
+the steps described above. Then add it to your Xcode project by selecting
+Project->Add to Project... from the main menu. Next, add libgtest_main.a from
+gtest.framework/Resources directory using the same menu command. Finally,
+create a new executable target and add gtest.framework and libgtest_main.a to
+the "Link Binary With Libraries" build phase.
 
 ### Using GNU Make ###
 The make/ directory contains a Makefile that you can use to build

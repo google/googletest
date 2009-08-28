@@ -13,3 +13,6 @@ GCC_DYNAMIC_NO_PIC = NO
 // Static libs should not have their internal globals or external symbols
 // stripped.
 STRIP_STYLE = debugging
+
+// Let the user install by specifying the $DSTROOT with xcodebuild
+SKIP_INSTALL = NO
