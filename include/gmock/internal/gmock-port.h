@@ -75,33 +75,11 @@
 namespace testing {
 namespace internal {
 
-// For Windows, check the compiler version. At least VS 2005 SP1 is
+// For MS Visual C++, check the compiler version. At least VS 2003 is
 // required to compile Google Mock.
-#if GTEST_OS_WINDOWS
-
-#if _MSC_VER < 1400
-#error "At least Visual Studio 2005 SP1 is required to compile Google Mock."
-#elif _MSC_VER == 1400
-
-// Unfortunately there is no unique _MSC_VER number for SP1. So for VS 2005
-// we have to check if it has SP1 by checking whether a bug fixed in SP1
-// is present. The bug in question is
-// http://connect.microsoft.com/VisualStudio/feedback/ViewFeedback.aspx?FeedbackID=101702
-// where the compiler incorrectly reports sizeof(poiter to an array).
-
-class TestForSP1 {
- private:  // GCC complains if x_ is used by sizeof before defining it.
-  static char x_[100];
-  // VS 2005 RTM incorrectly reports sizeof(&x) as 100, and that value
-  // is used to trigger 'invalid negative array size' error. If you
-  // see this error, upgrade to VS 2005 SP1 since Google Mock will not
-  // compile in VS 2005 RTM.
-  static char Google_Mock_requires_Visual_Studio_2005_SP1_or_later_to_compile_[
-      sizeof(&x_) != 100 ? 1 : -1];
-};
-
-#endif  // _MSC_VER
-#endif  // GTEST_OS_WINDOWS
+#if defined(_MSC_VER) && _MSC_VER < 1310
+#error "At least Visual C++ 2003 (7.1) is required to compile Google Mock."
+#endif
 
 // Use implicit_cast as a safe version of static_cast or const_cast
 // for upcasting in the type hierarchy (i.e. casting a pointer to Foo

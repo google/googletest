@@ -1432,7 +1432,7 @@ TEST(AfterTest, SucceedsWhenTotalOrderIsSatisfied) {
 #if GTEST_HAS_DEATH_TEST
 
 // Calls must be in strict order when specified so.
-TEST(AfterTest, CallsMustBeInStrictOrderWhenSpecifiedSo) {
+TEST(AfterDeathTest, CallsMustBeInStrictOrderWhenSpecifiedSo) {
   MockA a;
   MockB b;
   Expectation e1 = EXPECT_CALL(a, DoA(1));
@@ -1454,17 +1454,17 @@ TEST(AfterTest, CallsMustBeInStrictOrderWhenSpecifiedSo) {
   // gtest and gmock print messages to stdout, which isn't captured by
   // death tests.  Therefore we have to match with an empty regular
   // expression in all the EXPECT_DEATH()s.
-  EXPECT_DEATH(a.ReturnResult(2), "");
+  EXPECT_DEATH_IF_SUPPORTED(a.ReturnResult(2), "");
 
   b.DoB();
-  EXPECT_DEATH(a.ReturnResult(2), "");
+  EXPECT_DEATH_IF_SUPPORTED(a.ReturnResult(2), "");
 
   b.DoB();
   a.ReturnResult(2);
 }
 
 // Calls must satisfy the partial order when specified so.
-TEST(AfterTest, CallsMustSatisfyPartialOrderWhenSpecifiedSo) {
+TEST(AfterDeathTest, CallsMustSatisfyPartialOrderWhenSpecifiedSo) {
   MockA a;
   Expectation e = EXPECT_CALL(a, DoA(1));
   const ExpectationSet es = EXPECT_CALL(a, DoA(2));
@@ -1472,17 +1472,17 @@ TEST(AfterTest, CallsMustSatisfyPartialOrderWhenSpecifiedSo) {
       .After(e, es)
       .WillOnce(Return(Result()));
 
-  EXPECT_DEATH(a.ReturnResult(3), "");
+  EXPECT_DEATH_IF_SUPPORTED(a.ReturnResult(3), "");
 
   a.DoA(2);
-  EXPECT_DEATH(a.ReturnResult(3), "");
+  EXPECT_DEATH_IF_SUPPORTED(a.ReturnResult(3), "");
 
   a.DoA(1);
   a.ReturnResult(3);
 }
 
 // .After() can be combined with .InSequence().
-TEST(AfterTest, CanBeUsedWithInSequence) {
+TEST(AfterDeathTest, CanBeUsedWithInSequence) {
   MockA a;
   Sequence s;
   Expectation e = EXPECT_CALL(a, DoA(1));
@@ -1492,7 +1492,7 @@ TEST(AfterTest, CanBeUsedWithInSequence) {
       .WillOnce(Return(Result()));
 
   a.DoA(1);
-  EXPECT_DEATH(a.ReturnResult(3), "");
+  EXPECT_DEATH_IF_SUPPORTED(a.ReturnResult(3), "");
 
   a.DoA(2);
   a.ReturnResult(3);
@@ -1551,7 +1551,7 @@ TEST(AfterTest, AcceptsDuplicatedInput) {
       .WillOnce(Return(Result()));
 
   a.DoA(1);
-  EXPECT_DEATH(a.ReturnResult(3), "");
+  EXPECT_DEATH_IF_SUPPORTED(a.ReturnResult(3), "");
 
   a.DoA(2);
   a.ReturnResult(3);

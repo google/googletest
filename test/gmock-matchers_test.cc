@@ -1784,17 +1784,23 @@ TEST(MatcherAssertionTest, WorksWhenMatcherIsNotSatisfied) {
   // which cannot reference auto variables.
   static int n;
   n = 5;
-  EXPECT_FATAL_FAILURE(ASSERT_THAT(n, Gt(10)) << "This should fail.",
+
+  // VC++ prior to version 8.0 SP1 has a bug where it will not see any
+  // functions declared in the namespace scope from within nested classes.
+  // EXPECT/ASSERT_(NON)FATAL_FAILURE macros use nested classes so that all
+  // namespace-level functions invoked inside them need to be explicitly
+  // resolved.
+  EXPECT_FATAL_FAILURE(ASSERT_THAT(n, ::testing::Gt(10)),
                        "Value of: n\n"
                        "Expected: is greater than 10\n"
-                       "  Actual: 5\n"
-                       "This should fail.");
+                       "  Actual: 5");
   n = 0;
-  EXPECT_NONFATAL_FAILURE(EXPECT_THAT(n, AllOf(Le(7), Ge(5))),
-                          "Value of: n\n"
-                          "Expected: (is less than or equal to 7) and "
-                          "(is greater than or equal to 5)\n"
-                          "  Actual: 0");
+  EXPECT_NONFATAL_FAILURE(
+      EXPECT_THAT(n, ::testing::AllOf(::testing::Le(7), ::testing::Ge(5))),
+      "Value of: n\n"
+      "Expected: (is less than or equal to 7) and "
+      "(is greater than or equal to 5)\n"
+      "  Actual: 0");
 }
 
 // Tests that ASSERT_THAT() and EXPECT_THAT() work when the argument
@@ -1805,11 +1811,11 @@ TEST(MatcherAssertionTest, WorksForByRefArguments) {
   static int n;
   n = 0;
   EXPECT_THAT(n, AllOf(Le(7), Ref(n)));
-  EXPECT_FATAL_FAILURE(ASSERT_THAT(n, Not(Ref(n))),
+  EXPECT_FATAL_FAILURE(ASSERT_THAT(n, ::testing::Not(::testing::Ref(n))),
                        "Value of: n\n"
                        "Expected: does not reference the variable @");
   // Tests the "Actual" part.
-  EXPECT_FATAL_FAILURE(ASSERT_THAT(n, Not(Ref(n))),
+  EXPECT_FATAL_FAILURE(ASSERT_THAT(n, ::testing::Not(::testing::Ref(n))),
                        "Actual: 0 (is located @");
 }
 
@@ -2745,7 +2751,6 @@ TEST(ResultOfTest, WorksForReferencingCallables) {
   EXPECT_FALSE(matcher3.Matches(n2));
 }
 
-
 class DivisibleByImpl {
  public:
   explicit DivisibleByImpl(int divider) : divider_(divider) {}
@@ -2763,9 +2768,11 @@ class DivisibleByImpl {
     *os << "is not divisible by " << divider_;
   }
 
+  void set_divider(int divider) { divider_ = divider; }
   int divider() const { return divider_; }
+
  private:
-  const int divider_;
+  int divider_;
 };
 
 // For testing using ExplainMatchResultTo() with polymorphic matchers.
@@ -2859,6 +2866,7 @@ TEST(ByRefTest, AllowsNotCopyableValueInMatchers) {
   EXPECT_TRUE(m.Matches(n2));
 }
 
+#if GTEST_HAS_TYPED_TEST
 // Tests ContainerEq with different container types, and
 // different element types.
 
@@ -2927,6 +2935,7 @@ TYPED_TEST(ContainerEqTest, DuplicateDifference) {
   // But in any case there should be no explanation.
   EXPECT_EQ("", Explain(m, test_set));
 }
+#endif  // GTEST_HAS_TYPED_TEST
 
 // Tests that mutliple missing values are reported.
 // Using just vector here, so order is predicatble.
@@ -3343,6 +3352,23 @@ TEST(FormatMatcherDescriptionTest,
             FormatMatcherDescription("Foo", desc,
                                      Interpolations(interp, interp + 1),
                                      Strings(params, params + 1)));
+}
+
+// Tests PolymorphicMatcher::mutable_impl().
+TEST(PolymorphicMatcherTest, CanAccessMutableImpl) {
+  PolymorphicMatcher<DivisibleByImpl> m(DivisibleByImpl(42));
+  DivisibleByImpl& impl = m.mutable_impl();
+  EXPECT_EQ(42, impl.divider());
+
+  impl.set_divider(0);
+  EXPECT_EQ(0, m.mutable_impl().divider());
+}
+
+// Tests PolymorphicMatcher::impl().
+TEST(PolymorphicMatcherTest, CanAccessImpl) {
+  const PolymorphicMatcher<DivisibleByImpl> m(DivisibleByImpl(42));
+  const DivisibleByImpl& impl = m.impl();
+  EXPECT_EQ(42, impl.divider());
 }
 
 }  // namespace gmock_matchers_test

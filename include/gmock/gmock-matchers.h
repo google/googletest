@@ -236,6 +236,14 @@ class PolymorphicMatcher {
  public:
   explicit PolymorphicMatcher(const Impl& impl) : impl_(impl) {}
 
+  // Returns a mutable reference to the underlying matcher
+  // implementation object.
+  Impl& mutable_impl() { return impl_; }
+
+  // Returns an immutable reference to the underlying matcher
+  // implementation object.
+  const Impl& impl() const { return impl_; }
+
   template <typename T>
   operator Matcher<T>() const {
     return Matcher<T>(new MonomorphicImpl<T>(impl_));
@@ -273,11 +281,12 @@ class PolymorphicMatcher {
       // doesn't need to customize it.
       ExplainMatchResultTo(impl_, x, os);
     }
+
    private:
     const Impl impl_;
   };
 
-  const Impl impl_;
+  Impl impl_;
 };
 
 // Creates a matcher from its implementation.  This is easier to use
