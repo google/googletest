@@ -292,7 +292,7 @@ TEST_F(TestForDeathTest, SingleStatement) {
 }
 
 void DieWithEmbeddedNul() {
-  fprintf(stderr, "Hello%cworld.\n", '\0');
+  fprintf(stderr, "Hello%cmy null world.\n", '\0');
   fflush(stderr);
   _exit(1);
 }
@@ -303,8 +303,8 @@ void DieWithEmbeddedNul() {
 TEST_F(TestForDeathTest, EmbeddedNulInMessage) {
   // TODO(wan@google.com): <regex.h> doesn't support matching strings
   // with embedded NUL characters - find a way to workaround it.
-  EXPECT_DEATH(DieWithEmbeddedNul(), "w.*ld");
-  ASSERT_DEATH(DieWithEmbeddedNul(), "w.*ld");
+  EXPECT_DEATH(DieWithEmbeddedNul(), "my null world");
+  ASSERT_DEATH(DieWithEmbeddedNul(), "my null world");
 }
 #endif  // GTEST_USES_PCRE
 

@@ -445,7 +445,7 @@ bool UnitTestOptions::FilterMatchesTest(const String &test_case_name,
     positive = GTEST_FLAG(filter).c_str();  // Whole string is a positive filter
     negative = String("");
   } else {
-    positive.Set(p, dash - p);       // Everything up to the dash
+    positive = String(p, dash - p);  // Everything up to the dash
     negative = String(dash+1);       // Everything after the dash
     if (positive.empty()) {
       // Treat '-test1' as the same as '*-test1'
@@ -926,17 +926,17 @@ bool String::CStringEquals(const char * lhs, const char * rhs) {
 
 // Converts an array of wide chars to a narrow string using the UTF-8
 // encoding, and streams the result to the given Message object.
-static void StreamWideCharsToMessage(const wchar_t* wstr, size_t len,
+static void StreamWideCharsToMessage(const wchar_t* wstr, size_t length,
                                      Message* msg) {
   // TODO(wan): consider allowing a testing::String object to
   // contain '\0'.  This will make it behave more like std::string,
   // and will allow ToUtf8String() to return the correct encoding
   // for '\0' s.t. we can get rid of the conditional here (and in
   // several other places).
-  for (size_t i = 0; i != len; ) {  // NOLINT
+  for (size_t i = 0; i != length; ) {  // NOLINT
     if (wstr[i] != L'\0') {
-      *msg << WideStringToUtf8(wstr + i, static_cast<int>(len - i));
-      while (i != len && wstr[i] != L'\0')
+      *msg << WideStringToUtf8(wstr + i, static_cast<int>(length - i));
+      while (i != length && wstr[i] != L'\0')
         i++;
     } else {
       *msg << '\0';
@@ -1679,24 +1679,30 @@ bool String::CaseInsensitiveWideCStringEquals(const wchar_t* lhs,
 #endif  // OS selector
 }
 
-// Constructs a String by copying a given number of chars from a
-// buffer.  E.g. String("hello", 3) will create the string "hel".
-String::String(const char * buffer, size_t len) {
-  char * const temp = new char[ len + 1 ];
-  memcpy(temp, buffer, len);
-  temp[ len ] = '\0';
-  c_str_ = temp;
-}
-
 // Compares this with another String.
 // Returns < 0 if this is less than rhs, 0 if this is equal to rhs, or > 0
 // if this is greater than rhs.
 int String::Compare(const String & rhs) const {
-  if ( c_str_ == NULL ) {
-    return rhs.c_str_ == NULL ? 0 : -1;  // NULL < anything except NULL
+  const char* const lhs_c_str = c_str();
+  const char* const rhs_c_str = rhs.c_str();
+
+  if (lhs_c_str == NULL) {
+    return rhs_c_str == NULL ? 0 : -1;  // NULL < anything except NULL
+  } else if (rhs_c_str == NULL) {
+    return 1;
   }
 
-  return rhs.c_str_ == NULL ? 1 : strcmp(c_str_, rhs.c_str_);
+  const size_t shorter_str_len =
+      length() <= rhs.length() ? length() : rhs.length();
+  for (size_t i = 0; i != shorter_str_len; i++) {
+    if (lhs_c_str[i] < rhs_c_str[i]) {
+      return -1;
+    } else if (lhs_c_str[i] > rhs_c_str[i]) {
+      return 1;
+    }
+  }
+  return (length() < rhs.length()) ? -1 :
+      (length() > rhs.length()) ? 1 : 0;
 }
 
 // Returns true iff this String ends with the given suffix.  *Any*
@@ -1704,12 +1710,12 @@ int String::Compare(const String & rhs) const {
 bool String::EndsWith(const char* suffix) const {
   if (suffix == NULL || CStringEquals(suffix, "")) return true;
 
-  if (c_str_ == NULL) return false;
+  if (c_str() == NULL) return false;
 
-  const size_t this_len = strlen(c_str_);
+  const size_t this_len = strlen(c_str());
   const size_t suffix_len = strlen(suffix);
   return (this_len >= suffix_len) &&
-         CStringEquals(c_str_ + this_len - suffix_len, suffix);
+         CStringEquals(c_str() + this_len - suffix_len, suffix);
 }
 
 // Returns true iff this String ends with the given suffix, ignoring case.
@@ -1717,37 +1723,12 @@ bool String::EndsWith(const char* suffix) const {
 bool String::EndsWithCaseInsensitive(const char* suffix) const {
   if (suffix == NULL || CStringEquals(suffix, "")) return true;
 
-  if (c_str_ == NULL) return false;
+  if (c_str() == NULL) return false;
 
-  const size_t this_len = strlen(c_str_);
+  const size_t this_len = strlen(c_str());
   const size_t suffix_len = strlen(suffix);
   return (this_len >= suffix_len) &&
-         CaseInsensitiveCStringEquals(c_str_ + this_len - suffix_len, suffix);
-}
-
-// Sets the 0-terminated C string this String object represents.  The
-// old string in this object is deleted, and this object will own a
-// clone of the input string.  This function copies only up to length
-// bytes (plus a terminating null byte), or until the first null byte,
-// whichever comes first.
-//
-// This function works even when the c_str parameter has the same
-// value as that of the c_str_ field.
-void String::Set(const char * c_str, size_t length) {
-  // Makes sure this works when c_str == c_str_
-  const char* const temp = CloneString(c_str, length);
-  delete[] c_str_;
-  c_str_ = temp;
-}
-
-// Assigns a C string to this object.  Self-assignment works.
-const String& String::operator=(const char* c_str) {
-  // Makes sure this works when c_str == c_str_
-  if (c_str != c_str_) {
-    delete[] c_str_;
-    c_str_ = CloneCString(c_str);
-  }
-  return *this;
+         CaseInsensitiveCStringEquals(c_str() + this_len - suffix_len, suffix);
 }
 
 // Formats a list of arguments to a String, using the same format
@@ -1778,7 +1759,7 @@ String String::Format(const char * format, ...) {
 #endif  // _MSC_VER
   va_end(args);
 
-  return String(size >= 0 ? buffer : "<buffer exceeded>");
+  return (size >= 0) ? String(buffer, size) : String("<buffer exceeded>");
 }
 
 // Converts the buffer in a StrStream to a String, converting NUL
@@ -3491,7 +3472,7 @@ int UnitTest::Run() {
   // Catch SEH-style exceptions.
 
   const bool in_death_test_child_process =
-      internal::GTEST_FLAG(internal_run_death_test).GetLength() > 0;
+      internal::GTEST_FLAG(internal_run_death_test).length() > 0;
 
   // Either the user wants Google Test to catch exceptions thrown by the
   // tests or this is executing in the context of death test child
@@ -4161,7 +4142,7 @@ const char* ParseFlagValue(const char* str,
 
   // The flag must start with "--" followed by GTEST_FLAG_PREFIX_.
   const String flag_str = String::Format("--%s%s", GTEST_FLAG_PREFIX_, flag);
-  const size_t flag_len = flag_str.GetLength();
+  const size_t flag_len = flag_str.length();
   if (strncmp(str, flag_str.c_str(), flag_len) != 0) return NULL;
 
   // Skips the flag name.

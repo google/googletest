@@ -585,7 +585,7 @@ static String FlagToEnvVar(const char* flag) {
       (Message() << GTEST_FLAG_PREFIX_ << flag).GetString();
 
   Message env_var;
-  for (int i = 0; i != full_flag.GetLength(); i++) {
+  for (size_t i = 0; i != full_flag.length(); i++) {
     env_var << static_cast<char>(toupper(full_flag.c_str()[i]));
   }
 

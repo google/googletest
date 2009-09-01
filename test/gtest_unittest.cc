@@ -697,25 +697,61 @@ TEST(ListDeathTest, GetElement) {
 
 // Tests the String class.
 
+TEST(StringTest, SizeIsSmall) {
+  // To avoid breaking clients that use lots of assertions in one
+  // function, we cannot grow the size of String.
+  EXPECT_LE(sizeof(String), sizeof(void*));
+}
+
 // Tests String's constructors.
 TEST(StringTest, Constructors) {
   // Default ctor.
   String s1;
   // We aren't using EXPECT_EQ(NULL, s1.c_str()) because comparing
   // pointers with NULL isn't supported on all platforms.
+  EXPECT_EQ(0U, s1.length());
   EXPECT_TRUE(NULL == s1.c_str());
 
   // Implicitly constructs from a C-string.
   String s2 = "Hi";
+  EXPECT_EQ(2U, s2.length());
   EXPECT_STREQ("Hi", s2.c_str());
 
   // Constructs from a C-string and a length.
   String s3("hello", 3);
+  EXPECT_EQ(3U, s3.length());
   EXPECT_STREQ("hel", s3.c_str());
 
-  // Copy ctor.
-  String s4 = s3;
-  EXPECT_STREQ("hel", s4.c_str());
+  // The empty String should be created when String is constructed with
+  // a NULL pointer and length 0.
+  EXPECT_EQ(0U, String(NULL, 0).length());
+  EXPECT_FALSE(String(NULL, 0).c_str() == NULL);
+
+  // Constructs a String that contains '\0'.
+  String s4("a\0bcd", 4);
+  EXPECT_EQ(4U, s4.length());
+  EXPECT_EQ('a', s4.c_str()[0]);
+  EXPECT_EQ('\0', s4.c_str()[1]);
+  EXPECT_EQ('b', s4.c_str()[2]);
+  EXPECT_EQ('c', s4.c_str()[3]);
+
+  // Copy ctor where the source is NULL.
+  const String null_str;
+  String s5 = null_str;
+  EXPECT_TRUE(s5.c_str() == NULL);
+
+  // Copy ctor where the source isn't NULL.
+  String s6 = s3;
+  EXPECT_EQ(3U, s6.length());
+  EXPECT_STREQ("hel", s6.c_str());
+
+  // Copy ctor where the source contains '\0'.
+  String s7 = s4;
+  EXPECT_EQ(4U, s7.length());
+  EXPECT_EQ('a', s7.c_str()[0]);
+  EXPECT_EQ('\0', s7.c_str()[1]);
+  EXPECT_EQ('b', s7.c_str()[2]);
+  EXPECT_EQ('c', s7.c_str()[3]);
 }
 
 #if GTEST_HAS_STD_STRING
@@ -724,17 +760,22 @@ TEST(StringTest, ConvertsFromStdString) {
   // An empty std::string.
   const std::string src1("");
   const String dest1 = src1;
+  EXPECT_EQ(0U, dest1.length());
   EXPECT_STREQ("", dest1.c_str());
 
   // A normal std::string.
   const std::string src2("Hi");
   const String dest2 = src2;
+  EXPECT_EQ(2U, dest2.length());
   EXPECT_STREQ("Hi", dest2.c_str());
 
   // An std::string with an embedded NUL character.
-  const char src3[] = "Hello\0world.";
+  const char src3[] = "a\0b";
   const String dest3 = std::string(src3, sizeof(src3));
-  EXPECT_STREQ("Hello", dest3.c_str());
+  EXPECT_EQ(sizeof(src3), dest3.length());
+  EXPECT_EQ('a', dest3.c_str()[0]);
+  EXPECT_EQ('\0', dest3.c_str()[1]);
+  EXPECT_EQ('b', dest3.c_str()[2]);
 }
 
 TEST(StringTest, ConvertsToStdString) {
@@ -747,6 +788,11 @@ TEST(StringTest, ConvertsToStdString) {
   const String src2("Hi");
   const std::string dest2 = src2;
   EXPECT_EQ("Hi", dest2);
+
+  // A String containing a '\0'.
+  const String src3("x\0y", 3);
+  const std::string dest3 = src3;
+  EXPECT_EQ(std::string("x\0y", 3), dest3);
 }
 
 #endif  // GTEST_HAS_STD_STRING
@@ -757,17 +803,22 @@ TEST(StringTest, ConvertsFromGlobalString) {
   // An empty ::string.
   const ::string src1("");
   const String dest1 = src1;
+  EXPECT_EQ(0U, dest1.length());
   EXPECT_STREQ("", dest1.c_str());
 
   // A normal ::string.
   const ::string src2("Hi");
   const String dest2 = src2;
+  EXPECT_EQ(2U, dest2.length());
   EXPECT_STREQ("Hi", dest2.c_str());
 
   // An ::string with an embedded NUL character.
-  const char src3[] = "Hello\0world.";
+  const char src3[] = "x\0y";
   const String dest3 = ::string(src3, sizeof(src3));
-  EXPECT_STREQ("Hello", dest3.c_str());
+  EXPECT_EQ(sizeof(src3), dest3.length());
+  EXPECT_EQ('x', dest3.c_str()[0]);
+  EXPECT_EQ('\0', dest3.c_str()[1]);
+  EXPECT_EQ('y', dest3.c_str()[2]);
 }
 
 TEST(StringTest, ConvertsToGlobalString) {
@@ -780,16 +831,13 @@ TEST(StringTest, ConvertsToGlobalString) {
   const String src2("Hi");
   const ::string dest2 = src2;
   EXPECT_EQ("Hi", dest2);
+
+  const String src3("x\0y", 3);
+  const ::string dest3 = src3;
+  EXPECT_EQ(::string("x\0y", 3), dest3);
 }
 
 #endif  // GTEST_HAS_GLOBAL_STRING
-
-// Tests String::ShowCString().
-TEST(StringTest, ShowCString) {
-  EXPECT_STREQ("(null)", String::ShowCString(NULL));
-  EXPECT_STREQ("", String::ShowCString(""));
-  EXPECT_STREQ("foo", String::ShowCString("foo"));
-}
 
 // Tests String::ShowCStringQuoted().
 TEST(StringTest, ShowCStringQuoted) {
@@ -799,6 +847,53 @@ TEST(StringTest, ShowCStringQuoted) {
                String::ShowCStringQuoted("").c_str());
   EXPECT_STREQ("\"foo\"",
                String::ShowCStringQuoted("foo").c_str());
+}
+
+// Tests String::empty().
+TEST(StringTest, Empty) {
+  EXPECT_TRUE(String("").empty());
+  EXPECT_FALSE(String().empty());
+  EXPECT_FALSE(String(NULL).empty());
+  EXPECT_FALSE(String("a").empty());
+  EXPECT_FALSE(String("\0", 1).empty());
+}
+
+// Tests String::Compare().
+TEST(StringTest, Compare) {
+  // NULL vs NULL.
+  EXPECT_EQ(0, String().Compare(String()));
+
+  // NULL vs non-NULL.
+  EXPECT_EQ(-1, String().Compare(String("")));
+
+  // Non-NULL vs NULL.
+  EXPECT_EQ(1, String("").Compare(String()));
+
+  // The following covers non-NULL vs non-NULL.
+
+  // "" vs "".
+  EXPECT_EQ(0, String("").Compare(String("")));
+
+  // "" vs non-"".
+  EXPECT_EQ(-1, String("").Compare(String("\0", 1)));
+  EXPECT_EQ(-1, String("").Compare(" "));
+
+  // Non-"" vs "".
+  EXPECT_EQ(1, String("a").Compare(String("")));
+
+  // The following covers non-"" vs non-"".
+
+  // Same length and equal.
+  EXPECT_EQ(0, String("a").Compare(String("a")));
+
+  // Same length and different.
+  EXPECT_EQ(-1, String("a\0b", 3).Compare(String("a\0c", 3)));
+  EXPECT_EQ(1, String("b").Compare(String("a")));
+
+  // Different lengths.
+  EXPECT_EQ(-1, String("a").Compare(String("ab")));
+  EXPECT_EQ(-1, String("a").Compare(String("a\0", 2)));
+  EXPECT_EQ(1, String("abc").Compare(String("aacd")));
 }
 
 // Tests String::operator==().
@@ -818,6 +913,9 @@ TEST(StringTest, Equals) {
   EXPECT_FALSE(foo == "");  // NOLINT
   EXPECT_FALSE(foo == "bar");  // NOLINT
   EXPECT_TRUE(foo == "foo");  // NOLINT
+
+  const String bar("x\0y", 3);
+  EXPECT_FALSE(bar == "x");
 }
 
 // Tests String::operator!=().
@@ -837,6 +935,17 @@ TEST(StringTest, NotEquals) {
   EXPECT_TRUE(foo != "");  // NOLINT
   EXPECT_TRUE(foo != "bar");  // NOLINT
   EXPECT_FALSE(foo != "foo");  // NOLINT
+
+  const String bar("x\0y", 3);
+  EXPECT_TRUE(bar != "x");
+}
+
+// Tests String::length().
+TEST(StringTest, Length) {
+  EXPECT_EQ(0U, String().length());
+  EXPECT_EQ(0U, String("").length());
+  EXPECT_EQ(2U, String("ab").length());
+  EXPECT_EQ(3U, String("a\0b", 3).length());
 }
 
 // Tests String::EndsWith().
@@ -900,9 +1009,17 @@ TEST(StringTest, CanBeAssignedEmpty) {
 TEST(StringTest, CanBeAssignedNonEmpty) {
   const String src("hello");
   String dest;
-
   dest = src;
+  EXPECT_EQ(5U, dest.length());
   EXPECT_STREQ("hello", dest.c_str());
+
+  const String src2("x\0y", 3);
+  String dest2;
+  dest2 = src2;
+  EXPECT_EQ(3U, dest2.length());
+  EXPECT_EQ('x', dest2.c_str()[0]);
+  EXPECT_EQ('\0', dest2.c_str()[1]);
+  EXPECT_EQ('y', dest2.c_str()[2]);
 }
 
 // Tests that a String can be assigned to itself.
@@ -911,6 +1028,13 @@ TEST(StringTest, CanBeAssignedSelf) {
 
   dest = dest;
   EXPECT_STREQ("hello", dest.c_str());
+}
+
+// Tests streaming a String.
+TEST(StringTest, Streams) {
+  EXPECT_EQ(StreamableToString(String()), "(null)");
+  EXPECT_EQ(StreamableToString(String("")), "");
+  EXPECT_EQ(StreamableToString(String("a\0b", 3)), "a\\0b");
 }
 
 #if GTEST_OS_WINDOWS
