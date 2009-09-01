@@ -51,6 +51,22 @@
 namespace testing {
 namespace internal {
 
+// Holds data in a String object.  We need this class in order to put
+// String's data members on the heap instead of on the stack.
+// Otherwise tests using many assertions (and thus Strings) in one
+// function may need too much stack frame space to compile.
+class StringData {
+  StringData() : c_str_(NULL), length_(0) {}
+  ~StringData() { delete[] c_str_; }
+
+ private:
+  friend class String;
+
+  const char* c_str_;
+  size_t length_;  // Length of the string (excluding the terminating
+                   // '\0' character).
+};
+
 // String - a UTF-8 string class.
 //
 // We cannot use std::string as Microsoft's STL implementation in
@@ -79,19 +95,6 @@ namespace internal {
 class String {
  public:
   // Static utility methods
-
-  // Returns the input if it's not NULL, otherwise returns "(null)".
-  // This function serves two purposes:
-  //
-  // 1. ShowCString(NULL) has type 'const char *', instead of the
-  // type of NULL (which is int).
-  //
-  // 2. In MSVC, streaming a null char pointer to StrStream generates
-  // an access violation, so we need to convert NULL to "(null)"
-  // before streaming it.
-  static inline const char* ShowCString(const char* c_str) {
-    return c_str ? c_str : "(null)";
-  }
 
   // Returns the input enclosed in double quotes if it's not NULL;
   // otherwise returns "(null)".  For example, "\"Hello\"" is returned
@@ -199,27 +202,36 @@ class String {
 
   // C'tors
 
-  // The default c'tor constructs a NULL string.
-  String() : c_str_(NULL) {}
+  // The default c'tor constructs a NULL string, which is represented
+  // by data_ being NULL.
+  String() : data_(NULL) {}
 
   // Constructs a String by cloning a 0-terminated C string.
-  String(const char* c_str) : c_str_(NULL) {  // NOLINT
-    *this = c_str;
+  String(const char* c_str) {  // NOLINT
+    if (c_str == NULL) {
+      data_ = NULL;
+    } else {
+      ConstructNonNull(c_str, strlen(c_str));
+    }
   }
 
   // Constructs a String by copying a given number of chars from a
-  // buffer.  E.g. String("hello", 3) will create the string "hel".
-  String(const char* buffer, size_t len);
+  // buffer.  E.g. String("hello", 3) creates the string "hel",
+  // String("a\0bcd", 4) creates "a\0bc", String(NULL, 0) creates "",
+  // and String(NULL, 1) results in access violation.
+  String(const char* buffer, size_t length) {
+    ConstructNonNull(buffer, length);
+  }
 
   // The copy c'tor creates a new copy of the string.  The two
   // String objects do not share content.
-  String(const String& str) : c_str_(NULL) {
-    *this = str;
-  }
+  String(const String& str) : data_(NULL) { *this = str; }
 
   // D'tor.  String is intended to be a final class, so the d'tor
   // doesn't need to be virtual.
-  ~String() { delete[] c_str_; }
+  ~String() {
+    delete data_;
+  }
 
   // Allows a String to be implicitly converted to an ::std::string or
   // ::string, and vice versa.  Converting a String containing a NULL
@@ -228,21 +240,23 @@ class String {
   // character to a String will result in the prefix up to the first
   // NUL character.
 #if GTEST_HAS_STD_STRING
-  String(const ::std::string& str) : c_str_(NULL) { *this = str.c_str(); }
+  String(const ::std::string& str) {
+    ConstructNonNull(str.c_str(), str.length());
+  }
 
-  operator ::std::string() const { return ::std::string(c_str_); }
+  operator ::std::string() const { return ::std::string(c_str(), length()); }
 #endif  // GTEST_HAS_STD_STRING
 
 #if GTEST_HAS_GLOBAL_STRING
-  String(const ::string& str) : c_str_(NULL) { *this = str.c_str(); }
+  String(const ::string& str) {
+    ConstructNonNull(str.c_str(), str.length());
+  }
 
-  operator ::string() const { return ::string(c_str_); }
+  operator ::string() const { return ::string(c_str(), length()); }
 #endif  // GTEST_HAS_GLOBAL_STRING
 
   // Returns true iff this is an empty string (i.e. "").
-  bool empty() const {
-    return (c_str_ != NULL) && (*c_str_ == '\0');
-  }
+  bool empty() const { return (c_str() != NULL) && (length() == 0); }
 
   // Compares this with another String.
   // Returns < 0 if this is less than rhs, 0 if this is equal to rhs, or > 0
@@ -251,19 +265,15 @@ class String {
 
   // Returns true iff this String equals the given C string.  A NULL
   // string and a non-NULL string are considered not equal.
-  bool operator==(const char* c_str) const {
-    return CStringEquals(c_str_, c_str);
-  }
+  bool operator==(const char* c_str) const { return Compare(c_str) == 0; }
 
-  // Returns true iff this String is less than the given C string.  A NULL
-  // string is considered less than "".
+  // Returns true iff this String is less than the given String.  A
+  // NULL string is considered less than "".
   bool operator<(const String& rhs) const { return Compare(rhs) < 0; }
 
   // Returns true iff this String doesn't equal the given C string.  A NULL
   // string and a non-NULL string are considered not equal.
-  bool operator!=(const char* c_str) const {
-    return !CStringEquals(c_str_, c_str);
-  }
+  bool operator!=(const char* c_str) const { return !(*this == c_str); }
 
   // Returns true iff this String ends with the given suffix.  *Any*
   // String is considered to end with a NULL or empty suffix.
@@ -273,45 +283,66 @@ class String {
   // case. Any String is considered to end with a NULL or empty suffix.
   bool EndsWithCaseInsensitive(const char* suffix) const;
 
-  // Returns the length of the encapsulated string, or -1 if the
+  // Returns the length of the encapsulated string, or 0 if the
   // string is NULL.
-  int GetLength() const {
-    return c_str_ ? static_cast<int>(strlen(c_str_)) : -1;
-  }
+  size_t length() const { return (data_ == NULL) ? 0 : data_->length_; }
 
   // Gets the 0-terminated C string this String object represents.
   // The String object still owns the string.  Therefore the caller
   // should NOT delete the return value.
-  const char* c_str() const { return c_str_; }
-
-  // Sets the 0-terminated C string this String object represents.
-  // The old string in this object is deleted, and this object will
-  // own a clone of the input string.  This function copies only up to
-  // length bytes (plus a terminating null byte), or until the first
-  // null byte, whichever comes first.
-  //
-  // This function works even when the c_str parameter has the same
-  // value as that of the c_str_ field.
-  void Set(const char* c_str, size_t length);
+  const char* c_str() const { return (data_ == NULL) ? NULL : data_->c_str_; }
 
   // Assigns a C string to this object.  Self-assignment works.
-  const String& operator=(const char* c_str);
+  const String& operator=(const char* c_str) { return *this = String(c_str); }
 
   // Assigns a String object to this object.  Self-assignment works.
-  const String& operator=(const String &rhs) {
-    *this = rhs.c_str_;
+  const String& operator=(const String& rhs) {
+    if (this != &rhs) {
+      delete data_;
+      data_ = NULL;
+      if (rhs.data_ != NULL) {
+        ConstructNonNull(rhs.data_->c_str_, rhs.data_->length_);
+      }
+    }
+
     return *this;
   }
 
  private:
-  const char* c_str_;
-};
+  // Constructs a non-NULL String from the given content.  This
+  // function can only be called when data_ has not been allocated.
+  // ConstructNonNull(NULL, 0) results in an empty string ("").
+  // ConstructNonNull(NULL, non_zero) is undefined behavior.
+  void ConstructNonNull(const char* buffer, size_t length) {
+    data_ = new StringData;
+    char* const str = new char[length + 1];
+    memcpy(str, buffer, length);
+    str[length] = '\0';
+    data_->c_str_ = str;
+    data_->length_ = length;
+  }
 
-// Streams a String to an ostream.
-inline ::std::ostream& operator <<(::std::ostream& os, const String& str) {
-  // We call String::ShowCString() to convert NULL to "(null)".
-  // Otherwise we'll get an access violation on Windows.
-  return os << String::ShowCString(str.c_str());
+  // Points to the representation of the String.  A NULL String is
+  // represented by data_ == NULL.
+  StringData* data_;
+};  // class String
+
+// Streams a String to an ostream.  Each '\0' character in the String
+// is replaced with "\\0".
+inline ::std::ostream& operator<<(::std::ostream& os, const String& str) {
+  if (str.c_str() == NULL) {
+    os << "(null)";
+  } else {
+    const char* const c_str = str.c_str();
+    for (size_t i = 0; i != str.length(); i++) {
+      if (c_str[i] == '\0') {
+        os << "\\0";
+      } else {
+        os << c_str[i];
+      }
+    }
+  }
+  return os;
 }
 
 // Gets the content of the StrStream's buffer as a String.  Each '\0'

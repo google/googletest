@@ -103,7 +103,7 @@ FilePath FilePath::GetCurrentDir() {
 FilePath FilePath::RemoveExtension(const char* extension) const {
   String dot_extension(String::Format(".%s", extension));
   if (pathname_.EndsWithCaseInsensitive(dot_extension.c_str())) {
-    return FilePath(String(pathname_.c_str(), pathname_.GetLength() - 4));
+    return FilePath(String(pathname_.c_str(), pathname_.length() - 4));
   }
   return *this;
 }
@@ -217,7 +217,7 @@ bool FilePath::IsRootDirectory() const {
   // TODO(wan@google.com): on Windows a network share like
   // \\server\share can be a root directory, although it cannot be the
   // current directory.  Handle this properly.
-  return pathname_.GetLength() == 3 && IsAbsolutePath();
+  return pathname_.length() == 3 && IsAbsolutePath();
 #else
   return pathname_ == kPathSeparatorString;
 #endif
@@ -227,7 +227,7 @@ bool FilePath::IsRootDirectory() const {
 bool FilePath::IsAbsolutePath() const {
   const char* const name = pathname_.c_str();
 #if GTEST_OS_WINDOWS
-  return pathname_.GetLength() >= 3 &&
+  return pathname_.length() >= 3 &&
      ((name[0] >= 'a' && name[0] <= 'z') ||
       (name[0] >= 'A' && name[0] <= 'Z')) &&
      name[1] == ':' &&
@@ -271,7 +271,7 @@ bool FilePath::CreateDirectoriesRecursively() const {
     return false;
   }
 
-  if (pathname_.GetLength() == 0 || this->DirectoryExists()) {
+  if (pathname_.length() == 0 || this->DirectoryExists()) {
     return true;
   }
 
@@ -307,7 +307,7 @@ bool FilePath::CreateFolder() const {
 // On Windows platform, uses \ as the separator, other platforms use /.
 FilePath FilePath::RemoveTrailingPathSeparator() const {
   return pathname_.EndsWith(kPathSeparatorString)
-      ? FilePath(String(pathname_.c_str(), pathname_.GetLength() - 1))
+      ? FilePath(String(pathname_.c_str(), pathname_.length() - 1))
       : *this;
 }
 
@@ -320,9 +320,9 @@ void FilePath::Normalize() {
     return;
   }
   const char* src = pathname_.c_str();
-  char* const dest = new char[pathname_.GetLength() + 1];
+  char* const dest = new char[pathname_.length() + 1];
   char* dest_ptr = dest;
-  memset(dest_ptr, 0, pathname_.GetLength() + 1);
+  memset(dest_ptr, 0, pathname_.length() + 1);
 
   while (*src != '\0') {
     *dest_ptr++ = *src;
