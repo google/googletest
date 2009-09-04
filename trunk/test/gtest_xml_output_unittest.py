@@ -44,6 +44,7 @@ import gtest_xml_test_utils
 
 GTEST_OUTPUT_FLAG         = "--gtest_output"
 GTEST_DEFAULT_OUTPUT_FILE = "test_detail.xml"
+GTEST_PROGRAM_NAME = "gtest_xml_output_unittest_"
 
 SUPPORTS_STACK_TRACES = False
 
@@ -108,8 +109,7 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     Runs a test program that generates a non-empty XML output, and
     tests that the XML output is expected.
     """
-    self._TestXmlOutput("gtest_xml_output_unittest_",
-                        EXPECTED_NON_EMPTY_XML, 1)
+    self._TestXmlOutput(GTEST_PROGRAM_NAME, EXPECTED_NON_EMPTY_XML, 1)
 
   def testEmptyXmlOutput(self):
     """
@@ -141,6 +141,35 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     self.assert_(p.exited)
     self.assertEquals(0, p.exit_code)
     self.assert_(os.path.isfile(output_file))
+
+  def testSuppressedXmlOutput(self):
+    """
+    Tests that no XML file is generated if the default XML listener is
+    shut down before RUN_ALL_TESTS is invoked.
+    """
+
+    xml_path = os.path.join(gtest_test_utils.GetTempDir(),
+                            GTEST_PROGRAM_NAME + "out.xml")
+    if os.path.isfile(xml_path):
+      os.remove(xml_path)
+
+    gtest_prog_path = gtest_test_utils.GetTestExecutablePath(GTEST_PROGRAM_NAME)
+
+    command = [gtest_prog_path,
+               "%s=xml:%s" % (GTEST_OUTPUT_FLAG, xml_path),
+               "--shut_down_xml"]
+    p = gtest_test_utils.Subprocess(command)
+    if p.terminated_by_signal:
+      self.assert_(False,
+                   "%s was killed by signal %d" % (gtest_prog_name, p.signal))
+    else:
+      self.assert_(p.exited)
+      self.assertEquals(1, p.exit_code,
+                        "'%s' exited with code %s, which doesn't match "
+                        "the expected exit code %s."
+                        % (command, p.exit_code, 1))
+
+    self.assert_(not os.path.isfile(xml_path))
 
 
   def _TestXmlOutput(self, gtest_prog_name, expected_xml, expected_exit_code):

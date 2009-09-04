@@ -12,6 +12,8 @@ EXTRA_DIST = \
   include/gtest/internal/gtest-param-util-generated.h.pump \
   make/Makefile \
   scons/SConscript \
+  scons/SConstruct \
+  scons/SConstruct.common \
   scripts/fuse_gtest_files.py \
   scripts/gen_gtest_pred_impl.py \
   scripts/test/Makefile \
@@ -24,10 +26,15 @@ EXTRA_DIST += \
   msvc/gtest_color_test_.vcproj \
   msvc/gtest_env_var_test_.vcproj \
   msvc/gtest_environment_test.vcproj \
+  msvc/gtest_main-md.vcproj \
   msvc/gtest_main.vcproj \
+  msvc/gtest-md.sln \
+  msvc/gtest-md.vcproj \
   msvc/gtest_output_test_.vcproj \
+  msvc/gtest_prod_test-md.vcproj \
   msvc/gtest_prod_test.vcproj \
   msvc/gtest_uninitialized_test_.vcproj \
+  msvc/gtest_unittest-md.vcproj \
   msvc/gtest_unittest.vcproj
 
 # xcode project files
@@ -36,9 +43,8 @@ EXTRA_DIST += \
   xcode/Config/FrameworkTarget.xcconfig \
   xcode/Config/General.xcconfig \
   xcode/Config/ReleaseProject.xcconfig \
+  xcode/Config/StaticLibraryTarget.xcconfig \
   xcode/Config/TestTarget.xcconfig \
-  xcode/Config/InternalTestTarget.xcconfig \
-  xcode/Config/InternalPythonTestTarget.xcconfig \
   xcode/Resources/Info.plist \
   xcode/Scripts/versiongenerate.py \
   xcode/Scripts/runtests.sh \
@@ -299,6 +305,11 @@ check_PROGRAMS += test/gtest-unittest-api_test
 test_gtest_unittest_api_test_SOURCES = test/gtest-unittest-api_test.cc
 test_gtest_unittest_api_test_LDADD = lib/libgtest_main.la
 
+TESTS += test/gtest-listener_test
+check_PROGRAMS += test/gtest-listener_test
+test_gtest_listener_test_SOURCES = test/gtest-listener_test.cc
+test_gtest_listener_test_LDADD = lib/libgtest_main.la
+
 # Verifies that Google Test works when RTTI is disabled.
 TESTS += test/gtest_no_rtti_test
 check_PROGRAMS += test/gtest_no_rtti_test
@@ -407,7 +418,7 @@ TESTS += test/gtest_xml_outfiles_test.py
 
 check_PROGRAMS += test/gtest_xml_output_unittest_
 test_gtest_xml_output_unittest__SOURCES = test/gtest_xml_output_unittest_.cc
-test_gtest_xml_output_unittest__LDADD = lib/libgtest_main.la
+test_gtest_xml_output_unittest__LDADD = lib/libgtest.la
 check_SCRIPTS += test/gtest_xml_output_unittest.py
 TESTS += test/gtest_xml_output_unittest.py
 

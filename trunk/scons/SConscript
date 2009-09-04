@@ -318,8 +318,9 @@ GtestTest(env, 'gtest_list_tests_unittest_', gtest)
 GtestTest(env, 'gtest_throw_on_failure_test_', gtest)
 GtestTest(env, 'gtest_xml_outfile1_test_', gtest_main)
 GtestTest(env, 'gtest_xml_outfile2_test_', gtest_main)
-GtestTest(env, 'gtest_xml_output_unittest_', gtest_main)
+GtestTest(env, 'gtest_xml_output_unittest_', gtest)
 GtestTest(env, 'gtest-unittest-api_test', gtest)
+GtestTest(env, 'gtest-listener_test', gtest)
 
 ############################################################
 # Tests targets using custom environments.

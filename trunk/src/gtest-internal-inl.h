@@ -741,24 +741,15 @@ class UnitTestImpl {
     return test_cases_.GetElementOr(i, NULL);
   }
 
+  // Provides access to the event listener list.
+  EventListeners* listeners() { return &listeners_; }
+
   // Returns the TestResult for the test that's currently running, or
   // the TestResult for the ad hoc test if no test is running.
   TestResult* current_test_result();
 
   // Returns the TestResult for the ad hoc test.
   const TestResult* ad_hoc_test_result() const { return &ad_hoc_test_result_; }
-
-  // Sets the unit test result printer.
-  //
-  // Does nothing if the input and the current printer object are the
-  // same; otherwise, deletes the old printer object and makes the
-  // input the current printer.
-  void set_result_printer(UnitTestEventListenerInterface* result_printer);
-
-  // Returns the current unit test result printer if it is not NULL;
-  // otherwise, creates an appropriate result printer, makes it the
-  // current printer, and returns it.
-  UnitTestEventListenerInterface* result_printer();
 
   // Sets the OS stack trace getter.
   //
@@ -907,9 +898,13 @@ class UnitTestImpl {
   }
 
 #if GTEST_HAS_DEATH_TEST
+  void InitDeathTestSubprocessControlInfo() {
+    internal_run_death_test_flag_.reset(ParseInternalRunDeathTestFlag());
+  }
   // Returns a pointer to the parsed --gtest_internal_run_death_test
   // flag, or NULL if that flag was not specified.
   // This information is useful only in a death test child process.
+  // Must not be called before a call to InitGoogleTest.
   const InternalRunDeathTestFlag* internal_run_death_test_flag() const {
     return internal_run_death_test_flag_.get();
   }
@@ -919,8 +914,21 @@ class UnitTestImpl {
     return death_test_factory_.get();
   }
 
+  void SuppressTestEventsIfInSubprocess();
+
   friend class ReplaceDeathTestFactory;
 #endif  // GTEST_HAS_DEATH_TEST
+
+  // Initializes the event listener performing XML output as specified by
+  // UnitTestOptions. Must not be called before InitGoogleTest.
+  void ConfigureXmlOutput();
+
+// Performs initialization dependent upon flag values obtained in
+// ParseGoogleTestFlagsOnly.  Is called from InitGoogleTest after the call to
+// ParseGoogleTestFlagsOnly.  In case a user neglects to call InitGoogleTest
+// this function is also called from RunAllTests.  Since this function can be
+// called more than once, it has to be idempotent.
+  void PostFlagParsingInit();
 
   // Gets the random seed used at the start of the current test run.
   int random_seed() const { return random_seed_; }
@@ -992,17 +1000,18 @@ class UnitTestImpl {
   // test, and records the result in ad_hoc_test_result_.
   TestResult ad_hoc_test_result_;
 
-  // The unit test result printer.  Will be deleted when the UnitTest
-  // object is destructed.  By default, a plain text printer is used,
-  // but the user can set this field to use a custom printer if that
-  // is desired.
-  UnitTestEventListenerInterface* result_printer_;
+  // The list of event listeners that can be used to track events inside
+  // Google Test.
+  EventListeners listeners_;
 
   // The OS stack trace getter.  Will be deleted when the UnitTest
   // object is destructed.  By default, an OsStackTraceGetter is used,
   // but the user can set this field to use a custom getter if that is
   // desired.
   OsStackTraceGetterInterface* os_stack_trace_getter_;
+
+  // True iff PostFlagParsingInit() has been called.
+  bool post_flag_parse_init_performed_;
 
   // The random number seed used at the beginning of the test run.
   int random_seed_;

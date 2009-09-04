@@ -190,9 +190,16 @@ see 'gtest-config --help' for more detailed information.
   g++ $(../../my_gtest_build/scripts/gtest-config ...) ...
 
 ### Windows ###
-Open the gtest.sln file in the msvc/ folder using Visual Studio, and
-you are ready to build Google Test the same way you build any Visual
-Studio project.
+The msvc\ folder contains two solutions with Visual C++ projects. Open the
+gtest.sln or gtest-md.sln file using Visual Studio, and you are ready to
+build Google Test the same way you build any Visual Studio project. Files
+that have names ending with -md use DLL versions of Microsoft runtime
+libraries (the /MD or the /MDd compiler option). Files without that suffix
+use static versions of the runtime libraries (the /MT or the /MTd option).
+Please note that one must use the same option to compile both gtest and his
+test code. If you use Visual Studio 2005 or above, we recommend the -md
+version as /MD is the default for new projects in these versions of Visual
+Studio.
 
 ### Mac OS X (universal-binary framework) ###
 Open the gtest.xcodeproj in the xcode/ folder using Xcode. Build the "gtest"
@@ -201,7 +208,7 @@ directory (selected in the Xcode "Preferences..." -> "Building" pane and
 defaults to xcode/build). Alternatively, at the command line, enter:
 
   xcodebuild
- 
+
 This will build the "Release" configuration of gtest.framework in your
 default build location. See the "xcodebuild" man page for more information about
 building different configurations and building in different locations.
@@ -213,7 +220,7 @@ ones) as errors. However, you should see a "Build succeeded" message at the end
 of the build log. To run all of the tests from the command line, enter:
 
   xcodebuild -target Check
-  
+
 Installation with xcodebuild requires specifying an installation desitination
 directory, known as the DSTROOT. Three items will be installed when using
 xcodebuild:
@@ -221,12 +228,12 @@ xcodebuild:
   $DSTROOT/Library/Frameworks/gtest.framework
   $DSTROOT/usr/local/lib/libgtest.a
   $DSTROOT/usr/local/lib/libgtest_main.a
-  
+
 You specify the installation directory on the command line with the other
 xcodebuild options. Here's how you would install in a user-visible location:
 
   xcodebuild install DSTROOT=~
-  
+
 To perform a system-wide inistall, escalate to an administrator and specify
 the file system root as the DSTROOT:
 
