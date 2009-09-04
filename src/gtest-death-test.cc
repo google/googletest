@@ -469,7 +469,8 @@ bool DeathTestImpl::Passed(bool status_ok) {
       break;
     case DIED:
       if (status_ok) {
-        if (RE::PartialMatch(error_message.c_str(), *regex())) {
+        const bool matched = RE::PartialMatch(error_message.c_str(), *regex());
+        if (matched) {
           success = true;
         } else {
           buffer << "    Result: died but not with expected error.\n"
@@ -767,6 +768,9 @@ DeathTest::TestRole NoExecDeathTest::AssumeRole() {
     // concurrent writes to the log files.  We capture stderr in the parent
     // process and append the child process' output to a log.
     LogToStderr();
+    // Event forwarding to the listeners of event listener API mush be shut
+    // down in death test subprocesses.
+    GetUnitTestImpl()->listeners()->SuppressEventForwarding();
     return EXECUTE_TEST;
   } else {
     GTEST_DEATH_TEST_CHECK_SYSCALL_(close(pipe_fd[1]));

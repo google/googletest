@@ -85,7 +85,7 @@ class GTestEnvVarTest(gtest_test_utils.TestCase):
     TestFlag('break_on_failure', '1', '0')
     TestFlag('color', 'yes', 'auto')
     TestFlag('filter', 'FooTest.Bar', '*')
-    TestFlag('output', 'tmp/foo.xml', '')
+    TestFlag('output', 'xml:tmp/foo.xml', '')
     TestFlag('print_time', '0', '1')
     TestFlag('repeat', '999', '1')
     TestFlag('throw_on_failure', '1', '0')

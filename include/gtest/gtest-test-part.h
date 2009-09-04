@@ -41,6 +41,9 @@ namespace testing {
 
 // The possible outcomes of a test part (i.e. an assertion or an
 // explicit SUCCEED(), FAIL(), or ADD_FAILURE()).
+// TODO(vladl@google.com): Rename the enum values to kSuccess,
+// kNonFatalFailure, and kFatalFailure before publishing the event listener
+// API (see issue http://code.google.com/p/googletest/issues/detail?id=165).
 enum TestPartResultType {
   TPRT_SUCCESS,           // Succeeded.
   TPRT_NONFATAL_FAILURE,  // Failed but the test can continue.

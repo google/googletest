@@ -107,7 +107,6 @@ class Test;                            // Represents a test.
 class TestInfo;                        // Information about a test.
 class TestPartResult;                  // Result of a test part.
 class UnitTest;                        // A collection of test cases.
-class UnitTestEventListenerInterface;  // Listens to Google Test events.
 
 namespace internal {
 

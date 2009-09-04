@@ -84,11 +84,38 @@ const char* FormatTimeInMillisAsSeconds(TimeInMillis ms);
 
 bool ParseInt32Flag(const char* str, const char* flag, Int32* value);
 
+// Provides access to otherwise private parts of the EventListeners class
+// that are needed to test it.
+class EventListenersAccessor {
+ public:
+  static UnitTestEventListenerInterface* GetRepeater(
+      EventListeners* listeners) { return listeners->repeater(); }
+
+  static void SetDefaultResultPrinter(
+      EventListeners* listeners,
+      UnitTestEventListenerInterface* listener) {
+    listeners->SetDefaultResultPrinter(listener);
+  }
+  static void SetDefaultXmlGenerator(EventListeners* listeners,
+                                     UnitTestEventListenerInterface* listener) {
+    listeners->SetDefaultXmlGenerator(listener);
+  }
+
+  static bool EventForwardingEnabled(const EventListeners& listeners) {
+    return listeners.EventForwardingEnabled();
+  }
+
+  static void SuppressEventForwarding(EventListeners* listeners) {
+    listeners->SuppressEventForwarding();
+  }
+};
+
 }  // namespace internal
 }  // namespace testing
 
 using testing::internal::FormatTimeInMillisAsSeconds;
 using testing::internal::ParseInt32Flag;
+using testing::internal::EventListenersAccessor;
 
 namespace testing {
 
@@ -136,7 +163,9 @@ using testing::internal::kMaxRandomSeed;
 using testing::internal::kTestTypeIdInGoogleTest;
 using testing::internal::AppendUserMessage;
 using testing::internal::CodePointToUtf8;
+using testing::internal::EmptyTestEventListener;
 using testing::internal::EqFailure;
+using testing::internal::EventListeners;
 using testing::internal::FloatingPoint;
 using testing::internal::GTestFlagSaver;
 using testing::internal::GetCurrentOsStackTraceExceptTop;
@@ -160,6 +189,7 @@ using testing::internal::ThreadLocal;
 using testing::internal::Vector;
 using testing::internal::WideStringToUtf8;
 using testing::internal::kTestTypeIdInGoogleTest;
+using testing::internal::scoped_ptr;
 
 // This line tests that we can define tests in an unnamed namespace.
 namespace {
@@ -695,13 +725,15 @@ TEST(ListDeathTest, GetElement) {
       "Invalid Vector index -1: must be in range \\[0, 2\\]\\.");
 }
 
-// Tests the String class.
+// Tests the size of the AssertHelper class.
 
-TEST(StringTest, SizeIsSmall) {
+TEST(AssertHelperTest, AssertHelperIsSmall) {
   // To avoid breaking clients that use lots of assertions in one
-  // function, we cannot grow the size of String.
-  EXPECT_LE(sizeof(String), sizeof(void*));
+  // function, we cannot grow the size of AssertHelper.
+  EXPECT_LE(sizeof(testing::internal::AssertHelper), sizeof(void*));
 }
+
+// Tests the String class.
 
 // Tests String's constructors.
 TEST(StringTest, Constructors) {
@@ -1035,6 +1067,33 @@ TEST(StringTest, Streams) {
   EXPECT_EQ(StreamableToString(String()), "(null)");
   EXPECT_EQ(StreamableToString(String("")), "");
   EXPECT_EQ(StreamableToString(String("a\0b", 3)), "a\\0b");
+}
+
+// Tests that String::Format() works.
+TEST(StringTest, FormatWorks) {
+  // Normal case: the format spec is valid, the arguments match the
+  // spec, and the result is < 4095 characters.
+  EXPECT_STREQ("Hello, 42", String::Format("%s, %d", "Hello", 42).c_str());
+
+  // Edge case: the result is 4095 characters.
+  char buffer[4096];
+  const size_t kSize = sizeof(buffer);
+  memset(buffer, 'a', kSize - 1);
+  buffer[kSize - 1] = '\0';
+  EXPECT_STREQ(buffer, String::Format("%s", buffer).c_str());
+
+  // The result needs to be 4096 characters, exceeding Format()'s limit.
+  EXPECT_STREQ("<formatting error or buffer exceeded>",
+               String::Format("x%s", buffer).c_str());
+
+#if GTEST_OS_LINUX
+  // On Linux, invalid format spec should lead to an error message.
+  // In other environment (e.g. MSVC on Windows), String::Format() may
+  // simply ignore a bad format spec, so this assertion is run on
+  // Linux only.
+  EXPECT_STREQ("<formatting error or buffer exceeded>",
+               String::Format("%").c_str());
+#endif
 }
 
 #if GTEST_OS_WINDOWS
@@ -6141,4 +6200,276 @@ TEST(HasFailureTest, WorksOutsideOfTestBody2) {
   const bool has_failure = HasFailureHelper();
   ClearCurrentTestPartResults();
   EXPECT_TRUE(has_failure);
+}
+
+class TestListener : public EmptyTestEventListener {
+ public:
+  TestListener() : on_start_counter_(NULL), is_destroyed_(NULL) {}
+  TestListener(int* on_start_counter, bool* is_destroyed)
+      : on_start_counter_(on_start_counter),
+        is_destroyed_(is_destroyed) {}
+
+  virtual ~TestListener() {
+    if (is_destroyed_)
+      *is_destroyed_ = true;
+  }
+
+ protected:
+  virtual void OnUnitTestStart(const UnitTest& /*unit_test*/) {
+    if (on_start_counter_ != NULL)
+      (*on_start_counter_)++;
+  }
+
+ private:
+  int* on_start_counter_;
+  bool* is_destroyed_;
+};
+
+// Tests the constructor.
+TEST(EventListenersTest, ConstructionWorks) {
+  EventListeners listeners;
+
+  EXPECT_TRUE(EventListenersAccessor::GetRepeater(&listeners) != NULL);
+  EXPECT_TRUE(listeners.default_result_printer() == NULL);
+  EXPECT_TRUE(listeners.default_xml_generator() == NULL);
+}
+
+// Tests that the EventListeners destructor deletes all the listeners it
+// owns.
+TEST(EventListenersTest, DestructionWorks) {
+  bool default_result_printer_is_destroyed = false;
+  bool default_xml_printer_is_destroyed = false;
+  bool extra_listener_is_destroyed = false;
+  TestListener* default_result_printer = new TestListener(
+      NULL, &default_result_printer_is_destroyed);
+  TestListener* default_xml_printer = new TestListener(
+      NULL, &default_xml_printer_is_destroyed);
+  TestListener* extra_listener = new TestListener(
+      NULL, &extra_listener_is_destroyed);
+
+  {
+    EventListeners listeners;
+    EventListenersAccessor::SetDefaultResultPrinter(&listeners,
+                                                    default_result_printer);
+    EventListenersAccessor::SetDefaultXmlGenerator(&listeners,
+                                                   default_xml_printer);
+    listeners.Append(extra_listener);
+  }
+  EXPECT_TRUE(default_result_printer_is_destroyed);
+  EXPECT_TRUE(default_xml_printer_is_destroyed);
+  EXPECT_TRUE(extra_listener_is_destroyed);
+}
+
+// Tests that a listener Append'ed to an EventListeners list starts
+// receiving events.
+TEST(EventListenersTest, Append) {
+  int on_start_counter = 0;
+  bool is_destroyed = false;
+  TestListener* listener = new TestListener(&on_start_counter, &is_destroyed);
+  {
+    EventListeners listeners;
+    listeners.Append(listener);
+    EventListenersAccessor::GetRepeater(&listeners)->OnUnitTestStart(
+        *UnitTest::GetInstance());
+    EXPECT_EQ(1, on_start_counter);
+  }
+  EXPECT_TRUE(is_destroyed);
+}
+
+// Tests that listeners receive requests in the order they were appended to
+// the list.
+class SequenceTestingListener : public EmptyTestEventListener {
+ public:
+  SequenceTestingListener(Vector<const char*>* vector, const char* signature)
+      : vector_(vector), signature_(signature) {}
+
+ protected:
+  virtual void OnUnitTestStart(const UnitTest& /*unit_test*/) {
+    if (vector_ != NULL)
+      vector_->PushBack(signature_);
+  }
+
+ private:
+  Vector<const char*>* vector_;
+  const char* const signature_;
+};
+
+TEST(EventListenerTest, AppendKeepsOrder) {
+  Vector<const char*> vec;
+  EventListeners listeners;
+  listeners.Append(new SequenceTestingListener(&vec, "0"));
+  listeners.Append(new SequenceTestingListener(&vec, "1"));
+  listeners.Append(new SequenceTestingListener(&vec, "2"));
+  EventListenersAccessor::GetRepeater(&listeners)->OnUnitTestStart(
+      *UnitTest::GetInstance());
+  ASSERT_EQ(3, vec.size());
+  ASSERT_STREQ("0", vec.GetElement(0));
+  ASSERT_STREQ("1", vec.GetElement(1));
+  ASSERT_STREQ("2", vec.GetElement(2));
+}
+
+// Tests that a listener removed from an EventListeners list stops receiving
+// events and is not deleted when the list is destroyed.
+TEST(EventListenersTest, Release) {
+  int on_start_counter = 0;
+  bool is_destroyed = false;
+  // Although Append passes the ownership of this object to the list,
+  // the following calls release it, and we need to delete it before the
+  // test ends.
+  TestListener* listener = new TestListener(&on_start_counter, &is_destroyed);
+  {
+    EventListeners listeners;
+    listeners.Append(listener);
+    EXPECT_EQ(listener, listeners.Release(listener));
+    EventListenersAccessor::GetRepeater(&listeners)->OnUnitTestStart(
+        *UnitTest::GetInstance());
+    EXPECT_TRUE(listeners.Release(listener) == NULL);
+  }
+  EXPECT_EQ(0, on_start_counter);
+  EXPECT_FALSE(is_destroyed);
+  delete listener;
+}
+
+// Tests that no events are forwarded when event forwarding is disabled.
+TEST(EventListenerTest, SuppressEventForwarding) {
+  int on_start_counter = 0;
+  TestListener* listener = new TestListener(&on_start_counter, NULL);
+
+  EventListeners listeners;
+  listeners.Append(listener);
+  ASSERT_TRUE(EventListenersAccessor::EventForwardingEnabled(listeners));
+  EventListenersAccessor::SuppressEventForwarding(&listeners);
+  ASSERT_FALSE(EventListenersAccessor::EventForwardingEnabled(listeners));
+  EventListenersAccessor::GetRepeater(&listeners)->OnUnitTestStart(
+      *UnitTest::GetInstance());
+  EXPECT_EQ(0, on_start_counter);
+}
+
+#if GTEST_HAS_DEATH_TEST
+// Tests that events generated by Google Test are not forwarded in
+// death test subprocesses.
+TEST(EventListenerDeathTest, EventsNotForwardedInDeathTestSubprecesses) {
+  EXPECT_DEATH({  // NOLINT
+      GTEST_CHECK_(EventListenersAccessor::EventForwardingEnabled(
+          *GetUnitTestImpl()->listeners())) << "expected failure";},
+      "expected failure");
+}
+#endif  // GTEST_HAS_DEATH_TEST
+
+// Tests that a listener installed via SetDefaultResultPrinter() starts
+// receiving events and is returned via default_result_printer() and that
+// the previous default_result_printer is removed from the list and deleted.
+TEST(EventListenerTest, default_result_printer) {
+  int on_start_counter = 0;
+  bool is_destroyed = false;
+  TestListener* listener = new TestListener(&on_start_counter, &is_destroyed);
+
+  EventListeners listeners;
+  EventListenersAccessor::SetDefaultResultPrinter(&listeners, listener);
+
+  EXPECT_EQ(listener, listeners.default_result_printer());
+
+  EventListenersAccessor::GetRepeater(&listeners)->OnUnitTestStart(
+      *UnitTest::GetInstance());
+
+  EXPECT_EQ(1, on_start_counter);
+
+  // Replacing default_result_printer with something else should remove it
+  // from the list and destroy it.
+  EventListenersAccessor::SetDefaultResultPrinter(&listeners, NULL);
+
+  EXPECT_TRUE(listeners.default_result_printer() == NULL);
+  EXPECT_TRUE(is_destroyed);
+
+  // After broadcasting an event the counter is still the same, indicating
+  // the listener is not in the list anymore.
+  EventListenersAccessor::GetRepeater(&listeners)->OnUnitTestStart(
+      *UnitTest::GetInstance());
+  EXPECT_EQ(1, on_start_counter);
+}
+
+// Tests that the default_result_printer listener stops receiving events
+// when removed via Release and that is not owned by the list anymore.
+TEST(EventListenerTest, RemovingDefaultResultPrinterWorks) {
+  int on_start_counter = 0;
+  bool is_destroyed = false;
+  // Although Append passes the ownership of this object to the list,
+  // the following calls release it, and we need to delete it before the
+  // test ends.
+  TestListener* listener = new TestListener(&on_start_counter, &is_destroyed);
+  {
+    EventListeners listeners;
+    EventListenersAccessor::SetDefaultResultPrinter(&listeners, listener);
+
+    EXPECT_EQ(listener, listeners.Release(listener));
+    EXPECT_TRUE(listeners.default_result_printer() == NULL);
+    EXPECT_FALSE(is_destroyed);
+
+    // Broadcasting events now should not affect default_result_printer.
+    EventListenersAccessor::GetRepeater(&listeners)->OnUnitTestStart(
+        *UnitTest::GetInstance());
+    EXPECT_EQ(0, on_start_counter);
+  }
+  // Destroying the list should not affect the listener now, too.
+  EXPECT_FALSE(is_destroyed);
+  delete listener;
+}
+
+// Tests that a listener installed via SetDefaultXmlGenerator() starts
+// receiving events and is returned via default_xml_generator() and that
+// the previous default_xml_generator is removed from the list and deleted.
+TEST(EventListenerTest, default_xml_generator) {
+  int on_start_counter = 0;
+  bool is_destroyed = false;
+  TestListener* listener = new TestListener(&on_start_counter, &is_destroyed);
+
+  EventListeners listeners;
+  EventListenersAccessor::SetDefaultXmlGenerator(&listeners, listener);
+
+  EXPECT_EQ(listener, listeners.default_xml_generator());
+
+  EventListenersAccessor::GetRepeater(&listeners)->OnUnitTestStart(
+      *UnitTest::GetInstance());
+
+  EXPECT_EQ(1, on_start_counter);
+
+  // Replacing default_xml_generator with something else should remove it
+  // from the list and destroy it.
+  EventListenersAccessor::SetDefaultXmlGenerator(&listeners, NULL);
+
+  EXPECT_TRUE(listeners.default_xml_generator() == NULL);
+  EXPECT_TRUE(is_destroyed);
+
+  // After broadcasting an event the counter is still the same, indicating
+  // the listener is not in the list anymore.
+  EventListenersAccessor::GetRepeater(&listeners)->OnUnitTestStart(
+      *UnitTest::GetInstance());
+  EXPECT_EQ(1, on_start_counter);
+}
+
+// Tests that the default_xml_generator listener stops receiving events
+// when removed via Release and that is not owned by the list anymore.
+TEST(EventListenerTest, RemovingDefaultXmlGeneratorWorks) {
+  int on_start_counter = 0;
+  bool is_destroyed = false;
+  // Although Append passes the ownership of this object to the list,
+  // the following calls release it, and we need to delete it before the
+  // test ends.
+  TestListener* listener = new TestListener(&on_start_counter, &is_destroyed);
+  {
+    EventListeners listeners;
+    EventListenersAccessor::SetDefaultXmlGenerator(&listeners, listener);
+
+    EXPECT_EQ(listener, listeners.Release(listener));
+    EXPECT_TRUE(listeners.default_xml_generator() == NULL);
+    EXPECT_FALSE(is_destroyed);
+
+    // Broadcasting events now should not affect default_xml_generator.
+    EventListenersAccessor::GetRepeater(&listeners)->OnUnitTestStart(
+        *UnitTest::GetInstance());
+    EXPECT_EQ(0, on_start_counter);
+  }
+  // Destroying the list should not affect the listener now, too.
+  EXPECT_FALSE(is_destroyed);
+  delete listener;
 }

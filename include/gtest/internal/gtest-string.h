@@ -51,22 +51,6 @@
 namespace testing {
 namespace internal {
 
-// Holds data in a String object.  We need this class in order to put
-// String's data members on the heap instead of on the stack.
-// Otherwise tests using many assertions (and thus Strings) in one
-// function may need too much stack frame space to compile.
-class StringData {
-  StringData() : c_str_(NULL), length_(0) {}
-  ~StringData() { delete[] c_str_; }
-
- private:
-  friend class String;
-
-  const char* c_str_;
-  size_t length_;  // Length of the string (excluding the terminating
-                   // '\0' character).
-};
-
 // String - a UTF-8 string class.
 //
 // We cannot use std::string as Microsoft's STL implementation in
@@ -202,14 +186,14 @@ class String {
 
   // C'tors
 
-  // The default c'tor constructs a NULL string, which is represented
-  // by data_ being NULL.
-  String() : data_(NULL) {}
+  // The default c'tor constructs a NULL string.
+  String() : c_str_(NULL), length_(0) {}
 
   // Constructs a String by cloning a 0-terminated C string.
   String(const char* c_str) {  // NOLINT
     if (c_str == NULL) {
-      data_ = NULL;
+      c_str_ = NULL;
+      length_ = 0;
     } else {
       ConstructNonNull(c_str, strlen(c_str));
     }
@@ -225,13 +209,11 @@ class String {
 
   // The copy c'tor creates a new copy of the string.  The two
   // String objects do not share content.
-  String(const String& str) : data_(NULL) { *this = str; }
+  String(const String& str) : c_str_(NULL), length_(0) { *this = str; }
 
   // D'tor.  String is intended to be a final class, so the d'tor
   // doesn't need to be virtual.
-  ~String() {
-    delete data_;
-  }
+  ~String() { delete[] c_str_; }
 
   // Allows a String to be implicitly converted to an ::std::string or
   // ::string, and vice versa.  Converting a String containing a NULL
@@ -285,12 +267,12 @@ class String {
 
   // Returns the length of the encapsulated string, or 0 if the
   // string is NULL.
-  size_t length() const { return (data_ == NULL) ? 0 : data_->length_; }
+  size_t length() const { return length_; }
 
   // Gets the 0-terminated C string this String object represents.
   // The String object still owns the string.  Therefore the caller
   // should NOT delete the return value.
-  const char* c_str() const { return (data_ == NULL) ? NULL : data_->c_str_; }
+  const char* c_str() const { return c_str_; }
 
   // Assigns a C string to this object.  Self-assignment works.
   const String& operator=(const char* c_str) { return *this = String(c_str); }
@@ -298,10 +280,12 @@ class String {
   // Assigns a String object to this object.  Self-assignment works.
   const String& operator=(const String& rhs) {
     if (this != &rhs) {
-      delete data_;
-      data_ = NULL;
-      if (rhs.data_ != NULL) {
-        ConstructNonNull(rhs.data_->c_str_, rhs.data_->length_);
+      delete[] c_str_;
+      if (rhs.c_str() == NULL) {
+        c_str_ = NULL;
+        length_ = 0;
+      } else {
+        ConstructNonNull(rhs.c_str(), rhs.length());
       }
     }
 
@@ -314,17 +298,15 @@ class String {
   // ConstructNonNull(NULL, 0) results in an empty string ("").
   // ConstructNonNull(NULL, non_zero) is undefined behavior.
   void ConstructNonNull(const char* buffer, size_t length) {
-    data_ = new StringData;
     char* const str = new char[length + 1];
     memcpy(str, buffer, length);
     str[length] = '\0';
-    data_->c_str_ = str;
-    data_->length_ = length;
+    c_str_ = str;
+    length_ = length;
   }
 
-  // Points to the representation of the String.  A NULL String is
-  // represented by data_ == NULL.
-  StringData* data_;
+  const char* c_str_;
+  size_t length_;
 };  // class String
 
 // Streams a String to an ostream.  Each '\0' character in the String

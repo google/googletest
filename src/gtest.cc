@@ -129,9 +129,12 @@
 
 namespace testing {
 
+using internal::EventListeners;
+using internal::EmptyTestEventListener;
 using internal::TestCase;
 using internal::TestProperty;
 using internal::TestResult;
+using internal::UnitTestEventListenerInterface;
 
 // Constants.
 
@@ -303,14 +306,18 @@ static bool ShouldRunTestCase(const TestCase* test_case) {
 // AssertHelper constructor.
 AssertHelper::AssertHelper(TestPartResultType type, const char* file,
                            int line, const char* message)
-    : type_(type), file_(file), line_(line), message_(message) {
+    : data_(new AssertHelperData(type, file, line, message)) {
+}
+
+AssertHelper::~AssertHelper() {
+  delete data_;
 }
 
 // Message assignment, for assertion streaming support.
 void AssertHelper::operator=(const Message& message) const {
   UnitTest::GetInstance()->
-    AddTestPartResult(type_, file_, line_,
-                      AppendUserMessage(message_, message),
+    AddTestPartResult(data_->type, data_->file, data_->line,
+                      AppendUserMessage(data_->message, message),
                       UnitTest::GetInstance()->impl()
                       ->CurrentOsStackTraceExceptTop(1)
                       // Skips the stack frame for this function itself.
@@ -476,86 +483,6 @@ int UnitTestOptions::GTestShouldProcessSEH(DWORD exception_code) {
 
 }  // namespace internal
 
-// The interface for printing the result of a UnitTest
-class UnitTestEventListenerInterface {
- public:
-  // The d'tor is pure virtual as this is an abstract class.
-  virtual ~UnitTestEventListenerInterface() {}
-
-  // Called before the unit test starts.
-  virtual void OnUnitTestStart(const UnitTest& unit_test) = 0;
-
-  // Called after the unit test ends.
-  virtual void OnUnitTestEnd(const UnitTest& unit_test) = 0;
-
-  // Called before the test case starts.
-  virtual void OnTestCaseStart(const TestCase& test_case) = 0;
-
-  // Called after the test case ends.
-  virtual void OnTestCaseEnd(const TestCase& test_case) = 0;
-
-  // Called before the global set-up starts.
-  virtual void OnGlobalSetUpStart(const UnitTest& unit_test) = 0;
-
-  // Called after the global set-up ends.
-  virtual void OnGlobalSetUpEnd(const UnitTest& unit_test) = 0;
-
-  // Called before the global tear-down starts.
-  virtual void OnGlobalTearDownStart(const UnitTest& unit_test) = 0;
-
-  // Called after the global tear-down ends.
-  virtual void OnGlobalTearDownEnd(const UnitTest& unit_test) = 0;
-
-  // Called before the test starts.
-  virtual void OnTestStart(const TestInfo& test_info) = 0;
-
-  // Called after the test ends.
-  virtual void OnTestEnd(const TestInfo& test_info) = 0;
-
-  // Called after an assertion.
-  virtual void OnNewTestPartResult(const TestPartResult& test_part_result) = 0;
-};
-
-// The convenience class for users who need to override just one or two
-// methods and are not concerned that a possible change to a signature of
-// the methods they override will not be caught during the build.
-class EmptyTestEventListener : public UnitTestEventListenerInterface {
- public:
-  // Called before the unit test starts.
-  virtual void OnUnitTestStart(const UnitTest& /*unit_test*/) {}
-
-  // Called after the unit test ends.
-  virtual void OnUnitTestEnd(const UnitTest& /*unit_test*/) {}
-
-  // Called before the test case starts.
-  virtual void OnTestCaseStart(const TestCase& /*test_case*/) {}
-
-  // Called after the test case ends.
-  virtual void OnTestCaseEnd(const TestCase& /*test_case&*/) {}
-
-  // Called before the global set-up starts.
-  virtual void OnGlobalSetUpStart(const UnitTest& /*unit_test*/) {}
-
-  // Called after the global set-up ends.
-  virtual void OnGlobalSetUpEnd(const UnitTest& /*unit_test*/) {}
-
-  // Called before the global tear-down starts.
-  virtual void OnGlobalTearDownStart(const UnitTest& /*unit_test*/) {}
-
-  // Called after the global tear-down ends.
-  virtual void OnGlobalTearDownEnd(const UnitTest& /*unit_test*/) {}
-
-  // Called before the test starts.
-  virtual void OnTestStart(const TestInfo& /*test_info*/) {}
-
-  // Called after the test ends.
-  virtual void OnTestEnd(const TestInfo& /*test_info*/) {}
-
-  // Called after an assertion.
-  virtual void OnNewTestPartResult(const TestPartResult& /*test_part_result*/) {
-  }
-};
-
 // The c'tor sets this object as the test part result reporter used by
 // Google Test.  The 'result' parameter specifies where to report the
 // results. Intercepts only failures from the current thread.
@@ -690,7 +617,7 @@ DefaultGlobalTestPartResultReporter::DefaultGlobalTestPartResultReporter(
 void DefaultGlobalTestPartResultReporter::ReportTestPartResult(
     const TestPartResult& result) {
   unit_test_->current_test_result()->AddTestPartResult(result);
-  unit_test_->result_printer()->OnNewTestPartResult(result);
+  unit_test_->listeners()->repeater()->OnNewTestPartResult(result);
 }
 
 DefaultPerThreadTestPartResultReporter::DefaultPerThreadTestPartResultReporter(
@@ -1738,28 +1665,38 @@ bool String::EndsWithCaseInsensitive(const char* suffix) const {
 // available.
 //
 // The result is limited to 4096 characters (including the tailing 0).
-// If 4096 characters are not enough to format the input,
-// "<buffer exceeded>" is returned.
+// If 4096 characters are not enough to format the input, or if
+// there's an error, "<formatting error or buffer exceeded>" is
+// returned.
 String String::Format(const char * format, ...) {
   va_list args;
   va_start(args, format);
 
   char buffer[4096];
+  const int kBufferSize = sizeof(buffer)/sizeof(buffer[0]);
+
   // MSVC 8 deprecates vsnprintf(), so we want to suppress warning
   // 4996 (deprecated function) there.
 #ifdef _MSC_VER  // We are using MSVC.
 #pragma warning(push)          // Saves the current warning state.
 #pragma warning(disable:4996)  // Temporarily disables warning 4996.
-  const int size =
-    vsnprintf(buffer, sizeof(buffer)/sizeof(buffer[0]) - 1, format, args);
+  const int size = vsnprintf(buffer, kBufferSize, format, args);
 #pragma warning(pop)           // Restores the warning state.
 #else  // We are not using MSVC.
-  const int size =
-    vsnprintf(buffer, sizeof(buffer)/sizeof(buffer[0]) - 1, format, args);
+  const int size = vsnprintf(buffer, kBufferSize, format, args);
 #endif  // _MSC_VER
   va_end(args);
 
-  return (size >= 0) ? String(buffer, size) : String("<buffer exceeded>");
+  // vsnprintf()'s behavior is not portable.  When the buffer is not
+  // big enough, it returns a negative value in MSVC, and returns the
+  // needed buffer size on Linux.  When there is an output error, it
+  // always returns a negative value.  For simplicity, we lump the two
+  // error cases together.
+  if (size < 0 || size >= kBufferSize) {
+    return String("<formatting error or buffer exceeded>");
+  } else {
+    return String(buffer, size);
+  }
 }
 
 // Converts the buffer in a StrStream to a String, converting NUL
@@ -2297,11 +2234,11 @@ void TestInfoImpl::Run() {
   UnitTestImpl* const impl = internal::GetUnitTestImpl();
   impl->set_current_test_info(parent_);
 
-  // Notifies the unit test event listener that a test is about to
-  // start.
-  UnitTestEventListenerInterface* const result_printer =
-    impl->result_printer();
-  result_printer->OnTestStart(*parent_);
+  UnitTestEventListenerInterface* repeater =
+      UnitTest::GetInstance()->listeners().repeater();
+
+  // Notifies the unit test event listeners that a test is about to start.
+  repeater->OnTestStart(*parent_);
 
   const TimeInMillis start = GetTimeInMillis();
 
@@ -2344,7 +2281,7 @@ void TestInfoImpl::Run() {
   result_.set_elapsed_time(GetTimeInMillis() - start);
 
   // Notifies the unit test event listener that a test has just finished.
-  result_printer->OnTestEnd(*parent_);
+  repeater->OnTestEnd(*parent_);
 
   // Tells UnitTest to stop associating assertion results to this
   // test.
@@ -2425,10 +2362,10 @@ void TestCase::Run() {
   internal::UnitTestImpl* const impl = internal::GetUnitTestImpl();
   impl->set_current_test_case(this);
 
-  UnitTestEventListenerInterface * const result_printer =
-      impl->result_printer();
+  UnitTestEventListenerInterface* repeater =
+      UnitTest::GetInstance()->listeners().repeater();
 
-  result_printer->OnTestCaseStart(*this);
+  repeater->OnTestCaseStart(*this);
   impl->os_stack_trace_getter()->UponLeavingGTest();
   set_up_tc_();
 
@@ -2438,7 +2375,7 @@ void TestCase::Run() {
 
   impl->os_stack_trace_getter()->UponLeavingGTest();
   tear_down_tc_();
-  result_printer->OnTestCaseEnd(*this);
+  repeater->OnTestCaseEnd(*this);
   impl->set_current_test_case(NULL);
 }
 
@@ -2470,10 +2407,6 @@ bool TestCase::ShouldRunTest(const TestInfo *test_info) {
 }
 
 }  // namespace internal
-
-// A result printer that never prints anything.  Used in the child process
-// of an exec-style death test to avoid needless output clutter.
-class NullUnitTestResultPrinter : public EmptyTestEventListener {};
 
 // Formats a countable noun.  Depending on its quantity, either the
 // singular form or the plural form is used. e.g.
@@ -2662,14 +2595,6 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
 #endif  // GTEST_OS_WINDOWS && !defined(_WIN32_WCE)
   va_end(args);
 }
-
-}  // namespace internal
-
-using internal::ColoredPrintf;
-using internal::COLOR_DEFAULT;
-using internal::COLOR_RED;
-using internal::COLOR_GREEN;
-using internal::COLOR_YELLOW;
 
 // This class implements the UnitTestEventListenerInterface interface.
 //
@@ -2888,10 +2813,16 @@ void PrettyUnitTestResultPrinter::OnUnitTestEnd(const UnitTest& unit_test) {
 // This class forwards events to other event listeners.
 class UnitTestEventsRepeater : public UnitTestEventListenerInterface {
  public:
-  typedef internal::Vector<UnitTestEventListenerInterface *> Listeners;
-  UnitTestEventsRepeater() {}
+  UnitTestEventsRepeater() : forwarding_enabled_(true) {}
   virtual ~UnitTestEventsRepeater();
-  void AddListener(UnitTestEventListenerInterface *listener);
+  void Append(UnitTestEventListenerInterface *listener);
+  UnitTestEventListenerInterface* Release(
+      UnitTestEventListenerInterface* listener);
+
+  // Controls whether events will be forwarded to listeners_. Set to false
+  // in death test child processes.
+  bool forwarding_enabled() const { return forwarding_enabled_; }
+  void set_forwarding_enabled(bool enable) { forwarding_enabled_ = enable; }
 
   virtual void OnUnitTestStart(const UnitTest& unit_test);
   virtual void OnUnitTestEnd(const UnitTest& unit_test);
@@ -2906,7 +2837,11 @@ class UnitTestEventsRepeater : public UnitTestEventListenerInterface {
   virtual void OnNewTestPartResult(const TestPartResult& result);
 
  private:
-  Listeners listeners_;
+  // Controls whether events will be forwarded to listeners_. Set to false
+  // in death test child processes.
+  bool forwarding_enabled_;
+  // The list of listeners that receive events.
+  Vector<UnitTestEventListenerInterface*> listeners_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(UnitTestEventsRepeater);
 };
@@ -2917,17 +2852,31 @@ UnitTestEventsRepeater::~UnitTestEventsRepeater() {
   }
 }
 
-void UnitTestEventsRepeater::AddListener(
-    UnitTestEventListenerInterface *listener) {
+void UnitTestEventsRepeater::Append(UnitTestEventListenerInterface *listener) {
   listeners_.PushBack(listener);
+}
+
+// TODO(vladl@google.com): Factor the search functionality into Vector::Find.
+UnitTestEventListenerInterface* UnitTestEventsRepeater::Release(
+    UnitTestEventListenerInterface *listener) {
+  for (int i = 0; i < listeners_.size(); ++i) {
+    if (listeners_.GetElement(i) == listener) {
+      listeners_.Erase(i);
+      return listener;
+    }
+  }
+
+  return NULL;
 }
 
 // Since the methods are identical, use a macro to reduce boilerplate.
 // This defines a member that repeats the call to all listeners.
 #define GTEST_REPEATER_METHOD_(Name, Type) \
 void UnitTestEventsRepeater::Name(const Type& parameter) { \
-  for (int i = 0; i < listeners_.size(); i++) { \
-    listeners_.GetElement(i)->Name(parameter); \
+  if (forwarding_enabled_) { \
+    for (int i = 0; i < listeners_.size(); i++) { \
+      listeners_.GetElement(i)->Name(parameter); \
+    } \
   } \
 }
 
@@ -2945,7 +2894,7 @@ GTEST_REPEATER_METHOD_(OnNewTestPartResult, TestPartResult)
 
 #undef GTEST_REPEATER_METHOD_
 
-// End PrettyUnitTestResultPrinter
+// End UnitTestEventsRepeater
 
 // This class generates an XML output file.
 class XmlUnitTestResultPrinter : public EmptyTestEventListener {
@@ -2970,18 +2919,15 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
   // is_attribute is true, the text is meant to appear as an attribute
   // value, and normalizable whitespace is preserved by replacing it
   // with character references.
-  static internal::String EscapeXml(const char* str,
-                                    bool is_attribute);
+  static String EscapeXml(const char* str, bool is_attribute);
 
   // Convenience wrapper around EscapeXml when str is an attribute value.
-  static internal::String EscapeXmlAttribute(const char* str) {
+  static String EscapeXmlAttribute(const char* str) {
     return EscapeXml(str, true);
   }
 
   // Convenience wrapper around EscapeXml when str is not an attribute value.
-  static internal::String EscapeXmlText(const char* str) {
-    return EscapeXml(str, false);
-  }
+  static String EscapeXmlText(const char* str) { return EscapeXml(str, false); }
 
   // Prints an XML representation of a TestInfo object.
   static void PrintXmlTestInfo(FILE* out,
@@ -2998,11 +2944,10 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
   // delimited XML attributes based on the property key="value" pairs.
   // When the String is not empty, it includes a space at the beginning,
   // to delimit this attribute from prior attributes.
-  static internal::String TestPropertiesAsXmlAttributes(
-      const TestResult& result);
+  static String TestPropertiesAsXmlAttributes(const TestResult& result);
 
   // The output file.
-  const internal::String output_file_;
+  const String output_file_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(XmlUnitTestResultPrinter);
 };
@@ -3020,11 +2965,11 @@ XmlUnitTestResultPrinter::XmlUnitTestResultPrinter(const char* output_file)
 // Called after the unit test ends.
 void XmlUnitTestResultPrinter::OnUnitTestEnd(const UnitTest& unit_test) {
   FILE* xmlout = NULL;
-  internal::FilePath output_file(output_file_);
-  internal::FilePath output_dir(output_file.RemoveFileName());
+  FilePath output_file(output_file_);
+  FilePath output_dir(output_file.RemoveFileName());
 
   if (output_dir.CreateDirectoriesRecursively()) {
-    xmlout = internal::posix::FOpen(output_file_.c_str(), "w");
+    xmlout = posix::FOpen(output_file_.c_str(), "w");
   }
   if (xmlout == NULL) {
     // TODO(wan): report the reason of the failure.
@@ -3059,8 +3004,7 @@ void XmlUnitTestResultPrinter::OnUnitTestEnd(const UnitTest& unit_test) {
 // most invalid characters can be retained using character references.
 // TODO(wan): It might be nice to have a minimally invasive, human-readable
 // escaping scheme for invalid characters, rather than dropping them.
-internal::String XmlUnitTestResultPrinter::EscapeXml(const char* str,
-                                                     bool is_attribute) {
+String XmlUnitTestResultPrinter::EscapeXml(const char* str, bool is_attribute) {
   Message m;
 
   if (str != NULL) {
@@ -3090,7 +3034,7 @@ internal::String XmlUnitTestResultPrinter::EscapeXml(const char* str,
         default:
           if (IsValidXmlCharacter(*src)) {
             if (is_attribute && IsNormalizableWhitespace(*src))
-              m << internal::String::Format("&#x%02X;", unsigned(*src));
+              m << String::Format("&#x%02X;", unsigned(*src));
             else
               m << *src;
           }
@@ -3101,7 +3045,6 @@ internal::String XmlUnitTestResultPrinter::EscapeXml(const char* str,
 
   return m.GetString();
 }
-
 
 // The following routines generate an XML representation of a UnitTest
 // object.
@@ -3119,8 +3062,6 @@ internal::String XmlUnitTestResultPrinter::EscapeXml(const char* str,
 //   </testsuite>
 // </testsuites>
 
-namespace internal {
-
 // Formats the given time in milliseconds as seconds.  The returned
 // C-string is owned by this function and cannot be released by the
 // caller.  Calling the function again invalidates the previous
@@ -3130,8 +3071,6 @@ const char* FormatTimeInMillisAsSeconds(TimeInMillis ms) {
   str = (Message() << (ms/1000.0)).GetString();
   return str.c_str();
 }
-
-}  // namespace internal
 
 // Prints an XML representation of a TestInfo object.
 // TODO(wan): There is also value in printing properties with the plain printer.
@@ -3144,7 +3083,7 @@ void XmlUnitTestResultPrinter::PrintXmlTestInfo(FILE* out,
           "classname=\"%s\"%s",
           EscapeXmlAttribute(test_info.name()).c_str(),
           test_info.should_run() ? "run" : "notrun",
-          internal::FormatTimeInMillisAsSeconds(result.elapsed_time()),
+          FormatTimeInMillisAsSeconds(result.elapsed_time()),
           EscapeXmlAttribute(test_case_name).c_str(),
           TestPropertiesAsXmlAttributes(result).c_str());
 
@@ -3152,9 +3091,8 @@ void XmlUnitTestResultPrinter::PrintXmlTestInfo(FILE* out,
   for (int i = 0; i < result.total_part_count(); ++i) {
     const TestPartResult& part = result.GetTestPartResult(i);
     if (part.failed()) {
-      const internal::String message =
-          internal::String::Format("%s:%d\n%s", part.file_name(),
-                                   part.line_number(), part.message());
+      const String message = String::Format("%s:%d\n%s", part.file_name(),
+                                            part.line_number(), part.message());
       if (++failures == 1)
         fprintf(out, ">\n");
       fprintf(out,
@@ -3182,7 +3120,7 @@ void XmlUnitTestResultPrinter::PrintXmlTestCase(FILE* out,
           test_case.disabled_test_count());
   fprintf(out,
           "errors=\"0\" time=\"%s\">\n",
-          internal::FormatTimeInMillisAsSeconds(test_case.elapsed_time()));
+          FormatTimeInMillisAsSeconds(test_case.elapsed_time()));
   for (int i = 0; i < test_case.total_test_count(); ++i)
     PrintXmlTestInfo(out, test_case.name(), *test_case.GetTestInfo(i));
   fprintf(out, "  </testsuite>\n");
@@ -3198,7 +3136,7 @@ void XmlUnitTestResultPrinter::PrintXmlUnitTest(FILE* out,
           unit_test.total_test_count(),
           unit_test.failed_test_count(),
           unit_test.disabled_test_count(),
-          internal::FormatTimeInMillisAsSeconds(unit_test.elapsed_time()));
+          FormatTimeInMillisAsSeconds(unit_test.elapsed_time()));
   if (GTEST_FLAG(shuffle)) {
     fprintf(out, "random_seed=\"%d\" ", unit_test.random_seed());
   }
@@ -3210,7 +3148,7 @@ void XmlUnitTestResultPrinter::PrintXmlUnitTest(FILE* out,
 
 // Produces a string representing the test properties in a result as space
 // delimited XML attributes based on the property key="value" pairs.
-internal::String XmlUnitTestResultPrinter::TestPropertiesAsXmlAttributes(
+String XmlUnitTestResultPrinter::TestPropertiesAsXmlAttributes(
     const TestResult& result) {
   Message attributes;
   for (int i = 0; i < result.test_property_count(); ++i) {
@@ -3222,8 +3160,6 @@ internal::String XmlUnitTestResultPrinter::TestPropertiesAsXmlAttributes(
 }
 
 // End XmlUnitTestResultPrinter
-
-namespace internal {
 
 // Class ScopedTrace
 
@@ -3270,6 +3206,84 @@ OsStackTraceGetter::kElidedFramesMarker =
     "... " GTEST_NAME_ " internal frames ...";
 
 }  // namespace internal
+
+// class EventListeners
+
+EventListeners::EventListeners()
+    : repeater_(new internal::UnitTestEventsRepeater()),
+      default_result_printer_(NULL),
+      default_xml_generator_(NULL) {
+}
+
+EventListeners::~EventListeners() { delete repeater_; }
+
+// Returns the standard listener responsible for the default console
+// output.  Can be removed from the listeners list to shut down default
+// console output.  Note that removing this object from the listener list
+// with Release transfers its ownership to the user.
+void EventListeners::Append(UnitTestEventListenerInterface* listener) {
+  repeater_->Append(listener);
+}
+
+// Removes the given event listener from the list and returns it.  It then
+// becomes the caller's responsibility to delete the listener. Returns
+// NULL if the listener is not found in the list.
+UnitTestEventListenerInterface* EventListeners::Release(
+    UnitTestEventListenerInterface* listener) {
+  if (listener == default_result_printer_)
+    default_result_printer_ = NULL;
+  else if (listener == default_xml_generator_)
+    default_xml_generator_ = NULL;
+  return repeater_->Release(listener);
+}
+
+// Returns repeater that broadcasts the UnitTestEventListenerInterface
+// events to all subscribers.
+UnitTestEventListenerInterface* EventListeners::repeater() { return repeater_; }
+
+// Sets the default_result_printer attribute to the provided listener.
+// The listener is also added to the listener list and previous
+// default_result_printer is removed from it and deleted. The listener can
+// also be NULL in which case it will not be added to the list. Does
+// nothing if the previous and the current listener objects are the same.
+void EventListeners::SetDefaultResultPrinter(
+    UnitTestEventListenerInterface* listener) {
+  if (default_result_printer_ != listener) {
+    // It is an error to pass this method a listener that is already in the
+    // list.
+    delete Release(default_result_printer_);
+    default_result_printer_ = listener;
+    if (listener != NULL)
+      Append(listener);
+  }
+}
+
+// Sets the default_xml_generator attribute to the provided listener.  The
+// listener is also added to the listener list and previous
+// default_xml_generator is removed from it and deleted. The listener can
+// also be NULL in which case it will not be added to the list. Does
+// nothing if the previous and the current listener objects are the same.
+void EventListeners::SetDefaultXmlGenerator(
+    UnitTestEventListenerInterface* listener) {
+  if (default_xml_generator_ != listener) {
+    // It is an error to pass this method a listener that is already in the
+    // list.
+    delete Release(default_xml_generator_);
+    default_xml_generator_ = listener;
+    if (listener != NULL)
+      Append(listener);
+  }
+}
+
+// Controls whether events will be forwarded by the repeater to the
+// listeners in the list.
+bool EventListeners::EventForwardingEnabled() const {
+  return repeater_->forwarding_enabled();
+}
+
+void EventListeners::SuppressEventForwarding() {
+  repeater_->set_forwarding_enabled(false);
+}
 
 // class UnitTest
 
@@ -3357,6 +3371,12 @@ bool UnitTest::Failed() const { return impl()->Failed(); }
 // total_test_case_count() - 1. If i is not in that range, returns NULL.
 const TestCase* UnitTest::GetTestCase(int i) const {
   return impl()->GetTestCase(i);
+}
+
+// Returns the list of event listeners that can be used to track events
+// inside Google Test.
+EventListeners& UnitTest::listeners() {
+  return *impl()->listeners();
 }
 
 // Registers and returns a global test environment.  When a test
@@ -3614,8 +3634,8 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
       current_test_case_(NULL),
       current_test_info_(NULL),
       ad_hoc_test_result_(),
-      result_printer_(NULL),
       os_stack_trace_getter_(NULL),
+      post_flag_parse_init_performed_(false),
       random_seed_(0),
 #if GTEST_HAS_DEATH_TEST
       elapsed_time_(0),
@@ -3624,6 +3644,7 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
 #else
       elapsed_time_(0) {
 #endif  // GTEST_HAS_DEATH_TEST
+  listeners()->SetDefaultResultPrinter(new PrettyUnitTestResultPrinter);
 }
 
 UnitTestImpl::~UnitTestImpl() {
@@ -3633,10 +3654,56 @@ UnitTestImpl::~UnitTestImpl() {
   // Deletes every Environment.
   environments_.ForEach(internal::Delete<Environment>);
 
-  // Deletes the current test result printer.
-  delete result_printer_;
-
   delete os_stack_trace_getter_;
+}
+
+#if GTEST_HAS_DEATH_TEST
+// Disables event forwarding if the control is currently in a death test
+// subprocess. Must not be called before InitGoogleTest.
+void UnitTestImpl::SuppressTestEventsIfInSubprocess() {
+  if (internal_run_death_test_flag_.get() != NULL)
+    listeners()->SuppressEventForwarding();
+}
+#endif  // GTEST_HAS_DEATH_TEST
+
+// Initializes event listeners performing XML output as specified by
+// UnitTestOptions. Must not be called before InitGoogleTest.
+void UnitTestImpl::ConfigureXmlOutput() {
+  const String& output_format = UnitTestOptions::GetOutputFormat();
+  if (output_format == "xml") {
+    listeners()->SetDefaultXmlGenerator(new XmlUnitTestResultPrinter(
+        UnitTestOptions::GetAbsolutePathToOutputFile().c_str()));
+  } else if (output_format != "") {
+    printf("WARNING: unrecognized output format \"%s\" ignored.\n",
+           output_format.c_str());
+    fflush(stdout);
+  }
+}
+
+// Performs initialization dependent upon flag values obtained in
+// ParseGoogleTestFlagsOnly.  Is called from InitGoogleTest after the call to
+// ParseGoogleTestFlagsOnly.  In case a user neglects to call InitGoogleTest
+// this function is also called from RunAllTests.  Since this function can be
+// called more than once, it has to be idempotent.
+void UnitTestImpl::PostFlagParsingInit() {
+  // Ensures that this function does not execute more than once.
+  if (!post_flag_parse_init_performed_) {
+    post_flag_parse_init_performed_ = true;
+
+#if GTEST_HAS_DEATH_TEST
+    InitDeathTestSubprocessControlInfo();
+    SuppressTestEventsIfInSubprocess();
+#endif  // GTEST_HAS_DEATH_TEST
+
+    // Registers parameterized tests. This makes parameterized tests
+    // available to the UnitTest reflection API without running
+    // RUN_ALL_TESTS.
+    RegisterParameterizedTests();
+
+    // Configures listeners for XML output. This makes it possible for users
+    // to shut down the default XML output before invoking RUN_ALL_TESTS.
+    ConfigureXmlOutput();
+  }
 }
 
 // A predicate that checks the name of a TestCase against a known
@@ -3726,7 +3793,8 @@ int UnitTestImpl::RunAllTests() {
   if (g_help_flag)
     return 0;
 
-  RegisterParameterizedTests();
+  // TODO(vladl@google.com): Add a call to PostFlagParsingInit() here when
+  // merging into the main branch.
 
   // Even if sharding is not on, test runners may want to use the
   // GTEST_SHARD_STATUS_FILE to query whether the test supports the sharding
@@ -3738,11 +3806,8 @@ int UnitTestImpl::RunAllTests() {
   bool in_subprocess_for_death_test = false;
 
 #if GTEST_HAS_DEATH_TEST
-  internal_run_death_test_flag_.reset(ParseInternalRunDeathTestFlag());
   in_subprocess_for_death_test = (internal_run_death_test_flag_.get() != NULL);
 #endif  // GTEST_HAS_DEATH_TEST
-
-  UnitTestEventListenerInterface * const printer = result_printer();
 
   const bool should_shard = ShouldShard(kTestTotalShards, kTestShardIndex,
                                         in_subprocess_for_death_test);
@@ -3766,6 +3831,8 @@ int UnitTestImpl::RunAllTests() {
   // True iff at least one test has failed.
   bool failed = false;
 
+  UnitTestEventListenerInterface* repeater = listeners()->repeater();
+
   // How many times to repeat the tests?  We don't want to repeat them
   // when we are inside the subprocess of a death test.
   const int repeat = in_subprocess_for_death_test ? 1 : GTEST_FLAG(repeat);
@@ -3773,21 +3840,24 @@ int UnitTestImpl::RunAllTests() {
   const bool forever = repeat < 0;
   for (int i = 0; forever || i != repeat; i++) {
     if (repeat != 1) {
+      // TODO(vladl@google.com): Move this output to
+      // PrettyUnitTestResultPrinter. Add the iteration number parameter to
+      // OnUnitTestStart.
       printf("\nRepeating all tests (iteration %d) . . .\n\n", i + 1);
     }
 
-    // Tells the unit test event listener that the tests are about to
-    // start.
-    printer->OnUnitTestStart(*parent_);
+    // Tells the unit test event listeners that the tests are about to start.
+    repeater->OnUnitTestStart(*parent_);
 
+    // TODO(vladl@google.com): Move to before the OnUnitTestStart notification?
     const TimeInMillis start = GetTimeInMillis();
 
     // Runs each test case if there is at least one test to run.
     if (has_tests_to_run) {
       // Sets up all environments beforehand.
-      printer->OnGlobalSetUpStart(*parent_);
+      repeater->OnGlobalSetUpStart(*parent_);
       environments_.ForEach(SetUpEnvironment);
-      printer->OnGlobalSetUpEnd(*parent_);
+      repeater->OnGlobalSetUpEnd(*parent_);
 
       // Runs the tests only if there was no fatal failure during global
       // set-up.
@@ -3796,16 +3866,15 @@ int UnitTestImpl::RunAllTests() {
       }
 
       // Tears down all environments in reverse order afterwards.
-      printer->OnGlobalTearDownStart(*parent_);
+      repeater->OnGlobalTearDownStart(*parent_);
       environments_in_reverse_order_.ForEach(TearDownEnvironment);
-      printer->OnGlobalTearDownEnd(*parent_);
+      repeater->OnGlobalTearDownEnd(*parent_);
     }
 
     elapsed_time_ = GetTimeInMillis() - start;
 
-    // Tells the unit test event listener that the tests have just
-    // finished.
-    printer->OnUnitTestEnd(*parent_);
+    // Tells the unit test event listener that the tests have just finished.
+    repeater->OnUnitTestEnd(*parent_);
 
     // Gets the result and clears it.
     if (!Passed()) {
@@ -3995,49 +4064,6 @@ void UnitTestImpl::ListTestsMatchingFilter() {
     }
   }
   fflush(stdout);
-}
-
-// Sets the unit test result printer.
-//
-// Does nothing if the input and the current printer object are the
-// same; otherwise, deletes the old printer object and makes the
-// input the current printer.
-void UnitTestImpl::set_result_printer(
-    UnitTestEventListenerInterface* result_printer) {
-  if (result_printer_ != result_printer) {
-    delete result_printer_;
-    result_printer_ = result_printer;
-  }
-}
-
-// Returns the current unit test result printer if it is not NULL;
-// otherwise, creates an appropriate result printer, makes it the
-// current printer, and returns it.
-UnitTestEventListenerInterface* UnitTestImpl::result_printer() {
-  if (result_printer_ != NULL) {
-    return result_printer_;
-  }
-
-#if GTEST_HAS_DEATH_TEST
-  if (internal_run_death_test_flag_.get() != NULL) {
-    result_printer_ = new NullUnitTestResultPrinter;
-    return result_printer_;
-  }
-#endif  // GTEST_HAS_DEATH_TEST
-
-  UnitTestEventsRepeater *repeater = new UnitTestEventsRepeater;
-  const String& output_format = internal::UnitTestOptions::GetOutputFormat();
-  if (output_format == "xml") {
-    repeater->AddListener(new XmlUnitTestResultPrinter(
-        internal::UnitTestOptions::GetAbsolutePathToOutputFile().c_str()));
-  } else if (output_format != "") {
-      printf("WARNING: unrecognized output format \"%s\" ignored.\n",
-             output_format.c_str());
-      fflush(stdout);
-  }
-  repeater->AddListener(new PrettyUnitTestResultPrinter);
-  result_printer_ = repeater;
-  return result_printer_;
 }
 
 // Sets the OS stack trace getter.
@@ -4420,6 +4446,7 @@ void InitGoogleTestImpl(int* argc, CharType** argv) {
 #endif  // GTEST_HAS_DEATH_TEST
 
   ParseGoogleTestFlagsOnly(argc, argv);
+  GetUnitTestImpl()->PostFlagParsingInit();
 }
 
 }  // namespace internal

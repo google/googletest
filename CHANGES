@@ -1,3 +1,20 @@
+Changes for 1.4.0 (up to r300):
+
+ * New feature: the XML report format is closer to junitreport and can
+   be parsed by Hudson now.
+ * New feature: when a test runs under Visual Studio, its failures are
+   integrated in the IDE.
+ * New feature: /MD(d) versions of VC++ projects.
+ * New feature: elapsed time for the tests is printed by default.
+ * New feature: comes with a TR1 tuple implementation such that Boost
+   is no longer needed for Combine().
+ * New feature: EXPECT_DEATH_IF_SUPPORTED macro and friends.
+ * New feature: the Xcode project can now produce static gtest
+   libraries in addition to a framework.
+ * Compatibility fixes for Solaris, Cygwin, minGW, Windows Mobile,
+   Symbian, gcc, and C++Builder.
+ * Bug fixes and implementation clean-ups.
+
 Changes for 1.3.0:
 
  * New feature: death tests on Windows, Cygwin, and Mac.
@@ -11,7 +28,7 @@ Changes for 1.3.0:
    .cc file for easy deployment.
  * New feature: support for distributing test functions to multiple
    machines (requires support from the test runner).
- * Bug fixes and implementation clean-up.
+ * Bug fixes and implementation clean-ups.
 
 Changes for 1.2.1:
 
