@@ -34,6 +34,7 @@ pkginclude_HEADERS = include/gmock/gmock.h \
                      include/gmock/gmock-generated-matchers.h \
                      include/gmock/gmock-generated-nice-strict.h \
                      include/gmock/gmock-matchers.h \
+                     include/gmock/gmock-more-actions.h \
                      include/gmock/gmock-printers.h \
                      include/gmock/gmock-spec-builders.h
 
