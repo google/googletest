@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="Debug"
-			IntermediateDirectory="Debug"
+			OutputDirectory="$(SolutionName)/$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)/$(ProjectName)"
 			ConfigurationType="4"
 			CharacterSet="2"
 			ReferencesPath="">
@@ -54,8 +54,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="Release"
-			IntermediateDirectory="Release"
+			OutputDirectory="$(SolutionName)/$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)/$(ProjectName)"
 			ConfigurationType="4"
 			CharacterSet="2"
 			ReferencesPath="&quot;..\include&quot;;&quot;..&quot;">
