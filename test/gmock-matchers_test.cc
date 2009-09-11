@@ -2678,15 +2678,13 @@ TEST(ResultOfTest, WorksForCompatibleMatcherTypes) {
   EXPECT_FALSE(matcher.Matches(42));
 }
 
-#if GTEST_HAS_DEATH_TEST
 // Tests that the program aborts when ResultOf is passed
 // a NULL function pointer.
 TEST(ResultOfDeathTest, DiesOnNullFunctionPointers) {
-  EXPECT_DEATH(
+  EXPECT_DEATH_IF_SUPPORTED(
       ResultOf(static_cast<string(*)(int)>(NULL), Eq(string("foo"))),
                "NULL function pointer is passed into ResultOf\\(\\)\\.");
 }
-#endif  // GTEST_HAS_DEATH_TEST
 
 // Tests that ResultOf(f, ...) compiles and works as expected when f is a
 // function reference.

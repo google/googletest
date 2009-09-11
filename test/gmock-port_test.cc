@@ -65,8 +65,6 @@ TEST(GmockCheckSyntaxTest, WorksWithSwitch) {
       GMOCK_CHECK_(true) << "Check failed in switch case";
 }
 
-#if GTEST_HAS_DEATH_TEST
-
 TEST(GmockCheckDeathTest, DiesWithCorrectOutputOnFailure) {
   const bool a_false_condition = false;
   // MSVC and gcc use different formats to print source file locations.
@@ -81,8 +79,11 @@ TEST(GmockCheckDeathTest, DiesWithCorrectOutputOnFailure) {
 #endif  // _MSC_VER
      ".*a_false_condition.*Extra info";
 
-  EXPECT_DEATH(GMOCK_CHECK_(a_false_condition) << "Extra info", regex);
+  EXPECT_DEATH_IF_SUPPORTED(GMOCK_CHECK_(a_false_condition) << "Extra info",
+                            regex);
 }
+
+#if GTEST_HAS_DEATH_TEST
 
 TEST(GmockCheckDeathTest, LivesSilentlyOnSuccess) {
   EXPECT_EXIT({

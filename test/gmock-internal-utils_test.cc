@@ -472,20 +472,16 @@ TEST(AssertTest, SucceedsOnTrue) {
   Assert(true, __FILE__, __LINE__);  // This should succeed too.
 }
 
-#if GTEST_HAS_DEATH_TEST
-
 // Tests that Assert(false, ...) generates a fatal failure.
 TEST(AssertTest, FailsFatallyOnFalse) {
-  EXPECT_DEATH({  // NOLINT
+  EXPECT_DEATH_IF_SUPPORTED({
     Assert(false, __FILE__, __LINE__, "This should fail.");
   }, "");
 
-  EXPECT_DEATH({  // NOLINT
+  EXPECT_DEATH_IF_SUPPORTED({
     Assert(false, __FILE__, __LINE__);
   }, "");
 }
-
-#endif  // GTEST_HAS_DEATH_TEST
 
 // Tests that Expect(true, ...) succeeds.
 TEST(ExpectTest, SucceedsOnTrue) {

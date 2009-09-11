@@ -199,25 +199,21 @@ TEST(BuiltInDefaultValueTest, UserTypeHasNoDefault) {
   EXPECT_FALSE(BuiltInDefaultValue<UserType>::Exists());
 }
 
-#if GTEST_HAS_DEATH_TEST
-
 // Tests that BuiltInDefaultValue<T&>::Get() aborts the program.
 TEST(BuiltInDefaultValueDeathTest, IsUndefinedForReferences) {
-  EXPECT_DEATH({  // NOLINT
+  EXPECT_DEATH_IF_SUPPORTED({
     BuiltInDefaultValue<int&>::Get();
   }, "");
-  EXPECT_DEATH({  // NOLINT
+  EXPECT_DEATH_IF_SUPPORTED({
     BuiltInDefaultValue<const char&>::Get();
   }, "");
 }
 
 TEST(BuiltInDefaultValueDeathTest, IsUndefinedForUserTypes) {
-  EXPECT_DEATH({  // NOLINT
+  EXPECT_DEATH_IF_SUPPORTED({
     BuiltInDefaultValue<UserType>::Get();
   }, "");
 }
-
-#endif  // GTEST_HAS_DEATH_TEST
 
 // Tests that DefaultValue<T>::IsSet() is false initially.
 TEST(DefaultValueTest, IsInitiallyUnset) {
@@ -260,11 +256,9 @@ TEST(DefaultValueDeathTest, GetReturnsBuiltInDefaultValueWhenUnset) {
 
   EXPECT_EQ(0, DefaultValue<int>::Get());
 
-#if GTEST_HAS_DEATH_TEST
-  EXPECT_DEATH({  // NOLINT
+  EXPECT_DEATH_IF_SUPPORTED({
     DefaultValue<UserType>::Get();
   }, "");
-#endif  // GTEST_HAS_DEATH_TEST
 }
 
 // Tests that DefaultValue<void>::Get() returns void.
@@ -316,14 +310,12 @@ TEST(DefaultValueOfReferenceDeathTest, GetReturnsBuiltInDefaultValueWhenUnset) {
   EXPECT_FALSE(DefaultValue<int&>::IsSet());
   EXPECT_FALSE(DefaultValue<UserType&>::IsSet());
 
-#if GTEST_HAS_DEATH_TEST
-  EXPECT_DEATH({  // NOLINT
+  EXPECT_DEATH_IF_SUPPORTED({
     DefaultValue<int&>::Get();
   }, "");
-  EXPECT_DEATH({  // NOLINT
+  EXPECT_DEATH_IF_SUPPORTED({
     DefaultValue<UserType>::Get();
   }, "");
-#endif  // GTEST_HAS_DEATH_TEST
 }
 
 // Tests that ActionInterface can be implemented by defining the
@@ -559,15 +551,13 @@ TEST(DoDefaultTest, ReturnsBuiltInDefaultValueByDefault) {
   EXPECT_EQ(0, mock.IntFunc(true));
 }
 
-#if GTEST_HAS_DEATH_TEST
-
 // Tests that DoDefault() aborts the process when there is no built-in
 // default value for the return type.
 TEST(DoDefaultDeathTest, DiesForUnknowType) {
   MockClass mock;
   EXPECT_CALL(mock, Foo())
       .WillRepeatedly(DoDefault());
-  EXPECT_DEATH({  // NOLINT
+  EXPECT_DEATH_IF_SUPPORTED({
     mock.Foo();
   }, "");
 }
@@ -587,12 +577,10 @@ TEST(DoDefaultDeathTest, DiesIfUsedInCompositeAction) {
   // EXPECT_DEATH() can only capture stderr, while Google Mock's
   // errors are printed on stdout.  Therefore we have to settle for
   // not verifying the message.
-  EXPECT_DEATH({  // NOLINT
+  EXPECT_DEATH_IF_SUPPORTED({
     mock.IntFunc(true);
   }, "");
 }
-
-#endif  // GTEST_HAS_DEATH_TEST
 
 // Tests that DoDefault() returns the default value set by
 // DefaultValue<T>::Set() when it's not overriden by an ON_CALL().

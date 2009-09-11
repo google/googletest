@@ -197,18 +197,14 @@ TEST(OnCallSyntaxTest, WithCanAppearAtMostOnce) {
   }, ".With() cannot appear more than once in an ON_CALL()");
 }
 
-#if GTEST_HAS_DEATH_TEST
-
 TEST(OnCallSyntaxTest, WillByDefaultIsMandatory) {
   MockA a;
 
-  EXPECT_DEATH({  // NOLINT
+  EXPECT_DEATH_IF_SUPPORTED({
     ON_CALL(a, DoA(5));
     a.DoA(5);
   }, "");
 }
-
-#endif  // GTEST_HAS_DEATH_TEST
 
 TEST(OnCallSyntaxTest, WillByDefaultCanAppearAtMostOnce) {
   MockA a;
@@ -1018,17 +1014,13 @@ TEST(UnexpectedCallTest, UnsatisifiedPrerequisites) {
 
 #endif  // GMOCK_HAS_REGEX
 
-#if GTEST_HAS_DEATH_TEST
-
 TEST(UndefinedReturnValueTest, ReturnValueIsMandatory) {
   MockA a;
   // TODO(wan@google.com): We should really verify the output message,
   // but we cannot yet due to that EXPECT_DEATH only captures stderr
   // while Google Mock logs to stdout.
-  EXPECT_DEATH(a.ReturnResult(1), "");
+  EXPECT_DEATH_IF_SUPPORTED(a.ReturnResult(1), "");
 }
-
-#endif  // GTEST_HAS_DEATH_TEST
 
 // Tests that an excessive call (one whose arguments match the
 // matchers but is called too many times) performs the default action.
@@ -1174,8 +1166,6 @@ TEST(SequenceTest, AnyOrderIsOkByDefault) {
   }
 }
 
-#if GTEST_HAS_DEATH_TEST
-
 // Tests that the calls must be in strict order when a complete order
 // is specified.
 TEST(SequenceTest, CallsMustBeInStrictOrderWhenSaidSo) {
@@ -1194,13 +1184,13 @@ TEST(SequenceTest, CallsMustBeInStrictOrderWhenSaidSo) {
       .InSequence(s)
       .WillOnce(Return(Result()));
 
-  EXPECT_DEATH({  // NOLINT
+  EXPECT_DEATH_IF_SUPPORTED({
     a.ReturnResult(1);
     a.ReturnResult(3);
     a.ReturnResult(2);
   }, "");
 
-  EXPECT_DEATH({  // NOLINT
+  EXPECT_DEATH_IF_SUPPORTED({
     a.ReturnResult(2);
     a.ReturnResult(1);
     a.ReturnResult(3);
@@ -1233,21 +1223,21 @@ TEST(SequenceTest, CallsMustConformToSpecifiedDag) {
       .InSequence(x)
       .WillOnce(Return(Result()));
 
-  EXPECT_DEATH({  // NOLINT
+  EXPECT_DEATH_IF_SUPPORTED({
     a.ReturnResult(1);
     b.DoB();
     a.ReturnResult(2);
   }, "");
 
-  EXPECT_DEATH({  // NOLINT
+  EXPECT_DEATH_IF_SUPPORTED({
     a.ReturnResult(2);
   }, "");
 
-  EXPECT_DEATH({  // NOLINT
+  EXPECT_DEATH_IF_SUPPORTED({
     a.ReturnResult(3);
   }, "");
 
-  EXPECT_DEATH({  // NOLINT
+  EXPECT_DEATH_IF_SUPPORTED({
     a.ReturnResult(1);
     b.DoB();
     b.DoB();
@@ -1260,8 +1250,6 @@ TEST(SequenceTest, CallsMustConformToSpecifiedDag) {
   b.DoB();
   a.ReturnResult(3);
 }
-
-#endif  // GTEST_HAS_DEATH_TEST
 
 TEST(SequenceTest, Retirement) {
   MockA a;
@@ -1429,8 +1417,6 @@ TEST(AfterTest, SucceedsWhenTotalOrderIsSatisfied) {
   a.DoA(2);
 }
 
-#if GTEST_HAS_DEATH_TEST
-
 // Calls must be in strict order when specified so.
 TEST(AfterDeathTest, CallsMustBeInStrictOrderWhenSpecifiedSo) {
   MockA a;
@@ -1498,8 +1484,6 @@ TEST(AfterDeathTest, CanBeUsedWithInSequence) {
   a.ReturnResult(3);
 }
 
-#endif  // GTEST_HAS_DEATH_TEST
-
 // .After() can be called multiple times.
 TEST(AfterTest, CanBeCalledManyTimes) {
   MockA a;
@@ -1536,8 +1520,6 @@ TEST(AfterTest, AcceptsUpToFiveArguments) {
   a.DoA(6);
 }
 
-#if GTEST_HAS_DEATH_TEST
-
 // .After() allows input to contain duplicated Expectations.
 TEST(AfterTest, AcceptsDuplicatedInput) {
   MockA a;
@@ -1556,8 +1538,6 @@ TEST(AfterTest, AcceptsDuplicatedInput) {
   a.DoA(2);
   a.ReturnResult(3);
 }
-
-#endif  // GTEST_HAS_DEATH_TEST
 
 // An Expectation added to an ExpectationSet after it has been used in
 // an .After() has no effect.
