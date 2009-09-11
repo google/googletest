@@ -198,24 +198,22 @@ TEST_F(TypedTestCasePStateTest, IgnoresOrderAndSpaces) {
             state_.VerifyRegisteredTestNames("foo.cc", 1, tests));
 }
 
-#if GTEST_HAS_DEATH_TEST
-
 typedef TypedTestCasePStateTest TypedTestCasePStateDeathTest;
 
 TEST_F(TypedTestCasePStateDeathTest, DetectsDuplicates) {
-  EXPECT_DEATH(
+  EXPECT_DEATH_IF_SUPPORTED(
       state_.VerifyRegisteredTestNames("foo.cc", 1, "A, B, A, C"),
       "foo\\.cc.1.?: Test A is listed more than once\\.");
 }
 
 TEST_F(TypedTestCasePStateDeathTest, DetectsExtraTest) {
-  EXPECT_DEATH(
+  EXPECT_DEATH_IF_SUPPORTED(
       state_.VerifyRegisteredTestNames("foo.cc", 1, "A, B, C, D"),
       "foo\\.cc.1.?: No test named D can be found in this test case\\.");
 }
 
 TEST_F(TypedTestCasePStateDeathTest, DetectsMissedTest) {
-  EXPECT_DEATH(
+  EXPECT_DEATH_IF_SUPPORTED(
       state_.VerifyRegisteredTestNames("foo.cc", 1, "A, C"),
       "foo\\.cc.1.?: You forgot to list test B\\.");
 }
@@ -224,13 +222,11 @@ TEST_F(TypedTestCasePStateDeathTest, DetectsMissedTest) {
 // a run-time error if the test case has been registered.
 TEST_F(TypedTestCasePStateDeathTest, DetectsTestAfterRegistration) {
   state_.VerifyRegisteredTestNames("foo.cc", 1, "A, B, C");
-  EXPECT_DEATH(
+  EXPECT_DEATH_IF_SUPPORTED(
       state_.AddTestName("foo.cc", 2, "FooTest", "D"),
       "foo\\.cc.2.?: Test D must be defined before REGISTER_TYPED_TEST_CASE_P"
       "\\(FooTest, \\.\\.\\.\\)\\.");
 }
-
-#endif  // GTEST_HAS_DEATH_TEST
 
 // Tests that SetUpTestCase()/TearDownTestCase(), fixture ctor/dtor,
 // and SetUp()/TearDown() work correctly in type-parameterized tests.

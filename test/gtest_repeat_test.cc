@@ -112,13 +112,11 @@ int g_death_test_count = 0;
 TEST(BarDeathTest, ThreadSafeAndFast) {
   g_death_test_count++;
 
-#if GTEST_HAS_DEATH_TEST
   GTEST_FLAG(death_test_style) = "threadsafe";
-  EXPECT_DEATH(abort(), "");
+  EXPECT_DEATH_IF_SUPPORTED(abort(), "");
 
   GTEST_FLAG(death_test_style) = "fast";
-  EXPECT_DEATH(abort(), "");
-#endif  // GTEST_HAS_DEATH_TEST
+  EXPECT_DEATH_IF_SUPPORTED(abort(), "");
 }
 
 #if GTEST_HAS_PARAM_TEST

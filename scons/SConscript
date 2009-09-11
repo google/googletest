@@ -364,6 +364,8 @@ if env.get('GTEST_BUILD_SAMPLES', False):
   GtestSample(env, 'sample6_unittest')
   GtestSample(env, 'sample7_unittest')
   GtestSample(env, 'sample8_unittest')
+  GtestSample(env, 'sample9_unittest')
+  GtestSample(env, 'sample10_unittest')
 
 # These exports are used by Google Mock.
 gtest_exports = {'gtest': gtest,
