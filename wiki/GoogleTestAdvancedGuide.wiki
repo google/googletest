@@ -364,6 +364,16 @@ expression.
 As usual, the `ASSERT` variants abort the current test function, while the
 `EXPECT` variants do not.
 
+*Note:* We use the word "crash" here to mean that the process
+terminates with a _non-zero_ exit status code.  There are two
+possibilities: either the process has called `exit()` or `_exit()`
+with a non-zero value, or it may be killed by a signal.
+
+This means that if _statement_ terminates the process with a 0 exit
+code, it is _not_ considered a crash by `EXPECT_DEATH`.  Use
+`EXPECT_EXIT` instead if this is the case, or if you want to restrict
+the exit code more precisely.
+
 A predicate here must accept an `int` and return a `bool`. The death test
 succeeds only if the predicate returns `true`. Google Test defines a few
 predicates that handle the most common cases:
@@ -382,13 +392,12 @@ code.
 This expression is `true` if the program was killed by the given signal.
 
 The `*_DEATH` macros are convenient wrappers for `*_EXIT` that use a predicate
-that verifies that the process either exited with a nonzero exit code or was
-killed by a signal.
+that verifies the process' exit code is non-zero.
 
 Note that a death test only cares about three things:
 
   # does _statement_ abort or exit the process?
-  # (in the case of `ASSERT_EXIT` and `EXPECT_EXIT`) does the exit status satisfy _predicate_? And
+  # (in the case of `ASSERT_EXIT` and `EXPECT_EXIT`) does the exit status satisfy _predicate_?  Or (in the case of `ASSERT_DEATH` and `EXPECT_DEATH`) is the exit status non-zero?  And
   # does the stderr output match _regex_?
 
 In particular, if _statement_ generates an `ASSERT_*` or `EXPECT_*` failure, it will *not* cause the death test to fail, as Google Test assertions don't abort the process.
