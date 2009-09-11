@@ -133,8 +133,6 @@ TEST(GetThreadCountTest, ReturnsZeroWhenUnableToCountThreads) {
 }
 #endif  // GTEST_OS_MAC
 
-#if GTEST_HAS_DEATH_TEST
-
 TEST(GtestCheckDeathTest, DiesWithCorrectOutputOnFailure) {
   const bool a_false_condition = false;
   const char regex[] =
@@ -145,8 +143,11 @@ TEST(GtestCheckDeathTest, DiesWithCorrectOutputOnFailure) {
 #endif  // _MSC_VER
      ".*a_false_condition.*Extra info.*";
 
-  EXPECT_DEATH(GTEST_CHECK_(a_false_condition) << "Extra info", regex);
+  EXPECT_DEATH_IF_SUPPORTED(GTEST_CHECK_(a_false_condition) << "Extra info",
+                            regex);
 }
+
+#if GTEST_HAS_DEATH_TEST
 
 TEST(GtestCheckDeathTest, LivesSilentlyOnSuccess) {
   EXPECT_EXIT({

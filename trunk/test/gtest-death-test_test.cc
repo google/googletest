@@ -1136,7 +1136,7 @@ using testing::internal::GetCapturedStderr;
 using testing::internal::String;
 
 // Tests that EXPECT_DEATH_IF_SUPPORTED/ASSERT_DEATH_IF_SUPPORTED are still
-// defined but do not rigger failures when death tests are not available on
+// defined but do not trigger failures when death tests are not available on
 // the system.
 TEST(ConditionalDeathMacrosTest, WarnsWhenDeathTestsNotAvailable) {
   // Empty statement will not crash, but that should not trigger a failure
@@ -1148,15 +1148,88 @@ TEST(ConditionalDeathMacrosTest, WarnsWhenDeathTestsNotAvailable) {
                              "Death tests are not supported on this platform"));
   ASSERT_TRUE(NULL != strstr(output.c_str(), ";"));
 
+  // The streamed message should not be printed as there is no test failure.
   CaptureStderr();
-  ASSERT_DEATH_IF_SUPPORTED(;, "");
+  EXPECT_DEATH_IF_SUPPORTED(;, "") << "streamed message";
+  output = GetCapturedStderr();
+  ASSERT_TRUE(NULL == strstr(output.c_str(), "streamed message"));
+
+  CaptureStderr();
+  ASSERT_DEATH_IF_SUPPORTED(;, "");  // NOLINT
   output = GetCapturedStderr();
   ASSERT_TRUE(NULL != strstr(output.c_str(),
                              "Death tests are not supported on this platform"));
   ASSERT_TRUE(NULL != strstr(output.c_str(), ";"));
+
+  CaptureStderr();
+  ASSERT_DEATH_IF_SUPPORTED(;, "") << "streamed message";  // NOLINT
+  output = GetCapturedStderr();
+  ASSERT_TRUE(NULL == strstr(output.c_str(), "streamed message"));
 }
 
+void FuncWithAssert(int* n) {
+  ASSERT_DEATH_IF_SUPPORTED(return;, "");
+  (*n)++;
+}
+
+// Tests that ASSERT_DEATH_IF_SUPPORTED does not return from the current
+// function (as ASSERT_DEATH does) if death tests are not supported.
+TEST(ConditionalDeathMacrosTest, AssertDeatDoesNotReturnhIfUnsupported) {
+  int n = 0;
+  FuncWithAssert(&n);
+  EXPECT_EQ(1, n);
+}
 #endif  // GTEST_HAS_DEATH_TEST
+
+// Tests that the death test macros expand to code which may or may not
+// be followed by operator<<, and that in either case the complete text
+// comprises only a single C++ statement.
+//
+// The syntax should work whether death tests are available or not.
+TEST(ConditionalDeathMacrosSyntaxDeathTest, SingleStatement) {
+  if (false)
+    // This would fail if executed; this is a compilation test only
+    ASSERT_DEATH_IF_SUPPORTED(return, "");
+
+  if (true)
+    EXPECT_DEATH_IF_SUPPORTED(_exit(1), "");
+  else
+    // This empty "else" branch is meant to ensure that EXPECT_DEATH
+    // doesn't expand into an "if" statement without an "else"
+    ;  // NOLINT
+
+  if (false)
+    ASSERT_DEATH_IF_SUPPORTED(return, "") << "did not die";
+
+  if (false)
+    ;  // NOLINT
+  else
+    EXPECT_DEATH_IF_SUPPORTED(_exit(1), "") << 1 << 2 << 3;
+}
+
+// Tests that conditional death test macros expand to code which interacts
+// well with switch statements.
+TEST(ConditionalDeathMacrosSyntaxDeathTest, SwitchStatement) {
+// Microsoft compiler usually complains about switch statements without
+// case labels. We suppress that warning for this test.
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4065)
+#endif  // _MSC_VER
+
+  switch (0)
+    default:
+      ASSERT_DEATH_IF_SUPPORTED(_exit(1), "")
+          << "exit in default switch handler";
+
+  switch (0)
+    case 0:
+      EXPECT_DEATH_IF_SUPPORTED(_exit(1), "") << "exit in switch case";
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif  // _MSC_VER
+}
 
 // Tests that a test case whose name ends with "DeathTest" works fine
 // on Windows.

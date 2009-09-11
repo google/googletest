@@ -146,8 +146,6 @@ TEST_F(TestPartResultArrayTest, ContainsGivenResultsAfterTwoAppends) {
   EXPECT_STREQ("Failure 2", results.GetTestPartResult(1).message());
 }
 
-#if GTEST_HAS_DEATH_TEST
-
 typedef TestPartResultArrayTest TestPartResultArrayDeathTest;
 
 // Tests that the program dies when GetTestPartResult() is called with
@@ -156,11 +154,9 @@ TEST_F(TestPartResultArrayDeathTest, DiesWhenIndexIsOutOfBound) {
   TestPartResultArray results;
   results.Append(r1_);
 
-  EXPECT_DEATH(results.GetTestPartResult(-1), "");
-  EXPECT_DEATH(results.GetTestPartResult(1), "");
+  EXPECT_DEATH_IF_SUPPORTED(results.GetTestPartResult(-1), "");
+  EXPECT_DEATH_IF_SUPPORTED(results.GetTestPartResult(1), "");
 }
-
-#endif  // GTEST_HAS_DEATH_TEST
 
 // TODO(mheule@google.com): Add a test for the class HasNewFatalFailureHelper.
 
