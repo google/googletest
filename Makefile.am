@@ -21,19 +21,14 @@ EXTRA_DIST = \
 
 # MSVC project files
 EXTRA_DIST += \
+  msvc/gtest-md.sln \
   msvc/gtest.sln \
+  msvc/gtest-md.vcproj \
   msvc/gtest.vcproj \
-  msvc/gtest_color_test_.vcproj \
-  msvc/gtest_env_var_test_.vcproj \
-  msvc/gtest_environment_test.vcproj \
   msvc/gtest_main-md.vcproj \
   msvc/gtest_main.vcproj \
-  msvc/gtest-md.sln \
-  msvc/gtest-md.vcproj \
-  msvc/gtest_output_test_.vcproj \
   msvc/gtest_prod_test-md.vcproj \
   msvc/gtest_prod_test.vcproj \
-  msvc/gtest_uninitialized_test_.vcproj \
   msvc/gtest_unittest-md.vcproj \
   msvc/gtest_unittest.vcproj
 

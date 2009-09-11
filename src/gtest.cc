@@ -3793,8 +3793,9 @@ int UnitTestImpl::RunAllTests() {
   if (g_help_flag)
     return 0;
 
-  // TODO(vladl@google.com): Add a call to PostFlagParsingInit() here when
-  // merging into the main branch.
+  // Repeats the call to the post-flag parsing initialization in case the
+  // user didn't call InitGoogleTest.
+  PostFlagParsingInit();
 
   // Even if sharding is not on, test runners may want to use the
   // GTEST_SHARD_STATUS_FILE to query whether the test supports the sharding
