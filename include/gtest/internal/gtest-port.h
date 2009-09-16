@@ -672,7 +672,8 @@ class RE {
 };
 
 // Defines logging utilities:
-//   GTEST_LOG_()   - logs messages at the specified severity level.
+//   GTEST_LOG_(severity) - logs messages at the specified severity level. The
+//                          message itself is streamed into the macro.
 //   LogToStderr()  - directs all log messages to stderr.
 //   FlushInfoLog() - flushes informational log messages.
 
@@ -683,13 +684,27 @@ enum GTestLogSeverity {
   GTEST_FATAL
 };
 
-void GTestLog(GTestLogSeverity severity, const char* file,
-              int line, const char* msg);
+// Formats log entry severity, provides a stream object for streaming the
+// log message, and terminates the message with a newline when going out of
+// scope.
+class GTestLog {
+ public:
+  GTestLog(GTestLogSeverity severity, const char* file, int line);
 
-#define GTEST_LOG_(severity, msg)\
-    ::testing::internal::GTestLog(\
-        ::testing::internal::GTEST_##severity, __FILE__, __LINE__, \
-        (::testing::Message() << (msg)).GetString().c_str())
+  // Flushes the buffers and, if severity is GTEST_FATAL, aborts the program.
+  ~GTestLog();
+
+  ::std::ostream& GetStream() { return ::std::cerr; }
+
+ private:
+  const GTestLogSeverity severity_;
+
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(GTestLog);
+};
+
+#define GTEST_LOG_(severity) \
+    ::testing::internal::GTestLog(::testing::internal::GTEST_##severity, \
+                                  __FILE__, __LINE__).GetStream()
 
 inline void LogToStderr() {}
 inline void FlushInfoLog() { fflush(NULL); }
@@ -1011,38 +1026,12 @@ typedef TypeWithSize<8>::Int TimeInMillis;  // Represents time in milliseconds.
 //    condition itself, plus additional message streamed into it, if any,
 //    and then it aborts the program. It aborts the program irrespective of
 //    whether it is built in the debug mode or not.
-class GTestCheckProvider {
- public:
-  GTestCheckProvider(const char* condition, const char* file, int line) {
-    FormatFileLocation(file, line);
-    ::std::cerr << " ERROR: Condition " << condition << " failed. ";
-  }
-  ~GTestCheckProvider() {
-    ::std::cerr << ::std::endl;
-    posix::Abort();
-  }
-  void FormatFileLocation(const char* file, int line) {
-    if (file == NULL)
-      file = "unknown file";
-    if (line < 0) {
-      ::std::cerr << file << ":";
-    } else {
-#if _MSC_VER
-      ::std::cerr << file << "(" << line << "):";
-#else
-      ::std::cerr << file << ":" << line << ":";
-#endif
-    }
-  }
-  ::std::ostream& GetStream() { return ::std::cerr; }
-};
 #define GTEST_CHECK_(condition) \
     GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
     if (condition) \
       ; \
     else \
-      ::testing::internal::GTestCheckProvider(\
-          #condition, __FILE__, __LINE__).GetStream()
+      GTEST_LOG_(FATAL) << "Condition " #condition " failed. "
 
 // Macro for referencing flags.
 #define GTEST_FLAG(name) FLAGS_gtest_##name

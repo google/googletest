@@ -767,7 +767,7 @@ bool AlwaysTrue();
 // Suppresses MSVC warnings 4072 (unreachable code) for the code following
 // statement if it returns or throws (or doesn't return or throw in some
 // situations).
-#define GTEST_HIDE_UNREACHABLE_CODE_(statement) \
+#define GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement) \
   if (::testing::internal::AlwaysTrue()) { statement; }
 
 #define GTEST_TEST_THROW_(statement, expected_exception, fail) \
@@ -775,7 +775,7 @@ bool AlwaysTrue();
   if (const char* gtest_msg = "") { \
     bool gtest_caught_expected = false; \
     try { \
-      GTEST_HIDE_UNREACHABLE_CODE_(statement); \
+      GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
     } \
     catch (expected_exception const&) { \
       gtest_caught_expected = true; \
@@ -799,7 +799,7 @@ bool AlwaysTrue();
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (const char* gtest_msg = "") { \
     try { \
-      GTEST_HIDE_UNREACHABLE_CODE_(statement); \
+      GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
     } \
     catch (...) { \
       gtest_msg = "Expected: " #statement " doesn't throw an exception.\n" \
@@ -815,7 +815,7 @@ bool AlwaysTrue();
   if (const char* gtest_msg = "") { \
     bool gtest_caught_any = false; \
     try { \
-      GTEST_HIDE_UNREACHABLE_CODE_(statement); \
+      GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
     } \
     catch (...) { \
       gtest_caught_any = true; \
@@ -841,7 +841,7 @@ bool AlwaysTrue();
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (const char* gtest_msg = "") { \
     ::testing::internal::HasNewFatalFailureHelper gtest_fatal_failure_checker; \
-    GTEST_HIDE_UNREACHABLE_CODE_(statement); \
+    GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
     if (gtest_fatal_failure_checker.has_new_fatal_failure()) { \
       gtest_msg = "Expected: " #statement " doesn't generate new fatal " \
                   "failures in the current thread.\n" \
