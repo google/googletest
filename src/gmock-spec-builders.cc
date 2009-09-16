@@ -203,8 +203,8 @@ class MockObjectRegistry {
       // This can help the user identify the leaked object.
       std::cout << "\n";
       const MockObjectState& state = it->second;
-      internal::FormatFileLocation(
-          state.first_used_file, state.first_used_line, &std::cout);
+      std::cout << internal::FormatFileLocation(state.first_used_file,
+                                                state.first_used_line);
       std::cout << " ERROR: this mock object";
       if (state.first_used_test != "") {
         std::cout << " (used in test " << state.first_used_test_case << "."

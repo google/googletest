@@ -214,56 +214,6 @@ typedef ::wstring wstring;
 typedef ::std::wstring wstring;
 #endif  // GTEST_HAS_GLOBAL_WSTRING
 
-// Prints the file location in the format native to the compiler.
-inline void FormatFileLocation(const char* file, int line, ::std::ostream* os) {
-  if (file == NULL)
-    file = "unknown file";
-  if (line < 0) {
-    *os << file << ":";
-  } else {
-#if _MSC_VER
-    *os << file << "(" << line << "):";
-#else
-    *os << file << ":" << line << ":";
-#endif
-  }
-}
-
-// INTERNAL IMPLEMENTATION - DO NOT USE.
-//
-// GMOCK_CHECK_ is an all mode assert. It aborts the program if the condition
-// is not satisfied.
-//  Synopsys:
-//    GMOCK_CHECK_(boolean_condition);
-//     or
-//    GMOCK_CHECK_(boolean_condition) << "Additional message";
-//
-//    This checks the condition and if the condition is not satisfied
-//    it prints message about the condition violation, including the
-//    condition itself, plus additional message streamed into it, if any,
-//    and then it aborts the program. It aborts the program irrespective of
-//    whether it is built in the debug mode or not.
-
-class GMockCheckProvider {
- public:
-  GMockCheckProvider(const char* condition, const char* file, int line) {
-    FormatFileLocation(file, line, &::std::cerr);
-    ::std::cerr << " ERROR: Condition " << condition << " failed. ";
-  }
-  ~GMockCheckProvider() {
-    ::std::cerr << ::std::endl;
-    posix::Abort();
-  }
-  ::std::ostream& GetStream() { return ::std::cerr; }
-};
-#define GMOCK_CHECK_(condition) \
-    GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-    if (condition) \
-      ; \
-    else \
-      ::testing::internal::GMockCheckProvider(\
-          #condition, __FILE__, __LINE__).GetStream()
-
 }  // namespace internal
 }  // namespace testing
 

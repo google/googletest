@@ -1623,7 +1623,7 @@ struct CallableTraits<ResType(*)(ArgType)> {
   typedef ResType(*StorageType)(ArgType);
 
   static void CheckIsValid(ResType(*f)(ArgType)) {
-    GMOCK_CHECK_(f != NULL)
+    GTEST_CHECK_(f != NULL)
         << "NULL function pointer is passed into ResultOf().";
   }
   template <typename T>
@@ -1932,6 +1932,94 @@ class KeyMatcher {
 
  private:
   const M matcher_for_key_;
+};
+
+// Implements Pair(first_matcher, second_matcher) for the given argument pair
+// type with its two matchers. See Pair() function below.
+template <typename PairType>
+class PairMatcherImpl : public MatcherInterface<PairType> {
+ public:
+  typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(PairType)) RawPairType;
+  typedef typename RawPairType::first_type FirstType;
+  typedef typename RawPairType::second_type SecondType;
+
+  template <typename FirstMatcher, typename SecondMatcher>
+  PairMatcherImpl(FirstMatcher first_matcher, SecondMatcher second_matcher)
+      : first_matcher_(
+            testing::SafeMatcherCast<const FirstType&>(first_matcher)),
+        second_matcher_(
+            testing::SafeMatcherCast<const SecondType&>(second_matcher)) {
+  }
+
+  // Returns true iff 'a_pair.first' matches first_matcher and 'a_pair.second'
+  // matches second_matcher.
+  virtual bool Matches(PairType a_pair) const {
+    return first_matcher_.Matches(a_pair.first) &&
+           second_matcher_.Matches(a_pair.second);
+  }
+
+  // Describes what this matcher does.
+  virtual void DescribeTo(::std::ostream* os) const {
+    *os << "has a first field that ";
+    first_matcher_.DescribeTo(os);
+    *os << ", and has a second field that ";
+    second_matcher_.DescribeTo(os);
+  }
+
+  // Describes what the negation of this matcher does.
+  virtual void DescribeNegationTo(::std::ostream* os) const {
+    *os << "has a first field that ";
+    first_matcher_.DescribeNegationTo(os);
+    *os << ", or has a second field that ";
+    second_matcher_.DescribeNegationTo(os);
+  }
+
+  // Explains why 'a_pair' matches, or doesn't match, this matcher.
+  virtual void ExplainMatchResultTo(PairType a_pair,
+                                    ::std::ostream* os) const {
+    ::std::stringstream ss1;
+    first_matcher_.ExplainMatchResultTo(a_pair.first, &ss1);
+    internal::string s1 = ss1.str();
+    if (s1 != "") {
+       s1 = "the first field " + s1;
+    }
+
+    ::std::stringstream ss2;
+    second_matcher_.ExplainMatchResultTo(a_pair.second, &ss2);
+    internal::string s2 = ss2.str();
+    if (s2 != "") {
+       s2 = "the second field " + s2;
+    }
+
+    *os << s1;
+    if (s1 != "" && s2 != "") {
+       *os << ", and ";
+    }
+    *os << s2;
+  }
+
+ private:
+  const Matcher<const FirstType&> first_matcher_;
+  const Matcher<const SecondType&> second_matcher_;
+};
+
+// Implements polymorphic Pair(first_matcher, second_matcher).
+template <typename FirstMatcher, typename SecondMatcher>
+class PairMatcher {
+ public:
+  PairMatcher(FirstMatcher first_matcher, SecondMatcher second_matcher)
+      : first_matcher_(first_matcher), second_matcher_(second_matcher) {}
+
+  template <typename PairType>
+  operator Matcher<PairType> () const {
+    return MakeMatcher(
+        new PairMatcherImpl<PairType>(
+            first_matcher_, second_matcher_));
+  }
+
+ private:
+  const FirstMatcher first_matcher_;
+  const SecondMatcher second_matcher_;
 };
 
 // Implements ElementsAre() and ElementsAreArray().
@@ -2630,6 +2718,18 @@ inline internal::ContainsMatcher<M> Contains(M matcher) {
 template <typename M>
 inline internal::KeyMatcher<M> Key(M inner_matcher) {
   return internal::KeyMatcher<M>(inner_matcher);
+}
+
+// Pair(first_matcher, second_matcher) matches a std::pair whose 'first' field
+// matches first_matcher and whose 'second' field matches second_matcher.  For
+// example, EXPECT_THAT(map_type, ElementsAre(Pair(Ge(5), "foo"))) can be used
+// to match a std::map<int, string> that contains exactly one element whose key
+// is >= 5 and whose value equals "foo".
+template <typename FirstMatcher, typename SecondMatcher>
+inline internal::PairMatcher<FirstMatcher, SecondMatcher>
+Pair(FirstMatcher first_matcher, SecondMatcher second_matcher) {
+  return internal::PairMatcher<FirstMatcher, SecondMatcher>(
+      first_matcher, second_matcher);
 }
 
 // Returns a predicate that is satisfied by anything that matches the

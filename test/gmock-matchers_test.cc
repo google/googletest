@@ -42,6 +42,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -91,6 +92,7 @@ using testing::NanSensitiveFloatEq;
 using testing::Ne;
 using testing::Not;
 using testing::NotNull;
+using testing::Pair;
 using testing::Pointee;
 using testing::PolymorphicMatcher;
 using testing::Property;
@@ -125,6 +127,35 @@ using testing::ContainsRegex;
 using testing::MatchesRegex;
 using testing::internal::RE;
 #endif  // GMOCK_HAS_REGEX
+
+// For testing ExplainMatchResultTo().
+class GreaterThanMatcher : public MatcherInterface<int> {
+ public:
+  explicit GreaterThanMatcher(int rhs) : rhs_(rhs) {}
+
+  virtual bool Matches(int lhs) const { return lhs > rhs_; }
+
+  virtual void DescribeTo(::std::ostream* os) const {
+    *os << "is greater than " << rhs_;
+  }
+
+  virtual void ExplainMatchResultTo(int lhs, ::std::ostream* os) const {
+    const int diff = lhs - rhs_;
+    if (diff > 0) {
+      *os << "is " << diff << " more than " << rhs_;
+    } else if (diff == 0) {
+      *os << "is the same as " << rhs_;
+    } else {
+      *os << "is " << -diff << " less than " << rhs_;
+    }
+  }
+ private:
+  const int rhs_;
+};
+
+Matcher<int> GreaterThan(int n) {
+  return MakeMatcher(new GreaterThanMatcher(n));
+}
 
 // Returns the description of the given matcher.
 template <typename T>
@@ -897,6 +928,90 @@ TEST(KeyTest, InsideContainsUsingMultimap) {
 
   EXPECT_THAT(container, Contains(Key(1)));
   EXPECT_THAT(container, Not(Contains(Key(3))));
+}
+
+TEST(PairTest, Typing) {
+  // Test verifies the following type conversions can be compiled.
+  Matcher<const std::pair<const char*, int>&> m1 = Pair("foo", 42);
+  Matcher<const std::pair<const char*, int> > m2 = Pair("foo", 42);
+  Matcher<std::pair<const char*, int> > m3 = Pair("foo", 42);
+
+  Matcher<std::pair<int, const std::string> > m4 = Pair(25, "42");
+  Matcher<std::pair<const std::string, int> > m5 = Pair("25", 42);
+}
+
+TEST(PairTest, CanDescribeSelf) {
+  Matcher<const std::pair<std::string, int>&> m1 = Pair("foo", 42);
+  EXPECT_EQ("has a first field that is equal to \"foo\""
+            ", and has a second field that is equal to 42",
+            Describe(m1));
+  EXPECT_EQ("has a first field that is not equal to \"foo\""
+            ", or has a second field that is not equal to 42",
+            DescribeNegation(m1));
+  // Double and triple negation (1 or 2 times not and description of negation).
+  Matcher<const std::pair<int, int>&> m2 = Not(Pair(Not(13), 42));
+  EXPECT_EQ("has a first field that is not equal to 13"
+            ", and has a second field that is equal to 42",
+            DescribeNegation(m2));
+}
+
+TEST(PairTest, CanExplainMatchResultTo) {
+  const Matcher<std::pair<int, int> > m0 = Pair(0, 0);
+  EXPECT_EQ("", Explain(m0, std::make_pair(25, 42)));
+
+  const Matcher<std::pair<int, int> > m1 = Pair(GreaterThan(0), 0);
+  EXPECT_EQ("the first field is 25 more than 0",
+            Explain(m1, std::make_pair(25, 42)));
+
+  const Matcher<std::pair<int, int> > m2 = Pair(0, GreaterThan(0));
+  EXPECT_EQ("the second field is 42 more than 0",
+            Explain(m2, std::make_pair(25, 42)));
+
+  const Matcher<std::pair<int, int> > m3 = Pair(GreaterThan(0), GreaterThan(0));
+  EXPECT_EQ("the first field is 25 more than 0"
+            ", and the second field is 42 more than 0",
+            Explain(m3, std::make_pair(25, 42)));
+}
+
+TEST(PairTest, MatchesCorrectly) {
+  std::pair<int, std::string> p(25, "foo");
+
+  // Both fields match.
+  EXPECT_THAT(p, Pair(25, "foo"));
+  EXPECT_THAT(p, Pair(Ge(20), HasSubstr("o")));
+
+  // 'first' doesnt' match, but 'second' matches.
+  EXPECT_THAT(p, Not(Pair(42, "foo")));
+  EXPECT_THAT(p, Not(Pair(Lt(25), "foo")));
+
+  // 'first' matches, but 'second' doesn't match.
+  EXPECT_THAT(p, Not(Pair(25, "bar")));
+  EXPECT_THAT(p, Not(Pair(25, Not("foo"))));
+
+  // Neither field matches.
+  EXPECT_THAT(p, Not(Pair(13, "bar")));
+  EXPECT_THAT(p, Not(Pair(Lt(13), HasSubstr("a"))));
+}
+
+TEST(PairTest, SafelyCastsInnerMatchers) {
+  Matcher<int> is_positive = Gt(0);
+  Matcher<int> is_negative = Lt(0);
+  std::pair<char, bool> p('a', true);
+  EXPECT_THAT(p, Pair(is_positive, _));
+  EXPECT_THAT(p, Not(Pair(is_negative, _)));
+  EXPECT_THAT(p, Pair(_, is_positive));
+  EXPECT_THAT(p, Not(Pair(_, is_negative)));
+}
+
+TEST(PairTest, InsideContainsUsingMap) {
+  std::map<int, std::string> container;
+  container.insert(std::make_pair(1, "foo"));
+  container.insert(std::make_pair(2, "bar"));
+  container.insert(std::make_pair(4, "baz"));
+  EXPECT_THAT(container, Contains(Pair(1, "foo")));
+  EXPECT_THAT(container, Contains(Pair(1, _)));
+  EXPECT_THAT(container, Contains(Pair(_, "foo")));
+  EXPECT_THAT(container, Not(Contains(Pair(3, _))));
 }
 
 // Tests StartsWith(s).
@@ -2148,35 +2263,6 @@ TEST(PointeeTest, CanDescribeSelf) {
   EXPECT_EQ("points to a value that is greater than 3", Describe(m));
   EXPECT_EQ("does not point to a value that is greater than 3",
             DescribeNegation(m));
-}
-
-// For testing ExplainMatchResultTo().
-class GreaterThanMatcher : public MatcherInterface<int> {
- public:
-  explicit GreaterThanMatcher(int rhs) : rhs_(rhs) {}
-
-  virtual bool Matches(int lhs) const { return lhs > rhs_; }
-
-  virtual void DescribeTo(::std::ostream* os) const {
-    *os << "is greater than " << rhs_;
-  }
-
-  virtual void ExplainMatchResultTo(int lhs, ::std::ostream* os) const {
-    const int diff = lhs - rhs_;
-    if (diff > 0) {
-      *os << "is " << diff << " more than " << rhs_;
-    } else if (diff == 0) {
-      *os << "is the same as " << rhs_;
-    } else {
-      *os << "is " << -diff << " less than " << rhs_;
-    }
-  }
- private:
-  const int rhs_;
-};
-
-Matcher<int> GreaterThan(int n) {
-  return MakeMatcher(new GreaterThanMatcher(n));
 }
 
 TEST(PointeeTest, CanExplainMatchResult) {
