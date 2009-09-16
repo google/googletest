@@ -269,13 +269,12 @@ static void FailFromInternalError(int fd) {
   } while (num_read == -1 && errno == EINTR);
 
   if (num_read == 0) {
-    GTEST_LOG_(FATAL, error);
+    GTEST_LOG_(FATAL) << error.GetString().c_str();
   } else {
     const int last_error = errno;
     const String message = GetLastErrnoDescription();
-    GTEST_LOG_(FATAL,
-               Message() << "Error while reading death test internal: "
-               << message << " [" << last_error << "]");
+    GTEST_LOG_(FATAL) << "Error while reading death test internal: "
+                      << message.c_str() << " [" << last_error << "]";
   }
 }
 
@@ -397,15 +396,13 @@ void DeathTestImpl::ReadAndInterpretStatusByte() {
         FailFromInternalError(read_fd());  // Does not return.
         break;
       default:
-        GTEST_LOG_(FATAL,
-                   Message() << "Death test child process reported "
-                   << "unexpected status byte ("
-                   << static_cast<unsigned int>(flag) << ")");
+        GTEST_LOG_(FATAL) << "Death test child process reported "
+                          << "unexpected status byte ("
+                          << static_cast<unsigned int>(flag) << ")";
     }
   } else {
-    GTEST_LOG_(FATAL,
-               Message() << "Read from death test child process failed: "
-                         << GetLastErrnoDescription());
+    GTEST_LOG_(FATAL) << "Read from death test child process failed: "
+                      << GetLastErrnoDescription().c_str();
   }
   GTEST_DEATH_TEST_CHECK_SYSCALL_(posix::Close(read_fd()));
   set_read_fd(-1);
@@ -484,8 +481,8 @@ bool DeathTestImpl::Passed(bool status_ok) {
       break;
     case IN_PROGRESS:
     default:
-      GTEST_LOG_(FATAL,
-                 "DeathTest::Passed somehow called before conclusion of test");
+      GTEST_LOG_(FATAL)
+          << "DeathTest::Passed somehow called before conclusion of test";
   }
 
   DeathTest::set_last_death_test_message(buffer.GetString());
@@ -741,7 +738,7 @@ class NoExecDeathTest : public ForkingDeathTest {
 DeathTest::TestRole NoExecDeathTest::AssumeRole() {
   const size_t thread_count = GetThreadCount();
   if (thread_count != 1) {
-    GTEST_LOG_(WARNING, DeathTestThreadWarning(thread_count));
+    GTEST_LOG_(WARNING) << DeathTestThreadWarning(thread_count);
   }
 
   int pipe_fd[2];

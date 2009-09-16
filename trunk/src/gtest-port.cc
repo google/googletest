@@ -417,20 +417,25 @@ void RE::Init(const char* regex) {
 
 #endif  // GTEST_USES_POSIX_RE
 
-// Logs a message at the given severity level.
-void GTestLog(GTestLogSeverity severity, const char* file,
-              int line, const char* msg) {
+
+GTestLog::GTestLog(GTestLogSeverity severity, const char* file, int line)
+    : severity_(severity) {
   const char* const marker =
       severity == GTEST_INFO ?    "[  INFO ]" :
       severity == GTEST_WARNING ? "[WARNING]" :
       severity == GTEST_ERROR ?   "[ ERROR ]" : "[ FATAL ]";
-  fprintf(stderr, "\n%s %s:%d: %s\n", marker, file, line, msg);
-  if (severity == GTEST_FATAL) {
-    fflush(NULL);  // abort() is not guaranteed to flush open file streams.
+  GetStream() << ::std::endl << marker << " "
+              << FormatFileLocation(file, line).c_str() << ": ";
+}
+
+// Flushes the buffers and, if severity is GTEST_FATAL, aborts the program.
+GTestLog::~GTestLog() {
+  GetStream() << ::std::endl;
+  if (severity_ == GTEST_FATAL) {
+    fflush(stderr);
     posix::Abort();
   }
 }
-
 // Disable Microsoft deprecation warnings for POSIX functions called from
 // this class (creat, dup, dup2, and close)
 #ifdef _MSC_VER
@@ -537,7 +542,7 @@ static String ReadEntireFile(FILE * file) {
 // Starts capturing stderr.
 void CaptureStderr() {
   if (g_captured_stderr != NULL) {
-    GTEST_LOG_(FATAL, "Only one stderr capturer can exist at one time.");
+    GTEST_LOG_(FATAL) << "Only one stderr capturer can exist at one time.";
   }
   g_captured_stderr = new CapturedStderr;
 }

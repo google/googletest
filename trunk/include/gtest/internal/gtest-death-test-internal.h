@@ -172,7 +172,7 @@ bool ExitedUnsuccessfully(int exit_status);
         case ::testing::internal::DeathTest::EXECUTE_TEST: { \
           ::testing::internal::DeathTest::ReturnSentinel \
               gtest_sentinel(gtest_dt); \
-          GTEST_HIDE_UNREACHABLE_CODE_(statement); \
+          GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
           gtest_dt->Abort(::testing::internal::DeathTest::TEST_DID_NOT_DIE); \
           break; \
         } \
@@ -253,17 +253,15 @@ InternalRunDeathTestFlag* ParseInternalRunDeathTestFlag();
 //  statement unconditionally returns or throws. The Message constructor at
 //  the end allows the syntax of streaming additional messages into the
 //  macro, for compilational compatibility with EXPECT_DEATH/ASSERT_DEATH.
-//  TODO(vladl@google.com): rename the GTEST_HIDE_UNREACHABLE_CODE_ macro to
-//  GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_.
 #define GTEST_UNSUPPORTED_DEATH_TEST_(statement, regex, terminator) \
     GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
     if (::testing::internal::AlwaysTrue()) { \
-      GTEST_LOG_(WARNING, \
-                 "Death tests are not supported on this platform.\n" \
-                 "Statement '" #statement "' cannot be verified."); \
+      GTEST_LOG_(WARNING) \
+          << "Death tests are not supported on this platform.\n" \
+          << "Statement '" #statement "' cannot be verified."; \
     } else if (!::testing::internal::AlwaysTrue()) { \
       ::testing::internal::RE::PartialMatch(".*", (regex)); \
-      GTEST_HIDE_UNREACHABLE_CODE_(statement); \
+      GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
       terminator; \
     } else \
       ::testing::Message()
