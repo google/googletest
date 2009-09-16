@@ -36,6 +36,13 @@
 #include <gtest/gtest.h>
 #include <gtest/gtest-spi.h>
 
+// This must not be defined inside the ::testing namespace, or it will
+// clash with ::testing::Mock.
+class Mock {
+ public:
+  MOCK_METHOD0(DoThis, void());
+};
+
 namespace testing {
 namespace gmock_nice_strict_test {
 
@@ -166,6 +173,17 @@ TEST(NiceMockTest, NonDefaultConstructor10) {
   nice_bar.That(5, true);
 }
 
+// Tests that NiceMock<Mock> compiles where Mock is a user-defined
+// class (as opposed to ::testing::Mock).  We had to workaround an
+// MSVC 8.0 bug that caused the symbol Mock used in the definition of
+// NiceMock to be looked up in the wrong context, and this test
+// ensures that our fix works.
+TEST(NiceMockTest, AcceptsClassNamedMock) {
+  NiceMock< ::Mock> nice;
+  EXPECT_CALL(nice, DoThis());
+  nice.DoThis();
+}
+
 // Tests that a strict mock allows expected calls.
 TEST(StrictMockTest, AllowsExpectedCall) {
   StrictMock<MockFoo> strict_foo;
@@ -222,6 +240,17 @@ TEST(StrictMockTest, NonDefaultConstructor10) {
 
   EXPECT_NONFATAL_FAILURE(strict_bar.That(5, true),
                           "Uninteresting mock function call");
+}
+
+// Tests that StrictMock<Mock> compiles where Mock is a user-defined
+// class (as opposed to ::testing::Mock).  We had to workaround an
+// MSVC 8.0 bug that caused the symbol Mock used in the definition of
+// StrictMock to be looked up in the wrong context, and this test
+// ensures that our fix works.
+TEST(StrictMockTest, AcceptsClassNamedMock) {
+  StrictMock< ::Mock> nice;
+  EXPECT_CALL(nice, DoThis());
+  nice.DoThis();
 }
 
 }  // namespace gmock_nice_strict_test

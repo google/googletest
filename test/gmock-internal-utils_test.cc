@@ -815,26 +815,11 @@ TEST(CopyArrayTest, WorksForTwoDimensionalArrays) {
 
 // Tests NativeArray.
 
-TEST(NativeArrayTest, ConstructorFromArrayReferenceWorks) {
+TEST(NativeArrayTest, ConstructorFromArrayWorks) {
   const int a[3] = { 0, 1, 2 };
-  NativeArray<int> na(a, kReference);
+  NativeArray<int> na(a, 3, kReference);
   EXPECT_EQ(3, na.size());
   EXPECT_EQ(a, na.begin());
-}
-
-TEST(NativeArrayTest, ConstructorFromTupleWorks) {
-  int a[3] = { 0, 1, 2 };
-  int* const p = a;
-  // Tests with a plain pointer.
-  NativeArray<int> na(make_tuple(p, 3U), kReference);
-  EXPECT_EQ(a, na.begin());
-
-  const linked_ptr<char> b(new char);
-  *b = 'a';
-  // Tests with a smart pointer.
-  NativeArray<char> nb(make_tuple(b, 1), kCopy);
-  EXPECT_NE(b.get(), nb.begin());
-  EXPECT_EQ('a', nb.begin()[0]);
 }
 
 TEST(NativeArrayTest, CreatesAndDeletesCopyOfArrayWhenAskedTo) {
@@ -842,7 +827,7 @@ TEST(NativeArrayTest, CreatesAndDeletesCopyOfArrayWhenAskedTo) {
   Array* a = new Array[1];
   (*a)[0] = 0;
   (*a)[1] = 1;
-  NativeArray<int> na(*a, kCopy);
+  NativeArray<int> na(*a, 2, kCopy);
   EXPECT_NE(*a, na.begin());
   delete[] a;
   EXPECT_EQ(0, na.begin()[0]);
@@ -861,8 +846,8 @@ TEST(NativeArrayTest, TypeMembersAreCorrect) {
 }
 
 TEST(NativeArrayTest, MethodsWork) {
-  const int a[] = { 0, 1, 2 };
-  NativeArray<int> na(a, kCopy);
+  const int a[3] = { 0, 1, 2 };
+  NativeArray<int> na(a, 3, kCopy);
   ASSERT_EQ(3, na.size());
   EXPECT_EQ(3, na.end() - na.begin());
 
@@ -877,18 +862,18 @@ TEST(NativeArrayTest, MethodsWork) {
 
   EXPECT_THAT(na, Eq(na));
 
-  NativeArray<int> na2(a, kReference);
+  NativeArray<int> na2(a, 3, kReference);
   EXPECT_THAT(na, Eq(na2));
 
-  const int b1[] = { 0, 1, 1 };
-  const int b2[] = { 0, 1, 2, 3 };
-  EXPECT_THAT(na, Not(Eq(NativeArray<int>(b1, kReference))));
-  EXPECT_THAT(na, Not(Eq(NativeArray<int>(b2, kCopy))));
+  const int b1[3] = { 0, 1, 1 };
+  const int b2[4] = { 0, 1, 2, 3 };
+  EXPECT_THAT(na, Not(Eq(NativeArray<int>(b1, 3, kReference))));
+  EXPECT_THAT(na, Not(Eq(NativeArray<int>(b2, 4, kCopy))));
 }
 
 TEST(NativeArrayTest, WorksForTwoDimensionalArray) {
   const char a[2][3] = { "hi", "lo" };
-  NativeArray<char[3]> na(a, kReference);
+  NativeArray<char[3]> na(a, 2, kReference);
   ASSERT_EQ(2, na.size());
   EXPECT_EQ(a, na.begin());
 }

@@ -73,14 +73,16 @@ class NiceMock : public MockClass {
   // We don't factor out the constructor body to a common method, as
   // we have to avoid a possible clash with members of MockClass.
   NiceMock() {
-    Mock::AllowUninterestingCalls(internal::implicit_cast<MockClass*>(this));
+    ::testing::Mock::AllowUninterestingCalls(
+        internal::implicit_cast<MockClass*>(this));
   }
 
   // C++ doesn't (yet) allow inheritance of constructors, so we have
   // to define it for each arity.
   template <typename A1>
   explicit NiceMock(const A1& a1) : MockClass(a1) {
-    Mock::AllowUninterestingCalls(internal::implicit_cast<MockClass*>(this));
+    ::testing::Mock::AllowUninterestingCalls(
+        internal::implicit_cast<MockClass*>(this));
   }
 
 $range i 2..n
@@ -88,13 +90,15 @@ $for i [[
 $range j 1..i
   template <$for j, [[typename A$j]]>
   NiceMock($for j, [[const A$j& a$j]]) : MockClass($for j, [[a$j]]) {
-    Mock::AllowUninterestingCalls(internal::implicit_cast<MockClass*>(this));
+    ::testing::Mock::AllowUninterestingCalls(
+        internal::implicit_cast<MockClass*>(this));
   }
 
 
 ]]
   virtual ~NiceMock() {
-    Mock::UnregisterCallReaction(internal::implicit_cast<MockClass*>(this));
+    ::testing::Mock::UnregisterCallReaction(
+        internal::implicit_cast<MockClass*>(this));
   }
 };
 
@@ -104,25 +108,29 @@ class StrictMock : public MockClass {
   // We don't factor out the constructor body to a common method, as
   // we have to avoid a possible clash with members of MockClass.
   StrictMock() {
-    Mock::FailUninterestingCalls(internal::implicit_cast<MockClass*>(this));
+    ::testing::Mock::FailUninterestingCalls(
+        internal::implicit_cast<MockClass*>(this));
   }
 
   template <typename A1>
   explicit StrictMock(const A1& a1) : MockClass(a1) {
-    Mock::FailUninterestingCalls(internal::implicit_cast<MockClass*>(this));
+    ::testing::Mock::FailUninterestingCalls(
+        internal::implicit_cast<MockClass*>(this));
   }
 
 $for i [[
 $range j 1..i
   template <$for j, [[typename A$j]]>
   StrictMock($for j, [[const A$j& a$j]]) : MockClass($for j, [[a$j]]) {
-    Mock::FailUninterestingCalls(internal::implicit_cast<MockClass*>(this));
+    ::testing::Mock::FailUninterestingCalls(
+        internal::implicit_cast<MockClass*>(this));
   }
 
 
 ]]
   virtual ~StrictMock() {
-    Mock::UnregisterCallReaction(internal::implicit_cast<MockClass*>(this));
+    ::testing::Mock::UnregisterCallReaction(
+        internal::implicit_cast<MockClass*>(this));
   }
 };
 

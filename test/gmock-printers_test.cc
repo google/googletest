@@ -790,14 +790,14 @@ TEST(PrintStlContainerTest, NestedContainer) {
 }
 
 TEST(PrintStlContainerTest, OneDimensionalNativeArray) {
-  const int a[] = { 1, 2, 3 };
-  NativeArray<int> b(a, kReference);
+  const int a[3] = { 1, 2, 3 };
+  NativeArray<int> b(a, 3, kReference);
   EXPECT_EQ("{ 1, 2, 3 }", Print(b));
 }
 
 TEST(PrintStlContainerTest, TwoDimensionalNativeArray) {
-  const int a[][3] = { { 1, 2, 3 }, { 4, 5, 6 } };
-  NativeArray<int[3]> b(a, kReference);
+  const int a[2][3] = { { 1, 2, 3 }, { 4, 5, 6 } };
+  NativeArray<int[3]> b(a, 2, kReference);
   EXPECT_EQ("{ { 1, 2, 3 }, { 4, 5, 6 } }", Print(b));
 }
 

@@ -581,21 +581,9 @@ class NativeArray {
   typedef Element value_type;
   typedef const Element* const_iterator;
 
-  // Constructs from a native array passed by reference.
-  template <size_t N>
-  NativeArray(const Element (&array)[N], RelationToSource relation) {
-    Init(array, N, relation);
-  }
-
-  // Constructs from a native array passed by a pointer and a size.
-  // For generality we don't artificially restrict the types of the
-  // pointer and the size.
-  template <typename Pointer, typename Size>
-  NativeArray(const ::std::tr1::tuple<Pointer, Size>& array,
-              RelationToSource relation) {
-    Init(internal::GetRawPointer(::std::tr1::get<0>(array)),
-         ::std::tr1::get<1>(array),
-         relation);
+  // Constructs from a native array.
+  NativeArray(const Element* array, size_t count, RelationToSource relation) {
+    Init(array, count, relation);
   }
 
   // Copy constructor.
@@ -691,10 +679,10 @@ class StlContainerView<Element[N]> {
   static const_reference ConstReference(const Element (&array)[N]) {
     // Ensures that Element is not a const type.
     testing::StaticAssertTypeEq<Element, RawElement>();
-    return type(array, kReference);
+    return type(array, N, kReference);
   }
   static type Copy(const Element (&array)[N]) {
-    return type(array, kCopy);
+    return type(array, N, kCopy);
   }
 };
 
@@ -710,10 +698,12 @@ class StlContainerView< ::std::tr1::tuple<ElementPointer, Size> > {
 
   static const_reference ConstReference(
       const ::std::tr1::tuple<ElementPointer, Size>& array) {
-    return type(array, kReference);
+    using ::std::tr1::get;
+    return type(get<0>(array), get<1>(array), kReference);
   }
   static type Copy(const ::std::tr1::tuple<ElementPointer, Size>& array) {
-    return type(array, kCopy);
+    using ::std::tr1::get;
+    return type(get<0>(array), get<1>(array), kCopy);
   }
 };
 
