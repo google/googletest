@@ -269,12 +269,11 @@ static void FailFromInternalError(int fd) {
   } while (num_read == -1 && errno == EINTR);
 
   if (num_read == 0) {
-    GTEST_LOG_(FATAL) << error.GetString().c_str();
+    GTEST_LOG_(FATAL) << error.GetString();
   } else {
     const int last_error = errno;
-    const String message = GetLastErrnoDescription();
     GTEST_LOG_(FATAL) << "Error while reading death test internal: "
-                      << message.c_str() << " [" << last_error << "]";
+                      << GetLastErrnoDescription() << " [" << last_error << "]";
   }
 }
 
@@ -402,7 +401,7 @@ void DeathTestImpl::ReadAndInterpretStatusByte() {
     }
   } else {
     GTEST_LOG_(FATAL) << "Read from death test child process failed: "
-                      << GetLastErrnoDescription().c_str();
+                      << GetLastErrnoDescription();
   }
   GTEST_DEATH_TEST_CHECK_SYSCALL_(posix::Close(read_fd()));
   set_read_fd(-1);
