@@ -158,8 +158,7 @@ class TestCase;
 class TestInfoImpl;
 class TestResultAccessor;
 class UnitTestAccessor;
-// TODO(vladl@google.com): Rename to TestEventRepeater.
-class UnitTestEventsRepeater;
+class TestEventRepeater;
 class WindowsDeathTest;
 class UnitTestImpl* GetUnitTestImpl();
 void ReportFailureInUnknownLocation(TestPartResultType result_type,
@@ -781,86 +780,75 @@ class UnitTestEventListenerInterface {
  public:
   virtual ~UnitTestEventListenerInterface() {}
 
-  // TODO(vladl@google.com): Add events for test program start and test program
-  // end: OnTestIterationStart(const UnitTest&); // Start of one iteration.
-  // Add tests, too.
-  // TODO(vladl@google.com): Rename OnUnitTestStart() and OnUnitTestEnd() to
-  // OnTestProgramStart() and OnTestProgramEnd().
-  // Called before any test activity starts.
-  virtual void OnUnitTestStart(const UnitTest& unit_test) = 0;
+  // TODO(vladl@google.com): Add tests for OnTestIterationStart and
+  // OnTestIterationEnd.
 
-  // Called after all test activities have ended.
-  virtual void OnUnitTestEnd(const UnitTest& unit_test) = 0;
+  // Fired before any test activity starts.
+  virtual void OnTestProgramStart(const UnitTest& unit_test) = 0;
 
-  // Called before the test case starts.
+  // Fired after all test activities have ended.
+  virtual void OnTestProgramEnd(const UnitTest& unit_test) = 0;
+
+  // Fired before each iteration of tests starts.  There may be more than
+  // one iteration if GTEST_FLAG(repeat) is set. iteration is the iteration
+  // index, starting from 0.
+  virtual void OnTestIterationStart(const UnitTest& unit_test,
+                                    int iteration) = 0;
+
+  // Fired after each iteration of tests finishes.
+  virtual void OnTestIterationEnd(const UnitTest& unit_test,
+                                  int iteration) = 0;
+
+  // Fired before environment set-up for each iteration of tests starts.
+  virtual void OnEnvironmentsSetUpStart(const UnitTest& unit_test) = 0;
+
+  // Fired after environment set-up for each iteration of tests ends.
+  virtual void OnEnvironmentsSetUpEnd(const UnitTest& unit_test) = 0;
+
+  // Fired before environment tear-down for each iteration of tests starts.
+  virtual void OnEnvironmentsTearDownStart(const UnitTest& unit_test) = 0;
+
+  // Fired after environment tear-down for each iteration of tests ends.
+  virtual void OnEnvironmentsTearDownEnd(const UnitTest& unit_test) = 0;
+
+  // Fired before the test case starts.
   virtual void OnTestCaseStart(const TestCase& test_case) = 0;
 
-  // Called after the test case ends.
+  // Fired after the test case ends.
   virtual void OnTestCaseEnd(const TestCase& test_case) = 0;
 
-  // TODO(vladl@google.com): Rename OnGlobalSetUpStart  to
-  // OnEnvironmentsSetUpStart. Make similar changes for the rest of
-  // environment-related events.
-  // Called before the global set-up starts.
-  virtual void OnGlobalSetUpStart(const UnitTest& unit_test) = 0;
-
-  // Called after the global set-up ends.
-  virtual void OnGlobalSetUpEnd(const UnitTest& unit_test) = 0;
-
-  // Called before the global tear-down starts.
-  virtual void OnGlobalTearDownStart(const UnitTest& unit_test) = 0;
-
-  // Called after the global tear-down ends.
-  virtual void OnGlobalTearDownEnd(const UnitTest& unit_test) = 0;
-
-  // Called before the test starts.
+  // Fired before the test starts.
   virtual void OnTestStart(const TestInfo& test_info) = 0;
 
-  // Called after the test ends.
+  // Fired after the test ends.
   virtual void OnTestEnd(const TestInfo& test_info) = 0;
 
-  // Called after a failed assertion or a SUCCESS().
-  virtual void OnNewTestPartResult(const TestPartResult& test_part_result) = 0;
+  // Fired after a failed assertion or a SUCCESS().
+  virtual void OnTestPartResult(const TestPartResult& test_part_result) = 0;
 };
 
 // The convenience class for users who need to override just one or two
 // methods and are not concerned that a possible change to a signature of
 // the methods they override will not be caught during the build.
+// For comments about each method please see the definition of
+// UnitTestEventListenerInterface above.
 class EmptyTestEventListener : public UnitTestEventListenerInterface {
  public:
-  // Called before the unit test starts.
-  virtual void OnUnitTestStart(const UnitTest& /*unit_test*/) {}
-
-  // Called after the unit test ends.
-  virtual void OnUnitTestEnd(const UnitTest& /*unit_test*/) {}
-
-  // Called before the test case starts.
+  virtual void OnTestProgramStart(const UnitTest& /*unit_test*/) {}
+  virtual void OnTestProgramEnd(const UnitTest& /*unit_test*/) {}
+  virtual void OnTestIterationStart(const UnitTest& /*unit_test*/,
+                                    int /*iteration*/) {}
+  virtual void OnTestIterationEnd(const UnitTest& /*unit_test*/,
+                                  int /*iteration*/) {}
+  virtual void OnEnvironmentsSetUpStart(const UnitTest& /*unit_test*/) {}
+  virtual void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) {}
+  virtual void OnEnvironmentsTearDownStart(const UnitTest& /*unit_test*/) {}
+  virtual void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) {}
   virtual void OnTestCaseStart(const TestCase& /*test_case*/) {}
-
-  // Called after the test case ends.
-  virtual void OnTestCaseEnd(const TestCase& /*test_case&*/) {}
-
-  // Called before the global set-up starts.
-  virtual void OnGlobalSetUpStart(const UnitTest& /*unit_test*/) {}
-
-  // Called after the global set-up ends.
-  virtual void OnGlobalSetUpEnd(const UnitTest& /*unit_test*/) {}
-
-  // Called before the global tear-down starts.
-  virtual void OnGlobalTearDownStart(const UnitTest& /*unit_test*/) {}
-
-  // Called after the global tear-down ends.
-  virtual void OnGlobalTearDownEnd(const UnitTest& /*unit_test*/) {}
-
-  // Called before the test starts.
+  virtual void OnTestCaseEnd(const TestCase& /*test_case*/) {}
   virtual void OnTestStart(const TestInfo& /*test_info*/) {}
-
-  // Called after the test ends.
   virtual void OnTestEnd(const TestInfo& /*test_info*/) {}
-
-  // Called after a failed assertion or a SUCCESS().
-  virtual void OnNewTestPartResult(const TestPartResult& /*test_part_result*/) {
-  }
+  virtual void OnTestPartResult(const TestPartResult& /*test_part_result*/) {}
 };
 
 // EventListeners lets users add listeners to track events in Google Test.
@@ -932,7 +920,7 @@ class EventListeners {
   void SuppressEventForwarding();
 
   // The actual list of listeners.
-  internal::UnitTestEventsRepeater* repeater_;
+  internal::TestEventRepeater* repeater_;
   // Listener responsible for the standard result output.
   UnitTestEventListenerInterface* default_result_printer_;
   // Listener responsible for the creation of the XML output file.

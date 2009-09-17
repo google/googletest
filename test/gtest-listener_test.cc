@@ -73,50 +73,78 @@ class UnitTestAccessor {
 };
 
 class EventRecordingListener : public UnitTestEventListenerInterface {
+ public:
+  EventRecordingListener(const char* name) : name_(name) {}
+
  protected:
-  virtual void OnUnitTestStart(const UnitTest& /*unit_test*/) {
-    g_events->PushBack(String("TestEventListener::OnUnitTestStart"));
+  virtual void OnTestProgramStart(const UnitTest& /*unit_test*/) {
+    g_events->PushBack(GetFullMethodName("OnTestProgramStart"));
   }
 
-  virtual void OnGlobalSetUpStart(const UnitTest& /*unit_test*/) {
-    g_events->PushBack(String("TestEventListener::OnGlobalSetUpStart"));
+  virtual void OnTestIterationStart(const UnitTest& /*unit_test*/,
+                                    int iteration) {
+    Message message;
+    message << GetFullMethodName("OnTestIterationStart")
+            << "(" << iteration << ")";
+    g_events->PushBack(message.GetString());
   }
 
-  virtual void OnGlobalSetUpEnd(const UnitTest& /*unit_test*/) {
-    g_events->PushBack(String("TestEventListener::OnGlobalSetUpEnd"));
+  virtual void OnEnvironmentsSetUpStart(const UnitTest& /*unit_test*/) {
+    g_events->PushBack(GetFullMethodName("OnEnvironmentsSetUpStart"));
+  }
+
+  virtual void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) {
+    g_events->PushBack(GetFullMethodName("OnEnvironmentsSetUpEnd"));
   }
 
   virtual void OnTestCaseStart(const TestCase& /*test_case*/) {
-    g_events->PushBack(String("TestEventListener::OnTestCaseStart"));
+    g_events->PushBack(GetFullMethodName("OnTestCaseStart"));
   }
 
   virtual void OnTestStart(const TestInfo& /*test_info*/) {
-    g_events->PushBack(String("TestEventListener::OnTestStart"));
+    g_events->PushBack(GetFullMethodName("OnTestStart"));
   }
 
-  virtual void OnNewTestPartResult(const TestPartResult& /*test_part_result*/) {
-    g_events->PushBack(String("TestEventListener::OnNewTestPartResult"));
+  virtual void OnTestPartResult(const TestPartResult& /*test_part_result*/) {
+    g_events->PushBack(GetFullMethodName("OnTestPartResult"));
   }
 
   virtual void OnTestEnd(const TestInfo& /*test_info*/) {
-    g_events->PushBack(String("TestEventListener::OnTestEnd"));
+    g_events->PushBack(GetFullMethodName("OnTestEnd"));
   }
 
   virtual void OnTestCaseEnd(const TestCase& /*test_case*/) {
-    g_events->PushBack(String("TestEventListener::OnTestCaseEnd"));
+    g_events->PushBack(GetFullMethodName("OnTestCaseEnd"));
   }
 
-  virtual void OnGlobalTearDownStart(const UnitTest& /*unit_test*/) {
-    g_events->PushBack(String("TestEventListener::OnGlobalTearDownStart"));
+  virtual void OnEnvironmentsTearDownStart(const UnitTest& /*unit_test*/) {
+    g_events->PushBack(GetFullMethodName("OnEnvironmentsTearDownStart"));
   }
 
-  virtual void OnGlobalTearDownEnd(const UnitTest& /*unit_test*/) {
-    g_events->PushBack(String("TestEventListener::OnGlobalTearDownEnd"));
+  virtual void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) {
+    g_events->PushBack(GetFullMethodName("OnEnvironmentsTearDownEnd"));
   }
 
-  virtual void OnUnitTestEnd(const UnitTest& /*unit_test*/) {
-    g_events->PushBack(String("TestEventListener::OnUnitTestEnd"));
+  virtual void OnTestIterationEnd(const UnitTest& /*unit_test*/,
+                                  int iteration) {
+    Message message;
+    message << GetFullMethodName("OnTestIterationEnd")
+            << "("  << iteration << ")";
+    g_events->PushBack(message.GetString());
   }
+
+  virtual void OnTestProgramEnd(const UnitTest& /*unit_test*/) {
+    g_events->PushBack(GetFullMethodName("OnTestProgramEnd"));
+  }
+
+ private:
+  String GetFullMethodName(const char* name) {
+    Message message;
+    message << name_ << "." << name;
+    return message.GetString();
+  }
+
+  String name_;
 };
 
 class EnvironmentInvocationCatcher : public Environment {
@@ -169,57 +197,132 @@ using ::testing::internal::EnvironmentInvocationCatcher;
 using ::testing::internal::EventRecordingListener;
 using ::testing::internal::UnitTestAccessor;
 
+void VerifyResults(const Vector<String>& data,
+                   const char* const* expected_data,
+                   int expected_data_size) {
+  const int actual_size = data.size();
+  // If the following assertion fails, a new entry will be appended to
+  // data.  Hence we save data.size() first.
+  EXPECT_EQ(expected_data_size, actual_size);
+
+  // Compares the common prefix.
+  const int shorter_size = expected_data_size <= actual_size ?
+      expected_data_size : actual_size;
+  int i = 0;
+  for (; i < shorter_size; ++i) {
+    ASSERT_STREQ(expected_data[i], data.GetElement(i).c_str())
+        << "at position " << i;
+  }
+
+  // Prints extra elements in the actual data.
+  for (; i < actual_size; ++i) {
+    printf("  Actual event #%d: %s\n", i, data.GetElement(i).c_str());
+  }
+}
+
 int main(int argc, char **argv) {
   Vector<String> events;
   g_events = &events;
   InitGoogleTest(&argc, argv);
 
-  UnitTestEventListenerInterface* listener = new EventRecordingListener;
-  UnitTestAccessor::GetEventListeners().Append(listener);
+  UnitTestAccessor::GetEventListeners().Append(
+      new EventRecordingListener("1st"));
+  UnitTestAccessor::GetEventListeners().Append(
+      new EventRecordingListener("2nd"));
 
   AddGlobalTestEnvironment(new EnvironmentInvocationCatcher);
 
   GTEST_CHECK_(events.size() == 0)
       << "AddGlobalTestEnvironment should not generate any events itself.";
 
+  ::testing::GTEST_FLAG(repeat) = 2;
   int ret_val = RUN_ALL_TESTS();
 
   const char* const expected_events[] = {
-    "TestEventListener::OnUnitTestStart",
-    "TestEventListener::OnGlobalSetUpStart",
+    "1st.OnTestProgramStart",
+    "2nd.OnTestProgramStart",
+    "1st.OnTestIterationStart(0)",
+    "2nd.OnTestIterationStart(0)",
+    "1st.OnEnvironmentsSetUpStart",
+    "2nd.OnEnvironmentsSetUpStart",
     "Environment::SetUp",
-    "TestEventListener::OnGlobalSetUpEnd",
-    "TestEventListener::OnTestCaseStart",
+    "2nd.OnEnvironmentsSetUpEnd",
+    "1st.OnEnvironmentsSetUpEnd",
+    "1st.OnTestCaseStart",
+    "2nd.OnTestCaseStart",
     "ListenerTest::SetUpTestCase",
-    "TestEventListener::OnTestStart",
+    "1st.OnTestStart",
+    "2nd.OnTestStart",
     "ListenerTest::SetUp",
     "ListenerTest::* Test Body",
-    "TestEventListener::OnNewTestPartResult",
+    "1st.OnTestPartResult",
+    "2nd.OnTestPartResult",
     "ListenerTest::TearDown",
-    "TestEventListener::OnTestEnd",
-    "TestEventListener::OnTestStart",
+    "2nd.OnTestEnd",
+    "1st.OnTestEnd",
+    "1st.OnTestStart",
+    "2nd.OnTestStart",
     "ListenerTest::SetUp",
     "ListenerTest::* Test Body",
-    "TestEventListener::OnNewTestPartResult",
+    "1st.OnTestPartResult",
+    "2nd.OnTestPartResult",
     "ListenerTest::TearDown",
-    "TestEventListener::OnTestEnd",
+    "2nd.OnTestEnd",
+    "1st.OnTestEnd",
     "ListenerTest::TearDownTestCase",
-    "TestEventListener::OnTestCaseEnd",
-    "TestEventListener::OnGlobalTearDownStart",
+    "2nd.OnTestCaseEnd",
+    "1st.OnTestCaseEnd",
+    "1st.OnEnvironmentsTearDownStart",
+    "2nd.OnEnvironmentsTearDownStart",
     "Environment::TearDown",
-    "TestEventListener::OnGlobalTearDownEnd",
-    "TestEventListener::OnUnitTestEnd"
+    "2nd.OnEnvironmentsTearDownEnd",
+    "1st.OnEnvironmentsTearDownEnd",
+    "2nd.OnTestIterationEnd(0)",
+    "1st.OnTestIterationEnd(0)",
+    "1st.OnTestIterationStart(1)",
+    "2nd.OnTestIterationStart(1)",
+    "1st.OnEnvironmentsSetUpStart",
+    "2nd.OnEnvironmentsSetUpStart",
+    "Environment::SetUp",
+    "2nd.OnEnvironmentsSetUpEnd",
+    "1st.OnEnvironmentsSetUpEnd",
+    "1st.OnTestCaseStart",
+    "2nd.OnTestCaseStart",
+    "ListenerTest::SetUpTestCase",
+    "1st.OnTestStart",
+    "2nd.OnTestStart",
+    "ListenerTest::SetUp",
+    "ListenerTest::* Test Body",
+    "1st.OnTestPartResult",
+    "2nd.OnTestPartResult",
+    "ListenerTest::TearDown",
+    "2nd.OnTestEnd",
+    "1st.OnTestEnd",
+    "1st.OnTestStart",
+    "2nd.OnTestStart",
+    "ListenerTest::SetUp",
+    "ListenerTest::* Test Body",
+    "1st.OnTestPartResult",
+    "2nd.OnTestPartResult",
+    "ListenerTest::TearDown",
+    "2nd.OnTestEnd",
+    "1st.OnTestEnd",
+    "ListenerTest::TearDownTestCase",
+    "2nd.OnTestCaseEnd",
+    "1st.OnTestCaseEnd",
+    "1st.OnEnvironmentsTearDownStart",
+    "2nd.OnEnvironmentsTearDownStart",
+    "Environment::TearDown",
+    "2nd.OnEnvironmentsTearDownEnd",
+    "1st.OnEnvironmentsTearDownEnd",
+    "2nd.OnTestIterationEnd(1)",
+    "1st.OnTestIterationEnd(1)",
+    "2nd.OnTestProgramEnd",
+    "1st.OnTestProgramEnd"
   };
-  const int kExpectedEventsSize =
-      sizeof(expected_events)/sizeof(expected_events[0]);
-
-  // Cannot use ASSERT_EQ() here because it requires the scoping function to
-  // return void.
-  GTEST_CHECK_(events.size() == kExpectedEventsSize);
-
-  for (int i = 0; i < events.size(); ++i)
-    GTEST_CHECK_(String(events.GetElement(i)) == expected_events[i])
-        << "At position " << i;
+  VerifyResults(events,
+                expected_events,
+                sizeof(expected_events)/sizeof(expected_events[0]));
 
   // We need to check manually for ad hoc test failures that happen after
   // RUN_ALL_TESTS finishes.
