@@ -99,10 +99,6 @@ class SConstructHelper:
                  # Disables warnings that are either uninteresting or
                  # hard to fix.
 
-                 '/wd4100',
-                 # unreferenced formal parameter.  The violation is in
-                 # gcc's TR1 tuple and hard to fix.
-
                  '/wd4127',
                  # constant conditional expression.  The macro
                  # GTEST_IS_NULL_LITERAL_() triggers it and I cannot find

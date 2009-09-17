@@ -74,47 +74,47 @@ class UnitTestAccessor {
 
 class EventRecordingListener : public UnitTestEventListenerInterface {
  protected:
-  virtual void OnUnitTestStart(const UnitTest& unit_test) {
+  virtual void OnUnitTestStart(const UnitTest& /*unit_test*/) {
     g_events->PushBack(String("TestEventListener::OnUnitTestStart"));
   }
 
-  virtual void OnGlobalSetUpStart(const UnitTest& unit_test) {
+  virtual void OnGlobalSetUpStart(const UnitTest& /*unit_test*/) {
     g_events->PushBack(String("TestEventListener::OnGlobalSetUpStart"));
   }
 
-  virtual void OnGlobalSetUpEnd(const UnitTest& unit_test) {
+  virtual void OnGlobalSetUpEnd(const UnitTest& /*unit_test*/) {
     g_events->PushBack(String("TestEventListener::OnGlobalSetUpEnd"));
   }
 
-  virtual void OnTestCaseStart(const TestCase& test_case) {
+  virtual void OnTestCaseStart(const TestCase& /*test_case*/) {
     g_events->PushBack(String("TestEventListener::OnTestCaseStart"));
   }
 
-  virtual void OnTestStart(const TestInfo& test_info) {
+  virtual void OnTestStart(const TestInfo& /*test_info*/) {
     g_events->PushBack(String("TestEventListener::OnTestStart"));
   }
 
-  virtual void OnNewTestPartResult(const TestPartResult& test_part_result) {
+  virtual void OnNewTestPartResult(const TestPartResult& /*test_part_result*/) {
     g_events->PushBack(String("TestEventListener::OnNewTestPartResult"));
   }
 
-  virtual void OnTestEnd(const TestInfo& test_info) {
+  virtual void OnTestEnd(const TestInfo& /*test_info*/) {
     g_events->PushBack(String("TestEventListener::OnTestEnd"));
   }
 
-  virtual void OnTestCaseEnd(const TestCase& test_case) {
+  virtual void OnTestCaseEnd(const TestCase& /*test_case*/) {
     g_events->PushBack(String("TestEventListener::OnTestCaseEnd"));
   }
 
-  virtual void OnGlobalTearDownStart(const UnitTest& unit_test) {
+  virtual void OnGlobalTearDownStart(const UnitTest& /*unit_test*/) {
     g_events->PushBack(String("TestEventListener::OnGlobalTearDownStart"));
   }
 
-  virtual void OnGlobalTearDownEnd(const UnitTest& unit_test) {
+  virtual void OnGlobalTearDownEnd(const UnitTest& /*unit_test*/) {
     g_events->PushBack(String("TestEventListener::OnGlobalTearDownEnd"));
   }
 
-  virtual void OnUnitTestEnd(const UnitTest& unit_test) {
+  virtual void OnUnitTestEnd(const UnitTest& /*unit_test*/) {
     g_events->PushBack(String("TestEventListener::OnUnitTestEnd"));
   }
 };
