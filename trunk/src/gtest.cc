@@ -617,7 +617,7 @@ DefaultGlobalTestPartResultReporter::DefaultGlobalTestPartResultReporter(
 void DefaultGlobalTestPartResultReporter::ReportTestPartResult(
     const TestPartResult& result) {
   unit_test_->current_test_result()->AddTestPartResult(result);
-  unit_test_->listeners()->repeater()->OnNewTestPartResult(result);
+  unit_test_->listeners()->repeater()->OnTestPartResult(result);
 }
 
 DefaultPerThreadTestPartResultReporter::DefaultPerThreadTestPartResultReporter(
@@ -2471,12 +2471,10 @@ static void PrintTestPartResult(const TestPartResult& test_part_result) {
   // following statements add the test part result message to the Output
   // window such that the user can double-click on it to jump to the
   // corresponding source code location; otherwise they do nothing.
-#ifdef _WIN32_WCE
-  // Windows Mobile doesn't support the ANSI version of OutputDebugString,
-  // it works only with UTF16 strings.
-  ::OutputDebugString(internal::String::AnsiToUtf16(result.c_str()));
-  ::OutputDebugString(L"\n");
-#elif GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS && !defined(_WIN32_WCE)
+  // We don't call OutputDebugString*() on Windows Mobile, as printing
+  // to stdout is done by OutputDebugString() there already - we don't
+  // want the same message printed twice.
   ::OutputDebugStringA(result.c_str());
   ::OutputDebugStringA("\n");
 #endif
@@ -2608,17 +2606,19 @@ class PrettyUnitTestResultPrinter : public UnitTestEventListenerInterface {
 
   // The following methods override what's in the
   // UnitTestEventListenerInterface class.
-  virtual void OnUnitTestStart(const UnitTest& unit_test);
-  virtual void OnGlobalSetUpStart(const UnitTest& unit_test);
-  virtual void OnGlobalSetUpEnd(const UnitTest& /*unit_test*/) {}
+  virtual void OnTestProgramStart(const UnitTest& /*unit_test*/) {}
+  virtual void OnTestIterationStart(const UnitTest& unit_test, int iteration);
+  virtual void OnEnvironmentsSetUpStart(const UnitTest& unit_test);
+  virtual void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) {}
   virtual void OnTestCaseStart(const TestCase& test_case);
   virtual void OnTestCaseEnd(const TestCase& test_case);
   virtual void OnTestStart(const TestInfo& test_info);
-  virtual void OnNewTestPartResult(const TestPartResult& result);
+  virtual void OnTestPartResult(const TestPartResult& result);
   virtual void OnTestEnd(const TestInfo& test_info);
-  virtual void OnGlobalTearDownStart(const UnitTest& unit_test);
-  virtual void OnGlobalTearDownEnd(const UnitTest& /*unit_test*/) {}
-  virtual void OnUnitTestEnd(const UnitTest& unit_test);
+  virtual void OnEnvironmentsTearDownStart(const UnitTest& unit_test);
+  virtual void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) {}
+  virtual void OnTestIterationEnd(const UnitTest& unit_test, int iteration);
+  virtual void OnTestProgramEnd(const UnitTest& /*unit_test*/) {}
 
  private:
   static void PrintFailedTests(const UnitTest& unit_test);
@@ -2626,8 +2626,12 @@ class PrettyUnitTestResultPrinter : public UnitTestEventListenerInterface {
   internal::String test_case_name_;
 };
 
-// Called before the unit test starts.
-void PrettyUnitTestResultPrinter::OnUnitTestStart(const UnitTest& unit_test) {
+  // Fired before each iteration of tests starts.
+void PrettyUnitTestResultPrinter::OnTestIterationStart(
+    const UnitTest& unit_test, int iteration) {
+  if (GTEST_FLAG(repeat) != 1)
+    printf("\nRepeating all tests (iteration %d) . . .\n\n", iteration + 1);
+
   const char* const filter = GTEST_FLAG(filter).c_str();
 
   // Prints the filter if it's not *.  This reminds the user that some
@@ -2657,7 +2661,7 @@ void PrettyUnitTestResultPrinter::OnUnitTestStart(const UnitTest& unit_test) {
   fflush(stdout);
 }
 
-void PrettyUnitTestResultPrinter::OnGlobalSetUpStart(
+void PrettyUnitTestResultPrinter::OnEnvironmentsSetUpStart(
     const UnitTest& /*unit_test*/) {
   ColoredPrintf(COLOR_GREEN,  "[----------] ");
   printf("Global test environment set-up.\n");
@@ -2719,7 +2723,7 @@ void PrettyUnitTestResultPrinter::OnTestEnd(const TestInfo& test_info) {
 }
 
 // Called after an assertion failure.
-void PrettyUnitTestResultPrinter::OnNewTestPartResult(
+void PrettyUnitTestResultPrinter::OnTestPartResult(
     const TestPartResult& result) {
   // If the test part succeeded, we don't need to do anything.
   if (result.type() == TPRT_SUCCESS)
@@ -2730,7 +2734,7 @@ void PrettyUnitTestResultPrinter::OnNewTestPartResult(
   fflush(stdout);
 }
 
-void PrettyUnitTestResultPrinter::OnGlobalTearDownStart(
+void PrettyUnitTestResultPrinter::OnEnvironmentsTearDownStart(
     const UnitTest& /*unit_test*/) {
   ColoredPrintf(COLOR_GREEN,  "[----------] ");
   printf("Global test environment tear-down\n");
@@ -2769,7 +2773,8 @@ void PrettyUnitTestResultPrinter::PrintFailedTests(const UnitTest& unit_test) {
   }
 }
 
-void PrettyUnitTestResultPrinter::OnUnitTestEnd(const UnitTest& unit_test) {
+ void PrettyUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
+                                                      int /*iteration*/) {
   ColoredPrintf(COLOR_GREEN,  "[==========] ");
   printf("%s from %s ran.",
          FormatTestCount(unit_test.test_to_run_count()).c_str(),
@@ -2808,13 +2813,13 @@ void PrettyUnitTestResultPrinter::OnUnitTestEnd(const UnitTest& unit_test) {
 
 // End PrettyUnitTestResultPrinter
 
-// class UnitTestEventsRepeater
+// class TestEventRepeater
 //
 // This class forwards events to other event listeners.
-class UnitTestEventsRepeater : public UnitTestEventListenerInterface {
+class TestEventRepeater : public UnitTestEventListenerInterface {
  public:
-  UnitTestEventsRepeater() : forwarding_enabled_(true) {}
-  virtual ~UnitTestEventsRepeater();
+  TestEventRepeater() : forwarding_enabled_(true) {}
+  virtual ~TestEventRepeater();
   void Append(UnitTestEventListenerInterface *listener);
   UnitTestEventListenerInterface* Release(
       UnitTestEventListenerInterface* listener);
@@ -2824,17 +2829,19 @@ class UnitTestEventsRepeater : public UnitTestEventListenerInterface {
   bool forwarding_enabled() const { return forwarding_enabled_; }
   void set_forwarding_enabled(bool enable) { forwarding_enabled_ = enable; }
 
-  virtual void OnUnitTestStart(const UnitTest& unit_test);
-  virtual void OnUnitTestEnd(const UnitTest& unit_test);
-  virtual void OnGlobalSetUpStart(const UnitTest& unit_test);
-  virtual void OnGlobalSetUpEnd(const UnitTest& unit_test);
-  virtual void OnGlobalTearDownStart(const UnitTest& unit_test);
-  virtual void OnGlobalTearDownEnd(const UnitTest& unit_test);
+  virtual void OnTestProgramStart(const UnitTest& unit_test);
+  virtual void OnTestProgramEnd(const UnitTest& unit_test);
+  virtual void OnTestIterationStart(const UnitTest& unit_test, int iteration);
+  virtual void OnTestIterationEnd(const UnitTest& unit_test, int iteration);
+  virtual void OnEnvironmentsSetUpStart(const UnitTest& unit_test);
+  virtual void OnEnvironmentsSetUpEnd(const UnitTest& unit_test);
+  virtual void OnEnvironmentsTearDownStart(const UnitTest& unit_test);
+  virtual void OnEnvironmentsTearDownEnd(const UnitTest& unit_test);
   virtual void OnTestCaseStart(const TestCase& test_case);
   virtual void OnTestCaseEnd(const TestCase& test_case);
   virtual void OnTestStart(const TestInfo& test_info);
   virtual void OnTestEnd(const TestInfo& test_info);
-  virtual void OnNewTestPartResult(const TestPartResult& result);
+  virtual void OnTestPartResult(const TestPartResult& result);
 
  private:
   // Controls whether events will be forwarded to listeners_. Set to false
@@ -2843,21 +2850,21 @@ class UnitTestEventsRepeater : public UnitTestEventListenerInterface {
   // The list of listeners that receive events.
   Vector<UnitTestEventListenerInterface*> listeners_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(UnitTestEventsRepeater);
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(TestEventRepeater);
 };
 
-UnitTestEventsRepeater::~UnitTestEventsRepeater() {
+TestEventRepeater::~TestEventRepeater() {
   for (int i = 0; i < listeners_.size(); i++) {
     delete listeners_.GetElement(i);
   }
 }
 
-void UnitTestEventsRepeater::Append(UnitTestEventListenerInterface *listener) {
+void TestEventRepeater::Append(UnitTestEventListenerInterface *listener) {
   listeners_.PushBack(listener);
 }
 
 // TODO(vladl@google.com): Factor the search functionality into Vector::Find.
-UnitTestEventListenerInterface* UnitTestEventsRepeater::Release(
+UnitTestEventListenerInterface* TestEventRepeater::Release(
     UnitTestEventListenerInterface *listener) {
   for (int i = 0; i < listeners_.size(); ++i) {
     if (listeners_.GetElement(i) == listener) {
@@ -2869,39 +2876,68 @@ UnitTestEventListenerInterface* UnitTestEventsRepeater::Release(
   return NULL;
 }
 
-// Since the methods are identical, use a macro to reduce boilerplate.
-// This defines a member that repeats the call to all listeners.
+// Since most methods are very similar, use macros to reduce boilerplate.
+// This defines a member that forwards the call to all listeners.
 #define GTEST_REPEATER_METHOD_(Name, Type) \
-void UnitTestEventsRepeater::Name(const Type& parameter) { \
+void TestEventRepeater::Name(const Type& parameter) { \
   if (forwarding_enabled_) { \
     for (int i = 0; i < listeners_.size(); i++) { \
       listeners_.GetElement(i)->Name(parameter); \
     } \
   } \
 }
+// This defines a member that forwards the call to all listeners in reverse
+// order.
+#define GTEST_REVERSE_REPEATER_METHOD_(Name, Type) \
+void TestEventRepeater::Name(const Type& parameter) { \
+  if (forwarding_enabled_) { \
+    for (int i = static_cast<int>(listeners_.size()) - 1; i >= 0; i--) { \
+      listeners_.GetElement(i)->Name(parameter); \
+    } \
+  } \
+}
 
-GTEST_REPEATER_METHOD_(OnUnitTestStart, UnitTest)
-GTEST_REPEATER_METHOD_(OnUnitTestEnd, UnitTest)
-GTEST_REPEATER_METHOD_(OnGlobalSetUpStart, UnitTest)
-GTEST_REPEATER_METHOD_(OnGlobalSetUpEnd, UnitTest)
-GTEST_REPEATER_METHOD_(OnGlobalTearDownStart, UnitTest)
-GTEST_REPEATER_METHOD_(OnGlobalTearDownEnd, UnitTest)
+GTEST_REPEATER_METHOD_(OnTestProgramStart, UnitTest)
+GTEST_REPEATER_METHOD_(OnEnvironmentsSetUpStart, UnitTest)
+GTEST_REPEATER_METHOD_(OnEnvironmentsTearDownStart, UnitTest)
 GTEST_REPEATER_METHOD_(OnTestCaseStart, TestCase)
-GTEST_REPEATER_METHOD_(OnTestCaseEnd, TestCase)
 GTEST_REPEATER_METHOD_(OnTestStart, TestInfo)
-GTEST_REPEATER_METHOD_(OnTestEnd, TestInfo)
-GTEST_REPEATER_METHOD_(OnNewTestPartResult, TestPartResult)
+GTEST_REPEATER_METHOD_(OnTestPartResult, TestPartResult)
+GTEST_REVERSE_REPEATER_METHOD_(OnTestProgramEnd, UnitTest)
+GTEST_REVERSE_REPEATER_METHOD_(OnEnvironmentsSetUpEnd, UnitTest)
+GTEST_REVERSE_REPEATER_METHOD_(OnEnvironmentsTearDownEnd, UnitTest)
+GTEST_REVERSE_REPEATER_METHOD_(OnTestCaseEnd, TestCase)
+GTEST_REVERSE_REPEATER_METHOD_(OnTestEnd, TestInfo)
 
 #undef GTEST_REPEATER_METHOD_
+#undef GTEST_REVERSE_REPEATER_METHOD_
 
-// End UnitTestEventsRepeater
+void TestEventRepeater::OnTestIterationStart(const UnitTest& unit_test,
+                                             int iteration) {
+  if (forwarding_enabled_) {
+    for (int i = 0; i < listeners_.size(); i++) {
+      listeners_.GetElement(i)->OnTestIterationStart(unit_test, iteration);
+    }
+  }
+}
+
+void TestEventRepeater::OnTestIterationEnd(const UnitTest& unit_test,
+                                           int iteration) {
+  if (forwarding_enabled_) {
+    for (int i = static_cast<int>(listeners_.size()) - 1; i >= 0; i--) {
+      listeners_.GetElement(i)->OnTestIterationEnd(unit_test, iteration);
+    }
+  }
+}
+
+// End TestEventRepeater
 
 // This class generates an XML output file.
 class XmlUnitTestResultPrinter : public EmptyTestEventListener {
  public:
   explicit XmlUnitTestResultPrinter(const char* output_file);
 
-  virtual void OnUnitTestEnd(const UnitTest& unit_test);
+  virtual void OnTestIterationEnd(const UnitTest& unit_test, int iteration);
 
  private:
   // Is c a whitespace character that is normalized to a space character
@@ -2963,7 +2999,8 @@ XmlUnitTestResultPrinter::XmlUnitTestResultPrinter(const char* output_file)
 }
 
 // Called after the unit test ends.
-void XmlUnitTestResultPrinter::OnUnitTestEnd(const UnitTest& unit_test) {
+void XmlUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
+                                                  int /*iteration*/) {
   FILE* xmlout = NULL;
   FilePath output_file(output_file_);
   FilePath output_dir(output_file.RemoveFileName());
@@ -3210,7 +3247,7 @@ OsStackTraceGetter::kElidedFramesMarker =
 // class EventListeners
 
 EventListeners::EventListeners()
-    : repeater_(new internal::UnitTestEventsRepeater()),
+    : repeater_(new internal::TestEventRepeater()),
       default_result_printer_(NULL),
       default_xml_generator_(NULL) {
 }
@@ -3834,31 +3871,27 @@ int UnitTestImpl::RunAllTests() {
 
   UnitTestEventListenerInterface* repeater = listeners()->repeater();
 
+  repeater->OnTestProgramStart(*parent_);
+
   // How many times to repeat the tests?  We don't want to repeat them
   // when we are inside the subprocess of a death test.
   const int repeat = in_subprocess_for_death_test ? 1 : GTEST_FLAG(repeat);
   // Repeats forever if the repeat count is negative.
   const bool forever = repeat < 0;
   for (int i = 0; forever || i != repeat; i++) {
-    if (repeat != 1) {
-      // TODO(vladl@google.com): Move this output to
-      // PrettyUnitTestResultPrinter. Add the iteration number parameter to
-      // OnUnitTestStart.
-      printf("\nRepeating all tests (iteration %d) . . .\n\n", i + 1);
-    }
+    ClearResult();
+
+    const TimeInMillis start = GetTimeInMillis();
 
     // Tells the unit test event listeners that the tests are about to start.
-    repeater->OnUnitTestStart(*parent_);
-
-    // TODO(vladl@google.com): Move to before the OnUnitTestStart notification?
-    const TimeInMillis start = GetTimeInMillis();
+    repeater->OnTestIterationStart(*parent_, i);
 
     // Runs each test case if there is at least one test to run.
     if (has_tests_to_run) {
       // Sets up all environments beforehand.
-      repeater->OnGlobalSetUpStart(*parent_);
+      repeater->OnEnvironmentsSetUpStart(*parent_);
       environments_.ForEach(SetUpEnvironment);
-      repeater->OnGlobalSetUpEnd(*parent_);
+      repeater->OnEnvironmentsSetUpEnd(*parent_);
 
       // Runs the tests only if there was no fatal failure during global
       // set-up.
@@ -3867,27 +3900,28 @@ int UnitTestImpl::RunAllTests() {
       }
 
       // Tears down all environments in reverse order afterwards.
-      repeater->OnGlobalTearDownStart(*parent_);
+      repeater->OnEnvironmentsTearDownStart(*parent_);
       environments_in_reverse_order_.ForEach(TearDownEnvironment);
-      repeater->OnGlobalTearDownEnd(*parent_);
+      repeater->OnEnvironmentsTearDownEnd(*parent_);
     }
 
     elapsed_time_ = GetTimeInMillis() - start;
 
     // Tells the unit test event listener that the tests have just finished.
-    repeater->OnUnitTestEnd(*parent_);
+    repeater->OnTestIterationEnd(*parent_, i);
 
     // Gets the result and clears it.
     if (!Passed()) {
       failed = true;
     }
-    ClearResult();
 
     if (GTEST_FLAG(shuffle)) {
       // Picks a new random seed for each run.
       random_seed_ = GetNextRandomSeed(random_seed_);
     }
   }
+
+  repeater->OnTestProgramEnd(*parent_);
 
   // Returns 0 if all tests passed, or 1 other wise.
   return failed ? 1 : 0;

@@ -105,7 +105,7 @@ class TersePrinter : public EmptyTestEventListener {
   }
 
   // Called after a failed assertion or a SUCCESS().
-  virtual void OnNewTestPartResult(const TestPartResult& test_part_result) {
+  virtual void OnTestPartResult(const TestPartResult& test_part_result) {
     fprintf(stdout,
             "%s in %s:%d\n%s\n",
             test_part_result.failed() ? "*** Failure" : "Success",

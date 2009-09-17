@@ -6215,7 +6215,7 @@ class TestListener : public EmptyTestEventListener {
   }
 
  protected:
-  virtual void OnUnitTestStart(const UnitTest& /*unit_test*/) {
+  virtual void OnTestProgramStart(const UnitTest& /*unit_test*/) {
     if (on_start_counter_ != NULL)
       (*on_start_counter_)++;
   }
@@ -6269,43 +6269,88 @@ TEST(EventListenersTest, Append) {
   {
     EventListeners listeners;
     listeners.Append(listener);
-    EventListenersAccessor::GetRepeater(&listeners)->OnUnitTestStart(
+    EventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
         *UnitTest::GetInstance());
     EXPECT_EQ(1, on_start_counter);
   }
   EXPECT_TRUE(is_destroyed);
 }
 
-// Tests that listeners receive requests in the order they were appended to
-// the list.
+// Tests that listeners receive events in the order they were appended to
+// the list, except for *End requests, which must be received in the reverse
+// order.
 class SequenceTestingListener : public EmptyTestEventListener {
  public:
-  SequenceTestingListener(Vector<const char*>* vector, const char* signature)
-      : vector_(vector), signature_(signature) {}
+  SequenceTestingListener(Vector<String>* vector, const char* id)
+      : vector_(vector), id_(id) {}
 
  protected:
-  virtual void OnUnitTestStart(const UnitTest& /*unit_test*/) {
-    if (vector_ != NULL)
-      vector_->PushBack(signature_);
+  virtual void OnTestProgramStart(const UnitTest& /*unit_test*/) {
+    vector_->PushBack(GetEventDescription("OnTestProgramStart"));
+  }
+
+  virtual void OnTestProgramEnd(const UnitTest& /*unit_test*/) {
+    vector_->PushBack(GetEventDescription("OnTestProgramEnd"));
+  }
+
+  virtual void OnTestIterationStart(const UnitTest& /*unit_test*/,
+                                    int /*iteration*/) {
+    vector_->PushBack(GetEventDescription("OnTestIterationStart"));
+  }
+
+  virtual void OnTestIterationEnd(const UnitTest& /*unit_test*/,
+                                  int /*iteration*/) {
+    vector_->PushBack(GetEventDescription("OnTestIterationEnd"));
   }
 
  private:
-  Vector<const char*>* vector_;
-  const char* const signature_;
+  String GetEventDescription(const char* method) {
+    Message message;
+    message << id_ << "." << method;
+    return message.GetString();
+  }
+
+  Vector<String>* vector_;
+  const char* const id_;
 };
 
 TEST(EventListenerTest, AppendKeepsOrder) {
-  Vector<const char*> vec;
+  Vector<String> vec;
   EventListeners listeners;
-  listeners.Append(new SequenceTestingListener(&vec, "0"));
-  listeners.Append(new SequenceTestingListener(&vec, "1"));
-  listeners.Append(new SequenceTestingListener(&vec, "2"));
-  EventListenersAccessor::GetRepeater(&listeners)->OnUnitTestStart(
+  listeners.Append(new SequenceTestingListener(&vec, "1st"));
+  listeners.Append(new SequenceTestingListener(&vec, "2nd"));
+  listeners.Append(new SequenceTestingListener(&vec, "3rd"));
+
+  EventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
       *UnitTest::GetInstance());
   ASSERT_EQ(3, vec.size());
-  ASSERT_STREQ("0", vec.GetElement(0));
-  ASSERT_STREQ("1", vec.GetElement(1));
-  ASSERT_STREQ("2", vec.GetElement(2));
+  EXPECT_STREQ("1st.OnTestProgramStart", vec.GetElement(0).c_str());
+  EXPECT_STREQ("2nd.OnTestProgramStart", vec.GetElement(1).c_str());
+  EXPECT_STREQ("3rd.OnTestProgramStart", vec.GetElement(2).c_str());
+
+  vec.Clear();
+  EventListenersAccessor::GetRepeater(&listeners)->OnTestProgramEnd(
+      *UnitTest::GetInstance());
+  ASSERT_EQ(3, vec.size());
+  EXPECT_STREQ("3rd.OnTestProgramEnd", vec.GetElement(0).c_str());
+  EXPECT_STREQ("2nd.OnTestProgramEnd", vec.GetElement(1).c_str());
+  EXPECT_STREQ("1st.OnTestProgramEnd", vec.GetElement(2).c_str());
+
+  vec.Clear();
+  EventListenersAccessor::GetRepeater(&listeners)->OnTestIterationStart(
+      *UnitTest::GetInstance(), 0);
+  ASSERT_EQ(3, vec.size());
+  EXPECT_STREQ("1st.OnTestIterationStart", vec.GetElement(0).c_str());
+  EXPECT_STREQ("2nd.OnTestIterationStart", vec.GetElement(1).c_str());
+  EXPECT_STREQ("3rd.OnTestIterationStart", vec.GetElement(2).c_str());
+
+  vec.Clear();
+  EventListenersAccessor::GetRepeater(&listeners)->OnTestIterationEnd(
+      *UnitTest::GetInstance(), 0);
+  ASSERT_EQ(3, vec.size());
+  EXPECT_STREQ("3rd.OnTestIterationEnd", vec.GetElement(0).c_str());
+  EXPECT_STREQ("2nd.OnTestIterationEnd", vec.GetElement(1).c_str());
+  EXPECT_STREQ("1st.OnTestIterationEnd", vec.GetElement(2).c_str());
 }
 
 // Tests that a listener removed from an EventListeners list stops receiving
@@ -6321,7 +6366,7 @@ TEST(EventListenersTest, Release) {
     EventListeners listeners;
     listeners.Append(listener);
     EXPECT_EQ(listener, listeners.Release(listener));
-    EventListenersAccessor::GetRepeater(&listeners)->OnUnitTestStart(
+    EventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
         *UnitTest::GetInstance());
     EXPECT_TRUE(listeners.Release(listener) == NULL);
   }
@@ -6340,7 +6385,7 @@ TEST(EventListenerTest, SuppressEventForwarding) {
   ASSERT_TRUE(EventListenersAccessor::EventForwardingEnabled(listeners));
   EventListenersAccessor::SuppressEventForwarding(&listeners);
   ASSERT_FALSE(EventListenersAccessor::EventForwardingEnabled(listeners));
-  EventListenersAccessor::GetRepeater(&listeners)->OnUnitTestStart(
+  EventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
       *UnitTest::GetInstance());
   EXPECT_EQ(0, on_start_counter);
 }
@@ -6367,7 +6412,7 @@ TEST(EventListenerTest, default_result_printer) {
 
   EXPECT_EQ(listener, listeners.default_result_printer());
 
-  EventListenersAccessor::GetRepeater(&listeners)->OnUnitTestStart(
+  EventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
       *UnitTest::GetInstance());
 
   EXPECT_EQ(1, on_start_counter);
@@ -6381,7 +6426,7 @@ TEST(EventListenerTest, default_result_printer) {
 
   // After broadcasting an event the counter is still the same, indicating
   // the listener is not in the list anymore.
-  EventListenersAccessor::GetRepeater(&listeners)->OnUnitTestStart(
+  EventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
       *UnitTest::GetInstance());
   EXPECT_EQ(1, on_start_counter);
 }
@@ -6404,7 +6449,7 @@ TEST(EventListenerTest, RemovingDefaultResultPrinterWorks) {
     EXPECT_FALSE(is_destroyed);
 
     // Broadcasting events now should not affect default_result_printer.
-    EventListenersAccessor::GetRepeater(&listeners)->OnUnitTestStart(
+    EventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
         *UnitTest::GetInstance());
     EXPECT_EQ(0, on_start_counter);
   }
@@ -6426,7 +6471,7 @@ TEST(EventListenerTest, default_xml_generator) {
 
   EXPECT_EQ(listener, listeners.default_xml_generator());
 
-  EventListenersAccessor::GetRepeater(&listeners)->OnUnitTestStart(
+  EventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
       *UnitTest::GetInstance());
 
   EXPECT_EQ(1, on_start_counter);
@@ -6440,7 +6485,7 @@ TEST(EventListenerTest, default_xml_generator) {
 
   // After broadcasting an event the counter is still the same, indicating
   // the listener is not in the list anymore.
-  EventListenersAccessor::GetRepeater(&listeners)->OnUnitTestStart(
+  EventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
       *UnitTest::GetInstance());
   EXPECT_EQ(1, on_start_counter);
 }
@@ -6463,7 +6508,7 @@ TEST(EventListenerTest, RemovingDefaultXmlGeneratorWorks) {
     EXPECT_FALSE(is_destroyed);
 
     // Broadcasting events now should not affect default_xml_generator.
-    EventListenersAccessor::GetRepeater(&listeners)->OnUnitTestStart(
+    EventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
         *UnitTest::GetInstance());
     EXPECT_EQ(0, on_start_counter);
   }
