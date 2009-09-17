@@ -32,6 +32,35 @@ list can help you decide whether it is for you too.
   * `SCOPED_TRACE` helps you understand the context of an assertion failure when it comes from inside a sub-routine or loop.
   * You can decide which tests to run using name patterns.  This saves time when you want to quickly reproduce a test failure.
 
+== How do I generate 64-bit binaries on Windows (using Visual Studio 2008)? ==
+
+(Answered by Trevor Robinson)
+
+Load the supplied Visual Studio solution file, either `msvc\gtest-md.sln` or
+`msvc\gtest.sln`. Go through the migration wizard to migrate the
+solution and project files to Visual Studio 2008. Select
+`Configuration Manager...` from the `Build` menu. Select `<New...>` from
+the `Active solution platform` dropdown.  Select `x64` from the new
+platform dropdown, leave `Copy settings from` set to `Win32` and
+`Create new project platforms` checked, then click `OK`. You now have
+`Win32` and `x64` platform configurations, selectable from the
+`Standard` toolbar, which allow you to toggle between building 32-bit or
+64-bit binaries (or both at once using Batch Build).
+
+In order to prevent build output files from overwriting one another,
+you'll need to change the `Intermediate Directory` settings for the
+newly created platform configuration across all the projects. To do
+this, multi-select (e.g. using shift-click) all projects (but not the
+solution) in the `Solution Explorer`. Right-click one of them and
+select `Properties`. In the left pane, select `Configuration Properties`,
+and from the `Configuration` dropdown, select `All Configurations`.
+Make sure the selected platform is `x64`. For the
+`Intermediate Directory` setting, change the value from
+`$(PlatformName)\$(ConfigurationName)` to
+`$(OutDir)\$(ProjectName)`. Click `OK` and then build the
+solution. When the build is complete, the 64-bit binaries will be in
+the `msvc\x64\Debug` directory.
+
 == Can I use Google Test on MinGW? ==
 
 We haven't tested this ourselves, but Per Abrahamsen reported that he
@@ -851,4 +880,3 @@ not enough information in your question):
   * the complete command line flags you give to your compiler,
   * the complete compiler error messages (if the question is about compilation),
   * the _actual_ code (ideally, a minimal but complete program) that has the problem you encounter.
-
