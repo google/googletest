@@ -824,9 +824,10 @@ void MockDeathTestFactory::SetParameters(bool create,
 // Sets test to NULL (if create_ is false) or to the address of a new
 // MockDeathTest object with parameters taken from the last call
 // to SetParameters (if create_ is true).  Always returns true.
-bool MockDeathTestFactory::Create(const char* statement,
-                                  const ::testing::internal::RE* regex,
-                                  const char* file, int line,
+bool MockDeathTestFactory::Create(const char* /*statement*/,
+                                  const ::testing::internal::RE* /*regex*/,
+                                  const char* /*file*/,
+                                  int /*line*/,
                                   DeathTest** test) {
   test_deleted_ = false;
   if (create_) {
