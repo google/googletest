@@ -63,6 +63,9 @@ class ValueArray1 {
   operator ParamGenerator<T>() const { return ValuesIn(&v1_, &v1_ + 1); }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray1& other);
+
   const T1 v1_;
 };
 
@@ -78,6 +81,9 @@ class ValueArray2 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray2& other);
+
   const T1 v1_;
   const T2 v2_;
 };
@@ -94,6 +100,9 @@ class ValueArray3 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray3& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -112,6 +121,9 @@ class ValueArray4 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray4& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -131,6 +143,9 @@ class ValueArray5 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray5& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -152,6 +167,9 @@ class ValueArray6 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray6& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -174,6 +192,9 @@ class ValueArray7 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray7& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -198,6 +219,9 @@ class ValueArray8 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray8& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -223,6 +247,9 @@ class ValueArray9 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray9& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -249,6 +276,9 @@ class ValueArray10 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray10& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -277,6 +307,9 @@ class ValueArray11 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray11& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -307,6 +340,9 @@ class ValueArray12 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray12& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -339,6 +375,9 @@ class ValueArray13 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray13& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -372,6 +411,9 @@ class ValueArray14 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray14& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -406,6 +448,9 @@ class ValueArray15 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray15& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -443,6 +488,9 @@ class ValueArray16 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray16& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -481,6 +529,9 @@ class ValueArray17 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray17& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -520,6 +571,9 @@ class ValueArray18 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray18& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -560,6 +614,9 @@ class ValueArray19 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray19& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -602,6 +659,9 @@ class ValueArray20 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray20& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -646,6 +706,9 @@ class ValueArray21 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray21& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -691,6 +754,9 @@ class ValueArray22 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray22& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -739,6 +805,9 @@ class ValueArray23 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray23& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -788,6 +857,9 @@ class ValueArray24 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray24& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -838,6 +910,9 @@ class ValueArray25 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray25& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -890,6 +965,9 @@ class ValueArray26 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray26& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -944,6 +1022,9 @@ class ValueArray27 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray27& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -999,6 +1080,9 @@ class ValueArray28 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray28& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -1055,6 +1139,9 @@ class ValueArray29 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray29& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -1113,6 +1200,9 @@ class ValueArray30 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray30& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -1173,6 +1263,9 @@ class ValueArray31 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray31& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -1234,6 +1327,9 @@ class ValueArray32 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray32& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -1297,6 +1393,9 @@ class ValueArray33 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray33& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -1361,6 +1460,9 @@ class ValueArray34 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray34& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -1427,6 +1529,9 @@ class ValueArray35 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray35& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -1495,6 +1600,9 @@ class ValueArray36 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray36& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -1565,6 +1673,9 @@ class ValueArray37 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray37& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -1636,6 +1747,9 @@ class ValueArray38 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray38& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -1708,6 +1822,9 @@ class ValueArray39 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray39& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -1782,6 +1899,9 @@ class ValueArray40 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray40& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -1858,6 +1978,9 @@ class ValueArray41 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray41& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -1935,6 +2058,9 @@ class ValueArray42 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray42& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -2013,6 +2139,9 @@ class ValueArray43 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray43& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -2093,6 +2222,9 @@ class ValueArray44 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray44& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -2174,6 +2306,9 @@ class ValueArray45 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray45& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -2257,6 +2392,9 @@ class ValueArray46 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray46& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -2343,6 +2481,9 @@ class ValueArray47 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray47& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -2430,6 +2571,9 @@ class ValueArray48 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray48& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -2518,6 +2662,9 @@ class ValueArray49 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray49& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -2607,6 +2754,9 @@ class ValueArray50 {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray50& other);
+
   const T1 v1_;
   const T2 v2_;
   const T3 v3_;
@@ -2757,6 +2907,9 @@ class CartesianProductGenerator2
           current2_ == end2_;
     }
 
+    // No implementation - assignment is unsupported.
+    void operator=(const Iterator& other);
+
     const ParamGeneratorInterface<ParamType>* const base_;
     // begin[i]_ and end[i]_ define the i-th range that Iterator traverses.
     // current[i]_ is the actual traversing iterator.
@@ -2767,11 +2920,14 @@ class CartesianProductGenerator2
     const typename ParamGenerator<T2>::iterator end2_;
     typename ParamGenerator<T2>::iterator current2_;
     ParamType current_value_;
-  };
+  };  // class CartesianProductGenerator2::Iterator
+
+  // No implementation - assignment is unsupported.
+  void operator=(const CartesianProductGenerator2& other);
 
   const ParamGenerator<T1> g1_;
   const ParamGenerator<T2> g2_;
-};
+};  // class CartesianProductGenerator2
 
 
 template <typename T1, typename T2, typename T3>
@@ -2879,6 +3035,9 @@ class CartesianProductGenerator3
           current3_ == end3_;
     }
 
+    // No implementation - assignment is unsupported.
+    void operator=(const Iterator& other);
+
     const ParamGeneratorInterface<ParamType>* const base_;
     // begin[i]_ and end[i]_ define the i-th range that Iterator traverses.
     // current[i]_ is the actual traversing iterator.
@@ -2892,12 +3051,15 @@ class CartesianProductGenerator3
     const typename ParamGenerator<T3>::iterator end3_;
     typename ParamGenerator<T3>::iterator current3_;
     ParamType current_value_;
-  };
+  };  // class CartesianProductGenerator3::Iterator
+
+  // No implementation - assignment is unsupported.
+  void operator=(const CartesianProductGenerator3& other);
 
   const ParamGenerator<T1> g1_;
   const ParamGenerator<T2> g2_;
   const ParamGenerator<T3> g3_;
-};
+};  // class CartesianProductGenerator3
 
 
 template <typename T1, typename T2, typename T3, typename T4>
@@ -3020,6 +3182,9 @@ class CartesianProductGenerator4
           current4_ == end4_;
     }
 
+    // No implementation - assignment is unsupported.
+    void operator=(const Iterator& other);
+
     const ParamGeneratorInterface<ParamType>* const base_;
     // begin[i]_ and end[i]_ define the i-th range that Iterator traverses.
     // current[i]_ is the actual traversing iterator.
@@ -3036,13 +3201,16 @@ class CartesianProductGenerator4
     const typename ParamGenerator<T4>::iterator end4_;
     typename ParamGenerator<T4>::iterator current4_;
     ParamType current_value_;
-  };
+  };  // class CartesianProductGenerator4::Iterator
+
+  // No implementation - assignment is unsupported.
+  void operator=(const CartesianProductGenerator4& other);
 
   const ParamGenerator<T1> g1_;
   const ParamGenerator<T2> g2_;
   const ParamGenerator<T3> g3_;
   const ParamGenerator<T4> g4_;
-};
+};  // class CartesianProductGenerator4
 
 
 template <typename T1, typename T2, typename T3, typename T4, typename T5>
@@ -3177,6 +3345,9 @@ class CartesianProductGenerator5
           current5_ == end5_;
     }
 
+    // No implementation - assignment is unsupported.
+    void operator=(const Iterator& other);
+
     const ParamGeneratorInterface<ParamType>* const base_;
     // begin[i]_ and end[i]_ define the i-th range that Iterator traverses.
     // current[i]_ is the actual traversing iterator.
@@ -3196,14 +3367,17 @@ class CartesianProductGenerator5
     const typename ParamGenerator<T5>::iterator end5_;
     typename ParamGenerator<T5>::iterator current5_;
     ParamType current_value_;
-  };
+  };  // class CartesianProductGenerator5::Iterator
+
+  // No implementation - assignment is unsupported.
+  void operator=(const CartesianProductGenerator5& other);
 
   const ParamGenerator<T1> g1_;
   const ParamGenerator<T2> g2_;
   const ParamGenerator<T3> g3_;
   const ParamGenerator<T4> g4_;
   const ParamGenerator<T5> g5_;
-};
+};  // class CartesianProductGenerator5
 
 
 template <typename T1, typename T2, typename T3, typename T4, typename T5,
@@ -3353,6 +3527,9 @@ class CartesianProductGenerator6
           current6_ == end6_;
     }
 
+    // No implementation - assignment is unsupported.
+    void operator=(const Iterator& other);
+
     const ParamGeneratorInterface<ParamType>* const base_;
     // begin[i]_ and end[i]_ define the i-th range that Iterator traverses.
     // current[i]_ is the actual traversing iterator.
@@ -3375,7 +3552,10 @@ class CartesianProductGenerator6
     const typename ParamGenerator<T6>::iterator end6_;
     typename ParamGenerator<T6>::iterator current6_;
     ParamType current_value_;
-  };
+  };  // class CartesianProductGenerator6::Iterator
+
+  // No implementation - assignment is unsupported.
+  void operator=(const CartesianProductGenerator6& other);
 
   const ParamGenerator<T1> g1_;
   const ParamGenerator<T2> g2_;
@@ -3383,7 +3563,7 @@ class CartesianProductGenerator6
   const ParamGenerator<T4> g4_;
   const ParamGenerator<T5> g5_;
   const ParamGenerator<T6> g6_;
-};
+};  // class CartesianProductGenerator6
 
 
 template <typename T1, typename T2, typename T3, typename T4, typename T5,
@@ -3546,6 +3726,9 @@ class CartesianProductGenerator7
           current7_ == end7_;
     }
 
+    // No implementation - assignment is unsupported.
+    void operator=(const Iterator& other);
+
     const ParamGeneratorInterface<ParamType>* const base_;
     // begin[i]_ and end[i]_ define the i-th range that Iterator traverses.
     // current[i]_ is the actual traversing iterator.
@@ -3571,7 +3754,10 @@ class CartesianProductGenerator7
     const typename ParamGenerator<T7>::iterator end7_;
     typename ParamGenerator<T7>::iterator current7_;
     ParamType current_value_;
-  };
+  };  // class CartesianProductGenerator7::Iterator
+
+  // No implementation - assignment is unsupported.
+  void operator=(const CartesianProductGenerator7& other);
 
   const ParamGenerator<T1> g1_;
   const ParamGenerator<T2> g2_;
@@ -3580,7 +3766,7 @@ class CartesianProductGenerator7
   const ParamGenerator<T5> g5_;
   const ParamGenerator<T6> g6_;
   const ParamGenerator<T7> g7_;
-};
+};  // class CartesianProductGenerator7
 
 
 template <typename T1, typename T2, typename T3, typename T4, typename T5,
@@ -3758,6 +3944,9 @@ class CartesianProductGenerator8
           current8_ == end8_;
     }
 
+    // No implementation - assignment is unsupported.
+    void operator=(const Iterator& other);
+
     const ParamGeneratorInterface<ParamType>* const base_;
     // begin[i]_ and end[i]_ define the i-th range that Iterator traverses.
     // current[i]_ is the actual traversing iterator.
@@ -3786,7 +3975,10 @@ class CartesianProductGenerator8
     const typename ParamGenerator<T8>::iterator end8_;
     typename ParamGenerator<T8>::iterator current8_;
     ParamType current_value_;
-  };
+  };  // class CartesianProductGenerator8::Iterator
+
+  // No implementation - assignment is unsupported.
+  void operator=(const CartesianProductGenerator8& other);
 
   const ParamGenerator<T1> g1_;
   const ParamGenerator<T2> g2_;
@@ -3796,7 +3988,7 @@ class CartesianProductGenerator8
   const ParamGenerator<T6> g6_;
   const ParamGenerator<T7> g7_;
   const ParamGenerator<T8> g8_;
-};
+};  // class CartesianProductGenerator8
 
 
 template <typename T1, typename T2, typename T3, typename T4, typename T5,
@@ -3987,6 +4179,9 @@ class CartesianProductGenerator9
           current9_ == end9_;
     }
 
+    // No implementation - assignment is unsupported.
+    void operator=(const Iterator& other);
+
     const ParamGeneratorInterface<ParamType>* const base_;
     // begin[i]_ and end[i]_ define the i-th range that Iterator traverses.
     // current[i]_ is the actual traversing iterator.
@@ -4018,7 +4213,10 @@ class CartesianProductGenerator9
     const typename ParamGenerator<T9>::iterator end9_;
     typename ParamGenerator<T9>::iterator current9_;
     ParamType current_value_;
-  };
+  };  // class CartesianProductGenerator9::Iterator
+
+  // No implementation - assignment is unsupported.
+  void operator=(const CartesianProductGenerator9& other);
 
   const ParamGenerator<T1> g1_;
   const ParamGenerator<T2> g2_;
@@ -4029,7 +4227,7 @@ class CartesianProductGenerator9
   const ParamGenerator<T7> g7_;
   const ParamGenerator<T8> g8_;
   const ParamGenerator<T9> g9_;
-};
+};  // class CartesianProductGenerator9
 
 
 template <typename T1, typename T2, typename T3, typename T4, typename T5,
@@ -4233,6 +4431,9 @@ class CartesianProductGenerator10
           current10_ == end10_;
     }
 
+    // No implementation - assignment is unsupported.
+    void operator=(const Iterator& other);
+
     const ParamGeneratorInterface<ParamType>* const base_;
     // begin[i]_ and end[i]_ define the i-th range that Iterator traverses.
     // current[i]_ is the actual traversing iterator.
@@ -4267,7 +4468,10 @@ class CartesianProductGenerator10
     const typename ParamGenerator<T10>::iterator end10_;
     typename ParamGenerator<T10>::iterator current10_;
     ParamType current_value_;
-  };
+  };  // class CartesianProductGenerator10::Iterator
+
+  // No implementation - assignment is unsupported.
+  void operator=(const CartesianProductGenerator10& other);
 
   const ParamGenerator<T1> g1_;
   const ParamGenerator<T2> g2_;
@@ -4279,7 +4483,7 @@ class CartesianProductGenerator10
   const ParamGenerator<T8> g8_;
   const ParamGenerator<T9> g9_;
   const ParamGenerator<T10> g10_;
-};
+};  // class CartesianProductGenerator10
 
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
@@ -4302,9 +4506,12 @@ CartesianProductHolder2(const Generator1& g1, const Generator2& g2)
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const CartesianProductHolder2& other);
+
   const Generator1 g1_;
   const Generator2 g2_;
-};
+};  // class CartesianProductHolder2
 
 template <class Generator1, class Generator2, class Generator3>
 class CartesianProductHolder3 {
@@ -4322,10 +4529,13 @@ CartesianProductHolder3(const Generator1& g1, const Generator2& g2,
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const CartesianProductHolder3& other);
+
   const Generator1 g1_;
   const Generator2 g2_;
   const Generator3 g3_;
-};
+};  // class CartesianProductHolder3
 
 template <class Generator1, class Generator2, class Generator3,
     class Generator4>
@@ -4345,11 +4555,14 @@ CartesianProductHolder4(const Generator1& g1, const Generator2& g2,
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const CartesianProductHolder4& other);
+
   const Generator1 g1_;
   const Generator2 g2_;
   const Generator3 g3_;
   const Generator4 g4_;
-};
+};  // class CartesianProductHolder4
 
 template <class Generator1, class Generator2, class Generator3,
     class Generator4, class Generator5>
@@ -4370,12 +4583,15 @@ CartesianProductHolder5(const Generator1& g1, const Generator2& g2,
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const CartesianProductHolder5& other);
+
   const Generator1 g1_;
   const Generator2 g2_;
   const Generator3 g3_;
   const Generator4 g4_;
   const Generator5 g5_;
-};
+};  // class CartesianProductHolder5
 
 template <class Generator1, class Generator2, class Generator3,
     class Generator4, class Generator5, class Generator6>
@@ -4399,13 +4615,16 @@ CartesianProductHolder6(const Generator1& g1, const Generator2& g2,
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const CartesianProductHolder6& other);
+
   const Generator1 g1_;
   const Generator2 g2_;
   const Generator3 g3_;
   const Generator4 g4_;
   const Generator5 g5_;
   const Generator6 g6_;
-};
+};  // class CartesianProductHolder6
 
 template <class Generator1, class Generator2, class Generator3,
     class Generator4, class Generator5, class Generator6, class Generator7>
@@ -4431,6 +4650,9 @@ CartesianProductHolder7(const Generator1& g1, const Generator2& g2,
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const CartesianProductHolder7& other);
+
   const Generator1 g1_;
   const Generator2 g2_;
   const Generator3 g3_;
@@ -4438,7 +4660,7 @@ CartesianProductHolder7(const Generator1& g1, const Generator2& g2,
   const Generator5 g5_;
   const Generator6 g6_;
   const Generator7 g7_;
-};
+};  // class CartesianProductHolder7
 
 template <class Generator1, class Generator2, class Generator3,
     class Generator4, class Generator5, class Generator6, class Generator7,
@@ -4467,6 +4689,9 @@ CartesianProductHolder8(const Generator1& g1, const Generator2& g2,
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const CartesianProductHolder8& other);
+
   const Generator1 g1_;
   const Generator2 g2_;
   const Generator3 g3_;
@@ -4475,7 +4700,7 @@ CartesianProductHolder8(const Generator1& g1, const Generator2& g2,
   const Generator6 g6_;
   const Generator7 g7_;
   const Generator8 g8_;
-};
+};  // class CartesianProductHolder8
 
 template <class Generator1, class Generator2, class Generator3,
     class Generator4, class Generator5, class Generator6, class Generator7,
@@ -4507,6 +4732,9 @@ CartesianProductHolder9(const Generator1& g1, const Generator2& g2,
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const CartesianProductHolder9& other);
+
   const Generator1 g1_;
   const Generator2 g2_;
   const Generator3 g3_;
@@ -4516,7 +4744,7 @@ CartesianProductHolder9(const Generator1& g1, const Generator2& g2,
   const Generator7 g7_;
   const Generator8 g8_;
   const Generator9 g9_;
-};
+};  // class CartesianProductHolder9
 
 template <class Generator1, class Generator2, class Generator3,
     class Generator4, class Generator5, class Generator6, class Generator7,
@@ -4550,6 +4778,9 @@ CartesianProductHolder10(const Generator1& g1, const Generator2& g2,
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const CartesianProductHolder10& other);
+
   const Generator1 g1_;
   const Generator2 g2_;
   const Generator3 g3_;
@@ -4560,7 +4791,7 @@ CartesianProductHolder10(const Generator1& g1, const Generator2& g2,
   const Generator8 g8_;
   const Generator9 g9_;
   const Generator10 g10_;
-};
+};  // class CartesianProductHolder10
 
 #endif  // GTEST_HAS_COMBINE
 

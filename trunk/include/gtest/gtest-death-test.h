@@ -181,6 +181,9 @@ class ExitedWithCode {
   explicit ExitedWithCode(int exit_code);
   bool operator()(int exit_status) const;
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ExitedWithCode& other);
+
   const int exit_code_;
 };
 
