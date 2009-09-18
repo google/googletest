@@ -304,8 +304,10 @@ static bool ShouldRunTestCase(const TestCase* test_case) {
 }
 
 // AssertHelper constructor.
-AssertHelper::AssertHelper(TestPartResultType type, const char* file,
-                           int line, const char* message)
+AssertHelper::AssertHelper(TestPartResult::Type type,
+                           const char* file,
+                           int line,
+                           const char* message)
     : data_(new AssertHelperData(type, file, line, message)) {
 }
 
@@ -558,11 +560,11 @@ AssertionResult HasOneFailure(const char* /* results_expr */,
                               const char* /* type_expr */,
                               const char* /* substr_expr */,
                               const TestPartResultArray& results,
-                              TestPartResultType type,
+                              TestPartResult::Type type,
                               const char* substr) {
-  const String expected(
-      type == TPRT_FATAL_FAILURE ? "1 fatal failure" :
-      "1 non-fatal failure");
+  const String expected(type == TestPartResult::kFatalFailure ?
+                        "1 fatal failure" :
+                        "1 non-fatal failure");
   Message msg;
   if (results.size() != 1) {
     msg << "Expected: " << expected << "\n"
@@ -597,7 +599,7 @@ AssertionResult HasOneFailure(const char* /* results_expr */,
 // substring the failure message should contain.
 SingleFailureChecker:: SingleFailureChecker(
     const TestPartResultArray* results,
-    TestPartResultType type,
+    TestPartResult::Type type,
     const char* substr)
     : results_(results),
       type_(type),
@@ -1908,7 +1910,7 @@ void Test::RecordProperty(const char* key, int value) {
 
 namespace internal {
 
-void ReportFailureInUnknownLocation(TestPartResultType result_type,
+void ReportFailureInUnknownLocation(TestPartResult::Type result_type,
                                     const String& message) {
   // This function is a friend of UnitTest and as such has access to
   // AddTestPartResult.
@@ -1932,7 +1934,7 @@ static void AddExceptionThrownFailure(DWORD exception_code,
   message << "Exception thrown with code 0x" << std::setbase(16) <<
     exception_code << std::setbase(10) << " in " << location << ".";
 
-  internal::ReportFailureInUnknownLocation(TPRT_FATAL_FAILURE,
+  internal::ReportFailureInUnknownLocation(TestPartResult::kFatalFailure,
                                            message.GetString());
 }
 
@@ -2430,17 +2432,17 @@ static internal::String FormatTestCaseCount(int test_case_count) {
   return FormatCountableNoun(test_case_count, "test case", "test cases");
 }
 
-// Converts a TestPartResultType enum to human-friendly string
-// representation.  Both TPRT_NONFATAL_FAILURE and TPRT_FATAL_FAILURE
-// are translated to "Failure", as the user usually doesn't care about
-// the difference between the two when viewing the test result.
-static const char * TestPartResultTypeToString(TestPartResultType type) {
+// Converts a TestPartResult::Type enum to human-friendly string
+// representation.  Both kNonFatalFailure and kFatalFailure are translated
+// to "Failure", as the user usually doesn't care about the difference
+// between the two when viewing the test result.
+static const char * TestPartResultTypeToString(TestPartResult::Type type) {
   switch (type) {
-    case TPRT_SUCCESS:
+    case TestPartResult::kSuccess:
       return "Success";
 
-    case TPRT_NONFATAL_FAILURE:
-    case TPRT_FATAL_FAILURE:
+    case TestPartResult::kNonFatalFailure:
+    case TestPartResult::kFatalFailure:
 #ifdef _MSC_VER
       return "error: ";
 #else
@@ -2611,10 +2613,10 @@ class PrettyUnitTestResultPrinter : public UnitTestEventListenerInterface {
   virtual void OnEnvironmentsSetUpStart(const UnitTest& unit_test);
   virtual void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) {}
   virtual void OnTestCaseStart(const TestCase& test_case);
-  virtual void OnTestCaseEnd(const TestCase& test_case);
   virtual void OnTestStart(const TestInfo& test_info);
   virtual void OnTestPartResult(const TestPartResult& result);
   virtual void OnTestEnd(const TestInfo& test_info);
+  virtual void OnTestCaseEnd(const TestCase& test_case);
   virtual void OnEnvironmentsTearDownStart(const UnitTest& unit_test);
   virtual void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) {}
   virtual void OnTestIterationEnd(const UnitTest& unit_test, int iteration);
@@ -2682,19 +2684,6 @@ void PrettyUnitTestResultPrinter::OnTestCaseStart(const TestCase& test_case) {
   fflush(stdout);
 }
 
-void PrettyUnitTestResultPrinter::OnTestCaseEnd(const TestCase& test_case) {
-  if (!GTEST_FLAG(print_time)) return;
-
-  test_case_name_ = test_case.name();
-  const internal::String counts =
-      FormatCountableNoun(test_case.test_to_run_count(), "test", "tests");
-  ColoredPrintf(COLOR_GREEN, "[----------] ");
-  printf("%s from %s (%s ms total)\n\n",
-         counts.c_str(), test_case_name_.c_str(),
-         internal::StreamableToString(test_case.elapsed_time()).c_str());
-  fflush(stdout);
-}
-
 void PrettyUnitTestResultPrinter::OnTestStart(const TestInfo& test_info) {
   ColoredPrintf(COLOR_GREEN,  "[ RUN      ] ");
   PrintTestName(test_case_name_.c_str(), test_info.name());
@@ -2703,6 +2692,18 @@ void PrettyUnitTestResultPrinter::OnTestStart(const TestInfo& test_info) {
   } else {
     printf(", where %s\n", test_info.comment());
   }
+  fflush(stdout);
+}
+
+// Called after an assertion failure.
+void PrettyUnitTestResultPrinter::OnTestPartResult(
+    const TestPartResult& result) {
+  // If the test part succeeded, we don't need to do anything.
+  if (result.type() == TestPartResult::kSuccess)
+    return;
+
+  // Print failure message from the assertion (e.g. expected this and got that).
+  PrintTestPartResult(result);
   fflush(stdout);
 }
 
@@ -2722,15 +2723,16 @@ void PrettyUnitTestResultPrinter::OnTestEnd(const TestInfo& test_info) {
   fflush(stdout);
 }
 
-// Called after an assertion failure.
-void PrettyUnitTestResultPrinter::OnTestPartResult(
-    const TestPartResult& result) {
-  // If the test part succeeded, we don't need to do anything.
-  if (result.type() == TPRT_SUCCESS)
-    return;
+void PrettyUnitTestResultPrinter::OnTestCaseEnd(const TestCase& test_case) {
+  if (!GTEST_FLAG(print_time)) return;
 
-  // Print failure message from the assertion (e.g. expected this and got that).
-  PrintTestPartResult(result);
+  test_case_name_ = test_case.name();
+  const internal::String counts =
+      FormatCountableNoun(test_case.test_to_run_count(), "test", "tests");
+  ColoredPrintf(COLOR_GREEN, "[----------] ");
+  printf("%s from %s (%s ms total)\n\n",
+         counts.c_str(), test_case_name_.c_str(),
+         internal::StreamableToString(test_case.elapsed_time()).c_str());
   fflush(stdout);
 }
 
@@ -2830,18 +2832,18 @@ class TestEventRepeater : public UnitTestEventListenerInterface {
   void set_forwarding_enabled(bool enable) { forwarding_enabled_ = enable; }
 
   virtual void OnTestProgramStart(const UnitTest& unit_test);
-  virtual void OnTestProgramEnd(const UnitTest& unit_test);
   virtual void OnTestIterationStart(const UnitTest& unit_test, int iteration);
-  virtual void OnTestIterationEnd(const UnitTest& unit_test, int iteration);
   virtual void OnEnvironmentsSetUpStart(const UnitTest& unit_test);
   virtual void OnEnvironmentsSetUpEnd(const UnitTest& unit_test);
+  virtual void OnTestCaseStart(const TestCase& test_case);
+  virtual void OnTestStart(const TestInfo& test_info);
+  virtual void OnTestPartResult(const TestPartResult& result);
+  virtual void OnTestEnd(const TestInfo& test_info);
+  virtual void OnTestCaseEnd(const TestCase& test_case);
   virtual void OnEnvironmentsTearDownStart(const UnitTest& unit_test);
   virtual void OnEnvironmentsTearDownEnd(const UnitTest& unit_test);
-  virtual void OnTestCaseStart(const TestCase& test_case);
-  virtual void OnTestCaseEnd(const TestCase& test_case);
-  virtual void OnTestStart(const TestInfo& test_info);
-  virtual void OnTestEnd(const TestInfo& test_info);
-  virtual void OnTestPartResult(const TestPartResult& result);
+  virtual void OnTestIterationEnd(const UnitTest& unit_test, int iteration);
+  virtual void OnTestProgramEnd(const UnitTest& unit_test);
 
  private:
   // Controls whether events will be forwarded to listeners_. Set to false
@@ -2899,15 +2901,15 @@ void TestEventRepeater::Name(const Type& parameter) { \
 
 GTEST_REPEATER_METHOD_(OnTestProgramStart, UnitTest)
 GTEST_REPEATER_METHOD_(OnEnvironmentsSetUpStart, UnitTest)
-GTEST_REPEATER_METHOD_(OnEnvironmentsTearDownStart, UnitTest)
 GTEST_REPEATER_METHOD_(OnTestCaseStart, TestCase)
 GTEST_REPEATER_METHOD_(OnTestStart, TestInfo)
 GTEST_REPEATER_METHOD_(OnTestPartResult, TestPartResult)
-GTEST_REVERSE_REPEATER_METHOD_(OnTestProgramEnd, UnitTest)
+GTEST_REPEATER_METHOD_(OnEnvironmentsTearDownStart, UnitTest)
 GTEST_REVERSE_REPEATER_METHOD_(OnEnvironmentsSetUpEnd, UnitTest)
 GTEST_REVERSE_REPEATER_METHOD_(OnEnvironmentsTearDownEnd, UnitTest)
-GTEST_REVERSE_REPEATER_METHOD_(OnTestCaseEnd, TestCase)
 GTEST_REVERSE_REPEATER_METHOD_(OnTestEnd, TestInfo)
+GTEST_REVERSE_REPEATER_METHOD_(OnTestCaseEnd, TestCase)
+GTEST_REVERSE_REPEATER_METHOD_(OnTestProgramEnd, UnitTest)
 
 #undef GTEST_REPEATER_METHOD_
 #undef GTEST_REVERSE_REPEATER_METHOD_
@@ -3454,7 +3456,7 @@ class GoogleTestFailureException : public ::std::runtime_error {
 // this to report their results.  The user code should use the
 // assertion macros instead of calling this directly.
 // L < mutex_
-void UnitTest::AddTestPartResult(TestPartResultType result_type,
+void UnitTest::AddTestPartResult(TestPartResult::Type result_type,
                                  const char* file_name,
                                  int line_number,
                                  const internal::String& message,
@@ -3484,7 +3486,7 @@ void UnitTest::AddTestPartResult(TestPartResultType result_type,
   impl_->GetTestPartResultReporterForCurrentThread()->
       ReportTestPartResult(result);
 
-  if (result_type != TPRT_SUCCESS) {
+  if (result_type != TestPartResult::kSuccess) {
     // gtest_break_on_failure takes precedence over
     // gtest_throw_on_failure.  This allows a user to set the latter
     // in the code (perhaps in order to use Google Test assertions
