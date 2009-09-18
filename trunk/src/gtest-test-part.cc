@@ -56,12 +56,12 @@ internal::String TestPartResult::ExtractSummary(const char* message) {
 
 // Prints a TestPartResult object.
 std::ostream& operator<<(std::ostream& os, const TestPartResult& result) {
-  return os << result.file_name() << ":"
-            << result.line_number() << ": "
-            << (result.type() == TPRT_SUCCESS ? "Success" :
-                result.type() == TPRT_FATAL_FAILURE ? "Fatal failure" :
-                "Non-fatal failure") << ":\n"
-            << result.message() << std::endl;
+  return os
+      << result.file_name() << ":" << result.line_number() << ": "
+      << (result.type() == TestPartResult::kSuccess ? "Success" :
+          result.type() == TestPartResult::kFatalFailure ? "Fatal failure" :
+          "Non-fatal failure") << ":\n"
+      << result.message() << std::endl;
 }
 
 // Constructs an empty TestPartResultArray.

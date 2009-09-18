@@ -38,10 +38,6 @@ using testing::Test;
 using testing::TestPartResult;
 using testing::TestPartResultArray;
 
-using testing::TPRT_FATAL_FAILURE;
-using testing::TPRT_NONFATAL_FAILURE;
-using testing::TPRT_SUCCESS;
-
 namespace {
 
 // Tests the TestPartResult class.
@@ -50,18 +46,18 @@ namespace {
 class TestPartResultTest : public Test {
  protected:
   TestPartResultTest()
-      : r1_(TPRT_SUCCESS, "foo/bar.cc", 10, "Success!"),
-        r2_(TPRT_NONFATAL_FAILURE, "foo/bar.cc", -1, "Failure!"),
-        r3_(TPRT_FATAL_FAILURE, NULL, -1, "Failure!") {}
+      : r1_(TestPartResult::kSuccess, "foo/bar.cc", 10, "Success!"),
+        r2_(TestPartResult::kNonFatalFailure, "foo/bar.cc", -1, "Failure!"),
+        r3_(TestPartResult::kFatalFailure, NULL, -1, "Failure!") {}
 
   TestPartResult r1_, r2_, r3_;
 };
 
 // Tests TestPartResult::type().
 TEST_F(TestPartResultTest, type) {
-  EXPECT_EQ(TPRT_SUCCESS, r1_.type());
-  EXPECT_EQ(TPRT_NONFATAL_FAILURE, r2_.type());
-  EXPECT_EQ(TPRT_FATAL_FAILURE, r3_.type());
+  EXPECT_EQ(TestPartResult::kSuccess, r1_.type());
+  EXPECT_EQ(TestPartResult::kNonFatalFailure, r2_.type());
+  EXPECT_EQ(TestPartResult::kFatalFailure, r3_.type());
 }
 
 // Tests TestPartResult::file_name().
@@ -114,8 +110,8 @@ TEST_F(TestPartResultTest, NonfatallyFailed) {
 class TestPartResultArrayTest : public Test {
  protected:
   TestPartResultArrayTest()
-      : r1_(TPRT_NONFATAL_FAILURE, "foo/bar.cc", -1, "Failure 1"),
-        r2_(TPRT_FATAL_FAILURE, "foo/bar.cc", -1, "Failure 2") {}
+      : r1_(TestPartResult::kNonFatalFailure, "foo/bar.cc", -1, "Failure 1"),
+        r2_(TestPartResult::kFatalFailure, "foo/bar.cc", -1, "Failure 2") {}
 
   const TestPartResult r1_, r2_;
 };

@@ -152,9 +152,6 @@ using testing::IsSubstring;
 using testing::Message;
 using testing::ScopedFakeTestPartResultReporter;
 using testing::StaticAssertTypeEq;
-using testing::TPRT_FATAL_FAILURE;
-using testing::TPRT_NONFATAL_FAILURE;
-using testing::TPRT_SUCCESS;
 using testing::Test;
 using testing::TestPartResult;
 using testing::TestPartResultArray;
@@ -1404,12 +1401,12 @@ TEST(TestPartResultTest, ConstructorWorks) {
   message << static_cast<const char*>(testing::internal::kStackTraceMarker);
   message << "some unimportant stack trace";
 
-  const TestPartResult result(TPRT_NONFATAL_FAILURE,
+  const TestPartResult result(TestPartResult::kNonFatalFailure,
                               "some_file.cc",
                               42,
                               message.GetString().c_str());
 
-  EXPECT_EQ(TPRT_NONFATAL_FAILURE, result.type());
+  EXPECT_EQ(TestPartResult::kNonFatalFailure, result.type());
   EXPECT_STREQ("some_file.cc", result.file_name());
   EXPECT_EQ(42, result.line_number());
   EXPECT_STREQ(message.GetString().c_str(), result.message());
@@ -1417,13 +1414,16 @@ TEST(TestPartResultTest, ConstructorWorks) {
 }
 
 TEST(TestPartResultTest, ResultAccessorsWork) {
-  const TestPartResult success(TPRT_SUCCESS, "file.cc", 42, "message");
+  const TestPartResult success(TestPartResult::kSuccess,
+                               "file.cc",
+                               42,
+                               "message");
   EXPECT_TRUE(success.passed());
   EXPECT_FALSE(success.failed());
   EXPECT_FALSE(success.nonfatally_failed());
   EXPECT_FALSE(success.fatally_failed());
 
-  const TestPartResult nonfatal_failure(TPRT_NONFATAL_FAILURE,
+  const TestPartResult nonfatal_failure(TestPartResult::kNonFatalFailure,
                                         "file.cc",
                                         42,
                                         "message");
@@ -1432,7 +1432,7 @@ TEST(TestPartResultTest, ResultAccessorsWork) {
   EXPECT_TRUE(nonfatal_failure.nonfatally_failed());
   EXPECT_FALSE(nonfatal_failure.fatally_failed());
 
-  const TestPartResult fatal_failure(TPRT_FATAL_FAILURE,
+  const TestPartResult fatal_failure(TestPartResult::kFatalFailure,
                                      "file.cc",
                                      42,
                                      "message");
@@ -1457,10 +1457,14 @@ class TestResultTest : public Test {
 
   virtual void SetUp() {
     // pr1 is for success.
-    pr1 = new TestPartResult(TPRT_SUCCESS, "foo/bar.cc", 10, "Success!");
+    pr1 = new TestPartResult(TestPartResult::kSuccess,
+                             "foo/bar.cc",
+                             10,
+                             "Success!");
 
     // pr2 is for fatal failure.
-    pr2 = new TestPartResult(TPRT_FATAL_FAILURE, "foo/bar.cc",
+    pr2 = new TestPartResult(TestPartResult::kFatalFailure,
+                             "foo/bar.cc",
                              -1,  // This line number means "unknown"
                              "Failure!");
 
@@ -3334,9 +3338,9 @@ TEST_F(NoFatalFailureTest, AssertNoFatalFailureOnFatalFailure) {
     DoAssertNoFatalFailureOnFails();
   }
   ASSERT_EQ(2, gtest_failures.size());
-  EXPECT_EQ(testing::TPRT_FATAL_FAILURE,
+  EXPECT_EQ(TestPartResult::kFatalFailure,
             gtest_failures.GetTestPartResult(0).type());
-  EXPECT_EQ(testing::TPRT_FATAL_FAILURE,
+  EXPECT_EQ(TestPartResult::kFatalFailure,
             gtest_failures.GetTestPartResult(1).type());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "some fatal failure",
                       gtest_failures.GetTestPartResult(0).message());
@@ -3351,11 +3355,11 @@ TEST_F(NoFatalFailureTest, ExpectNoFatalFailureOnFatalFailure) {
     DoExpectNoFatalFailureOnFails();
   }
   ASSERT_EQ(3, gtest_failures.size());
-  EXPECT_EQ(testing::TPRT_FATAL_FAILURE,
+  EXPECT_EQ(TestPartResult::kFatalFailure,
             gtest_failures.GetTestPartResult(0).type());
-  EXPECT_EQ(testing::TPRT_NONFATAL_FAILURE,
+  EXPECT_EQ(TestPartResult::kNonFatalFailure,
             gtest_failures.GetTestPartResult(1).type());
-  EXPECT_EQ(testing::TPRT_NONFATAL_FAILURE,
+  EXPECT_EQ(TestPartResult::kNonFatalFailure,
             gtest_failures.GetTestPartResult(2).type());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "some fatal failure",
                       gtest_failures.GetTestPartResult(0).message());
@@ -3372,9 +3376,9 @@ TEST_F(NoFatalFailureTest, MessageIsStreamable) {
     EXPECT_NO_FATAL_FAILURE(FAIL() << "foo") << "my message";
   }
   ASSERT_EQ(2, gtest_failures.size());
-  EXPECT_EQ(testing::TPRT_NONFATAL_FAILURE,
+  EXPECT_EQ(TestPartResult::kNonFatalFailure,
             gtest_failures.GetTestPartResult(0).type());
-  EXPECT_EQ(testing::TPRT_NONFATAL_FAILURE,
+  EXPECT_EQ(TestPartResult::kNonFatalFailure,
             gtest_failures.GetTestPartResult(1).type());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "foo",
                       gtest_failures.GetTestPartResult(0).message());

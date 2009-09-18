@@ -95,15 +95,6 @@ class TersePrinter : public EmptyTestEventListener {
     fflush(stdout);
   }
 
-  // Called after a test ends.
-  virtual void OnTestEnd(const TestInfo& test_info) {
-    fprintf(stdout,
-            "*** Test %s.%s ending.\n",
-            test_info.test_case_name(),
-            test_info.name());
-    fflush(stdout);
-  }
-
   // Called after a failed assertion or a SUCCESS().
   virtual void OnTestPartResult(const TestPartResult& test_part_result) {
     fprintf(stdout,
@@ -112,6 +103,15 @@ class TersePrinter : public EmptyTestEventListener {
             test_part_result.file_name(),
             test_part_result.line_number(),
             test_part_result.summary());
+    fflush(stdout);
+  }
+
+  // Called after a test ends.
+  virtual void OnTestEnd(const TestInfo& test_info) {
+    fprintf(stdout,
+            "*** Test %s.%s ending.\n",
+            test_info.test_case_name(),
+            test_info.name());
     fflush(stdout);
   }
 };  // class TersePrinter

@@ -97,12 +97,12 @@ class SingleFailureChecker {
  public:
   // The constructor remembers the arguments.
   SingleFailureChecker(const TestPartResultArray* results,
-                       TestPartResultType type,
+                       TestPartResult::Type type,
                        const char* substr);
   ~SingleFailureChecker();
  private:
   const TestPartResultArray* const results_;
-  const TestPartResultType type_;
+  const TestPartResult::Type type_;
   const String substr_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(SingleFailureChecker);
@@ -143,7 +143,7 @@ class SingleFailureChecker {
     };\
     ::testing::TestPartResultArray gtest_failures;\
     ::testing::internal::SingleFailureChecker gtest_checker(\
-        &gtest_failures, ::testing::TPRT_FATAL_FAILURE, (substr));\
+        &gtest_failures, ::testing::TestPartResult::kFatalFailure, (substr));\
     {\
       ::testing::ScopedFakeTestPartResultReporter gtest_reporter(\
           ::testing::ScopedFakeTestPartResultReporter:: \
@@ -160,7 +160,7 @@ class SingleFailureChecker {
     };\
     ::testing::TestPartResultArray gtest_failures;\
     ::testing::internal::SingleFailureChecker gtest_checker(\
-        &gtest_failures, ::testing::TPRT_FATAL_FAILURE, (substr));\
+        &gtest_failures, ::testing::TestPartResult::kFatalFailure, (substr));\
     {\
       ::testing::ScopedFakeTestPartResultReporter gtest_reporter(\
           ::testing::ScopedFakeTestPartResultReporter:: \
@@ -196,7 +196,8 @@ class SingleFailureChecker {
   do {\
     ::testing::TestPartResultArray gtest_failures;\
     ::testing::internal::SingleFailureChecker gtest_checker(\
-        &gtest_failures, ::testing::TPRT_NONFATAL_FAILURE, (substr));\
+        &gtest_failures, ::testing::TestPartResult::kNonFatalFailure, \
+        (substr));\
     {\
       ::testing::ScopedFakeTestPartResultReporter gtest_reporter(\
           ::testing::ScopedFakeTestPartResultReporter:: \
@@ -209,7 +210,8 @@ class SingleFailureChecker {
   do {\
     ::testing::TestPartResultArray gtest_failures;\
     ::testing::internal::SingleFailureChecker gtest_checker(\
-        &gtest_failures, ::testing::TPRT_NONFATAL_FAILURE, (substr));\
+        &gtest_failures, ::testing::TestPartResult::kNonFatalFailure, \
+        (substr));\
     {\
       ::testing::ScopedFakeTestPartResultReporter gtest_reporter(\
           ::testing::ScopedFakeTestPartResultReporter::INTERCEPT_ALL_THREADS,\

@@ -161,7 +161,7 @@ class UnitTestAccessor;
 class TestEventRepeater;
 class WindowsDeathTest;
 class UnitTestImpl* GetUnitTestImpl();
-void ReportFailureInUnknownLocation(TestPartResultType result_type,
+void ReportFailureInUnknownLocation(TestPartResult::Type result_type,
                                     const String& message);
 class PrettyUnitTestResultPrinter;
 class XmlUnitTestResultPrinter;
@@ -773,21 +773,14 @@ class Environment {
 
 namespace internal {
 
-// TODO(vladl@google.com): Order the methods the way they are invoked by
-// Google Test.
-// The interface for tracing execution of tests.
+// The interface for tracing execution of tests. The methods are organized in
+// the order the corresponding events are fired.
 class UnitTestEventListenerInterface {
  public:
   virtual ~UnitTestEventListenerInterface() {}
 
-  // TODO(vladl@google.com): Add tests for OnTestIterationStart and
-  // OnTestIterationEnd.
-
   // Fired before any test activity starts.
   virtual void OnTestProgramStart(const UnitTest& unit_test) = 0;
-
-  // Fired after all test activities have ended.
-  virtual void OnTestProgramEnd(const UnitTest& unit_test) = 0;
 
   // Fired before each iteration of tests starts.  There may be more than
   // one iteration if GTEST_FLAG(repeat) is set. iteration is the iteration
@@ -795,15 +788,26 @@ class UnitTestEventListenerInterface {
   virtual void OnTestIterationStart(const UnitTest& unit_test,
                                     int iteration) = 0;
 
-  // Fired after each iteration of tests finishes.
-  virtual void OnTestIterationEnd(const UnitTest& unit_test,
-                                  int iteration) = 0;
-
   // Fired before environment set-up for each iteration of tests starts.
   virtual void OnEnvironmentsSetUpStart(const UnitTest& unit_test) = 0;
 
   // Fired after environment set-up for each iteration of tests ends.
   virtual void OnEnvironmentsSetUpEnd(const UnitTest& unit_test) = 0;
+
+  // Fired before the test case starts.
+  virtual void OnTestCaseStart(const TestCase& test_case) = 0;
+
+  // Fired before the test starts.
+  virtual void OnTestStart(const TestInfo& test_info) = 0;
+
+  // Fired after a failed assertion or a SUCCESS().
+  virtual void OnTestPartResult(const TestPartResult& test_part_result) = 0;
+
+  // Fired after the test ends.
+  virtual void OnTestEnd(const TestInfo& test_info) = 0;
+
+  // Fired after the test case ends.
+  virtual void OnTestCaseEnd(const TestCase& test_case) = 0;
 
   // Fired before environment tear-down for each iteration of tests starts.
   virtual void OnEnvironmentsTearDownStart(const UnitTest& unit_test) = 0;
@@ -811,20 +815,12 @@ class UnitTestEventListenerInterface {
   // Fired after environment tear-down for each iteration of tests ends.
   virtual void OnEnvironmentsTearDownEnd(const UnitTest& unit_test) = 0;
 
-  // Fired before the test case starts.
-  virtual void OnTestCaseStart(const TestCase& test_case) = 0;
+  // Fired after each iteration of tests finishes.
+  virtual void OnTestIterationEnd(const UnitTest& unit_test,
+                                  int iteration) = 0;
 
-  // Fired after the test case ends.
-  virtual void OnTestCaseEnd(const TestCase& test_case) = 0;
-
-  // Fired before the test starts.
-  virtual void OnTestStart(const TestInfo& test_info) = 0;
-
-  // Fired after the test ends.
-  virtual void OnTestEnd(const TestInfo& test_info) = 0;
-
-  // Fired after a failed assertion or a SUCCESS().
-  virtual void OnTestPartResult(const TestPartResult& test_part_result) = 0;
+  // Fired after all test activities have ended.
+  virtual void OnTestProgramEnd(const UnitTest& unit_test) = 0;
 };
 
 // The convenience class for users who need to override just one or two
@@ -835,20 +831,20 @@ class UnitTestEventListenerInterface {
 class EmptyTestEventListener : public UnitTestEventListenerInterface {
  public:
   virtual void OnTestProgramStart(const UnitTest& /*unit_test*/) {}
-  virtual void OnTestProgramEnd(const UnitTest& /*unit_test*/) {}
   virtual void OnTestIterationStart(const UnitTest& /*unit_test*/,
                                     int /*iteration*/) {}
-  virtual void OnTestIterationEnd(const UnitTest& /*unit_test*/,
-                                  int /*iteration*/) {}
   virtual void OnEnvironmentsSetUpStart(const UnitTest& /*unit_test*/) {}
   virtual void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) {}
+  virtual void OnTestCaseStart(const TestCase& /*test_case*/) {}
+  virtual void OnTestStart(const TestInfo& /*test_info*/) {}
+  virtual void OnTestPartResult(const TestPartResult& /*test_part_result*/) {}
+  virtual void OnTestEnd(const TestInfo& /*test_info*/) {}
+  virtual void OnTestCaseEnd(const TestCase& /*test_case*/) {}
   virtual void OnEnvironmentsTearDownStart(const UnitTest& /*unit_test*/) {}
   virtual void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) {}
-  virtual void OnTestCaseStart(const TestCase& /*test_case*/) {}
-  virtual void OnTestCaseEnd(const TestCase& /*test_case*/) {}
-  virtual void OnTestStart(const TestInfo& /*test_info*/) {}
-  virtual void OnTestEnd(const TestInfo& /*test_info*/) {}
-  virtual void OnTestPartResult(const TestPartResult& /*test_part_result*/) {}
+  virtual void OnTestIterationEnd(const UnitTest& /*unit_test*/,
+                                  int /*iteration*/) {}
+  virtual void OnTestProgramEnd(const UnitTest& /*unit_test*/) {}
 };
 
 // EventListeners lets users add listeners to track events in Google Test.
@@ -996,7 +992,7 @@ class UnitTest {
   // Google Test assertion macros (e.g. ASSERT_TRUE, EXPECT_EQ, etc)
   // eventually call this to report their results.  The user code
   // should use the assertion macros instead of calling this directly.
-  void AddTestPartResult(TestPartResultType result_type,
+  void AddTestPartResult(TestPartResult::Type result_type,
                          const char* file_name,
                          int line_number,
                          const internal::String& message,
@@ -1066,7 +1062,7 @@ class UnitTest {
   friend class internal::AssertHelper;
   friend class Test;
   friend void internal::ReportFailureInUnknownLocation(
-      TestPartResultType result_type,
+      TestPartResult::Type result_type,
       const internal::String& message);
   // TODO(vladl@google.com): Remove these when publishing the new accessors.
   friend class internal::PrettyUnitTestResultPrinter;
@@ -1470,7 +1466,9 @@ AssertionResult DoubleNearPredFormat(const char* expr1,
 class AssertHelper {
  public:
   // Constructor.
-  AssertHelper(TestPartResultType type, const char* file, int line,
+  AssertHelper(TestPartResult::Type type,
+               const char* file,
+               int line,
                const char* message);
   ~AssertHelper();
 
@@ -1484,11 +1482,13 @@ class AssertHelper {
   // re-using stack space even for temporary variables, so every EXPECT_EQ
   // reserves stack space for another AssertHelper.
   struct AssertHelperData {
-    AssertHelperData(TestPartResultType t, const char* srcfile, int line_num,
+    AssertHelperData(TestPartResult::Type t,
+                     const char* srcfile,
+                     int line_num,
                      const char* msg)
         : type(t), file(srcfile), line(line_num), message(msg) { }
 
-    TestPartResultType const type;
+    TestPartResult::Type const type;
     const char*        const file;
     int                const line;
     String             const message;

@@ -756,13 +756,13 @@ bool AlwaysTrue();
     = ::testing::Message()
 
 #define GTEST_FATAL_FAILURE_(message) \
-  return GTEST_MESSAGE_(message, ::testing::TPRT_FATAL_FAILURE)
+  return GTEST_MESSAGE_(message, ::testing::TestPartResult::kFatalFailure)
 
 #define GTEST_NONFATAL_FAILURE_(message) \
-  GTEST_MESSAGE_(message, ::testing::TPRT_NONFATAL_FAILURE)
+  GTEST_MESSAGE_(message, ::testing::TestPartResult::kNonFatalFailure)
 
 #define GTEST_SUCCESS_(message) \
-  GTEST_MESSAGE_(message, ::testing::TPRT_SUCCESS)
+  GTEST_MESSAGE_(message, ::testing::TestPartResult::kSuccess)
 
 // Suppresses MSVC warnings 4072 (unreachable code) for the code following
 // statement if it returns or throws (or doesn't return or throw in some
