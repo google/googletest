@@ -985,7 +985,7 @@ TEST(UnexpectedCallTest, UnsatisifiedPrerequisites) {
   // There should be one non-fatal failure.
   ASSERT_EQ(1, failures.size());
   const ::testing::TestPartResult& r = failures.GetTestPartResult(0);
-  EXPECT_EQ(::testing::TPRT_NONFATAL_FAILURE, r.type());
+  EXPECT_EQ(::testing::TestPartResult::kNonFatalFailure, r.type());
 
   // Verifies that the failure message contains the two unsatisfied
   // pre-requisites but not the satisfied one.

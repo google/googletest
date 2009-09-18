@@ -77,8 +77,12 @@ class GoogleTestFailureReporter : public FailureReporterInterface {
  public:
   virtual void ReportFailure(FailureType type, const char* file, int line,
                              const string& message) {
-    AssertHelper(type == FATAL ? TPRT_FATAL_FAILURE : TPRT_NONFATAL_FAILURE,
-                 file, line, message.c_str()) = Message();
+    AssertHelper(type == FATAL ?
+                 TestPartResult::kFatalFailure :
+                 TestPartResult::kNonFatalFailure,
+                 file,
+                 line,
+                 message.c_str()) = Message();
     if (type == FATAL) {
       posix::Abort();
     }
