@@ -104,9 +104,6 @@ class SConstructHelper:
                  # GTEST_IS_NULL_LITERAL_() triggers it and I cannot find
                  # a fix.
 
-                 '/wd4511', '/wd4512',
-                 # copy ctor / assignment operator cannot be generated.
-
                  '-WX',             # Treat warning as errors
                  #'-GR-',           # Disable runtime type information
                  '-RTCs',           # Enable stack-frame run-time error checks
@@ -114,7 +111,8 @@ class SConstructHelper:
                  #'-EHs',           # enable C++ EH (no SEH exceptions)
                  '-nologo',         # Suppress logo line
                  '-J',              # All chars unsigned
-                 #'-Wp64',          # Detect 64-bit portability issues
+                 #'-Wp64',          # Detect 64-bit portability issues.  This
+                                    # flag has been deprecated by VS 2008.
                  '-Zi',             # Produce debug information in PDB files.
                  ],
         CCPDBFLAGS='',

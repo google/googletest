@@ -64,6 +64,9 @@ class ValueArray1 {
   operator ParamGenerator<T>() const { return ValuesIn(&v1_, &v1_ + 1); }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray1& other);
+
   const T1 v1_;
 };
 
@@ -83,6 +86,9 @@ class ValueArray$i {
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const ValueArray$i& other);
+
 $for j [[
 
   const T$j v$(j)_;
@@ -201,6 +207,9 @@ $for j  || [[
 ]];
     }
 
+    // No implementation - assignment is unsupported.
+    void operator=(const Iterator& other);
+
     const ParamGeneratorInterface<ParamType>* const base_;
     // begin[i]_ and end[i]_ define the i-th range that Iterator traverses.
     // current[i]_ is the actual traversing iterator.
@@ -212,14 +221,17 @@ $for j [[
 ]]
 
     ParamType current_value_;
-  };
+  };  // class CartesianProductGenerator$i::Iterator
+
+  // No implementation - assignment is unsupported.
+  void operator=(const CartesianProductGenerator$i& other);
 
 
 $for j [[
   const ParamGenerator<T$j> g$(j)_;
 
 ]]
-};
+};  // class CartesianProductGenerator$i
 
 
 ]]
@@ -250,12 +262,15 @@ $for j,[[
   }
 
  private:
+  // No implementation - assignment is unsupported.
+  void operator=(const CartesianProductHolder$i& other);
+
 
 $for j [[
   const Generator$j g$(j)_;
 
 ]]
-};
+};  // class CartesianProductHolder$i
 
 ]]
 
