@@ -77,7 +77,7 @@ Caveats:
   * There are many warnings when compiling.
   * `make check` will produce some errors as not all tests for Google Test itself are compatible with MinGW.
 
-We also have reports on successful cross compilation of Google Test MinGW binaries on Linux using [http://wiki.wxwidgets.org/Cross-Compiling_Under_Linux#Cross-compiling_under_Linux_for_MS_Windows these instructions] on the WxWidgets site.
+We also have reports on successful cross compilation of Google Test MinGW binaries on Linux using [http://wiki.wxwidgets.org/Cross-Compiling_Under_Linux#Cross-compiling_under_Linux_for_MS_Windows these instructions] on the !WxWidgets site.
 
 Please contact `googletestframework@googlegroups.com` if you are
 interested in improving the support for MinGW.
