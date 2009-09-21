@@ -260,6 +260,25 @@ GTEST_DEFINE_bool_(
 
 namespace internal {
 
+// Generates a random number from [0, range), using a Linear
+// Congruential Generator (LCG).  Crashes if 'range' is 0 or greater
+// than kMaxRange.
+UInt32 Random::Generate(UInt32 range) {
+  // These constants are the same as are used in glibc's rand(3).
+  state_ = (1103515245U*state_ + 12345U) % kMaxRange;
+
+  GTEST_CHECK_(range > 0)
+      << "Cannot generate a number in the range [0, 0).";
+  GTEST_CHECK_(range <= kMaxRange)
+      << "Generation of a number in [0, " << range << ") was requested, "
+      << "but this can only generate numbers in [0, " << kMaxRange << ").";
+
+  // Converting via modulus introduces a bit of downward bias, but
+  // it's simple, and a linear congruential generator isn't too good
+  // to begin with.
+  return state_ % range;
+}
+
 // g_help_flag is true iff the --help flag or an equivalent form is
 // specified on the command line.
 static bool g_help_flag = false;
@@ -3815,7 +3834,7 @@ static void TearDownEnvironment(Environment* env) { env->TearDown(); }
 // considered to be failed, but the rest of the tests will still be
 // run.  (We disable exceptions on Linux and Mac OS X, so the issue
 // doesn't apply there.)
-// When parameterized tests are enabled, it explands and registers
+// When parameterized tests are enabled, it expands and registers
 // parameterized tests first in RegisterParameterizedTests().
 // All other functions called from RunAllTests() may safely assume that
 // parameterized tests are ready to be counted and run.

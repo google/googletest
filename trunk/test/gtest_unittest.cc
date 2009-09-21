@@ -183,6 +183,7 @@ using testing::internal::TestProperty;
 using testing::internal::TestResult;
 using testing::internal::TestResultAccessor;
 using testing::internal::ThreadLocal;
+using testing::internal::UInt32;
 using testing::internal::Vector;
 using testing::internal::WideStringToUtf8;
 using testing::internal::kTestTypeIdInGoogleTest;
@@ -498,6 +499,49 @@ TEST(WideStringToUtf8Test, ConcatenatesCodepointsCorrectly) {
       WideStringToUtf8(L"\xC74D\n\x576\x8D3", -1).c_str());
 }
 #endif  // !GTEST_WIDE_STRING_USES_UTF16_
+
+// Tests the Random class.
+
+TEST(RandomDeathTest, GeneratesCrashesOnInvalidRange) {
+  testing::internal::Random random(42);
+  EXPECT_DEATH_IF_SUPPORTED(
+      random.Generate(0),
+      "Cannot generate a number in the range \\[0, 0\\)");
+  EXPECT_DEATH_IF_SUPPORTED(
+      random.Generate(testing::internal::Random::kMaxRange + 1),
+      "Generation of a number in \\[0, 2147483649\\) was requested, "
+      "but this can only generate numbers in \\[0, 2147483648\\)");
+}
+
+TEST(RandomTest, GeneratesNumbersWithinRange) {
+  const UInt32 kRange = 10000;
+  testing::internal::Random random(12345);
+  for (int i = 0; i < 10; i++) {
+    EXPECT_LT(random.Generate(kRange), kRange) << " for iteration " << i;
+  }
+
+  testing::internal::Random random2(testing::internal::Random::kMaxRange);
+  for (int i = 0; i < 10; i++) {
+    EXPECT_LT(random2.Generate(kRange), kRange) << " for iteration " << i;
+  }
+}
+
+TEST(RandomTest, RepeatsWhenReseeded) {
+  const int kSeed = 123;
+  const int kArraySize = 10;
+  const UInt32 kRange = 10000;
+  UInt32 values[kArraySize];
+
+  testing::internal::Random random(kSeed);
+  for (int i = 0; i < kArraySize; i++) {
+    values[i] = random.Generate(kRange);
+  }
+
+  random.Reseed(kSeed);
+  for (int i = 0; i < kArraySize; i++) {
+    EXPECT_EQ(values[i], random.Generate(kRange)) << " for iteration " << i;
+  }
+}
 
 // Tests the Vector class template.
 

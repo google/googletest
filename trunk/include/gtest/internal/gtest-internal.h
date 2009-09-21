@@ -748,6 +748,28 @@ String GetCurrentOsStackTraceExceptTop(UnitTest* unit_test, int skip_count);
 // A helper for suppressing warnings on unreachable code in some macros.
 bool AlwaysTrue();
 
+// A simple Linear Congruential Generator for generating random
+// numbers with a uniform distribution.  Unlike rand() and srand(), it
+// doesn't use global state (and therefore can't interfere with user
+// code).  Unlike rand_r(), it's portable.  An LCG isn't very random,
+// but it's good enough for our purposes.
+class Random {
+ public:
+  static const UInt32 kMaxRange = 1u << 31;
+
+  explicit Random(UInt32 seed) : state_(seed) {}
+
+  void Reseed(UInt32 seed) { state_ = seed; }
+
+  // Generates a random number from [0, range).  Crashes if 'range' is
+  // 0 or greater than kMaxRange.
+  UInt32 Generate(UInt32 range);
+
+ private:
+  UInt32 state_;
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(Random);
+};
+
 }  // namespace internal
 }  // namespace testing
 
