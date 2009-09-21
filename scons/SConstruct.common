@@ -155,11 +155,6 @@ class SConstructHelper:
                      '/OPT:NOICF',
                      ]
         )
-    # Tell SCons to build depdendencies in random order (apart from the
-    # actual dependency order).  This helps ensure we don't introduce
-    # build files that "accidentally" work sometimes (e.g. when you are
-    # building some targets) and not other times.
-    debug_env.SetOption('random', 1)
     return debug_env
 
   def MakeWinOptimizedEnvironment(self, base_environment, name):
