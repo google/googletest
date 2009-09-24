@@ -1,5 +1,5 @@
 AC_INIT([Google C++ Mocking Framework],
-        [1.1.0],
+        [1.2.0],
         [googlemock@googlegroups.com],
         [gmock])
 
@@ -80,7 +80,7 @@ AC_ARG_VAR([GTEST_VERSION],
            [The version of Google Test available.])
 HAVE_BUILT_GTEST="no"
 
-GTEST_MIN_VERSION="1.3.0"
+GTEST_MIN_VERSION="1.4.0"
 
 AS_IF([test "x${enable_external_gtest}" = "xyes"],
       [# Begin filling in variables as we are able.
