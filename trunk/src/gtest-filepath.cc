@@ -34,7 +34,7 @@
 
 #include <stdlib.h>
 
-#ifdef _WIN32_WCE
+#if GTEST_OS_WINDOWS_MOBILE
 #include <windows.h>
 #elif GTEST_OS_WINDOWS
 #include <direct.h>
@@ -45,7 +45,7 @@
 #else
 #include <limits.h>
 #include <climits>  // Some Linux distributions define PATH_MAX here.
-#endif  // _WIN32_WCE or _WIN32
+#endif  // GTEST_OS_WINDOWS_MOBILE
 
 #if GTEST_OS_WINDOWS
 #define GTEST_PATH_MAX_ _MAX_PATH
@@ -65,7 +65,7 @@ namespace internal {
 #if GTEST_OS_WINDOWS
 const char kPathSeparator = '\\';
 const char kPathSeparatorString[] = "\\";
-#ifdef _WIN32_WCE
+#if GTEST_OS_WINDOWS_MOBILE
 // Windows CE doesn't have a current directory. You should not use
 // the current directory in tests on Windows CE, but this at least
 // provides a reasonable fallback.
@@ -74,7 +74,7 @@ const char kCurrentDirectoryString[] = "\\";
 const DWORD kInvalidFileAttributes = 0xffffffff;
 #else
 const char kCurrentDirectoryString[] = ".\\";
-#endif  // _WIN32_WCE
+#endif  // GTEST_OS_WINDOWS_MOBILE
 #else
 const char kPathSeparator = '/';
 const char kPathSeparatorString[] = "/";
@@ -83,9 +83,9 @@ const char kCurrentDirectoryString[] = "./";
 
 // Returns the current working directory, or "" if unsuccessful.
 FilePath FilePath::GetCurrentDir() {
-#ifdef _WIN32_WCE
-// Windows CE doesn't have a current directory, so we just return
-// something reasonable.
+#if GTEST_OS_WINDOWS_MOBILE
+  // Windows CE doesn't have a current directory, so we just return
+  // something reasonable.
   return FilePath(kCurrentDirectoryString);
 #elif GTEST_OS_WINDOWS
   char cwd[GTEST_PATH_MAX_ + 1] = { '\0' };
@@ -93,7 +93,7 @@ FilePath FilePath::GetCurrentDir() {
 #else
   char cwd[GTEST_PATH_MAX_ + 1] = { '\0' };
   return FilePath(getcwd(cwd, sizeof(cwd)) == NULL ? "" : cwd);
-#endif
+#endif  // GTEST_OS_WINDOWS_MOBILE
 }
 
 // Returns a copy of the FilePath with the case-insensitive extension removed.
@@ -169,7 +169,7 @@ FilePath FilePath::ConcatPaths(const FilePath& directory,
 // Returns true if pathname describes something findable in the file-system,
 // either a file, directory, or whatever.
 bool FilePath::FileOrDirectoryExists() const {
-#ifdef _WIN32_WCE
+#if GTEST_OS_WINDOWS_MOBILE
   LPCWSTR unicode = String::AnsiToUtf16(pathname_.c_str());
   const DWORD attributes = GetFileAttributes(unicode);
   delete [] unicode;
@@ -177,7 +177,7 @@ bool FilePath::FileOrDirectoryExists() const {
 #else
   posix::StatStruct file_stat;
   return posix::Stat(pathname_.c_str(), &file_stat) == 0;
-#endif  // _WIN32_WCE
+#endif  // GTEST_OS_WINDOWS_MOBILE
 }
 
 // Returns true if pathname describes a directory in the file-system
@@ -193,7 +193,7 @@ bool FilePath::DirectoryExists() const {
   const FilePath& path(*this);
 #endif
 
-#ifdef _WIN32_WCE
+#if GTEST_OS_WINDOWS_MOBILE
   LPCWSTR unicode = String::AnsiToUtf16(path.c_str());
   const DWORD attributes = GetFileAttributes(unicode);
   delete [] unicode;
@@ -205,7 +205,7 @@ bool FilePath::DirectoryExists() const {
   posix::StatStruct file_stat;
   result = posix::Stat(path.c_str(), &file_stat) == 0 &&
       posix::IsDir(file_stat);
-#endif  // _WIN32_WCE
+#endif  // GTEST_OS_WINDOWS_MOBILE
 
   return result;
 }
@@ -284,18 +284,17 @@ bool FilePath::CreateDirectoriesRecursively() const {
 // directory for any reason, including if the parent directory does not
 // exist. Not named "CreateDirectory" because that's a macro on Windows.
 bool FilePath::CreateFolder() const {
-#if GTEST_OS_WINDOWS
-#ifdef _WIN32_WCE
+#if GTEST_OS_WINDOWS_MOBILE
   FilePath removed_sep(this->RemoveTrailingPathSeparator());
   LPCWSTR unicode = String::AnsiToUtf16(removed_sep.c_str());
   int result = CreateDirectory(unicode, NULL) ? 0 : -1;
   delete [] unicode;
-#else
+#elif GTEST_OS_WINDOWS
   int result = _mkdir(pathname_.c_str());
-#endif  // !WIN32_WCE
 #else
   int result = mkdir(pathname_.c_str(), 0777);
-#endif  // _WIN32
+#endif  // GTEST_OS_WINDOWS_MOBILE
+
   if (result == -1) {
     return this->DirectoryExists();  // An error is OK if the directory exists.
   }

@@ -40,19 +40,9 @@
 
 #include <gtest/gtest.h>
 
-// TODO(vladl@google.com): Remove this include when the event listener API is
-// published and GetUnitTestImpl is no longer needed.
-//
-// Indicates that this translation unit is part of Google Test's
-// implementation.  It must come before gtest-internal-inl.h is
-// included, or there will be a compiler error.  This trick is to
-// prevent a user from accidentally including gtest-internal-inl.h in
-// his code.
-#define GTEST_IMPLEMENTATION_ 1
-#include "src/gtest-internal-inl.h"
-#undef GTEST_IMPLEMENTATION_
-
+using ::testing::EventListeners;
 using ::testing::InitGoogleTest;
+using ::testing::UnitTest;
 
 class SuccessfulTest : public testing::Test {
 };
@@ -137,11 +127,7 @@ int main(int argc, char** argv) {
   InitGoogleTest(&argc, argv);
 
   if (argc > 1 && strcmp(argv[1], "--shut_down_xml") == 0) {
-    // TODO(vladl@google.com): Replace GetUnitTestImpl()->listeners() with
-    // UnitTest::GetInstance()->listeners() when the event listener API is
-    // published.
-    ::testing::internal::EventListeners& listeners =
-        *::testing::internal::GetUnitTestImpl()->listeners();
+    EventListeners& listeners = UnitTest::GetInstance()->listeners();
     delete listeners.Release(listeners.default_xml_generator());
   }
   return RUN_ALL_TESTS();

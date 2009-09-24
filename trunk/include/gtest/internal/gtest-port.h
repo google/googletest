@@ -77,7 +77,10 @@
 //   GTEST_OS_MAC      - Mac OS X
 //   GTEST_OS_SOLARIS  - Sun Solaris
 //   GTEST_OS_SYMBIAN  - Symbian
-//   GTEST_OS_WINDOWS  - Windows
+//   GTEST_OS_WINDOWS  - Windows (Desktop, MinGW, or Mobile)
+//     GTEST_OS_WINDOWS_DESKTOP  - Windows Desktop
+//     GTEST_OS_WINDOWS_MINGW    - MinGW
+//     GTEST_OS_WINODWS_MOBILE   - Windows Mobile
 //   GTEST_OS_ZOS      - z/OS
 //
 // Among the platforms, Cygwin, Linux, Max OS X, and Windows have the
@@ -184,6 +187,13 @@
 #define GTEST_OS_SYMBIAN 1
 #elif defined _WIN32
 #define GTEST_OS_WINDOWS 1
+#ifdef _WIN32_WCE
+#define GTEST_OS_WINDOWS_MOBILE 1
+#elif defined(__MINGW__) || defined(__MINGW32__)
+#define GTEST_OS_WINDOWS_MINGW 1
+#else
+#define GTEST_OS_WINDOWS_DESKTOP 1
+#endif  // _WIN32_WCE
 #elif defined __APPLE__
 #define GTEST_OS_MAC 1
 #elif defined __linux__
@@ -210,10 +220,10 @@
 
 #elif GTEST_OS_WINDOWS
 
-#ifndef _WIN32_WCE
+#if !GTEST_OS_WINDOWS_MOBILE
 #include <direct.h>  // NOLINT
 #include <io.h>  // NOLINT
-#endif  // !_WIN32_WCE
+#endif
 
 // <regex.h> is not available on Windows.  Use our own simple regex
 // implementation instead.
@@ -449,11 +459,9 @@
 //      (this is covered by GTEST_HAS_STD_STRING guard).
 //   3. abort() in a VC 7.1 application compiled as GUI in debug config
 //      pops up a dialog window that cannot be suppressed programmatically.
-#if GTEST_HAS_STD_STRING && (GTEST_OS_LINUX || \
-                             GTEST_OS_MAC || \
-                             GTEST_OS_CYGWIN || \
-                             (GTEST_OS_WINDOWS && (_MSC_VER >= 1400) && \
-                              !defined(_WIN32_WCE)))
+#if GTEST_HAS_STD_STRING && \
+    (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_CYGWIN || \
+     (GTEST_OS_WINDOWS_DESKTOP && _MSC_VER >= 1400))
 #define GTEST_HAS_DEATH_TEST 1
 #include <vector>  // NOLINT
 #endif
@@ -835,29 +843,29 @@ inline int StrCaseCmp(const char* s1, const char* s2) {
 }
 inline char* StrDup(const char* src) { return strdup(src); }
 #else  // !__BORLANDC__
-#ifdef _WIN32_WCE
+#if GTEST_OS_WINDOWS_MOBILE
 inline int IsATTY(int /* fd */) { return 0; }
-#else  // !_WIN32_WCE
+#else
 inline int IsATTY(int fd) { return _isatty(fd); }
-#endif  // _WIN32_WCE
+#endif  // GTEST_OS_WINDOWS_MOBILE
 inline int StrCaseCmp(const char* s1, const char* s2) {
   return _stricmp(s1, s2);
 }
 inline char* StrDup(const char* src) { return _strdup(src); }
 #endif  // __BORLANDC__
 
-#ifdef _WIN32_WCE
+#if GTEST_OS_WINDOWS_MOBILE
 inline int FileNo(FILE* file) { return reinterpret_cast<int>(_fileno(file)); }
 // Stat(), RmDir(), and IsDir() are not needed on Windows CE at this
 // time and thus not defined there.
-#else  // !_WIN32_WCE
+#else
 inline int FileNo(FILE* file) { return _fileno(file); }
 inline int Stat(const char* path, StatStruct* buf) { return _stat(path, buf); }
 inline int RmDir(const char* dir) { return _rmdir(dir); }
 inline bool IsDir(const StatStruct& st) {
   return (_S_IFDIR & st.st_mode) != 0;
 }
-#endif  // _WIN32_WCE
+#endif  // GTEST_OS_WINDOWS_MOBILE
 
 #else
 
@@ -891,20 +899,20 @@ inline const char* StrNCpy(char* dest, const char* src, size_t n) {
 // StrError() aren't needed on Windows CE at this time and thus not
 // defined there.
 
-#ifndef _WIN32_WCE
+#if !GTEST_OS_WINDOWS_MOBILE
 inline int ChDir(const char* dir) { return chdir(dir); }
 #endif
 inline FILE* FOpen(const char* path, const char* mode) {
   return fopen(path, mode);
 }
-#ifndef _WIN32_WCE
+#if !GTEST_OS_WINDOWS_MOBILE
 inline FILE *FReopen(const char* path, const char* mode, FILE* stream) {
   return freopen(path, mode, stream);
 }
 inline FILE* FDOpen(int fd, const char* mode) { return fdopen(fd, mode); }
 #endif
 inline int FClose(FILE* fp) { return fclose(fp); }
-#ifndef _WIN32_WCE
+#if !GTEST_OS_WINDOWS_MOBILE
 inline int Read(int fd, void* buf, unsigned int count) {
   return static_cast<int>(read(fd, buf, count));
 }
@@ -915,7 +923,8 @@ inline int Close(int fd) { return close(fd); }
 inline const char* StrError(int errnum) { return strerror(errnum); }
 #endif
 inline const char* GetEnv(const char* name) {
-#ifdef _WIN32_WCE  // We are on Windows CE, which has no environment variables.
+#if GTEST_OS_WINDOWS_MOBILE
+  // We are on Windows CE, which has no environment variables.
   return NULL;
 #elif defined(__BORLANDC__)
   // Environment variables which we programmatically clear will be set to the
@@ -931,14 +940,14 @@ inline const char* GetEnv(const char* name) {
 #pragma warning(pop)  // Restores the warning state.
 #endif
 
-#ifdef _WIN32_WCE
+#if GTEST_OS_WINDOWS_MOBILE
 // Windows CE has no C library. The abort() function is used in
 // several places in Google Test. This implementation provides a reasonable
 // imitation of standard behaviour.
 void Abort();
 #else
 inline void Abort() { abort(); }
-#endif  // _WIN32_WCE
+#endif  // GTEST_OS_WINDOWS_MOBILE
 
 }  // namespace posix
 

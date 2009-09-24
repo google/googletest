@@ -36,33 +36,14 @@
 
 #include <gtest/gtest.h>
 
+using ::testing::EmptyTestEventListener;
+using ::testing::EventListeners;
 using ::testing::InitGoogleTest;
 using ::testing::Test;
+using ::testing::TestCase;
 using ::testing::TestInfo;
 using ::testing::TestPartResult;
 using ::testing::UnitTest;
-using ::testing::internal::EmptyTestEventListener;
-using ::testing::internal::EventListeners;
-using ::testing::internal::TestCase;
-
-namespace testing {
-namespace internal {
-
-// TODO(vladl@google.com): Get rid of the accessor class once the API is
-// published.
-class UnitTestAccessor {
- public:
-  static bool Passed(const UnitTest& unit_test) { return unit_test.Passed(); }
-  static EventListeners& listeners(UnitTest* unit_test) {
-    return unit_test->listeners();
-  }
-
-};
-
-}  // namespace internal
-}  // namespace testing
-
-using ::testing::internal::UnitTestAccessor;
 
 namespace {
 
@@ -142,8 +123,7 @@ int main(int argc, char **argv) {
   // If we are given the --check_for_leaks command line flag, installs the
   // leak checker.
   if (check_for_leaks) {
-    EventListeners& listeners = UnitTestAccessor::listeners(
-        UnitTest::GetInstance());
+    EventListeners& listeners = UnitTest::GetInstance()->listeners();
 
     // Adds the leak checker to the end of the test event listener list,
     // after the default text output printer and the default XML report

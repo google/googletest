@@ -1140,8 +1140,6 @@ class TestResultAccessor {
     test_result->RecordProperty(property);
   }
 
-  static bool Passed(const TestResult& result) { return result.Passed(); }
-
   static void ClearTestPartResults(TestResult* test_result) {
     test_result->ClearTestPartResults();
   }

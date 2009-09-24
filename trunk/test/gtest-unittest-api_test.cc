@@ -38,21 +38,7 @@
 #include <string.h>  // For strcmp.
 #include <algorithm>
 
-using ::testing::AddGlobalTestEnvironment;
-using ::testing::Environment;
 using ::testing::InitGoogleTest;
-using ::testing::Test;
-using ::testing::TestInfo;
-using ::testing::TestPartResult;
-using ::testing::UnitTest;
-using ::testing::internal::TestCase;
-using ::testing::internal::TestProperty;
-
-#if GTEST_HAS_TYPED_TEST
-using ::testing::Types;
-using ::testing::internal::GetTypeName;
-using ::testing::internal::String;
-#endif  // GTEST_HAS_TYPED_TEST
 
 namespace testing {
 namespace internal {
@@ -64,20 +50,20 @@ struct LessByName {
   }
 };
 
-class UnitTestAccessor {
+class UnitTestHelper {
  public:
   // Returns the array of pointers to all test cases sorted by the test case
   // name.  The caller is responsible for deleting the array.
   static TestCase const** const GetSortedTestCases() {
-    UnitTest* unit_test = UnitTest::GetInstance();
+    UnitTest& unit_test = *UnitTest::GetInstance();
     TestCase const** const test_cases =
-        new const TestCase*[unit_test->total_test_case_count()];
+        new const TestCase*[unit_test.total_test_case_count()];
 
-    for (int i = 0; i < unit_test->total_test_case_count(); ++i)
-      test_cases[i] = unit_test->GetTestCase(i);
+    for (int i = 0; i < unit_test.total_test_case_count(); ++i)
+      test_cases[i] = unit_test.GetTestCase(i);
 
     std::sort(test_cases,
-              test_cases + unit_test->total_test_case_count(),
+              test_cases + unit_test.total_test_case_count(),
               LessByName<TestCase>());
     return test_cases;
   }
@@ -85,9 +71,9 @@ class UnitTestAccessor {
   // Returns the test case by its name.  The caller doesn't own the returned
   // pointer.
   static const TestCase* FindTestCase(const char* name) {
-    UnitTest* unit_test = UnitTest::GetInstance();
-    for (int i = 0; i < unit_test->total_test_case_count(); ++i) {
-      const TestCase* test_case = unit_test->GetTestCase(i);
+    UnitTest& unit_test = *UnitTest::GetInstance();
+    for (int i = 0; i < unit_test.total_test_case_count(); ++i) {
+      const TestCase* test_case = unit_test.GetTestCase(i);
       if (0 == strcmp(test_case->name(), name))
         return test_case;
     }
@@ -104,18 +90,11 @@ class UnitTestAccessor {
     for (int i = 0; i < test_case->total_test_count(); ++i)
       tests[i] = test_case->GetTestInfo(i);
 
-    std::sort(tests,
-              tests + test_case->total_test_count(),
+    std::sort(tests, tests + test_case->total_test_count(),
               LessByName<TestInfo>());
     return tests;
   }
 };
-
-// TODO(vladl@google.com): Put tests into the internal namespace after
-// UnitTest methods are published.
-}  // namespace internal
-
-using internal::UnitTestAccessor;
 
 #if GTEST_HAS_TYPED_TEST
 template <typename T> class TestCaseWithCommentTest : public Test {};
@@ -147,7 +126,7 @@ TEST(ApiTest, UnitTestImmutableAccessorsWork) {
   EXPECT_EQ(5 + kTypedTests, unit_test->total_test_count());
   EXPECT_EQ(3 + kTypedTests, unit_test->test_to_run_count());
 
-  const TestCase** const test_cases = UnitTestAccessor::GetSortedTestCases();
+  const TestCase** const test_cases = UnitTestHelper::GetSortedTestCases();
 
   EXPECT_STREQ("ApiTest", test_cases[0]->name());
   EXPECT_STREQ("DISABLED_Test", test_cases[1]->name());
@@ -165,7 +144,7 @@ TEST(ApiTest, UnitTestImmutableAccessorsWork) {
 }
 
 TEST(ApiTest, TestCaseImmutableAccessorsWork) {
-  const TestCase* test_case = UnitTestAccessor::FindTestCase("ApiTest");
+  const TestCase* test_case = UnitTestHelper::FindTestCase("ApiTest");
   ASSERT_TRUE(test_case != NULL);
 
   EXPECT_STREQ("ApiTest", test_case->name());
@@ -175,7 +154,7 @@ TEST(ApiTest, TestCaseImmutableAccessorsWork) {
   EXPECT_EQ(3, test_case->test_to_run_count());
   ASSERT_EQ(4, test_case->total_test_count());
 
-  const TestInfo** tests = UnitTestAccessor::GetSortedTests(test_case);
+  const TestInfo** tests = UnitTestHelper::GetSortedTests(test_case);
 
   EXPECT_STREQ("DISABLED_Dummy1", tests[0]->name());
   EXPECT_STREQ("ApiTest", tests[0]->test_case_name());
@@ -205,7 +184,7 @@ TEST(ApiTest, TestCaseImmutableAccessorsWork) {
   tests = NULL;
 
 #if GTEST_HAS_TYPED_TEST
-  test_case = UnitTestAccessor::FindTestCase("TestCaseWithCommentTest/0");
+  test_case = UnitTestHelper::FindTestCase("TestCaseWithCommentTest/0");
   ASSERT_TRUE(test_case != NULL);
 
   EXPECT_STREQ("TestCaseWithCommentTest/0", test_case->name());
@@ -215,7 +194,7 @@ TEST(ApiTest, TestCaseImmutableAccessorsWork) {
   EXPECT_EQ(1, test_case->test_to_run_count());
   ASSERT_EQ(1, test_case->total_test_count());
 
-  tests = UnitTestAccessor::GetSortedTests(test_case);
+  tests = UnitTestHelper::GetSortedTests(test_case);
 
   EXPECT_STREQ("Dummy", tests[0]->name());
   EXPECT_STREQ("TestCaseWithCommentTest/0", tests[0]->test_case_name());
@@ -229,7 +208,7 @@ TEST(ApiTest, TestCaseImmutableAccessorsWork) {
 }
 
 TEST(ApiTest, TestCaseDisabledAccessorsWork) {
-  const TestCase* test_case = UnitTestAccessor::FindTestCase("DISABLED_Test");
+  const TestCase* test_case = UnitTestHelper::FindTestCase("DISABLED_Test");
   ASSERT_TRUE(test_case != NULL);
 
   EXPECT_STREQ("DISABLED_Test", test_case->name());
@@ -265,7 +244,7 @@ class FinalSuccessChecker : public Environment {
     EXPECT_FALSE(unit_test->Failed());
     ASSERT_EQ(2 + kTypedTestCases, unit_test->total_test_case_count());
 
-    const TestCase** const test_cases = UnitTestAccessor::GetSortedTestCases();
+    const TestCase** const test_cases = UnitTestHelper::GetSortedTestCases();
 
     EXPECT_STREQ("ApiTest", test_cases[0]->name());
     EXPECT_STREQ("", test_cases[0]->comment());
@@ -298,8 +277,8 @@ class FinalSuccessChecker : public Environment {
     EXPECT_FALSE(test_cases[2]->Failed());
 #endif  // GTEST_HAS_TYPED_TEST
 
-    const TestCase* test_case = UnitTestAccessor::FindTestCase("ApiTest");
-    const TestInfo** tests = UnitTestAccessor::GetSortedTests(test_case);
+    const TestCase* test_case = UnitTestHelper::FindTestCase("ApiTest");
+    const TestInfo** tests = UnitTestHelper::GetSortedTests(test_case);
     EXPECT_STREQ("DISABLED_Dummy1", tests[0]->name());
     EXPECT_STREQ("ApiTest", tests[0]->test_case_name());
     EXPECT_FALSE(tests[0]->should_run());
@@ -334,8 +313,8 @@ class FinalSuccessChecker : public Environment {
     delete[] tests;
 
 #if GTEST_HAS_TYPED_TEST
-    test_case = UnitTestAccessor::FindTestCase("TestCaseWithCommentTest/0");
-    tests = UnitTestAccessor::GetSortedTests(test_case);
+    test_case = UnitTestHelper::FindTestCase("TestCaseWithCommentTest/0");
+    tests = UnitTestHelper::GetSortedTests(test_case);
 
     EXPECT_STREQ("Dummy", tests[0]->name());
     EXPECT_STREQ("TestCaseWithCommentTest/0", tests[0]->test_case_name());
@@ -352,12 +331,13 @@ class FinalSuccessChecker : public Environment {
   }
 };
 
+}  // namespace internal
 }  // namespace testing
 
 int main(int argc, char **argv) {
   InitGoogleTest(&argc, argv);
 
-  AddGlobalTestEnvironment(new testing::FinalSuccessChecker());
+  AddGlobalTestEnvironment(new testing::internal::FinalSuccessChecker());
 
   return RUN_ALL_TESTS();
 }
