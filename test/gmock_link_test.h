@@ -147,6 +147,7 @@ using testing::IgnoreResult;
 using testing::Invoke;
 using testing::InvokeArgument;
 using testing::InvokeWithoutArgs;
+using testing::IsNull;
 using testing::Le;
 using testing::Lt;
 using testing::Matcher;
@@ -489,6 +490,13 @@ TEST(LinkTest, TestMatcherNotNull) {
   Mock mock;
 
   ON_CALL(mock, VoidFromString(NotNull())).WillByDefault(Return());
+}
+
+// Tests the linkage of the IsNull matcher.
+TEST(LinkTest, TestMatcherIsNull) {
+  Mock mock;
+
+  ON_CALL(mock, VoidFromString(IsNull())).WillByDefault(Return());
 }
 
 // Tests the linkage of the Ref matcher.

@@ -78,6 +78,7 @@ using testing::FloatEq;
 using testing::Ge;
 using testing::Gt;
 using testing::HasSubstr;
+using testing::IsNull;
 using testing::Key;
 using testing::Le;
 using testing::Lt;
@@ -683,6 +684,32 @@ TEST(NeTest, ImplementsNotEqual) {
 TEST(NeTest, CanDescribeSelf) {
   Matcher<int> m = Ne(5);
   EXPECT_EQ("is not equal to 5", Describe(m));
+}
+
+// Tests that IsNull() matches any NULL pointer of any type.
+TEST(IsNullTest, MatchesNullPointer) {
+  Matcher<int*> m1 = IsNull();
+  int* p1 = NULL;
+  int n = 0;
+  EXPECT_TRUE(m1.Matches(p1));
+  EXPECT_FALSE(m1.Matches(&n));
+
+  Matcher<const char*> m2 = IsNull();
+  const char* p2 = NULL;
+  EXPECT_TRUE(m2.Matches(p2));
+  EXPECT_FALSE(m2.Matches("hi"));
+
+  Matcher<void*> m3 = IsNull();
+  void* p3 = NULL;
+  EXPECT_TRUE(m3.Matches(p3));
+  EXPECT_FALSE(m3.Matches(reinterpret_cast<void*>(0xbeef)));
+}
+
+// Tests that IsNull() describes itself properly.
+TEST(IsNullTest, CanDescribeSelf) {
+  Matcher<int*> m = IsNull();
+  EXPECT_EQ("is NULL", Describe(m));
+  EXPECT_EQ("is not NULL", DescribeNegation(m));
 }
 
 // Tests that NotNull() matches any non-NULL pointer of any type.

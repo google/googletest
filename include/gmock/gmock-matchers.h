@@ -621,6 +621,19 @@ GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Ne, !=, "not equal to");
 
 #undef GMOCK_IMPLEMENT_COMPARISON_MATCHER_
 
+// Implements the polymorphic IsNull() matcher, which matches any
+// pointer that is NULL.
+class IsNullMatcher {
+ public:
+  template <typename T>
+  bool Matches(T* p) const { return p == NULL; }
+
+  void DescribeTo(::std::ostream* os) const { *os << "is NULL"; }
+  void DescribeNegationTo(::std::ostream* os) const {
+    *os << "is not NULL";
+  }
+};
+
 // Implements the polymorphic NotNull() matcher, which matches any
 // pointer that is not NULL.
 class NotNullMatcher {
@@ -2317,6 +2330,11 @@ inline internal::LtMatcher<Rhs> Lt(Rhs x) {
 template <typename Rhs>
 inline internal::NeMatcher<Rhs> Ne(Rhs x) {
   return internal::NeMatcher<Rhs>(x);
+}
+
+// Creates a polymorphic matcher that matches any NULL pointer.
+inline PolymorphicMatcher<internal::IsNullMatcher > IsNull() {
+  return MakePolymorphicMatcher(internal::IsNullMatcher());
 }
 
 // Creates a polymorphic matcher that matches any non-NULL pointer.
