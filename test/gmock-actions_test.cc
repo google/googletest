@@ -70,9 +70,9 @@ using testing::ReturnNull;
 using testing::ReturnRef;
 using testing::SetArgumentPointee;
 
-#ifndef _WIN32_WCE
+#if !GTEST_OS_WINDOWS_MOBILE
 using testing::SetErrnoAndReturn;
-#endif  // _WIN32_WCE
+#endif
 
 #if GMOCK_HAS_PROTOBUF_
 using testing::internal::TestMessage;
@@ -911,7 +911,7 @@ TEST(AssignTest, CompatibleTypes) {
   EXPECT_DOUBLE_EQ(5, x);
 }
 
-#ifndef _WIN32_WCE
+#if !GTEST_OS_WINDOWS_MOBILE
 
 class SetErrnoAndReturnTest : public testing::Test {
  protected:
@@ -938,7 +938,7 @@ TEST_F(SetErrnoAndReturnTest, CompatibleTypes) {
   EXPECT_EQ(EINVAL, errno);
 }
 
-#endif  // _WIN32_WCE
+#endif  // !GTEST_OS_WINDOWS_MOBILE
 
 // Tests ByRef().
 

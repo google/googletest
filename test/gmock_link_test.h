@@ -116,7 +116,7 @@
 
 #include <gmock/gmock.h>
 
-#ifndef _WIN32_WCE
+#if !GTEST_OS_WINDOWS_MOBILE
 #include <errno.h>
 #endif
 
@@ -176,18 +176,18 @@ using testing::WithArg;
 using testing::WithArgs;
 using testing::WithoutArgs;
 
-#ifndef _WIN32_WCE
+#if !GTEST_OS_WINDOWS_MOBILE
 using testing::SetErrnoAndReturn;
-#endif  // _WIN32_WCE
+#endif
 
 #if GTEST_HAS_EXCEPTIONS
 using testing::Throw;
-#endif  // GTEST_HAS_EXCEPTIONS
+#endif
 
 #if GMOCK_HAS_REGEX
 using testing::ContainsRegex;
 using testing::MatchesRegex;
-#endif  // GMOCK_HAS_REGEX
+#endif
 
 class Interface {
  public:
@@ -297,7 +297,7 @@ TEST(LinkTest, TestSetArrayArgument) {
   mock.VoidFromString(&ch);
 }
 
-#ifndef _WIN32_WCE
+#if !GTEST_OS_WINDOWS_MOBILE
 
 // Tests the linkage of the SetErrnoAndReturn action.
 TEST(LinkTest, TestSetErrnoAndReturn) {
@@ -309,7 +309,7 @@ TEST(LinkTest, TestSetErrnoAndReturn) {
   errno = saved_errno;
 }
 
-#endif  // _WIN32_WCE
+#endif  // !GTEST_OS_WINDOWS_MOBILE
 
 // Tests the linkage of the Invoke(function) and Invoke(object, method) actions.
 TEST(LinkTest, TestInvoke) {

@@ -606,7 +606,7 @@ class AssignAction {
   const T2 value_;
 };
 
-#ifndef _WIN32_WCE
+#if !GTEST_OS_WINDOWS_MOBILE
 
 // Implements the SetErrnoAndReturn action to simulate return from
 // various system calls and libc functions.
@@ -626,7 +626,7 @@ class SetErrnoAndReturnAction {
   const T result_;
 };
 
-#endif  // _WIN32_WCE
+#endif  // !GTEST_OS_WINDOWS_MOBILE
 
 // Implements the SetArgumentPointee<N>(x) action for any function
 // whose N-th argument (0-based) is a pointer to x's type.  The
@@ -912,7 +912,7 @@ PolymorphicAction<internal::AssignAction<T1, T2> > Assign(T1* ptr, T2 val) {
   return MakePolymorphicAction(internal::AssignAction<T1, T2>(ptr, val));
 }
 
-#ifndef _WIN32_WCE
+#if !GTEST_OS_WINDOWS_MOBILE
 
 // Creates an action that sets errno and returns the appropriate error.
 template <typename T>
@@ -922,7 +922,7 @@ SetErrnoAndReturn(int errval, T result) {
       internal::SetErrnoAndReturnAction<T>(errval, result));
 }
 
-#endif  // _WIN32_WCE
+#endif  // !GTEST_OS_WINDOWS_MOBILE
 
 // Various overloads for InvokeWithoutArgs().
 
