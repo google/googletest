@@ -36,38 +36,14 @@
 
 #include <gtest/gtest.h>
 
+using ::testing::EmptyTestEventListener;
+using ::testing::EventListeners;
 using ::testing::InitGoogleTest;
 using ::testing::Test;
+using ::testing::TestCase;
 using ::testing::TestInfo;
 using ::testing::TestPartResult;
 using ::testing::UnitTest;
-using ::testing::internal::EmptyTestEventListener;
-using ::testing::internal::EventListeners;
-using ::testing::internal::TestCase;
-
-namespace testing {
-namespace internal {
-
-// TODO(vladl@google.com): Get rid of the accessor class once the API is
-// published.
-class UnitTestAccessor {
- public:
-  static bool Passed(const UnitTest& unit_test) { return unit_test.Passed(); }
-  static EventListeners& listeners(UnitTest* unit_test) {
-    return unit_test->listeners();
-  }
-  static int GetTotalTestCaseCount(const UnitTest& unit_test) {
-    return unit_test.total_test_case_count();
-  }
-  static const TestCase* GetTestCase(const UnitTest& unit_test, int index) {
-    return unit_test.GetTestCase(index);
-  }
-};
-
-}  // namespace internal
-}  // namespace testing
-
-using ::testing::internal::UnitTestAccessor;
 
 namespace {
 
@@ -80,9 +56,7 @@ class TersePrinter : public EmptyTestEventListener {
 
   // Called after all test activities have ended.
   virtual void OnTestProgramEnd(const UnitTest& unit_test) {
-    fprintf(stdout,
-            "TEST %s\n",
-            UnitTestAccessor::Passed(unit_test) ? "PASSED" : "FAILED");
+    fprintf(stdout, "TEST %s\n", unit_test.Passed() ? "PASSED" : "FAILED");
     fflush(stdout);
   }
 
@@ -141,11 +115,12 @@ int main(int argc, char **argv) {
     printf("%s\n", "Run this program with --terse_output to change the way "
            "it prints its output.");
 
+  UnitTest& unit_test = *UnitTest::GetInstance();
+
   // If we are given the --terse_output command line flag, suppresses the
   // standard output and attaches own result printer.
   if (terse_output) {
-    EventListeners& listeners = UnitTestAccessor::listeners(
-        UnitTest::GetInstance());
+    EventListeners& listeners = unit_test.listeners();
 
     // Removes the default console output listener from the list so it will
     // not receive events from Google Test and won't print any output. Since
@@ -164,17 +139,14 @@ int main(int argc, char **argv) {
   // This is an example of using the UnitTest reflection API to inspect test
   // results. Here we discount failures from the tests we expected to fail.
   int unexpectedly_failed_tests = 0;
-  for (int i = 0;
-       i < UnitTestAccessor::GetTotalTestCaseCount(*UnitTest::GetInstance());
-       ++i) {
-    const TestCase* test_case = UnitTestAccessor::GetTestCase(
-        *UnitTest::GetInstance(), i);
-    for (int j = 0; j < test_case->total_test_count(); ++j) {
-      const TestInfo* test_info = test_case->GetTestInfo(j);
+  for (int i = 0; i < unit_test.total_test_case_count(); ++i) {
+    const TestCase& test_case = *unit_test.GetTestCase(i);
+    for (int j = 0; j < test_case.total_test_count(); ++j) {
+      const TestInfo& test_info = *test_case.GetTestInfo(j);
       // Counts failed tests that were not meant to fail (those without
       // 'Fails' in the name).
-      if (test_info->result()->Failed() &&
-          strcmp(test_info->name(), "Fails") != 0) {
+      if (test_info.result()->Failed() &&
+          strcmp(test_info.name(), "Fails") != 0) {
         unexpectedly_failed_tests++;
       }
     }

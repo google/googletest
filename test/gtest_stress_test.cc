@@ -46,7 +46,6 @@ namespace testing {
 namespace {
 
 using internal::String;
-using internal::TestProperty;
 using internal::TestPropertyKeyIs;
 using internal::Vector;
 

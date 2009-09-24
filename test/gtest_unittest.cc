@@ -88,16 +88,16 @@ bool ParseInt32Flag(const char* str, const char* flag, Int32* value);
 // that are needed to test it.
 class EventListenersAccessor {
  public:
-  static UnitTestEventListenerInterface* GetRepeater(
-      EventListeners* listeners) { return listeners->repeater(); }
+  static TestEventListener* GetRepeater(EventListeners* listeners) {
+    return listeners->repeater();
+  }
 
-  static void SetDefaultResultPrinter(
-      EventListeners* listeners,
-      UnitTestEventListenerInterface* listener) {
+  static void SetDefaultResultPrinter(EventListeners* listeners,
+                                      TestEventListener* listener) {
     listeners->SetDefaultResultPrinter(listener);
   }
   static void SetDefaultXmlGenerator(EventListeners* listeners,
-                                     UnitTestEventListenerInterface* listener) {
+                                     TestEventListener* listener) {
     listeners->SetDefaultXmlGenerator(listener);
   }
 
@@ -131,6 +131,8 @@ using testing::AssertionFailure;
 using testing::AssertionResult;
 using testing::AssertionSuccess;
 using testing::DoubleLE;
+using testing::EmptyTestEventListener;
+using testing::EventListeners;
 using testing::FloatLE;
 using testing::GTEST_FLAG(also_run_disabled_tests);
 using testing::GTEST_FLAG(break_on_failure);
@@ -153,16 +155,15 @@ using testing::Message;
 using testing::ScopedFakeTestPartResultReporter;
 using testing::StaticAssertTypeEq;
 using testing::Test;
+using testing::TestCase;
 using testing::TestPartResult;
 using testing::TestPartResultArray;
+using testing::TestProperty;
+using testing::TestResult;
 using testing::UnitTest;
-using testing::internal::kMaxRandomSeed;
-using testing::internal::kTestTypeIdInGoogleTest;
 using testing::internal::AppendUserMessage;
 using testing::internal::CodePointToUtf8;
-using testing::internal::EmptyTestEventListener;
 using testing::internal::EqFailure;
-using testing::internal::EventListeners;
 using testing::internal::FloatingPoint;
 using testing::internal::GTestFlagSaver;
 using testing::internal::GetCurrentOsStackTraceExceptTop;
@@ -178,14 +179,12 @@ using testing::internal::ShouldShard;
 using testing::internal::ShouldUseColor;
 using testing::internal::StreamableToString;
 using testing::internal::String;
-using testing::internal::TestCase;
-using testing::internal::TestProperty;
-using testing::internal::TestResult;
 using testing::internal::TestResultAccessor;
 using testing::internal::ThreadLocal;
 using testing::internal::UInt32;
 using testing::internal::Vector;
 using testing::internal::WideStringToUtf8;
+using testing::internal::kMaxRandomSeed;
 using testing::internal::kTestTypeIdInGoogleTest;
 using testing::internal::scoped_ptr;
 
@@ -1157,7 +1156,7 @@ TEST(StringTest, ShowWideCStringQuoted) {
                String::ShowWideCStringQuoted(L"foo").c_str());
 }
 
-#ifdef _WIN32_WCE
+#if GTEST_OS_WINDOWS_MOBILE
 TEST(StringTest, AnsiAndUtf16Null) {
   EXPECT_EQ(NULL, String::AnsiToUtf16(NULL));
   EXPECT_EQ(NULL, String::Utf16ToAnsi(NULL));
@@ -1180,7 +1179,7 @@ TEST(StringTest, AnsiAndUtf16ConvertPathChars) {
   EXPECT_EQ(0, wcsncmp(L".:\\ \"*?", utf16, 3));
   delete [] utf16;
 }
-#endif  // _WIN32_WCE
+#endif  // GTEST_OS_WINDOWS_MOBILE
 
 #endif  // GTEST_OS_WINDOWS
 
@@ -1808,7 +1807,7 @@ TEST_F(GTestFlagSaverTest, VerifyGTestFlags) {
 // value.  If the value argument is "", unsets the environment
 // variable.  The caller must ensure that both arguments are not NULL.
 static void SetEnv(const char* name, const char* value) {
-#ifdef _WIN32_WCE
+#if GTEST_OS_WINDOWS_MOBILE
   // Environment variables are not supported on Windows CE.
   return;
 #elif defined(__BORLANDC__)
@@ -1826,7 +1825,6 @@ static void SetEnv(const char* name, const char* value) {
   added_env[name] = new String((Message() << name << "=" << value).GetString());
   putenv(added_env[name]->c_str());
   delete prev_env;
-
 #elif GTEST_OS_WINDOWS  // If we are on Windows proper.
   _putenv((Message() << name << "=" << value).GetString().c_str());
 #else
@@ -1835,10 +1833,10 @@ static void SetEnv(const char* name, const char* value) {
   } else {
     setenv(name, value, 1);
   }
-#endif
+#endif  // GTEST_OS_WINDOWS_MOBILE
 }
 
-#ifndef _WIN32_WCE
+#if !GTEST_OS_WINDOWS_MOBILE
 // Environment variables are not supported on Windows CE.
 
 using testing::internal::Int32FromGTestEnv;
@@ -1886,7 +1884,7 @@ TEST(Int32FromGTestEnvTest, ParsesAndReturnsValidValue) {
   SetEnv(GTEST_FLAG_PREFIX_UPPER_ "TEMP", "-321");
   EXPECT_EQ(-321, Int32FromGTestEnv("temp", 0));
 }
-#endif  // !defined(_WIN32_WCE)
+#endif  // !GTEST_OS_WINDOWS_MOBILE
 
 // Tests ParseInt32Flag().
 
@@ -1944,7 +1942,7 @@ TEST(ParseInt32FlagTest, ParsesAndReturnsValidValue) {
 // Tests that Int32FromEnvOrDie() parses the value of the var or
 // returns the correct default.
 // Environment variables are not supported on Windows CE.
-#ifndef _WIN32_WCE
+#if !GTEST_OS_WINDOWS_MOBILE
 TEST(Int32FromEnvOrDieTest, ParsesAndReturnsValidValue) {
   EXPECT_EQ(333, Int32FromEnvOrDie(GTEST_FLAG_PREFIX_UPPER_ "UnsetVar", 333));
   SetEnv(GTEST_FLAG_PREFIX_UPPER_ "UnsetVar", "123");
@@ -1952,7 +1950,7 @@ TEST(Int32FromEnvOrDieTest, ParsesAndReturnsValidValue) {
   SetEnv(GTEST_FLAG_PREFIX_UPPER_ "UnsetVar", "-123");
   EXPECT_EQ(-123, Int32FromEnvOrDie(GTEST_FLAG_PREFIX_UPPER_ "UnsetVar", 333));
 }
-#endif  // _WIN32_WCE
+#endif  // !GTEST_OS_WINDOWS_MOBILE
 
 // Tests that Int32FromEnvOrDie() aborts with an error message
 // if the variable is not an Int32.
@@ -2019,7 +2017,7 @@ TEST_F(ShouldShardTest, ReturnsFalseWhenTotalShardIsOne) {
 // Tests that sharding is enabled if total_shards > 1 and
 // we are not in a death test subprocess.
 // Environment variables are not supported on Windows CE.
-#ifndef _WIN32_WCE
+#if !GTEST_OS_WINDOWS_MOBILE
 TEST_F(ShouldShardTest, WorksWhenShardEnvVarsAreValid) {
   SetEnv(index_var_, "4");
   SetEnv(total_var_, "22");
@@ -2036,7 +2034,7 @@ TEST_F(ShouldShardTest, WorksWhenShardEnvVarsAreValid) {
   EXPECT_TRUE(ShouldShard(total_var_, index_var_, false));
   EXPECT_FALSE(ShouldShard(total_var_, index_var_, true));
 }
-#endif  // _WIN32_WCE
+#endif  // !GTEST_OS_WINDOWS_MOBILE
 
 // Tests that we exit in error if the sharding values are not valid.
 

@@ -70,7 +70,7 @@
 // On z/OS we additionally need strings.h for strcasecmp.
 #include <strings.h>  // NOLINT
 
-#elif defined(_WIN32_WCE)  // We are on Windows CE.
+#elif GTEST_OS_WINDOWS_MOBILE  // We are on Windows CE.
 
 #include <windows.h>  // NOLINT
 
@@ -81,7 +81,7 @@
 #include <sys/types.h>  // NOLINT
 #include <sys/stat.h>  // NOLINT
 
-#if defined(__MINGW__) || defined(__MINGW32__)
+#if GTEST_OS_WINDOWS_MINGW
 // MinGW has gettimeofday() but not _ftime64().
 // TODO(kenton@google.com): Use autoconf to detect availability of
 //   gettimeofday().
@@ -90,7 +90,7 @@
 //   supports these.  consider using them instead.
 #define GTEST_HAS_GETTIMEOFDAY_ 1
 #include <sys/time.h>  // NOLINT
-#endif  // defined(__MINGW__) || defined(__MINGW32__)
+#endif  // GTEST_OS_WINDOWS_MINGW
 
 // cpplint thinks that the header is already included, so we want to
 // silence it.
@@ -128,13 +128,6 @@
 #endif  // GTEST_OS_WINDOWS
 
 namespace testing {
-
-using internal::EventListeners;
-using internal::EmptyTestEventListener;
-using internal::TestCase;
-using internal::TestProperty;
-using internal::TestResult;
-using internal::UnitTestEventListenerInterface;
 
 // Constants.
 
@@ -356,11 +349,11 @@ String g_executable_path;
 FilePath GetCurrentExecutableName() {
   FilePath result;
 
-#if defined(_WIN32_WCE) || GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   result.Set(FilePath(g_executable_path).RemoveExtension("exe"));
 #else
   result.Set(FilePath(g_executable_path));
-#endif  // _WIN32_WCE || GTEST_OS_WINDOWS
+#endif  // GTEST_OS_WINDOWS
 
   return result.RemoveDirectoryName();
 }
@@ -738,7 +731,7 @@ String UnitTestImpl::CurrentOsStackTraceExceptTop(int skip_count) {
 
 // Returns the current time in milliseconds.
 TimeInMillis GetTimeInMillis() {
-#if defined(_WIN32_WCE) || defined(__BORLANDC__)
+#if GTEST_OS_WINDOWS_MOBILE || defined(__BORLANDC__)
   // Difference between 1970-01-01 and 1601-01-01 in milliseconds.
   // http://analogous.blogspot.com/2005/04/epoch.html
   const TimeInMillis kJavaEpochToWinFileTimeDelta =
@@ -821,7 +814,7 @@ const char * String::CloneCString(const char* c_str) {
                     NULL : CloneString(c_str, strlen(c_str));
 }
 
-#ifdef _WIN32_WCE
+#if GTEST_OS_WINDOWS_MOBILE
 // Creates a UTF-16 wide string from the given ANSI string, allocating
 // memory using new. The caller is responsible for deleting the return
 // value using delete[]. Returns the wide string, or NULL if the
@@ -855,7 +848,7 @@ const char* String::Utf16ToAnsi(LPCWSTR utf16_str)  {
   return ansi;
 }
 
-#endif  // _WIN32_WCE
+#endif  // GTEST_OS_WINDOWS_MOBILE
 
 // Compares two C strings.  Returns true iff they have the same content.
 //
@@ -1329,7 +1322,7 @@ namespace {
 AssertionResult HRESULTFailureHelper(const char* expr,
                                      const char* expected,
                                      long hr) {  // NOLINT
-#ifdef _WIN32_WCE
+#if GTEST_OS_WINDOWS_MOBILE
   // Windows CE doesn't support FormatMessage.
   const char error_text[] = "";
 #else
@@ -1353,7 +1346,7 @@ AssertionResult HRESULTFailureHelper(const char* expr,
           --message_length) {
     error_text[message_length - 1] = '\0';
   }
-#endif  // _WIN32_WCE
+#endif  // GTEST_OS_WINDOWS_MOBILE
 
   const String error_hex(String::Format("0x%08X ", hr));
   Message msg;
@@ -1768,6 +1761,8 @@ String AppendUserMessage(const String& gtest_msg,
   return msg.GetString();
 }
 
+}  // namespace internal
+
 // class TestResult
 
 // Creates an empty TestResult.
@@ -1886,8 +1881,6 @@ int TestResult::total_part_count() const {
 int TestResult::test_property_count() const {
   return test_properties_->size();
 }
-
-}  // namespace internal
 
 // class Test
 
@@ -2255,8 +2248,7 @@ void TestInfoImpl::Run() {
   UnitTestImpl* const impl = internal::GetUnitTestImpl();
   impl->set_current_test_info(parent_);
 
-  UnitTestEventListenerInterface* repeater =
-      UnitTest::GetInstance()->listeners().repeater();
+  TestEventListener* repeater = UnitTest::GetInstance()->listeners().repeater();
 
   // Notifies the unit test event listeners that a test is about to start.
   repeater->OnTestStart(*parent_);
@@ -2308,6 +2300,8 @@ void TestInfoImpl::Run() {
   // test.
   impl->set_current_test_info(NULL);
 }
+
+}  // namespace internal
 
 // class TestCase
 
@@ -2383,8 +2377,7 @@ void TestCase::Run() {
   internal::UnitTestImpl* const impl = internal::GetUnitTestImpl();
   impl->set_current_test_case(this);
 
-  UnitTestEventListenerInterface* repeater =
-      UnitTest::GetInstance()->listeners().repeater();
+  TestEventListener* repeater = UnitTest::GetInstance()->listeners().repeater();
 
   repeater->OnTestCaseStart(*this);
   impl->os_stack_trace_getter()->UponLeavingGTest();
@@ -2426,8 +2419,6 @@ bool TestCase::TestDisabled(const TestInfo * test_info) {
 bool TestCase::ShouldRunTest(const TestInfo *test_info) {
   return test_info->impl()->should_run();
 }
-
-}  // namespace internal
 
 // Formats a countable noun.  Depending on its quantity, either the
 // singular form or the plural form is used. e.g.
@@ -2492,7 +2483,7 @@ static void PrintTestPartResult(const TestPartResult& test_part_result) {
   // following statements add the test part result message to the Output
   // window such that the user can double-click on it to jump to the
   // corresponding source code location; otherwise they do nothing.
-#if GTEST_OS_WINDOWS && !defined(_WIN32_WCE)
+#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE
   // We don't call OutputDebugString*() on Windows Mobile, as printing
   // to stdout is done by OutputDebugString() there already - we don't
   // want the same message printed twice.
@@ -2512,7 +2503,7 @@ enum GTestColor {
   COLOR_YELLOW
 };
 
-#if GTEST_OS_WINDOWS && !defined(_WIN32_WCE)
+#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE
 
 // Returns the character attribute for the given color.
 WORD GetColorAttribute(GTestColor color) {
@@ -2537,7 +2528,7 @@ const char* GetAnsiColorCode(GTestColor color) {
   };
 }
 
-#endif  // GTEST_OS_WINDOWS && !_WIN32_WCE
+#endif  // GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE
 
 // Returns true iff Google Test should use colors in the output.
 bool ShouldUseColor(bool stdout_is_tty) {
@@ -2578,13 +2569,13 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   va_list args;
   va_start(args, fmt);
 
-#if defined(_WIN32_WCE) || GTEST_OS_SYMBIAN || GTEST_OS_ZOS
+#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_SYMBIAN || GTEST_OS_ZOS
   const bool use_color = false;
 #else
   static const bool in_color_mode =
       ShouldUseColor(posix::IsATTY(posix::FileNo(stdout)) != 0);
   const bool use_color = in_color_mode && (color != COLOR_DEFAULT);
-#endif  // defined(_WIN32_WCE) || GTEST_OS_SYMBIAN || GTEST_OS_ZOS
+#endif  // GTEST_OS_WINDOWS_MOBILE || GTEST_OS_SYMBIAN || GTEST_OS_ZOS
   // The '!= 0' comparison is necessary to satisfy MSVC 7.1.
 
   if (!use_color) {
@@ -2593,7 +2584,7 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
     return;
   }
 
-#if GTEST_OS_WINDOWS && !defined(_WIN32_WCE)
+#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE
   const HANDLE stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 
   // Gets the current text color.
@@ -2611,22 +2602,21 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   printf("\033[0;3%sm", GetAnsiColorCode(color));
   vprintf(fmt, args);
   printf("\033[m");  // Resets the terminal to default.
-#endif  // GTEST_OS_WINDOWS && !defined(_WIN32_WCE)
+#endif  // GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE
   va_end(args);
 }
 
-// This class implements the UnitTestEventListenerInterface interface.
+// This class implements the TestEventListener interface.
 //
 // Class PrettyUnitTestResultPrinter is copyable.
-class PrettyUnitTestResultPrinter : public UnitTestEventListenerInterface {
+class PrettyUnitTestResultPrinter : public TestEventListener {
  public:
   PrettyUnitTestResultPrinter() {}
   static void PrintTestName(const char * test_case, const char * test) {
     printf("%s.%s", test_case, test);
   }
 
-  // The following methods override what's in the
-  // UnitTestEventListenerInterface class.
+  // The following methods override what's in the TestEventListener class.
   virtual void OnTestProgramStart(const UnitTest& /*unit_test*/) {}
   virtual void OnTestIterationStart(const UnitTest& unit_test, int iteration);
   virtual void OnEnvironmentsSetUpStart(const UnitTest& unit_test);
@@ -2837,13 +2827,12 @@ void PrettyUnitTestResultPrinter::PrintFailedTests(const UnitTest& unit_test) {
 // class TestEventRepeater
 //
 // This class forwards events to other event listeners.
-class TestEventRepeater : public UnitTestEventListenerInterface {
+class TestEventRepeater : public TestEventListener {
  public:
   TestEventRepeater() : forwarding_enabled_(true) {}
   virtual ~TestEventRepeater();
-  void Append(UnitTestEventListenerInterface *listener);
-  UnitTestEventListenerInterface* Release(
-      UnitTestEventListenerInterface* listener);
+  void Append(TestEventListener *listener);
+  TestEventListener* Release(TestEventListener* listener);
 
   // Controls whether events will be forwarded to listeners_. Set to false
   // in death test child processes.
@@ -2869,7 +2858,7 @@ class TestEventRepeater : public UnitTestEventListenerInterface {
   // in death test child processes.
   bool forwarding_enabled_;
   // The list of listeners that receive events.
-  Vector<UnitTestEventListenerInterface*> listeners_;
+  Vector<TestEventListener*> listeners_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(TestEventRepeater);
 };
@@ -2880,13 +2869,12 @@ TestEventRepeater::~TestEventRepeater() {
   }
 }
 
-void TestEventRepeater::Append(UnitTestEventListenerInterface *listener) {
+void TestEventRepeater::Append(TestEventListener *listener) {
   listeners_.PushBack(listener);
 }
 
 // TODO(vladl@google.com): Factor the search functionality into Vector::Find.
-UnitTestEventListenerInterface* TestEventRepeater::Release(
-    UnitTestEventListenerInterface *listener) {
+TestEventListener* TestEventRepeater::Release(TestEventListener *listener) {
   for (int i = 0; i < listeners_.size(); ++i) {
     if (listeners_.GetElement(i) == listener) {
       listeners_.Erase(i);
@@ -3279,15 +3267,14 @@ EventListeners::~EventListeners() { delete repeater_; }
 // output.  Can be removed from the listeners list to shut down default
 // console output.  Note that removing this object from the listener list
 // with Release transfers its ownership to the user.
-void EventListeners::Append(UnitTestEventListenerInterface* listener) {
+void EventListeners::Append(TestEventListener* listener) {
   repeater_->Append(listener);
 }
 
 // Removes the given event listener from the list and returns it.  It then
 // becomes the caller's responsibility to delete the listener. Returns
 // NULL if the listener is not found in the list.
-UnitTestEventListenerInterface* EventListeners::Release(
-    UnitTestEventListenerInterface* listener) {
+TestEventListener* EventListeners::Release(TestEventListener* listener) {
   if (listener == default_result_printer_)
     default_result_printer_ = NULL;
   else if (listener == default_xml_generator_)
@@ -3295,17 +3282,16 @@ UnitTestEventListenerInterface* EventListeners::Release(
   return repeater_->Release(listener);
 }
 
-// Returns repeater that broadcasts the UnitTestEventListenerInterface
-// events to all subscribers.
-UnitTestEventListenerInterface* EventListeners::repeater() { return repeater_; }
+// Returns repeater that broadcasts the TestEventListener events to all
+// subscribers.
+TestEventListener* EventListeners::repeater() { return repeater_; }
 
 // Sets the default_result_printer attribute to the provided listener.
 // The listener is also added to the listener list and previous
 // default_result_printer is removed from it and deleted. The listener can
 // also be NULL in which case it will not be added to the list. Does
 // nothing if the previous and the current listener objects are the same.
-void EventListeners::SetDefaultResultPrinter(
-    UnitTestEventListenerInterface* listener) {
+void EventListeners::SetDefaultResultPrinter(TestEventListener* listener) {
   if (default_result_printer_ != listener) {
     // It is an error to pass this method a listener that is already in the
     // list.
@@ -3321,8 +3307,7 @@ void EventListeners::SetDefaultResultPrinter(
 // default_xml_generator is removed from it and deleted. The listener can
 // also be NULL in which case it will not be added to the list. Does
 // nothing if the previous and the current listener objects are the same.
-void EventListeners::SetDefaultXmlGenerator(
-    UnitTestEventListenerInterface* listener) {
+void EventListeners::SetDefaultXmlGenerator(TestEventListener* listener) {
   if (default_xml_generator_ != listener) {
     // It is an error to pass this method a listener that is already in the
     // list.
@@ -3557,20 +3542,20 @@ int UnitTest::Run() {
   // process. In either case the user does not want to see pop-up dialogs
   // about crashes - they are expected..
   if (GTEST_FLAG(catch_exceptions) || in_death_test_child_process) {
-#if !defined(_WIN32_WCE)
+#if !GTEST_OS_WINDOWS_MOBILE
     // SetErrorMode doesn't exist on CE.
     SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOALIGNMENTFAULTEXCEPT |
                  SEM_NOGPFAULTERRORBOX | SEM_NOOPENFILEERRORBOX);
-#endif  // _WIN32_WCE
+#endif  // !GTEST_OS_WINDOWS_MOBILE
 
-#if (defined(_MSC_VER) || defined(__MINGW32__)) && !defined(_WIN32_WCE)
+#if (defined(_MSC_VER) || GTEST_OS_WINDOWS_MINGW) && !GTEST_OS_WINDOWS_MOBILE
     // Death test children can be terminated with _abort().  On Windows,
     // _abort() can show a dialog with a warning message.  This forces the
     // abort message to go to stderr instead.
     _set_error_mode(_OUT_TO_STDERR);
 #endif
 
-#if _MSC_VER >= 1400 && !defined(_WIN32_WCE)
+#if _MSC_VER >= 1400 && !GTEST_OS_WINDOWS_MOBILE
     // In the debug version, Visual Studio pops up a separate dialog
     // offering a choice to debug the aborted program. We need to suppress
     // this dialog or it will pop up for every EXPECT/ASSERT_DEATH statement
@@ -3890,7 +3875,7 @@ int UnitTestImpl::RunAllTests() {
   // True iff at least one test has failed.
   bool failed = false;
 
-  UnitTestEventListenerInterface* repeater = listeners()->repeater();
+  TestEventListener* repeater = listeners()->repeater();
 
   repeater->OnTestProgramStart(*parent_);
 

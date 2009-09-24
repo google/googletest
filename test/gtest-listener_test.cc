@@ -48,12 +48,12 @@ using ::testing::AddGlobalTestEnvironment;
 using ::testing::Environment;
 using ::testing::InitGoogleTest;
 using ::testing::Test;
+using ::testing::TestCase;
+using ::testing::TestEventListener;
 using ::testing::TestInfo;
 using ::testing::TestPartResult;
 using ::testing::UnitTest;
 using ::testing::internal::String;
-using ::testing::internal::TestCase;
-using ::testing::internal::UnitTestEventListenerInterface;
 using ::testing::internal::Vector;
 
 // Used by tests to register their events.
@@ -62,17 +62,7 @@ Vector<String>* g_events = NULL;
 namespace testing {
 namespace internal {
 
-// TODO(vladl@google.com): Remove this and use UnitTest::listeners()
-// directly after it is published.
-class UnitTestAccessor {
- public:
-  static EventListeners& GetEventListeners() {
-    return UnitTest::GetInstance()->listeners();
-  }
-  static bool UnitTestFailed() { return UnitTest::GetInstance()->Failed(); }
-};
-
-class EventRecordingListener : public UnitTestEventListenerInterface {
+class EventRecordingListener : public TestEventListener {
  public:
   EventRecordingListener(const char* name) : name_(name) {}
 
@@ -195,7 +185,6 @@ TEST_F(ListenerTest, DoesBar) {
 
 using ::testing::internal::EnvironmentInvocationCatcher;
 using ::testing::internal::EventRecordingListener;
-using ::testing::internal::UnitTestAccessor;
 
 void VerifyResults(const Vector<String>& data,
                    const char* const* expected_data,
@@ -225,9 +214,9 @@ int main(int argc, char **argv) {
   g_events = &events;
   InitGoogleTest(&argc, argv);
 
-  UnitTestAccessor::GetEventListeners().Append(
+  UnitTest::GetInstance()->listeners().Append(
       new EventRecordingListener("1st"));
-  UnitTestAccessor::GetEventListeners().Append(
+  UnitTest::GetInstance()->listeners().Append(
       new EventRecordingListener("2nd"));
 
   AddGlobalTestEnvironment(new EnvironmentInvocationCatcher);
@@ -326,7 +315,7 @@ int main(int argc, char **argv) {
 
   // We need to check manually for ad hoc test failures that happen after
   // RUN_ALL_TESTS finishes.
-  if (UnitTestAccessor::UnitTestFailed())
+  if (UnitTest::GetInstance()->Failed())
     ret_val = 1;
 
   return ret_val;

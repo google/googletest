@@ -98,7 +98,7 @@ class String {
   // memory using malloc().
   static const char* CloneCString(const char* c_str);
 
-#ifdef _WIN32_WCE
+#if GTEST_OS_WINDOWS_MOBILE
   // Windows CE does not have the 'ANSI' versions of Win32 APIs. To be
   // able to pass strings to Win32 APIs on CE we need to convert them
   // to 'Unicode', UTF-16.
