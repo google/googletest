@@ -211,7 +211,8 @@ TEST(GetRawPointerTest, WorksForSmartPointers) {
 
 TEST(GetRawPointerTest, WorksForRawPointers) {
   int* p = NULL;
-  EXPECT_EQ(NULL, GetRawPointer(p));
+  // Don't use EXPECT_EQ as no NULL-testing magic on Symbian.
+  EXPECT_TRUE(NULL == GetRawPointer(p));
   int n = 1;
   EXPECT_EQ(&n, GetRawPointer(&n));
 }

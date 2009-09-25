@@ -304,11 +304,15 @@ class ElementsAreMatcher1 {
     typedef typename internal::StlContainerView<RawContainer>::type::value_type
         Element;
 
-    const Matcher<const Element&> matchers[] = {
-      MatcherCast<const Element&>(e1_),
-    };
-
-    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers, 1));
+    // Nokia's Symbian Compiler has a nasty bug where the object put
+    // in a one-element local array is not destructed when the array
+    // goes out of scope.  This leads to obvious badness as we've
+    // added the linked_ptr in it to our other linked_ptrs list.
+    // Hence we implement ElementsAreMatcher1 specially to avoid using
+    // a local array.
+    const Matcher<const Element&> matcher =
+        MatcherCast<const Element&>(e1_);
+    return MakeMatcher(new ElementsAreMatcherImpl<Container>(&matcher, 1));
   }
 
  private:

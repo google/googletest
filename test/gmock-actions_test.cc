@@ -98,11 +98,13 @@ TEST(BuiltInDefaultValueTest, IsZeroForNumericTypes) {
   EXPECT_EQ(0, BuiltInDefaultValue<unsigned char>::Get());
   EXPECT_EQ(0, BuiltInDefaultValue<signed char>::Get());
   EXPECT_EQ(0, BuiltInDefaultValue<char>::Get());
-#if !GTEST_OS_WINDOWS
+#if GMOCK_HAS_SIGNED_WCHAR_T_
   EXPECT_EQ(0, BuiltInDefaultValue<unsigned wchar_t>::Get());
   EXPECT_EQ(0, BuiltInDefaultValue<signed wchar_t>::Get());
-#endif  // !GTEST_OS_WINDOWS
+#endif
+#if GMOCK_WCHAR_T_IS_NATIVE_
   EXPECT_EQ(0, BuiltInDefaultValue<wchar_t>::Get());
+#endif
   EXPECT_EQ(0, BuiltInDefaultValue<unsigned short>::Get());  // NOLINT
   EXPECT_EQ(0, BuiltInDefaultValue<signed short>::Get());  // NOLINT
   EXPECT_EQ(0, BuiltInDefaultValue<short>::Get());  // NOLINT
@@ -124,11 +126,13 @@ TEST(BuiltInDefaultValueTest, ExistsForNumericTypes) {
   EXPECT_TRUE(BuiltInDefaultValue<unsigned char>::Exists());
   EXPECT_TRUE(BuiltInDefaultValue<signed char>::Exists());
   EXPECT_TRUE(BuiltInDefaultValue<char>::Exists());
-#if !GTEST_OS_WINDOWS
+#if GMOCK_HAS_SIGNED_WCHAR_T_
   EXPECT_TRUE(BuiltInDefaultValue<unsigned wchar_t>::Exists());
   EXPECT_TRUE(BuiltInDefaultValue<signed wchar_t>::Exists());
-#endif  // !GTEST_OS_WINDOWS
+#endif
+#if GMOCK_WCHAR_T_IS_NATIVE_
   EXPECT_TRUE(BuiltInDefaultValue<wchar_t>::Exists());
+#endif
   EXPECT_TRUE(BuiltInDefaultValue<unsigned short>::Exists());  // NOLINT
   EXPECT_TRUE(BuiltInDefaultValue<signed short>::Exists());  // NOLINT
   EXPECT_TRUE(BuiltInDefaultValue<short>::Exists());  // NOLINT
@@ -395,12 +399,19 @@ class IsNotZero : public ActionInterface<bool(int)> {  // NOLINT
   }
 };
 
+#if !GTEST_OS_SYMBIAN
+// Compiling this test on Nokia's Symbian compiler fails with:
+//  'Result' is not a member of class 'testing::internal::Function<int>'
+//  (point of instantiation: '@unnamed@gmock_actions_test_cc@::
+//      ActionTest_CanBeConvertedToOtherActionType_Test::TestBody()')
+// with no obvious fix.
 TEST(ActionTest, CanBeConvertedToOtherActionType) {
   const Action<bool(int)> a1(new IsNotZero);  // NOLINT
   const Action<int(char)> a2 = Action<int(char)>(a1);  // NOLINT
   EXPECT_EQ(1, a2.Perform(make_tuple('a')));
   EXPECT_EQ(0, a2.Perform(make_tuple('\0')));
 }
+#endif  // !GTEST_OS_SYMBIAN
 
 // The following two classes are for testing MakePolymorphicAction().
 

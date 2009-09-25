@@ -125,32 +125,13 @@ GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(unsigned char, '\0');
 GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(signed char, '\0');
 GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(char, '\0');
 
-// signed wchar_t and unsigned wchar_t are NOT in the C++ standard.
-// Using them is a bad practice and not portable.  So don't use them.
-//
-// Still, Google Mock is designed to work even if the user uses signed
-// wchar_t or unsigned wchar_t (obviously, assuming the compiler
-// supports them).
-//
-// To gcc,
-//
-//   wchar_t == signed wchar_t != unsigned wchar_t == unsigned int
-//
-// MSVC does not recognize signed wchar_t or unsigned wchar_t.  It
-// treats wchar_t as a native type usually, but treats it as the same
-// as unsigned short when the compiler option /Zc:wchar_t- is
-// specified.
-//
-// Therefore we provide a default action for wchar_t when compiled
-// with gcc or _NATIVE_WCHAR_T_DEFINED is defined.
-//
 // There's no need for a default action for signed wchar_t, as that
 // type is the same as wchar_t for gcc, and invalid for MSVC.
 //
 // There's also no need for a default action for unsigned wchar_t, as
 // that type is the same as unsigned int for gcc, and invalid for
 // MSVC.
-#if defined(__GNUC__) || defined(_NATIVE_WCHAR_T_DEFINED)
+#if GMOCK_WCHAR_T_IS_NATIVE_
 GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(wchar_t, 0U);  // NOLINT
 #endif
 

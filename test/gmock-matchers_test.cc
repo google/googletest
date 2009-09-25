@@ -699,10 +699,20 @@ TEST(IsNullTest, MatchesNullPointer) {
   EXPECT_TRUE(m2.Matches(p2));
   EXPECT_FALSE(m2.Matches("hi"));
 
+#if !GTEST_OS_SYMBIAN
+  // Nokia's Symbian compiler generates:
+  // gmock-matchers.h: ambiguous access to overloaded function
+  // gmock-matchers.h: 'testing::Matcher<void *>::Matcher(void *)'
+  // gmock-matchers.h: 'testing::Matcher<void *>::Matcher(const testing::
+  //     MatcherInterface<void *> *)'
+  // gmock-matchers.h:  (point of instantiation: 'testing::
+  //     gmock_matchers_test::IsNullTest_MatchesNullPointer_Test::TestBody()')
+  // gmock-matchers.h:   (instantiating: 'testing::PolymorphicMatc
   Matcher<void*> m3 = IsNull();
   void* p3 = NULL;
   EXPECT_TRUE(m3.Matches(p3));
   EXPECT_FALSE(m3.Matches(reinterpret_cast<void*>(0xbeef)));
+#endif
 }
 
 // Tests that IsNull() describes itself properly.
@@ -933,24 +943,24 @@ TEST(KeyTest, SafelyCastsInnerMatcher) {
 }
 
 TEST(KeyTest, InsideContainsUsingMap) {
-  std::map<int, std::string> container;
-  container.insert(std::make_pair(1, "foo"));
-  container.insert(std::make_pair(2, "bar"));
-  container.insert(std::make_pair(4, "baz"));
+  std::map<int, char> container;
+  container.insert(std::make_pair(1, 'a'));
+  container.insert(std::make_pair(2, 'b'));
+  container.insert(std::make_pair(4, 'c'));
   EXPECT_THAT(container, Contains(Key(1)));
   EXPECT_THAT(container, Not(Contains(Key(3))));
 }
 
 TEST(KeyTest, InsideContainsUsingMultimap) {
-  std::multimap<int, std::string> container;
-  container.insert(std::make_pair(1, "foo"));
-  container.insert(std::make_pair(2, "bar"));
-  container.insert(std::make_pair(4, "baz"));
+  std::multimap<int, char> container;
+  container.insert(std::make_pair(1, 'a'));
+  container.insert(std::make_pair(2, 'b'));
+  container.insert(std::make_pair(4, 'c'));
 
   EXPECT_THAT(container, Not(Contains(Key(25))));
-  container.insert(std::make_pair(25, "more foo"));
+  container.insert(std::make_pair(25, 'd'));
   EXPECT_THAT(container, Contains(Key(25)));
-  container.insert(std::make_pair(25, "more bar"));
+  container.insert(std::make_pair(25, 'e'));
   EXPECT_THAT(container, Contains(Key(25)));
 
   EXPECT_THAT(container, Contains(Key(1)));
@@ -1031,13 +1041,13 @@ TEST(PairTest, SafelyCastsInnerMatchers) {
 }
 
 TEST(PairTest, InsideContainsUsingMap) {
-  std::map<int, std::string> container;
-  container.insert(std::make_pair(1, "foo"));
-  container.insert(std::make_pair(2, "bar"));
-  container.insert(std::make_pair(4, "baz"));
-  EXPECT_THAT(container, Contains(Pair(1, "foo")));
+  std::map<int, char> container;
+  container.insert(std::make_pair(1, 'a'));
+  container.insert(std::make_pair(2, 'b'));
+  container.insert(std::make_pair(4, 'c'));
+  EXPECT_THAT(container, Contains(Pair(1, 'a')));
   EXPECT_THAT(container, Contains(Pair(1, _)));
-  EXPECT_THAT(container, Contains(Pair(_, "foo")));
+  EXPECT_THAT(container, Contains(Pair(_, 'a')));
   EXPECT_THAT(container, Not(Contains(Pair(3, _))));
 }
 
@@ -1961,8 +1971,20 @@ TEST(MatcherAssertionTest, WorksForByRefArguments) {
                        "Actual: 0 (is located @");
 }
 
+#if !GTEST_OS_SYMBIAN
 // Tests that ASSERT_THAT() and EXPECT_THAT() work when the matcher is
 // monomorphic.
+
+// ASSERT_THAT("hello", starts_with_he) fails to compile with Nokia's
+// Symbian compiler: it tries to compile
+// template<T, U> class MatcherCastImpl { ...
+//   virtual bool Matches(T x) const {
+//     return source_matcher_.Matches(static_cast<U>(x));
+// with U == string and T == const char*
+// With ASSERT_THAT("hello"...) changed to ASSERT_THAT(string("hello") ... )
+// the compiler silently crashes with no output.
+// If MatcherCastImpl is changed to use U(x) instead of static_cast<U>(x)
+// the code compiles but the converted string is bogus.
 TEST(MatcherAssertionTest, WorksForMonomorphicMatcher) {
   Matcher<const char*> starts_with_he = StartsWith("he");
   ASSERT_THAT("hello", starts_with_he);
@@ -1976,6 +1998,7 @@ TEST(MatcherAssertionTest, WorksForMonomorphicMatcher) {
                           "Expected: is greater than 5\n"
                           "  Actual: 5");
 }
+#endif  // !GTEST_OS_SYMBIAN
 
 // Tests floating-point matchers.
 template <typename RawType>

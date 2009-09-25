@@ -320,47 +320,59 @@ inline PolymorphicMatcher<Impl> MakePolymorphicMatcher(const Impl& impl) {
 template <typename T, typename M>
 Matcher<T> MatcherCast(M m);
 
-// TODO(vladl@google.com): Modify the implementation to reject casting
-// Matcher<int> to Matcher<double>.
 // Implements SafeMatcherCast().
 //
-// This overload handles polymorphic matchers only since monomorphic
-// matchers are handled by the next one.
-template <typename T, typename M>
-inline Matcher<T> SafeMatcherCast(M polymorphic_matcher) {
-  return Matcher<T>(polymorphic_matcher);
-}
+// We use an intermediate class to do the actual safe casting as Nokia's
+// Symbian compiler cannot decide between
+// template <T, M> ... (M) and
+// template <T, U> ... (const Matcher<U>&)
+// for function templates but can for member function templates.
+template <typename T>
+class SafeMatcherCastImpl {
+ public:
+  // This overload handles polymorphic matchers only since monomorphic
+  // matchers are handled by the next one.
+  template <typename M>
+  static inline Matcher<T> Cast(M polymorphic_matcher) {
+    return Matcher<T>(polymorphic_matcher);
+  }
 
-// This overload handles monomorphic matchers.
-//
-// In general, if type T can be implicitly converted to type U, we can
-// safely convert a Matcher<U> to a Matcher<T> (i.e. Matcher is
-// contravariant): just keep a copy of the original Matcher<U>, convert the
-// argument from type T to U, and then pass it to the underlying Matcher<U>.
-// The only exception is when U is a reference and T is not, as the
-// underlying Matcher<U> may be interested in the argument's address, which
-// is not preserved in the conversion from T to U.
-template <typename T, typename U>
-Matcher<T> SafeMatcherCast(const Matcher<U>& matcher) {
-  // Enforce that T can be implicitly converted to U.
-  GMOCK_COMPILE_ASSERT_((internal::ImplicitlyConvertible<T, U>::value),
-                        T_must_be_implicitly_convertible_to_U);
-  // Enforce that we are not converting a non-reference type T to a reference
-  // type U.
-  GMOCK_COMPILE_ASSERT_(
-      internal::is_reference<T>::value || !internal::is_reference<U>::value,
-      cannot_convert_non_referentce_arg_to_reference);
-  // In case both T and U are arithmetic types, enforce that the
-  // conversion is not lossy.
-  typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(T)) RawT;
-  typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(U)) RawU;
-  const bool kTIsOther = GMOCK_KIND_OF_(RawT) == internal::kOther;
-  const bool kUIsOther = GMOCK_KIND_OF_(RawU) == internal::kOther;
-  GMOCK_COMPILE_ASSERT_(
-      kTIsOther || kUIsOther ||
-      (internal::LosslessArithmeticConvertible<RawT, RawU>::value),
-      conversion_of_arithmetic_types_must_be_lossless);
-  return MatcherCast<T>(matcher);
+  // This overload handles monomorphic matchers.
+  //
+  // In general, if type T can be implicitly converted to type U, we can
+  // safely convert a Matcher<U> to a Matcher<T> (i.e. Matcher is
+  // contravariant): just keep a copy of the original Matcher<U>, convert the
+  // argument from type T to U, and then pass it to the underlying Matcher<U>.
+  // The only exception is when U is a reference and T is not, as the
+  // underlying Matcher<U> may be interested in the argument's address, which
+  // is not preserved in the conversion from T to U.
+  template <typename U>
+  static inline Matcher<T> Cast(const Matcher<U>& matcher) {
+    // Enforce that T can be implicitly converted to U.
+    GMOCK_COMPILE_ASSERT_((internal::ImplicitlyConvertible<T, U>::value),
+                          T_must_be_implicitly_convertible_to_U);
+    // Enforce that we are not converting a non-reference type T to a reference
+    // type U.
+    GMOCK_COMPILE_ASSERT_(
+        internal::is_reference<T>::value || !internal::is_reference<U>::value,
+        cannot_convert_non_referentce_arg_to_reference);
+    // In case both T and U are arithmetic types, enforce that the
+    // conversion is not lossy.
+    typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(T)) RawT;
+    typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(U)) RawU;
+    const bool kTIsOther = GMOCK_KIND_OF_(RawT) == internal::kOther;
+    const bool kUIsOther = GMOCK_KIND_OF_(RawU) == internal::kOther;
+    GMOCK_COMPILE_ASSERT_(
+        kTIsOther || kUIsOther ||
+        (internal::LosslessArithmeticConvertible<RawT, RawU>::value),
+        conversion_of_arithmetic_types_must_be_lossless);
+    return MatcherCast<T>(matcher);
+  }
+};
+
+template <typename T, typename M>
+inline Matcher<T> SafeMatcherCast(const M& polymorphic_matcher) {
+  return SafeMatcherCastImpl<T>::Cast(polymorphic_matcher);
 }
 
 // A<T>() returns a matcher that matches any value of type T.

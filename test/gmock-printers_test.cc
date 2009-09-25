@@ -840,16 +840,16 @@ TEST(PrintTupleTest, VariousSizes) {
   const char* const str = "8";
   tuple<bool, char, short, testing::internal::Int32,  // NOLINT
       testing::internal::Int64, float, double, const char*, void*, string>
-      t10(false, 'a', 3, 4, 5, 6.5F, 7.5, str, NULL, "10");
-  EXPECT_EQ("(false, 'a' (97), 3, 4, 5, 6.5, 7.5, " + PrintPointer(str) +
+      t10(false, 'a', 3, 4, 5, 1.5F, -2.5, str, NULL, "10");
+  EXPECT_EQ("(false, 'a' (97), 3, 4, 5, 1.5, -2.5, " + PrintPointer(str) +
             " pointing to \"8\", NULL, \"10\")",
             Print(t10));
 }
 
 // Nested tuples.
 TEST(PrintTupleTest, NestedTuple) {
-  tuple<tuple<int, double>, char> nested(make_tuple(5, 9.5), 'a');
-  EXPECT_EQ("((5, 9.5), 'a' (97))", Print(nested));
+  tuple<tuple<int, bool>, char> nested(make_tuple(5, true), 'a');
+  EXPECT_EQ("((5, true), 'a' (97))", Print(nested));
 }
 
 // Tests printing user-defined unprintable types.
