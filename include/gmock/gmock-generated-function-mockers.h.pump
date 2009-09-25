@@ -198,6 +198,55 @@ $for i [[
 
 ]]
 
+// A MockFunction<F> class has one mock method whose type is F.  It is
+// useful when you just want your test code to emit some messages and
+// have Google Mock verify the right messages are sent (and perhaps at
+// the right times).  For example, if you are exercising code:
+//
+//   Foo(1);
+//   Foo(2);
+//   Foo(3);
+//
+// and want to verify that Foo(1) and Foo(3) both invoke
+// mock.Bar("a"), but Foo(2) doesn't invoke anything, you can write:
+//
+// TEST(FooTest, InvokesBarCorrectly) {
+//   MyMock mock;
+//   MockFunction<void(string check_point_name)> check;
+//   {
+//     InSequence s;
+//
+//     EXPECT_CALL(mock, Bar("a"));
+//     EXPECT_CALL(check, Call("1"));
+//     EXPECT_CALL(check, Call("2"));
+//     EXPECT_CALL(mock, Bar("a"));
+//   }
+//   Foo(1);
+//   check.Call("1");
+//   Foo(2);
+//   check.Call("2");
+//   Foo(3);
+// }
+//
+// The expectation spec says that the first Bar("a") must happen
+// before check point "1", the second Bar("a") must happen after check
+// point "2", and nothing should happen between the two check
+// points. The explicit check points make it easy to tell which
+// Bar("a") is called by which call to Foo().
+template <typename F>
+class MockFunction;
+
+
+$for i [[
+$range j 0..i-1
+template <typename R$for j [[, typename A$j]]>
+class MockFunction<R($for j, [[A$j]])> {
+ public:
+  MOCK_METHOD$i[[]]_T(Call, R($for j, [[A$j]]));
+};
+
+
+]]
 }  // namespace testing
 
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_FUNCTION_MOCKERS_H_

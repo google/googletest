@@ -66,6 +66,7 @@ using testing::Const;
 using testing::DoDefault;
 using testing::Eq;
 using testing::Lt;
+using testing::MockFunction;
 using testing::Ref;
 using testing::Return;
 using testing::ReturnRef;
@@ -460,6 +461,49 @@ TEST(OverloadedMockMethodTest, CanOverloadOnConstnessInMacroBody) {
 
   EXPECT_EQ(2, mock.Overloaded(1));
   EXPECT_EQ(3, const_mock->Overloaded(1));
+}
+
+TEST(MockFunctionTest, WorksForVoidNullary) {
+  MockFunction<void()> foo;
+  EXPECT_CALL(foo, Call());
+  foo.Call();
+}
+
+TEST(MockFunctionTest, WorksForNonVoidNullary) {
+  MockFunction<int()> foo;
+  EXPECT_CALL(foo, Call())
+      .WillOnce(Return(1))
+      .WillOnce(Return(2));
+  EXPECT_EQ(1, foo.Call());
+  EXPECT_EQ(2, foo.Call());
+}
+
+TEST(MockFunctionTest, WorksForVoidUnary) {
+  MockFunction<void(int)> foo;
+  EXPECT_CALL(foo, Call(1));
+  foo.Call(1);
+}
+
+TEST(MockFunctionTest, WorksForNonVoidBinary) {
+  MockFunction<int(bool, int)> foo;
+  EXPECT_CALL(foo, Call(false, 42))
+      .WillOnce(Return(1))
+      .WillOnce(Return(2));
+  EXPECT_CALL(foo, Call(true, Ge(100)))
+      .WillOnce(Return(3));
+  EXPECT_EQ(1, foo.Call(false, 42));
+  EXPECT_EQ(2, foo.Call(false, 42));
+  EXPECT_EQ(3, foo.Call(true, 120));
+}
+
+TEST(MockFunctionTest, WorksFor10Arguments) {
+  MockFunction<int(bool a0, char a1, int a2, int a3, int a4,
+                   int a5, int a6, char a7, int a8, bool a9)> foo;
+  EXPECT_CALL(foo, Call(_, 'a', _, _, _, _, _, _, _, _))
+      .WillOnce(Return(1))
+      .WillOnce(Return(2));
+  EXPECT_EQ(1, foo.Call(false, 'a', 0, 0, 0, 0, 0, 'b', 0, true));
+  EXPECT_EQ(2, foo.Call(true, 'a', 0, 0, 0, 0, 0, 'b', 1, false));
 }
 
 }  // namespace gmock_generated_function_mockers_test

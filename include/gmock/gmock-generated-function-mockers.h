@@ -712,6 +712,117 @@ using internal::FunctionMocker;
 #define MOCK_CONST_METHOD10_T_WITH_CALLTYPE(ct, m, F) \
     GMOCK_METHOD10_(typename, const, ct, m, F)
 
+// A MockFunction<F> class has one mock method whose type is F.  It is
+// useful when you just want your test code to emit some messages and
+// have Google Mock verify the right messages are sent (and perhaps at
+// the right times).  For example, if you are exercising code:
+//
+//   Foo(1);
+//   Foo(2);
+//   Foo(3);
+//
+// and want to verify that Foo(1) and Foo(3) both invoke
+// mock.Bar("a"), but Foo(2) doesn't invoke anything, you can write:
+//
+// TEST(FooTest, InvokesBarCorrectly) {
+//   MyMock mock;
+//   MockFunction<void(string check_point_name)> check;
+//   {
+//     InSequence s;
+//
+//     EXPECT_CALL(mock, Bar("a"));
+//     EXPECT_CALL(check, Call("1"));
+//     EXPECT_CALL(check, Call("2"));
+//     EXPECT_CALL(mock, Bar("a"));
+//   }
+//   Foo(1);
+//   check.Call("1");
+//   Foo(2);
+//   check.Call("2");
+//   Foo(3);
+// }
+//
+// The expectation spec says that the first Bar("a") must happen
+// before check point "1", the second Bar("a") must happen after check
+// point "2", and nothing should happen between the two check
+// points. The explicit check points make it easy to tell which
+// Bar("a") is called by which call to Foo().
+template <typename F>
+class MockFunction;
+
+template <typename R>
+class MockFunction<R()> {
+ public:
+  MOCK_METHOD0_T(Call, R());
+};
+
+template <typename R, typename A0>
+class MockFunction<R(A0)> {
+ public:
+  MOCK_METHOD1_T(Call, R(A0));
+};
+
+template <typename R, typename A0, typename A1>
+class MockFunction<R(A0, A1)> {
+ public:
+  MOCK_METHOD2_T(Call, R(A0, A1));
+};
+
+template <typename R, typename A0, typename A1, typename A2>
+class MockFunction<R(A0, A1, A2)> {
+ public:
+  MOCK_METHOD3_T(Call, R(A0, A1, A2));
+};
+
+template <typename R, typename A0, typename A1, typename A2, typename A3>
+class MockFunction<R(A0, A1, A2, A3)> {
+ public:
+  MOCK_METHOD4_T(Call, R(A0, A1, A2, A3));
+};
+
+template <typename R, typename A0, typename A1, typename A2, typename A3,
+    typename A4>
+class MockFunction<R(A0, A1, A2, A3, A4)> {
+ public:
+  MOCK_METHOD5_T(Call, R(A0, A1, A2, A3, A4));
+};
+
+template <typename R, typename A0, typename A1, typename A2, typename A3,
+    typename A4, typename A5>
+class MockFunction<R(A0, A1, A2, A3, A4, A5)> {
+ public:
+  MOCK_METHOD6_T(Call, R(A0, A1, A2, A3, A4, A5));
+};
+
+template <typename R, typename A0, typename A1, typename A2, typename A3,
+    typename A4, typename A5, typename A6>
+class MockFunction<R(A0, A1, A2, A3, A4, A5, A6)> {
+ public:
+  MOCK_METHOD7_T(Call, R(A0, A1, A2, A3, A4, A5, A6));
+};
+
+template <typename R, typename A0, typename A1, typename A2, typename A3,
+    typename A4, typename A5, typename A6, typename A7>
+class MockFunction<R(A0, A1, A2, A3, A4, A5, A6, A7)> {
+ public:
+  MOCK_METHOD8_T(Call, R(A0, A1, A2, A3, A4, A5, A6, A7));
+};
+
+template <typename R, typename A0, typename A1, typename A2, typename A3,
+    typename A4, typename A5, typename A6, typename A7, typename A8>
+class MockFunction<R(A0, A1, A2, A3, A4, A5, A6, A7, A8)> {
+ public:
+  MOCK_METHOD9_T(Call, R(A0, A1, A2, A3, A4, A5, A6, A7, A8));
+};
+
+template <typename R, typename A0, typename A1, typename A2, typename A3,
+    typename A4, typename A5, typename A6, typename A7, typename A8,
+    typename A9>
+class MockFunction<R(A0, A1, A2, A3, A4, A5, A6, A7, A8, A9)> {
+ public:
+  MOCK_METHOD10_T(Call, R(A0, A1, A2, A3, A4, A5, A6, A7, A8, A9));
+};
+
 }  // namespace testing
 
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_FUNCTION_MOCKERS_H_
