@@ -96,29 +96,119 @@ import os
 ############################################################
 # Environments for building the targets, sorted by name.
 
-def NewEnvironment(env, type):
-  """Copies environment and gives it suffix for names of targets built in it."""
 
-  if type:
-    suffix = '_' + type
-  else:
-    suffix = ''
+class EnvCreator:
+  """Creates new customized environments from a base one."""
 
-  new_env = env.Clone()
-  new_env['OBJ_SUFFIX'] = suffix
-  return new_env;
+  @staticmethod
+  def _Remove(env, attribute, value):
+    """Removes the given attribute value from the environment."""
 
+    attribute_values = env[attribute]
+    if value in attribute_values:
+      attribute_values.remove(value)
 
-def Remove(env, attribute, value):
-  """Removes the given attribute value from the environment."""
+  @staticmethod
+  def Create(base_env, modifier=None):
+    # User should NOT create more than one environment with the same
+    # modifier (including None).
+    new_env = env.Clone()
+    if modifier:
+      modifier(new_env)
+    else:
+      new_env['OBJ_SUFFIX'] = ''  # Default suffix for unchanged environment.
 
-  attribute_values = env[attribute]
-  if value in attribute_values:
-    attribute_values.remove(value)
+    return new_env;
+
+  # Each of the following methods modifies the environment for a particular
+  # purpose and can be used by clients for creating new environments.  Each
+  # one needs to set the OBJ_SUFFIX variable to a unique suffix to
+  # differentiate targets built with that environment.  Otherwise, SCons may
+  # complain about same target built with different settings.
+
+  @staticmethod
+  def UseOwnTuple(env):
+    """Instructs Google Test to use its internal implementation of tuple."""
+
+    env['OBJ_SUFFIX'] = '_use_own_tuple'
+    env.Append(CPPDEFINES = 'GTEST_USE_OWN_TR1_TUPLE=1')
+
+  @staticmethod
+  def WarningOk(env):
+    """Does not treat warnings as errors.
+
+    Necessary for compiling gtest_unittest.cc, which triggers a gcc
+    warning when testing EXPECT_EQ(NULL, ptr)."""
+
+    env['OBJ_SUFFIX'] = '_warning_ok'
+    if env['PLATFORM'] == 'win32':
+      EnvCreator._Remove(env, 'CCFLAGS', '-WX')
+    else:
+      EnvCreator._Remove(env, 'CCFLAGS', '-Werror')
+
+  @staticmethod
+  def WithExceptions(env):
+    """Re-enables exceptions."""
+
+    # We compile gtest_unittest in this environment which means we need to
+    # allow warnings here as well.
+    EnvCreator.WarningOk(env)
+    env['OBJ_SUFFIX'] = '_ex'  # Overrides the suffix supplied by WarningOK.
+    if env['PLATFORM'] == 'win32':
+      env.Append(CCFLAGS=['/EHsc'])
+      env.Append(CPPDEFINES='_HAS_EXCEPTIONS=1')
+      # Undoes the _TYPEINFO_ hack, which is unnecessary and only creates
+      # trouble when exceptions are enabled.
+      EnvCreator._Remove(env, 'CPPDEFINES', '_TYPEINFO_')
+      EnvCreator._Remove(env, 'CPPDEFINES', '_HAS_EXCEPTIONS=0')
+    else:
+      env.Append(CCFLAGS='-fexceptions')
+      EnvCreator._Remove(env, 'CCFLAGS', '-fno-exceptions')
+
+  @staticmethod
+  def LessOptimized(env):
+    """Disables certain optimizations on Windows.
+
+    We need to disable some optimization flags for some tests on
+    Windows; otherwise the redirection of stdout does not work
+    (apparently because of a compiler bug)."""
+
+    env['OBJ_SUFFIX'] = '_less_optimized'
+    if env['PLATFORM'] == 'win32':
+      for flag in ['/O1', '/Os', '/Og', '/Oy']:
+        EnvCreator._Remove(env, 'LINKFLAGS', flag)
+
+  @staticmethod
+  def WithThreads(env):
+    """Allows use of threads.
+
+    Currently only enables pthreads under GCC."""
+
+    env['OBJ_SUFFIX'] = '_with_threads'
+    if env['PLATFORM'] != 'win32':
+      # Assuming POSIX-like environment with GCC.
+      # TODO(vladl@google.com): sniff presence of pthread_atfork instead of
+      # selecting on a platform.
+      env.Append(CCFLAGS=['-pthread'])
+      env.Append(LINKFLAGS=['-pthread'])
+
+  @staticmethod
+  def NoRtti(env):
+    """Disables RTTI support."""
+
+    # We compile gtest_unittest in this environment which means we need to
+    # allow warnings here as well.
+    EnvCreator.WarningOk(env)
+    env['OBJ_SUFFIX'] = '_no_rtti'  # Overrides suffix supplied by WarningOK.
+    if env['PLATFORM'] == 'win32':
+      env.Append(CCFLAGS=['/GR-'])
+    else:
+      env.Append(CCFLAGS=['-fno-rtti'])
+      env.Append(CPPDEFINES='GTEST_HAS_RTTI=0')
 
 
 Import('env')
-env = NewEnvironment(env, '')
+env = EnvCreator.Create(env)
 
 # Note: The relative paths in SConscript files are relative to the location
 # of the SConscript file itself. To make a path relative to the location of
@@ -133,51 +223,12 @@ env = NewEnvironment(env, '')
 # file is one directory deeper than the gtest directory.
 env.Prepend(CPPPATH = ['..', '../include'])
 
-env_use_own_tuple = NewEnvironment(env, 'use_own_tuple')
-env_use_own_tuple.Append(CPPDEFINES = 'GTEST_USE_OWN_TR1_TUPLE=1')
-
-# Needed to allow gtest_unittest.cc, which triggers a gcc warning when
-# testing EXPECT_EQ(NULL, ptr), to compile.
-env_warning_ok = NewEnvironment(env, 'warning_ok')
-if env_warning_ok['PLATFORM'] == 'win32':
-  Remove(env_warning_ok, 'CCFLAGS', '-WX')
-else:
-  Remove(env_warning_ok, 'CCFLAGS', '-Werror')
-
-env_with_exceptions = NewEnvironment(env_warning_ok, 'ex')
-if env_with_exceptions['PLATFORM'] == 'win32':
-  env_with_exceptions.Append(CCFLAGS=['/EHsc'])
-  env_with_exceptions.Append(CPPDEFINES='_HAS_EXCEPTIONS=1')
-  # Undoes the _TYPEINFO_ hack, which is unnecessary and only creates
-  # trouble when exceptions are enabled.
-  Remove(env_with_exceptions, 'CPPDEFINES', '_TYPEINFO_')
-  Remove(env_with_exceptions, 'CPPDEFINES', '_HAS_EXCEPTIONS=0')
-else:
-  env_with_exceptions.Append(CCFLAGS='-fexceptions')
-  Remove(env_with_exceptions, 'CCFLAGS', '-fno-exceptions')
-
-# We need to disable some optimization flags for some tests on
-# Windows; otherwise the redirection of stdout does not work
-# (apparently because of a compiler bug).
-env_less_optimized = NewEnvironment(env, 'less_optimized')
-if env_less_optimized['PLATFORM'] == 'win32':
-  for flag in ['/O1', '/Os', '/Og', '/Oy']:
-    Remove(env_less_optimized, 'LINKFLAGS', flag)
-
-# Assuming POSIX-like environment with GCC.
-# TODO(vladl@google.com): sniff presence of pthread_atfork instead of
-# selecting on a platform.
-env_with_threads = NewEnvironment(env, 'with_threads')
-if env_with_threads['PLATFORM'] != 'win32':
-  env_with_threads.Append(CCFLAGS=['-pthread'])
-  env_with_threads.Append(LINKFLAGS=['-pthread'])
-
-env_without_rtti = NewEnvironment(env_warning_ok, 'no_rtti')
-if env_without_rtti['PLATFORM'] == 'win32':
-  env_without_rtti.Append(CCFLAGS=['/GR-'])
-else:
-  env_without_rtti.Append(CCFLAGS=['-fno-rtti'])
-  env_without_rtti.Append(CPPDEFINES='GTEST_HAS_RTTI=0')
+env_use_own_tuple = EnvCreator.Create(env, EnvCreator.UseOwnTuple)
+env_warning_ok = EnvCreator.Create(env, EnvCreator.WarningOk)
+env_with_exceptions = EnvCreator.Create(env, EnvCreator.WithExceptions)
+env_less_optimized = EnvCreator.Create(env, EnvCreator.LessOptimized)
+env_with_threads = EnvCreator.Create(env, EnvCreator.WithThreads)
+env_without_rtti = EnvCreator.Create(env, EnvCreator.NoRtti)
 
 ############################################################
 # Helpers for creating build targets.
@@ -372,7 +423,7 @@ gtest_exports = {'gtest': gtest,
                  'gtest_ex': gtest_ex,
                  'gtest_no_rtti': gtest_no_rtti,
                  'gtest_use_own_tuple': gtest_use_own_tuple,
-                 'NewEnvironment': NewEnvironment,
+                 'EnvCreator': EnvCreator,
                  'GtestObject': GtestObject,
                  'GtestBinary': GtestBinary,
                  'GtestTest': GtestTest}

@@ -742,7 +742,7 @@ class UnitTestImpl {
   }
 
   // Provides access to the event listener list.
-  EventListeners* listeners() { return &listeners_; }
+  TestEventListeners* listeners() { return &listeners_; }
 
   // Returns the TestResult for the test that's currently running, or
   // the TestResult for the ad hoc test if no test is running.
@@ -1002,7 +1002,7 @@ class UnitTestImpl {
 
   // The list of event listeners that can be used to track events inside
   // Google Test.
-  EventListeners listeners_;
+  TestEventListeners listeners_;
 
   // The OS stack trace getter.  Will be deleted when the UnitTest
   // object is destructed.  By default, an OsStackTraceGetter is used,

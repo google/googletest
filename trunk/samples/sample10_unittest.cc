@@ -37,10 +37,10 @@
 #include <gtest/gtest.h>
 
 using ::testing::EmptyTestEventListener;
-using ::testing::EventListeners;
 using ::testing::InitGoogleTest;
 using ::testing::Test;
 using ::testing::TestCase;
+using ::testing::TestEventListeners;
 using ::testing::TestInfo;
 using ::testing::TestPartResult;
 using ::testing::UnitTest;
@@ -123,7 +123,7 @@ int main(int argc, char **argv) {
   // If we are given the --check_for_leaks command line flag, installs the
   // leak checker.
   if (check_for_leaks) {
-    EventListeners& listeners = UnitTest::GetInstance()->listeners();
+    TestEventListeners& listeners = UnitTest::GetInstance()->listeners();
 
     // Adds the leak checker to the end of the test event listener list,
     // after the default text output printer and the default XML report

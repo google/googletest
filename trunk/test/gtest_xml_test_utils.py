@@ -77,19 +77,29 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
 
     expected_attributes = expected_node.attributes
     actual_attributes   = actual_node  .attributes
-    self.assertEquals(expected_attributes.length, actual_attributes.length)
+    self.assertEquals(
+        expected_attributes.length, actual_attributes.length,
+        "attribute numbers differ in element " + actual_node.tagName)
     for i in range(expected_attributes.length):
       expected_attr = expected_attributes.item(i)
       actual_attr   = actual_attributes.get(expected_attr.name)
-      self.assert_(actual_attr is not None)
-      self.assertEquals(expected_attr.value, actual_attr.value)
+      self.assert_(
+          actual_attr is not None,
+          "expected attribute %s not found in element %s" %
+          (expected_attr.name, actual_node.tagName))
+      self.assertEquals(expected_attr.value, actual_attr.value,
+                        " values of attribute %s in element %s differ" %
+                        (expected_attr.name, actual_node.tagName))
 
     expected_children = self._GetChildren(expected_node)
     actual_children = self._GetChildren(actual_node)
-    self.assertEquals(len(expected_children), len(actual_children))
+    self.assertEquals(
+        len(expected_children), len(actual_children),
+        "number of child elements differ in element " + actual_node.tagName)
     for child_id, child in expected_children.iteritems():
       self.assert_(child_id in actual_children,
-                   '<%s> is not in <%s>' % (child_id, actual_children))
+                   '<%s> is not in <%s> (in element %s)' %
+                   (child_id, actual_children, actual_node.tagName))
       self.AssertEquivalentNodes(child, actual_children[child_id])
 
   identifying_attribute = {
@@ -103,14 +113,13 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
     """
     Fetches all of the child nodes of element, a DOM Element object.
     Returns them as the values of a dictionary keyed by the IDs of the
-    children.  For <testsuites>, <testsuite> and <testcase> elements,
-    the ID is the value of their "name" attribute; for <failure>
-    elements, it is the value of the "message" attribute; for CDATA
-    section node, it is "detail".  An exception is raised if any
-    element other than the above four is encountered, if two child
-    elements with the same identifying attributes are encountered, or
-    if any other type of node is encountered, other than Text nodes
-    containing only whitespace.
+    children.  For <testsuites>, <testsuite> and <testcase> elements, the ID
+    is the value of their "name" attribute; for <failure> elements, it is
+    the value of the "message" attribute; CDATA sections and non-whitespace
+    text nodes are concatenated into a single CDATA section with ID
+    "detail".  An exception is raised if any element other than the above
+    four is encountered, if two child elements with the same identifying
+    attributes are encountered, or if any other type of node is encountered.
     """
 
     children = {}
@@ -121,11 +130,14 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
         childID = child.getAttribute(self.identifying_attribute[child.tagName])
         self.assert_(childID not in children)
         children[childID] = child
-      elif child.nodeType == Node.TEXT_NODE:
-        self.assert_(child.nodeValue.isspace())
-      elif child.nodeType == Node.CDATA_SECTION_NODE:
-        self.assert_("detail" not in children)
-        children["detail"] = child
+      elif child.nodeType in [Node.TEXT_NODE, Node.CDATA_SECTION_NODE]:
+        if "detail" not in children:
+          if (child.nodeType == Node.CDATA_SECTION_NODE or
+              not child.nodeValue.isspace()):
+            children["detail"] = child.ownerDocument.createCDATASection(
+                child.nodeValue)
+        else:
+          children["detail"].nodeValue += child.nodeValue
       else:
         self.fail("Encountered unexpected node type %d" % child.nodeType)
     return children

@@ -42,6 +42,8 @@
 #include <wchar.h>
 #include <wctype.h>
 
+#include <ostream>
+
 #if GTEST_OS_LINUX
 
 // TODO(kenton@google.com): Use autoconf to detect availability of
@@ -2966,6 +2968,9 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
   // with character references.
   static String EscapeXml(const char* str, bool is_attribute);
 
+  // Returns the given string with all characters invalid in XML removed.
+  static String RemoveInvalidXmlCharacters(const char* str);
+
   // Convenience wrapper around EscapeXml when str is an attribute value.
   static String EscapeXmlAttribute(const char* str) {
     return EscapeXml(str, true);
@@ -2974,10 +2979,13 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
   // Convenience wrapper around EscapeXml when str is not an attribute value.
   static String EscapeXmlText(const char* str) { return EscapeXml(str, false); }
 
-  // Prints an XML representation of a TestInfo object.
-  static void PrintXmlTestInfo(FILE* out,
-                               const char* test_case_name,
-                               const TestInfo& test_info);
+  // Streams an XML CDATA section, escaping invalid CDATA sequences as needed.
+  static void OutputXmlCDataSection(::std::ostream* stream, const char* data);
+
+  // Streams an XML representation of a TestInfo object.
+  static void OutputXmlTestInfo(::std::ostream* stream,
+                                const char* test_case_name,
+                                const TestInfo& test_info);
 
   // Prints an XML representation of a TestCase object
   static void PrintXmlTestCase(FILE* out, const TestCase& test_case);
@@ -3092,6 +3100,22 @@ String XmlUnitTestResultPrinter::EscapeXml(const char* str, bool is_attribute) {
   return m.GetString();
 }
 
+// Returns the given string with all characters invalid in XML removed.
+// Currently invalid characters are dropped from the string. An
+// alternative is to replace them with certain characters such as . or ?.
+String XmlUnitTestResultPrinter::RemoveInvalidXmlCharacters(const char* str) {
+  char* const output = new char[strlen(str) + 1];
+  char* appender = output;
+  for (char ch = *str; ch != '\0'; ch = *++str)
+    if (IsValidXmlCharacter(ch))
+      *appender++ = ch;
+  *appender = '\0';
+
+  String ret_value(output);
+  delete[] output;
+  return ret_value;
+}
+
 // The following routines generate an XML representation of a UnitTest
 // object.
 //
@@ -3118,40 +3142,62 @@ const char* FormatTimeInMillisAsSeconds(TimeInMillis ms) {
   return str.c_str();
 }
 
+// Streams an XML CDATA section, escaping invalid CDATA sequences as needed.
+void XmlUnitTestResultPrinter::OutputXmlCDataSection(::std::ostream* stream,
+                                                     const char* data) {
+  const char* segment = data;
+  *stream << "<![CDATA[";
+  for (;;) {
+    const char* const next_segment = strstr(segment, "]]>");
+    if (next_segment != NULL) {
+      stream->write(segment, next_segment - segment);
+      *stream << "]]>]]&gt;<![CDATA[";
+      segment = next_segment + strlen("]]>");
+    } else {
+      *stream << segment;
+      break;
+    }
+  }
+  *stream << "]]>";
+}
+
 // Prints an XML representation of a TestInfo object.
 // TODO(wan): There is also value in printing properties with the plain printer.
-void XmlUnitTestResultPrinter::PrintXmlTestInfo(FILE* out,
-                                                const char* test_case_name,
-                                                const TestInfo& test_info) {
+void XmlUnitTestResultPrinter::OutputXmlTestInfo(::std::ostream* stream,
+                                                 const char* test_case_name,
+                                                 const TestInfo& test_info) {
   const TestResult& result = *test_info.result();
-  fprintf(out,
-          "    <testcase name=\"%s\" status=\"%s\" time=\"%s\" "
-          "classname=\"%s\"%s",
-          EscapeXmlAttribute(test_info.name()).c_str(),
-          test_info.should_run() ? "run" : "notrun",
-          FormatTimeInMillisAsSeconds(result.elapsed_time()),
-          EscapeXmlAttribute(test_case_name).c_str(),
-          TestPropertiesAsXmlAttributes(result).c_str());
+  *stream << "    <testcase name=\""
+          << EscapeXmlAttribute(test_info.name()).c_str()
+          << "\" status=\""
+          << (test_info.should_run() ? "run" : "notrun")
+          << "\" time=\""
+          << FormatTimeInMillisAsSeconds(result.elapsed_time())
+          << "\" classname=\"" << EscapeXmlAttribute(test_case_name).c_str()
+          << "\"" << TestPropertiesAsXmlAttributes(result).c_str();
 
   int failures = 0;
   for (int i = 0; i < result.total_part_count(); ++i) {
     const TestPartResult& part = result.GetTestPartResult(i);
     if (part.failed()) {
-      const String message = String::Format("%s:%d\n%s", part.file_name(),
-                                            part.line_number(), part.message());
       if (++failures == 1)
-        fprintf(out, ">\n");
-      fprintf(out,
-              "      <failure message=\"%s\" type=\"\"><![CDATA[%s]]>"
-              "</failure>\n",
-              EscapeXmlAttribute(part.summary()).c_str(), message.c_str());
+        *stream << ">\n";
+      *stream << "      <failure message=\""
+              << EscapeXmlAttribute(part.summary()).c_str()
+              << "\" type=\"\">";
+      const String message = RemoveInvalidXmlCharacters(String::Format(
+          "%s:%d\n%s",
+          part.file_name(), part.line_number(),
+          part.message()).c_str());
+      OutputXmlCDataSection(stream, message.c_str());
+      *stream << "</failure>\n";
     }
   }
 
   if (failures == 0)
-    fprintf(out, " />\n");
+    *stream << " />\n";
   else
-    fprintf(out, "    </testcase>\n");
+    *stream << "    </testcase>\n";
 }
 
 // Prints an XML representation of a TestCase object
@@ -3167,8 +3213,11 @@ void XmlUnitTestResultPrinter::PrintXmlTestCase(FILE* out,
   fprintf(out,
           "errors=\"0\" time=\"%s\">\n",
           FormatTimeInMillisAsSeconds(test_case.elapsed_time()));
-  for (int i = 0; i < test_case.total_test_count(); ++i)
-    PrintXmlTestInfo(out, test_case.name(), *test_case.GetTestInfo(i));
+  for (int i = 0; i < test_case.total_test_count(); ++i) {
+    StrStream stream;
+    OutputXmlTestInfo(&stream, test_case.name(), *test_case.GetTestInfo(i));
+    fprintf(out, "%s", StrStreamToString(&stream).c_str());
+  }
   fprintf(out, "  </testsuite>\n");
 }
 
@@ -3253,28 +3302,28 @@ OsStackTraceGetter::kElidedFramesMarker =
 
 }  // namespace internal
 
-// class EventListeners
+// class TestEventListeners
 
-EventListeners::EventListeners()
+TestEventListeners::TestEventListeners()
     : repeater_(new internal::TestEventRepeater()),
       default_result_printer_(NULL),
       default_xml_generator_(NULL) {
 }
 
-EventListeners::~EventListeners() { delete repeater_; }
+TestEventListeners::~TestEventListeners() { delete repeater_; }
 
 // Returns the standard listener responsible for the default console
 // output.  Can be removed from the listeners list to shut down default
 // console output.  Note that removing this object from the listener list
 // with Release transfers its ownership to the user.
-void EventListeners::Append(TestEventListener* listener) {
+void TestEventListeners::Append(TestEventListener* listener) {
   repeater_->Append(listener);
 }
 
 // Removes the given event listener from the list and returns it.  It then
 // becomes the caller's responsibility to delete the listener. Returns
 // NULL if the listener is not found in the list.
-TestEventListener* EventListeners::Release(TestEventListener* listener) {
+TestEventListener* TestEventListeners::Release(TestEventListener* listener) {
   if (listener == default_result_printer_)
     default_result_printer_ = NULL;
   else if (listener == default_xml_generator_)
@@ -3284,14 +3333,14 @@ TestEventListener* EventListeners::Release(TestEventListener* listener) {
 
 // Returns repeater that broadcasts the TestEventListener events to all
 // subscribers.
-TestEventListener* EventListeners::repeater() { return repeater_; }
+TestEventListener* TestEventListeners::repeater() { return repeater_; }
 
 // Sets the default_result_printer attribute to the provided listener.
 // The listener is also added to the listener list and previous
 // default_result_printer is removed from it and deleted. The listener can
 // also be NULL in which case it will not be added to the list. Does
 // nothing if the previous and the current listener objects are the same.
-void EventListeners::SetDefaultResultPrinter(TestEventListener* listener) {
+void TestEventListeners::SetDefaultResultPrinter(TestEventListener* listener) {
   if (default_result_printer_ != listener) {
     // It is an error to pass this method a listener that is already in the
     // list.
@@ -3307,7 +3356,7 @@ void EventListeners::SetDefaultResultPrinter(TestEventListener* listener) {
 // default_xml_generator is removed from it and deleted. The listener can
 // also be NULL in which case it will not be added to the list. Does
 // nothing if the previous and the current listener objects are the same.
-void EventListeners::SetDefaultXmlGenerator(TestEventListener* listener) {
+void TestEventListeners::SetDefaultXmlGenerator(TestEventListener* listener) {
   if (default_xml_generator_ != listener) {
     // It is an error to pass this method a listener that is already in the
     // list.
@@ -3320,11 +3369,11 @@ void EventListeners::SetDefaultXmlGenerator(TestEventListener* listener) {
 
 // Controls whether events will be forwarded by the repeater to the
 // listeners in the list.
-bool EventListeners::EventForwardingEnabled() const {
+bool TestEventListeners::EventForwardingEnabled() const {
   return repeater_->forwarding_enabled();
 }
 
-void EventListeners::SuppressEventForwarding() {
+void TestEventListeners::SuppressEventForwarding() {
   repeater_->set_forwarding_enabled(false);
 }
 
@@ -3418,7 +3467,7 @@ const TestCase* UnitTest::GetTestCase(int i) const {
 
 // Returns the list of event listeners that can be used to track events
 // inside Google Test.
-EventListeners& UnitTest::listeners() {
+TestEventListeners& UnitTest::listeners() {
   return *impl()->listeners();
 }
 
@@ -4187,11 +4236,13 @@ namespace {
 class ClassUniqueToAlwaysTrue {};
 }
 
+bool IsTrue(bool condition) { return condition; }
+
 bool AlwaysTrue() {
 #if GTEST_HAS_EXCEPTIONS
   // This condition is always false so AlwaysTrue() never actually throws,
   // but it makes the compiler think that it may throw.
-  if (atoi("42") == 36)  // NOLINT
+  if (IsTrue(false))
     throw ClassUniqueToAlwaysTrue();
 #endif  // GTEST_HAS_EXCEPTIONS
   return true;

@@ -245,10 +245,10 @@ class KilledBySignal {
 #ifdef NDEBUG
 
 #define EXPECT_DEBUG_DEATH(statement, regex) \
-  do { statement; } while (false)
+  do { statement; } while (::testing::internal::AlwaysFalse())
 
 #define ASSERT_DEBUG_DEATH(statement, regex) \
-  do { statement; } while (false)
+  do { statement; } while (::testing::internal::AlwaysFalse())
 
 #else
 

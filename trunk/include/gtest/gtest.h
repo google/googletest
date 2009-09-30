@@ -146,13 +146,13 @@ namespace internal {
 
 class AssertHelper;
 class DefaultGlobalTestPartResultReporter;
-class EventListenersAccessor;
 class ExecDeathTest;
 class NoExecDeathTest;
 class FinalSuccessChecker;
 class GTestFlagSaver;
 class TestInfoImpl;
 class TestResultAccessor;
+class TestEventListenersAccessor;
 class TestEventRepeater;
 class WindowsDeathTest;
 class UnitTestImpl* GetUnitTestImpl();
@@ -832,11 +832,11 @@ class EmptyTestEventListener : public TestEventListener {
   virtual void OnTestProgramEnd(const UnitTest& /*unit_test*/) {}
 };
 
-// EventListeners lets users add listeners to track events in Google Test.
-class EventListeners {
+// TestEventListeners lets users add listeners to track events in Google Test.
+class TestEventListeners {
  public:
-  EventListeners();
-  ~EventListeners();
+  TestEventListeners();
+  ~TestEventListeners();
 
   // Appends an event listener to the end of the list. Google Test assumes
   // the ownership of the listener (i.e. it will delete the listener when
@@ -871,8 +871,8 @@ class EventListeners {
  private:
   friend class TestCase;
   friend class internal::DefaultGlobalTestPartResultReporter;
-  friend class internal::EventListenersAccessor;
   friend class internal::NoExecDeathTest;
+  friend class internal::TestEventListenersAccessor;
   friend class internal::TestInfoImpl;
   friend class internal::UnitTestImpl;
 
@@ -906,8 +906,8 @@ class EventListeners {
   // Listener responsible for the creation of the XML output file.
   TestEventListener* default_xml_generator_;
 
-  // We disallow copying EventListeners.
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(EventListeners);
+  // We disallow copying TestEventListeners.
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(TestEventListeners);
 };
 
 // A UnitTest consists of a vector of TestCases.
@@ -1002,7 +1002,7 @@ class UnitTest {
 
   // Returns the list of event listeners that can be used to track events
   // inside Google Test.
-  EventListeners& listeners();
+  TestEventListeners& listeners();
 
  private:
   // Registers and returns a global test environment.  When a test

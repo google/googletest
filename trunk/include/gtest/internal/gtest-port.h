@@ -577,6 +577,10 @@ typedef ::std::stringstream StrStream;
 typedef ::std::strstream StrStream;
 #endif  // GTEST_HAS_STD_STRING
 
+// A helper for suppressing warnings on constant condition.  It just
+// returns 'condition'.
+bool IsTrue(bool condition);
+
 // Defines scoped_ptr.
 
 // This implementation of scoped_ptr is PARTIAL - it only contains
@@ -599,7 +603,7 @@ class scoped_ptr {
 
   void reset(T* p = NULL) {
     if (p != ptr_) {
-      if (sizeof(T) > 0) {  // Makes sure T is a complete type.
+      if (IsTrue(sizeof(T) > 0)) {  // Makes sure T is a complete type.
         delete ptr_;
       }
       ptr_ = p;
@@ -1037,7 +1041,7 @@ typedef TypeWithSize<8>::Int TimeInMillis;  // Represents time in milliseconds.
 //    whether it is built in the debug mode or not.
 #define GTEST_CHECK_(condition) \
     GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-    if (condition) \
+    if (::testing::internal::IsTrue(condition)) \
       ; \
     else \
       GTEST_LOG_(FATAL) << "Condition " #condition " failed. "

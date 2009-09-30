@@ -54,16 +54,16 @@ namespace testing {
 namespace internal {
 
 TEST(GtestCheckSyntaxTest, BehavesLikeASingleStatement) {
-  if (false)
+  if (AlwaysFalse())
     GTEST_CHECK_(false) << "This should never be executed; "
                            "It's a compilation test only.";
 
-  if (true)
+  if (AlwaysTrue())
     GTEST_CHECK_(true);
   else
     ;  // NOLINT
 
-  if (false)
+  if (AlwaysFalse())
     ;  // NOLINT
   else
     GTEST_CHECK_(true) << "";

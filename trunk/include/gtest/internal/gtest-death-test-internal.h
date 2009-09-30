@@ -153,7 +153,7 @@ bool ExitedUnsuccessfully(int exit_status);
 // ASSERT_EXIT*, and EXPECT_EXIT*.
 #define GTEST_DEATH_TEST_(statement, predicate, regex, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-  if (true) { \
+  if (::testing::internal::AlwaysTrue()) { \
     const ::testing::internal::RE& gtest_regex = (regex); \
     ::testing::internal::DeathTest* gtest_dt; \
     if (!::testing::internal::DeathTest::Create(#statement, &gtest_regex, \
@@ -259,7 +259,7 @@ InternalRunDeathTestFlag* ParseInternalRunDeathTestFlag();
       GTEST_LOG_(WARNING) \
           << "Death tests are not supported on this platform.\n" \
           << "Statement '" #statement "' cannot be verified."; \
-    } else if (!::testing::internal::AlwaysTrue()) { \
+    } else if (::testing::internal::AlwaysFalse()) { \
       ::testing::internal::RE::PartialMatch(".*", (regex)); \
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
       terminator; \

@@ -37,10 +37,10 @@
 #include <gtest/gtest.h>
 
 using ::testing::EmptyTestEventListener;
-using ::testing::EventListeners;
 using ::testing::InitGoogleTest;
 using ::testing::Test;
 using ::testing::TestCase;
+using ::testing::TestEventListeners;
 using ::testing::TestInfo;
 using ::testing::TestPartResult;
 using ::testing::UnitTest;
@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
   // If we are given the --terse_output command line flag, suppresses the
   // standard output and attaches own result printer.
   if (terse_output) {
-    EventListeners& listeners = unit_test.listeners();
+    TestEventListeners& listeners = unit_test.listeners();
 
     // Removes the default console output listener from the list so it will
     // not receive events from Google Test and won't print any output. Since
