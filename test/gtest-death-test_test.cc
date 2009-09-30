@@ -659,7 +659,11 @@ static void TestExitMacros() {
   EXPECT_EXIT(_exit(1),  testing::ExitedWithCode(1),  "");
   ASSERT_EXIT(_exit(42), testing::ExitedWithCode(42), "");
 
-#if GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MINGW
+  // MinGW (as of MinGW 5.1.6 and MSYS 1.0.11) does not tag crashed
+  // processes with non-zero exit code and does not honor calls to
+  // SetErrorMode(SEM_NOGPFAULTERRORBOX) that are supposed to suppress
+  // error pop-ups.
   EXPECT_EXIT({
     testing::GTEST_FLAG(catch_exceptions) = false;
     *static_cast<int*>(NULL) = 1;
@@ -671,7 +675,9 @@ static void TestExitMacros() {
       *static_cast<int*>(NULL) = 1;
     }, testing::ExitedWithCode(0), "") << "This failure is expected.";
   }, "This failure is expected.");
+#endif  // GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MINGW
 
+#if GTEST_OS_WINDOWS
   // Of all signals effects on the process exit code, only those of SIGABRT
   // are documented on Windows.
   // See http://msdn.microsoft.com/en-us/library/dwwzkt4c(VS.71).aspx.

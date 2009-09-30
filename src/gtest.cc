@@ -2343,33 +2343,39 @@ TestCase::TestCase(const char* name, const char* comment,
                    Test::TearDownTestCaseFunc tear_down_tc)
     : name_(name),
       comment_(comment),
+      test_info_list_(new internal::Vector<TestInfo*>),
+      test_indices_(new internal::Vector<int>),
       set_up_tc_(set_up_tc),
       tear_down_tc_(tear_down_tc),
       should_run_(false),
       elapsed_time_(0) {
-  test_info_list_ = new internal::Vector<TestInfo *>;
 }
 
 // Destructor of TestCase.
 TestCase::~TestCase() {
   // Deletes every Test in the collection.
   test_info_list_->ForEach(internal::Delete<TestInfo>);
-
-  // Then deletes the Test collection.
-  delete test_info_list_;
-  test_info_list_ = NULL;
 }
 
 // Returns the i-th test among all the tests. i can range from 0 to
 // total_test_count() - 1. If i is not in that range, returns NULL.
 const TestInfo* TestCase::GetTestInfo(int i) const {
-  return test_info_list_->GetElementOr(i, NULL);
+  const int index = test_indices_->GetElementOr(i, -1);
+  return index < 0 ? NULL : test_info_list_->GetElement(index);
+}
+
+// Returns the i-th test among all the tests. i can range from 0 to
+// total_test_count() - 1. If i is not in that range, returns NULL.
+TestInfo* TestCase::GetMutableTestInfo(int i) {
+  const int index = test_indices_->GetElementOr(i, -1);
+  return index < 0 ? NULL : test_info_list_->GetElement(index);
 }
 
 // Adds a test to this test case.  Will delete the test upon
 // destruction of the TestCase object.
 void TestCase::AddTestInfo(TestInfo * test_info) {
   test_info_list_->PushBack(test_info);
+  test_indices_->PushBack(test_indices_->size());
 }
 
 // Runs every test in this TestCase.
@@ -2386,7 +2392,9 @@ void TestCase::Run() {
   set_up_tc_();
 
   const internal::TimeInMillis start = internal::GetTimeInMillis();
-  test_info_list_->ForEach(internal::TestInfoImpl::RunTest);
+  for (int i = 0; i < total_test_count(); i++) {
+    GetMutableTestInfo(i)->impl()->Run();
+  }
   elapsed_time_ = internal::GetTimeInMillis() - start;
 
   impl->os_stack_trace_getter()->UponLeavingGTest();
@@ -2420,6 +2428,18 @@ bool TestCase::TestDisabled(const TestInfo * test_info) {
 // Returns true if the given test should run.
 bool TestCase::ShouldRunTest(const TestInfo *test_info) {
   return test_info->impl()->should_run();
+}
+
+// Shuffles the tests in this test case.
+void TestCase::ShuffleTests(internal::Random* random) {
+  test_indices_->Shuffle(random);
+}
+
+// Restores the test order to before the first shuffle.
+void TestCase::UnshuffleTests() {
+  for (int i = 0; i < test_indices_->size(); i++) {
+    test_indices_->GetMutableElement(i) = i;
+  }
 }
 
 // Formats a countable noun.  Depending on its quantity, either the
@@ -3465,6 +3485,12 @@ const TestCase* UnitTest::GetTestCase(int i) const {
   return impl()->GetTestCase(i);
 }
 
+// Gets the i-th test case among all the test cases. i can range from 0 to
+// total_test_case_count() - 1. If i is not in that range, returns NULL.
+TestCase* UnitTest::GetMutableTestCase(int i) {
+  return impl()->GetMutableTestCase(i);
+}
+
 // Returns the list of event listeners that can be used to track events
 // inside Google Test.
 TestEventListeners& UnitTest::listeners() {
@@ -3717,7 +3743,6 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
           &default_global_test_part_result_reporter_),
       per_thread_test_part_result_reporter_(
           &default_per_thread_test_part_result_reporter_),
-      test_cases_(),
 #if GTEST_HAS_PARAM_TEST
       parameterized_test_registry_(),
       parameterized_tests_registered_(false),
@@ -3728,7 +3753,8 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
       ad_hoc_test_result_(),
       os_stack_trace_getter_(NULL),
       post_flag_parse_init_performed_(false),
-      random_seed_(0),
+      random_seed_(0),  // Will be overridden by the flag before first use.
+      random_(0),  // Will be reseeded before first use.
 #if GTEST_HAS_DEATH_TEST
       elapsed_time_(0),
       internal_run_death_test_flag_(NULL),
@@ -3822,7 +3848,9 @@ class TestCaseNameIs {
 };
 
 // Finds and returns a TestCase with the given name.  If one doesn't
-// exist, creates one and returns it.
+// exist, creates one and returns it.  It's the CALLER'S
+// RESPONSIBILITY to ensure that this function is only called WHEN THE
+// TESTS ARE NOT SHUFFLED.
 //
 // Arguments:
 //
@@ -3847,13 +3875,16 @@ TestCase* UnitTestImpl::GetTestCase(const char* test_case_name,
   if (internal::UnitTestOptions::MatchesFilter(String(test_case_name),
                                                kDeathTestCaseFilter)) {
     // Yes.  Inserts the test case after the last death test case
-    // defined so far.
+    // defined so far.  This only works when the test cases haven't
+    // been shuffled.  Otherwise we may end up running a death test
+    // after a non-death test.
     test_cases_.Insert(new_test_case, ++last_death_test_case_);
   } else {
     // No.  Appends to the end of the list.
     test_cases_.PushBack(new_test_case);
   }
 
+  test_case_indices_.PushBack(test_case_indices_.size());
   return new_test_case;
 }
 
@@ -3938,6 +3969,15 @@ int UnitTestImpl::RunAllTests() {
 
     const TimeInMillis start = GetTimeInMillis();
 
+    // Shuffles test cases and tests if requested.
+    if (has_tests_to_run && GTEST_FLAG(shuffle)) {
+      random()->Reseed(random_seed_);
+      // This should be done before calling OnTestIterationStart(),
+      // such that a test event listener can see the actual test order
+      // in the event.
+      ShuffleTests();
+    }
+
     // Tells the unit test event listeners that the tests are about to start.
     repeater->OnTestIterationStart(*parent_, i);
 
@@ -3951,7 +3991,9 @@ int UnitTestImpl::RunAllTests() {
       // Runs the tests only if there was no fatal failure during global
       // set-up.
       if (!Test::HasFatalFailure()) {
-        test_cases_.ForEach(TestCase::RunTestCase);
+        for (int i = 0; i < total_test_case_count(); i++) {
+          GetMutableTestCase(i)->Run();
+        }
       }
 
       // Tears down all environments in reverse order afterwards.
@@ -3970,8 +4012,16 @@ int UnitTestImpl::RunAllTests() {
       failed = true;
     }
 
+    // Restores the original test order after the iteration.  This
+    // allows the user to quickly repro a failure that happens in the
+    // N-th iteration without repeating the first (N - 1) iterations.
+    // This is not enclosed in "if (GTEST_FLAG(shuffle)) { ... }", in
+    // case the user somehow changes the value of the flag somewhere
+    // (it's always safe to unshuffle the tests).
+    UnshuffleTests();
+
     if (GTEST_FLAG(shuffle)) {
-      // Picks a new random seed for each run.
+      // Picks a new random seed for each iteration.
       random_seed_ = GetNextRandomSeed(random_seed_);
     }
   }
@@ -4185,6 +4235,32 @@ OsStackTraceGetterInterface* UnitTestImpl::os_stack_trace_getter() {
 TestResult* UnitTestImpl::current_test_result() {
   return current_test_info_ ?
     current_test_info_->impl()->result() : &ad_hoc_test_result_;
+}
+
+// Shuffles all test cases, and the tests within each test case,
+// making sure that death tests are still run first.
+void UnitTestImpl::ShuffleTests() {
+  // Shuffles the death test cases.
+  test_case_indices_.ShuffleRange(random(), 0, last_death_test_case_ + 1);
+
+  // Shuffles the non-death test cases.
+  test_case_indices_.ShuffleRange(random(), last_death_test_case_ + 1,
+                                  test_cases_.size());
+
+  // Shuffles the tests inside each test case.
+  for (int i = 0; i < test_cases_.size(); i++) {
+    test_cases_.GetElement(i)->ShuffleTests(random());
+  }
+}
+
+// Restores the test cases and tests to their order before the first shuffle.
+void UnitTestImpl::UnshuffleTests() {
+  for (int i = 0; i < test_cases_.size(); i++) {
+    // Unshuffles the tests in each test case.
+    test_cases_.GetElement(i)->UnshuffleTests();
+    // Resets the index of each test case.
+    test_case_indices_.GetMutableElement(i) = i;
+  }
 }
 
 // TestInfoImpl constructor. The new instance assumes ownership of the test
@@ -4401,8 +4477,8 @@ static const char kColorEncodedHelpMessage[] =
 "Test Execution:\n"
 "  @G--" GTEST_FLAG_PREFIX_ "repeat=@Y[COUNT]@D\n"
 "      Run the tests repeatedly; use a negative count to repeat forever.\n"
-"  @G--" GTEST_FLAG_PREFIX_ "shuffle\n"
-"      Randomize tests' orders on every run.  To be implemented.\n"
+"  @G--" GTEST_FLAG_PREFIX_ "shuffle@D\n"
+"      Randomize tests' orders on every iteration.\n"
 "  @G--" GTEST_FLAG_PREFIX_ "random_seed=@Y[NUMBER]@D\n"
 "      Random number seed to use for shuffling test orders (between 1 and\n"
 "      99999, or 0 to use a seed based on the current time).\n"

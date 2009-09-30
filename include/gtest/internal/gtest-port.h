@@ -461,7 +461,7 @@
 //      pops up a dialog window that cannot be suppressed programmatically.
 #if GTEST_HAS_STD_STRING && \
     (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_CYGWIN || \
-     (GTEST_OS_WINDOWS_DESKTOP && _MSC_VER >= 1400))
+     (GTEST_OS_WINDOWS_DESKTOP && _MSC_VER >= 1400) || GTEST_OS_WINDOWS_MINGW)
 #define GTEST_HAS_DEATH_TEST 1
 #include <vector>  // NOLINT
 #endif
