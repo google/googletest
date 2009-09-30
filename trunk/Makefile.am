@@ -173,22 +173,29 @@ TESTS += samples/sample6_unittest
 check_PROGRAMS += samples/sample6_unittest
 samples_sample6_unittest_SOURCES = samples/prime_tables.h \
                                    samples/sample6_unittest.cc
-samples_sample6_unittest_LDADD = lib/libgtest_main.la \
-                                 samples/libsamples.la
+samples_sample6_unittest_LDADD = lib/libgtest_main.la
 
 TESTS += samples/sample7_unittest
 check_PROGRAMS += samples/sample7_unittest
 samples_sample7_unittest_SOURCES = samples/prime_tables.h \
                                    samples/sample7_unittest.cc
-samples_sample7_unittest_LDADD = lib/libgtest_main.la \
-                                 samples/libsamples.la
+samples_sample7_unittest_LDADD = lib/libgtest_main.la
 
 TESTS += samples/sample8_unittest
 check_PROGRAMS += samples/sample8_unittest
 samples_sample8_unittest_SOURCES = samples/prime_tables.h \
                                    samples/sample8_unittest.cc
-samples_sample8_unittest_LDADD = lib/libgtest_main.la \
-                                 samples/libsamples.la
+samples_sample8_unittest_LDADD = lib/libgtest_main.la
+
+TESTS += samples/sample9_unittest
+check_PROGRAMS += samples/sample9_unittest
+samples_sample9_unittest_SOURCES = samples/sample9_unittest.cc
+samples_sample9_unittest_LDADD = lib/libgtest.la
+
+TESTS += samples/sample10_unittest
+check_PROGRAMS += samples/sample10_unittest
+samples_sample10_unittest_SOURCES = samples/sample10_unittest.cc
+samples_sample10_unittest_LDADD = lib/libgtest.la
 
 TESTS += test/gtest-death-test_test
 check_PROGRAMS += test/gtest-death-test_test
@@ -387,6 +394,12 @@ check_SCRIPTS += test/gtest_output_test.py
 EXTRA_DIST += test/gtest_output_test_golden_lin.txt \
               test/gtest_output_test_golden_win.txt
 TESTS += test/gtest_output_test.py
+
+check_PROGRAMS += test/gtest_shuffle_test_
+test_gtest_shuffle_test__SOURCES = test/gtest_shuffle_test_.cc
+test_gtest_shuffle_test__LDADD = lib/libgtest.la
+check_SCRIPTS += test/gtest_shuffle_test.py
+TESTS += test/gtest_shuffle_test.py
 
 check_PROGRAMS += test/gtest_throw_on_failure_test_
 test_gtest_throw_on_failure_test__SOURCES = \

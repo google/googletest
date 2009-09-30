@@ -127,7 +127,7 @@ GTEST_DECLARE_int32_(repeat);
 // stack frames in failure stack traces.
 GTEST_DECLARE_bool_(show_internal_stack_frames);
 
-// When this flag is specified, tests' order is randomized on every run.
+// When this flag is specified, tests' order is randomized on every iteration.
 GTEST_DECLARE_bool_(shuffle);
 
 // This flag specifies the maximum number of stack frames to be
@@ -675,6 +675,10 @@ class TestCase {
     return *test_info_list_;
   }
 
+  // Returns the i-th test among all the tests. i can range from 0 to
+  // total_test_count() - 1. If i is not in that range, returns NULL.
+  TestInfo* GetMutableTestInfo(int i);
+
   // Sets the should_run member.
   void set_should_run(bool should) { should_run_ = should; }
 
@@ -693,9 +697,6 @@ class TestCase {
   // Runs every test in this TestCase.
   void Run();
 
-  // Runs every test in the given TestCase.
-  static void RunTestCase(TestCase * test_case) { test_case->Run(); }
-
   // Returns true iff test passed.
   static bool TestPassed(const TestInfo * test_info);
 
@@ -708,12 +709,23 @@ class TestCase {
   // Returns true if the given test should run.
   static bool ShouldRunTest(const TestInfo *test_info);
 
+  // Shuffles the tests in this test case.
+  void ShuffleTests(internal::Random* random);
+
+  // Restores the test order to before the first shuffle.
+  void UnshuffleTests();
+
   // Name of the test case.
   internal::String name_;
   // Comment on the test case.
   internal::String comment_;
-  // Vector of TestInfos.
-  internal::Vector<TestInfo*>* test_info_list_;
+  // The vector of TestInfos in their original order.  It owns the
+  // elements in the vector.
+  const internal::scoped_ptr<internal::Vector<TestInfo*> > test_info_list_;
+  // Provides a level of indirection for the test list to allow easy
+  // shuffling and restoring the test order.  The i-th element in this
+  // vector is the index of the i-th test in the shuffled test list.
+  const internal::scoped_ptr<internal::Vector<int> > test_indices_;
   // Pointer to the function that sets up the test case.
   Test::SetUpTestCaseFunc set_up_tc_;
   // Pointer to the function that tears down the test case.
@@ -1029,6 +1041,10 @@ class UnitTest {
   // Adds a TestProperty to the current TestResult object. If the result already
   // contains a property with the same key, the value will be updated.
   void RecordPropertyForCurrentTest(const char* key, const char* value);
+
+  // Gets the i-th test case among all the test cases. i can range from 0 to
+  // total_test_case_count() - 1. If i is not in that range, returns NULL.
+  TestCase* GetMutableTestCase(int i);
 
   // Accessors for the implementation object.
   internal::UnitTestImpl* impl() { return impl_; }

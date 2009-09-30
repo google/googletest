@@ -372,6 +372,7 @@ GtestTest(env, 'gtest_xml_outfile2_test_', gtest_main)
 GtestTest(env, 'gtest_xml_output_unittest_', gtest)
 GtestTest(env, 'gtest-unittest-api_test', gtest)
 GtestTest(env, 'gtest-listener_test', gtest)
+GtestTest(env, 'gtest_shuffle_test_', gtest)
 
 ############################################################
 # Tests targets using custom environments.
