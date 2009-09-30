@@ -54,7 +54,7 @@ else:
   STACK_TRACE_TEMPLATE = ""
 
 EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
-<testsuites tests="13" failures="2" disabled="2" errors="0" time="*" name="AllTests">
+<testsuites tests="15" failures="4" disabled="2" errors="0" time="*" name="AllTests">
   <testsuite name="SuccessfulTest" tests="1" failures="0" disabled="0" errors="0" time="*">
     <testcase name="Succeeds" status="run" time="*" classname="SuccessfulTest"/>
   </testsuite>
@@ -76,6 +76,20 @@ Value of: 3
 Expected: 2%(stack)s]]></failure>
     </testcase>
     <testcase name="DISABLED_test" status="notrun" time="*" classname="MixedResultTest"/>
+  </testsuite>
+  <testsuite name="XmlQuotingTest" tests="1" failures="1" disabled="0" errors="0" time="*">
+    <testcase name="OutputsCData" status="run" time="*" classname="XmlQuotingTest">
+      <failure message="Failed&#x0A;XML output: &lt;?xml encoding=&quot;utf-8&quot;&gt;&lt;top&gt;&lt;![CDATA[cdata text]]&gt;&lt;/top&gt;" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
+Failed
+XML output: <?xml encoding="utf-8"><top><![CDATA[cdata text]]>]]&gt;<![CDATA[</top>%(stack)s]]></failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="InvalidCharactersTest" tests="1" failures="1" disabled="0" errors="0" time="*">
+    <testcase name="InvalidCharactersInMessage" status="run" time="*" classname="InvalidCharactersTest">
+      <failure message="Failed&#x0A;Invalid characters in brackets []" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
+Failed
+Invalid characters in brackets []%(stack)s]]></failure>
+    </testcase>
   </testsuite>
   <testsuite name="DisabledTest" tests="1" failures="0" disabled="1" errors="0" time="*">
     <testcase name="DISABLED_test_not_run" status="notrun" time="*" classname="DisabledTest"/>

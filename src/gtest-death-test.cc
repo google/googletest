@@ -220,12 +220,12 @@ void DeathTestAbort(const String& message) {
 // fails.
 #define GTEST_DEATH_TEST_CHECK_(expression) \
   do { \
-    if (!(expression)) { \
-      DeathTestAbort(::testing::internal::String::Format(\
+    if (!::testing::internal::IsTrue(expression)) { \
+      DeathTestAbort(::testing::internal::String::Format( \
           "CHECK failed: File %s, line %d: %s", \
           __FILE__, __LINE__, #expression)); \
     } \
-  } while (0)
+  } while (::testing::internal::AlwaysFalse())
 
 // This macro is similar to GTEST_DEATH_TEST_CHECK_, but it is meant for
 // evaluating any system call that fulfills two conditions: it must return
@@ -241,11 +241,11 @@ void DeathTestAbort(const String& message) {
       gtest_retval = (expression); \
     } while (gtest_retval == -1 && errno == EINTR); \
     if (gtest_retval == -1) { \
-      DeathTestAbort(::testing::internal::String::Format(\
+      DeathTestAbort(::testing::internal::String::Format( \
           "CHECK failed: File %s, line %d: %s != -1", \
           __FILE__, __LINE__, #expression)); \
     } \
-  } while (0)
+  } while (::testing::internal::AlwaysFalse())
 
 // Returns the message describing the last system error in errno.
 String GetLastErrnoDescription() {
@@ -581,8 +581,8 @@ int WindowsDeathTest::Wait() {
       WAIT_OBJECT_0 == ::WaitForSingleObject(child_handle_.Get(),
                                              INFINITE));
   DWORD status;
-  GTEST_DEATH_TEST_CHECK_(::GetExitCodeProcess(child_handle_.Get(),
-                                               &status));
+  GTEST_DEATH_TEST_CHECK_(::GetExitCodeProcess(child_handle_.Get(), &status)
+                          != FALSE);
   child_handle_.Reset();
   set_status(static_cast<int>(status));
   return this->status();
@@ -612,9 +612,10 @@ DeathTest::TestRole WindowsDeathTest::AssumeRole() {
   SECURITY_ATTRIBUTES handles_are_inheritable = {
     sizeof(SECURITY_ATTRIBUTES), NULL, TRUE };
   HANDLE read_handle, write_handle;
-  GTEST_DEATH_TEST_CHECK_(::CreatePipe(&read_handle, &write_handle,
-                                       &handles_are_inheritable,
-                                       0));  // Default buffer size.
+  GTEST_DEATH_TEST_CHECK_(
+      ::CreatePipe(&read_handle, &write_handle, &handles_are_inheritable,
+                   0)  // Default buffer size.
+      != FALSE);
   set_read_fd(::_open_osfhandle(reinterpret_cast<intptr_t>(read_handle),
                                 O_RDONLY));
   write_handle_.Reset(write_handle);
@@ -677,7 +678,7 @@ DeathTest::TestRole WindowsDeathTest::AssumeRole() {
       NULL,   // Inherit the parent's environment.
       UnitTest::GetInstance()->original_working_dir(),
       &startup_info,
-      &process_info));
+      &process_info) != FALSE);
   child_handle_.Reset(process_info.hProcess);
   ::CloseHandle(process_info.hThread);
   set_spawned(true);
@@ -1042,7 +1043,7 @@ static void SplitString(const ::std::string& str, char delimiter,
                         ::std::vector< ::std::string>* dest) {
   ::std::vector< ::std::string> parsed;
   ::std::string::size_type pos = 0;
-  while (true) {
+  while (::testing::internal::AlwaysTrue()) {
     const ::std::string::size_type colon = str.find(delimiter, pos);
     if (colon == ::std::string::npos) {
       parsed.push_back(str.substr(pos));

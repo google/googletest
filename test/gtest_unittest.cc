@@ -80,50 +80,37 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 
 namespace testing {
 namespace internal {
-const char* FormatTimeInMillisAsSeconds(TimeInMillis ms);
 
+bool ShouldUseColor(bool stdout_is_tty);
+const char* FormatTimeInMillisAsSeconds(TimeInMillis ms);
 bool ParseInt32Flag(const char* str, const char* flag, Int32* value);
 
-// Provides access to otherwise private parts of the EventListeners class
+// Provides access to otherwise private parts of the TestEventListeners class
 // that are needed to test it.
-class EventListenersAccessor {
+class TestEventListenersAccessor {
  public:
-  static TestEventListener* GetRepeater(EventListeners* listeners) {
+  static TestEventListener* GetRepeater(TestEventListeners* listeners) {
     return listeners->repeater();
   }
 
-  static void SetDefaultResultPrinter(EventListeners* listeners,
+  static void SetDefaultResultPrinter(TestEventListeners* listeners,
                                       TestEventListener* listener) {
     listeners->SetDefaultResultPrinter(listener);
   }
-  static void SetDefaultXmlGenerator(EventListeners* listeners,
+  static void SetDefaultXmlGenerator(TestEventListeners* listeners,
                                      TestEventListener* listener) {
     listeners->SetDefaultXmlGenerator(listener);
   }
 
-  static bool EventForwardingEnabled(const EventListeners& listeners) {
+  static bool EventForwardingEnabled(const TestEventListeners& listeners) {
     return listeners.EventForwardingEnabled();
   }
 
-  static void SuppressEventForwarding(EventListeners* listeners) {
+  static void SuppressEventForwarding(TestEventListeners* listeners) {
     listeners->SuppressEventForwarding();
   }
 };
 
-}  // namespace internal
-}  // namespace testing
-
-using testing::internal::FormatTimeInMillisAsSeconds;
-using testing::internal::ParseInt32Flag;
-using testing::internal::EventListenersAccessor;
-
-namespace testing {
-
-GTEST_DECLARE_string_(output);
-GTEST_DECLARE_string_(color);
-
-namespace internal {
-bool ShouldUseColor(bool stdout_is_tty);
 }  // namespace internal
 }  // namespace testing
 
@@ -132,7 +119,6 @@ using testing::AssertionResult;
 using testing::AssertionSuccess;
 using testing::DoubleLE;
 using testing::EmptyTestEventListener;
-using testing::EventListeners;
 using testing::FloatLE;
 using testing::GTEST_FLAG(also_run_disabled_tests);
 using testing::GTEST_FLAG(break_on_failure);
@@ -155,16 +141,20 @@ using testing::Message;
 using testing::ScopedFakeTestPartResultReporter;
 using testing::StaticAssertTypeEq;
 using testing::Test;
+using testing::TestEventListeners;
 using testing::TestCase;
 using testing::TestPartResult;
 using testing::TestPartResultArray;
 using testing::TestProperty;
 using testing::TestResult;
 using testing::UnitTest;
+using testing::internal::AlwaysFalse;
+using testing::internal::AlwaysTrue;
 using testing::internal::AppendUserMessage;
 using testing::internal::CodePointToUtf8;
 using testing::internal::EqFailure;
 using testing::internal::FloatingPoint;
+using testing::internal::FormatTimeInMillisAsSeconds;
 using testing::internal::GTestFlagSaver;
 using testing::internal::GetCurrentOsStackTraceExceptTop;
 using testing::internal::GetNextRandomSeed;
@@ -174,11 +164,13 @@ using testing::internal::GetTypeId;
 using testing::internal::GetUnitTestImpl;
 using testing::internal::Int32;
 using testing::internal::Int32FromEnvOrDie;
+using testing::internal::ParseInt32Flag;
 using testing::internal::ShouldRunTestOnShard;
 using testing::internal::ShouldShard;
 using testing::internal::ShouldUseColor;
 using testing::internal::StreamableToString;
 using testing::internal::String;
+using testing::internal::TestEventListenersAccessor;
 using testing::internal::TestResultAccessor;
 using testing::internal::ThreadLocal;
 using testing::internal::UInt32;
@@ -3880,19 +3872,19 @@ TEST(HRESULTAssertionTest, Streaming) {
 
 // Tests that the assertion macros behave like single statements.
 TEST(AssertionSyntaxTest, BasicAssertionsBehavesLikeSingleStatement) {
-  if (false)
+  if (AlwaysFalse())
     ASSERT_TRUE(false) << "This should never be executed; "
                           "It's a compilation test only.";
 
-  if (true)
+  if (AlwaysTrue())
     EXPECT_FALSE(false);
   else
     ;  // NOLINT
 
-  if (false)
+  if (AlwaysFalse())
     ASSERT_LT(1, 3);
 
-  if (false)
+  if (AlwaysFalse())
     ;  // NOLINT
   else
     EXPECT_GT(3, 2) << "";
@@ -3914,26 +3906,26 @@ TEST(ExpectThrowTest, DoesNotGenerateUnreachableCodeWarning) {
 }
 
 TEST(AssertionSyntaxTest, ExceptionAssertionsBehavesLikeSingleStatement) {
-  if (false)
+  if (AlwaysFalse())
     EXPECT_THROW(ThrowNothing(), bool);
 
-  if (true)
+  if (AlwaysTrue())
     EXPECT_THROW(ThrowAnInteger(), int);
   else
     ;  // NOLINT
 
-  if (false)
+  if (AlwaysFalse())
     EXPECT_NO_THROW(ThrowAnInteger());
 
-  if (true)
+  if (AlwaysTrue())
     EXPECT_NO_THROW(ThrowNothing());
   else
     ;  // NOLINT
 
-  if (false)
+  if (AlwaysFalse())
     EXPECT_ANY_THROW(ThrowNothing());
 
-  if (true)
+  if (AlwaysTrue())
     EXPECT_ANY_THROW(ThrowAnInteger());
   else
     ;  // NOLINT
@@ -3941,23 +3933,23 @@ TEST(AssertionSyntaxTest, ExceptionAssertionsBehavesLikeSingleStatement) {
 #endif  // GTEST_HAS_EXCEPTIONS
 
 TEST(AssertionSyntaxTest, NoFatalFailureAssertionsBehavesLikeSingleStatement) {
-  if (false)
+  if (AlwaysFalse())
     EXPECT_NO_FATAL_FAILURE(FAIL()) << "This should never be executed. "
                                     << "It's a compilation test only.";
   else
     ;  // NOLINT
 
-  if (false)
+  if (AlwaysFalse())
     ASSERT_NO_FATAL_FAILURE(FAIL()) << "";
   else
     ;  // NOLINT
 
-  if (true)
+  if (AlwaysTrue())
     EXPECT_NO_FATAL_FAILURE(SUCCEED());
   else
     ;  // NOLINT
 
-  if (false)
+  if (AlwaysFalse())
     ;  // NOLINT
   else
     ASSERT_NO_FATAL_FAILURE(SUCCEED());
@@ -6272,17 +6264,17 @@ class TestListener : public EmptyTestEventListener {
 };
 
 // Tests the constructor.
-TEST(EventListenersTest, ConstructionWorks) {
-  EventListeners listeners;
+TEST(TestEventListenersTest, ConstructionWorks) {
+  TestEventListeners listeners;
 
-  EXPECT_TRUE(EventListenersAccessor::GetRepeater(&listeners) != NULL);
+  EXPECT_TRUE(TestEventListenersAccessor::GetRepeater(&listeners) != NULL);
   EXPECT_TRUE(listeners.default_result_printer() == NULL);
   EXPECT_TRUE(listeners.default_xml_generator() == NULL);
 }
 
-// Tests that the EventListeners destructor deletes all the listeners it
+// Tests that the TestEventListeners destructor deletes all the listeners it
 // owns.
-TEST(EventListenersTest, DestructionWorks) {
+TEST(TestEventListenersTest, DestructionWorks) {
   bool default_result_printer_is_destroyed = false;
   bool default_xml_printer_is_destroyed = false;
   bool extra_listener_is_destroyed = false;
@@ -6294,11 +6286,11 @@ TEST(EventListenersTest, DestructionWorks) {
       NULL, &extra_listener_is_destroyed);
 
   {
-    EventListeners listeners;
-    EventListenersAccessor::SetDefaultResultPrinter(&listeners,
-                                                    default_result_printer);
-    EventListenersAccessor::SetDefaultXmlGenerator(&listeners,
-                                                   default_xml_printer);
+    TestEventListeners listeners;
+    TestEventListenersAccessor::SetDefaultResultPrinter(&listeners,
+                                                        default_result_printer);
+    TestEventListenersAccessor::SetDefaultXmlGenerator(&listeners,
+                                                       default_xml_printer);
     listeners.Append(extra_listener);
   }
   EXPECT_TRUE(default_result_printer_is_destroyed);
@@ -6306,16 +6298,16 @@ TEST(EventListenersTest, DestructionWorks) {
   EXPECT_TRUE(extra_listener_is_destroyed);
 }
 
-// Tests that a listener Append'ed to an EventListeners list starts
+// Tests that a listener Append'ed to a TestEventListeners list starts
 // receiving events.
-TEST(EventListenersTest, Append) {
+TEST(TestEventListenersTest, Append) {
   int on_start_counter = 0;
   bool is_destroyed = false;
   TestListener* listener = new TestListener(&on_start_counter, &is_destroyed);
   {
-    EventListeners listeners;
+    TestEventListeners listeners;
     listeners.Append(listener);
-    EventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
+    TestEventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
         *UnitTest::GetInstance());
     EXPECT_EQ(1, on_start_counter);
   }
@@ -6364,12 +6356,12 @@ class SequenceTestingListener : public EmptyTestEventListener {
 
 TEST(EventListenerTest, AppendKeepsOrder) {
   Vector<String> vec;
-  EventListeners listeners;
+  TestEventListeners listeners;
   listeners.Append(new SequenceTestingListener(&vec, "1st"));
   listeners.Append(new SequenceTestingListener(&vec, "2nd"));
   listeners.Append(new SequenceTestingListener(&vec, "3rd"));
 
-  EventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
+  TestEventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
       *UnitTest::GetInstance());
   ASSERT_EQ(3, vec.size());
   EXPECT_STREQ("1st.OnTestProgramStart", vec.GetElement(0).c_str());
@@ -6377,7 +6369,7 @@ TEST(EventListenerTest, AppendKeepsOrder) {
   EXPECT_STREQ("3rd.OnTestProgramStart", vec.GetElement(2).c_str());
 
   vec.Clear();
-  EventListenersAccessor::GetRepeater(&listeners)->OnTestProgramEnd(
+  TestEventListenersAccessor::GetRepeater(&listeners)->OnTestProgramEnd(
       *UnitTest::GetInstance());
   ASSERT_EQ(3, vec.size());
   EXPECT_STREQ("3rd.OnTestProgramEnd", vec.GetElement(0).c_str());
@@ -6385,7 +6377,7 @@ TEST(EventListenerTest, AppendKeepsOrder) {
   EXPECT_STREQ("1st.OnTestProgramEnd", vec.GetElement(2).c_str());
 
   vec.Clear();
-  EventListenersAccessor::GetRepeater(&listeners)->OnTestIterationStart(
+  TestEventListenersAccessor::GetRepeater(&listeners)->OnTestIterationStart(
       *UnitTest::GetInstance(), 0);
   ASSERT_EQ(3, vec.size());
   EXPECT_STREQ("1st.OnTestIterationStart", vec.GetElement(0).c_str());
@@ -6393,7 +6385,7 @@ TEST(EventListenerTest, AppendKeepsOrder) {
   EXPECT_STREQ("3rd.OnTestIterationStart", vec.GetElement(2).c_str());
 
   vec.Clear();
-  EventListenersAccessor::GetRepeater(&listeners)->OnTestIterationEnd(
+  TestEventListenersAccessor::GetRepeater(&listeners)->OnTestIterationEnd(
       *UnitTest::GetInstance(), 0);
   ASSERT_EQ(3, vec.size());
   EXPECT_STREQ("3rd.OnTestIterationEnd", vec.GetElement(0).c_str());
@@ -6401,9 +6393,9 @@ TEST(EventListenerTest, AppendKeepsOrder) {
   EXPECT_STREQ("1st.OnTestIterationEnd", vec.GetElement(2).c_str());
 }
 
-// Tests that a listener removed from an EventListeners list stops receiving
+// Tests that a listener removed from a TestEventListeners list stops receiving
 // events and is not deleted when the list is destroyed.
-TEST(EventListenersTest, Release) {
+TEST(TestEventListenersTest, Release) {
   int on_start_counter = 0;
   bool is_destroyed = false;
   // Although Append passes the ownership of this object to the list,
@@ -6411,10 +6403,10 @@ TEST(EventListenersTest, Release) {
   // test ends.
   TestListener* listener = new TestListener(&on_start_counter, &is_destroyed);
   {
-    EventListeners listeners;
+    TestEventListeners listeners;
     listeners.Append(listener);
     EXPECT_EQ(listener, listeners.Release(listener));
-    EventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
+    TestEventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
         *UnitTest::GetInstance());
     EXPECT_TRUE(listeners.Release(listener) == NULL);
   }
@@ -6428,12 +6420,12 @@ TEST(EventListenerTest, SuppressEventForwarding) {
   int on_start_counter = 0;
   TestListener* listener = new TestListener(&on_start_counter, NULL);
 
-  EventListeners listeners;
+  TestEventListeners listeners;
   listeners.Append(listener);
-  ASSERT_TRUE(EventListenersAccessor::EventForwardingEnabled(listeners));
-  EventListenersAccessor::SuppressEventForwarding(&listeners);
-  ASSERT_FALSE(EventListenersAccessor::EventForwardingEnabled(listeners));
-  EventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
+  ASSERT_TRUE(TestEventListenersAccessor::EventForwardingEnabled(listeners));
+  TestEventListenersAccessor::SuppressEventForwarding(&listeners);
+  ASSERT_FALSE(TestEventListenersAccessor::EventForwardingEnabled(listeners));
+  TestEventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
       *UnitTest::GetInstance());
   EXPECT_EQ(0, on_start_counter);
 }
@@ -6442,7 +6434,7 @@ TEST(EventListenerTest, SuppressEventForwarding) {
 // death test subprocesses.
 TEST(EventListenerDeathTest, EventsNotForwardedInDeathTestSubprecesses) {
   EXPECT_DEATH_IF_SUPPORTED({
-      GTEST_CHECK_(EventListenersAccessor::EventForwardingEnabled(
+      GTEST_CHECK_(TestEventListenersAccessor::EventForwardingEnabled(
           *GetUnitTestImpl()->listeners())) << "expected failure";},
       "expected failure");
 }
@@ -6455,26 +6447,26 @@ TEST(EventListenerTest, default_result_printer) {
   bool is_destroyed = false;
   TestListener* listener = new TestListener(&on_start_counter, &is_destroyed);
 
-  EventListeners listeners;
-  EventListenersAccessor::SetDefaultResultPrinter(&listeners, listener);
+  TestEventListeners listeners;
+  TestEventListenersAccessor::SetDefaultResultPrinter(&listeners, listener);
 
   EXPECT_EQ(listener, listeners.default_result_printer());
 
-  EventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
+  TestEventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
       *UnitTest::GetInstance());
 
   EXPECT_EQ(1, on_start_counter);
 
   // Replacing default_result_printer with something else should remove it
   // from the list and destroy it.
-  EventListenersAccessor::SetDefaultResultPrinter(&listeners, NULL);
+  TestEventListenersAccessor::SetDefaultResultPrinter(&listeners, NULL);
 
   EXPECT_TRUE(listeners.default_result_printer() == NULL);
   EXPECT_TRUE(is_destroyed);
 
   // After broadcasting an event the counter is still the same, indicating
   // the listener is not in the list anymore.
-  EventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
+  TestEventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
       *UnitTest::GetInstance());
   EXPECT_EQ(1, on_start_counter);
 }
@@ -6489,15 +6481,15 @@ TEST(EventListenerTest, RemovingDefaultResultPrinterWorks) {
   // test ends.
   TestListener* listener = new TestListener(&on_start_counter, &is_destroyed);
   {
-    EventListeners listeners;
-    EventListenersAccessor::SetDefaultResultPrinter(&listeners, listener);
+    TestEventListeners listeners;
+    TestEventListenersAccessor::SetDefaultResultPrinter(&listeners, listener);
 
     EXPECT_EQ(listener, listeners.Release(listener));
     EXPECT_TRUE(listeners.default_result_printer() == NULL);
     EXPECT_FALSE(is_destroyed);
 
     // Broadcasting events now should not affect default_result_printer.
-    EventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
+    TestEventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
         *UnitTest::GetInstance());
     EXPECT_EQ(0, on_start_counter);
   }
@@ -6514,26 +6506,26 @@ TEST(EventListenerTest, default_xml_generator) {
   bool is_destroyed = false;
   TestListener* listener = new TestListener(&on_start_counter, &is_destroyed);
 
-  EventListeners listeners;
-  EventListenersAccessor::SetDefaultXmlGenerator(&listeners, listener);
+  TestEventListeners listeners;
+  TestEventListenersAccessor::SetDefaultXmlGenerator(&listeners, listener);
 
   EXPECT_EQ(listener, listeners.default_xml_generator());
 
-  EventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
+  TestEventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
       *UnitTest::GetInstance());
 
   EXPECT_EQ(1, on_start_counter);
 
   // Replacing default_xml_generator with something else should remove it
   // from the list and destroy it.
-  EventListenersAccessor::SetDefaultXmlGenerator(&listeners, NULL);
+  TestEventListenersAccessor::SetDefaultXmlGenerator(&listeners, NULL);
 
   EXPECT_TRUE(listeners.default_xml_generator() == NULL);
   EXPECT_TRUE(is_destroyed);
 
   // After broadcasting an event the counter is still the same, indicating
   // the listener is not in the list anymore.
-  EventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
+  TestEventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
       *UnitTest::GetInstance());
   EXPECT_EQ(1, on_start_counter);
 }
@@ -6548,15 +6540,15 @@ TEST(EventListenerTest, RemovingDefaultXmlGeneratorWorks) {
   // test ends.
   TestListener* listener = new TestListener(&on_start_counter, &is_destroyed);
   {
-    EventListeners listeners;
-    EventListenersAccessor::SetDefaultXmlGenerator(&listeners, listener);
+    TestEventListeners listeners;
+    TestEventListenersAccessor::SetDefaultXmlGenerator(&listeners, listener);
 
     EXPECT_EQ(listener, listeners.Release(listener));
     EXPECT_TRUE(listeners.default_xml_generator() == NULL);
     EXPECT_FALSE(is_destroyed);
 
     // Broadcasting events now should not affect default_xml_generator.
-    EventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
+    TestEventListenersAccessor::GetRepeater(&listeners)->OnTestProgramStart(
         *UnitTest::GetInstance());
     EXPECT_EQ(0, on_start_counter);
   }

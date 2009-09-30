@@ -99,11 +99,6 @@ class SConstructHelper:
                  # Disables warnings that are either uninteresting or
                  # hard to fix.
 
-                 '/wd4127',
-                 # constant conditional expression.  The macro
-                 # GTEST_IS_NULL_LITERAL_() triggers it and I cannot find
-                 # a fix.
-
                  '-WX',             # Treat warning as errors
                  #'-GR-',           # Disable runtime type information
                  '-RTCs',           # Enable stack-frame run-time error checks

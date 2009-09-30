@@ -35,6 +35,9 @@
 #include <gtest/gtest.h>
 #include <gtest/internal/gtest-filepath.h>
 
+using testing::internal::AlwaysFalse;
+using testing::internal::AlwaysTrue;
+
 #if GTEST_HAS_DEATH_TEST
 
 #if GTEST_OS_WINDOWS
@@ -271,21 +274,21 @@ TEST(ExitStatusPredicateTest, KilledBySignal) {
 // be followed by operator<<, and that in either case the complete text
 // comprises only a single C++ statement.
 TEST_F(TestForDeathTest, SingleStatement) {
-  if (false)
+  if (AlwaysFalse())
     // This would fail if executed; this is a compilation test only
     ASSERT_DEATH(return, "");
 
-  if (true)
+  if (AlwaysTrue())
     EXPECT_DEATH(_exit(1), "");
   else
     // This empty "else" branch is meant to ensure that EXPECT_DEATH
     // doesn't expand into an "if" statement without an "else"
     ;
 
-  if (false)
+  if (AlwaysFalse())
     ASSERT_DEATH(return, "") << "did not die";
 
-  if (false)
+  if (AlwaysFalse())
     ;
   else
     EXPECT_DEATH(_exit(1), "") << 1 << 2 << 3;
@@ -1188,21 +1191,21 @@ TEST(ConditionalDeathMacrosTest, AssertDeatDoesNotReturnhIfUnsupported) {
 //
 // The syntax should work whether death tests are available or not.
 TEST(ConditionalDeathMacrosSyntaxDeathTest, SingleStatement) {
-  if (false)
+  if (AlwaysFalse())
     // This would fail if executed; this is a compilation test only
     ASSERT_DEATH_IF_SUPPORTED(return, "");
 
-  if (true)
+  if (AlwaysTrue())
     EXPECT_DEATH_IF_SUPPORTED(_exit(1), "");
   else
     // This empty "else" branch is meant to ensure that EXPECT_DEATH
     // doesn't expand into an "if" statement without an "else"
     ;  // NOLINT
 
-  if (false)
+  if (AlwaysFalse())
     ASSERT_DEATH_IF_SUPPORTED(return, "") << "did not die";
 
-  if (false)
+  if (AlwaysFalse())
     ;  // NOLINT
   else
     EXPECT_DEATH_IF_SUPPORTED(_exit(1), "") << 1 << 2 << 3;

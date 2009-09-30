@@ -64,14 +64,14 @@ namespace {
   do {\
     const int expected_val = (expected);\
     const int actual_val = (actual);\
-    if (expected_val != actual_val) {\
+    if (::testing::internal::IsTrue(expected_val != actual_val)) {\
       ::std::cout << "Value of: " #actual "\n"\
                   << "  Actual: " << actual_val << "\n"\
                   << "Expected: " #expected "\n"\
                   << "Which is: " << expected_val << "\n";\
       abort();\
     }\
-  } while(false)
+  } while(::testing::internal::AlwaysFalse())
 
 
 // Used for verifying that global environment set-up and tear-down are

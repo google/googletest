@@ -745,8 +745,14 @@ class TypeParameterizedTestCase<Fixture, Templates0, Types> {
 // the trace but Bar() and GetCurrentOsStackTraceExceptTop() won't.
 String GetCurrentOsStackTraceExceptTop(UnitTest* unit_test, int skip_count);
 
-// A helper for suppressing warnings on unreachable code in some macros.
+// Helpers for suppressing warnings on unreachable code or constant
+// condition.
+
+// Always returns true.
 bool AlwaysTrue();
+
+// Always returns false.
+inline bool AlwaysFalse() { return !AlwaysTrue(); }
 
 // A simple Linear Congruential Generator for generating random
 // numbers with a uniform distribution.  Unlike rand() and srand(), it
@@ -854,7 +860,7 @@ class Random {
 
 #define GTEST_TEST_BOOLEAN_(boolexpr, booltext, actual, expected, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-  if (boolexpr) \
+  if (::testing::internal::IsTrue(boolexpr)) \
     ; \
   else \
     fail("Value of: " booltext "\n  Actual: " #actual "\nExpected: " #expected)

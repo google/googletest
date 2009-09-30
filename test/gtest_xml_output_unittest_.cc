@@ -40,8 +40,8 @@
 
 #include <gtest/gtest.h>
 
-using ::testing::EventListeners;
 using ::testing::InitGoogleTest;
+using ::testing::TestEventListeners;
 using ::testing::UnitTest;
 
 class SuccessfulTest : public testing::Test {
@@ -78,6 +78,17 @@ TEST(MixedResultTest, Fails) {
 
 TEST(MixedResultTest, DISABLED_test) {
   FAIL() << "Unexpected failure: Disabled test should not be run";
+}
+
+TEST(XmlQuotingTest, OutputsCData) {
+  FAIL() << "XML output: "
+            "<?xml encoding=\"utf-8\"><top><![CDATA[cdata text]]></top>";
+}
+
+// Helps to test that invalid characters produced by test code do not make
+// it into the XML file.
+TEST(InvalidCharactersTest, InvalidCharactersInMessage) {
+  FAIL() << "Invalid characters in brackets [\x1\x2]";
 }
 
 class PropertyRecordingTest : public testing::Test {
@@ -127,7 +138,7 @@ int main(int argc, char** argv) {
   InitGoogleTest(&argc, argv);
 
   if (argc > 1 && strcmp(argv[1], "--shut_down_xml") == 0) {
-    EventListeners& listeners = UnitTest::GetInstance()->listeners();
+    TestEventListeners& listeners = UnitTest::GetInstance()->listeners();
     delete listeners.Release(listeners.default_xml_generator());
   }
   return RUN_ALL_TESTS();

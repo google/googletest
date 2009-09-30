@@ -29,8 +29,8 @@
 //
 // Author: wan@google.com (Zhanyong Wan)
 
-#include <list>
 #include <set>
+#include <vector>
 
 #include "test/gtest-typed-test_test.h"
 #include <gtest/gtest.h>
@@ -57,7 +57,9 @@ class CommonTest : public Test {
   // This 'protected:' is optional.  There's no harm in making all
   // members of this fixture class template public.
  protected:
-  typedef std::list<T> List;
+  // We used to use std::list here, but switched to std::vector since
+  // MSVC's <list> doesn't compile cleanly with /W4.
+  typedef std::vector<T> Vector;
   typedef std::set<int> IntSet;
 
   CommonTest() : value_(1) {}
@@ -99,7 +101,7 @@ TYPED_TEST(CommonTest, ValuesAreCorrect) {
 
   // Typedefs in the fixture class template can be visited via the
   // "typename TestFixture::" prefix.
-  typename TestFixture::List empty;
+  typename TestFixture::Vector empty;
   EXPECT_EQ(0U, empty.size());
 
   typename TestFixture::IntSet empty2;
@@ -314,7 +316,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(Double, TypedTestP2, Types<double>);
 // Tests that the same type-parameterized test case can be
 // instantiated in different translation units linked together.
 // (ContainerTest is also instantiated in gtest-typed-test_test.cc.)
-typedef Types<std::list<double>, std::set<char> > MyContainers;
+typedef Types<std::vector<double>, std::set<char> > MyContainers;
 INSTANTIATE_TYPED_TEST_CASE_P(My, ContainerTest, MyContainers);
 
 // Tests that a type-parameterized test case can be defined and
