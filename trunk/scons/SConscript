@@ -95,9 +95,8 @@ import os
 ############################################################
 # Environments for building the targets, sorted by name.
 
-Import('env')
+Import('env', 'EnvCreator')
 
-EnvCreator = SConscript('SConstruct.common').EnvCreator
 env = EnvCreator.Create(env)
 
 # Note: The relative paths in SConscript files are relative to the location
@@ -114,11 +113,15 @@ env = EnvCreator.Create(env)
 env.Prepend(CPPPATH = ['..', '../include'])
 
 env_use_own_tuple = EnvCreator.Create(env, EnvCreator.UseOwnTuple)
-env_warning_ok = EnvCreator.Create(env, EnvCreator.WarningOk)
-env_with_exceptions = EnvCreator.Create(env, EnvCreator.WithExceptions)
 env_less_optimized = EnvCreator.Create(env, EnvCreator.LessOptimized)
 env_with_threads = EnvCreator.Create(env, EnvCreator.WithThreads)
-env_without_rtti = EnvCreator.Create(env, EnvCreator.NoRtti)
+# The following environments are used to compile gtest_unittest.cc, which
+# triggers a warning  in all but the most recent GCC versions when compiling
+# the EXPECT_EQ(NULL, ptr) statement.
+env_warning_ok = EnvCreator.Create(env, EnvCreator.WarningOk)
+env_with_exceptions = EnvCreator.Create(env_warning_ok,
+                                        EnvCreator.WithExceptions)
+env_without_rtti = EnvCreator.Create(env_warning_ok, EnvCreator.NoRtti)
 
 ############################################################
 # Helpers for creating build targets.
