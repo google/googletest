@@ -1436,6 +1436,125 @@ functions called from them.
 
 _Availability:_ Linux, Windows, Mac.
 
+= Extending Google Test by Handling Test Events =
+
+Google Test provides an <b>event listener API</b> to let you receive
+notifications about the progress of a test program and test
+failures. The events you can listen to include the start and end of
+the test program, a test case, or a test method, among others. You may
+use this API to augment or replace the standard console output,
+replace the XML output, or provide a completely different form of
+output, such as a GUI or a database. You can also use test events as
+checkpoints to implement a resource leak checker, for example.
+
+_Availability:_ Linux, Windows, Mac; starting with v1.4.0.
+
+== Defining Event Listeners ==
+
+To define a event listener, you subclass either
+[http://code.google.com/p/googletest/source/browse/trunk/include/gtest/gtest.h#773 testing::TestEventListener]
+or [http://code.google.com/p/googletest/source/browse/trunk/include/gtest/gtest.h#823 testing::EmptyTestEventListener].
+The former is an (abstract) interface, where <i>each pure virtual method
+can be overridden to handle a test event</i> (For example, when a test
+starts, the `OnTestStart()` method will be called.). The latter provides
+an empty implementation of all methods in the interface, such that a
+subclass only needs to override the methods it cares about.
+
+When an event is fired, its context is passed to the handler function
+as an argument. The following argument types are used:
+  * [http://code.google.com/p/googletest/source/browse/trunk/include/gtest/gtest.h#925 UnitTest] reflects the state of the entire test program,
+  * [http://code.google.com/p/googletest/source/browse/trunk/include/gtest/gtest.h#607 TestCase] has information about a test case, which can contain one or more tests,
+  * [http://code.google.com/p/googletest/source/browse/trunk/include/gtest/gtest.h#517 TestInfo] contains the state of a test, and
+  * [http://code.google.com/p/googletest/source/browse/trunk/include/gtest/gtest-test-part.h#42 TestPartResult] represents the result of a test assertion.
+
+An event handler function can examine the argument it receives to find
+out interesting information about the event and the test program's
+state.  Here's an example:
+
+{{{
+  class MinimalistPrinter : public ::testing::EmptyTestEventListner {
+    // Called before a test starts.
+    virtual void OnTestStart(const TestInfo& test_info) {
+      printf("*** Test %s.%s starting.\n",
+             test_info.test_case_name(), test_info.name());
+    }
+
+    // Called after a failed assertion or a SUCCESS().
+    virtual void OnTestPartResult(const TestPartResult& test_part_result) {
+      printf("%s in %s:%d\n%s\n",
+             test_part_result.failed() ? "*** Failure" : "Success",
+             test_part_result.file_name(),
+             test_part_result.line_number(),
+             test_part_result.summary());
+    }
+
+    // Called after a test ends.
+    virtual void OnTestEnd(const TestInfo& test_info) {
+      printf("*** Test %s.%s ending.\n",
+             test_info.test_case_name(), test_info.name());
+    }
+  };
+}}}
+
+== Using Event Listeners ==
+
+To use the event listener you have defined, add an instance of it to
+the Google Test event listener list (represented by class
+[http://code.google.com/p/googletest/source/browse/trunk/include/gtest/gtest.h#847 TestEventListeners]
+- note the "s" at the end of the name) in your
+`main()` funciton, before calling `RUN_ALL_TESTS()`:
+{{{
+int main(int argc, char** argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  // Gets hold of the event listener list.
+  ::testing::TestEventListeners& listeners =
+      ::testing::UnitTest::GetInstance()->listeners();
+  // Adds a listener to the end.  Google Test takes the ownership.
+  listeners.Append(new MinimalistPrinter);
+  return RUN_ALL_TESTS();
+}
+}}}
+
+There's only one problem: the default test result printer is still in
+effect, so its output will mingle with the output from your minimalist
+printer. To suppress the default printer, just release it from the
+event listener list and delete it. You can do so by adding one line:
+{{{
+  ...
+  delete listeners.Release(listeners.default_result_printer());
+  listeners.Append(new MinimalistPrinter);
+  return RUN_ALL_TESTS();
+}}}
+
+Now, sit back and enjoy a completely different output from your
+tests. For more details, you can read this
+[http://code.google.com/p/googletest/source/browse/trunk/samples/sample9_unittest.cc sample].
+
+You may append more than one listener to the list. When an `On*Start()`
+or `OnTestPartResult()` event is fired, the listeners will receive it in
+the order they appear in the list (since new listeners are added to
+the end of the list, the default text printer and the default XML
+generator will receive the event first). An `On*End()` event will be
+received by the listeners in the _reverse_ order. This allows output by
+listeners added later to be framed by output from listeners added
+earlier.
+
+== Generating Failures in Listeners ==
+
+You may use failure-raising macros (`EXPECT_*()`, `ASSERT_*()`,
+`FAIL()`, etc) when processing an event. There are some restrictions:
+
+  # You cannot generate any failure in `OnTestPartResult()` (otherwise it will cause `OnTestPartResult()` to be called recursively).
+  # A listener that handles `OnTestPartResult()` is not allowed to generate any failure.
+
+When you add listeners to the listener list, you should put listeners
+that handle `OnTestPartResult()` _before_ listeners that can generate
+failures. This ensures that failures generated by the latter are
+attributed to the right test by the former.
+
+We have a sample of failure-raising listener
+[http://code.google.com/p/googletest/source/browse/trunk/samples/sample10_unittest.cc here].
+
 =  Running Test Programs: Advanced Options  =
 
 Google Test test programs are ordinary executables. Once built, you can run
