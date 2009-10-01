@@ -1447,7 +1447,7 @@ replace the XML output, or provide a completely different form of
 output, such as a GUI or a database. You can also use test events as
 checkpoints to implement a resource leak checker, for example.
 
-_Availability:_ Linux, Windows, Mac; starting with v1.4.0.
+_Availability:_ Linux, Windows, Mac; since v1.4.0.
 
 == Defining Event Listeners ==
 
@@ -1586,6 +1586,8 @@ int main(int argc, char** argv) {
 
 == Selecting Tests ==
 
+This section shows various options for choosing which tests to run.
+
 === Listing Test Names ===
 
 Sometimes it is necessary to list the available tests in a program before
@@ -1681,7 +1683,7 @@ which disabled tests to run.
 
 _Availability:_ Linux, Windows, Mac; since version 1.3.0.
 
-=== Repeating the Tests ===
+== Repeating the Tests ==
 
 Once in a while you'll run into a test whose result is hit-or-miss. Perhaps it
 will fail only 1% of the time, making it rather hard to reproduce the bug under
@@ -1703,8 +1705,30 @@ the repeat count by setting the `GTEST_REPEAT` environment variable.
 
 _Availability:_ Linux, Windows, Mac.
 
+== Shuffling the Tests ==
+
+You can specify the `--gtest_shuffle` flag (or set the `GTEST_SHUFFLE`
+environment variable to `1`) to run the tests in a program in a random
+order. This helps to reveal bad dependencies between tests.
+
+By default, Google Test uses a random seed calculated from the current
+time. Therefore you'll get a different order every time. The console
+output includes the random seed value, such that you can reproduce an
+order-related test failure later. To specify the random seed
+explicitly, use the `--gtest_random_seed=SEED` flag (or set the
+`GTEST_RANDOM_SEED` environment variable), where `SEED` is an integer
+between 0 and 99999. The seed value 0 is special: it tells Google Test
+to do the default behavior of calculating the seed from the current
+time.
+
+If you combine this with `--gtest_repeat=N`, Google Test will pick a
+different random seed and re-shuffle the tests in each iteration.
+
+_Availability:_ Linux, Windows, Mac; since v1.4.0.
+
 == Controlling Test Output ==
 
+This section teaches how to tweak the way test results are reported.
 
 === Colored Terminal Output ===
 
@@ -1883,7 +1907,7 @@ your `main()`, you can alternatively enable this feature by specifying
 the `--gtest_throw_on_failure` flag on the command-line or setting the
 `GTEST_THROW_ON_FAILURE` environment variable to a non-zero value.
 
-_Availability:_ Linux, Windows, Mac; starting with v1.3.0.
+_Availability:_ Linux, Windows, Mac; since v1.3.0.
 
 == Distributing Test Functions to Multiple Machines ==
 
@@ -1940,7 +1964,7 @@ Google Test's implementation consists of ~30 files (excluding its own
 tests).  Sometimes you may want them to be packaged up in two files (a
 `.h` and a `.cc`) instead, such that you can easily copy them to a new
 machine and start hacking there.  For this we provide an experimental
-Python script `fuse_gtest_files.py` in the `scripts/` directory (starting with release 1.3.0).
+Python script `fuse_gtest_files.py` in the `scripts/` directory (since release 1.3.0).
 Assuming you have Python 2.4 or above installed on your machine, just
 go to that directory and run
 {{{
