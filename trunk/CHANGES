@@ -1,5 +1,7 @@
-Changes for 1.4.0 (up to r300):
+Changes for 1.4.0:
 
+ * New feature: the event listener API
+ * New feature: test shuffling
  * New feature: the XML report format is closer to junitreport and can
    be parsed by Hudson now.
  * New feature: when a test runs under Visual Studio, its failures are
