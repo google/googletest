@@ -420,6 +420,14 @@ void Mock::ClearDefaultActionsLocked(void* mock_obj) {
   // needed by VerifyAndClearExpectationsLocked().
 }
 
+Expectation::Expectation() {}
+
+Expectation::Expectation(
+    const internal::linked_ptr<internal::ExpectationBase>& expectation_base)
+    : expectation_base_(expectation_base) {}
+
+Expectation::~Expectation() {}
+
 // Adds an expectation to a sequence.
 void Sequence::AddExpectation(const Expectation& expectation) const {
   if (*last_expectation_ != expectation) {

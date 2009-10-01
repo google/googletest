@@ -351,10 +351,18 @@ class Mock {
 //   - Constness is shallow: a const Expectation object itself cannot
 //     be modified, but the mutable methods of the ExpectationBase
 //     object it references can be called via expectation_base().
+//   - The constructors and destructor are defined out-of-line because
+//     the Symbian WINSCW compiler wants to otherwise instantiate them
+//     when it sees this class definition, at which point it doesn't have
+//     ExpectationBase available yet, leading to incorrect destruction
+//     in the linked_ptr (or compilation errors if using a checking
+//     linked_ptr).
 class Expectation {
  public:
   // Constructs a null object that doesn't reference any expectation.
-  Expectation() {}
+  Expectation();
+
+  ~Expectation();
 
   // This single-argument ctor must not be explicit, in order to support the
   //   Expectation e = EXPECT_CALL(...);
@@ -399,8 +407,7 @@ class Expectation {
   typedef ::std::set<Expectation, Less> Set;
 
   Expectation(
-      const internal::linked_ptr<internal::ExpectationBase>& expectation_base) :
-      expectation_base_(expectation_base) {}
+      const internal::linked_ptr<internal::ExpectationBase>& expectation_base);
 
   // Returns the expectation this object references.
   const internal::linked_ptr<internal::ExpectationBase>&
