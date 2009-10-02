@@ -1,0 +1,325 @@
+# -*- Python -*-
+# Copyright 2008 Google Inc. All Rights Reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#
+#     * Redistributions of source code must retain the above copyright
+# notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+# copyright notice, this list of conditions and the following disclaimer
+# in the documentation and/or other materials provided with the
+# distribution.
+#     * Neither the name of Google Inc. nor the names of its
+# contributors may be used to endorse or promote products derived from
+# this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+"""Builds the Google Test (gtest) lib. This has been tested on Windows,
+Linux, Mac OS X, and Cygwin.  The compilation settings from your project
+will be used, with some specific flags required for gtest added.
+
+You should be able to call this file from more or less any SConscript
+file.
+
+You can optionally set a variable on the construction environment to
+have the unit test executables copied to your output directory.  The
+variable should be env['EXE_OUTPUT'].
+
+Another optional variable is env['LIB_OUTPUT'].  If set, the generated
+libraries are copied to the folder indicated by the variable.
+
+If you place the gtest sources within your own project's source
+directory, you should be able to call this SConscript file simply as
+follows:
+
+# -- cut here --
+# Build gtest library; first tell it where to copy executables.
+env['EXE_OUTPUT'] = '#/mybuilddir/mybuildmode'  # example, optional
+env['LIB_OUTPUT'] = '#/mybuilddir/mybuildmode/lib'
+env.SConscript('whateverpath/gtest/scons/SConscript')
+# -- cut here --
+
+If on the other hand you place the gtest sources in a directory
+outside of your project's source tree, you would use a snippet similar
+to the following:
+
+# -- cut here --
+
+# The following assumes that $BUILD_DIR refers to the root of the
+# directory for your current build mode, e.g. "#/mybuilddir/mybuildmode"
+
+# Build gtest library; as it is outside of our source root, we need to
+# tell SCons that the directory it will refer to as
+# e.g. $BUILD_DIR/gtest is actually on disk in original form as
+# ../../gtest (relative to your project root directory).  Recall that
+# SCons by default copies all source files into the build directory
+# before building.
+gtest_dir = env.Dir('$BUILD_DIR/gtest')
+
+# Modify this part to point to gtest relative to the current
+# SConscript or SConstruct file's directory.  The ../.. path would
+# be different per project, to locate the base directory for gtest.
+gtest_dir.addRepository(env.Dir('../../gtest'))
+
+# Tell the gtest SCons file where to copy executables.
+env['EXE_OUTPUT'] = '$BUILD_DIR'  # example, optional
+
+# Call the gtest SConscript to build gtest.lib and unit tests.  The
+# location of the library should end up as
+# '$BUILD_DIR/gtest/scons/gtest.lib'
+env.SConscript(env.File('scons/SConscript', gtest_dir))
+
+# -- cut here --
+"""
+
+
+__author__ = 'joi@google.com (Joi Sigurdsson)'
+
+
+import os
+
+############################################################
+# Environments for building the targets, sorted by name.
+
+Import('env', 'EnvCreator')
+
+env = EnvCreator.Create(env)
+
+# Note: The relative paths in SConscript files are relative to the location
+# of the SConscript file itself. To make a path relative to the location of
+# the main SConstruct file, prepend the path with the # sign.
+#
+# But if a project uses variant builds without source duplication, the above
+# rule gets muddied a bit. In that case the paths must be counted from the
+# location of the copy of the SConscript file in scons/build/<config>/scons.
+#
+# Include paths to gtest headers are relative to either the gtest
+# directory or the 'include' subdirectory of it, and this SConscript
+# file is one directory deeper than the gtest directory.
+env.Prepend(CPPPATH = ['..', '../include'])
+
+env_use_own_tuple = EnvCreator.Create(env, EnvCreator.UseOwnTuple)
+env_less_optimized = EnvCreator.Create(env, EnvCreator.LessOptimized)
+env_with_threads = EnvCreator.Create(env, EnvCreator.WithThreads)
+# The following environments are used to compile gtest_unittest.cc, which
+# triggers a warning  in all but the most recent GCC versions when compiling
+# the EXPECT_EQ(NULL, ptr) statement.
+env_warning_ok = EnvCreator.Create(env, EnvCreator.WarningOk)
+env_with_exceptions = EnvCreator.Create(env_warning_ok,
+                                        EnvCreator.WithExceptions)
+env_without_rtti = EnvCreator.Create(env_warning_ok, EnvCreator.NoRtti)
+
+############################################################
+# Helpers for creating build targets.
+
+# Caches object file targets built by GtestObject to allow passing the
+# same source file with the same environment twice into the function as a
+# convenience.
+_all_objects = {}
+
+def GtestObject(build_env, source):
+  """Returns a target to build an object file from the given .cc source file."""
+
+  object_name = os.path.basename(source).rstrip('.cc') + build_env['OBJ_SUFFIX']
+  if object_name not in _all_objects:
+    _all_objects[object_name] = build_env.Object(target=object_name,
+                                                 source=source)
+  return _all_objects[object_name]
+
+
+def GtestStaticLibraries(build_env):
+  """Builds static libraries for gtest and gtest_main in build_env.
+
+  Args:
+    build_env: An environment in which to build libraries.
+
+  Returns:
+    A pair (gtest library, gtest_main library) built in the given environment.
+  """
+
+  gtest_object = GtestObject(build_env, '../src/gtest-all.cc')
+  gtest_main_object = GtestObject(build_env, '../src/gtest_main.cc')
+
+  return (build_env.StaticLibrary(target='gtest' + build_env['OBJ_SUFFIX'],
+                                  source=[gtest_object]),
+          build_env.StaticLibrary(target='gtest_main' + build_env['OBJ_SUFFIX'],
+                                  source=[gtest_object, gtest_main_object]))
+
+
+def GtestBinary(build_env, target, gtest_libs, sources):
+  """Creates a target to build a binary (either test or sample).
+
+  Args:
+    build_env:  The SCons construction environment to use to build.
+    target:     The basename of the target's main source file, also used as the
+                target name.
+    gtest_libs: The gtest library or the list of libraries to link.
+    sources:    A list of source files in the target.
+  """
+  srcs = []  # The object targets corresponding to sources.
+  for src in sources:
+    if type(src) is str:
+      srcs.append(GtestObject(build_env, src))
+    else:
+      srcs.append(src)
+
+  if not gtest_libs:
+    gtest_libs = []
+  elif type(gtest_libs) != type(list()):
+    gtest_libs = [gtest_libs]
+  binary = build_env.Program(target=target, source=srcs, LIBS=gtest_libs)
+  if 'EXE_OUTPUT' in build_env.Dictionary():
+    build_env.Install('$EXE_OUTPUT', source=[binary])
+
+
+def GtestTest(build_env, target, gtest_libs, additional_sources=None):
+  """Creates a target to build the given test.
+
+  Args:
+    build_env:  The SCons construction environment to use to build.
+    target:     The basename of the target test .cc file.
+    gtest_libs: The gtest library or the list of libraries to use.
+    additional_sources: A list of additional source files in the target.
+  """
+
+  GtestBinary(build_env, target, gtest_libs,
+              ['../test/%s.cc' % target] + (additional_sources or []))
+
+
+def GtestSample(build_env, target, additional_sources=None):
+  """Creates a target to build the given sample.
+
+  Args:
+    build_env:  The SCons construction environment to use to build.
+    target:     The basename of the target sample .cc file.
+    gtest_libs: The gtest library or the list of libraries to use.
+    additional_sources: A list of additional source files in the target.
+  """
+  GtestBinary(build_env, target, gtest_main,
+              ['../samples/%s.cc' % target] + (additional_sources or []))
+
+
+############################################################
+# Object and library targets.
+
+# gtest.lib to be used by most apps (if you have your own main function).
+# gtest_main.lib can be used if you just want a basic main function; it is also
+# used by some tests for Google Test itself.
+gtest, gtest_main = GtestStaticLibraries(env)
+gtest_ex, gtest_main_ex = GtestStaticLibraries(env_with_exceptions)
+gtest_no_rtti, gtest_main_no_rtti = GtestStaticLibraries(env_without_rtti)
+gtest_use_own_tuple, gtest_use_own_tuple_main = GtestStaticLibraries(
+    env_use_own_tuple)
+
+# Install the libraries if needed.
+if 'LIB_OUTPUT' in env.Dictionary():
+  env.Install('$LIB_OUTPUT', source=[gtest, gtest_main,
+                                     gtest_ex, gtest_main_ex,
+                                     gtest_no_rtti, gtest_main_no_rtti,
+                                     gtest_use_own_tuple,
+                                     gtest_use_own_tuple_main])
+
+############################################################
+# Test targets using the standard environment.
+
+GtestTest(env, 'gtest-filepath_test', gtest_main)
+GtestTest(env, 'gtest-message_test', gtest_main)
+GtestTest(env, 'gtest-options_test', gtest_main)
+GtestTest(env, 'gtest_environment_test', gtest)
+GtestTest(env, 'gtest_main_unittest', gtest_main)
+GtestTest(env, 'gtest_no_test_unittest', gtest)
+GtestTest(env, 'gtest_pred_impl_unittest', gtest_main)
+GtestTest(env, 'gtest_prod_test', gtest_main,
+          additional_sources=['../test/production.cc'])
+GtestTest(env, 'gtest_repeat_test', gtest)
+GtestTest(env, 'gtest_sole_header_test', gtest_main)
+GtestTest(env, 'gtest-test-part_test', gtest_main)
+GtestTest(env, 'gtest-typed-test_test', gtest_main,
+          additional_sources=['../test/gtest-typed-test2_test.cc'])
+GtestTest(env, 'gtest-param-test_test', gtest,
+          additional_sources=['../test/gtest-param-test2_test.cc'])
+GtestTest(env, 'gtest_color_test_', gtest)
+GtestTest(env, 'gtest-linked_ptr_test', gtest_main)
+GtestTest(env, 'gtest-port_test', gtest_main)
+GtestTest(env, 'gtest_break_on_failure_unittest_', gtest)
+GtestTest(env, 'gtest_filter_unittest_', gtest)
+GtestTest(env, 'gtest_help_test_', gtest_main)
+GtestTest(env, 'gtest_list_tests_unittest_', gtest)
+GtestTest(env, 'gtest_throw_on_failure_test_', gtest)
+GtestTest(env, 'gtest_xml_outfile1_test_', gtest_main)
+GtestTest(env, 'gtest_xml_outfile2_test_', gtest_main)
+GtestTest(env, 'gtest_xml_output_unittest_', gtest)
+GtestTest(env, 'gtest-unittest-api_test', gtest)
+GtestTest(env, 'gtest-listener_test', gtest)
+GtestTest(env, 'gtest_shuffle_test_', gtest)
+
+############################################################
+# Tests targets using custom environments.
+
+GtestTest(env_warning_ok, 'gtest_unittest', gtest_main)
+GtestTest(env_with_exceptions, 'gtest_output_test_', gtest_ex)
+GtestTest(env_with_exceptions, 'gtest_throw_on_failure_ex_test', gtest_ex)
+GtestTest(env_with_threads, 'gtest-death-test_test', gtest_main)
+GtestTest(env_less_optimized, 'gtest_env_var_test_', gtest)
+GtestTest(env_less_optimized, 'gtest_uninitialized_test_', gtest)
+GtestTest(env_use_own_tuple, 'gtest-tuple_test', gtest_use_own_tuple_main)
+GtestBinary(env_use_own_tuple,
+            'gtest_use_own_tuple_test',
+            gtest_use_own_tuple_main,
+            ['../test/gtest-param-test_test.cc',
+             '../test/gtest-param-test2_test.cc'])
+GtestBinary(env_with_exceptions, 'gtest_ex_unittest', gtest_main_ex,
+            ['../test/gtest_unittest.cc'])
+GtestBinary(env_without_rtti, 'gtest_no_rtti_test', gtest_main_no_rtti,
+            ['../test/gtest_unittest.cc'])
+
+############################################################
+# Sample targets.
+
+# Use the GTEST_BUILD_SAMPLES build variable to control building of samples.
+# In your SConstruct file, add
+#   vars = Variables()
+#   vars.Add(BoolVariable('GTEST_BUILD_SAMPLES', 'Build samples', False))
+#   my_environment = Environment(variables = vars, ...)
+# Then, in the command line use GTEST_BUILD_SAMPLES=true to enable them.
+if env.get('GTEST_BUILD_SAMPLES', False):
+  GtestSample(env, 'sample1_unittest',
+              additional_sources=['../samples/sample1.cc'])
+  GtestSample(env, 'sample2_unittest',
+              additional_sources=['../samples/sample2.cc'])
+  GtestSample(env, 'sample3_unittest')
+  GtestSample(env, 'sample4_unittest',
+              additional_sources=['../samples/sample4.cc'])
+  GtestSample(env, 'sample5_unittest',
+              additional_sources=['../samples/sample1.cc'])
+  GtestSample(env, 'sample6_unittest')
+  GtestSample(env, 'sample7_unittest')
+  GtestSample(env, 'sample8_unittest')
+  GtestSample(env, 'sample9_unittest')
+  GtestSample(env, 'sample10_unittest')
+
+# These exports are used by Google Mock.
+gtest_exports = {'gtest': gtest,
+                 'gtest_ex': gtest_ex,
+                 'gtest_no_rtti': gtest_no_rtti,
+                 'gtest_use_own_tuple': gtest_use_own_tuple,
+                 'EnvCreator': EnvCreator,
+                 'GtestObject': GtestObject,
+                 'GtestBinary': GtestBinary,
+                 'GtestTest': GtestTest}
+# Makes the gtest_exports dictionary available to the invoking SConstruct.
+Return('gtest_exports')
