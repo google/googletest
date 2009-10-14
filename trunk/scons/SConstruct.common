@@ -63,6 +63,7 @@ class SConstructHelper:
     vars.Add(ListVariable('BUILD', 'Build type', available_build_types[0],
                           available_build_types))
     vars.Add(BoolVariable('GTEST_BUILD_SAMPLES', 'Build samples', False))
+    vars.Add(BoolVariable('GTEST_BUILD_TESTS', 'Build tests', True))
 
     # Create base environment.
     self.env_base = Environment(variables=vars,
@@ -81,108 +82,6 @@ class SConstructHelper:
 
     # Enable scons -h
     Help(vars.GenerateHelpText(self.env_base))
-
-  class EnvCreator:
-    """Creates new customized environments from a base one."""
-
-    def _Remove(cls, env, attribute, value):
-      """Removes the given attribute value from the environment."""
-
-      attribute_values = env[attribute]
-      if value in attribute_values:
-        attribute_values.remove(value)
-    _Remove = classmethod(_Remove)
-
-    def Create(cls, base_env, modifier=None):
-      # User should NOT create more than one environment with the same
-      # modifier (including None).
-      env = base_env.Clone()
-      if modifier:
-        modifier(env)
-      else:
-        env['OBJ_SUFFIX'] = ''  # Default suffix for unchanged environment.
-      return env;
-    Create = classmethod(Create)
-
-    # Each of the following methods modifies the environment for a particular
-    # purpose and can be used by clients for creating new environments.  Each
-    # one needs to set the OBJ_SUFFIX variable to a unique suffix to
-    # differentiate targets built with that environment.  Otherwise, SCons may
-    # complain about same target built with different settings.
-
-    def UseOwnTuple(cls, env):
-      """Instructs Google Test to use its internal implementation of tuple."""
-
-      env['OBJ_SUFFIX'] = '_use_own_tuple'
-      env.Append(CPPDEFINES = 'GTEST_USE_OWN_TR1_TUPLE=1')
-    UseOwnTuple = classmethod(UseOwnTuple)
-
-    def WarningOk(cls, env):
-      """Does not treat warnings as errors.
-
-      Necessary for compiling gtest_unittest.cc, which triggers a gcc
-      warning when testing EXPECT_EQ(NULL, ptr)."""
-
-      env['OBJ_SUFFIX'] = '_warning_ok'
-      if env['PLATFORM'] == 'win32':
-        cls._Remove(env, 'CCFLAGS', '-WX')
-      else:
-        cls._Remove(env, 'CCFLAGS', '-Werror')
-    WarningOk = classmethod(WarningOk)
-
-    def WithExceptions(cls, env):
-      """Re-enables exceptions."""
-
-      env['OBJ_SUFFIX'] = '_ex'
-      if env['PLATFORM'] == 'win32':
-        env.Append(CCFLAGS=['/EHsc'])
-        env.Append(CPPDEFINES='_HAS_EXCEPTIONS=1')
-        # Undoes the _TYPEINFO_ hack, which is unnecessary and only creates
-        # trouble when exceptions are enabled.
-        cls._Remove(env, 'CPPDEFINES', '_TYPEINFO_')
-        cls._Remove(env, 'CPPDEFINES', '_HAS_EXCEPTIONS=0')
-      else:
-        env.Append(CCFLAGS='-fexceptions')
-        cls._Remove(env, 'CCFLAGS', '-fno-exceptions')
-    WithExceptions = classmethod(WithExceptions)
-
-    def LessOptimized(cls, env):
-      """Disables certain optimizations on Windows.
-
-      We need to disable some optimization flags for some tests on
-      Windows; otherwise the redirection of stdout does not work
-      (apparently because of a compiler bug)."""
-
-      env['OBJ_SUFFIX'] = '_less_optimized'
-      if env['PLATFORM'] == 'win32':
-        for flag in ['/O1', '/Os', '/Og', '/Oy']:
-          cls._Remove(env, 'LINKFLAGS', flag)
-    LessOptimized = classmethod(LessOptimized)
-
-    def WithThreads(cls, env):
-      """Allows use of threads.
-
-      Currently only enables pthreads under GCC."""
-
-      env['OBJ_SUFFIX'] = '_with_threads'
-      if env['PLATFORM'] != 'win32':
-        # Assuming POSIX-like environment with GCC.
-        # TODO(vladl@google.com): sniff presence of pthread_atfork instead of
-        # selecting on a platform.
-        env.Append(CCFLAGS=['-pthread'])
-        env.Append(LINKFLAGS=['-pthread'])
-    WithThreads = classmethod(WithThreads)
-
-    def NoRtti(cls, env):
-      """Disables RTTI support."""
-
-      env['OBJ_SUFFIX'] = '_no_rtti'
-      if env['PLATFORM'] == 'win32':
-        env.Append(CCFLAGS=['/GR-'])
-      else:
-        env.Append(CCFLAGS=['-fno-rtti'])
-        env.Append(CPPDEFINES='GTEST_HAS_RTTI=0')
-    NoRtti = classmethod(NoRtti)
 
   def AllowVc71StlWithoutExceptions(self, env):
     env.Append(
@@ -321,8 +220,6 @@ class SConstructHelper:
     self.SetBuildNameAndDir(gcc_opt, 'opt')
 
   def BuildSelectedEnvironments(self):
-    EnvCreator = SConstructHelper.EnvCreator
-    Export('EnvCreator')
     # Build using whichever environments the 'BUILD' option selected
     for build_name in self.env_base['BUILD']:
       print 'BUILDING %s' % build_name
