@@ -1,0 +1,140 @@
+# -*- Python -*-
+# Copyright 2008 Google Inc. All Rights Reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#
+#     * Redistributions of source code must retain the above copyright
+# notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+# copyright notice, this list of conditions and the following disclaimer
+# in the documentation and/or other materials provided with the
+# distribution.
+#     * Neither the name of Google Inc. nor the names of its
+# contributors may be used to endorse or promote products derived from
+# this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# Author: vladl@google.com (Vlad Losev)
+#
+# Shared SCons utilities for building Google Test's own tests.
+#
+
+EnsurePythonVersion(2, 3)
+
+
+class EnvCreator:
+  """Creates new customized environments from a base one."""
+
+  def _Remove(cls, env, attribute, value):
+    """Removes the given attribute value from the environment."""
+
+    attribute_values = env[attribute]
+    if value in attribute_values:
+      attribute_values.remove(value)
+  _Remove = classmethod(_Remove)
+
+  def Create(cls, base_env, modifier=None):
+    # User should NOT create more than one environment with the same
+    # modifier (including None).
+    env = base_env.Clone()
+    if modifier:
+      modifier(env)
+    return env;
+  Create = classmethod(Create)
+
+  # Each of the following methods modifies the environment for a particular
+  # purpose and can be used by clients for creating new environments.  Each
+  # one needs to set the OBJ_SUFFIX variable to a unique suffix to
+  # differentiate targets built with that environment.  Otherwise, SCons may
+  # complain about same target built with different settings.
+
+  def UseOwnTuple(cls, env):
+    """Instructs Google Test to use its internal implementation of tuple."""
+
+    env['OBJ_SUFFIX'] = '_use_own_tuple'
+    env.Append(CPPDEFINES = 'GTEST_USE_OWN_TR1_TUPLE=1')
+  UseOwnTuple = classmethod(UseOwnTuple)
+
+  def WarningOk(cls, env):
+    """Does not treat warnings as errors.
+
+    Necessary for compiling gtest_unittest.cc, which triggers a gcc
+    warning when testing EXPECT_EQ(NULL, ptr)."""
+
+    env['OBJ_SUFFIX'] = '_warning_ok'
+    if env['PLATFORM'] == 'win32':
+      cls._Remove(env, 'CCFLAGS', '-WX')
+    else:
+      cls._Remove(env, 'CCFLAGS', '-Werror')
+  WarningOk = classmethod(WarningOk)
+
+  def WithExceptions(cls, env):
+    """Re-enables exceptions."""
+
+    env['OBJ_SUFFIX'] = '_ex'
+    if env['PLATFORM'] == 'win32':
+      env.Append(CCFLAGS=['/EHsc'])
+      env.Append(CPPDEFINES='_HAS_EXCEPTIONS=1')
+      # Undoes the _TYPEINFO_ hack, which is unnecessary and only creates
+      # trouble when exceptions are enabled.
+      cls._Remove(env, 'CPPDEFINES', '_TYPEINFO_')
+      cls._Remove(env, 'CPPDEFINES', '_HAS_EXCEPTIONS=0')
+    else:
+      env.Append(CCFLAGS='-fexceptions')
+      cls._Remove(env, 'CCFLAGS', '-fno-exceptions')
+  WithExceptions = classmethod(WithExceptions)
+
+  def LessOptimized(cls, env):
+    """Disables certain optimizations on Windows.
+
+    We need to disable some optimization flags for some tests on
+    Windows; otherwise the redirection of stdout does not work
+    (apparently because of a compiler bug)."""
+
+    env['OBJ_SUFFIX'] = '_less_optimized'
+    if env['PLATFORM'] == 'win32':
+      for flag in ['/O1', '/Os', '/Og', '/Oy']:
+        cls._Remove(env, 'LINKFLAGS', flag)
+  LessOptimized = classmethod(LessOptimized)
+
+  def WithThreads(cls, env):
+    """Allows use of threads.
+
+    Currently only enables pthreads under GCC."""
+
+    env['OBJ_SUFFIX'] = '_with_threads'
+    if env['PLATFORM'] != 'win32':
+      # Assuming POSIX-like environment with GCC.
+      # TODO(vladl@google.com): sniff presence of pthread_atfork instead of
+      # selecting on a platform.
+      env.Append(CCFLAGS=['-pthread'])
+      env.Append(LINKFLAGS=['-pthread'])
+  WithThreads = classmethod(WithThreads)
+
+  def NoRtti(cls, env):
+    """Disables RTTI support."""
+
+    env['OBJ_SUFFIX'] = '_no_rtti'
+    if env['PLATFORM'] == 'win32':
+      env.Append(CCFLAGS=['/GR-'])
+    else:
+      env.Append(CCFLAGS=['-fno-rtti'])
+      env.Append(CPPDEFINES='GTEST_HAS_RTTI=0')
+  NoRtti = classmethod(NoRtti)
+
+
+sconscript_exports = {'EnvCreator': EnvCreator}
+Return('sconscript_exports')

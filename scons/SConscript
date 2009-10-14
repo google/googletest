@@ -95,9 +95,13 @@ import os
 ############################################################
 # Environments for building the targets, sorted by name.
 
-Import('env', 'EnvCreator')
+Import('env')
+env = env.Clone()
 
-env = EnvCreator.Create(env)
+BUILD_TESTS = env.get('GTEST_BUILD_TESTS', False)
+if BUILD_TESTS:
+  common_exports = SConscript('SConscript.common')
+  EnvCreator = common_exports['EnvCreator']
 
 # Note: The relative paths in SConscript files are relative to the location
 # of the SConscript file itself. To make a path relative to the location of
@@ -112,16 +116,17 @@ env = EnvCreator.Create(env)
 # file is one directory deeper than the gtest directory.
 env.Prepend(CPPPATH = ['..', '../include'])
 
-env_use_own_tuple = EnvCreator.Create(env, EnvCreator.UseOwnTuple)
-env_less_optimized = EnvCreator.Create(env, EnvCreator.LessOptimized)
-env_with_threads = EnvCreator.Create(env, EnvCreator.WithThreads)
-# The following environments are used to compile gtest_unittest.cc, which
-# triggers a warning  in all but the most recent GCC versions when compiling
-# the EXPECT_EQ(NULL, ptr) statement.
-env_warning_ok = EnvCreator.Create(env, EnvCreator.WarningOk)
-env_with_exceptions = EnvCreator.Create(env_warning_ok,
-                                        EnvCreator.WithExceptions)
-env_without_rtti = EnvCreator.Create(env_warning_ok, EnvCreator.NoRtti)
+if BUILD_TESTS:
+  env_use_own_tuple = EnvCreator.Create(env, EnvCreator.UseOwnTuple)
+  env_less_optimized = EnvCreator.Create(env, EnvCreator.LessOptimized)
+  env_with_threads = EnvCreator.Create(env, EnvCreator.WithThreads)
+  # The following environments are used to compile gtest_unittest.cc, which
+  # triggers a warning  in all but the most recent GCC versions when compiling
+  # the EXPECT_EQ(NULL, ptr) statement.
+  env_warning_ok = EnvCreator.Create(env, EnvCreator.WarningOk)
+  env_with_exceptions = EnvCreator.Create(env_warning_ok,
+                                          EnvCreator.WithExceptions)
+  env_without_rtti = EnvCreator.Create(env_warning_ok, EnvCreator.NoRtti)
 
 ############################################################
 # Helpers for creating build targets.
@@ -131,10 +136,14 @@ env_without_rtti = EnvCreator.Create(env_warning_ok, EnvCreator.NoRtti)
 # convenience.
 _all_objects = {}
 
+
+def GetObjSuffix(env):
+  return env.get('OBJ_SUFFIX', '')
+
 def GtestObject(build_env, source):
   """Returns a target to build an object file from the given .cc source file."""
 
-  object_name = os.path.basename(source).rstrip('.cc') + build_env['OBJ_SUFFIX']
+  object_name = os.path.basename(source).rstrip('.cc') + GetObjSuffix(build_env)
   if object_name not in _all_objects:
     _all_objects[object_name] = build_env.Object(target=object_name,
                                                  source=source)
@@ -154,9 +163,9 @@ def GtestStaticLibraries(build_env):
   gtest_object = GtestObject(build_env, '../src/gtest-all.cc')
   gtest_main_object = GtestObject(build_env, '../src/gtest_main.cc')
 
-  return (build_env.StaticLibrary(target='gtest' + build_env['OBJ_SUFFIX'],
+  return (build_env.StaticLibrary(target='gtest' + GetObjSuffix(build_env),
                                   source=[gtest_object]),
-          build_env.StaticLibrary(target='gtest_main' + build_env['OBJ_SUFFIX'],
+          build_env.StaticLibrary(target='gtest_main' + GetObjSuffix(build_env),
                                   source=[gtest_object, gtest_main_object]))
 
 
@@ -220,72 +229,68 @@ def GtestSample(build_env, target, additional_sources=None):
 # gtest_main.lib can be used if you just want a basic main function; it is also
 # used by some tests for Google Test itself.
 gtest, gtest_main = GtestStaticLibraries(env)
-gtest_ex, gtest_main_ex = GtestStaticLibraries(env_with_exceptions)
-gtest_no_rtti, gtest_main_no_rtti = GtestStaticLibraries(env_without_rtti)
-gtest_use_own_tuple, gtest_use_own_tuple_main = GtestStaticLibraries(
-    env_use_own_tuple)
+if BUILD_TESTS:
+  gtest_ex, gtest_main_ex = GtestStaticLibraries(env_with_exceptions)
+  gtest_no_rtti, gtest_main_no_rtti = GtestStaticLibraries(env_without_rtti)
+  gtest_use_own_tuple, gtest_use_own_tuple_main = GtestStaticLibraries(
+      env_use_own_tuple)
 
 # Install the libraries if needed.
 if 'LIB_OUTPUT' in env.Dictionary():
-  env.Install('$LIB_OUTPUT', source=[gtest, gtest_main,
-                                     gtest_ex, gtest_main_ex,
-                                     gtest_no_rtti, gtest_main_no_rtti,
-                                     gtest_use_own_tuple,
-                                     gtest_use_own_tuple_main])
+  env.Install('$LIB_OUTPUT', source=[gtest, gtest_main])
 
-############################################################
-# Test targets using the standard environment.
+if BUILD_TESTS:
+  ############################################################
+  # Test targets using the standard environment.
+  GtestTest(env, 'gtest-filepath_test', gtest_main)
+  GtestTest(env, 'gtest-message_test', gtest_main)
+  GtestTest(env, 'gtest-options_test', gtest_main)
+  GtestTest(env, 'gtest_environment_test', gtest)
+  GtestTest(env, 'gtest_main_unittest', gtest_main)
+  GtestTest(env, 'gtest_no_test_unittest', gtest)
+  GtestTest(env, 'gtest_pred_impl_unittest', gtest_main)
+  GtestTest(env, 'gtest_prod_test', gtest_main,
+            additional_sources=['../test/production.cc'])
+  GtestTest(env, 'gtest_repeat_test', gtest)
+  GtestTest(env, 'gtest_sole_header_test', gtest_main)
+  GtestTest(env, 'gtest-test-part_test', gtest_main)
+  GtestTest(env, 'gtest-typed-test_test', gtest_main,
+            additional_sources=['../test/gtest-typed-test2_test.cc'])
+  GtestTest(env, 'gtest-param-test_test', gtest,
+            additional_sources=['../test/gtest-param-test2_test.cc'])
+  GtestTest(env, 'gtest_color_test_', gtest)
+  GtestTest(env, 'gtest-linked_ptr_test', gtest_main)
+  GtestTest(env, 'gtest-port_test', gtest_main)
+  GtestTest(env, 'gtest_break_on_failure_unittest_', gtest)
+  GtestTest(env, 'gtest_filter_unittest_', gtest)
+  GtestTest(env, 'gtest_help_test_', gtest_main)
+  GtestTest(env, 'gtest_list_tests_unittest_', gtest)
+  GtestTest(env, 'gtest_throw_on_failure_test_', gtest)
+  GtestTest(env, 'gtest_xml_outfile1_test_', gtest_main)
+  GtestTest(env, 'gtest_xml_outfile2_test_', gtest_main)
+  GtestTest(env, 'gtest_xml_output_unittest_', gtest)
+  GtestTest(env, 'gtest-unittest-api_test', gtest)
+  GtestTest(env, 'gtest-listener_test', gtest)
+  GtestTest(env, 'gtest_shuffle_test_', gtest)
 
-GtestTest(env, 'gtest-filepath_test', gtest_main)
-GtestTest(env, 'gtest-message_test', gtest_main)
-GtestTest(env, 'gtest-options_test', gtest_main)
-GtestTest(env, 'gtest_environment_test', gtest)
-GtestTest(env, 'gtest_main_unittest', gtest_main)
-GtestTest(env, 'gtest_no_test_unittest', gtest)
-GtestTest(env, 'gtest_pred_impl_unittest', gtest_main)
-GtestTest(env, 'gtest_prod_test', gtest_main,
-          additional_sources=['../test/production.cc'])
-GtestTest(env, 'gtest_repeat_test', gtest)
-GtestTest(env, 'gtest_sole_header_test', gtest_main)
-GtestTest(env, 'gtest-test-part_test', gtest_main)
-GtestTest(env, 'gtest-typed-test_test', gtest_main,
-          additional_sources=['../test/gtest-typed-test2_test.cc'])
-GtestTest(env, 'gtest-param-test_test', gtest,
-          additional_sources=['../test/gtest-param-test2_test.cc'])
-GtestTest(env, 'gtest_color_test_', gtest)
-GtestTest(env, 'gtest-linked_ptr_test', gtest_main)
-GtestTest(env, 'gtest-port_test', gtest_main)
-GtestTest(env, 'gtest_break_on_failure_unittest_', gtest)
-GtestTest(env, 'gtest_filter_unittest_', gtest)
-GtestTest(env, 'gtest_help_test_', gtest_main)
-GtestTest(env, 'gtest_list_tests_unittest_', gtest)
-GtestTest(env, 'gtest_throw_on_failure_test_', gtest)
-GtestTest(env, 'gtest_xml_outfile1_test_', gtest_main)
-GtestTest(env, 'gtest_xml_outfile2_test_', gtest_main)
-GtestTest(env, 'gtest_xml_output_unittest_', gtest)
-GtestTest(env, 'gtest-unittest-api_test', gtest)
-GtestTest(env, 'gtest-listener_test', gtest)
-GtestTest(env, 'gtest_shuffle_test_', gtest)
-
-############################################################
-# Tests targets using custom environments.
-
-GtestTest(env_warning_ok, 'gtest_unittest', gtest_main)
-GtestTest(env_with_exceptions, 'gtest_output_test_', gtest_ex)
-GtestTest(env_with_exceptions, 'gtest_throw_on_failure_ex_test', gtest_ex)
-GtestTest(env_with_threads, 'gtest-death-test_test', gtest_main)
-GtestTest(env_less_optimized, 'gtest_env_var_test_', gtest)
-GtestTest(env_less_optimized, 'gtest_uninitialized_test_', gtest)
-GtestTest(env_use_own_tuple, 'gtest-tuple_test', gtest_use_own_tuple_main)
-GtestBinary(env_use_own_tuple,
-            'gtest_use_own_tuple_test',
-            gtest_use_own_tuple_main,
-            ['../test/gtest-param-test_test.cc',
-             '../test/gtest-param-test2_test.cc'])
-GtestBinary(env_with_exceptions, 'gtest_ex_unittest', gtest_main_ex,
-            ['../test/gtest_unittest.cc'])
-GtestBinary(env_without_rtti, 'gtest_no_rtti_test', gtest_main_no_rtti,
-            ['../test/gtest_unittest.cc'])
+  ############################################################
+  # Tests targets using custom environments.
+  GtestTest(env_warning_ok, 'gtest_unittest', gtest_main)
+  GtestTest(env_with_exceptions, 'gtest_output_test_', gtest_ex)
+  GtestTest(env_with_exceptions, 'gtest_throw_on_failure_ex_test', gtest_ex)
+  GtestTest(env_with_threads, 'gtest-death-test_test', gtest_main)
+  GtestTest(env_less_optimized, 'gtest_env_var_test_', gtest)
+  GtestTest(env_less_optimized, 'gtest_uninitialized_test_', gtest)
+  GtestTest(env_use_own_tuple, 'gtest-tuple_test', gtest_use_own_tuple_main)
+  GtestBinary(env_use_own_tuple,
+              'gtest_use_own_tuple_test',
+              gtest_use_own_tuple_main,
+              ['../test/gtest-param-test_test.cc',
+               '../test/gtest-param-test2_test.cc'])
+  GtestBinary(env_with_exceptions, 'gtest_ex_unittest', gtest_main_ex,
+              ['../test/gtest_unittest.cc'])
+  GtestBinary(env_without_rtti, 'gtest_no_rtti_test', gtest_main_no_rtti,
+              ['../test/gtest_unittest.cc'])
 
 ############################################################
 # Sample targets.
@@ -312,14 +317,18 @@ if env.get('GTEST_BUILD_SAMPLES', False):
   GtestSample(env, 'sample9_unittest')
   GtestSample(env, 'sample10_unittest')
 
-# These exports are used by Google Mock.
 gtest_exports = {'gtest': gtest,
-                 'gtest_ex': gtest_ex,
-                 'gtest_no_rtti': gtest_no_rtti,
-                 'gtest_use_own_tuple': gtest_use_own_tuple,
-                 'EnvCreator': EnvCreator,
+                 'gtest_main': gtest_main,
+                 # These exports are used by Google Mock.
                  'GtestObject': GtestObject,
                  'GtestBinary': GtestBinary,
                  'GtestTest': GtestTest}
+
+if BUILD_TESTS:
+  # These environments are needed for tests only.
+  gtest_exports.update({'gtest_ex': gtest_ex,
+                        'gtest_no_rtti': gtest_no_rtti,
+                        'gtest_use_own_tuple': gtest_use_own_tuple})
+
 # Makes the gtest_exports dictionary available to the invoking SConstruct.
 Return('gtest_exports')
