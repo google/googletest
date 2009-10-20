@@ -279,6 +279,7 @@ if BUILD_TESTS:
   GtestTest(env_with_exceptions, 'gtest_output_test_', gtest_ex)
   GtestTest(env_with_exceptions, 'gtest_throw_on_failure_ex_test', gtest_ex)
   GtestTest(env_with_threads, 'gtest-death-test_test', gtest_main)
+  GtestTest(env_with_threads, 'gtest_stress_test', gtest)
   GtestTest(env_less_optimized, 'gtest_env_var_test_', gtest)
   GtestTest(env_less_optimized, 'gtest_uninitialized_test_', gtest)
   GtestTest(env_use_own_tuple, 'gtest-tuple_test', gtest_use_own_tuple_main)

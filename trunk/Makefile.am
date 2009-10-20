@@ -276,7 +276,9 @@ test_gtest_sole_header_test_LDADD = lib/libgtest_main.la
 TESTS += test/gtest_stress_test
 check_PROGRAMS += test/gtest_stress_test
 test_gtest_stress_test_SOURCES = test/gtest_stress_test.cc
-test_gtest_stress_test_LDADD = lib/libgtest.la
+test_gtest_stress_test_CXXFLAGS = $(AM_CXXFLAGS) $(PTHREAD_CFLAGS)
+test_gtest_stress_test_LDADD = $(PTHREAD_LIBS) $(PTHREAD_CFLAGS) \
+                               lib/libgtest.la
 
 TESTS += test/gtest-test-part_test
 check_PROGRAMS += test/gtest-test-part_test

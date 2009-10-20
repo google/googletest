@@ -135,12 +135,44 @@ TEST(ReferenceFieldTest, IsAliasOfReferencedVariable) {
       << "Changing a reference field should update the underlying variable.";
 }
 
-// Tests tuple's default constructor.
-TEST(TupleConstructorTest, DefaultConstructor) {
-  // We are just testing that the following compiles.
+// Tests that tuple's default constructor default initializes each field.
+// This test needs to compile without generating warnings.
+TEST(TupleConstructorTest, DefaultConstructorDefaultInitializesEachField) {
+  // The TR1 report requires that tuple's default constructor default
+  // initializes each field, even if it's a primitive type.  If the
+  // implementation forgets to do this, this test will catch it by
+  // generating warnings about using uninitialized variables (assuming
+  // a decent compiler).
+
   tuple<> empty;
-  tuple<int> one_field;
-  tuple<double, char, bool*> three_fields;
+
+  tuple<int> a1, b1;
+  b1 = a1;
+  EXPECT_EQ(0, get<0>(b1));
+
+  tuple<int, double> a2, b2;
+  b2 = a2;
+  EXPECT_EQ(0, get<0>(b2));
+  EXPECT_EQ(0.0, get<1>(b2));
+
+  tuple<double, char, bool*> a3, b3;
+  b3 = a3;
+  EXPECT_EQ(0.0, get<0>(b3));
+  EXPECT_EQ('\0', get<1>(b3));
+  EXPECT_EQ(NULL, get<2>(b3));
+
+  tuple<int, int, int, int, int, int, int, int, int, int> a10, b10;
+  b10 = a10;
+  EXPECT_EQ(0, get<0>(b10));
+  EXPECT_EQ(0, get<1>(b10));
+  EXPECT_EQ(0, get<2>(b10));
+  EXPECT_EQ(0, get<3>(b10));
+  EXPECT_EQ(0, get<4>(b10));
+  EXPECT_EQ(0, get<5>(b10));
+  EXPECT_EQ(0, get<6>(b10));
+  EXPECT_EQ(0, get<7>(b10));
+  EXPECT_EQ(0, get<8>(b10));
+  EXPECT_EQ(0, get<9>(b10));
 }
 
 // Tests constructing a tuple from its fields.
