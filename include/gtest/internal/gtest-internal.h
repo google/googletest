@@ -299,6 +299,11 @@ AssertionResult EqFailure(const char* expected_expression,
                           const String& actual_value,
                           bool ignoring_case);
 
+// Constructs a failure message for Boolean assertions such as EXPECT_TRUE.
+String GetBoolAssertionFailureMessage(const AssertionResult& assertion_result,
+                                      const char* expression_text,
+                                      const char* actual_predicate_value,
+                                      const char* expected_predicate_value);
 
 // This template class represents an IEEE floating-point number
 // (either single-precision or double-precision, depending on the
@@ -858,12 +863,17 @@ class Random {
       fail(gtest_msg)
 
 
-#define GTEST_TEST_BOOLEAN_(boolexpr, booltext, actual, expected, fail) \
+// Implements Boolean test assertions such as EXPECT_TRUE. expression can be
+// either a boolean expression or an AssertionResult. text is a textual
+// represenation of expression as it was passed into the EXPECT_TRUE.
+#define GTEST_TEST_BOOLEAN_(expression, text, actual, expected, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-  if (::testing::internal::IsTrue(boolexpr)) \
+  if (const ::testing::AssertionResult gtest_ar_ = \
+      ::testing::AssertionResult(expression)) \
     ; \
   else \
-    fail("Value of: " booltext "\n  Actual: " #actual "\nExpected: " #expected)
+    fail(::testing::internal::GetBoolAssertionFailureMessage(\
+        gtest_ar_, text, #actual, #expected).c_str())
 
 #define GTEST_TEST_NO_FATAL_FAILURE_(statement, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \

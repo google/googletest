@@ -952,21 +952,37 @@ String FormatForFailureMessage(wchar_t wchar) {
 
 }  // namespace internal
 
-// AssertionResult constructor.
-AssertionResult::AssertionResult(const internal::String& failure_message)
-    : failure_message_(failure_message) {
+// AssertionResult constructors.
+// Used in EXPECT_TRUE/FALSE(assertion_result).
+AssertionResult::AssertionResult(const AssertionResult& other)
+    : success_(other.success_),
+      message_(other.message_.get() != NULL ?
+               new internal::String(*other.message_) :
+               static_cast<internal::String*>(NULL)) {
 }
 
+// Returns the assertion's negation. Used with EXPECT/ASSERT_FALSE.
+AssertionResult AssertionResult::operator!() const {
+  AssertionResult negation(!success_);
+  if (message_.get() != NULL)
+    negation << *message_;
+  return negation;
+}
 
 // Makes a successful assertion result.
 AssertionResult AssertionSuccess() {
-  return AssertionResult();
+  return AssertionResult(true);
 }
 
+// Makes a failed assertion result.
+AssertionResult AssertionFailure() {
+  return AssertionResult(false);
+}
 
 // Makes a failed assertion result with the given failure message.
+// Deprecated; use AssertionFailure() << message.
 AssertionResult AssertionFailure(const Message& message) {
-  return AssertionResult(message.GetString());
+  return AssertionFailure() << message;
 }
 
 namespace internal {
@@ -1008,6 +1024,20 @@ AssertionResult EqFailure(const char* expected_expression,
   return AssertionFailure(msg);
 }
 
+// Constructs a failure message for Boolean assertions such as EXPECT_TRUE.
+String GetBoolAssertionFailureMessage(const AssertionResult& assertion_result,
+                                      const char* expression_text,
+                                      const char* actual_predicate_value,
+                                      const char* expected_predicate_value) {
+  const char* actual_message = assertion_result.message();
+  Message msg;
+  msg << "Value of: " << expression_text
+      << "\n  Actual: " << actual_predicate_value;
+  if (actual_message[0] != '\0')
+    msg << " (" << actual_message << ")";
+  msg << "\nExpected: " << expected_predicate_value;
+  return msg.GetString();
+}
 
 // Helper function for implementing ASSERT_NEAR.
 AssertionResult DoubleNearPredFormat(const char* expr1,
