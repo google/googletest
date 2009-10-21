@@ -1500,7 +1500,7 @@ state.  Here's an example:
 
 To use the event listener you have defined, add an instance of it to
 the Google Test event listener list (represented by class
-[http://code.google.com/p/googletest/source/browse/trunk/include/gtest/gtest.h#847 TestEventListeners]
+[http://code.google.com/p/googletest/source/browse/trunk/include/gtest/gtest.h#929 TestEventListeners]
 - note the "s" at the end of the name) in your
 `main()` funciton, before calling `RUN_ALL_TESTS()`:
 {{{
