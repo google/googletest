@@ -1462,9 +1462,9 @@ subclass only needs to override the methods it cares about.
 
 When an event is fired, its context is passed to the handler function
 as an argument. The following argument types are used:
-  * [http://code.google.com/p/googletest/source/browse/trunk/include/gtest/gtest.h#925 UnitTest] reflects the state of the entire test program,
-  * [http://code.google.com/p/googletest/source/browse/trunk/include/gtest/gtest.h#607 TestCase] has information about a test case, which can contain one or more tests,
-  * [http://code.google.com/p/googletest/source/browse/trunk/include/gtest/gtest.h#517 TestInfo] contains the state of a test, and
+  * [http://code.google.com/p/googletest/source/browse/trunk/include/gtest/gtest.h#1007 UnitTest] reflects the state of the entire test program,
+  * [http://code.google.com/p/googletest/source/browse/trunk/include/gtest/gtest.h#689 TestCase] has information about a test case, which can contain one or more tests,
+  * [http://code.google.com/p/googletest/source/browse/trunk/include/gtest/gtest.h#599 TestInfo] contains the state of a test, and
   * [http://code.google.com/p/googletest/source/browse/trunk/include/gtest/gtest-test-part.h#42 TestPartResult] represents the result of a test assertion.
 
 An event handler function can examine the argument it receives to find
