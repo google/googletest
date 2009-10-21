@@ -161,6 +161,10 @@ TEST_F(GMockOutputTest, UnsatisfiedPrerequisites) {
   foo_.Bar2(1, 0);
 }
 
+TEST_F(GMockOutputTest, UnsatisfiedWith) {
+  EXPECT_CALL(foo_, Bar2(_, _)).With(Ge());
+}
+
 TEST_F(GMockOutputTest, UnsatisfiedExpectation) {
   EXPECT_CALL(foo_, Bar(_, _, _));
   EXPECT_CALL(foo_, Bar2(0, _))

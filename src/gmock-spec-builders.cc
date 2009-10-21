@@ -40,6 +40,7 @@
 #include <iostream>  // NOLINT
 #include <map>
 #include <set>
+#include <string>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -55,9 +56,12 @@ namespace internal {
 Mutex g_gmock_mutex(Mutex::NO_CONSTRUCTOR_NEEDED_FOR_STATIC_MUTEX);
 
 // Constructs an ExpectationBase object.
-ExpectationBase::ExpectationBase(const char* file, int line)
+ExpectationBase::ExpectationBase(const char* file,
+                                 int line,
+                                 const string& source_text)
     : file_(file),
       line_(line),
+      source_text_(source_text),
       cardinality_specified_(false),
       cardinality_(Exactly(1)),
       call_count_(0),

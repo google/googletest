@@ -571,29 +571,34 @@ TEST(ExpectCallSyntaxTest, WarnsOnTooManyActions) {
     b.DoB(2);
   }
   const string& output = GetCapturedTestStdout();
-  EXPECT_PRED_FORMAT2(IsSubstring,
-                      "Too many actions specified.\n"
-                      "Expected to be never called, but has 1 WillOnce().",
-                      output);  // #1
-  EXPECT_PRED_FORMAT2(IsSubstring,
-                      "Too many actions specified.\n"
-                      "Expected to be called at most once, "
-                      "but has 2 WillOnce()s.",
-                      output);  // #2
-  EXPECT_PRED_FORMAT2(IsSubstring,
-                      "Too many actions specified.\n"
-                      "Expected to be called once, but has 2 WillOnce()s.",
-                      output);  // #3
-  EXPECT_PRED_FORMAT2(IsSubstring,
-                      "Too many actions specified.\n"
-                      "Expected to be never called, but has 0 WillOnce()s "
-                      "and a WillRepeatedly().",
-                      output);  // #4
-  EXPECT_PRED_FORMAT2(IsSubstring,
-                      "Too many actions specified.\n"
-                      "Expected to be called once, but has 1 WillOnce() "
-                      "and a WillRepeatedly().",
-                      output);  // #5
+  EXPECT_PRED_FORMAT2(
+      IsSubstring,
+      "Too many actions specified in EXPECT_CALL(b, DoB())...\n"
+      "Expected to be never called, but has 1 WillOnce().",
+      output);  // #1
+  EXPECT_PRED_FORMAT2(
+      IsSubstring,
+      "Too many actions specified in EXPECT_CALL(b, DoB())...\n"
+      "Expected to be called at most once, "
+      "but has 2 WillOnce()s.",
+      output);  // #2
+  EXPECT_PRED_FORMAT2(
+      IsSubstring,
+      "Too many actions specified in EXPECT_CALL(b, DoB(1))...\n"
+      "Expected to be called once, but has 2 WillOnce()s.",
+      output);  // #3
+  EXPECT_PRED_FORMAT2(
+      IsSubstring,
+      "Too many actions specified in EXPECT_CALL(b, DoB())...\n"
+      "Expected to be never called, but has 0 WillOnce()s "
+      "and a WillRepeatedly().",
+      output);  // #4
+  EXPECT_PRED_FORMAT2(
+      IsSubstring,
+      "Too many actions specified in EXPECT_CALL(b, DoB(2))...\n"
+      "Expected to be called once, but has 1 WillOnce() "
+      "and a WillRepeatedly().",
+      output);  // #5
 }
 
 // Tests that Google Mock warns on having too few actions in an
@@ -608,11 +613,12 @@ TEST(ExpectCallSyntaxTest, WarnsOnTooFewActions) {
   CaptureTestStdout();
   b.DoB();
   const string& output = GetCapturedTestStdout();
-  EXPECT_PRED_FORMAT2(IsSubstring,
-                      "Too few actions specified.\n"
-                      "Expected to be called between 2 and 3 times, "
-                      "but has only 1 WillOnce().",
-                      output);
+  EXPECT_PRED_FORMAT2(
+      IsSubstring,
+      "Too few actions specified in EXPECT_CALL(b, DoB())...\n"
+      "Expected to be called between 2 and 3 times, "
+      "but has only 1 WillOnce().",
+      output);
   b.DoB();
 }
 
@@ -688,7 +694,7 @@ TEST(ExpectCallTest, CatchesTooFewCalls) {
         .Times(AtLeast(2));
 
     b.DoB(5);
-  }, "Actual function call count doesn't match this expectation.\n"
+  }, "Actual function call count doesn't match EXPECT_CALL(b, DoB(5))...\n"
      "         Expected: to be called at least twice\n"
      "           Actual: called once - unsatisfied and active");
 }
@@ -895,14 +901,14 @@ TEST(UnexpectedCallTest, GeneratesFailureForVoidFunction) {
       "Google Mock tried the following 2 expectations, but none matched:");
   EXPECT_NONFATAL_FAILURE(
       a2.DoA(2),
-      "tried expectation #0\n"
+      "tried expectation #0: EXPECT_CALL(a2, DoA(1))...\n"
       "  Expected arg #0: is equal to 1\n"
       "           Actual: 2\n"
       "         Expected: to be called once\n"
       "           Actual: called once - saturated and active");
   EXPECT_NONFATAL_FAILURE(
       a2.DoA(2),
-      "tried expectation #1\n"
+      "tried expectation #1: EXPECT_CALL(a2, DoA(3))...\n"
       "  Expected arg #0: is equal to 3\n"
       "           Actual: 2\n"
       "         Expected: to be called once\n"
@@ -2046,7 +2052,7 @@ TEST(VerifyAndClearExpectationsTest, SomeMethodsHaveExpectationsAndFail) {
   MockB b;
   EXPECT_CALL(b, DoB())
       .WillOnce(Return(1));
-  bool result;
+  bool result = true;
   EXPECT_NONFATAL_FAILURE(result = Mock::VerifyAndClearExpectations(&b),
                           "Actual: never called");
   ASSERT_FALSE(result);
@@ -2084,7 +2090,7 @@ TEST(VerifyAndClearExpectationsTest, AMethodHasManyExpectations) {
   EXPECT_CALL(b, DoB(_))
       .WillOnce(Return(2));
   b.DoB(1);
-  bool result;
+  bool result = true;
   EXPECT_NONFATAL_FAILURE(result = Mock::VerifyAndClearExpectations(&b),
                           "Actual: never called");
   ASSERT_FALSE(result);
@@ -2216,7 +2222,7 @@ TEST(VerifyAndClearTest, Failure) {
       .WillOnce(Return(2));
 
   b.DoB(1);
-  bool result;
+  bool result = true;
   EXPECT_NONFATAL_FAILURE(result = Mock::VerifyAndClear(&b),
                           "Actual: never called");
   ASSERT_FALSE(result);
