@@ -1452,8 +1452,8 @@ _Availability:_ Linux, Windows, Mac; since v1.4.0.
 == Defining Event Listeners ==
 
 To define a event listener, you subclass either
-[http://code.google.com/p/googletest/source/browse/trunk/include/gtest/gtest.h#773 testing::TestEventListener]
-or [http://code.google.com/p/googletest/source/browse/trunk/include/gtest/gtest.h#823 testing::EmptyTestEventListener].
+[http://code.google.com/p/googletest/source/browse/trunk/include/gtest/gtest.h#855 testing::TestEventListener]
+or [http://code.google.com/p/googletest/source/browse/trunk/include/gtest/gtest.h#905 testing::EmptyTestEventListener].
 The former is an (abstract) interface, where <i>each pure virtual method
 can be overridden to handle a test event</i> (For example, when a test
 starts, the `OnTestStart()` method will be called.). The latter provides
