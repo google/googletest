@@ -169,6 +169,7 @@
 
 #define GTEST_DEV_EMAIL_ "googletestframework@@googlegroups.com"
 #define GTEST_FLAG_PREFIX_ "gtest_"
+#define GTEST_FLAG_PREFIX_DASH_ "gtest-"
 #define GTEST_FLAG_PREFIX_UPPER_ "GTEST_"
 #define GTEST_NAME_ "Google Test"
 #define GTEST_PROJECT_URL_ "http://code.google.com/p/googletest/"
