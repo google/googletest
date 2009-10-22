@@ -50,6 +50,11 @@ PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath('gtest_help_test_')
 FLAG_PREFIX = '--gtest_'
 CATCH_EXCEPTIONS_FLAG = FLAG_PREFIX + 'catch_exceptions'
 DEATH_TEST_STYLE_FLAG = FLAG_PREFIX + 'death_test_style'
+UNKNOWN_FLAG = FLAG_PREFIX + 'unknown_flag_for_testing'
+INCORRECT_FLAG_VARIANTS = [re.sub('^--', '-', DEATH_TEST_STYLE_FLAG),
+                           re.sub('^--', '/', DEATH_TEST_STYLE_FLAG),
+                           re.sub('_', '-', DEATH_TEST_STYLE_FLAG)]
+INTERNAL_FLAG_FOR_TESTING = FLAG_PREFIX + 'internal_flag_for_testing'
 
 # The help message must match this regex.
 HELP_REGEX = re.compile(
@@ -88,8 +93,14 @@ class GTestHelpTest(gtest_test_utils.TestCase):
   """Tests the --help flag and its equivalent forms."""
 
   def TestHelpFlag(self, flag):
-    """Verifies that the right message is printed and the tests are
-    skipped when the given flag is specified."""
+    """Verifies correct behavior when help flag is specified.
+
+    The right message must be printed and the tests must
+    skipped when the given flag is specified.
+
+    Args:
+      flag:  A flag to pass to the binary or None.
+    """
 
     exit_code, output = RunWithFlag(flag)
     self.assertEquals(0, exit_code)
@@ -100,6 +111,20 @@ class GTestHelpTest(gtest_test_utils.TestCase):
     else:
       self.assert_(CATCH_EXCEPTIONS_FLAG not in output, output)
       self.assert_(DEATH_TEST_STYLE_FLAG in output, output)
+
+  def TestNonHelpFlag(self, flag):
+    """Verifies correct behavior when no help flag is specified.
+
+    Verifies that when no help flag is specified, the tests are run
+    and the help message is not printed.
+
+    Args:
+      flag:  A flag to pass to the binary or None.
+    """
+
+    exit_code, output = RunWithFlag(flag)
+    self.assert_(exit_code != 0)
+    self.assert_(not HELP_REGEX.search(output), output)
 
   def testPrintsHelpWithFullFlag(self):
     self.TestHelpFlag('--help')
@@ -113,13 +138,24 @@ class GTestHelpTest(gtest_test_utils.TestCase):
   def testPrintsHelpWithWindowsStyleQuestionFlag(self):
     self.TestHelpFlag('/?')
 
+  def testPrintsHelpWithUnrecognizedGoogleTestFlag(self):
+    self.TestHelpFlag(UNKNOWN_FLAG)
+
+  def testPrintsHelpWithIncorrectFlagStyle(self):
+    for incorrect_flag in INCORRECT_FLAG_VARIANTS:
+      self.TestHelpFlag(incorrect_flag)
+
   def testRunsTestsWithoutHelpFlag(self):
     """Verifies that when no help flag is specified, the tests are run
     and the help message is not printed."""
 
-    exit_code, output = RunWithFlag(None)
-    self.assert_(exit_code != 0)
-    self.assert_(not HELP_REGEX.search(output), output)
+    self.TestNonHelpFlag(None)
+
+  def testRunsTestsWithGtestInternalFlag(self):
+    """Verifies that the tests are run and no help message is printed when
+    a flag starting with Google Test prefix and 'internal_' is supplied."""
+
+    self.TestNonHelpFlag(INTERNAL_FLAG_FOR_TESTING)
 
 
 if __name__ == '__main__':

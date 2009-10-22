@@ -4444,6 +4444,33 @@ bool ParseStringFlag(const char* str, const char* flag, String* value) {
   return true;
 }
 
+// Determines whether a string pointed by *str has the prefix parameter as
+// its prefix and advances it to point past the prefix if it does.
+bool SkipPrefix(const char* prefix, const char** str) {
+  const int prefix_len = strlen(prefix);
+
+  if (strncmp(*str, prefix, prefix_len) != 0)
+    return false;
+
+  *str += prefix_len;
+  return true;
+}
+
+// Determines whether a string has a prefix that Google Test uses for its
+// flags, i.e., starts with GTEST_FLAG_PREFIX_ or GTEST_FLAG_PREFIX_DASH_.
+// If Google Test detects that a command line flag has its prefix but is not
+// recognized, it will print its help message. Flags starting with
+// GTEST_INTERNAL_PREFIX_ followed by "internal_" are considered Google Test
+// internal flags and do not trigger the help message.
+bool HasGoogleTestFlagPrefix(const char* str) {
+  return (SkipPrefix("--", &str) ||
+          SkipPrefix("-", &str) ||
+          SkipPrefix("/", &str)) &&
+         !SkipPrefix(GTEST_FLAG_PREFIX_ "internal_", &str) &&
+         (SkipPrefix(GTEST_FLAG_PREFIX_, &str) ||
+          SkipPrefix(GTEST_FLAG_PREFIX_DASH_, &str));
+}
+
 // Prints a string containing code-encoded text.  The following escape
 // sequences can be used in the string to control the text color:
 //
@@ -4601,7 +4628,10 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
       // an element.
       i--;
     } else if (arg_string == "--help" || arg_string == "-h" ||
-               arg_string == "-?" || arg_string == "/?") {
+               arg_string == "-?" || arg_string == "/?" ||
+               HasGoogleTestFlagPrefix(arg)) {
+      // Both help flag and unrecognized Google Test flags (excluding
+      // internal ones) trigger help display.
       g_help_flag = true;
     }
   }
