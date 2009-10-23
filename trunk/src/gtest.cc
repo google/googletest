@@ -4446,8 +4446,8 @@ bool ParseStringFlag(const char* str, const char* flag, String* value) {
 
 // Determines whether a string pointed by *str has the prefix parameter as
 // its prefix and advances it to point past the prefix if it does.
-bool SkipPrefix(const char* prefix, const char** str) {
-  const int prefix_len = strlen(prefix);
+static bool SkipPrefix(const char* prefix, const char** str) {
+  const size_t prefix_len = strlen(prefix);
 
   if (strncmp(*str, prefix, prefix_len) != 0)
     return false;
@@ -4462,7 +4462,7 @@ bool SkipPrefix(const char* prefix, const char** str) {
 // recognized, it will print its help message. Flags starting with
 // GTEST_INTERNAL_PREFIX_ followed by "internal_" are considered Google Test
 // internal flags and do not trigger the help message.
-bool HasGoogleTestFlagPrefix(const char* str) {
+static bool HasGoogleTestFlagPrefix(const char* str) {
   return (SkipPrefix("--", &str) ||
           SkipPrefix("-", &str) ||
           SkipPrefix("/", &str)) &&
