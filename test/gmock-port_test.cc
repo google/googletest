@@ -36,4 +36,8 @@
 #include <gmock/internal/gmock-port.h>
 #include <gtest/gtest.h>
 
-// This file intentionally contains no test at this moment.
+// This file intentionally contains no tests at this moment.
+
+// Putting a dummy test here makes references to symbols in the gtest
+// library and avoids 'undefined symbol' linker errors in gmock_main.
+TEST(DummyTest, Dummy) {}
