@@ -35,6 +35,11 @@
 // purpose is to allow a user to build Google Mock by compiling this
 // file alone.
 
+// This line ensures that gmock.h can be compiled on its own, even
+// when it's fused.
+#include <gmock/gmock.h>
+
+// The following lines pull in the real gmock *.cc files.
 #include "src/gmock-cardinalities.cc"
 #include "src/gmock-internal-utils.cc"
 #include "src/gmock-matchers.cc"
