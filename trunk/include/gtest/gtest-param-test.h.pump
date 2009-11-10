@@ -52,7 +52,7 @@ $var maxtuple = 10  $$ Maximum number of Combine arguments we want to support.
 // class. It must be derived from testing::TestWithParam<T>, where T is
 // the type of your parameter values. TestWithParam<T> is itself derived
 // from testing::Test. T can be any copyable type. If it's a raw pointer,
-// you are responsible for managing the lifespan of the pointed values. 
+// you are responsible for managing the lifespan of the pointed values.
 
 class FooTest : public ::testing::TestWithParam<const char*> {
   // You can implement all the usual class fixture members here.
@@ -60,7 +60,7 @@ class FooTest : public ::testing::TestWithParam<const char*> {
 
 // Then, use the TEST_P macro to define as many parameterized tests
 // for this fixture as you want. The _P suffix is for "parameterized"
-// or "pattern", whichever you prefer to think. 
+// or "pattern", whichever you prefer to think.
 
 TEST_P(FooTest, DoesBlah) {
   // Inside a test, access the test parameter with the GetParam() method
@@ -124,7 +124,7 @@ const char* pets[] = {"cat", "dog"};
 INSTANTIATE_TEST_CASE_P(AnotherInstantiationName, FooTest, ValuesIn(pets));
 
 // The tests from the instantiation above will have these names:
-// 
+//
 //    * AnotherInstantiationName/FooTest.DoesBlah/0 for "cat"
 //    * AnotherInstantiationName/FooTest.DoesBlah/1 for "dog"
 //    * AnotherInstantiationName/FooTest.HasBlahBlah/0 for "cat"
@@ -147,16 +147,20 @@ INSTANTIATE_TEST_CASE_P(AnotherInstantiationName, FooTest, ValuesIn(pets));
 
 #endif  // 0
 
-
-#include <utility>
-
 #include <gtest/internal/gtest-port.h>
 
-#if GTEST_HAS_PARAM_TEST
+#if !GTEST_OS_SYMBIAN
+#include <utility>
+#endif
 
+// scripts/fuse_gtest.py depends on gtest's own header being #included
+// *unconditionally*.  Therefore these #includes cannot be moved
+// inside #if GTEST_HAS_PARAM_TEST.
 #include <gtest/internal/gtest-internal.h>
 #include <gtest/internal/gtest-param-util.h>
 #include <gtest/internal/gtest-param-util-generated.h>
+
+#if GTEST_HAS_PARAM_TEST
 
 namespace testing {
 
