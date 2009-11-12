@@ -45,10 +45,6 @@ $var n = 10  $$ The maximum arity we support.
 #include <gmock/internal/gmock-internal-utils.h>
 
 namespace testing {
-
-template <typename F>
-class MockSpec;
-
 namespace internal {
 
 template <typename F>
@@ -89,7 +85,11 @@ $if i >= 1 [[
   }
 
   R Invoke($Aas) {
-    return InvokeWith(ArgumentTuple($as));
+    // Even though gcc and MSVC don't enforce it, 'this->' is required
+    // by the C++ standard [14.6.4] here, as the base class type is
+    // dependent on the template argument (and thus shouldn't be
+    // looked into when resolving InvokeWith).
+    return this->InvokeWith(ArgumentTuple($as));
   }
 };
 
