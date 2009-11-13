@@ -50,7 +50,7 @@ OPTIONS
               Specify build directories via build configurations.
               CONFIGURATIONS is either a comma-separated list of build
               configurations or 'all'. Each configuration is equivalent to
-              adding 'scons/build/<configuration>/scons' to BUILD_DIRs.
+              adding 'scons/build/<configuration>/gtest/scons' to BUILD_DIRs.
               Specifying -c=all is equivalent to providing all directories
               listed in KNOWN BUILD DIRECTORIES section below.
 
@@ -98,16 +98,16 @@ KNOWN BUILD DIRECTORIES
       defines them as follows (the default build directory is the first one
       listed in each group):
       On Windows:
-              <gtest root>/scons/build/win-dbg8/scons/
-              <gtest root>/scons/build/win-opt8/scons/
-              <gtest root>/scons/build/win-dbg/scons/
-              <gtest root>/scons/build/win-opt/scons/
+              <gtest root>/scons/build/win-dbg8/gtest/scons/
+              <gtest root>/scons/build/win-opt8/gtest/scons/
+              <gtest root>/scons/build/win-dbg/gtest/scons/
+              <gtest root>/scons/build/win-opt/gtest/scons/
       On Mac:
-              <gtest root>/scons/build/mac-dbg/scons/
-              <gtest root>/scons/build/mac-opt/scons/
+              <gtest root>/scons/build/mac-dbg/gtest/scons/
+              <gtest root>/scons/build/mac-opt/gtest/scons/
       On other platforms:
-              <gtest root>/scons/build/dbg/scons/
-              <gtest root>/scons/build/opt/scons/
+              <gtest root>/scons/build/dbg/gtest/scons/
+              <gtest root>/scons/build/opt/gtest/scons/
 
 AUTHOR
        Written by Zhanyong Wan (wan@google.com)
@@ -177,7 +177,10 @@ class TestRunner(object):
     """Returns the build directory for a given configuration."""
 
     return self.os.path.normpath(
-        self.os.path.join(self.script_dir, 'scons/build', config, 'scons'))
+        self.os.path.join(self.script_dir,
+                          'scons/build',
+                          config,
+                          'gtest/scons'))
 
   def Run(self, args):
     """Runs the executable with given args (args[0] is the executable name).

@@ -243,10 +243,8 @@ class SConstructHelper:
       # Invokes SConscript with variant_dir being build/<config name>.
       # Counter-intuitively, src_dir is relative to the build dir and has
       # to be '..' to point to the scons directory.
-      SConscript('SConscript',
-                 src_dir='..',
-                 variant_dir=env['BUILD_DIR'],
-                 duplicate=0)
+      VariantDir(env['BUILD_DIR'], src_dir='../..', duplicate=0);
+      SConscript(env['BUILD_DIR'] + '/gtest/scons/SConscript')
 
 
 sconstruct_helper = SConstructHelper()

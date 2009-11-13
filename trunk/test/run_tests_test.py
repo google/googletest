@@ -42,9 +42,9 @@ sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), os.pardir))
 import run_tests
 
 
-GTEST_DBG_DIR = 'scons/build/dbg/scons'
-GTEST_OPT_DIR = 'scons/build/opt/scons'
-GTEST_OTHER_DIR = 'scons/build/other/scons'
+GTEST_DBG_DIR = 'scons/build/dbg/gtest/scons'
+GTEST_OPT_DIR = 'scons/build/opt/gtest/scons'
+GTEST_OTHER_DIR = 'scons/build/other/gtest/scons'
 
 
 def AddExeExtension(path):
