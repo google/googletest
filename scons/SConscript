@@ -99,34 +99,34 @@ Import('env')
 env = env.Clone()
 
 BUILD_TESTS = env.get('GTEST_BUILD_TESTS', False)
-if BUILD_TESTS:
-  common_exports = SConscript('SConscript.common')
-  EnvCreator = common_exports['EnvCreator']
+common_exports = SConscript('SConscript.common')
+EnvCreator = common_exports['EnvCreator']
 
 # Note: The relative paths in SConscript files are relative to the location
 # of the SConscript file itself. To make a path relative to the location of
 # the main SConstruct file, prepend the path with the # sign.
 #
-# But if a project uses variant builds without source duplication, the above
-# rule gets muddied a bit. In that case the paths must be counted from the
-# location of the copy of the SConscript file in scons/build/<config>/scons.
+# But if a project uses variant builds without source duplication (see
+# http://www.scons.org/wiki/VariantDir%28%29 for more information), the
+# above rule gets muddied a bit. In that case the paths must be counted from
+# the location of the copy of the SConscript file in
+# scons/build/<config>/gtest/scons.
 #
 # Include paths to gtest headers are relative to either the gtest
 # directory or the 'include' subdirectory of it, and this SConscript
 # file is one directory deeper than the gtest directory.
 env.Prepend(CPPPATH = ['..', '../include'])
 
-if BUILD_TESTS:
-  env_use_own_tuple = EnvCreator.Create(env, EnvCreator.UseOwnTuple)
-  env_less_optimized = EnvCreator.Create(env, EnvCreator.LessOptimized)
-  env_with_threads = EnvCreator.Create(env, EnvCreator.WithThreads)
-  # The following environments are used to compile gtest_unittest.cc, which
-  # triggers a warning  in all but the most recent GCC versions when compiling
-  # the EXPECT_EQ(NULL, ptr) statement.
-  env_warning_ok = EnvCreator.Create(env, EnvCreator.WarningOk)
-  env_with_exceptions = EnvCreator.Create(env_warning_ok,
-                                          EnvCreator.WithExceptions)
-  env_without_rtti = EnvCreator.Create(env_warning_ok, EnvCreator.NoRtti)
+env_use_own_tuple = EnvCreator.Create(env, EnvCreator.UseOwnTuple)
+env_less_optimized = EnvCreator.Create(env, EnvCreator.LessOptimized)
+env_with_threads = EnvCreator.Create(env, EnvCreator.WithThreads)
+# The following environments are used to compile gtest_unittest.cc, which
+# triggers a warning  in all but the most recent GCC versions when compiling
+# the EXPECT_EQ(NULL, ptr) statement.
+env_warning_ok = EnvCreator.Create(env, EnvCreator.WarningOk)
+env_with_exceptions = EnvCreator.Create(env_warning_ok,
+                                        EnvCreator.WithExceptions)
+env_without_rtti = EnvCreator.Create(env_warning_ok, EnvCreator.NoRtti)
 
 ############################################################
 # Helpers for creating build targets.
@@ -229,10 +229,9 @@ def GtestSample(build_env, target, additional_sources=None):
 # gtest_main.lib can be used if you just want a basic main function; it is also
 # used by some tests for Google Test itself.
 gtest, gtest_main = GtestStaticLibraries(env)
-if BUILD_TESTS:
-  gtest_ex, gtest_main_ex = GtestStaticLibraries(env_with_exceptions)
-  gtest_no_rtti, gtest_main_no_rtti = GtestStaticLibraries(env_without_rtti)
-  gtest_use_own_tuple, gtest_use_own_tuple_main = GtestStaticLibraries(
+gtest_ex, gtest_main_ex = GtestStaticLibraries(env_with_exceptions)
+gtest_no_rtti, gtest_main_no_rtti = GtestStaticLibraries(env_without_rtti)
+gtest_use_own_tuple, gtest_main_use_own_tuple = GtestStaticLibraries(
       env_use_own_tuple)
 
 # Install the libraries if needed.
@@ -282,10 +281,10 @@ if BUILD_TESTS:
   GtestTest(env_with_threads, 'gtest_stress_test', gtest)
   GtestTest(env_less_optimized, 'gtest_env_var_test_', gtest)
   GtestTest(env_less_optimized, 'gtest_uninitialized_test_', gtest)
-  GtestTest(env_use_own_tuple, 'gtest-tuple_test', gtest_use_own_tuple_main)
+  GtestTest(env_use_own_tuple, 'gtest-tuple_test', gtest_main_use_own_tuple)
   GtestBinary(env_use_own_tuple,
               'gtest_use_own_tuple_test',
-              gtest_use_own_tuple_main,
+              gtest_main_use_own_tuple,
               ['../test/gtest-param-test_test.cc',
                '../test/gtest-param-test2_test.cc'])
   GtestBinary(env_with_exceptions, 'gtest_ex_unittest', gtest_main_ex,
@@ -320,16 +319,16 @@ if env.get('GTEST_BUILD_SAMPLES', False):
 
 gtest_exports = {'gtest': gtest,
                  'gtest_main': gtest_main,
+                 'gtest_ex': gtest_ex,
+                 'gtest_main_ex': gtest_main_ex,
+                 'gtest_no_rtti': gtest_no_rtti,
+                 'gtest_main_no_rtti': gtest_main_no_rtti,
+                 'gtest_use_own_tuple': gtest_use_own_tuple,
+                 'gtest_main_use_own_tuple': gtest_main_use_own_tuple,
                  # These exports are used by Google Mock.
                  'GtestObject': GtestObject,
                  'GtestBinary': GtestBinary,
                  'GtestTest': GtestTest}
-
-if BUILD_TESTS:
-  # These environments are needed for tests only.
-  gtest_exports.update({'gtest_ex': gtest_ex,
-                        'gtest_no_rtti': gtest_no_rtti,
-                        'gtest_use_own_tuple': gtest_use_own_tuple})
 
 # Makes the gtest_exports dictionary available to the invoking SConstruct.
 Return('gtest_exports')
