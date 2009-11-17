@@ -53,6 +53,14 @@
 namespace testing {
 namespace internal {
 
+// Tests that the element_type typedef is available in scoped_ptr and refers
+// to the parameter type.
+TEST(ScopedPtrTest, DefinesElementType) {
+  StaticAssertTypeEq<int, ::testing::internal::scoped_ptr<int>::element_type>();
+}
+
+// TODO(vladl@google.com): Implement THE REST of scoped_ptr tests.
+
 TEST(GtestCheckSyntaxTest, BehavesLikeASingleStatement) {
   if (AlwaysFalse())
     GTEST_CHECK_(false) << "This should never be executed; "

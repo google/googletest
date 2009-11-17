@@ -589,6 +589,8 @@ bool IsTrue(bool condition);
 template <typename T>
 class scoped_ptr {
  public:
+  typedef T element_type;
+
   explicit scoped_ptr(T* p = NULL) : ptr_(p) {}
   ~scoped_ptr() { reset(); }
 
