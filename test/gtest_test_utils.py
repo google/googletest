@@ -51,6 +51,7 @@ except:
   _SUBPROCESS_MODULE_AVAILABLE = False
 # pylint: enable-msg=C6204
 
+GTEST_OUTPUT_VAR_NAME = 'GTEST_OUTPUT'
 
 IS_WINDOWS = os.name == 'nt'
 IS_CYGWIN = os.name == 'posix' and 'CYGWIN' in os.uname()[0]
@@ -267,4 +268,11 @@ def Main():
   # unittest.main().  Otherwise the latter will be confused by the
   # --gtest_* flags.
   _ParseAndStripGTestFlags(sys.argv)
+  # The tested binaries should not be writing XML output files unless the
+  # script explicitly instructs them to.
+  # TODO(vladl@google.com): Move this into Subprocess when we implement
+  # passing environment into it as a parameter.
+  if GTEST_OUTPUT_VAR_NAME in os.environ:
+    del os.environ[GTEST_OUTPUT_VAR_NAME]
+
   _test_module.main()
