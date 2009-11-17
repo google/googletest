@@ -161,6 +161,10 @@ namespace internal {
 // stack trace.
 const char kStackTraceMarker[] = "\nStack trace:\n";
 
+// g_help_flag is true iff the --help flag or an equivalent form is
+// specified on the command line.
+bool g_help_flag = false;
+
 }  // namespace internal
 
 GTEST_DEFINE_bool_(
@@ -242,7 +246,7 @@ GTEST_DEFINE_bool_(
 
 GTEST_DEFINE_int32_(
     stack_trace_depth,
-        internal::Int32FromGTestEnv("stack_trace_depth", kMaxStackTraceDepth),
+    internal::Int32FromGTestEnv("stack_trace_depth", kMaxStackTraceDepth),
     "The maximum number of stack frames to print when an "
     "assertion fails.  The valid range is 0 through 100, inclusive.");
 
@@ -273,10 +277,6 @@ UInt32 Random::Generate(UInt32 range) {
   // to begin with.
   return state_ % range;
 }
-
-// g_help_flag is true iff the --help flag or an equivalent form is
-// specified on the command line.
-static bool g_help_flag = false;
 
 // GTestIsInitialized() returns true iff the user has initialized
 // Google Test.  Useful for catching the user mistake of not initializing
@@ -4611,6 +4611,8 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
         ParseInt32Flag(arg, kRandomSeedFlag, &GTEST_FLAG(random_seed)) ||
         ParseInt32Flag(arg, kRepeatFlag, &GTEST_FLAG(repeat)) ||
         ParseBoolFlag(arg, kShuffleFlag, &GTEST_FLAG(shuffle)) ||
+        ParseInt32Flag(arg, kStackTraceDepthFlag,
+                       &GTEST_FLAG(stack_trace_depth)) ||
         ParseBoolFlag(arg, kThrowOnFailureFlag, &GTEST_FLAG(throw_on_failure))
         ) {
       // Yes.  Shift the remainder of the argv list left by one.  Note

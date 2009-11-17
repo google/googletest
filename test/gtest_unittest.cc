@@ -85,6 +85,9 @@ bool ShouldUseColor(bool stdout_is_tty);
 const char* FormatTimeInMillisAsSeconds(TimeInMillis ms);
 bool ParseInt32Flag(const char* str, const char* flag, Int32* value);
 
+// Used for testing the flag parsing.
+extern bool g_help_flag;
+
 // Provides access to otherwise private parts of the TestEventListeners class
 // that are needed to test it.
 class TestEventListenersAccessor {
@@ -148,6 +151,7 @@ using testing::TestPartResultArray;
 using testing::TestProperty;
 using testing::TestResult;
 using testing::UnitTest;
+using testing::kMaxStackTraceDepth;
 using testing::internal::AlwaysFalse;
 using testing::internal::AlwaysTrue;
 using testing::internal::AppendUserMessage;
@@ -2022,6 +2026,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG(random_seed) = 0;
     GTEST_FLAG(repeat) = 1;
     GTEST_FLAG(shuffle) = false;
+    GTEST_FLAG(stack_trace_depth) = kMaxStackTraceDepth;
     GTEST_FLAG(throw_on_failure) = false;
   }
 
@@ -2047,6 +2052,7 @@ class GTestFlagSaverTest : public Test {
     EXPECT_EQ(0, GTEST_FLAG(random_seed));
     EXPECT_EQ(1, GTEST_FLAG(repeat));
     EXPECT_FALSE(GTEST_FLAG(shuffle));
+    EXPECT_EQ(kMaxStackTraceDepth, GTEST_FLAG(stack_trace_depth));
     EXPECT_FALSE(GTEST_FLAG(throw_on_failure));
 
     GTEST_FLAG(also_run_disabled_tests) = true;
@@ -2061,6 +2067,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG(random_seed) = 1;
     GTEST_FLAG(repeat) = 100;
     GTEST_FLAG(shuffle) = true;
+    GTEST_FLAG(stack_trace_depth) = 1;
     GTEST_FLAG(throw_on_failure) = true;
   }
  private:
@@ -5347,6 +5354,7 @@ struct Flags {
             random_seed(0),
             repeat(1),
             shuffle(false),
+            stack_trace_depth(kMaxStackTraceDepth),
             throw_on_failure(false) {}
 
   // Factory methods.
@@ -5439,6 +5447,14 @@ struct Flags {
     return flags;
   }
 
+  // Creates a Flags struct where the GTEST_FLAG(stack_trace_depth) flag has
+  // the given value.
+  static Flags StackTraceDepth(Int32 stack_trace_depth) {
+    Flags flags;
+    flags.stack_trace_depth = stack_trace_depth;
+    return flags;
+  }
+
   // Creates a Flags struct where the gtest_throw_on_failure flag has
   // the given value.
   static Flags ThrowOnFailure(bool throw_on_failure) {
@@ -5459,6 +5475,7 @@ struct Flags {
   Int32 random_seed;
   Int32 repeat;
   bool shuffle;
+  Int32 stack_trace_depth;
   bool throw_on_failure;
 };
 
@@ -5478,6 +5495,7 @@ class InitGoogleTestTest : public Test {
     GTEST_FLAG(random_seed) = 0;
     GTEST_FLAG(repeat) = 1;
     GTEST_FLAG(shuffle) = false;
+    GTEST_FLAG(stack_trace_depth) = kMaxStackTraceDepth;
     GTEST_FLAG(throw_on_failure) = false;
   }
 
@@ -5507,6 +5525,7 @@ class InitGoogleTestTest : public Test {
     EXPECT_EQ(expected.repeat, GTEST_FLAG(repeat));
     EXPECT_EQ(expected.shuffle, GTEST_FLAG(shuffle));
     EXPECT_EQ(expected.throw_on_failure, GTEST_FLAG(throw_on_failure));
+    EXPECT_EQ(expected.stack_trace_depth, GTEST_FLAG(stack_trace_depth));
   }
 
   // Parses a command line (specified by argc1 and argv1), then
@@ -5515,7 +5534,10 @@ class InitGoogleTestTest : public Test {
   template <typename CharType>
   static void TestParsingFlags(int argc1, const CharType** argv1,
                                int argc2, const CharType** argv2,
-                               const Flags& expected) {
+                               const Flags& expected, bool should_print_help) {
+    const bool saved_help_flag = ::testing::internal::g_help_flag;
+    ::testing::internal::g_help_flag = false;
+
     // Parses the command line.
     internal::ParseGoogleTestFlagsOnly(&argc1, const_cast<CharType**>(argv1));
 
@@ -5525,13 +5547,23 @@ class InitGoogleTestTest : public Test {
     // Verifies that the recognized flags are removed from the command
     // line.
     AssertStringArrayEq(argc1 + 1, argv1, argc2 + 1, argv2);
+
+    // ParseGoogleTestFlagsOnly should neither set g_help_flag nor print the
+    // help message for the flags it recognizes.
+    EXPECT_EQ(should_print_help, ::testing::internal::g_help_flag);
+
+    // TODO(vladl@google.com): Verify that the help output is not printed
+    // for recognized flags when stdout capturing is implemeted.
+
+    ::testing::internal::g_help_flag = saved_help_flag;
   }
 
   // This macro wraps TestParsingFlags s.t. the user doesn't need
   // to specify the array sizes.
-#define GTEST_TEST_PARSING_FLAGS_(argv1, argv2, expected) \
+#define GTEST_TEST_PARSING_FLAGS_(argv1, argv2, expected, should_print_help) \
   TestParsingFlags(sizeof(argv1)/sizeof(*argv1) - 1, argv1, \
-                   sizeof(argv2)/sizeof(*argv2) - 1, argv2, expected)
+                   sizeof(argv2)/sizeof(*argv2) - 1, argv2, \
+                   expected, should_print_help)
 };
 
 // Tests parsing an empty command line.
@@ -5544,7 +5576,7 @@ TEST_F(InitGoogleTestTest, Empty) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags());
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags(), false);
 }
 
 // Tests parsing a command line that has no flag.
@@ -5559,7 +5591,7 @@ TEST_F(InitGoogleTestTest, NoFlag) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags());
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags(), false);
 }
 
 // Tests parsing a bad --gtest_filter flag.
@@ -5576,7 +5608,7 @@ TEST_F(InitGoogleTestTest, FilterBad) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Filter(""));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Filter(""), true);
 }
 
 // Tests parsing an empty --gtest_filter flag.
@@ -5592,7 +5624,7 @@ TEST_F(InitGoogleTestTest, FilterEmpty) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Filter(""));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Filter(""), false);
 }
 
 // Tests parsing a non-empty --gtest_filter flag.
@@ -5608,7 +5640,7 @@ TEST_F(InitGoogleTestTest, FilterNonEmpty) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Filter("abc"));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Filter("abc"), false);
 }
 
 // Tests parsing --gtest_break_on_failure.
@@ -5624,7 +5656,7 @@ TEST_F(InitGoogleTestTest, BreakOnFailureWithoutValue) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::BreakOnFailure(true));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::BreakOnFailure(true), false);
 }
 
 // Tests parsing --gtest_break_on_failure=0.
@@ -5640,7 +5672,7 @@ TEST_F(InitGoogleTestTest, BreakOnFailureFalse_0) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::BreakOnFailure(false));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::BreakOnFailure(false), false);
 }
 
 // Tests parsing --gtest_break_on_failure=f.
@@ -5656,7 +5688,7 @@ TEST_F(InitGoogleTestTest, BreakOnFailureFalse_f) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::BreakOnFailure(false));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::BreakOnFailure(false), false);
 }
 
 // Tests parsing --gtest_break_on_failure=F.
@@ -5672,7 +5704,7 @@ TEST_F(InitGoogleTestTest, BreakOnFailureFalse_F) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::BreakOnFailure(false));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::BreakOnFailure(false), false);
 }
 
 // Tests parsing a --gtest_break_on_failure flag that has a "true"
@@ -5689,7 +5721,7 @@ TEST_F(InitGoogleTestTest, BreakOnFailureTrue) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::BreakOnFailure(true));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::BreakOnFailure(true), false);
 }
 
 // Tests parsing --gtest_catch_exceptions.
@@ -5705,7 +5737,7 @@ TEST_F(InitGoogleTestTest, CatchExceptions) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::CatchExceptions(true));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::CatchExceptions(true), false);
 }
 
 // Tests parsing --gtest_death_test_use_fork.
@@ -5721,7 +5753,7 @@ TEST_F(InitGoogleTestTest, DeathTestUseFork) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::DeathTestUseFork(true));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::DeathTestUseFork(true), false);
 }
 
 // Tests having the same flag twice with different values.  The
@@ -5739,7 +5771,7 @@ TEST_F(InitGoogleTestTest, DuplicatedFlags) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Filter("b"));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Filter("b"), false);
 }
 
 // Tests having an unrecognized flag on the command line.
@@ -5761,7 +5793,7 @@ TEST_F(InitGoogleTestTest, UnrecognizedFlag) {
   Flags flags;
   flags.break_on_failure = true;
   flags.filter = "b";
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, flags);
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, flags, false);
 }
 
 // Tests having a --gtest_list_tests flag
@@ -5777,7 +5809,7 @@ TEST_F(InitGoogleTestTest, ListTestsFlag) {
       NULL
     };
 
-    GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ListTests(true));
+    GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ListTests(true), false);
 }
 
 // Tests having a --gtest_list_tests flag with a "true" value
@@ -5793,7 +5825,7 @@ TEST_F(InitGoogleTestTest, ListTestsTrue) {
       NULL
     };
 
-    GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ListTests(true));
+    GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ListTests(true), false);
 }
 
 // Tests having a --gtest_list_tests flag with a "false" value
@@ -5809,7 +5841,7 @@ TEST_F(InitGoogleTestTest, ListTestsFalse) {
       NULL
     };
 
-    GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ListTests(false));
+    GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ListTests(false), false);
 }
 
 // Tests parsing --gtest_list_tests=f.
@@ -5825,7 +5857,7 @@ TEST_F(InitGoogleTestTest, ListTestsFalse_f) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ListTests(false));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ListTests(false), false);
 }
 
 // Tests parsing --gtest_list_tests=F.
@@ -5841,7 +5873,7 @@ TEST_F(InitGoogleTestTest, ListTestsFalse_F) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ListTests(false));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ListTests(false), false);
 }
 
 // Tests parsing --gtest_output (invalid).
@@ -5858,7 +5890,7 @@ TEST_F(InitGoogleTestTest, OutputEmpty) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags());
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags(), true);
 }
 
 // Tests parsing --gtest_output=xml
@@ -5874,7 +5906,7 @@ TEST_F(InitGoogleTestTest, OutputXml) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Output("xml"));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Output("xml"), false);
 }
 
 // Tests parsing --gtest_output=xml:file
@@ -5890,7 +5922,7 @@ TEST_F(InitGoogleTestTest, OutputXmlFile) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Output("xml:file"));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Output("xml:file"), false);
 }
 
 // Tests parsing --gtest_output=xml:directory/path/
@@ -5906,7 +5938,8 @@ TEST_F(InitGoogleTestTest, OutputXmlDirectory) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Output("xml:directory/path/"));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2,
+                            Flags::Output("xml:directory/path/"), false);
 }
 
 // Tests having a --gtest_print_time flag
@@ -5922,7 +5955,7 @@ TEST_F(InitGoogleTestTest, PrintTimeFlag) {
       NULL
     };
 
-    GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::PrintTime(true));
+    GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::PrintTime(true), false);
 }
 
 // Tests having a --gtest_print_time flag with a "true" value
@@ -5938,7 +5971,7 @@ TEST_F(InitGoogleTestTest, PrintTimeTrue) {
       NULL
     };
 
-    GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::PrintTime(true));
+    GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::PrintTime(true), false);
 }
 
 // Tests having a --gtest_print_time flag with a "false" value
@@ -5954,7 +5987,7 @@ TEST_F(InitGoogleTestTest, PrintTimeFalse) {
       NULL
     };
 
-    GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::PrintTime(false));
+    GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::PrintTime(false), false);
 }
 
 // Tests parsing --gtest_print_time=f.
@@ -5970,7 +6003,7 @@ TEST_F(InitGoogleTestTest, PrintTimeFalse_f) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::PrintTime(false));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::PrintTime(false), false);
 }
 
 // Tests parsing --gtest_print_time=F.
@@ -5986,7 +6019,7 @@ TEST_F(InitGoogleTestTest, PrintTimeFalse_F) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::PrintTime(false));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::PrintTime(false), false);
 }
 
 // Tests parsing --gtest_random_seed=number
@@ -6002,7 +6035,7 @@ TEST_F(InitGoogleTestTest, RandomSeed) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::RandomSeed(1000));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::RandomSeed(1000), false);
 }
 
 // Tests parsing --gtest_repeat=number
@@ -6018,7 +6051,7 @@ TEST_F(InitGoogleTestTest, Repeat) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Repeat(1000));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Repeat(1000), false);
 }
 
 // Tests having a --gtest_also_run_disabled_tests flag
@@ -6034,7 +6067,8 @@ TEST_F(InitGoogleTestTest, AlsoRunDisabledTestsFlag) {
       NULL
     };
 
-    GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::AlsoRunDisabledTests(true));
+    GTEST_TEST_PARSING_FLAGS_(argv, argv2,
+                              Flags::AlsoRunDisabledTests(true), false);
 }
 
 // Tests having a --gtest_also_run_disabled_tests flag with a "true" value
@@ -6050,7 +6084,8 @@ TEST_F(InitGoogleTestTest, AlsoRunDisabledTestsTrue) {
       NULL
     };
 
-    GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::AlsoRunDisabledTests(true));
+    GTEST_TEST_PARSING_FLAGS_(argv, argv2,
+                              Flags::AlsoRunDisabledTests(true), false);
 }
 
 // Tests having a --gtest_also_run_disabled_tests flag with a "false" value
@@ -6066,7 +6101,8 @@ TEST_F(InitGoogleTestTest, AlsoRunDisabledTestsFalse) {
       NULL
     };
 
-    GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::AlsoRunDisabledTests(false));
+    GTEST_TEST_PARSING_FLAGS_(argv, argv2,
+                              Flags::AlsoRunDisabledTests(false), false);
 }
 
 // Tests parsing --gtest_shuffle.
@@ -6082,7 +6118,7 @@ TEST_F(InitGoogleTestTest, ShuffleWithoutValue) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Shuffle(true));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Shuffle(true), false);
 }
 
 // Tests parsing --gtest_shuffle=0.
@@ -6098,7 +6134,7 @@ TEST_F(InitGoogleTestTest, ShuffleFalse_0) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Shuffle(false));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Shuffle(false), false);
 }
 
 // Tests parsing a --gtest_shuffle flag that has a "true"
@@ -6115,7 +6151,23 @@ TEST_F(InitGoogleTestTest, ShuffleTrue) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Shuffle(true));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Shuffle(true), false);
+}
+
+// Tests parsing --gtest_stack_trace_depth=number.
+TEST_F(InitGoogleTestTest, StackTraceDepth) {
+  const char* argv[] = {
+    "foo.exe",
+    "--gtest_stack_trace_depth=5",
+    NULL
+  };
+
+  const char* argv2[] = {
+    "foo.exe",
+    NULL
+  };
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::StackTraceDepth(5), false);
 }
 
 // Tests parsing --gtest_throw_on_failure.
@@ -6131,7 +6183,7 @@ TEST_F(InitGoogleTestTest, ThrowOnFailureWithoutValue) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ThrowOnFailure(true));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ThrowOnFailure(true), false);
 }
 
 // Tests parsing --gtest_throw_on_failure=0.
@@ -6147,7 +6199,7 @@ TEST_F(InitGoogleTestTest, ThrowOnFailureFalse_0) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ThrowOnFailure(false));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ThrowOnFailure(false), false);
 }
 
 // Tests parsing a --gtest_throw_on_failure flag that has a "true"
@@ -6164,7 +6216,7 @@ TEST_F(InitGoogleTestTest, ThrowOnFailureTrue) {
     NULL
   };
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ThrowOnFailure(true));
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ThrowOnFailure(true), false);
 }
 
 #if GTEST_OS_WINDOWS
@@ -6190,7 +6242,7 @@ TEST_F(InitGoogleTestTest, WideStrings) {
   expected_flags.filter = "Foo*";
   expected_flags.list_tests = true;
 
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2, expected_flags);
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, expected_flags, false);
 }
 #endif  // GTEST_OS_WINDOWS
 

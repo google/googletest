@@ -90,6 +90,7 @@ const char kPrintTimeFlag[] = "print_time";
 const char kRandomSeedFlag[] = "random_seed";
 const char kRepeatFlag[] = "repeat";
 const char kShuffleFlag[] = "shuffle";
+const char kStackTraceDepthFlag[] = "stack_trace_depth";
 const char kThrowOnFailureFlag[] = "throw_on_failure";
 
 // A valid random seed must be in [1, kMaxRandomSeed].
@@ -144,6 +145,7 @@ class GTestFlagSaver {
     random_seed_ = GTEST_FLAG(random_seed);
     repeat_ = GTEST_FLAG(repeat);
     shuffle_ = GTEST_FLAG(shuffle);
+    stack_trace_depth_ = GTEST_FLAG(stack_trace_depth);
     throw_on_failure_ = GTEST_FLAG(throw_on_failure);
   }
 
@@ -163,6 +165,7 @@ class GTestFlagSaver {
     GTEST_FLAG(random_seed) = random_seed_;
     GTEST_FLAG(repeat) = repeat_;
     GTEST_FLAG(shuffle) = shuffle_;
+    GTEST_FLAG(stack_trace_depth) = stack_trace_depth_;
     GTEST_FLAG(throw_on_failure) = throw_on_failure_;
   }
  private:
@@ -182,6 +185,7 @@ class GTestFlagSaver {
   internal::Int32 random_seed_;
   internal::Int32 repeat_;
   bool shuffle_;
+  internal::Int32 stack_trace_depth_;
   bool throw_on_failure_;
 } GTEST_ATTRIBUTE_UNUSED_;
 
