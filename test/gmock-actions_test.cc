@@ -515,6 +515,53 @@ TEST(ReturnTest, IsCovariant) {
   EXPECT_EQ(&derived, ret.Perform(make_tuple()));
 }
 
+// Tests that the type of the value passed into Return is converted into T
+// when the action is cast to Action<T(...)> rather than when the action is
+// performed. See comments on testing::internal::ReturnAction in
+// gmock-actions.h for more information.
+class FromType {
+ public:
+  FromType(bool* converted) : converted_(converted) {}
+  bool* converted() const { return converted_; }
+
+ private:
+  bool* const converted_;
+};
+
+class ToType {
+ public:
+  ToType(const FromType& x) { *x.converted() = true; }
+};
+
+TEST(ReturnTest, ConvertsArgumentWhenConverted) {
+  bool converted = false;
+  FromType x(&converted);
+  Action<ToType()> action(Return(x));
+  EXPECT_TRUE(converted) << "Return must convert its argument in its own "
+                         << "conversion operator.";
+  converted = false;
+  action.Perform(tuple<>());
+  EXPECT_FALSE(converted) << "Action must NOT convert its argument "
+                          << "when performed." ;
+}
+
+// We do not support non-const type conversions on Symbian. See
+// definition of implicit_cast in gmock-port.h for more information.
+#if !GTEST_OS_SYMBIAN
+class DestinationType {};
+
+class SourceType {
+ public:
+  // Note: a non-const typecast operator.
+  operator DestinationType() { return DestinationType(); }
+};
+
+TEST(ReturnTest, CanConvertArgumentUsingNonConstTypeCastOperator) {
+  SourceType s;
+  Action<DestinationType()> action(Return(s));
+}
+#endif  // !GTEST_OS_SYMBIAN
+
 // Tests that ReturnNull() returns NULL in a pointer-returning function.
 TEST(ReturnNullTest, WorksInPointerReturningFunction) {
   const Action<int*()> a1 = ReturnNull();

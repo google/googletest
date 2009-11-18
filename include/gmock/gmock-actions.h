@@ -310,7 +310,7 @@ class Action {
 
   // This constructor allows us to turn an Action<Func> object into an
   // Action<F>, as long as F's arguments can be implicitly converted
-  // to Func's and Func's return type cann be implicitly converted to
+  // to Func's and Func's return type can be implicitly converted to
   // F's.
   template <typename Func>
   explicit Action(const Action<Func>& action);
@@ -425,6 +425,27 @@ class ActionAdaptor : public ActionInterface<F1> {
 // Implements the polymorphic Return(x) action, which can be used in
 // any function that returns the type of x, regardless of the argument
 // types.
+//
+// Note: The value passed into Return must be converted into
+// Function<F>::Result when this action is cast to Action<F> rather than
+// when that action is performed. This is important in scenarios like
+//
+// MOCK_METHOD1(Method, T(U));
+// ...
+// {
+//   Foo foo;
+//   X x(&foo);
+//   EXPECT_CALL(mock, Method(_)).WillOnce(Return(x));
+// }
+//
+// In the example above the variable x holds reference to foo which leaves
+// scope and gets destroyed.  If copying X just copies a reference to foo,
+// that copy will be left with a hanging reference.  If conversion to T
+// makes a copy of foo, the above code is safe. To support that scenario, we
+// need to make sure that the type conversion happens inside the EXPECT_CALL
+// statement, and conversion of the result of Return to Action<T(U)> is a
+// good place for that.
+//
 template <typename R>
 class ReturnAction {
  public:
@@ -459,12 +480,22 @@ class ReturnAction {
     typedef typename Function<F>::Result Result;
     typedef typename Function<F>::ArgumentTuple ArgumentTuple;
 
-    explicit Impl(R value) : value_(value) {}
+    // The implicit cast is necessary when Result has more than one
+    // single-argument constructor (e.g. Result is std::vector<int>) and R
+    // has a type conversion operator template.  In that case, value_(value)
+    // won't compile as the compiler doesn't known which constructor of
+    // Result to call.  implicit_cast forces the compiler to convert R to
+    // Result without considering explicit constructors, thus resolving the
+    // ambiguity. value_ is then initialized using its copy constructor.
+    explicit Impl(R value)
+        : value_(::testing::internal::implicit_cast<Result>(value)) {}
 
     virtual Result Perform(const ArgumentTuple&) { return value_; }
 
    private:
-    R value_;
+    GMOCK_COMPILE_ASSERT_(!internal::is_reference<Result>::value,
+                          Result_cannot_be_a_reference_type);
+    Result value_;
   };
 
   R value_;
