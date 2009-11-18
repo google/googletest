@@ -99,9 +99,21 @@ namespace internal {
 // but the proposal was submitted too late.  It will probably make
 // its way into the language in the future.
 template<typename To, typename From>
-inline To implicit_cast(From const &f) {
+inline To implicit_cast(const From& f) {
   return f;
 }
+// Nokia's compiler can't tell which version of implicit_cast to use when
+// the source is a const, causing the compilation to fail with the error
+// "ambiguous access to overloaded function". So we only support the const
+// version of implicit_cast on Symbian.
+#if !GTEST_OS_SYMBIAN
+// This overload is needed in case the From type has a non-const type
+// conversion operator to type To.
+template<typename To, typename From>
+inline To implicit_cast(From& f) {
+  return f;
+}
+#endif
 
 // When you upcast (that is, cast a pointer from type Foo to type
 // SuperclassOfFoo), it's fine to use implicit_cast<>, since upcasts
