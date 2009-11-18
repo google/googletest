@@ -186,8 +186,9 @@ def _NeedToReturnNothingDiagnoser(msg):
   """Diagnoses the NRN disease, given the error messages by gcc."""
 
   regex = (_FILE_LINE_RE + r'instantiated from here\n'
-           r'.*gmock-actions\.h.*error: return-statement with a value, '
-           r'in function returning \'void\'')
+           r'.*gmock-actions\.h.*error: instantiation of '
+           r'\'testing::internal::ReturnAction<R>::Impl<F>::value_\' '
+           r'as type \'void\'')
   diagnosis = """
 You are using an action that returns *something*, but it needs to return
 void.  Please use a void-returning action instead.
@@ -336,8 +337,10 @@ Did you forget to write
 def _NeedToUseReturnNullDiagnoser(msg):
   """Diagnoses the NRNULL disease, given the error messages by gcc."""
 
-  regex = (_FILE_LINE_RE + r'instantiated from here\n'
-           r'.*gmock-actions\.h.*error: invalid conversion from '
+  regex = ('instantiated from \'testing::internal::ReturnAction<R>'
+           '::operator testing::Action<Func>\(\) const.*\n' +
+           _FILE_LINE_RE + r'instantiated from here\n'
+           r'.*gmock-port\.h.*error: invalid conversion from '
            r'\'long int\' to \'(?P<type>.+\*)')
   diagnosis = """
 You are probably calling Return(NULL) and the compiler isn't sure how to turn
