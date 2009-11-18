@@ -633,12 +633,12 @@ GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Ne, !=, "not equal to");
 
 #undef GMOCK_IMPLEMENT_COMPARISON_MATCHER_
 
-// Implements the polymorphic IsNull() matcher, which matches any
+// Implements the polymorphic IsNull() matcher, which matches any raw or smart
 // pointer that is NULL.
 class IsNullMatcher {
  public:
-  template <typename T>
-  bool Matches(T* p) const { return p == NULL; }
+  template <typename Pointer>
+  bool Matches(const Pointer& p) const { return GetRawPointer(p) == NULL; }
 
   void DescribeTo(::std::ostream* os) const { *os << "is NULL"; }
   void DescribeNegationTo(::std::ostream* os) const {
@@ -646,12 +646,12 @@ class IsNullMatcher {
   }
 };
 
-// Implements the polymorphic NotNull() matcher, which matches any
+// Implements the polymorphic NotNull() matcher, which matches any raw or smart
 // pointer that is not NULL.
 class NotNullMatcher {
  public:
-  template <typename T>
-  bool Matches(T* p) const { return p != NULL; }
+  template <typename Pointer>
+  bool Matches(const Pointer& p) const { return GetRawPointer(p) != NULL; }
 
   void DescribeTo(::std::ostream* os) const { *os << "is not NULL"; }
   void DescribeNegationTo(::std::ostream* os) const {

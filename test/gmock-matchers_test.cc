@@ -121,6 +121,7 @@ using testing::internal::ValidateMatcherDescription;
 using testing::internal::kInvalidInterpolation;
 using testing::internal::kPercentInterpolation;
 using testing::internal::kTupleInterpolation;
+using testing::internal::linked_ptr;
 using testing::internal::string;
 
 #ifdef GMOCK_HAS_REGEX
@@ -715,6 +716,24 @@ TEST(IsNullTest, MatchesNullPointer) {
 #endif
 }
 
+TEST(IsNullTest, LinkedPtr) {
+  const Matcher<linked_ptr<int> > m = IsNull();
+  const linked_ptr<int> null_p;
+  const linked_ptr<int> non_null_p(new int);
+
+  EXPECT_TRUE(m.Matches(null_p));
+  EXPECT_FALSE(m.Matches(non_null_p));
+}
+
+TEST(IsNullTest, ReferenceToConstLinkedPtr) {
+  const Matcher<const linked_ptr<double>&> m = IsNull();
+  const linked_ptr<double> null_p;
+  const linked_ptr<double> non_null_p(new double);
+
+  EXPECT_TRUE(m.Matches(null_p));
+  EXPECT_FALSE(m.Matches(non_null_p));
+}
+
 // Tests that IsNull() describes itself properly.
 TEST(IsNullTest, CanDescribeSelf) {
   Matcher<int*> m = IsNull();
@@ -734,6 +753,24 @@ TEST(NotNullTest, MatchesNonNullPointer) {
   const char* p2 = NULL;
   EXPECT_FALSE(m2.Matches(p2));
   EXPECT_TRUE(m2.Matches("hi"));
+}
+
+TEST(NotNullTest, LinkedPtr) {
+  const Matcher<linked_ptr<int> > m = NotNull();
+  const linked_ptr<int> null_p;
+  const linked_ptr<int> non_null_p(new int);
+
+  EXPECT_FALSE(m.Matches(null_p));
+  EXPECT_TRUE(m.Matches(non_null_p));
+}
+
+TEST(NotNullTest, ReferenceToConstLinkedPtr) {
+  const Matcher<const linked_ptr<double>&> m = NotNull();
+  const linked_ptr<double> null_p;
+  const linked_ptr<double> non_null_p(new double);
+
+  EXPECT_FALSE(m.Matches(null_p));
+  EXPECT_TRUE(m.Matches(non_null_p));
 }
 
 // Tests that NotNull() describes itself properly.
