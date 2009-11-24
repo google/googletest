@@ -28,18 +28,16 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-"""Tests for run_tests.py test runner script."""
+"""Tests for run_tests_util.py test runner script."""
 
 __author__ = 'vladl@google.com (Vlad Losev)'
 
 import os
 import re
 import sets
-import sys
 import unittest
 
-sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), os.pardir))
-import run_tests
+import run_tests_util
 
 
 GTEST_DBG_DIR = 'scons/build/dbg/gtest/scons'
@@ -50,7 +48,7 @@ GTEST_OTHER_DIR = 'scons/build/other/gtest/scons'
 def AddExeExtension(path):
   """Appends .exe to the path on Windows or Cygwin."""
 
-  if run_tests.IS_WINDOWS or run_tests.IS_CYGWIN:
+  if run_tests_util.IS_WINDOWS or run_tests_util.IS_CYGWIN:
     return path + '.exe'
   else:
     return path
@@ -109,6 +107,8 @@ class FakePath(object):
 
     return tree
 
+  # Silences pylint warning about using standard names.
+  # pylint: disable-msg=C6409
   def normpath(self, path):
     return os.path.normpath(path)
 
@@ -141,6 +141,7 @@ class FakeOs(object):
     # Some methods/attributes are delegated to the real os module.
     self.environ = os.environ
 
+  # pylint: disable-msg=C6409
   def listdir(self, path):
     assert self.path.isdir(path)
     return self.path.PathElement(path).iterkeys()
@@ -169,7 +170,7 @@ class GetTestsToRunTest(unittest.TestCase):
       # On Windows and Cygwin, the test file names have the .exe extension, but
       # they can be invoked either by name or by name+extension. Our test must
       # accommodate both situations.
-      if run_tests.IS_WINDOWS or run_tests.IS_CYGWIN:
+      if run_tests_util.IS_WINDOWS or run_tests_util.IS_CYGWIN:
         executable = re.sub(r'\.exe$', '', executable)
       return (directory, executable)
 
@@ -187,14 +188,14 @@ class GetTestsToRunTest(unittest.TestCase):
 
   def setUp(self):
     self.fake_os = FakeOs(FakePath(
-        current_dir=os.path.abspath(os.path.dirname(run_tests.__file__)),
+        current_dir=os.path.abspath(os.path.dirname(run_tests_util.__file__)),
         known_paths=[AddExeExtension(GTEST_DBG_DIR + '/gtest_unittest'),
                      AddExeExtension(GTEST_OPT_DIR + '/gtest_unittest'),
                      'test/gtest_color_test.py']))
     self.fake_configurations = ['dbg', 'opt']
-    self.test_runner = run_tests.TestRunner(injected_os=self.fake_os,
-                                            injected_subprocess=None,
-                                            injected_script_dir='.')
+    self.test_runner = run_tests_util.TestRunner(script_dir='.',
+                                                 injected_os=self.fake_os,
+                                                 injected_subprocess=None)
 
   def testBinaryTestsOnly(self):
     """Exercises GetTestsToRun with parameters designating binary tests only."""
@@ -419,12 +420,12 @@ class GetTestsToRunTest(unittest.TestCase):
     """Verifies that GetTestsToRun ignores non-test files in the filesystem."""
 
     self.fake_os = FakeOs(FakePath(
-        current_dir=os.path.abspath(os.path.dirname(run_tests.__file__)),
+        current_dir=os.path.abspath(os.path.dirname(run_tests_util.__file__)),
         known_paths=[AddExeExtension(GTEST_DBG_DIR + '/gtest_nontest'),
                      'test/']))
-    self.test_runner = run_tests.TestRunner(injected_os=self.fake_os,
-                                            injected_subprocess=None,
-                                            injected_script_dir='.')
+    self.test_runner = run_tests_util.TestRunner(script_dir='.',
+                                                 injected_os=self.fake_os,
+                                                 injected_subprocess=None)
     self.AssertResultsEqual(
         self.test_runner.GetTestsToRun(
             [],
@@ -446,9 +447,9 @@ class GetTestsToRunTest(unittest.TestCase):
             AddExeExtension('/d/' + GTEST_OPT_DIR + '/gtest_unittest'),
             '/d/test/gtest_color_test.py']))
     self.fake_configurations = ['dbg', 'opt']
-    self.test_runner = run_tests.TestRunner(injected_os=self.fake_os,
-                                            injected_subprocess=None,
-                                            injected_script_dir='/d/')
+    self.test_runner = run_tests_util.TestRunner(script_dir='/d/',
+                                                 injected_os=self.fake_os,
+                                                 injected_subprocess=None)
     # A binary test.
     self.AssertResultsEqual(
         self.test_runner.GetTestsToRun(
@@ -467,7 +468,6 @@ class GetTestsToRunTest(unittest.TestCase):
             False,
             available_configurations=self.fake_configurations),
         ([('/d/' + GTEST_DBG_DIR, '/d/test/gtest_color_test.py')], []))
-
 
   def testNonTestBinary(self):
     """Exercises GetTestsToRun with a non-test parameter."""
@@ -489,16 +489,17 @@ class GetTestsToRunTest(unittest.TestCase):
             False,
             available_configurations=self.fake_configurations))
 
-  if run_tests.IS_WINDOWS or run_tests.IS_CYGWIN:
+  if run_tests_util.IS_WINDOWS or run_tests_util.IS_CYGWIN:
+
     def testDoesNotPickNonExeFilesOnWindows(self):
       """Verifies that GetTestsToRun does not find _test files on Windows."""
 
       self.fake_os = FakeOs(FakePath(
-          current_dir=os.path.abspath(os.path.dirname(run_tests.__file__)),
+          current_dir=os.path.abspath(os.path.dirname(run_tests_util.__file__)),
           known_paths=['/d/' + GTEST_DBG_DIR + '/gtest_test', 'test/']))
-      self.test_runner = run_tests.TestRunner(injected_os=self.fake_os,
-                                              injected_subprocess=None,
-                                              injected_script_dir='.')
+      self.test_runner = run_tests_util.TestRunner(script_dir='.',
+                                                   injected_os=self.fake_os,
+                                                   injected_subprocess=None)
       self.AssertResultsEqual(
           self.test_runner.GetTestsToRun(
               [],
@@ -525,14 +526,16 @@ class RunTestsTest(unittest.TestCase):
 
   def setUp(self):
     self.fake_os = FakeOs(FakePath(
-        current_dir=os.path.abspath(os.path.dirname(run_tests.__file__)),
+        current_dir=os.path.abspath(os.path.dirname(run_tests_util.__file__)),
         known_paths=[
             AddExeExtension(GTEST_DBG_DIR + '/gtest_unittest'),
             AddExeExtension(GTEST_OPT_DIR + '/gtest_unittest'),
             'test/gtest_color_test.py']))
     self.fake_configurations = ['dbg', 'opt']
-    self.test_runner = run_tests.TestRunner(injected_os=self.fake_os,
-                                            injected_subprocess=None)
+    self.test_runner = run_tests_util.TestRunner(
+        script_dir=os.path.dirname(__file__) or '.',
+        injected_os=self.fake_os,
+        injected_subprocess=None)
     self.num_spawn_calls = 0  # A number of calls to spawn.
 
   def testRunPythonTestSuccess(self):
@@ -608,6 +611,65 @@ class RunTestsTest(unittest.TestCase):
             [(GTEST_DBG_DIR, GTEST_DBG_DIR + '/gtest_unittest')]),
         0)
     self.assertEqual(self.num_spawn_calls, 2)
+
+
+class ParseArgsTest(unittest.TestCase):
+  """Exercises ParseArgs."""
+
+  def testNoOptions(self):
+    options, args = run_tests_util.ParseArgs('gtest', argv=['script.py'])
+    self.assertEqual(args, ['script.py'])
+    self.assert_(options.configurations is None)
+    self.assertFalse(options.built_configurations)
+
+  def testOptionC(self):
+    options, args = run_tests_util.ParseArgs(
+        'gtest', argv=['script.py', '-c', 'dbg'])
+    self.assertEqual(args, ['script.py'])
+    self.assertEqual(options.configurations, 'dbg')
+    self.assertFalse(options.built_configurations)
+
+  def testOptionA(self):
+    options, args = run_tests_util.ParseArgs('gtest', argv=['script.py', '-a'])
+    self.assertEqual(args, ['script.py'])
+    self.assertEqual(options.configurations, 'all')
+    self.assertFalse(options.built_configurations)
+
+  def testOptionB(self):
+    options, args = run_tests_util.ParseArgs('gtest', argv=['script.py', '-b'])
+    self.assertEqual(args, ['script.py'])
+    self.assert_(options.configurations is None)
+    self.assertTrue(options.built_configurations)
+
+  def testOptionCAndOptionB(self):
+    options, args = run_tests_util.ParseArgs(
+        'gtest', argv=['script.py', '-c', 'dbg', '-b'])
+    self.assertEqual(args, ['script.py'])
+    self.assertEqual(options.configurations, 'dbg')
+    self.assertTrue(options.built_configurations)
+
+  def testOptionH(self):
+    help_called = [False]
+
+    # Suppresses lint warning on unused arguments.  These arguments are
+    # required by optparse, even though they are unused.
+    # pylint: disable-msg=W0613
+    def VerifyHelp(option, opt, value, parser):
+      help_called[0] = True
+
+    # Verifies that -h causes the help callback to be called.
+    help_called[0] = False
+    _, args = run_tests_util.ParseArgs(
+        'gtest', argv=['script.py', '-h'], help_callback=VerifyHelp)
+    self.assertEqual(args, ['script.py'])
+    self.assertTrue(help_called[0])
+
+    # Verifies that --help causes the help callback to be called.
+    help_called[0] = False
+    _, args = run_tests_util.ParseArgs(
+        'gtest', argv=['script.py', '--help'], help_callback=VerifyHelp)
+    self.assertEqual(args, ['script.py'])
+    self.assertTrue(help_called[0])
 
 
 if __name__ == '__main__':
