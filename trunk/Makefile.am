@@ -11,6 +11,7 @@ EXTRA_DIST = \
   include/gtest/internal/gtest-type-util.h.pump \
   include/gtest/internal/gtest-param-util-generated.h.pump \
   make/Makefile \
+  run_tests.py \
   scons/SConscript \
   scons/SConstruct \
   scons/SConstruct.common \
@@ -431,6 +432,10 @@ test_gtest_xml_output_unittest__SOURCES = test/gtest_xml_output_unittest_.cc
 test_gtest_xml_output_unittest__LDADD = lib/libgtest.la
 check_SCRIPTS += test/gtest_xml_output_unittest.py
 TESTS += test/gtest_xml_output_unittest.py
+
+check_SCRIPTS += test/run_tests_util.py \
+                 test/run_tests_util_test.py
+TESTS += test/run_tests_util_test.py
 
 # TODO(wan@google.com): make the build script compile and run the
 #   negative-compilation tests.  (The test/gtest_nc* files are unfinished

@@ -138,7 +138,7 @@ def GetTempDir():
   return _temp_dir
 
 
-def GetTestExecutablePath(executable_name):
+def GetTestExecutablePath(executable_name, build_dir=None):
   """Returns the absolute path of the test binary given its name.
 
   The function will print a message and abort the program if the resulting file
@@ -146,12 +146,15 @@ def GetTestExecutablePath(executable_name):
 
   Args:
     executable_name: name of the test binary that the test script runs.
+    build_dir:       directory where to look for executables, by default
+                     the result of GetBuildDir().
 
   Returns:
     The absolute path of the test binary.
   """
 
-  path = os.path.abspath(os.path.join(GetBuildDir(), executable_name))
+  path = os.path.abspath(os.path.join(build_dir or GetBuildDir(),
+                                      executable_name))
   if (IS_WINDOWS or IS_CYGWIN) and not path.endswith('.exe'):
     path += '.exe'
 
