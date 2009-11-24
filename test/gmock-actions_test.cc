@@ -545,9 +545,6 @@ TEST(ReturnTest, ConvertsArgumentWhenConverted) {
                           << "when performed." ;
 }
 
-// We do not support non-const type conversions on Symbian. See
-// definition of implicit_cast in gmock-port.h for more information.
-#if !GTEST_OS_SYMBIAN
 class DestinationType {};
 
 class SourceType {
@@ -560,7 +557,6 @@ TEST(ReturnTest, CanConvertArgumentUsingNonConstTypeCastOperator) {
   SourceType s;
   Action<DestinationType()> action(Return(s));
 }
-#endif  // !GTEST_OS_SYMBIAN
 
 // Tests that ReturnNull() returns NULL in a pointer-returning function.
 TEST(ReturnNullTest, WorksInPointerReturningFunction) {

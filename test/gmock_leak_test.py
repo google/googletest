@@ -33,51 +33,59 @@
 
 __author__ = 'wan@google.com (Zhanyong Wan)'
 
-import gmock_test_utils
 import os
 import unittest
 
-IS_WINDOWS = os.name == 'nt'
+import gmock_test_utils
 
-if IS_WINDOWS:
-  # TODO(wan@google.com): test the opt build too.  We should do it
-  # when Vlad Losev's work on Google Test's Python test driver is
-  # done, such that we can reuse the work.
-  PROGRAM = r'..\build.dbg\gmock_leak_test_.exe'
-else:
-  PROGRAM = 'gmock_leak_test_'
 
-PROGRAM_PATH = os.path.join(gmock_test_utils.GetBuildDir(), PROGRAM)
-TEST_WITH_EXPECT_CALL = PROGRAM_PATH + ' --gtest_filter=*ExpectCall*'
-TEST_WITH_ON_CALL = PROGRAM_PATH + ' --gtest_filter=*OnCall*'
-TEST_MULTIPLE_LEAKS = PROGRAM_PATH + ' --gtest_filter=*MultipleLeaked*'
+PROGRAM_PATH = gmock_test_utils.GetTestExecutablePath('gmock_leak_test_')
+TEST_WITH_EXPECT_CALL = [PROGRAM_PATH, '--gtest_filter=*ExpectCall*']
+TEST_WITH_ON_CALL = [PROGRAM_PATH, '--gtest_filter=*OnCall*']
+TEST_MULTIPLE_LEAKS = [PROGRAM_PATH, '--gtest_filter=*MultipleLeaked*']
 
 
 class GMockLeakTest(unittest.TestCase):
 
   def testCatchesLeakedMockByDefault(self):
-    self.assertNotEqual(os.system(TEST_WITH_EXPECT_CALL), 0)
-    self.assertNotEqual(os.system(TEST_WITH_ON_CALL), 0)
+    self.assertNotEqual(
+        0,
+        gmock_test_utils.Subprocess(TEST_WITH_EXPECT_CALL).exit_code)
+    self.assertNotEqual(
+        0,
+        gmock_test_utils.Subprocess(TEST_WITH_ON_CALL).exit_code)
 
   def testDoesNotCatchLeakedMockWhenDisabled(self):
     self.assertEquals(
-        0, os.system(TEST_WITH_EXPECT_CALL + ' --gmock_catch_leaked_mocks=0'))
+        0,
+        gmock_test_utils.Subprocess(TEST_WITH_EXPECT_CALL +
+                                    ['--gmock_catch_leaked_mocks=0']).exit_code)
     self.assertEquals(
-        0, os.system(TEST_WITH_ON_CALL + ' --gmock_catch_leaked_mocks=0'))
+        0,
+        gmock_test_utils.Subprocess(TEST_WITH_ON_CALL +
+                                    ['--gmock_catch_leaked_mocks=0']).exit_code)
 
   def testCatchesLeakedMockWhenEnabled(self):
     self.assertNotEqual(
-        os.system(TEST_WITH_EXPECT_CALL + ' --gmock_catch_leaked_mocks'), 0)
+        0,
+        gmock_test_utils.Subprocess(TEST_WITH_EXPECT_CALL +
+                                    ['--gmock_catch_leaked_mocks']).exit_code)
     self.assertNotEqual(
-        os.system(TEST_WITH_ON_CALL + ' --gmock_catch_leaked_mocks'), 0)
+        0,
+        gmock_test_utils.Subprocess(TEST_WITH_ON_CALL +
+                                    ['--gmock_catch_leaked_mocks']).exit_code)
 
   def testCatchesLeakedMockWhenEnabledWithExplictFlagValue(self):
     self.assertNotEqual(
-        os.system(TEST_WITH_EXPECT_CALL + ' --gmock_catch_leaked_mocks=1'), 0)
+        0,
+        gmock_test_utils.Subprocess(TEST_WITH_EXPECT_CALL +
+                                    ['--gmock_catch_leaked_mocks=1']).exit_code)
 
   def testCatchesMultipleLeakedMocks(self):
     self.assertNotEqual(
-        os.system(TEST_MULTIPLE_LEAKS + ' --gmock_catch_leaked_mocks'), 0)
+        0,
+        gmock_test_utils.Subprocess(TEST_MULTIPLE_LEAKS +
+                                    ['--gmock_catch_leaked_mocks']).exit_code)
 
 
 if __name__ == '__main__':

@@ -340,11 +340,11 @@ def _NeedToUseReturnNullDiagnoser(msg):
   regex = ('instantiated from \'testing::internal::ReturnAction<R>'
            '::operator testing::Action<Func>\(\) const.*\n' +
            _FILE_LINE_RE + r'instantiated from here\n'
-           r'.*gmock-port\.h.*error: invalid conversion from '
-           r'\'long int\' to \'(?P<type>.+\*)')
+           r'.*error: no matching function for call to \'implicit_cast\('
+           r'long int&\)')
   diagnosis = """
 You are probably calling Return(NULL) and the compiler isn't sure how to turn
-NULL into a %(type)s*. Use ReturnNull() instead.
+NULL into the right type. Use ReturnNull() instead.
 Note: the line number may be off; please fix all instances of Return(NULL)."""
   return _GenericDiagnoser('NRNULL', 'Need to use ReturnNull',
                            regex, diagnosis, msg)

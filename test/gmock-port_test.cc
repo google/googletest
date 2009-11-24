@@ -76,10 +76,6 @@ TEST(ImplicitCastTest, CanUseInheritance) {
   EXPECT_EQ(derived.member(), base.member());
 }
 
-// The non-const version is not enabled for Symbian since the Nokia compiler
-// cannot decide which version of the overloaded implicit_cast method to use
-// when the source is a const.
-#if !GTEST_OS_SYMBIAN
 class Castable {
  public:
   Castable(bool* converted) : converted_(converted) {}
@@ -98,7 +94,6 @@ TEST(ImplicitCastTest, CanUseNonConstCastOperator) {
   Base base = ::testing::internal::implicit_cast<Base>(castable);
   EXPECT_TRUE(converted);
 }
-#endif  // !GTEST_OS_SYMBIAN
 
 class ConstCastable {
  public:
@@ -119,10 +114,6 @@ TEST(ImplicitCastTest, CanUseConstCastOperatorOnConstValues) {
   EXPECT_TRUE(converted);
 }
 
-// The non-const version is not enabled for Symbian since the Nokia compiler
-// cannot decide which version of the overloaded implicit_cast method to use
-// when the source is a const.
-#if !GTEST_OS_SYMBIAN
 class ConstAndNonConstCastable {
  public:
   ConstAndNonConstCastable(bool* converted, bool* const_converted)
@@ -156,7 +147,6 @@ TEST(ImplicitCastTest, CanSelectBetweenConstAndNonConstCasrAppropriately) {
   EXPECT_FALSE(converted);
   EXPECT_TRUE(const_converted);
 }
-#endif  // !GTEST_OS_SYMBIAN
 
 class To {
  public:

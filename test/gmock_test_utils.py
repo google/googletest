@@ -35,7 +35,19 @@ __author__ = 'wan@google.com (Zhanyong Wan)'
 
 import os
 import sys
-import unittest
+
+# Determines path to gtest_test_utils and imports it.
+SCRIPT_DIR = os.path.dirname(__file__) or '.'
+
+# isdir resolves symbolic links.
+gtest_tests_util_dir = os.path.join(SCRIPT_DIR, '../gtest/test')
+if os.path.isdir(gtest_tests_util_dir):
+  GTEST_TESTS_UTIL_DIR = gtest_tests_util_dir
+else:
+  GTEST_TESTS_UTIL_DIR = os.path.join(SCRIPT_DIR, '../../gtest/test')
+
+sys.path.append(GTEST_TESTS_UTIL_DIR)
+import gtest_test_utils  # pylint: disable-msg=C6204
 
 
 # Initially maps a flag to its default value.  After
@@ -96,6 +108,22 @@ def GetBuildDir():
   return os.path.abspath(GetFlag('gmock_build_dir'))
 
 
+def GetTestExecutablePath(executable_name):
+  """Returns the absolute path of the test binary given its name.
+
+  The function will print a message and abort the program if the resulting file
+  doesn't exist.
+
+  Args:
+    executable_name: name of the test binary that the test script runs.
+
+  Returns:
+    The absolute path of the test binary.
+  """
+
+  return gtest_test_utils.GetTestExecutablePath(executable_name, GetBuildDir())
+
+
 def GetExitStatus(exit_code):
   """Returns the argument to exit(), or -1 if exit() wasn't called.
 
@@ -116,11 +144,15 @@ def GetExitStatus(exit_code):
       return -1
 
 
+# Exposes Subprocess from gtest_test_utils.
+Subprocess = gtest_test_utils.Subprocess  # pylint: disable-msg=C6409
+
+
 def Main():
   """Runs the unit test."""
 
   # We must call _ParseAndStripGMockFlags() before calling
-  # unittest.main().  Otherwise the latter will be confused by the
-  # --gmock_* flags.
+  # gtest_test_utils.Main().  Otherwise unittest.main it calls will be
+  # confused by the --gmock_* flags.
   _ParseAndStripGMockFlags(sys.argv)
-  unittest.main()
+  gtest_test_utils.Main()

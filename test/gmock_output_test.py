@@ -40,29 +40,21 @@ SYNOPSIS
 
 __author__ = 'wan@google.com (Zhanyong Wan)'
 
-import gmock_test_utils
 import os
 import re
-import string
 import sys
 import unittest
+
+import gmock_test_utils
 
 
 # The flag for generating the golden file
 GENGOLDEN_FLAG = '--gengolden'
 
-IS_WINDOWS = os.name == 'nt'
-
-if IS_WINDOWS:
-  PROGRAM = r'..\build.dbg\gmock_output_test_.exe'
-else:
-  PROGRAM = 'gmock_output_test_'
-
-PROGRAM_PATH = os.path.join(gmock_test_utils.GetBuildDir(), PROGRAM)
-COMMAND = PROGRAM_PATH + ' --gtest_stack_trace_depth=0 --gtest_print_time=0'
+PROGRAM_PATH = gmock_test_utils.GetTestExecutablePath('gmock_output_test_')
+COMMAND = [PROGRAM_PATH, '--gtest_stack_trace_depth=0', '--gtest_print_time=0']
 GOLDEN_NAME = 'gmock_output_test_golden.txt'
-GOLDEN_PATH = os.path.join(gmock_test_utils.GetSourceDir(),
-                           GOLDEN_NAME)
+GOLDEN_PATH = os.path.join(gmock_test_utils.GetSourceDir(), GOLDEN_NAME)
 
 
 def ToUnixLineEnding(s):
@@ -144,51 +136,10 @@ def GetNormalizedOutputAndLeakyTests(output):
   return (RemoveTestNamesOfLeakedMocks(output), GetLeakyTests(output))
 
 
-def IterShellCommandOutput(cmd, stdin_string=None):
-  """Runs a command in a sub-process, and iterates the lines in its STDOUT.
+def GetShellCommandOutput(cmd):
+  """Runs a command in a sub-process, and returns its STDOUT in a string."""
 
-  Args:
-
-    cmd:           The shell command.
-    stdin_string:  The string to be fed to the STDIN of the sub-process;
-                   If None, the sub-process will inherit the STDIN
-                   from the parent process.
-  """
-
-  # Spawns cmd in a sub-process, and gets its standard I/O file objects.
-  stdin_file, stdout_file = os.popen2(cmd, 'b')
-
-  # If the caller didn't specify a string for STDIN, gets it from the
-  # parent process.
-  if stdin_string is None:
-    stdin_string = sys.stdin.read()
-
-  # Feeds the STDIN string to the sub-process.
-  stdin_file.write(stdin_string)
-  stdin_file.close()
-
-  while True:
-    line = stdout_file.readline()
-    if not line:  # EOF
-      stdout_file.close()
-      break
-
-    yield line
-
-
-def GetShellCommandOutput(cmd, stdin_string=None):
-  """Runs a command in a sub-process, and returns its STDOUT in a string.
-
-  Args:
-
-    cmd:           The shell command.
-    stdin_string:  The string to be fed to the STDIN of the sub-process;
-                   If None, the sub-process will inherit the STDIN
-                   from the parent process.
-  """
-
-  lines = list(IterShellCommandOutput(cmd, stdin_string))
-  return string.join(lines, '')
+  return gmock_test_utils.Subprocess(cmd, capture_stderr=False).output
 
 
 def GetNormalizedCommandOutputAndLeakyTests(cmd):
@@ -200,7 +151,7 @@ def GetNormalizedCommandOutputAndLeakyTests(cmd):
 
   # Disables exception pop-ups on Windows.
   os.environ['GTEST_CATCH_EXCEPTIONS'] = '1'
-  return GetNormalizedOutputAndLeakyTests(GetShellCommandOutput(cmd, ''))
+  return GetNormalizedOutputAndLeakyTests(GetShellCommandOutput(cmd))
 
 
 class GMockOutputTest(unittest.TestCase):

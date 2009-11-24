@@ -81,39 +81,22 @@ namespace internal {
 #error "At least Visual C++ 2003 (7.1) is required to compile Google Mock."
 #endif
 
-// Use implicit_cast as a safe version of static_cast or const_cast
-// for upcasting in the type hierarchy (i.e. casting a pointer to Foo
-// to a pointer to SuperclassOfFoo or casting a pointer to Foo to
-// a const pointer to Foo).
-// When you use implicit_cast, the compiler checks that the cast is safe.
-// Such explicit implicit_casts are necessary in surprisingly many
-// situations where C++ demands an exact type match instead of an
-// argument type convertable to a target type.
+// Use implicit_cast as a safe version of static_cast for upcasting in
+// the type hierarchy (e.g. casting a Foo* to a SuperclassOfFoo* or a
+// const Foo*).  When you use implicit_cast, the compiler checks that
+// the cast is safe.  Such explicit implicit_casts are necessary in
+// surprisingly many situations where C++ demands an exact type match
+// instead of an argument type convertable to a target type.
 //
-// The From type can be inferred, so the preferred syntax for using
-// implicit_cast is the same as for static_cast etc.:
+// The syntax for using implicit_cast is the same as for static_cast:
 //
 //   implicit_cast<ToType>(expr)
 //
 // implicit_cast would have been part of the C++ standard library,
 // but the proposal was submitted too late.  It will probably make
 // its way into the language in the future.
-template<typename To, typename From>
-inline To implicit_cast(const From& f) {
-  return f;
-}
-// Nokia's compiler can't tell which version of implicit_cast to use when
-// the source is a const, causing the compilation to fail with the error
-// "ambiguous access to overloaded function". So we only support the const
-// version of implicit_cast on Symbian.
-#if !GTEST_OS_SYMBIAN
-// This overload is needed in case the From type has a non-const type
-// conversion operator to type To.
-template<typename To, typename From>
-inline To implicit_cast(From& f) {
-  return f;
-}
-#endif
+template<typename To>
+inline To implicit_cast(To x) { return x; }
 
 // When you upcast (that is, cast a pointer from type Foo to type
 // SuperclassOfFoo), it's fine to use implicit_cast<>, since upcasts
@@ -139,7 +122,8 @@ inline To down_cast(From* f) {  // so we only accept pointers
   // optimized build at run-time, as it will be optimized away
   // completely.
   if (false) {
-    implicit_cast<From*, To>(0);
+    const To to = NULL;
+    implicit_cast<From*>(to);
   }
 
 #if GTEST_HAS_RTTI
