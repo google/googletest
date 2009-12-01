@@ -846,7 +846,8 @@ Test project to match your project's.
 
 To update this setting open the project properties in the Visual
 Studio IDE then select the branch Configuration Properties | C/C++ |
-Code Generation and change the option "Runtime Library".
+Code Generation and change the option "Runtime Library".  You may also try
+using gtest-md.vcproj instead of gtest.vcproj.
 
 == I put my tests in a library and Google Test doesn't run them. What's happening? ==
 Have you read a
@@ -881,4 +882,4 @@ not enough information in your question):
   * the name and version of your compiler,
   * the complete command line flags you give to your compiler,
   * the complete compiler error messages (if the question is about compilation),
-  * the _actual_ code (ideally, a minimal but complete program) that has the problem you encounter.
+  * the _actual_ code (ideally, a minimal but complete program) that has the problem you encounter.
