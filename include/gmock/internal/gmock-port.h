@@ -123,7 +123,7 @@ inline To down_cast(From* f) {  // so we only accept pointers
   // completely.
   if (false) {
     const To to = NULL;
-    implicit_cast<From*>(to);
+    ::testing::internal::implicit_cast<From*>(to);
   }
 
 #if GTEST_HAS_RTTI

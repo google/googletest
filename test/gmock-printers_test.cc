@@ -443,8 +443,14 @@ TEST(PrintPointerToPointerTest, IntPointerPointer) {
 void MyFunction(int n) {}
 
 TEST(PrintPointerTest, NonMemberFunctionPointer) {
-  EXPECT_EQ(PrintPointer(reinterpret_cast<const void*>(&MyFunction)),
-            Print(&MyFunction));
+  // We cannot directly cast &MyFunction to const void* because the
+  // standard disallows casting between pointers to functions and
+  // pointers to objects, and some compilers (e.g. GCC 3.4) enforce
+  // this limitation.
+  EXPECT_EQ(
+      PrintPointer(reinterpret_cast<const void*>(
+          reinterpret_cast<internal::BiggestInt>(&MyFunction))),
+      Print(&MyFunction));
   int (*p)(bool) = NULL;  // NOLINT
   EXPECT_EQ("NULL", Print(p));
 }
@@ -973,7 +979,12 @@ TEST(PrintReferenceTest, HandlesFunctionPointer) {
   void (*fp)(int n) = &MyFunction;
   const string fp_pointer_string =
       PrintPointer(reinterpret_cast<const void*>(&fp));
-  const string fp_string = PrintPointer(reinterpret_cast<const void*>(fp));
+  // We cannot directly cast &MyFunction to const void* because the
+  // standard disallows casting between pointers to functions and
+  // pointers to objects, and some compilers (e.g. GCC 3.4) enforce
+  // this limitation.
+  const string fp_string = PrintPointer(reinterpret_cast<const void*>(
+      reinterpret_cast<internal::BiggestInt>(fp)));
   EXPECT_EQ("@" + fp_pointer_string + " " + fp_string,
             PrintByRef(fp));
 }

@@ -194,9 +194,6 @@ GtestTest(env, 'gmock_test', [gtest, gmock_main])
 # gmock_all_test is commented to save time building and running tests.
 # Uncomment if necessary.
 #GtestTest(env, 'gmock_all_test', [gtest, gmock_main])
-# TODO (vladl): Add a test verifying that gmock can be built from
-# testing/base/gunit.cc and testing/base/internal/gmock-all.cc after merging
-# into the main branch.  This is the API for Windows users.
 
 ############################################################
 # Tests targets using custom environments.

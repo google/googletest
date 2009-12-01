@@ -43,7 +43,6 @@ __author__ = 'wan@google.com (Zhanyong Wan)'
 import os
 import re
 import sys
-import unittest
 
 import gmock_test_utils
 
@@ -154,7 +153,7 @@ def GetNormalizedCommandOutputAndLeakyTests(cmd):
   return GetNormalizedOutputAndLeakyTests(GetShellCommandOutput(cmd))
 
 
-class GMockOutputTest(unittest.TestCase):
+class GMockOutputTest(gmock_test_utils.TestCase):
   def testOutput(self):
     (output, leaky_tests) = GetNormalizedCommandOutputAndLeakyTests(COMMAND)
     golden_file = open(GOLDEN_PATH, 'rb')

@@ -36,6 +36,7 @@ __author__ = 'wan@google.com (Zhanyong Wan)'
 import os
 import sys
 
+
 # Determines path to gtest_test_utils and imports it.
 SCRIPT_DIR = os.path.dirname(__file__) or '.'
 
@@ -144,8 +145,16 @@ def GetExitStatus(exit_code):
       return -1
 
 
+# Suppresses the "Invalid const name" lint complaint
+# pylint: disable-msg=C6409
+
 # Exposes Subprocess from gtest_test_utils.
-Subprocess = gtest_test_utils.Subprocess  # pylint: disable-msg=C6409
+Subprocess = gtest_test_utils.Subprocess
+
+# Exposes TestCase from gtest_test_utils.
+TestCase = gtest_test_utils.TestCase
+
+# pylint: enable-msg=C6409
 
 
 def Main():

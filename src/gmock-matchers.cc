@@ -83,18 +83,6 @@ int GetParamIndex(const char* param_names[], const string& param_name) {
   return kInvalidInterpolation;
 }
 
-// If *pstr starts with the given prefix, modifies *pstr to be right
-// past the prefix and returns true; otherwise leaves *pstr unchanged
-// and returns false.  None of pstr, *pstr, and prefix can be NULL.
-bool SkipPrefix(const char* prefix, const char** pstr) {
-  const size_t prefix_len = strlen(prefix);
-  if (strncmp(*pstr, prefix, prefix_len) == 0) {
-    *pstr += prefix_len;
-    return true;
-  }
-  return false;
-}
-
 // Helper function used by ValidateMatcherDescription() to format
 // error messages.
 string FormatMatcherDescriptionSyntaxError(const char* description,

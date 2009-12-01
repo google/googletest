@@ -33,8 +33,6 @@
 
 __author__ = 'wan@google.com (Zhanyong Wan)'
 
-import os
-import unittest
 
 import gmock_test_utils
 
@@ -45,7 +43,7 @@ TEST_WITH_ON_CALL = [PROGRAM_PATH, '--gtest_filter=*OnCall*']
 TEST_MULTIPLE_LEAKS = [PROGRAM_PATH, '--gtest_filter=*MultipleLeaked*']
 
 
-class GMockLeakTest(unittest.TestCase):
+class GMockLeakTest(gmock_test_utils.TestCase):
 
   def testCatchesLeakedMockByDefault(self):
     self.assertNotEqual(
