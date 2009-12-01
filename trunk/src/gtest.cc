@@ -4355,6 +4355,18 @@ bool AlwaysTrue() {
   return true;
 }
 
+// If *pstr starts with the given prefix, modifies *pstr to be right
+// past the prefix and returns true; otherwise leaves *pstr unchanged
+// and returns false.  None of pstr, *pstr, and prefix can be NULL.
+bool SkipPrefix(const char* prefix, const char** pstr) {
+  const size_t prefix_len = strlen(prefix);
+  if (strncmp(*pstr, prefix, prefix_len) == 0) {
+    *pstr += prefix_len;
+    return true;
+  }
+  return false;
+}
+
 // Parses a string as a command line flag.  The string should have
 // the format "--flag=value".  When def_optional is true, the "=value"
 // part can be omitted.
@@ -4441,18 +4453,6 @@ bool ParseStringFlag(const char* str, const char* flag, String* value) {
 
   // Sets *value to the value of the flag.
   *value = value_str;
-  return true;
-}
-
-// Determines whether a string pointed by *str has the prefix parameter as
-// its prefix and advances it to point past the prefix if it does.
-static bool SkipPrefix(const char* prefix, const char** str) {
-  const size_t prefix_len = strlen(prefix);
-
-  if (strncmp(*str, prefix, prefix_len) != 0)
-    return false;
-
-  *str += prefix_len;
   return true;
 }
 
