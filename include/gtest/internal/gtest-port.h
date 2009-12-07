@@ -787,22 +787,23 @@ size_t GetThreadCount();
 // Therefore Google Test is not thread-safe.
 #define GTEST_IS_THREADSAFE 0
 
-#if defined(__SYMBIAN32__) || defined(__IBMCPP__)
-
 // Passing non-POD classes through ellipsis (...) crashes the ARM
-// compiler.  The Nokia Symbian and the IBM XL C/C++ compiler try to
-// instantiate a copy constructor for objects passed through ellipsis
-// (...), failing for uncopyable objects.  We define this to indicate
-// the fact.
-#define GTEST_ELLIPSIS_NEEDS_COPY_ 1
+// compiler and generates a warning in Sun Studio.  The Nokia Symbian
+// and the IBM XL C/C++ compiler try to instantiate a copy constructor
+// for objects passed through ellipsis (...), failing for uncopyable
+// objects.  We define this to ensure that only POD is passed through
+// ellipsis on these systems.
+#if defined(__SYMBIAN32__) || defined(__IBMCPP__) || defined(__SUNPRO_CC)
+#define GTEST_ELLIPSIS_NEEDS_POD_ 1
+#endif
 
 // The Nokia Symbian and IBM XL C/C++ compilers cannot decide between
 // const T& and const T* in a function template.  These compilers
 // _can_ decide between class template specializations for T and T*,
 // so a tr1::type_traits-like is_pointer works.
+#if defined(__SYMBIAN32__) || defined(__IBMCPP__)
 #define GTEST_NEEDS_IS_POINTER_ 1
-
-#endif  // defined(__SYMBIAN32__) || defined(__IBMCPP__)
+#endif
 
 template <bool bool_value>
 struct bool_constant {
