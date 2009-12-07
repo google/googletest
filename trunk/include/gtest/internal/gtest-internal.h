@@ -148,17 +148,14 @@ char (&IsNullLiteralHelper(...))[2];  // NOLINT
 // A compile-time bool constant that is true if and only if x is a
 // null pointer literal (i.e. NULL or any 0-valued compile-time
 // integral constant).
-#ifdef GTEST_ELLIPSIS_NEEDS_COPY_
-// Passing non-POD classes through ellipsis (...) crashes the ARM
-// compiler.  The Nokia Symbian and the IBM XL C/C++ compiler try to
-// instantiate a copy constructor for objects passed through ellipsis
-// (...), failing for uncopyable objects.  Hence we define this to
-// false (and lose support for NULL detection).
+#ifdef GTEST_ELLIPSIS_NEEDS_POD_
+// We lose support for NULL detection where the compiler doesn't like
+// passing non-POD classes through ellipsis (...).
 #define GTEST_IS_NULL_LITERAL_(x) false
 #else
 #define GTEST_IS_NULL_LITERAL_(x) \
     (sizeof(::testing::internal::IsNullLiteralHelper(x)) == 1)
-#endif  // GTEST_ELLIPSIS_NEEDS_COPY_
+#endif  // GTEST_ELLIPSIS_NEEDS_POD_
 
 // Appends the user-supplied message to the Google-Test-generated message.
 String AppendUserMessage(const String& gtest_msg,
