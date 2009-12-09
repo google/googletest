@@ -7,8 +7,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gmock_test", "gmock_test.vc
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gmock_link_test", "gmock_link_test.vcproj", "{ED597847-A714-4327-B569-70029D2311F0}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gmock_output_test_", "gmock_output_test_.vcproj", "{EDCE4C87-C2C0-4D22-98AC-7B6466F89A15}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gmock_main", "gmock_main.vcproj", "{E4EF614B-30DF-4954-8C53-580A0BF6B589}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gmock-spec-builders_test", "gmock-spec-builders_test.vcproj", "{46972604-5BE0-4493-BAE3-878DB825FDCB}"
@@ -31,10 +29,6 @@ Global
 		{ED597847-A714-4327-B569-70029D2311F0}.Debug|Win32.Build.0 = Debug|Win32
 		{ED597847-A714-4327-B569-70029D2311F0}.Release|Win32.ActiveCfg = Release|Win32
 		{ED597847-A714-4327-B569-70029D2311F0}.Release|Win32.Build.0 = Release|Win32
-		{EDCE4C87-C2C0-4D22-98AC-7B6466F89A15}.Debug|Win32.ActiveCfg = Debug|Win32
-		{EDCE4C87-C2C0-4D22-98AC-7B6466F89A15}.Debug|Win32.Build.0 = Debug|Win32
-		{EDCE4C87-C2C0-4D22-98AC-7B6466F89A15}.Release|Win32.ActiveCfg = Release|Win32
-		{EDCE4C87-C2C0-4D22-98AC-7B6466F89A15}.Release|Win32.Build.0 = Release|Win32
 		{E4EF614B-30DF-4954-8C53-580A0BF6B589}.Debug|Win32.ActiveCfg = Debug|Win32
 		{E4EF614B-30DF-4954-8C53-580A0BF6B589}.Debug|Win32.Build.0 = Debug|Win32
 		{E4EF614B-30DF-4954-8C53-580A0BF6B589}.Release|Win32.ActiveCfg = Release|Win32

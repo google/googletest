@@ -233,6 +233,5 @@ EXTRA_DIST += \
     msvc/gmock_config.vsprops \
     msvc/gmock_link_test.vcproj \
     msvc/gmock_main.vcproj \
-    msvc/gmock_output_test_.vcproj \
     msvc/gmock-spec-builders_test.vcproj \
     msvc/gmock_test.vcproj
