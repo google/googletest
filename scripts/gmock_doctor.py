@@ -366,11 +366,17 @@ def _TypeInTemplatedBaseDiagnoser1(msg):
   type.
   """
 
-  regex = (r'In member function \'int .*\n' + _FILE_LINE_RE +
-           r'error: a function call cannot appear in a constant-expression')
+  gcc_4_3_1_regex = (
+      r'In member function \'int .*\n' + _FILE_LINE_RE +
+      r'error: a function call cannot appear in a constant-expression')
+  gcc_4_4_0_regex = (
+      r'error: a function call cannot appear in a constant-expression'
+      + _FILE_LINE_RE + r'error: template argument 1 is invalid\n')
   diagnosis = _TTB_DIAGNOSIS % {'type': 'Foo'}
-  return _GenericDiagnoser('TTB', 'Type in Template Base',
-                           regex, diagnosis, msg)
+  return (list(_GenericDiagnoser('TTB', 'Type in Template Base',
+                                gcc_4_3_1_regex, diagnosis, msg)) +
+          list(_GenericDiagnoser('TTB', 'Type in Template Base',
+                                 gcc_4_4_0_regex, diagnosis, msg)))
 
 
 def _TypeInTemplatedBaseDiagnoser2(msg):
@@ -380,8 +386,7 @@ def _TypeInTemplatedBaseDiagnoser2(msg):
   parameter type.
   """
 
-  regex = (r'In member function \'int .*\n'
-           + _FILE_LINE_RE +
+  regex = (_FILE_LINE_RE +
            r'error: \'(?P<type>.+)\' was not declared in this scope\n'
            r'.*error: template argument 1 is invalid\n')
   return _GenericDiagnoser('TTB', 'Type in Template Base',
@@ -458,9 +463,13 @@ _DIAGNOSERS = [
 def Diagnose(msg):
   """Generates all possible diagnoses given the gcc error message."""
 
+  diagnoses = []
   for diagnoser in _DIAGNOSERS:
-    for diagnosis in diagnoser(msg):
-      yield '[%s - %s]\n%s' % diagnosis
+    for diag in diagnoser(msg):
+      diagnosis = '[%s - %s]\n%s' % diag
+      if not diagnosis in diagnoses:
+        diagnoses.append(diagnosis)
+  return diagnoses
 
 
 def main():
@@ -474,7 +483,7 @@ def main():
     print 'Waiting for compiler errors on stdin . . .'
 
   msg = sys.stdin.read().strip()
-  diagnoses = list(Diagnose(msg))
+  diagnoses = Diagnose(msg)
   count = len(diagnoses)
   if not count:
     print '\nGcc complained:'
