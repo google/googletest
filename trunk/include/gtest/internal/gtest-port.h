@@ -269,6 +269,10 @@
 // ::std::string is not available is MSVC 7.1 or lower with exceptions
 // disabled.
 #if defined(_MSC_VER) && (_MSC_VER < 1400) && !GTEST_HAS_EXCEPTIONS
+#if !GTEST_ALLOW_VC71_WITHOUT_EXCEPTIONS_
+#error "When compiling gtest using MSVC 7.1, exceptions must be enabled."
+#error "Otherwise std::string and std::vector don't compile."
+#endif
 #define GTEST_HAS_STD_STRING 0
 #else
 #define GTEST_HAS_STD_STRING 1

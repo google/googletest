@@ -117,6 +117,7 @@ class SConstructHelper:
                     'STRICT',
                     'WIN32_LEAN_AND_MEAN',
                     '_HAS_EXCEPTIONS=0',
+                    'GTEST_ALLOW_VC71_WITHOUT_EXCEPTIONS_=1',
                     ],
         LIBPATH=['#/$MAIN_DIR/lib'],
         LINKFLAGS=['-MACHINE:x86',  # Enable safe SEH (not supp. on x64)
