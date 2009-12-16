@@ -82,7 +82,7 @@ We also have reports on successful cross compilation of Google Test MinGW binari
 Please contact `googletestframework@googlegroups.com` if you are
 interested in improving the support for MinGW.
 
-== Why does Google Test support EXPECT_EQ(NULL, ptr) but not EXPECT_NE(NULL, ptr)? ==
+== Why does Google Test support EXPECT_EQ(NULL, ptr) and ASSERT_EQ(NULL, ptr) but not EXPECT_NE(NULL, ptr) and ASSERT_NE(NULL, ptr)? ==
 
 Due to some peculiarity of C++, it requires some non-trivial template
 meta programming tricks to support using `NULL` as an argument of the
