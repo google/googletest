@@ -449,10 +449,8 @@ TEST_F(TestForDeathTest, AcceptsAnythingConvertibleToRE) {
   EXPECT_DEATH(GlobalFunction(), regex_str);
 #endif  // GTEST_HAS_GLOBAL_STRING
 
-#if GTEST_HAS_STD_STRING
   const ::std::string regex_std_str(regex_c_str);
   EXPECT_DEATH(GlobalFunction(), regex_std_str);
-#endif  // GTEST_HAS_STD_STRING
 }
 
 // Tests that a non-void function can be used in a death test.

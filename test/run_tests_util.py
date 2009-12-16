@@ -152,6 +152,20 @@ def _GetGtestBuildDir(injected_os, script_dir, config):
                                                          'gtest/scons'))
 
 
+def _GetConfigFromBuildDir(build_dir):
+  """Extracts the configuration name from the build directory."""
+
+  # We don't want to depend on build_dir containing the correct path
+  # separators.
+  m = re.match(r'.*[\\/]([^\\/]+)[\\/][^\\/]+[\\/]scons[\\/]?$', build_dir)
+  if m:
+    return m.group(1)
+  else:
+    print >>sys.stderr, ('%s is an invalid build directory that does not '
+                         'correspond to any configuration.' % (build_dir,))
+    return ''
+
+
 # All paths in this script are either absolute or relative to the current
 # working directory, unless otherwise specified.
 class TestRunner(object):
@@ -270,7 +284,8 @@ class TestRunner(object):
                     args,
                     named_configurations,
                     built_configurations,
-                    available_configurations=CONFIGS):
+                    available_configurations=CONFIGS,
+                    python_tests_to_skip=None):
     """Determines what tests should be run.
 
     Args:
@@ -278,7 +293,9 @@ class TestRunner(object):
       named_configurations: The list of configurations specified via -c or -a.
       built_configurations: True if -b has been specified.
       available_configurations: a list of configurations available on the
-                                current platform, injectable for testing.
+                            current platform, injectable for testing.
+      python_tests_to_skip: a collection of (configuration, python test name)s
+                            that need to be skipped.
 
     Returns:
       A tuple with 2 elements: the list of Python tests to run and the list of
@@ -356,7 +373,13 @@ class TestRunner(object):
     python_test_pairs = []
     for directory in build_dirs:
       for test in selected_python_tests:
-        python_test_pairs.append((directory, test))
+        config = _GetConfigFromBuildDir(directory)
+        file_name = os.path.basename(test)
+        if python_tests_to_skip and (config, file_name) in python_tests_to_skip:
+          print ('NOTE: %s is skipped for configuration %s, as it does not '
+                 'work there.' % (file_name, config))
+        else:
+          python_test_pairs.append((directory, test))
 
     binary_test_pairs = []
     for directory in build_dirs:

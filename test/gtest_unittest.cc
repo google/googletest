@@ -1111,8 +1111,6 @@ TEST(StringTest, Constructors) {
   EXPECT_EQ('c', s7.c_str()[3]);
 }
 
-#if GTEST_HAS_STD_STRING
-
 TEST(StringTest, ConvertsFromStdString) {
   // An empty std::string.
   const std::string src1("");
@@ -1151,8 +1149,6 @@ TEST(StringTest, ConvertsToStdString) {
   const std::string dest3 = src3;
   EXPECT_EQ(std::string("x\0y", 3), dest3);
 }
-
-#endif  // GTEST_HAS_STD_STRING
 
 #if GTEST_HAS_GLOBAL_STRING
 
@@ -2818,16 +2814,12 @@ TEST(IsSubstringTest, GeneratesCorrectMessageForCString) {
                            "needle", "haystack").failure_message());
 }
 
-#if GTEST_HAS_STD_STRING
-
 // Tests that IsSubstring returns the correct result when the input
 // argument type is ::std::string.
 TEST(IsSubstringTest, ReturnsCorrectResultsForStdString) {
   EXPECT_TRUE(IsSubstring("", "", std::string("hello"), "ahellob"));
   EXPECT_FALSE(IsSubstring("", "", "hello", std::string("world")));
 }
-
-#endif  // GTEST_HAS_STD_STRING
 
 #if GTEST_HAS_STD_WSTRING
 // Tests that IsSubstring returns the correct result when the input
@@ -2879,8 +2871,6 @@ TEST(IsNotSubstringTest, GeneratesCorrectMessageForWideCString) {
                    L"needle", L"two needles").failure_message());
 }
 
-#if GTEST_HAS_STD_STRING
-
 // Tests that IsNotSubstring returns the correct result when the input
 // argument type is ::std::string.
 TEST(IsNotSubstringTest, ReturnsCorrectResultsForStdString) {
@@ -2899,8 +2889,6 @@ TEST(IsNotSubstringTest, GeneratesCorrectMessageForStdString) {
                    "needle_expr", "haystack_expr",
                    ::std::string("needle"), "two needles").failure_message());
 }
-
-#endif  // GTEST_HAS_STD_STRING
 
 #if GTEST_HAS_STD_WSTRING
 
@@ -4575,7 +4563,6 @@ TEST(StreamableToStringTest, NullCString) {
 
 // Tests using streamable values as assertion messages.
 
-#if GTEST_HAS_STD_STRING
 // Tests using std::string as an assertion message.
 TEST(StreamableTest, string) {
   static const std::string str(
@@ -4595,8 +4582,6 @@ TEST(StreamableTest, stringWithEmbeddedNUL) {
   EXPECT_FATAL_FAILURE(FAIL() << string_with_nul,
                        "Here's a NUL\\0 and some more string");
 }
-
-#endif  // GTEST_HAS_STD_STRING
 
 // Tests that we can output a NUL char.
 TEST(StreamableTest, NULChar) {
@@ -4720,7 +4705,6 @@ TEST(EqAssertionTest, WideChar) {
                        "Value of: wchar");
 }
 
-#if GTEST_HAS_STD_STRING
 // Tests using ::std::string values in {EXPECT|ASSERT}_EQ.
 TEST(EqAssertionTest, StdString) {
   // Compares a const char* to an std::string that has identical
@@ -4750,8 +4734,6 @@ TEST(EqAssertionTest, StdString) {
                        "Value of: str3\n"
                        "  Actual: \"A \\0 in the middle\"");
 }
-
-#endif  // GTEST_HAS_STD_STRING
 
 #if GTEST_HAS_STD_WSTRING
 

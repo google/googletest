@@ -126,15 +126,15 @@ def RemoveTime(output):
 def RemoveTestCounts(output):
   """Removes test counts from a Google Test program's output."""
 
-  output = re.sub(r'\d+ tests, listed below',
+  output = re.sub(r'\d+ tests?, listed below',
                   '? tests, listed below', output)
   output = re.sub(r'\d+ FAILED TESTS',
                   '? FAILED TESTS', output)
-  output = re.sub(r'\d+ tests from \d+ test cases',
+  output = re.sub(r'\d+ tests? from \d+ test cases?',
                   '? tests from ? test cases', output)
-  output = re.sub(r'\d+ tests from ([a-zA-Z_])',
+  output = re.sub(r'\d+ tests? from ([a-zA-Z_])',
                   r'? tests from \1', output)
-  return re.sub(r'\d+ tests\.', '? tests.', output)
+  return re.sub(r'\d+ tests?\.', '? tests.', output)
 
 
 def RemoveMatchingTests(test_output, pattern):
@@ -268,16 +268,16 @@ class GTestOutputTest(gtest_test_utils.TestCase):
       normalized_actual = RemoveTestCounts(output)
       normalized_golden = RemoveTestCounts(self.RemoveUnsupportedTests(golden))
 
-      # This code is very handy when debugging test differences so I left it
-      # here, commented.
-      # open(os.path.join(
-      #     gtest_test_utils.GetSourceDir(),
-      #     '_gtest_output_test_normalized_actual.txt'), 'wb').write(
-      #         normalized_actual)
-      # open(os.path.join(
-      #     gtest_test_utils.GetSourceDir(),
-      #     '_gtest_output_test_normalized_golden.txt'), 'wb').write(
-      #         normalized_golden)
+      # This code is very handy when debugging golden file differences:
+      if os.getenv('DEBUG_GTEST_OUTPUT_TEST'):
+        open(os.path.join(
+            gtest_test_utils.GetSourceDir(),
+            '_gtest_output_test_normalized_actual.txt'), 'wb').write(
+                normalized_actual)
+        open(os.path.join(
+            gtest_test_utils.GetSourceDir(),
+            '_gtest_output_test_normalized_golden.txt'), 'wb').write(
+                normalized_golden)
 
       self.assert_(normalized_golden == normalized_actual)
 

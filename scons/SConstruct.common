@@ -45,6 +45,13 @@ class SConstructHelper:
     # A dictionary to look up an environment by its name.
     self.env_dict = {}
 
+  def _Remove(self, env, attribute, value):
+    """Removes the given attribute value from the environment."""
+
+    attribute_values = env[attribute]
+    if value in attribute_values:
+      attribute_values.remove(value)
+
   def Initialize(self, build_root_path, support_multiple_win_builds=False):
     test_env = Environment()
     platform = test_env['PLATFORM']
@@ -83,13 +90,14 @@ class SConstructHelper:
     # Enable scons -h
     Help(vars.GenerateHelpText(self.env_base))
 
-  def AllowVc71StlWithoutExceptions(self, env):
-    env.Append(
-        CPPDEFINES = [# needed for using some parts of STL with exception
-                      # disabled.  The scoop is given here, with comments
-                      # from P.J. Plauger at
-                      # http://groups.google.com/group/microsoft.public.vc.stl/browse_thread/thread/5e719833c6bdb177?q=_HAS_EXCEPTIONS+using+namespace+std&pli=1
-                      '_TYPEINFO_'])
+  def EnableExceptions(self, env):
+    if env['PLATFORM'] == 'win32':
+      env.Append(CCFLAGS=['/EHsc'])
+      env.Append(CPPDEFINES='_HAS_EXCEPTIONS=1')
+      self._Remove(env, 'CPPDEFINES', '_HAS_EXCEPTIONS=0')
+    else:
+      env.Append(CCFLAGS='-fexceptions')
+      self._Remove(env, 'CCFLAGS', '-fno-exceptions')
 
   def MakeWinBaseEnvironment(self):
     win_base = self.env_base.Clone(
@@ -117,7 +125,6 @@ class SConstructHelper:
                     'STRICT',
                     'WIN32_LEAN_AND_MEAN',
                     '_HAS_EXCEPTIONS=0',
-                    'GTEST_ALLOW_VC71_WITHOUT_EXCEPTIONS_=1',
                     ],
         LIBPATH=['#/$MAIN_DIR/lib'],
         LINKFLAGS=['-MACHINE:x86',  # Enable safe SEH (not supp. on x64)

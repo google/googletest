@@ -88,9 +88,6 @@ class EnvCreator:
     if env['PLATFORM'] == 'win32':
       env.Append(CCFLAGS=['/EHsc'])
       env.Append(CPPDEFINES='_HAS_EXCEPTIONS=1')
-      # Undoes the _TYPEINFO_ hack, which is unnecessary and only creates
-      # trouble when exceptions are enabled.
-      cls._Remove(env, 'CPPDEFINES', '_TYPEINFO_')
       cls._Remove(env, 'CPPDEFINES', '_HAS_EXCEPTIONS=0')
     else:
       env.Append(CCFLAGS='-fexceptions')

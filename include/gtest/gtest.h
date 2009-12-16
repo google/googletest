@@ -62,24 +62,19 @@
 #include <gtest/gtest-typed-test.h>
 
 // Depending on the platform, different string classes are available.
-// On Windows, ::std::string compiles only when exceptions are
-// enabled.  On Linux, in addition to ::std::string, Google also makes
-// use of class ::string, which has the same interface as
-// ::std::string, but has a different implementation.
+// On Linux, in addition to ::std::string, Google also makes use of
+// class ::string, which has the same interface as ::std::string, but
+// has a different implementation.
 //
-// The user can tell us whether ::std::string is available in his
-// environment by defining the macro GTEST_HAS_STD_STRING to either 1
-// or 0 on the compiler command line.  He can also define
-// GTEST_HAS_GLOBAL_STRING to 1 to indicate that ::string is available
-// AND is a distinct type to ::std::string, or define it to 0 to
-// indicate otherwise.
+// The user can define GTEST_HAS_GLOBAL_STRING to 1 to indicate that
+// ::string is available AND is a distinct type to ::std::string, or
+// define it to 0 to indicate otherwise.
 //
 // If the user's ::std::string and ::string are the same class due to
-// aliasing, he should define GTEST_HAS_STD_STRING to 1 and
-// GTEST_HAS_GLOBAL_STRING to 0.
+// aliasing, he should define GTEST_HAS_GLOBAL_STRING to 0.
 //
-// If the user doesn't define GTEST_HAS_STD_STRING and/or
-// GTEST_HAS_GLOBAL_STRING, they are defined heuristically.
+// If the user doesn't define GTEST_HAS_GLOBAL_STRING, it is defined
+// heuristically.
 
 namespace testing {
 
@@ -1210,11 +1205,9 @@ void InitGoogleTest(int* argc, wchar_t** argv);
 namespace internal {
 
 // These overloaded versions handle ::std::string and ::std::wstring.
-#if GTEST_HAS_STD_STRING
 inline String FormatForFailureMessage(const ::std::string& str) {
   return (Message() << '"' << str << '"').GetString();
 }
-#endif  // GTEST_HAS_STD_STRING
 
 #if GTEST_HAS_STD_WSTRING
 inline String FormatForFailureMessage(const ::std::wstring& wstr) {
@@ -1464,14 +1457,12 @@ AssertionResult IsNotSubstring(
 AssertionResult IsNotSubstring(
     const char* needle_expr, const char* haystack_expr,
     const wchar_t* needle, const wchar_t* haystack);
-#if GTEST_HAS_STD_STRING
 AssertionResult IsSubstring(
     const char* needle_expr, const char* haystack_expr,
     const ::std::string& needle, const ::std::string& haystack);
 AssertionResult IsNotSubstring(
     const char* needle_expr, const char* haystack_expr,
     const ::std::string& needle, const ::std::string& haystack);
-#endif  // GTEST_HAS_STD_STRING
 
 #if GTEST_HAS_STD_WSTRING
 AssertionResult IsSubstring(

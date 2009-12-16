@@ -177,9 +177,7 @@ class RETest : public ::testing::Test {};
 // Defines StringTypes as the list of all string types that class RE
 // supports.
 typedef testing::Types<
-#if GTEST_HAS_STD_STRING
     ::std::string,
-#endif  // GTEST_HAS_STD_STRING
 #if GTEST_HAS_GLOBAL_STRING
     ::string,
 #endif  // GTEST_HAS_GLOBAL_STRING

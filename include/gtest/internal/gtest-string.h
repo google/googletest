@@ -44,9 +44,7 @@
 #include <string.h>
 #include <gtest/internal/gtest-port.h>
 
-#if GTEST_HAS_GLOBAL_STRING || GTEST_HAS_STD_STRING
 #include <string>
-#endif  // GTEST_HAS_GLOBAL_STRING || GTEST_HAS_STD_STRING
 
 namespace testing {
 namespace internal {
@@ -221,13 +219,11 @@ class String {
   // Converting a ::std::string or ::string containing an embedded NUL
   // character to a String will result in the prefix up to the first
   // NUL character.
-#if GTEST_HAS_STD_STRING
   String(const ::std::string& str) {
     ConstructNonNull(str.c_str(), str.length());
   }
 
   operator ::std::string() const { return ::std::string(c_str(), length()); }
-#endif  // GTEST_HAS_STD_STRING
 
 #if GTEST_HAS_GLOBAL_STRING
   String(const ::string& str) {
