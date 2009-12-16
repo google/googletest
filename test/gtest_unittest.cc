@@ -1721,55 +1721,6 @@ TEST(TestPropertyTest, SetValue) {
   EXPECT_STREQ("value_2", property.value());
 }
 
-// Tests the TestPartResult class.
-
-TEST(TestPartResultTest, ConstructorWorks) {
-  Message message;
-  message << "something is terribly wrong";
-  message << static_cast<const char*>(testing::internal::kStackTraceMarker);
-  message << "some unimportant stack trace";
-
-  const TestPartResult result(TestPartResult::kNonFatalFailure,
-                              "some_file.cc",
-                              42,
-                              message.GetString().c_str());
-
-  EXPECT_EQ(TestPartResult::kNonFatalFailure, result.type());
-  EXPECT_STREQ("some_file.cc", result.file_name());
-  EXPECT_EQ(42, result.line_number());
-  EXPECT_STREQ(message.GetString().c_str(), result.message());
-  EXPECT_STREQ("something is terribly wrong", result.summary());
-}
-
-TEST(TestPartResultTest, ResultAccessorsWork) {
-  const TestPartResult success(TestPartResult::kSuccess,
-                               "file.cc",
-                               42,
-                               "message");
-  EXPECT_TRUE(success.passed());
-  EXPECT_FALSE(success.failed());
-  EXPECT_FALSE(success.nonfatally_failed());
-  EXPECT_FALSE(success.fatally_failed());
-
-  const TestPartResult nonfatal_failure(TestPartResult::kNonFatalFailure,
-                                        "file.cc",
-                                        42,
-                                        "message");
-  EXPECT_FALSE(nonfatal_failure.passed());
-  EXPECT_TRUE(nonfatal_failure.failed());
-  EXPECT_TRUE(nonfatal_failure.nonfatally_failed());
-  EXPECT_FALSE(nonfatal_failure.fatally_failed());
-
-  const TestPartResult fatal_failure(TestPartResult::kFatalFailure,
-                                     "file.cc",
-                                     42,
-                                     "message");
-  EXPECT_FALSE(fatal_failure.passed());
-  EXPECT_TRUE(fatal_failure.failed());
-  EXPECT_FALSE(fatal_failure.nonfatally_failed());
-  EXPECT_TRUE(fatal_failure.fatally_failed());
-}
-
 // Tests the TestResult class
 
 // The test fixture for testing TestResult.
