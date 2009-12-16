@@ -198,10 +198,8 @@ struct CompileAssert {
 
 #if GTEST_HAS_GLOBAL_STRING
 typedef ::string string;
-#elif GTEST_HAS_STD_STRING
-typedef ::std::string string;
 #else
-#error "Google Mock requires ::std::string to compile."
+typedef ::std::string string;
 #endif  // GTEST_HAS_GLOBAL_STRING
 
 #if GTEST_HAS_GLOBAL_WSTRING

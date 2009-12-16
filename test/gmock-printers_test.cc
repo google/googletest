@@ -560,7 +560,6 @@ TEST(PrintStringTest, StringInGlobalNamespace) {
 }
 #endif  // GTEST_HAS_GLOBAL_STRING
 
-#if GTEST_HAS_STD_STRING
 // ::std::string.
 TEST(PrintStringTest, StringInStdNamespace) {
   const char s[] = "'\"\?\\\a\b\f\n\0\r\t\v\x7F\xFF a";
@@ -568,7 +567,6 @@ TEST(PrintStringTest, StringInStdNamespace) {
   EXPECT_EQ("\"'\\\"\\?\\\\\\a\\b\\f\\n\\0\\r\\t\\v\\x7F\\xFF a\\0\"",
             Print(str));
 }
-#endif  // GTEST_HAS_STD_STRING
 
 // Tests printing ::wstring and ::std::wstring.
 

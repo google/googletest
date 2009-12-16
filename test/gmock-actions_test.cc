@@ -165,9 +165,7 @@ TEST(BuiltInDefaultValueTest, IsEmptyStringForString) {
   EXPECT_EQ("", BuiltInDefaultValue< ::string>::Get());
 #endif  // GTEST_HAS_GLOBAL_STRING
 
-#if GTEST_HAS_STD_STRING
   EXPECT_EQ("", BuiltInDefaultValue< ::std::string>::Get());
-#endif  // GTEST_HAS_STD_STRING
 }
 
 // Tests that BuiltInDefaultValue<T>::Exists() returns true when T is a
@@ -177,9 +175,7 @@ TEST(BuiltInDefaultValueTest, ExistsForString) {
   EXPECT_TRUE(BuiltInDefaultValue< ::string>::Exists());
 #endif  // GTEST_HAS_GLOBAL_STRING
 
-#if GTEST_HAS_STD_STRING
   EXPECT_TRUE(BuiltInDefaultValue< ::std::string>::Exists());
-#endif  // GTEST_HAS_STD_STRING
 }
 
 // Tests that BuiltInDefaultValue<const T>::Get() returns the same

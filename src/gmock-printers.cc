@@ -296,11 +296,9 @@ void PrintStringTo(const ::string& s, ostream* os) {
 }
 #endif  // GTEST_HAS_GLOBAL_STRING
 
-#if GTEST_HAS_STD_STRING
 void PrintStringTo(const ::std::string& s, ostream* os) {
   PrintCharsAsStringTo(s.data(), s.size(), os);
 }
-#endif  // GTEST_HAS_STD_STRING
 
 // Prints a ::wstring object.
 #if GTEST_HAS_GLOBAL_WSTRING
