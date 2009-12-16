@@ -52,9 +52,6 @@
 //                              is/isn't available.
 //   GTEST_HAS_RTTI           - Define it to 1/0 to indicate that RTTI is/isn't
 //                              enabled.
-//   GTEST_HAS_STD_STRING     - Define it to 1/0 to indicate that
-//                              std::string does/doesn't work (Google Test can
-//                              be used where std::string is unavailable).
 //   GTEST_HAS_STD_WSTRING    - Define it to 1/0 to indicate that
 //                              std::wstring does/doesn't work (Google Test can
 //                              be used where std::wstring is unavailable).
@@ -261,23 +258,14 @@
 #endif  // defined(__GNUC__) && __EXCEPTIONS
 #endif  // defined(_MSC_VER) || defined(__BORLANDC__)
 
-// Determines whether ::std::string and ::string are available.
-
-#ifndef GTEST_HAS_STD_STRING
-// The user didn't tell us whether ::std::string is available, so we
-// need to figure it out.  The only environment that we know
-// ::std::string is not available is MSVC 7.1 or lower with exceptions
-// disabled.
-#if defined(_MSC_VER) && (_MSC_VER < 1400) && !GTEST_HAS_EXCEPTIONS
-#if !GTEST_ALLOW_VC71_WITHOUT_EXCEPTIONS_
-#error "When compiling gtest using MSVC 7.1, exceptions must be enabled."
-#error "Otherwise std::string and std::vector don't compile."
-#endif
-#define GTEST_HAS_STD_STRING 0
-#else
+#if !defined(GTEST_HAS_STD_STRING)
+// Even though we don't use this macro any longer, we keep it in case
+// some clients still depend on it.
 #define GTEST_HAS_STD_STRING 1
-#endif
-#endif  // GTEST_HAS_STD_STRING
+#elif !GTEST_HAS_STD_STRING
+// The user told us that ::std::string isn't available.
+#error "Google Test cannot be used where ::std::string isn't available."
+#endif  // !defined(GTEST_HAS_STD_STRING)
 
 #ifndef GTEST_HAS_GLOBAL_STRING
 // The user didn't tell us whether ::string is available, so we need
@@ -293,14 +281,10 @@
 // TODO(wan@google.com): uses autoconf to detect whether ::std::wstring
 //   is available.
 
-#if GTEST_OS_CYGWIN || GTEST_OS_SOLARIS
 // Cygwin 1.5 and below doesn't support ::std::wstring.
 // Cygwin 1.7 might add wstring support; this should be updated when clear.
 // Solaris' libc++ doesn't support it either.
-#define GTEST_HAS_STD_WSTRING 0
-#else
-#define GTEST_HAS_STD_WSTRING GTEST_HAS_STD_STRING
-#endif  // GTEST_OS_CYGWIN || GTEST_OS_SOLARIS
+#define GTEST_HAS_STD_WSTRING (!(GTEST_OS_CYGWIN || GTEST_OS_SOLARIS))
 
 #endif  // GTEST_HAS_STD_WSTRING
 
@@ -311,17 +295,8 @@
     (GTEST_HAS_STD_WSTRING && GTEST_HAS_GLOBAL_STRING)
 #endif  // GTEST_HAS_GLOBAL_WSTRING
 
-#if GTEST_HAS_STD_STRING || GTEST_HAS_GLOBAL_STRING || \
-    GTEST_HAS_STD_WSTRING || GTEST_HAS_GLOBAL_WSTRING
 #include <string>  // NOLINT
-#endif  // GTEST_HAS_STD_STRING || GTEST_HAS_GLOBAL_STRING ||
-        // GTEST_HAS_STD_WSTRING || GTEST_HAS_GLOBAL_WSTRING
-
-#if GTEST_HAS_STD_STRING
 #include <sstream>  // NOLINT
-#else
-#include <strstream>  // NOLINT
-#endif  // GTEST_HAS_STD_STRING
 
 // Determines whether RTTI is available.
 #ifndef GTEST_HAS_RTTI
@@ -457,15 +432,10 @@
 #endif  // GTEST_HAS_CLONE
 
 // Determines whether to support death tests.
-// Google Test does not support death tests for VC 7.1 and earlier for
-// these reasons:
-//   1. std::vector does not build in VC 7.1 when exceptions are disabled.
-//   2. std::string does not build in VC 7.1 when exceptions are disabled
-//      (this is covered by GTEST_HAS_STD_STRING guard).
-//   3. abort() in a VC 7.1 application compiled as GUI in debug config
-//      pops up a dialog window that cannot be suppressed programmatically.
-#if GTEST_HAS_STD_STRING && \
-    (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_CYGWIN || \
+// Google Test does not support death tests for VC 7.1 and earlier as
+// abort() in a VC 7.1 application compiled as GUI in debug config
+// pops up a dialog window that cannot be suppressed programmatically.
+#if (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_CYGWIN || \
      (GTEST_OS_WINDOWS_DESKTOP && _MSC_VER >= 1400) || GTEST_OS_WINDOWS_MINGW)
 #define GTEST_HAS_DEATH_TEST 1
 #include <vector>  // NOLINT
@@ -572,15 +542,7 @@ namespace internal {
 
 class String;
 
-// std::strstream is deprecated.  However, we have to use it on
-// Windows as std::stringstream won't compile on Windows when
-// exceptions are disabled.  We use std::stringstream on other
-// platforms to avoid compiler warnings there.
-#if GTEST_HAS_STD_STRING
 typedef ::std::stringstream StrStream;
-#else
-typedef ::std::strstream StrStream;
-#endif  // GTEST_HAS_STD_STRING
 
 // A helper for suppressing warnings on constant condition.  It just
 // returns 'condition'.
@@ -629,9 +591,7 @@ class scoped_ptr {
 class RE {
  public:
   // Constructs an RE from a string.
-#if GTEST_HAS_STD_STRING
   RE(const ::std::string& regex) { Init(regex.c_str()); }  // NOLINT
-#endif  // GTEST_HAS_STD_STRING
 
 #if GTEST_HAS_GLOBAL_STRING
   RE(const ::string& regex) { Init(regex.c_str()); }  // NOLINT
@@ -650,14 +610,12 @@ class RE {
   //
   // TODO(wan@google.com): make FullMatch() and PartialMatch() work
   // when str contains NUL characters.
-#if GTEST_HAS_STD_STRING
   static bool FullMatch(const ::std::string& str, const RE& re) {
     return FullMatch(str.c_str(), re);
   }
   static bool PartialMatch(const ::std::string& str, const RE& re) {
     return PartialMatch(str.c_str(), re);
   }
-#endif  // GTEST_HAS_STD_STRING
 
 #if GTEST_HAS_GLOBAL_STRING
   static bool FullMatch(const ::string& str, const RE& re) {

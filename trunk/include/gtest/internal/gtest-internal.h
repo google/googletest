@@ -259,9 +259,7 @@ inline String FormatForComparisonFailureMessage(\
   return operand1_printer(str);\
 }
 
-#if GTEST_HAS_STD_STRING
 GTEST_FORMAT_IMPL_(::std::string, String::ShowCStringQuoted)
-#endif  // GTEST_HAS_STD_STRING
 #if GTEST_HAS_STD_WSTRING
 GTEST_FORMAT_IMPL_(::std::wstring, String::ShowWideCStringQuoted)
 #endif  // GTEST_HAS_STD_WSTRING

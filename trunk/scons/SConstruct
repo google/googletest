@@ -50,8 +50,12 @@ sconstruct_helper.Initialize(build_root_path='..',
 
 win_base = sconstruct_helper.MakeWinBaseEnvironment()
 
+# We don't support VC 7.1 with exceptions disabled, so we always
+# enable exceptions for VC 7.1.  For newer versions of VC, we still
+# compile with exceptions disabled by default, as that's a more common
+# setting for our users.
 if win_base.get('MSVS_VERSION', None) == '7.1':
-  sconstruct_helper.AllowVc71StlWithoutExceptions(win_base)
+  sconstruct_helper.EnableExceptions(win_base)
 
 sconstruct_helper.MakeWinDebugEnvironment(win_base, 'win-dbg')
 sconstruct_helper.MakeWinOptimizedEnvironment(win_base, 'win-opt')

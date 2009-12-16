@@ -1316,7 +1316,6 @@ AssertionResult IsNotSubstring(
   return IsSubstringImpl(false, needle_expr, haystack_expr, needle, haystack);
 }
 
-#if GTEST_HAS_STD_STRING
 AssertionResult IsSubstring(
     const char* needle_expr, const char* haystack_expr,
     const ::std::string& needle, const ::std::string& haystack) {
@@ -1328,7 +1327,6 @@ AssertionResult IsNotSubstring(
     const ::std::string& needle, const ::std::string& haystack) {
   return IsSubstringImpl(false, needle_expr, haystack_expr, needle, haystack);
 }
-#endif  // GTEST_HAS_STD_STRING
 
 #if GTEST_HAS_STD_WSTRING
 AssertionResult IsSubstring(
@@ -1748,14 +1746,9 @@ String String::Format(const char * format, ...) {
 // Converts the buffer in a StrStream to a String, converting NUL
 // bytes to "\\0" along the way.
 String StrStreamToString(StrStream* ss) {
-#if GTEST_HAS_STD_STRING
   const ::std::string& str = ss->str();
   const char* const start = str.c_str();
   const char* const end = start + str.length();
-#else
-  const char* const start = ss->str();
-  const char* const end = start + ss->pcount();
-#endif  // GTEST_HAS_STD_STRING
 
   // We need to use a helper StrStream to do this transformation
   // because String doesn't support push_back().
@@ -1768,14 +1761,7 @@ String StrStreamToString(StrStream* ss) {
     }
   }
 
-#if GTEST_HAS_STD_STRING
   return String(helper.str().c_str());
-#else
-  const String str(helper.str(), helper.pcount());
-  helper.freeze(false);
-  ss->freeze(false);
-  return str;
-#endif  // GTEST_HAS_STD_STRING
 }
 
 // Appends the user-supplied message to the Google-Test-generated message.

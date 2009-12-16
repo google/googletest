@@ -92,8 +92,6 @@ TEST(MessageTest, StreamsNullCString) {
   EXPECT_STREQ("(null)", ToCString(Message() << p));
 }
 
-#if GTEST_HAS_STD_STRING
-
 // Tests streaming std::string.
 //
 // As std::string has problem in MSVC when exception is disabled, we only
@@ -112,8 +110,6 @@ TEST(MessageTest, StreamsStringWithEmbeddedNUL) {
   EXPECT_STREQ("Here's a NUL\\0 and some more string",
                ToCString(Message() << string_with_nul));
 }
-
-#endif  // GTEST_HAS_STD_STRING
 
 // Tests streaming a NUL char.
 TEST(MessageTest, StreamsNULChar) {
