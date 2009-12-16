@@ -189,11 +189,12 @@ bool ExitedUnsuccessfully(int exit_status);
 // RUN_ALL_TESTS was called.
 class InternalRunDeathTestFlag {
  public:
-  InternalRunDeathTestFlag(const String& file,
-                           int line,
-                           int index,
-                           int write_fd)
-      : file_(file), line_(line), index_(index), write_fd_(write_fd) {}
+  InternalRunDeathTestFlag(const String& a_file,
+                           int a_line,
+                           int an_index,
+                           int a_write_fd)
+      : file_(a_file), line_(a_line), index_(an_index),
+        write_fd_(a_write_fd) {}
 
   ~InternalRunDeathTestFlag() {
     if (write_fd_ >= 0)

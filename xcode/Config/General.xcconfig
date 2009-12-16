@@ -17,7 +17,7 @@ ZERO_LINK = NO
 PREBINDING = NO
 
 // Strictest warning policy
-WARNING_CFLAGS = -Wall -Werror -Wendif-labels -Wnewline-eof -Wno-sign-compare
+WARNING_CFLAGS = -Wall -Werror -Wendif-labels -Wnewline-eof -Wno-sign-compare -Wshadow
 
 // Work around Xcode bugs by using external strip. See:
 // http://lists.apple.com/archives/Xcode-users/2006/Feb/msg00050.html

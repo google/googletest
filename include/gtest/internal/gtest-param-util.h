@@ -544,12 +544,12 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
   // LocalTestInfo structure keeps information about a single test registered
   // with TEST_P macro.
   struct TestInfo {
-    TestInfo(const char* test_case_base_name,
-             const char* test_base_name,
-             TestMetaFactoryBase<ParamType>* test_meta_factory) :
-        test_case_base_name(test_case_base_name),
-        test_base_name(test_base_name),
-        test_meta_factory(test_meta_factory) {}
+    TestInfo(const char* a_test_case_base_name,
+             const char* a_test_base_name,
+             TestMetaFactoryBase<ParamType>* a_test_meta_factory) :
+        test_case_base_name(a_test_case_base_name),
+        test_base_name(a_test_base_name),
+        test_meta_factory(a_test_meta_factory) {}
 
     const String test_case_base_name;
     const String test_base_name;

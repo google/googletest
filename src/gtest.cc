@@ -2123,14 +2123,14 @@ bool Test::HasNonfatalFailure() {
 
 // Constructs a TestInfo object. It assumes ownership of the test factory
 // object via impl_.
-TestInfo::TestInfo(const char* test_case_name,
-                   const char* name,
-                   const char* test_case_comment,
-                   const char* comment,
+TestInfo::TestInfo(const char* a_test_case_name,
+                   const char* a_name,
+                   const char* a_test_case_comment,
+                   const char* a_comment,
                    internal::TypeId fixture_class_id,
                    internal::TestFactoryBase* factory) {
-  impl_ = new internal::TestInfoImpl(this, test_case_name, name,
-                                     test_case_comment, comment,
+  impl_ = new internal::TestInfoImpl(this, a_test_case_name, a_name,
+                                     a_test_case_comment, a_comment,
                                      fixture_class_id, factory);
 }
 
@@ -2368,11 +2368,11 @@ int TestCase::total_test_count() const {
 //   name:         name of the test case
 //   set_up_tc:    pointer to the function that sets up the test case
 //   tear_down_tc: pointer to the function that tears down the test case
-TestCase::TestCase(const char* name, const char* comment,
+TestCase::TestCase(const char* a_name, const char* a_comment,
                    Test::SetUpTestCaseFunc set_up_tc,
                    Test::TearDownTestCaseFunc tear_down_tc)
-    : name_(name),
-      comment_(comment),
+    : name_(a_name),
+      comment_(a_comment),
       test_info_list_(new internal::Vector<TestInfo*>),
       test_indices_(new internal::Vector<int>),
       set_up_tc_(set_up_tc),
@@ -4022,8 +4022,9 @@ int UnitTestImpl::RunAllTests() {
       // Runs the tests only if there was no fatal failure during global
       // set-up.
       if (!Test::HasFatalFailure()) {
-        for (int i = 0; i < total_test_case_count(); i++) {
-          GetMutableTestCase(i)->Run();
+        for (int test_index = 0; test_index < total_test_case_count();
+             test_index++) {
+          GetMutableTestCase(test_index)->Run();
         }
       }
 
@@ -4297,18 +4298,18 @@ void UnitTestImpl::UnshuffleTests() {
 // TestInfoImpl constructor. The new instance assumes ownership of the test
 // factory object.
 TestInfoImpl::TestInfoImpl(TestInfo* parent,
-                           const char* test_case_name,
-                           const char* name,
-                           const char* test_case_comment,
-                           const char* comment,
-                           TypeId fixture_class_id,
+                           const char* a_test_case_name,
+                           const char* a_name,
+                           const char* a_test_case_comment,
+                           const char* a_comment,
+                           TypeId a_fixture_class_id,
                            internal::TestFactoryBase* factory) :
     parent_(parent),
-    test_case_name_(String(test_case_name)),
-    name_(String(name)),
-    test_case_comment_(String(test_case_comment)),
-    comment_(String(comment)),
-    fixture_class_id_(fixture_class_id),
+    test_case_name_(String(a_test_case_name)),
+    name_(String(a_name)),
+    test_case_comment_(String(a_test_case_comment)),
+    comment_(String(a_comment)),
+    fixture_class_id_(a_fixture_class_id),
     should_run_(false),
     is_disabled_(false),
     matches_filter_(false),

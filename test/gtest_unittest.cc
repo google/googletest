@@ -4009,7 +4009,7 @@ TEST(AssertionTest, NonFixtureSubroutine) {
 // An uncopyable class.
 class Uncopyable {
  public:
-  explicit Uncopyable(int value) : value_(value) {}
+  explicit Uncopyable(int a_value) : value_(a_value) {}
 
   int value() const { return value_; }
   bool operator==(const Uncopyable& rhs) const {
@@ -5095,7 +5095,7 @@ TEST(AssertionResultTest, StreamingWorks) {
 // both in the global namespace.
 class Base {
  public:
-  explicit Base(int x) : x_(x) {}
+  explicit Base(int an_x) : x_(an_x) {}
   int x() const { return x_; }
  private:
   int x_;
@@ -5122,7 +5122,7 @@ TEST(MessageTest, CanStreamUserTypeInGlobalNameSpace) {
 namespace {
 class MyTypeInUnnamedNameSpace : public Base {
  public:
-  explicit MyTypeInUnnamedNameSpace(int x): Base(x) {}
+  explicit MyTypeInUnnamedNameSpace(int an_x): Base(an_x) {}
 };
 std::ostream& operator<<(std::ostream& os,
                          const MyTypeInUnnamedNameSpace& val) {
@@ -5147,7 +5147,7 @@ TEST(MessageTest, CanStreamUserTypeInUnnamedNameSpace) {
 namespace namespace1 {
 class MyTypeInNameSpace1 : public Base {
  public:
-  explicit MyTypeInNameSpace1(int x): Base(x) {}
+  explicit MyTypeInNameSpace1(int an_x): Base(an_x) {}
 };
 std::ostream& operator<<(std::ostream& os,
                          const MyTypeInNameSpace1& val) {
@@ -5172,7 +5172,7 @@ TEST(MessageTest, CanStreamUserTypeInUserNameSpace) {
 namespace namespace2 {
 class MyTypeInNameSpace2 : public ::Base {
  public:
-  explicit MyTypeInNameSpace2(int x): Base(x) {}
+  explicit MyTypeInNameSpace2(int an_x): Base(an_x) {}
 };
 }  // namespace namespace2
 std::ostream& operator<<(std::ostream& os,

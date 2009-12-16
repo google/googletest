@@ -193,6 +193,7 @@ class SConstructHelper:
     env.Append(CCFLAGS=['-fno-exceptions',
                         '-Wall',
                         '-Werror',
+                        '-Wshadow',
                        ])
     if optimized:
       env.Append(CCFLAGS=['-O2'], CPPDEFINES=['NDEBUG', '_NDEBUG'])

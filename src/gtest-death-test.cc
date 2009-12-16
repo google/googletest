@@ -308,9 +308,9 @@ String DeathTest::last_death_test_message_;
 // Provides cross platform implementation for some death functionality.
 class DeathTestImpl : public DeathTest {
  protected:
-  DeathTestImpl(const char* statement, const RE* regex)
-      : statement_(statement),
-        regex_(regex),
+  DeathTestImpl(const char* a_statement, const RE* a_regex)
+      : statement_(a_statement),
+        regex_(a_regex),
         spawned_(false),
         status_(-1),
         outcome_(IN_PROGRESS),
@@ -326,11 +326,11 @@ class DeathTestImpl : public DeathTest {
   const char* statement() const { return statement_; }
   const RE* regex() const { return regex_; }
   bool spawned() const { return spawned_; }
-  void set_spawned(bool spawned) { spawned_ = spawned; }
+  void set_spawned(bool is_spawned) { spawned_ = is_spawned; }
   int status() const { return status_; }
-  void set_status(int status) { status_ = status; }
+  void set_status(int a_status) { status_ = a_status; }
   DeathTestOutcome outcome() const { return outcome_; }
-  void set_outcome(DeathTestOutcome outcome) { outcome_ = outcome; }
+  void set_outcome(DeathTestOutcome an_outcome) { outcome_ = an_outcome; }
   int read_fd() const { return read_fd_; }
   void set_read_fd(int fd) { read_fd_ = fd; }
   int write_fd() const { return write_fd_; }
@@ -705,8 +705,8 @@ class ForkingDeathTest : public DeathTestImpl {
 };
 
 // Constructs a ForkingDeathTest.
-ForkingDeathTest::ForkingDeathTest(const char* statement, const RE* regex)
-    : DeathTestImpl(statement, regex),
+ForkingDeathTest::ForkingDeathTest(const char* a_statement, const RE* a_regex)
+    : DeathTestImpl(a_statement, a_regex),
       child_pid_(-1) {}
 
 // Waits for the child in a death test to exit, returning its exit
@@ -718,18 +718,18 @@ int ForkingDeathTest::Wait() {
 
   ReadAndInterpretStatusByte();
 
-  int status;
-  GTEST_DEATH_TEST_CHECK_SYSCALL_(waitpid(child_pid_, &status, 0));
-  set_status(status);
-  return status;
+  int status_value;
+  GTEST_DEATH_TEST_CHECK_SYSCALL_(waitpid(child_pid_, &status_value, 0));
+  set_status(status_value);
+  return status_value;
 }
 
 // A concrete death test class that forks, then immediately runs the test
 // in the child process.
 class NoExecDeathTest : public ForkingDeathTest {
  public:
-  NoExecDeathTest(const char* statement, const RE* regex) :
-      ForkingDeathTest(statement, regex) { }
+  NoExecDeathTest(const char* a_statement, const RE* a_regex) :
+      ForkingDeathTest(a_statement, a_regex) { }
   virtual TestRole AssumeRole();
 };
 
@@ -782,9 +782,9 @@ DeathTest::TestRole NoExecDeathTest::AssumeRole() {
 // only this specific death test to be run.
 class ExecDeathTest : public ForkingDeathTest {
  public:
-  ExecDeathTest(const char* statement, const RE* regex,
+  ExecDeathTest(const char* a_statement, const RE* a_regex,
                 const char* file, int line) :
-      ForkingDeathTest(statement, regex), file_(file), line_(line) { }
+      ForkingDeathTest(a_statement, a_regex), file_(file), line_(line) { }
   virtual TestRole AssumeRole();
  private:
   // The name of the file in which the death test is located.

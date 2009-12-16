@@ -205,7 +205,7 @@ TEST(RangeTest, IntRangeWithCustomStepOverUpperBound) {
 // copy constructor, operator=(), operator+(), and operator<().
 class DogAdder {
  public:
-  explicit DogAdder(const char* value) : value_(value) {}
+  explicit DogAdder(const char* a_value) : value_(a_value) {}
   DogAdder(const DogAdder& other) : value_(other.value_.c_str()) {}
 
   DogAdder operator=(const DogAdder& other) {
@@ -243,7 +243,7 @@ TEST(RangeTest, WorksWithACustomType) {
 
 class IntWrapper {
  public:
-  explicit IntWrapper(int value) : value_(value) {}
+  explicit IntWrapper(int a_value) : value_(a_value) {}
   IntWrapper(const IntWrapper& other) : value_(other.value_) {}
 
   IntWrapper operator=(const IntWrapper& other) {
