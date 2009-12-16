@@ -190,12 +190,12 @@ class String {
   String() : c_str_(NULL), length_(0) {}
 
   // Constructs a String by cloning a 0-terminated C string.
-  String(const char* c_str) {  // NOLINT
-    if (c_str == NULL) {
+  String(const char* a_c_str) {  // NOLINT
+    if (a_c_str == NULL) {
       c_str_ = NULL;
       length_ = 0;
     } else {
-      ConstructNonNull(c_str, strlen(c_str));
+      ConstructNonNull(a_c_str, strlen(a_c_str));
     }
   }
 
@@ -203,8 +203,8 @@ class String {
   // buffer.  E.g. String("hello", 3) creates the string "hel",
   // String("a\0bcd", 4) creates "a\0bc", String(NULL, 0) creates "",
   // and String(NULL, 1) results in access violation.
-  String(const char* buffer, size_t length) {
-    ConstructNonNull(buffer, length);
+  String(const char* buffer, size_t a_length) {
+    ConstructNonNull(buffer, a_length);
   }
 
   // The copy c'tor creates a new copy of the string.  The two
@@ -247,7 +247,7 @@ class String {
 
   // Returns true iff this String equals the given C string.  A NULL
   // string and a non-NULL string are considered not equal.
-  bool operator==(const char* c_str) const { return Compare(c_str) == 0; }
+  bool operator==(const char* a_c_str) const { return Compare(a_c_str) == 0; }
 
   // Returns true iff this String is less than the given String.  A
   // NULL string is considered less than "".
@@ -255,7 +255,7 @@ class String {
 
   // Returns true iff this String doesn't equal the given C string.  A NULL
   // string and a non-NULL string are considered not equal.
-  bool operator!=(const char* c_str) const { return !(*this == c_str); }
+  bool operator!=(const char* a_c_str) const { return !(*this == a_c_str); }
 
   // Returns true iff this String ends with the given suffix.  *Any*
   // String is considered to end with a NULL or empty suffix.
@@ -275,7 +275,9 @@ class String {
   const char* c_str() const { return c_str_; }
 
   // Assigns a C string to this object.  Self-assignment works.
-  const String& operator=(const char* c_str) { return *this = String(c_str); }
+  const String& operator=(const char* a_c_str) {
+    return *this = String(a_c_str);
+  }
 
   // Assigns a String object to this object.  Self-assignment works.
   const String& operator=(const String& rhs) {
@@ -297,12 +299,12 @@ class String {
   // function can only be called when data_ has not been allocated.
   // ConstructNonNull(NULL, 0) results in an empty string ("").
   // ConstructNonNull(NULL, non_zero) is undefined behavior.
-  void ConstructNonNull(const char* buffer, size_t length) {
-    char* const str = new char[length + 1];
-    memcpy(str, buffer, length);
-    str[length] = '\0';
+  void ConstructNonNull(const char* buffer, size_t a_length) {
+    char* const str = new char[a_length + 1];
+    memcpy(str, buffer, a_length);
+    str[a_length] = '\0';
     c_str_ = str;
-    length_ = length;
+    length_ = a_length;
   }
 
   const char* c_str_;

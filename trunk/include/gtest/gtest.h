@@ -457,8 +457,8 @@ class TestProperty {
   // C'tor.  TestProperty does NOT have a default constructor.
   // Always use this constructor (with parameters) to create a
   // TestProperty object.
-  TestProperty(const char* key, const char* value) :
-    key_(key), value_(value) {
+  TestProperty(const char* a_key, const char* a_value) :
+    key_(a_key), value_(a_value) {
   }
 
   // Gets the user supplied key.

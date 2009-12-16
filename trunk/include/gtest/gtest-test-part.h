@@ -56,15 +56,15 @@ class TestPartResult {
   // C'tor.  TestPartResult does NOT have a default constructor.
   // Always use this constructor (with parameters) to create a
   // TestPartResult object.
-  TestPartResult(Type type,
-                 const char* file_name,
-                 int line_number,
-                 const char* message)
-      : type_(type),
-        file_name_(file_name),
-        line_number_(line_number),
-        summary_(ExtractSummary(message)),
-        message_(message) {
+  TestPartResult(Type a_type,
+                 const char* a_file_name,
+                 int a_line_number,
+                 const char* a_message)
+      : type_(a_type),
+        file_name_(a_file_name),
+        line_number_(a_line_number),
+        summary_(ExtractSummary(a_message)),
+        message_(a_message) {
   }
 
   // Gets the outcome of the test part.

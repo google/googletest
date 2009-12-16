@@ -902,15 +902,15 @@ class UnitTestImpl {
 #endif  // GTEST_HAS_PARAM_TEST
 
   // Sets the TestCase object for the test that's currently running.
-  void set_current_test_case(TestCase* current_test_case) {
-    current_test_case_ = current_test_case;
+  void set_current_test_case(TestCase* a_current_test_case) {
+    current_test_case_ = a_current_test_case;
   }
 
   // Sets the TestInfo object for the test that's currently running.  If
   // current_test_info is NULL, the assertion results will be stored in
   // ad_hoc_test_result_.
-  void set_current_test_info(TestInfo* current_test_info) {
-    current_test_info_ = current_test_info;
+  void set_current_test_info(TestInfo* a_current_test_info) {
+    current_test_info_ = a_current_test_info;
   }
 
   // Registers all parameterized tests defined using TEST_P and
