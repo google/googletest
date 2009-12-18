@@ -132,6 +132,24 @@ class EnvCreator:
       env.Append(CPPDEFINES='GTEST_HAS_RTTI=0')
   NoRtti = classmethod(NoRtti)
 
+  def DllBuild(cls, env):
+    """Enables building gtets as a DLL."""
+
+    env['OBJ_SUFFIX'] = '_dll'
+    # -MT(d) instructs MSVC to link to the static version of the C++
+    # runtime library; -MD(d) tells it to link to the DLL version.
+    flags = env['CCFLAGS']
+    if '-MTd' in flags:
+      flags.remove('-MTd')
+      flags.append('-MDd')
+    elif '-MT' in flags:
+      flags.remove('-MT')
+      flags.append('-MD')
+
+    # Disables the "non dll-interface class 'stdext::exception' used as
+    # base for dll-interface class" warning triggered by the STL code.
+    env.Append(CCFLAGS=['/wd4275'])
+  DllBuild = classmethod(DllBuild)
 
 sconscript_exports = {'EnvCreator': EnvCreator}
 Return('sconscript_exports')

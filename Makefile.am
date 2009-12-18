@@ -17,6 +17,7 @@ EXTRA_DIST = \
   scons/SConstruct.common \
   scripts/fuse_gtest_files.py \
   scripts/gen_gtest_pred_impl.py \
+  scripts/generate_gtest_def.py \
   scripts/test/Makefile
 
 # gtest source files that we don't compile directly.
@@ -27,7 +28,8 @@ EXTRA_DIST += \
   src/gtest-internal-inl.h \
   src/gtest-port.cc \
   src/gtest-test-part.cc \
-  src/gtest-typed-test.cc
+  src/gtest-typed-test.cc \
+  src/gtest.def
 
 # Sample files that we don't compile.
 EXTRA_DIST += \
@@ -86,7 +88,8 @@ EXTRA_DIST += \
   test/gtest_uninitialized_test_.cc \
   test/gtest_xml_outfile1_test_.cc \
   test/gtest_xml_outfile2_test_.cc \
-  test/gtest_xml_output_unittest_.cc
+  test/gtest_xml_output_unittest_.cc \
+  test/gtest_dll_test_.cc
 
 # Python tests that we don't run.
 EXTRA_DIST += \
