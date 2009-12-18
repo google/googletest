@@ -298,7 +298,7 @@ if BUILD_TESTS:
   if env['PLATFORM'] == 'win32' and env.get('GTEST_BUILD_DLL_TEST', None):
     test_env = EnvCreator.Create(env, EnvCreator.DllBuild)
     dll_env = test_env.Clone()
-    dll_env.Append(LINKFLAGS=['-DEF:../src/gtest.def'])
+    dll_env.Append(LINKFLAGS=['-DEF:../msvc/gtest.def'])
 
     gtest_dll = dll_env.SharedLibrary(
                     target='gtest_dll',

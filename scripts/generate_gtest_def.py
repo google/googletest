@@ -63,7 +63,7 @@ import sys
 
 # We assume that this file is in the scripts/ directory in the Google
 # Test root directory.
-GTEST_DEF_PATH = os.path.join(os.path.dirname(__file__), '../src/gtest.def')
+GTEST_DEF_PATH = os.path.join(os.path.dirname(__file__), '../msvc/gtest.def')
 
 # Locates the header of the EXPORTS section.
 EXPORTS_SECTION_REGEX = re.compile(r'^EXPORTS\s*$', re.IGNORECASE)
@@ -156,13 +156,13 @@ def main():
 
     exports = AdjustExports(exports, unresolved)
     WriteGtestDefFile(open(GTEST_DEF_PATH, 'w'), exports)
-    sys.stderr.write('Updated test/gtest.def. Please clean the .dll file\n'
+    sys.stderr.write('Updated gtest.def. Please clean the .dll file\n'
                      'produced by your Google Test DLL build, run the build\n'
                      'again and pass its diagnostic output to this script\n'
                      'unless the build succeeds.\n')
   else:
     sys.stderr.write('The build diagnostic output indicates no unresolved\n'
-                     'externals.  test/gtest.def is likely up to date and\n'
+                     'externals.  gtest.def is likely up to date and\n'
                      'has not been updated.\n')
 
 if __name__ == '__main__':
