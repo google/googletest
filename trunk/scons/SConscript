@@ -292,6 +292,25 @@ if BUILD_TESTS:
   GtestBinary(env_without_rtti, 'gtest_no_rtti_test', gtest_main_no_rtti,
               ['../test/gtest_unittest.cc'])
 
+  # Tests that gtest works when built as a DLL on Windows.
+  # We don't need to actually run this test.
+  # Note: this is not supported under VC 7.1.
+  if env['PLATFORM'] == 'win32' and env.get('GTEST_BUILD_DLL_TEST', None):
+    test_env = EnvCreator.Create(env, EnvCreator.DllBuild)
+    dll_env = test_env.Clone()
+    dll_env.Append(LINKFLAGS=['-DEF:../src/gtest.def'])
+
+    gtest_dll = dll_env.SharedLibrary(
+                    target='gtest_dll',
+                    source=[dll_env.SharedObject('gtest_all_dll',
+                                                 '../src/gtest-all.cc'),
+                            dll_env.SharedObject('gtest_main_dll',
+                                                 '../src/gtest_main.cc')])
+    # TODO(vladl@google.com): Get rid of the .data[1] hack. Find a proper
+    # way to depend on a shared library without knowing its path in advance.
+    test_env.Program('gtest_dll_test_',
+                     ['../test/gtest_dll_test_.cc', gtest_dll.data[1]])
+
 ############################################################
 # Sample targets.
 
