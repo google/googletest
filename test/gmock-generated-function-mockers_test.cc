@@ -114,6 +114,8 @@ class FooInterface {
 
 class MockFoo : public FooInterface {
  public:
+  MockFoo() {}
+
   // Makes sure that a mock function parameter can be named.
   MOCK_METHOD1(VoidReturning, void(int n));  // NOLINT
 
@@ -149,6 +151,9 @@ class MockFoo : public FooInterface {
       const string& k));
   MOCK_CONST_METHOD1_WITH_CALLTYPE(STDMETHODCALLTYPE, CTConst, char(int));
 #endif  // GTEST_OS_WINDOWS
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFoo);
 };
 
 class FunctionMockerTest : public testing::Test {
@@ -305,7 +310,12 @@ TEST_F(FunctionMockerTest, MocksFunctionsConstFunctionWithCallType) {
 
 class MockB {
  public:
+  MockB() {}
+
   MOCK_METHOD0(DoB, void());
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockB);
 };
 
 // Tests that functions with no EXPECT_CALL() ruls can be called any
@@ -345,10 +355,15 @@ class StackInterface {
 template <typename T>
 class MockStack : public StackInterface<T> {
  public:
+  MockStack() {}
+
   MOCK_METHOD1_T(Push, void(const T& elem));
   MOCK_METHOD0_T(Pop, void());
   MOCK_CONST_METHOD0_T(GetSize, int());  // NOLINT
   MOCK_CONST_METHOD0_T(GetTop, const T&());
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockStack);
 };
 
 // Tests that template mock works.
@@ -393,10 +408,15 @@ class StackInterfaceWithCallType {
 template <typename T>
 class MockStackWithCallType : public StackInterfaceWithCallType<T> {
  public:
+  MockStackWithCallType() {}
+
   MOCK_METHOD1_T_WITH_CALLTYPE(STDMETHODCALLTYPE, Push, void(const T& elem));
   MOCK_METHOD0_T_WITH_CALLTYPE(STDMETHODCALLTYPE, Pop, void());
   MOCK_CONST_METHOD0_T_WITH_CALLTYPE(STDMETHODCALLTYPE, GetSize, int());
   MOCK_CONST_METHOD0_T_WITH_CALLTYPE(STDMETHODCALLTYPE, GetTop, const T&());
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockStackWithCallType);
 };
 
 // Tests that template mock with calltype works.
@@ -430,7 +450,12 @@ TEST(TemplateMockTestWithCallType, Works) {
 
 class MockOverloadedOnArgNumber {
  public:
+  MockOverloadedOnArgNumber() {}
+
   MY_MOCK_METHODS1_;
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockOverloadedOnArgNumber);
 };
 
 TEST(OverloadedMockMethodTest, CanOverloadOnArgNumberInMacroBody) {
@@ -450,7 +475,12 @@ TEST(OverloadedMockMethodTest, CanOverloadOnArgNumberInMacroBody) {
 
 class MockOverloadedOnConstness {
  public:
+  MockOverloadedOnConstness() {}
+
   MY_MOCK_METHODS2_;
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockOverloadedOnConstness);
 };
 
 TEST(OverloadedMockMethodTest, CanOverloadOnConstnessInMacroBody) {

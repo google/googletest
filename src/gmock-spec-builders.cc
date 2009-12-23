@@ -56,12 +56,12 @@ namespace internal {
 Mutex g_gmock_mutex(Mutex::NO_CONSTRUCTOR_NEEDED_FOR_STATIC_MUTEX);
 
 // Constructs an ExpectationBase object.
-ExpectationBase::ExpectationBase(const char* file,
-                                 int line,
-                                 const string& source_text)
-    : file_(file),
-      line_(line),
-      source_text_(source_text),
+ExpectationBase::ExpectationBase(const char* a_file,
+                                 int a_line,
+                                 const string& a_source_text)
+    : file_(a_file),
+      line_(a_line),
+      source_text_(a_source_text),
       cardinality_specified_(false),
       cardinality_(Exactly(1)),
       call_count_(0),
@@ -73,9 +73,9 @@ ExpectationBase::~ExpectationBase() {}
 
 // Explicitly specifies the cardinality of this expectation.  Used by
 // the subclasses to implement the .Times() clause.
-void ExpectationBase::SpecifyCardinality(const Cardinality& cardinality) {
+void ExpectationBase::SpecifyCardinality(const Cardinality& a_cardinality) {
   cardinality_specified_ = true;
-  cardinality_ = cardinality;
+  cardinality_ = a_cardinality;
 }
 
 // Retires all pre-requisites of this expectation.
@@ -427,8 +427,8 @@ void Mock::ClearDefaultActionsLocked(void* mock_obj) {
 Expectation::Expectation() {}
 
 Expectation::Expectation(
-    const internal::linked_ptr<internal::ExpectationBase>& expectation_base)
-    : expectation_base_(expectation_base) {}
+    const internal::linked_ptr<internal::ExpectationBase>& an_expectation_base)
+    : expectation_base_(an_expectation_base) {}
 
 Expectation::~Expectation() {}
 

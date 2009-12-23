@@ -58,8 +58,11 @@ class InvokeAction {
   Result Perform(const ArgumentTuple& args) {
     return InvokeHelper<Result, ArgumentTuple>::Invoke(function_impl_, args);
   }
+
  private:
   FunctionImpl function_impl_;
+
+  GTEST_DISALLOW_ASSIGN_(InvokeAction);
 };
 
 // Implements the Invoke(object_ptr, &Class::Method) action.
@@ -74,9 +77,12 @@ class InvokeMethodAction {
     return InvokeHelper<Result, ArgumentTuple>::InvokeMethod(
         obj_ptr_, method_ptr_, args);
   }
+
  private:
   Class* const obj_ptr_;
   const MethodPtr method_ptr_;
+
+  GTEST_DISALLOW_ASSIGN_(InvokeMethodAction);
 };
 
 }  // namespace internal
@@ -121,6 +127,16 @@ inline internal::WithArgsAction<InnerAction, k>
 WithArg(const InnerAction& action) {
   return internal::WithArgsAction<InnerAction, k>(action);
 }
+
+// The ACTION*() macros trigger warning C4100 (unreferenced formal
+// parameter) in MSVC with -W4.  Unfortunately they cannot be fixed in
+// the macro definition, as the warnings are generated when the macro
+// is expanded and macro expansion cannot contain #pragma.  Therefore
+// we suppress them here.
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4100)
+#endif
 
 // Action ReturnArg<k>() returns the k-th argument of the mock function.
 ACTION_TEMPLATE(ReturnArg,
@@ -184,6 +200,10 @@ ACTION_TEMPLATE(DeleteArg,
 #if GTEST_HAS_EXCEPTIONS
 ACTION_P(Throw, exception) { throw exception; }
 #endif  // GTEST_HAS_EXCEPTIONS
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 }  // namespace testing
 

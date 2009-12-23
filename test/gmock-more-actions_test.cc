@@ -65,6 +65,10 @@ using testing::Unused;
 using testing::WithArg;
 using testing::WithoutArgs;
 
+// For suppressing compiler warnings on conversion possibly losing precision.
+inline short Short(short n) { return n; }  // NOLINT
+inline char Char(char ch) { return ch; }
+
 // Sample functions and functors for testing Invoke() and etc.
 int Nullary() { return 1; }
 
@@ -85,7 +89,7 @@ bool Unary(int x) { return x < 0; }
 
 const char* Plus1(const char* s) { return s + 1; }
 
-void VoidUnary(int n) { g_done = true; }
+void VoidUnary(int /* n */) { g_done = true; }
 
 bool ByConstRef(const string& s) { return s == "Hi"; }
 
@@ -239,13 +243,13 @@ TEST(InvokeTest, Unary) {
 TEST(InvokeTest, Binary) {
   Action<const char*(const char*, short)> a = Invoke(Binary);  // NOLINT
   const char* p = "Hello";
-  EXPECT_EQ(p + 2, a.Perform(make_tuple(p, 2)));
+  EXPECT_EQ(p + 2, a.Perform(make_tuple(p, Short(2))));
 }
 
 // Tests using Invoke() with a ternary function.
 TEST(InvokeTest, Ternary) {
   Action<int(int, char, short)> a = Invoke(Ternary);  // NOLINT
-  EXPECT_EQ(6, a.Perform(make_tuple(1, '\2', 3)));
+  EXPECT_EQ(6, a.Perform(make_tuple(1, '\2', Short(3))));
 }
 
 // Tests using Invoke() with a 4-argument function.
@@ -340,14 +344,14 @@ TEST(InvokeTest, MethodWithUnusedParameters) {
 
 // Tests using Invoke() with a functor.
 TEST(InvokeTest, Functor) {
-  Action<int(short, char)> a = Invoke(plus<short>());  // NOLINT
-  EXPECT_EQ(3, a.Perform(make_tuple(1, 2)));
+  Action<long(long, int)> a = Invoke(plus<long>());  // NOLINT
+  EXPECT_EQ(3L, a.Perform(make_tuple(1, 2)));
 }
 
 // Tests using Invoke(f) as an action of a compatible type.
 TEST(InvokeTest, FunctionWithCompatibleType) {
   Action<long(int, short, char, bool)> a = Invoke(SumOf4);  // NOLINT
-  EXPECT_EQ(4321, a.Perform(make_tuple(4000, 300, 20, true)));
+  EXPECT_EQ(4321, a.Perform(make_tuple(4000, Short(300), Char(20), true)));
 }
 
 // Tests using Invoke() with an object pointer and a method pointer.
@@ -378,7 +382,7 @@ TEST(InvokeMethodTest, Binary) {
 TEST(InvokeMethodTest, Ternary) {
   Foo foo;
   Action<int(int, bool, char)> a = Invoke(&foo, &Foo::Ternary);  // NOLINT
-  EXPECT_EQ(1124, a.Perform(make_tuple(1000, true, 1)));
+  EXPECT_EQ(1124, a.Perform(make_tuple(1000, true, Char(1))));
 }
 
 // Tests using Invoke() with a 4-argument method.
@@ -457,7 +461,7 @@ TEST(InvokeMethodTest, MethodWithCompatibleType) {
   Foo foo;
   Action<long(int, short, char, bool)> a =  // NOLINT
       Invoke(&foo, &Foo::SumOf4);
-  EXPECT_EQ(4444, a.Perform(make_tuple(4000, 300, 20, true)));
+  EXPECT_EQ(4444, a.Perform(make_tuple(4000, Short(300), Char(20), true)));
 }
 
 // Tests using WithoutArgs with an action that takes no argument.

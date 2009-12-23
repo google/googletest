@@ -155,6 +155,9 @@ class NiceMock : public MockClass {
     ::testing::Mock::UnregisterCallReaction(
         internal::implicit_cast<MockClass*>(this));
   }
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(NiceMock);
 };
 
 template <class MockClass>
@@ -246,6 +249,9 @@ class StrictMock : public MockClass {
     ::testing::Mock::UnregisterCallReaction(
         internal::implicit_cast<MockClass*>(this));
   }
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(StrictMock);
 };
 
 // The following specializations catch some (relatively more common)

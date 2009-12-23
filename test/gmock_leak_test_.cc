@@ -48,7 +48,12 @@ class FooInterface {
 
 class MockFoo : public FooInterface {
  public:
+  MockFoo() {}
+
   MOCK_METHOD0(DoThis, void());
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFoo);
 };
 
 TEST(LeakTest, LeakedMockWithExpectCallCausesFailureWhenLeakCheckingIsEnabled) {

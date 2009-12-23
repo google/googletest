@@ -794,66 +794,116 @@ class MockFunction;
 template <typename R>
 class MockFunction<R()> {
  public:
+  MockFunction() {}
+
   MOCK_METHOD0_T(Call, R());
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
 };
 
 template <typename R, typename A0>
 class MockFunction<R(A0)> {
  public:
+  MockFunction() {}
+
   MOCK_METHOD1_T(Call, R(A0));
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
 };
 
 template <typename R, typename A0, typename A1>
 class MockFunction<R(A0, A1)> {
  public:
+  MockFunction() {}
+
   MOCK_METHOD2_T(Call, R(A0, A1));
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
 };
 
 template <typename R, typename A0, typename A1, typename A2>
 class MockFunction<R(A0, A1, A2)> {
  public:
+  MockFunction() {}
+
   MOCK_METHOD3_T(Call, R(A0, A1, A2));
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
 };
 
 template <typename R, typename A0, typename A1, typename A2, typename A3>
 class MockFunction<R(A0, A1, A2, A3)> {
  public:
+  MockFunction() {}
+
   MOCK_METHOD4_T(Call, R(A0, A1, A2, A3));
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
 };
 
 template <typename R, typename A0, typename A1, typename A2, typename A3,
     typename A4>
 class MockFunction<R(A0, A1, A2, A3, A4)> {
  public:
+  MockFunction() {}
+
   MOCK_METHOD5_T(Call, R(A0, A1, A2, A3, A4));
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
 };
 
 template <typename R, typename A0, typename A1, typename A2, typename A3,
     typename A4, typename A5>
 class MockFunction<R(A0, A1, A2, A3, A4, A5)> {
  public:
+  MockFunction() {}
+
   MOCK_METHOD6_T(Call, R(A0, A1, A2, A3, A4, A5));
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
 };
 
 template <typename R, typename A0, typename A1, typename A2, typename A3,
     typename A4, typename A5, typename A6>
 class MockFunction<R(A0, A1, A2, A3, A4, A5, A6)> {
  public:
+  MockFunction() {}
+
   MOCK_METHOD7_T(Call, R(A0, A1, A2, A3, A4, A5, A6));
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
 };
 
 template <typename R, typename A0, typename A1, typename A2, typename A3,
     typename A4, typename A5, typename A6, typename A7>
 class MockFunction<R(A0, A1, A2, A3, A4, A5, A6, A7)> {
  public:
+  MockFunction() {}
+
   MOCK_METHOD8_T(Call, R(A0, A1, A2, A3, A4, A5, A6, A7));
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
 };
 
 template <typename R, typename A0, typename A1, typename A2, typename A3,
     typename A4, typename A5, typename A6, typename A7, typename A8>
 class MockFunction<R(A0, A1, A2, A3, A4, A5, A6, A7, A8)> {
  public:
+  MockFunction() {}
+
   MOCK_METHOD9_T(Call, R(A0, A1, A2, A3, A4, A5, A6, A7, A8));
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
 };
 
 template <typename R, typename A0, typename A1, typename A2, typename A3,
@@ -861,7 +911,12 @@ template <typename R, typename A0, typename A1, typename A2, typename A3,
     typename A9>
 class MockFunction<R(A0, A1, A2, A3, A4, A5, A6, A7, A8, A9)> {
  public:
+  MockFunction() {}
+
   MOCK_METHOD10_T(Call, R(A0, A1, A2, A3, A4, A5, A6, A7, A8, A9));
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
 };
 
 }  // namespace testing

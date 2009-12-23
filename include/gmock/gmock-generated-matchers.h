@@ -89,7 +89,7 @@ template <class Tuple>
 class TupleFields<Tuple, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1> {
  public:
   typedef ::std::tr1::tuple<> type;
-  static type GetSelectedFields(const Tuple& t) {
+  static type GetSelectedFields(const Tuple& /* t */) {
     using ::std::tr1::get;
     return type();
   }
@@ -271,6 +271,8 @@ class ArgsMatcherImpl : public MatcherInterface<ArgsTuple> {
   }
 
   const MonomorphicInnerMatcher inner_matcher_;
+
+  GTEST_DISALLOW_ASSIGN_(ArgsMatcherImpl);
 };
 
 template <class InnerMatcher, int k0 = -1, int k1 = -1, int k2 = -1,
@@ -287,7 +289,10 @@ class ArgsMatcher {
         k6, k7, k8, k9>(inner_matcher_));
   }
 
+ private:
   const InnerMatcher inner_matcher_;
+
+  GTEST_DISALLOW_ASSIGN_(ArgsMatcher);
 };
 
 // Implements ElementsAre() of 1-10 arguments.
@@ -317,6 +322,8 @@ class ElementsAreMatcher1 {
 
  private:
   const T1& e1_;
+
+  GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher1);
 };
 
 template <typename T1, typename T2>
@@ -342,6 +349,8 @@ class ElementsAreMatcher2 {
  private:
   const T1& e1_;
   const T2& e2_;
+
+  GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher2);
 };
 
 template <typename T1, typename T2, typename T3>
@@ -370,6 +379,8 @@ class ElementsAreMatcher3 {
   const T1& e1_;
   const T2& e2_;
   const T3& e3_;
+
+  GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher3);
 };
 
 template <typename T1, typename T2, typename T3, typename T4>
@@ -400,6 +411,8 @@ class ElementsAreMatcher4 {
   const T2& e2_;
   const T3& e3_;
   const T4& e4_;
+
+  GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher4);
 };
 
 template <typename T1, typename T2, typename T3, typename T4, typename T5>
@@ -432,6 +445,8 @@ class ElementsAreMatcher5 {
   const T3& e3_;
   const T4& e4_;
   const T5& e5_;
+
+  GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher5);
 };
 
 template <typename T1, typename T2, typename T3, typename T4, typename T5,
@@ -468,6 +483,8 @@ class ElementsAreMatcher6 {
   const T4& e4_;
   const T5& e5_;
   const T6& e6_;
+
+  GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher6);
 };
 
 template <typename T1, typename T2, typename T3, typename T4, typename T5,
@@ -506,6 +523,8 @@ class ElementsAreMatcher7 {
   const T5& e5_;
   const T6& e6_;
   const T7& e7_;
+
+  GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher7);
 };
 
 template <typename T1, typename T2, typename T3, typename T4, typename T5,
@@ -546,6 +565,8 @@ class ElementsAreMatcher8 {
   const T6& e6_;
   const T7& e7_;
   const T8& e8_;
+
+  GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher8);
 };
 
 template <typename T1, typename T2, typename T3, typename T4, typename T5,
@@ -589,6 +610,8 @@ class ElementsAreMatcher9 {
   const T7& e7_;
   const T8& e8_;
   const T9& e9_;
+
+  GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher9);
 };
 
 template <typename T1, typename T2, typename T3, typename T4, typename T5,
@@ -634,6 +657,8 @@ class ElementsAreMatcher10 {
   const T8& e8_;
   const T9& e9_;
   const T10& e10_;
+
+  GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher10);
 };
 
 }  // namespace internal
@@ -1012,6 +1037,8 @@ ElementsAreArray(const T (&array)[N]) {
                      #name, description, gmock_interp_, gmock_printed_params);\
       }\
       const ::testing::internal::Interpolations gmock_interp_;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -1023,7 +1050,9 @@ ElementsAreArray(const T (&array)[N]) {
       gmock_interp_ = ::testing::internal::ValidateMatcherDescription(\
           gmock_param_names, ("" description ""));\
     }\
+   private:\
     ::testing::internal::Interpolations gmock_interp_;\
+    GTEST_DISALLOW_ASSIGN_(name##Matcher);\
   };\
   inline name##Matcher name() {\
     return name##Matcher();\
@@ -1052,6 +1081,8 @@ ElementsAreArray(const T (&array)[N]) {
       }\
       p0##_type p0;\
       const ::testing::internal::Interpolations gmock_interp_;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -1064,7 +1095,9 @@ ElementsAreArray(const T (&array)[N]) {
           gmock_param_names, ("" description ""));\
     }\
     p0##_type p0;\
+   private:\
     ::testing::internal::Interpolations gmock_interp_;\
+    GTEST_DISALLOW_ASSIGN_(name##MatcherP);\
   };\
   template <typename p0##_type>\
   inline name##MatcherP<p0##_type> name(p0##_type p0) {\
@@ -1096,6 +1129,8 @@ ElementsAreArray(const T (&array)[N]) {
       p0##_type p0;\
       p1##_type p1;\
       const ::testing::internal::Interpolations gmock_interp_;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -1110,7 +1145,9 @@ ElementsAreArray(const T (&array)[N]) {
     }\
     p0##_type p0;\
     p1##_type p1;\
+   private:\
     ::testing::internal::Interpolations gmock_interp_;\
+    GTEST_DISALLOW_ASSIGN_(name##MatcherP2);\
   };\
   template <typename p0##_type, typename p1##_type>\
   inline name##MatcherP2<p0##_type, p1##_type> name(p0##_type p0, \
@@ -1146,6 +1183,8 @@ ElementsAreArray(const T (&array)[N]) {
       p1##_type p1;\
       p2##_type p2;\
       const ::testing::internal::Interpolations gmock_interp_;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -1161,7 +1200,9 @@ ElementsAreArray(const T (&array)[N]) {
     p0##_type p0;\
     p1##_type p1;\
     p2##_type p2;\
+   private:\
     ::testing::internal::Interpolations gmock_interp_;\
+    GTEST_DISALLOW_ASSIGN_(name##MatcherP3);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type>\
   inline name##MatcherP3<p0##_type, p1##_type, p2##_type> name(p0##_type p0, \
@@ -1200,6 +1241,8 @@ ElementsAreArray(const T (&array)[N]) {
       p2##_type p2;\
       p3##_type p3;\
       const ::testing::internal::Interpolations gmock_interp_;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -1217,7 +1260,9 @@ ElementsAreArray(const T (&array)[N]) {
     p1##_type p1;\
     p2##_type p2;\
     p3##_type p3;\
+   private:\
     ::testing::internal::Interpolations gmock_interp_;\
+    GTEST_DISALLOW_ASSIGN_(name##MatcherP4);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type>\
@@ -1261,6 +1306,8 @@ ElementsAreArray(const T (&array)[N]) {
       p3##_type p3;\
       p4##_type p4;\
       const ::testing::internal::Interpolations gmock_interp_;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -1280,7 +1327,9 @@ ElementsAreArray(const T (&array)[N]) {
     p2##_type p2;\
     p3##_type p3;\
     p4##_type p4;\
+   private:\
     ::testing::internal::Interpolations gmock_interp_;\
+    GTEST_DISALLOW_ASSIGN_(name##MatcherP5);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type>\
@@ -1325,6 +1374,8 @@ ElementsAreArray(const T (&array)[N]) {
       p4##_type p4;\
       p5##_type p5;\
       const ::testing::internal::Interpolations gmock_interp_;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -1345,7 +1396,9 @@ ElementsAreArray(const T (&array)[N]) {
     p3##_type p3;\
     p4##_type p4;\
     p5##_type p5;\
+   private:\
     ::testing::internal::Interpolations gmock_interp_;\
+    GTEST_DISALLOW_ASSIGN_(name##MatcherP6);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type>\
@@ -1396,6 +1449,8 @@ ElementsAreArray(const T (&array)[N]) {
       p5##_type p5;\
       p6##_type p6;\
       const ::testing::internal::Interpolations gmock_interp_;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -1419,7 +1474,9 @@ ElementsAreArray(const T (&array)[N]) {
     p4##_type p4;\
     p5##_type p5;\
     p6##_type p6;\
+   private:\
     ::testing::internal::Interpolations gmock_interp_;\
+    GTEST_DISALLOW_ASSIGN_(name##MatcherP7);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
@@ -1474,6 +1531,8 @@ ElementsAreArray(const T (&array)[N]) {
       p6##_type p6;\
       p7##_type p7;\
       const ::testing::internal::Interpolations gmock_interp_;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -1500,7 +1559,9 @@ ElementsAreArray(const T (&array)[N]) {
     p5##_type p5;\
     p6##_type p6;\
     p7##_type p7;\
+   private:\
     ::testing::internal::Interpolations gmock_interp_;\
+    GTEST_DISALLOW_ASSIGN_(name##MatcherP8);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
@@ -1557,6 +1618,8 @@ ElementsAreArray(const T (&array)[N]) {
       p7##_type p7;\
       p8##_type p8;\
       const ::testing::internal::Interpolations gmock_interp_;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -1584,7 +1647,9 @@ ElementsAreArray(const T (&array)[N]) {
     p6##_type p6;\
     p7##_type p7;\
     p8##_type p8;\
+   private:\
     ::testing::internal::Interpolations gmock_interp_;\
+    GTEST_DISALLOW_ASSIGN_(name##MatcherP9);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
@@ -1645,6 +1710,8 @@ ElementsAreArray(const T (&array)[N]) {
       p8##_type p8;\
       p9##_type p9;\
       const ::testing::internal::Interpolations gmock_interp_;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -1673,7 +1740,9 @@ ElementsAreArray(const T (&array)[N]) {
     p7##_type p7;\
     p8##_type p8;\
     p9##_type p9;\
+   private:\
     ::testing::internal::Interpolations gmock_interp_;\
+    GTEST_DISALLOW_ASSIGN_(name##MatcherP10);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \

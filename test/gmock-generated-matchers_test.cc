@@ -223,8 +223,9 @@ class GreaterThanMatcher : public MatcherInterface<int> {
       *os << "is " << -diff << " less than " << rhs_;
     }
   }
+
  private:
-  const int rhs_;
+  int rhs_;
 };
 
 Matcher<int> GreaterThan(int n) {
@@ -411,7 +412,7 @@ TEST(ElementsAreTest, WorksForNestedContainer) {
   };
 
   vector<list<char> > nested;
-  for (int i = 0; i < GMOCK_ARRAY_SIZE_(strings); i++) {
+  for (size_t i = 0; i < GMOCK_ARRAY_SIZE_(strings); i++) {
     nested.push_back(list<char>(strings[i], strings[i] + strlen(strings[i])));
   }
 
@@ -446,7 +447,12 @@ TEST(ElementsAreTest, WorksWithNativeArrayPassedByReference) {
 
 class NativeArrayPassedAsPointerAndSize {
  public:
+  NativeArrayPassedAsPointerAndSize() {}
+
   MOCK_METHOD2(Helper, void(int* array, int size));
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(NativeArrayPassedAsPointerAndSize);
 };
 
 TEST(ElementsAreTest, WorksWithNativeArrayPassedAsPointerAndSize) {
@@ -550,7 +556,10 @@ TEST(MatcherMacroTest, Works) {
 // Tests that the description string supplied to MATCHER() must be
 // valid.
 
-MATCHER(HasBadDescription, "Invalid%") { return true; }
+MATCHER(HasBadDescription, "Invalid%") {
+  // Uses arg to suppress "unused parameter" warning.
+  return arg==arg;
+}
 
 TEST(MatcherMacroTest,
      CreatingMatcherWithBadDescriptionGeneratesNonfatalFailure) {
@@ -560,7 +569,7 @@ TEST(MatcherMacroTest,
       "use \"%%\" instead of \"%\" to print \"%\".");
 }
 
-MATCHER(HasGoodDescription, "good") { return true; }
+MATCHER(HasGoodDescription, "good") { return arg==arg; }
 
 TEST(MatcherMacroTest, AcceptsValidDescription) {
   const Matcher<int> m = HasGoodDescription();
@@ -642,7 +651,7 @@ TEST(MatcherPMacroTest,
 }
 
 
-MATCHER_P(HasGoodDescription1, n, "good %(n)s") { return true; }
+MATCHER_P(HasGoodDescription1, n, "good %(n)s") { return arg==arg; }
 
 TEST(MatcherPMacroTest, AcceptsValidDescription) {
   const Matcher<int> m = HasGoodDescription1(5);
@@ -709,7 +718,7 @@ TEST(MatcherPnMacroTest,
 
 MATCHER_P2(HasComplexDescription, foo, bar,
            "is as complex as %(foo)s %(bar)s (i.e. %(*)s or %%%(foo)s!)") {
-  return true;
+  return arg==arg;
 }
 
 TEST(MatcherPnMacroTest, AcceptsValidDescription) {
@@ -861,7 +870,7 @@ TEST(MatcherPnMacroTest, WorksForDifferentParameterTypes) {
 MATCHER_P2(EqConcat, prefix, suffix, "") {
   // The following lines promote the two parameters to desired types.
   std::string prefix_str(prefix);
-  char suffix_char(suffix);
+  char suffix_char = static_cast<char>(suffix);
   return arg == prefix_str + suffix_char;
 }
 

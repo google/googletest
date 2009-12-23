@@ -242,7 +242,12 @@ $range j 0..i-1
 template <typename R$for j [[, typename A$j]]>
 class MockFunction<R($for j, [[A$j]])> {
  public:
+  MockFunction() {}
+
   MOCK_METHOD$i[[]]_T(Call, R($for j, [[A$j]]));
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
 };
 
 

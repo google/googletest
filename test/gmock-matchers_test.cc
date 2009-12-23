@@ -152,8 +152,9 @@ class GreaterThanMatcher : public MatcherInterface<int> {
       *os << "is " << -diff << " less than " << rhs_;
     }
   }
+
  private:
-  const int rhs_;
+  int rhs_;
 };
 
 Matcher<int> GreaterThan(int n) {
@@ -335,7 +336,7 @@ class IntValue {
  public:
   // An int can be statically (although not implicitly) cast to a
   // IntValue.
-  explicit IntValue(int value) : value_(value) {}
+  explicit IntValue(int a_value) : value_(a_value) {}
 
   int value() const { return value_; }
  private:
@@ -560,7 +561,7 @@ class Unprintable {
  public:
   Unprintable() : c_('a') {}
 
-  bool operator==(const Unprintable& rhs) { return true; }
+  bool operator==(const Unprintable& /* rhs */) { return true; }
  private:
   char c_;
 };
@@ -606,7 +607,7 @@ TEST(TypedEqTest, CanDescribeSelf) {
 // "undefined referece".
 template <typename T>
 struct Type {
-  static bool IsTypeOf(const T& v) { return true; }
+  static bool IsTypeOf(const T& /* v */) { return true; }
 
   template <typename T2>
   static void IsTypeOf(T2 v);
@@ -1861,8 +1862,9 @@ class IsGreaterThan {
   explicit IsGreaterThan(int threshold) : threshold_(threshold) {}
 
   bool operator()(int n) const { return n > threshold_; }
+
  private:
-  const int threshold_;
+  int threshold_;
 };
 
 // For testing Truly().
@@ -1959,7 +1961,12 @@ TEST(AllArgsTest, WorksForNonTuple) {
 
 class AllArgsHelper {
  public:
+  AllArgsHelper() {}
+
   MOCK_METHOD2(Helper, int(char x, int y));
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(AllArgsHelper);
 };
 
 TEST(AllArgsTest, WorksInWithClause) {
@@ -2384,7 +2391,7 @@ TEST(PointeeTest, CanExplainMatchResult) {
 // An uncopyable class.
 class Uncopyable {
  public:
-  explicit Uncopyable(int value) : value_(value) {}
+  explicit Uncopyable(int a_value) : value_(a_value) {}
 
   int value() const { return value_; }
  private:
@@ -2405,11 +2412,17 @@ struct AStruct {
   const double y;  // A const field.
   Uncopyable z;    // An uncopyable field.
   const char* p;   // A pointer field.
+
+ private:
+  GTEST_DISALLOW_ASSIGN_(AStruct);
 };
 
 // A derived struct for testing Field().
 struct DerivedStruct : public AStruct {
   char ch;
+
+ private:
+  GTEST_DISALLOW_ASSIGN_(DerivedStruct);
 };
 
 // Tests that Field(&Foo::field, ...) works when field is non-const.
@@ -2943,7 +2956,7 @@ TEST(ResultOfTest, WorksForReferencingCallables) {
 
 class DivisibleByImpl {
  public:
-  explicit DivisibleByImpl(int divider) : divider_(divider) {}
+  explicit DivisibleByImpl(int a_divider) : divider_(a_divider) {}
 
   template <typename T>
   bool Matches(const T& n) const {
@@ -2958,7 +2971,7 @@ class DivisibleByImpl {
     *os << "is not divisible by " << divider_;
   }
 
-  void set_divider(int divider) { divider_ = divider; }
+  void set_divider(int a_divider) { divider_ = a_divider; }
   int divider() const { return divider_; }
 
  private:
@@ -3021,7 +3034,7 @@ TEST(ExplainmatcherResultTest, MonomorphicMatcher) {
 
 class NotCopyable {
  public:
-  explicit NotCopyable(int value) : value_(value) {}
+  explicit NotCopyable(int a_value) : value_(a_value) {}
 
   int value() const { return value_; }
 

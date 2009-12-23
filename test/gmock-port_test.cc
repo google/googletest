@@ -85,7 +85,7 @@ class Castable {
   }
 
  private:
-  bool* const converted_;
+  bool* converted_;
 };
 
 TEST(ImplicitCastTest, CanUseNonConstCastOperator) {
@@ -104,7 +104,7 @@ class ConstCastable {
   }
 
  private:
-  bool* const converted_;
+  bool* converted_;
 };
 
 TEST(ImplicitCastTest, CanUseConstCastOperatorOnConstValues) {
@@ -128,8 +128,8 @@ class ConstAndNonConstCastable {
   }
 
  private:
-  bool* const converted_;
-  bool* const const_converted_;
+  bool* converted_;
+  bool* const_converted_;
 };
 
 TEST(ImplicitCastTest, CanSelectBetweenConstAndNonConstCasrAppropriately) {

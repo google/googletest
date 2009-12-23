@@ -91,7 +91,7 @@ template <class Tuple$for j [[, int k$j]]>
 class TupleFields<Tuple, $for k, [[$if k < i [[k$k]] $else [[-1]]]]> {
  public:
   typedef ::std::tr1::tuple<$for j, [[GMOCK_FIELD_TYPE_(Tuple, k$j)]]> type;
-  static type GetSelectedFields(const Tuple& t) {
+  static type GetSelectedFields(const Tuple& $if i==0 [[/* t */]] $else [[t]]) {
     using ::std::tr1::get;
     return type($for j, [[get<k$j>(t)]]);
   }
@@ -157,6 +157,8 @@ class ArgsMatcherImpl : public MatcherInterface<ArgsTuple> {
   }
 
   const MonomorphicInnerMatcher inner_matcher_;
+
+  GTEST_DISALLOW_ASSIGN_(ArgsMatcherImpl);
 };
 
 template <class InnerMatcher$for i [[, int k$i = -1]]>
@@ -170,7 +172,10 @@ class ArgsMatcher {
     return MakeMatcher(new ArgsMatcherImpl<ArgsTuple, $ks>(inner_matcher_));
   }
 
+ private:
   const InnerMatcher inner_matcher_;
+
+  GTEST_DISALLOW_ASSIGN_(ArgsMatcher);
 };
 
 // Implements ElementsAre() of 1-$n arguments.
@@ -224,6 +229,8 @@ $for j [[
   const T$j& e$j[[]]_;
 
 ]]
+
+  GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher$i);
 };
 
 
@@ -512,6 +519,8 @@ $var param_field_decls2 = [[$for j
                      #name, description, gmock_interp_, gmock_printed_params);\
       }\$param_field_decls
       const ::testing::internal::Interpolations gmock_interp_;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -523,7 +532,9 @@ $var param_field_decls2 = [[$for j
       gmock_interp_ = ::testing::internal::ValidateMatcherDescription(\
           gmock_param_names, ("" description ""));\
     }\$param_field_decls2
+   private:\
     ::testing::internal::Interpolations gmock_interp_;\
+    GTEST_DISALLOW_ASSIGN_($class_name);\
   };\$template
   inline $class_name$param_types name($param_types_and_names) {\
     return $class_name$param_types($params);\

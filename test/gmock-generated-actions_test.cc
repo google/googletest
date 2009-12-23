@@ -63,6 +63,10 @@ using testing::StaticAssertTypeEq;
 using testing::Unused;
 using testing::WithArgs;
 
+// For suppressing compiler warnings on conversion possibly losing precision.
+inline short Short(short n) { return n; }  // NOLINT
+inline char Char(char ch) { return ch; }
+
 // Sample functions and functors for testing various actions.
 int Nullary() { return 1; }
 
@@ -242,7 +246,7 @@ TEST(InvokeArgumentTest, Function10) {
 // Tests using InvokeArgument with a function that takes a pointer argument.
 TEST(InvokeArgumentTest, ByPointerFunction) {
   Action<const char*(const char*(*)(const char* input, short n))> a =  // NOLINT
-      InvokeArgument<0>(static_cast<const char*>("Hi"), 1);
+      InvokeArgument<0>(static_cast<const char*>("Hi"), Short(1));
   EXPECT_STREQ("i", a.Perform(make_tuple(&Binary)));
 }
 
@@ -250,7 +254,7 @@ TEST(InvokeArgumentTest, ByPointerFunction) {
 // by passing it a C-string literal.
 TEST(InvokeArgumentTest, FunctionWithCStringLiteral) {
   Action<const char*(const char*(*)(const char* input, short n))> a =  // NOLINT
-      InvokeArgument<0>("Hi", 1);
+      InvokeArgument<0>("Hi", Short(1));
   EXPECT_STREQ("i", a.Perform(make_tuple(&Binary)));
 }
 
@@ -286,17 +290,17 @@ TEST(WithArgsTest, OneArg) {
 
 // Tests using WithArgs with an action that takes 2 arguments.
 TEST(WithArgsTest, TwoArgs) {
-  Action<const char*(const char* s, double x, int n)> a =
+  Action<const char*(const char* s, double x, short n)> a =
       WithArgs<0, 2>(Invoke(Binary));
   const char s[] = "Hello";
-  EXPECT_EQ(s + 2, a.Perform(make_tuple(CharPtr(s), 0.5, 2)));
+  EXPECT_EQ(s + 2, a.Perform(make_tuple(CharPtr(s), 0.5, Short(2))));
 }
 
 // Tests using WithArgs with an action that takes 3 arguments.
 TEST(WithArgsTest, ThreeArgs) {
   Action<int(int, double, char, short)> a =  // NOLINT
       WithArgs<0, 2, 3>(Invoke(Ternary));
-  EXPECT_EQ(123, a.Perform(make_tuple(100, 6.5, 20, 3)));
+  EXPECT_EQ(123, a.Perform(make_tuple(100, 6.5, Char(20), Short(3))));
 }
 
 // Tests using WithArgs with an action that takes 4 arguments.
@@ -379,7 +383,7 @@ TEST(WithArgsTest, NonInvokeAction) {
 TEST(WithArgsTest, Identity) {
   Action<int(int x, char y, short z)> a =  // NOLINT
       WithArgs<0, 1, 2>(Invoke(Ternary));
-  EXPECT_EQ(123, a.Perform(make_tuple(100, 20, 3)));
+  EXPECT_EQ(123, a.Perform(make_tuple(100, Char(20), Short(3))));
 }
 
 // Tests using WithArgs with repeated arguments.
@@ -394,14 +398,14 @@ TEST(WithArgsTest, ReversedArgumentOrder) {
   Action<const char*(short n, const char* input)> a =  // NOLINT
       WithArgs<1, 0>(Invoke(Binary));
   const char s[] = "Hello";
-  EXPECT_EQ(s + 2, a.Perform(make_tuple(2, CharPtr(s))));
+  EXPECT_EQ(s + 2, a.Perform(make_tuple(Short(2), CharPtr(s))));
 }
 
 // Tests using WithArgs with compatible, but not identical, argument types.
 TEST(WithArgsTest, ArgsOfCompatibleTypes) {
-  Action<long(short x, int y, double z, char c)> a =  // NOLINT
+  Action<long(short x, char y, double z, char c)> a =  // NOLINT
       WithArgs<0, 1, 3>(Invoke(Ternary));
-  EXPECT_EQ(123, a.Perform(make_tuple(100, 20, 5.6, 3)));
+  EXPECT_EQ(123, a.Perform(make_tuple(Short(100), Char(20), 5.6, Char(3))));
 }
 
 // Tests using WithArgs with an action that returns void.
@@ -583,6 +587,16 @@ TEST(DoAllTest, TenActions) {
   EXPECT_EQ('g', g);
 }
 
+// The ACTION*() macros trigger warning C4100 (unreferenced formal
+// parameter) in MSVC with -W4.  Unfortunately they cannot be fixed in
+// the macro definition, as the warnings are generated when the macro
+// is expanded and macro expansion cannot contain #pragma.  Therefore
+// we suppress them here.
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4100)
+#endif
+
 // Tests the ACTION*() macro family.
 
 // Tests that ACTION() can define an action that doesn't reference the
@@ -633,7 +647,7 @@ ACTION(Sum2) {
 TEST(ActionMacroTest, CanReferenceArgumentTuple) {
   Action<int(int, char, int*)> a1 = Sum2();
   int dummy = 0;
-  EXPECT_EQ(11, a1.Perform(make_tuple(5, static_cast<char>(6), &dummy)));
+  EXPECT_EQ(11, a1.Perform(make_tuple(5, Char(6), &dummy)));
 }
 
 // Tests that the body of ACTION() can reference the mock function
@@ -731,7 +745,7 @@ ACTION_P(TypedPlus, n) {
 
 TEST(ActionPMacroTest, CanReferenceArgumentAndParameterTypes) {
   Action<int(char m, bool t)> a1 = TypedPlus(9);
-  EXPECT_EQ(10, a1.Perform(make_tuple(static_cast<char>(1), true)));
+  EXPECT_EQ(10, a1.Perform(make_tuple(Char(1), true)));
 }
 
 // Tests that a parameterized action can be used in any mock function
@@ -851,7 +865,7 @@ TEST(ActionPnMacroTest, WorksFor10Parameters) {
 ACTION_P2(PadArgument, prefix, suffix) {
   // The following lines promote the two parameters to desired types.
   std::string prefix_str(prefix);
-  char suffix_char(suffix);
+  char suffix_char = static_cast<char>(suffix);
   return prefix_str + arg0 + suffix_char;
 }
 
@@ -1078,7 +1092,7 @@ class BoolResetter {
   explicit BoolResetter(bool* value) : value_(value) {}
   ~BoolResetter() { *value_ = false; }
  private:
-  bool* const value_;
+  bool* value_;
 };
 
 TEST(ActionTemplateTest, WorksForIntegralTemplateParams) {
@@ -1189,6 +1203,10 @@ TEST(ActionTemplateTest, CanBeOverloadedOnNumberOfValueParameters) {
   EXPECT_EQ(6, a3.Perform(make_tuple()));
   EXPECT_EQ(12345, a4.Perform(make_tuple()));
 }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 }  // namespace gmock_generated_actions_test
 }  // namespace testing

@@ -64,7 +64,7 @@ string ConvertIdentifierNameToWords(const char* id_name) {
     if (isalnum(*p)) {
       if (starts_new_word && result != "")
         result += ' ';
-      result += tolower(*p);
+      result += static_cast<char>(tolower(*p));
     }
   }
   return result;

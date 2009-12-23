@@ -640,15 +640,15 @@ class NativeArray {
 
   // Initializes this object; makes a copy of the input array if
   // 'relation' is kCopy.
-  void Init(const Element* array, size_t size, RelationToSource relation) {
+  void Init(const Element* array, size_t a_size, RelationToSource relation) {
     if (relation == kReference) {
       array_ = array;
     } else {
-      Element* const copy = new Element[size];
-      CopyArray(array, size, copy);
+      Element* const copy = new Element[a_size];
+      CopyArray(array, a_size, copy);
       array_ = copy;
     }
-    size_ = size;
+    size_ = a_size;
     relation_to_source_ = relation;
   }
 

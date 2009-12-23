@@ -206,6 +206,8 @@ class Interface {
 
 class Mock: public Interface {
  public:
+  Mock() {}
+
   MOCK_METHOD1(VoidFromString, void(char* str));
   MOCK_METHOD1(StringFromString, char*(char* str));
   MOCK_METHOD1(IntFromString, int(char* str));
@@ -215,6 +217,9 @@ class Mock: public Interface {
   MOCK_METHOD1(VoidFromFloat, void(float n));
   MOCK_METHOD1(VoidFromDouble, void(double n));
   MOCK_METHOD1(VoidFromVector, void(const std::vector<int>& v));
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(Mock);
 };
 
 class InvokeHelper {
@@ -229,7 +234,7 @@ class InvokeHelper {
 
 class FieldHelper {
  public:
-  FieldHelper(int field) : field_(field) {}
+  FieldHelper(int a_field) : field_(a_field) {}
   int field() const { return field_; }
   int field_;  // NOLINT -- need external access to field_ to test
                //           the Field matcher.
@@ -410,6 +415,16 @@ TEST(LinkTest, TestThrow) {
 }
 #endif  // GTEST_HAS_EXCEPTIONS
 
+// The ACTION*() macros trigger warning C4100 (unreferenced formal
+// parameter) in MSVC with -W4.  Unfortunately they cannot be fixed in
+// the macro definition, as the warnings are generated when the macro
+// is expanded and macro expansion cannot contain #pragma.  Therefore
+// we suppress them here.
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4100)
+#endif
+
 // Tests the linkage of actions created using ACTION macro.
 namespace {
 ACTION(Return1) { return 1; }
@@ -440,6 +455,10 @@ ACTION_P2(ReturnEqualsEitherOf, first, second) {
   return arg0 == first || arg0 == second;
 }
 }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 TEST(LinkTest, TestActionP2Macro) {
   Mock mock;

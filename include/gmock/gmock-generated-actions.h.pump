@@ -228,6 +228,8 @@ class WithArgsAction {
   };
 
   const InnerAction action_;
+
+  GTEST_DISALLOW_ASSIGN_(WithArgsAction);
 };
 
 // A macro from the ACTION* family (defined later in this file)
@@ -630,12 +632,16 @@ $range k 0..n-1
       return_type gmock_PerformImpl(const args_type& args[[]]
 $for k [[, arg$k[[]]_type arg$k]]) const;\
       GMOCK_INTERNAL_DEFN_##value_params\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(\
           new gmock_Impl<F>(GMOCK_INTERNAL_LIST_##value_params));\
     }\
     GMOCK_INTERNAL_DEFN_##value_params\
+   private:\
+    GTEST_DISALLOW_ASSIGN_(GMOCK_ACTION_CLASS_(name, value_params));\
   };\
   template <GMOCK_INTERNAL_DECL_##template_params\
             GMOCK_INTERNAL_DECL_TYPE_##value_params>\
@@ -712,10 +718,14 @@ $var macro_name = [[$if i==0 [[ACTION]] $elif i==1 [[ACTION_P]]
       template <$typename_arg_types>\
       return_type gmock_PerformImpl(const args_type& args, [[]]
 $arg_types_and_names) const;\$param_field_decls
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>($params));\
     }\$param_field_decls2
+   private:\
+    GTEST_DISALLOW_ASSIGN_($class_name);\
   };\$template
   inline $class_name$param_types name($param_types_and_names) {\
     return $class_name$param_types($params);\
@@ -734,6 +744,16 @@ $$    // show up in the generated code.
 // such that we don't have to run 'pump' every time the code is
 // updated.
 namespace testing {
+
+// The ACTION*() macros trigger warning C4100 (unreferenced formal
+// parameter) in MSVC with -W4.  Unfortunately they cannot be fixed in
+// the macro definition, as the warnings are generated when the macro
+// is expanded and macro expansion cannot contain #pragma.  Therefore
+// we suppress them here.
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4100)
+#endif
 
 // Various overloads for InvokeArgument<N>().
 //
@@ -795,6 +815,10 @@ ACTION_TEMPLATE(ReturnNew,
 }
 
 ]]
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 }  // namespace testing
 

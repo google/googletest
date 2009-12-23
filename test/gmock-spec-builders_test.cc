@@ -97,16 +97,26 @@ class Result {};
 
 class MockA {
  public:
+  MockA() {}
+
   MOCK_METHOD1(DoA, void(int n));  // NOLINT
   MOCK_METHOD1(ReturnResult, Result(int n));  // NOLINT
   MOCK_METHOD2(Binary, bool(int x, int y));  // NOLINT
   MOCK_METHOD2(ReturnInt, int(int x, int y));  // NOLINT
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockA);
 };
 
 class MockB {
  public:
+  MockB() {}
+
   MOCK_CONST_METHOD0(DoB, int());  // NOLINT
   MOCK_METHOD1(DoB, int(int n));  // NOLINT
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockB);
 };
 
 // Tests that EXPECT_CALL and ON_CALL compile in a presence of macro
@@ -123,7 +133,12 @@ class CC {
 };
 class MockCC : public CC {
  public:
+  MockCC() {}
+
   MOCK_METHOD0(Method, int());
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockCC);
 };
 
 // Tests that a method with expanded name compiles.
@@ -1617,7 +1632,18 @@ TEST(DeletingMockEarlyTest, Success2) {
 
 // Tests that it's OK to delete a mock object itself in its action.
 
+// Suppresses warning on unreferenced formal parameter in MSVC with
+// -W4.
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4100)
+#endif
+
 ACTION_P(Delete, ptr) { delete ptr; }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 TEST(DeletingMockEarlyTest, CanDeleteSelfInActionReturningVoid) {
   MockA* const a = new MockA;
@@ -1691,7 +1717,9 @@ class EvenNumberCardinality : public CardinalityInterface {
   }
 
   // Returns true iff call_count calls will saturate this cardinality.
-  virtual bool IsSaturatedByCallCount(int call_count) const { return false; }
+  virtual bool IsSaturatedByCallCount(int /* call_count */) const {
+    return false;
+  }
 
   // Describes self to an ostream.
   virtual void DescribeTo(::std::ostream* os) const {
@@ -1740,9 +1768,14 @@ struct Unprintable {
 
 class MockC {
  public:
+  MockC() {}
+
   MOCK_METHOD6(VoidMethod, void(bool cond, int n, string s, void* p,
                                 const Printable& x, Unprintable y));
   MOCK_METHOD0(NonVoidMethod, int());  // NOLINT
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockC);
 };
 
 // TODO(wan@google.com): find a way to re-enable these tests.
@@ -1935,7 +1968,12 @@ void PrintTo(PrintMeNot /* dummy */, ::std::ostream* /* os */) {
 
 class LogTestHelper {
  public:
+  LogTestHelper() {}
+
   MOCK_METHOD1(Foo, PrintMeNot(PrintMeNot));
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(LogTestHelper);
 };
 
 class GMockLogTest : public ::testing::Test {

@@ -52,7 +52,11 @@ using testing::MakeCardinality;
 
 class MockFoo {
  public:
+  MockFoo() {}
   MOCK_METHOD0(Bar, int());  // NOLINT
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFoo);
 };
 
 // Tests that Cardinality objects can be default constructed.
@@ -398,7 +402,9 @@ class EvenCardinality : public CardinalityInterface {
   }
 
   // Returns true iff call_count calls will saturate this cardinality.
-  virtual bool IsSaturatedByCallCount(int call_count) const { return false; }
+  virtual bool IsSaturatedByCallCount(int /* call_count */) const {
+    return false;
+  }
 
   // Describes self to an ostream.
   virtual void DescribeTo(::std::ostream* ss) const {

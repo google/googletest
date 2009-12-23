@@ -142,10 +142,10 @@ class DefaultActionSpec {
 
   // Constructs a DefaultActionSpec object from the information inside
   // the parenthesis of an ON_CALL() statement.
-  DefaultActionSpec(const char* file, int line,
+  DefaultActionSpec(const char* a_file, int a_line,
                     const ArgumentMatcherTuple& matchers)
-      : file_(file),
-        line_(line),
+      : file_(a_file),
+        line_(a_line),
         matchers_(matchers),
         // By default, extra_matcher_ should match anything.  However,
         // we cannot initialize it with _ as that triggers a compiler
@@ -196,6 +196,7 @@ class DefaultActionSpec {
                        "once in an ON_CALL().");
     return action_;
   }
+
  private:
   // Gives each clause in the ON_CALL() statement a name.
   enum Clause {
@@ -582,6 +583,7 @@ class ExpectationBase {
   // expectation has occurred.
   // L >= g_gmock_mutex
   virtual void DescribeCallCountTo(::std::ostream* os) const = 0;
+
  protected:
   friend class ::testing::Expectation;
 
@@ -620,8 +622,8 @@ class ExpectationBase {
   bool cardinality_specified() const { return cardinality_specified_; }
 
   // Sets the cardinality of this expectation spec.
-  void set_cardinality(const Cardinality& cardinality) {
-    cardinality_ = cardinality;
+  void set_cardinality(const Cardinality& a_cardinality) {
+    cardinality_ = a_cardinality;
   }
 
   // The following group of methods should only be called after the
@@ -716,6 +718,8 @@ class ExpectationBase {
   // and can change as the mock function is called.
   int call_count_;  // How many times this expectation has been invoked.
   bool retired_;    // True iff this expectation has retired.
+
+  GTEST_DISALLOW_ASSIGN_(ExpectationBase);
 };  // class ExpectationBase
 
 // Impements an expectation for the given function type.
@@ -727,9 +731,9 @@ class TypedExpectation : public ExpectationBase {
   typedef typename Function<F>::Result Result;
 
   TypedExpectation(FunctionMockerBase<F>* owner,
-                   const char* file, int line, const string& source_text,
+                   const char* a_file, int a_line, const string& a_source_text,
                    const ArgumentMatcherTuple& m)
-      : ExpectationBase(file, line, source_text),
+      : ExpectationBase(a_file, a_line, a_source_text),
         owner_(owner),
         matchers_(m),
         extra_matcher_specified_(false),
@@ -769,7 +773,7 @@ class TypedExpectation : public ExpectationBase {
   }
 
   // Implements the .Times() clause.
-  TypedExpectation& Times(const Cardinality& cardinality) {
+  TypedExpectation& Times(const Cardinality& a_cardinality) {
     if (last_clause_ ==kTimes) {
       ExpectSpecProperty(false,
                          ".Times() cannot appear "
@@ -782,7 +786,7 @@ class TypedExpectation : public ExpectationBase {
     }
     last_clause_ = kTimes;
 
-    ExpectationBase::SpecifyCardinality(cardinality);
+    ExpectationBase::SpecifyCardinality(a_cardinality);
     return *this;
   }
 
@@ -1164,6 +1168,8 @@ class TypedExpectation : public ExpectationBase {
   Clause last_clause_;
   mutable bool action_count_checked_;  // Under mutex_.
   mutable Mutex mutex_;  // Protects action_count_checked_.
+
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(TypedExpectation);
 };  // class TypedExpectation
 
 // A MockSpec object is used by ON_CALL() or EXPECT_CALL() for
@@ -1228,6 +1234,8 @@ class MockSpec {
   internal::FunctionMockerBase<F>* const function_mocker_;
   // The argument matchers specified in the spec.
   ArgumentMatcherTuple matchers_;
+
+  GTEST_DISALLOW_ASSIGN_(MockSpec);
 };  // class MockSpec
 
 // MSVC warns about using 'this' in base member initializer list, so
@@ -1251,7 +1259,7 @@ class MockSpec {
 template <typename T>
 class ActionResultHolder {
  public:
-  explicit ActionResultHolder(T value) : value_(value) {}
+  explicit ActionResultHolder(T a_value) : value_(a_value) {}
 
   // The compiler-generated copy constructor and assignment operator
   // are exactly what we need, so we don't need to define them.
@@ -1285,6 +1293,9 @@ class ActionResultHolder {
 
  private:
   T value_;
+
+  // T could be a reference type, so = isn't supported.
+  GTEST_DISALLOW_ASSIGN_(ActionResultHolder);
 };
 
 // Specialization for T = void.
@@ -1433,6 +1444,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
     }
     return name;
   }
+
  protected:
   template <typename Function>
   friend class MockSpec;
@@ -1477,6 +1489,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   // The current spec (either default action spec or expectation spec)
   // being described on this function mocker.
   MockSpec<F>& current_spec() { return current_spec_; }
+
  private:
   template <typename Func> friend class TypedExpectation;
 

@@ -40,7 +40,12 @@
 // clash with ::testing::Mock.
 class Mock {
  public:
+  Mock() {}
+
   MOCK_METHOD0(DoThis, void());
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(Mock);
 };
 
 namespace testing {
@@ -64,10 +69,14 @@ class Foo {
 
 class MockFoo : public Foo {
  public:
+  MockFoo() {}
   void Delete() { delete this; }
 
   MOCK_METHOD0(DoThis, void());
   MOCK_METHOD1(DoThat, int(bool flag));
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFoo);
 };
 
 class MockBar {
@@ -89,6 +98,8 @@ class MockBar {
 
  private:
   string str_;
+
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockBar);
 };
 
 // TODO(wan@google.com): find a way to re-enable these tests.

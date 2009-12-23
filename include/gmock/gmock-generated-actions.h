@@ -615,6 +615,8 @@ class WithArgsAction {
   };
 
   const InnerAction action_;
+
+  GTEST_DISALLOW_ASSIGN_(WithArgsAction);
 };
 
 // A macro from the ACTION* family (defined later in this file)
@@ -1406,12 +1408,16 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
           arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
           arg9_type arg9) const;\
       GMOCK_INTERNAL_DEFN_##value_params\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(\
           new gmock_Impl<F>(GMOCK_INTERNAL_LIST_##value_params));\
     }\
     GMOCK_INTERNAL_DEFN_##value_params\
+   private:\
+    GTEST_DISALLOW_ASSIGN_(GMOCK_ACTION_CLASS_(name, value_params));\
   };\
   template <GMOCK_INTERNAL_DECL_##template_params\
             GMOCK_INTERNAL_DECL_TYPE_##value_params>\
@@ -1462,10 +1468,14 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
           arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
           arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
           arg9_type arg9) const;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>());\
     }\
+   private:\
+    GTEST_DISALLOW_ASSIGN_(name##Action);\
   };\
   inline name##Action name() {\
     return name##Action();\
@@ -1505,11 +1515,15 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
           arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
           arg9_type arg9) const;\
       p0##_type p0;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>(p0));\
     }\
     p0##_type p0;\
+   private:\
+    GTEST_DISALLOW_ASSIGN_(name##ActionP);\
   };\
   template <typename p0##_type>\
   inline name##ActionP<p0##_type> name(p0##_type p0) {\
@@ -1554,12 +1568,16 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
           arg9_type arg9) const;\
       p0##_type p0;\
       p1##_type p1;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>(p0, p1));\
     }\
     p0##_type p0;\
     p1##_type p1;\
+   private:\
+    GTEST_DISALLOW_ASSIGN_(name##ActionP2);\
   };\
   template <typename p0##_type, typename p1##_type>\
   inline name##ActionP2<p0##_type, p1##_type> name(p0##_type p0, \
@@ -1606,6 +1624,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       p0##_type p0;\
       p1##_type p1;\
       p2##_type p2;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2));\
@@ -1613,6 +1633,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
     p0##_type p0;\
     p1##_type p1;\
     p2##_type p2;\
+   private:\
+    GTEST_DISALLOW_ASSIGN_(name##ActionP3);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type>\
   inline name##ActionP3<p0##_type, p1##_type, p2##_type> name(p0##_type p0, \
@@ -1664,6 +1686,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       p1##_type p1;\
       p2##_type p2;\
       p3##_type p3;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3));\
@@ -1672,6 +1696,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
     p1##_type p1;\
     p2##_type p2;\
     p3##_type p3;\
+   private:\
+    GTEST_DISALLOW_ASSIGN_(name##ActionP4);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type>\
@@ -1729,6 +1755,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       p2##_type p2;\
       p3##_type p3;\
       p4##_type p4;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4));\
@@ -1738,6 +1766,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
     p2##_type p2;\
     p3##_type p3;\
     p4##_type p4;\
+   private:\
+    GTEST_DISALLOW_ASSIGN_(name##ActionP5);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type>\
@@ -1797,6 +1827,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       p3##_type p3;\
       p4##_type p4;\
       p5##_type p5;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4, p5));\
@@ -1807,6 +1839,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
     p3##_type p3;\
     p4##_type p4;\
     p5##_type p5;\
+   private:\
+    GTEST_DISALLOW_ASSIGN_(name##ActionP6);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type>\
@@ -1869,6 +1903,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       p4##_type p4;\
       p5##_type p5;\
       p6##_type p6;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4, p5, \
@@ -1881,6 +1917,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
     p4##_type p4;\
     p5##_type p5;\
     p6##_type p6;\
+   private:\
+    GTEST_DISALLOW_ASSIGN_(name##ActionP7);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
@@ -1949,6 +1987,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       p5##_type p5;\
       p6##_type p6;\
       p7##_type p7;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4, p5, \
@@ -1962,6 +2002,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
     p5##_type p5;\
     p6##_type p6;\
     p7##_type p7;\
+   private:\
+    GTEST_DISALLOW_ASSIGN_(name##ActionP8);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
@@ -2034,6 +2076,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       p6##_type p6;\
       p7##_type p7;\
       p8##_type p8;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4, p5, \
@@ -2048,6 +2092,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
     p6##_type p6;\
     p7##_type p7;\
     p8##_type p8;\
+   private:\
+    GTEST_DISALLOW_ASSIGN_(name##ActionP9);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
@@ -2123,6 +2169,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       p7##_type p7;\
       p8##_type p8;\
       p9##_type p9;\
+     private:\
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4, p5, \
@@ -2138,6 +2186,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
     p7##_type p7;\
     p8##_type p8;\
     p9##_type p9;\
+   private:\
+    GTEST_DISALLOW_ASSIGN_(name##ActionP10);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
@@ -2171,6 +2221,16 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
 // such that we don't have to run 'pump' every time the code is
 // updated.
 namespace testing {
+
+// The ACTION*() macros trigger warning C4100 (unreferenced formal
+// parameter) in MSVC with -W4.  Unfortunately they cannot be fixed in
+// the macro definition, as the warnings are generated when the macro
+// is expanded and macro expansion cannot contain #pragma.  Therefore
+// we suppress them here.
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4100)
+#endif
 
 // Various overloads for InvokeArgument<N>().
 //
@@ -2349,6 +2409,10 @@ ACTION_TEMPLATE(ReturnNew,
                 AND_10_VALUE_PARAMS(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9)) {
   return new T(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9);
 }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 }  // namespace testing
 
