@@ -39,7 +39,7 @@
 # where frequently used command-line options include:
 #     -h               print usage help.
 #     BUILD=all        build all build types.
-#     BUILD=win-opt    build the given build type.
+#     BUILD=win-opt8   build the given build type.
 
 EnsurePythonVersion(2, 3)
 
@@ -88,11 +88,8 @@ sconstruct_helper.Initialize(build_root_path='..',
 
 win_base = sconstruct_helper.MakeWinBaseEnvironment()
 
-if win_base.get('MSVS_VERSION', None) == '7.1':
-  sconstruct_helper.EnvCreator.WithExceptions(win_base)
-
-sconstruct_helper.MakeWinDebugEnvironment(win_base, 'win-dbg')
-sconstruct_helper.MakeWinOptimizedEnvironment(win_base, 'win-opt')
+sconstruct_helper.MakeWinDebugEnvironment(win_base, 'win-dbg8')
+sconstruct_helper.MakeWinOptimizedEnvironment(win_base, 'win-opt8')
 
 sconstruct_helper.ConfigureGccEnvironments()
 
