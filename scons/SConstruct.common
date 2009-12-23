@@ -56,10 +56,7 @@ class SConstructHelper:
     test_env = Environment()
     platform = test_env['PLATFORM']
     if platform == 'win32':
-      if support_multiple_win_builds:
-        available_build_types = ['win-dbg8', 'win-opt8', 'win-dbg', 'win-opt']
-      else:
-        available_build_types = ['win-dbg', 'win-opt']
+      available_build_types = ['win-dbg8', 'win-opt8']
     elif platform == 'darwin':  # MacOSX
       available_build_types = ['mac-dbg', 'mac-opt']
     else:
@@ -144,7 +141,7 @@ class SConstructHelper:
     self.env_dict[name] = env
 
   def MakeWinDebugEnvironment(self, base_environment, name):
-    """Takes a VC71 or VC80 base environment and adds debug settings."""
+    """Takes an MSVC base environment and adds debug settings."""
     debug_env = base_environment.Clone()
     self.SetBuildNameAndDir(debug_env, name)
     debug_env.Append(
@@ -164,7 +161,7 @@ class SConstructHelper:
     return debug_env
 
   def MakeWinOptimizedEnvironment(self, base_environment, name):
-    """Takes a VC71 or VC80 base environment and adds release settings."""
+    """Takes an MSVC base environment and adds release settings."""
     optimized_env = base_environment.Clone()
     self.SetBuildNameAndDir(optimized_env, name)
     optimized_env.Append(
