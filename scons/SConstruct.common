@@ -87,6 +87,8 @@ class SConstructHelper:
     # And another that definitely always points to the project root.
     self.env_base['PROJECT_ROOT'] = self.env_base.Dir('.').abspath
 
+    self.env_base['OBJ_SUFFIX'] = ''  # Default suffix for object files.
+
     # Enable scons -h
     Help(vars.GenerateHelpText(self.env_base))
 

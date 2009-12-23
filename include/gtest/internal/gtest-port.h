@@ -105,6 +105,7 @@
 //   GTEST_AMBIGUOUS_ELSE_BLOCKER_ - for disabling a gcc warning.
 //   GTEST_ATTRIBUTE_UNUSED_  - declares that a class' instances or a
 //                              variable don't have to be used.
+//   GTEST_DISALLOW_ASSIGN_   - disables operator=.
 //   GTEST_DISALLOW_COPY_AND_ASSIGN_ - disables copy ctor and operator=.
 //   GTEST_MUST_USE_RESULT_   - declares that a function's result must be used.
 //
@@ -163,6 +164,8 @@
 #endif  // !_WIN32_WCE
 
 #include <iostream>  // NOLINT
+#include <sstream>  // NOLINT
+#include <string>  // NOLINT
 
 #define GTEST_DEV_EMAIL_ "googletestframework@@googlegroups.com"
 #define GTEST_FLAG_PREFIX_ "gtest_"
@@ -294,9 +297,6 @@
 #define GTEST_HAS_GLOBAL_WSTRING \
     (GTEST_HAS_STD_WSTRING && GTEST_HAS_GLOBAL_STRING)
 #endif  // GTEST_HAS_GLOBAL_WSTRING
-
-#include <string>  // NOLINT
-#include <sstream>  // NOLINT
 
 // Determines whether RTTI is available.
 #ifndef GTEST_HAS_RTTI
@@ -501,11 +501,16 @@
 #define GTEST_ATTRIBUTE_UNUSED_
 #endif
 
-// A macro to disallow the evil copy constructor and operator= functions
+// A macro to disallow operator=
+// This should be used in the private: declarations for a class.
+#define GTEST_DISALLOW_ASSIGN_(type)\
+  void operator=(type const &)
+
+// A macro to disallow copy constructor and operator=
 // This should be used in the private: declarations for a class.
 #define GTEST_DISALLOW_COPY_AND_ASSIGN_(type)\
-  type(const type &);\
-  void operator=(const type &)
+  type(type const &);\
+  GTEST_DISALLOW_ASSIGN_(type)
 
 // Tell the compiler to warn about unused return values for functions declared
 // with this macro.  The macro should be used on function declarations
