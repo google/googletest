@@ -39,12 +39,6 @@ import sys
 
 SCRIPT_DIR = os.path.dirname(__file__) or '.'
 
-# Some Python tests don't work in all configurations.
-PYTHON_TESTS_TO_SKIP = (
-    ('win-dbg', 'gtest_throw_on_failure_test.py'),
-    ('win-opt', 'gtest_throw_on_failure_test.py'),
-    )
-
 sys.path.append(os.path.join(SCRIPT_DIR, 'test'))
 import run_tests_util
 
@@ -56,8 +50,7 @@ def _Main():
   test_runner = run_tests_util.TestRunner(script_dir=SCRIPT_DIR)
   tests = test_runner.GetTestsToRun(args,
                                     options.configurations,
-                                    options.built_configurations,
-                                    python_tests_to_skip=PYTHON_TESTS_TO_SKIP)
+                                    options.built_configurations)
   if not tests:
     sys.exit(1)  # Incorrect parameters given, abort execution.
 

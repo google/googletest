@@ -39,7 +39,7 @@
 # where frequently used command-line options include:
 #     -h               print usage help.
 #     BUILD=all        build all build types.
-#     BUILD=win-opt    build the given build type.
+#     BUILD=win-opt8   build the given build type.
 
 EnsurePythonVersion(2, 3)
 
@@ -49,18 +49,10 @@ sconstruct_helper.Initialize(build_root_path='..',
                              support_multiple_win_builds=False)
 
 win_base = sconstruct_helper.MakeWinBaseEnvironment()
+win_base['GTEST_BUILD_DLL_TEST'] = True
 
-# We don't support VC 7.1 with exceptions disabled, so we always
-# enable exceptions for VC 7.1.  For newer versions of VC, we still
-# compile with exceptions disabled by default, as that's a more common
-# setting for our users.
-if win_base.get('MSVS_VERSION', None) == '7.1':
-  sconstruct_helper.EnableExceptions(win_base)
-else:
-  win_base['GTEST_BUILD_DLL_TEST'] = True
-
-sconstruct_helper.MakeWinDebugEnvironment(win_base, 'win-dbg')
-sconstruct_helper.MakeWinOptimizedEnvironment(win_base, 'win-opt')
+sconstruct_helper.MakeWinDebugEnvironment(win_base, 'win-dbg8')
+sconstruct_helper.MakeWinOptimizedEnvironment(win_base, 'win-opt8')
 
 sconstruct_helper.ConfigureGccEnvironments()
 
