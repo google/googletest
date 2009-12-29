@@ -52,7 +52,7 @@ namespace {
 class TersePrinter : public EmptyTestEventListener {
  private:
   // Called before any test activity starts.
-  virtual void OnTestProgramStart(const UnitTest& unit_test) {}
+  virtual void OnTestProgramStart(const UnitTest& /* unit_test */) {}
 
   // Called after all test activities have ended.
   virtual void OnTestProgramEnd(const UnitTest& unit_test) {
