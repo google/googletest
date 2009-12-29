@@ -115,6 +115,9 @@ class PreCalculatedPrimeTable : public PrimeTable {
 
   const int is_prime_size_;
   bool* const is_prime_;
+
+  // Disables compiler wqarning "assignment operator could ot be generated."
+  void operator=(const PreCalculatedPrimeTable& rhs);
 };
 
 #endif  // GTEST_SAMPLES_PRIME_TABLES_H_

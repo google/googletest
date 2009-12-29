@@ -58,7 +58,7 @@ class Water {
     return malloc(allocation_size);
   }
 
-  void operator delete(void* block, size_t allocation_size) {
+  void operator delete(void* block, size_t /* allocation_size */) {
     allocated_--;
     free(block);
   }
@@ -78,12 +78,12 @@ int Water::allocated_ = 0;
 class LeakChecker : public EmptyTestEventListener {
  private:
   // Called before a test starts.
-  virtual void OnTestStart(const TestInfo& test_info) {
+  virtual void OnTestStart(const TestInfo& /* test_info */) {
     initially_allocated_ = Water::allocated();
   }
 
   // Called after a test ends.
-  virtual void OnTestEnd(const TestInfo& test_info) {
+  virtual void OnTestEnd(const TestInfo& /* test_info */) {
     int difference = Water::allocated() - initially_allocated_;
 
     // You can generate a failure in any event handler except
