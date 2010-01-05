@@ -19,7 +19,7 @@
 # ${gtest_BINARY_DIR}.
 # Language "C" is required for find_package(Threads).
 project(gtest CXX C)
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.6.4)
 
 # Where gtest's .h files can be found.
 include_directories(
@@ -84,7 +84,7 @@ function(cxx_executable name dir lib)
   target_link_libraries(${name} ${lib})
 endfunction()
 
-if (${build_gtest_samples})
+if (build_gtest_samples)
   cxx_executable(sample1_unittest samples gtest_main samples/sample1.cc)
   cxx_executable(sample2_unittest samples gtest_main samples/sample2.cc)
   cxx_executable(sample3_unittest samples gtest_main)
@@ -149,7 +149,7 @@ endfunction()
 
 cxx_test(gtest_unittest gtest_main)
 
-if (${build_all_gtest_tests})
+if (build_all_gtest_tests)
   cxx_test(gtest_environment_test gtest)
   cxx_test(gtest-filepath_test gtest_main)
   cxx_test(gtest-linked_ptr_test gtest_main)
@@ -186,7 +186,7 @@ else()
 endif()
 set(cxx_use_own_tuple "${cxx_default} -DGTEST_USE_OWN_TR1_TUPLE=1")
 
-if (${build_all_gtest_tests})
+if (build_all_gtest_tests)
   cxx_library(gtest_no_exception "${cxx_no_exception}"
     src/gtest-all.cc)
   cxx_library(gtest_main_no_rtti "${cxx_no_rtti}"
@@ -218,13 +218,13 @@ endif()
 # test/name.py.  It does nothing if Python is not installed.
 function(py_test name)
   if (PYTHONINTERP_FOUND)
-    add_test(NAME ${name}
-      COMMAND ${PYTHON_EXECUTABLE} ${gtest_SOURCE_DIR}/test/${name}.py
-              --gtest_build_dir=${EXECUTABLE_OUTPUT_PATH})
+    add_test(${name}
+      ${PYTHON_EXECUTABLE} ${gtest_SOURCE_DIR}/test/${name}.py
+          --gtest_build_dir=${EXECUTABLE_OUTPUT_PATH})
   endif()
 endfunction()
 
-if (${build_all_gtest_tests})
+if (build_all_gtest_tests)
   cxx_executable(gtest_break_on_failure_unittest_ test gtest)
   py_test(gtest_break_on_failure_unittest)
 
