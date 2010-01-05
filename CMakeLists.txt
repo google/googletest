@@ -17,7 +17,8 @@
 # CMake files in this project can refer to the root source directory
 # as ${gtest_SOURCE_DIR} and to the root binary directory as
 # ${gtest_BINARY_DIR}.
-project(gtest CXX)
+# Language "C" is required for find_package(Threads).
+project(gtest CXX C)
 cmake_minimum_required(VERSION 2.8)
 
 # Where gtest's .h files can be found.
@@ -114,23 +115,36 @@ option(build_all_gtest_tests "Build all of gtest's own tests." OFF)
 enable_testing()
 
 # Sets PYTHONINTERP_FOUND and PYTHON_EXECUTABLE.
-include(FindPythonInterp)
+find_package(PythonInterp)
 
 ############################################################
 # C++ tests built with standard compiler flags.
 
-# cxx_test(name lib srcs...)
+# cxx_test_with_flags(name cxx_flags libs srcs...)
 #
-# creates a named test target that depends on the given lib and is
-# built from the given source files.  test/name.cc is implicitly
-# included in the source file list.
-function(cxx_test name lib)
-  add_executable(${name} test/${name}.cc ${ARGN})
+# creates a named C++ test that depends on the given libs and is built
+# from the given source files with the given compiler flags.
+function(cxx_test_with_flags name cxx_flags libs)
+  add_executable(${name} ${ARGN})
   set_target_properties(${name}
     PROPERTIES
-    COMPILE_FLAGS "${cxx_default}")
-  target_link_libraries(${name} ${lib})
+    COMPILE_FLAGS "${cxx_flags}")
+  # To support mixing linking in static and dynamic libraries, link each
+  # library in with an extra call to target_link_libraries.
+  foreach (lib "${libs}")
+    target_link_libraries(${name} ${lib})
+  endforeach()
   add_test(${name} ${name})
+endfunction()
+
+# cxx_test(name libs srcs...)
+#
+# creates a named test target that depends on the given libs and is
+# built from the given source files.  Unlike cxx_test_with_flags,
+# test/name.cc is already implicitly included in the source file list.
+function(cxx_test name libs)
+  cxx_test_with_flags("${name}" "${cxx_default}" "${libs}"
+    "test/${name}.cc" ${ARGN})
 endfunction()
 
 cxx_test(gtest_unittest gtest_main)
@@ -163,34 +177,14 @@ endif()
 ############################################################
 # C++ tests built with non-standard compiler flags.
 
-# TODO(wan@google.com): use FindThreads to set the flags for using threads.
 if (MSVC)
   set(cxx_no_exception "${cxx_base} -D_HAS_EXCEPTIONS=0")
   set(cxx_no_rtti "${cxx_default} -GR-")
-  set(cxx_use_threads "${cxx_default}")
-  set(link_use_threads "")
 else()
   set(cxx_no_exception "${cxx_base} -fno-exceptions")
   set(cxx_no_rtti "${cxx_default} -fno-rtti -DGTEST_HAS_RTTI=0")
-  set(cxx_use_threads "${cxx_default} -pthread")
-  set(link_use_threads "-pthread")
 endif()
 set(cxx_use_own_tuple "${cxx_default} -DGTEST_USE_OWN_TR1_TUPLE=1")
-
-# cxx_test_with_flags(name cxx_flags lib srcs...)
-#
-# creates a named C++ test that depends on the given lib and is built
-# from the given source files with the given compiler flags.  Unlike
-# cxx_test(), test/name.cc is NOT implicitly included in the source
-# file list.
-function(cxx_test_with_flags name cxx_flags lib)
-  add_executable(${name} ${ARGN})
-  set_target_properties(${name}
-    PROPERTIES
-    COMPILE_FLAGS "${cxx_flags}")
-  target_link_libraries(${name} ${lib})
-  add_test(${name} ${name})
-endfunction()
 
 if (${build_all_gtest_tests})
   cxx_library(gtest_no_exception "${cxx_no_exception}"
@@ -200,11 +194,9 @@ if (${build_all_gtest_tests})
   cxx_library(gtest_main_use_own_tuple "${cxx_use_own_tuple}"
     src/gtest-all.cc src/gtest_main.cc)
 
-  cxx_test_with_flags(gtest-death-test_test "${cxx_use_threads}"
-    gtest_main test/gtest-death-test_test.cc)
-  set_target_properties(gtest-death-test_test
-    PROPERTIES
-    LINK_FLAGS "${link_use_threads}")
+  find_package(Threads)  # Defines CMAKE_THREAD_LIBS_INIT.
+  cxx_test_with_flags(gtest-death-test_test "${cxx_default}"
+    "gtest_main;${CMAKE_THREAD_LIBS_INIT}" test/gtest-death-test_test.cc)
 
   cxx_test_with_flags(gtest_no_rtti_unittest "${cxx_no_rtti}"
     gtest_main_no_rtti test/gtest_unittest.cc)
