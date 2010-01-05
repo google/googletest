@@ -354,16 +354,15 @@
 // The user didn't tell us, so we need to figure it out.
 
 // We use our own tr1 tuple if we aren't sure the user has an
-// implementation of it already.  At this time, GCC 4.0.0+ is the only
-// mainstream compiler that comes with a TR1 tuple implementation.
-// MSVC 2008 (9.0) provides TR1 tuple in a 323 MB Feature Pack
-// download, which we cannot assume the user has.  MSVC 2010 isn't
-// released yet.
-#if defined(__GNUC__) && (GTEST_GCC_VER_ >= 40000)
+// implementation of it already.  At this time, GCC 4.0.0+ and MSVC
+// 2010 are the only mainstream compilers that come with a TR1 tuple
+// implementation.  MSVC 2008 (9.0) provides TR1 tuple in a 323 MB
+// Feature Pack download, which we cannot assume the user has.
+#if (defined(__GNUC__) && (GTEST_GCC_VER_ >= 40000)) || _MSV_VER >= 1600
 #define GTEST_USE_OWN_TR1_TUPLE 0
 #else
 #define GTEST_USE_OWN_TR1_TUPLE 1
-#endif  // defined(__GNUC__) && (GTEST_GCC_VER_ >= 40000)
+#endif
 
 #endif  // GTEST_USE_OWN_TR1_TUPLE
 
@@ -405,13 +404,13 @@
 #undef _TR1_FUNCTIONAL  // Allows the user to #include
                         // <tr1/functional> if he chooses to.
 #else
-#include <tr1/tuple>
+#include <tr1/tuple>  // NOLINT
 #endif  // !GTEST_HAS_RTTI && GTEST_GCC_VER_ < 40302
 
 #else
 // If the compiler is not GCC 4.0+, we assume the user is using a
 // spec-conforming TR1 implementation.
-#include <tuple>
+#include <tuple>  // NOLINT
 #endif  // GTEST_USE_OWN_TR1_TUPLE
 
 #endif  // GTEST_HAS_TR1_TUPLE
