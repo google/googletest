@@ -33,7 +33,7 @@ link_directories(
 # Defines the compiler/linker flags used to build gtest.  You can
 # tweak these definitions to suit your need.
 if (MSVC)
-  set(cxx_base "${CMAKE_CXX_FLAGS} -GS -W4 -WX -wd4275 -RTCs -RTCu -nologo -J
+  set(cxx_base "${CMAKE_CXX_FLAGS} -GS -W4 -WX -wd4275 -nologo -J
                 -Zi -D_UNICODE -DUNICODE -DWIN32 -D_WIN32 -DSTRICT
                 -DWIN32_LEAN_AND_MEAN")
   set(cxx_default "${cxx_base} -EHsc -D_HAS_EXCEPTIONS=1")
@@ -218,9 +218,13 @@ endif()
 # test/name.py.  It does nothing if Python is not installed.
 function(py_test name)
   if (PYTHONINTERP_FOUND)
+    # ${gtest_BINARY_DIR} is known at configuration time, so we can
+    # directly bind it from cmake. ${CTEST_CONFIGURATION_TYPE} is known
+    # only at ctest runtime (by calling ctest -c <Configuration>), so
+    # we have to escape $ to delay variable substitution here.
     add_test(${name}
       ${PYTHON_EXECUTABLE} ${gtest_SOURCE_DIR}/test/${name}.py
-          --gtest_build_dir=${EXECUTABLE_OUTPUT_PATH})
+          --gtest_build_dir=${gtest_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE})
   endif()
 endfunction()
 
