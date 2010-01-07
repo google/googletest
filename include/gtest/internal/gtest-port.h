@@ -358,7 +358,7 @@
 // 2010 are the only mainstream compilers that come with a TR1 tuple
 // implementation.  MSVC 2008 (9.0) provides TR1 tuple in a 323 MB
 // Feature Pack download, which we cannot assume the user has.
-#if (defined(__GNUC__) && (GTEST_GCC_VER_ >= 40000)) || _MSV_VER >= 1600
+#if (defined(__GNUC__) && (GTEST_GCC_VER_ >= 40000)) || _MSC_VER >= 1600
 #define GTEST_USE_OWN_TR1_TUPLE 0
 #else
 #define GTEST_USE_OWN_TR1_TUPLE 1
