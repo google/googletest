@@ -82,7 +82,7 @@ namespace testing {
 namespace internal {
 
 bool ShouldUseColor(bool stdout_is_tty);
-const char* FormatTimeInMillisAsSeconds(TimeInMillis ms);
+::std::string FormatTimeInMillisAsSeconds(TimeInMillis ms);
 bool ParseInt32Flag(const char* str, const char* flag, Int32* value);
 
 // Used for testing the flag parsing.
@@ -270,23 +270,23 @@ TEST(GetTestTypeIdTest, ReturnsTheSameValueInsideOrOutsideOfGoogleTest) {
 // Tests FormatTimeInMillisAsSeconds().
 
 TEST(FormatTimeInMillisAsSecondsTest, FormatsZero) {
-  EXPECT_STREQ("0", FormatTimeInMillisAsSeconds(0));
+  EXPECT_EQ("0", FormatTimeInMillisAsSeconds(0));
 }
 
 TEST(FormatTimeInMillisAsSecondsTest, FormatsPositiveNumber) {
-  EXPECT_STREQ("0.003", FormatTimeInMillisAsSeconds(3));
-  EXPECT_STREQ("0.01", FormatTimeInMillisAsSeconds(10));
-  EXPECT_STREQ("0.2", FormatTimeInMillisAsSeconds(200));
-  EXPECT_STREQ("1.2", FormatTimeInMillisAsSeconds(1200));
-  EXPECT_STREQ("3", FormatTimeInMillisAsSeconds(3000));
+  EXPECT_EQ("0.003", FormatTimeInMillisAsSeconds(3));
+  EXPECT_EQ("0.01", FormatTimeInMillisAsSeconds(10));
+  EXPECT_EQ("0.2", FormatTimeInMillisAsSeconds(200));
+  EXPECT_EQ("1.2", FormatTimeInMillisAsSeconds(1200));
+  EXPECT_EQ("3", FormatTimeInMillisAsSeconds(3000));
 }
 
 TEST(FormatTimeInMillisAsSecondsTest, FormatsNegativeNumber) {
-  EXPECT_STREQ("-0.003", FormatTimeInMillisAsSeconds(-3));
-  EXPECT_STREQ("-0.01", FormatTimeInMillisAsSeconds(-10));
-  EXPECT_STREQ("-0.2", FormatTimeInMillisAsSeconds(-200));
-  EXPECT_STREQ("-1.2", FormatTimeInMillisAsSeconds(-1200));
-  EXPECT_STREQ("-3", FormatTimeInMillisAsSeconds(-3000));
+  EXPECT_EQ("-0.003", FormatTimeInMillisAsSeconds(-3));
+  EXPECT_EQ("-0.01", FormatTimeInMillisAsSeconds(-10));
+  EXPECT_EQ("-0.2", FormatTimeInMillisAsSeconds(-200));
+  EXPECT_EQ("-1.2", FormatTimeInMillisAsSeconds(-1200));
+  EXPECT_EQ("-3", FormatTimeInMillisAsSeconds(-3000));
 }
 
 #if !GTEST_OS_SYMBIAN
@@ -3095,9 +3095,9 @@ TEST_F(FloatTest, Commutative) {
 TEST_F(FloatTest, EXPECT_NEAR) {
   EXPECT_NEAR(-1.0f, -1.1f, 0.2f);
   EXPECT_NEAR(2.0f, 3.0f, 1.0f);
-  EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(1.0f,1.2f, 0.1f),  // NOLINT
-                          "The difference between 1.0f and 1.2f is 0.2, "
-                          "which exceeds 0.1f");
+  EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(1.0f,1.5f, 0.25f),  // NOLINT
+                          "The difference between 1.0f and 1.5f is 0.5, "
+                          "which exceeds 0.25f");
   // To work around a bug in gcc 2.95.0, there is intentionally no
   // space after the first comma in the previous line.
 }
@@ -3106,9 +3106,9 @@ TEST_F(FloatTest, EXPECT_NEAR) {
 TEST_F(FloatTest, ASSERT_NEAR) {
   ASSERT_NEAR(-1.0f, -1.1f, 0.2f);
   ASSERT_NEAR(2.0f, 3.0f, 1.0f);
-  EXPECT_FATAL_FAILURE(ASSERT_NEAR(1.0f,1.2f, 0.1f),  // NOLINT
-                       "The difference between 1.0f and 1.2f is 0.2, "
-                       "which exceeds 0.1f");
+  EXPECT_FATAL_FAILURE(ASSERT_NEAR(1.0f,1.5f, 0.25f),  // NOLINT
+                       "The difference between 1.0f and 1.5f is 0.5, "
+                       "which exceeds 0.25f");
   // To work around a bug in gcc 2.95.0, there is intentionally no
   // space after the first comma in the previous line.
 }
@@ -3261,9 +3261,9 @@ TEST_F(DoubleTest, Commutative) {
 TEST_F(DoubleTest, EXPECT_NEAR) {
   EXPECT_NEAR(-1.0, -1.1, 0.2);
   EXPECT_NEAR(2.0, 3.0, 1.0);
-  EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(1.0, 1.2, 0.1),  // NOLINT
-                          "The difference between 1.0 and 1.2 is 0.2, "
-                          "which exceeds 0.1");
+  EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(1.0, 1.5, 0.25),  // NOLINT
+                          "The difference between 1.0 and 1.5 is 0.5, "
+                          "which exceeds 0.25");
   // To work around a bug in gcc 2.95.0, there is intentionally no
   // space after the first comma in the previous statement.
 }
@@ -3272,9 +3272,9 @@ TEST_F(DoubleTest, EXPECT_NEAR) {
 TEST_F(DoubleTest, ASSERT_NEAR) {
   ASSERT_NEAR(-1.0, -1.1, 0.2);
   ASSERT_NEAR(2.0, 3.0, 1.0);
-  EXPECT_FATAL_FAILURE(ASSERT_NEAR(1.0, 1.2, 0.1),  // NOLINT
-                       "The difference between 1.0 and 1.2 is 0.2, "
-                       "which exceeds 0.1");
+  EXPECT_FATAL_FAILURE(ASSERT_NEAR(1.0, 1.5, 0.25),  // NOLINT
+                       "The difference between 1.0 and 1.5 is 0.5, "
+                       "which exceeds 0.25");
   // To work around a bug in gcc 2.95.0, there is intentionally no
   // space after the first comma in the previous statement.
 }

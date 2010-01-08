@@ -68,6 +68,23 @@ TEST(MessageTest, ConstructsFromCString) {
   EXPECT_STREQ("Hello", ToCString(msg));
 }
 
+// Tests streaming a float.
+TEST(MessageTest, StreamsFloat) {
+  const char* const s = ToCString(Message() << 1.23456F << " " << 2.34567F);
+  // Both numbers should be printed with enough precision.
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, "1.234560", s);
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, " 2.345669", s);
+}
+
+// Tests streaming a double.
+TEST(MessageTest, StreamsDouble) {
+  const char* const s = ToCString(Message() << 1260570880.4555497 << " "
+                                  << 1260572265.1954534);
+  // Both numbers should be printed with enough precision.
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, "1260570880.45", s);
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, " 1260572265.19", s);
+}
+
 // Tests streaming a non-char pointer.
 TEST(MessageTest, StreamsPointer) {
   int n = 0;
@@ -93,9 +110,6 @@ TEST(MessageTest, StreamsNullCString) {
 }
 
 // Tests streaming std::string.
-//
-// As std::string has problem in MSVC when exception is disabled, we only
-// test this where std::string can be used.
 TEST(MessageTest, StreamsString) {
   const ::std::string str("Hello");
   EXPECT_STREQ("Hello", ToCString(Message() << str));
