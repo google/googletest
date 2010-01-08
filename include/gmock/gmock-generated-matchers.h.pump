@@ -116,8 +116,9 @@ class ArgsMatcherImpl : public MatcherInterface<ArgsTuple> {
   explicit ArgsMatcherImpl(const InnerMatcher& inner_matcher)
       : inner_matcher_(SafeMatcherCast<const SelectedArgs&>(inner_matcher)) {}
 
-  virtual bool Matches(ArgsTuple args) const {
-    return inner_matcher_.Matches(GetSelectedArgs(args));
+  virtual bool MatchAndExplain(ArgsTuple args,
+                               MatchResultListener* listener) const {
+    return inner_matcher_.MatchAndExplain(GetSelectedArgs(args), listener);
   }
 
   virtual void DescribeTo(::std::ostream* os) const {
@@ -128,11 +129,6 @@ class ArgsMatcherImpl : public MatcherInterface<ArgsTuple> {
   virtual void DescribeNegationTo(::std::ostream* os) const {
     PrintIndices(os);
     inner_matcher_.DescribeNegationTo(os);
-  }
-
-  virtual void ExplainMatchResultTo(ArgsTuple args,
-                                    ::std::ostream* os) const {
-    inner_matcher_.ExplainMatchResultTo(GetSelectedArgs(args), os);
   }
 
  private:
@@ -301,14 +297,19 @@ $$   // show up in the generated code.
 
 
 // The MATCHER* family of macros can be used in a namespace scope to
-// define custom matchers easily.  The syntax:
+// define custom matchers easily.
+//
+// Basic Usage
+// ===========
+//
+// The syntax
 //
 //   MATCHER(name, description_string) { statements; }
 //
-// will define a matcher with the given name that executes the
-// statements, which must return a bool to indicate if the match
-// succeeds.  Inside the statements, you can refer to the value being
-// matched by 'arg', and refer to its type by 'arg_type'.
+// defines a matcher with the given name that executes the statements,
+// which must return a bool to indicate if the match succeeds.  Inside
+// the statements, you can refer to the value being matched by 'arg',
+// and refer to its type by 'arg_type'.
 //
 // The description string documents what the matcher does, and is used
 // to generate the failure message when the match fails.  Since a
@@ -341,6 +342,9 @@ $$   // show up in the generated code.
 // where the description "is even" is automatically calculated from the
 // matcher name IsEven.
 //
+// Argument Type
+// =============
+//
 // Note that the type of the value being matched (arg_type) is
 // determined by the context in which you use the matcher and is
 // supplied to you by the compiler, so you don't need to worry about
@@ -350,6 +354,9 @@ $$   // show up in the generated code.
 // a bool.  In the "Bar(IsEven())" example above, if method Bar()
 // takes an int, 'arg_type' will be int; if it takes an unsigned long,
 // 'arg_type' will be unsigned long; and so on.
+//
+// Parameterizing Matchers
+// =======================
 //
 // Sometimes you'll want to parameterize the matcher.  For that you
 // can use another macro:
@@ -380,6 +387,9 @@ $$   // show up in the generated code.
 //
 // We also provide MATCHER_P2, MATCHER_P3, ..., up to MATCHER_P$n to
 // support multi-parameter matchers.
+//
+// Describing Parameterized Matchers
+// =================================
 //
 // When defining a parameterized matcher, you can use Python-style
 // interpolations in the description string to refer to the parameter
@@ -413,6 +423,9 @@ $$   // show up in the generated code.
 //
 //   Expected: in closed range (4, 6)
 //
+// Types of Matcher Parameters
+// ===========================
+//
 // For the purpose of typing, you can view
 //
 //   MATCHER_Pk(Foo, p1, ..., pk, description_string) { ... }
@@ -440,23 +453,44 @@ $$   // show up in the generated code.
 // matcher you will see the value of the referenced object but not its
 // address.
 //
+// Explaining Match Results
+// ========================
+//
+// Sometimes the matcher description alone isn't enough to explain why
+// the match has failed or succeeded.  For example, when expecting a
+// long string, it can be very helpful to also print the diff between
+// the expected string and the actual one.  To achieve that, you can
+// optionally stream additional information to a special variable
+// named result_listener, whose type is a pointer to class
+// MatchResultListener:
+//
+//   MATCHER_P(EqualsLongString, str, "") {
+//     if (arg == str) return true;
+//
+//     *result_listener << "the difference: "
+///                     << DiffStrings(str, arg);
+//     return false;
+//   }
+//
+// Overloading Matchers
+// ====================
+//
 // You can overload matchers with different numbers of parameters:
 //
 //   MATCHER_P(Blah, a, description_string1) { ... }
 //   MATCHER_P2(Blah, a, b, description_string2) { ... }
 //
-// While it's tempting to always use the MATCHER* macros when defining
-// a new matcher, you should also consider implementing
-// MatcherInterface or using MakePolymorphicMatcher() instead,
-// especially if you need to use the matcher a lot.  While these
-// approaches require more work, they give you more control on the
-// types of the value being matched and the matcher parameters, which
-// in general leads to better compiler error messages that pay off in
-// the long run.  They also allow overloading matchers based on
-// parameter types (as opposed to just based on the number of
-// parameters).
+// Caveats
+// =======
 //
-// CAVEAT:
+// When defining a new matcher, you should also consider implementing
+// MatcherInterface or using MakePolymorphicMatcher().  These
+// approaches require more work than the MATCHER* macros, but also
+// give you more control on the types of the value being matched and
+// the matcher parameters, which may leads to better compiler error
+// messages when the matcher is used wrong.  They also allow
+// overloading matchers based on parameter types (as opposed to just
+// based on the number of parameters).
 //
 // MATCHER*() can only be used in a namespace scope.  The reason is
 // that C++ doesn't yet allow function-local types to be used to
@@ -464,7 +498,8 @@ $$   // show up in the generated code.
 // Once that's done, we'll consider supporting using MATCHER*() inside
 // a function.
 //
-// MORE INFORMATION:
+// More Information
+// ================
 //
 // To learn more about using these macros, please search for 'MATCHER'
 // on http://code.google.com/p/googlemock/wiki/CookBook.
@@ -510,7 +545,8 @@ $var param_field_decls2 = [[$for j
      public:\
       [[$if i==1 [[explicit ]]]]gmock_Impl($impl_ctor_param_list)\
           $impl_inits {}\
-      virtual bool Matches(arg_type arg) const;\
+      virtual bool MatchAndExplain(\
+          arg_type arg, ::testing::MatchResultListener* result_listener) const;\
       virtual void DescribeTo(::std::ostream* gmock_os) const {\
         const ::testing::internal::Strings& gmock_printed_params = \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
@@ -540,8 +576,10 @@ $var param_field_decls2 = [[$for j
     return $class_name$param_types($params);\
   }\$template
   template <typename arg_type>\
-  bool $class_name$param_types::\
-      gmock_Impl<arg_type>::Matches(arg_type arg) const
+  bool $class_name$param_types::gmock_Impl<arg_type>::MatchAndExplain(\
+      arg_type arg,\
+      ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
+          const
 ]]
 
 

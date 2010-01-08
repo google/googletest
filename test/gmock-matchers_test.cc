@@ -88,6 +88,7 @@ using testing::Matcher;
 using testing::MatcherCast;
 using testing::MatcherInterface;
 using testing::Matches;
+using testing::MatchResultListener;
 using testing::NanSensitiveDoubleEq;
 using testing::NanSensitiveFloatEq;
 using testing::Ne;
@@ -200,8 +201,37 @@ class EvenMatcherImpl : public MatcherInterface<int> {
   // two methods is optional.
 };
 
-TEST(MatcherInterfaceTest, CanBeImplemented) {
+TEST(MatcherInterfaceTest, CanBeImplementedUsingDeprecatedAPI) {
   EvenMatcherImpl m;
+}
+
+// Tests implementing a monomorphic matcher using MatchAndExplain().
+
+class NewEvenMatcherImpl : public MatcherInterface<int> {
+ public:
+  virtual bool MatchAndExplain(int x, MatchResultListener* listener) const {
+    const bool match = x % 2 == 0;
+    // Verifies that we can stream to a listener directly.
+    *listener << "value % " << 2;
+    if (listener->stream() != NULL) {
+      // Verifies that we can stream to a listener's underlying stream
+      // too.
+      *listener->stream() << " == " << (x % 2);
+    }
+    return match;
+  }
+
+  virtual void DescribeTo(::std::ostream* os) const {
+    *os << "is an even number";
+  }
+};
+
+TEST(MatcherInterfaceTest, CanBeImplementedUsingNewAPI) {
+  Matcher<int> m = MakeMatcher(new NewEvenMatcherImpl);
+  EXPECT_TRUE(m.Matches(2));
+  EXPECT_FALSE(m.Matches(3));
+  EXPECT_EQ("value % 2 == 0", Explain(m, 2));
+  EXPECT_EQ("value % 2 == 1", Explain(m, 3));
 }
 
 // Tests default-constructing a matcher.
@@ -252,6 +282,18 @@ TEST(MatcherTest, CanDescribeItself) {
             Describe(Matcher<int>(new EvenMatcherImpl)));
 }
 
+// Tests Matcher<T>::MatchAndExplain().
+TEST(MatcherTest, MatchAndExplain) {
+  Matcher<int> m = GreaterThan(0);
+  ::testing::internal::StringMatchResultListener listener1;
+  EXPECT_TRUE(m.MatchAndExplain(42, &listener1));
+  EXPECT_EQ("is 42 more than 0", listener1.str());
+
+  ::testing::internal::StringMatchResultListener listener2;
+  EXPECT_FALSE(m.MatchAndExplain(-9, &listener2));
+  EXPECT_EQ("is 9 less than 0", listener2.str());
+}
+
 // Tests that a C-string literal can be implicitly converted to a
 // Matcher<string> or Matcher<const string&>.
 TEST(StringMatcherTest, CanBeImplicitlyConstructedFromCStringLiteral) {
@@ -284,8 +326,8 @@ TEST(MakeMatcherTest, ConstructsMatcherFromMatcherInterface) {
   Matcher<int> m = MakeMatcher(dummy_impl);
 }
 
-// Tests that MakePolymorphicMatcher() constructs a polymorphic
-// matcher from its implementation.
+// Tests that MakePolymorphicMatcher() can construct a polymorphic
+// matcher from its implementation using the old API.
 const int bar = 1;
 class ReferencesBarOrIsZeroImpl {
  public:
@@ -308,7 +350,7 @@ PolymorphicMatcher<ReferencesBarOrIsZeroImpl> ReferencesBarOrIsZero() {
   return MakePolymorphicMatcher(ReferencesBarOrIsZeroImpl());
 }
 
-TEST(MakePolymorphicMatcherTest, ConstructsMatcherFromImpl) {
+TEST(MakePolymorphicMatcherTest, ConstructsMatcherUsingOldAPI) {
   // Using a polymorphic matcher to match a reference type.
   Matcher<const int&> m1 = ReferencesBarOrIsZero();
   EXPECT_TRUE(m1.Matches(0));
@@ -322,6 +364,58 @@ TEST(MakePolymorphicMatcherTest, ConstructsMatcherFromImpl) {
   EXPECT_TRUE(m2.Matches(0.0));
   EXPECT_FALSE(m2.Matches(0.1));
   EXPECT_EQ("bar or zero", Describe(m2));
+}
+
+// Tests implementing a polymorphic matcher using MatchAndExplain().
+
+class PolymorphicIsEvenImpl {
+ public:
+  void DescribeTo(::std::ostream* os) const { *os << "is even"; }
+
+  void DescribeNegationTo(::std::ostream* os) const {
+    *os << "is odd";
+  }
+};
+
+template <typename T>
+bool MatchAndExplain(const PolymorphicIsEvenImpl& /* impl */,
+                     T x, MatchResultListener* listener) {
+  // Verifies that we can stream to the listener directly.
+  *listener << "% " << 2;
+  if (listener->stream() != NULL) {
+    // Verifies that we can stream to the listener's underlying stream
+    // too.
+    *listener->stream() << " == " << (x % 2);
+  }
+  return (x % 2) == 0;
+}
+
+PolymorphicMatcher<PolymorphicIsEvenImpl> PolymorphicIsEven() {
+  return MakePolymorphicMatcher(PolymorphicIsEvenImpl());
+}
+
+TEST(MakePolymorphicMatcherTest, ConstructsMatcherUsingNewAPI) {
+  // Using PolymorphicIsEven() as a Matcher<int>.
+  const Matcher<int> m1 = PolymorphicIsEven();
+  EXPECT_TRUE(m1.Matches(42));
+  EXPECT_FALSE(m1.Matches(43));
+  EXPECT_EQ("is even", Describe(m1));
+
+  const Matcher<int> not_m1 = Not(m1);
+  EXPECT_EQ("is odd", Describe(not_m1));
+
+  EXPECT_EQ("% 2 == 0", Explain(m1, 42));
+
+  // Using PolymorphicIsEven() as a Matcher<char>.
+  const Matcher<char> m2 = PolymorphicIsEven();
+  EXPECT_TRUE(m2.Matches('\x42'));
+  EXPECT_FALSE(m2.Matches('\x43'));
+  EXPECT_EQ("is even", Describe(m2));
+
+  const Matcher<char> not_m2 = Not(m2);
+  EXPECT_EQ("is odd", Describe(not_m2));
+
+  EXPECT_EQ("% 2 == 0", Explain(m2, '\x42'));
 }
 
 // Tests that MatcherCast<T>(m) works when m is a polymorphic matcher.
@@ -1050,21 +1144,26 @@ TEST(PairTest, CanDescribeSelf) {
 }
 
 TEST(PairTest, CanExplainMatchResultTo) {
-  const Matcher<std::pair<int, int> > m0 = Pair(0, 0);
-  EXPECT_EQ("", Explain(m0, std::make_pair(25, 42)));
+  // If neither field matches, Pair() should explain about the first
+  // field.
+  const Matcher<std::pair<int, int> > m = Pair(GreaterThan(0), GreaterThan(0));
+  EXPECT_EQ("the first field is 1 less than 0",
+            Explain(m, std::make_pair(-1, -2)));
 
-  const Matcher<std::pair<int, int> > m1 = Pair(GreaterThan(0), 0);
-  EXPECT_EQ("the first field is 25 more than 0",
-            Explain(m1, std::make_pair(25, 42)));
+  // If the first field matches but the second doesn't, Pair() should
+  // explain about the second field.
+  EXPECT_EQ("the second field is 2 less than 0",
+            Explain(m, std::make_pair(1, -2)));
 
-  const Matcher<std::pair<int, int> > m2 = Pair(0, GreaterThan(0));
-  EXPECT_EQ("the second field is 42 more than 0",
-            Explain(m2, std::make_pair(25, 42)));
+  // If the first field doesn't match but the second does, Pair()
+  // should explain about the first field.
+  EXPECT_EQ("the first field is 1 less than 0",
+            Explain(m, std::make_pair(-1, 2)));
 
-  const Matcher<std::pair<int, int> > m3 = Pair(GreaterThan(0), GreaterThan(0));
-  EXPECT_EQ("the first field is 25 more than 0"
-            ", and the second field is 42 more than 0",
-            Explain(m3, std::make_pair(25, 42)));
+  // If both fields match, Pair() should explain about them both.
+  EXPECT_EQ("the first field is 1 more than 0"
+            ", and the second field is 2 more than 0",
+            Explain(m, std::make_pair(1, 2)));
 }
 
 TEST(PairTest, MatchesCorrectly) {
@@ -3335,6 +3434,16 @@ TEST(ValidateMatcherDescriptionTest,
               ElementsAre());
 }
 
+// The MATCHER*() macros trigger warning C4100 (unreferenced formal
+// parameter) in MSVC with -W4.  Unfortunately they cannot be fixed in
+// the macro definition, as the warnings are generated when the macro
+// is expanded and macro expansion cannot contain #pragma.  Therefore
+// we suppress them here.
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4100)
+#endif
+
 // We use MATCHER_P3() to define a matcher for testing
 // ValidateMatcherDescription(); otherwise we'll end up with much
 // plumbing code.  This is not circular as
@@ -3344,6 +3453,10 @@ MATCHER_P3(EqInterpolation, start, end, index, "equals Interpolation%(*)s") {
   return arg.start_pos == start && arg.end_pos == end &&
       arg.param_index == index;
 }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 TEST(ValidateMatcherDescriptionTest, AcceptsPercentInterpolation) {
   const char* params[] = { "foo", NULL };

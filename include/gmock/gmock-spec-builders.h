@@ -1004,13 +1004,13 @@ class TypedExpectation : public ExpectationBase {
       if (!TupleMatches(matchers_, args)) {
         DescribeMatchFailureTupleTo(matchers_, args, os);
       }
-      if (!extra_matcher_.Matches(args)) {
+      StringMatchResultListener listener;
+      if (!extra_matcher_.MatchAndExplain(args, &listener)) {
         *os << "    Expected args: ";
         extra_matcher_.DescribeTo(os);
         *os << "\n           Actual: don't match";
 
-        internal::ExplainMatchResultAsNeededTo<const ArgumentTuple&>(
-            extra_matcher_, args, os);
+        internal::StreamInParensAsNeeded(listener.str(), os);
         *os << "\n";
       }
     } else if (!AllPrerequisitesAreSatisfied()) {
