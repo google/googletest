@@ -46,6 +46,8 @@
 #ifndef GTEST_INCLUDE_GTEST_GTEST_MESSAGE_H_
 #define GTEST_INCLUDE_GTEST_GTEST_MESSAGE_H_
 
+#include <limits>
+
 #include <gtest/internal/gtest-string.h>
 #include <gtest/internal/gtest-internal.h>
 
@@ -89,7 +91,11 @@ class Message {
   // ASSERT/EXPECT in a procedure adds over 200 bytes to the procedure's
   // stack frame leading to huge stack frames in some cases; gcc does not reuse
   // the stack space.
-  Message() : ss_(new internal::StrStream) {}
+  Message() : ss_(new internal::StrStream) {
+    // By default, we want there to be enough precision when printing
+    // a double to a Message.
+    *ss_ << std::setprecision(std::numeric_limits<double>::digits10 + 2);
+  }
 
   // Copy constructor.
   Message(const Message& msg) : ss_(new internal::StrStream) {  // NOLINT

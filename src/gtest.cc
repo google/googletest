@@ -43,6 +43,7 @@
 #include <wctype.h>
 
 #include <ostream>
+#include <sstream>
 
 #if GTEST_OS_LINUX
 
@@ -3168,14 +3169,11 @@ String XmlUnitTestResultPrinter::RemoveInvalidXmlCharacters(const char* str) {
 //   </testsuite>
 // </testsuites>
 
-// Formats the given time in milliseconds as seconds.  The returned
-// C-string is owned by this function and cannot be released by the
-// caller.  Calling the function again invalidates the previous
-// result.
-const char* FormatTimeInMillisAsSeconds(TimeInMillis ms) {
-  static String str;
-  str = (Message() << (ms/1000.0)).GetString();
-  return str.c_str();
+// Formats the given time in milliseconds as seconds.
+std::string FormatTimeInMillisAsSeconds(TimeInMillis ms) {
+  ::std::stringstream ss;
+  ss << ms/1000.0;
+  return ss.str();
 }
 
 // Streams an XML CDATA section, escaping invalid CDATA sequences as needed.
@@ -3249,7 +3247,7 @@ void XmlUnitTestResultPrinter::PrintXmlTestCase(FILE* out,
           test_case.disabled_test_count());
   fprintf(out,
           "errors=\"0\" time=\"%s\">\n",
-          FormatTimeInMillisAsSeconds(test_case.elapsed_time()));
+          FormatTimeInMillisAsSeconds(test_case.elapsed_time()).c_str());
   for (int i = 0; i < test_case.total_test_count(); ++i) {
     StrStream stream;
     OutputXmlTestInfo(&stream, test_case.name(), *test_case.GetTestInfo(i));
@@ -3268,7 +3266,7 @@ void XmlUnitTestResultPrinter::PrintXmlUnitTest(FILE* out,
           unit_test.total_test_count(),
           unit_test.failed_test_count(),
           unit_test.disabled_test_count(),
-          FormatTimeInMillisAsSeconds(unit_test.elapsed_time()));
+          FormatTimeInMillisAsSeconds(unit_test.elapsed_time()).c_str());
   if (GTEST_FLAG(shuffle)) {
     fprintf(out, "random_seed=\"%d\" ", unit_test.random_seed());
   }
