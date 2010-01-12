@@ -265,10 +265,11 @@ inline void ExplainMatchResultTo(const PolymorphicMatcherImpl& /* impl */,
 }
 
 // The default implementation of MatchAndExplain() for polymorphic
-// matchers.
+// matchers.  The type of argument x cannot be const T&, in case
+// impl.Matches() takes a non-const reference.
 template <typename PolymorphicMatcherImpl, typename T>
 inline bool MatchAndExplain(const PolymorphicMatcherImpl& impl,
-                            const T& x,
+                            T& x,
                             MatchResultListener* listener) {
   const bool match = impl.Matches(x);
 
@@ -789,6 +790,12 @@ class IsNullMatcher {
   }
 };
 
+template <typename Pointer>
+bool MatchAndExplain(const IsNullMatcher& impl, Pointer& p,
+                     MatchResultListener* /* listener */) {
+  return impl.Matches(p);
+}
+
 // Implements the polymorphic NotNull() matcher, which matches any raw or smart
 // pointer that is not NULL.
 class NotNullMatcher {
@@ -801,6 +808,12 @@ class NotNullMatcher {
     *os << "is NULL";
   }
 };
+
+template <typename Pointer>
+bool MatchAndExplain(const NotNullMatcher& impl, Pointer& p,
+                     MatchResultListener* /* listener */) {
+  return impl.Matches(p);
+}
 
 // Ref(variable) matches any argument that is a reference to
 // 'variable'.  This matcher is polymorphic as it can match any
@@ -964,6 +977,12 @@ class StrEqualityMatcher {
   GTEST_DISALLOW_ASSIGN_(StrEqualityMatcher);
 };
 
+template <typename StringType, typename T>
+bool MatchAndExplain(const StrEqualityMatcher<StringType>& impl, T& s,
+                     MatchResultListener* /* listener */) {
+  return impl.Matches(s);
+}
+
 // Implements the polymorphic HasSubstr(substring) matcher, which
 // can be used as a Matcher<T> as long as T can be converted to a
 // string.
@@ -1002,6 +1021,12 @@ class HasSubstrMatcher {
 
   GTEST_DISALLOW_ASSIGN_(HasSubstrMatcher);
 };
+
+template <typename StringType, typename T>
+bool MatchAndExplain(const HasSubstrMatcher<StringType>& impl, T& s,
+                     MatchResultListener* /* listener */) {
+  return impl.Matches(s);
+}
 
 // Implements the polymorphic StartsWith(substring) matcher, which
 // can be used as a Matcher<T> as long as T can be converted to a
@@ -1042,6 +1067,12 @@ class StartsWithMatcher {
   GTEST_DISALLOW_ASSIGN_(StartsWithMatcher);
 };
 
+template <typename StringType, typename T>
+bool MatchAndExplain(const StartsWithMatcher<StringType>& impl, T& s,
+                     MatchResultListener* /* listener */) {
+  return impl.Matches(s);
+}
+
 // Implements the polymorphic EndsWith(substring) matcher, which
 // can be used as a Matcher<T> as long as T can be converted to a
 // string.
@@ -1079,6 +1110,12 @@ class EndsWithMatcher {
 
   GTEST_DISALLOW_ASSIGN_(EndsWithMatcher);
 };
+
+template <typename StringType, typename T>
+bool MatchAndExplain(const EndsWithMatcher<StringType>& impl, T& s,
+                     MatchResultListener* /* listener */) {
+  return impl.Matches(s);
+}
 
 #if GMOCK_HAS_REGEX
 
@@ -1121,6 +1158,12 @@ class MatchesRegexMatcher {
 
   GTEST_DISALLOW_ASSIGN_(MatchesRegexMatcher);
 };
+
+template <typename T>
+bool MatchAndExplain(const MatchesRegexMatcher& impl, T& s,
+                     MatchResultListener* /* listener */) {
+  return impl.Matches(s);
+}
 
 #endif  // GMOCK_HAS_REGEX
 
@@ -1424,6 +1467,12 @@ class TrulyMatcher {
 
   GTEST_DISALLOW_ASSIGN_(TrulyMatcher);
 };
+
+template <typename Predicate, typename T>
+bool MatchAndExplain(const TrulyMatcher<Predicate>& impl, T& x,
+                     MatchResultListener* /* listener */) {
+  return impl.Matches(x);
+}
 
 // Used for implementing Matches(matcher), which turns a matcher into
 // a predicate.
@@ -1733,7 +1782,7 @@ class FieldMatcher {
 
 template <typename Class, typename FieldType, typename T>
 bool MatchAndExplain(const FieldMatcher<Class, FieldType>& matcher,
-                     const T& value, MatchResultListener* listener) {
+                     T& value, MatchResultListener* listener) {
   return matcher.MatchAndExplain(
       typename ::testing::internal::is_pointer<T>::type(), value, listener);
 }
@@ -1798,7 +1847,7 @@ class PropertyMatcher {
 
 template <typename Class,  typename PropertyType, typename T>
 bool MatchAndExplain(const PropertyMatcher<Class, PropertyType>& matcher,
-                     const T& value, MatchResultListener* listener) {
+                     T& value, MatchResultListener* listener) {
   return matcher.MatchAndExplain(
       typename ::testing::internal::is_pointer<T>::type(), value, listener);
 }
@@ -1933,15 +1982,6 @@ class ContainerEqMatcher {
         GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))>();
   }
 
-  template <typename LhsContainer>
-  bool Matches(const LhsContainer& lhs) const {
-    // GMOCK_REMOVE_CONST_() is needed to work around an MSVC 8.0 bug
-    // that causes LhsContainer to be a const type sometimes.
-    typedef internal::StlContainerView<GMOCK_REMOVE_CONST_(LhsContainer)>
-        LhsView;
-    StlContainerReference lhs_stl_container = LhsView::ConstReference(lhs);
-    return lhs_stl_container == rhs_;
-  }
   void DescribeTo(::std::ostream* os) const {
     *os << "equals ";
     UniversalPrinter<StlContainer>::Print(rhs_, os);
@@ -1952,48 +1992,55 @@ class ContainerEqMatcher {
   }
 
   template <typename LhsContainer>
-  void ExplainMatchResultTo(const LhsContainer& lhs,
-                            ::std::ostream* os) const {
+  bool MatchAndExplain(const LhsContainer& lhs,
+                       MatchResultListener* listener) const {
     // GMOCK_REMOVE_CONST_() is needed to work around an MSVC 8.0 bug
     // that causes LhsContainer to be a const type sometimes.
     typedef internal::StlContainerView<GMOCK_REMOVE_CONST_(LhsContainer)>
         LhsView;
     typedef typename LhsView::type LhsStlContainer;
     StlContainerReference lhs_stl_container = LhsView::ConstReference(lhs);
+    if (lhs_stl_container == rhs_)
+      return true;
 
-    // Something is different. Check for missing values first.
-    bool printed_header = false;
-    for (typename LhsStlContainer::const_iterator it =
-             lhs_stl_container.begin();
-         it != lhs_stl_container.end(); ++it) {
-      if (internal::ArrayAwareFind(rhs_.begin(), rhs_.end(), *it) ==
-          rhs_.end()) {
-        if (printed_header) {
-          *os << ", ";
-        } else {
-          *os << "Only in actual: ";
-          printed_header = true;
+    ::std::ostream* const os = listener->stream();
+    if (os != NULL) {
+      // Something is different. Check for missing values first.
+      bool printed_header = false;
+      for (typename LhsStlContainer::const_iterator it =
+               lhs_stl_container.begin();
+           it != lhs_stl_container.end(); ++it) {
+        if (internal::ArrayAwareFind(rhs_.begin(), rhs_.end(), *it) ==
+            rhs_.end()) {
+          if (printed_header) {
+            *os << ", ";
+          } else {
+            *os << "Only in actual: ";
+            printed_header = true;
+          }
+          UniversalPrinter<typename LhsStlContainer::value_type>::Print(*it, os);
         }
-        UniversalPrinter<typename LhsStlContainer::value_type>::Print(*it, os);
+      }
+
+      // Now check for extra values.
+      bool printed_header2 = false;
+      for (typename StlContainer::const_iterator it = rhs_.begin();
+           it != rhs_.end(); ++it) {
+        if (internal::ArrayAwareFind(
+                lhs_stl_container.begin(), lhs_stl_container.end(), *it) ==
+            lhs_stl_container.end()) {
+          if (printed_header2) {
+            *os << ", ";
+          } else {
+            *os << (printed_header ? "; not" : "Not") << " in actual: ";
+            printed_header2 = true;
+          }
+          UniversalPrinter<typename StlContainer::value_type>::Print(*it, os);
+        }
       }
     }
 
-    // Now check for extra values.
-    bool printed_header2 = false;
-    for (typename StlContainer::const_iterator it = rhs_.begin();
-         it != rhs_.end(); ++it) {
-      if (internal::ArrayAwareFind(
-              lhs_stl_container.begin(), lhs_stl_container.end(), *it) ==
-          lhs_stl_container.end()) {
-        if (printed_header2) {
-          *os << ", ";
-        } else {
-          *os << (printed_header ? "; not" : "Not") << " in actual: ";
-          printed_header2 = true;
-        }
-        UniversalPrinter<typename StlContainer::value_type>::Print(*it, os);
-      }
-    }
+    return false;
   }
 
  private:
@@ -2003,10 +2050,10 @@ class ContainerEqMatcher {
 };
 
 template <typename LhsContainer, typename Container>
-void ExplainMatchResultTo(const ContainerEqMatcher<Container>& matcher,
-                          const LhsContainer& lhs,
-                          ::std::ostream* os) {
-  matcher.ExplainMatchResultTo(lhs, os);
+bool MatchAndExplain(const ContainerEqMatcher<Container>& matcher,
+                     LhsContainer& lhs,
+                     MatchResultListener* listener) {
+  return matcher.MatchAndExplain(lhs, listener);
 }
 
 // Implements Contains(element_matcher) for the given argument type Container.
