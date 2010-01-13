@@ -2648,6 +2648,16 @@ TEST(FieldForPointerTest, WorksForPointerToNonConst) {
   EXPECT_FALSE(m.Matches(&a));
 }
 
+// Tests that Field() works when the argument is a reference to a const pointer.
+TEST(FieldForPointerTest, WorksForReferenceToConstPointer) {
+  Matcher<AStruct* const&> m = Field(&AStruct::x, Ge(0));
+
+  AStruct a;
+  EXPECT_TRUE(m.Matches(&a));
+  a.x = -1;
+  EXPECT_FALSE(m.Matches(&a));
+}
+
 // Tests that Field() does not match the NULL pointer.
 TEST(FieldForPointerTest, DoesNotMatchNull) {
   Matcher<const AStruct*> m = Field(&AStruct::x, _);
@@ -2837,6 +2847,19 @@ TEST(PropertyForPointerTest, WorksForPointerToConst) {
 // Tests that Property() works when the argument is a pointer to non-const.
 TEST(PropertyForPointerTest, WorksForPointerToNonConst) {
   Matcher<AClass*> m = Property(&AClass::s, StartsWith("hi"));
+
+  AClass a;
+  a.set_s("hill");
+  EXPECT_TRUE(m.Matches(&a));
+
+  a.set_s("hole");
+  EXPECT_FALSE(m.Matches(&a));
+}
+
+// Tests that Property() works when the argument is a reference to a
+// const pointer.
+TEST(PropertyForPointerTest, WorksForReferenceToConstPointer) {
+  Matcher<AClass* const&> m = Property(&AClass::s, StartsWith("hi"));
 
   AClass a;
   a.set_s("hill");

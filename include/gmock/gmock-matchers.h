@@ -1784,7 +1784,8 @@ template <typename Class, typename FieldType, typename T>
 bool MatchAndExplain(const FieldMatcher<Class, FieldType>& matcher,
                      T& value, MatchResultListener* listener) {
   return matcher.MatchAndExplain(
-      typename ::testing::internal::is_pointer<T>::type(), value, listener);
+      typename ::testing::internal::is_pointer<GMOCK_REMOVE_CONST_(T)>::type(),
+      value, listener);
 }
 
 // Implements the Property() matcher for matching a property
@@ -1849,7 +1850,8 @@ template <typename Class,  typename PropertyType, typename T>
 bool MatchAndExplain(const PropertyMatcher<Class, PropertyType>& matcher,
                      T& value, MatchResultListener* listener) {
   return matcher.MatchAndExplain(
-      typename ::testing::internal::is_pointer<T>::type(), value, listener);
+      typename ::testing::internal::is_pointer<GMOCK_REMOVE_CONST_(T)>::type(),
+      value, listener);
 }
 
 // Type traits specifying various features of different functors for ResultOf.
@@ -2018,7 +2020,8 @@ class ContainerEqMatcher {
             *os << "Only in actual: ";
             printed_header = true;
           }
-          UniversalPrinter<typename LhsStlContainer::value_type>::Print(*it, os);
+          UniversalPrinter<typename LhsStlContainer::value_type>::
+              Print(*it, os);
         }
       }
 
