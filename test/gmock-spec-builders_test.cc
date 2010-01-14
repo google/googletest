@@ -68,6 +68,7 @@ using testing::AtMost;
 using testing::Between;
 using testing::Cardinality;
 using testing::CardinalityInterface;
+using testing::ContainsRegex;
 using testing::Const;
 using testing::DoAll;
 using testing::DoDefault;
@@ -978,8 +979,6 @@ TEST(UnexpectedCallTest, UnmatchedArguments) {
   b.DoB(1);
 }
 
-#ifdef GMOCK_HAS_REGEX
-
 // Tests that Google Mock explains that an expectation with
 // unsatisfied pre-requisites doesn't match the call.
 TEST(UnexpectedCallTest, UnsatisifiedPrerequisites) {
@@ -1010,30 +1009,32 @@ TEST(UnexpectedCallTest, UnsatisifiedPrerequisites) {
 
   // Verifies that the failure message contains the two unsatisfied
   // pre-requisites but not the satisfied one.
-  const char* const pattern =
-#if GMOCK_USES_PCRE
+#if GTEST_USES_PCRE
+  EXPECT_THAT(r.message(), ContainsRegex(
       // PCRE has trouble using (.|\n) to match any character, but
       // supports the (?s) prefix for using . to match any character.
       "(?s)the following immediate pre-requisites are not satisfied:\n"
       ".*: pre-requisite #0\n"
-      ".*: pre-requisite #1";
-#else
+      ".*: pre-requisite #1"));
+#elif GTEST_USES_POSIX_RE
+  EXPECT_THAT(r.message(), ContainsRegex(
       // POSIX RE doesn't understand the (?s) prefix, but has no trouble
       // with (.|\n).
       "the following immediate pre-requisites are not satisfied:\n"
       "(.|\n)*: pre-requisite #0\n"
-      "(.|\n)*: pre-requisite #1";
-#endif  // GMOCK_USES_PCRE
+      "(.|\n)*: pre-requisite #1"));
+#else
+  // We can only use Google Test's own simple regex.
+  EXPECT_THAT(r.message(), ContainsRegex(
+      "the following immediate pre-requisites are not satisfied:"));
+  EXPECT_THAT(r.message(), ContainsRegex(": pre-requisite #0"));
+  EXPECT_THAT(r.message(), ContainsRegex(": pre-requisite #1"));
+#endif  // GTEST_USES_PCRE
 
-  EXPECT_TRUE(
-      ::testing::internal::RE::PartialMatch(r.message(), pattern))
-              << " where the message is " << r.message();
   b.DoB(1);
   b.DoB(3);
   b.DoB(4);
 }
-
-#endif  // GMOCK_HAS_REGEX
 
 TEST(UndefinedReturnValueTest, ReturnValueIsMandatory) {
   MockA a;

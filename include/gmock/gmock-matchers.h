@@ -1117,8 +1117,6 @@ bool MatchAndExplain(const EndsWithMatcher<StringType>& impl, T& s,
   return impl.Matches(s);
 }
 
-#if GMOCK_HAS_REGEX
-
 // Implements polymorphic matchers MatchesRegex(regex) and
 // ContainsRegex(regex), which can be used as a Matcher<T> as long as
 // T can be converted to a string.
@@ -1164,8 +1162,6 @@ bool MatchAndExplain(const MatchesRegexMatcher& impl, T& s,
                      MatchResultListener* /* listener */) {
   return impl.Matches(s);
 }
-
-#endif  // GMOCK_HAS_REGEX
 
 // Implements a matcher that compares the two fields of a 2-tuple
 // using one of the ==, <=, <, etc, operators.  The two fields being
@@ -2718,8 +2714,6 @@ inline PolymorphicMatcher<internal::EndsWithMatcher<internal::string> >
       suffix));
 }
 
-#ifdef GMOCK_HAS_REGEX
-
 // Matches a string that fully matches regular expression 'regex'.
 // The matcher takes ownership of 'regex'.
 inline PolymorphicMatcher<internal::MatchesRegexMatcher> MatchesRegex(
@@ -2741,8 +2735,6 @@ inline PolymorphicMatcher<internal::MatchesRegexMatcher> ContainsRegex(
     const internal::string& regex) {
   return ContainsRegex(new internal::RE(regex));
 }
-
-#endif  // GMOCK_HAS_REGEX
 
 #if GTEST_HAS_GLOBAL_WSTRING || GTEST_HAS_STD_WSTRING
 // Wide string matchers.

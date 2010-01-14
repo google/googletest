@@ -52,25 +52,7 @@
 
 #if GTEST_OS_LINUX
 
-// On some platforms, <regex.h> needs someone to define size_t, and
-// won't compile otherwise.  We can #include it here as we already
-// included <stdlib.h>, which is guaranteed to define size_t through
-// <stddef.h>.
-#include <regex.h>  // NOLINT
-
-// Defines this iff Google Mock uses the enhanced POSIX regular
-// expression syntax.  This is public as it affects how a user uses
-// regular expression matchers.
-#define GMOCK_USES_POSIX_RE 1
-
 #endif  // GTEST_OS_LINUX
-
-#if defined(GMOCK_USES_PCRE) || defined(GMOCK_USES_POSIX_RE)
-// Defines this iff regular expression matchers are supported.  This
-// is public as it tells a user whether he can use regular expression
-// matchers.
-#define GMOCK_HAS_REGEX 1
-#endif  // defined(GMOCK_USES_PCRE) || defined(GMOCK_USES_POSIX_RE)
 
 namespace testing {
 namespace internal {

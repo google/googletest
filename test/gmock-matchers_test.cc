@@ -126,11 +126,9 @@ using testing::internal::linked_ptr;
 using testing::internal::scoped_ptr;
 using testing::internal::string;
 
-#ifdef GMOCK_HAS_REGEX
 using testing::ContainsRegex;
 using testing::MatchesRegex;
 using testing::internal::RE;
-#endif  // GMOCK_HAS_REGEX
 
 // For testing ExplainMatchResultTo().
 class GreaterThanMatcher : public MatcherInterface<int> {
@@ -1249,8 +1247,6 @@ TEST(EndsWithTest, CanDescribeSelf) {
   EXPECT_EQ("ends with \"Hi\"", Describe(m));
 }
 
-#ifdef GMOCK_HAS_REGEX
-
 // Tests MatchesRegex().
 
 TEST(MatchesRegexTest, MatchesStringMatchingGivenRegex) {
@@ -1269,8 +1265,8 @@ TEST(MatchesRegexTest, CanDescribeSelf) {
   Matcher<const std::string> m1 = MatchesRegex(string("Hi.*"));
   EXPECT_EQ("matches regular expression \"Hi.*\"", Describe(m1));
 
-  Matcher<const char*> m2 = MatchesRegex(new RE("[a-z].*"));
-  EXPECT_EQ("matches regular expression \"[a-z].*\"", Describe(m2));
+  Matcher<const char*> m2 = MatchesRegex(new RE("a.*"));
+  EXPECT_EQ("matches regular expression \"a.*\"", Describe(m2));
 }
 
 // Tests ContainsRegex().
@@ -1291,10 +1287,9 @@ TEST(ContainsRegexTest, CanDescribeSelf) {
   Matcher<const std::string> m1 = ContainsRegex("Hi.*");
   EXPECT_EQ("contains regular expression \"Hi.*\"", Describe(m1));
 
-  Matcher<const char*> m2 = ContainsRegex(new RE("[a-z].*"));
-  EXPECT_EQ("contains regular expression \"[a-z].*\"", Describe(m2));
+  Matcher<const char*> m2 = ContainsRegex(new RE("a.*"));
+  EXPECT_EQ("contains regular expression \"a.*\"", Describe(m2));
 }
-#endif  // GMOCK_HAS_REGEX
 
 // Tests for wide strings.
 #if GTEST_HAS_STD_WSTRING

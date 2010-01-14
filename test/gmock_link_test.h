@@ -185,10 +185,8 @@ using testing::SetErrnoAndReturn;
 using testing::Throw;
 #endif
 
-#if GMOCK_HAS_REGEX
 using testing::ContainsRegex;
 using testing::MatchesRegex;
-#endif
 
 class Interface {
  public:
@@ -547,7 +545,6 @@ TEST(LinkTest, TestMatchersFloatingPoint) {
       .WillByDefault(Return());
 }
 
-#if GMOCK_HAS_REGEX
 // Tests the linkage of the ContainsRegex matcher.
 TEST(LinkTest, TestMatcherContainsRegex) {
   Mock mock;
@@ -561,7 +558,6 @@ TEST(LinkTest, TestMatcherMatchesRegex) {
 
   ON_CALL(mock, VoidFromString(MatchesRegex(".*"))).WillByDefault(Return());
 }
-#endif  // GMOCK_HAS_REGEX
 
 // Tests the linkage of the StartsWith, EndsWith, and HasSubstr matchers.
 TEST(LinkTest, TestMatchersSubstrings) {
