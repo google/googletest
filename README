@@ -177,77 +177,11 @@ directory otherwise.
 
   ${SRCDIR}/configure  # Standard GNU configure script, --help for more info
 
-The default behavior of the configure script with respect to locating and using
-Google Test is to first search for a 'gtest-config' in the system path, and
-lacking this, build an internal copy of Google Test. You may optionally specify
-a custom Google Test you wish to build Google Mock against, provided it is
-a new enough version.
-
-  # Configure against an installation in '/opt' with '/opt/bin/gtest-config'.
-  ${SRCDIR}/configure --with-gtest=/opt
-
-This can also be used to specify a Google Test which hasn't yet been installed.
-However, it must have been configured and built as described in the Google Test
-README before you configure Google Mock. To enable this feature, simply pass
-the directory where you configured and built Google Test (which is not
-necessarily its source directory) to Google Mock's configure script.
-
-  # Configure against a build of Google Test in an arbitrary directory.
-  ${SRCDIR}/configure --with-gtest=../../my_gtest_build
-
-Finally, if you have a version of Google Test installed but for some reason
-wish to forcibly prevent it from being used, we provide a special option.
-Typically this is not needed as we fall back to the internal Google Test
-packaged with Google Mock if an installed version is either unavailable or too
-old to build Google Mock. When using the internally packaged Google Test, the
-user does *not* need to configure or build it, that is automatically handled by
-Google Mock's build system.
-
-  # Force the use of the internally packaged Google Test, despite
-  # 'gtest-config' being in your PATH.
-  ${SRCDIR}/configure --disable-external-gtest
-
 Once you have successfully configured Google Mock, the build steps are standard
 for GNU-style OSS packages.
 
   make  # Standard makefile following GNU conventions
   make check  # Builds and runs all tests - all should pass
-
-Other programs will only be able to use Google Mock's functionality if you
-install it in a location which they can access, in Linux this is typically
-under '/usr/local'. The following command will install all of the Google Mock
-libraries, public headers, and utilities necessary for other programs and
-libraries to leverage it. Note that if Google Mock was unable to find an
-external Google Test to build against, it will also install the internally
-packaged Google Test in order to allow the installed Google Mock to function
-properly. This Google Test install will be fully functional, and if installed
-will also be uninstalled by uninstalling Google Mock.
-
-  sudo make install  # Not necessary, but allows use by other programs
-
-Should you need to remove Google Mock from your system after having installed
-it, run the following command, and it will back out its changes.  However, note
-carefully that you must run this command on the *same* Google Mock build that
-you ran the install from, or the results are not predictable.  If you install
-Google Mock on your system, and are working from a VCS checkout, make sure you
-run this *before* updating your checkout of the source in order to uninstall
-the same version which you installed.
-
-  sudo make uninstall  # Must be run against the exact same build as "install"
-
-Your project can build against Google Mock and Google Test simply by leveraging
-the 'gmock-config' script. This script can be invoked directly out of the
-'scripts' subdirectory of the build tree, and it will be installed in the
-binary directory specified during the 'configure'. Here are some examples of
-its use, see 'gmock-config --help' for more detailed information.
-
-  gmock-config --min-version=1.0 || echo "Insufficient Google Mock version."
-
-  g++ $(gmock-config --cppflags --cxxflags) -o foo.o -c foo.cpp
-  g++ $(gmock-config --ldflags --libs) -o foo foo.o
-
-  # When using a built but not installed Google Mock:
-  g++ $(../../my_gmock_build/scripts/gmock-config ...) ...
 
 Note that when building your project against Google Mock, you are building
 against Google Test as well. There is no need to configure Google Test
