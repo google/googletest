@@ -157,38 +157,6 @@ directory otherwise.
   make  # Standard makefile following GNU conventions
   make check  # Builds and runs all tests - all should pass
 
-Other programs will only be able to use Google Test's functionality if you
-install it in a location which they can access, in Linux this is typically
-under '/usr/local'. The following command will install all of the Google Test
-libraries, public headers, and utilities necessary for other programs and
-libraries to leverage it:
-
-  sudo make install  # Not necessary, but allows use by other programs
-
-Should you need to remove Google Test from your system after having installed
-it, run the following command, and it will back out its changes.  However, note
-carefully that you must run this command on the *same* Google Test build that
-you ran the install from, or the results are not predictable.  If you install
-Google Test on your system, and are working from a VCS checkout, make sure you
-run this *before* updating your checkout of the source in order to uninstall
-the same version which you installed.
-
-  sudo make uninstall  # Must be run against the exact same build as "install"
-
-Your project can build against Google Test simply by leveraging the
-'gtest-config' script. This script can be invoked directly out of the 'scripts'
-subdirectory of the build tree, and it will be installed in the binary
-directory specified during the 'configure'. Here are some examples of its use,
-see 'gtest-config --help' for more detailed information.
-
-  gtest-config --min-version=1.0 || echo "Insufficient Google Test version."
-
-  g++ $(gtest-config --cppflags --cxxflags) -o foo.o -c foo.cpp
-  g++ $(gtest-config --ldflags --libs) -o foo foo.o
-
-  # When using a built but not installed Google Test:
-  g++ $(../../my_gtest_build/scripts/gtest-config ...) ...
-
 ### Windows ###
 The msvc\ folder contains two solutions with Visual C++ projects. Open the
 gtest.sln or gtest-md.sln file using Visual Studio, and you are ready to
