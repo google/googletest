@@ -1568,15 +1568,16 @@ out interesting information about the event and the test program's
 state.  Here's an example:
 
 {{{
-  class MinimalistPrinter : public ::testing::EmptyTestEventListner {
+  class MinimalistPrinter : public ::testing::EmptyTestEventListener {
     // Called before a test starts.
-    virtual void OnTestStart(const TestInfo& test_info) {
+    virtual void OnTestStart(const ::testing::TestInfo& test_info) {
       printf("*** Test %s.%s starting.\n",
              test_info.test_case_name(), test_info.name());
     }
 
     // Called after a failed assertion or a SUCCESS().
-    virtual void OnTestPartResult(const TestPartResult& test_part_result) {
+    virtual void OnTestPartResult(
+        const ::testing::TestPartResult& test_part_result) {
       printf("%s in %s:%d\n%s\n",
              test_part_result.failed() ? "*** Failure" : "Success",
              test_part_result.file_name(),
@@ -1585,7 +1586,7 @@ state.  Here's an example:
     }
 
     // Called after a test ends.
-    virtual void OnTestEnd(const TestInfo& test_info) {
+    virtual void OnTestEnd(const ::testing::TestInfo& test_info) {
       printf("*** Test %s.%s ending.\n",
              test_info.test_case_name(), test_info.name());
     }
