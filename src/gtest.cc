@@ -2634,6 +2634,9 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   SetConsoleTextAttribute(stdout_handle,
                           GetColorAttribute(color) | FOREGROUND_INTENSITY);
   vprintf(fmt, args);
+  // Unless we flush stream buffers now the next SetConsoleTextAttribute
+  // call can reset the color before the output reaches the console.
+  fflush(stdout);
 
   // Restores the text color.
   SetConsoleTextAttribute(stdout_handle, old_color_attrs);
