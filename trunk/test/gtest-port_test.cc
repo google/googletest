@@ -33,6 +33,8 @@
 
 #include <gtest/internal/gtest-port.h>
 
+#include <stdio.h>
+
 #if GTEST_OS_MAC
 #include <pthread.h>
 #include <time.h>
@@ -699,11 +701,49 @@ TEST(RETest, PartialMatchWorks) {
 
 #endif  // GTEST_USES_POSIX_RE
 
-TEST(CaptureStderrTest, CapturesStdErr) {
-  CaptureStderr();
-  fprintf(stderr, "abc");
-  ASSERT_STREQ("abc", GetCapturedStderr().c_str());
+#if !GTEST_OS_WINDOWS_MOBILE
+
+TEST(CaptureTest, CapturesStdout) {
+  CaptureStdout();
+  fprintf(stdout, "abc");
+  EXPECT_STREQ("abc", GetCapturedStdout().c_str());
+
+  CaptureStdout();
+  fprintf(stdout, "def%cghi", '\0');
+  EXPECT_EQ(::std::string("def\0ghi", 7), ::std::string(GetCapturedStdout()));
 }
+
+TEST(CaptureTest, CapturesStderr) {
+  CaptureStderr();
+  fprintf(stderr, "jkl");
+  EXPECT_STREQ("jkl", GetCapturedStderr().c_str());
+
+  CaptureStderr();
+  fprintf(stderr, "jkl%cmno", '\0');
+  EXPECT_EQ(::std::string("jkl\0mno", 7), ::std::string(GetCapturedStderr()));
+}
+
+// Tests that stdout and stderr capture don't interfere with each other.
+TEST(CaptureTest, CapturesStdoutAndStderr) {
+  CaptureStdout();
+  CaptureStderr();
+  fprintf(stdout, "pqr");
+  fprintf(stderr, "stu");
+  EXPECT_STREQ("pqr", GetCapturedStdout().c_str());
+  EXPECT_STREQ("stu", GetCapturedStderr().c_str());
+}
+
+TEST(CaptureDeathTest, CannotReenterStdoutCapture) {
+  CaptureStdout();
+  EXPECT_DEATH_IF_SUPPORTED(CaptureStdout();,
+                            "Only one stdout capturer can exist at a time");
+  GetCapturedStdout();
+
+  // We cannot test stderr capturing using death tests as they use it
+  // themselves.
+}
+
+#endif  // !GTEST_OS_WINDOWS_MOBILE
 
 }  // namespace internal
 }  // namespace testing

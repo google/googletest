@@ -132,7 +132,10 @@
 //   LogToStderr()  - directs all log messages to stderr.
 //   FlushInfoLog() - flushes informational log messages.
 //
-// Stderr capturing:
+// Stdout and stderr capturing:
+//   CaptureStdout()     - starts capturing stdout.
+//   GetCapturedStdout() - stops capturing stdout and returns the captured
+//                         string.
 //   CaptureStderr()     - starts capturing stderr.
 //   GetCapturedStderr() - stops capturing stderr and returns the captured
 //                         string.
@@ -353,12 +356,15 @@
 #ifndef GTEST_USE_OWN_TR1_TUPLE
 // The user didn't tell us, so we need to figure it out.
 
-// We use our own tr1 tuple if we aren't sure the user has an
+// We use our own TR1 tuple if we aren't sure the user has an
 // implementation of it already.  At this time, GCC 4.0.0+ and MSVC
 // 2010 are the only mainstream compilers that come with a TR1 tuple
+// implementation.  NVIDIA's CUDA NVCC compiler pretends to be GCC by
+// defining __GNUC__ and friends, but cannot compile GCC's tuple
 // implementation.  MSVC 2008 (9.0) provides TR1 tuple in a 323 MB
 // Feature Pack download, which we cannot assume the user has.
-#if (defined(__GNUC__) && (GTEST_GCC_VER_ >= 40000)) || _MSC_VER >= 1600
+#if (defined(__GNUC__) && !defined(__CUDACC__) && (GTEST_GCC_VER_ >= 40000)) \
+    || _MSC_VER >= 1600
 #define GTEST_USE_OWN_TR1_TUPLE 0
 #else
 #define GTEST_USE_OWN_TR1_TUPLE 1
@@ -690,12 +696,21 @@ class GTestLog {
 inline void LogToStderr() {}
 inline void FlushInfoLog() { fflush(NULL); }
 
+#if !GTEST_OS_WINDOWS_MOBILE
+
 // Defines the stderr capturer:
+//   CaptureStdout     - starts capturing stdout.
+//   GetCapturedStdout - stops capturing stdout and returns the captured string.
 //   CaptureStderr     - starts capturing stderr.
 //   GetCapturedStderr - stops capturing stderr and returns the captured string.
-
+//
+void CaptureStdout();
+String GetCapturedStdout();
 void CaptureStderr();
 String GetCapturedStderr();
+
+#endif  // !GTEST_OS_WINDOWS_MOBILE
+
 
 #if GTEST_HAS_DEATH_TEST
 
