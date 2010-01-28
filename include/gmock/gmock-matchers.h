@@ -108,10 +108,7 @@ class MatcherInterface {
   // Returns true iff the matcher matches x; also explains the match
   // result to 'listener'.
   //
-  // You should override this method when defining a new matcher.  For
-  // backward compatibility, we provide a default implementation that
-  // just forwards to the old, deprecated matcher API (Matches() and
-  // ExplainMatchResultTo()).
+  // You should override this method when defining a new matcher.
   //
   // It's the responsibility of the caller (Google Mock) to guarantee
   // that 'listener' is not NULL.  This helps to simplify a matcher's
@@ -119,19 +116,7 @@ class MatcherInterface {
   // can talk to 'listener' without checking its validity first.
   // However, in order to implement dummy listeners efficiently,
   // listener->stream() may be NULL.
-  virtual bool MatchAndExplain(T x, MatchResultListener* listener) const {
-    const bool match = Matches(x);
-    if (listener->stream() != NULL) {
-      ExplainMatchResultTo(x, listener->stream());
-    }
-    return match;
-  }
-
-  // DEPRECATED.  This method will be removed.  Override
-  // MatchAndExplain() instead.
-  //
-  // Returns true iff the matcher matches x.
-  virtual bool Matches(T /* x */) const { return false; }
+  virtual bool MatchAndExplain(T x, MatchResultListener* listener) const = 0;
 
   // Describes this matcher to an ostream.
   virtual void DescribeTo(::std::ostream* os) const = 0;
@@ -146,18 +131,6 @@ class MatcherInterface {
     *os << "not (";
     DescribeTo(os);
     *os << ")";
-  }
-
-  // DEPRECATED.  This method will be removed.  Override
-  // MatchAndExplain() instead.
-  //
-  // Explains why x matches, or doesn't match, the matcher.  Override
-  // this to provide any additional information that helps a user
-  // understand the match result.
-  virtual void ExplainMatchResultTo(T /* x */, ::std::ostream* /* os */) const {
-    // By default, nothing more needs to be explained, as Google Mock
-    // has already printed the value of x when this function is
-    // called.
   }
 };
 
@@ -254,38 +227,6 @@ class MatcherBase {
   ::testing::internal::linked_ptr<const MatcherInterface<T> > impl_;
 };
 
-// The default implementation of ExplainMatchResultTo() for
-// polymorphic matchers.
-template <typename PolymorphicMatcherImpl, typename T>
-inline void ExplainMatchResultTo(const PolymorphicMatcherImpl& /* impl */,
-                                 const T& /* x */,
-                                 ::std::ostream* /* os */) {
-  // By default, nothing more needs to be said, as Google Mock already
-  // prints the value of x elsewhere.
-}
-
-// The default implementation of MatchAndExplain() for polymorphic
-// matchers.  The type of argument x cannot be const T&, in case
-// impl.Matches() takes a non-const reference.
-template <typename PolymorphicMatcherImpl, typename T>
-inline bool MatchAndExplain(const PolymorphicMatcherImpl& impl,
-                            T& x,
-                            MatchResultListener* listener) {
-  const bool match = impl.Matches(x);
-
-  ::std::ostream* const os = listener->stream();
-  if (os != NULL) {
-    using ::testing::internal::ExplainMatchResultTo;
-    // When resolving the following call, both
-    // ::testing::internal::ExplainMatchResultTo() and
-    // foo::ExplainMatchResultTo() are considered, where foo is the
-    // namespace where class PolymorphicMatcherImpl is defined.
-    ExplainMatchResultTo(impl, x, os);
-  }
-
-  return match;
-}
-
 }  // namespace internal
 
 // A Matcher<T> is a copyable and IMMUTABLE (except by assignment)
@@ -350,29 +291,12 @@ class Matcher<internal::string>
 // polymorphic matcher (i.e. a matcher that can match values of more
 // than one type, e.g. Eq(n) and NotNull()).
 //
-// To define a polymorphic matcher in the old, deprecated way, a user
-// first provides an Impl class that has a Matches() method, a
-// DescribeTo() method, and a DescribeNegationTo() method.  The
-// Matches() method is usually a method template (such that it works
-// with multiple types).  Then the user creates the polymorphic
-// matcher using MakePolymorphicMatcher().  To provide additional
-// explanation to the match result, define a FREE function (or
-// function template)
+// To define a polymorphic matcher, a user should provide an Impl
+// class that has a DescribeTo() method and a DescribeNegationTo()
+// method, and define a member function (or member function template)
 //
-//   void ExplainMatchResultTo(const Impl& matcher, const Value& value,
-//                             ::std::ostream* os);
-//
-// in the SAME NAME SPACE where Impl is defined.
-//
-// The new, recommended way to define a polymorphic matcher is to
-// provide an Impl class that has a DescribeTo() method and a
-// DescribeNegationTo() method, and define a FREE function (or
-// function template)
-//
-//   bool MatchAndExplain(const Impl& matcher, const Value& value,
-//                        MatchResultListener* listener);
-//
-// in the SAME NAME SPACE where Impl is defined.
+//   bool MatchAndExplain(const Value& value,
+//                        MatchResultListener* listener) const;
 //
 // See the definition of NotNull() for a complete example.
 template <class Impl>
@@ -408,14 +332,7 @@ class PolymorphicMatcher {
     }
 
     virtual bool MatchAndExplain(T x, MatchResultListener* listener) const {
-      // C++ uses Argument-Dependent Look-up (aka Koenig Look-up) to
-      // resolve the call to MatchAndExplain() here.  This means that
-      // if there's a MatchAndExplain() function defined in the name
-      // space where class Impl is defined, it will be picked by the
-      // compiler as the better match.  Otherwise the default
-      // implementation of it in ::testing::internal will be picked.
-      using ::testing::internal::MatchAndExplain;
-      return MatchAndExplain(impl_, x, listener);
+      return impl_.MatchAndExplain(x, listener);
     }
 
    private:
@@ -578,7 +495,7 @@ class TuplePrefix {
       // We remove the reference in type Value to prevent the
       // universal printer from printing the address of value, which
       // isn't interesting to the user most of the time.  The
-      // matcher's ExplainMatchResultTo() method handles the case when
+      // matcher's MatchAndExplain() method handles the case when
       // the address is interesting.
       internal::UniversalPrinter<GMOCK_REMOVE_REFERENCE_(Value)>::
           Print(value, os);
@@ -782,7 +699,10 @@ GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Ne, !=, "not equal to");
 class IsNullMatcher {
  public:
   template <typename Pointer>
-  bool Matches(const Pointer& p) const { return GetRawPointer(p) == NULL; }
+  bool MatchAndExplain(const Pointer& p,
+                       MatchResultListener* /* listener */) const {
+    return GetRawPointer(p) == NULL;
+  }
 
   void DescribeTo(::std::ostream* os) const { *os << "is NULL"; }
   void DescribeNegationTo(::std::ostream* os) const {
@@ -790,30 +710,21 @@ class IsNullMatcher {
   }
 };
 
-template <typename Pointer>
-bool MatchAndExplain(const IsNullMatcher& impl, Pointer& p,
-                     MatchResultListener* /* listener */) {
-  return impl.Matches(p);
-}
-
 // Implements the polymorphic NotNull() matcher, which matches any raw or smart
 // pointer that is not NULL.
 class NotNullMatcher {
  public:
   template <typename Pointer>
-  bool Matches(const Pointer& p) const { return GetRawPointer(p) != NULL; }
+  bool MatchAndExplain(const Pointer& p,
+                       MatchResultListener* /* listener */) const {
+    return GetRawPointer(p) != NULL;
+  }
 
   void DescribeTo(::std::ostream* os) const { *os << "is not NULL"; }
   void DescribeNegationTo(::std::ostream* os) const {
     *os << "is NULL";
   }
 };
-
-template <typename Pointer>
-bool MatchAndExplain(const NotNullMatcher& impl, Pointer& p,
-                     MatchResultListener* /* listener */) {
-  return impl.Matches(p);
-}
 
 // Ref(variable) matches any argument that is a reference to
 // 'variable'.  This matcher is polymorphic as it can match any
@@ -860,8 +771,8 @@ class RefMatcher<T&> {
    public:
     explicit Impl(Super& x) : object_(x) {}  // NOLINT
 
-    // Matches() takes a Super& (as opposed to const Super&) in
-    // order to match the interface MatcherInterface<Super&>.
+    // MatchAndExplain() takes a Super& (as opposed to const Super&)
+    // in order to match the interface MatcherInterface<Super&>.
     virtual bool MatchAndExplain(
         Super& x, MatchResultListener* listener) const {
       *listener << "is located @" << static_cast<const void*>(&x);
@@ -936,14 +847,16 @@ class StrEqualityMatcher {
 
   // When expect_eq_ is true, returns true iff s is equal to string_;
   // otherwise returns true iff s is not equal to string_.
-  bool Matches(ConstCharPointer s) const {
+  bool MatchAndExplain(ConstCharPointer s,
+                       MatchResultListener* listener) const {
     if (s == NULL) {
       return !expect_eq_;
     }
-    return Matches(StringType(s));
+    return MatchAndExplain(StringType(s), listener);
   }
 
-  bool Matches(const StringType& s) const {
+  bool MatchAndExplain(const StringType& s,
+                       MatchResultListener* /* listener */) const {
     const bool eq = case_sensitive_ ? s == string_ :
         CaseInsensitiveStringEquals(s, string_);
     return expect_eq_ == eq;
@@ -977,12 +890,6 @@ class StrEqualityMatcher {
   GTEST_DISALLOW_ASSIGN_(StrEqualityMatcher);
 };
 
-template <typename StringType, typename T>
-bool MatchAndExplain(const StrEqualityMatcher<StringType>& impl, T& s,
-                     MatchResultListener* /* listener */) {
-  return impl.Matches(s);
-}
-
 // Implements the polymorphic HasSubstr(substring) matcher, which
 // can be used as a Matcher<T> as long as T can be converted to a
 // string.
@@ -997,11 +904,13 @@ class HasSubstrMatcher {
   // These overloaded methods allow HasSubstr(substring) to be used as a
   // Matcher<T> as long as T can be converted to string.  Returns true
   // iff s contains substring_ as a substring.
-  bool Matches(ConstCharPointer s) const {
-    return s != NULL && Matches(StringType(s));
+  bool MatchAndExplain(ConstCharPointer s,
+                       MatchResultListener* listener) const {
+    return s != NULL && MatchAndExplain(StringType(s), listener);
   }
 
-  bool Matches(const StringType& s) const {
+  bool MatchAndExplain(const StringType& s,
+                       MatchResultListener* /* listener */) const {
     return s.find(substring_) != StringType::npos;
   }
 
@@ -1022,12 +931,6 @@ class HasSubstrMatcher {
   GTEST_DISALLOW_ASSIGN_(HasSubstrMatcher);
 };
 
-template <typename StringType, typename T>
-bool MatchAndExplain(const HasSubstrMatcher<StringType>& impl, T& s,
-                     MatchResultListener* /* listener */) {
-  return impl.Matches(s);
-}
-
 // Implements the polymorphic StartsWith(substring) matcher, which
 // can be used as a Matcher<T> as long as T can be converted to a
 // string.
@@ -1042,11 +945,13 @@ class StartsWithMatcher {
   // These overloaded methods allow StartsWith(prefix) to be used as a
   // Matcher<T> as long as T can be converted to string.  Returns true
   // iff s starts with prefix_.
-  bool Matches(ConstCharPointer s) const {
-    return s != NULL && Matches(StringType(s));
+  bool MatchAndExplain(ConstCharPointer s,
+                       MatchResultListener* listener) const {
+    return s != NULL && MatchAndExplain(StringType(s), listener);
   }
 
-  bool Matches(const StringType& s) const {
+  bool MatchAndExplain(const StringType& s,
+                       MatchResultListener* /* listener */) const {
     return s.length() >= prefix_.length() &&
         s.substr(0, prefix_.length()) == prefix_;
   }
@@ -1067,12 +972,6 @@ class StartsWithMatcher {
   GTEST_DISALLOW_ASSIGN_(StartsWithMatcher);
 };
 
-template <typename StringType, typename T>
-bool MatchAndExplain(const StartsWithMatcher<StringType>& impl, T& s,
-                     MatchResultListener* /* listener */) {
-  return impl.Matches(s);
-}
-
 // Implements the polymorphic EndsWith(substring) matcher, which
 // can be used as a Matcher<T> as long as T can be converted to a
 // string.
@@ -1086,11 +985,13 @@ class EndsWithMatcher {
   // These overloaded methods allow EndsWith(suffix) to be used as a
   // Matcher<T> as long as T can be converted to string.  Returns true
   // iff s ends with suffix_.
-  bool Matches(ConstCharPointer s) const {
-    return s != NULL && Matches(StringType(s));
+  bool MatchAndExplain(ConstCharPointer s,
+                       MatchResultListener* listener) const {
+    return s != NULL && MatchAndExplain(StringType(s), listener);
   }
 
-  bool Matches(const StringType& s) const {
+  bool MatchAndExplain(const StringType& s,
+                       MatchResultListener* /* listener */) const {
     return s.length() >= suffix_.length() &&
         s.substr(s.length() - suffix_.length()) == suffix_;
   }
@@ -1111,12 +1012,6 @@ class EndsWithMatcher {
   GTEST_DISALLOW_ASSIGN_(EndsWithMatcher);
 };
 
-template <typename StringType, typename T>
-bool MatchAndExplain(const EndsWithMatcher<StringType>& impl, T& s,
-                     MatchResultListener* /* listener */) {
-  return impl.Matches(s);
-}
-
 // Implements polymorphic matchers MatchesRegex(regex) and
 // ContainsRegex(regex), which can be used as a Matcher<T> as long as
 // T can be converted to a string.
@@ -1129,11 +1024,13 @@ class MatchesRegexMatcher {
   // a Matcher<T> as long as T can be converted to string.  Returns
   // true iff s matches regular expression regex.  When full_match_ is
   // true, a full match is done; otherwise a partial match is done.
-  bool Matches(const char* s) const {
-    return s != NULL && Matches(internal::string(s));
+  bool MatchAndExplain(const char* s,
+                       MatchResultListener* listener) const {
+    return s != NULL && MatchAndExplain(internal::string(s), listener);
   }
 
-  bool Matches(const internal::string& s) const {
+  bool MatchAndExplain(const internal::string& s,
+                       MatchResultListener* /* listener */) const {
     return full_match_ ? RE::FullMatch(s, *regex_) :
         RE::PartialMatch(s, *regex_);
   }
@@ -1156,12 +1053,6 @@ class MatchesRegexMatcher {
 
   GTEST_DISALLOW_ASSIGN_(MatchesRegexMatcher);
 };
-
-template <typename T>
-bool MatchAndExplain(const MatchesRegexMatcher& impl, T& s,
-                     MatchResultListener* /* listener */) {
-  return impl.Matches(s);
-}
 
 // Implements a matcher that compares the two fields of a 2-tuple
 // using one of the ==, <=, <, etc, operators.  The two fields being
@@ -1438,7 +1329,8 @@ class TrulyMatcher {
   // argument is passed by reference as the predicate may be
   // interested in the address of the argument.
   template <typename T>
-  bool Matches(T& x) const {  // NOLINT
+  bool MatchAndExplain(T& x,  // NOLINT
+                       MatchResultListener* /* listener */) const {
 #if GTEST_OS_WINDOWS
     // MSVC warns about converting a value into bool (warning 4800).
 #pragma warning(push)          // Saves the current warning state.
@@ -1463,12 +1355,6 @@ class TrulyMatcher {
 
   GTEST_DISALLOW_ASSIGN_(TrulyMatcher);
 };
-
-template <typename Predicate, typename T>
-bool MatchAndExplain(const TrulyMatcher<Predicate>& impl, T& x,
-                     MatchResultListener* /* listener */) {
-  return impl.Matches(x);
-}
 
 // Used for implementing Matches(matcher), which turns a matcher into
 // a predicate.
@@ -1744,11 +1630,20 @@ class FieldMatcher {
     matcher_.DescribeNegationTo(os);
   }
 
-  // The first argument of MatchAndExplain() is needed to help
+  template <typename T>
+  bool MatchAndExplain(const T& value, MatchResultListener* listener) const {
+    return MatchAndExplainImpl(
+        typename ::testing::internal::
+            is_pointer<GMOCK_REMOVE_CONST_(T)>::type(),
+        value, listener);
+  }
+
+ private:
+  // The first argument of MatchAndExplainImpl() is needed to help
   // Symbian's C++ compiler choose which overload to use.  Its type is
   // true_type iff the Field() matcher is used to match a pointer.
-  bool MatchAndExplain(false_type /* is_not_pointer */, const Class& obj,
-                       MatchResultListener* listener) const {
+  bool MatchAndExplainImpl(false_type /* is_not_pointer */, const Class& obj,
+                           MatchResultListener* listener) const {
     StringMatchResultListener inner_listener;
     const bool match = matcher_.MatchAndExplain(obj.*field_, &inner_listener);
     const internal::string s = inner_listener.str();
@@ -1758,31 +1653,22 @@ class FieldMatcher {
     return match;
   }
 
-  bool MatchAndExplain(true_type /* is_pointer */, const Class* p,
-                       MatchResultListener* listener) const {
+  bool MatchAndExplainImpl(true_type /* is_pointer */, const Class* p,
+                           MatchResultListener* listener) const {
     if (p == NULL)
       return false;
 
     // Since *p has a field, it must be a class/struct/union type and
     // thus cannot be a pointer.  Therefore we pass false_type() as
     // the first argument.
-    return MatchAndExplain(false_type(), *p, listener);
+    return MatchAndExplainImpl(false_type(), *p, listener);
   }
 
- private:
   const FieldType Class::*field_;
   const Matcher<const FieldType&> matcher_;
 
   GTEST_DISALLOW_ASSIGN_(FieldMatcher);
 };
-
-template <typename Class, typename FieldType, typename T>
-bool MatchAndExplain(const FieldMatcher<Class, FieldType>& matcher,
-                     T& value, MatchResultListener* listener) {
-  return matcher.MatchAndExplain(
-      typename ::testing::internal::is_pointer<GMOCK_REMOVE_CONST_(T)>::type(),
-      value, listener);
-}
 
 // Implements the Property() matcher for matching a property
 // (i.e. return value of a getter method) of an object.
@@ -1809,11 +1695,20 @@ class PropertyMatcher {
     matcher_.DescribeNegationTo(os);
   }
 
-  // The first argument of MatchAndExplain() is needed to help
+  template <typename T>
+  bool MatchAndExplain(const T&value, MatchResultListener* listener) const {
+    return MatchAndExplainImpl(
+        typename ::testing::internal::
+            is_pointer<GMOCK_REMOVE_CONST_(T)>::type(),
+        value, listener);
+  }
+
+ private:
+  // The first argument of MatchAndExplainImpl() is needed to help
   // Symbian's C++ compiler choose which overload to use.  Its type is
   // true_type iff the Property() matcher is used to match a pointer.
-  bool MatchAndExplain(false_type /* is_not_pointer */, const Class& obj,
-                       MatchResultListener* listener) const {
+  bool MatchAndExplainImpl(false_type /* is_not_pointer */, const Class& obj,
+                           MatchResultListener* listener) const {
     StringMatchResultListener inner_listener;
     const bool match = matcher_.MatchAndExplain((obj.*property_)(),
                                                 &inner_listener);
@@ -1824,31 +1719,22 @@ class PropertyMatcher {
     return match;
   }
 
-  bool MatchAndExplain(true_type /* is_pointer */, const Class* p,
-                       MatchResultListener* listener) const {
+  bool MatchAndExplainImpl(true_type /* is_pointer */, const Class* p,
+                           MatchResultListener* listener) const {
     if (p == NULL)
       return false;
 
     // Since *p has a property method, it must be a class/struct/union
     // type and thus cannot be a pointer.  Therefore we pass
     // false_type() as the first argument.
-    return MatchAndExplain(false_type(), *p, listener);
+    return MatchAndExplainImpl(false_type(), *p, listener);
   }
 
- private:
   PropertyType (Class::*property_)() const;
   const Matcher<RefToConstProperty> matcher_;
 
   GTEST_DISALLOW_ASSIGN_(PropertyMatcher);
 };
-
-template <typename Class,  typename PropertyType, typename T>
-bool MatchAndExplain(const PropertyMatcher<Class, PropertyType>& matcher,
-                     T& value, MatchResultListener* listener) {
-  return matcher.MatchAndExplain(
-      typename ::testing::internal::is_pointer<GMOCK_REMOVE_CONST_(T)>::type(),
-      value, listener);
-}
 
 // Type traits specifying various features of different functors for ResultOf.
 // The default template specifies features for functor objects.
@@ -1947,13 +1833,6 @@ class ResultOfMatcher {
   GTEST_DISALLOW_ASSIGN_(ResultOfMatcher);
 };
 
-// Explains the result of matching a value against a functor matcher.
-template <typename T, typename Callable>
-void ExplainMatchResultTo(const ResultOfMatcher<Callable>& matcher,
-                          T obj, ::std::ostream* os) {
-  matcher.ExplainMatchResultTo(obj, os);
-}
-
 // Implements an equality matcher for any STL-style container whose elements
 // support ==. This matcher is like Eq(), but its failure explanations provide
 // more detailed information that is useful when the container is used as a set.
@@ -2047,13 +1926,6 @@ class ContainerEqMatcher {
 
   GTEST_DISALLOW_ASSIGN_(ContainerEqMatcher);
 };
-
-template <typename LhsContainer, typename Container>
-bool MatchAndExplain(const ContainerEqMatcher<Container>& matcher,
-                     LhsContainer& lhs,
-                     MatchResultListener* listener) {
-  return matcher.MatchAndExplain(lhs, listener);
-}
 
 // Implements Contains(element_matcher) for the given argument type Container.
 template <typename Container>

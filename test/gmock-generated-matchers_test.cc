@@ -68,6 +68,7 @@ using testing::Lt;
 using testing::MakeMatcher;
 using testing::Matcher;
 using testing::MatcherInterface;
+using testing::MatchResultListener;
 using testing::Ne;
 using testing::Not;
 using testing::Pointee;
@@ -217,21 +218,22 @@ class GreaterThanMatcher : public MatcherInterface<int> {
  public:
   explicit GreaterThanMatcher(int rhs) : rhs_(rhs) {}
 
-  virtual bool Matches(int lhs) const { return lhs > rhs_; }
-
   virtual void DescribeTo(::std::ostream* os) const {
     *os << "is greater than " << rhs_;
   }
 
-  virtual void ExplainMatchResultTo(int lhs, ::std::ostream* os) const {
+  virtual bool MatchAndExplain(int lhs,
+                               MatchResultListener* listener) const {
     const int diff = lhs - rhs_;
     if (diff > 0) {
-      *os << "is " << diff << " more than " << rhs_;
+      *listener << "is " << diff << " more than " << rhs_;
     } else if (diff == 0) {
-      *os << "is the same as " << rhs_;
+      *listener << "is the same as " << rhs_;
     } else {
-      *os << "is " << -diff << " less than " << rhs_;
+      *listener << "is " << -diff << " less than " << rhs_;
     }
+
+    return lhs > rhs_;
   }
 
  private:

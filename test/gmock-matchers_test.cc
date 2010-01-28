@@ -135,21 +135,22 @@ class GreaterThanMatcher : public MatcherInterface<int> {
  public:
   explicit GreaterThanMatcher(int rhs) : rhs_(rhs) {}
 
-  virtual bool Matches(int lhs) const { return lhs > rhs_; }
-
   virtual void DescribeTo(::std::ostream* os) const {
     *os << "is greater than " << rhs_;
   }
 
-  virtual void ExplainMatchResultTo(int lhs, ::std::ostream* os) const {
+  virtual bool MatchAndExplain(int lhs,
+                               MatchResultListener* listener) const {
     const int diff = lhs - rhs_;
     if (diff > 0) {
-      *os << "is " << diff << " more than " << rhs_;
+      *listener << "is " << diff << " more than " << rhs_;
     } else if (diff == 0) {
-      *os << "is the same as " << rhs_;
+      *listener << "is the same as " << rhs_;
     } else {
-      *os << "is " << -diff << " less than " << rhs_;
+      *listener << "is " << -diff << " less than " << rhs_;
     }
+
+    return lhs > rhs_;
   }
 
  private:
@@ -188,7 +189,10 @@ string Explain(const MatcherType& m, const Value& x) {
 // change.
 class EvenMatcherImpl : public MatcherInterface<int> {
  public:
-  virtual bool Matches(int x) const { return x % 2 == 0; }
+  virtual bool MatchAndExplain(int x,
+                               MatchResultListener* /* listener */) const {
+    return x % 2 == 0;
+  }
 
   virtual void DescribeTo(::std::ostream* os) const {
     *os << "is an even number";
@@ -330,7 +334,8 @@ const int bar = 1;
 class ReferencesBarOrIsZeroImpl {
  public:
   template <typename T>
-  bool Matches(const T& x) const {
+  bool MatchAndExplain(const T& x,
+                       MatchResultListener* /* listener */) const {
     const void* p = &x;
     return p == &bar || x == 0;
   }
@@ -373,20 +378,19 @@ class PolymorphicIsEvenImpl {
   void DescribeNegationTo(::std::ostream* os) const {
     *os << "is odd";
   }
-};
 
-template <typename T>
-bool MatchAndExplain(const PolymorphicIsEvenImpl& /* impl */,
-                     T x, MatchResultListener* listener) {
-  // Verifies that we can stream to the listener directly.
-  *listener << "% " << 2;
-  if (listener->stream() != NULL) {
-    // Verifies that we can stream to the listener's underlying stream
-    // too.
-    *listener->stream() << " == " << (x % 2);
+  template <typename T>
+  bool MatchAndExplain(const T& x, MatchResultListener* listener) const {
+    // Verifies that we can stream to the listener directly.
+    *listener << "% " << 2;
+    if (listener->stream() != NULL) {
+      // Verifies that we can stream to the listener's underlying stream
+      // too.
+      *listener->stream() << " == " << (x % 2);
+    }
+    return (x % 2) == 0;
   }
-  return (x % 2) == 0;
-}
+};
 
 PolymorphicMatcher<PolymorphicIsEvenImpl> PolymorphicIsEven() {
   return MakePolymorphicMatcher(PolymorphicIsEvenImpl());
@@ -2135,8 +2139,8 @@ TEST(MatcherAssertionTest, WorksForByRefArguments) {
 // ASSERT_THAT("hello", starts_with_he) fails to compile with Nokia's
 // Symbian compiler: it tries to compile
 // template<T, U> class MatcherCastImpl { ...
-//   virtual bool Matches(T x) const {
-//     return source_matcher_.Matches(static_cast<U>(x));
+//   virtual bool MatchAndExplain(T x, ...) const {
+//     return source_matcher_.MatchAndExplain(static_cast<U>(x), ...);
 // with U == string and T == const char*
 // With ASSERT_THAT("hello"...) changed to ASSERT_THAT(string("hello") ... )
 // the compiler silently crashes with no output.
@@ -3075,8 +3079,11 @@ class DivisibleByImpl {
  public:
   explicit DivisibleByImpl(int a_divider) : divider_(a_divider) {}
 
+  // For testing using ExplainMatchResultTo() with polymorphic matchers.
   template <typename T>
-  bool Matches(const T& n) const {
+  bool MatchAndExplain(const T& n, MatchResultListener* listener) const {
+    *listener << "is " << (n % divider_) << " modulo "
+              << divider_;
     return (n % divider_) == 0;
   }
 
@@ -3094,14 +3101,6 @@ class DivisibleByImpl {
  private:
   int divider_;
 };
-
-// For testing using ExplainMatchResultTo() with polymorphic matchers.
-template <typename T>
-void ExplainMatchResultTo(const DivisibleByImpl& impl, const T& n,
-                          ::std::ostream* os) {
-  *os << "is " << (n % impl.divider()) << " modulo "
-      << impl.divider();
-}
 
 PolymorphicMatcher<DivisibleByImpl> DivisibleBy(int n) {
   return MakePolymorphicMatcher(DivisibleByImpl(n));
