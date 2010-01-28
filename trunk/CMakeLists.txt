@@ -191,8 +191,6 @@ if (build_all_gtest_tests)
     src/gtest-all.cc)
   cxx_library(gtest_main_no_rtti "${cxx_no_rtti}"
     src/gtest-all.cc src/gtest_main.cc)
-  cxx_library(gtest_main_use_own_tuple "${cxx_use_own_tuple}"
-    src/gtest-all.cc src/gtest_main.cc)
 
   find_package(Threads)  # Defines CMAKE_THREAD_LIBS_INIT.
   cxx_test_with_flags(gtest-death-test_test "${cxx_default}"
@@ -201,12 +199,23 @@ if (build_all_gtest_tests)
   cxx_test_with_flags(gtest_no_rtti_unittest "${cxx_no_rtti}"
     gtest_main_no_rtti test/gtest_unittest.cc)
 
-  cxx_test_with_flags(gtest-tuple_test "${cxx_use_own_tuple}"
-    gtest_main_use_own_tuple test/gtest-tuple_test.cc)
+  if (NOT(MSVC AND (MSVC_VERSION EQUAL 1600)))
+    # The C++ Standard specifies tuple_element<int, class>.
+    # Yet MSVC 10's <utility> declares tuple_element<size_t, class>.
+    # That declaration conflicts with our own standard-conforming
+    # tuple implementation.  Therefore using our own tuple with
+    # MSVC 10 doesn't compile.
+    cxx_library(gtest_main_use_own_tuple "${cxx_use_own_tuple}"
+      src/gtest-all.cc src/gtest_main.cc)
 
-  cxx_test_with_flags(gtest_use_own_tuple_test "${cxx_use_own_tuple}"
-    gtest_main_use_own_tuple
-    test/gtest-param-test_test.cc test/gtest-param-test2_test.cc)
+    cxx_test_with_flags(gtest-tuple_test "${cxx_use_own_tuple}"
+      gtest_main_use_own_tuple test/gtest-tuple_test.cc)
+
+    cxx_test_with_flags(gtest_use_own_tuple_test "${cxx_use_own_tuple}"
+      gtest_main_use_own_tuple
+      test/gtest-param-test_test.cc test/gtest-param-test2_test.cc)
+  endif()
+
 endif()
 
 ############################################################

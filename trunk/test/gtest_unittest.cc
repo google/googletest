@@ -184,6 +184,11 @@ using testing::internal::kMaxRandomSeed;
 using testing::internal::kTestTypeIdInGoogleTest;
 using testing::internal::scoped_ptr;
 
+#if GTEST_HAS_STREAM_REDIRECTION_
+using testing::internal::CaptureStdout;
+using testing::internal::GetCapturedStdout;
+#endif  // GTEST_HAS_STREAM_REDIRECTION_
+
 class TestingVector : public Vector<int> {
 };
 
@@ -5471,8 +5476,16 @@ class InitGoogleTestTest : public Test {
     const bool saved_help_flag = ::testing::internal::g_help_flag;
     ::testing::internal::g_help_flag = false;
 
+#if GTEST_HAS_STREAM_REDIRECTION_
+    CaptureStdout();
+#endif  // GTEST_HAS_STREAM_REDIRECTION_
+
     // Parses the command line.
     internal::ParseGoogleTestFlagsOnly(&argc1, const_cast<CharType**>(argv1));
+
+#if GTEST_HAS_STREAM_REDIRECTION_
+    const String captured_stdout = GetCapturedStdout();
+#endif  // GTEST_HAS_STREAM_REDIRECTION_
 
     // Verifies the flag values.
     CheckFlags(expected);
@@ -5485,8 +5498,16 @@ class InitGoogleTestTest : public Test {
     // help message for the flags it recognizes.
     EXPECT_EQ(should_print_help, ::testing::internal::g_help_flag);
 
-    // TODO(vladl@google.com): Verify that the help output is not printed
-    // for recognized flags when stdout capturing is implemeted.
+#if GTEST_HAS_STREAM_REDIRECTION_
+    const char* const expected_help_fragment =
+        "This program contains tests written using";
+    if (should_print_help) {
+      EXPECT_PRED_FORMAT2(IsSubstring, expected_help_fragment, captured_stdout);
+    } else {
+      EXPECT_PRED_FORMAT2(IsNotSubstring,
+                          expected_help_fragment, captured_stdout);
+    }
+#endif  // GTEST_HAS_STREAM_REDIRECTION_
 
     ::testing::internal::g_help_flag = saved_help_flag;
   }
