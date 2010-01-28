@@ -77,7 +77,7 @@
 //   GTEST_OS_WINDOWS  - Windows (Desktop, MinGW, or Mobile)
 //     GTEST_OS_WINDOWS_DESKTOP  - Windows Desktop
 //     GTEST_OS_WINDOWS_MINGW    - MinGW
-//     GTEST_OS_WINODWS_MOBILE   - Windows Mobile
+//     GTEST_OS_WINDOWS_MOBILE   - Windows Mobile
 //   GTEST_OS_ZOS      - z/OS
 //
 // Among the platforms, Cygwin, Linux, Max OS X, and Windows have the
@@ -436,6 +436,12 @@
 
 #endif  // GTEST_HAS_CLONE
 
+// Determines whether to support stream redirection. This is used to test
+// output correctness and to implement death tests.
+#if !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_SYMBIAN
+#define GTEST_HAS_STREAM_REDIRECTION_ 1
+#endif  // !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_SYMBIAN
+
 // Determines whether to support death tests.
 // Google Test does not support death tests for VC 7.1 and earlier as
 // abort() in a VC 7.1 application compiled as GUI in debug config
@@ -696,7 +702,7 @@ class GTestLog {
 inline void LogToStderr() {}
 inline void FlushInfoLog() { fflush(NULL); }
 
-#if !GTEST_OS_WINDOWS_MOBILE
+#if GTEST_HAS_STREAM_REDIRECTION_
 
 // Defines the stderr capturer:
 //   CaptureStdout     - starts capturing stdout.
@@ -709,7 +715,7 @@ String GetCapturedStdout();
 void CaptureStderr();
 String GetCapturedStderr();
 
-#endif  // !GTEST_OS_WINDOWS_MOBILE
+#endif  // GTEST_HAS_STREAM_REDIRECTION_
 
 
 #if GTEST_HAS_DEATH_TEST

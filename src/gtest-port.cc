@@ -441,8 +441,7 @@ GTestLog::~GTestLog() {
 #pragma warning(disable: 4996)
 #endif  // _MSC_VER
 
-// Stream capturing is not supported on Windows Mobile.
-#if !GTEST_OS_WINDOWS_MOBILE
+#if GTEST_HAS_STREAM_REDIRECTION_
 
 // Object that captures an output stream (stdout/stderr).
 class CapturedStream {
@@ -575,7 +574,7 @@ String GetCapturedStdout() { return GetCapturedStream(&g_captured_stdout); }
 // Stops capturing stderr and returns the captured string.
 String GetCapturedStderr() { return GetCapturedStream(&g_captured_stderr); }
 
-#endif  // !GTEST_OS_WINDOWS_MOBILE
+#endif  // GTEST_HAS_STREAM_REDIRECTION_
 
 #if GTEST_HAS_DEATH_TEST
 
