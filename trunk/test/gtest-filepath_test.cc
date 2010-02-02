@@ -151,6 +151,36 @@ TEST(RemoveDirectoryNameTest, ShouldAlsoGiveFileName) {
       .RemoveDirectoryName().c_str());
 }
 
+#if GTEST_HAS_ALT_PATH_SEP_
+
+// Test RemoveDirectory* functions with "/".
+
+// RemoveDirectoryName "/afile" -> "afile"
+TEST(RemoveDirectoryNameTest, RootFileShouldGiveFileNameForAlternateSeparator) {
+  EXPECT_STREQ("afile",
+      FilePath("/afile").RemoveDirectoryName().c_str());
+}
+
+// RemoveDirectoryName "adir/" -> ""
+TEST(RemoveDirectoryNameTest, WhereThereIsNoFileNameForAlternateSeparator) {
+  EXPECT_STREQ("",
+      FilePath("adir/").RemoveDirectoryName().c_str());
+}
+
+// RemoveDirectoryName "adir/afile" -> "afile"
+TEST(RemoveDirectoryNameTest, ShouldGiveFileNameForAlternateSeparator) {
+  EXPECT_STREQ("afile",
+      FilePath("adir/afile").RemoveDirectoryName().c_str());
+}
+
+// RemoveDirectoryName "adir/subdir/afile" -> "afile"
+TEST(RemoveDirectoryNameTest, ShouldAlsoGiveFileNameForAlternateSeparator) {
+  EXPECT_STREQ("afile",
+      FilePath("adir/subdir/afile")
+      .RemoveDirectoryName().c_str());
+}
+
+#endif
 
 // RemoveFileName "" -> "./"
 TEST(RemoveFileNameTest, EmptyName) {
@@ -190,6 +220,37 @@ TEST(RemoveFileNameTest, GivesRootDir) {
       FilePath(GTEST_PATH_SEP_ "afile").RemoveFileName().c_str());
 }
 
+#if GTEST_HAS_ALT_PATH_SEP_
+
+// Test RemoveFile* functions with "/".
+
+// RemoveFileName "adir/" -> "adir/"
+TEST(RemoveFileNameTest, ButNoFileForAlternateSeparator) {
+  EXPECT_STREQ("adir" GTEST_PATH_SEP_,
+      FilePath("adir/").RemoveFileName().c_str());
+}
+
+// RemoveFileName "adir/afile" -> "adir/"
+TEST(RemoveFileNameTest, GivesDirNameForAlternateSeparator) {
+  EXPECT_STREQ("adir" GTEST_PATH_SEP_,
+      FilePath("adir/afile")
+      .RemoveFileName().c_str());
+}
+
+// RemoveFileName "adir/subdir/afile" -> "adir/subdir/"
+TEST(RemoveFileNameTest, GivesDirAndSubDirNameForAlternateSeparator) {
+  EXPECT_STREQ("adir" GTEST_PATH_SEP_ "subdir" GTEST_PATH_SEP_,
+      FilePath("adir/subdir/afile")
+      .RemoveFileName().c_str());
+}
+
+// RemoveFileName "/afile" -> "\"
+TEST(RemoveFileNameTest, GivesRootDirForAlternateSeparator) {
+  EXPECT_STREQ(GTEST_PATH_SEP_,
+      FilePath("/afile").RemoveFileName().c_str());
+}
+
+#endif
 
 TEST(MakeFileNameTest, GenerateWhenNumberIsZero) {
   FilePath actual = FilePath::MakeFileName(FilePath("foo"), FilePath("bar"),
@@ -295,6 +356,11 @@ TEST(RemoveTrailingPathSeparatorTest, ShouldRemoveTrailingSeparator) {
   EXPECT_STREQ(
       "foo",
       FilePath("foo" GTEST_PATH_SEP_).RemoveTrailingPathSeparator().c_str());
+#if GTEST_HAS_ALT_PATH_SEP_
+  EXPECT_STREQ(
+      "foo",
+      FilePath("foo/").RemoveTrailingPathSeparator().c_str());
+#endif
 }
 
 // RemoveTrailingPathSeparator "foo/bar/" -> "foo/bar/"
@@ -396,6 +462,20 @@ TEST(NormalizeTest, MultipleConsecutiveSepaparatorsAtStringEnd) {
   EXPECT_STREQ("foo" GTEST_PATH_SEP_,
     FilePath("foo" GTEST_PATH_SEP_ GTEST_PATH_SEP_ GTEST_PATH_SEP_).c_str());
 }
+
+#if GTEST_HAS_ALT_PATH_SEP_
+
+// "foo\" =="foo/\" == "foo\\/"
+TEST(NormalizeTest, MixAlternateSeparatorAtStringEnd) {
+  EXPECT_STREQ("foo" GTEST_PATH_SEP_,
+               FilePath("foo/").c_str());
+  EXPECT_STREQ("foo" GTEST_PATH_SEP_,
+               FilePath("foo" GTEST_PATH_SEP_ "/").c_str());
+  EXPECT_STREQ("foo" GTEST_PATH_SEP_,
+               FilePath("foo//" GTEST_PATH_SEP_).c_str());
+}
+
+#endif
 
 TEST(AssignmentOperatorTest, DefaultAssignedToNonDefault) {
   FilePath default_path;
@@ -566,6 +646,9 @@ TEST(FilePathTest, RemoveExtensionWhenThereIsNoExtension) {
 TEST(FilePathTest, IsDirectory) {
   EXPECT_FALSE(FilePath("cola").IsDirectory());
   EXPECT_TRUE(FilePath("koala" GTEST_PATH_SEP_).IsDirectory());
+#if GTEST_HAS_ALT_PATH_SEP_
+  EXPECT_TRUE(FilePath("koala/").IsDirectory());
+#endif
 }
 
 TEST(FilePathTest, IsAbsolutePath) {
@@ -575,10 +658,30 @@ TEST(FilePathTest, IsAbsolutePath) {
   EXPECT_TRUE(FilePath("c:\\" GTEST_PATH_SEP_ "is_not"
                        GTEST_PATH_SEP_ "relative").IsAbsolutePath());
   EXPECT_FALSE(FilePath("c:foo" GTEST_PATH_SEP_ "bar").IsAbsolutePath());
+  EXPECT_TRUE(FilePath("c:/" GTEST_PATH_SEP_ "is_not"
+                       GTEST_PATH_SEP_ "relative").IsAbsolutePath());
 #else
   EXPECT_TRUE(FilePath(GTEST_PATH_SEP_ "is_not" GTEST_PATH_SEP_ "relative")
               .IsAbsolutePath());
 #endif  // GTEST_OS_WINDOWS
+}
+
+TEST(FilePathTest, IsRootDirectory) {
+#if GTEST_OS_WINDOWS
+  EXPECT_TRUE(FilePath("a:\\").IsRootDirectory());
+  EXPECT_TRUE(FilePath("Z:/").IsRootDirectory());
+  EXPECT_TRUE(FilePath("e://").IsRootDirectory());
+  EXPECT_FALSE(FilePath("").IsRootDirectory());
+  EXPECT_FALSE(FilePath("b:").IsRootDirectory());
+  EXPECT_FALSE(FilePath("b:a").IsRootDirectory());
+  EXPECT_FALSE(FilePath("8:/").IsRootDirectory());
+  EXPECT_FALSE(FilePath("c|/").IsRootDirectory());
+#else
+  EXPECT_TRUE(FilePath("/").IsRootDirectory());
+  EXPECT_FALSE(FilePath("").IsRootDirectory());
+  EXPECT_FALSE(FilePath("\\").IsRootDirectory());
+  EXPECT_FALSE(FilePath("/x").IsRootDirectory());
+#endif
 }
 
 }  // namespace

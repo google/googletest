@@ -63,8 +63,14 @@ namespace testing {
 namespace internal {
 
 #if GTEST_OS_WINDOWS
+// On Windows, '\\' is the standard path separator, but many tools and the
+// Windows API also accept '/' as an alternate path separator. Unless otherwise
+// noted, a file path can contain either kind of path separators, or a mixture
+// of them.
 const char kPathSeparator = '\\';
+const char kAlternatePathSeparator = '/';
 const char kPathSeparatorString[] = "\\";
+const char kAlternatePathSeparatorString[] = "/";
 #if GTEST_OS_WINDOWS_MOBILE
 // Windows CE doesn't have a current directory. You should not use
 // the current directory in tests on Windows CE, but this at least
@@ -80,6 +86,15 @@ const char kPathSeparator = '/';
 const char kPathSeparatorString[] = "/";
 const char kCurrentDirectoryString[] = "./";
 #endif  // GTEST_OS_WINDOWS
+
+// Returns whether the given character is a valid path separator.
+static bool IsPathSeparator(char c) {
+#if GTEST_HAS_ALT_PATH_SEP_
+  return (c == kPathSeparator) || (c == kAlternatePathSeparator);
+#else
+  return c == kPathSeparator;
+#endif
+}
 
 // Returns the current working directory, or "" if unsuccessful.
 FilePath FilePath::GetCurrentDir() {
@@ -108,6 +123,22 @@ FilePath FilePath::RemoveExtension(const char* extension) const {
   return *this;
 }
 
+// Returns a pointer to the last occurence of a valid path separator in
+// the FilePath. On Windows, for example, both '/' and '\' are valid path
+// separators. Returns NULL if no path separator was found.
+const char* FilePath::FindLastPathSeparator() const {
+  const char* const last_sep = strrchr(c_str(), kPathSeparator);
+#if GTEST_HAS_ALT_PATH_SEP_
+  const char* const last_alt_sep = strrchr(c_str(), kAlternatePathSeparator);
+  // Comparing two pointers of which only one is NULL is undefined.
+  if (last_alt_sep != NULL &&
+      (last_sep == NULL || last_alt_sep > last_sep)) {
+    return last_alt_sep;
+  }
+#endif
+  return last_sep;
+}
+
 // Returns a copy of the FilePath with the directory part removed.
 // Example: FilePath("path/to/file").RemoveDirectoryName() returns
 // FilePath("file"). If there is no directory part ("just_a_file"), it returns
@@ -115,7 +146,7 @@ FilePath FilePath::RemoveExtension(const char* extension) const {
 // returns an empty FilePath ("").
 // On Windows platform, '\' is the path separator, otherwise it is '/'.
 FilePath FilePath::RemoveDirectoryName() const {
-  const char* const last_sep = strrchr(c_str(), kPathSeparator);
+  const char* const last_sep = FindLastPathSeparator();
   return last_sep ? FilePath(String(last_sep + 1)) : *this;
 }
 
@@ -126,7 +157,7 @@ FilePath FilePath::RemoveDirectoryName() const {
 // not have a file, like "just/a/dir/", it returns the FilePath unmodified.
 // On Windows platform, '\' is the path separator, otherwise it is '/'.
 FilePath FilePath::RemoveFileName() const {
-  const char* const last_sep = strrchr(c_str(), kPathSeparator);
+  const char* const last_sep = FindLastPathSeparator();
   String dir;
   if (last_sep) {
     dir = String(c_str(), last_sep + 1 - c_str());
@@ -219,7 +250,7 @@ bool FilePath::IsRootDirectory() const {
   // current directory.  Handle this properly.
   return pathname_.length() == 3 && IsAbsolutePath();
 #else
-  return pathname_ == kPathSeparatorString;
+  return pathname_.length() == 1 && IsPathSeparator(pathname_.c_str()[0]);
 #endif
 }
 
@@ -231,9 +262,9 @@ bool FilePath::IsAbsolutePath() const {
      ((name[0] >= 'a' && name[0] <= 'z') ||
       (name[0] >= 'A' && name[0] <= 'Z')) &&
      name[1] == ':' &&
-     name[2] == kPathSeparator;
+     IsPathSeparator(name[2]);
 #else
-  return name[0] == kPathSeparator;
+  return IsPathSeparator(name[0]);
 #endif
 }
 
@@ -260,7 +291,8 @@ FilePath FilePath::GenerateUniqueFileName(const FilePath& directory,
 // it is intended to represent a directory. Returns false otherwise.
 // This does NOT check that a directory (or file) actually exists.
 bool FilePath::IsDirectory() const {
-  return pathname_.EndsWith(kPathSeparatorString);
+  return !pathname_.empty() &&
+         IsPathSeparator(pathname_.c_str()[pathname_.length() - 1]);
 }
 
 // Create directories so that path exists. Returns true if successful or if
@@ -305,7 +337,7 @@ bool FilePath::CreateFolder() const {
 // name, otherwise return the name string unmodified.
 // On Windows platform, uses \ as the separator, other platforms use /.
 FilePath FilePath::RemoveTrailingPathSeparator() const {
-  return pathname_.EndsWith(kPathSeparatorString)
+  return IsDirectory()
       ? FilePath(String(pathname_.c_str(), pathname_.length() - 1))
       : *this;
 }
@@ -324,12 +356,19 @@ void FilePath::Normalize() {
   memset(dest_ptr, 0, pathname_.length() + 1);
 
   while (*src != '\0') {
-    *dest_ptr++ = *src;
-    if (*src != kPathSeparator)
+    *dest_ptr = *src;
+    if (!IsPathSeparator(*src)) {
       src++;
-    else
-      while (*src == kPathSeparator)
+    } else {
+#if GTEST_HAS_ALT_PATH_SEP_
+      if (*dest_ptr == kAlternatePathSeparator) {
+        *dest_ptr = kPathSeparator;
+      }
+#endif
+      while (IsPathSeparator(*src))
         src++;
+    }
+    dest_ptr++;
   }
   *dest_ptr = '\0';
   pathname_ = dest;
