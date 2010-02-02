@@ -57,6 +57,11 @@ using testing::HasSubstr;
 using testing::NiceMock;
 using testing::StrictMock;
 
+#if GTEST_HAS_STREAM_REDIRECTION_
+using testing::internal::CaptureStdout;
+using testing::internal::GetCapturedStdout;
+#endif  // GTEST_HAS_STREAM_REDIRECTION_
+
 // Defines some mock classes needed by the tests.
 
 class Foo {
@@ -102,17 +107,16 @@ class MockBar {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockBar);
 };
 
-// TODO(wan@google.com): find a way to re-enable these tests.
-#if 0
+#if GTEST_HAS_STREAM_REDIRECTION_
 
 // Tests that a nice mock generates no warning for uninteresting calls.
 TEST(NiceMockTest, NoWarningForUninterestingCall) {
   NiceMock<MockFoo> nice_foo;
 
-  CaptureTestStdout();
+  CaptureStdout();
   nice_foo.DoThis();
   nice_foo.DoThat(true);
-  EXPECT_EQ("", GetCapturedTestStdout());
+  EXPECT_STREQ("", GetCapturedStdout().c_str());
 }
 
 // Tests that a nice mock generates no warning for uninteresting calls
@@ -123,9 +127,9 @@ TEST(NiceMockTest, NoWarningForUninterestingCallAfterDeath) {
   ON_CALL(*nice_foo, DoThis())
       .WillByDefault(Invoke(nice_foo, &MockFoo::Delete));
 
-  CaptureTestStdout();
+  CaptureStdout();
   nice_foo->DoThis();
-  EXPECT_EQ("", GetCapturedTestStdout());
+  EXPECT_STREQ("", GetCapturedStdout().c_str());
 }
 
 // Tests that a nice mock generates informational logs for
@@ -134,18 +138,18 @@ TEST(NiceMockTest, InfoForUninterestingCall) {
   NiceMock<MockFoo> nice_foo;
 
   GMOCK_FLAG(verbose) = "info";
-  CaptureTestStdout();
+  CaptureStdout();
   nice_foo.DoThis();
-  EXPECT_THAT(GetCapturedTestStdout(),
+  EXPECT_THAT(GetCapturedStdout(),
               HasSubstr("Uninteresting mock function call"));
 
-  CaptureTestStdout();
+  CaptureStdout();
   nice_foo.DoThat(true);
-  EXPECT_THAT(GetCapturedTestStdout(),
+  EXPECT_THAT(GetCapturedStdout(),
               HasSubstr("Uninteresting mock function call"));
 }
 
-#endif  // 0
+#endif  // GTEST_HAS_STREAM_REDIRECTION_
 
 // Tests that a nice mock allows expected calls.
 TEST(NiceMockTest, AllowsExpectedCall) {

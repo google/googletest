@@ -538,8 +538,7 @@ TEST_F(LogIsVisibleTest, WorksWhenVerbosityIsWarning) {
   EXPECT_TRUE(LogIsVisible(WARNING));
 }
 
-// TODO(wan@google.com): find a way to re-enable these tests.
-#if 0
+#if GTEST_HAS_STREAM_REDIRECTION_
 
 // Tests the Log() function.
 
@@ -549,16 +548,16 @@ void TestLogWithSeverity(const string& verbosity, LogSeverity severity,
                          bool should_print) {
   const string old_flag = GMOCK_FLAG(verbose);
   GMOCK_FLAG(verbose) = verbosity;
-  CaptureTestStdout();
+  CaptureStdout();
   Log(severity, "Test log.\n", 0);
   if (should_print) {
-    EXPECT_PRED2(RE::FullMatch,
-                 GetCapturedTestStdout(),
-                 severity == WARNING ?
-                 "\nGMOCK WARNING:\nTest log\\.\nStack trace:\n[\\s\\S]*" :
-                 "\nTest log\\.\nStack trace:\n[\\s\\S]*");
+    EXPECT_THAT(GetCapturedStdout().c_str(),
+                ContainsRegex(
+                    severity == WARNING ?
+                    "^\nGMOCK WARNING:\nTest log\\.\nStack trace:\n" :
+                    "^\nTest log\\.\nStack trace:\n"));
   } else {
-    EXPECT_EQ("", GetCapturedTestStdout());
+    EXPECT_STREQ("", GetCapturedStdout().c_str());
   }
   GMOCK_FLAG(verbose) = old_flag;
 }
@@ -567,18 +566,18 @@ void TestLogWithSeverity(const string& verbosity, LogSeverity severity,
 // Log() doesn't include the stack trace in the output.
 TEST(LogTest, NoStackTraceWhenStackFramesToSkipIsNegative) {
   GMOCK_FLAG(verbose) = kInfoVerbosity;
-  CaptureTestStdout();
+  CaptureStdout();
   Log(INFO, "Test log.\n", -1);
-  EXPECT_EQ("\nTest log.\n", GetCapturedTestStdout());
+  EXPECT_STREQ("\nTest log.\n", GetCapturedStdout().c_str());
 }
 
 // Tests that in opt mode, a positive stack_frames_to_skip argument is
 // treated as 0.
 TEST(LogTest, NoSkippingStackFrameInOptMode) {
-  CaptureTestStdout();
+  CaptureStdout();
   Log(WARNING, "Test log.\n", 100);
-  const string log = GetCapturedTestStdout();
-#ifdef NDEBUG
+  const String log = GetCapturedStdout();
+#if defined(NDEBUG) && GTEST_GOOGLE3_MODE_
   // In opt mode, no stack frame should be skipped.
   EXPECT_THAT(log, ContainsRegex("\nGMOCK WARNING:\n"
                                  "Test log\\.\n"
@@ -586,10 +585,10 @@ TEST(LogTest, NoSkippingStackFrameInOptMode) {
                                  ".+"));
 #else
   // In dbg mode, the stack frames should be skipped.
-  EXPECT_EQ("\nGMOCK WARNING:\n"
-            "Test log.\n"
-            "Stack trace:\n", log);
-#endif  // NDEBUG
+  EXPECT_STREQ("\nGMOCK WARNING:\n"
+               "Test log.\n"
+               "Stack trace:\n", log.c_str());
+#endif
 }
 
 // Tests that all logs are printed when the value of the
@@ -620,7 +619,7 @@ TEST(LogTest, OnlyWarningsArePrintedWhenVerbosityIsInvalid) {
   TestLogWithSeverity("invalid", WARNING, true);
 }
 
-#endif  // 0
+#endif  // GTEST_HAS_STREAM_REDIRECTION_
 
 TEST(TypeTraitsTest, true_type) {
   EXPECT_TRUE(true_type::value);
@@ -657,18 +656,17 @@ TEST(TypeTraitsTest, remove_reference) {
   EXPECT_TRUE((type_equals<double*, remove_reference<double*>::type>::value));
 }
 
-// TODO(wan@google.com): find a way to re-enable these tests.
-#if 0
+#if GTEST_HAS_STREAM_REDIRECTION_
 
 // Verifies that Log() behaves correctly for the given verbosity level
 // and log severity.
-string GrabOutput(void(*logger)(), const char* verbosity) {
+String GrabOutput(void(*logger)(), const char* verbosity) {
   const string saved_flag = GMOCK_FLAG(verbose);
   GMOCK_FLAG(verbose) = verbosity;
-  CaptureTestStdout();
+  CaptureStdout();
   logger();
   GMOCK_FLAG(verbose) = saved_flag;
-  return GetCapturedTestStdout();
+  return GetCapturedStdout();
 }
 
 class DummyMock {
@@ -692,13 +690,13 @@ TEST(ExpectCallTest, LogsWhenVerbosityIsInfo) {
 // Verifies that EXPECT_CALL doesn't log
 // if the --gmock_verbose flag is set to "warning".
 TEST(ExpectCallTest, DoesNotLogWhenVerbosityIsWarning) {
-  EXPECT_EQ("", GrabOutput(ExpectCallLogger, kWarningVerbosity));
+  EXPECT_STREQ("", GrabOutput(ExpectCallLogger, kWarningVerbosity).c_str());
 }
 
 // Verifies that EXPECT_CALL doesn't log
 // if the --gmock_verbose flag is set to "error".
 TEST(ExpectCallTest,  DoesNotLogWhenVerbosityIsError) {
-  EXPECT_EQ("", GrabOutput(ExpectCallLogger, kErrorVerbosity));
+  EXPECT_STREQ("", GrabOutput(ExpectCallLogger, kErrorVerbosity).c_str());
 }
 
 void OnCallLogger() {
@@ -715,13 +713,13 @@ TEST(OnCallTest, LogsWhenVerbosityIsInfo) {
 // Verifies that ON_CALL doesn't log
 // if the --gmock_verbose flag is set to "warning".
 TEST(OnCallTest, DoesNotLogWhenVerbosityIsWarning) {
-  EXPECT_EQ("", GrabOutput(OnCallLogger, kWarningVerbosity));
+  EXPECT_STREQ("", GrabOutput(OnCallLogger, kWarningVerbosity).c_str());
 }
 
 // Verifies that ON_CALL doesn't log if
 // the --gmock_verbose flag is set to "error".
 TEST(OnCallTest, DoesNotLogWhenVerbosityIsError) {
-  EXPECT_EQ("", GrabOutput(OnCallLogger, kErrorVerbosity));
+  EXPECT_STREQ("", GrabOutput(OnCallLogger, kErrorVerbosity).c_str());
 }
 
 void OnCallAnyArgumentLogger() {
@@ -735,7 +733,7 @@ TEST(OnCallTest, LogsAnythingArgument) {
               HasSubstr("ON_CALL(mock, TestMethodArg(_)"));
 }
 
-#endif  // 0
+#endif  // GTEST_HAS_STREAM_REDIRECTION_
 
 // Tests ArrayEq().
 
