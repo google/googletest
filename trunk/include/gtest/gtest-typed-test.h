@@ -159,8 +159,11 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
 // given test case.
 #define GTEST_TYPE_PARAMS_(TestCaseName) gtest_type_params_##TestCaseName##_
 
+// The 'Types' template argument below must have spaces around it
+// since some compilers may choke on '>>' when passing a template
+// instance (e.g. Types<int>)
 #define TYPED_TEST_CASE(CaseName, Types) \
-  typedef ::testing::internal::TypeList<Types>::type \
+  typedef ::testing::internal::TypeList< Types >::type \
       GTEST_TYPE_PARAMS_(CaseName)
 
 #define TYPED_TEST(CaseName, TestName) \
@@ -241,11 +244,14 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
       GTEST_TYPED_TEST_CASE_P_STATE_(CaseName).VerifyRegisteredTestNames(\
           __FILE__, __LINE__, #__VA_ARGS__)
 
+// The 'Types' template argument below must have spaces around it
+// since some compilers may choke on '>>' when passing a template
+// instance (e.g. Types<int>)
 #define INSTANTIATE_TYPED_TEST_CASE_P(Prefix, CaseName, Types) \
   bool gtest_##Prefix##_##CaseName = \
       ::testing::internal::TypeParameterizedTestCase<CaseName, \
           GTEST_CASE_NAMESPACE_(CaseName)::gtest_AllTests_, \
-          ::testing::internal::TypeList<Types>::type>::Register(\
+          ::testing::internal::TypeList< Types >::type>::Register(\
               #Prefix, #CaseName, GTEST_REGISTERED_TEST_NAMES_(CaseName))
 
 #endif  // GTEST_HAS_TYPED_TEST_P

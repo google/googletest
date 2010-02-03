@@ -42,6 +42,8 @@
 //
 //   GTEST_HAS_CLONE          - Define it to 1/0 to indicate that clone(2)
 //                              is/isn't available.
+//   GTEST_HAS_EXCEPTIONS     - Define it to 1/0 to indicate that exceptions
+//                              are enabled.
 //   GTEST_HAS_GLOBAL_STRING  - Define it to 1/0 to indicate that ::string
 //                              is/isn't available (some systems define
 //                              ::string, which is different to std::string).
@@ -242,9 +244,9 @@
 #endif  // GTEST_OS_CYGWIN || GTEST_OS_LINUX || GTEST_OS_MAC ||
         // GTEST_OS_SYMBIAN || GTEST_OS_SOLARIS
 
-// Defines GTEST_HAS_EXCEPTIONS to 1 if exceptions are enabled, or 0
-// otherwise.
-
+#ifndef GTEST_HAS_EXCEPTIONS
+// The user didn't tell us whether exceptions are enabled, so we need
+// to figure it out.
 #if defined(_MSC_VER) || defined(__BORLANDC__)
 // MSVC's and C++Builder's implementations of the STL use the _HAS_EXCEPTIONS
 // macro to enable exceptions, so we'll do the same.
@@ -253,16 +255,20 @@
 #define _HAS_EXCEPTIONS 1
 #endif  // _HAS_EXCEPTIONS
 #define GTEST_HAS_EXCEPTIONS _HAS_EXCEPTIONS
-#else  // The compiler is not MSVC or C++Builder.
-// gcc defines __EXCEPTIONS to 1 iff exceptions are enabled.  For
-// other compilers, we assume exceptions are disabled to be
-// conservative.
-#if defined(__GNUC__) && __EXCEPTIONS
+#elif defined(__GNUC__) && __EXCEPTIONS
+// gcc defines __EXCEPTIONS to 1 iff exceptions are enabled.
+#define GTEST_HAS_EXCEPTIONS 1
+#elif defined(__SUNPRO_CC)
+// Sun Pro CC supports exceptions.  However, there is no compile-time way of
+// detecting whether they are enabled or not.  Therefore, we assume that
+// they are enabled unless the user tells us otherwise.
 #define GTEST_HAS_EXCEPTIONS 1
 #else
+// For other compilers, we assume exceptions are disabled to be
+// conservative.
 #define GTEST_HAS_EXCEPTIONS 0
-#endif  // defined(__GNUC__) && __EXCEPTIONS
 #endif  // defined(_MSC_VER) || defined(__BORLANDC__)
+#endif  // GTEST_HAS_EXCEPTIONS
 
 #if !defined(GTEST_HAS_STD_STRING)
 // Even though we don't use this macro any longer, we keep it in case
@@ -340,7 +346,7 @@
 // Determines whether <pthread.h> is available.
 #ifndef GTEST_HAS_PTHREAD
 // The user didn't tell us, so we need to figure it out.
-#define GTEST_HAS_PTHREAD (GTEST_OS_LINUX || GTEST_OS_MAC)
+#define GTEST_HAS_PTHREAD (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_SOLARIS)
 #endif  // GTEST_HAS_PTHREAD
 
 // Determines whether Google Test can use tr1/tuple.  You can define
@@ -446,7 +452,7 @@
 // Google Test does not support death tests for VC 7.1 and earlier as
 // abort() in a VC 7.1 application compiled as GUI in debug config
 // pops up a dialog window that cannot be suppressed programmatically.
-#if (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_CYGWIN || \
+#if (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_CYGWIN || GTEST_OS_SOLARIS || \
      (GTEST_OS_WINDOWS_DESKTOP && _MSC_VER >= 1400) || GTEST_OS_WINDOWS_MINGW)
 #define GTEST_HAS_DEATH_TEST 1
 #include <vector>  // NOLINT
@@ -462,12 +468,12 @@
 
 // Determines whether to support type-driven tests.
 
-// Typed tests need <typeinfo> and variadic macros, which gcc and VC
-// 8.0+ support.
-#if defined(__GNUC__) || (_MSC_VER >= 1400)
+// Typed tests need <typeinfo> and variadic macros, which GCC, VC++ 8.0, and
+// Sun Pro CC support.
+#if defined(__GNUC__) || (_MSC_VER >= 1400) || defined(__SUNPRO_CC)
 #define GTEST_HAS_TYPED_TEST 1
 #define GTEST_HAS_TYPED_TEST_P 1
-#endif  // defined(__GNUC__) || (_MSC_VER >= 1400)
+#endif
 
 // Determines whether to support Combine(). This only makes sense when
 // value-parameterized tests are enabled.
@@ -923,7 +929,7 @@ inline const char* GetEnv(const char* name) {
 #if GTEST_OS_WINDOWS_MOBILE
   // We are on Windows CE, which has no environment variables.
   return NULL;
-#elif defined(__BORLANDC__)
+#elif defined(__BORLANDC__) || defined(__SunOS_5_8) || defined(__SunOS_5_9)
   // Environment variables which we programmatically clear will be set to the
   // empty string rather than unset (NULL).  Handle that case.
   const char* const env = getenv(name);

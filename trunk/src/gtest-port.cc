@@ -111,8 +111,14 @@ size_t GetThreadCount() {
 // Implements RE.  Currently only needed for death tests.
 
 RE::~RE() {
-  regfree(&partial_regex_);
-  regfree(&full_regex_);
+  if (is_valid_) {
+    // regfree'ing an invalid regex might crash because the content
+    // of the regex is undefined. Since the regex's are essentially
+    // the same, one cannot be valid (or invalid) without the other
+    // being so too.
+    regfree(&partial_regex_);
+    regfree(&full_regex_);
+  }
   free(const_cast<char*>(pattern_));
 }
 
@@ -152,9 +158,10 @@ void RE::Init(const char* regex) {
   // Some implementation of POSIX regex (e.g. on at least some
   // versions of Cygwin) doesn't accept the empty string as a valid
   // regex.  We change it to an equivalent form "()" to be safe.
-  const char* const partial_regex = (*regex == '\0') ? "()" : regex;
-  is_valid_ = (regcomp(&partial_regex_, partial_regex, REG_EXTENDED) == 0)
-      && is_valid_;
+  if (is_valid_) {
+    const char* const partial_regex = (*regex == '\0') ? "()" : regex;
+    is_valid_ = regcomp(&partial_regex_, partial_regex, REG_EXTENDED) == 0;
+  }
   EXPECT_TRUE(is_valid_)
       << "Regular expression \"" << regex
       << "\" is not a valid POSIX Extended regular expression.";
