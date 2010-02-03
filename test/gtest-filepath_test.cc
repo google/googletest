@@ -153,31 +153,31 @@ TEST(RemoveDirectoryNameTest, ShouldAlsoGiveFileName) {
 
 #if GTEST_HAS_ALT_PATH_SEP_
 
-// Test RemoveDirectory* functions with "/".
+// Tests that RemoveDirectoryName() works with the alternate separator
+// on Windows.
 
-// RemoveDirectoryName "/afile" -> "afile"
+// RemoveDirectoryName("/afile") -> "afile"
 TEST(RemoveDirectoryNameTest, RootFileShouldGiveFileNameForAlternateSeparator) {
   EXPECT_STREQ("afile",
-      FilePath("/afile").RemoveDirectoryName().c_str());
+               FilePath("/afile").RemoveDirectoryName().c_str());
 }
 
-// RemoveDirectoryName "adir/" -> ""
+// RemoveDirectoryName("adir/") -> ""
 TEST(RemoveDirectoryNameTest, WhereThereIsNoFileNameForAlternateSeparator) {
   EXPECT_STREQ("",
-      FilePath("adir/").RemoveDirectoryName().c_str());
+               FilePath("adir/").RemoveDirectoryName().c_str());
 }
 
-// RemoveDirectoryName "adir/afile" -> "afile"
+// RemoveDirectoryName("adir/afile") -> "afile"
 TEST(RemoveDirectoryNameTest, ShouldGiveFileNameForAlternateSeparator) {
   EXPECT_STREQ("afile",
-      FilePath("adir/afile").RemoveDirectoryName().c_str());
+               FilePath("adir/afile").RemoveDirectoryName().c_str());
 }
 
-// RemoveDirectoryName "adir/subdir/afile" -> "afile"
+// RemoveDirectoryName("adir/subdir/afile") -> "afile"
 TEST(RemoveDirectoryNameTest, ShouldAlsoGiveFileNameForAlternateSeparator) {
   EXPECT_STREQ("afile",
-      FilePath("adir/subdir/afile")
-      .RemoveDirectoryName().c_str());
+               FilePath("adir/subdir/afile").RemoveDirectoryName().c_str());
 }
 
 #endif
@@ -222,32 +222,31 @@ TEST(RemoveFileNameTest, GivesRootDir) {
 
 #if GTEST_HAS_ALT_PATH_SEP_
 
-// Test RemoveFile* functions with "/".
+// Tests that RemoveFileName() works with the alternate separator on
+// Windows.
 
-// RemoveFileName "adir/" -> "adir/"
+// RemoveFileName("adir/") -> "adir/"
 TEST(RemoveFileNameTest, ButNoFileForAlternateSeparator) {
   EXPECT_STREQ("adir" GTEST_PATH_SEP_,
-      FilePath("adir/").RemoveFileName().c_str());
+               FilePath("adir/").RemoveFileName().c_str());
 }
 
-// RemoveFileName "adir/afile" -> "adir/"
+// RemoveFileName("adir/afile") -> "adir/"
 TEST(RemoveFileNameTest, GivesDirNameForAlternateSeparator) {
   EXPECT_STREQ("adir" GTEST_PATH_SEP_,
-      FilePath("adir/afile")
-      .RemoveFileName().c_str());
+               FilePath("adir/afile").RemoveFileName().c_str());
 }
 
-// RemoveFileName "adir/subdir/afile" -> "adir/subdir/"
+// RemoveFileName("adir/subdir/afile") -> "adir/subdir/"
 TEST(RemoveFileNameTest, GivesDirAndSubDirNameForAlternateSeparator) {
   EXPECT_STREQ("adir" GTEST_PATH_SEP_ "subdir" GTEST_PATH_SEP_,
-      FilePath("adir/subdir/afile")
-      .RemoveFileName().c_str());
+               FilePath("adir/subdir/afile").RemoveFileName().c_str());
 }
 
-// RemoveFileName "/afile" -> "\"
+// RemoveFileName("/afile") -> "\"
 TEST(RemoveFileNameTest, GivesRootDirForAlternateSeparator) {
   EXPECT_STREQ(GTEST_PATH_SEP_,
-      FilePath("/afile").RemoveFileName().c_str());
+               FilePath("/afile").RemoveFileName().c_str());
 }
 
 #endif
@@ -357,9 +356,8 @@ TEST(RemoveTrailingPathSeparatorTest, ShouldRemoveTrailingSeparator) {
       "foo",
       FilePath("foo" GTEST_PATH_SEP_).RemoveTrailingPathSeparator().c_str());
 #if GTEST_HAS_ALT_PATH_SEP_
-  EXPECT_STREQ(
-      "foo",
-      FilePath("foo/").RemoveTrailingPathSeparator().c_str());
+  EXPECT_STREQ("foo",
+               FilePath("foo/").RemoveTrailingPathSeparator().c_str());
 #endif
 }
 
@@ -465,7 +463,9 @@ TEST(NormalizeTest, MultipleConsecutiveSepaparatorsAtStringEnd) {
 
 #if GTEST_HAS_ALT_PATH_SEP_
 
-// "foo\" =="foo/\" == "foo\\/"
+// Tests that separators at the end of the string are normalized
+// regardless of their combination (e.g. "foo\" =="foo/\" ==
+// "foo\\/").
 TEST(NormalizeTest, MixAlternateSeparatorAtStringEnd) {
   EXPECT_STREQ("foo" GTEST_PATH_SEP_,
                FilePath("foo/").c_str());
@@ -678,6 +678,7 @@ TEST(FilePathTest, IsRootDirectory) {
   EXPECT_FALSE(FilePath("c|/").IsRootDirectory());
 #else
   EXPECT_TRUE(FilePath("/").IsRootDirectory());
+  EXPECT_TRUE(FilePath("//").IsRootDirectory());
   EXPECT_FALSE(FilePath("").IsRootDirectory());
   EXPECT_FALSE(FilePath("\\").IsRootDirectory());
   EXPECT_FALSE(FilePath("/x").IsRootDirectory());
