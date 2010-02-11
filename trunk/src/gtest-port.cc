@@ -460,8 +460,15 @@ class CapturedStream {
     char temp_file_path[MAX_PATH + 1] = { '\0' };  // NOLINT
 
     ::GetTempPathA(sizeof(temp_dir_path), temp_dir_path);
-    ::GetTempFileNameA(temp_dir_path, "gtest_redir", 0, temp_file_path);
+    const UINT success = ::GetTempFileNameA(temp_dir_path,
+                                            "gtest_redir",
+                                            0,  // Generate unique file name.
+                                            temp_file_path);
+    GTEST_CHECK_(success != 0)
+        << "Unable to create a temporary file in " << temp_dir_path;
     const int captured_fd = creat(temp_file_path, _S_IREAD | _S_IWRITE);
+    GTEST_CHECK_(captured_fd != -1) << "Unable to open temporary file "
+                                    << temp_file_path;
     filename_ = temp_file_path;
 #else
     // There's no guarantee that a test has write access to the
