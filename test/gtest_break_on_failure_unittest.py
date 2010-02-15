@@ -69,21 +69,24 @@ EXE_PATH = gtest_test_utils.GetTestExecutablePath(
 # Utilities.
 
 
+environ = os.environ.copy()
+
+
 def SetEnvVar(env_var, value):
   """Sets an environment variable to a given value; unsets it when the
   given value is None.
   """
 
   if value is not None:
-    os.environ[env_var] = value
-  elif env_var in os.environ:
-    del os.environ[env_var]
+    environ[env_var] = value
+  elif env_var in environ:
+    del environ[env_var]
 
 
 def Run(command):
   """Runs a command; returns 1 if it was killed by a signal, or 0 otherwise."""
 
-  p = gtest_test_utils.Subprocess(command)
+  p = gtest_test_utils.Subprocess(command, env=environ)
   if p.terminated_by_signal:
     return 1
   else:

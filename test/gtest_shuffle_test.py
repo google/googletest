@@ -78,16 +78,10 @@ def RandomSeedFlag(n):
 def RunAndReturnOutput(extra_env, args):
   """Runs the test program and returns its output."""
 
-  try:
-    original_env = os.environ.copy()
-    os.environ.update(extra_env)
-    return gtest_test_utils.Subprocess([COMMAND] + args).output
-  finally:
-    for key in extra_env.iterkeys():
-      if key in original_env:
-        os.environ[key] = original_env[key]
-      else:
-        del os.environ[key]
+  environ_copy = os.environ.copy()
+  environ_copy.update(extra_env)
+
+  return gtest_test_utils.Subprocess([COMMAND] + args, env=environ_copy).output
 
 
 def GetTestsForAllIterations(extra_env, args):
