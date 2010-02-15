@@ -45,11 +45,42 @@ __author__ = 'wan@google.com (Zhanyong Wan)'
 import os
 import re
 import sets
+import sys
+
 import gtest_test_utils
 
 # Constants.
 
-IS_WINDOWS = os.name == 'nt'
+# Checks if this platform can pass empty environment variables to child
+# processes.  We set an env variable to an empty string and invoke a python
+# script in a subprocess to print whether the variable is STILL in
+# os.environ.  We then use 'eval' to parse the child's output so that an
+# exception is thrown if the input is anything other than 'True' nor 'False'.
+os.environ['EMPTY_VAR'] = ''
+child = gtest_test_utils.Subprocess(
+    [sys.executable, '-c', 'import os; print \'EMPTY_VAR\' in os.environ'])
+CAN_PASS_EMPTY_ENV = eval(child.output)
+
+
+# Check if this platform can unset environment variables in child processes.
+# We set an env variable to a non-empty string, unset it, and invoke
+# a python script in a subprocess to print whether the variable
+# is NO LONGER in os.environ.
+# We use 'eval' to parse the child's output so that an exception
+# is thrown if the input is neither 'True' nor 'False'.
+os.environ['UNSET_VAR'] = 'X'
+del os.environ['UNSET_VAR']
+child = gtest_test_utils.Subprocess(
+    [sys.executable, '-c', 'import os; print \'UNSET_VAR\' not in os.environ'])
+CAN_UNSET_ENV = eval(child.output)
+
+
+# Checks if we should test with an empty filter. This doesn't
+# make sense on platforms that cannot pass empty env variables (Win32)
+# and on platforms that cannot unset variables (since we cannot tell
+# the difference between "" and NULL -- Borland and Solaris < 5.10)
+CAN_TEST_EMPTY_FILTER = (CAN_PASS_EMPTY_ENV and CAN_UNSET_ENV)
+
 
 # The environment variable for specifying the test filters.
 FILTER_ENV_VAR = 'GTEST_FILTER'
@@ -119,26 +150,29 @@ param_tests_present = None
 
 # Utilities.
 
+environ = os.environ.copy()
+
 
 def SetEnvVar(env_var, value):
   """Sets the env variable to 'value'; unsets it when 'value' is None."""
 
   if value is not None:
-    os.environ[env_var] = value
-  elif env_var in os.environ:
-    del os.environ[env_var]
+    environ[env_var] = value
+  elif env_var in environ:
+    del environ[env_var]
 
 
 def RunAndReturnOutput(args = None):
   """Runs the test program and returns its output."""
 
-  return gtest_test_utils.Subprocess([COMMAND] + (args or [])).output
+  return gtest_test_utils.Subprocess([COMMAND] + (args or []),
+                                     env=environ).output
 
 
 def RunAndExtractTestList(args = None):
   """Runs the test program and returns its exit code and a list of tests run."""
 
-  p = gtest_test_utils.Subprocess([COMMAND] + (args or []))
+  p = gtest_test_utils.Subprocess([COMMAND] + (args or []), env=environ)
   tests_run = []
   test_case = ''
   test = ''
@@ -157,15 +191,12 @@ def RunAndExtractTestList(args = None):
 def InvokeWithModifiedEnv(extra_env, function, *args, **kwargs):
   """Runs the given function and arguments in a modified environment."""
   try:
-    original_env = os.environ.copy()
-    os.environ.update(extra_env)
+    original_env = environ.copy()
+    environ.update(extra_env)
     return function(*args, **kwargs)
   finally:
-    for key in extra_env.iterkeys():
-      if key in original_env:
-        os.environ[key] = original_env[key]
-      else:
-        del os.environ[key]
+    environ.clear()
+    environ.update(original_env)
 
 
 def RunWithSharding(total_shards, shard_index, command):
@@ -223,7 +254,7 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
     # we can still test the case when the variable is not supplied (i.e.,
     # gtest_filter is None).
     # pylint: disable-msg=C6403
-    if not IS_WINDOWS or gtest_filter != '':
+    if CAN_TEST_EMPTY_FILTER or gtest_filter != '':
       SetEnvVar(FILTER_ENV_VAR, gtest_filter)
       tests_run = RunAndExtractTestList()[0]
       SetEnvVar(FILTER_ENV_VAR, None)
@@ -265,7 +296,7 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
     # we can still test the case when the variable is not supplied (i.e.,
     # gtest_filter is None).
     # pylint: disable-msg=C6403
-    if not IS_WINDOWS or gtest_filter != '':
+    if CAN_TEST_EMPTY_FILTER or gtest_filter != '':
       SetEnvVar(FILTER_ENV_VAR, gtest_filter)
       partition = []
       for i in range(0, total_shards):

@@ -48,6 +48,7 @@ import gtest_test_utils
 
 # The flag for generating the golden file
 GENGOLDEN_FLAG = '--gengolden'
+CATCH_EXCEPTIONS_ENV_VAR_NAME = 'GTEST_CATCH_EXCEPTIONS'
 
 IS_WINDOWS = os.name == 'nt'
 
@@ -123,6 +124,20 @@ def RemoveTime(output):
   return re.sub(r'\(\d+ ms', '(? ms', output)
 
 
+def RemoveTypeInfoDetails(test_output):
+  """Removes compiler-specific type info from Google Test program's output.
+
+  Args:
+       test_output:  the output of a Google Test program.
+
+  Returns:
+       output with type information normalized to canonical form.
+  """
+
+  # some compilers output the name of type 'unsigned int' as 'unsigned'
+  return re.sub(r'unsigned int', 'unsigned', test_output)
+
+
 def RemoveTestCounts(output):
   """Removes test counts from a Google Test program's output."""
 
@@ -184,16 +199,9 @@ def GetShellCommandOutput(env_cmd):
 
   # Spawns cmd in a sub-process, and gets its standard I/O file objects.
   # Set and save the environment properly.
-  old_env_vars = dict(os.environ)
-  os.environ.update(env_cmd[0])
-  p = gtest_test_utils.Subprocess(env_cmd[1])
-
-  # Changes made by os.environ.clear are not inheritable by child processes
-  # until Python 2.6. To produce inheritable changes we have to delete
-  # environment items with the del statement.
-  for key in os.environ.keys():
-    del os.environ[key]
-  os.environ.update(old_env_vars)
+  environ = os.environ.copy()
+  environ.update(env_cmd[0])
+  p = gtest_test_utils.Subprocess(env_cmd[1], env=environ)
 
   return p.output
 
@@ -209,8 +217,10 @@ def GetCommandOutput(env_cmd):
   """
 
   # Disables exception pop-ups on Windows.
-  os.environ['GTEST_CATCH_EXCEPTIONS'] = '1'
-  return NormalizeOutput(GetShellCommandOutput(env_cmd))
+  environ, cmdline = env_cmd
+  environ = dict(environ)  # Ensures we are modifying a copy.
+  environ[CATCH_EXCEPTIONS_ENV_VAR_NAME] = '1'
+  return NormalizeOutput(GetShellCommandOutput((environ, cmdline)))
 
 
 def GetOutputOfAllCommands():
@@ -262,11 +272,17 @@ class GTestOutputTest(gtest_test_utils.TestCase):
 
     # We want the test to pass regardless of certain features being
     # supported or not.
+
+    # We still have to remove type name specifics in all cases.
+    normalized_actual = RemoveTypeInfoDetails(output)
+    normalized_golden = RemoveTypeInfoDetails(golden)
+
     if CAN_GENERATE_GOLDEN_FILE:
-      self.assert_(golden == output)
+      self.assert_(normalized_golden == normalized_actual)
     else:
-      normalized_actual = RemoveTestCounts(output)
-      normalized_golden = RemoveTestCounts(self.RemoveUnsupportedTests(golden))
+      normalized_actual = RemoveTestCounts(normalized_actual)
+      normalized_golden = RemoveTestCounts(self.RemoveUnsupportedTests(
+          normalized_golden))
 
       # This code is very handy when debugging golden file differences:
       if os.getenv('DEBUG_GTEST_OUTPUT_TEST'):
