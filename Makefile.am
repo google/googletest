@@ -1,3 +1,5 @@
+# Automake file
+
 # Nonstandard package files for distribution.
 EXTRA_DIST =
 
@@ -15,6 +17,12 @@ DISTCLEANFILES = scripts/gmock-config
 # We define the global AM_CPPFLAGS as everything we compile includes from these
 # directories.
 AM_CPPFLAGS = $(GTEST_CPPFLAGS) -I$(srcdir)/include
+
+# Modifies compiler and linker flags for pthreads compatibility.
+if HAVE_PTHREADS
+  AM_CXXFLAGS = @PTHREAD_CFLAGS@ -DGTEST_HAS_PTHREAD=1
+  AM_LIBS = @PTHREAD_LIBS@
+endif
 
 # Build rules for libraries.
 lib_LTLIBRARIES = lib/libgmock.la lib/libgmock_main.la

@@ -1,3 +1,27 @@
+Changes for 1.5.0:
+
+ * Support for use in multi-threaded tests on platforms having pthreads
+   (by virtue of the Google Test thread change)
+ * The new matcher API lets user-defined matchers generate custom
+   explanations more directly and efficiently.
+ * Better expectation failure messages.
+ * NotNull() and IsNull() now work with smart pointers.
+ * Field() and Property() now work when the matcher argument is a pointer
+   passed by reference.
+ * Regular expression matching on all platforms.
+ * Added GCC 4.0 support for Google Mock Doctor.
+ * Added gmock_all_test.cc for compiling most Google Mock tests
+   in a single file.
+ * Significantly cleaned up compiler warnings.
+ * Bug fixes, better test coverage, and implementation clean-ups.
+
+ Potentially breaking changes:
+
+ * Custom matchers defined using MatcherInterface or MakePolymorphicMatcher()
+   need to be updated after upgrading to Google Mock 1.5.0; matchers defined
+   using MATCHER or MATCHER_P* aren't affected.
+ * Dropped support for 'make install'.
+
 Changes for 1.4.0 (we skipped 1.2.* and 1.3.* to match the version of
 Google Test):
 

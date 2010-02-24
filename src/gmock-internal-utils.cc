@@ -103,7 +103,7 @@ FailureReporterInterface* GetFailureReporter() {
 }
 
 // Protects global resources (stdout in particular) used by Log().
-static Mutex g_log_mutex(Mutex::NO_CONSTRUCTOR_NEEDED_FOR_STATIC_MUTEX);
+static GTEST_DEFINE_STATIC_MUTEX_(g_log_mutex);
 
 // Returns true iff a log with the given severity is visible according
 // to the --gmock_verbose flag.

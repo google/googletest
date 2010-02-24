@@ -53,7 +53,7 @@ namespace internal {
 
 // Protects the mock object registry (in class Mock), all function
 // mockers, and all expectations.
-Mutex g_gmock_mutex(Mutex::NO_CONSTRUCTOR_NEEDED_FOR_STATIC_MUTEX);
+GTEST_DEFINE_STATIC_MUTEX_(g_gmock_mutex);
 
 // Constructs an ExpectationBase object.
 ExpectationBase::ExpectationBase(const char* a_file,

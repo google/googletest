@@ -112,7 +112,7 @@ template <typename F> class FunctionMockerBase;
 // expectations when InSequence() is used, and thus affect which
 // expectation gets picked.  Therefore, we sequence all mock function
 // calls to ensure the integrity of the mock objects' states.
-extern Mutex g_gmock_mutex;
+GTEST_DECLARE_STATIC_MUTEX_(g_gmock_mutex);
 
 // Abstract base class of FunctionMockerBase.  This is the
 // type-agnostic part of the function mocker interface.  Its pure
