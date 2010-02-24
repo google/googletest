@@ -343,10 +343,14 @@
 
 #endif  // GTEST_HAS_RTTI
 
-// Determines whether <pthread.h> is available.
+// Determines whether Google Test can use the pthreads library.
 #ifndef GTEST_HAS_PTHREAD
-// The user didn't tell us, so we need to figure it out.
-#define GTEST_HAS_PTHREAD (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_SOLARIS)
+// The user didn't tell us explicitly, so we assume pthreads support is
+// available on Linux and Mac.
+//
+// To disable threading support in Google Test, add -DGTEST_HAS_PTHREAD=0
+// to your compiler flags.
+#define GTEST_HAS_PTHREAD (GTEST_OS_LINUX || GTEST_OS_MAC)
 #endif  // GTEST_HAS_PTHREAD
 
 // Determines whether Google Test can use tr1/tuple.  You can define
@@ -708,6 +712,27 @@ class GTestLog {
 inline void LogToStderr() {}
 inline void FlushInfoLog() { fflush(NULL); }
 
+// INTERNAL IMPLEMENTATION - DO NOT USE.
+//
+// GTEST_CHECK_ is an all-mode assert. It aborts the program if the condition
+// is not satisfied.
+//  Synopsys:
+//    GTEST_CHECK_(boolean_condition);
+//     or
+//    GTEST_CHECK_(boolean_condition) << "Additional message";
+//
+//    This checks the condition and if the condition is not satisfied
+//    it prints message about the condition violation, including the
+//    condition itself, plus additional message streamed into it, if any,
+//    and then it aborts the program. It aborts the program irrespective of
+//    whether it is built in the debug mode or not.
+#define GTEST_CHECK_(condition) \
+    GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
+    if (::testing::internal::IsTrue(condition)) \
+      ; \
+    else \
+      GTEST_LOG_(FATAL) << "Condition " #condition " failed. "
+
 #if GTEST_HAS_STREAM_REDIRECTION_
 
 // Defines the stderr capturer:
@@ -736,6 +761,260 @@ const ::std::vector<String>& GetArgvs();
 
 // Defines synchronization primitives.
 
+#if GTEST_HAS_PTHREAD
+
+// gtest-port.h guarantees to #include <pthread.h> when GTEST_HAS_PTHREAD is
+// true.
+#include <pthread.h>
+
+// MutexBase and Mutex implement mutex on pthreads-based platforms. They
+// are used in conjunction with class MutexLock:
+//
+// Mutex mutex;
+// ...
+// MutexLock lock(&mutex);  // Acquires the mutex and releases it at the end
+//                          // of the current scope.
+//
+// MutexBase implements behavior for both statically and dynamically
+// allocated mutexes.  Do not use the MutexBase type directly.  Instead,
+// define a static mutex using the GTEST_DEFINE_STATIC_MUTEX_ macro:
+//
+// GTEST_DEFINE_STATIC_MUTEX_(g_some_mutex);
+//
+// Such mutex may also be forward-declared:
+//
+// GTEST_DECLARE_STATIC_MUTEX_(g_some_mutex);
+//
+// Do not use MutexBase for dynamic mutexes either.  Use the Mutex class
+// for them.
+class MutexBase {
+ public:
+  void Lock();
+  void Unlock();
+
+  // Does nothing if the current thread holds the mutex. Otherwise, crashes
+  // with high probability.
+  void AssertHeld() const;
+
+ // We must be able to initialize objects of MutexBase used as static
+ // mutexes with initializer lists.  This means MutexBase has to be a POD.
+ // The class members have to be public.
+ public:
+  pthread_mutex_t mutex_;
+  pthread_t owner_;
+};
+
+// Forward-declares a static mutex.
+#define GTEST_DECLARE_STATIC_MUTEX_(mutex) \
+    extern ::testing::internal::MutexBase mutex
+
+// Defines and statically initializes a static mutex.
+#define GTEST_DEFINE_STATIC_MUTEX_(mutex) \
+    ::testing::internal::MutexBase mutex = { PTHREAD_MUTEX_INITIALIZER, 0 }
+
+// The class Mutex supports only mutexes created at runtime. It shares its
+// API with MutexBase otherwise.
+class Mutex : public MutexBase {
+ public:
+  Mutex();
+  ~Mutex();
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(Mutex);
+};
+
+// We cannot call it MutexLock directly as the ctor declaration would
+// conflict with a macro named MutexLock, which is defined on some
+// platforms.  Hence the typedef trick below.
+class GTestMutexLock {
+ public:
+  explicit GTestMutexLock(MutexBase* mutex)
+      : mutex_(mutex) { mutex_->Lock(); }
+
+  ~GTestMutexLock() { mutex_->Unlock(); }
+
+ private:
+  MutexBase* const mutex_;
+
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(GTestMutexLock);
+};
+
+typedef GTestMutexLock MutexLock;
+
+// Implements thread-local storage on pthreads-based systems.
+//
+// // Thread 1
+// ThreadLocal<int> tl(100);
+//
+// // Thread 2
+// tl.set(150);
+// EXPECT_EQ(150, tl.get());
+//
+// // Thread 1
+// EXPECT_EQ(100, tl.get());  // On Thread 1, tl.get() returns original value.
+// tl.set(200);
+// EXPECT_EQ(200, tl.get());
+//
+// The default ThreadLocal constructor requires T to have a default
+// constructor.  The single param constructor requires a copy contructor
+// from T.  A per-thread object managed by a ThreadLocal instance for a
+// thread is guaranteed to exist at least until the earliest of the two
+// events: (a) the thread terminates or (b) the ThreadLocal object
+// managing it is destroyed.
+template <typename T>
+class ThreadLocal {
+ public:
+  ThreadLocal()
+      : key_(CreateKey()),
+        default_(),
+        instance_creator_func_(DefaultConstructNewInstance) {}
+
+  explicit ThreadLocal(const T& value)
+      : key_(CreateKey()),
+        default_(value),
+        instance_creator_func_(CopyConstructNewInstance) {}
+
+  ~ThreadLocal() {
+    const int err = pthread_key_delete(key_);
+    GTEST_CHECK_(err == 0) << "pthread_key_delete failed with error " << err;
+  }
+
+  T* pointer() { return GetOrCreateValue(); }
+  const T* pointer() const { return GetOrCreateValue(); }
+  const T& get() const { return *pointer(); }
+  void set(const T& value) { *pointer() = value; }
+
+ private:
+  static pthread_key_t CreateKey() {
+    pthread_key_t key;
+    const int err = pthread_key_create(&key, &DeleteData);
+    GTEST_CHECK_(err == 0) << "pthread_key_create failed with error " << err;
+    return key;
+  }
+
+  T* GetOrCreateValue() const {
+    T* value = static_cast<T*>(pthread_getspecific(key_));
+    if (value == NULL) {
+      value = (*instance_creator_func_)(default_);
+      const int err = pthread_setspecific(key_, value);
+      GTEST_CHECK_(err == 0) << "pthread_setspecific failed with error " << err;
+    }
+    return value;
+  }
+
+  static void DeleteData(void* data) { delete static_cast<T*>(data); }
+
+  static T* DefaultConstructNewInstance(const T&) { return new T(); }
+
+  // Copy constructs new instance of T from default_.  Will not be
+  // instantiated unless this ThreadLocal is constructed by the single
+  // parameter constructor.
+  static T* CopyConstructNewInstance(const T& t) { return new T(t); }
+
+  // A key pthreads uses for looking up per-thread values.
+  const pthread_key_t key_;
+  // Contains the value that CopyConstructNewInstance copies from.
+  const T default_;
+  // Points to either DefaultConstructNewInstance or CopyConstructNewInstance.
+  T* (*const instance_creator_func_)(const T& default_);
+
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadLocal);
+};
+
+// Allows the controller thread pause execution of newly created test
+// threads until signalled. Instances of this class must be created and
+// destroyed in the controller thread.
+//
+// This class is supplied only for the purpose of testing Google Test's own
+// constructs. Do not use it in user tests, either directly or indirectly.
+class ThreadStartSemaphore {
+ public:
+  ThreadStartSemaphore();
+  ~ThreadStartSemaphore();
+  // Signals to all test threads created with this semaphore to start. Must
+  // be called from the controlling thread.
+  void Signal();
+  // Blocks until the controlling thread signals. Must be called from a test
+  // thread.
+  void Wait();
+
+ private:
+  // We cannot use Mutex here as this class is intended for testing it.
+  pthread_mutex_t mutex_;
+  pthread_cond_t cond_;
+  bool signalled_;
+
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadStartSemaphore);
+};
+
+// Helper class for testing Google Test's multithreading constructs.
+// Use:
+//
+// void ThreadFunc(int param) { /* Do things with param */ }
+// ThreadSemaphore semaphore;
+// ...
+// // The semaphore parameter is optional; you can supply NULL.
+// ThredWithParam<int> thread(&ThreadFunc, 5, &semaphore);
+// sem.Signal(); // Allows the thread to start.
+//
+// This class is supplied only for the purpose of testing Google Test's own
+// constructs. Do not use it in user tests, either directly or indirectly.
+template <typename T>
+class ThreadWithParam {
+ public:
+  typedef void (*UserThreadFunc)(T);
+
+  ThreadWithParam(UserThreadFunc func, T param, ThreadStartSemaphore* semaphore)
+      : func_(func),
+        param_(param),
+        start_semaphore_(semaphore),
+        finished_(false) {
+    // func_, param_, and start_semaphore_ must be initialized before
+    // pthread_create() is called.
+    const int err = pthread_create(&thread_, 0, ThreadMainStatic, this);
+    GTEST_CHECK_(err == 0) << "pthread_create failed with error: "
+                           << strerror(err) << "(" << err << ")";
+  }
+  ~ThreadWithParam() { Join(); }
+
+  void Join() {
+    if (!finished_) {
+      const int err = pthread_join(thread_, 0);
+      GTEST_CHECK_(err == 0) << "pthread_join failed with error:"
+        << strerror(err) << "(" << err << ")";
+      finished_ = true;
+    }
+  }
+
+ private:
+  void ThreadMain() {
+    if (start_semaphore_ != NULL)
+      start_semaphore_->Wait();
+    func_(param_);
+  }
+  static void* ThreadMainStatic(void* param) {
+    static_cast<ThreadWithParam<T>*>(param)->ThreadMain();
+    return NULL;  // We are not interested in thread exit code.
+  }
+
+  // User supplied thread function.
+  const UserThreadFunc func_;
+  // User supplied parameter to UserThreadFunc.
+  const T param_;
+
+  // Native thread object.
+  pthread_t thread_;
+  // When non-NULL, used to block execution until the controller thread
+  // signals.
+  ThreadStartSemaphore* const start_semaphore_;
+  // true iff UserThreadFunc has not completed yet.
+  bool finished_;
+};
+
+#define GTEST_IS_THREADSAFE 1
+
+#else  // GTEST_HAS_PTHREAD
+
 // A dummy implementation of synchronization primitives (mutex, lock,
 // and thread-local variable).  Necessary for compiling Google Test where
 // mutex is not supported - using Google Test in multiple threads is not
@@ -744,14 +1023,14 @@ const ::std::vector<String>& GetArgvs();
 class Mutex {
  public:
   Mutex() {}
-  explicit Mutex(int /*unused*/) {}
   void AssertHeld() const {}
-  enum { NO_CONSTRUCTOR_NEEDED_FOR_STATIC_MUTEX = 0 };
 };
 
-// We cannot call it MutexLock directly as the ctor declaration would
-// conflict with a macro named MutexLock, which is defined on some
-// platforms.  Hence the typedef trick below.
+#define GTEST_DECLARE_STATIC_MUTEX_(mutex) \
+  extern ::testing::internal::Mutex mutex
+
+#define GTEST_DEFINE_STATIC_MUTEX_(mutex) ::testing::internal::Mutex mutex
+
 class GTestMutexLock {
  public:
   explicit GTestMutexLock(Mutex*) {}  // NOLINT
@@ -772,13 +1051,15 @@ class ThreadLocal {
   T value_;
 };
 
-// Returns the number of threads running in the process, or 0 to indicate that
-// we cannot detect it.
-size_t GetThreadCount();
-
 // The above synchronization primitives have dummy implementations.
 // Therefore Google Test is not thread-safe.
 #define GTEST_IS_THREADSAFE 0
+
+#endif  // GTEST_HAS_PTHREAD
+
+// Returns the number of threads running in the process, or 0 to indicate that
+// we cannot detect it.
+size_t GetThreadCount();
 
 // Passing non-POD classes through ellipsis (...) crashes the ARM
 // compiler and generates a warning in Sun Studio.  The Nokia Symbian
@@ -1023,27 +1304,6 @@ typedef TypeWithSize<8>::UInt UInt64;
 typedef TypeWithSize<8>::Int TimeInMillis;  // Represents time in milliseconds.
 
 // Utilities for command line flags and environment variables.
-
-// INTERNAL IMPLEMENTATION - DO NOT USE.
-//
-// GTEST_CHECK_ is an all-mode assert. It aborts the program if the condition
-// is not satisfied.
-//  Synopsys:
-//    GTEST_CHECK_(boolean_condition);
-//     or
-//    GTEST_CHECK_(boolean_condition) << "Additional message";
-//
-//    This checks the condition and if the condition is not satisfied
-//    it prints message about the condition violation, including the
-//    condition itself, plus additional message streamed into it, if any,
-//    and then it aborts the program. It aborts the program irrespective of
-//    whether it is built in the debug mode or not.
-#define GTEST_CHECK_(condition) \
-    GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-    if (::testing::internal::IsTrue(condition)) \
-      ; \
-    else \
-      GTEST_LOG_(FATAL) << "Condition " #condition " failed. "
 
 // Macro for referencing flags.
 #define GTEST_FLAG(name) FLAGS_gtest_##name

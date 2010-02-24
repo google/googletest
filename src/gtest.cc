@@ -342,7 +342,7 @@ void AssertHelper::operator=(const Message& message) const {
 }
 
 // Mutex for linked pointers.
-Mutex g_linked_ptr_mutex(Mutex::NO_CONSTRUCTOR_NEEDED_FOR_STATIC_MUTEX);
+GTEST_DEFINE_STATIC_MUTEX_(g_linked_ptr_mutex);
 
 // Application pathname gotten in InitGoogleTest.
 String g_executable_path;

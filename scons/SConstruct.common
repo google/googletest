@@ -200,7 +200,9 @@ class SConstructHelper:
                         '-Wall',
                         '-Werror',
                         '-Wshadow',
+                        '-DGTEST_HAS_PTHREAD=1'
                        ])
+    env.Append(LINKFLAGS=['-pthread'])
     if optimized:
       env.Append(CCFLAGS=['-O2'], CPPDEFINES=['NDEBUG', '_NDEBUG'])
     else:

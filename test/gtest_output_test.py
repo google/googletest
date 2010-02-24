@@ -238,7 +238,9 @@ SUPPORTS_TYPED_TESTS = 'TypedTest' in test_list
 SUPPORTS_THREADS = 'ExpectFailureWithThreadsTest' in test_list
 SUPPORTS_STACK_TRACES = False
 
-CAN_GENERATE_GOLDEN_FILE = SUPPORTS_DEATH_TESTS and SUPPORTS_TYPED_TESTS
+CAN_GENERATE_GOLDEN_FILE = (SUPPORTS_DEATH_TESTS and
+                            SUPPORTS_TYPED_TESTS and
+                            SUPPORTS_THREADS)
 
 
 class GTestOutputTest(gtest_test_utils.TestCase):
@@ -314,8 +316,8 @@ that does not support all the required features (death tests""")
             """\nand typed tests). Please check that you are using VC++ 8.0 SP1
 or higher as your compiler.""")
       else:
-        message += """\nand typed tests).  Please generate the golden file
-using a binary built with those features enabled."""
+        message += """\ntyped tests, and threads).  Please generate the
+golden file using a binary built with those features enabled."""
 
       sys.stderr.write(message)
       sys.exit(1)

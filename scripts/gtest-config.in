@@ -214,7 +214,7 @@ if test "${this_bindir}" = "${this_bindir%${bindir}}"; then
   # TODO(chandlerc@google.com): This is a dangerous dependency on libtool, we
   # should work to remove it, and/or remove libtool altogether, replacing it
   # with direct references to the library and a link path.
-  gtest_libs="${build_dir}/lib/libgtest.la"
+  gtest_libs="${build_dir}/lib/libgtest.la @PTHREAD_CFLAGS@ @PTHREAD_LIBS@"
   gtest_ldflags=""
 
   # We provide hooks to include from either the source or build dir, where the
@@ -222,15 +222,15 @@ if test "${this_bindir}" = "${this_bindir%${bindir}}"; then
   # build rules for generated headers and have them automatically be preferred
   # over provided versions.
   gtest_cppflags="-I${build_dir}/include -I${src_dir}/include"
-  gtest_cxxflags=""
+  gtest_cxxflags="@PTHREAD_CFLAGS@"
 else
   # We're using an installed gtest, although it may be staged under some
   # prefix. Assume (as our own libraries do) that we can resolve the prefix,
   # and are present in the dynamic link paths.
   gtest_ldflags="-L${libdir}"
-  gtest_libs="-l${name}"
+  gtest_libs="-l${name} @PTHREAD_CFLAGS@ @PTHREAD_LIBS@"
   gtest_cppflags="-I${includedir}"
-  gtest_cxxflags=""
+  gtest_cxxflags="@PTHREAD_CFLAGS@"
 fi
 
 # Do an installation query if requested.

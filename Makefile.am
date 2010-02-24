@@ -11,10 +11,6 @@ EXTRA_DIST = \
   include/gtest/internal/gtest-type-util.h.pump \
   include/gtest/internal/gtest-param-util-generated.h.pump \
   make/Makefile \
-  run_tests.py \
-  scons/SConscript \
-  scons/SConstruct \
-  scons/SConstruct.common \
   scripts/fuse_gtest_files.py \
   scripts/gen_gtest_pred_impl.py \
   scripts/generate_gtest_def.py \
@@ -28,8 +24,7 @@ EXTRA_DIST += \
   src/gtest-internal-inl.h \
   src/gtest-port.cc \
   src/gtest-test-part.cc \
-  src/gtest-typed-test.cc \
-  src/gtest.def
+  src/gtest-typed-test.cc
 
 # Sample files that we don't compile.
 EXTRA_DIST += \
@@ -112,6 +107,10 @@ EXTRA_DIST += \
   test/run_tests_util.py \
   test/run_tests_util_test.py
 
+# CMake script
+EXTRA_DIST += \
+  CMakeLists.txt
+
 # MSVC project files
 EXTRA_DIST += \
   msvc/gtest-md.sln \
@@ -123,7 +122,8 @@ EXTRA_DIST += \
   msvc/gtest_prod_test-md.vcproj \
   msvc/gtest_prod_test.vcproj \
   msvc/gtest_unittest-md.vcproj \
-  msvc/gtest_unittest.vcproj
+  msvc/gtest_unittest.vcproj \
+  msvc/gtest.def
 
 # xcode project files
 EXTRA_DIST += \
@@ -172,6 +172,14 @@ EXTRA_DIST += $(m4data_DATA)
 # We define the global AM_CPPFLAGS as everything we compile includes from these
 # directories.
 AM_CPPFLAGS = -I$(srcdir) -I$(srcdir)/include
+
+# Modifies compiler and linker flags for pthreads compatibility.
+if HAVE_PTHREADS
+  AM_CXXFLAGS = @PTHREAD_CFLAGS@ -DGTEST_HAS_PTHREAD=1
+  AM_LIBS = @PTHREAD_LIBS@
+else
+  AM_CXXFLAGS = -DGTEST_HAS_PTHREAD=0
+endif
 
 # Build rules for libraries.
 lib_LTLIBRARIES = lib/libgtest.la lib/libgtest_main.la
@@ -244,6 +252,38 @@ samples_sample10_unittest_LDADD = lib/libgtest.la
 TESTS += test/gtest_all_test
 check_PROGRAMS += test/gtest_all_test
 test_gtest_all_test_SOURCES = test/gtest_all_test.cc
-test_gtest_all_test_CXXFLAGS = $(AM_CXXFLAGS) $(PTHREAD_CFLAGS)
-test_gtest_all_test_LDADD = $(PTHREAD_LIBS) $(PTHREAD_CFLAGS) \
-                            lib/libgtest_main.la
+test_gtest_all_test_LDADD = lib/libgtest_main.la
+
+# Tests that fused gtest files compile and work.
+TESTS += test/gtest_fused_test
+check_PROGRAMS += test/gtest_fused_test
+test_gtest_fused_test_SOURCES = fused-src/gtest/gtest-all.cc \
+                                fused-src/gtest/gtest_main.cc \
+                                fused-src/gtest/gtest.h \
+                                samples/sample1.cc samples/sample1_unittest.cc
+test_gtest_fused_test_CPPFLAGS = -I"$(srcdir)/fused-src"
+
+# Build rules for putting fused Google Test files into the distribution
+# package. The user can also create those files by manually running
+# scripts/fuse_gtest_files.py.
+$(srcdir)/fused-src/gtest/gtest-all.cc: fused-gtest-internal
+
+$(srcdir)/fused-src/gtest/gtest.h: fused-gtest-internal
+
+fused-gtest-internal: $(pkginclude_HEADERS) $(pkginclude_internal_HEADERS) \
+                      $(lib_libgtest_la_SOURCES) \
+                      scripts/fuse_gtest_files.py
+	mkdir -p "$(srcdir)/fused-src/gtest"
+	chmod -R u+w "$(srcdir)/fused-src"
+	rm -f "$(srcdir)/fused-src/gtest/gtest-all.cc"
+	rm -f "$(srcdir)/fused-src/gtest/gtest.h"
+	"$(srcdir)/scripts/fuse_gtest_files.py" "$(srcdir)/fused-src"
+
+$(srcdir)/fused-src/gtest/gtest_main.cc: src/gtest_main.cc
+	mkdir -p "$(srcdir)/fused-src/gtest"
+	chmod -R u+w "$(srcdir)/fused-src"
+	cp -f "$(srcdir)/src/gtest_main.cc" "$(srcdir)/fused-src/gtest"
+
+maintainer-clean-local:
+	chmod -R u+w "$(srcdir)/fused-src"
+	rm -rf "$(srcdir)/fused-src/gtest"

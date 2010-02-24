@@ -77,7 +77,7 @@ namespace testing {
 namespace internal {
 
 // Protects copying of all linked_ptr objects.
-extern Mutex g_linked_ptr_mutex;
+GTEST_DECLARE_STATIC_MUTEX_(g_linked_ptr_mutex);
 
 // This is used internally by all instances of linked_ptr<>.  It needs to be
 // a non-template class because different types of linked_ptr<> can refer to
