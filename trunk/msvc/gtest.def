@@ -75,6 +75,7 @@ EXPORTS
   ?HasNonfatalFailure@TestResult@testing@@QBE_NXZ
   ?Init@RE@internal@testing@@AAEXPBD@Z
   ?InitGoogleTest@testing@@YAXPAHPAPAD@Z
+  ?InitGoogleTest@testing@@YAXPAHPAPA_W@Z
   ?IsHRESULTFailure@internal@testing@@YA?AVAssertionResult@2@PBDJ@Z
   ?IsHRESULTSuccess@internal@testing@@YA?AVAssertionResult@2@PBDJ@Z
   ?IsTrue@internal@testing@@YA_N_N@Z

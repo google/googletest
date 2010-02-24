@@ -60,7 +60,7 @@
 #include <windows.h>  // For DWORD.
 #endif  // GTEST_OS_WINDOWS
 
-#include <gtest/gtest.h>
+#include <gtest/gtest.h>  // NOLINT
 #include <gtest/gtest-spi.h>
 
 namespace testing {
@@ -1228,6 +1228,9 @@ bool ParseNaturalNumber(const ::std::string& str, Integer* number) {
 // TestResult contains some private methods that should be hidden from
 // Google Test user but are required for testing. This class allow our tests
 // to access them.
+//
+// This class is supplied only for the purpose of testing Google Test's own
+// constructs. Do not use it in user tests, either directly or indirectly.
 class TestResultAccessor {
  public:
   static void RecordProperty(TestResult* test_result,

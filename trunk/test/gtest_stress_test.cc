@@ -48,23 +48,17 @@
 namespace testing {
 namespace {
 
+using internal::scoped_ptr;
 using internal::String;
 using internal::TestPropertyKeyIs;
 using internal::Vector;
+using internal::ThreadStartSemaphore;
+using internal::ThreadWithParam;
 
 // In order to run tests in this file, for platforms where Google Test is
-// thread safe, implement ThreadWithParam with the following interface:
-//
-// template <typename T> class ThreadWithParam {
-//  public:
-//   // Creates the thread. The thread should execute thread_func(param) when
-//   // started by a call to Start().
-//   ThreadWithParam(void (*thread_func)(T), T param);
-//   // Starts the thread.
-//   void Start();
-//   // Waits for the thread to finish.
-//   void Join();
-// };
+// thread safe, implement ThreadWithParam and ThreadStartSemaphore. See the
+// description of their API in gtest-port.h, where they are defined for
+// already supported platforms.
 
 // How many threads to create?
 const int kThreadCount = 50;
@@ -132,22 +126,17 @@ void CheckTestFailureCount(int expected_failures) {
 // Tests using SCOPED_TRACE() and Google Test assertions in many threads
 // concurrently.
 TEST(StressTest, CanUseScopedTraceAndAssertionsInManyThreads) {
-  ThreadWithParam<int>* threads[kThreadCount] = {};
-  for (int i = 0; i != kThreadCount; i++) {
-    // Creates a thread to run the ManyAsserts() function.
-    threads[i] = new ThreadWithParam<int>(&ManyAsserts, i);
+  {
+    scoped_ptr<ThreadWithParam<int> > threads[kThreadCount];
+    ThreadStartSemaphore semaphore;
+    for (int i = 0; i != kThreadCount; i++)
+      threads[i].reset(new ThreadWithParam<int>(&ManyAsserts, i, &semaphore));
 
-    // Starts the thread.
-    threads[i]->Start();
-  }
+    semaphore.Signal(); // Starts all the threads.
 
-  // At this point, we have many threads running.
-
-  for (int i = 0; i != kThreadCount; i++) {
-    // We block until the thread is done.
-    threads[i]->Join();
-    delete threads[i];
-    threads[i] = NULL;
+    // Blocks until all the threads are done.
+    for (int i = 0; i != kThreadCount; i++)
+      threads[i]->Join();
   }
 
   // Ensures that kThreadCount*kThreadCount failures have been reported.
@@ -180,8 +169,7 @@ void FailingThread(bool is_fatal) {
 }
 
 void GenerateFatalFailureInAnotherThread(bool is_fatal) {
-  ThreadWithParam<bool> thread(&FailingThread, is_fatal);
-  thread.Start();
+  ThreadWithParam<bool> thread(&FailingThread, is_fatal, NULL);
   thread.Join();
 }
 

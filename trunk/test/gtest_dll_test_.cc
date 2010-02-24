@@ -484,6 +484,11 @@ class MyOtherListener : public EmptyTestEventListener {};
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
 
+  void (*wide_init_google_test)(int*, wchar_t**) = &testing::InitGoogleTest;
+
+  // Ensures the linker doesn't throw away reference to wide InitGoogleTest.
+  GTEST_CHECK_(wide_init_google_test != NULL);
+
   TestEventListeners& listeners =  UnitTest::GetInstance()->listeners();
   TestEventListener* listener = new MyListener;
 

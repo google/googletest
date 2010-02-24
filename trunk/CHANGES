@@ -1,3 +1,24 @@
+Changes for 1.5.0:
+
+ * New feature: Ability to use test assertions in multi-threaded tests
+   on platforms implementing pthreads.
+ * New feature: Predicates used inside EXPECT_TRUE() and friends
+   can now generate custom failure messages.
+ * New feature: Google Test can now be compiled as a DLL on Windows.
+ * New feature: The distribution package now includes fused source files.
+ * New feature: Prints help when encountering unrecognized Google Test flags.
+ * Experimental feature: CMake build script (requires CMake 2.6.4+).
+ * double values streamed to an assertion are printed with enough precision
+   to differentiate any two different values.
+ * Google Test now works on Solaris.
+ * Build and test script improvements.
+ * Bug fixes and implementation clean-ups.
+
+ Potentially breaking changes:
+
+ * Stopped supporting VC++ 7.1 with exceptions disabled.
+ * Dropped support for 'make install'.
+
 Changes for 1.4.0:
 
  * New feature: the event listener API

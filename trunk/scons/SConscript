@@ -128,6 +128,10 @@ env_with_exceptions = EnvCreator.Create(env_warning_ok,
                                         EnvCreator.WithExceptions)
 env_without_rtti = EnvCreator.Create(env_warning_ok, EnvCreator.NoRtti)
 
+env_with_exceptions_and_threads = EnvCreator.Create(env_with_threads,
+                                                    EnvCreator.WithExceptions)
+env_with_exceptions_and_threads['OBJ_SUFFIX'] = '_with_exceptions_and_threads'
+
 ############################################################
 # Helpers for creating build targets.
 
@@ -232,7 +236,11 @@ gtest, gtest_main = GtestStaticLibraries(env)
 gtest_ex, gtest_main_ex = GtestStaticLibraries(env_with_exceptions)
 gtest_no_rtti, gtest_main_no_rtti = GtestStaticLibraries(env_without_rtti)
 gtest_use_own_tuple, gtest_main_use_own_tuple = GtestStaticLibraries(
-      env_use_own_tuple)
+    env_use_own_tuple)
+gtest_with_threads, gtest_main_with_threads = GtestStaticLibraries(
+    env_with_threads)
+gtest_ex_with_threads, gtest_main_ex_with_threads = GtestStaticLibraries(
+    env_with_exceptions_and_threads)
 
 # Install the libraries if needed.
 if 'LIB_OUTPUT' in env.Dictionary():
@@ -259,7 +267,6 @@ if BUILD_TESTS:
             additional_sources=['../test/gtest-param-test2_test.cc'])
   GtestTest(env, 'gtest_color_test_', gtest)
   GtestTest(env, 'gtest-linked_ptr_test', gtest_main)
-  GtestTest(env, 'gtest-port_test', gtest_main)
   GtestTest(env, 'gtest_break_on_failure_unittest_', gtest)
   GtestTest(env, 'gtest_filter_unittest_', gtest)
   GtestTest(env, 'gtest_help_test_', gtest_main)
@@ -275,10 +282,12 @@ if BUILD_TESTS:
   ############################################################
   # Tests targets using custom environments.
   GtestTest(env_warning_ok, 'gtest_unittest', gtest_main)
-  GtestTest(env_with_exceptions, 'gtest_output_test_', gtest_ex)
+  GtestTest(env_with_exceptions_and_threads, 'gtest_output_test_',
+            gtest_ex_with_threads)
   GtestTest(env_with_exceptions, 'gtest_throw_on_failure_ex_test', gtest_ex)
-  GtestTest(env_with_threads, 'gtest-death-test_test', gtest_main)
-  GtestTest(env_with_threads, 'gtest_stress_test', gtest)
+  GtestTest(env_with_threads, 'gtest-death-test_test', gtest_main_with_threads)
+  GtestTest(env_with_threads, 'gtest-port_test', gtest_main_with_threads)
+  GtestTest(env_with_threads, 'gtest_stress_test', gtest_with_threads)
   GtestTest(env_less_optimized, 'gtest_env_var_test_', gtest)
   GtestTest(env_less_optimized, 'gtest_uninitialized_test_', gtest)
   GtestTest(env_use_own_tuple, 'gtest-tuple_test', gtest_main_use_own_tuple)

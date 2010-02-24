@@ -119,6 +119,7 @@ class EnvCreator:
       # selecting on a platform.
       env.Append(CCFLAGS=['-pthread'])
       env.Append(LINKFLAGS=['-pthread'])
+      env.Append(CPPDEFINES='GTEST_HAS_PTHREAD=1')
   WithThreads = classmethod(WithThreads)
 
   def NoRtti(cls, env):

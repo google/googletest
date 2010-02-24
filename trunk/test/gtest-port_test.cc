@@ -35,10 +35,15 @@
 
 #include <stdio.h>
 
+#if GTEST_HAS_PTHREAD
+#include <unistd.h>  // For nanosleep().
+#endif  // GTEST_HAS_PTHREAD
+
 #if GTEST_OS_MAC
-#include <pthread.h>
 #include <time.h>
 #endif  // GTEST_OS_MAC
+
+#include <utility>  // For std::pair and std::make_pair.
 
 #include <gtest/gtest.h>
 #include <gtest/gtest-spi.h>
@@ -51,6 +56,9 @@
 #define GTEST_IMPLEMENTATION_ 1
 #include "src/gtest-internal-inl.h"
 #undef GTEST_IMPLEMENTATION_
+
+using std::make_pair;
+using std::pair;
 
 namespace testing {
 namespace internal {
@@ -94,7 +102,7 @@ TEST(GtestCheckSyntaxTest, WorksWithSwitch) {
 
 #if GTEST_OS_MAC
 void* ThreadFunc(void* data) {
-  pthread_mutex_t* mutex = reinterpret_cast<pthread_mutex_t*>(data);
+  pthread_mutex_t* mutex = static_cast<pthread_mutex_t*>(data);
   pthread_mutex_lock(mutex);
   pthread_mutex_unlock(mutex);
   return NULL;
@@ -744,6 +752,217 @@ TEST(CaptureDeathTest, CannotReenterStdoutCapture) {
 }
 
 #endif  // !GTEST_OS_WINDOWS_MOBILE
+
+TEST(ThreadLocalTest, DefaultConstructorInitializesToDefaultValues) {
+  ThreadLocal<int> t1;
+  EXPECT_EQ(0, t1.get());
+
+  ThreadLocal<void*> t2;
+  EXPECT_TRUE(t2.get() == NULL);
+}
+
+TEST(ThreadLocalTest, SingleParamConstructorInitializesToParam) {
+  ThreadLocal<int> t1(123);
+  EXPECT_EQ(123, t1.get());
+
+  int i = 0;
+  ThreadLocal<int*> t2(&i);
+  EXPECT_EQ(&i, t2.get());
+}
+
+class NoCopyConstructor {
+ public:
+  NoCopyConstructor() {}
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(NoCopyConstructor);
+};
+
+TEST(ThreadLocalTest, ValueCopyConstructorIsNotRequiredForDefaultVersion) {
+  ThreadLocal<NoCopyConstructor> bar;
+  bar.get();
+}
+
+class NoDefaultContructor {
+ public:
+  explicit NoDefaultContructor(const char*) {}
+  NoDefaultContructor(const NoDefaultContructor&) {}
+};
+
+TEST(ThreadLocalTest, ValueDefaultContructorIsNotRequiredForParamVersion) {
+  ThreadLocal<NoDefaultContructor> bar(NoDefaultContructor("foo"));
+  bar.pointer();
+}
+
+TEST(ThreadLocalTest, GetAndPointerReturnSameValue) {
+  ThreadLocal<String> thread_local;
+
+  // This is why EXPECT_TRUE is used here rather than EXPECT_EQ because
+  // we don't care about a particular value of thread_local.pointer() here;
+  // we only care about pointer and reference referring to the same lvalue.
+  EXPECT_EQ(thread_local.pointer(), &(thread_local.get()));
+
+  // Verifies the condition still holds after calling set.
+  thread_local.set("foo");
+  EXPECT_EQ(thread_local.pointer(), &(thread_local.get()));
+}
+
+TEST(ThreadLocalTest, PointerAndConstPointerReturnSameValue) {
+  ThreadLocal<String> thread_local;
+  const ThreadLocal<String>& const_thread_local = thread_local;
+
+  EXPECT_EQ(thread_local.pointer(), const_thread_local.pointer());
+
+  thread_local.set("foo");
+  EXPECT_EQ(thread_local.pointer(), const_thread_local.pointer());
+}
+
+#if GTEST_IS_THREADSAFE
+TEST(MutexTestDeathTest, AssertHeldShouldAssertWhenNotLocked) {
+  // AssertHeld() is flaky only in the presence of multiple threads accessing
+  // the lock. In this case, the test is robust.
+  EXPECT_DEATH_IF_SUPPORTED({
+    Mutex m;
+    { MutexLock lock(&m); }
+    m.AssertHeld();
+  },
+  "Current thread is not holding mutex..+");
+}
+
+void SleepMilliseconds(int time) {
+  usleep(static_cast<useconds_t>(time * 1000.0));
+}
+
+class AtomicCounterWithMutex {
+ public:
+  explicit AtomicCounterWithMutex(Mutex* mutex) :
+    value_(0), mutex_(mutex), random_(42) {}
+
+  void Increment() {
+    MutexLock lock(mutex_);
+    int temp = value_;
+    {
+      // Locking a mutex puts up a memory barrier, preventing reads and
+      // writes to value_ rearranged when observed from other threads.
+      //
+      // We cannot use Mutex and MutexLock here or rely on their memory
+      // barrier functionality as we are testing them here.
+      pthread_mutex_t memory_barrier_mutex;
+      int err = pthread_mutex_init(&memory_barrier_mutex, NULL);
+      GTEST_CHECK_(err == 0) << "pthread_mutex_init failed with error " << err;
+      err = pthread_mutex_lock(&memory_barrier_mutex);
+      GTEST_CHECK_(err == 0) << "pthread_mutex_lock failed with error " << err;
+
+      SleepMilliseconds(random_.Generate(30));
+
+      err = pthread_mutex_unlock(&memory_barrier_mutex);
+      GTEST_CHECK_(err == 0)
+          << "pthread_mutex_unlock failed with error " << err;
+    }
+    value_ = temp + 1;
+  }
+  int value() const { return value_; }
+
+ private:
+  volatile int value_;
+  Mutex* const mutex_;  // Protects value_.
+  Random       random_;
+};
+
+void CountingThreadFunc(pair<AtomicCounterWithMutex*, int> param) {
+  for (int i = 0; i < param.second; ++i)
+      param.first->Increment();
+}
+
+// Tests that the mutex only lets one thread at a time to lock it.
+TEST(MutexTest, OnlyOneThreadCanLockAtATime) {
+  Mutex mutex;
+  AtomicCounterWithMutex locked_counter(&mutex);
+
+  typedef ThreadWithParam<pair<AtomicCounterWithMutex*, int> > ThreadType;
+  const int kCycleCount = 20;
+  const int kThreadCount = 7;
+  scoped_ptr<ThreadType> counting_threads[kThreadCount];
+  ThreadStartSemaphore semaphore;
+  // Creates and runs kThreadCount threads that increment locked_counter
+  // kCycleCount times each.
+  for (int i = 0; i < kThreadCount; ++i) {
+    counting_threads[i].reset(new ThreadType(&CountingThreadFunc,
+                                             make_pair(&locked_counter,
+                                                       kCycleCount),
+                                             &semaphore));
+  }
+  semaphore.Signal();  // Start the threads.
+  for (int i = 0; i < kThreadCount; ++i)
+    counting_threads[i]->Join();
+
+  // If the mutex lets more than one thread to increment the counter at a
+  // time, they are likely to encounter a race condition and have some
+  // increments overwritten, resulting in the lower then expected counter
+  // value.
+  EXPECT_EQ(kCycleCount * kThreadCount, locked_counter.value());
+}
+
+template <typename T>
+void RunFromThread(void (func)(T), T param) {
+  ThreadWithParam<T> thread(func, param, NULL);
+  thread.Join();
+}
+
+void RetrieveThreadLocalValue(pair<ThreadLocal<String>*, String*> param) {
+  *param.second = param.first->get();
+}
+
+TEST(ThreadLocalTest, ParameterizedConstructorSetsDefault) {
+  ThreadLocal<String> thread_local("foo");
+  EXPECT_STREQ("foo", thread_local.get().c_str());
+
+  thread_local.set("bar");
+  EXPECT_STREQ("bar", thread_local.get().c_str());
+
+  String result;
+  RunFromThread(&RetrieveThreadLocalValue, make_pair(&thread_local, &result));
+  EXPECT_STREQ("foo", result.c_str());
+}
+
+class CountedDestructor {
+ public:
+  ~CountedDestructor() { counter_++; }
+  static int counter() { return counter_; }
+  static void set_counter(int value) { counter_ = value; }
+
+ private:
+  static int counter_;
+};
+int CountedDestructor::counter_ = 0;
+
+template <typename T>
+void CallThreadLocalGet(ThreadLocal<T>* threadLocal) {
+    threadLocal->get();
+}
+
+TEST(ThreadLocalTest, DestroysManagedObjectsNoLaterThanSelf) {
+  CountedDestructor::set_counter(0);
+  {
+    ThreadLocal<CountedDestructor> thread_local;
+    ThreadWithParam<ThreadLocal<CountedDestructor>*> thread(
+        &CallThreadLocalGet<CountedDestructor>, &thread_local, NULL);
+    thread.Join();
+  }
+  // There should be 2 desctuctor calls as ThreadLocal also contains a member
+  // T - used as a prototype for copy ctr version.
+  EXPECT_EQ(2, CountedDestructor::counter());
+}
+
+TEST(ThreadLocalTest, ThreadLocalMutationsAffectOnlyCurrentThread) {
+  ThreadLocal<String> thread_local;
+  thread_local.set("Foo");
+  EXPECT_STREQ("Foo", thread_local.get().c_str());
+
+  String result;
+  RunFromThread(&RetrieveThreadLocalValue, make_pair(&thread_local, &result));
+  EXPECT_TRUE(result.c_str() == NULL);
+}
+#endif  // GTEST_IS_THREADSAFE
 
 }  // namespace internal
 }  // namespace testing

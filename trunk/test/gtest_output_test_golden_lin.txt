@@ -7,7 +7,7 @@ Expected: true
 gtest_output_test_.cc:#: Failure
 Value of: 3
 Expected: 2
-[0;32m[==========] [mRunning 56 tests from 23 test cases.
+[0;32m[==========] [mRunning 59 tests from 25 test cases.
 [0;32m[----------] [mGlobal test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -506,6 +506,35 @@ Failed
 Expected non-fatal failure.
 
 [0;31m[  FAILED  ] [mExpectFailureTest.ExpectNonFatalFailureOnAllThreads
+[0;32m[----------] [m2 tests from ExpectFailureWithThreadsTest
+[0;32m[ RUN      ] [mExpectFailureWithThreadsTest.ExpectFatalFailure
+(expecting 2 failures)
+gtest_output_test_.cc:#: Failure
+Failed
+Expected fatal failure.
+gtest.cc:#: Failure
+Expected: 1 fatal failure
+  Actual: 0 failures
+[0;31m[  FAILED  ] [mExpectFailureWithThreadsTest.ExpectFatalFailure
+[0;32m[ RUN      ] [mExpectFailureWithThreadsTest.ExpectNonFatalFailure
+(expecting 2 failures)
+gtest_output_test_.cc:#: Failure
+Failed
+Expected non-fatal failure.
+gtest.cc:#: Failure
+Expected: 1 non-fatal failure
+  Actual: 0 failures
+[0;31m[  FAILED  ] [mExpectFailureWithThreadsTest.ExpectNonFatalFailure
+[0;32m[----------] [m1 test from ScopedFakeTestPartResultReporterTest
+[0;32m[ RUN      ] [mScopedFakeTestPartResultReporterTest.InterceptOnlyCurrentThread
+(expecting 2 failures)
+gtest_output_test_.cc:#: Failure
+Failed
+Expected fatal failure.
+gtest_output_test_.cc:#: Failure
+Failed
+Expected non-fatal failure.
+[0;31m[  FAILED  ] [mScopedFakeTestPartResultReporterTest.InterceptOnlyCurrentThread
 [0;32m[----------] [mGlobal test environment tear-down
 BarEnvironment::TearDown() called.
 gtest_output_test_.cc:#: Failure
@@ -515,9 +544,9 @@ FooEnvironment::TearDown() called.
 gtest_output_test_.cc:#: Failure
 Failed
 Expected fatal failure.
-[0;32m[==========] [m56 tests from 23 test cases ran.
+[0;32m[==========] [m59 tests from 25 test cases ran.
 [0;32m[  PASSED  ] [m21 tests.
-[0;31m[  FAILED  ] [m35 tests, listed below:
+[0;31m[  FAILED  ] [m38 tests, listed below:
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInSubroutine
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInNestedSubroutine
 [0;31m[  FAILED  ] [mFatalFailureTest.NonfatalFailureInSubroutine
@@ -553,8 +582,11 @@ Expected fatal failure.
 [0;31m[  FAILED  ] [mExpectFailureTest.ExpectNonFatalFailure
 [0;31m[  FAILED  ] [mExpectFailureTest.ExpectFatalFailureOnAllThreads
 [0;31m[  FAILED  ] [mExpectFailureTest.ExpectNonFatalFailureOnAllThreads
+[0;31m[  FAILED  ] [mExpectFailureWithThreadsTest.ExpectFatalFailure
+[0;31m[  FAILED  ] [mExpectFailureWithThreadsTest.ExpectNonFatalFailure
+[0;31m[  FAILED  ] [mScopedFakeTestPartResultReporterTest.InterceptOnlyCurrentThread
 
-35 FAILED TESTS
+38 FAILED TESTS
 [0;33m  YOU HAVE 1 DISABLED TEST
 
 [mNote: Google Test filter = FatalFailureTest.*:LoggingTest.*

@@ -30,6 +30,9 @@ include_directories(
 link_directories(
   ${gtest_BINARY_DIR}/src)
 
+# Defines CMAKE_USE_PTHREADS_INIT and CMAKE_THREAD_LIBS_INIT.
+find_package(Threads)
+
 # Defines the compiler/linker flags used to build gtest.  You can
 # tweak these definitions to suit your need.
 if (MSVC)
@@ -39,6 +42,11 @@ if (MSVC)
   set(cxx_default "${cxx_base} -EHsc -D_HAS_EXCEPTIONS=1")
 else()
   set(cxx_base "${CMAKE_CXX_FLAGS}")
+
+  if (CMAKE_USE_PTHREADS_INIT)  # The pthreads library is available.
+    set(cxx_base "${cxx_base} -DGTEST_HAS_PTHREAD=1")
+  endif()
+
   set(cxx_default "${cxx_base} -fexceptions")
 endif()
 
@@ -53,6 +61,9 @@ function(cxx_library name cxx_flags)
   set_target_properties(${name}
     PROPERTIES
     COMPILE_FLAGS "${cxx_flags}")
+    if (CMAKE_USE_PTHREADS_INIT)
+      target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT})
+    endif()
 endfunction()
 
 cxx_library(gtest "${cxx_default}" src/gtest-all.cc)
@@ -150,6 +161,7 @@ endfunction()
 cxx_test(gtest_unittest gtest_main)
 
 if (build_all_gtest_tests)
+  cxx_test(gtest-death-test_test gtest_main)
   cxx_test(gtest_environment_test gtest)
   cxx_test(gtest-filepath_test gtest_main)
   cxx_test(gtest-linked_ptr_test gtest_main)
@@ -191,10 +203,6 @@ if (build_all_gtest_tests)
     src/gtest-all.cc)
   cxx_library(gtest_main_no_rtti "${cxx_no_rtti}"
     src/gtest-all.cc src/gtest_main.cc)
-
-  find_package(Threads)  # Defines CMAKE_THREAD_LIBS_INIT.
-  cxx_test_with_flags(gtest-death-test_test "${cxx_default}"
-    "gtest_main;${CMAKE_THREAD_LIBS_INIT}" test/gtest-death-test_test.cc)
 
   cxx_test_with_flags(gtest_no_rtti_unittest "${cxx_no_rtti}"
     gtest_main_no_rtti test/gtest_unittest.cc)

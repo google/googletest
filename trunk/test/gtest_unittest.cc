@@ -174,7 +174,6 @@ using testing::internal::StreamableToString;
 using testing::internal::String;
 using testing::internal::TestEventListenersAccessor;
 using testing::internal::TestResultAccessor;
-using testing::internal::ThreadLocal;
 using testing::internal::UInt32;
 using testing::internal::Vector;
 using testing::internal::WideStringToUtf8;
@@ -6575,23 +6574,6 @@ typedef int IntAlias;
 TEST(StaticAssertTypeEqTest, CompilesForEqualTypes) {
   StaticAssertTypeEq<int, IntAlias>();
   StaticAssertTypeEq<int*, IntAlias*>();
-}
-
-TEST(ThreadLocalTest, DefaultConstructor) {
-  ThreadLocal<int> t1;
-  EXPECT_EQ(0, t1.get());
-
-  ThreadLocal<void*> t2;
-  EXPECT_TRUE(t2.get() == NULL);
-}
-
-TEST(ThreadLocalTest, Init) {
-  ThreadLocal<int> t1(123);
-  EXPECT_EQ(123, t1.get());
-
-  int i = 0;
-  ThreadLocal<int*> t2(&i);
-  EXPECT_EQ(&i, t2.get());
 }
 
 TEST(GetCurrentOsStackTraceExceptTopTest, ReturnsTheStackTrace) {

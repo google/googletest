@@ -410,7 +410,7 @@ void SetPthreadFlag() {
 
 }  // namespace
 
-#if GTEST_HAS_CLONE
+#if GTEST_HAS_CLONE && GTEST_HAS_PTHREAD
 
 TEST_F(TestForDeathTest, DoesNotExecuteAtforkHooks) {
   if (!testing::GTEST_FLAG(death_test_use_fork)) {
@@ -422,7 +422,7 @@ TEST_F(TestForDeathTest, DoesNotExecuteAtforkHooks) {
   }
 }
 
-#endif  // GTEST_HAS_CLONE
+#endif  // GTEST_HAS_CLONE && GTEST_HAS_PTHREAD
 
 // Tests that a method of another class can be used in a death test.
 TEST_F(TestForDeathTest, MethodOfAnotherClass) {
