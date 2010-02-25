@@ -690,7 +690,7 @@ int UnitTestImpl::failed_test_case_count() const {
 
 // Gets the number of all test cases.
 int UnitTestImpl::total_test_case_count() const {
-  return test_cases_.size();
+  return static_cast<int>(test_cases_.size());
 }
 
 // Gets the number of all test cases that contain at least one test
@@ -1898,12 +1898,12 @@ bool TestResult::HasNonfatalFailure() const {
 // Gets the number of all test parts.  This is the sum of the number
 // of successful test parts and the number of failed test parts.
 int TestResult::total_part_count() const {
-  return test_part_results_.size();
+  return static_cast<int>(test_part_results_.size());
 }
 
 // Returns the number of the test properties.
 int TestResult::test_property_count() const {
-  return test_properties_.size();
+  return static_cast<int>(test_properties_.size());
 }
 
 // class Test
@@ -2350,7 +2350,7 @@ int TestCase::test_to_run_count() const {
 
 // Gets the number of all tests.
 int TestCase::total_test_count() const {
-  return test_info_list_.size();
+  return static_cast<int>(test_info_list_.size());
 }
 
 // Creates a TestCase with the given name.
@@ -2395,7 +2395,7 @@ TestInfo* TestCase::GetMutableTestInfo(int i) {
 // destruction of the TestCase object.
 void TestCase::AddTestInfo(TestInfo * test_info) {
   test_info_list_.push_back(test_info);
-  test_indices_.push_back(test_indices_.size());
+  test_indices_.push_back(static_cast<int>(test_indices_.size()));
 }
 
 // Runs every test in this TestCase.
@@ -2458,7 +2458,7 @@ void TestCase::ShuffleTests(internal::Random* random) {
 // Restores the test order to before the first shuffle.
 void TestCase::UnshuffleTests() {
   for (size_t i = 0; i < test_indices_.size(); i++) {
-    test_indices_[i] = i;
+    test_indices_[i] = static_cast<int>(i);
   }
 }
 
@@ -3567,7 +3567,8 @@ void UnitTest::AddTestPartResult(TestPartResult::Type result_type,
   if (impl_->gtest_trace_stack().size() > 0) {
     msg << "\n" << GTEST_NAME_ << " trace:";
 
-    for (int i = impl_->gtest_trace_stack().size(); i > 0; --i) {
+    for (int i = static_cast<int>(impl_->gtest_trace_stack().size());
+         i > 0; --i) {
       const internal::TraceInfo& trace = impl_->gtest_trace_stack()[i - 1];
       msg << "\n" << internal::FormatFileLocation(trace.file, trace.line)
           << " " << trace.message;
@@ -3907,7 +3908,7 @@ TestCase* UnitTestImpl::GetTestCase(const char* test_case_name,
     test_cases_.push_back(new_test_case);
   }
 
-  test_case_indices_.push_back(test_case_indices_.size());
+  test_case_indices_.push_back(static_cast<int>(test_case_indices_.size()));
   return new_test_case;
 }
 
@@ -4270,7 +4271,7 @@ void UnitTestImpl::ShuffleTests() {
 
   // Shuffles the non-death test cases.
   ShuffleRange(random(), last_death_test_case_ + 1,
-               test_cases_.size(), &test_case_indices_);
+               static_cast<int>(test_cases_.size()), &test_case_indices_);
 
   // Shuffles the tests inside each test case.
   for (size_t i = 0; i < test_cases_.size(); i++) {
@@ -4284,7 +4285,7 @@ void UnitTestImpl::UnshuffleTests() {
     // Unshuffles the tests in each test case.
     test_cases_[i]->UnshuffleTests();
     // Resets the index of each test case.
-    test_case_indices_[i] = i;
+    test_case_indices_[i] = static_cast<int>(i);
   }
 }
 

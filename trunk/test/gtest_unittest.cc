@@ -683,7 +683,7 @@ class VectorShuffleTest : public Test {
   }
 
   static bool VectorIsShuffled(const TestingVector& vector) {
-    return RangeIsShuffled(vector, 0, vector.size());
+    return RangeIsShuffled(vector, 0, static_cast<int>(vector.size()));
   }
 
   static bool VectorIsUnshuffled(const TestingVector& vector) {

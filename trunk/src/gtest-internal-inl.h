@@ -251,7 +251,7 @@ bool ShouldRunTestOnShard(int total_shards, int shard_index, int test_id);
 // the given predicate.
 template <class Container, typename Predicate>
 inline int CountIf(const Container& c, Predicate predicate) {
-  return std::count_if(c.begin(), c.end(), predicate);
+  return static_cast<int>(std::count_if(c.begin(), c.end(), predicate));
 }
 
 // Applies a function/functor to each element in the container.
@@ -294,7 +294,7 @@ void ShuffleRange(internal::Random* random, int begin, int end,
 // Performs an in-place shuffle of the vector's elements.
 template <typename E>
 inline void Shuffle(internal::Random* random, std::vector<E>* v) {
-  ShuffleRange(random, 0, v->size(), v);
+  ShuffleRange(random, 0, static_cast<int>(v->size()), v);
 }
 
 // A function for deleting an object.  Handy for being used as a
