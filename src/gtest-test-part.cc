@@ -81,7 +81,7 @@ const TestPartResult& TestPartResultArray::GetTestPartResult(int index) const {
 
 // Returns the number of TestPartResult objects in the array.
 int TestPartResultArray::size() const {
-  return array_.size();
+  return static_cast<int>(array_.size());
 }
 
 namespace internal {
