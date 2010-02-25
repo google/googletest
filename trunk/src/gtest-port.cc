@@ -81,10 +81,8 @@ const int kStdErrFileno = STDERR_FILENO;
 // newly created test threads until signalled. Instances of this class must
 // be created and destroyed in the controller thread.
 ThreadStartSemaphore::ThreadStartSemaphore() : signalled_(false) {
-  int err = pthread_mutex_init(&mutex_, NULL);
-  GTEST_CHECK_(err == 0) << "pthread_mutex_init failed with error " << err;
-  err = pthread_cond_init(&cond_, NULL);
-  GTEST_CHECK_(err == 0) << "pthread_cond_init failed with error " << err;
+  GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_init(&mutex_, NULL));
+  GTEST_CHECK_POSIX_SUCCESS_(pthread_cond_init(&cond_, NULL));
   pthread_mutex_lock(&mutex_);
 }
 
@@ -92,75 +90,29 @@ ThreadStartSemaphore::~ThreadStartSemaphore() {
   // Every ThreadStartSemaphore object must be signalled. It locks
   // internal mutex upon creation and Signal unlocks it.
   GTEST_CHECK_(signalled_);
-
-  int err = pthread_mutex_destroy(&mutex_);
-  GTEST_CHECK_(err == 0)
-      << "pthread_mutex_destroy failed with error " << err;
-  err = pthread_cond_destroy(&cond_);
-  GTEST_CHECK_(err == 0)
-      << "pthread_cond_destroy failed with error " << err;
+  GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_destroy(&mutex_));
+  GTEST_CHECK_POSIX_SUCCESS_(pthread_cond_destroy(&cond_));
 }
 
 // Signals to all test threads to start. Must be called from the
 // controlling thread.
 void ThreadStartSemaphore::Signal() {
   signalled_ = true;
-  int err = pthread_cond_signal(&cond_);
-  GTEST_CHECK_(err == 0)
-      << "pthread_cond_signal failed with error " << err;
-  err = pthread_mutex_unlock(&mutex_);
-  GTEST_CHECK_(err == 0)
-      << "pthread_mutex_unlock failed with error " << err;
+  GTEST_CHECK_POSIX_SUCCESS_(pthread_cond_signal(&cond_));
+  GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_unlock(&mutex_));
 }
 
 // Blocks until the controlling thread signals. Should be called from a
 // test thread.
 void ThreadStartSemaphore::Wait() {
-  int err = pthread_mutex_lock(&mutex_);
-  GTEST_CHECK_(err == 0) << "pthread_mutex_lock failed with error " << err;
+  GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_lock(&mutex_));
 
   while (!signalled_) {
-    err = pthread_cond_wait(&cond_, &mutex_);
-    GTEST_CHECK_(err == 0)
-        << "pthread_cond_wait failed with error " << err;
+    GTEST_CHECK_POSIX_SUCCESS_(pthread_cond_wait(&cond_, &mutex_));
   }
-  err = pthread_mutex_unlock(&mutex_);
-  GTEST_CHECK_(err == 0)
-      << "pthread_mutex_unlock failed with error " << err;
+  GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_unlock(&mutex_));
 }
 
-void MutexBase::Lock() {
-  const int err = pthread_mutex_lock(&mutex_);
-  GTEST_CHECK_(err == 0) << "pthread_mutex_lock failed with error " << err;
-  owner_ = pthread_self();
-}
-
-void MutexBase::Unlock() {
-  // We don't protect writing to owner_ here, as it's the caller's
-  // responsibility to ensure that the current thread holds the mutex when
-  // this is called.
-  owner_ = 0;
-  const int err = pthread_mutex_unlock(&mutex_);
-  GTEST_CHECK_(err == 0) << "pthread_mutex_unlock failed with error " << err;
-}
-
-// Does nothing if the current thread holds the mutex. Otherwise, crashes
-// with high probability.
-void MutexBase::AssertHeld() const {
-  GTEST_CHECK_(owner_ == pthread_self())
-      << "Current thread is not holding mutex." << this;
-}
-
-Mutex::Mutex() {
-  owner_ = 0;
-  const int err = pthread_mutex_init(&mutex_, NULL);
-  GTEST_CHECK_(err == 0) << "pthread_mutex_init failed with error " << err;
-}
-
-Mutex::~Mutex() {
-  const int err = pthread_mutex_destroy(&mutex_);
-  GTEST_CHECK_(err == 0) << "pthread_mutex_destroy failed with error " << err;
-}
 #endif  // GTEST_HAS_PTHREAD
 
 #if GTEST_OS_MAC

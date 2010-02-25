@@ -733,6 +733,16 @@ inline void FlushInfoLog() { fflush(NULL); }
     else \
       GTEST_LOG_(FATAL) << "Condition " #condition " failed. "
 
+// An all-mode assert to verify that the given POSIX-style function
+// call returns 0 (indicating success).  Known limitation: this
+// doesn't expand to a balanced 'if' statement, so enclose the macro
+// in {} if you need to use it as the only statement in an 'if'
+// branch.
+#define GTEST_CHECK_POSIX_SUCCESS_(posix_call) \
+  if (const int gtest_error = (posix_call)) \
+    GTEST_LOG_(FATAL) << #posix_call << "failed with error " \
+                      << gtest_error
+
 #if GTEST_HAS_STREAM_REDIRECTION_
 
 // Defines the stderr capturer:
@@ -770,60 +780,81 @@ const ::std::vector<String>& GetArgvs();
 // MutexBase and Mutex implement mutex on pthreads-based platforms. They
 // are used in conjunction with class MutexLock:
 //
-// Mutex mutex;
-// ...
-// MutexLock lock(&mutex);  // Acquires the mutex and releases it at the end
-//                          // of the current scope.
+//   Mutex mutex;
+//   ...
+//   MutexLock lock(&mutex);  // Acquires the mutex and releases it at the end
+//                            // of the current scope.
 //
 // MutexBase implements behavior for both statically and dynamically
-// allocated mutexes.  Do not use the MutexBase type directly.  Instead,
-// define a static mutex using the GTEST_DEFINE_STATIC_MUTEX_ macro:
+// allocated mutexes.  Do not use MutexBase directly.  Instead, write
+// the following to define a static mutex:
 //
-// GTEST_DEFINE_STATIC_MUTEX_(g_some_mutex);
+//   GTEST_DEFINE_STATIC_MUTEX_(g_some_mutex);
 //
-// Such mutex may also be forward-declared:
+// You can forward declare a static mutex like this:
 //
-// GTEST_DECLARE_STATIC_MUTEX_(g_some_mutex);
+//   GTEST_DECLARE_STATIC_MUTEX_(g_some_mutex);
 //
-// Do not use MutexBase for dynamic mutexes either.  Use the Mutex class
-// for them.
+// To create a dynamic mutex, just define an object of type Mutex.
 class MutexBase {
  public:
-  void Lock();
-  void Unlock();
+  // Acquires this mutex.
+  void Lock() {
+    GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_lock(&mutex_));
+    owner_ = pthread_self();
+  }
+
+  // Releases this mutex.
+  void Unlock() {
+    // We don't protect writing to owner_ here, as it's the caller's
+    // responsibility to ensure that the current thread holds the
+    // mutex when this is called.
+    owner_ = 0;
+    GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_unlock(&mutex_));
+  }
 
   // Does nothing if the current thread holds the mutex. Otherwise, crashes
   // with high probability.
-  void AssertHeld() const;
+  void AssertHeld() const {
+    GTEST_CHECK_(owner_ == pthread_self())
+        << "The current thread is not holding the mutex @" << this;
+  }
 
- // We must be able to initialize objects of MutexBase used as static
- // mutexes with initializer lists.  This means MutexBase has to be a POD.
- // The class members have to be public.
+  // A static mutex may be used before main() is entered.  It may even
+  // be used before the dynamic initialization stage.  Therefore we
+  // must be able to initialize a static mutex object at link time.
+  // This means MutexBase has to be a POD and its member variables
+  // have to be public.
  public:
-  pthread_mutex_t mutex_;
-  pthread_t owner_;
+  pthread_mutex_t mutex_;  // The underlying pthread mutex.
+  pthread_t owner_;  // The thread holding the mutex; 0 means no one holds it.
 };
 
 // Forward-declares a static mutex.
 #define GTEST_DECLARE_STATIC_MUTEX_(mutex) \
     extern ::testing::internal::MutexBase mutex
 
-// Defines and statically initializes a static mutex.
+// Defines and statically (i.e. at link time) initializes a static mutex.
 #define GTEST_DEFINE_STATIC_MUTEX_(mutex) \
     ::testing::internal::MutexBase mutex = { PTHREAD_MUTEX_INITIALIZER, 0 }
 
-// The class Mutex supports only mutexes created at runtime. It shares its
-// API with MutexBase otherwise.
+// The Mutex class can only be used for mutexes created at runtime. It
+// shares its API with MutexBase otherwise.
 class Mutex : public MutexBase {
  public:
-  Mutex();
-  ~Mutex();
+  Mutex() {
+    GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_init(&mutex_, NULL));
+    owner_ = 0;
+  }
+  ~Mutex() {
+    GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_destroy(&mutex_));
+  }
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(Mutex);
 };
 
-// We cannot call it MutexLock directly as the ctor declaration would
+// We cannot name this class MutexLock as the ctor declaration would
 // conflict with a macro named MutexLock, which is defined on some
 // platforms.  Hence the typedef trick below.
 class GTestMutexLock {
@@ -843,40 +874,34 @@ typedef GTestMutexLock MutexLock;
 
 // Implements thread-local storage on pthreads-based systems.
 //
-// // Thread 1
-// ThreadLocal<int> tl(100);
+//   // Thread 1
+//   ThreadLocal<int> tl(100);  // 100 is the default value for each thread.
 //
-// // Thread 2
-// tl.set(150);
-// EXPECT_EQ(150, tl.get());
+//   // Thread 2
+//   tl.set(150);  // Changes the value for thread 2 only.
+//   EXPECT_EQ(150, tl.get());
 //
-// // Thread 1
-// EXPECT_EQ(100, tl.get());  // On Thread 1, tl.get() returns original value.
-// tl.set(200);
-// EXPECT_EQ(200, tl.get());
+//   // Thread 1
+//   EXPECT_EQ(100, tl.get());  // In thread 1, tl has the original value.
+//   tl.set(200);
+//   EXPECT_EQ(200, tl.get());
 //
-// The default ThreadLocal constructor requires T to have a default
-// constructor.  The single param constructor requires a copy contructor
-// from T.  A per-thread object managed by a ThreadLocal instance for a
-// thread is guaranteed to exist at least until the earliest of the two
-// events: (a) the thread terminates or (b) the ThreadLocal object
-// managing it is destroyed.
+// The template type argument T must have a public copy constructor.
+// In addition, the default ThreadLocal constructor requires T to have
+// a public default constructor.  An object managed by a ThreadLocal
+// instance for a thread is guaranteed to exist at least until the
+// earliest of the two events: (a) the thread terminates or (b) the
+// ThreadLocal object is destroyed.
 template <typename T>
 class ThreadLocal {
  public:
-  ThreadLocal()
-      : key_(CreateKey()),
-        default_(),
-        instance_creator_func_(DefaultConstructNewInstance) {}
-
-  explicit ThreadLocal(const T& value)
-      : key_(CreateKey()),
-        default_(value),
-        instance_creator_func_(CopyConstructNewInstance) {}
+  ThreadLocal() : key_(CreateKey()),
+                  default_() {}
+  explicit ThreadLocal(const T& value) : key_(CreateKey()),
+                                         default_(value) {}
 
   ~ThreadLocal() {
-    const int err = pthread_key_delete(key_);
-    GTEST_CHECK_(err == 0) << "pthread_key_delete failed with error " << err;
+    GTEST_CHECK_POSIX_SUCCESS_(pthread_key_delete(key_));
   }
 
   T* pointer() { return GetOrCreateValue(); }
@@ -887,54 +912,43 @@ class ThreadLocal {
  private:
   static pthread_key_t CreateKey() {
     pthread_key_t key;
-    const int err = pthread_key_create(&key, &DeleteData);
-    GTEST_CHECK_(err == 0) << "pthread_key_create failed with error " << err;
+    GTEST_CHECK_POSIX_SUCCESS_(pthread_key_create(&key, &DeleteData));
     return key;
   }
 
   T* GetOrCreateValue() const {
-    T* value = static_cast<T*>(pthread_getspecific(key_));
-    if (value == NULL) {
-      value = (*instance_creator_func_)(default_);
-      const int err = pthread_setspecific(key_, value);
-      GTEST_CHECK_(err == 0) << "pthread_setspecific failed with error " << err;
-    }
-    return value;
+    T* const value = static_cast<T*>(pthread_getspecific(key_));
+    if (value != NULL)
+      return value;
+
+    T* const new_value = new T(default_);
+    GTEST_CHECK_POSIX_SUCCESS_(pthread_setspecific(key_, new_value));
+    return new_value;
   }
 
   static void DeleteData(void* data) { delete static_cast<T*>(data); }
 
-  static T* DefaultConstructNewInstance(const T&) { return new T(); }
-
-  // Copy constructs new instance of T from default_.  Will not be
-  // instantiated unless this ThreadLocal is constructed by the single
-  // parameter constructor.
-  static T* CopyConstructNewInstance(const T& t) { return new T(t); }
-
   // A key pthreads uses for looking up per-thread values.
   const pthread_key_t key_;
-  // Contains the value that CopyConstructNewInstance copies from.
-  const T default_;
-  // Points to either DefaultConstructNewInstance or CopyConstructNewInstance.
-  T* (*const instance_creator_func_)(const T& default_);
+  const T default_;  // The default value for each thread.
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadLocal);
 };
 
-// Allows the controller thread pause execution of newly created test
-// threads until signalled. Instances of this class must be created and
-// destroyed in the controller thread.
+// Allows a controller thread to pause execution of newly created
+// threads until signalled.  Instances of this class must be created
+// and destroyed in the controller thread.
 //
-// This class is supplied only for the purpose of testing Google Test's own
+// This class is supplied only for testing Google Test's own
 // constructs. Do not use it in user tests, either directly or indirectly.
 class ThreadStartSemaphore {
  public:
   ThreadStartSemaphore();
   ~ThreadStartSemaphore();
-  // Signals to all test threads created with this semaphore to start. Must
-  // be called from the controlling thread.
+  // Signals to all threads created with this semaphore to start. Must
+  // be called from the controller thread.
   void Signal();
-  // Blocks until the controlling thread signals. Must be called from a test
+  // Blocks until the controller thread signals. Must be called from a test
   // thread.
   void Wait();
 
@@ -947,17 +961,17 @@ class ThreadStartSemaphore {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadStartSemaphore);
 };
 
-// Helper class for testing Google Test's multithreading constructs.
+// Helper class for testing Google Test's multi-threading constructs.
 // Use:
 //
-// void ThreadFunc(int param) { /* Do things with param */ }
-// ThreadSemaphore semaphore;
-// ...
-// // The semaphore parameter is optional; you can supply NULL.
-// ThredWithParam<int> thread(&ThreadFunc, 5, &semaphore);
-// sem.Signal(); // Allows the thread to start.
+//   void ThreadFunc(int param) { /* Do things with param */ }
+//   ThreadStartSemaphore semaphore;
+//   ...
+//   // The semaphore parameter is optional; you can supply NULL.
+//   ThreadWithParam<int> thread(&ThreadFunc, 5, &semaphore);
+//   semaphore.Signal();  // Allows the thread to start.
 //
-// This class is supplied only for the purpose of testing Google Test's own
+// This class is supplied only for testing Google Test's own
 // constructs. Do not use it in user tests, either directly or indirectly.
 template <typename T>
 class ThreadWithParam {
@@ -969,19 +983,16 @@ class ThreadWithParam {
         param_(param),
         start_semaphore_(semaphore),
         finished_(false) {
-    // func_, param_, and start_semaphore_ must be initialized before
-    // pthread_create() is called.
-    const int err = pthread_create(&thread_, 0, ThreadMainStatic, this);
-    GTEST_CHECK_(err == 0) << "pthread_create failed with error: "
-                           << strerror(err) << "(" << err << ")";
+    // The thread can be created only after all fields except thread_
+    // have been initialized.
+    GTEST_CHECK_POSIX_SUCCESS_(
+        pthread_create(&thread_, 0, ThreadMainStatic, this));
   }
   ~ThreadWithParam() { Join(); }
 
   void Join() {
     if (!finished_) {
-      const int err = pthread_join(thread_, 0);
-      GTEST_CHECK_(err == 0) << "pthread_join failed with error:"
-        << strerror(err) << "(" << err << ")";
+      GTEST_CHECK_POSIX_SUCCESS_(pthread_join(thread_, 0));
       finished_ = true;
     }
   }
@@ -992,23 +1003,18 @@ class ThreadWithParam {
       start_semaphore_->Wait();
     func_(param_);
   }
-  static void* ThreadMainStatic(void* param) {
-    static_cast<ThreadWithParam<T>*>(param)->ThreadMain();
-    return NULL;  // We are not interested in thread exit code.
+  static void* ThreadMainStatic(void* thread_with_param) {
+    static_cast<ThreadWithParam<T>*>(thread_with_param)->ThreadMain();
+    return NULL;  // We are not interested in the thread exit code.
   }
 
-  // User supplied thread function.
-  const UserThreadFunc func_;
-  // User supplied parameter to UserThreadFunc.
-  const T param_;
-
-  // Native thread object.
-  pthread_t thread_;
+  const UserThreadFunc func_;  // User-supplied thread function.
+  const T param_;  // User-supplied parameter to the thread function.
   // When non-NULL, used to block execution until the controller thread
   // signals.
   ThreadStartSemaphore* const start_semaphore_;
-  // true iff UserThreadFunc has not completed yet.
-  bool finished_;
+  bool finished_;  // Has the thread function finished?
+  pthread_t thread_;  // The native thread object.
 };
 
 #define GTEST_IS_THREADSAFE 1
