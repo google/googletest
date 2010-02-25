@@ -770,18 +770,6 @@ TEST(ThreadLocalTest, SingleParamConstructorInitializesToParam) {
   EXPECT_EQ(&i, t2.get());
 }
 
-class NoCopyConstructor {
- public:
-  NoCopyConstructor() {}
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(NoCopyConstructor);
-};
-
-TEST(ThreadLocalTest, ValueCopyConstructorIsNotRequiredForDefaultVersion) {
-  ThreadLocal<NoCopyConstructor> bar;
-  bar.get();
-}
-
 class NoDefaultContructor {
  public:
   explicit NoDefaultContructor(const char*) {}
@@ -796,9 +784,6 @@ TEST(ThreadLocalTest, ValueDefaultContructorIsNotRequiredForParamVersion) {
 TEST(ThreadLocalTest, GetAndPointerReturnSameValue) {
   ThreadLocal<String> thread_local;
 
-  // This is why EXPECT_TRUE is used here rather than EXPECT_EQ because
-  // we don't care about a particular value of thread_local.pointer() here;
-  // we only care about pointer and reference referring to the same lvalue.
   EXPECT_EQ(thread_local.pointer(), &(thread_local.get()));
 
   // Verifies the condition still holds after calling set.
@@ -825,7 +810,7 @@ TEST(MutexTestDeathTest, AssertHeldShouldAssertWhenNotLocked) {
     { MutexLock lock(&m); }
     m.AssertHeld();
   },
-  "Current thread is not holding mutex..+");
+  "The current thread is not holding the mutex @.+");
 }
 
 void SleepMilliseconds(int time) {
@@ -847,16 +832,13 @@ class AtomicCounterWithMutex {
       // We cannot use Mutex and MutexLock here or rely on their memory
       // barrier functionality as we are testing them here.
       pthread_mutex_t memory_barrier_mutex;
-      int err = pthread_mutex_init(&memory_barrier_mutex, NULL);
-      GTEST_CHECK_(err == 0) << "pthread_mutex_init failed with error " << err;
-      err = pthread_mutex_lock(&memory_barrier_mutex);
-      GTEST_CHECK_(err == 0) << "pthread_mutex_lock failed with error " << err;
+      GTEST_CHECK_POSIX_SUCCESS_(
+          pthread_mutex_init(&memory_barrier_mutex, NULL));
+      GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_lock(&memory_barrier_mutex));
 
       SleepMilliseconds(random_.Generate(30));
 
-      err = pthread_mutex_unlock(&memory_barrier_mutex);
-      GTEST_CHECK_(err == 0)
-          << "pthread_mutex_unlock failed with error " << err;
+      GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_unlock(&memory_barrier_mutex));
     }
     value_ = temp + 1;
   }
@@ -937,7 +919,7 @@ int CountedDestructor::counter_ = 0;
 
 template <typename T>
 void CallThreadLocalGet(ThreadLocal<T>* threadLocal) {
-    threadLocal->get();
+  threadLocal->get();
 }
 
 TEST(ThreadLocalTest, DestroysManagedObjectsNoLaterThanSelf) {
