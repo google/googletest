@@ -35,6 +35,7 @@
 #include <gtest/gtest.h>
 
 #include <iostream>
+#include <vector>
 
 // We must define this macro in order to #include
 // gtest-internal-inl.h.  This is how Google Test prevents a user from
@@ -51,7 +52,6 @@ namespace {
 using internal::scoped_ptr;
 using internal::String;
 using internal::TestPropertyKeyIs;
-using internal::Vector;
 using internal::ThreadStartSemaphore;
 using internal::ThreadWithParam;
 
@@ -75,12 +75,13 @@ String IdToString(int id) {
   return id_message.GetString();
 }
 
-void ExpectKeyAndValueWereRecordedForId(const Vector<TestProperty>& properties,
-                                        int id,
-                                        const char* suffix) {
+void ExpectKeyAndValueWereRecordedForId(
+    const std::vector<TestProperty>& properties,
+    int id, const char* suffix) {
   TestPropertyKeyIs matches_key(IdToKey(id, suffix).c_str());
-  const TestProperty* property = properties.FindIf(matches_key);
-  ASSERT_TRUE(property != NULL)
+  const std::vector<TestProperty>::const_iterator property =
+      std::find_if(properties.begin(), properties.end(), matches_key);
+  ASSERT_TRUE(property != properties.end())
       << "expecting " << suffix << " value for id " << id;
   EXPECT_STREQ(IdToString(id).c_str(), property->value());
 }
@@ -143,11 +144,11 @@ TEST(StressTest, CanUseScopedTraceAndAssertionsInManyThreads) {
   const TestInfo* const info = UnitTest::GetInstance()->current_test_info();
   const TestResult* const result = info->result();
 
-  Vector<TestProperty> properties;
+  std::vector<TestProperty> properties;
   // We have no access to the TestResult's list of properties but we can
   // copy them one by one.
   for (int i = 0; i < result->test_property_count(); ++i)
-    properties.PushBack(result->GetTestProperty(i));
+    properties.push_back(result->GetTestProperty(i));
 
   EXPECT_EQ(kThreadCount * 2 + 1, result->test_property_count())
       << "String and int values recorded on each thread, "

@@ -114,7 +114,6 @@ struct TraceInfo;                      // Information about a trace point.
 class ScopedTrace;                     // Implements scoped trace.
 class TestInfoImpl;                    // Opaque implementation of TestInfo
 class UnitTestImpl;                    // Opaque implementation of UnitTest
-template <typename E> class Vector;    // A generic vector.
 
 // How many times InitGoogleTest() has been called.
 extern int g_init_gtest_count;
