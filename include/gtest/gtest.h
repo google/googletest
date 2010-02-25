@@ -52,6 +52,8 @@
 #define GTEST_INCLUDE_GTEST_GTEST_H_
 
 #include <limits>
+#include <vector>
+
 #include <gtest/internal/gtest-internal.h>
 #include <gtest/internal/gtest-string.h>
 #include <gtest/gtest-death-test.h>
@@ -535,13 +537,13 @@ class TestResult {
   friend class internal::WindowsDeathTest;
 
   // Gets the vector of TestPartResults.
-  const internal::Vector<TestPartResult>& test_part_results() const {
-    return *test_part_results_;
+  const std::vector<TestPartResult>& test_part_results() const {
+    return test_part_results_;
   }
 
   // Gets the vector of TestProperties.
-  const internal::Vector<TestProperty>& test_properties() const {
-    return *test_properties_;
+  const std::vector<TestProperty>& test_properties() const {
+    return test_properties_;
   }
 
   // Sets the elapsed time.
@@ -579,9 +581,9 @@ class TestResult {
   internal::Mutex test_properites_mutex_;
 
   // The vector of TestPartResults
-  internal::scoped_ptr<internal::Vector<TestPartResult> > test_part_results_;
+  std::vector<TestPartResult> test_part_results_;
   // The vector of TestProperties
-  internal::scoped_ptr<internal::Vector<TestProperty> > test_properties_;
+  std::vector<TestProperty> test_properties_;
   // Running count of death tests.
   int death_test_count_;
   // The elapsed time, in milliseconds.
@@ -745,11 +747,11 @@ class TestCase {
   friend class internal::UnitTestImpl;
 
   // Gets the (mutable) vector of TestInfos in this TestCase.
-  internal::Vector<TestInfo*>& test_info_list() { return *test_info_list_; }
+  std::vector<TestInfo*>& test_info_list() { return test_info_list_; }
 
   // Gets the (immutable) vector of TestInfos in this TestCase.
-  const internal::Vector<TestInfo *> & test_info_list() const {
-    return *test_info_list_;
+  const std::vector<TestInfo*>& test_info_list() const {
+    return test_info_list_;
   }
 
   // Returns the i-th test among all the tests. i can range from 0 to
@@ -798,11 +800,11 @@ class TestCase {
   internal::String comment_;
   // The vector of TestInfos in their original order.  It owns the
   // elements in the vector.
-  const internal::scoped_ptr<internal::Vector<TestInfo*> > test_info_list_;
+  std::vector<TestInfo*> test_info_list_;
   // Provides a level of indirection for the test list to allow easy
   // shuffling and restoring the test order.  The i-th element in this
   // vector is the index of the i-th test in the shuffled test list.
-  const internal::scoped_ptr<internal::Vector<int> > test_indices_;
+  std::vector<int> test_indices_;
   // Pointer to the function that sets up the test case.
   Test::SetUpTestCaseFunc set_up_tc_;
   // Pointer to the function that tears down the test case.

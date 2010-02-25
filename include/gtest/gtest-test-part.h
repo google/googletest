@@ -34,6 +34,7 @@
 #define GTEST_INCLUDE_GTEST_GTEST_TEST_PART_H_
 
 #include <iosfwd>
+#include <vector>
 #include <gtest/internal/gtest-internal.h>
 #include <gtest/internal/gtest-string.h>
 
@@ -117,15 +118,11 @@ std::ostream& operator<<(std::ostream& os, const TestPartResult& result);
 
 // An array of TestPartResult objects.
 //
-// We define this class as we cannot use STL containers when compiling
-// Google Test with MSVC 7.1 and exceptions disabled.
-//
 // Don't inherit from TestPartResultArray as its destructor is not
 // virtual.
 class TestPartResultArray {
  public:
-  TestPartResultArray();
-  ~TestPartResultArray();
+  TestPartResultArray() {}
 
   // Appends the given TestPartResult to the array.
   void Append(const TestPartResult& result);
@@ -135,9 +132,9 @@ class TestPartResultArray {
 
   // Returns the number of TestPartResult objects in the array.
   int size() const;
+
  private:
-  // Internally we use a Vector to implement the array.
-  internal::Vector<TestPartResult>* const array_;
+  std::vector<TestPartResult> array_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(TestPartResultArray);
 };

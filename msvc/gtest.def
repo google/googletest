@@ -13,7 +13,6 @@ EXPORTS
   ??0ScopedTrace@internal@testing@@QAE@PBDHABVMessage@2@@Z
   ??0SingleFailureChecker@internal@testing@@QAE@PBVTestPartResultArray@2@W4Type@TestPartResult@2@PBD@Z
   ??0Test@testing@@IAE@XZ
-  ??0TestPartResultArray@testing@@QAE@XZ
   ??1AssertHelper@internal@testing@@QAE@XZ
   ??1GTestLog@internal@testing@@QAE@XZ
   ??1HasNewFatalFailureHelper@internal@testing@@UAE@XZ
@@ -22,7 +21,6 @@ EXPORTS
   ??1ScopedTrace@internal@testing@@QAE@XZ
   ??1SingleFailureChecker@internal@testing@@QAE@XZ
   ??1Test@testing@@UAE@XZ
-  ??1TestPartResultArray@testing@@QAE@XZ
   ??4AssertHelper@internal@testing@@QBEXABVMessage@2@@Z
   ??6Message@testing@@QAEAAV01@ABV?$basic_string@_WU?$char_traits@_W@std@@V?$allocator@_W@2@@std@@@Z
   ??7AssertionResult@testing@@QBE?AV01@XZ

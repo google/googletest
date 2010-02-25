@@ -52,7 +52,9 @@
 #include <stdlib.h>  // For strtoll/_strtoul64/malloc/free.
 #include <string.h>  // For memmove.
 
+#include <algorithm>
 #include <string>
+#include <vector>
 
 #include <gtest/internal/gtest-port.h>
 
@@ -243,255 +245,62 @@ Int32 Int32FromEnvOrDie(const char* env_var, Int32 default_val);
 // method. Assumes that 0 <= shard_index < total_shards.
 bool ShouldRunTestOnShard(int total_shards, int shard_index, int test_id);
 
-// Vector is an ordered container that supports random access to the
-// elements.
-//
-// We cannot use std::vector, as Visual C++ 7.1's implementation of
-// STL has problems compiling when exceptions are disabled.  There is
-// a hack to work around the problems, but we've seen cases where the
-// hack fails to work.
-//
-// The element type must support copy constructor and operator=.
-template <typename E>  // E is the element type.
-class Vector {
- public:
-  // Creates an empty Vector.
-  Vector() : elements_(NULL), capacity_(0), size_(0) {}
+// STL container utilities.
 
-  // D'tor.
-  virtual ~Vector() { Clear(); }
+// Returns the number of elements in the given container that satisfy
+// the given predicate.
+template <class Container, typename Predicate>
+inline int CountIf(const Container& c, Predicate predicate) {
+  return std::count_if(c.begin(), c.end(), predicate);
+}
 
-  // Clears the Vector.
-  void Clear() {
-    if (elements_ != NULL) {
-      for (int i = 0; i < size_; i++) {
-        delete elements_[i];
-      }
+// Applies a function/functor to each element in the container.
+template <class Container, typename Functor>
+void ForEach(const Container& c, Functor functor) {
+  std::for_each(c.begin(), c.end(), functor);
+}
 
-      free(elements_);
-      elements_ = NULL;
-      capacity_ = size_ = 0;
-    }
+// Returns the i-th element of the vector, or default_value if i is not
+// in range [0, v.size()).
+template <typename E>
+inline E GetElementOr(const std::vector<E>& v, int i, E default_value) {
+  return (i < 0 || i >= static_cast<int>(v.size())) ? default_value : v[i];
+}
+
+// Performs an in-place shuffle of a range of the vector's elements.
+// 'begin' and 'end' are element indices as an STL-style range;
+// i.e. [begin, end) are shuffled, where 'end' == size() means to
+// shuffle to the end of the vector.
+template <typename E>
+void ShuffleRange(internal::Random* random, int begin, int end,
+                  std::vector<E>* v) {
+  const int size = static_cast<int>(v->size());
+  GTEST_CHECK_(0 <= begin && begin <= size)
+      << "Invalid shuffle range start " << begin << ": must be in range [0, "
+      << size << "].";
+  GTEST_CHECK_(begin <= end && end <= size)
+      << "Invalid shuffle range finish " << end << ": must be in range ["
+      << begin << ", " << size << "].";
+
+  // Fisher-Yates shuffle, from
+  // http://en.wikipedia.org/wiki/Fisher-Yates_shuffle
+  for (int range_width = end - begin; range_width >= 2; range_width--) {
+    const int last_in_range = begin + range_width - 1;
+    const int selected = begin + random->Generate(range_width);
+    std::swap((*v)[selected], (*v)[last_in_range]);
   }
+}
 
-  // Gets the number of elements.
-  int size() const { return size_; }
-
-  // Adds an element to the end of the Vector.  A copy of the element
-  // is created using the copy constructor, and then stored in the
-  // Vector.  Changes made to the element in the Vector doesn't affect
-  // the source object, and vice versa.
-  void PushBack(const E& element) { Insert(element, size_); }
-
-  // Adds an element to the beginning of this Vector.
-  void PushFront(const E& element) { Insert(element, 0); }
-
-  // Removes an element from the beginning of this Vector.  If the
-  // result argument is not NULL, the removed element is stored in the
-  // memory it points to.  Otherwise the element is thrown away.
-  // Returns true iff the vector wasn't empty before the operation.
-  bool PopFront(E* result) {
-    if (size_ == 0)
-      return false;
-
-    if (result != NULL)
-      *result = GetElement(0);
-
-    Erase(0);
-    return true;
-  }
-
-  // Inserts an element at the given index.  It's the caller's
-  // responsibility to ensure that the given index is in the range [0,
-  // size()].
-  void Insert(const E& element, int index) {
-    GrowIfNeeded();
-    MoveElements(index, size_ - index, index + 1);
-    elements_[index] = new E(element);
-    size_++;
-  }
-
-  // Erases the element at the specified index, or aborts the program if the
-  // index is not in range [0, size()).
-  void Erase(int index) {
-    GTEST_CHECK_(0 <= index && index < size_)
-        << "Invalid Vector index " << index << ": must be in range [0, "
-        << (size_ - 1) << "].";
-
-    delete elements_[index];
-    MoveElements(index + 1, size_ - index - 1, index);
-    size_--;
-  }
-
-  // Returns the number of elements that satisfy a given predicate.
-  // The parameter 'predicate' is a Boolean function or functor that
-  // accepts a 'const E &', where E is the element type.
-  template <typename P>  // P is the type of the predicate function/functor
-  int CountIf(P predicate) const {
-    int count = 0;
-    for (int i = 0; i < size_; i++) {
-      if (predicate(*(elements_[i]))) {
-        count++;
-      }
-    }
-
-    return count;
-  }
-
-  // Applies a function/functor to each element in the Vector.  The
-  // parameter 'functor' is a function/functor that accepts a 'const
-  // E &', where E is the element type.  This method does not change
-  // the elements.
-  template <typename F>  // F is the type of the function/functor
-  void ForEach(F functor) const {
-    for (int i = 0; i < size_; i++) {
-      functor(*(elements_[i]));
-    }
-  }
-
-  // Returns the first node whose element satisfies a given predicate,
-  // or NULL if none is found.  The parameter 'predicate' is a
-  // function/functor that accepts a 'const E &', where E is the
-  // element type.  This method does not change the elements.
-  template <typename P>  // P is the type of the predicate function/functor.
-  const E* FindIf(P predicate) const {
-    for (int i = 0; i < size_; i++) {
-      if (predicate(*elements_[i])) {
-        return elements_[i];
-      }
-    }
-    return NULL;
-  }
-
-  template <typename P>
-  E* FindIf(P predicate) {
-    for (int i = 0; i < size_; i++) {
-      if (predicate(*elements_[i])) {
-        return elements_[i];
-      }
-    }
-    return NULL;
-  }
-
-  // Returns the i-th element of the Vector, or aborts the program if i
-  // is not in range [0, size()).
-  const E& GetElement(int i) const {
-    GTEST_CHECK_(0 <= i && i < size_)
-        << "Invalid Vector index " << i << ": must be in range [0, "
-        << (size_ - 1) << "].";
-
-    return *(elements_[i]);
-  }
-
-  // Returns a mutable reference to the i-th element of the Vector, or
-  // aborts the program if i is not in range [0, size()).
-  E& GetMutableElement(int i) {
-    GTEST_CHECK_(0 <= i && i < size_)
-        << "Invalid Vector index " << i << ": must be in range [0, "
-        << (size_ - 1) << "].";
-
-    return *(elements_[i]);
-  }
-
-  // Returns the i-th element of the Vector, or default_value if i is not
-  // in range [0, size()).
-  E GetElementOr(int i, E default_value) const {
-    return (i < 0 || i >= size_) ? default_value : *(elements_[i]);
-  }
-
-  // Swaps the i-th and j-th elements of the Vector.  Crashes if i or
-  // j is invalid.
-  void Swap(int i, int j) {
-    GTEST_CHECK_(0 <= i && i < size_)
-        << "Invalid first swap element " << i << ": must be in range [0, "
-        << (size_ - 1) << "].";
-    GTEST_CHECK_(0 <= j && j < size_)
-        << "Invalid second swap element " << j << ": must be in range [0, "
-        << (size_ - 1) << "].";
-
-    E* const temp = elements_[i];
-    elements_[i] = elements_[j];
-    elements_[j] = temp;
-  }
-
-  // Performs an in-place shuffle of a range of this Vector's nodes.
-  // 'begin' and 'end' are element indices as an STL-style range;
-  // i.e. [begin, end) are shuffled, where 'end' == size() means to
-  // shuffle to the end of the Vector.
-  void ShuffleRange(internal::Random* random, int begin, int end) {
-    GTEST_CHECK_(0 <= begin && begin <= size_)
-        << "Invalid shuffle range start " << begin << ": must be in range [0, "
-        << size_ << "].";
-    GTEST_CHECK_(begin <= end && end <= size_)
-        << "Invalid shuffle range finish " << end << ": must be in range ["
-        << begin << ", " << size_ << "].";
-
-    // Fisher-Yates shuffle, from
-    // http://en.wikipedia.org/wiki/Fisher-Yates_shuffle
-    for (int range_width = end - begin; range_width >= 2; range_width--) {
-      const int last_in_range = begin + range_width - 1;
-      const int selected = begin + random->Generate(range_width);
-      Swap(selected, last_in_range);
-    }
-  }
-
-  // Performs an in-place shuffle of this Vector's nodes.
-  void Shuffle(internal::Random* random) {
-    ShuffleRange(random, 0, size());
-  }
-
-  // Returns a copy of this Vector.
-  Vector* Clone() const {
-    Vector* const clone = new Vector;
-    clone->Reserve(size_);
-    for (int i = 0; i < size_; i++) {
-      clone->PushBack(GetElement(i));
-    }
-    return clone;
-  }
-
- private:
-  // Makes sure this Vector's capacity is at least the given value.
-  void Reserve(int new_capacity) {
-    if (new_capacity <= capacity_)
-      return;
-
-    capacity_ = new_capacity;
-    elements_ = static_cast<E**>(
-        realloc(elements_, capacity_*sizeof(elements_[0])));
-  }
-
-  // Grows the buffer if it is not big enough to hold one more element.
-  void GrowIfNeeded() {
-    if (size_ < capacity_)
-      return;
-
-    // Exponential bump-up is necessary to ensure that inserting N
-    // elements is O(N) instead of O(N^2).  The factor 3/2 means that
-    // no more than 1/3 of the slots are wasted.
-    const int new_capacity = 3*(capacity_/2 + 1);
-    GTEST_CHECK_(new_capacity > capacity_)  // Does the new capacity overflow?
-        << "Cannot grow a Vector with " << capacity_ << " elements already.";
-    Reserve(new_capacity);
-  }
-
-  // Moves the give consecutive elements to a new index in the Vector.
-  void MoveElements(int source, int count, int dest) {
-    memmove(elements_ + dest, elements_ + source, count*sizeof(elements_[0]));
-  }
-
-  E** elements_;
-  int capacity_;  // The number of elements allocated for elements_.
-  int size_;      // The number of elements; in the range [0, capacity_].
-
-  // We disallow copying Vector.
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(Vector);
-};  // class Vector
+// Performs an in-place shuffle of the vector's elements.
+template <typename E>
+inline void Shuffle(internal::Random* random, std::vector<E>* v) {
+  ShuffleRange(random, 0, v->size(), v);
+}
 
 // A function for deleting an object.  Handy for being used as a
 // functor.
 template <typename T>
-static void Delete(T * x) {
+static void Delete(T* x) {
   delete x;
 }
 
@@ -806,15 +615,15 @@ class UnitTestImpl {
   // Gets the i-th test case among all the test cases. i can range from 0 to
   // total_test_case_count() - 1. If i is not in that range, returns NULL.
   const TestCase* GetTestCase(int i) const {
-    const int index = test_case_indices_.GetElementOr(i, -1);
-    return index < 0 ? NULL : test_cases_.GetElement(i);
+    const int index = GetElementOr(test_case_indices_, i, -1);
+    return index < 0 ? NULL : test_cases_[i];
   }
 
   // Gets the i-th test case among all the test cases. i can range from 0 to
   // total_test_case_count() - 1. If i is not in that range, returns NULL.
   TestCase* GetMutableTestCase(int i) {
-    const int index = test_case_indices_.GetElementOr(i, -1);
-    return index < 0 ? NULL : test_cases_.GetElement(index);
+    const int index = GetElementOr(test_case_indices_, i, -1);
+    return index < 0 ? NULL : test_cases_[index];
   }
 
   // Provides access to the event listener list.
@@ -931,7 +740,7 @@ class UnitTestImpl {
 
   // Clears the results of all tests, including the ad hoc test.
   void ClearResult() {
-    test_cases_.ForEach(TestCase::ClearTestCaseResult);
+    ForEach(test_cases_, TestCase::ClearTestCaseResult);
     ad_hoc_test_result_.Clear();
   }
 
@@ -957,17 +766,14 @@ class UnitTestImpl {
 
   // Returns the vector of environments that need to be set-up/torn-down
   // before/after the tests are run.
-  internal::Vector<Environment*>* environments() { return &environments_; }
-  internal::Vector<Environment*>* environments_in_reverse_order() {
-    return &environments_in_reverse_order_;
-  }
+  std::vector<Environment*>& environments() { return environments_; }
 
   // Getters for the per-thread Google Test trace stack.
-  internal::Vector<TraceInfo>* gtest_trace_stack() {
-    return gtest_trace_stack_.pointer();
+  std::vector<TraceInfo>& gtest_trace_stack() {
+    return *(gtest_trace_stack_.pointer());
   }
-  const internal::Vector<TraceInfo>* gtest_trace_stack() const {
-    return gtest_trace_stack_.pointer();
+  const std::vector<TraceInfo>& gtest_trace_stack() const {
+    return gtest_trace_stack_.get();
   }
 
 #if GTEST_HAS_DEATH_TEST
@@ -1042,20 +848,18 @@ class UnitTestImpl {
       per_thread_test_part_result_reporter_;
 
   // The vector of environments that need to be set-up/torn-down
-  // before/after the tests are run.  environments_in_reverse_order_
-  // simply mirrors environments_ in reverse order.
-  internal::Vector<Environment*> environments_;
-  internal::Vector<Environment*> environments_in_reverse_order_;
+  // before/after the tests are run.
+  std::vector<Environment*> environments_;
 
   // The vector of TestCases in their original order.  It owns the
   // elements in the vector.
-  internal::Vector<TestCase*> test_cases_;
+  std::vector<TestCase*> test_cases_;
 
   // Provides a level of indirection for the test case list to allow
   // easy shuffling and restoring the test case order.  The i-th
   // element of this vector is the index of the i-th test case in the
   // shuffled order.
-  internal::Vector<int> test_case_indices_;
+  std::vector<int> test_case_indices_;
 
 #if GTEST_HAS_PARAM_TEST
   // ParameterizedTestRegistry object used to register value-parameterized
@@ -1121,7 +925,7 @@ class UnitTestImpl {
 #endif  // GTEST_HAS_DEATH_TEST
 
   // A per-thread stack of traces created by the SCOPED_TRACE() macro.
-  internal::ThreadLocal<internal::Vector<TraceInfo> > gtest_trace_stack_;
+  internal::ThreadLocal<std::vector<TraceInfo> > gtest_trace_stack_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(UnitTestImpl);
 };  // class UnitTestImpl
@@ -1242,7 +1046,7 @@ class TestResultAccessor {
     test_result->ClearTestPartResults();
   }
 
-  static const Vector<testing::TestPartResult>& test_part_results(
+  static const std::vector<testing::TestPartResult>& test_part_results(
       const TestResult& test_result) {
     return test_result.test_part_results();
   }
