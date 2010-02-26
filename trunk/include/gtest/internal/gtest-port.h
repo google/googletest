@@ -220,6 +220,7 @@
 #include <regex.h>  // NOLINT
 #include <strings.h>  // NOLINT
 #include <sys/types.h>  // NOLINT
+#include <time.h>  // NOLINT
 #include <unistd.h>  // NOLINT
 
 #define GTEST_USES_POSIX_RE 1
@@ -935,28 +936,41 @@ class ThreadLocal {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadLocal);
 };
 
+// Sleeps for (roughly) n milli-seconds.  This function is only for
+// testing Google Test's own constructs.  Don't use it in user tests,
+// either directly or indirectly.
+inline void SleepMilliseconds(int n) {
+  const timespec time = {
+    0,                  // 0 seconds.
+    n * 1000L * 1000L,  // And n ms.
+  };
+  nanosleep(&time, NULL);
+}
+
 // Allows a controller thread to pause execution of newly created
 // threads until signalled.  Instances of this class must be created
 // and destroyed in the controller thread.
 //
-// This class is supplied only for testing Google Test's own
-// constructs. Do not use it in user tests, either directly or indirectly.
+// This class is only for testing Google Test's own constructs. Do not
+// use it in user tests, either directly or indirectly.
 class ThreadStartSemaphore {
  public:
-  ThreadStartSemaphore();
-  ~ThreadStartSemaphore();
+  ThreadStartSemaphore() : signalled_(false) {}
+
   // Signals to all threads created with this semaphore to start. Must
   // be called from the controller thread.
-  void Signal();
+  void Signal() { signalled_ = true; }
+
   // Blocks until the controller thread signals. Must be called from a test
   // thread.
-  void Wait();
+  void Wait() {
+    while(!signalled_) {
+      SleepMilliseconds(10);
+    }
+  }
 
  private:
-  // We cannot use Mutex here as this class is intended for testing it.
-  pthread_mutex_t mutex_;
-  pthread_cond_t cond_;
-  bool signalled_;
+  volatile bool signalled_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadStartSemaphore);
 };
@@ -971,8 +985,8 @@ class ThreadStartSemaphore {
 //   ThreadWithParam<int> thread(&ThreadFunc, 5, &semaphore);
 //   semaphore.Signal();  // Allows the thread to start.
 //
-// This class is supplied only for testing Google Test's own
-// constructs. Do not use it in user tests, either directly or indirectly.
+// This class is only for testing Google Test's own constructs. Do not
+// use it in user tests, either directly or indirectly.
 template <typename T>
 class ThreadWithParam {
  public:

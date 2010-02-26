@@ -75,46 +75,6 @@ const int kStdOutFileno = STDOUT_FILENO;
 const int kStdErrFileno = STDERR_FILENO;
 #endif  // _MSC_VER
 
-#if GTEST_HAS_PTHREAD
-
-// ThreadStartSemaphore allows the controller thread to pause execution of
-// newly created test threads until signalled. Instances of this class must
-// be created and destroyed in the controller thread.
-ThreadStartSemaphore::ThreadStartSemaphore() : signalled_(false) {
-  GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_init(&mutex_, NULL));
-  GTEST_CHECK_POSIX_SUCCESS_(pthread_cond_init(&cond_, NULL));
-  pthread_mutex_lock(&mutex_);
-}
-
-ThreadStartSemaphore::~ThreadStartSemaphore() {
-  // Every ThreadStartSemaphore object must be signalled. It locks
-  // internal mutex upon creation and Signal unlocks it.
-  GTEST_CHECK_(signalled_);
-  GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_destroy(&mutex_));
-  GTEST_CHECK_POSIX_SUCCESS_(pthread_cond_destroy(&cond_));
-}
-
-// Signals to all test threads to start. Must be called from the
-// controlling thread.
-void ThreadStartSemaphore::Signal() {
-  signalled_ = true;
-  GTEST_CHECK_POSIX_SUCCESS_(pthread_cond_signal(&cond_));
-  GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_unlock(&mutex_));
-}
-
-// Blocks until the controlling thread signals. Should be called from a
-// test thread.
-void ThreadStartSemaphore::Wait() {
-  GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_lock(&mutex_));
-
-  while (!signalled_) {
-    GTEST_CHECK_POSIX_SUCCESS_(pthread_cond_wait(&cond_, &mutex_));
-  }
-  GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_unlock(&mutex_));
-}
-
-#endif  // GTEST_HAS_PTHREAD
-
 #if GTEST_OS_MAC
 
 // Returns the number of threads running in the process, or 0 to indicate that
