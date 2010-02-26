@@ -35,10 +35,6 @@
 
 #include <stdio.h>
 
-#if GTEST_HAS_PTHREAD
-#include <unistd.h>  // For nanosleep().
-#endif  // GTEST_HAS_PTHREAD
-
 #if GTEST_OS_MAC
 #include <time.h>
 #endif  // GTEST_OS_MAC
@@ -137,10 +133,7 @@ TEST(GetThreadCountTest, ReturnsCorrectValue) {
     if (GetThreadCount() == 1)
       break;
 
-    timespec time;
-    time.tv_sec = 0;
-    time.tv_nsec = 100L * 1000 * 1000;  // .1 seconds.
-    nanosleep(&time, NULL);
+    SleepMilliseconds(100);
   }
   EXPECT_EQ(1U, GetThreadCount());
   pthread_mutex_destroy(&mutex);
@@ -802,7 +795,7 @@ TEST(ThreadLocalTest, PointerAndConstPointerReturnSameValue) {
 }
 
 #if GTEST_IS_THREADSAFE
-TEST(MutexTestDeathTest, AssertHeldShouldAssertWhenNotLocked) {
+TEST(MutexDeathTest, AssertHeldShouldAssertWhenNotLocked) {
   // AssertHeld() is flaky only in the presence of multiple threads accessing
   // the lock. In this case, the test is robust.
   EXPECT_DEATH_IF_SUPPORTED({
@@ -813,8 +806,10 @@ TEST(MutexTestDeathTest, AssertHeldShouldAssertWhenNotLocked) {
   "The current thread is not holding the mutex @.+");
 }
 
-void SleepMilliseconds(int time) {
-  usleep(static_cast<useconds_t>(time * 1000.0));
+TEST(MutexTest, AssertHeldShouldNotAssertWhenLocked) {
+  Mutex m;
+  MutexLock lock(&m);
+  m.AssertHeld();
 }
 
 class AtomicCounterWithMutex {
@@ -873,7 +868,7 @@ TEST(MutexTest, OnlyOneThreadCanLockAtATime) {
                                                        kCycleCount),
                                              &semaphore));
   }
-  semaphore.Signal();  // Start the threads.
+  semaphore.Signal();  // Starts the threads.
   for (int i = 0; i < kThreadCount; ++i)
     counting_threads[i]->Join();
 
