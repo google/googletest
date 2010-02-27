@@ -171,24 +171,24 @@ class QueueTest : public QuickTest {
 
 // Tests the default constructor.
 TEST_F(QueueTest, DefaultConstructor) {
-  EXPECT_EQ(0, q0_.Size());
+  EXPECT_EQ(0u, q0_.Size());
 }
 
 // Tests Dequeue().
 TEST_F(QueueTest, Dequeue) {
-  int * n = q0_.Dequeue();
+  int* n = q0_.Dequeue();
   EXPECT_TRUE(n == NULL);
 
   n = q1_.Dequeue();
   EXPECT_TRUE(n != NULL);
   EXPECT_EQ(1, *n);
-  EXPECT_EQ(0, q1_.Size());
+  EXPECT_EQ(0u, q1_.Size());
   delete n;
 
   n = q2_.Dequeue();
   EXPECT_TRUE(n != NULL);
   EXPECT_EQ(2, *n);
-  EXPECT_EQ(1, q2_.Size());
+  EXPECT_EQ(1u, q2_.Size());
   delete n;
 }
 
