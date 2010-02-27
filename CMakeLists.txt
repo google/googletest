@@ -36,12 +36,12 @@ find_package(Threads)
 # Defines the compiler/linker flags used to build gtest.  You can
 # tweak these definitions to suit your need.
 if (MSVC)
-  set(cxx_base "${CMAKE_CXX_FLAGS} -GS -W4 -WX -wd4275 -nologo -J
-                -Zi -D_UNICODE -DUNICODE -DWIN32 -D_WIN32 -DSTRICT
+  set(cxx_base "${CMAKE_CXX_FLAGS} -GS -W4 -WX -wd4275 -nologo -J -Zi
+                -D_UNICODE -DUNICODE -DWIN32 -D_WIN32 -DSTRICT
                 -DWIN32_LEAN_AND_MEAN")
   set(cxx_default "${cxx_base} -EHsc -D_HAS_EXCEPTIONS=1")
 else()
-  set(cxx_base "${CMAKE_CXX_FLAGS}")
+  set(cxx_base "${CMAKE_CXX_FLAGS} -Wall -Werror -Wshadow")
 
   if (CMAKE_USE_PTHREADS_INIT)  # The pthreads library is available.
     set(cxx_base "${cxx_base} -DGTEST_HAS_PTHREAD=1")

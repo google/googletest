@@ -71,7 +71,7 @@ TEST(MyString, DefaultConstructor) {
   // </TechnicalDetails>
   EXPECT_STREQ(NULL, s.c_string());
 
-  EXPECT_EQ(0, s.Length());
+  EXPECT_EQ(0u, s.Length());
 }
 
 const char kHelloString[] = "Hello, world!";

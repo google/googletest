@@ -122,7 +122,7 @@ class QueueTest : public testing::Test {
 // Tests the default c'tor.
 TEST_F(QueueTest, DefaultConstructor) {
   // You can access data in the test fixture here.
-  EXPECT_EQ(0, q0_.Size());
+  EXPECT_EQ(0u, q0_.Size());
 }
 
 // Tests Dequeue().
@@ -133,13 +133,13 @@ TEST_F(QueueTest, Dequeue) {
   n = q1_.Dequeue();
   ASSERT_TRUE(n != NULL);
   EXPECT_EQ(1, *n);
-  EXPECT_EQ(0, q1_.Size());
+  EXPECT_EQ(0u, q1_.Size());
   delete n;
 
   n = q2_.Dequeue();
   ASSERT_TRUE(n != NULL);
   EXPECT_EQ(2, *n);
-  EXPECT_EQ(1, q2_.Size());
+  EXPECT_EQ(1u, q2_.Size());
   delete n;
 }
 
