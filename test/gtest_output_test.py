@@ -249,6 +249,8 @@ class GTestOutputTest(gtest_test_utils.TestCase):
       test_output = RemoveMatchingTests(test_output, 'DeathTest')
     if not SUPPORTS_TYPED_TESTS:
       test_output = RemoveMatchingTests(test_output, 'TypedTest')
+      test_output = RemoveMatchingTests(test_output, 'TypedDeathTest')
+      test_output = RemoveMatchingTests(test_output, 'TypeParamDeathTest')
     if not SUPPORTS_THREADS:
       test_output = RemoveMatchingTests(test_output,
                                         'ExpectFailureWithThreadsTest')
