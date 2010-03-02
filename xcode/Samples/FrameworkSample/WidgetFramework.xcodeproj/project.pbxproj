@@ -6,13 +6,40 @@
 	objectVersion = 42;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		4024D162113D7D2400C7059E /* Test */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 4024D169113D7D4600C7059E /* Build configuration list for PBXAggregateTarget "Test" */;
+			buildPhases = (
+				4024D161113D7D2400C7059E /* ShellScript */,
+			);
+			dependencies = (
+				4024D166113D7D3100C7059E /* PBXTargetDependency */,
+			);
+			name = Test;
+			productName = TestAndBuild;
+		};
+		4024D1E9113D83FF00C7059E /* TestAndBuild */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 4024D1F0113D842B00C7059E /* Build configuration list for PBXAggregateTarget "TestAndBuild" */;
+			buildPhases = (
+			);
+			dependencies = (
+				4024D1ED113D840900C7059E /* PBXTargetDependency */,
+				4024D1EF113D840D00C7059E /* PBXTargetDependency */,
+			);
+			name = TestAndBuild;
+			productName = TestAndBuild;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		3B7EB1250E5AEE3500C7F239 /* widget.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3B7EB1230E5AEE3500C7F239 /* widget.cc */; };
 		3B7EB1260E5AEE3500C7F239 /* widget.h in Headers */ = {isa = PBXBuildFile; fileRef = 3B7EB1240E5AEE3500C7F239 /* widget.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3B7EB1280E5AEE4600C7F239 /* widget_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3B7EB1270E5AEE4600C7F239 /* widget_test.cc */; };
 		3B7EB1480E5AF3B400C7F239 /* Widget.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8D07F2C80486CC7A007CD1D0 /* Widget.framework */; };
-		408BEC281046D72200DEF522 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 408BEC271046D72200DEF522 /* gtest.framework */; };
-		408BEC431046D7B300DEF522 /* libgtest_main.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 408BEC421046D7B300DEF522 /* libgtest_main.a */; };
+		4024D188113D7D7800C7059E /* libgtest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4024D185113D7D5500C7059E /* libgtest.a */; };
+		4024D189113D7D7A00C7059E /* libgtest_main.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4024D183113D7D5500C7059E /* libgtest_main.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -23,6 +50,27 @@
 			remoteGlobalIDString = 8D07F2BC0486CC7A007CD1D0;
 			remoteInfo = gTestExample;
 		};
+		4024D165113D7D3100C7059E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3B07BDE90E3F3F9E00647869;
+			remoteInfo = WidgetFrameworkTest;
+		};
+		4024D1EC113D840900C7059E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D07F2BC0486CC7A007CD1D0;
+			remoteInfo = WidgetFramework;
+		};
+		4024D1EE113D840D00C7059E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4024D162113D7D2400C7059E;
+			remoteInfo = Test;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -30,8 +78,9 @@
 		3B7EB1230E5AEE3500C7F239 /* widget.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = widget.cc; sourceTree = "<group>"; };
 		3B7EB1240E5AEE3500C7F239 /* widget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = widget.h; sourceTree = "<group>"; };
 		3B7EB1270E5AEE4600C7F239 /* widget_test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = widget_test.cc; sourceTree = "<group>"; };
-		408BEC271046D72200DEF522 /* gtest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = gtest.framework; path = /Library/Frameworks/gtest.framework; sourceTree = "<absolute>"; };
-		408BEC421046D7B300DEF522 /* libgtest_main.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest_main.a; path = /Library/Frameworks/gtest.framework/Versions/A/Resources/libgtest_main.a; sourceTree = "<absolute>"; };
+		4024D183113D7D5500C7059E /* libgtest_main.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest_main.a; path = /usr/local/lib/libgtest_main.a; sourceTree = "<absolute>"; };
+		4024D185113D7D5500C7059E /* libgtest.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest.a; path = /usr/local/lib/libgtest.a; sourceTree = "<absolute>"; };
+		4024D1E2113D838200C7059E /* runtests.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = runtests.sh; sourceTree = "<group>"; };
 		8D07F2C70486CC7A007CD1D0 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D07F2C80486CC7A007CD1D0 /* Widget.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Widget.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -41,9 +90,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4024D189113D7D7A00C7059E /* libgtest_main.a in Frameworks */,
+				4024D188113D7D7800C7059E /* libgtest.a in Frameworks */,
 				3B7EB1480E5AF3B400C7F239 /* Widget.framework in Frameworks */,
-				408BEC281046D72200DEF522 /* gtest.framework in Frameworks */,
-				408BEC431046D7B300DEF522 /* libgtest_main.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -69,6 +118,7 @@
 		0867D691FE84028FC02AAC07 /* gTestExample */ = {
 			isa = PBXGroup;
 			children = (
+				4024D1E1113D836C00C7059E /* Scripts */,
 				08FB77ACFE841707C02AAC07 /* Source */,
 				089C1665FE841158C02AAC07 /* Resources */,
 				3B07BE350E4094E400647869 /* Test */,
@@ -81,8 +131,8 @@
 		0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				408BEC421046D7B300DEF522 /* libgtest_main.a */,
-				408BEC271046D72200DEF522 /* gtest.framework */,
+				4024D183113D7D5500C7059E /* libgtest_main.a */,
+				4024D185113D7D5500C7059E /* libgtest.a */,
 			);
 			name = "External Frameworks and Libraries";
 			sourceTree = "<group>";
@@ -110,6 +160,14 @@
 				3B7EB1270E5AEE4600C7F239 /* widget_test.cc */,
 			);
 			name = Test;
+			sourceTree = "<group>";
+		};
+		4024D1E1113D836C00C7059E /* Scripts */ = {
+			isa = PBXGroup;
+			children = (
+				4024D1E2113D838200C7059E /* runtests.sh */,
+			);
+			name = Scripts;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -178,6 +236,8 @@
 			targets = (
 				8D07F2BC0486CC7A007CD1D0 /* WidgetFramework */,
 				3B07BDE90E3F3F9E00647869 /* WidgetFrameworkTest */,
+				4024D162113D7D2400C7059E /* Test */,
+				4024D1E9113D83FF00C7059E /* TestAndBuild */,
 			);
 		};
 /* End PBXProject section */
@@ -201,6 +261,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXRezBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		4024D161113D7D2400C7059E /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/bin/bash $SRCROOT/runtests.sh $BUILT_PRODUCTS_DIR/WidgetFrameworkTest\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		3B07BDE70E3F3F9E00647869 /* Sources */ = {
@@ -227,6 +303,21 @@
 			target = 8D07F2BC0486CC7A007CD1D0 /* WidgetFramework */;
 			targetProxy = 3B07BDF00E3F3FAE00647869 /* PBXContainerItemProxy */;
 		};
+		4024D166113D7D3100C7059E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3B07BDE90E3F3F9E00647869 /* WidgetFrameworkTest */;
+			targetProxy = 4024D165113D7D3100C7059E /* PBXContainerItemProxy */;
+		};
+		4024D1ED113D840900C7059E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8D07F2BC0486CC7A007CD1D0 /* WidgetFramework */;
+			targetProxy = 4024D1EC113D840900C7059E /* PBXContainerItemProxy */;
+		};
+		4024D1EF113D840D00C7059E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4024D162113D7D2400C7059E /* Test */;
+			targetProxy = 4024D1EE113D840D00C7059E /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -241,6 +332,34 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = WidgetFrameworkTest;
+			};
+			name = Release;
+		};
+		4024D163113D7D2400C7059E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = TestAndBuild;
+			};
+			name = Debug;
+		};
+		4024D164113D7D2400C7059E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = TestAndBuild;
+			};
+			name = Release;
+		};
+		4024D1EA113D83FF00C7059E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = TestAndBuild;
+			};
+			name = Debug;
+		};
+		4024D1EB113D83FF00C7059E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = TestAndBuild;
 			};
 			name = Release;
 		};
@@ -292,6 +411,24 @@
 			buildConfigurations = (
 				3B07BDEC0E3F3F9F00647869 /* Debug */,
 				3B07BDED0E3F3F9F00647869 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4024D169113D7D4600C7059E /* Build configuration list for PBXAggregateTarget "Test" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4024D163113D7D2400C7059E /* Debug */,
+				4024D164113D7D2400C7059E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4024D1F0113D842B00C7059E /* Build configuration list for PBXAggregateTarget "TestAndBuild" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4024D1EA113D83FF00C7059E /* Debug */,
+				4024D1EB113D83FF00C7059E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

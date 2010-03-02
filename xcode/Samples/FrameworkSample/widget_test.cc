@@ -27,7 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Author: preston.jackson@gmail.com (Preston Jackson)
+// Author: preston.a.jackson@gmail.com (Preston Jackson)
 //
 // Google Test - FrameworkSample
 // widget_test.cc
@@ -58,7 +58,7 @@ TEST(WidgetInitializerTest, TestConversion) {
   char buffer[max_size];
   widget.GetCharPtrValue(buffer, max_size);
   EXPECT_STREQ("name", buffer);
-}  
+}
 
 // Use the Google Test main that is linked into the framework. It does something
 // like this:
