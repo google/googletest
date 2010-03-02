@@ -103,6 +103,16 @@ class ReplaceDeathTestFactory {
 }  // namespace internal
 }  // namespace testing
 
+void DieInside(const char* function) {
+  fprintf(stderr, "death inside %s().", function);
+  fflush(stderr);
+  // We call _exit() instead of exit(), as the former is a direct
+  // system call and thus safer in the presence of threads.  exit()
+  // will invoke user-defined exit-hooks, which may do dangerous
+  // things that conflict with death tests.
+  _exit(1);
+}
+
 // Tests that death tests work.
 
 class TestForDeathTest : public testing::Test {
@@ -114,23 +124,12 @@ class TestForDeathTest : public testing::Test {
   }
 
   // A static member function that's expected to die.
-  static void StaticMemberFunction() {
-    fprintf(stderr, "%s", "death inside StaticMemberFunction().");
-    fflush(stderr);
-    // We call _exit() instead of exit(), as the former is a direct
-    // system call and thus safer in the presence of threads.  exit()
-    // will invoke user-defined exit-hooks, which may do dangerous
-    // things that conflict with death tests.
-    _exit(1);
-  }
+  static void StaticMemberFunction() { DieInside("StaticMemberFunction"); }
 
   // A method of the test fixture that may die.
   void MemberFunction() {
-    if (should_die_) {
-      fprintf(stderr, "%s", "death inside MemberFunction().");
-      fflush(stderr);
-      _exit(1);
-    }
+    if (should_die_)
+      DieInside("MemberFunction");
   }
 
   // True iff MemberFunction() should die.
@@ -145,9 +144,8 @@ class MayDie {
 
   // A member function that may die.
   void MemberFunction() const {
-    if (should_die_) {
-      GTEST_LOG_(FATAL) << "death inside MayDie::MemberFunction().";
-    }
+    if (should_die_)
+      DieInside("MayDie::MemberFunction");
   }
 
  private:
@@ -156,27 +154,24 @@ class MayDie {
 };
 
 // A global function that's expected to die.
-void GlobalFunction() {
-  GTEST_LOG_(FATAL) << "death inside GlobalFunction().";
-}
+void GlobalFunction() { DieInside("GlobalFunction"); }
 
 // A non-void function that's expected to die.
 int NonVoidFunction() {
-  GTEST_LOG_(FATAL) << "death inside NonVoidFunction().";
+  DieInside("NonVoidFunction");
   return 1;
 }
 
 // A unary function that may die.
 void DieIf(bool should_die) {
-  if (should_die) {
-    GTEST_LOG_(FATAL) << "death inside DieIf().";
-  }
+  if (should_die)
+    DieInside("DieIf");
 }
 
 // A binary function that may die.
 bool DieIfLessThan(int x, int y) {
   if (x < y) {
-    GTEST_LOG_(FATAL) << "death inside DieIfLessThan().";
+    DieInside("DieIfLessThan");
   }
   return true;
 }
@@ -191,7 +186,7 @@ void DeathTestSubroutine() {
 int DieInDebugElse12(int* sideeffect) {
   if (sideeffect) *sideeffect = 12;
 #ifndef NDEBUG
-  GTEST_LOG_(FATAL) << "debug death inside DieInDebugElse12()";
+  DieInside("DieInDebugElse12");
 #endif  // NDEBUG
   return 12;
 }
@@ -1111,8 +1106,10 @@ TEST(EnvironmentTest, HandleFitsIntoSizeT) {
 // Tests that EXPECT_DEATH_IF_SUPPORTED/ASSERT_DEATH_IF_SUPPORTED trigger
 // failures when death tests are available on the system.
 TEST(ConditionalDeathMacrosDeathTest, ExpectsDeathWhenDeathTestsAvailable) {
-  EXPECT_DEATH_IF_SUPPORTED(GTEST_CHECK_(false) << "failure", "false.*failure");
-  ASSERT_DEATH_IF_SUPPORTED(GTEST_CHECK_(false) << "failure", "false.*failure");
+  EXPECT_DEATH_IF_SUPPORTED(DieInside("CondDeathTestExpectMacro"),
+                            "death inside CondDeathTestExpectMacro");
+  ASSERT_DEATH_IF_SUPPORTED(DieInside("CondDeathTestAssertMacro"),
+                            "death inside CondDeathTestAssertMacro");
 
   // Empty statement will not crash, which must trigger a failure.
   EXPECT_NONFATAL_FAILURE(EXPECT_DEATH_IF_SUPPORTED(;, ""), "");
