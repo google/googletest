@@ -811,10 +811,7 @@ class Notification {
 };
 
 // Helper class for testing Google Test's multi-threading constructs.
-// To use it, derive a class template ThreadWithParam<T> from
-// ThreadWithParamBase<T> and implement thread creation and startup in
-// the constructor and joining the thread in JoinUnderlyingThread().
-// Then you can write:
+// To use it, write:
 //
 //   void ThreadFunc(int param) { /* Do things with param */ }
 //   Notification thread_can_start;
@@ -826,40 +823,51 @@ class Notification {
 // These classes are only for testing Google Test's own constructs. Do
 // not use them in user tests, either directly or indirectly.
 template <typename T>
-class ThreadWithParamBase {
+class ThreadWithParam {
  public:
   typedef void (*UserThreadFunc)(T);
 
-  ThreadWithParamBase(
+  ThreadWithParam(
       UserThreadFunc func, T param, Notification* thread_can_start)
       : func_(func),
         param_(param),
         thread_can_start_(thread_can_start),
-        finished_(false) {}
-  virtual ~ThreadWithParamBase() {}
+        finished_(false) {
+    // The thread can be created only after all fields except thread_
+    // have been initialized.
+    GTEST_CHECK_POSIX_SUCCESS_(
+        pthread_create(&thread_, 0, ThreadMainStatic, this));
+  }
+  ~ThreadWithParam() { Join(); }
 
   void Join() {
     if (!finished_) {
-      JoinUnderlyingThread();
+      GTEST_CHECK_POSIX_SUCCESS_(pthread_join(thread_, 0));
       finished_ = true;
     }
   }
 
-  virtual void JoinUnderlyingThread() = 0;
-
+ private:
   void ThreadMain() {
     if (thread_can_start_ != NULL)
       thread_can_start_->WaitForNotification();
     func_(param_);
   }
 
- protected:
+  static void* ThreadMainStatic(void* thread_with_param) {
+    static_cast<ThreadWithParam<T>*>(thread_with_param)->ThreadMain();
+    return NULL;  // We are not interested in the thread exit code.
+  }
+
   const UserThreadFunc func_;  // User-supplied thread function.
   const T param_;  // User-supplied parameter to the thread function.
   // When non-NULL, used to block execution until the controller thread
   // notifies.
   Notification* const thread_can_start_;
   bool finished_;  // true iff we know that the thread function has finished.
+  pthread_t thread_;  // The native thread object.
+
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadWithParam);
 };
 
 // gtest-port.h guarantees to #include <pthread.h> when GTEST_HAS_PTHREAD is
@@ -1022,34 +1030,6 @@ class ThreadLocal {
   const T default_;  // The default value for each thread.
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadLocal);
-};
-
-// Helper class for testing Google Test's multi-threading constructs.
-template <typename T>
-class ThreadWithParam : public ThreadWithParamBase<T> {
- public:
-  ThreadWithParam(void (*func)(T), T param, Notification* thread_can_start)
-      : ThreadWithParamBase<T>(func, param, thread_can_start) {
-    // The thread can be created only after all fields except thread_
-    // have been initialized.
-    GTEST_CHECK_POSIX_SUCCESS_(
-        pthread_create(&thread_, 0, ThreadMainStatic, this));
-  }
-  virtual ~ThreadWithParam() { this->Join(); }
-
-  virtual void JoinUnderlyingThread() {
-    GTEST_CHECK_POSIX_SUCCESS_(pthread_join(thread_, 0));
-  }
-
- private:
-  static void* ThreadMainStatic(void* thread_with_param) {
-    static_cast<ThreadWithParam<T>*>(thread_with_param)->ThreadMain();
-    return NULL;  // We are not interested in the thread exit code.
-  }
-
-  pthread_t thread_;  // The native thread object.
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadWithParam);
 };
 
 #define GTEST_IS_THREADSAFE 1
