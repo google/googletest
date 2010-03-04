@@ -463,13 +463,10 @@
 #include <vector>  // NOLINT
 #endif
 
-// Determines whether to support value-parameterized tests.
-
-#if defined(__GNUC__) || (_MSC_VER >= 1400)
-// TODO(vladl@google.com): get the implementation rid of vector and list
-// to compile on MSVC 7.1.
+// We don't support MSVC 7.1 with exceptions disabled now.  Therefore
+// all the compilers we care about are adequate for supporting
+// value-parameterized tests.
 #define GTEST_HAS_PARAM_TEST 1
-#endif  // defined(__GNUC__) || (_MSC_VER >= 1400)
 
 // Determines whether to support type-driven tests.
 
@@ -774,6 +771,97 @@ const ::std::vector<String>& GetArgvs();
 
 #if GTEST_HAS_PTHREAD
 
+// Sleeps for (roughly) n milli-seconds.  This function is only for
+// testing Google Test's own constructs.  Don't use it in user tests,
+// either directly or indirectly.
+inline void SleepMilliseconds(int n) {
+  const timespec time = {
+    0,                  // 0 seconds.
+    n * 1000L * 1000L,  // And n ms.
+  };
+  nanosleep(&time, NULL);
+}
+
+// Allows a controller thread to pause execution of newly created
+// threads until notified.  Instances of this class must be created
+// and destroyed in the controller thread.
+//
+// This class is only for testing Google Test's own constructs. Do not
+// use it in user tests, either directly or indirectly.
+class Notification {
+ public:
+  Notification() : notified_(false) {}
+
+  // Notifies all threads created with this notification to start. Must
+  // be called from the controller thread.
+  void Notify() { notified_ = true; }
+
+  // Blocks until the controller thread notifies. Must be called from a test
+  // thread.
+  void WaitForNotification() {
+    while(!notified_) {
+      SleepMilliseconds(10);
+    }
+  }
+
+ private:
+  volatile bool notified_;
+
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(Notification);
+};
+
+// Helper class for testing Google Test's multi-threading constructs.
+// To use it, derive a class template ThreadWithParam<T> from
+// ThreadWithParamBase<T> and implement thread creation and startup in
+// the constructor and joining the thread in JoinUnderlyingThread().
+// Then you can write:
+//
+//   void ThreadFunc(int param) { /* Do things with param */ }
+//   Notification thread_can_start;
+//   ...
+//   // The thread_can_start parameter is optional; you can supply NULL.
+//   ThreadWithParam<int> thread(&ThreadFunc, 5, &thread_can_start);
+//   thread_can_start.Notify();
+//
+// These classes are only for testing Google Test's own constructs. Do
+// not use them in user tests, either directly or indirectly.
+template <typename T>
+class ThreadWithParamBase {
+ public:
+  typedef void (*UserThreadFunc)(T);
+
+  ThreadWithParamBase(
+      UserThreadFunc func, T param, Notification* thread_can_start)
+      : func_(func),
+        param_(param),
+        thread_can_start_(thread_can_start),
+        finished_(false) {}
+  virtual ~ThreadWithParamBase() {}
+
+  void Join() {
+    if (!finished_) {
+      JoinUnderlyingThread();
+      finished_ = true;
+    }
+  }
+
+  virtual void JoinUnderlyingThread() = 0;
+
+  void ThreadMain() {
+    if (thread_can_start_ != NULL)
+      thread_can_start_->WaitForNotification();
+    func_(param_);
+  }
+
+ protected:
+  const UserThreadFunc func_;  // User-supplied thread function.
+  const T param_;  // User-supplied parameter to the thread function.
+  // When non-NULL, used to block execution until the controller thread
+  // notifies.
+  Notification* const thread_can_start_;
+  bool finished_;  // true iff we know that the thread function has finished.
+};
+
 // gtest-port.h guarantees to #include <pthread.h> when GTEST_HAS_PTHREAD is
 // true.
 #include <pthread.h>
@@ -936,99 +1024,32 @@ class ThreadLocal {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadLocal);
 };
 
-// Sleeps for (roughly) n milli-seconds.  This function is only for
-// testing Google Test's own constructs.  Don't use it in user tests,
-// either directly or indirectly.
-inline void SleepMilliseconds(int n) {
-  const timespec time = {
-    0,                  // 0 seconds.
-    n * 1000L * 1000L,  // And n ms.
-  };
-  nanosleep(&time, NULL);
-}
-
-// Allows a controller thread to pause execution of newly created
-// threads until signalled.  Instances of this class must be created
-// and destroyed in the controller thread.
-//
-// This class is only for testing Google Test's own constructs. Do not
-// use it in user tests, either directly or indirectly.
-class ThreadStartSemaphore {
- public:
-  ThreadStartSemaphore() : signalled_(false) {}
-
-  // Signals to all threads created with this semaphore to start. Must
-  // be called from the controller thread.
-  void Signal() { signalled_ = true; }
-
-  // Blocks until the controller thread signals. Must be called from a test
-  // thread.
-  void Wait() {
-    while(!signalled_) {
-      SleepMilliseconds(10);
-    }
-  }
-
- private:
-  volatile bool signalled_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadStartSemaphore);
-};
-
 // Helper class for testing Google Test's multi-threading constructs.
-// Use:
-//
-//   void ThreadFunc(int param) { /* Do things with param */ }
-//   ThreadStartSemaphore semaphore;
-//   ...
-//   // The semaphore parameter is optional; you can supply NULL.
-//   ThreadWithParam<int> thread(&ThreadFunc, 5, &semaphore);
-//   semaphore.Signal();  // Allows the thread to start.
-//
-// This class is only for testing Google Test's own constructs. Do not
-// use it in user tests, either directly or indirectly.
 template <typename T>
-class ThreadWithParam {
+class ThreadWithParam : public ThreadWithParamBase<T> {
  public:
-  typedef void (*UserThreadFunc)(T);
-
-  ThreadWithParam(UserThreadFunc func, T param, ThreadStartSemaphore* semaphore)
-      : func_(func),
-        param_(param),
-        start_semaphore_(semaphore),
-        finished_(false) {
+  ThreadWithParam(void (*func)(T), T param, Notification* thread_can_start)
+      : ThreadWithParamBase<T>(func, param, thread_can_start) {
     // The thread can be created only after all fields except thread_
     // have been initialized.
     GTEST_CHECK_POSIX_SUCCESS_(
         pthread_create(&thread_, 0, ThreadMainStatic, this));
   }
-  ~ThreadWithParam() { Join(); }
+  virtual ~ThreadWithParam() { this->Join(); }
 
-  void Join() {
-    if (!finished_) {
-      GTEST_CHECK_POSIX_SUCCESS_(pthread_join(thread_, 0));
-      finished_ = true;
-    }
+  virtual void JoinUnderlyingThread() {
+    GTEST_CHECK_POSIX_SUCCESS_(pthread_join(thread_, 0));
   }
 
  private:
-  void ThreadMain() {
-    if (start_semaphore_ != NULL)
-      start_semaphore_->Wait();
-    func_(param_);
-  }
   static void* ThreadMainStatic(void* thread_with_param) {
     static_cast<ThreadWithParam<T>*>(thread_with_param)->ThreadMain();
     return NULL;  // We are not interested in the thread exit code.
   }
 
-  const UserThreadFunc func_;  // User-supplied thread function.
-  const T param_;  // User-supplied parameter to the thread function.
-  // When non-NULL, used to block execution until the controller thread
-  // signals.
-  ThreadStartSemaphore* const start_semaphore_;
-  bool finished_;  // Has the thread function finished?
   pthread_t thread_;  // The native thread object.
+
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadWithParam);
 };
 
 #define GTEST_IS_THREADSAFE 1

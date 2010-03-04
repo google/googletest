@@ -282,7 +282,7 @@ class GTestOutputTest(gtest_test_utils.TestCase):
     normalized_golden = RemoveTypeInfoDetails(golden)
 
     if CAN_GENERATE_GOLDEN_FILE:
-      self.assert_(normalized_golden == normalized_actual)
+      self.assertEqual(normalized_golden, normalized_actual)
     else:
       normalized_actual = RemoveTestCounts(normalized_actual)
       normalized_golden = RemoveTestCounts(self.RemoveUnsupportedTests(
@@ -299,7 +299,7 @@ class GTestOutputTest(gtest_test_utils.TestCase):
             '_gtest_output_test_normalized_golden.txt'), 'wb').write(
                 normalized_golden)
 
-      self.assert_(normalized_golden == normalized_actual)
+      self.assertEqual(normalized_golden, normalized_actual)
 
 
 if __name__ == '__main__':

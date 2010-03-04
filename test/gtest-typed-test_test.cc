@@ -349,12 +349,12 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, NumericTest, NumericTypes);
 
 #if !defined(GTEST_HAS_TYPED_TEST) && !defined(GTEST_HAS_TYPED_TEST_P)
 
-// Google Test doesn't support type-parameterized tests on some platforms
-// and compilers, such as MSVC 7.1. If we use conditional compilation to
-// compile out all code referring to the gtest_main library, MSVC linker
-// will not link that library at all and consequently complain about
-// missing entry point defined in that library (fatal error LNK1561:
-// entry point must be defined). This dummy test keeps gtest_main linked in.
+// Google Test may not support type-parameterized tests with some
+// compilers. If we use conditional compilation to compile out all
+// code referring to the gtest_main library, MSVC linker will not link
+// that library at all and consequently complain about missing entry
+// point defined in that library (fatal error LNK1561: entry point
+// must be defined). This dummy test keeps gtest_main linked in.
 TEST(DummyTest, TypedTestsAreNotSupportedOnThisPlatform) {}
 
 #endif  // #if !defined(GTEST_HAS_TYPED_TEST) && !defined(GTEST_HAS_TYPED_TEST_P)

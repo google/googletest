@@ -49,16 +49,15 @@
 namespace testing {
 namespace {
 
-using internal::scoped_ptr;
+using internal::Notification;
 using internal::String;
 using internal::TestPropertyKeyIs;
-using internal::ThreadStartSemaphore;
 using internal::ThreadWithParam;
+using internal::scoped_ptr;
 
 // In order to run tests in this file, for platforms where Google Test is
-// thread safe, implement ThreadWithParam and ThreadStartSemaphore. See the
-// description of their API in gtest-port.h, where they are defined for
-// already supported platforms.
+// thread safe, implement ThreadWithParam. See the description of its API
+// in gtest-port.h, where it is defined for already supported platforms.
 
 // How many threads to create?
 const int kThreadCount = 50;
@@ -129,11 +128,13 @@ void CheckTestFailureCount(int expected_failures) {
 TEST(StressTest, CanUseScopedTraceAndAssertionsInManyThreads) {
   {
     scoped_ptr<ThreadWithParam<int> > threads[kThreadCount];
-    ThreadStartSemaphore semaphore;
+    Notification threads_can_start;
     for (int i = 0; i != kThreadCount; i++)
-      threads[i].reset(new ThreadWithParam<int>(&ManyAsserts, i, &semaphore));
+      threads[i].reset(new ThreadWithParam<int>(&ManyAsserts,
+                                                i,
+                                                &threads_can_start));
 
-    semaphore.Signal(); // Starts all the threads.
+    threads_can_start.Notify();
 
     // Blocks until all the threads are done.
     for (int i = 0; i != kThreadCount; i++)
