@@ -71,10 +71,6 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 #include <stdlib.h>
 #include <time.h>
 
-#if GTEST_HAS_PTHREAD
-#include <pthread.h>
-#endif  // GTEST_HAS_PTHREAD
-
 #include <map>
 
 namespace testing {
@@ -190,6 +186,10 @@ using testing::internal::scoped_ptr;
 using testing::internal::CaptureStdout;
 using testing::internal::GetCapturedStdout;
 #endif  // GTEST_HAS_STREAM_REDIRECTION_
+
+#if GTEST_IS_THREADSAFE
+using testing::internal::ThreadWithParam;
+#endif
 
 class TestingVector : public std::vector<int> {
 };
@@ -1283,25 +1283,14 @@ TEST_F(ScopedFakeTestPartResultReporterTest, DeprecatedConstructor) {
   EXPECT_EQ(1, results.size());
 }
 
-#if GTEST_IS_THREADSAFE && GTEST_HAS_PTHREAD
+#if GTEST_IS_THREADSAFE
 
 class ScopedFakeTestPartResultReporterWithThreadsTest
   : public ScopedFakeTestPartResultReporterTest {
  protected:
   static void AddFailureInOtherThread(FailureMode failure) {
-    pthread_t tid;
-    pthread_create(&tid,
-                   NULL,
-                   ScopedFakeTestPartResultReporterWithThreadsTest::
-                       FailureThread,
-                   &failure);
-    pthread_join(tid, NULL);
-  }
- private:
-  static void* FailureThread(void* attr) {
-    FailureMode* failure = static_cast<FailureMode*>(attr);
-    AddFailure(*failure);
-    return NULL;
+    ThreadWithParam<FailureMode> thread(&AddFailure, failure, NULL);
+    thread.Join();
   }
 };
 
@@ -1324,7 +1313,7 @@ TEST_F(ScopedFakeTestPartResultReporterWithThreadsTest,
   EXPECT_TRUE(results.GetTestPartResult(3).fatally_failed());
 }
 
-#endif  // GTEST_IS_THREADSAFE && GTEST_HAS_PTHREAD
+#endif  // GTEST_IS_THREADSAFE
 
 // Tests EXPECT_FATAL_FAILURE{,ON_ALL_THREADS}.  Makes sure that they
 // work even if the failure is generated in a called function rather than
@@ -1435,7 +1424,7 @@ TEST_F(ExpectNonfatalFailureTest, AcceptsMacroThatExpandsToUnprotectedComma) {
   }, "");
 }
 
-#if GTEST_IS_THREADSAFE && GTEST_HAS_PTHREAD
+#if GTEST_IS_THREADSAFE
 
 typedef ScopedFakeTestPartResultReporterWithThreadsTest
     ExpectFailureWithThreadsTest;
@@ -1450,7 +1439,7 @@ TEST_F(ExpectFailureWithThreadsTest, ExpectNonFatalFailureOnAllThreads) {
       AddFailureInOtherThread(NONFATAL_FAILURE), "Expected non-fatal failure.");
 }
 
-#endif  // GTEST_IS_THREADSAFE && GTEST_HAS_PTHREAD
+#endif  // GTEST_IS_THREADSAFE
 
 // Tests the TestProperty class.
 

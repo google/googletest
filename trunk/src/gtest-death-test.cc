@@ -1037,8 +1037,6 @@ bool DefaultDeathTestFactory::Create(const char* statement, const RE* regex,
 // Splits a given string on a given delimiter, populating a given
 // vector with the fields.  GTEST_HAS_DEATH_TEST implies that we have
 // ::std::string, so we can use it here.
-// TODO(vladl@google.com): Get rid of std::vector to be able to build on
-// Visual C++ 7.1 with exceptions disabled.
 static void SplitString(const ::std::string& str, char delimiter,
                         ::std::vector< ::std::string>* dest) {
   ::std::vector< ::std::string> parsed;

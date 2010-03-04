@@ -46,15 +46,17 @@
 
 #include <stdlib.h>
 
-#if GTEST_HAS_PTHREAD
-#include <pthread.h>
-#endif  // GTEST_HAS_PTHREAD
-
+#if GTEST_IS_THREADSAFE
 using testing::ScopedFakeTestPartResultReporter;
 using testing::TestPartResultArray;
 
+using testing::internal::Notification;
+using testing::internal::ThreadWithParam;
+#endif
+
 namespace posix = ::testing::internal::posix;
 using testing::internal::String;
+using testing::internal::scoped_ptr;
 
 // Tests catching fatal failures.
 
@@ -213,6 +215,83 @@ TEST(SCOPED_TRACETest, CanBeRepeated) {
   ADD_FAILURE() << "This failure is expected, and should contain "
                 << "trace point A, B, and D.";
 }
+
+#if GTEST_IS_THREADSAFE
+// Tests that SCOPED_TRACE()s can be used concurrently from multiple
+// threads.  Namely, an assertion should be affected by
+// SCOPED_TRACE()s in its own thread only.
+
+// Here's the sequence of actions that happen in the test:
+//
+//   Thread A (main)                | Thread B (spawned)
+//   ===============================|================================
+//   spawns thread B                |
+//   -------------------------------+--------------------------------
+//   waits for n1                   | SCOPED_TRACE("Trace B");
+//                                  | generates failure #1
+//                                  | notifies n1
+//   -------------------------------+--------------------------------
+//   SCOPED_TRACE("Trace A");       | waits for n2
+//   generates failure #2           |
+//   notifies n2                    |
+//   -------------------------------|--------------------------------
+//   waits for n3                   | generates failure #3
+//                                  | trace B dies
+//                                  | generates failure #4
+//                                  | notifies n3
+//   -------------------------------|--------------------------------
+//   generates failure #5           | finishes
+//   trace A dies                   |
+//   generates failure #6           |
+//   -------------------------------|--------------------------------
+//   waits for thread B to finish   |
+
+struct CheckPoints {
+  Notification n1;
+  Notification n2;
+  Notification n3;
+};
+
+static void ThreadWithScopedTrace(CheckPoints* check_points) {
+  {
+    SCOPED_TRACE("Trace B");
+    ADD_FAILURE()
+        << "Expected failure #1 (in thread B, only trace B alive).";
+    check_points->n1.Notify();
+    check_points->n2.WaitForNotification();
+
+    ADD_FAILURE()
+        << "Expected failure #3 (in thread B, trace A & B both alive).";
+  }  // Trace B dies here.
+  ADD_FAILURE()
+      << "Expected failure #4 (in thread B, only trace A alive).";
+  check_points->n3.Notify();
+}
+
+TEST(SCOPED_TRACETest, WorksConcurrently) {
+  printf("(expecting 6 failures)\n");
+
+  CheckPoints check_points;
+  ThreadWithParam<CheckPoints*> thread(&ThreadWithScopedTrace,
+                                       &check_points,
+                                       NULL);
+  check_points.n1.WaitForNotification();
+
+  {
+    SCOPED_TRACE("Trace A");
+    ADD_FAILURE()
+        << "Expected failure #2 (in thread A, trace A & B both alive).";
+    check_points.n2.Notify();
+    check_points.n3.WaitForNotification();
+
+    ADD_FAILURE()
+        << "Expected failure #5 (in thread A, only trace A alive).";
+  }  // Trace A dies here.
+  ADD_FAILURE()
+      << "Expected failure #6 (in thread A, no trace alive).";
+  thread.Join();
+}
+#endif  // GTEST_IS_THREADSAFE
 
 TEST(DisabledTestsWarningTest,
      DISABLED_AlsoRunDisabledTestsFlagSuppressesWarning) {
@@ -478,6 +557,63 @@ TEST_F(ExceptionInTearDownTest, ExceptionInTearDown) {
 #endif  // GTEST_HAS_EXCEPTIONS
 
 #endif  // GTEST_OS_WINDOWS
+
+#if GTEST_IS_THREADSAFE
+
+// A unary function that may die.
+void DieIf(bool should_die) {
+  GTEST_CHECK_(!should_die) << " - death inside DieIf().";
+}
+
+// Tests running death tests in a multi-threaded context.
+
+// Used for coordination between the main and the spawn thread.
+struct SpawnThreadNotifications {
+  SpawnThreadNotifications() {}
+
+  Notification spawn_thread_started;
+  Notification spawn_thread_ok_to_terminate;
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(SpawnThreadNotifications);
+};
+
+// The function to be executed in the thread spawn by the
+// MultipleThreads test (below).
+static void ThreadRoutine(SpawnThreadNotifications* notifications) {
+  // Signals the main thread that this thread has started.
+  notifications->spawn_thread_started.Notify();
+
+  // Waits for permission to finish from the main thread.
+  notifications->spawn_thread_ok_to_terminate.WaitForNotification();
+}
+
+// This is a death-test test, but it's not named with a DeathTest
+// suffix.  It starts threads which might interfere with later
+// death tests, so it must run after all other death tests.
+class DeathTestAndMultiThreadsTest : public testing::Test {
+ protected:
+  // Starts a thread and waits for it to begin.
+  virtual void SetUp() {
+    thread_.reset(new ThreadWithParam<SpawnThreadNotifications*>(
+        &ThreadRoutine, &notifications_, NULL));
+    notifications_.spawn_thread_started.WaitForNotification();
+  }
+  // Tells the thread to finish, and reaps it.
+  // Depending on the version of the thread library in use,
+  // a manager thread might still be left running that will interfere
+  // with later death tests.  This is unfortunate, but this class
+  // cleans up after itself as best it can.
+  virtual void TearDown() {
+    notifications_.spawn_thread_ok_to_terminate.Notify();
+  }
+
+ private:
+  SpawnThreadNotifications notifications_;
+  scoped_ptr<ThreadWithParam<SpawnThreadNotifications*> > thread_;
+};
+
+#endif  // GTEST_IS_THREADSAFE
 
 // The MixedUpTestCaseTest test case verifies that Google Test will fail a
 // test if it uses a different fixture class than what other tests in
@@ -849,23 +985,13 @@ TEST_F(ExpectFailureTest, ExpectNonFatalFailure) {
                           "failure.");
 }
 
-#if GTEST_IS_THREADSAFE && GTEST_HAS_PTHREAD
+#if GTEST_IS_THREADSAFE
 
 class ExpectFailureWithThreadsTest : public ExpectFailureTest {
  protected:
   static void AddFailureInOtherThread(FailureMode failure) {
-    pthread_t tid;
-    pthread_create(&tid,
-                   NULL,
-                   ExpectFailureWithThreadsTest::FailureThread,
-                   &failure);
-    pthread_join(tid, NULL);
-  }
- private:
-  static void* FailureThread(void* attr) {
-    FailureMode* failure = static_cast<FailureMode*>(attr);
-    AddFailure(*failure);
-    return NULL;
+    ThreadWithParam<FailureMode> thread(&AddFailure, failure, NULL);
+    thread.Join();
   }
 };
 
@@ -901,7 +1027,7 @@ TEST_F(ScopedFakeTestPartResultReporterTest, InterceptOnlyCurrentThread) {
   EXPECT_EQ(0, results.size()) << "This shouldn't fail.";
 }
 
-#endif  // GTEST_IS_THREADSAFE && GTEST_HAS_PTHREAD
+#endif  // GTEST_IS_THREADSAFE
 
 TEST_F(ExpectFailureTest, ExpectFatalFailureOnAllThreads) {
   // Expected fatal failure, but succeeds.

@@ -51,14 +51,13 @@ namespace internal {
 
 // String - a UTF-8 string class.
 //
-// We cannot use std::string as Microsoft's STL implementation in
-// Visual C++ 7.1 has problems when exception is disabled.  There is a
-// hack to work around this, but we've seen cases where the hack fails
-// to work.
+// For historic reasons, we don't use std::string.
 //
-// Also, String is different from std::string in that it can represent
-// both NULL and the empty string, while std::string cannot represent
-// NULL.
+// TODO(wan@google.com): replace this class with std::string or
+// implement it in terms of the latter.
+//
+// Note that String can represent both NULL and the empty string,
+// while std::string cannot represent NULL.
 //
 // NULL and the empty string are considered different.  NULL is less
 // than anything (including the empty string) except itself.

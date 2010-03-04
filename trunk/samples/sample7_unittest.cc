@@ -121,12 +121,12 @@ INSTANTIATE_TEST_CASE_P(
 
 #else
 
-// Google Test doesn't support value-parameterized tests on some platforms
-// and compilers, such as MSVC 7.1. If we use conditional compilation to
-// compile out all code referring to the gtest_main library, MSVC linker
-// will not link that library at all and consequently complain about
-// missing entry point defined in that library (fatal error LNK1561:
-// entry point must be defined). This dummy test keeps gtest_main linked in.
+// Google Test may not support value-parameterized tests with some
+// compilers. If we use conditional compilation to compile out all
+// code referring to the gtest_main library, MSVC linker will not link
+// that library at all and consequently complain about missing entry
+// point defined in that library (fatal error LNK1561: entry point
+// must be defined). This dummy test keeps gtest_main linked in.
 TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}
 
 #endif  // GTEST_HAS_PARAM_TEST

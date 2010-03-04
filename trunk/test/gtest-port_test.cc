@@ -803,7 +803,7 @@ TEST(MutexDeathTest, AssertHeldShouldAssertWhenNotLocked) {
     { MutexLock lock(&m); }
     m.AssertHeld();
   },
-  "The current thread is not holding the mutex @.+");
+  "thread .*hold");
 }
 
 TEST(MutexTest, AssertHeldShouldNotAssertWhenLocked) {
@@ -859,16 +859,16 @@ TEST(MutexTest, OnlyOneThreadCanLockAtATime) {
   const int kCycleCount = 20;
   const int kThreadCount = 7;
   scoped_ptr<ThreadType> counting_threads[kThreadCount];
-  ThreadStartSemaphore semaphore;
+  Notification threads_can_start;
   // Creates and runs kThreadCount threads that increment locked_counter
   // kCycleCount times each.
   for (int i = 0; i < kThreadCount; ++i) {
     counting_threads[i].reset(new ThreadType(&CountingThreadFunc,
                                              make_pair(&locked_counter,
                                                        kCycleCount),
-                                             &semaphore));
+                                             &threads_can_start));
   }
-  semaphore.Signal();  // Starts the threads.
+  threads_can_start.Notify();
   for (int i = 0; i < kThreadCount; ++i)
     counting_threads[i]->Join();
 
@@ -901,16 +901,29 @@ TEST(ThreadLocalTest, ParameterizedConstructorSetsDefault) {
   EXPECT_STREQ("foo", result.c_str());
 }
 
-class CountedDestructor {
+// DestructorTracker keeps track of whether the class instances have been
+// destroyed. The static synchronization mutex has to be defined outside
+// of the class, due to syntax of its definition.
+static GTEST_DEFINE_STATIC_MUTEX_(destructor_tracker_mutex);
+
+static std::vector<bool> g_destroyed;
+
+class DestructorTracker {
  public:
-  ~CountedDestructor() { counter_++; }
-  static int counter() { return counter_; }
-  static void set_counter(int value) { counter_ = value; }
+  DestructorTracker() : index_(GetNewIndex()) {}
+  ~DestructorTracker() {
+    MutexLock lock(&destructor_tracker_mutex);
+    g_destroyed[index_] = true;
+  }
 
  private:
-  static int counter_;
+  static int GetNewIndex() {
+    MutexLock lock(&destructor_tracker_mutex);
+    g_destroyed.push_back(false);
+    return g_destroyed.size() - 1;
+  }
+  const int index_;
 };
-int CountedDestructor::counter_ = 0;
 
 template <typename T>
 void CallThreadLocalGet(ThreadLocal<T>* threadLocal) {
@@ -918,16 +931,19 @@ void CallThreadLocalGet(ThreadLocal<T>* threadLocal) {
 }
 
 TEST(ThreadLocalTest, DestroysManagedObjectsNoLaterThanSelf) {
-  CountedDestructor::set_counter(0);
+  g_destroyed.clear();
   {
-    ThreadLocal<CountedDestructor> thread_local;
-    ThreadWithParam<ThreadLocal<CountedDestructor>*> thread(
-        &CallThreadLocalGet<CountedDestructor>, &thread_local, NULL);
+    ThreadLocal<DestructorTracker> thread_local;
+    ThreadWithParam<ThreadLocal<DestructorTracker>*> thread(
+        &CallThreadLocalGet<DestructorTracker>, &thread_local, NULL);
     thread.Join();
   }
-  // There should be 2 desctuctor calls as ThreadLocal also contains a member
-  // T - used as a prototype for copy ctr version.
-  EXPECT_EQ(2, CountedDestructor::counter());
+  // Verifies that all DestructorTracker objects there were have been
+  // destroyed.
+  for (size_t i = 0; i <  g_destroyed.size(); ++i)
+    EXPECT_TRUE(g_destroyed[i]) << "at index " << i;
+
+  g_destroyed.clear();
 }
 
 TEST(ThreadLocalTest, ThreadLocalMutationsAffectOnlyCurrentThread) {

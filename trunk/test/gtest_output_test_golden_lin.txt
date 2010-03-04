@@ -7,7 +7,7 @@ Expected: true
 gtest_output_test_.cc:#: Failure
 Value of: 3
 Expected: 2
-[0;32m[==========] [mRunning 59 tests from 25 test cases.
+[0;32m[==========] [mRunning 60 tests from 25 test cases.
 [0;32m[----------] [mGlobal test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -65,7 +65,7 @@ i == 3
 gtest_output_test_.cc:#: Failure
 Expected: (3) >= (a[i]), actual: 3 vs 6
 [0;31m[  FAILED  ] [mLoggingTest.InterleavingLoggingAndAssertions
-[0;32m[----------] [m5 tests from SCOPED_TRACETest
+[0;32m[----------] [m6 tests from SCOPED_TRACETest
 [0;32m[ RUN      ] [mSCOPED_TRACETest.ObeysScopes
 (expected to fail)
 gtest_output_test_.cc:#: Failure
@@ -148,6 +148,35 @@ gtest_output_test_.cc:#: D
 gtest_output_test_.cc:#: B
 gtest_output_test_.cc:#: A
 [0;31m[  FAILED  ] [mSCOPED_TRACETest.CanBeRepeated
+[0;32m[ RUN      ] [mSCOPED_TRACETest.WorksConcurrently
+(expecting 6 failures)
+gtest_output_test_.cc:#: Failure
+Failed
+Expected failure #1 (in thread B, only trace B alive).
+Google Test trace:
+gtest_output_test_.cc:#: Trace B
+gtest_output_test_.cc:#: Failure
+Failed
+Expected failure #2 (in thread A, trace A & B both alive).
+Google Test trace:
+gtest_output_test_.cc:#: Trace A
+gtest_output_test_.cc:#: Failure
+Failed
+Expected failure #3 (in thread B, trace A & B both alive).
+Google Test trace:
+gtest_output_test_.cc:#: Trace B
+gtest_output_test_.cc:#: Failure
+Failed
+Expected failure #4 (in thread B, only trace A alive).
+gtest_output_test_.cc:#: Failure
+Failed
+Expected failure #5 (in thread A, only trace A alive).
+Google Test trace:
+gtest_output_test_.cc:#: Trace A
+gtest_output_test_.cc:#: Failure
+Failed
+Expected failure #6 (in thread A, no trace alive).
+[0;31m[  FAILED  ] [mSCOPED_TRACETest.WorksConcurrently
 [0;32m[----------] [m1 test from NonFatalFailureInFixtureConstructorTest
 [0;32m[ RUN      ] [mNonFatalFailureInFixtureConstructorTest.FailureInConstructor
 (expecting 5 failures)
@@ -544,9 +573,9 @@ FooEnvironment::TearDown() called.
 gtest_output_test_.cc:#: Failure
 Failed
 Expected fatal failure.
-[0;32m[==========] [m59 tests from 25 test cases ran.
+[0;32m[==========] [m60 tests from 25 test cases ran.
 [0;32m[  PASSED  ] [m21 tests.
-[0;31m[  FAILED  ] [m38 tests, listed below:
+[0;31m[  FAILED  ] [m39 tests, listed below:
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInSubroutine
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInNestedSubroutine
 [0;31m[  FAILED  ] [mFatalFailureTest.NonfatalFailureInSubroutine
@@ -556,6 +585,7 @@ Expected fatal failure.
 [0;31m[  FAILED  ] [mSCOPED_TRACETest.WorksInSubroutine
 [0;31m[  FAILED  ] [mSCOPED_TRACETest.CanBeNested
 [0;31m[  FAILED  ] [mSCOPED_TRACETest.CanBeRepeated
+[0;31m[  FAILED  ] [mSCOPED_TRACETest.WorksConcurrently
 [0;31m[  FAILED  ] [mNonFatalFailureInFixtureConstructorTest.FailureInConstructor
 [0;31m[  FAILED  ] [mFatalFailureInFixtureConstructorTest.FailureInConstructor
 [0;31m[  FAILED  ] [mNonFatalFailureInSetUpTest.FailureInSetUp
@@ -586,7 +616,7 @@ Expected fatal failure.
 [0;31m[  FAILED  ] [mExpectFailureWithThreadsTest.ExpectNonFatalFailure
 [0;31m[  FAILED  ] [mScopedFakeTestPartResultReporterTest.InterceptOnlyCurrentThread
 
-38 FAILED TESTS
+39 FAILED TESTS
 [0;33m  YOU HAVE 1 DISABLED TEST
 
 [mNote: Google Test filter = FatalFailureTest.*:LoggingTest.*
