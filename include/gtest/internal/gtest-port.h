@@ -66,6 +66,13 @@
 //                              Test's own tr1 tuple implementation should be
 //                              used.  Unused when the user sets
 //                              GTEST_HAS_TR1_TUPLE to 0.
+//   GTEST_LINKED_AS_SHARED_LIBRARY
+//                            - Define to 1 when compiling tests that use
+//                              Google Test as a shared library (known as
+//                              DLL on Windows).
+//   GTEST_CREATE_SHARED_LIBRARY
+//                            - Define to 1 when compiling Google Test itself
+//                              as a shared library.
 
 // This header defines the following utilities:
 //
@@ -558,6 +565,20 @@
 
 #endif  // GTEST_HAS_SEH
 
+#ifdef _MSC_VER
+
+#if GTEST_LINKED_AS_SHARED_LIBRARY
+#define GTEST_API_ __declspec(dllimport)
+#elif GTEST_CREATE_SHARED_LIBRARY
+#define GTEST_API_ __declspec(dllexport)
+#endif
+
+#endif  // _MSC_VER
+
+#ifndef GTEST_API_
+#define GTEST_API_
+#endif
+
 namespace testing {
 
 class Message;
@@ -570,7 +591,7 @@ typedef ::std::stringstream StrStream;
 
 // A helper for suppressing warnings on constant condition.  It just
 // returns 'condition'.
-bool IsTrue(bool condition);
+GTEST_API_ bool IsTrue(bool condition);
 
 // Defines scoped_ptr.
 
@@ -612,7 +633,7 @@ class scoped_ptr {
 
 // A simple C++ wrapper for <regex.h>.  It uses the POSIX Enxtended
 // Regular Expression syntax.
-class RE {
+class GTEST_API_ RE {
  public:
   // Constructs an RE from a string.
   RE(const ::std::string& regex) { Init(regex.c_str()); }  // NOLINT
@@ -688,7 +709,7 @@ enum GTestLogSeverity {
 // Formats log entry severity, provides a stream object for streaming the
 // log message, and terminates the message with a newline when going out of
 // scope.
-class GTestLog {
+class GTEST_API_ GTestLog {
  public:
   GTestLog(GTestLogSeverity severity, const char* file, int line);
 
@@ -1330,19 +1351,19 @@ typedef TypeWithSize<8>::Int TimeInMillis;  // Represents time in milliseconds.
 #define GTEST_FLAG(name) FLAGS_gtest_##name
 
 // Macros for declaring flags.
-#define GTEST_DECLARE_bool_(name) extern bool GTEST_FLAG(name)
+#define GTEST_DECLARE_bool_(name) GTEST_API_ extern bool GTEST_FLAG(name)
 #define GTEST_DECLARE_int32_(name) \
-    extern ::testing::internal::Int32 GTEST_FLAG(name)
+    GTEST_API_ extern ::testing::internal::Int32 GTEST_FLAG(name)
 #define GTEST_DECLARE_string_(name) \
-    extern ::testing::internal::String GTEST_FLAG(name)
+    GTEST_API_ extern ::testing::internal::String GTEST_FLAG(name)
 
 // Macros for defining flags.
 #define GTEST_DEFINE_bool_(name, default_val, doc) \
-    bool GTEST_FLAG(name) = (default_val)
+    GTEST_API_ bool GTEST_FLAG(name) = (default_val)
 #define GTEST_DEFINE_int32_(name, default_val, doc) \
-    ::testing::internal::Int32 GTEST_FLAG(name) = (default_val)
+    GTEST_API_ ::testing::internal::Int32 GTEST_FLAG(name) = (default_val)
 #define GTEST_DEFINE_string_(name, default_val, doc) \
-    ::testing::internal::String GTEST_FLAG(name) = (default_val)
+    GTEST_API_ ::testing::internal::String GTEST_FLAG(name) = (default_val)
 
 // Parses 'str' for a 32-bit signed integer.  If successful, writes the result
 // to *value and returns true; otherwise leaves *value unchanged and returns

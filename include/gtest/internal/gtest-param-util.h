@@ -60,8 +60,8 @@ namespace internal {
 // fixture class for the same test case. This may happen when
 // TEST_P macro is used to define two tests with the same name
 // but in different namespaces.
-void ReportInvalidTestCaseType(const char* test_case_name,
-                               const char* file, int line);
+GTEST_API_ void ReportInvalidTestCaseType(const char* test_case_name,
+                                          const char* file, int line);
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 //

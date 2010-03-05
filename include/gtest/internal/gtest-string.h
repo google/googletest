@@ -73,7 +73,7 @@ namespace internal {
 //
 // In order to make the representation efficient, the d'tor of String
 // is not virtual.  Therefore DO NOT INHERIT FROM String.
-class String {
+class GTEST_API_ String {
  public:
   // Static utility methods
 
@@ -326,7 +326,7 @@ inline ::std::ostream& operator<<(::std::ostream& os, const String& str) {
 
 // Gets the content of the StrStream's buffer as a String.  Each '\0'
 // character in the buffer is replaced with "\\0".
-String StrStreamToString(StrStream* stream);
+GTEST_API_ String StrStreamToString(StrStream* stream);
 
 // Converts a streamable value to a String.  A NULL pointer is
 // converted to "(null)".  When the input value is a ::string,

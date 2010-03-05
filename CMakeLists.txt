@@ -54,10 +54,10 @@ endif()
 #
 # Defines the gtest & gtest_main libraries.  User tests should link
 # with one of them.
-
-function(cxx_library name cxx_flags)
+function(cxx_library_with_type name type cxx_flags)
+  # type can be either STATIC or SHARED to denote a static or shared library.
   # ARGN refers to additional arguments after 'cxx_flags'.
-  add_library(${name} STATIC ${ARGN})
+  add_library(${name} ${type} ${ARGN})
   set_target_properties(${name}
     PROPERTIES
     COMPILE_FLAGS "${cxx_flags}")
@@ -66,8 +66,22 @@ function(cxx_library name cxx_flags)
     endif()
 endfunction()
 
-cxx_library(gtest "${cxx_default}" src/gtest-all.cc)
-cxx_library(gtest_main "${cxx_default}" src/gtest_main.cc)
+function(cxx_static_library name cxx_flags)
+  cxx_library_with_type(${name} STATIC "${cxx_flags}" ${ARGN})
+endfunction()
+
+function(cxx_shared_library name cxx_flags)
+  cxx_library_with_type(${name} SHARED "${cxx_flags}" ${ARGN})
+endfunction()
+
+function(cxx_library name cxx_flags)
+  # TODO(vladl@google.com): Make static/shared a user option.
+  cxx_static_library(${name} "${cxx_flags}" ${ARGN})
+endfunction()
+
+# Static versions of Google Test libraries.
+cxx_static_library(gtest "${cxx_default}" src/gtest-all.cc)
+cxx_static_library(gtest_main "${cxx_default}" src/gtest_main.cc)
 target_link_libraries(gtest_main gtest)
 
 ########################################################################
@@ -85,14 +99,20 @@ option(build_gtest_samples "Build gtest's sample programs." OFF)
 # creates a named target that depends on the given lib and is built
 # from the given source files.  dir/name.cc is implicitly included in
 # the source file list.
-function(cxx_executable name dir lib)
+function(cxx_executable_with_flags name dir cxx_flags lib)
   add_executable(${name}
     ${dir}/${name}.cc
     ${ARGN})
-  set_target_properties(${name}
-    PROPERTIES
-    COMPILE_FLAGS "${cxx_default}")
+  if (cxx_flags)
+    set_target_properties(${name}
+      PROPERTIES
+      COMPILE_FLAGS "${cxx_flags}")
+  endif()
   target_link_libraries(${name} ${lib})
+endfunction()
+
+function(cxx_executable name dir lib)
+  cxx_executable_with_flags(${name} ${dir} "${cxx_default}" ${lib} ${ARGN})
 endfunction()
 
 if (build_gtest_samples)
@@ -206,6 +226,25 @@ if (build_all_gtest_tests)
 
   cxx_test_with_flags(gtest_no_rtti_unittest "${cxx_no_rtti}"
     gtest_main_no_rtti test/gtest_unittest.cc)
+
+  set(cxx_use_shared_gtest "${cxx_default} -DGTEST_LINKED_AS_SHARED_LIBRARY=1")
+  set(cxx_build_shared_gtest "${cxx_default} -DGTEST_CREATE_SHARED_LIBRARY=1")
+  if (MSVC)
+    # Disables the "class 'X' needs to have dll-interface to be used
+    # by clients of class 'Y'" warning. This particularly concerns generic
+    # classes like vector that MS doesn't mark as exported.
+    set(cxx_use_shared_gtest "${cxx_use_shared_gtest} -wd4251")
+    set(cxx_build_shared_gtest "${cxx_build_shared_gtest} -wd4251")
+  endif()
+
+  cxx_shared_library(gtest_dll "${cxx_build_shared_gtest}"
+    src/gtest-all.cc)
+
+  # TODO(vladl): This and the next tests may not run in the hermetic
+  # environment on Windows. Re-evaluate and possibly make them
+  # platform-conditional after implementing hermetic builds.
+  cxx_test_with_flags(gtest_dll_test_ "${cxx_use_shared_gtest}"
+    gtest_dll test/gtest_dll_test_.cc)
 
   if (NOT(MSVC AND (MSVC_VERSION EQUAL 1600)))
     # The C++ Standard specifies tuple_element<int, class>.
