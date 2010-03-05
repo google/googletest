@@ -795,6 +795,16 @@ TEST(ThreadLocalTest, PointerAndConstPointerReturnSameValue) {
 }
 
 #if GTEST_IS_THREADSAFE
+
+void AddTwo(int* param) { *param += 2; }
+
+TEST(ThreadWithParamTest, ConstructorExecutesThreadFunc) {
+  int i = 40;
+  ThreadWithParam<int*> thread(&AddTwo, &i, NULL);
+  thread.Join();
+  EXPECT_EQ(42, i);
+}
+
 TEST(MutexDeathTest, AssertHeldShouldAssertWhenNotLocked) {
   // AssertHeld() is flaky only in the presence of multiple threads accessing
   // the lock. In this case, the test is robust.
