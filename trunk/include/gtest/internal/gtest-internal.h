@@ -161,7 +161,7 @@ String AppendUserMessage(const String& gtest_msg,
                          const Message& user_msg);
 
 // A helper class for creating scoped traces in user programs.
-class ScopedTrace {
+class GTEST_API_ ScopedTrace {
  public:
   // The c'tor pushes the given source file location and message onto
   // a trace stack maintained by Google Test.
@@ -240,8 +240,8 @@ inline String FormatForFailureMessage(T* pointer) {
 #endif  // GTEST_NEEDS_IS_POINTER_
 
 // These overloaded versions handle narrow and wide characters.
-String FormatForFailureMessage(char ch);
-String FormatForFailureMessage(wchar_t wchar);
+GTEST_API_ String FormatForFailureMessage(char ch);
+GTEST_API_ String FormatForFailureMessage(wchar_t wchar);
 
 // When this operand is a const char* or char*, and the other operand
 // is a ::std::string or ::string, we print this operand as a C string
@@ -287,17 +287,18 @@ GTEST_FORMAT_IMPL_(::wstring, String::ShowWideCStringQuoted)
 // The ignoring_case parameter is true iff the assertion is a
 // *_STRCASEEQ*.  When it's true, the string " (ignoring case)" will
 // be inserted into the message.
-AssertionResult EqFailure(const char* expected_expression,
-                          const char* actual_expression,
-                          const String& expected_value,
-                          const String& actual_value,
-                          bool ignoring_case);
+GTEST_API_ AssertionResult EqFailure(const char* expected_expression,
+                                     const char* actual_expression,
+                                     const String& expected_value,
+                                     const String& actual_value,
+                                     bool ignoring_case);
 
 // Constructs a failure message for Boolean assertions such as EXPECT_TRUE.
-String GetBoolAssertionFailureMessage(const AssertionResult& assertion_result,
-                                      const char* expression_text,
-                                      const char* actual_predicate_value,
-                                      const char* expected_predicate_value);
+GTEST_API_ String GetBoolAssertionFailureMessage(
+    const AssertionResult& assertion_result,
+    const char* expression_text,
+    const char* actual_predicate_value,
+    const char* expected_predicate_value);
 
 // This template class represents an IEEE floating-point number
 // (either single-precision or double-precision, depending on the
@@ -517,7 +518,7 @@ TypeId GetTypeId() {
 // ::testing::Test, as the latter may give the wrong result due to a
 // suspected linker bug when compiling Google Test as a Mac OS X
 // framework.
-TypeId GetTestTypeId();
+GTEST_API_ TypeId GetTestTypeId();
 
 // Defines the abstract factory interface that creates instances
 // of a Test object.
@@ -550,8 +551,10 @@ class TestFactoryImpl : public TestFactoryBase {
 // {ASSERT|EXPECT}_HRESULT_{SUCCEEDED|FAILED}
 // We pass a long instead of HRESULT to avoid causing an
 // include dependency for the HRESULT type.
-AssertionResult IsHRESULTSuccess(const char* expr, long hr);  // NOLINT
-AssertionResult IsHRESULTFailure(const char* expr, long hr);  // NOLINT
+GTEST_API_ AssertionResult IsHRESULTSuccess(const char* expr,
+                                            long hr);  // NOLINT
+GTEST_API_ AssertionResult IsHRESULTFailure(const char* expr,
+                                            long hr);  // NOLINT
 
 #endif  // GTEST_OS_WINDOWS
 
@@ -590,7 +593,7 @@ typedef void (*TearDownTestCaseFunc)();
 //   factory:          pointer to the factory that creates a test object.
 //                     The newly created TestInfo instance will assume
 //                     ownership of the factory object.
-TestInfo* MakeAndRegisterTestInfo(
+GTEST_API_ TestInfo* MakeAndRegisterTestInfo(
     const char* test_case_name, const char* name,
     const char* test_case_comment, const char* comment,
     TypeId fixture_class_id,
@@ -606,7 +609,7 @@ bool SkipPrefix(const char* prefix, const char** pstr);
 #if GTEST_HAS_TYPED_TEST || GTEST_HAS_TYPED_TEST_P
 
 // State of the definition of a type-parameterized test case.
-class TypedTestCasePState {
+class GTEST_API_ TypedTestCasePState {
  public:
   TypedTestCasePState() : registered_(false) {}
 
@@ -753,7 +756,7 @@ String GetCurrentOsStackTraceExceptTop(UnitTest* unit_test, int skip_count);
 // condition.
 
 // Always returns true.
-bool AlwaysTrue();
+GTEST_API_ bool AlwaysTrue();
 
 // Always returns false.
 inline bool AlwaysFalse() { return !AlwaysTrue(); }

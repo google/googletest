@@ -251,7 +251,7 @@ String StreamableToString(const T& streamable) {
 //   Expected: Foo() is even
 //     Actual: it's 5
 //
-class AssertionResult {
+class GTEST_API_ AssertionResult {
  public:
   // Copy constructor.
   // Used in EXPECT_TRUE/FALSE(assertion_result).
@@ -306,14 +306,14 @@ AssertionResult& AssertionResult::operator<<(const T& value) {
 }
 
 // Makes a successful assertion result.
-AssertionResult AssertionSuccess();
+GTEST_API_ AssertionResult AssertionSuccess();
 
 // Makes a failed assertion result.
-AssertionResult AssertionFailure();
+GTEST_API_ AssertionResult AssertionFailure();
 
 // Makes a failed assertion result with the given failure message.
 // Deprecated; use AssertionFailure() << msg.
-AssertionResult AssertionFailure(const Message& msg);
+GTEST_API_ AssertionResult AssertionFailure(const Message& msg);
 
 // The abstract class that all tests inherit from.
 //
@@ -338,7 +338,7 @@ AssertionResult AssertionFailure(const Message& msg);
 //   TEST_F(FooTest, Baz) { ... }
 //
 // Test is not copyable.
-class Test {
+class GTEST_API_ Test {
  public:
   friend class internal::TestInfoImpl;
 
@@ -486,7 +486,7 @@ class TestProperty {
 // the Test.
 //
 // TestResult is not copyable.
-class TestResult {
+class GTEST_API_ TestResult {
  public:
   // Creates an empty TestResult.
   TestResult();
@@ -604,7 +604,7 @@ class TestResult {
 // The constructor of TestInfo registers itself with the UnitTest
 // singleton such that the RUN_ALL_TESTS() macro knows which tests to
 // run.
-class TestInfo {
+class GTEST_API_ TestInfo {
  public:
   // Destructs a TestInfo object.  This function is not virtual, so
   // don't inherit from TestInfo.
@@ -686,7 +686,7 @@ class TestInfo {
 // A test case, which consists of a vector of TestInfos.
 //
 // TestCase is not copyable.
-class TestCase {
+class GTEST_API_ TestCase {
  public:
   // Creates a TestCase with the given name.
   //
@@ -924,7 +924,7 @@ class EmptyTestEventListener : public TestEventListener {
 };
 
 // TestEventListeners lets users add listeners to track events in Google Test.
-class TestEventListeners {
+class GTEST_API_ TestEventListeners {
  public:
   TestEventListeners();
   ~TestEventListeners();
@@ -1011,7 +1011,7 @@ class TestEventListeners {
 //
 // This class is thread-safe as long as the methods are called
 // according to their specification.
-class UnitTest {
+class GTEST_API_ UnitTest {
  public:
   // Gets the singleton UnitTest object.  The first time this method
   // is called, a UnitTest object is constructed and returned.
@@ -1198,34 +1198,34 @@ inline Environment* AddGlobalTestEnvironment(Environment* env) {
 // updated.
 //
 // Calling the function for the second time has no user-visible effect.
-void InitGoogleTest(int* argc, char** argv);
+GTEST_API_ void InitGoogleTest(int* argc, char** argv);
 
 // This overloaded version can be used in Windows programs compiled in
 // UNICODE mode.
-void InitGoogleTest(int* argc, wchar_t** argv);
+GTEST_API_ void InitGoogleTest(int* argc, wchar_t** argv);
 
 namespace internal {
 
 // These overloaded versions handle ::std::string and ::std::wstring.
-inline String FormatForFailureMessage(const ::std::string& str) {
+GTEST_API_ inline String FormatForFailureMessage(const ::std::string& str) {
   return (Message() << '"' << str << '"').GetString();
 }
 
 #if GTEST_HAS_STD_WSTRING
-inline String FormatForFailureMessage(const ::std::wstring& wstr) {
+GTEST_API_ inline String FormatForFailureMessage(const ::std::wstring& wstr) {
   return (Message() << "L\"" << wstr << '"').GetString();
 }
 #endif  // GTEST_HAS_STD_WSTRING
 
 // These overloaded versions handle ::string and ::wstring.
 #if GTEST_HAS_GLOBAL_STRING
-inline String FormatForFailureMessage(const ::string& str) {
+GTEST_API_ inline String FormatForFailureMessage(const ::string& str) {
   return (Message() << '"' << str << '"').GetString();
 }
 #endif  // GTEST_HAS_GLOBAL_STRING
 
 #if GTEST_HAS_GLOBAL_WSTRING
-inline String FormatForFailureMessage(const ::wstring& wstr) {
+GTEST_API_ inline String FormatForFailureMessage(const ::wstring& wstr) {
   return (Message() << "L\"" << wstr << '"').GetString();
 }
 #endif  // GTEST_HAS_GLOBAL_WSTRING
@@ -1391,51 +1391,51 @@ GTEST_IMPL_CMP_HELPER_(GT, > )
 // The helper function for {ASSERT|EXPECT}_STREQ.
 //
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
-AssertionResult CmpHelperSTREQ(const char* expected_expression,
-                               const char* actual_expression,
-                               const char* expected,
-                               const char* actual);
+GTEST_API_ AssertionResult CmpHelperSTREQ(const char* expected_expression,
+                                          const char* actual_expression,
+                                          const char* expected,
+                                          const char* actual);
 
 // The helper function for {ASSERT|EXPECT}_STRCASEEQ.
 //
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
-AssertionResult CmpHelperSTRCASEEQ(const char* expected_expression,
-                                   const char* actual_expression,
-                                   const char* expected,
-                                   const char* actual);
+GTEST_API_ AssertionResult CmpHelperSTRCASEEQ(const char* expected_expression,
+                                              const char* actual_expression,
+                                              const char* expected,
+                                              const char* actual);
 
 // The helper function for {ASSERT|EXPECT}_STRNE.
 //
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
-AssertionResult CmpHelperSTRNE(const char* s1_expression,
-                               const char* s2_expression,
-                               const char* s1,
-                               const char* s2);
+GTEST_API_ AssertionResult CmpHelperSTRNE(const char* s1_expression,
+                                          const char* s2_expression,
+                                          const char* s1,
+                                          const char* s2);
 
 // The helper function for {ASSERT|EXPECT}_STRCASENE.
 //
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
-AssertionResult CmpHelperSTRCASENE(const char* s1_expression,
-                                   const char* s2_expression,
-                                   const char* s1,
-                                   const char* s2);
+GTEST_API_ AssertionResult CmpHelperSTRCASENE(const char* s1_expression,
+                                              const char* s2_expression,
+                                              const char* s1,
+                                              const char* s2);
 
 
 // Helper function for *_STREQ on wide strings.
 //
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
-AssertionResult CmpHelperSTREQ(const char* expected_expression,
-                               const char* actual_expression,
-                               const wchar_t* expected,
-                               const wchar_t* actual);
+GTEST_API_ AssertionResult CmpHelperSTREQ(const char* expected_expression,
+                                          const char* actual_expression,
+                                          const wchar_t* expected,
+                                          const wchar_t* actual);
 
 // Helper function for *_STRNE on wide strings.
 //
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
-AssertionResult CmpHelperSTRNE(const char* s1_expression,
-                               const char* s2_expression,
-                               const wchar_t* s1,
-                               const wchar_t* s2);
+GTEST_API_ AssertionResult CmpHelperSTRNE(const char* s1_expression,
+                                          const char* s2_expression,
+                                          const wchar_t* s1,
+                                          const wchar_t* s2);
 
 }  // namespace internal
 
@@ -1513,16 +1513,16 @@ AssertionResult CmpHelperFloatingPointEQ(const char* expected_expression,
 // Helper function for implementing ASSERT_NEAR.
 //
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
-AssertionResult DoubleNearPredFormat(const char* expr1,
-                                     const char* expr2,
-                                     const char* abs_error_expr,
-                                     double val1,
-                                     double val2,
-                                     double abs_error);
+GTEST_API_ AssertionResult DoubleNearPredFormat(const char* expr1,
+                                                const char* expr2,
+                                                const char* abs_error_expr,
+                                                double val1,
+                                                double val2,
+                                                double abs_error);
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 // A class that enables one to stream messages to assertion macros
-class AssertHelper {
+class GTEST_API_ AssertHelper {
  public:
   // Constructor.
   AssertHelper(TestPartResult::Type type,
@@ -1853,10 +1853,10 @@ const T* TestWithParam<T>::parameter_ = NULL;
 
 // Asserts that val1 is less than, or almost equal to, val2.  Fails
 // otherwise.  In particular, it fails if either val1 or val2 is NaN.
-AssertionResult FloatLE(const char* expr1, const char* expr2,
-                        float val1, float val2);
-AssertionResult DoubleLE(const char* expr1, const char* expr2,
-                         double val1, double val2);
+GTEST_API_ AssertionResult FloatLE(const char* expr1, const char* expr2,
+                                   float val1, float val2);
+GTEST_API_ AssertionResult DoubleLE(const char* expr1, const char* expr2,
+                                    double val1, double val2);
 
 
 #if GTEST_OS_WINDOWS

@@ -29,21 +29,24 @@
 // Author: vladl@google.com (Vlad Losev)
 //
 // Tests for Google Test itself.  This verifies that Google Test can be
-// linked into an executable successfully when built as a DLL on Windows.
-// The test is not meant to check the success of test assertions employed in
-// it. It only checks that constructs in them can be successfully linked.
+// linked into an executable successfully when built as a shared library (a
+// DLL on Windows).  The test is not meant to check the success of test
+// assertions employed in it.  It only checks that constructs in them can be
+// successfully linked.
 //
 // If you add new features to Google Test's documented interface, you need to
 // add tests exercising them to this file.
 //
 // If you start having 'unresolved external symbol' linker errors in this file
-// after the changes you have made, re-generate src/gtest.def by running
-// scripts/generate_gtest_def.py.
+// after the changes you have made, you have to modify your source code to
+// export the new symbols.
 
 #include <gtest/gtest.h>
 #include <gtest/gtest-spi.h>
 
+#if GTEST_OS_WINDOWS
 #include <windows.h>
+#endif
 #include <vector>
 
 using ::std::vector;
@@ -297,18 +300,20 @@ TEST(FloatingPointComparisonAssertionTest, LinksSuccessfully) {
   EXPECT_PRED_FORMAT2(::testing::DoubleLE, 0.0, 0.001);
 }
 
+#if GTEST_OS_WINDOWS
 // Tests linking of HRESULT assertions.
 TEST(HresultAssertionTest, LinksSuccessfully) {
   EXPECT_HRESULT_SUCCEEDED(S_OK);
   EXPECT_HRESULT_FAILED(E_FAIL);
 }
+#endif  // GTEST_OS_WINDOWS
 
 #if GTEST_HAS_EXCEPTIONS
 // Tests linking of exception assertions.
 TEST(ExceptionAssertionTest, LinksSuccessfully) {
   EXPECT_THROW(throw 1, int);
   EXPECT_ANY_THROW(throw 1);
-  EXPECT_NO_THROW(int x = 1);
+  EXPECT_NO_THROW(std::vector<int> v);
 }
 #endif  // GTEST_HAS_EXCEPTIONS
 
@@ -498,6 +503,7 @@ int main(int argc, char **argv) {
   listener = listeners.default_result_printer();
   listener = listeners.default_xml_generator();
 
-  RUN_ALL_TESTS();
+  int ret_val = RUN_ALL_TESTS();
+  static_cast<void>(ret_val);
   return  0;
 }
