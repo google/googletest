@@ -2850,6 +2850,14 @@ inline bool Value(const T& value, M matcher) {
   return testing::Matches(matcher)(value);
 }
 
+// Matches the value against the given matcher and explains the match
+// result to listener.
+template <typename T, typename M>
+inline bool MatchAndExplain(
+    M matcher, const T& value, MatchResultListener* listener) {
+  return SafeMatcherCast<const T&>(matcher).MatchAndExplain(value, listener);
+}
+
 // AllArgs(m) is a synonym of m.  This is useful in
 //
 //   EXPECT_CALL(foo, Bar(_, _)).With(AllArgs(Eq()));

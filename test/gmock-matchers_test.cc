@@ -88,6 +88,7 @@ using testing::Matcher;
 using testing::MatcherCast;
 using testing::MatcherInterface;
 using testing::Matches;
+using testing::MatchAndExplain;
 using testing::MatchResultListener;
 using testing::NanSensitiveDoubleEq;
 using testing::NanSensitiveFloatEq;
@@ -118,6 +119,7 @@ using testing::internal::JoinAsTuple;
 using testing::internal::SkipPrefix;
 using testing::internal::String;
 using testing::internal::Strings;
+using testing::internal::StringMatchResultListener;
 using testing::internal::ValidateMatcherDescription;
 using testing::internal::kInvalidInterpolation;
 using testing::internal::kPercentInterpolation;
@@ -287,11 +289,11 @@ TEST(MatcherTest, CanDescribeItself) {
 // Tests Matcher<T>::MatchAndExplain().
 TEST(MatcherTest, MatchAndExplain) {
   Matcher<int> m = GreaterThan(0);
-  ::testing::internal::StringMatchResultListener listener1;
+  StringMatchResultListener listener1;
   EXPECT_TRUE(m.MatchAndExplain(42, &listener1));
   EXPECT_EQ("is 42 more than 0", listener1.str());
 
-  ::testing::internal::StringMatchResultListener listener2;
+  StringMatchResultListener listener2;
   EXPECT_FALSE(m.MatchAndExplain(-9, &listener2));
   EXPECT_EQ("is 9 less than 0", listener2.str());
 }
@@ -2045,6 +2047,28 @@ TEST(ValueTest, WorksWithMonomorphicMatcher) {
   const Matcher<const int&> ref_n = Ref(n);
   EXPECT_TRUE(Value(n, ref_n));
   EXPECT_FALSE(Value(1, ref_n));
+}
+
+TEST(MatchAndExplainTest, WorksWithPolymorphicMatcher) {
+  StringMatchResultListener listener1;
+  EXPECT_TRUE(MatchAndExplain(PolymorphicIsEven(), 42, &listener1));
+  EXPECT_EQ("% 2 == 0", listener1.str());
+
+  StringMatchResultListener listener2;
+  EXPECT_FALSE(MatchAndExplain(Ge(42), 1.5, &listener2));
+  EXPECT_EQ("", listener2.str());
+}
+
+TEST(MatchAndExplainTest, WorksWithMonomorphicMatcher) {
+  const Matcher<int> is_even = PolymorphicIsEven();
+  StringMatchResultListener listener1;
+  EXPECT_TRUE(MatchAndExplain(is_even, 42, &listener1));
+  EXPECT_EQ("% 2 == 0", listener1.str());
+
+  const Matcher<const double&> is_zero = Eq(0);
+  StringMatchResultListener listener2;
+  EXPECT_FALSE(MatchAndExplain(is_zero, 1.5, &listener2));
+  EXPECT_EQ("", listener2.str());
 }
 
 TEST(AllArgsTest, WorksForTuple) {
