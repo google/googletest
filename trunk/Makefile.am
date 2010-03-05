@@ -13,7 +13,6 @@ EXTRA_DIST = \
   make/Makefile \
   scripts/fuse_gtest_files.py \
   scripts/gen_gtest_pred_impl.py \
-  scripts/generate_gtest_def.py \
   scripts/test/Makefile
 
 # gtest source files that we don't compile directly.
@@ -122,8 +121,7 @@ EXTRA_DIST += \
   msvc/gtest_prod_test-md.vcproj \
   msvc/gtest_prod_test.vcproj \
   msvc/gtest_unittest-md.vcproj \
-  msvc/gtest_unittest.vcproj \
-  msvc/gtest.def
+  msvc/gtest_unittest.vcproj
 
 # xcode project files
 EXTRA_DIST += \
@@ -141,6 +139,7 @@ EXTRA_DIST += \
 # xcode sample files
 EXTRA_DIST += \
   xcode/Samples/FrameworkSample/Info.plist \
+  xcode/Samples/FrameworkSample/runtests.sh \
   xcode/Samples/FrameworkSample/widget_test.cc \
   xcode/Samples/FrameworkSample/widget.cc \
   xcode/Samples/FrameworkSample/widget.h \
