@@ -110,7 +110,12 @@ void DieInside(const char* function) {
   // system call and thus safer in the presence of threads.  exit()
   // will invoke user-defined exit-hooks, which may do dangerous
   // things that conflict with death tests.
-  _exit(1);
+  //
+  // Some compilers can recognize that _exit() never returns and issue the
+  // 'unreachable code' warning for code following this function, unless
+  // fooled by a fake condition.
+  if (AlwaysTrue())
+    _exit(1);
 }
 
 // Tests that death tests work.
