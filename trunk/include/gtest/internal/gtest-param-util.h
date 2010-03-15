@@ -171,7 +171,7 @@ class ParamGeneratorInterface {
   virtual ParamIteratorInterface<T>* End() const = 0;
 };
 
-// Wraps ParamGeneratorInetrface<T> and provides general generator syntax
+// Wraps ParamGeneratorInterface<T> and provides general generator syntax
 // compatible with the STL Container concept.
 // This class implements copy initialization semantics and the contained
 // ParamGeneratorInterface<T> instance is shared among all copies
