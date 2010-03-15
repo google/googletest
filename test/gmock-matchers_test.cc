@@ -37,6 +37,7 @@
 
 #include <string.h>
 #include <functional>
+#include <iostream>
 #include <list>
 #include <map>
 #include <set>
@@ -88,7 +89,7 @@ using testing::Matcher;
 using testing::MatcherCast;
 using testing::MatcherInterface;
 using testing::Matches;
-using testing::MatchAndExplain;
+using testing::ExplainMatchResult;
 using testing::MatchResultListener;
 using testing::NanSensitiveDoubleEq;
 using testing::NanSensitiveFloatEq;
@@ -110,6 +111,7 @@ using testing::Truly;
 using testing::TypedEq;
 using testing::Value;
 using testing::_;
+using testing::internal::DummyMatchResultListener;
 using testing::internal::FloatingEqMatcher;
 using testing::internal::FormatMatcherDescriptionSyntaxError;
 using testing::internal::GetParamIndex;
@@ -117,6 +119,7 @@ using testing::internal::Interpolation;
 using testing::internal::Interpolations;
 using testing::internal::JoinAsTuple;
 using testing::internal::SkipPrefix;
+using testing::internal::StreamMatchResultListener;
 using testing::internal::String;
 using testing::internal::Strings;
 using testing::internal::StringMatchResultListener;
@@ -187,6 +190,31 @@ string Explain(const MatcherType& m, const Value& x) {
   return ss.str();
 }
 
+TEST(MatchResultListenerTest, StreamingWorks) {
+  StringMatchResultListener listener;
+  listener << "hi" << 5;
+  EXPECT_EQ("hi5", listener.str());
+
+  // Streaming shouldn't crash when the underlying ostream is NULL.
+  DummyMatchResultListener dummy;
+  dummy << "hi" << 5;
+}
+
+TEST(MatchResultListenerTest, CanAccessUnderlyingStream) {
+  EXPECT_TRUE(DummyMatchResultListener().stream() == NULL);
+  EXPECT_TRUE(StreamMatchResultListener(NULL).stream() == NULL);
+
+  EXPECT_EQ(&std::cout, StreamMatchResultListener(&std::cout).stream());
+}
+
+TEST(MatchResultListenerTest, IsInterestedWorks) {
+  EXPECT_TRUE(StringMatchResultListener().IsInterested());
+  EXPECT_TRUE(StreamMatchResultListener(&std::cout).IsInterested());
+
+  EXPECT_FALSE(DummyMatchResultListener().IsInterested());
+  EXPECT_FALSE(StreamMatchResultListener(NULL).IsInterested());
+}
+
 // Makes sure that the MatcherInterface<T> interface doesn't
 // change.
 class EvenMatcherImpl : public MatcherInterface<int> {
@@ -205,7 +233,8 @@ class EvenMatcherImpl : public MatcherInterface<int> {
   // two methods is optional.
 };
 
-TEST(MatcherInterfaceTest, CanBeImplementedUsingDeprecatedAPI) {
+// Makes sure that the MatcherInterface API doesn't change.
+TEST(MatcherInterfaceTest, CanBeImplementedUsingPublishedAPI) {
   EvenMatcherImpl m;
 }
 
@@ -2049,26 +2078,34 @@ TEST(ValueTest, WorksWithMonomorphicMatcher) {
   EXPECT_FALSE(Value(1, ref_n));
 }
 
-TEST(MatchAndExplainTest, WorksWithPolymorphicMatcher) {
+TEST(ExplainMatchResultTest, WorksWithPolymorphicMatcher) {
   StringMatchResultListener listener1;
-  EXPECT_TRUE(MatchAndExplain(PolymorphicIsEven(), 42, &listener1));
+  EXPECT_TRUE(ExplainMatchResult(PolymorphicIsEven(), 42, &listener1));
   EXPECT_EQ("% 2 == 0", listener1.str());
 
   StringMatchResultListener listener2;
-  EXPECT_FALSE(MatchAndExplain(Ge(42), 1.5, &listener2));
+  EXPECT_FALSE(ExplainMatchResult(Ge(42), 1.5, &listener2));
   EXPECT_EQ("", listener2.str());
 }
 
-TEST(MatchAndExplainTest, WorksWithMonomorphicMatcher) {
+TEST(ExplainMatchResultTest, WorksWithMonomorphicMatcher) {
   const Matcher<int> is_even = PolymorphicIsEven();
   StringMatchResultListener listener1;
-  EXPECT_TRUE(MatchAndExplain(is_even, 42, &listener1));
+  EXPECT_TRUE(ExplainMatchResult(is_even, 42, &listener1));
   EXPECT_EQ("% 2 == 0", listener1.str());
 
   const Matcher<const double&> is_zero = Eq(0);
   StringMatchResultListener listener2;
-  EXPECT_FALSE(MatchAndExplain(is_zero, 1.5, &listener2));
+  EXPECT_FALSE(ExplainMatchResult(is_zero, 1.5, &listener2));
   EXPECT_EQ("", listener2.str());
+}
+
+MATCHER_P(Really, inner_matcher, "") {
+  return ExplainMatchResult(inner_matcher, arg, result_listener);
+}
+
+TEST(ExplainMatchResultTest, WorksInsideMATCHER) {
+  EXPECT_THAT(0, Really(Eq(0)));
 }
 
 TEST(AllArgsTest, WorksForTuple) {

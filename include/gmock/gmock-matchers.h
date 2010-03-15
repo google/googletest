@@ -90,6 +90,12 @@ class MatchResultListener {
   // Returns the underlying ostream.
   ::std::ostream* stream() { return stream_; }
 
+  // Returns true iff the listener is interested in an explanation of
+  // the match result.  A matcher's MatchAndExplain() method can use
+  // this information to avoid generating the explanation when no one
+  // intends to hear it.
+  bool IsInterested() const { return stream_ != NULL; }
+
  private:
   ::std::ostream* const stream_;
 
@@ -106,7 +112,10 @@ class MatcherInterface {
   virtual ~MatcherInterface() {}
 
   // Returns true iff the matcher matches x; also explains the match
-  // result to 'listener'.
+  // result to 'listener', in the form of a non-restrictive relative
+  // clause ("which ...", "whose ...", etc) that describes x.  For
+  // example, the MatchAndExplain() method of the Pointee(...) matcher
+  // should generate an explanation like "which points to ...".
   //
   // You should override this method when defining a new matcher.
   //
@@ -118,7 +127,11 @@ class MatcherInterface {
   // listener->stream() may be NULL.
   virtual bool MatchAndExplain(T x, MatchResultListener* listener) const = 0;
 
-  // Describes this matcher to an ostream.
+  // Describes this matcher to an ostream.  The function should print
+  // a verb phrase that describes the property a value matching this
+  // matcher should have.  The subject of the verb phrase is the value
+  // being matched.  For example, the DescribeTo() method of the Gt(7)
+  // matcher prints "is greater than 7".
   virtual void DescribeTo(::std::ostream* os) const = 0;
 
   // Describes the negation of this matcher to an ostream.  For
@@ -2853,7 +2866,7 @@ inline bool Value(const T& value, M matcher) {
 // Matches the value against the given matcher and explains the match
 // result to listener.
 template <typename T, typename M>
-inline bool MatchAndExplain(
+inline bool ExplainMatchResult(
     M matcher, const T& value, MatchResultListener* listener) {
   return SafeMatcherCast<const T&>(matcher).MatchAndExplain(value, listener);
 }
