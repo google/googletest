@@ -178,9 +178,7 @@ TEST(ArgsTest, CanMatchTupleByReference) {
 
 // Validates that arg is printed as str.
 MATCHER_P(PrintsAs, str, "") {
-  typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(arg_type)) RawTuple;
-  return
-      testing::internal::UniversalPrinter<RawTuple>::PrintToString(arg) == str;
+  return testing::PrintToString(arg) == str;
 }
 
 TEST(ArgsTest, AcceptsTenTemplateArgs) {

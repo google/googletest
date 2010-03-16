@@ -148,11 +148,11 @@ class GreaterThanMatcher : public MatcherInterface<int> {
                                MatchResultListener* listener) const {
     const int diff = lhs - rhs_;
     if (diff > 0) {
-      *listener << "is " << diff << " more than " << rhs_;
+      *listener << "which is " << diff << " more than " << rhs_;
     } else if (diff == 0) {
-      *listener << "is the same as " << rhs_;
+      *listener << "which is the same as " << rhs_;
     } else {
-      *listener << "is " << -diff << " less than " << rhs_;
+      *listener << "which is " << -diff << " less than " << rhs_;
     }
 
     return lhs > rhs_;
@@ -320,11 +320,11 @@ TEST(MatcherTest, MatchAndExplain) {
   Matcher<int> m = GreaterThan(0);
   StringMatchResultListener listener1;
   EXPECT_TRUE(m.MatchAndExplain(42, &listener1));
-  EXPECT_EQ("is 42 more than 0", listener1.str());
+  EXPECT_EQ("which is 42 more than 0", listener1.str());
 
   StringMatchResultListener listener2;
   EXPECT_FALSE(m.MatchAndExplain(-9, &listener2));
-  EXPECT_EQ("is 9 less than 0", listener2.str());
+  EXPECT_EQ("which is 9 less than 0", listener2.str());
 }
 
 // Tests that a C-string literal can be implicitly converted to a
@@ -1180,23 +1180,38 @@ TEST(PairTest, CanExplainMatchResultTo) {
   // If neither field matches, Pair() should explain about the first
   // field.
   const Matcher<std::pair<int, int> > m = Pair(GreaterThan(0), GreaterThan(0));
-  EXPECT_EQ("the first field is 1 less than 0",
+  EXPECT_EQ("whose first field does not match, which is 1 less than 0",
             Explain(m, std::make_pair(-1, -2)));
 
   // If the first field matches but the second doesn't, Pair() should
   // explain about the second field.
-  EXPECT_EQ("the second field is 2 less than 0",
+  EXPECT_EQ("whose second field does not match, which is 2 less than 0",
             Explain(m, std::make_pair(1, -2)));
 
   // If the first field doesn't match but the second does, Pair()
   // should explain about the first field.
-  EXPECT_EQ("the first field is 1 less than 0",
+  EXPECT_EQ("whose first field does not match, which is 1 less than 0",
             Explain(m, std::make_pair(-1, 2)));
 
   // If both fields match, Pair() should explain about them both.
-  EXPECT_EQ("the first field is 1 more than 0"
-            ", and the second field is 2 more than 0",
+  EXPECT_EQ("whose both fields match, where the first field is a value "
+            "which is 1 more than 0, and the second field is a value "
+            "which is 2 more than 0",
             Explain(m, std::make_pair(1, 2)));
+
+  // If only the first match has an explanation, only this explanation should
+  // be printed.
+  const Matcher<std::pair<int, int> > explain_first = Pair(GreaterThan(0), 0);
+  EXPECT_EQ("whose both fields match, where the first field is a value "
+            "which is 1 more than 0",
+            Explain(explain_first, std::make_pair(1, 0)));
+
+  // If only the second match has an explanation, only this explanation should
+  // be printed.
+  const Matcher<std::pair<int, int> > explain_second = Pair(0, GreaterThan(0));
+  EXPECT_EQ("whose both fields match, where the second field is a value "
+            "which is 1 more than 0",
+            Explain(explain_second, std::make_pair(0, 1)));
 }
 
 TEST(PairTest, MatchesCorrectly) {
@@ -2544,7 +2559,14 @@ TEST(PointeeTest, CanExplainMatchResult) {
 
   const Matcher<int*> m2 = Pointee(GreaterThan(1));
   int n = 3;
-  EXPECT_EQ("points to a value that is 2 more than 1", Explain(m2, &n));
+  EXPECT_EQ("which points to 3, which is 2 more than 1",
+            Explain(m2, &n));
+}
+
+TEST(PointeeTest, AlwaysExplainsPointee) {
+  const Matcher<int*> m = Pointee(0);
+  int n = 42;
+  EXPECT_EQ("which points to 42", Explain(m, &n));
 }
 
 // An uncopyable class.
@@ -2671,8 +2693,9 @@ TEST(FieldTest, WorksForCompatibleMatcherType) {
 TEST(FieldTest, CanDescribeSelf) {
   Matcher<const AStruct&> m = Field(&AStruct::x, Ge(0));
 
-  EXPECT_EQ("the given field is greater than or equal to 0", Describe(m));
-  EXPECT_EQ("the given field is not greater than or equal to 0",
+  EXPECT_EQ("is an object whose given field is greater than or equal to 0",
+            Describe(m));
+  EXPECT_EQ("is an object whose given field is not greater than or equal to 0",
             DescribeNegation(m));
 }
 
@@ -2682,10 +2705,10 @@ TEST(FieldTest, CanExplainMatchResult) {
 
   AStruct a;
   a.x = 1;
-  EXPECT_EQ("", Explain(m, a));
+  EXPECT_EQ("whose given field is 1", Explain(m, a));
 
   m = Field(&AStruct::x, GreaterThan(0));
-  EXPECT_EQ("the given field is 1 more than 0", Explain(m, a));
+  EXPECT_EQ("whose given field is 1, which is 1 more than 0", Explain(m, a));
 }
 
 // Tests that Field() works when the argument is a pointer to const.
@@ -2741,8 +2764,9 @@ TEST(FieldForPointerTest, WorksForArgumentOfSubType) {
 TEST(FieldForPointerTest, CanDescribeSelf) {
   Matcher<const AStruct*> m = Field(&AStruct::x, Ge(0));
 
-  EXPECT_EQ("the given field is greater than or equal to 0", Describe(m));
-  EXPECT_EQ("the given field is not greater than or equal to 0",
+  EXPECT_EQ("is an object whose given field is greater than or equal to 0",
+            Describe(m));
+  EXPECT_EQ("is an object whose given field is not greater than or equal to 0",
             DescribeNegation(m));
 }
 
@@ -2753,10 +2777,11 @@ TEST(FieldForPointerTest, CanExplainMatchResult) {
   AStruct a;
   a.x = 1;
   EXPECT_EQ("", Explain(m, static_cast<const AStruct*>(NULL)));
-  EXPECT_EQ("", Explain(m, &a));
+  EXPECT_EQ("which points to an object whose given field is 1", Explain(m, &a));
 
   m = Field(&AStruct::x, GreaterThan(0));
-  EXPECT_EQ("the given field is 1 more than 0", Explain(m, &a));
+  EXPECT_EQ("which points to an object whose given field is 1, "
+            "which is 1 more than 0", Explain(m, &a));
 }
 
 // A user-defined class for testing Property().
@@ -2875,9 +2900,10 @@ TEST(PropertyTest, WorksForCompatibleMatcherType) {
 TEST(PropertyTest, CanDescribeSelf) {
   Matcher<const AClass&> m = Property(&AClass::n, Ge(0));
 
-  EXPECT_EQ("the given property is greater than or equal to 0", Describe(m));
-  EXPECT_EQ("the given property is not greater than or equal to 0",
-            DescribeNegation(m));
+  EXPECT_EQ("is an object whose given property is greater than or equal to 0",
+            Describe(m));
+  EXPECT_EQ("is an object whose given property "
+            "is not greater than or equal to 0", DescribeNegation(m));
 }
 
 // Tests that Property() can explain the match result.
@@ -2886,10 +2912,10 @@ TEST(PropertyTest, CanExplainMatchResult) {
 
   AClass a;
   a.set_n(1);
-  EXPECT_EQ("", Explain(m, a));
+  EXPECT_EQ("whose given property is 1", Explain(m, a));
 
   m = Property(&AClass::n, GreaterThan(0));
-  EXPECT_EQ("the given property is 1 more than 0", Explain(m, a));
+  EXPECT_EQ("whose given property is 1, which is 1 more than 0", Explain(m, a));
 }
 
 // Tests that Property() works when the argument is a pointer to const.
@@ -2954,9 +2980,10 @@ TEST(PropertyForPointerTest, WorksForArgumentOfSubType) {
 TEST(PropertyForPointerTest, CanDescribeSelf) {
   Matcher<const AClass*> m = Property(&AClass::n, Ge(0));
 
-  EXPECT_EQ("the given property is greater than or equal to 0", Describe(m));
-  EXPECT_EQ("the given property is not greater than or equal to 0",
-            DescribeNegation(m));
+  EXPECT_EQ("is an object whose given property is greater than or equal to 0",
+            Describe(m));
+  EXPECT_EQ("is an object whose given property "
+            "is not greater than or equal to 0", DescribeNegation(m));
 }
 
 // Tests that Property() can explain the result of matching a pointer.
@@ -2966,10 +2993,12 @@ TEST(PropertyForPointerTest, CanExplainMatchResult) {
   AClass a;
   a.set_n(1);
   EXPECT_EQ("", Explain(m, static_cast<const AClass*>(NULL)));
-  EXPECT_EQ("", Explain(m, &a));
+  EXPECT_EQ("which points to an object whose given property is 1",
+            Explain(m, &a));
 
   m = Property(&AClass::n, GreaterThan(0));
-  EXPECT_EQ("the given property is 1 more than 0", Explain(m, &a));
+  EXPECT_EQ("which points to an object whose given property is 1, "
+            "which is 1 more than 0", Explain(m, &a));
 }
 
 // Tests ResultOf.
@@ -2989,10 +3018,10 @@ TEST(ResultOfTest, WorksForFunctionPointers) {
 TEST(ResultOfTest, CanDescribeItself) {
   Matcher<int> matcher = ResultOf(&IntToStringFunction, StrEq("foo"));
 
-  EXPECT_EQ("result of the given callable is equal to \"foo\"",
-            Describe(matcher));
-  EXPECT_EQ("result of the given callable is not equal to \"foo\"",
-            DescribeNegation(matcher));
+  EXPECT_EQ("is mapped by the given callable to a value that "
+            "is equal to \"foo\"", Describe(matcher));
+  EXPECT_EQ("is mapped by the given callable to a value that "
+            "is not equal to \"foo\"", DescribeNegation(matcher));
 }
 
 // Tests that ResultOf() can explain the match result.
@@ -3000,11 +3029,12 @@ int IntFunction(int input) { return input == 42 ? 80 : 90; }
 
 TEST(ResultOfTest, CanExplainMatchResult) {
   Matcher<int> matcher = ResultOf(&IntFunction, Ge(85));
-  EXPECT_EQ("", Explain(matcher, 36));
+  EXPECT_EQ("which is mapped by the given callable to 90",
+            Explain(matcher, 36));
 
   matcher = ResultOf(&IntFunction, GreaterThan(85));
-  EXPECT_EQ("result of the given callable is 5 more than 85",
-            Explain(matcher, 36));
+  EXPECT_EQ("which is mapped by the given callable to 90, "
+            "which is 5 more than 85", Explain(matcher, 36));
 }
 
 // Tests that ResultOf(f, ...) compiles and works as expected when f(x)
@@ -3202,7 +3232,7 @@ TEST(ExplainMatchResultTest, AllOf_True_True_2) {
 
 TEST(ExplainmatcherResultTest, MonomorphicMatcher) {
   const Matcher<int> m = GreaterThan(5);
-  EXPECT_EQ("is 1 more than 5", Explain(m, 6));
+  EXPECT_EQ("which is 1 more than 5", Explain(m, 6));
 }
 
 // The following two tests verify that values without a public copy

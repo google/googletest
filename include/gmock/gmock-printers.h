@@ -57,18 +57,20 @@
 //
 // We also provide some convenient wrappers:
 //
-//   // Prints a value as the given type to a string.
-//   string ::testing::internal::UniversalPrinter<T>::PrintToString(value);
+//   // Prints a value to a string.  For a (const or not) char
+//   // pointer, the NUL-terminated string (but not the pointer) is
+//   // printed.
+//   std::string ::testing::PrintToString(const T& value);
 //
 //   // Prints a value tersely: for a reference type, the referenced
-//   // value (but not the address) is printed; for a (const) char
+//   // value (but not the address) is printed; for a (const or not) char
 //   // pointer, the NUL-terminated string (but not the pointer) is
 //   // printed.
 //   void ::testing::internal::UniversalTersePrint(const T& value, ostream*);
 //
 //   // Prints value using the type inferred by the compiler.  The difference
 //   // from UniversalTersePrint() is that this function prints both the
-//   // pointer and the NUL-terminated string for a (const) char pointer.
+//   // pointer and the NUL-terminated string for a (const or not) char pointer.
 //   void ::testing::internal::UniversalPrint(const T& value, ostream*);
 //
 //   // Prints the fields of a tuple tersely to a string vector, one
@@ -545,14 +547,6 @@ class UniversalPrinter {
     PrintTo(value, os);
   }
 
-  // A convenient wrapper for Print() that returns the print-out as a
-  // string.
-  static string PrintToString(const T& value) {
-    ::std::stringstream ss;
-    Print(value, &ss);
-    return ss.str();
-  }
-
 #ifdef _MSC_VER
 #pragma warning(pop)           // Restores the warning state.
 #endif  // _MSC_VER
@@ -585,14 +579,6 @@ void UniversalPrintArray(const T* begin, size_t len, ::std::ostream* os) {
 // This overload prints a (const) char array compactly.
 void UniversalPrintArray(const char* begin, size_t len, ::std::ostream* os);
 
-// Prints an array of 'len' elements, starting at address 'begin', to a string.
-template <typename T>
-string UniversalPrintArrayToString(const T* begin, size_t len) {
-  ::std::stringstream ss;
-  UniversalPrintArray(begin, len, &ss);
-  return ss.str();
-}
-
 // Implements printing an array type T[N].
 template <typename T, size_t N>
 class UniversalPrinter<T[N]> {
@@ -601,12 +587,6 @@ class UniversalPrinter<T[N]> {
   // many.
   static void Print(const T (&a)[N], ::std::ostream* os) {
     UniversalPrintArray(a, N, os);
-  }
-
-  // A convenient wrapper for Print() that returns the print-out as a
-  // string.
-  static string PrintToString(const T (&a)[N]) {
-    return UniversalPrintArrayToString(a, N);
   }
 };
 
@@ -628,14 +608,6 @@ class UniversalPrinter<T&> {
 
     // Then prints the value itself.
     UniversalPrinter<T>::Print(value, os);
-  }
-
-  // A convenient wrapper for Print() that returns the print-out as a
-  // string.
-  static string PrintToString(const T& value) {
-    ::std::stringstream ss;
-    Print(value, &ss);
-    return ss.str();
   }
 
 #ifdef _MSC_VER
@@ -740,6 +712,14 @@ Strings UniversalTersePrintTupleFieldsToStrings(const Tuple& value) {
 }
 
 }  // namespace internal
+
+template <typename T>
+::std::string PrintToString(const T& value) {
+  ::std::stringstream ss;
+  internal::UniversalTersePrint(value, &ss);
+  return ss.str();
+}
+
 }  // namespace testing
 
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_PRINTERS_H_

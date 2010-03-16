@@ -453,6 +453,38 @@ Matcher<T> A();
 // and MUST NOT BE USED IN USER CODE!!!
 namespace internal {
 
+// If the explanation is not empty, prints it to the listener.
+// 'listener' must not be NULL.
+inline void PrintIfNotEmpty(
+    const internal::string& explanation, MatchResultListener* listener) {
+  if (explanation != "") {
+    *listener << ", " << explanation;
+  }
+}
+
+// Matches the value against the given matcher, prints the value and explains
+// the match result to the listener. Returns the match result.
+// 'listener' must not be NULL.
+// Value cannot be passed by const reference, because some matchers take a
+// non-const argument.
+template <typename Value, typename T>
+bool MatchPrintAndExplain(Value& value, const Matcher<T>& matcher,
+                          MatchResultListener* listener) {
+  if (!listener->IsInterested()) {
+    // If the listener is not interested, we do not need to construct the
+    // inner explanation.
+    return matcher.Matches(value);
+  }
+
+  StringMatchResultListener inner_listener;
+  const bool match = matcher.MatchAndExplain(value, &inner_listener);
+
+  UniversalPrint(value, listener->stream());
+  PrintIfNotEmpty(inner_listener.str(), listener);
+
+  return match;
+}
+
 // If the given string is not empty and os is not NULL, wraps the
 // string inside a pair of parentheses and streams the result to os.
 inline void StreamInParensAsNeeded(const internal::string& str,
@@ -1604,13 +1636,8 @@ class PointeeMatcher {
       if (GetRawPointer(pointer) == NULL)
         return false;
 
-      StringMatchResultListener inner_listener;
-      const bool match = matcher_.MatchAndExplain(*pointer, &inner_listener);
-      const internal::string s = inner_listener.str();
-      if (s != "") {
-        *listener << "points to a value that " << s;
-      }
-      return match;
+      *listener << "which points to ";
+      return MatchPrintAndExplain(*pointer, matcher_, listener);
     }
 
    private:
@@ -1634,12 +1661,12 @@ class FieldMatcher {
       : field_(field), matcher_(matcher) {}
 
   void DescribeTo(::std::ostream* os) const {
-    *os << "the given field ";
+    *os << "is an object whose given field ";
     matcher_.DescribeTo(os);
   }
 
   void DescribeNegationTo(::std::ostream* os) const {
-    *os << "the given field ";
+    *os << "is an object whose given field ";
     matcher_.DescribeNegationTo(os);
   }
 
@@ -1657,13 +1684,8 @@ class FieldMatcher {
   // true_type iff the Field() matcher is used to match a pointer.
   bool MatchAndExplainImpl(false_type /* is_not_pointer */, const Class& obj,
                            MatchResultListener* listener) const {
-    StringMatchResultListener inner_listener;
-    const bool match = matcher_.MatchAndExplain(obj.*field_, &inner_listener);
-    const internal::string s = inner_listener.str();
-    if (s != "") {
-      *listener << "the given field " << s;
-    }
-    return match;
+    *listener << "whose given field is ";
+    return MatchPrintAndExplain(obj.*field_, matcher_, listener);
   }
 
   bool MatchAndExplainImpl(true_type /* is_pointer */, const Class* p,
@@ -1671,6 +1693,7 @@ class FieldMatcher {
     if (p == NULL)
       return false;
 
+    *listener << "which points to an object ";
     // Since *p has a field, it must be a class/struct/union type and
     // thus cannot be a pointer.  Therefore we pass false_type() as
     // the first argument.
@@ -1699,12 +1722,12 @@ class PropertyMatcher {
       : property_(property), matcher_(matcher) {}
 
   void DescribeTo(::std::ostream* os) const {
-    *os << "the given property ";
+    *os << "is an object whose given property ";
     matcher_.DescribeTo(os);
   }
 
   void DescribeNegationTo(::std::ostream* os) const {
-    *os << "the given property ";
+    *os << "is an object whose given property ";
     matcher_.DescribeNegationTo(os);
   }
 
@@ -1722,14 +1745,11 @@ class PropertyMatcher {
   // true_type iff the Property() matcher is used to match a pointer.
   bool MatchAndExplainImpl(false_type /* is_not_pointer */, const Class& obj,
                            MatchResultListener* listener) const {
-    StringMatchResultListener inner_listener;
-    const bool match = matcher_.MatchAndExplain((obj.*property_)(),
-                                                &inner_listener);
-    const internal::string s = inner_listener.str();
-    if (s != "") {
-      *listener << "the given property " << s;
-    }
-    return match;
+    *listener << "whose given property is ";
+    // Cannot pass the return value (for example, int) to MatchPrintAndExplain,
+    // which takes a non-const reference as argument.
+    RefToConstProperty result = (obj.*property_)();
+    return MatchPrintAndExplain(result, matcher_, listener);
   }
 
   bool MatchAndExplainImpl(true_type /* is_pointer */, const Class* p,
@@ -1737,6 +1757,7 @@ class PropertyMatcher {
     if (p == NULL)
       return false;
 
+    *listener << "which points to an object ";
     // Since *p has a property method, it must be a class/struct/union
     // type and thus cannot be a pointer.  Therefore we pass
     // false_type() as the first argument.
@@ -1806,26 +1827,22 @@ class ResultOfMatcher {
         : callable_(callable), matcher_(matcher) {}
 
     virtual void DescribeTo(::std::ostream* os) const {
-      *os << "result of the given callable ";
+      *os << "is mapped by the given callable to a value that ";
       matcher_.DescribeTo(os);
     }
 
     virtual void DescribeNegationTo(::std::ostream* os) const {
-      *os << "result of the given callable ";
+      *os << "is mapped by the given callable to a value that ";
       matcher_.DescribeNegationTo(os);
     }
 
     virtual bool MatchAndExplain(T obj, MatchResultListener* listener) const {
-      StringMatchResultListener inner_listener;
-      const bool match = matcher_.MatchAndExplain(
-          CallableTraits<Callable>::template Invoke<T>(callable_, obj),
-          &inner_listener);
-
-      const internal::string s = inner_listener.str();
-      if (s != "")
-        *listener << "result of the given callable " << s;
-
-      return match;
+      *listener << "which is mapped by the given callable to ";
+      // Cannot pass the return value (for example, int) to
+      // MatchPrintAndExplain, which takes a non-const reference as argument.
+      ResultType result =
+          CallableTraits<Callable>::template Invoke<T>(callable_, obj);
+      return MatchPrintAndExplain(result, matcher_, listener);
     }
 
    private:
@@ -2098,39 +2115,50 @@ class PairMatcherImpl : public MatcherInterface<PairType> {
   // matches second_matcher.
   virtual bool MatchAndExplain(PairType a_pair,
                                MatchResultListener* listener) const {
-    StringMatchResultListener listener1;
-    const bool match1 = first_matcher_.MatchAndExplain(a_pair.first,
-                                                       &listener1);
-    internal::string s1 = listener1.str();
-    if (s1 != "") {
-      s1 = "the first field " + s1;
+    if (!listener->IsInterested()) {
+      // If the listener is not interested, we don't need to construct the
+      // explanation.
+      return first_matcher_.Matches(a_pair.first) &&
+             second_matcher_.Matches(a_pair.second);
     }
-    if (!match1) {
-      *listener << s1;
+    StringMatchResultListener first_inner_listener;
+    if (!first_matcher_.MatchAndExplain(a_pair.first,
+                                        &first_inner_listener)) {
+      *listener << "whose first field does not match";
+      PrintIfNotEmpty(first_inner_listener.str(), listener);
       return false;
     }
-
-    StringMatchResultListener listener2;
-    const bool match2 = second_matcher_.MatchAndExplain(a_pair.second,
-                                                        &listener2);
-    internal::string s2 = listener2.str();
-    if (s2 != "") {
-      s2 = "the second field " + s2;
-    }
-    if (!match2) {
-      *listener << s2;
+    StringMatchResultListener second_inner_listener;
+    if (!second_matcher_.MatchAndExplain(a_pair.second,
+                                         &second_inner_listener)) {
+      *listener << "whose second field does not match";
+      PrintIfNotEmpty(second_inner_listener.str(), listener);
       return false;
     }
-
-    *listener << s1;
-    if (s1 != "" && s2 != "") {
-      *listener << ", and ";
-    }
-    *listener << s2;
+    ExplainSuccess(first_inner_listener.str(), second_inner_listener.str(),
+                   listener);
     return true;
   }
 
  private:
+  void ExplainSuccess(const internal::string& first_explanation,
+                      const internal::string& second_explanation,
+                      MatchResultListener* listener) const {
+    *listener << "whose both fields match";
+    if (first_explanation != "") {
+      *listener << ", where the first field is a value " << first_explanation;
+    }
+    if (second_explanation != "") {
+      *listener << ", ";
+      if (first_explanation != "") {
+        *listener << "and ";
+      } else {
+        *listener << "where ";
+      }
+      *listener << "the second field is a value " << second_explanation;
+    }
+  }
+
   const Matcher<const FirstType&> first_matcher_;
   const Matcher<const SecondType&> second_matcher_;
 

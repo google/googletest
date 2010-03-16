@@ -153,6 +153,7 @@ using ::std::tr1::make_tuple;
 using ::std::tr1::tuple;
 using ::std::vector;
 using ::testing::ElementsAre;
+using ::testing::PrintToString;
 using ::testing::StartsWith;
 using ::testing::internal::NativeArray;
 using ::testing::internal::Strings;
@@ -1010,19 +1011,24 @@ TEST(PrintReferenceTest, HandlesMemberVariablePointer) {
                          + " " + Print(sizeof(p)) + "-byte object "));
 }
 
-TEST(PrintToStringTest, WorksForNonReference) {
-  EXPECT_EQ("123", UniversalPrinter<int>::PrintToString(123));
+TEST(PrintToStringTest, WorksForScalar) {
+  EXPECT_EQ("123", PrintToString(123));
 }
 
-TEST(PrintToStringTest, WorksForReference) {
-  int n = 123;
-  EXPECT_EQ("@" + PrintPointer(&n) + " 123",
-            UniversalPrinter<const int&>::PrintToString(n));
+TEST(PrintToStringTest, WorksForPointerToConstChar) {
+  const char* p = "hello";
+  EXPECT_EQ("\"hello\"", PrintToString(p));
+}
+
+TEST(PrintToStringTest, WorksForPointerToNonConstChar) {
+  char s[] = "hello";
+  char* p = s;
+  EXPECT_EQ("\"hello\"", PrintToString(p));
 }
 
 TEST(PrintToStringTest, WorksForArray) {
   int n[3] = { 1, 2, 3 };
-  EXPECT_EQ("{ 1, 2, 3 }", UniversalPrinter<int[3]>::PrintToString(n));
+  EXPECT_EQ("{ 1, 2, 3 }", PrintToString(n));
 }
 
 TEST(UniversalTersePrintTest, WorksForNonReference) {
