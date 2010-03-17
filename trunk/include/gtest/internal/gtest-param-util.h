@@ -247,7 +247,8 @@ class RangeGenerator : public ParamGeneratorInterface<T> {
 
    private:
     Iterator(const Iterator& other)
-        : base_(other.base_), value_(other.value_), index_(other.index_),
+        : ParamIteratorInterface<T>(),
+          base_(other.base_), value_(other.value_), index_(other.index_),
           step_(other.step_) {}
 
     // No implementation - assignment is unsupported.
