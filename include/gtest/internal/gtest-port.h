@@ -78,6 +78,7 @@
 //
 // Macros indicating the current platform (defined to 1 if compiled on
 // the given platform; otherwise undefined):
+//   GTEST_OS_AIX      - IBM AIX
 //   GTEST_OS_CYGWIN   - Cygwin
 //   GTEST_OS_LINUX    - Linux
 //   GTEST_OS_MAC      - Mac OS X
@@ -109,6 +110,7 @@
 //   GTEST_USES_POSIX_RE    - enhanced POSIX regex is used.
 //   GTEST_USES_SIMPLE_RE   - our own simple regex is used;
 //                            the above two are mutually exclusive.
+//   GTEST_CAN_COMPARE_NULL - accepts untyped NULL in EXPECT_EQ().
 //
 // Macros for basic C++ coding:
 //   GTEST_AMBIGUOUS_ELSE_BLOCKER_ - for disabling a gcc warning.
@@ -215,10 +217,12 @@
 #define GTEST_OS_ZOS 1
 #elif defined(__sun) && defined(__SVR4)
 #define GTEST_OS_SOLARIS 1
+#elif defined(_AIX)
+#define GTEST_OS_AIX 1
 #endif  // __CYGWIN__
 
 #if GTEST_OS_CYGWIN || GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_SYMBIAN || \
-    GTEST_OS_SOLARIS
+    GTEST_OS_SOLARIS || GTEST_OS_AIX
 
 // On some platforms, <regex.h> needs someone to define size_t, and
 // won't compile otherwise.  We can #include it here as we already
@@ -250,7 +254,7 @@
 #define GTEST_USES_SIMPLE_RE 1
 
 #endif  // GTEST_OS_CYGWIN || GTEST_OS_LINUX || GTEST_OS_MAC ||
-        // GTEST_OS_SYMBIAN || GTEST_OS_SOLARIS
+        // GTEST_OS_SYMBIAN || GTEST_OS_SOLARIS || GTEST_OS_AIX
 
 #ifndef GTEST_HAS_EXCEPTIONS
 // The user didn't tell us whether exceptions are enabled, so we need
@@ -270,6 +274,9 @@
 // Sun Pro CC supports exceptions.  However, there is no compile-time way of
 // detecting whether they are enabled or not.  Therefore, we assume that
 // they are enabled unless the user tells us otherwise.
+#define GTEST_HAS_EXCEPTIONS 1
+#elif defined(__IBMCPP__) && __EXCEPTIONS
+// xlC defines __EXCEPTIONS to 1 iff exceptions are enabled.
 #define GTEST_HAS_EXCEPTIONS 1
 #else
 // For other compilers, we assume exceptions are disabled to be
@@ -477,9 +484,10 @@
 
 // Determines whether to support type-driven tests.
 
-// Typed tests need <typeinfo> and variadic macros, which GCC, VC++ 8.0, and
-// Sun Pro CC support.
-#if defined(__GNUC__) || (_MSC_VER >= 1400) || defined(__SUNPRO_CC)
+// Typed tests need <typeinfo> and variadic macros, which GCC, VC++ 8.0,
+// Sun Pro CC, and IBM Visual Age support.
+#if defined(__GNUC__) || (_MSC_VER >= 1400) || defined(__SUNPRO_CC) || \
+    defined(__IBMCPP__)
 #define GTEST_HAS_TYPED_TEST 1
 #define GTEST_HAS_TYPED_TEST_P 1
 #endif
@@ -492,7 +500,7 @@
 
 // Determines whether the system compiler uses UTF-16 for encoding wide strings.
 #define GTEST_WIDE_STRING_USES_UTF16_ \
-    (GTEST_OS_WINDOWS || GTEST_OS_CYGWIN || GTEST_OS_SYMBIAN)
+    (GTEST_OS_WINDOWS || GTEST_OS_CYGWIN || GTEST_OS_SYMBIAN || GTEST_OS_AIX)
 
 // Defines some utility macros.
 
@@ -631,10 +639,14 @@ class scoped_ptr {
 
 // Defines RE.
 
-// A simple C++ wrapper for <regex.h>.  It uses the POSIX Enxtended
+// A simple C++ wrapper for <regex.h>.  It uses the POSIX Extended
 // Regular Expression syntax.
 class GTEST_API_ RE {
  public:
+  // A copy constructor is required by the Standard to initialize object
+  // references from r-values.
+  RE(const RE& other) { Init(other.pattern()); }
+
   // Constructs an RE from a string.
   RE(const ::std::string& regex) { Init(regex.c_str()); }  // NOLINT
 
@@ -690,7 +702,7 @@ class GTEST_API_ RE {
   const char* full_pattern_;  // For FullMatch();
 #endif
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(RE);
+  GTEST_DISALLOW_ASSIGN_(RE);
 };
 
 // Defines logging utilities:
@@ -831,6 +843,28 @@ class Notification {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(Notification);
 };
 
+// As a C-function, ThreadFuncWithCLinkage cannot be templated itself.
+// Consequently, it cannot select a correct instantiation of ThreadWithParam
+// in order to call its Run(). Introducing ThreadWithParamBase as a
+// non-templated base class for ThreadWithParam allows us to bypass this
+// problem.
+class ThreadWithParamBase {
+ public:
+  virtual ~ThreadWithParamBase() {}
+  virtual void Run() = 0;
+};
+
+// pthread_create() accepts a pointer to a function type with the C linkage.
+// According to the Standard (7.5/1), function types with different linkages
+// are different even if they are otherwise identical.  Some compilers (for
+// example, SunStudio) treat them as different types.  Since class methods
+// cannot be defined with C-linkage we need to define a free C-function to
+// pass into pthread_create().
+extern "C" inline void* ThreadFuncWithCLinkage(void* thread) {
+  static_cast<ThreadWithParamBase*>(thread)->Run();
+  return NULL;
+}
+
 // Helper class for testing Google Test's multi-threading constructs.
 // To use it, write:
 //
@@ -844,7 +878,7 @@ class Notification {
 // These classes are only for testing Google Test's own constructs. Do
 // not use them in user tests, either directly or indirectly.
 template <typename T>
-class ThreadWithParam {
+class ThreadWithParam : public ThreadWithParamBase {
  public:
   typedef void (*UserThreadFunc)(T);
 
@@ -857,7 +891,12 @@ class ThreadWithParam {
     // The thread can be created only after all fields except thread_
     // have been initialized.
     GTEST_CHECK_POSIX_SUCCESS_(
-        pthread_create(&thread_, 0, ThreadMainStatic, this));
+        // TODO(vladl@google.com): Use implicit_cast instead of static_cast
+        // when it is moved over from Google Mock.
+        pthread_create(&thread_,
+                       0,
+                       &ThreadFuncWithCLinkage,
+                       static_cast<ThreadWithParamBase*>(this)));
   }
   ~ThreadWithParam() { Join(); }
 
@@ -868,18 +907,13 @@ class ThreadWithParam {
     }
   }
 
- private:
-  void ThreadMain() {
+  virtual void Run() {
     if (thread_can_start_ != NULL)
       thread_can_start_->WaitForNotification();
     func_(param_);
   }
 
-  static void* ThreadMainStatic(void* thread_with_param) {
-    static_cast<ThreadWithParam<T>*>(thread_with_param)->ThreadMain();
-    return NULL;  // We are not interested in the thread exit code.
-  }
-
+ private:
   const UserThreadFunc func_;  // User-supplied thread function.
   const T param_;  // User-supplied parameter to the thread function.
   // When non-NULL, used to block execution until the controller thread
@@ -1110,7 +1144,11 @@ size_t GetThreadCount();
 // objects.  We define this to ensure that only POD is passed through
 // ellipsis on these systems.
 #if defined(__SYMBIAN32__) || defined(__IBMCPP__) || defined(__SUNPRO_CC)
+// We lose support for NULL detection where the compiler doesn't like
+// passing non-POD classes through ellipsis (...).
 #define GTEST_ELLIPSIS_NEEDS_POD_ 1
+#else
+#define GTEST_CAN_COMPARE_NULL 1
 #endif
 
 // The Nokia Symbian and IBM XL C/C++ compilers cannot decide between
