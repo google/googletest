@@ -8,6 +8,14 @@
 # ctest.  You can select which tests to run using 'ctest -R regex'.
 # For more options, run 'ctest --help'.
 
+# For hermetic builds, we may need to tell CMake to use compiler in a
+# specific location.
+if (gtest_compiler)
+  include(CMakeForceCompiler)
+  cmake_force_c_compiler("${gtest_compiler}" "")
+  cmake_force_cxx_compiler("${gtest_compiler}" "")
+endif()
+
 ########################################################################
 #
 # Project-wide settings
@@ -20,6 +28,23 @@
 # Language "C" is required for find_package(Threads).
 project(gtest CXX C)
 cmake_minimum_required(VERSION 2.6.4)
+
+if (MSVC)
+  # For MSVC, CMake sets certain flags to defaults we want to override.
+  # This replacement code is taken from sample in the CMake Wiki at
+  # http://www.cmake.org/Wiki/CMake_FAQ#Dynamic_Replace.
+  foreach (flag_var
+           CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+           CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+    # In hermetic build environments, tests may not have access to MS runtime
+    # DLLs, so this replaces /MD (CRT libraries in DLLs) with /MT (static CRT
+    # libraries).
+    string(REPLACE "/MD" "-MT" ${flag_var} "${${flag_var}}")
+    # We prefer more strict warning checking for building Google Test.
+    # Replaces /W3 with /W4 in defaults.
+    string(REPLACE "/W3" "-W4" ${flag_var} "${${flag_var}}")
+  endforeach()
+endif()
 
 # Where gtest's .h files can be found.
 include_directories(
@@ -36,19 +61,22 @@ find_package(Threads)
 # Defines the compiler/linker flags used to build gtest.  You can
 # tweak these definitions to suit your need.
 if (MSVC)
-  set(cxx_base "${CMAKE_CXX_FLAGS} -GS -W4 -WX -wd4275 -nologo -J -Zi
-                -D_UNICODE -DUNICODE -DWIN32 -D_WIN32 -DSTRICT
-                -DWIN32_LEAN_AND_MEAN")
+  # Newlines inside flags variables break CMake's NMake generator.
+  set(cxx_base "${CMAKE_CXX_FLAGS} -GS -W4 -WX -wd4275 -nologo -J -Zi")
+  set(cxx_base "${cxx_base} -D_UNICODE -DUNICODE -DWIN32 -D_WIN32")
+  set(cxx_base "${cxx_base} -DSTRICT -DWIN32_LEAN_AND_MEAN")
   set(cxx_default "${cxx_base} -EHsc -D_HAS_EXCEPTIONS=1")
+  set(cxx_strict "${cxx_default}")
 else()
   set(cxx_base "${CMAKE_CXX_FLAGS} -Wall -Werror -Wshadow")
-
+   
   if (CMAKE_USE_PTHREADS_INIT)  # The pthreads library is available.
     set(cxx_base "${cxx_base} -DGTEST_HAS_PTHREAD=1")
   endif()
 
   set(cxx_default "${cxx_base} -fexceptions")
-endif()
+  set(cxx_strict "${cxx_default} -Wextra")
+ endif()
 
 ########################################################################
 #
@@ -79,9 +107,11 @@ function(cxx_library name cxx_flags)
   cxx_static_library(${name} "${cxx_flags}" ${ARGN})
 endfunction()
 
-# Static versions of Google Test libraries.
-cxx_static_library(gtest "${cxx_default}" src/gtest-all.cc)
-cxx_static_library(gtest_main "${cxx_default}" src/gtest_main.cc)
+# Static versions of Google Test libraries.  We build them using more
+# strict warnings than what are used for other targets, to ensure that
+# gtest can be compiled by a user aggressive about warnings.
+cxx_static_library(gtest "${cxx_strict}" src/gtest-all.cc)
+cxx_static_library(gtest_main "${cxx_strict}" src/gtest_main.cc)
 target_link_libraries(gtest_main gtest)
 
 ########################################################################
@@ -243,8 +273,8 @@ if (build_all_gtest_tests)
   # TODO(vladl): This and the next tests may not run in the hermetic
   # environment on Windows. Re-evaluate and possibly make them
   # platform-conditional after implementing hermetic builds.
-  cxx_test_with_flags(gtest_dll_test_ "${cxx_use_shared_gtest}"
-    gtest_dll test/gtest_dll_test_.cc)
+  cxx_executable_with_flags(gtest_dll_test_ test "${cxx_use_shared_gtest}"
+    gtest_dll)
 
   if (NOT(MSVC AND (MSVC_VERSION EQUAL 1600)))
     # The C++ Standard specifies tuple_element<int, class>.
