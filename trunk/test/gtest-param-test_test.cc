@@ -692,13 +692,15 @@ INSTANTIATE_TEST_CASE_P(TestExpansionModule, TestGenerationTest,
                         ValuesIn(test_generation_params));
 
 // This test verifies that the element sequence (third parameter of
-// INSTANTIATE_TEST_CASE_P) is evaluated in RUN_ALL_TESTS and not at the call
-// site of INSTANTIATE_TEST_CASE_P.
-// For that, we declare param_value_ to be a static member of
-// GeneratorEvaluationTest and initialize it to 0. We set it to 1 in main(),
-// just before invocation of RUN_ALL_TESTS. If the sequence is evaluated
-// before that moment, INSTANTIATE_TEST_CASE_P will create a test with
-// parameter 0, and the test body will fail the assertion.
+// INSTANTIATE_TEST_CASE_P) is evaluated in InitGoogleTest() and neither at
+// the call site of INSTANTIATE_TEST_CASE_P nor in RUN_ALL_TESTS().  For
+// that, we declare param_value_ to be a static member of
+// GeneratorEvaluationTest and initialize it to 0.  We set it to 1 in
+// main(), just before invocation of InitGoogleTest().  After calling
+// InitGoogleTest(), we set the value to 2.  If the sequence is evaluated
+// before or after InitGoogleTest, INSTANTIATE_TEST_CASE_P will create a
+// test with parameter other than 1, and the test body will fail the
+// assertion.
 class GeneratorEvaluationTest : public TestWithParam<int> {
  public:
   static int param_value() { return param_value_; }
@@ -815,10 +817,19 @@ int main(int argc, char **argv) {
 #if GTEST_HAS_PARAM_TEST
   // Used in TestGenerationTest test case.
   AddGlobalTestEnvironment(TestGenerationTest::Environment::Instance());
-  // Used in GeneratorEvaluationTest test case.
+  // Used in GeneratorEvaluationTest test case. Tests that the updated value
+  // will be picked up for instantiating tests in GeneratorEvaluationTest.
   GeneratorEvaluationTest::set_param_value(1);
 #endif  // GTEST_HAS_PARAM_TEST
 
   ::testing::InitGoogleTest(&argc, argv);
+
+#if GTEST_HAS_PARAM_TEST
+  // Used in GeneratorEvaluationTest test case. Tests that value updated
+  // here will NOT be used for instantiating tests in
+  // GeneratorEvaluationTest.
+  GeneratorEvaluationTest::set_param_value(2);
+#endif  // GTEST_HAS_PARAM_TEST
+
   return RUN_ALL_TESTS();
 }
