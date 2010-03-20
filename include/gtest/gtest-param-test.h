@@ -133,9 +133,12 @@ INSTANTIATE_TEST_CASE_P(AnotherInstantiationName, FooTest, ValuesIn(pets));
 // in the given test case, whether their definitions come before or
 // AFTER the INSTANTIATE_TEST_CASE_P statement.
 //
-// Please also note that generator expressions are evaluated in
-// RUN_ALL_TESTS(), after main() has started. This allows evaluation of
-// parameter list based on command line parameters.
+// Please also note that generator expressions (including parameters to the
+// generators) are evaluated in InitGoogleTest(), after main() has started.
+// This allows the user on one hand, to adjust generator parameters in order
+// to dynamically determine a set of tests to run and on the other hand,
+// give the user a chance to inspect the generated tests with Google Test
+// reflection API before RUN_ALL_TESTS() is executed.
 //
 // You can see samples/sample7_unittest.cc and samples/sample8_unittest.cc
 // for more examples.
