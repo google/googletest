@@ -76,13 +76,6 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 namespace testing {
 namespace internal {
 
-bool ShouldUseColor(bool stdout_is_tty);
-::std::string FormatTimeInMillisAsSeconds(TimeInMillis ms);
-bool ParseInt32Flag(const char* str, const char* flag, Int32* value);
-
-// Used for testing the flag parsing.
-extern bool g_help_flag;
-
 // Provides access to otherwise private parts of the TestEventListeners class
 // that are needed to test it.
 class TestEventListenersAccessor {

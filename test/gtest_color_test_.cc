@@ -37,11 +37,14 @@
 
 #include <gtest/gtest.h>
 
-namespace testing {
-namespace internal {
-bool ShouldUseColor(bool stdout_is_tty);
-}  // namespace internal
-}  // namespace testing
+// Indicates that this translation unit is part of Google Test's
+// implementation.  It must come before gtest-internal-inl.h is
+// included, or there will be a compiler error.  This trick is to
+// prevent a user from accidentally including gtest-internal-inl.h in
+// his code.
+#define GTEST_IMPLEMENTATION_ 1
+#include "src/gtest-internal-inl.h"
+#undef GTEST_IMPLEMENTATION_
 
 using testing::internal::ShouldUseColor;
 

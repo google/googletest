@@ -124,15 +124,12 @@ target_link_libraries(gtest_main gtest)
 
 option(build_gtest_samples "Build gtest's sample programs." OFF)
 
-# cxx_executable(name dir lib srcs...)
+# cxx_executable_with_flags(name cxx_flags lib srcs...)
 #
-# creates a named target that depends on the given lib and is built
-# from the given source files.  dir/name.cc is implicitly included in
-# the source file list.
-function(cxx_executable_with_flags name dir cxx_flags lib)
-  add_executable(${name}
-    ${dir}/${name}.cc
-    ${ARGN})
+# creates a named C++ executable that depends on the given library and
+# is built from the given source files with the given compiler flags.
+function(cxx_executable_with_flags name cxx_flags lib)
+  add_executable(${name} ${ARGN})
   if (cxx_flags)
     set_target_properties(${name}
       PROPERTIES
@@ -141,8 +138,14 @@ function(cxx_executable_with_flags name dir cxx_flags lib)
   target_link_libraries(${name} ${lib})
 endfunction()
 
+# cxx_executable(name dir lib srcs...)
+#
+# creates a named target that depends on the given lib and is built
+# from the given source files.  dir/name.cc is implicitly included in
+# the source file list.
 function(cxx_executable name dir lib)
-  cxx_executable_with_flags(${name} ${dir} "${cxx_default}" ${lib} ${ARGN})
+  cxx_executable_with_flags(
+    ${name} "${cxx_default}" ${lib} "${dir}/${name}.cc" ${ARGN})
 endfunction()
 
 if (build_gtest_samples)
@@ -273,8 +276,8 @@ if (build_all_gtest_tests)
   # TODO(vladl): This and the next tests may not run in the hermetic
   # environment on Windows. Re-evaluate and possibly make them
   # platform-conditional after implementing hermetic builds.
-  cxx_executable_with_flags(gtest_dll_test_ test "${cxx_use_shared_gtest}"
-    gtest_dll)
+  cxx_executable_with_flags(gtest_dll_test_ "${cxx_use_shared_gtest}"
+    gtest_dll test/gtest_all_test.cc)
 
   if (NOT(MSVC AND (MSVC_VERSION EQUAL 1600)))
     # The C++ Standard specifies tuple_element<int, class>.

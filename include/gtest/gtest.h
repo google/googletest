@@ -1278,10 +1278,10 @@ AssertionResult CmpHelperEQ(const char* expected_expression,
 // With this overloaded version, we allow anonymous enums to be used
 // in {ASSERT|EXPECT}_EQ when compiled with gcc 4, as anonymous enums
 // can be implicitly cast to BiggestInt.
-AssertionResult CmpHelperEQ(const char* expected_expression,
-                            const char* actual_expression,
-                            BiggestInt expected,
-                            BiggestInt actual);
+GTEST_API_ AssertionResult CmpHelperEQ(const char* expected_expression,
+                                       const char* actual_expression,
+                                       BiggestInt expected,
+                                       BiggestInt actual);
 
 // The helper class for {ASSERT|EXPECT}_EQ.  The template argument
 // lhs_is_null_literal is true iff the first argument to ASSERT_EQ()
@@ -1370,21 +1370,21 @@ AssertionResult CmpHelper##op_name(const char* expr1, const char* expr2, \
     return AssertionFailure(msg);\
   }\
 }\
-AssertionResult CmpHelper##op_name(const char* expr1, const char* expr2, \
-                                   BiggestInt val1, BiggestInt val2);
+GTEST_API_ AssertionResult CmpHelper##op_name(\
+    const char* expr1, const char* expr2, BiggestInt val1, BiggestInt val2)
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
 
 // Implements the helper function for {ASSERT|EXPECT}_NE
-GTEST_IMPL_CMP_HELPER_(NE, !=)
+GTEST_IMPL_CMP_HELPER_(NE, !=);
 // Implements the helper function for {ASSERT|EXPECT}_LE
-GTEST_IMPL_CMP_HELPER_(LE, <=)
+GTEST_IMPL_CMP_HELPER_(LE, <=);
 // Implements the helper function for {ASSERT|EXPECT}_LT
-GTEST_IMPL_CMP_HELPER_(LT, < )
+GTEST_IMPL_CMP_HELPER_(LT, < );
 // Implements the helper function for {ASSERT|EXPECT}_GE
-GTEST_IMPL_CMP_HELPER_(GE, >=)
+GTEST_IMPL_CMP_HELPER_(GE, >=);
 // Implements the helper function for {ASSERT|EXPECT}_GT
-GTEST_IMPL_CMP_HELPER_(GT, > )
+GTEST_IMPL_CMP_HELPER_(GT, > );
 
 #undef GTEST_IMPL_CMP_HELPER_
 
@@ -1447,30 +1447,30 @@ GTEST_API_ AssertionResult CmpHelperSTRNE(const char* s1_expression,
 //
 // The {needle,haystack}_expr arguments are the stringified
 // expressions that generated the two real arguments.
-AssertionResult IsSubstring(
+GTEST_API_ AssertionResult IsSubstring(
     const char* needle_expr, const char* haystack_expr,
     const char* needle, const char* haystack);
-AssertionResult IsSubstring(
+GTEST_API_ AssertionResult IsSubstring(
     const char* needle_expr, const char* haystack_expr,
     const wchar_t* needle, const wchar_t* haystack);
-AssertionResult IsNotSubstring(
+GTEST_API_ AssertionResult IsNotSubstring(
     const char* needle_expr, const char* haystack_expr,
     const char* needle, const char* haystack);
-AssertionResult IsNotSubstring(
+GTEST_API_ AssertionResult IsNotSubstring(
     const char* needle_expr, const char* haystack_expr,
     const wchar_t* needle, const wchar_t* haystack);
-AssertionResult IsSubstring(
+GTEST_API_ AssertionResult IsSubstring(
     const char* needle_expr, const char* haystack_expr,
     const ::std::string& needle, const ::std::string& haystack);
-AssertionResult IsNotSubstring(
+GTEST_API_ AssertionResult IsNotSubstring(
     const char* needle_expr, const char* haystack_expr,
     const ::std::string& needle, const ::std::string& haystack);
 
 #if GTEST_HAS_STD_WSTRING
-AssertionResult IsSubstring(
+GTEST_API_ AssertionResult IsSubstring(
     const char* needle_expr, const char* haystack_expr,
     const ::std::wstring& needle, const ::std::wstring& haystack);
-AssertionResult IsNotSubstring(
+GTEST_API_ AssertionResult IsNotSubstring(
     const char* needle_expr, const char* haystack_expr,
     const ::std::wstring& needle, const ::std::wstring& haystack);
 #endif  // GTEST_HAS_STD_WSTRING

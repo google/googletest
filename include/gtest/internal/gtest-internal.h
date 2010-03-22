@@ -120,7 +120,7 @@ extern int g_init_gtest_count;
 
 // The text used in failure messages to indicate the start of the
 // stack trace.
-extern const char kStackTraceMarker[];
+GTEST_API_ extern const char kStackTraceMarker[];
 
 // A secret type that Google Test users don't know about.  It has no
 // definition on purpose.  Therefore it's impossible to create a
@@ -157,8 +157,8 @@ char (&IsNullLiteralHelper(...))[2];  // NOLINT
 #endif  // GTEST_ELLIPSIS_NEEDS_POD_
 
 // Appends the user-supplied message to the Google-Test-generated message.
-String AppendUserMessage(const String& gtest_msg,
-                         const Message& user_msg);
+GTEST_API_ String AppendUserMessage(const String& gtest_msg,
+                                    const Message& user_msg);
 
 // A helper class for creating scoped traces in user programs.
 class GTEST_API_ ScopedTrace {
@@ -750,7 +750,8 @@ class TypeParameterizedTestCase<Fixture, Templates0, Types> {
 // For example, if Foo() calls Bar(), which in turn calls
 // GetCurrentOsStackTraceExceptTop(..., 1), Foo() will be included in
 // the trace but Bar() and GetCurrentOsStackTraceExceptTop() won't.
-String GetCurrentOsStackTraceExceptTop(UnitTest* unit_test, int skip_count);
+GTEST_API_ String GetCurrentOsStackTraceExceptTop(UnitTest* unit_test,
+                                                  int skip_count);
 
 // Helpers for suppressing warnings on unreachable code or constant
 // condition.
@@ -766,7 +767,7 @@ inline bool AlwaysFalse() { return !AlwaysTrue(); }
 // doesn't use global state (and therefore can't interfere with user
 // code).  Unlike rand_r(), it's portable.  An LCG isn't very random,
 // but it's good enough for our purposes.
-class Random {
+class GTEST_API_ Random {
  public:
   static const UInt32 kMaxRange = 1u << 31;
 

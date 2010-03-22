@@ -82,8 +82,7 @@ EXTRA_DIST += \
   test/gtest_uninitialized_test_.cc \
   test/gtest_xml_outfile1_test_.cc \
   test/gtest_xml_outfile2_test_.cc \
-  test/gtest_xml_output_unittest_.cc \
-  test/gtest_dll_test_.cc
+  test/gtest_xml_output_unittest_.cc
 
 # Python tests that we don't run.
 EXTRA_DIST += \
