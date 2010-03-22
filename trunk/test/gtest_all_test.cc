@@ -45,3 +45,4 @@
 #include "test/gtest-typed-test2_test.cc"
 #include "test/gtest_unittest.cc"
 #include "test/production.cc"
+#include "src/gtest_main.cc"

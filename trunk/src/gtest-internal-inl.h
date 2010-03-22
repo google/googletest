@@ -78,7 +78,7 @@ namespace internal {
 
 // The value of GetTestTypeId() as seen from within the Google Test
 // library.  This is solely for testing GetTestTypeId().
-extern const TypeId kTestTypeIdInGoogleTest;
+GTEST_API_ extern const TypeId kTestTypeIdInGoogleTest;
 
 // Names of the flags (needed for parsing Google Test flags).
 const char kAlsoRunDisabledTestsFlag[] = "also_run_disabled_tests";
@@ -98,8 +98,25 @@ const char kThrowOnFailureFlag[] = "throw_on_failure";
 // A valid random seed must be in [1, kMaxRandomSeed].
 const int kMaxRandomSeed = 99999;
 
+// g_help_flag is true iff the --help flag or an equivalent form is
+// specified on the command line.
+GTEST_API_ extern bool g_help_flag;
+
 // Returns the current time in milliseconds.
-TimeInMillis GetTimeInMillis();
+GTEST_API_ TimeInMillis GetTimeInMillis();
+
+// Returns true iff Google Test should use colors in the output.
+GTEST_API_ bool ShouldUseColor(bool stdout_is_tty);
+
+// Formats the given time in milliseconds as seconds.
+GTEST_API_ std::string FormatTimeInMillisAsSeconds(TimeInMillis ms);
+
+// Parses a string for an Int32 flag, in the form of "--flag=value".
+//
+// On success, stores the value of the flag in *value, and returns
+// true.  On failure, returns false without changing *value.
+GTEST_API_ bool ParseInt32Flag(
+    const char* str, const char* flag, Int32* value);
 
 // Returns a random seed in range [1, kMaxRandomSeed] based on the
 // given --gtest_random_seed flag value.
@@ -199,7 +216,7 @@ class GTestFlagSaver {
 // If the code_point is not a valid Unicode code point
 // (i.e. outside of Unicode range U+0 to U+10FFFF) it will be output
 // as '(Invalid Unicode 0xXXXXXXXX)'.
-char* CodePointToUtf8(UInt32 code_point, char* str);
+GTEST_API_ char* CodePointToUtf8(UInt32 code_point, char* str);
 
 // Converts a wide string to a narrow string in UTF-8 encoding.
 // The wide string is assumed to have the following encoding:
@@ -214,10 +231,7 @@ char* CodePointToUtf8(UInt32 code_point, char* str);
 // as '(Invalid Unicode 0xXXXXXXXX)'. If the string is in UTF16 encoding
 // and contains invalid UTF-16 surrogate pairs, values in those pairs
 // will be encoded as individual Unicode characters from Basic Normal Plane.
-String WideStringToUtf8(const wchar_t* str, int num_chars);
-
-// Returns the number of active threads, or 0 when there is an error.
-size_t GetThreadCount();
+GTEST_API_ String WideStringToUtf8(const wchar_t* str, int num_chars);
 
 // Reads the GTEST_SHARD_STATUS_FILE environment variable, and creates the file
 // if the variable is present. If a file already exists at this location, this
@@ -231,19 +245,21 @@ void WriteToShardStatusFileIfNeeded();
 // an error and exits. If in_subprocess_for_death_test, sharding is
 // disabled because it must only be applied to the original test
 // process. Otherwise, we could filter out death tests we intended to execute.
-bool ShouldShard(const char* total_shards_str, const char* shard_index_str,
-                 bool in_subprocess_for_death_test);
+GTEST_API_ bool ShouldShard(const char* total_shards_str,
+                            const char* shard_index_str,
+                            bool in_subprocess_for_death_test);
 
 // Parses the environment variable var as an Int32. If it is unset,
 // returns default_val. If it is not an Int32, prints an error and
 // and aborts.
-Int32 Int32FromEnvOrDie(const char* env_var, Int32 default_val);
+GTEST_API_ Int32 Int32FromEnvOrDie(const char* env_var, Int32 default_val);
 
 // Given the total number of shards, the shard index, and the test id,
 // returns true iff the test should be run on this shard. The test id is
 // some arbitrary but unique non-negative integer assigned to each test
 // method. Assumes that 0 <= shard_index < total_shards.
-bool ShouldRunTestOnShard(int total_shards, int shard_index, int test_id);
+GTEST_API_ bool ShouldRunTestOnShard(
+    int total_shards, int shard_index, int test_id);
 
 // STL container utilities.
 
@@ -413,7 +429,7 @@ class TestInfoImpl {
 // test filter using either GTEST_FILTER or --gtest_filter.  If both
 // the variable and the flag are present, the latter overrides the
 // former.
-class UnitTestOptions {
+class GTEST_API_ UnitTestOptions {
  public:
   // Functions for processing the gtest_output flag.
 
@@ -455,7 +471,7 @@ class UnitTestOptions {
 
 // Returns the current application's name, removing directory path if that
 // is present.  Used by UnitTestOptions::GetOutputFile.
-FilePath GetCurrentExecutableName();
+GTEST_API_ FilePath GetCurrentExecutableName();
 
 // The role interface for getting the OS stack trace as a string.
 class OsStackTraceGetterInterface {
@@ -546,7 +562,7 @@ class DefaultPerThreadTestPartResultReporter
 // the methods under a mutex, as this class is not accessible by a
 // user and the UnitTest class that delegates work to this class does
 // proper locking.
-class UnitTestImpl {
+class GTEST_API_ UnitTestImpl {
  public:
   explicit UnitTestImpl(UnitTest* parent);
   virtual ~UnitTestImpl();
@@ -938,24 +954,24 @@ inline UnitTestImpl* GetUnitTestImpl() {
 
 // Internal helper functions for implementing the simple regular
 // expression matcher.
-bool IsInSet(char ch, const char* str);
-bool IsDigit(char ch);
-bool IsPunct(char ch);
-bool IsRepeat(char ch);
-bool IsWhiteSpace(char ch);
-bool IsWordChar(char ch);
-bool IsValidEscape(char ch);
-bool AtomMatchesChar(bool escaped, char pattern, char ch);
-bool ValidateRegex(const char* regex);
-bool MatchRegexAtHead(const char* regex, const char* str);
-bool MatchRepetitionAndRegexAtHead(
+GTEST_API_ bool IsInSet(char ch, const char* str);
+GTEST_API_ bool IsDigit(char ch);
+GTEST_API_ bool IsPunct(char ch);
+GTEST_API_ bool IsRepeat(char ch);
+GTEST_API_ bool IsWhiteSpace(char ch);
+GTEST_API_ bool IsWordChar(char ch);
+GTEST_API_ bool IsValidEscape(char ch);
+GTEST_API_ bool AtomMatchesChar(bool escaped, char pattern, char ch);
+GTEST_API_ bool ValidateRegex(const char* regex);
+GTEST_API_ bool MatchRegexAtHead(const char* regex, const char* str);
+GTEST_API_ bool MatchRepetitionAndRegexAtHead(
     bool escaped, char ch, char repeat, const char* regex, const char* str);
-bool MatchRegexAnywhere(const char* regex, const char* str);
+GTEST_API_ bool MatchRegexAnywhere(const char* regex, const char* str);
 
 // Parses the command line for Google Test flags, without initializing
 // other parts of Google Test.
-void ParseGoogleTestFlagsOnly(int* argc, char** argv);
-void ParseGoogleTestFlagsOnly(int* argc, wchar_t** argv);
+GTEST_API_ void ParseGoogleTestFlagsOnly(int* argc, char** argv);
+GTEST_API_ void ParseGoogleTestFlagsOnly(int* argc, wchar_t** argv);
 
 #if GTEST_HAS_DEATH_TEST
 

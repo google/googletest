@@ -89,61 +89,38 @@ TEST(XmlOutputTest, GetOutputFileSingleFile) {
 }
 
 TEST(XmlOutputTest, GetOutputFileFromDirectoryPath) {
+  GTEST_FLAG(output) = "xml:path" GTEST_PATH_SEP_;
+  const std::string expected_output_file =
+      GetAbsolutePathOf(
+          FilePath(std::string("path") + GTEST_PATH_SEP_ +
+                   GetCurrentExecutableName().c_str() + ".xml")).c_str();
+  const String& output_file = UnitTestOptions::GetAbsolutePathToOutputFile();
 #if GTEST_OS_WINDOWS
-  GTEST_FLAG(output) = "xml:path\\";
-  const String& output_file = UnitTestOptions::GetAbsolutePathToOutputFile();
-  EXPECT_TRUE(
-      _strcmpi(output_file.c_str(),
-               GetAbsolutePathOf(
-                   FilePath("path\\gtest-options_test.xml")).c_str()) == 0 ||
-      _strcmpi(output_file.c_str(),
-               GetAbsolutePathOf(
-                   FilePath("path\\gtest-options-ex_test.xml")).c_str()) == 0 ||
-      _strcmpi(output_file.c_str(),
-               GetAbsolutePathOf(
-                   FilePath("path\\gtest_all_test.xml")).c_str()) == 0)
-                       << " output_file = " << output_file;
+  EXPECT_STRCASEEQ(expected_output_file.c_str(), output_file.c_str());
 #else
-  GTEST_FLAG(output) = "xml:path/";
-  const String& output_file = UnitTestOptions::GetAbsolutePathToOutputFile();
-  // TODO(wan@google.com): libtool causes the test binary file to be
-  //   named lt-gtest-options_test.  Therefore the output file may be
-  //   named .../lt-gtest-options_test.xml.  We should remove this
-  //   hard-coded logic when Chandler Carruth's libtool replacement is
-  //   ready.
-  EXPECT_TRUE(output_file ==
-              GetAbsolutePathOf(
-                  FilePath("path/gtest-options_test.xml")).c_str() ||
-              output_file ==
-              GetAbsolutePathOf(
-                  FilePath("path/lt-gtest-options_test.xml")).c_str() ||
-              output_file ==
-              GetAbsolutePathOf(
-                  FilePath("path/gtest_all_test.xml")).c_str() ||
-              output_file ==
-              GetAbsolutePathOf(
-                  FilePath("path/lt-gtest_all_test.xml")).c_str())
-                      << " output_file = " << output_file;
+  EXPECT_EQ(expected_output_file, output_file.c_str());
 #endif
 }
 
 TEST(OutputFileHelpersTest, GetCurrentExecutableName) {
-  const FilePath executable = GetCurrentExecutableName();
-  const char* const exe_str = executable.c_str();
+  const std::string exe_str = GetCurrentExecutableName().c_str();
 #if GTEST_OS_WINDOWS
-  ASSERT_TRUE(_strcmpi("gtest-options_test", exe_str) == 0 ||
-              _strcmpi("gtest-options-ex_test", exe_str) == 0 ||
-              _strcmpi("gtest_all_test", exe_str) == 0)
-              << "GetCurrentExecutableName() returns " << exe_str;
+  const bool success =
+      _strcmpi("gtest-options_test", exe_str.c_str()) == 0 ||
+      _strcmpi("gtest-options-ex_test", exe_str.c_str()) == 0 ||
+      _strcmpi("gtest_all_test", exe_str.c_str()) == 0 ||
+      _strcmpi("gtest_dll_test", exe_str.c_str()) == 0;
 #else
   // TODO(wan@google.com): remove the hard-coded "lt-" prefix when
   //   Chandler Carruth's libtool replacement is ready.
-  EXPECT_TRUE(String(exe_str) == "gtest-options_test" ||
-              String(exe_str) == "lt-gtest-options_test" ||
-              String(exe_str) == "gtest_all_test" ||
-              String(exe_str) == "lt-gtest_all_test")
-                  << "GetCurrentExecutableName() returns " << exe_str;
+  const bool success =
+      exe_str == "gtest-options_test" ||
+      exe_str == "gtest_all_test" ||
+      exe_str == "lt-gtest_all_test" ||
+      exe_str == "gtest_dll_test";
 #endif  // GTEST_OS_WINDOWS
+  if (!success)
+    FAIL() << "GetCurrentExecutableName() returns " << exe_str;
 }
 
 class XmlOutputChangeDirTest : public Test {
@@ -185,40 +162,17 @@ TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithRelativeFile) {
 }
 
 TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithRelativePath) {
+  GTEST_FLAG(output) = "xml:path" GTEST_PATH_SEP_;
+  const std::string expected_output_file =
+      FilePath::ConcatPaths(
+          original_working_dir_,
+          FilePath(std::string("path") + GTEST_PATH_SEP_ +
+                   GetCurrentExecutableName().c_str() + ".xml")).c_str();
+  const String& output_file = UnitTestOptions::GetAbsolutePathToOutputFile();
 #if GTEST_OS_WINDOWS
-  GTEST_FLAG(output) = "xml:path\\";
-  const String& output_file = UnitTestOptions::GetAbsolutePathToOutputFile();
-  EXPECT_TRUE(
-      _strcmpi(output_file.c_str(),
-               FilePath::ConcatPaths(
-                   original_working_dir_,
-                   FilePath("path\\gtest-options_test.xml")).c_str()) == 0 ||
-      _strcmpi(output_file.c_str(),
-               FilePath::ConcatPaths(
-                   original_working_dir_,
-                   FilePath("path\\gtest-options-ex_test.xml")).c_str()) == 0 ||
-      _strcmpi(output_file.c_str(),
-               FilePath::ConcatPaths(
-                   original_working_dir_,
-                   FilePath("path\\gtest_all_test.xml")).c_str()) == 0)
-                       << " output_file = " << output_file;
+  EXPECT_STRCASEEQ(expected_output_file.c_str(), output_file.c_str());
 #else
-  GTEST_FLAG(output) = "xml:path/";
-  const String& output_file = UnitTestOptions::GetAbsolutePathToOutputFile();
-  // TODO(wan@google.com): libtool causes the test binary file to be
-  //   named lt-gtest-options_test.  Therefore the output file may be
-  //   named .../lt-gtest-options_test.xml.  We should remove this
-  //   hard-coded logic when Chandler Carruth's libtool replacement is
-  //   ready.
-  EXPECT_TRUE(output_file == FilePath::ConcatPaths(original_working_dir_,
-                      FilePath("path/gtest-options_test.xml")).c_str() ||
-              output_file == FilePath::ConcatPaths(original_working_dir_,
-                      FilePath("path/lt-gtest-options_test.xml")).c_str() ||
-              output_file == FilePath::ConcatPaths(original_working_dir_,
-                      FilePath("path/gtest_all_test.xml")).c_str() ||
-              output_file == FilePath::ConcatPaths(original_working_dir_,
-                      FilePath("path/lt-gtest_all_test.xml")).c_str())
-                  << " output_file = " << output_file;
+  EXPECT_EQ(expected_output_file, output_file.c_str());
 #endif
 }
 
@@ -236,29 +190,20 @@ TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithAbsoluteFile) {
 
 TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithAbsolutePath) {
 #if GTEST_OS_WINDOWS
-  GTEST_FLAG(output) = "xml:c:\\tmp\\";
-  const String& output_file = UnitTestOptions::GetAbsolutePathToOutputFile();
-  EXPECT_TRUE(
-      _strcmpi(output_file.c_str(),
-               FilePath("c:\\tmp\\gtest-options_test.xml").c_str()) == 0 ||
-      _strcmpi(output_file.c_str(),
-               FilePath("c:\\tmp\\gtest-options-ex_test.xml").c_str()) == 0 ||
-      _strcmpi(output_file.c_str(),
-               FilePath("c:\\tmp\\gtest_all_test.xml").c_str()) == 0)
-                   << " output_file = " << output_file;
+  const std::string path = "c:\\tmp\\";
 #else
-  GTEST_FLAG(output) = "xml:/tmp/";
+  const std::string path = "/tmp/";
+#endif
+
+  GTEST_FLAG(output) = "xml:" + path;
+  const std::string expected_output_file =
+      path + GetCurrentExecutableName().c_str() + ".xml";
   const String& output_file = UnitTestOptions::GetAbsolutePathToOutputFile();
-  // TODO(wan@google.com): libtool causes the test binary file to be
-  //   named lt-gtest-options_test.  Therefore the output file may be
-  //   named .../lt-gtest-options_test.xml.  We should remove this
-  //   hard-coded logic when Chandler Carruth's libtool replacement is
-  //   ready.
-  EXPECT_TRUE(output_file == "/tmp/gtest-options_test.xml" ||
-              output_file == "/tmp/lt-gtest-options_test.xml" ||
-              output_file == "/tmp/gtest_all_test.xml" ||
-              output_file == "/tmp/lt-gtest_all_test.xml")
-                  << " output_file = " << output_file;
+
+#if GTEST_OS_WINDOWS
+  EXPECT_STRCASEEQ(expected_output_file.c_str(), output_file.c_str());
+#else
+  EXPECT_EQ(expected_output_file, output_file.c_str());
 #endif
 }
 

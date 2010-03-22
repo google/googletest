@@ -688,5 +688,3 @@ TEST(FilePathTest, IsRootDirectory) {
 }  // namespace
 }  // namespace internal
 }  // namespace testing
-
-#undef GTEST_PATH_SEP_

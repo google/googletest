@@ -782,10 +782,10 @@ inline void FlushInfoLog() { fflush(NULL); }
 //   CaptureStderr     - starts capturing stderr.
 //   GetCapturedStderr - stops capturing stderr and returns the captured string.
 //
-void CaptureStdout();
-String GetCapturedStdout();
-void CaptureStderr();
-String GetCapturedStderr();
+GTEST_API_ void CaptureStdout();
+GTEST_API_ String GetCapturedStdout();
+GTEST_API_ void CaptureStderr();
+GTEST_API_ String GetCapturedStderr();
 
 #endif  // GTEST_HAS_STREAM_REDIRECTION_
 
@@ -1135,7 +1135,7 @@ class ThreadLocal {
 
 // Returns the number of threads running in the process, or 0 to indicate that
 // we cannot detect it.
-size_t GetThreadCount();
+GTEST_API_ size_t GetThreadCount();
 
 // Passing non-POD classes through ellipsis (...) crashes the ARM
 // compiler and generates a warning in Sun Studio.  The Nokia Symbian
@@ -1414,7 +1414,7 @@ bool ParseInt32(const Message& src_text, const char* str, Int32* value);
 // Parses a bool/Int32/string from the environment variable
 // corresponding to the given Google Test flag.
 bool BoolFromGTestEnv(const char* flag, bool default_val);
-Int32 Int32FromGTestEnv(const char* flag, Int32 default_val);
+GTEST_API_ Int32 Int32FromGTestEnv(const char* flag, Int32 default_val);
 const char* StringFromGTestEnv(const char* flag, const char* default_val);
 
 }  // namespace internal

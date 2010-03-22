@@ -56,7 +56,7 @@ namespace internal {
 // Names are NOT checked for syntax correctness -- no checking for illegal
 // characters, malformed paths, etc.
 
-class FilePath {
+class GTEST_API_ FilePath {
  public:
   FilePath() : pathname_("") { }
   FilePath(const FilePath& rhs) : pathname_(rhs.pathname_) { }
