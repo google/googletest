@@ -13,6 +13,7 @@ EXTRA_DIST = \
   make/Makefile \
   scripts/fuse_gtest_files.py \
   scripts/gen_gtest_pred_impl.py \
+  scripts/pump.py \
   scripts/test/Makefile
 
 # gtest source files that we don't compile directly.
