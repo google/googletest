@@ -1805,6 +1805,8 @@ TestResult::~TestResult() {
 // range from 0 to total_part_count() - 1. If i is not in that range,
 // aborts the program.
 const TestPartResult& TestResult::GetTestPartResult(int i) const {
+  if (i < 0 || i >= total_part_count())
+    internal::posix::Abort();
   return test_part_results_.at(i);
 }
 
@@ -1812,6 +1814,8 @@ const TestPartResult& TestResult::GetTestPartResult(int i) const {
 // test_property_count() - 1. If i is not in that range, aborts the
 // program.
 const TestProperty& TestResult::GetTestProperty(int i) const {
+  if (i < 0 || i >= test_property_count())
+    internal::posix::Abort();
   return test_properties_.at(i);
 }
 
