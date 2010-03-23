@@ -478,7 +478,8 @@
 // abort() in a VC 7.1 application compiled as GUI in debug config
 // pops up a dialog window that cannot be suppressed programmatically.
 #if (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_CYGWIN || GTEST_OS_SOLARIS || \
-     (GTEST_OS_WINDOWS_DESKTOP && _MSC_VER >= 1400) || GTEST_OS_WINDOWS_MINGW)
+     (GTEST_OS_WINDOWS_DESKTOP && _MSC_VER >= 1400) || \
+     GTEST_OS_WINDOWS_MINGW || GTEST_OS_AIX)
 #define GTEST_HAS_DEATH_TEST 1
 #include <vector>  // NOLINT
 #endif
