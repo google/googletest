@@ -53,8 +53,6 @@ $var n = 50  $$ Maximum length of type lists we want to support.
 #include <cxxabi.h>
 #endif  // __GLIBCXX__
 
-#include <typeinfo>
-
 namespace testing {
 namespace internal {
 
