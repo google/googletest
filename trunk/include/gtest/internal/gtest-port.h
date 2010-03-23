@@ -358,6 +358,12 @@
 
 #endif  // GTEST_HAS_RTTI
 
+// It's this header's responsibility to #include <typeinfo> when RTTI
+// is enabled.
+#if GTEST_HAS_RTTI
+#include <typeinfo>
+#endif
+
 // Determines whether Google Test can use the pthreads library.
 #ifndef GTEST_HAS_PTHREAD
 // The user didn't tell us explicitly, so we assume pthreads support is
@@ -493,10 +499,12 @@
 #endif
 
 // Determines whether to support Combine(). This only makes sense when
-// value-parameterized tests are enabled.
-#if GTEST_HAS_PARAM_TEST && GTEST_HAS_TR1_TUPLE
+// value-parameterized tests are enabled.  The implementation doesn't
+// work on Sun Studio since it doesn't understand templated conversion
+// operators.
+#if GTEST_HAS_PARAM_TEST && GTEST_HAS_TR1_TUPLE && !defined(__SUNPRO_CC)
 #define GTEST_HAS_COMBINE 1
-#endif  // GTEST_HAS_PARAM_TEST && GTEST_HAS_TR1_TUPLE
+#endif
 
 // Determines whether the system compiler uses UTF-16 for encoding wide strings.
 #define GTEST_WIDE_STRING_USES_UTF16_ \
@@ -774,6 +782,23 @@ inline void FlushInfoLog() { fflush(NULL); }
     GTEST_LOG_(FATAL) << #posix_call << "failed with error " \
                       << gtest_error
 
+// INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
+//
+// Downcasts the pointer of type Base to Derived.
+// Derived must be a subclass of Base. The parameter MUST
+// point to a class of type Derived, not any subclass of it.
+// When RTTI is available, the function performs a runtime
+// check to enforce this.
+template <class Derived, class Base>
+Derived* CheckedDowncastToActualType(Base* base) {
+#if GTEST_HAS_RTTI
+  GTEST_CHECK_(typeid(*base) == typeid(Derived));
+  return dynamic_cast<Derived*>(base);  // NOLINT
+#else
+  return static_cast<Derived*>(base);  // Poor man's downcast.
+#endif  // GTEST_HAS_RTTI
+}
+
 #if GTEST_HAS_STREAM_REDIRECTION_
 
 // Defines the stderr capturer:
@@ -888,15 +913,11 @@ class ThreadWithParam : public ThreadWithParamBase {
         param_(param),
         thread_can_start_(thread_can_start),
         finished_(false) {
+    ThreadWithParamBase* const base = this;
     // The thread can be created only after all fields except thread_
     // have been initialized.
     GTEST_CHECK_POSIX_SUCCESS_(
-        // TODO(vladl@google.com): Use implicit_cast instead of static_cast
-        // when it is moved over from Google Mock.
-        pthread_create(&thread_,
-                       0,
-                       &ThreadFuncWithCLinkage,
-                       static_cast<ThreadWithParamBase*>(this)));
+        pthread_create(&thread_, 0, &ThreadFuncWithCLinkage, base));
   }
   ~ThreadWithParam() { Join(); }
 
@@ -1024,6 +1045,23 @@ class GTestMutexLock {
 
 typedef GTestMutexLock MutexLock;
 
+// Helpers for ThreadLocal.
+
+// pthread_key_create() requires DeleteThreadLocalValue() to have
+// C-linkage.  Therefore it cannot be templatized to access
+// ThreadLocal<T>.  Hence the need for class
+// ThreadLocalValueHolderBase.
+class ThreadLocalValueHolderBase {
+ public:
+  virtual ~ThreadLocalValueHolderBase() {}
+};
+
+// Called by pthread to delete thread-local data stored by
+// pthread_setspecific().
+extern "C" inline void DeleteThreadLocalValue(void* value_holder) {
+  delete static_cast<ThreadLocalValueHolderBase*>(value_holder);
+}
+
 // Implements thread-local storage on pthreads-based systems.
 //
 //   // Thread 1
@@ -1062,23 +1100,37 @@ class ThreadLocal {
   void set(const T& value) { *pointer() = value; }
 
  private:
+  // Holds a value of type T.
+  class ValueHolder : public ThreadLocalValueHolderBase {
+   public:
+    explicit ValueHolder(const T& value) : value_(value) {}
+
+    T* pointer() { return &value_; }
+
+   private:
+    T value_;
+    GTEST_DISALLOW_COPY_AND_ASSIGN_(ValueHolder);
+  };
+
   static pthread_key_t CreateKey() {
     pthread_key_t key;
-    GTEST_CHECK_POSIX_SUCCESS_(pthread_key_create(&key, &DeleteData));
+    GTEST_CHECK_POSIX_SUCCESS_(
+        pthread_key_create(&key, &DeleteThreadLocalValue));
     return key;
   }
 
   T* GetOrCreateValue() const {
-    T* const value = static_cast<T*>(pthread_getspecific(key_));
-    if (value != NULL)
-      return value;
+    ThreadLocalValueHolderBase* const holder =
+        static_cast<ThreadLocalValueHolderBase*>(pthread_getspecific(key_));
+    if (holder != NULL) {
+      return CheckedDowncastToActualType<ValueHolder>(holder)->pointer();
+    }
 
-    T* const new_value = new T(default_);
-    GTEST_CHECK_POSIX_SUCCESS_(pthread_setspecific(key_, new_value));
-    return new_value;
+    ValueHolder* const new_holder = new ValueHolder(default_);
+    ThreadLocalValueHolderBase* const holder_base = new_holder;
+    GTEST_CHECK_POSIX_SUCCESS_(pthread_setspecific(key_, holder_base));
+    return new_holder->pointer();
   }
-
-  static void DeleteData(void* data) { delete static_cast<T*>(data); }
 
   // A key pthreads uses for looking up per-thread values.
   const pthread_key_t key_;

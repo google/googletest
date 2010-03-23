@@ -47,10 +47,6 @@
 
 #if GTEST_HAS_PARAM_TEST
 
-#if GTEST_HAS_RTTI
-#include <typeinfo>  // NOLINT
-#endif  // GTEST_HAS_RTTI
-
 namespace testing {
 namespace internal {
 
@@ -62,24 +58,6 @@ namespace internal {
 // but in different namespaces.
 GTEST_API_ void ReportInvalidTestCaseType(const char* test_case_name,
                                           const char* file, int line);
-
-// INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
-//
-// Downcasts the pointer of type Base to Derived.
-// Derived must be a subclass of Base. The parameter MUST
-// point to a class of type Derived, not any subclass of it.
-// When RTTI is available, the function performs a runtime
-// check to enforce this.
-template <class Derived, class Base>
-Derived* CheckedDowncastToActualType(Base* base) {
-#if GTEST_HAS_RTTI
-  GTEST_CHECK_(typeid(*base) == typeid(Derived));
-  Derived* derived = dynamic_cast<Derived*>(base);  // NOLINT
-#else
-  Derived* derived = static_cast<Derived*>(base);  // Poor man's downcast.
-#endif  // GTEST_HAS_RTTI
-  return derived;
-}
 
 template <typename> class ParamGeneratorInterface;
 template <typename> class ParamGenerator;
