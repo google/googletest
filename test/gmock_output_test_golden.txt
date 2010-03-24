@@ -175,8 +175,8 @@ Google Mock tried the following 1 expectation, but it didn't match:
 
 FILE:#: EXPECT_CALL(foo_, Bar(Ref(s), _, Ge(0)))...
   Expected arg #0: references the variable @0x# "Hi"
-           Actual: "Ho" (is located @0x#)
-  Expected arg #2: is greater than or equal to 0
+           Actual: "Ho", which is located @0x#
+  Expected arg #2: is >= 0
            Actual: -0.1
          Expected: to be called once
            Actual: never called - unsatisfied and active
@@ -204,7 +204,7 @@ Unexpected mock function call - returning default value.
 Google Mock tried the following 1 expectation, but it didn't match:
 
 FILE:#: EXPECT_CALL(foo_, Bar2(Ge(2), Ge(1)))...
-  Expected arg #0: is greater than or equal to 2
+  Expected arg #0: is >= 2
            Actual: 1
     Expected args: are a pair (x, y) where x >= y
            Actual: don't match

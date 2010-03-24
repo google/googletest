@@ -453,12 +453,11 @@ Matcher<T> A();
 // and MUST NOT BE USED IN USER CODE!!!
 namespace internal {
 
-// If the explanation is not empty, prints it to the listener.
-// 'listener' must not be NULL.
-inline void PrintIfNotEmpty(
-    const internal::string& explanation, MatchResultListener* listener) {
-  if (explanation != "") {
-    *listener << ", " << explanation;
+// If the explanation is not empty, prints it to the ostream.
+inline void PrintIfNotEmpty(const internal::string& explanation,
+                            std::ostream* os) {
+  if (explanation != "" && os != NULL) {
+    *os << ", " << explanation;
   }
 }
 
@@ -480,18 +479,9 @@ bool MatchPrintAndExplain(Value& value, const Matcher<T>& matcher,
   const bool match = matcher.MatchAndExplain(value, &inner_listener);
 
   UniversalPrint(value, listener->stream());
-  PrintIfNotEmpty(inner_listener.str(), listener);
+  PrintIfNotEmpty(inner_listener.str(), listener->stream());
 
   return match;
-}
-
-// If the given string is not empty and os is not NULL, wraps the
-// string inside a pair of parentheses and streams the result to os.
-inline void StreamInParensAsNeeded(const internal::string& str,
-                                   ::std::ostream* os) {
-  if (!str.empty() && os != NULL) {
-    *os << " (" << str << ")";
-  }
 }
 
 // An internal helper class for doing compile-time loop on a tuple's
@@ -510,19 +500,19 @@ class TuplePrefix {
         && get<N - 1>(matcher_tuple).Matches(get<N - 1>(value_tuple));
   }
 
-  // TuplePrefix<N>::DescribeMatchFailuresTo(matchers, values, os)
+  // TuplePrefix<N>::ExplainMatchFailuresTo(matchers, values, os)
   // describes failures in matching the first N fields of matchers
   // against the first N fields of values.  If there is no failure,
   // nothing will be streamed to os.
   template <typename MatcherTuple, typename ValueTuple>
-  static void DescribeMatchFailuresTo(const MatcherTuple& matchers,
-                                      const ValueTuple& values,
-                                      ::std::ostream* os) {
+  static void ExplainMatchFailuresTo(const MatcherTuple& matchers,
+                                     const ValueTuple& values,
+                                     ::std::ostream* os) {
     using ::std::tr1::tuple_element;
     using ::std::tr1::get;
 
     // First, describes failures in the first N - 1 fields.
-    TuplePrefix<N - 1>::DescribeMatchFailuresTo(matchers, values, os);
+    TuplePrefix<N - 1>::ExplainMatchFailuresTo(matchers, values, os);
 
     // Then describes the failure (if any) in the (N - 1)-th (0-based)
     // field.
@@ -542,10 +532,8 @@ class TuplePrefix {
       // isn't interesting to the user most of the time.  The
       // matcher's MatchAndExplain() method handles the case when
       // the address is interesting.
-      internal::UniversalPrinter<GMOCK_REMOVE_REFERENCE_(Value)>::
-          Print(value, os);
-
-      StreamInParensAsNeeded(listener.str(), os);
+      internal::UniversalPrint(value, os);
+      PrintIfNotEmpty(listener.str(), os);
       *os << "\n";
     }
   }
@@ -562,9 +550,9 @@ class TuplePrefix<0> {
   }
 
   template <typename MatcherTuple, typename ValueTuple>
-  static void DescribeMatchFailuresTo(const MatcherTuple& /* matchers */,
-                                      const ValueTuple& /* values */,
-                                      ::std::ostream* /* os */) {}
+  static void ExplainMatchFailuresTo(const MatcherTuple& /* matchers */,
+                                     const ValueTuple& /* values */,
+                                     ::std::ostream* /* os */) {}
 };
 
 // TupleMatches(matcher_tuple, value_tuple) returns true iff all
@@ -588,11 +576,11 @@ bool TupleMatches(const MatcherTuple& matcher_tuple,
 // Describes failures in matching matchers against values.  If there
 // is no failure, nothing will be streamed to os.
 template <typename MatcherTuple, typename ValueTuple>
-void DescribeMatchFailureTupleTo(const MatcherTuple& matchers,
-                                 const ValueTuple& values,
-                                 ::std::ostream* os) {
+void ExplainMatchFailureTupleTo(const MatcherTuple& matchers,
+                                const ValueTuple& values,
+                                ::std::ostream* os) {
   using ::std::tr1::tuple_size;
-  TuplePrefix<tuple_size<MatcherTuple>::value>::DescribeMatchFailuresTo(
+  TuplePrefix<tuple_size<MatcherTuple>::value>::ExplainMatchFailuresTo(
       matchers, values, os);
 }
 
@@ -695,7 +683,8 @@ class AnythingMatcher {
 //
 // The following template definition assumes that the Rhs parameter is
 // a "bare" type (i.e. neither 'const T' nor 'T&').
-#define GMOCK_IMPLEMENT_COMPARISON_MATCHER_(name, op, relation) \
+#define GMOCK_IMPLEMENT_COMPARISON_MATCHER_( \
+    name, op, relation, negated_relation) \
   template <typename Rhs> class name##Matcher { \
    public: \
     explicit name##Matcher(const Rhs& rhs) : rhs_(rhs) {} \
@@ -713,11 +702,11 @@ class AnythingMatcher {
         return lhs op rhs_; \
       } \
       virtual void DescribeTo(::std::ostream* os) const { \
-        *os << "is " relation  " "; \
+        *os << relation  " "; \
         UniversalPrinter<Rhs>::Print(rhs_, os); \
       } \
       virtual void DescribeNegationTo(::std::ostream* os) const { \
-        *os << "is not " relation  " "; \
+        *os << negated_relation  " "; \
         UniversalPrinter<Rhs>::Print(rhs_, os); \
       } \
      private: \
@@ -730,12 +719,12 @@ class AnythingMatcher {
 
 // Implements Eq(v), Ge(v), Gt(v), Le(v), Lt(v), and Ne(v)
 // respectively.
-GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Eq, ==, "equal to");
-GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Ge, >=, "greater than or equal to");
-GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Gt, >, "greater than");
-GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Le, <=, "less than or equal to");
-GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Lt, <, "less than");
-GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Ne, !=, "not equal to");
+GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Eq, ==, "is equal to", "isn't equal to");
+GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Ge, >=, "is >=", "isn't >=");
+GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Gt, >, "is >", "isn't >");
+GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Le, <=, "is <=", "isn't <=");
+GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Lt, <, "is <", "isn't <");
+GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Ne, !=, "isn't equal to", "is equal to");
 
 #undef GMOCK_IMPLEMENT_COMPARISON_MATCHER_
 
@@ -751,7 +740,7 @@ class IsNullMatcher {
 
   void DescribeTo(::std::ostream* os) const { *os << "is NULL"; }
   void DescribeNegationTo(::std::ostream* os) const {
-    *os << "is not NULL";
+    *os << "isn't NULL";
   }
 };
 
@@ -765,7 +754,7 @@ class NotNullMatcher {
     return GetRawPointer(p) != NULL;
   }
 
-  void DescribeTo(::std::ostream* os) const { *os << "is not NULL"; }
+  void DescribeTo(::std::ostream* os) const { *os << "isn't NULL"; }
   void DescribeNegationTo(::std::ostream* os) const {
     *os << "is NULL";
   }
@@ -820,7 +809,7 @@ class RefMatcher<T&> {
     // in order to match the interface MatcherInterface<Super&>.
     virtual bool MatchAndExplain(
         Super& x, MatchResultListener* listener) const {
-      *listener << "is located @" << static_cast<const void*>(&x);
+      *listener << "which is located @" << static_cast<const void*>(&x);
       return &x == &object_;
     }
 
@@ -917,10 +906,7 @@ class StrEqualityMatcher {
 
  private:
   void DescribeToHelper(bool expect_eq, ::std::ostream* os) const {
-    *os << "is ";
-    if (!expect_eq) {
-      *os << "not ";
-    }
+    *os << (expect_eq ? "is " : "isn't ");
     *os << "equal to ";
     if (!case_sensitive_) {
       *os << "(ignoring case) ";
@@ -1212,8 +1198,11 @@ class BothOfMatcherImpl : public MatcherInterface<T> {
   }
 
   virtual void DescribeNegationTo(::std::ostream* os) const {
-    *os << "not ";
-    DescribeTo(os);
+    *os << "(";
+    matcher1_.DescribeNegationTo(os);
+    *os << ") or (";
+    matcher2_.DescribeNegationTo(os);
+    *os << ")";
   }
 
   virtual bool MatchAndExplain(T x, MatchResultListener* listener) const {
@@ -1240,7 +1229,7 @@ class BothOfMatcherImpl : public MatcherInterface<T> {
     } else {
       *listener << s1;
       if (s2 != "") {
-        *listener << "; " << s2;
+        *listener << ", and " << s2;
       }
     }
     return true;
@@ -1296,8 +1285,11 @@ class EitherOfMatcherImpl : public MatcherInterface<T> {
   }
 
   virtual void DescribeNegationTo(::std::ostream* os) const {
-    *os << "not ";
-    DescribeTo(os);
+    *os << "(";
+    matcher1_.DescribeNegationTo(os);
+    *os << ") and (";
+    matcher2_.DescribeNegationTo(os);
+    *os << ")";
   }
 
   virtual bool MatchAndExplain(T x, MatchResultListener* listener) const {
@@ -1324,7 +1316,7 @@ class EitherOfMatcherImpl : public MatcherInterface<T> {
     } else {
       *listener << s1;
       if (s2 != "") {
-        *listener << "; " << s2;
+        *listener << ", and " << s2;
       }
     }
     return false;
@@ -1462,18 +1454,15 @@ class PredicateFormatterFromMatcher {
     // matcher_ has type Matcher<T> (e.g. An<int>()).
     const Matcher<const T&> matcher = MatcherCast<const T&>(matcher_);
     StringMatchResultListener listener;
-    if (matcher.MatchAndExplain(x, &listener)) {
+    if (MatchPrintAndExplain(x, matcher, &listener))
       return AssertionSuccess();
-    } else {
-      ::std::stringstream ss;
-      ss << "Value of: " << value_text << "\n"
-         << "Expected: ";
-      matcher.DescribeTo(&ss);
-      ss << "\n  Actual: ";
-      UniversalPrinter<T>::Print(x, &ss);
-      StreamInParensAsNeeded(listener.str(), &ss);
-      return AssertionFailure(Message() << ss.str());
-    }
+
+    ::std::stringstream ss;
+    ss << "Value of: " << value_text << "\n"
+       << "Expected: ";
+    matcher.DescribeTo(&ss);
+    ss << "\n  Actual: " << listener.str();
+    return AssertionFailure() << ss.str();
   }
 
  private:
@@ -1548,12 +1537,12 @@ class FloatingEqMatcher {
           ::std::numeric_limits<FloatType>::digits10 + 2);
       if (FloatingPoint<FloatType>(rhs_).is_nan()) {
         if (nan_eq_nan_) {
-          *os << "is not NaN";
+          *os << "isn't NaN";
         } else {
           *os << "is anything";
         }
       } else {
-        *os << "is not approximately " << rhs_;
+        *os << "isn't approximately " << rhs_;
       }
       // Restore original precision.
       os->precision(old_precision);
@@ -1912,7 +1901,7 @@ class ContainerEqMatcher {
 
     ::std::ostream* const os = listener->stream();
     if (os != NULL) {
-      // Something is different. Check for missing values first.
+      // Something is different. Check for extra values first.
       bool printed_header = false;
       for (typename LhsStlContainer::const_iterator it =
                lhs_stl_container.begin();
@@ -1922,7 +1911,7 @@ class ContainerEqMatcher {
           if (printed_header) {
             *os << ", ";
           } else {
-            *os << "Only in actual: ";
+            *os << "which has these unexpected elements: ";
             printed_header = true;
           }
           UniversalPrinter<typename LhsStlContainer::value_type>::
@@ -1930,7 +1919,7 @@ class ContainerEqMatcher {
         }
       }
 
-      // Now check for extra values.
+      // Now check for missing values.
       bool printed_header2 = false;
       for (typename StlContainer::const_iterator it = rhs_.begin();
            it != rhs_.end(); ++it) {
@@ -1940,7 +1929,8 @@ class ContainerEqMatcher {
           if (printed_header2) {
             *os << ", ";
           } else {
-            *os << (printed_header ? "; not" : "Not") << " in actual: ";
+            *os << (printed_header ? ",\nand" : "which")
+                << " doesn't have these expected elements: ";
             printed_header2 = true;
           }
           UniversalPrinter<typename StlContainer::value_type>::Print(*it, os);
@@ -1990,8 +1980,10 @@ class ContainsMatcherImpl : public MatcherInterface<Container> {
     size_t i = 0;
     for (typename StlContainer::const_iterator it = stl_container.begin();
          it != stl_container.end(); ++it, ++i) {
-      if (inner_matcher_.Matches(*it)) {
-        *listener << "element " << i << " matches";
+      StringMatchResultListener inner_listener;
+      if (inner_matcher_.MatchAndExplain(*it, &inner_listener)) {
+        *listener << "whose element #" << i << " matches";
+        PrintIfNotEmpty(inner_listener.str(), listener->stream());
         return true;
       }
     }
@@ -2040,7 +2032,14 @@ class KeyMatcherImpl : public MatcherInterface<PairType> {
   // Returns true iff 'key_value.first' (the key) matches the inner matcher.
   virtual bool MatchAndExplain(PairType key_value,
                                MatchResultListener* listener) const {
-    return inner_matcher_.MatchAndExplain(key_value.first, listener);
+    StringMatchResultListener inner_listener;
+    const bool match = inner_matcher_.MatchAndExplain(key_value.first,
+                                                      &inner_listener);
+    const internal::string explanation = inner_listener.str();
+    if (explanation != "") {
+      *listener << "whose first field is a value " << explanation;
+    }
+    return match;
   }
 
   // Describes what this matcher does.
@@ -2125,14 +2124,14 @@ class PairMatcherImpl : public MatcherInterface<PairType> {
     if (!first_matcher_.MatchAndExplain(a_pair.first,
                                         &first_inner_listener)) {
       *listener << "whose first field does not match";
-      PrintIfNotEmpty(first_inner_listener.str(), listener);
+      PrintIfNotEmpty(first_inner_listener.str(), listener->stream());
       return false;
     }
     StringMatchResultListener second_inner_listener;
     if (!second_matcher_.MatchAndExplain(a_pair.second,
                                          &second_inner_listener)) {
       *listener << "whose second field does not match";
-      PrintIfNotEmpty(second_inner_listener.str(), listener);
+      PrintIfNotEmpty(second_inner_listener.str(), listener->stream());
       return false;
     }
     ExplainSuccess(first_inner_listener.str(), second_inner_listener.str(),
@@ -2217,7 +2216,7 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
     } else {
       *os << "has " << Elements(count()) << " where\n";
       for (size_t i = 0; i != count(); ++i) {
-        *os << "element " << i << " ";
+        *os << "element #" << i << " ";
         matchers_[i].DescribeTo(os);
         if (i + 1 < count()) {
           *os << ",\n";
@@ -2229,13 +2228,13 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
   // Describes what the negation of this matcher does.
   virtual void DescribeNegationTo(::std::ostream* os) const {
     if (count() == 0) {
-      *os << "is not empty";
+      *os << "isn't empty";
       return;
     }
 
-    *os << "does not have " << Elements(count()) << ", or\n";
+    *os << "doesn't have " << Elements(count()) << ", or\n";
     for (size_t i = 0; i != count(); ++i) {
-      *os << "element " << i << " ";
+      *os << "element #" << i << " ";
       matchers_[i].DescribeNegationTo(os);
       if (i + 1 < count()) {
         *os << ", or\n";
@@ -2253,7 +2252,7 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
       // prints the empty container.  Otherwise we just need to show
       // how many elements there actually are.
       if (actual_count != 0) {
-        *listener << "has " << Elements(actual_count);
+        *listener << "which has " << Elements(actual_count);
       }
       return false;
     }
@@ -2268,24 +2267,22 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
       } else {
         // The container has the right size but the i-th element
         // doesn't match its expectation.
-        *listener << "element " << i << " doesn't match";
-
-        StreamInParensAsNeeded(s.str(), listener->stream());
+        *listener << "whose element #" << i << " doesn't match";
+        PrintIfNotEmpty(s.str(), listener->stream());
         return false;
       }
     }
 
     // Every element matches its expectation.  We need to explain why
     // (the obvious ones can be skipped).
-
     bool reason_printed = false;
     for (size_t i = 0; i != count(); ++i) {
       const internal::string& s = explanations[i];
       if (!s.empty()) {
         if (reason_printed) {
-          *listener << ",\n";
+          *listener << ",\nand ";
         }
-        *listener << "element " << i << " " << s;
+        *listener << "whose element #" << i << " matches, " << s;
         reason_printed = true;
       }
     }

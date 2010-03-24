@@ -993,8 +993,8 @@ class TypedExpectation : public ExpectationBase {
   // Describes the result of matching the arguments against this
   // expectation to the given ostream.
   // L >= g_gmock_mutex
-  void DescribeMatchResultTo(const ArgumentTuple& args,
-                             ::std::ostream* os) const {
+  void ExplainMatchResultTo(const ArgumentTuple& args,
+                            ::std::ostream* os) const {
     g_gmock_mutex.AssertHeld();
 
     if (is_retired()) {
@@ -1002,7 +1002,7 @@ class TypedExpectation : public ExpectationBase {
           << "           Actual: it is retired\n";
     } else if (!Matches(args)) {
       if (!TupleMatches(matchers_, args)) {
-        DescribeMatchFailureTupleTo(matchers_, args, os);
+        ExplainMatchFailureTupleTo(matchers_, args, os);
       }
       StringMatchResultListener listener;
       if (!extra_matcher_.MatchAndExplain(args, &listener)) {
@@ -1010,7 +1010,7 @@ class TypedExpectation : public ExpectationBase {
         extra_matcher_.DescribeTo(os);
         *os << "\n           Actual: don't match";
 
-        internal::StreamInParensAsNeeded(listener.str(), os);
+        internal::PrintIfNotEmpty(listener.str(), os);
         *os << "\n";
       }
     } else if (!AllPrerequisitesAreSatisfied()) {
@@ -1028,7 +1028,7 @@ class TypedExpectation : public ExpectationBase {
       *os << "                   (end of pre-requisites)\n";
     } else {
       // This line is here just for completeness' sake.  It will never
-      // be executed as currently the DescribeMatchResultTo() function
+      // be executed as currently the ExplainMatchResultTo() function
       // is called only when the mock function call does NOT match the
       // expectation.
       *os << "The call matches the expectation.\n";
@@ -1618,7 +1618,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
         *why << "tried expectation #" << i << ": ";
       }
       *why << expectations_[i]->source_text() << "...\n";
-      expectations_[i]->DescribeMatchResultTo(args, why);
+      expectations_[i]->ExplainMatchResultTo(args, why);
       expectations_[i]->DescribeCallCountTo(why);
     }
   }

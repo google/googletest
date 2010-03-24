@@ -118,15 +118,28 @@ class ArgsMatcherImpl : public MatcherInterface<ArgsTuple> {
 
   virtual bool MatchAndExplain(ArgsTuple args,
                                MatchResultListener* listener) const {
-    return inner_matcher_.MatchAndExplain(GetSelectedArgs(args), listener);
+    const SelectedArgs& selected_args = GetSelectedArgs(args);
+    if (!listener->IsInterested())
+      return inner_matcher_.Matches(selected_args);
+
+    PrintIndices(listener->stream());
+    *listener << "are " << PrintToString(selected_args);
+
+    StringMatchResultListener inner_listener;
+    const bool match = inner_matcher_.MatchAndExplain(selected_args,
+                                                      &inner_listener);
+    PrintIfNotEmpty(inner_listener.str(), listener->stream());
+    return match;
   }
 
   virtual void DescribeTo(::std::ostream* os) const {
+    *os << "are a tuple ";
     PrintIndices(os);
     inner_matcher_.DescribeTo(os);
   }
 
   virtual void DescribeNegationTo(::std::ostream* os) const {
+    *os << "are a tuple ";
     PrintIndices(os);
     inner_matcher_.DescribeNegationTo(os);
   }
@@ -138,7 +151,7 @@ class ArgsMatcherImpl : public MatcherInterface<ArgsTuple> {
 
   // Prints the indices of the selected fields.
   static void PrintIndices(::std::ostream* os) {
-    *os << "are a tuple whose fields (";
+    *os << "whose fields (";
     const int indices[$n] = { $ks };
     for (int i = 0; i < $n; i++) {
       if (indices[i] < 0)
