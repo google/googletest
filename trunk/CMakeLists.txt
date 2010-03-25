@@ -67,21 +67,26 @@ if (MSVC)
   set(cxx_base_flags "-GS -W4 -WX -wd4275 -nologo -J -Zi")
   set(cxx_base_flags "${cxx_base_flags} -D_UNICODE -DUNICODE -DWIN32 -D_WIN32")
   set(cxx_base_flags "${cxx_base_flags} -DSTRICT -DWIN32_LEAN_AND_MEAN")
-  set(cxx_exceptions_flags "-EHsc -D_HAS_EXCEPTIONS=1")
+  set(cxx_exception_flags "-EHsc -D_HAS_EXCEPTIONS=1")
   set(cxx_no_exception_flags "-D_HAS_EXCEPTIONS=0")
   set(cxx_no_rtti_flags "-GR-")
 elseif (CMAKE_COMPILER_IS_GNUCXX)
   set(cxx_base_flags "-Wall -Wshadow")
-  set(cxx_exceptions_flags "-fexceptions")
+  set(cxx_exception_flags "-fexceptions")
   set(cxx_no_exception_flags "-fno-exceptions")
-  set(cxx_no_rtti_flags "-fno-rtti")
-  set(cxx_strict_flags "${cxx_strict_flags} -Wextra")
+  # Until version 4.3.2, GCC doesn't define a macro to indicate
+  # whether RTTI is enabled.  Therefore we define GTEST_HAS_RTTI
+  # explicitly.
+  set(cxx_no_rtti_flags "-fno-rtti -DGTEST_HAS_RTTI=0")
+  set(cxx_strict_flags "-Wextra")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "SunPro")
-  set(cxx_exceptions_flags "-features=except")
+  set(cxx_exception_flags "-features=except")
+  # Sun Pro doesn't provide macros to indicate whether exceptions and
+  # RTTI are enabled, so we define GTEST_HAS_* explicitly.
   set(cxx_no_exception_flags "-features=no%except -DGTEST_HAS_EXCEPTIONS=0")
-  set(cxx_no_rtti_flags "-features=no%rtti")
+  set(cxx_no_rtti_flags "-features=no%rtti -DGTEST_HAS_RTTI=0")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "VisualAge")
-  set(cxx_exceptions_flags "-qeh")
+  set(cxx_exception_flags "-qeh")
   set(cxx_no_exception_flags "-qnoeh")
   set(cxx_no_rtti_flags "-qnortti")
 endif()
@@ -91,10 +96,11 @@ if (CMAKE_USE_PTHREADS_INIT)  # The pthreads library is available.
 endif()
 
 # For building gtest's own tests and samples.
-set(cxx_default "${CMAKE_CXX_FLAGS} ${cxx_base_flags} ${cxx_exceptions_flags}")
+set(cxx_exception "${CMAKE_CXX_FLAGS} ${cxx_base_flags} ${cxx_exception_flags}")
 set(cxx_no_exception
     "${CMAKE_CXX_FLAGS} ${cxx_base_flags} ${cxx_no_exception_flags}")
-set(cxx_no_rtti "${cxx_default} ${cxx_no_rtti_flags} -DGTEST_HAS_RTTI=0")
+set(cxx_default "${cxx_exception}")
+set(cxx_no_rtti "${cxx_default} ${cxx_no_rtti_flags}")
 set(cxx_use_own_tuple "${cxx_default} -DGTEST_USE_OWN_TR1_TUPLE=1")
 
 # For building the gtest libraries.
