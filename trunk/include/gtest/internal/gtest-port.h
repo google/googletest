@@ -797,7 +797,7 @@ Derived* CheckedDowncastToActualType(Base* base) {
   return dynamic_cast<Derived*>(base);  // NOLINT
 #else
   return static_cast<Derived*>(base);  // Poor man's downcast.
-#endif  // GTEST_HAS_RTTI
+#endif
 }
 
 #if GTEST_HAS_STREAM_REDIRECTION_
