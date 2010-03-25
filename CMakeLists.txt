@@ -59,24 +59,46 @@ link_directories(
 find_package(Threads)
 
 # Defines the compiler/linker flags used to build gtest.  You can
-# tweak these definitions to suit your need.
+# tweak these definitions to suit your need.  A variable's value is
+# empty before it's explicitly assigned to.
+
 if (MSVC)
   # Newlines inside flags variables break CMake's NMake generator.
-  set(cxx_base "${CMAKE_CXX_FLAGS} -GS -W4 -WX -wd4275 -nologo -J -Zi")
-  set(cxx_base "${cxx_base} -D_UNICODE -DUNICODE -DWIN32 -D_WIN32")
-  set(cxx_base "${cxx_base} -DSTRICT -DWIN32_LEAN_AND_MEAN")
-  set(cxx_default "${cxx_base} -EHsc -D_HAS_EXCEPTIONS=1")
-  set(cxx_strict "${cxx_default}")
-else()
-  set(cxx_base "${CMAKE_CXX_FLAGS} -Wall -Werror -Wshadow")
-   
-  if (CMAKE_USE_PTHREADS_INIT)  # The pthreads library is available.
-    set(cxx_base "${cxx_base} -DGTEST_HAS_PTHREAD=1")
-  endif()
+  set(cxx_base_flags "-GS -W4 -WX -wd4275 -nologo -J -Zi")
+  set(cxx_base_flags "${cxx_base_flags} -D_UNICODE -DUNICODE -DWIN32 -D_WIN32")
+  set(cxx_base_flags "${cxx_base_flags} -DSTRICT -DWIN32_LEAN_AND_MEAN")
+  set(cxx_exceptions_flags "-EHsc -D_HAS_EXCEPTIONS=1")
+  set(cxx_no_exception_flags "-D_HAS_EXCEPTIONS=0")
+  set(cxx_no_rtti_flags "-GR-")
+elseif (CMAKE_COMPILER_IS_GNUCXX)
+  set(cxx_base_flags "-Wall -Wshadow")
+  set(cxx_exceptions_flags "-fexceptions")
+  set(cxx_no_exception_flags "-fno-exceptions")
+  set(cxx_no_rtti_flags "-fno-rtti")
+  set(cxx_strict_flags "${cxx_strict_flags} -Wextra")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "SunPro")
+  set(cxx_exceptions_flags "-features=except")
+  set(cxx_no_exception_flags "-features=no%except -DGTEST_HAS_EXCEPTIONS=0")
+  set(cxx_no_rtti_flags "-features=no%rtti")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "VisualAge")
+  set(cxx_exceptions_flags "-qeh")
+  set(cxx_no_exception_flags "-qnoeh")
+  set(cxx_no_rtti_flags "-qnortti")
+endif()
 
-  set(cxx_default "${cxx_base} -fexceptions")
-  set(cxx_strict "${cxx_default} -Wextra")
- endif()
+if (CMAKE_USE_PTHREADS_INIT)  # The pthreads library is available.
+  set(cxx_base_flags "${cxx_base_flags} -DGTEST_HAS_PTHREAD=1")
+endif()
+
+# For building gtest's own tests and samples.
+set(cxx_default "${CMAKE_CXX_FLAGS} ${cxx_base_flags} ${cxx_exceptions_flags}")
+set(cxx_no_exception
+    "${CMAKE_CXX_FLAGS} ${cxx_base_flags} ${cxx_no_exception_flags}")
+set(cxx_no_rtti "${cxx_default} ${cxx_no_rtti_flags} -DGTEST_HAS_RTTI=0")
+set(cxx_use_own_tuple "${cxx_default} -DGTEST_USE_OWN_TR1_TUPLE=1")
+
+# For building the gtest libraries.
+set(cxx_strict "${cxx_default} ${cxx_strict_flags}")
 
 ########################################################################
 #
@@ -241,15 +263,6 @@ endif()
 
 ############################################################
 # C++ tests built with non-standard compiler flags.
-
-if (MSVC)
-  set(cxx_no_exception "${cxx_base} -D_HAS_EXCEPTIONS=0")
-  set(cxx_no_rtti "${cxx_default} -GR-")
-else()
-  set(cxx_no_exception "${cxx_base} -fno-exceptions")
-  set(cxx_no_rtti "${cxx_default} -fno-rtti -DGTEST_HAS_RTTI=0")
-endif()
-set(cxx_use_own_tuple "${cxx_default} -DGTEST_USE_OWN_TR1_TUPLE=1")
 
 if (build_all_gtest_tests)
   cxx_library(gtest_no_exception "${cxx_no_exception}"
