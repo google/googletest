@@ -333,7 +333,7 @@
 #define GTEST_HAS_RTTI 1
 #else
 #define GTEST_HAS_RTTI 0
-#endif  // _CPPRTTI
+#endif
 
 #elif defined(__GNUC__)
 
@@ -348,6 +348,16 @@
 // For gcc versions smaller than 4.3.2, we assume RTTI is enabled.
 #define GTEST_HAS_RTTI 1
 #endif  // GTEST_GCC_VER >= 40302
+
+#elif defined(__IBMCPP__)
+
+// IBM Visual Age defines __RTTI_ALL__ to 1 if both the typeid and
+// dynamic_cast features are present.
+#ifdef __RTTI_ALL__
+#define GTEST_HAS_RTTI 1
+#else
+#define GTEST_HAS_RTTI 0
+#endif
 
 #else
 
