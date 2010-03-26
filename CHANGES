@@ -1,14 +1,17 @@
 Changes for 1.5.0:
 
- * Support for use in multi-threaded tests on platforms having pthreads
-   (by virtue of the Google Test thread change)
+ * New feature: Google Mock can be safely used in multi-threaded tests
+   on platforms having pthreads.
+ * New feature: function for printing a value of arbitrary type.
+ * New feature: function ExplainMatchResult() for easy definition of
+   composite matchers.
  * The new matcher API lets user-defined matchers generate custom
    explanations more directly and efficiently.
- * Better expectation failure messages.
+ * Better failure messages all around.
  * NotNull() and IsNull() now work with smart pointers.
  * Field() and Property() now work when the matcher argument is a pointer
    passed by reference.
- * Regular expression matching on all platforms.
+ * Regular expression matchers on all platforms.
  * Added GCC 4.0 support for Google Mock Doctor.
  * Added gmock_all_test.cc for compiling most Google Mock tests
    in a single file.
