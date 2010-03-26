@@ -911,47 +911,93 @@ TEST(ThreadLocalTest, ParameterizedConstructorSetsDefault) {
   EXPECT_STREQ("foo", result.c_str());
 }
 
-// DestructorTracker keeps track of whether the class instances have been
-// destroyed. The static synchronization mutex has to be defined outside
-// of the class, due to syntax of its definition.
-static GTEST_DEFINE_STATIC_MUTEX_(destructor_tracker_mutex);
-
+// DestructorTracker keeps track of whether its instances have been
+// destroyed.
 static std::vector<bool> g_destroyed;
 
 class DestructorTracker {
  public:
   DestructorTracker() : index_(GetNewIndex()) {}
+  DestructorTracker(const DestructorTracker& /* rhs */)
+      : index_(GetNewIndex()) {}
   ~DestructorTracker() {
-    MutexLock lock(&destructor_tracker_mutex);
+    // We never access g_destroyed concurrently, so we don't need to
+    // protect the write operation under a mutex.
     g_destroyed[index_] = true;
   }
 
  private:
   static int GetNewIndex() {
-    MutexLock lock(&destructor_tracker_mutex);
     g_destroyed.push_back(false);
     return g_destroyed.size() - 1;
   }
   const int index_;
 };
 
-template <typename T>
-void CallThreadLocalGet(ThreadLocal<T>* threadLocal) {
-  threadLocal->get();
+typedef ThreadLocal<DestructorTracker>* ThreadParam;
+
+void CallThreadLocalGet(ThreadParam thread_local) {
+  thread_local->get();
 }
 
-TEST(ThreadLocalTest, DestroysManagedObjectsNoLaterThanSelf) {
+// Tests that when a ThreadLocal object dies in a thread, it destroys
+// the managed object for that thread.
+TEST(ThreadLocalTest, DestroysManagedObjectForOwnThreadWhenDying) {
   g_destroyed.clear();
+
   {
+    // The next line default constructs a DestructorTracker object as
+    // the default value of objects managed by thread_local.
     ThreadLocal<DestructorTracker> thread_local;
-    ThreadWithParam<ThreadLocal<DestructorTracker>*> thread(
-        &CallThreadLocalGet<DestructorTracker>, &thread_local, NULL);
-    thread.Join();
+    ASSERT_EQ(1U, g_destroyed.size());
+    ASSERT_FALSE(g_destroyed[0]);
+
+    // This creates another DestructorTracker object for the main thread.
+    thread_local.get();
+    ASSERT_EQ(2U, g_destroyed.size());
+    ASSERT_FALSE(g_destroyed[0]);
+    ASSERT_FALSE(g_destroyed[1]);
   }
-  // Verifies that all DestructorTracker objects there were have been
-  // destroyed.
-  for (size_t i = 0; i <  g_destroyed.size(); ++i)
-    EXPECT_TRUE(g_destroyed[i]) << "at index " << i;
+
+  // Now thread_local has died.  It should have destroyed both the
+  // default value shared by all threads and the value for the main
+  // thread.
+  ASSERT_EQ(2U, g_destroyed.size());
+  EXPECT_TRUE(g_destroyed[0]);
+  EXPECT_TRUE(g_destroyed[1]);
+
+  g_destroyed.clear();
+}
+
+// Tests that when a thread exits, the thread-local object for that
+// thread is destroyed.
+TEST(ThreadLocalTest, DestroysManagedObjectAtThreadExit) {
+  g_destroyed.clear();
+
+  {
+    // The next line default constructs a DestructorTracker object as
+    // the default value of objects managed by thread_local.
+    ThreadLocal<DestructorTracker> thread_local;
+    ASSERT_EQ(1U, g_destroyed.size());
+    ASSERT_FALSE(g_destroyed[0]);
+
+    // This creates another DestructorTracker object in the new thread.
+    ThreadWithParam<ThreadParam> thread(
+        &CallThreadLocalGet, &thread_local, NULL);
+    thread.Join();
+
+    // Now the new thread has exited.  The per-thread object for it
+    // should have been destroyed.
+    ASSERT_EQ(2U, g_destroyed.size());
+    ASSERT_FALSE(g_destroyed[0]);
+    ASSERT_TRUE(g_destroyed[1]);
+  }
+
+  // Now thread_local has died.  The default value should have been
+  // destroyed too.
+  ASSERT_EQ(2U, g_destroyed.size());
+  EXPECT_TRUE(g_destroyed[0]);
+  EXPECT_TRUE(g_destroyed[1]);
 
   g_destroyed.clear();
 }
@@ -965,6 +1011,7 @@ TEST(ThreadLocalTest, ThreadLocalMutationsAffectOnlyCurrentThread) {
   RunFromThread(&RetrieveThreadLocalValue, make_pair(&thread_local, &result));
   EXPECT_TRUE(result.c_str() == NULL);
 }
+
 #endif  // GTEST_IS_THREADSAFE
 
 }  // namespace internal
