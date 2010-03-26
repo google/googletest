@@ -1,16 +1,17 @@
 Changes for 1.5.0:
 
- * New feature: Ability to use test assertions in multi-threaded tests
-   on platforms implementing pthreads.
- * New feature: Predicates used inside EXPECT_TRUE() and friends
+ * New feature: assertions can be safely called in multiple threads
+   where the pthreads library is available.
+ * New feature: predicates used inside EXPECT_TRUE() and friends
    can now generate custom failure messages.
- * New feature: Google Test can now be compiled as a DLL on Windows.
- * New feature: The distribution package now includes fused source files.
- * New feature: Prints help when encountering unrecognized Google Test flags.
+ * New feature: Google Test can now be compiled as a DLL.
+ * New feature: fused source files are included.
+ * New feature: prints help when encountering unrecognized Google Test flags.
  * Experimental feature: CMake build script (requires CMake 2.6.4+).
+ * Experimental feature: the Pump script for meta programming.
  * double values streamed to an assertion are printed with enough precision
    to differentiate any two different values.
- * Google Test now works on Solaris.
+ * Google Test now works on Solaris and AIX.
  * Build and test script improvements.
  * Bug fixes and implementation clean-ups.
 

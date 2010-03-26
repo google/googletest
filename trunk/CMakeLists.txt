@@ -88,7 +88,10 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "SunPro")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "VisualAge")
   set(cxx_exception_flags "-qeh")
   set(cxx_no_exception_flags "-qnoeh")
-  set(cxx_no_rtti_flags "-qnortti")
+  # Until version 9.0, Visual Age doesn't define a macro to indicate
+  # whether RTTI is enabled.  Therefore we define GTEST_HAS_RTTI
+  # explicitly.
+  set(cxx_no_rtti_flags "-qnortti -DGTEST_HAS_RTTI=0")
 endif()
 
 if (CMAKE_USE_PTHREADS_INIT)  # The pthreads library is available.
