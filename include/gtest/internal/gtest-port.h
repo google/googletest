@@ -1084,10 +1084,19 @@ extern "C" inline void DeleteThreadLocalValue(void* value_holder) {
 //
 // The template type argument T must have a public copy constructor.
 // In addition, the default ThreadLocal constructor requires T to have
-// a public default constructor.  An object managed by a ThreadLocal
-// instance for a thread is guaranteed to exist at least until the
-// earliest of the two events: (a) the thread terminates or (b) the
-// ThreadLocal object is destroyed.
+// a public default constructor.
+//
+// An object managed for a thread by a ThreadLocal instance is deleted
+// when the thread exits.  Or, if the ThreadLocal instance dies in
+// that thread, when the ThreadLocal dies.  It's the user's
+// responsibility to ensure that all other threads using a ThreadLocal
+// have exited when it dies, or the per-thread objects for those
+// threads will not be deleted.
+//
+// Google Test only uses global ThreadLocal objects.  That means they
+// will die after main() has returned.  Therefore, no per-thread
+// object managed by Google Test will be leaked as long as all threads
+// using Google Test have exited when main() returns.
 template <typename T>
 class ThreadLocal {
  public:
@@ -1097,6 +1106,11 @@ class ThreadLocal {
                                          default_(value) {}
 
   ~ThreadLocal() {
+    // Destroys the managed object for the current thread, if any.
+    DeleteThreadLocalValue(pthread_getspecific(key_));
+
+    // Releases resources associated with the key.  This will *not*
+    // delete managed objects for other threads.
     GTEST_CHECK_POSIX_SUCCESS_(pthread_key_delete(key_));
   }
 
@@ -1120,6 +1134,8 @@ class ThreadLocal {
 
   static pthread_key_t CreateKey() {
     pthread_key_t key;
+    // When a thread exits, DeleteThreadLocalValue() will be called on
+    // the object managed for that thread.
     GTEST_CHECK_POSIX_SUCCESS_(
         pthread_key_create(&key, &DeleteThreadLocalValue));
     return key;
