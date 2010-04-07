@@ -323,7 +323,7 @@ TEST(NullLiteralTest, IsFalseForNonNullLiterals) {
 }
 
 #ifdef __BORLANDC__
-// Restores warnings after previous "#pragma option push" supressed them
+// Restores warnings after previous "#pragma option push" suppressed them.
 #pragma option pop
 #endif
 
@@ -1353,7 +1353,7 @@ void DoesNotAbortHelper(bool* aborted) {
 }
 
 #ifdef __BORLANDC__
-// Restores warnings after previous "#pragma option push" supressed them
+// Restores warnings after previous "#pragma option push" suppressed them.
 #pragma option pop
 #endif
 
@@ -1371,7 +1371,7 @@ static int global_var = 0;
 #define GTEST_USE_UNPROTECTED_COMMA_ global_var++, global_var++
 
 TEST_F(ExpectFatalFailureTest, AcceptsMacroThatExpandsToUnprotectedComma) {
-#ifndef __BORLANDC__
+#if !defined(__BORLANDC__) || __BORLANDC__ >= 0x600
   // ICE's in C++Builder 2007.
   EXPECT_FATAL_FAILURE({
     GTEST_USE_UNPROTECTED_COMMA_;
@@ -3490,10 +3490,13 @@ TEST(AssertionTest, ASSERT_TRUE) {
 // Tests ASSERT_TRUE(predicate) for predicates returning AssertionResult.
 TEST(AssertionTest, AssertTrueWithAssertionResult) {
   ASSERT_TRUE(ResultIsEven(2));
+#if !defined(__BORLANDC__) || __BORLANDC__ >= 0x600
+  // ICE's in C++Builder 2007.
   EXPECT_FATAL_FAILURE(ASSERT_TRUE(ResultIsEven(3)),
                        "Value of: ResultIsEven(3)\n"
                        "  Actual: false (3 is odd)\n"
                        "Expected: true");
+#endif
   ASSERT_TRUE(ResultIsEvenNoExplanation(2));
   EXPECT_FATAL_FAILURE(ASSERT_TRUE(ResultIsEvenNoExplanation(3)),
                        "Value of: ResultIsEvenNoExplanation(3)\n"
@@ -3513,10 +3516,13 @@ TEST(AssertionTest, ASSERT_FALSE) {
 // Tests ASSERT_FALSE(predicate) for predicates returning AssertionResult.
 TEST(AssertionTest, AssertFalseWithAssertionResult) {
   ASSERT_FALSE(ResultIsEven(3));
+#if !defined(__BORLANDC__) || __BORLANDC__ >= 0x600
+  // ICE's in C++Builder 2007.
   EXPECT_FATAL_FAILURE(ASSERT_FALSE(ResultIsEven(2)),
                        "Value of: ResultIsEven(2)\n"
                        "  Actual: true (2 is even)\n"
                        "Expected: false");
+#endif
   ASSERT_FALSE(ResultIsEvenNoExplanation(3));
   EXPECT_FATAL_FAILURE(ASSERT_FALSE(ResultIsEvenNoExplanation(2)),
                        "Value of: ResultIsEvenNoExplanation(2)\n"
@@ -3628,13 +3634,15 @@ void ThrowNothing() {}
 // Tests ASSERT_THROW.
 TEST(AssertionTest, ASSERT_THROW) {
   ASSERT_THROW(ThrowAnInteger(), int);
-#if !defined(__BORLANDC__) || __BORLANDC__ >= 0x600 || defined(_DEBUG)
-  // ICE's in C++Builder 2007 (Release build).
+
+#ifndef __BORLANDC__
+  // ICE's in C++Builder 2007 and 2009.
   EXPECT_FATAL_FAILURE(
       ASSERT_THROW(ThrowAnInteger(), bool),
       "Expected: ThrowAnInteger() throws an exception of type bool.\n"
       "  Actual: it throws a different type.");
 #endif
+
   EXPECT_FATAL_FAILURE(
       ASSERT_THROW(ThrowNothing(), bool),
       "Expected: ThrowNothing() throws an exception of type bool.\n"

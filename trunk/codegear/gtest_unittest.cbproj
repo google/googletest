@@ -18,27 +18,27 @@
     <CfgParent>Base</CfgParent>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Base)'!=''">
-    <BCC_OptimizeForSpeed>true</BCC_OptimizeForSpeed>
     <OutputExt>exe</OutputExt>
-    <DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>
+    <BCC_OptimizeForSpeed>true</BCC_OptimizeForSpeed>
     <Defines>NO_STRICT</Defines>
+    <DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>
     <DynamicRTL>true</DynamicRTL>
-    <UsePackages>true</UsePackages>
     <ILINK_ObjectSearchPath>..\test</ILINK_ObjectSearchPath>
-    <NoVCL>true</NoVCL>
+    <UsePackages>true</UsePackages>
     <ProjectType>CppConsoleApplication</ProjectType>
+    <NoVCL>true</NoVCL>
     <BCC_CPPCompileAlways>true</BCC_CPPCompileAlways>
-    <PackageImports>rtl.bpi;vcl.bpi;bcbie.bpi;vclx.bpi;vclactnband.bpi;xmlrtl.bpi;bcbsmp.bpi;dbrtl.bpi;vcldb.bpi;bdertl.bpi;vcldbx.bpi;dsnap.bpi;dsnapcon.bpi;vclib.bpi;ibxpress.bpi;adortl.bpi;dbxcds.bpi;dbexpress.bpi;DbxCommonDriver.bpi;websnap.bpi;vclie.bpi;webdsnap.bpi;inet.bpi;inetdbbde.bpi;inetdbxpress.bpi;soaprtl.bpi;Rave75VCL.bpi;teeUI.bpi;tee.bpi;teedb.bpi;IndyCore.bpi;IndySystem.bpi;IndyProtocols.bpi;IntrawebDB_90_100.bpi;Intraweb_90_100.bpi;dclZipForged11.bpi;vclZipForged11.bpi;Jcl.bpi;JclVcl.bpi;JvCoreD11R.bpi;JvSystemD11R.bpi;JvStdCtrlsD11R.bpi;JvAppFrmD11R.bpi;JvBandsD11R.bpi;JvDBD11R.bpi;JvDlgsD11R.bpi;JvBDED11R.bpi;JvCmpD11R.bpi;JvCryptD11R.bpi;JvCtrlsD11R.bpi;JvCustomD11R.bpi;JvDockingD11R.bpi;JvDotNetCtrlsD11R.bpi;JvEDID11R.bpi;JvGlobusD11R.bpi;JvHMID11R.bpi;JvInterpreterD11R.bpi;JvJansD11R.bpi;JvManagedThreadsD11R.bpi;JvMMD11R.bpi;JvNetD11R.bpi;JvPageCompsD11R.bpi;JvPluginD11R.bpi;JvPrintPreviewD11R.bpi;JvRuntimeDesignD11R.bpi;JvTimeFrameworkD11R.bpi;JvValidatorsD11R.bpi;JvWizardD11R.bpi;JvXPCtrlsD11R.bpi;VclSmp.bpi</PackageImports>
+    <PackageImports>rtl.bpi;vcl.bpi;bcbie.bpi;vclx.bpi;vclactnband.bpi;xmlrtl.bpi;bcbsmp.bpi;dbrtl.bpi;vcldb.bpi;bdertl.bpi;vcldbx.bpi;dsnap.bpi;dsnapcon.bpi;vclib.bpi;ibxpress.bpi;adortl.bpi;dbxcds.bpi;dbexpress.bpi;DbxCommonDriver.bpi;websnap.bpi;vclie.bpi;webdsnap.bpi;inet.bpi;inetdbbde.bpi;inetdbxpress.bpi;soaprtl.bpi;Rave75VCL.bpi;teeUI.bpi;tee.bpi;teedb.bpi;IndyCore.bpi;IndySystem.bpi;IndyProtocols.bpi;IntrawebDB_90_100.bpi;Intraweb_90_100.bpi;Jcl.bpi;JclVcl.bpi;JvCoreD11R.bpi;JvSystemD11R.bpi;JvStdCtrlsD11R.bpi;JvAppFrmD11R.bpi;JvBandsD11R.bpi;JvDBD11R.bpi;JvDlgsD11R.bpi;JvBDED11R.bpi;JvCmpD11R.bpi;JvCryptD11R.bpi;JvCtrlsD11R.bpi;JvCustomD11R.bpi;JvDockingD11R.bpi;JvDotNetCtrlsD11R.bpi;JvEDID11R.bpi;JvGlobusD11R.bpi;JvHMID11R.bpi;JvInterpreterD11R.bpi;JvJansD11R.bpi;JvManagedThreadsD11R.bpi;JvMMD11R.bpi;JvNetD11R.bpi;JvPageCompsD11R.bpi;JvPluginD11R.bpi;JvPrintPreviewD11R.bpi;JvRuntimeDesignD11R.bpi;JvTimeFrameworkD11R.bpi;JvValidatorsD11R.bpi;JvWizardD11R.bpi;JvXPCtrlsD11R.bpi;VclSmp.bpi</PackageImports>
     <BCC_wpar>false</BCC_wpar>
     <IncludePath>$(BDS)\include;$(BDS)\include\dinkumware;$(BDS)\include\vcl;..\include;..\test;..</IncludePath>
     <ILINK_LibraryPath>$(BDS)\lib;$(BDS)\lib\obj;$(BDS)\lib\psdk;..\test</ILINK_LibraryPath>
     <Multithreaded>true</Multithreaded>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Cfg_1)'!=''">
-    <DCC_Optimize>false</DCC_Optimize>
     <BCC_OptimizeForSpeed>false</BCC_OptimizeForSpeed>
-    <Defines>_DEBUG;$(Defines)</Defines>
+    <DCC_Optimize>false</DCC_Optimize>
     <DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
+    <Defines>_DEBUG;$(Defines)</Defines>
     <ILINK_FullDebugInfo>true</ILINK_FullDebugInfo>
     <BCC_InlineFunctionExpansion>false</BCC_InlineFunctionExpansion>
     <ILINK_DisableIncrementalLinking>true</ILINK_DisableIncrementalLinking>
@@ -48,8 +48,8 @@
     <IntermediateOutputDir>Debug</IntermediateOutputDir>
     <TASM_DisplaySourceLines>true</TASM_DisplaySourceLines>
     <BCC_StackFrames>true</BCC_StackFrames>
-    <ILINK_LibraryPath>$(BDS)\lib\debug;$(ILINK_LibraryPath)</ILINK_LibraryPath>
     <BCC_DisableOptimizations>true</BCC_DisableOptimizations>
+    <ILINK_LibraryPath>$(BDS)\lib\debug;$(ILINK_LibraryPath)</ILINK_LibraryPath>
     <TASM_Debugging>Full</TASM_Debugging>
     <BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
   </PropertyGroup>
