@@ -23,15 +23,6 @@
   <Target Name="gtest:Make">
     <MSBuild Projects="gtest.cbproj" Targets="Make" />
   </Target>
-  <Target Name="gtest_unittest">
-    <MSBuild Projects="gtest_unittest.cbproj" Targets="" />
-  </Target>
-  <Target Name="gtest_unittest:Clean">
-    <MSBuild Projects="gtest_unittest.cbproj" Targets="Clean" />
-  </Target>
-  <Target Name="gtest_unittest:Make">
-    <MSBuild Projects="gtest_unittest.cbproj" Targets="Make" />
-  </Target>
   <Target Name="gtest_main">
     <MSBuild Projects="gtest_main.cbproj" Targets="" />
   </Target>
@@ -41,14 +32,23 @@
   <Target Name="gtest_main:Make">
     <MSBuild Projects="gtest_main.cbproj" Targets="Make" />
   </Target>
+  <Target Name="gtest_unittest">
+    <MSBuild Projects="gtest_unittest.cbproj" Targets="" />
+  </Target>
+  <Target Name="gtest_unittest:Clean">
+    <MSBuild Projects="gtest_unittest.cbproj" Targets="Clean" />
+  </Target>
+  <Target Name="gtest_unittest:Make">
+    <MSBuild Projects="gtest_unittest.cbproj" Targets="Make" />
+  </Target>
   <Target Name="Build">
-    <CallTarget Targets="gtest;gtest_unittest;gtest_main" />
+    <CallTarget Targets="gtest;gtest_main;gtest_unittest" />
   </Target>
   <Target Name="Clean">
-    <CallTarget Targets="gtest:Clean;gtest_unittest:Clean;gtest_main:Clean" />
+    <CallTarget Targets="gtest:Clean;gtest_main:Clean;gtest_unittest:Clean" />
   </Target>
   <Target Name="Make">
-    <CallTarget Targets="gtest:Make;gtest_unittest:Make;gtest_main:Make" />
+    <CallTarget Targets="gtest:Make;gtest_main:Make;gtest_unittest:Make" />
   </Target>
   <Import Condition="Exists('$(MSBuildBinPath)\Borland.Group.Targets')" Project="$(MSBuildBinPath)\Borland.Group.Targets" />
 </Project>

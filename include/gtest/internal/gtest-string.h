@@ -41,6 +41,11 @@
 #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_STRING_H_
 #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_STRING_H_
 
+#ifdef __BORLANDC__
+// string.h is not guaranteed to provide strcpy on C++ Builder.
+#include <mem.h>
+#endif
+
 #include <string.h>
 #include <gtest/internal/gtest-port.h>
 
