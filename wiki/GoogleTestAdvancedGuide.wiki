@@ -127,7 +127,7 @@ c is 10
 
 _Availability_: Linux, Windows, Mac
 
-=== Using a Funciton That Returns an !AssertionResult === 
+=== Using a Function That Returns an !AssertionResult === 
 
 While `EXPECT_PRED*()` and friends are handy for a quick job, the
 syntax is not satisfactory: you have to use different macros for
@@ -1599,7 +1599,7 @@ To use the event listener you have defined, add an instance of it to
 the Google Test event listener list (represented by class
 [http://code.google.com/p/googletest/source/browse/trunk/include/gtest/gtest.h#929 TestEventListeners]
 - note the "s" at the end of the name) in your
-`main()` funciton, before calling `RUN_ALL_TESTS()`:
+`main()` function, before calling `RUN_ALL_TESTS()`:
 {{{
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
