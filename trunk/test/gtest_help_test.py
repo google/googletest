@@ -51,10 +51,14 @@ FLAG_PREFIX = '--gtest_'
 CATCH_EXCEPTIONS_FLAG = FLAG_PREFIX + 'catch_exceptions'
 DEATH_TEST_STYLE_FLAG = FLAG_PREFIX + 'death_test_style'
 UNKNOWN_FLAG = FLAG_PREFIX + 'unknown_flag_for_testing'
-INCORRECT_FLAG_VARIANTS = [re.sub('^--', '-', DEATH_TEST_STYLE_FLAG),
-                           re.sub('^--', '/', DEATH_TEST_STYLE_FLAG),
-                           re.sub('_', '-', DEATH_TEST_STYLE_FLAG)]
+LIST_TESTS_FLAG = FLAG_PREFIX + 'list_tests'
+INCORRECT_FLAG_VARIANTS = [re.sub('^--', '-', LIST_TESTS_FLAG),
+                           re.sub('^--', '/', LIST_TESTS_FLAG),
+                           re.sub('_', '-', LIST_TESTS_FLAG)]
 INTERNAL_FLAG_FOR_TESTING = FLAG_PREFIX + 'internal_flag_for_testing'
+
+SUPPORTS_DEATH_TESTS = "DeathTest" in gtest_test_utils.Subprocess(
+    [PROGRAM_PATH, LIST_TESTS_FLAG]).output
 
 # The help message must match this regex.
 HELP_REGEX = re.compile(
@@ -107,10 +111,13 @@ class GTestHelpTest(gtest_test_utils.TestCase):
     self.assert_(HELP_REGEX.search(output), output)
     if IS_WINDOWS:
       self.assert_(CATCH_EXCEPTIONS_FLAG in output, output)
-      self.assert_(DEATH_TEST_STYLE_FLAG not in output, output)
     else:
       self.assert_(CATCH_EXCEPTIONS_FLAG not in output, output)
+
+    if SUPPORTS_DEATH_TESTS and not IS_WINDOWS:
       self.assert_(DEATH_TEST_STYLE_FLAG in output, output)
+    else:
+      self.assert_(DEATH_TEST_STYLE_FLAG not in output, output)
 
   def TestNonHelpFlag(self, flag):
     """Verifies correct behavior when no help flag is specified.
