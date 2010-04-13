@@ -1,7 +1,5 @@
 # Automake file
 
-# TODO(chandlerc@google.com): automate the generation of *.h from *.h.pump.
-
 # Nonstandard package files for distribution
 EXTRA_DIST = \
   CHANGES \
@@ -16,8 +14,9 @@ EXTRA_DIST = \
   scripts/pump.py \
   scripts/test/Makefile
 
-# gtest source files that we don't compile directly.
-EXTRA_DIST += \
+# gtest source files that we don't compile directly.  They are
+# #included by gtest-all.cc.
+GTEST_SRC = \
   src/gtest.cc \
   src/gtest-death-test.cc \
   src/gtest-filepath.cc \
@@ -25,6 +24,8 @@ EXTRA_DIST += \
   src/gtest-port.cc \
   src/gtest-test-part.cc \
   src/gtest-typed-test.cc
+
+EXTRA_DIST += $(GTEST_SRC)
 
 # Sample files that we don't compile.
 EXTRA_DIST += \
@@ -154,11 +155,6 @@ EXTRA_DIST += \
   codegear/gtest_unittest.cbproj \
   codegear/gtest.groupproj
 
-# TODO(wan@google.com): integrate scripts/gen_gtest_pred_impl.py into
-#   the build system such that a user can specify the maximum predicate
-#   arity here and have the script automatically generate the
-#   corresponding .h and .cc files.
-
 # Scripts and utilities
 bin_SCRIPTS = scripts/gtest-config
 CLEANFILES = $(bin_SCRIPTS)
@@ -254,35 +250,35 @@ test_gtest_all_test_SOURCES = test/gtest_all_test.cc
 test_gtest_all_test_LDADD = lib/libgtest_main.la
 
 # Tests that fused gtest files compile and work.
-TESTS += test/gtest_fused_test
-check_PROGRAMS += test/gtest_fused_test
-test_gtest_fused_test_SOURCES = fused-src/gtest/gtest-all.cc \
-                                fused-src/gtest/gtest_main.cc \
-                                fused-src/gtest/gtest.h \
+FUSED_GTEST_SRC = \
+  fused-src/gtest/gtest-all.cc \
+  fused-src/gtest/gtest_main.cc \
+  fused-src/gtest/gtest.h
+
+TESTS += test/fused_gtest_test
+check_PROGRAMS += test/fused_gtest_test
+test_fused_gtest_test_SOURCES = $(FUSED_GTEST_SRC) \
                                 samples/sample1.cc samples/sample1_unittest.cc
-test_gtest_fused_test_CPPFLAGS = -I"$(srcdir)/fused-src"
+test_fused_gtest_test_CPPFLAGS = -I"$(srcdir)/fused-src"
 
 # Build rules for putting fused Google Test files into the distribution
 # package. The user can also create those files by manually running
 # scripts/fuse_gtest_files.py.
-$(srcdir)/fused-src/gtest/gtest-all.cc: fused-gtest-internal
+$(test_fused_gtest_test_SOURCES): fused-gtest
 
-$(srcdir)/fused-src/gtest/gtest.h: fused-gtest-internal
-
-fused-gtest-internal: $(pkginclude_HEADERS) $(pkginclude_internal_HEADERS) \
-                      $(lib_libgtest_la_SOURCES) \
-                      scripts/fuse_gtest_files.py
-	mkdir -p "$(srcdir)/fused-src/gtest"
+fused-gtest: $(pkginclude_HEADERS) $(pkginclude_internal_HEADERS) \
+             $(GTEST_SRC) src/gtest-all.cc src/gtest_main.cc \
+             scripts/fuse_gtest_files.py
+	mkdir -p "$(srcdir)/fused-src"
 	chmod -R u+w "$(srcdir)/fused-src"
 	rm -f "$(srcdir)/fused-src/gtest/gtest-all.cc"
 	rm -f "$(srcdir)/fused-src/gtest/gtest.h"
 	"$(srcdir)/scripts/fuse_gtest_files.py" "$(srcdir)/fused-src"
-
-$(srcdir)/fused-src/gtest/gtest_main.cc: src/gtest_main.cc
-	mkdir -p "$(srcdir)/fused-src/gtest"
-	chmod -R u+w "$(srcdir)/fused-src"
-	cp -f "$(srcdir)/src/gtest_main.cc" "$(srcdir)/fused-src/gtest"
+	cp -f "$(srcdir)/src/gtest_main.cc" "$(srcdir)/fused-src/gtest/"
 
 maintainer-clean-local:
-	chmod -R u+w "$(srcdir)/fused-src"
-	rm -rf "$(srcdir)/fused-src/gtest"
+	rm -rf "$(srcdir)/fused-src"
+
+# Death tests may produce core dumps in the build directory. In case
+# this happens, clean them to keep distcleancheck happy.
+CLEANFILES += core
