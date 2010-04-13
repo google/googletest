@@ -6703,3 +6703,16 @@ TEST(EventListenerTest, RemovingDefaultXmlGeneratorWorks) {
   EXPECT_FALSE(is_destroyed);
   delete listener;
 }
+
+// Sanity tests to ensure that the alternative, verbose spellings of
+// some of the macros work.  We don't test them thoroughly as that
+// would be quite involved.  Since their implementations are
+// straightforward, and they are rarely used, we'll just rely on the
+// users to tell us when they are broken.
+GTEST_TEST(AlternativeNameTest, Works) {  // GTEST_TEST is the same as TEST.
+  GTEST_SUCCEED() << "OK";  // GTEST_SUCCEED is the same as SUCCEED.
+
+  // GTEST_FAIL is the same as FAIL.
+  EXPECT_FATAL_FAILURE(GTEST_FAIL() << "An expected failure",
+                       "An expected failure");
+}

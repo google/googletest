@@ -1651,10 +1651,22 @@ const T* TestWithParam<T>::parameter_ = NULL;
 #define ADD_FAILURE() GTEST_NONFATAL_FAILURE_("Failed")
 
 // Generates a fatal failure with a generic message.
-#define FAIL() GTEST_FATAL_FAILURE_("Failed")
+#define GTEST_FAIL() GTEST_FATAL_FAILURE_("Failed")
+
+// Define this macro to 1 to omit the definition of FAIL(), which is a
+// generic name and clashes with some other libraries.
+#if !GTEST_DONT_DEFINE_FAIL
+#define FAIL() GTEST_FAIL()
+#endif
 
 // Generates a success with a generic message.
-#define SUCCEED() GTEST_SUCCESS_("Succeeded")
+#define GTEST_SUCCEED() GTEST_SUCCESS_("Succeeded")
+
+// Define this macro to 1 to omit the definition of SUCCEED(), which
+// is a generic name and clashes with some other libraries.
+#if !GTEST_DONT_DEFINE_SUCCEED
+#define SUCCEED() GTEST_SUCCEED()
+#endif
 
 // Macros for testing exceptions.
 //
@@ -1986,10 +1998,15 @@ bool StaticAssertTypeEq() {
 // code.  GetTestTypeId() is guaranteed to always return the same
 // value, as it always calls GetTypeId<>() from the Google Test
 // framework.
-#define TEST(test_case_name, test_name)\
+#define GTEST_TEST(test_case_name, test_name)\
   GTEST_TEST_(test_case_name, test_name, \
               ::testing::Test, ::testing::internal::GetTestTypeId())
 
+// Define this macro to 1 to omit the definition of TEST(), which
+// is a generic name and clashes with some other libraries.
+#if !GTEST_DONT_DEFINE_TEST
+#define TEST(test_case_name, test_name) GTEST_TEST(test_case_name, test_name)
+#endif
 
 // Defines a test that uses a test fixture.
 //
