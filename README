@@ -1,13 +1,16 @@
 Google C++ Mocking Framework
 ============================
+
 http://code.google.com/p/googlemock/
 
 Overview
 --------
-Google's framework for writing and using C++ mock classes on Linux,
-Mac OS X, and Windows.  Inspired by jMock, EasyMock, and Hamcrest, and
-designed with C++'s specifics in mind, it can help you derive better
-designs of your system and write better tests.
+
+Google's framework for writing and using C++ mock classes on a variety
+of platforms (Linux, Mac OS X, Windows, Windows CE, Symbian, etc).
+Inspired by jMock, EasyMock, and Hamcrest, and designed with C++'s
+specifics in mind, it can help you derive better designs of your
+system and write better tests.
 
 Google Mock:
 
@@ -25,22 +28,23 @@ Google Mock:
 - does not use exceptions, and
 - is easy to learn and use.
 
-Please see the project page above for more information as well as mailing lists
-for questions, discussions, and development. There is also an IRC channel on
-OFTC (irc.oftc.net) #gtest available. Please join us!
+Please see the project page above for more information as well as the
+mailing list for questions, discussions, and development.  There is
+also an IRC channel on OFTC (irc.oftc.net) #gtest available.  Please
+join us!
 
 Please note that code under scripts/generator/ is from the cppclean
 project (http://code.google.com/p/cppclean/) and under the Apache
 License, which is different from Google Mock's license.
 
-Requirements
-------------
-Google Mock is not a testing framework itself. Instead, it needs a
-testing framework for writing tests. It works with Google Test
-(http://code.google.com/p/googletest/) out of the box. You can use
-either the copy of Google Test that comes with Google Mock, or a
-compatible version you already have.  This version of Google Mock
-requires Google Test 1.4.0.
+Requirements for End Users
+--------------------------
+
+Google Mock is implemented on top of the Google Test C++ testing
+framework (http://code.google.com/p/googletest/), and includes the
+latter as part of the SVN repositary and distribution package.  You
+must use the bundled version of Google Test when using Google Mock, or
+you may get compiler/linker errors.
 
 You can also easily configure Google Mock to work with another testing
 framework of your choice; although it will still need Google Test as
@@ -52,90 +56,186 @@ Google Mock depends on advanced C++ features and thus requires a more
 modern compiler.  The following are needed to use Google Mock:
 
 ### Linux Requirements ###
+
 These are the base requirements to build and use Google Mock from a source
 package (as described below):
+
   * GNU-compatible Make or "gmake"
   * POSIX-standard shell
   * POSIX(-2) Regular Expressions (regex.h)
-  * gcc 3.4 or newer.
-
-Furthermore, if you are building Google Mock from a VCS Checkout (also
-described below), there are further requirements:
-  * Automake version 1.9 or newer
-  * Autoconf version 2.59 or newer
-  * Libtool / Libtoolize
-  * Python version 2.3 or newer
+  * C++98-standard-compliant compiler (e.g. GCC 3.4 or newer)
 
 ### Windows Requirements ###
+
   * Microsoft Visual C++ 8.0 SP1 or newer
 
 ### Mac OS X Requirements ###
+
   * Mac OS X 10.4 Tiger or newer
   * Developer Tools Installed
 
+Requirements for Contributors
+-----------------------------
+
+We welcome patches.  If you plan to contribute a patch, you need to
+build Google Mock and its own tests from an SVN checkout (described
+below), which has further requirements:
+
+  * Automake version 1.9 or newer
+  * Autoconf version 2.59 or newer
+  * Libtool / Libtoolize
+  * Python version 2.3 or newer (for running some of the tests and
+    re-generating certain source files from templates)
+
 Getting the Source
 ------------------
-There are two primary ways of getting Google Mock's source code: you can
-download a source release in your preferred archive format, or directly check
-out the source from a Version Control System (VCS, we use Google Code's
-Subversion hosting). The VCS checkout requires a few extra steps and some extra
-software packages on your system, but lets you track development, and make
-patches to contribute much more easily, so we highly encourage it.
 
-### VCS Checkout: ###
-The first step is to select whether you want to check out the main line of
-development on Google Mock, or one of the released branches. The former will be
-much more active and have the latest features, but the latter provides much
-more stability and predictability. Choose whichever fits your needs best, and
-proceed with the following Subversion commands:
+There are two primary ways of getting Google Mock's source code: you
+can download a stable source release in your preferred archive format,
+or directly check out the source from our Subversion (SVN) repositary.
+The SVN checkout requires a few extra steps and some extra software
+packages on your system, but lets you track development and make
+patches much more easily, so we highly encourage it.
 
-  svn checkout http://googlemock.googlecode.com/svn/trunk/ gmock-svn
+### Source Package ###
 
-or for a release version X.Y.*'s branch:
+Google Mock is released in versioned source packages which can be
+downloaded from the download page [1].  Several different archive
+formats are provided, but the only difference is the tools needed to
+extract their contents, and the size of the resulting file.  Download
+whichever you are most comfortable with.
 
-  svn checkout http://googlemock.googlecode.com/svn/branches/release-X.Y/ \
-    gmock-X.Y-svn
+  [1] http://code.google.com/p/googlemock/downloads/list
 
-Next you will need to prepare the GNU Autotools build system, if you
-are using Linux or Mac OS X. Enter the target directory of the
-checkout command you used ('gmock-svn' or 'gmock-X.Y-svn' above) and
-proceed with the following command:
-
-  autoreconf -fvi
-
-Once you have completed this step, you are ready to build the library. Note
-that you should only need to complete this step once. The subsequent `make'
-invocations will automatically re-generate the bits of the build system that
-need to be changed.
-
-If your system uses older versions of the autotools, the above command will
-fail. You may need to explicitly specify a version to use. For instance, if you
-have both GNU Automake 1.4 and 1.9 installed and `automake' would invoke the
-1.4, use instead:
-
-  AUTOMAKE=automake-1.9 ACLOCAL=aclocal-1.9 autoreconf -fvi
-
-Make sure you're using the same version of automake and aclocal.
-
-### Source Package: ###
-Google Mock is also released in source packages which can be downloaded from
-its Google Code download page[1]. Several different archive formats are
-provided, but the only difference is the tools needed to extract their
-contents, and the size of the resulting file. Download whichever you are most
-comfortable with.
-
-  [1] Google Mock Downloads: http://code.google.com/p/googlemock/downloads/list
-
-Once downloaded expand the archive using whichever tools you prefer for that
-type. This will always result in a new directory with the name "gmock-X.Y.Z"
-which contains all of the source code. Here are some examples in Linux:
+Once downloaded expand the archive using whichever tools you prefer
+for that type.  This will always result in a new directory with the
+name "gmock-X.Y.Z" which contains all of the source code.  Here are
+some examples on Linux:
 
   tar -xvzf gmock-X.Y.Z.tar.gz
   tar -xvjf gmock-X.Y.Z.tar.bz2
   unzip gmock-X.Y.Z.zip
 
-Choosing a TR1 Tuple Library
-----------------------------
+### SVN Checkout ###
+
+To check out the main branch (also known as the "trunk") of Google
+Mock, run the following Subversion command:
+
+  svn checkout http://googlemock.googlecode.com/svn/trunk/ gmock-svn
+
+If you are using a *nix system and plan to use the GNU Autotools build
+system to build Google Mock (described below), you'll need to
+configure it now.  Otherwise you are done with getting the source
+files.
+
+To prepare the Autotools build system, enter the target directory of
+the checkout command you used ('gmock-svn') and proceed with the
+following command:
+
+  autoreconf -fvi
+
+Once you have completed this step, you are ready to build the library.
+Note that you should only need to complete this step once.  The
+subsequent 'make' invocations will automatically re-generate the bits
+of the build system that need to be changed.
+
+If your system uses older versions of the autotools, the above command
+will fail.  You may need to explicitly specify a version to use.  For
+instance, if you have both GNU Automake 1.4 and 1.9 installed and
+'automake' would invoke the 1.4, use instead:
+
+  AUTOMAKE=automake-1.9 ACLOCAL=aclocal-1.9 autoreconf -fvi
+
+Make sure you're using the same version of automake and aclocal.
+
+Setting up the Build
+--------------------
+
+To build Google Mock and your tests that use it, you need to tell your
+build system where to find its headers and source files.  The exact
+way to do it depends on which build system you use, and is usually
+straightforward.
+
+### Generic Build Instructions ###
+
+This section shows how you can integrate Google Mock into your
+existing build system.
+
+Suppose you put Google Mock in directory ${GMOCK_DIR} and Google Test
+in ${GTEST_DIR} (the latter is ${GMOCK_DIR}/gtest by default).  To
+build Google Mock, create a library build target (or a project as
+called by Visual Studio and Xcode) to compile
+
+  ${GTEST_DIR}/src/gtest-all.cc and ${GMOCK_DIR}/src/gmock-all.cc
+
+with
+
+  ${GTEST_DIR}/include, ${GTEST_DIR}, ${GMOCK_DIR}/include, and ${GMOCK_DIR}
+
+in the header search path.  Assuming a Linux-like system and gcc,
+something like the following will do:
+
+  g++ -I${GTEST_DIR}/include -I${GTEST_DIR} -I${GMOCK_DIR}/include \
+      -I${GMOCK_DIR} -c ${GTEST_DIR}/src/gtest-all.cc
+  g++ -I${GTEST_DIR}/include -I${GTEST_DIR} -I${GMOCK_DIR}/include \
+      -I${GMOCK_DIR} -c ${GMOCK_DIR}/src/gmock-all.cc
+  ar -rv libgmock.a gtest-all.o gmock-all.o
+
+Next, you should compile your test source file with
+${GTEST_DIR}/include and ${GMOCK_DIR}/include in the header search
+path, and link it with gmock and any other necessary libraries:
+
+  g++ -I${GTEST_DIR}/include -I${GMOCK_DIR}/include \
+      path/to/your_test.cc libgmock.a -o your_test
+
+As an example, the make/ directory contains a Makefile that you can
+use to build Google Mock on systems where GNU make is available
+(e.g. Linux, Mac OS X, and Cygwin).  It doesn't try to build Google
+Mock's own tests.  Instead, it just builds the Google Mock library and
+a sample test.  You can use it as a starting point for your own build
+script.
+
+If the default settings are correct for your environment, the
+following commands should succeed:
+
+  cd ${GMOCK_DIR}/make
+  make
+  ./gmock_test
+
+If you see errors, try to tweak the contents of make/Makefile to make
+them go away.  There are instructions in make/Makefile on how to do
+it.
+
+### Windows ###
+
+The msvc/ directory contains VC++ 2005 projects for building Google
+Mock and selected tests.
+
+Open msvc/gmock.sln and build the library and tests.  If you want to
+create your own project to use with Google Mock, you'll have to
+configure it to use the gmock_config propety sheet.  For that:
+
+ * Open the Property Manager window (View | Other Windows | Property Manager)
+ * Right-click on your project and select "Add Existing Property Sheet..."
+ * Navigate to gmock_config.vsprops and select it.
+ * In Project Properties | Configuration Properties | General | Additional
+   Include Directories, type <path to Google Mock>/include.
+
+Tweaking Google Mock
+--------------------
+
+Google Mock can be used in diverse environments.  The default
+configuration may not work (or may not work well) out of the box in
+some environments.  However, you can easily tweak Google Mock by
+defining control macros on the compiler command line.  Generally,
+these macros are named like GTEST_XYZ and you define them to either 1
+or 0 to enable or disable a certain feature.
+
+We list the most frequently used macros below.  For a complete list,
+see file ${GTEST_DIR}/include/gtest/internal/gtest-port.h.
+
+### Choosing a TR1 Tuple Library ###
+
 Google Mock uses the C++ Technical Report 1 (TR1) tuple library
 heavily.  Unfortunately TR1 tuple is not yet widely available with all
 compilers.  The good news is that Google Test 1.4.0+ implements a
@@ -146,104 +246,85 @@ provide TR1 tuple.
 Usually you don't need to care about which tuple library Google Test
 and Google Mock use.  However, if your project already uses TR1 tuple,
 you need to tell Google Test and Google Mock to use the same TR1 tuple
-library the rest of your project uses (this requirement is new in
-Google Test 1.4.0 and Google Mock 1.2.0, so you may need to take care
-of it when upgrading from an earlier version), or the two tuple
+library the rest of your project uses, or the two tuple
 implementations will clash.  To do that, add
 
   -DGTEST_USE_OWN_TR1_TUPLE=0
 
 to the compiler flags while compiling Google Test, Google Mock, and
-your tests.
+your tests.  If you want to force Google Test and Google Mock to use
+their own tuple library, just add
+
+  -DGTEST_USE_OWN_TR1_TUPLE=1
+
+to the compiler flags instead.
 
 If you want to use Boost's TR1 tuple library with Google Mock, please
 refer to the Boost website (http://www.boost.org/) for how to obtain
 it and set it up.
 
-Building the Source
--------------------
-### Linux and Mac OS X (without Xcode) ###
-There are two primary options for building the source at this point: build it
-inside the source code tree, or in a separate directory. We recommend building
-in a separate directory as that tends to produce both more consistent results
-and be easier to clean up should anything go wrong, but both patterns are
-supported. The only hard restriction is that while the build directory can be
-a subdirectory of the source directory, the opposite is not possible and will
-result in errors. Once you have selected where you wish to build Google Mock,
-create the directory if necessary, and enter it. The following steps apply for
-either approach by simply substituting the shell variable SRCDIR with "." for
-building inside the source directory, and the relative path to the source
-directory otherwise.
+### Tweaking Google Test ###
 
-  ${SRCDIR}/configure  # Standard GNU configure script, --help for more info
+Most of Google Test's control macros apply to Google Mock as well.
+Please see file ${GTEST_DIR}/README for how to tweak them.
 
-Once you have successfully configured Google Mock, the build steps are standard
-for GNU-style OSS packages.
+Upgrading from an Earlier Version
+---------------------------------
 
-  make  # Standard makefile following GNU conventions
-  make check  # Builds and runs all tests - all should pass
+We strive to keep Google Mock releases backward compatible.
+Sometimes, though, we have to make some breaking changes for the
+users' long-term benefits.  This section describes what you'll need to
+do if you are upgrading from an earlier version of Google Mock.
+
+### Upgrading from 1.2.0 or Earlier ###
+
+You may need to explicitly enable or disable Google Test's own TR1
+tuple library.  See the instructions in section "Choosing a TR1 Tuple
+Library".
+
+### Upgrading from 1.4.0 or Earlier ###
+
+On platforms where the pthread library is available, Google Test and
+Google Mock use it in order to be thread-safe.  For this to work, you
+may need to tweak your compiler and/or linker flags.  Please see the
+"Multi-threaded Tests" section in file ${GTEST_DIR}/README for what
+you may need to do.
+
+If you have custom matchers defined using MatcherInterface or
+MakePolymorphicMatcher(), you'll need to update their definitions to
+use the new matcher API [2].  Matchers defined using MATCHER() or
+MATCHER_P*() aren't affected.
+
+  [2] http://code.google.com/p/googlemock/wiki/CookBook#Writing_New_Monomorphic_Matchers,
+      http://code.google.com/p/googlemock/wiki/CookBook#Writing_New_Polymorphic_Matchers
+
+Developing Google Mock
+----------------------
+
+This section discusses how to make your own changes to Google Mock.
+
+### Testing Google Mock Itself ###
+
+To make sure your changes work as intended and don't break existing
+functionality, you'll want to compile and run Google Test's own tests.
+For that you'll need Autotools.  First, make sure you have followed
+the instructions in section "SVN Checkout" to configure Google Mock.
+Then, create a build output directory and enter it.  Next,
+
+  ${GMOCK_DIR}/configure  # Standard GNU configure script, --help for more info
+
+Once you have successfully configured Google Mock, the build steps are
+standard for GNU-style OSS packages.
+
+  make        # Standard makefile following GNU conventions
+  make check  # Builds and runs all tests - all should pass.
 
 Note that when building your project against Google Mock, you are building
-against Google Test as well. There is no need to configure Google Test
+against Google Test as well.  There is no need to configure Google Test
 separately.
 
-### Windows ###
-The msvc/ directory contains VC++ 2005 projects for building Google
-Mock and selected tests.
+### Regenerating Source Files ###
 
-If you want to use a version of Google Test other then the one bundled with
-Google Mock, change the value of the GTestDir macro in gmock_config.vsprop
-to point to the new location.
-
-Open msvc/gmock.sln and build the library and tests. If you want to
-create your own project to use with Google Mock, you'll have to
-configure it to use the gmock_config propety sheet. For that:
- * Open the Property Manager window (View | Other Windows | Property Manager)
- * Right-click on your project and select "Add Existing Property Sheet..."
- * Navigate to gmock_config.vsprops and select it.
- * In Project Properties | Configuration Properties | General | Additional
-   Include Directories, type <path to Google Mock>/include.
-
-TODO(wan@google.com): update the .vsprops and .vcproj files such that the
-last step is unnecessary.
-
-### Using GNU Make ###
-The make/ directory contains a Makefile that you can use to build
-Google Mock on systems where GNU make is available (e.g. Linux and Mac
-OS X).  It doesn't try to build Google Mock's own tests.  Instead, it
-just builds the Google Mock libraries and some sample tests.  You can
-use it as a starting point for your own Makefile.
-
-If the default settings are correct for your environment, the
-following commands should succeed:
-
-  cd ${SRCDIR}/make
-  make
-  ./gmock_test
-
-If you see errors, try to tweak the contents of make/Makefile to make
-them go away.  There are instructions in make/Makefile on how to do
-it.
-
-### Using Your Own Build System ###
-If none of the build solutions we provide works for you, or if you
-prefer your own build system, you just need to compile
-${GTEST_SRCDIR}/src/gtest-all.cc (where GTEST_SRCDIR is the root of
-the Google Test source tree) and src/gmock-all.cc into a library and
-link your tests with it.  Assuming a Linux-like system and gcc,
-something like the following will do:
-
-  cd ${SRCDIR}
-  g++ -I. -I./include -I${GTEST_SRCDIR} -I${GTEST_SRCDIR}/include \
-    -c {GTEST_SRCDIR}/src/gtest-all.cc
-  g++ -I. -I./include -I${GTEST_SRCDIR} -I${GTEST_SRCDIR}/include \
-    -c src/gmock-all.cc
-  ar -rv libgmock.a gtest-all.o gmock-all.o
-  g++ -I. -I./include -I${GTEST_SRCDIR} -I${GTEST_SRCDIR}/include \
-    path/to/your_test.cc libgmock.a -o your_test
-
-Regenerating Source Files
--------------------------
 Some of Google Mock's source files are generated from templates (not
 in the C++ sense) using a script.  A template file is named FOO.pump,
 where FOO is the name of the file it will generate.  For example, the
@@ -251,12 +332,21 @@ file include/gmock/gmock-generated-actions.h.pump is used to generate
 gmock-generated-actions.h in the same directory.
 
 Normally you don't need to worry about regenerating the source files,
-unless you need to modify them (e.g. if you are working on a patch for
-Google Mock).  In that case, you should modify the corresponding .pump
-files instead and run the 'pump' script (for Pump is Useful for Meta
-Programming) to regenerate them.  We are still working on releasing
-the script and its documentation.  If you need it now, please email
-googlemock@googlegroups.com such that we know to make it happen
-sooner.
+unless you need to modify them.  In that case, you should modify the
+corresponding .pump files instead and run the 'pump' script (for Pump
+is Useful for Meta Programming) to regenerate them.  You can find
+pump.py in the ${GTEST_DIR}/scripts/ directory.  Read the Pump manual
+[3] for how to use it.
+
+  [3] http://code.google.com/p/googletest/wiki/PumpManual.
+
+### Contributing a Patch ###
+
+We welcome patches.  Please read the Google Mock developer's guide [4]
+for how you can contribute.  In particular, make sure you have signed
+the Contributor License Agreement, or we won't be able to accept the
+patch.
+
+  [4] http://code.google.com/p/googlemock/wiki/DevGuide
 
 Happy testing!

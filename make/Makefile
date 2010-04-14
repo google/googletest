@@ -27,15 +27,14 @@ GMOCK_DIR = ..
 USER_DIR = ../test
 
 # Flags passed to the preprocessor.
-CPPFLAGS += -I$(GMOCK_DIR) -I$(GMOCK_DIR)/include \
-            -I$(GTEST_DIR) -I$(GTEST_DIR)/include
+CPPFLAGS += -I$(GTEST_DIR)/include -I$(GMOCK_DIR)/include
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g -Wall -Wextra
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS = gmock_link_test gmock_test
+TESTS = gmock_test
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -73,13 +72,16 @@ GMOCK_SRCS_ = $(GMOCK_DIR)/src/*.cc $(GMOCK_HEADERS)
 # Google Test compile fast and for ordinary users their source rarely
 # changes.
 gtest-all.o : $(GTEST_SRCS_)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(GTEST_DIR)/src/gtest-all.cc
+	$(CXX) $(CPPFLAGS) -I$(GTEST_DIR) -I$(GMOCK_DIR) $(CXXFLAGS) \
+            -c $(GTEST_DIR)/src/gtest-all.cc
 
 gmock-all.o : $(GMOCK_SRCS_)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(GMOCK_DIR)/src/gmock-all.cc
+	$(CXX) $(CPPFLAGS) -I$(GTEST_DIR) -I$(GMOCK_DIR) $(CXXFLAGS) \
+            -c $(GMOCK_DIR)/src/gmock-all.cc
 
 gmock_main.o : $(GMOCK_SRCS_)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(GMOCK_DIR)/src/gmock_main.cc
+	$(CXX) $(CPPFLAGS) -I$(GTEST_DIR) -I$(GMOCK_DIR) $(CXXFLAGS) \
+            -c $(GMOCK_DIR)/src/gmock_main.cc
 
 gmock.a : gmock-all.o gtest-all.o
 	$(AR) $(ARFLAGS) $@ $^
@@ -89,21 +91,8 @@ gmock_main.a : gmock-all.o gtest-all.o gmock_main.o
 
 # Builds a sample test.
 
-gmock_link_test.o : $(USER_DIR)/gmock_link_test.cc \
-                    $(USER_DIR)/gmock_link_test.h $(GMOCK_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/gmock_link_test.cc
-
-gmock_link2_test.o : $(USER_DIR)/gmock_link2_test.cc \
-                     $(USER_DIR)/gmock_link_test.h $(GMOCK_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/gmock_link2_test.cc
-
-gmock_link_test : gmock_link_test.o gmock_link2_test.o gmock_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@
-
-# Builds another sample test.
-
 gmock_test.o : $(USER_DIR)/gmock_test.cc $(GMOCK_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/gmock_test.cc
 
 gmock_test : gmock_test.o gmock_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
