@@ -1947,9 +1947,9 @@ class ContainerEqMatcher {
   GTEST_DISALLOW_ASSIGN_(ContainerEqMatcher);
 };
 
-// Implements Contains(element_matcher) for the given argument type Container.
+// Holds the logic common to ContainsMatcherImpl and EachMatcherImpl.
 template <typename Container>
-class ContainsMatcherImpl : public MatcherInterface<Container> {
+class QuantifierMatcherImpl : public MatcherInterface<Container> {
  public:
   typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container)) RawContainer;
   typedef StlContainerView<RawContainer> View;
@@ -1958,42 +1958,95 @@ class ContainsMatcherImpl : public MatcherInterface<Container> {
   typedef typename StlContainer::value_type Element;
 
   template <typename InnerMatcher>
-  explicit ContainsMatcherImpl(InnerMatcher inner_matcher)
+  explicit QuantifierMatcherImpl(InnerMatcher inner_matcher)
       : inner_matcher_(
-          testing::SafeMatcherCast<const Element&>(inner_matcher)) {}
+           testing::SafeMatcherCast<const Element&>(inner_matcher)) {}
 
-  // Describes what this matcher does.
-  virtual void DescribeTo(::std::ostream* os) const {
-    *os << "contains at least one element that ";
-    inner_matcher_.DescribeTo(os);
-  }
-
-  // Describes what the negation of this matcher does.
-  virtual void DescribeNegationTo(::std::ostream* os) const {
-    *os << "doesn't contain any element that ";
-    inner_matcher_.DescribeTo(os);
-  }
-
-  virtual bool MatchAndExplain(Container container,
-                               MatchResultListener* listener) const {
+  // Checks whether:
+  // * All elements in the container match, if all_elements_should_match.
+  // * Any element in the container matches, if !all_elements_should_match.
+  bool MatchAndExplainImpl(bool all_elements_should_match,
+                           Container container,
+                           MatchResultListener* listener) const {
     StlContainerReference stl_container = View::ConstReference(container);
     size_t i = 0;
     for (typename StlContainer::const_iterator it = stl_container.begin();
          it != stl_container.end(); ++it, ++i) {
       StringMatchResultListener inner_listener;
-      if (inner_matcher_.MatchAndExplain(*it, &inner_listener)) {
-        *listener << "whose element #" << i << " matches";
+      const bool matches = inner_matcher_.MatchAndExplain(*it, &inner_listener);
+
+      if (matches != all_elements_should_match) {
+        *listener << "whose element #" << i
+                  << (matches ? " matches" : " doesn't match");
         PrintIfNotEmpty(inner_listener.str(), listener->stream());
-        return true;
+        return !all_elements_should_match;
       }
     }
-    return false;
+    return all_elements_should_match;
+  }
+
+ protected:
+  const Matcher<const Element&> inner_matcher_;
+
+  GTEST_DISALLOW_ASSIGN_(QuantifierMatcherImpl);
+};
+
+// Implements Contains(element_matcher) for the given argument type Container.
+// Symmetric to EachMatcherImpl.
+template <typename Container>
+class ContainsMatcherImpl : public QuantifierMatcherImpl<Container> {
+ public:
+  template <typename InnerMatcher>
+  explicit ContainsMatcherImpl(InnerMatcher inner_matcher)
+      : QuantifierMatcherImpl<Container>(inner_matcher) {}
+
+  // Describes what this matcher does.
+  virtual void DescribeTo(::std::ostream* os) const {
+    *os << "contains at least one element that ";
+    this->inner_matcher_.DescribeTo(os);
+  }
+
+  virtual void DescribeNegationTo(::std::ostream* os) const {
+    *os << "doesn't contain any element that ";
+    this->inner_matcher_.DescribeTo(os);
+  }
+
+  virtual bool MatchAndExplain(Container container,
+                               MatchResultListener* listener) const {
+    return this->MatchAndExplainImpl(false, container, listener);
   }
 
  private:
-  const Matcher<const Element&> inner_matcher_;
-
   GTEST_DISALLOW_ASSIGN_(ContainsMatcherImpl);
+};
+
+// Implements Each(element_matcher) for the given argument type Container.
+// Symmetric to ContainsMatcherImpl.
+template <typename Container>
+class EachMatcherImpl : public QuantifierMatcherImpl<Container> {
+ public:
+  template <typename InnerMatcher>
+  explicit EachMatcherImpl(InnerMatcher inner_matcher)
+      : QuantifierMatcherImpl<Container>(inner_matcher) {}
+
+  // Describes what this matcher does.
+  virtual void DescribeTo(::std::ostream* os) const {
+    *os << "only contains elements that ";
+    this->inner_matcher_.DescribeTo(os);
+  }
+
+  virtual void DescribeNegationTo(::std::ostream* os) const {
+    *os << "contains some element that ";
+    this->inner_matcher_.DescribeNegationTo(os);
+  }
+
+  virtual bool MatchAndExplain(Container container,
+                               MatchResultListener* listener) const {
+    return this->MatchAndExplainImpl(true, container, listener);
+  }
+
+ private:
+  GTEST_DISALLOW_ASSIGN_(EachMatcherImpl);
 };
 
 // Implements polymorphic Contains(element_matcher).
@@ -2011,6 +2064,23 @@ class ContainsMatcher {
   const M inner_matcher_;
 
   GTEST_DISALLOW_ASSIGN_(ContainsMatcher);
+};
+
+// Implements polymorphic Each(element_matcher).
+template <typename M>
+class EachMatcher {
+ public:
+  explicit EachMatcher(M m) : inner_matcher_(m) {}
+
+  template <typename Container>
+  operator Matcher<Container>() const {
+    return MakeMatcher(new EachMatcherImpl<Container>(inner_matcher_));
+  }
+
+ private:
+  const M inner_matcher_;
+
+  GTEST_DISALLOW_ASSIGN_(EachMatcher);
 };
 
 // Implements Key(inner_matcher) for the given argument pair type.
@@ -2853,6 +2923,38 @@ inline PolymorphicMatcher<internal::ContainerEqMatcher<  // NOLINT
 template <typename M>
 inline internal::ContainsMatcher<M> Contains(M matcher) {
   return internal::ContainsMatcher<M>(matcher);
+}
+
+// Matches an STL-style container or a native array that contains only
+// elements matching the given value or matcher.
+//
+// Each(m) is semantically equivalent to Not(Contains(Not(m))). Only
+// the messages are different.
+//
+// Examples:
+//   ::std::set<int> page_ids;
+//   // Each(m) matches an empty container, regardless of what m is.
+//   EXPECT_THAT(page_ids, Each(Eq(1)));
+//   EXPECT_THAT(page_ids, Each(Eq(77)));
+//
+//   page_ids.insert(3);
+//   EXPECT_THAT(page_ids, Each(Gt(0)));
+//   EXPECT_THAT(page_ids, Not(Each(Gt(4))));
+//   page_ids.insert(1);
+//   EXPECT_THAT(page_ids, Not(Each(Lt(2))));
+//
+//   ::std::map<int, size_t> page_lengths;
+//   page_lengths[1] = 100;
+//   page_lengths[2] = 200;
+//   page_lengths[3] = 300;
+//   EXPECT_THAT(page_lengths, Not(Each(Pair(1, 100))));
+//   EXPECT_THAT(page_lengths, Each(Key(Le(3))));
+//
+//   const char* user_ids[] = { "joe", "mike", "tom" };
+//   EXPECT_THAT(user_ids, Not(Each(Eq(::std::string("tom")))));
+template <typename M>
+inline internal::EachMatcher<M> Each(M matcher) {
+  return internal::EachMatcher<M>(matcher);
 }
 
 // Key(inner_matcher) matches an std::pair whose 'first' field matches

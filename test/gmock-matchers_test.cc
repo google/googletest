@@ -65,8 +65,10 @@ using std::make_pair;
 using std::map;
 using std::multimap;
 using std::pair;
+using std::set;
 using std::stringstream;
 using std::tr1::make_tuple;
+using std::vector;
 using testing::A;
 using testing::AllArgs;
 using testing::AllOf;
@@ -363,20 +365,20 @@ TEST(MakeMatcherTest, ConstructsMatcherFromMatcherInterface) {
 
 // Tests that MakePolymorphicMatcher() can construct a polymorphic
 // matcher from its implementation using the old API.
-const int bar = 1;
+const int g_bar = 1;
 class ReferencesBarOrIsZeroImpl {
  public:
   template <typename T>
   bool MatchAndExplain(const T& x,
                        MatchResultListener* /* listener */) const {
     const void* p = &x;
-    return p == &bar || x == 0;
+    return p == &g_bar || x == 0;
   }
 
-  void DescribeTo(::std::ostream* os) const { *os << "bar or zero"; }
+  void DescribeTo(::std::ostream* os) const { *os << "g_bar or zero"; }
 
   void DescribeNegationTo(::std::ostream* os) const {
-    *os << "doesn't reference bar and is not zero";
+    *os << "doesn't reference g_bar and is not zero";
   }
 };
 
@@ -391,15 +393,15 @@ TEST(MakePolymorphicMatcherTest, ConstructsMatcherUsingOldAPI) {
   Matcher<const int&> m1 = ReferencesBarOrIsZero();
   EXPECT_TRUE(m1.Matches(0));
   // Verifies that the identity of a by-reference argument is preserved.
-  EXPECT_TRUE(m1.Matches(bar));
+  EXPECT_TRUE(m1.Matches(g_bar));
   EXPECT_FALSE(m1.Matches(1));
-  EXPECT_EQ("bar or zero", Describe(m1));
+  EXPECT_EQ("g_bar or zero", Describe(m1));
 
   // Using a polymorphic matcher to match a value type.
   Matcher<double> m2 = ReferencesBarOrIsZero();
   EXPECT_TRUE(m2.Matches(0.0));
   EXPECT_FALSE(m2.Matches(0.1));
-  EXPECT_EQ("bar or zero", Describe(m2));
+  EXPECT_EQ("g_bar or zero", Describe(m2));
 }
 
 // Tests implementing a polymorphic matcher using MatchAndExplain().
@@ -3982,6 +3984,92 @@ TEST(MatcherTupleTest, ExplainsMatchFailure) {
             "           Actual: 2, which is 3 less than 5\n",
             ss3.str());  // Failed match where only one argument needs
                          // explanation.
+}
+
+// Tests Each().
+
+TEST(EachTest, ExplainsMatchResultCorrectly) {
+  set<int> a;  // empty
+
+  Matcher<set<int> > m = Each(2);
+  EXPECT_EQ("", Explain(m, a));
+
+  Matcher<const int(&)[1]> n = Each(1);
+
+  const int b[1] = { 1 };
+  EXPECT_EQ("", Explain(n, b));
+
+  n = Each(3);
+  EXPECT_EQ("whose element #0 doesn't match", Explain(n, b));
+
+  a.insert(1);
+  a.insert(2);
+  a.insert(3);
+  m = Each(GreaterThan(0));
+  EXPECT_EQ("", Explain(m, a));
+
+  m = Each(GreaterThan(10));
+  EXPECT_EQ("whose element #0 doesn't match, which is 9 less than 10",
+            Explain(m, a));
+}
+
+TEST(EachTest, DescribesItselfCorrectly) {
+  Matcher<vector<int> > m = Each(1);
+  EXPECT_EQ("only contains elements that is equal to 1", Describe(m));
+
+  Matcher<vector<int> > m2 = Not(m);
+  EXPECT_EQ("contains some element that isn't equal to 1", Describe(m2));
+}
+
+TEST(EachTest, MatchesVectorWhenAllElementsMatch) {
+  vector<int> some_vector;
+  EXPECT_THAT(some_vector, Each(1));
+  some_vector.push_back(3);
+  EXPECT_THAT(some_vector, Not(Each(1)));
+  EXPECT_THAT(some_vector, Each(3));
+  some_vector.push_back(1);
+  some_vector.push_back(2);
+  EXPECT_THAT(some_vector, Not(Each(3)));
+  EXPECT_THAT(some_vector, Each(Lt(3.5)));
+
+  vector<string> another_vector;
+  another_vector.push_back("fee");
+  EXPECT_THAT(another_vector, Each(string("fee")));
+  another_vector.push_back("fie");
+  another_vector.push_back("foe");
+  another_vector.push_back("fum");
+  EXPECT_THAT(another_vector, Not(Each(string("fee"))));
+}
+
+TEST(EachTest, MatchesMapWhenAllElementsMatch) {
+  map<const char*, int> my_map;
+  const char* bar = "a string";
+  my_map[bar] = 2;
+  EXPECT_THAT(my_map, Each(make_pair(bar, 2)));
+
+  map<string, int> another_map;
+  EXPECT_THAT(another_map, Each(make_pair(string("fee"), 1)));
+  another_map["fee"] = 1;
+  EXPECT_THAT(another_map, Each(make_pair(string("fee"), 1)));
+  another_map["fie"] = 2;
+  another_map["foe"] = 3;
+  another_map["fum"] = 4;
+  EXPECT_THAT(another_map, Not(Each(make_pair(string("fee"), 1))));
+  EXPECT_THAT(another_map, Not(Each(make_pair(string("fum"), 1))));
+  EXPECT_THAT(another_map, Each(Pair(_, Gt(0))));
+}
+
+TEST(EachTest, AcceptsMatcher) {
+  const int a[] = { 1, 2, 3 };
+  EXPECT_THAT(a, Each(Gt(0)));
+  EXPECT_THAT(a, Not(Each(Gt(1))));
+}
+
+TEST(EachTest, WorksForNativeArrayAsTuple) {
+  const int a[] = { 1, 2 };
+  const int* const pointer = a;
+  EXPECT_THAT(make_tuple(pointer, 2), Each(Gt(0)));
+  EXPECT_THAT(make_tuple(pointer, 2), Not(Each(Gt(1))));
 }
 
 }  // namespace gmock_matchers_test

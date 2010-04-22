@@ -137,9 +137,7 @@ EXTRA_DIST += include/gmock/gmock-generated-actions.h.pump \
               include/gmock/internal/gmock-generated-internal-utils.h.pump
 
 # Script for fusing Google Mock and Google Test source files.
-EXTRA_DIST += \
-    scripts/fuse_gmock_files.py \
-    scripts/test/Makefile
+EXTRA_DIST += scripts/fuse_gmock_files.py
 
 # The Google Mock Generator tool from the cppclean project.
 EXTRA_DIST += \
