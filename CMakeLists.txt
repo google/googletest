@@ -8,9 +8,11 @@
 # ctest.  You can select which tests to run using 'ctest -R regex'.
 # For more options, run 'ctest --help'.
 
-# For hermetic builds, we may need to tell CMake to use compiler in a
+# For hermetic builds, we may need to tell CMake to use toolchain in a
 # specific location.
+string(REPLACE "\\" "/" CMAKE_RC_COMPILER "${CMAKE_RC_COMPILER}")
 if (gtest_compiler)
+  string(REPLACE "\\" "/" gtest_compiler "${gtest_compiler}")
   include(CMakeForceCompiler)
   cmake_force_c_compiler("${gtest_compiler}" "")
   cmake_force_cxx_compiler("${gtest_compiler}" "")
