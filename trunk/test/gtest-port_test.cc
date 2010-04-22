@@ -149,8 +149,10 @@ TEST(GtestCheckDeathTest, DiesWithCorrectOutputOnFailure) {
   const char regex[] =
 #ifdef _MSC_VER
      "gtest-port_test\\.cc\\(\\d+\\):"
-#else
+#elif GTEST_USES_POSIX_RE
      "gtest-port_test\\.cc:[0-9]+"
+#else
+     "gtest-port_test\\.cc:\\d+"
 #endif  // _MSC_VER
      ".*a_false_condition.*Extra info.*";
 
