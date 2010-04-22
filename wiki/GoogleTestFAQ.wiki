@@ -859,6 +859,12 @@ Many people are in your position and one of the posted his solution to
 our mailing list. Here is his link:
 http://hassanjamilahmad.blogspot.com/2009/07/gtest-starters-help.html.
 
+== I am seeing compile errors mentioning std::type_traits when I try to use Google Test on Solaris. ==
+Google Test uses parts of the standard C++ library that SunStudio does not support.
+Our users reported success using alternative implementations. Try running the build after runing this commad:
+
+{{{export CC=cc CXX=CC CXXFLAGS='-library=stlport4'}}}
+
 == My question is not covered in your FAQ! ==
 
 If you cannot find the answer to your question in this FAQ, there are
