@@ -2358,9 +2358,23 @@ TEST(VerifyAndClearTest, DoesNotAffectOtherMockObjects) {
 // action or as a default action without causing a dead lock.  It
 // verifies that the action is not performed inside the critical
 // section.
+TEST(SynchronizationTest, CanCallMockMethodInAction) {
+  MockA a;
+  MockC c;
+  ON_CALL(a, DoA(_))
+      .WillByDefault(IgnoreResult(InvokeWithoutArgs(&c,
+                                                    &MockC::NonVoidMethod)));
+  EXPECT_CALL(a, DoA(1));
+  EXPECT_CALL(a, DoA(1))
+      .WillOnce(Invoke(&a, &MockA::DoA))
+      .RetiresOnSaturation();
+  EXPECT_CALL(c, NonVoidMethod());
 
-void Helper(MockC* c) {
-  c->NonVoidMethod();
+  a.DoA(1);
+  // This will match the second EXPECT_CALL() and trigger another a.DoA(1),
+  // which will in turn match the first EXPECT_CALL() and trigger a call to
+  // c.NonVoidMethod() that was specified by the ON_CALL() since the first
+  // EXPECT_CALL() did not specify an action.
 }
 
 }  // namespace
