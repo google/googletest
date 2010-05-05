@@ -1783,6 +1783,25 @@ class MockC {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockC);
 };
 
+class VerboseFlagPreservingFixture : public testing::Test {
+ protected:
+  // The code needs to work when both ::string and ::std::string are defined
+  // and the flag is implemented as a testing::internal::String.  In this
+  // case, without the call to c_str(), the compiler will complain that it
+  // cannot figure out what overload of string constructor to use.
+  // TODO(vladl@google.com): Use internal::string instead of String for
+  // string flags in Google Test.
+  VerboseFlagPreservingFixture()
+      : saved_verbose_flag_(GMOCK_FLAG(verbose).c_str()) {}
+
+  ~VerboseFlagPreservingFixture() { GMOCK_FLAG(verbose) = saved_verbose_flag_; }
+
+ private:
+  const string saved_verbose_flag_;
+
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(VerboseFlagPreservingFixture);
+};
+
 #if GTEST_HAS_STREAM_REDIRECTION_
 
 // Tests that an uninteresting mock function call generates a warning
@@ -1842,7 +1861,7 @@ TEST(FunctionCallMessageTest, UninterestingCallPrintsArgumentsAndReturnValue) {
 
 // Tests how the --gmock_verbose flag affects Google Mock's output.
 
-class GMockVerboseFlagTest : public testing::Test {
+class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
  public:
   // Verifies that the given Google Mock output is correct.  (When
   // should_print is true, the output should match the given regex and
@@ -1982,22 +2001,9 @@ class LogTestHelper {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(LogTestHelper);
 };
 
-class GMockLogTest : public ::testing::Test {
+class GMockLogTest : public VerboseFlagPreservingFixture {
  protected:
-  virtual void SetUp() {
-    // The code needs to work when both ::string and ::std::string are
-    // defined and the flag is implemented as a
-    // testing::internal::String.  In this case, without the call to
-    // c_str(), the compiler will complain that it cannot figure out
-    // whether the String flag should be converted to a ::string or an
-    // ::std::string before being assigned to original_verbose_.
-    original_verbose_ = GMOCK_FLAG(verbose).c_str();
-  }
-
-  virtual void TearDown() { GMOCK_FLAG(verbose) = original_verbose_; }
-
   LogTestHelper helper_;
-  string original_verbose_;
 };
 
 TEST_F(GMockLogTest, DoesNotPrintGoodCallInternallyIfVerbosityIsWarning) {

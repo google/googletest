@@ -565,10 +565,12 @@ void TestLogWithSeverity(const string& verbosity, LogSeverity severity,
 // Tests that when the stack_frames_to_skip parameter is negative,
 // Log() doesn't include the stack trace in the output.
 TEST(LogTest, NoStackTraceWhenStackFramesToSkipIsNegative) {
+  const string saved_flag = GMOCK_FLAG(verbose);
   GMOCK_FLAG(verbose) = kInfoVerbosity;
   CaptureStdout();
   Log(INFO, "Test log.\n", -1);
   EXPECT_STREQ("\nTest log.\n", GetCapturedStdout().c_str());
+  GMOCK_FLAG(verbose) = saved_flag;
 }
 
 // Tests that in opt mode, a positive stack_frames_to_skip argument is

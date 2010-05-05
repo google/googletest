@@ -137,6 +137,7 @@ TEST(NiceMockTest, NoWarningForUninterestingCallAfterDeath) {
 TEST(NiceMockTest, InfoForUninterestingCall) {
   NiceMock<MockFoo> nice_foo;
 
+  const string saved_flag = GMOCK_FLAG(verbose);
   GMOCK_FLAG(verbose) = "info";
   CaptureStdout();
   nice_foo.DoThis();
@@ -147,6 +148,7 @@ TEST(NiceMockTest, InfoForUninterestingCall) {
   nice_foo.DoThat(true);
   EXPECT_THAT(GetCapturedStdout(),
               HasSubstr("Uninteresting mock function call"));
+  GMOCK_FLAG(verbose) = saved_flag;
 }
 
 #endif  // GTEST_HAS_STREAM_REDIRECTION_
