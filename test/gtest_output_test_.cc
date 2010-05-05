@@ -1085,9 +1085,7 @@ class BarEnvironment : public testing::Environment {
   }
 };
 
-GTEST_DEFINE_bool_(internal_skip_environment_and_ad_hoc_tests, false,
-                   "This flag causes the program to skip test environment "
-                   "tests and ad hoc tests.");
+bool GTEST_FLAG(internal_skip_environment_and_ad_hoc_tests) = false;
 
 // The main function.
 //

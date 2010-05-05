@@ -418,7 +418,14 @@ void DeathTestImpl::Abort(AbortReason reason) {
   const char status_ch =
       reason == TEST_DID_NOT_DIE ? kDeathTestLived : kDeathTestReturned;
   GTEST_DEATH_TEST_CHECK_SYSCALL_(posix::Write(write_fd(), &status_ch, 1));
-  GTEST_DEATH_TEST_CHECK_SYSCALL_(posix::Close(write_fd()));
+  // We are leaking the descriptor here because on some platforms (i.e.,
+  // when built as Windows DLL), destructors of global objects will still
+  // run after calling _exit(). On such systems, write_fd_ will be
+  // indirectly closed from the destructor of UnitTestImpl, causing double
+  // close if it is also closed here. On debug configurations, double close
+  // may assert. As there are no in-process buffers to flush here, we are
+  // relying on the OS to close the descriptor after the process terminates
+  // when the destructors are not run.
   _exit(1);  // Exits w/o any normal exit hooks (we were supposed to crash)
 }
 

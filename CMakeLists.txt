@@ -8,14 +8,18 @@
 # ctest.  You can select which tests to run using 'ctest -R regex'.
 # For more options, run 'ctest --help'.
 
-# For hermetic builds, we may need to tell CMake to use toolchain in a
-# specific location.
-string(REPLACE "\\" "/" CMAKE_RC_COMPILER "${CMAKE_RC_COMPILER}")
-if (gtest_compiler)
-  string(REPLACE "\\" "/" gtest_compiler "${gtest_compiler}")
-  include(CMakeForceCompiler)
-  cmake_force_c_compiler("${gtest_compiler}" "")
-  cmake_force_cxx_compiler("${gtest_compiler}" "")
+# BUILD_SHARED_LIBS is a standard CMake variable, but we declare it here to
+# make it prominent in the GUI.
+option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
+
+option(build_all_gtest_tests "Build all of gtest's own tests." OFF)
+
+option(build_gtest_samples "Build gtest's sample programs." OFF)
+
+include(cmake/hermetic_build.cmake OPTIONAL)
+
+if (COMMAND pre_project_set_up_hermetic_build)
+  pre_project_set_up_hermetic_build()
 endif()
 
 ########################################################################
@@ -29,7 +33,11 @@ endif()
 # ${gtest_BINARY_DIR}.
 # Language "C" is required for find_package(Threads).
 project(gtest CXX C)
-cmake_minimum_required(VERSION 2.6.4)
+cmake_minimum_required(VERSION 2.6.2)
+
+if (COMMAND set_up_hermetic_build)
+  set_up_hermetic_build()
+endif()
 
 if (MSVC)
   # For MSVC, CMake sets certain flags to defaults we want to override.
@@ -38,10 +46,17 @@ if (MSVC)
   foreach (flag_var
            CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
            CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-    # In hermetic build environments, tests may not have access to MS runtime
-    # DLLs, so this replaces /MD (CRT libraries in DLLs) with /MT (static CRT
-    # libraries).
-    string(REPLACE "/MD" "-MT" ${flag_var} "${${flag_var}}")
+    if (NOT BUILD_SHARED_LIBS)
+      # When Google Test is built as a shared library, it should also use
+      # shared runtime libraries.  Otherwise, it may end up with multiple
+      # copies of runtime library data in different modules, resulting in
+      # hard-to-find crashes. When it is built as a static library, it is
+      # preferable to use CRT as static libraries, as we don't have to rely
+      # on CRT DLLs being available. CMake always defaults to using shared
+      # CRT libraries, so we override that default here.
+      string(REPLACE "/MD" "-MT" ${flag_var} "${${flag_var}}")
+    endif()
+
     # We prefer more strict warning checking for building Google Test.
     # Replaces /W3 with /W4 in defaults.
     string(REPLACE "/W3" "-W4" ${flag_var} "${${flag_var}}")
@@ -66,7 +81,8 @@ find_package(Threads)
 
 if (MSVC)
   # Newlines inside flags variables break CMake's NMake generator.
-  set(cxx_base_flags "-GS -W4 -WX -wd4275 -nologo -J -Zi")
+  # TODO(vladl@google.com): Add -RTCs and -RTCu to debug builds.
+  set(cxx_base_flags "-GS -W4 -WX -wd4251 -wd4275 -nologo -J -Zi")
   set(cxx_base_flags "${cxx_base_flags} -D_UNICODE -DUNICODE -DWIN32 -D_WIN32")
   set(cxx_base_flags "${cxx_base_flags} -DSTRICT -DWIN32_LEAN_AND_MEAN")
   set(cxx_exception_flags "-EHsc -D_HAS_EXCEPTIONS=1")
@@ -124,13 +140,14 @@ function(cxx_library_with_type name type cxx_flags)
   set_target_properties(${name}
     PROPERTIES
     COMPILE_FLAGS "${cxx_flags}")
-    if (CMAKE_USE_PTHREADS_INIT)
-      target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT})
-    endif()
-endfunction()
-
-function(cxx_static_library name cxx_flags)
-  cxx_library_with_type(${name} STATIC "${cxx_flags}" ${ARGN})
+  if (BUILD_SHARED_LIBS OR type STREQUAL "SHARED")
+    set_target_properties(${name}
+      PROPERTIES
+      COMPILE_DEFINITIONS "GTEST_CREATE_SHARED_LIBRARY=1")
+  endif()
+  if (CMAKE_USE_PTHREADS_INIT)
+    target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT})
+  endif()
 endfunction()
 
 function(cxx_shared_library name cxx_flags)
@@ -138,15 +155,14 @@ function(cxx_shared_library name cxx_flags)
 endfunction()
 
 function(cxx_library name cxx_flags)
-  # TODO(vladl@google.com): Make static/shared a user option.
-  cxx_static_library(${name} "${cxx_flags}" ${ARGN})
+  cxx_library_with_type(${name} "" "${cxx_flags}" ${ARGN})
 endfunction()
 
-# Static versions of Google Test libraries.  We build them using more
-# strict warnings than what are used for other targets, to ensure that
-# gtest can be compiled by a user aggressive about warnings.
-cxx_static_library(gtest "${cxx_strict}" src/gtest-all.cc)
-cxx_static_library(gtest_main "${cxx_strict}" src/gtest_main.cc)
+# Google Test libraries.  We build them using more strict warnings than what
+# are used for other targets, to ensure that gtest can be compiled by a user
+# aggressive about warnings.
+cxx_library(gtest "${cxx_strict}" src/gtest-all.cc)
+cxx_library(gtest_main "${cxx_strict}" src/gtest_main.cc)
 target_link_libraries(gtest_main gtest)
 
 ########################################################################
@@ -157,30 +173,37 @@ target_link_libraries(gtest_main gtest)
 # build_gtest_samples option to ON.  You can do it by running ccmake
 # or specifying the -Dbuild_gtest_samples=ON flag when running cmake.
 
-option(build_gtest_samples "Build gtest's sample programs." OFF)
-
-# cxx_executable_with_flags(name cxx_flags lib srcs...)
+# cxx_executable_with_flags(name cxx_flags libs srcs...)
 #
-# creates a named C++ executable that depends on the given library and
+# creates a named C++ executable that depends on the given libraries and
 # is built from the given source files with the given compiler flags.
-function(cxx_executable_with_flags name cxx_flags lib)
+function(cxx_executable_with_flags name cxx_flags libs)
   add_executable(${name} ${ARGN})
   if (cxx_flags)
     set_target_properties(${name}
       PROPERTIES
       COMPILE_FLAGS "${cxx_flags}")
   endif()
-  target_link_libraries(${name} ${lib})
+  if (BUILD_SHARED_LIBS)
+    set_target_properties(${name}
+      PROPERTIES
+      COMPILE_DEFINITIONS "GTEST_LINKED_AS_SHARED_LIBRARY=1")
+  endif()
+  # To support mixing linking in static and dynamic libraries, link each
+  # library in with an extra call to target_link_libraries.
+  foreach (lib "${libs}")
+    target_link_libraries(${name} ${lib})
+  endforeach()
 endfunction()
 
 # cxx_executable(name dir lib srcs...)
 #
-# creates a named target that depends on the given lib and is built
+# creates a named target that depends on the given libs and is built
 # from the given source files.  dir/name.cc is implicitly included in
 # the source file list.
-function(cxx_executable name dir lib)
+function(cxx_executable name dir libs)
   cxx_executable_with_flags(
-    ${name} "${cxx_default}" ${lib} "${dir}/${name}.cc" ${ARGN})
+    ${name} "${cxx_default}" "${libs}" "${dir}/${name}.cc" ${ARGN})
 endfunction()
 
 if (build_gtest_samples)
@@ -207,8 +230,6 @@ endif()
 # build_all_gtest_tests option to ON.  You can do it by running ccmake
 # or specifying the -Dbuild_all_gtest_tests=ON flag when running cmake.
 
-option(build_all_gtest_tests "Build all of gtest's own tests." OFF)
-
 # This must be set in the root directory for the tests to be run by
 # 'make test' or ctest.
 enable_testing()
@@ -224,15 +245,7 @@ find_package(PythonInterp)
 # creates a named C++ test that depends on the given libs and is built
 # from the given source files with the given compiler flags.
 function(cxx_test_with_flags name cxx_flags libs)
-  add_executable(${name} ${ARGN})
-  set_target_properties(${name}
-    PROPERTIES
-    COMPILE_FLAGS "${cxx_flags}")
-  # To support mixing linking in static and dynamic libraries, link each
-  # library in with an extra call to target_link_libraries.
-  foreach (lib "${libs}")
-    target_link_libraries(${name} ${lib})
-  endforeach()
+  cxx_executable_with_flags(${name} "${cxx_flags}" "${libs}" ${ARGN})
   add_test(${name} ${name})
 endfunction()
 
@@ -286,26 +299,16 @@ if (build_all_gtest_tests)
   cxx_test_with_flags(gtest_no_rtti_unittest "${cxx_no_rtti}"
     gtest_main_no_rtti test/gtest_unittest.cc)
 
-  set(cxx_use_shared_gtest "${cxx_default} -DGTEST_LINKED_AS_SHARED_LIBRARY=1")
-  set(cxx_build_shared_gtest "${cxx_default} -DGTEST_CREATE_SHARED_LIBRARY=1")
-  if (MSVC)
-    # Disables the "class 'X' needs to have dll-interface to be used
-    # by clients of class 'Y'" warning. This particularly concerns generic
-    # classes like vector that MS doesn't mark as exported.
-    set(cxx_use_shared_gtest "${cxx_use_shared_gtest} -wd4251")
-    set(cxx_build_shared_gtest "${cxx_build_shared_gtest} -wd4251")
-  endif()
+  cxx_shared_library(gtest_dll "${cxx_default}"
+    src/gtest-all.cc src/gtest_main.cc)
 
-  cxx_shared_library(gtest_dll "${cxx_build_shared_gtest}"
-    src/gtest-all.cc)
-
-  # TODO(vladl): This and the next tests may not run in the hermetic
-  # environment on Windows. Re-evaluate and possibly make them
-  # platform-conditional after implementing hermetic builds.
-  cxx_executable_with_flags(gtest_dll_test_ "${cxx_use_shared_gtest}"
+  cxx_executable_with_flags(gtest_dll_test_ "${cxx_default}"
     gtest_dll test/gtest_all_test.cc)
+  set_target_properties(gtest_dll_test_
+                        PROPERTIES
+                        COMPILE_DEFINITIONS "GTEST_LINKED_AS_SHARED_LIBRARY=1")
 
-  if (NOT(MSVC AND (MSVC_VERSION EQUAL 1600)))
+  if (NOT MSVC OR NOT MSVC_VERSION EQUAL 1600)
     # The C++ Standard specifies tuple_element<int, class>.
     # Yet MSVC 10's <utility> declares tuple_element<size_t, class>.
     # That declaration conflicts with our own standard-conforming
