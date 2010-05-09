@@ -1969,7 +1969,7 @@ struct StaticAssertTypeEqHelper<T, T> {};
 // to cause a compiler error.
 template <typename T1, typename T2>
 bool StaticAssertTypeEq() {
-  internal::StaticAssertTypeEqHelper<T1, T2>();
+  (void)internal::StaticAssertTypeEqHelper<T1, T2>();
   return true;
 }
 
