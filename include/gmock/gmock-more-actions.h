@@ -162,7 +162,7 @@ ACTION_TEMPLATE(SetArgReferee,
   // Ensures that argument #k is a reference.  If you get a compiler
   // error on the next line, you are using SetArgReferee<k>(value) in
   // a mock function whose k-th (0-based) argument is not a reference.
-  GMOCK_COMPILE_ASSERT_(internal::is_reference<argk_type>::value,
+  GTEST_COMPILE_ASSERT_(internal::is_reference<argk_type>::value,
                         SetArgReferee_must_be_used_with_a_reference_argument);
   ::std::tr1::get<k>(args) = value;
 }

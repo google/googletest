@@ -38,7 +38,6 @@ pkginclude_HEADERS = include/gmock/gmock.h \
                      include/gmock/gmock-generated-nice-strict.h \
                      include/gmock/gmock-matchers.h \
                      include/gmock/gmock-more-actions.h \
-                     include/gmock/gmock-printers.h \
                      include/gmock/gmock-spec-builders.h
 
 pkginclude_internaldir = $(pkgincludedir)/internal
@@ -92,7 +91,6 @@ GMOCK_SOURCE_INGLUDES = \
   src/gmock-cardinalities.cc \
   src/gmock-internal-utils.cc \
   src/gmock-matchers.cc \
-  src/gmock-printers.cc \
   src/gmock-spec-builders.cc
 
 EXTRA_DIST += $(GMOCK_SOURCE_INGLUDES)
@@ -110,8 +108,7 @@ EXTRA_DIST += \
   test/gmock-matchers_test.cc \
   test/gmock-more-actions_test.cc \
   test/gmock-nice-strict_test.cc \
-  test/gmock-port_test.cc \
-  test/gmock-printers_test.cc
+  test/gmock-port_test.cc
 
 # Python tests, which we don't run using autotools.
 EXTRA_DIST += \

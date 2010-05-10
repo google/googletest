@@ -45,7 +45,6 @@
 #include <string>
 #include <vector>
 
-#include <gmock/gmock-printers.h>
 #include <gmock/internal/gmock-internal-utils.h>
 #include <gmock/internal/gmock-port.h>
 #include <gtest/gtest.h>
@@ -419,20 +418,20 @@ class SafeMatcherCastImpl {
   template <typename U>
   static inline Matcher<T> Cast(const Matcher<U>& matcher) {
     // Enforce that T can be implicitly converted to U.
-    GMOCK_COMPILE_ASSERT_((internal::ImplicitlyConvertible<T, U>::value),
+    GTEST_COMPILE_ASSERT_((internal::ImplicitlyConvertible<T, U>::value),
                           T_must_be_implicitly_convertible_to_U);
     // Enforce that we are not converting a non-reference type T to a reference
     // type U.
-    GMOCK_COMPILE_ASSERT_(
+    GTEST_COMPILE_ASSERT_(
         internal::is_reference<T>::value || !internal::is_reference<U>::value,
         cannot_convert_non_referentce_arg_to_reference);
     // In case both T and U are arithmetic types, enforce that the
     // conversion is not lossy.
-    typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(T)) RawT;
-    typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(U)) RawU;
+    typedef GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(T)) RawT;
+    typedef GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(U)) RawU;
     const bool kTIsOther = GMOCK_KIND_OF_(RawT) == internal::kOther;
     const bool kUIsOther = GMOCK_KIND_OF_(RawU) == internal::kOther;
-    GMOCK_COMPILE_ASSERT_(
+    GTEST_COMPILE_ASSERT_(
         kTIsOther || kUIsOther ||
         (internal::LosslessArithmeticConvertible<RawT, RawU>::value),
         conversion_of_arithmetic_types_must_be_lossless);
@@ -566,7 +565,7 @@ bool TupleMatches(const MatcherTuple& matcher_tuple,
   using ::std::tr1::tuple_size;
   // Makes sure that matcher_tuple and value_tuple have the same
   // number of fields.
-  GMOCK_COMPILE_ASSERT_(tuple_size<MatcherTuple>::value ==
+  GTEST_COMPILE_ASSERT_(tuple_size<MatcherTuple>::value ==
                         tuple_size<ValueTuple>::value,
                         matcher_and_value_have_different_numbers_of_fields);
   return TuplePrefix<tuple_size<ValueTuple>::value>::
@@ -1604,8 +1603,8 @@ class PointeeMatcher {
   template <typename Pointer>
   class Impl : public MatcherInterface<Pointer> {
    public:
-    typedef typename PointeeOf<GMOCK_REMOVE_CONST_(  // NOLINT
-        GMOCK_REMOVE_REFERENCE_(Pointer))>::type Pointee;
+    typedef typename PointeeOf<GTEST_REMOVE_CONST_(  // NOLINT
+        GTEST_REMOVE_REFERENCE_(Pointer))>::type Pointee;
 
     explicit Impl(const InnerMatcher& matcher)
         : matcher_(MatcherCast<const Pointee&>(matcher)) {}
@@ -1663,7 +1662,7 @@ class FieldMatcher {
   bool MatchAndExplain(const T& value, MatchResultListener* listener) const {
     return MatchAndExplainImpl(
         typename ::testing::internal::
-            is_pointer<GMOCK_REMOVE_CONST_(T)>::type(),
+            is_pointer<GTEST_REMOVE_CONST_(T)>::type(),
         value, listener);
   }
 
@@ -1702,9 +1701,9 @@ class PropertyMatcher {
  public:
   // The property may have a reference type, so 'const PropertyType&'
   // may cause double references and fail to compile.  That's why we
-  // need GMOCK_REFERENCE_TO_CONST, which works regardless of
+  // need GTEST_REFERENCE_TO_CONST, which works regardless of
   // PropertyType being a reference or not.
-  typedef GMOCK_REFERENCE_TO_CONST_(PropertyType) RefToConstProperty;
+  typedef GTEST_REFERENCE_TO_CONST_(PropertyType) RefToConstProperty;
 
   PropertyMatcher(PropertyType (Class::*property)() const,
                   const Matcher<RefToConstProperty>& matcher)
@@ -1724,7 +1723,7 @@ class PropertyMatcher {
   bool MatchAndExplain(const T&value, MatchResultListener* listener) const {
     return MatchAndExplainImpl(
         typename ::testing::internal::
-            is_pointer<GMOCK_REMOVE_CONST_(T)>::type(),
+            is_pointer<GTEST_REMOVE_CONST_(T)>::type(),
         value, listener);
   }
 
@@ -1875,7 +1874,7 @@ class ContainerEqMatcher {
     // Makes sure the user doesn't instantiate this class template
     // with a const or reference type.
     testing::StaticAssertTypeEq<Container,
-        GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))>();
+        GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(Container))>();
   }
 
   void DescribeTo(::std::ostream* os) const {
@@ -1890,9 +1889,9 @@ class ContainerEqMatcher {
   template <typename LhsContainer>
   bool MatchAndExplain(const LhsContainer& lhs,
                        MatchResultListener* listener) const {
-    // GMOCK_REMOVE_CONST_() is needed to work around an MSVC 8.0 bug
+    // GTEST_REMOVE_CONST_() is needed to work around an MSVC 8.0 bug
     // that causes LhsContainer to be a const type sometimes.
-    typedef internal::StlContainerView<GMOCK_REMOVE_CONST_(LhsContainer)>
+    typedef internal::StlContainerView<GTEST_REMOVE_CONST_(LhsContainer)>
         LhsView;
     typedef typename LhsView::type LhsStlContainer;
     StlContainerReference lhs_stl_container = LhsView::ConstReference(lhs);
@@ -1951,7 +1950,7 @@ class ContainerEqMatcher {
 template <typename Container>
 class QuantifierMatcherImpl : public MatcherInterface<Container> {
  public:
-  typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container)) RawContainer;
+  typedef GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(Container)) RawContainer;
   typedef StlContainerView<RawContainer> View;
   typedef typename View::type StlContainer;
   typedef typename View::const_reference StlContainerReference;
@@ -2090,7 +2089,7 @@ class EachMatcher {
 template <typename PairType>
 class KeyMatcherImpl : public MatcherInterface<PairType> {
  public:
-  typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(PairType)) RawPairType;
+  typedef GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(PairType)) RawPairType;
   typedef typename RawPairType::first_type KeyType;
 
   template <typename InnerMatcher>
@@ -2152,7 +2151,7 @@ class KeyMatcher {
 template <typename PairType>
 class PairMatcherImpl : public MatcherInterface<PairType> {
  public:
-  typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(PairType)) RawPairType;
+  typedef GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(PairType)) RawPairType;
   typedef typename RawPairType::first_type FirstType;
   typedef typename RawPairType::second_type SecondType;
 
@@ -2259,7 +2258,7 @@ class PairMatcher {
 template <typename Container>
 class ElementsAreMatcherImpl : public MatcherInterface<Container> {
  public:
-  typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container)) RawContainer;
+  typedef GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(Container)) RawContainer;
   typedef internal::StlContainerView<RawContainer> View;
   typedef typename View::type StlContainer;
   typedef typename View::const_reference StlContainerReference;
@@ -2378,7 +2377,7 @@ class ElementsAreMatcher0 {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
+    typedef GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(Container))
         RawContainer;
     typedef typename internal::StlContainerView<RawContainer>::type::value_type
         Element;
@@ -2397,7 +2396,7 @@ class ElementsAreArrayMatcher {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    typedef GMOCK_REMOVE_CONST_(GMOCK_REMOVE_REFERENCE_(Container))
+    typedef GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(Container))
         RawContainer;
     typedef typename internal::StlContainerView<RawContainer>::type::value_type
         Element;
@@ -2609,7 +2608,7 @@ inline PolymorphicMatcher<
   return MakePolymorphicMatcher(
       internal::PropertyMatcher<Class, PropertyType>(
           property,
-          MatcherCast<GMOCK_REFERENCE_TO_CONST_(PropertyType)>(matcher)));
+          MatcherCast<GTEST_REFERENCE_TO_CONST_(PropertyType)>(matcher)));
   // The call to MatcherCast() is required for supporting inner
   // matchers of compatible types.  For example, it allows
   //   Property(&Foo::bar, m)
@@ -2893,11 +2892,11 @@ Truly(Predicate pred) {
 // values and order differences are not explained.)
 template <typename Container>
 inline PolymorphicMatcher<internal::ContainerEqMatcher<  // NOLINT
-                            GMOCK_REMOVE_CONST_(Container)> >
+                            GTEST_REMOVE_CONST_(Container)> >
     ContainerEq(const Container& rhs) {
   // This following line is for working around a bug in MSVC 8.0,
   // which causes Container to be a const type sometimes.
-  typedef GMOCK_REMOVE_CONST_(Container) RawContainer;
+  typedef GTEST_REMOVE_CONST_(Container) RawContainer;
   return MakePolymorphicMatcher(
       internal::ContainerEqMatcher<RawContainer>(rhs));
 }

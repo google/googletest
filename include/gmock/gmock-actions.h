@@ -43,7 +43,6 @@
 #include <errno.h>
 #endif
 
-#include <gmock/gmock-printers.h>
 #include <gmock/internal/gmock-internal-utils.h>
 #include <gmock/internal/gmock-port.h>
 
@@ -477,7 +476,7 @@ class ReturnAction {
     // and put the typedef both here (for use in assert statement) and
     // in the Impl class. But both definitions must be the same.
     typedef typename Function<F>::Result Result;
-    GMOCK_COMPILE_ASSERT_(
+    GTEST_COMPILE_ASSERT_(
         !internal::is_reference<Result>::value,
         use_ReturnRef_instead_of_Return_to_return_a_reference);
     return Action<F>(new Impl<F>(value_));
@@ -504,7 +503,7 @@ class ReturnAction {
     virtual Result Perform(const ArgumentTuple&) { return value_; }
 
    private:
-    GMOCK_COMPILE_ASSERT_(!internal::is_reference<Result>::value,
+    GTEST_COMPILE_ASSERT_(!internal::is_reference<Result>::value,
                           Result_cannot_be_a_reference_type);
     Result value_;
 
@@ -522,7 +521,7 @@ class ReturnNullAction {
   // Allows ReturnNull() to be used in any pointer-returning function.
   template <typename Result, typename ArgumentTuple>
   static Result Perform(const ArgumentTuple&) {
-    GMOCK_COMPILE_ASSERT_(internal::is_pointer<Result>::value,
+    GTEST_COMPILE_ASSERT_(internal::is_pointer<Result>::value,
                           ReturnNull_can_be_used_to_return_a_pointer_only);
     return NULL;
   }
@@ -555,7 +554,7 @@ class ReturnRefAction {
     // Asserts that the function return type is a reference.  This
     // catches the user error of using ReturnRef(x) when Return(x)
     // should be used, and generates some helpful error message.
-    GMOCK_COMPILE_ASSERT_(internal::is_reference<Result>::value,
+    GTEST_COMPILE_ASSERT_(internal::is_reference<Result>::value,
                           use_Return_instead_of_ReturnRef_to_return_a_value);
     return Action<F>(new Impl<F>(ref_));
   }

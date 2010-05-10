@@ -186,7 +186,6 @@ GtestTest(env, 'gmock-matchers_test', [gtest, gmock_main])
 GtestTest(env, 'gmock-more-actions_test', [gtest, gmock_main])
 GtestTest(env, 'gmock-nice-strict_test', [gtest, gmock_main])
 GtestTest(env, 'gmock-port_test', [gtest, gmock_main])
-GtestTest(env, 'gmock-printers_test', [gtest, gmock_main])
 GtestTest(env, 'gmock-spec-builders_test', [gtest, gmock_main])
 GtestTest(env, 'gmock_leak_test_', [gtest, gmock_main])
 GtestTest(env, 'gmock_link_test', [gtest, gmock_main],

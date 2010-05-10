@@ -344,7 +344,7 @@ using internal::FunctionMocker;
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
 #define GMOCK_METHOD0_(tn, constness, ct, Method, F) \
   GMOCK_RESULT_(tn, F) ct Method() constness { \
-    GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
+    GTEST_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == 0, \
         this_method_does_not_take_0_arguments); \
     GMOCK_MOCKER_(0, constness, Method).SetOwnerAndName(this, #Method); \
@@ -359,7 +359,7 @@ using internal::FunctionMocker;
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
 #define GMOCK_METHOD1_(tn, constness, ct, Method, F) \
   GMOCK_RESULT_(tn, F) ct Method(GMOCK_ARG_(tn, F, 1) gmock_a1) constness { \
-    GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
+    GTEST_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == 1, \
         this_method_does_not_take_1_argument); \
     GMOCK_MOCKER_(1, constness, Method).SetOwnerAndName(this, #Method); \
@@ -376,7 +376,7 @@ using internal::FunctionMocker;
 #define GMOCK_METHOD2_(tn, constness, ct, Method, F) \
   GMOCK_RESULT_(tn, F) ct Method(GMOCK_ARG_(tn, F, 1) gmock_a1, \
                                  GMOCK_ARG_(tn, F, 2) gmock_a2) constness { \
-    GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
+    GTEST_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == 2, \
         this_method_does_not_take_2_arguments); \
     GMOCK_MOCKER_(2, constness, Method).SetOwnerAndName(this, #Method); \
@@ -395,7 +395,7 @@ using internal::FunctionMocker;
   GMOCK_RESULT_(tn, F) ct Method(GMOCK_ARG_(tn, F, 1) gmock_a1, \
                                  GMOCK_ARG_(tn, F, 2) gmock_a2, \
                                  GMOCK_ARG_(tn, F, 3) gmock_a3) constness { \
-    GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
+    GTEST_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == 3, \
         this_method_does_not_take_3_arguments); \
     GMOCK_MOCKER_(3, constness, Method).SetOwnerAndName(this, #Method); \
@@ -417,7 +417,7 @@ using internal::FunctionMocker;
                                  GMOCK_ARG_(tn, F, 2) gmock_a2, \
                                  GMOCK_ARG_(tn, F, 3) gmock_a3, \
                                  GMOCK_ARG_(tn, F, 4) gmock_a4) constness { \
-    GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
+    GTEST_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == 4, \
         this_method_does_not_take_4_arguments); \
     GMOCK_MOCKER_(4, constness, Method).SetOwnerAndName(this, #Method); \
@@ -442,7 +442,7 @@ using internal::FunctionMocker;
                                  GMOCK_ARG_(tn, F, 3) gmock_a3, \
                                  GMOCK_ARG_(tn, F, 4) gmock_a4, \
                                  GMOCK_ARG_(tn, F, 5) gmock_a5) constness { \
-    GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
+    GTEST_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == 5, \
         this_method_does_not_take_5_arguments); \
     GMOCK_MOCKER_(5, constness, Method).SetOwnerAndName(this, #Method); \
@@ -469,7 +469,7 @@ using internal::FunctionMocker;
                                  GMOCK_ARG_(tn, F, 4) gmock_a4, \
                                  GMOCK_ARG_(tn, F, 5) gmock_a5, \
                                  GMOCK_ARG_(tn, F, 6) gmock_a6) constness { \
-    GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
+    GTEST_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == 6, \
         this_method_does_not_take_6_arguments); \
     GMOCK_MOCKER_(6, constness, Method).SetOwnerAndName(this, #Method); \
@@ -498,7 +498,7 @@ using internal::FunctionMocker;
                                  GMOCK_ARG_(tn, F, 5) gmock_a5, \
                                  GMOCK_ARG_(tn, F, 6) gmock_a6, \
                                  GMOCK_ARG_(tn, F, 7) gmock_a7) constness { \
-    GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
+    GTEST_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == 7, \
         this_method_does_not_take_7_arguments); \
     GMOCK_MOCKER_(7, constness, Method).SetOwnerAndName(this, #Method); \
@@ -529,7 +529,7 @@ using internal::FunctionMocker;
                                  GMOCK_ARG_(tn, F, 6) gmock_a6, \
                                  GMOCK_ARG_(tn, F, 7) gmock_a7, \
                                  GMOCK_ARG_(tn, F, 8) gmock_a8) constness { \
-    GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
+    GTEST_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == 8, \
         this_method_does_not_take_8_arguments); \
     GMOCK_MOCKER_(8, constness, Method).SetOwnerAndName(this, #Method); \
@@ -562,7 +562,7 @@ using internal::FunctionMocker;
                                  GMOCK_ARG_(tn, F, 7) gmock_a7, \
                                  GMOCK_ARG_(tn, F, 8) gmock_a8, \
                                  GMOCK_ARG_(tn, F, 9) gmock_a9) constness { \
-    GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
+    GTEST_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == 9, \
         this_method_does_not_take_9_arguments); \
     GMOCK_MOCKER_(9, constness, Method).SetOwnerAndName(this, #Method); \
@@ -598,7 +598,7 @@ using internal::FunctionMocker;
                                  GMOCK_ARG_(tn, F, 8) gmock_a8, \
                                  GMOCK_ARG_(tn, F, 9) gmock_a9, \
                                  GMOCK_ARG_(tn, F, 10) gmock_a10) constness { \
-    GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
+    GTEST_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == 10, \
         this_method_does_not_take_10_arguments); \
     GMOCK_MOCKER_(10, constness, Method).SetOwnerAndName(this, #Method); \

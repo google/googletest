@@ -203,7 +203,7 @@ def _IncompleteByReferenceArgumentDiagnoser(msg):
   """Diagnoses the IBRA disease, given the error messages by gcc."""
 
   regex = (_FILE_LINE_RE + r'instantiated from here\n'
-           r'.*gmock-printers\.h.*error: invalid application of '
+           r'.*gtest-printers\.h.*error: invalid application of '
            r'\'sizeof\' to incomplete type \'(?P<type>.*)\'')
   diagnosis = """
 In order to mock this function, Google Mock needs to see the definition

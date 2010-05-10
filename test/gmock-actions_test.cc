@@ -74,9 +74,9 @@ using testing::SetArgumentPointee;
 using testing::SetErrnoAndReturn;
 #endif
 
-#if GMOCK_HAS_PROTOBUF_
+#if GTEST_HAS_PROTOBUF_
 using testing::internal::TestMessage;
-#endif  // GMOCK_HAS_PROTOBUF_
+#endif  // GTEST_HAS_PROTOBUF_
 
 // Tests that BuiltInDefaultValue<T*>::Get() returns NULL.
 TEST(BuiltInDefaultValueTest, IsNullForPointerTypes) {
@@ -689,7 +689,7 @@ TEST(SetArgumentPointeeTest, SetsTheNthPointee) {
   EXPECT_EQ('a', ch);
 }
 
-#if GMOCK_HAS_PROTOBUF_
+#if GTEST_HAS_PROTOBUF_
 
 // Tests that SetArgumentPointee<N>(proto_buffer) sets the v1 protobuf
 // variable pointed to by the N-th (0-based) argument to proto_buffer.
@@ -786,7 +786,7 @@ TEST(SetArgumentPointeeTest, SetsTheNthPointeeOfProto2BufferBaseType) {
   EXPECT_EQ("hi", dest.string_field());
 }
 
-#endif  // GMOCK_HAS_PROTOBUF_
+#endif  // GTEST_HAS_PROTOBUF_
 
 // Sample functions and functors for testing Invoke() and etc.
 int Nullary() { return 1; }

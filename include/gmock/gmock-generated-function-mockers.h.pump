@@ -132,7 +132,7 @@ $var matcher_as = [[$for j, \
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
 #define GMOCK_METHOD$i[[]]_(tn, constness, ct, Method, F) \
   GMOCK_RESULT_(tn, F) ct Method($arg_as) constness { \
-    GMOCK_COMPILE_ASSERT_(::std::tr1::tuple_size< \
+    GTEST_COMPILE_ASSERT_(::std::tr1::tuple_size< \
         tn ::testing::internal::Function<F>::ArgumentTuple>::value == $i, \
         this_method_does_not_take_$i[[]]_argument[[$if i != 1 [[s]]]]); \
     GMOCK_MOCKER_($i, constness, Method).SetOwnerAndName(this, #Method); \
