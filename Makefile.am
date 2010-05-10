@@ -22,6 +22,7 @@ GTEST_SRC = \
   src/gtest-filepath.cc \
   src/gtest-internal-inl.h \
   src/gtest-port.cc \
+  src/gtest-printers.cc \
   src/gtest-test-part.cc \
   src/gtest-typed-test.cc
 
@@ -52,6 +53,7 @@ EXTRA_DIST += \
   test/gtest-param-test2_test.cc \
   test/gtest-param-test_test.h \
   test/gtest-port_test.cc \
+  test/gtest-printers_test.cc \
   test/gtest_pred_impl_unittest.cc \
   test/gtest_prod_test.cc \
   test/production.cc \
@@ -186,6 +188,7 @@ pkginclude_HEADERS = include/gtest/gtest.h \
                      include/gtest/gtest-message.h \
                      include/gtest/gtest-param-test.h \
                      include/gtest/gtest_pred_impl.h \
+                     include/gtest/gtest-printers.h \
                      include/gtest/gtest_prod.h \
                      include/gtest/gtest-spi.h \
                      include/gtest/gtest-test-part.h \
