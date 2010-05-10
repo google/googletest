@@ -765,6 +765,15 @@ GTEST_API_ bool AlwaysTrue();
 // Always returns false.
 inline bool AlwaysFalse() { return !AlwaysTrue(); }
 
+// Helper for suppressing false warning from Clang on a const char*
+// variable declared in a conditional expression always being NULL in
+// the else branch.
+struct GTEST_API_ ConstCharPtr {
+  ConstCharPtr(const char* str) : value(str) {}
+  operator bool() const { return true; }
+  const char* value;
+};
+
 // A simple Linear Congruential Generator for generating random
 // numbers with a uniform distribution.  Unlike rand() and srand(), it
 // doesn't use global state (and therefore can't interfere with user
@@ -1097,7 +1106,7 @@ class NativeArray {
 
 #define GTEST_TEST_THROW_(statement, expected_exception, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-  if (const char* gtest_msg = "") { \
+  if (::testing::internal::ConstCharPtr gtest_msg = "") { \
     bool gtest_caught_expected = false; \
     try { \
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
@@ -1106,38 +1115,38 @@ class NativeArray {
       gtest_caught_expected = true; \
     } \
     catch (...) { \
-      gtest_msg = "Expected: " #statement " throws an exception of type " \
-                  #expected_exception ".\n  Actual: it throws a different " \
-                  "type."; \
+      gtest_msg.value = \
+          "Expected: " #statement " throws an exception of type " \
+          #expected_exception ".\n  Actual: it throws a different type."; \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
     } \
     if (!gtest_caught_expected) { \
-      gtest_msg = "Expected: " #statement " throws an exception of type " \
-                  #expected_exception ".\n  Actual: it throws nothing."; \
+      gtest_msg.value = \
+          "Expected: " #statement " throws an exception of type " \
+          #expected_exception ".\n  Actual: it throws nothing."; \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
     } \
   } else \
     GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__): \
-      fail(gtest_msg)
+      fail(gtest_msg.value)
 
 #define GTEST_TEST_NO_THROW_(statement, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-  if (const char* gtest_msg = "") { \
+  if (::testing::internal::AlwaysTrue()) { \
     try { \
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
     } \
     catch (...) { \
-      gtest_msg = "Expected: " #statement " doesn't throw an exception.\n" \
-                  "  Actual: it throws."; \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__); \
     } \
   } else \
     GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__): \
-      fail(gtest_msg)
+      fail("Expected: " #statement " doesn't throw an exception.\n" \
+           "  Actual: it throws.")
 
 #define GTEST_TEST_ANY_THROW_(statement, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-  if (const char* gtest_msg = "") { \
+  if (::testing::internal::AlwaysTrue()) { \
     bool gtest_caught_any = false; \
     try { \
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
@@ -1146,13 +1155,12 @@ class NativeArray {
       gtest_caught_any = true; \
     } \
     if (!gtest_caught_any) { \
-      gtest_msg = "Expected: " #statement " throws an exception.\n" \
-                  "  Actual: it doesn't."; \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testanythrow_, __LINE__); \
     } \
   } else \
     GTEST_CONCAT_TOKEN_(gtest_label_testanythrow_, __LINE__): \
-      fail(gtest_msg)
+      fail("Expected: " #statement " throws an exception.\n" \
+           "  Actual: it doesn't.")
 
 
 // Implements Boolean test assertions such as EXPECT_TRUE. expression can be
@@ -1169,18 +1177,17 @@ class NativeArray {
 
 #define GTEST_TEST_NO_FATAL_FAILURE_(statement, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-  if (const char* gtest_msg = "") { \
+  if (::testing::internal::AlwaysTrue()) { \
     ::testing::internal::HasNewFatalFailureHelper gtest_fatal_failure_checker; \
     GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
     if (gtest_fatal_failure_checker.has_new_fatal_failure()) { \
-      gtest_msg = "Expected: " #statement " doesn't generate new fatal " \
-                  "failures in the current thread.\n" \
-                  "  Actual: it does."; \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testnofatal_, __LINE__); \
     } \
   } else \
     GTEST_CONCAT_TOKEN_(gtest_label_testnofatal_, __LINE__): \
-      fail(gtest_msg)
+      fail("Expected: " #statement " doesn't generate new fatal " \
+           "failures in the current thread.\n" \
+           "  Actual: it does.")
 
 // Expands to the name of the class that implements the given test.
 #define GTEST_TEST_CLASS_NAME_(test_case_name, test_name) \
