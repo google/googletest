@@ -39,29 +39,9 @@ if (COMMAND set_up_hermetic_build)
   set_up_hermetic_build()
 endif()
 
-if (MSVC)
-  # For MSVC, CMake sets certain flags to defaults we want to override.
-  # This replacement code is taken from sample in the CMake Wiki at
-  # http://www.cmake.org/Wiki/CMake_FAQ#Dynamic_Replace.
-  foreach (flag_var
-           CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
-           CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-    if (NOT BUILD_SHARED_LIBS)
-      # When Google Test is built as a shared library, it should also use
-      # shared runtime libraries.  Otherwise, it may end up with multiple
-      # copies of runtime library data in different modules, resulting in
-      # hard-to-find crashes. When it is built as a static library, it is
-      # preferable to use CRT as static libraries, as we don't have to rely
-      # on CRT DLLs being available. CMake always defaults to using shared
-      # CRT libraries, so we override that default here.
-      string(REPLACE "/MD" "-MT" ${flag_var} "${${flag_var}}")
-    endif()
+include(cmake/internal_utils.cmake)
 
-    # We prefer more strict warning checking for building Google Test.
-    # Replaces /W3 with /W4 in defaults.
-    string(REPLACE "/W3" "-W4" ${flag_var} "${${flag_var}}")
-  endforeach()
-endif()
+fix_default_settings()  # Defined in internal_utils.cmake.
 
 # Where gtest's .h files can be found.
 include_directories(
@@ -72,91 +52,10 @@ include_directories(
 link_directories(
   ${gtest_BINARY_DIR}/src)
 
-# Defines CMAKE_USE_PTHREADS_INIT and CMAKE_THREAD_LIBS_INIT.
-find_package(Threads)
-
-# Defines the compiler/linker flags used to build gtest.  You can
-# tweak these definitions to suit your need.  A variable's value is
-# empty before it's explicitly assigned to.
-
-if (MSVC)
-  # Newlines inside flags variables break CMake's NMake generator.
-  # TODO(vladl@google.com): Add -RTCs and -RTCu to debug builds.
-  set(cxx_base_flags "-GS -W4 -WX -wd4251 -wd4275 -nologo -J -Zi")
-  set(cxx_base_flags "${cxx_base_flags} -D_UNICODE -DUNICODE -DWIN32 -D_WIN32")
-  set(cxx_base_flags "${cxx_base_flags} -DSTRICT -DWIN32_LEAN_AND_MEAN")
-  set(cxx_exception_flags "-EHsc -D_HAS_EXCEPTIONS=1")
-  set(cxx_no_exception_flags "-D_HAS_EXCEPTIONS=0")
-  set(cxx_no_rtti_flags "-GR-")
-elseif (CMAKE_COMPILER_IS_GNUCXX)
-  set(cxx_base_flags "-Wall -Wshadow")
-  set(cxx_exception_flags "-fexceptions")
-  set(cxx_no_exception_flags "-fno-exceptions")
-  # Until version 4.3.2, GCC doesn't define a macro to indicate
-  # whether RTTI is enabled.  Therefore we define GTEST_HAS_RTTI
-  # explicitly.
-  set(cxx_no_rtti_flags "-fno-rtti -DGTEST_HAS_RTTI=0")
-  set(cxx_strict_flags "-Wextra")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "SunPro")
-  set(cxx_exception_flags "-features=except")
-  # Sun Pro doesn't provide macros to indicate whether exceptions and
-  # RTTI are enabled, so we define GTEST_HAS_* explicitly.
-  set(cxx_no_exception_flags "-features=no%except -DGTEST_HAS_EXCEPTIONS=0")
-  set(cxx_no_rtti_flags "-features=no%rtti -DGTEST_HAS_RTTI=0")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "VisualAge" OR
-        CMAKE_CXX_COMPILER_ID STREQUAL "XL")
-  # CMake 2.8 changes Visual Age's compiler ID to "XL".
-  set(cxx_exception_flags "-qeh")
-  set(cxx_no_exception_flags "-qnoeh")
-  # Until version 9.0, Visual Age doesn't define a macro to indicate
-  # whether RTTI is enabled.  Therefore we define GTEST_HAS_RTTI
-  # explicitly.
-  set(cxx_no_rtti_flags "-qnortti -DGTEST_HAS_RTTI=0")
-endif()
-
-if (CMAKE_USE_PTHREADS_INIT)  # The pthreads library is available.
-  set(cxx_base_flags "${cxx_base_flags} -DGTEST_HAS_PTHREAD=1")
-endif()
-
-# For building gtest's own tests and samples.
-set(cxx_exception "${CMAKE_CXX_FLAGS} ${cxx_base_flags} ${cxx_exception_flags}")
-set(cxx_no_exception
-    "${CMAKE_CXX_FLAGS} ${cxx_base_flags} ${cxx_no_exception_flags}")
-set(cxx_default "${cxx_exception}")
-set(cxx_no_rtti "${cxx_default} ${cxx_no_rtti_flags}")
-set(cxx_use_own_tuple "${cxx_default} -DGTEST_USE_OWN_TR1_TUPLE=1")
-
-# For building the gtest libraries.
-set(cxx_strict "${cxx_default} ${cxx_strict_flags}")
-
 ########################################################################
 #
 # Defines the gtest & gtest_main libraries.  User tests should link
 # with one of them.
-function(cxx_library_with_type name type cxx_flags)
-  # type can be either STATIC or SHARED to denote a static or shared library.
-  # ARGN refers to additional arguments after 'cxx_flags'.
-  add_library(${name} ${type} ${ARGN})
-  set_target_properties(${name}
-    PROPERTIES
-    COMPILE_FLAGS "${cxx_flags}")
-  if (BUILD_SHARED_LIBS OR type STREQUAL "SHARED")
-    set_target_properties(${name}
-      PROPERTIES
-      COMPILE_DEFINITIONS "GTEST_CREATE_SHARED_LIBRARY=1")
-  endif()
-  if (CMAKE_USE_PTHREADS_INIT)
-    target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT})
-  endif()
-endfunction()
-
-function(cxx_shared_library name cxx_flags)
-  cxx_library_with_type(${name} SHARED "${cxx_flags}" ${ARGN})
-endfunction()
-
-function(cxx_library name cxx_flags)
-  cxx_library_with_type(${name} "" "${cxx_flags}" ${ARGN})
-endfunction()
 
 # Google Test libraries.  We build them using more strict warnings than what
 # are used for other targets, to ensure that gtest can be compiled by a user
@@ -172,39 +71,6 @@ target_link_libraries(gtest_main gtest)
 # They are not built by default.  To build them, set the
 # build_gtest_samples option to ON.  You can do it by running ccmake
 # or specifying the -Dbuild_gtest_samples=ON flag when running cmake.
-
-# cxx_executable_with_flags(name cxx_flags libs srcs...)
-#
-# creates a named C++ executable that depends on the given libraries and
-# is built from the given source files with the given compiler flags.
-function(cxx_executable_with_flags name cxx_flags libs)
-  add_executable(${name} ${ARGN})
-  if (cxx_flags)
-    set_target_properties(${name}
-      PROPERTIES
-      COMPILE_FLAGS "${cxx_flags}")
-  endif()
-  if (BUILD_SHARED_LIBS)
-    set_target_properties(${name}
-      PROPERTIES
-      COMPILE_DEFINITIONS "GTEST_LINKED_AS_SHARED_LIBRARY=1")
-  endif()
-  # To support mixing linking in static and dynamic libraries, link each
-  # library in with an extra call to target_link_libraries.
-  foreach (lib "${libs}")
-    target_link_libraries(${name} ${lib})
-  endforeach()
-endfunction()
-
-# cxx_executable(name dir lib srcs...)
-#
-# creates a named target that depends on the given libs and is built
-# from the given source files.  dir/name.cc is implicitly included in
-# the source file list.
-function(cxx_executable name dir libs)
-  cxx_executable_with_flags(
-    ${name} "${cxx_default}" "${libs}" "${dir}/${name}.cc" ${ARGN})
-endfunction()
 
 if (build_gtest_samples)
   cxx_executable(sample1_unittest samples gtest_main samples/sample1.cc)
@@ -230,38 +96,14 @@ endif()
 # build_all_gtest_tests option to ON.  You can do it by running ccmake
 # or specifying the -Dbuild_all_gtest_tests=ON flag when running cmake.
 
-# This must be set in the root directory for the tests to be run by
-# 'make test' or ctest.
-enable_testing()
-
-# Sets PYTHONINTERP_FOUND and PYTHON_EXECUTABLE.
-find_package(PythonInterp)
-
-############################################################
-# C++ tests built with standard compiler flags.
-
-# cxx_test_with_flags(name cxx_flags libs srcs...)
-#
-# creates a named C++ test that depends on the given libs and is built
-# from the given source files with the given compiler flags.
-function(cxx_test_with_flags name cxx_flags libs)
-  cxx_executable_with_flags(${name} "${cxx_flags}" "${libs}" ${ARGN})
-  add_test(${name} ${name})
-endfunction()
-
-# cxx_test(name libs srcs...)
-#
-# creates a named test target that depends on the given libs and is
-# built from the given source files.  Unlike cxx_test_with_flags,
-# test/name.cc is already implicitly included in the source file list.
-function(cxx_test name libs)
-  cxx_test_with_flags("${name}" "${cxx_default}" "${libs}"
-    "test/${name}.cc" ${ARGN})
-endfunction()
-
-cxx_test(gtest_unittest gtest_main)
-
 if (build_all_gtest_tests)
+  # This must be set in the root directory for the tests to be run by
+  # 'make test' or ctest.
+  enable_testing()
+
+  ############################################################
+  # C++ tests built with standard compiler flags.
+
   cxx_test(gtest-death-test_test gtest_main)
   cxx_test(gtest_environment_test gtest)
   cxx_test(gtest-filepath_test gtest_main)
@@ -275,6 +117,7 @@ if (build_all_gtest_tests)
     test/gtest-param-test2_test.cc)
   cxx_test(gtest-port_test gtest_main)
   cxx_test(gtest_pred_impl_unittest gtest_main)
+  cxx_test(gtest-printers_test gtest_main)
   cxx_test(gtest_prod_test gtest_main
     test/production.cc)
   cxx_test(gtest_repeat_test gtest)
@@ -284,13 +127,12 @@ if (build_all_gtest_tests)
   cxx_test(gtest_throw_on_failure_ex_test gtest)
   cxx_test(gtest-typed-test_test gtest_main
     test/gtest-typed-test2_test.cc)
+  cxx_test(gtest_unittest gtest_main)
   cxx_test(gtest-unittest-api_test gtest)
-endif()
 
-############################################################
-# C++ tests built with non-standard compiler flags.
+  ############################################################
+  # C++ tests built with non-standard compiler flags.
 
-if (build_all_gtest_tests)
   cxx_library(gtest_no_exception "${cxx_no_exception}"
     src/gtest-all.cc)
   cxx_library(gtest_main_no_rtti "${cxx_no_rtti}"
@@ -325,28 +167,9 @@ if (build_all_gtest_tests)
       test/gtest-param-test_test.cc test/gtest-param-test2_test.cc)
   endif()
 
-endif()
+  ############################################################
+  # Python tests.
 
-############################################################
-# Python tests.
-
-# py_test(name)
-#
-# creates a Python test with the given name whose main module is in
-# test/name.py.  It does nothing if Python is not installed.
-function(py_test name)
-  if (PYTHONINTERP_FOUND)
-    # ${gtest_BINARY_DIR} is known at configuration time, so we can
-    # directly bind it from cmake. ${CTEST_CONFIGURATION_TYPE} is known
-    # only at ctest runtime (by calling ctest -c <Configuration>), so
-    # we have to escape $ to delay variable substitution here.
-    add_test(${name}
-      ${PYTHON_EXECUTABLE} ${gtest_SOURCE_DIR}/test/${name}.py
-          --gtest_build_dir=${gtest_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE})
-  endif()
-endfunction()
-
-if (build_all_gtest_tests)
   cxx_executable(gtest_break_on_failure_unittest_ test gtest)
   py_test(gtest_break_on_failure_unittest)
 
