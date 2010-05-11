@@ -12,9 +12,9 @@
 # make it prominent in the GUI.
 option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
 
-option(build_all_gtest_tests "Build all of gtest's own tests." OFF)
+option(gtest_build_tests "Build all of gtest's own tests." OFF)
 
-option(build_gtest_samples "Build gtest's sample programs." OFF)
+option(gtest_build_samples "Build gtest's sample programs." OFF)
 
 include(cmake/hermetic_build.cmake OPTIONAL)
 
@@ -69,10 +69,10 @@ target_link_libraries(gtest_main gtest)
 # Samples on how to link user tests with gtest or gtest_main.
 #
 # They are not built by default.  To build them, set the
-# build_gtest_samples option to ON.  You can do it by running ccmake
+# gtest_build_samples option to ON.  You can do it by running ccmake
 # or specifying the -Dbuild_gtest_samples=ON flag when running cmake.
 
-if (build_gtest_samples)
+if (gtest_build_samples)
   cxx_executable(sample1_unittest samples gtest_main samples/sample1.cc)
   cxx_executable(sample2_unittest samples gtest_main samples/sample2.cc)
   cxx_executable(sample3_unittest samples gtest_main)
@@ -93,10 +93,10 @@ endif()
 # Google Test itself.
 #
 # Most of the tests are not built by default.  To build them, set the
-# build_all_gtest_tests option to ON.  You can do it by running ccmake
-# or specifying the -Dbuild_all_gtest_tests=ON flag when running cmake.
+# gtest_build_tests option to ON.  You can do it by running ccmake
+# or specifying the -Dgtest_build_tests=ON flag when running cmake.
 
-if (build_all_gtest_tests)
+if (gtest_build_tests)
   # This must be set in the root directory for the tests to be run by
   # 'make test' or ctest.
   enable_testing()

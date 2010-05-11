@@ -171,7 +171,7 @@ workflow starts with:
 If you want to build Google Test's samples, you should replace the
 last command with
 
-  cmake -Dbuild_gtest_samples=ON ${GTEST_DIR}
+  cmake -Dgtest_build_samples=ON ${GTEST_DIR}
 
 If you are on a *nix system, you should now see a Makefile in the
 current directory.  Just type 'make' to build gtest.
@@ -371,7 +371,7 @@ For that you can use CMake:
 
   mkdir mybuild
   cd mybuild
-  cmake -Dbuild_all_gtest_tests=ON ${GTEST_DIR}
+  cmake -Dgtest_build_tests=ON ${GTEST_DIR}
 
 Make sure you have Python installed, as some of Google Test's tests
 are written in Python.  If the cmake command complains about not being
@@ -379,8 +379,7 @@ able to find Python ("Could NOT find PythonInterp (missing:
 PYTHON_EXECUTABLE)"), try telling it explicitly where your Python
 executable can be found:
 
-  cmake -DPYTHON_EXECUTABLE=path/to/python -Dbuild_all_gtest_tests=ON \
-      ${GTEST_DIR}
+  cmake -DPYTHON_EXECUTABLE=path/to/python -Dgtest_build_tests=ON ${GTEST_DIR}
 
 Next, you can build Google Test and all of its own tests.  On *nix,
 this is usually done by 'make'.  To run the tests, do
