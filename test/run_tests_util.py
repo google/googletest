@@ -171,7 +171,7 @@ class TestRunner(object):
 
   def __init__(self,
                script_dir,
-               build_dir_var_name='GTEST_BUILD_DIR',
+               build_dir_var_name='BUILD_DIR',
                injected_os=os,
                injected_subprocess=subprocess,
                injected_build_dir_finder=_GetGtestBuildDir):

@@ -32,7 +32,7 @@
 """Tests the --help flag of Google C++ Testing Framework.
 
 SYNOPSIS
-       gtest_help_test.py --gtest_build_dir=BUILD/DIR
+       gtest_help_test.py --build_dir=BUILD/DIR
          # where BUILD/DIR contains the built gtest_help_test_ file.
        gtest_help_test.py
 """
