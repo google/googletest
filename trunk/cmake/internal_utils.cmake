@@ -1,3 +1,7 @@
+# NOTE: This file can be included both into Google Test's and Google Mock's
+# build scripts, so actions and functions defined here need to be
+# idempotent.
+
 # Defines CMAKE_USE_PTHREADS_INIT and CMAKE_THREAD_LIBS_INIT.
 find_package(Threads)
 
@@ -174,13 +178,13 @@ endfunction()
 function(py_test name)
   # We are not supporting Python tests on Linux yet as they consider
   # all Linux environments to be google3 and try to use google3 features.
-  if (PYTHONINTERP_FOUND AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    # ${gtest_BINARY_DIR} is known at configuration time, so we can
+  if (PYTHONINTERP_FOUND)
+    # ${CMAKE_BINARY_DIR} is known at configuration time, so we can
     # directly bind it from cmake. ${CTEST_CONFIGURATION_TYPE} is known
     # only at ctest runtime (by calling ctest -c <Configuration>), so
     # we have to escape $ to delay variable substitution here.
     add_test(${name}
-      ${PYTHON_EXECUTABLE} ${gtest_SOURCE_DIR}/test/${name}.py
-          --gtest_build_dir=${gtest_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE})
+      ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/test/${name}.py
+          --build_dir=${CMAKE_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE})
   endif()
 endfunction()

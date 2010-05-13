@@ -63,8 +63,8 @@ TestCase = _test_module.TestCase  # pylint: disable-msg=C6409
 
 # Initially maps a flag to its default value. After
 # _ParseAndStripGTestFlags() is called, maps a flag to its actual value.
-_flag_map = {'gtest_source_dir': os.path.dirname(sys.argv[0]),
-             'gtest_build_dir': os.path.dirname(sys.argv[0])}
+_flag_map = {'source_dir': os.path.dirname(sys.argv[0]),
+             'build_dir': os.path.dirname(sys.argv[0])}
 _gtest_flags_are_parsed = False
 
 
@@ -111,13 +111,13 @@ def GetFlag(flag):
 def GetSourceDir():
   """Returns the absolute path of the directory where the .py files are."""
 
-  return os.path.abspath(GetFlag('gtest_source_dir'))
+  return os.path.abspath(GetFlag('source_dir'))
 
 
 def GetBuildDir():
   """Returns the absolute path of the directory where the test binaries are."""
 
-  return os.path.abspath(GetFlag('gtest_build_dir'))
+  return os.path.abspath(GetFlag('build_dir'))
 
 
 _temp_dir = None
@@ -161,7 +161,7 @@ def GetTestExecutablePath(executable_name, build_dir=None):
   if not os.path.exists(path):
     message = (
         'Unable to find the test binary. Please make sure to provide path\n'
-        'to the binary via the --gtest_build_dir flag or the GTEST_BUILD_DIR\n'
+        'to the binary via the --build_dir flag or the BUILD_DIR\n'
         'environment variable. For convenient use, invoke this script via\n'
         'mk_test.py.\n'
         # TODO(vladl@google.com): change mk_test.py to test.py after renaming
