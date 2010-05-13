@@ -39,18 +39,18 @@ if (COMMAND set_up_hermetic_build)
   set_up_hermetic_build()
 endif()
 
+# Defines functions and variables used by Google Test.
 include(cmake/internal_utils.cmake)
 
 fix_default_settings()  # Defined in internal_utils.cmake.
 
-# Where gtest's .h files can be found.
+# Where Google Test's .h files can be found.
 include_directories(
   ${gtest_SOURCE_DIR}/include
   ${gtest_SOURCE_DIR})
 
-# Where the gtest libraries can be found.
-link_directories(
-  ${gtest_BINARY_DIR}/src)
+# Where Google Test's libraries can be found.
+link_directories(${gtest_BINARY_DIR}/src)
 
 ########################################################################
 #
@@ -92,7 +92,7 @@ endif()
 # You can skip this section if you aren't interested in testing
 # Google Test itself.
 #
-# Most of the tests are not built by default.  To build them, set the
+# The tests are not built by default.  To build them, set the
 # gtest_build_tests option to ON.  You can do it by running ccmake
 # or specifying the -Dgtest_build_tests=ON flag when running cmake.
 
