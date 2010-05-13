@@ -395,10 +395,10 @@ inline void PrintTo(wchar_t* s, ::std::ostream* os) {
 // the curly braces.
 template <typename T>
 void PrintRawArrayTo(const T a[], size_t count, ::std::ostream* os) {
-  UniversalPrinter<T>::Print(a[0], os);
+  UniversalPrint(a[0], os);
   for (size_t i = 1; i != count; i++) {
     *os << ", ";
-    UniversalPrinter<T>::Print(a[i], os);
+    UniversalPrint(a[i], os);
   }
 }
 
@@ -515,6 +515,8 @@ void PrintTo(
 template <typename T1, typename T2>
 void PrintTo(const ::std::pair<T1, T2>& value, ::std::ostream* os) {
   *os << '(';
+  // We cannot use UniversalPrint(value.first, os) here, as T1 may be
+  // a reference type.  The same for printing value.second.
   UniversalPrinter<T1>::Print(value.first, os);
   *os << ", ";
   UniversalPrinter<T2>::Print(value.second, os);
@@ -610,7 +612,7 @@ class UniversalPrinter<T&> {
     *os << "@" << reinterpret_cast<const void*>(&value) << " ";
 
     // Then prints the value itself.
-    UniversalPrinter<T>::Print(value, os);
+    UniversalPrint(value, os);
   }
 
 #ifdef _MSC_VER
@@ -623,13 +625,13 @@ class UniversalPrinter<T&> {
 // NUL-terminated string (but not the pointer) is printed.
 template <typename T>
 void UniversalTersePrint(const T& value, ::std::ostream* os) {
-  UniversalPrinter<T>::Print(value, os);
+  UniversalPrint(value, os);
 }
 inline void UniversalTersePrint(const char* str, ::std::ostream* os) {
   if (str == NULL) {
     *os << "NULL";
   } else {
-    UniversalPrinter<string>::Print(string(str), os);
+    UniversalPrint(string(str), os);
   }
 }
 inline void UniversalTersePrint(char* str, ::std::ostream* os) {
