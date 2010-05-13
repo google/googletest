@@ -32,7 +32,7 @@
 """Tests the text output of Google C++ Mocking Framework.
 
 SYNOPSIS
-       gmock_output_test.py --gmock_build_dir=BUILD/DIR --gengolden
+       gmock_output_test.py --build_dir=BUILD/DIR --gengolden
          # where BUILD/DIR contains the built gmock_output_test_ file.
        gmock_output_test.py --gengolden
        gmock_output_test.py

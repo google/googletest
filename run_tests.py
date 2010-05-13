@@ -68,7 +68,6 @@ def _Main():
   options, args = run_tests_util.ParseArgs('gtest')
   test_runner = run_tests_util.TestRunner(
       script_dir=SCRIPT_DIR,
-      build_dir_var_name='GMOCK_BUILD_DIR',
       injected_build_dir_finder=GetGmockBuildDir)
   tests = test_runner.GetTestsToRun(args,
                                     options.configurations,

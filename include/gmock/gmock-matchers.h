@@ -702,11 +702,11 @@ class AnythingMatcher {
       } \
       virtual void DescribeTo(::std::ostream* os) const { \
         *os << relation  " "; \
-        UniversalPrinter<Rhs>::Print(rhs_, os); \
+        UniversalPrint(rhs_, os); \
       } \
       virtual void DescribeNegationTo(::std::ostream* os) const { \
         *os << negated_relation  " "; \
-        UniversalPrinter<Rhs>::Print(rhs_, os); \
+        UniversalPrint(rhs_, os); \
       } \
      private: \
       Rhs rhs_; \
@@ -910,7 +910,7 @@ class StrEqualityMatcher {
     if (!case_sensitive_) {
       *os << "(ignoring case) ";
     }
-    UniversalPrinter<StringType>::Print(string_, os);
+    UniversalPrint(string_, os);
   }
 
   const StringType string_;
@@ -947,12 +947,12 @@ class HasSubstrMatcher {
   // Describes what this matcher matches.
   void DescribeTo(::std::ostream* os) const {
     *os << "has substring ";
-    UniversalPrinter<StringType>::Print(substring_, os);
+    UniversalPrint(substring_, os);
   }
 
   void DescribeNegationTo(::std::ostream* os) const {
     *os << "has no substring ";
-    UniversalPrinter<StringType>::Print(substring_, os);
+    UniversalPrint(substring_, os);
   }
 
  private:
@@ -988,12 +988,12 @@ class StartsWithMatcher {
 
   void DescribeTo(::std::ostream* os) const {
     *os << "starts with ";
-    UniversalPrinter<StringType>::Print(prefix_, os);
+    UniversalPrint(prefix_, os);
   }
 
   void DescribeNegationTo(::std::ostream* os) const {
     *os << "doesn't start with ";
-    UniversalPrinter<StringType>::Print(prefix_, os);
+    UniversalPrint(prefix_, os);
   }
 
  private:
@@ -1028,12 +1028,12 @@ class EndsWithMatcher {
 
   void DescribeTo(::std::ostream* os) const {
     *os << "ends with ";
-    UniversalPrinter<StringType>::Print(suffix_, os);
+    UniversalPrint(suffix_, os);
   }
 
   void DescribeNegationTo(::std::ostream* os) const {
     *os << "doesn't end with ";
-    UniversalPrinter<StringType>::Print(suffix_, os);
+    UniversalPrint(suffix_, os);
   }
 
  private:
@@ -1879,11 +1879,11 @@ class ContainerEqMatcher {
 
   void DescribeTo(::std::ostream* os) const {
     *os << "equals ";
-    UniversalPrinter<StlContainer>::Print(rhs_, os);
+    UniversalPrint(rhs_, os);
   }
   void DescribeNegationTo(::std::ostream* os) const {
     *os << "does not equal ";
-    UniversalPrinter<StlContainer>::Print(rhs_, os);
+    UniversalPrint(rhs_, os);
   }
 
   template <typename LhsContainer>
@@ -1913,8 +1913,7 @@ class ContainerEqMatcher {
             *os << "which has these unexpected elements: ";
             printed_header = true;
           }
-          UniversalPrinter<typename LhsStlContainer::value_type>::
-              Print(*it, os);
+          UniversalPrint(*it, os);
         }
       }
 
@@ -1932,7 +1931,7 @@ class ContainerEqMatcher {
                 << " doesn't have these expected elements: ";
             printed_header2 = true;
           }
-          UniversalPrinter<typename StlContainer::value_type>::Print(*it, os);
+          UniversalPrint(*it, os);
         }
       }
     }

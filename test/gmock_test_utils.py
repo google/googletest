@@ -51,62 +51,10 @@ sys.path.append(GTEST_TESTS_UTIL_DIR)
 import gtest_test_utils  # pylint: disable-msg=C6204
 
 
-# Initially maps a flag to its default value.  After
-# _ParseAndStripGMockFlags() is called, maps a flag to its actual
-# value.
-_flag_map = {'gmock_source_dir': os.path.dirname(sys.argv[0]),
-             'gmock_build_dir': os.path.dirname(sys.argv[0])}
-_gmock_flags_are_parsed = False
-
-
-def _ParseAndStripGMockFlags(argv):
-  """Parses and strips Google Test flags from argv.  This is idempotent."""
-
-  global _gmock_flags_are_parsed
-  if _gmock_flags_are_parsed:
-    return
-
-  _gmock_flags_are_parsed = True
-  for flag in _flag_map:
-    # The environment variable overrides the default value.
-    if flag.upper() in os.environ:
-      _flag_map[flag] = os.environ[flag.upper()]
-
-    # The command line flag overrides the environment variable.
-    i = 1  # Skips the program name.
-    while i < len(argv):
-      prefix = '--' + flag + '='
-      if argv[i].startswith(prefix):
-        _flag_map[flag] = argv[i][len(prefix):]
-        del argv[i]
-        break
-      else:
-        # We don't increment i in case we just found a --gmock_* flag
-        # and removed it from argv.
-        i += 1
-
-
-def GetFlag(flag):
-  """Returns the value of the given flag."""
-
-  # In case GetFlag() is called before Main(), we always call
-  # _ParseAndStripGMockFlags() here to make sure the --gmock_* flags
-  # are parsed.
-  _ParseAndStripGMockFlags(sys.argv)
-
-  return _flag_map[flag]
-
-
 def GetSourceDir():
   """Returns the absolute path of the directory where the .py files are."""
 
-  return os.path.abspath(GetFlag('gmock_source_dir'))
-
-
-def GetBuildDir():
-  """Returns the absolute path of the directory where the test binaries are."""
-
-  return os.path.abspath(GetFlag('gmock_build_dir'))
+  return gtest_test_utils.GetSourceDir()
 
 
 def GetTestExecutablePath(executable_name):
@@ -122,7 +70,7 @@ def GetTestExecutablePath(executable_name):
     The absolute path of the test binary.
   """
 
-  return gtest_test_utils.GetTestExecutablePath(executable_name, GetBuildDir())
+  return gtest_test_utils.GetTestExecutablePath(executable_name)
 
 
 def GetExitStatus(exit_code):
@@ -160,8 +108,4 @@ TestCase = gtest_test_utils.TestCase
 def Main():
   """Runs the unit test."""
 
-  # We must call _ParseAndStripGMockFlags() before calling
-  # gtest_test_utils.Main().  Otherwise unittest.main it calls will be
-  # confused by the --gmock_* flags.
-  _ParseAndStripGMockFlags(sys.argv)
   gtest_test_utils.Main()

@@ -1268,6 +1268,7 @@ class ActionResultHolder {
   // Prints the held value as an action's result to os.
   void PrintAsActionResult(::std::ostream* os) const {
     *os << "\n          Returns: ";
+    // T may be a reference type, so we don't use UniversalPrint().
     UniversalPrinter<T>::Print(value_, os);
   }
 
@@ -1539,7 +1540,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
     *os << "Uninteresting mock function call - ";
     DescribeDefaultActionTo(args, os);
     *os << "    Function call: " << Name();
-    UniversalPrinter<ArgumentTuple>::Print(args, os);
+    UniversalPrint(args, os);
   }
 
   // Critical section: We must find the matching expectation and the
@@ -1775,7 +1776,7 @@ typename Function<F>::Result FunctionMockerBase<F>::InvokeWith(
   }
 
   ss << "    Function call: " << Name();
-  UniversalPrinter<ArgumentTuple>::Print(args, &ss);
+  UniversalPrint(args, &ss);
 
   // In case the action deletes a piece of the expectation, we
   // generate the message beforehand.
