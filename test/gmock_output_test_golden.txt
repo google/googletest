@@ -151,7 +151,7 @@ FILE:#: pre-requisite #1
 [ RUN      ] GMockOutputTest.UnsatisfiedWith
 FILE:#: Failure
 Actual function call count doesn't match EXPECT_CALL(foo_, Bar2(_, _))...
-    Expected args: are a pair (x, y) where x >= y
+    Expected args: are a pair where the first >= the second
          Expected: to be called once
            Actual: never called - unsatisfied and active
 [  FAILED  ] GMockOutputTest.UnsatisfiedWith
@@ -190,7 +190,7 @@ Unexpected mock function call - returning default value.
 Google Mock tried the following 1 expectation, but it didn't match:
 
 FILE:#: EXPECT_CALL(foo_, Bar2(Ge(2), Ge(1)))...
-    Expected args: are a pair (x, y) where x >= y
+    Expected args: are a pair where the first >= the second
            Actual: don't match
          Expected: to be called once
            Actual: never called - unsatisfied and active
@@ -206,7 +206,7 @@ Google Mock tried the following 1 expectation, but it didn't match:
 FILE:#: EXPECT_CALL(foo_, Bar2(Ge(2), Ge(1)))...
   Expected arg #0: is >= 2
            Actual: 1
-    Expected args: are a pair (x, y) where x >= y
+    Expected args: are a pair where the first >= the second
            Actual: don't match
          Expected: to be called once
            Actual: never called - unsatisfied and active

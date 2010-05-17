@@ -192,7 +192,8 @@ TEST(ArgsTest, AcceptsTenTemplateArgs) {
 
 TEST(ArgsTest, DescirbesSelfCorrectly) {
   const Matcher<tuple<int, bool, char> > m = Args<2, 0>(Lt());
-  EXPECT_EQ("are a tuple whose fields (#2, #0) are a pair (x, y) where x < y",
+  EXPECT_EQ("are a tuple whose fields (#2, #0) are a pair where "
+            "the first < the second",
             Describe(m));
 }
 
@@ -200,14 +201,14 @@ TEST(ArgsTest, DescirbesNestedArgsCorrectly) {
   const Matcher<const tuple<int, bool, char, int>&> m =
       Args<0, 2, 3>(Args<2, 0>(Lt()));
   EXPECT_EQ("are a tuple whose fields (#0, #2, #3) are a tuple "
-            "whose fields (#2, #0) are a pair (x, y) where x < y",
+            "whose fields (#2, #0) are a pair where the first < the second",
             Describe(m));
 }
 
 TEST(ArgsTest, DescribesNegationCorrectly) {
   const Matcher<tuple<int, char> > m = Args<1, 0>(Gt());
-  EXPECT_EQ("are a tuple whose fields (#1, #0) are a pair (x, y) "
-            "where x > y is false",
+  EXPECT_EQ("are a tuple whose fields (#1, #0) aren't a pair "
+            "where the first > the second",
             DescribeNegation(m));
 }
 

@@ -43,6 +43,7 @@
 #include <ostream>  // NOLINT
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <gmock/internal/gmock-internal-utils.h>
@@ -427,8 +428,8 @@ class SafeMatcherCastImpl {
         cannot_convert_non_referentce_arg_to_reference);
     // In case both T and U are arithmetic types, enforce that the
     // conversion is not lossy.
-    typedef GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(T)) RawT;
-    typedef GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(U)) RawU;
+    typedef GTEST_REMOVE_REFERENCE_AND_CONST_(T) RawT;
+    typedef GTEST_REMOVE_REFERENCE_AND_CONST_(U) RawU;
     const bool kTIsOther = GMOCK_KIND_OF_(RawT) == internal::kOther;
     const bool kUIsOther = GMOCK_KIND_OF_(RawU) == internal::kOther;
     GTEST_COMPILE_ASSERT_(
@@ -1095,38 +1096,46 @@ class MatchesRegexMatcher {
 //
 // We define this as a macro in order to eliminate duplicated source
 // code.
-#define GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(name, op) \
+#define GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(name, op, relation) \
   class name##2Matcher { \
    public: \
     template <typename T1, typename T2> \
+    operator Matcher< ::std::tr1::tuple<T1, T2> >() const { \
+      return MakeMatcher(new Impl< ::std::tr1::tuple<T1, T2> >); \
+    } \
+    template <typename T1, typename T2> \
     operator Matcher<const ::std::tr1::tuple<T1, T2>&>() const { \
-      return MakeMatcher(new Impl<T1, T2>); \
+      return MakeMatcher(new Impl<const ::std::tr1::tuple<T1, T2>&>); \
     } \
    private: \
-    template <typename T1, typename T2> \
-    class Impl : public MatcherInterface<const ::std::tr1::tuple<T1, T2>&> { \
+    template <typename Tuple> \
+    class Impl : public MatcherInterface<Tuple> { \
      public: \
       virtual bool MatchAndExplain( \
-          const ::std::tr1::tuple<T1, T2>& args, \
+          Tuple args, \
           MatchResultListener* /* listener */) const { \
         return ::std::tr1::get<0>(args) op ::std::tr1::get<1>(args); \
       } \
       virtual void DescribeTo(::std::ostream* os) const { \
-        *os << "are a pair (x, y) where x " #op " y"; \
+        *os << "are " relation;                                 \
       } \
       virtual void DescribeNegationTo(::std::ostream* os) const { \
-        *os << "are a pair (x, y) where x " #op " y is false"; \
+        *os << "aren't " relation; \
       } \
     }; \
   }
 
 // Implements Eq(), Ge(), Gt(), Le(), Lt(), and Ne() respectively.
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Eq, ==);
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Ge, >=);
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Gt, >);
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Le, <=);
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Lt, <);
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Ne, !=);
+GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Eq, ==, "an equal pair");
+GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(
+    Ge, >=, "a pair where the first >= the second");
+GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(
+    Gt, >, "a pair where the first > the second");
+GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(
+    Le, <=, "a pair where the first <= the second");
+GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(
+    Lt, <, "a pair where the first < the second");
+GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Ne, !=, "an unequal pair");
 
 #undef GMOCK_IMPLEMENT_COMPARISON2_MATCHER_
 
@@ -1873,8 +1882,8 @@ class ContainerEqMatcher {
   explicit ContainerEqMatcher(const Container& rhs) : rhs_(View::Copy(rhs)) {
     // Makes sure the user doesn't instantiate this class template
     // with a const or reference type.
-    testing::StaticAssertTypeEq<Container,
-        GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(Container))>();
+    (void)testing::StaticAssertTypeEq<Container,
+        GTEST_REMOVE_REFERENCE_AND_CONST_(Container)>();
   }
 
   void DescribeTo(::std::ostream* os) const {
@@ -1945,11 +1954,121 @@ class ContainerEqMatcher {
   GTEST_DISALLOW_ASSIGN_(ContainerEqMatcher);
 };
 
+// Implements Pointwise(tuple_matcher, rhs_container).  tuple_matcher
+// must be able to be safely cast to Matcher<tuple<const T1&, const
+// T2&> >, where T1 and T2 are the types of elements in the LHS
+// container and the RHS container respectively.
+template <typename TupleMatcher, typename RhsContainer>
+class PointwiseMatcher {
+ public:
+  typedef internal::StlContainerView<RhsContainer> RhsView;
+  typedef typename RhsView::type RhsStlContainer;
+  typedef typename RhsStlContainer::value_type RhsValue;
+
+  // Like ContainerEq, we make a copy of rhs in case the elements in
+  // it are modified after this matcher is created.
+  PointwiseMatcher(const TupleMatcher& tuple_matcher, const RhsContainer& rhs)
+      : tuple_matcher_(tuple_matcher), rhs_(RhsView::Copy(rhs)) {
+    // Makes sure the user doesn't instantiate this class template
+    // with a const or reference type.
+    (void)testing::StaticAssertTypeEq<RhsContainer,
+        GTEST_REMOVE_REFERENCE_AND_CONST_(RhsContainer)>();
+  }
+
+  template <typename LhsContainer>
+  operator Matcher<LhsContainer>() const {
+    return MakeMatcher(new Impl<LhsContainer>(tuple_matcher_, rhs_));
+  }
+
+  template <typename LhsContainer>
+  class Impl : public MatcherInterface<LhsContainer> {
+   public:
+    typedef internal::StlContainerView<
+         GTEST_REMOVE_REFERENCE_AND_CONST_(LhsContainer)> LhsView;
+    typedef typename LhsView::type LhsStlContainer;
+    typedef typename LhsView::const_reference LhsStlContainerReference;
+    typedef typename LhsStlContainer::value_type LhsValue;
+    // We pass the LHS value and the RHS value to the inner matcher by
+    // reference, as they may be expensive to copy.  We must use tuple
+    // instead of pair here, as a pair cannot hold references (C++ 98,
+    // 20.2.2 [lib.pairs]).
+    typedef std::tr1::tuple<const LhsValue&, const RhsValue&> InnerMatcherArg;
+
+    Impl(const TupleMatcher& tuple_matcher, const RhsStlContainer& rhs)
+        // mono_tuple_matcher_ holds a monomorphic version of the tuple matcher.
+        : mono_tuple_matcher_(SafeMatcherCast<InnerMatcherArg>(tuple_matcher)),
+          rhs_(rhs) {}
+
+    virtual void DescribeTo(::std::ostream* os) const {
+      *os << "contains " << rhs_.size()
+          << " values, where each value and its corresponding value in ";
+      UniversalPrinter<RhsStlContainer>::Print(rhs_, os);
+      *os << " ";
+      mono_tuple_matcher_.DescribeTo(os);
+    }
+    virtual void DescribeNegationTo(::std::ostream* os) const {
+      *os << "doesn't contain exactly " << rhs_.size()
+          << " values, or contains a value x at some index i"
+          << " where x and the i-th value of ";
+      UniversalPrint(rhs_, os);
+      *os << " ";
+      mono_tuple_matcher_.DescribeNegationTo(os);
+    }
+
+    virtual bool MatchAndExplain(LhsContainer lhs,
+                                 MatchResultListener* listener) const {
+      LhsStlContainerReference lhs_stl_container = LhsView::ConstReference(lhs);
+      const size_t actual_size = lhs_stl_container.size();
+      if (actual_size != rhs_.size()) {
+        *listener << "which contains " << actual_size << " values";
+        return false;
+      }
+
+      typename LhsStlContainer::const_iterator left = lhs_stl_container.begin();
+      typename RhsStlContainer::const_iterator right = rhs_.begin();
+      for (size_t i = 0; i != actual_size; ++i, ++left, ++right) {
+        const InnerMatcherArg value_pair(*left, *right);
+
+        if (listener->IsInterested()) {
+          StringMatchResultListener inner_listener;
+          if (!mono_tuple_matcher_.MatchAndExplain(
+                  value_pair, &inner_listener)) {
+            *listener << "where the value pair (";
+            UniversalPrint(*left, listener->stream());
+            *listener << ", ";
+            UniversalPrint(*right, listener->stream());
+            *listener << ") at index #" << i << " don't match";
+            PrintIfNotEmpty(inner_listener.str(), listener->stream());
+            return false;
+          }
+        } else {
+          if (!mono_tuple_matcher_.Matches(value_pair))
+            return false;
+        }
+      }
+
+      return true;
+    }
+
+   private:
+    const Matcher<InnerMatcherArg> mono_tuple_matcher_;
+    const RhsStlContainer rhs_;
+
+    GTEST_DISALLOW_ASSIGN_(Impl);
+  };
+
+ private:
+  const TupleMatcher tuple_matcher_;
+  const RhsStlContainer rhs_;
+
+  GTEST_DISALLOW_ASSIGN_(PointwiseMatcher);
+};
+
 // Holds the logic common to ContainsMatcherImpl and EachMatcherImpl.
 template <typename Container>
 class QuantifierMatcherImpl : public MatcherInterface<Container> {
  public:
-  typedef GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(Container)) RawContainer;
+  typedef GTEST_REMOVE_REFERENCE_AND_CONST_(Container) RawContainer;
   typedef StlContainerView<RawContainer> View;
   typedef typename View::type StlContainer;
   typedef typename View::const_reference StlContainerReference;
@@ -2088,7 +2207,7 @@ class EachMatcher {
 template <typename PairType>
 class KeyMatcherImpl : public MatcherInterface<PairType> {
  public:
-  typedef GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(PairType)) RawPairType;
+  typedef GTEST_REMOVE_REFERENCE_AND_CONST_(PairType) RawPairType;
   typedef typename RawPairType::first_type KeyType;
 
   template <typename InnerMatcher>
@@ -2150,7 +2269,7 @@ class KeyMatcher {
 template <typename PairType>
 class PairMatcherImpl : public MatcherInterface<PairType> {
  public:
-  typedef GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(PairType)) RawPairType;
+  typedef GTEST_REMOVE_REFERENCE_AND_CONST_(PairType) RawPairType;
   typedef typename RawPairType::first_type FirstType;
   typedef typename RawPairType::second_type SecondType;
 
@@ -2257,7 +2376,7 @@ class PairMatcher {
 template <typename Container>
 class ElementsAreMatcherImpl : public MatcherInterface<Container> {
  public:
-  typedef GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(Container)) RawContainer;
+  typedef GTEST_REMOVE_REFERENCE_AND_CONST_(Container) RawContainer;
   typedef internal::StlContainerView<RawContainer> View;
   typedef typename View::type StlContainer;
   typedef typename View::const_reference StlContainerReference;
@@ -2376,8 +2495,7 @@ class ElementsAreMatcher0 {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    typedef GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(Container))
-        RawContainer;
+    typedef GTEST_REMOVE_REFERENCE_AND_CONST_(Container) RawContainer;
     typedef typename internal::StlContainerView<RawContainer>::type::value_type
         Element;
 
@@ -2395,8 +2513,7 @@ class ElementsAreArrayMatcher {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    typedef GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(Container))
-        RawContainer;
+    typedef GTEST_REMOVE_REFERENCE_AND_CONST_(Container) RawContainer;
     typedef typename internal::StlContainerView<RawContainer>::type::value_type
         Element;
 
@@ -2898,6 +3015,23 @@ inline PolymorphicMatcher<internal::ContainerEqMatcher<  // NOLINT
   typedef GTEST_REMOVE_CONST_(Container) RawContainer;
   return MakePolymorphicMatcher(
       internal::ContainerEqMatcher<RawContainer>(rhs));
+}
+
+// Matches an STL-style container or a native array that contains the
+// same number of elements as in rhs, where its i-th element and rhs's
+// i-th element (as a pair) satisfy the given pair matcher, for all i.
+// TupleMatcher must be able to be safely cast to Matcher<tuple<const
+// T1&, const T2&> >, where T1 and T2 are the types of elements in the
+// LHS container and the RHS container respectively.
+template <typename TupleMatcher, typename Container>
+inline internal::PointwiseMatcher<TupleMatcher,
+                                  GTEST_REMOVE_CONST_(Container)>
+Pointwise(const TupleMatcher& tuple_matcher, const Container& rhs) {
+  // This following line is for working around a bug in MSVC 8.0,
+  // which causes Container to be a const type sometimes.
+  typedef GTEST_REMOVE_CONST_(Container) RawContainer;
+  return internal::PointwiseMatcher<TupleMatcher, RawContainer>(
+      tuple_matcher, rhs);
 }
 
 // Matches an STL-style container or a native array that contains at

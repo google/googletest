@@ -61,13 +61,18 @@ bool SkipPrefix(const char* prefix, const char** pstr);
 
 namespace gmock_matchers_test {
 
+using std::list;
 using std::make_pair;
 using std::map;
 using std::multimap;
+using std::multiset;
+using std::ostream;
 using std::pair;
 using std::set;
 using std::stringstream;
+using std::tr1::get;
 using std::tr1::make_tuple;
+using std::tr1::tuple;
 using std::vector;
 using testing::A;
 using testing::AllArgs;
@@ -104,6 +109,7 @@ using testing::Not;
 using testing::NotNull;
 using testing::Pair;
 using testing::Pointee;
+using testing::Pointwise;
 using testing::PolymorphicMatcher;
 using testing::Property;
 using testing::Ref;
@@ -144,7 +150,7 @@ class GreaterThanMatcher : public MatcherInterface<int> {
  public:
   explicit GreaterThanMatcher(int rhs) : rhs_(rhs) {}
 
-  virtual void DescribeTo(::std::ostream* os) const {
+  virtual void DescribeTo(ostream* os) const {
     *os << "is > " << rhs_;
   }
 
@@ -189,9 +195,9 @@ string DescribeNegation(const Matcher<T>& m) {
 // Returns the reason why x matches, or doesn't match, m.
 template <typename MatcherType, typename Value>
 string Explain(const MatcherType& m, const Value& x) {
-  stringstream ss;
-  m.ExplainMatchResultTo(x, &ss);
-  return ss.str();
+  StringMatchResultListener listener;
+  ExplainMatchResult(m, x, &listener);
+  return listener.str();
 }
 
 TEST(MatchResultListenerTest, StreamingWorks) {
@@ -228,7 +234,7 @@ class EvenMatcherImpl : public MatcherInterface<int> {
     return x % 2 == 0;
   }
 
-  virtual void DescribeTo(::std::ostream* os) const {
+  virtual void DescribeTo(ostream* os) const {
     *os << "is an even number";
   }
 
@@ -258,7 +264,7 @@ class NewEvenMatcherImpl : public MatcherInterface<int> {
     return match;
   }
 
-  virtual void DescribeTo(::std::ostream* os) const {
+  virtual void DescribeTo(ostream* os) const {
     *os << "is an even number";
   }
 };
@@ -375,9 +381,9 @@ class ReferencesBarOrIsZeroImpl {
     return p == &g_bar || x == 0;
   }
 
-  void DescribeTo(::std::ostream* os) const { *os << "g_bar or zero"; }
+  void DescribeTo(ostream* os) const { *os << "g_bar or zero"; }
 
-  void DescribeNegationTo(::std::ostream* os) const {
+  void DescribeNegationTo(ostream* os) const {
     *os << "doesn't reference g_bar and is not zero";
   }
 };
@@ -408,9 +414,9 @@ TEST(MakePolymorphicMatcherTest, ConstructsMatcherUsingOldAPI) {
 
 class PolymorphicIsEvenImpl {
  public:
-  void DescribeTo(::std::ostream* os) const { *os << "is even"; }
+  void DescribeTo(ostream* os) const { *os << "is even"; }
 
-  void DescribeNegationTo(::std::ostream* os) const {
+  void DescribeNegationTo(ostream* os) const {
     *os << "is odd";
   }
 
@@ -1150,7 +1156,7 @@ TEST(KeyTest, SafelyCastsInnerMatcher) {
 }
 
 TEST(KeyTest, InsideContainsUsingMap) {
-  std::map<int, char> container;
+  map<int, char> container;
   container.insert(make_pair(1, 'a'));
   container.insert(make_pair(2, 'b'));
   container.insert(make_pair(4, 'c'));
@@ -1159,7 +1165,7 @@ TEST(KeyTest, InsideContainsUsingMap) {
 }
 
 TEST(KeyTest, InsideContainsUsingMultimap) {
-  std::multimap<int, char> container;
+  multimap<int, char> container;
   container.insert(make_pair(1, 'a'));
   container.insert(make_pair(2, 'b'));
   container.insert(make_pair(4, 'c'));
@@ -1268,7 +1274,7 @@ TEST(PairTest, SafelyCastsInnerMatchers) {
 }
 
 TEST(PairTest, InsideContainsUsingMap) {
-  std::map<int, char> container;
+  map<int, char> container;
   container.insert(make_pair(1, 'a'));
   container.insert(make_pair(2, 'b'));
   container.insert(make_pair(4, 'c'));
@@ -1761,7 +1767,7 @@ TEST(Eq2Test, MatchesEqualArguments) {
 // Tests that Eq() describes itself properly.
 TEST(Eq2Test, CanDescribeSelf) {
   Matcher<const Tuple2&> m = Eq();
-  EXPECT_EQ("are a pair (x, y) where x == y", Describe(m));
+  EXPECT_EQ("are an equal pair", Describe(m));
 }
 
 // Tests that Ge() matches a 2-tuple where the first field >= the
@@ -1776,7 +1782,7 @@ TEST(Ge2Test, MatchesGreaterThanOrEqualArguments) {
 // Tests that Ge() describes itself properly.
 TEST(Ge2Test, CanDescribeSelf) {
   Matcher<const Tuple2&> m = Ge();
-  EXPECT_EQ("are a pair (x, y) where x >= y", Describe(m));
+  EXPECT_EQ("are a pair where the first >= the second", Describe(m));
 }
 
 // Tests that Gt() matches a 2-tuple where the first field > the
@@ -1791,7 +1797,7 @@ TEST(Gt2Test, MatchesGreaterThanArguments) {
 // Tests that Gt() describes itself properly.
 TEST(Gt2Test, CanDescribeSelf) {
   Matcher<const Tuple2&> m = Gt();
-  EXPECT_EQ("are a pair (x, y) where x > y", Describe(m));
+  EXPECT_EQ("are a pair where the first > the second", Describe(m));
 }
 
 // Tests that Le() matches a 2-tuple where the first field <= the
@@ -1806,7 +1812,7 @@ TEST(Le2Test, MatchesLessThanOrEqualArguments) {
 // Tests that Le() describes itself properly.
 TEST(Le2Test, CanDescribeSelf) {
   Matcher<const Tuple2&> m = Le();
-  EXPECT_EQ("are a pair (x, y) where x <= y", Describe(m));
+  EXPECT_EQ("are a pair where the first <= the second", Describe(m));
 }
 
 // Tests that Lt() matches a 2-tuple where the first field < the
@@ -1821,7 +1827,7 @@ TEST(Lt2Test, MatchesLessThanArguments) {
 // Tests that Lt() describes itself properly.
 TEST(Lt2Test, CanDescribeSelf) {
   Matcher<const Tuple2&> m = Lt();
-  EXPECT_EQ("are a pair (x, y) where x < y", Describe(m));
+  EXPECT_EQ("are a pair where the first < the second", Describe(m));
 }
 
 // Tests that Ne() matches a 2-tuple where the first field != the
@@ -1836,7 +1842,7 @@ TEST(Ne2Test, MatchesUnequalArguments) {
 // Tests that Ne() describes itself properly.
 TEST(Ne2Test, CanDescribeSelf) {
   Matcher<const Tuple2&> m = Ne();
-  EXPECT_EQ("are a pair (x, y) where x != y", Describe(m));
+  EXPECT_EQ("are an unequal pair", Describe(m));
 }
 
 // Tests that Not(m) matches any value that doesn't match m.
@@ -3338,11 +3344,11 @@ class DivisibleByImpl {
     return (n % divider_) == 0;
   }
 
-  void DescribeTo(::std::ostream* os) const {
+  void DescribeTo(ostream* os) const {
     *os << "is divisible by " << divider_;
   }
 
-  void DescribeNegationTo(::std::ostream* os) const {
+  void DescribeNegationTo(ostream* os) const {
     *os << "is not divisible by " << divider_;
   }
 
@@ -3444,10 +3450,10 @@ template <typename T>
 class ContainerEqTest : public testing::Test {};
 
 typedef testing::Types<
-    std::set<int>,
-    std::vector<size_t>,
-    std::multiset<size_t>,
-    std::list<int> >
+    set<int>,
+    vector<size_t>,
+    multiset<size_t>,
+    list<int> >
     ContainerEqTestTypes;
 
 TYPED_TEST_CASE(ContainerEqTest, ContainerEqTestTypes);
@@ -3515,9 +3521,9 @@ TYPED_TEST(ContainerEqTest, DuplicateDifference) {
 TEST(ContainerEqExtraTest, MultipleValuesMissing) {
   static const int vals[] = {1, 1, 2, 3, 5, 8};
   static const int test_vals[] = {2, 1, 5};
-  std::vector<int> my_set(vals, vals + 6);
-  std::vector<int> test_set(test_vals, test_vals + 3);
-  const Matcher<std::vector<int> > m = ContainerEq(my_set);
+  vector<int> my_set(vals, vals + 6);
+  vector<int> test_set(test_vals, test_vals + 3);
+  const Matcher<vector<int> > m = ContainerEq(my_set);
   EXPECT_FALSE(m.Matches(test_set));
   EXPECT_EQ("which doesn't have these expected elements: 3, 8",
             Explain(m, test_set));
@@ -3528,9 +3534,9 @@ TEST(ContainerEqExtraTest, MultipleValuesMissing) {
 TEST(ContainerEqExtraTest, MultipleValuesAdded) {
   static const int vals[] = {1, 1, 2, 3, 5, 8};
   static const int test_vals[] = {1, 2, 92, 3, 5, 8, 46};
-  std::list<size_t> my_set(vals, vals + 6);
-  std::list<size_t> test_set(test_vals, test_vals + 7);
-  const Matcher<const std::list<size_t>&> m = ContainerEq(my_set);
+  list<size_t> my_set(vals, vals + 6);
+  list<size_t> test_set(test_vals, test_vals + 7);
+  const Matcher<const list<size_t>&> m = ContainerEq(my_set);
   EXPECT_FALSE(m.Matches(test_set));
   EXPECT_EQ("which has these unexpected elements: 92, 46",
             Explain(m, test_set));
@@ -3540,9 +3546,9 @@ TEST(ContainerEqExtraTest, MultipleValuesAdded) {
 TEST(ContainerEqExtraTest, MultipleValuesAddedAndRemoved) {
   static const int vals[] = {1, 1, 2, 3, 5, 8};
   static const int test_vals[] = {1, 2, 3, 92, 46};
-  std::list<size_t> my_set(vals, vals + 6);
-  std::list<size_t> test_set(test_vals, test_vals + 5);
-  const Matcher<const std::list<size_t> > m = ContainerEq(my_set);
+  list<size_t> my_set(vals, vals + 6);
+  list<size_t> test_set(test_vals, test_vals + 5);
+  const Matcher<const list<size_t> > m = ContainerEq(my_set);
   EXPECT_FALSE(m.Matches(test_set));
   EXPECT_EQ("which has these unexpected elements: 92, 46,\n"
             "and doesn't have these expected elements: 5, 8",
@@ -3554,9 +3560,9 @@ TEST(ContainerEqExtraTest, MultipleValuesAddedAndRemoved) {
 TEST(ContainerEqExtraTest, MultiSetOfIntDuplicateDifference) {
   static const int vals[] = {1, 1, 2, 3, 5, 8};
   static const int test_vals[] = {1, 2, 3, 5, 8};
-  std::vector<int> my_set(vals, vals + 6);
-  std::vector<int> test_set(test_vals, test_vals + 5);
-  const Matcher<std::vector<int> > m = ContainerEq(my_set);
+  vector<int> my_set(vals, vals + 6);
+  vector<int> test_set(test_vals, test_vals + 5);
+  const Matcher<vector<int> > m = ContainerEq(my_set);
   EXPECT_TRUE(m.Matches(my_set));
   EXPECT_FALSE(m.Matches(test_set));
   // There is nothing to report when both sets contain all the same values.
@@ -3566,15 +3572,15 @@ TEST(ContainerEqExtraTest, MultiSetOfIntDuplicateDifference) {
 // Tests that ContainerEq works for non-trivial associative containers,
 // like maps.
 TEST(ContainerEqExtraTest, WorksForMaps) {
-  std::map<int, std::string> my_map;
+  map<int, std::string> my_map;
   my_map[0] = "a";
   my_map[1] = "b";
 
-  std::map<int, std::string> test_map;
+  map<int, std::string> test_map;
   test_map[0] = "aa";
   test_map[1] = "b";
 
-  const Matcher<const std::map<int, std::string>&> m = ContainerEq(my_map);
+  const Matcher<const map<int, std::string>&> m = ContainerEq(my_map);
   EXPECT_TRUE(m.Matches(my_map));
   EXPECT_FALSE(m.Matches(test_map));
 
@@ -4070,6 +4076,124 @@ TEST(EachTest, WorksForNativeArrayAsTuple) {
   const int* const pointer = a;
   EXPECT_THAT(make_tuple(pointer, 2), Each(Gt(0)));
   EXPECT_THAT(make_tuple(pointer, 2), Not(Each(Gt(1))));
+}
+
+// For testing Pointwise().
+class IsHalfOfMatcher {
+ public:
+  template <typename T1, typename T2>
+  bool MatchAndExplain(const tuple<T1, T2>& a_pair,
+                       MatchResultListener* listener) const {
+    if (get<0>(a_pair) == get<1>(a_pair)/2) {
+      *listener << "where the second is " << get<1>(a_pair);
+      return true;
+    } else {
+      *listener << "where the second/2 is " << get<1>(a_pair)/2;
+      return false;
+    }
+  }
+
+  void DescribeTo(ostream* os) const {
+    *os << "are a pair where the first is half of the second";
+  }
+
+  void DescribeNegationTo(ostream* os) const {
+    *os << "are a pair where the first isn't half of the second";
+  }
+};
+
+PolymorphicMatcher<IsHalfOfMatcher> IsHalfOf() {
+  return MakePolymorphicMatcher(IsHalfOfMatcher());
+}
+
+TEST(PointwiseTest, DescribesSelf) {
+  vector<int> rhs;
+  rhs.push_back(1);
+  rhs.push_back(2);
+  rhs.push_back(3);
+  const Matcher<const vector<int>&> m = Pointwise(IsHalfOf(), rhs);
+  EXPECT_EQ("contains 3 values, where each value and its corresponding value "
+            "in { 1, 2, 3 } are a pair where the first is half of the second",
+            Describe(m));
+  EXPECT_EQ("doesn't contain exactly 3 values, or contains a value x at some "
+            "index i where x and the i-th value of { 1, 2, 3 } are a pair "
+            "where the first isn't half of the second",
+            DescribeNegation(m));
+}
+
+TEST(PointwiseTest, MakesCopyOfRhs) {
+  list<signed char> rhs;
+  rhs.push_back(2);
+  rhs.push_back(4);
+
+  int lhs[] = { 1, 2 };
+  const Matcher<const int (&)[2]> m = Pointwise(IsHalfOf(), rhs);
+  EXPECT_THAT(lhs, m);
+
+  // Changing rhs now shouldn't affect m, which made a copy of rhs.
+  rhs.push_back(6);
+  EXPECT_THAT(lhs, m);
+}
+
+TEST(PointwiseTest, WorksForLhsNativeArray) {
+  const int lhs[] = { 1, 2, 3 };
+  vector<int> rhs;
+  rhs.push_back(2);
+  rhs.push_back(4);
+  rhs.push_back(6);
+  EXPECT_THAT(lhs, Pointwise(Lt(), rhs));
+  EXPECT_THAT(lhs, Not(Pointwise(Gt(), rhs)));
+}
+
+TEST(PointwiseTest, WorksForRhsNativeArray) {
+  const int rhs[] = { 1, 2, 3 };
+  vector<int> lhs;
+  lhs.push_back(2);
+  lhs.push_back(4);
+  lhs.push_back(6);
+  EXPECT_THAT(lhs, Pointwise(Gt(), rhs));
+  EXPECT_THAT(lhs, Not(Pointwise(Lt(), rhs)));
+}
+
+TEST(PointwiseTest, RejectsWrongSize) {
+  const double lhs[2] = { 1, 2 };
+  const int rhs[1] = { 0 };
+  EXPECT_THAT(lhs, Not(Pointwise(Gt(), rhs)));
+  EXPECT_EQ("which contains 2 values",
+            Explain(Pointwise(Gt(), rhs), lhs));
+
+  const int rhs2[3] = { 0, 1, 2 };
+  EXPECT_THAT(lhs, Not(Pointwise(Gt(), rhs2)));
+}
+
+TEST(PointwiseTest, RejectsWrongContent) {
+  const double lhs[3] = { 1, 2, 3 };
+  const int rhs[3] = { 2, 6, 4 };
+  EXPECT_THAT(lhs, Not(Pointwise(IsHalfOf(), rhs)));
+  EXPECT_EQ("where the value pair (2, 6) at index #1 don't match, "
+            "where the second/2 is 3",
+            Explain(Pointwise(IsHalfOf(), rhs), lhs));
+}
+
+TEST(PointwiseTest, AcceptsCorrectContent) {
+  const double lhs[3] = { 1, 2, 3 };
+  const int rhs[3] = { 2, 4, 6 };
+  EXPECT_THAT(lhs, Pointwise(IsHalfOf(), rhs));
+  EXPECT_EQ("", Explain(Pointwise(IsHalfOf(), rhs), lhs));
+}
+
+TEST(PointwiseTest, AllowsMonomorphicInnerMatcher) {
+  const double lhs[3] = { 1, 2, 3 };
+  const int rhs[3] = { 2, 4, 6 };
+  const Matcher<tuple<const double&, const int&> > m1 = IsHalfOf();
+  EXPECT_THAT(lhs, Pointwise(m1, rhs));
+  EXPECT_EQ("", Explain(Pointwise(m1, rhs), lhs));
+
+  // This type works as a tuple<const double&, const int&> can be
+  // implicitly cast to tuple<double, int>.
+  const Matcher<tuple<double, int> > m2 = IsHalfOf();
+  EXPECT_THAT(lhs, Pointwise(m2, rhs));
+  EXPECT_EQ("", Explain(Pointwise(m2, rhs), lhs));
 }
 
 }  // namespace gmock_matchers_test
