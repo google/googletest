@@ -6834,6 +6834,21 @@ TEST(RemoveConstTest, MacroVersion) {
   TestGTestRemoveConst<char, const char>();
 }
 
+// Tests GTEST_REMOVE_REFERENCE_AND_CONST_.
+
+template <typename T1, typename T2>
+void TestGTestRemoveReferenceAndConst() {
+  CompileAssertTypesEqual<T1, GTEST_REMOVE_REFERENCE_AND_CONST_(T2)>();
+}
+
+TEST(RemoveReferenceToConstTest, Works) {
+  TestGTestRemoveReferenceAndConst<int, int>();
+  TestGTestRemoveReferenceAndConst<double, double&>();
+  TestGTestRemoveReferenceAndConst<char, const char>();
+  TestGTestRemoveReferenceAndConst<char, const char&>();
+  TestGTestRemoveReferenceAndConst<const char*, const char*>();
+}
+
 // Tests that AddReference does not affect reference types.
 TEST(AddReferenceTest, DoesNotAffectReferenceType) {
   CompileAssertTypesEqual<int&, AddReference<int&>::type>();
