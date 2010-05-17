@@ -842,6 +842,10 @@ struct RemoveConst<T[N]> {
 #define GTEST_REMOVE_CONST_(T) \
     typename ::testing::internal::RemoveConst<T>::type
 
+// Turns const U&, U&, const U, and U all into U.
+#define GTEST_REMOVE_REFERENCE_AND_CONST_(T) \
+    GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(T))
+
 // Adds reference to a type if it is not a reference type,
 // otherwise leaves it unchanged.  This is the same as
 // tr1::add_reference, which is not widely available yet.
@@ -1046,7 +1050,7 @@ class NativeArray {
     // Ensures that the user doesn't instantiate NativeArray with a
     // const or reference type.
     static_cast<void>(StaticAssertTypeEqHelper<Element,
-        GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(Element))>());
+        GTEST_REMOVE_REFERENCE_AND_CONST_(Element)>());
     if (relation_to_source_ == kCopy)
       delete[] array_;
   }
