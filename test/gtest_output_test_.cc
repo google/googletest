@@ -87,6 +87,20 @@ TEST(PassingTest, PassingTest1) {
 TEST(PassingTest, PassingTest2) {
 }
 
+// Tests that parameters of failing parameterized tests are printed in the
+// failing test summary.
+class FailingParamTest : public testing::TestWithParam<int> {};
+
+TEST_P(FailingParamTest, Fails) {
+  EXPECT_EQ(1, GetParam());
+}
+
+// This generates a test which will fail. Google Test is expected to print
+// its parameter when it outputs the list of all failed tests.
+INSTANTIATE_TEST_CASE_P(PrintingFailingParams,
+                        FailingParamTest,
+                        testing::Values(2));
+
 // Tests catching a fatal failure in a subroutine.
 TEST(FatalFailureTest, FatalFailureInSubroutine) {
   printf("(expecting a failure that x should be 1)\n");

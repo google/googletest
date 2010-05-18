@@ -2658,6 +2658,19 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   va_end(args);
 }
 
+void PrintFullTestCommentIfPresent(const TestInfo& test_info) {
+  const char* const comment = test_info.comment();
+  const char* const test_case_comment = test_info.test_case_comment();
+
+  if (test_case_comment[0] != '\0' || comment[0] != '\0') {
+    printf(", where %s", test_case_comment);
+    if (test_case_comment[0] != '\0' && comment[0] != '\0') {
+      printf(" and ");
+    }
+    printf("%s", comment);
+  }
+}
+
 // This class implements the TestEventListener interface.
 //
 // Class PrettyUnitTestResultPrinter is copyable.
@@ -2748,11 +2761,7 @@ void PrettyUnitTestResultPrinter::OnTestCaseStart(const TestCase& test_case) {
 void PrettyUnitTestResultPrinter::OnTestStart(const TestInfo& test_info) {
   ColoredPrintf(COLOR_GREEN,  "[ RUN      ] ");
   PrintTestName(test_case_name_.c_str(), test_info.name());
-  if (test_info.comment()[0] == '\0') {
-    printf("\n");
-  } else {
-    printf(", where %s\n", test_info.comment());
-  }
+  printf("\n");
   fflush(stdout);
 }
 
@@ -2775,6 +2784,9 @@ void PrettyUnitTestResultPrinter::OnTestEnd(const TestInfo& test_info) {
     ColoredPrintf(COLOR_RED, "[  FAILED  ] ");
   }
   PrintTestName(test_case_name_.c_str(), test_info.name());
+  if (test_info.result()->Failed())
+    PrintFullTestCommentIfPresent(test_info);
+
   if (GTEST_FLAG(print_time)) {
     printf(" (%s ms)\n", internal::StreamableToString(
            test_info.result()->elapsed_time()).c_str());
@@ -2823,15 +2835,8 @@ void PrettyUnitTestResultPrinter::PrintFailedTests(const UnitTest& unit_test) {
       }
       ColoredPrintf(COLOR_RED, "[  FAILED  ] ");
       printf("%s.%s", test_case.name(), test_info.name());
-      if (test_case.comment()[0] != '\0' ||
-          test_info.comment()[0] != '\0') {
-        printf(", where %s", test_case.comment());
-        if (test_case.comment()[0] != '\0' &&
-            test_info.comment()[0] != '\0') {
-          printf(" and ");
-        }
-      }
-      printf("%s\n", test_info.comment());
+      PrintFullTestCommentIfPresent(test_info);
+      printf("\n");
     }
   }
 }

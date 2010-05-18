@@ -5,7 +5,7 @@ gtest_output_test_.cc:#: error: Value of: false
 Expected: true
 gtest_output_test_.cc:#: error: Value of: 3
 Expected: 2
-[==========] Running 61 tests from 27 test cases.
+[==========] Running 62 tests from 28 test cases.
 [----------] Global test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -369,7 +369,7 @@ gtest_output_test_.cc:#: error: Value of: TypeParam()
   Actual: 0
 Expected: 1
 Expected failure
-[  FAILED  ] TypedTest/0.Failure
+[  FAILED  ] TypedTest/0.Failure, where TypeParam = int
 [----------] 2 tests from Unsigned/TypedTestP/0, where TypeParam = unsigned char
 [ RUN      ] Unsigned/TypedTestP/0.Success
 [       OK ] Unsigned/TypedTestP/0.Success
@@ -379,7 +379,7 @@ gtest_output_test_.cc:#: error: Value of: TypeParam()
 Expected: 1U
 Which is: 1
 Expected failure
-[  FAILED  ] Unsigned/TypedTestP/0.Failure
+[  FAILED  ] Unsigned/TypedTestP/0.Failure, where TypeParam = unsigned char
 [----------] 2 tests from Unsigned/TypedTestP/1, where TypeParam = unsigned int
 [ RUN      ] Unsigned/TypedTestP/1.Success
 [       OK ] Unsigned/TypedTestP/1.Success
@@ -389,7 +389,7 @@ gtest_output_test_.cc:#: error: Value of: TypeParam()
 Expected: 1U
 Which is: 1
 Expected failure
-[  FAILED  ] Unsigned/TypedTestP/1.Failure
+[  FAILED  ] Unsigned/TypedTestP/1.Failure, where TypeParam = unsigned int
 [----------] 4 tests from ExpectFailureTest
 [ RUN      ] ExpectFailureTest.ExpectFatalFailure
 (expecting 1 failure)
@@ -479,6 +479,12 @@ Failed
 Expected non-fatal failure.
 
 [  FAILED  ] ExpectFailureTest.ExpectNonFatalFailureOnAllThreads
+[----------] 1 test from PrintingFailingParams/FailingParamTest
+[ RUN      ] PrintingFailingParams/FailingParamTest.Fails/0
+gtest_output_test_.cc:#: error: Value of: GetParam()
+  Actual: 2
+Expected: 1
+[  FAILED  ] PrintingFailingParams/FailingParamTest.Fails/0, where GetParam() = 2
 [----------] Global test environment tear-down
 BarEnvironment::TearDown() called.
 gtest_output_test_.cc:#: error: Failed
@@ -486,9 +492,9 @@ Expected non-fatal failure.
 FooEnvironment::TearDown() called.
 gtest_output_test_.cc:#: error: Failed
 Expected fatal failure.
-[==========] 61 tests from 27 test cases ran.
+[==========] 62 tests from 28 test cases ran.
 [  PASSED  ] 21 tests.
-[  FAILED  ] 40 tests, listed below:
+[  FAILED  ] 41 tests, listed below:
 [  FAILED  ] FatalFailureTest.FatalFailureInSubroutine
 [  FAILED  ] FatalFailureTest.FatalFailureInNestedSubroutine
 [  FAILED  ] FatalFailureTest.NonfatalFailureInSubroutine
@@ -529,8 +535,9 @@ Expected fatal failure.
 [  FAILED  ] ExpectFailureTest.ExpectNonFatalFailure
 [  FAILED  ] ExpectFailureTest.ExpectFatalFailureOnAllThreads
 [  FAILED  ] ExpectFailureTest.ExpectNonFatalFailureOnAllThreads
+[  FAILED  ] PrintingFailingParams/FailingParamTest.Fails/0, where GetParam() = 2
 
-40 FAILED TESTS
+41 FAILED TESTS
   YOU HAVE 1 DISABLED TEST
 
 Note: Google Test filter = FatalFailureTest.*:LoggingTest.*

@@ -240,7 +240,7 @@ SUPPORTS_STACK_TRACES = False
 
 CAN_GENERATE_GOLDEN_FILE = (SUPPORTS_DEATH_TESTS and
                             SUPPORTS_TYPED_TESTS and
-                            SUPPORTS_THREADS)
+                            (SUPPORTS_THREADS or IS_WINDOWS))
 
 
 class GTestOutputTest(gtest_test_utils.TestCase):

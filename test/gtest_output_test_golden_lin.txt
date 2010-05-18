@@ -7,7 +7,7 @@ Expected: true
 gtest_output_test_.cc:#: Failure
 Value of: 3
 Expected: 2
-[0;32m[==========] [mRunning 60 tests from 25 test cases.
+[0;32m[==========] [mRunning 61 tests from 26 test cases.
 [0;32m[----------] [mGlobal test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -411,7 +411,7 @@ Value of: TypeParam()
   Actual: 0
 Expected: 1
 Expected failure
-[0;31m[  FAILED  ] [mTypedTest/0.Failure
+[0;31m[  FAILED  ] [mTypedTest/0.Failure, where TypeParam = int
 [0;32m[----------] [m2 tests from Unsigned/TypedTestP/0, where TypeParam = unsigned char
 [0;32m[ RUN      ] [mUnsigned/TypedTestP/0.Success
 [0;32m[       OK ] [mUnsigned/TypedTestP/0.Success
@@ -422,7 +422,7 @@ Value of: TypeParam()
 Expected: 1U
 Which is: 1
 Expected failure
-[0;31m[  FAILED  ] [mUnsigned/TypedTestP/0.Failure
+[0;31m[  FAILED  ] [mUnsigned/TypedTestP/0.Failure, where TypeParam = unsigned char
 [0;32m[----------] [m2 tests from Unsigned/TypedTestP/1, where TypeParam = unsigned int
 [0;32m[ RUN      ] [mUnsigned/TypedTestP/1.Success
 [0;32m[       OK ] [mUnsigned/TypedTestP/1.Success
@@ -433,7 +433,7 @@ Value of: TypeParam()
 Expected: 1U
 Which is: 1
 Expected failure
-[0;31m[  FAILED  ] [mUnsigned/TypedTestP/1.Failure
+[0;31m[  FAILED  ] [mUnsigned/TypedTestP/1.Failure, where TypeParam = unsigned int
 [0;32m[----------] [m4 tests from ExpectFailureTest
 [0;32m[ RUN      ] [mExpectFailureTest.ExpectFatalFailure
 (expecting 1 failure)
@@ -564,6 +564,13 @@ gtest_output_test_.cc:#: Failure
 Failed
 Expected non-fatal failure.
 [0;31m[  FAILED  ] [mScopedFakeTestPartResultReporterTest.InterceptOnlyCurrentThread
+[0;32m[----------] [m1 test from PrintingFailingParams/FailingParamTest
+[0;32m[ RUN      ] [mPrintingFailingParams/FailingParamTest.Fails/0
+gtest_output_test_.cc:#: Failure
+Value of: GetParam()
+  Actual: 2
+Expected: 1
+[0;31m[  FAILED  ] [mPrintingFailingParams/FailingParamTest.Fails/0, where GetParam() = 2
 [0;32m[----------] [mGlobal test environment tear-down
 BarEnvironment::TearDown() called.
 gtest_output_test_.cc:#: Failure
@@ -573,9 +580,9 @@ FooEnvironment::TearDown() called.
 gtest_output_test_.cc:#: Failure
 Failed
 Expected fatal failure.
-[0;32m[==========] [m60 tests from 25 test cases ran.
+[0;32m[==========] [m61 tests from 26 test cases ran.
 [0;32m[  PASSED  ] [m21 tests.
-[0;31m[  FAILED  ] [m39 tests, listed below:
+[0;31m[  FAILED  ] [m40 tests, listed below:
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInSubroutine
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInNestedSubroutine
 [0;31m[  FAILED  ] [mFatalFailureTest.NonfatalFailureInSubroutine
@@ -615,8 +622,9 @@ Expected fatal failure.
 [0;31m[  FAILED  ] [mExpectFailureWithThreadsTest.ExpectFatalFailure
 [0;31m[  FAILED  ] [mExpectFailureWithThreadsTest.ExpectNonFatalFailure
 [0;31m[  FAILED  ] [mScopedFakeTestPartResultReporterTest.InterceptOnlyCurrentThread
+[0;31m[  FAILED  ] [mPrintingFailingParams/FailingParamTest.Fails/0, where GetParam() = 2
 
-39 FAILED TESTS
+40 FAILED TESTS
 [0;33m  YOU HAVE 1 DISABLED TEST
 
 [mNote: Google Test filter = FatalFailureTest.*:LoggingTest.*
