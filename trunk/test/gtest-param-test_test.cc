@@ -792,18 +792,49 @@ INSTANTIATE_TEST_CASE_P(FourElemSequence, SeparateInstanceTest, Range(1, 4));
 // sequence element used to instantiate the test.
 class NamingTest : public TestWithParam<int> {};
 
-TEST_P(NamingTest, TestsAreNamedAppropriately) {
+TEST_P(NamingTest, TestsAreNamedAndCommentedCorrectly) {
   const ::testing::TestInfo* const test_info =
      ::testing::UnitTest::GetInstance()->current_test_info();
 
   EXPECT_STREQ("ZeroToFiveSequence/NamingTest", test_info->test_case_name());
 
-  Message msg;
-  msg << "TestsAreNamedAppropriately/" << GetParam();
-  EXPECT_STREQ(msg.GetString().c_str(), test_info->name());
+  Message index_stream;
+  index_stream << "TestsAreNamedAndCommentedCorrectly/" << GetParam();
+  EXPECT_STREQ(index_stream.GetString().c_str(), test_info->name());
+
+  const ::std::string comment =
+      "GetParam() = " + ::testing::PrintToString(GetParam());
+  EXPECT_EQ(comment, test_info->comment());
 }
 
 INSTANTIATE_TEST_CASE_P(ZeroToFiveSequence, NamingTest, Range(0, 5));
+
+// Class that cannot be streamed into an ostream.  It needs to be copyable
+// (and, in case of MSVC, also assignable) in order to be a test parameter
+// type.  Its default copy constructor and assignment operator do exactly
+// what we need.
+class Unstreamable {
+ public:
+  explicit Unstreamable(int value) : value_(value) {}
+
+ private:
+  int value_;
+};
+
+class CommentTest : public TestWithParam<Unstreamable> {};
+
+TEST_P(CommentTest, TestsWithUnstreamableParamsCommentedCorrectly) {
+  const ::testing::TestInfo* const test_info =
+     ::testing::UnitTest::GetInstance()->current_test_info();
+
+  const ::std::string comment =
+      "GetParam() = " + ::testing::PrintToString(GetParam());
+  EXPECT_EQ(comment, test_info->comment());
+}
+
+INSTANTIATE_TEST_CASE_P(InstantiationWithComments,
+                        CommentTest,
+                        Values(Unstreamable(1)));
 
 #endif  // GTEST_HAS_PARAM_TEST
 
