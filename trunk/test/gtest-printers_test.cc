@@ -84,10 +84,9 @@ namespace foo {
 // A user-defined unprintable type in a user namespace.
 class UnprintableInFoo {
  public:
-  UnprintableInFoo() : x_(0x12EF), y_(0xAB34), z_(0) {}
+  UnprintableInFoo() : z_(0) { memcpy(xy_, "\xEF\x12\x0\x0\x34\xAB\x0\x0", 8); }
  private:
-  testing::internal::Int32 x_;
-  testing::internal::Int32 y_;
+  char xy_[8];
   double z_;
 };
 
