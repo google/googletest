@@ -184,7 +184,7 @@ function(py_test name)
     # only at ctest runtime (by calling ctest -c <Configuration>), so
     # we have to escape $ to delay variable substitution here.
     add_test(${name}
-      ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/test/${name}.py
-          --build_dir=${CMAKE_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE})
+      ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+          --build_dir=${CMAKE_CURRENT_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE})
   endif()
 endfunction()
