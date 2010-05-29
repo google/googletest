@@ -1575,7 +1575,7 @@ state.  Here's an example:
              test_info.test_case_name(), test_info.name());
     }
 
-    // Called after a failed assertion or a SUCCESS().
+    // Called after a failed assertion or a SUCCEED() invocation.
     virtual void OnTestPartResult(
         const ::testing::TestPartResult& test_part_result) {
       printf("%s in %s:%d\n%s\n",
