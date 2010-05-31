@@ -69,7 +69,7 @@ class TersePrinter : public EmptyTestEventListener {
     fflush(stdout);
   }
 
-  // Called after a failed assertion or a SUCCESS().
+  // Called after a failed assertion or a SUCCEED() invocation.
   virtual void OnTestPartResult(const TestPartResult& test_part_result) {
     fprintf(stdout,
             "%s in %s:%d\n%s\n",
