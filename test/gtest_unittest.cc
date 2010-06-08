@@ -178,6 +178,7 @@ using testing::internal::ShouldShard;
 using testing::internal::ShouldUseColor;
 using testing::internal::Shuffle;
 using testing::internal::ShuffleRange;
+using testing::internal::SkipPrefix;
 using testing::internal::StreamableToString;
 using testing::internal::String;
 using testing::internal::TestEventListenersAccessor;
@@ -7074,4 +7075,30 @@ TEST(NativeArrayTest, WorksForTwoDimensionalArray) {
   NativeArray<char[3]> na(a, 2, kReference);
   ASSERT_EQ(2U, na.size());
   EXPECT_EQ(a, na.begin());
+}
+
+// Tests SkipPrefix().
+
+TEST(SkipPrefixTest, SkipsWhenPrefixMatches) {
+  const char* const str = "hello";
+
+  const char* p = str;
+  EXPECT_TRUE(SkipPrefix("", &p));
+  EXPECT_EQ(str, p);
+
+  p = str;
+  EXPECT_TRUE(SkipPrefix("hell", &p));
+  EXPECT_EQ(str + 4, p);
+}
+
+TEST(SkipPrefixTest, DoesNotSkipWhenPrefixDoesNotMatch) {
+  const char* const str = "world";
+
+  const char* p = str;
+  EXPECT_FALSE(SkipPrefix("W", &p));
+  EXPECT_EQ(str, p);
+
+  p = str;
+  EXPECT_FALSE(SkipPrefix("world!", &p));
+  EXPECT_EQ(str, p);
 }
