@@ -402,25 +402,29 @@ $$   // show up in the generated code.
 // Describing Parameterized Matchers
 // =================================
 //
-// When defining a parameterized matcher, you can use Python-style
-// interpolations in the description string to refer to the parameter
-// values.  We support the following syntax currently:
+// The last argument to MATCHER*() is a string-typed expression.  The
+// expression can reference all of the matcher's parameters and a
+// special bool-typed variable named 'negation'.  When 'negation' is
+// false, the expression should evaluate to the matcher's description;
+// otherwise it should evaluate to the description of the negation of
+// the matcher.  For example,
 //
-//   %%       a single '%' character
-//   %(*)s    all parameters of the matcher printed as a tuple
-//   %(foo)s  value of the matcher parameter named 'foo'
+//   using testing::PrintToString;
 //
-// For example,
-//
-//   MATCHER_P2(InClosedRange, low, hi, "is in range [%(low)s, %(hi)s]") {
+//   MATCHER_P2(InClosedRange, low, hi,
+//       string(negation ? "is not" : "is") + " in range [" +
+//       PrintToString(low) + ", " + PrintToString(hi) + "]") {
 //     return low <= arg && arg <= hi;
 //   }
 //   ...
 //   EXPECT_THAT(3, InClosedRange(4, 6));
+//   EXPECT_THAT(3, Not(InClosedRange(2, 4)));
 //
-// would generate a failure that contains the message:
+// would generate two failures that contain the text:
 //
 //   Expected: is in range [4, 6]
+//   ...
+//   Expected: is not in range [2, 4]
 //
 // If you specify "" as the description, the failure message will
 // contain the sequence of words in the matcher name followed by the
@@ -429,10 +433,13 @@ $$   // show up in the generated code.
 //   MATCHER_P2(InClosedRange, low, hi, "") { ... }
 //   ...
 //   EXPECT_THAT(3, InClosedRange(4, 6));
+//   EXPECT_THAT(3, Not(InClosedRange(2, 4)));
 //
-// would generate a failure that contains the text:
+// would generate two failures that contain the text:
 //
 //   Expected: in closed range (4, 6)
+//   ...
+//   Expected: not (in closed range (2, 4))
 //
 // Types of Matcher Parameters
 // ===========================
@@ -529,11 +536,9 @@ $var template = [[$if i==0 [[]] $else [[
   template <$for j, [[typename p$j##_type]]>\
 ]]]]
 $var ctor_param_list = [[$for j, [[p$j##_type gmock_p$j]]]]
-$var impl_ctor_param_list = [[$for j [[p$j##_type gmock_p$j, ]]
-const ::testing::internal::Interpolations& gmock_interp]]
-$var impl_inits = [[ : $for j [[p$j(gmock_p$j), ]]gmock_interp_(gmock_interp)]]
+$var impl_ctor_param_list = [[$for j, [[p$j##_type gmock_p$j]]]]
+$var impl_inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(gmock_p$j)]]]]]]
 $var inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(gmock_p$j)]]]]]]
-$var params_and_interp = [[$for j [[p$j, ]]gmock_interp_]]
 $var params = [[$for j, [[p$j]]]]
 $var param_types = [[$if i==0 [[]] $else [[<$for j, [[p$j##_type]]>]]]]
 $var param_types_and_names = [[$for j, [[p$j##_type p$j]]]]
@@ -559,28 +564,31 @@ $var param_field_decls2 = [[$for j
       virtual bool MatchAndExplain(\
           arg_type arg, ::testing::MatchResultListener* result_listener) const;\
       virtual void DescribeTo(::std::ostream* gmock_os) const {\
-        const ::testing::internal::Strings& gmock_printed_params = \
-            ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::std::tr1::tuple<$for j, [[p$j##_type]]>($for j, [[p$j]]));\
-        *gmock_os << ::testing::internal::FormatMatcherDescription(\
-                     #name, description, gmock_interp_, gmock_printed_params);\
+        *gmock_os << FormatDescription(false);\
+      }\
+      virtual void DescribeNegationTo(::std::ostream* gmock_os) const {\
+        *gmock_os << FormatDescription(true);\
       }\$param_field_decls
-      const ::testing::internal::Interpolations gmock_interp_;\
      private:\
+      ::testing::internal::string FormatDescription(bool negation) const {\
+        const ::testing::internal::string gmock_description = (description);\
+        if (!gmock_description.empty())\
+          return gmock_description;\
+        return ::testing::internal::FormatMatcherDescription(\
+            negation, #name,\
+            ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
+                ::std::tr1::tuple<$for j, [[p$j##_type]]>($for j, [[p$j]])));\
+      }\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
       return ::testing::Matcher<arg_type>(\
-          new gmock_Impl<arg_type>($params_and_interp));\
+          new gmock_Impl<arg_type>($params));\
     }\
     $class_name($ctor_param_list)$inits {\
-      const char* gmock_param_names[] = { $for j [[#p$j, ]]NULL };\
-      gmock_interp_ = ::testing::internal::ValidateMatcherDescription(\
-          gmock_param_names, ("" description ""));\
     }\$param_field_decls2
    private:\
-    ::testing::internal::Interpolations gmock_interp_;\
     GTEST_DISALLOW_ASSIGN_($class_name);\
   };\$template
   inline $class_name$param_types name($param_types_and_names) {\

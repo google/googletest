@@ -2527,41 +2527,13 @@ class ElementsAreArrayMatcher {
   GTEST_DISALLOW_ASSIGN_(ElementsAreArrayMatcher);
 };
 
-// Constants denoting interpolations in a matcher description string.
-const int kTupleInterpolation = -1;    // "%(*)s"
-const int kPercentInterpolation = -2;  // "%%"
-const int kInvalidInterpolation = -3;  // "%" followed by invalid text
-
-// Records the location and content of an interpolation.
-struct Interpolation {
-  Interpolation(const char* start, const char* end, int param)
-      : start_pos(start), end_pos(end), param_index(param) {}
-
-  // Points to the start of the interpolation (the '%' character).
-  const char* start_pos;
-  // Points to the first character after the interpolation.
-  const char* end_pos;
-  // 0-based index of the interpolated matcher parameter;
-  // kTupleInterpolation for "%(*)s"; kPercentInterpolation for "%%".
-  int param_index;
-};
-
-typedef ::std::vector<Interpolation> Interpolations;
-
-// Parses a matcher description string and returns a vector of
-// interpolations that appear in the string; generates non-fatal
-// failures iff 'description' is an invalid matcher description.
-// 'param_names' is a NULL-terminated array of parameter names in the
-// order they appear in the MATCHER_P*() parameter list.
-Interpolations ValidateMatcherDescription(
-    const char* param_names[], const char* description);
-
-// Returns the actual matcher description, given the matcher name,
-// user-supplied description template string, interpolations in the
-// string, and the printed values of the matcher parameters.
-string FormatMatcherDescription(
-    const char* matcher_name, const char* description,
-    const Interpolations& interp, const Strings& param_values);
+// Returns the description for a matcher defined using the MATCHER*()
+// macro where the user-supplied description string is "", if
+// 'negation' is false; otherwise returns the description of the
+// negation of the matcher.  'param_values' contains a list of strings
+// that are the print-out of the matcher's parameters.
+string FormatMatcherDescription(bool negation, const char* matcher_name,
+                                const Strings& param_values);
 
 }  // namespace internal
 

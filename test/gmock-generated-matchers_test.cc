@@ -72,6 +72,7 @@ using testing::MatchResultListener;
 using testing::Ne;
 using testing::Not;
 using testing::Pointee;
+using testing::PrintToString;
 using testing::Ref;
 using testing::StaticAssertTypeEq;
 using testing::StrEq;
@@ -603,9 +604,8 @@ TEST(MatcherMacroTest, Works) {
   EXPECT_EQ("", Explain(m, 7));
 }
 
-// Tests explaining match result in a MATCHER* macro.
-
-MATCHER(IsEven2, "is even") {
+// This also tests that the description string can reference 'negation'.
+MATCHER(IsEven2, negation ? "is odd" : "is even") {
   if ((arg % 2) == 0) {
     // Verifies that we can stream to result_listener, a listener
     // supplied by the MATCHER macro implicitly.
@@ -617,7 +617,11 @@ MATCHER(IsEven2, "is even") {
   }
 }
 
-MATCHER_P2(EqSumOf, x, y, "") {
+// This also tests that the description string can reference matcher
+// parameters.
+MATCHER_P2(EqSumOf, x, y,
+           string(negation ? "doesn't equal" : "equals") + " the sum of " +
+           PrintToString(x) + " and " + PrintToString(y)) {
   if (arg == (x + y)) {
     *result_listener << "OK";
     return true;
@@ -631,6 +635,19 @@ MATCHER_P2(EqSumOf, x, y, "") {
   }
 }
 
+// Tests that the matcher description can reference 'negation' and the
+// matcher parameters.
+TEST(MatcherMacroTest, DescriptionCanReferenceNegationAndParameters) {
+  const Matcher<int> m1 = IsEven2();
+  EXPECT_EQ("is even", Describe(m1));
+  EXPECT_EQ("is odd", DescribeNegation(m1));
+
+  const Matcher<int> m2 = EqSumOf(5, 9);
+  EXPECT_EQ("equals the sum of 5 and 9", Describe(m2));
+  EXPECT_EQ("doesn't equal the sum of 5 and 9", DescribeNegation(m2));
+}
+
+// Tests explaining match result in a MATCHER* macro.
 TEST(MatcherMacroTest, CanExplainMatchResult) {
   const Matcher<int> m1 = IsEven2();
   EXPECT_EQ("OK", Explain(m1, 4));
@@ -639,29 +656,6 @@ TEST(MatcherMacroTest, CanExplainMatchResult) {
   const Matcher<int> m2 = EqSumOf(1, 2);
   EXPECT_EQ("OK", Explain(m2, 3));
   EXPECT_EQ("diff == -1", Explain(m2, 4));
-}
-
-// Tests that the description string supplied to MATCHER() must be
-// valid.
-
-MATCHER(HasBadDescription, "Invalid%") {
-  // Uses arg to suppress "unused parameter" warning.
-  return arg==arg;
-}
-
-TEST(MatcherMacroTest,
-     CreatingMatcherWithBadDescriptionGeneratesNonfatalFailure) {
-  EXPECT_NONFATAL_FAILURE(
-      HasBadDescription(),
-      "Syntax error at index 7 in matcher description \"Invalid%\": "
-      "use \"%%\" instead of \"%\" to print \"%\".");
-}
-
-MATCHER(HasGoodDescription, "good") { return arg==arg; }
-
-TEST(MatcherMacroTest, AcceptsValidDescription) {
-  const Matcher<int> m = HasGoodDescription();
-  EXPECT_EQ("good", Describe(m));
 }
 
 // Tests that the body of MATCHER() can reference the type of the
@@ -723,29 +717,6 @@ TEST(MatcherPMacroTest, Works) {
   EXPECT_EQ("", Explain(m, 5));
 }
 
-// Tests that the description string supplied to MATCHER_P() must be
-// valid.
-
-MATCHER_P(HasBadDescription1, n, "not %(m)s good") {
-  return arg > n;
-}
-
-TEST(MatcherPMacroTest,
-     CreatingMatcherWithBadDescriptionGeneratesNonfatalFailure) {
-  EXPECT_NONFATAL_FAILURE(
-      HasBadDescription1(2),
-      "Syntax error at index 6 in matcher description \"not %(m)s good\": "
-      "\"m\" is an invalid parameter name.");
-}
-
-
-MATCHER_P(HasGoodDescription1, n, "good %(n)s") { return arg==arg; }
-
-TEST(MatcherPMacroTest, AcceptsValidDescription) {
-  const Matcher<int> m = HasGoodDescription1(5);
-  EXPECT_EQ("good 5", Describe(m));
-}
-
 // Tests that the description is calculated correctly from the matcher name.
 MATCHER_P(_is_Greater_Than32and_, n, "") { return arg > 32 && arg > n; }
 
@@ -788,32 +759,6 @@ TEST(MatcherPMacroTest, WorksWhenExplicitlyInstantiatedWithReference) {
   EXPECT_EQ("references uncopyable 1-byte object <31>", Describe(m));
 }
 
-
-// Tests that the description string supplied to MATCHER_Pn() must be
-// valid.
-
-MATCHER_P2(HasBadDescription2, m, n, "not %(good") {
-  return arg > m + n;
-}
-
-TEST(MatcherPnMacroTest,
-     CreatingMatcherWithBadDescriptionGeneratesNonfatalFailure) {
-  EXPECT_NONFATAL_FAILURE(
-      HasBadDescription2(3, 4),
-      "Syntax error at index 4 in matcher description \"not %(good\": "
-      "an interpolation must end with \")s\", but \"%(good\" does not.");
-}
-
-MATCHER_P2(HasComplexDescription, foo, bar,
-           "is as complex as %(foo)s %(bar)s (i.e. %(*)s or %%%(foo)s!)") {
-  return arg==arg;
-}
-
-TEST(MatcherPnMacroTest, AcceptsValidDescription) {
-  Matcher<int> m = HasComplexDescription(100, "ducks");
-  EXPECT_EQ("is as complex as 100 \"ducks\" (i.e. (100, \"ducks\") or %100!)",
-            Describe(m));
-}
 
 // Tests that the body of MATCHER_Pn() can reference the parameter
 // types.
