@@ -302,6 +302,52 @@ ElementsAreArray(const T (&array)[N]) {
   return internal::ElementsAreArrayMatcher<T>(array, N);
 }
 
+// AllOf(m1, m2, ..., mk) matches any value that matches all of the given
+// sub-matchers.
+
+$range i 2..n
+$for i [[
+$range j 1..i
+$range k 1..i-1
+
+template <$for j, [[typename Matcher$j]]>
+inline $for k[[internal::BothOfMatcher<Matcher$k, ]]Matcher$i[[]]$for k [[> ]]
+
+AllOf($for j, [[Matcher$j m$j]]) {
+
+$if i == 2 [[
+  return internal::BothOfMatcher<Matcher1, Matcher2>(m1, m2);
+]] $else [[
+  return AllOf(m1, AllOf($for k, [[m$(k + 1)]]));
+]]
+
+}
+
+]]
+
+// AnyOf(m1, m2, ..., mk) matches any value that matches any of the given
+// sub-matchers.
+
+$range i 2..n
+$for i [[
+$range j 1..i
+$range k 1..i-1
+
+template <$for j, [[typename Matcher$j]]>
+inline $for k[[internal::EitherOfMatcher<Matcher$k, ]]Matcher$i[[]]$for k [[> ]]
+
+AnyOf($for j, [[Matcher$j m$j]]) {
+
+$if i == 2 [[
+  return internal::EitherOfMatcher<Matcher1, Matcher2>(m1, m2);
+]] $else [[
+  return AnyOf(m1, AnyOf($for k, [[m$(k + 1)]]));
+]]
+
+}
+
+]]
+
 }  // namespace testing
 $$ } // This Pump meta comment fixes auto-indentation in Emacs. It will not
 $$   // show up in the generated code.

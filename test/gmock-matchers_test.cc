@@ -1857,6 +1857,16 @@ TEST(NotTest, NotMatcherSafelyCastsMonomorphicMatchers) {
   Matcher<int&> m3 = Not(m);
 }
 
+// Helper to allow easy testing of AllOf matchers with num parameters.
+void AllOfMatches(int num, const Matcher<int>& m) {
+  SCOPED_TRACE(Describe(m));
+  EXPECT_TRUE(m.Matches(0));
+  for (int i = 1; i <= num; ++i) {
+    EXPECT_FALSE(m.Matches(i));
+  }
+  EXPECT_TRUE(m.Matches(num + 1));
+}
+
 // Tests that AllOf(m1, ..., mn) matches any value that matches all of
 // the given matchers.
 TEST(AllOfTest, MatchesWhenAllMatch) {
@@ -1884,6 +1894,23 @@ TEST(AllOfTest, MatchesWhenAllMatch) {
   EXPECT_TRUE(m.Matches(0));
   EXPECT_TRUE(m.Matches(1));
   EXPECT_FALSE(m.Matches(3));
+
+  // The following tests for varying number of sub-matchers. Due to the way
+  // the sub-matchers are handled it is enough to test every sub-matcher once
+  // with sub-matchers using the same matcher type. Varying matcher types are
+  // checked for above.
+  AllOfMatches(2, AllOf(Ne(1), Ne(2)));
+  AllOfMatches(3, AllOf(Ne(1), Ne(2), Ne(3)));
+  AllOfMatches(4, AllOf(Ne(1), Ne(2), Ne(3), Ne(4)));
+  AllOfMatches(5, AllOf(Ne(1), Ne(2), Ne(3), Ne(4), Ne(5)));
+  AllOfMatches(6, AllOf(Ne(1), Ne(2), Ne(3), Ne(4), Ne(5), Ne(6)));
+  AllOfMatches(7, AllOf(Ne(1), Ne(2), Ne(3), Ne(4), Ne(5), Ne(6), Ne(7)));
+  AllOfMatches(8, AllOf(Ne(1), Ne(2), Ne(3), Ne(4), Ne(5), Ne(6), Ne(7),
+                        Ne(8)));
+  AllOfMatches(9, AllOf(Ne(1), Ne(2), Ne(3), Ne(4), Ne(5), Ne(6), Ne(7),
+                        Ne(8), Ne(9)));
+  AllOfMatches(10, AllOf(Ne(1), Ne(2), Ne(3), Ne(4), Ne(5), Ne(6), Ne(7), Ne(8),
+                         Ne(9), Ne(10)));
 }
 
 // Tests that AllOf(m1, ..., mn) describes itself properly.
@@ -2006,6 +2033,16 @@ TEST(AllOfTest, ExplainsResult) {
   EXPECT_EQ("which is 5 less than 20", Explain(m, 15));
 }
 
+// Helper to allow easy testing of AnyOf matchers with num parameters.
+void AnyOfMatches(int num, const Matcher<int>& m) {
+  SCOPED_TRACE(Describe(m));
+  EXPECT_FALSE(m.Matches(0));
+  for (int i = 1; i <= num; ++i) {
+    EXPECT_TRUE(m.Matches(i));
+  }
+  EXPECT_FALSE(m.Matches(num + 1));
+}
+
 // Tests that AnyOf(m1, ..., mn) matches any value that matches at
 // least one of the given matchers.
 TEST(AnyOfTest, MatchesWhenAnyMatches) {
@@ -2033,6 +2070,20 @@ TEST(AnyOfTest, MatchesWhenAnyMatches) {
   EXPECT_TRUE(m.Matches(11));
   EXPECT_TRUE(m.Matches(3));
   EXPECT_FALSE(m.Matches(2));
+
+  // The following tests for varying number of sub-matchers. Due to the way
+  // the sub-matchers are handled it is enough to test every sub-matcher once
+  // with sub-matchers using the same matcher type. Varying matcher types are
+  // checked for above.
+  AnyOfMatches(2, AnyOf(1, 2));
+  AnyOfMatches(3, AnyOf(1, 2, 3));
+  AnyOfMatches(4, AnyOf(1, 2, 3, 4));
+  AnyOfMatches(5, AnyOf(1, 2, 3, 4, 5));
+  AnyOfMatches(6, AnyOf(1, 2, 3, 4, 5, 6));
+  AnyOfMatches(7, AnyOf(1, 2, 3, 4, 5, 6, 7));
+  AnyOfMatches(8, AnyOf(1, 2, 3, 4, 5, 6, 7, 8));
+  AnyOfMatches(9, AnyOf(1, 2, 3, 4, 5, 6, 7, 8, 9));
+  AnyOfMatches(10, AnyOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
 }
 
 // Tests that AnyOf(m1, ..., mn) describes itself properly.
