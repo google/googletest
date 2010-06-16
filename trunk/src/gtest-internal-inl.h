@@ -754,9 +754,13 @@ class GTEST_API_ UnitTestImpl {
   // doesn't apply there.)
   int RunAllTests();
 
-  // Clears the results of all tests, including the ad hoc test.
-  void ClearResult() {
+  // Clears the results of all tests, except the ad hoc tests.
+  void ClearNonAdHocTestResult() {
     ForEach(test_cases_, TestCase::ClearTestCaseResult);
+  }
+
+  // Clears the results of ad-hoc test assertions.
+  void ClearAdHocTestResult() {
     ad_hoc_test_result_.Clear();
   }
 
