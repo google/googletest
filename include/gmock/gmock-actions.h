@@ -584,6 +584,55 @@ class ReturnRefAction {
   GTEST_DISALLOW_ASSIGN_(ReturnRefAction);
 };
 
+// Implements the polymorphic ReturnRefOfCopy(x) action, which can be
+// used in any function that returns a reference to the type of x,
+// regardless of the argument types.
+template <typename T>
+class ReturnRefOfCopyAction {
+ public:
+  // Constructs a ReturnRefOfCopyAction object from the reference to
+  // be returned.
+  explicit ReturnRefOfCopyAction(const T& value) : value_(value) {}  // NOLINT
+
+  // This template type conversion operator allows ReturnRefOfCopy(x) to be
+  // used in ANY function that returns a reference to x's type.
+  template <typename F>
+  operator Action<F>() const {
+    typedef typename Function<F>::Result Result;
+    // Asserts that the function return type is a reference.  This
+    // catches the user error of using ReturnRefOfCopy(x) when Return(x)
+    // should be used, and generates some helpful error message.
+    GTEST_COMPILE_ASSERT_(
+        internal::is_reference<Result>::value,
+        use_Return_instead_of_ReturnRefOfCopy_to_return_a_value);
+    return Action<F>(new Impl<F>(value_));
+  }
+
+ private:
+  // Implements the ReturnRefOfCopy(x) action for a particular function type F.
+  template <typename F>
+  class Impl : public ActionInterface<F> {
+   public:
+    typedef typename Function<F>::Result Result;
+    typedef typename Function<F>::ArgumentTuple ArgumentTuple;
+
+    explicit Impl(const T& value) : value_(value) {}  // NOLINT
+
+    virtual Result Perform(const ArgumentTuple&) {
+      return value_;
+    }
+
+   private:
+    T value_;
+
+    GTEST_DISALLOW_ASSIGN_(Impl);
+  };
+
+  const T value_;
+
+  GTEST_DISALLOW_ASSIGN_(ReturnRefOfCopyAction);
+};
+
 // Implements the DoDefault() action for a particular function type F.
 template <typename F>
 class MonomorphicDoDefaultActionImpl : public ActionInterface<F> {
@@ -946,6 +995,14 @@ inline PolymorphicAction<internal::ReturnVoidAction> Return() {
 template <typename R>
 inline internal::ReturnRefAction<R> ReturnRef(R& x) {  // NOLINT
   return internal::ReturnRefAction<R>(x);
+}
+
+// Creates an action that returns the reference to a copy of the
+// argument.  The copy is created when the action is constructed and
+// lives as long as the action.
+template <typename R>
+inline internal::ReturnRefOfCopyAction<R> ReturnRefOfCopy(const R& x) {
+  return internal::ReturnRefOfCopyAction<R>(x);
 }
 
 // Creates an action that does the default action for the give mock function.

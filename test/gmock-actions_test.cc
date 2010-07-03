@@ -68,6 +68,7 @@ using testing::PolymorphicAction;
 using testing::Return;
 using testing::ReturnNull;
 using testing::ReturnRef;
+using testing::ReturnRefOfCopy;
 using testing::SetArgumentPointee;
 
 #if !GTEST_OS_WINDOWS_MOBILE
@@ -582,6 +583,30 @@ TEST(ReturnRefTest, IsCovariant) {
 
   a = ReturnRef(derived);
   EXPECT_EQ(&derived, &a.Perform(make_tuple()));
+}
+
+// Tests that ReturnRefOfCopy(v) works for reference types.
+TEST(ReturnRefOfCopyTest, WorksForReference) {
+  int n = 42;
+  const Action<const int&()> ret = ReturnRefOfCopy(n);
+
+  EXPECT_NE(&n, &ret.Perform(make_tuple()));
+  EXPECT_EQ(42, ret.Perform(make_tuple()));
+
+  n = 43;
+  EXPECT_NE(&n, &ret.Perform(make_tuple()));
+  EXPECT_EQ(42, ret.Perform(make_tuple()));
+}
+
+// Tests that ReturnRefOfCopy(v) is covariant.
+TEST(ReturnRefOfCopyTest, IsCovariant) {
+  Base base;
+  Derived derived;
+  Action<Base&()> a = ReturnRefOfCopy(base);
+  EXPECT_NE(&base, &a.Perform(make_tuple()));
+
+  a = ReturnRefOfCopy(derived);
+  EXPECT_NE(&derived, &a.Perform(make_tuple()));
 }
 
 // Tests that DoDefault() does the default action for the mock method.

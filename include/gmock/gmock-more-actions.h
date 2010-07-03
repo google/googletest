@@ -195,6 +195,9 @@ ACTION_TEMPLATE(DeleteArg,
   delete ::std::tr1::get<k>(args);
 }
 
+// This action returns the value pointed to by 'pointer'.
+ACTION_P(ReturnPointee, pointer) { return *pointer; }
+
 // Action Throw(exception) can be used in a mock function of any type
 // to throw the given exception.  Any copyable value can be thrown.
 #if GTEST_HAS_EXCEPTIONS

@@ -57,6 +57,7 @@ using testing::DeleteArg;
 using testing::Invoke;
 using testing::Return;
 using testing::ReturnArg;
+using testing::ReturnPointee;
 using testing::SaveArg;
 using testing::SetArgReferee;
 using testing::SetArgumentPointee;
@@ -662,6 +663,15 @@ TEST(SetArrayArgumentTest, SetsTheNthArrayWithIteratorArgument) {
   std::string s;
   a.Perform(make_tuple(true, back_inserter(s)));
   EXPECT_EQ(letters, s);
+}
+
+TEST(ReturnPointeeTest, Works) {
+  int n = 42;
+  const Action<int()> a = ReturnPointee(&n);
+  EXPECT_EQ(42, a.Perform(make_tuple()));
+
+  n = 43;
+  EXPECT_EQ(43, a.Perform(make_tuple()));
 }
 
 }  // namespace gmock_generated_actions_test
