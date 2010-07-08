@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
   // a general protection fault (segment violation).
   SetErrorMode(SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS);
 
-#if !GTEST_OS_WINDOWS_MOBILE
+#if GTEST_HAS_SEH && !GTEST_OS_WINDOWS_MOBILE
   // The default unhandled exception filter does not always exit
   // with the exception code as exit code - for example it exits with
   // 0 for EXCEPTION_ACCESS_VIOLATION and 1 for EXCEPTION_BREAKPOINT
