@@ -535,7 +535,7 @@
 #ifdef __INTEL_COMPILER
 #define GTEST_AMBIGUOUS_ELSE_BLOCKER_
 #else
-#define GTEST_AMBIGUOUS_ELSE_BLOCKER_ switch (0) case 0:  // NOLINT
+#define GTEST_AMBIGUOUS_ELSE_BLOCKER_ switch (0) case 0: default:  // NOLINT
 #endif
 
 // Use this annotation at the end of a struct/class definition to
