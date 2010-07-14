@@ -2504,9 +2504,9 @@ static const char * TestPartResultTypeToString(TestPartResult::Type type) {
 #else
       return "Failure\n";
 #endif
+    default:
+      return "Unknown result type";
   }
-
-  return "Unknown result type";
 }
 
 // Prints a TestPartResult to a String.
