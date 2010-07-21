@@ -3751,8 +3751,8 @@ TEST(MatcherTupleTest, ExplainsMatchFailure) {
                              make_tuple(2, 'b'), &ss2);
   EXPECT_EQ("  Expected arg #0: is > 5\n"
             "           Actual: 2, which is 3 less than 5\n"
-            "  Expected arg #1: is equal to 'a' (97)\n"
-            "           Actual: 'b' (98)\n",
+            "  Expected arg #1: is equal to 'a' (97, 0x61)\n"
+            "           Actual: 'b' (98, 0x62)\n",
             ss2.str());  // Failed match where both arguments need explanation.
 
   stringstream ss3;

@@ -243,7 +243,7 @@ Matcher<tuple<char, int> > LessThan() {
 
 TEST(ArgsTest, ExplainsMatchResultWithInnerExplanation) {
   const Matcher<tuple<char, int, int> > m = Args<0, 2>(LessThan());
-  EXPECT_EQ("whose fields (#0, #2) are ('a' (97), 42), "
+  EXPECT_EQ("whose fields (#0, #2) are ('a' (97, 0x61), 42), "
             "where the first value is 55 more than the second",
             Explain(m, make_tuple('a', 42, 42)));
   EXPECT_EQ("whose fields (#0, #2) are ('\\0', 43)",
