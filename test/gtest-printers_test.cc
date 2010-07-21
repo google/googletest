@@ -79,6 +79,10 @@ inline void operator<<(::std::ostream& os, const StreamableInGlobal& /* x */) {
   os << "StreamableInGlobal";
 }
 
+void operator<<(::std::ostream& os, const StreamableInGlobal* /* x */) {
+  os << "StreamableInGlobal*";
+}
+
 namespace foo {
 
 // A user-defined unprintable type in a user namespace.
@@ -98,6 +102,15 @@ struct PrintableViaPrintTo {
 
 void PrintTo(const PrintableViaPrintTo& x, ::std::ostream* os) {
   *os << "PrintableViaPrintTo: " << x.value;
+}
+
+// A type with a user-defined << for printing its pointer.
+struct PointerPrintable {
+};
+
+::std::ostream& operator<<(::std::ostream& os,
+                           const PointerPrintable* /* x */) {
+  return os << "PointerPrintable*";
 }
 
 // A user-defined printable class template in a user-chosen namespace.
@@ -199,21 +212,21 @@ string PrintByRef(const T& value) {
 // char.
 TEST(PrintCharTest, PlainChar) {
   EXPECT_EQ("'\\0'", Print('\0'));
-  EXPECT_EQ("'\\'' (39)", Print('\''));
-  EXPECT_EQ("'\"' (34)", Print('"'));
-  EXPECT_EQ("'\\?' (63)", Print('\?'));
-  EXPECT_EQ("'\\\\' (92)", Print('\\'));
+  EXPECT_EQ("'\\'' (39, 0x27)", Print('\''));
+  EXPECT_EQ("'\"' (34, 0x22)", Print('"'));
+  EXPECT_EQ("'\\?' (63, 0x3F)", Print('\?'));
+  EXPECT_EQ("'\\\\' (92, 0x5C)", Print('\\'));
   EXPECT_EQ("'\\a' (7)", Print('\a'));
   EXPECT_EQ("'\\b' (8)", Print('\b'));
-  EXPECT_EQ("'\\f' (12)", Print('\f'));
-  EXPECT_EQ("'\\n' (10)", Print('\n'));
-  EXPECT_EQ("'\\r' (13)", Print('\r'));
+  EXPECT_EQ("'\\f' (12, 0xC)", Print('\f'));
+  EXPECT_EQ("'\\n' (10, 0xA)", Print('\n'));
+  EXPECT_EQ("'\\r' (13, 0xD)", Print('\r'));
   EXPECT_EQ("'\\t' (9)", Print('\t'));
-  EXPECT_EQ("'\\v' (11)", Print('\v'));
+  EXPECT_EQ("'\\v' (11, 0xB)", Print('\v'));
   EXPECT_EQ("'\\x7F' (127)", Print('\x7F'));
   EXPECT_EQ("'\\xFF' (255)", Print('\xFF'));
-  EXPECT_EQ("' ' (32)", Print(' '));
-  EXPECT_EQ("'a' (97)", Print('a'));
+  EXPECT_EQ("' ' (32, 0x20)", Print(' '));
+  EXPECT_EQ("'a' (97, 0x61)", Print('a'));
 }
 
 // signed char.
@@ -226,7 +239,7 @@ TEST(PrintCharTest, SignedChar) {
 // unsigned char.
 TEST(PrintCharTest, UnsignedChar) {
   EXPECT_EQ("'\\0'", Print(static_cast<unsigned char>('\0')));
-  EXPECT_EQ("'b' (98)",
+  EXPECT_EQ("'b' (98, 0x62)",
             Print(static_cast<unsigned char>('b')));
 }
 
@@ -241,21 +254,21 @@ TEST(PrintBuiltInTypeTest, Bool) {
 // wchar_t.
 TEST(PrintBuiltInTypeTest, Wchar_t) {
   EXPECT_EQ("L'\\0'", Print(L'\0'));
-  EXPECT_EQ("L'\\'' (39)", Print(L'\''));
-  EXPECT_EQ("L'\"' (34)", Print(L'"'));
-  EXPECT_EQ("L'\\?' (63)", Print(L'\?'));
-  EXPECT_EQ("L'\\\\' (92)", Print(L'\\'));
+  EXPECT_EQ("L'\\'' (39, 0x27)", Print(L'\''));
+  EXPECT_EQ("L'\"' (34, 0x22)", Print(L'"'));
+  EXPECT_EQ("L'\\?' (63, 0x3F)", Print(L'\?'));
+  EXPECT_EQ("L'\\\\' (92, 0x5C)", Print(L'\\'));
   EXPECT_EQ("L'\\a' (7)", Print(L'\a'));
   EXPECT_EQ("L'\\b' (8)", Print(L'\b'));
-  EXPECT_EQ("L'\\f' (12)", Print(L'\f'));
-  EXPECT_EQ("L'\\n' (10)", Print(L'\n'));
-  EXPECT_EQ("L'\\r' (13)", Print(L'\r'));
+  EXPECT_EQ("L'\\f' (12, 0xC)", Print(L'\f'));
+  EXPECT_EQ("L'\\n' (10, 0xA)", Print(L'\n'));
+  EXPECT_EQ("L'\\r' (13, 0xD)", Print(L'\r'));
   EXPECT_EQ("L'\\t' (9)", Print(L'\t'));
-  EXPECT_EQ("L'\\v' (11)", Print(L'\v'));
+  EXPECT_EQ("L'\\v' (11, 0xB)", Print(L'\v'));
   EXPECT_EQ("L'\\x7F' (127)", Print(L'\x7F'));
   EXPECT_EQ("L'\\xFF' (255)", Print(L'\xFF'));
-  EXPECT_EQ("L' ' (32)", Print(L' '));
-  EXPECT_EQ("L'a' (97)", Print(L'a'));
+  EXPECT_EQ("L' ' (32, 0x20)", Print(L' '));
+  EXPECT_EQ("L'a' (97, 0x61)", Print(L'a'));
   EXPECT_EQ("L'\\x576' (1398)", Print(L'\x576'));
   EXPECT_EQ("L'\\xC74D' (51021)", Print(L'\xC74D'));
 }
@@ -700,7 +713,7 @@ TEST(PrintStlContainerTest, NonEmptyDeque) {
 TEST(PrintStlContainerTest, OneElementHashMap) {
   hash_map<int, char> map1;
   map1[1] = 'a';
-  EXPECT_EQ("{ (1, 'a' (97)) }", Print(map1));
+  EXPECT_EQ("{ (1, 'a' (97, 0x61)) }", Print(map1));
 }
 
 TEST(PrintStlContainerTest, HashMultiMap) {
@@ -848,7 +861,7 @@ TEST(PrintTupleTest, VariousSizes) {
   EXPECT_EQ("(5)", Print(t1));
 
   tuple<char, bool> t2('a', true);
-  EXPECT_EQ("('a' (97), true)", Print(t2));
+  EXPECT_EQ("('a' (97, 0x61), true)", Print(t2));
 
   tuple<bool, int, int> t3(false, 2, 3);
   EXPECT_EQ("(false, 2, 3)", Print(t3));
@@ -877,7 +890,7 @@ TEST(PrintTupleTest, VariousSizes) {
   tuple<bool, char, short, testing::internal::Int32,  // NOLINT
       testing::internal::Int64, float, double, const char*, void*, string>
       t10(false, 'a', 3, 4, 5, 1.5F, -2.5, str, NULL, "10");
-  EXPECT_EQ("(false, 'a' (97), 3, 4, 5, 1.5, -2.5, " + PrintPointer(str) +
+  EXPECT_EQ("(false, 'a' (97, 0x61), 3, 4, 5, 1.5, -2.5, " + PrintPointer(str) +
             " pointing to \"8\", NULL, \"10\")",
             Print(t10));
 }
@@ -885,7 +898,7 @@ TEST(PrintTupleTest, VariousSizes) {
 // Nested tuples.
 TEST(PrintTupleTest, NestedTuple) {
   tuple<tuple<int, bool>, char> nested(make_tuple(5, true), 'a');
-  EXPECT_EQ("((5, true), 'a' (97))", Print(nested));
+  EXPECT_EQ("((5, true), 'a' (97, 0x61))", Print(nested));
 }
 
 #endif  // GTEST_HAS_TR1_TUPLE
@@ -926,8 +939,9 @@ TEST(PrintUnpritableTypeTest, BigObject) {
 
 // Streamable types in the global namespace.
 TEST(PrintStreamableTypeTest, InGlobalNamespace) {
-  EXPECT_EQ("StreamableInGlobal",
-            Print(StreamableInGlobal()));
+  StreamableInGlobal x;
+  EXPECT_EQ("StreamableInGlobal", Print(x));
+  EXPECT_EQ("StreamableInGlobal*", Print(&x));
 }
 
 // Printable template types in a user namespace.
@@ -940,6 +954,13 @@ TEST(PrintStreamableTypeTest, TemplateTypeInUserNamespace) {
 TEST(PrintPrintableTypeTest, InUserNamespace) {
   EXPECT_EQ("PrintableViaPrintTo: 0",
             Print(::foo::PrintableViaPrintTo()));
+}
+
+// Tests printing a pointer to a user-defined type that has a <<
+// operator for its pointer.
+TEST(PrintPrintableTypeTest, PointerInUserNamespace) {
+  ::foo::PointerPrintable x;
+  EXPECT_EQ("PointerPrintable*", Print(&x));
 }
 
 // Tests printing user-defined class template that have a PrintTo() function.
@@ -1046,25 +1067,34 @@ TEST(PrintReferenceTest, HandlesMemberVariablePointer) {
       "@" + PrintPointer(&p) + " " + Print(sizeof(p)) + "-byte object "));
 }
 
+// Useful for testing PrintToString().  We cannot use EXPECT_EQ()
+// there as its implementation uses PrintToString().  The caller must
+// ensure that 'value' has no side effect.
+#define EXPECT_PRINT_TO_STRING_(value, expected_string)         \
+  EXPECT_TRUE(PrintToString(value) == (expected_string))        \
+      << " where " #value " prints as " << (PrintToString(value))
+
 TEST(PrintToStringTest, WorksForScalar) {
-  EXPECT_EQ("123", PrintToString(123));
+  EXPECT_PRINT_TO_STRING_(123, "123");
 }
 
 TEST(PrintToStringTest, WorksForPointerToConstChar) {
   const char* p = "hello";
-  EXPECT_EQ("\"hello\"", PrintToString(p));
+  EXPECT_PRINT_TO_STRING_(p, "\"hello\"");
 }
 
 TEST(PrintToStringTest, WorksForPointerToNonConstChar) {
   char s[] = "hello";
   char* p = s;
-  EXPECT_EQ("\"hello\"", PrintToString(p));
+  EXPECT_PRINT_TO_STRING_(p, "\"hello\"");
 }
 
 TEST(PrintToStringTest, WorksForArray) {
   int n[3] = { 1, 2, 3 };
-  EXPECT_EQ("{ 1, 2, 3 }", PrintToString(n));
+  EXPECT_PRINT_TO_STRING_(n, "{ 1, 2, 3 }");
 }
+
+#undef EXPECT_PRINT_TO_STRING_
 
 TEST(UniversalTersePrintTest, WorksForNonReference) {
   ::std::stringstream ss;
@@ -1144,7 +1174,7 @@ TEST(UniversalTersePrintTupleFieldsToStringsTest, PrintsTwoTuple) {
   Strings result = UniversalTersePrintTupleFieldsToStrings(make_tuple(1, 'a'));
   ASSERT_EQ(2u, result.size());
   EXPECT_EQ("1", result[0]);
-  EXPECT_EQ("'a' (97)", result[1]);
+  EXPECT_EQ("'a' (97, 0x61)", result[1]);
 }
 
 TEST(UniversalTersePrintTupleFieldsToStringsTest, PrintsTersely) {

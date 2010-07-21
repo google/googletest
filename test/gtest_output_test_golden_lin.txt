@@ -418,7 +418,7 @@ Expected failure
 [0;32m[ RUN      ] [mUnsigned/TypedTestP/0.Failure
 gtest_output_test_.cc:#: Failure
 Value of: TypeParam()
-  Actual: \0
+  Actual: '\0'
 Expected: 1U
 Which is: 1
 Expected failure

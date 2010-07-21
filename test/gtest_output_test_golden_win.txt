@@ -375,7 +375,7 @@ Expected failure
 [       OK ] Unsigned/TypedTestP/0.Success
 [ RUN      ] Unsigned/TypedTestP/0.Failure
 gtest_output_test_.cc:#: error: Value of: TypeParam()
-  Actual: \0
+  Actual: '\0'
 Expected: 1U
 Which is: 1
 Expected failure

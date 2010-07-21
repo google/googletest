@@ -918,48 +918,6 @@ Message& Message::operator <<(const ::wstring& wstr) {
 }
 #endif  // GTEST_HAS_GLOBAL_WSTRING
 
-namespace internal {
-
-// Formats a value to be used in a failure message.
-
-// For a char value, we print it as a C++ char literal and as an
-// unsigned integer (both in decimal and in hexadecimal).
-String FormatForFailureMessage(char ch) {
-  const unsigned int ch_as_uint = ch;
-  // A String object cannot contain '\0', so we print "\\0" when ch is
-  // '\0'.
-  return String::Format("'%s' (%u, 0x%X)",
-                        ch ? String::Format("%c", ch).c_str() : "\\0",
-                        ch_as_uint, ch_as_uint);
-}
-
-// For a wchar_t value, we print it as a C++ wchar_t literal and as an
-// unsigned integer (both in decimal and in hexidecimal).
-String FormatForFailureMessage(wchar_t wchar) {
-  // The C++ standard doesn't specify the exact size of the wchar_t
-  // type.  It just says that it shall have the same size as another
-  // integral type, called its underlying type.
-  //
-  // Therefore, in order to print a wchar_t value in the numeric form,
-  // we first convert it to the largest integral type (UInt64) and
-  // then print the converted value.
-  //
-  // We use streaming to print the value as "%llu" doesn't work
-  // correctly with MSVC 7.1.
-  const UInt64 wchar_as_uint64 = wchar;
-  Message msg;
-  // A String object cannot contain '\0', so we print "\\0" when wchar is
-  // L'\0'.
-  char buffer[32];  // CodePointToUtf8 requires a buffer that big.
-  msg << "L'"
-      << (wchar ? CodePointToUtf8(static_cast<UInt32>(wchar), buffer) : "\\0")
-      << "' (" << wchar_as_uint64 << ", 0x" << ::std::setbase(16)
-      << wchar_as_uint64 << ")";
-  return msg.GetString();
-}
-
-}  // namespace internal
-
 // AssertionResult constructors.
 // Used in EXPECT_TRUE/FALSE(assertion_result).
 AssertionResult::AssertionResult(const AssertionResult& other)

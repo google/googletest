@@ -280,12 +280,23 @@ void DefaultPrintTo(IsNotContainer /* dummy */,
   if (p == NULL) {
     *os << "NULL";
   } else {
-    // We want to print p as a const void*.  However, we cannot cast
-    // it to const void* directly, even using reinterpret_cast, as
-    // earlier versions of gcc (e.g. 3.4.5) cannot compile the cast
-    // when p is a function pointer.  Casting to UInt64 first solves
-    // the problem.
-    *os << reinterpret_cast<const void*>(reinterpret_cast<internal::UInt64>(p));
+    // C++ doesn't allow casting from a function pointer to any object
+    // pointer.
+    if (ImplicitlyConvertible<T*, const void*>::value) {
+      // T is not a function type.  We just call << to print p,
+      // relying on ADL to pick up user-defined << for their pointer
+      // types, if any.
+      *os << p;
+    } else {
+      // T is a function type, so '*os << p' doesn't do what we want
+      // (it just prints p as bool).  We want to print p as a const
+      // void*.  However, we cannot cast it to const void* directly,
+      // even using reinterpret_cast, as earlier versions of gcc
+      // (e.g. 3.4.5) cannot compile the cast when p is a function
+      // pointer.  Casting to UInt64 first solves the problem.
+      *os << reinterpret_cast<const void*>(
+          reinterpret_cast<internal::UInt64>(p));
+    }
   }
 }
 
@@ -341,13 +352,8 @@ void PrintTo(const T& value, ::std::ostream* os) {
 // types, strings, plain arrays, and pointers).
 
 // Overloads for various char types.
-GTEST_API_ void PrintCharTo(char c, int char_code, ::std::ostream* os);
-inline void PrintTo(unsigned char c, ::std::ostream* os) {
-  PrintCharTo(c, c, os);
-}
-inline void PrintTo(signed char c, ::std::ostream* os) {
-  PrintCharTo(c, c, os);
-}
+GTEST_API_ void PrintTo(unsigned char c, ::std::ostream* os);
+GTEST_API_ void PrintTo(signed char c, ::std::ostream* os);
 inline void PrintTo(char c, ::std::ostream* os) {
   // When printing a plain char, we always treat it as unsigned.  This
   // way, the output won't be affected by whether the compiler thinks
@@ -373,6 +379,21 @@ GTEST_API_ void PrintTo(wchar_t wc, ::std::ostream* os);
 GTEST_API_ void PrintTo(const char* s, ::std::ostream* os);
 inline void PrintTo(char* s, ::std::ostream* os) {
   PrintTo(implicit_cast<const char*>(s), os);
+}
+
+// signed/unsigned char is often used for representing binary data, so
+// we print pointers to it as void* to be safe.
+inline void PrintTo(const signed char* s, ::std::ostream* os) {
+  PrintTo(implicit_cast<const void*>(s), os);
+}
+inline void PrintTo(signed char* s, ::std::ostream* os) {
+  PrintTo(implicit_cast<const void*>(s), os);
+}
+inline void PrintTo(const unsigned char* s, ::std::ostream* os) {
+  PrintTo(implicit_cast<const void*>(s), os);
+}
+inline void PrintTo(unsigned char* s, ::std::ostream* os) {
+  PrintTo(implicit_cast<const void*>(s), os);
 }
 
 // MSVC can be configured to define wchar_t as a typedef of unsigned
