@@ -4652,6 +4652,65 @@ TEST(EqAssertionTest, OtherPointer) {
                        "0x1234");
 }
 
+// A class that supports binary comparison operators but not streaming.
+class UnprintableChar {
+ public:
+  explicit UnprintableChar(char ch) : char_(ch) {}
+
+  bool operator==(const UnprintableChar& rhs) const {
+    return char_ == rhs.char_;
+  }
+  bool operator!=(const UnprintableChar& rhs) const {
+    return char_ != rhs.char_;
+  }
+  bool operator<(const UnprintableChar& rhs) const {
+    return char_ < rhs.char_;
+  }
+  bool operator<=(const UnprintableChar& rhs) const {
+    return char_ <= rhs.char_;
+  }
+  bool operator>(const UnprintableChar& rhs) const {
+    return char_ > rhs.char_;
+  }
+  bool operator>=(const UnprintableChar& rhs) const {
+    return char_ >= rhs.char_;
+  }
+
+ private:
+  char char_;
+};
+
+// Tests that ASSERT_EQ() and friends don't require the arguments to
+// be printable.
+TEST(ComparisonAssertionTest, AcceptsUnprintableArgs) {
+  const UnprintableChar x('x'), y('y');
+  ASSERT_EQ(x, x);
+  EXPECT_NE(x, y);
+  ASSERT_LT(x, y);
+  EXPECT_LE(x, y);
+  ASSERT_GT(y, x);
+  EXPECT_GE(x, x);
+
+  EXPECT_NONFATAL_FAILURE(EXPECT_EQ(x, y), "1-byte object <78>");
+  EXPECT_NONFATAL_FAILURE(EXPECT_EQ(x, y), "1-byte object <79>");
+  EXPECT_NONFATAL_FAILURE(EXPECT_LT(y, y), "1-byte object <79>");
+  EXPECT_NONFATAL_FAILURE(EXPECT_GT(x, y), "1-byte object <78>");
+  EXPECT_NONFATAL_FAILURE(EXPECT_GT(x, y), "1-byte object <79>");
+
+  // Code tested by EXPECT_FATAL_FAILURE cannot reference local
+  // variables, so we have to write UnprintableChar('x') instead of x.
+  EXPECT_FATAL_FAILURE(ASSERT_NE(UnprintableChar('x'), UnprintableChar('x')),
+                       "1-byte object <78>");
+  EXPECT_FATAL_FAILURE(ASSERT_LE(UnprintableChar('y'), UnprintableChar('x')),
+                       "1-byte object <78>");
+  EXPECT_FATAL_FAILURE(ASSERT_LE(UnprintableChar('y'), UnprintableChar('x')),
+                       "1-byte object <79>");
+  EXPECT_FATAL_FAILURE(ASSERT_GE(UnprintableChar('x'), UnprintableChar('y')),
+                       "1-byte object <78>");
+  EXPECT_FATAL_FAILURE(ASSERT_GE(UnprintableChar('x'), UnprintableChar('y')),
+                       "1-byte object <79>");
+}
+
 // Tests the FRIEND_TEST macro.
 
 // This class has a private member we want to test.  We will test it

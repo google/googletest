@@ -1207,30 +1207,6 @@ GTEST_API_ void InitGoogleTest(int* argc, wchar_t** argv);
 
 namespace internal {
 
-// These overloaded versions handle ::std::string and ::std::wstring.
-GTEST_API_ inline String FormatForFailureMessage(const ::std::string& str) {
-  return (Message() << '"' << str << '"').GetString();
-}
-
-#if GTEST_HAS_STD_WSTRING
-GTEST_API_ inline String FormatForFailureMessage(const ::std::wstring& wstr) {
-  return (Message() << "L\"" << wstr << '"').GetString();
-}
-#endif  // GTEST_HAS_STD_WSTRING
-
-// These overloaded versions handle ::string and ::wstring.
-#if GTEST_HAS_GLOBAL_STRING
-GTEST_API_ inline String FormatForFailureMessage(const ::string& str) {
-  return (Message() << '"' << str << '"').GetString();
-}
-#endif  // GTEST_HAS_GLOBAL_STRING
-
-#if GTEST_HAS_GLOBAL_WSTRING
-GTEST_API_ inline String FormatForFailureMessage(const ::wstring& wstr) {
-  return (Message() << "L\"" << wstr << '"').GetString();
-}
-#endif  // GTEST_HAS_GLOBAL_WSTRING
-
 // Formats a comparison assertion (e.g. ASSERT_EQ, EXPECT_LT, and etc)
 // operand to be used in a failure message.  The type (but not value)
 // of the other operand may affect the format.  This allows us to
@@ -1246,7 +1222,7 @@ GTEST_API_ inline String FormatForFailureMessage(const ::wstring& wstr) {
 template <typename T1, typename T2>
 String FormatForComparisonFailureMessage(const T1& value,
                                          const T2& /* other_operand */) {
-  return FormatForFailureMessage(value);
+  return PrintToString(value);
 }
 
 // The helper function for {ASSERT|EXPECT}_EQ.
