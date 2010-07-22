@@ -72,19 +72,27 @@ class GTestNCTest(unittest.TestCase):
        [r'Setup_should_be_spelled_SetUp']),
 
       ('CATCHES_WRONG_CASE_IN_TYPED_TEST_P',
-       [r'BarTest.*was not declared']),
+       [r'BarTest.*was not declared',        # GCC
+        r'undeclared identifier .*BarTest',  # Clang
+        ]),
 
       ('CATCHES_WRONG_CASE_IN_REGISTER_TYPED_TEST_CASE_P',
-       [r'BarTest.*was not declared']),
+       [r'BarTest.*was not declared',        # GCC
+        r'undeclared identifier .*BarTest',  # Clang
+        ]),
 
       ('CATCHES_WRONG_CASE_IN_INSTANTIATE_TYPED_TEST_CASE_P',
-       [r'BarTest.*not declared']),
+       [r'BarTest.*not declared',            # GCC
+        r'undeclared identifier .*BarTest',  # Clang
+        ]),
 
       ('CATCHES_INSTANTIATE_TYPED_TESET_CASE_P_WITH_SAME_NAME_PREFIX',
        [r'redefinition of.*My.*FooTest']),
 
       ('STATIC_ASSERT_TYPE_EQ_IS_NOT_A_TYPE',
-       [r'StaticAssertTypeEq.* does not name a type']),
+       [r'StaticAssertTypeEq.* does not name a type',  # GCC
+        r'requires a type.*\n.*StaticAssertTypeEq',    # Clang
+        ]),
 
       ('STATIC_ASSERT_TYPE_EQ_WORKS_IN_NAMESPACE',
        [r'StaticAssertTypeEq.*int.*const int']),
