@@ -107,9 +107,7 @@ EXTRA_DIST += \
   test/gtest_throw_on_failure_test.py \
   test/gtest_uninitialized_test.py \
   test/gtest_xml_outfiles_test.py \
-  test/gtest_xml_output_unittest.py \
-  test/run_tests_util.py \
-  test/run_tests_util_test.py
+  test/gtest_xml_output_unittest.py
 
 # CMake script
 EXTRA_DIST += \
