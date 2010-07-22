@@ -139,9 +139,14 @@ we'll introduce later), you should put the expression you want to test
 in the position of _actual_, and put its expected value in _expected_,
 as Google Test's failure messages are optimized for this convention.
 
-Value arguments must be comparable by the assertion's comparison operator or
-you'll get a compiler error. Values must also support the `<<` operator for
-streaming to an `ostream`. All built-in types support this.
+Value arguments must be comparable by the assertion's comparison
+operator or you'll get a compiler error.  We used to require the
+arguments to support the `<<` operator for streaming to an `ostream`,
+but it's no longer necessary since v1.6.0 (if `<<` is supported, it
+will be called to print the arguments when the assertion fails;
+otherwise Google Test will attempt to print them in the best way it
+can. For more details and how to customize the printing of the
+arguments, see this Google Mock [http://code.google.com/p/googlemock/wiki/CookBook#Teaching_Google_Mock_How_to_Print_Your_Values recipe].).
 
 These assertions can work with a user-defined type, but only if you define the
 corresponding comparison operator (e.g. `==`, `<`, etc).  If the corresponding
