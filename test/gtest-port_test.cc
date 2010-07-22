@@ -284,6 +284,17 @@ TEST(GtestCheckDeathTest, LivesSilentlyOnSuccess) {
 
 #endif  // GTEST_HAS_DEATH_TEST
 
+// Verifies that Google Test choose regular expression engine appropriate to
+// the platform. The test will produce compiler errors in case of failure.
+// For simplicity, we only cover the most important platforms here.
+TEST(RegexEngineSelectionTest, SelectsCorrectRegexEngine) {
+#if GTEST_HAS_POSIX_RE
+  EXPECT_TRUE(GTEST_USES_POSIX_RE);
+#else
+  EXPECT_TRUE(GTEST_USES_SIMPLE_RE);
+#endif
+}
+
 #if GTEST_USES_POSIX_RE
 
 #if GTEST_HAS_TYPED_TEST

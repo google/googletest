@@ -34,6 +34,7 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #if GTEST_OS_WINDOWS_MOBILE
 #include <windows.h>  // For TerminateProcess()
