@@ -50,6 +50,8 @@
 //   GTEST_HAS_GLOBAL_WSTRING - Define it to 1/0 to indicate that ::string
 //                              is/isn't available (some systems define
 //                              ::wstring, which is different to std::wstring).
+//   GTEST_HAS_POSIX_RE       - Define it to 1/0 to indicate that POSIX regular
+//                              expressions are/aren't available.
 //   GTEST_HAS_PTHREAD        - Define it to 1/0 to indicate that <pthread.h>
 //                              is/isn't available.
 //   GTEST_HAS_RTTI           - Define it to 1/0 to indicate that RTTI is/isn't
@@ -107,7 +109,9 @@
 //   GTEST_HAS_PARAM_TEST   - value-parameterized tests
 //   GTEST_HAS_TYPED_TEST   - typed tests
 //   GTEST_HAS_TYPED_TEST_P - type-parameterized tests
-//   GTEST_USES_POSIX_RE    - enhanced POSIX regex is used.
+//   GTEST_USES_POSIX_RE    - enhanced POSIX regex is used. Do not confuse with
+//                            GTEST_HAS_POSIX_RE (see above) which users can
+//                            define themselves.
 //   GTEST_USES_SIMPLE_RE   - our own simple regex is used;
 //                            the above two are mutually exclusive.
 //   GTEST_CAN_COMPARE_NULL - accepts untyped NULL in EXPECT_EQ().
@@ -174,6 +178,7 @@
 #include <stdio.h>
 #include <string.h>
 #ifndef _WIN32_WCE
+#include <sys/types.h>
 #include <sys/stat.h>
 #endif  // !_WIN32_WCE
 
@@ -221,27 +226,36 @@
 #define GTEST_OS_AIX 1
 #endif  // __CYGWIN__
 
-#if GTEST_OS_CYGWIN || GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_SYMBIAN || \
-    GTEST_OS_SOLARIS || GTEST_OS_AIX
+// Brings in definitions for functions used in the testing::internal::posix
+// namespace (read, write, close, chdir, isatty, stat). We do not currently
+// use them on Windows Mobile.
+#if !GTEST_OS_WINDOWS
+// This assumes that non-Windows OSes provide unistd.h. For OSes where this
+// is not the case, we need to include headers that provide the functions
+// mentioned above.
+#include <unistd.h>
+#include <strings.h>
+#elif !GTEST_OS_WINDOWS_MOBILE
+#include <direct.h>
+#include <io.h>
+#endif
+
+// Defines this to true iff Google Test can use POSIX regular expressions.
+#ifndef GTEST_HAS_POSIX_RE
+#define GTEST_HAS_POSIX_RE (!GTEST_OS_WINDOWS)
+#endif
+
+#if GTEST_HAS_POSIX_RE
 
 // On some platforms, <regex.h> needs someone to define size_t, and
 // won't compile otherwise.  We can #include it here as we already
 // included <stdlib.h>, which is guaranteed to define size_t through
 // <stddef.h>.
 #include <regex.h>  // NOLINT
-#include <strings.h>  // NOLINT
-#include <sys/types.h>  // NOLINT
-#include <time.h>  // NOLINT
-#include <unistd.h>  // NOLINT
 
 #define GTEST_USES_POSIX_RE 1
 
 #elif GTEST_OS_WINDOWS
-
-#if !GTEST_OS_WINDOWS_MOBILE
-#include <direct.h>  // NOLINT
-#include <io.h>  // NOLINT
-#endif
 
 // <regex.h> is not available on Windows.  Use our own simple regex
 // implementation instead.
@@ -253,8 +267,7 @@
 // simple regex implementation instead.
 #define GTEST_USES_SIMPLE_RE 1
 
-#endif  // GTEST_OS_CYGWIN || GTEST_OS_LINUX || GTEST_OS_MAC ||
-        // GTEST_OS_SYMBIAN || GTEST_OS_SOLARIS || GTEST_OS_AIX
+#endif  // GTEST_HAS_POSIX_RE
 
 #ifndef GTEST_HAS_EXCEPTIONS
 // The user didn't tell us whether exceptions are enabled, so we need
@@ -308,8 +321,7 @@
 // TODO(wan@google.com): uses autoconf to detect whether ::std::wstring
 //   is available.
 
-// Cygwin 1.5 and below doesn't support ::std::wstring.
-// Cygwin 1.7 might add wstring support; this should be updated when clear.
+// Cygwin 1.7 and below doesn't support ::std::wstring.
 // Solaris' libc++ doesn't support it either.
 #define GTEST_HAS_STD_WSTRING (!(GTEST_OS_CYGWIN || GTEST_OS_SOLARIS))
 
@@ -382,7 +394,10 @@
 #if GTEST_HAS_PTHREAD
 // gtest-port.h guarantees to #include <pthread.h> when GTEST_HAS_PTHREAD is
 // true.
-#include <pthread.h>
+#include <pthread.h>  // NOLINT
+
+// For timespec and nanosleep, used below.
+#include <time.h>  // NOLINT
 #endif
 
 // Determines whether Google Test can use tr1/tuple.  You can define
