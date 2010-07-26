@@ -4393,6 +4393,21 @@ TEST(MacroTest, ADD_FAILURE) {
   EXPECT_FALSE(aborted);
 }
 
+// Tests ADD_FAILURE_AT.
+TEST(MacroTest, ADD_FAILURE_AT) {
+  // Verifies that ADD_FAILURE_AT does generate a nonfatal failure and
+  // the failure message contains the user-streamed part.
+  EXPECT_NONFATAL_FAILURE(ADD_FAILURE_AT("foo.cc", 42) << "Wrong!", "Wrong!");
+
+  // Verifies that the user-streamed part is optional.
+  EXPECT_NONFATAL_FAILURE(ADD_FAILURE_AT("foo.cc", 42), "Failed");
+
+  // Unfortunately, we cannot verify that the failure message contains
+  // the right file path and line number the same way, as
+  // EXPECT_NONFATAL_FAILURE() doesn't get to see the file path and
+  // line number.  Instead, we do that in gtest_output_test_.cc.
+}
+
 // Tests FAIL.
 TEST(MacroTest, FAIL) {
   EXPECT_FATAL_FAILURE(FAIL(),

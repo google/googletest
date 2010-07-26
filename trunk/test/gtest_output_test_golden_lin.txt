@@ -7,7 +7,7 @@ Expected: true
 gtest_output_test_.cc:#: Failure
 Value of: 3
 Expected: 2
-[0;32m[==========] [mRunning 61 tests from 26 test cases.
+[0;32m[==========] [mRunning 62 tests from 27 test cases.
 [0;32m[----------] [mGlobal test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -235,6 +235,12 @@ gtest_output_test_.cc:#: Failure
 Failed
 Expected failure #3, in the test fixture d'tor.
 [0;31m[  FAILED  ] [mFatalFailureInSetUpTest.FailureInSetUp
+[0;32m[----------] [m1 test from AddFailureAtTest
+[0;32m[ RUN      ] [mAddFailureAtTest.MessageContainsSpecifiedFileAndLineNumber
+foo.cc:42: Failure
+Failed
+Expected failure in foo.cc
+[0;31m[  FAILED  ] [mAddFailureAtTest.MessageContainsSpecifiedFileAndLineNumber
 [0;32m[----------] [m4 tests from MixedUpTestCaseTest
 [0;32m[ RUN      ] [mMixedUpTestCaseTest.FirstTestFromNamespaceFoo
 [0;32m[       OK ] [mMixedUpTestCaseTest.FirstTestFromNamespaceFoo
@@ -580,9 +586,9 @@ FooEnvironment::TearDown() called.
 gtest_output_test_.cc:#: Failure
 Failed
 Expected fatal failure.
-[0;32m[==========] [m61 tests from 26 test cases ran.
+[0;32m[==========] [m62 tests from 27 test cases ran.
 [0;32m[  PASSED  ] [m21 tests.
-[0;31m[  FAILED  ] [m40 tests, listed below:
+[0;31m[  FAILED  ] [m41 tests, listed below:
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInSubroutine
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInNestedSubroutine
 [0;31m[  FAILED  ] [mFatalFailureTest.NonfatalFailureInSubroutine
@@ -597,6 +603,7 @@ Expected fatal failure.
 [0;31m[  FAILED  ] [mFatalFailureInFixtureConstructorTest.FailureInConstructor
 [0;31m[  FAILED  ] [mNonFatalFailureInSetUpTest.FailureInSetUp
 [0;31m[  FAILED  ] [mFatalFailureInSetUpTest.FailureInSetUp
+[0;31m[  FAILED  ] [mAddFailureAtTest.MessageContainsSpecifiedFileAndLineNumber
 [0;31m[  FAILED  ] [mMixedUpTestCaseTest.ThisShouldFail
 [0;31m[  FAILED  ] [mMixedUpTestCaseTest.ThisShouldFailToo
 [0;31m[  FAILED  ] [mMixedUpTestCaseWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
@@ -624,7 +631,7 @@ Expected fatal failure.
 [0;31m[  FAILED  ] [mScopedFakeTestPartResultReporterTest.InterceptOnlyCurrentThread
 [0;31m[  FAILED  ] [mPrintingFailingParams/FailingParamTest.Fails/0, where GetParam() = 2
 
-40 FAILED TESTS
+41 FAILED TESTS
 [0;33m  YOU HAVE 1 DISABLED TEST
 
 [mNote: Google Test filter = FatalFailureTest.*:LoggingTest.*
