@@ -29,9 +29,9 @@ Note: `SUCCEED()` is purely documentary and currently doesn't generate any
 user-visible output. However, we may add `SUCCEED()` messages to Google Test's
 output in the future.
 
-|| `FAIL();`  || `ADD_FAILURE();` ||
+|| `FAIL();`  || `ADD_FAILURE();` || `ADD_FAILURE_AT("`_file_path_`", `_line_number_`);` ||
 
-`FAIL*` generates a fatal failure while `ADD_FAILURE*` generates a nonfatal
+`FAIL()` generates a fatal failure, while `ADD_FAILURE()` and `ADD_FAILURE_AT()` generate a nonfatal
 failure. These are useful when control flow, rather than a Boolean expression,
 deteremines the test's success or failure. For example, you might want to write
 something like:
