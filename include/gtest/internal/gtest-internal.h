@@ -1064,9 +1064,12 @@ class NativeArray {
 }  // namespace internal
 }  // namespace testing
 
-#define GTEST_MESSAGE_(message, result_type) \
-  ::testing::internal::AssertHelper(result_type, __FILE__, __LINE__, message) \
+#define GTEST_MESSAGE_AT_(file, line, message, result_type) \
+  ::testing::internal::AssertHelper(result_type, file, line, message) \
     = ::testing::Message()
+
+#define GTEST_MESSAGE_(message, result_type) \
+  GTEST_MESSAGE_AT_(__FILE__, __LINE__, message, result_type)
 
 #define GTEST_FATAL_FAILURE_(message) \
   return GTEST_MESSAGE_(message, ::testing::TestPartResult::kFatalFailure)

@@ -54,7 +54,7 @@ elseif (CMAKE_COMPILER_IS_GNUCXX)
   # whether RTTI is enabled.  Therefore we define GTEST_HAS_RTTI
   # explicitly.
   set(cxx_no_rtti_flags "-fno-rtti -DGTEST_HAS_RTTI=0")
-  set(cxx_strict_flags "-Wextra -Wswitch-default")
+  set(cxx_strict_flags "-Wextra")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "SunPro")
   set(cxx_exception_flags "-features=except")
   # Sun Pro doesn't provide macros to indicate whether exceptions and

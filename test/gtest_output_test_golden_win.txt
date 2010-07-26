@@ -5,7 +5,7 @@ gtest_output_test_.cc:#: error: Value of: false
 Expected: true
 gtest_output_test_.cc:#: error: Value of: 3
 Expected: 2
-[==========] Running 62 tests from 28 test cases.
+[==========] Running 63 tests from 29 test cases.
 [----------] Global test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -173,6 +173,11 @@ Expected failure #2, in TearDown().
 gtest_output_test_.cc:#: error: Failed
 Expected failure #3, in the test fixture d'tor.
 [  FAILED  ] FatalFailureInSetUpTest.FailureInSetUp
+[----------] 1 test from AddFailureAtTest
+[ RUN      ] AddFailureAtTest.MessageContainsSpecifiedFileAndLineNumber
+foo.cc(42): error: Failed
+Expected failure in foo.cc
+[  FAILED  ] AddFailureAtTest.MessageContainsSpecifiedFileAndLineNumber
 [----------] 1 test from ExceptionInFixtureCtorTest
 [ RUN      ] ExceptionInFixtureCtorTest.ExceptionInFixtureCtor
 (expecting a failure on thrown exception in the test fixture's constructor)
@@ -492,9 +497,9 @@ Expected non-fatal failure.
 FooEnvironment::TearDown() called.
 gtest_output_test_.cc:#: error: Failed
 Expected fatal failure.
-[==========] 62 tests from 28 test cases ran.
+[==========] 63 tests from 29 test cases ran.
 [  PASSED  ] 21 tests.
-[  FAILED  ] 41 tests, listed below:
+[  FAILED  ] 42 tests, listed below:
 [  FAILED  ] FatalFailureTest.FatalFailureInSubroutine
 [  FAILED  ] FatalFailureTest.FatalFailureInNestedSubroutine
 [  FAILED  ] FatalFailureTest.NonfatalFailureInSubroutine
@@ -508,6 +513,7 @@ Expected fatal failure.
 [  FAILED  ] FatalFailureInFixtureConstructorTest.FailureInConstructor
 [  FAILED  ] NonFatalFailureInSetUpTest.FailureInSetUp
 [  FAILED  ] FatalFailureInSetUpTest.FailureInSetUp
+[  FAILED  ] AddFailureAtTest.MessageContainsSpecifiedFileAndLineNumber
 [  FAILED  ] ExceptionInFixtureCtorTest.ExceptionInFixtureCtor
 [  FAILED  ] ExceptionInSetUpTest.ExceptionInSetUp
 [  FAILED  ] ExceptionInTestFunctionTest.SEH
@@ -537,7 +543,7 @@ Expected fatal failure.
 [  FAILED  ] ExpectFailureTest.ExpectNonFatalFailureOnAllThreads
 [  FAILED  ] PrintingFailingParams/FailingParamTest.Fails/0, where GetParam() = 2
 
-41 FAILED TESTS
+42 FAILED TESTS
   YOU HAVE 1 DISABLED TEST
 
 Note: Google Test filter = FatalFailureTest.*:LoggingTest.*

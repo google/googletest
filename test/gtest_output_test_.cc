@@ -441,6 +441,10 @@ TEST_F(FatalFailureInSetUpTest, FailureInSetUp) {
          << "We should never get here, as SetUp() failed.";
 }
 
+TEST(AddFailureAtTest, MessageContainsSpecifiedFileAndLineNumber) {
+  ADD_FAILURE_AT("foo.cc", 42) << "Expected failure in foo.cc";
+}
+
 #if GTEST_OS_WINDOWS
 
 // This group of tests verifies that Google Test handles SEH and C++
