@@ -1855,7 +1855,7 @@ TEST(FunctionCallMessageTest, UninterestingCallPrintsArgumentsAndReturnValue) {
                   "Uninteresting mock function call - returning directly\\.\n"
                   "    Function call: VoidMethod"
                   "\\(false, 5, \"Hi\", NULL, @.+ "
-                  "Printable, 4-byte object <0000 0000>\\)"));
+                  "Printable, 4-byte object <00-00 00-00>\\)"));
   // A void function has no return value to print.
 }
 
