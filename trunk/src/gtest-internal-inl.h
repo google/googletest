@@ -340,85 +340,6 @@ class TestPropertyKeyIs {
   String key_;
 };
 
-class TestInfoImpl {
- public:
-  TestInfoImpl(TestInfo* parent, const char* test_case_name,
-               const char* name, const char* test_case_comment,
-               const char* comment, TypeId fixture_class_id,
-               internal::TestFactoryBase* factory);
-  ~TestInfoImpl();
-
-  // Returns true if this test should run.
-  bool should_run() const { return should_run_; }
-
-  // Sets the should_run member.
-  void set_should_run(bool should) { should_run_ = should; }
-
-  // Returns true if this test is disabled. Disabled tests are not run.
-  bool is_disabled() const { return is_disabled_; }
-
-  // Sets the is_disabled member.
-  void set_is_disabled(bool is) { is_disabled_ = is; }
-
-  // Returns true if this test matches the filter specified by the user.
-  bool matches_filter() const { return matches_filter_; }
-
-  // Sets the matches_filter member.
-  void set_matches_filter(bool matches) { matches_filter_ = matches; }
-
-  // Returns the test case name.
-  const char* test_case_name() const { return test_case_name_.c_str(); }
-
-  // Returns the test name.
-  const char* name() const { return name_.c_str(); }
-
-  // Returns the test case comment.
-  const char* test_case_comment() const { return test_case_comment_.c_str(); }
-
-  // Returns the test comment.
-  const char* comment() const { return comment_.c_str(); }
-
-  // Returns the ID of the test fixture class.
-  TypeId fixture_class_id() const { return fixture_class_id_; }
-
-  // Returns the test result.
-  TestResult* result() { return &result_; }
-  const TestResult* result() const { return &result_; }
-
-  // Creates the test object, runs it, records its result, and then
-  // deletes it.
-  void Run();
-
-  // Clears the test result.
-  void ClearResult() { result_.Clear(); }
-
-  // Clears the test result in the given TestInfo object.
-  static void ClearTestResult(TestInfo * test_info) {
-    test_info->impl()->ClearResult();
-  }
-
- private:
-  // These fields are immutable properties of the test.
-  TestInfo* const parent_;          // The owner of this object
-  const String test_case_name_;     // Test case name
-  const String name_;               // Test name
-  const String test_case_comment_;  // Test case comment
-  const String comment_;            // Test comment
-  const TypeId fixture_class_id_;   // ID of the test fixture class
-  bool should_run_;                 // True iff this test should run
-  bool is_disabled_;                // True iff this test is disabled
-  bool matches_filter_;             // True if this test matches the
-                                    // user-specified filter.
-  internal::TestFactoryBase* const factory_;  // The factory that creates
-                                              // the test object
-
-  // This field is mutable and needs to be reset before running the
-  // test for the second time.
-  TestResult result_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(TestInfoImpl);
-};
-
 // Class UnitTestOptions.
 //
 // This class contains functions for processing options the user
@@ -747,12 +668,10 @@ class GTEST_API_ UnitTestImpl {
   void RegisterParameterizedTests();
 
   // Runs all tests in this UnitTest object, prints the result, and
-  // returns 0 if all tests are successful, or 1 otherwise.  If any
-  // exception is thrown during a test on Windows, this test is
-  // considered to be failed, but the rest of the tests will still be
-  // run.  (We disable exceptions on Linux and Mac OS X, so the issue
-  // doesn't apply there.)
-  int RunAllTests();
+  // returns true if all tests are successful.  If any exception is
+  // thrown during a test, this test is considered to be failed, but
+  // the rest of the tests will still be run.
+  bool RunAllTests();
 
   // Clears the results of all tests, except the ad hoc tests.
   void ClearNonAdHocTestResult() {

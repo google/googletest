@@ -495,13 +495,26 @@ bool UnitTestOptions::FilterMatchesTest(const String &test_case_name,
 // given SEH exception, or EXCEPTION_CONTINUE_SEARCH otherwise.
 // This function is useful as an __except condition.
 int UnitTestOptions::GTestShouldProcessSEH(DWORD exception_code) {
-  // Google Test should handle an exception if:
+  // Google Test should handle a SEH exception if:
   //   1. the user wants it to, AND
-  //   2. this is not a breakpoint exception.
-  return (GTEST_FLAG(catch_exceptions) &&
-          exception_code != EXCEPTION_BREAKPOINT) ?
-      EXCEPTION_EXECUTE_HANDLER :
-      EXCEPTION_CONTINUE_SEARCH;
+  //   2. this is not a breakpoint exception, AND
+  //   3. this is not a C++ exception (VC++ implements them via SEH,
+  //      apparently).
+  //
+  // SEH exception code for C++ exceptions.
+  // (see http://support.microsoft.com/kb/185294 for more information).
+  const DWORD kCxxExceptionCode = 0xe06d7363;
+
+  bool should_handle = true;
+
+  if (!GTEST_FLAG(catch_exceptions))
+    should_handle = false;
+  else if (exception_code == EXCEPTION_BREAKPOINT)
+    should_handle = false;
+  else if (exception_code == kCxxExceptionCode)
+    should_handle = false;
+
+  return should_handle ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH;
 }
 #endif  // GTEST_OS_WINDOWS
 
@@ -1922,22 +1935,6 @@ void ReportFailureInUnknownLocation(TestPartResult::Type result_type,
 
 }  // namespace internal
 
-#if GTEST_OS_WINDOWS
-// We are on Windows.
-
-// Adds an "exception thrown" fatal failure to the current test.
-static void AddExceptionThrownFailure(DWORD exception_code,
-                                      const char* location) {
-  Message message;
-  message << "Exception thrown with code 0x" << std::setbase(16) <<
-    exception_code << std::setbase(10) << " in " << location << ".";
-
-  internal::ReportFailureInUnknownLocation(TestPartResult::kFatalFailure,
-                                           message.GetString());
-}
-
-#endif  // GTEST_OS_WINDOWS
-
 // Google Test requires all tests in the same test case to use the same test
 // fixture class.  This function checks if the current test has the
 // same fixture class as the first test in the current test case.  If
@@ -1948,15 +1945,13 @@ bool Test::HasSameFixtureClass() {
   const TestCase* const test_case = impl->current_test_case();
 
   // Info about the first test in the current test case.
-  const internal::TestInfoImpl* const first_test_info =
-      test_case->test_info_list()[0]->impl();
-  const internal::TypeId first_fixture_id = first_test_info->fixture_class_id();
+  const TestInfo* const first_test_info = test_case->test_info_list()[0];
+  const internal::TypeId first_fixture_id = first_test_info->fixture_class_id_;
   const char* const first_test_name = first_test_info->name();
 
   // Info about the current test.
-  const internal::TestInfoImpl* const this_test_info =
-      impl->current_test_info()->impl();
-  const internal::TypeId this_fixture_id = this_test_info->fixture_class_id();
+  const TestInfo* const this_test_info = impl->current_test_info();
+  const internal::TypeId this_fixture_id = this_test_info->fixture_class_id_;
   const char* const this_test_name = this_test_info->name();
 
   if (this_fixture_id != first_fixture_id) {
@@ -2006,61 +2001,133 @@ bool Test::HasSameFixtureClass() {
   return true;
 }
 
+#if GTEST_HAS_SEH
+
+// Adds an "exception thrown" fatal failure to the current test.  This
+// function returns its result via an output parameter pointer because VC++
+// prohibits creation of objects with destructors on stack in functions
+// using __try (see error C2712).
+static internal::String* FormatSehExceptionMessage(DWORD exception_code,
+                                                   const char* location) {
+  Message message;
+  message << "SEH exception with code 0x" << std::setbase(16) <<
+    exception_code << std::setbase(10) << " thrown in " << location << ".";
+
+  return new internal::String(message.GetString());
+}
+
+#endif  // GTEST_HAS_SEH
+
+#if GTEST_HAS_EXCEPTIONS
+
+// Adds an "exception thrown" fatal failure to the current test.
+static internal::String FormatCxxExceptionMessage(const char* description,
+                                                  const char* location) {
+  Message message;
+  if (description != NULL) {
+    message << "C++ exception with description \"" << description << "\"";
+  } else {
+    message << "Unknown C++ exception";
+  }
+  message << " thrown in " << location << ".";
+
+  return message.GetString();
+}
+
+static internal::String PrintTestPartResultToString(
+    const TestPartResult& test_part_result);
+
+// A failed Google Test assertion will throw an exception of this type when
+// GTEST_FLAG(throw_on_failure) is true (if exceptions are enabled).  We
+// derive it from std::runtime_error, which is for errors presumably
+// detectable only at run time.  Since std::runtime_error inherits from
+// std::exception, many testing frameworks know how to extract and print the
+// message inside it.
+class GoogleTestFailureException : public ::std::runtime_error {
+ public:
+  explicit GoogleTestFailureException(const TestPartResult& failure)
+      : ::std::runtime_error(PrintTestPartResultToString(failure).c_str()) {}
+};
+#endif  // GTEST_HAS_EXCEPTIONS
+
+// Runs the given method and handles SEH exceptions it throws, when
+// SEH is supported; returns the 0-value for type Result in case of an
+// SEH exception.  (Microsoft compilers cannot handle SEH and C++
+// exceptions in the same function.  Therefore, we provide a separate
+// wrapper function for handling SEH exceptions.)
+template <class T, typename Result>
+static Result HandleSehExceptionsInMethodIfSupported(
+    T* object, Result (T::*method)(), const char* location) {
+#if GTEST_HAS_SEH
+  __try {
+    return (object->*method)();
+  } __except (internal::UnitTestOptions::GTestShouldProcessSEH(  // NOLINT
+      GetExceptionCode())) {
+    // We create the exception message on the heap because VC++ prohibits
+    // creation of objects with destructors on stack in functions using __try
+    // (see error C2712).
+    internal::String* exception_message = FormatSehExceptionMessage(
+        GetExceptionCode(), location);
+    internal::ReportFailureInUnknownLocation(TestPartResult::kFatalFailure,
+                                             *exception_message);
+    delete exception_message;
+    return static_cast<Result>(0);
+  }
+#else
+  (void)location;
+  return (object->*method)();
+#endif  // GTEST_HAS_SEH
+}
+
+// Runs the given method and catches and reports C++ and/or SEH-style
+// exceptions, if they are supported; returns the 0-value for type
+// Result in case of an SEH exception.
+template <class T, typename Result>
+static Result HandleExceptionsInMethodIfSupported(
+    T* object, Result (T::*method)(), const char* location) {
+#if GTEST_HAS_EXCEPTIONS
+  try {
+    return HandleSehExceptionsInMethodIfSupported(object, method, location);
+  } catch (const GoogleTestFailureException&) {  // NOLINT
+    // This exception doesn't originate in code under test. It makes no
+    // sense to report it as a test failure.
+    throw;
+  } catch (const std::exception& e) {  // NOLINT
+    internal::ReportFailureInUnknownLocation(
+        TestPartResult::kFatalFailure,
+        FormatCxxExceptionMessage(e.what(), location));
+  } catch (...) {  // NOLINT
+    internal::ReportFailureInUnknownLocation(
+        TestPartResult::kFatalFailure,
+        FormatCxxExceptionMessage(NULL, location));
+  }
+  return static_cast<Result>(0);
+#else
+  return HandleSehExceptionsInMethodIfSupported(object, method, location);
+#endif  // GTEST_HAS_EXCEPTIONS
+}
+
 // Runs the test and updates the test result.
 void Test::Run() {
   if (!HasSameFixtureClass()) return;
 
   internal::UnitTestImpl* const impl = internal::GetUnitTestImpl();
-#if GTEST_HAS_SEH
-  // Catch SEH-style exceptions.
   impl->os_stack_trace_getter()->UponLeavingGTest();
-  __try {
-    SetUp();
-  } __except(internal::UnitTestOptions::GTestShouldProcessSEH(
-      GetExceptionCode())) {
-    AddExceptionThrownFailure(GetExceptionCode(), "SetUp()");
-  }
-
-  // We will run the test only if SetUp() had no fatal failure.
-  if (!HasFatalFailure()) {
-    impl->os_stack_trace_getter()->UponLeavingGTest();
-    __try {
-      TestBody();
-    } __except(internal::UnitTestOptions::GTestShouldProcessSEH(
-        GetExceptionCode())) {
-      AddExceptionThrownFailure(GetExceptionCode(), "the test body");
-    }
-  }
-
-  // However, we want to clean up as much as possible.  Hence we will
-  // always call TearDown(), even if SetUp() or the test body has
-  // failed.
-  impl->os_stack_trace_getter()->UponLeavingGTest();
-  __try {
-    TearDown();
-  } __except(internal::UnitTestOptions::GTestShouldProcessSEH(
-      GetExceptionCode())) {
-    AddExceptionThrownFailure(GetExceptionCode(), "TearDown()");
-  }
-
-#else  // We are on a compiler or platform that doesn't support SEH.
-  impl->os_stack_trace_getter()->UponLeavingGTest();
-  SetUp();
-
+  HandleExceptionsInMethodIfSupported(this, &Test::SetUp, "SetUp()");
   // We will run the test only if SetUp() was successful.
   if (!HasFatalFailure()) {
     impl->os_stack_trace_getter()->UponLeavingGTest();
-    TestBody();
+    HandleExceptionsInMethodIfSupported(
+        this, &Test::TestBody, "the test body");
   }
 
   // However, we want to clean up as much as possible.  Hence we will
   // always call TearDown(), even if SetUp() or the test body has
   // failed.
   impl->os_stack_trace_getter()->UponLeavingGTest();
-  TearDown();
-#endif  // GTEST_HAS_SEH
+  HandleExceptionsInMethodIfSupported(
+      this, &Test::TearDown, "TearDown()");
 }
-
 
 // Returns true iff the current test has a fatal failure.
 bool Test::HasFatalFailure() {
@@ -2076,22 +2143,26 @@ bool Test::HasNonfatalFailure() {
 // class TestInfo
 
 // Constructs a TestInfo object. It assumes ownership of the test factory
-// object via impl_.
+// object.
 TestInfo::TestInfo(const char* a_test_case_name,
                    const char* a_name,
                    const char* a_test_case_comment,
                    const char* a_comment,
                    internal::TypeId fixture_class_id,
-                   internal::TestFactoryBase* factory) {
-  impl_ = new internal::TestInfoImpl(this, a_test_case_name, a_name,
-                                     a_test_case_comment, a_comment,
-                                     fixture_class_id, factory);
-}
+                   internal::TestFactoryBase* factory)
+    : test_case_name_(a_test_case_name),
+      name_(a_name),
+      test_case_comment_(a_test_case_comment),
+      comment_(a_comment),
+      fixture_class_id_(fixture_class_id),
+      should_run_(false),
+      is_disabled_(false),
+      matches_filter_(false),
+      factory_(factory),
+      result_() {}
 
 // Destructs a TestInfo object.
-TestInfo::~TestInfo() {
-  delete impl_;
-}
+TestInfo::~TestInfo() { delete factory_; }
 
 namespace internal {
 
@@ -2147,41 +2218,6 @@ void ReportInvalidTestCaseType(const char* test_case_name,
 
 }  // namespace internal
 
-// Returns the test case name.
-const char* TestInfo::test_case_name() const {
-  return impl_->test_case_name();
-}
-
-// Returns the test name.
-const char* TestInfo::name() const {
-  return impl_->name();
-}
-
-// Returns the test case comment.
-const char* TestInfo::test_case_comment() const {
-  return impl_->test_case_comment();
-}
-
-// Returns the test comment.
-const char* TestInfo::comment() const {
-  return impl_->comment();
-}
-
-// Returns true if this test should run.
-bool TestInfo::should_run() const { return impl_->should_run(); }
-
-// Returns true if this test matches the user-specified filter.
-bool TestInfo::matches_filter() const { return impl_->matches_filter(); }
-
-// Returns the result of the test.
-const TestResult* TestInfo::result() const { return impl_->result(); }
-
-// Increments the number of death tests encountered in this test so
-// far.
-int TestInfo::increment_death_test_count() {
-  return impl_->result()->increment_death_test_count();
-}
-
 namespace {
 
 // A predicate that checks the test name of a TestInfo against a known
@@ -2225,69 +2261,53 @@ void UnitTestImpl::RegisterParameterizedTests() {
 #endif
 }
 
+}  // namespace internal
+
 // Creates the test object, runs it, records its result, and then
 // deletes it.
-void TestInfoImpl::Run() {
+void TestInfo::Run() {
   if (!should_run_) return;
 
   // Tells UnitTest where to store test result.
-  UnitTestImpl* const impl = internal::GetUnitTestImpl();
-  impl->set_current_test_info(parent_);
+  internal::UnitTestImpl* const impl = internal::GetUnitTestImpl();
+  impl->set_current_test_info(this);
 
   TestEventListener* repeater = UnitTest::GetInstance()->listeners().repeater();
 
   // Notifies the unit test event listeners that a test is about to start.
-  repeater->OnTestStart(*parent_);
+  repeater->OnTestStart(*this);
 
-  const TimeInMillis start = GetTimeInMillis();
+  const TimeInMillis start = internal::GetTimeInMillis();
 
   impl->os_stack_trace_getter()->UponLeavingGTest();
-#if GTEST_HAS_SEH
-  // Catch SEH-style exceptions.
-  Test* test = NULL;
-
-  __try {
-    // Creates the test object.
-    test = factory_->CreateTest();
-  } __except(internal::UnitTestOptions::GTestShouldProcessSEH(
-      GetExceptionCode())) {
-    AddExceptionThrownFailure(GetExceptionCode(),
-                              "the test fixture's constructor");
-    return;
-  }
-#else  // We are on a compiler or platform that doesn't support SEH.
-
-  // TODO(wan): If test->Run() throws, test won't be deleted.  This is
-  // not a problem now as we don't use exceptions.  If we were to
-  // enable exceptions, we should revise the following to be
-  // exception-safe.
 
   // Creates the test object.
-  Test* test = factory_->CreateTest();
-#endif  // GTEST_HAS_SEH
+  Test* const test = HandleExceptionsInMethodIfSupported(
+      factory_, &internal::TestFactoryBase::CreateTest,
+      "the test fixture's constructor");
 
-  // Runs the test only if the constructor of the test fixture didn't
+  // Runs the test only if the test object was created and its constructor didn't
   // generate a fatal failure.
-  if (!Test::HasFatalFailure()) {
+  if ((test != NULL) && !Test::HasFatalFailure()) {
+    // This doesn't throw as all user code that can throw are wrapped into
+    // exception handling code.
     test->Run();
   }
 
   // Deletes the test object.
   impl->os_stack_trace_getter()->UponLeavingGTest();
-  delete test;
-  test = NULL;
+  HandleExceptionsInMethodIfSupported(
+      test, &Test::DeleteSelf_, "the test fixture's destructor");
 
-  result_.set_elapsed_time(GetTimeInMillis() - start);
+  result_.set_elapsed_time(internal::GetTimeInMillis() - start);
 
   // Notifies the unit test event listener that a test has just finished.
-  repeater->OnTestEnd(*parent_);
+  repeater->OnTestEnd(*this);
 
   // Tells UnitTest to stop associating assertion results to this
   // test.
   impl->set_current_test_info(NULL);
 }
-
-}  // namespace internal
 
 // class TestCase
 
@@ -2371,45 +2391,26 @@ void TestCase::Run() {
 
   repeater->OnTestCaseStart(*this);
   impl->os_stack_trace_getter()->UponLeavingGTest();
-  set_up_tc_();
+  HandleExceptionsInMethodIfSupported(
+      this, &TestCase::RunSetUpTestCase, "SetUpTestCase()");
 
   const internal::TimeInMillis start = internal::GetTimeInMillis();
   for (int i = 0; i < total_test_count(); i++) {
-    GetMutableTestInfo(i)->impl()->Run();
+    GetMutableTestInfo(i)->Run();
   }
   elapsed_time_ = internal::GetTimeInMillis() - start;
 
   impl->os_stack_trace_getter()->UponLeavingGTest();
-  tear_down_tc_();
+  HandleExceptionsInMethodIfSupported(
+      this, &TestCase::RunTearDownTestCase, "TearDownTestCase()");
+
   repeater->OnTestCaseEnd(*this);
   impl->set_current_test_case(NULL);
 }
 
 // Clears the results of all tests in this test case.
 void TestCase::ClearResult() {
-  ForEach(test_info_list_, internal::TestInfoImpl::ClearTestResult);
-}
-
-// Returns true iff test passed.
-bool TestCase::TestPassed(const TestInfo * test_info) {
-  const internal::TestInfoImpl* const impl = test_info->impl();
-  return impl->should_run() && impl->result()->Passed();
-}
-
-// Returns true iff test failed.
-bool TestCase::TestFailed(const TestInfo * test_info) {
-  const internal::TestInfoImpl* const impl = test_info->impl();
-  return impl->should_run() && impl->result()->Failed();
-}
-
-// Returns true iff test is disabled.
-bool TestCase::TestDisabled(const TestInfo * test_info) {
-  return test_info->impl()->is_disabled();
-}
-
-// Returns true if the given test should run.
-bool TestCase::ShouldRunTest(const TestInfo *test_info) {
-  return test_info->impl()->should_run();
+  ForEach(test_info_list_, TestInfo::ClearTestResult);
 }
 
 // Shuffles the tests in this test case.
@@ -3505,19 +3506,6 @@ Environment* UnitTest::AddEnvironment(Environment* env) {
   return env;
 }
 
-#if GTEST_HAS_EXCEPTIONS
-// A failed Google Test assertion will throw an exception of this type
-// when exceptions are enabled.  We derive it from std::runtime_error,
-// which is for errors presumably detectable only at run time.  Since
-// std::runtime_error inherits from std::exception, many testing
-// frameworks know how to extract and print the message inside it.
-class GoogleTestFailureException : public ::std::runtime_error {
- public:
-  explicit GoogleTestFailureException(const TestPartResult& failure)
-      : ::std::runtime_error(PrintTestPartResultToString(failure).c_str()) {}
-};
-#endif
-
 // Adds a TestPartResult to the current TestResult object.  All Google Test
 // assertion macros (e.g. ASSERT_TRUE, EXPECT_EQ, etc) eventually call
 // this to report their results.  The user code should use the
@@ -3640,20 +3628,12 @@ int UnitTest::Run() {
           _WRITE_ABORT_MSG | _CALL_REPORTFAULT);  // pop-up window, core dump.
 #endif
   }
-
-  __try {
-    return impl_->RunAllTests();
-  } __except(internal::UnitTestOptions::GTestShouldProcessSEH(
-      GetExceptionCode())) {
-    printf("Exception thrown with code 0x%x.\nFAIL\n", GetExceptionCode());
-    fflush(stdout);
-    return 1;
-  }
-
-#else  // We are on a compiler or platform that doesn't support SEH.
-
-  return impl_->RunAllTests();
 #endif  // GTEST_HAS_SEH
+
+  return HandleExceptionsInMethodIfSupported(
+      impl_,
+      &internal::UnitTestImpl::RunAllTests,
+      "auxiliary test code (environments or event listeners)") ? 0 : 1;
 }
 
 // Returns the working directory when the first TEST() or TEST_F() was
@@ -3890,27 +3870,26 @@ static void SetUpEnvironment(Environment* env) { env->SetUp(); }
 static void TearDownEnvironment(Environment* env) { env->TearDown(); }
 
 // Runs all tests in this UnitTest object, prints the result, and
-// returns 0 if all tests are successful, or 1 otherwise.  If any
-// exception is thrown during a test on Windows, this test is
-// considered to be failed, but the rest of the tests will still be
-// run.  (We disable exceptions on Linux and Mac OS X, so the issue
-// doesn't apply there.)
+// returns true if all tests are successful.  If any exception is
+// thrown during a test, the test is considered to be failed, but the
+// rest of the tests will still be run.
+//
 // When parameterized tests are enabled, it expands and registers
 // parameterized tests first in RegisterParameterizedTests().
 // All other functions called from RunAllTests() may safely assume that
 // parameterized tests are ready to be counted and run.
-int UnitTestImpl::RunAllTests() {
+bool UnitTestImpl::RunAllTests() {
   // Makes sure InitGoogleTest() was called.
   if (!GTestIsInitialized()) {
     printf("%s",
            "\nThis test program did NOT call ::testing::InitGoogleTest "
            "before calling RUN_ALL_TESTS().  Please fix it.\n");
-    return 1;
+    return false;
   }
 
   // Do not run any test if the --help flag was specified.
   if (g_help_flag)
-    return 0;
+    return true;
 
   // Repeats the call to the post-flag parsing initialization in case the
   // user didn't call InitGoogleTest.
@@ -3942,7 +3921,7 @@ int UnitTestImpl::RunAllTests() {
   if (GTEST_FLAG(list_tests)) {
     // This must be called *after* FilterTests() has been called.
     ListTestsMatchingFilter();
-    return 0;
+    return true;
   }
 
   random_seed_ = GTEST_FLAG(shuffle) ?
@@ -4028,8 +4007,7 @@ int UnitTestImpl::RunAllTests() {
 
   repeater->OnTestProgramEnd(*parent_);
 
-  // Returns 0 if all tests passed, or 1 other wise.
-  return failed ? 1 : 0;
+  return !failed;
 }
 
 // Reads the GTEST_SHARD_STATUS_FILE environment variable, and creates the file
@@ -4159,12 +4137,12 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
                                                    kDisableTestFilter) ||
           internal::UnitTestOptions::MatchesFilter(test_name,
                                                    kDisableTestFilter);
-      test_info->impl()->set_is_disabled(is_disabled);
+      test_info->is_disabled_ = is_disabled;
 
       const bool matches_filter =
           internal::UnitTestOptions::FilterMatchesTest(test_case_name,
                                                        test_name);
-      test_info->impl()->set_matches_filter(matches_filter);
+      test_info->matches_filter_ = matches_filter;
 
       const bool is_runnable =
           (GTEST_FLAG(also_run_disabled_tests) || !is_disabled) &&
@@ -4178,7 +4156,7 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
       num_runnable_tests += is_runnable;
       num_selected_tests += is_selected;
 
-      test_info->impl()->set_should_run(is_selected);
+      test_info->should_run_ = is_selected;
       test_case->set_should_run(test_case->should_run() || is_selected);
     }
   }
@@ -4194,7 +4172,7 @@ void UnitTestImpl::ListTestsMatchingFilter() {
     for (size_t j = 0; j < test_case->test_info_list().size(); j++) {
       const TestInfo* const test_info =
           test_case->test_info_list()[j];
-      if (test_info->matches_filter()) {
+      if (test_info->matches_filter_) {
         if (!printed_test_case_name) {
           printed_test_case_name = true;
           printf("%s.\n", test_case->name());
@@ -4234,7 +4212,7 @@ OsStackTraceGetterInterface* UnitTestImpl::os_stack_trace_getter() {
 // the TestResult for the ad hoc test if no test is running.
 TestResult* UnitTestImpl::current_test_result() {
   return current_test_info_ ?
-    current_test_info_->impl()->result() : &ad_hoc_test_result_;
+      &(current_test_info_->result_) : &ad_hoc_test_result_;
 }
 
 // Shuffles all test cases, and the tests within each test case,
@@ -4263,32 +4241,6 @@ void UnitTestImpl::UnshuffleTests() {
   }
 }
 
-// TestInfoImpl constructor. The new instance assumes ownership of the test
-// factory object.
-TestInfoImpl::TestInfoImpl(TestInfo* parent,
-                           const char* a_test_case_name,
-                           const char* a_name,
-                           const char* a_test_case_comment,
-                           const char* a_comment,
-                           TypeId a_fixture_class_id,
-                           internal::TestFactoryBase* factory) :
-    parent_(parent),
-    test_case_name_(String(a_test_case_name)),
-    name_(String(a_name)),
-    test_case_comment_(String(a_test_case_comment)),
-    comment_(String(a_comment)),
-    fixture_class_id_(a_fixture_class_id),
-    should_run_(false),
-    is_disabled_(false),
-    matches_filter_(false),
-    factory_(factory) {
-}
-
-// TestInfoImpl destructor.
-TestInfoImpl::~TestInfoImpl() {
-  delete factory_;
-}
-
 // Returns the current OS stack trace as a String.
 //
 // The maximum number of stack frames to be included is specified by
@@ -4306,8 +4258,8 @@ String GetCurrentOsStackTraceExceptTop(UnitTest* /*unit_test*/,
   return GetUnitTestImpl()->CurrentOsStackTraceExceptTop(skip_count + 1);
 }
 
-// Used by the GTEST_HIDE_UNREACHABLE_CODE_ macro to suppress unreachable
-// code warnings.
+// Used by the GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_ macro to
+// suppress unreachable code warnings.
 namespace {
 class ClassUniqueToAlwaysTrue {};
 }

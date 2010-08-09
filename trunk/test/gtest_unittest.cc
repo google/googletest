@@ -3767,6 +3767,17 @@ TEST(AssertionTest, ExpectWorksWithUncopyableObject) {
     "Value of: y\n  Actual: -1\nExpected: x\nWhich is: 5");
 }
 
+enum NamedEnum {
+  kE1 = 0,
+  kE2 = 1,
+};
+
+TEST(AssertionTest, NamedEnum) {
+  EXPECT_EQ(kE1, kE1);
+  EXPECT_LT(kE1, kE2);
+  EXPECT_NONFATAL_FAILURE(EXPECT_EQ(kE1, kE2), "Which is: 0");
+  EXPECT_NONFATAL_FAILURE(EXPECT_EQ(kE1, kE2), "Actual: 1");
+}
 
 // The version of gcc used in XCode 2.2 has a bug and doesn't allow
 // anonymous enums in assertions.  Therefore the following test is not
@@ -3776,7 +3787,7 @@ TEST(AssertionTest, ExpectWorksWithUncopyableObject) {
 
 // Tests using assertions with anonymous enums.
 enum {
-  CASE_A = -1,
+  kCaseA = -1,
 #if GTEST_OS_LINUX
   // We want to test the case where the size of the anonymous enum is
   // larger than sizeof(int), to make sure our implementation of the
@@ -3784,37 +3795,44 @@ enum {
   // (incorrectly) doesn't allow an enum value to exceed the range of
   // an int, so this has to be conditionally compiled.
   //
-  // On Linux, CASE_B and CASE_A have the same value when truncated to
+  // On Linux, kCaseB and kCaseA have the same value when truncated to
   // int size.  We want to test whether this will confuse the
   // assertions.
-  CASE_B = testing::internal::kMaxBiggestInt,
+  kCaseB = testing::internal::kMaxBiggestInt,
 #else
-  CASE_B = INT_MAX,
+  kCaseB = INT_MAX,
 #endif  // GTEST_OS_LINUX
+  kCaseC = 42,
 };
 
 TEST(AssertionTest, AnonymousEnum) {
 #if GTEST_OS_LINUX
-  EXPECT_EQ(static_cast<int>(CASE_A), static_cast<int>(CASE_B));
+  EXPECT_EQ(static_cast<int>(kCaseA), static_cast<int>(kCaseB));
 #endif  // GTEST_OS_LINUX
 
-  EXPECT_EQ(CASE_A, CASE_A);
-  EXPECT_NE(CASE_A, CASE_B);
-  EXPECT_LT(CASE_A, CASE_B);
-  EXPECT_LE(CASE_A, CASE_B);
-  EXPECT_GT(CASE_B, CASE_A);
-  EXPECT_GE(CASE_A, CASE_A);
-  EXPECT_NONFATAL_FAILURE(EXPECT_GE(CASE_A, CASE_B),
-                          "(CASE_A) >= (CASE_B)");
+  EXPECT_EQ(kCaseA, kCaseA);
+  EXPECT_NE(kCaseA, kCaseB);
+  EXPECT_LT(kCaseA, kCaseB);
+  EXPECT_LE(kCaseA, kCaseB);
+  EXPECT_GT(kCaseB, kCaseA);
+  EXPECT_GE(kCaseA, kCaseA);
+  EXPECT_NONFATAL_FAILURE(EXPECT_GE(kCaseA, kCaseB),
+                          "(kCaseA) >= (kCaseB)");
+  EXPECT_NONFATAL_FAILURE(EXPECT_GE(kCaseA, kCaseC),
+                          "-1 vs 42");
 
-  ASSERT_EQ(CASE_A, CASE_A);
-  ASSERT_NE(CASE_A, CASE_B);
-  ASSERT_LT(CASE_A, CASE_B);
-  ASSERT_LE(CASE_A, CASE_B);
-  ASSERT_GT(CASE_B, CASE_A);
-  ASSERT_GE(CASE_A, CASE_A);
-  EXPECT_FATAL_FAILURE(ASSERT_EQ(CASE_A, CASE_B),
-                       "Value of: CASE_B");
+  ASSERT_EQ(kCaseA, kCaseA);
+  ASSERT_NE(kCaseA, kCaseB);
+  ASSERT_LT(kCaseA, kCaseB);
+  ASSERT_LE(kCaseA, kCaseB);
+  ASSERT_GT(kCaseB, kCaseA);
+  ASSERT_GE(kCaseA, kCaseA);
+  EXPECT_FATAL_FAILURE(ASSERT_EQ(kCaseA, kCaseB),
+                       "Value of: kCaseB");
+  EXPECT_FATAL_FAILURE(ASSERT_EQ(kCaseA, kCaseC),
+                       "Actual: 42");
+  EXPECT_FATAL_FAILURE(ASSERT_EQ(kCaseA, kCaseC),
+                       "Which is: -1");
 }
 
 #endif  // !GTEST_OS_MAC && !defined(__SUNPRO_CC)

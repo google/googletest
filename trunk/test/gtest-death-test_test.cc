@@ -614,17 +614,6 @@ TEST(PopUpDeathTest, DoesNotShowPopUpOnAbort) {
     abort();
   }, "");
 }
-
-TEST(PopUpDeathTest, DoesNotShowPopUpOnThrow) {
-  printf("This test should be considered failing if it shows "
-         "any pop-up dialogs.\n");
-  fflush(stdout);
-
-  EXPECT_DEATH({
-    testing::GTEST_FLAG(catch_exceptions) = false;
-    throw 1;
-  }, "");
-}
 #endif  // GTEST_OS_WINDOWS
 
 // Tests that EXPECT_DEBUG_DEATH in debug mode does not abort

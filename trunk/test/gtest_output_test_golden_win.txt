@@ -5,7 +5,7 @@ gtest_output_test_.cc:#: error: Value of: false
 Expected: true
 gtest_output_test_.cc:#: error: Value of: 3
 Expected: 2
-[==========] Running 63 tests from 29 test cases.
+[==========] Running 58 tests from 25 test cases.
 [----------] Global test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -178,42 +178,6 @@ Expected failure #3, in the test fixture d'tor.
 foo.cc(42): error: Failed
 Expected failure in foo.cc
 [  FAILED  ] AddFailureAtTest.MessageContainsSpecifiedFileAndLineNumber
-[----------] 1 test from ExceptionInFixtureCtorTest
-[ RUN      ] ExceptionInFixtureCtorTest.ExceptionInFixtureCtor
-(expecting a failure on thrown exception in the test fixture's constructor)
-unknown file: error: Exception thrown with code 0xc0000005 in the test fixture's constructor.
-[----------] 1 test from ExceptionInSetUpTest
-[ RUN      ] ExceptionInSetUpTest.ExceptionInSetUp
-(expecting 3 failures)
-unknown file: error: Exception thrown with code 0xc0000005 in SetUp().
-gtest_output_test_.cc:#: error: Failed
-Expected failure #2, in TearDown().
-gtest_output_test_.cc:#: error: Failed
-Expected failure #3, in the test fixture d'tor.
-[  FAILED  ] ExceptionInSetUpTest.ExceptionInSetUp
-[----------] 2 tests from ExceptionInTestFunctionTest
-[ RUN      ] ExceptionInTestFunctionTest.SEH
-(expecting 3 failures)
-unknown file: error: Exception thrown with code 0xc0000005 in the test body.
-gtest_output_test_.cc:#: error: Failed
-Expected failure #2, in TearDown().
-gtest_output_test_.cc:#: error: Failed
-Expected failure #3, in the test fixture d'tor.
-[  FAILED  ] ExceptionInTestFunctionTest.SEH
-[ RUN      ] ExceptionInTestFunctionTest.CppException
-unknown file: error: Exception thrown with code 0xe06d7363 in the test body.
-gtest_output_test_.cc:#: error: Failed
-Expected failure #2, in TearDown().
-gtest_output_test_.cc:#: error: Failed
-Expected failure #3, in the test fixture d'tor.
-[  FAILED  ] ExceptionInTestFunctionTest.CppException
-[----------] 1 test from ExceptionInTearDownTest
-[ RUN      ] ExceptionInTearDownTest.ExceptionInTearDown
-(expecting 2 failures)
-unknown file: error: Exception thrown with code 0xe06d7363 in TearDown().
-gtest_output_test_.cc:#: error: Failed
-Expected failure #2, in the test fixture d'tor.
-[  FAILED  ] ExceptionInTearDownTest.ExceptionInTearDown
 [----------] 4 tests from MixedUpTestCaseTest
 [ RUN      ] MixedUpTestCaseTest.FirstTestFromNamespaceFoo
 [       OK ] MixedUpTestCaseTest.FirstTestFromNamespaceFoo
@@ -497,9 +461,9 @@ Expected non-fatal failure.
 FooEnvironment::TearDown() called.
 gtest_output_test_.cc:#: error: Failed
 Expected fatal failure.
-[==========] 63 tests from 29 test cases ran.
+[==========] 58 tests from 25 test cases ran.
 [  PASSED  ] 21 tests.
-[  FAILED  ] 42 tests, listed below:
+[  FAILED  ] 37 tests, listed below:
 [  FAILED  ] FatalFailureTest.FatalFailureInSubroutine
 [  FAILED  ] FatalFailureTest.FatalFailureInNestedSubroutine
 [  FAILED  ] FatalFailureTest.NonfatalFailureInSubroutine
@@ -514,11 +478,6 @@ Expected fatal failure.
 [  FAILED  ] NonFatalFailureInSetUpTest.FailureInSetUp
 [  FAILED  ] FatalFailureInSetUpTest.FailureInSetUp
 [  FAILED  ] AddFailureAtTest.MessageContainsSpecifiedFileAndLineNumber
-[  FAILED  ] ExceptionInFixtureCtorTest.ExceptionInFixtureCtor
-[  FAILED  ] ExceptionInSetUpTest.ExceptionInSetUp
-[  FAILED  ] ExceptionInTestFunctionTest.SEH
-[  FAILED  ] ExceptionInTestFunctionTest.CppException
-[  FAILED  ] ExceptionInTearDownTest.ExceptionInTearDown
 [  FAILED  ] MixedUpTestCaseTest.ThisShouldFail
 [  FAILED  ] MixedUpTestCaseTest.ThisShouldFailToo
 [  FAILED  ] MixedUpTestCaseWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
@@ -543,7 +502,7 @@ Expected fatal failure.
 [  FAILED  ] ExpectFailureTest.ExpectNonFatalFailureOnAllThreads
 [  FAILED  ] PrintingFailingParams/FailingParamTest.Fails/0, where GetParam() = 2
 
-42 FAILED TESTS
+37 FAILED TESTS
   YOU HAVE 1 DISABLED TEST
 
 Note: Google Test filter = FatalFailureTest.*:LoggingTest.*

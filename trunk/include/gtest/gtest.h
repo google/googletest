@@ -148,7 +148,6 @@ class ExecDeathTest;
 class NoExecDeathTest;
 class FinalSuccessChecker;
 class GTestFlagSaver;
-class TestInfoImpl;
 class TestResultAccessor;
 class TestEventListenersAccessor;
 class TestEventRepeater;
@@ -341,7 +340,7 @@ GTEST_API_ AssertionResult AssertionFailure(const Message& msg);
 // Test is not copyable.
 class GTEST_API_ Test {
  public:
-  friend class internal::TestInfoImpl;
+  friend class TestInfo;
 
   // Defines types for pointers to functions that set up and tear down
   // a test case.
@@ -417,6 +416,10 @@ class GTEST_API_ Test {
 
   // Sets up, executes, and tears down the test.
   void Run();
+
+  // Deletes self.  We deliberately pick an unusual name for this
+  // internal method to avoid clashing with names used in user TESTs.
+  void DeleteSelf_() { delete this; }
 
   // Uses a GTestFlagSaver to save and restore all Google Test flags.
   const internal::GTestFlagSaver* const gtest_flag_saver_;
@@ -532,7 +535,6 @@ class GTEST_API_ TestResult {
   friend class UnitTest;
   friend class internal::DefaultGlobalTestPartResultReporter;
   friend class internal::ExecDeathTest;
-  friend class internal::TestInfoImpl;
   friend class internal::TestResultAccessor;
   friend class internal::UnitTestImpl;
   friend class internal::WindowsDeathTest;
@@ -612,16 +614,16 @@ class GTEST_API_ TestInfo {
   ~TestInfo();
 
   // Returns the test case name.
-  const char* test_case_name() const;
+  const char* test_case_name() const { return test_case_name_.c_str(); }
 
   // Returns the test name.
-  const char* name() const;
+  const char* name() const { return name_.c_str(); }
 
   // Returns the test case comment.
-  const char* test_case_comment() const;
+  const char* test_case_comment() const { return test_case_comment_.c_str(); }
 
   // Returns the test comment.
-  const char* comment() const;
+  const char* comment() const { return comment_.c_str(); }
 
   // Returns true if this test should run, that is if the test is not disabled
   // (or it is disabled but the also_run_disabled_tests flag has been specified)
@@ -639,10 +641,10 @@ class GTEST_API_ TestInfo {
   //
   // For example, *A*:Foo.* is a filter that matches any string that
   // contains the character 'A' or starts with "Foo.".
-  bool should_run() const;
+  bool should_run() const { return should_run_; }
 
   // Returns the result of the test.
-  const TestResult* result() const;
+  const TestResult* result() const { return &result_; }
 
  private:
 #if GTEST_HAS_DEATH_TEST
@@ -650,7 +652,6 @@ class GTEST_API_ TestInfo {
 #endif  // GTEST_HAS_DEATH_TEST
   friend class Test;
   friend class TestCase;
-  friend class internal::TestInfoImpl;
   friend class internal::UnitTestImpl;
   friend TestInfo* internal::MakeAndRegisterTestInfo(
       const char* test_case_name, const char* name,
@@ -660,17 +661,6 @@ class GTEST_API_ TestInfo {
       Test::TearDownTestCaseFunc tear_down_tc,
       internal::TestFactoryBase* factory);
 
-  // Returns true if this test matches the user-specified filter.
-  bool matches_filter() const;
-
-  // Increments the number of death tests encountered in this test so
-  // far.
-  int increment_death_test_count();
-
-  // Accessors for the implementation object.
-  internal::TestInfoImpl* impl() { return impl_; }
-  const internal::TestInfoImpl* impl() const { return impl_; }
-
   // Constructs a TestInfo object. The newly constructed instance assumes
   // ownership of the factory object.
   TestInfo(const char* test_case_name, const char* name,
@@ -678,8 +668,36 @@ class GTEST_API_ TestInfo {
            internal::TypeId fixture_class_id,
            internal::TestFactoryBase* factory);
 
-  // An opaque implementation object.
-  internal::TestInfoImpl* impl_;
+  // Increments the number of death tests encountered in this test so
+  // far.
+  int increment_death_test_count() {
+    return result_.increment_death_test_count();
+  }
+
+  // Creates the test object, runs it, records its result, and then
+  // deletes it.
+  void Run();
+
+  static void ClearTestResult(TestInfo* test_info) {
+    test_info->result_.Clear();
+  }
+
+  // These fields are immutable properties of the test.
+  const std::string test_case_name_;     // Test case name
+  const std::string name_;               // Test name
+  const std::string test_case_comment_;  // Test case comment
+  const std::string comment_;            // Test comment
+  const internal::TypeId fixture_class_id_;   // ID of the test fixture class
+  bool should_run_;                 // True iff this test should run
+  bool is_disabled_;                // True iff this test is disabled
+  bool matches_filter_;             // True if this test matches the
+                                    // user-specified filter.
+  internal::TestFactoryBase* const factory_;  // The factory that creates
+                                              // the test object
+
+  // This field is mutable and needs to be reset before running the
+  // test for the second time.
+  TestResult result_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(TestInfo);
 };
@@ -777,17 +795,33 @@ class GTEST_API_ TestCase {
   // Runs every test in this TestCase.
   void Run();
 
+  // Runs SetUpTestCase() for this TestCase.  This wrapper is needed
+  // for catching exceptions thrown from SetUpTestCase().
+  void RunSetUpTestCase() { (*set_up_tc_)(); }
+
+  // Runs TearDownTestCase() for this TestCase.  This wrapper is
+  // needed for catching exceptions thrown from TearDownTestCase().
+  void RunTearDownTestCase() { (*tear_down_tc_)(); }
+
   // Returns true iff test passed.
-  static bool TestPassed(const TestInfo * test_info);
+  static bool TestPassed(const TestInfo* test_info) {
+    return test_info->should_run() && test_info->result()->Passed();
+  }
 
   // Returns true iff test failed.
-  static bool TestFailed(const TestInfo * test_info);
+  static bool TestFailed(const TestInfo* test_info) {
+    return test_info->should_run() && test_info->result()->Failed();
+  }
 
   // Returns true iff test is disabled.
-  static bool TestDisabled(const TestInfo * test_info);
+  static bool TestDisabled(const TestInfo* test_info) {
+    return test_info->is_disabled_;
+  }
 
   // Returns true if the given test should run.
-  static bool ShouldRunTest(const TestInfo *test_info);
+  static bool ShouldRunTest(const TestInfo* test_info) {
+    return test_info->should_run();
+  }
 
   // Shuffles the tests in this test case.
   void ShuffleTests(internal::Random* random);
@@ -962,10 +996,10 @@ class GTEST_API_ TestEventListeners {
 
  private:
   friend class TestCase;
+  friend class TestInfo;
   friend class internal::DefaultGlobalTestPartResultReporter;
   friend class internal::NoExecDeathTest;
   friend class internal::TestEventListenersAccessor;
-  friend class internal::TestInfoImpl;
   friend class internal::UnitTestImpl;
 
   // Returns repeater that broadcasts the TestEventListener events to all
