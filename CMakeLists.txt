@@ -142,6 +142,8 @@ if (gtest_build_tests)
 
   cxx_library(gtest_no_exception "${cxx_no_exception}"
     src/gtest-all.cc)
+  cxx_library(gtest_main_no_exception "${cxx_no_exception}"
+    src/gtest-all.cc src/gtest_main.cc)
   cxx_library(gtest_main_no_rtti "${cxx_no_rtti}"
     src/gtest-all.cc src/gtest_main.cc)
 
@@ -179,6 +181,18 @@ if (gtest_build_tests)
 
   cxx_executable(gtest_break_on_failure_unittest_ test gtest)
   py_test(gtest_break_on_failure_unittest)
+
+  cxx_executable_with_flags(
+    gtest_catch_exceptions_no_ex_test_
+    "${cxx_no_exception}"
+    gtest_main_no_exception
+    test/gtest_catch_exceptions_test_.cc)
+  cxx_executable_with_flags(
+    gtest_catch_exceptions_ex_test_
+    "${cxx_exception}"
+    gtest_main
+    test/gtest_catch_exceptions_test_.cc)
+  py_test(gtest_catch_exceptions_test)
 
   cxx_executable(gtest_color_test_ test gtest)
   py_test(gtest_color_test)

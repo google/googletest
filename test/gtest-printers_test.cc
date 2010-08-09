@@ -60,6 +60,42 @@
 
 // Some user-defined types for testing the universal value printer.
 
+// An anonymous enum type.
+enum AnonymousEnum {
+  kAE1 = -1,
+  kAE2 = 1
+};
+
+// An enum without a user-defined printer.
+enum EnumWithoutPrinter {
+  kEWP1 = -2,
+  kEWP2 = 42
+};
+
+// An enum with a << operator.
+enum EnumWithStreaming {
+  kEWS1 = 10,
+};
+
+std::ostream& operator<<(std::ostream& os, EnumWithStreaming e) {
+  return os << (e == kEWS1 ? "kEWS1" : "invalid");
+}
+
+// An enum with a PrintTo() function.
+enum EnumWithPrintTo {
+  kEWPT1 = 1,
+};
+
+void PrintTo(EnumWithPrintTo e, std::ostream* os) {
+  *os << (e == kEWPT1 ? "kEWPT1" : "invalid");
+}
+
+// A class implicitly convertible to BiggestInt.
+class BiggestIntConvertible {
+ public:
+  operator ::testing::internal::BiggestInt() const { return 42; }
+};
+
 // A user-defined unprintable class template in the global namespace.
 template <typename T>
 class UnprintableTemplateInGlobal {
@@ -205,6 +241,34 @@ string PrintByRef(const T& value) {
   ::std::stringstream ss;
   UniversalPrinter<T&>::Print(value, &ss);
   return ss.str();
+}
+
+// Tests printing various enum types.
+
+TEST(PrintEnumTest, AnonymousEnum) {
+  EXPECT_EQ("-1", Print(kAE1));
+  EXPECT_EQ("1", Print(kAE2));
+}
+
+TEST(PrintEnumTest, EnumWithoutPrinter) {
+  EXPECT_EQ("-2", Print(kEWP1));
+  EXPECT_EQ("42", Print(kEWP2));
+}
+
+TEST(PrintEnumTest, EnumWithStreaming) {
+  EXPECT_EQ("kEWS1", Print(kEWS1));
+  EXPECT_EQ("invalid", Print(static_cast<EnumWithStreaming>(0)));
+}
+
+TEST(PrintEnumTest, EnumWithPrintTo) {
+  EXPECT_EQ("kEWPT1", Print(kEWPT1));
+  EXPECT_EQ("invalid", Print(static_cast<EnumWithPrintTo>(0)));
+}
+
+// Tests printing a class implicitly convertible to BiggestInt.
+
+TEST(PrintClassTest, BiggestIntConvertible) {
+  EXPECT_EQ("42", Print(BiggestIntConvertible()));
 }
 
 // Tests printing various char types.
@@ -913,7 +977,7 @@ TEST(PrintUnprintableTypeTest, InGlobalNamespace) {
 
 // Unprintable types in a user namespace.
 TEST(PrintUnprintableTypeTest, InUserNamespace) {
-  EXPECT_EQ("16-byte object <EF12 0000 34AB 0000 0000 0000 0000 0000>",
+  EXPECT_EQ("16-byte object <EF-12 00-00 34-AB 00-00 00-00 00-00 00-00 00-00>",
             Print(::foo::UnprintableInFoo()));
 }
 
@@ -925,13 +989,13 @@ struct Big {
 };
 
 TEST(PrintUnpritableTypeTest, BigObject) {
-  EXPECT_EQ("257-byte object <0000 0000 0000 0000 0000 0000 "
-            "0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 "
-            "0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 "
-            "0000 0000 0000 0000 0000 0000 ... 0000 0000 0000 "
-            "0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 "
-            "0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 "
-            "0000 0000 0000 0000 0000 0000 0000 0000 00>",
+  EXPECT_EQ("257-byte object <00-00 00-00 00-00 00-00 00-00 00-00 "
+            "00-00 00-00 00-00 00-00 00-00 00-00 00-00 00-00 00-00 00-00 "
+            "00-00 00-00 00-00 00-00 00-00 00-00 00-00 00-00 00-00 00-00 "
+            "00-00 00-00 00-00 00-00 00-00 00-00 ... 00-00 00-00 00-00 "
+            "00-00 00-00 00-00 00-00 00-00 00-00 00-00 00-00 00-00 00-00 "
+            "00-00 00-00 00-00 00-00 00-00 00-00 00-00 00-00 00-00 00-00 "
+            "00-00 00-00 00-00 00-00 00-00 00-00 00-00 00-00 00>",
             Print(Big()));
 }
 
@@ -1022,7 +1086,7 @@ TEST(PrintReferenceTest, PrintsAddressAndValue) {
 
   const ::foo::UnprintableInFoo x;
   EXPECT_EQ("@" + PrintPointer(&x) + " 16-byte object "
-            "<EF12 0000 34AB 0000 0000 0000 0000 0000>",
+            "<EF-12 00-00 34-AB 00-00 00-00 00-00 00-00 00-00>",
             PrintByRef(x));
 }
 

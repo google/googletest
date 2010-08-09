@@ -72,9 +72,10 @@ void PrintByteSegmentInObjectTo(const unsigned char* obj_bytes, size_t start,
     if (i != 0) {
       // Organizes the bytes into groups of 2 for easy parsing by
       // human.
-      if ((j % 2) == 0) {
-        *os << " ";
-      }
+      if ((j % 2) == 0)
+        *os << ' ';
+      else
+        *os << '-';
     }
     snprintf(text, sizeof(text), "%02X", obj_bytes[j]);
     *os << text;

@@ -115,16 +115,23 @@ GTEST_API_ void PrintBytesInObjectTo(const unsigned char* obj_bytes,
                                      size_t count,
                                      ::std::ostream* os);
 
-// TypeWithoutFormatter<T, kIsProto>::PrintValue(value, os) is called
+// For selecting which printer to use when a given type has neither <<
+// nor PrintTo().
+enum TypeKind {
+  kProtobuf,              // a protobuf type
+  kConvertibleToInteger,  // a type implicitly convertible to BiggestInt
+                          // (e.g. a named or unnamed enum type)
+  kOtherType,             // anything else
+};
+
+// TypeWithoutFormatter<T, kTypeKind>::PrintValue(value, os) is called
 // by the universal printer to print a value of type T when neither
-// operator<< nor PrintTo() is defined for type T.  When T is
-// ProtocolMessage, proto2::Message, or a subclass of those, kIsProto
-// will be true and the short debug string of the protocol message
-// value will be printed; otherwise kIsProto will be false and the
-// bytes in the value will be printed.
-template <typename T, bool kIsProto>
+// operator<< nor PrintTo() is defined for T, where kTypeKind is the
+// "kind" of T as defined by enum TypeKind.
+template <typename T, TypeKind kTypeKind>
 class TypeWithoutFormatter {
  public:
+  // This default version is called when kTypeKind is kOtherType.
   static void PrintValue(const T& value, ::std::ostream* os) {
     PrintBytesInObjectTo(reinterpret_cast<const unsigned char*>(&value),
                          sizeof(value), os);
@@ -137,22 +144,39 @@ class TypeWithoutFormatter {
 const size_t kProtobufOneLinerMaxLength = 50;
 
 template <typename T>
-class TypeWithoutFormatter<T, true> {
+class TypeWithoutFormatter<T, kProtobuf> {
  public:
   static void PrintValue(const T& value, ::std::ostream* os) {
     const ::testing::internal::string short_str = value.ShortDebugString();
     const ::testing::internal::string pretty_str =
         short_str.length() <= kProtobufOneLinerMaxLength ?
         short_str : ("\n" + value.DebugString());
-    ::std::operator<<(*os, "<" + pretty_str + ">");
+    *os << ("<" + pretty_str + ">");
+  }
+};
+
+template <typename T>
+class TypeWithoutFormatter<T, kConvertibleToInteger> {
+ public:
+  // Since T has no << operator or PrintTo() but can be implicitly
+  // converted to BiggestInt, we print it as a BiggestInt.
+  //
+  // Most likely T is an enum type (either named or unnamed), in which
+  // case printing it as an integer is the desired behavior.  In case
+  // T is not an enum, printing it as an integer is the best we can do
+  // given that it has no user-defined printer.
+  static void PrintValue(const T& value, ::std::ostream* os) {
+    const internal::BiggestInt kBigInt = value;
+    *os << kBigInt;
   }
 };
 
 // Prints the given value to the given ostream.  If the value is a
-// protocol message, its short debug string is printed; otherwise the
-// bytes in the value are printed.  This is what
-// UniversalPrinter<T>::Print() does when it knows nothing about type
-// T and T has no << operator.
+// protocol message, its debug string is printed; if it's an enum or
+// of a type implicitly convertible to BiggestInt, it's printed as an
+// integer; otherwise the bytes in the value are printed.  This is
+// what UniversalPrinter<T>::Print() does when it knows nothing about
+// type T and T has neither << operator nor PrintTo().
 //
 // A user can override this behavior for a class type Foo by defining
 // a << operator in the namespace where Foo is defined.
@@ -174,8 +198,10 @@ class TypeWithoutFormatter<T, true> {
 template <typename Char, typename CharTraits, typename T>
 ::std::basic_ostream<Char, CharTraits>& operator<<(
     ::std::basic_ostream<Char, CharTraits>& os, const T& x) {
-  TypeWithoutFormatter<T, ::testing::internal::IsAProtocolMessage<T>::value>::
-      PrintValue(x, &os);
+  TypeWithoutFormatter<T,
+      (internal::IsAProtocolMessage<T>::value ? kProtobuf :
+       internal::ImplicitlyConvertible<const T&, internal::BiggestInt>::value ?
+       kConvertibleToInteger : kOtherType)>::PrintValue(x, &os);
   return os;
 }
 
