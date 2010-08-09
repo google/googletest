@@ -537,7 +537,7 @@ class InSequence {
   bool sequence_created_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(InSequence);  // NOLINT
-} GMOCK_ATTRIBUTE_UNUSED_;
+} GTEST_ATTRIBUTE_UNUSED_;
 
 namespace internal {
 

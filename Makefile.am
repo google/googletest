@@ -29,16 +29,17 @@ lib_LTLIBRARIES = lib/libgmock.la lib/libgmock_main.la
 
 lib_libgmock_la_SOURCES = src/gmock-all.cc
 
-pkginclude_HEADERS = include/gmock/gmock.h \
-                     include/gmock/gmock-actions.h \
-                     include/gmock/gmock-cardinalities.h \
-                     include/gmock/gmock-generated-actions.h \
-                     include/gmock/gmock-generated-function-mockers.h \
-                     include/gmock/gmock-generated-matchers.h \
-                     include/gmock/gmock-generated-nice-strict.h \
-                     include/gmock/gmock-matchers.h \
-                     include/gmock/gmock-more-actions.h \
-                     include/gmock/gmock-spec-builders.h
+pkginclude_HEADERS = \
+  include/gmock/gmock-actions.h \
+  include/gmock/gmock-cardinalities.h \
+  include/gmock/gmock-generated-actions.h \
+  include/gmock/gmock-generated-function-mockers.h \
+  include/gmock/gmock-generated-matchers.h \
+  include/gmock/gmock-generated-nice-strict.h \
+  include/gmock/gmock-matchers.h \
+  include/gmock/gmock-more-actions.h \
+  include/gmock/gmock-spec-builders.h \
+  include/gmock/gmock.h
 
 pkginclude_internaldir = $(pkgincludedir)/internal
 pkginclude_internal_HEADERS = \
@@ -70,34 +71,35 @@ test_gmock_spec_builders_test_LDADD = $(GTEST_LIBS) lib/libgmock.la
 # verifies that libgmock_main works.
 TESTS += test/gmock_link_test
 check_PROGRAMS += test/gmock_link_test
-test_gmock_link_test_SOURCES = test/gmock_link_test.cc \
-                               test/gmock_link2_test.cc \
-                               test/gmock_link_test.h
+test_gmock_link_test_SOURCES = \
+  test/gmock_link2_test.cc \
+  test/gmock_link_test.cc \
+  test/gmock_link_test.h
 test_gmock_link_test_LDADD = $(GTEST_LIBS) lib/libgmock_main.la
 
 # Tests that fused gmock files compile and work.
 TESTS += test/gmock_fused_test
 check_PROGRAMS += test/gmock_fused_test
-test_gmock_fused_test_SOURCES = fused-src/gmock-gtest-all.cc \
-                                fused-src/gmock_main.cc \
-                                fused-src/gmock/gmock.h \
-                                fused-src/gtest/gtest.h \
-                                test/gmock_test.cc
+test_gmock_fused_test_SOURCES = \
+  fused-src/gmock-gtest-all.cc \
+  fused-src/gmock/gmock.h \
+  fused-src/gmock_main.cc \
+  fused-src/gtest/gtest.h \
+  test/gmock_test.cc
 test_gmock_fused_test_CPPFLAGS = -I"$(srcdir)/fused-src"
 
 # Google Mock source files that we don't compile directly.
 GMOCK_SOURCE_INGLUDES = \
-  src/gmock.cc \
   src/gmock-cardinalities.cc \
   src/gmock-internal-utils.cc \
   src/gmock-matchers.cc \
-  src/gmock-spec-builders.cc
+  src/gmock-spec-builders.cc \
+  src/gmock.cc
 
 EXTRA_DIST += $(GMOCK_SOURCE_INGLUDES)
 
 # C++ tests that we don't compile using autotools.
 EXTRA_DIST += \
-  test/gmock_all_test.cc \
   test/gmock-actions_test.cc \
   test/gmock-cardinalities_test.cc \
   test/gmock-generated-actions_test.cc \
@@ -108,56 +110,58 @@ EXTRA_DIST += \
   test/gmock-matchers_test.cc \
   test/gmock-more-actions_test.cc \
   test/gmock-nice-strict_test.cc \
-  test/gmock-port_test.cc
+  test/gmock-port_test.cc \
+  test/gmock_all_test.cc
 
 # Python tests, which we don't run using autotools.
 EXTRA_DIST += \
-  test/gmock_test_utils.py \
-  test/gmock_leak_test_.cc \
   test/gmock_leak_test.py \
-  test/gmock_output_test_.cc \
+  test/gmock_leak_test_.cc \
   test/gmock_output_test.py \
-  test/gmock_output_test_golden.txt
+  test/gmock_output_test_.cc \
+  test/gmock_output_test_golden.txt \
+  test/gmock_test_utils.py
 
 # Nonstandard package files for distribution.
 EXTRA_DIST += \
-    CHANGES \
-    CONTRIBUTORS \
-    make/Makefile
+  CHANGES \
+  CONTRIBUTORS \
+  make/Makefile
 
 # Pump scripts for generating Google Mock headers.
 # TODO(chandlerc@google.com): automate the generation of *.h from *.h.pump.
-EXTRA_DIST += include/gmock/gmock-generated-actions.h.pump \
-              include/gmock/gmock-generated-function-mockers.h.pump \
-              include/gmock/gmock-generated-matchers.h.pump \
-              include/gmock/gmock-generated-nice-strict.h.pump \
-              include/gmock/internal/gmock-generated-internal-utils.h.pump
+EXTRA_DIST += \
+  include/gmock/gmock-generated-actions.h.pump \
+  include/gmock/gmock-generated-function-mockers.h.pump \
+  include/gmock/gmock-generated-matchers.h.pump \
+  include/gmock/gmock-generated-nice-strict.h.pump \
+  include/gmock/internal/gmock-generated-internal-utils.h.pump
 
 # Script for fusing Google Mock and Google Test source files.
 EXTRA_DIST += scripts/fuse_gmock_files.py
 
 # The Google Mock Generator tool from the cppclean project.
 EXTRA_DIST += \
-    scripts/generator/COPYING \
-    scripts/generator/README \
-    scripts/generator/README.cppclean \
-    scripts/generator/cpp/__init__.py \
-    scripts/generator/cpp/ast.py \
-    scripts/generator/cpp/gmock_class.py \
-    scripts/generator/cpp/keywords.py \
-    scripts/generator/cpp/tokenize.py \
-    scripts/generator/cpp/utils.py \
-    scripts/generator/gmock_gen.py
+  scripts/generator/COPYING \
+  scripts/generator/README \
+  scripts/generator/README.cppclean \
+  scripts/generator/cpp/__init__.py \
+  scripts/generator/cpp/ast.py \
+  scripts/generator/cpp/gmock_class.py \
+  scripts/generator/cpp/keywords.py \
+  scripts/generator/cpp/tokenize.py \
+  scripts/generator/cpp/utils.py \
+  scripts/generator/gmock_gen.py
 
 # Microsoft Visual Studio 2005 projects.
 EXTRA_DIST += \
-    msvc/gmock.sln \
-    msvc/gmock.vcproj \
-    msvc/gmock_config.vsprops \
-    msvc/gmock_link_test.vcproj \
-    msvc/gmock_main.vcproj \
-    msvc/gmock-spec-builders_test.vcproj \
-    msvc/gmock_test.vcproj
+  msvc/gmock-spec-builders_test.vcproj \
+  msvc/gmock.sln \
+  msvc/gmock.vcproj \
+  msvc/gmock_config.vsprops \
+  msvc/gmock_link_test.vcproj \
+  msvc/gmock_main.vcproj \
+  msvc/gmock_test.vcproj
 
 # gmock_test.cc does not really depend on files generated by the
 # fused-gmock-internal rule.  However, gmock_test.o does, and it is

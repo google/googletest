@@ -46,17 +46,6 @@
 #include <gmock/internal/gmock-port.h>
 #include <gtest/gtest.h>
 
-// Concatenates two pre-processor symbols; works for concatenating
-// built-in macros like __FILE__ and __LINE__.
-#define GMOCK_CONCAT_TOKEN_IMPL_(foo, bar) foo##bar
-#define GMOCK_CONCAT_TOKEN_(foo, bar) GMOCK_CONCAT_TOKEN_IMPL_(foo, bar)
-
-#ifdef __GNUC__
-#define GMOCK_ATTRIBUTE_UNUSED_ __attribute__ ((unused))
-#else
-#define GMOCK_ATTRIBUTE_UNUSED_
-#endif  // __GNUC__
-
 namespace testing {
 namespace internal {
 

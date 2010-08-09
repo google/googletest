@@ -119,7 +119,7 @@ using internal::FunctionMocker;
 // The variable for mocking the given method.
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
 #define GMOCK_MOCKER_(arity, constness, Method) \
-    GMOCK_CONCAT_TOKEN_(gmock##constness##arity##_##Method##_, __LINE__)
+    GTEST_CONCAT_TOKEN_(gmock##constness##arity##_##Method##_, __LINE__)
 
 
 $for i [[

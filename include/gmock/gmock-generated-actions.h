@@ -1378,7 +1378,7 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
 
 // The name of the class template implementing the action template.
 #define GMOCK_ACTION_CLASS_(name, value_params)\
-    GMOCK_CONCAT_TOKEN_(name##Action, GMOCK_INTERNAL_COUNT_##value_params)
+    GTEST_CONCAT_TOKEN_(name##Action, GMOCK_INTERNAL_COUNT_##value_params)
 
 #define ACTION_TEMPLATE(name, template_params, value_params)\
   template <GMOCK_INTERNAL_DECL_##template_params\
