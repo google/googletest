@@ -1,3 +1,0 @@
-#summary One-sentence summary of this page.
-
-This is a test.
