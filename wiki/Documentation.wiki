@@ -1,7 +1,7 @@
 #summary Documentation on Google Test (the SVN trunk version)
 #labels Featured
 
-This page lists all official Google Test documentation wiki pages:
+This page lists all documentation wiki pages for the version of Google Test *in the SVN trunk* -- *if you use a released version of Google Test, please read the documentation for that specific version instead.*
 
   * [http:Primer Primer] -- start here if you are new to Google Test.
   * [http:Samples Samples] -- learn from examples.
