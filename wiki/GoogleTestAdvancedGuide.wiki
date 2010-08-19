@@ -122,7 +122,7 @@ c is 10
 
 *Notes:*
 
-  # If you see a compiler error "no matching function to call" when using `ASSERT_PRED*` or `EXPECT_PRED*`, please see [GoogleTestFAQ#The_compiler_complains_%22no_matching_function_to_call%22 this] for how to resolve it.
+  # If you see a compiler error "no matching function to call" when using `ASSERT_PRED*` or `EXPECT_PRED*`, please see [FAQ#The_compiler_complains_%22no_matching_function_to_call%22 this] for how to resolve it.
   # Currently we only provide predicate assertions of arity <= 5. If you need a higher-arity assertion, let us know.
 
 _Availability_: Linux, Windows, Mac
@@ -2079,4 +2079,4 @@ file as an example on how to compile your tests against them.
 
 Congratulations! You've now learned more advanced Google Test tools and are
 ready to tackle more complex testing tasks. If you want to dive even deeper, you
-can read the [http://code.google.com/p/googletest/wiki/GoogleTestFAQ GoogleTestFAQ].
+can read the [http://code.google.com/p/googletest/wiki/FAQ Frequently-Asked Questions].
