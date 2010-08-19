@@ -2,7 +2,7 @@
 
 <wiki:toc max_depth="3" />
 
-Now that you have read [http:Primer Primer] and learned how to write tests
+Now that you have read [Primer Primer] and learned how to write tests
 using Google Test, it's time to learn some new tricks. This document
 will show you more assertions as well as how to construct complex
 failure messages, propagate fatal failures, reuse and speed up your
@@ -2078,4 +2078,4 @@ file as an example on how to compile your tests against them.
 
 Congratulations! You've now learned more advanced Google Test tools and are
 ready to tackle more complex testing tasks. If you want to dive even deeper, you
-can read the [http://code.google.com/p/googletest/wiki/FAQ Frequently-Asked Questions].
+can read the [FAQ Frequently-Asked Questions].

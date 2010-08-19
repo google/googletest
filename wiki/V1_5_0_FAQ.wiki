@@ -3,7 +3,7 @@
 <wiki:toc max_depth="3" />
 
 If you cannot find the answer to your question here, and you have read
-[http:V1_5_0_Primer Primer] and [V1_5_0_AdvancedGuide AdvancedGuide], send it to
+[V1_5_0_Primer Primer] and [V1_5_0_AdvancedGuide AdvancedGuide], send it to
 googletestframework@googlegroups.com.
 
 == Why should I use Google Test instead of my favorite C++ testing framework? ==
@@ -853,7 +853,7 @@ using gtest-md.vcproj instead of gtest.vcproj.
 
 == I put my tests in a library and Google Test doesn't run them. What's happening? ==
 Have you read a
-[http:V1_5_0_Primer#Important_note_for_Visual_C++_users warning] on
+[V1_5_0_Primer#Important_note_for_Visual_C++_users warning] on
 the Google Test Primer page?
 
 == I want to use Google Test with Visual Studio but don't know where to start. ==

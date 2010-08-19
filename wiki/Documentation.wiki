@@ -3,11 +3,11 @@
 
 This page lists all documentation wiki pages for the version of Google Test *in the SVN trunk* -- *if you use a released version of Google Test, please read the documentation for that specific version instead.*
 
-  * [http:Primer Primer] -- start here if you are new to Google Test.
-  * [http:Samples Samples] -- learn from examples.
+  * [Primer Primer] -- start here if you are new to Google Test.
+  * [Samples Samples] -- learn from examples.
   * AdvancedGuide -- learn more about Google Test.
   * XcodeGuide -- how to use Google Test in Xcode on Mac.
-  * [http:FAQ Frequently-Asked Questions] -- check here before asking a question on the mailing list.
+  * [FAQ Frequently-Asked Questions] -- check here before asking a question on the mailing list.
 
 To contribute code to Google Test, read:
 
