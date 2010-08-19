@@ -4,7 +4,7 @@
 <wiki:toc max_depth="3" />
 
 If you cannot find the answer to your question here, and you have read
-Primer and AdvancedGuide, send it to
+[http:Primer Primer] and AdvancedGuide, send it to
 googletestframework@googlegroups.com.
 
 == Why should I use Google Test instead of my favorite C++ testing framework? ==
