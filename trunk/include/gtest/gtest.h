@@ -137,6 +137,11 @@ GTEST_DECLARE_int32_(stack_trace_depth);
 // non-zero code otherwise.
 GTEST_DECLARE_bool_(throw_on_failure);
 
+// When this flag is set with a "host:port" string, on supported
+// platforms test results are streamed to the specified port on
+// the specified host machine.
+GTEST_DECLARE_string_(stream_result_to);
+
 // The upper limit for valid stack trace depths.
 const int kMaxStackTraceDepth = 100;
 
@@ -155,8 +160,6 @@ class WindowsDeathTest;
 class UnitTestImpl* GetUnitTestImpl();
 void ReportFailureInUnknownLocation(TestPartResult::Type result_type,
                                     const String& message);
-class PrettyUnitTestResultPrinter;
-class XmlUnitTestResultPrinter;
 
 // Converts a streamable value to a String.  A NULL pointer is
 // converted to "(null)".  When the input value is a ::string,

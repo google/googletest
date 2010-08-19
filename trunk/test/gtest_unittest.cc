@@ -52,6 +52,7 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
       || testing::GTEST_FLAG(show_internal_stack_frames)
       || testing::GTEST_FLAG(shuffle)
       || testing::GTEST_FLAG(stack_trace_depth) > 0
+      || testing::GTEST_FLAG(stream_result_to) != "unknown"
       || testing::GTEST_FLAG(throw_on_failure);
   EXPECT_TRUE(dummy || !dummy);  // Suppresses warning that dummy is unused.
 }
@@ -125,6 +126,7 @@ using testing::GTEST_FLAG(repeat);
 using testing::GTEST_FLAG(show_internal_stack_frames);
 using testing::GTEST_FLAG(shuffle);
 using testing::GTEST_FLAG(stack_trace_depth);
+using testing::GTEST_FLAG(stream_result_to);
 using testing::GTEST_FLAG(throw_on_failure);
 using testing::IsNotSubstring;
 using testing::IsSubstring;
@@ -1718,6 +1720,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG(repeat) = 1;
     GTEST_FLAG(shuffle) = false;
     GTEST_FLAG(stack_trace_depth) = kMaxStackTraceDepth;
+    GTEST_FLAG(stream_result_to) = "";
     GTEST_FLAG(throw_on_failure) = false;
   }
 
@@ -1744,6 +1747,7 @@ class GTestFlagSaverTest : public Test {
     EXPECT_EQ(1, GTEST_FLAG(repeat));
     EXPECT_FALSE(GTEST_FLAG(shuffle));
     EXPECT_EQ(kMaxStackTraceDepth, GTEST_FLAG(stack_trace_depth));
+    EXPECT_STREQ("", GTEST_FLAG(stream_result_to).c_str());
     EXPECT_FALSE(GTEST_FLAG(throw_on_failure));
 
     GTEST_FLAG(also_run_disabled_tests) = true;
@@ -1759,6 +1763,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG(repeat) = 100;
     GTEST_FLAG(shuffle) = true;
     GTEST_FLAG(stack_trace_depth) = 1;
+    GTEST_FLAG(stream_result_to) = "localhost:1234";
     GTEST_FLAG(throw_on_failure) = true;
   }
  private:
@@ -5142,6 +5147,7 @@ struct Flags {
             repeat(1),
             shuffle(false),
             stack_trace_depth(kMaxStackTraceDepth),
+            stream_result_to(""),
             throw_on_failure(false) {}
 
   // Factory methods.
@@ -5242,6 +5248,14 @@ struct Flags {
     return flags;
   }
 
+  // Creates a Flags struct where the GTEST_FLAG(stream_result_to) flag has
+  // the given value.
+  static Flags StreamResultTo(const char* stream_result_to) {
+    Flags flags;
+    flags.stream_result_to = stream_result_to;
+    return flags;
+  }
+
   // Creates a Flags struct where the gtest_throw_on_failure flag has
   // the given value.
   static Flags ThrowOnFailure(bool throw_on_failure) {
@@ -5263,6 +5277,7 @@ struct Flags {
   Int32 repeat;
   bool shuffle;
   Int32 stack_trace_depth;
+  const char* stream_result_to;
   bool throw_on_failure;
 };
 
@@ -5283,6 +5298,7 @@ class InitGoogleTestTest : public Test {
     GTEST_FLAG(repeat) = 1;
     GTEST_FLAG(shuffle) = false;
     GTEST_FLAG(stack_trace_depth) = kMaxStackTraceDepth;
+    GTEST_FLAG(stream_result_to) = "";
     GTEST_FLAG(throw_on_failure) = false;
   }
 
@@ -5311,8 +5327,10 @@ class InitGoogleTestTest : public Test {
     EXPECT_EQ(expected.random_seed, GTEST_FLAG(random_seed));
     EXPECT_EQ(expected.repeat, GTEST_FLAG(repeat));
     EXPECT_EQ(expected.shuffle, GTEST_FLAG(shuffle));
-    EXPECT_EQ(expected.throw_on_failure, GTEST_FLAG(throw_on_failure));
     EXPECT_EQ(expected.stack_trace_depth, GTEST_FLAG(stack_trace_depth));
+    EXPECT_STREQ(expected.stream_result_to,
+                 GTEST_FLAG(stream_result_to).c_str());
+    EXPECT_EQ(expected.throw_on_failure, GTEST_FLAG(throw_on_failure));
   }
 
   // Parses a command line (specified by argc1 and argv1), then
@@ -5971,6 +5989,22 @@ TEST_F(InitGoogleTestTest, StackTraceDepth) {
   };
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::StackTraceDepth(5), false);
+}
+
+TEST_F(InitGoogleTestTest, StreamResultTo) {
+  const char* argv[] = {
+    "foo.exe",
+    "--gtest_stream_result_to=localhost:1234",
+    NULL
+  };
+
+  const char* argv2[] = {
+    "foo.exe",
+    NULL
+  };
+
+  GTEST_TEST_PARSING_FLAGS_(
+      argv, argv2, Flags::StreamResultTo("localhost:1234"), false);
 }
 
 // Tests parsing --gtest_throw_on_failure.

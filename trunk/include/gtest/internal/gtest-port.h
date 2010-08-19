@@ -537,6 +537,11 @@
 #define GTEST_WIDE_STRING_USES_UTF16_ \
     (GTEST_OS_WINDOWS || GTEST_OS_CYGWIN || GTEST_OS_SYMBIAN || GTEST_OS_AIX)
 
+// Determines whether test results can be streamed to a socket.
+#if GTEST_OS_LINUX
+#define GTEST_CAN_STREAM_RESULTS_ 1
+#endif
+
 // Defines some utility macros.
 
 // The GNU compiler emits a warning if nested "if" statements are followed by

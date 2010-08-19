@@ -102,7 +102,6 @@ EXTRA_DIST += \
   test/gtest_list_tests_unittest.py \
   test/gtest_output_test.py \
   test/gtest_output_test_golden_lin.txt \
-  test/gtest_output_test_golden_win.txt \
   test/gtest_shuffle_test.py \
   test/gtest_test_utils.py \
   test/gtest_throw_on_failure_test.py \
