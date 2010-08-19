@@ -3,11 +3,11 @@
 
 This page lists all official Google Test documentation wiki pages:
 
-  * [http://Primer Primer] -- start here if you are new to Google Test.
-  * [http://Samples Samples] -- learn from examples.
+  * [http:Primer Primer] -- start here if you are new to Google Test.
+  * [http:Samples Samples] -- learn from examples.
   * AdvancedGuide -- learn more about Google Test.
   * XcodeGuide -- how to use Google Test in Xcode on Mac.
-  * [http://FAQ Frequently-Asked Questions] -- check here before asking a question on the mailing list.
+  * [http:FAQ Frequently-Asked Questions] -- check here before asking a question on the mailing list.
 
 To contribute code to Google Test, read:
 
