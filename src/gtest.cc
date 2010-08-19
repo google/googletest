@@ -43,7 +43,7 @@
 #include <wctype.h>
 
 #include <algorithm>
-#include <ostream>
+#include <ostream>  // NOLINT
 #include <sstream>
 #include <vector>
 
@@ -53,16 +53,15 @@
 // gettimeofday().
 #define GTEST_HAS_GETTIMEOFDAY_ 1
 
-#include <fcntl.h>
-#include <limits.h>
-#include <sched.h>
+#include <fcntl.h>  // NOLINT
+#include <limits.h>  // NOLINT
+#include <sched.h>  // NOLINT
 // Declares vsnprintf().  This header is not available on Windows.
-#include <strings.h>
-#include <sys/mman.h>
-#include <sys/time.h>
-#include <unistd.h>
+#include <strings.h>  // NOLINT
+#include <sys/mman.h>  // NOLINT
+#include <sys/time.h>  // NOLINT
+#include <unistd.h>  // NOLINT
 #include <string>
-#include <vector>
 
 #elif GTEST_OS_SYMBIAN
 #define GTEST_HAS_GETTIMEOFDAY_ 1
@@ -117,6 +116,11 @@
 
 #if GTEST_HAS_EXCEPTIONS
 #include <stdexcept>
+#endif
+
+#if GTEST_CAN_STREAM_RESULTS_
+#include <arpa/inet.h>  // NOLINT
+#include <netdb.h>  // NOLINT
 #endif
 
 // Indicates that this translation unit is part of Google Test's
@@ -257,6 +261,13 @@ GTEST_DEFINE_int32_(
     internal::Int32FromGTestEnv("stack_trace_depth", kMaxStackTraceDepth),
     "The maximum number of stack frames to print when an "
     "assertion fails.  The valid range is 0 through 100, inclusive.");
+
+GTEST_DEFINE_string_(
+    stream_result_to,
+    internal::StringFromGTestEnv("stream_result_to", ""),
+    "This flag specifies the host name and the port number on which to stream "
+    "test results. Example: \"localhost:555\". The flag is effective only on "
+    "Linux.");
 
 GTEST_DEFINE_bool_(
     throw_on_failure,
@@ -2286,8 +2297,8 @@ void TestInfo::Run() {
       factory_, &internal::TestFactoryBase::CreateTest,
       "the test fixture's constructor");
 
-  // Runs the test only if the test object was created and its constructor didn't
-  // generate a fatal failure.
+  // Runs the test only if the test object was created and its
+  // constructor didn't generate a fatal failure.
   if ((test != NULL) && !Test::HasFatalFailure()) {
     // This doesn't throw as all user code that can throw are wrapped into
     // exception handling code.
@@ -2800,8 +2811,8 @@ void PrettyUnitTestResultPrinter::PrintFailedTests(const UnitTest& unit_test) {
   }
 }
 
- void PrettyUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
-                                                      int /*iteration*/) {
+void PrettyUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
+                                                     int /*iteration*/) {
   ColoredPrintf(COLOR_GREEN,  "[==========] ");
   printf("%s from %s ran.",
          FormatTestCount(unit_test.test_to_run_count()).c_str(),
@@ -3265,6 +3276,182 @@ String XmlUnitTestResultPrinter::TestPropertiesAsXmlAttributes(
 }
 
 // End XmlUnitTestResultPrinter
+
+#if GTEST_CAN_STREAM_RESULTS_
+
+// Streams test results to the given port on the given host machine.
+class StreamingListener : public EmptyTestEventListener {
+ public:
+  // Escapes '=', '&', '%', and '\n' characters in str as "%xx".
+  static string UrlEncode(const char* str);
+
+  StreamingListener(const string& host, const string& port)
+      : sockfd_(-1), host_name_(host), port_num_(port) {
+    MakeConnection();
+    Send("gtest_streaming_protocol_version=1.0\n");
+  }
+
+  virtual ~StreamingListener() {
+    if (sockfd_ != -1)
+      CloseConnection();
+  }
+
+  void OnTestProgramStart(const UnitTest& /* unit_test */) {
+    Send("event=TestProgramStart\n");
+  }
+
+  void OnTestProgramEnd(const UnitTest& unit_test) {
+    // Note that Google Test current only report elapsed time for each
+    // test iteration, not for the entire test program.
+    Send(String::Format("event=TestProgramEnd&passed=%d\n",
+                        unit_test.Passed()));
+
+    // Notify the streaming server to stop.
+    CloseConnection();
+  }
+
+  void OnTestIterationStart(const UnitTest& /* unit_test */, int iteration) {
+    Send(String::Format("event=TestIterationStart&iteration=%d\n",
+                        iteration));
+  }
+
+  void OnTestIterationEnd(const UnitTest& unit_test, int /* iteration */) {
+    Send(String::Format("event=TestIterationEnd&passed=%d&elapsed_time=%sms\n",
+                        unit_test.Passed(),
+                        StreamableToString(unit_test.elapsed_time()).c_str()));
+  }
+
+  void OnTestCaseStart(const TestCase& test_case) {
+    Send(String::Format("event=TestCaseStart&name=%s\n", test_case.name()));
+  }
+
+  void OnTestCaseEnd(const TestCase& test_case) {
+    Send(String::Format("event=TestCaseEnd&passed=%d&elapsed_time=%sms\n",
+                        test_case.Passed(),
+                        StreamableToString(test_case.elapsed_time()).c_str()));
+  }
+
+  void OnTestStart(const TestInfo& test_info) {
+    Send(String::Format("event=TestStart&name=%s\n", test_info.name()));
+  }
+
+  void OnTestEnd(const TestInfo& test_info) {
+    Send(String::Format(
+        "event=TestEnd&passed=%d&elapsed_time=%sms\n",
+        (test_info.result())->Passed(),
+        StreamableToString((test_info.result())->elapsed_time()).c_str()));
+  }
+
+  void OnTestPartResult(const TestPartResult& test_part_result) {
+    const char* file_name = test_part_result.file_name();
+    if (file_name == NULL)
+      file_name = "";
+    Send(String::Format("event=TestPartResult&file=%s&line=%d&message=",
+                        UrlEncode(file_name).c_str(),
+                        test_part_result.line_number()));
+    Send(UrlEncode(test_part_result.message()) + "\n");
+  }
+
+ private:
+  // Creates a client socket and connects to the server.
+  void MakeConnection();
+
+  // Closes the socket.
+  void CloseConnection() {
+    GTEST_CHECK_(sockfd_ != -1)
+        << "CloseConnection() can be called only when there is a connection.";
+
+    close(sockfd_);
+    sockfd_ = -1;
+  }
+
+  // Sends a string to the socket.
+  void Send(const string& message) {
+    GTEST_CHECK_(sockfd_ != -1)
+        << "Send() can be called only when there is a connection.";
+
+    const int len = static_cast<int>(message.length());
+    if (write(sockfd_, message.c_str(), len) != len) {
+      GTEST_LOG_(WARNING)
+          << "stream_result_to: failed to stream to "
+          << host_name_ << ":" << port_num_;
+    }
+  }
+
+  int sockfd_;   // socket file descriptor
+  const string host_name_;
+  const string port_num_;
+
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(StreamingListener);
+};  // class StreamingListener
+
+// Checks if str contains '=', '&', '%' or '\n' characters. If yes,
+// replaces them by "%xx" where xx is their hexadecimal value. For
+// example, replaces "=" with "%3D".  This algorithm is O(strlen(str))
+// in both time and space -- important as the input str may contain an
+// arbitrarily long test failure message and stack trace.
+string StreamingListener::UrlEncode(const char* str) {
+  string result;
+  result.reserve(strlen(str) + 1);
+  for (char ch = *str; ch != '\0'; ch = *++str) {
+    switch (ch) {
+      case '%':
+      case '=':
+      case '&':
+      case '\n':
+        result.append(String::Format("%%%02x", static_cast<unsigned char>(ch)));
+        break;
+      default:
+        result.push_back(ch);
+        break;
+    }
+  }
+  return result;
+}
+
+void StreamingListener::MakeConnection() {
+  GTEST_CHECK_(sockfd_ == -1)
+      << "MakeConnection() can't be called when there is already a connection.";
+
+  addrinfo hints;
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = AF_UNSPEC;    // To allow both IPv4 and IPv6 addresses.
+  hints.ai_socktype = SOCK_STREAM;
+  addrinfo* servinfo = NULL;
+
+  // Use the getaddrinfo() to get a linked list of IP addresses for
+  // the given host name.
+  const int error_num = getaddrinfo(
+      host_name_.c_str(), port_num_.c_str(), &hints, &servinfo);
+  if (error_num != 0) {
+    GTEST_LOG_(WARNING) << "stream_result_to: getaddrinfo() failed: "
+                        << gai_strerror(error_num);
+  }
+
+  // Loop through all the results and connect to the first we can.
+  for (addrinfo* cur_addr = servinfo; sockfd_ == -1 && cur_addr != NULL;
+       cur_addr = cur_addr->ai_next) {
+    sockfd_ = socket(
+        cur_addr->ai_family, cur_addr->ai_socktype, cur_addr->ai_protocol);
+    if (sockfd_ != -1) {
+      // Connect the client socket to the server socket.
+      if (connect(sockfd_, cur_addr->ai_addr, cur_addr->ai_addrlen) == -1) {
+        close(sockfd_);
+        sockfd_ = -1;
+      }
+    }
+  }
+
+  freeaddrinfo(servinfo);  // all done with this structure
+
+  if (sockfd_ == -1) {
+    GTEST_LOG_(WARNING) << "stream_result_to: failed to connect to "
+                        << host_name_ << ":" << port_num_;
+  }
+}
+
+// End of class Streaming Listener
+#endif  // GTEST_CAN_STREAM_RESULTS__
 
 // Class ScopedTrace
 
@@ -3770,6 +3957,25 @@ void UnitTestImpl::ConfigureXmlOutput() {
   }
 }
 
+#if GTEST_CAN_STREAM_RESULTS_
+// Initializes event listeners for streaming test results in String form.
+// Must not be called before InitGoogleTest.
+void UnitTestImpl::ConfigureStreamingOutput() {
+  const string& target = GTEST_FLAG(stream_result_to);
+  if (!target.empty()) {
+    const size_t pos = target.find(':');
+    if (pos != string::npos) {
+      listeners()->Append(new StreamingListener(target.substr(0, pos),
+                                                target.substr(pos+1)));
+    } else {
+      printf("WARNING: unrecognized streaming target \"%s\" ignored.\n",
+             target.c_str());
+      fflush(stdout);
+    }
+  }
+}
+#endif  // GTEST_CAN_STREAM_RESULTS_
+
 // Performs initialization dependent upon flag values obtained in
 // ParseGoogleTestFlagsOnly.  Is called from InitGoogleTest after the call to
 // ParseGoogleTestFlagsOnly.  In case a user neglects to call InitGoogleTest
@@ -3793,6 +3999,11 @@ void UnitTestImpl::PostFlagParsingInit() {
     // Configures listeners for XML output. This makes it possible for users
     // to shut down the default XML output before invoking RUN_ALL_TESTS.
     ConfigureXmlOutput();
+
+#if GTEST_CAN_STREAM_RESULTS_
+    // Configures listeners for streaming test results to the specified server.
+    ConfigureStreamingOutput();
+#endif  // GTEST_CAN_STREAM_RESULTS_
   }
 }
 
@@ -4471,6 +4682,10 @@ static const char kColorEncodedHelpMessage[] =
     GTEST_PATH_SEP_ "@Y|@G:@YFILE_PATH]@D\n"
 "      Generate an XML report in the given directory or with the given file\n"
 "      name. @YFILE_PATH@D defaults to @Gtest_details.xml@D.\n"
+#if GTEST_CAN_STREAM_RESULTS_
+"  @G--" GTEST_FLAG_PREFIX_ "stream_result_to=@YHOST@G:@YPORT@D\n"
+"      Stream test results to the given server.\n"
+#endif  // GTEST_CAN_STREAM_RESULTS_
 "\n"
 "Assertion Behavior:\n"
 #if GTEST_HAS_DEATH_TEST && !GTEST_OS_WINDOWS
@@ -4481,10 +4696,8 @@ static const char kColorEncodedHelpMessage[] =
 "      Turn assertion failures into debugger break-points.\n"
 "  @G--" GTEST_FLAG_PREFIX_ "throw_on_failure@D\n"
 "      Turn assertion failures into C++ exceptions.\n"
-#if GTEST_OS_WINDOWS
 "  @G--" GTEST_FLAG_PREFIX_ "catch_exceptions@D\n"
 "      Suppress pop-ups caused by exceptions.\n"
-#endif  // GTEST_OS_WINDOWS
 "\n"
 "Except for @G--" GTEST_FLAG_PREFIX_ "list_tests@D, you can alternatively set "
     "the corresponding\n"
@@ -4534,7 +4747,10 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
         ParseBoolFlag(arg, kShuffleFlag, &GTEST_FLAG(shuffle)) ||
         ParseInt32Flag(arg, kStackTraceDepthFlag,
                        &GTEST_FLAG(stack_trace_depth)) ||
-        ParseBoolFlag(arg, kThrowOnFailureFlag, &GTEST_FLAG(throw_on_failure))
+        ParseStringFlag(arg, kStreamResultToFlag,
+                        &GTEST_FLAG(stream_result_to)) ||
+        ParseBoolFlag(arg, kThrowOnFailureFlag,
+                      &GTEST_FLAG(throw_on_failure))
         ) {
       // Yes.  Shift the remainder of the argv list left by one.  Note
       // that argv has (*argc + 1) elements, the last one always being

@@ -93,6 +93,7 @@ const char kRandomSeedFlag[] = "random_seed";
 const char kRepeatFlag[] = "repeat";
 const char kShuffleFlag[] = "shuffle";
 const char kStackTraceDepthFlag[] = "stack_trace_depth";
+const char kStreamResultToFlag[] = "stream_result_to";
 const char kThrowOnFailureFlag[] = "throw_on_failure";
 
 // A valid random seed must be in [1, kMaxRandomSeed].
@@ -165,6 +166,7 @@ class GTestFlagSaver {
     repeat_ = GTEST_FLAG(repeat);
     shuffle_ = GTEST_FLAG(shuffle);
     stack_trace_depth_ = GTEST_FLAG(stack_trace_depth);
+    stream_result_to_ = GTEST_FLAG(stream_result_to);
     throw_on_failure_ = GTEST_FLAG(throw_on_failure);
   }
 
@@ -185,6 +187,7 @@ class GTestFlagSaver {
     GTEST_FLAG(repeat) = repeat_;
     GTEST_FLAG(shuffle) = shuffle_;
     GTEST_FLAG(stack_trace_depth) = stack_trace_depth_;
+    GTEST_FLAG(stream_result_to) = stream_result_to_;
     GTEST_FLAG(throw_on_failure) = throw_on_failure_;
   }
  private:
@@ -205,6 +208,7 @@ class GTestFlagSaver {
   internal::Int32 repeat_;
   bool shuffle_;
   internal::Int32 stack_trace_depth_;
+  String stream_result_to_;
   bool throw_on_failure_;
 } GTEST_ATTRIBUTE_UNUSED_;
 
@@ -740,6 +744,12 @@ class GTEST_API_ UnitTestImpl {
   // Initializes the event listener performing XML output as specified by
   // UnitTestOptions. Must not be called before InitGoogleTest.
   void ConfigureXmlOutput();
+
+#if GTEST_CAN_STREAM_RESULTS_
+  // Initializes the event listener for streaming test results to a socket.
+  // Must not be called before InitGoogleTest.
+  void ConfigureStreamingOutput();
+#endif
 
   // Performs initialization dependent upon flag values obtained in
   // ParseGoogleTestFlagsOnly.  Is called from InitGoogleTest after the call to
