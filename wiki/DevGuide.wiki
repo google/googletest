@@ -1,5 +1,5 @@
 #summary How to contribute to Google C++ Testing Framework
-#labels Phase-Implementation
+#labels Phase-Implementation,Featured
 
 <wiki:toc max_depth="3" />
 
