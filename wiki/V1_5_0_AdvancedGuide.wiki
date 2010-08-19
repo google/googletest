@@ -1,5 +1,4 @@
 #summary Advanced topics on using Google C++ Testing Framework
-#labels Featured
 
 <wiki:toc max_depth="3" />
 

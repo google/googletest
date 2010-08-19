@@ -1,5 +1,5 @@
 #summary A guide for using the Google Testing Framework with Xcode on Mac OS X
-#labels Featured,Phase-Deploy
+#labels Phase-Deploy
 
 <wiki:toc max_depth="3" />
 
