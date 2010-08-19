@@ -4,7 +4,7 @@
 <wiki:toc max_depth="3" />
 
 If you cannot find the answer to your question here, and you have read
-GoogleTestPrimer and GoogleTestAdvancedGuide, send it to
+GoogleTestPrimer and AdvancedGuide, send it to
 googletestframework@googlegroups.com.
 
 == Why should I use Google Test instead of my favorite C++ testing framework? ==
@@ -654,7 +654,7 @@ EXPECT_TRUE(internal::Func(12345));
 
 == I would like to run a test several times with different parameters. Do I need to write several similar copies of it? ==
 
-No. You can use a feature called [GoogleTestAdvancedGuide#Value_Parameterized_Tests value-parameterized tests] which
+No. You can use a feature called [AdvancedGuide#Value_Parameterized_Tests value-parameterized tests] which
 lets you repeat your tests with different parameters, without defining it more than once.
 
 ==  How do I test a file that defines main()?  ==
@@ -744,7 +744,7 @@ TEST(MyDeathTest, CompoundStatement) {
 ==   What syntax does the regular expression in ASSERT_DEATH use?  ==
 
 On POSIX systems, Google Test uses the POSIX Extended regular expression syntax
-(http://en.wikipedia.org/wiki/Regular_expression#POSIX_Extended_Regular_Expressions). On Windows, it uses a limited variant of regular expression syntax. For more details, see [GoogleTestAdvancedGuide#Regular_Expression_Syntax].
+(http://en.wikipedia.org/wiki/Regular_expression#POSIX_Extended_Regular_Expressions). On Windows, it uses a limited variant of regular expression syntax. For more details, see [AdvancedGuide#Regular_Expression_Syntax].
 
 ==  I have a fixture class Foo, but TEST_F(Foo, Bar) gives me error "no matching function for call to Foo::Foo()". Why?  ==
 
