@@ -488,7 +488,7 @@ There is one more pitfall, though. If you use Google Test as a static library (t
 = Where to Go from Here =
 
 Congratulations! You've learned the Google Test basics. You can start writing
-and running Google Test tests, read some GoogleTestSamples, or continue with
+and running Google Test tests, read some Samples, or continue with
 AdvancedGuide, which describes many more useful Google Test features.
 
 = Known Limitations =
