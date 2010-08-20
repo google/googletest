@@ -12,3 +12,5 @@ variety of Google Test features.
   * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample6_unittest.cc Sample #6] demonstrates type-parameterized tests.
   * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample7_unittest.cc Sample #7] teaches the basics of value-parameterized tests.
   * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample8_unittest.cc Sample #8] shows using `Combine()` in value-parameterized tests.
+  * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample9_unittest.cc Sample #9] shows use of the listener API to modify Google Test's console output and the use of its reflection API to inspect test results.
+  * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample10_unittest.cc Sample #10] shows use of the listener API to implement a primitive memory leak checker.
