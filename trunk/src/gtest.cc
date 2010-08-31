@@ -501,7 +501,7 @@ bool UnitTestOptions::FilterMatchesTest(const String &test_case_name,
           !MatchesFilter(full_name, negative.c_str()));
 }
 
-#if GTEST_OS_WINDOWS
+#if GTEST_HAS_SEH
 // Returns EXCEPTION_EXECUTE_HANDLER if Google Test should handle the
 // given SEH exception, or EXCEPTION_CONTINUE_SEARCH otherwise.
 // This function is useful as an __except condition.
@@ -527,7 +527,7 @@ int UnitTestOptions::GTestShouldProcessSEH(DWORD exception_code) {
 
   return should_handle ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH;
 }
-#endif  // GTEST_OS_WINDOWS
+#endif  // GTEST_HAS_SEH
 
 }  // namespace internal
 
@@ -1362,7 +1362,7 @@ AssertionResult HRESULTFailureHelper(const char* expr,
                                           kBufSize,  // buf size
                                           NULL);  // no arguments for inserts
   // Trims tailing white space (FormatMessage leaves a trailing cr-lf)
-  for (; message_length && isspace(error_text[message_length - 1]);
+  for (; message_length && IsSpace(error_text[message_length - 1]);
           --message_length) {
     error_text[message_length - 1] = '\0';
   }
@@ -1620,9 +1620,9 @@ bool String::CaseInsensitiveCStringEquals(const char * lhs, const char * rhs) {
   // current locale.
 bool String::CaseInsensitiveWideCStringEquals(const wchar_t* lhs,
                                               const wchar_t* rhs) {
-  if ( lhs == NULL ) return rhs == NULL;
+  if (lhs == NULL) return rhs == NULL;
 
-  if ( rhs == NULL ) return false;
+  if (rhs == NULL) return false;
 
 #if GTEST_OS_WINDOWS
   return _wcsicmp(lhs, rhs) == 0;
@@ -2096,26 +2096,53 @@ static Result HandleSehExceptionsInMethodIfSupported(
 template <class T, typename Result>
 static Result HandleExceptionsInMethodIfSupported(
     T* object, Result (T::*method)(), const char* location) {
+  // NOTE: The user code can affect the way in which Google Test handles
+  // exceptions by setting GTEST_FLAG(catch_exceptions), but only before
+  // RUN_ALL_TESTS() starts. It is technically possible to check the flag
+  // after the exception is caught and either report or re-throw the
+  // exception based on the flag's value:
+  //
+  // try {
+  //   // Perform the test method.
+  // } catch (...) {
+  //   if (GTEST_FLAG(catch_exceptions))
+  //     // Report the exception as failure.
+  //   else
+  //     throw;  // Re-throws the original exception.
+  // }
+  //
+  // However, the purpose of this flag is to allow the program to drop into
+  // the debugger when the exception is thrown. On most platforms, once the
+  // control enters the catch block, the exception origin information is
+  // lost and the debugger will stop the program at the point of the
+  // re-throw in this function -- instead of at the point of the original
+  // throw statement in the code under test.  For this reason, we perform
+  // the check early, sacrificing the ability to affect Google Test's
+  // exception handling in the method where the exception is thrown.
+  if (internal::GetUnitTestImpl()->catch_exceptions()) {
 #if GTEST_HAS_EXCEPTIONS
-  try {
-    return HandleSehExceptionsInMethodIfSupported(object, method, location);
-  } catch (const GoogleTestFailureException&) {  // NOLINT
-    // This exception doesn't originate in code under test. It makes no
-    // sense to report it as a test failure.
-    throw;
-  } catch (const std::exception& e) {  // NOLINT
-    internal::ReportFailureInUnknownLocation(
-        TestPartResult::kFatalFailure,
-        FormatCxxExceptionMessage(e.what(), location));
-  } catch (...) {  // NOLINT
-    internal::ReportFailureInUnknownLocation(
-        TestPartResult::kFatalFailure,
-        FormatCxxExceptionMessage(NULL, location));
-  }
-  return static_cast<Result>(0);
+    try {
+      return HandleSehExceptionsInMethodIfSupported(object, method, location);
+    } catch (const GoogleTestFailureException&) {  // NOLINT
+      // This exception doesn't originate in code under test. It makes no
+      // sense to report it as a test failure.
+      throw;
+    } catch (const std::exception& e) {  // NOLINT
+      internal::ReportFailureInUnknownLocation(
+          TestPartResult::kFatalFailure,
+          FormatCxxExceptionMessage(e.what(), location));
+    } catch (...) {  // NOLINT
+      internal::ReportFailureInUnknownLocation(
+          TestPartResult::kFatalFailure,
+          FormatCxxExceptionMessage(NULL, location));
+    }
+    return static_cast<Result>(0);
 #else
-  return HandleSehExceptionsInMethodIfSupported(object, method, location);
+    return HandleSehExceptionsInMethodIfSupported(object, method, location);
 #endif  // GTEST_HAS_EXCEPTIONS
+  } else {
+    return (object->*method)();
+  }
 }
 
 // Runs the test and updates the test result.
@@ -3773,17 +3800,19 @@ void UnitTest::RecordPropertyForCurrentTest(const char* key,
 // We don't protect this under mutex_, as we only support calling it
 // from the main thread.
 int UnitTest::Run() {
-#if GTEST_HAS_SEH
-  // Catch SEH-style exceptions.
+  // Captures the value of GTEST_FLAG(catch_exceptions).  This value will be
+  // used for the duration of the program.
+  impl()->set_catch_exceptions(GTEST_FLAG(catch_exceptions));
 
+#if GTEST_HAS_SEH
   const bool in_death_test_child_process =
       internal::GTEST_FLAG(internal_run_death_test).length() > 0;
 
   // Either the user wants Google Test to catch exceptions thrown by the
   // tests or this is executing in the context of death test child
   // process. In either case the user does not want to see pop-up dialogs
-  // about crashes - they are expected..
-  if (GTEST_FLAG(catch_exceptions) || in_death_test_child_process) {
+  // about crashes - they are expected.
+  if (impl()->catch_exceptions() || in_death_test_child_process) {
 #if !GTEST_OS_WINDOWS_MOBILE
     // SetErrorMode doesn't exist on CE.
     SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOALIGNMENTFAULTEXCEPT |
@@ -3818,7 +3847,7 @@ int UnitTest::Run() {
 #endif  // GTEST_HAS_SEH
 
   return HandleExceptionsInMethodIfSupported(
-      impl_,
+      impl(),
       &internal::UnitTestImpl::RunAllTests,
       "auxiliary test code (environments or event listeners)") ? 0 : 1;
 }
@@ -3914,13 +3943,13 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
       post_flag_parse_init_performed_(false),
       random_seed_(0),  // Will be overridden by the flag before first use.
       random_(0),  // Will be reseeded before first use.
-#if GTEST_HAS_DEATH_TEST
       elapsed_time_(0),
+#if GTEST_HAS_DEATH_TEST
       internal_run_death_test_flag_(NULL),
-      death_test_factory_(new DefaultDeathTestFactory) {
-#else
-      elapsed_time_(0) {
-#endif  // GTEST_HAS_DEATH_TEST
+      death_test_factory_(new DefaultDeathTestFactory),
+#endif
+      // Will be overridden by the flag before first use.
+      catch_exceptions_(false) {
   listeners()->SetDefaultResultPrinter(new PrettyUnitTestResultPrinter);
 }
 

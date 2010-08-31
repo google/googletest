@@ -64,6 +64,10 @@
 //   GTEST_HAS_SEH            - Define it to 1/0 to indicate whether the
 //                              compiler supports Microsoft's "Structured
 //                              Exception Handling".
+//   GTEST_HAS_STREAM_REDIRECTION
+//                            - Define it to 1/0 to indicate whether the
+//                              platform supports I/O stream redirection using
+//                              dup() and dup2().
 //   GTEST_USE_OWN_TR1_TUPLE  - Define it to 1/0 to indicate whether Google
 //                              Test's own tr1 tuple implementation should be
 //                              used.  Unused when the user sets
@@ -139,8 +143,9 @@
 //
 // Regular expressions:
 //   RE             - a simple regular expression class using the POSIX
-//                    Extended Regular Expression syntax.  Not available on
-//                    Windows.
+//                    Extended Regular Expression syntax on UNIX-like
+//                    platforms, or a reduced regular exception syntax on
+//                    other platforms, including Windows.
 //
 // Logging:
 //   GTEST_LOG_()   - logs messages at the specified severity level.
@@ -173,7 +178,8 @@
 //   Int32FromGTestEnv()  - parses an Int32 environment variable.
 //   StringFromGTestEnv() - parses a string environment variable.
 
-#include <stddef.h>  // For ptrdiff_t
+#include <ctype.h>   // for isspace, etc
+#include <stddef.h>  // for ptrdiff_t
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -495,9 +501,15 @@
 
 // Determines whether to support stream redirection. This is used to test
 // output correctness and to implement death tests.
-#if !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_SYMBIAN
-#define GTEST_HAS_STREAM_REDIRECTION_ 1
+#ifndef GTEST_HAS_STREAM_REDIRECTION
+// By default, we assume that stream redirection is supported on all
+// platforms except known mobile ones.
+#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_SYMBIAN
+#define GTEST_HAS_STREAM_REDIRECTION 0
+#else
+#define GTEST_HAS_STREAM_REDIRECTION 1
 #endif  // !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_SYMBIAN
+#endif  // GTEST_HAS_STREAM_REDIRECTION
 
 // Determines whether to support death tests.
 // Google Test does not support death tests for VC 7.1 and earlier as
@@ -968,7 +980,7 @@ Derived* CheckedDowncastToActualType(Base* base) {
 #endif
 }
 
-#if GTEST_HAS_STREAM_REDIRECTION_
+#if GTEST_HAS_STREAM_REDIRECTION
 
 // Defines the stderr capturer:
 //   CaptureStdout     - starts capturing stdout.
@@ -981,7 +993,7 @@ GTEST_API_ String GetCapturedStdout();
 GTEST_API_ void CaptureStderr();
 GTEST_API_ String GetCapturedStderr();
 
-#endif  // GTEST_HAS_STREAM_REDIRECTION_
+#endif  // GTEST_HAS_STREAM_REDIRECTION
 
 
 #if GTEST_HAS_DEATH_TEST
@@ -1418,6 +1430,39 @@ typedef __int64 BiggestInt;
 #define GTEST_HAS_ALT_PATH_SEP_ 0
 typedef long long BiggestInt;  // NOLINT
 #endif  // GTEST_OS_WINDOWS
+
+// Utilities for char.
+
+// isspace(int ch) and friends accept an unsigned char or EOF.  char
+// may be signed, depending on the compiler (or compiler flags).
+// Therefore we need to cast a char to unsigned char before calling
+// isspace(), etc.
+
+inline bool IsAlpha(char ch) {
+  return isalpha(static_cast<unsigned char>(ch)) != 0;
+}
+inline bool IsAlNum(char ch) {
+  return isalnum(static_cast<unsigned char>(ch)) != 0;
+}
+inline bool IsDigit(char ch) {
+  return isdigit(static_cast<unsigned char>(ch)) != 0;
+}
+inline bool IsLower(char ch) {
+  return islower(static_cast<unsigned char>(ch)) != 0;
+}
+inline bool IsSpace(char ch) {
+  return isspace(static_cast<unsigned char>(ch)) != 0;
+}
+inline bool IsUpper(char ch) {
+  return isupper(static_cast<unsigned char>(ch)) != 0;
+}
+
+inline char ToLower(char ch) {
+  return static_cast<char>(tolower(static_cast<unsigned char>(ch)));
+}
+inline char ToUpper(char ch) {
+  return static_cast<char>(toupper(static_cast<unsigned char>(ch)));
+}
 
 // The testing::internal::posix namespace holds wrappers for common
 // POSIX functions.  These wrappers hide the differences between

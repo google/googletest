@@ -377,33 +377,33 @@ TEST(IsInSetTest, WorksForNonNulChars) {
   EXPECT_TRUE(IsInSet('b', "ab"));
 }
 
-TEST(IsDigitTest, IsFalseForNonDigit) {
-  EXPECT_FALSE(IsDigit('\0'));
-  EXPECT_FALSE(IsDigit(' '));
-  EXPECT_FALSE(IsDigit('+'));
-  EXPECT_FALSE(IsDigit('-'));
-  EXPECT_FALSE(IsDigit('.'));
-  EXPECT_FALSE(IsDigit('a'));
+TEST(IsAsciiDigitTest, IsFalseForNonDigit) {
+  EXPECT_FALSE(IsAsciiDigit('\0'));
+  EXPECT_FALSE(IsAsciiDigit(' '));
+  EXPECT_FALSE(IsAsciiDigit('+'));
+  EXPECT_FALSE(IsAsciiDigit('-'));
+  EXPECT_FALSE(IsAsciiDigit('.'));
+  EXPECT_FALSE(IsAsciiDigit('a'));
 }
 
-TEST(IsDigitTest, IsTrueForDigit) {
-  EXPECT_TRUE(IsDigit('0'));
-  EXPECT_TRUE(IsDigit('1'));
-  EXPECT_TRUE(IsDigit('5'));
-  EXPECT_TRUE(IsDigit('9'));
+TEST(IsAsciiDigitTest, IsTrueForDigit) {
+  EXPECT_TRUE(IsAsciiDigit('0'));
+  EXPECT_TRUE(IsAsciiDigit('1'));
+  EXPECT_TRUE(IsAsciiDigit('5'));
+  EXPECT_TRUE(IsAsciiDigit('9'));
 }
 
-TEST(IsPunctTest, IsFalseForNonPunct) {
-  EXPECT_FALSE(IsPunct('\0'));
-  EXPECT_FALSE(IsPunct(' '));
-  EXPECT_FALSE(IsPunct('\n'));
-  EXPECT_FALSE(IsPunct('a'));
-  EXPECT_FALSE(IsPunct('0'));
+TEST(IsAsciiPunctTest, IsFalseForNonPunct) {
+  EXPECT_FALSE(IsAsciiPunct('\0'));
+  EXPECT_FALSE(IsAsciiPunct(' '));
+  EXPECT_FALSE(IsAsciiPunct('\n'));
+  EXPECT_FALSE(IsAsciiPunct('a'));
+  EXPECT_FALSE(IsAsciiPunct('0'));
 }
 
-TEST(IsPunctTest, IsTrueForPunct) {
+TEST(IsAsciiPunctTest, IsTrueForPunct) {
   for (const char* p = "^-!\"#$%&'()*+,./:;<=>?@[\\]_`{|}~"; *p; p++) {
-    EXPECT_PRED1(IsPunct, *p);
+    EXPECT_PRED1(IsAsciiPunct, *p);
   }
 }
 
@@ -421,47 +421,47 @@ TEST(IsRepeatTest, IsTrueForRepeatChar) {
   EXPECT_TRUE(IsRepeat('+'));
 }
 
-TEST(IsWhiteSpaceTest, IsFalseForNonWhiteSpace) {
-  EXPECT_FALSE(IsWhiteSpace('\0'));
-  EXPECT_FALSE(IsWhiteSpace('a'));
-  EXPECT_FALSE(IsWhiteSpace('1'));
-  EXPECT_FALSE(IsWhiteSpace('+'));
-  EXPECT_FALSE(IsWhiteSpace('_'));
+TEST(IsAsciiWhiteSpaceTest, IsFalseForNonWhiteSpace) {
+  EXPECT_FALSE(IsAsciiWhiteSpace('\0'));
+  EXPECT_FALSE(IsAsciiWhiteSpace('a'));
+  EXPECT_FALSE(IsAsciiWhiteSpace('1'));
+  EXPECT_FALSE(IsAsciiWhiteSpace('+'));
+  EXPECT_FALSE(IsAsciiWhiteSpace('_'));
 }
 
-TEST(IsWhiteSpaceTest, IsTrueForWhiteSpace) {
-  EXPECT_TRUE(IsWhiteSpace(' '));
-  EXPECT_TRUE(IsWhiteSpace('\n'));
-  EXPECT_TRUE(IsWhiteSpace('\r'));
-  EXPECT_TRUE(IsWhiteSpace('\t'));
-  EXPECT_TRUE(IsWhiteSpace('\v'));
-  EXPECT_TRUE(IsWhiteSpace('\f'));
+TEST(IsAsciiWhiteSpaceTest, IsTrueForWhiteSpace) {
+  EXPECT_TRUE(IsAsciiWhiteSpace(' '));
+  EXPECT_TRUE(IsAsciiWhiteSpace('\n'));
+  EXPECT_TRUE(IsAsciiWhiteSpace('\r'));
+  EXPECT_TRUE(IsAsciiWhiteSpace('\t'));
+  EXPECT_TRUE(IsAsciiWhiteSpace('\v'));
+  EXPECT_TRUE(IsAsciiWhiteSpace('\f'));
 }
 
-TEST(IsWordCharTest, IsFalseForNonWordChar) {
-  EXPECT_FALSE(IsWordChar('\0'));
-  EXPECT_FALSE(IsWordChar('+'));
-  EXPECT_FALSE(IsWordChar('.'));
-  EXPECT_FALSE(IsWordChar(' '));
-  EXPECT_FALSE(IsWordChar('\n'));
+TEST(IsAsciiWordCharTest, IsFalseForNonWordChar) {
+  EXPECT_FALSE(IsAsciiWordChar('\0'));
+  EXPECT_FALSE(IsAsciiWordChar('+'));
+  EXPECT_FALSE(IsAsciiWordChar('.'));
+  EXPECT_FALSE(IsAsciiWordChar(' '));
+  EXPECT_FALSE(IsAsciiWordChar('\n'));
 }
 
-TEST(IsWordCharTest, IsTrueForLetter) {
-  EXPECT_TRUE(IsWordChar('a'));
-  EXPECT_TRUE(IsWordChar('b'));
-  EXPECT_TRUE(IsWordChar('A'));
-  EXPECT_TRUE(IsWordChar('Z'));
+TEST(IsAsciiWordCharTest, IsTrueForLetter) {
+  EXPECT_TRUE(IsAsciiWordChar('a'));
+  EXPECT_TRUE(IsAsciiWordChar('b'));
+  EXPECT_TRUE(IsAsciiWordChar('A'));
+  EXPECT_TRUE(IsAsciiWordChar('Z'));
 }
 
-TEST(IsWordCharTest, IsTrueForDigit) {
-  EXPECT_TRUE(IsWordChar('0'));
-  EXPECT_TRUE(IsWordChar('1'));
-  EXPECT_TRUE(IsWordChar('7'));
-  EXPECT_TRUE(IsWordChar('9'));
+TEST(IsAsciiWordCharTest, IsTrueForDigit) {
+  EXPECT_TRUE(IsAsciiWordChar('0'));
+  EXPECT_TRUE(IsAsciiWordChar('1'));
+  EXPECT_TRUE(IsAsciiWordChar('7'));
+  EXPECT_TRUE(IsAsciiWordChar('9'));
 }
 
-TEST(IsWordCharTest, IsTrueForUnderscore) {
-  EXPECT_TRUE(IsWordChar('_'));
+TEST(IsAsciiWordCharTest, IsTrueForUnderscore) {
+  EXPECT_TRUE(IsAsciiWordChar('_'));
 }
 
 TEST(IsValidEscapeTest, IsFalseForNonPrintable) {

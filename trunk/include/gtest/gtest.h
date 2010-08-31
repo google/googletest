@@ -175,6 +175,14 @@ String StreamableToString(const T& streamable) {
 
 }  // namespace internal
 
+// The friend relationship of some of these classes is cyclic.
+// If we don't forward declare them the compiler might confuse the classes
+// in friendship clauses with same named classes on the scope.
+class Test;
+class TestCase;
+class TestInfo;
+class UnitTest;
+
 // A class for indicating whether an assertion was successful.  When
 // the assertion wasn't successful, the AssertionResult object
 // remembers a non-empty message that describes how it failed.
