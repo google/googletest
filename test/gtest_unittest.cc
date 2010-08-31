@@ -193,18 +193,14 @@ using testing::internal::kReference;
 using testing::internal::kTestTypeIdInGoogleTest;
 using testing::internal::scoped_ptr;
 
-#if GTEST_HAS_STREAM_REDIRECTION_
+#if GTEST_HAS_STREAM_REDIRECTION
 using testing::internal::CaptureStdout;
 using testing::internal::GetCapturedStdout;
-#endif  // GTEST_HAS_STREAM_REDIRECTION_
+#endif
 
 #if GTEST_IS_THREADSAFE
 using testing::internal::ThreadWithParam;
 #endif
-
-#if GTEST_HAS_PROTOBUF_
-using ::testing::internal::TestMessage;
-#endif  // GTEST_HAS_PROTOBUF_
 
 class TestingVector : public std::vector<int> {
 };
@@ -5343,16 +5339,16 @@ class InitGoogleTestTest : public Test {
     const bool saved_help_flag = ::testing::internal::g_help_flag;
     ::testing::internal::g_help_flag = false;
 
-#if GTEST_HAS_STREAM_REDIRECTION_
+#if GTEST_HAS_STREAM_REDIRECTION
     CaptureStdout();
-#endif  // GTEST_HAS_STREAM_REDIRECTION_
+#endif
 
     // Parses the command line.
     internal::ParseGoogleTestFlagsOnly(&argc1, const_cast<CharType**>(argv1));
 
-#if GTEST_HAS_STREAM_REDIRECTION_
+#if GTEST_HAS_STREAM_REDIRECTION
     const String captured_stdout = GetCapturedStdout();
-#endif  // GTEST_HAS_STREAM_REDIRECTION_
+#endif
 
     // Verifies the flag values.
     CheckFlags(expected);
@@ -5365,7 +5361,7 @@ class InitGoogleTestTest : public Test {
     // help message for the flags it recognizes.
     EXPECT_EQ(should_print_help, ::testing::internal::g_help_flag);
 
-#if GTEST_HAS_STREAM_REDIRECTION_
+#if GTEST_HAS_STREAM_REDIRECTION
     const char* const expected_help_fragment =
         "This program contains tests written using";
     if (should_print_help) {
@@ -5374,7 +5370,7 @@ class InitGoogleTestTest : public Test {
       EXPECT_PRED_FORMAT2(IsNotSubstring,
                           expected_help_fragment, captured_stdout);
     }
-#endif  // GTEST_HAS_STREAM_REDIRECTION_
+#endif  // GTEST_HAS_STREAM_REDIRECTION
 
     ::testing::internal::g_help_flag = saved_help_flag;
   }
@@ -6887,13 +6883,10 @@ TEST(IsAProtocolMessageTest, ValueIsCompileTimeConstant) {
 }
 
 // Tests that IsAProtocolMessage<T>::value is true when T is
-// ProtocolMessage or a sub-class of it.
+// proto2::Message or a sub-class of it.
 TEST(IsAProtocolMessageTest, ValueIsTrueWhenTypeIsAProtocolMessage) {
   EXPECT_TRUE(IsAProtocolMessage< ::proto2::Message>::value);
   EXPECT_TRUE(IsAProtocolMessage<ProtocolMessage>::value);
-#if GTEST_HAS_PROTOBUF_
-  EXPECT_TRUE(IsAProtocolMessage<const TestMessage>::value);
-#endif  // GTEST_HAS_PROTOBUF_
 }
 
 // Tests that IsAProtocolMessage<T>::value is false when T is neither

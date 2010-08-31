@@ -771,8 +771,16 @@ class GTEST_API_ UnitTestImpl {
   // Restores the test cases and tests to their order before the first shuffle.
   void UnshuffleTests();
 
+  // Returns the value of GTEST_FLAG(catch_exceptions) at the moment
+  // UnitTest::Run() starts.
+  bool catch_exceptions() const { return catch_exceptions_; }
+
  private:
   friend class ::testing::UnitTest;
+
+  // Used by UnitTest::Run() to capture the state of
+  // GTEST_FLAG(catch_exceptions) at the moment it starts.
+  void set_catch_exceptions(bool value) { catch_exceptions_ = value; }
 
   // The UnitTest object that owns this implementation object.
   UnitTest* const parent_;
@@ -876,6 +884,10 @@ class GTEST_API_ UnitTestImpl {
   // A per-thread stack of traces created by the SCOPED_TRACE() macro.
   internal::ThreadLocal<std::vector<TraceInfo> > gtest_trace_stack_;
 
+  // The value of GTEST_FLAG(catch_exceptions) at the moment RunAllTests()
+  // starts.
+  bool catch_exceptions_;
+
   GTEST_DISALLOW_COPY_AND_ASSIGN_(UnitTestImpl);
 };  // class UnitTestImpl
 
@@ -885,14 +897,16 @@ inline UnitTestImpl* GetUnitTestImpl() {
   return UnitTest::GetInstance()->impl();
 }
 
+#if GTEST_USES_SIMPLE_RE
+
 // Internal helper functions for implementing the simple regular
 // expression matcher.
 GTEST_API_ bool IsInSet(char ch, const char* str);
-GTEST_API_ bool IsDigit(char ch);
-GTEST_API_ bool IsPunct(char ch);
+GTEST_API_ bool IsAsciiDigit(char ch);
+GTEST_API_ bool IsAsciiPunct(char ch);
 GTEST_API_ bool IsRepeat(char ch);
-GTEST_API_ bool IsWhiteSpace(char ch);
-GTEST_API_ bool IsWordChar(char ch);
+GTEST_API_ bool IsAsciiWhiteSpace(char ch);
+GTEST_API_ bool IsAsciiWordChar(char ch);
 GTEST_API_ bool IsValidEscape(char ch);
 GTEST_API_ bool AtomMatchesChar(bool escaped, char pattern, char ch);
 GTEST_API_ bool ValidateRegex(const char* regex);
@@ -900,6 +914,8 @@ GTEST_API_ bool MatchRegexAtHead(const char* regex, const char* str);
 GTEST_API_ bool MatchRepetitionAndRegexAtHead(
     bool escaped, char ch, char repeat, const char* regex, const char* str);
 GTEST_API_ bool MatchRegexAnywhere(const char* regex, const char* str);
+
+#endif  // GTEST_USES_SIMPLE_RE
 
 // Parses the command line for Google Test flags, without initializing
 // other parts of Google Test.
@@ -947,7 +963,7 @@ bool ParseNaturalNumber(const ::std::string& str, Integer* number) {
   // Fail fast if the given string does not begin with a digit;
   // this bypasses strtoXXX's "optional leading whitespace and plus
   // or minus sign" semantics, which are undesirable here.
-  if (str.empty() || !isdigit(str[0])) {
+  if (str.empty() || !IsDigit(str[0])) {
     return false;
   }
   errno = 0;

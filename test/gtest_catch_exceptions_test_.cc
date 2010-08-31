@@ -35,17 +35,18 @@
 #include <gtest/gtest.h>
 
 #include <stdio.h>  // NOLINT
+#include <stdlib.h>  // For exit().
 
 #if GTEST_HAS_SEH
 #include <windows.h>
 #endif
 
 #if GTEST_HAS_EXCEPTIONS
+#include <exception>  // For set_terminate().
 #include <stdexcept>
 #endif
 
 using testing::Test;
-using testing::GTEST_FLAG(catch_exceptions);
 
 #if GTEST_HAS_SEH
 
@@ -287,12 +288,20 @@ TEST(CxxExceptionTest, ThrowsNonStdCxxException) {
   throw "C-string";
 }
 
+// This terminate handler aborts the program using exit() rather than abort().
+// This avoids showing pop-ups on Windows systems and core dumps on Unix-like
+// ones.
+void TerminateHandler() {
+  fprintf(stderr, "%s\n", "Unhandled C++ exception terminating the program.");
+  fflush(NULL);
+  exit(3);
+}
+
 #endif  // GTEST_HAS_EXCEPTIONS
 
 int main(int argc, char** argv) {
-#if GTEST_HAS_SEH
-  // Tells Google Test to catch SEH-style exceptions on Windows.
-  GTEST_FLAG(catch_exceptions) = true;
+#if GTEST_HAS_EXCEPTIONS
+  std::set_terminate(&TerminateHandler);
 #endif
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

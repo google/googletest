@@ -181,20 +181,20 @@ bool IsInSet(char ch, const char* str) {
 // Returns true iff ch belongs to the given classification.  Unlike
 // similar functions in <ctype.h>, these aren't affected by the
 // current locale.
-bool IsDigit(char ch) { return '0' <= ch && ch <= '9'; }
-bool IsPunct(char ch) {
+bool IsAsciiDigit(char ch) { return '0' <= ch && ch <= '9'; }
+bool IsAsciiPunct(char ch) {
   return IsInSet(ch, "^-!\"#$%&'()*+,./:;<=>?@[\\]_`{|}~");
 }
 bool IsRepeat(char ch) { return IsInSet(ch, "?*+"); }
-bool IsWhiteSpace(char ch) { return IsInSet(ch, " \f\n\r\t\v"); }
-bool IsWordChar(char ch) {
+bool IsAsciiWhiteSpace(char ch) { return IsInSet(ch, " \f\n\r\t\v"); }
+bool IsAsciiWordChar(char ch) {
   return ('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') ||
       ('0' <= ch && ch <= '9') || ch == '_';
 }
 
 // Returns true iff "\\c" is a supported escape sequence.
 bool IsValidEscape(char c) {
-  return (IsPunct(c) || IsInSet(c, "dDfnrsStvwW"));
+  return (IsAsciiPunct(c) || IsInSet(c, "dDfnrsStvwW"));
 }
 
 // Returns true iff the given atom (specified by escaped and pattern)
@@ -202,19 +202,19 @@ bool IsValidEscape(char c) {
 bool AtomMatchesChar(bool escaped, char pattern_char, char ch) {
   if (escaped) {  // "\\p" where p is pattern_char.
     switch (pattern_char) {
-      case 'd': return IsDigit(ch);
-      case 'D': return !IsDigit(ch);
+      case 'd': return IsAsciiDigit(ch);
+      case 'D': return !IsAsciiDigit(ch);
       case 'f': return ch == '\f';
       case 'n': return ch == '\n';
       case 'r': return ch == '\r';
-      case 's': return IsWhiteSpace(ch);
-      case 'S': return !IsWhiteSpace(ch);
+      case 's': return IsAsciiWhiteSpace(ch);
+      case 'S': return !IsAsciiWhiteSpace(ch);
       case 't': return ch == '\t';
       case 'v': return ch == '\v';
-      case 'w': return IsWordChar(ch);
-      case 'W': return !IsWordChar(ch);
+      case 'w': return IsAsciiWordChar(ch);
+      case 'W': return !IsAsciiWordChar(ch);
     }
-    return IsPunct(pattern_char) && pattern_char == ch;
+    return IsAsciiPunct(pattern_char) && pattern_char == ch;
   }
 
   return (pattern_char == '.' && ch != '\n') || pattern_char == ch;
@@ -449,7 +449,7 @@ GTestLog::~GTestLog() {
 #pragma warning(disable: 4996)
 #endif  // _MSC_VER
 
-#if GTEST_HAS_STREAM_REDIRECTION_
+#if GTEST_HAS_STREAM_REDIRECTION
 
 // Object that captures an output stream (stdout/stderr).
 class CapturedStream {
@@ -589,7 +589,7 @@ String GetCapturedStdout() { return GetCapturedStream(&g_captured_stdout); }
 // Stops capturing stderr and returns the captured string.
 String GetCapturedStderr() { return GetCapturedStream(&g_captured_stderr); }
 
-#endif  // GTEST_HAS_STREAM_REDIRECTION_
+#endif  // GTEST_HAS_STREAM_REDIRECTION
 
 #if GTEST_HAS_DEATH_TEST
 
@@ -619,7 +619,7 @@ static String FlagToEnvVar(const char* flag) {
 
   Message env_var;
   for (size_t i = 0; i != full_flag.length(); i++) {
-    env_var << static_cast<char>(toupper(full_flag.c_str()[i]));
+    env_var << ToUpper(full_flag.c_str()[i]);
   }
 
   return env_var.GetString();

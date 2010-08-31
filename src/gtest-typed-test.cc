@@ -40,7 +40,7 @@ namespace internal {
 // Skips to the first non-space char in str. Returns an empty string if str
 // contains only whitespace characters.
 static const char* SkipSpaces(const char* str) {
-  while (isspace(*str))
+  while (IsSpace(*str))
     str++;
   return str;
 }

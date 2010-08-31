@@ -625,7 +625,7 @@ inline const char* SkipComma(const char* str) {
   if (comma == NULL) {
     return NULL;
   }
-  while (isspace(*(++comma))) {}
+  while (IsSpace(*(++comma))) {}
   return comma;
 }
 
