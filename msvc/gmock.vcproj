@@ -163,10 +163,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\gmock-printers.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\src\gmock-spec-builders.cc"
 				>
 			</File>
@@ -226,10 +222,6 @@
 			</File>
 			<File
 				RelativePath="..\include\gmock\gmock-matchers.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\gmock\gmock-printers.h"
 				>
 			</File>
 			<File

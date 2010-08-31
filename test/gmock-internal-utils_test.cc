@@ -375,7 +375,7 @@ TEST_F(LogIsVisibleTest, WorksWhenVerbosityIsWarning) {
   EXPECT_TRUE(LogIsVisible(WARNING));
 }
 
-#if GTEST_HAS_STREAM_REDIRECTION_
+#if GTEST_HAS_STREAM_REDIRECTION
 
 // Tests the Log() function.
 
@@ -458,7 +458,7 @@ TEST(LogTest, OnlyWarningsArePrintedWhenVerbosityIsInvalid) {
   TestLogWithSeverity("invalid", WARNING, true);
 }
 
-#endif  // GTEST_HAS_STREAM_REDIRECTION_
+#endif  // GTEST_HAS_STREAM_REDIRECTION
 
 TEST(TypeTraitsTest, true_type) {
   EXPECT_TRUE(true_type::value);
@@ -495,7 +495,7 @@ TEST(TypeTraitsTest, remove_reference) {
   EXPECT_TRUE((type_equals<double*, remove_reference<double*>::type>::value));
 }
 
-#if GTEST_HAS_STREAM_REDIRECTION_
+#if GTEST_HAS_STREAM_REDIRECTION
 
 // Verifies that Log() behaves correctly for the given verbosity level
 // and log severity.
@@ -572,7 +572,7 @@ TEST(OnCallTest, LogsAnythingArgument) {
               HasSubstr("ON_CALL(mock, TestMethodArg(_)"));
 }
 
-#endif  // GTEST_HAS_STREAM_REDIRECTION_
+#endif  // GTEST_HAS_STREAM_REDIRECTION
 
 // Tests StlContainerView.
 

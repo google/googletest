@@ -223,10 +223,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\test\gmock-printers_test.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\test\gmock_test.cc"
 				>
 			</File>

@@ -95,11 +95,11 @@ using testing::internal::kWarningVerbosity;
 using testing::internal::String;
 using testing::internal::string;
 
-#if GTEST_HAS_STREAM_REDIRECTION_
+#if GTEST_HAS_STREAM_REDIRECTION
 using testing::HasSubstr;
 using testing::internal::CaptureStdout;
 using testing::internal::GetCapturedStdout;
-#endif  // GTEST_HAS_STREAM_REDIRECTION_
+#endif
 
 class Result {};
 
@@ -518,7 +518,7 @@ TEST(ExpectCallSyntaxTest, DefaultCardinalityIsOnce) {
   }, "to be called once");
 }
 
-#if GTEST_HAS_STREAM_REDIRECTION_
+#if GTEST_HAS_STREAM_REDIRECTION
 
 // Tests that Google Mock doesn't print a warning when the number of
 // WillOnce() is adequate.
@@ -643,7 +643,7 @@ TEST(ExpectCallSyntaxTest, WarnsOnTooFewActions) {
   b.DoB();
 }
 
-#endif  // GTEST_HAS_STREAM_REDIRECTION_
+#endif  // GTEST_HAS_STREAM_REDIRECTION
 
 // Tests the semantics of ON_CALL().
 
@@ -797,7 +797,7 @@ TEST(ExpectCallTest, NthMatchTakesNthAction) {
   EXPECT_EQ(3, b.DoB());
 }
 
-#if GTEST_HAS_STREAM_REDIRECTION_
+#if GTEST_HAS_STREAM_REDIRECTION
 
 // Tests that the default action is taken when the WillOnce(...) list is
 // exhausted and there is no WillRepeatedly().
@@ -832,7 +832,7 @@ TEST(ExpectCallTest, TakesDefaultActionWhenWillListIsExhausted) {
                         " - returning default value."));
 }
 
-#endif  // GTEST_HAS_STREAM_REDIRECTION_
+#endif  // GTEST_HAS_STREAM_REDIRECTION
 
 // Tests that the WillRepeatedly() action is taken when the WillOnce(...)
 // list is exhausted.
@@ -1802,7 +1802,7 @@ class VerboseFlagPreservingFixture : public testing::Test {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(VerboseFlagPreservingFixture);
 };
 
-#if GTEST_HAS_STREAM_REDIRECTION_
+#if GTEST_HAS_STREAM_REDIRECTION
 
 // Tests that an uninteresting mock function call generates a warning
 // containing the stack trace.
@@ -1979,7 +1979,7 @@ TEST_F(GMockVerboseFlagTest, InvalidFlagIsTreatedAsWarning) {
   TestUninterestingCall(true);
 }
 
-#endif  // GTEST_HAS_STREAM_REDIRECTION_
+#endif  // GTEST_HAS_STREAM_REDIRECTION
 
 // A helper class that generates a failure when printed.  We use it to
 // ensure that Google Mock doesn't print a value (even to an internal

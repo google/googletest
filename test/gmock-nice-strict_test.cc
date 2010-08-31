@@ -57,10 +57,10 @@ using testing::HasSubstr;
 using testing::NiceMock;
 using testing::StrictMock;
 
-#if GTEST_HAS_STREAM_REDIRECTION_
+#if GTEST_HAS_STREAM_REDIRECTION
 using testing::internal::CaptureStdout;
 using testing::internal::GetCapturedStdout;
-#endif  // GTEST_HAS_STREAM_REDIRECTION_
+#endif
 
 // Defines some mock classes needed by the tests.
 
@@ -107,7 +107,7 @@ class MockBar {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockBar);
 };
 
-#if GTEST_HAS_STREAM_REDIRECTION_
+#if GTEST_HAS_STREAM_REDIRECTION
 
 // Tests that a nice mock generates no warning for uninteresting calls.
 TEST(NiceMockTest, NoWarningForUninterestingCall) {
@@ -151,7 +151,7 @@ TEST(NiceMockTest, InfoForUninterestingCall) {
   GMOCK_FLAG(verbose) = saved_flag;
 }
 
-#endif  // GTEST_HAS_STREAM_REDIRECTION_
+#endif  // GTEST_HAS_STREAM_REDIRECTION
 
 // Tests that a nice mock allows expected calls.
 TEST(NiceMockTest, AllowsExpectedCall) {
