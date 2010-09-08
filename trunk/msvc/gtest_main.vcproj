@@ -122,42 +122,6 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
-			<File
-				RelativePath="..\include\gtest\internal\gtest-death-test-internal.h">
-			</File>
-			<File
-				RelativePath="..\include\gtest\gtest-death-test.h">
-			</File>
-			<File
-				RelativePath="..\include\gtest\internal\gtest-filepath.h">
-			</File>
-			<File
-				RelativePath="..\src\gtest-internal-inl.h">
-			</File>
-			<File
-				RelativePath="..\include\gtest\internal\gtest-internal.h">
-			</File>
-			<File
-				RelativePath="..\include\gtest\gtest-message.h">
-			</File>
-			<File
-				RelativePath="..\include\gtest\internal\gtest-port.h">
-			</File>
-			<File
-				RelativePath="..\include\gtest\gtest-spi.h">
-			</File>
-			<File
-				RelativePath="..\include\gtest\internal\gtest-string.h">
-			</File>
-			<File
-				RelativePath="..\include\gtest\gtest.h">
-			</File>
-			<File
-				RelativePath="..\include\gtest\gtest_pred_impl.h">
-			</File>
-			<File
-				RelativePath="..\include\gtest\gtest_prod.h">
-			</File>
 		</Filter>
 	</Files>
 	<Globals>

@@ -732,8 +732,6 @@ typedef ::wstring wstring;
 typedef ::std::wstring wstring;
 #endif  // GTEST_HAS_GLOBAL_WSTRING
 
-typedef ::std::stringstream StrStream;
-
 // A helper for suppressing warnings on constant condition.  It just
 // returns 'condition'.
 GTEST_API_ bool IsTrue(bool condition);

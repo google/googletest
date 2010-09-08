@@ -1072,18 +1072,18 @@ AssertionResult FloatingPointLE(const char* expr1,
   // val2 is NaN, as the IEEE floating-point standard requires that
   // any predicate involving a NaN must return false.
 
-  StrStream val1_ss;
+  ::std::stringstream val1_ss;
   val1_ss << std::setprecision(std::numeric_limits<RawType>::digits10 + 2)
           << val1;
 
-  StrStream val2_ss;
+  ::std::stringstream val2_ss;
   val2_ss << std::setprecision(std::numeric_limits<RawType>::digits10 + 2)
           << val2;
 
   Message msg;
   msg << "Expected: (" << expr1 << ") <= (" << expr2 << ")\n"
-      << "  Actual: " << StrStreamToString(&val1_ss) << " vs "
-      << StrStreamToString(&val2_ss);
+      << "  Actual: " << StringStreamToString(&val1_ss) << " vs "
+      << StringStreamToString(&val2_ss);
 
   return AssertionFailure(msg);
 }
@@ -1508,7 +1508,7 @@ String WideStringToUtf8(const wchar_t* str, int num_chars) {
   if (num_chars == -1)
     num_chars = static_cast<int>(wcslen(str));
 
-  StrStream stream;
+  ::std::stringstream stream;
   for (int i = 0; i < num_chars; ++i) {
     UInt32 unicode_code_point;
 
@@ -1525,7 +1525,7 @@ String WideStringToUtf8(const wchar_t* str, int num_chars) {
     char buffer[32];  // CodePointToUtf8 requires a buffer this big.
     stream << CodePointToUtf8(unicode_code_point, buffer);
   }
-  return StrStreamToString(&stream);
+  return StringStreamToString(&stream);
 }
 
 // Converts a wide C string to a String using the UTF-8 encoding.
@@ -1733,16 +1733,16 @@ String String::Format(const char * format, ...) {
   }
 }
 
-// Converts the buffer in a StrStream to a String, converting NUL
+// Converts the buffer in a stringstream to a String, converting NUL
 // bytes to "\\0" along the way.
-String StrStreamToString(StrStream* ss) {
+String StringStreamToString(::std::stringstream* ss) {
   const ::std::string& str = ss->str();
   const char* const start = str.c_str();
   const char* const end = start + str.length();
 
-  // We need to use a helper StrStream to do this transformation
+  // We need to use a helper stringstream to do this transformation
   // because String doesn't support push_back().
-  StrStream helper;
+  ::std::stringstream helper;
   for (const char* ch = start; ch != end; ++ch) {
     if (*ch == '\0') {
       helper << "\\0";  // Replaces NUL with "\\0";
@@ -3262,9 +3262,9 @@ void XmlUnitTestResultPrinter::PrintXmlTestCase(FILE* out,
           "errors=\"0\" time=\"%s\">\n",
           FormatTimeInMillisAsSeconds(test_case.elapsed_time()).c_str());
   for (int i = 0; i < test_case.total_test_count(); ++i) {
-    StrStream stream;
+    ::std::stringstream stream;
     OutputXmlTestInfo(&stream, test_case.name(), *test_case.GetTestInfo(i));
-    fprintf(out, "%s", StrStreamToString(&stream).c_str());
+    fprintf(out, "%s", StringStreamToString(&stream).c_str());
   }
   fprintf(out, "  </testsuite>\n");
 }

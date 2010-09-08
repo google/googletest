@@ -329,9 +329,9 @@ inline ::std::ostream& operator<<(::std::ostream& os, const String& str) {
   return os;
 }
 
-// Gets the content of the StrStream's buffer as a String.  Each '\0'
+// Gets the content of the stringstream's buffer as a String.  Each '\0'
 // character in the buffer is replaced with "\\0".
-GTEST_API_ String StrStreamToString(StrStream* stream);
+GTEST_API_ String StringStreamToString(::std::stringstream* stream);
 
 // Converts a streamable value to a String.  A NULL pointer is
 // converted to "(null)".  When the input value is a ::string,
