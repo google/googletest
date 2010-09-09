@@ -170,7 +170,7 @@
 					>
 					<Tool
 						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
+						AdditionalIncludeDirectories="../include"
 					/>
 				</FileConfiguration>
 			</File>

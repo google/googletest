@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../include"
+				AdditionalIncludeDirectories="..\include;.."
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -105,7 +105,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="../include"
+				AdditionalIncludeDirectories="..\include;.."
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
@@ -151,23 +151,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\src\gmock-cardinalities.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\src\gmock-internal-utils.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\src\gmock-matchers.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\src\gmock-spec-builders.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\src\gmock.cc"
+				RelativePath="..\src\gmock-all.cc"
 				>
 			</File>
 			<File
@@ -196,58 +180,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath="..\include\gmock\gmock-actions.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\gmock\gmock-cardinalities.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\gmock\gmock-generated-actions.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\gmock\gmock-generated-function-mockers.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\gmock\gmock-generated-matchers.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\gmock\gmock-generated-nice-strict.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\gmock\gmock-matchers.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\gmock\gmock-spec-builders.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\gmock\gmock.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Private Header Files"
 			>
-			<File
-				RelativePath="..\include\gmock\internal\gmock-generated-internal-utils.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\gmock\internal\gmock-internal-utils.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\gmock\internal\gmock-port.h"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>

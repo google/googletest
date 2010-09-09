@@ -40,8 +40,9 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/bigobj"
 				Optimization="0"
-				AdditionalIncludeDirectories="../include"
+				AdditionalIncludeDirectories="..\include;.."
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -118,7 +119,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="../include"
+				AdditionalOptions="/bigobj"
+				AdditionalIncludeDirectories="..\include;.."
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
@@ -183,47 +185,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\test\gmock-actions_test.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\test\gmock-cardinalities_test.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\test\gmock-generated-actions_test.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\test\gmock-generated-function-mockers_test.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\test\gmock-generated-internal-utils_test.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\test\gmock-generated-matchers_test.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\test\gmock-internal-utils_test.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\test\gmock-matchers_test.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\test\gmock-nice-strict_test.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\test\gmock-port_test.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\test\gmock_test.cc"
+				RelativePath="..\test\gmock_all_test.cc"
 				>
 			</File>
 		</Filter>
