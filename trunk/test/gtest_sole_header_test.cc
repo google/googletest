@@ -32,7 +32,7 @@
 // This test verifies that it's possible to use Google Test by including
 // the gtest.h header file alone.
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 namespace {
 

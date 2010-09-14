@@ -33,7 +33,7 @@
 // generators objects produce correct parameter sequences and that
 // Google Test runtime instantiates correct tests from those sequences.
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 #if GTEST_HAS_PARAM_TEST
 

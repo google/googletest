@@ -35,8 +35,8 @@
 
 #include <iosfwd>
 #include <vector>
-#include <gtest/internal/gtest-internal.h>
-#include <gtest/internal/gtest-string.h>
+#include "gtest/internal/gtest-internal.h"
+#include "gtest/internal/gtest-string.h"
 
 namespace testing {
 

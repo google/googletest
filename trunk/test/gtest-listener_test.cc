@@ -33,7 +33,7 @@
 // This file verifies Google Test event listeners receive events at the
 // right times.
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 #include <vector>
 
 using ::testing::AddGlobalTestEnvironment;

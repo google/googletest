@@ -30,9 +30,9 @@
 // Author: mheule@google.com (Markus Heule)
 //
 
-#include <gtest/gtest-test-part.h>
+#include "gtest/gtest-test-part.h"
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 using testing::Message;
 using testing::Test;

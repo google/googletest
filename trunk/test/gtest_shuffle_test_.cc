@@ -31,7 +31,7 @@
 
 // Verifies that test shuffling works.
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 namespace {
 

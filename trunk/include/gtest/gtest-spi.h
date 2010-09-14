@@ -35,7 +35,7 @@
 #ifndef GTEST_INCLUDE_GTEST_GTEST_SPI_H_
 #define GTEST_INCLUDE_GTEST_GTEST_SPI_H_
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 namespace testing {
 

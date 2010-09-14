@@ -31,7 +31,7 @@
 //
 // The Google C++ Testing Framework (Google Test)
 
-#include <gtest/gtest-test-part.h>
+#include "gtest/gtest-test-part.h"
 
 // Indicates that this translation unit is part of Google Test's
 // implementation.  It must come before gtest-internal-inl.h is

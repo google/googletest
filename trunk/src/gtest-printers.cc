@@ -42,12 +42,12 @@
 // or void PrintTo(const Foo&, ::std::ostream*) in the namespace that
 // defines Foo.
 
-#include <gtest/gtest-printers.h>
+#include "gtest/gtest-printers.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <ostream>  // NOLINT
 #include <string>
-#include <gtest/internal/gtest-port.h>
+#include "gtest/internal/gtest-port.h"
 
 namespace testing {
 

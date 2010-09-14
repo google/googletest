@@ -38,7 +38,7 @@
 #ifndef GTEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_
 #define GTEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_
 
-#include <gtest/internal/gtest-death-test-internal.h>
+#include "gtest/internal/gtest-death-test-internal.h"
 
 namespace testing {
 

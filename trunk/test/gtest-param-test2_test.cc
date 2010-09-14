@@ -32,7 +32,7 @@
 // Tests for Google Test itself.  This verifies that the basic constructs of
 // Google Test work.
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 #include "test/gtest-param-test_test.h"
 

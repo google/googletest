@@ -29,7 +29,7 @@
 //
 // Author: wan@google.com (Zhanyong Wan)
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 TEST(DummyTest, Dummy) {
   // This test doesn't verify anything.  We just need it to create a

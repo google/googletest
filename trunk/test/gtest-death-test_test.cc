@@ -31,9 +31,9 @@
 //
 // Tests for death tests.
 
-#include <gtest/gtest-death-test.h>
-#include <gtest/gtest.h>
-#include <gtest/internal/gtest-filepath.h>
+#include "gtest/gtest-death-test.h"
+#include "gtest/gtest.h"
+#include "gtest/internal/gtest-filepath.h"
 
 using testing::internal::AlwaysFalse;
 using testing::internal::AlwaysTrue;
@@ -52,7 +52,7 @@ using testing::internal::AlwaysTrue;
 #include <signal.h>
 #include <stdio.h>
 
-#include <gtest/gtest-spi.h>
+#include "gtest/gtest-spi.h"
 
 // Indicates that this translation unit is part of Google Test's
 // implementation.  It must come before gtest-internal-inl.h is

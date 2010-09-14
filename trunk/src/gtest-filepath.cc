@@ -29,8 +29,8 @@
 //
 // Authors: keith.ray@gmail.com (Keith Ray)
 
-#include <gtest/internal/gtest-filepath.h>
-#include <gtest/internal/gtest-port.h>
+#include "gtest/internal/gtest-filepath.h"
+#include "gtest/internal/gtest-port.h"
 
 #include <stdlib.h>
 
@@ -57,7 +57,7 @@
 #define GTEST_PATH_MAX_ _POSIX_PATH_MAX
 #endif  // GTEST_OS_WINDOWS
 
-#include <gtest/internal/gtest-string.h>
+#include "gtest/internal/gtest-string.h"
 
 namespace testing {
 namespace internal {

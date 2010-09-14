@@ -32,7 +32,7 @@
 // Tests for Google Test itself.  This verifies that the basic constructs of
 // Google Test work.
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 #include <vector>
 
 // Verifies that the command line flag variables can be accessed
@@ -57,7 +57,7 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
   EXPECT_TRUE(dummy || !dummy);  // Suppresses warning that dummy is unused.
 }
 
-#include <gtest/gtest-spi.h>
+#include "gtest/gtest-spi.h"
 
 // Indicates that this translation unit is part of Google Test's
 // implementation.  It must come before gtest-internal-inl.h is
