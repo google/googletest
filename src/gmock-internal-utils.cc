@@ -35,14 +35,14 @@
 // Mock.  They are subject to change without notice, so please DO NOT
 // USE THEM IN USER CODE.
 
-#include <gmock/internal/gmock-internal-utils.h>
+#include "gmock/internal/gmock-internal-utils.h"
 
 #include <ctype.h>
 #include <ostream>  // NOLINT
 #include <string>
-#include <gmock/gmock.h>
-#include <gmock/internal/gmock-port.h>
-#include <gtest/gtest.h>
+#include "gmock/gmock.h"
+#include "gmock/internal/gmock-port.h"
+#include "gtest/gtest.h"
 
 namespace testing {
 namespace internal {

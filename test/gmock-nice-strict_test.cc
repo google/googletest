@@ -29,12 +29,12 @@
 //
 // Author: wan@google.com (Zhanyong Wan)
 
-#include <gmock/gmock-generated-nice-strict.h>
+#include "gmock/gmock-generated-nice-strict.h"
 
 #include <string>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include <gtest/gtest-spi.h>
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+#include "gtest/gtest-spi.h"
 
 // This must not be defined inside the ::testing namespace, or it will
 // clash with ::testing::Mock.

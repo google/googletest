@@ -33,12 +33,12 @@
 //
 // This file tests the function mocker classes.
 
-#include <gmock/gmock-generated-function-mockers.h>
+#include "gmock/gmock-generated-function-mockers.h"
 
 #include <map>
 #include <string>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #if GTEST_OS_WINDOWS
 // MSDN says the header file to be included for STDMETHOD is BaseTyps.h but

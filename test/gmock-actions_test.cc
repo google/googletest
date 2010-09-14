@@ -33,14 +33,14 @@
 //
 // This file tests the built-in actions.
 
-#include <gmock/gmock-actions.h>
+#include "gmock/gmock-actions.h"
 #include <algorithm>
 #include <iterator>
 #include <string>
-#include <gmock/gmock.h>
-#include <gmock/internal/gmock-port.h>
-#include <gtest/gtest.h>
-#include <gtest/gtest-spi.h>
+#include "gmock/gmock.h"
+#include "gmock/internal/gmock-port.h"
+#include "gtest/gtest.h"
+#include "gtest/gtest-spi.h"
 
 namespace {
 

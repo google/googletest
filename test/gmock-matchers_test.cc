@@ -33,7 +33,7 @@
 //
 // This file tests some commonly used argument matchers.
 
-#include <gmock/gmock-matchers.h>
+#include "gmock/gmock-matchers.h"
 
 #include <string.h>
 #include <functional>
@@ -45,9 +45,9 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include <gtest/gtest-spi.h>
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+#include "gtest/gtest-spi.h"
 
 namespace testing {
 

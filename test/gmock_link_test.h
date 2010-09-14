@@ -114,14 +114,14 @@
 #ifndef GMOCK_TEST_GMOCK_LINK_TEST_H_
 #define GMOCK_TEST_GMOCK_LINK_TEST_H_
 
-#include <gmock/gmock.h>
+#include "gmock/gmock.h"
 
 #if !GTEST_OS_WINDOWS_MOBILE
 #include <errno.h>
 #endif
 
-#include <gmock/internal/gmock-port.h>
-#include <gtest/gtest.h>
+#include "gmock/internal/gmock-port.h"
+#include "gtest/gtest.h"
 #include <iostream>
 #include <vector>
 

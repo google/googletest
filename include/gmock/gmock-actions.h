@@ -43,8 +43,8 @@
 #include <errno.h>
 #endif
 
-#include <gmock/internal/gmock-internal-utils.h>
-#include <gmock/internal/gmock-port.h>
+#include "gmock/internal/gmock-internal-utils.h"
+#include "gmock/internal/gmock-port.h"
 
 namespace testing {
 

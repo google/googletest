@@ -46,9 +46,9 @@
 #include <utility>
 #include <vector>
 
-#include <gmock/internal/gmock-internal-utils.h>
-#include <gmock/internal/gmock-port.h>
-#include <gtest/gtest.h>
+#include "gmock/internal/gmock-internal-utils.h"
+#include "gmock/internal/gmock-port.h"
+#include "gtest/gtest.h"
 
 namespace testing {
 

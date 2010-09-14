@@ -33,16 +33,16 @@
 //
 // This file tests the internal utilities.
 
-#include <gmock/internal/gmock-internal-utils.h>
+#include "gmock/internal/gmock-internal-utils.h"
 #include <stdlib.h>
 #include <map>
 #include <string>
 #include <sstream>
 #include <vector>
-#include <gmock/gmock.h>
-#include <gmock/internal/gmock-port.h>
-#include <gtest/gtest.h>
-#include <gtest/gtest-spi.h>
+#include "gmock/gmock.h"
+#include "gmock/internal/gmock-port.h"
+#include "gtest/gtest.h"
+#include "gtest/gtest-spi.h"
 
 #if GTEST_OS_CYGWIN
 #include <sys/types.h>  // For ssize_t. NOLINT

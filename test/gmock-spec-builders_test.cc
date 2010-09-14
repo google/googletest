@@ -33,16 +33,16 @@
 //
 // This file tests the spec builder syntax.
 
-#include <gmock/gmock-spec-builders.h>
+#include "gmock/gmock-spec-builders.h"
 
 #include <ostream>  // NOLINT
 #include <sstream>
 #include <string>
 
-#include <gmock/gmock.h>
-#include <gmock/internal/gmock-port.h>
-#include <gtest/gtest.h>
-#include <gtest/gtest-spi.h>
+#include "gmock/gmock.h"
+#include "gmock/internal/gmock-port.h"
+#include "gtest/gtest.h"
+#include "gtest/gtest-spi.h"
 
 namespace testing {
 namespace internal {

@@ -33,13 +33,13 @@
 //
 // This file tests the built-in actions in gmock-more-actions.h.
 
-#include <gmock/gmock-more-actions.h>
+#include "gmock/gmock-more-actions.h"
 
 #include <functional>
 #include <sstream>
 #include <string>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 namespace testing {
 namespace gmock_more_actions_test {

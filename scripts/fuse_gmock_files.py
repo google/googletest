@@ -75,8 +75,8 @@ sys.path.append(os.path.join(DEFAULT_GMOCK_ROOT_DIR, 'gtest/scripts'))
 import fuse_gtest_files
 gtest = fuse_gtest_files
 
-# Regex for matching '#include <gmock/...>'.
-INCLUDE_GMOCK_FILE_REGEX = re.compile(r'^\s*#\s*include\s*<(gmock/.+)>')
+# Regex for matching '#include "gmock/..."'.
+INCLUDE_GMOCK_FILE_REGEX = re.compile(r'^\s*#\s*include\s*"(gmock/.+)"')
 
 # Where to find the source seed files.
 GMOCK_H_SEED = 'include/gmock/gmock.h'
@@ -135,19 +135,19 @@ def FuseGMockH(gmock_root, output_dir):
     for line in file(os.path.join(gmock_root, gmock_header_path), 'r'):
       m = INCLUDE_GMOCK_FILE_REGEX.match(line)
       if m:
-        # It's '#include <gmock/...>' - let's process it recursively.
+        # It's '#include "gmock/..."' - let's process it recursively.
         ProcessFile('include/' + m.group(1))
       else:
         m = gtest.INCLUDE_GTEST_FILE_REGEX.match(line)
         if m:
-          # It's '#include <gtest/foo.h>'.  We translate it to
-          # <gtest/gtest.h>, regardless of what foo is, since all
+          # It's '#include "gtest/foo.h"'.  We translate it to
+          # "gtest/gtest.h", regardless of what foo is, since all
           # gtest headers are fused into gtest/gtest.h.
 
           # There is no need to #include gtest.h twice.
           if not gtest.GTEST_H_SEED in processed_files:
             processed_files.add(gtest.GTEST_H_SEED)
-            output_file.write('#include <%s>\n' % (gtest.GTEST_H_OUTPUT,))
+            output_file.write('#include "%s"\n' % (gtest.GTEST_H_OUTPUT,))
         else:
           # Otherwise we copy the line unchanged to the output file.
           output_file.write(line)
@@ -174,18 +174,18 @@ def FuseGMockAllCcToFile(gmock_root, output_file):
     for line in file(os.path.join(gmock_root, gmock_source_file), 'r'):
       m = INCLUDE_GMOCK_FILE_REGEX.match(line)
       if m:
-        # It's '#include <gmock/foo.h>'.  We treat it as '#include
-        # <gmock/gmock.h>', as all other gmock headers are being fused
+        # It's '#include "gmock/foo.h"'.  We treat it as '#include
+        # "gmock/gmock.h"', as all other gmock headers are being fused
         # into gmock.h and cannot be #included directly.
 
-        # There is no need to #include <gmock/gmock.h> more than once.
+        # There is no need to #include "gmock/gmock.h" more than once.
         if not GMOCK_H_SEED in processed_files:
           processed_files.add(GMOCK_H_SEED)
-          output_file.write('#include <%s>\n' % (GMOCK_H_OUTPUT,))
+          output_file.write('#include "%s"\n' % (GMOCK_H_OUTPUT,))
       else:
         m = gtest.INCLUDE_GTEST_FILE_REGEX.match(line)
         if m:
-          # It's '#include <gtest/...>'.
+          # It's '#include "gtest/..."'.
           # There is no need to #include gtest.h as it has been
           # #included by gtest-all.cc.
           pass

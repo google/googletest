@@ -36,7 +36,7 @@
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_MORE_ACTIONS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_MORE_ACTIONS_H_
 
-#include <gmock/gmock-generated-actions.h>
+#include "gmock/gmock-generated-actions.h"
 
 namespace testing {
 namespace internal {

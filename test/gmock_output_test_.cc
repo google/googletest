@@ -32,12 +32,12 @@
 // Tests Google Mock's output in various scenarios.  This ensures that
 // Google Mock's messages are readable and useful.
 
-#include <gmock/gmock.h>
+#include "gmock/gmock.h"
 
 #include <stdio.h>
 #include <string>
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 using testing::_;
 using testing::AnyNumber;

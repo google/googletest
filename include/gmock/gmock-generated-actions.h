@@ -38,8 +38,8 @@
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_ACTIONS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_ACTIONS_H_
 
-#include <gmock/gmock-actions.h>
-#include <gmock/internal/gmock-port.h>
+#include "gmock/gmock-actions.h"
+#include "gmock/internal/gmock-port.h"
 
 namespace testing {
 namespace internal {

@@ -34,7 +34,7 @@
 // This program is for verifying that a leaked mock object can be
 // caught by Google Mock's leak detector.
 
-#include <gmock/gmock.h>
+#include "gmock/gmock.h"
 
 namespace {
 

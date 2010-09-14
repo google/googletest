@@ -33,9 +33,9 @@
 //
 // This file tests the internal utilities.
 
-#include <gmock/internal/gmock-generated-internal-utils.h>
-#include <gmock/internal/gmock-internal-utils.h>
-#include <gtest/gtest.h>
+#include "gmock/internal/gmock-generated-internal-utils.h"
+#include "gmock/internal/gmock-internal-utils.h"
+#include "gtest/gtest.h"
 
 namespace {
 

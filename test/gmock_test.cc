@@ -33,10 +33,10 @@
 //
 // This file tests code in gmock.cc.
 
-#include <gmock/gmock.h>
+#include "gmock/gmock.h"
 
 #include <string>
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 using testing::GMOCK_FLAG(verbose);
 using testing::InitGoogleMock;

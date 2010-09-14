@@ -34,15 +34,15 @@
 // This file implements the spec builder syntax (ON_CALL and
 // EXPECT_CALL).
 
-#include <gmock/gmock-spec-builders.h>
+#include "gmock/gmock-spec-builders.h"
 
 #include <stdlib.h>
 #include <iostream>  // NOLINT
 #include <map>
 #include <set>
 #include <string>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #if GTEST_OS_CYGWIN || GTEST_OS_LINUX || GTEST_OS_MAC
 #include <unistd.h>  // NOLINT

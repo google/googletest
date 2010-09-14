@@ -39,7 +39,7 @@
 #ifndef GMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_GENERATED_INTERNAL_UTILS_H_
 #define GMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_GENERATED_INTERNAL_UTILS_H_
 
-#include <gmock/internal/gmock-port.h>
+#include "gmock/internal/gmock-port.h"
 
 namespace testing {
 

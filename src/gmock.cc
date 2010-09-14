@@ -29,8 +29,8 @@
 //
 // Author: wan@google.com (Zhanyong Wan)
 
-#include <gmock/gmock.h>
-#include <gmock/internal/gmock-port.h>
+#include "gmock/gmock.h"
+#include "gmock/internal/gmock-port.h"
 
 namespace testing {
 
