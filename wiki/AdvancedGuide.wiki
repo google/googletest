@@ -1390,7 +1390,7 @@ FRIEND_TEST(TestCaseName, TestName);
 For example,
 {{{
 // foo.h
-#include <gtest/gtest_prod.h>
+#include "gtest/gtest_prod.h"
 
 // Defines FRIEND_TEST.
 class Foo {
@@ -1455,7 +1455,7 @@ exception, you could catch the exception and assert on it.  But Google
 Test doesn't use exceptions, so how do we test that a piece of code
 generates an expected failure?
 
-`<gtest/gtest-spi.h>` contains some constructs to do this.  After
+`"gtest/gtest-spi.h"` contains some constructs to do this.  After
 #including this header, you can use
 
 || `EXPECT_FATAL_FAILURE(`_statement, substring_`);` ||
@@ -1474,7 +1474,7 @@ For technical reasons, there are some caveats:
   # _statement_ in `EXPECT_FATAL_FAILURE()` cannot return a value.
 
 _Note:_ Google Test is designed with threads in mind.  Once the
-synchronization primitives in `<gtest/internal/gtest-port.h>` have
+synchronization primitives in `"gtest/internal/gtest-port.h"` have
 been implemented, Google Test will become thread-safe, meaning that
 you can then use assertions in multiple threads concurrently.  Before
 
@@ -1969,7 +1969,7 @@ your existing tests.  Just change your `main()` function to look
 like:
 
 {{{
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 int main(int argc, char** argv) {
   ::testing::GTEST_FLAG(throw_on_failure) = true;
