@@ -32,7 +32,7 @@
 #ifndef GTEST_TEST_GTEST_TYPED_TEST_TEST_H_
 #define GTEST_TEST_GTEST_TYPED_TEST_TEST_H_
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 #if GTEST_HAS_TYPED_TEST_P
 

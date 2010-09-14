@@ -32,8 +32,8 @@
 //
 // Author: wan@google.com (Zhanyong Wan)
 
-#include <gtest/gtest-spi.h>
-#include <gtest/gtest.h>
+#include "gtest/gtest-spi.h"
+#include "gtest/gtest.h"
 
 // Indicates that this translation unit is part of Google Test's
 // implementation.  It must come before gtest-internal-inl.h is

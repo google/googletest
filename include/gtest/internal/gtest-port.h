@@ -441,7 +441,7 @@
 #if GTEST_HAS_TR1_TUPLE
 
 #if GTEST_USE_OWN_TR1_TUPLE
-#include <gtest/internal/gtest-tuple.h>
+#include "gtest/internal/gtest-tuple.h"
 #elif GTEST_OS_SYMBIAN
 
 // On Symbian, BOOST_HAS_TR1_TUPLE causes Boost's TR1 tuple library to

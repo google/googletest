@@ -38,8 +38,8 @@
 // build or make-files for some existing Google Test clients. Do not
 // #include this file anywhere else!
 
-#include <gtest/internal/gtest-filepath.h>
-#include <gtest/gtest.h>
+#include "gtest/internal/gtest-filepath.h"
+#include "gtest/gtest.h"
 
 // Indicates that this translation unit is part of Google Test's
 // implementation.  It must come before gtest-internal-inl.h is

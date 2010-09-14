@@ -41,7 +41,7 @@
 // needed.
 
 #include "sample2.h"
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 // In this example, we test the MyString class (a simple string).
 

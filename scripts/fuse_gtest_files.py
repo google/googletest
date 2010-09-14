@@ -67,8 +67,8 @@ import sys
 # Test root directory.
 DEFAULT_GTEST_ROOT_DIR = os.path.join(os.path.dirname(__file__), '..')
 
-# Regex for matching '#include <gtest/...>'.
-INCLUDE_GTEST_FILE_REGEX = re.compile(r'^\s*#\s*include\s*<(gtest/.+)>')
+# Regex for matching '#include "gtest/..."'.
+INCLUDE_GTEST_FILE_REGEX = re.compile(r'^\s*#\s*include\s*"(gtest/.+)"')
 
 # Regex for matching '#include "src/..."'.
 INCLUDE_SRC_FILE_REGEX = re.compile(r'^\s*#\s*include\s*"(src/.+)"')
@@ -162,7 +162,7 @@ def FuseGTestH(gtest_root, output_dir):
     for line in file(os.path.join(gtest_root, gtest_header_path), 'r'):
       m = INCLUDE_GTEST_FILE_REGEX.match(line)
       if m:
-        # It's '#include <gtest/...>' - let's process it recursively.
+        # It's '#include "gtest/..."' - let's process it recursively.
         ProcessFile('include/' + m.group(1))
       else:
         # Otherwise we copy the line unchanged to the output file.
@@ -191,19 +191,19 @@ def FuseGTestAllCcToFile(gtest_root, output_file):
       m = INCLUDE_GTEST_FILE_REGEX.match(line)
       if m:
         if 'include/' + m.group(1) == GTEST_SPI_H_SEED:
-          # It's '#include <gtest/gtest-spi.h>'.  This file is not
-          # #included by <gtest/gtest.h>, so we need to process it.
+          # It's '#include "gtest/gtest-spi.h"'.  This file is not
+          # #included by "gtest/gtest.h", so we need to process it.
           ProcessFile(GTEST_SPI_H_SEED)
         else:
-          # It's '#include <gtest/foo.h>' where foo is not gtest-spi.
-          # We treat it as '#include <gtest/gtest.h>', as all other
+          # It's '#include "gtest/foo.h"' where foo is not gtest-spi.
+          # We treat it as '#include "gtest/gtest.h"', as all other
           # gtest headers are being fused into gtest.h and cannot be
           # #included directly.
 
-          # There is no need to #include <gtest/gtest.h> more than once.
+          # There is no need to #include "gtest/gtest.h" more than once.
           if not GTEST_H_SEED in processed_files:
             processed_files.add(GTEST_H_SEED)
-            output_file.write('#include <%s>\n' % (GTEST_H_OUTPUT,))
+            output_file.write('#include "%s"\n' % (GTEST_H_OUTPUT,))
       else:
         m = INCLUDE_SRC_FILE_REGEX.match(line)
         if m:

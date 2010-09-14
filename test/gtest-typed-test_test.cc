@@ -33,7 +33,7 @@
 #include <vector>
 
 #include "test/gtest-typed-test_test.h"
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 using testing::Test;
 

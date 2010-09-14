@@ -31,7 +31,7 @@
 
 // Tests Google Test's throw-on-failure mode with exceptions enabled.
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 #include <stdlib.h>
 #include <stdio.h>

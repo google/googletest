@@ -44,8 +44,8 @@
 #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_TYPE_UTIL_H_
 #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_TYPE_UTIL_H_
 
-#include <gtest/internal/gtest-port.h>
-#include <gtest/internal/gtest-string.h>
+#include "gtest/internal/gtest-port.h"
+#include "gtest/internal/gtest-string.h"
 
 #if GTEST_HAS_TYPED_TEST || GTEST_HAS_TYPED_TEST_P
 

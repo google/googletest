@@ -33,7 +33,7 @@
 //
 // This file tests the universal value printer.
 
-#include <gtest/gtest-printers.h>
+#include "gtest/gtest-printers.h"
 
 #include <ctype.h>
 #include <limits.h>
@@ -48,7 +48,7 @@
 #include <utility>
 #include <vector>
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 // hash_map and hash_set are available on Windows.
 #if GTEST_OS_WINDOWS

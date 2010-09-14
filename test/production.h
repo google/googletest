@@ -34,7 +34,7 @@
 #ifndef GTEST_TEST_PRODUCTION_H_
 #define GTEST_TEST_PRODUCTION_H_
 
-#include <gtest/gtest_prod.h>
+#include "gtest/gtest_prod.h"
 
 class PrivateCode {
  public:

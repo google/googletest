@@ -29,7 +29,7 @@
 //
 // Author: wan@google.com (Zhanyong Wan)
 
-#include <gtest/internal/gtest-port.h>
+#include "gtest/internal/gtest-port.h"
 
 #include <limits.h>
 #include <stdlib.h>
@@ -51,9 +51,9 @@
 #include <mach/vm_map.h>
 #endif  // GTEST_OS_MAC
 
-#include <gtest/gtest-spi.h>
-#include <gtest/gtest-message.h>
-#include <gtest/internal/gtest-string.h>
+#include "gtest/gtest-spi.h"
+#include "gtest/gtest-message.h"
+#include "gtest/internal/gtest-string.h"
 
 // Indicates that this translation unit is part of Google Test's
 // implementation.  It must come before gtest-internal-inl.h is

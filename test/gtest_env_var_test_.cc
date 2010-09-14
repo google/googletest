@@ -32,7 +32,7 @@
 // A helper program for testing that Google Test parses the environment
 // variables correctly.
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 #include <iostream>
 

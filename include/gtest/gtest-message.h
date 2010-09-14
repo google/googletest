@@ -48,8 +48,8 @@
 
 #include <limits>
 
-#include <gtest/internal/gtest-string.h>
-#include <gtest/internal/gtest-internal.h>
+#include "gtest/internal/gtest-string.h"
+#include "gtest/internal/gtest-internal.h"
 
 namespace testing {
 

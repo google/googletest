@@ -42,7 +42,7 @@
 #ifdef TEST_CANNOT_IGNORE_RUN_ALL_TESTS_RESULT
 // Tests that the result of RUN_ALL_TESTS() cannot be ignored.
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
 // Tests that the compiler catches the typo when a user declares a
 // Setup() method in a test fixture.
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 class MyTest : public testing::Test {
  protected:
@@ -69,7 +69,7 @@ class MyTest : public testing::Test {
 // Tests that the compiler catches the typo when a user calls Setup()
 // from a test fixture.
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 class MyTest : public testing::Test {
  protected:
@@ -82,7 +82,7 @@ class MyTest : public testing::Test {
 // Tests that the compiler catches the typo when a user declares a
 // Setup() method in a subclass of Environment.
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 class MyEnvironment : public testing::Environment {
  public:
@@ -93,7 +93,7 @@ class MyEnvironment : public testing::Environment {
 // Tests that the compiler catches the typo when a user calls Setup()
 // in an Environment.
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 class MyEnvironment : public testing::Environment {
  protected:
@@ -107,7 +107,7 @@ class MyEnvironment : public testing::Environment {
 // Tests that the compiler catches using the wrong test case name in
 // TYPED_TEST_P.
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 template <typename T>
 class FooTest : public testing::Test {
@@ -126,7 +126,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, testing::Types<int>);
 // Tests that the compiler catches using the wrong test case name in
 // REGISTER_TYPED_TEST_CASE_P.
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 template <typename T>
 class FooTest : public testing::Test {
@@ -145,7 +145,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, testing::Types<int>);
 // Tests that the compiler catches using the wrong test case name in
 // INSTANTIATE_TYPED_TEST_CASE_P.
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 template <typename T>
 class FooTest : public testing::Test {
@@ -166,7 +166,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, BarTest, testing::Types<int>);
 // Tests that the compiler catches instantiating TYPED_TEST_CASE_P
 // twice with the same name prefix.
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 template <typename T>
 class FooTest : public testing::Test {
@@ -183,21 +183,21 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, testing::Types<double>);
 
 #elif defined(TEST_STATIC_ASSERT_TYPE_EQ_IS_NOT_A_TYPE)
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 // Tests that StaticAssertTypeEq<T1, T2> cannot be used as a type.
 testing::StaticAssertTypeEq<int, int> dummy;
 
 #elif defined(TEST_STATIC_ASSERT_TYPE_EQ_WORKS_IN_NAMESPACE)
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 // Tests that StaticAssertTypeEq<T1, T2> works in a namespace scope.
 static bool dummy = testing::StaticAssertTypeEq<int, const int>();
 
 #elif defined(TEST_STATIC_ASSERT_TYPE_EQ_WORKS_IN_CLASS)
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 template <typename T>
 class Helper {
@@ -215,7 +215,7 @@ void Test() {
 
 #elif defined(TEST_STATIC_ASSERT_TYPE_EQ_WORKS_IN_FUNCTION)
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 void Test() {
   // Tests that StaticAssertTypeEq<T1, T2> works inside a function.
@@ -225,7 +225,7 @@ void Test() {
 #else
 // A sanity test.  This should compile.
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 int main() {
   return RUN_ALL_TESTS();

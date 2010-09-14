@@ -29,7 +29,7 @@
 //
 // Author: wan@google.com (Zhanyong Wan)
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 // Tests that we don't have to define main() when we link to
 // gtest_main instead of gtest.

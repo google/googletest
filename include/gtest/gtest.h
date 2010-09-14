@@ -54,15 +54,15 @@
 #include <limits>
 #include <vector>
 
-#include <gtest/internal/gtest-internal.h>
-#include <gtest/internal/gtest-string.h>
-#include <gtest/gtest-death-test.h>
-#include <gtest/gtest-message.h>
-#include <gtest/gtest-param-test.h>
-#include <gtest/gtest-printers.h>
-#include <gtest/gtest_prod.h>
-#include <gtest/gtest-test-part.h>
-#include <gtest/gtest-typed-test.h>
+#include "gtest/internal/gtest-internal.h"
+#include "gtest/internal/gtest-string.h"
+#include "gtest/gtest-death-test.h"
+#include "gtest/gtest-message.h"
+#include "gtest/gtest-param-test.h"
+#include "gtest/gtest-printers.h"
+#include "gtest/gtest_prod.h"
+#include "gtest/gtest-test-part.h"
+#include "gtest/gtest-typed-test.h"
 
 // Depending on the platform, different string classes are available.
 // On Linux, in addition to ::std::string, Google also makes use of
@@ -1736,7 +1736,7 @@ const T* TestWithParam<T>::parameter_ = NULL;
 
 // Includes the auto-generated header that implements a family of
 // generic predicate assertion macros.
-#include <gtest/gtest_pred_impl.h>
+#include "gtest/gtest_pred_impl.h"
 
 // Macros for testing equalities and inequalities.
 //

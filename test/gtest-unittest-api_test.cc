@@ -33,7 +33,7 @@
 // This file contains tests verifying correctness of data provided via
 // UnitTest's public methods.
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 #include <string.h>  // For strcmp.
 #include <algorithm>

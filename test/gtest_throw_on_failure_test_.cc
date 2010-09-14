@@ -35,7 +35,7 @@
 // invoked by gtest_throw_on_failure_test.py, and is expected to exit
 // with non-zero in the throw-on-failure mode or 0 otherwise.
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);

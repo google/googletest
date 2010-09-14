@@ -40,7 +40,7 @@
 #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_FILEPATH_H_
 #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_FILEPATH_H_
 
-#include <gtest/internal/gtest-string.h>
+#include "gtest/internal/gtest-string.h"
 
 namespace testing {
 namespace internal {
