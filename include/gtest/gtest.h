@@ -1799,20 +1799,47 @@ const T* TestWithParam<T>::parameter_ = NULL;
 #define EXPECT_GT(val1, val2) \
   EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperGT, val1, val2)
 
-#define ASSERT_EQ(expected, actual) \
+#define GTEST_ASSERT_EQ(expected, actual) \
   ASSERT_PRED_FORMAT2(::testing::internal:: \
                       EqHelper<GTEST_IS_NULL_LITERAL_(expected)>::Compare, \
                       expected, actual)
-#define ASSERT_NE(val1, val2) \
+#define GTEST_ASSERT_NE(val1, val2) \
   ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperNE, val1, val2)
-#define ASSERT_LE(val1, val2) \
+#define GTEST_ASSERT_LE(val1, val2) \
   ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperLE, val1, val2)
-#define ASSERT_LT(val1, val2) \
+#define GTEST_ASSERT_LT(val1, val2) \
   ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperLT, val1, val2)
-#define ASSERT_GE(val1, val2) \
+#define GTEST_ASSERT_GE(val1, val2) \
   ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperGE, val1, val2)
-#define ASSERT_GT(val1, val2) \
+#define GTEST_ASSERT_GT(val1, val2) \
   ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperGT, val1, val2)
+
+// Define macro GTEST_DONT_DEFINE_ASSERT_XY to 1 to omit the definition of
+// ASSERT_XY(), which clashes with some users' own code.
+
+#if !GTEST_DONT_DEFINE_ASSERT_EQ
+#define ASSERT_EQ(val1, val2) GTEST_ASSERT_EQ(val1, val2)
+#endif
+
+#if !GTEST_DONT_DEFINE_ASSERT_NE
+#define ASSERT_NE(val1, val2) GTEST_ASSERT_NE(val1, val2)
+#endif
+
+#if !GTEST_DONT_DEFINE_ASSERT_LE
+#define ASSERT_LE(val1, val2) GTEST_ASSERT_LE(val1, val2)
+#endif
+
+#if !GTEST_DONT_DEFINE_ASSERT_LT
+#define ASSERT_LT(val1, val2) GTEST_ASSERT_LT(val1, val2)
+#endif
+
+#if !GTEST_DONT_DEFINE_ASSERT_GE
+#define ASSERT_GE(val1, val2) GTEST_ASSERT_GE(val1, val2)
+#endif
+
+#if !GTEST_DONT_DEFINE_ASSERT_GT
+#define ASSERT_GT(val1, val2) GTEST_ASSERT_GT(val1, val2)
+#endif
 
 // C String Comparisons.  All tests treat NULL and any non-NULL string
 // as different.  Two NULLs are equal.
