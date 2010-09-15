@@ -6866,6 +6866,41 @@ GTEST_TEST(AlternativeNameTest, Works) {  // GTEST_TEST is the same as TEST.
   // GTEST_FAIL is the same as FAIL.
   EXPECT_FATAL_FAILURE(GTEST_FAIL() << "An expected failure",
                        "An expected failure");
+
+  // GTEST_ASSERT_XY is the same as ASSERT_XY.
+
+  GTEST_ASSERT_EQ(0, 0);
+  EXPECT_FATAL_FAILURE(GTEST_ASSERT_EQ(0, 1) << "An expected failure",
+                       "An expected failure");
+  EXPECT_FATAL_FAILURE(GTEST_ASSERT_EQ(1, 0) << "An expected failure",
+                       "An expected failure");
+
+  GTEST_ASSERT_NE(0, 1);
+  GTEST_ASSERT_NE(1, 0);
+  EXPECT_FATAL_FAILURE(GTEST_ASSERT_NE(0, 0) << "An expected failure",
+                       "An expected failure");
+
+  GTEST_ASSERT_LE(0, 0);
+  GTEST_ASSERT_LE(0, 1);
+  EXPECT_FATAL_FAILURE(GTEST_ASSERT_LE(1, 0) << "An expected failure",
+                       "An expected failure");
+
+  GTEST_ASSERT_LT(0, 1);
+  EXPECT_FATAL_FAILURE(GTEST_ASSERT_LT(0, 0) << "An expected failure",
+                       "An expected failure");
+  EXPECT_FATAL_FAILURE(GTEST_ASSERT_LT(1, 0) << "An expected failure",
+                       "An expected failure");
+
+  GTEST_ASSERT_GE(0, 0);
+  GTEST_ASSERT_GE(1, 0);
+  EXPECT_FATAL_FAILURE(GTEST_ASSERT_GE(0, 1) << "An expected failure",
+                       "An expected failure");
+
+  GTEST_ASSERT_GT(1, 0);
+  EXPECT_FATAL_FAILURE(GTEST_ASSERT_GT(0, 1) << "An expected failure",
+                       "An expected failure");
+  EXPECT_FATAL_FAILURE(GTEST_ASSERT_GT(1, 1) << "An expected failure",
+                       "An expected failure");
 }
 
 // Tests for internal utilities necessary for implementation of the universal
