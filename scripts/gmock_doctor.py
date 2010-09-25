@@ -29,7 +29,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-"""Converts gcc errors in code using Google Mock to plain English."""
+"""Converts compiler's errors in code using Google Mock to plain English."""
 
 __author__ = 'wan@google.com (Zhanyong Wan)'
 
@@ -124,8 +124,11 @@ _COMMON_GMOCK_SYMBOLS = [
     'Mock',
     ]
 
-# Regex for matching source file path and line number in gcc's errors.
-_FILE_LINE_RE = r'(?P<file>.*):(?P<line>\d+):\s+'
+# Regex for matching source file path and line number in the compiler's errors.
+_GCC_FILE_LINE_RE = r'(?P<file>.*):(?P<line>\d+):\s+'
+_CLANG_FILE_LINE_RE = r'(?P<file>.*):(?P<line>\d+):(?P<column>\d+):\s+'
+_CLANG_NON_GMOCK_FILE_LINE_RE = (
+    r'(?P<file>.*[/\\^](?!gmock-)[^/\\]+):(?P<line>\d+):(?P<column>\d+):\s+')
 
 
 def _FindAllMatches(regex, s):
@@ -135,109 +138,174 @@ def _FindAllMatches(regex, s):
   return r.finditer(s)
 
 
-def _GenericDiagnoser(short_name, long_name, regex, diagnosis, msg):
+def _GenericDiagnoser(short_name, long_name, diagnoses, msg):
   """Diagnoses the given disease by pattern matching.
+
+  Can provide different diagnoses for different patterns.
 
   Args:
     short_name: Short name of the disease.
     long_name:  Long name of the disease.
-    regex:      Regex for matching the symptoms.
-    diagnosis:  Pattern for formatting the diagnosis.
-    msg:        Gcc's error messages.
+    diagnoses:  A list of pairs (regex, pattern for formatting the diagnosis
+                for matching regex).
+    msg:        Compiler's error messages.
   Yields:
     Tuples of the form
       (short name of disease, long name of disease, diagnosis).
   """
-
-  diagnosis = '%(file)s:%(line)s:' + diagnosis
-  for m in _FindAllMatches(regex, msg):
-    yield (short_name, long_name, diagnosis % m.groupdict())
+  for regex, diagnosis in diagnoses:
+    if re.search(regex, msg):
+      diagnosis = '%(file)s:%(line)s:' + diagnosis
+      for m in _FindAllMatches(regex, msg):
+        yield (short_name, long_name, diagnosis % m.groupdict())
 
 
 def _NeedToReturnReferenceDiagnoser(msg):
-  """Diagnoses the NRR disease, given the error messages by gcc."""
+  """Diagnoses the NRR disease, given the error messages by the compiler."""
 
-  regex = (r'In member function \'testing::internal::ReturnAction<R>.*\n'
-           + _FILE_LINE_RE + r'instantiated from here\n'
-           r'.*gmock-actions\.h.*error: creating array with negative size')
+  gcc_regex = (r'In member function \'testing::internal::ReturnAction<R>.*\n'
+               + _GCC_FILE_LINE_RE + r'instantiated from here\n'
+               r'.*gmock-actions\.h.*error: creating array with negative size')
+  clang_regex = (r'error: array size is negative\r?\n'
+                 r'(.*\n)*?' +
+                 _CLANG_NON_GMOCK_FILE_LINE_RE +
+                 r'note: in instantiation of function template specialization '
+                 r'\'testing::internal::ReturnAction<(?P<type>).*>'
+                 r'::operator Action<.*>\' requested here')
   diagnosis = """
-You are using an Return() action in a function that returns a reference.
-Please use ReturnRef() instead."""
+You are using a Return() action in a function that returns a reference to
+%(type)s.  Please use ReturnRef() instead."""
   return _GenericDiagnoser('NRR', 'Need to Return Reference',
-                           regex, diagnosis, msg)
+                           [(clang_regex, diagnosis),
+                            (gcc_regex, diagnosis % {'type': 'a type'})],
+                           msg)
 
 
 def _NeedToReturnSomethingDiagnoser(msg):
-  """Diagnoses the NRS disease, given the error messages by gcc."""
+  """Diagnoses the NRS disease, given the error messages by the compiler."""
 
-  regex = (_FILE_LINE_RE +
-           r'(instantiated from here\n.'
-           r'*gmock.*actions\.h.*error: void value not ignored)'
-           r'|(error: control reaches end of non-void function)')
+  gcc_regex = (_GCC_FILE_LINE_RE + r'(instantiated from here\n.'
+               r'*gmock.*actions\.h.*error: void value not ignored)'
+               r'|(error: control reaches end of non-void function)')
+  clang_regex1 = (_CLANG_FILE_LINE_RE +
+                  r'error: cannot initialize return object '
+                  r'of type \'Result\' \(aka \'(?P<return_type>).*\'\) '
+                  r'with an rvalue of type \'void\'')
+  clang_regex2 = (_CLANG_FILE_LINE_RE +
+                  r'error: cannot initialize return object '
+                  r'of type \'(?P<return_type>).*\' '
+                  r'with an rvalue of type \'void\'')
   diagnosis = """
 You are using an action that returns void, but it needs to return
-*something*.  Please tell it *what* to return.  Perhaps you can use
+%(return_type)s.  Please tell it *what* to return.  Perhaps you can use
 the pattern DoAll(some_action, Return(some_value))?"""
-  return _GenericDiagnoser('NRS', 'Need to Return Something',
-                           regex, diagnosis, msg)
+  return _GenericDiagnoser(
+      'NRS',
+      'Need to Return Something',
+      [(gcc_regex, diagnosis % {'return_type': '*something*'}),
+       (clang_regex1, diagnosis),
+       (clang_regex2, diagnosis)],
+      msg)
 
 
 def _NeedToReturnNothingDiagnoser(msg):
-  """Diagnoses the NRN disease, given the error messages by gcc."""
+  """Diagnoses the NRN disease, given the error messages by the compiler."""
 
-  regex = (_FILE_LINE_RE + r'instantiated from here\n'
-           r'.*gmock-actions\.h.*error: instantiation of '
-           r'\'testing::internal::ReturnAction<R>::Impl<F>::value_\' '
-           r'as type \'void\'')
+  gcc_regex = (_GCC_FILE_LINE_RE + r'instantiated from here\n'
+               r'.*gmock-actions\.h.*error: instantiation of '
+               r'\'testing::internal::ReturnAction<R>::Impl<F>::value_\' '
+               r'as type \'void\'')
+  clang_regex1 = (r'error: field has incomplete type '
+                  r'\'Result\' \(aka \'void\'\)(\r)?\n'
+                  r'(.*\n)*?' +
+                  _CLANG_NON_GMOCK_FILE_LINE_RE + r'note: in instantiation '
+                  r'of function template specialization '
+                  r'\'testing::internal::ReturnAction<(?P<return_type>.*)>'
+                  r'::operator Action<void \(.*\)>\' requested here')
+  clang_regex2 = (r'error: field has incomplete type '
+                  r'\'Result\' \(aka \'void\'\)(\r)?\n'
+                  r'(.*\n)*?' +
+                  _CLANG_NON_GMOCK_FILE_LINE_RE + r'note: in instantiation '
+                  r'of function template specialization '
+                  r'\'testing::internal::DoBothAction<.*>'
+                  r'::operator Action<(?P<return_type>.*) \(.*\)>\' '
+                  r'requested here')
   diagnosis = """
-You are using an action that returns *something*, but it needs to return
+You are using an action that returns %(return_type)s, but it needs to return
 void.  Please use a void-returning action instead.
 
 All actions but the last in DoAll(...) must return void.  Perhaps you need
 to re-arrange the order of actions in a DoAll(), if you are using one?"""
-  return _GenericDiagnoser('NRN', 'Need to Return Nothing',
-                           regex, diagnosis, msg)
+  return _GenericDiagnoser(
+      'NRN',
+      'Need to Return Nothing',
+      [(gcc_regex, diagnosis % {'return_type': '*something*'}),
+       (clang_regex1, diagnosis),
+       (clang_regex2, diagnosis)],
+      msg)
 
 
 def _IncompleteByReferenceArgumentDiagnoser(msg):
-  """Diagnoses the IBRA disease, given the error messages by gcc."""
+  """Diagnoses the IBRA disease, given the error messages by the compiler."""
 
-  regex = (_FILE_LINE_RE + r'instantiated from here\n'
-           r'.*gtest-printers\.h.*error: invalid application of '
-           r'\'sizeof\' to incomplete type \'(?P<type>.*)\'')
+  gcc_regex = (_GCC_FILE_LINE_RE + r'instantiated from here\n'
+               r'.*gtest-printers\.h.*error: invalid application of '
+               r'\'sizeof\' to incomplete type \'(?P<type>.*)\'')
+
+  clang_regex = (r'.*gtest-printers\.h.*error: invalid application of '
+                 r'\'sizeof\' to an incomplete type '
+                 r'\'(?P<type>.*)( const)?\'\r?\n'
+                 r'(.*\n)*?' +
+                 _CLANG_NON_GMOCK_FILE_LINE_RE +
+                 r'note: in instantiation of member function '
+                 r'\'testing::internal::FunctionMocker<.*>::Invoke\' '
+                 r'requested here')
   diagnosis = """
 In order to mock this function, Google Mock needs to see the definition
 of type "%(type)s" - declaration alone is not enough.  Either #include
 the header that defines it, or change the argument to be passed
 by pointer."""
+
   return _GenericDiagnoser('IBRA', 'Incomplete By-Reference Argument Type',
-                           regex, diagnosis, msg)
+                           [(gcc_regex, diagnosis),
+                            (clang_regex, diagnosis)],
+                           msg)
 
 
 def _OverloadedFunctionMatcherDiagnoser(msg):
-  """Diagnoses the OFM disease, given the error messages by gcc."""
+  """Diagnoses the OFM disease, given the error messages by the compiler."""
 
-  regex = (_FILE_LINE_RE + r'error: no matching function for '
-           r'call to \'Truly\(<unresolved overloaded function type>\)')
+  gcc_regex = (_GCC_FILE_LINE_RE + r'error: no matching function for '
+               r'call to \'Truly\(<unresolved overloaded function type>\)')
+  clang_regex = (_CLANG_FILE_LINE_RE + r'error: no matching function for '
+                 r'call to \'Truly')
   diagnosis = """
 The argument you gave to Truly() is an overloaded function.  Please tell
-gcc which overloaded version you want to use.
+your compiler which overloaded version you want to use.
 
 For example, if you want to use the version whose signature is
   bool Foo(int n);
 you should write
   Truly(static_cast<bool (*)(int n)>(Foo))"""
   return _GenericDiagnoser('OFM', 'Overloaded Function Matcher',
-                           regex, diagnosis, msg)
+                           [(gcc_regex, diagnosis),
+                            (clang_regex, diagnosis)],
+                           msg)
 
 
 def _OverloadedFunctionActionDiagnoser(msg):
-  """Diagnoses the OFA disease, given the error messages by gcc."""
+  """Diagnoses the OFA disease, given the error messages by the compiler."""
 
-  regex = (_FILE_LINE_RE + r'error: no matching function for call to \'Invoke\('
-           r'<unresolved overloaded function type>')
+  gcc_regex = (_GCC_FILE_LINE_RE + r'error: no matching function for call to '
+               r'\'Invoke\(<unresolved overloaded function type>')
+  clang_regex = (_CLANG_FILE_LINE_RE + r'error: no matching '
+                 r'function for call to \'Invoke\'\r?\n'
+                 r'(.*\n)*?'
+                 r'.*\bgmock-\w+-actions\.h:\d+:\d+:\s+'
+                 r'note: candidate template ignored:\s+'
+                 r'couldn\'t infer template argument \'FunctionImpl\'')
   diagnosis = """
-You are passing an overloaded function to Invoke().  Please tell gcc
+Function you are passing to Invoke is overloaded.  Please tell your compiler
 which overloaded version you want to use.
 
 For example, if you want to use the version whose signature is
@@ -245,18 +313,26 @@ For example, if you want to use the version whose signature is
 you should write something like
   Invoke(static_cast<bool (*)(int n, double x)>(MyFunction))"""
   return _GenericDiagnoser('OFA', 'Overloaded Function Action',
-                           regex, diagnosis, msg)
+                           [(gcc_regex, diagnosis),
+                            (clang_regex, diagnosis)],
+                           msg)
 
 
-def _OverloadedMethodActionDiagnoser1(msg):
-  """Diagnoses the OMA disease, given the error messages by gcc."""
+def _OverloadedMethodActionDiagnoser(msg):
+  """Diagnoses the OMA disease, given the error messages by the compiler."""
 
-  regex = (_FILE_LINE_RE + r'error: '
-           r'.*no matching function for call to \'Invoke\(.*, '
-           r'unresolved overloaded function type>')
+  gcc_regex = (_GCC_FILE_LINE_RE + r'error: no matching function for '
+               r'call to \'Invoke\(.+, <unresolved overloaded function '
+               r'type>\)')
+  clang_regex = (_CLANG_FILE_LINE_RE + r'error: no matching function '
+                 r'for call to \'Invoke\'\r?\n'
+                 r'(.*\n)*?'
+                 r'.*\bgmock-\w+-actions\.h:\d+:\d+: '
+                 r'note: candidate function template not viable: '
+                 r'requires 1 argument, but 2 were provided')
   diagnosis = """
 The second argument you gave to Invoke() is an overloaded method.  Please
-tell gcc which overloaded version you want to use.
+tell your compiler which overloaded version you want to use.
 
 For example, if you want to use the version whose signature is
   class Foo {
@@ -266,15 +342,20 @@ For example, if you want to use the version whose signature is
 you should write something like
   Invoke(foo, static_cast<bool (Foo::*)(int n, double x)>(&Foo::Bar))"""
   return _GenericDiagnoser('OMA', 'Overloaded Method Action',
-                           regex, diagnosis, msg)
+                           [(gcc_regex, diagnosis),
+                            (clang_regex, diagnosis)],
+                           msg)
 
 
 def _MockObjectPointerDiagnoser(msg):
-  """Diagnoses the MOP disease, given the error messages by gcc."""
+  """Diagnoses the MOP disease, given the error messages by the compiler."""
 
-  regex = (_FILE_LINE_RE + r'error: request for member '
-           r'\'gmock_(?P<method>.+)\' in \'(?P<mock_object>.+)\', '
-           r'which is of non-class type \'(.*::)*(?P<class_name>.+)\*\'')
+  gcc_regex = (_GCC_FILE_LINE_RE + r'error: request for member '
+               r'\'gmock_(?P<method>.+)\' in \'(?P<mock_object>.+)\', '
+               r'which is of non-class type \'(.*::)*(?P<class_name>.+)\*\'')
+  clang_regex = (_CLANG_FILE_LINE_RE + r'error: member reference type '
+                 r'\'(?P<class_name>.*?) *\' is a pointer; '
+                 r'maybe you meant to use \'->\'\?')
   diagnosis = """
 The first argument to ON_CALL() and EXPECT_CALL() must be a mock *object*,
 not a *pointer* to it.  Please write '*(%(mock_object)s)' instead of
@@ -294,63 +375,89 @@ and the following mock instance:
 you should use the EXPECT_CALL like this:
 
   EXPECT_CALL(*mock_ptr, %(method)s(...));"""
-  return _GenericDiagnoser('MOP', 'Mock Object Pointer',
-                           regex, diagnosis, msg)
 
-
-def _OverloadedMethodActionDiagnoser2(msg):
-  """Diagnoses the OMA disease, given the error messages by gcc."""
-
-  regex = (_FILE_LINE_RE + r'error: no matching function for '
-           r'call to \'Invoke\(.+, <unresolved overloaded function type>\)')
-  diagnosis = """
-The second argument you gave to Invoke() is an overloaded method.  Please
-tell gcc which overloaded version you want to use.
-
-For example, if you want to use the version whose signature is
-  class Foo {
-    ...
-    bool Bar(int n, double x);
-  };
-you should write something like
-  Invoke(foo, static_cast<bool (Foo::*)(int n, double x)>(&Foo::Bar))"""
-  return _GenericDiagnoser('OMA', 'Overloaded Method Action',
-                           regex, diagnosis, msg)
+  return _GenericDiagnoser(
+      'MOP',
+      'Mock Object Pointer',
+      [(gcc_regex, diagnosis),
+       (clang_regex, diagnosis % {'mock_object': 'mock_object',
+                                  'method': 'method',
+                                  'class_name': '%(class_name)s'})],
+       msg)
 
 
 def _NeedToUseSymbolDiagnoser(msg):
-  """Diagnoses the NUS disease, given the error messages by gcc."""
+  """Diagnoses the NUS disease, given the error messages by the compiler."""
 
-  regex = (_FILE_LINE_RE + r'error: \'(?P<symbol>.+)\' '
-           r'(was not declared in this scope|has not been declared)')
+  gcc_regex = (_GCC_FILE_LINE_RE + r'error: \'(?P<symbol>.+)\' '
+               r'(was not declared in this scope|has not been declared)')
+  clang_regex = (_CLANG_FILE_LINE_RE + r'error: use of undeclared identifier '
+                 r'\'(?P<symbol>.+)\'')
   diagnosis = """
 '%(symbol)s' is defined by Google Mock in the testing namespace.
 Did you forget to write
   using testing::%(symbol)s;
 ?"""
-  for m in _FindAllMatches(regex, msg):
+  for m in (list(_FindAllMatches(gcc_regex, msg)) +
+            list(_FindAllMatches(clang_regex, msg))):
     symbol = m.groupdict()['symbol']
     if symbol in _COMMON_GMOCK_SYMBOLS:
       yield ('NUS', 'Need to Use Symbol', diagnosis % m.groupdict())
 
 
 def _NeedToUseReturnNullDiagnoser(msg):
-  """Diagnoses the NRNULL disease, given the error messages by gcc."""
+  """Diagnoses the NRNULL disease, given the error messages by the compiler."""
 
-  regex = ('instantiated from \'testing::internal::ReturnAction<R>'
-           '::operator testing::Action<Func>\(\) const.*\n' +
-           _FILE_LINE_RE + r'instantiated from here\n'
-           r'.*error: no matching function for call to \'implicit_cast\('
-           r'long int&\)')
+  gcc_regex = ('instantiated from \'testing::internal::ReturnAction<R>'
+               '::operator testing::Action<Func>\(\) const.*\n' +
+               _GCC_FILE_LINE_RE + r'instantiated from here\n'
+               r'.*error: no matching function for call to \'implicit_cast\('
+               r'long int&\)')
+  clang_regex = (r'\bgmock-actions.h:.* error: no matching function for '
+                 r'call to \'implicit_cast\'\r?\n'
+                 r'(.*\n)*?' +
+                 _CLANG_NON_GMOCK_FILE_LINE_RE + r'note: in instantiation '
+                 r'of function template specialization '
+                 r'\'testing::internal::ReturnAction<long>::operator '
+                 r'Action<(?P<type>.*)\(\)>\' requested here')
   diagnosis = """
 You are probably calling Return(NULL) and the compiler isn't sure how to turn
-NULL into the right type. Use ReturnNull() instead.
+NULL into %(type)s. Use ReturnNull() instead.
 Note: the line number may be off; please fix all instances of Return(NULL)."""
-  return _GenericDiagnoser('NRNULL', 'Need to use ReturnNull',
-                           regex, diagnosis, msg)
+  return _GenericDiagnoser(
+      'NRNULL', 'Need to use ReturnNull',
+      [(clang_regex, diagnosis),
+       (gcc_regex, diagnosis % {'type': 'the right type'})],
+      msg)
 
 
-_TTB_DIAGNOSIS = """
+def _TypeInTemplatedBaseDiagnoser(msg):
+  """Diagnoses the TTB disease, given the error messages by the compiler."""
+
+  # This version works when the type is used as the mock function's return
+  # type.
+  gcc_4_3_1_regex_type_in_retval = (
+      r'In member function \'int .*\n' + _GCC_FILE_LINE_RE +
+      r'error: a function call cannot appear in a constant-expression')
+  gcc_4_4_0_regex_type_in_retval = (
+      r'error: a function call cannot appear in a constant-expression'
+      + _GCC_FILE_LINE_RE + r'error: template argument 1 is invalid\n')
+  # This version works when the type is used as the mock function's sole
+  # parameter type.
+  gcc_regex_type_of_sole_param = (
+      _GCC_FILE_LINE_RE +
+      r'error: \'(?P<type>.+)\' was not declared in this scope\n'
+      r'.*error: template argument 1 is invalid\n')
+  # This version works when the type is used as a parameter of a mock
+  # function that has multiple parameters.
+  gcc_regex_type_of_a_param = (
+      r'error: expected `;\' before \'::\' token\n'
+      + _GCC_FILE_LINE_RE +
+      r'error: \'(?P<type>.+)\' was not declared in this scope\n'
+      r'.*error: template argument 1 is invalid\n'
+      r'.*error: \'.+\' was not declared in this scope')
+
+  diagnosis = """
 In a mock class template, types or typedefs defined in the base class
 template are *not* automatically visible.  This is how C++ works.  Before
 you can use a type or typedef named %(type)s defined in base class Base<T>, you
@@ -358,78 +465,47 @@ need to make it visible.  One way to do it is:
 
   typedef typename Base<T>::%(type)s %(type)s;"""
 
-
-def _TypeInTemplatedBaseDiagnoser1(msg):
-  """Diagnoses the TTB disease, given the error messages by gcc.
-
-  This version works when the type is used as the mock function's return
-  type.
-  """
-
-  gcc_4_3_1_regex = (
-      r'In member function \'int .*\n' + _FILE_LINE_RE +
-      r'error: a function call cannot appear in a constant-expression')
-  gcc_4_4_0_regex = (
-      r'error: a function call cannot appear in a constant-expression'
-      + _FILE_LINE_RE + r'error: template argument 1 is invalid\n')
-  diagnosis = _TTB_DIAGNOSIS % {'type': 'Foo'}
-  return (list(_GenericDiagnoser('TTB', 'Type in Template Base',
-                                gcc_4_3_1_regex, diagnosis, msg)) +
-          list(_GenericDiagnoser('TTB', 'Type in Template Base',
-                                 gcc_4_4_0_regex, diagnosis, msg)))
-
-
-def _TypeInTemplatedBaseDiagnoser2(msg):
-  """Diagnoses the TTB disease, given the error messages by gcc.
-
-  This version works when the type is used as the mock function's sole
-  parameter type.
-  """
-
-  regex = (_FILE_LINE_RE +
-           r'error: \'(?P<type>.+)\' was not declared in this scope\n'
-           r'.*error: template argument 1 is invalid\n')
-  return _GenericDiagnoser('TTB', 'Type in Template Base',
-                           regex, _TTB_DIAGNOSIS, msg)
-
-
-def _TypeInTemplatedBaseDiagnoser3(msg):
-  """Diagnoses the TTB disease, given the error messages by gcc.
-
-  This version works when the type is used as a parameter of a mock
-  function that has multiple parameters.
-  """
-
-  regex = (r'error: expected `;\' before \'::\' token\n'
-           + _FILE_LINE_RE +
-           r'error: \'(?P<type>.+)\' was not declared in this scope\n'
-           r'.*error: template argument 1 is invalid\n'
-           r'.*error: \'.+\' was not declared in this scope')
-  return _GenericDiagnoser('TTB', 'Type in Template Base',
-                           regex, _TTB_DIAGNOSIS, msg)
+  return _GenericDiagnoser(
+      'TTB', 'Type in Template Base',
+      [(gcc_4_3_1_regex_type_in_retval, diagnosis % {'type': 'Foo'}),
+       (gcc_4_4_0_regex_type_in_retval, diagnosis % {'type': 'Foo'}),
+       (gcc_regex_type_of_sole_param, diagnosis),
+       (gcc_regex_type_of_a_param, diagnosis)],
+      msg)
 
 
 def _WrongMockMethodMacroDiagnoser(msg):
-  """Diagnoses the WMM disease, given the error messages by gcc."""
+  """Diagnoses the WMM disease, given the error messages by the compiler."""
 
-  regex = (_FILE_LINE_RE +
-           r'.*this_method_does_not_take_(?P<wrong_args>\d+)_argument.*\n'
-           r'.*\n'
-           r'.*candidates are.*FunctionMocker<[^>]+A(?P<args>\d+)\)>')
+  gcc_regex = (_GCC_FILE_LINE_RE +
+               r'.*this_method_does_not_take_(?P<wrong_args>\d+)_argument.*\n'
+               r'.*\n'
+               r'.*candidates are.*FunctionMocker<[^>]+A(?P<args>\d+)\)>')
+  clang_regex = (_CLANG_NON_GMOCK_FILE_LINE_RE +
+                 r'error: array size is negative\r?\n'
+                 r'(.*\n)*?'
+                 r'(?P=file):(?P=line):(?P=column): error: too few arguments '
+                 r'to function call, expected (?P<args>\d+), '
+                 r'have (?P<wrong_args>\d+)')
   diagnosis = """
 You are using MOCK_METHOD%(wrong_args)s to define a mock method that has
 %(args)s arguments. Use MOCK_METHOD%(args)s (or MOCK_CONST_METHOD%(args)s,
 MOCK_METHOD%(args)s_T, MOCK_CONST_METHOD%(args)s_T as appropriate) instead."""
   return _GenericDiagnoser('WMM', 'Wrong MOCK_METHODn Macro',
-                           regex, diagnosis, msg)
+                           [(gcc_regex, diagnosis),
+                            (clang_regex, diagnosis)],
+                           msg)
 
 
 def _WrongParenPositionDiagnoser(msg):
-  """Diagnoses the WPP disease, given the error messages by gcc."""
+  """Diagnoses the WPP disease, given the error messages by the compiler."""
 
-  regex = (_FILE_LINE_RE +
-           r'error:.*testing::internal::MockSpec<.* has no member named \''
-           r'(?P<method>\w+)\'')
+  gcc_regex = (_GCC_FILE_LINE_RE +
+               r'error:.*testing::internal::MockSpec<.* has no member named \''
+               r'(?P<method>\w+)\'')
+  clang_regex = (_CLANG_NON_GMOCK_FILE_LINE_RE +
+                 r'error: no member named \'(?P<method>\w+)\' in '
+                 r'\'testing::internal::MockSpec<.*>\'')
   diagnosis = """
 The closing parenthesis of ON_CALL or EXPECT_CALL should be *before*
 ".%(method)s".  For example, you should write:
@@ -437,7 +513,9 @@ The closing parenthesis of ON_CALL or EXPECT_CALL should be *before*
 instead of:
   EXPECT_CALL(my_mock, Foo(_).%(method)s(...));"""
   return _GenericDiagnoser('WPP', 'Wrong Parenthesis Position',
-                           regex, diagnosis, msg)
+                           [(gcc_regex, diagnosis),
+                            (clang_regex, diagnosis)],
+                           msg)
 
 
 _DIAGNOSERS = [
@@ -450,18 +528,17 @@ _DIAGNOSERS = [
     _NeedToUseSymbolDiagnoser,
     _OverloadedFunctionActionDiagnoser,
     _OverloadedFunctionMatcherDiagnoser,
-    _OverloadedMethodActionDiagnoser1,
-    _OverloadedMethodActionDiagnoser2,
-    _TypeInTemplatedBaseDiagnoser1,
-    _TypeInTemplatedBaseDiagnoser2,
-    _TypeInTemplatedBaseDiagnoser3,
+    _OverloadedMethodActionDiagnoser,
+    _TypeInTemplatedBaseDiagnoser,
     _WrongMockMethodMacroDiagnoser,
     _WrongParenPositionDiagnoser,
     ]
 
 
 def Diagnose(msg):
-  """Generates all possible diagnoses given the gcc error message."""
+  """Generates all possible diagnoses given the compiler error message."""
+
+  msg = re.sub(r'\x1b\[[^m]*m', '', msg)  # Strips all color formatting.
 
   diagnoses = []
   for diagnoser in _DIAGNOSERS:
@@ -493,7 +570,7 @@ def main():
     print """
 Uh-oh, I'm not smart enough to figure out what the problem is. :-(
 However...
-If you send your source code and gcc's error messages to
+If you send your source code and the compiler's error messages to
 googlemock@googlegroups.com, you can be helped and I can get smarter --
 win-win for us!"""
   else:
@@ -511,8 +588,8 @@ win-win for us!"""
       print d
     print """
 How did I do?  If you think I'm wrong or unhelpful, please send your
-source code and gcc's error messages to googlemock@googlegroups.com.  Then
-you can be helped and I can get smarter -- I promise I won't be upset!"""
+source code and compiler's error messages to googlemock@googlegroups.com.
+Then you can be helped and I can get smarter -- I promise I won't be upset!"""
 
 
 if __name__ == '__main__':
