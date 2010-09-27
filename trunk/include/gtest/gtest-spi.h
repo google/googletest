@@ -98,12 +98,12 @@ class GTEST_API_ SingleFailureChecker {
   // The constructor remembers the arguments.
   SingleFailureChecker(const TestPartResultArray* results,
                        TestPartResult::Type type,
-                       const char* substr);
+                       const string& substr);
   ~SingleFailureChecker();
  private:
   const TestPartResultArray* const results_;
   const TestPartResult::Type type_;
-  const String substr_;
+  const string substr_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(SingleFailureChecker);
 };
