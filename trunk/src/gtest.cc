@@ -618,23 +618,21 @@ AssertionResult HasOneFailure(const char* /* results_expr */,
     for (int i = 0; i < results.size(); i++) {
       msg << "\n" << results.GetTestPartResult(i);
     }
-    return AssertionFailure(msg);
+    return AssertionFailure() << msg;
   }
 
   const TestPartResult& r = results.GetTestPartResult(0);
   if (r.type() != type) {
-    msg << "Expected: " << expected << "\n"
-        << "  Actual:\n"
-        << r;
-    return AssertionFailure(msg);
+    return AssertionFailure() << "Expected: " << expected << "\n"
+                              << "  Actual:\n"
+                              << r;
   }
 
   if (strstr(r.message(), substr.c_str()) == NULL) {
-    msg << "Expected: " << expected << " containing \""
-        << substr << "\"\n"
-        << "  Actual:\n"
-        << r;
-    return AssertionFailure(msg);
+    return AssertionFailure() << "Expected: " << expected << " containing \""
+                              << substr << "\"\n"
+                              << "  Actual:\n"
+                              << r;
   }
 
   return AssertionSuccess();
@@ -1011,7 +1009,7 @@ AssertionResult EqFailure(const char* expected_expression,
     msg << "\nWhich is: " << expected_value;
   }
 
-  return AssertionFailure(msg);
+  return AssertionFailure() << msg;
 }
 
 // Constructs a failure message for Boolean assertions such as EXPECT_TRUE.
@@ -1041,13 +1039,12 @@ AssertionResult DoubleNearPredFormat(const char* expr1,
 
   // TODO(wan): do not print the value of an expression if it's
   // already a literal.
-  Message msg;
-  msg << "The difference between " << expr1 << " and " << expr2
+  return AssertionFailure()
+      << "The difference between " << expr1 << " and " << expr2
       << " is " << diff << ", which exceeds " << abs_error_expr << ", where\n"
       << expr1 << " evaluates to " << val1 << ",\n"
       << expr2 << " evaluates to " << val2 << ", and\n"
       << abs_error_expr << " evaluates to " << abs_error << ".";
-  return AssertionFailure(msg);
 }
 
 
@@ -1080,12 +1077,10 @@ AssertionResult FloatingPointLE(const char* expr1,
   val2_ss << std::setprecision(std::numeric_limits<RawType>::digits10 + 2)
           << val2;
 
-  Message msg;
-  msg << "Expected: (" << expr1 << ") <= (" << expr2 << ")\n"
+  return AssertionFailure()
+      << "Expected: (" << expr1 << ") <= (" << expr2 << ")\n"
       << "  Actual: " << StringStreamToString(&val1_ss) << " vs "
       << StringStreamToString(&val2_ss);
-
-  return AssertionFailure(msg);
 }
 
 }  // namespace internal
@@ -1132,11 +1127,10 @@ AssertionResult CmpHelper##op_name(const char* expr1, const char* expr2, \
   if (val1 op val2) {\
     return AssertionSuccess();\
   } else {\
-    Message msg;\
-    msg << "Expected: (" << expr1 << ") " #op " (" << expr2\
+    return AssertionFailure() \
+        << "Expected: (" << expr1 << ") " #op " (" << expr2\
         << "), actual: " << FormatForComparisonFailureMessage(val1, val2)\
         << " vs " << FormatForComparisonFailureMessage(val2, val1);\
-    return AssertionFailure(msg);\
   }\
 }
 
@@ -1198,11 +1192,9 @@ AssertionResult CmpHelperSTRNE(const char* s1_expression,
   if (!String::CStringEquals(s1, s2)) {
     return AssertionSuccess();
   } else {
-    Message msg;
-    msg << "Expected: (" << s1_expression << ") != ("
-        << s2_expression << "), actual: \""
-        << s1 << "\" vs \"" << s2 << "\"";
-    return AssertionFailure(msg);
+    return AssertionFailure() << "Expected: (" << s1_expression << ") != ("
+                              << s2_expression << "), actual: \""
+                              << s1 << "\" vs \"" << s2 << "\"";
   }
 }
 
@@ -1214,11 +1206,10 @@ AssertionResult CmpHelperSTRCASENE(const char* s1_expression,
   if (!String::CaseInsensitiveCStringEquals(s1, s2)) {
     return AssertionSuccess();
   } else {
-    Message msg;
-    msg << "Expected: (" << s1_expression << ") != ("
+    return AssertionFailure()
+        << "Expected: (" << s1_expression << ") != ("
         << s2_expression << ") (ignoring case), actual: \""
         << s1 << "\" vs \"" << s2 << "\"";
-    return AssertionFailure(msg);
   }
 }
 
@@ -1267,13 +1258,12 @@ AssertionResult IsSubstringImpl(
 
   const bool is_wide_string = sizeof(needle[0]) > 1;
   const char* const begin_string_quote = is_wide_string ? "L\"" : "\"";
-  return AssertionFailure(
-      Message()
+  return AssertionFailure()
       << "Value of: " << needle_expr << "\n"
       << "  Actual: " << begin_string_quote << needle << "\"\n"
       << "Expected: " << (expected_to_be_substring ? "" : "not ")
       << "a substring of " << haystack_expr << "\n"
-      << "Which is: " << begin_string_quote << haystack << "\"");
+      << "Which is: " << begin_string_quote << haystack << "\"";
 }
 
 }  // namespace
@@ -1369,11 +1359,9 @@ AssertionResult HRESULTFailureHelper(const char* expr,
 #endif  // GTEST_OS_WINDOWS_MOBILE
 
   const String error_hex(String::Format("0x%08X ", hr));
-  Message msg;
-  msg << "Expected: " << expr << " " << expected << ".\n"
+  return ::testing::AssertionFailure()
+      << "Expected: " << expr << " " << expected << ".\n"
       << "  Actual: " << error_hex << error_text << "\n";
-
-  return ::testing::AssertionFailure(msg);
 }
 
 }  // namespace
@@ -1584,12 +1572,10 @@ AssertionResult CmpHelperSTRNE(const char* s1_expression,
     return AssertionSuccess();
   }
 
-  Message msg;
-  msg << "Expected: (" << s1_expression << ") != ("
-      << s2_expression << "), actual: "
-      << String::ShowWideCStringQuoted(s1)
-      << " vs " << String::ShowWideCStringQuoted(s2);
-  return AssertionFailure(msg);
+  return AssertionFailure() << "Expected: (" << s1_expression << ") != ("
+                            << s2_expression << "), actual: "
+                            << String::ShowWideCStringQuoted(s1)
+                            << " vs " << String::ShowWideCStringQuoted(s2);
 }
 
 // Compares two C strings, ignoring case.  Returns true iff they have
