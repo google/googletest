@@ -31,6 +31,35 @@ list can help you decide whether it is for you too.
   * `SCOPED_TRACE` helps you understand the context of an assertion failure when it comes from inside a sub-routine or loop.
   * You can decide which tests to run using name patterns.  This saves time when you want to quickly reproduce a test failure.
 
+== Why is it not recommended to install a pre-compiled copy of Google Test (for example, into /usr/local)? ==
+
+In the early days, we said that you could install 
+compiled Google Test libraries on `*`nix systems using `make install`.
+Then every user of your machine can write tests without 
+recompiling Google Test.
+
+This seemed like a good idea, but it has a 
+got-cha: every user needs to compile his tests using the _same_ compiler 
+flags used to compile the installed Google Test libraries; otherwise 
+he may run into undefined behaviors (i.e. the tests can behave 
+strangely and may even crash for no obvious reasons).
+
+Why?  Because C++ has this thing called the One-Definition Rule: if 
+two C++ source files contain different definitions of the same 
+class/function/variable, and you link them together, you violate the 
+rule.  The linker may or may not catch the error (in many cases it's 
+not required by the C++ standard to catch the violation).  If it 
+doesn't, you get strange run-time behaviors that are unexpected and 
+hard to debug. 
+
+If you compile Google Test and your test code using different compiler 
+flags, they may see different definitions of the same 
+class/function/variable (e.g. due to the use of `#if` in Google Test). 
+Therefore, for your sanity, we recommend to avoid installing pre-compiled
+Google Test libraries.  Instead, each project should compile 
+Google Test itself such that it can be sure that the same flags are 
+used for both Google Test and the tests.
+
 == How do I generate 64-bit binaries on Windows (using Visual Studio 2008)? ==
 
 (Answered by Trevor Robinson)
