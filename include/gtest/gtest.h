@@ -1385,11 +1385,10 @@ AssertionResult CmpHelper##op_name(const char* expr1, const char* expr2, \
   if (val1 op val2) {\
     return AssertionSuccess();\
   } else {\
-    Message msg;\
-    msg << "Expected: (" << expr1 << ") " #op " (" << expr2\
+    return AssertionFailure() \
+        << "Expected: (" << expr1 << ") " #op " (" << expr2\
         << "), actual: " << FormatForComparisonFailureMessage(val1, val2)\
         << " vs " << FormatForComparisonFailureMessage(val2, val1);\
-    return AssertionFailure(msg);\
   }\
 }\
 GTEST_API_ AssertionResult CmpHelper##op_name(\
