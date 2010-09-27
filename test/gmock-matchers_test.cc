@@ -123,6 +123,7 @@ using testing::internal::DummyMatchResultListener;
 using testing::internal::ExplainMatchFailureTupleTo;
 using testing::internal::FloatingEqMatcher;
 using testing::internal::FormatMatcherDescription;
+using testing::internal::IsReadableTypeName;
 using testing::internal::JoinAsTuple;
 using testing::internal::RE;
 using testing::internal::StreamMatchResultListener;
@@ -162,6 +163,14 @@ class GreaterThanMatcher : public MatcherInterface<int> {
 
 Matcher<int> GreaterThan(int n) {
   return MakeMatcher(new GreaterThanMatcher(n));
+}
+
+string OfType(const string& type_name) {
+#if GTEST_HAS_RTTI
+  return " (of type " + type_name + ")";
+#else
+  return "";
+#endif
 }
 
 // Returns the description of the given matcher.
@@ -2383,7 +2392,7 @@ TEST(MatcherAssertionTest, WorksWhenMatcherIsSatisfied) {
 TEST(MatcherAssertionTest, WorksWhenMatcherIsNotSatisfied) {
   // 'n' must be static as it is used in an EXPECT_FATAL_FAILURE(),
   // which cannot reference auto variables.
-  static int n;
+  static unsigned short n;  // NOLINT
   n = 5;
 
   // VC++ prior to version 8.0 SP1 has a bug where it will not see any
@@ -2394,13 +2403,13 @@ TEST(MatcherAssertionTest, WorksWhenMatcherIsNotSatisfied) {
   EXPECT_FATAL_FAILURE(ASSERT_THAT(n, ::testing::Gt(10)),
                        "Value of: n\n"
                        "Expected: is > 10\n"
-                       "  Actual: 5");
+                       "  Actual: 5" + OfType("unsigned short"));
   n = 0;
   EXPECT_NONFATAL_FAILURE(
       EXPECT_THAT(n, ::testing::AllOf(::testing::Le(7), ::testing::Ge(5))),
       "Value of: n\n"
       "Expected: (is <= 7) and (is >= 5)\n"
-      "  Actual: 0");
+      "  Actual: 0" + OfType("unsigned short"));
 }
 
 // Tests that ASSERT_THAT() and EXPECT_THAT() work when the argument
@@ -2416,7 +2425,7 @@ TEST(MatcherAssertionTest, WorksForByRefArguments) {
                        "Expected: does not reference the variable @");
   // Tests the "Actual" part.
   EXPECT_FATAL_FAILURE(ASSERT_THAT(n, ::testing::Not(::testing::Ref(n))),
-                       "Actual: 0, which is located @");
+                       "Actual: 0" + OfType("int") + ", which is located @");
 }
 
 #if !GTEST_OS_SYMBIAN
@@ -2439,12 +2448,16 @@ TEST(MatcherAssertionTest, WorksForMonomorphicMatcher) {
 
   Matcher<const string&> ends_with_ok = EndsWith("ok");
   ASSERT_THAT("book", ends_with_ok);
-
+  const string bad = "bad";
+  EXPECT_NONFATAL_FAILURE(EXPECT_THAT(bad, ends_with_ok),
+                          "Value of: bad\n"
+                          "Expected: ends with \"ok\"\n"
+                          "  Actual: \"bad\"");
   Matcher<int> is_greater_than_5 = Gt(5);
   EXPECT_NONFATAL_FAILURE(EXPECT_THAT(5, is_greater_than_5),
                           "Value of: 5\n"
                           "Expected: is > 5\n"
-                          "  Actual: 5");
+                          "  Actual: 5" + OfType("int"));
 }
 #endif  // !GTEST_OS_SYMBIAN
 
@@ -2768,16 +2781,16 @@ TEST(PointeeTest, CanExplainMatchResult) {
 
   EXPECT_EQ("", Explain(m, static_cast<const string*>(NULL)));
 
-  const Matcher<int*> m2 = Pointee(GreaterThan(1));
-  int n = 3;
-  EXPECT_EQ("which points to 3, which is 2 more than 1",
+  const Matcher<long*> m2 = Pointee(GreaterThan(1));  // NOLINT
+  long n = 3;  // NOLINT
+  EXPECT_EQ("which points to 3" + OfType("long") + ", which is 2 more than 1",
             Explain(m2, &n));
 }
 
 TEST(PointeeTest, AlwaysExplainsPointee) {
   const Matcher<int*> m = Pointee(0);
   int n = 42;
-  EXPECT_EQ("which points to 42", Explain(m, &n));
+  EXPECT_EQ("which points to 42" + OfType("int"), Explain(m, &n));
 }
 
 // An uncopyable class.
@@ -2914,10 +2927,12 @@ TEST(FieldTest, CanExplainMatchResult) {
 
   AStruct a;
   a.x = 1;
-  EXPECT_EQ("whose given field is 1", Explain(m, a));
+  EXPECT_EQ("whose given field is 1" + OfType("int"), Explain(m, a));
 
   m = Field(&AStruct::x, GreaterThan(0));
-  EXPECT_EQ("whose given field is 1, which is 1 more than 0", Explain(m, a));
+  EXPECT_EQ(
+      "whose given field is 1" + OfType("int") + ", which is 1 more than 0",
+      Explain(m, a));
 }
 
 // Tests that Field() works when the argument is a pointer to const.
@@ -2984,11 +2999,12 @@ TEST(FieldForPointerTest, CanExplainMatchResult) {
   AStruct a;
   a.x = 1;
   EXPECT_EQ("", Explain(m, static_cast<const AStruct*>(NULL)));
-  EXPECT_EQ("which points to an object whose given field is 1", Explain(m, &a));
+  EXPECT_EQ("which points to an object whose given field is 1" + OfType("int"),
+            Explain(m, &a));
 
   m = Field(&AStruct::x, GreaterThan(0));
-  EXPECT_EQ("which points to an object whose given field is 1, "
-            "which is 1 more than 0", Explain(m, &a));
+  EXPECT_EQ("which points to an object whose given field is 1" + OfType("int") +
+            ", which is 1 more than 0", Explain(m, &a));
 }
 
 // A user-defined class for testing Property().
@@ -3118,10 +3134,12 @@ TEST(PropertyTest, CanExplainMatchResult) {
 
   AClass a;
   a.set_n(1);
-  EXPECT_EQ("whose given property is 1", Explain(m, a));
+  EXPECT_EQ("whose given property is 1" + OfType("int"), Explain(m, a));
 
   m = Property(&AClass::n, GreaterThan(0));
-  EXPECT_EQ("whose given property is 1, which is 1 more than 0", Explain(m, a));
+  EXPECT_EQ(
+      "whose given property is 1" + OfType("int") + ", which is 1 more than 0",
+      Explain(m, a));
 }
 
 // Tests that Property() works when the argument is a pointer to const.
@@ -3198,12 +3216,14 @@ TEST(PropertyForPointerTest, CanExplainMatchResult) {
   AClass a;
   a.set_n(1);
   EXPECT_EQ("", Explain(m, static_cast<const AClass*>(NULL)));
-  EXPECT_EQ("which points to an object whose given property is 1",
-            Explain(m, &a));
+  EXPECT_EQ(
+      "which points to an object whose given property is 1" + OfType("int"),
+      Explain(m, &a));
 
   m = Property(&AClass::n, GreaterThan(0));
-  EXPECT_EQ("which points to an object whose given property is 1, "
-            "which is 1 more than 0", Explain(m, &a));
+  EXPECT_EQ("which points to an object whose given property is 1" +
+            OfType("int") + ", which is 1 more than 0",
+            Explain(m, &a));
 }
 
 // Tests ResultOf.
@@ -3234,12 +3254,12 @@ int IntFunction(int input) { return input == 42 ? 80 : 90; }
 
 TEST(ResultOfTest, CanExplainMatchResult) {
   Matcher<int> matcher = ResultOf(&IntFunction, Ge(85));
-  EXPECT_EQ("which is mapped by the given callable to 90",
+  EXPECT_EQ("which is mapped by the given callable to 90" + OfType("int"),
             Explain(matcher, 36));
 
   matcher = ResultOf(&IntFunction, GreaterThan(85));
-  EXPECT_EQ("which is mapped by the given callable to 90, "
-            "which is 5 more than 85", Explain(matcher, 36));
+  EXPECT_EQ("which is mapped by the given callable to 90" + OfType("int") +
+            ", which is 5 more than 85", Explain(matcher, 36));
 }
 
 // Tests that ResultOf(f, ...) compiles and works as expected when f(x)
@@ -3253,9 +3273,9 @@ TEST(ResultOfTest, WorksForNonReferenceResults) {
 
 // Tests that ResultOf(f, ...) compiles and works as expected when f(x)
 // returns a reference to non-const.
-double& DoubleFunction(double& input) { return input; }
+double& DoubleFunction(double& input) { return input; }  // NOLINT
 
-Uncopyable& RefUncopyableFunction(Uncopyable& obj) {
+Uncopyable& RefUncopyableFunction(Uncopyable& obj) {  // NOLINT
   return obj;
 }
 
@@ -3304,7 +3324,7 @@ TEST(ResultOfTest, WorksForCompatibleMatcherTypes) {
 // a NULL function pointer.
 TEST(ResultOfDeathTest, DiesOnNullFunctionPointers) {
   EXPECT_DEATH_IF_SUPPORTED(
-      ResultOf(static_cast<string(*)(int)>(NULL), Eq(string("foo"))),
+      ResultOf(static_cast<string(*)(int dummy)>(NULL), Eq(string("foo"))),
                "NULL function pointer is passed into ResultOf\\(\\)\\.");
 }
 
@@ -3682,6 +3702,31 @@ TEST(ContainerEqExtraTest, CopiesNativeArrayParameter) {
   EXPECT_THAT(a1, m);
 }
 
+// Tests IsReadableTypeName().
+
+TEST(IsReadableTypeNameTest, ReturnsTrueForShortNames) {
+  EXPECT_TRUE(IsReadableTypeName("int"));
+  EXPECT_TRUE(IsReadableTypeName("const unsigned char*"));
+  EXPECT_TRUE(IsReadableTypeName("MyMap<int, void*>"));
+  EXPECT_TRUE(IsReadableTypeName("void (*)(int, bool)"));
+}
+
+TEST(IsReadableTypeNameTest, ReturnsTrueForLongNonTemplateNonFunctionNames) {
+  EXPECT_TRUE(IsReadableTypeName("my_long_namespace::MyClassName"));
+  EXPECT_TRUE(IsReadableTypeName("int [5][6][7][8][9][10][11]"));
+  EXPECT_TRUE(IsReadableTypeName("my_namespace::MyOuterClass::MyInnerClass"));
+}
+
+TEST(IsReadableTypeNameTest, ReturnsFalseForLongTemplateNames) {
+  EXPECT_FALSE(
+      IsReadableTypeName("basic_string<char, std::char_traits<char> >"));
+  EXPECT_FALSE(IsReadableTypeName("std::vector<int, std::alloc_traits<int> >"));
+}
+
+TEST(IsReadableTypeNameTest, ReturnsFalseForLongFunctionTypeNames) {
+  EXPECT_FALSE(IsReadableTypeName("void (&)(int, bool, char, float)"));
+}
+
 // Tests JoinAsTuple().
 
 TEST(JoinAsTupleTest, JoinsEmptyTuple) {
@@ -3772,7 +3817,7 @@ TEST(EachTest, ExplainsMatchResultCorrectly) {
   Matcher<set<int> > m = Each(2);
   EXPECT_EQ("", Explain(m, a));
 
-  Matcher<const int(&)[1]> n = Each(1);
+  Matcher<const int(&)[1]> n = Each(1);  // NOLINT
 
   const int b[1] = { 1 };
   EXPECT_EQ("", Explain(n, b));

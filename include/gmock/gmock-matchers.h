@@ -461,6 +461,16 @@ inline void PrintIfNotEmpty(const internal::string& explanation,
   }
 }
 
+// Returns true if the given type name is easy to read by a human.
+// This is used to decide whether printing the type of a value might
+// be helpful.
+inline bool IsReadableTypeName(const string& type_name) {
+  // We consider a type name readable if it's short or doesn't contain
+  // a template or function type.
+  return (type_name.length() <= 20 ||
+          type_name.find_first_of("<(") == string::npos);
+}
+
 // Matches the value against the given matcher, prints the value and explains
 // the match result to the listener. Returns the match result.
 // 'listener' must not be NULL.
@@ -479,6 +489,11 @@ bool MatchPrintAndExplain(Value& value, const Matcher<T>& matcher,
   const bool match = matcher.MatchAndExplain(value, &inner_listener);
 
   UniversalPrint(value, listener->stream());
+#if GTEST_HAS_RTTI
+  const string& type_name = GetTypeName<Value>();
+  if (IsReadableTypeName(type_name))
+    *listener->stream() << " (of type " << type_name << ")";
+#endif
   PrintIfNotEmpty(inner_listener.str(), listener->stream());
 
   return match;
