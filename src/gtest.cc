@@ -607,7 +607,7 @@ AssertionResult HasOneFailure(const char* /* results_expr */,
                               const char* /* substr_expr */,
                               const TestPartResultArray& results,
                               TestPartResult::Type type,
-                              const char* substr) {
+                              const string& substr) {
   const String expected(type == TestPartResult::kFatalFailure ?
                         "1 fatal failure" :
                         "1 non-fatal failure");
@@ -629,7 +629,7 @@ AssertionResult HasOneFailure(const char* /* results_expr */,
     return AssertionFailure(msg);
   }
 
-  if (strstr(r.message(), substr) == NULL) {
+  if (strstr(r.message(), substr.c_str()) == NULL) {
     msg << "Expected: " << expected << " containing \""
         << substr << "\"\n"
         << "  Actual:\n"
@@ -646,7 +646,7 @@ AssertionResult HasOneFailure(const char* /* results_expr */,
 SingleFailureChecker:: SingleFailureChecker(
     const TestPartResultArray* results,
     TestPartResult::Type type,
-    const char* substr)
+    const string& substr)
     : results_(results),
       type_(type),
       substr_(substr) {}
@@ -656,7 +656,7 @@ SingleFailureChecker:: SingleFailureChecker(
 // type and contains the given substring.  If that's not the case, a
 // non-fatal failure will be generated.
 SingleFailureChecker::~SingleFailureChecker() {
-  EXPECT_PRED_FORMAT3(HasOneFailure, *results_, type_, substr_.c_str());
+  EXPECT_PRED_FORMAT3(HasOneFailure, *results_, type_, substr_);
 }
 
 DefaultGlobalTestPartResultReporter::DefaultGlobalTestPartResultReporter(
