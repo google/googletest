@@ -288,7 +288,7 @@ Google Test is compact, so most users can build and link it as a
 static library for the simplicity.  You can choose to use Google Test
 as a shared library (known as a DLL on Windows) if you prefer.
 
-To compile gtest as a shared library, add
+To compile *gtest* as a shared library, add
 
   -DGTEST_CREATE_SHARED_LIBRARY=1
 
@@ -296,11 +296,19 @@ to the compiler flags.  You'll also need to tell the linker to produce
 a shared library instead - consult your linker's manual for how to do
 it.
 
-To compile your tests that use the gtest shared library, add
+To compile your *tests* that use the gtest shared library, add
 
   -DGTEST_LINKED_AS_SHARED_LIBRARY=1
 
 to the compiler flags.
+
+Note: while the above steps aren't technically necessary today when
+using some compilers (e.g. GCC), they may become necessary in the
+future, if we decide to improve the speed of loading the library (see
+http://gcc.gnu.org/wiki/Visibility for details).  Therefore you are
+recommended to always add the above flags when using Google Test as a
+shared library.  Otherwise a future release of Google Test may break
+your build script.
 
 ### Avoiding Macro Name Clashes ###
 
