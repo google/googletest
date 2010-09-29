@@ -38,6 +38,8 @@ import sys
 
 _VERSION = '1.0.3'
 
+_EMAIL = 'googlemock@googlegroups.com'
+
 _COMMON_GMOCK_SYMBOLS = [
     # Matchers
     '_',
@@ -563,16 +565,17 @@ def main():
   diagnoses = Diagnose(msg)
   count = len(diagnoses)
   if not count:
-    print '\nGcc complained:'
-    print '8<------------------------------------------------------------'
-    print msg
-    print '------------------------------------------------------------>8'
-    print """
+    print ("""
+Your compiler complained:
+8<------------------------------------------------------------
+%s
+------------------------------------------------------------>8
+
 Uh-oh, I'm not smart enough to figure out what the problem is. :-(
 However...
 If you send your source code and the compiler's error messages to
-googlemock@googlegroups.com, you can be helped and I can get smarter --
-win-win for us!"""
+%s, you can be helped and I can get smarter --
+win-win for us!""" % (msg, _EMAIL))
   else:
     print '------------------------------------------------------------'
     print 'Your code appears to have the following',
@@ -586,10 +589,11 @@ win-win for us!"""
       if count > 1:
         print '\n#%s:' % (i,)
       print d
-    print """
+    print ("""
 How did I do?  If you think I'm wrong or unhelpful, please send your
-source code and compiler's error messages to googlemock@googlegroups.com.
-Then you can be helped and I can get smarter -- I promise I won't be upset!"""
+source code and the compiler's error messages to %s.
+Then you can be helped and I can get smarter -- I promise I won't be upset!""" %
+           _EMAIL)
 
 
 if __name__ == '__main__':
