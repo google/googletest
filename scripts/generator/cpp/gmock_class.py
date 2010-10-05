@@ -31,11 +31,17 @@ __author__ = 'nnorwitz@google.com (Neal Norwitz)'
 
 import os
 import re
-import sets
 import sys
 
 from cpp import ast
 from cpp import utils
+
+# Preserve compatibility with Python 2.3.
+try:
+  _dummy = set
+except NameError:
+  import sets
+  set = sets.Set
 
 _VERSION = (1, 0, 1)  # The version of this script.
 # How many spaces to indent.  Can set me with the INDENT environment variable.
@@ -45,6 +51,7 @@ _INDENT = 2
 def _GenerateMethods(output_lines, source, class_node):
   function_type = ast.FUNCTION_VIRTUAL | ast.FUNCTION_PURE_VIRTUAL
   ctor_or_dtor = ast.FUNCTION_CTOR | ast.FUNCTION_DTOR
+  indent = ' ' * _INDENT
 
   for node in class_node.body:
     # We only care about virtual functions.
@@ -62,11 +69,20 @@ def _GenerateMethods(output_lines, source, class_node):
         if node.return_type.modifiers:
           modifiers = ' '.join(node.return_type.modifiers) + ' '
         return_type = modifiers + node.return_type.name
+        template_args = [arg.name for arg in node.return_type.templated_types]
+        if template_args:
+          return_type += '<' + ', '.join(template_args) + '>'
+          if len(template_args) > 1:
+            for line in [
+                '// The following line won\'t really compile, as the return',
+                '// type has multiple template arguments.  To fix it, use a',
+                '// typedef for the return type.']:
+              output_lines.append(indent + line)
         if node.return_type.pointer:
           return_type += '*'
         if node.return_type.reference:
           return_type += '&'
-      prefix = 'MOCK_%sMETHOD%d' % (const, len(node.parameters))
+      mock_method_macro = 'MOCK_%sMETHOD%d' % (const, len(node.parameters))
       args = ''
       if node.parameters:
         # Get the full text of the parameters from the start
@@ -81,15 +97,13 @@ def _GenerateMethods(output_lines, source, class_node):
         # intervening whitespace, e.g.: int\nBar
         args = re.sub('  +', ' ', args_strings.replace('\n', ' '))
 
-      # Create the prototype.
-      indent = ' ' * _INDENT
-      line = ('%s%s(%s,\n%s%s(%s));' %
-              (indent, prefix, node.name, indent*3, return_type, args))
-      output_lines.append(line)
+      # Create the mock method definition.
+      output_lines.extend(['%s%s(%s,' % (indent, mock_method_macro, node.name),
+                           '%s%s(%s));' % (indent*3, return_type, args)])
 
 
 def _GenerateMocks(filename, source, ast_list, desired_class_names):
-  processed_class_names = sets.Set()
+  processed_class_names = set()
   lines = []
   for node in ast_list:
     if (isinstance(node, ast.Class) and node.body and
@@ -156,7 +170,7 @@ def main(argv=sys.argv):
   filename = argv[1]
   desired_class_names = None  # None means all classes in the source file.
   if len(argv) >= 3:
-    desired_class_names = sets.Set(argv[2:])
+    desired_class_names = set(argv[2:])
   source = utils.ReadFile(filename)
   if source is None:
     return 1
