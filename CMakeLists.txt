@@ -1,8 +1,5 @@
 ########################################################################
-# Experimental CMake build script for Google Mock.
-#
-# Consider this a prototype.  It will change drastically.  For now,
-# this is only for people on the cutting edge.
+# CMake build script for Google Mock.
 #
 # To run the tests for Google Mock itself on Linux, use 'make test' or
 # ctest.  You can select which tests to run using 'ctest -R regex'.
@@ -12,7 +9,7 @@
 # make it prominent in the GUI.
 option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
 
-# Forses BUILD_SHARED_LIBS to OFF as Google Mock currently does not support
+# Forces BUILD_SHARED_LIBS to OFF as Google Mock currently does not support
 # working in a DLL.
 # TODO(vladl@google.com): Implement building gMock as a DLL.
 set(BUILD_SHARED_LIBS OFF)
@@ -26,6 +23,7 @@ else()
   set(gtest_dir ../gtest)
 endif()
 
+# Defines pre_project_set_up_hermetic_build() and set_up_hermetic_build().
 include("${gtest_dir}/cmake/hermetic_build.cmake" OPTIONAL)
 
 if (COMMAND pre_project_set_up_hermetic_build)
@@ -51,18 +49,16 @@ if (COMMAND set_up_hermetic_build)
   set_up_hermetic_build()
 endif()
 
-# Defines functions and variables used by Google Mock.
-include("${gtest_dir}/cmake/internal_utils.cmake")
-
-# Google Test also calls this function from add_subdirectory,
-# although its changes will not affect things at the current scope.
-fix_default_settings()  # Defined in internal_utils.cmake.
-
 # Instructs CMake to process Google Test's CMakeLists.txt and add its
 # targets to the current scope.  We are placing Google Test's binary
-# directory in a subdirectory of our own as VC compilation may break if they
-# are the same (the default).
+# directory in a subdirectory of our own as VC compilation may break
+# if they are the same (the default).
 add_subdirectory("${gtest_dir}" "${gmock_BINARY_DIR}/gtest")
+
+# Although Google Test's CMakeLists.txt calls this function, the
+# changes there don't affect the current scope.  Therefore we have to
+# call it again here.
+config_compiler_and_linker()  # from ${gtest_dir}/cmake/internal_utils.cmake
 
 # Adds Google Mock's and Google Test's header directories to the search path.
 include_directories("${gmock_SOURCE_DIR}/include"
