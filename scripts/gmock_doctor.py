@@ -102,6 +102,7 @@ _COMMON_GMOCK_SYMBOLS = [
     'ReturnRef',
     'SaveArg',
     'SetArgReferee',
+    'SetArgPointee',
     'SetArgumentPointee',
     'SetArrayArgument',
     'SetErrnoAndReturn',

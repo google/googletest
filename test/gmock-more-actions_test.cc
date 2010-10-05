@@ -60,7 +60,6 @@ using testing::ReturnArg;
 using testing::ReturnPointee;
 using testing::SaveArg;
 using testing::SetArgReferee;
-using testing::SetArgumentPointee;
 using testing::StaticAssertTypeEq;
 using testing::Unused;
 using testing::WithArg;

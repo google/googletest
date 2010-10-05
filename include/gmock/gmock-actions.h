@@ -1016,6 +1016,15 @@ template <size_t N, typename T>
 PolymorphicAction<
   internal::SetArgumentPointeeAction<
     N, T, internal::IsAProtocolMessage<T>::value> >
+SetArgPointee(const T& x) {
+  return MakePolymorphicAction(internal::SetArgumentPointeeAction<
+      N, T, internal::IsAProtocolMessage<T>::value>(x));
+}
+// The following version is DEPRECATED.
+template <size_t N, typename T>
+PolymorphicAction<
+  internal::SetArgumentPointeeAction<
+    N, T, internal::IsAProtocolMessage<T>::value> >
 SetArgumentPointee(const T& x) {
   return MakePolymorphicAction(internal::SetArgumentPointeeAction<
       N, T, internal::IsAProtocolMessage<T>::value>(x));

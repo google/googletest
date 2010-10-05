@@ -58,7 +58,7 @@ using testing::DoAll;
 using testing::Invoke;
 using testing::Return;
 using testing::ReturnNew;
-using testing::SetArgumentPointee;
+using testing::SetArgPointee;
 using testing::StaticAssertTypeEq;
 using testing::Unused;
 using testing::WithArgs;
@@ -419,7 +419,7 @@ TEST(WithArgsTest, VoidAction) {
 // Tests DoAll(a1, a2).
 TEST(DoAllTest, TwoActions) {
   int n = 0;
-  Action<int(int*)> a = DoAll(SetArgumentPointee<0>(1),  // NOLINT
+  Action<int(int*)> a = DoAll(SetArgPointee<0>(1),  // NOLINT
                               Return(2));
   EXPECT_EQ(2, a.Perform(make_tuple(&n)));
   EXPECT_EQ(1, n);
@@ -428,8 +428,8 @@ TEST(DoAllTest, TwoActions) {
 // Tests DoAll(a1, a2, a3).
 TEST(DoAllTest, ThreeActions) {
   int m = 0, n = 0;
-  Action<int(int*, int*)> a = DoAll(SetArgumentPointee<0>(1),  // NOLINT
-                                    SetArgumentPointee<1>(2),
+  Action<int(int*, int*)> a = DoAll(SetArgPointee<0>(1),  // NOLINT
+                                    SetArgPointee<1>(2),
                                     Return(3));
   EXPECT_EQ(3, a.Perform(make_tuple(&m, &n)));
   EXPECT_EQ(1, m);
@@ -441,9 +441,9 @@ TEST(DoAllTest, FourActions) {
   int m = 0, n = 0;
   char ch = '\0';
   Action<int(int*, int*, char*)> a =  // NOLINT
-      DoAll(SetArgumentPointee<0>(1),
-            SetArgumentPointee<1>(2),
-            SetArgumentPointee<2>('a'),
+      DoAll(SetArgPointee<0>(1),
+            SetArgPointee<1>(2),
+            SetArgPointee<2>('a'),
             Return(3));
   EXPECT_EQ(3, a.Perform(make_tuple(&m, &n, &ch)));
   EXPECT_EQ(1, m);
@@ -456,10 +456,10 @@ TEST(DoAllTest, FiveActions) {
   int m = 0, n = 0;
   char a = '\0', b = '\0';
   Action<int(int*, int*, char*, char*)> action =  // NOLINT
-      DoAll(SetArgumentPointee<0>(1),
-            SetArgumentPointee<1>(2),
-            SetArgumentPointee<2>('a'),
-            SetArgumentPointee<3>('b'),
+      DoAll(SetArgPointee<0>(1),
+            SetArgPointee<1>(2),
+            SetArgPointee<2>('a'),
+            SetArgPointee<3>('b'),
             Return(3));
   EXPECT_EQ(3, action.Perform(make_tuple(&m, &n, &a, &b)));
   EXPECT_EQ(1, m);
@@ -473,11 +473,11 @@ TEST(DoAllTest, SixActions) {
   int m = 0, n = 0;
   char a = '\0', b = '\0', c = '\0';
   Action<int(int*, int*, char*, char*, char*)> action =  // NOLINT
-      DoAll(SetArgumentPointee<0>(1),
-            SetArgumentPointee<1>(2),
-            SetArgumentPointee<2>('a'),
-            SetArgumentPointee<3>('b'),
-            SetArgumentPointee<4>('c'),
+      DoAll(SetArgPointee<0>(1),
+            SetArgPointee<1>(2),
+            SetArgPointee<2>('a'),
+            SetArgPointee<3>('b'),
+            SetArgPointee<4>('c'),
             Return(3));
   EXPECT_EQ(3, action.Perform(make_tuple(&m, &n, &a, &b, &c)));
   EXPECT_EQ(1, m);
@@ -492,12 +492,12 @@ TEST(DoAllTest, SevenActions) {
   int m = 0, n = 0;
   char a = '\0', b = '\0', c = '\0', d = '\0';
   Action<int(int*, int*, char*, char*, char*, char*)> action =  // NOLINT
-      DoAll(SetArgumentPointee<0>(1),
-            SetArgumentPointee<1>(2),
-            SetArgumentPointee<2>('a'),
-            SetArgumentPointee<3>('b'),
-            SetArgumentPointee<4>('c'),
-            SetArgumentPointee<5>('d'),
+      DoAll(SetArgPointee<0>(1),
+            SetArgPointee<1>(2),
+            SetArgPointee<2>('a'),
+            SetArgPointee<3>('b'),
+            SetArgPointee<4>('c'),
+            SetArgPointee<5>('d'),
             Return(3));
   EXPECT_EQ(3, action.Perform(make_tuple(&m, &n, &a, &b, &c, &d)));
   EXPECT_EQ(1, m);
@@ -514,13 +514,13 @@ TEST(DoAllTest, EightActions) {
   char a = '\0', b = '\0', c = '\0', d = '\0', e = '\0';
   Action<int(int*, int*, char*, char*, char*, char*,  // NOLINT
              char*)> action =
-      DoAll(SetArgumentPointee<0>(1),
-            SetArgumentPointee<1>(2),
-            SetArgumentPointee<2>('a'),
-            SetArgumentPointee<3>('b'),
-            SetArgumentPointee<4>('c'),
-            SetArgumentPointee<5>('d'),
-            SetArgumentPointee<6>('e'),
+      DoAll(SetArgPointee<0>(1),
+            SetArgPointee<1>(2),
+            SetArgPointee<2>('a'),
+            SetArgPointee<3>('b'),
+            SetArgPointee<4>('c'),
+            SetArgPointee<5>('d'),
+            SetArgPointee<6>('e'),
             Return(3));
   EXPECT_EQ(3, action.Perform(make_tuple(&m, &n, &a, &b, &c, &d, &e)));
   EXPECT_EQ(1, m);
@@ -538,14 +538,14 @@ TEST(DoAllTest, NineActions) {
   char a = '\0', b = '\0', c = '\0', d = '\0', e = '\0', f = '\0';
   Action<int(int*, int*, char*, char*, char*, char*,  // NOLINT
              char*, char*)> action =
-      DoAll(SetArgumentPointee<0>(1),
-            SetArgumentPointee<1>(2),
-            SetArgumentPointee<2>('a'),
-            SetArgumentPointee<3>('b'),
-            SetArgumentPointee<4>('c'),
-            SetArgumentPointee<5>('d'),
-            SetArgumentPointee<6>('e'),
-            SetArgumentPointee<7>('f'),
+      DoAll(SetArgPointee<0>(1),
+            SetArgPointee<1>(2),
+            SetArgPointee<2>('a'),
+            SetArgPointee<3>('b'),
+            SetArgPointee<4>('c'),
+            SetArgPointee<5>('d'),
+            SetArgPointee<6>('e'),
+            SetArgPointee<7>('f'),
             Return(3));
   EXPECT_EQ(3, action.Perform(make_tuple(&m, &n, &a, &b, &c, &d, &e, &f)));
   EXPECT_EQ(1, m);
@@ -565,15 +565,15 @@ TEST(DoAllTest, TenActions) {
   char e = '\0', f = '\0', g = '\0';
   Action<int(int*, int*, char*, char*, char*, char*,  // NOLINT
              char*, char*, char*)> action =
-      DoAll(SetArgumentPointee<0>(1),
-            SetArgumentPointee<1>(2),
-            SetArgumentPointee<2>('a'),
-            SetArgumentPointee<3>('b'),
-            SetArgumentPointee<4>('c'),
-            SetArgumentPointee<5>('d'),
-            SetArgumentPointee<6>('e'),
-            SetArgumentPointee<7>('f'),
-            SetArgumentPointee<8>('g'),
+      DoAll(SetArgPointee<0>(1),
+            SetArgPointee<1>(2),
+            SetArgPointee<2>('a'),
+            SetArgPointee<3>('b'),
+            SetArgPointee<4>('c'),
+            SetArgPointee<5>('d'),
+            SetArgPointee<6>('e'),
+            SetArgPointee<7>('f'),
+            SetArgPointee<8>('g'),
             Return(3));
   EXPECT_EQ(3, action.Perform(make_tuple(&m, &n, &a, &b, &c, &d, &e, &f, &g)));
   EXPECT_EQ(1, m);

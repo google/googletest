@@ -44,7 +44,7 @@
 //      ReturnNull
 //      ReturnRef
 //      Assign
-//      SetArgumentPointee
+//      SetArgPointee
 //      SetArrayArgument
 //      SetErrnoAndReturn
 //      Invoke(function)
@@ -164,7 +164,7 @@ using testing::ResultOf;
 using testing::Return;
 using testing::ReturnNull;
 using testing::ReturnRef;
-using testing::SetArgumentPointee;
+using testing::SetArgPointee;
 using testing::SetArrayArgument;
 using testing::StartsWith;
 using testing::StrCaseEq;
@@ -281,12 +281,12 @@ TEST(LinkTest, TestAssign) {
   mock.VoidFromString(NULL);
 }
 
-// Tests the linkage of the SetArgumentPointee action.
-TEST(LinkTest, TestSetArgumentPointee) {
+// Tests the linkage of the SetArgPointee action.
+TEST(LinkTest, TestSetArgPointee) {
   Mock mock;
   char ch = 'x';
 
-  EXPECT_CALL(mock, VoidFromString(_)).WillOnce(SetArgumentPointee<0>('y'));
+  EXPECT_CALL(mock, VoidFromString(_)).WillOnce(SetArgPointee<0>('y'));
   mock.VoidFromString(&ch);
 }
 
@@ -381,7 +381,7 @@ TEST(LinkTest, TestDoAll) {
   char ch = 'x';
 
   EXPECT_CALL(mock, VoidFromString(_))
-      .WillOnce(DoAll(SetArgumentPointee<0>('y'), Return()));
+      .WillOnce(DoAll(SetArgPointee<0>('y'), Return()));
   mock.VoidFromString(&ch);
 }
 
