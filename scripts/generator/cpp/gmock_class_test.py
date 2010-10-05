@@ -34,22 +34,47 @@ from cpp import gmock_class
 class TestCase(unittest.TestCase):
   """Helper class that adds assert methods."""
 
+  def StripLeadingWhitespace(self, lines):
+    """Strip leading whitespace in each line in 'lines'."""
+    return '\n'.join([s.lstrip() for s in lines.split('\n')])
+
   def assertEqualIgnoreLeadingWhitespace(self, expected_lines, lines):
     """Specialized assert that ignores the indent level."""
-    stripped_lines = '\n'.join([s.lstrip() for s in lines.split('\n')])
-    self.assertEqual(expected_lines, stripped_lines)
+    self.assertEqual(expected_lines, self.StripLeadingWhitespace(lines))
 
 
 class GenerateMethodsTest(TestCase):
 
   def GenerateMethodSource(self, cpp_source):
-    """Helper method to convert C++ source to gMock output source lines."""
+    """Convert C++ source to Google Mock output source lines."""
     method_source_lines = []
     # <test> is a pseudo-filename, it is not read or written.
     builder = ast.BuilderFromSource(cpp_source, '<test>')
     ast_list = list(builder.Generate())
     gmock_class._GenerateMethods(method_source_lines, cpp_source, ast_list[0])
-    return ''.join(method_source_lines)
+    return '\n'.join(method_source_lines)
+
+  def testSimpleMethod(self):
+    source = """
+class Foo {
+ public:
+  virtual int Bar();
+};
+"""
+    self.assertEqualIgnoreLeadingWhitespace(
+        'MOCK_METHOD0(Bar,\nint());',
+        self.GenerateMethodSource(source))
+
+  def testSimpleConstMethod(self):
+    source = """
+class Foo {
+ public:
+  virtual void Bar(bool flag) const;
+};
+"""
+    self.assertEqualIgnoreLeadingWhitespace(
+        'MOCK_CONST_METHOD1(Bar,\nvoid(bool flag));',
+        self.GenerateMethodSource(source))
 
   def testStrangeNewlineInParameter(self):
     source = """
@@ -90,11 +115,47 @@ class Foo {
         'MOCK_METHOD2(Bar,\nconst string&(int /* keeper */, int b));',
         self.GenerateMethodSource(source))
 
+  def testArgsOfTemplateTypes(self):
+    source = """
+class Foo {
+ public:
+  virtual int Bar(const vector<int>& v, map<int, string>* output);
+};"""
+    self.assertEqualIgnoreLeadingWhitespace(
+        'MOCK_METHOD2(Bar,\n'
+        'int(const vector<int>& v, map<int, string>* output));',
+        self.GenerateMethodSource(source))
+
+  def testReturnTypeWithOneTemplateArg(self):
+    source = """
+class Foo {
+ public:
+  virtual vector<int>* Bar(int n);
+};"""
+    self.assertEqualIgnoreLeadingWhitespace(
+        'MOCK_METHOD1(Bar,\nvector<int>*(int n));',
+        self.GenerateMethodSource(source))
+
+  def testReturnTypeWithManyTemplateArgs(self):
+    source = """
+class Foo {
+ public:
+  virtual map<int, string> Bar();
+};"""
+    # Comparing the comment text is brittle - we'll think of something
+    # better in case this gets annoying, but for now let's keep it simple.
+    self.assertEqualIgnoreLeadingWhitespace(
+        '// The following line won\'t really compile, as the return\n'
+        '// type has multiple template arguments.  To fix it, use a\n'
+        '// typedef for the return type.\n'
+        'MOCK_METHOD0(Bar,\nmap<int, string>());',
+        self.GenerateMethodSource(source))
+
 
 class GenerateMocksTest(TestCase):
 
   def GenerateMocks(self, cpp_source):
-    """Helper method to convert C++ source to complete gMock output source."""
+    """Convert C++ source to complete Google Mock output source."""
     # <test> is a pseudo-filename, it is not read or written.
     filename = '<test>'
     builder = ast.BuilderFromSource(cpp_source, filename)
