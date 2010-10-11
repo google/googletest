@@ -192,8 +192,7 @@ A `NULL` pointer and an empty string are considered _different_.
 _Availability_: Linux, Windows, Mac.
 
 See also: For more string comparison tricks (substring, prefix, suffix, and
-regular expression matching, for example), see the [AdvancedGuide Advanced
-Google Test Guide].
+regular expression matching, for example), see the [AdvancedGuide Advanced Google Test Guide].
 
 = Simple Tests =
 
@@ -459,7 +458,7 @@ int main(int argc, char **argv) {
 
 The `::testing::InitGoogleTest()` function parses the command line for Google
 Test flags, and removes all recognized flags. This allows the user to control a
-test program's behavior via various flags, which we'll cover in AdvancedGuide.
+test program's behavior via various flags, which we'll cover in [AdvancedGuide AdvancedGuide].
 You must call this function before calling `RUN_ALL_TESTS()`, or the flags
 won't be properly initialized.
 
