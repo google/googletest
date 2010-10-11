@@ -172,15 +172,6 @@ class linked_ptr {
   T* get() const { return value_; }
   T* operator->() const { return value_; }
   T& operator*() const { return *value_; }
-  // Release ownership of the pointed object and returns it.
-  // Sole ownership by this linked_ptr object is required.
-  T* release() {
-    bool last = link_.depart();
-    assert(last);
-    T* v = value_;
-    value_ = NULL;
-    return v;
-  }
 
   bool operator==(T* p) const { return value_ == p; }
   bool operator!=(T* p) const { return value_ != p; }

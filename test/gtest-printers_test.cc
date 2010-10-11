@@ -50,8 +50,8 @@
 
 #include "gtest/gtest.h"
 
-// hash_map and hash_set are available on Windows.
-#if GTEST_OS_WINDOWS
+// hash_map and hash_set are available under Visual C++.
+#if _MSC_VER
 #define GTEST_HAS_HASH_MAP_ 1  // Indicates that hash_map is available.
 #include <hash_map>            // NOLINT
 #define GTEST_HAS_HASH_SET_ 1  // Indicates that hash_set is available.
@@ -212,17 +212,15 @@ using ::std::tr1::make_tuple;
 using ::std::tr1::tuple;
 #endif
 
-#if GTEST_OS_WINDOWS
+#if _MSC_VER
 // MSVC defines the following classes in the ::stdext namespace while
 // gcc defines them in the :: namespace.  Note that they are not part
 // of the C++ standard.
-
 using ::stdext::hash_map;
 using ::stdext::hash_set;
 using ::stdext::hash_multimap;
 using ::stdext::hash_multiset;
-
-#endif  // GTEST_OS_WINDOWS
+#endif
 
 // Prints a value to a string using the universal value printer.  This
 // is a helper for testing UniversalPrinter<T>::Print() for various types.
@@ -333,8 +331,8 @@ TEST(PrintBuiltInTypeTest, Wchar_t) {
   EXPECT_EQ("L'\\xFF' (255)", Print(L'\xFF'));
   EXPECT_EQ("L' ' (32, 0x20)", Print(L' '));
   EXPECT_EQ("L'a' (97, 0x61)", Print(L'a'));
-  EXPECT_EQ("L'\\x576' (1398)", Print(L'\x576'));
-  EXPECT_EQ("L'\\xC74D' (51021)", Print(L'\xC74D'));
+  EXPECT_EQ("L'\\x576' (1398)", Print(static_cast<wchar_t>(0x576)));
+  EXPECT_EQ("L'\\xC74D' (51021)", Print(static_cast<wchar_t>(0xC74D)));
 }
 
 // Test that Int64 provides more storage than wchar_t.
@@ -440,10 +438,11 @@ TEST(PrintWideCStringTest, Null) {
 
 // Tests that wide C strings are escaped properly.
 TEST(PrintWideCStringTest, EscapesProperly) {
-  const wchar_t* p = L"'\"\?\\\a\b\f\n\r\t\v\xD3\x576\x8D3\xC74D a";
-  EXPECT_EQ(PrintPointer(p) + " pointing to L\"'\\\"\\?\\\\\\a\\b\\f"
+  const wchar_t s[] = {'\'', '"', '\?', '\\', '\a', '\b', '\f', '\n', '\r',
+                       '\t', '\v', 0xD3, 0x576, 0x8D3, 0xC74D, ' ', 'a', '\0'};
+  EXPECT_EQ(PrintPointer(s) + " pointing to L\"'\\\"\\?\\\\\\a\\b\\f"
             "\\n\\r\\t\\v\\xD3\\x576\\x8D3\\xC74D a\"",
-            Print(p));
+            Print(static_cast<const wchar_t*>(s)));
 }
 #endif  // native wchar_t
 
