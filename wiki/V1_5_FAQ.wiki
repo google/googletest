@@ -3,7 +3,7 @@
 <wiki:toc max_depth="3" />
 
 If you cannot find the answer to your question here, and you have read
-[V1_5_0_Primer Primer] and [V1_5_0_AdvancedGuide AdvancedGuide], send it to
+[V1_5_Primer Primer] and [V1_5_AdvancedGuide AdvancedGuide], send it to
 googletestframework@googlegroups.com.
 
 == Why should I use Google Test instead of my favorite C++ testing framework? ==
@@ -653,7 +653,7 @@ EXPECT_TRUE(internal::Func(12345));
 
 == I would like to run a test several times with different parameters. Do I need to write several similar copies of it? ==
 
-No. You can use a feature called [V1_5_0_AdvancedGuide#Value_Parameterized_Tests value-parameterized tests] which
+No. You can use a feature called [V1_5_AdvancedGuide#Value_Parameterized_Tests value-parameterized tests] which
 lets you repeat your tests with different parameters, without defining it more than once.
 
 ==  How do I test a file that defines main()?  ==
@@ -746,7 +746,7 @@ On POSIX systems, Google Test uses the POSIX Extended regular
 expression syntax
 (http://en.wikipedia.org/wiki/Regular_expression#POSIX_Extended_Regular_Expressions). On
 Windows, it uses a limited variant of regular expression syntax. For
-more details, see the [V1_5_0_AdvancedGuide#Regular_Expression_Syntax regular expression syntax].
+more details, see the [V1_5_AdvancedGuide#Regular_Expression_Syntax regular expression syntax].
 
 ==  I have a fixture class Foo, but TEST_F(Foo, Bar) gives me error "no matching function for call to Foo::Foo()". Why?  ==
 
@@ -853,7 +853,7 @@ using gtest-md.vcproj instead of gtest.vcproj.
 
 == I put my tests in a library and Google Test doesn't run them. What's happening? ==
 Have you read a
-[V1_5_0_Primer#Important_note_for_Visual_C++_users warning] on
+[V1_5_Primer#Important_note_for_Visual_C++_users warning] on
 the Google Test Primer page?
 
 == I want to use Google Test with Visual Studio but don't know where to start. ==
