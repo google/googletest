@@ -994,7 +994,7 @@ TEST(AutoHandleTest, AutoHandleWorks) {
 typedef unsigned __int64 BiggestParsable;
 typedef signed __int64 BiggestSignedParsable;
 const BiggestParsable kBiggestParsableMax = ULLONG_MAX;
-const BiggestParsable kBiggestSignedParsableMax = LLONG_MAX;
+const BiggestSignedParsable kBiggestSignedParsableMax = LLONG_MAX;
 #else
 typedef unsigned long long BiggestParsable;
 typedef signed long long BiggestSignedParsable;

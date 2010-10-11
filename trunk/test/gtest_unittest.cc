@@ -372,7 +372,11 @@ TEST(CodePointToUtf8Test, CanEncode8To11Bits) {
   EXPECT_STREQ("\xC3\x93", CodePointToUtf8(L'\xD3', buffer));
 
   // 101 0111 0110 => 110-10101 10-110110
-  EXPECT_STREQ("\xD5\xB6", CodePointToUtf8(L'\x576', buffer));
+  // Some compilers (e.g., GCC on MinGW) cannot handle non-ASCII codepoints
+  // in wide strings and wide chars. In order to accomodate them, we have to
+  // introduce such character constants as integers.
+  EXPECT_STREQ("\xD5\xB6",
+               CodePointToUtf8(static_cast<wchar_t>(0x576), buffer));
 }
 
 // Tests that Unicode code-points that have 12 to 16 bits are encoded
@@ -380,10 +384,12 @@ TEST(CodePointToUtf8Test, CanEncode8To11Bits) {
 TEST(CodePointToUtf8Test, CanEncode12To16Bits) {
   char buffer[32];
   // 0000 1000 1101 0011 => 1110-0000 10-100011 10-010011
-  EXPECT_STREQ("\xE0\xA3\x93", CodePointToUtf8(L'\x8D3', buffer));
+  EXPECT_STREQ("\xE0\xA3\x93",
+               CodePointToUtf8(static_cast<wchar_t>(0x8D3), buffer));
 
   // 1100 0111 0100 1101 => 1110-1100 10-011101 10-001101
-  EXPECT_STREQ("\xEC\x9D\x8D", CodePointToUtf8(L'\xC74D', buffer));
+  EXPECT_STREQ("\xEC\x9D\x8D",
+               CodePointToUtf8(static_cast<wchar_t>(0xC74D), buffer));
 }
 
 #if !GTEST_WIDE_STRING_USES_UTF16_
@@ -438,20 +444,23 @@ TEST(WideStringToUtf8Test, CanEncode8To11Bits) {
   EXPECT_STREQ("\xC3\x93", WideStringToUtf8(L"\xD3", -1).c_str());
 
   // 101 0111 0110 => 110-10101 10-110110
-  EXPECT_STREQ("\xD5\xB6", WideStringToUtf8(L"\x576", 1).c_str());
-  EXPECT_STREQ("\xD5\xB6", WideStringToUtf8(L"\x576", -1).c_str());
+  const wchar_t s[] = { 0x576, '\0' };
+  EXPECT_STREQ("\xD5\xB6", WideStringToUtf8(s, 1).c_str());
+  EXPECT_STREQ("\xD5\xB6", WideStringToUtf8(s, -1).c_str());
 }
 
 // Tests that Unicode code-points that have 12 to 16 bits are encoded
 // as 1110xxxx 10xxxxxx 10xxxxxx.
 TEST(WideStringToUtf8Test, CanEncode12To16Bits) {
   // 0000 1000 1101 0011 => 1110-0000 10-100011 10-010011
-  EXPECT_STREQ("\xE0\xA3\x93", WideStringToUtf8(L"\x8D3", 1).c_str());
-  EXPECT_STREQ("\xE0\xA3\x93", WideStringToUtf8(L"\x8D3", -1).c_str());
+  const wchar_t s1[] = { 0x8D3, '\0' };
+  EXPECT_STREQ("\xE0\xA3\x93", WideStringToUtf8(s1, 1).c_str());
+  EXPECT_STREQ("\xE0\xA3\x93", WideStringToUtf8(s1, -1).c_str());
 
   // 1100 0111 0100 1101 => 1110-1100 10-011101 10-001101
-  EXPECT_STREQ("\xEC\x9D\x8D", WideStringToUtf8(L"\xC74D", 1).c_str());
-  EXPECT_STREQ("\xEC\x9D\x8D", WideStringToUtf8(L"\xC74D", -1).c_str());
+  const wchar_t s2[] = { 0xC74D, '\0' };
+  EXPECT_STREQ("\xEC\x9D\x8D", WideStringToUtf8(s2, 1).c_str());
+  EXPECT_STREQ("\xEC\x9D\x8D", WideStringToUtf8(s2, -1).c_str());
 }
 
 // Tests that the conversion stops when the function encounters \0 character.
@@ -464,7 +473,6 @@ TEST(WideStringToUtf8Test, StopsOnNulCharacter) {
 TEST(WideStringToUtf8Test, StopsWhenLengthLimitReached) {
   EXPECT_STREQ("ABC", WideStringToUtf8(L"ABCDEF", 3).c_str());
 }
-
 
 #if !GTEST_WIDE_STRING_USES_UTF16_
 // Tests that Unicode code-points that have 17 to 21 bits are encoded
@@ -489,25 +497,29 @@ TEST(WideStringToUtf8Test, CanEncodeInvalidCodePoint) {
 // Tests that surrogate pairs are encoded correctly on the systems using
 // UTF-16 encoding in the wide strings.
 TEST(WideStringToUtf8Test, CanEncodeValidUtf16SUrrogatePairs) {
-  EXPECT_STREQ("\xF0\x90\x90\x80",
-               WideStringToUtf8(L"\xD801\xDC00", -1).c_str());
+  const wchar_t s[] = { 0xD801, 0xDC00, '\0' };
+  EXPECT_STREQ("\xF0\x90\x90\x80", WideStringToUtf8(s, -1).c_str());
 }
 
 // Tests that encoding an invalid UTF-16 surrogate pair
 // generates the expected result.
 TEST(WideStringToUtf8Test, CanEncodeInvalidUtf16SurrogatePair) {
   // Leading surrogate is at the end of the string.
-  EXPECT_STREQ("\xED\xA0\x80", WideStringToUtf8(L"\xD800", -1).c_str());
+  const wchar_t s1[] = { 0xD800, '\0' };
+  EXPECT_STREQ("\xED\xA0\x80", WideStringToUtf8(s1, -1).c_str());
   // Leading surrogate is not followed by the trailing surrogate.
-  EXPECT_STREQ("\xED\xA0\x80$", WideStringToUtf8(L"\xD800$", -1).c_str());
+  const wchar_t s2[] = { 0xD800, 'M', '\0' };
+  EXPECT_STREQ("\xED\xA0\x80M", WideStringToUtf8(s2, -1).c_str());
   // Trailing surrogate appearas without a leading surrogate.
-  EXPECT_STREQ("\xED\xB0\x80PQR", WideStringToUtf8(L"\xDC00PQR", -1).c_str());
+  const wchar_t s3[] = { 0xDC00, 'P', 'Q', 'R', '\0' };
+  EXPECT_STREQ("\xED\xB0\x80PQR", WideStringToUtf8(s3, -1).c_str());
 }
 #endif  // !GTEST_WIDE_STRING_USES_UTF16_
 
 // Tests that codepoint concatenation works correctly.
 #if !GTEST_WIDE_STRING_USES_UTF16_
 TEST(WideStringToUtf8Test, ConcatenatesCodepointsCorrectly) {
+  const wchar_t s[] = { 0x108634, 0xC74D, '\n', 0x576, 0x8D3, 0x108634, '\0'};
   EXPECT_STREQ(
       "\xF4\x88\x98\xB4"
           "\xEC\x9D\x8D"
@@ -515,13 +527,14 @@ TEST(WideStringToUtf8Test, ConcatenatesCodepointsCorrectly) {
           "\xD5\xB6"
           "\xE0\xA3\x93"
           "\xF4\x88\x98\xB4",
-      WideStringToUtf8(L"\x108634\xC74D\n\x576\x8D3\x108634", -1).c_str());
+      WideStringToUtf8(s, -1).c_str());
 }
 #else
 TEST(WideStringToUtf8Test, ConcatenatesCodepointsCorrectly) {
+  const wchar_t s[] = { 0xC74D, '\n', 0x576, 0x8D3, '\0'};
   EXPECT_STREQ(
       "\xEC\x9D\x8D" "\n" "\xD5\xB6" "\xE0\xA3\x93",
-      WideStringToUtf8(L"\xC74D\n\x576\x8D3", -1).c_str());
+      WideStringToUtf8(s, -1).c_str());
 }
 #endif  // !GTEST_WIDE_STRING_USES_UTF16_
 
@@ -4519,8 +4532,8 @@ TEST(EqAssertionTest, WideChar) {
   wchar = L'b';
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(L'a', wchar),
                           "wchar");
-  wchar = L'\x8119';
-  EXPECT_FATAL_FAILURE(ASSERT_EQ(L'\x8120', wchar),
+  wchar = 0x8119;
+  EXPECT_FATAL_FAILURE(ASSERT_EQ(static_cast<wchar_t>(0x8120), wchar),
                        "Value of: wchar");
 }
 
@@ -4558,20 +4571,22 @@ TEST(EqAssertionTest, StdString) {
 
 // Tests using ::std::wstring values in {EXPECT|ASSERT}_EQ.
 TEST(EqAssertionTest, StdWideString) {
-  // Compares an std::wstring to a const wchar_t* that has identical
-  // content.
-  EXPECT_EQ(::std::wstring(L"Test\x8119"), L"Test\x8119");
-
   // Compares two identical std::wstrings.
   const ::std::wstring wstr1(L"A * in the middle");
   const ::std::wstring wstr2(wstr1);
   ASSERT_EQ(wstr1, wstr2);
 
+  // Compares an std::wstring to a const wchar_t* that has identical
+  // content.
+  const wchar_t kTestX8119[] = { 'T', 'e', 's', 't', 0x8119, '\0' };
+  EXPECT_EQ(::std::wstring(kTestX8119), kTestX8119);
+
   // Compares an std::wstring to a const wchar_t* that has different
   // content.
+  const wchar_t kTestX8120[] = { 'T', 'e', 's', 't', 0x8120, '\0' };
   EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_EQ(::std::wstring(L"Test\x8119"), L"Test\x8120");
-  }, "L\"Test\\x8120\"");
+    EXPECT_EQ(::std::wstring(kTestX8119), kTestX8120);
+  }, "kTestX8120");
 
   // Compares two std::wstrings that have different contents, one of
   // which having a NUL character in the middle.
@@ -4623,18 +4638,20 @@ TEST(EqAssertionTest, GlobalString) {
 
 // Tests using ::wstring values in {EXPECT|ASSERT}_EQ.
 TEST(EqAssertionTest, GlobalWideString) {
-  // Compares a const wchar_t* to a ::wstring that has identical content.
-  ASSERT_EQ(L"Test\x8119", ::wstring(L"Test\x8119"));
-
   // Compares two identical ::wstrings.
   static const ::wstring wstr1(L"A * in the middle");
   static const ::wstring wstr2(wstr1);
   EXPECT_EQ(wstr1, wstr2);
 
+  // Compares a const wchar_t* to a ::wstring that has identical content.
+  const wchar_t kTestX8119[] = { 'T', 'e', 's', 't', 0x8119, '\0' };
+  ASSERT_EQ(kTestX8119, ::wstring(kTestX8119));
+
   // Compares a const wchar_t* to a ::wstring that has different
   // content.
+  const wchar_t kTestX8120[] = { 'T', 'e', 's', 't', 0x8120, '\0' };
   EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_EQ(L"Test\x8120", ::wstring(L"Test\x8119"));
+    EXPECT_EQ(kTestX8120, ::wstring(kTestX8119));
   }, "Test\\x8119");
 
   // Compares a wchar_t* to a ::wstring that has different content.
