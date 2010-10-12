@@ -78,6 +78,7 @@
 		4539C9380EC280E200A70F4C /* gtest-linked_ptr.h in Copy Headers Internal */ = {isa = PBXBuildFile; fileRef = 4539C9350EC280E200A70F4C /* gtest-linked_ptr.h */; };
 		4539C9390EC280E200A70F4C /* gtest-param-util-generated.h in Copy Headers Internal */ = {isa = PBXBuildFile; fileRef = 4539C9360EC280E200A70F4C /* gtest-param-util-generated.h */; };
 		4539C93A0EC280E200A70F4C /* gtest-param-util.h in Copy Headers Internal */ = {isa = PBXBuildFile; fileRef = 4539C9370EC280E200A70F4C /* gtest-param-util.h */; };
+		4567C8181264FF71007740BE /* gtest-printers.h in Headers */ = {isa = PBXBuildFile; fileRef = 4567C8171264FF71007740BE /* gtest-printers.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -242,6 +243,7 @@
 		4539C9350EC280E200A70F4C /* gtest-linked_ptr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-linked_ptr.h"; sourceTree = "<group>"; };
 		4539C9360EC280E200A70F4C /* gtest-param-util-generated.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-param-util-generated.h"; sourceTree = "<group>"; };
 		4539C9370EC280E200A70F4C /* gtest-param-util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-param-util.h"; sourceTree = "<group>"; };
+		4567C8171264FF71007740BE /* gtest-printers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-printers.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -360,6 +362,7 @@
 				404883DB0E2F799B00CF7658 /* gtest-death-test.h */,
 				404883DC0E2F799B00CF7658 /* gtest-message.h */,
 				4539C9330EC280AE00A70F4C /* gtest-param-test.h */,
+				4567C8171264FF71007740BE /* gtest-printers.h */,
 				404883DD0E2F799B00CF7658 /* gtest-spi.h */,
 				404883DE0E2F799B00CF7658 /* gtest.h */,
 				404883DF0E2F799B00CF7658 /* gtest_pred_impl.h */,
@@ -437,6 +440,7 @@
 				404884380E2F799B00CF7658 /* gtest-death-test.h in Headers */,
 				404884390E2F799B00CF7658 /* gtest-message.h in Headers */,
 				4539C9340EC280AE00A70F4C /* gtest-param-test.h in Headers */,
+				4567C8181264FF71007740BE /* gtest-printers.h in Headers */,
 				3BF6F2A50E79B616000F2EEE /* gtest-typed-test.h in Headers */,
 				4048843A0E2F799B00CF7658 /* gtest-spi.h in Headers */,
 				4048843B0E2F799B00CF7658 /* gtest.h in Headers */,
