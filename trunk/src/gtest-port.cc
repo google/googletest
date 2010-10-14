@@ -53,6 +53,7 @@
 
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest-message.h"
+#include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-string.h"
 
 // Indicates that this translation unit is part of Google Test's
