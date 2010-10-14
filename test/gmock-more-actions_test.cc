@@ -40,6 +40,7 @@
 #include <string>
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "gtest/internal/gtest-linked_ptr.h"
 
 namespace testing {
 namespace gmock_more_actions_test {
@@ -59,11 +60,13 @@ using testing::Return;
 using testing::ReturnArg;
 using testing::ReturnPointee;
 using testing::SaveArg;
+using testing::SaveArgPointee;
 using testing::SetArgReferee;
 using testing::StaticAssertTypeEq;
 using testing::Unused;
 using testing::WithArg;
 using testing::WithoutArgs;
+using testing::internal::linked_ptr;
 
 // For suppressing compiler warnings on conversion possibly losing precision.
 inline short Short(short n) { return n; }  // NOLINT
@@ -504,6 +507,30 @@ TEST(SaveArgActionTest, WorksForCompatibleType) {
   const Action<void(bool, char)> a1 = SaveArg<1>(&result);
   a1.Perform(make_tuple(true, 'a'));
   EXPECT_EQ('a', result);
+}
+
+TEST(SaveArgPointeeActionTest, WorksForSameType) {
+  int result = 0;
+  const int value = 5;
+  const Action<void(const int*)> a1 = SaveArgPointee<0>(&result);
+  a1.Perform(make_tuple(&value));
+  EXPECT_EQ(5, result);
+}
+
+TEST(SaveArgPointeeActionTest, WorksForCompatibleType) {
+  int result = 0;
+  char value = 'a';
+  const Action<void(bool, char*)> a1 = SaveArgPointee<1>(&result);
+  a1.Perform(make_tuple(true, &value));
+  EXPECT_EQ('a', result);
+}
+
+TEST(SaveArgPointeeActionTest, WorksForLinkedPtr) {
+  int result = 0;
+  linked_ptr<int> value(new int(5));
+  const Action<void(linked_ptr<int>)> a1 = SaveArgPointee<0>(&result);
+  a1.Perform(make_tuple(value));
+  EXPECT_EQ(5, result);
 }
 
 TEST(SetArgRefereeActionTest, WorksForSameType) {

@@ -36,6 +36,8 @@
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_MORE_ACTIONS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_MORE_ACTIONS_H_
 
+#include <algorithm>
+
 #include "gmock/gmock-generated-actions.h"
 
 namespace testing {
@@ -151,6 +153,14 @@ ACTION_TEMPLATE(SaveArg,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_1_VALUE_PARAMS(pointer)) {
   *pointer = ::std::tr1::get<k>(args);
+}
+
+// Action SaveArgPointee<k>(pointer) saves the value pointed to
+// by the k-th (0-based) argument of the mock function to *pointer.
+ACTION_TEMPLATE(SaveArgPointee,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_1_VALUE_PARAMS(pointer)) {
+  *pointer = *::std::tr1::get<k>(args);
 }
 
 // Action SetArgReferee<k>(value) assigns 'value' to the variable
