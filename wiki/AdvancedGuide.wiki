@@ -424,9 +424,9 @@ leaving your object in a partially-constructed state. Likewise, a fatal
 assertion failure in a destructor may leave your object in a
 partially-destructed state. Use assertions carefully in these situations!
 
-= Teaching gUnit How to Print Your Values =
+= Teaching Google Test How to Print Your Values =
 
-When a test assertion such as `EXPECT_EQ` fails, gUnit prints the
+When a test assertion such as `EXPECT_EQ` fails, Google Test prints the
 argument values to help you debug.  It does this using a
 user-extensible value printer.
 
@@ -444,7 +444,7 @@ than to dump the bytes.  To do that, define `<<` for your type:
 
 namespace foo {
 
-class Bar { ... };  // We want gUnit to be able to print instances of this.
+class Bar { ... };  // We want Google Test to be able to print instances of this.
 
 // It's important that the << operator is defined in the SAME
 // namespace that defines Bar.  C++'s look-up rules rely on that.
@@ -477,11 +477,11 @@ void PrintTo(const Bar& bar, ::std::ostream* os) {
 }}}
 
 If you have defined both `<<` and `PrintTo()`, the latter will be used
-when gUnit is concerned.  This allows you to customize how the value
-appears in gUnit's output without affecting code that relies on the
+when Google Test is concerned.  This allows you to customize how the value
+appears in Google Test's output without affecting code that relies on the
 behavior of its `<<` operator.
 
-If you want to print a value `x` using gUnit's value printer
+If you want to print a value `x` using Google Test's value printer
 yourself, just call `::testing::PrintToString(`_x_`)`, which
 returns an `std::string`:
 
