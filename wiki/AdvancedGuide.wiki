@@ -424,6 +424,74 @@ leaving your object in a partially-constructed state. Likewise, a fatal
 assertion failure in a destructor may leave your object in a
 partially-destructed state. Use assertions carefully in these situations!
 
+= Teaching gUnit How to Print Your Values =
+
+When a test assertion such as `EXPECT_EQ` fails, gUnit prints the
+argument values to help you debug.  It does this using a
+user-extensible value printer.
+
+This printer knows how to print built-in C++ types, native arrays, STL
+containers, and any type that supports the `<<` operator.  For other
+types, it prints the raw bytes in the value and hopes that you the
+user can figure it out.
+
+As mentioned earlier, the printer is _extensible_.  That means
+you can teach it to do a better job at printing your particular type
+than to dump the bytes.  To do that, define `<<` for your type:
+
+{{{
+#include <iostream>
+
+namespace foo {
+
+class Bar { ... };  // We want gUnit to be able to print instances of this.
+
+// It's important that the << operator is defined in the SAME
+// namespace that defines Bar.  C++'s look-up rules rely on that.
+::std::ostream&amp; operator<<(::std::ostream& os, const Bar& bar) {
+  return os << bar.DebugString();  // whatever needed to print bar to os
+}
+
+}  // namespace foo
+}}}
+
+Sometimes, this might not be an option: your team may consider it bad
+style to have a `<<` operator for `Bar`, or `Bar` may already have a
+`<<` operator that doesn't do what you want (and you cannot change
+it).  If so, you can instead define a `PrintTo()` function like this:
+
+{{{
+#include <iostream>
+
+namespace foo {
+
+class Bar { ... };
+
+// It's important that PrintTo() is defined in the SAME
+// namespace that defines Bar.  C++'s look-up rules rely on that.
+void PrintTo(const Bar& bar, ::std::ostream* os) {
+  *os << bar.DebugString();  // whatever needed to print bar to os
+}
+
+}  // namespace foo
+}}}
+
+If you have defined both `<<` and `PrintTo()`, the latter will be used
+when gUnit is concerned.  This allows you to customize how the value
+appears in gUnit's output without affecting code that relies on the
+behavior of its `<<` operator.
+
+If you want to print a value `x` using gUnit's value printer
+yourself, just call `::testing::PrintToString(`_x_`)`, which
+returns an `std::string`:
+
+{{{
+vector<pair<Bar, int> > bar_ints = GetBarIntVector();
+
+EXPECT_TRUE(IsCorrectBarIntVector(bar_ints))
+    << "bar_ints = " << ::testing::PrintToString(bar_ints);
+}}}
+
 =  Death Tests  =
 
 In many applications, there are assertions that can cause application failure
