@@ -448,7 +448,7 @@ class Bar { ... };  // We want Google Test to be able to print instances of this
 
 // It's important that the << operator is defined in the SAME
 // namespace that defines Bar.  C++'s look-up rules rely on that.
-::std::ostream&amp; operator<<(::std::ostream& os, const Bar& bar) {
+::std::ostream& operator<<(::std::ostream& os, const Bar& bar) {
   return os << bar.DebugString();  // whatever needed to print bar to os
 }
 
