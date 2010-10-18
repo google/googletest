@@ -31,6 +31,52 @@ list can help you decide whether it is for you too.
   * `SCOPED_TRACE` helps you understand the context of an assertion failure when it comes from inside a sub-routine or loop.
   * You can decide which tests to run using name patterns.  This saves time when you want to quickly reproduce a test failure.
 
+== Why should not test case names and test names contain underscore? ==
+
+Underscore (`_`) is special, as C++ reserves the following to be used by
+the compiler and the standard library:
+
+  # any identifier that starts with an `_` followed by an upper-case letter, and
+  # any identifier that containers two consecutive underscores (i.e. `__`) _anywhere_ in its name.
+
+User code is _prohibited_ from using such identifiers.
+
+Now let's look at what this means for `TEST` and `TEST_F`.
+
+Currently `TEST(TestCaseName, TestName)` generates a class named
+`TestCaseName_TestName_Test`.  What happens if `TestCaseName` or `TestName`
+contains `_`?
+
+  # If `TestCaseName` starts with an `_` followed by an upper-case letter (say, `_Foo`), we end up with `_Foo_TestName_Test`, which is reserved and thus invalid.
+  # If `TestCaseName` ends with an `_` (say, `Foo_`), we get `Foo__TestName_Test`, which is invalid.
+  # If `TestName` starts with an `_` (say, `_Bar`), we get `TestCaseName__Bar_Test`, which is invalid.
+  # If `TestName` ends with an `_` (say, `Bar_`), we get `TestCaseName_Bar__Test`, which is invalid.
+
+So clearly `TestCaseName` and `TestName` cannot start or end with `_`
+(Actually, `TestCaseName` can start with `_` -- as long as the `_` isn't
+followed by an upper-case letter.  But that's getting complicated.  So
+for simplicity we just say that it cannot start with `_`.).
+
+It may seem fine for `TestCaseName` and `TestName` to contain `_` in the
+middle.  However, consider this:
+{{{
+TEST(Time, Flies_Like_An_Arrow) { ... }
+TEST(Time_Flies, Like_An_Arrow) { ... }
+}}}
+
+Now, the two `TEST`s will both generate the same class
+(`Time_Files_Like_An_Arrow_Test`).  That's not good.
+
+So for simplicity, we just ask the users to avoid `_` in `TestCaseName`
+and `TestName`.  The rule is more constraining than necessary, but it's
+simple and easy to remember.  It also gives Google Test some wiggle
+room in case its implementation needs to change in the future.
+
+If you violate the rule, there may not be immediately consequences,
+but your test may (just may) break with a new compiler (or a new
+version of the compiler you are using) or with a new version of Google
+Test.  Therefore it's best to follow the rule.
+
 == Why is it not recommended to install a pre-compiled copy of Google Test (for example, into /usr/local)? ==
 
 In the early days, we said that you could install 
