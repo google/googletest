@@ -182,15 +182,19 @@ static String DeathTestThreadWarning(size_t thread_count) {
 // Flag characters for reporting a death test that did not die.
 static const char kDeathTestLived = 'L';
 static const char kDeathTestReturned = 'R';
+static const char kDeathTestThrew = 'T';
 static const char kDeathTestInternalError = 'I';
 
-// An enumeration describing all of the possible ways that a death test
-// can conclude.  DIED means that the process died while executing the
-// test code; LIVED means that process lived beyond the end of the test
-// code; and RETURNED means that the test statement attempted a "return,"
-// which is not allowed.  IN_PROGRESS means the test has not yet
-// concluded.
-enum DeathTestOutcome { IN_PROGRESS, DIED, LIVED, RETURNED };
+// An enumeration describing all of the possible ways that a death test can
+// conclude.  DIED means that the process died while executing the test
+// code; LIVED means that process lived beyond the end of the test code;
+// RETURNED means that the test statement attempted to execute a return
+// statement, which is not allowed; THREW means that the test statement
+// returned control by throwing an exception.  IN_PROGRESS means the test
+// has not yet concluded.
+// TODO(vladl@google.com): Unify names and possibly values for
+// AbortReason, DeathTestOutcome, and flag characters above.
+enum DeathTestOutcome { IN_PROGRESS, DIED, LIVED, RETURNED, THREW };
 
 // Routine for aborting the program which is safe to call from an
 // exec-style death test child process, in which case the error
@@ -388,6 +392,9 @@ void DeathTestImpl::ReadAndInterpretStatusByte() {
       case kDeathTestReturned:
         set_outcome(RETURNED);
         break;
+      case kDeathTestThrew:
+        set_outcome(THREW);
+        break;
       case kDeathTestLived:
         set_outcome(LIVED);
         break;
@@ -416,7 +423,9 @@ void DeathTestImpl::Abort(AbortReason reason) {
   // it finds any data in our pipe.  So, here we write a single flag byte
   // to the pipe, then exit.
   const char status_ch =
-      reason == TEST_DID_NOT_DIE ? kDeathTestLived : kDeathTestReturned;
+      reason == TEST_DID_NOT_DIE ? kDeathTestLived :
+      reason == TEST_THREW_EXCEPTION ? kDeathTestThrew : kDeathTestReturned;
+
   GTEST_DEATH_TEST_CHECK_SYSCALL_(posix::Write(write_fd(), &status_ch, 1));
   // We are leaking the descriptor here because on some platforms (i.e.,
   // when built as Windows DLL), destructors of global objects will still
@@ -434,8 +443,8 @@ void DeathTestImpl::Abort(AbortReason reason) {
 //
 // Private data members:
 //   outcome:  An enumeration describing how the death test
-//             concluded: DIED, LIVED, or RETURNED.  The death test fails
-//             in the latter two cases.
+//             concluded: DIED, LIVED, THREW, or RETURNED.  The death test
+//             fails in the latter three cases.
 //   status:   The exit status of the child process. On *nix, it is in the
 //             in the format specified by wait(2). On Windows, this is the
 //             value supplied to the ExitProcess() API or a numeric code
@@ -464,6 +473,10 @@ bool DeathTestImpl::Passed(bool status_ok) {
   switch (outcome()) {
     case LIVED:
       buffer << "    Result: failed to die.\n"
+             << " Error msg: " << error_message;
+      break;
+    case THREW:
+      buffer << "    Result: threw an exception.\n"
              << " Error msg: " << error_message;
       break;
     case RETURNED:

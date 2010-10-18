@@ -147,6 +147,13 @@ if (gtest_build_tests)
   cxx_library(gtest_main_no_rtti "${cxx_no_rtti}"
     src/gtest-all.cc src/gtest_main.cc)
 
+  cxx_test_with_flags(gtest-death-test_ex_nocatch_test
+    "${cxx_exception} -DGTEST_ENABLE_CATCH_EXCEPTIONS_=0"
+    gtest test/gtest-death-test_ex_test.cc)
+  cxx_test_with_flags(gtest-death-test_ex_catch_test
+    "${cxx_exception} -DGTEST_ENABLE_CATCH_EXCEPTIONS_=1"
+    gtest test/gtest-death-test_ex_test.cc)
+
   cxx_test_with_flags(gtest_no_rtti_unittest "${cxx_no_rtti}"
     gtest_main_no_rtti test/gtest_unittest.cc)
 
