@@ -210,8 +210,7 @@ TEST(test_case_name, test_name) {
 
 `TEST()` arguments go from general to specific. The _first_ argument is the
 name of the test case, and the _second_ argument is the test's name within the
-test case. Remember that a test case can contain any number of individual
-tests. A test's _full name_ consists of its containing test case and its
+test case. Both names must be valid C++ identifiers, and they should not contain underscore (`_`). A test's _full name_ consists of its containing test case and its
 individual name. Tests from different test cases can have the same individual
 name.
 
