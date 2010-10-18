@@ -39,6 +39,8 @@
 
 #include "gtest/internal/gtest-internal.h"
 
+#include <stdio.h>
+
 namespace testing {
 namespace internal {
 
@@ -96,8 +98,12 @@ class GTEST_API_ DeathTest {
   // test, then wait for it to complete.
   enum TestRole { OVERSEE_TEST, EXECUTE_TEST };
 
-  // An enumeration of the two reasons that a test might be aborted.
-  enum AbortReason { TEST_ENCOUNTERED_RETURN_STATEMENT, TEST_DID_NOT_DIE };
+  // An enumeration of the three reasons that a test might be aborted.
+  enum AbortReason {
+    TEST_ENCOUNTERED_RETURN_STATEMENT,
+    TEST_THREW_EXCEPTION,
+    TEST_DID_NOT_DIE
+  };
 
   // Assumes one of the above roles.
   virtual TestRole AssumeRole() = 0;
@@ -149,6 +155,29 @@ class DefaultDeathTestFactory : public DeathTestFactory {
 // by a signal, or exited normally with a nonzero exit code.
 GTEST_API_ bool ExitedUnsuccessfully(int exit_status);
 
+// Traps C++ exceptions escaping statement and reports them as test
+// failures. Note that trapping SEH exceptions is not implemented here.
+#if GTEST_HAS_EXCEPTIONS
+#define GTEST_EXECUTE_DEATH_TEST_STATEMENT_(statement, death_test) \
+  try { \
+    GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
+  } catch (const ::std::exception& gtest_exception) { \
+    fprintf(\
+        stderr, \
+        "\n%s: Caught std::exception-derived exception escaping the " \
+        "death test statement. Exception message: %s\n", \
+        ::testing::internal::FormatFileLocation(__FILE__, __LINE__).c_str(), \
+        gtest_exception.what()); \
+    fflush(stderr); \
+    death_test->Abort(::testing::internal::DeathTest::TEST_THREW_EXCEPTION); \
+  } catch (...) { \
+    death_test->Abort(::testing::internal::DeathTest::TEST_THREW_EXCEPTION); \
+  }
+#else
+#define GTEST_EXECUTE_DEATH_TEST_STATEMENT_(statement, death_test) \
+  GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement)
+#endif
+
 // This macro is for implementing ASSERT_DEATH*, EXPECT_DEATH*,
 // ASSERT_EXIT*, and EXPECT_EXIT*.
 #define GTEST_DEATH_TEST_(statement, predicate, regex, fail) \
@@ -172,7 +201,7 @@ GTEST_API_ bool ExitedUnsuccessfully(int exit_status);
         case ::testing::internal::DeathTest::EXECUTE_TEST: { \
           ::testing::internal::DeathTest::ReturnSentinel \
               gtest_sentinel(gtest_dt); \
-          GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
+          GTEST_EXECUTE_DEATH_TEST_STATEMENT_(statement, gtest_dt); \
           gtest_dt->Abort(::testing::internal::DeathTest::TEST_DID_NOT_DIE); \
           break; \
         } \
