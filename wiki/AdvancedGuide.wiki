@@ -2014,23 +2014,27 @@ command line flag.
 
 _Availability:_ Linux, Windows, Mac.
 
-=== Suppressing Pop-ups Caused by Exceptions ===
+=== Catching Test-Thrown Exceptions ===
 
-On Windows, Google Test may be used with exceptions enabled. Even when
-exceptions are disabled, an application can still throw structured exceptions
-(SEH's). If a test throws an exception, by default Google Test doesn't try to
-catch it. Instead, you'll see a pop-up dialog, at which point you can attach
-the process to a debugger and easily find out what went wrong.
+Google Test can be used either with or without exceptions enabled.  If
+a test throws a C++ exception or (on Windows) a structured exception
+(SEH), by default Google Test doesn't try to catch it.  This makes it
+easy to find out the source of the exception in a debugger.
 
-However, if you don't want to see the pop-ups (for example, if you run the
-tests in a batch job), set the `GTEST_CATCH_EXCEPTIONS` environment variable to
-a non- `0` value, or use the `--gtest_catch_exceptions` flag. Google Test now
-catches all test-thrown exceptions and logs them as failures.
+The flip side of this is that an uncaught exception will terminate the
+entire test program, leaving the rest of the test methods no chance to
+run.  Also, on Windows it will cause a pop-up window, which is
+unacceptable when you want to run the tests automatically.
 
-_Availability:_ Windows. `GTEST_CATCH_EXCEPTIONS` and
-`--gtest_catch_exceptions` have no effect on Google Test's behavior on Linux or
-Mac, even if exceptions are enabled. It is possible to add support for catching
-exceptions on these platforms, but it is not implemented yet.
+To override the default behavior, set the `GTEST_CATCH_EXCEPTIONS`
+environment variable to a non-zero value, or use the
+`--gtest_catch_exceptions` flag when running the tests.  That will
+make Google Test catch all test-thrown exceptions and log them as test
+failures.  If one test method throws an exception, only that test
+method will be aborted -- the execution will continue with the next
+test method.
+
+*Availability*: Linux, Windows, Mac.
 
 === Letting Another Testing Framework Drive ===
 
