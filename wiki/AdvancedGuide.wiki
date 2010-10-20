@@ -504,7 +504,12 @@ that such assertion statements work as expected.
 
 Since these precondition checks cause the processes to die, we call such tests
 _death tests_. More generally, any test that checks that a program terminates
-in an expected fashion is also a death test.
+(except by throwing an exception) in an expected fashion is also a death test.
+
+Note that if a piece of code throws an exception, we don't consider it "death"
+for the purpose of death tests, as the caller of the code could catch the exception
+and avoid the crash. If you want to verify exceptions thrown by your code,
+see [#Exception_Assertions Exception Assertions]. 
 
 If you want to test `EXPECT_*()/ASSERT_*()` failures in your test code, see [#Catching_Failures Catching Failures]. 
 
@@ -740,11 +745,10 @@ int main(int argc, char** argv) {
 
 ==  Caveats  ==
 
-The _statement_ argument of `ASSERT_EXIT()` can be any valid C++ statement
-except that it can not return from the current function. This means
-_statement_ should not contain `return` or a macro that might return (e.g.
-`ASSERT_TRUE()` ). If _statement_ returns before it crashes, Google Test will
-print an error message, and the test will fail.
+The _statement_ argument of `ASSERT_EXIT()` can be any valid C++ statement.
+If it leaves the current function via a `return` statement or by throwing an exception,
+the death test is considered to have failed.  Some Google Test macros may return
+from the current function (e.g. `ASSERT_TRUE()`), so be sure to avoid them in _statement_.
 
 Since _statement_ runs in the child process, any in-memory side effect (e.g.
 modifying a variable, releasing memory, etc) it causes will _not_ be observable
