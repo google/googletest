@@ -121,7 +121,7 @@ enum TypeKind {
   kProtobuf,              // a protobuf type
   kConvertibleToInteger,  // a type implicitly convertible to BiggestInt
                           // (e.g. a named or unnamed enum type)
-  kOtherType,             // anything else
+  kOtherType              // anything else
 };
 
 // TypeWithoutFormatter<T, kTypeKind>::PrintValue(value, os) is called

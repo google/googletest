@@ -34,6 +34,7 @@
 
 #include "gtest/gtest.h"
 #include <vector>
+#include <ostream>
 
 // Verifies that the command line flag variables can be accessed
 // in code once <gtest/gtest.h> has been #included.
@@ -4902,7 +4903,7 @@ TEST(AssertionResultTest, ConstructionWorks) {
   EXPECT_STREQ("ghi", r5.message());
 }
 
-// Tests that the negation fips the predicate result but keeps the message.
+// Tests that the negation flips the predicate result but keeps the message.
 TEST(AssertionResultTest, NegationWorks) {
   AssertionResult r1 = AssertionSuccess() << "abc";
   EXPECT_FALSE(!r1);
@@ -4917,6 +4918,12 @@ TEST(AssertionResultTest, StreamingWorks) {
   AssertionResult r = AssertionSuccess();
   r << "abc" << 'd' << 0 << true;
   EXPECT_STREQ("abcd0true", r.message());
+}
+
+TEST(AssertionResultTest, CanStreamOstreamManipulators) {
+  AssertionResult r = AssertionSuccess();
+  r << "Data" << std::endl << std::flush << std::ends << "Will be visible";
+  EXPECT_STREQ("Data\n\\0Will be visible", r.message());
 }
 
 // Tests streaming a user type whose definition and operator << are

@@ -281,20 +281,33 @@ class GTEST_API_ AssertionResult {
   // assertion's expectation). When nothing has been streamed into the
   // object, returns an empty string.
   const char* message() const {
-    return message_.get() != NULL && message_->c_str() != NULL ?
-           message_->c_str() : "";
+    return message_.get() != NULL ?  message_->c_str() : "";
   }
   // TODO(vladl@google.com): Remove this after making sure no clients use it.
   // Deprecated; please use message() instead.
   const char* failure_message() const { return message(); }
 
   // Streams a custom failure message into this object.
-  template <typename T> AssertionResult& operator<<(const T& value);
+  template <typename T> AssertionResult& operator<<(const T& value) {
+    AppendMessage(Message() << value);
+    return *this;
+  }
+
+  // Allows streaming basic output manipulators such as endl or flush into
+  // this object.
+  AssertionResult& operator<<(
+      ::std::ostream& (*basic_manipulator)(::std::ostream& stream)) {
+    AppendMessage(Message() << basic_manipulator);
+    return *this;
+  }
 
  private:
-  // No implementation - we want AssertionResult to be
-  // copy-constructible but not assignable.
-  void operator=(const AssertionResult& other);
+  // Appends the contents of message to message_.
+  void AppendMessage(const Message& a_message) {
+    if (message_.get() == NULL)
+      message_.reset(new ::std::string);
+    message_->append(a_message.GetString().c_str());
+  }
 
   // Stores result of the assertion predicate.
   bool success_;
@@ -302,19 +315,10 @@ class GTEST_API_ AssertionResult {
   // construct is not satisfied with the predicate's outcome.
   // Referenced via a pointer to avoid taking too much stack frame space
   // with test assertions.
-  internal::scoped_ptr<internal::String> message_;
-};  // class AssertionResult
+  internal::scoped_ptr< ::std::string> message_;
 
-// Streams a custom failure message into this object.
-template <typename T>
-AssertionResult& AssertionResult::operator<<(const T& value) {
-  Message msg;
-  if (message_.get() != NULL)
-    msg << *message_;
-  msg << value;
-  message_.reset(new internal::String(msg.GetString()));
-  return *this;
-}
+  GTEST_DISALLOW_ASSIGN_(AssertionResult);
+};
 
 // Makes a successful assertion result.
 GTEST_API_ AssertionResult AssertionSuccess();
