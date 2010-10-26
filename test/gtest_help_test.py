@@ -74,7 +74,7 @@ HELP_REGEX = re.compile(
     FLAG_PREFIX + r'output=.*' +
     FLAG_PREFIX + r'break_on_failure.*' +
     FLAG_PREFIX + r'throw_on_failure.*' +
-    FLAG_PREFIX + r'catch_exceptions.*',
+    FLAG_PREFIX + r'catch_exceptions=0.*',
     re.DOTALL)
 
 

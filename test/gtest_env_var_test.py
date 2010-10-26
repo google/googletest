@@ -92,9 +92,7 @@ class GTestEnvVarTest(gtest_test_utils.TestCase):
     TestFlag('repeat', '999', '1')
     TestFlag('throw_on_failure', '1', '0')
     TestFlag('death_test_style', 'threadsafe', 'fast')
-
-    if IS_WINDOWS:
-      TestFlag('catch_exceptions', '1', '0')
+    TestFlag('catch_exceptions', '0', '1')
 
     if IS_LINUX:
       TestFlag('death_test_use_fork', '1', '0')
