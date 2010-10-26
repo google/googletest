@@ -42,9 +42,10 @@ import os
 import gtest_test_utils
 
 # Constants.
-LIST_TESTS_FLAG = '--gtest_list_tests'
-CATCH_EXCEPTIONS_FLAG = '--gtest_catch_exceptions=1'
-FILTER_FLAG='--gtest_filter'
+FLAG_PREFIX = '--gtest_'
+LIST_TESTS_FLAG = FLAG_PREFIX + 'list_tests'
+NO_CATCH_EXCEPTIONS_FLAG = FLAG_PREFIX + 'catch_exceptions=0'
+FILTER_FLAG = FLAG_PREFIX + 'filter'
 
 # Path to the gtest_catch_exceptions_ex_test_ binary, compiled with
 # exceptions enabled.
@@ -61,11 +62,9 @@ TEST_LIST = gtest_test_utils.Subprocess([EXE_PATH, LIST_TESTS_FLAG]).output
 SUPPORTS_SEH_EXCEPTIONS = 'ThrowsSehException' in TEST_LIST
 
 if SUPPORTS_SEH_EXCEPTIONS:
-  BINARY_OUTPUT = gtest_test_utils.Subprocess([EXE_PATH,
-                                               CATCH_EXCEPTIONS_FLAG]).output
+  BINARY_OUTPUT = gtest_test_utils.Subprocess([EXE_PATH]).output
 
-EX_BINARY_OUTPUT = gtest_test_utils.Subprocess([EX_EXE_PATH,
-                                                CATCH_EXCEPTIONS_FLAG]).output
+EX_BINARY_OUTPUT = gtest_test_utils.Subprocess([EX_EXE_PATH]).output
 
 # The tests.
 if SUPPORTS_SEH_EXCEPTIONS:
@@ -208,7 +207,9 @@ class CatchCxxExceptionsTest(gtest_test_utils.TestCase):
     FITLER_OUT_SEH_TESTS_FLAG = FILTER_FLAG + '=-*Seh*'
     # By default, Google Test doesn't catch the exceptions.
     uncaught_exceptions_ex_binary_output = gtest_test_utils.Subprocess(
-        [EX_EXE_PATH, FITLER_OUT_SEH_TESTS_FLAG]).output
+        [EX_EXE_PATH,
+         NO_CATCH_EXCEPTIONS_FLAG,
+         FITLER_OUT_SEH_TESTS_FLAG]).output
 
     self.assert_('Unhandled C++ exception terminating the program'
                  in uncaught_exceptions_ex_binary_output)
