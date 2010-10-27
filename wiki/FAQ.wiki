@@ -946,6 +946,28 @@ Our users reported success using alternative implementations. Try running the bu
 
 {{{export CC=cc CXX=CC CXXFLAGS='-library=stlport4'}}}
 
+== How can my code detect if it is running in a test? ==
+
+If you write code that sniffs whether it's running in a test and does
+different things accordingly, you are leaking test-only logic into
+production code and there is no easy way to ensure that the test-only
+code paths aren't run by mistake in production.  Such cleverness also
+leads to
+[http://en.wikipedia.org/wiki/Unusual_software_bug#Heisenbug Heisenbugs].
+Therefore we strongly advise against the practice, and Google Test doesn't
+provide a way to do it.
+
+In general, the recommended way to cause the code to behave
+differently under test is [http://jamesshore.com/Blog/Dependency-Injection-Demystified.html dependency injection].
+You can inject different functionality from the test and from the
+production code.  Since your production code doesn't link in the
+for-test logic at all, there is no danger in accidentally running it.
+
+However, if you _really_, _really_, _really_ have no choice, and if
+you follow the rule of ending your test program names with `_test`,
+you can use the _horrible_ hack of sniffing your executable name
+(`argv[0]` in `main()`) to know whether the code is under test.
+
 == My question is not covered in your FAQ! ==
 
 If you cannot find the answer to your question in this FAQ, there are
