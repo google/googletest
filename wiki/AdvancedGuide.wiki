@@ -2147,7 +2147,7 @@ and you should see an `OUTPUT_DIR` directory being created with files
 `gtest/gtest.h` and `gtest/gtest-all.cc` in it.  These files contain
 everything you need to use Google Test.  Just copy them to anywhere
 you want and you are ready to write tests.  You can use the
-[http://code.google.com/p/googletest/source/browse/trunk/scripts/test/Makefile scrpts/test/Makefile]
+[http://code.google.com/p/googletest/source/browse/trunk/scripts/test/Makefile scripts/test/Makefile]
 file as an example on how to compile your tests against them.
 
 = Where to Go from Here =
