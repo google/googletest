@@ -2014,25 +2014,21 @@ command line flag.
 
 _Availability:_ Linux, Windows, Mac.
 
-=== Catching Test-Thrown Exceptions ===
+=== Disabling Catching Test-Thrown Exceptions ===
 
 Google Test can be used either with or without exceptions enabled.  If
 a test throws a C++ exception or (on Windows) a structured exception
-(SEH), by default Google Test doesn't try to catch it.  This makes it
-easy to find out the source of the exception in a debugger.
+(SEH), by default Google Test catches it, reports it as a test
+failure, and continues with the next test method.  This maximizes the
+coverage of a test run.  Also, on Windows an uncaught exception will
+cause a pop-up window, so catching the exceptions allows you to run
+the tests automatically.
 
-The flip side of this is that an uncaught exception will terminate the
-entire test program, leaving the rest of the test methods no chance to
-run.  Also, on Windows it will cause a pop-up window, which is
-unacceptable when you want to run the tests automatically.
-
-To override the default behavior, set the `GTEST_CATCH_EXCEPTIONS`
-environment variable to a non-zero value, or use the
-`--gtest_catch_exceptions` flag when running the tests.  That will
-make Google Test catch all test-thrown exceptions and log them as test
-failures.  If one test method throws an exception, only that test
-method will be aborted -- the execution will continue with the next
-test method.
+When debugging the test failures, however, you may instead want the
+exceptions to be handled by the debugger, such that you can examine
+the call stack when an exception is thrown.  To achieve that, set the
+`GTEST_CATCH_EXCEPTIONS` environment variable to `0`, or use the
+`--gtest_catch_exceptions=0` flag when running the tests.
 
 *Availability*: Linux, Windows, Mac.
 
