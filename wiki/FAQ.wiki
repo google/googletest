@@ -392,7 +392,7 @@ If necessary, you can continue to derive test fixtures from a derived fixture.
 Google Test has no limit on how deep the hierarchy can be.
 
 For a complete example using derived test fixtures, see
-`//depot/googletest_samples/sample5_unittest.cc`.
+[http://code.google.com/p/googletest/source/browse/trunk/samples/sample5_unittest.cc sample5].
 
 ==  My compiler complains "void value not ignored as it ought to be." What does this mean?  ==
 
