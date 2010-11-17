@@ -45,12 +45,11 @@
 using ::testing::TestWithParam;
 using ::testing::Values;
 
-// As a general rule, tested objects should not be reused between tests.
-// Also, their constructors and destructors of tested objects can have
-// side effects. Thus you should create and destroy them for each test.
-// In this sample we will define a simple factory function for PrimeTable
-// objects. We will instantiate objects in test's SetUp() method and
-// delete them in TearDown() method.
+// As a general rule, to prevent a test from affecting the tests that come
+// after it, you should create and destroy the tested objects for each test
+// instead of reusing them.  In this sample we will define a simple factory
+// function for PrimeTable objects.  We will instantiate objects in test's
+// SetUp() method and delete them in TearDown() method.
 typedef PrimeTable* CreatePrimeTableFunc();
 
 PrimeTable* CreateOnTheFlyPrimeTable() {
@@ -62,11 +61,10 @@ PrimeTable* CreatePreCalculatedPrimeTable() {
   return new PreCalculatedPrimeTable(max_precalculated);
 }
 
-// Inside the test body, fixture constructor, SetUp(), and TearDown()
-// you can refer to the test parameter by GetParam().
-// In this case, the test parameter is a PrimeTableFactory interface pointer
-// which we use in fixture's SetUp() to create and store an instance of
-// PrimeTable.
+// Inside the test body, fixture constructor, SetUp(), and TearDown() you
+// can refer to the test parameter by GetParam().  In this case, the test
+// parameter is a factory function which we call in fixture's SetUp() to
+// create and store an instance of PrimeTable.
 class PrimeTableTest : public TestWithParam<CreatePrimeTableFunc*> {
  public:
   virtual ~PrimeTableTest() { delete table_; }
