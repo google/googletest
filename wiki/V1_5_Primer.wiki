@@ -466,7 +466,7 @@ But maybe you think that writing all those main() functions is too much work? We
 == Important note for Visual C++ users ==
 If you put your tests into a library and your `main()` function is in a different library or in your .exe file, those tests will not run. The reason is a [https://connect.microsoft.com/feedback/viewfeedback.aspx?FeedbackID=244410&siteid=210 bug] in Visual C++. When you define your tests, Google Test creates certain static objects to register them. These objects are not referenced from elsewhere but their constructors are still supposed to run. When Visual C++ linker sees that nothing in the library is referenced from other places it throws the library out. You have to reference your library with tests from your main program to keep the linker from discarding it. Here is how to do it. Somewhere in your library code declare a function:
 {{{
-__declspec(dllimport) int PullInMyLibrary() { return 0; }
+__declspec(dllexport) int PullInMyLibrary() { return 0; }
 }}}
 If you put your tests in a static library (not DLL) then `__declspec(dllexport)` is not required. Now, in your main program, write a code that invokes that function:
 {{{
