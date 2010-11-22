@@ -121,7 +121,7 @@ c is 10
 
 *Notes:*
 
-  # If you see a compiler error "no matching function to call" when using `ASSERT_PRED*` or `EXPECT_PRED*`, please see [V1_5_FAQ#The_compiler_complains_%22no_matching_function_to_call%22 this] for how to resolve it.
+  # If you see a compiler error "no matching function to call" when using `ASSERT_PRED*` or `EXPECT_PRED*`, please see [http://code.google.com/p/googletest/wiki/V1_5_FAQ#The_compiler_complains_%22no_matching_function_to_call%22 this] for how to resolve it.
   # Currently we only provide predicate assertions of arity <= 5. If you need a higher-arity assertion, let us know.
 
 _Availability_: Linux, Windows, Mac
