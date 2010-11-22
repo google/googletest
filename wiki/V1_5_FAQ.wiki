@@ -314,7 +314,7 @@ If necessary, you can continue to derive test fixtures from a derived fixture.
 Google Test has no limit on how deep the hierarchy can be.
 
 For a complete example using derived test fixtures, see
-`//depot/googletest_samples/sample5_unittest.cc`.
+`samples/sample5_unittest.cc`.
 
 ==  My compiler complains "void value not ignored as it ought to be." What does this mean?  ==
 
@@ -346,7 +346,7 @@ In the end, this boils down to good concurrent programming. You have to make
 sure that there is no race conditions or dead locks in your program. No silver
 bullet - sorry!
 
-==  Should I use the constructor/destructor of the test fixture or the set-up/tear-down function? ==
+==  Should I use the constructor of the test fixture or the set-up function? ==
 
 The first thing to remember is that Google Test does not reuse the
 same test fixture object across multiple tests. For each `TEST_F`,
