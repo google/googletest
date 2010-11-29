@@ -1,9 +1,0 @@
-Changes for 1.0.1:
-
- * Added project files for Visual Studio 7.1.
- * Fixed issues with compiling on Mac OS X.
- * Fixed issues with compiling on Cygwin.
-
-Changes for 1.0.0:
-
- * Initial Open Source release of Google Test
