@@ -88,6 +88,7 @@
 //   GTEST_OS_CYGWIN   - Cygwin
 //   GTEST_OS_LINUX    - Linux
 //   GTEST_OS_MAC      - Mac OS X
+//   GTEST_OS_NACL     - Google Native Client (NaCl)
 //   GTEST_OS_SOLARIS  - Sun Solaris
 //   GTEST_OS_SYMBIAN  - Symbian
 //   GTEST_OS_WINDOWS  - Windows (Desktop, MinGW, or Mobile)
@@ -230,6 +231,8 @@
 #define GTEST_OS_SOLARIS 1
 #elif defined(_AIX)
 #define GTEST_OS_AIX 1
+#elif defined __native_client__
+#define GTEST_OS_NACL 1
 #endif  // __CYGWIN__
 
 // Brings in definitions for functions used in the testing::internal::posix
@@ -240,7 +243,12 @@
 // is not the case, we need to include headers that provide the functions
 // mentioned above.
 #include <unistd.h>
-#include <strings.h>
+#if !GTEST_OS_NACL
+// TODO(vladl@google.com): Remove this condition when Native Client SDK adds
+// strings.h (tracked in
+// http://code.google.com/p/nativeclient/issues/detail?id=1175).
+#include <strings.h>  // Native Client doesn't provide strings.h.
+#endif
 #elif !GTEST_OS_WINDOWS_MOBILE
 #include <direct.h>
 #include <io.h>
