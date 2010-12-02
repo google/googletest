@@ -194,25 +194,25 @@ static CharFormat PrintAsCharLiteralTo(Char c, ostream* os) {
   return kSpecialEscape;
 }
 
-// Prints a char as if it's part of a string literal, escaping it when
-// necessary.
-static void PrintAsWideStringLiteralTo(wchar_t c, ostream* os) {
+// Prints a char c as if it's part of a string literal, escaping it when
+// necessary; returns how c was formatted.
+static CharFormat PrintAsWideStringLiteralTo(wchar_t c, ostream* os) {
   switch (c) {
     case L'\'':
       *os << "'";
-      break;
+      return kAsIs;
     case L'"':
       *os << "\\\"";
-      break;
+      return kSpecialEscape;
     default:
-      PrintAsCharLiteralTo<wchar_t>(c, os);
+      return PrintAsCharLiteralTo<wchar_t>(c, os);
   }
 }
 
-// Prints a char as if it's part of a string literal, escaping it when
-// necessary.
-static void PrintAsNarrowStringLiteralTo(char c, ostream* os) {
-  PrintAsWideStringLiteralTo(static_cast<unsigned char>(c), os);
+// Prints a char c as if it's part of a string literal, escaping it when
+// necessary; returns how c was formatted.
+static CharFormat PrintAsNarrowStringLiteralTo(char c, ostream* os) {
+  return PrintAsWideStringLiteralTo(static_cast<unsigned char>(c), os);
 }
 
 // Prints a wide or narrow character c and its code.  '\0' is printed
@@ -263,8 +263,16 @@ void PrintTo(wchar_t wc, ostream* os) {
 // and may not be null-terminated.
 static void PrintCharsAsStringTo(const char* begin, size_t len, ostream* os) {
   *os << "\"";
+  bool is_previous_hex = false;
   for (size_t index = 0; index < len; ++index) {
-    PrintAsNarrowStringLiteralTo(begin[index], os);
+    const char cur = begin[index];
+    if (is_previous_hex && IsXDigit(cur)) {
+      // Previous character is of '\x..' form and this character can be
+      // interpreted as another hexadecimal digit in its number. Break string to
+      // disambiguate.
+      *os << "\" \"";
+    }
+    is_previous_hex = PrintAsNarrowStringLiteralTo(cur, os) == kHexEscape;
   }
   *os << "\"";
 }
@@ -280,8 +288,17 @@ void UniversalPrintArray(const char* begin, size_t len, ostream* os) {
 static void PrintWideCharsAsStringTo(const wchar_t* begin, size_t len,
                                      ostream* os) {
   *os << "L\"";
+  bool is_previous_hex = false;
   for (size_t index = 0; index < len; ++index) {
-    PrintAsWideStringLiteralTo(begin[index], os);
+    const wchar_t cur = begin[index];
+    if (is_previous_hex && 0 <= cur && cur < 128 &&
+        IsXDigit(static_cast<char>(cur))) {
+      // Previous character is of '\x..' form and this character can be
+      // interpreted as another hexadecimal digit in its number. Break string to
+      // disambiguate.
+      *os << "\" L\"";
+    }
+    is_previous_hex = PrintAsWideStringLiteralTo(cur, os) == kHexEscape;
   }
   *os << "\"";
 }
