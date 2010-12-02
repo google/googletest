@@ -715,6 +715,43 @@ TEST(SetArgPointeeTest, SetsTheNthPointee) {
   EXPECT_EQ('a', ch);
 }
 
+// Tests that SetArgPointee<N>() accepts a string literal.
+TEST(SetArgPointeeTest, AcceptsStringLiteral) {
+  typedef void MyFunction(bool, std::string*, const char**);
+  Action<MyFunction> a = SetArgPointee<1>("hi");
+  std::string str;
+  const char* ptr = NULL;
+  a.Perform(make_tuple(true, &str, &ptr));
+  EXPECT_EQ("hi", str);
+  EXPECT_TRUE(ptr == NULL);
+
+  a = SetArgPointee<2>("world");
+  str = "";
+  a.Perform(make_tuple(true, &str, &ptr));
+  EXPECT_EQ("", str);
+  EXPECT_STREQ("world", ptr);
+}
+
+// Tests that SetArgPointee<N>() accepts a char pointer.
+TEST(SetArgPointeeTest, AcceptsCharPointer) {
+  typedef void MyFunction(bool, std::string*, const char**);
+  const char* const hi = "hi";
+  Action<MyFunction> a = SetArgPointee<1>(hi);
+  std::string str;
+  const char* ptr = NULL;
+  a.Perform(make_tuple(true, &str, &ptr));
+  EXPECT_EQ("hi", str);
+  EXPECT_TRUE(ptr == NULL);
+
+  char world_array[] = "world";
+  char* const world = world_array;
+  a = SetArgPointee<2>(world);
+  str = "";
+  a.Perform(make_tuple(true, &str, &ptr));
+  EXPECT_EQ("", str);
+  EXPECT_EQ(world, ptr);
+}
+
 #if GTEST_HAS_PROTOBUF_
 
 // Tests that SetArgPointee<N>(proto_buffer) sets the v1 protobuf

@@ -251,5 +251,5 @@ TEST(WideInitGoogleMockTest, CallsInitGoogleTest) {
 TEST(FlagTest, IsAccessibleInCode) {
   bool dummy = testing::GMOCK_FLAG(catch_leaked_mocks) &&
       testing::GMOCK_FLAG(verbose) == "";
-  dummy = dummy;  // Avoids the "unused local variable" warning.
+  (void)dummy;  // Avoids the "unused local variable" warning.
 }

@@ -459,6 +459,20 @@ def _TypeInTemplatedBaseDiagnoser(msg):
       r'error: \'(?P<type>.+)\' was not declared in this scope\n'
       r'.*error: template argument 1 is invalid\n'
       r'.*error: \'.+\' was not declared in this scope')
+  clang_regex_type_of_retval_or_sole_param = (
+      _CLANG_FILE_LINE_RE +
+      r'error: use of undeclared identifier \'(?P<type>.*)\'\n'
+      r'(.*\n)*?'
+      r'(?P=file):(?P=line):(?P=column): error: '
+      r'non-friend class member \'Result\' cannot have a qualified name'
+      )
+  clang_regex_type_of_a_param = (
+      _CLANG_FILE_LINE_RE +
+      r'error: C\+\+ requires a type specifier for all declarations\n'
+      r'(.*\n)*?'
+      r'(?P=file):(?P=line):(?P=column): error: '
+      r'C\+\+ requires a type specifier for all declarations'
+      )
 
   diagnosis = """
 In a mock class template, types or typedefs defined in the base class
@@ -473,7 +487,9 @@ need to make it visible.  One way to do it is:
       [(gcc_4_3_1_regex_type_in_retval, diagnosis % {'type': 'Foo'}),
        (gcc_4_4_0_regex_type_in_retval, diagnosis % {'type': 'Foo'}),
        (gcc_regex_type_of_sole_param, diagnosis),
-       (gcc_regex_type_of_a_param, diagnosis)],
+       (gcc_regex_type_of_a_param, diagnosis),
+       (clang_regex_type_of_retval_or_sole_param, diagnosis),
+       (clang_regex_type_of_a_param, diagnosis % {'type': 'Foo'})],
       msg)
 
 

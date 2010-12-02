@@ -1020,6 +1020,14 @@ SetArgPointee(const T& x) {
   return MakePolymorphicAction(internal::SetArgumentPointeeAction<
       N, T, internal::IsAProtocolMessage<T>::value>(x));
 }
+// This overload allows SetArgPointee() to accept a string literal.
+template <size_t N>
+PolymorphicAction<
+  internal::SetArgumentPointeeAction<N, const char*, false> >
+SetArgPointee(const char* p) {
+  return MakePolymorphicAction(internal::SetArgumentPointeeAction<
+      N, const char*, false>(p));
+}
 // The following version is DEPRECATED.
 template <size_t N, typename T>
 PolymorphicAction<
