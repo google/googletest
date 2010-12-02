@@ -1462,6 +1462,9 @@ inline bool IsSpace(char ch) {
 inline bool IsUpper(char ch) {
   return isupper(static_cast<unsigned char>(ch)) != 0;
 }
+inline bool IsXDigit(char ch) {
+  return isxdigit(static_cast<unsigned char>(ch)) != 0;
+}
 
 inline char ToLower(char ch) {
   return static_cast<char>(tolower(static_cast<unsigned char>(ch)));
