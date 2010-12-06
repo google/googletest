@@ -1132,17 +1132,29 @@ Here are some other situations when value-parameterized tests come handy:
 == How to Write Value-Parameterized Tests ==
 
 To write value-parameterized tests, first you should define a fixture
-class. It must be derived from `::testing::TestWithParam<T>`, where `T`
-is the type of your parameter values. `TestWithParam<T>` is itself
-derived from `::testing::Test`. `T` can be any copyable type. If it's
-a raw pointer, you are responsible for managing the lifespan of the
-pointed values.
+class.  It must be derived from both `::testing::Test` and
+`::testing::WithParamInterface<T>` (the latter is a pure interface),
+where `T` is the type of your parameter values.  For convenience, you
+can just derive the fixture class from `::testing::TestWithParam<T>`,
+which itself is derived from both `::testing::Test` and
+`::testing::WithParamInterface<T>`. `T` can be any copyable type. If
+it's a raw pointer, you are responsible for managing the lifespan of
+the pointed values.
 
 {{{
 class FooTest : public ::testing::TestWithParam<const char*> {
   // You can implement all the usual fixture class members here.
   // To access the test parameter, call GetParam() from class
   // TestWithParam<T>.
+};
+
+// Or, when you want to add parameters to a pre-existing fixture class:
+class BaseTest : public ::testing::Test {
+  ...
+};
+class BarTest : public BaseTest,
+                public ::testing::WithParamInterface<const char*> {
+  ...
 };
 }}}
 
