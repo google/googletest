@@ -836,6 +836,39 @@ INSTANTIATE_TEST_CASE_P(InstantiationWithComments,
                         CommentTest,
                         Values(Unstreamable(1)));
 
+// Verify that we can create a hierarchy of test fixtures, where the base
+// class fixture is not parameterized and the derived class is. In this case
+// ParameterizedDerivedTest inherits from NonParameterizedBaseTest.  We
+// perform simple tests on both.
+class NonParameterizedBaseTest : public ::testing::Test {
+ public:
+  NonParameterizedBaseTest() : n_(17) { }
+ protected:
+  int n_;
+};
+
+class ParameterizedDerivedTest : public NonParameterizedBaseTest,
+                                 public ::testing::WithParamInterface<int> {
+ protected:
+  ParameterizedDerivedTest() : count_(0) { }
+  int count_;
+  static int global_count_;
+};
+
+int ParameterizedDerivedTest::global_count_ = 0;
+
+TEST_F(NonParameterizedBaseTest, FixtureIsInitialized) {
+  EXPECT_EQ(17, n_);
+}
+
+TEST_P(ParameterizedDerivedTest, SeesSequence) {
+  EXPECT_EQ(17, n_);
+  EXPECT_EQ(0, count_++);
+  EXPECT_EQ(GetParam(), global_count_++);
+}
+
+INSTANTIATE_TEST_CASE_P(RangeZeroToFive, ParameterizedDerivedTest, Range(0, 5));
+
 #endif  // GTEST_HAS_PARAM_TEST
 
 TEST(CompileTest, CombineIsDefinedOnlyWhenGtestHasParamTestIsDefined) {
