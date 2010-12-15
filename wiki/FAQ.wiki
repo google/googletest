@@ -31,6 +31,20 @@ list can help you decide whether it is for you too.
   * `SCOPED_TRACE` helps you understand the context of an assertion failure when it comes from inside a sub-routine or loop.
   * You can decide which tests to run using name patterns.  This saves time when you want to quickly reproduce a test failure.
 
+== I'm getting warnings when compiling Google Test.  Would you fix them? ==
+
+We strive to minimize compiler warnings Google Test generates.  Before releasing a new version, we test to make sure that it doesn't generate warnings when compiled using its CMake script on Windows, Linux, and Mac OS.
+
+Unfortunately, this doesn't mean you are guaranteed to see no warnings when compiling Google Test in your environment:
+
+  * You may be using a different compiler as we use, or a different version of the same compiler.  We cannot possibly test for all compilers.
+  * You may be compiling on a different platform as we do.
+  * Your project may be using different compiler flags as we do.
+
+It is not always possible to make Google Test warning-free for everyone.  Or, it may not be desirable if the warning is rarely enabled and fixing the violations makes the code more complex.
+
+If you see warnings when compiling Google Test, we suggest that you use the `-isystem` flag (assuming your are using GCC) to mark Google Test headers as system headers.  That'll suppress warnings from Google Test headers. 
+
 == Why should not test case names and test names contain underscore? ==
 
 Underscore (`_`) is special, as C++ reserves the following to be used by
