@@ -77,7 +77,8 @@ class LinkedPtrTest : public testing::Test {
 TEST_F(LinkedPtrTest, GeneralTest) {
   {
     linked_ptr<A> a0, a1, a2;
-    a0 = a0;
+    // Use explicit function call notation here to suppress self-assign warning.
+    a0.operator=(a0);
     a1 = a2;
     ASSERT_EQ(a0.get(), static_cast<A*>(NULL));
     ASSERT_EQ(a1.get(), static_cast<A*>(NULL));
