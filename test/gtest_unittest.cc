@@ -1150,7 +1150,8 @@ TEST(StringTest, CanBeAssignedNonEmpty) {
 TEST(StringTest, CanBeAssignedSelf) {
   String dest("hello");
 
-  dest = dest;
+  // Use explicit function call notation here to suppress self-assign warning.
+  dest.operator=(dest);
   EXPECT_STREQ("hello", dest.c_str());
 }
 
