@@ -168,6 +168,7 @@ class To {
 TEST(ImplicitCastTest, CanUseImplicitConstructor) {
   bool converted = false;
   To to = ::testing::internal::implicit_cast<To>(&converted);
+  (void)to;
   EXPECT_TRUE(converted);
 }
 
