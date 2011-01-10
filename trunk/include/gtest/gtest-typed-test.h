@@ -175,7 +175,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
     typedef gtest_TypeParam_ TypeParam; \
     virtual void TestBody(); \
   }; \
-  bool gtest_##CaseName##_##TestName##_registered_ = \
+  bool gtest_##CaseName##_##TestName##_registered_ GTEST_ATTRIBUTE_UNUSED_ = \
       ::testing::internal::TypeParameterizedTest< \
           CaseName, \
           ::testing::internal::TemplateSel< \
@@ -229,7 +229,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
     typedef gtest_TypeParam_ TypeParam; \
     virtual void TestBody(); \
   }; \
-  static bool gtest_##TestName##_defined_ = \
+  static bool gtest_##TestName##_defined_ GTEST_ATTRIBUTE_UNUSED_ = \
       GTEST_TYPED_TEST_CASE_P_STATE_(CaseName).AddTestName(\
           __FILE__, __LINE__, #CaseName, #TestName); \
   } \
@@ -248,7 +248,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
 // since some compilers may choke on '>>' when passing a template
 // instance (e.g. Types<int>)
 #define INSTANTIATE_TYPED_TEST_CASE_P(Prefix, CaseName, Types) \
-  bool gtest_##Prefix##_##CaseName = \
+  bool gtest_##Prefix##_##CaseName GTEST_ATTRIBUTE_UNUSED_ = \
       ::testing::internal::TypeParameterizedTestCase<CaseName, \
           GTEST_CASE_NAMESPACE_(CaseName)::gtest_AllTests_, \
           ::testing::internal::TypeList< Types >::type>::Register(\
