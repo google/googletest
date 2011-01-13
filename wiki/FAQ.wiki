@@ -982,6 +982,32 @@ you follow the rule of ending your test program names with `_test`,
 you can use the _horrible_ hack of sniffing your executable name
 (`argv[0]` in `main()`) to know whether the code is under test.
 
+== Google Test defines a macro that clashes with one defined by another library. How do I deal with that? ==
+
+In C++, macros don't obey namespaces.  Therefore two libraries that
+both define a macro of the same name will clash if you #include both
+definitions.  In case a Google Test macro clashes with another
+library, you can force Google Test to rename its macro to avoid the
+conflict.
+
+Specifically, if both Google Test and some other code define macro
+`FOO`, you can add
+{{{
+  -DGTEST_DONT_DEFINE_FOO=1
+}}}
+to the compiler flags to tell Google Test to change the macro's name
+from `FOO` to `GTEST_FOO`. For example, with `-DGTEST_DONT_DEFINE_TEST=1`, you'll need to write
+{{{
+  GTEST_TEST(SomeTest, DoesThis) { ... }
+}}}
+instead of
+{{{
+  TEST(SomeTest, DoesThis) { ... }
+}}}
+in order to define a test.
+
+Currently, the following `TEST`, `FAIL`, `SUCCEED`, and the basic comparison assertion macros can have alternative names. You can see the full list of covered macros [if%20!GTEST_DONT_DEFINE_%20package:http://googletest\.googlecode\.com%20file:/include/gtest/gtest.h here].
+
 == My question is not covered in your FAQ! ==
 
 If you cannot find the answer to your question in this FAQ, there are
