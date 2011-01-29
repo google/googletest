@@ -2047,13 +2047,17 @@ class GoogleTestFailureException : public ::std::runtime_error {
 };
 #endif  // GTEST_HAS_EXCEPTIONS
 
+namespace internal {
+// We put these helper functions in the internal namespace as IBM's xIC_r
+// compiler rejects the code if they were declared static.
+
 // Runs the given method and handles SEH exceptions it throws, when
 // SEH is supported; returns the 0-value for type Result in case of an
 // SEH exception.  (Microsoft compilers cannot handle SEH and C++
 // exceptions in the same function.  Therefore, we provide a separate
 // wrapper function for handling SEH exceptions.)
 template <class T, typename Result>
-static Result HandleSehExceptionsInMethodIfSupported(
+Result HandleSehExceptionsInMethodIfSupported(
     T* object, Result (T::*method)(), const char* location) {
 #if GTEST_HAS_SEH
   __try {
@@ -2080,7 +2084,7 @@ static Result HandleSehExceptionsInMethodIfSupported(
 // exceptions, if they are supported; returns the 0-value for type
 // Result in case of an SEH exception.
 template <class T, typename Result>
-static Result HandleExceptionsInMethodIfSupported(
+Result HandleExceptionsInMethodIfSupported(
     T* object, Result (T::*method)(), const char* location) {
   // NOTE: The user code can affect the way in which Google Test handles
   // exceptions by setting GTEST_FLAG(catch_exceptions), but only before
@@ -2131,17 +2135,19 @@ static Result HandleExceptionsInMethodIfSupported(
   }
 }
 
+}  // namespace internal
+
 // Runs the test and updates the test result.
 void Test::Run() {
   if (!HasSameFixtureClass()) return;
 
   internal::UnitTestImpl* const impl = internal::GetUnitTestImpl();
   impl->os_stack_trace_getter()->UponLeavingGTest();
-  HandleExceptionsInMethodIfSupported(this, &Test::SetUp, "SetUp()");
+  internal::HandleExceptionsInMethodIfSupported(this, &Test::SetUp, "SetUp()");
   // We will run the test only if SetUp() was successful.
   if (!HasFatalFailure()) {
     impl->os_stack_trace_getter()->UponLeavingGTest();
-    HandleExceptionsInMethodIfSupported(
+    internal::HandleExceptionsInMethodIfSupported(
         this, &Test::TestBody, "the test body");
   }
 
@@ -2149,7 +2155,7 @@ void Test::Run() {
   // always call TearDown(), even if SetUp() or the test body has
   // failed.
   impl->os_stack_trace_getter()->UponLeavingGTest();
-  HandleExceptionsInMethodIfSupported(
+  internal::HandleExceptionsInMethodIfSupported(
       this, &Test::TearDown, "TearDown()");
 }
 
@@ -2306,7 +2312,7 @@ void TestInfo::Run() {
   impl->os_stack_trace_getter()->UponLeavingGTest();
 
   // Creates the test object.
-  Test* const test = HandleExceptionsInMethodIfSupported(
+  Test* const test = internal::HandleExceptionsInMethodIfSupported(
       factory_, &internal::TestFactoryBase::CreateTest,
       "the test fixture's constructor");
 
@@ -2320,7 +2326,7 @@ void TestInfo::Run() {
 
   // Deletes the test object.
   impl->os_stack_trace_getter()->UponLeavingGTest();
-  HandleExceptionsInMethodIfSupported(
+  internal::HandleExceptionsInMethodIfSupported(
       test, &Test::DeleteSelf_, "the test fixture's destructor");
 
   result_.set_elapsed_time(internal::GetTimeInMillis() - start);
@@ -2415,7 +2421,7 @@ void TestCase::Run() {
 
   repeater->OnTestCaseStart(*this);
   impl->os_stack_trace_getter()->UponLeavingGTest();
-  HandleExceptionsInMethodIfSupported(
+  internal::HandleExceptionsInMethodIfSupported(
       this, &TestCase::RunSetUpTestCase, "SetUpTestCase()");
 
   const internal::TimeInMillis start = internal::GetTimeInMillis();
@@ -2425,7 +2431,7 @@ void TestCase::Run() {
   elapsed_time_ = internal::GetTimeInMillis() - start;
 
   impl->os_stack_trace_getter()->UponLeavingGTest();
-  HandleExceptionsInMethodIfSupported(
+  internal::HandleExceptionsInMethodIfSupported(
       this, &TestCase::RunTearDownTestCase, "TearDownTestCase()");
 
   repeater->OnTestCaseEnd(*this);
@@ -3832,7 +3838,7 @@ int UnitTest::Run() {
   }
 #endif  // GTEST_HAS_SEH
 
-  return HandleExceptionsInMethodIfSupported(
+  return internal::HandleExceptionsInMethodIfSupported(
       impl(),
       &internal::UnitTestImpl::RunAllTests,
       "auxiliary test code (environments or event listeners)") ? 0 : 1;
