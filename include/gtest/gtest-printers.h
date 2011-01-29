@@ -404,22 +404,22 @@ GTEST_API_ void PrintTo(wchar_t wc, ::std::ostream* os);
 // Overloads for C strings.
 GTEST_API_ void PrintTo(const char* s, ::std::ostream* os);
 inline void PrintTo(char* s, ::std::ostream* os) {
-  PrintTo(implicit_cast<const char*>(s), os);
+  PrintTo(ImplicitCast_<const char*>(s), os);
 }
 
 // signed/unsigned char is often used for representing binary data, so
 // we print pointers to it as void* to be safe.
 inline void PrintTo(const signed char* s, ::std::ostream* os) {
-  PrintTo(implicit_cast<const void*>(s), os);
+  PrintTo(ImplicitCast_<const void*>(s), os);
 }
 inline void PrintTo(signed char* s, ::std::ostream* os) {
-  PrintTo(implicit_cast<const void*>(s), os);
+  PrintTo(ImplicitCast_<const void*>(s), os);
 }
 inline void PrintTo(const unsigned char* s, ::std::ostream* os) {
-  PrintTo(implicit_cast<const void*>(s), os);
+  PrintTo(ImplicitCast_<const void*>(s), os);
 }
 inline void PrintTo(unsigned char* s, ::std::ostream* os) {
-  PrintTo(implicit_cast<const void*>(s), os);
+  PrintTo(ImplicitCast_<const void*>(s), os);
 }
 
 // MSVC can be configured to define wchar_t as a typedef of unsigned
@@ -431,7 +431,7 @@ inline void PrintTo(unsigned char* s, ::std::ostream* os) {
 // Overloads for wide C strings
 GTEST_API_ void PrintTo(const wchar_t* s, ::std::ostream* os);
 inline void PrintTo(wchar_t* s, ::std::ostream* os) {
-  PrintTo(implicit_cast<const wchar_t*>(s), os);
+  PrintTo(ImplicitCast_<const wchar_t*>(s), os);
 }
 #endif
 
