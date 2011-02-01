@@ -169,7 +169,7 @@ def _NeedToReturnReferenceDiagnoser(msg):
   gcc_regex = (r'In member function \'testing::internal::ReturnAction<R>.*\n'
                + _GCC_FILE_LINE_RE + r'instantiated from here\n'
                r'.*gmock-actions\.h.*error: creating array with negative size')
-  clang_regex = (r'error: array size is negative\r?\n'
+  clang_regex = (r'error:.*array.*negative.*\r?\n'
                  r'(.*\n)*?' +
                  _CLANG_NON_GMOCK_FILE_LINE_RE +
                  r'note: in instantiation of function template specialization '
@@ -414,10 +414,10 @@ def _NeedToUseReturnNullDiagnoser(msg):
   gcc_regex = ('instantiated from \'testing::internal::ReturnAction<R>'
                '::operator testing::Action<Func>\(\) const.*\n' +
                _GCC_FILE_LINE_RE + r'instantiated from here\n'
-               r'.*error: no matching function for call to \'implicit_cast\('
+               r'.*error: no matching function for call to \'ImplicitCast_\('
                r'long int&\)')
   clang_regex = (r'\bgmock-actions.h:.* error: no matching function for '
-                 r'call to \'implicit_cast\'\r?\n'
+                 r'call to \'ImplicitCast_\'\r?\n'
                  r'(.*\n)*?' +
                  _CLANG_NON_GMOCK_FILE_LINE_RE + r'note: in instantiation '
                  r'of function template specialization '
@@ -501,7 +501,7 @@ def _WrongMockMethodMacroDiagnoser(msg):
                r'.*\n'
                r'.*candidates are.*FunctionMocker<[^>]+A(?P<args>\d+)\)>')
   clang_regex = (_CLANG_NON_GMOCK_FILE_LINE_RE +
-                 r'error: array size is negative\r?\n'
+                 r'error:.*array.*negative.*r?\n'
                  r'(.*\n)*?'
                  r'(?P=file):(?P=line):(?P=column): error: too few arguments '
                  r'to function call, expected (?P<args>\d+), '

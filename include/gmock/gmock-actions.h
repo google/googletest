@@ -494,11 +494,11 @@ class ReturnAction {
     // single-argument constructor (e.g. Result is std::vector<int>) and R
     // has a type conversion operator template.  In that case, value_(value)
     // won't compile as the compiler doesn't known which constructor of
-    // Result to call.  implicit_cast forces the compiler to convert R to
+    // Result to call.  ImplicitCast_ forces the compiler to convert R to
     // Result without considering explicit constructors, thus resolving the
     // ambiguity. value_ is then initialized using its copy constructor.
     explicit Impl(R value)
-        : value_(::testing::internal::implicit_cast<Result>(value)) {}
+        : value_(::testing::internal::ImplicitCast_<Result>(value)) {}
 
     virtual Result Perform(const ArgumentTuple&) { return value_; }
 

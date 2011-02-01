@@ -1483,7 +1483,13 @@ class AstBuilder(object):
             assert class_token.token_type == tokenize.SYNTAX, class_token
             token = class_token
         else:
-            self._AddBackToken(class_token)
+            # Skip any macro (e.g. storage class specifiers) after the
+            # 'class' keyword.
+            next_token = self._GetNextToken()
+            if next_token.token_type == tokenize.NAME:
+                self._AddBackToken(next_token)
+            else:
+                self._AddBackTokens([class_token, next_token])
             name_tokens, token = self.GetName()
             class_name = ''.join([t.name for t in name_tokens])
         bases = None

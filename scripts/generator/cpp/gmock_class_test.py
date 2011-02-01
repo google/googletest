@@ -193,6 +193,22 @@ void());
     self.assertEqualIgnoreLeadingWhitespace(
         expected, self.GenerateMocks(source))
 
+  def testClassWithStorageSpecifierMacro(self):
+    source = """
+class STORAGE_SPECIFIER Test {
+ public:
+  virtual void Foo();
+};
+"""
+    expected = """\
+class MockTest : public Test {
+public:
+MOCK_METHOD0(Foo,
+void());
+};
+"""
+    self.assertEqualIgnoreLeadingWhitespace(
+        expected, self.GenerateMocks(source))
 
 if __name__ == '__main__':
   unittest.main()

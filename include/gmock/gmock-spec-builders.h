@@ -1388,7 +1388,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
       mock_obj_ = mock_obj;
     }
     Mock::Register(mock_obj, this);
-    return *::testing::internal::down_cast<FunctionMocker<F>*>(this);
+    return *::testing::internal::DownCast_<FunctionMocker<F>*>(this);
   }
 
   // The following two functions are from UntypedFunctionMockerBase.
