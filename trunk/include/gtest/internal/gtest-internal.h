@@ -561,10 +561,10 @@ typedef void (*TearDownTestCaseFunc)();
 //
 //   test_case_name:   name of the test case
 //   name:             name of the test
-//   test_case_comment: a comment on the test case that will be included in
-//                      the test output
-//   comment:          a comment on the test that will be included in the
-//                     test output
+//   type_param        the name of the test's type parameter, or NULL if
+//                     this is not  a typed or a type-parameterized test.
+//   value_param       text representation of the test's value parameter,
+//                     or NULL if this is not a type-parameterized test.
 //   fixture_class_id: ID of the test fixture class
 //   set_up_tc:        pointer to the function that sets up the test case
 //   tear_down_tc:     pointer to the function that tears down the test case
@@ -573,7 +573,8 @@ typedef void (*TearDownTestCaseFunc)();
 //                     ownership of the factory object.
 GTEST_API_ TestInfo* MakeAndRegisterTestInfo(
     const char* test_case_name, const char* name,
-    const char* test_case_comment, const char* comment,
+    const char* type_param,
+    const char* value_param,
     TypeId fixture_class_id,
     SetUpTestCaseFunc set_up_tc,
     TearDownTestCaseFunc tear_down_tc,
@@ -662,8 +663,8 @@ class TypeParameterizedTest {
         String::Format("%s%s%s/%d", prefix, prefix[0] == '\0' ? "" : "/",
                        case_name, index).c_str(),
         GetPrefixUntilComma(test_names).c_str(),
-        String::Format("TypeParam = %s", GetTypeName<Type>().c_str()).c_str(),
-        "",
+        GetTypeName<Type>().c_str(),
+        NULL,  // No value parameter.
         GetTypeId<FixtureClass>(),
         TestClass::SetUpTestCase,
         TestClass::TearDownTestCase,
@@ -1197,7 +1198,7 @@ class GTEST_TEST_CLASS_NAME_(test_case_name, test_name) : public parent_class {\
 ::testing::TestInfo* const GTEST_TEST_CLASS_NAME_(test_case_name, test_name)\
   ::test_info_ =\
     ::testing::internal::MakeAndRegisterTestInfo(\
-        #test_case_name, #test_name, "", "", \
+        #test_case_name, #test_name, NULL, NULL, \
         (parent_id), \
         parent_class::SetUpTestCase, \
         parent_class::TearDownTestCase, \

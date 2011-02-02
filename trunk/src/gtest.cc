@@ -2174,16 +2174,18 @@ bool Test::HasNonfatalFailure() {
 
 // Constructs a TestInfo object. It assumes ownership of the test factory
 // object.
+// TODO(vladl@google.com): Make a_test_case_name and a_name const string&'s
+// to signify they cannot be NULLs.
 TestInfo::TestInfo(const char* a_test_case_name,
                    const char* a_name,
-                   const char* a_test_case_comment,
-                   const char* a_comment,
+                   const char* a_type_param,
+                   const char* a_value_param,
                    internal::TypeId fixture_class_id,
                    internal::TestFactoryBase* factory)
     : test_case_name_(a_test_case_name),
       name_(a_name),
-      test_case_comment_(a_test_case_comment),
-      comment_(a_comment),
+      type_param_(a_type_param ? new std::string(a_type_param) : NULL),
+      value_param_(a_value_param ? new std::string(a_value_param) : NULL),
       fixture_class_id_(fixture_class_id),
       should_run_(false),
       is_disabled_(false),
@@ -2203,10 +2205,10 @@ namespace internal {
 //
 //   test_case_name:   name of the test case
 //   name:             name of the test
-//   test_case_comment: a comment on the test case that will be included in
-//                      the test output
-//   comment:          a comment on the test that will be included in the
-//                     test output
+//   type_param:       the name of the test's type parameter, or NULL if
+//                     this is not a typed or a type-parameterized test.
+//   value_param:      text representation of the test's value parameter,
+//                     or NULL if this is not a value-parameterized test.
 //   fixture_class_id: ID of the test fixture class
 //   set_up_tc:        pointer to the function that sets up the test case
 //   tear_down_tc:     pointer to the function that tears down the test case
@@ -2215,13 +2217,14 @@ namespace internal {
 //                     ownership of the factory object.
 TestInfo* MakeAndRegisterTestInfo(
     const char* test_case_name, const char* name,
-    const char* test_case_comment, const char* comment,
+    const char* type_param,
+    const char* value_param,
     TypeId fixture_class_id,
     SetUpTestCaseFunc set_up_tc,
     TearDownTestCaseFunc tear_down_tc,
     TestFactoryBase* factory) {
   TestInfo* const test_info =
-      new TestInfo(test_case_name, name, test_case_comment, comment,
+      new TestInfo(test_case_name, name, type_param, value_param,
                    fixture_class_id, factory);
   GetUnitTestImpl()->AddTestInfo(set_up_tc, tear_down_tc, test_info);
   return test_info;
@@ -2370,13 +2373,15 @@ int TestCase::total_test_count() const {
 // Arguments:
 //
 //   name:         name of the test case
+//   a_type_param: the name of the test case's type parameter, or NULL if
+//                 this is not a typed or a type-parameterized test case.
 //   set_up_tc:    pointer to the function that sets up the test case
 //   tear_down_tc: pointer to the function that tears down the test case
-TestCase::TestCase(const char* a_name, const char* a_comment,
+TestCase::TestCase(const char* a_name, const char* a_type_param,
                    Test::SetUpTestCaseFunc set_up_tc,
                    Test::TearDownTestCaseFunc tear_down_tc)
     : name_(a_name),
-      comment_(a_comment),
+      type_param_(a_type_param ? new std::string(a_type_param) : NULL),
       set_up_tc_(set_up_tc),
       tear_down_tc_(tear_down_tc),
       should_run_(false),
@@ -2648,15 +2653,19 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
 }
 
 void PrintFullTestCommentIfPresent(const TestInfo& test_info) {
-  const char* const comment = test_info.comment();
-  const char* const test_case_comment = test_info.test_case_comment();
+  const char* const type_param = test_info.type_param();
+  const char* const value_param = test_info.value_param();
 
-  if (test_case_comment[0] != '\0' || comment[0] != '\0') {
-    printf(", where %s", test_case_comment);
-    if (test_case_comment[0] != '\0' && comment[0] != '\0') {
-      printf(" and ");
+  if (type_param != NULL || value_param != NULL) {
+    printf(", where ");
+    if (type_param != NULL) {
+      printf("TypeParam = %s", type_param);
+      if (value_param != NULL)
+        printf(" and ");
     }
-    printf("%s", comment);
+    if (value_param != NULL) {
+      printf("GetParam() = %s", value_param);
+    }
   }
 }
 
@@ -2739,10 +2748,10 @@ void PrettyUnitTestResultPrinter::OnTestCaseStart(const TestCase& test_case) {
       FormatCountableNoun(test_case.test_to_run_count(), "test", "tests");
   ColoredPrintf(COLOR_GREEN, "[----------] ");
   printf("%s from %s", counts.c_str(), test_case_name_.c_str());
-  if (test_case.comment()[0] == '\0') {
+  if (test_case.type_param() == NULL) {
     printf("\n");
   } else {
-    printf(", where %s\n", test_case.comment());
+    printf(", where TypeParam = %s\n", test_case.type_param());
   }
   fflush(stdout);
 }
@@ -3208,8 +3217,18 @@ void XmlUnitTestResultPrinter::OutputXmlTestInfo(::std::ostream* stream,
                                                  const TestInfo& test_info) {
   const TestResult& result = *test_info.result();
   *stream << "    <testcase name=\""
-          << EscapeXmlAttribute(test_info.name()).c_str()
-          << "\" status=\""
+          << EscapeXmlAttribute(test_info.name()).c_str() << "\"";
+
+  if (test_info.value_param() != NULL) {
+    *stream << " value_param=\"" << EscapeXmlAttribute(test_info.value_param())
+            << "\"";
+  }
+  if (test_info.type_param() != NULL) {
+    *stream << " type_param=\"" << EscapeXmlAttribute(test_info.type_param())
+            << "\"";
+  }
+
+  *stream << " status=\""
           << (test_info.should_run() ? "run" : "notrun")
           << "\" time=\""
           << FormatTimeInMillisAsSeconds(result.elapsed_time())
@@ -4059,10 +4078,12 @@ class TestCaseNameIs {
 // Arguments:
 //
 //   test_case_name: name of the test case
+//   type_param:     the name of the test case's type parameter, or NULL if
+//                   this is not a typed or a type-parameterized test case.
 //   set_up_tc:      pointer to the function that sets up the test case
 //   tear_down_tc:   pointer to the function that tears down the test case
 TestCase* UnitTestImpl::GetTestCase(const char* test_case_name,
-                                    const char* comment,
+                                    const char* type_param,
                                     Test::SetUpTestCaseFunc set_up_tc,
                                     Test::TearDownTestCaseFunc tear_down_tc) {
   // Can we find a TestCase with the given name?
@@ -4075,7 +4096,7 @@ TestCase* UnitTestImpl::GetTestCase(const char* test_case_name,
 
   // No.  Let's create one.
   TestCase* const new_test_case =
-      new TestCase(test_case_name, comment, set_up_tc, tear_down_tc);
+      new TestCase(test_case_name, type_param, set_up_tc, tear_down_tc);
 
   // Is this a death test case?
   if (internal::UnitTestOptions::MatchesFilter(String(test_case_name),

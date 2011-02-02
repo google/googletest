@@ -505,12 +505,11 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
              param_it != generator.end(); ++param_it, ++i) {
           Message test_name_stream;
           test_name_stream << test_info->test_base_name.c_str() << "/" << i;
-          std::string comment = "GetParam() = " + PrintToString(*param_it);
           MakeAndRegisterTestInfo(
               test_case_name_stream.GetString().c_str(),
               test_name_stream.GetString().c_str(),
-              "",  // test_case_comment
-              comment.c_str(),
+              NULL,  // No type parameter.
+              PrintToString(*param_it).c_str(),
               GetTestCaseTypeId(),
               TestCase::SetUpTestCase,
               TestCase::TearDownTestCase,
