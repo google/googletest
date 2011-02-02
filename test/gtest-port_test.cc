@@ -209,6 +209,44 @@ TEST(GtestCheckSyntaxTest, WorksWithSwitch) {
       GTEST_CHECK_(true) << "Check failed in switch case";
 }
 
+// Verifies behavior of FormatFileLocation.
+TEST(FormatFileLocationTest, FormatsFileLocation) {
+  EXPECT_PRED_FORMAT2(IsSubstring, "foo.cc", FormatFileLocation("foo.cc", 42));
+  EXPECT_PRED_FORMAT2(IsSubstring, "42", FormatFileLocation("foo.cc", 42));
+}
+
+TEST(FormatFileLocationTest, FormatsUnknownFile) {
+  EXPECT_PRED_FORMAT2(
+      IsSubstring, "unknown file", FormatFileLocation(NULL, 42));
+  EXPECT_PRED_FORMAT2(IsSubstring, "42", FormatFileLocation(NULL, 42));
+}
+
+TEST(FormatFileLocationTest, FormatsUknownLine) {
+  EXPECT_EQ("foo.cc:", FormatFileLocation("foo.cc", -1));
+}
+
+TEST(FormatFileLocationTest, FormatsUknownFileAndLine) {
+  EXPECT_EQ("unknown file:", FormatFileLocation(NULL, -1));
+}
+
+// Verifies behavior of FormatCompilerIndependentFileLocation.
+TEST(FormatCompilerIndependentFileLocationTest, FormatsFileLocation) {
+  EXPECT_EQ("foo.cc:42", FormatCompilerIndependentFileLocation("foo.cc", 42));
+}
+
+TEST(FormatCompilerIndependentFileLocationTest, FormatsUknownFile) {
+  EXPECT_EQ("unknown file:42",
+            FormatCompilerIndependentFileLocation(NULL, 42));
+}
+
+TEST(FormatCompilerIndependentFileLocationTest, FormatsUknownLine) {
+  EXPECT_EQ("foo.cc", FormatCompilerIndependentFileLocation("foo.cc", -1));
+}
+
+TEST(FormatCompilerIndependentFileLocationTest, FormatsUknownFileAndLine) {
+  EXPECT_EQ("unknown file", FormatCompilerIndependentFileLocation(NULL, -1));
+}
+
 #if GTEST_OS_MAC
 void* ThreadFunc(void* data) {
   pthread_mutex_t* mutex = static_cast<pthread_mutex_t*>(data);

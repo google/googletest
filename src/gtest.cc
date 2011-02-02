@@ -3245,8 +3245,9 @@ void XmlUnitTestResultPrinter::OutputXmlTestInfo(::std::ostream* stream,
               << EscapeXmlAttribute(part.summary()).c_str()
               << "\" type=\"\">";
       const String message = RemoveInvalidXmlCharacters(String::Format(
-          "%s:%d\n%s",
-          part.file_name(), part.line_number(),
+          "%s\n%s",
+          internal::FormatCompilerIndependentFileLocation(
+              part.file_name(), part.line_number()).c_str(),
           part.message()).c_str());
       OutputXmlCDataSection(stream, message.c_str());
       *stream << "</failure>\n";

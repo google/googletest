@@ -424,6 +424,38 @@ void RE::Init(const char* regex) {
 
 #endif  // GTEST_USES_POSIX_RE
 
+const char kUnknownFile[] = "unknown file";
+
+// Formats a source file path and a line number as they would appear
+// in an error message from the compiler used to compile this code.
+GTEST_API_ ::std::string FormatFileLocation(const char* file, int line) {
+  const char* const file_name = file == NULL ? kUnknownFile : file;
+
+  if (line < 0) {
+    return String::Format("%s:", file_name).c_str();
+  }
+#ifdef _MSC_VER
+  return String::Format("%s(%d):", file_name, line).c_str();
+#else
+  return String::Format("%s:%d:", file_name, line).c_str();
+#endif  // _MSC_VER
+}
+
+// Formats a file location for compiler-independent XML output.
+// Although this function is not platform dependent, we put it next to
+// FormatFileLocation in order to contrast the two functions.
+// Note that FormatCompilerIndependentFileLocation() does NOT append colon
+// to the file location it produces, unlike FormatFileLocation().
+GTEST_API_ ::std::string FormatCompilerIndependentFileLocation(
+    const char* file, int line) {
+  const char* const file_name = file == NULL ? kUnknownFile : file;
+
+  if (line < 0)
+    return file_name;
+  else
+    return String::Format("%s:%d", file_name, line).c_str();
+}
+
 
 GTestLog::GTestLog(GTestLogSeverity severity, const char* file, int line)
     : severity_(severity) {
