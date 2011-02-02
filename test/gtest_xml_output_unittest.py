@@ -54,7 +54,7 @@ else:
   STACK_TRACE_TEMPLATE = ""
 
 EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
-<testsuites tests="15" failures="4" disabled="2" errors="0" time="*" name="AllTests">
+<testsuites tests="23" failures="4" disabled="2" errors="0" time="*" name="AllTests">
   <testsuite name="SuccessfulTest" tests="1" failures="0" disabled="0" errors="0" time="*">
     <testcase name="Succeeds" status="run" time="*" classname="SuccessfulTest"/>
   </testsuite>
@@ -104,6 +104,24 @@ Invalid characters in brackets []%(stack)s]]></failure>
      <testcase name="RecordProperty" status="run" time="*" classname="NoFixtureTest" key="1"/>
      <testcase name="ExternalUtilityThatCallsRecordIntValuedProperty" status="run" time="*" classname="NoFixtureTest" key_for_utility_int="1"/>
      <testcase name="ExternalUtilityThatCallsRecordStringValuedProperty" status="run" time="*" classname="NoFixtureTest" key_for_utility_string="1"/>
+  </testsuite>
+  <testsuite name="Single/ValueParamTest" tests="4" failures="0" disabled="0" errors="0" time="*">
+    <testcase name="HasValueParamAttribute/0" value_param="33" status="run" time="*" classname="Single/ValueParamTest" />
+    <testcase name="HasValueParamAttribute/1" value_param="42" status="run" time="*" classname="Single/ValueParamTest" />
+    <testcase name="AnotherTestThatHasValueParamAttribute/0" value_param="33" status="run" time="*" classname="Single/ValueParamTest" />
+    <testcase name="AnotherTestThatHasValueParamAttribute/1" value_param="42" status="run" time="*" classname="Single/ValueParamTest" />
+  </testsuite>
+  <testsuite name="TypedTest/0" tests="1" failures="0" disabled="0" errors="0" time="*">
+    <testcase name="HasTypeParamAttribute" type_param="*" status="run" time="*" classname="TypedTest/0" />
+  </testsuite>
+  <testsuite name="TypedTest/1" tests="1" failures="0" disabled="0" errors="0" time="*">
+    <testcase name="HasTypeParamAttribute" type_param="*" status="run" time="*" classname="TypedTest/1" />
+  </testsuite>
+  <testsuite name="Single/TypeParameterizedTestCase/0" tests="1" failures="0" disabled="0" errors="0" time="*">
+    <testcase name="HasTypeParamAttribute" type_param="*" status="run" time="*" classname="Single/TypeParameterizedTestCase/0" />
+  </testsuite>
+  <testsuite name="Single/TypeParameterizedTestCase/1" tests="1" failures="0" disabled="0" errors="0" time="*">
+    <testcase name="HasTypeParamAttribute" type_param="*" status="run" time="*" classname="Single/TypeParameterizedTestCase/1" />
   </testsuite>
 </testsuites>""" % {'stack': STACK_TRACE_TEMPLATE}
 

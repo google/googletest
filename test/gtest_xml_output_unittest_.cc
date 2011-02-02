@@ -42,9 +42,13 @@
 
 using ::testing::InitGoogleTest;
 using ::testing::TestEventListeners;
+using ::testing::TestWithParam;
 using ::testing::UnitTest;
+using ::testing::Test;
+using ::testing::Types;
+using ::testing::Values;
 
-class SuccessfulTest : public testing::Test {
+class SuccessfulTest : public Test {
 };
 
 TEST_F(SuccessfulTest, Succeeds) {
@@ -52,14 +56,14 @@ TEST_F(SuccessfulTest, Succeeds) {
   ASSERT_EQ(1, 1);
 }
 
-class FailedTest : public testing::Test {
+class FailedTest : public Test {
 };
 
 TEST_F(FailedTest, Fails) {
   ASSERT_EQ(1, 2);
 }
 
-class DisabledTest : public testing::Test {
+class DisabledTest : public Test {
 };
 
 TEST_F(DisabledTest, DISABLED_test_not_run) {
@@ -91,7 +95,7 @@ TEST(InvalidCharactersTest, InvalidCharactersInMessage) {
   FAIL() << "Invalid characters in brackets [\x1\x2]";
 }
 
-class PropertyRecordingTest : public testing::Test {
+class PropertyRecordingTest : public Test {
 };
 
 TEST_F(PropertyRecordingTest, OneProperty) {
@@ -133,6 +137,31 @@ TEST(NoFixtureTest, ExternalUtilityThatCallsRecordIntValuedProperty) {
 TEST(NoFixtureTest, ExternalUtilityThatCallsRecordStringValuedProperty) {
   ExternalUtilityThatCallsRecordProperty("key_for_utility_string", "1");
 }
+
+// Verifies that the test parameter value is output in the 'value_param'
+// XML attribute for value-parameterized tests.
+class ValueParamTest : public TestWithParam<int> {};
+TEST_P(ValueParamTest, HasValueParamAttribute) {}
+TEST_P(ValueParamTest, AnotherTestThatHasValueParamAttribute) {}
+INSTANTIATE_TEST_CASE_P(Single, ValueParamTest, Values(33, 42));
+
+// Verifies that the type parameter name is output in the 'type_param'
+// XML attribute for typed tests.
+template <typename T> class TypedTest : public Test {};
+typedef Types<int, long> TypedTestTypes;
+TYPED_TEST_CASE(TypedTest, TypedTestTypes);
+TYPED_TEST(TypedTest, HasTypeParamAttribute) {}
+
+// Verifies that the type parameter name is output in the 'type_param'
+// XML attribute for type-parameterized tests.
+template <typename T> class TypeParameterizedTestCase : public Test {};
+TYPED_TEST_CASE_P(TypeParameterizedTestCase);
+TYPED_TEST_P(TypeParameterizedTestCase, HasTypeParamAttribute) {}
+REGISTER_TYPED_TEST_CASE_P(TypeParameterizedTestCase, HasTypeParamAttribute);
+typedef Types<int, long> TypeParameterizedTestCaseTypes;
+INSTANTIATE_TYPED_TEST_CASE_P(Single,
+                              TypeParameterizedTestCase,
+                              TypeParameterizedTestCaseTypes);
 
 int main(int argc, char** argv) {
   InitGoogleTest(&argc, argv);

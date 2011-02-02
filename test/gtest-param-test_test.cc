@@ -792,19 +792,17 @@ INSTANTIATE_TEST_CASE_P(FourElemSequence, SeparateInstanceTest, Range(1, 4));
 // sequence element used to instantiate the test.
 class NamingTest : public TestWithParam<int> {};
 
-TEST_P(NamingTest, TestsAreNamedAndCommentedCorrectly) {
+TEST_P(NamingTest, TestsReportCorrectNamesAndParameters) {
   const ::testing::TestInfo* const test_info =
      ::testing::UnitTest::GetInstance()->current_test_info();
 
   EXPECT_STREQ("ZeroToFiveSequence/NamingTest", test_info->test_case_name());
 
   Message index_stream;
-  index_stream << "TestsAreNamedAndCommentedCorrectly/" << GetParam();
+  index_stream << "TestsReportCorrectNamesAndParameters/" << GetParam();
   EXPECT_STREQ(index_stream.GetString().c_str(), test_info->name());
 
-  const ::std::string comment =
-      "GetParam() = " + ::testing::PrintToString(GetParam());
-  EXPECT_EQ(comment, test_info->comment());
+  EXPECT_EQ(::testing::PrintToString(GetParam()), test_info->value_param());
 }
 
 INSTANTIATE_TEST_CASE_P(ZeroToFiveSequence, NamingTest, Range(0, 5));
@@ -823,13 +821,11 @@ class Unstreamable {
 
 class CommentTest : public TestWithParam<Unstreamable> {};
 
-TEST_P(CommentTest, TestsWithUnstreamableParamsCommentedCorrectly) {
+TEST_P(CommentTest, TestsCorrectlyReportUnstreamableParams) {
   const ::testing::TestInfo* const test_info =
      ::testing::UnitTest::GetInstance()->current_test_info();
 
-  const ::std::string comment =
-      "GetParam() = " + ::testing::PrintToString(GetParam());
-  EXPECT_EQ(comment, test_info->comment());
+  EXPECT_EQ(::testing::PrintToString(GetParam()), test_info->value_param());
 }
 
 INSTANTIATE_TEST_CASE_P(InstantiationWithComments,

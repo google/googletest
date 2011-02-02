@@ -607,10 +607,12 @@ class GTEST_API_ UnitTestImpl {
   // Arguments:
   //
   //   test_case_name: name of the test case
+  //   type_param:     the name of the test's type parameter, or NULL if
+  //                   this is not a typed or a type-parameterized test.
   //   set_up_tc:      pointer to the function that sets up the test case
   //   tear_down_tc:   pointer to the function that tears down the test case
   TestCase* GetTestCase(const char* test_case_name,
-                        const char* comment,
+                        const char* type_param,
                         Test::SetUpTestCaseFunc set_up_tc,
                         Test::TearDownTestCaseFunc tear_down_tc);
 
@@ -623,7 +625,7 @@ class GTEST_API_ UnitTestImpl {
   //   test_info:    the TestInfo object
   void AddTestInfo(Test::SetUpTestCaseFunc set_up_tc,
                    Test::TearDownTestCaseFunc tear_down_tc,
-                   TestInfo * test_info) {
+                   TestInfo* test_info) {
     // In order to support thread-safe death tests, we need to
     // remember the original working directory when the test program
     // was first invoked.  We cannot do this in RUN_ALL_TESTS(), as
@@ -638,7 +640,7 @@ class GTEST_API_ UnitTestImpl {
     }
 
     GetTestCase(test_info->test_case_name(),
-                test_info->test_case_comment(),
+                test_info->type_param(),
                 set_up_tc,
                 tear_down_tc)->AddTestInfo(test_info);
   }

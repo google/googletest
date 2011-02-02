@@ -58,8 +58,9 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
     *  It has the same tag name as expected_node.
     *  It has the same set of attributes as expected_node, each with
        the same value as the corresponding attribute of expected_node.
-       An exception is any attribute named "time", which needs only be
-       convertible to a floating-point number.
+       Exceptions are any attribute named "time", which needs only be
+       convertible to a floating-point number and any attribute named
+       "type_param" which only has to be non-empty.
     *  It has an equivalent set of child nodes (including elements and
        CDATA sections) as expected_node.  Note that we ignore the
        order of the children as they are not guaranteed to be in any
@@ -150,6 +151,9 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
     *  The "time" attribute of <testsuites>, <testsuite> and <testcase>
        elements is replaced with a single asterisk, if it contains
        only digit characters.
+    *  The "type_param" attribute of <testcase> elements is replaced with a
+       single asterisk (if it sn non-empty) as it is the type name returned
+       by the compiler and is platform dependent.
     *  The line number reported in the first line of the "message"
        attribute of <failure> elements is replaced with a single asterisk.
     *  The directory names in file paths are removed.
@@ -159,6 +163,9 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
     if element.tagName in ("testsuites", "testsuite", "testcase"):
       time = element.getAttributeNode("time")
       time.value = re.sub(r"^\d+(\.\d+)?$", "*", time.value)
+      type_param = element.getAttributeNode("type_param")
+      if type_param and type_param.value:
+        type_param.value = "*"
     elif element.tagName == "failure":
       for child in element.childNodes:
         if child.nodeType == Node.CDATA_SECTION_NODE:
