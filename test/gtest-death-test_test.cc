@@ -103,9 +103,10 @@ class ReplaceDeathTestFactory {
 }  // namespace internal
 }  // namespace testing
 
-void DieInside(const char* function) {
-  fprintf(stderr, "death inside %s().", function);
-  fflush(stderr);
+void DieWithMessage(const ::std::string& message) {
+  fprintf(stderr, "%s", message.c_str());
+  fflush(stderr);  // Make sure the text is printed before the process exits.
+
   // We call _exit() instead of exit(), as the former is a direct
   // system call and thus safer in the presence of threads.  exit()
   // will invoke user-defined exit-hooks, which may do dangerous
@@ -116,6 +117,10 @@ void DieInside(const char* function) {
   // fooled by a fake condition.
   if (AlwaysTrue())
     _exit(1);
+}
+
+void DieInside(const ::std::string& function) {
+  DieWithMessage("death inside " + function + "().");
 }
 
 // Tests that death tests work.
@@ -684,6 +689,57 @@ TEST_F(TestForDeathTest, InvalidStyle) {
   EXPECT_NONFATAL_FAILURE({  // NOLINT
     EXPECT_DEATH(_exit(0), "") << "This failure is expected.";
   }, "This failure is expected.");
+}
+
+TEST_F(TestForDeathTest, DeathTestFailedOutput) {
+  testing::GTEST_FLAG(death_test_style) = "fast";
+  EXPECT_NONFATAL_FAILURE(
+      EXPECT_DEATH(DieWithMessage("death\n"),
+                   "expected message"),
+      "Actual msg:\n"
+      "[  DEATH   ] death\n");
+}
+
+TEST_F(TestForDeathTest, DeathTestUnexpectedReturnOutput) {
+  testing::GTEST_FLAG(death_test_style) = "fast";
+  EXPECT_NONFATAL_FAILURE(
+      EXPECT_DEATH({
+          fprintf(stderr, "returning\n");
+          fflush(stderr);
+          return;
+        }, ""),
+      "    Result: illegal return in test statement.\n"
+      " Error msg:\n"
+      "[  DEATH   ] returning\n");
+}
+
+TEST_F(TestForDeathTest, DeathTestBadExitCodeOutput) {
+  testing::GTEST_FLAG(death_test_style) = "fast";
+  EXPECT_NONFATAL_FAILURE(
+      EXPECT_EXIT(DieWithMessage("exiting with rc 1\n"),
+                  testing::ExitedWithCode(3),
+                  "expected message"),
+      "    Result: died but not with expected exit code:\n"
+      "            Exited with exit status 1\n"
+      "Actual msg:\n"
+      "[  DEATH   ] exiting with rc 1\n");
+}
+
+TEST_F(TestForDeathTest, DeathTestMultiLineMatchFail) {
+  testing::GTEST_FLAG(death_test_style) = "fast";
+  EXPECT_NONFATAL_FAILURE(
+      EXPECT_DEATH(DieWithMessage("line 1\nline 2\nline 3\n"),
+                   "line 1\nxyz\nline 3\n"),
+      "Actual msg:\n"
+      "[  DEATH   ] line 1\n"
+      "[  DEATH   ] line 2\n"
+      "[  DEATH   ] line 3\n");
+}
+
+TEST_F(TestForDeathTest, DeathTestMultiLineMatchPass) {
+  testing::GTEST_FLAG(death_test_style) = "fast";
+  EXPECT_DEATH(DieWithMessage("line 1\nline 2\nline 3\n"),
+               "line 1\nline 2\nline 3\n");
 }
 
 // A DeathTestFactory that returns MockDeathTests.

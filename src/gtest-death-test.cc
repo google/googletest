@@ -438,6 +438,24 @@ void DeathTestImpl::Abort(AbortReason reason) {
   _exit(1);  // Exits w/o any normal exit hooks (we were supposed to crash)
 }
 
+// Returns an indented copy of stderr output for a death test.
+// This makes distinguishing death test output lines from regular log lines
+// much easier.
+static ::std::string FormatDeathTestOutput(const ::std::string& output) {
+  ::std::string ret;
+  for (size_t at = 0; ; ) {
+    const size_t line_end = output.find('\n', at);
+    ret += "[  DEATH   ] ";
+    if (line_end == ::std::string::npos) {
+      ret += output.substr(at);
+      break;
+    }
+    ret += output.substr(at, line_end + 1 - at);
+    at = line_end + 1;
+  }
+  return ret;
+}
+
 // Assesses the success or failure of a death test, using both private
 // members which have previously been set, and one argument:
 //
@@ -473,15 +491,15 @@ bool DeathTestImpl::Passed(bool status_ok) {
   switch (outcome()) {
     case LIVED:
       buffer << "    Result: failed to die.\n"
-             << " Error msg: " << error_message;
+             << " Error msg:\n" << FormatDeathTestOutput(error_message);
       break;
     case THREW:
       buffer << "    Result: threw an exception.\n"
-             << " Error msg: " << error_message;
+             << " Error msg:\n" << FormatDeathTestOutput(error_message);
       break;
     case RETURNED:
       buffer << "    Result: illegal return in test statement.\n"
-             << " Error msg: " << error_message;
+             << " Error msg:\n" << FormatDeathTestOutput(error_message);
       break;
     case DIED:
       if (status_ok) {
@@ -491,11 +509,12 @@ bool DeathTestImpl::Passed(bool status_ok) {
         } else {
           buffer << "    Result: died but not with expected error.\n"
                  << "  Expected: " << regex()->pattern() << "\n"
-                 << "Actual msg: " << error_message;
+                 << "Actual msg:\n" << FormatDeathTestOutput(error_message);
         }
       } else {
         buffer << "    Result: died but not with expected exit code:\n"
-               << "            " << ExitSummary(status()) << "\n";
+               << "            " << ExitSummary(status()) << "\n"
+               << "Actual msg:\n" << FormatDeathTestOutput(error_message);
       }
       break;
     case IN_PROGRESS:
