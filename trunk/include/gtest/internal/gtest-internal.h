@@ -536,20 +536,6 @@ GTEST_API_ AssertionResult IsHRESULTFailure(const char* expr,
 
 #endif  // GTEST_OS_WINDOWS
 
-// Formats a source file path and a line number as they would appear
-// in a compiler error message.
-inline String FormatFileLocation(const char* file, int line) {
-  const char* const file_name = file == NULL ? "unknown file" : file;
-  if (line < 0) {
-    return String::Format("%s:", file_name);
-  }
-#ifdef _MSC_VER
-  return String::Format("%s(%d):", file_name, line);
-#else
-  return String::Format("%s:%d:", file_name, line);
-#endif  // _MSC_VER
-}
-
 // Types of SetUpTestCase() and TearDownTestCase() functions.
 typedef void (*SetUpTestCaseFunc)();
 typedef void (*TearDownTestCaseFunc)();
