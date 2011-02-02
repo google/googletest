@@ -37,7 +37,6 @@
 
 #include <string.h>  // For strcmp.
 #include <algorithm>
-#include <sstream>
 
 using ::testing::InitGoogleTest;
 
