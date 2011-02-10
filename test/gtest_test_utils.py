@@ -162,11 +162,7 @@ def GetTestExecutablePath(executable_name, build_dir=None):
     message = (
         'Unable to find the test binary. Please make sure to provide path\n'
         'to the binary via the --build_dir flag or the BUILD_DIR\n'
-        'environment variable. For convenient use, invoke this script via\n'
-        'mk_test.py.\n'
-        # TODO(vladl@google.com): change mk_test.py to test.py after renaming
-        # the file.
-        'Please run mk_test.py -h for help.')
+        'environment variable.')
     print >> sys.stderr, message
     sys.exit(1)
 
