@@ -43,6 +43,7 @@
 #include "gmock/internal/gmock-port.h"
 #include "gtest/gtest.h"
 #include "gtest/gtest-spi.h"
+#include "gtest/internal/gtest-port.h"
 
 namespace testing {
 namespace internal {
@@ -88,6 +89,7 @@ using testing::Ne;
 using testing::Return;
 using testing::Sequence;
 using testing::internal::ExpectationTester;
+using testing::internal::FormatFileLocation;
 using testing::internal::g_gmock_mutex;
 using testing::internal::kErrorVerbosity;
 using testing::internal::kInfoVerbosity;
@@ -797,6 +799,19 @@ TEST(ExpectCallTest, NthMatchTakesNthAction) {
   EXPECT_EQ(3, b.DoB());
 }
 
+// Tests that the WillRepeatedly() action is taken when the WillOnce(...)
+// list is exhausted.
+TEST(ExpectCallTest, TakesRepeatedActionWhenWillListIsExhausted) {
+  MockB b;
+  EXPECT_CALL(b, DoB())
+      .WillOnce(Return(1))
+      .WillRepeatedly(Return(2));
+
+  EXPECT_EQ(1, b.DoB());
+  EXPECT_EQ(2, b.DoB());
+  EXPECT_EQ(2, b.DoB());
+}
+
 #if GTEST_HAS_STREAM_REDIRECTION
 
 // Tests that the default action is taken when the WillOnce(...) list is
@@ -832,20 +847,33 @@ TEST(ExpectCallTest, TakesDefaultActionWhenWillListIsExhausted) {
                         " - returning default value."));
 }
 
-#endif  // GTEST_HAS_STREAM_REDIRECTION
-
-// Tests that the WillRepeatedly() action is taken when the WillOnce(...)
-// list is exhausted.
-TEST(ExpectCallTest, TakesRepeatedActionWhenWillListIsExhausted) {
+TEST(FunctionMockerTest, ReportsExpectCallLocationForExhausedActions) {
   MockB b;
-  EXPECT_CALL(b, DoB())
-      .WillOnce(Return(1))
-      .WillRepeatedly(Return(2));
+  std::string expect_call_location = FormatFileLocation(__FILE__, __LINE__ + 1);
+  EXPECT_CALL(b, DoB()).Times(AnyNumber()).WillOnce(Return(1));
 
   EXPECT_EQ(1, b.DoB());
-  EXPECT_EQ(2, b.DoB());
-  EXPECT_EQ(2, b.DoB());
+
+  CaptureStdout();
+  EXPECT_EQ(0, b.DoB());
+  const String output = GetCapturedStdout();
+  // The warning message should contain the call location.
+  EXPECT_PRED_FORMAT2(IsSubstring, expect_call_location, output);
 }
+
+TEST(FunctionMockerTest, ReportsDefaultActionLocationOfUninterestingCalls) {
+  std::string on_call_location;
+  CaptureStdout();
+  {
+    MockB b;
+    on_call_location = FormatFileLocation(__FILE__, __LINE__ + 1);
+    ON_CALL(b, DoB(_)).WillByDefault(Return(0));
+    b.DoB(0);
+  }
+  EXPECT_PRED_FORMAT2(IsSubstring, on_call_location, GetCapturedStdout());
+}
+
+#endif  // GTEST_HAS_STREAM_REDIRECTION
 
 // Tests that an uninteresting call performs the default action.
 TEST(UninterestingCallTest, DoesDefaultAction) {

@@ -575,7 +575,7 @@ class ExpectationBase {
 
   // Describes the source file location of this expectation.
   void DescribeLocationTo(::std::ostream* os) const {
-    *os << file() << ":" << line() << ": ";
+    *os << FormatFileLocation(file(), line()) << " ";
   }
 
   // Describes how many times a function call matching this
@@ -1527,7 +1527,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
               "returning default value.\n");
     } else {
       *os << "taking default action specified at:\n"
-          << spec->file() << ":" << spec->line() << ":\n";
+          << FormatFileLocation(spec->file(), spec->line()) << "\n";
     }
   }
 
