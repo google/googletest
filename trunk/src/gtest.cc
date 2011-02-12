@@ -2716,9 +2716,10 @@ void PrettyUnitTestResultPrinter::OnTestIterationStart(
   }
 
   if (internal::ShouldShard(kTestTotalShards, kTestShardIndex, false)) {
+    const Int32 shard_index = Int32FromEnvOrDie(kTestShardIndex, -1);
     ColoredPrintf(COLOR_YELLOW,
-                  "Note: This is test shard %s of %s.\n",
-                  internal::posix::GetEnv(kTestShardIndex),
+                  "Note: This is test shard %d of %s.\n",
+                  static_cast<int>(shard_index) + 1,
                   internal::posix::GetEnv(kTestTotalShards));
   }
 

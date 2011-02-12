@@ -697,7 +697,7 @@ Note: Google Test filter = *DISABLED_*
 [==========] 1 test from 1 test case ran.
 [  PASSED  ] 1 test.
 Note: Google Test filter = PassingTest.*
-Note: This is test shard 1 of 2.
+Note: This is test shard 2 of 2.
 [==========] Running 1 test from 1 test case.
 [----------] Global test environment set-up.
 [----------] 1 test from PassingTest
