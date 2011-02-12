@@ -42,7 +42,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/bigobj"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include;.."
+				AdditionalIncludeDirectories="..\..\include;..\.."
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -120,7 +120,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/bigobj"
-				AdditionalIncludeDirectories="..\include;.."
+				AdditionalIncludeDirectories="..\..\include;..\.."
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
@@ -185,7 +185,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\test\gmock_all_test.cc"
+				RelativePath="..\..\test\gmock_all_test.cc"
 				>
 			</File>
 		</Filter>

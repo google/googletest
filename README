@@ -208,16 +208,18 @@ it.
 
 ### Windows ###
 
-The msvc/ directory contains VC++ 2005 projects for building Google
-Mock and selected tests.
+The msvc/2005 directory contains VC++ 2005 projects and the msvc/2010
+directory contains VC++ 2010 projects for building Google Mock and
+selected tests.
 
-Open msvc/gmock.sln and build the library and tests.  If you want to
-create your own project to use with Google Mock, you'll have to
-configure it to use the gmock_config propety sheet.  For that:
+Change to the appropriate directory and run "msbuild gmock.sln" to
+build the library and tests (or open the gmock.sln in the MSVC IDE).
+If you want to create your own project to use with Google Mock, you'll
+have to configure it to use the gmock_config propety sheet.  For that:
 
  * Open the Property Manager window (View | Other Windows | Property Manager)
  * Right-click on your project and select "Add Existing Property Sheet..."
- * Navigate to gmock_config.vsprops and select it.
+ * Navigate to gmock_config.vsprops or gmock_config.props and select it.
  * In Project Properties | Configuration Properties | General | Additional
    Include Directories, type <path to Google Mock>/include.
 
