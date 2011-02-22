@@ -42,8 +42,8 @@
 #include "gtest/gtest.h"
 
 #if GTEST_OS_WINDOWS
-#include <windows.h>
-#include <stdlib.h>
+# include <windows.h>
+# include <stdlib.h>
 #endif
 
 namespace {
@@ -69,7 +69,8 @@ int main(int argc, char **argv) {
   // a general protection fault (segment violation).
   SetErrorMode(SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS);
 
-#if GTEST_HAS_SEH && !GTEST_OS_WINDOWS_MOBILE
+# if GTEST_HAS_SEH && !GTEST_OS_WINDOWS_MOBILE
+
   // The default unhandled exception filter does not always exit
   // with the exception code as exit code - for example it exits with
   // 0 for EXCEPTION_ACCESS_VIOLATION and 1 for EXCEPTION_BREAKPOINT
@@ -77,7 +78,8 @@ int main(int argc, char **argv) {
   // filter which always exits with the exception code for unhandled
   // exceptions.
   SetUnhandledExceptionFilter(ExitWithExceptionCode);
-#endif
+
+# endif
 #endif
 
   testing::InitGoogleTest(&argc, argv);

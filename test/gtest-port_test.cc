@@ -36,7 +36,7 @@
 #include <stdio.h>
 
 #if GTEST_OS_MAC
-#include <time.h>
+# include <time.h>
 #endif  // GTEST_OS_MAC
 
 #include <utility>  // For std::pair and std::make_pair.
@@ -328,15 +328,19 @@ TEST(GtestCheckDeathTest, LivesSilentlyOnSuccess) {
 // For simplicity, we only cover the most important platforms here.
 TEST(RegexEngineSelectionTest, SelectsCorrectRegexEngine) {
 #if GTEST_HAS_POSIX_RE
+
   EXPECT_TRUE(GTEST_USES_POSIX_RE);
+
 #else
+
   EXPECT_TRUE(GTEST_USES_SIMPLE_RE);
+
 #endif
 }
 
 #if GTEST_USES_POSIX_RE
 
-#if GTEST_HAS_TYPED_TEST
+# if GTEST_HAS_TYPED_TEST
 
 template <typename Str>
 class RETest : public ::testing::Test {};
@@ -345,9 +349,9 @@ class RETest : public ::testing::Test {};
 // supports.
 typedef testing::Types<
     ::std::string,
-#if GTEST_HAS_GLOBAL_STRING
+#  if GTEST_HAS_GLOBAL_STRING
     ::string,
-#endif  // GTEST_HAS_GLOBAL_STRING
+#  endif  // GTEST_HAS_GLOBAL_STRING
     const char*> StringTypes;
 
 TYPED_TEST_CASE(RETest, StringTypes);
@@ -398,7 +402,7 @@ TYPED_TEST(RETest, PartialMatchWorks) {
   EXPECT_FALSE(RE::PartialMatch(TypeParam("zza"), re));
 }
 
-#endif  // GTEST_HAS_TYPED_TEST
+# endif  // GTEST_HAS_TYPED_TEST
 
 #elif GTEST_USES_SIMPLE_RE
 

@@ -115,7 +115,7 @@ $for j [[
 
 ]]
 
-#if GTEST_HAS_COMBINE
+# if GTEST_HAS_COMBINE
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 //
 // Generates values from the Cartesian product of values produced
@@ -291,7 +291,7 @@ $for j [[
 
 ]]
 
-#endif  // GTEST_HAS_COMBINE
+# endif  // GTEST_HAS_COMBINE
 
 }  // namespace internal
 }  // namespace testing

@@ -43,7 +43,7 @@
 
 #ifdef __BORLANDC__
 // string.h is not guaranteed to provide strcpy on C++ Builder.
-#include <mem.h>
+# include <mem.h>
 #endif
 
 #include <string.h>

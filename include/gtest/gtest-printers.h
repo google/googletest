@@ -578,8 +578,8 @@ class UniversalPrinter {
   // MSVC warns about adding const to a function type, so we want to
   // disable the warning.
 #ifdef _MSC_VER
-#pragma warning(push)          // Saves the current warning state.
-#pragma warning(disable:4180)  // Temporarily disables warning 4180.
+# pragma warning(push)          // Saves the current warning state.
+# pragma warning(disable:4180)  // Temporarily disables warning 4180.
 #endif  // _MSC_VER
 
   // Note: we deliberately don't call this PrintTo(), as that name
@@ -598,7 +598,7 @@ class UniversalPrinter {
   }
 
 #ifdef _MSC_VER
-#pragma warning(pop)           // Restores the warning state.
+# pragma warning(pop)           // Restores the warning state.
 #endif  // _MSC_VER
 };
 
@@ -649,8 +649,8 @@ class UniversalPrinter<T&> {
   // MSVC warns about adding const to a function type, so we want to
   // disable the warning.
 #ifdef _MSC_VER
-#pragma warning(push)          // Saves the current warning state.
-#pragma warning(disable:4180)  // Temporarily disables warning 4180.
+# pragma warning(push)          // Saves the current warning state.
+# pragma warning(disable:4180)  // Temporarily disables warning 4180.
 #endif  // _MSC_VER
 
   static void Print(const T& value, ::std::ostream* os) {
@@ -663,7 +663,7 @@ class UniversalPrinter<T&> {
   }
 
 #ifdef _MSC_VER
-#pragma warning(pop)           // Restores the warning state.
+# pragma warning(pop)           // Restores the warning state.
 #endif  // _MSC_VER
 };
 

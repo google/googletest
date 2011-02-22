@@ -37,18 +37,18 @@
 #include <string.h>
 
 #if GTEST_OS_WINDOWS_MOBILE
-#include <windows.h>  // For TerminateProcess()
+# include <windows.h>  // For TerminateProcess()
 #elif GTEST_OS_WINDOWS
-#include <io.h>
-#include <sys/stat.h>
+# include <io.h>
+# include <sys/stat.h>
 #else
-#include <unistd.h>
+# include <unistd.h>
 #endif  // GTEST_OS_WINDOWS_MOBILE
 
 #if GTEST_OS_MAC
-#include <mach/mach_init.h>
-#include <mach/task.h>
-#include <mach/vm_map.h>
+# include <mach/mach_init.h>
+# include <mach/task.h>
+# include <mach/vm_map.h>
 #endif  // GTEST_OS_MAC
 
 #include "gtest/gtest-spi.h"
@@ -478,8 +478,8 @@ GTestLog::~GTestLog() {
 // Disable Microsoft deprecation warnings for POSIX functions called from
 // this class (creat, dup, dup2, and close)
 #ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4996)
+# pragma warning(push)
+# pragma warning(disable: 4996)
 #endif  // _MSC_VER
 
 #if GTEST_HAS_STREAM_REDIRECTION
@@ -489,7 +489,8 @@ class CapturedStream {
  public:
   // The ctor redirects the stream to a temporary file.
   CapturedStream(int fd) : fd_(fd), uncaptured_fd_(dup(fd)) {
-#if GTEST_OS_WINDOWS
+
+# if GTEST_OS_WINDOWS
     char temp_dir_path[MAX_PATH + 1] = { '\0' };  // NOLINT
     char temp_file_path[MAX_PATH + 1] = { '\0' };  // NOLINT
 
@@ -504,14 +505,14 @@ class CapturedStream {
     GTEST_CHECK_(captured_fd != -1) << "Unable to open temporary file "
                                     << temp_file_path;
     filename_ = temp_file_path;
-#else
+# else
     // There's no guarantee that a test has write access to the
     // current directory, so we create the temporary file in the /tmp
     // directory instead.
     char name_template[] = "/tmp/captured_stream.XXXXXX";
     const int captured_fd = mkstemp(name_template);
     filename_ = name_template;
-#endif  // GTEST_OS_WINDOWS
+# endif  // GTEST_OS_WINDOWS
     fflush(NULL);
     dup2(captured_fd, fd_);
     close(captured_fd);
@@ -580,9 +581,9 @@ String CapturedStream::ReadEntireFile(FILE* file) {
   return content;
 }
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif  // _MSC_VER
+# ifdef _MSC_VER
+#  pragma warning(pop)
+# endif  // _MSC_VER
 
 static CapturedStream* g_captured_stderr = NULL;
 static CapturedStream* g_captured_stdout = NULL;

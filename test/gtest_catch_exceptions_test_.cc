@@ -38,12 +38,12 @@
 #include <stdlib.h>  // For exit().
 
 #if GTEST_HAS_SEH
-#include <windows.h>
+# include <windows.h>
 #endif
 
 #if GTEST_HAS_EXCEPTIONS
-#include <exception>  // For set_terminate().
-#include <stdexcept>
+# include <exception>  // For set_terminate().
+# include <stdexcept>
 #endif
 
 using testing::Test;

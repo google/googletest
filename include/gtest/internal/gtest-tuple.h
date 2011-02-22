@@ -44,9 +44,9 @@
 // private as public.
 // Sun Studio versions < 12 also have the above bug.
 #if defined(__SYMBIAN32__) || (defined(__SUNPRO_CC) && __SUNPRO_CC < 0x590)
-#define GTEST_DECLARE_TUPLE_AS_FRIEND_ public:
+# define GTEST_DECLARE_TUPLE_AS_FRIEND_ public:
 #else
-#define GTEST_DECLARE_TUPLE_AS_FRIEND_ \
+# define GTEST_DECLARE_TUPLE_AS_FRIEND_ \
     template <GTEST_10_TYPENAMES_(U)> friend class tuple; \
    private:
 #endif

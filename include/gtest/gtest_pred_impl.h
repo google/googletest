@@ -37,7 +37,7 @@
 
 // Makes sure this header is not included before gtest.h.
 #ifndef GTEST_INCLUDE_GTEST_GTEST_H_
-#error Do not include gtest_pred_impl.h directly.  Include gtest.h instead.
+# error Do not include gtest_pred_impl.h directly.  Include gtest.h instead.
 #endif  // GTEST_INCLUDE_GTEST_GTEST_H_
 
 // This header implements a family of generic predicate assertion

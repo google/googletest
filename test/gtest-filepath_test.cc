@@ -51,9 +51,9 @@
 #undef GTEST_IMPLEMENTATION_
 
 #if GTEST_OS_WINDOWS_MOBILE
-#include <windows.h>  // NOLINT
+# include <windows.h>  // NOLINT
 #elif GTEST_OS_WINDOWS
-#include <direct.h>  // NOLINT
+# include <direct.h>  // NOLINT
 #endif  // GTEST_OS_WINDOWS_MOBILE
 
 namespace testing {
@@ -91,14 +91,18 @@ TEST(GetCurrentDirTest, ReturnsCurrentDir) {
   const FilePath cwd = FilePath::GetCurrentDir();
   posix::ChDir(original_dir.c_str());
 
-#if GTEST_OS_WINDOWS
+# if GTEST_OS_WINDOWS
+
   // Skips the ":".
   const char* const cwd_without_drive = strchr(cwd.c_str(), ':');
   ASSERT_TRUE(cwd_without_drive != NULL);
   EXPECT_STREQ(GTEST_PATH_SEP_, cwd_without_drive + 1);
-#else
+
+# else
+
   EXPECT_STREQ(GTEST_PATH_SEP_, cwd.c_str());
-#endif
+
+# endif
 }
 
 #endif  // GTEST_OS_WINDOWS_MOBILE
@@ -415,10 +419,12 @@ TEST(DirectoryTest, EmptyPathDirectoryDoesNotExist) {
 
 TEST(DirectoryTest, CurrentDirectoryExists) {
 #if GTEST_OS_WINDOWS  // We are on Windows.
-#ifndef _WIN32_CE  // Windows CE doesn't have a current directory.
+# ifndef _WIN32_CE  // Windows CE doesn't have a current directory.
+
   EXPECT_TRUE(FilePath(".").DirectoryExists());
   EXPECT_TRUE(FilePath(".\\").DirectoryExists());
-#endif  // _WIN32_CE
+
+# endif  // _WIN32_CE
 #else
   EXPECT_TRUE(FilePath(".").DirectoryExists());
   EXPECT_TRUE(FilePath("./").DirectoryExists());

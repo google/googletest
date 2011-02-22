@@ -51,9 +51,9 @@
 
 // #ifdef __GNUC__ is too general here.  It is possible to use gcc without using
 // libstdc++ (which is where cxxabi.h comes from).
-#ifdef __GLIBCXX__
-#include <cxxabi.h>
-#endif  // __GLIBCXX__
+# ifdef __GLIBCXX__
+#  include <cxxabi.h>
+# endif  // __GLIBCXX__
 
 namespace testing {
 namespace internal {
@@ -73,10 +73,10 @@ struct AssertTypeEq<T, T> {
 // GetTypeName<T>() returns a human-readable name of type T.
 template <typename T>
 String GetTypeName() {
-#if GTEST_HAS_RTTI
+# if GTEST_HAS_RTTI
 
   const char* const name = typeid(T).name();
-#ifdef __GLIBCXX__
+#  ifdef __GLIBCXX__
   int status = 0;
   // gcc's implementation of typeid(T).name() mangles the type name,
   // so we have to demangle it.
@@ -84,13 +84,15 @@ String GetTypeName() {
   const String name_str(status == 0 ? readable_name : name);
   free(readable_name);
   return name_str;
-#else
+#  else
   return name;
-#endif  // __GLIBCXX__
+#  endif  // __GLIBCXX__
 
-#else
+# else
+
   return "<type>";
-#endif  // GTEST_HAS_RTTI
+
+# endif  // GTEST_HAS_RTTI
 }
 
 // A unique type used as the default value for the arguments of class
@@ -1611,7 +1613,7 @@ struct Types<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15,
 
 namespace internal {
 
-#define GTEST_TEMPLATE_ template <typename T> class
+# define GTEST_TEMPLATE_ template <typename T> class
 
 // The template "selector" struct TemplateSel<Tmpl> is used to
 // represent Tmpl, which must be a class template with one type
@@ -1629,7 +1631,7 @@ struct TemplateSel {
   };
 };
 
-#define GTEST_BIND_(TmplSel, T) \
+# define GTEST_BIND_(TmplSel, T) \
   TmplSel::template Bind<T>::type
 
 // A unique struct template used as the default value for the

@@ -52,10 +52,10 @@
 
 // hash_map and hash_set are available under Visual C++.
 #if _MSC_VER
-#define GTEST_HAS_HASH_MAP_ 1  // Indicates that hash_map is available.
-#include <hash_map>            // NOLINT
-#define GTEST_HAS_HASH_SET_ 1  // Indicates that hash_set is available.
-#include <hash_set>            // NOLINT
+# define GTEST_HAS_HASH_MAP_ 1  // Indicates that hash_map is available.
+# include <hash_map>            // NOLINT
+# define GTEST_HAS_HASH_SET_ 1  // Indicates that hash_set is available.
+# include <hash_set>            // NOLINT
 #endif  // GTEST_OS_WINDOWS
 
 // Some user-defined types for testing the universal value printer.
