@@ -35,26 +35,26 @@
 #include <stdlib.h>
 
 #if GTEST_OS_WINDOWS_MOBILE
-#include <windows.h>
+# include <windows.h>
 #elif GTEST_OS_WINDOWS
-#include <direct.h>
-#include <io.h>
+# include <direct.h>
+# include <io.h>
 #elif GTEST_OS_SYMBIAN || GTEST_OS_NACL
 // Symbian OpenC and NaCl have PATH_MAX in sys/syslimits.h
-#include <sys/syslimits.h>
+# include <sys/syslimits.h>
 #else
-#include <limits.h>
-#include <climits>  // Some Linux distributions define PATH_MAX here.
+# include <limits.h>
+# include <climits>  // Some Linux distributions define PATH_MAX here.
 #endif  // GTEST_OS_WINDOWS_MOBILE
 
 #if GTEST_OS_WINDOWS
-#define GTEST_PATH_MAX_ _MAX_PATH
+# define GTEST_PATH_MAX_ _MAX_PATH
 #elif defined(PATH_MAX)
-#define GTEST_PATH_MAX_ PATH_MAX
+# define GTEST_PATH_MAX_ PATH_MAX
 #elif defined(_XOPEN_PATH_MAX)
-#define GTEST_PATH_MAX_ _XOPEN_PATH_MAX
+# define GTEST_PATH_MAX_ _XOPEN_PATH_MAX
 #else
-#define GTEST_PATH_MAX_ _POSIX_PATH_MAX
+# define GTEST_PATH_MAX_ _POSIX_PATH_MAX
 #endif  // GTEST_OS_WINDOWS
 
 #include "gtest/internal/gtest-string.h"
@@ -71,16 +71,16 @@ const char kPathSeparator = '\\';
 const char kAlternatePathSeparator = '/';
 const char kPathSeparatorString[] = "\\";
 const char kAlternatePathSeparatorString[] = "/";
-#if GTEST_OS_WINDOWS_MOBILE
+# if GTEST_OS_WINDOWS_MOBILE
 // Windows CE doesn't have a current directory. You should not use
 // the current directory in tests on Windows CE, but this at least
 // provides a reasonable fallback.
 const char kCurrentDirectoryString[] = "\\";
 // Windows CE doesn't define INVALID_FILE_ATTRIBUTES
 const DWORD kInvalidFileAttributes = 0xffffffff;
-#else
+# else
 const char kCurrentDirectoryString[] = ".\\";
-#endif  // GTEST_OS_WINDOWS_MOBILE
+# endif  // GTEST_OS_WINDOWS_MOBILE
 #else
 const char kPathSeparator = '/';
 const char kPathSeparatorString[] = "/";

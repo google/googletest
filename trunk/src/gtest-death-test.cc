@@ -36,21 +36,21 @@
 
 #if GTEST_HAS_DEATH_TEST
 
-#if GTEST_OS_MAC
-#include <crt_externs.h>
-#endif  // GTEST_OS_MAC
+# if GTEST_OS_MAC
+#  include <crt_externs.h>
+# endif  // GTEST_OS_MAC
 
-#include <errno.h>
-#include <fcntl.h>
-#include <limits.h>
-#include <stdarg.h>
+# include <errno.h>
+# include <fcntl.h>
+# include <limits.h>
+# include <stdarg.h>
 
-#if GTEST_OS_WINDOWS
-#include <windows.h>
-#else
-#include <sys/mman.h>
-#include <sys/wait.h>
-#endif  // GTEST_OS_WINDOWS
+# if GTEST_OS_WINDOWS
+#  include <windows.h>
+# else
+#  include <sys/mman.h>
+#  include <sys/wait.h>
+# endif  // GTEST_OS_WINDOWS
 
 #endif  // GTEST_HAS_DEATH_TEST
 
@@ -113,14 +113,18 @@ ExitedWithCode::ExitedWithCode(int exit_code) : exit_code_(exit_code) {
 
 // ExitedWithCode function-call operator.
 bool ExitedWithCode::operator()(int exit_status) const {
-#if GTEST_OS_WINDOWS
+# if GTEST_OS_WINDOWS
+
   return exit_status == exit_code_;
-#else
+
+# else
+
   return WIFEXITED(exit_status) && WEXITSTATUS(exit_status) == exit_code_;
-#endif  // GTEST_OS_WINDOWS
+
+# endif  // GTEST_OS_WINDOWS
 }
 
-#if !GTEST_OS_WINDOWS
+# if !GTEST_OS_WINDOWS
 // KilledBySignal constructor.
 KilledBySignal::KilledBySignal(int signum) : signum_(signum) {
 }
@@ -129,7 +133,7 @@ KilledBySignal::KilledBySignal(int signum) : signum_(signum) {
 bool KilledBySignal::operator()(int exit_status) const {
   return WIFSIGNALED(exit_status) && WTERMSIG(exit_status) == signum_;
 }
-#endif  // !GTEST_OS_WINDOWS
+# endif  // !GTEST_OS_WINDOWS
 
 namespace internal {
 
@@ -139,20 +143,25 @@ namespace internal {
 // specified by wait(2).
 static String ExitSummary(int exit_code) {
   Message m;
-#if GTEST_OS_WINDOWS
+
+# if GTEST_OS_WINDOWS
+
   m << "Exited with exit status " << exit_code;
-#else
+
+# else
+
   if (WIFEXITED(exit_code)) {
     m << "Exited with exit status " << WEXITSTATUS(exit_code);
   } else if (WIFSIGNALED(exit_code)) {
     m << "Terminated by signal " << WTERMSIG(exit_code);
   }
-#ifdef WCOREDUMP
+#  ifdef WCOREDUMP
   if (WCOREDUMP(exit_code)) {
     m << " (core dumped)";
   }
-#endif
-#endif  // GTEST_OS_WINDOWS
+#  endif
+# endif  // GTEST_OS_WINDOWS
+
   return m.GetString();
 }
 
@@ -162,7 +171,7 @@ bool ExitedUnsuccessfully(int exit_status) {
   return !ExitedWithCode(0)(exit_status);
 }
 
-#if !GTEST_OS_WINDOWS
+# if !GTEST_OS_WINDOWS
 // Generates a textual failure message when a death test finds more than
 // one thread running, or cannot determine the number of threads, prior
 // to executing the given statement.  It is the responsibility of the
@@ -177,7 +186,7 @@ static String DeathTestThreadWarning(size_t thread_count) {
     msg << "detected " << thread_count << " threads.";
   return msg.GetString();
 }
-#endif  // !GTEST_OS_WINDOWS
+# endif  // !GTEST_OS_WINDOWS
 
 // Flag characters for reporting a death test that did not die.
 static const char kDeathTestLived = 'L';
@@ -222,7 +231,7 @@ void DeathTestAbort(const String& message) {
 
 // A replacement for CHECK that calls DeathTestAbort if the assertion
 // fails.
-#define GTEST_DEATH_TEST_CHECK_(expression) \
+# define GTEST_DEATH_TEST_CHECK_(expression) \
   do { \
     if (!::testing::internal::IsTrue(expression)) { \
       DeathTestAbort(::testing::internal::String::Format( \
@@ -238,7 +247,7 @@ void DeathTestAbort(const String& message) {
 // evaluates the expression as long as it evaluates to -1 and sets
 // errno to EINTR.  If the expression evaluates to -1 but errno is
 // something other than EINTR, DeathTestAbort is called.
-#define GTEST_DEATH_TEST_CHECK_SYSCALL_(expression) \
+# define GTEST_DEATH_TEST_CHECK_SYSCALL_(expression) \
   do { \
     int gtest_retval; \
     do { \
@@ -527,7 +536,7 @@ bool DeathTestImpl::Passed(bool status_ok) {
   return success;
 }
 
-#if GTEST_OS_WINDOWS
+# if GTEST_OS_WINDOWS
 // WindowsDeathTest implements death tests on Windows. Due to the
 // specifics of starting new processes on Windows, death tests there are
 // always threadsafe, and Google Test considers the
@@ -723,7 +732,7 @@ DeathTest::TestRole WindowsDeathTest::AssumeRole() {
   set_spawned(true);
   return OVERSEE_TEST;
 }
-#else  // We are not on Windows.
+# else  // We are not on Windows.
 
 // ForkingDeathTest provides implementations for most of the abstract
 // methods of the DeathTest interface.  Only the AssumeRole method is
@@ -871,19 +880,19 @@ struct ExecDeathTestArgs {
   int close_fd;       // File descriptor to close; the read end of a pipe
 };
 
-#if GTEST_OS_MAC
+#  if GTEST_OS_MAC
 inline char** GetEnviron() {
   // When Google Test is built as a framework on MacOS X, the environ variable
   // is unavailable. Apple's documentation (man environ) recommends using
   // _NSGetEnviron() instead.
   return *_NSGetEnviron();
 }
-#else
+#  else
 // Some POSIX platforms expect you to declare environ. extern "C" makes
 // it reside in the global namespace.
 extern "C" char** environ;
 inline char** GetEnviron() { return environ; }
-#endif  // GTEST_OS_MAC
+#  endif  // GTEST_OS_MAC
 
 // The main function for a threadsafe-style death test child process.
 // This function is called in a clone()-ed process and thus must avoid
@@ -940,7 +949,7 @@ static pid_t ExecDeathTestFork(char* const* argv, int close_fd) {
   ExecDeathTestArgs args = { argv, close_fd };
   pid_t child_pid = -1;
 
-#if GTEST_HAS_CLONE
+#  if GTEST_HAS_CLONE
   const bool use_fork = GTEST_FLAG(death_test_use_fork);
 
   if (!use_fork) {
@@ -957,9 +966,9 @@ static pid_t ExecDeathTestFork(char* const* argv, int close_fd) {
 
     GTEST_DEATH_TEST_CHECK_(munmap(stack, stack_size) != -1);
   }
-#else
+#  else
   const bool use_fork = true;
-#endif  // GTEST_HAS_CLONE
+#  endif  // GTEST_HAS_CLONE
 
   if (use_fork && (child_pid = fork()) == 0) {
       ExecDeathTestChildMain(&args);
@@ -1020,7 +1029,7 @@ DeathTest::TestRole ExecDeathTest::AssumeRole() {
   return OVERSEE_TEST;
 }
 
-#endif  // !GTEST_OS_WINDOWS
+# endif  // !GTEST_OS_WINDOWS
 
 // Creates a concrete DeathTest-derived class that depends on the
 // --gtest_death_test_style flag, and sets the pointer pointed to
@@ -1051,18 +1060,23 @@ bool DefaultDeathTestFactory::Create(const char* statement, const RE* regex,
     }
   }
 
-#if GTEST_OS_WINDOWS
+# if GTEST_OS_WINDOWS
+
   if (GTEST_FLAG(death_test_style) == "threadsafe" ||
       GTEST_FLAG(death_test_style) == "fast") {
     *test = new WindowsDeathTest(statement, regex, file, line);
   }
-#else
+
+# else
+
   if (GTEST_FLAG(death_test_style) == "threadsafe") {
     *test = new ExecDeathTest(statement, regex, file, line);
   } else if (GTEST_FLAG(death_test_style) == "fast") {
     *test = new NoExecDeathTest(statement, regex);
   }
-#endif  // GTEST_OS_WINDOWS
+
+# endif  // GTEST_OS_WINDOWS
+
   else {  // NOLINT - this is more readable than unbalanced brackets inside #if.
     DeathTest::set_last_death_test_message(String::Format(
         "Unknown death test style \"%s\" encountered",
@@ -1093,7 +1107,7 @@ static void SplitString(const ::std::string& str, char delimiter,
   dest->swap(parsed);
 }
 
-#if GTEST_OS_WINDOWS
+# if GTEST_OS_WINDOWS
 // Recreates the pipe and event handles from the provided parameters,
 // signals the event, and returns a file descriptor wrapped around the pipe
 // handle. This function is called in the child process only.
@@ -1157,7 +1171,7 @@ int GetStatusFileDescriptor(unsigned int parent_process_id,
 
   return write_fd;
 }
-#endif  // GTEST_OS_WINDOWS
+# endif  // GTEST_OS_WINDOWS
 
 // Returns a newly created InternalRunDeathTestFlag object with fields
 // initialized from the GTEST_FLAG(internal_run_death_test) flag if
@@ -1173,7 +1187,8 @@ InternalRunDeathTestFlag* ParseInternalRunDeathTestFlag() {
   SplitString(GTEST_FLAG(internal_run_death_test).c_str(), '|', &fields);
   int write_fd = -1;
 
-#if GTEST_OS_WINDOWS
+# if GTEST_OS_WINDOWS
+
   unsigned int parent_process_id = 0;
   size_t write_handle_as_size_t = 0;
   size_t event_handle_as_size_t = 0;
@@ -1191,7 +1206,8 @@ InternalRunDeathTestFlag* ParseInternalRunDeathTestFlag() {
   write_fd = GetStatusFileDescriptor(parent_process_id,
                                      write_handle_as_size_t,
                                      event_handle_as_size_t);
-#else
+# else
+
   if (fields.size() != 4
       || !ParseNaturalNumber(fields[1], &line)
       || !ParseNaturalNumber(fields[2], &index)
@@ -1200,7 +1216,9 @@ InternalRunDeathTestFlag* ParseInternalRunDeathTestFlag() {
         "Bad --gtest_internal_run_death_test flag: %s",
         GTEST_FLAG(internal_run_death_test).c_str()));
   }
-#endif  // GTEST_OS_WINDOWS
+
+# endif  // GTEST_OS_WINDOWS
+
   return new InternalRunDeathTestFlag(fields[0], line, index, write_fd);
 }
 

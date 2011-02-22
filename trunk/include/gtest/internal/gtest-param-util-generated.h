@@ -2826,7 +2826,7 @@ class ValueArray50 {
   const T50 v50_;
 };
 
-#if GTEST_HAS_COMBINE
+# if GTEST_HAS_COMBINE
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 //
 // Generates values from the Cartesian product of values produced
@@ -4810,7 +4810,7 @@ CartesianProductHolder10(const Generator1& g1, const Generator2& g2,
   const Generator10 g10_;
 };  // class CartesianProductHolder10
 
-#endif  // GTEST_HAS_COMBINE
+# endif  // GTEST_HAS_COMBINE
 
 }  // namespace internal
 }  // namespace testing

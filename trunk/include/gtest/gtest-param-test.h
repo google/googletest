@@ -182,7 +182,7 @@ TEST_P(DerivedTest, DoesBlah) {
 #include "gtest/internal/gtest-port.h"
 
 #if !GTEST_OS_SYMBIAN
-#include <utility>
+# include <utility>
 #endif
 
 // scripts/fuse_gtest.py depends on gtest's own header being #included
@@ -1222,7 +1222,7 @@ inline internal::ParamGenerator<bool> Bool() {
   return Values(false, true);
 }
 
-#if GTEST_HAS_COMBINE
+# if GTEST_HAS_COMBINE
 // Combine() allows the user to combine two or more sequences to produce
 // values of a Cartesian product of those sequences' elements.
 //
@@ -1374,11 +1374,11 @@ internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
       Generator10>(
       g1, g2, g3, g4, g5, g6, g7, g8, g9, g10);
 }
-#endif  // GTEST_HAS_COMBINE
+# endif  // GTEST_HAS_COMBINE
 
 
 
-#define TEST_P(test_case_name, test_name) \
+# define TEST_P(test_case_name, test_name) \
   class GTEST_TEST_CLASS_NAME_(test_case_name, test_name) \
       : public test_case_name { \
    public: \
@@ -1404,7 +1404,7 @@ internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
       GTEST_TEST_CLASS_NAME_(test_case_name, test_name)::AddToRegistry(); \
   void GTEST_TEST_CLASS_NAME_(test_case_name, test_name)::TestBody()
 
-#define INSTANTIATE_TEST_CASE_P(prefix, test_case_name, generator) \
+# define INSTANTIATE_TEST_CASE_P(prefix, test_case_name, generator) \
   ::testing::internal::ParamGenerator<test_case_name::ParamType> \
       gtest_##prefix##test_case_name##_EvalGenerator_() { return generator; } \
   int gtest_##prefix##test_case_name##_dummy_ = \
