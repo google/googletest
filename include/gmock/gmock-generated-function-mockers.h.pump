@@ -140,7 +140,8 @@ $var matcher_as = [[$for j, \
   } \
   ::testing::MockSpec<F>& \
       gmock_##Method($matcher_as) constness { \
-    return GMOCK_MOCKER_($i, constness, Method).RegisterOwner(this).With($as); \
+    GMOCK_MOCKER_($i, constness, Method).RegisterOwner(this); \
+    return GMOCK_MOCKER_($i, constness, Method).With($as); \
   } \
   mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_($i, constness, Method)
 

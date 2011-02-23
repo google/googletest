@@ -261,8 +261,8 @@ def _IncompleteByReferenceArgumentDiagnoser(msg):
                  r'(.*\n)*?' +
                  _CLANG_NON_GMOCK_FILE_LINE_RE +
                  r'note: in instantiation of member function '
-                 r'\'testing::internal::FunctionMocker<.*>::Invoke\' '
-                 r'requested here')
+                 r'\'testing::internal2::TypeWithoutFormatter<.*>::'
+                 r'PrintValue\' requested here')
   diagnosis = """
 In order to mock this function, Google Mock needs to see the definition
 of type "%(type)s" - declaration alone is not enough.  Either #include

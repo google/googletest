@@ -334,8 +334,7 @@ class MyActionImpl : public ActionInterface<MyFunction> {
 
 TEST(ActionInterfaceTest, CanBeImplementedByDefiningPerform) {
   MyActionImpl my_action_impl;
-
-  EXPECT_FALSE(my_action_impl.IsDoDefault());
+  (void)my_action_impl;
 }
 
 TEST(ActionInterfaceTest, MakeAction) {

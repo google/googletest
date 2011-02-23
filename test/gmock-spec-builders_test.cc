@@ -103,6 +103,34 @@ using testing::internal::CaptureStdout;
 using testing::internal::GetCapturedStdout;
 #endif
 
+class Incomplete;
+
+class MockIncomplete {
+ public:
+  // This line verifies that a mock method can take a by-reference
+  // argument of an incomplete type.
+  MOCK_METHOD1(ByRefFunc, void(const Incomplete& x));
+};
+
+// Tells Google Mock how to print a value of type Incomplete.
+void PrintTo(const Incomplete& x, ::std::ostream* os);
+
+TEST(MockMethodTest, CanInstantiateWithIncompleteArgType) {
+  // Even though this mock class contains a mock method that takes
+  // by-reference an argument whose type is incomplete, we can still
+  // use the mock, as long as Google Mock knows how to print the
+  // argument.
+  MockIncomplete incomplete;
+  EXPECT_CALL(incomplete, ByRefFunc(_))
+      .Times(AnyNumber());
+}
+
+// The definition of the printer for the argument type doesn't have to
+// be visible where the mock is used.
+void PrintTo(const Incomplete& /* x */, ::std::ostream* os) {
+  *os << "incomplete";
+}
+
 class Result {};
 
 class MockA {
@@ -1327,12 +1355,33 @@ TEST(SequenceTest, Retirement) {
 TEST(ExpectationTest, ConstrutorsWork) {
   MockA a;
   Expectation e1;  // Default ctor.
-  Expectation e2 = EXPECT_CALL(a, DoA(1));  // Ctor from EXPECT_CALL.
-  Expectation e3 = e2;  // Copy ctor.
+
+  // Ctor from various forms of EXPECT_CALL.
+  Expectation e2 = EXPECT_CALL(a, DoA(2));
+  Expectation e3 = EXPECT_CALL(a, DoA(3)).With(_);
+  {
+    Sequence s;
+    Expectation e4 = EXPECT_CALL(a, DoA(4)).Times(1);
+    Expectation e5 = EXPECT_CALL(a, DoA(5)).InSequence(s);
+  }
+  Expectation e6 = EXPECT_CALL(a, DoA(6)).After(e2);
+  Expectation e7 = EXPECT_CALL(a, DoA(7)).WillOnce(Return());
+  Expectation e8 = EXPECT_CALL(a, DoA(8)).WillRepeatedly(Return());
+  Expectation e9 = EXPECT_CALL(a, DoA(9)).RetiresOnSaturation();
+
+  Expectation e10 = e2;  // Copy ctor.
 
   EXPECT_THAT(e1, Ne(e2));
-  EXPECT_THAT(e2, Eq(e3));
-  a.DoA(1);
+  EXPECT_THAT(e2, Eq(e10));
+
+  a.DoA(2);
+  a.DoA(3);
+  a.DoA(4);
+  a.DoA(5);
+  a.DoA(6);
+  a.DoA(7);
+  a.DoA(8);
+  a.DoA(9);
 }
 
 TEST(ExpectationTest, AssignmentWorks) {

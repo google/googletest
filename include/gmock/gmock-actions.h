@@ -59,9 +59,6 @@ namespace testing {
 
 namespace internal {
 
-template <typename F>
-class MonomorphicDoDefaultActionImpl;
-
 template <typename F1, typename F2>
 class ActionAdaptor;
 
@@ -255,8 +252,7 @@ class ActionInterface {
   typedef typename internal::Function<F>::Result Result;
   typedef typename internal::Function<F>::ArgumentTuple ArgumentTuple;
 
-  ActionInterface() : is_do_default_(false) {}
-
+  ActionInterface() {}
   virtual ~ActionInterface() {}
 
   // Performs the action.  This method is not const, as in general an
@@ -265,21 +261,7 @@ class ActionInterface {
   // remember the current element.
   virtual Result Perform(const ArgumentTuple& args) = 0;
 
-  // Returns true iff this is the DoDefault() action.
-  bool IsDoDefault() const { return is_do_default_; }
-
  private:
-  template <typename Function>
-  friend class internal::MonomorphicDoDefaultActionImpl;
-
-  // This private constructor is reserved for implementing
-  // DoDefault(), the default action for a given mock function.
-  explicit ActionInterface(bool is_do_default)
-      : is_do_default_(is_do_default) {}
-
-  // True iff this action is DoDefault().
-  const bool is_do_default_;
-
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ActionInterface);
 };
 
@@ -302,7 +284,8 @@ class Action {
   // STL containers.
   Action() : impl_(NULL) {}
 
-  // Constructs an Action from its implementation.
+  // Constructs an Action from its implementation.  A NULL impl is
+  // used to represent the "do-default" action.
   explicit Action(ActionInterface<F>* impl) : impl_(impl) {}
 
   // Copy constructor.
@@ -316,7 +299,7 @@ class Action {
   explicit Action(const Action<Func>& action);
 
   // Returns true iff this is the DoDefault() action.
-  bool IsDoDefault() const { return impl_->IsDoDefault(); }
+  bool IsDoDefault() const { return impl_.get() == NULL; }
 
   // Performs the action.  Note that this method is const even though
   // the corresponding method in ActionInterface is not.  The reason
@@ -325,6 +308,13 @@ class Action {
   // cannot change state.  (Think of the difference between a const
   // pointer and a pointer to const.)
   Result Perform(const ArgumentTuple& args) const {
+    internal::Assert(
+        !IsDoDefault(), __FILE__, __LINE__,
+        "You are using DoDefault() inside a composite action like "
+        "DoAll() or WithArgs().  This is not supported for technical "
+        "reasons.  Please instead spell out the default action, or "
+        "assign the default action to an Action variable and use "
+        "the variable in various places.");
     return impl_->Perform(args);
   }
 
@@ -633,42 +623,13 @@ class ReturnRefOfCopyAction {
   GTEST_DISALLOW_ASSIGN_(ReturnRefOfCopyAction);
 };
 
-// Implements the DoDefault() action for a particular function type F.
-template <typename F>
-class MonomorphicDoDefaultActionImpl : public ActionInterface<F> {
- public:
-  typedef typename Function<F>::Result Result;
-  typedef typename Function<F>::ArgumentTuple ArgumentTuple;
-
-  MonomorphicDoDefaultActionImpl() : ActionInterface<F>(true) {}
-
-  // For technical reasons, DoDefault() cannot be used inside a
-  // composite action (e.g. DoAll(...)).  It can only be used at the
-  // top level in an EXPECT_CALL().  If this function is called, the
-  // user must be using DoDefault() inside a composite action, and we
-  // have to generate a run-time error.
-  virtual Result Perform(const ArgumentTuple&) {
-    Assert(false, __FILE__, __LINE__,
-           "You are using DoDefault() inside a composite action like "
-           "DoAll() or WithArgs().  This is not supported for technical "
-           "reasons.  Please instead spell out the default action, or "
-           "assign the default action to an Action variable and use "
-           "the variable in various places.");
-    return internal::Invalid<Result>();
-    // The above statement will never be reached, but is required in
-    // order for this function to compile.
-  }
-};
-
 // Implements the polymorphic DoDefault() action.
 class DoDefaultAction {
  public:
   // This template type conversion operator allows DoDefault() to be
   // used in any function.
   template <typename F>
-  operator Action<F>() const {
-    return Action<F>(new MonomorphicDoDefaultActionImpl<F>);
-  }
+  operator Action<F>() const { return Action<F>(NULL); }
 };
 
 // Implements the Assign action to set a given pointer referent to a
