@@ -153,6 +153,10 @@ EXTRA_DIST += \
   scripts/generator/cpp/utils.py \
   scripts/generator/gmock_gen.py
 
+# CMake scripts.
+EXTRA_DIST += \
+  CMakeLists.txt
+
 # Microsoft Visual Studio 2005 projects.
 EXTRA_DIST += \
   msvc/2005/gmock.sln \

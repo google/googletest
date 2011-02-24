@@ -5,6 +5,7 @@ Changes for 1.6.0:
   the class body.
 * New matchers: Pointwise(), Each().
 * New actions: ReturnPointee() and ReturnRefOfCopy().
+* CMake support.
 * Project files for Visual Studio 2010.
 * AllOf() and AnyOf() can handle up-to 10 arguments now.
 * Google Mock doctor understands Clang error messages now.
