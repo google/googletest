@@ -1,3 +1,32 @@
+Changes for 1.6.0:
+
+* New feature: ADD_FAILURE_AT() for reporting a test failure at the
+  given source location -- useful for writing testing utilities.
+* New feature: the universal value printer is moved from Google Mock
+  to Google Test.
+* New feature: type parameters and value parameters are reported in
+  the XML report now.
+* A gtest_disable_pthreads CMake option.
+* Colored output works in GNU Screen sessions now.
+* Parameters of value-parameterized tests are now printed in the
+  textual output.
+* Failures from ad hoc test assertions run before RUN_ALL_TESTS() are
+  now correctly reported.
+* Arguments of ASSERT_XY and EXPECT_XY no longer need to support << to
+  ostream.
+* More complete handling of exceptions.
+* GTEST_ASSERT_XY can be used instead of ASSERT_XY in case the latter
+  name is already used by another library.
+* --gtest_catch_exceptions is now true by default, allowing a test
+  program to continue after an exception is thrown.
+* Value-parameterized test fixtures can now derive from Test and
+  WithParamInterface<T> separately, easing conversion of legacy tests.
+* Death test messages are clearly marked to make them more
+  distinguishable from other messages.
+* Compatibility fixes for Google Native Client, MinGW, Lucid
+  autotools, and C++0x.
+* Bug fixes and implementation clean-ups.
+
 Changes for 1.5.0:
 
  * New feature: assertions can be safely called in multiple threads
