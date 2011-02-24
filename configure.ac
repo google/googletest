@@ -1,7 +1,7 @@
 m4_include(gtest/m4/acx_pthread.m4)
 
 AC_INIT([Google C++ Mocking Framework],
-        [1.5.0],
+        [1.6.0],
         [googlemock@googlegroups.com],
         [gmock])
 
@@ -101,7 +101,7 @@ AC_ARG_VAR([GTEST_VERSION],
            [The version of Google Test available.])
 HAVE_BUILT_GTEST="no"
 
-GTEST_MIN_VERSION="1.5.0"
+GTEST_MIN_VERSION="1.6.0"
 
 AS_IF([test "x${enable_external_gtest}" = "xyes"],
       [# Begin filling in variables as we are able.

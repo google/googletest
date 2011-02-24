@@ -1,3 +1,26 @@
+Changes for 1.6.0:
+
+* Compilation is much faster and uses much less memory, especially
+  when the constructor and destructor of a mock class are moved out of
+  the class body.
+* New matchers: Pointwise(), Each().
+* New actions: ReturnPointee() and ReturnRefOfCopy().
+* Project files for Visual Studio 2010.
+* AllOf() and AnyOf() can handle up-to 10 arguments now.
+* Google Mock doctor understands Clang error messages now.
+* SetArgPointee<> now accepts string literals.
+* gmock_gen.py handles storage specifier macros and template return
+  types now.
+* Compatibility fixes.
+* Bug fixes and implementation clean-ups.
+
+Potentially breaking changes:
+
+* The description string for MATCHER*() changes from Python-style
+  interpolation to an ordinary C++ string expression.
+* SetArgumentPointee is deprecated in favor of SetArgPointee.
+* Some non-essential project files for Visual Studio 2005 are removed.
+
 Changes for 1.5.0:
 
  * New feature: Google Mock can be safely used in multi-threaded tests
