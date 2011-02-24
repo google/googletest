@@ -40,7 +40,7 @@
 #include <string>
 
 #ifndef _WIN32_WCE
-#include <errno.h>
+# include <errno.h>
 #endif
 
 #include "gmock/internal/gmock-internal-utils.h"

@@ -117,7 +117,7 @@
 #include "gmock/gmock.h"
 
 #if !GTEST_OS_WINDOWS_MOBILE
-#include <errno.h>
+# include <errno.h>
 #endif
 
 #include "gmock/internal/gmock-port.h"
@@ -419,8 +419,8 @@ TEST(LinkTest, TestThrow) {
 // is expanded and macro expansion cannot contain #pragma.  Therefore
 // we suppress them here.
 #ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4100)
+# pragma warning(push)
+# pragma warning(disable:4100)
 #endif
 
 // Tests the linkage of actions created using ACTION macro.
@@ -455,7 +455,7 @@ ACTION_P2(ReturnEqualsEitherOf, first, second) {
 }
 
 #ifdef _MSC_VER
-#pragma warning(pop)
+# pragma warning(pop)
 #endif
 
 TEST(LinkTest, TestActionP2Macro) {

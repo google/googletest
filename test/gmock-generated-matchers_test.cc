@@ -144,8 +144,8 @@ TEST(ArgsTest, AcceptsDecreasingTemplateArgs) {
 // is expanded and macro expansion cannot contain #pragma.  Therefore
 // we suppress them here.
 #ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4100)
+# pragma warning(push)
+# pragma warning(disable:4100)
 #endif
 
 MATCHER(SumIsZero, "") {
@@ -1092,7 +1092,7 @@ TEST(ContainsTest, WorksForTwoDimensionalNativeArray) {
 }
 
 #ifdef _MSC_VER
-#pragma warning(pop)
+# pragma warning(pop)
 #endif
 
 }  // namespace

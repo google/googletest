@@ -45,7 +45,7 @@
 #include "gtest/gtest.h"
 
 #if GTEST_OS_CYGWIN || GTEST_OS_LINUX || GTEST_OS_MAC
-#include <unistd.h>  // NOLINT
+# include <unistd.h>  // NOLINT
 #endif
 
 namespace testing {

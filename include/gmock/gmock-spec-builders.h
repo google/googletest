@@ -1279,8 +1279,8 @@ class MockSpec {
 // the constructor only.
 
 #ifdef _MSC_VER
-#pragma warning(push)          // Saves the current warning state.
-#pragma warning(disable:4355)  // Temporarily disables warning 4355.
+# pragma warning(push)          // Saves the current warning state.
+# pragma warning(disable:4355)  // Temporarily disables warning 4355.
 #endif  // _MSV_VER
 
 // C++ treats the void type specially.  For example, you cannot define
@@ -1686,7 +1686,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
 };  // class FunctionMockerBase
 
 #ifdef _MSC_VER
-#pragma warning(pop)  // Restores the warning state.
+# pragma warning(pop)  // Restores the warning state.
 #endif  // _MSV_VER
 
 // Implements methods of FunctionMockerBase.

@@ -593,8 +593,8 @@ TEST(DoAllTest, TenActions) {
 // is expanded and macro expansion cannot contain #pragma.  Therefore
 // we suppress them here.
 #ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4100)
+# pragma warning(push)
+# pragma warning(disable:4100)
 #endif
 
 // Tests the ACTION*() macro family.
@@ -1205,7 +1205,7 @@ TEST(ActionTemplateTest, CanBeOverloadedOnNumberOfValueParameters) {
 }
 
 #ifdef _MSC_VER
-#pragma warning(pop)
+# pragma warning(pop)
 #endif
 
 }  // namespace gmock_generated_actions_test

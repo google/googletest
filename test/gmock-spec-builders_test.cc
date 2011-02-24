@@ -1717,14 +1717,14 @@ TEST(DeletingMockEarlyTest, Success2) {
 // Suppresses warning on unreferenced formal parameter in MSVC with
 // -W4.
 #ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4100)
+# pragma warning(push)
+# pragma warning(disable:4100)
 #endif
 
 ACTION_P(Delete, ptr) { delete ptr; }
 
 #ifdef _MSC_VER
-#pragma warning(pop)
+# pragma warning(pop)
 #endif
 
 TEST(DeletingMockEarlyTest, CanDeleteSelfInActionReturningVoid) {
@@ -1890,7 +1890,9 @@ TEST(FunctionCallMessageTest, UninterestingCallGeneratesFyiWithStackTrace) {
   const String output = GetCapturedStdout();
   EXPECT_PRED_FORMAT2(IsSubstring, "GMOCK WARNING", output);
   EXPECT_PRED_FORMAT2(IsSubstring, "Stack trace:", output);
-#ifndef NDEBUG
+
+# ifndef NDEBUG
+
   // We check the stack trace content in dbg-mode only, as opt-mode
   // may inline the call we are interested in seeing.
 
@@ -1904,7 +1906,8 @@ TEST(FunctionCallMessageTest, UninterestingCallGeneratesFyiWithStackTrace) {
   c.NonVoidMethod();
   const String output2 = GetCapturedStdout();
   EXPECT_PRED_FORMAT2(IsSubstring, "NonVoidMethod(", output2);
-#endif  // NDEBUG
+
+# endif  // NDEBUG
 }
 
 // Tests that an uninteresting mock function call causes the function
@@ -1949,14 +1952,14 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
                     const string& function_name) {
     if (should_print) {
       EXPECT_THAT(output.c_str(), HasSubstr(expected_substring));
-#ifndef NDEBUG
+# ifndef NDEBUG
       // We check the stack trace content in dbg-mode only, as opt-mode
       // may inline the call we are interested in seeing.
       EXPECT_THAT(output.c_str(), HasSubstr(function_name));
-#else
+# else
       // Suppresses 'unused function parameter' warnings.
       static_cast<void>(function_name);
-#endif  // NDEBUG
+# endif  // NDEBUG
     } else {
       EXPECT_STREQ("", output.c_str());
     }

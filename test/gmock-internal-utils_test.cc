@@ -45,7 +45,7 @@
 #include "gtest/gtest-spi.h"
 
 #if GTEST_OS_CYGWIN
-#include <sys/types.h>  // For ssize_t. NOLINT
+# include <sys/types.h>  // For ssize_t. NOLINT
 #endif
 
 class ProtocolMessage;
@@ -416,18 +416,21 @@ TEST(LogTest, NoSkippingStackFrameInOptMode) {
   CaptureStdout();
   Log(WARNING, "Test log.\n", 100);
   const String log = GetCapturedStdout();
-#if defined(NDEBUG) && GTEST_GOOGLE3_MODE_
+
+# if defined(NDEBUG) && GTEST_GOOGLE3_MODE_
+
   // In opt mode, no stack frame should be skipped.
   EXPECT_THAT(log, ContainsRegex("\nGMOCK WARNING:\n"
                                  "Test log\\.\n"
                                  "Stack trace:\n"
                                  ".+"));
-#else
+# else
+
   // In dbg mode, the stack frames should be skipped.
   EXPECT_STREQ("\nGMOCK WARNING:\n"
                "Test log.\n"
                "Stack trace:\n", log.c_str());
-#endif
+# endif
 }
 
 // Tests that all logs are printed when the value of the

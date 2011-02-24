@@ -136,8 +136,8 @@ WithArg(const InnerAction& action) {
 // is expanded and macro expansion cannot contain #pragma.  Therefore
 // we suppress them here.
 #ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4100)
+# pragma warning(push)
+# pragma warning(disable:4100)
 #endif
 
 // Action ReturnArg<k>() returns the k-th argument of the mock function.
@@ -188,12 +188,12 @@ ACTION_TEMPLATE(SetArrayArgument,
   // Microsoft compiler deprecates ::std::copy, so we want to suppress warning
   // 4996 (Function call with parameters that may be unsafe) there.
 #ifdef _MSC_VER
-#pragma warning(push)          // Saves the current warning state.
-#pragma warning(disable:4996)  // Temporarily disables warning 4996.
+# pragma warning(push)          // Saves the current warning state.
+# pragma warning(disable:4996)  // Temporarily disables warning 4996.
 #endif
   ::std::copy(first, last, ::std::tr1::get<k>(args));
 #ifdef _MSC_VER
-#pragma warning(pop)           // Restores the warning state.
+# pragma warning(pop)           // Restores the warning state.
 #endif
 }
 
@@ -213,19 +213,19 @@ ACTION_P(ReturnPointee, pointer) { return *pointer; }
 #if GTEST_HAS_EXCEPTIONS
 
 // Suppresses the 'unreachable code' warning that VC generates in opt modes.
-#ifdef _MSC_VER
-#pragma warning(push)          // Saves the current warning state.
-#pragma warning(disable:4702)  // Temporarily disables warning 4702.
-#endif
+# ifdef _MSC_VER
+#  pragma warning(push)          // Saves the current warning state.
+#  pragma warning(disable:4702)  // Temporarily disables warning 4702.
+# endif
 ACTION_P(Throw, exception) { throw exception; }
-#ifdef _MSC_VER
-#pragma warning(pop)           // Restores the warning state.
-#endif
+# ifdef _MSC_VER
+#  pragma warning(pop)           // Restores the warning state.
+# endif
 
 #endif  // GTEST_HAS_EXCEPTIONS
 
 #ifdef _MSC_VER
-#pragma warning(pop)
+# pragma warning(pop)
 #endif
 
 }  // namespace testing

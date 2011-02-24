@@ -53,7 +53,7 @@
 // For MS Visual C++, check the compiler version. At least VS 2003 is
 // required to compile Google Mock.
 #if defined(_MSC_VER) && _MSC_VER < 1310
-#error "At least Visual C++ 2003 (7.1) is required to compile Google Mock."
+# error "At least Visual C++ 2003 (7.1) is required to compile Google Mock."
 #endif
 
 // Macro for referencing flags.  This is public as we want the user to

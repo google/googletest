@@ -44,14 +44,14 @@
 // MSDN says the header file to be included for STDMETHOD is BaseTyps.h but
 // we are getting compiler errors if we use basetyps.h, hence including
 // objbase.h for definition of STDMETHOD.
-#include <objbase.h>
+# include <objbase.h>
 #endif  // GTEST_OS_WINDOWS
 
 // There is a bug in MSVC (fixed in VS 2008) that prevents creating a
 // mock for a function with const arguments, so we don't test such
 // cases for MSVC versions older than 2008.
 #if !GTEST_OS_WINDOWS || (_MSC_VER >= 1500)
-#define GMOCK_ALLOWS_CONST_PARAM_FUNCTIONS
+# define GMOCK_ALLOWS_CONST_PARAM_FUNCTIONS
 #endif  // !GTEST_OS_WINDOWS || (_MSC_VER >= 1500)
 
 namespace testing {

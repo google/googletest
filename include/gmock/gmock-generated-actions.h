@@ -2228,8 +2228,8 @@ namespace testing {
 // is expanded and macro expansion cannot contain #pragma.  Therefore
 // we suppress them here.
 #ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4100)
+# pragma warning(push)
+# pragma warning(disable:4100)
 #endif
 
 // Various overloads for InvokeArgument<N>().
@@ -2411,7 +2411,7 @@ ACTION_TEMPLATE(ReturnNew,
 }
 
 #ifdef _MSC_VER
-#pragma warning(pop)
+# pragma warning(pop)
 #endif
 
 }  // namespace testing

@@ -39,7 +39,7 @@
 // Windows. See the following link to track the current status of this bug:
 // http://connect.microsoft.com/VisualStudio/feedback/ViewFeedback.aspx?FeedbackID=394464  // NOLINT
 #if GTEST_OS_WINDOWS_MOBILE
-#include <tchar.h>  // NOLINT
+# include <tchar.h>  // NOLINT
 
 int _tmain(int argc, TCHAR** argv) {
 #else
