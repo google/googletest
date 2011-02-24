@@ -5,7 +5,7 @@ m4_include(m4/acx_pthread.m4)
 # "[1.0.1]"). It also asumes that there won't be any closing parenthesis
 # between "AC_INIT(" and the closing ")" including comments and strings.
 AC_INIT([Google C++ Testing Framework],
-        [1.5.0],
+        [1.6.0],
         [googletestframework@googlegroups.com],
         [gtest])
 
