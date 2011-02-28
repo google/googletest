@@ -995,7 +995,7 @@ TEST(PrintTupleTest, NestedTuple) {
 // Unprintable types in the global namespace.
 TEST(PrintUnprintableTypeTest, InGlobalNamespace) {
   EXPECT_EQ("1-byte object <00>",
-            Print(UnprintableTemplateInGlobal<bool>()));
+            Print(UnprintableTemplateInGlobal<char>()));
 }
 
 // Unprintable types in a user namespace.
