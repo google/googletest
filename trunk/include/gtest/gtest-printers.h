@@ -308,7 +308,10 @@ void DefaultPrintTo(IsNotContainer /* dummy */,
   } else {
     // C++ doesn't allow casting from a function pointer to any object
     // pointer.
-    if (ImplicitlyConvertible<T*, const void*>::value) {
+    //
+    // IsTrue() silences warnings: "Condition is always true",
+    // "unreachable code".
+    if (IsTrue(ImplicitlyConvertible<T*, const void*>::value)) {
       // T is not a function type.  We just call << to print p,
       // relying on ADL to pick up user-defined << for their pointer
       // types, if any.
@@ -736,12 +739,25 @@ struct TuplePrefixPrinter<0> {
   template <typename Tuple>
   static void TersePrintPrefixToStrings(const Tuple&, Strings*) {}
 };
+// We have to specialize the entire TuplePrefixPrinter<> class
+// template here, even though the definition of
+// TersePrintPrefixToStrings() is the same as the generic version, as
+// Borland C++ doesn't support specializing a method.
 template <>
-template <typename Tuple>
-void TuplePrefixPrinter<1>::PrintPrefixTo(const Tuple& t, ::std::ostream* os) {
-  UniversalPrinter<typename ::std::tr1::tuple_element<0, Tuple>::type>::
-      Print(::std::tr1::get<0>(t), os);
-}
+struct TuplePrefixPrinter<1> {
+  template <typename Tuple>
+  static void PrintPrefixTo(const Tuple& t, ::std::ostream* os) {
+    UniversalPrinter<typename ::std::tr1::tuple_element<0, Tuple>::type>::
+        Print(::std::tr1::get<0>(t), os);
+  }
+
+  template <typename Tuple>
+  static void TersePrintPrefixToStrings(const Tuple& t, Strings* strings) {
+    ::std::stringstream ss;
+    UniversalTersePrint(::std::tr1::get<0>(t), &ss);
+    strings->push_back(ss.str());
+  }
+};
 
 // Helper function for printing a tuple.  T must be instantiated with
 // a tuple type.
