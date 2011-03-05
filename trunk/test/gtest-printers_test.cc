@@ -74,7 +74,7 @@ enum EnumWithoutPrinter {
 
 // An enum with a << operator.
 enum EnumWithStreaming {
-  kEWS1 = 10,
+  kEWS1 = 10
 };
 
 std::ostream& operator<<(std::ostream& os, EnumWithStreaming e) {
@@ -83,7 +83,7 @@ std::ostream& operator<<(std::ostream& os, EnumWithStreaming e) {
 
 // An enum with a PrintTo() function.
 enum EnumWithPrintTo {
-  kEWPT1 = 1,
+  kEWPT1 = 1
 };
 
 void PrintTo(EnumWithPrintTo e, std::ostream* os) {
