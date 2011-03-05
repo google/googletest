@@ -1296,7 +1296,9 @@ namespace internal {
 template <typename T1, typename T2>
 String FormatForComparisonFailureMessage(const T1& value,
                                          const T2& /* other_operand */) {
-  return PrintToString(value);
+  // C++Builder compiles this incorrectly if the namespace isn't explicitly
+  // given.
+  return ::testing::PrintToString(value);
 }
 
 // The helper function for {ASSERT|EXPECT}_EQ.

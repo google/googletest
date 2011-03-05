@@ -296,7 +296,7 @@ class GTEST_API_ String {
 
  private:
   // Constructs a non-NULL String from the given content.  This
-  // function can only be called when data_ has not been allocated.
+  // function can only be called when c_str_ has not been allocated.
   // ConstructNonNull(NULL, 0) results in an empty string ("").
   // ConstructNonNull(NULL, non_zero) is undefined behavior.
   void ConstructNonNull(const char* buffer, size_t a_length) {
