@@ -981,7 +981,11 @@ SetArgPointee(const T& x) {
   return MakePolymorphicAction(internal::SetArgumentPointeeAction<
       N, T, internal::IsAProtocolMessage<T>::value>(x));
 }
+
+#if !((GTEST_GCC_VER_ && GTEST_GCC_VER_ < 40000) || GTEST_OS_SYMBIAN)
 // This overload allows SetArgPointee() to accept a string literal.
+// GCC prior to the version 4.0 and Symbian C++ compiler cannot distinguish
+// this overload from the templated version and emit a compile error.
 template <size_t N>
 PolymorphicAction<
   internal::SetArgumentPointeeAction<N, const char*, false> >
@@ -989,6 +993,16 @@ SetArgPointee(const char* p) {
   return MakePolymorphicAction(internal::SetArgumentPointeeAction<
       N, const char*, false>(p));
 }
+
+template <size_t N>
+PolymorphicAction<
+  internal::SetArgumentPointeeAction<N, const wchar_t*, false> >
+SetArgPointee(const wchar_t* p) {
+  return MakePolymorphicAction(internal::SetArgumentPointeeAction<
+      N, const wchar_t*, false>(p));
+}
+#endif
+
 // The following version is DEPRECATED.
 template <size_t N, typename T>
 PolymorphicAction<

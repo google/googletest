@@ -714,22 +714,43 @@ TEST(SetArgPointeeTest, SetsTheNthPointee) {
   EXPECT_EQ('a', ch);
 }
 
+#if !((GTEST_GCC_VER_ && GTEST_GCC_VER_ < 40000) || GTEST_OS_SYMBIAN)
 // Tests that SetArgPointee<N>() accepts a string literal.
+// GCC prior to v4.0 and the Symbian compiler do not support this.
 TEST(SetArgPointeeTest, AcceptsStringLiteral) {
-  typedef void MyFunction(bool, std::string*, const char**);
-  Action<MyFunction> a = SetArgPointee<1>("hi");
+  typedef void MyFunction(std::string*, const char**);
+  Action<MyFunction> a = SetArgPointee<0>("hi");
   std::string str;
   const char* ptr = NULL;
-  a.Perform(make_tuple(true, &str, &ptr));
+  a.Perform(make_tuple(&str, &ptr));
   EXPECT_EQ("hi", str);
   EXPECT_TRUE(ptr == NULL);
 
-  a = SetArgPointee<2>("world");
+  a = SetArgPointee<1>("world");
   str = "";
-  a.Perform(make_tuple(true, &str, &ptr));
+  a.Perform(make_tuple(&str, &ptr));
   EXPECT_EQ("", str);
   EXPECT_STREQ("world", ptr);
 }
+
+TEST(SetArgPointeeTest, AcceptsWideStringLiteral) {
+  typedef void MyFunction(const wchar_t**);
+  Action<MyFunction> a = SetArgPointee<0>(L"world");
+  const wchar_t* ptr = NULL;
+  a.Perform(make_tuple(&ptr));
+  EXPECT_STREQ(L"world", ptr);
+
+# if GTEST_HAS_STD_WSTRING
+
+  typedef void MyStringFunction(std::wstring*);
+  Action<MyStringFunction> a2 = SetArgPointee<0>(L"world");
+  std::wstring str = L"";
+  a2.Perform(make_tuple(&str));
+  EXPECT_EQ(L"world", str);
+
+# endif
+}
+#endif
 
 // Tests that SetArgPointee<N>() accepts a char pointer.
 TEST(SetArgPointeeTest, AcceptsCharPointer) {
@@ -749,6 +770,26 @@ TEST(SetArgPointeeTest, AcceptsCharPointer) {
   a.Perform(make_tuple(true, &str, &ptr));
   EXPECT_EQ("", str);
   EXPECT_EQ(world, ptr);
+}
+
+TEST(SetArgPointeeTest, AcceptsWideCharPointer) {
+  typedef void MyFunction(bool, const wchar_t**);
+  const wchar_t* const hi = L"hi";
+  Action<MyFunction> a = SetArgPointee<1>(hi);
+  const wchar_t* ptr = NULL;
+  a.Perform(make_tuple(true, &ptr));
+  EXPECT_EQ(hi, ptr);
+
+# if GTEST_HAS_STD_WSTRING
+
+  typedef void MyStringFunction(bool, std::wstring*);
+  wchar_t world_array[] = L"world";
+  wchar_t* const world = world_array;
+  Action<MyStringFunction> a2 = SetArgPointee<1>(world);
+  std::wstring str;
+  a2.Perform(make_tuple(true, &str));
+  EXPECT_EQ(world_array, str);
+# endif
 }
 
 #if GTEST_HAS_PROTOBUF_
