@@ -896,21 +896,38 @@ struct IsAProtocolMessage
   ImplicitlyConvertible<const T*, const ::proto2::Message*>::value> {
 };
 
-// When the compiler sees expression IsContainerTest<C>(0), the first
-// overload of IsContainerTest will be picked if C is an STL-style
-// container class (since C::const_iterator* is a valid type and 0 can
-// be converted to it), while the second overload will be picked
-// otherwise (since C::const_iterator will be an invalid type in this
-// case).  Therefore, we can determine whether C is a container class
-// by checking the type of IsContainerTest<C>(0).  The value of the
-// expression is insignificant.
+// When the compiler sees expression IsContainerTest<C>(0), if C is an
+// STL-style container class, the first overload of IsContainerTest
+// will be viable (since both C::iterator* and C::const_iterator* are
+// valid types and NULL can be implicitly converted to them).  It will
+// be picked over the second overload as 'int' is a perfect match for
+// the type of argument 0.  If C::iterator or C::const_iterator is not
+// a valid type, the first overload is not viable, and the second
+// overload will be picked.  Therefore, we can determine whether C is
+// a container class by checking the type of IsContainerTest<C>(0).
+// The value of the expression is insignificant.
+//
+// Note that we look for both C::iterator and C::const_iterator.  The
+// reason is that C++ injects the name of a class as a member of the
+// class itself (e.g. you can refer to class iterator as either
+// 'iterator' or 'iterator::iterator').  If we look for C::iterator
+// only, for example, we would mistakenly think that a class named
+// iterator is an STL container.
+//
+// Also note that the simpler approach of overloading
+// IsContainerTest(typename C::const_iterator*) and
+// IsContainerTest(...) doesn't work with Visual Age C++ and Sun C++.
 typedef int IsContainer;
 template <class C>
-IsContainer IsContainerTest(typename C::const_iterator*) { return 0; }
+IsContainer IsContainerTest(int /* dummy */,
+                            typename C::iterator* /* it */ = NULL,
+                            typename C::const_iterator* /* const_it */ = NULL) {
+  return 0;
+}
 
 typedef char IsNotContainer;
 template <class C>
-IsNotContainer IsContainerTest(...) { return '\0'; }
+IsNotContainer IsContainerTest(long /* dummy */) { return '\0'; }
 
 // EnableIf<condition>::type is void when 'Cond' is true, and
 // undefined when 'Cond' is false.  To use SFINAE to make a function
@@ -1009,6 +1026,7 @@ class NativeArray {
  public:
   // STL-style container typedefs.
   typedef Element value_type;
+  typedef Element* iterator;
   typedef const Element* const_iterator;
 
   // Constructs from a native array.

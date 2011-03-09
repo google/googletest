@@ -742,7 +742,8 @@ struct TuplePrefixPrinter<0> {
 // We have to specialize the entire TuplePrefixPrinter<> class
 // template here, even though the definition of
 // TersePrintPrefixToStrings() is the same as the generic version, as
-// Borland C++ doesn't support specializing a method.
+// Embarcadero (formerly CodeGear, formerly Borland) C++ doesn't
+// support specializing a method template of a class template.
 template <>
 struct TuplePrefixPrinter<1> {
   template <typename Tuple>

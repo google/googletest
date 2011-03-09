@@ -936,6 +936,28 @@ TEST(PrintStlContainerTest, TwoDimensionalNativeArray) {
   EXPECT_EQ("{ { 1, 2, 3 }, { 4, 5, 6 } }", Print(b));
 }
 
+// Tests that a class named iterator isn't treated as a container.
+
+struct iterator {
+  char x;
+};
+
+TEST(PrintStlContainerTest, Iterator) {
+  iterator it = {};
+  EXPECT_EQ("1-byte object <00>", Print(it));
+}
+
+// Tests that a class named const_iterator isn't treated as a container.
+
+struct const_iterator {
+  char x;
+};
+
+TEST(PrintStlContainerTest, ConstIterator) {
+  const_iterator it = {};
+  EXPECT_EQ("1-byte object <00>", Print(it));
+}
+
 #if GTEST_HAS_TR1_TUPLE
 // Tests printing tuples.
 
