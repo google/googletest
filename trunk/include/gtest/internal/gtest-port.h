@@ -87,6 +87,7 @@
 //   GTEST_OS_AIX      - IBM AIX
 //   GTEST_OS_CYGWIN   - Cygwin
 //   GTEST_OS_LINUX    - Linux
+//     GTEST_OS_LINUX_ANDROID - Google Android
 //   GTEST_OS_MAC      - Mac OS X
 //   GTEST_OS_NACL     - Google Native Client (NaCl)
 //   GTEST_OS_SOLARIS  - Sun Solaris
@@ -225,6 +226,9 @@
 # define GTEST_OS_MAC 1
 #elif defined __linux__
 # define GTEST_OS_LINUX 1
+# ifdef ANDROID
+#  define GTEST_OS_LINUX_ANDROID 1
+# endif  // ANDROID
 #elif defined __MVS__
 # define GTEST_OS_ZOS 1
 #elif defined(__sun) && defined(__SVR4)
@@ -336,8 +340,10 @@
 //   is available.
 
 // Cygwin 1.7 and below doesn't support ::std::wstring.
-// Solaris' libc++ doesn't support it either.
-# define GTEST_HAS_STD_WSTRING (!(GTEST_OS_CYGWIN || GTEST_OS_SOLARIS))
+// Solaris' libc++ doesn't support it either.  Android has
+// no support for it at least as recent as Froyo (2.2).
+# define GTEST_HAS_STD_WSTRING \
+    (!(GTEST_OS_LINUX_ANDROID || GTEST_OS_CYGWIN || GTEST_OS_SOLARIS))
 
 #endif  // GTEST_HAS_STD_WSTRING
 

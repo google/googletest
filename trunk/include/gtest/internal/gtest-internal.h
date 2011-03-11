@@ -788,16 +788,16 @@ struct RemoveConst { typedef T type; };  // NOLINT
 template <typename T>
 struct RemoveConst<const T> { typedef T type; };  // NOLINT
 
-// MSVC 8.0 has a bug which causes the above definition to fail to
-// remove the const in 'const int[3]'.  The following specialization
-// works around the bug.  However, it causes trouble with gcc and thus
-// needs to be conditionally compiled.
-#ifdef _MSC_VER
+// MSVC 8.0 and Sun C++ have a bug which causes the above definition
+// to fail to remove the const in 'const int[3]'.  The following
+// specialization works around the bug.  However, it causes trouble
+// with GCC and thus needs to be conditionally compiled.
+#if defined(_MSC_VER) || defined(__SUNPRO_CC)
 template <typename T, size_t N>
 struct RemoveConst<T[N]> {
   typedef typename RemoveConst<T>::type type[N];
 };
-#endif  // _MSC_VER
+#endif
 
 // A handy wrapper around RemoveConst that works when the argument
 // T depends on template parameters.
