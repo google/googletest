@@ -850,7 +850,7 @@ ElementsAreArray(const T (&array)[N]) {
 }
 
 // AllOf(m1, m2, ..., mk) matches any value that matches all of the given
-// sub-matchers.
+// sub-matchers.  AllOf is called fully qualified to prevent ADL from firing.
 
 template <typename Matcher1, typename Matcher2>
 inline internal::BothOfMatcher<Matcher1, Matcher2>
@@ -862,7 +862,7 @@ template <typename Matcher1, typename Matcher2, typename Matcher3>
 inline internal::BothOfMatcher<Matcher1, internal::BothOfMatcher<Matcher2,
     Matcher3> >
 AllOf(Matcher1 m1, Matcher2 m2, Matcher3 m3) {
-  return AllOf(m1, AllOf(m2, m3));
+  return ::testing::AllOf(m1, ::testing::AllOf(m2, m3));
 }
 
 template <typename Matcher1, typename Matcher2, typename Matcher3,
@@ -870,7 +870,7 @@ template <typename Matcher1, typename Matcher2, typename Matcher3,
 inline internal::BothOfMatcher<Matcher1, internal::BothOfMatcher<Matcher2,
     internal::BothOfMatcher<Matcher3, Matcher4> > >
 AllOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4) {
-  return AllOf(m1, AllOf(m2, m3, m4));
+  return ::testing::AllOf(m1, ::testing::AllOf(m2, m3, m4));
 }
 
 template <typename Matcher1, typename Matcher2, typename Matcher3,
@@ -879,7 +879,7 @@ inline internal::BothOfMatcher<Matcher1, internal::BothOfMatcher<Matcher2,
     internal::BothOfMatcher<Matcher3, internal::BothOfMatcher<Matcher4,
     Matcher5> > > >
 AllOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5) {
-  return AllOf(m1, AllOf(m2, m3, m4, m5));
+  return ::testing::AllOf(m1, ::testing::AllOf(m2, m3, m4, m5));
 }
 
 template <typename Matcher1, typename Matcher2, typename Matcher3,
@@ -889,7 +889,7 @@ inline internal::BothOfMatcher<Matcher1, internal::BothOfMatcher<Matcher2,
     internal::BothOfMatcher<Matcher5, Matcher6> > > > >
 AllOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
     Matcher6 m6) {
-  return AllOf(m1, AllOf(m2, m3, m4, m5, m6));
+  return ::testing::AllOf(m1, ::testing::AllOf(m2, m3, m4, m5, m6));
 }
 
 template <typename Matcher1, typename Matcher2, typename Matcher3,
@@ -900,7 +900,7 @@ inline internal::BothOfMatcher<Matcher1, internal::BothOfMatcher<Matcher2,
     Matcher7> > > > > >
 AllOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
     Matcher6 m6, Matcher7 m7) {
-  return AllOf(m1, AllOf(m2, m3, m4, m5, m6, m7));
+  return ::testing::AllOf(m1, ::testing::AllOf(m2, m3, m4, m5, m6, m7));
 }
 
 template <typename Matcher1, typename Matcher2, typename Matcher3,
@@ -912,7 +912,7 @@ inline internal::BothOfMatcher<Matcher1, internal::BothOfMatcher<Matcher2,
     internal::BothOfMatcher<Matcher7, Matcher8> > > > > > >
 AllOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
     Matcher6 m6, Matcher7 m7, Matcher8 m8) {
-  return AllOf(m1, AllOf(m2, m3, m4, m5, m6, m7, m8));
+  return ::testing::AllOf(m1, ::testing::AllOf(m2, m3, m4, m5, m6, m7, m8));
 }
 
 template <typename Matcher1, typename Matcher2, typename Matcher3,
@@ -925,7 +925,7 @@ inline internal::BothOfMatcher<Matcher1, internal::BothOfMatcher<Matcher2,
     Matcher9> > > > > > > >
 AllOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
     Matcher6 m6, Matcher7 m7, Matcher8 m8, Matcher9 m9) {
-  return AllOf(m1, AllOf(m2, m3, m4, m5, m6, m7, m8, m9));
+  return ::testing::AllOf(m1, ::testing::AllOf(m2, m3, m4, m5, m6, m7, m8, m9));
 }
 
 template <typename Matcher1, typename Matcher2, typename Matcher3,
@@ -938,11 +938,12 @@ inline internal::BothOfMatcher<Matcher1, internal::BothOfMatcher<Matcher2,
     internal::BothOfMatcher<Matcher9, Matcher10> > > > > > > > >
 AllOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
     Matcher6 m6, Matcher7 m7, Matcher8 m8, Matcher9 m9, Matcher10 m10) {
-  return AllOf(m1, AllOf(m2, m3, m4, m5, m6, m7, m8, m9, m10));
+  return ::testing::AllOf(m1, ::testing::AllOf(m2, m3, m4, m5, m6, m7, m8, m9,
+      m10));
 }
 
 // AnyOf(m1, m2, ..., mk) matches any value that matches any of the given
-// sub-matchers.
+// sub-matchers.  AnyOf is called fully qualified to prevent ADL from firing.
 
 template <typename Matcher1, typename Matcher2>
 inline internal::EitherOfMatcher<Matcher1, Matcher2>
@@ -954,7 +955,7 @@ template <typename Matcher1, typename Matcher2, typename Matcher3>
 inline internal::EitherOfMatcher<Matcher1, internal::EitherOfMatcher<Matcher2,
     Matcher3> >
 AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3) {
-  return AnyOf(m1, AnyOf(m2, m3));
+  return ::testing::AnyOf(m1, ::testing::AnyOf(m2, m3));
 }
 
 template <typename Matcher1, typename Matcher2, typename Matcher3,
@@ -962,7 +963,7 @@ template <typename Matcher1, typename Matcher2, typename Matcher3,
 inline internal::EitherOfMatcher<Matcher1, internal::EitherOfMatcher<Matcher2,
     internal::EitherOfMatcher<Matcher3, Matcher4> > >
 AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4) {
-  return AnyOf(m1, AnyOf(m2, m3, m4));
+  return ::testing::AnyOf(m1, ::testing::AnyOf(m2, m3, m4));
 }
 
 template <typename Matcher1, typename Matcher2, typename Matcher3,
@@ -971,7 +972,7 @@ inline internal::EitherOfMatcher<Matcher1, internal::EitherOfMatcher<Matcher2,
     internal::EitherOfMatcher<Matcher3, internal::EitherOfMatcher<Matcher4,
     Matcher5> > > >
 AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5) {
-  return AnyOf(m1, AnyOf(m2, m3, m4, m5));
+  return ::testing::AnyOf(m1, ::testing::AnyOf(m2, m3, m4, m5));
 }
 
 template <typename Matcher1, typename Matcher2, typename Matcher3,
@@ -981,7 +982,7 @@ inline internal::EitherOfMatcher<Matcher1, internal::EitherOfMatcher<Matcher2,
     internal::EitherOfMatcher<Matcher5, Matcher6> > > > >
 AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
     Matcher6 m6) {
-  return AnyOf(m1, AnyOf(m2, m3, m4, m5, m6));
+  return ::testing::AnyOf(m1, ::testing::AnyOf(m2, m3, m4, m5, m6));
 }
 
 template <typename Matcher1, typename Matcher2, typename Matcher3,
@@ -992,7 +993,7 @@ inline internal::EitherOfMatcher<Matcher1, internal::EitherOfMatcher<Matcher2,
     Matcher7> > > > > >
 AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
     Matcher6 m6, Matcher7 m7) {
-  return AnyOf(m1, AnyOf(m2, m3, m4, m5, m6, m7));
+  return ::testing::AnyOf(m1, ::testing::AnyOf(m2, m3, m4, m5, m6, m7));
 }
 
 template <typename Matcher1, typename Matcher2, typename Matcher3,
@@ -1004,7 +1005,7 @@ inline internal::EitherOfMatcher<Matcher1, internal::EitherOfMatcher<Matcher2,
     internal::EitherOfMatcher<Matcher7, Matcher8> > > > > > >
 AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
     Matcher6 m6, Matcher7 m7, Matcher8 m8) {
-  return AnyOf(m1, AnyOf(m2, m3, m4, m5, m6, m7, m8));
+  return ::testing::AnyOf(m1, ::testing::AnyOf(m2, m3, m4, m5, m6, m7, m8));
 }
 
 template <typename Matcher1, typename Matcher2, typename Matcher3,
@@ -1017,7 +1018,7 @@ inline internal::EitherOfMatcher<Matcher1, internal::EitherOfMatcher<Matcher2,
     Matcher9> > > > > > > >
 AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
     Matcher6 m6, Matcher7 m7, Matcher8 m8, Matcher9 m9) {
-  return AnyOf(m1, AnyOf(m2, m3, m4, m5, m6, m7, m8, m9));
+  return ::testing::AnyOf(m1, ::testing::AnyOf(m2, m3, m4, m5, m6, m7, m8, m9));
 }
 
 template <typename Matcher1, typename Matcher2, typename Matcher3,
@@ -1030,10 +1031,12 @@ inline internal::EitherOfMatcher<Matcher1, internal::EitherOfMatcher<Matcher2,
     internal::EitherOfMatcher<Matcher9, Matcher10> > > > > > > > >
 AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
     Matcher6 m6, Matcher7 m7, Matcher8 m8, Matcher9 m9, Matcher10 m10) {
-  return AnyOf(m1, AnyOf(m2, m3, m4, m5, m6, m7, m8, m9, m10));
+  return ::testing::AnyOf(m1, ::testing::AnyOf(m2, m3, m4, m5, m6, m7, m8, m9,
+      m10));
 }
 
 }  // namespace testing
+
 
 // The MATCHER* family of macros can be used in a namespace scope to
 // define custom matchers easily.

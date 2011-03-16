@@ -1091,6 +1091,35 @@ TEST(ContainsTest, WorksForTwoDimensionalNativeArray) {
   EXPECT_THAT(a, Contains(Not(Contains(5))));
 }
 
+namespace adl_test {
+
+// Verifies that the implementation of ::testing::AllOf and ::testing::AnyOf
+// don't issue unqualified recursive calls.  If they do, the argument dependent
+// name lookup will cause AllOf/AnyOf in the 'adl_test' namespace to be found
+// as a candidate and the compilation will break due to an ambiguous overload.
+
+// The matcher must be in the same namespace as AllOf/AnyOf to make argument
+// dependent lookup find those.
+MATCHER(M, "") { return true; }
+
+template <typename T1, typename T2>
+bool AllOf(const T1& t1, const T2& t2) { return true; }
+
+TEST(AllOfTest, DoesNotCallAllOfUnqualified) {
+  EXPECT_THAT(42, testing::AllOf(
+      M(), M(), M(), M(), M(), M(), M(), M(), M(), M()));
+}
+
+template <typename T1, typename T2> bool
+AnyOf(const T1& t1, const T2& t2) { return true; }
+
+TEST(AnyOfTest, DoesNotCallAnyOfUnqualified) {
+  EXPECT_THAT(42, testing::AnyOf(
+      M(), M(), M(), M(), M(), M(), M(), M(), M(), M()));
+}
+
+}  // namespace adl_test
+
 #ifdef _MSC_VER
 # pragma warning(pop)
 #endif

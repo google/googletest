@@ -303,7 +303,7 @@ ElementsAreArray(const T (&array)[N]) {
 }
 
 // AllOf(m1, m2, ..., mk) matches any value that matches all of the given
-// sub-matchers.
+// sub-matchers.  AllOf is called fully qualified to prevent ADL from firing.
 
 $range i 2..n
 $for i [[
@@ -318,7 +318,7 @@ AllOf($for j, [[Matcher$j m$j]]) {
 $if i == 2 [[
   return internal::BothOfMatcher<Matcher1, Matcher2>(m1, m2);
 ]] $else [[
-  return AllOf(m1, AllOf($for k, [[m$(k + 1)]]));
+  return ::testing::AllOf(m1, ::testing::AllOf($for k, [[m$(k + 1)]]));
 ]]
 
 }
@@ -326,7 +326,7 @@ $if i == 2 [[
 ]]
 
 // AnyOf(m1, m2, ..., mk) matches any value that matches any of the given
-// sub-matchers.
+// sub-matchers.  AnyOf is called fully qualified to prevent ADL from firing.
 
 $range i 2..n
 $for i [[
@@ -341,7 +341,7 @@ AnyOf($for j, [[Matcher$j m$j]]) {
 $if i == 2 [[
   return internal::EitherOfMatcher<Matcher1, Matcher2>(m1, m2);
 ]] $else [[
-  return AnyOf(m1, AnyOf($for k, [[m$(k + 1)]]));
+  return ::testing::AnyOf(m1, ::testing::AnyOf($for k, [[m$(k + 1)]]));
 ]]
 
 }
