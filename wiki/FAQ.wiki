@@ -8,7 +8,7 @@ googletestframework@googlegroups.com.
 
 == Why should I use Google Test instead of my favorite C++ testing framework? ==
 
-First, let's say clearly that we don't want to get into the debate of
+First, let us say clearly that we don't want to get into the debate of
 which C++ testing framework is *the best*.  There exist many fine
 frameworks for writing C++ tests, and we have tremendous respect for
 the developers and users of them.  We don't think there is (or will
@@ -22,14 +22,19 @@ Test.  We don't claim them to be unique to Google Test - rather, the
 combination of them makes Google Test the choice for us.  We hope this
 list can help you decide whether it is for you too.
 
-  * Google Test is designed to be portable.  It works where many STL types (e.g. `std::string` and `std::vector`) don't compile.  It doesn't require exceptions or RTTI.  As a result, it runs on Linux, Mac OS X, Windows and several embedded operating systems.
+  * Google Test is designed to be portable: it doesn't require exceptions or RTTI; it works around various bugs in various compilers and environments; etc.  As a result, it works on Linux, Mac OS X, Windows and several embedded operating systems.
   * Nonfatal assertions (`EXPECT_*`) have proven to be great time savers, as they allow a test to report multiple failures in a single edit-compile-test cycle.
   * It's easy to write assertions that generate informative messages: you just use the stream syntax to append any additional information, e.g. `ASSERT_EQ(5, Foo(i)) << " where i = " << i;`.  It doesn't require a new set of macros or special functions.
   * Google Test automatically detects your tests and doesn't require you to enumerate them in order to run them.
-  * No framework can anticipate all your needs, so Google Test provides `EXPECT_PRED*` to make it easy to extend your assertion vocabulary.  For a nicer syntax, you can define your own assertion macros trivially in terms of `EXPECT_PRED*`.
   * Death tests are pretty handy for ensuring that your asserts in production code are triggered by the right conditions.
   * `SCOPED_TRACE` helps you understand the context of an assertion failure when it comes from inside a sub-routine or loop.
   * You can decide which tests to run using name patterns.  This saves time when you want to quickly reproduce a test failure.
+  * Google Test can generate XML test result reports that can be parsed by popular continuous build system like Hudson.
+  * Simple things are easy in Google Test, while hard things are possible: in addition to advanced features like [http://code.google.com/p/googletest/wiki/AdvancedGuide#Global_Set-Up_and_Tear-Down global test environments] and tests parameterized by [http://code.google.com/p/googletest/wiki/AdvancedGuide#Value_Parameterized_Tests values] or [http://code.google.com/p/googletest/wiki/AdvancedGuide#Typed_Tests types], Google Test supports various ways for the user to extend the framework -- if Google Test doesn't do something out of the box, chances are that a user can implement the feature using Google Test's public API, without changing Google Test itself.  In particular, you can:
+    * expand your testing vocabulary by defining [http://code.google.com/p/googletest/wiki/AdvancedGuide#Predicate_Assertions_for_Better_Error_Messages custom predicates],
+    * teach Google Test how to [http://code.google.com/p/googletest/wiki/AdvancedGuide#Teaching_Google_Test_How_to_Print_Your_Values print your types],
+    * define your own testing macros or utilities and verify them using Google Test's [http://code.google.com/p/googletest/wiki/AdvancedGuide#Catching_Failures Service Provider Interface], and
+    * reflect on the test cases or change the test output format by intercepting the [http://code.google.com/p/googletest/wiki/AdvancedGuide#Extending_Google_Test_by_Handling_Test_Events test events].
 
 == I'm getting warnings when compiling Google Test.  Would you fix them? ==
 
