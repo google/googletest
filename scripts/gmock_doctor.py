@@ -463,7 +463,7 @@ def _TypeInTemplatedBaseDiagnoser(msg):
       _CLANG_FILE_LINE_RE +
       r'error: use of undeclared identifier \'(?P<type>.*)\'\n'
       r'(.*\n)*?'
-      r'(?P=file):(?P=line):(?P=column): error: '
+      r'(?P=file):(?P=line):\d+: error: '
       r'non-friend class member \'Result\' cannot have a qualified name'
       )
   clang_regex_type_of_a_param = (
