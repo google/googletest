@@ -47,8 +47,6 @@
 #include "gtest/internal/gtest-port.h"
 #include "gtest/internal/gtest-string.h"
 
-#if GTEST_HAS_TYPED_TEST || GTEST_HAS_TYPED_TEST_P
-
 // #ifdef __GNUC__ is too general here.  It is possible to use gcc without using
 // libstdc++ (which is where cxxabi.h comes from).
 # ifdef __GLIBCXX__
@@ -58,19 +56,9 @@
 namespace testing {
 namespace internal {
 
-// AssertyTypeEq<T1, T2>::type is defined iff T1 and T2 are the same
-// type.  This can be used as a compile-time assertion to ensure that
-// two types are equal.
-
-template <typename T1, typename T2>
-struct AssertTypeEq;
-
-template <typename T>
-struct AssertTypeEq<T, T> {
-  typedef bool type;
-};
-
 // GetTypeName<T>() returns a human-readable name of type T.
+// NB: This function is also used in Google Mock, so don't move it inside of
+// the typed-test-only section below.
 template <typename T>
 String GetTypeName() {
 # if GTEST_HAS_RTTI
@@ -94,6 +82,20 @@ String GetTypeName() {
 
 # endif  // GTEST_HAS_RTTI
 }
+
+#if GTEST_HAS_TYPED_TEST || GTEST_HAS_TYPED_TEST_P
+
+// AssertyTypeEq<T1, T2>::type is defined iff T1 and T2 are the same
+// type.  This can be used as a compile-time assertion to ensure that
+// two types are equal.
+
+template <typename T1, typename T2>
+struct AssertTypeEq;
+
+template <typename T>
+struct AssertTypeEq<T, T> {
+  typedef bool type;
+};
 
 // A unique type used as the default value for the arguments of class
 // template Types.  This allows us to simulate variadic templates
@@ -3315,9 +3317,9 @@ struct TypeList<Types<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13,
       T41, T42, T43, T44, T45, T46, T47, T48, T49, T50>::type type;
 };
 
+#endif  // GTEST_HAS_TYPED_TEST || GTEST_HAS_TYPED_TEST_P
+
 }  // namespace internal
 }  // namespace testing
-
-#endif  // GTEST_HAS_TYPED_TEST || GTEST_HAS_TYPED_TEST_P
 
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_TYPE_UTIL_H_
