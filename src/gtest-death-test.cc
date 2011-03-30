@@ -225,7 +225,7 @@ void DeathTestAbort(const String& message) {
   } else {
     fprintf(stderr, "%s", message.c_str());
     fflush(stderr);
-    abort();
+    posix::Abort();
   }
 }
 

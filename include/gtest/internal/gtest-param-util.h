@@ -579,7 +579,7 @@ class ParameterizedTestCaseRegistry {
           // and terminate the program since we cannot guaranty correct
           // test case setup and tear-down in this case.
           ReportInvalidTestCaseType(test_case_name,  file, line);
-          abort();
+          posix::Abort();
         } else {
           // At this point we are sure that the object we found is of the same
           // type we are looking for, so we downcast it to that type
