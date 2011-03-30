@@ -115,7 +115,7 @@ TEST(FooTest, Bar) {
 void Check(bool condition, const char* msg) {
   if (!condition) {
     printf("FAILED: %s\n", msg);
-    abort();
+    testing::internal::posix::Abort();
   }
 }
 
