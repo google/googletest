@@ -3032,7 +3032,7 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
   static String EscapeXml(const char* str, bool is_attribute);
 
   // Returns the given string with all characters invalid in XML removed.
-  static String RemoveInvalidXmlCharacters(const char* str);
+  static string RemoveInvalidXmlCharacters(const string& str);
 
   // Convenience wrapper around EscapeXml when str is an attribute value.
   static String EscapeXmlAttribute(const char* str) {
@@ -3166,17 +3166,14 @@ String XmlUnitTestResultPrinter::EscapeXml(const char* str, bool is_attribute) {
 // Returns the given string with all characters invalid in XML removed.
 // Currently invalid characters are dropped from the string. An
 // alternative is to replace them with certain characters such as . or ?.
-String XmlUnitTestResultPrinter::RemoveInvalidXmlCharacters(const char* str) {
-  char* const output = new char[strlen(str) + 1];
-  char* appender = output;
-  for (char ch = *str; ch != '\0'; ch = *++str)
-    if (IsValidXmlCharacter(ch))
-      *appender++ = ch;
-  *appender = '\0';
+string XmlUnitTestResultPrinter::RemoveInvalidXmlCharacters(const string& str) {
+  string output;
+  output.reserve(str.size());
+  for (string::const_iterator it = str.begin(); it != str.end(); ++it)
+    if (IsValidXmlCharacter(*it))
+      output.push_back(*it);
 
-  String ret_value(output);
-  delete[] output;
-  return ret_value;
+  return output;
 }
 
 // The following routines generate an XML representation of a UnitTest
@@ -3256,12 +3253,11 @@ void XmlUnitTestResultPrinter::OutputXmlTestInfo(::std::ostream* stream,
       *stream << "      <failure message=\""
               << EscapeXmlAttribute(part.summary()).c_str()
               << "\" type=\"\">";
-      const String message = RemoveInvalidXmlCharacters(String::Format(
-          "%s\n%s",
-          internal::FormatCompilerIndependentFileLocation(
-              part.file_name(), part.line_number()).c_str(),
-          part.message()).c_str());
-      OutputXmlCDataSection(stream, message.c_str());
+      const string location = internal::FormatCompilerIndependentFileLocation(
+          part.file_name(), part.line_number());
+      const string message = location + "\n" + part.message();
+      OutputXmlCDataSection(stream,
+                            RemoveInvalidXmlCharacters(message).c_str());
       *stream << "</failure>\n";
     }
   }
