@@ -1004,8 +1004,8 @@ TEST(StrEqTest, MatchesEqualString) {
 }
 
 TEST(StrEqTest, CanDescribeSelf) {
-  Matcher<string> m = StrEq("Hi-\'\"\?\\\a\b\f\n\r\t\v\xD3");
-  EXPECT_EQ("is equal to \"Hi-\'\\\"\\?\\\\\\a\\b\\f\\n\\r\\t\\v\\xD3\"",
+  Matcher<string> m = StrEq("Hi-\'\"?\\\a\b\f\n\r\t\v\xD3");
+  EXPECT_EQ("is equal to \"Hi-\'\\\"?\\\\\\a\\b\\f\\n\\r\\t\\v\\xD3\"",
       Describe(m));
 
   string str("01204500800");
@@ -1393,8 +1393,8 @@ TEST(StdWideStrEqTest, MatchesEqual) {
 }
 
 TEST(StdWideStrEqTest, CanDescribeSelf) {
-  Matcher< ::std::wstring> m = StrEq(L"Hi-\'\"\?\\\a\b\f\n\r\t\v");
-  EXPECT_EQ("is equal to L\"Hi-\'\\\"\\?\\\\\\a\\b\\f\\n\\r\\t\\v\"",
+  Matcher< ::std::wstring> m = StrEq(L"Hi-\'\"?\\\a\b\f\n\r\t\v");
+  EXPECT_EQ("is equal to L\"Hi-\'\\\"?\\\\\\a\\b\\f\\n\\r\\t\\v\"",
     Describe(m));
 
   Matcher< ::std::wstring> m2 = StrEq(L"\xD3\x576\x8D3\xC74D");
@@ -1584,8 +1584,8 @@ TEST(GlobalWideStrEqTest, MatchesEqual) {
 }
 
 TEST(GlobalWideStrEqTest, CanDescribeSelf) {
-  Matcher< ::wstring> m = StrEq(L"Hi-\'\"\?\\\a\b\f\n\r\t\v");
-  EXPECT_EQ("is equal to L\"Hi-\'\\\"\\?\\\\\\a\\b\\f\\n\\r\\t\\v\"",
+  Matcher< ::wstring> m = StrEq(L"Hi-\'\"?\\\a\b\f\n\r\t\v");
+  EXPECT_EQ("is equal to L\"Hi-\'\\\"?\\\\\\a\\b\\f\\n\\r\\t\\v\"",
     Describe(m));
 
   Matcher< ::wstring> m2 = StrEq(L"\xD3\x576\x8D3\xC74D");
