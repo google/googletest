@@ -155,9 +155,6 @@ static CharFormat PrintAsCharLiteralTo(Char c, ostream* os) {
     case L'\'':
       *os << "\\'";
       break;
-    case L'\?':
-      *os << "\\?";
-      break;
     case L'\\':
       *os << "\\\\";
       break;
