@@ -276,7 +276,7 @@ TEST(PrintCharTest, PlainChar) {
   EXPECT_EQ("'\\0'", Print('\0'));
   EXPECT_EQ("'\\'' (39, 0x27)", Print('\''));
   EXPECT_EQ("'\"' (34, 0x22)", Print('"'));
-  EXPECT_EQ("'\\?' (63, 0x3F)", Print('\?'));
+  EXPECT_EQ("'?' (63, 0x3F)", Print('?'));
   EXPECT_EQ("'\\\\' (92, 0x5C)", Print('\\'));
   EXPECT_EQ("'\\a' (7)", Print('\a'));
   EXPECT_EQ("'\\b' (8)", Print('\b'));
@@ -318,7 +318,7 @@ TEST(PrintBuiltInTypeTest, Wchar_t) {
   EXPECT_EQ("L'\\0'", Print(L'\0'));
   EXPECT_EQ("L'\\'' (39, 0x27)", Print(L'\''));
   EXPECT_EQ("L'\"' (34, 0x22)", Print(L'"'));
-  EXPECT_EQ("L'\\?' (63, 0x3F)", Print(L'\?'));
+  EXPECT_EQ("L'?' (63, 0x3F)", Print(L'?'));
   EXPECT_EQ("L'\\\\' (92, 0x5C)", Print(L'\\'));
   EXPECT_EQ("L'\\a' (7)", Print(L'\a'));
   EXPECT_EQ("L'\\b' (8)", Print(L'\b'));
@@ -401,8 +401,8 @@ TEST(PrintCStringTest, Null) {
 
 // Tests that C strings are escaped properly.
 TEST(PrintCStringTest, EscapesProperly) {
-  const char* p = "'\"\?\\\a\b\f\n\r\t\v\x7F\xFF a";
-  EXPECT_EQ(PrintPointer(p) + " pointing to \"'\\\"\\?\\\\\\a\\b\\f"
+  const char* p = "'\"?\\\a\b\f\n\r\t\v\x7F\xFF a";
+  EXPECT_EQ(PrintPointer(p) + " pointing to \"'\\\"?\\\\\\a\\b\\f"
             "\\n\\r\\t\\v\\x7F\\xFF a\"",
             Print(p));
 }
@@ -438,9 +438,9 @@ TEST(PrintWideCStringTest, Null) {
 
 // Tests that wide C strings are escaped properly.
 TEST(PrintWideCStringTest, EscapesProperly) {
-  const wchar_t s[] = {'\'', '"', '\?', '\\', '\a', '\b', '\f', '\n', '\r',
+  const wchar_t s[] = {'\'', '"', '?', '\\', '\a', '\b', '\f', '\n', '\r',
                        '\t', '\v', 0xD3, 0x576, 0x8D3, 0xC74D, ' ', 'a', '\0'};
-  EXPECT_EQ(PrintPointer(s) + " pointing to L\"'\\\"\\?\\\\\\a\\b\\f"
+  EXPECT_EQ(PrintPointer(s) + " pointing to L\"'\\\"?\\\\\\a\\b\\f"
             "\\n\\r\\t\\v\\xD3\\x576\\x8D3\\xC74D a\"",
             Print(static_cast<const wchar_t*>(s)));
 }
@@ -643,18 +643,18 @@ TEST(PrintArrayTest, BigArray) {
 #if GTEST_HAS_GLOBAL_STRING
 // ::string.
 TEST(PrintStringTest, StringInGlobalNamespace) {
-  const char s[] = "'\"\?\\\a\b\f\n\0\r\t\v\x7F\xFF a";
+  const char s[] = "'\"?\\\a\b\f\n\0\r\t\v\x7F\xFF a";
   const ::string str(s, sizeof(s));
-  EXPECT_EQ("\"'\\\"\\?\\\\\\a\\b\\f\\n\\0\\r\\t\\v\\x7F\\xFF a\\0\"",
+  EXPECT_EQ("\"'\\\"?\\\\\\a\\b\\f\\n\\0\\r\\t\\v\\x7F\\xFF a\\0\"",
             Print(str));
 }
 #endif  // GTEST_HAS_GLOBAL_STRING
 
 // ::std::string.
 TEST(PrintStringTest, StringInStdNamespace) {
-  const char s[] = "'\"\?\\\a\b\f\n\0\r\t\v\x7F\xFF a";
+  const char s[] = "'\"?\\\a\b\f\n\0\r\t\v\x7F\xFF a";
   const ::std::string str(s, sizeof(s));
-  EXPECT_EQ("\"'\\\"\\?\\\\\\a\\b\\f\\n\\0\\r\\t\\v\\x7F\\xFF a\\0\"",
+  EXPECT_EQ("\"'\\\"?\\\\\\a\\b\\f\\n\\0\\r\\t\\v\\x7F\\xFF a\\0\"",
             Print(str));
 }
 
@@ -677,9 +677,9 @@ TEST(PrintStringTest, StringAmbiguousHex) {
 #if GTEST_HAS_GLOBAL_WSTRING
 // ::wstring.
 TEST(PrintWideStringTest, StringInGlobalNamespace) {
-  const wchar_t s[] = L"'\"\?\\\a\b\f\n\0\r\t\v\xD3\x576\x8D3\xC74D a";
+  const wchar_t s[] = L"'\"?\\\a\b\f\n\0\r\t\v\xD3\x576\x8D3\xC74D a";
   const ::wstring str(s, sizeof(s)/sizeof(wchar_t));
-  EXPECT_EQ("L\"'\\\"\\?\\\\\\a\\b\\f\\n\\0\\r\\t\\v"
+  EXPECT_EQ("L\"'\\\"?\\\\\\a\\b\\f\\n\\0\\r\\t\\v"
             "\\xD3\\x576\\x8D3\\xC74D a\\0\"",
             Print(str));
 }
@@ -688,9 +688,9 @@ TEST(PrintWideStringTest, StringInGlobalNamespace) {
 #if GTEST_HAS_STD_WSTRING
 // ::std::wstring.
 TEST(PrintWideStringTest, StringInStdNamespace) {
-  const wchar_t s[] = L"'\"\?\\\a\b\f\n\0\r\t\v\xD3\x576\x8D3\xC74D a";
+  const wchar_t s[] = L"'\"?\\\a\b\f\n\0\r\t\v\xD3\x576\x8D3\xC74D a";
   const ::std::wstring str(s, sizeof(s)/sizeof(wchar_t));
-  EXPECT_EQ("L\"'\\\"\\?\\\\\\a\\b\\f\\n\\0\\r\\t\\v"
+  EXPECT_EQ("L\"'\\\"?\\\\\\a\\b\\f\\n\\0\\r\\t\\v"
             "\\xD3\\x576\\x8D3\\xC74D a\\0\"",
             Print(str));
 }
