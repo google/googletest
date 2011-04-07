@@ -68,14 +68,14 @@ test_gmock_spec_builders_test_SOURCES = test/gmock-spec-builders_test.cc
 test_gmock_spec_builders_test_LDADD = $(GTEST_LIBS) lib/libgmock.la
 
 # This tests using Google Mock in multiple translation units.  It also
-# verifies that libgmock_main works.
+# verifies that libgmock_main and libgmock work.
 TESTS += test/gmock_link_test
 check_PROGRAMS += test/gmock_link_test
 test_gmock_link_test_SOURCES = \
   test/gmock_link2_test.cc \
   test/gmock_link_test.cc \
   test/gmock_link_test.h
-test_gmock_link_test_LDADD = $(GTEST_LIBS) lib/libgmock_main.la
+test_gmock_link_test_LDADD = $(GTEST_LIBS) lib/libgmock_main.la  lib/libgmock.la
 
 # Tests that fused gmock files compile and work.
 TESTS += test/gmock_fused_test
