@@ -242,6 +242,7 @@ TESTS += samples/sample1_unittest
 check_PROGRAMS += samples/sample1_unittest
 samples_sample1_unittest_SOURCES = samples/sample1_unittest.cc
 samples_sample1_unittest_LDADD = lib/libgtest_main.la \
+                                 lib/libgtest.la \
                                  samples/libsamples.la
 
 # Another sample.  It also verifies that libgtest works.
@@ -251,11 +252,12 @@ samples_sample10_unittest_SOURCES = samples/sample10_unittest.cc
 samples_sample10_unittest_LDADD = lib/libgtest.la
 
 # This tests most constructs of gtest and verifies that libgtest_main
-# works.
+# and libgtest work.
 TESTS += test/gtest_all_test
 check_PROGRAMS += test/gtest_all_test
 test_gtest_all_test_SOURCES = test/gtest_all_test.cc
-test_gtest_all_test_LDADD = lib/libgtest_main.la
+test_gtest_all_test_LDADD = lib/libgtest_main.la \
+                            lib/libgtest.la
 
 # Tests that fused gtest files compile and work.
 FUSED_GTEST_SRC = \
