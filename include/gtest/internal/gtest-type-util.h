@@ -51,6 +51,8 @@
 // libstdc++ (which is where cxxabi.h comes from).
 # ifdef __GLIBCXX__
 #  include <cxxabi.h>
+# elif defined(__HP_aCC)
+#  include <acxx_demangle.h>
 # endif  // __GLIBCXX__
 
 namespace testing {
@@ -64,17 +66,20 @@ String GetTypeName() {
 # if GTEST_HAS_RTTI
 
   const char* const name = typeid(T).name();
-#  ifdef __GLIBCXX__
+#  if defined(__GLIBCXX__) || defined(__HP_aCC)
   int status = 0;
   // gcc's implementation of typeid(T).name() mangles the type name,
   // so we have to demangle it.
-  char* const readable_name = abi::__cxa_demangle(name, 0, 0, &status);
+#   ifdef __GLIBCXX__
+  using abi::__cxa_demangle;
+#   endif // __GLIBCXX__
+  char* const readable_name = __cxa_demangle(name, 0, 0, &status);
   const String name_str(status == 0 ? readable_name : name);
   free(readable_name);
   return name_str;
 #  else
   return name;
-#  endif  // __GLIBCXX__
+#  endif  // __GLIBCXX__ || __HP_aCC
 
 # else
 

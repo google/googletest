@@ -3824,8 +3824,8 @@ TEST(AssertionTest, NamedEnum) {
 // The version of gcc used in XCode 2.2 has a bug and doesn't allow
 // anonymous enums in assertions.  Therefore the following test is not
 // done on Mac.
-// Sun Studio also rejects this code.
-#if !GTEST_OS_MAC && !defined(__SUNPRO_CC)
+// Sun Studio and HP aCC also reject this code.
+#if !GTEST_OS_MAC && !defined(__SUNPRO_CC) && !defined(__HP_aCC)
 
 // Tests using assertions with anonymous enums.
 enum {

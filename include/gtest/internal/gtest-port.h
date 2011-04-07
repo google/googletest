@@ -86,6 +86,7 @@
 // the given platform; otherwise undefined):
 //   GTEST_OS_AIX      - IBM AIX
 //   GTEST_OS_CYGWIN   - Cygwin
+//   GTEST_OS_HPUX     - HP-UX
 //   GTEST_OS_LINUX    - Linux
 //     GTEST_OS_LINUX_ANDROID - Google Android
 //   GTEST_OS_MAC      - Mac OS X
@@ -235,6 +236,8 @@
 # define GTEST_OS_SOLARIS 1
 #elif defined(_AIX)
 # define GTEST_OS_AIX 1
+#elif defined(__hpux)
+# define GTEST_OS_HPUX 1
 #elif defined __native_client__
 # define GTEST_OS_NACL 1
 #endif  // __CYGWIN__
@@ -308,6 +311,10 @@
 #  define GTEST_HAS_EXCEPTIONS 1
 # elif defined(__IBMCPP__) && __EXCEPTIONS
 // xlC defines __EXCEPTIONS to 1 iff exceptions are enabled.
+#  define GTEST_HAS_EXCEPTIONS 1
+# elif defined(__HP_aCC)
+// Exception handling is in effect by default in HP aCC compiler. It has to
+// be turned of by +noeh compiler option if desired.
 #  define GTEST_HAS_EXCEPTIONS 1
 # else
 // For other compilers, we assume exceptions are disabled to be
@@ -408,7 +415,7 @@
 //
 // To disable threading support in Google Test, add -DGTEST_HAS_PTHREAD=0
 // to your compiler flags.
-# define GTEST_HAS_PTHREAD (GTEST_OS_LINUX || GTEST_OS_MAC)
+# define GTEST_HAS_PTHREAD (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_HPUX)
 #endif  // GTEST_HAS_PTHREAD
 
 #if GTEST_HAS_PTHREAD
@@ -531,7 +538,7 @@
 // pops up a dialog window that cannot be suppressed programmatically.
 #if (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_CYGWIN || GTEST_OS_SOLARIS || \
      (GTEST_OS_WINDOWS_DESKTOP && _MSC_VER >= 1400) || \
-     GTEST_OS_WINDOWS_MINGW || GTEST_OS_AIX)
+     GTEST_OS_WINDOWS_MINGW || GTEST_OS_AIX || GTEST_OS_HPUX)
 # define GTEST_HAS_DEATH_TEST 1
 # include <vector>  // NOLINT
 #endif
@@ -544,9 +551,9 @@
 // Determines whether to support type-driven tests.
 
 // Typed tests need <typeinfo> and variadic macros, which GCC, VC++ 8.0,
-// Sun Pro CC, and IBM Visual Age support.
+// Sun Pro CC, IBM Visual Age, and HP aCC support.
 #if defined(__GNUC__) || (_MSC_VER >= 1400) || defined(__SUNPRO_CC) || \
-    defined(__IBMCPP__)
+    defined(__IBMCPP__) || defined(__HP_aCC)
 # define GTEST_HAS_TYPED_TEST 1
 # define GTEST_HAS_TYPED_TEST_P 1
 #endif

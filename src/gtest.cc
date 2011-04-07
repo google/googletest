@@ -2059,7 +2059,7 @@ class GoogleTestFailureException : public ::std::runtime_error {
 #endif  // GTEST_HAS_EXCEPTIONS
 
 namespace internal {
-// We put these helper functions in the internal namespace as IBM's xIC_r
+// We put these helper functions in the internal namespace as IBM's xlC
 // compiler rejects the code if they were declared static.
 
 // Runs the given method and handles SEH exceptions it throws, when
