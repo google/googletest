@@ -160,10 +160,6 @@ EXTRA_DIST += \
   codegear/gtest_main.cbproj \
   codegear/gtest_unittest.cbproj
 
-# Scripts and utilities
-bin_SCRIPTS = scripts/gtest-config
-CLEANFILES = $(bin_SCRIPTS)
-
 # Distribute and install M4 macro
 m4datadir = $(datadir)/aclocal
 m4data_DATA = m4/gtest.m4
@@ -291,4 +287,16 @@ maintainer-clean-local:
 
 # Death tests may produce core dumps in the build directory. In case
 # this happens, clean them to keep distcleancheck happy.
-CLEANFILES += core
+CLEANFILES = core
+
+# Disables 'make install' as installing a compiled version of Google
+# Test can lead to undefined behavior due to violation of the
+# One-Definition Rule.
+
+install-exec-local:
+	echo "'make install' is dangerous and not supported. Instead, see README for how to integrate Google Test into your build system."
+	false
+
+install-data-local:
+	echo "'make install' is dangerous and not supported. Instead, see README for how to integrate Google Test into your build system."
+	false
