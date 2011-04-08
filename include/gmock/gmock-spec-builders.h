@@ -254,7 +254,7 @@ class UntypedOnCallSpecBase {
     // syntax checking relies on it.
     kNone,
     kWith,
-    kWillByDefault,
+    kWillByDefault
   };
 
   // Asserts that the ON_CALL() statement has a certain property.
@@ -357,7 +357,7 @@ class OnCallSpec : public UntypedOnCallSpecBase {
 enum CallReaction {
   ALLOW,
   WARN,
-  FAIL,
+  FAIL
 };
 
 }  // namespace internal
@@ -715,7 +715,7 @@ class ExpectationBase {
     kAfter,
     kWillOnce,
     kWillRepeatedly,
-    kRetiresOnSaturation,
+    kRetiresOnSaturation
   };
 
   typedef std::vector<const void*> UntypedActions;

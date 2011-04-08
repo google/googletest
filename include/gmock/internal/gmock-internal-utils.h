@@ -305,7 +305,7 @@ inline void Expect(bool condition, const char* file, int line) {
 // Severity level of a log.
 enum LogSeverity {
   INFO = 0,
-  WARNING = 1,
+  WARNING = 1
 };
 
 // Valid values for the --gmock_verbose flag.
