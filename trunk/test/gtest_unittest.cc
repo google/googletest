@@ -3850,7 +3850,7 @@ enum {
 
 # endif  // GTEST_OS_LINUX
 
-  kCaseC = 42,
+  kCaseC = 42
 };
 
 TEST(AssertionTest, AnonymousEnum) {
