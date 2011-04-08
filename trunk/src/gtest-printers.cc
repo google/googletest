@@ -138,7 +138,7 @@ enum CharFormat {
 // Returns true if c is a printable ASCII character.  We test the
 // value of c directly instead of calling isprint(), which is buggy on
 // Windows Mobile.
-static inline bool IsPrintableAscii(wchar_t c) {
+inline bool IsPrintableAscii(wchar_t c) {
   return 0x20 <= c && c <= 0x7E;
 }
 
