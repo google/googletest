@@ -288,8 +288,7 @@ static void PrintWideCharsAsStringTo(const wchar_t* begin, size_t len,
   bool is_previous_hex = false;
   for (size_t index = 0; index < len; ++index) {
     const wchar_t cur = begin[index];
-    if (is_previous_hex && 0 <= cur && cur < 128 &&
-        IsXDigit(static_cast<char>(cur))) {
+    if (is_previous_hex && isascii(cur) && IsXDigit(static_cast<char>(cur))) {
       // Previous character is of '\x..' form and this character can be
       // interpreted as another hexadecimal digit in its number. Break string to
       // disambiguate.
