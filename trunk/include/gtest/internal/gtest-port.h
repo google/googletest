@@ -140,6 +140,8 @@
 //
 // Template meta programming:
 //   is_pointer     - as in TR1; needed on Symbian and IBM XL C/C++ only.
+//   IteratorTraits - partial implementation of std::iterator_traits, which
+//                    is not available in libCstd when compiled with Sun C++.
 //
 // Smart pointers:
 //   scoped_ptr     - as in TR2.
@@ -1465,6 +1467,21 @@ struct is_pointer : public false_type {};
 
 template <typename T>
 struct is_pointer<T*> : public true_type {};
+
+template <typename Iterator>
+struct IteratorTraits {
+  typedef typename Iterator::value_type value_type;
+};
+
+template <typename T>
+struct IteratorTraits<T*> {
+  typedef T value_type;
+};
+
+template <typename T>
+struct IteratorTraits<const T*> {
+  typedef T value_type;
+};
 
 #if GTEST_OS_WINDOWS
 # define GTEST_PATH_SEP_ "\\"

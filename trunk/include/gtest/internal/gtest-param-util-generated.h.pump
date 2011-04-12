@@ -59,8 +59,8 @@ namespace testing {
 // include/gtest/gtest-param-test.h.
 template <typename ForwardIterator>
 internal::ParamGenerator<
-    typename ::std::iterator_traits<ForwardIterator>::value_type> ValuesIn(
-        ForwardIterator begin, ForwardIterator end);
+  typename ::testing::internal::IteratorTraits<ForwardIterator>::value_type>
+ValuesIn(ForwardIterator begin, ForwardIterator end);
 
 template <typename T, size_t N>
 internal::ParamGenerator<T> ValuesIn(const T (&array)[N]);
