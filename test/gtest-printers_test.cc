@@ -857,7 +857,7 @@ TEST(PrintStlContainerTest, HashMultiSet) {
 #endif  // GTEST_HAS_HASH_SET_
 
 TEST(PrintStlContainerTest, List) {
-  const char* a[] = {
+  const string a[] = {
     "hello",
     "world"
   };
@@ -875,9 +875,15 @@ TEST(PrintStlContainerTest, Map) {
 
 TEST(PrintStlContainerTest, MultiMap) {
   multimap<bool, int> map1;
-  map1.insert(make_pair(true, 0));
-  map1.insert(make_pair(true, 1));
-  map1.insert(make_pair(false, 2));
+  // The make_pair template function would deduce the type as
+  // pair<bool, int> here, and since the key part in a multimap has to
+  // be constant, without a templated ctor in the pair class (as in
+  // libCstd on Solaris), make_pair call would fail to compile as no
+  // implicit conversion is found.  Thus explicit typename is used
+  // here instead.
+  map1.insert(pair<const bool, int>(true, 0));
+  map1.insert(pair<const bool, int>(true, 1));
+  map1.insert(pair<const bool, int>(false, 2));
   EXPECT_EQ("{ (false, 2), (true, 0), (true, 1) }", Print(map1));
 }
 
