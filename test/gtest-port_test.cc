@@ -39,7 +39,9 @@
 # include <time.h>
 #endif  // GTEST_OS_MAC
 
+#include <list>
 #include <utility>  // For std::pair and std::make_pair.
+#include <vector>
 
 #include "gtest/gtest.h"
 #include "gtest/gtest-spi.h"
@@ -170,6 +172,24 @@ TEST(ImplicitCastTest, CanUseImplicitConstructor) {
   To to = ::testing::internal::ImplicitCast_<To>(&converted);
   (void)to;
   EXPECT_TRUE(converted);
+}
+
+TEST(IteratorTraitsTest, WorksForSTLContainerIterators) {
+  StaticAssertTypeEq<int,
+      IteratorTraits< ::std::vector<int>::const_iterator>::value_type>();
+  StaticAssertTypeEq<bool,
+      IteratorTraits< ::std::list<bool>::iterator>::value_type>();
+}
+
+TEST(IteratorTraitsTest, WorksForPointerToNonConst) {
+  StaticAssertTypeEq<char, IteratorTraits<char*>::value_type>();
+  StaticAssertTypeEq<const void*, IteratorTraits<const void**>::value_type>();
+}
+
+TEST(IteratorTraitsTest, WorksForPointerToConst) {
+  StaticAssertTypeEq<char, IteratorTraits<const char*>::value_type>();
+  StaticAssertTypeEq<const void*,
+      IteratorTraits<const void* const*>::value_type>();
 }
 
 // Tests that the element_type typedef is available in scoped_ptr and refers
