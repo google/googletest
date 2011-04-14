@@ -1392,13 +1392,13 @@ class TrulyMatcher {
   template <typename T>
   bool MatchAndExplain(T& x,  // NOLINT
                        MatchResultListener* /* listener */) const {
-#if _MSC_VER
+#ifdef _MSC_VER
     // MSVC warns about converting a value into bool (warning 4800).
 # pragma warning(push)          // Saves the current warning state.
 # pragma warning(disable:4800)  // Temporarily disables warning 4800.
 #endif
     return predicate_(x);
-#if _MSC_VER
+#ifdef _MSC_VER
 # pragma warning(pop)           // Restores the warning state.
 #endif
   }
