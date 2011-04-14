@@ -662,6 +662,13 @@
 # define GTEST_API_
 #endif
 
+#if defined(__GNUC__)
+// Ask the compiler to never inline a given function.
+#define GTEST_NO_INLINE_ __attribute__((noinline))
+#else
+#define GTEST_NO_INLINE_
+#endif  // __GNUC__
+
 namespace testing {
 
 class Message;
