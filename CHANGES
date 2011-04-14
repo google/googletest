@@ -23,9 +23,12 @@ Changes for 1.6.0:
   WithParamInterface<T> separately, easing conversion of legacy tests.
 * Death test messages are clearly marked to make them more
   distinguishable from other messages.
-* Compatibility fixes for Google Native Client, MinGW, Lucid
-  autotools, and C++0x.
+* Compatibility fixes for Android, Google Native Client, MinGW, HP UX,
+  PowerPC, Lucid autotools, libCStd, Sun C++, Borland C++ Builder (Code Gear),
+  IBM XL C++ (Visual Age C++), and C++0x.
 * Bug fixes and implementation clean-ups.
+* Potentially incompatible changes: disables the harmful 'make install'
+  command in autotools.
 
 Changes for 1.5.0:
 
