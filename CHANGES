@@ -14,6 +14,8 @@ Changes for 1.6.0:
   types now.
 * Compatibility fixes.
 * Bug fixes and implementation clean-ups.
+* Potentially incompatible changes: disables the harmful 'make install'
+  command in autotools.
 
 Potentially breaking changes:
 
