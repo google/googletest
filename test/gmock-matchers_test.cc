@@ -2256,6 +2256,29 @@ TEST(TrulyTest, CanBeUsedWithFunctor) {
   EXPECT_FALSE(m.Matches(4));
 }
 
+// A class that can be implicitly converted to bool.
+class ConvertibleToBool {
+ public:
+  explicit ConvertibleToBool(int number) : number_(number) {}
+  operator bool() const { return number_ != 0; }
+
+ private:
+  int number_;
+};
+
+ConvertibleToBool IsNotZero(int number) {
+  return ConvertibleToBool(number);
+}
+
+// Tests that the predicate used in Truly() may return a class that's
+// implicitly convertible to bool, even when the class has no
+// operator!().
+TEST(TrulyTest, PredicateCanReturnAClassConvertibleToBool) {
+  Matcher<int> m = Truly(IsNotZero);
+  EXPECT_TRUE(m.Matches(1));
+  EXPECT_FALSE(m.Matches(0));
+}
+
 // Tests that Truly(predicate) can describe itself properly.
 TEST(TrulyTest, CanDescribeSelf) {
   Matcher<double> m = Truly(IsPositive);
