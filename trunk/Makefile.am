@@ -261,6 +261,7 @@ FUSED_GTEST_SRC = \
   fused-src/gtest/gtest.h \
   fused-src/gtest/gtest_main.cc
 
+if HAVE_PYTHON
 TESTS += test/fused_gtest_test
 check_PROGRAMS += test/fused_gtest_test
 test_fused_gtest_test_SOURCES = $(FUSED_GTEST_SRC) \
@@ -284,6 +285,7 @@ fused-gtest: $(pkginclude_HEADERS) $(pkginclude_internal_HEADERS) \
 
 maintainer-clean-local:
 	rm -rf "$(srcdir)/fused-src"
+endif
 
 # Death tests may produce core dumps in the build directory. In case
 # this happens, clean them to keep distcleancheck happy.
