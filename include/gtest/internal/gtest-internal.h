@@ -797,14 +797,10 @@ struct RemoveConst<const T> { typedef T type; };  // NOLINT
 // MSVC 8.0, Sun C++, and IBM XL C++ have a bug which causes the above
 // definition to fail to remove the const in 'const int[3]' and 'const
 // char[3][4]'.  The following specialization works around the bug.
-// However, it causes trouble with GCC and thus needs to be
-// conditionally compiled.
-#if defined(_MSC_VER) || defined(__SUNPRO_CC) || defined(__IBMCPP__)
 template <typename T, size_t N>
 struct RemoveConst<const T[N]> {
   typedef typename RemoveConst<T>::type type[N];
 };
-#endif
 
 // A handy wrapper around RemoveConst that works when the argument
 // T depends on template parameters.
