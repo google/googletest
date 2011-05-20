@@ -265,7 +265,14 @@ If you want to use Boost's TR1 tuple library with Google Mock, please
 refer to the Boost website (http://www.boost.org/) for how to obtain
 it and set it up.
 
-### Tweaking Google Test ###
+### As a Shared Library (DLL) ###
+
+Google Mock is compact, so most users can build and link it as a static
+library for the simplicity.  Google Mock can be used as a DLL, but the
+same DLL must contain Google Test as well.  See Google Test's README
+file for instructions on how to set up necessary compiler settings.
+
+### Tweaking Google Mock ###
 
 Most of Google Test's control macros apply to Google Mock as well.
 Please see file ${GTEST_DIR}/README for how to tweak them.
