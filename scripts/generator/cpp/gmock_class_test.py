@@ -76,6 +76,17 @@ class Foo {
         'MOCK_CONST_METHOD1(Bar,\nvoid(bool flag));',
         self.GenerateMethodSource(source))
 
+  def testExplicitVoid(self):
+    source = """
+class Foo {
+ public:
+  virtual int Bar(void);
+};
+"""
+    self.assertEqualIgnoreLeadingWhitespace(
+        'MOCK_METHOD0(Bar,\nint(void));',
+        self.GenerateMethodSource(source))
+
   def testStrangeNewlineInParameter(self):
     source = """
 class Foo {
@@ -86,6 +97,40 @@ a) = 0;
 """
     self.assertEqualIgnoreLeadingWhitespace(
         'MOCK_METHOD1(Bar,\nvoid(int a));',
+        self.GenerateMethodSource(source))
+
+  def testDefaultParameters(self):
+    source = """
+class Foo {
+ public:
+  virtual void Bar(int a, char c = 'x') = 0;
+};
+"""
+    self.assertEqualIgnoreLeadingWhitespace(
+        'MOCK_METHOD2(Bar,\nvoid(int, char));',
+        self.GenerateMethodSource(source))
+
+  def testMultipleDefaultParameters(self):
+    source = """
+class Foo {
+ public:
+  virtual void Bar(int a = 42, char c = 'x') = 0;
+};
+"""
+    self.assertEqualIgnoreLeadingWhitespace(
+        'MOCK_METHOD2(Bar,\nvoid(int, char));',
+        self.GenerateMethodSource(source))
+
+  def testRemovesCommentsWhenDefaultsArePresent(self):
+    source = """
+class Foo {
+ public:
+  virtual void Bar(int a = 42 /* a comment */,
+                   char /* other comment */ c= 'x') = 0;
+};
+"""
+    self.assertEqualIgnoreLeadingWhitespace(
+        'MOCK_METHOD2(Bar,\nvoid(int, char));',
         self.GenerateMethodSource(source))
 
   def testDoubleSlashCommentsInParameterListAreRemoved(self):

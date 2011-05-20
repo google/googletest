@@ -82,20 +82,36 @@ def _GenerateMethods(output_lines, source, class_node):
           return_type += '*'
         if node.return_type.reference:
           return_type += '&'
-      mock_method_macro = 'MOCK_%sMETHOD%d' % (const, len(node.parameters))
+        num_parameters = len(node.parameters)
+        if len(node.parameters) == 1:
+          first_param = node.parameters[0]
+          if source[first_param.start:first_param.end].strip() == 'void':
+            # We must treat T(void) as a function with no parameters.
+            num_parameters = 0
+      mock_method_macro = 'MOCK_%sMETHOD%d' % (const, num_parameters)
       args = ''
       if node.parameters:
-        # Get the full text of the parameters from the start
-        # of the first parameter to the end of the last parameter.
-        start = node.parameters[0].start
-        end = node.parameters[-1].end
-        # Remove // comments.
-        args_strings = re.sub(r'//.*', '', source[start:end])
-        # Condense multiple spaces and eliminate newlines putting the
-        # parameters together on a single line.  Ensure there is a
-        # space in an argument which is split by a newline without
-        # intervening whitespace, e.g.: int\nBar
-        args = re.sub('  +', ' ', args_strings.replace('\n', ' '))
+        # Due to the parser limitations, it is impossible to keep comments
+        # while stripping the default parameters.  When defaults are
+        # present, we choose to strip them and comments (and produce
+        # compilable code).
+        # TODO(nnorwitz@google.com): Investigate whether it is possible to
+        # preserve parameter name when reconstructing parameter text from
+        # the AST.
+        if len([param for param in node.parameters if param.default]) > 0:
+          args = ', '.join(param.type.name for param in node.parameters)
+        else:
+          # Get the full text of the parameters from the start
+          # of the first parameter to the end of the last parameter.
+          start = node.parameters[0].start
+          end = node.parameters[-1].end
+          # Remove // comments.
+          args_strings = re.sub(r'//.*', '', source[start:end])
+          # Condense multiple spaces and eliminate newlines putting the
+          # parameters together on a single line.  Ensure there is a
+          # space in an argument which is split by a newline without
+          # intervening whitespace, e.g.: int\nBar
+          args = re.sub('  +', ' ', args_strings.replace('\n', ' '))
 
       # Create the mock method definition.
       output_lines.extend(['%s%s(%s,' % (indent, mock_method_macro, node.name),
