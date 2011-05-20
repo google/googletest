@@ -111,7 +111,7 @@ template <typename F> class FunctionMockerBase;
 // expectations when InSequence() is used, and thus affect which
 // expectation gets picked.  Therefore, we sequence all mock function
 // calls to ensure the integrity of the mock objects' states.
-GTEST_DECLARE_STATIC_MUTEX_(g_gmock_mutex);
+GTEST_API_ GTEST_DECLARE_STATIC_MUTEX_(g_gmock_mutex);
 
 // Untyped base class for ActionResultHolder<R>.
 class UntypedActionResultHolderBase;
@@ -119,7 +119,7 @@ class UntypedActionResultHolderBase;
 // Abstract base class of FunctionMockerBase.  This is the
 // type-agnostic part of the function mocker interface.  Its pure
 // virtual methods are implemented by FunctionMockerBase.
-class UntypedFunctionMockerBase {
+class GTEST_API_ UntypedFunctionMockerBase {
  public:
   UntypedFunctionMockerBase();
   virtual ~UntypedFunctionMockerBase();
@@ -363,7 +363,7 @@ enum CallReaction {
 }  // namespace internal
 
 // Utilities for manipulating mock objects.
-class Mock {
+class GTEST_API_ Mock {
  public:
   // The following public methods can be called concurrently.
 
@@ -471,7 +471,7 @@ class Mock {
 //     ExpectationBase available yet, leading to incorrect destruction
 //     in the linked_ptr (or compilation errors if using a checking
 //     linked_ptr).
-class Expectation {
+class GTEST_API_ Expectation {
  public:
   // Constructs a null object that doesn't reference any expectation.
   Expectation();
@@ -603,7 +603,7 @@ class ExpectationSet {
 // Sequence objects are used by a user to specify the relative order
 // in which the expectations should match.  They are copyable (we rely
 // on the compiler-defined copy constructor and assignment operator).
-class Sequence {
+class GTEST_API_ Sequence {
  public:
   // Constructs an empty sequence.
   Sequence() : last_expectation_(new Expectation) {}
@@ -644,7 +644,7 @@ class Sequence {
 // thread.  However, for clarity of your tests we recommend you to set
 // up mocks in the main thread unless you have a good reason not to do
 // so.
-class InSequence {
+class GTEST_API_ InSequence {
  public:
   InSequence();
   ~InSequence();
@@ -658,7 +658,7 @@ namespace internal {
 
 // Points to the implicit sequence introduced by a living InSequence
 // object (if any) in the current thread or NULL.
-extern ThreadLocal<Sequence*> g_gmock_implicit_sequence;
+GTEST_API_ extern ThreadLocal<Sequence*> g_gmock_implicit_sequence;
 
 // Base class for implementing expectations.
 //
@@ -674,7 +674,7 @@ extern ThreadLocal<Sequence*> g_gmock_implicit_sequence;
 //   on the template argument of Expectation to the base class.
 //
 // This class is internal and mustn't be used by user code directly.
-class ExpectationBase {
+class GTEST_API_ ExpectationBase {
  public:
   // source_text is the EXPECT_CALL(...) source that created this Expectation.
   ExpectationBase(const char* file, int line, const string& source_text);
@@ -1222,9 +1222,9 @@ class TypedExpectation : public ExpectationBase {
 // ::testing::internal and import it into ::testing.
 
 // Logs a message including file and line number information.
-void LogWithLocation(testing::internal::LogSeverity severity,
-                     const char* file, int line,
-                     const string& message);
+GTEST_API_ void LogWithLocation(testing::internal::LogSeverity severity,
+                                const char* file, int line,
+                                const string& message);
 
 template <typename F>
 class MockSpec {

@@ -53,7 +53,7 @@ namespace internal {
 // words.  Each maximum substring of the form [A-Za-z][a-z]*|\d+ is
 // treated as one word.  For example, both "FooBar123" and
 // "foo_bar_123" are converted to "foo bar 123".
-string ConvertIdentifierNameToWords(const char* id_name);
+GTEST_API_ string ConvertIdentifierNameToWords(const char* id_name);
 
 // PointeeOf<Pointer>::type is the type of a value pointed to by a
 // Pointer, which can be either a smart pointer or a raw pointer.  The
@@ -271,7 +271,7 @@ class FailureReporterInterface {
 };
 
 // Returns the failure reporter used by Google Mock.
-FailureReporterInterface* GetFailureReporter();
+GTEST_API_ FailureReporterInterface* GetFailureReporter();
 
 // Asserts that condition is true; aborts the process with the given
 // message if condition is false.  We cannot use LOG(FATAL) or CHECK()
@@ -319,7 +319,7 @@ const char kErrorVerbosity[] = "error";
 
 // Returns true iff a log with the given severity is visible according
 // to the --gmock_verbose flag.
-bool LogIsVisible(LogSeverity severity);
+GTEST_API_ bool LogIsVisible(LogSeverity severity);
 
 // Prints the given message to stdout iff 'severity' >= the level
 // specified by the --gmock_verbose flag.  If stack_frames_to_skip >=
@@ -328,7 +328,9 @@ bool LogIsVisible(LogSeverity severity);
 // stack_frames_to_skip is treated as 0, since we don't know which
 // function calls will be inlined by the compiler and need to be
 // conservative.
-void Log(LogSeverity severity, const string& message, int stack_frames_to_skip);
+GTEST_API_ void Log(LogSeverity severity,
+                    const string& message,
+                    int stack_frames_to_skip);
 
 // TODO(wan@google.com): group all type utilities together.
 

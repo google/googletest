@@ -80,7 +80,7 @@ class CardinalityInterface {
 // be called.  The implementation of Cardinality is just a linked_ptr
 // to const CardinalityInterface, so copying is fairly cheap.
 // Don't inherit from Cardinality!
-class Cardinality {
+class GTEST_API_ Cardinality {
  public:
   // Constructs a null cardinality.  Needed for storing Cardinality
   // objects in STL containers.
@@ -122,19 +122,19 @@ class Cardinality {
 };
 
 // Creates a cardinality that allows at least n calls.
-Cardinality AtLeast(int n);
+GTEST_API_ Cardinality AtLeast(int n);
 
 // Creates a cardinality that allows at most n calls.
-Cardinality AtMost(int n);
+GTEST_API_ Cardinality AtMost(int n);
 
 // Creates a cardinality that allows any number of calls.
-Cardinality AnyNumber();
+GTEST_API_ Cardinality AnyNumber();
 
 // Creates a cardinality that allows between min and max calls.
-Cardinality Between(int min, int max);
+GTEST_API_ Cardinality Between(int min, int max);
 
 // Creates a cardinality that allows exactly n calls.
-Cardinality Exactly(int n);
+GTEST_API_ Cardinality Exactly(int n);
 
 // Creates a cardinality from its implementation.
 inline Cardinality MakeCardinality(const CardinalityInterface* c) {

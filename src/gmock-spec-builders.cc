@@ -53,12 +53,12 @@ namespace internal {
 
 // Protects the mock object registry (in class Mock), all function
 // mockers, and all expectations.
-GTEST_DEFINE_STATIC_MUTEX_(g_gmock_mutex);
+GTEST_API_ GTEST_DEFINE_STATIC_MUTEX_(g_gmock_mutex);
 
 // Logs a message including file and line number information.
-void LogWithLocation(testing::internal::LogSeverity severity,
-                     const char* file, int line,
-                     const string& message) {
+GTEST_API_ void LogWithLocation(testing::internal::LogSeverity severity,
+                                const char* file, int line,
+                                const string& message) {
   ::std::ostringstream s;
   s << file << ":" << line << ": " << message << ::std::endl;
   Log(severity, s.str(), 0);
@@ -240,7 +240,7 @@ void ExpectationBase::UntypedTimes(const Cardinality& a_cardinality) {
 
 // Points to the implicit sequence introduced by a living InSequence
 // object (if any) in the current thread or NULL.
-ThreadLocal<Sequence*> g_gmock_implicit_sequence;
+GTEST_API_ ThreadLocal<Sequence*> g_gmock_implicit_sequence;
 
 // Reports an uninteresting call (whose description is in msg) in the
 // manner specified by 'reaction'.

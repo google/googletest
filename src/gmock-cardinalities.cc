@@ -136,20 +136,20 @@ void Cardinality::DescribeActualCallCountTo(int actual_call_count,
 }
 
 // Creates a cardinality that allows at least n calls.
-Cardinality AtLeast(int n) { return Between(n, INT_MAX); }
+GTEST_API_ Cardinality AtLeast(int n) { return Between(n, INT_MAX); }
 
 // Creates a cardinality that allows at most n calls.
-Cardinality AtMost(int n) { return Between(0, n); }
+GTEST_API_ Cardinality AtMost(int n) { return Between(0, n); }
 
 // Creates a cardinality that allows any number of calls.
-Cardinality AnyNumber() { return AtLeast(0); }
+GTEST_API_ Cardinality AnyNumber() { return AtLeast(0); }
 
 // Creates a cardinality that allows between min and max calls.
-Cardinality Between(int min, int max) {
+GTEST_API_ Cardinality Between(int min, int max) {
   return Cardinality(new BetweenCardinalityImpl(min, max));
 }
 
 // Creates a cardinality that allows exactly n calls.
-Cardinality Exactly(int n) { return Between(n, n); }
+GTEST_API_ Cardinality Exactly(int n) { return Between(n, n); }
 
 }  // namespace testing

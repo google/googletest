@@ -67,7 +67,7 @@ namespace internal {
 
 // Joins a vector of strings as if they are fields of a tuple; returns
 // the joined string.
-string JoinAsTuple(const Strings& fields) {
+GTEST_API_ string JoinAsTuple(const Strings& fields) {
   switch (fields.size()) {
     case 0:
       return "";
@@ -89,8 +89,9 @@ string JoinAsTuple(const Strings& fields) {
 // 'negation' is false; otherwise returns the description of the
 // negation of the matcher.  'param_values' contains a list of strings
 // that are the print-out of the matcher's parameters.
-string FormatMatcherDescription(bool negation, const char* matcher_name,
-                                const Strings& param_values) {
+GTEST_API_ string FormatMatcherDescription(bool negation,
+                                           const char* matcher_name,
+                                           const Strings& param_values) {
   string result = ConvertIdentifierNameToWords(matcher_name);
   if (param_values.size() >= 1)
     result += " " + JoinAsTuple(param_values);

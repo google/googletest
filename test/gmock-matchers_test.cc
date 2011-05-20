@@ -52,7 +52,7 @@
 namespace testing {
 
 namespace internal {
-string JoinAsTuple(const Strings& fields);
+GTEST_API_ string JoinAsTuple(const Strings& fields);
 }  // namespace internal
 
 namespace gmock_matchers_test {

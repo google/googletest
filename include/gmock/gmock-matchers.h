@@ -268,7 +268,7 @@ class Matcher : public internal::MatcherBase<T> {
 // instead of Eq(str) and "foo" instead of Eq("foo") when a string
 // matcher is expected.
 template <>
-class Matcher<const internal::string&>
+class GTEST_API_ Matcher<const internal::string&>
     : public internal::MatcherBase<const internal::string&> {
  public:
   Matcher() {}
@@ -285,7 +285,7 @@ class Matcher<const internal::string&>
 };
 
 template <>
-class Matcher<internal::string>
+class GTEST_API_ Matcher<internal::string>
     : public internal::MatcherBase<internal::string> {
  public:
   Matcher() {}
@@ -2548,8 +2548,9 @@ class ElementsAreArrayMatcher {
 // 'negation' is false; otherwise returns the description of the
 // negation of the matcher.  'param_values' contains a list of strings
 // that are the print-out of the matcher's parameters.
-string FormatMatcherDescription(bool negation, const char* matcher_name,
-                                const Strings& param_values);
+GTEST_API_ string FormatMatcherDescription(bool negation,
+                                           const char* matcher_name,
+                                           const Strings& param_values);
 
 }  // namespace internal
 
