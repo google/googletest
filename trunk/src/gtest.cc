@@ -305,7 +305,7 @@ UInt32 Random::Generate(UInt32 range) {
 // Test.  g_init_gtest_count is set to the number of times
 // InitGoogleTest() has been called.  We don't protect this variable
 // under a mutex as it is only accessed in the main thread.
-int g_init_gtest_count = 0;
+GTEST_API_ int g_init_gtest_count = 0;
 static bool GTestIsInitialized() { return g_init_gtest_count != 0; }
 
 // Iterates over a vector of TestCases, keeping a running sum of the
@@ -360,7 +360,7 @@ void AssertHelper::operator=(const Message& message) const {
 }
 
 // Mutex for linked pointers.
-GTEST_DEFINE_STATIC_MUTEX_(g_linked_ptr_mutex);
+GTEST_API_ GTEST_DEFINE_STATIC_MUTEX_(g_linked_ptr_mutex);
 
 // Application pathname gotten in InitGoogleTest.
 String g_executable_path;
