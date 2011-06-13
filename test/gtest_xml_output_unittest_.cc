@@ -45,7 +45,6 @@ using ::testing::TestEventListeners;
 using ::testing::TestWithParam;
 using ::testing::UnitTest;
 using ::testing::Test;
-using ::testing::Types;
 using ::testing::Values;
 
 class SuccessfulTest : public Test {
@@ -145,23 +144,27 @@ TEST_P(ValueParamTest, HasValueParamAttribute) {}
 TEST_P(ValueParamTest, AnotherTestThatHasValueParamAttribute) {}
 INSTANTIATE_TEST_CASE_P(Single, ValueParamTest, Values(33, 42));
 
+#if GTEST_HAS_TYPED_TEST
 // Verifies that the type parameter name is output in the 'type_param'
 // XML attribute for typed tests.
 template <typename T> class TypedTest : public Test {};
-typedef Types<int, long> TypedTestTypes;
+typedef testing::Types<int, long> TypedTestTypes;
 TYPED_TEST_CASE(TypedTest, TypedTestTypes);
 TYPED_TEST(TypedTest, HasTypeParamAttribute) {}
+#endif
 
+#if GTEST_HAS_TYPED_TEST_P
 // Verifies that the type parameter name is output in the 'type_param'
 // XML attribute for type-parameterized tests.
 template <typename T> class TypeParameterizedTestCase : public Test {};
 TYPED_TEST_CASE_P(TypeParameterizedTestCase);
 TYPED_TEST_P(TypeParameterizedTestCase, HasTypeParamAttribute) {}
 REGISTER_TYPED_TEST_CASE_P(TypeParameterizedTestCase, HasTypeParamAttribute);
-typedef Types<int, long> TypeParameterizedTestCaseTypes;
+typedef testing::Types<int, long> TypeParameterizedTestCaseTypes;
 INSTANTIATE_TYPED_TEST_CASE_P(Single,
                               TypeParameterizedTestCase,
                               TypeParameterizedTestCaseTypes);
+#endif
 
 int main(int argc, char** argv) {
   InitGoogleTest(&argc, argv);

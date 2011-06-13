@@ -42,6 +42,7 @@ import gtest_test_utils
 import gtest_xml_test_utils
 
 
+GTEST_LIST_TESTS_FLAG = '--gtest_list_tests'
 GTEST_OUTPUT_FLAG         = "--gtest_output"
 GTEST_DEFAULT_OUTPUT_FILE = "test_detail.xml"
 GTEST_PROGRAM_NAME = "gtest_xml_output_unittest_"
@@ -49,9 +50,9 @@ GTEST_PROGRAM_NAME = "gtest_xml_output_unittest_"
 SUPPORTS_STACK_TRACES = False
 
 if SUPPORTS_STACK_TRACES:
-  STACK_TRACE_TEMPLATE = "\nStack trace:\n*"
+  STACK_TRACE_TEMPLATE = '\nStack trace:\n*'
 else:
-  STACK_TRACE_TEMPLATE = ""
+  STACK_TRACE_TEMPLATE = ''
 
 EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="23" failures="4" disabled="2" errors="0" time="*" name="AllTests">
@@ -130,18 +131,26 @@ EXPECTED_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="0" failures="0" disabled="0" errors="0" time="*" name="AllTests">
 </testsuites>"""
 
+GTEST_PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath(GTEST_PROGRAM_NAME)
+
+SUPPORTS_TYPED_TESTS = 'TypedTest' in gtest_test_utils.Subprocess(
+    [GTEST_PROGRAM_PATH, GTEST_LIST_TESTS_FLAG], capture_stderr=False).output
+
 
 class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
   """
   Unit test for Google Test's XML output functionality.
   """
 
-  def testNonEmptyXmlOutput(self):
-    """
-    Runs a test program that generates a non-empty XML output, and
-    tests that the XML output is expected.
-    """
-    self._TestXmlOutput(GTEST_PROGRAM_NAME, EXPECTED_NON_EMPTY_XML, 1)
+  # This test currently breaks on platforms that do not support typed and
+  # type-parameterized tests, so we don't run it under them.
+  if SUPPORTS_TYPED_TESTS:
+    def testNonEmptyXmlOutput(self):
+      """
+      Runs a test program that generates a non-empty XML output, and
+      tests that the XML output is expected.
+      """
+      self._TestXmlOutput(GTEST_PROGRAM_NAME, EXPECTED_NON_EMPTY_XML, 1)
 
   def testEmptyXmlOutput(self):
     """
@@ -149,8 +158,7 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     tests that the XML output is expected.
     """
 
-    self._TestXmlOutput("gtest_no_test_unittest",
-                        EXPECTED_EMPTY_XML, 0)
+    self._TestXmlOutput('gtest_no_test_unittest', EXPECTED_EMPTY_XML, 0)
 
   def testDefaultOutputFile(self):
     """
@@ -160,7 +168,7 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     output_file = os.path.join(gtest_test_utils.GetTempDir(),
                                GTEST_DEFAULT_OUTPUT_FILE)
     gtest_prog_path = gtest_test_utils.GetTestExecutablePath(
-        "gtest_no_test_unittest")
+        'gtest_no_test_unittest')
     try:
       os.remove(output_file)
     except OSError, e:
@@ -168,7 +176,7 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
         raise
 
     p = gtest_test_utils.Subprocess(
-        [gtest_prog_path, "%s=xml" % GTEST_OUTPUT_FLAG],
+        [gtest_prog_path, '%s=xml' % GTEST_OUTPUT_FLAG],
         working_dir=gtest_test_utils.GetTempDir())
     self.assert_(p.exited)
     self.assertEquals(0, p.exit_code)
@@ -181,24 +189,22 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     """
 
     xml_path = os.path.join(gtest_test_utils.GetTempDir(),
-                            GTEST_PROGRAM_NAME + "out.xml")
+                            GTEST_PROGRAM_NAME + 'out.xml')
     if os.path.isfile(xml_path):
       os.remove(xml_path)
 
-    gtest_prog_path = gtest_test_utils.GetTestExecutablePath(GTEST_PROGRAM_NAME)
-
-    command = [gtest_prog_path,
-               "%s=xml:%s" % (GTEST_OUTPUT_FLAG, xml_path),
-               "--shut_down_xml"]
+    command = [GTEST_PROGRAM_PATH,
+               '%s=xml:%s' % (GTEST_OUTPUT_FLAG, xml_path),
+               '--shut_down_xml']
     p = gtest_test_utils.Subprocess(command)
     if p.terminated_by_signal:
       self.assert_(False,
-                   "%s was killed by signal %d" % (gtest_prog_name, p.signal))
+                   '%s was killed by signal %d' % (gtest_prog_name, p.signal))
     else:
       self.assert_(p.exited)
       self.assertEquals(1, p.exit_code,
                         "'%s' exited with code %s, which doesn't match "
-                        "the expected exit code %s."
+                        'the expected exit code %s.'
                         % (command, p.exit_code, 1))
 
     self.assert_(not os.path.isfile(xml_path))
@@ -212,19 +218,19 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     expected_exit_code.
     """
     xml_path = os.path.join(gtest_test_utils.GetTempDir(),
-                            gtest_prog_name + "out.xml")
+                            gtest_prog_name + 'out.xml')
     gtest_prog_path = gtest_test_utils.GetTestExecutablePath(gtest_prog_name)
 
-    command = [gtest_prog_path, "%s=xml:%s" % (GTEST_OUTPUT_FLAG, xml_path)]
+    command = [gtest_prog_path, '%s=xml:%s' % (GTEST_OUTPUT_FLAG, xml_path)]
     p = gtest_test_utils.Subprocess(command)
     if p.terminated_by_signal:
       self.assert_(False,
-                   "%s was killed by signal %d" % (gtest_prog_name, p.signal))
+                   '%s was killed by signal %d' % (gtest_prog_name, p.signal))
     else:
       self.assert_(p.exited)
       self.assertEquals(expected_exit_code, p.exit_code,
                         "'%s' exited with code %s, which doesn't match "
-                        "the expected exit code %s."
+                        'the expected exit code %s.'
                         % (command, p.exit_code, expected_exit_code))
 
     expected = minidom.parseString(expected_xml)
