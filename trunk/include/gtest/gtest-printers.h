@@ -694,7 +694,10 @@ inline void UniversalTersePrint(char* str, ::std::ostream* os) {
 // NUL-terminated string.
 template <typename T>
 void UniversalPrint(const T& value, ::std::ostream* os) {
-  UniversalPrinter<T>::Print(value, os);
+  // A workarond for the bug in VC++ 7.1 that prevents us from instantiating
+  // UniversalPrinter with T directly.
+  typedef T T1;
+  UniversalPrinter<T1>::Print(value, os);
 }
 
 #if GTEST_HAS_TR1_TUPLE

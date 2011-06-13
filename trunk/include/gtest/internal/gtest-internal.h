@@ -802,6 +802,16 @@ struct RemoveConst<const T[N]> {
   typedef typename RemoveConst<T>::type type[N];
 };
 
+#if defined(_MSC_VER) && _MSC_VER < 1400
+// This is the only specialization that allows VC++ 7.1 to remove const in
+// 'const int[3] and 'const int[3][4]'.  However, it causes trouble with GCC
+// and thus needs to be conditionally compiled.
+template <typename T, size_t N>
+struct RemoveConst<T[N]> {
+  typedef typename RemoveConst<T>::type type[N];
+};
+#endif
+
 // A handy wrapper around RemoveConst that works when the argument
 // T depends on template parameters.
 #define GTEST_REMOVE_CONST_(T) \

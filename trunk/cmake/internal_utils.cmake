@@ -56,6 +56,16 @@ macro(config_compiler_and_linker)
     # Newlines inside flags variables break CMake's NMake generator.
     # TODO(vladl@google.com): Add -RTCs and -RTCu to debug builds.
     set(cxx_base_flags "-GS -W4 -WX -wd4127 -wd4251 -wd4275 -nologo -J -Zi")
+    if (MSVC_VERSION LESS 1400)
+      # Suppress spurious warnings MSVC 7.1 sometimes issues.
+      # Forcing value to bool.
+      set(cxx_base_flags "${cxx_base_flags} -wd4800")
+      # Copy constructor and assignment operator could not be generated.
+      set(cxx_base_flags "${cxx_base_flags} -wd4511 -wd4512")
+      # Compatibility warnings not applicable to Google Test.
+      # Resolved overload was found by argument-dependent lookup.
+      set(cxx_base_flags "${cxx_base_flags} -wd4675")
+    endif()
     set(cxx_base_flags "${cxx_base_flags} -D_UNICODE -DUNICODE -DWIN32 -D_WIN32")
     set(cxx_base_flags "${cxx_base_flags} -DSTRICT -DWIN32_LEAN_AND_MEAN")
     set(cxx_exception_flags "-EHsc -D_HAS_EXCEPTIONS=1")
