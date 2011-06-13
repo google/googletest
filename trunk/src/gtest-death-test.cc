@@ -936,15 +936,17 @@ static int ExecDeathTestChildMain(void* child_arg) {
 // GTEST_NO_INLINE_ is required to prevent GCC 4.6 from inlining
 // StackLowerThanAddress into StackGrowsDown, which then doesn't give
 // correct answer.
-bool StackLowerThanAddress(const void* ptr) GTEST_NO_INLINE_;
-bool StackLowerThanAddress(const void* ptr) {
+void StackLowerThanAddress(const void* ptr, bool* result) GTEST_NO_INLINE_;
+void StackLowerThanAddress(const void* ptr, bool* result) {
   int dummy;
-  return &dummy < ptr;
+  *result = (&dummy < ptr);
 }
 
 bool StackGrowsDown() {
   int dummy;
-  return StackLowerThanAddress(&dummy);
+  bool result;
+  StackLowerThanAddress(&dummy, &result);
+  return result;
 }
 
 // A threadsafe implementation of fork(2) for threadsafe-style death tests
