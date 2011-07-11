@@ -1037,6 +1037,7 @@ class AtomicCounterWithMutex {
       SleepMilliseconds(random_.Generate(30));
 
       GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_unlock(&memory_barrier_mutex));
+      GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_destroy(&memory_barrier_mutex));
     }
     value_ = temp + 1;
   }
