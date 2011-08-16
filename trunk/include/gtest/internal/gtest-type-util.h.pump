@@ -47,11 +47,11 @@ $var n = 50  $$ Maximum length of type lists we want to support.
 
 // #ifdef __GNUC__ is too general here.  It is possible to use gcc without using
 // libstdc++ (which is where cxxabi.h comes from).
-# ifdef __GLIBCXX__
+# if GTEST_HAS_CXXABI_H_
 #  include <cxxabi.h>
 # elif defined(__HP_aCC)
 #  include <acxx_demangle.h>
-# endif  // __GLIBCXX__
+# endif  // GTEST_HASH_CXXABI_H_
 
 namespace testing {
 namespace internal {
@@ -64,20 +64,20 @@ String GetTypeName() {
 # if GTEST_HAS_RTTI
 
   const char* const name = typeid(T).name();
-#  if defined(__GLIBCXX__) || defined(__HP_aCC)
+#  if GTEST_HAS_CXXABI_H_ || defined(__HP_aCC)
   int status = 0;
   // gcc's implementation of typeid(T).name() mangles the type name,
   // so we have to demangle it.
-#   ifdef __GLIBCXX__
+#   if GTEST_HAS_CXXABI_H_
   using abi::__cxa_demangle;
-#   endif // __GLIBCXX__
+#   endif // GTEST_HAS_CXXABI_H_
   char* const readable_name = __cxa_demangle(name, 0, 0, &status);
   const String name_str(status == 0 ? readable_name : name);
   free(readable_name);
   return name_str;
 #  else
   return name;
-#  endif  // __GLIBCXX__ || __HP_aCC
+#  endif  // GTEST_HAS_CXXABI_H_ || __HP_aCC
 
 # else
 
