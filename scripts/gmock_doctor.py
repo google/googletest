@@ -394,8 +394,9 @@ def _NeedToUseSymbolDiagnoser(msg):
 
   gcc_regex = (_GCC_FILE_LINE_RE + r'error: \'(?P<symbol>.+)\' '
                r'(was not declared in this scope|has not been declared)')
-  clang_regex = (_CLANG_FILE_LINE_RE + r'error: use of undeclared identifier '
-                 r'\'(?P<symbol>.+)\'')
+  clang_regex = (_CLANG_FILE_LINE_RE +
+                 r'error: (use of undeclared identifier|unknown type name) '
+                 r'\'(?P<symbol>[^\']+)\'')
   diagnosis = """
 '%(symbol)s' is defined by Google Mock in the testing namespace.
 Did you forget to write
