@@ -241,7 +241,7 @@ class Subprocess:
         # Changes made by os.environ.clear are not inheritable by child
         # processes until Python 2.6. To produce inheritable changes we have
         # to delete environment items with the del statement.
-        for key in dest:
+        for key in dest.keys():
           del dest[key]
         dest.update(src)
 
