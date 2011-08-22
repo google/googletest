@@ -1016,7 +1016,7 @@ Currently, the following `TEST`, `FAIL`, `SUCCEED`, and the basic comparison ass
 == How do I build Google Testing Framework with Xcode 4? ==
 
 If you try to build Google Test's Xcode project with Xcode 4.0 or later, you may encounter an error message that looks like
-"Missing SDK in target gtest_framework: /Xcode4.2/SDKs/MacOSX10.4u.sdk". That means that Xcode does not support the SDK the project is targeting. See the Xcode section in the [http://code.google.com/p/googletest/source/browse/trunk/README README] file on how to resolve this.
+"Missing SDK in target gtest_framework: /Developer/SDKs/MacOSX10.4u.sdk". That means that Xcode does not support the SDK the project is targeting. See the Xcode section in the [http://code.google.com/p/googletest/source/browse/trunk/README README] file on how to resolve this.
 
 == My question is not covered in your FAQ! ==
 
