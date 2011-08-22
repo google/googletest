@@ -217,6 +217,16 @@ default build location.  See the "xcodebuild" man page for more
 information about building different configurations and building in
 different locations.
 
+If you wish to use the Google Test Xcode project with Xcode 4.x and
+above, you need to either:
+ * update the SDK configuration options in xcode/Config/General.xconfig.
+   Comment options SDKROOT, MACOS_DEPLOYMENT_TARGET, and GCC_VERSION. If
+   you choose this route you lose the ability to target earlier versions
+   of MacOS X.
+ * Install an SDK for an earlier version. This doesn't appear to be
+   supported by Apple, but has been reported to work
+   (http://stackoverflow.com/questions/5378518).
+
 Tweaking Google Test
 --------------------
 
