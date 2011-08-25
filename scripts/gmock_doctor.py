@@ -173,7 +173,7 @@ def _NeedToReturnReferenceDiagnoser(msg):
                  r'(.*\n)*?' +
                  _CLANG_NON_GMOCK_FILE_LINE_RE +
                  r'note: in instantiation of function template specialization '
-                 r'\'testing::internal::ReturnAction<(?P<type>).*>'
+                 r'\'testing::internal::ReturnAction<(?P<type>.*)>'
                  r'::operator Action<.*>\' requested here')
   diagnosis = """
 You are using a Return() action in a function that returns a reference to
@@ -192,11 +192,11 @@ def _NeedToReturnSomethingDiagnoser(msg):
                r'|(error: control reaches end of non-void function)')
   clang_regex1 = (_CLANG_FILE_LINE_RE +
                   r'error: cannot initialize return object '
-                  r'of type \'Result\' \(aka \'(?P<return_type>).*\'\) '
+                  r'of type \'Result\' \(aka \'(?P<return_type>.*)\'\) '
                   r'with an rvalue of type \'void\'')
   clang_regex2 = (_CLANG_FILE_LINE_RE +
                   r'error: cannot initialize return object '
-                  r'of type \'(?P<return_type>).*\' '
+                  r'of type \'(?P<return_type>.*)\' '
                   r'with an rvalue of type \'void\'')
   diagnosis = """
 You are using an action that returns void, but it needs to return
@@ -395,8 +395,8 @@ def _NeedToUseSymbolDiagnoser(msg):
   gcc_regex = (_GCC_FILE_LINE_RE + r'error: \'(?P<symbol>.+)\' '
                r'(was not declared in this scope|has not been declared)')
   clang_regex = (_CLANG_FILE_LINE_RE +
-                 r'error: (use of undeclared identifier|unknown type name) '
-                 r'\'(?P<symbol>[^\']+)\'')
+                 r'error: (use of undeclared identifier|unknown type name|'
+                 r'no template named) \'(?P<symbol>[^\']+)\'')
   diagnosis = """
 '%(symbol)s' is defined by Google Mock in the testing namespace.
 Did you forget to write
