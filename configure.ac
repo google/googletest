@@ -7,7 +7,7 @@ AC_INIT([Google C++ Mocking Framework],
 
 # Provide various options to initialize the Autoconf and configure processes.
 AC_PREREQ([2.59])
-AC_CONFIG_SRCDIR([./COPYING])
+AC_CONFIG_SRCDIR([./LICENSE])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_HEADERS([build-aux/config.h])
 AC_CONFIG_FILES([Makefile])

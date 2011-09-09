@@ -140,7 +140,7 @@ EXTRA_DIST += scripts/fuse_gmock_files.py
 
 # The Google Mock Generator tool from the cppclean project.
 EXTRA_DIST += \
-  scripts/generator/COPYING \
+  scripts/generator/LICENSE \
   scripts/generator/README \
   scripts/generator/README.cppclean \
   scripts/generator/cpp/__init__.py \
