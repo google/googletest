@@ -52,6 +52,10 @@ using testing::internal::AlwaysTrue;
 # include <signal.h>
 # include <stdio.h>
 
+# if GTEST_OS_LINUX
+#  include <sys/time.h>
+# endif  // GTEST_OS_LINUX
+
 # include "gtest/gtest-spi.h"
 
 // Indicates that this translation unit is part of Google Test's
@@ -371,6 +375,57 @@ TEST_F(TestForDeathTest, FastDeathTestInChangedDir) {
   ChangeToRootDir();
   ASSERT_DEATH(_exit(1), "");
 }
+
+# if GTEST_OS_LINUX
+void SigprofAction(int, siginfo_t*, void*) { /* no op */ }
+
+// Sets SIGPROF action and ITIMER_PROF timer (interval: 1ms).
+void SetSigprofActionAndTimer() {
+  struct itimerval timer;
+  timer.it_interval.tv_sec = 0;
+  timer.it_interval.tv_usec = 1;
+  timer.it_value = timer.it_interval;
+  ASSERT_EQ(0, setitimer(ITIMER_PROF, &timer, NULL));
+  struct sigaction signal_action;
+  memset(&signal_action, 0, sizeof(signal_action));
+  sigemptyset(&signal_action.sa_mask);
+  signal_action.sa_sigaction = SigprofAction;
+  signal_action.sa_flags = SA_RESTART | SA_SIGINFO;
+  ASSERT_EQ(0, sigaction(SIGPROF, &signal_action, NULL));
+}
+
+// Disables ITIMER_PROF timer and ignores SIGPROF signal.
+void DisableSigprofActionAndTimer(struct sigaction* old_signal_action) {
+  struct itimerval timer;
+  timer.it_interval.tv_usec = 0;
+  timer.it_value.tv_usec = 0;
+  ASSERT_EQ(0, setitimer(ITIMER_PROF, &timer, NULL));
+  struct sigaction signal_action;
+  memset(&signal_action, 0, sizeof(signal_action));
+  sigemptyset(&signal_action.sa_mask);
+  signal_action.sa_handler = SIG_IGN;
+  ASSERT_EQ(0, sigaction(SIGPROF, &signal_action, old_signal_action));
+}
+
+// Tests that death tests work when SIGPROF handler and timer are set.
+TEST_F(TestForDeathTest, FastSigprofActionSet) {
+  testing::GTEST_FLAG(death_test_style) = "fast";
+  SetSigprofActionAndTimer();
+  EXPECT_DEATH(_exit(1), "");
+  struct sigaction old_signal_action;
+  DisableSigprofActionAndTimer(&old_signal_action);
+  EXPECT_TRUE(old_signal_action.sa_sigaction == SigprofAction);
+}
+
+TEST_F(TestForDeathTest, ThreadSafeSigprofActionSet) {
+  testing::GTEST_FLAG(death_test_style) = "threadsafe";
+  SetSigprofActionAndTimer();
+  EXPECT_DEATH(_exit(1), "");
+  struct sigaction old_signal_action;
+  DisableSigprofActionAndTimer(&old_signal_action);
+  EXPECT_TRUE(old_signal_action.sa_sigaction == SigprofAction);
+}
+# endif  // GTEST_OS_LINUX
 
 // Repeats a representative sample of death tests in the "threadsafe" style:
 
