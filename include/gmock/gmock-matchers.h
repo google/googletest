@@ -1970,6 +1970,85 @@ class ContainerEqMatcher {
   GTEST_DISALLOW_ASSIGN_(ContainerEqMatcher);
 };
 
+// A comparator functor that uses the < operator to compare two values.
+struct LessComparator {
+  template <typename T, typename U>
+  bool operator()(const T& lhs, const U& rhs) const { return lhs < rhs; }
+};
+
+// Implements WhenSortedBy(comparator, container_matcher).
+template <typename Comparator, typename ContainerMatcher>
+class WhenSortedByMatcher {
+ public:
+  WhenSortedByMatcher(const Comparator& comparator,
+                      const ContainerMatcher& matcher)
+      : comparator_(comparator), matcher_(matcher) {}
+
+  template <typename LhsContainer>
+  operator Matcher<LhsContainer>() const {
+    return MakeMatcher(new Impl<LhsContainer>(comparator_, matcher_));
+  }
+
+  template <typename LhsContainer>
+  class Impl : public MatcherInterface<LhsContainer> {
+   public:
+    typedef internal::StlContainerView<
+         GTEST_REMOVE_REFERENCE_AND_CONST_(LhsContainer)> LhsView;
+    typedef typename LhsView::type LhsStlContainer;
+    typedef typename LhsView::const_reference LhsStlContainerReference;
+    typedef typename LhsStlContainer::value_type LhsValue;
+
+    Impl(const Comparator& comparator, const ContainerMatcher& matcher)
+        : comparator_(comparator), matcher_(matcher) {}
+
+    virtual void DescribeTo(::std::ostream* os) const {
+      *os << "(when sorted) ";
+      matcher_.DescribeTo(os);
+    }
+
+    virtual void DescribeNegationTo(::std::ostream* os) const {
+      *os << "(when sorted) ";
+      matcher_.DescribeNegationTo(os);
+    }
+
+    virtual bool MatchAndExplain(LhsContainer lhs,
+                                 MatchResultListener* listener) const {
+      LhsStlContainerReference lhs_stl_container = LhsView::ConstReference(lhs);
+      std::vector<LhsValue> sorted_container(lhs_stl_container.begin(),
+                                             lhs_stl_container.end());
+      std::sort(sorted_container.begin(), sorted_container.end(), comparator_);
+
+      if (!listener->IsInterested()) {
+        // If the listener is not interested, we do not need to
+        // construct the inner explanation.
+        return matcher_.Matches(sorted_container);
+      }
+
+      *listener << "which is ";
+      UniversalPrint(sorted_container, listener->stream());
+      *listener << " when sorted";
+
+      StringMatchResultListener inner_listener;
+      const bool match = matcher_.MatchAndExplain(sorted_container,
+                                                  &inner_listener);
+      PrintIfNotEmpty(inner_listener.str(), listener->stream());
+      return match;
+    }
+
+   private:
+    const Comparator comparator_;
+    const Matcher<const std::vector<LhsValue>&> matcher_;
+
+    GTEST_DISALLOW_COPY_AND_ASSIGN_(Impl);
+  };
+
+ private:
+  const Comparator comparator_;
+  const ContainerMatcher matcher_;
+
+  GTEST_DISALLOW_ASSIGN_(WhenSortedByMatcher);
+};
+
 // Implements Pointwise(tuple_matcher, rhs_container).  tuple_matcher
 // must be able to be safely cast to Matcher<tuple<const T1&, const
 // T2&> >, where T1 and T2 are the types of elements in the LHS
@@ -2928,6 +3007,26 @@ inline PolymorphicMatcher<internal::ContainerEqMatcher<  // NOLINT
   typedef GTEST_REMOVE_CONST_(Container) RawContainer;
   return MakePolymorphicMatcher(
       internal::ContainerEqMatcher<RawContainer>(rhs));
+}
+
+// Returns a matcher that matches a container that, when sorted using
+// the given comparator, matches container_matcher.
+template <typename Comparator, typename ContainerMatcher>
+inline internal::WhenSortedByMatcher<Comparator, ContainerMatcher>
+WhenSortedBy(const Comparator& comparator,
+             const ContainerMatcher& container_matcher) {
+  return internal::WhenSortedByMatcher<Comparator, ContainerMatcher>(
+      comparator, container_matcher);
+}
+
+// Returns a matcher that matches a container that, when sorted using
+// the < operator, matches container_matcher.
+template <typename ContainerMatcher>
+inline internal::WhenSortedByMatcher<internal::LessComparator, ContainerMatcher>
+WhenSorted(const ContainerMatcher& container_matcher) {
+  return
+      internal::WhenSortedByMatcher<internal::LessComparator, ContainerMatcher>(
+          internal::LessComparator(), container_matcher);
 }
 
 // Matches an STL-style container or a native array that contains the
