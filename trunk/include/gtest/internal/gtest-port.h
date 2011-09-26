@@ -1682,6 +1682,23 @@ inline void Abort() { abort(); }
 
 }  // namespace posix
 
+// MSVC "deprecates" snprintf and issues warnings wherever it is used.  In
+// order to avoid these warnings, we need to use _snprintf or _snprintf_s on
+// MSVC-based platforms.  We map the GTEST_SNPRINTF_ macro to the appropriate
+// function in order to achieve that.  We use macro definition here because
+// snprintf is a variadic function.
+#if _MSC_VER >= 1400 && !GTEST_OS_WINDOWS_MOBILE
+// MSVC 2005 and above support variadic macros.
+# define GTEST_SNPRINTF_(buffer, size, format, ...) \
+     _snprintf_s(buffer, size, size, format, __VA_ARGS__)
+#elif defined(_MSC_VER)
+// Windows CE does not define _snprintf_s and MSVC prior to 2005 doesn't
+// complain about _snprintf.
+# define GTEST_SNPRINTF_ _snprintf
+#else
+# define GTEST_SNPRINTF_ snprintf
+#endif
+
 // The maximum number a BiggestInt can represent.  This definition
 // works no matter BiggestInt is represented in one's complement or
 // two's complement.
