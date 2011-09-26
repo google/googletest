@@ -98,7 +98,7 @@ class ValueArray$i {
 
   template <typename T>
   operator ParamGenerator<T>() const {
-    const T array[] = {$for j, [[v$(j)_]]};
+    const T array[] = {$for j, [[static_cast<T>(v$(j)_)]]};
     return ValuesIn(array);
   }
 
