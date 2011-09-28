@@ -128,7 +128,7 @@ _COMMON_GMOCK_SYMBOLS = [
     ]
 
 # Regex for matching source file path and line number in the compiler's errors.
-_GCC_FILE_LINE_RE = r'(?P<file>.*):(?P<line>\d+):\s+'
+_GCC_FILE_LINE_RE = r'(?P<file>.*):(?P<line>\d+):(\d+:)?\s+'
 _CLANG_FILE_LINE_RE = r'(?P<file>.*):(?P<line>\d+):(?P<column>\d+):\s+'
 _CLANG_NON_GMOCK_FILE_LINE_RE = (
     r'(?P<file>.*[/\\^](?!gmock-)[^/\\]+):(?P<line>\d+):(?P<column>\d+):\s+')
@@ -559,6 +559,9 @@ def Diagnose(msg):
   """Generates all possible diagnoses given the compiler error message."""
 
   msg = re.sub(r'\x1b\[[^m]*m', '', msg)  # Strips all color formatting.
+  # Assuming the string is using the UTF-8 encoding, replaces the left and
+  # the right single quote characters with apostrophes.
+  msg = re.sub(r'(\xe2\x80\x98|\xe2\x80\x99)', "'", msg)
 
   diagnoses = []
   for diagnoser in _DIAGNOSERS:
