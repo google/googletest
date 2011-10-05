@@ -71,6 +71,7 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 
 #include <limits.h>  // For INT_MAX.
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #include <map>
@@ -141,6 +142,7 @@ using testing::TestPartResult;
 using testing::TestPartResultArray;
 using testing::TestProperty;
 using testing::TestResult;
+using testing::TimeInMillis;
 using testing::UnitTest;
 using testing::kMaxStackTraceDepth;
 using testing::internal::AddReference;
@@ -156,6 +158,7 @@ using testing::internal::CountIf;
 using testing::internal::EqFailure;
 using testing::internal::FloatingPoint;
 using testing::internal::ForEach;
+using testing::internal::FormatEpochTimeInMillisAsIso8601;
 using testing::internal::FormatTimeInMillisAsSeconds;
 using testing::internal::GTestFlagSaver;
 using testing::internal::GetCurrentOsStackTraceExceptTop;
@@ -163,6 +166,7 @@ using testing::internal::GetElementOr;
 using testing::internal::GetNextRandomSeed;
 using testing::internal::GetRandomSeedFromFlag;
 using testing::internal::GetTestTypeId;
+using testing::internal::GetTimeInMillis;
 using testing::internal::GetTypeId;
 using testing::internal::GetUnitTestImpl;
 using testing::internal::ImplicitlyConvertible;
@@ -306,6 +310,103 @@ TEST(FormatTimeInMillisAsSecondsTest, FormatsNegativeNumber) {
   EXPECT_EQ("-0.2", FormatTimeInMillisAsSeconds(-200));
   EXPECT_EQ("-1.2", FormatTimeInMillisAsSeconds(-1200));
   EXPECT_EQ("-3", FormatTimeInMillisAsSeconds(-3000));
+}
+
+// Tests FormatEpochTimeInMillisAsIso8601().  The correctness of conversion
+// for particular dates below was verified in Python using
+// datetime.datetime.fromutctimestamp(<timetamp>/1000).
+
+// FormatEpochTimeInMillisAsIso8601 depends on the current timezone, so we
+// have to set up a particular timezone to obtain predictable results.
+class FormatEpochTimeInMillisAsIso8601Test : public Test {
+ public:
+  // On Cygwin, GCC doesn't allow unqualified integer literals to exceed
+  // 32 bits, even when 64-bit integer types are available.  We have to
+  // force the constants to have a 64-bit type here.
+  static const TimeInMillis kMillisPerSec = 1000;
+
+ private:
+  virtual void SetUp() {
+    saved_tz_ = NULL;
+#if _MSC_VER
+# pragma warning(push)          // Saves the current warning state.
+# pragma warning(disable:4996)  // Temporarily disables warning 4996
+                                // (function or variable may be unsafe
+                                // for getenv, function is deprecated for
+                                // strdup).
+    if (getenv("TZ"))
+      saved_tz_ = strdup(getenv("TZ"));
+# pragma warning(pop)           // Restores the warning state again.
+#else
+    if (getenv("TZ"))
+      saved_tz_ = strdup(getenv("TZ"));
+#endif
+
+    // Set up the time zone for FormatEpochTimeInMillisAsIso8601 to use.  We
+    // cannot use the local time zone because the function's output depends
+    // on the time zone.
+    SetTimeZone("UTC+00");
+  }
+
+  virtual void TearDown() {
+    SetTimeZone(saved_tz_);
+    free(const_cast<char*>(saved_tz_));
+    saved_tz_ = NULL;
+  }
+
+  static void SetTimeZone(const char* time_zone) {
+    // tzset() distinguishes between the TZ variable being present and empty
+    // and not being present, so we have to consider the case of time_zone
+    // being NULL.
+#if _MSC_VER
+    // ...Unless it's MSVC, whose standard library's _putenv doesn't
+    // distinguish between an empty and a missing variable.
+    const std::string env_var =
+        std::string("TZ=") + (time_zone ? time_zone : "");
+    _putenv(env_var.c_str());
+# pragma warning(push)          // Saves the current warning state.
+# pragma warning(disable:4996)  // Temporarily disables warning 4996
+                                // (function is deprecated).
+    tzset();
+# pragma warning(pop)           // Restores the warning state again.
+#else
+    if (time_zone) {
+      setenv(("TZ"), time_zone, 1);
+    } else {
+      unsetenv("TZ");
+    }
+    tzset();
+#endif
+  }
+
+  const char* saved_tz_;
+};
+
+const TimeInMillis FormatEpochTimeInMillisAsIso8601Test::kMillisPerSec;
+
+TEST_F(FormatEpochTimeInMillisAsIso8601Test, PrintsTwoDigitSegments) {
+  EXPECT_EQ("2011-10-31T18:52:42",
+            FormatEpochTimeInMillisAsIso8601(1320087162 * kMillisPerSec));
+}
+
+TEST_F(FormatEpochTimeInMillisAsIso8601Test, MillisecondsDoNotAffectResult) {
+  EXPECT_EQ(
+      "2011-10-31T18:52:42",
+      FormatEpochTimeInMillisAsIso8601(1320087162 * kMillisPerSec + 234));
+}
+
+TEST_F(FormatEpochTimeInMillisAsIso8601Test, PrintsLeadingZeroes) {
+  EXPECT_EQ("2011-09-03T05:07:02",
+            FormatEpochTimeInMillisAsIso8601(1315026422 * kMillisPerSec));
+}
+
+TEST_F(FormatEpochTimeInMillisAsIso8601Test, Prints24HourTime) {
+  EXPECT_EQ("2011-09-28T17:08:22",
+            FormatEpochTimeInMillisAsIso8601(1317229702 * kMillisPerSec));
+}
+
+TEST_F(FormatEpochTimeInMillisAsIso8601Test, PrintsEpochStart) {
+  EXPECT_EQ("1970-01-01T00:00:00", FormatEpochTimeInMillisAsIso8601(0));
 }
 
 #if GTEST_CAN_COMPARE_NULL
@@ -2128,6 +2229,11 @@ TEST(ShouldRunTestOnShardTest, IsPartitionWhenThereAreFiveShards) {
 TEST(UnitTestTest, CanGetOriginalWorkingDir) {
   ASSERT_TRUE(UnitTest::GetInstance()->original_working_dir() != NULL);
   EXPECT_STRNE(UnitTest::GetInstance()->original_working_dir(), "");
+}
+
+TEST(UnitTestTest, ReturnsPlausibleTimestamp) {
+  EXPECT_LT(0, UnitTest::GetInstance()->start_timestamp());
+  EXPECT_LE(UnitTest::GetInstance()->start_timestamp(), GetTimeInMillis());
 }
 
 // This group of tests is for predicate assertions (ASSERT_PRED*, etc)

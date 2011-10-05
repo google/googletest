@@ -1152,6 +1152,10 @@ class GTEST_API_ UnitTest {
   // Gets the number of tests that should run.
   int test_to_run_count() const;
 
+  // Gets the time of the test program start, in ms from the start of the
+  // UNIX epoch.
+  TimeInMillis start_timestamp() const;
+
   // Gets the elapsed time, in milliseconds.
   TimeInMillis elapsed_time() const;
 
