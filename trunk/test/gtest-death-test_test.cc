@@ -397,8 +397,9 @@ void SetSigprofActionAndTimer() {
 // Disables ITIMER_PROF timer and ignores SIGPROF signal.
 void DisableSigprofActionAndTimer(struct sigaction* old_signal_action) {
   struct itimerval timer;
+  timer.it_interval.tv_sec = 0;
   timer.it_interval.tv_usec = 0;
-  timer.it_value.tv_usec = 0;
+  timer.it_value = timer.it_interval;
   ASSERT_EQ(0, setitimer(ITIMER_PROF, &timer, NULL));
   struct sigaction signal_action;
   memset(&signal_action, 0, sizeof(signal_action));
