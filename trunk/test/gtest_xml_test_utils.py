@@ -39,8 +39,8 @@ from xml.dom import minidom, Node
 import gtest_test_utils
 
 
-GTEST_OUTPUT_FLAG         = "--gtest_output"
-GTEST_DEFAULT_OUTPUT_FILE = "test_detail.xml"
+GTEST_OUTPUT_FLAG         = '--gtest_output'
+GTEST_DEFAULT_OUTPUT_FILE = 'test_detail.xml'
 
 class GTestXMLTestCase(gtest_test_utils.TestCase):
   """
@@ -80,23 +80,23 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
     actual_attributes   = actual_node  .attributes
     self.assertEquals(
         expected_attributes.length, actual_attributes.length,
-        "attribute numbers differ in element " + actual_node.tagName)
+        'attribute numbers differ in element ' + actual_node.tagName)
     for i in range(expected_attributes.length):
       expected_attr = expected_attributes.item(i)
       actual_attr   = actual_attributes.get(expected_attr.name)
       self.assert_(
           actual_attr is not None,
-          "expected attribute %s not found in element %s" %
+          'expected attribute %s not found in element %s' %
           (expected_attr.name, actual_node.tagName))
       self.assertEquals(expected_attr.value, actual_attr.value,
-                        " values of attribute %s in element %s differ" %
+                        ' values of attribute %s in element %s differ' %
                         (expected_attr.name, actual_node.tagName))
 
     expected_children = self._GetChildren(expected_node)
     actual_children = self._GetChildren(actual_node)
     self.assertEquals(
         len(expected_children), len(actual_children),
-        "number of child elements differ in element " + actual_node.tagName)
+        'number of child elements differ in element ' + actual_node.tagName)
     for child_id, child in expected_children.iteritems():
       self.assert_(child_id in actual_children,
                    '<%s> is not in <%s> (in element %s)' %
@@ -104,10 +104,10 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
       self.AssertEquivalentNodes(child, actual_children[child_id])
 
   identifying_attribute = {
-    "testsuites": "name",
-    "testsuite": "name",
-    "testcase":  "name",
-    "failure":   "message",
+    'testsuites': 'name',
+    'testsuite': 'name',
+    'testcase':  'name',
+    'failure':   'message',
     }
 
   def _GetChildren(self, element):
@@ -127,20 +127,20 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
     for child in element.childNodes:
       if child.nodeType == Node.ELEMENT_NODE:
         self.assert_(child.tagName in self.identifying_attribute,
-                     "Encountered unknown element <%s>" % child.tagName)
+                     'Encountered unknown element <%s>' % child.tagName)
         childID = child.getAttribute(self.identifying_attribute[child.tagName])
         self.assert_(childID not in children)
         children[childID] = child
       elif child.nodeType in [Node.TEXT_NODE, Node.CDATA_SECTION_NODE]:
-        if "detail" not in children:
+        if 'detail' not in children:
           if (child.nodeType == Node.CDATA_SECTION_NODE or
               not child.nodeValue.isspace()):
-            children["detail"] = child.ownerDocument.createCDATASection(
+            children['detail'] = child.ownerDocument.createCDATASection(
                 child.nodeValue)
         else:
-          children["detail"].nodeValue += child.nodeValue
+          children['detail'].nodeValue += child.nodeValue
       else:
-        self.fail("Encountered unexpected node type %d" % child.nodeType)
+        self.fail('Encountered unexpected node type %d' % child.nodeType)
     return children
 
   def NormalizeXml(self, element):
@@ -151,6 +151,8 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
     *  The "time" attribute of <testsuites>, <testsuite> and <testcase>
        elements is replaced with a single asterisk, if it contains
        only digit characters.
+    *  The "timestamp" attribute of <testsuites> elements is replaced with a
+       single asterisk, if it contains a valid ISO8601 datetime value.
     *  The "type_param" attribute of <testcase> elements is replaced with a
        single asterisk (if it sn non-empty) as it is the type name returned
        by the compiler and is platform dependent.
@@ -160,20 +162,24 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
     *  The stack traces are removed.
     """
 
-    if element.tagName in ("testsuites", "testsuite", "testcase"):
-      time = element.getAttributeNode("time")
-      time.value = re.sub(r"^\d+(\.\d+)?$", "*", time.value)
-      type_param = element.getAttributeNode("type_param")
+    if element.tagName == 'testsuites':
+      timestamp = element.getAttributeNode('timestamp')
+      timestamp.value = re.sub(r'^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d$',
+                               '*', timestamp.value)
+    if element.tagName in ('testsuites', 'testsuite', 'testcase'):
+      time = element.getAttributeNode('time')
+      time.value = re.sub(r'^\d+(\.\d+)?$', '*', time.value)
+      type_param = element.getAttributeNode('type_param')
       if type_param and type_param.value:
-        type_param.value = "*"
-    elif element.tagName == "failure":
+        type_param.value = '*'
+    elif element.tagName == 'failure':
       for child in element.childNodes:
         if child.nodeType == Node.CDATA_SECTION_NODE:
           # Removes the source line number.
-          cdata = re.sub(r"^.*[/\\](.*:)\d+\n", "\\1*\n", child.nodeValue)
+          cdata = re.sub(r'^.*[/\\](.*:)\d+\n', '\\1*\n', child.nodeValue)
           # Removes the actual stack trace.
-          child.nodeValue = re.sub(r"\nStack trace:\n(.|\n)*",
-                                   "", cdata)
+          child.nodeValue = re.sub(r'\nStack trace:\n(.|\n)*',
+                                   '', cdata)
     for child in element.childNodes:
       if child.nodeType == Node.ELEMENT_NODE:
         self.NormalizeXml(child)

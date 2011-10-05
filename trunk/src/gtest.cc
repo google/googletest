@@ -39,6 +39,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <wchar.h>
 #include <wctype.h>
 
@@ -3195,6 +3196,32 @@ std::string FormatTimeInMillisAsSeconds(TimeInMillis ms) {
   return ss.str();
 }
 
+// Converts the given epoch time in milliseconds to a date string in the ISO
+// 8601 format, without the timezone information.
+std::string FormatEpochTimeInMillisAsIso8601(TimeInMillis ms) {
+  // Using non-reentrant version as localtime_r is not portable.
+  time_t seconds = static_cast<time_t>(ms / 1000);
+#ifdef _MSC_VER
+# pragma warning(push)          // Saves the current warning state.
+# pragma warning(disable:4996)  // Temporarily disables warning 4996
+                                // (function or variable may be unsafe).
+  const struct tm* const time_struct = localtime(&seconds);  // NOLINT
+# pragma warning(pop)           // Restores the warning state again.
+#else
+  const struct tm* const time_struct = localtime(&seconds);  // NOLINT
+#endif
+  if (time_struct == NULL)
+    return "";  // Invalid ms value
+
+  return String::Format("%d-%02d-%02dT%02d:%02d:%02d",  // YYYY-MM-DDThh:mm:ss
+                        time_struct->tm_year + 1900,
+                        time_struct->tm_mon + 1,
+                        time_struct->tm_mday,
+                        time_struct->tm_hour,
+                        time_struct->tm_min,
+                        time_struct->tm_sec);
+}
+
 // Streams an XML CDATA section, escaping invalid CDATA sequences as needed.
 void XmlUnitTestResultPrinter::OutputXmlCDataSection(::std::ostream* stream,
                                                      const char* data) {
@@ -3291,10 +3318,11 @@ void XmlUnitTestResultPrinter::PrintXmlUnitTest(FILE* out,
   fprintf(out, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
   fprintf(out,
           "<testsuites tests=\"%d\" failures=\"%d\" disabled=\"%d\" "
-          "errors=\"0\" time=\"%s\" ",
+          "errors=\"0\" timestamp=\"%s\" time=\"%s\" ",
           unit_test.total_test_count(),
           unit_test.failed_test_count(),
           unit_test.disabled_test_count(),
+          FormatEpochTimeInMillisAsIso8601(unit_test.start_timestamp()).c_str(),
           FormatTimeInMillisAsSeconds(unit_test.elapsed_time()).c_str());
   if (GTEST_FLAG(shuffle)) {
     fprintf(out, "random_seed=\"%d\" ", unit_test.random_seed());
@@ -3687,6 +3715,12 @@ int UnitTest::total_test_count() const { return impl()->total_test_count(); }
 // Gets the number of tests that should run.
 int UnitTest::test_to_run_count() const { return impl()->test_to_run_count(); }
 
+// Gets the time of the test program start, in ms from the start of the
+// UNIX epoch.
+internal::TimeInMillis UnitTest::start_timestamp() const {
+    return impl()->start_timestamp();
+}
+
 // Gets the elapsed time, in milliseconds.
 internal::TimeInMillis UnitTest::elapsed_time() const {
   return impl()->elapsed_time();
@@ -3961,6 +3995,7 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
       post_flag_parse_init_performed_(false),
       random_seed_(0),  // Will be overridden by the flag before first use.
       random_(0),  // Will be reseeded before first use.
+      start_timestamp_(0),
       elapsed_time_(0),
 #if GTEST_HAS_DEATH_TEST
       internal_run_death_test_flag_(NULL),
@@ -4192,6 +4227,7 @@ bool UnitTestImpl::RunAllTests() {
 
   TestEventListener* repeater = listeners()->repeater();
 
+  start_timestamp_ = GetTimeInMillis();
   repeater->OnTestProgramStart(*parent_);
 
   // How many times to repeat the tests?  We don't want to repeat them
