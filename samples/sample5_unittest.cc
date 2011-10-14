@@ -117,20 +117,20 @@ TEST_F(IntegerFunctionTest, Factorial) {
 // Tests IsPrime()
 TEST_F(IntegerFunctionTest, IsPrime) {
   // Tests negative input.
-  EXPECT_TRUE(!IsPrime(-1));
-  EXPECT_TRUE(!IsPrime(-2));
-  EXPECT_TRUE(!IsPrime(INT_MIN));
+  EXPECT_FALSE(IsPrime(-1));
+  EXPECT_FALSE(IsPrime(-2));
+  EXPECT_FALSE(IsPrime(INT_MIN));
 
   // Tests some trivial cases.
-  EXPECT_TRUE(!IsPrime(0));
-  EXPECT_TRUE(!IsPrime(1));
+  EXPECT_FALSE(IsPrime(0));
+  EXPECT_FALSE(IsPrime(1));
   EXPECT_TRUE(IsPrime(2));
   EXPECT_TRUE(IsPrime(3));
 
   // Tests positive input.
-  EXPECT_TRUE(!IsPrime(4));
+  EXPECT_FALSE(IsPrime(4));
   EXPECT_TRUE(IsPrime(5));
-  EXPECT_TRUE(!IsPrime(6));
+  EXPECT_FALSE(IsPrime(6));
   EXPECT_TRUE(IsPrime(23));
 }
 
