@@ -3528,8 +3528,8 @@ void StreamingListener::MakeConnection() {
 
 // Pushes the given source file location and message onto a per-thread
 // trace stack maintained by Google Test.
-// L < UnitTest::mutex_
-ScopedTrace::ScopedTrace(const char* file, int line, const Message& message) {
+ScopedTrace::ScopedTrace(const char* file, int line, const Message& message)
+    GTEST_LOCK_EXCLUDED_(UnitTest::mutex_) {
   TraceInfo trace;
   trace.file = file;
   trace.line = line;
@@ -3539,8 +3539,8 @@ ScopedTrace::ScopedTrace(const char* file, int line, const Message& message) {
 }
 
 // Pops the info pushed by the c'tor.
-// L < UnitTest::mutex_
-ScopedTrace::~ScopedTrace() {
+ScopedTrace::~ScopedTrace()
+    GTEST_LOCK_EXCLUDED_(UnitTest::mutex_) {
   UnitTest::GetInstance()->PopGTestTrace();
 }
 
@@ -3554,14 +3554,14 @@ ScopedTrace::~ScopedTrace() {
 //   skip_count - the number of top frames to be skipped; doesn't count
 //                against max_depth.
 //
-// L < mutex_
-// We use "L < mutex_" to denote that the function may acquire mutex_.
-String OsStackTraceGetter::CurrentStackTrace(int, int) {
+String OsStackTraceGetter::CurrentStackTrace(int /* max_depth */,
+                                             int /* skip_count */)
+    GTEST_LOCK_EXCLUDED_(mutex_) {
   return String("");
 }
 
-// L < mutex_
-void OsStackTraceGetter::UponLeavingGTest() {
+void OsStackTraceGetter::UponLeavingGTest()
+    GTEST_LOCK_EXCLUDED_(mutex_) {
 }
 
 const char* const
@@ -3774,12 +3774,13 @@ Environment* UnitTest::AddEnvironment(Environment* env) {
 // assertion macros (e.g. ASSERT_TRUE, EXPECT_EQ, etc) eventually call
 // this to report their results.  The user code should use the
 // assertion macros instead of calling this directly.
-// L < mutex_
-void UnitTest::AddTestPartResult(TestPartResult::Type result_type,
-                                 const char* file_name,
-                                 int line_number,
-                                 const internal::String& message,
-                                 const internal::String& os_stack_trace) {
+void UnitTest::AddTestPartResult(
+    TestPartResult::Type result_type,
+    const char* file_name,
+    int line_number,
+    const internal::String& message,
+    const internal::String& os_stack_trace)
+        GTEST_LOCK_EXCLUDED_(mutex_) {
   Message msg;
   msg << message;
 
@@ -3912,16 +3913,16 @@ const char* UnitTest::original_working_dir() const {
 
 // Returns the TestCase object for the test that's currently running,
 // or NULL if no test is running.
-// L < mutex_
-const TestCase* UnitTest::current_test_case() const {
+const TestCase* UnitTest::current_test_case() const
+    GTEST_LOCK_EXCLUDED_(mutex_) {
   internal::MutexLock lock(&mutex_);
   return impl_->current_test_case();
 }
 
 // Returns the TestInfo object for the test that's currently running,
 // or NULL if no test is running.
-// L < mutex_
-const TestInfo* UnitTest::current_test_info() const {
+const TestInfo* UnitTest::current_test_info() const
+    GTEST_LOCK_EXCLUDED_(mutex_) {
   internal::MutexLock lock(&mutex_);
   return impl_->current_test_info();
 }
@@ -3932,9 +3933,9 @@ int UnitTest::random_seed() const { return impl_->random_seed(); }
 #if GTEST_HAS_PARAM_TEST
 // Returns ParameterizedTestCaseRegistry object used to keep track of
 // value-parameterized tests and instantiate and register them.
-// L < mutex_
 internal::ParameterizedTestCaseRegistry&
-    UnitTest::parameterized_test_registry() {
+    UnitTest::parameterized_test_registry()
+        GTEST_LOCK_EXCLUDED_(mutex_) {
   return impl_->parameterized_test_registry();
 }
 #endif  // GTEST_HAS_PARAM_TEST
@@ -3951,15 +3952,15 @@ UnitTest::~UnitTest() {
 
 // Pushes a trace defined by SCOPED_TRACE() on to the per-thread
 // Google Test trace stack.
-// L < mutex_
-void UnitTest::PushGTestTrace(const internal::TraceInfo& trace) {
+void UnitTest::PushGTestTrace(const internal::TraceInfo& trace)
+    GTEST_LOCK_EXCLUDED_(mutex_) {
   internal::MutexLock lock(&mutex_);
   impl_->gtest_trace_stack().push_back(trace);
 }
 
 // Pops a trace from the per-thread Google Test trace stack.
-// L < mutex_
-void UnitTest::PopGTestTrace() {
+void UnitTest::PopGTestTrace()
+    GTEST_LOCK_EXCLUDED_(mutex_) {
   internal::MutexLock lock(&mutex_);
   impl_->gtest_trace_stack().pop_back();
 }

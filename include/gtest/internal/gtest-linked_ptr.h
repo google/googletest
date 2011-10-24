@@ -105,8 +105,8 @@ class linked_ptr_internal {
   // framework.
 
   // Join an existing circle.
-  // L < g_linked_ptr_mutex
-  void join(linked_ptr_internal const* ptr) {
+  void join(linked_ptr_internal const* ptr)
+      GTEST_LOCK_EXCLUDED_(g_linked_ptr_mutex) {
     MutexLock lock(&g_linked_ptr_mutex);
 
     linked_ptr_internal const* p = ptr;
@@ -117,8 +117,8 @@ class linked_ptr_internal {
 
   // Leave whatever circle we're part of.  Returns true if we were the
   // last member of the circle.  Once this is done, you can join() another.
-  // L < g_linked_ptr_mutex
-  bool depart() {
+  bool depart()
+      GTEST_LOCK_EXCLUDED_(g_linked_ptr_mutex) {
     MutexLock lock(&g_linked_ptr_mutex);
 
     if (next_ == this) return true;
