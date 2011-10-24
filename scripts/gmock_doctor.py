@@ -422,7 +422,7 @@ def _NeedToUseReturnNullDiagnoser(msg):
                  r'(.*\n)*?' +
                  _CLANG_NON_GMOCK_FILE_LINE_RE + r'note: in instantiation '
                  r'of function template specialization '
-                 r'\'testing::internal::ReturnAction<long>::operator '
+                 r'\'testing::internal::ReturnAction<(int|long)>::operator '
                  r'Action<(?P<type>.*)\(\)>\' requested here')
   diagnosis = """
 You are probably calling Return(NULL) and the compiler isn't sure how to turn
