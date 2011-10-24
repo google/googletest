@@ -197,6 +197,7 @@ using ::std::pair;
 using ::std::set;
 using ::std::vector;
 using ::testing::PrintToString;
+using ::testing::internal::ImplicitCast_;
 using ::testing::internal::NativeArray;
 using ::testing::internal::RE;
 using ::testing::internal::Strings;
@@ -1002,9 +1003,12 @@ TEST(PrintTupleTest, VariousSizes) {
   EXPECT_EQ("(false, 2, 3, 4, true, 6, 7, true, 9)", Print(t9));
 
   const char* const str = "8";
+  // VC++ 2010's implementation of tuple of C++0x is deficient, requiring
+  // an explicit type cast of NULL to be used.
   tuple<bool, char, short, testing::internal::Int32,  // NOLINT
       testing::internal::Int64, float, double, const char*, void*, string>
-      t10(false, 'a', 3, 4, 5, 1.5F, -2.5, str, NULL, "10");
+      t10(false, 'a', 3, 4, 5, 1.5F, -2.5, str,
+          ImplicitCast_<void*>(NULL), "10");
   EXPECT_EQ("(false, 'a' (97, 0x61), 3, 4, 5, 1.5, -2.5, " + PrintPointer(str) +
             " pointing to \"8\", NULL, \"10\")",
             Print(t10));
