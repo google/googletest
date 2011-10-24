@@ -88,13 +88,14 @@ using testing::Mock;
 using testing::Ne;
 using testing::Return;
 using testing::Sequence;
+using testing::SetArgPointee;
 using testing::internal::ExpectationTester;
 using testing::internal::FormatFileLocation;
-using testing::internal::g_gmock_mutex;
 using testing::internal::kErrorVerbosity;
 using testing::internal::kInfoVerbosity;
 using testing::internal::kWarningVerbosity;
 using testing::internal::String;
+using testing::internal::linked_ptr;
 using testing::internal::string;
 
 #if GTEST_HAS_STREAM_REDIRECTION
@@ -155,6 +156,16 @@ class MockB {
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockB);
+};
+
+class ReferenceHoldingMock {
+ public:
+  ReferenceHoldingMock() {}
+
+  MOCK_METHOD1(AcceptReference, void(linked_ptr<MockA>*));
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(ReferenceHoldingMock);
 };
 
 // Tests that EXPECT_CALL and ON_CALL compile in a presence of macro
@@ -2437,6 +2448,46 @@ TEST(VerifyAndClearTest, DoesNotAffectOtherMockObjects) {
 
   EXPECT_EQ(1, b1.DoB());
   EXPECT_EQ(2, b1.DoB(0));
+}
+
+TEST(VerifyAndClearTest,
+     DestroyingChainedMocksDoesNotDeadlockThroughExpectations) {
+  linked_ptr<MockA> a(new MockA);
+  ReferenceHoldingMock test_mock;
+
+  // EXPECT_CALL stores a reference to a inside test_mock.
+  EXPECT_CALL(test_mock, AcceptReference(_))
+      .WillRepeatedly(SetArgPointee<0>(a));
+
+  // Throw away the reference to the mock that we have in a. After this, the
+  // only reference to it is stored by test_mock.
+  a.reset();
+
+  // When test_mock goes out of scope, it destroys the last remaining reference
+  // to the mock object originally pointed to by a. This will cause the MockA
+  // destructor to be called from inside the ReferenceHoldingMock destructor.
+  // The state of all mocks is protected by a single global lock, but there
+  // should be no deadlock.
+}
+
+TEST(VerifyAndClearTest,
+     DestroyingChainedMocksDoesNotDeadlockThroughDefaultAction) {
+  linked_ptr<MockA> a(new MockA);
+  ReferenceHoldingMock test_mock;
+
+  // ON_CALL stores a reference to a inside test_mock.
+  ON_CALL(test_mock, AcceptReference(_))
+      .WillByDefault(SetArgPointee<0>(a));
+
+  // Throw away the reference to the mock that we have in a. After this, the
+  // only reference to it is stored by test_mock.
+  a.reset();
+
+  // When test_mock goes out of scope, it destroys the last remaining reference
+  // to the mock object originally pointed to by a. This will cause the MockA
+  // destructor to be called from inside the ReferenceHoldingMock destructor.
+  // The state of all mocks is protected by a single global lock, but there
+  // should be no deadlock.
 }
 
 // Tests that a mock function's action can call a mock function

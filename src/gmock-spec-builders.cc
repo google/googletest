@@ -480,7 +480,21 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
              untyped_expectation->line(), ss.str());
     }
   }
-  untyped_expectations_.clear();
+
+  // Deleting our expectations may trigger other mock objects to be deleted, for
+  // example if an action contains a reference counted smart pointer to that
+  // mock object, and that is the last reference. So if we delete our
+  // expectations within the context of the global mutex we may deadlock when
+  // this method is called again. Instead, make a copy of the set of
+  // expectations to delete, clear our set within the mutex, and then clear the
+  // copied set outside of it.
+  UntypedExpectations expectations_to_delete;
+  untyped_expectations_.swap(expectations_to_delete);
+
+  g_gmock_mutex.Unlock();
+  expectations_to_delete.clear();
+  g_gmock_mutex.Lock();
+
   return expectations_met;
 }
 

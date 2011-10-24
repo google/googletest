@@ -1475,12 +1475,27 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   virtual void ClearDefaultActionsLocked()
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
     g_gmock_mutex.AssertHeld();
+
+    // Deleting our default actions may trigger other mock objects to be
+    // deleted, for example if an action contains a reference counted smart
+    // pointer to that mock object, and that is the last reference. So if we
+    // delete our actions within the context of the global mutex we may deadlock
+    // when this method is called again. Instead, make a copy of the set of
+    // actions to delete, clear our set within the mutex, and then delete the
+    // actions outside of the mutex.
+    UntypedOnCallSpecs specs_to_delete;
+    untyped_on_call_specs_.swap(specs_to_delete);
+
+    g_gmock_mutex.Unlock();
     for (UntypedOnCallSpecs::const_iterator it =
-             untyped_on_call_specs_.begin();
-         it != untyped_on_call_specs_.end(); ++it) {
+             specs_to_delete.begin();
+         it != specs_to_delete.end(); ++it) {
       delete static_cast<const OnCallSpec<F>*>(*it);
     }
-    untyped_on_call_specs_.clear();
+
+    // Lock the mutex again, since the caller expects it to be locked when we
+    // return.
+    g_gmock_mutex.Lock();
   }
 
  protected:
