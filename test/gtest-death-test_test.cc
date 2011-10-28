@@ -75,6 +75,7 @@ using testing::internal::DeathTestFactory;
 using testing::internal::FilePath;
 using testing::internal::GetLastErrnoDescription;
 using testing::internal::GetUnitTestImpl;
+using testing::internal::InDeathTestChild;
 using testing::internal::ParseNaturalNumber;
 using testing::internal::String;
 
@@ -1343,6 +1344,26 @@ TEST(ConditionalDeathMacrosSyntaxDeathTest, SwitchStatement) {
 #ifdef _MSC_VER
 # pragma warning(pop)
 #endif  // _MSC_VER
+}
+
+TEST(InDeathTestChildDeathTest, ReportsDeathTestCorrectlyInFastStyle) {
+  testing::GTEST_FLAG(death_test_style) = "fast";
+  EXPECT_FALSE(InDeathTestChild());
+  EXPECT_DEATH({
+    fprintf(stderr, InDeathTestChild() ? "Inside" : "Outside");
+    fflush(stderr);
+    _exit(1);
+  }, "Inside");
+}
+
+TEST(InDeathTestChildDeathTest, ReportsDeathTestCorrectlyInThreadSafeStyle) {
+  testing::GTEST_FLAG(death_test_style) = "threadsafe";
+  EXPECT_FALSE(InDeathTestChild());
+  EXPECT_DEATH({
+    fprintf(stderr, InDeathTestChild() ? "Inside" : "Outside");
+    fflush(stderr);
+    _exit(1);
+  }, "Inside");
 }
 
 // Tests that a test case whose name ends with "DeathTest" works fine
