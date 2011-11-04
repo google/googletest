@@ -60,7 +60,7 @@ class QueueNode {
  private:
   // Creates a node with a given element value.  The next pointer is
   // set to NULL.
-  QueueNode(const E& an_element) : element_(an_element), next_(NULL) {}
+  explicit QueueNode(const E& an_element) : element_(an_element), next_(NULL) {}
 
   // We disable the default assignment operator and copy c'tor.
   const QueueNode& operator = (const QueueNode&);
@@ -72,8 +72,7 @@ class QueueNode {
 
 template <typename E>  // E is the element type.
 class Queue {
-public:
-
+ public:
   // Creates an empty queue.
   Queue() : head_(NULL), last_(NULL), size_(0) {}
 
@@ -168,6 +167,6 @@ public:
   // We disallow copying a queue.
   Queue(const Queue&);
   const Queue& operator = (const Queue&);
- };
+};
 
 #endif  // GTEST_SAMPLES_SAMPLE3_INL_H_

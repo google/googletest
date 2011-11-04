@@ -223,7 +223,7 @@ class GTEST_API_ SingleFailureChecker {
         (substr));\
     {\
       ::testing::ScopedFakeTestPartResultReporter gtest_reporter(\
-          ::testing::ScopedFakeTestPartResultReporter::INTERCEPT_ALL_THREADS,\
+          ::testing::ScopedFakeTestPartResultReporter::INTERCEPT_ALL_THREADS, \
           &gtest_failures);\
       if (::testing::internal::AlwaysTrue()) { statement; }\
     }\

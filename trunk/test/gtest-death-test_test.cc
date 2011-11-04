@@ -896,6 +896,7 @@ class MockDeathTest : public DeathTest {
   virtual void Abort(AbortReason reason) {
     parent_->abort_args_.push_back(reason);
   }
+
  private:
   MockDeathTestFactory* const parent_;
   const TestRole role_;

@@ -117,7 +117,7 @@ def HeaderPreamble(n):
 
 // Makes sure this header is not included before gtest.h.
 #ifndef GTEST_INCLUDE_GTEST_GTEST_H_
-#error Do not include gtest_pred_impl.h directly.  Include gtest.h instead.
+# error Do not include gtest_pred_impl.h directly.  Include gtest.h instead.
 #endif  // GTEST_INCLUDE_GTEST_GTEST_H_
 
 // This header implements a family of generic predicate assertion
@@ -256,7 +256,7 @@ AssertionResult AssertPred%(n)sHelper(const char* pred_text""" % DEFS
 // Internal macro for implementing {EXPECT|ASSERT}_PRED_FORMAT%(n)s.
 // Don't use this in your code.
 #define GTEST_PRED_FORMAT%(n)s_(pred_format, %(vs)s, on_failure)\\
-  GTEST_ASSERT_(pred_format(%(vts)s, %(vs)s),\\
+  GTEST_ASSERT_(pred_format(%(vts)s, %(vs)s), \\
                 on_failure)
 
 // Internal macro for implementing {EXPECT|ASSERT}_PRED%(n)s.  Don't use

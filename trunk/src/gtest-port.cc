@@ -514,7 +514,6 @@ class CapturedStream {
  public:
   // The ctor redirects the stream to a temporary file.
   CapturedStream(int fd) : fd_(fd), uncaptured_fd_(dup(fd)) {
-
 # if GTEST_OS_WINDOWS
     char temp_dir_path[MAX_PATH + 1] = { '\0' };  // NOLINT
     char temp_file_path[MAX_PATH + 1] = { '\0' };  // NOLINT

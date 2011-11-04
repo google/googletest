@@ -44,7 +44,6 @@ class MyString {
   const MyString& operator=(const MyString& rhs);
 
  public:
-
   // Clones a 0-terminated C string, allocating memory using new.
   static const char* CloneCString(const char* a_c_string);
 

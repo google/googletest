@@ -913,6 +913,7 @@ class Arguments {
   char* const* Argv() {
     return &args_[0];
   }
+
  private:
   std::vector<char*> args_;
 };

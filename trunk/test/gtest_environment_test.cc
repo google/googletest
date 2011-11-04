@@ -96,6 +96,7 @@ class MyEnvironment : public testing::Environment {
 
   // Was TearDown() run?
   bool tear_down_was_run() const { return tear_down_was_run_; }
+
  private:
   FailureType failure_in_set_up_;
   bool set_up_was_run_;

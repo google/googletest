@@ -148,8 +148,7 @@ TEST_F(LinkedPtrTest, GeneralTest) {
     "A0 dtor\n"
     "A3 dtor\n"
     "A1 dtor\n",
-    history->GetString().c_str()
-  );
+    history->GetString().c_str());
 }
 
 }  // Unnamed namespace

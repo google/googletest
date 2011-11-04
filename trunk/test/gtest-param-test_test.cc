@@ -606,6 +606,7 @@ class TestGenerationEnvironment : public ::testing::Environment {
           << "has not been run as expected.";
     }
   }
+
  private:
   TestGenerationEnvironment() : fixture_constructor_count_(0), set_up_count_(0),
                                 tear_down_count_(0), test_body_count_(0) {}
@@ -674,6 +675,7 @@ class TestGenerationTest : public TestWithParam<int> {
 
     EXPECT_TRUE(collected_parameters_ == expected_values);
   }
+
  protected:
   int current_parameter_;
   static vector<int> collected_parameters_;

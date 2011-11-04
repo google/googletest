@@ -118,8 +118,9 @@ struct TupleElement;
 
 $for i [[
 template <GTEST_$(n)_TYPENAMES_(T)>
-struct TupleElement<true, $i, GTEST_$(n)_TUPLE_(T)> [[]]
-{ typedef T$i type; };
+struct TupleElement<true, $i, GTEST_$(n)_TUPLE_(T)> {
+  typedef T$i type;
+};
 
 
 ]]
@@ -220,7 +221,9 @@ template <typename Tuple> struct tuple_size;
 
 $for j [[
 template <GTEST_$(j)_TYPENAMES_(T)>
-struct tuple_size<GTEST_$(j)_TUPLE_(T)> { static const int value = $j; };
+struct tuple_size<GTEST_$(j)_TUPLE_(T)> {
+  static const int value = $j;
+};
 
 
 ]]

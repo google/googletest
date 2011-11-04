@@ -812,6 +812,7 @@ class scoped_ptr {
       ptr_ = p;
     }
   }
+
  private:
   T* ptr_;
 
@@ -1110,7 +1111,7 @@ class Notification {
   // Blocks until the controller thread notifies. Must be called from a test
   // thread.
   void WaitForNotification() {
-    while(!notified_) {
+    while (!notified_) {
       SleepMilliseconds(10);
     }
   }
@@ -1754,7 +1755,6 @@ class TypeWithSize<4> {
 template <>
 class TypeWithSize<8> {
  public:
-
 #if GTEST_OS_WINDOWS
   typedef __int64 Int;
   typedef unsigned __int64 UInt;
