@@ -89,8 +89,7 @@ class LeakChecker : public EmptyTestEventListener {
     // You can generate a failure in any event handler except
     // OnTestPartResult. Just use an appropriate Google Test assertion to do
     // it.
-    EXPECT_TRUE(difference <= 0)
-        << "Leaked " << difference << " unit(s) of Water!";
+    EXPECT_LE(difference, 0) << "Leaked " << difference << " unit(s) of Water!";
   }
 
   int initially_allocated_;

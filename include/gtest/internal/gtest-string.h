@@ -47,9 +47,9 @@
 #endif
 
 #include <string.h>
-#include "gtest/internal/gtest-port.h"
-
 #include <string>
+
+#include "gtest/internal/gtest-port.h"
 
 namespace testing {
 namespace internal {
@@ -223,14 +223,14 @@ class GTEST_API_ String {
   // Converting a ::std::string or ::string containing an embedded NUL
   // character to a String will result in the prefix up to the first
   // NUL character.
-  String(const ::std::string& str) {
+  String(const ::std::string& str) {  // NOLINT
     ConstructNonNull(str.c_str(), str.length());
   }
 
   operator ::std::string() const { return ::std::string(c_str(), length()); }
 
 #if GTEST_HAS_GLOBAL_STRING
-  String(const ::string& str) {
+  String(const ::string& str) {  // NOLINT
     ConstructNonNull(str.c_str(), str.length());
   }
 

@@ -101,7 +101,7 @@ TEST_F(IntegerFunctionTest, Factorial) {
   // Tests factorial of negative numbers.
   EXPECT_EQ(1, Factorial(-5));
   EXPECT_EQ(1, Factorial(-1));
-  EXPECT_TRUE(Factorial(-10) > 0);
+  EXPECT_GT(Factorial(-10), 0);
 
   // Tests factorial of 0.
   EXPECT_EQ(1, Factorial(0));

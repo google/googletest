@@ -33,8 +33,6 @@
 // Google Test work.
 
 #include "gtest/gtest.h"
-#include <vector>
-#include <ostream>
 
 // Verifies that the command line flag variables can be accessed
 // in code once <gtest/gtest.h> has been #included.
@@ -58,6 +56,15 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
   EXPECT_TRUE(dummy || !dummy);  // Suppresses warning that dummy is unused.
 }
 
+#include <limits.h>  // For INT_MAX.
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#include <map>
+#include <vector>
+#include <ostream>
+
 #include "gtest/gtest-spi.h"
 
 // Indicates that this translation unit is part of Google Test's
@@ -68,13 +75,6 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 #define GTEST_IMPLEMENTATION_ 1
 #include "src/gtest-internal-inl.h"
 #undef GTEST_IMPLEMENTATION_
-
-#include <limits.h>  // For INT_MAX.
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-
-#include <map>
 
 namespace testing {
 namespace internal {
@@ -1141,7 +1141,7 @@ TEST(StringTest, Equals) {
   EXPECT_TRUE(foo == "foo");  // NOLINT
 
   const String bar("x\0y", 3);
-  EXPECT_FALSE(bar == "x");
+  EXPECT_NE(bar, "x");
 }
 
 // Tests String::operator!=().
@@ -1163,7 +1163,7 @@ TEST(StringTest, NotEquals) {
   EXPECT_FALSE(foo != "foo");  // NOLINT
 
   const String bar("x\0y", 3);
-  EXPECT_TRUE(bar != "x");
+  EXPECT_NE(bar, "x");
 }
 
 // Tests String::length().
@@ -1902,6 +1902,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG(stream_result_to) = "localhost:1234";
     GTEST_FLAG(throw_on_failure) = true;
   }
+
  private:
   // For saving Google Test flags during this test case.
   static GTestFlagSaver* saver_;
@@ -2797,7 +2798,6 @@ TEST(IsNotSubstringTest, ReturnsCorrectResultForStdWstring) {
 template <typename RawType>
 class FloatingPointTest : public Test {
  protected:
-
   // Pre-calculated numbers to be used by the tests.
   struct TestValues {
     RawType close_to_positive_zero;
@@ -7278,6 +7278,7 @@ TEST(ArrayEqTest, WorksForDegeneratedArrays) {
 }
 
 TEST(ArrayEqTest, WorksForOneDimensionalArrays) {
+  // Note that a and b are distinct but compatible types.
   const int a[] = { 0, 1 };
   long b[] = { 0, 1 };
   EXPECT_TRUE(ArrayEq(a, b));

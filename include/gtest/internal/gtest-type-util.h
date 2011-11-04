@@ -72,7 +72,7 @@ String GetTypeName() {
   // so we have to demangle it.
 #   if GTEST_HAS_CXXABI_H_
   using abi::__cxa_demangle;
-#   endif // GTEST_HAS_CXXABI_H_
+#   endif  // GTEST_HAS_CXXABI_H_
   char* const readable_name = __cxa_demangle(name, 0, 0, &status);
   const String name_str(status == 0 ? readable_name : name);
   free(readable_name);
@@ -3300,7 +3300,9 @@ struct Templates<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14,
 // INSTANTIATE_TYPED_TEST_CASE_P().
 
 template <typename T>
-struct TypeList { typedef Types1<T> type; };
+struct TypeList {
+  typedef Types1<T> type;
+};
 
 template <typename T1, typename T2, typename T3, typename T4, typename T5,
     typename T6, typename T7, typename T8, typename T9, typename T10,

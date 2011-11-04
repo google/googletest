@@ -96,6 +96,7 @@ class GTEST_API_ TestPartResult {
 
   // Returns true iff the test part fatally failed.
   bool fatally_failed() const { return type_ == kFatalFailure; }
+
  private:
   Type type_;
 

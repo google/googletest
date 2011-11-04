@@ -92,7 +92,7 @@ TEST(ImplicitCastTest, CanUseInheritance) {
 
 class Castable {
  public:
-  Castable(bool* converted) : converted_(converted) {}
+  explicit Castable(bool* converted) : converted_(converted) {}
   operator Base() {
     *converted_ = true;
     return Base();
@@ -111,7 +111,7 @@ TEST(ImplicitCastTest, CanUseNonConstCastOperator) {
 
 class ConstCastable {
  public:
-  ConstCastable(bool* converted) : converted_(converted) {}
+  explicit ConstCastable(bool* converted) : converted_(converted) {}
   operator Base() const {
     *converted_ = true;
     return Base();
@@ -224,7 +224,7 @@ TEST(GtestCheckSyntaxTest, WorksWithSwitch) {
       GTEST_CHECK_(true);
   }
 
-  switch(0)
+  switch (0)
     case 0:
       GTEST_CHECK_(true) << "Check failed in switch case";
 }
@@ -929,7 +929,7 @@ TEST(CaptureTest, CapturesStdoutAndStderr) {
 
 TEST(CaptureDeathTest, CannotReenterStdoutCapture) {
   CaptureStdout();
-  EXPECT_DEATH_IF_SUPPORTED(CaptureStdout();,
+  EXPECT_DEATH_IF_SUPPORTED(CaptureStdout(),
                             "Only one stdout capturer can exist at a time");
   GetCapturedStdout();
 
