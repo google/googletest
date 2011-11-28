@@ -443,8 +443,7 @@ class OsStackTraceGetter : public OsStackTraceGetterInterface {
   virtual String CurrentStackTrace(int max_depth, int skip_count)
       GTEST_LOCK_EXCLUDED_(mutex_);
 
-  virtual void UponLeavingGTest();
-      GTEST_LOCK_EXCLUDED_(mutex_);
+  virtual void UponLeavingGTest() GTEST_LOCK_EXCLUDED_(mutex_);
 
   // This string is inserted in place of stack frames that are part of
   // Google Test's implementation.
