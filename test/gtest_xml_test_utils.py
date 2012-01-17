@@ -156,8 +156,9 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
     *  The "type_param" attribute of <testcase> elements is replaced with a
        single asterisk (if it sn non-empty) as it is the type name returned
        by the compiler and is platform dependent.
-    *  The line number reported in the first line of the "message"
-       attribute of <failure> elements is replaced with a single asterisk.
+    *  The line info reported in the first line of the "message"
+       attribute and CDATA section of <failure> elements is replaced with the
+       file's basename and a single asterisk for the line number.
     *  The directory names in file paths are removed.
     *  The stack traces are removed.
     """
@@ -173,10 +174,14 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
       if type_param and type_param.value:
         type_param.value = '*'
     elif element.tagName == 'failure':
+      source_line_pat = r'^.*[/\\](.*:)\d+\n'
+      # Replaces the source line information with a normalized form.
+      message = element.getAttributeNode('message')
+      message.value = re.sub(source_line_pat, '\\1*\n', message.value)
       for child in element.childNodes:
         if child.nodeType == Node.CDATA_SECTION_NODE:
-          # Removes the source line number.
-          cdata = re.sub(r'^.*[/\\](.*:)\d+\n', '\\1*\n', child.nodeValue)
+          # Replaces the source line information with a normalized form.
+          cdata = re.sub(source_line_pat, '\\1*\n', child.nodeValue)
           # Removes the actual stack trace.
           child.nodeValue = re.sub(r'\nStack trace:\n(.|\n)*',
                                    '', cdata)
