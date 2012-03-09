@@ -81,7 +81,8 @@ def RunAndReturnOutput(extra_env, args):
   environ_copy = os.environ.copy()
   environ_copy.update(extra_env)
 
-  return gtest_test_utils.Subprocess([COMMAND] + args, env=environ_copy).output
+  return gtest_test_utils.Subprocess([COMMAND] + args, env=environ_copy,
+                                     capture_stderr=False).output
 
 
 def GetTestsForAllIterations(extra_env, args):

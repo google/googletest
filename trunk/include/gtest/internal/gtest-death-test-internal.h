@@ -217,6 +217,17 @@ GTEST_API_ bool ExitedUnsuccessfully(int exit_status);
 // The symbol "fail" here expands to something into which a message
 // can be streamed.
 
+// This macro is for implementing ASSERT/EXPECT_DEBUG_DEATH when compiled in
+// NDEBUG mode. In this case we need the statements to be executed, the regex is
+// ignored, and the macro must accept a streamed message even though the message
+// is never printed.
+# define GTEST_EXECUTE_STATEMENT_(statement, regex) \
+  GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
+  if (::testing::internal::AlwaysTrue()) { \
+     GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
+  } else \
+    ::testing::Message()
+
 // A class representing the parsed contents of the
 // --gtest_internal_run_death_test flag, as it existed when
 // RUN_ALL_TESTS was called.

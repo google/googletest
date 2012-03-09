@@ -530,10 +530,15 @@ class CapturedStream {
                                     << temp_file_path;
     filename_ = temp_file_path;
 # else
-    // There's no guarantee that a test has write access to the
-    // current directory, so we create the temporary file in the /tmp
-    // directory instead.
+    // There's no guarantee that a test has write access to the current
+    // directory, so we create the temporary file in the /tmp directory instead.
+    // We use /tmp on most systems, and /mnt/sdcard on Android. That's because
+    // Android doesn't have /tmp.
+#  if GTEST_OS_LINUX_ANDROID
+    char name_template[] = "/mnt/sdcard/gtest_captured_stream.XXXXXX";
+#  else
     char name_template[] = "/tmp/captured_stream.XXXXXX";
+#  endif  // GTEST_OS_LINUX_ANDROID
     const int captured_fd = mkstemp(name_template);
     filename_ = name_template;
 # endif  // GTEST_OS_WINDOWS

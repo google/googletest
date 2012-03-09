@@ -1731,12 +1731,6 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 // usually want the fail-fast behavior of FAIL and ASSERT_*, but those
 // writing data-driven tests often find themselves using ADD_FAILURE
 // and EXPECT_* more.
-//
-// Examples:
-//
-//   EXPECT_TRUE(server.StatusIsOK());
-//   ASSERT_FALSE(server.HasPendingRequest(port))
-//       << "There are still pending requests " << "on port " << port;
 
 // Generates a nonfatal failure with a generic message.
 #define ADD_FAILURE() GTEST_NONFATAL_FAILURE_("Failed")
