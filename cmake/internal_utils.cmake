@@ -79,7 +79,8 @@ macro(config_compiler_and_linker)
     # whether RTTI is enabled.  Therefore we define GTEST_HAS_RTTI
     # explicitly.
     set(cxx_no_rtti_flags "-fno-rtti -DGTEST_HAS_RTTI=0")
-    set(cxx_strict_flags "-Wextra")
+    set(cxx_strict_flags
+      "-Wextra -Wno-unused-parameter -Wno-missing-field-initializers")
   elseif (CMAKE_CXX_COMPILER_ID STREQUAL "SunPro")
     set(cxx_exception_flags "-features=except")
     # Sun Pro doesn't provide macros to indicate whether exceptions and
