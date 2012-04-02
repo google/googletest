@@ -1240,21 +1240,23 @@ class MutexBase {
   void Lock() {
     GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_lock(&mutex_));
     owner_ = pthread_self();
+    has_owner_ = true;
   }
 
   // Releases this mutex.
   void Unlock() {
-    // We don't protect writing to owner_ here, as it's the caller's
-    // responsibility to ensure that the current thread holds the
+    // Since the lock is being released the owner_ field should no longer be
+    // considered valid. We don't protect writing to has_owner_ here, as it's
+    // the caller's responsibility to ensure that the current thread holds the
     // mutex when this is called.
-    owner_ = 0;
+    has_owner_ = false;
     GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_unlock(&mutex_));
   }
 
   // Does nothing if the current thread holds the mutex. Otherwise, crashes
   // with high probability.
   void AssertHeld() const {
-    GTEST_CHECK_(owner_ == pthread_self())
+    GTEST_CHECK_(has_owner_ && pthread_equal(owner_, pthread_self()))
         << "The current thread is not holding the mutex @" << this;
   }
 
@@ -1265,7 +1267,14 @@ class MutexBase {
   // have to be public.
  public:
   pthread_mutex_t mutex_;  // The underlying pthread mutex.
-  pthread_t owner_;  // The thread holding the mutex; 0 means no one holds it.
+  // has_owner_ indicates whether the owner_ field below contains a valid thread
+  // ID and is therefore safe to inspect (e.g., to use in pthread_equal()). All
+  // accesses to the owner_ field should be protected by a check of this field.
+  // An alternative might be to memset() owner_ to all zeros, but there's no
+  // guarantee that a zero'd pthread_t is necessarily invalid or even different
+  // from pthread_self().
+  bool has_owner_;
+  pthread_t owner_;  // The thread holding the mutex.
 };
 
 // Forward-declares a static mutex.
@@ -1273,8 +1282,13 @@ class MutexBase {
     extern ::testing::internal::MutexBase mutex
 
 // Defines and statically (i.e. at link time) initializes a static mutex.
+// The initialization list here does not explicitly initialize each field,
+// instead relying on default initialization for the unspecified fields. In
+// particular, the owner_ field (a pthread_t) is not explicitly initialized.
+// This allows initialization to work whether pthread_t is a scalar or struct.
+// The flag -Wmissing-field-initializers must not be specified for this to work.
 # define GTEST_DEFINE_STATIC_MUTEX_(mutex) \
-    ::testing::internal::MutexBase mutex = { PTHREAD_MUTEX_INITIALIZER, 0 }
+    ::testing::internal::MutexBase mutex = { PTHREAD_MUTEX_INITIALIZER, false }
 
 // The Mutex class can only be used for mutexes created at runtime. It
 // shares its API with MutexBase otherwise.
@@ -1282,7 +1296,7 @@ class Mutex : public MutexBase {
  public:
   Mutex() {
     GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_init(&mutex_, NULL));
-    owner_ = 0;
+    has_owner_ = false;
   }
   ~Mutex() {
     GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_destroy(&mutex_));
