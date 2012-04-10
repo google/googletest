@@ -384,6 +384,7 @@ class GTEST_API_ Mock {
   // verification was successful.
   static bool VerifyAndClear(void* mock_obj)
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
+
  private:
   friend class internal::UntypedFunctionMockerBase;
 

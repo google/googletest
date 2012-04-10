@@ -1091,6 +1091,20 @@ TEST(ContainsTest, WorksForTwoDimensionalNativeArray) {
   EXPECT_THAT(a, Contains(Not(Contains(5))));
 }
 
+TEST(AllOfTest, HugeMatcher) {
+  // Verify that using AllOf with many arguments doesn't cause
+  // the compiler to exceed template instantiation depth limit.
+  EXPECT_THAT(0, testing::AllOf(_, _, _, _, _, _, _, _, _,
+                                testing::AllOf(_, _, _, _, _, _, _, _, _, _)));
+}
+
+TEST(AnyOfTest, HugeMatcher) {
+  // Verify that using AnyOf with many arguments doesn't cause
+  // the compiler to exceed template instantiation depth limit.
+  EXPECT_THAT(0, testing::AnyOf(_, _, _, _, _, _, _, _, _,
+                                testing::AnyOf(_, _, _, _, _, _, _, _, _, _)));
+}
+
 namespace adl_test {
 
 // Verifies that the implementation of ::testing::AllOf and ::testing::AnyOf

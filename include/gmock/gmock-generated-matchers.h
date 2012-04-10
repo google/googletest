@@ -661,6 +661,182 @@ class ElementsAreMatcher10 {
   GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher10);
 };
 
+// A set of metafunctions for computing the result type of AllOf.
+// AllOf(m1, ..., mN) returns
+// AllOfResultN<decltype(m1), ..., decltype(mN)>::type.
+
+// Although AllOf isn't defined for one argument, AllOfResult1 is defined
+// to simplify the implementation.
+template <typename M1>
+struct AllOfResult1 {
+  typedef M1 type;
+};
+
+template <typename M1, typename M2>
+struct AllOfResult2 {
+  typedef BothOfMatcher<
+      typename AllOfResult1<M1>::type,
+      typename AllOfResult1<M2>::type
+  > type;
+};
+
+template <typename M1, typename M2, typename M3>
+struct AllOfResult3 {
+  typedef BothOfMatcher<
+      typename AllOfResult1<M1>::type,
+      typename AllOfResult2<M2, M3>::type
+  > type;
+};
+
+template <typename M1, typename M2, typename M3, typename M4>
+struct AllOfResult4 {
+  typedef BothOfMatcher<
+      typename AllOfResult2<M1, M2>::type,
+      typename AllOfResult2<M3, M4>::type
+  > type;
+};
+
+template <typename M1, typename M2, typename M3, typename M4, typename M5>
+struct AllOfResult5 {
+  typedef BothOfMatcher<
+      typename AllOfResult2<M1, M2>::type,
+      typename AllOfResult3<M3, M4, M5>::type
+  > type;
+};
+
+template <typename M1, typename M2, typename M3, typename M4, typename M5,
+    typename M6>
+struct AllOfResult6 {
+  typedef BothOfMatcher<
+      typename AllOfResult3<M1, M2, M3>::type,
+      typename AllOfResult3<M4, M5, M6>::type
+  > type;
+};
+
+template <typename M1, typename M2, typename M3, typename M4, typename M5,
+    typename M6, typename M7>
+struct AllOfResult7 {
+  typedef BothOfMatcher<
+      typename AllOfResult3<M1, M2, M3>::type,
+      typename AllOfResult4<M4, M5, M6, M7>::type
+  > type;
+};
+
+template <typename M1, typename M2, typename M3, typename M4, typename M5,
+    typename M6, typename M7, typename M8>
+struct AllOfResult8 {
+  typedef BothOfMatcher<
+      typename AllOfResult4<M1, M2, M3, M4>::type,
+      typename AllOfResult4<M5, M6, M7, M8>::type
+  > type;
+};
+
+template <typename M1, typename M2, typename M3, typename M4, typename M5,
+    typename M6, typename M7, typename M8, typename M9>
+struct AllOfResult9 {
+  typedef BothOfMatcher<
+      typename AllOfResult4<M1, M2, M3, M4>::type,
+      typename AllOfResult5<M5, M6, M7, M8, M9>::type
+  > type;
+};
+
+template <typename M1, typename M2, typename M3, typename M4, typename M5,
+    typename M6, typename M7, typename M8, typename M9, typename M10>
+struct AllOfResult10 {
+  typedef BothOfMatcher<
+      typename AllOfResult5<M1, M2, M3, M4, M5>::type,
+      typename AllOfResult5<M6, M7, M8, M9, M10>::type
+  > type;
+};
+
+// A set of metafunctions for computing the result type of AnyOf.
+// AnyOf(m1, ..., mN) returns
+// AnyOfResultN<decltype(m1), ..., decltype(mN)>::type.
+
+// Although AnyOf isn't defined for one argument, AnyOfResult1 is defined
+// to simplify the implementation.
+template <typename M1>
+struct AnyOfResult1 {
+  typedef M1 type;
+};
+
+template <typename M1, typename M2>
+struct AnyOfResult2 {
+  typedef EitherOfMatcher<
+      typename AnyOfResult1<M1>::type,
+      typename AnyOfResult1<M2>::type
+  > type;
+};
+
+template <typename M1, typename M2, typename M3>
+struct AnyOfResult3 {
+  typedef EitherOfMatcher<
+      typename AnyOfResult1<M1>::type,
+      typename AnyOfResult2<M2, M3>::type
+  > type;
+};
+
+template <typename M1, typename M2, typename M3, typename M4>
+struct AnyOfResult4 {
+  typedef EitherOfMatcher<
+      typename AnyOfResult2<M1, M2>::type,
+      typename AnyOfResult2<M3, M4>::type
+  > type;
+};
+
+template <typename M1, typename M2, typename M3, typename M4, typename M5>
+struct AnyOfResult5 {
+  typedef EitherOfMatcher<
+      typename AnyOfResult2<M1, M2>::type,
+      typename AnyOfResult3<M3, M4, M5>::type
+  > type;
+};
+
+template <typename M1, typename M2, typename M3, typename M4, typename M5,
+    typename M6>
+struct AnyOfResult6 {
+  typedef EitherOfMatcher<
+      typename AnyOfResult3<M1, M2, M3>::type,
+      typename AnyOfResult3<M4, M5, M6>::type
+  > type;
+};
+
+template <typename M1, typename M2, typename M3, typename M4, typename M5,
+    typename M6, typename M7>
+struct AnyOfResult7 {
+  typedef EitherOfMatcher<
+      typename AnyOfResult3<M1, M2, M3>::type,
+      typename AnyOfResult4<M4, M5, M6, M7>::type
+  > type;
+};
+
+template <typename M1, typename M2, typename M3, typename M4, typename M5,
+    typename M6, typename M7, typename M8>
+struct AnyOfResult8 {
+  typedef EitherOfMatcher<
+      typename AnyOfResult4<M1, M2, M3, M4>::type,
+      typename AnyOfResult4<M5, M6, M7, M8>::type
+  > type;
+};
+
+template <typename M1, typename M2, typename M3, typename M4, typename M5,
+    typename M6, typename M7, typename M8, typename M9>
+struct AnyOfResult9 {
+  typedef EitherOfMatcher<
+      typename AnyOfResult4<M1, M2, M3, M4>::type,
+      typename AnyOfResult5<M5, M6, M7, M8, M9>::type
+  > type;
+};
+
+template <typename M1, typename M2, typename M3, typename M4, typename M5,
+    typename M6, typename M7, typename M8, typename M9, typename M10>
+struct AnyOfResult10 {
+  typedef EitherOfMatcher<
+      typename AnyOfResult5<M1, M2, M3, M4, M5>::type,
+      typename AnyOfResult5<M6, M7, M8, M9, M10>::type
+  > type;
+};
+
 }  // namespace internal
 
 // Args<N1, N2, ..., Nk>(a_matcher) matches a tuple if the selected
@@ -852,187 +1028,167 @@ ElementsAreArray(const T (&array)[N]) {
 // AllOf(m1, m2, ..., mk) matches any value that matches all of the given
 // sub-matchers.  AllOf is called fully qualified to prevent ADL from firing.
 
-template <typename Matcher1, typename Matcher2>
-inline internal::BothOfMatcher<Matcher1, Matcher2>
-AllOf(Matcher1 m1, Matcher2 m2) {
-  return internal::BothOfMatcher<Matcher1, Matcher2>(m1, m2);
+template <typename M1, typename M2>
+inline typename internal::AllOfResult2<M1, M2>::type
+AllOf(M1 m1, M2 m2) {
+  return typename internal::AllOfResult2<M1, M2>::type(
+      m1,
+      m2);
 }
 
-template <typename Matcher1, typename Matcher2, typename Matcher3>
-inline internal::BothOfMatcher<Matcher1, internal::BothOfMatcher<Matcher2,
-    Matcher3> >
-AllOf(Matcher1 m1, Matcher2 m2, Matcher3 m3) {
-  return ::testing::AllOf(m1, ::testing::AllOf(m2, m3));
+template <typename M1, typename M2, typename M3>
+inline typename internal::AllOfResult3<M1, M2, M3>::type
+AllOf(M1 m1, M2 m2, M3 m3) {
+  return typename internal::AllOfResult3<M1, M2, M3>::type(
+      m1,
+      ::testing::AllOf(m2, m3));
 }
 
-template <typename Matcher1, typename Matcher2, typename Matcher3,
-    typename Matcher4>
-inline internal::BothOfMatcher<Matcher1, internal::BothOfMatcher<Matcher2,
-    internal::BothOfMatcher<Matcher3, Matcher4> > >
-AllOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4) {
-  return ::testing::AllOf(m1, ::testing::AllOf(m2, m3, m4));
+template <typename M1, typename M2, typename M3, typename M4>
+inline typename internal::AllOfResult4<M1, M2, M3, M4>::type
+AllOf(M1 m1, M2 m2, M3 m3, M4 m4) {
+  return typename internal::AllOfResult4<M1, M2, M3, M4>::type(
+      ::testing::AllOf(m1, m2),
+      ::testing::AllOf(m3, m4));
 }
 
-template <typename Matcher1, typename Matcher2, typename Matcher3,
-    typename Matcher4, typename Matcher5>
-inline internal::BothOfMatcher<Matcher1, internal::BothOfMatcher<Matcher2,
-    internal::BothOfMatcher<Matcher3, internal::BothOfMatcher<Matcher4,
-    Matcher5> > > >
-AllOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5) {
-  return ::testing::AllOf(m1, ::testing::AllOf(m2, m3, m4, m5));
+template <typename M1, typename M2, typename M3, typename M4, typename M5>
+inline typename internal::AllOfResult5<M1, M2, M3, M4, M5>::type
+AllOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5) {
+  return typename internal::AllOfResult5<M1, M2, M3, M4, M5>::type(
+      ::testing::AllOf(m1, m2),
+      ::testing::AllOf(m3, m4, m5));
 }
 
-template <typename Matcher1, typename Matcher2, typename Matcher3,
-    typename Matcher4, typename Matcher5, typename Matcher6>
-inline internal::BothOfMatcher<Matcher1, internal::BothOfMatcher<Matcher2,
-    internal::BothOfMatcher<Matcher3, internal::BothOfMatcher<Matcher4,
-    internal::BothOfMatcher<Matcher5, Matcher6> > > > >
-AllOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
-    Matcher6 m6) {
-  return ::testing::AllOf(m1, ::testing::AllOf(m2, m3, m4, m5, m6));
+template <typename M1, typename M2, typename M3, typename M4, typename M5,
+    typename M6>
+inline typename internal::AllOfResult6<M1, M2, M3, M4, M5, M6>::type
+AllOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6) {
+  return typename internal::AllOfResult6<M1, M2, M3, M4, M5, M6>::type(
+      ::testing::AllOf(m1, m2, m3),
+      ::testing::AllOf(m4, m5, m6));
 }
 
-template <typename Matcher1, typename Matcher2, typename Matcher3,
-    typename Matcher4, typename Matcher5, typename Matcher6, typename Matcher7>
-inline internal::BothOfMatcher<Matcher1, internal::BothOfMatcher<Matcher2,
-    internal::BothOfMatcher<Matcher3, internal::BothOfMatcher<Matcher4,
-    internal::BothOfMatcher<Matcher5, internal::BothOfMatcher<Matcher6,
-    Matcher7> > > > > >
-AllOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
-    Matcher6 m6, Matcher7 m7) {
-  return ::testing::AllOf(m1, ::testing::AllOf(m2, m3, m4, m5, m6, m7));
+template <typename M1, typename M2, typename M3, typename M4, typename M5,
+    typename M6, typename M7>
+inline typename internal::AllOfResult7<M1, M2, M3, M4, M5, M6, M7>::type
+AllOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7) {
+  return typename internal::AllOfResult7<M1, M2, M3, M4, M5, M6, M7>::type(
+      ::testing::AllOf(m1, m2, m3),
+      ::testing::AllOf(m4, m5, m6, m7));
 }
 
-template <typename Matcher1, typename Matcher2, typename Matcher3,
-    typename Matcher4, typename Matcher5, typename Matcher6, typename Matcher7,
-    typename Matcher8>
-inline internal::BothOfMatcher<Matcher1, internal::BothOfMatcher<Matcher2,
-    internal::BothOfMatcher<Matcher3, internal::BothOfMatcher<Matcher4,
-    internal::BothOfMatcher<Matcher5, internal::BothOfMatcher<Matcher6,
-    internal::BothOfMatcher<Matcher7, Matcher8> > > > > > >
-AllOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
-    Matcher6 m6, Matcher7 m7, Matcher8 m8) {
-  return ::testing::AllOf(m1, ::testing::AllOf(m2, m3, m4, m5, m6, m7, m8));
+template <typename M1, typename M2, typename M3, typename M4, typename M5,
+    typename M6, typename M7, typename M8>
+inline typename internal::AllOfResult8<M1, M2, M3, M4, M5, M6, M7, M8>::type
+AllOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8) {
+  return typename internal::AllOfResult8<M1, M2, M3, M4, M5, M6, M7, M8>::type(
+      ::testing::AllOf(m1, m2, m3, m4),
+      ::testing::AllOf(m5, m6, m7, m8));
 }
 
-template <typename Matcher1, typename Matcher2, typename Matcher3,
-    typename Matcher4, typename Matcher5, typename Matcher6, typename Matcher7,
-    typename Matcher8, typename Matcher9>
-inline internal::BothOfMatcher<Matcher1, internal::BothOfMatcher<Matcher2,
-    internal::BothOfMatcher<Matcher3, internal::BothOfMatcher<Matcher4,
-    internal::BothOfMatcher<Matcher5, internal::BothOfMatcher<Matcher6,
-    internal::BothOfMatcher<Matcher7, internal::BothOfMatcher<Matcher8,
-    Matcher9> > > > > > > >
-AllOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
-    Matcher6 m6, Matcher7 m7, Matcher8 m8, Matcher9 m9) {
-  return ::testing::AllOf(m1, ::testing::AllOf(m2, m3, m4, m5, m6, m7, m8, m9));
+template <typename M1, typename M2, typename M3, typename M4, typename M5,
+    typename M6, typename M7, typename M8, typename M9>
+inline typename internal::AllOfResult9<M1, M2, M3, M4, M5, M6, M7, M8, M9>::type
+AllOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9) {
+  return typename internal::AllOfResult9<M1, M2, M3, M4, M5, M6, M7, M8,
+      M9>::type(
+      ::testing::AllOf(m1, m2, m3, m4),
+      ::testing::AllOf(m5, m6, m7, m8, m9));
 }
 
-template <typename Matcher1, typename Matcher2, typename Matcher3,
-    typename Matcher4, typename Matcher5, typename Matcher6, typename Matcher7,
-    typename Matcher8, typename Matcher9, typename Matcher10>
-inline internal::BothOfMatcher<Matcher1, internal::BothOfMatcher<Matcher2,
-    internal::BothOfMatcher<Matcher3, internal::BothOfMatcher<Matcher4,
-    internal::BothOfMatcher<Matcher5, internal::BothOfMatcher<Matcher6,
-    internal::BothOfMatcher<Matcher7, internal::BothOfMatcher<Matcher8,
-    internal::BothOfMatcher<Matcher9, Matcher10> > > > > > > > >
-AllOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
-    Matcher6 m6, Matcher7 m7, Matcher8 m8, Matcher9 m9, Matcher10 m10) {
-  return ::testing::AllOf(m1, ::testing::AllOf(m2, m3, m4, m5, m6, m7, m8, m9,
-      m10));
+template <typename M1, typename M2, typename M3, typename M4, typename M5,
+    typename M6, typename M7, typename M8, typename M9, typename M10>
+inline typename internal::AllOfResult10<M1, M2, M3, M4, M5, M6, M7, M8, M9,
+    M10>::type
+AllOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
+  return typename internal::AllOfResult10<M1, M2, M3, M4, M5, M6, M7, M8, M9,
+      M10>::type(
+      ::testing::AllOf(m1, m2, m3, m4, m5),
+      ::testing::AllOf(m6, m7, m8, m9, m10));
 }
 
 // AnyOf(m1, m2, ..., mk) matches any value that matches any of the given
 // sub-matchers.  AnyOf is called fully qualified to prevent ADL from firing.
 
-template <typename Matcher1, typename Matcher2>
-inline internal::EitherOfMatcher<Matcher1, Matcher2>
-AnyOf(Matcher1 m1, Matcher2 m2) {
-  return internal::EitherOfMatcher<Matcher1, Matcher2>(m1, m2);
+template <typename M1, typename M2>
+inline typename internal::AnyOfResult2<M1, M2>::type
+AnyOf(M1 m1, M2 m2) {
+  return typename internal::AnyOfResult2<M1, M2>::type(
+      m1,
+      m2);
 }
 
-template <typename Matcher1, typename Matcher2, typename Matcher3>
-inline internal::EitherOfMatcher<Matcher1, internal::EitherOfMatcher<Matcher2,
-    Matcher3> >
-AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3) {
-  return ::testing::AnyOf(m1, ::testing::AnyOf(m2, m3));
+template <typename M1, typename M2, typename M3>
+inline typename internal::AnyOfResult3<M1, M2, M3>::type
+AnyOf(M1 m1, M2 m2, M3 m3) {
+  return typename internal::AnyOfResult3<M1, M2, M3>::type(
+      m1,
+      ::testing::AnyOf(m2, m3));
 }
 
-template <typename Matcher1, typename Matcher2, typename Matcher3,
-    typename Matcher4>
-inline internal::EitherOfMatcher<Matcher1, internal::EitherOfMatcher<Matcher2,
-    internal::EitherOfMatcher<Matcher3, Matcher4> > >
-AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4) {
-  return ::testing::AnyOf(m1, ::testing::AnyOf(m2, m3, m4));
+template <typename M1, typename M2, typename M3, typename M4>
+inline typename internal::AnyOfResult4<M1, M2, M3, M4>::type
+AnyOf(M1 m1, M2 m2, M3 m3, M4 m4) {
+  return typename internal::AnyOfResult4<M1, M2, M3, M4>::type(
+      ::testing::AnyOf(m1, m2),
+      ::testing::AnyOf(m3, m4));
 }
 
-template <typename Matcher1, typename Matcher2, typename Matcher3,
-    typename Matcher4, typename Matcher5>
-inline internal::EitherOfMatcher<Matcher1, internal::EitherOfMatcher<Matcher2,
-    internal::EitherOfMatcher<Matcher3, internal::EitherOfMatcher<Matcher4,
-    Matcher5> > > >
-AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5) {
-  return ::testing::AnyOf(m1, ::testing::AnyOf(m2, m3, m4, m5));
+template <typename M1, typename M2, typename M3, typename M4, typename M5>
+inline typename internal::AnyOfResult5<M1, M2, M3, M4, M5>::type
+AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5) {
+  return typename internal::AnyOfResult5<M1, M2, M3, M4, M5>::type(
+      ::testing::AnyOf(m1, m2),
+      ::testing::AnyOf(m3, m4, m5));
 }
 
-template <typename Matcher1, typename Matcher2, typename Matcher3,
-    typename Matcher4, typename Matcher5, typename Matcher6>
-inline internal::EitherOfMatcher<Matcher1, internal::EitherOfMatcher<Matcher2,
-    internal::EitherOfMatcher<Matcher3, internal::EitherOfMatcher<Matcher4,
-    internal::EitherOfMatcher<Matcher5, Matcher6> > > > >
-AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
-    Matcher6 m6) {
-  return ::testing::AnyOf(m1, ::testing::AnyOf(m2, m3, m4, m5, m6));
+template <typename M1, typename M2, typename M3, typename M4, typename M5,
+    typename M6>
+inline typename internal::AnyOfResult6<M1, M2, M3, M4, M5, M6>::type
+AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6) {
+  return typename internal::AnyOfResult6<M1, M2, M3, M4, M5, M6>::type(
+      ::testing::AnyOf(m1, m2, m3),
+      ::testing::AnyOf(m4, m5, m6));
 }
 
-template <typename Matcher1, typename Matcher2, typename Matcher3,
-    typename Matcher4, typename Matcher5, typename Matcher6, typename Matcher7>
-inline internal::EitherOfMatcher<Matcher1, internal::EitherOfMatcher<Matcher2,
-    internal::EitherOfMatcher<Matcher3, internal::EitherOfMatcher<Matcher4,
-    internal::EitherOfMatcher<Matcher5, internal::EitherOfMatcher<Matcher6,
-    Matcher7> > > > > >
-AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
-    Matcher6 m6, Matcher7 m7) {
-  return ::testing::AnyOf(m1, ::testing::AnyOf(m2, m3, m4, m5, m6, m7));
+template <typename M1, typename M2, typename M3, typename M4, typename M5,
+    typename M6, typename M7>
+inline typename internal::AnyOfResult7<M1, M2, M3, M4, M5, M6, M7>::type
+AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7) {
+  return typename internal::AnyOfResult7<M1, M2, M3, M4, M5, M6, M7>::type(
+      ::testing::AnyOf(m1, m2, m3),
+      ::testing::AnyOf(m4, m5, m6, m7));
 }
 
-template <typename Matcher1, typename Matcher2, typename Matcher3,
-    typename Matcher4, typename Matcher5, typename Matcher6, typename Matcher7,
-    typename Matcher8>
-inline internal::EitherOfMatcher<Matcher1, internal::EitherOfMatcher<Matcher2,
-    internal::EitherOfMatcher<Matcher3, internal::EitherOfMatcher<Matcher4,
-    internal::EitherOfMatcher<Matcher5, internal::EitherOfMatcher<Matcher6,
-    internal::EitherOfMatcher<Matcher7, Matcher8> > > > > > >
-AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
-    Matcher6 m6, Matcher7 m7, Matcher8 m8) {
-  return ::testing::AnyOf(m1, ::testing::AnyOf(m2, m3, m4, m5, m6, m7, m8));
+template <typename M1, typename M2, typename M3, typename M4, typename M5,
+    typename M6, typename M7, typename M8>
+inline typename internal::AnyOfResult8<M1, M2, M3, M4, M5, M6, M7, M8>::type
+AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8) {
+  return typename internal::AnyOfResult8<M1, M2, M3, M4, M5, M6, M7, M8>::type(
+      ::testing::AnyOf(m1, m2, m3, m4),
+      ::testing::AnyOf(m5, m6, m7, m8));
 }
 
-template <typename Matcher1, typename Matcher2, typename Matcher3,
-    typename Matcher4, typename Matcher5, typename Matcher6, typename Matcher7,
-    typename Matcher8, typename Matcher9>
-inline internal::EitherOfMatcher<Matcher1, internal::EitherOfMatcher<Matcher2,
-    internal::EitherOfMatcher<Matcher3, internal::EitherOfMatcher<Matcher4,
-    internal::EitherOfMatcher<Matcher5, internal::EitherOfMatcher<Matcher6,
-    internal::EitherOfMatcher<Matcher7, internal::EitherOfMatcher<Matcher8,
-    Matcher9> > > > > > > >
-AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
-    Matcher6 m6, Matcher7 m7, Matcher8 m8, Matcher9 m9) {
-  return ::testing::AnyOf(m1, ::testing::AnyOf(m2, m3, m4, m5, m6, m7, m8, m9));
+template <typename M1, typename M2, typename M3, typename M4, typename M5,
+    typename M6, typename M7, typename M8, typename M9>
+inline typename internal::AnyOfResult9<M1, M2, M3, M4, M5, M6, M7, M8, M9>::type
+AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9) {
+  return typename internal::AnyOfResult9<M1, M2, M3, M4, M5, M6, M7, M8,
+      M9>::type(
+      ::testing::AnyOf(m1, m2, m3, m4),
+      ::testing::AnyOf(m5, m6, m7, m8, m9));
 }
 
-template <typename Matcher1, typename Matcher2, typename Matcher3,
-    typename Matcher4, typename Matcher5, typename Matcher6, typename Matcher7,
-    typename Matcher8, typename Matcher9, typename Matcher10>
-inline internal::EitherOfMatcher<Matcher1, internal::EitherOfMatcher<Matcher2,
-    internal::EitherOfMatcher<Matcher3, internal::EitherOfMatcher<Matcher4,
-    internal::EitherOfMatcher<Matcher5, internal::EitherOfMatcher<Matcher6,
-    internal::EitherOfMatcher<Matcher7, internal::EitherOfMatcher<Matcher8,
-    internal::EitherOfMatcher<Matcher9, Matcher10> > > > > > > > >
-AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
-    Matcher6 m6, Matcher7 m7, Matcher8 m8, Matcher9 m9, Matcher10 m10) {
-  return ::testing::AnyOf(m1, ::testing::AnyOf(m2, m3, m4, m5, m6, m7, m8, m9,
-      m10));
+template <typename M1, typename M2, typename M3, typename M4, typename M5,
+    typename M6, typename M7, typename M8, typename M9, typename M10>
+inline typename internal::AnyOfResult10<M1, M2, M3, M4, M5, M6, M7, M8, M9,
+    M10>::type
+AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
+  return typename internal::AnyOfResult10<M1, M2, M3, M4, M5, M6, M7, M8, M9,
+      M10>::type(
+      ::testing::AnyOf(m1, m2, m3, m4, m5),
+      ::testing::AnyOf(m6, m7, m8, m9, m10));
 }
 
 }  // namespace testing
@@ -1275,7 +1431,7 @@ AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
         if (!gmock_description.empty())\
           return gmock_description;\
         return ::testing::internal::FormatMatcherDescription(\
-            negation, #name,\
+            negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
                 ::std::tr1::tuple<>()));\
       }\
@@ -1296,7 +1452,7 @@ AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
   }\
   template <typename arg_type>\
   bool name##Matcher::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg,\
+      arg_type arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 
@@ -1324,7 +1480,7 @@ AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
         if (!gmock_description.empty())\
           return gmock_description;\
         return ::testing::internal::FormatMatcherDescription(\
-            negation, #name,\
+            negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
                 ::std::tr1::tuple<p0##_type>(p0)));\
       }\
@@ -1348,7 +1504,7 @@ AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
   template <typename p0##_type>\
   template <typename arg_type>\
   bool name##MatcherP<p0##_type>::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg,\
+      arg_type arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 
@@ -1377,7 +1533,7 @@ AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
         if (!gmock_description.empty())\
           return gmock_description;\
         return ::testing::internal::FormatMatcherDescription(\
-            negation, #name,\
+            negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
                 ::std::tr1::tuple<p0##_type, p1##_type>(p0, p1)));\
       }\
@@ -1405,7 +1561,7 @@ AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
   template <typename arg_type>\
   bool name##MatcherP2<p0##_type, \
       p1##_type>::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg,\
+      arg_type arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 
@@ -1435,7 +1591,7 @@ AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
         if (!gmock_description.empty())\
           return gmock_description;\
         return ::testing::internal::FormatMatcherDescription(\
-            negation, #name,\
+            negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
                 ::std::tr1::tuple<p0##_type, p1##_type, p2##_type>(p0, p1, \
                     p2)));\
@@ -1465,7 +1621,7 @@ AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
   template <typename arg_type>\
   bool name##MatcherP3<p0##_type, p1##_type, \
       p2##_type>::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg,\
+      arg_type arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 
@@ -1498,7 +1654,7 @@ AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
         if (!gmock_description.empty())\
           return gmock_description;\
         return ::testing::internal::FormatMatcherDescription(\
-            negation, #name,\
+            negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
                 ::std::tr1::tuple<p0##_type, p1##_type, p2##_type, \
                     p3##_type>(p0, p1, p2, p3)));\
@@ -1534,7 +1690,7 @@ AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
   template <typename arg_type>\
   bool name##MatcherP4<p0##_type, p1##_type, p2##_type, \
       p3##_type>::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg,\
+      arg_type arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 
@@ -1569,7 +1725,7 @@ AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
         if (!gmock_description.empty())\
           return gmock_description;\
         return ::testing::internal::FormatMatcherDescription(\
-            negation, #name,\
+            negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
                 ::std::tr1::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
                     p4##_type>(p0, p1, p2, p3, p4)));\
@@ -1607,7 +1763,7 @@ AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
   template <typename arg_type>\
   bool name##MatcherP5<p0##_type, p1##_type, p2##_type, p3##_type, \
       p4##_type>::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg,\
+      arg_type arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 
@@ -1643,7 +1799,7 @@ AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
         if (!gmock_description.empty())\
           return gmock_description;\
         return ::testing::internal::FormatMatcherDescription(\
-            negation, #name,\
+            negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
                 ::std::tr1::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
                     p4##_type, p5##_type>(p0, p1, p2, p3, p4, p5)));\
@@ -1682,7 +1838,7 @@ AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
   template <typename arg_type>\
   bool name##MatcherP6<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
       p5##_type>::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg,\
+      arg_type arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 
@@ -1721,7 +1877,7 @@ AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
         if (!gmock_description.empty())\
           return gmock_description;\
         return ::testing::internal::FormatMatcherDescription(\
-            negation, #name,\
+            negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
                 ::std::tr1::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
                     p4##_type, p5##_type, p6##_type>(p0, p1, p2, p3, p4, p5, \
@@ -1766,7 +1922,7 @@ AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
   template <typename arg_type>\
   bool name##MatcherP7<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
       p5##_type, p6##_type>::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg,\
+      arg_type arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 
@@ -1806,7 +1962,7 @@ AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
         if (!gmock_description.empty())\
           return gmock_description;\
         return ::testing::internal::FormatMatcherDescription(\
-            negation, #name,\
+            negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
                 ::std::tr1::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
                     p4##_type, p5##_type, p6##_type, p7##_type>(p0, p1, p2, \
@@ -1855,7 +2011,7 @@ AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
   bool name##MatcherP8<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
       p5##_type, p6##_type, \
       p7##_type>::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg,\
+      arg_type arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 
@@ -1897,7 +2053,7 @@ AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
         if (!gmock_description.empty())\
           return gmock_description;\
         return ::testing::internal::FormatMatcherDescription(\
-            negation, #name,\
+            negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
                 ::std::tr1::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
                     p4##_type, p5##_type, p6##_type, p7##_type, \
@@ -1948,7 +2104,7 @@ AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
   bool name##MatcherP9<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
       p5##_type, p6##_type, p7##_type, \
       p8##_type>::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg,\
+      arg_type arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 
@@ -1993,7 +2149,7 @@ AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
         if (!gmock_description.empty())\
           return gmock_description;\
         return ::testing::internal::FormatMatcherDescription(\
-            negation, #name,\
+            negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
                 ::std::tr1::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
                     p4##_type, p5##_type, p6##_type, p7##_type, p8##_type, \
@@ -2047,7 +2203,7 @@ AnyOf(Matcher1 m1, Matcher2 m2, Matcher3 m3, Matcher4 m4, Matcher5 m5,
   bool name##MatcherP10<p0##_type, p1##_type, p2##_type, p3##_type, \
       p4##_type, p5##_type, p6##_type, p7##_type, p8##_type, \
       p9##_type>::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg,\
+      arg_type arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 

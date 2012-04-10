@@ -545,6 +545,37 @@ TEST(MatcherCastTest, FromSameType) {
   EXPECT_FALSE(m2.Matches(1));
 }
 
+// Implicitly convertible form any type.
+struct ConvertibleFromAny {
+  ConvertibleFromAny(int a_value) : value(a_value) {}
+  template <typename T>
+  ConvertibleFromAny(const T& a_value) : value(-1) {
+    ADD_FAILURE() << "Conversion constructor called";
+  }
+  int value;
+};
+
+bool operator==(const ConvertibleFromAny& a, const ConvertibleFromAny& b) {
+  return a.value == b.value;
+}
+
+ostream& operator<<(ostream& os, const ConvertibleFromAny& a) {
+  return os << a.value;
+}
+
+TEST(MatcherCastTest, ConversionConstructorIsUsed) {
+  Matcher<ConvertibleFromAny> m = MatcherCast<ConvertibleFromAny>(1);
+  EXPECT_TRUE(m.Matches(ConvertibleFromAny(1)));
+  EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
+}
+
+TEST(MatcherCastTest, FromConvertibleFromAny) {
+  Matcher<ConvertibleFromAny> m =
+      MatcherCast<ConvertibleFromAny>(Eq(ConvertibleFromAny(1)));
+  EXPECT_TRUE(m.Matches(ConvertibleFromAny(1)));
+  EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
+}
+
 class Base {};
 class Derived : public Base {};
 
@@ -618,6 +649,19 @@ TEST(SafeMatcherCastTest, FromSameType) {
   Matcher<int> m2 = SafeMatcherCast<int>(m1);
   EXPECT_TRUE(m2.Matches(0));
   EXPECT_FALSE(m2.Matches(1));
+}
+
+TEST(SafeMatcherCastTest, ConversionConstructorIsUsed) {
+  Matcher<ConvertibleFromAny> m = SafeMatcherCast<ConvertibleFromAny>(1);
+  EXPECT_TRUE(m.Matches(ConvertibleFromAny(1)));
+  EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
+}
+
+TEST(SafeMatcherCastTest, FromConvertibleFromAny) {
+  Matcher<ConvertibleFromAny> m =
+      SafeMatcherCast<ConvertibleFromAny>(Eq(ConvertibleFromAny(1)));
+  EXPECT_TRUE(m.Matches(ConvertibleFromAny(1)));
+  EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
 }
 
 // Tests that A<T>() matches any value of type T.
@@ -1940,19 +1984,19 @@ TEST(AllOfTest, CanDescribeSelf) {
 
 
   m = AllOf(Gt(0), Ne(1), Ne(2), Ne(3));
-  EXPECT_EQ("(is > 0) and "
-            "((isn't equal to 1) and "
+  EXPECT_EQ("((is > 0) and "
+            "(isn't equal to 1)) and "
             "((isn't equal to 2) and "
-            "(isn't equal to 3)))",
+            "(isn't equal to 3))",
             Describe(m));
 
 
   m = AllOf(Ge(0), Lt(10), Ne(3), Ne(5), Ne(7));
-  EXPECT_EQ("(is >= 0) and "
-            "((is < 10) and "
+  EXPECT_EQ("((is >= 0) and "
+            "(is < 10)) and "
             "((isn't equal to 3) and "
             "((isn't equal to 5) and "
-            "(isn't equal to 7))))",
+            "(isn't equal to 7)))",
             Describe(m));
 }
 
@@ -1972,19 +2016,19 @@ TEST(AllOfTest, CanDescribeNegation) {
 
 
   m = AllOf(Gt(0), Ne(1), Ne(2), Ne(3));
-  EXPECT_EQ("(isn't > 0) or "
-            "((is equal to 1) or "
+  EXPECT_EQ("((isn't > 0) or "
+            "(is equal to 1)) or "
             "((is equal to 2) or "
-            "(is equal to 3)))",
+            "(is equal to 3))",
             DescribeNegation(m));
 
 
   m = AllOf(Ge(0), Lt(10), Ne(3), Ne(5), Ne(7));
-  EXPECT_EQ("(isn't >= 0) or "
-            "((isn't < 10) or "
+  EXPECT_EQ("((isn't >= 0) or "
+            "(isn't < 10)) or "
             "((is equal to 3) or "
             "((is equal to 5) or "
-            "(is equal to 7))))",
+            "(is equal to 7)))",
             DescribeNegation(m));
 }
 
@@ -2112,18 +2156,18 @@ TEST(AnyOfTest, CanDescribeSelf) {
             Describe(m));
 
   m = AnyOf(Lt(0), Eq(1), Eq(2), Eq(3));
-  EXPECT_EQ("(is < 0) or "
-            "((is equal to 1) or "
+  EXPECT_EQ("((is < 0) or "
+            "(is equal to 1)) or "
             "((is equal to 2) or "
-            "(is equal to 3)))",
+            "(is equal to 3))",
             Describe(m));
 
   m = AnyOf(Le(0), Gt(10), 3, 5, 7);
-  EXPECT_EQ("(is <= 0) or "
-            "((is > 10) or "
+  EXPECT_EQ("((is <= 0) or "
+            "(is > 10)) or "
             "((is equal to 3) or "
             "((is equal to 5) or "
-            "(is equal to 7))))",
+            "(is equal to 7)))",
             Describe(m));
 }
 
@@ -2140,18 +2184,18 @@ TEST(AnyOfTest, CanDescribeNegation) {
             DescribeNegation(m));
 
   m = AnyOf(Lt(0), Eq(1), Eq(2), Eq(3));
-  EXPECT_EQ("(isn't < 0) and "
-            "((isn't equal to 1) and "
+  EXPECT_EQ("((isn't < 0) and "
+            "(isn't equal to 1)) and "
             "((isn't equal to 2) and "
-            "(isn't equal to 3)))",
+            "(isn't equal to 3))",
             DescribeNegation(m));
 
   m = AnyOf(Le(0), Gt(10), 3, 5, 7);
-  EXPECT_EQ("(isn't <= 0) and "
-            "((isn't > 10) and "
+  EXPECT_EQ("((isn't <= 0) and "
+            "(isn't > 10)) and "
             "((isn't equal to 3) and "
             "((isn't equal to 5) and "
-            "(isn't equal to 7))))",
+            "(isn't equal to 7)))",
             DescribeNegation(m));
 }
 

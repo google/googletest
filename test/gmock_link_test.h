@@ -195,8 +195,8 @@ class Interface {
   virtual char* StringFromString(char* str) = 0;
   virtual int IntFromString(char* str) = 0;
   virtual int& IntRefFromString(char* str) = 0;
-  virtual void VoidFromFunc(void(*)(char*)) = 0;
-  virtual void VoidFromIntRef(int& n) = 0;
+  virtual void VoidFromFunc(void(*func)(char* str)) = 0;
+  virtual void VoidFromIntRef(int& n) = 0;  // NOLINT
   virtual void VoidFromFloat(float n) = 0;
   virtual void VoidFromDouble(double n) = 0;
   virtual void VoidFromVector(const std::vector<int>& v) = 0;
@@ -211,7 +211,7 @@ class Mock: public Interface {
   MOCK_METHOD1(IntFromString, int(char* str));
   MOCK_METHOD1(IntRefFromString, int&(char* str));
   MOCK_METHOD1(VoidFromFunc, void(void(*func)(char* str)));
-  MOCK_METHOD1(VoidFromIntRef, void(int& n));
+  MOCK_METHOD1(VoidFromIntRef, void(int& n));  // NOLINT
   MOCK_METHOD1(VoidFromFloat, void(float n));
   MOCK_METHOD1(VoidFromDouble, void(double n));
   MOCK_METHOD1(VoidFromVector, void(const std::vector<int>& v));
@@ -224,15 +224,15 @@ class InvokeHelper {
  public:
   static void StaticVoidFromVoid() {}
   void VoidFromVoid() {}
-  static void StaticVoidFromString(char*) {}
-  void VoidFromString(char*) {}
-  static int StaticIntFromString(char*) { return 1; }
-  static bool StaticBoolFromString(const char*) { return true; }
+  static void StaticVoidFromString(char* /* str */) {}
+  void VoidFromString(char* /* str */) {}
+  static int StaticIntFromString(char* /* str */) { return 1; }
+  static bool StaticBoolFromString(const char* /* str */) { return true; }
 };
 
 class FieldHelper {
  public:
-  FieldHelper(int a_field) : field_(a_field) {}
+  explicit FieldHelper(int a_field) : field_(a_field) {}
   int field() const { return field_; }
   int field_;  // NOLINT -- need external access to field_ to test
                //           the Field matcher.

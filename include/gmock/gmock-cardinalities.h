@@ -117,6 +117,7 @@ class GTEST_API_ Cardinality {
   // Describes the given actual call count to an ostream.
   static void DescribeActualCallCountTo(int actual_call_count,
                                         ::std::ostream* os);
+
  private:
   internal::linked_ptr<const CardinalityInterface> impl_;
 };

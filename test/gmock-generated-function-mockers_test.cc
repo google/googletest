@@ -35,17 +35,17 @@
 
 #include "gmock/gmock-generated-function-mockers.h"
 
-#include <map>
-#include <string>
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
-
 #if GTEST_OS_WINDOWS
 // MSDN says the header file to be included for STDMETHOD is BaseTyps.h but
 // we are getting compiler errors if we use basetyps.h, hence including
 // objbase.h for definition of STDMETHOD.
 # include <objbase.h>
 #endif  // GTEST_OS_WINDOWS
+
+#include <map>
+#include <string>
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 // There is a bug in MSVC (fixed in VS 2008) that prevents creating a
 // mock for a function with const arguments, so we don't test such

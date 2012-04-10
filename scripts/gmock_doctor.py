@@ -416,7 +416,7 @@ def _NeedToUseReturnNullDiagnoser(msg):
                '::operator testing::Action<Func>\(\) const.*\n' +
                _GCC_FILE_LINE_RE + r'instantiated from here\n'
                r'.*error: no matching function for call to \'ImplicitCast_\('
-               r'long int&\)')
+               r'(:?long )?int&\)')
   clang_regex = (r'\bgmock-actions.h:.* error: no matching function for '
                  r'call to \'ImplicitCast_\'\r?\n'
                  r'(.*\n)*?' +

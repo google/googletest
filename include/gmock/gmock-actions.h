@@ -36,12 +36,12 @@
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_ACTIONS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_ACTIONS_H_
 
-#include <algorithm>
-#include <string>
-
 #ifndef _WIN32_WCE
 # include <errno.h>
 #endif
+
+#include <algorithm>
+#include <string>
 
 #include "gmock/internal/gmock-internal-utils.h"
 #include "gmock/internal/gmock-port.h"
@@ -189,6 +189,7 @@ class DefaultValue {
     return value_ == NULL ?
         internal::BuiltInDefaultValue<T>::Get() : *value_;
   }
+
  private:
   static const T* value_;
 };
@@ -224,6 +225,7 @@ class DefaultValue<T&> {
     return address_ == NULL ?
         internal::BuiltInDefaultValue<T&>::Get() : *address_;
   }
+
  private:
   static T* address_;
 };

@@ -354,7 +354,8 @@ template <typename T> struct remove_reference<T&> { typedef T type; }; // NOLINT
 // crashes).
 template <typename T>
 inline T Invalid() {
-  return *static_cast<typename remove_reference<T>::type*>(NULL);
+  return const_cast<typename remove_reference<T>::type&>(
+      *static_cast<volatile typename remove_reference<T>::type*>(NULL));
 }
 template <>
 inline void Invalid<void>() {}
@@ -458,6 +459,11 @@ class StlContainerView< ::std::tr1::tuple<ElementPointer, Size> > {
 // The following specialization prevents the user from instantiating
 // StlContainer with a reference type.
 template <typename T> class StlContainerView<T&>;
+
+// Mapping from booleans to types. Similar to boost::bool_<kValue> and
+// std::integral_constant<bool, kValue>.
+template <bool kValue>
+struct BooleanConstant {};
 
 }  // namespace internal
 }  // namespace testing

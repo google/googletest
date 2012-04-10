@@ -518,7 +518,7 @@ TEST(ReturnTest, IsCovariant) {
 // gmock-actions.h for more information.
 class FromType {
  public:
-  FromType(bool* is_converted) : converted_(is_converted) {}
+  explicit FromType(bool* is_converted) : converted_(is_converted) {}
   bool* converted() const { return converted_; }
 
  private:
@@ -529,7 +529,8 @@ class FromType {
 
 class ToType {
  public:
-  ToType(const FromType& x) { *x.converted() = true; }
+  // Must allow implicit conversion due to use in ImplicitCast_<T>.
+  ToType(const FromType& x) { *x.converted() = true; }  // NOLINT
 };
 
 TEST(ReturnTest, ConvertsArgumentWhenConverted) {
@@ -541,7 +542,7 @@ TEST(ReturnTest, ConvertsArgumentWhenConverted) {
   converted = false;
   action.Perform(tuple<>());
   EXPECT_FALSE(converted) << "Action must NOT convert its argument "
-                          << "when performed." ;
+                          << "when performed.";
 }
 
 class DestinationType {};
@@ -1226,7 +1227,8 @@ TEST(ByRefTest, IsCopyable) {
   const std::string s1 = "Hi";
   const std::string s2 = "Hello";
 
-  ::testing::internal::ReferenceWrapper<const std::string> ref_wrapper = ByRef(s1);
+  ::testing::internal::ReferenceWrapper<const std::string> ref_wrapper =
+      ByRef(s1);
   const std::string& r1 = ref_wrapper;
   EXPECT_EQ(&s1, &r1);
 
@@ -1235,7 +1237,8 @@ TEST(ByRefTest, IsCopyable) {
   const std::string& r2 = ref_wrapper;
   EXPECT_EQ(&s2, &r2);
 
-  ::testing::internal::ReferenceWrapper<const std::string> ref_wrapper1 = ByRef(s1);
+  ::testing::internal::ReferenceWrapper<const std::string> ref_wrapper1 =
+      ByRef(s1);
   // Copies ref_wrapper1 to ref_wrapper.
   ref_wrapper = ref_wrapper1;
   const std::string& r3 = ref_wrapper;

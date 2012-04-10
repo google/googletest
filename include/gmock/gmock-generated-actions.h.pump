@@ -136,7 +136,6 @@ $var Ts = [[$for j, [[T$j]]]]
   }
 
 ]]
-
 };  // class CallableHelper
 
 // An INTERNAL macro for extracting the type of a tuple field.  It's
@@ -427,7 +426,7 @@ $range k 0..n-1
 // An internal macro needed for implementing ACTION*().
 #define GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_\
     const args_type& args GTEST_ATTRIBUTE_UNUSED_
-$for k [[,\
+$for k [[, \
     arg$k[[]]_type arg$k GTEST_ATTRIBUTE_UNUSED_]]
 
 
@@ -657,9 +656,9 @@ $for k [[, arg$k[[]]_type arg$k]]) const;\
   template <GMOCK_INTERNAL_DECL_##template_params\
             GMOCK_INTERNAL_DECL_TYPE_##value_params>\
   template <typename F>\
-  template <typename arg0_type, typename arg1_type, typename arg2_type,\
-      typename arg3_type, typename arg4_type, typename arg5_type,\
-      typename arg6_type, typename arg7_type, typename arg8_type,\
+  template <typename arg0_type, typename arg1_type, typename arg2_type, \
+      typename arg3_type, typename arg4_type, typename arg5_type, \
+      typename arg6_type, typename arg7_type, typename arg8_type, \
       typename arg9_type>\
   typename ::testing::internal::Function<F>::Result\
       GMOCK_ACTION_CLASS_(name, value_params)<\

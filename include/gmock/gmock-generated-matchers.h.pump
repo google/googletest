@@ -242,6 +242,66 @@ $for j [[
 
 
 ]]
+// A set of metafunctions for computing the result type of AllOf.
+// AllOf(m1, ..., mN) returns
+// AllOfResultN<decltype(m1), ..., decltype(mN)>::type.
+
+// Although AllOf isn't defined for one argument, AllOfResult1 is defined
+// to simplify the implementation.
+template <typename M1>
+struct AllOfResult1 {
+  typedef M1 type;
+};
+
+$range i 1..n
+
+$range i 2..n
+$for i [[
+$range j 2..i
+$var m = i/2
+$range k 1..m
+$range t m+1..i
+
+template <typename M1$for j [[, typename M$j]]>
+struct AllOfResult$i {
+  typedef BothOfMatcher<
+      typename AllOfResult$m<$for k, [[M$k]]>::type,
+      typename AllOfResult$(i-m)<$for t, [[M$t]]>::type
+  > type;
+};
+
+]]
+
+// A set of metafunctions for computing the result type of AnyOf.
+// AnyOf(m1, ..., mN) returns
+// AnyOfResultN<decltype(m1), ..., decltype(mN)>::type.
+
+// Although AnyOf isn't defined for one argument, AnyOfResult1 is defined
+// to simplify the implementation.
+template <typename M1>
+struct AnyOfResult1 {
+  typedef M1 type;
+};
+
+$range i 1..n
+
+$range i 2..n
+$for i [[
+$range j 2..i
+$var m = i/2
+$range k 1..m
+$range t m+1..i
+
+template <typename M1$for j [[, typename M$j]]>
+struct AnyOfResult$i {
+  typedef EitherOfMatcher<
+      typename AnyOfResult$m<$for k, [[M$k]]>::type,
+      typename AnyOfResult$(i-m)<$for t, [[M$t]]>::type
+  > type;
+};
+
+]]
+
 }  // namespace internal
 
 // Args<N1, N2, ..., Nk>(a_matcher) matches a tuple if the selected
@@ -308,19 +368,16 @@ ElementsAreArray(const T (&array)[N]) {
 $range i 2..n
 $for i [[
 $range j 1..i
-$range k 1..i-1
+$var m = i/2
+$range k 1..m
+$range t m+1..i
 
-template <$for j, [[typename Matcher$j]]>
-inline $for k[[internal::BothOfMatcher<Matcher$k, ]]Matcher$i[[]]$for k [[> ]]
-
-AllOf($for j, [[Matcher$j m$j]]) {
-
-$if i == 2 [[
-  return internal::BothOfMatcher<Matcher1, Matcher2>(m1, m2);
-]] $else [[
-  return ::testing::AllOf(m1, ::testing::AllOf($for k, [[m$(k + 1)]]));
-]]
-
+template <$for j, [[typename M$j]]>
+inline typename internal::AllOfResult$i<$for j, [[M$j]]>::type
+AllOf($for j, [[M$j m$j]]) {
+  return typename internal::AllOfResult$i<$for j, [[M$j]]>::type(
+      $if m == 1 [[m1]] $else [[::testing::AllOf($for k, [[m$k]])]],
+      $if m+1 == i [[m$i]] $else [[::testing::AllOf($for t, [[m$t]])]]);
 }
 
 ]]
@@ -331,19 +388,16 @@ $if i == 2 [[
 $range i 2..n
 $for i [[
 $range j 1..i
-$range k 1..i-1
+$var m = i/2
+$range k 1..m
+$range t m+1..i
 
-template <$for j, [[typename Matcher$j]]>
-inline $for k[[internal::EitherOfMatcher<Matcher$k, ]]Matcher$i[[]]$for k [[> ]]
-
-AnyOf($for j, [[Matcher$j m$j]]) {
-
-$if i == 2 [[
-  return internal::EitherOfMatcher<Matcher1, Matcher2>(m1, m2);
-]] $else [[
-  return ::testing::AnyOf(m1, ::testing::AnyOf($for k, [[m$(k + 1)]]));
-]]
-
+template <$for j, [[typename M$j]]>
+inline typename internal::AnyOfResult$i<$for j, [[M$j]]>::type
+AnyOf($for j, [[M$j m$j]]) {
+  return typename internal::AnyOfResult$i<$for j, [[M$j]]>::type(
+      $if m == 1 [[m1]] $else [[::testing::AnyOf($for k, [[m$k]])]],
+      $if m+1 == i [[m$i]] $else [[::testing::AnyOf($for t, [[m$t]])]]);
 }
 
 ]]
@@ -621,7 +675,7 @@ $var param_field_decls2 = [[$for j
         if (!gmock_description.empty())\
           return gmock_description;\
         return ::testing::internal::FormatMatcherDescription(\
-            negation, #name,\
+            negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
                 ::std::tr1::tuple<$for j, [[p$j##_type]]>($for j, [[p$j]])));\
       }\
@@ -642,7 +696,7 @@ $var param_field_decls2 = [[$for j
   }\$template
   template <typename arg_type>\
   bool $class_name$param_types::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg,\
+      arg_type arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 ]]

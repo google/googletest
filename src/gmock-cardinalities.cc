@@ -75,7 +75,7 @@ class BetweenCardinalityImpl : public CardinalityInterface {
   virtual int ConservativeUpperBound() const { return max_; }
 
   virtual bool IsSatisfiedByCallCount(int call_count) const {
-    return min_ <= call_count && call_count <= max_ ;
+    return min_ <= call_count && call_count <= max_;
   }
 
   virtual bool IsSaturatedByCallCount(int call_count) const {
@@ -83,6 +83,7 @@ class BetweenCardinalityImpl : public CardinalityInterface {
   }
 
   virtual void DescribeTo(::std::ostream* os) const;
+
  private:
   const int min_;
   const int max_;

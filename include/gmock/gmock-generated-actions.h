@@ -381,7 +381,6 @@ class CallableHelper {
       A7 a7, A8 a8, A9 a9, A10 a10) {
     return function(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
   }
-
 };  // class CallableHelper
 
 // An INTERNAL macro for extracting the type of a tuple field.  It's
@@ -1018,16 +1017,16 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
 
 // An internal macro needed for implementing ACTION*().
 #define GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_\
-    const args_type& args GTEST_ATTRIBUTE_UNUSED_,\
-    arg0_type arg0 GTEST_ATTRIBUTE_UNUSED_,\
-    arg1_type arg1 GTEST_ATTRIBUTE_UNUSED_,\
-    arg2_type arg2 GTEST_ATTRIBUTE_UNUSED_,\
-    arg3_type arg3 GTEST_ATTRIBUTE_UNUSED_,\
-    arg4_type arg4 GTEST_ATTRIBUTE_UNUSED_,\
-    arg5_type arg5 GTEST_ATTRIBUTE_UNUSED_,\
-    arg6_type arg6 GTEST_ATTRIBUTE_UNUSED_,\
-    arg7_type arg7 GTEST_ATTRIBUTE_UNUSED_,\
-    arg8_type arg8 GTEST_ATTRIBUTE_UNUSED_,\
+    const args_type& args GTEST_ATTRIBUTE_UNUSED_, \
+    arg0_type arg0 GTEST_ATTRIBUTE_UNUSED_, \
+    arg1_type arg1 GTEST_ATTRIBUTE_UNUSED_, \
+    arg2_type arg2 GTEST_ATTRIBUTE_UNUSED_, \
+    arg3_type arg3 GTEST_ATTRIBUTE_UNUSED_, \
+    arg4_type arg4 GTEST_ATTRIBUTE_UNUSED_, \
+    arg5_type arg5 GTEST_ATTRIBUTE_UNUSED_, \
+    arg6_type arg6 GTEST_ATTRIBUTE_UNUSED_, \
+    arg7_type arg7 GTEST_ATTRIBUTE_UNUSED_, \
+    arg8_type arg8 GTEST_ATTRIBUTE_UNUSED_, \
     arg9_type arg9 GTEST_ATTRIBUTE_UNUSED_
 
 // Sometimes you want to give an action explicit template parameters
@@ -1433,9 +1432,9 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
   template <GMOCK_INTERNAL_DECL_##template_params\
             GMOCK_INTERNAL_DECL_TYPE_##value_params>\
   template <typename F>\
-  template <typename arg0_type, typename arg1_type, typename arg2_type,\
-      typename arg3_type, typename arg4_type, typename arg5_type,\
-      typename arg6_type, typename arg7_type, typename arg8_type,\
+  template <typename arg0_type, typename arg1_type, typename arg2_type, \
+      typename arg3_type, typename arg4_type, typename arg5_type, \
+      typename arg6_type, typename arg7_type, typename arg8_type, \
       typename arg9_type>\
   typename ::testing::internal::Function<F>::Result\
       GMOCK_ACTION_CLASS_(name, value_params)<\

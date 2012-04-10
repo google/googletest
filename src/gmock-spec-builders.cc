@@ -579,6 +579,7 @@ class MockObjectRegistry {
   }
 
   StateMap& states() { return states_; }
+
  private:
   StateMap states_;
 };
