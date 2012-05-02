@@ -391,6 +391,13 @@
 #   define GTEST_HAS_RTTI 0
 #  endif  // __GXX_RTTI
 
+// Clang defines __GXX_RTTI starting with version 3.0, but its manual recommends
+// using has_feature instead. has_feature(cxx_rtti) is supported since 2.7, the
+// first version with C++ support.
+# elif defined(__clang__)
+
+#  define GTEST_HAS_RTTI __has_feature(cxx_rtti)
+
 // Starting with version 9.0 IBM Visual Age defines __RTTI_ALL__ to 1 if
 // both the typeid and dynamic_cast features are present.
 # elif defined(__IBMCPP__) && (__IBMCPP__ >= 900)
