@@ -359,20 +359,20 @@ class LogIsVisibleTest : public ::testing::Test {
 
 TEST_F(LogIsVisibleTest, AlwaysReturnsTrueIfVerbosityIsInfo) {
   GMOCK_FLAG(verbose) = kInfoVerbosity;
-  EXPECT_TRUE(LogIsVisible(INFO));
-  EXPECT_TRUE(LogIsVisible(WARNING));
+  EXPECT_TRUE(LogIsVisible(kInfo));
+  EXPECT_TRUE(LogIsVisible(kWarning));
 }
 
 TEST_F(LogIsVisibleTest, AlwaysReturnsFalseIfVerbosityIsError) {
   GMOCK_FLAG(verbose) = kErrorVerbosity;
-  EXPECT_FALSE(LogIsVisible(INFO));
-  EXPECT_FALSE(LogIsVisible(WARNING));
+  EXPECT_FALSE(LogIsVisible(kInfo));
+  EXPECT_FALSE(LogIsVisible(kWarning));
 }
 
 TEST_F(LogIsVisibleTest, WorksWhenVerbosityIsWarning) {
   GMOCK_FLAG(verbose) = kWarningVerbosity;
-  EXPECT_FALSE(LogIsVisible(INFO));
-  EXPECT_TRUE(LogIsVisible(WARNING));
+  EXPECT_FALSE(LogIsVisible(kInfo));
+  EXPECT_TRUE(LogIsVisible(kWarning));
 }
 
 #if GTEST_HAS_STREAM_REDIRECTION
@@ -390,7 +390,7 @@ void TestLogWithSeverity(const string& verbosity, LogSeverity severity,
   if (should_print) {
     EXPECT_THAT(GetCapturedStdout().c_str(),
                 ContainsRegex(
-                    severity == WARNING ?
+                    severity == kWarning ?
                     "^\nGMOCK WARNING:\nTest log\\.\nStack trace:\n" :
                     "^\nTest log\\.\nStack trace:\n"));
   } else {
@@ -405,7 +405,7 @@ TEST(LogTest, NoStackTraceWhenStackFramesToSkipIsNegative) {
   const string saved_flag = GMOCK_FLAG(verbose);
   GMOCK_FLAG(verbose) = kInfoVerbosity;
   CaptureStdout();
-  Log(INFO, "Test log.\n", -1);
+  Log(kInfo, "Test log.\n", -1);
   EXPECT_STREQ("\nTest log.\n", GetCapturedStdout().c_str());
   GMOCK_FLAG(verbose) = saved_flag;
 }
@@ -414,7 +414,7 @@ TEST(LogTest, NoStackTraceWhenStackFramesToSkipIsNegative) {
 // treated as 0.
 TEST(LogTest, NoSkippingStackFrameInOptMode) {
   CaptureStdout();
-  Log(WARNING, "Test log.\n", 100);
+  Log(kWarning, "Test log.\n", 100);
   const String log = GetCapturedStdout();
 
 # if defined(NDEBUG) && GTEST_GOOGLE3_MODE_
@@ -436,29 +436,29 @@ TEST(LogTest, NoSkippingStackFrameInOptMode) {
 // Tests that all logs are printed when the value of the
 // --gmock_verbose flag is "info".
 TEST(LogTest, AllLogsArePrintedWhenVerbosityIsInfo) {
-  TestLogWithSeverity(kInfoVerbosity, INFO, true);
-  TestLogWithSeverity(kInfoVerbosity, WARNING, true);
+  TestLogWithSeverity(kInfoVerbosity, kInfo, true);
+  TestLogWithSeverity(kInfoVerbosity, kWarning, true);
 }
 
 // Tests that only warnings are printed when the value of the
 // --gmock_verbose flag is "warning".
 TEST(LogTest, OnlyWarningsArePrintedWhenVerbosityIsWarning) {
-  TestLogWithSeverity(kWarningVerbosity, INFO, false);
-  TestLogWithSeverity(kWarningVerbosity, WARNING, true);
+  TestLogWithSeverity(kWarningVerbosity, kInfo, false);
+  TestLogWithSeverity(kWarningVerbosity, kWarning, true);
 }
 
 // Tests that no logs are printed when the value of the
 // --gmock_verbose flag is "error".
 TEST(LogTest, NoLogsArePrintedWhenVerbosityIsError) {
-  TestLogWithSeverity(kErrorVerbosity, INFO, false);
-  TestLogWithSeverity(kErrorVerbosity, WARNING, false);
+  TestLogWithSeverity(kErrorVerbosity, kInfo, false);
+  TestLogWithSeverity(kErrorVerbosity, kWarning, false);
 }
 
 // Tests that only warnings are printed when the value of the
 // --gmock_verbose flag is invalid.
 TEST(LogTest, OnlyWarningsArePrintedWhenVerbosityIsInvalid) {
-  TestLogWithSeverity("invalid", INFO, false);
-  TestLogWithSeverity("invalid", WARNING, true);
+  TestLogWithSeverity("invalid", kInfo, false);
+  TestLogWithSeverity("invalid", kWarning, true);
 }
 
 #endif  // GTEST_HAS_STREAM_REDIRECTION

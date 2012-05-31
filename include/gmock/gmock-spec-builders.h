@@ -353,12 +353,11 @@ class OnCallSpec : public UntypedOnCallSpecBase {
   Action<F> action_;
 };  // class OnCallSpec
 
-// Possible reactions on uninteresting calls.  TODO(wan@google.com):
-// rename the enum values to the kFoo style.
+// Possible reactions on uninteresting calls.
 enum CallReaction {
-  ALLOW,
-  WARN,
-  FAIL
+  kAllow,
+  kWarn,
+  kFail
 };
 
 }  // namespace internal
@@ -422,7 +421,7 @@ class GTEST_API_ Mock {
   // Returns the reaction Google Mock will have on uninteresting calls
   // made on the given mock object.
   static internal::CallReaction GetReactionOnUninterestingCalls(
-      const void* mock_obj);
+      const void* mock_obj)
           GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
 
   // Verifies that all expectations on the given mock object have been
@@ -1163,7 +1162,7 @@ class TypedExpectation : public ExpectationBase {
          << action_count << " WillOnce()"
          << (action_count == 1 ? " is" : "s are") << " specified - ";
       mocker->DescribeDefaultActionTo(args, &ss);
-      Log(WARNING, ss.str(), 1);
+      Log(kWarning, ss.str(), 1);
     }
 
     return count <= action_count ?
@@ -1251,7 +1250,7 @@ class MockSpec {
   // the newly created spec.
   internal::OnCallSpec<F>& InternalDefaultActionSetAt(
       const char* file, int line, const char* obj, const char* call) {
-    LogWithLocation(internal::INFO, file, line,
+    LogWithLocation(internal::kInfo, file, line,
         string("ON_CALL(") + obj + ", " + call + ") invoked");
     return function_mocker_->AddNewOnCallSpec(file, line, matchers_);
   }
@@ -1261,7 +1260,7 @@ class MockSpec {
   internal::TypedExpectation<F>& InternalExpectedAt(
       const char* file, int line, const char* obj, const char* call) {
     const string source_text(string("EXPECT_CALL(") + obj + ", " + call + ")");
-    LogWithLocation(internal::INFO, file, line, source_text + " invoked");
+    LogWithLocation(internal::kInfo, file, line, source_text + " invoked");
     return function_mocker_->AddNewExpectation(
         file, line, source_text, matchers_);
   }

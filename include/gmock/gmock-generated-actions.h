@@ -2216,9 +2216,6 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
           p9##_type>::gmock_Impl<F>::gmock_PerformImpl(\
           GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
 
-// TODO(wan@google.com): move the following to a different .h file
-// such that we don't have to run 'pump' every time the code is
-// updated.
 namespace testing {
 
 // The ACTION*() macros trigger warning C4100 (unreferenced formal

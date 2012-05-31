@@ -332,7 +332,7 @@ def _OverloadedMethodActionDiagnoser(msg):
                  r'(.*\n)*?'
                  r'.*\bgmock-\w+-actions\.h:\d+:\d+: '
                  r'note: candidate function template not viable: '
-                 r'requires 1 argument, but 2 were provided')
+                 r'requires .*, but 2 (arguments )?were provided')
   diagnosis = """
 The second argument you gave to Invoke() is an overloaded method.  Please
 tell your compiler which overloaded version you want to use.
@@ -474,6 +474,10 @@ def _TypeInTemplatedBaseDiagnoser(msg):
       r'(?P=file):(?P=line):(?P=column): error: '
       r'C\+\+ requires a type specifier for all declarations'
       )
+  clang_regex_unknown_type = (
+      _CLANG_FILE_LINE_RE +
+      r'error: unknown type name \'(?P<type>[^\']+)\''
+      )
 
   diagnosis = """
 In a mock class template, types or typedefs defined in the base class
@@ -483,7 +487,7 @@ need to make it visible.  One way to do it is:
 
   typedef typename Base<T>::%(type)s %(type)s;"""
 
-  return _GenericDiagnoser(
+  for diag in _GenericDiagnoser(
       'TTB', 'Type in Template Base',
       [(gcc_4_3_1_regex_type_in_retval, diagnosis % {'type': 'Foo'}),
        (gcc_4_4_0_regex_type_in_retval, diagnosis % {'type': 'Foo'}),
@@ -491,7 +495,13 @@ need to make it visible.  One way to do it is:
        (gcc_regex_type_of_a_param, diagnosis),
        (clang_regex_type_of_retval_or_sole_param, diagnosis),
        (clang_regex_type_of_a_param, diagnosis % {'type': 'Foo'})],
-      msg)
+      msg):
+    yield diag
+  # Avoid overlap with the NUS pattern.
+  for m in _FindAllMatches(clang_regex_unknown_type, msg):
+    type_ = m.groupdict()['type']
+    if type_ not in _COMMON_GMOCK_SYMBOLS:
+      yield ('TTB', 'Type in Template Base', diagnosis % m.groupdict())
 
 
 def _WrongMockMethodMacroDiagnoser(msg):

@@ -217,7 +217,7 @@ void ExpectationBase::CheckActionCountIfNotDone() const
       ss << " and a WillRepeatedly()";
     }
     ss << ".";
-    Log(WARNING, ss.str(), -1);  // -1 means "don't print stack trace".
+    Log(kWarning, ss.str(), -1);  // -1 means "don't print stack trace".
   }
 }
 
@@ -246,11 +246,11 @@ GTEST_API_ ThreadLocal<Sequence*> g_gmock_implicit_sequence;
 // manner specified by 'reaction'.
 void ReportUninterestingCall(CallReaction reaction, const string& msg) {
   switch (reaction) {
-    case ALLOW:
-      Log(INFO, msg, 3);
+    case kAllow:
+      Log(kInfo, msg, 3);
       break;
-    case WARN:
-      Log(WARNING, msg, 3);
+    case kWarn:
+      Log(kWarning, msg, 3);
       break;
     default:  // FAIL
       Expect(false, NULL, -1, msg);
@@ -345,10 +345,10 @@ UntypedFunctionMockerBase::UntypedInvokeWith(const void* const untyped_args)
     const bool need_to_report_uninteresting_call =
         // If the user allows this uninteresting call, we print it
         // only when he wants informational messages.
-        reaction == ALLOW ? LogIsVisible(INFO) :
+        reaction == kAllow ? LogIsVisible(kInfo) :
         // If the user wants this to be a warning, we print it only
         // when he wants to see warnings.
-        reaction == WARN ? LogIsVisible(WARNING) :
+        reaction == kWarn ? LogIsVisible(kWarning) :
         // Otherwise, the user wants this to be an error, and we
         // should always print detailed information in the error.
         true;
@@ -391,7 +391,8 @@ UntypedFunctionMockerBase::UntypedInvokeWith(const void* const untyped_args)
   // True iff we need to print the call's arguments and return value.
   // This definition must be kept in sync with the uses of Expect()
   // and Log() in this function.
-  const bool need_to_report_call = !found || is_excessive || LogIsVisible(INFO);
+  const bool need_to_report_call =
+      !found || is_excessive || LogIsVisible(kInfo);
   if (!need_to_report_call) {
     // Perform the action without printing the call information.
     return
@@ -427,7 +428,7 @@ UntypedFunctionMockerBase::UntypedInvokeWith(const void* const untyped_args)
   } else {
     // We had an expected call and the matching expectation is
     // described in ss.
-    Log(INFO, loc.str() + ss.str(), 2);
+    Log(kInfo, loc.str() + ss.str(), 2);
   }
 
   return result;
@@ -606,21 +607,21 @@ void SetReactionOnUninterestingCalls(const void* mock_obj,
 // object.
 void Mock::AllowUninterestingCalls(const void* mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
-  SetReactionOnUninterestingCalls(mock_obj, internal::ALLOW);
+  SetReactionOnUninterestingCalls(mock_obj, internal::kAllow);
 }
 
 // Tells Google Mock to warn the user about uninteresting calls on the
 // given mock object.
 void Mock::WarnUninterestingCalls(const void* mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
-  SetReactionOnUninterestingCalls(mock_obj, internal::WARN);
+  SetReactionOnUninterestingCalls(mock_obj, internal::kWarn);
 }
 
 // Tells Google Mock to fail uninteresting calls on the given mock
 // object.
 void Mock::FailUninterestingCalls(const void* mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
-  SetReactionOnUninterestingCalls(mock_obj, internal::FAIL);
+  SetReactionOnUninterestingCalls(mock_obj, internal::kFail);
 }
 
 // Tells Google Mock the given mock object is being destroyed and its
@@ -638,7 +639,7 @@ internal::CallReaction Mock::GetReactionOnUninterestingCalls(
         GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   internal::MutexLock l(&internal::g_gmock_mutex);
   return (g_uninteresting_call_reaction.count(mock_obj) == 0) ?
-      internal::WARN : g_uninteresting_call_reaction[mock_obj];
+      internal::kWarn : g_uninteresting_call_reaction[mock_obj];
 }
 
 // Tells Google Mock to ignore mock_obj when checking for leaked mock

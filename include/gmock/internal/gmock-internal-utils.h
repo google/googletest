@@ -260,7 +260,7 @@ class FailureReporterInterface {
  public:
   // The type of a failure (either non-fatal or fatal).
   enum FailureType {
-    NONFATAL, FATAL
+    kNonfatal, kFatal
   };
 
   virtual ~FailureReporterInterface() {}
@@ -281,7 +281,7 @@ GTEST_API_ FailureReporterInterface* GetFailureReporter();
 inline void Assert(bool condition, const char* file, int line,
                    const string& msg) {
   if (!condition) {
-    GetFailureReporter()->ReportFailure(FailureReporterInterface::FATAL,
+    GetFailureReporter()->ReportFailure(FailureReporterInterface::kFatal,
                                         file, line, msg);
   }
 }
@@ -294,7 +294,7 @@ inline void Assert(bool condition, const char* file, int line) {
 inline void Expect(bool condition, const char* file, int line,
                    const string& msg) {
   if (!condition) {
-    GetFailureReporter()->ReportFailure(FailureReporterInterface::NONFATAL,
+    GetFailureReporter()->ReportFailure(FailureReporterInterface::kNonfatal,
                                         file, line, msg);
   }
 }
@@ -304,8 +304,8 @@ inline void Expect(bool condition, const char* file, int line) {
 
 // Severity level of a log.
 enum LogSeverity {
-  INFO = 0,
-  WARNING = 1
+  kInfo = 0,
+  kWarning = 1
 };
 
 // Valid values for the --gmock_verbose flag.

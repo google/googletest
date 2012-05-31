@@ -739,9 +739,6 @@ $$ }  // This meta comment fixes auto-indentation in Emacs.  It won't
 $$    // show up in the generated code.
 
 
-// TODO(wan@google.com): move the following to a different .h file
-// such that we don't have to run 'pump' every time the code is
-// updated.
 namespace testing {
 
 // The ACTION*() macros trigger warning C4100 (unreferenced formal

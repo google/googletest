@@ -77,13 +77,13 @@ class GoogleTestFailureReporter : public FailureReporterInterface {
  public:
   virtual void ReportFailure(FailureType type, const char* file, int line,
                              const string& message) {
-    AssertHelper(type == FATAL ?
+    AssertHelper(type == kFatal ?
                  TestPartResult::kFatalFailure :
                  TestPartResult::kNonFatalFailure,
                  file,
                  line,
                  message.c_str()) = Message();
-    if (type == FATAL) {
+    if (type == kFatal) {
       posix::Abort();
     }
   }
@@ -117,7 +117,7 @@ GTEST_API_ bool LogIsVisible(LogSeverity severity) {
   } else {
     // If --gmock_verbose is neither "info" nor "error", we treat it
     // as "warning" (its default value).
-    return severity == WARNING;
+    return severity == kWarning;
   }
 }
 
@@ -140,7 +140,7 @@ GTEST_API_ void Log(LogSeverity severity,
   // "using ::std::cout;" doesn't work with Symbian's STLport, where cout is a
   // macro.
 
-  if (severity == WARNING) {
+  if (severity == kWarning) {
     // Prints a GMOCK WARNING marker to make the warnings easily searchable.
     std::cout << "\nGMOCK WARNING:";
   }
