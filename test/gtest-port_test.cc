@@ -61,6 +61,43 @@ using std::pair;
 namespace testing {
 namespace internal {
 
+TEST(IsXDigitTest, WorksForNarrowAscii) {
+  EXPECT_TRUE(IsXDigit('0'));
+  EXPECT_TRUE(IsXDigit('9'));
+  EXPECT_TRUE(IsXDigit('A'));
+  EXPECT_TRUE(IsXDigit('F'));
+  EXPECT_TRUE(IsXDigit('a'));
+  EXPECT_TRUE(IsXDigit('f'));
+
+  EXPECT_FALSE(IsXDigit('-'));
+  EXPECT_FALSE(IsXDigit('g'));
+  EXPECT_FALSE(IsXDigit('G'));
+}
+
+TEST(IsXDigitTest, ReturnsFalseForNarrowNonAscii) {
+  EXPECT_FALSE(IsXDigit(static_cast<char>(0x80)));
+  EXPECT_FALSE(IsXDigit(static_cast<char>('0' | 0x80)));
+}
+
+TEST(IsXDigitTest, WorksForWideAscii) {
+  EXPECT_TRUE(IsXDigit(L'0'));
+  EXPECT_TRUE(IsXDigit(L'9'));
+  EXPECT_TRUE(IsXDigit(L'A'));
+  EXPECT_TRUE(IsXDigit(L'F'));
+  EXPECT_TRUE(IsXDigit(L'a'));
+  EXPECT_TRUE(IsXDigit(L'f'));
+
+  EXPECT_FALSE(IsXDigit(L'-'));
+  EXPECT_FALSE(IsXDigit(L'g'));
+  EXPECT_FALSE(IsXDigit(L'G'));
+}
+
+TEST(IsXDigitTest, ReturnsFalseForWideNonAscii) {
+  EXPECT_FALSE(IsXDigit(static_cast<wchar_t>(0x80)));
+  EXPECT_FALSE(IsXDigit(static_cast<wchar_t>(L'0' | 0x80)));
+  EXPECT_FALSE(IsXDigit(static_cast<wchar_t>(L'0' | 0x100)));
+}
+
 class Base {
  public:
   // Copy constructor and assignment operator do exactly what we need, so we

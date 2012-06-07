@@ -1585,6 +1585,10 @@ inline bool IsUpper(char ch) {
 inline bool IsXDigit(char ch) {
   return isxdigit(static_cast<unsigned char>(ch)) != 0;
 }
+inline bool IsXDigit(wchar_t ch) {
+  const unsigned char low_byte = static_cast<unsigned char>(ch);
+  return ch == low_byte && isxdigit(low_byte) != 0;
+}
 
 inline char ToLower(char ch) {
   return static_cast<char>(tolower(static_cast<unsigned char>(ch)));
