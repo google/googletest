@@ -1065,16 +1065,6 @@ TEST(StringTest, ConvertsToGlobalString) {
 
 #endif  // GTEST_HAS_GLOBAL_STRING
 
-// Tests String::ShowCStringQuoted().
-TEST(StringTest, ShowCStringQuoted) {
-  EXPECT_STREQ("(null)",
-               String::ShowCStringQuoted(NULL).c_str());
-  EXPECT_STREQ("\"\"",
-               String::ShowCStringQuoted("").c_str());
-  EXPECT_STREQ("\"foo\"",
-               String::ShowCStringQuoted("foo").c_str());
-}
-
 // Tests String::empty().
 TEST(StringTest, Empty) {
   EXPECT_TRUE(String("").empty());
@@ -1303,16 +1293,6 @@ TEST(StringTest, ShowWideCString) {
                String::ShowWideCString(NULL).c_str());
   EXPECT_STREQ("", String::ShowWideCString(L"").c_str());
   EXPECT_STREQ("foo", String::ShowWideCString(L"foo").c_str());
-}
-
-// Tests String::ShowWideCStringQuoted().
-TEST(StringTest, ShowWideCStringQuoted) {
-  EXPECT_STREQ("(null)",
-               String::ShowWideCStringQuoted(NULL).c_str());
-  EXPECT_STREQ("L\"\"",
-               String::ShowWideCStringQuoted(L"").c_str());
-  EXPECT_STREQ("L\"foo\"",
-               String::ShowWideCStringQuoted(L"foo").c_str());
 }
 
 # if GTEST_OS_WINDOWS_MOBILE

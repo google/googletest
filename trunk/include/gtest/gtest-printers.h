@@ -630,9 +630,12 @@ void UniversalPrintArray(const T* begin, size_t len, ::std::ostream* os) {
   }
 }
 // This overload prints a (const) char array compactly.
-GTEST_API_ void UniversalPrintArray(const char* begin,
-                                    size_t len,
-                                    ::std::ostream* os);
+GTEST_API_ void UniversalPrintArray(
+    const char* begin, size_t len, ::std::ostream* os);
+
+// This overload prints a (const) wchar_t array compactly.
+GTEST_API_ void UniversalPrintArray(
+    const wchar_t* begin, size_t len, ::std::ostream* os);
 
 // Implements printing an array type T[N].
 template <typename T, size_t N>
@@ -673,19 +676,72 @@ class UniversalPrinter<T&> {
 // Prints a value tersely: for a reference type, the referenced value
 // (but not the address) is printed; for a (const) char pointer, the
 // NUL-terminated string (but not the pointer) is printed.
+
+template <typename T>
+class UniversalTersePrinter {
+ public:
+  static void Print(const T& value, ::std::ostream* os) {
+    UniversalPrint(value, os);
+  }
+};
+template <typename T>
+class UniversalTersePrinter<T&> {
+ public:
+  static void Print(const T& value, ::std::ostream* os) {
+    UniversalPrint(value, os);
+  }
+};
+template <typename T, size_t N>
+class UniversalTersePrinter<T[N]> {
+ public:
+  static void Print(const T (&value)[N], ::std::ostream* os) {
+    UniversalPrinter<T[N]>::Print(value, os);
+  }
+};
+template <>
+class UniversalTersePrinter<const char*> {
+ public:
+  static void Print(const char* str, ::std::ostream* os) {
+    if (str == NULL) {
+      *os << "NULL";
+    } else {
+      UniversalPrint(string(str), os);
+    }
+  }
+};
+template <>
+class UniversalTersePrinter<char*> {
+ public:
+  static void Print(char* str, ::std::ostream* os) {
+    UniversalTersePrinter<const char*>::Print(str, os);
+  }
+};
+
+#if GTEST_HAS_STD_WSTRING
+template <>
+class UniversalTersePrinter<const wchar_t*> {
+ public:
+  static void Print(const wchar_t* str, ::std::ostream* os) {
+    if (str == NULL) {
+      *os << "NULL";
+    } else {
+      UniversalPrint(::std::wstring(str), os);
+    }
+  }
+};
+#endif
+
+template <>
+class UniversalTersePrinter<wchar_t*> {
+ public:
+  static void Print(wchar_t* str, ::std::ostream* os) {
+    UniversalTersePrinter<const wchar_t*>::Print(str, os);
+  }
+};
+
 template <typename T>
 void UniversalTersePrint(const T& value, ::std::ostream* os) {
-  UniversalPrint(value, os);
-}
-inline void UniversalTersePrint(const char* str, ::std::ostream* os) {
-  if (str == NULL) {
-    *os << "NULL";
-  } else {
-    UniversalPrint(string(str), os);
-  }
-}
-inline void UniversalTersePrint(char* str, ::std::ostream* os) {
-  UniversalTersePrint(static_cast<const char*>(str), os);
+  UniversalTersePrinter<T>::Print(value, os);
 }
 
 // Prints a value using the type inferred by the compiler.  The
@@ -790,7 +846,7 @@ Strings UniversalTersePrintTupleFieldsToStrings(const Tuple& value) {
 template <typename T>
 ::std::string PrintToString(const T& value) {
   ::std::stringstream ss;
-  internal::UniversalTersePrint(value, &ss);
+  internal::UniversalTersePrinter<T>::Print(value, &ss);
   return ss.str();
 }
 
