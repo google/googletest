@@ -2085,6 +2085,8 @@ your `main()`, you can alternatively enable this feature by specifying
 the `--gtest_throw_on_failure` flag on the command-line or setting the
 `GTEST_THROW_ON_FAILURE` environment variable to a non-zero value.
 
+Death tests are _not_ supported when other test framework is used to organize tests.
+
 _Availability:_ Linux, Windows, Mac; since v1.3.0.
 
 == Distributing Test Functions to Multiple Machines ==
