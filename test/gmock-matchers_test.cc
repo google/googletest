@@ -2824,6 +2824,38 @@ TEST(PointeeTest, ReferenceToNonConstRawPointer) {
   EXPECT_FALSE(m.Matches(p));
 }
 
+// Minimal const-propagating pointer.
+template <typename T>
+class ConstPropagatingPtr {
+ public:
+  typedef T element_type;
+
+  ConstPropagatingPtr() : val_() {}
+  explicit ConstPropagatingPtr(T* t) : val_(t) {}
+  ConstPropagatingPtr(const ConstPropagatingPtr& other) : val_(other.val_) {}
+
+  T* get() { return val_; }
+  T& operator*() { return *val_; }
+  // Most smart pointers return non-const T* and T& from the next methods.
+  const T* get() const { return val_; }
+  const T& operator*() const { return *val_; }
+
+ private:
+  T* val_;
+};
+
+TEST(PointeeTest, WorksWithConstPropagatingPointers) {
+  const Matcher< ConstPropagatingPtr<int> > m = Pointee(Lt(5));
+  int three = 3;
+  const ConstPropagatingPtr<int> co(&three);
+  ConstPropagatingPtr<int> o(&three);
+  EXPECT_TRUE(m.Matches(o));
+  EXPECT_TRUE(m.Matches(co));
+  *o = 6;
+  EXPECT_FALSE(m.Matches(o));
+  EXPECT_FALSE(m.Matches(ConstPropagatingPtr<int>()));
+}
+
 TEST(PointeeTest, NeverMatchesNull) {
   const Matcher<const char*> m = Pointee(_);
   EXPECT_FALSE(m.Matches(NULL));

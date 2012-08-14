@@ -73,7 +73,7 @@ struct PointeeOf<T*> { typedef T type; };  // NOLINT
 // smart pointer, or returns p itself when p is already a raw pointer.
 // The following default implementation is for the smart pointer case.
 template <typename Pointer>
-inline typename Pointer::element_type* GetRawPointer(const Pointer& p) {
+inline const typename Pointer::element_type* GetRawPointer(const Pointer& p) {
   return p.get();
 }
 // This overloaded version is for the raw pointer case.
