@@ -39,8 +39,8 @@
 #elif GTEST_OS_WINDOWS
 # include <direct.h>
 # include <io.h>
-#elif GTEST_OS_SYMBIAN || GTEST_OS_NACL
-// Symbian OpenC and NaCl have PATH_MAX in sys/syslimits.h
+#elif GTEST_OS_SYMBIAN
+// Symbian OpenC has PATH_MAX in sys/syslimits.h
 # include <sys/syslimits.h>
 #else
 # include <limits.h>
