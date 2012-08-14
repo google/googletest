@@ -704,14 +704,14 @@ def RunCode(env, code_node, output):
     RunAtomicCode(env, atomic_code, output)
 
 
-def IsComment(cur_line):
+def IsSingleLineComment(cur_line):
   return '//' in cur_line
 
 
-def IsInPreprocessorDirevative(prev_lines, cur_line):
+def IsInPreprocessorDirective(prev_lines, cur_line):
   if cur_line.lstrip().startswith('#'):
     return True
-  return prev_lines != [] and prev_lines[-1].endswith('\\')
+  return prev_lines and prev_lines[-1].endswith('\\')
 
 
 def WrapComment(line, output):
@@ -768,7 +768,7 @@ def WrapCode(line, line_concat, output):
     output.append(prefix + cur_line.strip())
 
 
-def WrapPreprocessorDirevative(line, output):
+def WrapPreprocessorDirective(line, output):
   WrapCode(line, ' \\', output)
 
 
@@ -776,29 +776,37 @@ def WrapPlainCode(line, output):
   WrapCode(line, '', output)
 
 
-def IsHeaderGuardOrInclude(line):
+def IsMultiLineIWYUPragma(line):
+  return re.search(r'/\* IWYU pragma: ', line)
+
+
+def IsHeaderGuardIncludeOrOneLineIWYUPragma(line):
   return (re.match(r'^#(ifndef|define|endif\s*//)\s*[\w_]+\s*$', line) or
-          re.match(r'^#include\s', line))
+          re.match(r'^#include\s', line) or
+          # Don't break IWYU pragmas, either; that causes iwyu.py problems.
+          re.search(r'// IWYU pragma: ', line))
 
 
 def WrapLongLine(line, output):
   line = line.rstrip()
   if len(line) <= 80:
     output.append(line)
-  elif IsComment(line):
-    if IsHeaderGuardOrInclude(line):
-      # The style guide made an exception to allow long header guard lines
-      # and includes.
+  elif IsSingleLineComment(line):
+    if IsHeaderGuardIncludeOrOneLineIWYUPragma(line):
+      # The style guide made an exception to allow long header guard lines,
+      # includes and IWYU pragmas.
       output.append(line)
     else:
       WrapComment(line, output)
-  elif IsInPreprocessorDirevative(output, line):
-    if IsHeaderGuardOrInclude(line):
-      # The style guide made an exception to allow long header guard lines
-      # and includes.
+  elif IsInPreprocessorDirective(output, line):
+    if IsHeaderGuardIncludeOrOneLineIWYUPragma(line):
+      # The style guide made an exception to allow long header guard lines,
+      # includes and IWYU pragmas.
       output.append(line)
     else:
-      WrapPreprocessorDirevative(line, output)
+      WrapPreprocessorDirective(line, output)
+  elif IsMultiLineIWYUPragma(line):
+    output.append(line)
   else:
     WrapPlainCode(line, output)
 
