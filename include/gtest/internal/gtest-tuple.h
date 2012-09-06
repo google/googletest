@@ -142,52 +142,52 @@ template <bool kIndexValid, int kIndex, class Tuple>
 struct TupleElement;
 
 template <GTEST_10_TYPENAMES_(T)>
-struct TupleElement<true, 0, GTEST_10_TUPLE_(T)> {
+struct TupleElement<true, 0, GTEST_10_TUPLE_(T) > {
   typedef T0 type;
 };
 
 template <GTEST_10_TYPENAMES_(T)>
-struct TupleElement<true, 1, GTEST_10_TUPLE_(T)> {
+struct TupleElement<true, 1, GTEST_10_TUPLE_(T) > {
   typedef T1 type;
 };
 
 template <GTEST_10_TYPENAMES_(T)>
-struct TupleElement<true, 2, GTEST_10_TUPLE_(T)> {
+struct TupleElement<true, 2, GTEST_10_TUPLE_(T) > {
   typedef T2 type;
 };
 
 template <GTEST_10_TYPENAMES_(T)>
-struct TupleElement<true, 3, GTEST_10_TUPLE_(T)> {
+struct TupleElement<true, 3, GTEST_10_TUPLE_(T) > {
   typedef T3 type;
 };
 
 template <GTEST_10_TYPENAMES_(T)>
-struct TupleElement<true, 4, GTEST_10_TUPLE_(T)> {
+struct TupleElement<true, 4, GTEST_10_TUPLE_(T) > {
   typedef T4 type;
 };
 
 template <GTEST_10_TYPENAMES_(T)>
-struct TupleElement<true, 5, GTEST_10_TUPLE_(T)> {
+struct TupleElement<true, 5, GTEST_10_TUPLE_(T) > {
   typedef T5 type;
 };
 
 template <GTEST_10_TYPENAMES_(T)>
-struct TupleElement<true, 6, GTEST_10_TUPLE_(T)> {
+struct TupleElement<true, 6, GTEST_10_TUPLE_(T) > {
   typedef T6 type;
 };
 
 template <GTEST_10_TYPENAMES_(T)>
-struct TupleElement<true, 7, GTEST_10_TUPLE_(T)> {
+struct TupleElement<true, 7, GTEST_10_TUPLE_(T) > {
   typedef T7 type;
 };
 
 template <GTEST_10_TYPENAMES_(T)>
-struct TupleElement<true, 8, GTEST_10_TUPLE_(T)> {
+struct TupleElement<true, 8, GTEST_10_TUPLE_(T) > {
   typedef T8 type;
 };
 
 template <GTEST_10_TYPENAMES_(T)>
-struct TupleElement<true, 9, GTEST_10_TUPLE_(T)> {
+struct TupleElement<true, 9, GTEST_10_TUPLE_(T) > {
   typedef T9 type;
 };
 
@@ -730,57 +730,57 @@ inline GTEST_10_TUPLE_(T) make_tuple(const T0& f0, const T1& f1, const T2& f2,
 template <typename Tuple> struct tuple_size;
 
 template <GTEST_0_TYPENAMES_(T)>
-struct tuple_size<GTEST_0_TUPLE_(T)> {
+struct tuple_size<GTEST_0_TUPLE_(T) > {
   static const int value = 0;
 };
 
 template <GTEST_1_TYPENAMES_(T)>
-struct tuple_size<GTEST_1_TUPLE_(T)> {
+struct tuple_size<GTEST_1_TUPLE_(T) > {
   static const int value = 1;
 };
 
 template <GTEST_2_TYPENAMES_(T)>
-struct tuple_size<GTEST_2_TUPLE_(T)> {
+struct tuple_size<GTEST_2_TUPLE_(T) > {
   static const int value = 2;
 };
 
 template <GTEST_3_TYPENAMES_(T)>
-struct tuple_size<GTEST_3_TUPLE_(T)> {
+struct tuple_size<GTEST_3_TUPLE_(T) > {
   static const int value = 3;
 };
 
 template <GTEST_4_TYPENAMES_(T)>
-struct tuple_size<GTEST_4_TUPLE_(T)> {
+struct tuple_size<GTEST_4_TUPLE_(T) > {
   static const int value = 4;
 };
 
 template <GTEST_5_TYPENAMES_(T)>
-struct tuple_size<GTEST_5_TUPLE_(T)> {
+struct tuple_size<GTEST_5_TUPLE_(T) > {
   static const int value = 5;
 };
 
 template <GTEST_6_TYPENAMES_(T)>
-struct tuple_size<GTEST_6_TUPLE_(T)> {
+struct tuple_size<GTEST_6_TUPLE_(T) > {
   static const int value = 6;
 };
 
 template <GTEST_7_TYPENAMES_(T)>
-struct tuple_size<GTEST_7_TUPLE_(T)> {
+struct tuple_size<GTEST_7_TUPLE_(T) > {
   static const int value = 7;
 };
 
 template <GTEST_8_TYPENAMES_(T)>
-struct tuple_size<GTEST_8_TUPLE_(T)> {
+struct tuple_size<GTEST_8_TUPLE_(T) > {
   static const int value = 8;
 };
 
 template <GTEST_9_TYPENAMES_(T)>
-struct tuple_size<GTEST_9_TUPLE_(T)> {
+struct tuple_size<GTEST_9_TUPLE_(T) > {
   static const int value = 9;
 };
 
 template <GTEST_10_TYPENAMES_(T)>
-struct tuple_size<GTEST_10_TUPLE_(T)> {
+struct tuple_size<GTEST_10_TUPLE_(T) > {
   static const int value = 10;
 };
 
@@ -966,8 +966,8 @@ template <GTEST_10_TYPENAMES_(T), GTEST_10_TYPENAMES_(U)>
 inline bool operator==(const GTEST_10_TUPLE_(T)& t,
                        const GTEST_10_TUPLE_(U)& u) {
   return gtest_internal::SameSizeTuplePrefixComparator<
-      tuple_size<GTEST_10_TUPLE_(T)>::value,
-      tuple_size<GTEST_10_TUPLE_(U)>::value>::Eq(t, u);
+      tuple_size<GTEST_10_TUPLE_(T) >::value,
+      tuple_size<GTEST_10_TUPLE_(U) >::value>::Eq(t, u);
 }
 
 template <GTEST_10_TYPENAMES_(T), GTEST_10_TYPENAMES_(U)>

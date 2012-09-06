@@ -118,7 +118,7 @@ struct TupleElement;
 
 $for i [[
 template <GTEST_$(n)_TYPENAMES_(T)>
-struct TupleElement<true, $i, GTEST_$(n)_TUPLE_(T)> {
+struct TupleElement<true, $i, GTEST_$(n)_TUPLE_(T) > {
   typedef T$i type;
 };
 
@@ -221,7 +221,7 @@ template <typename Tuple> struct tuple_size;
 
 $for j [[
 template <GTEST_$(j)_TYPENAMES_(T)>
-struct tuple_size<GTEST_$(j)_TUPLE_(T)> {
+struct tuple_size<GTEST_$(j)_TUPLE_(T) > {
   static const int value = $j;
 };
 
@@ -305,8 +305,8 @@ template <GTEST_$(n)_TYPENAMES_(T), GTEST_$(n)_TYPENAMES_(U)>
 inline bool operator==(const GTEST_$(n)_TUPLE_(T)& t,
                        const GTEST_$(n)_TUPLE_(U)& u) {
   return gtest_internal::SameSizeTuplePrefixComparator<
-      tuple_size<GTEST_$(n)_TUPLE_(T)>::value,
-      tuple_size<GTEST_$(n)_TUPLE_(U)>::value>::Eq(t, u);
+      tuple_size<GTEST_$(n)_TUPLE_(T) >::value,
+      tuple_size<GTEST_$(n)_TUPLE_(U) >::value>::Eq(t, u);
 }
 
 template <GTEST_$(n)_TYPENAMES_(T), GTEST_$(n)_TYPENAMES_(U)>
