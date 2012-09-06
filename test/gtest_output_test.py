@@ -213,7 +213,7 @@ def GetShellCommandOutput(env_cmd):
   # Set and save the environment properly.
   environ = os.environ.copy()
   environ.update(env_cmd[0])
-  p = gtest_test_utils.Subprocess(env_cmd[1], env=environ, capture_stderr=False)
+  p = gtest_test_utils.Subprocess(env_cmd[1], env=environ)
 
   return p.output
 
