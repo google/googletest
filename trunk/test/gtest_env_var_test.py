@@ -67,8 +67,7 @@ def GetFlag(flag):
   args = [COMMAND]
   if flag is not None:
     args += [flag]
-  return gtest_test_utils.Subprocess(args, env=environ,
-                                     capture_stderr=False).output
+  return gtest_test_utils.Subprocess(args, env=environ).output
 
 
 def TestFlag(flag, test_val, default_val):

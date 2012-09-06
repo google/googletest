@@ -73,7 +73,7 @@
 // This allows a user to use his own types in Google Test assertions by
 // overloading the << operator.
 //
-// util/gtl/stl_logging-inl.h overloads << for STL containers.  These
+// util/gtl/stl_logging.h overloads << for STL containers.  These
 // overloads cannot be defined in the std namespace, as that will be
 // undefined behavior.  Therefore, they are defined in the global
 // namespace instead.
