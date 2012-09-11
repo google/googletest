@@ -7,7 +7,7 @@ variety of Google Test features.
   * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample1_unittest.cc Sample #1] shows the basic steps of using Google Test to test C++ functions.
   * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample2_unittest.cc Sample #2] shows a more complex unit test for a class with multiple member functions.
   * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample3_unittest.cc Sample #3] uses a test fixture.
-  * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample4_unittest.cc Sample #4] puts shared testing logic in a base test fixture, and reuses it in derived fixtures.
+  * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample4_unittest.cc Sample #4] is another basic example of using Google Test.
   * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample5_unittest.cc Sample #5] teaches how to reuse a test fixture in multiple test cases by deriving sub-fixtures from it.
   * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample6_unittest.cc Sample #6] demonstrates type-parameterized tests.
   * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample7_unittest.cc Sample #7] teaches the basics of value-parameterized tests.
