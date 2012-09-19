@@ -574,7 +574,7 @@ To write a death test, simply use one of the above macros inside your test
 function. For example,
 
 {{{
-TEST(My*DeathTest*, Foo) {
+TEST(MyDeathTest, Foo) {
   // This death test uses a compound statement.
   ASSERT_DEATH({ int n = 5; Foo(&n); }, "Error on line .* of Foo()");
 }
@@ -1114,7 +1114,7 @@ void TestFooHelper(bool flag_value) {
   // A code to test foo().
 }
 
-TEST(MyCodeTest, TestFooo) {
+TEST(MyCodeTest, TestFoo) {
   TestFooHelper(false);
   TestFooHelper(true);
 }
