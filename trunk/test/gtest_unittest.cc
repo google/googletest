@@ -1275,7 +1275,7 @@ TEST(StringTest, FormatWorks) {
   EXPECT_STREQ("<formatting error or buffer exceeded>",
                String::Format("x%s", buffer).c_str());
 
-#if GTEST_OS_LINUX
+#if GTEST_OS_LINUX && !GTEST_OS_LINUX_ANDROID
   // On Linux, invalid format spec should lead to an error message.
   // In other environment (e.g. MSVC on Windows), String::Format() may
   // simply ignore a bad format spec, so this assertion is run on
