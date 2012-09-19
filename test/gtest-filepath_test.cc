@@ -543,6 +543,8 @@ class DirectoryCreationTest : public Test {
       return String(temp_dir);
     else
       return String::Format("%s\\", temp_dir);
+#elif GTEST_OS_LINUX_ANDROID
+    return String("/sdcard/");
 #else
     return String("/tmp/");
 #endif  // GTEST_OS_WINDOWS_MOBILE
