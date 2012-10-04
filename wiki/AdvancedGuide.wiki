@@ -180,7 +180,7 @@ bool IsEven(int n) {
 the failed assertion `EXPECT_TRUE(IsEven(Fib(4)))` will print:
 
 <pre>
-  Value of: !IsEven(Fib(4))
+  Value of: IsEven(Fib(4))
     Actual: false (*3 is odd*)
   Expected: true
 </pre>
@@ -188,7 +188,7 @@ the failed assertion `EXPECT_TRUE(IsEven(Fib(4)))` will print:
 instead of a more opaque
 
 <pre>
-  Value of: !IsEven(Fib(4))
+  Value of: IsEven(Fib(4))
     Actual: false
   Expected: true
 </pre>
@@ -209,7 +209,7 @@ case, you can supply a success message:
 Then the statement `EXPECT_FALSE(IsEven(Fib(6)))` will print
 
 <pre>
-  Value of: !IsEven(Fib(6))
+  Value of: IsEven(Fib(6))
     Actual: true (8 is even)
   Expected: false
 </pre>
