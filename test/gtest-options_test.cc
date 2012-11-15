@@ -78,14 +78,14 @@ TEST(XmlOutputTest, GetOutputFormat) {
 
 TEST(XmlOutputTest, GetOutputFileDefault) {
   GTEST_FLAG(output) = "";
-  EXPECT_STREQ(GetAbsolutePathOf(FilePath("test_detail.xml")).c_str(),
-               UnitTestOptions::GetAbsolutePathToOutputFile().c_str());
+  EXPECT_EQ(GetAbsolutePathOf(FilePath("test_detail.xml")).string(),
+            UnitTestOptions::GetAbsolutePathToOutputFile());
 }
 
 TEST(XmlOutputTest, GetOutputFileSingleFile) {
   GTEST_FLAG(output) = "xml:filename.abc";
-  EXPECT_STREQ(GetAbsolutePathOf(FilePath("filename.abc")).c_str(),
-               UnitTestOptions::GetAbsolutePathToOutputFile().c_str());
+  EXPECT_EQ(GetAbsolutePathOf(FilePath("filename.abc")).string(),
+            UnitTestOptions::GetAbsolutePathToOutputFile());
 }
 
 TEST(XmlOutputTest, GetOutputFileFromDirectoryPath) {
@@ -93,8 +93,9 @@ TEST(XmlOutputTest, GetOutputFileFromDirectoryPath) {
   const std::string expected_output_file =
       GetAbsolutePathOf(
           FilePath(std::string("path") + GTEST_PATH_SEP_ +
-                   GetCurrentExecutableName().c_str() + ".xml")).c_str();
-  const String& output_file = UnitTestOptions::GetAbsolutePathToOutputFile();
+                   GetCurrentExecutableName().string() + ".xml")).string();
+  const std::string& output_file =
+      UnitTestOptions::GetAbsolutePathToOutputFile();
 #if GTEST_OS_WINDOWS
   EXPECT_STRCASEEQ(expected_output_file.c_str(), output_file.c_str());
 #else
@@ -103,7 +104,7 @@ TEST(XmlOutputTest, GetOutputFileFromDirectoryPath) {
 }
 
 TEST(OutputFileHelpersTest, GetCurrentExecutableName) {
-  const std::string exe_str = GetCurrentExecutableName().c_str();
+  const std::string exe_str = GetCurrentExecutableName().string();
 #if GTEST_OS_WINDOWS
   const bool success =
       _strcmpi("gtest-options_test", exe_str.c_str()) == 0 ||
@@ -129,12 +130,12 @@ class XmlOutputChangeDirTest : public Test {
     original_working_dir_ = FilePath::GetCurrentDir();
     posix::ChDir("..");
     // This will make the test fail if run from the root directory.
-    EXPECT_STRNE(original_working_dir_.c_str(),
-                 FilePath::GetCurrentDir().c_str());
+    EXPECT_NE(original_working_dir_.string(),
+              FilePath::GetCurrentDir().string());
   }
 
   virtual void TearDown() {
-    posix::ChDir(original_working_dir_.c_str());
+    posix::ChDir(original_working_dir_.string().c_str());
   }
 
   FilePath original_working_dir_;
@@ -142,23 +143,23 @@ class XmlOutputChangeDirTest : public Test {
 
 TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithDefault) {
   GTEST_FLAG(output) = "";
-  EXPECT_STREQ(FilePath::ConcatPaths(original_working_dir_,
-                                     FilePath("test_detail.xml")).c_str(),
-               UnitTestOptions::GetAbsolutePathToOutputFile().c_str());
+  EXPECT_EQ(FilePath::ConcatPaths(original_working_dir_,
+                                  FilePath("test_detail.xml")).string(),
+            UnitTestOptions::GetAbsolutePathToOutputFile());
 }
 
 TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithDefaultXML) {
   GTEST_FLAG(output) = "xml";
-  EXPECT_STREQ(FilePath::ConcatPaths(original_working_dir_,
-                                     FilePath("test_detail.xml")).c_str(),
-               UnitTestOptions::GetAbsolutePathToOutputFile().c_str());
+  EXPECT_EQ(FilePath::ConcatPaths(original_working_dir_,
+                                  FilePath("test_detail.xml")).string(),
+            UnitTestOptions::GetAbsolutePathToOutputFile());
 }
 
 TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithRelativeFile) {
   GTEST_FLAG(output) = "xml:filename.abc";
-  EXPECT_STREQ(FilePath::ConcatPaths(original_working_dir_,
-                                     FilePath("filename.abc")).c_str(),
-               UnitTestOptions::GetAbsolutePathToOutputFile().c_str());
+  EXPECT_EQ(FilePath::ConcatPaths(original_working_dir_,
+                                  FilePath("filename.abc")).string(),
+            UnitTestOptions::GetAbsolutePathToOutputFile());
 }
 
 TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithRelativePath) {
@@ -167,8 +168,9 @@ TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithRelativePath) {
       FilePath::ConcatPaths(
           original_working_dir_,
           FilePath(std::string("path") + GTEST_PATH_SEP_ +
-                   GetCurrentExecutableName().c_str() + ".xml")).c_str();
-  const String& output_file = UnitTestOptions::GetAbsolutePathToOutputFile();
+                   GetCurrentExecutableName().string() + ".xml")).string();
+  const std::string& output_file =
+      UnitTestOptions::GetAbsolutePathToOutputFile();
 #if GTEST_OS_WINDOWS
   EXPECT_STRCASEEQ(expected_output_file.c_str(), output_file.c_str());
 #else
@@ -179,12 +181,12 @@ TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithRelativePath) {
 TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithAbsoluteFile) {
 #if GTEST_OS_WINDOWS
   GTEST_FLAG(output) = "xml:c:\\tmp\\filename.abc";
-  EXPECT_STREQ(FilePath("c:\\tmp\\filename.abc").c_str(),
-               UnitTestOptions::GetAbsolutePathToOutputFile().c_str());
+  EXPECT_EQ(FilePath("c:\\tmp\\filename.abc").string(),
+            UnitTestOptions::GetAbsolutePathToOutputFile());
 #else
   GTEST_FLAG(output) ="xml:/tmp/filename.abc";
-  EXPECT_STREQ(FilePath("/tmp/filename.abc").c_str(),
-               UnitTestOptions::GetAbsolutePathToOutputFile().c_str());
+  EXPECT_EQ(FilePath("/tmp/filename.abc").string(),
+            UnitTestOptions::GetAbsolutePathToOutputFile());
 #endif
 }
 
@@ -197,8 +199,9 @@ TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithAbsolutePath) {
 
   GTEST_FLAG(output) = "xml:" + path;
   const std::string expected_output_file =
-      path + GetCurrentExecutableName().c_str() + ".xml";
-  const String& output_file = UnitTestOptions::GetAbsolutePathToOutputFile();
+      path + GetCurrentExecutableName().string() + ".xml";
+  const std::string& output_file =
+      UnitTestOptions::GetAbsolutePathToOutputFile();
 
 #if GTEST_OS_WINDOWS
   EXPECT_STRCASEEQ(expected_output_file.c_str(), output_file.c_str());

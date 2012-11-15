@@ -77,7 +77,6 @@ using testing::internal::GetLastErrnoDescription;
 using testing::internal::GetUnitTestImpl;
 using testing::internal::InDeathTestChild;
 using testing::internal::ParseNaturalNumber;
-using testing::internal::String;
 
 namespace testing {
 namespace internal {
@@ -1139,26 +1138,26 @@ TEST(ParseNaturalNumberTest, RejectsInvalidFormat) {
   BiggestParsable result = 0;
 
   // Rejects non-numbers.
-  EXPECT_FALSE(ParseNaturalNumber(String("non-number string"), &result));
+  EXPECT_FALSE(ParseNaturalNumber("non-number string", &result));
 
   // Rejects numbers with whitespace prefix.
-  EXPECT_FALSE(ParseNaturalNumber(String(" 123"), &result));
+  EXPECT_FALSE(ParseNaturalNumber(" 123", &result));
 
   // Rejects negative numbers.
-  EXPECT_FALSE(ParseNaturalNumber(String("-123"), &result));
+  EXPECT_FALSE(ParseNaturalNumber("-123", &result));
 
   // Rejects numbers starting with a plus sign.
-  EXPECT_FALSE(ParseNaturalNumber(String("+123"), &result));
+  EXPECT_FALSE(ParseNaturalNumber("+123", &result));
   errno = 0;
 }
 
 TEST(ParseNaturalNumberTest, RejectsOverflownNumbers) {
   BiggestParsable result = 0;
 
-  EXPECT_FALSE(ParseNaturalNumber(String("99999999999999999999999"), &result));
+  EXPECT_FALSE(ParseNaturalNumber("99999999999999999999999", &result));
 
   signed char char_result = 0;
-  EXPECT_FALSE(ParseNaturalNumber(String("200"), &char_result));
+  EXPECT_FALSE(ParseNaturalNumber("200", &char_result));
   errno = 0;
 }
 
@@ -1166,16 +1165,16 @@ TEST(ParseNaturalNumberTest, AcceptsValidNumbers) {
   BiggestParsable result = 0;
 
   result = 0;
-  ASSERT_TRUE(ParseNaturalNumber(String("123"), &result));
+  ASSERT_TRUE(ParseNaturalNumber("123", &result));
   EXPECT_EQ(123U, result);
 
   // Check 0 as an edge case.
   result = 1;
-  ASSERT_TRUE(ParseNaturalNumber(String("0"), &result));
+  ASSERT_TRUE(ParseNaturalNumber("0", &result));
   EXPECT_EQ(0U, result);
 
   result = 1;
-  ASSERT_TRUE(ParseNaturalNumber(String("00000"), &result));
+  ASSERT_TRUE(ParseNaturalNumber("00000", &result));
   EXPECT_EQ(0U, result);
 }
 
@@ -1211,11 +1210,11 @@ TEST(ParseNaturalNumberTest, AcceptsTypeLimits) {
 
 TEST(ParseNaturalNumberTest, WorksForShorterIntegers) {
   short short_result = 0;
-  ASSERT_TRUE(ParseNaturalNumber(String("123"), &short_result));
+  ASSERT_TRUE(ParseNaturalNumber("123", &short_result));
   EXPECT_EQ(123, short_result);
 
   signed char char_result = 0;
-  ASSERT_TRUE(ParseNaturalNumber(String("123"), &char_result));
+  ASSERT_TRUE(ParseNaturalNumber("123", &char_result));
   EXPECT_EQ(123, char_result);
 }
 
@@ -1245,7 +1244,6 @@ TEST(ConditionalDeathMacrosDeathTest, ExpectsDeathWhenDeathTestsAvailable) {
 
 using testing::internal::CaptureStderr;
 using testing::internal::GetCapturedStderr;
-using testing::internal::String;
 
 // Tests that EXPECT_DEATH_IF_SUPPORTED/ASSERT_DEATH_IF_SUPPORTED are still
 // defined but do not trigger failures when death tests are not available on
@@ -1255,7 +1253,7 @@ TEST(ConditionalDeathMacrosTest, WarnsWhenDeathTestsNotAvailable) {
   // when death tests are not supported.
   CaptureStderr();
   EXPECT_DEATH_IF_SUPPORTED(;, "");
-  String output = GetCapturedStderr();
+  std::string output = GetCapturedStderr();
   ASSERT_TRUE(NULL != strstr(output.c_str(),
                              "Death tests are not supported on this platform"));
   ASSERT_TRUE(NULL != strstr(output.c_str(), ";"));

@@ -62,7 +62,7 @@ namespace internal {
 // NB: This function is also used in Google Mock, so don't move it inside of
 // the typed-test-only section below.
 template <typename T>
-String GetTypeName() {
+std::string GetTypeName() {
 # if GTEST_HAS_RTTI
 
   const char* const name = typeid(T).name();
@@ -74,7 +74,7 @@ String GetTypeName() {
   using abi::__cxa_demangle;
 #   endif  // GTEST_HAS_CXXABI_H_
   char* const readable_name = __cxa_demangle(name, 0, 0, &status);
-  const String name_str(status == 0 ? readable_name : name);
+  const std::string name_str(status == 0 ? readable_name : name);
   free(readable_name);
   return name_str;
 #  else

@@ -280,10 +280,10 @@ class DogAdder {
   bool operator<(const DogAdder& other) const {
     return value_ < other.value_;
   }
-  const ::testing::internal::String& value() const { return value_; }
+  const std::string& value() const { return value_; }
 
  private:
-  ::testing::internal::String value_;
+  std::string value_;
 };
 
 TEST(RangeTest, WorksWithACustomType) {
