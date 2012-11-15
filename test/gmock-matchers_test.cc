@@ -131,7 +131,6 @@ using testing::internal::IsReadableTypeName;
 using testing::internal::JoinAsTuple;
 using testing::internal::RE;
 using testing::internal::StreamMatchResultListener;
-using testing::internal::String;
 using testing::internal::StringMatchResultListener;
 using testing::internal::Strings;
 using testing::internal::linked_ptr;

@@ -935,26 +935,33 @@ bool CaseInsensitiveStringEquals(const StringType& s1,
 template <typename StringType>
 class StrEqualityMatcher {
  public:
-  typedef typename StringType::const_pointer ConstCharPointer;
-
   StrEqualityMatcher(const StringType& str, bool expect_eq,
                      bool case_sensitive)
       : string_(str), expect_eq_(expect_eq), case_sensitive_(case_sensitive) {}
 
-  // When expect_eq_ is true, returns true iff s is equal to string_;
-  // otherwise returns true iff s is not equal to string_.
-  bool MatchAndExplain(ConstCharPointer s,
-                       MatchResultListener* listener) const {
+  // Accepts pointer types, particularly:
+  //   const char*
+  //   char*
+  //   const wchar_t*
+  //   wchar_t*
+  template <typename CharType>
+  bool MatchAndExplain(CharType* s, MatchResultListener* listener) const {
     if (s == NULL) {
       return !expect_eq_;
     }
     return MatchAndExplain(StringType(s), listener);
   }
 
-  bool MatchAndExplain(const StringType& s,
+  // Matches anything that can convert to StringType.
+  //
+  // This is a template, not just a plain function with const StringType&,
+  // because StringPiece has some interfering non-explicit constructors.
+  template <typename MatcheeStringType>
+  bool MatchAndExplain(const MatcheeStringType& s,
                        MatchResultListener* /* listener */) const {
-    const bool eq = case_sensitive_ ? s == string_ :
-        CaseInsensitiveStringEquals(s, string_);
+    const StringType& s2(s);
+    const bool eq = case_sensitive_ ? s2 == string_ :
+        CaseInsensitiveStringEquals(s2, string_);
     return expect_eq_ == eq;
   }
 
@@ -989,22 +996,28 @@ class StrEqualityMatcher {
 template <typename StringType>
 class HasSubstrMatcher {
  public:
-  typedef typename StringType::const_pointer ConstCharPointer;
-
   explicit HasSubstrMatcher(const StringType& substring)
       : substring_(substring) {}
 
-  // These overloaded methods allow HasSubstr(substring) to be used as a
-  // Matcher<T> as long as T can be converted to string.  Returns true
-  // iff s contains substring_ as a substring.
-  bool MatchAndExplain(ConstCharPointer s,
-                       MatchResultListener* listener) const {
+  // Accepts pointer types, particularly:
+  //   const char*
+  //   char*
+  //   const wchar_t*
+  //   wchar_t*
+  template <typename CharType>
+  bool MatchAndExplain(CharType* s, MatchResultListener* listener) const {
     return s != NULL && MatchAndExplain(StringType(s), listener);
   }
 
-  bool MatchAndExplain(const StringType& s,
+  // Matches anything that can convert to StringType.
+  //
+  // This is a template, not just a plain function with const StringType&,
+  // because StringPiece has some interfering non-explicit constructors.
+  template <typename MatcheeStringType>
+  bool MatchAndExplain(const MatcheeStringType& s,
                        MatchResultListener* /* listener */) const {
-    return s.find(substring_) != StringType::npos;
+    const StringType& s2(s);
+    return s2.find(substring_) != StringType::npos;
   }
 
   // Describes what this matcher matches.
@@ -1030,23 +1043,29 @@ class HasSubstrMatcher {
 template <typename StringType>
 class StartsWithMatcher {
  public:
-  typedef typename StringType::const_pointer ConstCharPointer;
-
   explicit StartsWithMatcher(const StringType& prefix) : prefix_(prefix) {
   }
 
-  // These overloaded methods allow StartsWith(prefix) to be used as a
-  // Matcher<T> as long as T can be converted to string.  Returns true
-  // iff s starts with prefix_.
-  bool MatchAndExplain(ConstCharPointer s,
-                       MatchResultListener* listener) const {
+  // Accepts pointer types, particularly:
+  //   const char*
+  //   char*
+  //   const wchar_t*
+  //   wchar_t*
+  template <typename CharType>
+  bool MatchAndExplain(CharType* s, MatchResultListener* listener) const {
     return s != NULL && MatchAndExplain(StringType(s), listener);
   }
 
-  bool MatchAndExplain(const StringType& s,
+  // Matches anything that can convert to StringType.
+  //
+  // This is a template, not just a plain function with const StringType&,
+  // because StringPiece has some interfering non-explicit constructors.
+  template <typename MatcheeStringType>
+  bool MatchAndExplain(const MatcheeStringType& s,
                        MatchResultListener* /* listener */) const {
-    return s.length() >= prefix_.length() &&
-        s.substr(0, prefix_.length()) == prefix_;
+    const StringType& s2(s);
+    return s2.length() >= prefix_.length() &&
+        s2.substr(0, prefix_.length()) == prefix_;
   }
 
   void DescribeTo(::std::ostream* os) const {
@@ -1071,22 +1090,28 @@ class StartsWithMatcher {
 template <typename StringType>
 class EndsWithMatcher {
  public:
-  typedef typename StringType::const_pointer ConstCharPointer;
-
   explicit EndsWithMatcher(const StringType& suffix) : suffix_(suffix) {}
 
-  // These overloaded methods allow EndsWith(suffix) to be used as a
-  // Matcher<T> as long as T can be converted to string.  Returns true
-  // iff s ends with suffix_.
-  bool MatchAndExplain(ConstCharPointer s,
-                       MatchResultListener* listener) const {
+  // Accepts pointer types, particularly:
+  //   const char*
+  //   char*
+  //   const wchar_t*
+  //   wchar_t*
+  template <typename CharType>
+  bool MatchAndExplain(CharType* s, MatchResultListener* listener) const {
     return s != NULL && MatchAndExplain(StringType(s), listener);
   }
 
-  bool MatchAndExplain(const StringType& s,
+  // Matches anything that can convert to StringType.
+  //
+  // This is a template, not just a plain function with const StringType&,
+  // because StringPiece has some interfering non-explicit constructors.
+  template <typename MatcheeStringType>
+  bool MatchAndExplain(const MatcheeStringType& s,
                        MatchResultListener* /* listener */) const {
-    return s.length() >= suffix_.length() &&
-        s.substr(s.length() - suffix_.length()) == suffix_;
+    const StringType& s2(s);
+    return s2.length() >= suffix_.length() &&
+        s2.substr(s2.length() - suffix_.length()) == suffix_;
   }
 
   void DescribeTo(::std::ostream* os) const {
@@ -1113,19 +1138,26 @@ class MatchesRegexMatcher {
   MatchesRegexMatcher(const RE* regex, bool full_match)
       : regex_(regex), full_match_(full_match) {}
 
-  // These overloaded methods allow MatchesRegex(regex) to be used as
-  // a Matcher<T> as long as T can be converted to string.  Returns
-  // true iff s matches regular expression regex.  When full_match_ is
-  // true, a full match is done; otherwise a partial match is done.
-  bool MatchAndExplain(const char* s,
-                       MatchResultListener* listener) const {
+  // Accepts pointer types, particularly:
+  //   const char*
+  //   char*
+  //   const wchar_t*
+  //   wchar_t*
+  template <typename CharType>
+  bool MatchAndExplain(CharType* s, MatchResultListener* listener) const {
     return s != NULL && MatchAndExplain(internal::string(s), listener);
   }
 
-  bool MatchAndExplain(const internal::string& s,
+  // Matches anything that can convert to internal::string.
+  //
+  // This is a template, not just a plain function with const internal::string&,
+  // because StringPiece has some interfering non-explicit constructors.
+  template <class MatcheeStringType>
+  bool MatchAndExplain(const MatcheeStringType& s,
                        MatchResultListener* /* listener */) const {
-    return full_match_ ? RE::FullMatch(s, *regex_) :
-        RE::PartialMatch(s, *regex_);
+    const internal::string& s2(s);
+    return full_match_ ? RE::FullMatch(s2, *regex_) :
+        RE::PartialMatch(s2, *regex_);
   }
 
   void DescribeTo(::std::ostream* os) const {
@@ -2527,11 +2559,9 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
   // Constructs the matcher from a sequence of element values or
   // element matchers.
   template <typename InputIter>
-  ElementsAreMatcherImpl(InputIter first, size_t a_count) {
-    matchers_.reserve(a_count);
-    InputIter it = first;
-    for (size_t i = 0; i != a_count; ++i, ++it) {
-      matchers_.push_back(MatcherCast<const Element&>(*it));
+  ElementsAreMatcherImpl(InputIter first, InputIter last) {
+    while (first != last) {
+      matchers_.push_back(MatcherCast<const Element&>(*first++));
     }
   }
 
@@ -2642,7 +2672,8 @@ class ElementsAreMatcher0 {
         Element;
 
     const Matcher<const Element&>* const matchers = NULL;
-    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers, 0));
+    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers,
+                                                             matchers));
   }
 };
 
@@ -2650,21 +2681,17 @@ class ElementsAreMatcher0 {
 template <typename T>
 class ElementsAreArrayMatcher {
  public:
-  ElementsAreArrayMatcher(const T* first, size_t count) :
-      first_(first), count_(count) {}
+  template <typename Iter>
+  ElementsAreArrayMatcher(Iter first, Iter last) : matchers_(first, last) {}
 
   template <typename Container>
   operator Matcher<Container>() const {
-    typedef GTEST_REMOVE_REFERENCE_AND_CONST_(Container) RawContainer;
-    typedef typename internal::StlContainerView<RawContainer>::type::value_type
-        Element;
-
-    return MakeMatcher(new ElementsAreMatcherImpl<Container>(first_, count_));
+    return MakeMatcher(new ElementsAreMatcherImpl<Container>(
+        matchers_.begin(), matchers_.end()));
   }
 
  private:
-  const T* const first_;
-  const size_t count_;
+  const std::vector<T> matchers_;
 
   GTEST_DISALLOW_ASSIGN_(ElementsAreArrayMatcher);
 };

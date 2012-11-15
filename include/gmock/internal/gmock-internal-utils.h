@@ -348,6 +348,19 @@ template <typename T> struct type_equals<T, T> : public true_type {};
 template <typename T> struct remove_reference { typedef T type; };  // NOLINT
 template <typename T> struct remove_reference<T&> { typedef T type; }; // NOLINT
 
+// DecayArray<T>::type turns an array type U[N] to const U* and preserves
+// other types.  Useful for saving a copy of a function argument.
+template <typename T> struct DecayArray { typedef T type; };  // NOLINT
+template <typename T, size_t N> struct DecayArray<T[N]> {
+  typedef const T* type;
+};
+// Sometimes people use arrays whose size is not available at the use site
+// (e.g. extern const char kNamePrefix[]).  This specialization covers that
+// case.
+template <typename T> struct DecayArray<T[]> {
+  typedef const T* type;
+};
+
 // Invalid<T>() returns an invalid value of type T.  This is useful
 // when a value of type T is needed for compilation, but the statement
 // will not really be executed (or we don't care if the statement

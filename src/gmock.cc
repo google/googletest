@@ -62,7 +62,7 @@ static const char* ParseGoogleMockFlagValue(const char* str,
   if (str == NULL || flag == NULL) return NULL;
 
   // The flag must start with "--gmock_".
-  const String flag_str = String::Format("--gmock_%s", flag);
+  const std::string flag_str = std::string("--gmock_") + flag;
   const size_t flag_len = flag_str.length();
   if (strncmp(str, flag_str.c_str(), flag_len) != 0) return NULL;
 
@@ -107,7 +107,7 @@ static bool ParseGoogleMockBoolFlag(const char* str, const char* flag,
 // On success, stores the value of the flag in *value, and returns
 // true.  On failure, returns false without changing *value.
 static bool ParseGoogleMockStringFlag(const char* str, const char* flag,
-                                      String* value) {
+                                      std::string* value) {
   // Gets the value of the flag as a string.
   const char* const value_str = ParseGoogleMockFlagValue(str, flag, false);
 
@@ -131,7 +131,7 @@ void InitGoogleMockImpl(int* argc, CharType** argv) {
   if (*argc <= 0) return;
 
   for (int i = 1; i != *argc; i++) {
-    const String arg_string = StreamableToString(argv[i]);
+    const std::string arg_string = StreamableToString(argv[i]);
     const char* const arg = arg_string.c_str();
 
     // Do we see a Google Mock flag?

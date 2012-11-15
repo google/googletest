@@ -38,6 +38,7 @@
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_MATCHERS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_MATCHERS_H_
 
+#include <iterator>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -305,7 +306,9 @@ class ArgsMatcher {
   GTEST_DISALLOW_ASSIGN_(ArgsMatcher);
 };
 
-// Implements ElementsAre() of 1-10 arguments.
+// Implements ElementsAre() of 1-10 arguments.  The use of DecayArray in
+// the implementation allows ElementsAre() to accept string literals, whose
+// inferred type is const char[N] while we want to treat them as const char*.
 
 template <typename T1>
 class ElementsAreMatcher1 {
@@ -326,11 +329,12 @@ class ElementsAreMatcher1 {
     // a local array.
     const Matcher<const Element&> matcher =
         MatcherCast<const Element&>(e1_);
-    return MakeMatcher(new ElementsAreMatcherImpl<Container>(&matcher, 1));
+    return MakeMatcher(new ElementsAreMatcherImpl<Container>(&matcher,
+                                                             &matcher + 1));
   }
 
  private:
-  const T1& e1_;
+    const typename DecayArray<T1>::type e1_;
 
   GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher1);
 };
@@ -351,12 +355,13 @@ class ElementsAreMatcher2 {
       MatcherCast<const Element&>(e2_),
     };
 
-    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers, 2));
+    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers,
+                                                             matchers + 2));
   }
 
  private:
-  const T1& e1_;
-  const T2& e2_;
+    const typename DecayArray<T1>::type e1_;
+    const typename DecayArray<T2>::type e2_;
 
   GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher2);
 };
@@ -379,13 +384,14 @@ class ElementsAreMatcher3 {
       MatcherCast<const Element&>(e3_),
     };
 
-    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers, 3));
+    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers,
+                                                             matchers + 3));
   }
 
  private:
-  const T1& e1_;
-  const T2& e2_;
-  const T3& e3_;
+    const typename DecayArray<T1>::type e1_;
+    const typename DecayArray<T2>::type e2_;
+    const typename DecayArray<T3>::type e3_;
 
   GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher3);
 };
@@ -409,14 +415,15 @@ class ElementsAreMatcher4 {
       MatcherCast<const Element&>(e4_),
     };
 
-    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers, 4));
+    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers,
+                                                             matchers + 4));
   }
 
  private:
-  const T1& e1_;
-  const T2& e2_;
-  const T3& e3_;
-  const T4& e4_;
+    const typename DecayArray<T1>::type e1_;
+    const typename DecayArray<T2>::type e2_;
+    const typename DecayArray<T3>::type e3_;
+    const typename DecayArray<T4>::type e4_;
 
   GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher4);
 };
@@ -441,15 +448,16 @@ class ElementsAreMatcher5 {
       MatcherCast<const Element&>(e5_),
     };
 
-    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers, 5));
+    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers,
+                                                             matchers + 5));
   }
 
  private:
-  const T1& e1_;
-  const T2& e2_;
-  const T3& e3_;
-  const T4& e4_;
-  const T5& e5_;
+    const typename DecayArray<T1>::type e1_;
+    const typename DecayArray<T2>::type e2_;
+    const typename DecayArray<T3>::type e3_;
+    const typename DecayArray<T4>::type e4_;
+    const typename DecayArray<T5>::type e5_;
 
   GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher5);
 };
@@ -477,16 +485,17 @@ class ElementsAreMatcher6 {
       MatcherCast<const Element&>(e6_),
     };
 
-    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers, 6));
+    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers,
+                                                             matchers + 6));
   }
 
  private:
-  const T1& e1_;
-  const T2& e2_;
-  const T3& e3_;
-  const T4& e4_;
-  const T5& e5_;
-  const T6& e6_;
+    const typename DecayArray<T1>::type e1_;
+    const typename DecayArray<T2>::type e2_;
+    const typename DecayArray<T3>::type e3_;
+    const typename DecayArray<T4>::type e4_;
+    const typename DecayArray<T5>::type e5_;
+    const typename DecayArray<T6>::type e6_;
 
   GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher6);
 };
@@ -515,17 +524,18 @@ class ElementsAreMatcher7 {
       MatcherCast<const Element&>(e7_),
     };
 
-    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers, 7));
+    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers,
+                                                             matchers + 7));
   }
 
  private:
-  const T1& e1_;
-  const T2& e2_;
-  const T3& e3_;
-  const T4& e4_;
-  const T5& e5_;
-  const T6& e6_;
-  const T7& e7_;
+    const typename DecayArray<T1>::type e1_;
+    const typename DecayArray<T2>::type e2_;
+    const typename DecayArray<T3>::type e3_;
+    const typename DecayArray<T4>::type e4_;
+    const typename DecayArray<T5>::type e5_;
+    const typename DecayArray<T6>::type e6_;
+    const typename DecayArray<T7>::type e7_;
 
   GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher7);
 };
@@ -555,18 +565,19 @@ class ElementsAreMatcher8 {
       MatcherCast<const Element&>(e8_),
     };
 
-    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers, 8));
+    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers,
+                                                             matchers + 8));
   }
 
  private:
-  const T1& e1_;
-  const T2& e2_;
-  const T3& e3_;
-  const T4& e4_;
-  const T5& e5_;
-  const T6& e6_;
-  const T7& e7_;
-  const T8& e8_;
+    const typename DecayArray<T1>::type e1_;
+    const typename DecayArray<T2>::type e2_;
+    const typename DecayArray<T3>::type e3_;
+    const typename DecayArray<T4>::type e4_;
+    const typename DecayArray<T5>::type e5_;
+    const typename DecayArray<T6>::type e6_;
+    const typename DecayArray<T7>::type e7_;
+    const typename DecayArray<T8>::type e8_;
 
   GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher8);
 };
@@ -598,19 +609,20 @@ class ElementsAreMatcher9 {
       MatcherCast<const Element&>(e9_),
     };
 
-    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers, 9));
+    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers,
+                                                             matchers + 9));
   }
 
  private:
-  const T1& e1_;
-  const T2& e2_;
-  const T3& e3_;
-  const T4& e4_;
-  const T5& e5_;
-  const T6& e6_;
-  const T7& e7_;
-  const T8& e8_;
-  const T9& e9_;
+    const typename DecayArray<T1>::type e1_;
+    const typename DecayArray<T2>::type e2_;
+    const typename DecayArray<T3>::type e3_;
+    const typename DecayArray<T4>::type e4_;
+    const typename DecayArray<T5>::type e5_;
+    const typename DecayArray<T6>::type e6_;
+    const typename DecayArray<T7>::type e7_;
+    const typename DecayArray<T8>::type e8_;
+    const typename DecayArray<T9>::type e9_;
 
   GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher9);
 };
@@ -643,20 +655,21 @@ class ElementsAreMatcher10 {
       MatcherCast<const Element&>(e10_),
     };
 
-    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers, 10));
+    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers,
+                                                             matchers + 10));
   }
 
  private:
-  const T1& e1_;
-  const T2& e2_;
-  const T3& e3_;
-  const T4& e4_;
-  const T5& e5_;
-  const T6& e6_;
-  const T7& e7_;
-  const T8& e8_;
-  const T9& e9_;
-  const T10& e10_;
+    const typename DecayArray<T1>::type e1_;
+    const typename DecayArray<T2>::type e2_;
+    const typename DecayArray<T3>::type e3_;
+    const typename DecayArray<T4>::type e4_;
+    const typename DecayArray<T5>::type e5_;
+    const typename DecayArray<T6>::type e6_;
+    const typename DecayArray<T7>::type e7_;
+    const typename DecayArray<T8>::type e8_;
+    const typename DecayArray<T9>::type e9_;
+    const typename DecayArray<T10>::type e10_;
 
   GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher10);
 };
@@ -1007,23 +1020,54 @@ inline internal::ElementsAreMatcher10<T1, T2, T3, T4, T5, T6, T7, T8, T9,
       T10>(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10);
 }
 
-// ElementsAreArray(array) and ElementAreArray(array, count) are like
-// ElementsAre(), except that they take an array of values or
-// matchers.  The former form infers the size of 'array', which must
-// be a static C-style array.  In the latter form, 'array' can either
-// be a static array or a pointer to a dynamically created array.
-
+// ElementsAreArray(array)
+// ElementsAreArray(pointer, count)
+// ElementsAreArray(vector)
+// ElementsAreArray(first, last)
+//
+// The ElementsAreArray() functions are like ElementsAre(...), except that
+// they are given a sequence of matchers or values rather than taking each
+// element as a function argument. The sequence can be specified as a
+// C-style array, a pointer and count, a vector, or an STL iterator range.
+//
+// * The array form infers the size of 'array', which must be of a
+//   statically-sized C-style array type.
+//
+// * The (pointer, count) form can take either a statically-sized C-style
+//   array or a pointer to a dynamically created array. It does not take
+//   ownership of the pointer.
+//
+// * The vector form can take a std::vector either of values or of matchers.
+//
+// * The (first, last) form can take any STL iterator range.
+//
+// All forms of ElementsAreArray() make a copy of the input sequence.
 template <typename T>
 inline internal::ElementsAreArrayMatcher<T> ElementsAreArray(
     const T* first, size_t count) {
-  return internal::ElementsAreArrayMatcher<T>(first, count);
+  return internal::ElementsAreArrayMatcher<T>(first, first + count);
 }
 
 template <typename T, size_t N>
-inline internal::ElementsAreArrayMatcher<T>
-ElementsAreArray(const T (&array)[N]) {
-  return internal::ElementsAreArrayMatcher<T>(array, N);
+inline internal::ElementsAreArrayMatcher<T> ElementsAreArray(
+    const T (&array)[N]) {
+  return internal::ElementsAreArrayMatcher<T>(array, array + N);
 }
+
+template <typename T, typename A>
+inline internal::ElementsAreArrayMatcher<T> ElementsAreArray(
+    const std::vector<T, A>& vec) {
+  return internal::ElementsAreArrayMatcher<T>(vec.begin(), vec.end());
+}
+
+template <typename Iter>
+inline internal::ElementsAreArrayMatcher<
+    typename std::iterator_traits<Iter>::value_type>
+ElementsAreArray(Iter first, Iter last) {
+  typedef typename std::iterator_traits<Iter>::value_type T;
+  return internal::ElementsAreArrayMatcher<T>(first, last);
+}
+
 
 // AllOf(m1, m2, ..., mk) matches any value that matches all of the given
 // sub-matchers.  AllOf is called fully qualified to prevent ADL from firing.

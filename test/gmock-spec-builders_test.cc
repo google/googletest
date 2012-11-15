@@ -94,7 +94,6 @@ using testing::internal::FormatFileLocation;
 using testing::internal::kErrorVerbosity;
 using testing::internal::kInfoVerbosity;
 using testing::internal::kWarningVerbosity;
-using testing::internal::String;
 using testing::internal::linked_ptr;
 using testing::internal::string;
 
@@ -632,7 +631,7 @@ TEST(ExpectCallSyntaxTest, WarnsOnTooManyActions) {
     b.DoB(1);
     b.DoB(2);
   }
-  const String output = GetCapturedStdout();
+  const std::string output = GetCapturedStdout();
   EXPECT_PRED_FORMAT2(
       IsSubstring,
       "Too many actions specified in EXPECT_CALL(b, DoB())...\n"
@@ -674,7 +673,7 @@ TEST(ExpectCallSyntaxTest, WarnsOnTooFewActions) {
 
   CaptureStdout();
   b.DoB();
-  const String output = GetCapturedStdout();
+  const std::string output = GetCapturedStdout();
   EXPECT_PRED_FORMAT2(
       IsSubstring,
       "Too few actions specified in EXPECT_CALL(b, DoB())...\n"
@@ -869,13 +868,13 @@ TEST(ExpectCallTest, TakesDefaultActionWhenWillListIsExhausted) {
                            // expectation has no action clause at all.
   EXPECT_EQ(1, b.DoB());
   EXPECT_EQ(2, b.DoB());
-  const String output1 = GetCapturedStdout();
+  const std::string output1 = GetCapturedStdout();
   EXPECT_STREQ("", output1.c_str());
 
   CaptureStdout();
   EXPECT_EQ(0, b.DoB());
   EXPECT_EQ(0, b.DoB());
-  const String output2 = GetCapturedStdout();
+  const std::string output2 = GetCapturedStdout();
   EXPECT_THAT(output2.c_str(),
               HasSubstr("Actions ran out in EXPECT_CALL(b, DoB())...\n"
                         "Called 3 times, but only 2 WillOnce()s are specified"
@@ -895,7 +894,7 @@ TEST(FunctionMockerTest, ReportsExpectCallLocationForExhausedActions) {
 
   CaptureStdout();
   EXPECT_EQ(0, b.DoB());
-  const String output = GetCapturedStdout();
+  const std::string output = GetCapturedStdout();
   // The warning message should contain the call location.
   EXPECT_PRED_FORMAT2(IsSubstring, expect_call_location, output);
 }
@@ -1873,14 +1872,8 @@ class MockC {
 
 class VerboseFlagPreservingFixture : public testing::Test {
  protected:
-  // The code needs to work when both ::string and ::std::string are defined
-  // and the flag is implemented as a testing::internal::String.  In this
-  // case, without the call to c_str(), the compiler will complain that it
-  // cannot figure out what overload of string constructor to use.
-  // TODO(vladl@google.com): Use internal::string instead of String for
-  // string flags in Google Test.
   VerboseFlagPreservingFixture()
-      : saved_verbose_flag_(GMOCK_FLAG(verbose).c_str()) {}
+      : saved_verbose_flag_(GMOCK_FLAG(verbose)) {}
 
   ~VerboseFlagPreservingFixture() { GMOCK_FLAG(verbose) = saved_verbose_flag_; }
 
@@ -1898,7 +1891,7 @@ TEST(FunctionCallMessageTest, UninterestingCallGeneratesFyiWithStackTrace) {
   MockC c;
   CaptureStdout();
   c.VoidMethod(false, 5, "Hi", NULL, Printable(), Unprintable());
-  const String output = GetCapturedStdout();
+  const std::string output = GetCapturedStdout();
   EXPECT_PRED_FORMAT2(IsSubstring, "GMOCK WARNING", output);
   EXPECT_PRED_FORMAT2(IsSubstring, "Stack trace:", output);
 
@@ -1915,7 +1908,7 @@ TEST(FunctionCallMessageTest, UninterestingCallGeneratesFyiWithStackTrace) {
   // stack trace.
   CaptureStdout();
   c.NonVoidMethod();
-  const String output2 = GetCapturedStdout();
+  const std::string output2 = GetCapturedStdout();
   EXPECT_PRED_FORMAT2(IsSubstring, "NonVoidMethod(", output2);
 
 # endif  // NDEBUG
@@ -1928,7 +1921,7 @@ TEST(FunctionCallMessageTest, UninterestingCallPrintsArgumentsAndReturnValue) {
   MockB b;
   CaptureStdout();
   b.DoB();
-  const String output1 = GetCapturedStdout();
+  const std::string output1 = GetCapturedStdout();
   EXPECT_PRED_FORMAT2(
       IsSubstring,
       "Uninteresting mock function call - returning default value.\n"
@@ -1940,7 +1933,7 @@ TEST(FunctionCallMessageTest, UninterestingCallPrintsArgumentsAndReturnValue) {
   MockC c;
   CaptureStdout();
   c.VoidMethod(false, 5, "Hi", NULL, Printable(), Unprintable());
-  const String output2 = GetCapturedStdout();
+  const std::string output2 = GetCapturedStdout();
   EXPECT_THAT(output2.c_str(),
               ContainsRegex(
                   "Uninteresting mock function call - returning directly\\.\n"
@@ -1958,7 +1951,7 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
   // should_print is true, the output should match the given regex and
   // contain the given function name in the stack trace.  When it's
   // false, the output should be empty.)
-  void VerifyOutput(const String& output, bool should_print,
+  void VerifyOutput(const std::string& output, bool should_print,
                     const string& expected_substring,
                     const string& function_name) {
     if (should_print) {

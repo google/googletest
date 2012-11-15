@@ -77,6 +77,7 @@ using testing::Ref;
 using testing::StaticAssertTypeEq;
 using testing::StrEq;
 using testing::Value;
+using testing::internal::ElementsAreArrayMatcher;
 using testing::internal::string;
 
 // Returns the description of the given matcher.
@@ -527,6 +528,51 @@ TEST(ElementsAreTest, WorksWithTwoDimensionalNativeArray) {
                               ElementsAre('l', 'o', '\0')));
 }
 
+TEST(ElementsAreTest, AcceptsStringLiteral) {
+  string array[] = { "hi", "one", "two" };
+  EXPECT_THAT(array, ElementsAre("hi", "one", "two"));
+  EXPECT_THAT(array, Not(ElementsAre("hi", "one", "too")));
+}
+
+#ifndef _MSC_VER
+
+// The following test passes a value of type const char[] to a
+// function template that expects const T&.  Some versions of MSVC
+// generates a compiler error C2665 for that.  We believe it's a bug
+// in MSVC.  Therefore this test is #if-ed out for MSVC.
+
+// Declared here with the size unknown.  Defined AFTER the following test.
+extern const char kHi[];
+
+TEST(ElementsAreTest, AcceptsArrayWithUnknownSize) {
+  // The size of kHi is not known in this test, but ElementsAre() should
+  // still accept it.
+
+  string array1[] = { "hi" };
+  EXPECT_THAT(array1, ElementsAre(kHi));
+
+  string array2[] = { "ho" };
+  EXPECT_THAT(array2, Not(ElementsAre(kHi)));
+}
+
+const char kHi[] = "hi";
+
+#endif  // _MSC_VER
+
+TEST(ElementsAreTest, MakesCopyOfArguments) {
+  int x = 1;
+  int y = 2;
+  // This should make a copy of x and y.
+  ::testing::internal::ElementsAreMatcher2<int, int> polymorphic_matcher =
+        ElementsAre(x, y);
+  // Changing x and y now shouldn't affect the meaning of the above matcher.
+  x = y = 0;
+  const int array1[] = { 1, 2 };
+  EXPECT_THAT(array1, polymorphic_matcher);
+  const int array2[] = { 0, 0 };
+  EXPECT_THAT(array2, Not(polymorphic_matcher));
+}
+
 // Tests for ElementsAreArray().  Since ElementsAreArray() shares most
 // of the implementation with ElementsAre(), we don't test it as
 // thoroughly here.
@@ -576,6 +622,39 @@ TEST(ElementsAreArrayTest, CanBeCreatedWithMatcherArray) {
   EXPECT_THAT(test_vector, Not(ElementsAreArray(kMatcherArray)));
 }
 
+TEST(ElementsAreArrayTest, CanBeCreatedWithVector) {
+  const int a[] = { 1, 2, 3 };
+  vector<int> test_vector(a, a + GMOCK_ARRAY_SIZE_(a));
+  const vector<int> expected(a, a + GMOCK_ARRAY_SIZE_(a));
+  EXPECT_THAT(test_vector, ElementsAreArray(expected));
+  test_vector.push_back(4);
+  EXPECT_THAT(test_vector, Not(ElementsAreArray(expected)));
+}
+
+TEST(ElementsAreArrayTest, CanBeCreatedWithMatcherVector) {
+  const int a[] = { 1, 2, 3 };
+  const Matcher<int> kMatchers[] = { Eq(1), Eq(2), Eq(3) };
+  vector<int> test_vector(a, a + GMOCK_ARRAY_SIZE_(a));
+  const vector<Matcher<int> > expected(
+      kMatchers, kMatchers + GMOCK_ARRAY_SIZE_(kMatchers));
+  EXPECT_THAT(test_vector, ElementsAreArray(expected));
+  test_vector.push_back(4);
+  EXPECT_THAT(test_vector, Not(ElementsAreArray(expected)));
+}
+
+TEST(ElementsAreArrayTest, CanBeCreatedWithIteratorRange) {
+  const int a[] = { 1, 2, 3 };
+  const vector<int> test_vector(a, a + GMOCK_ARRAY_SIZE_(a));
+  const vector<int> expected(a, a + GMOCK_ARRAY_SIZE_(a));
+  EXPECT_THAT(test_vector, ElementsAreArray(expected.begin(), expected.end()));
+  // Pointers are iterators, too.
+  EXPECT_THAT(test_vector, ElementsAreArray(a, a + GMOCK_ARRAY_SIZE_(a)));
+  // The empty range of NULL pointers should also be okay.
+  int* const null_int = NULL;
+  EXPECT_THAT(test_vector, Not(ElementsAreArray(null_int, null_int)));
+  EXPECT_THAT((vector<int>()), ElementsAreArray(null_int, null_int));
+}
+
 // Since ElementsAre() and ElementsAreArray() share much of the
 // implementation, we only do a sanity test for native arrays here.
 TEST(ElementsAreArrayTest, WorksWithNativeArray) {
@@ -585,6 +664,22 @@ TEST(ElementsAreArrayTest, WorksWithNativeArray) {
   EXPECT_THAT(a, ElementsAreArray(b));
   EXPECT_THAT(a, ElementsAreArray(b, 2));
   EXPECT_THAT(a, Not(ElementsAreArray(b, 1)));
+}
+
+TEST(ElementsAreArrayTest, SourceLifeSpan) {
+  const int a[] = { 1, 2, 3 };
+  vector<int> test_vector(a, a + GMOCK_ARRAY_SIZE_(a));
+  vector<int> expect(a, a + GMOCK_ARRAY_SIZE_(a));
+  ElementsAreArrayMatcher<int> matcher_maker =
+      ElementsAreArray(expect.begin(), expect.end());
+  EXPECT_THAT(test_vector, matcher_maker);
+  // Changing in place the values that initialized matcher_maker should not
+  // affect matcher_maker anymore. It should have made its own copy of them.
+  typedef vector<int>::iterator Iter;
+  for (Iter it = expect.begin(); it != expect.end(); ++it) { *it += 10; }
+  EXPECT_THAT(test_vector, matcher_maker);
+  test_vector.push_back(3);
+  EXPECT_THAT(test_vector, Not(matcher_maker));
 }
 
 // Tests for the MATCHER*() macro family.
@@ -1017,7 +1112,7 @@ TEST(ContainsTest, SetDoesNotMatchWhenElementIsNotInContainer) {
 
 TEST(ContainsTest, ExplainsMatchResultCorrectly) {
   const int a[2] = { 1, 2 };
-  Matcher<const int(&)[2]> m = Contains(2);
+  Matcher<const int (&)[2]> m = Contains(2);
   EXPECT_EQ("whose element #1 matches", Explain(m, a));
 
   m = Contains(3);

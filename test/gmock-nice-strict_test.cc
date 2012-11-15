@@ -141,12 +141,12 @@ TEST(NiceMockTest, InfoForUninterestingCall) {
   GMOCK_FLAG(verbose) = "info";
   CaptureStdout();
   nice_foo.DoThis();
-  EXPECT_THAT(GetCapturedStdout(),
+  EXPECT_THAT(std::string(GetCapturedStdout()),
               HasSubstr("Uninteresting mock function call"));
 
   CaptureStdout();
   nice_foo.DoThat(true);
-  EXPECT_THAT(GetCapturedStdout(),
+  EXPECT_THAT(std::string(GetCapturedStdout()),
               HasSubstr("Uninteresting mock function call"));
   GMOCK_FLAG(verbose) = saved_flag;
 }
