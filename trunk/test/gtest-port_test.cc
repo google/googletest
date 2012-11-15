@@ -1005,7 +1005,7 @@ TEST(ThreadLocalTest, ValueDefaultContructorIsNotRequiredForParamVersion) {
 }
 
 TEST(ThreadLocalTest, GetAndPointerReturnSameValue) {
-  ThreadLocal<String> thread_local_string;
+  ThreadLocal<std::string> thread_local_string;
 
   EXPECT_EQ(thread_local_string.pointer(), &(thread_local_string.get()));
 
@@ -1015,8 +1015,9 @@ TEST(ThreadLocalTest, GetAndPointerReturnSameValue) {
 }
 
 TEST(ThreadLocalTest, PointerAndConstPointerReturnSameValue) {
-  ThreadLocal<String> thread_local_string;
-  const ThreadLocal<String>& const_thread_local_string = thread_local_string;
+  ThreadLocal<std::string> thread_local_string;
+  const ThreadLocal<std::string>& const_thread_local_string =
+      thread_local_string;
 
   EXPECT_EQ(thread_local_string.pointer(), const_thread_local_string.pointer());
 
@@ -1126,18 +1127,19 @@ void RunFromThread(void (func)(T), T param) {
   thread.Join();
 }
 
-void RetrieveThreadLocalValue(pair<ThreadLocal<String>*, String*> param) {
+void RetrieveThreadLocalValue(
+    pair<ThreadLocal<std::string>*, std::string*> param) {
   *param.second = param.first->get();
 }
 
 TEST(ThreadLocalTest, ParameterizedConstructorSetsDefault) {
-  ThreadLocal<String> thread_local_string("foo");
+  ThreadLocal<std::string> thread_local_string("foo");
   EXPECT_STREQ("foo", thread_local_string.get().c_str());
 
   thread_local_string.set("bar");
   EXPECT_STREQ("bar", thread_local_string.get().c_str());
 
-  String result;
+  std::string result;
   RunFromThread(&RetrieveThreadLocalValue,
                 make_pair(&thread_local_string, &result));
   EXPECT_STREQ("foo", result.c_str());
@@ -1235,14 +1237,14 @@ TEST(ThreadLocalTest, DestroysManagedObjectAtThreadExit) {
 }
 
 TEST(ThreadLocalTest, ThreadLocalMutationsAffectOnlyCurrentThread) {
-  ThreadLocal<String> thread_local_string;
+  ThreadLocal<std::string> thread_local_string;
   thread_local_string.set("Foo");
   EXPECT_STREQ("Foo", thread_local_string.get().c_str());
 
-  String result;
+  std::string result;
   RunFromThread(&RetrieveThreadLocalValue,
                 make_pair(&thread_local_string, &result));
-  EXPECT_TRUE(result.c_str() == NULL);
+  EXPECT_TRUE(result.empty());
 }
 
 #endif  // GTEST_IS_THREADSAFE

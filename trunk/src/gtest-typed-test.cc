@@ -58,10 +58,10 @@ const char* TypedTestCasePState::VerifyRegisteredTestNames(
   registered_tests = SkipSpaces(registered_tests);
 
   Message errors;
-  ::std::set<String> tests;
+  ::std::set<std::string> tests;
   for (const char* names = registered_tests; names != NULL;
        names = SkipComma(names)) {
-    const String name = GetPrefixUntilComma(names);
+    const std::string name = GetPrefixUntilComma(names);
     if (tests.count(name) != 0) {
       errors << "Test " << name << " is listed more than once.\n";
       continue;
@@ -93,7 +93,7 @@ const char* TypedTestCasePState::VerifyRegisteredTestNames(
     }
   }
 
-  const String& errors_str = errors.GetString();
+  const std::string& errors_str = errors.GetString();
   if (errors_str != "") {
     fprintf(stderr, "%s %s", FormatFileLocation(file, line).c_str(),
             errors_str.c_str());

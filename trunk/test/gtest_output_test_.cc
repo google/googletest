@@ -58,7 +58,6 @@ using testing::internal::ThreadWithParam;
 #endif
 
 namespace posix = ::testing::internal::posix;
-using testing::internal::String;
 using testing::internal::scoped_ptr;
 
 // Tests catching fatal failures.
@@ -1005,7 +1004,8 @@ int main(int argc, char **argv) {
   // for it.
   testing::InitGoogleTest(&argc, argv);
   if (argc >= 2 &&
-      String(argv[1]) == "--gtest_internal_skip_environment_and_ad_hoc_tests")
+      (std::string(argv[1]) ==
+       "--gtest_internal_skip_environment_and_ad_hoc_tests"))
     GTEST_FLAG(internal_skip_environment_and_ad_hoc_tests) = true;
 
 #if GTEST_HAS_DEATH_TEST
