@@ -6,6 +6,7 @@ ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = \
   CHANGES \
   CONTRIBUTORS \
+  LICENSE \
   include/gtest/gtest-param-test.h.pump \
   include/gtest/internal/gtest-param-util-generated.h.pump \
   include/gtest/internal/gtest-tuple.h.pump \
