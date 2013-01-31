@@ -1,7 +1,7 @@
 # Automake file
 
 # Nonstandard package files for distribution.
-EXTRA_DIST =
+EXTRA_DIST = LICENSE
 
 # We may need to build our internally packaged gtest. If so, it will be
 # included in the 'subdirs' variable.
