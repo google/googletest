@@ -494,10 +494,10 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
         const string& instantiation_name = gen_it->first;
         ParamGenerator<ParamType> generator((*gen_it->second)());
 
-        Message test_case_name_stream;
+        string test_case_name;
         if ( !instantiation_name.empty() )
-          test_case_name_stream << instantiation_name << "/";
-        test_case_name_stream << test_info->test_case_base_name;
+          test_case_name = instantiation_name + "/";
+        test_case_name += test_info->test_case_base_name;
 
         int i = 0;
         for (typename ParamGenerator<ParamType>::iterator param_it =
@@ -506,7 +506,7 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
           Message test_name_stream;
           test_name_stream << test_info->test_base_name << "/" << i;
           MakeAndRegisterTestInfo(
-              test_case_name_stream.GetString().c_str(),
+              test_case_name.c_str(),
               test_name_stream.GetString().c_str(),
               NULL,  // No type parameter.
               PrintToString(*param_it).c_str(),

@@ -680,7 +680,8 @@ class GTEST_API_ TestInfo {
   friend class TestCase;
   friend class internal::UnitTestImpl;
   friend TestInfo* internal::MakeAndRegisterTestInfo(
-      const char* test_case_name, const char* name,
+      const char* test_case_name,
+      const char* name,
       const char* type_param,
       const char* value_param,
       internal::TypeId fixture_class_id,
@@ -690,9 +691,10 @@ class GTEST_API_ TestInfo {
 
   // Constructs a TestInfo object. The newly constructed instance assumes
   // ownership of the factory object.
-  TestInfo(const char* test_case_name, const char* name,
-           const char* a_type_param,
-           const char* a_value_param,
+  TestInfo(const std::string& test_case_name,
+           const std::string& name,
+           const char* a_type_param,   // NULL if not a type-parameterized test
+           const char* a_value_param,  // NULL if not a value-parameterized test
            internal::TypeId fixture_class_id,
            internal::TestFactoryBase* factory);
 

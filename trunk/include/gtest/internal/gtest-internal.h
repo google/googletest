@@ -493,7 +493,7 @@ typedef void (*TearDownTestCaseFunc)();
 //   test_case_name:   name of the test case
 //   name:             name of the test
 //   type_param        the name of the test's type parameter, or NULL if
-//                     this is not  a typed or a type-parameterized test.
+//                     this is not a typed or a type-parameterized test.
 //   value_param       text representation of the test's value parameter,
 //                     or NULL if this is not a type-parameterized test.
 //   fixture_class_id: ID of the test fixture class
@@ -503,7 +503,8 @@ typedef void (*TearDownTestCaseFunc)();
 //                     The newly created TestInfo instance will assume
 //                     ownership of the factory object.
 GTEST_API_ TestInfo* MakeAndRegisterTestInfo(
-    const char* test_case_name, const char* name,
+    const char* test_case_name,
+    const char* name,
     const char* type_param,
     const char* value_param,
     TypeId fixture_class_id,
@@ -591,8 +592,8 @@ class TypeParameterizedTest {
     // First, registers the first type-parameterized test in the type
     // list.
     MakeAndRegisterTestInfo(
-        String::Format("%s%s%s/%d", prefix, prefix[0] == '\0' ? "" : "/",
-                       case_name, index).c_str(),
+        (std::string(prefix) + (prefix[0] == '\0' ? "" : "/") + case_name + "/"
+         + StreamableToString(index)).c_str(),
         GetPrefixUntilComma(test_names).c_str(),
         GetTypeName<Type>().c_str(),
         NULL,  // No value parameter.
