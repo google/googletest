@@ -79,6 +79,81 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 namespace testing {
 namespace internal {
 
+#if GTEST_CAN_STREAM_RESULTS_
+
+class StreamingListenerTest : public Test {
+ public:
+  class FakeSocketWriter : public StreamingListener::AbstractSocketWriter {
+   public:
+    // Sends a string to the socket.
+    virtual void Send(const string& message) { output_ += message; }
+
+    string output_;
+  };
+
+  StreamingListenerTest()
+      : fake_sock_writer_(new FakeSocketWriter),
+        streamer_(fake_sock_writer_),
+        test_info_obj_("FooTest", "Bar", NULL, NULL, 0, NULL) {}
+
+ protected:
+  string* output() { return &(fake_sock_writer_->output_); }
+
+  FakeSocketWriter* const fake_sock_writer_;
+  StreamingListener streamer_;
+  UnitTest unit_test_;
+  TestInfo test_info_obj_;  // The name test_info_ was taken by testing::Test.
+};
+
+TEST_F(StreamingListenerTest, OnTestProgramEnd) {
+  *output() = "";
+  streamer_.OnTestProgramEnd(unit_test_);
+  EXPECT_EQ("event=TestProgramEnd&passed=1\n", *output());
+}
+
+TEST_F(StreamingListenerTest, OnTestIterationEnd) {
+  *output() = "";
+  streamer_.OnTestIterationEnd(unit_test_, 42);
+  EXPECT_EQ("event=TestIterationEnd&passed=1&elapsed_time=0ms\n", *output());
+}
+
+TEST_F(StreamingListenerTest, OnTestCaseStart) {
+  *output() = "";
+  streamer_.OnTestCaseStart(TestCase("FooTest", "Bar", NULL, NULL));
+  EXPECT_EQ("event=TestCaseStart&name=FooTest\n", *output());
+}
+
+TEST_F(StreamingListenerTest, OnTestCaseEnd) {
+  *output() = "";
+  streamer_.OnTestCaseEnd(TestCase("FooTest", "Bar", NULL, NULL));
+  EXPECT_EQ("event=TestCaseEnd&passed=1&elapsed_time=0ms\n", *output());
+}
+
+TEST_F(StreamingListenerTest, OnTestStart) {
+  *output() = "";
+  streamer_.OnTestStart(test_info_obj_);
+  EXPECT_EQ("event=TestStart&name=Bar\n", *output());
+}
+
+TEST_F(StreamingListenerTest, OnTestEnd) {
+  *output() = "";
+  streamer_.OnTestEnd(test_info_obj_);
+  EXPECT_EQ("event=TestEnd&passed=1&elapsed_time=0ms\n", *output());
+}
+
+TEST_F(StreamingListenerTest, OnTestPartResult) {
+  *output() = "";
+  streamer_.OnTestPartResult(TestPartResult(
+      TestPartResult::kFatalFailure, "foo.cc", 42, "failed=\n&%"));
+
+  // Meta characters in the failure message should be properly escaped.
+  EXPECT_EQ(
+      "event=TestPartResult&file=foo.cc&line=42&message=failed%3D%0A%26%25\n",
+      *output());
+}
+
+#endif  // GTEST_CAN_STREAM_RESULTS_
+
 // Provides access to otherwise private parts of the TestEventListeners class
 // that are needed to test it.
 class TestEventListenersAccessor {
