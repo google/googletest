@@ -454,45 +454,41 @@ TEST(NullLiteralTest, IsFalseForNonNullLiterals) {
 
 // Tests that the NUL character L'\0' is encoded correctly.
 TEST(CodePointToUtf8Test, CanEncodeNul) {
-  char buffer[32];
-  EXPECT_STREQ("", CodePointToUtf8(L'\0', buffer));
+  EXPECT_EQ("", CodePointToUtf8(L'\0'));
 }
 
 // Tests that ASCII characters are encoded correctly.
 TEST(CodePointToUtf8Test, CanEncodeAscii) {
-  char buffer[32];
-  EXPECT_STREQ("a", CodePointToUtf8(L'a', buffer));
-  EXPECT_STREQ("Z", CodePointToUtf8(L'Z', buffer));
-  EXPECT_STREQ("&", CodePointToUtf8(L'&', buffer));
-  EXPECT_STREQ("\x7F", CodePointToUtf8(L'\x7F', buffer));
+  EXPECT_EQ("a", CodePointToUtf8(L'a'));
+  EXPECT_EQ("Z", CodePointToUtf8(L'Z'));
+  EXPECT_EQ("&", CodePointToUtf8(L'&'));
+  EXPECT_EQ("\x7F", CodePointToUtf8(L'\x7F'));
 }
 
 // Tests that Unicode code-points that have 8 to 11 bits are encoded
 // as 110xxxxx 10xxxxxx.
 TEST(CodePointToUtf8Test, CanEncode8To11Bits) {
-  char buffer[32];
   // 000 1101 0011 => 110-00011 10-010011
-  EXPECT_STREQ("\xC3\x93", CodePointToUtf8(L'\xD3', buffer));
+  EXPECT_EQ("\xC3\x93", CodePointToUtf8(L'\xD3'));
 
   // 101 0111 0110 => 110-10101 10-110110
   // Some compilers (e.g., GCC on MinGW) cannot handle non-ASCII codepoints
   // in wide strings and wide chars. In order to accomodate them, we have to
   // introduce such character constants as integers.
-  EXPECT_STREQ("\xD5\xB6",
-               CodePointToUtf8(static_cast<wchar_t>(0x576), buffer));
+  EXPECT_EQ("\xD5\xB6",
+            CodePointToUtf8(static_cast<wchar_t>(0x576)));
 }
 
 // Tests that Unicode code-points that have 12 to 16 bits are encoded
 // as 1110xxxx 10xxxxxx 10xxxxxx.
 TEST(CodePointToUtf8Test, CanEncode12To16Bits) {
-  char buffer[32];
   // 0000 1000 1101 0011 => 1110-0000 10-100011 10-010011
-  EXPECT_STREQ("\xE0\xA3\x93",
-               CodePointToUtf8(static_cast<wchar_t>(0x8D3), buffer));
+  EXPECT_EQ("\xE0\xA3\x93",
+            CodePointToUtf8(static_cast<wchar_t>(0x8D3)));
 
   // 1100 0111 0100 1101 => 1110-1100 10-011101 10-001101
-  EXPECT_STREQ("\xEC\x9D\x8D",
-               CodePointToUtf8(static_cast<wchar_t>(0xC74D), buffer));
+  EXPECT_EQ("\xEC\x9D\x8D",
+            CodePointToUtf8(static_cast<wchar_t>(0xC74D)));
 }
 
 #if !GTEST_WIDE_STRING_USES_UTF16_
@@ -503,22 +499,19 @@ TEST(CodePointToUtf8Test, CanEncode12To16Bits) {
 // Tests that Unicode code-points that have 17 to 21 bits are encoded
 // as 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx.
 TEST(CodePointToUtf8Test, CanEncode17To21Bits) {
-  char buffer[32];
   // 0 0001 0000 1000 1101 0011 => 11110-000 10-010000 10-100011 10-010011
-  EXPECT_STREQ("\xF0\x90\xA3\x93", CodePointToUtf8(L'\x108D3', buffer));
+  EXPECT_EQ("\xF0\x90\xA3\x93", CodePointToUtf8(L'\x108D3'));
 
   // 0 0001 0000 0100 0000 0000 => 11110-000 10-010000 10-010000 10-000000
-  EXPECT_STREQ("\xF0\x90\x90\x80", CodePointToUtf8(L'\x10400', buffer));
+  EXPECT_EQ("\xF0\x90\x90\x80", CodePointToUtf8(L'\x10400'));
 
   // 1 0000 1000 0110 0011 0100 => 11110-100 10-001000 10-011000 10-110100
-  EXPECT_STREQ("\xF4\x88\x98\xB4", CodePointToUtf8(L'\x108634', buffer));
+  EXPECT_EQ("\xF4\x88\x98\xB4", CodePointToUtf8(L'\x108634'));
 }
 
 // Tests that encoding an invalid code-point generates the expected result.
 TEST(CodePointToUtf8Test, CanEncodeInvalidCodePoint) {
-  char buffer[32];
-  EXPECT_STREQ("(Invalid Unicode 0x1234ABCD)",
-               CodePointToUtf8(L'\x1234ABCD', buffer));
+  EXPECT_EQ("(Invalid Unicode 0x1234ABCD)", CodePointToUtf8(L'\x1234ABCD'));
 }
 
 #endif  // !GTEST_WIDE_STRING_USES_UTF16_
@@ -958,33 +951,6 @@ TEST(StringTest, CaseInsensitiveWideCStringEquals) {
   EXPECT_TRUE(String::CaseInsensitiveWideCStringEquals(L"foobar", L"foobar"));
   EXPECT_TRUE(String::CaseInsensitiveWideCStringEquals(L"foobar", L"FOOBAR"));
   EXPECT_TRUE(String::CaseInsensitiveWideCStringEquals(L"FOOBAR", L"foobar"));
-}
-
-// Tests that String::Format() works.
-TEST(StringTest, FormatWorks) {
-  // Normal case: the format spec is valid, the arguments match the
-  // spec, and the result is < 4095 characters.
-  EXPECT_STREQ("Hello, 42", String::Format("%s, %d", "Hello", 42).c_str());
-
-  // Edge case: the result is 4095 characters.
-  char buffer[4096];
-  const size_t kSize = sizeof(buffer);
-  memset(buffer, 'a', kSize - 1);
-  buffer[kSize - 1] = '\0';
-  EXPECT_EQ(buffer, String::Format("%s", buffer));
-
-  // The result needs to be 4096 characters, exceeding Format()'s limit.
-  EXPECT_EQ("<formatting error or buffer exceeded>",
-            String::Format("x%s", buffer));
-
-#if GTEST_OS_LINUX && !GTEST_OS_LINUX_ANDROID
-  // On Linux, invalid format spec should lead to an error message.
-  // In other environment (e.g. MSVC on Windows), String::Format() may
-  // simply ignore a bad format spec, so this assertion is run on
-  // Linux only.
-  EXPECT_EQ("<formatting error or buffer exceeded>",
-            String::Format("%"));
-#endif
 }
 
 #if GTEST_OS_WINDOWS
@@ -3731,10 +3697,10 @@ TEST(HRESULTAssertionTest, EXPECT_HRESULT_FAILED) {
 
   EXPECT_NONFATAL_FAILURE(EXPECT_HRESULT_FAILED(OkHRESULTSuccess()),
     "Expected: (OkHRESULTSuccess()) fails.\n"
-    "  Actual: 0x00000000");
+    "  Actual: 0x0");
   EXPECT_NONFATAL_FAILURE(EXPECT_HRESULT_FAILED(FalseHRESULTSuccess()),
     "Expected: (FalseHRESULTSuccess()) fails.\n"
-    "  Actual: 0x00000001");
+    "  Actual: 0x1");
 }
 
 TEST(HRESULTAssertionTest, ASSERT_HRESULT_FAILED) {
@@ -3745,12 +3711,12 @@ TEST(HRESULTAssertionTest, ASSERT_HRESULT_FAILED) {
   // ICE's in C++Builder 2007 and 2009.
   EXPECT_FATAL_FAILURE(ASSERT_HRESULT_FAILED(OkHRESULTSuccess()),
     "Expected: (OkHRESULTSuccess()) fails.\n"
-    "  Actual: 0x00000000");
+    "  Actual: 0x0");
 # endif
 
   EXPECT_FATAL_FAILURE(ASSERT_HRESULT_FAILED(FalseHRESULTSuccess()),
     "Expected: (FalseHRESULTSuccess()) fails.\n"
-    "  Actual: 0x00000001");
+    "  Actual: 0x1");
 }
 
 // Tests that streaming to the HRESULT macros works.

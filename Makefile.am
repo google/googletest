@@ -82,6 +82,7 @@ EXTRA_DIST += \
   test/gtest_shuffle_test_.cc \
   test/gtest_sole_header_test.cc \
   test/gtest_stress_test.cc \
+  test/gtest_test_macro_stack_footprint_test.cc \
   test/gtest_throw_on_failure_ex_test.cc \
   test/gtest_throw_on_failure_test_.cc \
   test/gtest_uninitialized_test_.cc \

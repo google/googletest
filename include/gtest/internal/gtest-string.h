@@ -144,16 +144,14 @@ class GTEST_API_ String {
   static bool EndsWithCaseInsensitive(
       const std::string& str, const std::string& suffix);
 
-  // Formats a list of arguments to an std::string, using the same format
-  // spec string as for printf.
-  //
-  // We do not use the StringPrintf class as it is not universally
-  // available.
-  //
-  // The result is limited to 4096 characters (including the tailing
-  // 0).  If 4096 characters are not enough to format the input,
-  // "<buffer exceeded>" is returned.
-  static std::string Format(const char* format, ...);
+  // Formats an int value as "%02d".
+  static std::string FormatIntWidth2(int value);  // "%02d" for width == 2
+
+  // Formats an int value as "%X".
+  static std::string FormatHexInt(int value);
+
+  // Formats a byte as "%02X".
+  static std::string FormatByte(unsigned char value);
 
  private:
   String();  // Not meant to be instantiated.

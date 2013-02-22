@@ -130,6 +130,7 @@ if (gtest_build_tests)
   cxx_test(gtest_repeat_test gtest)
   cxx_test(gtest_sole_header_test gtest_main)
   cxx_test(gtest_stress_test gtest)
+  cxx_test(gtest_test_macro_stack_footprint_test gtest)
   cxx_test(gtest-test-part_test gtest_main)
   cxx_test(gtest_throw_on_failure_ex_test gtest)
   cxx_test(gtest-typed-test_test gtest_main
