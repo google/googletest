@@ -3230,116 +3230,6 @@ std::string XmlUnitTestResultPrinter::TestPropertiesAsXmlAttributes(
 
 #if GTEST_CAN_STREAM_RESULTS_
 
-// Streams test results to the given port on the given host machine.
-class StreamingListener : public EmptyTestEventListener {
- public:
-  // Escapes '=', '&', '%', and '\n' characters in str as "%xx".
-  static string UrlEncode(const char* str);
-
-  StreamingListener(const string& host, const string& port)
-      : sockfd_(-1), host_name_(host), port_num_(port) {
-    MakeConnection();
-    SendLn("gtest_streaming_protocol_version=1.0");
-  }
-
-  virtual ~StreamingListener() {
-    if (sockfd_ != -1)
-      CloseConnection();
-  }
-
-  void OnTestProgramStart(const UnitTest& /* unit_test */) {
-    SendLn("event=TestProgramStart");
-  }
-
-  void OnTestProgramEnd(const UnitTest& unit_test) {
-    // Note that Google Test current only report elapsed time for each
-    // test iteration, not for the entire test program.
-    SendLn("event=TestProgramEnd&passed=" +
-           StreamableToString(unit_test.Passed()));
-
-    // Notify the streaming server to stop.
-    CloseConnection();
-  }
-
-  void OnTestIterationStart(const UnitTest& /* unit_test */, int iteration) {
-    SendLn("event=TestIterationStart&iteration=" +
-           StreamableToString(iteration));
-  }
-
-  void OnTestIterationEnd(const UnitTest& unit_test, int /* iteration */) {
-    SendLn("event=TestIterationEnd&passed=" +
-           StreamableToString(unit_test.Passed()) + "&elapsed_time=" +
-           StreamableToString(unit_test.elapsed_time()) + "ms");
-  }
-
-  void OnTestCaseStart(const TestCase& test_case) {
-    SendLn(std::string("event=TestCaseStart&name=") + test_case.name());
-  }
-
-  void OnTestCaseEnd(const TestCase& test_case) {
-    SendLn("event=TestCaseEnd&passed=" + StreamableToString(test_case.Passed())
-           + "&elapsed_time=" + StreamableToString(test_case.elapsed_time())
-           + "ms");
-  }
-
-  void OnTestStart(const TestInfo& test_info) {
-    SendLn(std::string("event=TestStart&name=") + test_info.name());
-  }
-
-  void OnTestEnd(const TestInfo& test_info) {
-    SendLn("event=TestEnd&passed=" +
-           StreamableToString((test_info.result())->Passed()) +
-           "&elapsed_time=" +
-           StreamableToString((test_info.result())->elapsed_time()) + "ms");
-  }
-
-  void OnTestPartResult(const TestPartResult& test_part_result) {
-    const char* file_name = test_part_result.file_name();
-    if (file_name == NULL)
-      file_name = "";
-    SendLn("event=TestPartResult&file=" + UrlEncode(file_name) +
-           "&line=" + StreamableToString(test_part_result.line_number()) +
-           "&message=" + UrlEncode(test_part_result.message()));
-  }
-
- private:
-  // Creates a client socket and connects to the server.
-  void MakeConnection();
-
-  // Closes the socket.
-  void CloseConnection() {
-    GTEST_CHECK_(sockfd_ != -1)
-        << "CloseConnection() can be called only when there is a connection.";
-
-    close(sockfd_);
-    sockfd_ = -1;
-  }
-
-  // Sends a string to the socket.
-  void Send(const string& message) {
-    GTEST_CHECK_(sockfd_ != -1)
-        << "Send() can be called only when there is a connection.";
-
-    const int len = static_cast<int>(message.length());
-    if (write(sockfd_, message.c_str(), len) != len) {
-      GTEST_LOG_(WARNING)
-          << "stream_result_to: failed to stream to "
-          << host_name_ << ":" << port_num_;
-    }
-  }
-
-  // Sends a string and a newline to the socket.
-  void SendLn(const string& message) {
-    Send(message + "\n");
-  }
-
-  int sockfd_;   // socket file descriptor
-  const string host_name_;
-  const string port_num_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(StreamingListener);
-};  // class StreamingListener
-
 // Checks if str contains '=', '&', '%' or '\n' characters. If yes,
 // replaces them by "%xx" where xx is their hexadecimal value. For
 // example, replaces "=" with "%3D".  This algorithm is O(strlen(str))
@@ -3364,7 +3254,7 @@ string StreamingListener::UrlEncode(const char* str) {
   return result;
 }
 
-void StreamingListener::MakeConnection() {
+void StreamingListener::SocketWriter::MakeConnection() {
   GTEST_CHECK_(sockfd_ == -1)
       << "MakeConnection() can't be called when there is already a connection.";
 

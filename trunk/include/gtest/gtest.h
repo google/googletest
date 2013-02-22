@@ -154,6 +154,7 @@ class ExecDeathTest;
 class NoExecDeathTest;
 class FinalSuccessChecker;
 class GTestFlagSaver;
+class StreamingListenerTest;
 class TestResultAccessor;
 class TestEventListenersAccessor;
 class TestEventRepeater;
@@ -679,6 +680,7 @@ class GTEST_API_ TestInfo {
   friend class Test;
   friend class TestCase;
   friend class internal::UnitTestImpl;
+  friend class internal::StreamingListenerTest;
   friend TestInfo* internal::MakeAndRegisterTestInfo(
       const char* test_case_name,
       const char* name,
@@ -1219,6 +1221,7 @@ class GTEST_API_ UnitTest {
   friend class Test;
   friend class internal::AssertHelper;
   friend class internal::ScopedTrace;
+  friend class internal::StreamingListenerTest;
   friend Environment* AddGlobalTestEnvironment(Environment* env);
   friend internal::UnitTestImpl* internal::GetUnitTestImpl();
   friend void internal::ReportFailureInUnknownLocation(
