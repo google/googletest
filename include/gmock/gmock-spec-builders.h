@@ -66,6 +66,10 @@
 #include <string>
 #include <vector>
 
+#if GTEST_HAS_EXCEPTIONS
+# include <stdexcept>  // NOLINT
+#endif
+
 #include "gmock/gmock-actions.h"
 #include "gmock/gmock-cardinalities.h"
 #include "gmock/gmock-matchers.h"
@@ -1425,10 +1429,12 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
     return NULL;
   }
 
-  // Performs the default action of this mock function on the given arguments
-  // and returns the result. Asserts with a helpful call descrption if there is
-  // no valid return value. This method doesn't depend on the mutable state of
-  // this object, and thus can be called concurrently without locking.
+  // Performs the default action of this mock function on the given
+  // arguments and returns the result. Asserts (or throws if
+  // exceptions are enabled) with a helpful call descrption if there
+  // is no valid return value. This method doesn't depend on the
+  // mutable state of this object, and thus can be called concurrently
+  // without locking.
   // L = *
   Result PerformDefaultAction(const ArgumentTuple& args,
                               const string& call_description) const {
@@ -1437,9 +1443,16 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
     if (spec != NULL) {
       return spec->GetAction().Perform(args);
     }
-    Assert(DefaultValue<Result>::Exists(), "", -1,
-           call_description + "\n    The mock function has no default action "
-           "set, and its return type has no default value set.");
+    const string message = call_description +
+        "\n    The mock function has no default action "
+        "set, and its return type has no default value set.";
+#if GTEST_HAS_EXCEPTIONS
+    if (!DefaultValue<Result>::Exists()) {
+      throw std::runtime_error(message);
+    }
+#else
+    Assert(DefaultValue<Result>::Exists(), "", -1, message);
+#endif
     return DefaultValue<Result>::Get();
   }
 

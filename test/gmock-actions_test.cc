@@ -634,15 +634,19 @@ TEST(DoDefaultTest, ReturnsBuiltInDefaultValueByDefault) {
   EXPECT_EQ(0, mock.IntFunc(true));
 }
 
-// Tests that DoDefault() aborts the process when there is no built-in
-// default value for the return type.
+// Tests that DoDefault() throws (when exceptions are enabled) or aborts
+// the process when there is no built-in default value for the return type.
 TEST(DoDefaultDeathTest, DiesForUnknowType) {
   MockClass mock;
   EXPECT_CALL(mock, Foo())
       .WillRepeatedly(DoDefault());
+#if GTEST_HAS_EXCEPTIONS
+  EXPECT_ANY_THROW(mock.Foo());
+#else
   EXPECT_DEATH_IF_SUPPORTED({
     mock.Foo();
   }, "");
+#endif
 }
 
 // Tests that using DoDefault() inside a composite action leads to a
