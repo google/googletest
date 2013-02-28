@@ -465,6 +465,8 @@ TEST_F(TestForDeathTest, MixedStyles) {
   EXPECT_DEATH(_exit(1), "");
 }
 
+# if GTEST_HAS_CLONE && GTEST_HAS_PTHREAD
+
 namespace {
 
 bool pthread_flag;
@@ -474,8 +476,6 @@ void SetPthreadFlag() {
 }
 
 }  // namespace
-
-# if GTEST_HAS_CLONE && GTEST_HAS_PTHREAD
 
 TEST_F(TestForDeathTest, DoesNotExecuteAtforkHooks) {
   if (!testing::GTEST_FLAG(death_test_use_fork)) {
