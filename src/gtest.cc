@@ -3571,13 +3571,13 @@ Environment* UnitTest::AddEnvironment(Environment* env) {
 // assertion macros (e.g. ASSERT_TRUE, EXPECT_EQ, etc) eventually call
 // this to report their results.  The user code should use the
 // assertion macros instead of calling this directly.
+GTEST_LOCK_EXCLUDED_(mutex_)
 void UnitTest::AddTestPartResult(
     TestPartResult::Type result_type,
     const char* file_name,
     int line_number,
     const std::string& message,
-    const std::string& os_stack_trace)
-        GTEST_LOCK_EXCLUDED_(mutex_) {
+    const std::string& os_stack_trace) {
   Message msg;
   msg << message;
 
