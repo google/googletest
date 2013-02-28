@@ -44,6 +44,8 @@
 #include <wctype.h>
 
 #include <algorithm>
+#include <iomanip>
+#include <limits>
 #include <ostream>  // NOLINT
 #include <sstream>
 #include <vector>
@@ -886,6 +888,26 @@ static void StreamWideCharsToMessage(const wchar_t* wstr, size_t length,
 
 }  // namespace internal
 
+// Constructs an empty Message.
+// We allocate the stringstream separately because otherwise each use of
+// ASSERT/EXPECT in a procedure adds over 200 bytes to the procedure's
+// stack frame leading to huge stack frames in some cases; gcc does not reuse
+// the stack space.
+Message::Message() : ss_(new ::std::stringstream) {
+  // By default, we want there to be enough precision when printing
+  // a double to a Message.
+  *ss_ << std::setprecision(std::numeric_limits<double>::digits10 + 2);
+}
+
+// These two overloads allow streaming a wide C string to a Message
+// using the UTF-8 encoding.
+Message& Message::operator <<(const wchar_t* wide_c_str) {
+  return *this << internal::String::ShowWideCString(wide_c_str);
+}
+Message& Message::operator <<(wchar_t* wide_c_str) {
+  return *this << internal::String::ShowWideCString(wide_c_str);
+}
+
 #if GTEST_HAS_STD_WSTRING
 // Converts the given wide string to a narrow string using the UTF-8
 // encoding, and streams the result to this Message object.
@@ -903,6 +925,12 @@ Message& Message::operator <<(const ::wstring& wstr) {
   return *this;
 }
 #endif  // GTEST_HAS_GLOBAL_WSTRING
+
+// Gets the text streamed to this object so far as an std::string.
+// Each '\0' character in the buffer is replaced with "\\0".
+std::string Message::GetString() const {
+  return internal::StringStreamToString(ss_.get());
+}
 
 // AssertionResult constructors.
 // Used in EXPECT_TRUE/FALSE(assertion_result).

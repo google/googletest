@@ -161,17 +161,6 @@ class GTEST_API_ String {
 // character in the buffer is replaced with "\\0".
 GTEST_API_ std::string StringStreamToString(::std::stringstream* stream);
 
-// Converts a streamable value to an std::string.  A NULL pointer is
-// converted to "(null)".  When the input value is a ::string,
-// ::std::string, ::wstring, or ::std::wstring object, each NUL
-// character in it is replaced with "\\0".
-
-// Declared here but defined in gtest.h, so that it has access
-// to the definition of the Message class, required by the ARM
-// compiler.
-template <typename T>
-std::string StreamableToString(const T& streamable);
-
 }  // namespace internal
 }  // namespace testing
 
