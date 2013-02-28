@@ -29,6 +29,7 @@
 //
 // Authors: keith.ray@gmail.com (Keith Ray)
 
+#include "gtest/gtest-message.h"
 #include "gtest/internal/gtest-filepath.h"
 #include "gtest/internal/gtest-port.h"
 

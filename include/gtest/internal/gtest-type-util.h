@@ -45,7 +45,6 @@
 #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_TYPE_UTIL_H_
 
 #include "gtest/internal/gtest-port.h"
-#include "gtest/internal/gtest-string.h"
 
 // #ifdef __GNUC__ is too general here.  It is possible to use gcc without using
 // libstdc++ (which is where cxxabi.h comes from).
