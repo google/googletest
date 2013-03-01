@@ -103,6 +103,7 @@ if (gmock_build_tests)
 
   cxx_test(gmock-actions_test gmock_main)
   cxx_test(gmock-cardinalities_test gmock_main)
+  cxx_test(gmock_ex_test gmock_main)
   cxx_test(gmock-generated-actions_test gmock_main)
   cxx_test(gmock-generated-function-mockers_test gmock_main)
   cxx_test(gmock-generated-internal-utils_test gmock_main)

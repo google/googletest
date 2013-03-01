@@ -323,9 +323,9 @@ TEST(DefaultValueOfReferenceDeathTest, GetReturnsBuiltInDefaultValueWhenUnset) {
 // Tests that ActionInterface can be implemented by defining the
 // Perform method.
 
-typedef int MyFunction(bool, int);
+typedef int MyGlobalFunction(bool, int);
 
-class MyActionImpl : public ActionInterface<MyFunction> {
+class MyActionImpl : public ActionInterface<MyGlobalFunction> {
  public:
   virtual int Perform(const tuple<bool, int>& args) {
     return get<0>(args) ? get<1>(args) : 0;
@@ -338,7 +338,7 @@ TEST(ActionInterfaceTest, CanBeImplementedByDefiningPerform) {
 }
 
 TEST(ActionInterfaceTest, MakeAction) {
-  Action<MyFunction> action = MakeAction(new MyActionImpl);
+  Action<MyGlobalFunction> action = MakeAction(new MyActionImpl);
 
   // When exercising the Perform() method of Action<F>, we must pass
   // it a tuple whose size and type are compatible with F's argument
@@ -351,12 +351,12 @@ TEST(ActionInterfaceTest, MakeAction) {
 // Tests that Action<F> can be contructed from a pointer to
 // ActionInterface<F>.
 TEST(ActionTest, CanBeConstructedFromActionInterface) {
-  Action<MyFunction> action(new MyActionImpl);
+  Action<MyGlobalFunction> action(new MyActionImpl);
 }
 
 // Tests that Action<F> delegates actual work to ActionInterface<F>.
 TEST(ActionTest, DelegatesWorkToActionInterface) {
-  const Action<MyFunction> action(new MyActionImpl);
+  const Action<MyGlobalFunction> action(new MyActionImpl);
 
   EXPECT_EQ(5, action.Perform(make_tuple(true, 5)));
   EXPECT_EQ(0, action.Perform(make_tuple(false, 1)));
@@ -364,8 +364,8 @@ TEST(ActionTest, DelegatesWorkToActionInterface) {
 
 // Tests that Action<F> can be copied.
 TEST(ActionTest, IsCopyable) {
-  Action<MyFunction> a1(new MyActionImpl);
-  Action<MyFunction> a2(a1);  // Tests the copy constructor.
+  Action<MyGlobalFunction> a1(new MyActionImpl);
+  Action<MyGlobalFunction> a2(a1);  // Tests the copy constructor.
 
   // a1 should continue to work after being copied from.
   EXPECT_EQ(5, a1.Perform(make_tuple(true, 5)));
