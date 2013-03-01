@@ -110,6 +110,56 @@ class MockBar {
 
 #if GTEST_HAS_STREAM_REDIRECTION
 
+// Tests that a raw mock generates warnings for uninteresting calls.
+TEST(RawMockTest, WarningForUninterestingCall) {
+  const string saved_flag = GMOCK_FLAG(verbose);
+  GMOCK_FLAG(verbose) = "warning";
+
+  MockFoo raw_foo;
+
+  CaptureStdout();
+  raw_foo.DoThis();
+  raw_foo.DoThat(true);
+  EXPECT_THAT(GetCapturedStdout(),
+              HasSubstr("Uninteresting mock function call"));
+
+  GMOCK_FLAG(verbose) = saved_flag;
+}
+
+// Tests that a raw mock generates warnings for uninteresting calls
+// that delete the mock object.
+TEST(RawMockTest, WarningForUninterestingCallAfterDeath) {
+  const string saved_flag = GMOCK_FLAG(verbose);
+  GMOCK_FLAG(verbose) = "warning";
+
+  MockFoo* const raw_foo = new MockFoo;
+
+  ON_CALL(*raw_foo, DoThis())
+      .WillByDefault(Invoke(raw_foo, &MockFoo::Delete));
+
+  CaptureStdout();
+  raw_foo->DoThis();
+  EXPECT_THAT(GetCapturedStdout(),
+              HasSubstr("Uninteresting mock function call"));
+
+  GMOCK_FLAG(verbose) = saved_flag;
+}
+
+// Tests that a raw mock generates informational logs for
+// uninteresting calls.
+TEST(RawMockTest, InfoForUninterestingCall) {
+  MockFoo raw_foo;
+
+  const string saved_flag = GMOCK_FLAG(verbose);
+  GMOCK_FLAG(verbose) = "info";
+  CaptureStdout();
+  raw_foo.DoThis();
+  EXPECT_THAT(GetCapturedStdout(),
+              HasSubstr("Uninteresting mock function call"));
+
+  GMOCK_FLAG(verbose) = saved_flag;
+}
+
 // Tests that a nice mock generates no warning for uninteresting calls.
 TEST(NiceMockTest, NoWarningForUninterestingCall) {
   NiceMock<MockFoo> nice_foo;
@@ -145,10 +195,6 @@ TEST(NiceMockTest, InfoForUninterestingCall) {
   EXPECT_THAT(GetCapturedStdout(),
               HasSubstr("Uninteresting mock function call"));
 
-  CaptureStdout();
-  nice_foo.DoThat(true);
-  EXPECT_THAT(GetCapturedStdout(),
-              HasSubstr("Uninteresting mock function call"));
   GMOCK_FLAG(verbose) = saved_flag;
 }
 

@@ -361,7 +361,8 @@ class OnCallSpec : public UntypedOnCallSpecBase {
 enum CallReaction {
   kAllow,
   kWarn,
-  kFail
+  kFail,
+  kDefault = kWarn  // By default, warn about uninteresting calls.
 };
 
 }  // namespace internal

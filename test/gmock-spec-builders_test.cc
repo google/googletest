@@ -85,6 +85,7 @@ using testing::IsSubstring;
 using testing::Lt;
 using testing::Message;
 using testing::Mock;
+using testing::NaggyMock;
 using testing::Ne;
 using testing::Return;
 using testing::Sequence;
@@ -899,11 +900,12 @@ TEST(FunctionMockerTest, ReportsExpectCallLocationForExhausedActions) {
   EXPECT_PRED_FORMAT2(IsSubstring, expect_call_location, output);
 }
 
-TEST(FunctionMockerTest, ReportsDefaultActionLocationOfUninterestingCalls) {
+TEST(FunctionMockerTest,
+     ReportsDefaultActionLocationOfUninterestingCallsForNaggyMock) {
   std::string on_call_location;
   CaptureStdout();
   {
-    MockB b;
+    NaggyMock<MockB> b;
     on_call_location = FormatFileLocation(__FILE__, __LINE__ + 1);
     ON_CALL(b, DoB(_)).WillByDefault(Return(0));
     b.DoB(0);
@@ -1966,10 +1968,11 @@ class VerboseFlagPreservingFixture : public testing::Test {
 
 #if GTEST_HAS_STREAM_REDIRECTION
 
-// Tests that an uninteresting mock function call generates a warning
-// containing the stack trace.
-TEST(FunctionCallMessageTest, UninterestingCallGeneratesFyiWithStackTrace) {
-  MockC c;
+// Tests that an uninteresting mock function call on a naggy mock
+// generates a warning containing the stack trace.
+TEST(FunctionCallMessageTest,
+     UninterestingCallOnNaggyMockGeneratesFyiWithStackTrace) {
+  NaggyMock<MockC> c;
   CaptureStdout();
   c.VoidMethod(false, 5, "Hi", NULL, Printable(), Unprintable());
   const std::string output = GetCapturedStdout();
@@ -1995,11 +1998,12 @@ TEST(FunctionCallMessageTest, UninterestingCallGeneratesFyiWithStackTrace) {
 # endif  // NDEBUG
 }
 
-// Tests that an uninteresting mock function call causes the function
-// arguments and return value to be printed.
-TEST(FunctionCallMessageTest, UninterestingCallPrintsArgumentsAndReturnValue) {
+// Tests that an uninteresting mock function call on a naggy mock
+// causes the function arguments and return value to be printed.
+TEST(FunctionCallMessageTest,
+     UninterestingCallOnNaggyMockPrintsArgumentsAndReturnValue) {
   // A non-void mock function.
-  MockB b;
+  NaggyMock<MockB> b;
   CaptureStdout();
   b.DoB();
   const std::string output1 = GetCapturedStdout();
@@ -2011,7 +2015,7 @@ TEST(FunctionCallMessageTest, UninterestingCallPrintsArgumentsAndReturnValue) {
   // Makes sure the return value is printed.
 
   // A void mock function.
-  MockC c;
+  NaggyMock<MockC> c;
   CaptureStdout();
   c.VoidMethod(false, 5, "Hi", NULL, Printable(), Unprintable());
   const std::string output2 = GetCapturedStdout();
@@ -2081,9 +2085,9 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
         "Binary");
   }
 
-  // Tests how the flag affects uninteresting calls.
-  void TestUninterestingCall(bool should_print) {
-    MockA a;
+  // Tests how the flag affects uninteresting calls on a naggy mock.
+  void TestUninterestingCallOnNaggyMock(bool should_print) {
+    NaggyMock<MockA> a;
 
     // A void-returning function.
     CaptureStdout();
@@ -2117,7 +2121,7 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
 TEST_F(GMockVerboseFlagTest, Info) {
   GMOCK_FLAG(verbose) = kInfoVerbosity;
   TestExpectedCall(true);
-  TestUninterestingCall(true);
+  TestUninterestingCallOnNaggyMock(true);
 }
 
 // Tests that --gmock_verbose=warning causes uninteresting calls to be
@@ -2125,7 +2129,7 @@ TEST_F(GMockVerboseFlagTest, Info) {
 TEST_F(GMockVerboseFlagTest, Warning) {
   GMOCK_FLAG(verbose) = kWarningVerbosity;
   TestExpectedCall(false);
-  TestUninterestingCall(true);
+  TestUninterestingCallOnNaggyMock(true);
 }
 
 // Tests that --gmock_verbose=warning causes neither expected nor
@@ -2133,7 +2137,7 @@ TEST_F(GMockVerboseFlagTest, Warning) {
 TEST_F(GMockVerboseFlagTest, Error) {
   GMOCK_FLAG(verbose) = kErrorVerbosity;
   TestExpectedCall(false);
-  TestUninterestingCall(false);
+  TestUninterestingCallOnNaggyMock(false);
 }
 
 // Tests that --gmock_verbose=SOME_INVALID_VALUE has the same effect
@@ -2141,7 +2145,7 @@ TEST_F(GMockVerboseFlagTest, Error) {
 TEST_F(GMockVerboseFlagTest, InvalidFlagIsTreatedAsWarning) {
   GMOCK_FLAG(verbose) = "invalid";  // Treated as "warning".
   TestExpectedCall(false);
-  TestUninterestingCall(true);
+  TestUninterestingCallOnNaggyMock(true);
 }
 
 #endif  // GTEST_HAS_STREAM_REDIRECTION

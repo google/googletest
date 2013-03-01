@@ -43,6 +43,7 @@ using testing::_;
 using testing::AnyNumber;
 using testing::Ge;
 using testing::InSequence;
+using testing::NaggyMock;
 using testing::Ref;
 using testing::Return;
 using testing::Sequence;
@@ -61,7 +62,7 @@ class MockFoo {
 
 class GMockOutputTest : public testing::Test {
  protected:
-  MockFoo foo_;
+  NaggyMock<MockFoo> foo_;
 };
 
 TEST_F(GMockOutputTest, ExpectedCall) {
