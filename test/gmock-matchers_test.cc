@@ -114,6 +114,7 @@ using testing::PolymorphicMatcher;
 using testing::Property;
 using testing::Ref;
 using testing::ResultOf;
+using testing::SizeIs;
 using testing::StartsWith;
 using testing::StrCaseEq;
 using testing::StrCaseNe;
@@ -3635,6 +3636,64 @@ TEST(IsEmptyTest, ExplainsResult) {
   EXPECT_EQ("", Explain(m, container));
   container.push_back(0);
   EXPECT_EQ("whose size is 1", Explain(m, container));
+}
+
+TEST(SizeIsTest, ImplementsSizeIs) {
+  vector<int> container;
+  EXPECT_THAT(container, SizeIs(0));
+  EXPECT_THAT(container, Not(SizeIs(1)));
+  container.push_back(0);
+  EXPECT_THAT(container, Not(SizeIs(0)));
+  EXPECT_THAT(container, SizeIs(1));
+  container.push_back(0);
+  EXPECT_THAT(container, Not(SizeIs(0)));
+  EXPECT_THAT(container, SizeIs(2));
+}
+
+TEST(SizeIsTest, WorksWithMap) {
+  map<string, int> container;
+  EXPECT_THAT(container, SizeIs(0));
+  EXPECT_THAT(container, Not(SizeIs(1)));
+  container.insert(make_pair("foo", 1));
+  EXPECT_THAT(container, Not(SizeIs(0)));
+  EXPECT_THAT(container, SizeIs(1));
+  container.insert(make_pair("bar", 2));
+  EXPECT_THAT(container, Not(SizeIs(0)));
+  EXPECT_THAT(container, SizeIs(2));
+}
+
+TEST(SizeIsTest, WorksWithReferences) {
+  vector<int> container;
+  Matcher<const vector<int>&> m = SizeIs(1);
+  EXPECT_THAT(container, Not(m));
+  container.push_back(0);
+  EXPECT_THAT(container, m);
+}
+
+TEST(SizeIsTest, CanDescribeSelf) {
+  Matcher<vector<int> > m = SizeIs(2);
+  EXPECT_EQ("size is equal to 2", Describe(m));
+  EXPECT_EQ("size isn't equal to 2", DescribeNegation(m));
+}
+
+TEST(SizeIsTest, ExplainsResult) {
+  Matcher<vector<int> > m1 = SizeIs(2);
+  Matcher<vector<int> > m2 = SizeIs(Lt(2u));
+  Matcher<vector<int> > m3 = SizeIs(AnyOf(0, 3));
+  Matcher<vector<int> > m4 = SizeIs(GreaterThan(1));
+  vector<int> container;
+  EXPECT_EQ("whose size 0 doesn't match", Explain(m1, container));
+  EXPECT_EQ("whose size 0 matches", Explain(m2, container));
+  EXPECT_EQ("whose size 0 matches", Explain(m3, container));
+  EXPECT_EQ("whose size 0 doesn't match, which is 1 less than 1",
+            Explain(m4, container));
+  container.push_back(0);
+  container.push_back(0);
+  EXPECT_EQ("whose size 2 matches", Explain(m1, container));
+  EXPECT_EQ("whose size 2 doesn't match", Explain(m2, container));
+  EXPECT_EQ("whose size 2 doesn't match", Explain(m3, container));
+  EXPECT_EQ("whose size 2 matches, which is 1 more than 1",
+            Explain(m4, container));
 }
 
 #if GTEST_HAS_TYPED_TEST
