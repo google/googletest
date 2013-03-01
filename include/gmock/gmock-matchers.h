@@ -112,10 +112,27 @@ class MatcherInterface {
   virtual ~MatcherInterface() {}
 
   // Returns true iff the matcher matches x; also explains the match
-  // result to 'listener', in the form of a non-restrictive relative
-  // clause ("which ...", "whose ...", etc) that describes x.  For
-  // example, the MatchAndExplain() method of the Pointee(...) matcher
-  // should generate an explanation like "which points to ...".
+  // result to 'listener' if necessary (see the next paragraph), in
+  // the form of a non-restrictive relative clause ("which ...",
+  // "whose ...", etc) that describes x.  For example, the
+  // MatchAndExplain() method of the Pointee(...) matcher should
+  // generate an explanation like "which points to ...".
+  //
+  // Implementations of MatchAndExplain() should add an explanation of
+  // the match result *if and only if* they can provide additional
+  // information that's not already present (or not obvious) in the
+  // print-out of x and the matcher's description.  Whether the match
+  // succeeds is not a factor in deciding whether an explanation is
+  // needed, as sometimes the caller needs to print a failure message
+  // when the match succeeds (e.g. when the matcher is used inside
+  // Not()).
+  //
+  // For example, a "has at least 10 elements" matcher should explain
+  // what the actual element count is, regardless of the match result,
+  // as it is useful information to the reader; on the other hand, an
+  // "is empty" matcher probably only needs to explain what the actual
+  // size is when the match fails, as it's redundant to say that the
+  // size is 0 when the value is already known to be empty.
   //
   // You should override this method when defining a new matcher.
   //
