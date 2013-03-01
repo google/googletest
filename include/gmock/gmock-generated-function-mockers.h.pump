@@ -104,17 +104,23 @@ $if i >= 1 [[
 // cannot handle it if we define FunctionMocker in ::testing.
 using internal::FunctionMocker;
 
-// The result type of function type F.
+// GMOCK_RESULT_(tn, F) expands to the result type of function type F.
+// We define this as a variadic macro in case F contains unprotected
+// commas (the same reason that we use variadic macros in other places
+// in this file).
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
-#define GMOCK_RESULT_(tn, F) tn ::testing::internal::Function<F>::Result
+#define GMOCK_RESULT_(tn, ...) \
+    tn ::testing::internal::Function<__VA_ARGS__>::Result
 
-// The type of argument N of function type F.
+// The type of argument N of the given function type.
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
-#define GMOCK_ARG_(tn, F, N) tn ::testing::internal::Function<F>::Argument##N
+#define GMOCK_ARG_(tn, N, ...) \
+    tn ::testing::internal::Function<__VA_ARGS__>::Argument##N
 
-// The matcher type for argument N of function type F.
+// The matcher type for argument N of the given function type.
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
-#define GMOCK_MATCHER_(tn, F, N) const ::testing::Matcher<GMOCK_ARG_(tn, F, N)>&
+#define GMOCK_MATCHER_(tn, N, ...) \
+    const ::testing::Matcher<GMOCK_ARG_(tn, N, __VA_ARGS__)>&
 
 // The variable for mocking the given method.
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
@@ -125,77 +131,78 @@ using internal::FunctionMocker;
 $for i [[
 $range j 1..i
 $var arg_as = [[$for j, \
-                                 [[GMOCK_ARG_(tn, F, $j) gmock_a$j]]]]
+      [[GMOCK_ARG_(tn, $j, __VA_ARGS__) gmock_a$j]]]]
 $var as = [[$for j, [[gmock_a$j]]]]
 $var matcher_as = [[$for j, \
-                     [[GMOCK_MATCHER_(tn, F, $j) gmock_a$j]]]]
+                     [[GMOCK_MATCHER_(tn, $j, __VA_ARGS__) gmock_a$j]]]]
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
-#define GMOCK_METHOD$i[[]]_(tn, constness, ct, Method, F) \
-  GMOCK_RESULT_(tn, F) ct Method($arg_as) constness { \
-    GTEST_COMPILE_ASSERT_(::std::tr1::tuple_size< \
-        tn ::testing::internal::Function<F>::ArgumentTuple>::value == $i, \
+#define GMOCK_METHOD$i[[]]_(tn, constness, ct, Method, ...) \
+  GMOCK_RESULT_(tn, __VA_ARGS__) ct Method( \
+      $arg_as) constness { \
+    GTEST_COMPILE_ASSERT_((::std::tr1::tuple_size<                          \
+        tn ::testing::internal::Function<__VA_ARGS__>::ArgumentTuple>::value == $i), \
         this_method_does_not_take_$i[[]]_argument[[$if i != 1 [[s]]]]); \
     GMOCK_MOCKER_($i, constness, Method).SetOwnerAndName(this, #Method); \
     return GMOCK_MOCKER_($i, constness, Method).Invoke($as); \
   } \
-  ::testing::MockSpec<F>& \
+  ::testing::MockSpec<__VA_ARGS__>& \
       gmock_##Method($matcher_as) constness { \
     GMOCK_MOCKER_($i, constness, Method).RegisterOwner(this); \
     return GMOCK_MOCKER_($i, constness, Method).With($as); \
   } \
-  mutable ::testing::FunctionMocker<F> GMOCK_MOCKER_($i, constness, Method)
+  mutable ::testing::FunctionMocker<__VA_ARGS__> GMOCK_MOCKER_($i, constness, Method)
 
 
 ]]
 $for i [[
-#define MOCK_METHOD$i(m, F) GMOCK_METHOD$i[[]]_(, , , m, F)
-
-]]
-
-
-$for i [[
-#define MOCK_CONST_METHOD$i(m, F) GMOCK_METHOD$i[[]]_(, const, , m, F)
+#define MOCK_METHOD$i(m, ...) GMOCK_METHOD$i[[]]_(, , , m, __VA_ARGS__)
 
 ]]
 
 
 $for i [[
-#define MOCK_METHOD$i[[]]_T(m, F) GMOCK_METHOD$i[[]]_(typename, , , m, F)
+#define MOCK_CONST_METHOD$i(m, ...) GMOCK_METHOD$i[[]]_(, const, , m, __VA_ARGS__)
 
 ]]
 
 
 $for i [[
-#define MOCK_CONST_METHOD$i[[]]_T(m, F) [[]]
-GMOCK_METHOD$i[[]]_(typename, const, , m, F)
+#define MOCK_METHOD$i[[]]_T(m, ...) GMOCK_METHOD$i[[]]_(typename, , , m, __VA_ARGS__)
 
 ]]
 
 
 $for i [[
-#define MOCK_METHOD$i[[]]_WITH_CALLTYPE(ct, m, F) [[]]
-GMOCK_METHOD$i[[]]_(, , ct, m, F)
+#define MOCK_CONST_METHOD$i[[]]_T(m, ...) \
+    GMOCK_METHOD$i[[]]_(typename, const, , m, __VA_ARGS__)
 
 ]]
 
 
 $for i [[
-#define MOCK_CONST_METHOD$i[[]]_WITH_CALLTYPE(ct, m, F) \
-    GMOCK_METHOD$i[[]]_(, const, ct, m, F)
+#define MOCK_METHOD$i[[]]_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD$i[[]]_(, , ct, m, __VA_ARGS__)
 
 ]]
 
 
 $for i [[
-#define MOCK_METHOD$i[[]]_T_WITH_CALLTYPE(ct, m, F) \
-    GMOCK_METHOD$i[[]]_(typename, , ct, m, F)
+#define MOCK_CONST_METHOD$i[[]]_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD$i[[]]_(, const, ct, m, __VA_ARGS__)
 
 ]]
 
 
 $for i [[
-#define MOCK_CONST_METHOD$i[[]]_T_WITH_CALLTYPE(ct, m, F) \
-    GMOCK_METHOD$i[[]]_(typename, const, ct, m, F)
+#define MOCK_METHOD$i[[]]_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD$i[[]]_(typename, , ct, m, __VA_ARGS__)
+
+]]
+
+
+$for i [[
+#define MOCK_CONST_METHOD$i[[]]_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD$i[[]]_(typename, const, ct, m, __VA_ARGS__)
 
 ]]
 
