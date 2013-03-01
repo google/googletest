@@ -54,6 +54,7 @@ namespace gmock_nice_strict_test {
 using testing::internal::string;
 using testing::GMOCK_FLAG(verbose);
 using testing::HasSubstr;
+using testing::NaggyMock;
 using testing::NiceMock;
 using testing::StrictMock;
 
@@ -116,7 +117,7 @@ TEST(NiceMockTest, NoWarningForUninterestingCall) {
   CaptureStdout();
   nice_foo.DoThis();
   nice_foo.DoThat(true);
-  EXPECT_STREQ("", GetCapturedStdout().c_str());
+  EXPECT_EQ("", GetCapturedStdout());
 }
 
 // Tests that a nice mock generates no warning for uninteresting calls
@@ -129,7 +130,7 @@ TEST(NiceMockTest, NoWarningForUninterestingCallAfterDeath) {
 
   CaptureStdout();
   nice_foo->DoThis();
-  EXPECT_STREQ("", GetCapturedStdout().c_str());
+  EXPECT_EQ("", GetCapturedStdout());
 }
 
 // Tests that a nice mock generates informational logs for
@@ -141,12 +142,12 @@ TEST(NiceMockTest, InfoForUninterestingCall) {
   GMOCK_FLAG(verbose) = "info";
   CaptureStdout();
   nice_foo.DoThis();
-  EXPECT_THAT(std::string(GetCapturedStdout()),
+  EXPECT_THAT(GetCapturedStdout(),
               HasSubstr("Uninteresting mock function call"));
 
   CaptureStdout();
   nice_foo.DoThat(true);
-  EXPECT_THAT(std::string(GetCapturedStdout()),
+  EXPECT_THAT(GetCapturedStdout(),
               HasSubstr("Uninteresting mock function call"));
   GMOCK_FLAG(verbose) = saved_flag;
 }
@@ -192,7 +193,7 @@ TEST(NiceMockTest, NonDefaultConstructor10) {
 
 #if !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 // Tests that NiceMock<Mock> compiles where Mock is a user-defined
-// class (as opposed to ::testing::Mock).  We had to workaround an
+// class (as opposed to ::testing::Mock).  We had to work around an
 // MSVC 8.0 bug that caused the symbol Mock used in the definition of
 // NiceMock to be looked up in the wrong context, and this test
 // ensures that our fix works.
@@ -203,6 +204,99 @@ TEST(NiceMockTest, AcceptsClassNamedMock) {
   NiceMock< ::Mock> nice;
   EXPECT_CALL(nice, DoThis());
   nice.DoThis();
+}
+#endif  // !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
+
+#if GTEST_HAS_STREAM_REDIRECTION
+
+// Tests that a naggy mock generates warnings for uninteresting calls.
+TEST(NaggyMockTest, WarningForUninterestingCall) {
+  const string saved_flag = GMOCK_FLAG(verbose);
+  GMOCK_FLAG(verbose) = "warning";
+
+  NaggyMock<MockFoo> naggy_foo;
+
+  CaptureStdout();
+  naggy_foo.DoThis();
+  naggy_foo.DoThat(true);
+  EXPECT_THAT(GetCapturedStdout(),
+              HasSubstr("Uninteresting mock function call"));
+
+  GMOCK_FLAG(verbose) = saved_flag;
+}
+
+// Tests that a naggy mock generates a warning for an uninteresting call
+// that deletes the mock object.
+TEST(NaggyMockTest, WarningForUninterestingCallAfterDeath) {
+  const string saved_flag = GMOCK_FLAG(verbose);
+  GMOCK_FLAG(verbose) = "warning";
+
+  NaggyMock<MockFoo>* const naggy_foo = new NaggyMock<MockFoo>;
+
+  ON_CALL(*naggy_foo, DoThis())
+      .WillByDefault(Invoke(naggy_foo, &MockFoo::Delete));
+
+  CaptureStdout();
+  naggy_foo->DoThis();
+  EXPECT_THAT(GetCapturedStdout(),
+              HasSubstr("Uninteresting mock function call"));
+
+  GMOCK_FLAG(verbose) = saved_flag;
+}
+
+#endif  // GTEST_HAS_STREAM_REDIRECTION
+
+// Tests that a naggy mock allows expected calls.
+TEST(NaggyMockTest, AllowsExpectedCall) {
+  NaggyMock<MockFoo> naggy_foo;
+
+  EXPECT_CALL(naggy_foo, DoThis());
+  naggy_foo.DoThis();
+}
+
+// Tests that an unexpected call on a naggy mock fails.
+TEST(NaggyMockTest, UnexpectedCallFails) {
+  NaggyMock<MockFoo> naggy_foo;
+
+  EXPECT_CALL(naggy_foo, DoThis()).Times(0);
+  EXPECT_NONFATAL_FAILURE(naggy_foo.DoThis(),
+                          "called more times than expected");
+}
+
+// Tests that NaggyMock works with a mock class that has a non-default
+// constructor.
+TEST(NaggyMockTest, NonDefaultConstructor) {
+  NaggyMock<MockBar> naggy_bar("hi");
+  EXPECT_EQ("hi", naggy_bar.str());
+
+  naggy_bar.This();
+  naggy_bar.That(5, true);
+}
+
+// Tests that NaggyMock works with a mock class that has a 10-ary
+// non-default constructor.
+TEST(NaggyMockTest, NonDefaultConstructor10) {
+  NaggyMock<MockBar> naggy_bar('0', '1', "2", "3", '4', '5',
+                               "6", "7", true, false);
+  EXPECT_EQ("01234567TF", naggy_bar.str());
+
+  naggy_bar.This();
+  naggy_bar.That(5, true);
+}
+
+#if !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
+// Tests that NaggyMock<Mock> compiles where Mock is a user-defined
+// class (as opposed to ::testing::Mock).  We had to work around an
+// MSVC 8.0 bug that caused the symbol Mock used in the definition of
+// NaggyMock to be looked up in the wrong context, and this test
+// ensures that our fix works.
+//
+// We have to skip this test on Symbian and Windows Mobile, as it
+// causes the program to crash there, for reasons unclear to us yet.
+TEST(NaggyMockTest, AcceptsClassNamedMock) {
+  NaggyMock< ::Mock> naggy;
+  EXPECT_CALL(naggy, DoThis());
+  naggy.DoThis();
 }
 #endif  // !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 
@@ -266,7 +360,7 @@ TEST(StrictMockTest, NonDefaultConstructor10) {
 
 #if !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 // Tests that StrictMock<Mock> compiles where Mock is a user-defined
-// class (as opposed to ::testing::Mock).  We had to workaround an
+// class (as opposed to ::testing::Mock).  We had to work around an
 // MSVC 8.0 bug that caused the symbol Mock used in the definition of
 // StrictMock to be looked up in the wrong context, and this test
 // ensures that our fix works.

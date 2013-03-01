@@ -400,6 +400,9 @@ class GTEST_API_ Mock {
   friend class NiceMock;
 
   template <typename M>
+  friend class NaggyMock;
+
+  template <typename M>
   friend class StrictMock;
 
   // Tells Google Mock to allow uninteresting calls on the given mock
