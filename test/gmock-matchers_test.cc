@@ -34,6 +34,7 @@
 // This file tests some commonly used argument matchers.
 
 #include "gmock/gmock-matchers.h"
+#include "gmock/gmock-more-matchers.h"
 
 #include <string.h>
 #include <functional>
@@ -88,6 +89,7 @@ using testing::FloatEq;
 using testing::Ge;
 using testing::Gt;
 using testing::HasSubstr;
+using testing::IsEmpty;
 using testing::IsNull;
 using testing::Key;
 using testing::Le;
@@ -3601,6 +3603,38 @@ TEST(ByRefTest, AllowsNotCopyableValueInMatchers) {
   NotCopyable n1(1), n2(2);
   EXPECT_FALSE(m.Matches(n1));
   EXPECT_TRUE(m.Matches(n2));
+}
+
+TEST(IsEmptyTest, ImplementsIsEmpty) {
+  vector<int> container;
+  EXPECT_THAT(container, IsEmpty());
+  container.push_back(0);
+  EXPECT_THAT(container, Not(IsEmpty()));
+  container.push_back(1);
+  EXPECT_THAT(container, Not(IsEmpty()));
+}
+
+TEST(IsEmptyTest, WorksWithString) {
+  string text;
+  EXPECT_THAT(text, IsEmpty());
+  text = "foo";
+  EXPECT_THAT(text, Not(IsEmpty()));
+  text = string("\0", 1);
+  EXPECT_THAT(text, Not(IsEmpty()));
+}
+
+TEST(IsEmptyTest, CanDescribeSelf) {
+  Matcher<vector<int> > m = IsEmpty();
+  EXPECT_EQ("is empty", Describe(m));
+  EXPECT_EQ("isn't empty", DescribeNegation(m));
+}
+
+TEST(IsEmptyTest, ExplainsResult) {
+  Matcher<vector<int> > m = IsEmpty();
+  vector<int> container;
+  EXPECT_EQ("", Explain(m, container));
+  container.push_back(0);
+  EXPECT_EQ("whose size is 1", Explain(m, container));
 }
 
 #if GTEST_HAS_TYPED_TEST
