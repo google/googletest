@@ -1031,68 +1031,12 @@ class VoidNullaryFunctor {
   void operator()() { g_done = true; }
 };
 
-bool Unary(int x) { return x < 0; }
-
-const char* Plus1(const char* s) { return s + 1; }
-
-void VoidUnary(int /* n */) { g_done = true; }
-
-bool ByConstRef(const std::string& s) { return s == "Hi"; }
-
-const double g_double = 0;
-bool ReferencesGlobalDouble(const double& x) { return &x == &g_double; }
-
-std::string ByNonConstRef(std::string& s) { return s += "+"; }  // NOLINT
-
-struct UnaryFunctor {
-  int operator()(bool x) { return x ? 1 : -1; }
-};
-
-const char* Binary(const char* input, short n) { return input + n; }  // NOLINT
-
-void VoidBinary(int, char) { g_done = true; }
-
-int Ternary(int x, char y, short z) { return x + y + z; }  // NOLINT
-
-void VoidTernary(int, char, bool) { g_done = true; }
-
-int SumOf4(int a, int b, int c, int d) { return a + b + c + d; }
-
-void VoidFunctionWithFourArguments(char, int, float, double) { g_done = true; }
-
-int SumOf5(int a, int b, int c, int d, int e) { return a + b + c + d + e; }
-
-struct SumOf5Functor {
-  int operator()(int a, int b, int c, int d, int e) {
-    return a + b + c + d + e;
-  }
-};
-
-int SumOf6(int a, int b, int c, int d, int e, int f) {
-  return a + b + c + d + e + f;
-}
-
-struct SumOf6Functor {
-  int operator()(int a, int b, int c, int d, int e, int f) {
-    return a + b + c + d + e + f;
-  }
-};
-
 class Foo {
  public:
   Foo() : value_(123) {}
 
   int Nullary() const { return value_; }
-  short Unary(long x) { return static_cast<short>(value_ + x); }  // NOLINT
-  std::string Binary(const std::string& str, char c) const { return str + c; }
-  int Ternary(int x, bool y, char z) { return value_ + x + y*z; }
-  int SumOf4(int a, int b, int c, int d) const {
-    return a + b + c + d + value_;
-  }
-  int SumOf5(int a, int b, int c, int d, int e) { return a + b + c + d + e; }
-  int SumOf6(int a, int b, int c, int d, int e, int f) {
-    return a + b + c + d + e + f;
-  }
+
  private:
   int value_;
 };
