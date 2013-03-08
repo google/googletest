@@ -387,7 +387,7 @@ class PolymorphicMatcher {
 template <typename T>
 inline Matcher<T> MakeMatcher(const MatcherInterface<T>* impl) {
   return Matcher<T>(impl);
-};
+}
 
 // Creates a polymorphic matcher from its implementation.  This is
 // easier to use than the PolymorphicMatcher<Impl> constructor as it
