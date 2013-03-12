@@ -865,6 +865,13 @@ TEST_P(ParameterizedDerivedTest, SeesSequence) {
   EXPECT_EQ(GetParam(), global_count_++);
 }
 
+class ParameterizedDeathTest : public ::testing::TestWithParam<int> { };
+
+TEST_F(ParameterizedDeathTest, GetParamDiesFromTestF) {
+  EXPECT_DEATH_IF_SUPPORTED(GetParam(),
+                            ".* value-parameterized test .*");
+}
+
 INSTANTIATE_TEST_CASE_P(RangeZeroToFive, ParameterizedDerivedTest, Range(0, 5));
 
 #endif  // GTEST_HAS_PARAM_TEST
