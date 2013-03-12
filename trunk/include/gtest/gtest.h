@@ -1755,7 +1755,12 @@ class WithParamInterface {
   // references static data, to reduce the opportunity for incorrect uses
   // like writing 'WithParamInterface<bool>::GetParam()' for a test that
   // uses a fixture whose parameter type is int.
-  const ParamType& GetParam() const { return *parameter_; }
+  const ParamType& GetParam() const {
+    GTEST_CHECK_(parameter_ != NULL)
+        << "GetParam() can only be called inside a value-parameterized test "
+        << "-- did you intend to write TEST_P instead of TEST_F?";
+    return *parameter_;
+  }
 
  private:
   // Sets parameter value. The caller is responsible for making sure the value
