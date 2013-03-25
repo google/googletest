@@ -318,6 +318,51 @@ class GTEST_API_ Matcher<internal::string>
   Matcher(const char* s);  // NOLINT
 };
 
+#if GTEST_HAS_STRING_PIECE_
+// The following two specializations allow the user to write str
+// instead of Eq(str) and "foo" instead of Eq("foo") when a StringPiece
+// matcher is expected.
+template <>
+class GTEST_API_ Matcher<const StringPiece&>
+    : public internal::MatcherBase<const StringPiece&> {
+ public:
+  Matcher() {}
+
+  explicit Matcher(const MatcherInterface<const StringPiece&>* impl)
+      : internal::MatcherBase<const StringPiece&>(impl) {}
+
+  // Allows the user to write str instead of Eq(str) sometimes, where
+  // str is a string object.
+  Matcher(const internal::string& s);  // NOLINT
+
+  // Allows the user to write "foo" instead of Eq("foo") sometimes.
+  Matcher(const char* s);  // NOLINT
+
+  // Allows the user to pass StringPieces directly.
+  Matcher(StringPiece s);  // NOLINT
+};
+
+template <>
+class GTEST_API_ Matcher<StringPiece>
+    : public internal::MatcherBase<StringPiece> {
+ public:
+  Matcher() {}
+
+  explicit Matcher(const MatcherInterface<StringPiece>* impl)
+      : internal::MatcherBase<StringPiece>(impl) {}
+
+  // Allows the user to write str instead of Eq(str) sometimes, where
+  // str is a string object.
+  Matcher(const internal::string& s);  // NOLINT
+
+  // Allows the user to write "foo" instead of Eq("foo") sometimes.
+  Matcher(const char* s);  // NOLINT
+
+  // Allows the user to pass StringPieces directly.
+  Matcher(StringPiece s);  // NOLINT
+};
+#endif  // GTEST_HAS_STRING_PIECE_
+
 // The PolymorphicMatcher class template makes it easy to implement a
 // polymorphic matcher (i.e. a matcher that can match values of more
 // than one type, e.g. Eq(n) and NotNull()).

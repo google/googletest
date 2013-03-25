@@ -63,6 +63,41 @@ Matcher<internal::string>::Matcher(const char* s) {
   *this = Eq(internal::string(s));
 }
 
+#if GTEST_HAS_STRING_PIECE_
+// Constructs a matcher that matches a const StringPiece& whose value is
+// equal to s.
+Matcher<const StringPiece&>::Matcher(const internal::string& s) {
+  *this = Eq(s);
+}
+
+// Constructs a matcher that matches a const StringPiece& whose value is
+// equal to s.
+Matcher<const StringPiece&>::Matcher(const char* s) {
+  *this = Eq(internal::string(s));
+}
+
+// Constructs a matcher that matches a const StringPiece& whose value is
+// equal to s.
+Matcher<const StringPiece&>::Matcher(StringPiece s) {
+  *this = Eq(s.ToString());
+}
+
+// Constructs a matcher that matches a StringPiece whose value is equal to s.
+Matcher<StringPiece>::Matcher(const internal::string& s) {
+  *this = Eq(s);
+}
+
+// Constructs a matcher that matches a StringPiece whose value is equal to s.
+Matcher<StringPiece>::Matcher(const char* s) {
+  *this = Eq(internal::string(s));
+}
+
+// Constructs a matcher that matches a StringPiece whose value is equal to s.
+Matcher<StringPiece>::Matcher(StringPiece s) {
+  *this = Eq(s.ToString());
+}
+#endif  // GTEST_HAS_STRING_PIECE_
+
 namespace internal {
 
 // Joins a vector of strings as if they are fields of a tuple; returns

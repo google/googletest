@@ -364,6 +364,44 @@ TEST(StringMatcherTest, CanBeImplicitlyConstructedFromString) {
   EXPECT_FALSE(m2.Matches("hello"));
 }
 
+#if GTEST_HAS_STRING_PIECE_
+// Tests that a C-string literal can be implicitly converted to a
+// Matcher<StringPiece> or Matcher<const StringPiece&>.
+TEST(StringPieceMatcherTest, CanBeImplicitlyConstructedFromCStringLiteral) {
+  Matcher<StringPiece> m1 = "cats";
+  EXPECT_TRUE(m1.Matches("cats"));
+  EXPECT_FALSE(m1.Matches("dogs"));
+
+  Matcher<const StringPiece&> m2 = "cats";
+  EXPECT_TRUE(m2.Matches("cats"));
+  EXPECT_FALSE(m2.Matches("dogs"));
+}
+
+// Tests that a string object can be implicitly converted to a
+// Matcher<StringPiece> or Matcher<const StringPiece&>.
+TEST(StringPieceMatcherTest, CanBeImplicitlyConstructedFromString) {
+  Matcher<StringPiece> m1 = string("cats");
+  EXPECT_TRUE(m1.Matches("cats"));
+  EXPECT_FALSE(m1.Matches("dogs"));
+
+  Matcher<const StringPiece&> m2 = string("cats");
+  EXPECT_TRUE(m2.Matches("cats"));
+  EXPECT_FALSE(m2.Matches("dogs"));
+}
+
+// Tests that a StringPiece object can be implicitly converted to a
+// Matcher<StringPiece> or Matcher<const StringPiece&>.
+TEST(StringPieceMatcherTest, CanBeImplicitlyConstructedFromStringPiece) {
+  Matcher<StringPiece> m1 = StringPiece("cats");
+  EXPECT_TRUE(m1.Matches("cats"));
+  EXPECT_FALSE(m1.Matches("dogs"));
+
+  Matcher<const StringPiece&> m2 = StringPiece("cats");
+  EXPECT_TRUE(m2.Matches("cats"));
+  EXPECT_FALSE(m2.Matches("dogs"));
+}
+#endif  // GTEST_HAS_STRING_PIECE_
+
 // Tests that MakeMatcher() constructs a Matcher<T> from a
 // MatcherInterface* without requiring the user to explicitly
 // write the type.
