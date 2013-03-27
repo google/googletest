@@ -2189,7 +2189,10 @@ class WhenSortedByMatcher {
          GTEST_REMOVE_REFERENCE_AND_CONST_(LhsContainer)> LhsView;
     typedef typename LhsView::type LhsStlContainer;
     typedef typename LhsView::const_reference LhsStlContainerReference;
-    typedef typename LhsStlContainer::value_type LhsValue;
+    // Transforms std::pair<const Key, Value> into std::pair<Key, Value>
+    // so that we can match associative containers.
+    typedef typename RemoveConstFromKey<
+        typename LhsStlContainer::value_type>::type LhsValue;
 
     Impl(const Comparator& comparator, const ContainerMatcher& matcher)
         : comparator_(comparator), matcher_(matcher) {}

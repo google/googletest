@@ -37,8 +37,10 @@
 #include "gmock/gmock-more-matchers.h"
 
 #include <string.h>
+#include <deque>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <list>
 #include <map>
 #include <set>
@@ -4010,6 +4012,165 @@ TEST(WhenSortedTest, WorksForNonEmptyContainer) {
   words.push_back("2");
   EXPECT_THAT(words, WhenSorted(ElementsAre("1", "2", "2", "3")));
   EXPECT_THAT(words, Not(WhenSorted(ElementsAre("3", "1", "2", "2"))));
+}
+
+TEST(WhenSortedTest, WorksForMapTypes) {
+    map<string, int> word_counts;
+    word_counts["and"] = 1;
+    word_counts["the"] = 1;
+    word_counts["buffalo"] = 2;
+    EXPECT_THAT(word_counts, WhenSorted(ElementsAre(
+            Pair("and", 1), Pair("buffalo", 2), Pair("the", 1))));
+    EXPECT_THAT(word_counts, Not(WhenSorted(ElementsAre(
+            Pair("and", 1), Pair("the", 1), Pair("buffalo", 2)))));
+}
+
+TEST(WhenSortedTest, WorksForMultiMapTypes) {
+    multimap<int, int> ifib;
+    ifib.insert(make_pair(8, 6));
+    ifib.insert(make_pair(2, 3));
+    ifib.insert(make_pair(1, 1));
+    ifib.insert(make_pair(3, 4));
+    ifib.insert(make_pair(1, 2));
+    ifib.insert(make_pair(5, 5));
+    EXPECT_THAT(ifib, WhenSorted(ElementsAre(Pair(1, 1),
+                                             Pair(1, 2),
+                                             Pair(2, 3),
+                                             Pair(3, 4),
+                                             Pair(5, 5),
+                                             Pair(8, 6))));
+    EXPECT_THAT(ifib, Not(WhenSorted(ElementsAre(Pair(8, 6),
+                                                 Pair(2, 3),
+                                                 Pair(1, 1),
+                                                 Pair(3, 4),
+                                                 Pair(1, 2),
+                                                 Pair(5, 5)))));
+}
+
+TEST(WhenSortedTest, WorksForPolymorphicMatcher) {
+    std::deque<int> d;
+    d.push_back(2);
+    d.push_back(1);
+    EXPECT_THAT(d, WhenSorted(ElementsAre(1, 2)));
+    EXPECT_THAT(d, Not(WhenSorted(ElementsAre(2, 1))));
+}
+
+TEST(WhenSortedTest, WorksForVectorConstRefMatcher) {
+    std::deque<int> d;
+    d.push_back(2);
+    d.push_back(1);
+    Matcher<const std::vector<int>&> vector_match = ElementsAre(1, 2);
+    EXPECT_THAT(d, WhenSorted(vector_match));
+    Matcher<const std::vector<int>&> not_vector_match = ElementsAre(2, 1);
+    EXPECT_THAT(d, Not(WhenSorted(not_vector_match)));
+}
+
+// Deliberately bare pseudo-container.
+// Offers only begin() and end() accessors, yielding InputIterator.
+template <typename T>
+class Streamlike {
+ private:
+  class ConstIter;
+ public:
+  typedef ConstIter const_iterator;
+  typedef T value_type;
+
+  template <typename InIter>
+  Streamlike(InIter first, InIter last) : remainder_(first, last) {}
+
+  const_iterator begin() const {
+    return const_iterator(this, remainder_.begin());
+  }
+  const_iterator end() const {
+    return const_iterator(this, remainder_.end());
+  }
+
+ private:
+  class ConstIter : public std::iterator<std::input_iterator_tag,
+                                         value_type,
+                                         ptrdiff_t,
+                                         const value_type&,
+                                         const value_type*> {
+   public:
+    ConstIter(const Streamlike* s,
+              typename std::list<value_type>::iterator pos)
+        : s_(s), pos_(pos) {}
+
+    const value_type& operator*() const { return *pos_; }
+    const value_type* operator->() const { return &*pos_; }
+    ConstIter& operator++() {
+      s_->remainder_.erase(pos_++);
+      return *this;
+    }
+
+    // *iter++ is required to work (see std::istreambuf_iterator).
+    // (void)iter++ is also required to work.
+    class PostIncrProxy {
+     public:
+      explicit PostIncrProxy(const value_type& value) : value_(value) {}
+      value_type operator*() const { return value_; }
+     private:
+      value_type value_;
+    };
+    PostIncrProxy operator++(int) {
+      PostIncrProxy proxy(**this);
+      ++(*this);
+      return proxy;
+    }
+
+    friend bool operator==(const ConstIter& a, const ConstIter& b) {
+      return a.s_ == b.s_ && a.pos_ == b.pos_;
+    }
+    friend bool operator!=(const ConstIter& a, const ConstIter& b) {
+      return !(a == b);
+    }
+
+   private:
+    const Streamlike* s_;
+    typename std::list<value_type>::iterator pos_;
+  };
+
+  friend std::ostream& operator<<(std::ostream& os, const Streamlike& s) {
+    os << "[";
+    typedef typename std::list<value_type>::const_iterator Iter;
+    const char* sep = "";
+    for (Iter it = s.remainder_.begin(); it != s.remainder_.end(); ++it) {
+      os << sep << *it;
+      sep = ",";
+    }
+    os << "]";
+    return os;
+  }
+
+  mutable std::list<value_type> remainder_;  // modified by iteration
+};
+
+TEST(StreamlikeTest, Iteration) {
+  const int a[5] = { 2, 1, 4, 5, 3 };
+  Streamlike<int> s(a, a + 5);
+  Streamlike<int>::const_iterator it = s.begin();
+  const int* ip = a;
+  while (it != s.end()) {
+    SCOPED_TRACE(ip - a);
+    EXPECT_EQ(*ip++, *it++);
+  }
+}
+
+TEST(WhenSortedTest, WorksForStreamlike) {
+  // Streamlike 'container' provides only minimal iterator support.
+  // Its iterators are tagged with input_iterator_tag.
+  const int a[5] = { 2, 1, 4, 5, 3 };
+  Streamlike<int> s(a, a + 5);
+  EXPECT_THAT(s, WhenSorted(ElementsAre(1, 2, 3, 4, 5)));
+  EXPECT_THAT(s, Not(WhenSorted(ElementsAre(2, 1, 4, 5, 3))));
+}
+
+TEST(WhenSortedTest, WorksForVectorConstRefMatcherOnStreamlike) {
+  const int a[5] = { 2, 1, 4, 5, 3 };
+  Streamlike<int> s(a, a + 5);
+  Matcher<const std::vector<int>&> vector_match = ElementsAre(1, 2, 3, 4, 5);
+  EXPECT_THAT(s, WhenSorted(vector_match));
+  EXPECT_THAT(s, Not(WhenSorted(ElementsAre(2, 1, 4, 5, 3))));
 }
 
 // Tests IsReadableTypeName().

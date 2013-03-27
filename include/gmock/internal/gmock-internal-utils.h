@@ -473,6 +473,20 @@ class StlContainerView< ::std::tr1::tuple<ElementPointer, Size> > {
 // StlContainer with a reference type.
 template <typename T> class StlContainerView<T&>;
 
+// A type transform to remove constness from the first part of a pair.
+// Pairs like that are used as the value_type of associative containers,
+// and this transform produces a similar but assignable pair.
+template <typename T>
+struct RemoveConstFromKey {
+  typedef T type;
+};
+
+// Partially specialized to remove constness from std::pair<const K, V>.
+template <typename K, typename V>
+struct RemoveConstFromKey<std::pair<const K, V> > {
+  typedef std::pair<K, V> type;
+};
+
 // Mapping from booleans to types. Similar to boost::bool_<kValue> and
 // std::integral_constant<bool, kValue>.
 template <bool kValue>
