@@ -4518,7 +4518,7 @@ TEST(EqAssertionTest, StdString) {
   // Compares a const char* to an std::string that has different
   // content
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ("Test", ::std::string("test")),
-                          "::std::string(\"test\")");
+                          "\"test\"");
 
   // Compares an std::string to a char* that has different content.
   char* const p1 = const_cast<char*>("foo");
