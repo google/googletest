@@ -214,10 +214,15 @@ using ::std::tr1::make_tuple;
 using ::std::tr1::tuple;
 #endif
 
-#if _MSC_VER
-// MSVC defines the following classes in the ::stdext namespace while
-// gcc defines them in the :: namespace.  Note that they are not part
-// of the C++ standard.
+// The hash_* classes are not part of the C++ standard.  STLport
+// defines them in namespace std.  MSVC defines them in ::stdext.  GCC
+// defines them in ::.
+#ifdef _STLP_HASH_MAP  // We got <hash_map> from STLport.
+using ::std::hash_map;
+using ::std::hash_set;
+using ::std::hash_multimap;
+using ::std::hash_multiset;
+#elif _MSC_VER
 using ::stdext::hash_map;
 using ::stdext::hash_set;
 using ::stdext::hash_multimap;
