@@ -1523,14 +1523,14 @@ TEST(ExpectationSetTest, SizeWorks) {
 
 TEST(ExpectationSetTest, IsEnumerable) {
   ExpectationSet es;
-  EXPECT_THAT(es.begin(), Eq(es.end()));
+  EXPECT_TRUE(es.begin() == es.end());
 
   es += Expectation();
   ExpectationSet::const_iterator it = es.begin();
-  EXPECT_THAT(it, Ne(es.end()));
+  EXPECT_TRUE(it != es.end());
   EXPECT_THAT(*it, Eq(Expectation()));
   ++it;
-  EXPECT_THAT(it, Eq(es.end()));
+  EXPECT_TRUE(it== es.end());
 }
 
 // Tests the .After() clause.
