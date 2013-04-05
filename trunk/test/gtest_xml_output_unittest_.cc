@@ -95,6 +95,9 @@ TEST(InvalidCharactersTest, InvalidCharactersInMessage) {
 }
 
 class PropertyRecordingTest : public Test {
+ public:
+  static void SetUpTestCase() { RecordProperty("SetUpTestCase", "yes"); }
+  static void TearDownTestCase() { RecordProperty("TearDownTestCase", "aye"); }
 };
 
 TEST_F(PropertyRecordingTest, OneProperty) {
@@ -120,12 +123,12 @@ TEST(NoFixtureTest, RecordProperty) {
   RecordProperty("key", "1");
 }
 
-void ExternalUtilityThatCallsRecordProperty(const char* key, int value) {
+void ExternalUtilityThatCallsRecordProperty(const std::string& key, int value) {
   testing::Test::RecordProperty(key, value);
 }
 
-void ExternalUtilityThatCallsRecordProperty(const char* key,
-                                            const char* value) {
+void ExternalUtilityThatCallsRecordProperty(const std::string& key,
+                                            const std::string& value) {
   testing::Test::RecordProperty(key, value);
 }
 
@@ -173,5 +176,6 @@ int main(int argc, char** argv) {
     TestEventListeners& listeners = UnitTest::GetInstance()->listeners();
     delete listeners.Release(listeners.default_xml_generator());
   }
+  testing::Test::RecordProperty("ad_hoc_property", "42");
   return RUN_ALL_TESTS();
 }
