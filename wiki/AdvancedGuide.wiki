@@ -965,7 +965,7 @@ will output XML like this:
 
 _Note_:
  *  `RecordProperty()` is a static member of the `Test` class. Therefore it needs to be prefixed with `::testing::Test::` if used outside of the `TEST` body and the test fixture class.
- *  `key` must be a valid XML attribute name, and cannot conflict with the ones already used by Google Test (`name`, `status`,     `time`, and `classname`).
+ *  `key` must be a valid XML attribute name, and cannot conflict with the ones already used by Google Test (`name`, `status`, `time`, `classname`, `type_param`, and `value_param`).
 
 _Availability_: Linux, Windows, Mac.
 
