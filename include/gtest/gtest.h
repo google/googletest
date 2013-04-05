@@ -158,6 +158,7 @@ class StreamingListenerTest;
 class TestResultAccessor;
 class TestEventListenersAccessor;
 class TestEventRepeater;
+class UnitTestRecordPropertyTestHelper;
 class WindowsDeathTest;
 class UnitTestImpl* GetUnitTestImpl();
 void ReportFailureInUnknownLocation(TestPartResult::Type result_type,
@@ -381,20 +382,21 @@ class GTEST_API_ Test {
   // non-fatal) failure.
   static bool HasFailure() { return HasFatalFailure() || HasNonfatalFailure(); }
 
-  // Logs a property for the current test.  Only the last value for a given
-  // key is remembered.
-  // These are public static so they can be called from utility functions
-  // that are not members of the test fixture.
-  // The arguments are const char* instead strings, as Google Test is used
-  // on platforms where string doesn't compile.
-  //
-  // Note that a driving consideration for these RecordProperty methods
-  // was to produce xml output suited to the Greenspan charting utility,
-  // which at present will only chart values that fit in a 32-bit int. It
-  // is the user's responsibility to restrict their values to 32-bit ints
-  // if they intend them to be used with Greenspan.
-  static void RecordProperty(const char* key, const char* value);
-  static void RecordProperty(const char* key, int value);
+  // Logs a property for the current test, test case, or for the entire
+  // invocation of the test program when used outside of the context of a
+  // test case.  Only the last value for a given key is remembered.  These
+  // are public static so they can be called from utility functions that are
+  // not members of the test fixture.  Calls to RecordProperty made during
+  // lifespan of the test (from the moment its constructor starts to the
+  // moment its destructor finishes) will be output in XML as attributes of
+  // the <testcase> element.  Properties recorded from fixture's
+  // SetUpTestCase or TearDownTestCase are logged as attributes of the
+  // corresponding <testsuite> element.  Calls to RecordProperty made in the
+  // global context (before or after invocation of RUN_ALL_TESTS and from
+  // SetUp/TearDown method of Environment objects registered with Google
+  // Test) will be output as attributes of the <testsuites> element.
+  static void RecordProperty(const std::string& key, const std::string& value);
+  static void RecordProperty(const std::string& key, int value);
 
  protected:
   // Creates a Test object.
@@ -463,7 +465,7 @@ class TestProperty {
   // C'tor.  TestProperty does NOT have a default constructor.
   // Always use this constructor (with parameters) to create a
   // TestProperty object.
-  TestProperty(const char* a_key, const char* a_value) :
+  TestProperty(const std::string& a_key, const std::string& a_value) :
     key_(a_key), value_(a_value) {
   }
 
@@ -478,7 +480,7 @@ class TestProperty {
   }
 
   // Sets a new value, overriding the one supplied in the constructor.
-  void SetValue(const char* new_value) {
+  void SetValue(const std::string& new_value) {
     value_ = new_value;
   }
 
@@ -537,6 +539,7 @@ class GTEST_API_ TestResult {
 
  private:
   friend class TestInfo;
+  friend class TestCase;
   friend class UnitTest;
   friend class internal::DefaultGlobalTestPartResultReporter;
   friend class internal::ExecDeathTest;
@@ -561,13 +564,16 @@ class GTEST_API_ TestResult {
   // a non-fatal failure if invalid (e.g., if it conflicts with reserved
   // key names). If a property is already recorded for the same key, the
   // value will be updated, rather than storing multiple values for the same
-  // key.
-  void RecordProperty(const TestProperty& test_property);
+  // key.  xml_element specifies the element for which the property is being
+  // recorded and is used for validation.
+  void RecordProperty(const std::string& xml_element,
+                      const TestProperty& test_property);
 
   // Adds a failure if the key is a reserved attribute of Google Test
   // testcase tags.  Returns true if the property is valid.
   // TODO(russr): Validate attribute names are legal and human readable.
-  static bool ValidateTestProperty(const TestProperty& test_property);
+  static bool ValidateTestProperty(const std::string& xml_element,
+                                   const TestProperty& test_property);
 
   // Adds a test part result to the list.
   void AddTestPartResult(const TestPartResult& test_part_result);
@@ -792,6 +798,10 @@ class GTEST_API_ TestCase {
   // total_test_count() - 1. If i is not in that range, returns NULL.
   const TestInfo* GetTestInfo(int i) const;
 
+  // Returns the TestResult that holds test properties recorded during
+  // execution of SetUpTestCase and TearDownTestCase.
+  const TestResult& ad_hoc_test_result() const { return ad_hoc_test_result_; }
+
  private:
   friend class Test;
   friend class internal::UnitTestImpl;
@@ -880,6 +890,9 @@ class GTEST_API_ TestCase {
   bool should_run_;
   // Elapsed time, in milliseconds.
   TimeInMillis elapsed_time_;
+  // Holds test properties recorded during execution of SetUpTestCase and
+  // TearDownTestCase.
+  TestResult ad_hoc_test_result_;
 
   // We disallow copying TestCases.
   GTEST_DISALLOW_COPY_AND_ASSIGN_(TestCase);
@@ -1165,6 +1178,10 @@ class GTEST_API_ UnitTest {
   // total_test_case_count() - 1. If i is not in that range, returns NULL.
   const TestCase* GetTestCase(int i) const;
 
+  // Returns the TestResult containing information on test failures and
+  // properties logged outside of individual test cases.
+  const TestResult& ad_hoc_test_result() const;
+
   // Returns the list of event listeners that can be used to track events
   // inside Google Test.
   TestEventListeners& listeners();
@@ -1192,9 +1209,12 @@ class GTEST_API_ UnitTest {
                          const std::string& os_stack_trace)
       GTEST_LOCK_EXCLUDED_(mutex_);
 
-  // Adds a TestProperty to the current TestResult object. If the result already
-  // contains a property with the same key, the value will be updated.
-  void RecordPropertyForCurrentTest(const char* key, const char* value);
+  // Adds a TestProperty to the current TestResult object when invoked from
+  // inside a test, to current TestCase's ad_hoc_test_result_ when invoked
+  // from SetUpTestCase or TearDownTestCase, or to the global property set
+  // when invoked elsewhere.  If the result already contains a property with
+  // the same key, the value will be updated.
+  void RecordProperty(const std::string& key, const std::string& value);
 
   // Gets the i-th test case among all the test cases. i can range from 0 to
   // total_test_case_count() - 1. If i is not in that range, returns NULL.
@@ -1210,6 +1230,7 @@ class GTEST_API_ UnitTest {
   friend class internal::AssertHelper;
   friend class internal::ScopedTrace;
   friend class internal::StreamingListenerTest;
+  friend class internal::UnitTestRecordPropertyTestHelper;
   friend Environment* AddGlobalTestEnvironment(Environment* env);
   friend internal::UnitTestImpl* internal::GetUnitTestImpl();
   friend void internal::ReportFailureInUnknownLocation(

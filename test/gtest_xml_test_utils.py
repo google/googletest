@@ -80,7 +80,9 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
     actual_attributes   = actual_node  .attributes
     self.assertEquals(
         expected_attributes.length, actual_attributes.length,
-        'attribute numbers differ in element ' + actual_node.tagName)
+        'attribute numbers differ in element %s:\nExpected: %r\nActual: %r' % (
+            actual_node.tagName, expected_attributes.keys(),
+            actual_attributes.keys()))
     for i in range(expected_attributes.length):
       expected_attr = expected_attributes.item(i)
       actual_attr   = actual_attributes.get(expected_attr.name)

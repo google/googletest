@@ -57,7 +57,7 @@ else:
   STACK_TRACE_TEMPLATE = ''
 
 EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
-<testsuites tests="23" failures="4" disabled="2" errors="0" time="*" timestamp="*" name="AllTests">
+<testsuites tests="23" failures="4" disabled="2" errors="0" time="*" timestamp="*" name="AllTests" ad_hoc_property="42">
   <testsuite name="SuccessfulTest" tests="1" failures="0" disabled="0" errors="0" time="*">
     <testcase name="Succeeds" status="run" time="*" classname="SuccessfulTest"/>
   </testsuite>
@@ -97,7 +97,7 @@ Invalid characters in brackets []%(stack)s]]></failure>
   <testsuite name="DisabledTest" tests="1" failures="0" disabled="1" errors="0" time="*">
     <testcase name="DISABLED_test_not_run" status="notrun" time="*" classname="DisabledTest"/>
   </testsuite>
-  <testsuite name="PropertyRecordingTest" tests="4" failures="0" disabled="0" errors="0" time="*">
+  <testsuite name="PropertyRecordingTest" tests="4" failures="0" disabled="0" errors="0" time="*" SetUpTestCase="yes" TearDownTestCase="aye">
     <testcase name="OneProperty" status="run" time="*" classname="PropertyRecordingTest" key_1="1"/>
     <testcase name="IntValuedProperty" status="run" time="*" classname="PropertyRecordingTest" key_int="1"/>
     <testcase name="ThreeProperties" status="run" time="*" classname="PropertyRecordingTest" key_1="1" key_2="2" key_3="3"/>

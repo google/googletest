@@ -1716,8 +1716,9 @@ void TestResult::AddTestPartResult(const TestPartResult& test_part_result) {
 // Adds a test property to the list. If a property with the same key as the
 // supplied property is already represented, the value of this test_property
 // replaces the old value for that key.
-void TestResult::RecordProperty(const TestProperty& test_property) {
-  if (!ValidateTestProperty(test_property)) {
+void TestResult::RecordProperty(const std::string& xml_element,
+                                const TestProperty& test_property) {
+  if (!ValidateTestProperty(xml_element, test_property)) {
     return;
   }
   internal::MutexLock lock(&test_properites_mutex_);
@@ -1731,19 +1732,92 @@ void TestResult::RecordProperty(const TestProperty& test_property) {
   property_with_matching_key->SetValue(test_property.value());
 }
 
-// Adds a failure if the key is a reserved attribute of Google Test
-// testcase tags.  Returns true if the property is valid.
-bool TestResult::ValidateTestProperty(const TestProperty& test_property) {
-  const std::string& key = test_property.key();
-  if (key == "name" || key == "status" || key == "time" || key == "classname") {
-    ADD_FAILURE()
-        << "Reserved key used in RecordProperty(): "
-        << key
-        << " ('name', 'status', 'time', and 'classname' are reserved by "
-        << GTEST_NAME_ << ")";
+// The list of reserved attributes used in the <testsuites> element of XML
+// output.
+static const char* const kReservedTestSuitesAttributes[] = {
+  "disabled",
+  "errors",
+  "failures",
+  "name",
+  "random_seed",
+  "tests",
+  "time",
+  "timestamp"
+};
+
+// The list of reserved attributes used in the <testsuite> element of XML
+// output.
+static const char* const kReservedTestSuiteAttributes[] = {
+  "disabled",
+  "errors",
+  "failures",
+  "name",
+  "tests",
+  "time"
+};
+
+// The list of reserved attributes used in the <testcase> element of XML output.
+static const char* const kReservedTestCaseAttributes[] = {
+  "classname",
+  "name",
+  "status",
+  "time",
+  "type_param",
+  "value_param"
+};
+
+template <int kSize>
+std::vector<std::string> ArrayAsVector(const char* const (&array)[kSize]) {
+  return std::vector<std::string>(array, array + kSize);
+}
+
+static std::vector<std::string> GetReservedAttributesForElement(
+    const std::string& xml_element) {
+  if (xml_element == "testsuites") {
+    return ArrayAsVector(kReservedTestSuitesAttributes);
+  } else if (xml_element == "testsuite") {
+    return ArrayAsVector(kReservedTestSuiteAttributes);
+  } else if (xml_element == "testcase") {
+    return ArrayAsVector(kReservedTestCaseAttributes);
+  } else {
+    GTEST_CHECK_(false) << "Unrecognized xml_element provided: " << xml_element;
+  }
+  // This code is unreachable but some compilers may not realizes that.
+  return std::vector<std::string>();
+}
+
+static std::string FormatWordList(const std::vector<std::string>& words) {
+  Message word_list;
+  for (size_t i = 0; i < words.size(); ++i) {
+    if (i > 0 && words.size() > 2) {
+      word_list << ", ";
+    }
+    if (i == words.size() - 1) {
+      word_list << "and ";
+    }
+    word_list << "'" << words[i] << "'";
+  }
+  return word_list.GetString();
+}
+
+bool ValidateTestPropertyName(const std::string& property_name,
+                              const std::vector<std::string>& reserved_names) {
+  if (std::find(reserved_names.begin(), reserved_names.end(), property_name) !=
+          reserved_names.end()) {
+    ADD_FAILURE() << "Reserved key used in RecordProperty(): " << property_name
+                  << " (" << FormatWordList(reserved_names)
+                  << " are reserved by " << GTEST_NAME_ << ")";
     return false;
   }
   return true;
+}
+
+// Adds a failure if the key is a reserved attribute of the element named
+// xml_element.  Returns true if the property is valid.
+bool TestResult::ValidateTestProperty(const std::string& xml_element,
+                                      const TestProperty& test_property) {
+  return ValidateTestPropertyName(test_property.key(),
+                                  GetReservedAttributesForElement(xml_element));
 }
 
 // Clears the object.
@@ -1821,12 +1895,12 @@ void Test::TearDown() {
 }
 
 // Allows user supplied key value pairs to be recorded for later output.
-void Test::RecordProperty(const char* key, const char* value) {
-  UnitTest::GetInstance()->RecordPropertyForCurrentTest(key, value);
+void Test::RecordProperty(const std::string& key, const std::string& value) {
+  UnitTest::GetInstance()->RecordProperty(key, value);
 }
 
 // Allows user supplied key value pairs to be recorded for later output.
-void Test::RecordProperty(const char* key, int value) {
+void Test::RecordProperty(const std::string& key, int value) {
   Message value_message;
   value_message << value;
   RecordProperty(key, value_message.GetString().c_str());
@@ -2355,6 +2429,7 @@ void TestCase::Run() {
 
 // Clears the results of all tests in this test case.
 void TestCase::ClearResult() {
+  ad_hoc_test_result_.Clear();
   ForEach(test_info_list_, TestInfo::ClearTestResult);
 }
 
@@ -2925,13 +3000,13 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
   // is_attribute is true, the text is meant to appear as an attribute
   // value, and normalizable whitespace is preserved by replacing it
   // with character references.
-  static std::string EscapeXml(const char* str, bool is_attribute);
+  static std::string EscapeXml(const std::string& str, bool is_attribute);
 
   // Returns the given string with all characters invalid in XML removed.
-  static string RemoveInvalidXmlCharacters(const string& str);
+  static std::string RemoveInvalidXmlCharacters(const std::string& str);
 
   // Convenience wrapper around EscapeXml when str is an attribute value.
-  static std::string EscapeXmlAttribute(const char* str) {
+  static std::string EscapeXmlAttribute(const std::string& str) {
     return EscapeXml(str, true);
   }
 
@@ -2939,6 +3014,13 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
   static std::string EscapeXmlText(const char* str) {
     return EscapeXml(str, false);
   }
+
+  // Verifies that the given attribute belongs to the given element and
+  // streams the attribute as XML.
+  static void OutputXmlAttribute(std::ostream* stream,
+                                 const std::string& element_name,
+                                 const std::string& name,
+                                 const std::string& value);
 
   // Streams an XML CDATA section, escaping invalid CDATA sequences as needed.
   static void OutputXmlCDataSection(::std::ostream* stream, const char* data);
@@ -2949,10 +3031,12 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
                                 const TestInfo& test_info);
 
   // Prints an XML representation of a TestCase object
-  static void PrintXmlTestCase(FILE* out, const TestCase& test_case);
+  static void PrintXmlTestCase(::std::ostream* stream,
+                               const TestCase& test_case);
 
   // Prints an XML summary of unit_test to output stream out.
-  static void PrintXmlUnitTest(FILE* out, const UnitTest& unit_test);
+  static void PrintXmlUnitTest(::std::ostream* stream,
+                               const UnitTest& unit_test);
 
   // Produces a string representing the test properties in a result as space
   // delimited XML attributes based on the property key="value" pairs.
@@ -3003,7 +3087,9 @@ void XmlUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
     fflush(stderr);
     exit(EXIT_FAILURE);
   }
-  PrintXmlUnitTest(xmlout, unit_test);
+  std::stringstream stream;
+  PrintXmlUnitTest(&stream, unit_test);
+  fprintf(xmlout, "%s", StringStreamToString(&stream).c_str());
   fclose(xmlout);
 }
 
@@ -3020,43 +3106,42 @@ void XmlUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
 // TODO(wan): It might be nice to have a minimally invasive, human-readable
 // escaping scheme for invalid characters, rather than dropping them.
 std::string XmlUnitTestResultPrinter::EscapeXml(
-    const char* str, bool is_attribute) {
+    const std::string& str, bool is_attribute) {
   Message m;
 
-  if (str != NULL) {
-    for (const char* src = str; *src; ++src) {
-      switch (*src) {
-        case '<':
-          m << "&lt;";
-          break;
-        case '>':
-          m << "&gt;";
-          break;
-        case '&':
-          m << "&amp;";
-          break;
-        case '\'':
-          if (is_attribute)
-            m << "&apos;";
+  for (size_t i = 0; i < str.size(); ++i) {
+    const char ch = str[i];
+    switch (ch) {
+      case '<':
+        m << "&lt;";
+        break;
+      case '>':
+        m << "&gt;";
+        break;
+      case '&':
+        m << "&amp;";
+        break;
+      case '\'':
+        if (is_attribute)
+          m << "&apos;";
+        else
+          m << '\'';
+        break;
+      case '"':
+        if (is_attribute)
+          m << "&quot;";
+        else
+          m << '"';
+        break;
+      default:
+        if (IsValidXmlCharacter(ch)) {
+          if (is_attribute && IsNormalizableWhitespace(ch))
+            m << "&#x" << String::FormatByte(static_cast<unsigned char>(ch))
+              << ";";
           else
-            m << '\'';
-          break;
-        case '"':
-          if (is_attribute)
-            m << "&quot;";
-          else
-            m << '"';
-          break;
-        default:
-          if (IsValidXmlCharacter(*src)) {
-            if (is_attribute && IsNormalizableWhitespace(*src))
-              m << "&#x" << String::FormatByte(static_cast<unsigned char>(*src))
-                << ";";
-            else
-              m << *src;
-          }
-          break;
-      }
+            m << ch;
+        }
+        break;
     }
   }
 
@@ -3066,10 +3151,11 @@ std::string XmlUnitTestResultPrinter::EscapeXml(
 // Returns the given string with all characters invalid in XML removed.
 // Currently invalid characters are dropped from the string. An
 // alternative is to replace them with certain characters such as . or ?.
-string XmlUnitTestResultPrinter::RemoveInvalidXmlCharacters(const string& str) {
-  string output;
+std::string XmlUnitTestResultPrinter::RemoveInvalidXmlCharacters(
+    const std::string& str) {
+  std::string output;
   output.reserve(str.size());
-  for (string::const_iterator it = str.begin(); it != str.end(); ++it)
+  for (std::string::const_iterator it = str.begin(); it != str.end(); ++it)
     if (IsValidXmlCharacter(*it))
       output.push_back(*it);
 
@@ -3145,30 +3231,47 @@ void XmlUnitTestResultPrinter::OutputXmlCDataSection(::std::ostream* stream,
   *stream << "]]>";
 }
 
+void XmlUnitTestResultPrinter::OutputXmlAttribute(
+    std::ostream* stream,
+    const std::string& element_name,
+    const std::string& name,
+    const std::string& value) {
+  const std::vector<std::string>& allowed_names =
+      GetReservedAttributesForElement(element_name);
+
+  GTEST_CHECK_(std::find(allowed_names.begin(), allowed_names.end(), name) !=
+                   allowed_names.end())
+      << "Attribute " << name << " is not allowed for element <" << element_name
+      << ">.";
+
+  *stream << " " << name << "=\"" << EscapeXmlAttribute(value) << "\"";
+}
+
 // Prints an XML representation of a TestInfo object.
 // TODO(wan): There is also value in printing properties with the plain printer.
 void XmlUnitTestResultPrinter::OutputXmlTestInfo(::std::ostream* stream,
                                                  const char* test_case_name,
                                                  const TestInfo& test_info) {
   const TestResult& result = *test_info.result();
-  *stream << "    <testcase name=\""
-          << EscapeXmlAttribute(test_info.name()).c_str() << "\"";
+  const std::string kTestcase = "testcase";
+
+  *stream << "    <testcase";
+  OutputXmlAttribute(stream, kTestcase, "name", test_info.name());
 
   if (test_info.value_param() != NULL) {
-    *stream << " value_param=\"" << EscapeXmlAttribute(test_info.value_param())
-            << "\"";
+    OutputXmlAttribute(stream, kTestcase, "value_param",
+                       test_info.value_param());
   }
   if (test_info.type_param() != NULL) {
-    *stream << " type_param=\"" << EscapeXmlAttribute(test_info.type_param())
-            << "\"";
+    OutputXmlAttribute(stream, kTestcase, "type_param", test_info.type_param());
   }
 
-  *stream << " status=\""
-          << (test_info.should_run() ? "run" : "notrun")
-          << "\" time=\""
-          << FormatTimeInMillisAsSeconds(result.elapsed_time())
-          << "\" classname=\"" << EscapeXmlAttribute(test_case_name).c_str()
-          << "\"" << TestPropertiesAsXmlAttributes(result).c_str();
+  OutputXmlAttribute(stream, kTestcase, "status",
+                     test_info.should_run() ? "run" : "notrun");
+  OutputXmlAttribute(stream, kTestcase, "time",
+                     FormatTimeInMillisAsSeconds(result.elapsed_time()));
+  OutputXmlAttribute(stream, kTestcase, "classname", test_case_name);
+  *stream << TestPropertiesAsXmlAttributes(result);
 
   int failures = 0;
   for (int i = 0; i < result.total_part_count(); ++i) {
@@ -3196,45 +3299,64 @@ void XmlUnitTestResultPrinter::OutputXmlTestInfo(::std::ostream* stream,
 }
 
 // Prints an XML representation of a TestCase object
-void XmlUnitTestResultPrinter::PrintXmlTestCase(FILE* out,
+void XmlUnitTestResultPrinter::PrintXmlTestCase(std::ostream* stream,
                                                 const TestCase& test_case) {
-  fprintf(out,
-          "  <testsuite name=\"%s\" tests=\"%d\" failures=\"%d\" "
-          "disabled=\"%d\" ",
-          EscapeXmlAttribute(test_case.name()).c_str(),
-          test_case.total_test_count(),
-          test_case.failed_test_count(),
-          test_case.disabled_test_count());
-  fprintf(out,
-          "errors=\"0\" time=\"%s\">\n",
-          FormatTimeInMillisAsSeconds(test_case.elapsed_time()).c_str());
-  for (int i = 0; i < test_case.total_test_count(); ++i) {
-    ::std::stringstream stream;
-    OutputXmlTestInfo(&stream, test_case.name(), *test_case.GetTestInfo(i));
-    fprintf(out, "%s", StringStreamToString(&stream).c_str());
-  }
-  fprintf(out, "  </testsuite>\n");
+  const std::string kTestsuite = "testsuite";
+  *stream << "  <" << kTestsuite;
+  OutputXmlAttribute(stream, kTestsuite, "name", test_case.name());
+  OutputXmlAttribute(stream, kTestsuite, "tests",
+                     StreamableToString(test_case.total_test_count()));
+  OutputXmlAttribute(stream, kTestsuite, "failures",
+                     StreamableToString(test_case.failed_test_count()));
+  OutputXmlAttribute(stream, kTestsuite, "disabled",
+                     StreamableToString(test_case.disabled_test_count()));
+  OutputXmlAttribute(stream, kTestsuite, "errors", "0");
+  OutputXmlAttribute(stream, kTestsuite, "time",
+                     FormatTimeInMillisAsSeconds(test_case.elapsed_time()));
+  *stream << TestPropertiesAsXmlAttributes(test_case.ad_hoc_test_result())
+          << ">\n";
+
+  for (int i = 0; i < test_case.total_test_count(); ++i)
+    OutputXmlTestInfo(stream, test_case.name(), *test_case.GetTestInfo(i));
+  *stream << "  </" << kTestsuite << ">\n";
 }
 
 // Prints an XML summary of unit_test to output stream out.
-void XmlUnitTestResultPrinter::PrintXmlUnitTest(FILE* out,
+void XmlUnitTestResultPrinter::PrintXmlUnitTest(std::ostream* stream,
                                                 const UnitTest& unit_test) {
-  fprintf(out, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-  fprintf(out,
-          "<testsuites tests=\"%d\" failures=\"%d\" disabled=\"%d\" "
-          "errors=\"0\" timestamp=\"%s\" time=\"%s\" ",
-          unit_test.total_test_count(),
-          unit_test.failed_test_count(),
-          unit_test.disabled_test_count(),
-          FormatEpochTimeInMillisAsIso8601(unit_test.start_timestamp()).c_str(),
-          FormatTimeInMillisAsSeconds(unit_test.elapsed_time()).c_str());
+  const std::string kTestsuites = "testsuites";
+
+  *stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+  *stream << "<" << kTestsuites;
+
+  OutputXmlAttribute(stream, kTestsuites, "tests",
+                     StreamableToString(unit_test.total_test_count()));
+  OutputXmlAttribute(stream, kTestsuites, "failures",
+                     StreamableToString(unit_test.failed_test_count()));
+  OutputXmlAttribute(stream, kTestsuites, "disabled",
+                     StreamableToString(unit_test.disabled_test_count()));
+  OutputXmlAttribute(stream, kTestsuites, "errors", "0");
+  OutputXmlAttribute(
+      stream, kTestsuites, "timestamp",
+      FormatEpochTimeInMillisAsIso8601(unit_test.start_timestamp()));
+  OutputXmlAttribute(stream, kTestsuites, "time",
+                     FormatTimeInMillisAsSeconds(unit_test.elapsed_time()));
+
   if (GTEST_FLAG(shuffle)) {
-    fprintf(out, "random_seed=\"%d\" ", unit_test.random_seed());
+    OutputXmlAttribute(stream, kTestsuites, "random_seed",
+                       StreamableToString(unit_test.random_seed()));
   }
-  fprintf(out, "name=\"AllTests\">\n");
-  for (int i = 0; i < unit_test.total_test_case_count(); ++i)
-    PrintXmlTestCase(out, *unit_test.GetTestCase(i));
-  fprintf(out, "</testsuites>\n");
+
+  *stream << TestPropertiesAsXmlAttributes(unit_test.ad_hoc_test_result());
+
+  OutputXmlAttribute(stream, kTestsuites, "name", "AllTests");
+  *stream << ">\n";
+
+
+  for (int i = 0; i < unit_test.total_test_case_count(); ++i) {
+    PrintXmlTestCase(stream, *unit_test.GetTestCase(i));
+  }
+  *stream << "</" << kTestsuites << ">\n";
 }
 
 // Produces a string representing the test properties in a result as space
@@ -3452,7 +3574,7 @@ void TestEventListeners::SuppressEventForwarding() {
 // We don't protect this under mutex_ as a user is not supposed to
 // call this before main() starts, from which point on the return
 // value will never change.
-UnitTest * UnitTest::GetInstance() {
+UnitTest* UnitTest::GetInstance() {
   // When compiled with MSVC 7.1 in optimized mode, destroying the
   // UnitTest object upon exiting the program messes up the exit code,
   // causing successful tests to appear failed.  We have to use a
@@ -3535,6 +3657,12 @@ bool UnitTest::Failed() const { return impl()->Failed(); }
 // total_test_case_count() - 1. If i is not in that range, returns NULL.
 const TestCase* UnitTest::GetTestCase(int i) const {
   return impl()->GetTestCase(i);
+}
+
+// Returns the TestResult containing information on test failures and
+// properties logged outside of individual test cases.
+const TestResult& UnitTest::ad_hoc_test_result() const {
+  return *impl()->ad_hoc_test_result();
 }
 
 // Gets the i-th test case among all the test cases. i can range from 0 to
@@ -3635,12 +3763,14 @@ void UnitTest::AddTestPartResult(
   }
 }
 
-// Creates and adds a property to the current TestResult. If a property matching
-// the supplied value already exists, updates its value instead.
-void UnitTest::RecordPropertyForCurrentTest(const char* key,
-                                            const char* value) {
-  const TestProperty test_property(key, value);
-  impl_->current_test_result()->RecordProperty(test_property);
+// Adds a TestProperty to the current TestResult object when invoked from
+// inside a test, to current TestCase's ad_hoc_test_result_ when invoked
+// from SetUpTestCase or TearDownTestCase, or to the global property set
+// when invoked elsewhere.  If the result already contains a property with
+// the same key, the value will be updated.
+void UnitTest::RecordProperty(const std::string& key,
+                              const std::string& value) {
+  impl_->RecordProperty(TestProperty(key, value));
 }
 
 // Runs all tests in this UnitTest object and prints the result.
@@ -3811,6 +3941,28 @@ UnitTestImpl::~UnitTestImpl() {
   ForEach(environments_, internal::Delete<Environment>);
 
   delete os_stack_trace_getter_;
+}
+
+// Adds a TestProperty to the current TestResult object when invoked in a
+// context of a test, to current test case's ad_hoc_test_result when invoke
+// from SetUpTestCase/TearDownTestCase, or to the global property set
+// otherwise.  If the result already contains a property with the same key,
+// the value will be updated.
+void UnitTestImpl::RecordProperty(const TestProperty& test_property) {
+  std::string xml_element;
+  TestResult* test_result;  // TestResult appropriate for property recording.
+
+  if (current_test_info_ != NULL) {
+    xml_element = "testcase";
+    test_result = &(current_test_info_->result_);
+  } else if (current_test_case_ != NULL) {
+    xml_element = "testsuite";
+    test_result = &(current_test_case_->ad_hoc_test_result_);
+  } else {
+    xml_element = "testsuites";
+    test_result = &ad_hoc_test_result_;
+  }
+  test_result->RecordProperty(xml_element, test_property);
 }
 
 #if GTEST_HAS_DEATH_TEST

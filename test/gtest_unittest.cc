@@ -180,6 +180,18 @@ class TestEventListenersAccessor {
   }
 };
 
+class UnitTestRecordPropertyTestHelper : public Test {
+ protected:
+  UnitTestRecordPropertyTestHelper() {}
+
+  // Forwards to UnitTest::RecordProperty() to bypass access controls.
+  void UnitTestRecordProperty(const char* key, const std::string& value) {
+    unit_test_.RecordProperty(key, value);
+  }
+
+  UnitTest unit_test_;
+};
+
 }  // namespace internal
 }  // namespace testing
 
@@ -188,6 +200,7 @@ using testing::AssertionResult;
 using testing::AssertionSuccess;
 using testing::DoubleLE;
 using testing::EmptyTestEventListener;
+using testing::Environment;
 using testing::FloatLE;
 using testing::GTEST_FLAG(also_run_disabled_tests);
 using testing::GTEST_FLAG(break_on_failure);
@@ -213,6 +226,7 @@ using testing::StaticAssertTypeEq;
 using testing::Test;
 using testing::TestCase;
 using testing::TestEventListeners;
+using testing::TestInfo;
 using testing::TestPartResult;
 using testing::TestPartResultArray;
 using testing::TestProperty;
@@ -1447,7 +1461,7 @@ TEST(TestResultPropertyTest, NoPropertiesFoundWhenNoneAreAdded) {
 TEST(TestResultPropertyTest, OnePropertyFoundWhenAdded) {
   TestResult test_result;
   TestProperty property("key_1", "1");
-  TestResultAccessor::RecordProperty(&test_result, property);
+  TestResultAccessor::RecordProperty(&test_result, "testcase", property);
   ASSERT_EQ(1, test_result.test_property_count());
   const TestProperty& actual_property = test_result.GetTestProperty(0);
   EXPECT_STREQ("key_1", actual_property.key());
@@ -1459,8 +1473,8 @@ TEST(TestResultPropertyTest, MultiplePropertiesFoundWhenAdded) {
   TestResult test_result;
   TestProperty property_1("key_1", "1");
   TestProperty property_2("key_2", "2");
-  TestResultAccessor::RecordProperty(&test_result, property_1);
-  TestResultAccessor::RecordProperty(&test_result, property_2);
+  TestResultAccessor::RecordProperty(&test_result, "testcase", property_1);
+  TestResultAccessor::RecordProperty(&test_result, "testcase", property_2);
   ASSERT_EQ(2, test_result.test_property_count());
   const TestProperty& actual_property_1 = test_result.GetTestProperty(0);
   EXPECT_STREQ("key_1", actual_property_1.key());
@@ -1478,10 +1492,10 @@ TEST(TestResultPropertyTest, OverridesValuesForDuplicateKeys) {
   TestProperty property_2_1("key_2", "2");
   TestProperty property_1_2("key_1", "12");
   TestProperty property_2_2("key_2", "22");
-  TestResultAccessor::RecordProperty(&test_result, property_1_1);
-  TestResultAccessor::RecordProperty(&test_result, property_2_1);
-  TestResultAccessor::RecordProperty(&test_result, property_1_2);
-  TestResultAccessor::RecordProperty(&test_result, property_2_2);
+  TestResultAccessor::RecordProperty(&test_result, "testcase", property_1_1);
+  TestResultAccessor::RecordProperty(&test_result, "testcase", property_2_1);
+  TestResultAccessor::RecordProperty(&test_result, "testcase", property_1_2);
+  TestResultAccessor::RecordProperty(&test_result, "testcase", property_2_2);
 
   ASSERT_EQ(2, test_result.test_property_count());
   const TestProperty& actual_property_1 = test_result.GetTestProperty(0);
@@ -1494,14 +1508,14 @@ TEST(TestResultPropertyTest, OverridesValuesForDuplicateKeys) {
 }
 
 // Tests TestResult::GetTestProperty().
-TEST(TestResultPropertyDeathTest, GetTestProperty) {
+TEST(TestResultPropertyTest, GetTestProperty) {
   TestResult test_result;
   TestProperty property_1("key_1", "1");
   TestProperty property_2("key_2", "2");
   TestProperty property_3("key_3", "3");
-  TestResultAccessor::RecordProperty(&test_result, property_1);
-  TestResultAccessor::RecordProperty(&test_result, property_2);
-  TestResultAccessor::RecordProperty(&test_result, property_3);
+  TestResultAccessor::RecordProperty(&test_result, "testcase", property_1);
+  TestResultAccessor::RecordProperty(&test_result, "testcase", property_2);
+  TestResultAccessor::RecordProperty(&test_result, "testcase", property_3);
 
   const TestProperty& fetched_property_1 = test_result.GetTestProperty(0);
   const TestProperty& fetched_property_2 = test_result.GetTestProperty(1);
@@ -1518,42 +1532,6 @@ TEST(TestResultPropertyDeathTest, GetTestProperty) {
 
   EXPECT_DEATH_IF_SUPPORTED(test_result.GetTestProperty(3), "");
   EXPECT_DEATH_IF_SUPPORTED(test_result.GetTestProperty(-1), "");
-}
-
-// When a property using a reserved key is supplied to this function, it tests
-// that a non-fatal failure is added, a fatal failure is not added, and that the
-// property is not recorded.
-void ExpectNonFatalFailureRecordingPropertyWithReservedKey(const char* key) {
-  TestResult test_result;
-  TestProperty property(key, "1");
-  EXPECT_NONFATAL_FAILURE(
-      TestResultAccessor::RecordProperty(&test_result, property),
-      "Reserved key");
-  ASSERT_EQ(0, test_result.test_property_count()) << "Not recorded";
-}
-
-// Attempting to recording a property with the Reserved literal "name"
-// should add a non-fatal failure and the property should not be recorded.
-TEST(TestResultPropertyTest, AddFailureWhenUsingReservedKeyCalledName) {
-  ExpectNonFatalFailureRecordingPropertyWithReservedKey("name");
-}
-
-// Attempting to recording a property with the Reserved literal "status"
-// should add a non-fatal failure and the property should not be recorded.
-TEST(TestResultPropertyTest, AddFailureWhenUsingReservedKeyCalledStatus) {
-  ExpectNonFatalFailureRecordingPropertyWithReservedKey("status");
-}
-
-// Attempting to recording a property with the Reserved literal "time"
-// should add a non-fatal failure and the property should not be recorded.
-TEST(TestResultPropertyTest, AddFailureWhenUsingReservedKeyCalledTime) {
-  ExpectNonFatalFailureRecordingPropertyWithReservedKey("time");
-}
-
-// Attempting to recording a property with the Reserved literal "classname"
-// should add a non-fatal failure and the property should not be recorded.
-TEST(TestResultPropertyTest, AddFailureWhenUsingReservedKeyCalledClassname) {
-  ExpectNonFatalFailureRecordingPropertyWithReservedKey("classname");
 }
 
 // Tests that GTestFlagSaver works on Windows and Mac.
@@ -1960,6 +1938,168 @@ TEST(UnitTestTest, ReturnsPlausibleTimestamp) {
   EXPECT_LT(0, UnitTest::GetInstance()->start_timestamp());
   EXPECT_LE(UnitTest::GetInstance()->start_timestamp(), GetTimeInMillis());
 }
+
+// When a property using a reserved key is supplied to this function, it
+// tests that a non-fatal failure is added, a fatal failure is not added,
+// and that the property is not recorded.
+void ExpectNonFatalFailureRecordingPropertyWithReservedKey(
+    const TestResult& test_result, const char* key) {
+  EXPECT_NONFATAL_FAILURE(Test::RecordProperty(key, "1"), "Reserved key");
+  ASSERT_EQ(0, test_result.test_property_count()) << "Property for key '" << key
+                                                  << "' recorded unexpectedly.";
+}
+
+void ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTest(
+    const char* key) {
+  const TestInfo* test_info = UnitTest::GetInstance()->current_test_info();
+  ASSERT_TRUE(test_info != NULL);
+  ExpectNonFatalFailureRecordingPropertyWithReservedKey(*test_info->result(),
+                                                        key);
+}
+
+void ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestCase(
+    const char* key) {
+  const TestCase* test_case = UnitTest::GetInstance()->current_test_case();
+  ASSERT_TRUE(test_case != NULL);
+  ExpectNonFatalFailureRecordingPropertyWithReservedKey(
+      test_case->ad_hoc_test_result(), key);
+}
+
+void ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
+    const char* key) {
+  ExpectNonFatalFailureRecordingPropertyWithReservedKey(
+      UnitTest::GetInstance()->ad_hoc_test_result(), key);
+}
+
+// Tests that property recording functions in UnitTest outside of tests
+// functions correcly.  Creating a separate instance of UnitTest ensures it
+// is in a state similar to the UnitTest's singleton's between tests.
+class UnitTestRecordPropertyTest :
+    public testing::internal::UnitTestRecordPropertyTestHelper {
+ public:
+  static void SetUpTestCase() {
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestCase(
+        "disabled");
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestCase(
+        "errors");
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestCase(
+        "failures");
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestCase(
+        "name");
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestCase(
+        "tests");
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestCase(
+        "time");
+
+    Test::RecordProperty("test_case_key_1", "1");
+    const TestCase* test_case = UnitTest::GetInstance()->current_test_case();
+    ASSERT_TRUE(test_case != NULL);
+
+    ASSERT_EQ(1, test_case->ad_hoc_test_result().test_property_count());
+    EXPECT_STREQ("test_case_key_1",
+                 test_case->ad_hoc_test_result().GetTestProperty(0).key());
+    EXPECT_STREQ("1",
+                 test_case->ad_hoc_test_result().GetTestProperty(0).value());
+  }
+};
+
+// Tests TestResult has the expected property when added.
+TEST_F(UnitTestRecordPropertyTest, OnePropertyFoundWhenAdded) {
+  UnitTestRecordProperty("key_1", "1");
+
+  ASSERT_EQ(1, unit_test_.ad_hoc_test_result().test_property_count());
+
+  EXPECT_STREQ("key_1",
+               unit_test_.ad_hoc_test_result().GetTestProperty(0).key());
+  EXPECT_STREQ("1",
+               unit_test_.ad_hoc_test_result().GetTestProperty(0).value());
+}
+
+// Tests TestResult has multiple properties when added.
+TEST_F(UnitTestRecordPropertyTest, MultiplePropertiesFoundWhenAdded) {
+  UnitTestRecordProperty("key_1", "1");
+  UnitTestRecordProperty("key_2", "2");
+
+  ASSERT_EQ(2, unit_test_.ad_hoc_test_result().test_property_count());
+
+  EXPECT_STREQ("key_1",
+               unit_test_.ad_hoc_test_result().GetTestProperty(0).key());
+  EXPECT_STREQ("1", unit_test_.ad_hoc_test_result().GetTestProperty(0).value());
+
+  EXPECT_STREQ("key_2",
+               unit_test_.ad_hoc_test_result().GetTestProperty(1).key());
+  EXPECT_STREQ("2", unit_test_.ad_hoc_test_result().GetTestProperty(1).value());
+}
+
+// Tests TestResult::RecordProperty() overrides values for duplicate keys.
+TEST_F(UnitTestRecordPropertyTest, OverridesValuesForDuplicateKeys) {
+  UnitTestRecordProperty("key_1", "1");
+  UnitTestRecordProperty("key_2", "2");
+  UnitTestRecordProperty("key_1", "12");
+  UnitTestRecordProperty("key_2", "22");
+
+  ASSERT_EQ(2, unit_test_.ad_hoc_test_result().test_property_count());
+
+  EXPECT_STREQ("key_1",
+               unit_test_.ad_hoc_test_result().GetTestProperty(0).key());
+  EXPECT_STREQ("12",
+               unit_test_.ad_hoc_test_result().GetTestProperty(0).value());
+
+  EXPECT_STREQ("key_2",
+               unit_test_.ad_hoc_test_result().GetTestProperty(1).key());
+  EXPECT_STREQ("22",
+               unit_test_.ad_hoc_test_result().GetTestProperty(1).value());
+}
+
+TEST_F(UnitTestRecordPropertyTest,
+       AddFailureInsideTestsWhenUsingTestCaseReservedKeys) {
+  ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTest(
+      "name");
+  ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTest(
+      "value_param");
+  ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTest(
+      "type_param");
+  ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTest(
+      "status");
+  ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTest(
+      "time");
+  ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTest(
+      "classname");
+}
+
+TEST_F(UnitTestRecordPropertyTest,
+       AddRecordWithReservedKeysGeneratesCorrectPropertyList) {
+  EXPECT_NONFATAL_FAILURE(
+      Test::RecordProperty("name", "1"),
+      "'classname', 'name', 'status', 'time', 'type_param', and 'value_param'"
+      " are reserved");
+}
+
+class UnitTestRecordPropertyTestEnvironment : public Environment {
+ public:
+  virtual void TearDown() {
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
+        "tests");
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
+        "failures");
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
+        "disabled");
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
+        "errors");
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
+        "name");
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
+        "timestamp");
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
+        "time");
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
+        "random_seed");
+  }
+};
+
+// This will test property recording outside of any test or test case.
+static Environment* record_property_env =
+    AddGlobalTestEnvironment(new UnitTestRecordPropertyTestEnvironment);
 
 // This group of tests is for predicate assertions (ASSERT_PRED*, etc)
 // of various arities.  They do not attempt to be exhaustive.  Rather,
