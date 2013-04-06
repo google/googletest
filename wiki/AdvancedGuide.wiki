@@ -1,4 +1,4 @@
-#summary Advanced topics on using Google C++ Testing Framework
+r#summary Advanced topics on using Google C++ Testing Framework
 
 <wiki:toc max_depth="3" />
 
@@ -942,8 +942,7 @@ _Availability:_ Linux, Windows, Mac.  `HasNonfatalFailure()` and
 = Logging Additional Information  =
 
 In your test code, you can call `RecordProperty("key", value)` to log
-additional information, where `value` can be either a C string or a 32-bit
-integer. The _last_ value recorded for a key will be emitted to the XML output
+additional information, where `value` can be either a string or an `int`. The _last_ value recorded for a key will be emitted to the XML output
 if you specify one. For example, the test
 
 {{{
@@ -964,8 +963,9 @@ will output XML like this:
 }}}
 
 _Note_:
- *  `RecordProperty()` is a static member of the `Test` class. Therefore it needs to be prefixed with `::testing::Test::` if used outside of the `TEST` body and the test fixture class.
- *  `key` must be a valid XML attribute name, and cannot conflict with the ones already used by Google Test (`name`, `status`, `time`, `classname`, `type_param`, and `value_param`).
+  *  `RecordProperty()` is a static member of the `Test` class. Therefore it needs to be prefixed with `::testing::Test::` if used outside of the `TEST` body and the test fixture class.
+  *  `key` must be a valid XML attribute name, and cannot conflict with the ones already used by Google Test (`name`, `status`, `time`, `classname`, `type_param`, and `value_param`).
+  *  Calling `RecordProperty()` outside of the lifespan of a test is allowed. If it's called outside of a test but between a test case's `SetUpTestCase()` and `TearDownTestCase()` methods, it will be attributed to the XML element for the test case. If it's called outside of all test cases (e.g. in a test environment), it will be attributed to the top-level XML element.
 
 _Availability_: Linux, Windows, Mac.
 
