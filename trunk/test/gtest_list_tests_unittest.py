@@ -40,6 +40,7 @@ Google Test) the command line flags.
 __author__ = 'phanna@google.com (Patrick Hanna)'
 
 import gtest_test_utils
+import re
 
 
 # Constants.
@@ -52,38 +53,63 @@ EXE_PATH = gtest_test_utils.GetTestExecutablePath('gtest_list_tests_unittest_')
 
 # The expected output when running gtest_list_tests_unittest_ with
 # --gtest_list_tests
-EXPECTED_OUTPUT_NO_FILTER = """FooDeathTest.
+EXPECTED_OUTPUT_NO_FILTER_RE = re.compile(r"""FooDeathTest\.
   Test1
-Foo.
+Foo\.
   Bar1
   Bar2
   DISABLED_Bar3
-Abc.
+Abc\.
   Xyz
   Def
-FooBar.
+FooBar\.
   Baz
-FooTest.
+FooTest\.
   Test1
   DISABLED_Test2
   Test3
-"""
+TypedTest/0\.  # TypeParam = (VeryLo{245}|class VeryLo{239})\.\.\.
+  TestA
+  TestB
+TypedTest/1\.  # TypeParam = int\s*\*
+  TestA
+  TestB
+TypedTest/2\.  # TypeParam = .*MyArray<bool,\s*42>
+  TestA
+  TestB
+My/TypeParamTest/0\.  # TypeParam = (VeryLo{245}|class VeryLo{239})\.\.\.
+  TestA
+  TestB
+My/TypeParamTest/1\.  # TypeParam = int\s*\*
+  TestA
+  TestB
+My/TypeParamTest/2\.  # TypeParam = .*MyArray<bool,\s*42>
+  TestA
+  TestB
+MyInstantiation/ValueParamTest\.
+  TestA/0  # GetParam\(\) = one line
+  TestA/1  # GetParam\(\) = two\\nlines
+  TestA/2  # GetParam\(\) = a very\\nlo{241}\.\.\.
+  TestB/0  # GetParam\(\) = one line
+  TestB/1  # GetParam\(\) = two\\nlines
+  TestB/2  # GetParam\(\) = a very\\nlo{241}\.\.\.
+""")
 
 # The expected output when running gtest_list_tests_unittest_ with
 # --gtest_list_tests and --gtest_filter=Foo*.
-EXPECTED_OUTPUT_FILTER_FOO = """FooDeathTest.
+EXPECTED_OUTPUT_FILTER_FOO_RE = re.compile(r"""FooDeathTest\.
   Test1
-Foo.
+Foo\.
   Bar1
   Bar2
   DISABLED_Bar3
-FooBar.
+FooBar\.
   Baz
-FooTest.
+FooTest\.
   Test1
   DISABLED_Test2
   Test3
-"""
+""")
 
 # Utilities.
 
@@ -100,19 +126,18 @@ def Run(args):
 class GTestListTestsUnitTest(gtest_test_utils.TestCase):
   """Tests using the --gtest_list_tests flag to list all tests."""
 
-  def RunAndVerify(self, flag_value, expected_output, other_flag):
+  def RunAndVerify(self, flag_value, expected_output_re, other_flag):
     """Runs gtest_list_tests_unittest_ and verifies that it prints
     the correct tests.
 
     Args:
-      flag_value:       value of the --gtest_list_tests flag;
-                        None if the flag should not be present.
-
-      expected_output:  the expected output after running command;
-
-      other_flag:       a different flag to be passed to command
-                        along with gtest_list_tests;
-                        None if the flag should not be present.
+      flag_value:         value of the --gtest_list_tests flag;
+                          None if the flag should not be present.
+      expected_output_re: regular expression that matches the expected
+                          output after running command;
+      other_flag:         a different flag to be passed to command
+                          along with gtest_list_tests;
+                          None if the flag should not be present.
     """
 
     if flag_value is None:
@@ -132,36 +157,41 @@ class GTestListTestsUnitTest(gtest_test_utils.TestCase):
 
     output = Run(args)
 
-    msg = ('when %s is %s, the output of "%s" is "%s".' %
-           (LIST_TESTS_FLAG, flag_expression, ' '.join(args), output))
-
-    if expected_output is not None:
-      self.assert_(output == expected_output, msg)
+    if expected_output_re:
+      self.assert_(
+          expected_output_re.match(output),
+          ('when %s is %s, the output of "%s" is "%s",\n'
+           'which does not match regex "%s"' %
+           (LIST_TESTS_FLAG, flag_expression, ' '.join(args), output,
+            expected_output_re.pattern)))
     else:
-      self.assert_(output != EXPECTED_OUTPUT_NO_FILTER, msg)
+      self.assert_(
+          not EXPECTED_OUTPUT_NO_FILTER_RE.match(output),
+          ('when %s is %s, the output of "%s" is "%s"'%
+           (LIST_TESTS_FLAG, flag_expression, ' '.join(args), output)))
 
   def testDefaultBehavior(self):
     """Tests the behavior of the default mode."""
 
     self.RunAndVerify(flag_value=None,
-                      expected_output=None,
+                      expected_output_re=None,
                       other_flag=None)
 
   def testFlag(self):
     """Tests using the --gtest_list_tests flag."""
 
     self.RunAndVerify(flag_value='0',
-                      expected_output=None,
+                      expected_output_re=None,
                       other_flag=None)
     self.RunAndVerify(flag_value='1',
-                      expected_output=EXPECTED_OUTPUT_NO_FILTER,
+                      expected_output_re=EXPECTED_OUTPUT_NO_FILTER_RE,
                       other_flag=None)
 
   def testOverrideNonFilterFlags(self):
     """Tests that --gtest_list_tests overrides the non-filter flags."""
 
     self.RunAndVerify(flag_value='1',
-                      expected_output=EXPECTED_OUTPUT_NO_FILTER,
+                      expected_output_re=EXPECTED_OUTPUT_NO_FILTER_RE,
                       other_flag='--gtest_break_on_failure')
 
   def testWithFilterFlags(self):
@@ -169,7 +199,7 @@ class GTestListTestsUnitTest(gtest_test_utils.TestCase):
     --gtest_filter flag."""
 
     self.RunAndVerify(flag_value='1',
-                      expected_output=EXPECTED_OUTPUT_FILTER_FOO,
+                      expected_output_re=EXPECTED_OUTPUT_FILTER_FOO_RE,
                       other_flag='--gtest_filter=Foo*')
 
 
