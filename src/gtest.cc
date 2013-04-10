@@ -2638,6 +2638,11 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   va_end(args);
 }
 
+// Text printed in Google Test's text output and --gunit_list_tests
+// output to label the type parameter and value parameter for a test.
+static const char kTypeParamLabel[] = "TypeParam";
+static const char kValueParamLabel[] = "GetParam()";
+
 void PrintFullTestCommentIfPresent(const TestInfo& test_info) {
   const char* const type_param = test_info.type_param();
   const char* const value_param = test_info.value_param();
@@ -2645,12 +2650,12 @@ void PrintFullTestCommentIfPresent(const TestInfo& test_info) {
   if (type_param != NULL || value_param != NULL) {
     printf(", where ");
     if (type_param != NULL) {
-      printf("TypeParam = %s", type_param);
+      printf("%s = %s", kTypeParamLabel, type_param);
       if (value_param != NULL)
         printf(" and ");
     }
     if (value_param != NULL) {
-      printf("GetParam() = %s", value_param);
+      printf("%s = %s", kValueParamLabel, value_param);
     }
   }
 }
@@ -2735,7 +2740,7 @@ void PrettyUnitTestResultPrinter::OnTestCaseStart(const TestCase& test_case) {
   if (test_case.type_param() == NULL) {
     printf("\n");
   } else {
-    printf(", where TypeParam = %s\n", test_case.type_param());
+    printf(", where %s = %s\n", kTypeParamLabel, test_case.type_param());
   }
   fflush(stdout);
 }
@@ -4408,8 +4413,33 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
   return num_selected_tests;
 }
 
+// Prints the given C-string on a single line by replacing all '\n'
+// characters with string "\\n".  If the output takes more than
+// max_length characters, only prints the first max_length characters
+// and "...".
+static void PrintOnOneLine(const char* str, int max_length) {
+  if (str != NULL) {
+    for (int i = 0; *str != '\0'; ++str) {
+      if (i >= max_length) {
+        printf("...");
+        break;
+      }
+      if (*str == '\n') {
+        printf("\\n");
+        i += 2;
+      } else {
+        printf("%c", *str);
+        ++i;
+      }
+    }
+  }
+}
+
 // Prints the names of the tests matching the user-specified filter flag.
 void UnitTestImpl::ListTestsMatchingFilter() {
+  // Print at most this many characters for each type/value parameter.
+  const int kMaxParamLength = 250;
+
   for (size_t i = 0; i < test_cases_.size(); i++) {
     const TestCase* const test_case = test_cases_[i];
     bool printed_test_case_name = false;
@@ -4420,9 +4450,23 @@ void UnitTestImpl::ListTestsMatchingFilter() {
       if (test_info->matches_filter_) {
         if (!printed_test_case_name) {
           printed_test_case_name = true;
-          printf("%s.\n", test_case->name());
+          printf("%s.", test_case->name());
+          if (test_case->type_param() != NULL) {
+            printf("  # %s = ", kTypeParamLabel);
+            // We print the type parameter on a single line to make
+            // the output easy to parse by a program.
+            PrintOnOneLine(test_case->type_param(), kMaxParamLength);
+          }
+          printf("\n");
         }
-        printf("  %s\n", test_info->name());
+        printf("  %s", test_info->name());
+        if (test_info->value_param() != NULL) {
+          printf("  # %s = ", kValueParamLabel);
+          // We print the value parameter on a single line to make the
+          // output easy to parse by a program.
+          PrintOnOneLine(test_info->value_param(), kMaxParamLength);
+        }
+        printf("\n");
       }
     }
   }
