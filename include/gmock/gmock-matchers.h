@@ -1613,10 +1613,12 @@ class PredicateFormatterFromMatcher {
     // know which type to instantiate it to until we actually see the
     // type of x here.
     //
-    // We write MatcherCast<const T&>(matcher_) instead of
+    // We write SafeMatcherCast<const T&>(matcher_) instead of
     // Matcher<const T&>(matcher_), as the latter won't compile when
     // matcher_ has type Matcher<T> (e.g. An<int>()).
-    const Matcher<const T&> matcher = MatcherCast<const T&>(matcher_);
+    // We don't write MatcherCast<const T&> either, as that allows
+    // potentially unsafe downcasting of the matcher argument.
+    const Matcher<const T&> matcher = SafeMatcherCast<const T&>(matcher_);
     StringMatchResultListener listener;
     if (MatchPrintAndExplain(x, matcher, &listener))
       return AssertionSuccess();

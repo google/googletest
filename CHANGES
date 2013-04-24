@@ -1,6 +1,26 @@
 Changes for 1.7.0:
 
-TO BE WRITTEN.
+* All new improvements in Google Test 1.7.0.
+* New feature: matchers WhenSorted(), WhenSortedBy(), IsEmpty(), and
+  SizeIs().
+* Improvement: Google Mock can now be built as a DLL.
+* Improvement: when exceptions are enabled, a mock method with no
+  default action now throws instead crashing the test.
+* Improvement: function return types used in MOCK_METHOD*() macros can
+  now contain unprotected commas.
+* Improvement (potentially breaking): EXPECT_THAT() and ASSERT_THAT()
+  are now more strict in ensuring that the value type and the matcher
+  type are compatible, catching potential bugs in tests.
+* Improvement: Pointee() now works on an optional<T>.
+* Improvement: the ElementsAreArray() matcher can now take a vector or
+  iterator range as input, and makes a copy of its input elements
+  before the conversion to a Matcher.
+* Bug fix: mock object destruction triggerred by another mock object's
+  destruction no longer hangs.
+* Improvement: Google Mock Doctor works better with newer Clang and
+  GCC now.
+* Compatibility fixes.
+* Bug/warning fixes.
 
 Changes for 1.6.0:
 

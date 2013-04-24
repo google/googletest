@@ -721,6 +721,15 @@ TEST(ATest, MatchesAnyValue) {
   EXPECT_TRUE(m2.Matches(b));
 }
 
+TEST(ATest, WorksForDerivedClass) {
+  Base base;
+  Derived derived;
+  EXPECT_THAT(&base, A<Base*>());
+  // This shouldn't compile: EXPECT_THAT(&base, A<Derived*>());
+  EXPECT_THAT(&derived, A<Base*>());
+  EXPECT_THAT(&derived, A<Derived*>());
+}
+
 // Tests that A<T>() describes itself properly.
 TEST(ATest, CanDescribeSelf) {
   EXPECT_EQ("is anything", Describe(A<bool>()));
