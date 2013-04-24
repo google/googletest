@@ -1,6 +1,23 @@
 Changes for 1.7.0:
 
-TO BE WRITTEN.
+* New feature: death tests are supported on OpenBSD and in iOS
+  simulator now.
+* New feature: Test::RecordProperty() can now be used outside of the
+  lifespan of a test method, in which case it will be attributed to
+  the current test case or the test program in the XML report.
+* New feature (potentially breaking): --gtest_list_tests now prints
+  the type parameters and value parameters for each test.
+* Improvement: char pointers and char arrays are now escaped properly
+  in failure messages.
+* Improvement: failure summary in XML reports now includes file and
+  line information.
+* Improvement: the <testsuites> XML element now has a timestamp attribute.
+* Fixed the bug where long --gtest_filter flag values are truncated in
+  death tests.
+* Potentially breaking change: RUN_ALL_TESTS() is now implemented as a
+  function instead of a macro in order to work better with Clang.
+* Compatibility fixes with C++ 11 and various platforms.
+* Bug/warning fixes.
 
 Changes for 1.6.0:
 
