@@ -12,6 +12,8 @@ Changes for 1.7.0:
 * Improvement: failure summary in XML reports now includes file and
   line information.
 * Improvement: the <testsuites> XML element now has a timestamp attribute.
+* Improvement: When --gtest_filter is specified, XML report now doesn't
+  contain information about tests that are filtered out.
 * Fixed the bug where long --gtest_filter flag values are truncated in
   death tests.
 * Potentially breaking change: RUN_ALL_TESTS() is now implemented as a

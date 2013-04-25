@@ -731,9 +731,20 @@ int UnitTestImpl::failed_test_count() const {
   return SumOverTestCaseList(test_cases_, &TestCase::failed_test_count);
 }
 
+// Gets the number of disabled tests that will be reported in the XML report.
+int UnitTestImpl::reportable_disabled_test_count() const {
+  return SumOverTestCaseList(test_cases_,
+                             &TestCase::reportable_disabled_test_count);
+}
+
 // Gets the number of disabled tests.
 int UnitTestImpl::disabled_test_count() const {
   return SumOverTestCaseList(test_cases_, &TestCase::disabled_test_count);
+}
+
+// Gets the number of tests to be printed in the XML report.
+int UnitTestImpl::reportable_test_count() const {
+  return SumOverTestCaseList(test_cases_, &TestCase::reportable_test_count);
 }
 
 // Gets the number of all tests.
@@ -2338,8 +2349,19 @@ int TestCase::failed_test_count() const {
   return CountIf(test_info_list_, TestFailed);
 }
 
+// Gets the number of disabled tests that will be reported in the XML report.
+int TestCase::reportable_disabled_test_count() const {
+  return CountIf(test_info_list_, TestReportableDisabled);
+}
+
+// Gets the number of disabled tests in this test case.
 int TestCase::disabled_test_count() const {
   return CountIf(test_info_list_, TestDisabled);
+}
+
+// Gets the number of tests to be printed in the XML report.
+int TestCase::reportable_test_count() const {
+  return CountIf(test_info_list_, TestReportable);
 }
 
 // Get the number of tests in this test case that should run.
@@ -2851,7 +2873,7 @@ void PrettyUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
                         num_failures == 1 ? "TEST" : "TESTS");
   }
 
-  int num_disabled = unit_test.disabled_test_count();
+  int num_disabled = unit_test.reportable_disabled_test_count();
   if (num_disabled && !GTEST_FLAG(also_run_disabled_tests)) {
     if (!num_failures) {
       printf("\n");  // Add a spacer if no FAILURE banner is displayed.
@@ -3310,19 +3332,22 @@ void XmlUnitTestResultPrinter::PrintXmlTestCase(std::ostream* stream,
   *stream << "  <" << kTestsuite;
   OutputXmlAttribute(stream, kTestsuite, "name", test_case.name());
   OutputXmlAttribute(stream, kTestsuite, "tests",
-                     StreamableToString(test_case.total_test_count()));
+                     StreamableToString(test_case.reportable_test_count()));
   OutputXmlAttribute(stream, kTestsuite, "failures",
                      StreamableToString(test_case.failed_test_count()));
-  OutputXmlAttribute(stream, kTestsuite, "disabled",
-                     StreamableToString(test_case.disabled_test_count()));
+  OutputXmlAttribute(
+      stream, kTestsuite, "disabled",
+      StreamableToString(test_case.reportable_disabled_test_count()));
   OutputXmlAttribute(stream, kTestsuite, "errors", "0");
   OutputXmlAttribute(stream, kTestsuite, "time",
                      FormatTimeInMillisAsSeconds(test_case.elapsed_time()));
   *stream << TestPropertiesAsXmlAttributes(test_case.ad_hoc_test_result())
           << ">\n";
 
-  for (int i = 0; i < test_case.total_test_count(); ++i)
-    OutputXmlTestInfo(stream, test_case.name(), *test_case.GetTestInfo(i));
+  for (int i = 0; i < test_case.total_test_count(); ++i) {
+    if (test_case.GetTestInfo(i)->is_reportable())
+      OutputXmlTestInfo(stream, test_case.name(), *test_case.GetTestInfo(i));
+  }
   *stream << "  </" << kTestsuite << ">\n";
 }
 
@@ -3335,11 +3360,12 @@ void XmlUnitTestResultPrinter::PrintXmlUnitTest(std::ostream* stream,
   *stream << "<" << kTestsuites;
 
   OutputXmlAttribute(stream, kTestsuites, "tests",
-                     StreamableToString(unit_test.total_test_count()));
+                     StreamableToString(unit_test.reportable_test_count()));
   OutputXmlAttribute(stream, kTestsuites, "failures",
                      StreamableToString(unit_test.failed_test_count()));
-  OutputXmlAttribute(stream, kTestsuites, "disabled",
-                     StreamableToString(unit_test.disabled_test_count()));
+  OutputXmlAttribute(
+      stream, kTestsuites, "disabled",
+      StreamableToString(unit_test.reportable_disabled_test_count()));
   OutputXmlAttribute(stream, kTestsuites, "errors", "0");
   OutputXmlAttribute(
       stream, kTestsuites, "timestamp",
@@ -3357,9 +3383,9 @@ void XmlUnitTestResultPrinter::PrintXmlUnitTest(std::ostream* stream,
   OutputXmlAttribute(stream, kTestsuites, "name", "AllTests");
   *stream << ">\n";
 
-
   for (int i = 0; i < unit_test.total_test_case_count(); ++i) {
-    PrintXmlTestCase(stream, *unit_test.GetTestCase(i));
+    if (unit_test.GetTestCase(i)->reportable_test_count() > 0)
+      PrintXmlTestCase(stream, *unit_test.GetTestCase(i));
   }
   *stream << "</" << kTestsuites << ">\n";
 }
@@ -3629,9 +3655,19 @@ int UnitTest::successful_test_count() const {
 // Gets the number of failed tests.
 int UnitTest::failed_test_count() const { return impl()->failed_test_count(); }
 
+// Gets the number of disabled tests that will be reported in the XML report.
+int UnitTest::reportable_disabled_test_count() const {
+  return impl()->reportable_disabled_test_count();
+}
+
 // Gets the number of disabled tests.
 int UnitTest::disabled_test_count() const {
   return impl()->disabled_test_count();
+}
+
+// Gets the number of tests to be printed in the XML report.
+int UnitTest::reportable_test_count() const {
+  return impl()->reportable_test_count();
 }
 
 // Gets the number of all tests.
@@ -3929,7 +3965,6 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
       start_timestamp_(0),
       elapsed_time_(0),
 #if GTEST_HAS_DEATH_TEST
-      internal_run_death_test_flag_(NULL),
       death_test_factory_(new DefaultDeathTestFactory),
 #endif
       // Will be overridden by the flag before first use.
