@@ -699,8 +699,6 @@ Expected: (3) >= (a[i]), actual: 3 vs 6
 [  FAILED  ] LoggingTest.InterleavingLoggingAndAssertions
 
  4 FAILED TESTS
-  YOU HAVE 1 DISABLED TEST
-
 Note: Google Test filter = *DISABLED_*
 [==========] Running 1 test from 1 test case.
 [----------] Global test environment set-up.
@@ -720,6 +718,3 @@ Note: This is test shard 2 of 2.
 [----------] Global test environment tear-down
 [==========] 1 test from 1 test case ran.
 [  PASSED  ] 1 test.
-
-  YOU HAVE 1 DISABLED TEST
-

@@ -90,9 +90,11 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
           actual_attr is not None,
           'expected attribute %s not found in element %s' %
           (expected_attr.name, actual_node.tagName))
-      self.assertEquals(expected_attr.value, actual_attr.value,
-                        ' values of attribute %s in element %s differ' %
-                        (expected_attr.name, actual_node.tagName))
+      self.assertEquals(
+          expected_attr.value, actual_attr.value,
+          ' values of attribute %s in element %s differ: %s vs %s' %
+          (expected_attr.name, actual_node.tagName,
+           expected_attr.value, actual_attr.value))
 
     expected_children = self._GetChildren(expected_node)
     actual_children = self._GetChildren(actual_node)
