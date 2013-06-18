@@ -1,9 +1,12 @@
 Changes for 1.7.0:
 
 * All new improvements in Google Test 1.7.0.
-* New feature: matchers WhenSorted(), WhenSortedBy(), IsEmpty(), and
-  SizeIs().
+* New feature: matchers DoubleNear(), FloatNear(),
+  NanSensitiveDoubleNear(), NanSensitiveFloatNear(), WhenSorted(),
+  WhenSortedBy(), IsEmpty(), and SizeIs().
 * Improvement: Google Mock can now be built as a DLL.
+* Improvement: when compiled by a C++11 compiler, matchers AllOf()
+  and AnyOf() can accept an arbitrary number of matchers.
 * Improvement: when exceptions are enabled, a mock method with no
   default action now throws instead crashing the test.
 * Improvement: function return types used in MOCK_METHOD*() macros can

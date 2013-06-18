@@ -41,6 +41,7 @@
 #include <functional>
 #include <iostream>
 #include <iterator>
+#include <limits>
 #include <list>
 #include <map>
 #include <set>
@@ -83,11 +84,13 @@ using testing::AnyOf;
 using testing::ByRef;
 using testing::ContainsRegex;
 using testing::DoubleEq;
+using testing::DoubleNear;
 using testing::EndsWith;
 using testing::Eq;
 using testing::ExplainMatchResult;
 using testing::Field;
 using testing::FloatEq;
+using testing::FloatNear;
 using testing::Ge;
 using testing::Gt;
 using testing::HasSubstr;
@@ -105,7 +108,9 @@ using testing::MatcherInterface;
 using testing::Matches;
 using testing::MatchesRegex;
 using testing::NanSensitiveDoubleEq;
+using testing::NanSensitiveDoubleNear;
 using testing::NanSensitiveFloatEq;
+using testing::NanSensitiveFloatNear;
 using testing::Ne;
 using testing::Not;
 using testing::NotNull;
@@ -2021,6 +2026,28 @@ TEST(AllOfTest, MatchesWhenAllMatch) {
                          Ne(9), Ne(10)));
 }
 
+#if GTEST_LANG_CXX11
+// Tests the variadic version of the AllOfMatcher.
+TEST(AllOfTest, VariadicMatchesWhenAllMatch) {
+  // Make sure AllOf is defined in the right namespace and does not depend on
+  // ADL.
+  ::testing::AllOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+  Matcher<int> m = AllOf(Ne(1), Ne(2), Ne(3), Ne(4), Ne(5), Ne(6), Ne(7), Ne(8),
+                         Ne(9), Ne(10), Ne(11));
+  EXPECT_THAT(Describe(m), EndsWith("and (isn't equal to 11))))))))))"));
+  AllOfMatches(11, m);
+  AllOfMatches(50, AllOf(Ne(1), Ne(2), Ne(3), Ne(4), Ne(5), Ne(6), Ne(7), Ne(8),
+                         Ne(9), Ne(10), Ne(11), Ne(12), Ne(13), Ne(14), Ne(15),
+                         Ne(16), Ne(17), Ne(18), Ne(19), Ne(20), Ne(21), Ne(22),
+                         Ne(23), Ne(24), Ne(25), Ne(26), Ne(27), Ne(28), Ne(29),
+                         Ne(30), Ne(31), Ne(32), Ne(33), Ne(34), Ne(35), Ne(36),
+                         Ne(37), Ne(38), Ne(39), Ne(40), Ne(41), Ne(42), Ne(43),
+                         Ne(44), Ne(45), Ne(46), Ne(47), Ne(48), Ne(49),
+                         Ne(50)));
+}
+
+#endif  // GTEST_LANG_CXX11
+
 // Tests that AllOf(m1, ..., mn) describes itself properly.
 TEST(AllOfTest, CanDescribeSelf) {
   Matcher<int> m;
@@ -2193,6 +2220,24 @@ TEST(AnyOfTest, MatchesWhenAnyMatches) {
   AnyOfMatches(9, AnyOf(1, 2, 3, 4, 5, 6, 7, 8, 9));
   AnyOfMatches(10, AnyOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
 }
+
+#if GTEST_LANG_CXX11
+// Tests the variadic version of the AnyOfMatcher.
+TEST(AnyOfTest, VariadicMatchesWhenAnyMatches) {
+  // Also make sure AnyOf is defined in the right namespace and does not depend
+  // on ADL.
+  Matcher<int> m = ::testing::AnyOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+
+  EXPECT_THAT(Describe(m), EndsWith("or (is equal to 11))))))))))"));
+  AnyOfMatches(11, m);
+  AnyOfMatches(50, AnyOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                         11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                         21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+                         31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+                         41, 42, 43, 44, 45, 46, 47, 48, 49, 50));
+}
+
+#endif  // GTEST_LANG_CXX11
 
 // Tests that AnyOf(m1, ..., mn) describes itself properly.
 TEST(AnyOfTest, CanDescribeSelf) {
@@ -2723,6 +2768,95 @@ RawType FloatingPointTest<RawType>::nan1_;
 template <typename RawType>
 RawType FloatingPointTest<RawType>::nan2_;
 
+// Tests floating-point matchers with fixed epsilons.
+template <typename RawType>
+class FloatingPointNearTest : public FloatingPointTest<RawType> {
+ protected:
+  typedef FloatingPointTest<RawType> ParentType;
+
+  // A battery of tests for FloatingEqMatcher::Matches with a fixed epsilon.
+  // matcher_maker is a pointer to a function which creates a FloatingEqMatcher.
+  void TestNearMatches(
+      testing::internal::FloatingEqMatcher<RawType>
+          (*matcher_maker)(RawType, RawType)) {
+    Matcher<RawType> m1 = matcher_maker(0.0, 0.0);
+    EXPECT_TRUE(m1.Matches(0.0));
+    EXPECT_TRUE(m1.Matches(-0.0));
+    EXPECT_FALSE(m1.Matches(ParentType::close_to_positive_zero_));
+    EXPECT_FALSE(m1.Matches(ParentType::close_to_negative_zero_));
+    EXPECT_FALSE(m1.Matches(1.0));
+
+    Matcher<RawType> m2 = matcher_maker(0.0, 1.0);
+    EXPECT_TRUE(m2.Matches(0.0));
+    EXPECT_TRUE(m2.Matches(-0.0));
+    EXPECT_TRUE(m2.Matches(1.0));
+    EXPECT_TRUE(m2.Matches(-1.0));
+    EXPECT_FALSE(m2.Matches(ParentType::close_to_one_));
+    EXPECT_FALSE(m2.Matches(-ParentType::close_to_one_));
+
+    // Check that inf matches inf, regardless of the of the specified max
+    // absolute error.
+    Matcher<RawType> m3 = matcher_maker(ParentType::infinity_, 0.0);
+    EXPECT_TRUE(m3.Matches(ParentType::infinity_));
+    EXPECT_FALSE(m3.Matches(ParentType::close_to_infinity_));
+    EXPECT_FALSE(m3.Matches(-ParentType::infinity_));
+
+    Matcher<RawType> m4 = matcher_maker(-ParentType::infinity_, 0.0);
+    EXPECT_TRUE(m4.Matches(-ParentType::infinity_));
+    EXPECT_FALSE(m4.Matches(-ParentType::close_to_infinity_));
+    EXPECT_FALSE(m4.Matches(ParentType::infinity_));
+
+    // Test various overflow scenarios.
+    Matcher<RawType> m5 = matcher_maker(
+        std::numeric_limits<RawType>::max(),
+        std::numeric_limits<RawType>::max());
+    EXPECT_TRUE(m5.Matches(std::numeric_limits<RawType>::max()));
+    EXPECT_FALSE(m5.Matches(-std::numeric_limits<RawType>::max()));
+
+    Matcher<RawType> m6 = matcher_maker(
+        -std::numeric_limits<RawType>::max(),
+        std::numeric_limits<RawType>::max());
+    EXPECT_FALSE(m6.Matches(std::numeric_limits<RawType>::max()));
+    EXPECT_TRUE(m6.Matches(-std::numeric_limits<RawType>::max()));
+
+    Matcher<RawType> m7 = matcher_maker(std::numeric_limits<RawType>::max(), 0);
+    EXPECT_TRUE(m7.Matches(std::numeric_limits<RawType>::max()));
+    EXPECT_FALSE(m7.Matches(-std::numeric_limits<RawType>::max()));
+
+    Matcher<RawType> m8 = matcher_maker(
+        -std::numeric_limits<RawType>::max(), 0);
+    EXPECT_FALSE(m8.Matches(std::numeric_limits<RawType>::max()));
+    EXPECT_TRUE(m8.Matches(-std::numeric_limits<RawType>::max()));
+
+    // The difference between max() and -max() normally overflows to infinity,
+    // but it should still match if the max_abs_error is also infinity.
+    Matcher<RawType> m9 = matcher_maker(
+        std::numeric_limits<RawType>::max(), ParentType::infinity_);
+    EXPECT_TRUE(m8.Matches(-std::numeric_limits<RawType>::max()));
+
+    // matcher_maker can produce a Matcher<const RawType&>, which is needed in
+    // some cases.
+    Matcher<const RawType&> m10 = matcher_maker(0.0, 1.0);
+    EXPECT_TRUE(m10.Matches(-0.0));
+    EXPECT_TRUE(m10.Matches(ParentType::close_to_positive_zero_));
+    EXPECT_FALSE(m10.Matches(ParentType::close_to_one_));
+
+    // matcher_maker can produce a Matcher<RawType&>, which is needed in some
+    // cases.
+    Matcher<RawType&> m11 = matcher_maker(0.0, 1.0);
+    RawType x = 0.0;
+    EXPECT_TRUE(m11.Matches(x));
+    x = 1.0f;
+    EXPECT_TRUE(m11.Matches(x));
+    x = -1.0f;
+    EXPECT_TRUE(m11.Matches(x));
+    x = 1.1f;
+    EXPECT_FALSE(m11.Matches(x));
+    x = -1.1f;
+    EXPECT_FALSE(m11.Matches(x));
+  }
+};
+
 // Instantiate FloatingPointTest for testing floats.
 typedef FloatingPointTest<float> FloatTest;
 
@@ -2778,6 +2912,66 @@ TEST_F(FloatTest, NanSensitiveFloatEqCanDescribeSelf) {
   EXPECT_EQ("isn't NaN", DescribeNegation(m3));
 }
 
+// Instantiate FloatingPointTest for testing floats with a user-specified
+// max absolute error.
+typedef FloatingPointNearTest<float> FloatNearTest;
+
+TEST_F(FloatNearTest, FloatNearMatches) {
+  TestNearMatches(&FloatNear);
+}
+
+TEST_F(FloatNearTest, NanSensitiveFloatNearApproximatelyMatchesFloats) {
+  TestNearMatches(&NanSensitiveFloatNear);
+}
+
+TEST_F(FloatNearTest, FloatNearCanDescribeSelf) {
+  Matcher<float> m1 = FloatNear(2.0f, 0.5f);
+  EXPECT_EQ("is approximately 2 (absolute error <= 0.5)", Describe(m1));
+  EXPECT_EQ(
+      "isn't approximately 2 (absolute error > 0.5)", DescribeNegation(m1));
+
+  Matcher<float> m2 = FloatNear(0.5f, 0.5f);
+  EXPECT_EQ("is approximately 0.5 (absolute error <= 0.5)", Describe(m2));
+  EXPECT_EQ(
+      "isn't approximately 0.5 (absolute error > 0.5)", DescribeNegation(m2));
+
+  Matcher<float> m3 = FloatNear(nan1_, 0.0);
+  EXPECT_EQ("never matches", Describe(m3));
+  EXPECT_EQ("is anything", DescribeNegation(m3));
+}
+
+TEST_F(FloatNearTest, NanSensitiveFloatNearCanDescribeSelf) {
+  Matcher<float> m1 = NanSensitiveFloatNear(2.0f, 0.5f);
+  EXPECT_EQ("is approximately 2 (absolute error <= 0.5)", Describe(m1));
+  EXPECT_EQ(
+      "isn't approximately 2 (absolute error > 0.5)", DescribeNegation(m1));
+
+  Matcher<float> m2 = NanSensitiveFloatNear(0.5f, 0.5f);
+  EXPECT_EQ("is approximately 0.5 (absolute error <= 0.5)", Describe(m2));
+  EXPECT_EQ(
+      "isn't approximately 0.5 (absolute error > 0.5)", DescribeNegation(m2));
+
+  Matcher<float> m3 = NanSensitiveFloatNear(nan1_, 0.1f);
+  EXPECT_EQ("is NaN", Describe(m3));
+  EXPECT_EQ("isn't NaN", DescribeNegation(m3));
+}
+
+TEST_F(FloatNearTest, FloatNearCannotMatchNaN) {
+  // FloatNear never matches NaN.
+  Matcher<float> m = FloatNear(ParentType::nan1_, 0.1f);
+  EXPECT_FALSE(m.Matches(nan1_));
+  EXPECT_FALSE(m.Matches(nan2_));
+  EXPECT_FALSE(m.Matches(1.0));
+}
+
+TEST_F(FloatNearTest, NanSensitiveFloatNearCanMatchNaN) {
+  // NanSensitiveFloatNear will match NaN.
+  Matcher<float> m = NanSensitiveFloatNear(nan1_, 0.1f);
+  EXPECT_TRUE(m.Matches(nan1_));
+  EXPECT_TRUE(m.Matches(nan2_));
+  EXPECT_FALSE(m.Matches(1.0));
+}
+
 // Instantiate FloatingPointTest for testing doubles.
 typedef FloatingPointTest<double> DoubleTest;
 
@@ -2831,6 +3025,66 @@ TEST_F(DoubleTest, NanSensitiveDoubleEqCanDescribeSelf) {
   Matcher<double> m3 = NanSensitiveDoubleEq(nan1_);
   EXPECT_EQ("is NaN", Describe(m3));
   EXPECT_EQ("isn't NaN", DescribeNegation(m3));
+}
+
+// Instantiate FloatingPointTest for testing floats with a user-specified
+// max absolute error.
+typedef FloatingPointNearTest<double> DoubleNearTest;
+
+TEST_F(DoubleNearTest, DoubleNearMatches) {
+  TestNearMatches(&DoubleNear);
+}
+
+TEST_F(DoubleNearTest, NanSensitiveDoubleNearApproximatelyMatchesDoubles) {
+  TestNearMatches(&NanSensitiveDoubleNear);
+}
+
+TEST_F(DoubleNearTest, DoubleNearCanDescribeSelf) {
+  Matcher<double> m1 = DoubleNear(2.0, 0.5);
+  EXPECT_EQ("is approximately 2 (absolute error <= 0.5)", Describe(m1));
+  EXPECT_EQ(
+      "isn't approximately 2 (absolute error > 0.5)", DescribeNegation(m1));
+
+  Matcher<double> m2 = DoubleNear(0.5, 0.5);
+  EXPECT_EQ("is approximately 0.5 (absolute error <= 0.5)", Describe(m2));
+  EXPECT_EQ(
+      "isn't approximately 0.5 (absolute error > 0.5)", DescribeNegation(m2));
+
+  Matcher<double> m3 = DoubleNear(nan1_, 0.0);
+  EXPECT_EQ("never matches", Describe(m3));
+  EXPECT_EQ("is anything", DescribeNegation(m3));
+}
+
+TEST_F(DoubleNearTest, NanSensitiveDoubleNearCanDescribeSelf) {
+  Matcher<double> m1 = NanSensitiveDoubleNear(2.0, 0.5);
+  EXPECT_EQ("is approximately 2 (absolute error <= 0.5)", Describe(m1));
+  EXPECT_EQ(
+      "isn't approximately 2 (absolute error > 0.5)", DescribeNegation(m1));
+
+  Matcher<double> m2 = NanSensitiveDoubleNear(0.5, 0.5);
+  EXPECT_EQ("is approximately 0.5 (absolute error <= 0.5)", Describe(m2));
+  EXPECT_EQ(
+      "isn't approximately 0.5 (absolute error > 0.5)", DescribeNegation(m2));
+
+  Matcher<double> m3 = NanSensitiveDoubleNear(nan1_, 0.1);
+  EXPECT_EQ("is NaN", Describe(m3));
+  EXPECT_EQ("isn't NaN", DescribeNegation(m3));
+}
+
+TEST_F(DoubleNearTest, DoubleNearCannotMatchNaN) {
+  // DoubleNear never matches NaN.
+  Matcher<double> m = DoubleNear(ParentType::nan1_, 0.1);
+  EXPECT_FALSE(m.Matches(nan1_));
+  EXPECT_FALSE(m.Matches(nan2_));
+  EXPECT_FALSE(m.Matches(1.0));
+}
+
+TEST_F(DoubleNearTest, NanSensitiveDoubleNearCanMatchNaN) {
+  // NanSensitiveDoubleNear will match NaN.
+  Matcher<double> m = NanSensitiveDoubleNear(nan1_, 0.1);
+  EXPECT_TRUE(m.Matches(nan1_));
+  EXPECT_TRUE(m.Matches(nan2_));
+  EXPECT_FALSE(m.Matches(1.0));
 }
 
 TEST(PointeeTest, RawPointer) {

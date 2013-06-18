@@ -38,6 +38,7 @@
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_MATCHERS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_MATCHERS_H_
 
+#include <math.h>
 #include <algorithm>
 #include <limits>
 #include <ostream>  // NOLINT
@@ -1406,6 +1407,91 @@ class BothOfMatcherImpl : public MatcherInterface<T> {
   GTEST_DISALLOW_ASSIGN_(BothOfMatcherImpl);
 };
 
+#if GTEST_LANG_CXX11
+// MatcherList provides mechanisms for storing a variable number of matchers in
+// a list structure (ListType) and creating a combining matcher from such a
+// list.
+// The template is defined recursively using the following template paramters:
+//   * kSize is the length of the MatcherList.
+//   * Head is the type of the first matcher of the list.
+//   * Tail denotes the types of the remaining matchers of the list.
+template <int kSize, typename Head, typename... Tail>
+struct MatcherList {
+  typedef MatcherList<kSize - 1, Tail...> MatcherListTail;
+  typedef pair<Head, typename MatcherListTail::ListType> ListType;
+
+  // BuildList stores variadic type values in a nested pair structure.
+  // Example:
+  // MatcherList<3, int, string, float>::BuildList(5, "foo", 2.0) will return
+  // the corresponding result of type pair<int, pair<string, float>>.
+  static ListType BuildList(const Head& matcher, const Tail&... tail) {
+    return ListType(matcher, MatcherListTail::BuildList(tail...));
+  }
+
+  // CreateMatcher<T> creates a Matcher<T> from a given list of matchers (built
+  // by BuildList()). CombiningMatcher<T> is used to combine the matchers of the
+  // list. CombiningMatcher<T> must implement MatcherInterface<T> and have a
+  // constructor taking two Matcher<T>s as input.
+  template <typename T, template <typename /* T */> class CombiningMatcher>
+  static Matcher<T> CreateMatcher(const ListType& matchers) {
+    return Matcher<T>(new CombiningMatcher<T>(
+        SafeMatcherCast<T>(matchers.first),
+        MatcherListTail::template CreateMatcher<T, CombiningMatcher>(
+            matchers.second)));
+  }
+};
+
+// The following defines the base case for the recursive definition of
+// MatcherList.
+template <typename Matcher1, typename Matcher2>
+struct MatcherList<2, Matcher1, Matcher2> {
+  typedef pair<Matcher1, Matcher2> ListType;
+
+  static ListType BuildList(const Matcher1& matcher1,
+                            const Matcher2& matcher2) {
+    return pair<Matcher1, Matcher2>(matcher1, matcher2);
+  }
+
+  template <typename T, template <typename /* T */> class CombiningMatcher>
+  static Matcher<T> CreateMatcher(const ListType& matchers) {
+    return Matcher<T>(new CombiningMatcher<T>(
+        SafeMatcherCast<T>(matchers.first),
+        SafeMatcherCast<T>(matchers.second)));
+  }
+};
+
+// VariadicMatcher is used for the variadic implementation of
+// AllOf(m_1, m_2, ...) and AnyOf(m_1, m_2, ...).
+// CombiningMatcher<T> is used to recursively combine the provided matchers
+// (of type Args...).
+template <template <typename T> class CombiningMatcher, typename... Args>
+class VariadicMatcher {
+ public:
+  VariadicMatcher(const Args&... matchers)  // NOLINT
+      : matchers_(MatcherListType::BuildList(matchers...)) {}
+
+  // This template type conversion operator allows an
+  // VariadicMatcher<Matcher1, Matcher2...> object to match any type that
+  // all of the provided matchers (Matcher1, Matcher2, ...) can match.
+  template <typename T>
+  operator Matcher<T>() const {
+    return MatcherListType::template CreateMatcher<T, CombiningMatcher>(
+        matchers_);
+  }
+
+ private:
+  typedef MatcherList<sizeof...(Args), Args...> MatcherListType;
+
+  const typename MatcherListType::ListType matchers_;
+
+  GTEST_DISALLOW_ASSIGN_(VariadicMatcher);
+};
+
+template <typename... Args>
+using AllOfMatcher = VariadicMatcher<BothOfMatcherImpl, Args...>;
+
+#endif  // GTEST_LANG_CXX11
+
 // Used for implementing the AllOf(m_1, ..., m_n) matcher, which
 // matches a value that matches all of the matchers m_1, ..., and m_n.
 template <typename Matcher1, typename Matcher2>
@@ -1492,6 +1578,13 @@ class EitherOfMatcherImpl : public MatcherInterface<T> {
 
   GTEST_DISALLOW_ASSIGN_(EitherOfMatcherImpl);
 };
+
+#if GTEST_LANG_CXX11
+// AnyOfMatcher is used for the variadic implementation of AnyOf(m_1, m_2, ...).
+template <typename... Args>
+using AnyOfMatcher = VariadicMatcher<EitherOfMatcherImpl, Args...>;
+
+#endif  // GTEST_LANG_CXX11
 
 // Used for implementing the AnyOf(m_1, ..., m_n) matcher, which
 // matches a value that matches at least one of the matchers m_1, ...,
@@ -1646,37 +1739,60 @@ MakePredicateFormatterFromMatcher(const M& matcher) {
   return PredicateFormatterFromMatcher<M>(matcher);
 }
 
-// Implements the polymorphic floating point equality matcher, which
-// matches two float values using ULP-based approximation.  The
-// template is meant to be instantiated with FloatType being either
-// float or double.
+// Implements the polymorphic floating point equality matcher, which matches
+// two float values using ULP-based approximation or, optionally, a
+// user-specified epsilon.  The template is meant to be instantiated with
+// FloatType being either float or double.
 template <typename FloatType>
 class FloatingEqMatcher {
  public:
   // Constructor for FloatingEqMatcher.
   // The matcher's input will be compared with rhs.  The matcher treats two
   // NANs as equal if nan_eq_nan is true.  Otherwise, under IEEE standards,
-  // equality comparisons between NANs will always return false.
+  // equality comparisons between NANs will always return false.  We specify a
+  // negative max_abs_error_ term to indicate that ULP-based approximation will
+  // be used for comparison.
   FloatingEqMatcher(FloatType rhs, bool nan_eq_nan) :
-    rhs_(rhs), nan_eq_nan_(nan_eq_nan) {}
+    rhs_(rhs), nan_eq_nan_(nan_eq_nan), max_abs_error_(-1) {
+  }
+
+  // Constructor that supports a user-specified max_abs_error that will be used
+  // for comparison instead of ULP-based approximation.  The max absolute
+  // should be non-negative.
+  FloatingEqMatcher(FloatType rhs, bool nan_eq_nan, FloatType max_abs_error) :
+    rhs_(rhs), nan_eq_nan_(nan_eq_nan), max_abs_error_(max_abs_error) {
+    GTEST_CHECK_(max_abs_error >= 0)
+        << ", where max_abs_error is" << max_abs_error;
+  }
 
   // Implements floating point equality matcher as a Matcher<T>.
   template <typename T>
   class Impl : public MatcherInterface<T> {
    public:
-    Impl(FloatType rhs, bool nan_eq_nan) :
-      rhs_(rhs), nan_eq_nan_(nan_eq_nan) {}
+    Impl(FloatType rhs, bool nan_eq_nan, FloatType max_abs_error) :
+      rhs_(rhs), nan_eq_nan_(nan_eq_nan), max_abs_error_(max_abs_error) {}
 
     virtual bool MatchAndExplain(T value,
                                  MatchResultListener* /* listener */) const {
       const FloatingPoint<FloatType> lhs(value), rhs(rhs_);
 
       // Compares NaNs first, if nan_eq_nan_ is true.
-      if (nan_eq_nan_ && lhs.is_nan()) {
-        return rhs.is_nan();
+      if (lhs.is_nan() || rhs.is_nan()) {
+        if (lhs.is_nan() && rhs.is_nan()) {
+          return nan_eq_nan_;
+        }
+        // One is nan; the other is not nan.
+        return false;
       }
-
-      return lhs.AlmostEquals(rhs);
+      if (HasMaxAbsError()) {
+        // We perform an equality check so that inf will match inf, regardless
+        // of error bounds.  If the result of value - rhs_ would result in
+        // overflow or if either value is inf, the default result is infinity,
+        // which should only match if max_abs_error_ is also infinity.
+        return value == rhs_ || fabs(value - rhs_) <= max_abs_error_;
+      } else {
+        return lhs.AlmostEquals(rhs);
+      }
     }
 
     virtual void DescribeTo(::std::ostream* os) const {
@@ -1693,6 +1809,9 @@ class FloatingEqMatcher {
         }
       } else {
         *os << "is approximately " << rhs_;
+        if (HasMaxAbsError()) {
+          *os << " (absolute error <= " << max_abs_error_ << ")";
+        }
       }
       os->precision(old_precision);
     }
@@ -1709,14 +1828,23 @@ class FloatingEqMatcher {
         }
       } else {
         *os << "isn't approximately " << rhs_;
+        if (HasMaxAbsError()) {
+          *os << " (absolute error > " << max_abs_error_ << ")";
+        }
       }
       // Restore original precision.
       os->precision(old_precision);
     }
 
    private:
+    bool HasMaxAbsError() const {
+      return max_abs_error_ >= 0;
+    }
+
     const FloatType rhs_;
     const bool nan_eq_nan_;
+    // max_abs_error will be used for value comparison when >= 0.
+    const FloatType max_abs_error_;
 
     GTEST_DISALLOW_ASSIGN_(Impl);
   };
@@ -1728,20 +1856,23 @@ class FloatingEqMatcher {
   // by non-const reference, we may see them in code not conforming to
   // the style.  Therefore Google Mock needs to support them.)
   operator Matcher<FloatType>() const {
-    return MakeMatcher(new Impl<FloatType>(rhs_, nan_eq_nan_));
+    return MakeMatcher(new Impl<FloatType>(rhs_, nan_eq_nan_, max_abs_error_));
   }
 
   operator Matcher<const FloatType&>() const {
-    return MakeMatcher(new Impl<const FloatType&>(rhs_, nan_eq_nan_));
+    return MakeMatcher(
+        new Impl<const FloatType&>(rhs_, nan_eq_nan_, max_abs_error_));
   }
 
   operator Matcher<FloatType&>() const {
-    return MakeMatcher(new Impl<FloatType&>(rhs_, nan_eq_nan_));
+    return MakeMatcher(new Impl<FloatType&>(rhs_, nan_eq_nan_, max_abs_error_));
   }
 
  private:
   const FloatType rhs_;
   const bool nan_eq_nan_;
+  // max_abs_error will be used for value comparison when >= 0.
+  const FloatType max_abs_error_;
 
   GTEST_DISALLOW_ASSIGN_(FloatingEqMatcher);
 };
@@ -2931,16 +3062,48 @@ inline internal::FloatingEqMatcher<double> NanSensitiveDoubleEq(double rhs) {
   return internal::FloatingEqMatcher<double>(rhs, true);
 }
 
+// Creates a matcher that matches any double argument approximately equal to
+// rhs, up to the specified max absolute error bound, where two NANs are
+// considered unequal.  The max absolute error bound must be non-negative.
+inline internal::FloatingEqMatcher<double> DoubleNear(
+    double rhs, double max_abs_error) {
+  return internal::FloatingEqMatcher<double>(rhs, false, max_abs_error);
+}
+
+// Creates a matcher that matches any double argument approximately equal to
+// rhs, up to the specified max absolute error bound, including NaN values when
+// rhs is NaN.  The max absolute error bound must be non-negative.
+inline internal::FloatingEqMatcher<double> NanSensitiveDoubleNear(
+    double rhs, double max_abs_error) {
+  return internal::FloatingEqMatcher<double>(rhs, true, max_abs_error);
+}
+
 // Creates a matcher that matches any float argument approximately
 // equal to rhs, where two NANs are considered unequal.
 inline internal::FloatingEqMatcher<float> FloatEq(float rhs) {
   return internal::FloatingEqMatcher<float>(rhs, false);
 }
 
-// Creates a matcher that matches any double argument approximately
+// Creates a matcher that matches any float argument approximately
 // equal to rhs, including NaN values when rhs is NaN.
 inline internal::FloatingEqMatcher<float> NanSensitiveFloatEq(float rhs) {
   return internal::FloatingEqMatcher<float>(rhs, true);
+}
+
+// Creates a matcher that matches any float argument approximately equal to
+// rhs, up to the specified max absolute error bound, where two NANs are
+// considered unequal.  The max absolute error bound must be non-negative.
+inline internal::FloatingEqMatcher<float> FloatNear(
+    float rhs, float max_abs_error) {
+  return internal::FloatingEqMatcher<float>(rhs, false, max_abs_error);
+}
+
+// Creates a matcher that matches any float argument approximately equal to
+// rhs, up to the specified max absolute error bound, including NaN values when
+// rhs is NaN.  The max absolute error bound must be non-negative.
+inline internal::FloatingEqMatcher<float> NanSensitiveFloatNear(
+    float rhs, float max_abs_error) {
+  return internal::FloatingEqMatcher<float>(rhs, true, max_abs_error);
 }
 
 // Creates a matcher that matches a pointer (raw or smart) that points
@@ -3340,6 +3503,21 @@ inline bool ExplainMatchResult(
     M matcher, const T& value, MatchResultListener* listener) {
   return SafeMatcherCast<const T&>(matcher).MatchAndExplain(value, listener);
 }
+
+#if GTEST_LANG_CXX11
+// Define variadic matcher versions. They are overloaded in
+// gmock-generated-matchers.h for the cases supported by pre C++11 compilers.
+template <typename... Args>
+inline internal::AllOfMatcher<Args...> AllOf(const Args&... matchers) {
+  return internal::AllOfMatcher<Args...>(matchers...);
+}
+
+template <typename... Args>
+inline internal::AnyOfMatcher<Args...> AnyOf(const Args&... matchers) {
+  return internal::AnyOfMatcher<Args...>(matchers...);
+}
+
+#endif  // GTEST_LANG_CXX11
 
 // AllArgs(m) is a synonym of m.  This is useful in
 //
