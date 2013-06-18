@@ -512,15 +512,6 @@ TEST(NullLiteralTest, IsTrueForNullLiterals) {
   EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(0));
   EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(0U));
   EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(0L));
-
-# ifndef __BORLANDC__
-
-  // Some compilers may fail to detect some null pointer literals;
-  // as long as users of the framework don't use such literals, this
-  // is harmless.
-  EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(1 - 1));
-
-# endif
 }
 
 // Tests that GTEST_IS_NULL_LITERAL_(x) is false when x is not a null
