@@ -1418,7 +1418,7 @@ class BothOfMatcherImpl : public MatcherInterface<T> {
 template <int kSize, typename Head, typename... Tail>
 struct MatcherList {
   typedef MatcherList<kSize - 1, Tail...> MatcherListTail;
-  typedef pair<Head, typename MatcherListTail::ListType> ListType;
+  typedef ::std::pair<Head, typename MatcherListTail::ListType> ListType;
 
   // BuildList stores variadic type values in a nested pair structure.
   // Example:
@@ -1445,11 +1445,11 @@ struct MatcherList {
 // MatcherList.
 template <typename Matcher1, typename Matcher2>
 struct MatcherList<2, Matcher1, Matcher2> {
-  typedef pair<Matcher1, Matcher2> ListType;
+  typedef ::std::pair<Matcher1, Matcher2> ListType;
 
   static ListType BuildList(const Matcher1& matcher1,
                             const Matcher2& matcher2) {
-    return pair<Matcher1, Matcher2>(matcher1, matcher2);
+    return ::std::pair<Matcher1, Matcher2>(matcher1, matcher2);
   }
 
   template <typename T, template <typename /* T */> class CombiningMatcher>
