@@ -209,7 +209,7 @@ if test "${this_bindir}" = "${this_bindir%${bindir}}"; then
   # The path to the script doesn't end in the bindir sequence from Autoconf,
   # assume that we are in a build tree.
   build_dir=`dirname ${this_bindir}`
-  src_dir=`cd ${this_bindir}/@top_srcdir@; pwd -P`
+  src_dir=`cd ${this_bindir}; cd @top_srcdir@; pwd -P`
 
   # TODO(chandlerc@google.com): This is a dangerous dependency on libtool, we
   # should work to remove it, and/or remove libtool altogether, replacing it
