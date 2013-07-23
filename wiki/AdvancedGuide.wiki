@@ -629,7 +629,7 @@ On Windows, Google Test uses its own simple regular expression
 implementation. It lacks many features you can find in POSIX extended
 regular expressions.  For example, we don't support union (`"x|y"`),
 grouping (`"(xy)"`), brackets (`"[xy]"`), and repetition count
-(`"x{5,7}"`), among others. Below is what we do support (`A` denotes a
+(`"x{5,7}"`), among others. Below is what we do support (Letter `A` denotes a
 literal character, period (`.`), or a single `\\` escape sequence; `x`
 and `y` denote regular expressions.):
 
@@ -646,6 +646,7 @@ and `y` denote regular expressions.):
 || `\\w` || matches any letter, `_`, or decimal digit ||
 || `\\W` || matches any character that `\\w` doesn't match ||
 || `\\c` || matches any literal character `c`, which must be a punctuation ||
+|| `\\.` || matches the `.` character ||
 || `.` || matches any single character except `\n` ||
 || `A?` || matches 0 or 1 occurrences of `A` ||
 || `A*` || matches 0 or many occurrences of `A` ||
