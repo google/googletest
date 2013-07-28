@@ -37,6 +37,7 @@
 #include "gmock/gmock-more-matchers.h"
 
 #include <string.h>
+#include <time.h>
 #include <deque>
 #include <functional>
 #include <iostream>
@@ -134,11 +135,14 @@ using testing::WhenSorted;
 using testing::WhenSortedBy;
 using testing::_;
 using testing::internal::DummyMatchResultListener;
+using testing::internal::ElementMatcherPair;
+using testing::internal::ElementMatcherPairs;
 using testing::internal::ExplainMatchFailureTupleTo;
 using testing::internal::FloatingEqMatcher;
 using testing::internal::FormatMatcherDescription;
 using testing::internal::IsReadableTypeName;
 using testing::internal::JoinAsTuple;
+using testing::internal::MatchMatrix;
 using testing::internal::RE;
 using testing::internal::StreamMatchResultListener;
 using testing::internal::StringMatchResultListener;
@@ -146,6 +150,9 @@ using testing::internal::Strings;
 using testing::internal::linked_ptr;
 using testing::internal::scoped_ptr;
 using testing::internal::string;
+
+// Evaluates to the number of elements in 'array'.
+#define GMOCK_ARRAY_SIZE_(array) (sizeof(array) / sizeof(array[0]))
 
 // For testing ExplainMatchResultTo().
 class GreaterThanMatcher : public MatcherInterface<int> {
@@ -4429,12 +4436,438 @@ TEST(WhenSortedTest, WorksForStreamlike) {
 }
 
 TEST(WhenSortedTest, WorksForVectorConstRefMatcherOnStreamlike) {
-  const int a[5] = { 2, 1, 4, 5, 3 };
-  Streamlike<int> s(a, a + 5);
+  const int a[] = { 2, 1, 4, 5, 3 };
+  Streamlike<int> s(a, a + GMOCK_ARRAY_SIZE_(a));
   Matcher<const std::vector<int>&> vector_match = ElementsAre(1, 2, 3, 4, 5);
   EXPECT_THAT(s, WhenSorted(vector_match));
   EXPECT_THAT(s, Not(WhenSorted(ElementsAre(2, 1, 4, 5, 3))));
 }
+
+// Tests for UnorderedElementsAreArray()
+
+TEST(UnorderedElementsAreArrayTest, SucceedsWhenExpected) {
+  const int a[] = { 0, 1, 2, 3, 4 };
+  std::vector<int> s(a, a + GMOCK_ARRAY_SIZE_(a));
+  do {
+    StringMatchResultListener listener;
+    EXPECT_TRUE(ExplainMatchResult(UnorderedElementsAreArray(a),
+                                   s, &listener)) << listener.str();
+  } while (std::next_permutation(s.begin(), s.end()));
+}
+
+TEST(UnorderedElementsAreArrayTest, VectorBool) {
+  const bool a[] = { 0, 1, 0, 1, 1 };
+  const bool b[] = { 1, 0, 1, 1, 0 };
+  std::vector<bool> expected(a, a + GMOCK_ARRAY_SIZE_(a));
+  std::vector<bool> actual(b, b + GMOCK_ARRAY_SIZE_(b));
+  StringMatchResultListener listener;
+  EXPECT_TRUE(ExplainMatchResult(UnorderedElementsAreArray(expected),
+                                 actual, &listener)) << listener.str();
+}
+
+class UnorderedElementsAreTest : public testing::Test {
+ protected:
+  typedef std::vector<int> IntVec;
+};
+
+TEST_F(UnorderedElementsAreTest, SucceedsWhenExpected) {
+  const int a[] = { 1, 2, 3 };
+  std::vector<int> s(a, a + GMOCK_ARRAY_SIZE_(a));
+  do {
+    StringMatchResultListener listener;
+    EXPECT_TRUE(ExplainMatchResult(UnorderedElementsAre(1, 2, 3),
+                                   s, &listener)) << listener.str();
+  } while (std::next_permutation(s.begin(), s.end()));
+}
+
+TEST_F(UnorderedElementsAreTest, FailsWhenAnElementMatchesNoMatcher) {
+  const int a[] = { 1, 2, 3 };
+  std::vector<int> s(a, a + GMOCK_ARRAY_SIZE_(a));
+  std::vector<Matcher<int> > mv;
+  mv.push_back(1);
+  mv.push_back(2);
+  mv.push_back(2);
+  // The element with value '3' matches nothing: fail fast.
+  StringMatchResultListener listener;
+  EXPECT_FALSE(ExplainMatchResult(UnorderedElementsAreArray(mv),
+                                  s, &listener)) << listener.str();
+}
+
+// One naive implementation of the matcher runs in O(N!) time, which is too
+// slow for many real-world inputs. This test shows that our matcher can match
+// 100 inputs very quickly (a few milliseconds).  An O(100!) is 10^158
+// iterations and obviously effectively incomputable.
+// [ RUN      ] UnorderedElementsAreTest.Performance
+// [       OK ] UnorderedElementsAreTest.Performance (4 ms)
+TEST_F(UnorderedElementsAreTest, Performance) {
+  std::vector<int> s;
+  std::vector<Matcher<int> > mv;
+  for (int i = 0; i < 100; ++i) {
+    s.push_back(i);
+    mv.push_back(_);
+  }
+  mv[50] = Eq(0);
+  StringMatchResultListener listener;
+  EXPECT_TRUE(ExplainMatchResult(UnorderedElementsAreArray(mv),
+                                 s, &listener)) << listener.str();
+}
+
+// Another variant of 'Performance' with similar expectations.
+// [ RUN      ] UnorderedElementsAreTest.PerformanceHalfStrict
+// [       OK ] UnorderedElementsAreTest.PerformanceHalfStrict (4 ms)
+TEST_F(UnorderedElementsAreTest, PerformanceHalfStrict) {
+  std::vector<int> s;
+  std::vector<Matcher<int> > mv;
+  for (int i = 0; i < 100; ++i) {
+    s.push_back(i);
+    if (i & 1) {
+      mv.push_back(_);
+    } else {
+      mv.push_back(i);
+    }
+  }
+  StringMatchResultListener listener;
+  EXPECT_TRUE(ExplainMatchResult(UnorderedElementsAreArray(mv),
+                                 s, &listener)) << listener.str();
+}
+
+TEST_F(UnorderedElementsAreTest, FailMessageCountWrong) {
+  std::vector<int> v;
+  v.push_back(4);
+  StringMatchResultListener listener;
+  EXPECT_FALSE(ExplainMatchResult(UnorderedElementsAre(1, 2, 3),
+                                  v, &listener)) << listener.str();
+  EXPECT_THAT(listener.str(), Eq("which has 1 element"));
+}
+
+TEST_F(UnorderedElementsAreTest, FailMessageCountWrongZero) {
+  std::vector<int> v;
+  StringMatchResultListener listener;
+  EXPECT_FALSE(ExplainMatchResult(UnorderedElementsAre(1, 2, 3),
+                                  v, &listener)) << listener.str();
+  EXPECT_THAT(listener.str(), Eq(""));
+}
+
+TEST_F(UnorderedElementsAreTest, FailMessageUnmatchedMatchers) {
+  std::vector<int> v;
+  v.push_back(1);
+  v.push_back(1);
+  StringMatchResultListener listener;
+  EXPECT_FALSE(ExplainMatchResult(UnorderedElementsAre(1, 2),
+                                  v, &listener)) << listener.str();
+  EXPECT_THAT(
+      listener.str(),
+      Eq("where the following matchers don't match any elements:\n"
+         "matcher #1: is equal to 2"));
+}
+
+TEST_F(UnorderedElementsAreTest, FailMessageUnmatchedElements) {
+  std::vector<int> v;
+  v.push_back(1);
+  v.push_back(2);
+  StringMatchResultListener listener;
+  EXPECT_FALSE(ExplainMatchResult(UnorderedElementsAre(1, 1),
+                                  v, &listener)) << listener.str();
+  EXPECT_THAT(
+      listener.str(),
+      Eq("where the following elements don't match any matchers:\n"
+         "element #1: 2"));
+}
+
+TEST_F(UnorderedElementsAreTest, FailMessageUnmatchedMatcherAndElement) {
+  std::vector<int> v;
+  v.push_back(2);
+  v.push_back(3);
+  StringMatchResultListener listener;
+  EXPECT_FALSE(ExplainMatchResult(UnorderedElementsAre(1, 2),
+                                  v, &listener)) << listener.str();
+  EXPECT_THAT(
+      listener.str(),
+      Eq("where"
+         " the following matchers don't match any elements:\n"
+         "matcher #0: is equal to 1\n"
+         "and"
+         " where"
+         " the following elements don't match any matchers:\n"
+         "element #1: 3"));
+}
+
+// Test helper for formatting element, matcher index pairs in expectations.
+static string EMString(int element, int matcher) {
+  stringstream ss;
+  ss << "(element #" << element << ", matcher #" << matcher << ")";
+  return ss.str();
+}
+
+TEST_F(UnorderedElementsAreTest, FailMessageImperfectMatchOnly) {
+  // A situation where all elements and matchers have a match
+  // associated with them, but the max matching is not perfect.
+  std::vector<string> v;
+  v.push_back("a");
+  v.push_back("b");
+  v.push_back("c");
+  StringMatchResultListener listener;
+  EXPECT_FALSE(ExplainMatchResult(
+      UnorderedElementsAre("a", "a", AnyOf("b", "c")), v, &listener))
+      << listener.str();
+
+  string prefix =
+      "where no permutation of the elements can satisfy all matchers, "
+      "and the closest match is 2 of 3 matchers with the "
+      "pairings:\n";
+
+  // We have to be a bit loose here, because there are 4 valid max matches.
+  EXPECT_THAT(
+      listener.str(),
+      AnyOf(prefix + "{\n  " + EMString(0, 0) +
+                     ",\n  " + EMString(1, 2) + "\n}",
+            prefix + "{\n  " + EMString(0, 1) +
+                     ",\n  " + EMString(1, 2) + "\n}",
+            prefix + "{\n  " + EMString(0, 0) +
+                     ",\n  " + EMString(2, 2) + "\n}",
+            prefix + "{\n  " + EMString(0, 1) +
+                     ",\n  " + EMString(2, 2) + "\n}"));
+}
+
+TEST_F(UnorderedElementsAreTest, Describe) {
+  EXPECT_THAT(Describe<IntVec>(UnorderedElementsAre()),
+              Eq("is empty"));
+  EXPECT_THAT(
+      Describe<IntVec>(UnorderedElementsAre(345)),
+      Eq("has 1 element and that element is equal to 345"));
+  EXPECT_THAT(
+      Describe<IntVec>(UnorderedElementsAre(111, 222, 333)),
+      Eq("has 3 elements and there exists some permutation "
+         "of elements such that:\n"
+         " - element #0 is equal to 111, and\n"
+         " - element #1 is equal to 222, and\n"
+         " - element #2 is equal to 333"));
+}
+
+TEST_F(UnorderedElementsAreTest, DescribeNegation) {
+  EXPECT_THAT(DescribeNegation<IntVec>(UnorderedElementsAre()),
+              Eq("isn't empty"));
+  EXPECT_THAT(
+      DescribeNegation<IntVec>(UnorderedElementsAre(345)),
+      Eq("doesn't have 1 element, or has 1 element that isn't equal to 345"));
+  EXPECT_THAT(
+      DescribeNegation<IntVec>(UnorderedElementsAre(123, 234, 345)),
+      Eq("doesn't have 3 elements, or there exists no permutation "
+         "of elements such that:\n"
+         " - element #0 is equal to 123, and\n"
+         " - element #1 is equal to 234, and\n"
+         " - element #2 is equal to 345"));
+}
+
+namespace {
+
+// Used as a check on the more complex max flow method used in the
+// real testing::internal::FindMaxBipartiteMatching. This method is
+// compatible but runs in worst-case factorial time, so we only
+// use it in testing for small problem sizes.
+template <typename Graph>
+class BacktrackingMaxBPMState {
+ public:
+  // Does not take ownership of 'g'.
+  explicit BacktrackingMaxBPMState(const Graph* g) : graph_(g) { }
+
+  ElementMatcherPairs Compute() {
+    if (graph_->LhsSize() == 0 || graph_->RhsSize() == 0) {
+      return best_so_far_;
+    }
+    lhs_used_.assign(graph_->LhsSize(), kUnused);
+    rhs_used_.assign(graph_->RhsSize(), kUnused);
+    for (size_t irhs = 0; irhs < graph_->RhsSize(); ++irhs) {
+      matches_.clear();
+      RecurseInto(irhs);
+      if (best_so_far_.size() == graph_->RhsSize())
+        break;
+    }
+    return best_so_far_;
+  }
+
+ private:
+  static const size_t kUnused = static_cast<size_t>(-1);
+
+  void PushMatch(size_t lhs, size_t rhs) {
+    matches_.push_back(ElementMatcherPair(lhs, rhs));
+    lhs_used_[lhs] = rhs;
+    rhs_used_[rhs] = lhs;
+    if (matches_.size() > best_so_far_.size()) {
+      best_so_far_ = matches_;
+    }
+  }
+
+  void PopMatch() {
+    const ElementMatcherPair& back = matches_.back();
+    lhs_used_[back.first] = kUnused;
+    rhs_used_[back.second] = kUnused;
+    matches_.pop_back();
+  }
+
+  bool RecurseInto(size_t irhs) {
+    if (rhs_used_[irhs] != kUnused) {
+      return true;
+    }
+    for (size_t ilhs = 0; ilhs < graph_->LhsSize(); ++ilhs) {
+      if (lhs_used_[ilhs] != kUnused) {
+        continue;
+      }
+      if (!graph_->HasEdge(ilhs, irhs)) {
+        continue;
+      }
+      PushMatch(ilhs, irhs);
+      if (best_so_far_.size() == graph_->RhsSize()) {
+        return false;
+      }
+      for (size_t mi = irhs + 1; mi < graph_->RhsSize(); ++mi) {
+        if (!RecurseInto(mi)) return false;
+      }
+      PopMatch();
+    }
+    return true;
+  }
+
+  const Graph* graph_;  // not owned
+  std::vector<size_t> lhs_used_;
+  std::vector<size_t> rhs_used_;
+  ElementMatcherPairs matches_;
+  ElementMatcherPairs best_so_far_;
+};
+
+template <typename Graph>
+const size_t BacktrackingMaxBPMState<Graph>::kUnused;
+
+}  // namespace
+
+// Implement a simple backtracking algorithm to determine if it is possible
+// to find one element per matcher, without reusing elements.
+template <typename Graph>
+ElementMatcherPairs
+FindBacktrackingMaxBPM(const Graph& g) {
+  return BacktrackingMaxBPMState<Graph>(&g).Compute();
+}
+
+class BacktrackingBPMTest : public ::testing::Test { };
+
+// Tests the MaxBipartiteMatching algorithm with square matrices.
+// The single int param is the # of nodes on each of the left and right sides.
+class BipartiteTest : public ::testing::TestWithParam<int> { };
+
+// Verify all match graphs up to some moderate number of edges.
+TEST_P(BipartiteTest, Exhaustive) {
+  int nodes = GetParam();
+  MatchMatrix graph(nodes, nodes);
+  do {
+    ElementMatcherPairs matches =
+        internal::FindMaxBipartiteMatching(graph);
+    EXPECT_EQ(FindBacktrackingMaxBPM(graph).size(), matches.size())
+        << "graph: " << graph.DebugString();
+    // Check that all elements of matches are in the graph.
+    // Check that elements of first and second are unique.
+    std::vector<bool> seen_element(graph.LhsSize());
+    std::vector<bool> seen_matcher(graph.RhsSize());
+    SCOPED_TRACE(PrintToString(matches));
+    for (size_t i = 0; i < matches.size(); ++i) {
+      size_t ilhs = matches[i].first;
+      size_t irhs = matches[i].second;
+      EXPECT_TRUE(graph.HasEdge(ilhs, irhs));
+      EXPECT_FALSE(seen_element[ilhs]);
+      EXPECT_FALSE(seen_matcher[irhs]);
+      seen_element[ilhs] = true;
+      seen_matcher[irhs] = true;
+    }
+  } while (graph.NextGraph());
+}
+
+INSTANTIATE_TEST_CASE_P(AllGraphs, BipartiteTest,
+                        ::testing::Range(0, 5));
+
+// Parameterized by a pair interpreted as (LhsSize, RhsSize).
+class BipartiteNonSquareTest
+    : public ::testing::TestWithParam<std::pair<size_t, size_t> > {
+};
+
+TEST_F(BipartiteNonSquareTest, SimpleBacktracking) {
+  //   .......
+  // 0:-----\ :
+  // 1:---\ | :
+  // 2:---\ | :
+  // 3:-\ | | :
+  //  :.......:
+  //    0 1 2
+  MatchMatrix g(4, 3);
+  static const int kEdges[][2] = { {0, 2}, {1, 1}, {2, 1}, {3, 0} };
+  for (size_t i = 0; i < GMOCK_ARRAY_SIZE_(kEdges); ++i) {
+    g.SetEdge(kEdges[i][0], kEdges[i][1], true);
+  }
+  EXPECT_THAT(FindBacktrackingMaxBPM(g),
+              ElementsAre(Pair(3, 0),
+                          Pair(AnyOf(1, 2), 1),
+                          Pair(0, 2))) << g.DebugString();
+}
+
+// Verify a few nonsquare matrices.
+TEST_P(BipartiteNonSquareTest, Exhaustive) {
+  size_t nlhs = GetParam().first;
+  size_t nrhs = GetParam().second;
+  MatchMatrix graph(nlhs, nrhs);
+  do {
+    EXPECT_EQ(FindBacktrackingMaxBPM(graph).size(),
+              internal::FindMaxBipartiteMatching(graph).size())
+        << "graph: " << graph.DebugString()
+        << "\nbacktracking: "
+        << PrintToString(FindBacktrackingMaxBPM(graph))
+        << "\nmax flow: "
+        << PrintToString(internal::FindMaxBipartiteMatching(graph));
+  } while (graph.NextGraph());
+}
+
+INSTANTIATE_TEST_CASE_P(AllGraphs, BipartiteNonSquareTest,
+    testing::Values(
+        std::make_pair(1, 2),
+        std::make_pair(2, 1),
+        std::make_pair(3, 2),
+        std::make_pair(2, 3),
+        std::make_pair(4, 1),
+        std::make_pair(1, 4),
+        std::make_pair(4, 3),
+        std::make_pair(3, 4)));
+
+class BipartiteRandomTest
+    : public ::testing::TestWithParam<std::pair<int, int> > {
+};
+
+// Verifies a large sample of larger graphs.
+TEST_P(BipartiteRandomTest, LargerNets) {
+  int nodes = GetParam().first;
+  int iters = GetParam().second;
+  MatchMatrix graph(nodes, nodes);
+
+  testing::internal::Int32 seed = GTEST_FLAG(random_seed);
+  if (seed == 0) {
+    seed = static_cast<testing::internal::Int32>(time(NULL));
+  }
+
+  for (; iters > 0; --iters, ++seed) {
+    srand(static_cast<int>(seed));
+    graph.Randomize();
+    EXPECT_EQ(FindBacktrackingMaxBPM(graph).size(),
+              internal::FindMaxBipartiteMatching(graph).size())
+        << " graph: " << graph.DebugString()
+        << "\nTo reproduce the failure, rerun the test with the flag"
+           " --" << GTEST_FLAG_PREFIX_ << "random_seed=" << seed;
+  }
+}
+
+// Test argument is a std::pair<int, int> representing (nodes, iters).
+INSTANTIATE_TEST_CASE_P(Samples, BipartiteRandomTest,
+    testing::Values(
+        std::make_pair(5, 10000),
+        std::make_pair(6, 5000),
+        std::make_pair(7, 2000),
+        std::make_pair(8, 500),
+        std::make_pair(9, 100)));
 
 // Tests IsReadableTypeName().
 

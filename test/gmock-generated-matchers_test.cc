@@ -80,6 +80,9 @@ using testing::Value;
 using testing::internal::ElementsAreArrayMatcher;
 using testing::internal::string;
 
+// Evaluates to the number of elements in 'array'.
+#define GMOCK_ARRAY_SIZE_(a) (sizeof(a) / sizeof(a[0]))
+
 // Returns the description of the given matcher.
 template <typename T>
 string Describe(const Matcher<T>& m) {
@@ -283,9 +286,6 @@ Matcher<int> GreaterThan(int n) {
 }
 
 // Tests for ElementsAre().
-
-// Evaluates to the number of elements in 'array'.
-#define GMOCK_ARRAY_SIZE_(array) (sizeof(array)/sizeof(array[0]))
 
 TEST(ElementsAreTest, CanDescribeExpectingNoElement) {
   Matcher<const vector<int>&> m = ElementsAre();
@@ -563,8 +563,8 @@ TEST(ElementsAreTest, MakesCopyOfArguments) {
   int x = 1;
   int y = 2;
   // This should make a copy of x and y.
-  ::testing::internal::ElementsAreMatcher2<int, int> polymorphic_matcher =
-        ElementsAre(x, y);
+  ::testing::internal::ElementsAreMatcher<std::tr1::tuple<int, int> >
+          polymorphic_matcher = ElementsAre(x, y);
   // Changing x and y now shouldn't affect the meaning of the above matcher.
   x = y = 0;
   const int array1[] = { 1, 2 };
@@ -572,6 +572,7 @@ TEST(ElementsAreTest, MakesCopyOfArguments) {
   const int array2[] = { 0, 0 };
   EXPECT_THAT(array2, Not(polymorphic_matcher));
 }
+
 
 // Tests for ElementsAreArray().  Since ElementsAreArray() shares most
 // of the implementation with ElementsAre(), we don't test it as

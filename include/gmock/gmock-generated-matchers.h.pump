@@ -187,66 +187,6 @@ class ArgsMatcher {
   GTEST_DISALLOW_ASSIGN_(ArgsMatcher);
 };
 
-// Implements ElementsAre() of 1-$n arguments.  The use of DecayArray in
-// the implementation allows ElementsAre() to accept string literals, whose
-// inferred type is const char[N] while we want to treat them as const char*.
-
-
-$range i 1..n
-$for i [[
-$range j 1..i
-template <$for j, [[typename T$j]]>
-class ElementsAreMatcher$i {
- public:
-  $if i==1 [[explicit ]]ElementsAreMatcher$i($for j, [[const T$j& e$j]])$if i > 0 [[ : ]]
-      $for j, [[e$j[[]]_(e$j)]] {}
-
-  template <typename Container>
-  operator Matcher<Container>() const {
-    typedef GTEST_REMOVE_REFERENCE_AND_CONST_(Container) RawContainer;
-    typedef typename internal::StlContainerView<RawContainer>::type::value_type
-        Element;
-
-$if i==1 [[
-
-    // Nokia's Symbian Compiler has a nasty bug where the object put
-    // in a one-element local array is not destructed when the array
-    // goes out of scope.  This leads to obvious badness as we've
-    // added the linked_ptr in it to our other linked_ptrs list.
-    // Hence we implement ElementsAreMatcher1 specially to avoid using
-    // a local array.
-    const Matcher<const Element&> matcher =
-        MatcherCast<const Element&>(e1_);
-    return MakeMatcher(new ElementsAreMatcherImpl<Container>(&matcher,
-                                                             &matcher + 1));
-]] $else [[
-
-    const Matcher<const Element&> matchers[] = {
-
-$for j [[
-      MatcherCast<const Element&>(e$j[[]]_),
-
-]]
-    };
-
-    return MakeMatcher(new ElementsAreMatcherImpl<Container>(matchers,
-                                                             matchers + $i));
-]]
-
-  }
-
- private:
-
-$for j [[
-    const typename DecayArray<T$j>::type e$j[[]]_;
-
-]]
-
-  GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher$i);
-};
-
-
-]]
 // A set of metafunctions for computing the result type of AllOf.
 // AllOf(m1, ..., mN) returns
 // AllOfResultN<decltype(m1), ..., decltype(mN)>::type.
@@ -324,79 +264,72 @@ Args(const InnerMatcher& matcher) {
 
 
 ]]
-// ElementsAre(e0, e1, ..., e_n) matches an STL-style container with
-// (n + 1) elements, where the i-th element in the container must
+// ElementsAre(e_1, e_2, ... e_n) matches an STL-style container with
+// n elements, where the i-th element in the container must
 // match the i-th argument in the list.  Each argument of
 // ElementsAre() can be either a value or a matcher.  We support up to
 // $n arguments.
+//
+// The use of DecayArray in the implementation allows ElementsAre()
+// to accept string literals, whose type is const char[N], but we
+// want to treat them as const char*.
 //
 // NOTE: Since ElementsAre() cares about the order of the elements, it
 // must not be used with containers whose elements's order is
 // undefined (e.g. hash_map).
 
-inline internal::ElementsAreMatcher0 ElementsAre() {
-  return internal::ElementsAreMatcher0();
-}
-
-$range i 1..n
+$range i 0..n
 $for i [[
+
 $range j 1..i
 
+$if i>0 [[
+
 template <$for j, [[typename T$j]]>
-inline internal::ElementsAreMatcher$i<$for j, [[T$j]]> ElementsAre($for j, [[const T$j& e$j]]) {
-  return internal::ElementsAreMatcher$i<$for j, [[T$j]]>($for j, [[e$j]]);
+]]
+
+inline internal::ElementsAreMatcher<
+    std::tr1::tuple<
+$for j, [[
+
+        typename internal::DecayArray<T$j[[]]>::type]]> >
+ElementsAre($for j, [[const T$j& e$j]]) {
+  typedef std::tr1::tuple<
+$for j, [[
+
+      typename internal::DecayArray<T$j[[]]>::type]]> Args;
+  return internal::ElementsAreMatcher<Args>(Args($for j, [[e$j]]));
 }
 
 ]]
 
-// ElementsAreArray(array)
-// ElementsAreArray(pointer, count)
-// ElementsAreArray(vector)
-// ElementsAreArray(first, last)
-//
-// The ElementsAreArray() functions are like ElementsAre(...), except that
-// they are given a sequence of matchers or values rather than taking each
-// element as a function argument. The sequence can be specified as a
-// C-style array, a pointer and count, a vector, or an STL iterator range.
-//
-// * The array form infers the size of 'array', which must be of a
-//   statically-sized C-style array type.
-//
-// * The (pointer, count) form can take either a statically-sized C-style
-//   array or a pointer to a dynamically created array. It does not take
-//   ownership of the pointer.
-//
-// * The vector form can take a std::vector either of values or of matchers.
-//
-// * The (first, last) form can take any STL iterator range.
-//
-// All forms of ElementsAreArray() make a copy of the input sequence.
-template <typename T>
-inline internal::ElementsAreArrayMatcher<T> ElementsAreArray(
-    const T* first, size_t count) {
-  return internal::ElementsAreArrayMatcher<T>(first, first + count);
+// UnorderedElementsAre(e_1, e_2, ..., e_n) is an ElementsAre extension
+// that matches n elements in any order.  We support up to n=$n arguments.
+
+$range i 0..n
+$for i [[
+
+$range j 1..i
+
+$if i>0 [[
+
+template <$for j, [[typename T$j]]>
+]]
+
+inline internal::UnorderedElementsAreMatcher<
+    std::tr1::tuple<
+$for j, [[
+
+        typename internal::DecayArray<T$j[[]]>::type]]> >
+UnorderedElementsAre($for j, [[const T$j& e$j]]) {
+  typedef std::tr1::tuple<
+$for j, [[
+
+      typename internal::DecayArray<T$j[[]]>::type]]> Args;
+  return internal::UnorderedElementsAreMatcher<Args>(Args($for j, [[e$j]]));
 }
 
-template <typename T, size_t N>
-inline internal::ElementsAreArrayMatcher<T> ElementsAreArray(
-    const T (&array)[N]) {
-  return internal::ElementsAreArrayMatcher<T>(array, array + N);
-}
-
-template <typename T, typename A>
-inline internal::ElementsAreArrayMatcher<T> ElementsAreArray(
-    const std::vector<T, A>& vec) {
-  return internal::ElementsAreArrayMatcher<T>(vec.begin(), vec.end());
-}
-
-template <typename Iter>
-inline internal::ElementsAreArrayMatcher<
-    typename std::iterator_traits<Iter>::value_type>
-ElementsAreArray(Iter first, Iter last) {
-  typedef typename std::iterator_traits<Iter>::value_type T;
-  return internal::ElementsAreArrayMatcher<T>(first, last);
-}
-
+]]
 
 // AllOf(m1, m2, ..., mk) matches any value that matches all of the given
 // sub-matchers.  AllOf is called fully qualified to prevent ADL from firing.

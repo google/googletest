@@ -2,7 +2,8 @@ Changes for 1.7.0:
 
 * All new improvements in Google Test 1.7.0.
 * New feature: matchers DoubleNear(), FloatNear(),
-  NanSensitiveDoubleNear(), NanSensitiveFloatNear(), WhenSorted(),
+  NanSensitiveDoubleNear(), NanSensitiveFloatNear(),
+  UnorderedElementsAre(), UnorderedElementsAreArray(), WhenSorted(),
   WhenSortedBy(), IsEmpty(), and SizeIs().
 * Improvement: Google Mock can now be built as a DLL.
 * Improvement: when compiled by a C++11 compiler, matchers AllOf()
