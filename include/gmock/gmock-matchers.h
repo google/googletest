@@ -3095,8 +3095,13 @@ class UnorderedElementsAreMatcherImpl
   virtual bool MatchAndExplain(Container container,
                                MatchResultListener* listener) const {
     StlContainerReference stl_container = View::ConstReference(container);
-    size_t actual_count = stl_container.size();
+    ::std::vector<string> element_printouts;
+    MatchMatrix matrix = AnalyzeElements(stl_container.begin(),
+                                         stl_container.end(),
+                                         &element_printouts,
+                                         listener);
 
+    const size_t actual_count = matrix.LhsSize();
     if (actual_count == 0 && matchers_.empty()) {
       return true;
     }
@@ -3111,12 +3116,6 @@ class UnorderedElementsAreMatcherImpl
       return false;
     }
 
-    ::std::vector<string> element_printouts;
-    MatchMatrix matrix = AnalyzeElements(stl_container.begin(),
-                                         stl_container.end(),
-                                         &element_printouts,
-                                         listener);
-
     return VerifyAllElementsAndMatchersAreMatched(element_printouts,
                                                   matrix, listener) &&
            FindPairing(matrix, listener);
@@ -3129,6 +3128,7 @@ class UnorderedElementsAreMatcherImpl
   MatchMatrix AnalyzeElements(ElementIter elem_first, ElementIter elem_last,
                               ::std::vector<string>* element_printouts,
                               MatchResultListener* listener) const {
+    element_printouts->clear();
     ::std::vector<char> did_match;
     size_t num_elements = 0;
     for (; elem_first != elem_last; ++num_elements, ++elem_first) {

@@ -4430,7 +4430,7 @@ TEST(WhenSortedTest, WorksForStreamlike) {
   // Streamlike 'container' provides only minimal iterator support.
   // Its iterators are tagged with input_iterator_tag.
   const int a[5] = { 2, 1, 4, 5, 3 };
-  Streamlike<int> s(a, a + 5);
+  Streamlike<int> s(a, a + GMOCK_ARRAY_SIZE_(a));
   EXPECT_THAT(s, WhenSorted(ElementsAre(1, 2, 3, 4, 5)));
   EXPECT_THAT(s, Not(WhenSorted(ElementsAre(2, 1, 4, 5, 3))));
 }
@@ -4465,6 +4465,25 @@ TEST(UnorderedElementsAreArrayTest, VectorBool) {
                                  actual, &listener)) << listener.str();
 }
 
+TEST(UnorderedElementsAreArrayTest, WorksForStreamlike) {
+  // Streamlike 'container' provides only minimal iterator support.
+  // Its iterators are tagged with input_iterator_tag, and it has no
+  // size() or empty() methods.
+  const int a[5] = { 2, 1, 4, 5, 3 };
+  Streamlike<int> s(a, a + GMOCK_ARRAY_SIZE_(a));
+
+  ::std::vector<int> expected;
+  expected.push_back(1);
+  expected.push_back(2);
+  expected.push_back(3);
+  expected.push_back(4);
+  expected.push_back(5);
+  EXPECT_THAT(s, UnorderedElementsAreArray(expected));
+
+  expected.push_back(6);
+  EXPECT_THAT(s, Not(UnorderedElementsAreArray(expected)));
+}
+
 class UnorderedElementsAreTest : public testing::Test {
  protected:
   typedef std::vector<int> IntVec;
@@ -4491,6 +4510,17 @@ TEST_F(UnorderedElementsAreTest, FailsWhenAnElementMatchesNoMatcher) {
   StringMatchResultListener listener;
   EXPECT_FALSE(ExplainMatchResult(UnorderedElementsAreArray(mv),
                                   s, &listener)) << listener.str();
+}
+
+TEST_F(UnorderedElementsAreTest, WorksForStreamlike) {
+  // Streamlike 'container' provides only minimal iterator support.
+  // Its iterators are tagged with input_iterator_tag, and it has no
+  // size() or empty() methods.
+  const int a[5] = { 2, 1, 4, 5, 3 };
+  Streamlike<int> s(a, a + GMOCK_ARRAY_SIZE_(a));
+
+  EXPECT_THAT(s, UnorderedElementsAre(1, 2, 3, 4, 5));
+  EXPECT_THAT(s, Not(UnorderedElementsAre(2, 2, 3, 4, 5)));
 }
 
 // One naive implementation of the matcher runs in O(N!) time, which is too
