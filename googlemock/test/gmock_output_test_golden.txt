@@ -311,6 +311,7 @@ Expected: is pair (is >= 48, true)
 [  FAILED  ] GMockOutputTest.PrintsMatcher
 
 
+
 FILE:#: ERROR: this mock object should be deleted but never is. Its address is @0x#.
 FILE:#: ERROR: this mock object should be deleted but never is. Its address is @0x#.
 FILE:#: ERROR: this mock object should be deleted but never is. Its address is @0x#.

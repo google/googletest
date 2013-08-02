@@ -1043,8 +1043,8 @@ Stack trace: (omitted)
 
 53 FAILED TESTS
 [0;33m  YOU HAVE 1 DISABLED TEST
-
-[mNote: Google Test filter = FatalFailureTest.*:LoggingTest.*
+[m
+Note: Google Test filter = FatalFailureTest.*:LoggingTest.*
 [==========] Running 4 tests from 2 test suites.
 [----------] Global test environment set-up.
 [----------] 3 tests from FatalFailureTest
@@ -1107,6 +1107,8 @@ Stack trace: (omitted)
 [  FAILED  ] LoggingTest.InterleavingLoggingAndAssertions
 
  4 FAILED TESTS
+  YOU HAVE 80 FILTERED OUT TESTS
+
 Note: Google Test filter = *DISABLED_*
 [==========] Running 1 test from 1 test suite.
 [----------] Global test environment set-up.
@@ -1116,6 +1118,9 @@ Note: Google Test filter = *DISABLED_*
 [----------] Global test environment tear-down
 [==========] 1 test from 1 test suite ran.
 [  PASSED  ] 1 test.
+
+  YOU HAVE 83 FILTERED OUT TESTS
+
 Note: Google Test filter = PassingTest.*
 Note: This is test shard 2 of 2.
 [==========] Running 1 test from 1 test suite.
@@ -1126,3 +1131,6 @@ Note: This is test shard 2 of 2.
 [----------] Global test environment tear-down
 [==========] 1 test from 1 test suite ran.
 [  PASSED  ] 1 test.
+
+  YOU HAVE 83 FILTERED OUT TESTS
+

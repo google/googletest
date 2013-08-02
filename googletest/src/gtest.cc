@@ -812,6 +812,11 @@ int UnitTestImpl::test_to_run_count() const {
   return SumOverTestSuiteList(test_suites_, &TestSuite::test_to_run_count);
 }
 
+// Gets the number of tests that should run.
+int UnitTestImpl::test_was_run_count() const {
+  return SumOverTestSuiteList(test_suites_, &TestCase::test_was_run_count);
+}
+
 // Returns the current OS stack trace as an std::string.
 //
 // The maximum number of stack frames to be included is specified by
@@ -2033,6 +2038,7 @@ std::string AppendUserMessage(const std::string& gtest_msg,
 TestResult::TestResult()
     : death_test_count_(0),
       success_assert_count_(0),
+      executed_(false),
       elapsed_time_(0) {
 }
 
@@ -2176,6 +2182,7 @@ void TestResult::Clear() {
   test_part_results_.clear();
   test_properties_.clear();
   death_test_count_ = 0;
+  executed_ = false;
   elapsed_time_ = 0;
 }
 
@@ -2682,6 +2689,7 @@ void TestInfo::Run() {
         test, &Test::DeleteSelf_, "the test fixture's destructor");
 
   result_.set_elapsed_time(internal::GetTimeInMillis() - start);
+  result_.executed_ = true;
 
   // Notifies the unit test event listener that a test has just finished.
   repeater->OnTestEnd(*this);
@@ -2726,6 +2734,11 @@ int TestSuite::reportable_test_count() const {
 // Get the number of tests in this test suite that should run.
 int TestSuite::test_to_run_count() const {
   return CountIf(test_info_list_, ShouldRunTest);
+}
+
+// Get the number of tests that have actually been run.
+int TestCase::test_was_run_count() const {
+  return CountIf(test_info_list_, WasRunTest);
 }
 
 // Gets the number of all tests.
@@ -3288,8 +3301,8 @@ void PrettyUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
                                                      int /*iteration*/) {
   ColoredPrintf(COLOR_GREEN,  "[==========] ");
   printf("%s from %s ran.",
-         FormatTestCount(unit_test.test_to_run_count()).c_str(),
-         FormatTestSuiteCount(unit_test.test_suite_to_run_count()).c_str());
+         FormatTestCount(unit_test.test_was_run_count()).c_str(),
+         FormatTestSuiteCount(unit_test.test_case_to_run_count()).c_str());
   if (GTEST_FLAG(print_time)) {
     printf(" (%s ms total)",
            internal::StreamableToString(unit_test.elapsed_time()).c_str());
@@ -3316,15 +3329,38 @@ void PrettyUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
   }
 
   int num_disabled = unit_test.reportable_disabled_test_count();
+  int num_filtered = unit_test.total_test_count() - unit_test.test_to_run_count();
+  int num_requested = unit_test.test_to_run_count();
+  int not_run = num_requested - unit_test.test_was_run_count();
+
+  if (!num_failures) {
+    printf("\n");  // Add a spacer if no FAILURE banner is displayed.
+  }
+
+  if (not_run) {
+    ColoredPrintf(COLOR_RED,
+		  "  ** %d of %d %s WAS NOT RUN DUE TO ENVIRONMENT ERRORS! **\n",
+		  not_run, num_requested,
+		  not_run == 1 ? "TEST" : "TESTS");
+  }
+
   if (num_disabled && !GTEST_FLAG(also_run_disabled_tests)) {
-    if (!num_failures) {
-      printf("\n");  // Add a spacer if no FAILURE banner is displayed.
-    }
     ColoredPrintf(COLOR_YELLOW,
-                  "  YOU HAVE %d DISABLED %s\n\n",
+                  "  YOU HAVE %d DISABLED %s\n",
                   num_disabled,
                   num_disabled == 1 ? "TEST" : "TESTS");
   }
+
+  if (!GTEST_FLAG(also_run_disabled_tests)) num_filtered -= num_disabled;
+  if (num_filtered > 0) {
+    ColoredPrintf(COLOR_YELLOW,
+                  "  YOU HAVE %d FILTERED OUT %s\n\n",
+                  num_filtered,
+                  num_filtered == 1 ? "TEST" : "TESTS");
+  } else {
+    printf("\n");
+  }
+
   // Ensure that Google Test output is printed before, e.g., heapchecker output.
   fflush(stdout);
 }
@@ -3838,7 +3874,10 @@ void XmlUnitTestResultPrinter::PrintXmlUnitTest(std::ostream* stream,
   OutputXmlAttribute(
       stream, kTestsuites, "disabled",
       StreamableToString(unit_test.reportable_disabled_test_count()));
-  OutputXmlAttribute(stream, kTestsuites, "errors", "0");
+
+  OutputXmlAttribute(stream, kTestsuites, "errors",
+		     StreamableToString(unit_test.test_to_run_count() -
+					unit_test.test_was_run_count()));
   OutputXmlAttribute(
       stream, kTestsuites, "timestamp",
       FormatEpochTimeInMillisAsIso8601(unit_test.start_timestamp()));
@@ -4622,6 +4661,9 @@ int UnitTest::total_test_count() const { return impl()->total_test_count(); }
 
 // Gets the number of tests that should run.
 int UnitTest::test_to_run_count() const { return impl()->test_to_run_count(); }
+
+// Gets the number of tests that actually was run.
+int UnitTest::test_was_run_count() const { return impl()->test_was_run_count(); }
 
 // Gets the time of the test program start, in ms from the start of the
 // UNIX epoch.
