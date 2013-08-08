@@ -124,6 +124,7 @@ using testing::Ref;
 using testing::ResultOf;
 using testing::SizeIs;
 using testing::StartsWith;
+using testing::StringMatchResultListener;
 using testing::StrCaseEq;
 using testing::StrCaseNe;
 using testing::StrEq;
@@ -145,7 +146,6 @@ using testing::internal::JoinAsTuple;
 using testing::internal::MatchMatrix;
 using testing::internal::RE;
 using testing::internal::StreamMatchResultListener;
-using testing::internal::StringMatchResultListener;
 using testing::internal::Strings;
 using testing::internal::linked_ptr;
 using testing::internal::scoped_ptr;
@@ -221,6 +221,12 @@ TEST(MatchResultListenerTest, StreamingWorks) {
   StringMatchResultListener listener;
   listener << "hi" << 5;
   EXPECT_EQ("hi5", listener.str());
+
+  listener.Clear();
+  EXPECT_EQ("", listener.str());
+
+  listener << 42;
+  EXPECT_EQ("42", listener.str());
 
   // Streaming shouldn't crash when the underlying ostream is NULL.
   DummyMatchResultListener dummy;
@@ -4443,6 +4449,32 @@ TEST(WhenSortedTest, WorksForVectorConstRefMatcherOnStreamlike) {
   EXPECT_THAT(s, Not(WhenSorted(ElementsAre(2, 1, 4, 5, 3))));
 }
 
+// Tests using ElementsAre() and ElementsAreArray() with stream-like
+// "containers".
+
+TEST(ElemensAreStreamTest, WorksForStreamlike) {
+  const int a[5] = { 1, 2, 3, 4, 5 };
+  Streamlike<int> s(a, a + GMOCK_ARRAY_SIZE_(a));
+  EXPECT_THAT(s, ElementsAre(1, 2, 3, 4, 5));
+  EXPECT_THAT(s, Not(ElementsAre(2, 1, 4, 5, 3)));
+}
+
+TEST(ElemensAreArrayStreamTest, WorksForStreamlike) {
+  const int a[5] = { 1, 2, 3, 4, 5 };
+  Streamlike<int> s(a, a + GMOCK_ARRAY_SIZE_(a));
+
+  vector<int> expected;
+  expected.push_back(1);
+  expected.push_back(2);
+  expected.push_back(3);
+  expected.push_back(4);
+  expected.push_back(5);
+  EXPECT_THAT(s, ElementsAreArray(expected));
+
+  expected[3] = 0;
+  EXPECT_THAT(s, Not(ElementsAreArray(expected)));
+}
+
 // Tests for UnorderedElementsAreArray()
 
 TEST(UnorderedElementsAreArrayTest, SucceedsWhenExpected) {
@@ -4483,6 +4515,42 @@ TEST(UnorderedElementsAreArrayTest, WorksForStreamlike) {
   expected.push_back(6);
   EXPECT_THAT(s, Not(UnorderedElementsAreArray(expected)));
 }
+
+#if GTEST_LANG_CXX11
+
+TEST(UnorderedElementsAreArrayTest, TakesInitializerList) {
+  const int a[5] = { 2, 1, 4, 5, 3 };
+  EXPECT_THAT(a, UnorderedElementsAreArray({ 1, 2, 3, 4, 5 }));
+  EXPECT_THAT(a, Not(UnorderedElementsAreArray({ 1, 2, 3, 4, 6 })));
+}
+
+TEST(UnorderedElementsAreArrayTest, TakesInitializerListOfCStrings) {
+  const string a[5] = { "a", "b", "c", "d", "e" };
+  EXPECT_THAT(a, UnorderedElementsAreArray({ "a", "b", "c", "d", "e" }));
+  EXPECT_THAT(a, Not(UnorderedElementsAreArray({ "a", "b", "c", "d", "ef" })));
+}
+
+TEST(UnorderedElementsAreArrayTest, TakesInitializerListOfSameTypedMatchers) {
+  const int a[5] = { 2, 1, 4, 5, 3 };
+  EXPECT_THAT(a, UnorderedElementsAreArray(
+      { Eq(1), Eq(2), Eq(3), Eq(4), Eq(5) }));
+  EXPECT_THAT(a, Not(UnorderedElementsAreArray(
+      { Eq(1), Eq(2), Eq(3), Eq(4), Eq(6) })));
+}
+
+TEST(UnorderedElementsAreArrayTest,
+     TakesInitializerListOfDifferentTypedMatchers) {
+  const int a[5] = { 2, 1, 4, 5, 3 };
+  // The compiler cannot infer the type of the initializer list if its
+  // elements have different types.  We must explicitly specify the
+  // unified element type in this case.
+  EXPECT_THAT(a, UnorderedElementsAreArray<Matcher<int> >(
+      { Eq(1), Ne(-2), Ge(3), Le(4), Eq(5) }));
+  EXPECT_THAT(a, Not(UnorderedElementsAreArray<Matcher<int> >(
+      { Eq(1), Ne(-2), Ge(3), Le(4), Eq(6) })));
+}
+
+#endif  // GTEST_LANG_CXX11
 
 class UnorderedElementsAreTest : public testing::Test {
  protected:

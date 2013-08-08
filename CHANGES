@@ -8,8 +8,12 @@ Changes for 1.7.0:
 * Improvement: Google Mock can now be built as a DLL.
 * Improvement: when compiled by a C++11 compiler, matchers AllOf()
   and AnyOf() can accept an arbitrary number of matchers.
+* Improvement: when compiled by a C++11 compiler, matchers
+  ElementsAreArray() can accept an initializer list.
 * Improvement: when exceptions are enabled, a mock method with no
   default action now throws instead crashing the test.
+* Improvement: added class testing::StringMatchResultListener to aid
+  definition of composite matchers.
 * Improvement: function return types used in MOCK_METHOD*() macros can
   now contain unprotected commas.
 * Improvement (potentially breaking): EXPECT_THAT() and ASSERT_THAT()

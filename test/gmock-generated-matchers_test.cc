@@ -64,6 +64,7 @@ using testing::ElementsAreArray;
 using testing::Eq;
 using testing::Ge;
 using testing::Gt;
+using testing::Le;
 using testing::Lt;
 using testing::MakeMatcher;
 using testing::Matcher;
@@ -631,6 +632,44 @@ TEST(ElementsAreArrayTest, CanBeCreatedWithVector) {
   test_vector.push_back(4);
   EXPECT_THAT(test_vector, Not(ElementsAreArray(expected)));
 }
+
+#if GTEST_LANG_CXX11
+
+TEST(ElementsAreArrayTest, TakesInitializerList) {
+  const int a[5] = { 1, 2, 3, 4, 5 };
+  EXPECT_THAT(a, ElementsAreArray({ 1, 2, 3, 4, 5 }));
+  EXPECT_THAT(a, Not(ElementsAreArray({ 1, 2, 3, 5, 4 })));
+  EXPECT_THAT(a, Not(ElementsAreArray({ 1, 2, 3, 4, 6 })));
+}
+
+TEST(ElementsAreArrayTest, TakesInitializerListOfCStrings) {
+  const string a[5] = { "a", "b", "c", "d", "e" };
+  EXPECT_THAT(a, ElementsAreArray({ "a", "b", "c", "d", "e" }));
+  EXPECT_THAT(a, Not(ElementsAreArray({ "a", "b", "c", "e", "d" })));
+  EXPECT_THAT(a, Not(ElementsAreArray({ "a", "b", "c", "d", "ef" })));
+}
+
+TEST(ElementsAreArrayTest, TakesInitializerListOfSameTypedMatchers) {
+  const int a[5] = { 1, 2, 3, 4, 5 };
+  EXPECT_THAT(a, ElementsAreArray(
+      { Eq(1), Eq(2), Eq(3), Eq(4), Eq(5) }));
+  EXPECT_THAT(a, Not(ElementsAreArray(
+      { Eq(1), Eq(2), Eq(3), Eq(4), Eq(6) })));
+}
+
+TEST(ElementsAreArrayTest,
+     TakesInitializerListOfDifferentTypedMatchers) {
+  const int a[5] = { 1, 2, 3, 4, 5 };
+  // The compiler cannot infer the type of the initializer list if its
+  // elements have different types.  We must explicitly specify the
+  // unified element type in this case.
+  EXPECT_THAT(a, ElementsAreArray<Matcher<int> >(
+      { Eq(1), Ne(-2), Ge(3), Le(4), Eq(5) }));
+  EXPECT_THAT(a, Not(ElementsAreArray<Matcher<int> >(
+      { Eq(1), Ne(-2), Ge(3), Le(4), Eq(6) })));
+}
+
+#endif  // GTEST_LANG_CXX11
 
 TEST(ElementsAreArrayTest, CanBeCreatedWithMatcherVector) {
   const int a[] = { 1, 2, 3 };

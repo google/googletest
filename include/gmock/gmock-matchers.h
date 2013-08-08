@@ -52,6 +52,10 @@
 #include "gmock/internal/gmock-port.h"
 #include "gtest/gtest.h"
 
+#if GTEST_LANG_CXX11
+#include <initializer_list>  // NOLINT -- must be after gtest.h
+#endif
+
 namespace testing {
 
 // To implement a matcher Foo for type T, define:
@@ -76,7 +80,8 @@ namespace testing {
 class MatchResultListener {
  public:
   // Creates a listener object with the given underlying ostream.  The
-  // listener does not own the ostream.
+  // listener does not own the ostream, and does not dereference it
+  // in the constructor or destructor.
   explicit MatchResultListener(::std::ostream* os) : stream_(os) {}
   virtual ~MatchResultListener() = 0;  // Makes this class abstract.
 
@@ -175,6 +180,23 @@ class MatcherInterface : public MatcherDescriberInterface {
   //   virtual void DescribeNegationTo(::std::ostream* os) const;
 };
 
+// A match result listener that stores the explanation in a string.
+class StringMatchResultListener : public MatchResultListener {
+ public:
+  StringMatchResultListener() : MatchResultListener(&ss_) {}
+
+  // Returns the explanation accumulated so far.
+  internal::string str() const { return ss_.str(); }
+
+  // Clears the explanation accumulated so far.
+  void Clear() { ss_.str(""); }
+
+ private:
+  ::std::stringstream ss_;
+
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(StringMatchResultListener);
+};
+
 namespace internal {
 
 // A match result listener that ignores the explanation.
@@ -196,20 +218,6 @@ class StreamMatchResultListener : public MatchResultListener {
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(StreamMatchResultListener);
-};
-
-// A match result listener that stores the explanation in a string.
-class StringMatchResultListener : public MatchResultListener {
- public:
-  StringMatchResultListener() : MatchResultListener(&ss_) {}
-
-  // Returns the explanation heard so far.
-  internal::string str() const { return ss_.str(); }
-
- private:
-  ::std::stringstream ss_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(StringMatchResultListener);
 };
 
 // An internal class for implementing Matcher<T>, which will derive
@@ -2911,49 +2919,81 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
 
   virtual bool MatchAndExplain(Container container,
                                MatchResultListener* listener) const {
+    // To work with stream-like "containers", we must only walk
+    // through the elements in one pass.
+
+    const bool listener_interested = listener->IsInterested();
+
+    // explanations[i] is the explanation of the element at index i.
+    ::std::vector<internal::string> explanations(count());
     StlContainerReference stl_container = View::ConstReference(container);
-    const size_t actual_count = stl_container.size();
+    typename StlContainer::const_iterator it = stl_container.begin();
+    size_t exam_pos = 0;
+    bool mismatch_found = false;  // Have we found a mismatched element yet?
+
+    // Go through the elements and matchers in pairs, until we reach
+    // the end of either the elements or the matchers, or until we find a
+    // mismatch.
+    for (; it != stl_container.end() && exam_pos != count(); ++it, ++exam_pos) {
+      bool match;  // Does the current element match the current matcher?
+      if (listener_interested) {
+        StringMatchResultListener s;
+        match = matchers_[exam_pos].MatchAndExplain(*it, &s);
+        explanations[exam_pos] = s.str();
+      } else {
+        match = matchers_[exam_pos].Matches(*it);
+      }
+
+      if (!match) {
+        mismatch_found = true;
+        break;
+      }
+    }
+    // If mismatch_found is true, 'exam_pos' is the index of the mismatch.
+
+    // Find how many elements the actual container has.  We avoid
+    // calling size() s.t. this code works for stream-like "containers"
+    // that don't define size().
+    size_t actual_count = exam_pos;
+    for (; it != stl_container.end(); ++it) {
+      ++actual_count;
+    }
+
     if (actual_count != count()) {
       // The element count doesn't match.  If the container is empty,
       // there's no need to explain anything as Google Mock already
       // prints the empty container.  Otherwise we just need to show
       // how many elements there actually are.
-      if (actual_count != 0 && listener->IsInterested()) {
+      if (listener_interested && (actual_count != 0)) {
         *listener << "which has " << Elements(actual_count);
       }
       return false;
     }
 
-    typename StlContainer::const_iterator it = stl_container.begin();
-    // explanations[i] is the explanation of the element at index i.
-    ::std::vector<internal::string> explanations(count());
-    for (size_t i = 0; i != count();  ++it, ++i) {
-      StringMatchResultListener s;
-      if (matchers_[i].MatchAndExplain(*it, &s)) {
-        explanations[i] = s.str();
-      } else {
-        // The container has the right size but the i-th element
-        // doesn't match its expectation.
-        *listener << "whose element #" << i << " doesn't match";
-        PrintIfNotEmpty(s.str(), listener->stream());
-        return false;
+    if (mismatch_found) {
+      // The element count matches, but the exam_pos-th element doesn't match.
+      if (listener_interested) {
+        *listener << "whose element #" << exam_pos << " doesn't match";
+        PrintIfNotEmpty(explanations[exam_pos], listener->stream());
       }
+      return false;
     }
 
     // Every element matches its expectation.  We need to explain why
     // (the obvious ones can be skipped).
-    bool reason_printed = false;
-    for (size_t i = 0; i != count(); ++i) {
-      const internal::string& s = explanations[i];
-      if (!s.empty()) {
-        if (reason_printed) {
-          *listener << ",\nand ";
+    if (listener_interested) {
+      bool reason_printed = false;
+      for (size_t i = 0; i != count(); ++i) {
+        const internal::string& s = explanations[i];
+        if (!s.empty()) {
+          if (reason_printed) {
+            *listener << ",\nand ";
+          }
+          *listener << "whose element #" << i << " matches, " << s;
+          reason_printed = true;
         }
-        *listener << "whose element #" << i << " matches, " << s;
-        reason_printed = true;
       }
     }
-
     return true;
   }
 
@@ -3273,21 +3313,14 @@ GTEST_API_ string FormatMatcherDescription(bool negation,
 // ElementsAreArray(pointer, count)
 // ElementsAreArray(array)
 // ElementsAreArray(vector)
+// ElementsAreArray({ e1, e2, ..., en })
 //
-// The ElementsAreArray() functions are like ElementsAre(...), except that
-// they are given a homogeneous sequence rather than taking each element as
-// a function argument. The sequence can be specified as an array, a
-// pointer and count, a vector, or an STL iterator range. In each of these
-// cases, the underlying sequence can be either a sequence of values or a
-// sequence of matchers.
-//
-// * ElementsAreArray(array) deduces the size of the array.
-//
-// * ElementsAreArray(pointer, count) form takes a pointer and count.
-//
-// * ElementsAreArray(vector) takes a std::vector.
-//
-// * ElementsAreArray(first, last) takes any iterator range.
+// The ElementsAreArray() functions are like ElementsAre(...), except
+// that they are given a homogeneous sequence rather than taking each
+// element as a function argument. The sequence can be specified as an
+// array, a pointer and count, a vector, an initializer list, or an
+// STL iterator range. In each of these cases, the underlying sequence
+// can be either a sequence of values or a sequence of matchers.
 //
 // All forms of ElementsAreArray() make a copy of the input matcher sequence.
 
@@ -3317,10 +3350,19 @@ inline internal::ElementsAreArrayMatcher<T> ElementsAreArray(
   return ElementsAreArray(vec.begin(), vec.end());
 }
 
+#if GTEST_LANG_CXX11
+template <typename T>
+inline internal::ElementsAreArrayMatcher<T>
+ElementsAreArray(::std::initializer_list<T> xs) {
+  return ElementsAreArray(xs.begin(), xs.end());
+}
+#endif
+
 // UnorderedElementsAreArray(first, last)
 // UnorderedElementsAreArray(pointer, count)
 // UnorderedElementsAreArray(array)
 // UnorderedElementsAreArray(vector)
+// UnorderedElementsAreArray({ e1, e2, ..., en })
 //
 // The UnorderedElementsAreArray() functions are like
 // ElementsAreArray(...), but allow matching the elements in any order.
@@ -3350,6 +3392,13 @@ UnorderedElementsAreArray(const ::std::vector<T, A>& vec) {
   return UnorderedElementsAreArray(vec.begin(), vec.end());
 }
 
+#if GTEST_LANG_CXX11
+template <typename T>
+inline internal::UnorderedElementsAreArrayMatcher<T>
+UnorderedElementsAreArray(::std::initializer_list<T> xs) {
+  return UnorderedElementsAreArray(xs.begin(), xs.end());
+}
+#endif
 
 // _ is a matcher that matches anything of any type.
 //
