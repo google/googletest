@@ -100,7 +100,9 @@ EXTRA_DIST += $(GMOCK_SOURCE_INGLUDES)
 # C++ tests that we don't compile using autotools.
 EXTRA_DIST += \
   test/gmock-actions_test.cc \
+  test/gmock_all_test.cc \
   test/gmock-cardinalities_test.cc \
+  test/gmock_ex_test.cc \
   test/gmock-generated-actions_test.cc \
   test/gmock-generated-function-mockers_test.cc \
   test/gmock-generated-internal-utils_test.cc \
@@ -110,7 +112,7 @@ EXTRA_DIST += \
   test/gmock-more-actions_test.cc \
   test/gmock-nice-strict_test.cc \
   test/gmock-port_test.cc \
-  test/gmock_all_test.cc
+  test/gmock_stress_test.cc
 
 # Python tests, which we don't run using autotools.
 EXTRA_DIST += \
