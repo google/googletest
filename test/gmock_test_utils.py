@@ -96,11 +96,12 @@ def GetExitStatus(exit_code):
 # Suppresses the "Invalid const name" lint complaint
 # pylint: disable-msg=C6409
 
-# Exposes Subprocess from gtest_test_utils.
+# Exposes utilities from gtest_test_utils.
 Subprocess = gtest_test_utils.Subprocess
-
-# Exposes TestCase from gtest_test_utils.
 TestCase = gtest_test_utils.TestCase
+environ = gtest_test_utils.environ
+SetEnvVar = gtest_test_utils.SetEnvVar
+PREMATURE_EXIT_FILE_ENV_VAR = gtest_test_utils.PREMATURE_EXIT_FILE_ENV_VAR
 
 # pylint: enable-msg=C6409
 

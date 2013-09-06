@@ -196,6 +196,18 @@ class Foo {
         'MOCK_METHOD0(Bar,\nmap<int, string>());',
         self.GenerateMethodSource(source))
 
+  def testSimpleMethodInTemplatedClass(self):
+    source = """
+template<class T>
+class Foo {
+ public:
+  virtual int Bar();
+};
+"""
+    self.assertEqualIgnoreLeadingWhitespace(
+        'MOCK_METHOD0_T(Bar,\nint());',
+        self.GenerateMethodSource(source))
+
 
 class GenerateMocksTest(TestCase):
 
@@ -254,6 +266,44 @@ void());
 """
     self.assertEqualIgnoreLeadingWhitespace(
         expected, self.GenerateMocks(source))
+
+  def testTemplatedForwardDeclaration(self):
+    source = """
+template <class T> class Forward;  // Forward declaration should be ignored.
+class Test {
+ public:
+  virtual void Foo();
+};
+"""
+    expected = """\
+class MockTest : public Test {
+public:
+MOCK_METHOD0(Foo,
+void());
+};
+"""
+    self.assertEqualIgnoreLeadingWhitespace(
+        expected, self.GenerateMocks(source))
+
+  def testTemplatedClass(self):
+    source = """
+template <typename S, typename T>
+class Test {
+ public:
+  virtual void Foo();
+};
+"""
+    expected = """\
+template <typename T0, typename T1>
+class MockTest : public Test<T0, T1> {
+public:
+MOCK_METHOD0_T(Foo,
+void());
+};
+"""
+    self.assertEqualIgnoreLeadingWhitespace(
+        expected, self.GenerateMocks(source))
+
 
 if __name__ == '__main__':
   unittest.main()

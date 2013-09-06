@@ -1546,7 +1546,7 @@ class AstBuilder(object):
             self._AddBackToken(token)
 
         return class_type(class_token.start, class_token.end, class_name,
-                          bases, None, body, self.namespace_stack)
+                          bases, templated_types, body, self.namespace_stack)
 
     def handle_namespace(self):
         token = self._GetNextToken()

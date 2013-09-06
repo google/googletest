@@ -88,7 +88,11 @@ def _GenerateMethods(output_lines, source, class_node):
           if source[first_param.start:first_param.end].strip() == 'void':
             # We must treat T(void) as a function with no parameters.
             num_parameters = 0
-      mock_method_macro = 'MOCK_%sMETHOD%d' % (const, num_parameters)
+      tmpl = ''
+      if class_node.templated_types:
+        tmpl = '_T'
+      mock_method_macro = 'MOCK_%sMETHOD%d%s' % (const, num_parameters, tmpl)
+
       args = ''
       if node.parameters:
         # Due to the parser limitations, it is impossible to keep comments
@@ -126,6 +130,7 @@ def _GenerateMocks(filename, source, ast_list, desired_class_names):
         # desired_class_names being None means that all classes are selected.
         (not desired_class_names or node.name in desired_class_names)):
       class_name = node.name
+      parent_name = class_name
       processed_class_names.add(class_name)
       class_node = node
       # Add namespace before the class.
@@ -133,8 +138,21 @@ def _GenerateMocks(filename, source, ast_list, desired_class_names):
         lines.extend(['namespace %s {' % n for n in class_node.namespace])  # }
         lines.append('')
 
+      # Add template args for templated classes.
+      if class_node.templated_types:
+        # TODO(paulchang): The AST doesn't preserve template argument order,
+        # so we have to make up names here.
+        # TODO(paulchang): Handle non-type template arguments (e.g.
+        # template<typename T, int N>).
+        template_arg_count = len(class_node.templated_types.keys())
+        template_args = ['T%d' % n for n in range(template_arg_count)]
+        template_decls = ['typename ' + arg for arg in template_args]
+        lines.append('template <' + ', '.join(template_decls) + '>')
+        parent_name += '<' + ', '.join(template_args) + '>'
+
       # Add the class prolog.
-      lines.append('class Mock%s : public %s {' % (class_name, class_name))  # }
+      lines.append('class Mock%s : public %s {'  # }
+                   % (class_name, parent_name))
       lines.append('%spublic:' % (' ' * (_INDENT // 2)))
 
       # Add all the methods.

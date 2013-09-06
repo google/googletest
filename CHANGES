@@ -23,6 +23,8 @@ Changes for 1.7.0:
 * Improvement: the ElementsAreArray() matcher can now take a vector or
   iterator range as input, and makes a copy of its input elements
   before the conversion to a Matcher.
+* Improvement: the Google Mock Generator can now generate mocks for
+  some class templates.
 * Bug fix: mock object destruction triggerred by another mock object's
   destruction no longer hangs.
 * Improvement: Google Mock Doctor works better with newer Clang and
