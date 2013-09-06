@@ -2,6 +2,10 @@ Changes for 1.7.0:
 
 * New feature: death tests are supported on OpenBSD and in iOS
   simulator now.
+* New feature: Google Test now implements a protocol to allow
+  a test runner to detect that a test program has exited
+  prematurely and report it as a failure (before it would be
+  falsely reported as a success if the exit code is 0).
 * New feature: Test::RecordProperty() can now be used outside of the
   lifespan of a test method, in which case it will be attributed to
   the current test case or the test program in the XML report.

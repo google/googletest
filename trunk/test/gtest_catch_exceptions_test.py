@@ -57,14 +57,27 @@ EX_EXE_PATH = gtest_test_utils.GetTestExecutablePath(
 EXE_PATH = gtest_test_utils.GetTestExecutablePath(
     'gtest_catch_exceptions_no_ex_test_')
 
-TEST_LIST = gtest_test_utils.Subprocess([EXE_PATH, LIST_TESTS_FLAG]).output
+environ = gtest_test_utils.environ
+SetEnvVar = gtest_test_utils.SetEnvVar
+
+# Tests in this file run a Google-Test-based test program and expect it
+# to terminate prematurely.  Therefore they are incompatible with
+# the premature-exit-file protocol by design.  Unset the
+# premature-exit filepath to prevent Google Test from creating
+# the file.
+SetEnvVar(gtest_test_utils.PREMATURE_EXIT_FILE_ENV_VAR, None)
+
+TEST_LIST = gtest_test_utils.Subprocess(
+    [EXE_PATH, LIST_TESTS_FLAG], env=environ).output
 
 SUPPORTS_SEH_EXCEPTIONS = 'ThrowsSehException' in TEST_LIST
 
 if SUPPORTS_SEH_EXCEPTIONS:
-  BINARY_OUTPUT = gtest_test_utils.Subprocess([EXE_PATH]).output
+  BINARY_OUTPUT = gtest_test_utils.Subprocess([EXE_PATH], env=environ).output
 
-EX_BINARY_OUTPUT = gtest_test_utils.Subprocess([EX_EXE_PATH]).output
+EX_BINARY_OUTPUT = gtest_test_utils.Subprocess(
+    [EX_EXE_PATH], env=environ).output
+
 
 # The tests.
 if SUPPORTS_SEH_EXCEPTIONS:
@@ -212,7 +225,8 @@ class CatchCxxExceptionsTest(gtest_test_utils.TestCase):
     uncaught_exceptions_ex_binary_output = gtest_test_utils.Subprocess(
         [EX_EXE_PATH,
          NO_CATCH_EXCEPTIONS_FLAG,
-         FITLER_OUT_SEH_TESTS_FLAG]).output
+         FITLER_OUT_SEH_TESTS_FLAG],
+        env=environ).output
 
     self.assert_('Unhandled C++ exception terminating the program'
                  in uncaught_exceptions_ex_binary_output)
