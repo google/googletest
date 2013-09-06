@@ -66,21 +66,15 @@ EXE_PATH = gtest_test_utils.GetTestExecutablePath(
     'gtest_break_on_failure_unittest_')
 
 
-# Utilities.
+environ = gtest_test_utils.environ
+SetEnvVar = gtest_test_utils.SetEnvVar
 
-
-environ = os.environ.copy()
-
-
-def SetEnvVar(env_var, value):
-  """Sets an environment variable to a given value; unsets it when the
-  given value is None.
-  """
-
-  if value is not None:
-    environ[env_var] = value
-  elif env_var in environ:
-    del environ[env_var]
+# Tests in this file run a Google-Test-based test program and expect it
+# to terminate prematurely.  Therefore they are incompatible with
+# the premature-exit-file protocol by design.  Unset the
+# premature-exit filepath to prevent Google Test from creating
+# the file.
+SetEnvVar(gtest_test_utils.PREMATURE_EXIT_FILE_ENV_VAR, None)
 
 
 def Run(command):

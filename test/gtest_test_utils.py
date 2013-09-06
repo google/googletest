@@ -56,6 +56,21 @@ GTEST_OUTPUT_VAR_NAME = 'GTEST_OUTPUT'
 IS_WINDOWS = os.name == 'nt'
 IS_CYGWIN = os.name == 'posix' and 'CYGWIN' in os.uname()[0]
 
+# The environment variable for specifying the path to the premature-exit file.
+PREMATURE_EXIT_FILE_ENV_VAR = 'TEST_PREMATURE_EXIT_FILE'
+
+environ = os.environ.copy()
+
+
+def SetEnvVar(env_var, value):
+  """Sets/unsets an environment variable to a given value."""
+
+  if value is not None:
+    environ[env_var] = value
+  elif env_var in environ:
+    del environ[env_var]
+
+
 # Here we expose a class from a particular module, depending on the
 # environment. The comment suppresses the 'Invalid variable name' lint
 # complaint.

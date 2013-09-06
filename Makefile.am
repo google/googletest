@@ -58,6 +58,7 @@ EXTRA_DIST += \
   test/gtest-param-test_test.cc \
   test/gtest-param-test_test.h \
   test/gtest-port_test.cc \
+  test/gtest_premature_exit_test.cc \
   test/gtest-printers_test.cc \
   test/gtest-test-part_test.cc \
   test/gtest-tuple_test.cc \

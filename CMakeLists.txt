@@ -124,6 +124,8 @@ if (gtest_build_tests)
     test/gtest-param-test2_test.cc)
   cxx_test(gtest-port_test gtest_main)
   cxx_test(gtest_pred_impl_unittest gtest_main)
+  cxx_test(gtest_premature_exit_test gtest
+    test/gtest_premature_exit_test.cc)
   cxx_test(gtest-printers_test gtest_main)
   cxx_test(gtest_prod_test gtest_main
     test/production.cc)
