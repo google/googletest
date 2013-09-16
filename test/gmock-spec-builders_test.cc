@@ -886,7 +886,7 @@ TEST(ExpectCallTest, TakesDefaultActionWhenWillListIsExhausted) {
                         " - returning default value."));
 }
 
-TEST(FunctionMockerTest, ReportsExpectCallLocationForExhausedActions) {
+TEST(FunctionMockerMessageTest, ReportsExpectCallLocationForExhausedActions) {
   MockB b;
   std::string expect_call_location = FormatFileLocation(__FILE__, __LINE__ + 1);
   EXPECT_CALL(b, DoB()).Times(AnyNumber()).WillOnce(Return(1));
@@ -900,7 +900,7 @@ TEST(FunctionMockerTest, ReportsExpectCallLocationForExhausedActions) {
   EXPECT_PRED_FORMAT2(IsSubstring, expect_call_location, output);
 }
 
-TEST(FunctionMockerTest,
+TEST(FunctionMockerMessageTest,
      ReportsDefaultActionLocationOfUninterestingCallsForNaggyMock) {
   std::string on_call_location;
   CaptureStdout();
