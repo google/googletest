@@ -45,7 +45,6 @@ using testing::internal::AlwaysTrue;
 # else
 #  include <unistd.h>
 #  include <sys/wait.h>        // For waitpid.
-#  include <limits>            // For std::numeric_limits.
 # endif  // GTEST_OS_WINDOWS
 
 # include <limits.h>
@@ -1123,16 +1122,15 @@ TEST(AutoHandleTest, AutoHandleWorks) {
 # if GTEST_OS_WINDOWS
 typedef unsigned __int64 BiggestParsable;
 typedef signed __int64 BiggestSignedParsable;
-const BiggestParsable kBiggestParsableMax = ULLONG_MAX;
-const BiggestSignedParsable kBiggestSignedParsableMax = LLONG_MAX;
 # else
 typedef unsigned long long BiggestParsable;
 typedef signed long long BiggestSignedParsable;
-const BiggestParsable kBiggestParsableMax =
-    ::std::numeric_limits<BiggestParsable>::max();
-const BiggestSignedParsable kBiggestSignedParsableMax =
-    ::std::numeric_limits<BiggestSignedParsable>::max();
 # endif  // GTEST_OS_WINDOWS
+
+// We cannot use std::numeric_limits<T>::max() as it clashes with the
+// max() macro defined by <windows.h>.
+const BiggestParsable kBiggestParsableMax = ULLONG_MAX;
+const BiggestSignedParsable kBiggestSignedParsableMax = LLONG_MAX;
 
 TEST(ParseNaturalNumberTest, RejectsInvalidFormat) {
   BiggestParsable result = 0;
