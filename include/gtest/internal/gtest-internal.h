@@ -51,6 +51,7 @@
 #endif
 
 #include <ctype.h>
+#include <float.h>
 #include <string.h>
 #include <iomanip>
 #include <limits>
@@ -294,6 +295,9 @@ class FloatingPoint {
     return ReinterpretBits(kExponentBitMask);
   }
 
+  // Returns the maximum representable finite floating-point number.
+  static RawType Max();
+
   // Non-static methods
 
   // Returns the bits that represents this number.
@@ -373,6 +377,13 @@ class FloatingPoint {
 
   FloatingPointUnion u_;
 };
+
+// We cannot use std::numeric_limits<T>::max() as it clashes with the max()
+// macro defined by <windows.h>.
+template <>
+inline float FloatingPoint<float>::Max() { return FLT_MAX; }
+template <>
+inline double FloatingPoint<double>::Max() { return DBL_MAX; }
 
 // Typedefs the instances of the FloatingPoint template class that we
 // care to use.
