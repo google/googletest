@@ -2645,43 +2645,30 @@ TEST(MatcherAssertionTest, WorksForMonomorphicMatcher) {
 template <typename RawType>
 class FloatingPointTest : public testing::Test {
  protected:
-  typedef typename testing::internal::FloatingPoint<RawType> Floating;
+  typedef testing::internal::FloatingPoint<RawType> Floating;
   typedef typename Floating::Bits Bits;
 
-  virtual void SetUp() {
-    const size_t max_ulps = Floating::kMaxUlps;
-
-    // The bits that represent 0.0.
-    const Bits zero_bits = Floating(0).bits();
-
-    // Makes some numbers close to 0.0.
-    close_to_positive_zero_ = Floating::ReinterpretBits(zero_bits + max_ulps/2);
-    close_to_negative_zero_ = -Floating::ReinterpretBits(
-        zero_bits + max_ulps - max_ulps/2);
-    further_from_negative_zero_ = -Floating::ReinterpretBits(
-        zero_bits + max_ulps + 1 - max_ulps/2);
-
-    // The bits that represent 1.0.
-    const Bits one_bits = Floating(1).bits();
-
-    // Makes some numbers close to 1.0.
-    close_to_one_ = Floating::ReinterpretBits(one_bits + max_ulps);
-    further_from_one_ = Floating::ReinterpretBits(one_bits + max_ulps + 1);
-
-    // +infinity.
-    infinity_ = Floating::Infinity();
-
-    // The bits that represent +infinity.
-    const Bits infinity_bits = Floating(infinity_).bits();
-
-    // Makes some numbers close to infinity.
-    close_to_infinity_ = Floating::ReinterpretBits(infinity_bits - max_ulps);
-    further_from_infinity_ = Floating::ReinterpretBits(
-        infinity_bits - max_ulps - 1);
-
-    // Makes some NAN's.
-    nan1_ = Floating::ReinterpretBits(Floating::kExponentBitMask | 1);
-    nan2_ = Floating::ReinterpretBits(Floating::kExponentBitMask | 200);
+  FloatingPointTest()
+      : max_ulps_(Floating::kMaxUlps),
+        zero_bits_(Floating(0).bits()),
+        one_bits_(Floating(1).bits()),
+        infinity_bits_(Floating(Floating::Infinity()).bits()),
+        close_to_positive_zero_(
+            Floating::ReinterpretBits(zero_bits_ + max_ulps_/2)),
+        close_to_negative_zero_(
+            -Floating::ReinterpretBits(zero_bits_ + max_ulps_ - max_ulps_/2)),
+        further_from_negative_zero_(-Floating::ReinterpretBits(
+            zero_bits_ + max_ulps_ + 1 - max_ulps_/2)),
+        close_to_one_(Floating::ReinterpretBits(one_bits_ + max_ulps_)),
+        further_from_one_(Floating::ReinterpretBits(one_bits_ + max_ulps_ + 1)),
+        infinity_(Floating::Infinity()),
+        close_to_infinity_(
+            Floating::ReinterpretBits(infinity_bits_ - max_ulps_)),
+        further_from_infinity_(
+            Floating::ReinterpretBits(infinity_bits_ - max_ulps_ - 1)),
+        max_(Floating::Max()),
+        nan1_(Floating::ReinterpretBits(Floating::kExponentBitMask | 1)),
+        nan2_(Floating::ReinterpretBits(Floating::kExponentBitMask | 200)) {
   }
 
   void TestSize() {
@@ -2736,50 +2723,33 @@ class FloatingPointTest : public testing::Test {
 
   // Pre-calculated numbers to be used by the tests.
 
-  static RawType close_to_positive_zero_;
-  static RawType close_to_negative_zero_;
-  static RawType further_from_negative_zero_;
+  const size_t max_ulps_;
 
-  static RawType close_to_one_;
-  static RawType further_from_one_;
+  const Bits zero_bits_;  // The bits that represent 0.0.
+  const Bits one_bits_;  // The bits that represent 1.0.
+  const Bits infinity_bits_;  // The bits that represent +infinity.
 
-  static RawType infinity_;
-  static RawType close_to_infinity_;
-  static RawType further_from_infinity_;
+  // Some numbers close to 0.0.
+  const RawType close_to_positive_zero_;
+  const RawType close_to_negative_zero_;
+  const RawType further_from_negative_zero_;
 
-  static RawType nan1_;
-  static RawType nan2_;
+  // Some numbers close to 1.0.
+  const RawType close_to_one_;
+  const RawType further_from_one_;
+
+  // Some numbers close to +infinity.
+  const RawType infinity_;
+  const RawType close_to_infinity_;
+  const RawType further_from_infinity_;
+
+  // Maximum representable value that's not infinity.
+  const RawType max_;
+
+  // Some NaNs.
+  const RawType nan1_;
+  const RawType nan2_;
 };
-
-template <typename RawType>
-RawType FloatingPointTest<RawType>::close_to_positive_zero_;
-
-template <typename RawType>
-RawType FloatingPointTest<RawType>::close_to_negative_zero_;
-
-template <typename RawType>
-RawType FloatingPointTest<RawType>::further_from_negative_zero_;
-
-template <typename RawType>
-RawType FloatingPointTest<RawType>::close_to_one_;
-
-template <typename RawType>
-RawType FloatingPointTest<RawType>::further_from_one_;
-
-template <typename RawType>
-RawType FloatingPointTest<RawType>::infinity_;
-
-template <typename RawType>
-RawType FloatingPointTest<RawType>::close_to_infinity_;
-
-template <typename RawType>
-RawType FloatingPointTest<RawType>::further_from_infinity_;
-
-template <typename RawType>
-RawType FloatingPointTest<RawType>::nan1_;
-
-template <typename RawType>
-RawType FloatingPointTest<RawType>::nan2_;
 
 // Tests floating-point matchers with fixed epsilons.
 template <typename RawType>
@@ -2820,32 +2790,27 @@ class FloatingPointNearTest : public FloatingPointTest<RawType> {
     EXPECT_FALSE(m4.Matches(ParentType::infinity_));
 
     // Test various overflow scenarios.
-    Matcher<RawType> m5 = matcher_maker(
-        std::numeric_limits<RawType>::max(),
-        std::numeric_limits<RawType>::max());
-    EXPECT_TRUE(m5.Matches(std::numeric_limits<RawType>::max()));
-    EXPECT_FALSE(m5.Matches(-std::numeric_limits<RawType>::max()));
+    Matcher<RawType> m5 = matcher_maker(ParentType::max_, ParentType::max_);
+    EXPECT_TRUE(m5.Matches(ParentType::max_));
+    EXPECT_FALSE(m5.Matches(-ParentType::max_));
 
-    Matcher<RawType> m6 = matcher_maker(
-        -std::numeric_limits<RawType>::max(),
-        std::numeric_limits<RawType>::max());
-    EXPECT_FALSE(m6.Matches(std::numeric_limits<RawType>::max()));
-    EXPECT_TRUE(m6.Matches(-std::numeric_limits<RawType>::max()));
+    Matcher<RawType> m6 = matcher_maker(-ParentType::max_, ParentType::max_);
+    EXPECT_FALSE(m6.Matches(ParentType::max_));
+    EXPECT_TRUE(m6.Matches(-ParentType::max_));
 
-    Matcher<RawType> m7 = matcher_maker(std::numeric_limits<RawType>::max(), 0);
-    EXPECT_TRUE(m7.Matches(std::numeric_limits<RawType>::max()));
-    EXPECT_FALSE(m7.Matches(-std::numeric_limits<RawType>::max()));
+    Matcher<RawType> m7 = matcher_maker(ParentType::max_, 0);
+    EXPECT_TRUE(m7.Matches(ParentType::max_));
+    EXPECT_FALSE(m7.Matches(-ParentType::max_));
 
-    Matcher<RawType> m8 = matcher_maker(
-        -std::numeric_limits<RawType>::max(), 0);
-    EXPECT_FALSE(m8.Matches(std::numeric_limits<RawType>::max()));
-    EXPECT_TRUE(m8.Matches(-std::numeric_limits<RawType>::max()));
+    Matcher<RawType> m8 = matcher_maker(-ParentType::max_, 0);
+    EXPECT_FALSE(m8.Matches(ParentType::max_));
+    EXPECT_TRUE(m8.Matches(-ParentType::max_));
 
     // The difference between max() and -max() normally overflows to infinity,
     // but it should still match if the max_abs_error is also infinity.
     Matcher<RawType> m9 = matcher_maker(
-        std::numeric_limits<RawType>::max(), ParentType::infinity_);
-    EXPECT_TRUE(m8.Matches(-std::numeric_limits<RawType>::max()));
+        ParentType::max_, ParentType::infinity_);
+    EXPECT_TRUE(m8.Matches(-ParentType::max_));
 
     // matcher_maker can produce a Matcher<const RawType&>, which is needed in
     // some cases.
