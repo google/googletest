@@ -1,0 +1,16 @@
+#summary Google C++ Testing Framework Samples
+
+If you're like us, you'd like to look at some Google Test sample code.  The
+[http://code.google.com/p/googletest/source/browse/#svn/trunk/samples samples folder] has a number of well-commented samples showing how to use a
+variety of Google Test features.
+
+  * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample1_unittest.cc Sample #1] shows the basic steps of using Google Test to test C++ functions.
+  * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample2_unittest.cc Sample #2] shows a more complex unit test for a class with multiple member functions.
+  * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample3_unittest.cc Sample #3] uses a test fixture.
+  * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample4_unittest.cc Sample #4] is another basic example of using Google Test.
+  * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample5_unittest.cc Sample #5] teaches how to reuse a test fixture in multiple test cases by deriving sub-fixtures from it.
+  * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample6_unittest.cc Sample #6] demonstrates type-parameterized tests.
+  * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample7_unittest.cc Sample #7] teaches the basics of value-parameterized tests.
+  * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample8_unittest.cc Sample #8] shows using `Combine()` in value-parameterized tests.
+  * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample9_unittest.cc Sample #9] shows use of the listener API to modify Google Test's console output and the use of its reflection API to inspect test results.
+  * [http://code.google.com/p/googletest/source/browse/trunk/samples/sample10_unittest.cc Sample #10] shows use of the listener API to implement a primitive memory leak checker.
