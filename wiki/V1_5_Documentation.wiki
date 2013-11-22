@@ -1,5 +1,4 @@
 #summary Documentation on Google Test 1.5.0
-#labels Featured
 
 This page lists all official documentation wiki pages for Google Test *1.5.0* -- *if you use a different version of Google Test, make sure to read the documentation for that version instead.*
 
