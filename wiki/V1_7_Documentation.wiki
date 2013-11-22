@@ -1,4 +1,4 @@
-#summary Documentation on Google Test (the SVN trunk version)
+#summary Documentation on Google Test version 1.7
 #labels Featured
 
 This page lists all documentation wiki pages for Google Test *(the SVN trunk version)*
