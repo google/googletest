@@ -784,7 +784,7 @@ class ImplicitlyConvertible {
   // MakeFrom() is an expression whose type is From.  We cannot simply
   // use From(), as the type From may not have a public default
   // constructor.
-  static From MakeFrom();
+  static typename AddReference<From>::type MakeFrom();
 
   // These two functions are overloaded.  Given an expression
   // Helper(x), the compiler will pick the first version if x can be
