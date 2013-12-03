@@ -31,8 +31,11 @@
 //
 // Tests for Google C++ Mocking Framework (Google Mock)
 //
-// Sometimes it's desirable to build most of Google Mock's own tests
-// by compiling a single file.  This file serves this purpose.
+// Some users use a build system that Google Mock doesn't support directly,
+// yet they still want to build and run Google Mock's own tests.  This file
+// includes most such tests, making it easier for these users to maintain
+// their build scripts (they just need to build this file, even though the
+// below list of actual *_test.cc files might change).
 #include "test/gmock-actions_test.cc"
 #include "test/gmock-cardinalities_test.cc"
 #include "test/gmock-generated-actions_test.cc"
