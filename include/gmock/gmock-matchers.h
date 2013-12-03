@@ -489,7 +489,7 @@ namespace internal {
 template <typename T, typename M>
 class MatcherCastImpl {
  public:
-  static Matcher<T> Cast(M polymorphic_matcher_or_value) {
+  static Matcher<T> Cast(const M& polymorphic_matcher_or_value) {
     // M can be a polymorhic matcher, in which case we want to use
     // its conversion operator to create Matcher<T>.  Or it can be a value
     // that should be passed to the Matcher<T>'s constructor.
@@ -510,14 +510,14 @@ class MatcherCastImpl {
   }
 
  private:
-  static Matcher<T> CastImpl(M value, BooleanConstant<false>) {
+  static Matcher<T> CastImpl(const M& value, BooleanConstant<false>) {
     // M can't be implicitly converted to Matcher<T>, so M isn't a polymorphic
     // matcher.  It must be a value then.  Use direct initialization to create
     // a matcher.
     return Matcher<T>(ImplicitCast_<T>(value));
   }
 
-  static Matcher<T> CastImpl(M polymorphic_matcher_or_value,
+  static Matcher<T> CastImpl(const M& polymorphic_matcher_or_value,
                              BooleanConstant<true>) {
     // M is implicitly convertible to Matcher<T>, which means that either
     // M is a polymorhpic matcher or Matcher<T> has an implicit constructor
@@ -582,7 +582,7 @@ class MatcherCastImpl<T, Matcher<T> > {
 // matcher m and returns a Matcher<T>.  It compiles only when T can be
 // statically converted to the argument type of m.
 template <typename T, typename M>
-inline Matcher<T> MatcherCast(M matcher) {
+inline Matcher<T> MatcherCast(const M& matcher) {
   return internal::MatcherCastImpl<T, M>::Cast(matcher);
 }
 
@@ -599,7 +599,7 @@ class SafeMatcherCastImpl {
   // This overload handles polymorphic matchers and values only since
   // monomorphic matchers are handled by the next one.
   template <typename M>
-  static inline Matcher<T> Cast(M polymorphic_matcher_or_value) {
+  static inline Matcher<T> Cast(const M& polymorphic_matcher_or_value) {
     return internal::MatcherCastImpl<T, M>::Cast(polymorphic_matcher_or_value);
   }
 

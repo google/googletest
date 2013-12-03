@@ -636,6 +636,22 @@ TEST(MatcherCastTest, FromConvertibleFromAny) {
   EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
 }
 
+struct IntReferenceWrapper {
+  IntReferenceWrapper(const int& a_value) : value(&a_value) {}
+  const int* value;
+};
+
+bool operator==(const IntReferenceWrapper& a, const IntReferenceWrapper& b) {
+  return a.value == b.value;
+}
+
+TEST(MatcherCastTest, ValueIsNotCopied) {
+  int n = 42;
+  Matcher<IntReferenceWrapper> m = MatcherCast<IntReferenceWrapper>(n);
+  // Verify that the matcher holds a reference to n, not to its temporary copy.
+  EXPECT_TRUE(m.Matches(n));
+}
+
 class Base {};
 class Derived : public Base {};
 
@@ -722,6 +738,13 @@ TEST(SafeMatcherCastTest, FromConvertibleFromAny) {
       SafeMatcherCast<ConvertibleFromAny>(Eq(ConvertibleFromAny(1)));
   EXPECT_TRUE(m.Matches(ConvertibleFromAny(1)));
   EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
+}
+
+TEST(SafeMatcherCastTest, ValueIsNotCopied) {
+  int n = 42;
+  Matcher<IntReferenceWrapper> m = SafeMatcherCast<IntReferenceWrapper>(n);
+  // Verify that the matcher holds a reference to n, not to its temporary copy.
+  EXPECT_TRUE(m.Matches(n));
 }
 
 // Tests that A<T>() matches any value of type T.
