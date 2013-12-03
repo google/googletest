@@ -782,6 +782,19 @@ using ::std::tuple_size;
 # define GTEST_HAS_CXXABI_H_ 0
 #endif
 
+// A function level attribute to disable checking for use of uninitialized
+// memory when built with MemorySanitizer.
+#if defined(__clang__)
+# if __has_feature(memory_sanitizer)
+#  define GTEST_ATTRIBUTE_NO_SANITIZE_MEMORY_ \
+       __attribute__((no_sanitize_memory))
+# else
+#  define GTEST_ATTRIBUTE_NO_SANITIZE_MEMORY_
+# endif
+#else
+# define GTEST_ATTRIBUTE_NO_SANITIZE_MEMORY_
+#endif
+
 namespace testing {
 
 class Message;
