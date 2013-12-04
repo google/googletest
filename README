@@ -42,7 +42,7 @@ Requirements for End Users
 
 Google Mock is implemented on top of the Google Test C++ testing
 framework (http://code.google.com/p/googletest/), and includes the
-latter as part of the SVN repositary and distribution package.  You
+latter as part of the SVN repository and distribution package.  You
 must use the bundled version of Google Test when using Google Mock, or
 you may get compiler/linker errors.
 
@@ -92,7 +92,7 @@ Getting the Source
 
 There are two primary ways of getting Google Mock's source code: you
 can download a stable source release in your preferred archive format,
-or directly check out the source from our Subversion (SVN) repositary.
+or directly check out the source from our Subversion (SVN) repository.
 The SVN checkout requires a few extra steps and some extra software
 packages on your system, but lets you track development and make
 patches much more easily, so we highly encourage it.

@@ -52,8 +52,8 @@
 #include "gmock/internal/gmock-port.h"
 #include "gtest/gtest.h"
 
-#if GTEST_LANG_CXX11
-#include <initializer_list>  // NOLINT -- must be after gtest.h
+#if GTEST_HAS_STD_INITIALIZER_LIST_
+# include <initializer_list>  // NOLINT -- must be after gtest.h
 #endif
 
 namespace testing {
@@ -3350,7 +3350,7 @@ inline internal::ElementsAreArrayMatcher<T> ElementsAreArray(
   return ElementsAreArray(vec.begin(), vec.end());
 }
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_INITIALIZER_LIST_
 template <typename T>
 inline internal::ElementsAreArrayMatcher<T>
 ElementsAreArray(::std::initializer_list<T> xs) {
@@ -3392,7 +3392,7 @@ UnorderedElementsAreArray(const ::std::vector<T, A>& vec) {
   return UnorderedElementsAreArray(vec.begin(), vec.end());
 }
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_INITIALIZER_LIST_
 template <typename T>
 inline internal::UnorderedElementsAreArrayMatcher<T>
 UnorderedElementsAreArray(::std::initializer_list<T> xs) {
