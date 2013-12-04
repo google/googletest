@@ -282,6 +282,14 @@
 # endif
 #endif
 
+// C++11 specifies that <initializer_list> provides std::initializer_list. Use
+// that if gtest is used in C++11 mode and libstdc++ isn't very old (binaries
+// targeting OS X 10.6 can build with clang but need to use gcc4.2's
+// libstdc++).
+#if GTEST_LANG_CXX11 && (!defined(__GLIBCXX__) || __GLIBCXX__ > 20110325)
+# define GTEST_HAS_STD_INITIALIZER_LIST_ 1
+#endif
+
 // Brings in definitions for functions used in the testing::internal::posix
 // namespace (read, write, close, chdir, isatty, stat). We do not currently
 // use them on Windows Mobile.
