@@ -343,6 +343,30 @@
 # define GTEST_HAS_STD_INITIALIZER_LIST_ 1
 #endif
 
+// C++11 specifies that <tuple> provides std::tuple.
+// Some platforms still might not have it, however.
+#if GTEST_LANG_CXX11
+# define GTEST_HAS_STD_TUPLE_ 1
+# if defined(__clang__)
+// Inspired by http://clang.llvm.org/docs/LanguageExtensions.html#__has_include
+#  if defined(__has_include) && !__has_include(<tuple>)
+#   undef GTEST_HAS_STD_TUPLE_
+#  endif
+# elif defined(_MSC_VER)
+// Inspired by boost/config/stdlib/dinkumware.hpp
+#  if defined(_CPPLIB_VER) && _CPPLIB_VER < 520
+#   undef GTEST_HAS_STD_TUPLE_
+#  endif
+# elif defined(__GLIBCXX__)
+// Inspired by boost/config/stdlib/libstdcpp3.hpp,
+// http://gcc.gnu.org/gcc-4.2/changes.html and
+// http://gcc.gnu.org/onlinedocs/libstdc++/manual/bk01pt01ch01.html#manual.intro.status.standard.200x
+#  if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)
+#   undef GTEST_HAS_STD_TUPLE_
+#  endif
+# endif
+#endif
+
 // Brings in definitions for functions used in the testing::internal::posix
 // namespace (read, write, close, chdir, isatty, stat). We do not currently
 // use them on Windows Mobile.
