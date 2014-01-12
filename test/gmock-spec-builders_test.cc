@@ -2088,6 +2088,12 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
   // Tests how the flag affects uninteresting calls on a naggy mock.
   void TestUninterestingCallOnNaggyMock(bool should_print) {
     NaggyMock<MockA> a;
+    const string note =
+        "NOTE: You can safely ignore the above warning unless this "
+        "call should not happen.  Do not suppress it by blindly adding "
+        "an EXPECT_CALL() if you don't mean to enforce the call.  "
+        "See http://code.google.com/p/googlemock/wiki/CookBook#"
+        "Knowing_When_to_Expect for details.";
 
     // A void-returning function.
     CaptureStdout();
@@ -2097,8 +2103,9 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
         should_print,
         "\nGMOCK WARNING:\n"
         "Uninteresting mock function call - returning directly.\n"
-        "    Function call: DoA(5)\n"
-        "Stack trace:\n",
+        "    Function call: DoA(5)\n" +
+        note +
+        "\nStack trace:\n",
         "DoA");
 
     // A non-void-returning function.
@@ -2110,8 +2117,9 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
         "\nGMOCK WARNING:\n"
         "Uninteresting mock function call - returning default value.\n"
         "    Function call: Binary(2, 1)\n"
-        "          Returns: false\n"
-        "Stack trace:\n",
+        "          Returns: false\n" +
+        note +
+        "\nStack trace:\n",
         "Binary");
   }
 };

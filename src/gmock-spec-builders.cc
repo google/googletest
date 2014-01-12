@@ -250,7 +250,14 @@ void ReportUninterestingCall(CallReaction reaction, const string& msg) {
       Log(kInfo, msg, 3);
       break;
     case kWarn:
-      Log(kWarning, msg, 3);
+      Log(kWarning,
+          msg +
+          "\nNOTE: You can safely ignore the above warning unless this "
+          "call should not happen.  Do not suppress it by blindly adding "
+          "an EXPECT_CALL() if you don't mean to enforce the call.  "
+          "See http://code.google.com/p/googlemock/wiki/CookBook#"
+          "Knowing_When_to_Expect for details.",
+          3);
       break;
     default:  // FAIL
       Expect(false, NULL, -1, msg);
