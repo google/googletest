@@ -157,7 +157,7 @@ it.
 ### Using CMake ###
 
 Google Test comes with a CMake build script (CMakeLists.txt) that can
-be used on a wide range of platforms ("C" stands for cross-platofrm.).
+be used on a wide range of platforms ("C" stands for cross-platform.).
 If you don't have CMake installed already, you can download it for
 free from http://www.cmake.org/.
 
@@ -177,7 +177,7 @@ last command with
 If you are on a *nix system, you should now see a Makefile in the
 current directory.  Just type 'make' to build gtest.
 
-If you use Windows and have Vistual Studio installed, a gtest.sln file
+If you use Windows and have Visual Studio installed, a gtest.sln file
 and several .vcproj files will be created.  You can then build them
 using Visual Studio.
 
