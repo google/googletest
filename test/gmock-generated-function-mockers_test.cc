@@ -112,6 +112,14 @@ class FooInterface {
 #endif  // GTEST_OS_WINDOWS
 };
 
+// Const qualifiers on arguments were once (incorrectly) considered
+// significant in determining whether two virtual functions had the same
+// signature. This was fixed in Visual Studio 2008. However, the compiler
+// still emits a warning that alerts about this change in behavior.
+#ifdef _MSC_VER
+# pragma warning(push)
+# pragma warning(disable : 4373)
+#endif
 class MockFoo : public FooInterface {
  public:
   MockFoo() {}
@@ -167,6 +175,9 @@ class MockFoo : public FooInterface {
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFoo);
 };
+#ifdef _MSC_VER
+# pragma warning(pop)
+#endif
 
 class FunctionMockerTest : public testing::Test {
  protected:

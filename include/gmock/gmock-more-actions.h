@@ -87,6 +87,20 @@ class InvokeMethodAction {
   GTEST_DISALLOW_ASSIGN_(InvokeMethodAction);
 };
 
+// An internal replacement for std::copy which mimics its behavior. This is
+// necessary because Visual Studio deprecates ::std::copy, issuing warning 4996.
+// However Visual Studio 2010 and later do not honor #pragmas which disable that
+// warning.
+template<typename InputIterator, typename OutputIterator>
+inline OutputIterator CopyElements(InputIterator first,
+                                   InputIterator last,
+                                   OutputIterator output) {
+  for (; first != last; ++first, ++output) {
+    *output = *first;
+  }
+  return output;
+}
+
 }  // namespace internal
 
 // Various overloads for Invoke().
@@ -185,15 +199,11 @@ ACTION_TEMPLATE(SetArgReferee,
 ACTION_TEMPLATE(SetArrayArgument,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_2_VALUE_PARAMS(first, last)) {
-  // Microsoft compiler deprecates ::std::copy, so we want to suppress warning
-  // 4996 (Function call with parameters that may be unsafe) there.
+  // Visual Studio deprecates ::std::copy, so we use our own copy in that case.
 #ifdef _MSC_VER
-# pragma warning(push)          // Saves the current warning state.
-# pragma warning(disable:4996)  // Temporarily disables warning 4996.
-#endif
+  internal::CopyElements(first, last, ::std::tr1::get<k>(args));
+#else
   ::std::copy(first, last, ::std::tr1::get<k>(args));
-#ifdef _MSC_VER
-# pragma warning(pop)           // Restores the warning state.
 #endif
 }
 

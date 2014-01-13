@@ -668,17 +668,17 @@ TEST(SetArrayArgumentTest, SetsTheNthArrayWithEmptyRange) {
 // Tests SetArrayArgument<N>(first, last) where *first is convertible
 // (but not equal) to the argument type.
 TEST(SetArrayArgumentTest, SetsTheNthArrayWithConvertibleType) {
-  typedef void MyFunction(bool, char*);
-  int codes[] = { 97, 98, 99 };
-  Action<MyFunction> a = SetArrayArgument<1>(codes, codes + 3);
+  typedef void MyFunction(bool, int*);
+  char chars[] = { 97, 98, 99 };
+  Action<MyFunction> a = SetArrayArgument<1>(chars, chars + 3);
 
-  char ch[4] = {};
-  char* pch = ch;
-  a.Perform(make_tuple(true, pch));
-  EXPECT_EQ('a', ch[0]);
-  EXPECT_EQ('b', ch[1]);
-  EXPECT_EQ('c', ch[2]);
-  EXPECT_EQ('\0', ch[3]);
+  int codes[4] = { 111, 222, 333, 444 };
+  int* pcodes = codes;
+  a.Perform(make_tuple(true, pcodes));
+  EXPECT_EQ(97, codes[0]);
+  EXPECT_EQ(98, codes[1]);
+  EXPECT_EQ(99, codes[2]);
+  EXPECT_EQ(444, codes[3]);
 }
 
 // Test SetArrayArgument<N>(first, last) with iterator as argument.
