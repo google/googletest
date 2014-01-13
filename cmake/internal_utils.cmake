@@ -37,7 +37,7 @@ macro(fix_default_compiler_settings_)
 
       # We prefer more strict warning checking for building Google Test.
       # Replaces /W3 with /W4 in defaults.
-      string(REPLACE "/W3" "-W4" ${flag_var} "${${flag_var}}")
+      string(REPLACE "/W3" "/W4" ${flag_var} "${${flag_var}}")
     endforeach()
   endif()
 endmacro()
@@ -56,7 +56,7 @@ macro(config_compiler_and_linker)
     # Newlines inside flags variables break CMake's NMake generator.
     # TODO(vladl@google.com): Add -RTCs and -RTCu to debug builds.
     set(cxx_base_flags "-GS -W4 -WX -wd4127 -wd4251 -wd4275 -nologo -J -Zi")
-    if (MSVC_VERSION LESS 1400)
+    if (MSVC_VERSION LESS 1400)  # 1400 is Visual Studio 2005
       # Suppress spurious warnings MSVC 7.1 sometimes issues.
       # Forcing value to bool.
       set(cxx_base_flags "${cxx_base_flags} -wd4800")
@@ -66,6 +66,12 @@ macro(config_compiler_and_linker)
       # Resolved overload was found by argument-dependent lookup.
       set(cxx_base_flags "${cxx_base_flags} -wd4675")
     endif()
+    if (NOT (MSVC_VERSION LESS 1700))  # 1700 is Visual Studio 2012.
+      # Suppress "unreachable code" warning on VS 2012 and later.
+      # http://stackoverflow.com/questions/3232669 explains the issue.
+      set(cxx_base_flags "${cxx_base_flags} -wd4702")
+    endif()
+
     set(cxx_base_flags "${cxx_base_flags} -D_UNICODE -DUNICODE -DWIN32 -D_WIN32")
     set(cxx_base_flags "${cxx_base_flags} -DSTRICT -DWIN32_LEAN_AND_MEAN")
     set(cxx_exception_flags "-EHsc -D_HAS_EXCEPTIONS=1")
