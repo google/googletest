@@ -900,7 +900,9 @@ template <typename T1, typename T2>
 // pattern requires the user to use it directly.
 ConcatImplActionP3<std::string, T1, T2>
 Concat(const std::string& a, T1 b, T2 c) {
+  GTEST_INTENTIONAL_CONST_COND_PUSH_
   if (true) {
+  GTEST_INTENTIONAL_CONST_COND_POP_
     // This branch verifies that ConcatImpl() can be invoked without
     // explicit template arguments.
     return ConcatImpl(a, b, c);
