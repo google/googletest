@@ -835,7 +835,9 @@ struct TuplePrefixPrinter {
   template <typename Tuple>
   static void PrintPrefixTo(const Tuple& t, ::std::ostream* os) {
     TuplePrefixPrinter<N - 1>::PrintPrefixTo(t, os);
+    GTEST_INTENTIONAL_CONST_COND_PUSH_
     if (N > 1) {
+    GTEST_INTENTIONAL_CONST_COND_POP_
       *os << ", ";
     }
     UniversalPrinter<

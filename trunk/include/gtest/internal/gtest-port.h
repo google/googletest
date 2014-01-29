@@ -197,6 +197,10 @@
 //   GTEST_DISALLOW_ASSIGN_   - disables operator=.
 //   GTEST_DISALLOW_COPY_AND_ASSIGN_ - disables copy ctor and operator=.
 //   GTEST_MUST_USE_RESULT_   - declares that a function's result must be used.
+//   GTEST_INTENTIONAL_CONST_COND_PUSH_ - start code section where MSVC C4127 is
+//                                        suppressed (constant conditional).
+//   GTEST_INTENTIONAL_CONST_COND_POP_  - finish code section where MSVC C4127
+//                                        is suppressed.
 //
 // C++11 feature wrappers:
 //
@@ -834,6 +838,25 @@ using ::std::tuple_size;
 # define GTEST_MOVE_(x) x
 #endif
 
+// MS C++ compiler emits warning when a conditional expression is compile time
+// constant. In some contexts this warning is false positive and needs to be
+// suppressed. Use the following two macros in such cases:
+//
+// GTEST_INTENTIONAL_CONST_COND_PUSH_
+// while (true) {
+// GTEST_INTENTIONAL_CONST_COND_POP_
+// }
+#if defined(_MSC_VER)
+# define GTEST_INTENTIONAL_CONST_COND_PUSH_ \
+    __pragma(warning(push)) \
+    __pragma(warning(disable: 4127))
+# define GTEST_INTENTIONAL_CONST_COND_POP_ \
+    __pragma(warning(pop))
+#else
+# define GTEST_INTENTIONAL_CONST_COND_PUSH_
+# define GTEST_INTENTIONAL_CONST_COND_POP_
+#endif
+
 // Determine whether the compiler supports Microsoft's Structured Exception
 // Handling.  This is supported by several Windows compilers but generally
 // does not exist on any other system.
@@ -1248,7 +1271,9 @@ inline To DownCast_(From* f) {  // so we only accept pointers
   // for compile-time type checking, and has no overhead in an
   // optimized build at run-time, as it will be optimized away
   // completely.
+  GTEST_INTENTIONAL_CONST_COND_PUSH_
   if (false) {
+  GTEST_INTENTIONAL_CONST_COND_POP_
     const To to = NULL;
     ::testing::internal::ImplicitCast_<From*>(to);
   }
