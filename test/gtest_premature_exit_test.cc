@@ -100,7 +100,9 @@ TEST_F(PrematureExitDeathTest, FileExistsDuringExecutionOfDeathTest) {
 // Tests that TEST_PREMATURE_EXIT_FILE is set where it's expected to
 // be set.
 TEST_F(PrematureExitTest, TestPrematureExitFileEnvVarIsSet) {
+  GTEST_INTENTIONAL_CONST_COND_PUSH_
   if (kTestPrematureExitFileEnvVarShouldBeSet) {
+  GTEST_INTENTIONAL_CONST_COND_POP_
     const char* const filepath = GetEnv("TEST_PREMATURE_EXIT_FILE");
     ASSERT_TRUE(filepath != NULL);
     ASSERT_NE(*filepath, '\0');

@@ -55,7 +55,7 @@ macro(config_compiler_and_linker)
   if (MSVC)
     # Newlines inside flags variables break CMake's NMake generator.
     # TODO(vladl@google.com): Add -RTCs and -RTCu to debug builds.
-    set(cxx_base_flags "-GS -W4 -WX -wd4127 -wd4251 -wd4275 -nologo -J -Zi")
+    set(cxx_base_flags "-GS -W4 -WX -wd4251 -wd4275 -nologo -J -Zi")
     if (MSVC_VERSION LESS 1400)  # 1400 is Visual Studio 2005
       # Suppress spurious warnings MSVC 7.1 sometimes issues.
       # Forcing value to bool.
@@ -65,6 +65,15 @@ macro(config_compiler_and_linker)
       # Compatibility warnings not applicable to Google Test.
       # Resolved overload was found by argument-dependent lookup.
       set(cxx_base_flags "${cxx_base_flags} -wd4675")
+    endif()
+    if (MSVC_VERSION LESS 1500)  # 1500 is Visual Studio 2008
+      # Conditional expression is constant.
+      # When compiling with /W4, we get several instances of C4127
+      # (Conditional expression is constant). In our code, we disable that
+      # warning on a case-by-case basis. However, on Visual Studio 2005,
+      # the warning fires on std::list. Therefore on that compiler and earlier,
+      # we disable the warning project-wide.
+      set(cxx_base_flags "${cxx_base_flags} -wd4127")
     endif()
     if (NOT (MSVC_VERSION LESS 1700))  # 1700 is Visual Studio 2012.
       # Suppress "unreachable code" warning on VS 2012 and later.
