@@ -36,6 +36,7 @@
 #include "gmock/gmock-actions.h"
 #include <algorithm>
 #include <iterator>
+#include <memory>
 #include <string>
 #include "gmock/gmock.h"
 #include "gmock/internal/gmock-port.h"
@@ -262,6 +263,21 @@ TEST(DefaultValueDeathTest, GetReturnsBuiltInDefaultValueWhenUnset) {
     DefaultValue<UserType>::Get();
   }, "");
 }
+
+#if GTEST_LANG_CXX11
+TEST(DefaultValueDeathTest, GetWorksForMoveOnlyIfSet) {
+  EXPECT_FALSE(DefaultValue<std::unique_ptr<int>>::Exists());
+  EXPECT_DEATH_IF_SUPPORTED({
+      DefaultValue<std::unique_ptr<int>>::Get();
+  }, "");
+  DefaultValue<std::unique_ptr<int>>::SetFactory([] {
+    return std::unique_ptr<int>(new int(42));
+  });
+  EXPECT_TRUE(DefaultValue<std::unique_ptr<int>>::Exists());
+  std::unique_ptr<int> i = DefaultValue<std::unique_ptr<int>>::Get();
+  EXPECT_EQ(42, *i);
+}
+#endif  // GTEST_LANG_CXX11
 
 // Tests that DefaultValue<void>::Get() returns void.
 TEST(DefaultValueTest, GetWorksForVoid) {
@@ -620,6 +636,10 @@ class MockClass {
 
   MOCK_METHOD1(IntFunc, int(bool flag));  // NOLINT
   MOCK_METHOD0(Foo, MyClass());
+#if GTEST_LANG_CXX11
+  MOCK_METHOD0(MakeUnique, std::unique_ptr<int>());
+  MOCK_METHOD0(MakeVectorUnique, std::vector<std::unique_ptr<int>>());
+#endif
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockClass);
@@ -1252,5 +1272,44 @@ TEST(ByRefTest, PrintsCorrectly) {
   testing::internal::UniversalPrint(ByRef(n), &actual);
   EXPECT_EQ(expected.str(), actual.str());
 }
+
+#if GTEST_LANG_CXX11
+
+std::unique_ptr<int> UniquePtrSource() {
+  return std::unique_ptr<int>(new int(19));
+}
+
+std::vector<std::unique_ptr<int>> VectorUniquePtrSource() {
+  std::vector<std::unique_ptr<int>> out;
+  out.emplace_back(new int(7));
+  return out;
+}
+
+TEST(MockMethodTest, CanReturnMoveOnlyValue) {
+  MockClass mock;
+
+  // Check default value
+  DefaultValue<std::unique_ptr<int>>::SetFactory([] {
+    return std::unique_ptr<int>(new int(42));
+  });
+  EXPECT_EQ(42, *mock.MakeUnique());
+
+  EXPECT_CALL(mock, MakeUnique())
+      .WillRepeatedly(Invoke(UniquePtrSource));
+  EXPECT_CALL(mock, MakeVectorUnique())
+      .WillRepeatedly(Invoke(VectorUniquePtrSource));
+  std::unique_ptr<int> result1 = mock.MakeUnique();
+  EXPECT_EQ(19, *result1);
+  std::unique_ptr<int> result2 = mock.MakeUnique();
+  EXPECT_EQ(19, *result2);
+  EXPECT_NE(result1, result2);
+
+  std::vector<std::unique_ptr<int>> vresult = mock.MakeVectorUnique();
+  EXPECT_EQ(1, vresult.size());
+  EXPECT_NE(nullptr, vresult[0]);
+  EXPECT_EQ(7, *vresult[0]);
+}
+
+#endif  // GTEST_LANG_CXX11
 
 }  // Unnamed namespace
