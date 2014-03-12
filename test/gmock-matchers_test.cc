@@ -54,6 +54,10 @@
 #include "gtest/gtest.h"
 #include "gtest/gtest-spi.h"
 
+#if GTEST_LANG_CXX11
+# include <forward_list>  // NOLINT
+#endif
+
 namespace testing {
 
 namespace internal {
@@ -4417,6 +4421,63 @@ TEST(StreamlikeTest, Iteration) {
     SCOPED_TRACE(ip - a);
     EXPECT_EQ(*ip++, *it++);
   }
+}
+
+#if GTEST_LANG_CXX11
+TEST(BeginEndDistanceIsTest, WorksWithForwardList) {
+  std::forward_list<int> container;
+  EXPECT_THAT(container, BeginEndDistanceIs(0));
+  EXPECT_THAT(container, Not(BeginEndDistanceIs(1)));
+  container.push_front(0);
+  EXPECT_THAT(container, Not(BeginEndDistanceIs(0)));
+  EXPECT_THAT(container, BeginEndDistanceIs(1));
+  container.push_front(0);
+  EXPECT_THAT(container, Not(BeginEndDistanceIs(0)));
+  EXPECT_THAT(container, BeginEndDistanceIs(2));
+}
+#endif  // GTEST_LANG_CXX11
+
+TEST(BeginEndDistanceIsTest, WorksWithNonStdList) {
+  const int a[5] = { 1, 2, 3, 4, 5 };
+  Streamlike<int> s(a, a + 5);
+  EXPECT_THAT(s, BeginEndDistanceIs(5));
+}
+
+TEST(BeginEndDistanceIsTest, CanDescribeSelf) {
+  Matcher<vector<int> > m = BeginEndDistanceIs(2);
+  EXPECT_EQ("distance between begin() and end() is equal to 2", Describe(m));
+  EXPECT_EQ("distance between begin() and end() isn't equal to 2",
+            DescribeNegation(m));
+}
+
+TEST(BeginEndDistanceIsTest, ExplainsResult) {
+  Matcher<vector<int> > m1 = BeginEndDistanceIs(2);
+  Matcher<vector<int> > m2 = BeginEndDistanceIs(Lt(2));
+  Matcher<vector<int> > m3 = BeginEndDistanceIs(AnyOf(0, 3));
+  Matcher<vector<int> > m4 = BeginEndDistanceIs(GreaterThan(1));
+  vector<int> container;
+  EXPECT_EQ("whose distance between begin() and end() 0 doesn't match",
+            Explain(m1, container));
+  EXPECT_EQ("whose distance between begin() and end() 0 matches",
+            Explain(m2, container));
+  EXPECT_EQ("whose distance between begin() and end() 0 matches",
+            Explain(m3, container));
+  EXPECT_EQ(
+      "whose distance between begin() and end() 0 doesn't match, which is 1 "
+      "less than 1",
+      Explain(m4, container));
+  container.push_back(0);
+  container.push_back(0);
+  EXPECT_EQ("whose distance between begin() and end() 2 matches",
+            Explain(m1, container));
+  EXPECT_EQ("whose distance between begin() and end() 2 doesn't match",
+            Explain(m2, container));
+  EXPECT_EQ("whose distance between begin() and end() 2 doesn't match",
+            Explain(m3, container));
+  EXPECT_EQ(
+      "whose distance between begin() and end() 2 matches, which is 1 more "
+      "than 1",
+      Explain(m4, container));
 }
 
 TEST(WhenSortedTest, WorksForStreamlike) {
