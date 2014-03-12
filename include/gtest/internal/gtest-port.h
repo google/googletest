@@ -926,6 +926,18 @@ using ::std::tuple_size;
 # define GTEST_ATTRIBUTE_NO_SANITIZE_ADDRESS_
 #endif  // __clang__
 
+// A function level attribute to disable ThreadSanitizer instrumentation.
+#if defined(__clang__)
+# if __has_feature(thread_sanitizer)
+#  define GTEST_ATTRIBUTE_NO_SANITIZE_THREAD_ \
+       __attribute__((no_sanitize_thread))
+# else
+#  define GTEST_ATTRIBUTE_NO_SANITIZE_THREAD_
+# endif  // __has_feature(thread_sanitizer)
+#else
+# define GTEST_ATTRIBUTE_NO_SANITIZE_THREAD_
+#endif  // __clang__
+
 namespace testing {
 
 class Message;
