@@ -49,7 +49,8 @@ _INDENT = 2
 
 
 def _GenerateMethods(output_lines, source, class_node):
-  function_type = ast.FUNCTION_VIRTUAL | ast.FUNCTION_PURE_VIRTUAL
+  function_type = (ast.FUNCTION_VIRTUAL | ast.FUNCTION_PURE_VIRTUAL |
+                   ast.FUNCTION_OVERRIDE)
   ctor_or_dtor = ast.FUNCTION_CTOR | ast.FUNCTION_DTOR
   indent = ' ' * _INDENT
 

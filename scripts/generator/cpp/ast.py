@@ -70,6 +70,7 @@ FUNCTION_DTOR = 0x10
 FUNCTION_ATTRIBUTE = 0x20
 FUNCTION_UNKNOWN_ANNOTATION = 0x40
 FUNCTION_THROW = 0x80
+FUNCTION_OVERRIDE = 0x100
 
 """
 These are currently unused.  Should really handle these properly at some point.
@@ -1027,6 +1028,8 @@ class AstBuilder(object):
                 # Consume everything between the (parens).
                 unused_tokens = list(self._GetMatchingChar('(', ')'))
                 token = self._GetNextToken()
+            elif modifier_token.name == 'override':
+                modifiers |= FUNCTION_OVERRIDE
             elif modifier_token.name == modifier_token.name.upper():
                 # HACK(nnorwitz):  assume that all upper-case names
                 # are some macro we aren't expanding.
@@ -1285,7 +1288,7 @@ class AstBuilder(object):
         if token2.token_type == tokenize.SYNTAX and token2.name == '~':
             return self.GetMethod(FUNCTION_VIRTUAL + FUNCTION_DTOR, None)
         assert token.token_type == tokenize.NAME or token.name == '::', token
-        return_type_and_name = self._GetTokensUpTo(tokenize.SYNTAX, '(')
+        return_type_and_name = self._GetTokensUpTo(tokenize.SYNTAX, '(')  # )
         return_type_and_name.insert(0, token)
         if token2 is not token:
             return_type_and_name.insert(1, token2)

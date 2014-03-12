@@ -65,6 +65,17 @@ class Foo {
         'MOCK_METHOD0(Bar,\nint());',
         self.GenerateMethodSource(source))
 
+  def testSimpleOverrideMethod(self):
+    source = """
+class Foo {
+ public:
+  int Bar() override;
+};
+"""
+    self.assertEqualIgnoreLeadingWhitespace(
+        'MOCK_METHOD0(Bar,\nint());',
+        self.GenerateMethodSource(source))
+
   def testSimpleConstMethod(self):
     source = """
 class Foo {
