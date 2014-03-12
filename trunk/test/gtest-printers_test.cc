@@ -1164,13 +1164,6 @@ TEST(PrintPrintableTypeTest, TemplateInUserNamespace) {
 
 #if GTEST_HAS_PROTOBUF_
 
-// Tests printing a protocol message.
-TEST(PrintProtocolMessageTest, PrintsShortDebugString) {
-  testing::internal::TestMessage msg;
-  msg.set_member("yes");
-  EXPECT_EQ("<member:\"yes\">", Print(msg));
-}
-
 // Tests printing a short proto2 message.
 TEST(PrintProto2MessageTest, PrintsShortDebugStringWhenItIsShort) {
   testing::internal::FooMessage msg;
