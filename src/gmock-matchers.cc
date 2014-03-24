@@ -191,9 +191,9 @@ GTEST_API_ string FormatMatcherDescription(bool negation,
 // .                                         [ sink ]  .
 //
 // See Also:
-//   [1] Cormen, et al (2001). "Section 26.2: The Ford–Fulkerson method".
-//       "Introduction to Algorithms (Second ed.)", pp. 651–664.
-//   [2] "Ford–Fulkerson algorithm", Wikipedia,
+//   [1] Cormen, et al (2001). "Section 26.2: The Ford-Fulkerson method".
+//       "Introduction to Algorithms (Second ed.)", pp. 651-664.
+//   [2] "Ford-Fulkerson algorithm", Wikipedia,
 //       'http://en.wikipedia.org/wiki/Ford%E2%80%93Fulkerson_algorithm'
 class MaxBipartiteMatchState {
  public:

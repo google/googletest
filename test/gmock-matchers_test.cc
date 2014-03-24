@@ -33,6 +33,10 @@
 //
 // This file tests some commonly used argument matchers.
 
+// windows.h defines macros which conflict with standard identifiers used in
+// this test.  Defining this symbol prevents windows.h from doing that.
+#define NOMINMAX
+
 #include "gmock/gmock-matchers.h"
 #include "gmock/gmock-more-matchers.h"
 
