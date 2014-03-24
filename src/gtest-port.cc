@@ -36,14 +36,14 @@
 #include <stdio.h>
 #include <string.h>
 
-#if GTEST_OS_WINDOWS_MOBILE
-# include <windows.h>  // For TerminateProcess()
-#elif GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
+# include <windows.h>
 # include <io.h>
 # include <sys/stat.h>
+# include <map>  // Used in ThreadLocal.
 #else
 # include <unistd.h>
-#endif  // GTEST_OS_WINDOWS_MOBILE
+#endif  // GTEST_OS_WINDOWS
 
 #if GTEST_OS_MAC
 # include <mach/mach_init.h>
@@ -133,6 +133,389 @@ size_t GetThreadCount() {
 }
 
 #endif  // GTEST_OS_MAC
+
+#if GTEST_IS_THREADSAFE && GTEST_OS_WINDOWS
+
+void SleepMilliseconds(int n) {
+  ::Sleep(n);
+}
+
+AutoHandle::AutoHandle()
+    : handle_(INVALID_HANDLE_VALUE) {}
+
+AutoHandle::AutoHandle(Handle handle)
+    : handle_(handle) {}
+
+AutoHandle::~AutoHandle() {
+  Reset();
+}
+
+AutoHandle::Handle AutoHandle::Get() const {
+  return handle_;
+}
+
+void AutoHandle::Reset() {
+  Reset(INVALID_HANDLE_VALUE);
+}
+
+void AutoHandle::Reset(HANDLE handle) {
+  // Resetting with the same handle we already own is invalid.
+  if (handle_ != handle) {
+    if (IsCloseable()) {
+      ::CloseHandle(handle_);
+    }
+    handle_ = handle;
+  } else {
+    GTEST_CHECK_(!IsCloseable())
+        << "Resetting a valid handle to itself is likely a programmer error "
+            "and thus not allowed.";
+  }
+}
+
+bool AutoHandle::IsCloseable() const {
+  // Different Windows APIs may use either of these values to represent an
+  // invalid handle.
+  return handle_ != NULL && handle_ != INVALID_HANDLE_VALUE;
+}
+
+Notification::Notification()
+    : event_(::CreateEvent(NULL,   // Default security attributes.
+                           TRUE,   // Do not reset automatically.
+                           FALSE,  // Initially unset.
+                           NULL)) {  // Anonymous event.
+  GTEST_CHECK_(event_.Get() != NULL);
+}
+
+void Notification::Notify() {
+  GTEST_CHECK_(::SetEvent(event_.Get()) != FALSE);
+}
+
+void Notification::WaitForNotification() {
+  GTEST_CHECK_(
+      ::WaitForSingleObject(event_.Get(), INFINITE) == WAIT_OBJECT_0);
+}
+
+Mutex::Mutex()
+    : type_(kDynamic),
+      owner_thread_id_(0),
+      critical_section_init_phase_(0),
+      critical_section_(new CRITICAL_SECTION) {
+  ::InitializeCriticalSection(critical_section_);
+}
+
+Mutex::~Mutex() {
+  // Static mutexes are leaked intentionally. It is not thread-safe to try
+  // to clean them up.
+  // TODO(yukawa): Switch to Slim Reader/Writer (SRW) Locks, which requires
+  // nothing to clean it up but is available only on Vista and later.
+  // http://msdn.microsoft.com/en-us/library/windows/desktop/aa904937.aspx
+  if (type_ == kDynamic) {
+    ::DeleteCriticalSection(critical_section_);
+    delete critical_section_;
+    critical_section_ = NULL;
+  }
+}
+
+void Mutex::Lock() {
+  ThreadSafeLazyInit();
+  ::EnterCriticalSection(critical_section_);
+  owner_thread_id_ = ::GetCurrentThreadId();
+}
+
+void Mutex::Unlock() {
+  ThreadSafeLazyInit();
+  // We don't protect writing to owner_thread_id_ here, as it's the
+  // caller's responsibility to ensure that the current thread holds the
+  // mutex when this is called.
+  owner_thread_id_ = 0;
+  ::LeaveCriticalSection(critical_section_);
+}
+
+// Does nothing if the current thread holds the mutex. Otherwise, crashes
+// with high probability.
+void Mutex::AssertHeld() {
+  ThreadSafeLazyInit();
+  GTEST_CHECK_(owner_thread_id_ == ::GetCurrentThreadId())
+      << "The current thread is not holding the mutex @" << this;
+}
+
+// Initializes owner_thread_id_ and critical_section_ in static mutexes.
+void Mutex::ThreadSafeLazyInit() {
+  // Dynamic mutexes are initialized in the constructor.
+  if (type_ == kStatic) {
+    switch (
+        ::InterlockedCompareExchange(&critical_section_init_phase_, 1L, 0L)) {
+      case 0:
+        // If critical_section_init_phase_ was 0 before the exchange, we
+        // are the first to test it and need to perform the initialization.
+        owner_thread_id_ = 0;
+        critical_section_ = new CRITICAL_SECTION;
+        ::InitializeCriticalSection(critical_section_);
+        // Updates the critical_section_init_phase_ to 2 to signal
+        // initialization complete.
+        GTEST_CHECK_(::InterlockedCompareExchange(
+                          &critical_section_init_phase_, 2L, 1L) ==
+                      1L);
+        break;
+      case 1:
+        // Somebody else is already initializing the mutex; spin until they
+        // are done.
+        while (::InterlockedCompareExchange(&critical_section_init_phase_,
+                                            2L,
+                                            2L) != 2L) {
+          // Possibly yields the rest of the thread's time slice to other
+          // threads.
+          ::Sleep(0);
+        }
+        break;
+
+      case 2:
+        break;  // The mutex is already initialized and ready for use.
+
+      default:
+        GTEST_CHECK_(false)
+            << "Unexpected value of critical_section_init_phase_ "
+            << "while initializing a static mutex.";
+    }
+  }
+}
+
+namespace {
+
+class ThreadWithParamSupport : public ThreadWithParamBase {
+ public:
+  static HANDLE CreateThread(Runnable* runnable,
+                             Notification* thread_can_start) {
+    ThreadMainParam* param = new ThreadMainParam(runnable, thread_can_start);
+    DWORD thread_id;
+    // TODO(yukawa): Consider to use _beginthreadex instead.
+    HANDLE thread_handle = ::CreateThread(
+        NULL,    // Default security.
+        0,       // Default stack size.
+        &ThreadWithParamSupport::ThreadMain,
+        param,   // Parameter to ThreadMainStatic
+        0x0,     // Default creation flags.
+        &thread_id);  // Need a valid pointer for the call to work under Win98.
+    GTEST_CHECK_(thread_handle != NULL) << "CreateThread failed with error "
+                                        << ::GetLastError() << ".";
+    if (thread_handle == NULL) {
+      delete param;
+    }
+    return thread_handle;
+  }
+
+ private:
+  struct ThreadMainParam {
+    ThreadMainParam(Runnable* runnable, Notification* thread_can_start)
+        : runnable_(runnable),
+          thread_can_start_(thread_can_start) {
+    }
+    scoped_ptr<Runnable> runnable_;
+    // Does not own.
+    Notification* thread_can_start_;
+  };
+
+  static DWORD WINAPI ThreadMain(void* ptr) {
+    // Transfers ownership.
+    scoped_ptr<ThreadMainParam> param(static_cast<ThreadMainParam*>(ptr));
+    if (param->thread_can_start_ != NULL)
+      param->thread_can_start_->WaitForNotification();
+    param->runnable_->Run();
+    return 0;
+  }
+
+  // Prohibit instantiation.
+  ThreadWithParamSupport();
+
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadWithParamSupport);
+};
+
+}  // namespace
+
+ThreadWithParamBase::ThreadWithParamBase(Runnable *runnable,
+                                         Notification* thread_can_start)
+      : thread_(ThreadWithParamSupport::CreateThread(runnable,
+                                                     thread_can_start)) {
+}
+
+ThreadWithParamBase::~ThreadWithParamBase() {
+  Join();
+}
+
+void ThreadWithParamBase::Join() {
+  GTEST_CHECK_(::WaitForSingleObject(thread_.Get(), INFINITE) == WAIT_OBJECT_0)
+      << "Failed to join the thread with error " << ::GetLastError() << ".";
+}
+
+// Maps a thread to a set of ThreadIdToThreadLocals that have values
+// instantiated on that thread and notifies them when the thread exits.  A
+// ThreadLocal instance is expected to persist until all threads it has
+// values on have terminated.
+class ThreadLocalRegistryImpl {
+ public:
+  // Registers thread_local_instance as having value on the current thread.
+  // Returns a value that can be used to identify the thread from other threads.
+  static ThreadLocalValueHolderBase* GetValueOnCurrentThread(
+      const ThreadLocalBase* thread_local_instance) {
+    DWORD current_thread = ::GetCurrentThreadId();
+    MutexLock lock(&mutex_);
+    ThreadIdToThreadLocals* const thread_to_thread_locals =
+        GetThreadLocalsMapLocked();
+    ThreadIdToThreadLocals::iterator thread_local_pos =
+        thread_to_thread_locals->find(current_thread);
+    if (thread_local_pos == thread_to_thread_locals->end()) {
+      thread_local_pos = thread_to_thread_locals->insert(
+          std::make_pair(current_thread, ThreadLocalValues())).first;
+      StartWatcherThreadFor(current_thread);
+    }
+    ThreadLocalValues& thread_local_values = thread_local_pos->second;
+    ThreadLocalValues::iterator value_pos =
+        thread_local_values.find(thread_local_instance);
+    if (value_pos == thread_local_values.end()) {
+      value_pos =
+          thread_local_values
+              .insert(std::make_pair(
+                  thread_local_instance,
+                  linked_ptr<ThreadLocalValueHolderBase>(
+                      thread_local_instance->NewValueForCurrentThread())))
+              .first;
+    }
+    return value_pos->second.get();
+  }
+
+  static void OnThreadLocalDestroyed(
+      const ThreadLocalBase* thread_local_instance) {
+    std::vector<linked_ptr<ThreadLocalValueHolderBase> > value_holders;
+    // Clean up the ThreadLocalValues data structure while holding the lock, but
+    // defer the destruction of the ThreadLocalValueHolderBases.
+    {
+      MutexLock lock(&mutex_);
+      ThreadIdToThreadLocals* const thread_to_thread_locals =
+          GetThreadLocalsMapLocked();
+      for (ThreadIdToThreadLocals::iterator it =
+          thread_to_thread_locals->begin();
+          it != thread_to_thread_locals->end();
+          ++it) {
+        ThreadLocalValues& thread_local_values = it->second;
+        ThreadLocalValues::iterator value_pos =
+            thread_local_values.find(thread_local_instance);
+        if (value_pos != thread_local_values.end()) {
+          value_holders.push_back(value_pos->second);
+          thread_local_values.erase(value_pos);
+          // This 'if' can only be successful at most once, so theoretically we
+          // could break out of the loop here, but we don't bother doing so.
+        }
+      }
+    }
+    // Outside the lock, let the destructor for 'value_holders' deallocate the
+    // ThreadLocalValueHolderBases.
+  }
+
+  static void OnThreadExit(DWORD thread_id) {
+    GTEST_CHECK_(thread_id != 0) << ::GetLastError();
+    std::vector<linked_ptr<ThreadLocalValueHolderBase> > value_holders;
+    // Clean up the ThreadIdToThreadLocals data structure while holding the
+    // lock, but defer the destruction of the ThreadLocalValueHolderBases.
+    {
+      MutexLock lock(&mutex_);
+      ThreadIdToThreadLocals* const thread_to_thread_locals =
+          GetThreadLocalsMapLocked();
+      ThreadIdToThreadLocals::iterator thread_local_pos =
+          thread_to_thread_locals->find(thread_id);
+      if (thread_local_pos != thread_to_thread_locals->end()) {
+        ThreadLocalValues& thread_local_values = thread_local_pos->second;
+        for (ThreadLocalValues::iterator value_pos =
+            thread_local_values.begin();
+            value_pos != thread_local_values.end();
+            ++value_pos) {
+          value_holders.push_back(value_pos->second);
+        }
+        thread_to_thread_locals->erase(thread_local_pos);
+      }
+    }
+    // Outside the lock, let the destructor for 'value_holders' deallocate the
+    // ThreadLocalValueHolderBases.
+  }
+
+ private:
+  // In a particular thread, maps a ThreadLocal object to its value.
+  typedef std::map<const ThreadLocalBase*,
+                   linked_ptr<ThreadLocalValueHolderBase> > ThreadLocalValues;
+  // Stores all ThreadIdToThreadLocals having values in a thread, indexed by
+  // thread's ID.
+  typedef std::map<DWORD, ThreadLocalValues> ThreadIdToThreadLocals;
+
+  // Holds the thread id and thread handle that we pass from
+  // StartWatcherThreadFor to WatcherThreadFunc.
+  typedef std::pair<DWORD, HANDLE> ThreadIdAndHandle;
+
+  static void StartWatcherThreadFor(DWORD thread_id) {
+    // The returned handle will be kept in thread_map and closed by
+    // watcher_thread in WatcherThreadFunc.
+    HANDLE thread = ::OpenThread(SYNCHRONIZE | THREAD_QUERY_INFORMATION,
+                                 FALSE,
+                                 thread_id);
+    GTEST_CHECK_(thread != NULL);
+    // We need to to pass a valid thread ID pointer into CreateThread for it
+    // to work correctly under Win98.
+    DWORD watcher_thread_id;
+    HANDLE watcher_thread = ::CreateThread(
+        NULL,   // Default security.
+        0,      // Default stack size
+        &ThreadLocalRegistryImpl::WatcherThreadFunc,
+        reinterpret_cast<LPVOID>(new ThreadIdAndHandle(thread_id, thread)),
+        CREATE_SUSPENDED,
+        &watcher_thread_id);
+    GTEST_CHECK_(watcher_thread != NULL);
+    // Give the watcher thread the same priority as ours to avoid being
+    // blocked by it.
+    ::SetThreadPriority(watcher_thread,
+                        ::GetThreadPriority(::GetCurrentThread()));
+    ::ResumeThread(watcher_thread);
+    ::CloseHandle(watcher_thread);
+  }
+
+  // Monitors exit from a given thread and notifies those
+  // ThreadIdToThreadLocals about thread termination.
+  static DWORD WINAPI WatcherThreadFunc(LPVOID param) {
+    const ThreadIdAndHandle* tah =
+        reinterpret_cast<const ThreadIdAndHandle*>(param);
+    GTEST_CHECK_(
+        ::WaitForSingleObject(tah->second, INFINITE) == WAIT_OBJECT_0);
+    OnThreadExit(tah->first);
+    ::CloseHandle(tah->second);
+    delete tah;
+    return 0;
+  }
+
+  // Returns map of thread local instances.
+  static ThreadIdToThreadLocals* GetThreadLocalsMapLocked() {
+    mutex_.AssertHeld();
+    static ThreadIdToThreadLocals* map = new ThreadIdToThreadLocals;
+    return map;
+  }
+
+  // Protects access to GetThreadLocalsMapLocked() and its return value.
+  static Mutex mutex_;
+  // Protects access to GetThreadMapLocked() and its return value.
+  static Mutex thread_map_mutex_;
+};
+
+Mutex ThreadLocalRegistryImpl::mutex_(Mutex::kStaticMutex);
+Mutex ThreadLocalRegistryImpl::thread_map_mutex_(Mutex::kStaticMutex);
+
+ThreadLocalValueHolderBase* ThreadLocalRegistry::GetValueOnCurrentThread(
+      const ThreadLocalBase* thread_local_instance) {
+  return ThreadLocalRegistryImpl::GetValueOnCurrentThread(
+      thread_local_instance);
+}
+
+void ThreadLocalRegistry::OnThreadLocalDestroyed(
+      const ThreadLocalBase* thread_local_instance) {
+  ThreadLocalRegistryImpl::OnThreadLocalDestroyed(thread_local_instance);
+}
+
+#endif  // GTEST_IS_THREADSAFE && GTEST_OS_WINDOWS
 
 #if GTEST_USES_POSIX_RE
 

@@ -699,13 +699,79 @@ TEST_F(TestForDeathTest, ExpectDebugDeathDoesNotAbort) {
 
 void AssertDebugDeathHelper(bool* aborted) {
   *aborted = true;
-  ASSERT_DEBUG_DEATH(return, "") << "This is expected to fail.";
+  GTEST_LOG_(INFO) << "Before ASSERT_DEBUG_DEATH";
+  ASSERT_DEBUG_DEATH(GTEST_LOG_(INFO) << "In ASSERT_DEBUG_DEATH"; return, "")
+      << "This is expected to fail.";
+  GTEST_LOG_(INFO) << "After ASSERT_DEBUG_DEATH";
   *aborted = false;
 }
 
 // Tests that ASSERT_DEBUG_DEATH in debug mode aborts the function on
 // failure.
 TEST_F(TestForDeathTest, AssertDebugDeathAborts) {
+  static bool aborted;
+  aborted = false;
+  EXPECT_FATAL_FAILURE(AssertDebugDeathHelper(&aborted), "");
+  EXPECT_TRUE(aborted);
+}
+
+TEST_F(TestForDeathTest, AssertDebugDeathAborts2) {
+  static bool aborted;
+  aborted = false;
+  EXPECT_FATAL_FAILURE(AssertDebugDeathHelper(&aborted), "");
+  EXPECT_TRUE(aborted);
+}
+
+TEST_F(TestForDeathTest, AssertDebugDeathAborts3) {
+  static bool aborted;
+  aborted = false;
+  EXPECT_FATAL_FAILURE(AssertDebugDeathHelper(&aborted), "");
+  EXPECT_TRUE(aborted);
+}
+
+TEST_F(TestForDeathTest, AssertDebugDeathAborts4) {
+  static bool aborted;
+  aborted = false;
+  EXPECT_FATAL_FAILURE(AssertDebugDeathHelper(&aborted), "");
+  EXPECT_TRUE(aborted);
+}
+
+TEST_F(TestForDeathTest, AssertDebugDeathAborts5) {
+  static bool aborted;
+  aborted = false;
+  EXPECT_FATAL_FAILURE(AssertDebugDeathHelper(&aborted), "");
+  EXPECT_TRUE(aborted);
+}
+
+TEST_F(TestForDeathTest, AssertDebugDeathAborts6) {
+  static bool aborted;
+  aborted = false;
+  EXPECT_FATAL_FAILURE(AssertDebugDeathHelper(&aborted), "");
+  EXPECT_TRUE(aborted);
+}
+
+TEST_F(TestForDeathTest, AssertDebugDeathAborts7) {
+  static bool aborted;
+  aborted = false;
+  EXPECT_FATAL_FAILURE(AssertDebugDeathHelper(&aborted), "");
+  EXPECT_TRUE(aborted);
+}
+
+TEST_F(TestForDeathTest, AssertDebugDeathAborts8) {
+  static bool aborted;
+  aborted = false;
+  EXPECT_FATAL_FAILURE(AssertDebugDeathHelper(&aborted), "");
+  EXPECT_TRUE(aborted);
+}
+
+TEST_F(TestForDeathTest, AssertDebugDeathAborts9) {
+  static bool aborted;
+  aborted = false;
+  EXPECT_FATAL_FAILURE(AssertDebugDeathHelper(&aborted), "");
+  EXPECT_TRUE(aborted);
+}
+
+TEST_F(TestForDeathTest, AssertDebugDeathAborts10) {
   static bool aborted;
   aborted = false;
   EXPECT_FATAL_FAILURE(AssertDebugDeathHelper(&aborted), "");
