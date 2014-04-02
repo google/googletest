@@ -640,8 +640,18 @@ struct _RTL_CRITICAL_SECTION;
 
 // To avoid conditional compilation everywhere, we make it
 // gtest-port.h's responsibility to #include the header implementing
-// tr1/tuple.
+// tuple.
+// TODO(sbenza): Enable this block to start using std::tuple instead of
+//               std::tr1::tuple.
+#if 0 && GTEST_HAS_STD_TUPLE_
+# include <tuple>
+# define GTEST_TUPLE_NAMESPACE_ ::std
+#endif
+
 #if GTEST_HAS_TR1_TUPLE
+# ifndef GTEST_TUPLE_NAMESPACE_
+#  define GTEST_TUPLE_NAMESPACE_ ::std::tr1
+# endif  // GTEST_TUPLE_NAMESPACE_
 
 # if GTEST_USE_OWN_TR1_TUPLE
 #  include "gtest/internal/gtest-tuple.h"
@@ -951,6 +961,15 @@ using ::std::tuple_size;
 namespace testing {
 
 class Message;
+
+// Import tuple and friends into the ::testing namespace.
+// It is part of our interface, having them in ::testing allows us to change
+// their types as needed.
+using GTEST_TUPLE_NAMESPACE_::get;
+using GTEST_TUPLE_NAMESPACE_::make_tuple;
+using GTEST_TUPLE_NAMESPACE_::tuple;
+using GTEST_TUPLE_NAMESPACE_::tuple_size;
+using GTEST_TUPLE_NAMESPACE_::tuple_element;
 
 namespace internal {
 

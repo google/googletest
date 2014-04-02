@@ -90,7 +90,7 @@ using ::testing::Combine;
 // PreCalculatedPrimeTable disabled. We do this by defining fixture which will
 // accept different combinations of parameters for instantiating a
 // HybridPrimeTable instance.
-class PrimeTableTest : public TestWithParam< ::std::tr1::tuple<bool, int> > {
+class PrimeTableTest : public TestWithParam< ::testing::tuple<bool, int> > {
  protected:
   virtual void SetUp() {
     // This can be written as
@@ -101,8 +101,8 @@ class PrimeTableTest : public TestWithParam< ::std::tr1::tuple<bool, int> > {
     //
     // once the Google C++ Style Guide allows use of ::std::tr1::tie.
     //
-    bool force_on_the_fly = ::std::tr1::get<0>(GetParam());
-    int max_precalculated = ::std::tr1::get<1>(GetParam());
+    bool force_on_the_fly = ::testing::get<0>(GetParam());
+    int max_precalculated = ::testing::get<1>(GetParam());
     table_ = new HybridPrimeTable(force_on_the_fly, max_precalculated);
   }
   virtual void TearDown() {
