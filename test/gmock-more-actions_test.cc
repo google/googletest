@@ -47,10 +47,10 @@ namespace gmock_more_actions_test {
 
 using ::std::plus;
 using ::std::string;
-using ::std::tr1::get;
-using ::std::tr1::make_tuple;
-using ::std::tr1::tuple;
-using ::std::tr1::tuple_element;
+using testing::get;
+using testing::make_tuple;
+using testing::tuple;
+using testing::tuple_element;
 using testing::_;
 using testing::Action;
 using testing::ActionInterface;

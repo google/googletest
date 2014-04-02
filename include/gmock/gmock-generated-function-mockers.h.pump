@@ -78,7 +78,7 @@ class FunctionMocker<R($As)> : public
   MockSpec<F>& With($matchers) {
 
 $if i >= 1 [[
-    this->current_spec().SetMatchers(::std::tr1::make_tuple($ms));
+    this->current_spec().SetMatchers(::testing::make_tuple($ms));
 
 ]]
     return this->current_spec();
@@ -139,7 +139,7 @@ $var matcher_as = [[$for j, \
 #define GMOCK_METHOD$i[[]]_(tn, constness, ct, Method, ...) \
   GMOCK_RESULT_(tn, __VA_ARGS__) ct Method( \
       $arg_as) constness { \
-    GTEST_COMPILE_ASSERT_((::std::tr1::tuple_size<                          \
+    GTEST_COMPILE_ASSERT_((::testing::tuple_size<                          \
         tn ::testing::internal::Function<__VA_ARGS__>::ArgumentTuple>::value == $i), \
         this_method_does_not_take_$i[[]]_argument[[$if i != 1 [[s]]]]); \
     GMOCK_MOCKER_($i, constness, Method).SetOwnerAndName(this, #Method); \

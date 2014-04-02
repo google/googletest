@@ -61,24 +61,20 @@ $range j 1..i
 $var types = [[$for j [[, typename A$j]]]]
 $var as = [[$for j, [[A$j]]]]
 $var args = [[$if i==0 [[]] $else [[ args]]]]
-$var import = [[$if i==0 [[]] $else [[
-    using ::std::tr1::get;
-
-]]]]
 $var gets = [[$for j, [[get<$(j - 1)>(args)]]]]
 template <typename R$types>
-class InvokeHelper<R, ::std::tr1::tuple<$as> > {
+class InvokeHelper<R, ::testing::tuple<$as> > {
  public:
   template <typename Function>
-  static R Invoke(Function function, const ::std::tr1::tuple<$as>&$args) {
-$import    return function($gets);
+  static R Invoke(Function function, const ::testing::tuple<$as>&$args) {
+           return function($gets);
   }
 
   template <class Class, typename MethodPtr>
   static R InvokeMethod(Class* obj_ptr,
                         MethodPtr method_ptr,
-                        const ::std::tr1::tuple<$as>&$args) {
-$import    return (obj_ptr->*method_ptr)($gets);
+                        const ::testing::tuple<$as>&$args) {
+           return (obj_ptr->*method_ptr)($gets);
   }
 };
 
@@ -141,7 +137,7 @@ $var Ts = [[$for j, [[T$j]]]]
 // An INTERNAL macro for extracting the type of a tuple field.  It's
 // subject to change without notice - DO NOT USE IN USER CODE!
 #define GMOCK_FIELD_(Tuple, N) \
-    typename ::std::tr1::tuple_element<N, Tuple>::type
+    typename ::testing::tuple_element<N, Tuple>::type
 
 $range i 1..n
 
@@ -149,15 +145,15 @@ $range i 1..n
 // type of an n-ary function whose i-th (1-based) argument type is the
 // k{i}-th (0-based) field of ArgumentTuple, which must be a tuple
 // type, and whose return type is Result.  For example,
-//   SelectArgs<int, ::std::tr1::tuple<bool, char, double, long>, 0, 3>::type
+//   SelectArgs<int, ::testing::tuple<bool, char, double, long>, 0, 3>::type
 // is int(bool, long).
 //
 // SelectArgs<Result, ArgumentTuple, k1, k2, ..., k_n>::Select(args)
 // returns the selected fields (k1, k2, ..., k_n) of args as a tuple.
 // For example,
-//   SelectArgs<int, ::std::tr1::tuple<bool, char, double>, 2, 0>::Select(
-//       ::std::tr1::make_tuple(true, 'a', 2.5))
-// returns ::std::tr1::tuple (2.5, true).
+//   SelectArgs<int, tuple<bool, char, double>, 2, 0>::Select(
+//       ::testing::make_tuple(true, 'a', 2.5))
+// returns tuple (2.5, true).
 //
 // The numbers in list k1, k2, ..., k_n must be >= 0, where n can be
 // in the range [0, $n].  Duplicates are allowed and they don't have
@@ -169,7 +165,6 @@ class SelectArgs {
   typedef Result type($for i, [[GMOCK_FIELD_(ArgumentTuple, k$i)]]);
   typedef typename Function<type>::ArgumentTuple SelectedArgs;
   static SelectedArgs Select(const ArgumentTuple& args) {
-    using ::std::tr1::get;
     return SelectedArgs($for i, [[get<k$i>(args)]]);
   }
 };
@@ -186,7 +181,6 @@ class SelectArgs<Result, ArgumentTuple,
   typedef typename Function<type>::ArgumentTuple SelectedArgs;
   static SelectedArgs Select(const ArgumentTuple& [[]]
 $if i == 1 [[/* args */]] $else [[args]]) {
-    using ::std::tr1::get;
     return SelectedArgs($for j1, [[get<k$j1>(args)]]);
   }
 };
@@ -266,8 +260,7 @@ $range k 1..n-i
 $var eas = [[$for k, [[ExcessiveArg()]]]]
 $var arg_list = [[$if (i==0) | (i==n) [[$as$eas]] $else [[$as, $eas]]]]
 $template
-  static Result Perform(Impl* impl, const ::std::tr1::tuple<$As>& args) {
-    using ::std::tr1::get;
+  static Result Perform(Impl* impl, const ::testing::tuple<$As>& args) {
     return impl->template gmock_PerformImpl<$As>(args, $arg_list);
   }
 
@@ -454,7 +447,7 @@ $for k [[, \
 //   ACTION_TEMPLATE(DuplicateArg,
 //                   HAS_2_TEMPLATE_PARAMS(int, k, typename, T),
 //                   AND_1_VALUE_PARAMS(output)) {
-//     *output = T(std::tr1::get<k>(args));
+//     *output = T(::testing::get<k>(args));
 //   }
 //   ...
 //     int n;
@@ -789,7 +782,7 @@ ACTION_TEMPLATE(InvokeArgument,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_$i[[]]_VALUE_PARAMS($for j, [[p$j]])) {
   return internal::CallableHelper<return_type>::Call(
-      ::std::tr1::get<k>(args)$for j [[, p$j]]);
+      ::testing::get<k>(args)$for j [[, p$j]]);
 }
 
 ]]

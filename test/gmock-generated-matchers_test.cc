@@ -53,9 +53,9 @@ using std::pair;
 using std::set;
 using std::stringstream;
 using std::vector;
-using std::tr1::get;
-using std::tr1::make_tuple;
-using std::tr1::tuple;
+using testing::get;
+using testing::make_tuple;
+using testing::tuple;
 using testing::_;
 using testing::Args;
 using testing::Contains;
@@ -507,7 +507,7 @@ class NativeArrayPassedAsPointerAndSize {
 
 TEST(ElementsAreTest, WorksWithNativeArrayPassedAsPointerAndSize) {
   int array[] = { 0, 1 };
-  ::std::tr1::tuple<int*, size_t> array_as_tuple(array, 2);
+  ::testing::tuple<int*, size_t> array_as_tuple(array, 2);
   EXPECT_THAT(array_as_tuple, ElementsAre(0, 1));
   EXPECT_THAT(array_as_tuple, Not(ElementsAre(0)));
 
@@ -561,7 +561,7 @@ TEST(ElementsAreTest, MakesCopyOfArguments) {
   int x = 1;
   int y = 2;
   // This should make a copy of x and y.
-  ::testing::internal::ElementsAreMatcher<std::tr1::tuple<int, int> >
+  ::testing::internal::ElementsAreMatcher<testing::tuple<int, int> >
           polymorphic_matcher = ElementsAre(x, y);
   // Changing x and y now shouldn't affect the meaning of the above matcher.
   x = y = 0;

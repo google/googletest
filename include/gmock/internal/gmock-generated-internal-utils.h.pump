@@ -77,8 +77,8 @@ $var typename_As = [[$for j, [[typename A$j]]]]
 $var As = [[$for j, [[A$j]]]]
 $var matcher_As = [[$for j, [[Matcher<A$j>]]]]
 template <$typename_As>
-struct MatcherTuple< ::std::tr1::tuple<$As> > {
-  typedef ::std::tr1::tuple<$matcher_As > type;
+struct MatcherTuple< ::testing::tuple<$As> > {
+  typedef ::testing::tuple<$matcher_As > type;
 };
 
 
@@ -102,7 +102,7 @@ struct Function;
 template <typename R>
 struct Function<R()> {
   typedef R Result;
-  typedef ::std::tr1::tuple<> ArgumentTuple;
+  typedef ::testing::tuple<> ArgumentTuple;
   typedef typename MatcherTuple<ArgumentTuple>::type ArgumentMatcherTuple;
   typedef void MakeResultVoid();
   typedef IgnoredValue MakeResultIgnoredValue();
@@ -121,7 +121,7 @@ template <typename R$typename_As>
 struct Function<R($As)>
     : Function<R($prev_As)> {
   typedef A$i Argument$i;
-  typedef ::std::tr1::tuple<$As> ArgumentTuple;
+  typedef ::testing::tuple<$As> ArgumentTuple;
   typedef typename MatcherTuple<ArgumentTuple>::type ArgumentMatcherTuple;
   typedef void MakeResultVoid($As);
   typedef IgnoredValue MakeResultIgnoredValue($As);

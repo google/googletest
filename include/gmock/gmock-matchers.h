@@ -706,7 +706,6 @@ class TuplePrefix {
   template <typename MatcherTuple, typename ValueTuple>
   static bool Matches(const MatcherTuple& matcher_tuple,
                       const ValueTuple& value_tuple) {
-    using ::std::tr1::get;
     return TuplePrefix<N - 1>::Matches(matcher_tuple, value_tuple)
         && get<N - 1>(matcher_tuple).Matches(get<N - 1>(value_tuple));
   }
@@ -719,9 +718,6 @@ class TuplePrefix {
   static void ExplainMatchFailuresTo(const MatcherTuple& matchers,
                                      const ValueTuple& values,
                                      ::std::ostream* os) {
-    using ::std::tr1::tuple_element;
-    using ::std::tr1::get;
-
     // First, describes failures in the first N - 1 fields.
     TuplePrefix<N - 1>::ExplainMatchFailuresTo(matchers, values, os);
 
@@ -774,7 +770,6 @@ class TuplePrefix<0> {
 template <typename MatcherTuple, typename ValueTuple>
 bool TupleMatches(const MatcherTuple& matcher_tuple,
                   const ValueTuple& value_tuple) {
-  using ::std::tr1::tuple_size;
   // Makes sure that matcher_tuple and value_tuple have the same
   // number of fields.
   GTEST_COMPILE_ASSERT_(tuple_size<MatcherTuple>::value ==
@@ -790,7 +785,6 @@ template <typename MatcherTuple, typename ValueTuple>
 void ExplainMatchFailureTupleTo(const MatcherTuple& matchers,
                                 const ValueTuple& values,
                                 ::std::ostream* os) {
-  using ::std::tr1::tuple_size;
   TuplePrefix<tuple_size<MatcherTuple>::value>::ExplainMatchFailuresTo(
       matchers, values, os);
 }
@@ -802,7 +796,7 @@ void ExplainMatchFailureTupleTo(const MatcherTuple& matchers,
 template <typename Tuple, typename Func, typename OutIter>
 class TransformTupleValuesHelper {
  private:
-  typedef typename ::std::tr1::tuple_size<Tuple> TupleSize;
+  typedef ::testing::tuple_size<Tuple> TupleSize;
 
  public:
   // For each member of tuple 't', taken in order, evaluates '*out++ = f(t)'.
@@ -815,7 +809,7 @@ class TransformTupleValuesHelper {
   template <typename Tup, size_t kRemainingSize>
   struct IterateOverTuple {
     OutIter operator() (Func f, const Tup& t, OutIter out) const {
-      *out++ = f(::std::tr1::get<TupleSize::value - kRemainingSize>(t));
+      *out++ = f(::testing::get<TupleSize::value - kRemainingSize>(t));
       return IterateOverTuple<Tup, kRemainingSize - 1>()(f, t, out);
     }
   };
@@ -1322,12 +1316,12 @@ class MatchesRegexMatcher {
   class name##2Matcher { \
    public: \
     template <typename T1, typename T2> \
-    operator Matcher< ::std::tr1::tuple<T1, T2> >() const { \
-      return MakeMatcher(new Impl< ::std::tr1::tuple<T1, T2> >); \
+    operator Matcher< ::testing::tuple<T1, T2> >() const { \
+      return MakeMatcher(new Impl< ::testing::tuple<T1, T2> >); \
     } \
     template <typename T1, typename T2> \
-    operator Matcher<const ::std::tr1::tuple<T1, T2>&>() const { \
-      return MakeMatcher(new Impl<const ::std::tr1::tuple<T1, T2>&>); \
+    operator Matcher<const ::testing::tuple<T1, T2>&>() const { \
+      return MakeMatcher(new Impl<const ::testing::tuple<T1, T2>&>); \
     } \
    private: \
     template <typename Tuple> \
@@ -1336,10 +1330,10 @@ class MatchesRegexMatcher {
       virtual bool MatchAndExplain( \
           Tuple args, \
           MatchResultListener* /* listener */) const { \
-        return ::std::tr1::get<0>(args) op ::std::tr1::get<1>(args); \
+        return ::testing::get<0>(args) op ::testing::get<1>(args); \
       } \
       virtual void DescribeTo(::std::ostream* os) const { \
-        *os << "are " relation;                                 \
+        *os << "are " relation; \
       } \
       virtual void DescribeNegationTo(::std::ostream* os) const { \
         *os << "aren't " relation; \
@@ -2543,7 +2537,7 @@ class PointwiseMatcher {
     // reference, as they may be expensive to copy.  We must use tuple
     // instead of pair here, as a pair cannot hold references (C++ 98,
     // 20.2.2 [lib.pairs]).
-    typedef ::std::tr1::tuple<const LhsValue&, const RhsValue&> InnerMatcherArg;
+    typedef ::testing::tuple<const LhsValue&, const RhsValue&> InnerMatcherArg;
 
     Impl(const TupleMatcher& tuple_matcher, const RhsStlContainer& rhs)
         // mono_tuple_matcher_ holds a monomorphic version of the tuple matcher.
@@ -3280,7 +3274,7 @@ class UnorderedElementsAreMatcher {
     typedef typename View::value_type Element;
     typedef ::std::vector<Matcher<const Element&> > MatcherVec;
     MatcherVec matchers;
-    matchers.reserve(::std::tr1::tuple_size<MatcherTuple>::value);
+    matchers.reserve(::testing::tuple_size<MatcherTuple>::value);
     TransformTupleValues(CastAndAppendTransform<const Element&>(), matchers_,
                          ::std::back_inserter(matchers));
     return MakeMatcher(new UnorderedElementsAreMatcherImpl<Container>(
@@ -3305,7 +3299,7 @@ class ElementsAreMatcher {
     typedef typename View::value_type Element;
     typedef ::std::vector<Matcher<const Element&> > MatcherVec;
     MatcherVec matchers;
-    matchers.reserve(::std::tr1::tuple_size<MatcherTuple>::value);
+    matchers.reserve(::testing::tuple_size<MatcherTuple>::value);
     TransformTupleValues(CastAndAppendTransform<const Element&>(), matchers_,
                          ::std::back_inserter(matchers));
     return MakeMatcher(new ElementsAreMatcherImpl<Container>(

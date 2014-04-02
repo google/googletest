@@ -53,7 +53,7 @@ $range i 0..n-1
 
 // The type of the i-th (0-based) field of Tuple.
 #define GMOCK_FIELD_TYPE_(Tuple, i) \
-    typename ::std::tr1::tuple_element<i, Tuple>::type
+    typename ::testing::tuple_element<i, Tuple>::type
 
 // TupleFields<Tuple, k0, ..., kn> is for selecting fields from a
 // tuple of type Tuple.  It has two members:
@@ -73,9 +73,8 @@ class TupleFields;
 template <class Tuple$for i [[, int k$i]]>
 class TupleFields {
  public:
-  typedef ::std::tr1::tuple<$for i, [[GMOCK_FIELD_TYPE_(Tuple, k$i)]]> type;
+  typedef ::testing::tuple<$for i, [[GMOCK_FIELD_TYPE_(Tuple, k$i)]]> type;
   static type GetSelectedFields(const Tuple& t) {
-    using ::std::tr1::get;
     return type($for i, [[get<k$i>(t)]]);
   }
 };
@@ -90,9 +89,8 @@ $range k 0..n-1
 template <class Tuple$for j [[, int k$j]]>
 class TupleFields<Tuple, $for k, [[$if k < i [[k$k]] $else [[-1]]]]> {
  public:
-  typedef ::std::tr1::tuple<$for j, [[GMOCK_FIELD_TYPE_(Tuple, k$j)]]> type;
+  typedef ::testing::tuple<$for j, [[GMOCK_FIELD_TYPE_(Tuple, k$j)]]> type;
   static type GetSelectedFields(const Tuple& $if i==0 [[/* t */]] $else [[t]]) {
-    using ::std::tr1::get;
     return type($for j, [[get<k$j>(t)]]);
   }
 };
@@ -289,12 +287,12 @@ template <$for j, [[typename T$j]]>
 ]]
 
 inline internal::ElementsAreMatcher<
-    std::tr1::tuple<
+    ::testing::tuple<
 $for j, [[
 
         typename internal::DecayArray<T$j[[]]>::type]]> >
 ElementsAre($for j, [[const T$j& e$j]]) {
-  typedef std::tr1::tuple<
+  typedef ::testing::tuple<
 $for j, [[
 
       typename internal::DecayArray<T$j[[]]>::type]]> Args;
@@ -317,12 +315,12 @@ template <$for j, [[typename T$j]]>
 ]]
 
 inline internal::UnorderedElementsAreMatcher<
-    std::tr1::tuple<
+    ::testing::tuple<
 $for j, [[
 
         typename internal::DecayArray<T$j[[]]>::type]]> >
 UnorderedElementsAre($for j, [[const T$j& e$j]]) {
-  typedef std::tr1::tuple<
+  typedef ::testing::tuple<
 $for j, [[
 
       typename internal::DecayArray<T$j[[]]>::type]]> Args;
@@ -646,7 +644,7 @@ $var param_field_decls2 = [[$for j
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::std::tr1::tuple<$for j, [[p$j##_type]]>($for j, [[p$j]])));\
+                ::testing::tuple<$for j, [[p$j##_type]]>($for j, [[p$j]])));\
       }\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\

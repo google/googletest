@@ -81,9 +81,9 @@ using std::ostream;
 using std::pair;
 using std::set;
 using std::stringstream;
-using std::tr1::get;
-using std::tr1::make_tuple;
-using std::tr1::tuple;
+using testing::get;
+using testing::make_tuple;
+using testing::tuple;
 using std::vector;
 using testing::A;
 using testing::AllArgs;
@@ -1896,7 +1896,7 @@ TEST(GlobalWideEndsWithTest, CanDescribeSelf) {
 #endif  // GTEST_HAS_GLOBAL_WSTRING
 
 
-typedef ::std::tr1::tuple<long, int> Tuple2;  // NOLINT
+typedef ::testing::tuple<long, int> Tuple2;  // NOLINT
 
 // Tests that Eq() matches a 2-tuple where the first field == the
 // second field.

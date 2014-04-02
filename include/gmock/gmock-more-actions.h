@@ -158,7 +158,7 @@ WithArg(const InnerAction& action) {
 ACTION_TEMPLATE(ReturnArg,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_0_VALUE_PARAMS()) {
-  return std::tr1::get<k>(args);
+  return ::testing::get<k>(args);
 }
 
 // Action SaveArg<k>(pointer) saves the k-th (0-based) argument of the
@@ -166,7 +166,7 @@ ACTION_TEMPLATE(ReturnArg,
 ACTION_TEMPLATE(SaveArg,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_1_VALUE_PARAMS(pointer)) {
-  *pointer = ::std::tr1::get<k>(args);
+  *pointer = ::testing::get<k>(args);
 }
 
 // Action SaveArgPointee<k>(pointer) saves the value pointed to
@@ -174,7 +174,7 @@ ACTION_TEMPLATE(SaveArg,
 ACTION_TEMPLATE(SaveArgPointee,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_1_VALUE_PARAMS(pointer)) {
-  *pointer = *::std::tr1::get<k>(args);
+  *pointer = *::testing::get<k>(args);
 }
 
 // Action SetArgReferee<k>(value) assigns 'value' to the variable
@@ -182,13 +182,13 @@ ACTION_TEMPLATE(SaveArgPointee,
 ACTION_TEMPLATE(SetArgReferee,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_1_VALUE_PARAMS(value)) {
-  typedef typename ::std::tr1::tuple_element<k, args_type>::type argk_type;
+  typedef typename ::testing::tuple_element<k, args_type>::type argk_type;
   // Ensures that argument #k is a reference.  If you get a compiler
   // error on the next line, you are using SetArgReferee<k>(value) in
   // a mock function whose k-th (0-based) argument is not a reference.
   GTEST_COMPILE_ASSERT_(internal::is_reference<argk_type>::value,
                         SetArgReferee_must_be_used_with_a_reference_argument);
-  ::std::tr1::get<k>(args) = value;
+  ::testing::get<k>(args) = value;
 }
 
 // Action SetArrayArgument<k>(first, last) copies the elements in
@@ -201,9 +201,9 @@ ACTION_TEMPLATE(SetArrayArgument,
                 AND_2_VALUE_PARAMS(first, last)) {
   // Visual Studio deprecates ::std::copy, so we use our own copy in that case.
 #ifdef _MSC_VER
-  internal::CopyElements(first, last, ::std::tr1::get<k>(args));
+  internal::CopyElements(first, last, ::testing::get<k>(args));
 #else
-  ::std::copy(first, last, ::std::tr1::get<k>(args));
+  ::std::copy(first, last, ::testing::get<k>(args));
 #endif
 }
 
@@ -212,7 +212,7 @@ ACTION_TEMPLATE(SetArrayArgument,
 ACTION_TEMPLATE(DeleteArg,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_0_VALUE_PARAMS()) {
-  delete ::std::tr1::get<k>(args);
+  delete ::testing::get<k>(args);
 }
 
 // This action returns the value pointed to by 'pointer'.

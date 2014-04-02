@@ -45,10 +45,10 @@
 
 namespace {
 
-using ::std::tr1::get;
-using ::std::tr1::make_tuple;
-using ::std::tr1::tuple;
-using ::std::tr1::tuple_element;
+using testing::get;
+using testing::make_tuple;
+using testing::tuple;
+using testing::tuple_element;
 using testing::internal::BuiltInDefaultValue;
 using testing::internal::Int64;
 using testing::internal::UInt64;

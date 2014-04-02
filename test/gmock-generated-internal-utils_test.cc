@@ -39,7 +39,7 @@
 
 namespace {
 
-using ::std::tr1::tuple;
+using ::testing::tuple;
 using ::testing::Matcher;
 using ::testing::internal::CompileAssertTypesEqual;
 using ::testing::internal::MatcherTuple;

@@ -728,7 +728,7 @@ class SetArgumentPointeeAction {
   template <typename Result, typename ArgumentTuple>
   void Perform(const ArgumentTuple& args) const {
     CompileAssertTypesEqual<void, Result>();
-    *::std::tr1::get<N>(args) = value_;
+    *::testing::get<N>(args) = value_;
   }
 
  private:
@@ -751,7 +751,7 @@ class SetArgumentPointeeAction<N, Proto, true> {
   template <typename Result, typename ArgumentTuple>
   void Perform(const ArgumentTuple& args) const {
     CompileAssertTypesEqual<void, Result>();
-    ::std::tr1::get<N>(args)->CopyFrom(*proto_);
+    ::testing::get<N>(args)->CopyFrom(*proto_);
   }
 
  private:

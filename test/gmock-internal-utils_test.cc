@@ -59,9 +59,6 @@ namespace internal {
 
 namespace {
 
-using ::std::tr1::make_tuple;
-using ::std::tr1::tuple;
-
 TEST(ConvertIdentifierNameToWordsTest, WorksWhenNameContainsNoWord) {
   EXPECT_EQ("", ConvertIdentifierNameToWords(""));
   EXPECT_EQ("", ConvertIdentifierNameToWords("_"));

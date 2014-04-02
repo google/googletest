@@ -46,10 +46,10 @@ namespace gmock_generated_actions_test {
 
 using ::std::plus;
 using ::std::string;
-using ::std::tr1::get;
-using ::std::tr1::make_tuple;
-using ::std::tr1::tuple;
-using ::std::tr1::tuple_element;
+using testing::get;
+using testing::make_tuple;
+using testing::tuple;
+using testing::tuple_element;
 using testing::_;
 using testing::Action;
 using testing::ActionInterface;
@@ -639,7 +639,7 @@ TEST(ActionMacroTest, CanReferenceArgumentType) {
 // Tests that the body of ACTION() can reference the argument tuple
 // via args_type and args.
 ACTION(Sum2) {
-  StaticAssertTypeEq< ::std::tr1::tuple<int, char, int*>, args_type>();
+  StaticAssertTypeEq<tuple<int, char, int*>, args_type>();
   args_type args_copy = args;
   return get<0>(args_copy) + get<1>(args_copy);
 }
@@ -1098,7 +1098,7 @@ TEST(ActionTemplateTest, WorksWithValueParams) {
 ACTION_TEMPLATE(MyDeleteArg,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_0_VALUE_PARAMS()) {
-  delete std::tr1::get<k>(args);
+  delete get<k>(args);
 }
 
 // Resets a bool variable in the destructor.

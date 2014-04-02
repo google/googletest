@@ -49,7 +49,7 @@ namespace internal {
 
 // The type of the i-th (0-based) field of Tuple.
 #define GMOCK_FIELD_TYPE_(Tuple, i) \
-    typename ::std::tr1::tuple_element<i, Tuple>::type
+    typename ::testing::tuple_element<i, Tuple>::type
 
 // TupleFields<Tuple, k0, ..., kn> is for selecting fields from a
 // tuple of type Tuple.  It has two members:
@@ -72,14 +72,13 @@ template <class Tuple, int k0, int k1, int k2, int k3, int k4, int k5, int k6,
     int k7, int k8, int k9>
 class TupleFields {
  public:
-  typedef ::std::tr1::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
+  typedef ::testing::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
       GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2),
       GMOCK_FIELD_TYPE_(Tuple, k3), GMOCK_FIELD_TYPE_(Tuple, k4),
       GMOCK_FIELD_TYPE_(Tuple, k5), GMOCK_FIELD_TYPE_(Tuple, k6),
       GMOCK_FIELD_TYPE_(Tuple, k7), GMOCK_FIELD_TYPE_(Tuple, k8),
       GMOCK_FIELD_TYPE_(Tuple, k9)> type;
   static type GetSelectedFields(const Tuple& t) {
-    using ::std::tr1::get;
     return type(get<k0>(t), get<k1>(t), get<k2>(t), get<k3>(t), get<k4>(t),
         get<k5>(t), get<k6>(t), get<k7>(t), get<k8>(t), get<k9>(t));
   }
@@ -90,9 +89,8 @@ class TupleFields {
 template <class Tuple>
 class TupleFields<Tuple, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1> {
  public:
-  typedef ::std::tr1::tuple<> type;
+  typedef ::testing::tuple<> type;
   static type GetSelectedFields(const Tuple& /* t */) {
-    using ::std::tr1::get;
     return type();
   }
 };
@@ -100,9 +98,8 @@ class TupleFields<Tuple, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1> {
 template <class Tuple, int k0>
 class TupleFields<Tuple, k0, -1, -1, -1, -1, -1, -1, -1, -1, -1> {
  public:
-  typedef ::std::tr1::tuple<GMOCK_FIELD_TYPE_(Tuple, k0)> type;
+  typedef ::testing::tuple<GMOCK_FIELD_TYPE_(Tuple, k0)> type;
   static type GetSelectedFields(const Tuple& t) {
-    using ::std::tr1::get;
     return type(get<k0>(t));
   }
 };
@@ -110,10 +107,9 @@ class TupleFields<Tuple, k0, -1, -1, -1, -1, -1, -1, -1, -1, -1> {
 template <class Tuple, int k0, int k1>
 class TupleFields<Tuple, k0, k1, -1, -1, -1, -1, -1, -1, -1, -1> {
  public:
-  typedef ::std::tr1::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
+  typedef ::testing::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
       GMOCK_FIELD_TYPE_(Tuple, k1)> type;
   static type GetSelectedFields(const Tuple& t) {
-    using ::std::tr1::get;
     return type(get<k0>(t), get<k1>(t));
   }
 };
@@ -121,10 +117,9 @@ class TupleFields<Tuple, k0, k1, -1, -1, -1, -1, -1, -1, -1, -1> {
 template <class Tuple, int k0, int k1, int k2>
 class TupleFields<Tuple, k0, k1, k2, -1, -1, -1, -1, -1, -1, -1> {
  public:
-  typedef ::std::tr1::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
+  typedef ::testing::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
       GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2)> type;
   static type GetSelectedFields(const Tuple& t) {
-    using ::std::tr1::get;
     return type(get<k0>(t), get<k1>(t), get<k2>(t));
   }
 };
@@ -132,11 +127,10 @@ class TupleFields<Tuple, k0, k1, k2, -1, -1, -1, -1, -1, -1, -1> {
 template <class Tuple, int k0, int k1, int k2, int k3>
 class TupleFields<Tuple, k0, k1, k2, k3, -1, -1, -1, -1, -1, -1> {
  public:
-  typedef ::std::tr1::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
+  typedef ::testing::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
       GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2),
       GMOCK_FIELD_TYPE_(Tuple, k3)> type;
   static type GetSelectedFields(const Tuple& t) {
-    using ::std::tr1::get;
     return type(get<k0>(t), get<k1>(t), get<k2>(t), get<k3>(t));
   }
 };
@@ -144,11 +138,10 @@ class TupleFields<Tuple, k0, k1, k2, k3, -1, -1, -1, -1, -1, -1> {
 template <class Tuple, int k0, int k1, int k2, int k3, int k4>
 class TupleFields<Tuple, k0, k1, k2, k3, k4, -1, -1, -1, -1, -1> {
  public:
-  typedef ::std::tr1::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
+  typedef ::testing::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
       GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2),
       GMOCK_FIELD_TYPE_(Tuple, k3), GMOCK_FIELD_TYPE_(Tuple, k4)> type;
   static type GetSelectedFields(const Tuple& t) {
-    using ::std::tr1::get;
     return type(get<k0>(t), get<k1>(t), get<k2>(t), get<k3>(t), get<k4>(t));
   }
 };
@@ -156,12 +149,11 @@ class TupleFields<Tuple, k0, k1, k2, k3, k4, -1, -1, -1, -1, -1> {
 template <class Tuple, int k0, int k1, int k2, int k3, int k4, int k5>
 class TupleFields<Tuple, k0, k1, k2, k3, k4, k5, -1, -1, -1, -1> {
  public:
-  typedef ::std::tr1::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
+  typedef ::testing::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
       GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2),
       GMOCK_FIELD_TYPE_(Tuple, k3), GMOCK_FIELD_TYPE_(Tuple, k4),
       GMOCK_FIELD_TYPE_(Tuple, k5)> type;
   static type GetSelectedFields(const Tuple& t) {
-    using ::std::tr1::get;
     return type(get<k0>(t), get<k1>(t), get<k2>(t), get<k3>(t), get<k4>(t),
         get<k5>(t));
   }
@@ -170,12 +162,11 @@ class TupleFields<Tuple, k0, k1, k2, k3, k4, k5, -1, -1, -1, -1> {
 template <class Tuple, int k0, int k1, int k2, int k3, int k4, int k5, int k6>
 class TupleFields<Tuple, k0, k1, k2, k3, k4, k5, k6, -1, -1, -1> {
  public:
-  typedef ::std::tr1::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
+  typedef ::testing::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
       GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2),
       GMOCK_FIELD_TYPE_(Tuple, k3), GMOCK_FIELD_TYPE_(Tuple, k4),
       GMOCK_FIELD_TYPE_(Tuple, k5), GMOCK_FIELD_TYPE_(Tuple, k6)> type;
   static type GetSelectedFields(const Tuple& t) {
-    using ::std::tr1::get;
     return type(get<k0>(t), get<k1>(t), get<k2>(t), get<k3>(t), get<k4>(t),
         get<k5>(t), get<k6>(t));
   }
@@ -185,13 +176,12 @@ template <class Tuple, int k0, int k1, int k2, int k3, int k4, int k5, int k6,
     int k7>
 class TupleFields<Tuple, k0, k1, k2, k3, k4, k5, k6, k7, -1, -1> {
  public:
-  typedef ::std::tr1::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
+  typedef ::testing::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
       GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2),
       GMOCK_FIELD_TYPE_(Tuple, k3), GMOCK_FIELD_TYPE_(Tuple, k4),
       GMOCK_FIELD_TYPE_(Tuple, k5), GMOCK_FIELD_TYPE_(Tuple, k6),
       GMOCK_FIELD_TYPE_(Tuple, k7)> type;
   static type GetSelectedFields(const Tuple& t) {
-    using ::std::tr1::get;
     return type(get<k0>(t), get<k1>(t), get<k2>(t), get<k3>(t), get<k4>(t),
         get<k5>(t), get<k6>(t), get<k7>(t));
   }
@@ -201,13 +191,12 @@ template <class Tuple, int k0, int k1, int k2, int k3, int k4, int k5, int k6,
     int k7, int k8>
 class TupleFields<Tuple, k0, k1, k2, k3, k4, k5, k6, k7, k8, -1> {
  public:
-  typedef ::std::tr1::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
+  typedef ::testing::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
       GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2),
       GMOCK_FIELD_TYPE_(Tuple, k3), GMOCK_FIELD_TYPE_(Tuple, k4),
       GMOCK_FIELD_TYPE_(Tuple, k5), GMOCK_FIELD_TYPE_(Tuple, k6),
       GMOCK_FIELD_TYPE_(Tuple, k7), GMOCK_FIELD_TYPE_(Tuple, k8)> type;
   static type GetSelectedFields(const Tuple& t) {
-    using ::std::tr1::get;
     return type(get<k0>(t), get<k1>(t), get<k2>(t), get<k3>(t), get<k4>(t),
         get<k5>(t), get<k6>(t), get<k7>(t), get<k8>(t));
   }
@@ -577,29 +566,29 @@ Args(const InnerMatcher& matcher) {
 // undefined (e.g. hash_map).
 
 inline internal::ElementsAreMatcher<
-    std::tr1::tuple<> >
+    ::testing::tuple<> >
 ElementsAre() {
-  typedef std::tr1::tuple<> Args;
+  typedef ::testing::tuple<> Args;
   return internal::ElementsAreMatcher<Args>(Args());
 }
 
 template <typename T1>
 inline internal::ElementsAreMatcher<
-    std::tr1::tuple<
+    ::testing::tuple<
         typename internal::DecayArray<T1>::type> >
 ElementsAre(const T1& e1) {
-  typedef std::tr1::tuple<
+  typedef ::testing::tuple<
       typename internal::DecayArray<T1>::type> Args;
   return internal::ElementsAreMatcher<Args>(Args(e1));
 }
 
 template <typename T1, typename T2>
 inline internal::ElementsAreMatcher<
-    std::tr1::tuple<
+    ::testing::tuple<
         typename internal::DecayArray<T1>::type,
         typename internal::DecayArray<T2>::type> >
 ElementsAre(const T1& e1, const T2& e2) {
-  typedef std::tr1::tuple<
+  typedef ::testing::tuple<
       typename internal::DecayArray<T1>::type,
       typename internal::DecayArray<T2>::type> Args;
   return internal::ElementsAreMatcher<Args>(Args(e1, e2));
@@ -607,12 +596,12 @@ ElementsAre(const T1& e1, const T2& e2) {
 
 template <typename T1, typename T2, typename T3>
 inline internal::ElementsAreMatcher<
-    std::tr1::tuple<
+    ::testing::tuple<
         typename internal::DecayArray<T1>::type,
         typename internal::DecayArray<T2>::type,
         typename internal::DecayArray<T3>::type> >
 ElementsAre(const T1& e1, const T2& e2, const T3& e3) {
-  typedef std::tr1::tuple<
+  typedef ::testing::tuple<
       typename internal::DecayArray<T1>::type,
       typename internal::DecayArray<T2>::type,
       typename internal::DecayArray<T3>::type> Args;
@@ -621,13 +610,13 @@ ElementsAre(const T1& e1, const T2& e2, const T3& e3) {
 
 template <typename T1, typename T2, typename T3, typename T4>
 inline internal::ElementsAreMatcher<
-    std::tr1::tuple<
+    ::testing::tuple<
         typename internal::DecayArray<T1>::type,
         typename internal::DecayArray<T2>::type,
         typename internal::DecayArray<T3>::type,
         typename internal::DecayArray<T4>::type> >
 ElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4) {
-  typedef std::tr1::tuple<
+  typedef ::testing::tuple<
       typename internal::DecayArray<T1>::type,
       typename internal::DecayArray<T2>::type,
       typename internal::DecayArray<T3>::type,
@@ -637,7 +626,7 @@ ElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4) {
 
 template <typename T1, typename T2, typename T3, typename T4, typename T5>
 inline internal::ElementsAreMatcher<
-    std::tr1::tuple<
+    ::testing::tuple<
         typename internal::DecayArray<T1>::type,
         typename internal::DecayArray<T2>::type,
         typename internal::DecayArray<T3>::type,
@@ -645,7 +634,7 @@ inline internal::ElementsAreMatcher<
         typename internal::DecayArray<T5>::type> >
 ElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
     const T5& e5) {
-  typedef std::tr1::tuple<
+  typedef ::testing::tuple<
       typename internal::DecayArray<T1>::type,
       typename internal::DecayArray<T2>::type,
       typename internal::DecayArray<T3>::type,
@@ -657,7 +646,7 @@ ElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
 template <typename T1, typename T2, typename T3, typename T4, typename T5,
     typename T6>
 inline internal::ElementsAreMatcher<
-    std::tr1::tuple<
+    ::testing::tuple<
         typename internal::DecayArray<T1>::type,
         typename internal::DecayArray<T2>::type,
         typename internal::DecayArray<T3>::type,
@@ -666,7 +655,7 @@ inline internal::ElementsAreMatcher<
         typename internal::DecayArray<T6>::type> >
 ElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
     const T5& e5, const T6& e6) {
-  typedef std::tr1::tuple<
+  typedef ::testing::tuple<
       typename internal::DecayArray<T1>::type,
       typename internal::DecayArray<T2>::type,
       typename internal::DecayArray<T3>::type,
@@ -679,7 +668,7 @@ ElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
 template <typename T1, typename T2, typename T3, typename T4, typename T5,
     typename T6, typename T7>
 inline internal::ElementsAreMatcher<
-    std::tr1::tuple<
+    ::testing::tuple<
         typename internal::DecayArray<T1>::type,
         typename internal::DecayArray<T2>::type,
         typename internal::DecayArray<T3>::type,
@@ -689,7 +678,7 @@ inline internal::ElementsAreMatcher<
         typename internal::DecayArray<T7>::type> >
 ElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
     const T5& e5, const T6& e6, const T7& e7) {
-  typedef std::tr1::tuple<
+  typedef ::testing::tuple<
       typename internal::DecayArray<T1>::type,
       typename internal::DecayArray<T2>::type,
       typename internal::DecayArray<T3>::type,
@@ -703,7 +692,7 @@ ElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
 template <typename T1, typename T2, typename T3, typename T4, typename T5,
     typename T6, typename T7, typename T8>
 inline internal::ElementsAreMatcher<
-    std::tr1::tuple<
+    ::testing::tuple<
         typename internal::DecayArray<T1>::type,
         typename internal::DecayArray<T2>::type,
         typename internal::DecayArray<T3>::type,
@@ -714,7 +703,7 @@ inline internal::ElementsAreMatcher<
         typename internal::DecayArray<T8>::type> >
 ElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
     const T5& e5, const T6& e6, const T7& e7, const T8& e8) {
-  typedef std::tr1::tuple<
+  typedef ::testing::tuple<
       typename internal::DecayArray<T1>::type,
       typename internal::DecayArray<T2>::type,
       typename internal::DecayArray<T3>::type,
@@ -730,7 +719,7 @@ ElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
 template <typename T1, typename T2, typename T3, typename T4, typename T5,
     typename T6, typename T7, typename T8, typename T9>
 inline internal::ElementsAreMatcher<
-    std::tr1::tuple<
+    ::testing::tuple<
         typename internal::DecayArray<T1>::type,
         typename internal::DecayArray<T2>::type,
         typename internal::DecayArray<T3>::type,
@@ -742,7 +731,7 @@ inline internal::ElementsAreMatcher<
         typename internal::DecayArray<T9>::type> >
 ElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
     const T5& e5, const T6& e6, const T7& e7, const T8& e8, const T9& e9) {
-  typedef std::tr1::tuple<
+  typedef ::testing::tuple<
       typename internal::DecayArray<T1>::type,
       typename internal::DecayArray<T2>::type,
       typename internal::DecayArray<T3>::type,
@@ -759,7 +748,7 @@ ElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
 template <typename T1, typename T2, typename T3, typename T4, typename T5,
     typename T6, typename T7, typename T8, typename T9, typename T10>
 inline internal::ElementsAreMatcher<
-    std::tr1::tuple<
+    ::testing::tuple<
         typename internal::DecayArray<T1>::type,
         typename internal::DecayArray<T2>::type,
         typename internal::DecayArray<T3>::type,
@@ -773,7 +762,7 @@ inline internal::ElementsAreMatcher<
 ElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
     const T5& e5, const T6& e6, const T7& e7, const T8& e8, const T9& e9,
     const T10& e10) {
-  typedef std::tr1::tuple<
+  typedef ::testing::tuple<
       typename internal::DecayArray<T1>::type,
       typename internal::DecayArray<T2>::type,
       typename internal::DecayArray<T3>::type,
@@ -792,29 +781,29 @@ ElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
 // that matches n elements in any order.  We support up to n=10 arguments.
 
 inline internal::UnorderedElementsAreMatcher<
-    std::tr1::tuple<> >
+    ::testing::tuple<> >
 UnorderedElementsAre() {
-  typedef std::tr1::tuple<> Args;
+  typedef ::testing::tuple<> Args;
   return internal::UnorderedElementsAreMatcher<Args>(Args());
 }
 
 template <typename T1>
 inline internal::UnorderedElementsAreMatcher<
-    std::tr1::tuple<
+    ::testing::tuple<
         typename internal::DecayArray<T1>::type> >
 UnorderedElementsAre(const T1& e1) {
-  typedef std::tr1::tuple<
+  typedef ::testing::tuple<
       typename internal::DecayArray<T1>::type> Args;
   return internal::UnorderedElementsAreMatcher<Args>(Args(e1));
 }
 
 template <typename T1, typename T2>
 inline internal::UnorderedElementsAreMatcher<
-    std::tr1::tuple<
+    ::testing::tuple<
         typename internal::DecayArray<T1>::type,
         typename internal::DecayArray<T2>::type> >
 UnorderedElementsAre(const T1& e1, const T2& e2) {
-  typedef std::tr1::tuple<
+  typedef ::testing::tuple<
       typename internal::DecayArray<T1>::type,
       typename internal::DecayArray<T2>::type> Args;
   return internal::UnorderedElementsAreMatcher<Args>(Args(e1, e2));
@@ -822,12 +811,12 @@ UnorderedElementsAre(const T1& e1, const T2& e2) {
 
 template <typename T1, typename T2, typename T3>
 inline internal::UnorderedElementsAreMatcher<
-    std::tr1::tuple<
+    ::testing::tuple<
         typename internal::DecayArray<T1>::type,
         typename internal::DecayArray<T2>::type,
         typename internal::DecayArray<T3>::type> >
 UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3) {
-  typedef std::tr1::tuple<
+  typedef ::testing::tuple<
       typename internal::DecayArray<T1>::type,
       typename internal::DecayArray<T2>::type,
       typename internal::DecayArray<T3>::type> Args;
@@ -836,13 +825,13 @@ UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3) {
 
 template <typename T1, typename T2, typename T3, typename T4>
 inline internal::UnorderedElementsAreMatcher<
-    std::tr1::tuple<
+    ::testing::tuple<
         typename internal::DecayArray<T1>::type,
         typename internal::DecayArray<T2>::type,
         typename internal::DecayArray<T3>::type,
         typename internal::DecayArray<T4>::type> >
 UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4) {
-  typedef std::tr1::tuple<
+  typedef ::testing::tuple<
       typename internal::DecayArray<T1>::type,
       typename internal::DecayArray<T2>::type,
       typename internal::DecayArray<T3>::type,
@@ -852,7 +841,7 @@ UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4) {
 
 template <typename T1, typename T2, typename T3, typename T4, typename T5>
 inline internal::UnorderedElementsAreMatcher<
-    std::tr1::tuple<
+    ::testing::tuple<
         typename internal::DecayArray<T1>::type,
         typename internal::DecayArray<T2>::type,
         typename internal::DecayArray<T3>::type,
@@ -860,7 +849,7 @@ inline internal::UnorderedElementsAreMatcher<
         typename internal::DecayArray<T5>::type> >
 UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
     const T5& e5) {
-  typedef std::tr1::tuple<
+  typedef ::testing::tuple<
       typename internal::DecayArray<T1>::type,
       typename internal::DecayArray<T2>::type,
       typename internal::DecayArray<T3>::type,
@@ -872,7 +861,7 @@ UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
 template <typename T1, typename T2, typename T3, typename T4, typename T5,
     typename T6>
 inline internal::UnorderedElementsAreMatcher<
-    std::tr1::tuple<
+    ::testing::tuple<
         typename internal::DecayArray<T1>::type,
         typename internal::DecayArray<T2>::type,
         typename internal::DecayArray<T3>::type,
@@ -881,7 +870,7 @@ inline internal::UnorderedElementsAreMatcher<
         typename internal::DecayArray<T6>::type> >
 UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
     const T5& e5, const T6& e6) {
-  typedef std::tr1::tuple<
+  typedef ::testing::tuple<
       typename internal::DecayArray<T1>::type,
       typename internal::DecayArray<T2>::type,
       typename internal::DecayArray<T3>::type,
@@ -895,7 +884,7 @@ UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
 template <typename T1, typename T2, typename T3, typename T4, typename T5,
     typename T6, typename T7>
 inline internal::UnorderedElementsAreMatcher<
-    std::tr1::tuple<
+    ::testing::tuple<
         typename internal::DecayArray<T1>::type,
         typename internal::DecayArray<T2>::type,
         typename internal::DecayArray<T3>::type,
@@ -905,7 +894,7 @@ inline internal::UnorderedElementsAreMatcher<
         typename internal::DecayArray<T7>::type> >
 UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
     const T5& e5, const T6& e6, const T7& e7) {
-  typedef std::tr1::tuple<
+  typedef ::testing::tuple<
       typename internal::DecayArray<T1>::type,
       typename internal::DecayArray<T2>::type,
       typename internal::DecayArray<T3>::type,
@@ -920,7 +909,7 @@ UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
 template <typename T1, typename T2, typename T3, typename T4, typename T5,
     typename T6, typename T7, typename T8>
 inline internal::UnorderedElementsAreMatcher<
-    std::tr1::tuple<
+    ::testing::tuple<
         typename internal::DecayArray<T1>::type,
         typename internal::DecayArray<T2>::type,
         typename internal::DecayArray<T3>::type,
@@ -931,7 +920,7 @@ inline internal::UnorderedElementsAreMatcher<
         typename internal::DecayArray<T8>::type> >
 UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
     const T5& e5, const T6& e6, const T7& e7, const T8& e8) {
-  typedef std::tr1::tuple<
+  typedef ::testing::tuple<
       typename internal::DecayArray<T1>::type,
       typename internal::DecayArray<T2>::type,
       typename internal::DecayArray<T3>::type,
@@ -947,7 +936,7 @@ UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
 template <typename T1, typename T2, typename T3, typename T4, typename T5,
     typename T6, typename T7, typename T8, typename T9>
 inline internal::UnorderedElementsAreMatcher<
-    std::tr1::tuple<
+    ::testing::tuple<
         typename internal::DecayArray<T1>::type,
         typename internal::DecayArray<T2>::type,
         typename internal::DecayArray<T3>::type,
@@ -959,7 +948,7 @@ inline internal::UnorderedElementsAreMatcher<
         typename internal::DecayArray<T9>::type> >
 UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
     const T5& e5, const T6& e6, const T7& e7, const T8& e8, const T9& e9) {
-  typedef std::tr1::tuple<
+  typedef ::testing::tuple<
       typename internal::DecayArray<T1>::type,
       typename internal::DecayArray<T2>::type,
       typename internal::DecayArray<T3>::type,
@@ -976,7 +965,7 @@ UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
 template <typename T1, typename T2, typename T3, typename T4, typename T5,
     typename T6, typename T7, typename T8, typename T9, typename T10>
 inline internal::UnorderedElementsAreMatcher<
-    std::tr1::tuple<
+    ::testing::tuple<
         typename internal::DecayArray<T1>::type,
         typename internal::DecayArray<T2>::type,
         typename internal::DecayArray<T3>::type,
@@ -990,7 +979,7 @@ inline internal::UnorderedElementsAreMatcher<
 UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
     const T5& e5, const T6& e6, const T7& e7, const T8& e8, const T9& e9,
     const T10& e10) {
-  typedef std::tr1::tuple<
+  typedef ::testing::tuple<
       typename internal::DecayArray<T1>::type,
       typename internal::DecayArray<T2>::type,
       typename internal::DecayArray<T3>::type,
@@ -1413,7 +1402,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::std::tr1::tuple<>()));\
+                ::testing::tuple<>()));\
       }\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
@@ -1462,7 +1451,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::std::tr1::tuple<p0##_type>(p0)));\
+                ::testing::tuple<p0##_type>(p0)));\
       }\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
@@ -1515,7 +1504,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::std::tr1::tuple<p0##_type, p1##_type>(p0, p1)));\
+                ::testing::tuple<p0##_type, p1##_type>(p0, p1)));\
       }\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
@@ -1573,7 +1562,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::std::tr1::tuple<p0##_type, p1##_type, p2##_type>(p0, p1, \
+                ::testing::tuple<p0##_type, p1##_type, p2##_type>(p0, p1, \
                     p2)));\
       }\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
@@ -1636,7 +1625,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::std::tr1::tuple<p0##_type, p1##_type, p2##_type, \
+                ::testing::tuple<p0##_type, p1##_type, p2##_type, \
                     p3##_type>(p0, p1, p2, p3)));\
       }\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
@@ -1707,7 +1696,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::std::tr1::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
+                ::testing::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
                     p4##_type>(p0, p1, p2, p3, p4)));\
       }\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
@@ -1781,7 +1770,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::std::tr1::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
+                ::testing::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
                     p4##_type, p5##_type>(p0, p1, p2, p3, p4, p5)));\
       }\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
@@ -1859,7 +1848,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::std::tr1::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
+                ::testing::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
                     p4##_type, p5##_type, p6##_type>(p0, p1, p2, p3, p4, p5, \
                     p6)));\
       }\
@@ -1944,7 +1933,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::std::tr1::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
+                ::testing::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
                     p4##_type, p5##_type, p6##_type, p7##_type>(p0, p1, p2, \
                     p3, p4, p5, p6, p7)));\
       }\
@@ -2035,7 +2024,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::std::tr1::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
+                ::testing::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
                     p4##_type, p5##_type, p6##_type, p7##_type, \
                     p8##_type>(p0, p1, p2, p3, p4, p5, p6, p7, p8)));\
       }\
@@ -2131,7 +2120,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::std::tr1::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
+                ::testing::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
                     p4##_type, p5##_type, p6##_type, p7##_type, p8##_type, \
                     p9##_type>(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9)));\
       }\

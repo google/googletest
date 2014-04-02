@@ -464,7 +464,7 @@ class StlContainerView<Element[N]> {
 // This specialization is used when RawContainer is a native array
 // represented as a (pointer, size) tuple.
 template <typename ElementPointer, typename Size>
-class StlContainerView< ::std::tr1::tuple<ElementPointer, Size> > {
+class StlContainerView< ::testing::tuple<ElementPointer, Size> > {
  public:
   typedef GTEST_REMOVE_CONST_(
       typename internal::PointeeOf<ElementPointer>::type) RawElement;
@@ -472,12 +472,10 @@ class StlContainerView< ::std::tr1::tuple<ElementPointer, Size> > {
   typedef const type const_reference;
 
   static const_reference ConstReference(
-      const ::std::tr1::tuple<ElementPointer, Size>& array) {
-    using ::std::tr1::get;
+      const ::testing::tuple<ElementPointer, Size>& array) {
     return type(get<0>(array), get<1>(array), kReference);
   }
-  static type Copy(const ::std::tr1::tuple<ElementPointer, Size>& array) {
-    using ::std::tr1::get;
+  static type Copy(const ::testing::tuple<ElementPointer, Size>& array) {
     return type(get<0>(array), get<1>(array), kCopy);
   }
 };
