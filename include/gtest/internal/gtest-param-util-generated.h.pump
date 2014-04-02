@@ -39,7 +39,7 @@ $var maxtuple = 10  $$ Maximum number of Combine arguments we want to support.
 // and at most $maxtuple arguments in Combine. Please contact
 // googletestframework@googlegroups.com if you need more.
 // Please note that the number of arguments to Combine is limited
-// by the maximum arity of the implementation of tr1::tuple which is
+// by the maximum arity of the implementation of tuple which is
 // currently set at $maxtuple.
 
 #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_GENERATED_H_
@@ -128,9 +128,9 @@ $range k 2..i
 
 template <$for j, [[typename T$j]]>
 class CartesianProductGenerator$i
-    : public ParamGeneratorInterface< ::std::tr1::tuple<$for j, [[T$j]]> > {
+    : public ParamGeneratorInterface< ::testing::tuple<$for j, [[T$j]]> > {
  public:
-  typedef ::std::tr1::tuple<$for j, [[T$j]]> ParamType;
+  typedef ::testing::tuple<$for j, [[T$j]]> ParamType;
 
   CartesianProductGenerator$i($for j, [[const ParamGenerator<T$j>& g$j]])
       : $for j, [[g$(j)_(g$j)]] {}
@@ -269,8 +269,8 @@ class CartesianProductHolder$i {
 CartesianProductHolder$i($for j, [[const Generator$j& g$j]])
       : $for j, [[g$(j)_(g$j)]] {}
   template <$for j, [[typename T$j]]>
-  operator ParamGenerator< ::std::tr1::tuple<$for j, [[T$j]]> >() const {
-    return ParamGenerator< ::std::tr1::tuple<$for j, [[T$j]]> >(
+  operator ParamGenerator< ::testing::tuple<$for j, [[T$j]]> >() const {
+    return ParamGenerator< ::testing::tuple<$for j, [[T$j]]> >(
         new CartesianProductGenerator$i<$for j, [[T$j]]>(
 $for j,[[
 
