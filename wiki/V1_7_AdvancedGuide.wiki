@@ -1954,7 +1954,7 @@ over from a previous run), Google Test will pick a different name (e.g.
 
 The report uses the format described here.  It is based on the
 `junitreport` Ant task and can be parsed by popular continuous build
-systems like [https://hudson.dev.java.net/ Hudson]. Since that format
+systems like [http://jenkins-ci.org/ Jenkins]. Since that format
 was originally intended for Java, a little interpretation is required
 to make it apply to Google Test tests, as shown here:
 
