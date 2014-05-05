@@ -1,4 +1,4 @@
-r#summary Advanced topics on using Google C++ Testing Framework
+#summary Advanced topics on using Google C++ Testing Framework
 
 <wiki:toc max_depth="3" />
 
@@ -44,7 +44,7 @@ switch(expression) {
 }
 }}}
 
-Note: you can only use `FAIL()` in functions that return `void`. See the [#AssertionPlacement Assertion Placement section] for more information.
+Note: you can only use `FAIL()` in functions that return `void`. See the [#Assertion_Placement Assertion Placement section] for more information.
 
 _Availability_: Linux, Windows, Mac.
 
@@ -394,7 +394,6 @@ to cause a compiler error.
 
 _Availability:_ Linux, Windows, Mac; since version 1.3.0.
 
-#AssertionPlacement
 == Assertion Placement  ==
 
 You can use assertions in any C++ function. In particular, it doesn't
