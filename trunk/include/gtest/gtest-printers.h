@@ -593,10 +593,7 @@ class UniversalPrinter {
  public:
   // MSVC warns about adding const to a function type, so we want to
   // disable the warning.
-#ifdef _MSC_VER
-# pragma warning(push)          // Saves the current warning state.
-# pragma warning(disable:4180)  // Temporarily disables warning 4180.
-#endif  // _MSC_VER
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4180)
 
   // Note: we deliberately don't call this PrintTo(), as that name
   // conflicts with ::testing::internal::PrintTo in the body of the
@@ -613,9 +610,7 @@ class UniversalPrinter {
     PrintTo(value, os);
   }
 
-#ifdef _MSC_VER
-# pragma warning(pop)           // Restores the warning state.
-#endif  // _MSC_VER
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
 };
 
 // UniversalPrintArray(begin, len, os) prints an array of 'len'
@@ -667,10 +662,7 @@ class UniversalPrinter<T&> {
  public:
   // MSVC warns about adding const to a function type, so we want to
   // disable the warning.
-#ifdef _MSC_VER
-# pragma warning(push)          // Saves the current warning state.
-# pragma warning(disable:4180)  // Temporarily disables warning 4180.
-#endif  // _MSC_VER
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4180)
 
   static void Print(const T& value, ::std::ostream* os) {
     // Prints the address of the value.  We use reinterpret_cast here
@@ -681,9 +673,7 @@ class UniversalPrinter<T&> {
     UniversalPrint(value, os);
   }
 
-#ifdef _MSC_VER
-# pragma warning(pop)           // Restores the warning state.
-#endif  // _MSC_VER
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
 };
 
 // Prints a value tersely: for a reference type, the referenced value
@@ -835,9 +825,9 @@ struct TuplePrefixPrinter {
   template <typename Tuple>
   static void PrintPrefixTo(const Tuple& t, ::std::ostream* os) {
     TuplePrefixPrinter<N - 1>::PrintPrefixTo(t, os);
-    GTEST_INTENTIONAL_CONST_COND_PUSH_
+    GTEST_INTENTIONAL_CONST_COND_PUSH_()
     if (N > 1) {
-    GTEST_INTENTIONAL_CONST_COND_POP_
+    GTEST_INTENTIONAL_CONST_COND_POP_()
       *os << ", ";
     }
     UniversalPrinter<

@@ -202,12 +202,12 @@ using ::testing::internal::FormatForComparisonFailureMessage;
 using ::testing::internal::ImplicitCast_;
 using ::testing::internal::NativeArray;
 using ::testing::internal::RE;
+using ::testing::internal::RelationToSourceReference;
 using ::testing::internal::Strings;
 using ::testing::internal::UniversalPrint;
 using ::testing::internal::UniversalPrinter;
 using ::testing::internal::UniversalTersePrint;
 using ::testing::internal::UniversalTersePrintTupleFieldsToStrings;
-using ::testing::internal::kReference;
 using ::testing::internal::string;
 
 // The hash_* classes are not part of the C++ standard.  STLport
@@ -946,13 +946,13 @@ TEST(PrintStlContainerTest, NestedContainer) {
 
 TEST(PrintStlContainerTest, OneDimensionalNativeArray) {
   const int a[3] = { 1, 2, 3 };
-  NativeArray<int> b(a, 3, kReference);
+  NativeArray<int> b(a, 3, RelationToSourceReference());
   EXPECT_EQ("{ 1, 2, 3 }", Print(b));
 }
 
 TEST(PrintStlContainerTest, TwoDimensionalNativeArray) {
   const int a[2][3] = { { 1, 2, 3 }, { 4, 5, 6 } };
-  NativeArray<int[3]> b(a, 2, kReference);
+  NativeArray<int[3]> b(a, 2, RelationToSourceReference());
   EXPECT_EQ("{ { 1, 2, 3 }, { 4, 5, 6 } }", Print(b));
 }
 
@@ -1648,3 +1648,4 @@ TEST(UniversalTersePrintTupleFieldsToStringsTestWithStd, PrintsTersely) {
 
 }  // namespace gtest_printers_test
 }  // namespace testing
+
