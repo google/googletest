@@ -653,7 +653,7 @@ $var param_field_decls2 = [[$for j
       return ::testing::Matcher<arg_type>(\
           new gmock_Impl<arg_type>($params));\
     }\
-    $class_name($ctor_param_list)$inits {\
+    [[$if i==1 [[explicit ]]]]$class_name($ctor_param_list)$inits {\
     }\$param_field_decls2
    private:\
     GTEST_DISALLOW_ASSIGN_($class_name);\

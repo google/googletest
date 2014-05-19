@@ -606,7 +606,7 @@ $range k 0..n-1
             GMOCK_INTERNAL_DECL_TYPE_##value_params>\
   class GMOCK_ACTION_CLASS_(name, value_params) {\
    public:\
-    GMOCK_ACTION_CLASS_(name, value_params)\
+    explicit GMOCK_ACTION_CLASS_(name, value_params)\
         GMOCK_INTERNAL_INIT_##value_params {}\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
@@ -694,7 +694,7 @@ $var macro_name = [[$if i==0 [[ACTION]] $elif i==1 [[ACTION_P]]
 #define $macro_name(name$for j [[, p$j]])\$template
   class $class_name {\
    public:\
-    $class_name($ctor_param_list)$inits {}\
+    [[$if i==1 [[explicit ]]]]$class_name($ctor_param_list)$inits {}\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\

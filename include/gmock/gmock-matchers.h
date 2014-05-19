@@ -1997,6 +1997,83 @@ class PointeeMatcher {
   GTEST_DISALLOW_ASSIGN_(PointeeMatcher);
 };
 
+// Implements the WhenDynamicCastTo<T>(m) matcher that matches a pointer or
+// reference that matches inner_matcher when dynamic_cast<T> is applied.
+// The result of dynamic_cast<To> is forwarded to the inner matcher.
+// If To is a pointer and the cast fails, the inner matcher will receive NULL.
+// If To is a reference and the cast fails, this matcher returns false
+// immediately.
+template <typename To>
+class WhenDynamicCastToMatcherBase {
+ public:
+  explicit WhenDynamicCastToMatcherBase(const Matcher<To>& matcher)
+      : matcher_(matcher) {}
+
+  void DescribeTo(::std::ostream* os) const {
+    GetCastTypeDescription(os);
+    matcher_.DescribeTo(os);
+  }
+
+  void DescribeNegationTo(::std::ostream* os) const {
+    GetCastTypeDescription(os);
+    matcher_.DescribeNegationTo(os);
+  }
+
+ protected:
+  const Matcher<To> matcher_;
+
+  static string GetToName() {
+#if GTEST_HAS_RTTI
+    return GetTypeName<To>();
+#else  // GTEST_HAS_RTTI
+    return "the target type";
+#endif  // GTEST_HAS_RTTI
+  }
+
+ private:
+  static void GetCastTypeDescription(::std::ostream* os) {
+    *os << "when dynamic_cast to " << GetToName() << ", ";
+  }
+
+  GTEST_DISALLOW_ASSIGN_(WhenDynamicCastToMatcherBase);
+};
+
+// Primary template.
+// To is a pointer. Cast and forward the result.
+template <typename To>
+class WhenDynamicCastToMatcher : public WhenDynamicCastToMatcherBase<To> {
+ public:
+  explicit WhenDynamicCastToMatcher(const Matcher<To>& matcher)
+      : WhenDynamicCastToMatcherBase<To>(matcher) {}
+
+  template <typename From>
+  bool MatchAndExplain(From from, MatchResultListener* listener) const {
+    // TODO(sbenza): Add more detail on failures. ie did the dyn_cast fail?
+    To to = dynamic_cast<To>(from);
+    return MatchPrintAndExplain(to, this->matcher_, listener);
+  }
+};
+
+// Specialize for references.
+// In this case we return false if the dynamic_cast fails.
+template <typename To>
+class WhenDynamicCastToMatcher<To&> : public WhenDynamicCastToMatcherBase<To&> {
+ public:
+  explicit WhenDynamicCastToMatcher(const Matcher<To&>& matcher)
+      : WhenDynamicCastToMatcherBase<To&>(matcher) {}
+
+  template <typename From>
+  bool MatchAndExplain(From& from, MatchResultListener* listener) const {
+    // We don't want an std::bad_cast here, so do the cast with pointers.
+    To* to = dynamic_cast<To*>(&from);
+    if (to == NULL) {
+      *listener << "which cannot be dynamic_cast to " << this->GetToName();
+      return false;
+    }
+    return MatchPrintAndExplain(*to, this->matcher_, listener);
+  }
+};
+
 // Implements the Field() matcher for matching a field (i.e. member
 // variable) of an object.
 template <typename Class, typename FieldType>
@@ -3612,6 +3689,19 @@ inline internal::PointeeMatcher<InnerMatcher> Pointee(
   return internal::PointeeMatcher<InnerMatcher>(inner_matcher);
 }
 
+// Creates a matcher that matches a pointer or reference that matches
+// inner_matcher when dynamic_cast<To> is applied.
+// The result of dynamic_cast<To> is forwarded to the inner matcher.
+// If To is a pointer and the cast fails, the inner matcher will receive NULL.
+// If To is a reference and the cast fails, this matcher returns false
+// immediately.
+template <typename To>
+inline PolymorphicMatcher<internal::WhenDynamicCastToMatcher<To> >
+WhenDynamicCastTo(const Matcher<To>& inner_matcher) {
+  return MakePolymorphicMatcher(
+      internal::WhenDynamicCastToMatcher<To>(inner_matcher));
+}
+
 // Creates a matcher that matches an object whose given field matches
 // 'matcher'.  For example,
 //   Field(&Foo::number, Ge(5))
@@ -4050,3 +4140,4 @@ inline InnerMatcher AllArgs(const InnerMatcher& matcher) { return matcher; }
 }  // namespace testing
 
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_MATCHERS_H_
+

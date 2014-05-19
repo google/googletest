@@ -33,10 +33,6 @@
 //
 // This file tests some commonly used argument matchers.
 
-// windows.h defines macros which conflict with standard identifiers used in
-// this test.  Defining this symbol prevents windows.h from doing that.
-#define NOMINMAX
-
 #include "gmock/gmock-matchers.h"
 #include "gmock/gmock-more-matchers.h"
 
@@ -657,8 +653,21 @@ TEST(MatcherCastTest, ValueIsNotCopied) {
   EXPECT_TRUE(m.Matches(n));
 }
 
-class Base {};
-class Derived : public Base {};
+class Base {
+ public:
+  virtual ~Base() {}
+  Base() {}
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(Base);
+};
+
+class Derived : public Base {
+ public:
+  Derived() : Base() {}
+  int i;
+};
+
+class OtherDerived : public Base {};
 
 // Tests that SafeMatcherCast<T>(m) works when m is a polymorphic matcher.
 TEST(SafeMatcherCastTest, FromPolymorphicMatcher) {
@@ -3135,6 +3144,107 @@ TEST(PointeeTest, ReferenceToNonConstRawPointer) {
   EXPECT_FALSE(m.Matches(p));
 }
 
+
+MATCHER_P(FieldIIs, inner_matcher, "") {
+  return ExplainMatchResult(inner_matcher, arg.i, result_listener);
+}
+
+TEST(WhenDynamicCastToTest, SameType) {
+  Derived derived;
+  derived.i = 4;
+
+  // Right type. A pointer is passed down.
+  Base* as_base_ptr = &derived;
+  EXPECT_THAT(as_base_ptr, WhenDynamicCastTo<Derived*>(Not(IsNull())));
+  EXPECT_THAT(as_base_ptr, WhenDynamicCastTo<Derived*>(Pointee(FieldIIs(4))));
+  EXPECT_THAT(as_base_ptr,
+              Not(WhenDynamicCastTo<Derived*>(Pointee(FieldIIs(5)))));
+}
+
+TEST(WhenDynamicCastToTest, WrongTypes) {
+  Base base;
+  Derived derived;
+  OtherDerived other_derived;
+
+  // Wrong types. NULL is passed.
+  EXPECT_THAT(&base, Not(WhenDynamicCastTo<Derived*>(Pointee(_))));
+  EXPECT_THAT(&base, WhenDynamicCastTo<Derived*>(IsNull()));
+  Base* as_base_ptr = &derived;
+  EXPECT_THAT(as_base_ptr, Not(WhenDynamicCastTo<OtherDerived*>(Pointee(_))));
+  EXPECT_THAT(as_base_ptr, WhenDynamicCastTo<OtherDerived*>(IsNull()));
+  as_base_ptr = &other_derived;
+  EXPECT_THAT(as_base_ptr, Not(WhenDynamicCastTo<Derived*>(Pointee(_))));
+  EXPECT_THAT(as_base_ptr, WhenDynamicCastTo<Derived*>(IsNull()));
+}
+
+TEST(WhenDynamicCastToTest, AlreadyNull) {
+  // Already NULL.
+  Base* as_base_ptr = NULL;
+  EXPECT_THAT(as_base_ptr, WhenDynamicCastTo<Derived*>(IsNull()));
+}
+
+struct AmbiguousCastTypes {
+  class VirtualDerived : public virtual Base {};
+  class DerivedSub1 : public VirtualDerived {};
+  class DerivedSub2 : public VirtualDerived {};
+  class ManyDerivedInHierarchy : public DerivedSub1, public DerivedSub2 {};
+};
+
+TEST(WhenDynamicCastToTest, AmbiguousCast) {
+  AmbiguousCastTypes::DerivedSub1 sub1;
+  AmbiguousCastTypes::ManyDerivedInHierarchy many_derived;
+  // Multiply derived from Base. dynamic_cast<> returns NULL.
+  Base* as_base_ptr =
+      static_cast<AmbiguousCastTypes::DerivedSub1*>(&many_derived);
+  EXPECT_THAT(as_base_ptr,
+              WhenDynamicCastTo<AmbiguousCastTypes::VirtualDerived*>(IsNull()));
+  as_base_ptr = &sub1;
+  EXPECT_THAT(
+      as_base_ptr,
+      WhenDynamicCastTo<AmbiguousCastTypes::VirtualDerived*>(Not(IsNull())));
+}
+
+TEST(WhenDynamicCastToTest, Describe) {
+  Matcher<Base*> matcher = WhenDynamicCastTo<Derived*>(Pointee(_));
+#if GTEST_HAS_RTTI
+  const string prefix =
+      "when dynamic_cast to " + internal::GetTypeName<Derived*>() + ", ";
+#else  // GTEST_HAS_RTTI
+  const string prefix = "when dynamic_cast, ";
+#endif  // GTEST_HAS_RTTI
+  EXPECT_EQ(prefix + "points to a value that is anything", Describe(matcher));
+  EXPECT_EQ(prefix + "does not point to a value that is anything",
+            DescribeNegation(matcher));
+}
+
+TEST(WhenDynamicCastToTest, Explain) {
+  Matcher<Base*> matcher = WhenDynamicCastTo<Derived*>(Pointee(_));
+  Base* null = NULL;
+  EXPECT_THAT(Explain(matcher, null), HasSubstr("NULL"));
+  Derived derived;
+  EXPECT_TRUE(matcher.Matches(&derived));
+  EXPECT_THAT(Explain(matcher, &derived), HasSubstr("which points to "));
+
+  // With references, the matcher itself can fail. Test for that one.
+  Matcher<const Base&> ref_matcher = WhenDynamicCastTo<const OtherDerived&>(_);
+  EXPECT_THAT(Explain(ref_matcher, derived),
+              HasSubstr("which cannot be dynamic_cast"));
+}
+
+TEST(WhenDynamicCastToTest, GoodReference) {
+  Derived derived;
+  derived.i = 4;
+  Base& as_base_ref = derived;
+  EXPECT_THAT(as_base_ref, WhenDynamicCastTo<const Derived&>(FieldIIs(4)));
+  EXPECT_THAT(as_base_ref, WhenDynamicCastTo<const Derived&>(Not(FieldIIs(5))));
+}
+
+TEST(WhenDynamicCastToTest, BadReference) {
+  Derived derived;
+  Base& as_base_ref = derived;
+  EXPECT_THAT(as_base_ref, Not(WhenDynamicCastTo<const OtherDerived&>(_)));
+}
+
 // Minimal const-propagating pointer.
 template <typename T>
 class ConstPropagatingPtr {
@@ -3210,16 +3320,23 @@ TEST(PointeeTest, AlwaysExplainsPointee) {
 // An uncopyable class.
 class Uncopyable {
  public:
+  Uncopyable() : value_(-1) {}
   explicit Uncopyable(int a_value) : value_(a_value) {}
 
   int value() const { return value_; }
+  void set_value(int i) { value_ = i; }
+
  private:
-  const int value_;
+  int value_;
   GTEST_DISALLOW_COPY_AND_ASSIGN_(Uncopyable);
 };
 
 // Returns true iff x.value() is positive.
 bool ValueIsPositive(const Uncopyable& x) { return x.value() > 0; }
+
+MATCHER_P(UncopyableIs, inner_matcher, "") {
+  return ExplainMatchResult(inner_matcher, arg.value(), result_listener);
+}
 
 // A user-defined struct for testing Field().
 struct AStruct {
@@ -4527,6 +4644,13 @@ TEST(ElemensAreArrayStreamTest, WorksForStreamlike) {
   EXPECT_THAT(s, Not(ElementsAreArray(expected)));
 }
 
+TEST(ElementsAreTest, WorksWithUncopyable) {
+  Uncopyable objs[2];
+  objs[0].set_value(-3);
+  objs[1].set_value(1);
+  EXPECT_THAT(objs, ElementsAre(UncopyableIs(-3), Truly(ValueIsPositive)));
+}
+
 // Tests for UnorderedElementsAreArray()
 
 TEST(UnorderedElementsAreArrayTest, SucceedsWhenExpected) {
@@ -4608,6 +4732,14 @@ class UnorderedElementsAreTest : public testing::Test {
  protected:
   typedef std::vector<int> IntVec;
 };
+
+TEST_F(UnorderedElementsAreTest, WorksWithUncopyable) {
+  Uncopyable objs[2];
+  objs[0].set_value(-3);
+  objs[1].set_value(1);
+  EXPECT_THAT(objs,
+              UnorderedElementsAre(Truly(ValueIsPositive), UncopyableIs(-3)));
+}
 
 TEST_F(UnorderedElementsAreTest, SucceedsWhenExpected) {
   const int a[] = { 1, 2, 3 };
@@ -5332,3 +5464,4 @@ TEST(PointwiseTest, AllowsMonomorphicInnerMatcher) {
 
 }  // namespace gmock_matchers_test
 }  // namespace testing
+

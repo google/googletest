@@ -1347,7 +1347,7 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
             GMOCK_INTERNAL_DECL_TYPE_##value_params>\
   class GMOCK_ACTION_CLASS_(name, value_params) {\
    public:\
-    GMOCK_ACTION_CLASS_(name, value_params)\
+    explicit GMOCK_ACTION_CLASS_(name, value_params)\
         GMOCK_INTERNAL_INIT_##value_params {}\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
@@ -1455,7 +1455,7 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
   template <typename p0##_type>\
   class name##ActionP {\
    public:\
-    name##ActionP(p0##_type gmock_p0) : p0(gmock_p0) {}\
+    explicit name##ActionP(p0##_type gmock_p0) : p0(gmock_p0) {}\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\

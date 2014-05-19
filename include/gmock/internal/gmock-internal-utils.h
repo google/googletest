@@ -447,16 +447,17 @@ class StlContainerView<Element[N]> {
     //     ConstReference(const char * (&)[4])')
     // (and though the N parameter type is mismatched in the above explicit
     // conversion of it doesn't help - only the conversion of the array).
-    return type(const_cast<Element*>(&array[0]), N, kReference);
+    return type(const_cast<Element*>(&array[0]), N,
+                RelationToSourceReference());
 #else
-    return type(array, N, kReference);
+    return type(array, N, RelationToSourceReference());
 #endif  // GTEST_OS_SYMBIAN
   }
   static type Copy(const Element (&array)[N]) {
 #if GTEST_OS_SYMBIAN
-    return type(const_cast<Element*>(&array[0]), N, kCopy);
+    return type(const_cast<Element*>(&array[0]), N, RelationToSourceCopy());
 #else
-    return type(array, N, kCopy);
+    return type(array, N, RelationToSourceCopy());
 #endif  // GTEST_OS_SYMBIAN
   }
 };
@@ -473,10 +474,10 @@ class StlContainerView< ::testing::tuple<ElementPointer, Size> > {
 
   static const_reference ConstReference(
       const ::testing::tuple<ElementPointer, Size>& array) {
-    return type(get<0>(array), get<1>(array), kReference);
+    return type(get<0>(array), get<1>(array), RelationToSourceReference());
   }
   static type Copy(const ::testing::tuple<ElementPointer, Size>& array) {
-    return type(get<0>(array), get<1>(array), kCopy);
+    return type(get<0>(array), get<1>(array), RelationToSourceCopy());
   }
 };
 
@@ -507,3 +508,4 @@ struct BooleanConstant {};
 }  // namespace testing
 
 #endif  // GMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_INTERNAL_UTILS_H_
+

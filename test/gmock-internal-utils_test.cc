@@ -247,9 +247,9 @@ TEST(LosslessArithmeticConvertibleTest, FloatingPointToFloatingPoint) {
 
   // Larger size => smaller size is not fine.
   EXPECT_FALSE((LosslessArithmeticConvertible<double, float>::value));
-  GTEST_INTENTIONAL_CONST_COND_PUSH_
+  GTEST_INTENTIONAL_CONST_COND_PUSH_()
   if (sizeof(double) == sizeof(long double)) {  // NOLINT
-  GTEST_INTENTIONAL_CONST_COND_POP_
+  GTEST_INTENTIONAL_CONST_COND_POP_()
     // In some implementations (e.g. MSVC), double and long double
     // have the same size.
     EXPECT_TRUE((LosslessArithmeticConvertible<long double, double>::value));
