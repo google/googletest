@@ -448,12 +448,18 @@ bullet - sorry!
 The first thing to remember is that Google Test does not reuse the
 same test fixture object across multiple tests. For each `TEST_F`,
 Google Test will create a fresh test fixture object, _immediately_
-call `SetUp()`, run the test, call `TearDown()`, and then
-_immediately_ delete the test fixture object. Therefore, there is no
-need to write a `SetUp()` or `TearDown()` function if the constructor
-or destructor already does the job.
+call `SetUp()`, run the test body, call `TearDown()`, and then
+_immediately_ delete the test fixture object.
 
-You may still want to use `SetUp()/TearDown()` in the following cases:
+When you need to write per-test set-up and tear-down logic, you have
+the choice between using the test fixture constructor/destructor or
+`SetUp()/TearDown()`. The former is usually preferred, as it has the
+following benefits:
+
+ * By initializing a member variable in the constructor, we have the option to make it `const`, which helps prevent accidental changes to its value and makes the tests more obviously correct.
+ * In case we need to subclass the test fixture class, the subclass' constructor is guaranteed to call the base class' constructor first, and the subclass' destructor is guaranteed to call the base class' destructor afterward. With `SetUp()/TearDown()`, a subclass may make the mistake of forgetting to call the base class' `SetUp()/TearDown()` or call them at the wrong moment.
+
+You may still want to use `SetUp()/TearDown()` in the following rare cases:
  * If the tear-down operation could throw an exception, you must use `TearDown()` as opposed to the destructor, as throwing in a destructor leads to undefined behavior and usually will kill your program right away. Note that many standard libraries (like STL) may throw when exceptions are enabled in the compiler. Therefore you should prefer `TearDown()` if you want to write portable tests that work with or without exceptions.
  *  The assertion macros throw an exception when flag `--gtest_throw_on_failure` is specified. Therefore, you shouldn't use Google Test assertions in a destructor if you plan to run your tests with this flag.
  *  In a constructor or destructor, you cannot make a virtual function call on this object. (You can call a method declared as virtual, but it will be statically bound.) Therefore, if you need to call a method that will be overriden in a derived class, you have to use `SetUp()/TearDown()`.
