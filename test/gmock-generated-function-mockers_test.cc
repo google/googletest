@@ -595,5 +595,18 @@ TEST(MockFunctionTest, WorksFor10Arguments) {
   EXPECT_EQ(2, foo.Call(true, 'a', 0, 0, 0, 0, 0, 'b', 1, false));
 }
 
+#if GTEST_LANG_CXX11
+TEST(MockFunctionTest, AsStdFunction) {
+  MockFunction<int(int)> foo;
+  auto call = [](const std::function<int(int)> &f, int i) {
+    return f(i);
+  };
+  EXPECT_CALL(foo, Call(1)).WillOnce(Return(-1));
+  EXPECT_CALL(foo, Call(2)).WillOnce(Return(-2));
+  EXPECT_EQ(-1, call(foo.AsStdFunction(), 1));
+  EXPECT_EQ(-2, call(foo.AsStdFunction(), 2));
+}
+#endif  // GTEST_LANG_CXX11
+
 }  // namespace gmock_generated_function_mockers_test
 }  // namespace testing

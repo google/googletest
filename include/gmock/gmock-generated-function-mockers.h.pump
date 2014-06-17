@@ -241,18 +241,40 @@ $for i [[
 // point "2", and nothing should happen between the two check
 // points. The explicit check points make it easy to tell which
 // Bar("a") is called by which call to Foo().
+//
+// MockFunction<F> can also be used to exercise code that accepts
+// std::function<F> callbacks. To do so, use AsStdFunction() method
+// to create std::function proxy forwarding to original object's Call.
+// Example:
+//
+// TEST(FooTest, RunsCallbackWithBarArgument) {
+//   MockFunction<int(string)> callback;
+//   EXPECT_CALL(callback, Call("bar")).WillOnce(Return(1));
+//   Foo(callback.AsStdFunction());
+// }
 template <typename F>
 class MockFunction;
 
 
 $for i [[
 $range j 0..i-1
+$var ArgTypes = [[$for j, [[A$j]]]]
+$var ArgNames = [[$for j, [[a$j]]]]
+$var ArgDecls = [[$for j, [[A$j a$j]]]]
 template <typename R$for j [[, typename A$j]]>
-class MockFunction<R($for j, [[A$j]])> {
+class MockFunction<R($ArgTypes)> {
  public:
   MockFunction() {}
 
-  MOCK_METHOD$i[[]]_T(Call, R($for j, [[A$j]]));
+  MOCK_METHOD$i[[]]_T(Call, R($ArgTypes));
+
+#if GTEST_LANG_CXX11
+  std::function<R($ArgTypes)> AsStdFunction() {
+    return [this]($ArgDecls) {
+      return this->Call($ArgNames);
+    };
+  }
+#endif  // GTEST_LANG_CXX11
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
