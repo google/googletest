@@ -917,7 +917,9 @@ using ::std::tuple_size;
 # endif
 
 #define GTEST_IS_THREADSAFE \
-    (GTEST_OS_WINDOWS || GTEST_HAS_PTHREAD)
+    (0 \
+     || (GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT) \
+     || GTEST_HAS_PTHREAD)
 
 #endif  // GTEST_HAS_SEH
 
@@ -1465,7 +1467,7 @@ class Notification {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(Notification);
 };
 
-# elif GTEST_OS_WINDOWS
+# elif GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT
 
 GTEST_API_ void SleepMilliseconds(int n);
 
@@ -1600,7 +1602,7 @@ class ThreadWithParam : public ThreadWithParamBase {
 # endif  // GTEST_HAS_PTHREAD && !GTEST_OS_WINDOWS_MINGW
 
 # if 0  // OS detection
-# elif GTEST_OS_WINDOWS
+# elif GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT
 
 // Mutex implements mutex on Windows platforms.  It is used in conjunction
 // with class MutexLock:
