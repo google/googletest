@@ -1962,8 +1962,8 @@ bool Test::HasSameFixtureClass() {
     const bool this_is_TEST = this_fixture_id == internal::GetTestTypeId();
 
     if (first_is_TEST || this_is_TEST) {
-      // The user mixed TEST and TEST_F in this test case - we'll tell
-      // him/her how to fix it.
+      // Both TEST and TEST_F appear in same test case, which is incorrect.
+      // Tell the user how to fix this.
 
       // Gets the name of the TEST and the name of the TEST_F.  Note
       // that first_is_TEST and this_is_TEST cannot both be true, as
@@ -1983,8 +1983,8 @@ bool Test::HasSameFixtureClass() {
           << "want to change the TEST to TEST_F or move it to another test\n"
           << "case.";
     } else {
-      // The user defined two fixture classes with the same name in
-      // two namespaces - we'll tell him/her how to fix it.
+      // Two fixture classes with the same name appear in two different
+      // namespaces, which is not allowed. Tell the user how to fix this.
       ADD_FAILURE()
           << "All tests in the same test case must use the same test fixture\n"
           << "class.  However, in test case "
