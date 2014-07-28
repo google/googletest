@@ -3430,6 +3430,81 @@ class ElementsAreArrayMatcher {
   GTEST_DISALLOW_ASSIGN_(ElementsAreArrayMatcher);
 };
 
+// Given a 2-tuple matcher tm of type Tuple2Matcher and a value second
+// of type Second, BoundSecondMatcher<Tuple2Matcher, Second>(tm,
+// second) is a polymorphic matcher that matches a value x iff tm
+// matches tuple (x, second).  Useful for implementing
+// UnorderedPointwise() in terms of UnorderedElementsAreArray().
+//
+// BoundSecondMatcher is copyable and assignable, as we need to put
+// instances of this class in a vector when implementing
+// UnorderedPointwise().
+template <typename Tuple2Matcher, typename Second>
+class BoundSecondMatcher {
+ public:
+  BoundSecondMatcher(const Tuple2Matcher& tm, const Second& second)
+      : tuple2_matcher_(tm), second_value_(second) {}
+
+  template <typename T>
+  operator Matcher<T>() const {
+    return MakeMatcher(new Impl<T>(tuple2_matcher_, second_value_));
+  }
+
+  // We have to define this for UnorderedPointwise() to compile in
+  // C++98 mode, as it puts BoundSecondMatcher instances in a vector,
+  // which requires the elements to be assignable in C++98.  The
+  // compiler cannot generate the operator= for us, as Tuple2Matcher
+  // and Second may not be assignable.
+  //
+  // However, this should never be called, so the implementation just
+  // need to assert.
+  void operator=(const BoundSecondMatcher& /*rhs*/) {
+    GTEST_LOG_(FATAL) << "BoundSecondMatcher should never be assigned.";
+  }
+
+ private:
+  template <typename T>
+  class Impl : public MatcherInterface<T> {
+   public:
+    typedef ::testing::tuple<T, Second> ArgTuple;
+
+    Impl(const Tuple2Matcher& tm, const Second& second)
+        : mono_tuple2_matcher_(SafeMatcherCast<const ArgTuple&>(tm)),
+          second_value_(second) {}
+
+    virtual void DescribeTo(::std::ostream* os) const {
+      *os << "and ";
+      UniversalPrint(second_value_, os);
+      *os << " ";
+      mono_tuple2_matcher_.DescribeTo(os);
+    }
+
+    virtual bool MatchAndExplain(T x, MatchResultListener* listener) const {
+      return mono_tuple2_matcher_.MatchAndExplain(ArgTuple(x, second_value_),
+                                                  listener);
+    }
+
+   private:
+    const Matcher<const ArgTuple&> mono_tuple2_matcher_;
+    const Second second_value_;
+
+    GTEST_DISALLOW_ASSIGN_(Impl);
+  };
+
+  const Tuple2Matcher tuple2_matcher_;
+  const Second second_value_;
+};
+
+// Given a 2-tuple matcher tm and a value second,
+// MatcherBindSecond(tm, second) returns a matcher that matches a
+// value x iff tm matches tuple (x, second).  Useful for implementing
+// UnorderedPointwise() in terms of UnorderedElementsAreArray().
+template <typename Tuple2Matcher, typename Second>
+BoundSecondMatcher<Tuple2Matcher, Second> MatcherBindSecond(
+    const Tuple2Matcher& tm, const Second& second) {
+  return BoundSecondMatcher<Tuple2Matcher, Second>(tm, second);
+}
+
 // Returns the description for a matcher defined using the MATCHER*()
 // macro where the user-supplied description string is "", if
 // 'negation' is false; otherwise returns the description of the
@@ -4002,11 +4077,79 @@ inline internal::PointwiseMatcher<TupleMatcher,
                                   GTEST_REMOVE_CONST_(Container)>
 Pointwise(const TupleMatcher& tuple_matcher, const Container& rhs) {
   // This following line is for working around a bug in MSVC 8.0,
-  // which causes Container to be a const type sometimes.
+  // which causes Container to be a const type sometimes (e.g. when
+  // rhs is a const int[])..
   typedef GTEST_REMOVE_CONST_(Container) RawContainer;
   return internal::PointwiseMatcher<TupleMatcher, RawContainer>(
       tuple_matcher, rhs);
 }
+
+#if GTEST_HAS_STD_INITIALIZER_LIST_
+
+// Supports the Pointwise(m, {a, b, c}) syntax.
+template <typename TupleMatcher, typename T>
+inline internal::PointwiseMatcher<TupleMatcher, std::vector<T> > Pointwise(
+    const TupleMatcher& tuple_matcher, std::initializer_list<T> rhs) {
+  return Pointwise(tuple_matcher, std::vector<T>(rhs));
+}
+
+#endif  // GTEST_HAS_STD_INITIALIZER_LIST_
+
+// UnorderedPointwise(pair_matcher, rhs) matches an STL-style
+// container or a native array that contains the same number of
+// elements as in rhs, where in some permutation of the container, its
+// i-th element and rhs's i-th element (as a pair) satisfy the given
+// pair matcher, for all i.  Tuple2Matcher must be able to be safely
+// cast to Matcher<tuple<const T1&, const T2&> >, where T1 and T2 are
+// the types of elements in the LHS container and the RHS container
+// respectively.
+//
+// This is like Pointwise(pair_matcher, rhs), except that the element
+// order doesn't matter.
+template <typename Tuple2Matcher, typename RhsContainer>
+inline internal::UnorderedElementsAreArrayMatcher<
+    typename internal::BoundSecondMatcher<
+        Tuple2Matcher, typename internal::StlContainerView<GTEST_REMOVE_CONST_(
+                           RhsContainer)>::type::value_type> >
+UnorderedPointwise(const Tuple2Matcher& tuple2_matcher,
+                   const RhsContainer& rhs_container) {
+  // This following line is for working around a bug in MSVC 8.0,
+  // which causes RhsContainer to be a const type sometimes (e.g. when
+  // rhs_container is a const int[]).
+  typedef GTEST_REMOVE_CONST_(RhsContainer) RawRhsContainer;
+
+  // RhsView allows the same code to handle RhsContainer being a
+  // STL-style container and it being a native C-style array.
+  typedef typename internal::StlContainerView<RawRhsContainer> RhsView;
+  typedef typename RhsView::type RhsStlContainer;
+  typedef typename RhsStlContainer::value_type Second;
+  const RhsStlContainer& rhs_stl_container =
+      RhsView::ConstReference(rhs_container);
+
+  // Create a matcher for each element in rhs_container.
+  ::std::vector<internal::BoundSecondMatcher<Tuple2Matcher, Second> > matchers;
+  for (typename RhsStlContainer::const_iterator it = rhs_stl_container.begin();
+       it != rhs_stl_container.end(); ++it) {
+    matchers.push_back(
+        internal::MatcherBindSecond(tuple2_matcher, *it));
+  }
+
+  // Delegate the work to UnorderedElementsAreArray().
+  return UnorderedElementsAreArray(matchers);
+}
+
+#if GTEST_HAS_STD_INITIALIZER_LIST_
+
+// Supports the UnorderedPointwise(m, {a, b, c}) syntax.
+template <typename Tuple2Matcher, typename T>
+inline internal::UnorderedElementsAreArrayMatcher<
+    typename internal::BoundSecondMatcher<Tuple2Matcher, T> >
+UnorderedPointwise(const Tuple2Matcher& tuple2_matcher,
+                   std::initializer_list<T> rhs) {
+  return UnorderedPointwise(tuple2_matcher, std::vector<T>(rhs));
+}
+
+#endif  // GTEST_HAS_STD_INITIALIZER_LIST_
 
 // Matches an STL-style container or a native array that contains at
 // least one element matching the given value or matcher.

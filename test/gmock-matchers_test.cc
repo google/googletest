@@ -77,9 +77,6 @@ using std::ostream;
 using std::pair;
 using std::set;
 using std::stringstream;
-using testing::get;
-using testing::make_tuple;
-using testing::tuple;
 using std::vector;
 using testing::A;
 using testing::AllArgs;
@@ -128,17 +125,19 @@ using testing::Ref;
 using testing::ResultOf;
 using testing::SizeIs;
 using testing::StartsWith;
-using testing::StringMatchResultListener;
 using testing::StrCaseEq;
 using testing::StrCaseNe;
 using testing::StrEq;
 using testing::StrNe;
+using testing::StringMatchResultListener;
 using testing::Truly;
 using testing::TypedEq;
+using testing::UnorderedPointwise;
 using testing::Value;
 using testing::WhenSorted;
 using testing::WhenSortedBy;
 using testing::_;
+using testing::get;
 using testing::internal::DummyMatchResultListener;
 using testing::internal::ElementMatcherPair;
 using testing::internal::ElementMatcherPairs;
@@ -154,6 +153,8 @@ using testing::internal::Strings;
 using testing::internal::linked_ptr;
 using testing::internal::scoped_ptr;
 using testing::internal::string;
+using testing::make_tuple;
+using testing::tuple;
 
 // For testing ExplainMatchResultTo().
 class GreaterThanMatcher : public MatcherInterface<int> {
@@ -4272,18 +4273,18 @@ TEST(ContainerEqExtraTest, WorksForMaps) {
 }
 
 TEST(ContainerEqExtraTest, WorksForNativeArray) {
-  int a1[] = { 1, 2, 3 };
-  int a2[] = { 1, 2, 3 };
-  int b[] = { 1, 2, 4 };
+  int a1[] = {1, 2, 3};
+  int a2[] = {1, 2, 3};
+  int b[] = {1, 2, 4};
 
   EXPECT_THAT(a1, ContainerEq(a2));
   EXPECT_THAT(a1, Not(ContainerEq(b)));
 }
 
 TEST(ContainerEqExtraTest, WorksForTwoDimensionalNativeArray) {
-  const char a1[][3] = { "hi", "lo" };
-  const char a2[][3] = { "hi", "lo" };
-  const char b[][3] = { "lo", "hi" };
+  const char a1[][3] = {"hi", "lo"};
+  const char a2[][3] = {"hi", "lo"};
+  const char b[][3] = {"lo", "hi"};
 
   // Tests using ContainerEq() in the first dimension.
   EXPECT_THAT(a1, ContainerEq(a2));
@@ -4295,27 +4296,27 @@ TEST(ContainerEqExtraTest, WorksForTwoDimensionalNativeArray) {
 }
 
 TEST(ContainerEqExtraTest, WorksForNativeArrayAsTuple) {
-  const int a1[] = { 1, 2, 3 };
-  const int a2[] = { 1, 2, 3 };
-  const int b[] = { 1, 2, 3, 4 };
+  const int a1[] = {1, 2, 3};
+  const int a2[] = {1, 2, 3};
+  const int b[] = {1, 2, 3, 4};
 
   const int* const p1 = a1;
   EXPECT_THAT(make_tuple(p1, 3), ContainerEq(a2));
   EXPECT_THAT(make_tuple(p1, 3), Not(ContainerEq(b)));
 
-  const int c[] = { 1, 3, 2 };
+  const int c[] = {1, 3, 2};
   EXPECT_THAT(make_tuple(p1, 3), Not(ContainerEq(c)));
 }
 
 TEST(ContainerEqExtraTest, CopiesNativeArrayParameter) {
   std::string a1[][3] = {
-    { "hi", "hello", "ciao" },
-    { "bye", "see you", "ciao" }
+    {"hi", "hello", "ciao"},
+    {"bye", "see you", "ciao"}
   };
 
   std::string a2[][3] = {
-    { "hi", "hello", "ciao" },
-    { "bye", "see you", "ciao" }
+    {"hi", "hello", "ciao"},
+    {"bye", "see you", "ciao"}
   };
 
   const Matcher<const std::string(&)[2][3]> m = ContainerEq(a2);
@@ -4355,8 +4356,8 @@ TEST(WhenSortedByTest, WorksForNonVectorContainer) {
 }
 
 TEST(WhenSortedByTest, WorksForNativeArray) {
-  const int numbers[] = { 1, 3, 2, 4 };
-  const int sorted_numbers[] = { 1, 2, 3, 4 };
+  const int numbers[] = {1, 3, 2, 4};
+  const int sorted_numbers[] = {1, 2, 3, 4};
   EXPECT_THAT(numbers, WhenSortedBy(less<int>(), ElementsAre(1, 2, 3, 4)));
   EXPECT_THAT(numbers, WhenSortedBy(less<int>(),
                                     ElementsAreArray(sorted_numbers)));
@@ -4376,7 +4377,7 @@ TEST(WhenSortedByTest, CanDescribeSelf) {
 }
 
 TEST(WhenSortedByTest, ExplainsMatchResult) {
-  const int a[] = { 2, 1 };
+  const int a[] = {2, 1};
   EXPECT_EQ("which is { 1, 2 } when sorted, whose element #0 doesn't match",
             Explain(WhenSortedBy(less<int>(), ElementsAre(2, 3)), a));
   EXPECT_EQ("which is { 1, 2 } when sorted",
@@ -4534,7 +4535,7 @@ class Streamlike {
 };
 
 TEST(StreamlikeTest, Iteration) {
-  const int a[5] = { 2, 1, 4, 5, 3 };
+  const int a[5] = {2, 1, 4, 5, 3};
   Streamlike<int> s(a, a + 5);
   Streamlike<int>::const_iterator it = s.begin();
   const int* ip = a;
@@ -4559,7 +4560,7 @@ TEST(BeginEndDistanceIsTest, WorksWithForwardList) {
 #endif  // GTEST_LANG_CXX11
 
 TEST(BeginEndDistanceIsTest, WorksWithNonStdList) {
-  const int a[5] = { 1, 2, 3, 4, 5 };
+  const int a[5] = {1, 2, 3, 4, 5};
   Streamlike<int> s(a, a + 5);
   EXPECT_THAT(s, BeginEndDistanceIs(5));
 }
@@ -4604,14 +4605,14 @@ TEST(BeginEndDistanceIsTest, ExplainsResult) {
 TEST(WhenSortedTest, WorksForStreamlike) {
   // Streamlike 'container' provides only minimal iterator support.
   // Its iterators are tagged with input_iterator_tag.
-  const int a[5] = { 2, 1, 4, 5, 3 };
+  const int a[5] = {2, 1, 4, 5, 3};
   Streamlike<int> s(a, a + GTEST_ARRAY_SIZE_(a));
   EXPECT_THAT(s, WhenSorted(ElementsAre(1, 2, 3, 4, 5)));
   EXPECT_THAT(s, Not(WhenSorted(ElementsAre(2, 1, 4, 5, 3))));
 }
 
 TEST(WhenSortedTest, WorksForVectorConstRefMatcherOnStreamlike) {
-  const int a[] = { 2, 1, 4, 5, 3 };
+  const int a[] = {2, 1, 4, 5, 3};
   Streamlike<int> s(a, a + GTEST_ARRAY_SIZE_(a));
   Matcher<const std::vector<int>&> vector_match = ElementsAre(1, 2, 3, 4, 5);
   EXPECT_THAT(s, WhenSorted(vector_match));
@@ -4622,14 +4623,14 @@ TEST(WhenSortedTest, WorksForVectorConstRefMatcherOnStreamlike) {
 // "containers".
 
 TEST(ElemensAreStreamTest, WorksForStreamlike) {
-  const int a[5] = { 1, 2, 3, 4, 5 };
+  const int a[5] = {1, 2, 3, 4, 5};
   Streamlike<int> s(a, a + GTEST_ARRAY_SIZE_(a));
   EXPECT_THAT(s, ElementsAre(1, 2, 3, 4, 5));
   EXPECT_THAT(s, Not(ElementsAre(2, 1, 4, 5, 3)));
 }
 
 TEST(ElemensAreArrayStreamTest, WorksForStreamlike) {
-  const int a[5] = { 1, 2, 3, 4, 5 };
+  const int a[5] = {1, 2, 3, 4, 5};
   Streamlike<int> s(a, a + GTEST_ARRAY_SIZE_(a));
 
   vector<int> expected;
@@ -4667,7 +4668,7 @@ TEST(ElementsAreTest, TakesStlContainer) {
 // Tests for UnorderedElementsAreArray()
 
 TEST(UnorderedElementsAreArrayTest, SucceedsWhenExpected) {
-  const int a[] = { 0, 1, 2, 3, 4 };
+  const int a[] = {0, 1, 2, 3, 4};
   std::vector<int> s(a, a + GTEST_ARRAY_SIZE_(a));
   do {
     StringMatchResultListener listener;
@@ -4677,8 +4678,8 @@ TEST(UnorderedElementsAreArrayTest, SucceedsWhenExpected) {
 }
 
 TEST(UnorderedElementsAreArrayTest, VectorBool) {
-  const bool a[] = { 0, 1, 0, 1, 1 };
-  const bool b[] = { 1, 0, 1, 1, 0 };
+  const bool a[] = {0, 1, 0, 1, 1};
+  const bool b[] = {1, 0, 1, 1, 0};
   std::vector<bool> expected(a, a + GTEST_ARRAY_SIZE_(a));
   std::vector<bool> actual(b, b + GTEST_ARRAY_SIZE_(b));
   StringMatchResultListener listener;
@@ -4690,7 +4691,7 @@ TEST(UnorderedElementsAreArrayTest, WorksForStreamlike) {
   // Streamlike 'container' provides only minimal iterator support.
   // Its iterators are tagged with input_iterator_tag, and it has no
   // size() or empty() methods.
-  const int a[5] = { 2, 1, 4, 5, 3 };
+  const int a[5] = {2, 1, 4, 5, 3};
   Streamlike<int> s(a, a + GTEST_ARRAY_SIZE_(a));
 
   ::std::vector<int> expected;
@@ -4721,35 +4722,35 @@ TEST(UnorderedElementsAreArrayTest, TakesStlContainer) {
 #if GTEST_HAS_STD_INITIALIZER_LIST_
 
 TEST(UnorderedElementsAreArrayTest, TakesInitializerList) {
-  const int a[5] = { 2, 1, 4, 5, 3 };
-  EXPECT_THAT(a, UnorderedElementsAreArray({ 1, 2, 3, 4, 5 }));
-  EXPECT_THAT(a, Not(UnorderedElementsAreArray({ 1, 2, 3, 4, 6 })));
+  const int a[5] = {2, 1, 4, 5, 3};
+  EXPECT_THAT(a, UnorderedElementsAreArray({1, 2, 3, 4, 5}));
+  EXPECT_THAT(a, Not(UnorderedElementsAreArray({1, 2, 3, 4, 6})));
 }
 
 TEST(UnorderedElementsAreArrayTest, TakesInitializerListOfCStrings) {
-  const string a[5] = { "a", "b", "c", "d", "e" };
-  EXPECT_THAT(a, UnorderedElementsAreArray({ "a", "b", "c", "d", "e" }));
-  EXPECT_THAT(a, Not(UnorderedElementsAreArray({ "a", "b", "c", "d", "ef" })));
+  const string a[5] = {"a", "b", "c", "d", "e"};
+  EXPECT_THAT(a, UnorderedElementsAreArray({"a", "b", "c", "d", "e"}));
+  EXPECT_THAT(a, Not(UnorderedElementsAreArray({"a", "b", "c", "d", "ef"})));
 }
 
 TEST(UnorderedElementsAreArrayTest, TakesInitializerListOfSameTypedMatchers) {
-  const int a[5] = { 2, 1, 4, 5, 3 };
+  const int a[5] = {2, 1, 4, 5, 3};
   EXPECT_THAT(a, UnorderedElementsAreArray(
-      { Eq(1), Eq(2), Eq(3), Eq(4), Eq(5) }));
+      {Eq(1), Eq(2), Eq(3), Eq(4), Eq(5)}));
   EXPECT_THAT(a, Not(UnorderedElementsAreArray(
-      { Eq(1), Eq(2), Eq(3), Eq(4), Eq(6) })));
+      {Eq(1), Eq(2), Eq(3), Eq(4), Eq(6)})));
 }
 
 TEST(UnorderedElementsAreArrayTest,
      TakesInitializerListOfDifferentTypedMatchers) {
-  const int a[5] = { 2, 1, 4, 5, 3 };
+  const int a[5] = {2, 1, 4, 5, 3};
   // The compiler cannot infer the type of the initializer list if its
   // elements have different types.  We must explicitly specify the
   // unified element type in this case.
   EXPECT_THAT(a, UnorderedElementsAreArray<Matcher<int> >(
-      { Eq(1), Ne(-2), Ge(3), Le(4), Eq(5) }));
+      {Eq(1), Ne(-2), Ge(3), Le(4), Eq(5)}));
   EXPECT_THAT(a, Not(UnorderedElementsAreArray<Matcher<int> >(
-      { Eq(1), Ne(-2), Ge(3), Le(4), Eq(6) })));
+      {Eq(1), Ne(-2), Ge(3), Le(4), Eq(6)})));
 }
 
 #endif  // GTEST_HAS_STD_INITIALIZER_LIST_
@@ -4768,7 +4769,7 @@ TEST_F(UnorderedElementsAreTest, WorksWithUncopyable) {
 }
 
 TEST_F(UnorderedElementsAreTest, SucceedsWhenExpected) {
-  const int a[] = { 1, 2, 3 };
+  const int a[] = {1, 2, 3};
   std::vector<int> s(a, a + GTEST_ARRAY_SIZE_(a));
   do {
     StringMatchResultListener listener;
@@ -4778,7 +4779,7 @@ TEST_F(UnorderedElementsAreTest, SucceedsWhenExpected) {
 }
 
 TEST_F(UnorderedElementsAreTest, FailsWhenAnElementMatchesNoMatcher) {
-  const int a[] = { 1, 2, 3 };
+  const int a[] = {1, 2, 3};
   std::vector<int> s(a, a + GTEST_ARRAY_SIZE_(a));
   std::vector<Matcher<int> > mv;
   mv.push_back(1);
@@ -4794,7 +4795,7 @@ TEST_F(UnorderedElementsAreTest, WorksForStreamlike) {
   // Streamlike 'container' provides only minimal iterator support.
   // Its iterators are tagged with input_iterator_tag, and it has no
   // size() or empty() methods.
-  const int a[5] = { 2, 1, 4, 5, 3 };
+  const int a[5] = {2, 1, 4, 5, 3};
   Streamlike<int> s(a, a + GTEST_ARRAY_SIZE_(a));
 
   EXPECT_THAT(s, UnorderedElementsAre(1, 2, 3, 4, 5));
@@ -5105,7 +5106,7 @@ TEST_F(BipartiteNonSquareTest, SimpleBacktracking) {
   //  :.......:
   //    0 1 2
   MatchMatrix g(4, 3);
-  static const int kEdges[][2] = { {0, 2}, {1, 1}, {2, 1}, {3, 0} };
+  static const int kEdges[][2] = {{0, 2}, {1, 1}, {2, 1}, {3, 0}};
   for (size_t i = 0; i < GTEST_ARRAY_SIZE_(kEdges); ++i) {
     g.SetEdge(kEdges[i][0], kEdges[i][1], true);
   }
@@ -5209,17 +5210,17 @@ TEST(JoinAsTupleTest, JoinsEmptyTuple) {
 }
 
 TEST(JoinAsTupleTest, JoinsOneTuple) {
-  const char* fields[] = { "1" };
+  const char* fields[] = {"1"};
   EXPECT_EQ("1", JoinAsTuple(Strings(fields, fields + 1)));
 }
 
 TEST(JoinAsTupleTest, JoinsTwoTuple) {
-  const char* fields[] = { "1", "a" };
+  const char* fields[] = {"1", "a"};
   EXPECT_EQ("(1, a)", JoinAsTuple(Strings(fields, fields + 2)));
 }
 
 TEST(JoinAsTupleTest, JoinsTenTuple) {
-  const char* fields[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
+  const char* fields[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
   EXPECT_EQ("(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)",
             JoinAsTuple(Strings(fields, fields + 10)));
 }
@@ -5232,12 +5233,12 @@ TEST(FormatMatcherDescriptionTest, WorksForEmptyDescription) {
   EXPECT_EQ("not (is even)",
             FormatMatcherDescription(true, "IsEven", Strings()));
 
-  const char* params[] = { "5" };
+  const char* params[] = {"5"};
   EXPECT_EQ("equals 5",
             FormatMatcherDescription(false, "Equals",
                                      Strings(params, params + 1)));
 
-  const char* params2[] = { "5", "8" };
+  const char* params2[] = {"5", "8"};
   EXPECT_EQ("is in range (5, 8)",
             FormatMatcherDescription(false, "IsInRange",
                                      Strings(params2, params2 + 2)));
@@ -5294,7 +5295,7 @@ TEST(EachTest, ExplainsMatchResultCorrectly) {
 
   Matcher<const int(&)[1]> n = Each(1);  // NOLINT
 
-  const int b[1] = { 1 };
+  const int b[1] = {1};
   EXPECT_EQ("", Explain(n, b));
 
   n = Each(3);
@@ -5358,13 +5359,13 @@ TEST(EachTest, MatchesMapWhenAllElementsMatch) {
 }
 
 TEST(EachTest, AcceptsMatcher) {
-  const int a[] = { 1, 2, 3 };
+  const int a[] = {1, 2, 3};
   EXPECT_THAT(a, Each(Gt(0)));
   EXPECT_THAT(a, Not(Each(Gt(1))));
 }
 
 TEST(EachTest, WorksForNativeArrayAsTuple) {
-  const int a[] = { 1, 2 };
+  const int a[] = {1, 2};
   const int* const pointer = a;
   EXPECT_THAT(make_tuple(pointer, 2), Each(Gt(0)));
   EXPECT_THAT(make_tuple(pointer, 2), Not(Each(Gt(1))));
@@ -5418,7 +5419,7 @@ TEST(PointwiseTest, MakesCopyOfRhs) {
   rhs.push_back(2);
   rhs.push_back(4);
 
-  int lhs[] = { 1, 2 };
+  int lhs[] = {1, 2};
   const Matcher<const int (&)[2]> m = Pointwise(IsHalfOf(), rhs);
   EXPECT_THAT(lhs, m);
 
@@ -5428,7 +5429,7 @@ TEST(PointwiseTest, MakesCopyOfRhs) {
 }
 
 TEST(PointwiseTest, WorksForLhsNativeArray) {
-  const int lhs[] = { 1, 2, 3 };
+  const int lhs[] = {1, 2, 3};
   vector<int> rhs;
   rhs.push_back(2);
   rhs.push_back(4);
@@ -5438,7 +5439,7 @@ TEST(PointwiseTest, WorksForLhsNativeArray) {
 }
 
 TEST(PointwiseTest, WorksForRhsNativeArray) {
-  const int rhs[] = { 1, 2, 3 };
+  const int rhs[] = {1, 2, 3};
   vector<int> lhs;
   lhs.push_back(2);
   lhs.push_back(4);
@@ -5447,20 +5448,30 @@ TEST(PointwiseTest, WorksForRhsNativeArray) {
   EXPECT_THAT(lhs, Not(Pointwise(Lt(), rhs)));
 }
 
+#if GTEST_HAS_STD_INITIALIZER_LIST_
+
+TEST(PointwiseTest, WorksForRhsInitializerList) {
+  const vector<int> lhs{2, 4, 6};
+  EXPECT_THAT(lhs, Pointwise(Gt(), {1, 2, 3}));
+  EXPECT_THAT(lhs, Not(Pointwise(Lt(), {3, 3, 7})));
+}
+
+#endif  // GTEST_HAS_STD_INITIALIZER_LIST_
+
 TEST(PointwiseTest, RejectsWrongSize) {
-  const double lhs[2] = { 1, 2 };
-  const int rhs[1] = { 0 };
+  const double lhs[2] = {1, 2};
+  const int rhs[1] = {0};
   EXPECT_THAT(lhs, Not(Pointwise(Gt(), rhs)));
   EXPECT_EQ("which contains 2 values",
             Explain(Pointwise(Gt(), rhs), lhs));
 
-  const int rhs2[3] = { 0, 1, 2 };
+  const int rhs2[3] = {0, 1, 2};
   EXPECT_THAT(lhs, Not(Pointwise(Gt(), rhs2)));
 }
 
 TEST(PointwiseTest, RejectsWrongContent) {
-  const double lhs[3] = { 1, 2, 3 };
-  const int rhs[3] = { 2, 6, 4 };
+  const double lhs[3] = {1, 2, 3};
+  const int rhs[3] = {2, 6, 4};
   EXPECT_THAT(lhs, Not(Pointwise(IsHalfOf(), rhs)));
   EXPECT_EQ("where the value pair (2, 6) at index #1 don't match, "
             "where the second/2 is 3",
@@ -5468,15 +5479,15 @@ TEST(PointwiseTest, RejectsWrongContent) {
 }
 
 TEST(PointwiseTest, AcceptsCorrectContent) {
-  const double lhs[3] = { 1, 2, 3 };
-  const int rhs[3] = { 2, 4, 6 };
+  const double lhs[3] = {1, 2, 3};
+  const int rhs[3] = {2, 4, 6};
   EXPECT_THAT(lhs, Pointwise(IsHalfOf(), rhs));
   EXPECT_EQ("", Explain(Pointwise(IsHalfOf(), rhs), lhs));
 }
 
 TEST(PointwiseTest, AllowsMonomorphicInnerMatcher) {
-  const double lhs[3] = { 1, 2, 3 };
-  const int rhs[3] = { 2, 4, 6 };
+  const double lhs[3] = {1, 2, 3};
+  const int rhs[3] = {2, 4, 6};
   const Matcher<tuple<const double&, const int&> > m1 = IsHalfOf();
   EXPECT_THAT(lhs, Pointwise(m1, rhs));
   EXPECT_EQ("", Explain(Pointwise(m1, rhs), lhs));
@@ -5486,6 +5497,120 @@ TEST(PointwiseTest, AllowsMonomorphicInnerMatcher) {
   const Matcher<tuple<double, int> > m2 = IsHalfOf();
   EXPECT_THAT(lhs, Pointwise(m2, rhs));
   EXPECT_EQ("", Explain(Pointwise(m2, rhs), lhs));
+}
+
+TEST(UnorderedPointwiseTest, DescribesSelf) {
+  vector<int> rhs;
+  rhs.push_back(1);
+  rhs.push_back(2);
+  rhs.push_back(3);
+  const Matcher<const vector<int>&> m = UnorderedPointwise(IsHalfOf(), rhs);
+  EXPECT_EQ(
+      "has 3 elements and there exists some permutation of elements such "
+      "that:\n"
+      " - element #0 and 1 are a pair where the first is half of the second, "
+      "and\n"
+      " - element #1 and 2 are a pair where the first is half of the second, "
+      "and\n"
+      " - element #2 and 3 are a pair where the first is half of the second",
+      Describe(m));
+  EXPECT_EQ(
+      "doesn't have 3 elements, or there exists no permutation of elements "
+      "such that:\n"
+      " - element #0 and 1 are a pair where the first is half of the second, "
+      "and\n"
+      " - element #1 and 2 are a pair where the first is half of the second, "
+      "and\n"
+      " - element #2 and 3 are a pair where the first is half of the second",
+      DescribeNegation(m));
+}
+
+TEST(UnorderedPointwiseTest, MakesCopyOfRhs) {
+  list<signed char> rhs;
+  rhs.push_back(2);
+  rhs.push_back(4);
+
+  int lhs[] = {2, 1};
+  const Matcher<const int (&)[2]> m = UnorderedPointwise(IsHalfOf(), rhs);
+  EXPECT_THAT(lhs, m);
+
+  // Changing rhs now shouldn't affect m, which made a copy of rhs.
+  rhs.push_back(6);
+  EXPECT_THAT(lhs, m);
+}
+
+TEST(UnorderedPointwiseTest, WorksForLhsNativeArray) {
+  const int lhs[] = {1, 2, 3};
+  vector<int> rhs;
+  rhs.push_back(4);
+  rhs.push_back(6);
+  rhs.push_back(2);
+  EXPECT_THAT(lhs, UnorderedPointwise(Lt(), rhs));
+  EXPECT_THAT(lhs, Not(UnorderedPointwise(Gt(), rhs)));
+}
+
+TEST(UnorderedPointwiseTest, WorksForRhsNativeArray) {
+  const int rhs[] = {1, 2, 3};
+  vector<int> lhs;
+  lhs.push_back(4);
+  lhs.push_back(2);
+  lhs.push_back(6);
+  EXPECT_THAT(lhs, UnorderedPointwise(Gt(), rhs));
+  EXPECT_THAT(lhs, Not(UnorderedPointwise(Lt(), rhs)));
+}
+
+#if GTEST_HAS_STD_INITIALIZER_LIST_
+
+TEST(UnorderedPointwiseTest, WorksForRhsInitializerList) {
+  const vector<int> lhs{2, 4, 6};
+  EXPECT_THAT(lhs, UnorderedPointwise(Gt(), {5, 1, 3}));
+  EXPECT_THAT(lhs, Not(UnorderedPointwise(Lt(), {1, 1, 7})));
+}
+
+#endif  // GTEST_HAS_STD_INITIALIZER_LIST_
+
+TEST(UnorderedPointwiseTest, RejectsWrongSize) {
+  const double lhs[2] = {1, 2};
+  const int rhs[1] = {0};
+  EXPECT_THAT(lhs, Not(UnorderedPointwise(Gt(), rhs)));
+  EXPECT_EQ("which has 2 elements",
+            Explain(UnorderedPointwise(Gt(), rhs), lhs));
+
+  const int rhs2[3] = {0, 1, 2};
+  EXPECT_THAT(lhs, Not(UnorderedPointwise(Gt(), rhs2)));
+}
+
+TEST(UnorderedPointwiseTest, RejectsWrongContent) {
+  const double lhs[3] = {1, 2, 3};
+  const int rhs[3] = {2, 6, 6};
+  EXPECT_THAT(lhs, Not(UnorderedPointwise(IsHalfOf(), rhs)));
+  EXPECT_EQ("where the following elements don't match any matchers:\n"
+            "element #1: 2",
+            Explain(UnorderedPointwise(IsHalfOf(), rhs), lhs));
+}
+
+TEST(UnorderedPointwiseTest, AcceptsCorrectContentInSameOrder) {
+  const double lhs[3] = {1, 2, 3};
+  const int rhs[3] = {2, 4, 6};
+  EXPECT_THAT(lhs, UnorderedPointwise(IsHalfOf(), rhs));
+}
+
+TEST(UnorderedPointwiseTest, AcceptsCorrectContentInDifferentOrder) {
+  const double lhs[3] = {1, 2, 3};
+  const int rhs[3] = {6, 4, 2};
+  EXPECT_THAT(lhs, UnorderedPointwise(IsHalfOf(), rhs));
+}
+
+TEST(UnorderedPointwiseTest, AllowsMonomorphicInnerMatcher) {
+  const double lhs[3] = {1, 2, 3};
+  const int rhs[3] = {4, 6, 2};
+  const Matcher<tuple<const double&, const int&> > m1 = IsHalfOf();
+  EXPECT_THAT(lhs, UnorderedPointwise(m1, rhs));
+
+  // This type works as a tuple<const double&, const int&> can be
+  // implicitly cast to tuple<double, int>.
+  const Matcher<tuple<double, int> > m2 = IsHalfOf();
+  EXPECT_THAT(lhs, UnorderedPointwise(m2, rhs));
 }
 
 }  // namespace gmock_matchers_test
