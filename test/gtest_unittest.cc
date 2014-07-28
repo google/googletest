@@ -282,6 +282,9 @@ using testing::internal::TestEventListenersAccessor;
 using testing::internal::TestResultAccessor;
 using testing::internal::UInt32;
 using testing::internal::WideStringToUtf8;
+using testing::internal::edit_distance::CalculateOptimalEdits;
+using testing::internal::edit_distance::CreateUnifiedDiff;
+using testing::internal::edit_distance::EditType;
 using testing::internal::kMaxRandomSeed;
 using testing::internal::kTestTypeIdInGoogleTest;
 using testing::internal::scoped_ptr;
@@ -3431,6 +3434,79 @@ TEST_F(NoFatalFailureTest, MessageIsStreamable) {
 
 // Tests non-string assertions.
 
+std::string EditsToString(const std::vector<EditType>& edits) {
+  std::string out;
+  for (size_t i = 0; i < edits.size(); ++i) {
+    static const char kEdits[] = " +-/";
+    out.append(1, kEdits[edits[i]]);
+  }
+  return out;
+}
+
+std::vector<size_t> CharsToIndices(const std::string& str) {
+  std::vector<size_t> out;
+  for (size_t i = 0; i < str.size(); ++i) {
+    out.push_back(str[i]);
+  }
+  return out;
+}
+
+std::vector<std::string> CharsToLines(const std::string& str) {
+  std::vector<std::string> out;
+  for (size_t i = 0; i < str.size(); ++i) {
+    out.push_back(str.substr(i, 1));
+  }
+  return out;
+}
+
+TEST(EditDistance, TestCases) {
+  struct Case {
+    int line;
+    const char* left;
+    const char* right;
+    const char* expected_edits;
+    const char* expected_diff;
+  };
+  static const Case kCases[] = {
+      // No change.
+      {__LINE__, "A", "A", " ", ""},
+      {__LINE__, "ABCDE", "ABCDE", "     ", ""},
+      // Simple adds.
+      {__LINE__, "X", "XA", " +", "@@ +1,2 @@\n X\n+A\n"},
+      {__LINE__, "X", "XABCD", " ++++", "@@ +1,5 @@\n X\n+A\n+B\n+C\n+D\n"},
+      // Simple removes.
+      {__LINE__, "XA", "X", " -", "@@ -1,2 @@\n X\n-A\n"},
+      {__LINE__, "XABCD", "X", " ----", "@@ -1,5 @@\n X\n-A\n-B\n-C\n-D\n"},
+      // Simple replaces.
+      {__LINE__, "A", "a", "/", "@@ -1,1 +1,1 @@\n-A\n+a\n"},
+      {__LINE__, "ABCD", "abcd", "////",
+       "@@ -1,4 +1,4 @@\n-A\n-B\n-C\n-D\n+a\n+b\n+c\n+d\n"},
+      // Path finding.
+      {__LINE__, "ABCDEFGH", "ABXEGH1", "  -/ -  +",
+       "@@ -1,8 +1,7 @@\n A\n B\n-C\n-D\n+X\n E\n-F\n G\n H\n+1\n"},
+      {__LINE__, "AAAABCCCC", "ABABCDCDC", "- /   + / ",
+       "@@ -1,9 +1,9 @@\n-A\n A\n-A\n+B\n A\n B\n C\n+D\n C\n-C\n+D\n C\n"},
+      {__LINE__, "ABCDE", "BCDCD", "-   +/",
+       "@@ -1,5 +1,5 @@\n-A\n B\n C\n D\n-E\n+C\n+D\n"},
+      {__LINE__, "ABCDEFGHIJKL", "BCDCDEFGJKLJK", "- ++     --   ++",
+       "@@ -1,4 +1,5 @@\n-A\n B\n+C\n+D\n C\n D\n"
+       "@@ -6,7 +7,7 @@\n F\n G\n-H\n-I\n J\n K\n L\n+J\n+K\n"},
+      {}};
+  for (const Case* c = kCases; c->left; ++c) {
+    EXPECT_TRUE(c->expected_edits ==
+                EditsToString(CalculateOptimalEdits(CharsToIndices(c->left),
+                                                    CharsToIndices(c->right))))
+        << "Left <" << c->left << "> Right <" << c->right << "> Edits <"
+        << EditsToString(CalculateOptimalEdits(
+               CharsToIndices(c->left), CharsToIndices(c->right))) << ">";
+    EXPECT_TRUE(c->expected_diff == CreateUnifiedDiff(CharsToLines(c->left),
+                                                      CharsToLines(c->right)))
+        << "Left <" << c->left << "> Right <" << c->right << "> Diff <"
+        << CreateUnifiedDiff(CharsToLines(c->left), CharsToLines(c->right))
+        << ">";
+  }
+}
+
 // Tests EqFailure(), used for implementing *EQ* assertions.
 TEST(AssertionTest, EqFailure) {
   const std::string foo_val("5"), bar_val("6");
@@ -3479,6 +3555,24 @@ TEST(AssertionTest, EqFailure) {
       "Expected: foo (ignoring case)\n"
       "Which is: \"x\"",
       msg5.c_str());
+}
+
+TEST(AssertionTest, EqFailureWithDiff) {
+  const std::string left(
+      "1\\n2XXX\\n3\\n5\\n6\\n7\\n8\\n9\\n10\\n11\\n12XXX\\n13\\n14\\n15");
+  const std::string right(
+      "1\\n2\\n3\\n4\\n5\\n6\\n7\\n8\\n9\\n11\\n12\\n13\\n14");
+  const std::string msg1(
+      EqFailure("left", "right", left, right, false).failure_message());
+  EXPECT_STREQ(
+      "Value of: right\n"
+      "  Actual: 1\\n2\\n3\\n4\\n5\\n6\\n7\\n8\\n9\\n11\\n12\\n13\\n14\n"
+      "Expected: left\n"
+      "Which is: "
+      "1\\n2XXX\\n3\\n5\\n6\\n7\\n8\\n9\\n10\\n11\\n12XXX\\n13\\n14\\n15\n"
+      "With diff:\n@@ -1,5 +1,6 @@\n 1\n-2XXX\n+2\n 3\n+4\n 5\n 6\n"
+      "@@ -7,8 +8,6 @@\n 8\n 9\n-10\n 11\n-12XXX\n+12\n 13\n 14\n-15\n",
+      msg1.c_str());
 }
 
 // Tests AppendUserMessage(), used for implementing the *EQ* macros.

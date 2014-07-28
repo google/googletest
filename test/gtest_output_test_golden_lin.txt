@@ -7,7 +7,7 @@ Expected: true
 gtest_output_test_.cc:#: Failure
 Value of: 3
 Expected: 2
-[0;32m[==========] [mRunning 63 tests from 28 test cases.
+[0;32m[==========] [mRunning 64 tests from 28 test cases.
 [0;32m[----------] [mGlobal test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -31,7 +31,7 @@ BarEnvironment::SetUp() called.
 [0;32m[       OK ] [mPassingTest.PassingTest1
 [0;32m[ RUN      ] [mPassingTest.PassingTest2
 [0;32m[       OK ] [mPassingTest.PassingTest2
-[0;32m[----------] [m1 test from NonfatalFailureTest
+[0;32m[----------] [m2 tests from NonfatalFailureTest
 [0;32m[ RUN      ] [mNonfatalFailureTest.EscapesStringOperands
 gtest_output_test_.cc:#: Failure
 Value of: actual
@@ -44,6 +44,17 @@ Value of: actual
 Expected: golden
 Which is: "\"Line"
 [0;31m[  FAILED  ] [mNonfatalFailureTest.EscapesStringOperands
+[0;32m[ RUN      ] [mNonfatalFailureTest.DiffForLongStrings
+gtest_output_test_.cc:#: Failure
+Value of: "Line 2"
+Expected: golden_str
+Which is: "\"Line\0 1\"\nLine 2"
+With diff:
+@@ -1,2 @@
+-\"Line\0 1\"
+ Line 2
+
+[0;31m[  FAILED  ] [mNonfatalFailureTest.DiffForLongStrings
 [0;32m[----------] [m3 tests from FatalFailureTest
 [0;32m[ RUN      ] [mFatalFailureTest.FatalFailureInSubroutine
 (expecting a failure that x should be 1)
@@ -599,10 +610,11 @@ FooEnvironment::TearDown() called.
 gtest_output_test_.cc:#: Failure
 Failed
 Expected fatal failure.
-[0;32m[==========] [m63 tests from 28 test cases ran.
+[0;32m[==========] [m64 tests from 28 test cases ran.
 [0;32m[  PASSED  ] [m21 tests.
-[0;31m[  FAILED  ] [m42 tests, listed below:
+[0;31m[  FAILED  ] [m43 tests, listed below:
 [0;31m[  FAILED  ] [mNonfatalFailureTest.EscapesStringOperands
+[0;31m[  FAILED  ] [mNonfatalFailureTest.DiffForLongStrings
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInSubroutine
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInNestedSubroutine
 [0;31m[  FAILED  ] [mFatalFailureTest.NonfatalFailureInSubroutine
@@ -645,7 +657,7 @@ Expected fatal failure.
 [0;31m[  FAILED  ] [mScopedFakeTestPartResultReporterTest.InterceptOnlyCurrentThread
 [0;31m[  FAILED  ] [mPrintingFailingParams/FailingParamTest.Fails/0, where GetParam() = 2
 
-42 FAILED TESTS
+43 FAILED TESTS
 [0;33m  YOU HAVE 1 DISABLED TEST
 
 [mNote: Google Test filter = FatalFailureTest.*:LoggingTest.*

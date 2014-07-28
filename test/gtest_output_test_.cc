@@ -113,6 +113,11 @@ TEST(NonfatalFailureTest, EscapesStringOperands) {
   EXPECT_EQ(golden, actual);
 }
 
+TEST(NonfatalFailureTest, DiffForLongStrings) {
+  std::string golden_str(kGoldenString, sizeof(kGoldenString) - 1);
+  EXPECT_EQ(golden_str, "Line 2");
+}
+
 // Tests catching a fatal failure in a subroutine.
 TEST(FatalFailureTest, FatalFailureInSubroutine) {
   printf("(expecting a failure that x should be 1)\n");
