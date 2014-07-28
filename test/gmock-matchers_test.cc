@@ -4651,6 +4651,19 @@ TEST(ElementsAreTest, WorksWithUncopyable) {
   EXPECT_THAT(objs, ElementsAre(UncopyableIs(-3), Truly(ValueIsPositive)));
 }
 
+TEST(ElementsAreTest, TakesStlContainer) {
+  const int actual[] = {3, 1, 2};
+
+  ::std::list<int> expected;
+  expected.push_back(3);
+  expected.push_back(1);
+  expected.push_back(2);
+  EXPECT_THAT(actual, ElementsAreArray(expected));
+
+  expected.push_back(4);
+  EXPECT_THAT(actual, Not(ElementsAreArray(expected)));
+}
+
 // Tests for UnorderedElementsAreArray()
 
 TEST(UnorderedElementsAreArrayTest, SucceedsWhenExpected) {
@@ -4690,6 +4703,19 @@ TEST(UnorderedElementsAreArrayTest, WorksForStreamlike) {
 
   expected.push_back(6);
   EXPECT_THAT(s, Not(UnorderedElementsAreArray(expected)));
+}
+
+TEST(UnorderedElementsAreArrayTest, TakesStlContainer) {
+  const int actual[] = {3, 1, 2};
+
+  ::std::list<int> expected;
+  expected.push_back(1);
+  expected.push_back(2);
+  expected.push_back(3);
+  EXPECT_THAT(actual, UnorderedElementsAreArray(expected));
+
+  expected.push_back(4);
+  EXPECT_THAT(actual, Not(UnorderedElementsAreArray(expected)));
 }
 
 #if GTEST_HAS_STD_INITIALIZER_LIST_
@@ -5464,4 +5490,3 @@ TEST(PointwiseTest, AllowsMonomorphicInnerMatcher) {
 
 }  // namespace gmock_matchers_test
 }  // namespace testing
-

@@ -3444,7 +3444,7 @@ GTEST_API_ string FormatMatcherDescription(bool negation,
 // ElementsAreArray(first, last)
 // ElementsAreArray(pointer, count)
 // ElementsAreArray(array)
-// ElementsAreArray(vector)
+// ElementsAreArray(container)
 // ElementsAreArray({ e1, e2, ..., en })
 //
 // The ElementsAreArray() functions are like ElementsAre(...), except
@@ -3476,10 +3476,10 @@ inline internal::ElementsAreArrayMatcher<T> ElementsAreArray(
   return ElementsAreArray(array, N);
 }
 
-template <typename T, typename A>
-inline internal::ElementsAreArrayMatcher<T> ElementsAreArray(
-    const ::std::vector<T, A>& vec) {
-  return ElementsAreArray(vec.begin(), vec.end());
+template <typename Container>
+inline internal::ElementsAreArrayMatcher<typename Container::value_type>
+ElementsAreArray(const Container& container) {
+  return ElementsAreArray(container.begin(), container.end());
 }
 
 #if GTEST_HAS_STD_INITIALIZER_LIST_
@@ -3493,7 +3493,7 @@ ElementsAreArray(::std::initializer_list<T> xs) {
 // UnorderedElementsAreArray(first, last)
 // UnorderedElementsAreArray(pointer, count)
 // UnorderedElementsAreArray(array)
-// UnorderedElementsAreArray(vector)
+// UnorderedElementsAreArray(container)
 // UnorderedElementsAreArray({ e1, e2, ..., en })
 //
 // The UnorderedElementsAreArray() functions are like
@@ -3518,10 +3518,11 @@ UnorderedElementsAreArray(const T (&array)[N]) {
   return UnorderedElementsAreArray(array, N);
 }
 
-template <typename T, typename A>
-inline internal::UnorderedElementsAreArrayMatcher<T>
-UnorderedElementsAreArray(const ::std::vector<T, A>& vec) {
-  return UnorderedElementsAreArray(vec.begin(), vec.end());
+template <typename Container>
+inline internal::UnorderedElementsAreArrayMatcher<
+    typename Container::value_type>
+UnorderedElementsAreArray(const Container& container) {
+  return UnorderedElementsAreArray(container.begin(), container.end());
 }
 
 #if GTEST_HAS_STD_INITIALIZER_LIST_
