@@ -1319,7 +1319,7 @@ inline void FlushInfoLog() { fflush(NULL); }
 
 #if GTEST_HAS_STD_MOVE_
 using std::move;
-#else  // GTEST_LANG_CXX11
+#else  // GTEST_HAS_STD_MOVE_
 template <typename T>
 const T& move(const T& t) {
   return t;
@@ -1347,7 +1347,7 @@ const T& move(const T& t) {
 // similar functions users may have (e.g., implicit_cast). The internal
 // namespace alone is not enough because the function can be found by ADL.
 template<typename To>
-inline To ImplicitCast_(To x) { return move(x); }
+inline To ImplicitCast_(To x) { return ::testing::internal::move(x); }
 
 // When you upcast (that is, cast a pointer from type Foo to type
 // SuperclassOfFoo), it's fine to use ImplicitCast_<>, since upcasts
