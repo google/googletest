@@ -509,6 +509,26 @@ TEST(ReturnTest, AcceptsStringLiteral) {
   EXPECT_EQ("world", a2.Perform(make_tuple()));
 }
 
+// Test struct which wraps a vector of integers. Used in
+// 'SupportsWrapperReturnType' test.
+struct IntegerVectorWrapper {
+  std::vector<int> * v;
+  IntegerVectorWrapper(std::vector<int>& _v) : v(&_v) {}  // NOLINT
+};
+
+// Tests that Return() works when return type is a wrapper type.
+TEST(ReturnTest, SupportsWrapperReturnType) {
+  // Initialize vector of integers.
+  std::vector<int> v;
+  for (int i = 0; i < 5; ++i) v.push_back(i);
+
+  // Return() called with 'v' as argument. The Action will return the same data
+  // as 'v' (copy) but it will be wrapped in an IntegerVectorWrapper.
+  Action<IntegerVectorWrapper()> a = Return(v);
+  const std::vector<int>& result = *(a.Perform(make_tuple()).v);
+  EXPECT_THAT(result, ::testing::ElementsAre(0, 1, 2, 3, 4));
+}
+
 // Tests that Return(v) is covaraint.
 
 struct Base {

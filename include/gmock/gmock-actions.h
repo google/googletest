@@ -534,16 +534,20 @@ class ReturnAction {
     // Result without considering explicit constructors, thus resolving the
     // ambiguity. value_ is then initialized using its copy constructor.
     explicit Impl(const linked_ptr<R>& value)
-        : value_(ImplicitCast_<Result>(*value)) {}
+        : value_before_cast_(*value),
+          value_(ImplicitCast_<Result>(value_before_cast_)) {}
 
     virtual Result Perform(const ArgumentTuple&) { return value_; }
 
    private:
     GTEST_COMPILE_ASSERT_(!is_reference<Result>::value,
                           Result_cannot_be_a_reference_type);
+    // We save the value before casting just in case it is being cast to a
+    // wrapper type.
+    R value_before_cast_;
     Result value_;
 
-    GTEST_DISALLOW_ASSIGN_(Impl);
+    GTEST_DISALLOW_COPY_AND_ASSIGN_(Impl);
   };
 
   // Partially specialize for ByMoveWrapper. This version of ReturnAction will
