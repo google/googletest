@@ -65,6 +65,68 @@ class Foo {
         'MOCK_METHOD0(Bar,\nint());',
         self.GenerateMethodSource(source))
 
+  def testSimpleConstructorsAndDestructor(self):
+    source = """
+class Foo {
+ public:
+  Foo();
+  Foo(int x);
+  Foo(const Foo& f);
+  Foo(Foo&& f);
+  ~Foo();
+  virtual int Bar() = 0;
+};
+"""
+    # The constructors and destructor should be ignored.
+    self.assertEqualIgnoreLeadingWhitespace(
+        'MOCK_METHOD0(Bar,\nint());',
+        self.GenerateMethodSource(source))
+
+  def testVirtualDestructor(self):
+    source = """
+class Foo {
+ public:
+  virtual ~Foo();
+  virtual int Bar() = 0;
+};
+"""
+    # The destructor should be ignored.
+    self.assertEqualIgnoreLeadingWhitespace(
+        'MOCK_METHOD0(Bar,\nint());',
+        self.GenerateMethodSource(source))
+
+  def testExplicitlyDefaultedConstructorsAndDestructor(self):
+    source = """
+class Foo {
+ public:
+  Foo() = default;
+  Foo(const Foo& f) = default;
+  Foo(Foo&& f) = default;
+  ~Foo() = default;
+  virtual int Bar() = 0;
+};
+"""
+    # The constructors and destructor should be ignored.
+    self.assertEqualIgnoreLeadingWhitespace(
+        'MOCK_METHOD0(Bar,\nint());',
+        self.GenerateMethodSource(source))
+
+  def testExplicitlyDeletedConstructorsAndDestructor(self):
+    source = """
+class Foo {
+ public:
+  Foo() = delete;
+  Foo(const Foo& f) = delete;
+  Foo(Foo&& f) = delete;
+  ~Foo() = delete;
+  virtual int Bar() = 0;
+};
+"""
+    # The constructors and destructor should be ignored.
+    self.assertEqualIgnoreLeadingWhitespace(
+        'MOCK_METHOD0(Bar,\nint());',
+        self.GenerateMethodSource(source))
+
   def testSimpleOverrideMethod(self):
     source = """
 class Foo {

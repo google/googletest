@@ -1081,10 +1081,17 @@ class AstBuilder(object):
             body = None
             if token.name == '=':
                 token = self._GetNextToken()
-                assert token.token_type == tokenize.CONSTANT, token
-                assert token.name == '0', token
-                modifiers |= FUNCTION_PURE_VIRTUAL
-                token = self._GetNextToken()
+
+                if token.name == 'default' or token.name == 'delete':
+                    # Ignore explicitly defaulted and deleted special members
+                    # in C++11.
+                    token = self._GetNextToken()
+                else:
+                    # Handle pure-virtual declarations.
+                    assert token.token_type == tokenize.CONSTANT, token
+                    assert token.name == '0', token
+                    modifiers |= FUNCTION_PURE_VIRTUAL
+                    token = self._GetNextToken()
 
             if token.name == '[':
                 # TODO(nnorwitz): store tokens and improve parsing.
