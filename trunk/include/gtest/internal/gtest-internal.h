@@ -612,7 +612,7 @@ class TypeParameterizedTest {
     MakeAndRegisterTestInfo(
         (std::string(prefix) + (prefix[0] == '\0' ? "" : "/") + case_name + "/"
          + StreamableToString(index)).c_str(),
-        GetPrefixUntilComma(test_names).c_str(),
+        StripTrailingSpaces(GetPrefixUntilComma(test_names)).c_str(),
         GetTypeName<Type>().c_str(),
         NULL,  // No value parameter.
         GetTypeId<FixtureClass>(),
