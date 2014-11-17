@@ -4478,8 +4478,8 @@ class Streamlike {
   class ConstIter : public std::iterator<std::input_iterator_tag,
                                          value_type,
                                          ptrdiff_t,
-                                         const value_type&,
-                                         const value_type*> {
+                                         const value_type*,
+                                         const value_type&> {
    public:
     ConstIter(const Streamlike* s,
               typename std::list<value_type>::iterator pos)
