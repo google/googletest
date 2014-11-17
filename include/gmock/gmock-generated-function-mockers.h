@@ -875,13 +875,13 @@ class MockFunction<R()> {
 
   MOCK_METHOD0_T(Call, R());
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_FUNCTION_
   std::function<R()> AsStdFunction() {
     return [this]() {
       return this->Call();
     };
   }
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_STD_FUNCTION_
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
@@ -894,13 +894,13 @@ class MockFunction<R(A0)> {
 
   MOCK_METHOD1_T(Call, R(A0));
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_FUNCTION_
   std::function<R(A0)> AsStdFunction() {
     return [this](A0 a0) {
       return this->Call(a0);
     };
   }
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_STD_FUNCTION_
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
@@ -913,13 +913,13 @@ class MockFunction<R(A0, A1)> {
 
   MOCK_METHOD2_T(Call, R(A0, A1));
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_FUNCTION_
   std::function<R(A0, A1)> AsStdFunction() {
     return [this](A0 a0, A1 a1) {
       return this->Call(a0, a1);
     };
   }
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_STD_FUNCTION_
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
@@ -932,13 +932,13 @@ class MockFunction<R(A0, A1, A2)> {
 
   MOCK_METHOD3_T(Call, R(A0, A1, A2));
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_FUNCTION_
   std::function<R(A0, A1, A2)> AsStdFunction() {
     return [this](A0 a0, A1 a1, A2 a2) {
       return this->Call(a0, a1, a2);
     };
   }
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_STD_FUNCTION_
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
@@ -951,13 +951,13 @@ class MockFunction<R(A0, A1, A2, A3)> {
 
   MOCK_METHOD4_T(Call, R(A0, A1, A2, A3));
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_FUNCTION_
   std::function<R(A0, A1, A2, A3)> AsStdFunction() {
     return [this](A0 a0, A1 a1, A2 a2, A3 a3) {
       return this->Call(a0, a1, a2, a3);
     };
   }
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_STD_FUNCTION_
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
@@ -971,13 +971,13 @@ class MockFunction<R(A0, A1, A2, A3, A4)> {
 
   MOCK_METHOD5_T(Call, R(A0, A1, A2, A3, A4));
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_FUNCTION_
   std::function<R(A0, A1, A2, A3, A4)> AsStdFunction() {
     return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4) {
       return this->Call(a0, a1, a2, a3, a4);
     };
   }
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_STD_FUNCTION_
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
@@ -991,13 +991,13 @@ class MockFunction<R(A0, A1, A2, A3, A4, A5)> {
 
   MOCK_METHOD6_T(Call, R(A0, A1, A2, A3, A4, A5));
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_FUNCTION_
   std::function<R(A0, A1, A2, A3, A4, A5)> AsStdFunction() {
     return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
       return this->Call(a0, a1, a2, a3, a4, a5);
     };
   }
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_STD_FUNCTION_
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
@@ -1011,13 +1011,13 @@ class MockFunction<R(A0, A1, A2, A3, A4, A5, A6)> {
 
   MOCK_METHOD7_T(Call, R(A0, A1, A2, A3, A4, A5, A6));
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_FUNCTION_
   std::function<R(A0, A1, A2, A3, A4, A5, A6)> AsStdFunction() {
     return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
       return this->Call(a0, a1, a2, a3, a4, a5, a6);
     };
   }
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_STD_FUNCTION_
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
@@ -1031,13 +1031,13 @@ class MockFunction<R(A0, A1, A2, A3, A4, A5, A6, A7)> {
 
   MOCK_METHOD8_T(Call, R(A0, A1, A2, A3, A4, A5, A6, A7));
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_FUNCTION_
   std::function<R(A0, A1, A2, A3, A4, A5, A6, A7)> AsStdFunction() {
     return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
       return this->Call(a0, a1, a2, a3, a4, a5, a6, a7);
     };
   }
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_STD_FUNCTION_
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
@@ -1051,14 +1051,14 @@ class MockFunction<R(A0, A1, A2, A3, A4, A5, A6, A7, A8)> {
 
   MOCK_METHOD9_T(Call, R(A0, A1, A2, A3, A4, A5, A6, A7, A8));
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_FUNCTION_
   std::function<R(A0, A1, A2, A3, A4, A5, A6, A7, A8)> AsStdFunction() {
     return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
         A8 a8) {
       return this->Call(a0, a1, a2, a3, a4, a5, a6, a7, a8);
     };
   }
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_STD_FUNCTION_
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
@@ -1073,14 +1073,14 @@ class MockFunction<R(A0, A1, A2, A3, A4, A5, A6, A7, A8, A9)> {
 
   MOCK_METHOD10_T(Call, R(A0, A1, A2, A3, A4, A5, A6, A7, A8, A9));
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_FUNCTION_
   std::function<R(A0, A1, A2, A3, A4, A5, A6, A7, A8, A9)> AsStdFunction() {
     return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
         A8 a8, A9 a9) {
       return this->Call(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9);
     };
   }
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_STD_FUNCTION_
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);

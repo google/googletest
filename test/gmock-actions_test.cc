@@ -264,7 +264,7 @@ TEST(DefaultValueDeathTest, GetReturnsBuiltInDefaultValueWhenUnset) {
   }, "");
 }
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_UNIQUE_PTR_
 TEST(DefaultValueDeathTest, GetWorksForMoveOnlyIfSet) {
   EXPECT_FALSE(DefaultValue<std::unique_ptr<int>>::Exists());
   EXPECT_DEATH_IF_SUPPORTED({
@@ -277,7 +277,7 @@ TEST(DefaultValueDeathTest, GetWorksForMoveOnlyIfSet) {
   std::unique_ptr<int> i = DefaultValue<std::unique_ptr<int>>::Get();
   EXPECT_EQ(42, *i);
 }
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_STD_UNIQUE_PTR_
 
 // Tests that DefaultValue<void>::Get() returns void.
 TEST(DefaultValueTest, GetWorksForVoid) {
@@ -636,7 +636,7 @@ class MockClass {
 
   MOCK_METHOD1(IntFunc, int(bool flag));  // NOLINT
   MOCK_METHOD0(Foo, MyClass());
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_UNIQUE_PTR_
   MOCK_METHOD0(MakeUnique, std::unique_ptr<int>());
   MOCK_METHOD0(MakeVectorUnique, std::vector<std::unique_ptr<int>>());
 #endif
@@ -1273,7 +1273,7 @@ TEST(ByRefTest, PrintsCorrectly) {
   EXPECT_EQ(expected.str(), actual.str());
 }
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_UNIQUE_PTR_
 
 std::unique_ptr<int> UniquePtrSource() {
   return std::unique_ptr<int>(new int(19));
@@ -1310,6 +1310,6 @@ TEST(MockMethodTest, CanReturnMoveOnlyValue) {
   EXPECT_EQ(7, *vresult[0]);
 }
 
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_STD_UNIQUE_PTR_
 
 }  // Unnamed namespace

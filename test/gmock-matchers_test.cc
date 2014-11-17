@@ -54,7 +54,7 @@
 #include "gtest/gtest.h"
 #include "gtest/gtest-spi.h"
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_FORWARD_LIST_
 # include <forward_list>  // NOLINT
 #endif
 
@@ -4545,7 +4545,7 @@ TEST(StreamlikeTest, Iteration) {
   }
 }
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_FORWARD_LIST_
 TEST(BeginEndDistanceIsTest, WorksWithForwardList) {
   std::forward_list<int> container;
   EXPECT_THAT(container, BeginEndDistanceIs(0));
@@ -4557,7 +4557,7 @@ TEST(BeginEndDistanceIsTest, WorksWithForwardList) {
   EXPECT_THAT(container, Not(BeginEndDistanceIs(0)));
   EXPECT_THAT(container, BeginEndDistanceIs(2));
 }
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_STD_FORWARD_LIST_
 
 TEST(BeginEndDistanceIsTest, WorksWithNonStdList) {
   const int a[5] = {1, 2, 3, 4, 5};

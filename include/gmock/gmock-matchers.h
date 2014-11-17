@@ -2373,7 +2373,7 @@ class BeginEndDistanceIsMatcher {
 
     virtual bool MatchAndExplain(Container container,
                                  MatchResultListener* listener) const {
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_BEGIN_AND_END_
       using std::begin;
       using std::end;
       DistanceType distance = std::distance(begin(container), end(container));
