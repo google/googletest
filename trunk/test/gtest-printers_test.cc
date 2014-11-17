@@ -1037,7 +1037,7 @@ TEST(PrintTr1TupleTest, NestedTuple) {
 
 #endif  // GTEST_HAS_TR1_TUPLE
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_TUPLE_
 // Tests printing ::std::tuples.
 
 // Tuples of various arities.
