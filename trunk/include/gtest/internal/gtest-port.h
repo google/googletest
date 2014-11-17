@@ -879,7 +879,12 @@ using ::std::tuple_size;
 // compiler the variable/parameter does not have to be used.
 #if defined(__GNUC__) && !defined(COMPILER_ICC)
 # define GTEST_ATTRIBUTE_UNUSED_ __attribute__ ((unused))
-#else
+#elif defined(__clang__)
+# if __has_attribute(unused)
+#  define GTEST_ATTRIBUTE_UNUSED_ __attribute__ ((unused))
+# endif
+#endif
+#ifndef GTEST_ATTRIBUTE_UNUSED_
 # define GTEST_ATTRIBUTE_UNUSED_
 #endif
 
@@ -1041,15 +1046,21 @@ class Secret;
 // the expression is false, most compilers will issue a warning/error
 // containing the name of the variable.
 
+#if GTEST_LANG_CXX11
+# define GTEST_COMPILE_ASSERT_(expr, msg) static_assert(expr, #msg)
+#else  // !GTEST_LANG_CXX11
 template <bool>
-struct CompileAssert {
+  struct CompileAssert {
 };
 
-#define GTEST_COMPILE_ASSERT_(expr, msg) \
+# define GTEST_COMPILE_ASSERT_(expr, msg) \
   typedef ::testing::internal::CompileAssert<(static_cast<bool>(expr))> \
       msg[static_cast<bool>(expr) ? 1 : -1] GTEST_ATTRIBUTE_UNUSED_
+#endif  // !GTEST_LANG_CXX11
 
 // Implementation details of GTEST_COMPILE_ASSERT_:
+//
+// (In C++11, we simply use static_assert instead of the following)
 //
 // - GTEST_COMPILE_ASSERT_ works by defining an array type that has -1
 //   elements (and thus is invalid) when the expression is false.
