@@ -607,11 +607,11 @@ TEST(MatcherCastTest, FromSameType) {
   EXPECT_FALSE(m2.Matches(1));
 }
 
-// Implicitly convertible form any type.
+// Implicitly convertible from any type.
 struct ConvertibleFromAny {
   ConvertibleFromAny(int a_value) : value(a_value) {}
   template <typename T>
-  ConvertibleFromAny(const T& a_value) : value(-1) {
+  ConvertibleFromAny(const T& /*a_value*/) : value(-1) {
     ADD_FAILURE() << "Conversion constructor called";
   }
   int value;

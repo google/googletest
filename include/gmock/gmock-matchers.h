@@ -199,6 +199,31 @@ class StringMatchResultListener : public MatchResultListener {
 
 namespace internal {
 
+struct AnyEq {
+  template <typename A, typename B>
+  bool operator()(const A& a, const B& b) const { return a == b; }
+};
+struct AnyNe {
+  template <typename A, typename B>
+  bool operator()(const A& a, const B& b) const { return a != b; }
+};
+struct AnyLt {
+  template <typename A, typename B>
+  bool operator()(const A& a, const B& b) const { return a < b; }
+};
+struct AnyGt {
+  template <typename A, typename B>
+  bool operator()(const A& a, const B& b) const { return a > b; }
+};
+struct AnyLe {
+  template <typename A, typename B>
+  bool operator()(const A& a, const B& b) const { return a <= b; }
+};
+struct AnyGe {
+  template <typename A, typename B>
+  bool operator()(const A& a, const B& b) const { return a >= b; }
+};
+
 // A match result listener that ignores the explanation.
 class DummyMatchResultListener : public MatchResultListener {
  public:
@@ -862,55 +887,90 @@ class AnythingMatcher {
 // used to match an int, a short, a double, etc).  Therefore we use
 // a template type conversion operator in the implementation.
 //
-// We define this as a macro in order to eliminate duplicated source
-// code.
-//
 // The following template definition assumes that the Rhs parameter is
 // a "bare" type (i.e. neither 'const T' nor 'T&').
-#define GMOCK_IMPLEMENT_COMPARISON_MATCHER_( \
-    name, op, relation, negated_relation) \
-  template <typename Rhs> class name##Matcher { \
-   public: \
-    explicit name##Matcher(const Rhs& rhs) : rhs_(rhs) {} \
-    template <typename Lhs> \
-    operator Matcher<Lhs>() const { \
-      return MakeMatcher(new Impl<Lhs>(rhs_)); \
-    } \
-   private: \
-    template <typename Lhs> \
-    class Impl : public MatcherInterface<Lhs> { \
-     public: \
-      explicit Impl(const Rhs& rhs) : rhs_(rhs) {} \
-      virtual bool MatchAndExplain(\
-          Lhs lhs, MatchResultListener* /* listener */) const { \
-        return lhs op rhs_; \
-      } \
-      virtual void DescribeTo(::std::ostream* os) const { \
-        *os << relation  " "; \
-        UniversalPrint(rhs_, os); \
-      } \
-      virtual void DescribeNegationTo(::std::ostream* os) const { \
-        *os << negated_relation  " "; \
-        UniversalPrint(rhs_, os); \
-      } \
-     private: \
-      Rhs rhs_; \
-      GTEST_DISALLOW_ASSIGN_(Impl); \
-    }; \
-    Rhs rhs_; \
-    GTEST_DISALLOW_ASSIGN_(name##Matcher); \
+template <typename D, typename Rhs, typename Op>
+class ComparisonBase {
+ public:
+  explicit ComparisonBase(const Rhs& rhs) : rhs_(rhs) {}
+  template <typename Lhs>
+  operator Matcher<Lhs>() const {
+    return MakeMatcher(new Impl<Lhs>(rhs_));
   }
 
-// Implements Eq(v), Ge(v), Gt(v), Le(v), Lt(v), and Ne(v)
-// respectively.
-GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Eq, ==, "is equal to", "isn't equal to");
-GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Ge, >=, "is >=", "isn't >=");
-GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Gt, >, "is >", "isn't >");
-GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Le, <=, "is <=", "isn't <=");
-GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Lt, <, "is <", "isn't <");
-GMOCK_IMPLEMENT_COMPARISON_MATCHER_(Ne, !=, "isn't equal to", "is equal to");
+ private:
+  template <typename Lhs>
+  class Impl : public MatcherInterface<Lhs> {
+   public:
+    explicit Impl(const Rhs& rhs) : rhs_(rhs) {}
+    virtual bool MatchAndExplain(
+        Lhs lhs, MatchResultListener* /* listener */) const {
+      return Op()(lhs, rhs_);
+    }
+    virtual void DescribeTo(::std::ostream* os) const {
+      *os << D::Desc() << " ";
+      UniversalPrint(rhs_, os);
+    }
+    virtual void DescribeNegationTo(::std::ostream* os) const {
+      *os << D::NegatedDesc() <<  " ";
+      UniversalPrint(rhs_, os);
+    }
+   private:
+    Rhs rhs_;
+    GTEST_DISALLOW_ASSIGN_(Impl);
+  };
+  Rhs rhs_;
+  GTEST_DISALLOW_ASSIGN_(ComparisonBase);
+};
 
-#undef GMOCK_IMPLEMENT_COMPARISON_MATCHER_
+template <typename Rhs>
+class EqMatcher : public ComparisonBase<EqMatcher<Rhs>, Rhs, AnyEq> {
+ public:
+  explicit EqMatcher(const Rhs& rhs)
+      : ComparisonBase<EqMatcher<Rhs>, Rhs, AnyEq>(rhs) { }
+  static const char* Desc() { return "is equal to"; }
+  static const char* NegatedDesc() { return "isn't equal to"; }
+};
+template <typename Rhs>
+class NeMatcher : public ComparisonBase<NeMatcher<Rhs>, Rhs, AnyNe> {
+ public:
+  explicit NeMatcher(const Rhs& rhs)
+      : ComparisonBase<NeMatcher<Rhs>, Rhs, AnyNe>(rhs) { }
+  static const char* Desc() { return "isn't equal to"; }
+  static const char* NegatedDesc() { return "is equal to"; }
+};
+template <typename Rhs>
+class LtMatcher : public ComparisonBase<LtMatcher<Rhs>, Rhs, AnyLt> {
+ public:
+  explicit LtMatcher(const Rhs& rhs)
+      : ComparisonBase<LtMatcher<Rhs>, Rhs, AnyLt>(rhs) { }
+  static const char* Desc() { return "is <"; }
+  static const char* NegatedDesc() { return "isn't <"; }
+};
+template <typename Rhs>
+class GtMatcher : public ComparisonBase<GtMatcher<Rhs>, Rhs, AnyGt> {
+ public:
+  explicit GtMatcher(const Rhs& rhs)
+      : ComparisonBase<GtMatcher<Rhs>, Rhs, AnyGt>(rhs) { }
+  static const char* Desc() { return "is >"; }
+  static const char* NegatedDesc() { return "isn't >"; }
+};
+template <typename Rhs>
+class LeMatcher : public ComparisonBase<LeMatcher<Rhs>, Rhs, AnyLe> {
+ public:
+  explicit LeMatcher(const Rhs& rhs)
+      : ComparisonBase<LeMatcher<Rhs>, Rhs, AnyLe>(rhs) { }
+  static const char* Desc() { return "is <="; }
+  static const char* NegatedDesc() { return "isn't <="; }
+};
+template <typename Rhs>
+class GeMatcher : public ComparisonBase<GeMatcher<Rhs>, Rhs, AnyGe> {
+ public:
+  explicit GeMatcher(const Rhs& rhs)
+      : ComparisonBase<GeMatcher<Rhs>, Rhs, AnyGe>(rhs) { }
+  static const char* Desc() { return "is >="; }
+  static const char* NegatedDesc() { return "isn't >="; }
+};
 
 // Implements the polymorphic IsNull() matcher, which matches any raw or smart
 // pointer that is NULL.
@@ -1309,51 +1369,64 @@ class MatchesRegexMatcher {
 // used to match a tuple<int, short>, a tuple<const long&, double>,
 // etc).  Therefore we use a template type conversion operator in the
 // implementation.
-//
-// We define this as a macro in order to eliminate duplicated source
-// code.
-#define GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(name, op, relation) \
-  class name##2Matcher { \
-   public: \
-    template <typename T1, typename T2> \
-    operator Matcher< ::testing::tuple<T1, T2> >() const { \
-      return MakeMatcher(new Impl< ::testing::tuple<T1, T2> >); \
-    } \
-    template <typename T1, typename T2> \
-    operator Matcher<const ::testing::tuple<T1, T2>&>() const { \
-      return MakeMatcher(new Impl<const ::testing::tuple<T1, T2>&>); \
-    } \
-   private: \
-    template <typename Tuple> \
-    class Impl : public MatcherInterface<Tuple> { \
-     public: \
-      virtual bool MatchAndExplain( \
-          Tuple args, \
-          MatchResultListener* /* listener */) const { \
-        return ::testing::get<0>(args) op ::testing::get<1>(args); \
-      } \
-      virtual void DescribeTo(::std::ostream* os) const { \
-        *os << "are " relation; \
-      } \
-      virtual void DescribeNegationTo(::std::ostream* os) const { \
-        *os << "aren't " relation; \
-      } \
-    }; \
+template <typename D, typename Op>
+class PairMatchBase {
+ public:
+  template <typename T1, typename T2>
+  operator Matcher< ::testing::tuple<T1, T2> >() const {
+    return MakeMatcher(new Impl< ::testing::tuple<T1, T2> >);
+  }
+  template <typename T1, typename T2>
+  operator Matcher<const ::testing::tuple<T1, T2>&>() const {
+    return MakeMatcher(new Impl<const ::testing::tuple<T1, T2>&>);
   }
 
-// Implements Eq(), Ge(), Gt(), Le(), Lt(), and Ne() respectively.
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Eq, ==, "an equal pair");
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(
-    Ge, >=, "a pair where the first >= the second");
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(
-    Gt, >, "a pair where the first > the second");
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(
-    Le, <=, "a pair where the first <= the second");
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(
-    Lt, <, "a pair where the first < the second");
-GMOCK_IMPLEMENT_COMPARISON2_MATCHER_(Ne, !=, "an unequal pair");
+ private:
+  static ::std::ostream& GetDesc(::std::ostream& os) {  // NOLINT
+    return os << D::Desc();
+  }
 
-#undef GMOCK_IMPLEMENT_COMPARISON2_MATCHER_
+  template <typename Tuple>
+  class Impl : public MatcherInterface<Tuple> {
+   public:
+    virtual bool MatchAndExplain(
+        Tuple args,
+        MatchResultListener* /* listener */) const {
+      return Op()(::testing::get<0>(args), ::testing::get<1>(args));
+    }
+    virtual void DescribeTo(::std::ostream* os) const {
+      *os << "are " << GetDesc;
+    }
+    virtual void DescribeNegationTo(::std::ostream* os) const {
+      *os << "aren't " << GetDesc;
+    }
+  };
+};
+
+class Eq2Matcher : public PairMatchBase<Eq2Matcher, AnyEq> {
+ public:
+  static const char* Desc() { return "an equal pair"; }
+};
+class Ne2Matcher : public PairMatchBase<Ne2Matcher, AnyNe> {
+ public:
+  static const char* Desc() { return "an unequal pair"; }
+};
+class Lt2Matcher : public PairMatchBase<Lt2Matcher, AnyLt> {
+ public:
+  static const char* Desc() { return "a pair where the first < the second"; }
+};
+class Gt2Matcher : public PairMatchBase<Gt2Matcher, AnyGt> {
+ public:
+  static const char* Desc() { return "a pair where the first > the second"; }
+};
+class Le2Matcher : public PairMatchBase<Le2Matcher, AnyLe> {
+ public:
+  static const char* Desc() { return "a pair where the first <= the second"; }
+};
+class Ge2Matcher : public PairMatchBase<Ge2Matcher, AnyGe> {
+ public:
+  static const char* Desc() { return "a pair where the first >= the second"; }
+};
 
 // Implements the Not(...) matcher for a particular argument type T.
 // We do not nest it inside the NotMatcher class template, as that
