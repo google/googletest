@@ -217,7 +217,7 @@ def main(argv=sys.argv):
     return
   except:
     # An error message was already printed since we couldn't parse.
-    pass
+    sys.exit(1)
   else:
     lines = _GenerateMocks(filename, source, entire_ast, desired_class_names)
     sys.stdout.write('\n'.join(lines))
