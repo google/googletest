@@ -219,6 +219,36 @@ class Foo {
         'MOCK_METHOD0_T(Bar,\nint());',
         self.GenerateMethodSource(source))
 
+  def testPointerArgWithoutNames(self):
+    source = """
+class Foo {
+  virtual int Bar(C*);
+};
+"""
+    self.assertEqualIgnoreLeadingWhitespace(
+        'MOCK_METHOD1(Bar,\nint(C*));',
+        self.GenerateMethodSource(source))
+
+  def testReferenceArgWithoutNames(self):
+    source = """
+class Foo {
+  virtual int Bar(C&);
+};
+"""
+    self.assertEqualIgnoreLeadingWhitespace(
+        'MOCK_METHOD1(Bar,\nint(C&));',
+        self.GenerateMethodSource(source))
+
+  def testArrayArgWithoutNames(self):
+    source = """
+class Foo {
+  virtual int Bar(C[]);
+};
+"""
+    self.assertEqualIgnoreLeadingWhitespace(
+        'MOCK_METHOD1(Bar,\nint(C[]));',
+        self.GenerateMethodSource(source))
+
 
 class GenerateMocksTest(TestCase):
 
