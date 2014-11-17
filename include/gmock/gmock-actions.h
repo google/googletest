@@ -459,6 +459,14 @@ class ActionAdaptor : public ActionInterface<F1> {
   GTEST_DISALLOW_ASSIGN_(ActionAdaptor);
 };
 
+// Helper struct to specialize ReturnAction to execute a move instead of a copy
+// on return. Useful for move-only types, but could be used on any type.
+template <typename T>
+struct ByMoveWrapper {
+  explicit ByMoveWrapper(T value) : payload(move(value)) {}
+  T payload;
+};
+
 // Implements the polymorphic Return(x) action, which can be used in
 // any function that returns the type of x, regardless of the argument
 // types.
@@ -489,7 +497,7 @@ class ReturnAction {
   // Constructs a ReturnAction object from the value to be returned.
   // 'value' is passed by value instead of by const reference in order
   // to allow Return("string literal") to compile.
-  explicit ReturnAction(R value) : value_(value) {}
+  explicit ReturnAction(R value) : value_(new R(move(value))) {}
 
   // This template type conversion operator allows Return(x) to be
   // used in ANY function that returns x's type.
@@ -505,14 +513,14 @@ class ReturnAction {
     // in the Impl class. But both definitions must be the same.
     typedef typename Function<F>::Result Result;
     GTEST_COMPILE_ASSERT_(
-        !internal::is_reference<Result>::value,
+        !is_reference<Result>::value,
         use_ReturnRef_instead_of_Return_to_return_a_reference);
-    return Action<F>(new Impl<F>(value_));
+    return Action<F>(new Impl<R, F>(value_));
   }
 
  private:
   // Implements the Return(x) action for a particular function type F.
-  template <typename F>
+  template <typename R_, typename F>
   class Impl : public ActionInterface<F> {
    public:
     typedef typename Function<F>::Result Result;
@@ -525,20 +533,45 @@ class ReturnAction {
     // Result to call.  ImplicitCast_ forces the compiler to convert R to
     // Result without considering explicit constructors, thus resolving the
     // ambiguity. value_ is then initialized using its copy constructor.
-    explicit Impl(R value)
-        : value_(::testing::internal::ImplicitCast_<Result>(value)) {}
+    explicit Impl(const linked_ptr<R>& value)
+        : value_(ImplicitCast_<Result>(*value)) {}
 
     virtual Result Perform(const ArgumentTuple&) { return value_; }
 
    private:
-    GTEST_COMPILE_ASSERT_(!internal::is_reference<Result>::value,
+    GTEST_COMPILE_ASSERT_(!is_reference<Result>::value,
                           Result_cannot_be_a_reference_type);
     Result value_;
 
     GTEST_DISALLOW_ASSIGN_(Impl);
   };
 
-  R value_;
+  // Partially specialize for ByMoveWrapper. This version of ReturnAction will
+  // move its contents instead.
+  template <typename R_, typename F>
+  class Impl<ByMoveWrapper<R_>, F> : public ActionInterface<F> {
+   public:
+    typedef typename Function<F>::Result Result;
+    typedef typename Function<F>::ArgumentTuple ArgumentTuple;
+
+    explicit Impl(const linked_ptr<R>& wrapper)
+        : performed_(false), wrapper_(wrapper) {}
+
+    virtual Result Perform(const ArgumentTuple&) {
+      GTEST_CHECK_(!performed_)
+          << "A ByMove() action should only be performed once.";
+      performed_ = true;
+      return move(wrapper_->payload);
+    }
+
+   private:
+    bool performed_;
+    const linked_ptr<R> wrapper_;
+
+    GTEST_DISALLOW_ASSIGN_(Impl);
+  };
+
+  const linked_ptr<R> value_;
 
   GTEST_DISALLOW_ASSIGN_(ReturnAction);
 };
@@ -977,7 +1010,7 @@ Action<To>::Action(const Action<From>& from)
 // will trigger a compiler error about using array as initializer.
 template <typename R>
 internal::ReturnAction<R> Return(R value) {
-  return internal::ReturnAction<R>(value);
+  return internal::ReturnAction<R>(internal::move(value));
 }
 
 // Creates an action that returns NULL.
@@ -1002,6 +1035,15 @@ inline internal::ReturnRefAction<R> ReturnRef(R& x) {  // NOLINT
 template <typename R>
 inline internal::ReturnRefOfCopyAction<R> ReturnRefOfCopy(const R& x) {
   return internal::ReturnRefOfCopyAction<R>(x);
+}
+
+// Modifies the parent action (a Return() action) to perform a move of the
+// argument instead of a copy.
+// Return(ByMove()) actions can only be executed once and will assert this
+// invariant.
+template <typename R>
+internal::ByMoveWrapper<R> ByMove(R x) {
+  return internal::ByMoveWrapper<R>(internal::move(x));
 }
 
 // Creates an action that does the default action for the give mock function.

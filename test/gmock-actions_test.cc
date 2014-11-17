@@ -57,6 +57,7 @@ using testing::_;
 using testing::Action;
 using testing::ActionInterface;
 using testing::Assign;
+using testing::ByMove;
 using testing::ByRef;
 using testing::DefaultValue;
 using testing::DoDefault;
@@ -638,6 +639,7 @@ class MockClass {
   MOCK_METHOD0(Foo, MyClass());
 #if GTEST_HAS_STD_UNIQUE_PTR_
   MOCK_METHOD0(MakeUnique, std::unique_ptr<int>());
+  MOCK_METHOD0(MakeUniqueBase, std::unique_ptr<Base>());
   MOCK_METHOD0(MakeVectorUnique, std::vector<std::unique_ptr<int>>());
 #endif
 
@@ -1285,7 +1287,42 @@ std::vector<std::unique_ptr<int>> VectorUniquePtrSource() {
   return out;
 }
 
-TEST(MockMethodTest, CanReturnMoveOnlyValue) {
+TEST(MockMethodTest, CanReturnMoveOnlyValue_Return) {
+  MockClass mock;
+  std::unique_ptr<int> i(new int(19));
+  EXPECT_CALL(mock, MakeUnique()).WillOnce(Return(ByMove(std::move(i))));
+  EXPECT_CALL(mock, MakeVectorUnique())
+      .WillOnce(Return(ByMove(VectorUniquePtrSource())));
+  Derived* d = new Derived;
+  EXPECT_CALL(mock, MakeUniqueBase())
+      .WillOnce(Return(ByMove(std::unique_ptr<Derived>(d))));
+
+  std::unique_ptr<int> result1 = mock.MakeUnique();
+  EXPECT_EQ(19, *result1);
+
+  std::vector<std::unique_ptr<int>> vresult = mock.MakeVectorUnique();
+  EXPECT_EQ(1, vresult.size());
+  EXPECT_NE(nullptr, vresult[0]);
+  EXPECT_EQ(7, *vresult[0]);
+
+  std::unique_ptr<Base> result2 = mock.MakeUniqueBase();
+  EXPECT_EQ(d, result2.get());
+}
+
+TEST(MockMethodTest, CanReturnMoveOnlyValue_DoAllReturn) {
+  testing::MockFunction<void()> mock_function;
+  MockClass mock;
+  std::unique_ptr<int> i(new int(19));
+  EXPECT_CALL(mock_function, Call());
+  EXPECT_CALL(mock, MakeUnique()).WillOnce(DoAll(
+      InvokeWithoutArgs(&mock_function, &testing::MockFunction<void()>::Call),
+      Return(ByMove(std::move(i)))));
+
+  std::unique_ptr<int> result1 = mock.MakeUnique();
+  EXPECT_EQ(19, *result1);
+}
+
+TEST(MockMethodTest, CanReturnMoveOnlyValue_Invoke) {
   MockClass mock;
 
   // Check default value
@@ -1294,8 +1331,7 @@ TEST(MockMethodTest, CanReturnMoveOnlyValue) {
   });
   EXPECT_EQ(42, *mock.MakeUnique());
 
-  EXPECT_CALL(mock, MakeUnique())
-      .WillRepeatedly(Invoke(UniquePtrSource));
+  EXPECT_CALL(mock, MakeUnique()).WillRepeatedly(Invoke(UniquePtrSource));
   EXPECT_CALL(mock, MakeVectorUnique())
       .WillRepeatedly(Invoke(VectorUniquePtrSource));
   std::unique_ptr<int> result1 = mock.MakeUnique();
