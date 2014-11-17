@@ -175,11 +175,15 @@ def _NeedToReturnReferenceDiagnoser(msg):
                  r'note: in instantiation of function template specialization '
                  r'\'testing::internal::ReturnAction<(?P<type>.*)>'
                  r'::operator Action<.*>\' requested here')
+  clang11_re = (r'use_ReturnRef_instead_of_Return_to_return_a_reference.*'
+                r'(.*\n)*?' + _CLANG_NON_GMOCK_FILE_LINE_RE)
+
   diagnosis = """
 You are using a Return() action in a function that returns a reference to
 %(type)s.  Please use ReturnRef() instead."""
   return _GenericDiagnoser('NRR', 'Need to Return Reference',
                            [(clang_regex, diagnosis),
+                            (clang11_re, diagnosis % {'type': 'a type'}),
                             (gcc_regex, diagnosis % {'type': 'a type'})],
                            msg)
 
@@ -517,12 +521,17 @@ def _WrongMockMethodMacroDiagnoser(msg):
                  r'(?P=file):(?P=line):(?P=column): error: too few arguments '
                  r'to function call, expected (?P<args>\d+), '
                  r'have (?P<wrong_args>\d+)')
+  clang11_re = (_CLANG_NON_GMOCK_FILE_LINE_RE +
+                r'.*this_method_does_not_take_'
+                r'(?P<wrong_args>\d+)_argument.*')
   diagnosis = """
 You are using MOCK_METHOD%(wrong_args)s to define a mock method that has
 %(args)s arguments. Use MOCK_METHOD%(args)s (or MOCK_CONST_METHOD%(args)s,
 MOCK_METHOD%(args)s_T, MOCK_CONST_METHOD%(args)s_T as appropriate) instead."""
   return _GenericDiagnoser('WMM', 'Wrong MOCK_METHODn Macro',
                            [(gcc_regex, diagnosis),
+                            (clang11_re, diagnosis % {'wrong_args': 'm',
+                                                      'args': 'n'}),
                             (clang_regex, diagnosis)],
                            msg)
 
