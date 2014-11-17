@@ -43,6 +43,10 @@
 #include "gmock/gmock-spec-builders.h"
 #include "gmock/internal/gmock-internal-utils.h"
 
+#if GTEST_HAS_STD_FUNCTION_
+# include <functional>
+#endif
+
 namespace testing {
 namespace internal {
 

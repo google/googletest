@@ -1301,7 +1301,7 @@ TEST(MockMethodTest, CanReturnMoveOnlyValue_Return) {
   EXPECT_EQ(19, *result1);
 
   std::vector<std::unique_ptr<int>> vresult = mock.MakeVectorUnique();
-  EXPECT_EQ(1, vresult.size());
+  EXPECT_EQ(1u, vresult.size());
   EXPECT_NE(nullptr, vresult[0]);
   EXPECT_EQ(7, *vresult[0]);
 
@@ -1341,7 +1341,7 @@ TEST(MockMethodTest, CanReturnMoveOnlyValue_Invoke) {
   EXPECT_NE(result1, result2);
 
   std::vector<std::unique_ptr<int>> vresult = mock.MakeVectorUnique();
-  EXPECT_EQ(1, vresult.size());
+  EXPECT_EQ(1u, vresult.size());
   EXPECT_NE(nullptr, vresult[0]);
   EXPECT_EQ(7, *vresult[0]);
 }
