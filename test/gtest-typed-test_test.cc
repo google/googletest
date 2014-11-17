@@ -344,6 +344,25 @@ REGISTER_TYPED_TEST_CASE_P(NumericTest,
 typedef Types<int, double> NumericTypes;
 INSTANTIATE_TYPED_TEST_CASE_P(My, NumericTest, NumericTypes);
 
+static const char* GetTestName() {
+  return testing::UnitTest::GetInstance()->current_test_info()->name();
+}
+// Test the stripping of space from test names
+template <typename T> class TrimmedTest : public Test { };
+TYPED_TEST_CASE_P(TrimmedTest);
+TYPED_TEST_P(TrimmedTest, Test1) { EXPECT_STREQ("Test1", GetTestName()); }
+TYPED_TEST_P(TrimmedTest, Test2) { EXPECT_STREQ("Test2", GetTestName()); }
+TYPED_TEST_P(TrimmedTest, Test3) { EXPECT_STREQ("Test3", GetTestName()); }
+TYPED_TEST_P(TrimmedTest, Test4) { EXPECT_STREQ("Test4", GetTestName()); }
+TYPED_TEST_P(TrimmedTest, Test5) { EXPECT_STREQ("Test5", GetTestName()); }
+REGISTER_TYPED_TEST_CASE_P(
+    TrimmedTest,
+    Test1, Test2,Test3 , Test4 ,Test5 );  // NOLINT
+template <typename T1, typename T2> struct MyPair {};
+// Be sure to try a type with a comma in its name just in case it matters.
+typedef Types<int, double, MyPair<int, int> > TrimTypes;
+INSTANTIATE_TYPED_TEST_CASE_P(My, TrimmedTest, TrimTypes);
+
 }  // namespace library2
 
 #endif  // GTEST_HAS_TYPED_TEST_P

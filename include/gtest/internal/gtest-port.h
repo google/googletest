@@ -2215,6 +2215,13 @@ inline char ToUpper(char ch) {
   return static_cast<char>(toupper(static_cast<unsigned char>(ch)));
 }
 
+inline std::string StripTrailingSpaces(std::string str) {
+  std::string::iterator it = str.end();
+  while (it != str.begin() && IsSpace(*--it))
+    it = str.erase(it);
+  return str;
+}
+
 // The testing::internal::posix namespace holds wrappers for common
 // POSIX functions.  These wrappers hide the differences between
 // Windows/MSVC and POSIX systems.  Since some compilers define these
