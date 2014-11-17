@@ -463,7 +463,7 @@ class ActionAdaptor : public ActionInterface<F1> {
 // on return. Useful for move-only types, but could be used on any type.
 template <typename T>
 struct ByMoveWrapper {
-  explicit ByMoveWrapper(T value) : payload(move(value)) {}
+  explicit ByMoveWrapper(T value) : payload(internal::move(value)) {}
   T payload;
 };
 
@@ -497,7 +497,7 @@ class ReturnAction {
   // Constructs a ReturnAction object from the value to be returned.
   // 'value' is passed by value instead of by const reference in order
   // to allow Return("string literal") to compile.
-  explicit ReturnAction(R value) : value_(new R(move(value))) {}
+  explicit ReturnAction(R value) : value_(new R(internal::move(value))) {}
 
   // This template type conversion operator allows Return(x) to be
   // used in ANY function that returns x's type.
@@ -561,7 +561,7 @@ class ReturnAction {
       GTEST_CHECK_(!performed_)
           << "A ByMove() action should only be performed once.";
       performed_ = true;
-      return move(wrapper_->payload);
+      return internal::move(wrapper_->payload);
     }
 
    private:

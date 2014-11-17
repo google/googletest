@@ -1302,12 +1302,14 @@ template <typename T>
 class ReferenceOrValueWrapper {
  public:
   // Constructs a wrapper from the given value/reference.
-  explicit ReferenceOrValueWrapper(T value) : value_(move(value)) {}
+  explicit ReferenceOrValueWrapper(T value)
+      : value_(::testing::internal::move(value)) {
+  }
 
   // Unwraps and returns the underlying value/reference, exactly as
   // originally passed. The behavior of calling this more than once on
   // the same object is unspecified.
-  T Unwrap() { return move(value_); }
+  T Unwrap() { return ::testing::internal::move(value_); }
 
   // Provides nondestructive access to the underlying value/reference.
   // Always returns a const reference (more precisely,
@@ -1404,7 +1406,9 @@ class ActionResultHolder : public UntypedActionResultHolderBase {
  private:
   typedef ReferenceOrValueWrapper<T> Wrapper;
 
-  explicit ActionResultHolder(Wrapper result) : result_(move(result)) {}
+  explicit ActionResultHolder(Wrapper result)
+      : result_(::testing::internal::move(result)) {
+  }
 
   Wrapper result_;
 
