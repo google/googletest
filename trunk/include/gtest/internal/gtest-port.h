@@ -498,6 +498,11 @@ struct _RTL_CRITICAL_SECTION;
 #   define _HAS_EXCEPTIONS 1
 #  endif  // _HAS_EXCEPTIONS
 #  define GTEST_HAS_EXCEPTIONS _HAS_EXCEPTIONS
+# elif defined(__clang__)
+// __EXCEPTIONS determines if cleanups are enabled. In Obj-C++ files, there can
+// be cleanups for ObjC exceptions, but C++ exceptions might still be disabled.
+// So use a __has_feature check for C++ exceptions instead.
+#  define GTEST_HAS_EXCEPTIONS __has_feature(cxx_exceptions)
 # elif defined(__GNUC__) && __EXCEPTIONS
 // gcc defines __EXCEPTIONS to 1 iff exceptions are enabled.
 #  define GTEST_HAS_EXCEPTIONS 1
