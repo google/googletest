@@ -359,8 +359,8 @@ GTEST_API_ AssertionResult AssertionFailure(const Message& msg);
 //
 //   class FooTest : public testing::Test {
 //    protected:
-//     virtual void SetUp() { ... }
-//     virtual void TearDown() { ... }
+//     void SetUp() override { ... }
+//     void TearDown() override { ... }
 //     ...
 //   };
 //
