@@ -1879,20 +1879,23 @@ template <typename FloatType>
 class FloatingEqMatcher {
  public:
   // Constructor for FloatingEqMatcher.
-  // The matcher's input will be compared with rhs.  The matcher treats two
+  // The matcher's input will be compared with expected.  The matcher treats two
   // NANs as equal if nan_eq_nan is true.  Otherwise, under IEEE standards,
   // equality comparisons between NANs will always return false.  We specify a
   // negative max_abs_error_ term to indicate that ULP-based approximation will
   // be used for comparison.
-  FloatingEqMatcher(FloatType rhs, bool nan_eq_nan) :
-    rhs_(rhs), nan_eq_nan_(nan_eq_nan), max_abs_error_(-1) {
+  FloatingEqMatcher(FloatType expected, bool nan_eq_nan) :
+    expected_(expected), nan_eq_nan_(nan_eq_nan), max_abs_error_(-1) {
   }
 
   // Constructor that supports a user-specified max_abs_error that will be used
   // for comparison instead of ULP-based approximation.  The max absolute
   // should be non-negative.
-  FloatingEqMatcher(FloatType rhs, bool nan_eq_nan, FloatType max_abs_error) :
-    rhs_(rhs), nan_eq_nan_(nan_eq_nan), max_abs_error_(max_abs_error) {
+  FloatingEqMatcher(FloatType expected, bool nan_eq_nan,
+                    FloatType max_abs_error)
+      : expected_(expected),
+        nan_eq_nan_(nan_eq_nan),
+        max_abs_error_(max_abs_error) {
     GTEST_CHECK_(max_abs_error >= 0)
         << ", where max_abs_error is" << max_abs_error;
   }
@@ -1901,16 +1904,18 @@ class FloatingEqMatcher {
   template <typename T>
   class Impl : public MatcherInterface<T> {
    public:
-    Impl(FloatType rhs, bool nan_eq_nan, FloatType max_abs_error) :
-      rhs_(rhs), nan_eq_nan_(nan_eq_nan), max_abs_error_(max_abs_error) {}
+    Impl(FloatType expected, bool nan_eq_nan, FloatType max_abs_error)
+        : expected_(expected),
+          nan_eq_nan_(nan_eq_nan),
+          max_abs_error_(max_abs_error) {}
 
     virtual bool MatchAndExplain(T value,
-                                 MatchResultListener* /* listener */) const {
-      const FloatingPoint<FloatType> lhs(value), rhs(rhs_);
+                                 MatchResultListener* listener) const {
+      const FloatingPoint<FloatType> actual(value), expected(expected_);
 
       // Compares NaNs first, if nan_eq_nan_ is true.
-      if (lhs.is_nan() || rhs.is_nan()) {
-        if (lhs.is_nan() && rhs.is_nan()) {
+      if (actual.is_nan() || expected.is_nan()) {
+        if (actual.is_nan() && expected.is_nan()) {
           return nan_eq_nan_;
         }
         // One is nan; the other is not nan.
@@ -1918,12 +1923,24 @@ class FloatingEqMatcher {
       }
       if (HasMaxAbsError()) {
         // We perform an equality check so that inf will match inf, regardless
-        // of error bounds.  If the result of value - rhs_ would result in
+        // of error bounds.  If the result of value - expected_ would result in
         // overflow or if either value is inf, the default result is infinity,
         // which should only match if max_abs_error_ is also infinity.
-        return value == rhs_ || fabs(value - rhs_) <= max_abs_error_;
+        if (value == expected_) {
+          return true;
+        }
+
+        const FloatType diff = value - expected_;
+        if (fabs(diff) <= max_abs_error_) {
+          return true;
+        }
+
+        if (listener->IsInterested()) {
+          *listener << "which is " << diff << " from " << expected_;
+        }
+        return false;
       } else {
-        return lhs.AlmostEquals(rhs);
+        return actual.AlmostEquals(expected);
       }
     }
 
@@ -1933,14 +1950,14 @@ class FloatingEqMatcher {
       // after outputting.
       const ::std::streamsize old_precision = os->precision(
           ::std::numeric_limits<FloatType>::digits10 + 2);
-      if (FloatingPoint<FloatType>(rhs_).is_nan()) {
+      if (FloatingPoint<FloatType>(expected_).is_nan()) {
         if (nan_eq_nan_) {
           *os << "is NaN";
         } else {
           *os << "never matches";
         }
       } else {
-        *os << "is approximately " << rhs_;
+        *os << "is approximately " << expected_;
         if (HasMaxAbsError()) {
           *os << " (absolute error <= " << max_abs_error_ << ")";
         }
@@ -1952,14 +1969,14 @@ class FloatingEqMatcher {
       // As before, get original precision.
       const ::std::streamsize old_precision = os->precision(
           ::std::numeric_limits<FloatType>::digits10 + 2);
-      if (FloatingPoint<FloatType>(rhs_).is_nan()) {
+      if (FloatingPoint<FloatType>(expected_).is_nan()) {
         if (nan_eq_nan_) {
           *os << "isn't NaN";
         } else {
           *os << "is anything";
         }
       } else {
-        *os << "isn't approximately " << rhs_;
+        *os << "isn't approximately " << expected_;
         if (HasMaxAbsError()) {
           *os << " (absolute error > " << max_abs_error_ << ")";
         }
@@ -1973,7 +1990,7 @@ class FloatingEqMatcher {
       return max_abs_error_ >= 0;
     }
 
-    const FloatType rhs_;
+    const FloatType expected_;
     const bool nan_eq_nan_;
     // max_abs_error will be used for value comparison when >= 0.
     const FloatType max_abs_error_;
@@ -1981,27 +1998,29 @@ class FloatingEqMatcher {
     GTEST_DISALLOW_ASSIGN_(Impl);
   };
 
-  // The following 3 type conversion operators allow FloatEq(rhs) and
-  // NanSensitiveFloatEq(rhs) to be used as a Matcher<float>, a
+  // The following 3 type conversion operators allow FloatEq(expected) and
+  // NanSensitiveFloatEq(expected) to be used as a Matcher<float>, a
   // Matcher<const float&>, or a Matcher<float&>, but nothing else.
   // (While Google's C++ coding style doesn't allow arguments passed
   // by non-const reference, we may see them in code not conforming to
   // the style.  Therefore Google Mock needs to support them.)
   operator Matcher<FloatType>() const {
-    return MakeMatcher(new Impl<FloatType>(rhs_, nan_eq_nan_, max_abs_error_));
+    return MakeMatcher(
+        new Impl<FloatType>(expected_, nan_eq_nan_, max_abs_error_));
   }
 
   operator Matcher<const FloatType&>() const {
     return MakeMatcher(
-        new Impl<const FloatType&>(rhs_, nan_eq_nan_, max_abs_error_));
+        new Impl<const FloatType&>(expected_, nan_eq_nan_, max_abs_error_));
   }
 
   operator Matcher<FloatType&>() const {
-    return MakeMatcher(new Impl<FloatType&>(rhs_, nan_eq_nan_, max_abs_error_));
+    return MakeMatcher(
+        new Impl<FloatType&>(expected_, nan_eq_nan_, max_abs_error_));
   }
 
  private:
-  const FloatType rhs_;
+  const FloatType expected_;
   const bool nan_eq_nan_;
   // max_abs_error will be used for value comparison when >= 0.
   const FloatType max_abs_error_;
@@ -2489,9 +2508,10 @@ class ContainerEqMatcher {
   typedef typename View::type StlContainer;
   typedef typename View::const_reference StlContainerReference;
 
-  // We make a copy of rhs in case the elements in it are modified
+  // We make a copy of expected in case the elements in it are modified
   // after this matcher is created.
-  explicit ContainerEqMatcher(const Container& rhs) : rhs_(View::Copy(rhs)) {
+  explicit ContainerEqMatcher(const Container& expected)
+      : expected_(View::Copy(expected)) {
     // Makes sure the user doesn't instantiate this class template
     // with a const or reference type.
     (void)testing::StaticAssertTypeEq<Container,
@@ -2500,11 +2520,11 @@ class ContainerEqMatcher {
 
   void DescribeTo(::std::ostream* os) const {
     *os << "equals ";
-    UniversalPrint(rhs_, os);
+    UniversalPrint(expected_, os);
   }
   void DescribeNegationTo(::std::ostream* os) const {
     *os << "does not equal ";
-    UniversalPrint(rhs_, os);
+    UniversalPrint(expected_, os);
   }
 
   template <typename LhsContainer>
@@ -2516,7 +2536,7 @@ class ContainerEqMatcher {
         LhsView;
     typedef typename LhsView::type LhsStlContainer;
     StlContainerReference lhs_stl_container = LhsView::ConstReference(lhs);
-    if (lhs_stl_container == rhs_)
+    if (lhs_stl_container == expected_)
       return true;
 
     ::std::ostream* const os = listener->stream();
@@ -2526,8 +2546,8 @@ class ContainerEqMatcher {
       for (typename LhsStlContainer::const_iterator it =
                lhs_stl_container.begin();
            it != lhs_stl_container.end(); ++it) {
-        if (internal::ArrayAwareFind(rhs_.begin(), rhs_.end(), *it) ==
-            rhs_.end()) {
+        if (internal::ArrayAwareFind(expected_.begin(), expected_.end(), *it) ==
+            expected_.end()) {
           if (printed_header) {
             *os << ", ";
           } else {
@@ -2540,8 +2560,8 @@ class ContainerEqMatcher {
 
       // Now check for missing values.
       bool printed_header2 = false;
-      for (typename StlContainer::const_iterator it = rhs_.begin();
-           it != rhs_.end(); ++it) {
+      for (typename StlContainer::const_iterator it = expected_.begin();
+           it != expected_.end(); ++it) {
         if (internal::ArrayAwareFind(
                 lhs_stl_container.begin(), lhs_stl_container.end(), *it) ==
             lhs_stl_container.end()) {
@@ -2561,7 +2581,7 @@ class ContainerEqMatcher {
   }
 
  private:
-  const StlContainer rhs_;
+  const StlContainer expected_;
 
   GTEST_DISALLOW_ASSIGN_(ContainerEqMatcher);
 };

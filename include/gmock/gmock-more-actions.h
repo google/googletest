@@ -72,7 +72,7 @@ template <class Class, typename MethodPtr>
 class InvokeMethodAction {
  public:
   InvokeMethodAction(Class* obj_ptr, MethodPtr method_ptr)
-      : obj_ptr_(obj_ptr), method_ptr_(method_ptr) {}
+      : method_ptr_(method_ptr), obj_ptr_(obj_ptr) {}
 
   template <typename Result, typename ArgumentTuple>
   Result Perform(const ArgumentTuple& args) const {
@@ -81,8 +81,11 @@ class InvokeMethodAction {
   }
 
  private:
-  Class* const obj_ptr_;
+  // The order of these members matters.  Reversing the order can trigger
+  // warning C4121 in MSVC (see
+  // http://computer-programming-forum.com/7-vc.net/6fbc30265f860ad1.htm ).
   const MethodPtr method_ptr_;
+  Class* const obj_ptr_;
 
   GTEST_DISALLOW_ASSIGN_(InvokeMethodAction);
 };

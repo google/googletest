@@ -3071,6 +3071,19 @@ TEST_F(DoubleNearTest, DoubleNearCanDescribeSelf) {
   EXPECT_EQ("is anything", DescribeNegation(m3));
 }
 
+TEST_F(DoubleNearTest, ExplainsResultWhenMatchFails) {
+  EXPECT_EQ("", Explain(DoubleNear(2.0, 0.1), 2.05));
+  EXPECT_EQ("which is 0.2 from 2", Explain(DoubleNear(2.0, 0.1), 2.2));
+  EXPECT_EQ("which is -0.3 from 2", Explain(DoubleNear(2.0, 0.1), 1.7));
+
+  const string explanation = Explain(DoubleNear(2.1, 1e-10), 2.1 + 1.2e-10);
+  // Different C++ implementations may print floating-point numbers
+  // slightly differently.
+  EXPECT_TRUE(explanation == "which is 1.2e-10 from 2.1" ||  // GCC
+              explanation == "which is 1.2e-010 from 2.1")   // MSVC
+      << " where explanation is \"" << explanation << "\".";
+}
+
 TEST_F(DoubleNearTest, NanSensitiveDoubleNearCanDescribeSelf) {
   Matcher<double> m1 = NanSensitiveDoubleNear(2.0, 0.5);
   EXPECT_EQ("is approximately 2 (absolute error <= 0.5)", Describe(m1));
