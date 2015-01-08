@@ -173,7 +173,7 @@ def GetTokens(source):
             token_type = SYNTAX
             i += 1
             new_ch = source[i]
-            if new_ch == c:
+            if new_ch == c and c != '>':         # Treat ">>" as two tokens.
                 i += 1
             elif c == '-' and new_ch == '>':
                 i += 1

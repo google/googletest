@@ -496,9 +496,10 @@ class TypeConverter(object):
                 else:
                     names.append(t.name)
             name = ''.join(names)
-            result.append(Type(name_tokens[0].start, name_tokens[-1].end,
-                               name, templated_types, modifiers,
-                               reference, pointer, array))
+            if name_tokens:
+                result.append(Type(name_tokens[0].start, name_tokens[-1].end,
+                                   name, templated_types, modifiers,
+                                   reference, pointer, array))
             del name_tokens[:]
 
         i = 0

@@ -407,6 +407,42 @@ void());
     self.assertEqualIgnoreLeadingWhitespace(
         expected, self.GenerateMocks(source))
 
+  def testTemplateInATemplateTypedef(self):
+    source = """
+class Test {
+ public:
+  typedef std::vector<std::list<int>> FooType;
+  virtual void Bar(const FooType& test_arg);
+};
+"""
+    expected = """\
+class MockTest : public Test {
+public:
+MOCK_METHOD1(Bar,
+void(const FooType& test_arg));
+};
+"""
+    self.assertEqualIgnoreLeadingWhitespace(
+        expected, self.GenerateMocks(source))
+
+  def testTemplateInATemplateTypedefWithComma(self):
+    source = """
+class Test {
+ public:
+  typedef std::function<void(
+      const vector<std::list<int>>&, int> FooType;
+  virtual void Bar(const FooType& test_arg);
+};
+"""
+    expected = """\
+class MockTest : public Test {
+public:
+MOCK_METHOD1(Bar,
+void(const FooType& test_arg));
+};
+"""
+    self.assertEqualIgnoreLeadingWhitespace(
+        expected, self.GenerateMocks(source))
 
 if __name__ == '__main__':
   unittest.main()
