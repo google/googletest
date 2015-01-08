@@ -3505,19 +3505,28 @@ std::string FormatTimeInMillisAsSeconds(TimeInMillis ms) {
   return ss.str();
 }
 
+static bool PortableLocaltime(time_t seconds, struct tm* out) {
+#if defined(_MSC_VER)
+  return localtime_s(out, &seconds) == 0;
+#elif defined(__MINGW32__) || defined(__MINGW64__)
+  // MINGW <time.h> provides neither localtime_r nor localtime_s, but uses
+  // Windows' localtime(), which has a thread-local tm buffer.
+  struct tm* tm_ptr = localtime(&seconds);  // NOLINT
+  if (tm_ptr == NULL)
+    return false;
+  *out = *tm_ptr;
+  return true;
+#else
+  return localtime_r(&seconds, out) != NULL;
+#endif
+}
+
 // Converts the given epoch time in milliseconds to a date string in the ISO
 // 8601 format, without the timezone information.
 std::string FormatEpochTimeInMillisAsIso8601(TimeInMillis ms) {
-  time_t seconds = static_cast<time_t>(ms / 1000);
   struct tm time_struct;
-#ifdef _MSC_VER
-  if (localtime_s(&time_struct, &seconds) != 0)
-    return "";  // Invalid ms value
-#else
-  if (localtime_r(&seconds, &time_struct) == NULL)
-    return "";  // Invalid ms value
-#endif
-
+  if (!PortableLocaltime(static_cast<time_t>(ms / 1000), &time_struct))
+    return "";
   // YYYY-MM-DDThh:mm:ss
   return StreamableToString(time_struct.tm_year + 1900) + "-" +
       String::FormatIntWidth2(time_struct.tm_mon + 1) + "-" +
