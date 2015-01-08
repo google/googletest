@@ -128,6 +128,8 @@
 #if GTEST_CAN_STREAM_RESULTS_
 # include <arpa/inet.h>  // NOLINT
 # include <netdb.h>  // NOLINT
+# include <sys/socket.h>  // NOLINT
+# include <sys/types.h>  // NOLINT
 #endif
 
 // Indicates that this translation unit is part of Google Test's
