@@ -604,6 +604,18 @@ TEST(ReturnNullTest, WorksInPointerReturningFunction) {
   EXPECT_TRUE(a2.Perform(make_tuple(true)) == NULL);
 }
 
+#if GTEST_HAS_STD_UNIQUE_PTR_
+// Tests that ReturnNull() returns NULL for shared_ptr and unique_ptr returning
+// functions.
+TEST(ReturnNullTest, WorksInSmartPointerReturningFunction) {
+  const Action<std::unique_ptr<const int>()> a1 = ReturnNull();
+  EXPECT_TRUE(a1.Perform(make_tuple()) == nullptr);
+
+  const Action<std::shared_ptr<int>(std::string)> a2 = ReturnNull();
+  EXPECT_TRUE(a2.Perform(make_tuple("foo")) == nullptr);
+}
+#endif  // GTEST_HAS_STD_UNIQUE_PTR_
+
 // Tests that ReturnRef(v) works for reference types.
 TEST(ReturnRefTest, WorksForReference) {
   const int n = 0;

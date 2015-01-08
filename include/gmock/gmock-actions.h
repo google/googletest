@@ -583,12 +583,18 @@ class ReturnAction {
 // Implements the ReturnNull() action.
 class ReturnNullAction {
  public:
-  // Allows ReturnNull() to be used in any pointer-returning function.
+  // Allows ReturnNull() to be used in any pointer-returning function. In C++11
+  // this is enforced by returning nullptr, and in non-C++11 by asserting a
+  // pointer type on compile time.
   template <typename Result, typename ArgumentTuple>
   static Result Perform(const ArgumentTuple&) {
+#if GTEST_LANG_CXX11
+    return nullptr;
+#else
     GTEST_COMPILE_ASSERT_(internal::is_pointer<Result>::value,
                           ReturnNull_can_be_used_to_return_a_pointer_only);
     return NULL;
+#endif  // GTEST_LANG_CXX11
   }
 };
 
