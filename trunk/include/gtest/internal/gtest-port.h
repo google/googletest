@@ -499,10 +499,14 @@ struct _RTL_CRITICAL_SECTION;
 #  endif  // _HAS_EXCEPTIONS
 #  define GTEST_HAS_EXCEPTIONS _HAS_EXCEPTIONS
 # elif defined(__clang__)
-// __EXCEPTIONS determines if cleanups are enabled. In Obj-C++ files, there can
-// be cleanups for ObjC exceptions, but C++ exceptions might still be disabled.
-// So use a __has_feature check for C++ exceptions instead.
-#  define GTEST_HAS_EXCEPTIONS __has_feature(cxx_exceptions)
+// clang defines __EXCEPTIONS iff exceptions are enabled before clang 220714,
+// but iff cleanups are enabled after that. In Obj-C++ files, there can be
+// cleanups for ObjC exceptions which also need cleanups, even if C++ exceptions
+// are disabled. clang has __has_feature(cxx_exceptions) which checks for C++
+// exceptions starting at clang r206352, but which checked for cleanups prior to
+// that. To reliably check for C++ exception availability with clang, check for
+// __EXCEPTIONS && __has_feature(cxx_exceptions).
+#  define GTEST_HAS_EXCEPTIONS __EXCEPTIONS && __has_feature(cxx_exceptions)
 # elif defined(__GNUC__) && __EXCEPTIONS
 // gcc defines __EXCEPTIONS to 1 iff exceptions are enabled.
 #  define GTEST_HAS_EXCEPTIONS 1
