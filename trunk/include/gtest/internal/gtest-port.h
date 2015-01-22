@@ -121,6 +121,7 @@
 //
 //   GTEST_OS_AIX      - IBM AIX
 //   GTEST_OS_CYGWIN   - Cygwin
+//   GTEST_OS_FREEBSD  - FreeBSD
 //   GTEST_OS_HPUX     - HP-UX
 //   GTEST_OS_LINUX    - Linux
 //     GTEST_OS_LINUX_ANDROID - Google Android
@@ -322,6 +323,8 @@
 # if TARGET_OS_IPHONE
 #  define GTEST_OS_IOS 1
 # endif
+#elif defined __FreeBSD__
+# define GTEST_OS_FREEBSD 1
 #elif defined __linux__
 # define GTEST_OS_LINUX 1
 # if defined __ANDROID__
@@ -506,7 +509,7 @@ struct _RTL_CRITICAL_SECTION;
 // exceptions starting at clang r206352, but which checked for cleanups prior to
 // that. To reliably check for C++ exception availability with clang, check for
 // __EXCEPTIONS && __has_feature(cxx_exceptions).
-#  define GTEST_HAS_EXCEPTIONS __EXCEPTIONS && __has_feature(cxx_exceptions)
+#  define GTEST_HAS_EXCEPTIONS (__EXCEPTIONS && __has_feature(cxx_exceptions))
 # elif defined(__GNUC__) && __EXCEPTIONS
 // gcc defines __EXCEPTIONS to 1 iff exceptions are enabled.
 #  define GTEST_HAS_EXCEPTIONS 1
@@ -638,7 +641,7 @@ struct _RTL_CRITICAL_SECTION;
 // To disable threading support in Google Test, add -DGTEST_HAS_PTHREAD=0
 // to your compiler flags.
 # define GTEST_HAS_PTHREAD (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_HPUX \
-    || GTEST_OS_QNX)
+    || GTEST_OS_QNX || GTEST_OS_FREEBSD)
 #endif  // GTEST_HAS_PTHREAD
 
 #if GTEST_HAS_PTHREAD
@@ -818,7 +821,7 @@ using ::std::tuple_size;
      (GTEST_OS_MAC && !GTEST_OS_IOS) || \
      (GTEST_OS_WINDOWS_DESKTOP && _MSC_VER >= 1400) || \
      GTEST_OS_WINDOWS_MINGW || GTEST_OS_AIX || GTEST_OS_HPUX || \
-     GTEST_OS_OPENBSD || GTEST_OS_QNX)
+     GTEST_OS_OPENBSD || GTEST_OS_QNX || GTEST_OS_FREEBSD)
 # define GTEST_HAS_DEATH_TEST 1
 # include <vector>  // NOLINT
 #endif
