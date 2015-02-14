@@ -2263,8 +2263,15 @@ class PropertyMatcher {
     *listener << "whose given property is ";
     // Cannot pass the return value (for example, int) to MatchPrintAndExplain,
     // which takes a non-const reference as argument.
+#if defined(_PREFAST_ ) && _MSC_VER == 1800
+    // Workaround bug in VC++ 2013's /analyze parser.
+    // https://connect.microsoft.com/VisualStudio/feedback/details/1106363/internal-compiler-error-with-analyze-due-to-failure-to-infer-move
+    posix::Abort();  // To make sure it is never run.
+    return false;
+#else
     RefToConstProperty result = (obj.*property_)();
     return MatchPrintAndExplain(result, matcher_, listener);
+#endif
   }
 
   bool MatchAndExplainImpl(true_type /* is_pointer */, const Class* p,
