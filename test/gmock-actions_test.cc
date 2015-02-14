@@ -45,15 +45,7 @@
 
 namespace {
 
-using testing::get;
-using testing::make_tuple;
-using testing::tuple;
-using testing::tuple_element;
-using testing::internal::BuiltInDefaultValue;
-using testing::internal::Int64;
-using testing::internal::UInt64;
 // This list should be kept sorted.
-using testing::_;
 using testing::Action;
 using testing::ActionInterface;
 using testing::Assign;
@@ -73,6 +65,14 @@ using testing::ReturnRef;
 using testing::ReturnRefOfCopy;
 using testing::SetArgPointee;
 using testing::SetArgumentPointee;
+using testing::_;
+using testing::get;
+using testing::internal::BuiltInDefaultValue;
+using testing::internal::Int64;
+using testing::internal::UInt64;
+using testing::make_tuple;
+using testing::tuple;
+using testing::tuple_element;
 
 #if !GTEST_OS_WINDOWS_MOBILE
 using testing::SetErrnoAndReturn;
@@ -191,16 +191,43 @@ TEST(BuiltInDefaultValueTest, WorksForConstTypes) {
   EXPECT_FALSE(BuiltInDefaultValue<const bool>::Get());
 }
 
-// Tests that BuiltInDefaultValue<T>::Get() aborts the program with
-// the correct error message when T is a user-defined type.
-struct UserType {
-  UserType() : value(0) {}
+// A type that's default constructible.
+class MyDefaultConstructible {
+ public:
+  MyDefaultConstructible() : value_(42) {}
 
-  int value;
+  int value() const { return value_; }
+
+ private:
+  int value_;
 };
 
-TEST(BuiltInDefaultValueTest, UserTypeHasNoDefault) {
-  EXPECT_FALSE(BuiltInDefaultValue<UserType>::Exists());
+// A type that's not default constructible.
+class MyNonDefaultConstructible {
+ public:
+  // Does not have a default ctor.
+  explicit MyNonDefaultConstructible(int a_value) : value_(a_value) {}
+
+  int value() const { return value_; }
+
+ private:
+  int value_;
+};
+
+#if GTEST_LANG_CXX11
+
+TEST(BuiltInDefaultValueTest, ExistsForDefaultConstructibleType) {
+  EXPECT_TRUE(BuiltInDefaultValue<MyDefaultConstructible>::Exists());
+}
+
+TEST(BuiltInDefaultValueTest, IsDefaultConstructedForDefaultConstructibleType) {
+  EXPECT_EQ(42, BuiltInDefaultValue<MyDefaultConstructible>::Get().value());
+}
+
+#endif  // GTEST_LANG_CXX11
+
+TEST(BuiltInDefaultValueTest, DoesNotExistForNonDefaultConstructibleType) {
+  EXPECT_FALSE(BuiltInDefaultValue<MyNonDefaultConstructible>::Exists());
 }
 
 // Tests that BuiltInDefaultValue<T&>::Get() aborts the program.
@@ -213,40 +240,42 @@ TEST(BuiltInDefaultValueDeathTest, IsUndefinedForReferences) {
   }, "");
 }
 
-TEST(BuiltInDefaultValueDeathTest, IsUndefinedForUserTypes) {
+TEST(BuiltInDefaultValueDeathTest, IsUndefinedForNonDefaultConstructibleType) {
   EXPECT_DEATH_IF_SUPPORTED({
-    BuiltInDefaultValue<UserType>::Get();
+    BuiltInDefaultValue<MyNonDefaultConstructible>::Get();
   }, "");
 }
 
 // Tests that DefaultValue<T>::IsSet() is false initially.
 TEST(DefaultValueTest, IsInitiallyUnset) {
   EXPECT_FALSE(DefaultValue<int>::IsSet());
-  EXPECT_FALSE(DefaultValue<const UserType>::IsSet());
+  EXPECT_FALSE(DefaultValue<MyDefaultConstructible>::IsSet());
+  EXPECT_FALSE(DefaultValue<const MyNonDefaultConstructible>::IsSet());
 }
 
 // Tests that DefaultValue<T> can be set and then unset.
 TEST(DefaultValueTest, CanBeSetAndUnset) {
   EXPECT_TRUE(DefaultValue<int>::Exists());
-  EXPECT_FALSE(DefaultValue<const UserType>::Exists());
+  EXPECT_FALSE(DefaultValue<const MyNonDefaultConstructible>::Exists());
 
   DefaultValue<int>::Set(1);
-  DefaultValue<const UserType>::Set(UserType());
+  DefaultValue<const MyNonDefaultConstructible>::Set(
+      MyNonDefaultConstructible(42));
 
   EXPECT_EQ(1, DefaultValue<int>::Get());
-  EXPECT_EQ(0, DefaultValue<const UserType>::Get().value);
+  EXPECT_EQ(42, DefaultValue<const MyNonDefaultConstructible>::Get().value());
 
   EXPECT_TRUE(DefaultValue<int>::Exists());
-  EXPECT_TRUE(DefaultValue<const UserType>::Exists());
+  EXPECT_TRUE(DefaultValue<const MyNonDefaultConstructible>::Exists());
 
   DefaultValue<int>::Clear();
-  DefaultValue<const UserType>::Clear();
+  DefaultValue<const MyNonDefaultConstructible>::Clear();
 
   EXPECT_FALSE(DefaultValue<int>::IsSet());
-  EXPECT_FALSE(DefaultValue<const UserType>::IsSet());
+  EXPECT_FALSE(DefaultValue<const MyNonDefaultConstructible>::IsSet());
 
   EXPECT_TRUE(DefaultValue<int>::Exists());
-  EXPECT_FALSE(DefaultValue<const UserType>::Exists());
+  EXPECT_FALSE(DefaultValue<const MyNonDefaultConstructible>::Exists());
 }
 
 // Tests that DefaultValue<T>::Get() returns the
@@ -255,22 +284,20 @@ TEST(DefaultValueTest, CanBeSetAndUnset) {
 TEST(DefaultValueDeathTest, GetReturnsBuiltInDefaultValueWhenUnset) {
   EXPECT_FALSE(DefaultValue<int>::IsSet());
   EXPECT_TRUE(DefaultValue<int>::Exists());
-  EXPECT_FALSE(DefaultValue<UserType>::IsSet());
-  EXPECT_FALSE(DefaultValue<UserType>::Exists());
+  EXPECT_FALSE(DefaultValue<MyNonDefaultConstructible>::IsSet());
+  EXPECT_FALSE(DefaultValue<MyNonDefaultConstructible>::Exists());
 
   EXPECT_EQ(0, DefaultValue<int>::Get());
 
   EXPECT_DEATH_IF_SUPPORTED({
-    DefaultValue<UserType>::Get();
+    DefaultValue<MyNonDefaultConstructible>::Get();
   }, "");
 }
 
 #if GTEST_HAS_STD_UNIQUE_PTR_
-TEST(DefaultValueDeathTest, GetWorksForMoveOnlyIfSet) {
-  EXPECT_FALSE(DefaultValue<std::unique_ptr<int>>::Exists());
-  EXPECT_DEATH_IF_SUPPORTED({
-      DefaultValue<std::unique_ptr<int>>::Get();
-  }, "");
+TEST(DefaultValueTest, GetWorksForMoveOnlyIfSet) {
+  EXPECT_TRUE(DefaultValue<std::unique_ptr<int>>::Exists());
+  EXPECT_TRUE(DefaultValue<std::unique_ptr<int>>::Get() == NULL);
   DefaultValue<std::unique_ptr<int>>::SetFactory([] {
     return std::unique_ptr<int>(new int(42));
   });
@@ -290,36 +317,38 @@ TEST(DefaultValueTest, GetWorksForVoid) {
 // Tests that DefaultValue<T&>::IsSet() is false initially.
 TEST(DefaultValueOfReferenceTest, IsInitiallyUnset) {
   EXPECT_FALSE(DefaultValue<int&>::IsSet());
-  EXPECT_FALSE(DefaultValue<UserType&>::IsSet());
+  EXPECT_FALSE(DefaultValue<MyDefaultConstructible&>::IsSet());
+  EXPECT_FALSE(DefaultValue<MyNonDefaultConstructible&>::IsSet());
 }
 
 // Tests that DefaultValue<T&>::Exists is false initiallly.
 TEST(DefaultValueOfReferenceTest, IsInitiallyNotExisting) {
   EXPECT_FALSE(DefaultValue<int&>::Exists());
-  EXPECT_FALSE(DefaultValue<UserType&>::Exists());
+  EXPECT_FALSE(DefaultValue<MyDefaultConstructible&>::Exists());
+  EXPECT_FALSE(DefaultValue<MyNonDefaultConstructible&>::Exists());
 }
 
 // Tests that DefaultValue<T&> can be set and then unset.
 TEST(DefaultValueOfReferenceTest, CanBeSetAndUnset) {
   int n = 1;
   DefaultValue<const int&>::Set(n);
-  UserType u;
-  DefaultValue<UserType&>::Set(u);
+  MyNonDefaultConstructible x(42);
+  DefaultValue<MyNonDefaultConstructible&>::Set(x);
 
   EXPECT_TRUE(DefaultValue<const int&>::Exists());
-  EXPECT_TRUE(DefaultValue<UserType&>::Exists());
+  EXPECT_TRUE(DefaultValue<MyNonDefaultConstructible&>::Exists());
 
   EXPECT_EQ(&n, &(DefaultValue<const int&>::Get()));
-  EXPECT_EQ(&u, &(DefaultValue<UserType&>::Get()));
+  EXPECT_EQ(&x, &(DefaultValue<MyNonDefaultConstructible&>::Get()));
 
   DefaultValue<const int&>::Clear();
-  DefaultValue<UserType&>::Clear();
+  DefaultValue<MyNonDefaultConstructible&>::Clear();
 
   EXPECT_FALSE(DefaultValue<const int&>::Exists());
-  EXPECT_FALSE(DefaultValue<UserType&>::Exists());
+  EXPECT_FALSE(DefaultValue<MyNonDefaultConstructible&>::Exists());
 
   EXPECT_FALSE(DefaultValue<const int&>::IsSet());
-  EXPECT_FALSE(DefaultValue<UserType&>::IsSet());
+  EXPECT_FALSE(DefaultValue<MyNonDefaultConstructible&>::IsSet());
 }
 
 // Tests that DefaultValue<T&>::Get() returns the
@@ -327,13 +356,13 @@ TEST(DefaultValueOfReferenceTest, CanBeSetAndUnset) {
 // false.
 TEST(DefaultValueOfReferenceDeathTest, GetReturnsBuiltInDefaultValueWhenUnset) {
   EXPECT_FALSE(DefaultValue<int&>::IsSet());
-  EXPECT_FALSE(DefaultValue<UserType&>::IsSet());
+  EXPECT_FALSE(DefaultValue<MyNonDefaultConstructible&>::IsSet());
 
   EXPECT_DEATH_IF_SUPPORTED({
     DefaultValue<int&>::Get();
   }, "");
   EXPECT_DEATH_IF_SUPPORTED({
-    DefaultValue<UserType>::Get();
+    DefaultValue<MyNonDefaultConstructible>::Get();
   }, "");
 }
 
@@ -661,14 +690,12 @@ TEST(ReturnRefOfCopyTest, IsCovariant) {
 
 // Tests that DoDefault() does the default action for the mock method.
 
-class MyClass {};
-
 class MockClass {
  public:
   MockClass() {}
 
   MOCK_METHOD1(IntFunc, int(bool flag));  // NOLINT
-  MOCK_METHOD0(Foo, MyClass());
+  MOCK_METHOD0(Foo, MyNonDefaultConstructible());
 #if GTEST_HAS_STD_UNIQUE_PTR_
   MOCK_METHOD0(MakeUnique, std::unique_ptr<int>());
   MOCK_METHOD0(MakeUniqueBase, std::unique_ptr<Base>());
@@ -1160,14 +1187,15 @@ TEST(IgnoreResultTest, MonomorphicAction) {
 
 // Tests using IgnoreResult() on an action that returns a class type.
 
-MyClass ReturnMyClass(double /* x */) {
+MyNonDefaultConstructible ReturnMyNonDefaultConstructible(double /* x */) {
   g_done = true;
-  return MyClass();
+  return MyNonDefaultConstructible(42);
 }
 
 TEST(IgnoreResultTest, ActionReturningClass) {
   g_done = false;
-  Action<void(int)> a = IgnoreResult(Invoke(ReturnMyClass));  // NOLINT
+  Action<void(int)> a =
+      IgnoreResult(Invoke(ReturnMyNonDefaultConstructible));  // NOLINT
   a.Perform(make_tuple(2));
   EXPECT_TRUE(g_done);
 }

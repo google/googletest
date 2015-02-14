@@ -134,14 +134,21 @@ void PrintTo(const Incomplete& /* x */, ::std::ostream* os) {
 
 class Result {};
 
+// A type that's not default constructible.
+class NonDefaultConstructible {
+ public:
+  explicit NonDefaultConstructible(int /* dummy */) {}
+};
+
 class MockA {
  public:
   MockA() {}
 
-  MOCK_METHOD1(DoA, void(int n));  // NOLINT
-  MOCK_METHOD1(ReturnResult, Result(int n));  // NOLINT
-  MOCK_METHOD2(Binary, bool(int x, int y));  // NOLINT
-  MOCK_METHOD2(ReturnInt, int(int x, int y));  // NOLINT
+  MOCK_METHOD1(DoA, void(int n));
+  MOCK_METHOD1(ReturnResult, Result(int n));
+  MOCK_METHOD0(ReturnNonDefaultConstructible, NonDefaultConstructible());
+  MOCK_METHOD2(Binary, bool(int x, int y));
+  MOCK_METHOD2(ReturnInt, int(int x, int y));
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockA);
@@ -1108,15 +1115,16 @@ TEST(UnexpectedCallTest, UnsatisifiedPrerequisites) {
   b.DoB(4);
 }
 
-TEST(UndefinedReturnValueTest, ReturnValueIsMandatory) {
+TEST(UndefinedReturnValueTest,
+     ReturnValueIsMandatoryWhenNotDefaultConstructible) {
   MockA a;
   // TODO(wan@google.com): We should really verify the output message,
   // but we cannot yet due to that EXPECT_DEATH only captures stderr
   // while Google Mock logs to stdout.
 #if GTEST_HAS_EXCEPTIONS
-  EXPECT_ANY_THROW(a.ReturnResult(1));
+  EXPECT_ANY_THROW(a.ReturnNonDefaultConstructible());
 #else
-  EXPECT_DEATH_IF_SUPPORTED(a.ReturnResult(1), "");
+  EXPECT_DEATH_IF_SUPPORTED(a.ReturnNonDefaultConstructible(), "");
 #endif
 }
 

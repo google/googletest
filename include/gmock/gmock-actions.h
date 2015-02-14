@@ -46,6 +46,10 @@
 #include "gmock/internal/gmock-internal-utils.h"
 #include "gmock/internal/gmock-port.h"
 
+#if GTEST_LANG_CXX11  // Defined by gtest-port.h via gmock-port.h.
+#include <type_traits>
+#endif
+
 namespace testing {
 
 // To implement an action Foo, define:
@@ -62,16 +66,17 @@ namespace internal {
 template <typename F1, typename F2>
 class ActionAdaptor;
 
-// BuiltInDefaultValue<T>::Get() returns the "built-in" default
-// value for type T, which is NULL when T is a pointer type, 0 when T
-// is a numeric type, false when T is bool, or "" when T is string or
-// std::string.  For any other type T, this value is undefined and the
-// function will abort the process.
+// BuiltInDefaultValueGetter<T, true>::Get() returns a
+// default-constructed T value.  BuiltInDefaultValueGetter<T,
+// false>::Get() crashes with an error.
+//
+// This primary template is used when kDefaultConstructible is true.
+template <typename T, bool kDefaultConstructible>
+struct BuiltInDefaultValueGetter {
+  static T Get() { return T(); }
+};
 template <typename T>
-class BuiltInDefaultValue {
- public:
-  // This function returns true iff type T has a built-in default value.
-  static bool Exists() { return false; }
+struct BuiltInDefaultValueGetter<T, false> {
   static T Get() {
     Assert(false, __FILE__, __LINE__,
            "Default action undefined for the function return type.");
@@ -79,6 +84,40 @@ class BuiltInDefaultValue {
     // The above statement will never be reached, but is required in
     // order for this function to compile.
   }
+};
+
+// BuiltInDefaultValue<T>::Get() returns the "built-in" default value
+// for type T, which is NULL when T is a raw pointer type, 0 when T is
+// a numeric type, false when T is bool, or "" when T is string or
+// std::string.  In addition, in C++11 and above, it turns a
+// default-constructed T value if T is default constructible.  For any
+// other type T, the built-in default T value is undefined, and the
+// function will abort the process.
+template <typename T>
+class BuiltInDefaultValue {
+ public:
+#if GTEST_LANG_CXX11
+  // This function returns true iff type T has a built-in default value.
+  static bool Exists() {
+    return ::std::is_default_constructible<T>::value;
+  }
+
+  static T Get() {
+    return BuiltInDefaultValueGetter<
+        T, ::std::is_default_constructible<T>::value>::Get();
+  }
+
+#else  // GTEST_LANG_CXX11
+  // This function returns true iff type T has a built-in default value.
+  static bool Exists() {
+    return false;
+  }
+
+  static T Get() {
+    return BuiltInDefaultValueGetter<T, false>::Get();
+  }
+
+#endif  // GTEST_LANG_CXX11
 };
 
 // This partial specialization says that we use the same built-in

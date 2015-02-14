@@ -39,14 +39,17 @@ namespace {
 using testing::HasSubstr;
 using testing::internal::GoogleTestFailureException;
 
-// A user-defined class.
-class Something {};
+// A type that cannot be default constructed.
+class NonDefaultConstructible {
+ public:
+  explicit NonDefaultConstructible(int /* dummy */) {}
+};
 
 class MockFoo {
  public:
   // A mock method that returns a user-defined type.  Google Mock
   // doesn't know what the default value for this type is.
-  MOCK_METHOD0(GetSomething, Something());
+  MOCK_METHOD0(GetNonDefaultConstructible, NonDefaultConstructible());
 };
 
 #if GTEST_HAS_EXCEPTIONS
@@ -59,9 +62,9 @@ TEST(DefaultValueTest, ThrowsRuntimeErrorWhenNoDefaultValue) {
     // nothing about the return type, it doesn't know what to return,
     // and has to throw (when exceptions are enabled) or abort
     // (otherwise).
-    mock.GetSomething();
-    FAIL() << "GetSomething()'s return type has no default value, "
-           << "so Google Mock should have thrown.";
+    mock.GetNonDefaultConstructible();
+    FAIL() << "GetNonDefaultConstructible()'s return type has no default "
+           << "value, so Google Mock should have thrown.";
   } catch (const GoogleTestFailureException& /* unused */) {
     FAIL() << "Google Test does not try to catch an exception of type "
            << "GoogleTestFailureException, which is used for reporting "
