@@ -245,9 +245,12 @@ GTEST_API_ ThreadLocal<Sequence*> g_gmock_implicit_sequence;
 // Reports an uninteresting call (whose description is in msg) in the
 // manner specified by 'reaction'.
 void ReportUninterestingCall(CallReaction reaction, const string& msg) {
+  // Include a stack trace only if --gmock_verbose=info is specified.
+  const int stack_frames_to_skip =
+      GMOCK_FLAG(verbose) == kInfoVerbosity ? 3 : -1;
   switch (reaction) {
     case kAllow:
-      Log(kInfo, msg, 3);
+      Log(kInfo, msg, stack_frames_to_skip);
       break;
     case kWarn:
       Log(kWarning,
@@ -256,8 +259,8 @@ void ReportUninterestingCall(CallReaction reaction, const string& msg) {
           "call should not happen.  Do not suppress it by blindly adding "
           "an EXPECT_CALL() if you don't mean to enforce the call.  "
           "See http://code.google.com/p/googlemock/wiki/CookBook#"
-          "Knowing_When_to_Expect for details.",
-          3);
+          "Knowing_When_to_Expect for details.\n",
+          stack_frames_to_skip);
       break;
     default:  // FAIL
       Expect(false, NULL, -1, msg);

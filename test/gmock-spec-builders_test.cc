@@ -81,6 +81,7 @@ using testing::Gt;
 using testing::InSequence;
 using testing::Invoke;
 using testing::InvokeWithoutArgs;
+using testing::IsNotSubstring;
 using testing::IsSubstring;
 using testing::Lt;
 using testing::Message;
@@ -1977,9 +1978,25 @@ class VerboseFlagPreservingFixture : public testing::Test {
 #if GTEST_HAS_STREAM_REDIRECTION
 
 // Tests that an uninteresting mock function call on a naggy mock
-// generates a warning containing the stack trace.
+// generates a warning without the stack trace when
+// --gmock_verbose=warning is specified.
 TEST(FunctionCallMessageTest,
-     UninterestingCallOnNaggyMockGeneratesFyiWithStackTrace) {
+     UninterestingCallOnNaggyMockGeneratesNoStackTraceWhenVerboseWarning) {
+  GMOCK_FLAG(verbose) = kWarningVerbosity;
+  NaggyMock<MockC> c;
+  CaptureStdout();
+  c.VoidMethod(false, 5, "Hi", NULL, Printable(), Unprintable());
+  const std::string output = GetCapturedStdout();
+  EXPECT_PRED_FORMAT2(IsSubstring, "GMOCK WARNING", output);
+  EXPECT_PRED_FORMAT2(IsNotSubstring, "Stack trace:", output);
+}
+
+// Tests that an uninteresting mock function call on a naggy mock
+// generates a warning containing the stack trace when
+// --gmock_verbose=info is specified.
+TEST(FunctionCallMessageTest,
+     UninterestingCallOnNaggyMockGeneratesFyiWithStackTraceWhenVerboseInfo) {
+  GMOCK_FLAG(verbose) = kInfoVerbosity;
   NaggyMock<MockC> c;
   CaptureStdout();
   c.VoidMethod(false, 5, "Hi", NULL, Printable(), Unprintable());
@@ -2112,8 +2129,7 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
         "\nGMOCK WARNING:\n"
         "Uninteresting mock function call - returning directly.\n"
         "    Function call: DoA(5)\n" +
-        note +
-        "\nStack trace:\n",
+        note,
         "DoA");
 
     // A non-void-returning function.
@@ -2126,8 +2142,7 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
         "Uninteresting mock function call - returning default value.\n"
         "    Function call: Binary(2, 1)\n"
         "          Returns: false\n" +
-        note +
-        "\nStack trace:\n",
+        note,
         "Binary");
   }
 };
