@@ -1,4 +1,4 @@
-r#summary Advanced topics on using Google C++ Testing Framework
+#summary Advanced topics on using Google C++ Testing Framework
 
 <wiki:toc max_depth="3" />
 
