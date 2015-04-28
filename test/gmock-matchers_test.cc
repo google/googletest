@@ -762,6 +762,21 @@ TEST(SafeMatcherCastTest, ValueIsNotCopied) {
   EXPECT_TRUE(m.Matches(n));
 }
 
+TEST(ExpectThat, TakesLiterals) {
+  EXPECT_THAT(1, 1);
+  EXPECT_THAT(1.0, 1.0);
+  EXPECT_THAT(string(), "");
+}
+
+TEST(ExpectThat, TakesFunctions) {
+  struct Helper {
+    static void Func() {}
+  };
+  void (*func)() = Helper::Func;
+  EXPECT_THAT(func, Helper::Func);
+  EXPECT_THAT(func, &Helper::Func);
+}
+
 // Tests that A<T>() matches any value of type T.
 TEST(ATest, MatchesAnyValue) {
   // Tests a matcher for a value type.
