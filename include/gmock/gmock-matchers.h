@@ -979,7 +979,11 @@ class IsNullMatcher {
   template <typename Pointer>
   bool MatchAndExplain(const Pointer& p,
                        MatchResultListener* /* listener */) const {
+#if GTEST_LANG_CXX11
+    return p == nullptr;
+#else  // GTEST_LANG_CXX11
     return GetRawPointer(p) == NULL;
+#endif  // GTEST_LANG_CXX11
   }
 
   void DescribeTo(::std::ostream* os) const { *os << "is NULL"; }
@@ -995,7 +999,11 @@ class NotNullMatcher {
   template <typename Pointer>
   bool MatchAndExplain(const Pointer& p,
                        MatchResultListener* /* listener */) const {
+#if GTEST_LANG_CXX11
+    return p != nullptr;
+#else  // GTEST_LANG_CXX11
     return GetRawPointer(p) != NULL;
+#endif  // GTEST_LANG_CXX11
   }
 
   void DescribeTo(::std::ostream* os) const { *os << "isn't NULL"; }
