@@ -176,16 +176,16 @@ using ::testing::internal::EventRecordingListener;
 
 void VerifyResults(const std::vector<std::string>& data,
                    const char* const* expected_data,
-                   int expected_data_size) {
-  const int actual_size = data.size();
+                   size_t expected_data_size) {
+  const size_t actual_size = data.size();
   // If the following assertion fails, a new entry will be appended to
   // data.  Hence we save data.size() first.
   EXPECT_EQ(expected_data_size, actual_size);
 
   // Compares the common prefix.
-  const int shorter_size = expected_data_size <= actual_size ?
+  const size_t shorter_size = expected_data_size <= actual_size ?
       expected_data_size : actual_size;
-  int i = 0;
+  size_t i = 0;
   for (; i < shorter_size; ++i) {
     ASSERT_STREQ(expected_data[i], data[i].c_str())
         << "at position " << i;
@@ -193,7 +193,8 @@ void VerifyResults(const std::vector<std::string>& data,
 
   // Prints extra elements in the actual data.
   for (; i < actual_size; ++i) {
-    printf("  Actual event #%d: %s\n", i, data[i].c_str());
+    printf("  Actual event #%lu: %s\n",
+        static_cast<unsigned long>(i), data[i].c_str());
   }
 }
 

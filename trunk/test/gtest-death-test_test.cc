@@ -887,9 +887,9 @@ class MockDeathTestFactory : public DeathTestFactory {
   // Accessors.
   int AssumeRoleCalls() const { return assume_role_calls_; }
   int WaitCalls() const { return wait_calls_; }
-  int PassedCalls() const { return passed_args_.size(); }
+  size_t PassedCalls() const { return passed_args_.size(); }
   bool PassedArgument(int n) const { return passed_args_[n]; }
-  int AbortCalls() const { return abort_args_.size(); }
+  size_t AbortCalls() const { return abort_args_.size(); }
   DeathTest::AbortReason AbortArgument(int n) const {
     return abort_args_[n];
   }
@@ -1050,8 +1050,8 @@ TEST_F(MacroLogicDeathTest, NothingHappens) {
   EXPECT_FALSE(flag);
   EXPECT_EQ(0, factory_->AssumeRoleCalls());
   EXPECT_EQ(0, factory_->WaitCalls());
-  EXPECT_EQ(0, factory_->PassedCalls());
-  EXPECT_EQ(0, factory_->AbortCalls());
+  EXPECT_EQ(0U, factory_->PassedCalls());
+  EXPECT_EQ(0U, factory_->AbortCalls());
   EXPECT_FALSE(factory_->TestDeleted());
 }
 
@@ -1065,9 +1065,9 @@ TEST_F(MacroLogicDeathTest, ChildExitsSuccessfully) {
   EXPECT_FALSE(flag);
   EXPECT_EQ(1, factory_->AssumeRoleCalls());
   EXPECT_EQ(1, factory_->WaitCalls());
-  ASSERT_EQ(1, factory_->PassedCalls());
+  ASSERT_EQ(1U, factory_->PassedCalls());
   EXPECT_FALSE(factory_->PassedArgument(0));
-  EXPECT_EQ(0, factory_->AbortCalls());
+  EXPECT_EQ(0U, factory_->AbortCalls());
   EXPECT_TRUE(factory_->TestDeleted());
 }
 
@@ -1080,9 +1080,9 @@ TEST_F(MacroLogicDeathTest, ChildExitsUnsuccessfully) {
   EXPECT_FALSE(flag);
   EXPECT_EQ(1, factory_->AssumeRoleCalls());
   EXPECT_EQ(1, factory_->WaitCalls());
-  ASSERT_EQ(1, factory_->PassedCalls());
+  ASSERT_EQ(1U, factory_->PassedCalls());
   EXPECT_TRUE(factory_->PassedArgument(0));
-  EXPECT_EQ(0, factory_->AbortCalls());
+  EXPECT_EQ(0U, factory_->AbortCalls());
   EXPECT_TRUE(factory_->TestDeleted());
 }
 
@@ -1096,8 +1096,8 @@ TEST_F(MacroLogicDeathTest, ChildPerformsReturn) {
   EXPECT_TRUE(flag);
   EXPECT_EQ(1, factory_->AssumeRoleCalls());
   EXPECT_EQ(0, factory_->WaitCalls());
-  EXPECT_EQ(0, factory_->PassedCalls());
-  EXPECT_EQ(1, factory_->AbortCalls());
+  EXPECT_EQ(0U, factory_->PassedCalls());
+  EXPECT_EQ(1U, factory_->AbortCalls());
   EXPECT_EQ(DeathTest::TEST_ENCOUNTERED_RETURN_STATEMENT,
             factory_->AbortArgument(0));
   EXPECT_TRUE(factory_->TestDeleted());
@@ -1112,13 +1112,13 @@ TEST_F(MacroLogicDeathTest, ChildDoesNotDie) {
   EXPECT_TRUE(flag);
   EXPECT_EQ(1, factory_->AssumeRoleCalls());
   EXPECT_EQ(0, factory_->WaitCalls());
-  EXPECT_EQ(0, factory_->PassedCalls());
+  EXPECT_EQ(0U, factory_->PassedCalls());
   // This time there are two calls to Abort: one since the test didn't
   // die, and another from the ReturnSentinel when it's destroyed.  The
   // sentinel normally isn't destroyed if a test doesn't die, since
   // _exit(2) is called in that case by ForkingDeathTest, but not by
   // our MockDeathTest.
-  ASSERT_EQ(2, factory_->AbortCalls());
+  ASSERT_EQ(2U, factory_->AbortCalls());
   EXPECT_EQ(DeathTest::TEST_DID_NOT_DIE,
             factory_->AbortArgument(0));
   EXPECT_EQ(DeathTest::TEST_ENCOUNTERED_RETURN_STATEMENT,

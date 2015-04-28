@@ -1219,11 +1219,11 @@ class DestructorTracker {
   }
 
  private:
-  static int GetNewIndex() {
+  static size_t GetNewIndex() {
     DestructorCall::List().push_back(new DestructorCall);
     return DestructorCall::List().size() - 1;
   }
-  const int index_;
+  const size_t index_;
 
   GTEST_DISALLOW_ASSIGN_(DestructorTracker);
 };
