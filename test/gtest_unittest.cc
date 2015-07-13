@@ -287,7 +287,6 @@ using testing::internal::edit_distance::CreateUnifiedDiff;
 using testing::internal::edit_distance::EditType;
 using testing::internal::kMaxRandomSeed;
 using testing::internal::kTestTypeIdInGoogleTest;
-using testing::internal::scoped_ptr;
 using testing::kMaxStackTraceDepth;
 
 #if GTEST_HAS_STREAM_REDIRECTION
