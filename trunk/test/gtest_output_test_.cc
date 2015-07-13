@@ -58,7 +58,6 @@ using testing::internal::ThreadWithParam;
 #endif
 
 namespace posix = ::testing::internal::posix;
-using testing::internal::scoped_ptr;
 
 // Tests catching fatal failures.
 
@@ -515,7 +514,8 @@ class DeathTestAndMultiThreadsTest : public testing::Test {
 
  private:
   SpawnThreadNotifications notifications_;
-  scoped_ptr<ThreadWithParam<SpawnThreadNotifications*> > thread_;
+  testing::internal::scoped_ptr<ThreadWithParam<SpawnThreadNotifications*> >
+      thread_;
 };
 
 #endif  // GTEST_IS_THREADSAFE
