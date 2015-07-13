@@ -472,7 +472,7 @@ internal::CartesianProductHolder$i<$for j, [[Generator$j]]> Combine(
 # define INSTANTIATE_TEST_CASE_P(prefix, test_case_name, generator) \
   ::testing::internal::ParamGenerator<test_case_name::ParamType> \
       gtest_##prefix##test_case_name##_EvalGenerator_() { return generator; } \
-  int gtest_##prefix##test_case_name##_dummy_ = \
+  int gtest_##prefix##test_case_name##_dummy_ GTEST_ATTRIBUTE_UNUSED_ = \
       ::testing::UnitTest::GetInstance()->parameterized_test_registry(). \
           GetTestCasePatternHolder<test_case_name>(\
               #test_case_name, __FILE__, __LINE__)->AddTestCaseInstantiation(\
