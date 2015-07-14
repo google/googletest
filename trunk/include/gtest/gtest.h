@@ -452,8 +452,7 @@ class GTEST_API_ Test {
   // internal method to avoid clashing with names used in user TESTs.
   void DeleteSelf_() { delete this; }
 
-  // Uses a GTestFlagSaver to save and restore all Google Test flags.
-  const internal::GTestFlagSaver* const gtest_flag_saver_;
+  const internal::scoped_ptr< GTEST_FLAG_SAVER_ > gtest_flag_saver_;
 
   // Often a user misspells SetUp() as Setup() and spends a long time
   // wondering why it is never called by Google Test.  The declaration of

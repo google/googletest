@@ -2179,14 +2179,15 @@ int TestResult::test_property_count() const {
 
 // Creates a Test object.
 
-// The c'tor saves the values of all Google Test flags.
+// The c'tor saves the states of all flags.
 Test::Test()
-    : gtest_flag_saver_(new internal::GTestFlagSaver) {
+    : gtest_flag_saver_(new GTEST_FLAG_SAVER_) {
 }
 
-// The d'tor restores the values of all Google Test flags.
+// The d'tor restores the states of all flags.  The actual work is
+// done by the d'tor of the gtest_flag_saver_ field, and thus not
+// visible here.
 Test::~Test() {
-  delete gtest_flag_saver_;
 }
 
 // Sets up the test fixture.

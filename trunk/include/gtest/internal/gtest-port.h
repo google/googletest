@@ -2418,6 +2418,8 @@ typedef TypeWithSize<8>::Int TimeInMillis;  // Represents time in milliseconds.
 #endif  // !defined(GTEST_FLAG)
 
 #if !defined(GTEST_DECLARE_bool_)
+# define GTEST_FLAG_SAVER_ ::testing::internal::GTestFlagSaver
+
 // Macros for declaring flags.
 # define GTEST_DECLARE_bool_(name) GTEST_API_ extern bool GTEST_FLAG(name)
 # define GTEST_DECLARE_int32_(name) \
