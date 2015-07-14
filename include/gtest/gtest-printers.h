@@ -888,4 +888,9 @@ template <typename T>
 
 }  // namespace testing
 
+// Include any custom printer added by the local installation.
+// We must include this header at the end to make sure it can use the
+// declarations from this file.
+#include "gtest/internal/custom/gtest-printers.h"
+
 #endif  // GTEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
