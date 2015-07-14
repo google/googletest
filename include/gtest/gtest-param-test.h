@@ -1394,7 +1394,7 @@ internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
                       GTEST_TEST_CLASS_NAME_(test_case_name, test_name)>()); \
       return 0; \
     } \
-    static int gtest_registering_dummy_; \
+    static int gtest_registering_dummy_ GTEST_ATTRIBUTE_UNUSED_; \
     GTEST_DISALLOW_COPY_AND_ASSIGN_(\
         GTEST_TEST_CLASS_NAME_(test_case_name, test_name)); \
   }; \
