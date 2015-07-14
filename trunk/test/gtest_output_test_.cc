@@ -990,8 +990,6 @@ class BarEnvironment : public testing::Environment {
   }
 };
 
-bool GTEST_FLAG(internal_skip_environment_and_ad_hoc_tests) = false;
-
 // The main function.
 //
 // The idea is to use Google Test to run all the tests we have defined (some
@@ -1008,10 +1006,9 @@ int main(int argc, char **argv) {
   // global side effects.  The following line serves as a sanity test
   // for it.
   testing::InitGoogleTest(&argc, argv);
-  if (argc >= 2 &&
-      (std::string(argv[1]) ==
-       "--gtest_internal_skip_environment_and_ad_hoc_tests"))
-    GTEST_FLAG(internal_skip_environment_and_ad_hoc_tests) = true;
+  bool internal_skip_environment_and_ad_hoc_tests =
+      std::count(argv, argv + argc,
+                 std::string("internal_skip_environment_and_ad_hoc_tests")) > 0;
 
 #if GTEST_HAS_DEATH_TEST
   if (testing::internal::GTEST_FLAG(internal_run_death_test) != "") {
@@ -1026,7 +1023,7 @@ int main(int argc, char **argv) {
   }
 #endif  // GTEST_HAS_DEATH_TEST
 
-  if (GTEST_FLAG(internal_skip_environment_and_ad_hoc_tests))
+  if (internal_skip_environment_and_ad_hoc_tests)
     return RUN_ALL_TESTS();
 
   // Registers two global test environments.

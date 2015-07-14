@@ -40,6 +40,7 @@ SYNOPSIS
 
 __author__ = 'wan@google.com (Zhanyong Wan)'
 
+import difflib
 import os
 import re
 import sys
@@ -58,22 +59,22 @@ GOLDEN_NAME = 'gtest_output_test_golden_lin.txt'
 PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath('gtest_output_test_')
 
 # At least one command we exercise must not have the
-# --gtest_internal_skip_environment_and_ad_hoc_tests flag.
+# 'internal_skip_environment_and_ad_hoc_tests' argument.
 COMMAND_LIST_TESTS = ({}, [PROGRAM_PATH, '--gtest_list_tests'])
 COMMAND_WITH_COLOR = ({}, [PROGRAM_PATH, '--gtest_color=yes'])
 COMMAND_WITH_TIME = ({}, [PROGRAM_PATH,
                           '--gtest_print_time',
-                          '--gtest_internal_skip_environment_and_ad_hoc_tests',
+                          'internal_skip_environment_and_ad_hoc_tests',
                           '--gtest_filter=FatalFailureTest.*:LoggingTest.*'])
 COMMAND_WITH_DISABLED = (
     {}, [PROGRAM_PATH,
          '--gtest_also_run_disabled_tests',
-         '--gtest_internal_skip_environment_and_ad_hoc_tests',
+         'internal_skip_environment_and_ad_hoc_tests',
          '--gtest_filter=*DISABLED_*'])
 COMMAND_WITH_SHARDING = (
     {'GTEST_SHARD_INDEX': '1', 'GTEST_TOTAL_SHARDS': '2'},
     [PROGRAM_PATH,
-     '--gtest_internal_skip_environment_and_ad_hoc_tests',
+     'internal_skip_environment_and_ad_hoc_tests',
      '--gtest_filter=PassingTest.*'])
 
 GOLDEN_PATH = os.path.join(gtest_test_utils.GetSourceDir(), GOLDEN_NAME)
@@ -294,7 +295,11 @@ class GTestOutputTest(gtest_test_utils.TestCase):
     normalized_golden = RemoveTypeInfoDetails(golden)
 
     if CAN_GENERATE_GOLDEN_FILE:
-      self.assertEqual(normalized_golden, normalized_actual)
+      self.assertEqual(normalized_golden, normalized_actual,
+                       '\n'.join(difflib.unified_diff(
+                           normalized_golden.split('\n'),
+                           normalized_actual.split('\n'),
+                           'golden', 'actual')))
     else:
       normalized_actual = NormalizeToCurrentPlatform(
           RemoveTestCounts(normalized_actual))
