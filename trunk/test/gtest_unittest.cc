@@ -6333,7 +6333,7 @@ TEST_F(InitGoogleTestTest, WideStrings) {
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, expected_flags, false);
 }
-#endif  // GTEST_OS_WINDOWS
+# endif  // GTEST_OS_WINDOWS
 
 // Tests current_test_info() in UnitTest.
 class CurrentTestInfoTest : public Test {

@@ -1410,7 +1410,7 @@ const ::std::vector<testing::internal::string>& GetInjectableArgvs();
 void SetInjectableArgvs(const ::std::vector<testing::internal::string>*
                              new_argvs);
 
-// A copy of all command line arguments.  Set by InitGoogleTest().
+// A copy of all command line arguments.  Set by ParseGTestFlags().
 extern ::std::vector<testing::internal::string> g_argvs;
 
 #endif  // GTEST_HAS_DEATH_TEST
