@@ -58,6 +58,10 @@
 # include <hash_set>            // NOLINT
 #endif  // GTEST_OS_WINDOWS
 
+#if GTEST_HAS_STD_FORWARD_LIST_
+# include <forward_list> // NOLINT
+#endif  // GTEST_HAS_STD_FORWARD_LIST_
+
 // Some user-defined types for testing the universal value printer.
 
 // An anonymous enum type.
@@ -913,6 +917,17 @@ TEST(PrintStlContainerTest, MultiSet) {
   EXPECT_EQ("{ 1, 1, 1, 2, 5 }", Print(set1));
 }
 
+#if GTEST_HAS_STD_FORWARD_LIST_
+// <slist> is available on Linux in the google3 mode, but not on
+// Windows or Mac OS X.
+
+TEST(PrintStlContainerTest, SinglyLinkedList) {
+  int a[] = { 9, 2, 8 };
+  const std::forward_list<int> ints(a, a + 3);
+  EXPECT_EQ("{ 9, 2, 8 }", Print(ints));
+}
+#endif  // GTEST_HAS_STD_FORWARD_LIST_
+
 TEST(PrintStlContainerTest, Pair) {
   pair<const bool, int> p(true, 5);
   EXPECT_EQ("(true, 5)", Print(p));
@@ -1161,37 +1176,6 @@ TEST(PrintPrintableTypeTest, TemplateInUserNamespace) {
   EXPECT_EQ("PrintableViaPrintToTemplate: 5",
             Print(::foo::PrintableViaPrintToTemplate<int>(5)));
 }
-
-#if GTEST_HAS_PROTOBUF_
-
-// Tests printing a short proto2 message.
-TEST(PrintProto2MessageTest, PrintsShortDebugStringWhenItIsShort) {
-  testing::internal::FooMessage msg;
-  msg.set_int_field(2);
-  msg.set_string_field("hello");
-  EXPECT_PRED2(RE::FullMatch, Print(msg),
-               "<int_field:\\s*2\\s+string_field:\\s*\"hello\">");
-}
-
-// Tests printing a long proto2 message.
-TEST(PrintProto2MessageTest, PrintsDebugStringWhenItIsLong) {
-  testing::internal::FooMessage msg;
-  msg.set_int_field(2);
-  msg.set_string_field("hello");
-  msg.add_names("peter");
-  msg.add_names("paul");
-  msg.add_names("mary");
-  EXPECT_PRED2(RE::FullMatch, Print(msg),
-               "<\n"
-               "int_field:\\s*2\n"
-               "string_field:\\s*\"hello\"\n"
-               "names:\\s*\"peter\"\n"
-               "names:\\s*\"paul\"\n"
-               "names:\\s*\"mary\"\n"
-               ">");
-}
-
-#endif  // GTEST_HAS_PROTOBUF_
 
 // Tests that the universal printer prints both the address and the
 // value of a reference.
