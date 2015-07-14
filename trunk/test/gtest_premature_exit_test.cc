@@ -44,10 +44,6 @@ using ::testing::internal::posix::StatStruct;
 
 namespace {
 
-// Is the TEST_PREMATURE_EXIT_FILE environment variable expected to be
-// set?
-const bool kTestPrematureExitFileEnvVarShouldBeSet = false;
-
 class PrematureExitTest : public Test {
  public:
   // Returns true iff the given file exists.
@@ -95,18 +91,6 @@ TEST_F(PrematureExitDeathTest, FileExistsDuringExecutionOfDeathTest) {
         exit(1);
       }
     }, "");
-}
-
-// Tests that TEST_PREMATURE_EXIT_FILE is set where it's expected to
-// be set.
-TEST_F(PrematureExitTest, TestPrematureExitFileEnvVarIsSet) {
-  GTEST_INTENTIONAL_CONST_COND_PUSH_()
-  if (kTestPrematureExitFileEnvVarShouldBeSet) {
-  GTEST_INTENTIONAL_CONST_COND_POP_()
-    const char* const filepath = GetEnv("TEST_PREMATURE_EXIT_FILE");
-    ASSERT_TRUE(filepath != NULL);
-    ASSERT_NE(*filepath, '\0');
-  }
 }
 
 // Tests that the premature-exit file exists during the execution of a
