@@ -1517,6 +1517,16 @@ TEST(TestResultPropertyTest, GetTestProperty) {
   EXPECT_DEATH_IF_SUPPORTED(test_result.GetTestProperty(-1), "");
 }
 
+// Tests the Test class.
+//
+// It's difficult to test every public method of this class (we are
+// already stretching the limit of Google Test by using it to test itself!).
+// Fortunately, we don't have to do that, as we are already testing
+// the functionalities of the Test class extensively by using Google Test
+// alone.
+//
+// Therefore, this section only contains one test.
+
 // Tests that GTestFlagSaver works on Windows and Mac.
 
 class GTestFlagSaverTest : public Test {
