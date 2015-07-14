@@ -510,8 +510,12 @@ TEST_F(TestForDeathTest, AcceptsAnythingConvertibleToRE) {
 
 # endif  // GTEST_HAS_GLOBAL_STRING
 
+# if !GTEST_USES_PCRE
+
   const ::std::string regex_std_str(regex_c_str);
   EXPECT_DEATH(GlobalFunction(), regex_std_str);
+
+# endif  // !GTEST_USES_PCRE
 }
 
 // Tests that a non-void function can be used in a death test.
