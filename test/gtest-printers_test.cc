@@ -50,13 +50,13 @@
 
 #include "gtest/gtest.h"
 
-// hash_map and hash_set are available under Visual C++.
-#if _MSC_VER
-# define GTEST_HAS_HASH_MAP_ 1  // Indicates that hash_map is available.
+// hash_map and hash_set are available under Visual C++, or on Linux.
+#if GTEST_HAS_HASH_MAP_
 # include <hash_map>            // NOLINT
-# define GTEST_HAS_HASH_SET_ 1  // Indicates that hash_set is available.
+#endif  // GTEST_HAS_HASH_MAP_
+#if GTEST_HAS_HASH_SET_
 # include <hash_set>            // NOLINT
-#endif  // GTEST_OS_WINDOWS
+#endif  // GTEST_HAS_HASH_SET_
 
 #if GTEST_HAS_STD_FORWARD_LIST_
 # include <forward_list> // NOLINT
