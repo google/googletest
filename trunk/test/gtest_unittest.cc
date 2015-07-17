@@ -6345,6 +6345,105 @@ TEST_F(InitGoogleTestTest, WideStrings) {
 }
 # endif  // GTEST_OS_WINDOWS
 
+class FlagfileTest : public InitGoogleTestTest {
+ public:
+  virtual void SetUp() {
+    InitGoogleTestTest::SetUp();
+
+    testdata_path_.Set(internal::FilePath(
+        internal::TempDir() + internal::GetCurrentExecutableName().string() +
+        "_flagfile_test"));
+    testing::internal::posix::RmDir(testdata_path_.c_str());
+    EXPECT_TRUE(testdata_path_.CreateFolder());
+  }
+
+  virtual void TearDown() {
+    testing::internal::posix::RmDir(testdata_path_.c_str());
+    InitGoogleTestTest::TearDown();
+  }
+
+  internal::FilePath CreateFlagfile(const char* contents) {
+    internal::FilePath file_path(internal::FilePath::GenerateUniqueFileName(
+        testdata_path_, internal::FilePath("unique"), "txt"));
+    FILE* f = testing::internal::posix::FOpen(file_path.c_str(), "w");
+    fprintf(f, "%s", contents);
+    fclose(f);
+    return file_path;
+  }
+
+ private:
+  internal::FilePath testdata_path_;
+};
+
+// Tests an empty flagfile.
+TEST_F(FlagfileTest, Empty) {
+  internal::FilePath flagfile_path(CreateFlagfile(""));
+  std::string flagfile_flag =
+      std::string("--" GTEST_FLAG_PREFIX_ "flagfile=") + flagfile_path.c_str();
+
+  const char* argv[] = {
+    "foo.exe",
+    flagfile_flag.c_str(),
+    NULL
+  };
+
+  const char* argv2[] = {
+    "foo.exe",
+    NULL
+  };
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags(), false);
+}
+
+// Tests passing a non-empty --gtest_filter flag via --gtest_flagfile.
+TEST_F(FlagfileTest, FilterNonEmpty) {
+  internal::FilePath flagfile_path(CreateFlagfile(
+      "--"  GTEST_FLAG_PREFIX_  "filter=abc"));
+  std::string flagfile_flag =
+      std::string("--" GTEST_FLAG_PREFIX_ "flagfile=") + flagfile_path.c_str();
+
+  const char* argv[] = {
+    "foo.exe",
+    flagfile_flag.c_str(),
+    NULL
+  };
+
+  const char* argv2[] = {
+    "foo.exe",
+    NULL
+  };
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Filter("abc"), false);
+}
+
+// Tests passing several flags via --gtest_flagfile.
+TEST_F(FlagfileTest, SeveralFlags) {
+  internal::FilePath flagfile_path(CreateFlagfile(
+      "--"  GTEST_FLAG_PREFIX_  "filter=abc\n"
+      "--"  GTEST_FLAG_PREFIX_  "break_on_failure\n"
+      "--"  GTEST_FLAG_PREFIX_  "list_tests"));
+  std::string flagfile_flag =
+      std::string("--" GTEST_FLAG_PREFIX_ "flagfile=") + flagfile_path.c_str();
+
+  const char* argv[] = {
+    "foo.exe",
+    flagfile_flag.c_str(),
+    NULL
+  };
+
+  const char* argv2[] = {
+    "foo.exe",
+    NULL
+  };
+
+  Flags expected_flags;
+  expected_flags.break_on_failure = true;
+  expected_flags.filter = "abc";
+  expected_flags.list_tests = true;
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, expected_flags, false);
+}
+
 // Tests current_test_info() in UnitTest.
 class CurrentTestInfoTest : public Test {
  protected:

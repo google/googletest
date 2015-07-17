@@ -587,6 +587,11 @@ inline std::string GetPrefixUntilComma(const char* str) {
   return comma == NULL ? str : std::string(str, comma);
 }
 
+// Splits a given string on a given delimiter, populating a given
+// vector with the fields.
+void SplitString(const ::std::string& str, char delimiter,
+                 ::std::vector< ::std::string>* dest);
+
 // TypeParameterizedTest<Fixture, TestSel, Types>::Register()
 // registers a list of type-parameterized tests with Google Test.  The
 // return value is insignificant - we just need to return something

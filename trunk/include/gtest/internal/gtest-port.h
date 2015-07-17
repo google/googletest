@@ -1403,6 +1403,14 @@ GTEST_API_ std::string GetCapturedStderr();
 
 #endif  // GTEST_HAS_STREAM_REDIRECTION
 
+// Returns a path to temporary directory.
+GTEST_API_ std::string TempDir();
+
+// Returns the size (in bytes) of a file.
+GTEST_API_ size_t GetFileSize(FILE* file);
+
+// Reads the entire content of a file as a string.
+GTEST_API_ std::string ReadEntireFile(FILE* file);
 
 #if GTEST_HAS_DEATH_TEST
 
