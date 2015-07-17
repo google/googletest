@@ -181,7 +181,8 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
           ::testing::internal::TemplateSel< \
               GTEST_TEST_CLASS_NAME_(CaseName, TestName)>, \
           GTEST_TYPE_PARAMS_(CaseName)>::Register(\
-              "", #CaseName, #TestName, 0); \
+              "", ::testing::internal::CodeLocation(__FILE__, __LINE__), \
+              #CaseName, #TestName, 0); \
   template <typename gtest_TypeParam_> \
   void GTEST_TEST_CLASS_NAME_(CaseName, TestName)<gtest_TypeParam_>::TestBody()
 
@@ -252,7 +253,10 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
       ::testing::internal::TypeParameterizedTestCase<CaseName, \
           GTEST_CASE_NAMESPACE_(CaseName)::gtest_AllTests_, \
           ::testing::internal::TypeList< Types >::type>::Register(\
-              #Prefix, #CaseName, GTEST_REGISTERED_TEST_NAMES_(CaseName))
+              #Prefix, \
+              ::testing::internal::CodeLocation(__FILE__, __LINE__), \
+              &GTEST_TYPED_TEST_CASE_P_STATE_(CaseName), \
+              #CaseName, GTEST_REGISTERED_TEST_NAMES_(CaseName))
 
 #endif  // GTEST_HAS_TYPED_TEST_P
 
