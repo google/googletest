@@ -887,7 +887,6 @@ GTEST_API_ ::std::string FormatCompilerIndependentFileLocation(
     return file_name + ":" + StreamableToString(line);
 }
 
-
 GTestLog::GTestLog(GTestLogSeverity severity, const char* file, int line)
     : severity_(severity) {
   const char* const marker =

@@ -606,6 +606,15 @@ struct _RTL_CRITICAL_SECTION;
 # include <time.h>  // NOLINT
 #endif
 
+// Determines if hash_map/hash_set are available.
+// Only used for testing against those containers.
+#if !defined(GTEST_HAS_HASH_MAP_)
+# if _MSC_VER
+#  define GTEST_HAS_HASH_MAP_ 1  // Indicates that hash_map is available.
+#  define GTEST_HAS_HASH_SET_ 1  // Indicates that hash_set is available.
+# endif  // _MSC_VER
+#endif  // !defined(GTEST_HAS_HASH_MAP_)
+
 // Determines whether Google Test can use tr1/tuple.  You can define
 // this macro to 0 to prevent Google Test from using tuple (any
 // feature depending on tuple with be disabled in this mode).
