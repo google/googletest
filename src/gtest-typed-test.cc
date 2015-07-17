@@ -55,11 +55,11 @@ static std::vector<std::string> SplitIntoTestNames(const char* src) {
 }
 
 // Verifies that registered_tests match the test names in
-// defined_test_names_; returns registered_tests if successful, or
+// registered_tests_; returns registered_tests if successful, or
 // aborts the program otherwise.
 const char* TypedTestCasePState::VerifyRegisteredTestNames(
     const char* file, int line, const char* registered_tests) {
-  typedef ::std::set<const char*>::const_iterator DefinedTestIter;
+  typedef RegisteredTestsMap::const_iterator RegisteredTestIter;
   registered_ = true;
 
   std::vector<std::string> name_vec = SplitIntoTestNames(registered_tests);
@@ -76,10 +76,10 @@ const char* TypedTestCasePState::VerifyRegisteredTestNames(
     }
 
     bool found = false;
-    for (DefinedTestIter it = defined_test_names_.begin();
-         it != defined_test_names_.end();
+    for (RegisteredTestIter it = registered_tests_.begin();
+         it != registered_tests_.end();
          ++it) {
-      if (name == *it) {
+      if (name == it->first) {
         found = true;
         break;
       }
@@ -93,11 +93,11 @@ const char* TypedTestCasePState::VerifyRegisteredTestNames(
     }
   }
 
-  for (DefinedTestIter it = defined_test_names_.begin();
-       it != defined_test_names_.end();
+  for (RegisteredTestIter it = registered_tests_.begin();
+       it != registered_tests_.end();
        ++it) {
-    if (tests.count(*it) == 0) {
-      errors << "You forgot to list test " << *it << ".\n";
+    if (tests.count(it->first) == 0) {
+      errors << "You forgot to list test " << it->first << ".\n";
     }
   }
 

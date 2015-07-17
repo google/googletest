@@ -58,7 +58,7 @@ namespace internal {
 // TEST_P macro is used to define two tests with the same name
 // but in different namespaces.
 GTEST_API_ void ReportInvalidTestCaseType(const char* test_case_name,
-                                          const char* file, int line);
+                                          CodeLocation code_location);
 
 template <typename> class ParamGeneratorInterface;
 template <typename> class ParamGenerator;
@@ -450,8 +450,9 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
   // A function that returns an instance of appropriate generator type.
   typedef ParamGenerator<ParamType>(GeneratorCreationFunc)();
 
-  explicit ParameterizedTestCaseInfo(const char* name)
-      : test_case_name_(name) {}
+  explicit ParameterizedTestCaseInfo(
+      const char* name, CodeLocation code_location)
+      : test_case_name_(name), code_location_(code_location) {}
 
   // Test case base name for display purposes.
   virtual const string& GetTestCaseName() const { return test_case_name_; }
@@ -510,6 +511,7 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
               test_name_stream.GetString().c_str(),
               NULL,  // No type parameter.
               PrintToString(*param_it).c_str(),
+              code_location_,
               GetTestCaseTypeId(),
               TestCase::SetUpTestCase,
               TestCase::TearDownTestCase,
@@ -541,6 +543,7 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
       InstantiationContainer;
 
   const string test_case_name_;
+  CodeLocation code_location_;
   TestInfoContainer tests_;
   InstantiationContainer instantiations_;
 
@@ -568,8 +571,7 @@ class ParameterizedTestCaseRegistry {
   template <class TestCase>
   ParameterizedTestCaseInfo<TestCase>* GetTestCasePatternHolder(
       const char* test_case_name,
-      const char* file,
-      int line) {
+      CodeLocation code_location) {
     ParameterizedTestCaseInfo<TestCase>* typed_test_info = NULL;
     for (TestCaseInfoContainer::iterator it = test_case_infos_.begin();
          it != test_case_infos_.end(); ++it) {
@@ -578,7 +580,7 @@ class ParameterizedTestCaseRegistry {
           // Complain about incorrect usage of Google Test facilities
           // and terminate the program since we cannot guaranty correct
           // test case setup and tear-down in this case.
-          ReportInvalidTestCaseType(test_case_name,  file, line);
+          ReportInvalidTestCaseType(test_case_name, code_location);
           posix::Abort();
         } else {
           // At this point we are sure that the object we found is of the same
@@ -591,7 +593,8 @@ class ParameterizedTestCaseRegistry {
       }
     }
     if (typed_test_info == NULL) {
-      typed_test_info = new ParameterizedTestCaseInfo<TestCase>(test_case_name);
+      typed_test_info = new ParameterizedTestCaseInfo<TestCase>(
+          test_case_name, code_location);
       test_case_infos_.push_back(typed_test_info);
     }
     return typed_test_info;

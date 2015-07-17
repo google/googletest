@@ -94,7 +94,8 @@ class StreamingListenerTest : public Test {
   StreamingListenerTest()
       : fake_sock_writer_(new FakeSocketWriter),
         streamer_(fake_sock_writer_),
-        test_info_obj_("FooTest", "Bar", NULL, NULL, 0, NULL) {}
+        test_info_obj_("FooTest", "Bar", NULL, NULL,
+                       CodeLocation(__FILE__, __LINE__), 0, NULL) {}
 
  protected:
   string* output() { return &(fake_sock_writer_->output_); }
@@ -5327,6 +5328,59 @@ TEST_F(TestInfoTest, result) {
   // After the previous assertion, there is still none.
   ASSERT_EQ(0, GetTestResult(test_info)->total_part_count());
 }
+
+#define VERIFY_CODE_LOCATION \
+  const int expected_line = __LINE__ - 1; \
+  const TestInfo* const test_info = GetUnitTestImpl()->current_test_info(); \
+  ASSERT_TRUE(test_info); \
+  EXPECT_STREQ(__FILE__, test_info->file()); \
+  EXPECT_EQ(expected_line, test_info->line())
+
+TEST(CodeLocationForTEST, Verify) {
+  VERIFY_CODE_LOCATION;
+}
+
+class CodeLocationForTESTF : public Test {
+};
+
+TEST_F(CodeLocationForTESTF, Verify) {
+  VERIFY_CODE_LOCATION;
+}
+
+class CodeLocationForTESTP : public TestWithParam<int> {
+};
+
+TEST_P(CodeLocationForTESTP, Verify) {
+  VERIFY_CODE_LOCATION;
+}
+
+INSTANTIATE_TEST_CASE_P(, CodeLocationForTESTP, Values(0));
+
+template <typename T>
+class CodeLocationForTYPEDTEST : public Test {
+};
+
+TYPED_TEST_CASE(CodeLocationForTYPEDTEST, int);
+
+TYPED_TEST(CodeLocationForTYPEDTEST, Verify) {
+  VERIFY_CODE_LOCATION;
+}
+
+template <typename T>
+class CodeLocationForTYPEDTESTP : public Test {
+};
+
+TYPED_TEST_CASE_P(CodeLocationForTYPEDTESTP);
+
+TYPED_TEST_P(CodeLocationForTYPEDTESTP, Verify) {
+  VERIFY_CODE_LOCATION;
+}
+
+REGISTER_TYPED_TEST_CASE_P(CodeLocationForTYPEDTESTP, Verify);
+
+INSTANTIATE_TYPED_TEST_CASE_P(My, CodeLocationForTYPEDTESTP, int);
+
+#undef VERIFY_CODE_LOCATION
 
 // Tests setting up and tearing down a test case.
 

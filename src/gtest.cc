@@ -2493,12 +2493,14 @@ TestInfo::TestInfo(const std::string& a_test_case_name,
                    const std::string& a_name,
                    const char* a_type_param,
                    const char* a_value_param,
+                   internal::CodeLocation a_code_location,
                    internal::TypeId fixture_class_id,
                    internal::TestFactoryBase* factory)
     : test_case_name_(a_test_case_name),
       name_(a_name),
       type_param_(a_type_param ? new std::string(a_type_param) : NULL),
       value_param_(a_value_param ? new std::string(a_value_param) : NULL),
+      location_(a_code_location),
       fixture_class_id_(fixture_class_id),
       should_run_(false),
       is_disabled_(false),
@@ -2522,6 +2524,7 @@ namespace internal {
 //                     this is not a typed or a type-parameterized test.
 //   value_param:      text representation of the test's value parameter,
 //                     or NULL if this is not a value-parameterized test.
+//   code_location:    code location where the test is defined
 //   fixture_class_id: ID of the test fixture class
 //   set_up_tc:        pointer to the function that sets up the test case
 //   tear_down_tc:     pointer to the function that tears down the test case
@@ -2533,20 +2536,21 @@ TestInfo* MakeAndRegisterTestInfo(
     const char* name,
     const char* type_param,
     const char* value_param,
+    CodeLocation code_location,
     TypeId fixture_class_id,
     SetUpTestCaseFunc set_up_tc,
     TearDownTestCaseFunc tear_down_tc,
     TestFactoryBase* factory) {
   TestInfo* const test_info =
       new TestInfo(test_case_name, name, type_param, value_param,
-                   fixture_class_id, factory);
+                   code_location, fixture_class_id, factory);
   GetUnitTestImpl()->AddTestInfo(set_up_tc, tear_down_tc, test_info);
   return test_info;
 }
 
 #if GTEST_HAS_PARAM_TEST
 void ReportInvalidTestCaseType(const char* test_case_name,
-                               const char* file, int line) {
+                               CodeLocation code_location) {
   Message errors;
   errors
       << "Attempted redefinition of test case " << test_case_name << ".\n"
@@ -2558,7 +2562,9 @@ void ReportInvalidTestCaseType(const char* test_case_name,
       << "probably rename one of the classes to put the tests into different\n"
       << "test cases.";
 
-  fprintf(stderr, "%s %s", FormatFileLocation(file, line).c_str(),
+  fprintf(stderr, "%s %s",
+          FormatFileLocation(code_location.file.c_str(),
+                             code_location.line).c_str(),
           errors.GetString().c_str());
 }
 #endif  // GTEST_HAS_PARAM_TEST
