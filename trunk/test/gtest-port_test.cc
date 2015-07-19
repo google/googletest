@@ -1149,13 +1149,6 @@ TEST(ThreadLocalTest, ParameterizedConstructorSetsDefault) {
   EXPECT_STREQ("foo", result.c_str());
 }
 
-# if !GTEST_HAS_MUTEX_AND_THREAD_LOCAL_
-
-// Tests in this section depend on that Google Test's own ThreadLocal
-// implementation stores a copy of the default value shared by all
-// threads.  We don't want to test this for an external implementation received
-// through GTEST_HAS_MUTEX_AND_THREAD_LOCAL_.
-
 // Keeps track of whether of destructors being called on instances of
 // DestructorTracker.  On Windows, waits for the destructor call reports.
 class DestructorCall {
@@ -1240,25 +1233,18 @@ TEST(ThreadLocalTest, DestroysManagedObjectForOwnThreadWhenDying) {
   DestructorCall::ResetList();
 
   {
-    // The next line default constructs a DestructorTracker object as
-    // the default value of objects managed by thread_local_tracker.
     ThreadLocal<DestructorTracker> thread_local_tracker;
-    ASSERT_EQ(1U, DestructorCall::List().size());
-    ASSERT_FALSE(DestructorCall::List()[0]->CheckDestroyed());
+    ASSERT_EQ(0U, DestructorCall::List().size());
 
     // This creates another DestructorTracker object for the main thread.
     thread_local_tracker.get();
-    ASSERT_EQ(2U, DestructorCall::List().size());
+    ASSERT_EQ(1U, DestructorCall::List().size());
     ASSERT_FALSE(DestructorCall::List()[0]->CheckDestroyed());
-    ASSERT_FALSE(DestructorCall::List()[1]->CheckDestroyed());
   }
 
-  // Now thread_local_tracker has died.  It should have destroyed both the
-  // default value shared by all threads and the value for the main
-  // thread.
-  ASSERT_EQ(2U, DestructorCall::List().size());
+  // Now thread_local_tracker has died.
+  ASSERT_EQ(1U, DestructorCall::List().size());
   EXPECT_TRUE(DestructorCall::List()[0]->CheckDestroyed());
-  EXPECT_TRUE(DestructorCall::List()[1]->CheckDestroyed());
 
   DestructorCall::ResetList();
 }
@@ -1269,34 +1255,25 @@ TEST(ThreadLocalTest, DestroysManagedObjectAtThreadExit) {
   DestructorCall::ResetList();
 
   {
-    // The next line default constructs a DestructorTracker object as
-    // the default value of objects managed by thread_local_tracker.
     ThreadLocal<DestructorTracker> thread_local_tracker;
-    ASSERT_EQ(1U, DestructorCall::List().size());
-    ASSERT_FALSE(DestructorCall::List()[0]->CheckDestroyed());
+    ASSERT_EQ(0U, DestructorCall::List().size());
 
     // This creates another DestructorTracker object in the new thread.
     ThreadWithParam<ThreadParam> thread(
         &CallThreadLocalGet, &thread_local_tracker, NULL);
     thread.Join();
 
-    // The thread has exited, and we should have another DestroyedTracker
+    // The thread has exited, and we should have a DestroyedTracker
     // instance created for it. But it may not have been destroyed yet.
-    // The instance for the main thread should still persist.
-    ASSERT_EQ(2U, DestructorCall::List().size());
-    ASSERT_FALSE(DestructorCall::List()[0]->CheckDestroyed());
+    ASSERT_EQ(1U, DestructorCall::List().size());
   }
 
-  // The thread has exited and thread_local_tracker has died.  The default
-  // value should have been destroyed too.
-  ASSERT_EQ(2U, DestructorCall::List().size());
+  // The thread has exited and thread_local_tracker has died.
+  ASSERT_EQ(1U, DestructorCall::List().size());
   EXPECT_TRUE(DestructorCall::List()[0]->CheckDestroyed());
-  EXPECT_TRUE(DestructorCall::List()[1]->CheckDestroyed());
 
   DestructorCall::ResetList();
 }
-
-# endif  // !GTEST_HAS_MUTEX_AND_THREAD_LOCAL_
 
 TEST(ThreadLocalTest, ThreadLocalMutationsAffectOnlyCurrentThread) {
   ThreadLocal<std::string> thread_local_string;
