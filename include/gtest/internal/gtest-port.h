@@ -2434,6 +2434,10 @@ typedef TypeWithSize<8>::Int TimeInMillis;  // Represents time in milliseconds.
 # define GTEST_FLAG(name) FLAGS_gtest_##name
 #endif  // !defined(GTEST_FLAG)
 
+#if !defined(GTEST_USE_OWN_FLAGFILE_FLAG_)
+# define GTEST_USE_OWN_FLAGFILE_FLAG_ 1
+#endif  // !defined(GTEST_USE_OWN_FLAGFILE_FLAG_)
+
 #if !defined(GTEST_DECLARE_bool_)
 # define GTEST_FLAG_SAVER_ ::testing::internal::GTestFlagSaver
 

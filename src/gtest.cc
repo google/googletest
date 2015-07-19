@@ -296,10 +296,12 @@ GTEST_DEFINE_bool_(
     "if exceptions are enabled or exit the program with a non-zero code "
     "otherwise.");
 
+#if GTEST_USE_OWN_FLAGFILE_FLAG_
 GTEST_DEFINE_string_(
     flagfile,
     internal::StringFromGTestEnv("flagfile", ""),
     "This flag specifies the flagfile to read command-line flags from.");
+#endif  // GTEST_USE_OWN_FLAGFILE_FLAG_
 
 namespace internal {
 
@@ -5233,6 +5235,7 @@ bool ParseGoogleTestFlag(const char* const arg) {
                     &GTEST_FLAG(throw_on_failure));
 }
 
+#if GTEST_USE_OWN_FLAGFILE_FLAG_
 void LoadFlagsFromFile(const std::string& path) {
   FILE* flagfile = posix::FOpen(path.c_str(), "r");
   if (!flagfile) {
@@ -5253,6 +5256,7 @@ void LoadFlagsFromFile(const std::string& path) {
       g_help_flag = true;
   }
 }
+#endif  // GTEST_USE_OWN_FLAGFILE_FLAG_
 
 // Parses the command line for Google Test flags, without initializing
 // other parts of Google Test.  The type parameter CharType can be
@@ -5270,9 +5274,11 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
     bool remove_flag = false;
     if (ParseGoogleTestFlag(arg)) {
       remove_flag = true;
+#if GTEST_USE_OWN_FLAGFILE_FLAG_
     } else if (ParseStringFlag(arg, kFlagfileFlag, &GTEST_FLAG(flagfile))) {
       LoadFlagsFromFile(GTEST_FLAG(flagfile));
       remove_flag = true;
+#endif  // GTEST_USE_OWN_FLAGFILE_FLAG_
     } else if (arg_string == "--help" || arg_string == "-h" ||
                arg_string == "-?" || arg_string == "/?" ||
                HasGoogleTestFlagPrefix(arg)) {
