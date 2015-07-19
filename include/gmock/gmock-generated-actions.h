@@ -267,107 +267,6 @@ class InvokeHelper<R, ::testing::tuple<A1, A2, A3, A4, A5, A6, A7, A8, A9,
   }
 };
 
-// CallableHelper has static methods for invoking "callables",
-// i.e. function pointers and functors.  It uses overloading to
-// provide a uniform interface for invoking different kinds of
-// callables.  In particular, you can use:
-//
-//   CallableHelper<R>::Call(callable, a1, a2, ..., an)
-//
-// to invoke an n-ary callable, where R is its return type.  If an
-// argument, say a2, needs to be passed by reference, you should write
-// ByRef(a2) instead of a2 in the above expression.
-template <typename R>
-class CallableHelper {
- public:
-  // Calls a nullary callable.
-  template <typename Function>
-  static R Call(Function function) { return function(); }
-
-  // Calls a unary callable.
-
-  // We deliberately pass a1 by value instead of const reference here
-  // in case it is a C-string literal.  If we had declared the
-  // parameter as 'const A1& a1' and write Call(function, "Hi"), the
-  // compiler would've thought A1 is 'char[3]', which causes trouble
-  // when you need to copy a value of type A1.  By declaring the
-  // parameter as 'A1 a1', the compiler will correctly infer that A1
-  // is 'const char*' when it sees Call(function, "Hi").
-  //
-  // Since this function is defined inline, the compiler can get rid
-  // of the copying of the arguments.  Therefore the performance won't
-  // be hurt.
-  template <typename Function, typename A1>
-  static R Call(Function function, A1 a1) { return function(a1); }
-
-  // Calls a binary callable.
-  template <typename Function, typename A1, typename A2>
-  static R Call(Function function, A1 a1, A2 a2) {
-    return function(a1, a2);
-  }
-
-  // Calls a ternary callable.
-  template <typename Function, typename A1, typename A2, typename A3>
-  static R Call(Function function, A1 a1, A2 a2, A3 a3) {
-    return function(a1, a2, a3);
-  }
-
-  // Calls a 4-ary callable.
-  template <typename Function, typename A1, typename A2, typename A3,
-      typename A4>
-  static R Call(Function function, A1 a1, A2 a2, A3 a3, A4 a4) {
-    return function(a1, a2, a3, a4);
-  }
-
-  // Calls a 5-ary callable.
-  template <typename Function, typename A1, typename A2, typename A3,
-      typename A4, typename A5>
-  static R Call(Function function, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-    return function(a1, a2, a3, a4, a5);
-  }
-
-  // Calls a 6-ary callable.
-  template <typename Function, typename A1, typename A2, typename A3,
-      typename A4, typename A5, typename A6>
-  static R Call(Function function, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
-    return function(a1, a2, a3, a4, a5, a6);
-  }
-
-  // Calls a 7-ary callable.
-  template <typename Function, typename A1, typename A2, typename A3,
-      typename A4, typename A5, typename A6, typename A7>
-  static R Call(Function function, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
-      A7 a7) {
-    return function(a1, a2, a3, a4, a5, a6, a7);
-  }
-
-  // Calls a 8-ary callable.
-  template <typename Function, typename A1, typename A2, typename A3,
-      typename A4, typename A5, typename A6, typename A7, typename A8>
-  static R Call(Function function, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
-      A7 a7, A8 a8) {
-    return function(a1, a2, a3, a4, a5, a6, a7, a8);
-  }
-
-  // Calls a 9-ary callable.
-  template <typename Function, typename A1, typename A2, typename A3,
-      typename A4, typename A5, typename A6, typename A7, typename A8,
-      typename A9>
-  static R Call(Function function, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
-      A7 a7, A8 a8, A9 a9) {
-    return function(a1, a2, a3, a4, a5, a6, a7, a8, a9);
-  }
-
-  // Calls a 10-ary callable.
-  template <typename Function, typename A1, typename A2, typename A3,
-      typename A4, typename A5, typename A6, typename A7, typename A8,
-      typename A9, typename A10>
-  static R Call(Function function, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
-      A7 a7, A8 a8, A9 a9, A10 a10) {
-    return function(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
-  }
-};  // class CallableHelper
-
 // An INTERNAL macro for extracting the type of a tuple field.  It's
 // subject to change without notice - DO NOT USE IN USER CODE!
 #define GMOCK_FIELD_(Tuple, N) \
@@ -2181,6 +2080,7 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
 
 namespace testing {
 
+
 // The ACTION*() macros trigger warning C4100 (unreferenced formal
 // parameter) in MSVC with -W4.  Unfortunately they cannot be fixed in
 // the macro definition, as the warnings are generated when the macro
@@ -2221,80 +2121,174 @@ namespace testing {
 //   InvokeArgument action from temporary values and have it performed
 //   later.
 
+namespace internal {
+namespace invoke_argument {
+
+// Appears in InvokeArgumentAdl's argument list to help avoid
+// accidental calls to user functions of the same name.
+struct AdlTag {};
+
+// InvokeArgumentAdl - a helper for InvokeArgument.
+// The basic overloads are provided here for generic functors.
+// Overloads for other custom-callables are provided in the
+// internal/custom/callback-actions.h header.
+
+template <typename R, typename F>
+R InvokeArgumentAdl(AdlTag, F f) {
+  return f();
+}
+template <typename R, typename F, typename A1>
+R InvokeArgumentAdl(AdlTag, F f, A1 a1) {
+  return f(a1);
+}
+template <typename R, typename F, typename A1, typename A2>
+R InvokeArgumentAdl(AdlTag, F f, A1 a1, A2 a2) {
+  return f(a1, a2);
+}
+template <typename R, typename F, typename A1, typename A2, typename A3>
+R InvokeArgumentAdl(AdlTag, F f, A1 a1, A2 a2, A3 a3) {
+  return f(a1, a2, a3);
+}
+template <typename R, typename F, typename A1, typename A2, typename A3,
+    typename A4>
+R InvokeArgumentAdl(AdlTag, F f, A1 a1, A2 a2, A3 a3, A4 a4) {
+  return f(a1, a2, a3, a4);
+}
+template <typename R, typename F, typename A1, typename A2, typename A3,
+    typename A4, typename A5>
+R InvokeArgumentAdl(AdlTag, F f, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+  return f(a1, a2, a3, a4, a5);
+}
+template <typename R, typename F, typename A1, typename A2, typename A3,
+    typename A4, typename A5, typename A6>
+R InvokeArgumentAdl(AdlTag, F f, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+  return f(a1, a2, a3, a4, a5, a6);
+}
+template <typename R, typename F, typename A1, typename A2, typename A3,
+    typename A4, typename A5, typename A6, typename A7>
+R InvokeArgumentAdl(AdlTag, F f, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
+    A7 a7) {
+  return f(a1, a2, a3, a4, a5, a6, a7);
+}
+template <typename R, typename F, typename A1, typename A2, typename A3,
+    typename A4, typename A5, typename A6, typename A7, typename A8>
+R InvokeArgumentAdl(AdlTag, F f, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
+    A7 a7, A8 a8) {
+  return f(a1, a2, a3, a4, a5, a6, a7, a8);
+}
+template <typename R, typename F, typename A1, typename A2, typename A3,
+    typename A4, typename A5, typename A6, typename A7, typename A8,
+    typename A9>
+R InvokeArgumentAdl(AdlTag, F f, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
+    A7 a7, A8 a8, A9 a9) {
+  return f(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+}
+template <typename R, typename F, typename A1, typename A2, typename A3,
+    typename A4, typename A5, typename A6, typename A7, typename A8,
+    typename A9, typename A10>
+R InvokeArgumentAdl(AdlTag, F f, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
+    A7 a7, A8 a8, A9 a9, A10 a10) {
+  return f(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+}
+}  // namespace invoke_argument
+}  // namespace internal
+
 ACTION_TEMPLATE(InvokeArgument,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_0_VALUE_PARAMS()) {
-  return internal::CallableHelper<return_type>::Call(
+  using internal::invoke_argument::InvokeArgumentAdl;
+  return InvokeArgumentAdl<return_type>(
+      internal::invoke_argument::AdlTag(),
       ::testing::get<k>(args));
 }
 
 ACTION_TEMPLATE(InvokeArgument,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_1_VALUE_PARAMS(p0)) {
-  return internal::CallableHelper<return_type>::Call(
+  using internal::invoke_argument::InvokeArgumentAdl;
+  return InvokeArgumentAdl<return_type>(
+      internal::invoke_argument::AdlTag(),
       ::testing::get<k>(args), p0);
 }
 
 ACTION_TEMPLATE(InvokeArgument,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_2_VALUE_PARAMS(p0, p1)) {
-  return internal::CallableHelper<return_type>::Call(
+  using internal::invoke_argument::InvokeArgumentAdl;
+  return InvokeArgumentAdl<return_type>(
+      internal::invoke_argument::AdlTag(),
       ::testing::get<k>(args), p0, p1);
 }
 
 ACTION_TEMPLATE(InvokeArgument,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_3_VALUE_PARAMS(p0, p1, p2)) {
-  return internal::CallableHelper<return_type>::Call(
+  using internal::invoke_argument::InvokeArgumentAdl;
+  return InvokeArgumentAdl<return_type>(
+      internal::invoke_argument::AdlTag(),
       ::testing::get<k>(args), p0, p1, p2);
 }
 
 ACTION_TEMPLATE(InvokeArgument,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_4_VALUE_PARAMS(p0, p1, p2, p3)) {
-  return internal::CallableHelper<return_type>::Call(
+  using internal::invoke_argument::InvokeArgumentAdl;
+  return InvokeArgumentAdl<return_type>(
+      internal::invoke_argument::AdlTag(),
       ::testing::get<k>(args), p0, p1, p2, p3);
 }
 
 ACTION_TEMPLATE(InvokeArgument,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_5_VALUE_PARAMS(p0, p1, p2, p3, p4)) {
-  return internal::CallableHelper<return_type>::Call(
+  using internal::invoke_argument::InvokeArgumentAdl;
+  return InvokeArgumentAdl<return_type>(
+      internal::invoke_argument::AdlTag(),
       ::testing::get<k>(args), p0, p1, p2, p3, p4);
 }
 
 ACTION_TEMPLATE(InvokeArgument,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_6_VALUE_PARAMS(p0, p1, p2, p3, p4, p5)) {
-  return internal::CallableHelper<return_type>::Call(
+  using internal::invoke_argument::InvokeArgumentAdl;
+  return InvokeArgumentAdl<return_type>(
+      internal::invoke_argument::AdlTag(),
       ::testing::get<k>(args), p0, p1, p2, p3, p4, p5);
 }
 
 ACTION_TEMPLATE(InvokeArgument,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_7_VALUE_PARAMS(p0, p1, p2, p3, p4, p5, p6)) {
-  return internal::CallableHelper<return_type>::Call(
+  using internal::invoke_argument::InvokeArgumentAdl;
+  return InvokeArgumentAdl<return_type>(
+      internal::invoke_argument::AdlTag(),
       ::testing::get<k>(args), p0, p1, p2, p3, p4, p5, p6);
 }
 
 ACTION_TEMPLATE(InvokeArgument,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_8_VALUE_PARAMS(p0, p1, p2, p3, p4, p5, p6, p7)) {
-  return internal::CallableHelper<return_type>::Call(
+  using internal::invoke_argument::InvokeArgumentAdl;
+  return InvokeArgumentAdl<return_type>(
+      internal::invoke_argument::AdlTag(),
       ::testing::get<k>(args), p0, p1, p2, p3, p4, p5, p6, p7);
 }
 
 ACTION_TEMPLATE(InvokeArgument,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_9_VALUE_PARAMS(p0, p1, p2, p3, p4, p5, p6, p7, p8)) {
-  return internal::CallableHelper<return_type>::Call(
+  using internal::invoke_argument::InvokeArgumentAdl;
+  return InvokeArgumentAdl<return_type>(
+      internal::invoke_argument::AdlTag(),
       ::testing::get<k>(args), p0, p1, p2, p3, p4, p5, p6, p7, p8);
 }
 
 ACTION_TEMPLATE(InvokeArgument,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_10_VALUE_PARAMS(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9)) {
-  return internal::CallableHelper<return_type>::Call(
+  using internal::invoke_argument::InvokeArgumentAdl;
+  return InvokeArgumentAdl<return_type>(
+      internal::invoke_argument::AdlTag(),
       ::testing::get<k>(args), p0, p1, p2, p3, p4, p5, p6, p7, p8, p9);
 }
 
@@ -2374,5 +2368,10 @@ ACTION_TEMPLATE(ReturnNew,
 #endif
 
 }  // namespace testing
+
+// Include any custom callback actions added by the local installation.
+// We must include this header at the end to make sure it can use the
+// declarations from this file.
+#include "gmock/internal/custom/callback-actions.h"
 
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_ACTIONS_H_
