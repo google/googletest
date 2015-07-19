@@ -146,8 +146,10 @@ using testing::internal::FloatingEqMatcher;
 using testing::internal::FormatMatcherDescription;
 using testing::internal::IsReadableTypeName;
 using testing::internal::JoinAsTuple;
+using testing::internal::linked_ptr;
 using testing::internal::MatchMatrix;
 using testing::internal::RE;
+using testing::internal::scoped_ptr;
 using testing::internal::StreamMatchResultListener;
 using testing::internal::Strings;
 using testing::internal::linked_ptr;
@@ -1049,15 +1051,6 @@ TEST(IsNullTest, StdFunction) {
 }
 #endif  // GTEST_LANG_CXX11
 
-TEST(IsNullTest, ReferenceToConstScopedPtr) {
-  const Matcher<const scoped_ptr<double>&> m = IsNull();
-  const scoped_ptr<double> null_p;
-  const scoped_ptr<double> non_null_p(new double);
-
-  EXPECT_TRUE(m.Matches(null_p));
-  EXPECT_FALSE(m.Matches(non_null_p));
-}
-
 // Tests that IsNull() describes itself properly.
 TEST(IsNullTest, CanDescribeSelf) {
   Matcher<int*> m = IsNull();
@@ -1105,15 +1098,6 @@ TEST(NotNullTest, StdFunction) {
   EXPECT_FALSE(m.Matches(std::function<void()>()));
 }
 #endif  // GTEST_LANG_CXX11
-
-TEST(NotNullTest, ReferenceToConstScopedPtr) {
-  const Matcher<const scoped_ptr<double>&> m = NotNull();
-  const scoped_ptr<double> null_p;
-  const scoped_ptr<double> non_null_p(new double);
-
-  EXPECT_FALSE(m.Matches(null_p));
-  EXPECT_TRUE(m.Matches(non_null_p));
-}
 
 // Tests that NotNull() describes itself properly.
 TEST(NotNullTest, CanDescribeSelf) {
@@ -3190,7 +3174,6 @@ TEST(PointeeTest, ReferenceToNonConstRawPointer) {
   p = NULL;
   EXPECT_FALSE(m.Matches(p));
 }
-
 
 MATCHER_P(FieldIIs, inner_matcher, "") {
   return ExplainMatchResult(inner_matcher, arg.i, result_listener);
