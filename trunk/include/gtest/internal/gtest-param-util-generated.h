@@ -79,7 +79,10 @@ class ValueArray1 {
   explicit ValueArray1(T1 v1) : v1_(v1) {}
 
   template <typename T>
-  operator ParamGenerator<T>() const { return ValuesIn(&v1_, &v1_ + 1); }
+  operator ParamGenerator<T>() const {
+    const T array[] = {static_cast<T>(v1_)};
+    return ValuesIn(array);
+  }
 
  private:
   // No implementation - assignment is unsupported.
