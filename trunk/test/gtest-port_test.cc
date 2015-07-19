@@ -1149,6 +1149,13 @@ TEST(ThreadLocalTest, ParameterizedConstructorSetsDefault) {
   EXPECT_STREQ("foo", result.c_str());
 }
 
+# if !GTEST_HAS_MUTEX_AND_THREAD_LOCAL_
+
+// Tests in this section depend on that Google Test's own ThreadLocal
+// implementation stores a copy of the default value shared by all
+// threads.  We don't want to test this for an external implementation received
+// through GTEST_HAS_MUTEX_AND_THREAD_LOCAL_.
+
 // Keeps track of whether of destructors being called on instances of
 // DestructorTracker.  On Windows, waits for the destructor call reports.
 class DestructorCall {
@@ -1288,6 +1295,8 @@ TEST(ThreadLocalTest, DestroysManagedObjectAtThreadExit) {
 
   DestructorCall::ResetList();
 }
+
+# endif  // !GTEST_HAS_MUTEX_AND_THREAD_LOCAL_
 
 TEST(ThreadLocalTest, ThreadLocalMutationsAffectOnlyCurrentThread) {
   ThreadLocal<std::string> thread_local_string;
