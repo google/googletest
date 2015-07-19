@@ -72,29 +72,14 @@ internal::ParamGenerator<typename Container::value_type> ValuesIn(
 namespace internal {
 
 // Used in the Values() function to provide polymorphic capabilities.
-template <typename T1>
-class ValueArray1 {
- public:
-  explicit ValueArray1(T1 v1) : v1_(v1) {}
-
-  template <typename T>
-  operator ParamGenerator<T>() const { return ValuesIn(&v1_, &v1_ + 1); }
-
- private:
-  // No implementation - assignment is unsupported.
-  void operator=(const ValueArray1& other);
-
-  const T1 v1_;
-};
-
-$range i 2..n
+$range i 1..n
 $for i [[
 $range j 1..i
 
 template <$for j, [[typename T$j]]>
 class ValueArray$i {
  public:
-  ValueArray$i($for j, [[T$j v$j]]) : $for j, [[v$(j)_(v$j)]] {}
+  $if i==1 [[explicit ]]ValueArray$i($for j, [[T$j v$j]]) : $for j, [[v$(j)_(v$j)]] {}
 
   template <typename T>
   operator ParamGenerator<T>() const {
