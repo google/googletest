@@ -606,6 +606,16 @@ TEST(MockFunctionTest, AsStdFunction) {
   EXPECT_EQ(-1, call(foo.AsStdFunction(), 1));
   EXPECT_EQ(-2, call(foo.AsStdFunction(), 2));
 }
+
+TEST(MockFunctionTest, AsStdFunctionReturnsReference) {
+  MockFunction<int&()> foo;
+  int value = 1;
+  EXPECT_CALL(foo, Call()).WillOnce(ReturnRef(value));
+  int& ref = foo.AsStdFunction()();
+  EXPECT_EQ(1, ref);
+  value = 2;
+  EXPECT_EQ(2, ref);
+}
 #endif  // GTEST_HAS_STD_FUNCTION_
 
 }  // namespace gmock_generated_function_mockers_test

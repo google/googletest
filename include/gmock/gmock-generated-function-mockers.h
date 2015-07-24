@@ -881,7 +881,7 @@ class MockFunction<R()> {
 
 #if GTEST_HAS_STD_FUNCTION_
   std::function<R()> AsStdFunction() {
-    return [this]() {
+    return [this]() -> R {
       return this->Call();
     };
   }
@@ -900,7 +900,7 @@ class MockFunction<R(A0)> {
 
 #if GTEST_HAS_STD_FUNCTION_
   std::function<R(A0)> AsStdFunction() {
-    return [this](A0 a0) {
+    return [this](A0 a0) -> R {
       return this->Call(a0);
     };
   }
@@ -919,7 +919,7 @@ class MockFunction<R(A0, A1)> {
 
 #if GTEST_HAS_STD_FUNCTION_
   std::function<R(A0, A1)> AsStdFunction() {
-    return [this](A0 a0, A1 a1) {
+    return [this](A0 a0, A1 a1) -> R {
       return this->Call(a0, a1);
     };
   }
@@ -938,7 +938,7 @@ class MockFunction<R(A0, A1, A2)> {
 
 #if GTEST_HAS_STD_FUNCTION_
   std::function<R(A0, A1, A2)> AsStdFunction() {
-    return [this](A0 a0, A1 a1, A2 a2) {
+    return [this](A0 a0, A1 a1, A2 a2) -> R {
       return this->Call(a0, a1, a2);
     };
   }
@@ -957,7 +957,7 @@ class MockFunction<R(A0, A1, A2, A3)> {
 
 #if GTEST_HAS_STD_FUNCTION_
   std::function<R(A0, A1, A2, A3)> AsStdFunction() {
-    return [this](A0 a0, A1 a1, A2 a2, A3 a3) {
+    return [this](A0 a0, A1 a1, A2 a2, A3 a3) -> R {
       return this->Call(a0, a1, a2, a3);
     };
   }
@@ -977,7 +977,7 @@ class MockFunction<R(A0, A1, A2, A3, A4)> {
 
 #if GTEST_HAS_STD_FUNCTION_
   std::function<R(A0, A1, A2, A3, A4)> AsStdFunction() {
-    return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4) {
+    return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4) -> R {
       return this->Call(a0, a1, a2, a3, a4);
     };
   }
@@ -997,7 +997,7 @@ class MockFunction<R(A0, A1, A2, A3, A4, A5)> {
 
 #if GTEST_HAS_STD_FUNCTION_
   std::function<R(A0, A1, A2, A3, A4, A5)> AsStdFunction() {
-    return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+    return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) -> R {
       return this->Call(a0, a1, a2, a3, a4, a5);
     };
   }
@@ -1017,7 +1017,7 @@ class MockFunction<R(A0, A1, A2, A3, A4, A5, A6)> {
 
 #if GTEST_HAS_STD_FUNCTION_
   std::function<R(A0, A1, A2, A3, A4, A5, A6)> AsStdFunction() {
-    return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+    return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) -> R {
       return this->Call(a0, a1, a2, a3, a4, a5, a6);
     };
   }
@@ -1037,7 +1037,7 @@ class MockFunction<R(A0, A1, A2, A3, A4, A5, A6, A7)> {
 
 #if GTEST_HAS_STD_FUNCTION_
   std::function<R(A0, A1, A2, A3, A4, A5, A6, A7)> AsStdFunction() {
-    return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
+    return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) -> R {
       return this->Call(a0, a1, a2, a3, a4, a5, a6, a7);
     };
   }
@@ -1058,7 +1058,7 @@ class MockFunction<R(A0, A1, A2, A3, A4, A5, A6, A7, A8)> {
 #if GTEST_HAS_STD_FUNCTION_
   std::function<R(A0, A1, A2, A3, A4, A5, A6, A7, A8)> AsStdFunction() {
     return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
-        A8 a8) {
+        A8 a8) -> R {
       return this->Call(a0, a1, a2, a3, a4, a5, a6, a7, a8);
     };
   }
@@ -1080,7 +1080,7 @@ class MockFunction<R(A0, A1, A2, A3, A4, A5, A6, A7, A8, A9)> {
 #if GTEST_HAS_STD_FUNCTION_
   std::function<R(A0, A1, A2, A3, A4, A5, A6, A7, A8, A9)> AsStdFunction() {
     return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
-        A8 a8, A9 a9) {
+        A8 a8, A9 a9) -> R {
       return this->Call(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9);
     };
   }

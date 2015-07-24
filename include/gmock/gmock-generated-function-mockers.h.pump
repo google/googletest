@@ -274,7 +274,7 @@ class MockFunction<R($ArgTypes)> {
 
 #if GTEST_HAS_STD_FUNCTION_
   std::function<R($ArgTypes)> AsStdFunction() {
-    return [this]($ArgDecls) {
+    return [this]($ArgDecls) -> R {
       return this->Call($ArgNames);
     };
   }
