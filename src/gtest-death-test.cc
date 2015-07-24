@@ -33,6 +33,7 @@
 
 #include "gtest/gtest-death-test.h"
 #include "gtest/internal/gtest-port.h"
+#include "gtest/internal/custom/gtest.h"
 
 #if GTEST_HAS_DEATH_TEST
 
@@ -883,6 +884,11 @@ class ExecDeathTest : public ForkingDeathTest {
   static ::std::vector<testing::internal::string>
   GetArgvsForDeathTestChildProcess() {
     ::std::vector<testing::internal::string> args = GetInjectableArgvs();
+#  if defined(GTEST_EXTRA_DEATH_TEST_COMMAND_LINE_ARGS_)
+    ::std::vector<testing::internal::string> extra_args =
+        GTEST_EXTRA_DEATH_TEST_COMMAND_LINE_ARGS_();
+    args.insert(args.end(), extra_args.begin(), extra_args.end());
+#  endif  // defined(GTEST_EXTRA_DEATH_TEST_COMMAND_LINE_ARGS_)
     return args;
   }
   // The name of the file in which the death test is located.
