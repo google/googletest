@@ -4436,6 +4436,11 @@ void UnitTestImpl::PostFlagParsingInit() {
   if (!post_flag_parse_init_performed_) {
     post_flag_parse_init_performed_ = true;
 
+#if defined(GTEST_CUSTOM_TEST_EVENT_LISTENER_)
+    // Register to send notifications about key process state changes.
+    listeners()->Append(new GTEST_CUSTOM_TEST_EVENT_LISTENER_());
+#endif  // defined(GTEST_CUSTOM_TEST_EVENT_LISTENER_)
+
 #if GTEST_HAS_DEATH_TEST
     InitDeathTestSubprocessControlInfo();
     SuppressTestEventsIfInSubprocess();
