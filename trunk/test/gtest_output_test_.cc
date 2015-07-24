@@ -755,6 +755,32 @@ TEST(ExpectFatalFailureTest, FailsWhenStatementThrows) {
 
 #endif  // GTEST_HAS_EXCEPTIONS
 
+// This #ifdef block tests the output of value-parameterized tests.
+
+#if GTEST_HAS_PARAM_TEST
+
+std::string ParamNameFunc(const testing::TestParamInfo<std::string>& info) {
+  return info.param;
+}
+
+class ParamTest : public testing::TestWithParam<std::string> {
+};
+
+TEST_P(ParamTest, Success) {
+  EXPECT_EQ("a", GetParam());
+}
+
+TEST_P(ParamTest, Failure) {
+  EXPECT_EQ("b", GetParam()) << "Expected failure";
+}
+
+INSTANTIATE_TEST_CASE_P(PrintingStrings,
+                        ParamTest,
+                        testing::Values(std::string("a")),
+                        ParamNameFunc);
+
+#endif  // GTEST_HAS_PARAM_TEST
+
 // This #ifdef block tests the output of typed tests.
 #if GTEST_HAS_TYPED_TEST
 

@@ -7,7 +7,7 @@ Expected: true
 gtest_output_test_.cc:#: Failure
 Value of: 3
 Expected: 2
-[0;32m[==========] [mRunning 64 tests from 28 test cases.
+[0;32m[==========] [mRunning 66 tests from 29 test cases.
 [0;32m[----------] [mGlobal test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -601,6 +601,16 @@ Value of: GetParam()
   Actual: 2
 Expected: 1
 [0;31m[  FAILED  ] [mPrintingFailingParams/FailingParamTest.Fails/0, where GetParam() = 2
+[0;32m[----------] [m2 tests from PrintingStrings/ParamTest
+[0;32m[ RUN      ] [mPrintingStrings/ParamTest.Success/a
+[0;32m[       OK ] [mPrintingStrings/ParamTest.Success/a
+[0;32m[ RUN      ] [mPrintingStrings/ParamTest.Failure/a
+gtest_output_test_.cc:#: Failure
+Value of: GetParam()
+  Actual: "a"
+Expected: "b"
+Expected failure
+[0;31m[  FAILED  ] [mPrintingStrings/ParamTest.Failure/a, where GetParam() = "a"
 [0;32m[----------] [mGlobal test environment tear-down
 BarEnvironment::TearDown() called.
 gtest_output_test_.cc:#: Failure
@@ -610,9 +620,9 @@ FooEnvironment::TearDown() called.
 gtest_output_test_.cc:#: Failure
 Failed
 Expected fatal failure.
-[0;32m[==========] [m64 tests from 28 test cases ran.
-[0;32m[  PASSED  ] [m21 tests.
-[0;31m[  FAILED  ] [m43 tests, listed below:
+[0;32m[==========] [m66 tests from 29 test cases ran.
+[0;32m[  PASSED  ] [m22 tests.
+[0;31m[  FAILED  ] [m44 tests, listed below:
 [0;31m[  FAILED  ] [mNonfatalFailureTest.EscapesStringOperands
 [0;31m[  FAILED  ] [mNonfatalFailureTest.DiffForLongStrings
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInSubroutine
@@ -656,8 +666,9 @@ Expected fatal failure.
 [0;31m[  FAILED  ] [mExpectFailureWithThreadsTest.ExpectNonFatalFailure
 [0;31m[  FAILED  ] [mScopedFakeTestPartResultReporterTest.InterceptOnlyCurrentThread
 [0;31m[  FAILED  ] [mPrintingFailingParams/FailingParamTest.Fails/0, where GetParam() = 2
+[0;31m[  FAILED  ] [mPrintingStrings/ParamTest.Failure/a, where GetParam() = "a"
 
-43 FAILED TESTS
+44 FAILED TESTS
 [0;33m  YOU HAVE 1 DISABLED TEST
 
 [mNote: Google Test filter = FatalFailureTest.*:LoggingTest.*
