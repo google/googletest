@@ -327,13 +327,7 @@ UInt32 Random::Generate(UInt32 range) {
 // GTestIsInitialized() returns true iff the user has initialized
 // Google Test.  Useful for catching the user mistake of not initializing
 // Google Test before calling RUN_ALL_TESTS().
-//
-// A user must call testing::InitGoogleTest() to initialize Google
-// Test.  g_init_gtest_count is set to the number of times
-// InitGoogleTest() has been called.  We don't protect this variable
-// under a mutex as it is only accessed in the main thread.
-GTEST_API_ int g_init_gtest_count = 0;
-static bool GTestIsInitialized() { return g_init_gtest_count != 0; }
+static bool GTestIsInitialized() { return GetArgvs().size() > 0; }
 
 // Iterates over a vector of TestCases, keeping a running sum of the
 // results of calling a given int-returning method on each.
@@ -389,8 +383,16 @@ void AssertHelper::operator=(const Message& message) const {
 // Mutex for linked pointers.
 GTEST_API_ GTEST_DEFINE_STATIC_MUTEX_(g_linked_ptr_mutex);
 
-// Application pathname gotten in InitGoogleTest.
-std::string g_executable_path;
+// A copy of all command line arguments.  Set by InitGoogleTest().
+::std::vector<testing::internal::string> g_argvs;
+
+const ::std::vector<testing::internal::string>& GetArgvs() {
+#if defined(GTEST_CUSTOM_GET_ARGVS_)
+  return GTEST_CUSTOM_GET_ARGVS_();
+#else  // defined(GTEST_CUSTOM_GET_ARGVS_)
+  return g_argvs;
+#endif  // defined(GTEST_CUSTOM_GET_ARGVS_)
+}
 
 // Returns the current application's name, removing directory path if that
 // is present.
@@ -398,9 +400,9 @@ FilePath GetCurrentExecutableName() {
   FilePath result;
 
 #if GTEST_OS_WINDOWS
-  result.Set(FilePath(g_executable_path).RemoveExtension("exe"));
+  result.Set(FilePath(GetArgvs()[0]).RemoveExtension("exe"));
 #else
-  result.Set(FilePath(g_executable_path));
+  result.Set(FilePath(GetArgvs()[0]));
 #endif  // GTEST_OS_WINDOWS
 
   return result.RemoveDirectoryName();
@@ -5328,23 +5330,15 @@ void ParseGoogleTestFlagsOnly(int* argc, wchar_t** argv) {
 // wchar_t.
 template <typename CharType>
 void InitGoogleTestImpl(int* argc, CharType** argv) {
-  g_init_gtest_count++;
-
   // We don't want to run the initialization code twice.
-  if (g_init_gtest_count != 1) return;
+  if (GTestIsInitialized()) return;
 
   if (*argc <= 0) return;
-
-  internal::g_executable_path = internal::StreamableToString(argv[0]);
-
-#if GTEST_HAS_DEATH_TEST
 
   g_argvs.clear();
   for (int i = 0; i != *argc; i++) {
     g_argvs.push_back(StreamableToString(argv[i]));
   }
-
-#endif  // GTEST_HAS_DEATH_TEST
 
   ParseGoogleTestFlagsOnly(argc, argv);
   GetUnitTestImpl()->PostFlagParsingInit();

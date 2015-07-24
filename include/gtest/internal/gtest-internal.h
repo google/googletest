@@ -100,9 +100,6 @@ class ScopedTrace;                     // Implements scoped trace.
 class TestInfoImpl;                    // Opaque implementation of TestInfo
 class UnitTestImpl;                    // Opaque implementation of UnitTest
 
-// How many times InitGoogleTest() has been called.
-GTEST_API_ extern int g_init_gtest_count;
-
 // The text used in failure messages to indicate the start of the
 // stack trace.
 GTEST_API_ extern const char kStackTraceMarker[];
