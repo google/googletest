@@ -290,6 +290,10 @@
 # define GTEST_PROJECT_URL_ "http://code.google.com/p/googletest/"
 #endif  // !defined(GTEST_DEV_EMAIL_)
 
+#if !defined(GTEST_INIT_GOOGLE_TEST_NAME_)
+# define GTEST_INIT_GOOGLE_TEST_NAME_ "testing::InitGoogleTest"
+#endif  // !defined(GTEST_INIT_GOOGLE_TEST_NAME_)
+
 // Determines the version of gcc that is used to compile this.
 #ifdef __GNUC__
 // 40302 means version 4.3.2.
