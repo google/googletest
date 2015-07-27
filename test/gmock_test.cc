@@ -40,7 +40,6 @@
 
 using testing::GMOCK_FLAG(verbose);
 using testing::InitGoogleMock;
-using testing::internal::g_init_gtest_count;
 
 // Verifies that calling InitGoogleMock() on argv results in new_argv,
 // and the gmock_verbose flag's value is set to expected_gmock_verbose.
@@ -135,25 +134,6 @@ TEST(InitGoogleMockTest, ParsesGoogleMockFlagAndUnrecognizedFlag) {
   TestInitGoogleMock(argv, new_argv, "error");
 }
 
-TEST(InitGoogleMockTest, CallsInitGoogleTest) {
-  const int old_init_gtest_count = g_init_gtest_count;
-  const char* argv[] = {
-    "foo.exe",
-    "--non_gmock_flag=blah",
-    "--gmock_verbose=error",
-    NULL
-  };
-
-  const char* new_argv[] = {
-    "foo.exe",
-    "--non_gmock_flag=blah",
-    NULL
-  };
-
-  TestInitGoogleMock(argv, new_argv, "error");
-  EXPECT_EQ(old_init_gtest_count + 1, g_init_gtest_count);
-}
-
 TEST(WideInitGoogleMockTest, ParsesInvalidCommandLine) {
   const wchar_t* argv[] = {
     NULL
@@ -226,25 +206,6 @@ TEST(WideInitGoogleMockTest, ParsesGoogleMockFlagAndUnrecognizedFlag) {
   };
 
   TestInitGoogleMock(argv, new_argv, "error");
-}
-
-TEST(WideInitGoogleMockTest, CallsInitGoogleTest) {
-  const int old_init_gtest_count = g_init_gtest_count;
-  const wchar_t* argv[] = {
-    L"foo.exe",
-    L"--non_gmock_flag=blah",
-    L"--gmock_verbose=error",
-    NULL
-  };
-
-  const wchar_t* new_argv[] = {
-    L"foo.exe",
-    L"--non_gmock_flag=blah",
-    NULL
-  };
-
-  TestInitGoogleMock(argv, new_argv, "error");
-  EXPECT_EQ(old_init_gtest_count + 1, g_init_gtest_count);
 }
 
 // Makes sure Google Mock flags can be accessed in code.
