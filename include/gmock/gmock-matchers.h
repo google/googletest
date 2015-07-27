@@ -4392,5 +4392,8 @@ inline InnerMatcher AllArgs(const InnerMatcher& matcher) { return matcher; }
 
 }  // namespace testing
 
+// Include any custom callback matchers added by the local installation.
+// We must include this header at the end to make sure it can use the
+// declarations from this file.
+#include "gmock/internal/custom/gmock-matchers.h"
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_MATCHERS_H_
-
