@@ -218,8 +218,8 @@ void Notification::WaitForNotification() {
 }
 
 Mutex::Mutex()
-    : type_(kDynamic),
-      owner_thread_id_(0),
+    : owner_thread_id_(0),
+      type_(kDynamic),
       critical_section_init_phase_(0),
       critical_section_(new CRITICAL_SECTION) {
   ::InitializeCriticalSection(critical_section_);
