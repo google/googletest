@@ -230,7 +230,7 @@ class RangeGenerator : public ParamGeneratorInterface<T> {
       return base_;
     }
     virtual void Advance() {
-      value_ = value_ + step_;
+      value_ = static_cast<T>(value_ + step_);
       index_++;
     }
     virtual ParamIteratorInterface<T>* Clone() const {
@@ -267,7 +267,7 @@ class RangeGenerator : public ParamGeneratorInterface<T> {
                                const T& end,
                                const IncrementT& step) {
     int end_index = 0;
-    for (T i = begin; i < end; i = i + step)
+    for (T i = begin; i < end; i = static_cast<T>(i + step))
       end_index++;
     return end_index;
   }
