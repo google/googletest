@@ -2369,9 +2369,9 @@ ACTION_TEMPLATE(ReturnNew,
 
 }  // namespace testing
 
-// Include any custom callback actions added by the local installation.
+// Include any custom actions added by the local installation.
 // We must include this header at the end to make sure it can use the
 // declarations from this file.
-#include "gmock/internal/custom/callback-actions.h"
+#include "gmock/internal/custom/gmock-generated-actions.h"
 
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_ACTIONS_H_

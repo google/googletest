@@ -308,7 +308,7 @@ def _OverloadedFunctionActionDiagnoser(msg):
   clang_regex = (_CLANG_FILE_LINE_RE + r'error: no matching '
                  r'function for call to \'Invoke\'\r?\n'
                  r'(.*\n)*?'
-                 r'.*\bcallback-actions\.h:\d+:\d+:\s+'
+                 r'.*\bgmock-generated-actions\.h:\d+:\d+:\s+'
                  r'note: candidate template ignored:\s+'
                  r'couldn\'t infer template argument \'FunctionImpl\'')
   diagnosis = """
@@ -334,7 +334,7 @@ def _OverloadedMethodActionDiagnoser(msg):
   clang_regex = (_CLANG_FILE_LINE_RE + r'error: no matching function '
                  r'for call to \'Invoke\'\r?\n'
                  r'(.*\n)*?'
-                 r'.*\bcallback-actions\.h:\d+:\d+: '
+                 r'.*\bgmock-generated-actions\.h:\d+:\d+: '
                  r'note: candidate function template not viable: '
                  r'requires .*, but 2 (arguments )?were provided')
   diagnosis = """
