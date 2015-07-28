@@ -52,6 +52,7 @@
 // here if it's truly specific to Google Mock.
 #include "gtest/internal/gtest-linked_ptr.h"
 #include "gtest/internal/gtest-port.h"
+#include "gmock/internal/custom/gmock-port.h"
 
 // To avoid conditional compilation everywhere, we make it
 // gmock-port.h's responsibility to #include the header implementing
@@ -68,6 +69,8 @@
 // use this syntax to reference Google Mock flags.
 #define GMOCK_FLAG(name) FLAGS_gmock_##name
 
+#if !defined(GMOCK_DECLARE_bool_)
+
 // Macros for declaring flags.
 #define GMOCK_DECLARE_bool_(name) extern GTEST_API_ bool GMOCK_FLAG(name)
 #define GMOCK_DECLARE_int32_(name) \
@@ -82,5 +85,7 @@
     GTEST_API_ ::testing::internal::Int32 GMOCK_FLAG(name) = (default_val)
 #define GMOCK_DEFINE_string_(name, default_val, doc) \
     GTEST_API_ ::std::string GMOCK_FLAG(name) = (default_val)
+
+#endif  // !defined(GMOCK_DECLARE_bool_)
 
 #endif  // GMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_PORT_H_
