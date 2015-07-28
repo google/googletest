@@ -37,6 +37,9 @@
 
 #include <string>
 #include "gtest/gtest.h"
+#include "gtest/internal/custom/gtest.h"
+
+#if !defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
 
 using testing::GMOCK_FLAG(verbose);
 using testing::InitGoogleMock;
@@ -207,6 +210,8 @@ TEST(WideInitGoogleMockTest, ParsesGoogleMockFlagAndUnrecognizedFlag) {
 
   TestInitGoogleMock(argv, new_argv, "error");
 }
+
+#endif  // !defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
 
 // Makes sure Google Mock flags can be accessed in code.
 TEST(FlagTest, IsAccessibleInCode) {
