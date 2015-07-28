@@ -44,6 +44,15 @@
 #include "gtest/gtest.h"
 #include "gtest/gtest-spi.h"
 
+// Indicates that this translation unit is part of Google Test's
+// implementation.  It must come before gtest-internal-inl.h is
+// included, or there will be a compiler error.  This trick is to
+// prevent a user from accidentally including gtest-internal-inl.h in
+// his code.
+#define GTEST_IMPLEMENTATION_ 1
+#include "src/gtest-internal-inl.h"
+#undef GTEST_IMPLEMENTATION_
+
 #if GTEST_OS_CYGWIN
 # include <sys/types.h>  // For ssize_t. NOLINT
 #endif
@@ -421,27 +430,50 @@ TEST(LogTest, NoStackTraceWhenStackFramesToSkipIsNegative) {
   GMOCK_FLAG(verbose) = saved_flag;
 }
 
+struct MockStackTraceGetter : testing::internal::OsStackTraceGetterInterface {
+  virtual string CurrentStackTrace(int max_depth, int skip_count) {
+    return (testing::Message() << max_depth << "::" << skip_count << "\n")
+        .GetString();
+  }
+  virtual void UponLeavingGTest() {}
+};
+
 // Tests that in opt mode, a positive stack_frames_to_skip argument is
 // treated as 0.
 TEST(LogTest, NoSkippingStackFrameInOptMode) {
+  MockStackTraceGetter* mock_os_stack_trace_getter = new MockStackTraceGetter;
+  GetUnitTestImpl()->set_os_stack_trace_getter(mock_os_stack_trace_getter);
+
   CaptureStdout();
   Log(kWarning, "Test log.\n", 100);
   const string log = GetCapturedStdout();
 
-# if defined(NDEBUG) && GTEST_GOOGLE3_MODE_
+  string expected_trace =
+      (testing::Message() << GTEST_FLAG(stack_trace_depth) << "::").GetString();
+  string expected_message =
+      "\nGMOCK WARNING:\n"
+      "Test log.\n"
+      "Stack trace:\n" +
+      expected_trace;
+  EXPECT_THAT(log, HasSubstr(expected_message));
+  int skip_count = atoi(log.substr(expected_message.size()).c_str());
 
+# if defined(NDEBUG)
   // In opt mode, no stack frame should be skipped.
-  EXPECT_THAT(log, ContainsRegex("\nGMOCK WARNING:\n"
-                                 "Test log\\.\n"
-                                 "Stack trace:\n"
-                                 ".+"));
+  const int expected_skip_count = 0;
 # else
-
   // In dbg mode, the stack frames should be skipped.
-  EXPECT_STREQ("\nGMOCK WARNING:\n"
-               "Test log.\n"
-               "Stack trace:\n", log.c_str());
+  const int expected_skip_count = 100;
 # endif
+
+  // Note that each inner implementation layer will +1 the number to remove
+  // itself from the trace. This means that the value is a little higher than
+  // expected, but close enough.
+  EXPECT_THAT(skip_count,
+              AllOf(Ge(expected_skip_count), Le(expected_skip_count + 10)));
+
+  // Restores the default OS stack trace getter.
+  GetUnitTestImpl()->set_os_stack_trace_getter(NULL);
 }
 
 // Tests that all logs are printed when the value of the
