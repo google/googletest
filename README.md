@@ -28,7 +28,7 @@ effort to support other platforms (e.g. Solaris, AIX, and z/OS).
 However, since core members of the Google Test project have no access
 to these platforms, Google Test may have outstanding issues there.  If
 you notice any problems on your platform, please notify
-googletestframework@googlegroups.com.  Patches for fixing them are
+[googletestframework@googlegroups.com](https://groups.google.com/forum/#!forum/googletestframework).  Patches for fixing them are
 even more welcome!
 
 ### Linux Requirements ###
