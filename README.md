@@ -81,8 +81,8 @@ make patches much more easily, so we highly encourage it.
 
 ### Source Package ###
 
-Snapshots of Google Test's master branch can be 
-[downloaded directly](archive/master.zip).
+Snapshots of Google Test's master branch can be downloaded directly with GitHub's
+"Download ZIP" button on the main page.
 
 Versioned releases are also available by clicking on
 [Releases](releases) in the project page.
