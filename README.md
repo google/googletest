@@ -82,10 +82,10 @@ make patches much more easily, so we highly encourage it.
 ### Source Package ###
 
 Snapshots of Google Test's master branch can be 
-[downloaded directly](https://github.com/google/googletest/archive/master.zip).
+[downloaded directly](archive/master.zip).
 
 Versioned releases are also available by clicking on
-[Releases](https://github.com/google/googletest/releases) in the project page.
+[Releases](releases) in the project page.
 
 ### Git Checkout ###
 
@@ -147,7 +147,7 @@ it.
 ### Using CMake ###
 
 Google Test comes with a CMake build script (
-[CMakeLists.txt](https://github.com/google/googletest/blob/master/CMakeLists.txt)) that can be used on a wide range of platforms ("C" stands for
+[CMakeLists.txt](master/CMakeLists.txt)) that can be used on a wide range of platforms ("C" stands for
 cross-platform.). If you don't have CMake installed already, you can
 download it for free from <http://www.cmake.org/>.
 
@@ -410,15 +410,13 @@ gtest-type-util.h in the same directory.
 Normally you don't need to worry about regenerating the source files,
 unless you need to modify them.  In that case, you should modify the
 corresponding .pump files instead and run the pump.py Python script to
-regenerate them.  You can find pump.py in the scripts/ directory.
-Read the [Pump manual](http://code.google.com/p/googletest/wiki/PumpManual)
-for how to use it.
+regenerate them.  You can find pump.py in the [scripts/](scripts/) directory.
+Read the [Pump manual](docs/PumpManual.md) for how to use it.
 
 ### Contributing a Patch ###
 
 We welcome patches.  Please read the
-[Google Test developer's guide](
-    http://code.google.com/p/googletest/wiki/DevGuide)
+[Google Test developer's guide](docs/DevGuide.md)
 for how you can contribute.  In particular, make sure you have signed
 the Contributor License Agreement, or we won't be able to accept the
 patch.
