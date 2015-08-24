@@ -81,11 +81,11 @@ make patches much more easily, so we highly encourage it.
 
 ### Source Package ###
 
-Snapshots of Google Test's master branch can be
-[https://github.com/google/googletest/archive/master.zip](downloaded directly).
+Snapshots of Google Test's master branch can be 
+[downloaded directly](https://github.com/google/googletest/archive/master.zip).
 
 Versioned releases are also available by clicking on
-[https://github.com/google/googletest/releases](Releases) in the project page.
+[Releases](https://github.com/google/googletest/releases) in the project page.
 
 ### Git Checkout ###
 
@@ -418,7 +418,7 @@ for how to use it.
 
 We welcome patches.  Please read the
 [Google Test developer's guide](
-    http://code.google.com/p/googletest/wiki/GoogleTestDevGuide)
+    http://code.google.com/p/googletest/wiki/DevGuide)
 for how you can contribute.  In particular, make sure you have signed
 the Contributor License Agreement, or we won't be able to accept the
 patch.
