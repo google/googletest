@@ -1,15 +1,16 @@
 
-Welcome to **Google C++ Test Framework**!
+Welcome to **Google Test**, the Google C++ Test Framework!
 
 This GitHub repository is a merger of the former <googletest> and <googlemock> products,
 which are so closely related that it makes sense to maintain and release them together.
 
 ## GoogleTest ##
 
-Based on the xUnit architecture.  Supports automatic test discovery, a rich
-set of assertions, user-defined assertions, death tests, fatal and
-non-fatal failures, value- and type-parameterized tests, various
-options for running the tests, and XML test report generation.
+Based on the [XUnit](https://en.wikipedia.org/wiki/XUnit) architecture.
+Supports automatic test discovery, a rich set of assertions, user-defined
+assertions, death tests, fatal and non-fatal failures, value- and
+type-parameterized tests, various options for running the tests, and XML test
+report generation.
 
 ## Platforms ##
 
