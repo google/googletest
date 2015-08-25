@@ -1,8 +1,8 @@
 
 Welcome to **Google Test**, the Google C++ Test Framework!
 
-This GitHub repository is a merger of the former <googletest> and <googlemock> products,
-which are so closely related that it makes sense to maintain and release them together.
+This GitHub repository is a merger of the formerly separate GoogleTest and GoogleMock projects.
+These were so closely related that it makes sense to maintain and release them together.
 
 ## GoogleTest ##
 
