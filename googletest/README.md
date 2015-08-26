@@ -1,10 +1,8 @@
-Google C++ Testing Framework
-============================
+## Google C++ Testing Framework ##
 
 https://github.com/google/googletest
 
-Overview
---------
+### Overview ###
 
 Google's framework for writing C++ tests on a variety of platforms
 (Linux, Mac OS X, Windows, Windows CE, Symbian, etc).  Based on the
@@ -18,8 +16,7 @@ mailing list for questions, discussions, and development.  There is
 also an IRC channel on OFTC (irc.oftc.net) #gtest available.  Please
 join us!
 
-Requirements for End Users
---------------------------
+### Requirements for End Users ###
 
 Google Test is designed to have fairly minimal requirements to build
 and use with your projects, but there are some.  Currently, we support
@@ -31,7 +28,7 @@ you notice any problems on your platform, please notify
 <googletestframework@googlegroups.com>. Patches for fixing them are
 even more welcome!
 
-### Linux Requirements ###
+#### Linux Requirements ####
 
 These are the base requirements to build and use Google Test from a source
 package (as described below):
@@ -41,15 +38,15 @@ package (as described below):
   * POSIX(-2) Regular Expressions (regex.h)
   * A C++98-standard-compliant compiler
 
-### Windows Requirements ###
+#### Windows Requirements ####
 
   * Microsoft Visual C++ 7.1 or newer
 
-### Cygwin Requirements ###
+#### Cygwin Requirements ####
 
   * Cygwin 1.5.25-14 or newer
 
-### Mac OS X Requirements ###
+#### Mac OS X Requirements ####
 
   * Mac OS X 10.4 Tiger or newer
   * Developer Tools Installed
@@ -58,8 +55,7 @@ Also, you'll need [CMake](http://www.cmake.org/ CMake) 2.6.4 or higher if
 you want to build the samples using the provided CMake script, regardless
 of the platform.
 
-Requirements for Contributors
------------------------------
+### Requirements for Contributors ###
 
 We welcome patches.  If you plan to contribute a patch, you need to
 build Google Test and its own tests from a git checkout (described
@@ -69,8 +65,7 @@ below), which has further requirements:
     re-generating certain source files from templates)
   * [CMake](http://www.cmake.org/) 2.6.4 or newer
 
-Getting the Source
-------------------
+## Getting the Source ##
 
 Google Test's source is available from its GitHub repository at
 <https://github.com/google/googletest>.
@@ -81,8 +76,8 @@ make patches much more easily, so we highly encourage it.
 
 ### Source Package ###
 
-Snapshots of Google Test's master branch can be downloaded directly with GitHub's
-"Download ZIP" button on the main page.
+Snapshots of Google Test's master branch can be downloaded directly with
+GitHub's "Download ZIP" button on the main page.
 
 Versioned releases are also available by clicking on
 [Releases](releases) in the project page.
@@ -93,8 +88,7 @@ To check out the master branch of Google Test, run the following git command:
 
     git clone https://github.com/google/googletest.git (via HTTPS)
 
-Setting up the Build
---------------------
+## Setting up the Build ##
 
 To build Google Test and your tests that use it, you need to tell your
 build system where to find its headers and source files.  The exact
@@ -219,8 +213,7 @@ above, you need to either:
    supported by Apple, but has been reported to work
    (http://stackoverflow.com/questions/5378518).
 
-Tweaking Google Test
---------------------
+### Tweaking Google Test ###
 
 Google Test can be used in diverse environments.  The default
 configuration may not work (or may not work well) out of the box in
@@ -338,8 +331,7 @@ instead of
 
 in order to define a test.
 
-Upgrating from an Earlier Version
----------------------------------
+### Upgrating from an Earlier Version ###
 
 We strive to keep Google Test releases backward compatible.
 Sometimes, though, we have to make some breaking changes for the
@@ -369,8 +361,7 @@ large portion of STL (including <string>) doesn't compile in this mode
 anyway.  We decided to stop supporting it in order to greatly simplify
 Google Test's implementation.
 
-Developing Google Test
-----------------------
+## Developing Google Test ##
 
 This section discusses how to make your own changes to Google Test.
 
@@ -399,27 +390,8 @@ this is usually done by 'make'.  To run the tests, do
 
 All tests should pass.
 
-### Regenerating Source Files ###
-
-Some of Google Test's source files are generated from templates (not
-in the C++ sense) using a script.  A template file is named FOO.pump,
-where FOO is the name of the file it will generate.  For example, the
-file include/gtest/internal/gtest-type-util.h.pump is used to generate
-gtest-type-util.h in the same directory.
-
 Normally you don't need to worry about regenerating the source files,
 unless you need to modify them.  In that case, you should modify the
 corresponding .pump files instead and run the pump.py Python script to
 regenerate them.  You can find pump.py in the [scripts/](scripts/) directory.
 Read the [Pump manual](docs/PumpManual.md) for how to use it.
-
-### Contributing a Patch ###
-
-We welcome patches.  Please read the
-[Google Test developer's guide](docs/DevGuide.md)
-for how you can contribute.  In particular, make sure you have signed
-the Contributor License Agreement, or we won't be able to accept the
-patch.
-
-
-Happy testing!

@@ -1,16 +1,24 @@
 
 Welcome to **Google Test**, Google's C++ test framework!
 
-This GitHub repository is a merger of the formerly separate GoogleTest and GoogleMock projects.
-These were so closely related that it makes sense to maintain and release them together.
+This repository is a merger of the formerly separate GoogleTest and
+GoogleMock projects. These were so closely related that it makes sense to
+maintain and release them together.
 
-## GoogleTest ##
+## Google Test ##
 
-Based on the [XUnit](https://en.wikipedia.org/wiki/XUnit) architecture.
-Supports automatic test discovery, a rich set of assertions, user-defined
-assertions, death tests, fatal and non-fatal failures, value- and
-type-parameterized tests, various options for running the tests, and XML test
-report generation.
+Google Test conforms to the [XUnit](https://en.wikipedia.org/wiki/XUnit)
+test framework pattern. It features:
+
+  * test discovery
+  * a rich set of assertions
+  * user-defined assertions
+  * death tests
+  * fatal and non-fatal failures
+  * value-parameterized tests
+  * type-parameterized tests
+  * various options for running the tests
+  * XML test report generation
 
 ## Platforms ##
 
@@ -29,12 +37,14 @@ Google test has been used on a variety of platforms:
 In addition to many internal projects at Google, Google Test is also used by
 the following notable projects:
 
-  * The [Chromium projects](http://www.chromium.org/) (behind the Chrome browser and Chrome OS)
-  * The [LLVM](http://llvm.org/) compiler
-  * [Protocol Buffers](http://code.google.com/p/protobuf/) (Google's data interchange format)
-  * The [OpenCV](http://opencv.org/) computer vision library
+  * The [Chromium projects](http://www.chromium.org/) (behind the Chrome
+    browser and Chrome OS).
+  * The [LLVM](http://llvm.org/) compiler.
+  * [Protocol Buffers](http://code.google.com/p/protobuf/), Google's data
+    interchange format.
+  * The [OpenCV](http://opencv.org/) computer vision library.
 
-## Google Test-related open source projects ##
+## Related Open Source Projects ##
 
 [Google Test UI](http://code.google.com/p/gtest-gbar/) is test runner that runs
 your test binary, allows you to track its progress via a progress bar, and
@@ -72,9 +82,10 @@ you can also use it with [any C++ testing framework](googlemock/ForDummies.md#Us
 If you are new to the project, we suggest that you read the user
 documentation in the following order:
 
-  * Learn the [basics](http://code.google.com/p/googletest/wiki/Primer) of Google Test, if you choose to use Google Mock with it (recommended).
+  * Learn the [basics](http://code.google.com/p/googletest/wiki/Primer) of
+    Google Test, if you choose to use Google Mock with it (recommended).
   * Read [Google Mock for Dummies](ForDummies.md).
-  * Read the instructions on how to [build Google Mock](http://code.google.com/p/googlemock/source/browse/trunk/README).
+  * Read the instructions on how to [build Google Mock](googlemock/README.md).
 
 You can also watch Zhanyong's [talk](http://www.youtube.com/watch?v=sYpCyLI47rM) on Google Mock's usage and implementation.
 
@@ -87,6 +98,25 @@ If you need help, please check the [KnownIssues](googlemock/docs/KnownIssues.md)
 [FrequentlyAskedQuestions](googlemock/docs/frequentlyaskedquestions.md) before
 posting a question on the [googlemock discussion group](http://groups.google.com/group/googlemock).
 
-We'd love to have your help! Please read the Developer Guides if you are willing to contribute to the development.
+### Regenerating Source Files ###
 
-Happy mocking!
+Some of Google Test's source files are generated from templates (not
+in the C++ sense) using a script.  A template file is named FOO.pump,
+where FOO is the name of the file it will generate.  For example, the
+file include/gtest/internal/gtest-type-util.h.pump is used to generate
+gtest-type-util.h in the same directory.
+
+You don't need to worry about regenerating the source files
+unless you need to modify them.  You would then modify the
+corresponding `.pump` files and run the '[pump.py](googletest/scripts/pump.py)'
+generator script regenerate them.  See the
+[Pump Manual](googletest/docs/PumpManual.md).
+
+### Contributing Code ###
+
+We welcome patches.  Please read the [Developer's Guide](docs/DevGuide.md)
+for how you can contribute. In particular, make sure you have signed
+the Contributor License Agreement, or we won't be able to accept the
+patch.
+
+Happy testing!
