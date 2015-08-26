@@ -85,7 +85,7 @@ Snapshots of Google Test's master branch can be downloaded directly with GitHub'
 "Download ZIP" button on the main page.
 
 Versioned releases are also available by clicking on
-[Releases](releases) in the project page.
+[Releases](../../../releases) in the project page.
 
 ### Git Checkout ###
 
