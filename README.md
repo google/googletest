@@ -36,7 +36,7 @@ the following notable projects:
 
 ## Google Test-related open source projects ##
 
-[Google Test UI](http://code.google.com/p/gtest-gbar/) is test runner that runs
+[Google Test UI](https://github.com/ospector/gtest-gbar) is test runner that runs
 your test binary, allows you to track its progress via a progress bar, and
 displays a list of test failures. Clicking on one shows failure text. Google
 Test UI is written in C#.
