@@ -1,11 +1,11 @@
 
+## Google Test ##
+
 Welcome to **Google Test**, Google's C++ test framework!
 
 This repository is a merger of the formerly separate GoogleTest and
 GoogleMock projects. These were so closely related that it makes sense to
 maintain and release them together.
-
-## Google Test ##
 
 Google Test conforms to the [XUnit](https://en.wikipedia.org/wiki/XUnit)
 test framework pattern. It features:
@@ -58,9 +58,12 @@ result output. If your test runner understands TAP, you may find it useful.
 
 ## About Google Mock ##
 
-**Google Mock** is an extension to Google Test for writing and using C++ mock classes.
-It is inspired by [jMock](http://www.jmock.org/), [EasyMock](http://www.easymock.org/),
-and [Hamcrest](http://code.google.com/p/hamcrest/), and designed with C++'s specifics in mind.
+**Google Mock** is an extension to Google Test for writing and using C++ mock
+classes. It is inspired by
+[jMock](http://www.jmock.org/),
+[EasyMock](http://www.easymock.org/), and
+[Hamcrest](http://code.google.com/p/hamcrest/),
+and designed with C++'s specifics in mind.
 
 Google mock:
 
@@ -71,7 +74,8 @@ Google mock:
 
 We hope you find it useful!
 
-## Using Google Mock Without Google Test ## 
+### Using Google Mock Without Google Test ###
+
 Google Mock is not a testing framework itself.  Instead, it needs a
 testing framework for writing tests.  Google Mock works seamlessly
 with [Google Test](http://code.google.com/p/googletest/), butj
@@ -82,21 +86,25 @@ you can also use it with [any C++ testing framework](googlemock/ForDummies.md#Us
 If you are new to the project, we suggest that you read the user
 documentation in the following order:
 
-  * Learn the [basics](http://code.google.com/p/googletest/wiki/Primer) of
+  * Learn the [basics](googletest/docs/Primer) of
     Google Test, if you choose to use Google Mock with it (recommended).
-  * Read [Google Mock for Dummies](ForDummies.md).
+  * Read [Google Mock for Dummies](googlemock/docs/ForDummies.md).
   * Read the instructions on how to [build Google Mock](googlemock/README.md).
 
 You can also watch Zhanyong's [talk](http://www.youtube.com/watch?v=sYpCyLI47rM) on Google Mock's usage and implementation.
 
 Once you understand the basics, check out the rest of the docs:
 
-  * [CheatSheet](googlemock/docs/CheatSheet.md) - all the commonly used stuff at a glance.
-  * [CookBook](googlemock/docs/CookBook.md) - recipes for getting things done, including advanced techniques.
+  * [CheatSheet](googlemock/docs/CheatSheet.md) - all the commonly used stuff
+    at a glance.
+  * [CookBook](googlemock/docs/CookBook.md) - recipes for getting things done,
+    including advanced techniques.
 
-If you need help, please check the [KnownIssues](googlemock/docs/KnownIssues.md) and
+If you need help, please check the
+[KnownIssues](googlemock/docs/KnownIssues.md) and
 [FrequentlyAskedQuestions](googlemock/docs/frequentlyaskedquestions.md) before
-posting a question on the [googlemock discussion group](http://groups.google.com/group/googlemock).
+posting a question on the
+[discussion group](http://groups.google.com/group/googlemock).
 
 ### Regenerating Source Files ###
 

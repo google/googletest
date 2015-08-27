@@ -10,40 +10,38 @@ Inspired by jMock, EasyMock, and Hamcrest, and designed with C++'s
 specifics in mind, it can help you derive better designs of your
 system and write better tests.
 
-Google Mock:
+### Features ###
 
-- provides a declarative syntax for defining mocks,
-- can easily define partial (hybrid) mocks, which are a cross of real
-  and mock objects,
-- handles functions of arbitrary types and overloaded functions,
-- comes with a rich set of matchers for validating function arguments,
-- uses an intuitive syntax for controlling the behavior of a mock,
-- does automatic verification of expectations (no record-and-replay
-  needed),
-- allows arbitrary (partial) ordering constraints on
-  function calls to be expressed,
-- lets a user extend it by defining new matchers and actions.
-- does not use exceptions, and
-- is easy to learn and use.
+  * Provides a declarative syntax for defining mocks.
+  * Can easily define partial (hybrid) mocks, which are a cross of real
+    and mock objects.
+  * Handles functions of arbitrary types and overloaded functions.
+  * Comes with a rich set of matchers for validating function arguments.
+  * Uses an intuitive syntax for controlling the behavior of a mock.
+  * Does automatic verification of expectations (no record-and-replay needed).
+  * Allows arbitrary (partial) ordering constraints on
+    function calls to be expressed,.
+  * Lets a user extend it by defining new matchers and actions.
+  * Does not use exceptions.
+  * Is easy to learn and use.
 
 Please see the project page above for more information as well as the
 mailing list for questions, discussions, and development.  There is
 also an IRC channel on OFTC (irc.oftc.net) #gtest available.  Please
 join us!
 
-Please note that code under scripts/generator/ is from the [cppclean
-project](http://code.google.com/p/cppclean/) and under the Apache
-License, which is different from Google Mock's license.
+Please note that code under [scripts/generator](scripts/generator/) is
+from [cppclean](http://code.google.com/p/cppclean/) and released under
+the Apache License, which is different from Google Mock's license.
 
 ### Requirements for End Users ###
 
 Google Mock is implemented on top of [Google Test](
-    http://github.com/google/googletest/), and depends on it.
+http://github.com/google/googletest/), and depends on it.
 You must use the bundled version of Google Test when using Google Mock.
 
 You can also easily configure Google Mock to work with another testing
 framework, although it will still need Google Test.  Please read
-
 ["Using_Google_Mock_with_Any_Testing_Framework"](
     docs/ForDummies.md#Using_Google_Mock_with_Any_Testing_Framework)
 for instructions.
@@ -52,9 +50,6 @@ Google Mock depends on advanced C++ features and thus requires a more
 modern compiler. The following are needed to use Google Mock:
 
 #### Linux Requirements ####
-
-These are the base requirements to build and use Google Mock from a source
-package (as described below):
 
   * GNU-compatible Make or "gmake"
   * POSIX-standard shell
@@ -72,9 +67,8 @@ package (as described below):
 
 ### Requirements for Contributors ###
 
-We welcome patches.  If you plan to contribute a patch, you need to
-build Google Mock and its own tests from an SVN checkout (described
-below), which has further requirements:
+We welcome patches. If you plan to contribute a patch, you need to
+build Google Mock and its tests, which has further requirements:
 
   * Automake version 1.9 or newer
   * Autoconf version 2.59 or newer
@@ -82,60 +76,29 @@ below), which has further requirements:
   * Python version 2.3 or newer (for running some of the tests and
     re-generating certain source files from templates)
 
-### Getting the Source ###
+### Building Google Mock ###
 
-There are two primary ways of getting Google Mock's source code: you
-can download a [stable source release](releases),
-or directly check out the source from our Git repository.
-The Git checkout requires a few extra steps and some extra software
-packages on your system, but lets you track development and make
-patches much more easily, so we highly encourage it.
+#### Preparing to Build (Unix only) ####
 
-### Git Checkout ###
-
-To check out the master branch of Google Mock, run the following git command:
-
-    git clone https://github.com/google/googlemock.git
-
-If you are using a \*nix system and plan to use the GNU Autotools build
+If you are using a Unix system and plan to use the GNU Autotools build
 system to build Google Mock (described below), you'll need to
-configure it now.  Otherwise you are done with getting the source
-files.
+configure it now.
 
-To prepare the Autotools build system, enter the target directory of
-the checkout command you used ('gmock-svn') and proceed with the
-following command:
+To prepare the Autotools build system:
 
+    cd googlemock
     autoreconf -fvi
-
-Once you have completed this step, you are ready to build the library.
-Note that you should only need to complete this step once.  The
-subsequent 'make' invocations will automatically re-generate the bits
-of the build system that need to be changed.
-
-If your system uses older versions of the autotools, the above command
-will fail.  You may need to explicitly specify a version to use.  For
-instance, if you have both GNU Automake 1.4 and 1.9 installed and
-'automake' would invoke the 1.4, use instead:
-
-    AUTOMAKE=automake-1.9 ACLOCAL=aclocal-1.9 autoreconf -fvi
-
-Make sure you're using the same version of automake and aclocal.
-
-### Preparing to Build ###
 
 To build Google Mock and your tests that use it, you need to tell your
 build system where to find its headers and source files.  The exact
 way to do it depends on which build system you use, and is usually
 straightforward.
 
-### Build ###
-
 This section shows how you can integrate Google Mock into your
 existing build system.
 
-Suppose you put Google Mock in directory ${GMOCK\_DIR} and Google Test
-in ${GTEST\_DIR} (the latter is ${GMOCK\_DIR}/gtest by default).  To
+Suppose you put Google Mock in directory `${GMOCK_DIR}` and Google Test
+in `${GTEST_DIR}` (the latter is `${GMOCK_DIR}/gtest` by default).  To
 build Google Mock, create a library build target (or a project as
 called by Visual Studio and Xcode) to compile
 
@@ -183,7 +146,8 @@ following commands should succeed:
     make
     ./gmock_test
 
-If you see errors, try to tweak the contents of [make/Makefile](make/Makefile) to make them go away.
+If you see errors, try to tweak the contents of
+[make/Makefile](make/Makefile) to make them go away.
 
 ### Windows ###
 
@@ -284,7 +248,6 @@ use the new matcher API (
 [monomorphic](http://code.google.com/p/googlemock/wiki/CookBook#Writing_New_Monomorphic_Matchers),
 [polymorphic](http://code.google.com/p/googlemock/wiki/CookBook#Writing_New_Polymorphic_Matchers)).
 Matchers defined using `MATCHER()` or `MATCHER_P*()` aren't affected.
-
 
 ### Developing Google Mock ###
 

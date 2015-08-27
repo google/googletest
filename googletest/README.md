@@ -65,29 +65,6 @@ below), which has further requirements:
     re-generating certain source files from templates)
   * [CMake](http://www.cmake.org/) 2.6.4 or newer
 
-## Getting the Source ##
-
-Google Test's source is available from its GitHub repository at
-<https://github.com/google/googletest>.
-The GitHub repository offers stable tagged releases available as .ZIP archives. 
-A Git checkout requires a few extra steps and some extra software
-packages on your system, but lets you track the latest development and
-make patches much more easily, so we highly encourage it.
-
-### Source Package ###
-
-Snapshots of Google Test's master branch can be downloaded directly with
-GitHub's "Download ZIP" button on the main page.
-
-Versioned releases are also available by clicking on
-[Releases](releases) in the project page.
-
-### Git Checkout ###
-
-To check out the master branch of Google Test, run the following git command:
-
-    git clone https://github.com/google/googletest.git (via HTTPS)
-
 ## Setting up the Build ##
 
 To build Google Test and your tests that use it, you need to tell your
