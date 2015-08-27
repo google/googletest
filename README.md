@@ -74,7 +74,7 @@ documentation in the following order:
 
   * Learn the [basics](http://code.google.com/p/googletest/wiki/Primer) of Google Test, if you choose to use Google Mock with it (recommended).
   * Read [Google Mock for Dummies](googlemock/docs/ForDummies.md).
-  * Read the instructions on how to [build Google Mock](http://code.google.com/p/googlemock/source/browse/trunk/README).
+  * Read the instructions on how to [build Google Mock](googlemock/README.md#setting-up-the-build).
 
 You can also watch Zhanyong's [talk](http://www.youtube.com/watch?v=sYpCyLI47rM) on Google Mock's usage and implementation.
 
