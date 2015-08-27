@@ -65,7 +65,7 @@ We hope you find it useful!
 Google Mock is not a testing framework itself.  Instead, it needs a
 testing framework for writing tests.  Google Mock works seamlessly
 with [Google Test](http://code.google.com/p/googletest/), butj
-you can also use it with [any C++ testing framework](googlemock/ForDummies.md#Using_Google_Mock_with_Any_Testing_Framework).
+you can also use it with [any C++ testing framework](googlemock/docs/ForDummies.md#using-google-mock-with-any-testing-framework).
 
 ## Getting Started ##
 
@@ -73,7 +73,7 @@ If you are new to the project, we suggest that you read the user
 documentation in the following order:
 
   * Learn the [basics](http://code.google.com/p/googletest/wiki/Primer) of Google Test, if you choose to use Google Mock with it (recommended).
-  * Read [Google Mock for Dummies](ForDummies.md).
+  * Read [Google Mock for Dummies](googlemock/docs/ForDummies.md).
   * Read the instructions on how to [build Google Mock](http://code.google.com/p/googlemock/source/browse/trunk/README).
 
 You can also watch Zhanyong's [talk](http://www.youtube.com/watch?v=sYpCyLI47rM) on Google Mock's usage and implementation.
