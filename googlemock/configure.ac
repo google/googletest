@@ -1,4 +1,4 @@
-m4_include(gtest/m4/acx_pthread.m4)
+m4_include(googletest/m4/acx_pthread.m4)
 
 AC_INIT([Google C++ Mocking Framework],
         [1.7.0],
