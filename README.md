@@ -86,7 +86,7 @@ you can also use it with [any C++ testing framework](googlemock/ForDummies.md#Us
 If you are new to the project, we suggest that you read the user
 documentation in the following order:
 
-  * Learn the [basics](googletest/docs/Primer) of
+  * Learn the [basics](googletest/docs/Primer.md) of
     Google Test, if you choose to use Google Mock with it (recommended).
   * Read [Google Mock for Dummies](googlemock/docs/ForDummies.md).
   * Read the instructions on how to [build Google Mock](googlemock/README.md).
@@ -109,11 +109,7 @@ posting a question on the
 ### Regenerating Source Files ###
 
 Some of Google Test's source files are generated from templates (not
-in the C++ sense) using a script.  A template file is named FOO.pump,
-where FOO is the name of the file it will generate.  For example, the
-file include/gtest/internal/gtest-type-util.h.pump is used to generate
-gtest-type-util.h in the same directory.
-
+in the C++ sense) using a script.
 You don't need to worry about regenerating the source files
 unless you need to modify them.  You would then modify the
 corresponding `.pump` files and run the '[pump.py](googletest/scripts/pump.py)'
