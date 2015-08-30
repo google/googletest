@@ -1,14 +1,28 @@
-## Google C++ Mocking Framework ##
+## Google Mock ##
 
-<http://github.com/google/googlemock/>
+The Google C++ mocking framework.
 
 ### Overview ###
 
-Google's framework for writing and using C++ mock classes on a variety
-of platforms (Linux, Mac OS X, Windows, Windows CE, Symbian, etc).
-Inspired by jMock, EasyMock, and Hamcrest, and designed with C++'s
-specifics in mind, it can help you derive better designs of your
-system and write better tests.
+Google's framework for writing and using C++ mock classes.
+It can help you derive better designs of your system and write better tests.
+
+It is inspired by:
+
+  * [jMock](http://www.jmock.org/),
+  * [EasyMock](http://www.easymock.org/), and
+  * [Hamcrest](http://code.google.com/p/hamcrest/),
+
+and designed with C++'s specifics in mind.
+
+Google mock:
+
+  * lets you create mock classes trivially using simple macros.
+  * supports a rich set of matchers and actions.
+  * handles unordered, partially ordered, or completely ordered expectations.
+  * is extensible by users.
+
+We hope you find it useful!
 
 ### Features ###
 
@@ -33,6 +47,39 @@ join us!
 Please note that code under [scripts/generator](scripts/generator/) is
 from [cppclean](http://code.google.com/p/cppclean/) and released under
 the Apache License, which is different from Google Mock's license.
+
+## Getting Started ##
+
+If you are new to the project, we suggest that you read the user
+documentation in the following order:
+
+  * Learn the [basics](../googletest/docs/Primer.md) of
+    Google Test, if you choose to use Google Mock with it (recommended).
+  * Read [Google Mock for Dummies](docs/ForDummies.md).
+  * Read the instructions below on how to build Google Mock.
+
+You can also watch Zhanyong's [talk](http://www.youtube.com/watch?v=sYpCyLI47rM) on Google Mock's usage and implementation.
+
+Once you understand the basics, check out the rest of the docs:
+
+  * [CheatSheet](googlemock/docs/CheatSheet.md) - all the commonly used stuff
+    at a glance.
+  * [CookBook](googlemock/docs/CookBook.md) - recipes for getting things done,
+    including advanced techniques.
+
+If you need help, please check the
+[KnownIssues](googlemock/docs/KnownIssues.md) and
+[FrequentlyAskedQuestions](googlemock/docs/frequentlyaskedquestions.md) before
+posting a question on the
+[discussion group](http://groups.google.com/group/googlemock).
+
+
+### Using Google Mock Without Google Test ###
+
+Google Mock is not a testing framework itself.  Instead, it needs a
+testing framework for writing tests.  Google Mock works seamlessly
+with [Google Test](http://code.google.com/p/googletest/), butj
+you can also use it with [any C++ testing framework](googlemock/ForDummies.md#Using_Google_Mock_with_Any_Testing_Framework).
 
 ### Requirements for End Users ###
 

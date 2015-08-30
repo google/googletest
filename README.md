@@ -1,5 +1,5 @@
 
-## Google Test ##
+# Google Test #
 
 Welcome to **Google Test**, Google's C++ test framework!
 
@@ -7,18 +7,29 @@ This repository is a merger of the formerly separate GoogleTest and
 GoogleMock projects. These were so closely related that it makes sense to
 maintain and release them together.
 
-Google Test conforms to the [XUnit](https://en.wikipedia.org/wiki/XUnit)
-test framework pattern. It features:
+Please see the project page above for more information as well as the
+mailing list for questions, discussions, and development.  There is
+also an IRC channel on OFTC (irc.oftc.net) #gtest available.  Please
+join us!
 
-  * test discovery
-  * a rich set of assertions
-  * user-defined assertions
-  * death tests
-  * fatal and non-fatal failures
-  * value-parameterized tests
-  * type-parameterized tests
-  * various options for running the tests
-  * XML test report generation
+**Google Mock** is an extension to Google Test for writing and using C++ mock
+classes.  See the separate [Google Mock documentation](googlemock/README.md).
+
+More detailed instructions for googletest are in its interior
+[README.md](googletest/README.md) file.
+
+## Features ##
+
+  * An [XUnit](https://en.wikipedia.org/wiki/XUnit) test framework.
+  * Test discovery.
+  * A rich set of assertions.
+  * User-defined assertions.
+  * Death tests.
+  * Fatal and non-fatal failures.
+  * Value-parameterized tests.
+  * Type-parameterized tests.
+  * Various options for running the tests.
+  * XML test report generation.
 
 ## Platforms ##
 
@@ -56,60 +67,63 @@ listener for Google Test that implements the
 [TAP protocol](http://en.wikipedia.org/wiki/Test_Anything_Protocol) for test
 result output. If your test runner understands TAP, you may find it useful.
 
-## About Google Mock ##
+## Requirements ##
 
-**Google Mock** is an extension to Google Test for writing and using C++ mock
-classes. It is inspired by
-[jMock](http://www.jmock.org/),
-[EasyMock](http://www.easymock.org/), and
-[Hamcrest](http://code.google.com/p/hamcrest/),
-and designed with C++'s specifics in mind.
+Google Test is designed to have fairly minimal requirements to build
+and use with your projects, but there are some.  Currently, we support
+Linux, Windows, Mac OS X, and Cygwin.  We will also make our best
+effort to support other platforms (e.g. Solaris, AIX, and z/OS).
+However, since core members of the Google Test project have no access
+to these platforms, Google Test may have outstanding issues there.  If
+you notice any problems on your platform, please notify
+<googletestframework@googlegroups.com>. Patches for fixing them are
+even more welcome!
 
-Google mock:
+### Linux Requirements ###
 
-  * lets you create mock classes trivially using simple macros.
-  * supports a rich set of matchers and actions.
-  * handles unordered, partially ordered, or completely ordered expectations.
-  * is extensible by users.
+These are the base requirements to build and use Google Test from a source
+package (as described below):
 
-We hope you find it useful!
+  * GNU-compatible Make or gmake
+  * POSIX-standard shell
+  * POSIX(-2) Regular Expressions (regex.h)
+  * A C++98-standard-compliant compiler
 
-### Using Google Mock Without Google Test ###
+### Windows Requirements ###
 
-Google Mock is not a testing framework itself.  Instead, it needs a
-testing framework for writing tests.  Google Mock works seamlessly
-with [Google Test](http://code.google.com/p/googletest/), butj
-you can also use it with [any C++ testing framework](googlemock/ForDummies.md#Using_Google_Mock_with_Any_Testing_Framework).
+  * Microsoft Visual C++ v7.1 or newer
 
-## Getting Started ##
+### Cygwin Requirements ###
 
-If you are new to the project, we suggest that you read the user
-documentation in the following order:
+  * Cygwin v1.5.25-14 or newer
 
-  * Learn the [basics](googletest/docs/Primer.md) of
-    Google Test, if you choose to use Google Mock with it (recommended).
-  * Read [Google Mock for Dummies](googlemock/docs/ForDummies.md).
-  * Read the instructions on how to [build Google Mock](googlemock/README.md).
+### Mac OS X Requirements ###
 
-You can also watch Zhanyong's [talk](http://www.youtube.com/watch?v=sYpCyLI47rM) on Google Mock's usage and implementation.
+  * Mac OS X v10.4 Tiger or newer
+  * XCode Developer Tools
 
-Once you understand the basics, check out the rest of the docs:
+Also, you'll need [CMake](http://www.cmake.org/) v2.6.4 or higher if
+you want to build the samples using the provided CMake script, regardless
+of the platform.
 
-  * [CheatSheet](googlemock/docs/CheatSheet.md) - all the commonly used stuff
-    at a glance.
-  * [CookBook](googlemock/docs/CookBook.md) - recipes for getting things done,
-    including advanced techniques.
+### Requirements for Contributors ###
 
-If you need help, please check the
-[KnownIssues](googlemock/docs/KnownIssues.md) and
-[FrequentlyAskedQuestions](googlemock/docs/frequentlyaskedquestions.md) before
-posting a question on the
-[discussion group](http://groups.google.com/group/googlemock).
+We welcome patches.  If you plan to contribute a patch, you need to
+build Google Test and its own tests from a git checkout (described
+below), which has further requirements:
 
-### Regenerating Source Files ###
+  * [Python](http://python.org/) v2.3 or newer (for running some of
+    the tests and re-generating certain source files from templates)
+  * [CMake](http://www.cmake.org/) v2.6.4 or newer
+
+## Regenerating Source Files ##
 
 Some of Google Test's source files are generated from templates (not
 in the C++ sense) using a script.
+For example, the
+file include/gtest/internal/gtest-type-util.h.pump is used to generate
+gtest-type-util.h in the same directory.
+
 You don't need to worry about regenerating the source files
 unless you need to modify them.  You would then modify the
 corresponding `.pump` files and run the '[pump.py](googletest/scripts/pump.py)'
@@ -117,7 +131,8 @@ generator script.  See the [Pump Manual](googletest/docs/PumpManual.md).
 
 ### Contributing Code ###
 
-We welcome patches.  Please read the [Developer's Guide](docs/DevGuide.md)
+We welcome patches.  Please read the
+[Developer's Guide](googletest/docs/DevGuide.md)
 for how you can contribute. In particular, make sure you have signed
 the Contributor License Agreement, or we won't be able to accept the
 patch.
