@@ -57,7 +57,7 @@ the following notable projects:
 
 ## Related Open Source Projects ##
 
-[Google Test UI](http://code.google.com/p/gtest-gbar/) is test runner that runs
+[Google Test UI](https://github.com/ospector/gtest-gbar) is test runner that runs
 your test binary, allows you to track its progress via a progress bar, and
 displays a list of test failures. Clicking on one shows failure text. Google
 Test UI is written in C#.
@@ -101,10 +101,6 @@ package (as described below):
 
   * Mac OS X v10.4 Tiger or newer
   * XCode Developer Tools
-
-Also, you'll need [CMake](http://www.cmake.org/) v2.6.4 or higher if
-you want to build the samples using the provided CMake script, regardless
-of the platform.
 
 ### Requirements for Contributors ###
 

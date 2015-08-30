@@ -15,7 +15,7 @@ option(gmock_build_tests "Build all of Google Mock's own tests." OFF)
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/gtest/CMakeLists.txt")
   set(gtest_dir gtest)
 else()
-  set(gtest_dir ../gtest)
+  set(gtest_dir ../googletest)
 endif()
 
 # Defines pre_project_set_up_hermetic_build() and set_up_hermetic_build().

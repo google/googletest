@@ -46,7 +46,7 @@
 		4048843B0E2F799B00CF7658 /* gtest.h in Headers */ = {isa = PBXBuildFile; fileRef = 404883DE0E2F799B00CF7658 /* gtest.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4048843C0E2F799B00CF7658 /* gtest_pred_impl.h in Headers */ = {isa = PBXBuildFile; fileRef = 404883DF0E2F799B00CF7658 /* gtest_pred_impl.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4048843D0E2F799B00CF7658 /* gtest_prod.h in Headers */ = {isa = PBXBuildFile; fileRef = 404883E00E2F799B00CF7658 /* gtest_prod.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		404884500E2F799B00CF7658 /* README in Resources */ = {isa = PBXBuildFile; fileRef = 404883F60E2F799B00CF7658 /* README */; };
+		404884500E2F799B00CF7658 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 404883F60E2F799B00CF7658 /* README.md */; };
 		404884A00E2F7BE600CF7658 /* gtest-death-test-internal.h in Copy Headers Internal */ = {isa = PBXBuildFile; fileRef = 404883E20E2F799B00CF7658 /* gtest-death-test-internal.h */; };
 		404884A10E2F7BE600CF7658 /* gtest-filepath.h in Copy Headers Internal */ = {isa = PBXBuildFile; fileRef = 404883E30E2F799B00CF7658 /* gtest-filepath.h */; };
 		404884A20E2F7BE600CF7658 /* gtest-internal.h in Copy Headers Internal */ = {isa = PBXBuildFile; fileRef = 404883E40E2F799B00CF7658 /* gtest-internal.h */; };
@@ -217,7 +217,7 @@
 		404883E40E2F799B00CF7658 /* gtest-internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-internal.h"; sourceTree = "<group>"; };
 		404883E50E2F799B00CF7658 /* gtest-port.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-port.h"; sourceTree = "<group>"; };
 		404883E60E2F799B00CF7658 /* gtest-string.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-string.h"; sourceTree = "<group>"; };
-		404883F60E2F799B00CF7658 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = README; path = ../README; sourceTree = SOURCE_ROOT; };
+		404883F60E2F799B00CF7658 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = README.md; path = ../README.md; sourceTree = SOURCE_ROOT; };
 		4048840D0E2F799B00CF7658 /* gtest_main.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gtest_main.cc; sourceTree = "<group>"; };
 		404884A90E2F7CD900CF7658 /* CHANGES */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = CHANGES; path = ../CHANGES; sourceTree = SOURCE_ROOT; };
 		404884AA0E2F7CD900CF7658 /* CONTRIBUTORS */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = CONTRIBUTORS; path = ../CONTRIBUTORS; sourceTree = SOURCE_ROOT; };
@@ -318,7 +318,7 @@
 				404884A90E2F7CD900CF7658 /* CHANGES */,
 				404884AA0E2F7CD900CF7658 /* CONTRIBUTORS */,
 				404884AB0E2F7CD900CF7658 /* LICENSE */,
-				404883F60E2F799B00CF7658 /* README */,
+				404883F60E2F799B00CF7658 /* README.md */,
 				404883D90E2F799B00CF7658 /* include */,
 				4089A02F0FFACF84000B29AE /* samples */,
 				404884070E2F799B00CF7658 /* src */,
@@ -617,7 +617,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				404884500E2F799B00CF7658 /* README in Resources */,
+				404884500E2F799B00CF7658 /* README.md in Resources */,
 				404884AC0E2F7CD900CF7658 /* CHANGES in Resources */,
 				404884AD0E2F7CD900CF7658 /* CONTRIBUTORS in Resources */,
 				404884AE0E2F7CD900CF7658 /* LICENSE in Resources */,
