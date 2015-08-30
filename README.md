@@ -15,8 +15,8 @@ join us!
 **Google Mock** is an extension to Google Test for writing and using C++ mock
 classes.  See the separate [Google Mock documentation](googlemock/README.md).
 
-More detailed instructions for googletest are in its interior
-[README.md](googletest/README.md) file.
+More detailed documentation for googletest (including build instructions) are
+in its interior [googletest/README.md](googletest/README.md) file.
 
 ## Features ##
 
