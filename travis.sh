@@ -17,7 +17,9 @@ set -vex
 
 env | sort
 
-cmake -DJSONCPP_WITH_CMAKE_PACKAGE=$CMAKE_PKG -DBUILD_SHARED_LIBS=$SHARED_LIB -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_VERBOSE_MAKEFILE=$VERBOSE_MAKE .
+mkdir build
+cd build
+cmake ../googletest
 make
 
 # Python is not available in Travis for osx.
