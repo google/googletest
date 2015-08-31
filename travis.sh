@@ -18,14 +18,17 @@ set -vex
 env | sort
 
 mkdir build
-cd build
-cmake ../googletest
-make
 
-# Python is not available in Travis for osx.
-#  https://github.com/travis-ci/travis-ci/issues/2320
+mkdir build/googletest
+( cd build/googletest && cmake ../../googletest )
 if [ "$TRAVIS_OS_NAME" != "osx" ]
 then
-  make
-  # valgrind --error-exitcode=42 --leak-check=full ./src/test_lib_json/jsoncpp_test
+( cd build/googletest && make )
+fi
+
+mkdir build/googlemock
+( cd build/googlemock && cmake ../../googlemock )
+if [ "$TRAVIS_OS_NAME" != "osx" ]
+then
+  ( cd build/googlemock && make )
 fi
