@@ -1,11 +1,9 @@
 #!/usr/bin/env sh
 set -evx
 env | sort
+t = $GTEST_TARGET
 mkdir build
-for d in googletest googlemock
-do
-  ( mkdir build/$d &&
-    cd build/$d &&
-    cmake ../../$d &&
-    make)
-done
+mkdir build/$t
+cd build/$t
+cmake ../../$t
+make
