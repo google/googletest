@@ -17,7 +17,6 @@ install:
 - export PATH=/usr/local/bin:/usr/bin:${PATH}
 - echo ${CXX}
 - ${CXX} --version
-- which valgrind
 addons:
   apt:
     sources:
