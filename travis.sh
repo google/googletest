@@ -13,22 +13,17 @@
 # -e: fail on error
 # -v: show commands
 # -x: show expanded commands
-set -vex
+set -evx
 
 env | sort
 
 mkdir build
 
-mkdir build/googletest
-( cd build/googletest && cmake ../../googletest )
-if [ "$TRAVIS_OS_NAME" != "osx" ]
-then
-( cd build/googletest && make )
-fi
-
-mkdir build/googlemock
-( cd build/googlemock && cmake ../../googlemock )
-if [ "$TRAVIS_OS_NAME" != "osx" ]
-then
-  ( cd build/googlemock && make )
-fi
+( mkdir build/googletest &&
+  cd build/googletest &&
+  cmake ../../googletest &&
+  make)
+( mkdir build/googlemock &&
+  cd build/googlemock &&
+  cmake ../../googlemock &&
+  make)
