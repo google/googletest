@@ -1,0 +1,43 @@
+# Build matrix / environment variable are explained on:
+# http://about.travis-ci.org/docs/user/build-configuration/
+# This file can be validated on:
+# http://lint.travis-ci.org/
+# See also
+# http://stackoverflow.com/questions/22111549/travis-ci-with-clang-3-4-and-c11/30925448#30925448
+# to allow C++11, though we are not yet building with -std=c++11
+
+install:
+# /usr/bin/gcc is 4.6 always, but gcc-X.Y is available.
+- if [ "$CXX" = "g++" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
+# /usr/bin/clang is our version already, and clang-X.Y does not exist.
+#- if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.7" CC="clang-3.7"; fi
+- echo ${PATH}
+- ls /usr/local
+- ls /usr/local/bin
+- export PATH=/usr/local/bin:/usr/bin:${PATH}
+- echo ${CXX}
+- ${CXX} --version
+- which valgrind
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-4.9
+    - g++-4.9
+    - clang
+    - valgrind
+os:
+  - linux
+language: cpp
+compiler:
+  - gcc
+  - clang
+script: ./travis.sh
+env:
+  matrix:
+    - SHARED_LIB=ON  STATIC_LIB=ON CMAKE_PKG=ON  BUILD_TYPE=release VERBOSE_MAKE=false
+    - SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug   VERBOSE_MAKE=true VERBOSE
+notifications:
+  email: false
+sudo: false
