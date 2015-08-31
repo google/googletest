@@ -1,29 +1,11 @@
 #!/usr/bin/env sh
-# This is called by `.travis.yml` via Travis CI.
-# Travis supplies $TRAVIS_OS_NAME.
-#  http://docs.travis-ci.com/user/multi-os/
-# Our .travis.yml also defines:
-#   - SHARED_LIB=ON/OFF
-#   - STATIC_LIB=ON/OFF
-#   - CMAKE_PKG=ON/OFF
-#   - BUILD_TYPE=release/debug
-#   - VERBOSE_MAKE=false/true
-#   - VERBOSE (set or not)
-
-# -e: fail on error
-# -v: show commands
-# -x: show expanded commands
 set -evx
-
 env | sort
-
 mkdir build
-
-( mkdir build/googletest &&
-  cd build/googletest &&
-  cmake ../../googletest &&
-  make)
-( mkdir build/googlemock &&
-  cd build/googlemock &&
-  cmake ../../googlemock &&
-  make)
+for d in googletest googlemock
+do
+  ( mkdir build/$d &&
+    cd build/$d &&
+    cmake ../../$d &&
+    make)
+done
