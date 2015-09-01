@@ -17,13 +17,13 @@ set -evx
 
 env | sort
 
-mkdir build
+mkdir build || true
 
-( mkdir build/googletest &&
+( ( mkdir build/googletest || true ) &&
   cd build/googletest &&
-  cmake ../../googletest &&
-  make)
-( mkdir build/googlemock &&
+  cmake -Dgtest_build_tests=ON -Dgtest_build_samples=ON ../../googletest &&
+  make && make test)
+( ( mkdir build/googlemock || true ) &&
   cd build/googlemock &&
-  cmake ../../googlemock &&
-  make)
+  cmake -Dgmock_build_tests=ON -Dgtest_build_samples=ON ../../googlemock &&
+  make && make test)
