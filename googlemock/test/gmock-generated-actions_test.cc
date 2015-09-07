@@ -374,7 +374,7 @@ class SubstractAction : public ActionInterface<int(int, int)> {  // NOLINT
 };
 
 TEST(WithArgsTest, NonInvokeAction) {
-  Action<int(const string&, int, int)> a =  // NOLINT
+  Action<int(const string, int, int)> a =  // NOLINT
       WithArgs<2, 1>(MakeAction(new SubstractAction));
   EXPECT_EQ(8, a.Perform(make_tuple(string("hi"), 2, 10)));
 }
@@ -751,7 +751,7 @@ TEST(ActionPMacroTest, CanReferenceArgumentAndParameterTypes) {
 // Tests that a parameterized action can be used in any mock function
 // whose type is compatible.
 TEST(ActionPMacroTest, WorksInCompatibleMockFunction) {
-  Action<std::string(const std::string& s)> a1 = Plus("tail");
+  Action<std::string(const std::string s)> a1 = Plus("tail");
   const std::string re = "re";
   EXPECT_EQ("retail", a1.Perform(make_tuple(re)));
 }
@@ -793,7 +793,7 @@ TEST(ActionPnMacroTest, WorksFor3Parameters) {
   Action<double(int m, bool t)> a1 = Plus(100, 20, 3.4);
   EXPECT_DOUBLE_EQ(3123.4, a1.Perform(make_tuple(3000, true)));
 
-  Action<std::string(const std::string& s)> a2 = Plus("tail", "-", ">");
+  Action<std::string(const std::string s)> a2 = Plus("tail", "-", ">");
   const std::string re = "re";
   EXPECT_EQ("retail->", a2.Perform(make_tuple(re)));
 }
