@@ -374,7 +374,7 @@ class SubstractAction : public ActionInterface<int(int, int)> {  // NOLINT
 };
 
 TEST(WithArgsTest, NonInvokeAction) {
-  Action<int(const string, int, int)> a =  // NOLINT
+  Action<int(string, int, int)> a =  // NOLINT
       WithArgs<2, 1>(MakeAction(new SubstractAction));
   EXPECT_EQ(8, a.Perform(make_tuple(string("hi"), 2, 10)));
 }
@@ -751,8 +751,8 @@ TEST(ActionPMacroTest, CanReferenceArgumentAndParameterTypes) {
 // Tests that a parameterized action can be used in any mock function
 // whose type is compatible.
 TEST(ActionPMacroTest, WorksInCompatibleMockFunction) {
-  Action<std::string(const std::string s)> a1 = Plus("tail");
-  const std::string re = "re";
+  Action<string(string s)> a1 = Plus("tail");
+  const string re = "re";
   EXPECT_EQ("retail", a1.Perform(make_tuple(re)));
 }
 
@@ -793,8 +793,8 @@ TEST(ActionPnMacroTest, WorksFor3Parameters) {
   Action<double(int m, bool t)> a1 = Plus(100, 20, 3.4);
   EXPECT_DOUBLE_EQ(3123.4, a1.Perform(make_tuple(3000, true)));
 
-  Action<std::string(const std::string s)> a2 = Plus("tail", "-", ">");
-  const std::string re = "re";
+  Action<string(string s)> a2 = Plus("tail", "-", ">");
+  const string re = "re";
   EXPECT_EQ("retail->", a2.Perform(make_tuple(re)));
 }
 
@@ -864,15 +864,15 @@ TEST(ActionPnMacroTest, WorksFor10Parameters) {
 
 ACTION_P2(PadArgument, prefix, suffix) {
   // The following lines promote the two parameters to desired types.
-  std::string prefix_str(prefix);
+  string prefix_str(prefix);
   char suffix_char = static_cast<char>(suffix);
   return prefix_str + arg0 + suffix_char;
 }
 
 TEST(ActionPnMacroTest, SimpleTypePromotion) {
-  Action<std::string(const char*)> no_promo =
-      PadArgument(std::string("foo"), 'r');
-  Action<std::string(const char*)> promo =
+  Action<string(const char*)> no_promo =
+      PadArgument(string("foo"), 'r');
+  Action<string(const char*)> promo =
       PadArgument("foo", static_cast<int>('r'));
   EXPECT_EQ("foobar", no_promo.Perform(make_tuple(CharPtr("ba"))));
   EXPECT_EQ("foobar", promo.Perform(make_tuple(CharPtr("ba"))));
@@ -898,8 +898,8 @@ template <typename T1, typename T2>
 // ConcatImplActionP3 is the class template ACTION_P3 uses to
 // implement ConcatImpl.  We shouldn't change the name as this
 // pattern requires the user to use it directly.
-ConcatImplActionP3<std::string, T1, T2>
-Concat(const std::string& a, T1 b, T2 c) {
+ConcatImplActionP3<string, T1, T2>
+Concat(const string& a, T1 b, T2 c) {
   GTEST_INTENTIONAL_CONST_COND_PUSH_()
   if (true) {
   GTEST_INTENTIONAL_CONST_COND_POP_()
@@ -910,7 +910,7 @@ Concat(const std::string& a, T1 b, T2 c) {
     // This branch verifies that ConcatImpl() can also be invoked with
     // explicit template arguments.  It doesn't really need to be
     // executed as this is a compile-time verification.
-    return ConcatImpl<std::string, T1, T2>(a, b, c);
+    return ConcatImpl<string, T1, T2>(a, b, c);
   }
 }
 
@@ -923,7 +923,7 @@ Concat(T1 a, int b, T2 c) {
 }
 
 TEST(ActionPnMacroTest, CanPartiallyRestrictParameterTypes) {
-  Action<const std::string()> a1 = Concat("Hello", "1", 2);
+  Action<const string()> a1 = Concat("Hello", "1", 2);
   EXPECT_EQ("Hello12", a1.Perform(make_tuple()));
 
   a1 = Concat(1, 2, 3);
