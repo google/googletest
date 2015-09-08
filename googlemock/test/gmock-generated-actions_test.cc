@@ -374,9 +374,10 @@ class SubstractAction : public ActionInterface<int(int, int)> {  // NOLINT
 };
 
 TEST(WithArgsTest, NonInvokeAction) {
-  Action<int(string, int, int)> a =  // NOLINT
+  using ActionType = Action<int(const string&, int, int)>;
+  ActionType a =  // NOLINT
       WithArgs<2, 1>(MakeAction(new SubstractAction));
-  EXPECT_EQ(8, a.Perform(make_tuple(string("hi"), 2, 10)));
+  EXPECT_EQ(8, a.Perform(ActionType::ArgumentTuple("hi", 2, 10)));
 }
 
 // Tests using WithArgs to pass all original arguments in the original order.
@@ -751,9 +752,10 @@ TEST(ActionPMacroTest, CanReferenceArgumentAndParameterTypes) {
 // Tests that a parameterized action can be used in any mock function
 // whose type is compatible.
 TEST(ActionPMacroTest, WorksInCompatibleMockFunction) {
-  Action<string(string s)> a1 = Plus("tail");
+  using ActionType = Action<string(const string& s)>;
+  ActionType a1 = Plus("tail");
   const string re = "re";
-  EXPECT_EQ("retail", a1.Perform(make_tuple(re)));
+  EXPECT_EQ("retail", a1.Perform(ActionType::ArgumentTuple(re)));
 }
 
 // Tests that we can use ACTION*() to define actions overloaded on the
@@ -793,9 +795,10 @@ TEST(ActionPnMacroTest, WorksFor3Parameters) {
   Action<double(int m, bool t)> a1 = Plus(100, 20, 3.4);
   EXPECT_DOUBLE_EQ(3123.4, a1.Perform(make_tuple(3000, true)));
 
-  Action<string(string s)> a2 = Plus("tail", "-", ">");
+  using ActionType = Action<string(const string& s)>;
+  ActionType a2 = Plus("tail", "-", ">");
   const string re = "re";
-  EXPECT_EQ("retail->", a2.Perform(make_tuple(re)));
+  EXPECT_EQ("retail->", a2.Perform(ActionType::ArgumentTuple(re)));
 }
 
 ACTION_P4(Plus, p0, p1, p2, p3) { return arg0 + p0 + p1 + p2 + p3; }
