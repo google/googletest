@@ -325,9 +325,10 @@ TEST(InvokeTest, FunctionThatTakes10Arguments) {
 
 // Tests using Invoke() with functions with parameters declared as Unused.
 TEST(InvokeTest, FunctionWithUnusedParameters) {
-  Action<int(int, int, double, const string&)> a1 =
-      Invoke(SumOfFirst2);
-  EXPECT_EQ(12, a1.Perform(make_tuple(10, 2, 5.6, string("hi"))));
+  using ActionType = Action<int(int, int, double, const string&)>;
+  ActionType a1 = Invoke(SumOfFirst2);
+  EXPECT_EQ(12,
+	    a1.Perform(ActionType::ArgumentTuple(10, 2, 5.6, "hi")));
 
   Action<int(int, int, bool, int*)> a2 =
       Invoke(SumOfFirst2);
@@ -377,9 +378,10 @@ TEST(InvokeMethodTest, Unary) {
 // Tests using Invoke() with a binary method.
 TEST(InvokeMethodTest, Binary) {
   Foo foo;
-  Action<string(const string&, char)> a = Invoke(&foo, &Foo::Binary);
+  using ActionType = Action<string(const string&, char)>;
+  ActionType a = Invoke(&foo, &Foo::Binary);
   string s("Hell");
-  EXPECT_EQ("Hello", a.Perform(make_tuple(s, 'o')));
+  EXPECT_EQ("Hello", a.Perform(ActionType::ArgumentTuple(s, 'o')));
 }
 
 // Tests using Invoke() with a ternary method.
