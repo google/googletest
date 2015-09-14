@@ -34,10 +34,7 @@ cc_library(
         "-g",
         "-Wall",
         "-Wextra",
-<<<<<<< HEAD
-=======
         "-pthread",
->>>>>>> Add support for Bazel build targets and fix some tests.
     ],
     linkopts = [
         "-pthread",
@@ -45,11 +42,7 @@ cc_library(
 )
 
 cc_library(
-<<<<<<< HEAD
-	name = "googlemock",
-=======
     name = "googlemock",
->>>>>>> Add support for Bazel build targets and fix some tests.
     srcs = glob([
         "googlemock/src/gmock-cardinalities.cc",
         "googlemock/src/gmock.cc",
@@ -64,10 +57,6 @@ cc_library(
         "googlemock/include/gmock/*.h"
     ]),
     includes = [
-<<<<<<< HEAD
-        "googletest/include",
-=======
->>>>>>> Add support for Bazel build targets and fix some tests.
         "googlemock",
         "googlemock/include",
     ],
