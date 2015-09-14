@@ -10,12 +10,19 @@ licenses(["notice"])
 
 cc_library(
     name = "googletest",
+    srcs = ["googletest/src/gtest_main.cc"],
+    deps = [
+        ":googletest_no_main",
+    ],
+)
+
+cc_library(
+    name = "googletest_no_main",
     srcs = glob([
     	"googletest/src/gtest.cc",
     	"googletest/src/gtest-death-test.cc",
     	"googletest/src/gtest-filepath.cc",
     	"googletest/src/gtest-internal-inl.h",
-    	"googletest/src/gtest_main.cc",
     	"googletest/src/gtest-port.cc",
     	"googletest/src/gtest-printers.cc",
     	"googletest/src/gtest-test-part.cc",
