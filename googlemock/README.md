@@ -62,14 +62,14 @@ You can also watch Zhanyong's [talk](http://www.youtube.com/watch?v=sYpCyLI47rM)
 
 Once you understand the basics, check out the rest of the docs:
 
-  * [CheatSheet](googlemock/docs/CheatSheet.md) - all the commonly used stuff
+  * [CheatSheet](docs/CheatSheet.md) - all the commonly used stuff
     at a glance.
-  * [CookBook](googlemock/docs/CookBook.md) - recipes for getting things done,
+  * [CookBook](docs/CookBook.md) - recipes for getting things done,
     including advanced techniques.
 
 If you need help, please check the
-[KnownIssues](googlemock/docs/KnownIssues.md) and
-[FrequentlyAskedQuestions](googlemock/docs/frequentlyaskedquestions.md) before
+[KnownIssues](docs/KnownIssues.md) and
+[FrequentlyAskedQuestions](docs/frequentlyaskedquestions.md) before
 posting a question on the
 [discussion group](http://groups.google.com/group/googlemock).
 
