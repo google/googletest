@@ -36,8 +36,8 @@ SYNOPSIS
        fuse_gmock_files.py [GMOCK_ROOT_DIR] OUTPUT_DIR
 
        Scans GMOCK_ROOT_DIR for Google Mock and Google Test source
-       code, assuming Google Test is in the GMOCK_ROOT_DIR/gtest
-       sub-directory, and generates three files:
+       code, assuming Google Test is in the GMOCK_ROOT_DIR/../googletest
+       directory, and generates three files:
        OUTPUT_DIR/gtest/gtest.h, OUTPUT_DIR/gmock/gmock.h, and
        OUTPUT_DIR/gmock-gtest-all.cc.  Then you can build your tests
        by adding OUTPUT_DIR to the include search path and linking
@@ -70,8 +70,8 @@ import sys
 # Mock root directory.
 DEFAULT_GMOCK_ROOT_DIR = os.path.join(os.path.dirname(__file__), '..')
 
-# We need to call into gtest/scripts/fuse_gtest_files.py.
-sys.path.append(os.path.join(DEFAULT_GMOCK_ROOT_DIR, 'gtest/scripts'))
+# We need to call into googletest/scripts/fuse_gtest_files.py.
+sys.path.append(os.path.join(DEFAULT_GMOCK_ROOT_DIR, '../googletest/scripts'))
 import fuse_gtest_files
 gtest = fuse_gtest_files
 
@@ -91,7 +91,7 @@ GMOCK_GTEST_ALL_CC_OUTPUT = 'gmock-gtest-all.cc'
 def GetGTestRootDir(gmock_root):
   """Returns the root directory of Google Test."""
 
-  return os.path.join(gmock_root, 'gtest')
+  return os.path.join(gmock_root, '../googletest')
 
 
 def ValidateGMockRootDir(gmock_root):
