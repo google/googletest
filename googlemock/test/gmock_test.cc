@@ -37,7 +37,6 @@
 
 #include <string>
 #include "gtest/gtest.h"
-#include "gtest/internal/custom/gtest.h"
 
 #if !defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
 
