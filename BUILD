@@ -6,6 +6,7 @@
 # build targets here, the libraries are independent of their location in
 # a more straightforward way.
 
+package(default_visibility = ["//visibility:public"])
 licenses(["notice"])
 
 cc_library(
