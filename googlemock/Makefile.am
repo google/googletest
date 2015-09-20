@@ -42,7 +42,10 @@ pkginclude_internaldir = $(pkgincludedir)/internal
 pkginclude_internal_HEADERS = \
   include/gmock/internal/gmock-generated-internal-utils.h \
   include/gmock/internal/gmock-internal-utils.h \
-  include/gmock/internal/gmock-port.h
+  include/gmock/internal/gmock-port.h \
+  include/gmock/internal/custom/gmock-generated-actions.h \
+  include/gmock/internal/custom/gmock-matchers.h \
+  include/gmock/internal/custom/gmock-port.h
 
 lib_libgmock_main_la_SOURCES = src/gmock_main.cc
 lib_libgmock_main_la_LIBADD = lib/libgmock.la
@@ -136,7 +139,8 @@ EXTRA_DIST += \
   include/gmock/gmock-generated-function-mockers.h.pump \
   include/gmock/gmock-generated-matchers.h.pump \
   include/gmock/gmock-generated-nice-strict.h.pump \
-  include/gmock/internal/gmock-generated-internal-utils.h.pump
+  include/gmock/internal/gmock-generated-internal-utils.h.pump \
+  include/gmock/internal/custom/gmock-generated-actions.h.pump
 
 # Script for fusing Google Mock and Google Test source files.
 EXTRA_DIST += scripts/fuse_gmock_files.py
