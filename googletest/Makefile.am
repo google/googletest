@@ -205,9 +205,13 @@ pkginclude_internal_HEADERS = \
   include/gtest/internal/gtest-param-util-generated.h \
   include/gtest/internal/gtest-param-util.h \
   include/gtest/internal/gtest-port.h \
+  include/gtest/internal/gtest-port-arch.h \
   include/gtest/internal/gtest-string.h \
   include/gtest/internal/gtest-tuple.h \
-  include/gtest/internal/gtest-type-util.h
+  include/gtest/internal/gtest-type-util.h \
+  include/gtest/internal/custom/gtest.h \
+  include/gtest/internal/custom/gtest-port.h \
+  include/gtest/internal/custom/gtest-printers.h
 
 lib_libgtest_main_la_SOURCES = src/gtest_main.cc
 lib_libgtest_main_la_LIBADD = lib/libgtest.la
