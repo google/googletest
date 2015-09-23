@@ -69,7 +69,7 @@ Once you understand the basics, check out the rest of the docs:
 
 If you need help, please check the
 [KnownIssues](docs/KnownIssues.md) and
-[FrequentlyAskedQuestions](docs/frequentlyaskedquestions.md) before
+[FrequentlyAskedQuestions](docs/FrequentlyAskedQuestions.md) before
 posting a question on the
 [discussion group](http://groups.google.com/group/googlemock).
 
