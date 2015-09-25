@@ -2906,6 +2906,8 @@ class ContainsSequenceMatcherImpl : public MatcherInterface<Container> {
   typedef typename View::type StlContainer;
   typedef typename View::const_reference StlContainerReference;
   typedef typename StlContainer::value_type Element;
+  typedef typename ::std::vector<Matcher<const Element&> >::const_iterator
+  SeqPos;  // A position in sequence_.
 
   // Constructs the matcher from a sequence of element values or
   // element matchers.
@@ -2949,30 +2951,47 @@ class ContainsSequenceMatcherImpl : public MatcherInterface<Container> {
     const bool listener_interested = listener->IsInterested();
 
     StlContainerReference stl_container = View::ConstReference(container);
-    using SeqPos = decltype(sequence_.cbegin());  // A position in sequence_.
     // Tracks positions that match the container so far.
     ::std::vector<SeqPos> ongoing_matches;
-    for (const auto& current : stl_container) {
+    for (typename StlContainer::const_iterator current = stl_container.begin();
+         current != stl_container.end(); ++current) {
       // Assume current begins an ongoing match at position 0.
-      ongoing_matches.push_back(sequence_.cbegin());
+      ongoing_matches.push_back(sequence_.begin());
       // Terminate any ongoing matches that don't extend to current.
       ongoing_matches.erase(
-			    remove_if(ongoing_matches.begin(),
-				      ongoing_matches.end(),
-				      [&current](const SeqPos& pos){
-					// TODO(deki): inform listener.
-					return !pos->Matches(current);
-				      }),
-			    ongoing_matches.end());
+          remove_if(ongoing_matches.begin(),
+                    ongoing_matches.end(),
+                    DoesntMatch(*current)),
+          ongoing_matches.end());
       // Increment ongoing matches.
-      for (auto& pos : ongoing_matches) {
-	if (++pos == sequence_.cend()) return true;
+      for (typename ::std::vector<SeqPos>::iterator pos
+               = ongoing_matches.begin();
+           pos != ongoing_matches.end(); ++pos) {
+	if (++*pos == sequence_.end()) return true;
       }
     }
     return false;
   }
 
  private:
+
+  // Functor checking for a match of a container element by a sequence_ element.
+  class DoesntMatch {
+   public:
+    // Initializes with the container element.
+    DoesntMatch(const typename StlContainer::value_type& element) :
+        element_(element) {}
+
+    // True if pos doesn't match the container element.
+    bool operator()(const SeqPos& pos) {
+      // TODO(deki): inform listener.
+      return !pos->Matches(element_);
+    }
+
+   private:
+    const typename StlContainer::value_type& element_;
+  };
+
   static Message Elements(size_t count) {
     return Message() << count << (count == 1 ? " element" : " elements");
   }

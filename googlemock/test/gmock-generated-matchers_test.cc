@@ -1239,7 +1239,8 @@ TEST(ContainsTest, WorksForTwoDimensionalNativeArray) {
 
 // Tests ContainsSequence().
 TEST(ContainsSequenceTest, SingleElementSequence) {
-  vector<int> a = { 1, 2, 3, 4, 5 };
+  vector<int> a;  // = { 1, 2, 3, 4, 5 };
+  for (size_t i = 1; i <= 5; ++i) { a.push_back(i); }
   EXPECT_THAT(a, ContainsSequence(1));
   EXPECT_THAT(a, ContainsSequence(2));
   EXPECT_THAT(a, ContainsSequence(3));
@@ -1249,7 +1250,9 @@ TEST(ContainsSequenceTest, SingleElementSequence) {
 }
 
 TEST(ContainsSequenceTest, AllSequenceLengths) {
-  vector<int> a = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2 };
+  vector<int> a;  // = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2 };
+  for (size_t i = 1; i <= 10; ++i) { a.push_back(1); }
+  a.push_back(2);
 
   EXPECT_THAT(a, ContainsSequence(1));
   EXPECT_THAT(a, ContainsSequence(2));
@@ -1293,7 +1296,7 @@ TEST(ContainsSequenceTest, AllSequenceLengths) {
 }
 
 TEST(ContainsSequenceTest, SingleElementVector) {
-  vector<int> a = { 1 };
+  vector<int> a(1, 1);  // = { 1 };
   EXPECT_THAT(a, ContainsSequence(1));
   EXPECT_THAT(a, Not(ContainsSequence(100)));
   EXPECT_THAT(a, Not(ContainsSequence(1, 2)));
@@ -1301,7 +1304,8 @@ TEST(ContainsSequenceTest, SingleElementVector) {
 }
 
 TEST(ContainsSequenceTest, SingleElementSet) {
-  set<double> a = { .1 };
+  set<double> a;  // = { .1 };
+  a.insert(.1);
   EXPECT_THAT(a, ContainsSequence(.1));
   EXPECT_THAT(a, Not(ContainsSequence(100)));
   EXPECT_THAT(a, Not(ContainsSequence(.1, _)));
@@ -1309,7 +1313,8 @@ TEST(ContainsSequenceTest, SingleElementSet) {
 }
 
 TEST(ContainsSequenceTest, SingleElementNativeArray) {
-  char a[] = { '1' };
+  char a[1];  // = { '1' };
+  a[0] = '1';
   EXPECT_THAT(a, ContainsSequence('1'));
   EXPECT_THAT(a, Not(ContainsSequence('2')));
   EXPECT_THAT(a, Not(ContainsSequence('1', Not('1'))));
