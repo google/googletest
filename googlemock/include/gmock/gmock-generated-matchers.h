@@ -994,6 +994,211 @@ UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
       e6, e7, e8, e9, e10));
 }
 
+template <typename T1>
+inline internal::ContainsSequenceMatcher<
+    ::testing::tuple<typename internal::DecayArray<T1>::type> >
+ContainsSequence(const T1& e1) {
+  typedef ::testing::tuple< typename internal::DecayArray<T1>::type> Args;
+  return internal::ContainsSequenceMatcher<Args>(Args(e1));
+}
+
+template <typename T1, typename T2>
+inline internal::ContainsSequenceMatcher<
+    ::testing::tuple<
+      typename internal::DecayArray<T1>::type,
+      typename internal::DecayArray<T2>::type> >
+ContainsSequence(const T1& e1, const T2& e2) {
+  typedef ::testing::tuple<
+    typename internal::DecayArray<T1>::type,
+    typename internal::DecayArray<T2>::type> Args;
+  return internal::ContainsSequenceMatcher<Args>(Args(e1, e2));
+}
+
+template <typename T1, typename T2, typename T3>
+inline internal::ContainsSequenceMatcher<
+    ::testing::tuple<
+      typename internal::DecayArray<T1>::type,
+      typename internal::DecayArray<T2>::type,
+      typename internal::DecayArray<T3>::type> >
+ContainsSequence(const T1& e1, const T2& e2, const T3& e3) {
+  typedef ::testing::tuple<
+    typename internal::DecayArray<T1>::type,
+    typename internal::DecayArray<T2>::type,
+    typename internal::DecayArray<T3>::type> Args;
+  return internal::ContainsSequenceMatcher<Args>(Args(e1, e2, e3));
+}
+
+template <typename T1, typename T2, typename T3, typename T4>
+inline internal::ContainsSequenceMatcher<
+    ::testing::tuple<
+      typename internal::DecayArray<T1>::type,
+      typename internal::DecayArray<T2>::type,
+      typename internal::DecayArray<T3>::type,
+      typename internal::DecayArray<T4>::type> >
+ContainsSequence(const T1& e1, const T2& e2, const T3& e3, const T4& e4) {
+  typedef ::testing::tuple<
+    typename internal::DecayArray<T1>::type,
+    typename internal::DecayArray<T2>::type,
+    typename internal::DecayArray<T3>::type,
+    typename internal::DecayArray<T4>::type> Args;
+  return internal::ContainsSequenceMatcher<Args>(Args(e1, e2, e3, e4));
+}
+
+template <typename T1, typename T2, typename T3, typename T4, typename T5>
+inline internal::ContainsSequenceMatcher<
+    ::testing::tuple<
+      typename internal::DecayArray<T1>::type,
+      typename internal::DecayArray<T2>::type,
+      typename internal::DecayArray<T3>::type,
+      typename internal::DecayArray<T4>::type,
+      typename internal::DecayArray<T5>::type> >
+ContainsSequence(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
+                 const T5& e5) {
+  typedef ::testing::tuple<
+    typename internal::DecayArray<T1>::type,
+    typename internal::DecayArray<T2>::type,
+    typename internal::DecayArray<T3>::type,
+    typename internal::DecayArray<T4>::type,
+    typename internal::DecayArray<T5>::type> Args;
+  return internal::ContainsSequenceMatcher<Args>(Args(e1, e2, e3, e4, e5));
+}
+
+template <typename T1, typename T2, typename T3, typename T4, typename T5,
+          typename T6>
+inline internal::ContainsSequenceMatcher<
+    ::testing::tuple<
+      typename internal::DecayArray<T1>::type,
+      typename internal::DecayArray<T2>::type,
+      typename internal::DecayArray<T3>::type,
+      typename internal::DecayArray<T4>::type,
+      typename internal::DecayArray<T5>::type,
+      typename internal::DecayArray<T6>::type> >
+ContainsSequence(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
+                 const T5& e5, const T6& e6) {
+  typedef ::testing::tuple<
+    typename internal::DecayArray<T1>::type,
+    typename internal::DecayArray<T2>::type,
+    typename internal::DecayArray<T3>::type,
+    typename internal::DecayArray<T4>::type,
+    typename internal::DecayArray<T5>::type,
+    typename internal::DecayArray<T6>::type> Args;
+  return internal::ContainsSequenceMatcher<Args>(Args(e1, e2, e3, e4, e5, e6));
+}
+
+template <typename T1, typename T2, typename T3, typename T4, typename T5,
+          typename T6, typename T7>
+inline internal::ContainsSequenceMatcher<
+    ::testing::tuple<
+      typename internal::DecayArray<T1>::type,
+      typename internal::DecayArray<T2>::type,
+      typename internal::DecayArray<T3>::type,
+      typename internal::DecayArray<T4>::type,
+      typename internal::DecayArray<T5>::type,
+      typename internal::DecayArray<T6>::type,
+      typename internal::DecayArray<T7>::type> >
+ContainsSequence(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
+                 const T5& e5, const T6& e6, const T7& e7) {
+  typedef ::testing::tuple<
+    typename internal::DecayArray<T1>::type,
+    typename internal::DecayArray<T2>::type,
+    typename internal::DecayArray<T3>::type,
+    typename internal::DecayArray<T4>::type,
+    typename internal::DecayArray<T5>::type,
+    typename internal::DecayArray<T6>::type,
+    typename internal::DecayArray<T7>::type> Args;
+  return internal::ContainsSequenceMatcher<Args>(
+      Args(e1, e2, e3, e4, e5, e6, e7));
+}
+
+template <typename T1, typename T2, typename T3, typename T4, typename T5,
+          typename T6, typename T7, typename T8>
+inline internal::ContainsSequenceMatcher<
+    ::testing::tuple<
+      typename internal::DecayArray<T1>::type,
+      typename internal::DecayArray<T2>::type,
+      typename internal::DecayArray<T3>::type,
+      typename internal::DecayArray<T4>::type,
+      typename internal::DecayArray<T5>::type,
+      typename internal::DecayArray<T6>::type,
+      typename internal::DecayArray<T7>::type,
+      typename internal::DecayArray<T8>::type> >
+ContainsSequence(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
+                 const T5& e5, const T6& e6, const T7& e7, const T8& e8) {
+  typedef ::testing::tuple<
+    typename internal::DecayArray<T1>::type,
+    typename internal::DecayArray<T2>::type,
+    typename internal::DecayArray<T3>::type,
+    typename internal::DecayArray<T4>::type,
+    typename internal::DecayArray<T5>::type,
+    typename internal::DecayArray<T6>::type,
+    typename internal::DecayArray<T7>::type,
+    typename internal::DecayArray<T8>::type> Args;
+  return internal::ContainsSequenceMatcher<Args>(
+      Args(e1, e2, e3, e4, e5, e6, e7, e8));
+}
+
+template <typename T1, typename T2, typename T3, typename T4, typename T5,
+          typename T6, typename T7, typename T8, typename T9>
+inline internal::ContainsSequenceMatcher<
+    ::testing::tuple<
+      typename internal::DecayArray<T1>::type,
+      typename internal::DecayArray<T2>::type,
+      typename internal::DecayArray<T3>::type,
+      typename internal::DecayArray<T4>::type,
+      typename internal::DecayArray<T5>::type,
+      typename internal::DecayArray<T6>::type,
+      typename internal::DecayArray<T7>::type,
+      typename internal::DecayArray<T8>::type,
+      typename internal::DecayArray<T9>::type> >
+ContainsSequence(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
+                 const T5& e5, const T6& e6, const T7& e7, const T8& e8,
+                 const T9& e9) {
+  typedef ::testing::tuple<
+    typename internal::DecayArray<T1>::type,
+    typename internal::DecayArray<T2>::type,
+    typename internal::DecayArray<T3>::type,
+    typename internal::DecayArray<T4>::type,
+    typename internal::DecayArray<T5>::type,
+    typename internal::DecayArray<T6>::type,
+    typename internal::DecayArray<T7>::type,
+    typename internal::DecayArray<T8>::type,
+    typename internal::DecayArray<T9>::type> Args;
+  return internal::ContainsSequenceMatcher<Args>(
+      Args(e1, e2, e3, e4, e5, e6, e7, e8, e9));
+}
+
+template <typename T1, typename T2, typename T3, typename T4, typename T5,
+          typename T6, typename T7, typename T8, typename T9, typename T10>
+inline internal::ContainsSequenceMatcher<
+    ::testing::tuple<
+      typename internal::DecayArray<T1>::type,
+      typename internal::DecayArray<T2>::type,
+      typename internal::DecayArray<T3>::type,
+      typename internal::DecayArray<T4>::type,
+      typename internal::DecayArray<T5>::type,
+      typename internal::DecayArray<T6>::type,
+      typename internal::DecayArray<T7>::type,
+      typename internal::DecayArray<T8>::type,
+      typename internal::DecayArray<T9>::type,
+      typename internal::DecayArray<T10>::type> >
+ContainsSequence(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
+                 const T5& e5, const T6& e6, const T7& e7, const T8& e8,
+                 const T9& e9, const T10& e10) {
+  typedef ::testing::tuple<
+    typename internal::DecayArray<T1>::type,
+    typename internal::DecayArray<T2>::type,
+    typename internal::DecayArray<T3>::type,
+    typename internal::DecayArray<T4>::type,
+    typename internal::DecayArray<T5>::type,
+    typename internal::DecayArray<T6>::type,
+    typename internal::DecayArray<T7>::type,
+    typename internal::DecayArray<T8>::type,
+    typename internal::DecayArray<T9>::type,
+    typename internal::DecayArray<T10>::type> Args;
+  return internal::ContainsSequenceMatcher<Args>(
+      Args(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10));
+}
+
 // AllOf(m1, m2, ..., mk) matches any value that matches all of the given
 // sub-matchers.  AllOf is called fully qualified to prevent ADL from firing.
 
