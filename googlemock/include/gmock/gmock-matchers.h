@@ -2959,9 +2959,9 @@ class ContainsSequenceMatcherImpl : public MatcherInterface<Container> {
       ongoing_matches.push_back(sequence_.begin());
       // Terminate any ongoing matches that don't extend to current.
       ongoing_matches.erase(
-          remove_if(ongoing_matches.begin(),
-                    ongoing_matches.end(),
-                    DoesntMatch(*current)),
+          std::remove_if(ongoing_matches.begin(),
+                         ongoing_matches.end(),
+                         DoesntMatch(*current)),
           ongoing_matches.end());
       // Increment ongoing matches.
       for (typename ::std::vector<SeqPos>::iterator pos
