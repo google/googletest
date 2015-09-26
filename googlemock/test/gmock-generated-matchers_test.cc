@@ -59,7 +59,6 @@ using testing::tuple;
 using testing::_;
 using testing::Args;
 using testing::Contains;
-using testing::ContainsSequence;
 using testing::ElementsAre;
 using testing::ElementsAreArray;
 using testing::Eq;
