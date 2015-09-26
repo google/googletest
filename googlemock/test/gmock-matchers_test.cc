@@ -5642,5 +5642,145 @@ TEST(UnorderedPointwiseTest, AllowsMonomorphicInnerMatcher) {
   EXPECT_THAT(lhs, UnorderedPointwise(m2, rhs));
 }
 
+// Tests ContainsSequence().
+TEST(ContainsSequenceTest, SingleElementSequence) {
+  vector<int> a;  // = { 1, 2, 3, 4, 5 };
+  for (size_t i = 1; i <= 5; ++i) { a.push_back(i); }
+  int s[1];
+  s[0] = 1;
+  EXPECT_THAT(a, ContainsSequence(s));
+  s[0] = 2;
+  EXPECT_THAT(a, ContainsSequence(s));
+  s[0] = 3;
+  EXPECT_THAT(a, ContainsSequence(s));
+  s[0] = 4;
+  EXPECT_THAT(a, ContainsSequence(s));
+  s[0] = 5;
+  EXPECT_THAT(a, ContainsSequence(s));
+  s[0] = 6;
+  EXPECT_THAT(a, Not(ContainsSequence(s)));
+}
+
+TEST(ContainsSequenceTest, LongSequence) {
+  vector<int> a;  // = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2 };
+  for (size_t i = 1; i <= 10; ++i) { a.push_back(1); }
+  a.push_back(2);
+
+  vector<int> s(7);
+  s[0] = s[1] = s[2] = s[3] = s[4] = s[5] = s[6] = 1;
+  EXPECT_THAT(a, ContainsSequence(s));
+  EXPECT_THAT(a, ContainsSequence(s.begin(), s.end()));
+  s[6] = 2;
+  EXPECT_THAT(a, ContainsSequence(s));
+  EXPECT_THAT(a, ContainsSequence(s.begin(), s.end()));
+  s[6] = -1;
+  EXPECT_THAT(a, Not(ContainsSequence(s)));
+  EXPECT_THAT(a, Not(ContainsSequence(s.begin(), s.end())));
+}
+
+TEST(ContainsSequenceTest, SingleElementVector) {
+  vector<int> a(1, 1);  // = { 1 };
+  int s[2];
+  s[0] = s[1] = 1;
+  EXPECT_THAT(a, ContainsSequence(s, 1));
+  EXPECT_THAT(a, ContainsSequence(s, s+1));
+  EXPECT_THAT(a, Not(ContainsSequence(s, 2)));
+  EXPECT_THAT(a, Not(ContainsSequence(s, s+2)));
+}
+
+TEST(ContainsSequenceTest, SingleElementSet) {
+  set<double> a;  // = { .1 };
+  a.insert(.1);
+  double s[2];
+  s[0] = .1;
+  s[1] = 100;
+  EXPECT_THAT(a, ContainsSequence(s, 1));
+  EXPECT_THAT(a, ContainsSequence(s, s+1));
+  EXPECT_THAT(a, Not(ContainsSequence(s+1, 1)));
+  EXPECT_THAT(a, Not(ContainsSequence(s+1, s+2)));
+  EXPECT_THAT(a, Not(ContainsSequence(s)));
+  EXPECT_THAT(a, Not(ContainsSequence(s, 2)));
+}
+
+TEST(ContainsSequenceTest, SingleElementNativeArray) {
+  char a[1];  // = { '1' };
+  a[0] = '1';
+  EXPECT_THAT(a, ContainsSequence(std::string("1")));
+  EXPECT_THAT(a, Not(ContainsSequence(std::string("2"))));
+  EXPECT_THAT(a, Not(ContainsSequence(std::string("12"))));
+}
+
+TEST(ContainsSequenceTest, SingleElementList) {
+  list<int> a;  // = { 1 };
+  a.push_back(1);
+  int s[2];
+  s[0] = s[1] = 1;
+  EXPECT_THAT(a, ContainsSequence(s, 1));
+  EXPECT_THAT(a, ContainsSequence(s, s+1));
+  EXPECT_THAT(a, Not(ContainsSequence(s, 2)));
+  EXPECT_THAT(a, Not(ContainsSequence(s, s+2)));
+}
+
+TEST(ContainsSequenceTest, VariousSequenceTypes) {
+  int a[3];
+  a[0] = 1;
+  a[1] = 2;
+  a[2] = 3;
+
+  int sa[2];
+  sa[0] = 2;
+  sa[1] = 3;
+  EXPECT_THAT(a, ContainsSequence(sa));
+  EXPECT_THAT(a, ContainsSequence(a));
+
+  set<int> ss;
+  ss.insert(1);
+  EXPECT_THAT(a, ContainsSequence(ss));
+  ss.insert(3);
+  EXPECT_THAT(a, Not(ContainsSequence(ss)));
+  ss.insert(2);
+  EXPECT_THAT(a, ContainsSequence(ss));
+  ss.insert(-1);
+  EXPECT_THAT(a, Not(ContainsSequence(ss)));
+
+  list<int> sl;
+  sl.push_back(2);
+  EXPECT_THAT(a, ContainsSequence(sl));
+  sl.push_back(1);
+  EXPECT_THAT(a, Not(ContainsSequence(sl)));
+
+  vector<int> sv;
+  EXPECT_THAT(a, ContainsSequence(sv));
+  sv = vector<int>(a, a+3);
+  EXPECT_THAT(a, ContainsSequence(sv));
+  sv.push_back(4);
+  EXPECT_THAT(a, Not(ContainsSequence(sv)));
+
+#if GTEST_HAS_STD_INITIALIZER_LIST_
+  EXPECT_THAT(a, ContainsSequence({1, 2, 3}));
+  EXPECT_THAT(a, ContainsSequence({2}));
+  EXPECT_THAT(a, Not(ContainsSequence({3, 2, 1, 0})));
+#endif  // GTEST_HAS_STD_INITIALIZER_LIST_
+}
+
+TEST(ContainsSequenceTest, EmptyContainer) {
+  int s[1];
+  s[0] = 0;
+  EXPECT_THAT(list<int>(), Not(ContainsSequence(s)));
+  EXPECT_THAT(vector<int>(), Not(ContainsSequence(s)));
+  EXPECT_THAT(set<int>(), Not(ContainsSequence(s)));
+}
+
+TEST(ContainsSequenceTest, EmptySequence) {
+  int a[3];
+  EXPECT_THAT(a, ContainsSequence(vector<int>()));
+  EXPECT_THAT(a,ContainsSequence(set<int>()));
+  EXPECT_THAT(a,ContainsSequence(list<int>()));
+}
+
+// TODO(dekimir): test stream containers.
+// TODO(dekimir): test composition with other matchers.
+// TODO(dekimir): test description of match/mismatch.
+// TODO(dekimir): test explanation.
 }  // namespace gmock_matchers_test
 }  // namespace testing
