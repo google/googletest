@@ -2920,7 +2920,7 @@ class ContainsSequenceMatcherImpl : public MatcherInterface<Container> {
 
   // Describes what this matcher does.
   virtual void DescribeTo(::std::ostream* os) const {
-    *os << "contains a sequence of " << Elements(count()) << 
+    *os << "contains a sequence of " << Elements(count()) <<
       " elements where\n";
     for (size_t i = 0; i != count(); ++i) {
       *os << "element #" << i << " ";
