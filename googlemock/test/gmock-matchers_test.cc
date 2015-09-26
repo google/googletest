@@ -5778,9 +5778,9 @@ TEST(ContainsSequenceTest, EmptySequence) {
   EXPECT_THAT(a,ContainsSequence(list<int>()));
 }
 
-// TODO(dekimir): test stream containers.
-// TODO(dekimir): test composition with other matchers.
-// TODO(dekimir): test description of match/mismatch.
-// TODO(dekimir): test explanation.
+// TODO(dmircevski): test stream containers.
+// TODO(dmircevski): test composition with other matchers.
+// TODO(dmircevski): test description of match/mismatch.
+// TODO(dmircevski): test explanation.
 }  // namespace gmock_matchers_test
 }  // namespace testing

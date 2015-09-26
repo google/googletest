@@ -2984,7 +2984,7 @@ class ContainsSequenceMatcherImpl : public MatcherInterface<Container> {
 
     // True if pos doesn't match the container element.
     bool operator()(const SeqPos& pos) {
-      // TODO(dekimir): inform listener.
+      // TODO(dmircevski): inform listener.
       return !pos->Matches(element_);
     }
 
