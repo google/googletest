@@ -3575,6 +3575,30 @@ class ContainsSequenceArrayMatcher {
   GTEST_DISALLOW_ASSIGN_(ContainsSequenceArrayMatcher);
 };
 
+template <typename MatcherTuple>
+class ContainsSequenceMatcher {
+ public:
+  explicit ContainsSequenceMatcher(const MatcherTuple& args) : matchers_(args) {}
+
+  template <typename Container>
+  operator Matcher<Container>() const {
+    typedef GTEST_REMOVE_REFERENCE_AND_CONST_(Container) RawContainer;
+    typedef typename internal::StlContainerView<RawContainer>::type View;
+    typedef typename View::value_type Element;
+    typedef ::std::vector<Matcher<const Element&> > MatcherVec;
+    MatcherVec matchers;
+    matchers.reserve(::testing::tuple_size<MatcherTuple>::value);
+    TransformTupleValues(CastAndAppendTransform<const Element&>(), matchers_,
+                         ::std::back_inserter(matchers));
+    return MakeMatcher(new ContainsSequenceMatcherImpl<Container>(
+                           matchers.begin(), matchers.end()));
+  }
+
+ private:
+  const MatcherTuple matchers_;
+  GTEST_DISALLOW_ASSIGN_(ContainsSequenceMatcher);
+};
+
 // Implements UnorderedElementsAre.
 template <typename MatcherTuple>
 class UnorderedElementsAreMatcher {
