@@ -3552,7 +3552,6 @@ struct CastAndAppendTransform {
   }
 };
 
-// Implements polymorphic ContainsSequence(matchers).
 template <typename T>
 class ContainsSequenceArrayMatcher {
  public:
@@ -3575,6 +3574,7 @@ class ContainsSequenceArrayMatcher {
   GTEST_DISALLOW_ASSIGN_(ContainsSequenceArrayMatcher);
 };
 
+// Implements polymorphic ContainsSequence(matchers).
 template <typename MatcherTuple>
 class ContainsSequenceMatcher {
  public:
