@@ -5646,8 +5646,7 @@ TEST(UnorderedPointwiseTest, AllowsMonomorphicInnerMatcher) {
 TEST(ContainsSequenceArrayTest, SingleElementSequence) {
   vector<int> a;  // = { 1, 2, 3, 4, 5 };
   for (size_t i = 1; i <= 5; ++i) { a.push_back(i); }
-  int s[1];
-  s[0] = 1;
+  int s[] = { 1 };
   EXPECT_THAT(a, ContainsSequenceArray(s));
   s[0] = 2;
   EXPECT_THAT(a, ContainsSequenceArray(s));
@@ -5680,8 +5679,7 @@ TEST(ContainsSequenceArrayTest, LongSequence) {
 
 TEST(ContainsSequenceArrayTest, SingleElementVector) {
   vector<int> a(1, 1);  // = { 1 };
-  int s[2];
-  s[0] = s[1] = 1;
+  int s[] = { 1, 1 };
   EXPECT_THAT(a, ContainsSequenceArray(s, 1));
   EXPECT_THAT(a, ContainsSequenceArray(s, s+1));
   EXPECT_THAT(a, Not(ContainsSequenceArray(s, 2)));
@@ -5691,9 +5689,7 @@ TEST(ContainsSequenceArrayTest, SingleElementVector) {
 TEST(ContainsSequenceArrayTest, SingleElementSet) {
   set<double> a;  // = { .1 };
   a.insert(.1);
-  double s[2];
-  s[0] = .1;
-  s[1] = 100;
+  double s[] = { .1, 100 };
   EXPECT_THAT(a, ContainsSequenceArray(s, 1));
   EXPECT_THAT(a, ContainsSequenceArray(s, s+1));
   EXPECT_THAT(a, Not(ContainsSequenceArray(s+1, 1)));
@@ -5703,8 +5699,7 @@ TEST(ContainsSequenceArrayTest, SingleElementSet) {
 }
 
 TEST(ContainsSequenceArrayTest, SingleElementNativeArray) {
-  char a[1];  // = { '1' };
-  a[0] = '1';
+  char a[] = { '1' };
   EXPECT_THAT(a, ContainsSequenceArray(std::string("1")));
   EXPECT_THAT(a, Not(ContainsSequenceArray(std::string("2"))));
   EXPECT_THAT(a, Not(ContainsSequenceArray(std::string("12"))));
@@ -5713,8 +5708,7 @@ TEST(ContainsSequenceArrayTest, SingleElementNativeArray) {
 TEST(ContainsSequenceArrayTest, SingleElementList) {
   list<int> a;  // = { 1 };
   a.push_back(1);
-  int s[2];
-  s[0] = s[1] = 1;
+  int s[] = { 1, 1 };
   EXPECT_THAT(a, ContainsSequenceArray(s, 1));
   EXPECT_THAT(a, ContainsSequenceArray(s, s+1));
   EXPECT_THAT(a, Not(ContainsSequenceArray(s, 2)));
@@ -5722,14 +5716,8 @@ TEST(ContainsSequenceArrayTest, SingleElementList) {
 }
 
 TEST(ContainsSequenceArrayTest, VariousSequenceTypes) {
-  int a[3];
-  a[0] = 1;
-  a[1] = 2;
-  a[2] = 3;
-
-  int sa[2];
-  sa[0] = 2;
-  sa[1] = 3;
+  int a[] = { 1, 2, 3 };
+  int sa[] = { 2, 3 };
   EXPECT_THAT(a, ContainsSequenceArray(sa));
   EXPECT_THAT(a, ContainsSequenceArray(a));
 
@@ -5764,8 +5752,7 @@ TEST(ContainsSequenceArrayTest, VariousSequenceTypes) {
 }
 
 TEST(ContainsSequenceArrayTest, EmptyContainer) {
-  int s[1];
-  s[0] = 0;
+  int s[] = { 0 };
   EXPECT_THAT(list<int>(), Not(ContainsSequenceArray(s)));
   EXPECT_THAT(vector<int>(), Not(ContainsSequenceArray(s)));
   EXPECT_THAT(set<int>(), Not(ContainsSequenceArray(s)));
