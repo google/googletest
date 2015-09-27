@@ -5761,8 +5761,8 @@ TEST(ContainsSequenceArrayTest, EmptyContainer) {
 TEST(ContainsSequenceArrayTest, EmptySequence) {
   int a[3];
   EXPECT_THAT(a, ContainsSequenceArray(vector<int>()));
-  EXPECT_THAT(a,ContainsSequenceArray(set<int>()));
-  EXPECT_THAT(a,ContainsSequenceArray(list<int>()));
+  EXPECT_THAT(a, ContainsSequenceArray(set<int>()));
+  EXPECT_THAT(a, ContainsSequenceArray(list<int>()));
 }
 
 // TODO(dmircevski): test stream containers.
