@@ -3554,10 +3554,10 @@ struct CastAndAppendTransform {
 
 // Implements polymorphic ContainsSequence(matchers).
 template <typename T>
-class ContainsSequenceMatcher {
+class ContainsSequenceArrayMatcher {
  public:
   template <typename Iter>
-  ContainsSequenceMatcher(Iter first, Iter last)
+  ContainsSequenceArrayMatcher(Iter first, Iter last)
       : sequence_(first, last) {}
 
   template <typename Container>
@@ -3572,7 +3572,7 @@ class ContainsSequenceMatcher {
 
  private:
   const ::std::vector<T> sequence_;
-  GTEST_DISALLOW_ASSIGN_(ContainsSequenceMatcher);
+  GTEST_DISALLOW_ASSIGN_(ContainsSequenceArrayMatcher);
 };
 
 // Implements UnorderedElementsAre.
@@ -3820,36 +3820,36 @@ ElementsAreArray(::std::initializer_list<T> xs) {
 // All forms of ContainsSequence() make a copy of the input matcher sequence.
 
 template <typename Iter>
-inline internal::ContainsSequenceMatcher<
+inline internal::ContainsSequenceArrayMatcher<
     typename ::std::iterator_traits<Iter>::value_type>
-ContainsSequence(Iter first, Iter last) {
+ContainsSequenceArray(Iter first, Iter last) {
   typedef typename ::std::iterator_traits<Iter>::value_type T;
-  return internal::ContainsSequenceMatcher<T>(first, last);
+  return internal::ContainsSequenceArrayMatcher<T>(first, last);
 }
 
 template <typename T>
-inline internal::ContainsSequenceMatcher<T> ContainsSequence(
+inline internal::ContainsSequenceArrayMatcher<T> ContainsSequenceArray(
     const T* pointer, size_t count) {
-  return ContainsSequence(pointer, pointer + count);
+  return ContainsSequenceArray(pointer, pointer + count);
 }
 
 template <typename T, size_t N>
-inline internal::ContainsSequenceMatcher<T> ContainsSequence(
+inline internal::ContainsSequenceArrayMatcher<T> ContainsSequenceArray(
     const T (&array)[N]) {
-  return ContainsSequence(array, N);
+  return ContainsSequenceArray(array, N);
 }
 
 template <typename Container>
-inline internal::ContainsSequenceMatcher<typename Container::value_type>
-ContainsSequence(const Container& container) {
-  return ContainsSequence(container.begin(), container.end());
+inline internal::ContainsSequenceArrayMatcher<typename Container::value_type>
+ContainsSequenceArray(const Container& container) {
+  return ContainsSequenceArray(container.begin(), container.end());
 }
 
 #if GTEST_HAS_STD_INITIALIZER_LIST_
 template <typename T>
-inline internal::ContainsSequenceMatcher<T>
-ContainsSequence(::std::initializer_list<T> xs) {
-  return ContainsSequence(xs.begin(), xs.end());
+inline internal::ContainsSequenceArrayMatcher<T>
+ContainsSequenceArray(::std::initializer_list<T> xs) {
+  return ContainsSequenceArray(xs.begin(), xs.end());
 }
 #endif
 
