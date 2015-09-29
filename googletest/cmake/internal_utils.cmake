@@ -240,3 +240,19 @@ function(py_test name)
           --build_dir=${CMAKE_CURRENT_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE})
   endif()
 endfunction()
+
+# pump_target(filepath library)
+#
+# adds ${filepath}, which must be absolute, as a target produced by invoking
+# pump.py ${filepath}.pump.  Makes ${library} dependent on ${filepath}.
+function(pump_target filepath library)
+  #  if (PYTHONINTERP_FOUND)
+  add_custom_command(OUTPUT ${filepath}
+    COMMAND ${PYTHON_EXECUTABLE} ${gtest_SOURCE_DIR}/scripts/pump.py ${filepath}.pump
+    MAIN_DEPENDENCY ${filepath}.pump)
+  set_source_files_properties(${filepath} PROPERTIES GENERATED TRUE)
+  string(REPLACE "/" "_slash_" fictitious_target ${filepath})
+  add_custom_target(${fictitious_target} DEPENDS ${filepath})
+  add_dependencies(${library} ${fictitious_target})
+#  endif()
+endfunction()
