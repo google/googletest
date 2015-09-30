@@ -1412,11 +1412,11 @@ internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
 // type testing::TestParamInfo<class ParamType>, and return std::string.
 //
 // testing::PrintToStringParamName is a builtin test suffix generator that
-// returns the value of testing::PrintToString(GetParam()).
+// returns the value of testing::PrintToString(GetParam()). It does not work
+// for std::string or C strings.
 //
 // Note: test names must be non-empty, unique, and may only contain ASCII
-// alphanumeric characters or underscore. Because PrintToString adds quotes
-// to std::string and C strings, it won't work for these types.
+// alphanumeric characters or underscore.
 
 # define INSTANTIATE_TEST_CASE_P(prefix, test_case_name, generator, ...) \
   ::testing::internal::ParamGenerator<test_case_name::ParamType> \
