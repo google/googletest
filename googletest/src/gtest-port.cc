@@ -60,6 +60,7 @@
 
 #if GTEST_OS_AIX
 # include <procinfo.h>
+# include <sys/types.h>
 #endif  // GTEST_OS_AIX
 
 #include "gtest/gtest-spi.h"
