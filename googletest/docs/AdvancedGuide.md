@@ -44,7 +44,7 @@ switch(expression) {
 }
 ```
 
-Note: you can only use `FAIL()` in functions that return `void`. See the [Assertion Placement section](#Assertion_Placement.md) for more information.
+Note: you can only use `FAIL()` in functions that return `void`. See the [Assertion Placement section](#assertion-placement) for more information.
 
 _Availability_: Linux, Windows, Mac.
 
@@ -125,7 +125,7 @@ c is 10<br>
 
 **Notes:**
 
-  1. If you see a compiler error "no matching function to call" when using `ASSERT_PRED*` or `EXPECT_PRED*`, please see [this](FAQ.md#the-compiler-complains-no-matching-function-to-call-when-i-use-assert_predn-how-do-i-fix-it) for how to resolve it.
+  1. If you see a compiler error "no matching function to call" when using `ASSERT_PRED*` or `EXPECT_PRED*`, please see [this FAQ](FAQ.md#the-compiler-complains-no-matching-function-to-call-when-i-use-assert_predn-how-do-i-fix-it) for how to resolve it.
   1. Currently we only provide predicate assertions of arity <= 5. If you need a higher-arity assertion, let us know.
 
 _Availability_: Linux, Windows, Mac
@@ -517,9 +517,9 @@ _death tests_. More generally, any test that checks that a program terminates
 Note that if a piece of code throws an exception, we don't consider it "death"
 for the purpose of death tests, as the caller of the code could catch the exception
 and avoid the crash. If you want to verify exceptions thrown by your code,
-see [Exception Assertions](#Exception_Assertions.md).
+see [Exception Assertions](#exception-assertions).
 
-If you want to test `EXPECT_*()/ASSERT_*()` failures in your test code, see [Catching Failures](#Catching_Failures.md).
+If you want to test `EXPECT_*()/ASSERT_*()` failures in your test code, see [Catching Failures](#catching-failures).
 
 ## How to Write a Death Test ##
 
@@ -1226,7 +1226,7 @@ names:
   * `InstantiationName/FooTest.HasBlahBlah/1` for `"miny"`
   * `InstantiationName/FooTest.HasBlahBlah/2` for `"moe"`
 
-You can use these names in [--gtest\_filter](#Running_a_Subset_of_the_Tests.md).
+You can use these names in [--gtest\_filter](#running-a-subset-of-the-tests).
 
 This statement will instantiate all tests from `FooTest` again, each
 with parameter values `"cat"` and `"dog"`:
@@ -1695,7 +1695,7 @@ state.  Here's an example:
 
 To use the event listener you have defined, add an instance of it to
 the Google Test event listener list (represented by class
-[TestEventListeners](https://github.com/google/googletest/blob/master/googletest/include/gtest/gtest.h#L991)
+[TestEventListeners](https://github.com/google/googletest/blob/master/googletest/include/gtest/gtest.h#L1064)
 - note the "s" at the end of the name) in your
 `main()` function, before calling `RUN_ALL_TESTS()`:
 ```
@@ -1868,12 +1868,12 @@ _Availability:_ Linux, Windows, Mac.
 
 ### Temporarily Enabling Disabled Tests ###
 
-To include [disabled tests](#Temporarily_Disabling_Tests.md) in test
+To include [disabled tests](#temporarily-disabling-tests) in test
 execution, just invoke the test program with the
 `--gtest_also_run_disabled_tests` flag or set the
 `GTEST_ALSO_RUN_DISABLED_TESTS` environment variable to a value other
 than `0`.  You can combine this with the
-[--gtest\_filter](#Running_a_Subset_of_the_Tests.md) flag to further select
+[--gtest\_filter](#running-a-subset-of-the-tests) flag to further select
 which disabled tests to run.
 
 _Availability:_ Linux, Windows, Mac; since version 1.3.0.
