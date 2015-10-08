@@ -14,8 +14,8 @@ All Google Test source and pre-built packages are provided under the [New BSD Li
 
 ## The Google Test Community ##
 
-The Google Test community exists primarily through the [discussion group](http://groups.google.com/group/googletestframework), the
-[issue tracker](http://code.google.com/p/googletest/issues/list) and, to a lesser extent, the [source control repository](http://code.google.com/p/googletest/source/checkout). You are definitely encouraged to contribute to the
+The Google Test community exists primarily through the [discussion group](http://groups.google.com/group/googletestframework) and the GitHub repository.
+You are definitely encouraged to contribute to the
 discussion and you can also help us to keep the effectiveness of the
 group high by following and promoting the guidelines listed here.
 
@@ -35,37 +35,27 @@ Sure, C++ testing is serious business and all that, but it's also
 a lot of fun. Let's keep it that way. Let's strive to be one of the
 friendliest communities in all of open source.
 
-### Where to Discuss Google Test ###
-
-As always, discuss Google Test in the official [Google C++ Testing Framework discussion group](http://groups.google.com/group/googletestframework).  You don't have to actually submit
-code in order to sign up. Your participation itself is a valuable
-contribution.
+As always, discuss Google Test in the official GoogleTest discussion group.
+You don't have to actually submit code in order to sign up. Your participation
+itself is a valuable contribution.
 
 # Working with the Code #
 
 If you want to get your hands dirty with the code inside Google Test,
 this is the section for you.
 
-## Checking Out the Source from Subversion ##
-
-Checking out the Google Test source is most useful if you plan to
-tweak it yourself.  You check out the source for Google Test using a
-[Subversion](http://subversion.tigris.org/) client as you would for any
-other project hosted on Google Code.  Please see the instruction on
-the [source code access page](http://code.google.com/p/googletest/source/checkout) for how to do it.
-
 ## Compiling from Source ##
 
 Once you check out the code, you can find instructions on how to
-compile it in the [README](http://code.google.com/p/googletest/source/browse/trunk/README) file.
+compile it in the [README](../README.md) file.
 
 ## Testing ##
 
 A testing framework is of no good if itself is not thoroughly tested.
 Tests should be written for any new code, and changes should be
 verified to not break existing tests before they are submitted for
-review. To perform the tests, follow the instructions in [README](http://code.google.com/p/googletest/source/browse/trunk/README) and
-verify that there are no failures.
+review. To perform the tests, follow the instructions in
+[README](../README.md) and verify that there are no failures.
 
 # Contributing Code #
 
@@ -104,14 +94,12 @@ can read the PumpManual for details.
 
 Please do submit code. Here's what you need to do:
 
-  1. Normally you should make your change against the SVN trunk instead of a branch or a tag, as the latter two are for release control and should be treated mostly as read-only.
-  1. Decide which code you want to submit. A submission should be a set of changes that addresses one issue in the [Google Test issue tracker](http://code.google.com/p/googletest/issues/list). Please don't mix more than one logical change per submittal, because it makes the history hard to follow. If you want to make a change that doesn't have a corresponding issue in the issue tracker, please create one.
+  1. A submission should be a set of changes that addresses one issue in the [issue tracker](https://github.com/google/googletest/issues). Please don't mix more than one logical change per submittal, because it makes the history hard to follow. If you want to make a change that doesn't have a corresponding issue in the issue tracker, please create one.
   1. Also, coordinate with team members that are listed on the issue in question. This ensures that work isn't being duplicated and communicating your plan early also generally leads to better patches.
   1. Ensure that your code adheres to the [Google Test source code style](#Coding_Style.md).
   1. Ensure that there are unit tests for your code.
   1. Sign a Contributor License Agreement.
-  1. Create a patch file using `svn diff`.
-  1. We use [Rietveld](http://codereview.appspot.com/) to do web-based code reviews.  You can read about the tool [here](http://code.google.com/p/rietveld/wiki/CodeReviewHelp).  When you are ready, upload your patch via Rietveld and notify `googletestframework@googlegroups.com` to review it.  There are several ways to upload the patch.  We recommend using the [upload\_gtest.py](http://code.google.com/p/googletest/source/browse/trunk/scripts/upload_gtest.py) script, which you can find in the `scripts/` folder in the SVN trunk.
+  1. Create a Pull Request in the usual way.
 
 ## Google Test Committers ##
 
@@ -125,14 +113,13 @@ Test.
 
 # Release Process #
 
-We follow the typical release process for Subversion-based projects:
+We follow a typical release process:
 
   1. A release branch named `release-X.Y` is created.
   1. Bugs are fixed and features are added in trunk; those individual patches are merged into the release branch until it's stable.
   1. An individual point release (the `Z` in `X.Y.Z`) is made by creating a tag from the branch.
   1. Repeat steps 2 and 3 throughout one release cycle (as determined by features or time).
   1. Go back to step 1 to create another release branch and so on.
-
 
 ---
 
