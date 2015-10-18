@@ -12,6 +12,8 @@ before-install:
   - uname -a
   - $CC --version
   - $CXX --version
+  - $CXX -v
+
 install:
 # /usr/bin/gcc is 4.6 always, but gcc-X.Y is available.
 - if [ "$CXX" = "g++" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
@@ -20,6 +22,8 @@ install:
 - echo ${PATH}
 - echo ${CXX}
 - ${CXX} --version
+- $CXX -v
+- apt-cache search clang
 addons:
   apt:
     sources:
@@ -27,11 +31,11 @@ addons:
     packages:
     - gcc-4.9
     - g++-4.9
-    - clang-3.6
+    - clang
     - valgrind
 os:
   - linux
-  - osx
+#  - osx
 language: cpp
 compiler:
   - gcc
@@ -42,8 +46,8 @@ env:
 #    - LIBSTDC_VERSION=5
     - CLANG_VERSION=3.6
   matrix:
-    - GTEST_TARGET=googletest SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug   VERBOSE_MAKE=true VERBOSE
-    - GTEST_TARGET=googlemock SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug   VERBOSE_MAKE=true VERBOSE
+#    - GTEST_TARGET=googletest SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug   VERBOSE_MAKE=true VERBOSE
+#    - GTEST_TARGET=googlemock SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug   VERBOSE_MAKE=true VERBOSE
     - GTEST_TARGET=googlemock SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug CXX_FLAGS=-std=c++11  VERBOSE_MAKE=true VERBOSE
 #    - GTEST_TARGET=googletest SHARED_LIB=ON  STATIC_LIB=ON CMAKE_PKG=ON  BUILD_TYPE=release VERBOSE_MAKE=false
 #    - GTEST_TARGET=googlemock SHARED_LIB=ON  STATIC_LIB=ON CMAKE_PKG=ON  BUILD_TYPE=release VERBOSE_MAKE=false
