@@ -6,14 +6,6 @@
 # http://stackoverflow.com/questions/22111549/travis-ci-with-clang-3-4-and-c11/30925448#30925448
 # to allow C++11, though we are not yet building with -std=c++11
 
-before-install:
-  # Debug information
-  - if [[ "$TRAVIS_OS_NAME" = "linux" ]]; then lsb_release -a; fi
-  - uname -a
-  - $CC --version
-  - $CXX --version
-  - $CXX -v
-
 install:
 # /usr/bin/gcc is 4.6 always, but gcc-X.Y is available.
 - if [ "$CXX" = "g++" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
@@ -22,32 +14,29 @@ install:
 - echo ${PATH}
 - echo ${CXX}
 - ${CXX} --version
-- $CXX -v
-- apt-cache search clang
+- ${CXX} -v
 addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
+    - llvm-toolchain-precise-3.6
     packages:
     - gcc-4.9
     - g++-4.9
-    - clang
+    - clang-3.6
     - valgrind
 os:
   - linux
-#  - osx
+  - osx
 language: cpp
 compiler:
   - gcc
   - clang
 script: ./travis.sh
 env:
-  global:
-#    - LIBSTDC_VERSION=5
-    - CLANG_VERSION=3.6
   matrix:
-#    - GTEST_TARGET=googletest SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug   VERBOSE_MAKE=true VERBOSE
-#    - GTEST_TARGET=googlemock SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug   VERBOSE_MAKE=true VERBOSE
+    - GTEST_TARGET=googletest SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug   VERBOSE_MAKE=true VERBOSE
+    - GTEST_TARGET=googlemock SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug   VERBOSE_MAKE=true VERBOSE
     - GTEST_TARGET=googlemock SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug CXX_FLAGS=-std=c++11  VERBOSE_MAKE=true VERBOSE
 #    - GTEST_TARGET=googletest SHARED_LIB=ON  STATIC_LIB=ON CMAKE_PKG=ON  BUILD_TYPE=release VERBOSE_MAKE=false
 #    - GTEST_TARGET=googlemock SHARED_LIB=ON  STATIC_LIB=ON CMAKE_PKG=ON  BUILD_TYPE=release VERBOSE_MAKE=false
