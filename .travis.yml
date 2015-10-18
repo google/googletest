@@ -18,9 +18,6 @@ install:
 # /usr/bin/clang is our version already, and clang-X.Y does not exist.
 #- if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.7" CC="clang-3.7"; fi
 - echo ${PATH}
-- ls /usr/local
-- ls /usr/local/bin
-- export PATH=/usr/local/bin:/usr/bin:${PATH}
 - echo ${CXX}
 - ${CXX} --version
 addons:
@@ -30,7 +27,7 @@ addons:
     packages:
     - gcc-4.9
     - g++-4.9
-    - clang
+    - clang-3.6
     - valgrind
 os:
   - linux
