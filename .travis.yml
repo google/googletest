@@ -35,6 +35,9 @@ compiler:
   - clang
 script: ./travis.sh
 env:
+  global:
+#    - LIBSTDC_VERSION=5
+    - CLANG_VERSION=3.6
   matrix:
     - GTEST_TARGET=googletest SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug   VERBOSE_MAKE=true VERBOSE
     - GTEST_TARGET=googlemock SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug   VERBOSE_MAKE=true VERBOSE
