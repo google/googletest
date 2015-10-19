@@ -57,14 +57,14 @@ the [source code access page](http://code.google.com/p/googletest/source/checkou
 ## Compiling from Source ##
 
 Once you check out the code, you can find instructions on how to
-compile it in the [README](http://code.google.com/p/googletest/source/browse/trunk/README) file.
+compile it in the [README](../README.md) file.
 
 ## Testing ##
 
 A testing framework is of no good if itself is not thoroughly tested.
 Tests should be written for any new code, and changes should be
 verified to not break existing tests before they are submitted for
-review. To perform the tests, follow the instructions in [README](http://code.google.com/p/googletest/source/browse/trunk/README) and
+review. To perform the tests, follow the instructions in [README](../README.md) and
 verify that there are no failures.
 
 # Contributing Code #
