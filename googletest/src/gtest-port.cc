@@ -953,7 +953,15 @@ class CapturedStream {
     // use /sdcard.
     char name_template[] = "/sdcard/gtest_captured_stream.XXXXXX";
 #  else
-    char name_template[] = "/tmp/captured_stream.XXXXXX";
+    char name_template[256];
+    char *test_tmpdir = getenv("GTEST_TMP_DIR");
+    if (test_tmpdir != NULL && test_tmpdir[0] != '\0') {
+      snprintf(name_template, sizeof(name_template),
+               "%s/captured_stream.XXXXXX", test_tmpdir);
+    } else {
+      const char *default_template = "/tmp/captured_stream.XXXXXX";
+      strcpy(name_template, default_template);
+    }
 #  endif  // GTEST_OS_LINUX_ANDROID
     const int captured_fd = mkstemp(name_template);
     filename_ = name_template;
