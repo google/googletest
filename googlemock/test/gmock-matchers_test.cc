@@ -1042,14 +1042,14 @@ TEST(IsNullTest, ReferenceToConstLinkedPtr) {
   EXPECT_FALSE(m.Matches(non_null_p));
 }
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_FUNCTION_
 TEST(IsNullTest, StdFunction) {
   const Matcher<std::function<void()>> m = IsNull();
 
   EXPECT_TRUE(m.Matches(std::function<void()>()));
   EXPECT_FALSE(m.Matches([]{}));
 }
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_STD_FUNCTION_
 
 // Tests that IsNull() describes itself properly.
 TEST(IsNullTest, CanDescribeSelf) {
@@ -1090,14 +1090,14 @@ TEST(NotNullTest, ReferenceToConstLinkedPtr) {
   EXPECT_TRUE(m.Matches(non_null_p));
 }
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_FUNCTION_
 TEST(NotNullTest, StdFunction) {
   const Matcher<std::function<void()>> m = NotNull();
 
   EXPECT_TRUE(m.Matches([]{}));
   EXPECT_FALSE(m.Matches(std::function<void()>()));
 }
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_STD_FUNCTION_
 
 // Tests that NotNull() describes itself properly.
 TEST(NotNullTest, CanDescribeSelf) {
