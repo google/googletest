@@ -358,8 +358,9 @@
 # define GTEST_HAS_STD_FUNCTION_ 1
 # define GTEST_HAS_STD_INITIALIZER_LIST_ 1
 # define GTEST_HAS_STD_MOVE_ 1
-# define GTEST_HAS_STD_UNIQUE_PTR_ 1
 # define GTEST_HAS_STD_SHARED_PTR_ 1
+# define GTEST_HAS_STD_TYPE_TRAITS_ 1
+# define GTEST_HAS_STD_UNIQUE_PTR_ 1
 #endif
 
 // C++11 specifies that <tuple> provides std::tuple.
