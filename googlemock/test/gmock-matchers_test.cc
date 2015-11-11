@@ -2708,21 +2708,16 @@ class FloatingPointTest : public testing::Test {
         zero_bits_(Floating(0).bits()),
         one_bits_(Floating(1).bits()),
         infinity_bits_(Floating(Floating::Infinity()).bits()),
-        close_to_positive_zero_(Floating::ReinterpretBits(
-            static_cast<Bits>(zero_bits_ + max_ulps_/2))),
-        close_to_negative_zero_(-Floating::ReinterpretBits(
-            static_cast<Bits>(zero_bits_ + max_ulps_ - max_ulps_/2))),
-        further_from_negative_zero_(-Floating::ReinterpretBits(
-            static_cast<Bits>(zero_bits_ + max_ulps_ + 1 - max_ulps_/2))),
-        close_to_one_(Floating::ReinterpretBits(
-            static_cast<Bits>(one_bits_ + max_ulps_))),
-        further_from_one_(Floating::ReinterpretBits(
-            static_cast<Bits>(one_bits_ + max_ulps_ + 1))),
+        close_to_positive_zero_(ReinterpretBits(zero_bits_ + max_ulps_/2)),
+        close_to_negative_zero_(ReinterpretBits(
+            zero_bits_ + max_ulps_ - max_ulps_/2)),
+        further_from_negative_zero_(-ReinterpretBits(
+            zero_bits_ + max_ulps_ + 1 - max_ulps_/2)),
+        close_to_one_(ReinterpretBits(one_bits_ + max_ulps_)),
+        further_from_one_(ReinterpretBits(one_bits_ + max_ulps_ + 1)),
         infinity_(Floating::Infinity()),
-        close_to_infinity_(Floating::ReinterpretBits(
-            static_cast<Bits>(infinity_bits_ - max_ulps_))),
-        further_from_infinity_(Floating::ReinterpretBits(
-            static_cast<Bits>(infinity_bits_ - max_ulps_ - 1))),
+        close_to_infinity_(ReinterpretBits(infinity_bits_ - max_ulps_)),
+        further_from_infinity_(ReinterpretBits(infinity_bits_ - max_ulps_ - 1)),
         max_(Floating::Max()),
         nan1_(Floating::ReinterpretBits(Floating::kExponentBitMask | 1)),
         nan2_(Floating::ReinterpretBits(Floating::kExponentBitMask | 200)) {
@@ -2806,6 +2801,12 @@ class FloatingPointTest : public testing::Test {
   // Some NaNs.
   const RawType nan1_;
   const RawType nan2_;
+
+ private:
+  template <typename T>
+  static RawType ReinterpretBits(T value) {
+    return Floating::ReinterpretBits(static_cast<Bits>(value));
+  }
 };
 
 // Tests floating-point matchers with fixed epsilons.
