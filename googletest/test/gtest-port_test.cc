@@ -75,8 +75,8 @@ TEST(IsXDigitTest, WorksForNarrowAscii) {
 }
 
 TEST(IsXDigitTest, ReturnsFalseForNarrowNonAscii) {
-  EXPECT_FALSE(IsXDigit(static_cast<char>(0x80)));
-  EXPECT_FALSE(IsXDigit(static_cast<char>('0' | 0x80)));
+  EXPECT_FALSE(IsXDigit(static_cast<char>(0x80u)));
+  EXPECT_FALSE(IsXDigit(static_cast<char>('0' | 0x80u)));
 }
 
 TEST(IsXDigitTest, WorksForWideAscii) {
