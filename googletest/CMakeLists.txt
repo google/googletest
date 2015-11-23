@@ -93,6 +93,14 @@ target_link_libraries(gtest_main gtest)
 
 ########################################################################
 #
+# Install rules
+install(TARGETS gtest gtest_main
+  DESTINATION lib)
+install(DIRECTORY ${gtest_SOURCE_DIR}/include/gtest
+  DESTINATION include)
+
+########################################################################
+#
 # Samples on how to link user tests with gtest or gtest_main.
 #
 # They are not built by default.  To build them, set the
