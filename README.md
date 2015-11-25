@@ -53,7 +53,7 @@ the following notable projects:
   * The [Chromium projects](http://www.chromium.org/) (behind the Chrome
     browser and Chrome OS).
   * The [LLVM](http://llvm.org/) compiler.
-  * [Protocol Buffers](http://code.google.com/p/protobuf/), Google's data
+  * [Protocol Buffers](https://github.com/google/protobuf), Google's data
     interchange format.
   * The [OpenCV](http://opencv.org/) computer vision library.
 
@@ -66,7 +66,7 @@ Test UI is written in C#.
 
 [GTest TAP Listener](https://github.com/kinow/gtest-tap-listener) is an event
 listener for Google Test that implements the
-[TAP protocol](http://en.wikipedia.org/wiki/Test_Anything_Protocol) for test
+[TAP protocol](https://en.wikipedia.org/wiki/Test_Anything_Protocol) for test
 result output. If your test runner understands TAP, you may find it useful.
 
 ## Requirements ##
@@ -110,9 +110,9 @@ We welcome patches.  If you plan to contribute a patch, you need to
 build Google Test and its own tests from a git checkout (described
 below), which has further requirements:
 
-  * [Python](http://python.org/) v2.3 or newer (for running some of
+  * [Python](https://www.python.org/) v2.3 or newer (for running some of
     the tests and re-generating certain source files from templates)
-  * [CMake](http://www.cmake.org/) v2.6.4 or newer
+  * [CMake](https://cmake.org/) v2.6.4 or newer
 
 ## Regenerating Source Files ##
 
