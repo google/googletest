@@ -76,6 +76,8 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 #include "src/gtest-internal-inl.h"
 #undef GTEST_IMPLEMENTATION_
 
+#include "gtest/gtest-printers.h"
+
 namespace testing {
 namespace internal {
 
@@ -3319,38 +3321,45 @@ TEST_F(SingleEvaluationTest, ExceptionTests) {
   }, int);
   EXPECT_EQ(1, a_);
 
+  // successful EXPECT_THROW
+  EXPECT_THROW_WHAT({  // NOLINT
+    a_++;
+    ThrowAnInteger();
+  }, int, "1");
+  EXPECT_EQ(2, a_);
+
   // failed EXPECT_THROW, throws different
   EXPECT_NONFATAL_FAILURE(EXPECT_THROW({  // NOLINT
     a_++;
     ThrowAnInteger();
   }, bool), "throws a different type");
-  EXPECT_EQ(2, a_);
+  EXPECT_EQ(3, a_);
 
   // failed EXPECT_THROW, throws nothing
   EXPECT_NONFATAL_FAILURE(EXPECT_THROW(a_++, bool), "throws nothing");
-  EXPECT_EQ(3, a_);
+  EXPECT_EQ(4, a_);
 
   // successful EXPECT_NO_THROW
   EXPECT_NO_THROW(a_++);
-  EXPECT_EQ(4, a_);
+  EXPECT_EQ(5, a_);
 
   // failed EXPECT_NO_THROW
   EXPECT_NONFATAL_FAILURE(EXPECT_NO_THROW({  // NOLINT
     a_++;
     ThrowAnInteger();
   }), "it throws");
-  EXPECT_EQ(5, a_);
+  EXPECT_EQ(6, a_);
 
   // successful EXPECT_ANY_THROW
   EXPECT_ANY_THROW({  // NOLINT
     a_++;
     ThrowAnInteger();
   });
-  EXPECT_EQ(6, a_);
+  EXPECT_EQ(7, a_);
 
   // failed EXPECT_ANY_THROW
   EXPECT_NONFATAL_FAILURE(EXPECT_ANY_THROW(a_++), "it doesn't");
-  EXPECT_EQ(7, a_);
+  EXPECT_EQ(8, a_);
 }
 
 #endif  // GTEST_HAS_EXCEPTIONS
@@ -3756,6 +3765,10 @@ TEST(AssertionTest, ASSERT_GT) {
 
 #if GTEST_HAS_EXCEPTIONS
 
+void ThrowAString() {
+    throw "std::string";
+}
+
 void ThrowNothing() {}
 
 // Tests ASSERT_THROW.
@@ -3773,6 +3786,31 @@ TEST(AssertionTest, ASSERT_THROW) {
 
   EXPECT_FATAL_FAILURE(
       ASSERT_THROW(ThrowNothing(), bool),
+      "Expected: ThrowNothing() throws an exception of type bool.\n"
+      "  Actual: it throws nothing.");
+}
+
+// Tests ASSERT_THROW_WHAT.
+TEST(AssertionTest, ASSERT_THROW_WHAT) {
+  ASSERT_THROW_WHAT(ThrowAString(), const char *, "std::string");
+
+# ifndef __BORLANDC__
+
+  // ICE's in C++Builder 2007 and 2009.
+  EXPECT_FATAL_FAILURE(
+      ASSERT_THROW_WHAT(ThrowAString(), bool, "std::string"),
+      "Expected: ThrowAString() throws an exception of type bool.\n"
+      "  Actual: it throws a different type.");
+
+  // Need to figure out how to get the message that was actually thrown into this
+  EXPECT_FATAL_FAILURE(
+      ASSERT_THROW_WHAT(ThrowAString(), const char *, "std::array"),
+      "Result: ThrowAString() threw correct exception "
+      "type const char * with wrong message. Expected: \"std::array\".");
+# endif
+
+  EXPECT_FATAL_FAILURE(
+      ASSERT_THROW_WHAT(ThrowNothing(), bool, "std::string"),
       "Expected: ThrowNothing() throws an exception of type bool.\n"
       "  Actual: it throws nothing.");
 }
@@ -4085,6 +4123,7 @@ TEST(ExpectThrowTest, DoesNotGenerateUnreachableCodeWarning) {
   int n = 0;
 
   EXPECT_THROW(throw 1, int);
+  EXPECT_THROW_WHAT(throw 1, int, "1");
   EXPECT_NONFATAL_FAILURE(EXPECT_THROW(n++, int), "");
   EXPECT_NONFATAL_FAILURE(EXPECT_THROW(throw 1, const char*), "");
   EXPECT_NO_THROW(n++);
@@ -4099,6 +4138,14 @@ TEST(AssertionSyntaxTest, ExceptionAssertionsBehavesLikeSingleStatement) {
 
   if (AlwaysTrue())
     EXPECT_THROW(ThrowAnInteger(), int);
+  else
+    ;  // NOLINT
+
+  if (AlwaysFalse())
+    EXPECT_THROW_WHAT(ThrowNothing(), bool, "false");
+
+  if (AlwaysTrue())
+    EXPECT_THROW_WHAT(ThrowAnInteger(), int, "1");
   else
     ;  // NOLINT
 
@@ -4171,16 +4218,14 @@ TEST(AssertionSyntaxTest, WorksWithSwitch) {
 
 #if GTEST_HAS_EXCEPTIONS
 
-void ThrowAString() {
-    throw "std::string";
-}
-
 // Test that the exception assertion macros compile and work with const
 // type qualifier.
 TEST(AssertionSyntaxTest, WorksWithConst) {
     ASSERT_THROW(ThrowAString(), const char*);
+    ASSERT_THROW_WHAT(ThrowAString(), const char*, "std::string");
 
     EXPECT_THROW(ThrowAString(), const char*);
+    EXPECT_THROW_WHAT(ThrowAString(), const char*, "std::string");
 }
 
 #endif  // GTEST_HAS_EXCEPTIONS
@@ -4511,6 +4556,23 @@ TEST(ExpectTest, EXPECT_THROW) {
                           "type bool.\n  Actual: it throws a different type.");
   EXPECT_NONFATAL_FAILURE(
       EXPECT_THROW(ThrowNothing(), bool),
+      "Expected: ThrowNothing() throws an exception of type bool.\n"
+      "  Actual: it throws nothing.");
+}
+
+// Tests EXPECT_THROW_WHAT.
+TEST(ExpectTest, EXPECT_THROW_WHAT) {
+  EXPECT_THROW_WHAT(ThrowAString(), const char *, "std::string");
+  EXPECT_NONFATAL_FAILURE(EXPECT_THROW_WHAT(ThrowAString(), bool, "std::string"),
+                          "Expected: ThrowAString() throws an exception of "
+                          "type bool.\n  Actual: it throws a different type.");
+
+  // Need to figure out how to get the message that was actually thrown into this
+  EXPECT_NONFATAL_FAILURE(EXPECT_THROW_WHAT(ThrowAString(), const char *, "std::array"),
+                          "Result: ThrowAString() threw correct exception "
+                          "type const char * with wrong message. Expected: \"std::array\".");
+  EXPECT_NONFATAL_FAILURE(
+      EXPECT_THROW_WHAT(ThrowNothing(), bool, "1"),
       "Expected: ThrowNothing() throws an exception of type bool.\n"
       "  Actual: it throws nothing.");
 }

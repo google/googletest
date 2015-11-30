@@ -1147,6 +1147,46 @@ class NativeArray {
     GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__): \
       fail(gtest_msg.value)
 
+#define GTEST_TEST_THROW_WHAT_(statement, expected_exception, regex, fail) \
+  GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
+  if (::testing::internal::ConstCharPtr gtest_msg = "") { \
+    bool gtest_caught_expected = false; \
+    try { \
+      GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
+    } \
+    catch (expected_exception const& e) { \
+      const ::testing::internal::RE& gtest_regex = (regex); \
+      const bool matched = ::testing::internal::RE::PartialMatch(::testing::PrintToString(e), gtest_regex); \
+      if (matched) { \
+        gtest_caught_expected = true; \
+      } else { \
+        Message buffer; \
+        buffer << "Result: threw correct exception type " << "#expected_exception" \
+               << ". Expected " << gtest_regex.pattern() << "\n" \
+               << "Actual msg: " << ::testing::PrintToString(e); \
+        std::cout << "asdfasdfasdfasdfasdfasdf: " << buffer.GetString() << std::endl; \
+        gtest_msg.value = \
+            "Result: " #statement " threw correct exception type " #expected_exception \
+            " with wrong message. Expected: " #regex "."; \
+        goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
+      } \
+    } \
+    catch (...) { \
+      gtest_msg.value = \
+          "Expected: " #statement " throws an exception of type " \
+          #expected_exception ".\n  Actual: it throws a different type."; \
+      goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
+    } \
+    if (!gtest_caught_expected) { \
+      gtest_msg.value = \
+          "Expected: " #statement " throws an exception of type " \
+          #expected_exception ".\n  Actual: it throws nothing."; \
+      goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
+    } \
+  } else \
+    GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__): \
+      fail(gtest_msg.value)
+
 #define GTEST_TEST_NO_THROW_(statement, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (::testing::internal::AlwaysTrue()) { \
