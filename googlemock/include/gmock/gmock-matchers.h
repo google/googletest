@@ -1600,6 +1600,7 @@ struct MatcherList<2, Matcher1, Matcher2> {
   }
 };
 
+#if GTEST_HAS_VARIADIC_TEMPLATES
 // VariadicMatcher is used for the variadic implementation of
 // AllOf(m_1, m_2, ...) and AnyOf(m_1, m_2, ...).
 // CombiningMatcher<T> is used to recursively combine the provided matchers
@@ -1630,6 +1631,7 @@ class VariadicMatcher {
 template <typename... Args>
 using AllOfMatcher = VariadicMatcher<BothOfMatcherImpl, Args...>;
 
+#endif  // GTEST_HAS_VARIADIC_TEMPLATES
 #endif  // GTEST_LANG_CXX11
 
 // Used for implementing the AllOf(m_1, ..., m_n) matcher, which
@@ -1719,12 +1721,12 @@ class EitherOfMatcherImpl : public MatcherInterface<T> {
   GTEST_DISALLOW_ASSIGN_(EitherOfMatcherImpl);
 };
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_VARIADIC_TEMPLATES
 // AnyOfMatcher is used for the variadic implementation of AnyOf(m_1, m_2, ...).
 template <typename... Args>
 using AnyOfMatcher = VariadicMatcher<EitherOfMatcherImpl, Args...>;
 
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_VARIADIC_TEMPLATES
 
 // Used for implementing the AnyOf(m_1, ..., m_n) matcher, which
 // matches a value that matches at least one of the matchers m_1, ...,
@@ -4356,7 +4358,7 @@ inline bool ExplainMatchResult(
   return SafeMatcherCast<const T&>(matcher).MatchAndExplain(value, listener);
 }
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_VARIADIC_TEMPLATES
 // Define variadic matcher versions. They are overloaded in
 // gmock-generated-matchers.h for the cases supported by pre C++11 compilers.
 template <typename... Args>
@@ -4369,7 +4371,7 @@ inline internal::AnyOfMatcher<Args...> AnyOf(const Args&... matchers) {
   return internal::AnyOfMatcher<Args...>(matchers...);
 }
 
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_VARIADIC_TEMPLATES
 
 // AllArgs(m) is a synonym of m.  This is useful in
 //

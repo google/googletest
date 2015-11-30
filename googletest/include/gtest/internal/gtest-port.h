@@ -387,6 +387,19 @@
 # endif
 #endif
 
+// Skip variadic implementation of matchers if using GCC < 4.7 due to
+// Bug 35722 -[C++0x] Variadic templates expansion into non-variadic class template
+// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=35722
+#if !defined(GTEST_HAS_VARIADIC_TEMPLATES)
+# if !GTEST_LANG_CXX11 || \
+    (defined(__GNUC__) && \
+        (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 7)))
+#   define GTEST_HAS_VARIADIC_TEMPLATES 0
+#  else
+#   define GTEST_HAS_VARIADIC_TEMPLATES 1
+#  endif
+#endif
+
 // Brings in definitions for functions used in the testing::internal::posix
 // namespace (read, write, close, chdir, isatty, stat). We do not currently
 // use them on Windows Mobile.
