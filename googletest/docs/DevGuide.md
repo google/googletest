@@ -4,6 +4,23 @@ If you are interested in understanding the internals of Google Test,
 building from source, or contributing ideas or modifications to the
 project, then this document is for you.
 
+# Table of Contents #
+
+- [Introduction](#introduction)
+    - [Licensing](#licensing)
+    - [The Google Test Community](#the-google-test-community)
+        - [Please Be Friendly](#please-be-friendly)
+- [Working with the Code](#working-with-the-code)
+    - [Compiling from Source](#compiling-from-source)
+    - [Testing](#testing)
+- [Contributing Code](#contributing-code)
+    - [Contributor License Agreements](#contributor-license-agreements)
+    - [Coding Style](#coding-style)
+    - [Updating Generated Code](#updating-generated-code)
+    - [Submitting Patches](#submitting-patches)
+    - [Google Test Committers](#google-test-committers)
+- [Release Process](#release-process)
+
 # Introduction #
 
 First, let's give you some background of the project.
