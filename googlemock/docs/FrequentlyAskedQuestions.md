@@ -5,6 +5,30 @@ Please send your questions to the
 group. If you need help with compiler errors, make sure you have
 tried [Google Mock Doctor](#How_am_I_supposed_to_make_sense_of_these_horrible_template_error.md) first.
 
+## Table of Contents
+
+- [When I call a method on my mock object, the method for the real object is invoked instead.  What's the problem?](#when-i-call-a-method-on-my-mock-object-the-method-for-the-real-object-is-invoked-instead--whats-the-problem)
+- [I wrote some matchers.  After I upgraded to a new version of Google Mock, they no longer compile.  What's going on?](#i-wrote-some-matchers--after-i-upgraded-to-a-new-version-of-google-mock-they-no-longer-compile--whats-going-on)
+- [When using Google Mock, do I have to use Google Test as the testing framework?  I have my favorite testing framework and don't want to switch.](#when-using-google-mock-do-i-have-to-use-google-test-as-the-testing-framework--i-have-my-favorite-testing-framework-and-dont-want-to-switch)
+- [How am I supposed to make sense of these horrible template errors?](#how-am-i-supposed-to-make-sense-of-these-horrible-template-errors)
+- [Can I mock a variadic function?](#can-i-mock-a-variadic-function)
+- [MSVC gives me warning C4301 or C4373 when I define a mock method with a const parameter.  Why?](#msvc-gives-me-warning-c4301-or-c4373-when-i-define-a-mock-method-with-a-const-parameter--why)
+- [I have a huge mock class, and Microsoft Visual C++ runs out of memory when compiling it.  What can I do?](#i-have-a-huge-mock-class-and-microsoft-visual-c-runs-out-of-memory-when-compiling-it--what-can-i-do)
+- [I can't figure out why Google Mock thinks my expectations are not satisfied.  What should I do?](#i-cant-figure-out-why-google-mock-thinks-my-expectations-are-not-satisfied--what-should-i-do)
+- [How can I assert that a function is NEVER called?](#how-can-i-assert-that-a-function-is-never-called)
+- [I have a failed test where Google Mock tells me TWICE that a particular expectation is not satisfied.  Isn't this redundant?](#i-have-a-failed-test-where-google-mock-tells-me-twice-that-a-particular-expectation-is-not-satisfied--isnt-this-redundant)
+- [I get a heap check failure when using a mock object, but using a real object is fine.  What can be wrong?](#i-get-a-heap-check-failure-when-using-a-mock-object-but-using-a-real-object-is-fine--what-can-be-wrong)
+- [The "newer expectations override older ones" rule makes writing expectations awkward.  Why does Google Mock do that?](#the-newer-expectations-override-older-ones-rule-makes-writing-expectations-awkward--why-does-google-mock-do-that)
+- [Google Mock prints a warning when a function without EXPECT\_CALL is called, even if I have set its behavior using ON\_CALL.  Would it be reasonable not to show the warning in this case?](#google-mock-prints-a-warning-when-a-function-without-expect_call-is-called-even-if-i-have-set-its-behavior-using-on_call--would-it-be-reasonable-not-to-show-the-warning-in-this-case)
+- [How can I delete the mock function's argument in an action?](#how-can-i-delete-the-mock-functions-argument-in-an-action)
+- [MOCK\_METHODn()'s second argument looks funny.  Why don't you use the MOCK\_METHODn(Method, return\_type, arg\_1, ..., arg\_n) syntax?](#mock_methodns-second-argument-looks-funny--why-dont-you-use-the-mock_methodnmethod-return_type-arg_1--arg_n-syntax)
+- [My code calls a static/global function.  Can I mock it?](#my-code-calls-a-staticglobal-function--can-i-mock-it)
+- [My mock object needs to do complex stuff.  It's a lot of pain to specify the actions.  Google Mock sucks!](#my-mock-object-needs-to-do-complex-stuff--its-a-lot-of-pain-to-specify-the-actions--google-mock-sucks)
+- [I got a warning "Uninteresting function call encountered - default action taken.."  Should I panic?](#i-got-a-warning-uninteresting-function-call-encountered---default-action-taken--should-i-panic)
+- [I want to define a custom action.  Should I use Invoke() or implement the action interface?](#i-want-to-define-a-custom-action--should-i-use-invoke-or-implement-the-action-interface)
+- [I'm using the set-argument-pointee action, and the compiler complains about "conflicting return type specified".  What does it mean?](#im-using-the-set-argument-pointee-action-and-the-compiler-complains-about-conflicting-return-type-specified--what-does-it-mean)
+- [My question is not in your FAQ!](#my-question-is-not-in-your-faq)
+
 ## When I call a method on my mock object, the method for the real object is invoked instead.  What's the problem? ##
 
 In order for a method to be mocked, it must be _virtual_, unless you use the [high-perf dependency injection technique](http://code.google.com/p/googlemock/wiki/CookBook#Mocking_Nonvirtual_Methods).
