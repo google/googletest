@@ -553,7 +553,7 @@ class MockFunction<R(A1, ..., An)> {
   MOCK_METHODn(Call, R(A1, ..., An));
 };
 ```
-See this [recipe](http://code.google.com/p/googlemock/wiki/CookBook#Using_Check_Points) for one application of it.
+See this [recipe](CookBook.md#using-check-points) for one application of it.
 
 # Flags #
 
