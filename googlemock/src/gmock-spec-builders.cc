@@ -268,7 +268,7 @@ void ReportUninterestingCall(CallReaction reaction, const string& msg) {
 }
 
 UntypedFunctionMockerBase::UntypedFunctionMockerBase()
-    : mock_obj_(NULL), name_("") {}
+    : mock_obj_(NULL), name_(""), registry_destructed(false) {}
 
 UntypedFunctionMockerBase::~UntypedFunctionMockerBase() {}
 
@@ -551,19 +551,25 @@ class MockObjectRegistry {
     // "using ::std::cout;" doesn't work with Symbian's STLport, where cout is
     // a macro.
 
-    if (!GMOCK_FLAG(catch_leaked_mocks))
-      return;
-
     int leaked_count = 0;
     for (StateMap::const_iterator it = states_.begin(); it != states_.end();
          ++it) {
-      if (it->second.leakable)  // The user said it's fine to leak this object.
+      const MockObjectState& state = it->second;
+
+      if (!GMOCK_FLAG(catch_leaked_mocks)
+          || state.leakable)              // The user said it's fine to leak this object.
+      {
+        for (FunctionMockers::iterator mocker_it = state.function_mockers.begin();
+             mocker_it != state.function_mockers.end();
+             ++mocker_it) {
+           (*mocker_it)->set_registry_destructed();
+        }
         continue;
+      }
 
       // TODO(wan@google.com): Print the type of the leaked object.
       // This can help the user identify the leaked object.
       std::cout << "\n";
-      const MockObjectState& state = it->second;
       std::cout << internal::FormatFileLocation(state.first_used_file,
                                                 state.first_used_line);
       std::cout << " ERROR: this mock object";

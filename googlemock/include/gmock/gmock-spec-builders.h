@@ -215,6 +215,10 @@ class GTEST_API_ UntypedFunctionMockerBase {
       const void* untyped_args)
           GTEST_LOCK_EXCLUDED_(g_gmock_mutex);
 
+  void set_registry_destructed() {
+    registry_destructed = true;
+  }
+
  protected:
   typedef std::vector<const void*> UntypedOnCallSpecs;
 
@@ -239,6 +243,8 @@ class GTEST_API_ UntypedFunctionMockerBase {
 
   // All expectations for this function mocker.
   UntypedExpectations untyped_expectations_;
+
+  bool registry_destructed;
 };  // class UntypedFunctionMockerBase
 
 // Untyped base class for OnCallSpec<F>.
@@ -1468,7 +1474,8 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
         GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
     MutexLock l(&g_gmock_mutex);
     VerifyAndClearExpectationsLocked();
-    Mock::UnregisterLocked(this);
+    if (!registry_destructed)
+      Mock::UnregisterLocked(this);
     ClearDefaultActionsLocked();
   }
 
