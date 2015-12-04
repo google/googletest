@@ -508,8 +508,8 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
             And that static instance is probably already destructed. (Same as the registry).
             Therefore write out the message here.
          */
-         std::cout << "Warning: Mocks (typically global static mocks), should not be verified on destruction (at program ending),\n"
-                      "but explicitly by calling Mock::VerifyAndClearExpectations(&your_global_mock_obj)\n"
+         std::cout << "   Warning: Mocks (typically global static mocks), should not be verified on destruction (if this is at program ending!),\n"
+                      "   but explicitly by calling Mock::VerifyAndClearExpectations(&your_global_mock_obj)\n"
                    << untyped_expectation->file() << ':' << untyped_expectation->line() << ": Failure\n" << ss.str() << std::endl;
       }
     }
