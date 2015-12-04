@@ -28,11 +28,11 @@ list can help you decide whether it is for you too.
   * `SCOPED_TRACE` helps you understand the context of an assertion failure when it comes from inside a sub-routine or loop.
   * You can decide which tests to run using name patterns.  This saves time when you want to quickly reproduce a test failure.
   * Google Test can generate XML test result reports that can be parsed by popular continuous build system like Hudson.
-  * Simple things are easy in Google Test, while hard things are possible: in addition to advanced features like [global test environments](https://github.com/google/googletest/blob/master/googletest/docs/AdvancedGuide.md#global-set-up-and-tear-down) and tests parameterized by [values](https://github.com/google/googletest/blob/master/googletest/docs/AdvancedGuide.md#value-parameterized-tests) or [types](https://github.com/google/googletest/blob/master/googletest/docs/AdvancedGuide.md#typed-tests), Google Test supports various ways for the user to extend the framework -- if Google Test doesn't do something out of the box, chances are that a user can implement the feature using Google Test's public API, without changing Google Test itself.  In particular, you can:
-    * expand your testing vocabulary by defining [custom predicates](https://github.com/google/googletest/blob/master/googletest/docs/AdvancedGuide.md#predicate-assertions-for-better-error-messages),
-    * teach Google Test how to [print your types](https://github.com/google/googletest/blob/master/googletest/docs/AdvancedGuide.md#teaching-google-test-how-to-print-your-values),
-    * define your own testing macros or utilities and verify them using Google Test's [Service Provider Interface](https://github.com/google/googletest/blob/master/googletest/docs/AdvancedGuide.md#catching-failures), and
-    * reflect on the test cases or change the test output format by intercepting the [test events](https://github.com/google/googletest/blob/master/googletest/docs/AdvancedGuide.md#extending-google-test-by-handling-test-events).
+  * Simple things are easy in Google Test, while hard things are possible: in addition to advanced features like [global test environments](AdvancedGuide.md#global-set-up-and-tear-down) and tests parameterized by [values](AdvancedGuide.md#value-parameterized-tests) or [types](docs/AdvancedGuide.md#typed-tests), Google Test supports various ways for the user to extend the framework -- if Google Test doesn't do something out of the box, chances are that a user can implement the feature using Google Test's public API, without changing Google Test itself.  In particular, you can:
+    * expand your testing vocabulary by defining [custom predicates](AdvancedGuide.md#predicate-assertions-for-better-error-messages),
+    * teach Google Test how to [print your types](AdvancedGuide.md#teaching-google-test-how-to-print-your-values),
+    * define your own testing macros or utilities and verify them using Google Test's [Service Provider Interface](AdvancedGuide.md#catching-failures), and
+    * reflect on the test cases or change the test output format by intercepting the [test events](AdvancedGuide.md#extending-google-test-by-handling-test-events).
 
 ## I'm getting warnings when compiling Google Test.  Would you fix them? ##
 
@@ -201,7 +201,7 @@ we don't have a convention on the order of the two arguments for
 twice in the implementation, making it even harder to understand and
 maintain. We believe the benefit doesn't justify the cost.
 
-Finally, with the growth of Google Mock's [matcher](http://code.google.com/p/googlemock/wiki/CookBook#Using_Matchers_in_Google_Test_Assertions) library, we are
+Finally, with the growth of Google Mock's [matcher](../../googlemock/docs/CookBook.md#using-matchers-in-google-test-assertions) library, we are
 encouraging people to use the unified `EXPECT_THAT(value, matcher)`
 syntax more often in tests. One significant advantage of the matcher
 approach is that matchers can be easily combined to form new matchers,
@@ -409,7 +409,7 @@ If necessary, you can continue to derive test fixtures from a derived fixture.
 Google Test has no limit on how deep the hierarchy can be.
 
 For a complete example using derived test fixtures, see
-[sample5](https://github.com/google/googletest/blob/master/googletest/samples/sample5_unittest.cc).
+[sample5](../samples/sample5_unittest.cc).
 
 ## My compiler complains "void value not ignored as it ought to be." What does this mean? ##
 
@@ -849,7 +849,7 @@ expression syntax
 (http://en.wikipedia.org/wiki/Regular_expression#POSIX_Extended_Regular_Expressions).
 On Windows, it uses a limited variant of regular expression
 syntax. For more details, see the
-[regular expression syntax](AdvancedGuide#Regular_Expression_Syntax.md).
+[regular expression syntax](AdvancedGuide.md#Regular_Expression_Syntax).
 
 ## I have a fixture class Foo, but TEST\_F(Foo, Bar) gives me error "no matching function for call to Foo::Foo()". Why? ##
 
@@ -956,7 +956,7 @@ using gtest-md.vcproj instead of gtest.vcproj.
 
 ## I put my tests in a library and Google Test doesn't run them. What's happening? ##
 Have you read a
-[warning](https://github.com/google/googletest/blob/master/googletest/docs/Primer.md#important-note-for-visual-c-users) on
+[warning](Primer.md#important-note-for-visual-c-users) on
 the Google Test Primer page?
 
 ## I want to use Google Test with Visual Studio but don't know where to start. ##
@@ -1059,14 +1059,14 @@ TEST_F(CoolTest, DoSomething) {
 ## How do I build Google Testing Framework with Xcode 4? ##
 
 If you try to build Google Test's Xcode project with Xcode 4.0 or later, you may encounter an error message that looks like
-"Missing SDK in target gtest\_framework: /Developer/SDKs/MacOSX10.4u.sdk". That means that Xcode does not support the SDK the project is targeting. See the Xcode section in the [README](https://github.com/google/googletest/blob/master/googletest/README.md) file on how to resolve this.
+"Missing SDK in target gtest\_framework: /Developer/SDKs/MacOSX10.4u.sdk". That means that Xcode does not support the SDK the project is targeting. See the Xcode section in the [README](../README.md) file on how to resolve this.
 
 ## My question is not covered in your FAQ! ##
 
 If you cannot find the answer to your question in this FAQ, there are
 some other resources you can use:
 
-  1. read other [wiki pages](https://github.com/google/googletest/tree/master/googletest/docs),
+  1. read other [wiki pages](../docs),
   1. search the mailing list [archive](https://groups.google.com/forum/#!forum/googletestframework),
   1. ask it on [googletestframework@googlegroups.com](mailto:googletestframework@googlegroups.com) and someone will answer it (to prevent spam, we require you to join the [discussion group](http://groups.google.com/group/googletestframework) before you can post.).
 
