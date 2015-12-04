@@ -104,7 +104,7 @@ we don't have a convention on the order of the two arguments for
 twice in the implementation, making it even harder to understand and
 maintain. We believe the benefit doesn't justify the cost.
 
-Finally, with the growth of Google Mock's [matcher](http://code.google.com/p/googlemock/wiki/CookBook#Using_Matchers_in_Google_Test_Assertions) library, we are
+Finally, with the growth of Google Mock's [matcher](../../CookBook.md#using-matchers-in-google-test-assertions) library, we are
 encouraging people to use the unified `EXPECT_THAT(value, matcher)`
 syntax more often in tests. One significant advantage of the matcher
 approach is that matchers can be easily combined to form new matchers,
@@ -651,7 +651,7 @@ EXPECT_TRUE(internal::Func(12345));
 
 ## I would like to run a test several times with different parameters. Do I need to write several similar copies of it? ##
 
-No. You can use a feature called [value-parameterized tests](V1_5_AdvancedGuide#Value_Parameterized_Tests.md) which
+No. You can use a feature called [value-parameterized tests](V1_5_AdvancedGuide.md#Value_Parameterized_Tests) which
 lets you repeat your tests with different parameters, without defining it more than once.
 
 ## How do I test a file that defines main()? ##
@@ -701,6 +701,7 @@ reference global and/or local variables, and can be:
   * a compound statement.
 
 > Some examples are shown here:
+
 ```
 // A death test can be a simple function call.
 TEST(MyDeathTest, FunctionCall) {
@@ -744,7 +745,7 @@ On POSIX systems, Google Test uses the POSIX Extended regular
 expression syntax
 (http://en.wikipedia.org/wiki/Regular_expression#POSIX_Extended_Regular_Expressions). On
 Windows, it uses a limited variant of regular expression syntax. For
-more details, see the [regular expression syntax](V1_5_AdvancedGuide#Regular_Expression_Syntax.md).
+more details, see the [regular expression syntax](V1_5_AdvancedGuide.md#Regular_Expression_Syntax).
 
 ## I have a fixture class Foo, but TEST\_F(Foo, Bar) gives me error "no matching function for call to Foo::Foo()". Why? ##
 
@@ -851,7 +852,7 @@ using gtest-md.vcproj instead of gtest.vcproj.
 
 ## I put my tests in a library and Google Test doesn't run them. What's happening? ##
 Have you read a
-[warning](V1_5_Primer#Important_note_for_Visual_C++_users.md) on
+[warning](V1_5_Primer.md#important-note-for-visual-c-users) on
 the Google Test Primer page?
 
 ## I want to use Google Test with Visual Studio but don't know where to start. ##
