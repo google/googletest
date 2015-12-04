@@ -77,7 +77,7 @@ The typical flow is:
   1. Create the mock objects.
   1. Optionally, set the default actions of the mock objects.
   1. Set your expectations on the mock objects (How will they be called? What wil they do?).
-  1. Exercise code that uses the mock objects; if necessary, check the result using [Google Test](http://code.google.com/p/googletest/) assertions.
+  1. Exercise code that uses the mock objects; if necessary, check the result using [Google Test](https://github.com/google/googletest) assertions.
   1. When a mock objects is destructed, Google Mock automatically verifies that all expectations on it have been satisfied.
 
 Here is an example:
@@ -197,7 +197,7 @@ matcher will be changed.
 |`NanSensitiveFloatEq(a_float)`|`argument` is a `float` value approximately equal to `a_float`, treating two NaNs as equal.    |
 
 The above matchers use ULP-based comparison (the same as used in
-[Google Test](http://code.google.com/p/googletest/)). They
+[Google Test](https://github.com/google/googletest)). They
 automatically pick a reasonable error bound based on the absolute
 value of the expected value.  `DoubleEq()` and `FloatEq()` conform to
 the IEEE standard, which requires comparing two NaNs for equality to
@@ -227,7 +227,7 @@ The `argument` can be either a C string or a C++ string object:
 
 `ContainsRegex()` and `MatchesRegex()` use the regular expression
 syntax defined
-[here](http://code.google.com/p/googletest/wiki/AdvancedGuide#Regular_Expression_Syntax).
+[here](../../googletest/docs/AdvancedGuide.md#regular-expression-syntax).
 `StrCaseEq()`, `StrCaseNe()`, `StrEq()`, and `StrNe()` work for wide
 strings as well.
 
@@ -256,7 +256,7 @@ Notes:
 
   * These matchers can also match:
     1. a native array passed by reference (e.g. in `Foo(const int (&a)[5])`), and
-    1. an array passed as a pointer and a count (e.g. in `Bar(const T* buffer, int len)` -- see [Multi-argument Matchers](#Multiargument_Matchers.md)).
+    1. an array passed as a pointer and a count (e.g. in `Bar(const T* buffer, int len)` -- see [Multi-argument Matchers](#multiargument-matchers)).
   * The array being matched may be multi-dimensional (i.e. its elements can be arrays).
   * `m` in `Pointwise(m, ...)` should be a matcher for `::testing::tuple<T, U>` where `T` and `U` are the element type of the actual container and the expected container, respectively. For example, to compare two `Foo` containers where `Foo` doesn't support `operator==` but has an `Equals()` method, one might write:
 
@@ -322,7 +322,7 @@ You can make a matcher from one or more other matchers:
 
 |`MatcherCast<T>(m)`|casts matcher `m` to type `Matcher<T>`.|
 |:------------------|:--------------------------------------|
-|`SafeMatcherCast<T>(m)`| [safely casts](http://code.google.com/p/googlemock/wiki/CookBook#Casting_Matchers) matcher `m` to type `Matcher<T>`. |
+|`SafeMatcherCast<T>(m)`| [safely casts](CookBook.md#casting-matchers) matcher `m` to type `Matcher<T>`. |
 |`Truly(predicate)` |`predicate(argument)` returns something considered by C++ to be true, where `predicate` is a function or functor.|
 
 ## Matchers as Predicates ##
@@ -347,7 +347,7 @@ You can make a matcher from one or more other matchers:
 
 ## Matchers as Test Assertions ##
 
-|`ASSERT_THAT(expression, m)`|Generates a [fatal failure](http://code.google.com/p/googletest/wiki/Primer#Assertions) if the value of `expression` doesn't match matcher `m`.|
+|`ASSERT_THAT(expression, m)`|Generates a [fatal failure](../../googletest/docs/Primer.md#assertions) if the value of `expression` doesn't match matcher `m`.|
 |:---------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------|
 |`EXPECT_THAT(expression, m)`|Generates a non-fatal failure if the value of `expression` doesn't match matcher `m`.                                                          |
 
@@ -553,7 +553,7 @@ class MockFunction<R(A1, ..., An)> {
   MOCK_METHODn(Call, R(A1, ..., An));
 };
 ```
-See this [recipe](http://code.google.com/p/googlemock/wiki/CookBook#Using_Check_Points) for one application of it.
+See this [recipe](CookBook.md#using-check-points) for one application of it.
 
 # Flags #
 
