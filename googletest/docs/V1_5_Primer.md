@@ -251,7 +251,7 @@ To create a fixture, just:
   1. Derive a class from `::testing::Test` . Start its body with `protected:` or `public:` as we'll want to access fixture members from sub-classes.
   1. Inside the class, declare any objects you plan to use.
   1. If necessary, write a default constructor or `SetUp()` function to prepare the objects for each test. A common mistake is to spell `SetUp()` as `Setup()` with a small `u` - don't let that happen to you.
-  1. If necessary, write a destructor or `TearDown()` function to release any resources you allocated in `SetUp()` . To learn when you should use the constructor/destructor and when you should use `SetUp()/TearDown()`, read this [FAQ entry](http://code.google.com/p/googletest/wiki/V1_5_FAQ#Should_I_use_the_constructor/destructor_of_the_test_fixture_or_t).
+  1. If necessary, write a destructor or `TearDown()` function to release any resources you allocated in `SetUp()` . To learn when you should use the constructor/destructor and when you should use `SetUp()/TearDown()`, read this [FAQ entry](V1_5_FAQ.md#should-i-use-the-constructordestructor-of-the-test-fixture-or-the-set-uptear-down-function).
   1. If needed, define subroutines for your tests to share.
 
 When using a fixture, use `TEST_F()` instead of `TEST()` as it allows you to
