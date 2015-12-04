@@ -383,6 +383,15 @@ class GTEST_API_ Mock {
   static void AllowLeak(const void* mock_obj)
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
 
+  // Tells Google Mock about global static mocks, so that they are
+  // not falsely detected as leaks, if they outlive the
+  // global g_mock_object_registry
+  // (this is if a global static mock's destructor is called AFTER
+  //  g_mock_object_registry's destructor)
+  inline static void MarkGlobalStatic(const void* mock_obj) {
+     AllowLeak(mock_obj);
+  }
+
   // Verifies and clears all expectations on the given mock object.
   // If the expectations aren't satisfied, generates one or more
   // Google Test non-fatal failures and returns false.
