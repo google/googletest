@@ -1147,7 +1147,7 @@ class NativeArray {
     GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__): \
       fail(gtest_msg.value)
 
-#define GTEST_TEST_THROW_WHAT_(statement, expected_exception, regex, fail) \
+#define GTEST_TEST_THROW_MSG_(statement, expected_exception, regex, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (::testing::internal::ConstCharPtr gtest_msg = "") { \
     bool gtest_caught_expected = false; \
@@ -1156,7 +1156,8 @@ class NativeArray {
     } \
     catch (expected_exception const& e) { \
       const ::testing::internal::RE& gtest_regex = (regex); \
-      const bool matched = ::testing::internal::RE::PartialMatch(::testing::PrintToString(e), gtest_regex); \
+      const std::string err_string = ::testing::PrintToString(e); \
+      const bool matched = ::testing::internal::RE::PartialMatch(err_string, gtest_regex); \
       if (matched) { \
         gtest_caught_expected = true; \
       } else { \
