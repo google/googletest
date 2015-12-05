@@ -268,7 +268,7 @@ void ReportUninterestingCall(CallReaction reaction, const string& msg) {
 }
 
 UntypedFunctionMockerBase::UntypedFunctionMockerBase()
-    : mock_obj_(NULL), name_(""), registry_destructed(false) {}
+    : mock_obj_(NULL), name_(""), registry_destructed_(false) {}
 
 UntypedFunctionMockerBase::~UntypedFunctionMockerBase() {}
 
@@ -487,30 +487,23 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
       // takes care of it.
       untyped_expectation->MaybeDescribeExtraMatcherTo(&ss);
       untyped_expectation->DescribeCallCountTo(&ss);
-      if (! registry_destructed) {
-         Expect(false, untyped_expectation->file(),
-                untyped_expectation->line(), ss.str());
+      if (! registry_destructed_) {
+        Expect(false, untyped_expectation->file(),
+               untyped_expectation->line(), ss.str());
       } else {
-         /* We are at the end of the program.
-            There is a high chance that the call ...
-
-            Expect(false, untyped_expectation->file(),
-                untyped_expectation->line(), ss.str());
-
-            ... will fail (segfault), because
-
-            Expect()                                                 calls
-            GetFailureReporter()->ReportFailure                which calls
-            AssertHelper::operator=(const Message& message)    which calls
-            UnitTest::GetInstance()                            which returns a pointer to
-            static UnitTest instance;
-
-            And that static instance is probably already destructed. (Same as the registry).
-            Therefore write out the message here.
-         */
-         std::cout << "   Warning: Mocks (typically global static mocks), should not be verified on destruction (if this is at program ending!),\n"
-                      "   but explicitly by calling Mock::VerifyAndClearExpectations(&your_global_mock_obj)\n"
-                   << untyped_expectation->file() << ':' << untyped_expectation->line() << ": Failure\n" << ss.str() << std::endl;
+        // Program nearing end: static registry already destructed.
+        // Other statics (such as obj pointed to by return of
+        // UnitTest::GetInstance(); which is called by Expect)
+        // probably also already destructed...
+        // -> Write out message immediately, instead of calling Expect.
+        std::cout << "   Warning: Mocks (typically mocks with static storage duration), "
+                         "should not be verified on destruction (if this "
+                         "is at program ending!),\n"
+                     "   but explicitly by calling "
+                         "Mock::VerifyAndClearExpectations(&your_global_mock_obj)\n"
+                  << untyped_expectation->file() << ':'
+                  << untyped_expectation->line() << ": Failure\n"
+                  << ss.str() << std::endl;
       }
     }
   }
@@ -585,7 +578,7 @@ class MockObjectRegistry {
         for (FunctionMockers::iterator mocker_it = state.function_mockers.begin();
              mocker_it != state.function_mockers.end();
              ++mocker_it) {
-           (*mocker_it)->set_registry_destructed();
+           (*mocker_it)->SetRegistryDestructed();
         }
         continue;
       }
@@ -602,8 +595,11 @@ class MockObjectRegistry {
       }
       std::cout << " should be deleted but never is. Its address is @"
            << it->first << ".\n"
-              "   If the mock happens to be a global static, it should be marked with ::testing::Mock::MarkGlobalStatic(&my_global_mock)\n"
-              "   and it's expectations explicitly verified, e.g. with Mock::VerifyAndClearExpectations(&my_global_mock);";
+              "   If the mock happens to have static storage duration, "
+                  "it should be marked with "
+                  "::testing::Mock::MarkStatic(&my_global_mock)\n"
+              "   and its expectations explicitly verified, e.g. with "
+                  "Mock::VerifyAndClearExpectations(&my_global_mock);";
       leaked_count++;
     }
     if (leaked_count > 0) {
@@ -690,7 +686,7 @@ void Mock::AllowLeak(const void* mock_obj)
   internal::MutexLock l(&internal::g_gmock_mutex);
   g_mock_object_registry.states()[mock_obj].leakable = true;
 }
-   
+
 // Verifies and clears all expectations on the given mock object.  If
 // the expectations aren't satisfied, generates one or more Google
 // Test non-fatal failures and returns false.
