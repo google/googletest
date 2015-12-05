@@ -3799,20 +3799,20 @@ TEST(AssertionTest, ASSERT_THROW_MSG) {
   // ICE's in C++Builder 2007 and 2009.
   EXPECT_FATAL_FAILURE(
       ASSERT_THROW_MSG(ThrowAString(), bool, "std::string"),
-      "Expected: ThrowAString() throws an exception of type bool.\n"
-      "  Actual: it throws a different type.");
+      "Expected: ThrowAString() throws an exception of type bool.\n "
+      "Actual: it throws a different type.");
 
-  // Need to figure out how to get the message that was actually thrown into this
   EXPECT_FATAL_FAILURE(
       ASSERT_THROW_MSG(ThrowAString(), const char *, "std::array"),
       "Result: ThrowAString() threw correct exception "
-      "type const char * with wrong message. Expected: \"std::array\".");
+      "type const char * with wrong message. Expected: std::array.\n "
+      "Actual: \"std::string\".");
 # endif
 
   EXPECT_FATAL_FAILURE(
       ASSERT_THROW_MSG(ThrowNothing(), bool, "std::string"),
-      "Expected: ThrowNothing() throws an exception of type bool.\n"
-      "  Actual: it throws nothing.");
+      "Expected: ThrowNothing() throws an exception of type bool.\n "
+      "Actual: it throws nothing.");
 }
 
 // Tests ASSERT_NO_THROW.
@@ -4564,17 +4564,17 @@ TEST(ExpectTest, EXPECT_THROW) {
 TEST(ExpectTest, EXPECT_THROW_MSG) {
   EXPECT_THROW_MSG(ThrowAString(), const char *, "std::string");
   EXPECT_NONFATAL_FAILURE(EXPECT_THROW_MSG(ThrowAString(), bool, "std::string"),
-                          "Expected: ThrowAString() throws an exception of "
-                          "type bool.\n  Actual: it throws a different type.");
+                          "Expected: ThrowAString() throws an exception of type bool.\n "
+                          "Actual: it throws a different type.");
 
-  // Need to figure out how to get the message that was actually thrown into this
   EXPECT_NONFATAL_FAILURE(EXPECT_THROW_MSG(ThrowAString(), const char *, "std::array"),
                           "Result: ThrowAString() threw correct exception "
-                          "type const char * with wrong message. Expected: \"std::array\".");
+                          "type const char * with wrong message. Expected: std::array.\n "
+                          "Actual: \"std::string\".");
   EXPECT_NONFATAL_FAILURE(
       EXPECT_THROW_MSG(ThrowNothing(), bool, "1"),
-      "Expected: ThrowNothing() throws an exception of type bool.\n"
-      "  Actual: it throws nothing.");
+      "Expected: ThrowNothing() throws an exception of type bool.\n "
+      "Actual: it throws nothing.");
 }
 
 // Tests EXPECT_NO_THROW.

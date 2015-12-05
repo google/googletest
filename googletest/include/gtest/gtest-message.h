@@ -102,6 +102,8 @@ class GTEST_API_ Message {
     *ss_ << str;
   }
 
+  operator bool() const { return true; }
+
 #if GTEST_OS_SYMBIAN
   // Streams a value (either a pointer or not) to this object.
   template <typename T>

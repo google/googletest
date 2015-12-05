@@ -1149,7 +1149,7 @@ class NativeArray {
 
 #define GTEST_TEST_THROW_MSG_(statement, expected_exception, regex, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-  if (::testing::internal::ConstCharPtr gtest_msg = "") { \
+  if (::testing::Message buffer = ::testing::Message()) { \
     bool gtest_caught_expected = false; \
     try { \
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
@@ -1161,32 +1161,26 @@ class NativeArray {
       if (matched) { \
         gtest_caught_expected = true; \
       } else { \
-        Message buffer; \
-        buffer << "Result: threw correct exception type " << "#expected_exception" \
-               << ". Expected " << gtest_regex.pattern() << "\n" \
-               << "Actual msg: " << ::testing::PrintToString(e); \
-        std::cout << "asdfasdfasdfasdfasdfasdf: " << buffer.GetString() << std::endl; \
-        gtest_msg.value = \
-            "Result: " #statement " threw correct exception type " #expected_exception \
-            " with wrong message. Expected: " #regex "."; \
+        buffer << "Result: " #statement " threw correct exception type " \
+                  #expected_exception " with wrong message. " \
+               << "Expected: " << gtest_regex.pattern() << ".\n " \
+               << "Actual: " << err_string << "."; \
         goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
       } \
     } \
     catch (...) { \
-      gtest_msg.value = \
-          "Expected: " #statement " throws an exception of type " \
-          #expected_exception ".\n  Actual: it throws a different type."; \
+      buffer << "Expected: " #statement " throws an exception of type " \
+          #expected_exception ".\n Actual: it throws a different type."; \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
     } \
     if (!gtest_caught_expected) { \
-      gtest_msg.value = \
-          "Expected: " #statement " throws an exception of type " \
-          #expected_exception ".\n  Actual: it throws nothing."; \
+      buffer << "Expected: " #statement " throws an exception of type " \
+          #expected_exception ".\n Actual: it throws nothing."; \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
     } \
   } else \
     GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__): \
-      fail(gtest_msg.value)
+      fail(buffer.GetString().c_str()) \
 
 #define GTEST_TEST_NO_THROW_(statement, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
