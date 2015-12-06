@@ -48,7 +48,12 @@
 # include <unistd.h>  // NOLINT
 #endif
 
+
+
 namespace testing {
+
+MockObjectRegistry *g_mock_object_registry_ptr;
+
 namespace internal {
 
 // Protects the mock object registry (in class Mock), all function
@@ -268,7 +273,7 @@ void ReportUninterestingCall(CallReaction reaction, const string& msg) {
 }
 
 UntypedFunctionMockerBase::UntypedFunctionMockerBase()
-    : mock_obj_(NULL), name_("") {}
+    : mock_obj_(NULL), name_(""), g_mock_object_registry_p(g_mock_object_registry_ptr) {}
 
 UntypedFunctionMockerBase::~UntypedFunctionMockerBase() {}
 
@@ -511,9 +516,6 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
 
 }  // namespace internal
 
-// Class Mock.
-
-namespace {
 
 typedef std::set<internal::UntypedFunctionMockerBase*> FunctionMockers;
 
@@ -543,6 +545,9 @@ class MockObjectRegistry {
   // Maps a mock object (identified by its address) to its state.
   typedef std::map<const void*, MockObjectState> StateMap;
 
+  MockObjectRegistry() {
+    g_mock_object_registry_ptr = this;
+  }
   // This destructor will be called when a program exits, after all
   // tests in it have been run.  By then, there should be no mock
   // object alive.  Therefore we report any living object as test
@@ -550,6 +555,8 @@ class MockObjectRegistry {
   ~MockObjectRegistry() {
     // "using ::std::cout;" doesn't work with Symbian's STLport, where cout is
     // a macro.
+
+    g_mock_object_registry_ptr = 0;
 
     if (!GMOCK_FLAG(catch_leaked_mocks))
       return;
@@ -572,7 +579,12 @@ class MockObjectRegistry {
              << state.first_used_test << ")";
       }
       std::cout << " should be deleted but never is. Its address is @"
-           << it->first << ".";
+           << it->first << ".\n"
+              "   If the mock happens to have static storage duration, "
+                  "it should be marked with "
+                  "::testing::Mock::AllowLeak(&my_global_mock)\n"
+              "   and its expectations explicitly verified, e.g. with "
+                  "Mock::VerifyAndClearExpectations(&my_global_mock);";
       leaked_count++;
     }
     if (leaked_count > 0) {
@@ -594,6 +606,11 @@ class MockObjectRegistry {
  private:
   StateMap states_;
 };
+
+
+// Class Mock.
+
+namespace {
 
 // Protected by g_gmock_mutex.
 MockObjectRegistry g_mock_object_registry;

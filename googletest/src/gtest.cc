@@ -3960,6 +3960,8 @@ void TestEventListeners::SuppressEventForwarding() {
 
 // class UnitTest
 
+UnitTest *ut_instance;
+
 // Gets the singleton UnitTest object.  The first time this method is
 // called, a UnitTest object is constructed and returned.  Consecutive
 // calls will return the same object.
@@ -4295,11 +4297,13 @@ internal::ParameterizedTestCaseRegistry&
 
 // Creates an empty UnitTest.
 UnitTest::UnitTest() {
+  ut_instance = this;
   impl_ = new internal::UnitTestImpl(this);
 }
 
 // Destructor of UnitTest.
 UnitTest::~UnitTest() {
+  ut_instance = 0;
   delete impl_;
 }
 
