@@ -403,16 +403,12 @@ void AssertHelper::operator=(const Message& message) const {
                             );  // NOLINT
   } else {
     std::cout << "   Warning: Mocks with static storage duration, should not be "
-                 "verified implicitly by destruction (at program ending, where "
-                 "other static objects may already have been destructed) "
-                 "   but explicitly by calling "
-                 "Mock::VerifyAndClearExpectations(&your_global_mock_obj)\n"
+                 "verified implicitly by destruction\n"
+                 "   (at program ending, where other static objects may already have been destructed)\n"
+                 "   but explicitly by calling Mock::VerifyAndClearExpectations(&your_global_mock_obj)\n"
               << data_->file << ':'
               << data_->line << ": "
-              << TestPartResultTypeToString(data_->type)/* == kFatal ?
-                                            TestPartResult::kFatalFailure :
-                                            TestPartResult::kNonFatalFailure)*/
-              << '\n'
+              << TestPartResultTypeToString(data_->type)
               << data_->message << std::endl;
   }
 }
