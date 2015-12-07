@@ -303,6 +303,28 @@ GTEST_DEFINE_string_(
     "This flag specifies the flagfile to read command-line flags from.");
 #endif  // GTEST_USE_OWN_FLAGFILE_FLAG_
 
+// Converts a TestPartResult::Type enum to human-friendly string
+// representation.  Both kNonFatalFailure and kFatalFailure are translated
+// to "Failure", as the user usually doesn't care about the difference
+// between the two when viewing the test result.
+static const char * TestPartResultTypeToString(TestPartResult::Type type) {
+  switch (type) {
+    case TestPartResult::kSuccess:
+      return "Success";
+
+    case TestPartResult::kNonFatalFailure:
+    case TestPartResult::kFatalFailure:
+#ifdef _MSC_VER
+      return "error: ";
+#else
+      return "Failure\n";
+#endif
+    default:
+      return "Unknown result type";
+  }
+}
+
+
 namespace internal {
 
 // Generates a random number from [0, range), using a Linear
@@ -371,13 +393,28 @@ AssertHelper::~AssertHelper() {
 
 // Message assignment, for assertion streaming support.
 void AssertHelper::operator=(const Message& message) const {
-  UnitTest::GetInstance()->
-    AddTestPartResult(data_->type, data_->file, data_->line,
-                      AppendUserMessage(data_->message, message),
-                      UnitTest::GetInstance()->impl()
-                      ->CurrentOsStackTraceExceptTop(1)
-                      // Skips the stack frame for this function itself.
-                      );  // NOLINT
+  UnitTest *inst = UnitTest::GetInstance();
+  if (inst) {
+    inst->AddTestPartResult(data_->type, data_->file, data_->line,
+                            AppendUserMessage(data_->message, message),
+                            inst->impl()
+                            ->CurrentOsStackTraceExceptTop(1)
+                            // Skips the stack frame for this function itself.
+                            );  // NOLINT
+  } else {
+    std::cout << "   Warning: Mocks with static storage duration, should not be "
+                 "verified implicitly by destruction (at program ending, where "
+                 "other static objects may already have been destructed) "
+                 "   but explicitly by calling "
+                 "Mock::VerifyAndClearExpectations(&your_global_mock_obj)\n"
+              << data_->file << ':'
+              << data_->line << ": "
+              << TestPartResultTypeToString(data_->type)/* == kFatal ?
+                                            TestPartResult::kFatalFailure :
+                                            TestPartResult::kNonFatalFailure)*/
+              << '\n'
+              << data_->message << std::endl;
+  }
 }
 
 // Mutex for linked pointers.
@@ -2823,27 +2860,6 @@ static std::string FormatTestCaseCount(int test_case_count) {
   return FormatCountableNoun(test_case_count, "test case", "test cases");
 }
 
-// Converts a TestPartResult::Type enum to human-friendly string
-// representation.  Both kNonFatalFailure and kFatalFailure are translated
-// to "Failure", as the user usually doesn't care about the difference
-// between the two when viewing the test result.
-static const char * TestPartResultTypeToString(TestPartResult::Type type) {
-  switch (type) {
-    case TestPartResult::kSuccess:
-      return "Success";
-
-    case TestPartResult::kNonFatalFailure:
-    case TestPartResult::kFatalFailure:
-#ifdef _MSC_VER
-      return "error: ";
-#else
-      return "Failure\n";
-#endif
-    default:
-      return "Unknown result type";
-  }
-}
-
 namespace internal {
 
 // Prints a TestPartResult to an std::string.
@@ -3960,7 +3976,7 @@ void TestEventListeners::SuppressEventForwarding() {
 
 // class UnitTest
 
-UnitTest *ut_instance;
+UnitTest *UnitTest::ut_instance;
 
 // Gets the singleton UnitTest object.  The first time this method is
 // called, a UnitTest object is constructed and returned.  Consecutive
@@ -3986,7 +4002,7 @@ UnitTest* UnitTest::GetInstance() {
   return instance;
 #else
   static UnitTest instance;
-  return &instance;
+  return ut_instance;
 #endif  // (_MSC_VER == 1310 && !defined(_DEBUG)) || defined(__BORLANDC__)
 }
 
@@ -4297,8 +4313,8 @@ internal::ParameterizedTestCaseRegistry&
 
 // Creates an empty UnitTest.
 UnitTest::UnitTest() {
-  ut_instance = this;
   impl_ = new internal::UnitTestImpl(this);
+  ut_instance = this;
 }
 
 // Destructor of UnitTest.

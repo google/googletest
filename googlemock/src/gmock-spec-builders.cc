@@ -48,8 +48,6 @@
 # include <unistd.h>  // NOLINT
 #endif
 
-
-
 namespace testing {
 
 MockObjectRegistry *g_mock_object_registry_ptr;
