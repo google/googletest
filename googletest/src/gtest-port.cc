@@ -58,6 +58,11 @@
 # include <sys/procfs.h>
 #endif  // GTEST_OS_QNX
 
+#if GTEST_OS_AIX
+# include <procinfo.h>
+# include <sys/types.h>
+#endif  // GTEST_OS_AIX
+
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest-message.h"
 #include "gtest/internal/gtest-internal.h"
@@ -141,6 +146,19 @@ size_t GetThreadCount() {
   close(fd);
   if (status == EOK) {
     return static_cast<size_t>(process_info.num_threads);
+  } else {
+    return 0;
+  }
+}
+
+#elif GTEST_OS_AIX
+
+size_t GetThreadCount() {
+  struct procentry64 entry;
+  pid_t pid = getpid();
+  int status = getprocs64(&entry, sizeof(entry), NULL, 0, &pid, 1);
+  if (status == 1) {
+    return entry.pi_thcount;
   } else {
     return 0;
   }
