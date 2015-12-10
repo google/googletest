@@ -94,6 +94,14 @@ cxx_library(gmock_main
 
 ########################################################################
 #
+# Install rules
+install(TARGETS gmock gmock_main
+  DESTINATION lib)
+install(DIRECTORY ${gmock_SOURCE_DIR}/include/gmock
+  DESTINATION include)
+
+########################################################################
+#
 # Google Mock's own tests.
 #
 # You can skip this section if you aren't interested in testing
