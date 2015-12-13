@@ -34,7 +34,7 @@
 
 #include "gtest/gtest.h"
 
-#include "test/gtest-param-test_test.h"
+#include "gtest-param-test_test.h"
 
 #if GTEST_HAS_PARAM_TEST
 

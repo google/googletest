@@ -41,7 +41,7 @@
 // gtest-internal-inl.h.  This is how Google Test prevents a user from
 // accidentally depending on its internal implementation.
 #define GTEST_IMPLEMENTATION_ 1
-#include "src/gtest-internal-inl.h"
+#include "../src/gtest-internal-inl.h"
 #undef GTEST_IMPLEMENTATION_
 
 #if GTEST_IS_THREADSAFE

@@ -74,7 +74,7 @@
 // prevent the accidental inclusion of gtest-internal-inl.h in the
 // user's code.
 #define GTEST_IMPLEMENTATION_ 1
-#include "src/gtest-internal-inl.h"
+#include "gtest-internal-inl.h"
 #undef GTEST_IMPLEMENTATION_
 
 namespace testing {
