@@ -1325,6 +1325,8 @@ class GTEST_API_ UnitTest {
   // Mutable state in *impl_ is protected by mutex_.
   internal::UnitTestImpl* impl_;
 
+  static UnitTest *ut_instance;
+  
   // We disallow copying UnitTest.
   GTEST_DISALLOW_COPY_AND_ASSIGN_(UnitTest);
 };

@@ -79,6 +79,8 @@
 
 namespace testing {
 
+class MockObjectRegistry; // forward declaration
+
 // An abstract handle of an expectation.
 class Expectation;
 
@@ -215,10 +217,6 @@ class GTEST_API_ UntypedFunctionMockerBase {
       const void* untyped_args)
           GTEST_LOCK_EXCLUDED_(g_gmock_mutex);
 
-  void SetRegistryDestructed() {
-    registry_destructed_ = true;
-  }
-
  protected:
   typedef std::vector<const void*> UntypedOnCallSpecs;
 
@@ -244,7 +242,7 @@ class GTEST_API_ UntypedFunctionMockerBase {
   // All expectations for this function mocker.
   UntypedExpectations untyped_expectations_;
 
-  bool registry_destructed_;
+  MockObjectRegistry *&g_mock_object_registry_p;
 };  // class UntypedFunctionMockerBase
 
 // Untyped base class for OnCallSpec<F>.
@@ -382,15 +380,6 @@ class GTEST_API_ Mock {
   // mock objects.
   static void AllowLeak(const void* mock_obj)
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
-
-  // Tells Google Mock about mocks with static storage duration,
-  // so that they are not falsely detected as leaks, if they
-  // outlive the static g_mock_object_registry
-  // (this is if a static mock's destructor is called AFTER
-  //  g_mock_object_registry's destructor)
-  static void MarkStatic(const void* mock_obj) {
-     AllowLeak(mock_obj);
-  }
 
   // Verifies and clears all expectations on the given mock object.
   // If the expectations aren't satisfied, generates one or more
@@ -1483,7 +1472,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
         GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
     MutexLock l(&g_gmock_mutex);
     VerifyAndClearExpectationsLocked();
-    if (!registry_destructed_)
+    if (g_mock_object_registry_p)
       Mock::UnregisterLocked(this);
     ClearDefaultActionsLocked();
   }

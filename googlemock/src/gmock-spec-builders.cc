@@ -49,6 +49,9 @@
 #endif
 
 namespace testing {
+
+static MockObjectRegistry *g_mock_object_registry_ptr;
+
 namespace internal {
 
 // Protects the mock object registry (in class Mock), all function
@@ -268,7 +271,7 @@ void ReportUninterestingCall(CallReaction reaction, const string& msg) {
 }
 
 UntypedFunctionMockerBase::UntypedFunctionMockerBase()
-    : mock_obj_(NULL), name_(""), registry_destructed_(false) {}
+    : mock_obj_(NULL), name_(""), g_mock_object_registry_p(g_mock_object_registry_ptr) {}
 
 UntypedFunctionMockerBase::~UntypedFunctionMockerBase() {}
 
@@ -487,24 +490,8 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
       // takes care of it.
       untyped_expectation->MaybeDescribeExtraMatcherTo(&ss);
       untyped_expectation->DescribeCallCountTo(&ss);
-      if (! registry_destructed_) {
-        Expect(false, untyped_expectation->file(),
-               untyped_expectation->line(), ss.str());
-      } else {
-        // Program nearing end: static registry already destructed.
-        // Other statics (such as obj pointed to by return of
-        // UnitTest::GetInstance(); which is called by Expect)
-        // probably also already destructed...
-        // -> Write out message immediately, instead of calling Expect.
-        std::cout << "   Warning: Mocks (typically mocks with static storage duration), "
-                         "should not be verified on destruction (if this "
-                         "is at program ending!),\n"
-                     "   but explicitly by calling "
-                         "Mock::VerifyAndClearExpectations(&your_global_mock_obj)\n"
-                  << untyped_expectation->file() << ':'
-                  << untyped_expectation->line() << ": Failure\n"
-                  << ss.str() << std::endl;
-      }
+      Expect(false, untyped_expectation->file(),
+             untyped_expectation->line(), ss.str());
     }
   }
 
@@ -527,9 +514,6 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
 
 }  // namespace internal
 
-// Class Mock.
-
-namespace {
 
 typedef std::set<internal::UntypedFunctionMockerBase*> FunctionMockers;
 
@@ -559,6 +543,9 @@ class MockObjectRegistry {
   // Maps a mock object (identified by its address) to its state.
   typedef std::map<const void*, MockObjectState> StateMap;
 
+  MockObjectRegistry() {
+    g_mock_object_registry_ptr = this;
+  }
   // This destructor will be called when a program exits, after all
   // tests in it have been run.  By then, there should be no mock
   // object alive.  Therefore we report any living object as test
@@ -567,25 +554,21 @@ class MockObjectRegistry {
     // "using ::std::cout;" doesn't work with Symbian's STLport, where cout is
     // a macro.
 
+    g_mock_object_registry_ptr = 0;
+
+    if (!GMOCK_FLAG(catch_leaked_mocks))
+      return;
+
     int leaked_count = 0;
     for (StateMap::const_iterator it = states_.begin(); it != states_.end();
          ++it) {
-      const MockObjectState& state = it->second;
-
-      if (!GMOCK_FLAG(catch_leaked_mocks)
-          || state.leakable)              // The user said it's fine to leak this object.
-      {
-        for (FunctionMockers::iterator mocker_it = state.function_mockers.begin();
-             mocker_it != state.function_mockers.end();
-             ++mocker_it) {
-           (*mocker_it)->SetRegistryDestructed();
-        }
+      if (it->second.leakable)  // The user said it's fine to leak this object.
         continue;
-      }
 
       // TODO(wan@google.com): Print the type of the leaked object.
       // This can help the user identify the leaked object.
       std::cout << "\n";
+      const MockObjectState& state = it->second;
       std::cout << internal::FormatFileLocation(state.first_used_file,
                                                 state.first_used_line);
       std::cout << " ERROR: this mock object";
@@ -597,7 +580,7 @@ class MockObjectRegistry {
            << it->first << ".\n"
               "   If the mock happens to have static storage duration, "
                   "it should be marked with "
-                  "::testing::Mock::MarkStatic(&my_global_mock)\n"
+                  "::testing::Mock::AllowLeak(&my_global_mock)\n"
               "   and its expectations explicitly verified, e.g. with "
                   "Mock::VerifyAndClearExpectations(&my_global_mock);";
       leaked_count++;
@@ -621,6 +604,11 @@ class MockObjectRegistry {
  private:
   StateMap states_;
 };
+
+
+// Class Mock.
+
+namespace {
 
 // Protected by g_gmock_mutex.
 MockObjectRegistry g_mock_object_registry;
