@@ -50,7 +50,7 @@
 
 namespace testing {
 
-MockObjectRegistry *g_mock_object_registry_ptr;
+static MockObjectRegistry *g_mock_object_registry_ptr;
 
 namespace internal {
 
