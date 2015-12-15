@@ -3997,7 +3997,7 @@ UnitTest* UnitTest::GetInstance() {
   static UnitTest* const instance = new UnitTest;
   return instance;
 #else
-  static UnitTest instance;
+  static UnitTest instance(true);
   return ut_instance;
 #endif  // (_MSC_VER == 1310 && !defined(_DEBUG)) || defined(__BORLANDC__)
 }
@@ -4308,14 +4308,16 @@ internal::ParameterizedTestCaseRegistry&
 #endif  // GTEST_HAS_PARAM_TEST
 
 // Creates an empty UnitTest.
-UnitTest::UnitTest() {
+UnitTest::UnitTest(bool static_unit) : static_unit_(static_unit_) {
   impl_ = new internal::UnitTestImpl(this);
-  ut_instance = this;
+  if (static_unit_)
+    ut_instance = this;
 }
 
 // Destructor of UnitTest.
 UnitTest::~UnitTest() {
-  ut_instance = 0;
+  if (static_unit_)
+    ut_instance = 0;
   delete impl_;
 }
 

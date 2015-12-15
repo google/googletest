@@ -1301,7 +1301,7 @@ class GTEST_API_ UnitTest {
       const std::string& message);
 
   // Creates an empty UnitTest.
-  UnitTest();
+  UnitTest(bool static_unit = false);
 
   // D'tor
   virtual ~UnitTest();
@@ -1326,6 +1326,8 @@ class GTEST_API_ UnitTest {
   internal::UnitTestImpl* impl_;
 
   static UnitTest *ut_instance;
+
+  const bool static_unit_;
   
   // We disallow copying UnitTest.
   GTEST_DISALLOW_COPY_AND_ASSIGN_(UnitTest);
