@@ -4308,7 +4308,7 @@ internal::ParameterizedTestCaseRegistry&
 #endif  // GTEST_HAS_PARAM_TEST
 
 // Creates an empty UnitTest.
-UnitTest::UnitTest(bool static_unit) : static_unit_(static_unit_) {
+UnitTest::UnitTest(bool static_unit) : static_unit_(static_unit) {
   impl_ = new internal::UnitTestImpl(this);
   if (static_unit_)
     ut_instance = this;
