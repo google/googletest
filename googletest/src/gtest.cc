@@ -3994,7 +3994,7 @@ UnitTest* UnitTest::GetInstance() {
   // design with private destructor.
 
 #if (_MSC_VER == 1310 && !defined(_DEBUG)) || defined(__BORLANDC__)
-  static UnitTest* const instance = new UnitTest;
+  static UnitTest* const instance = new UnitTest(true);
   return instance;
 #else
   static UnitTest instance(true);
