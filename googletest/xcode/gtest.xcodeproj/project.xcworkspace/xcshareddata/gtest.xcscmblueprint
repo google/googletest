@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "76A15575C5B740800EF8E92EA66B97A276AEF659",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "3642467E64C54FC70A3C4221833F90F3D1D1927D" : 0,
+    "76A15575C5B740800EF8E92EA66B97A276AEF659" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "14F272C1-3A56-4C50-B2FF-7FB6DE3E6B4C",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "3642467E64C54FC70A3C4221833F90F3D1D1927D" : "..",
+    "76A15575C5B740800EF8E92EA66B97A276AEF659" : "googletest\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "gtest",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "googletest\/xcode\/gtest.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "http:\/\/git-lab-hq.agroup.dot.corp\/modules-linux\/livepen2linux.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "3642467E64C54FC70A3C4221833F90F3D1D1927D"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/google\/googletest.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "76A15575C5B740800EF8E92EA66B97A276AEF659"
+    }
+  ]
+}
