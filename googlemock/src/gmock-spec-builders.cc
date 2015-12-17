@@ -50,7 +50,7 @@
 
 namespace testing {
 
-static MockObjectRegistry *g_mock_object_registry_ptr;
+static bool g_mock_object_registry_valid;
 
 namespace internal {
 
@@ -271,7 +271,7 @@ void ReportUninterestingCall(CallReaction reaction, const string& msg) {
 }
 
 UntypedFunctionMockerBase::UntypedFunctionMockerBase()
-    : mock_obj_(NULL), name_(""), g_mock_object_registry_p(g_mock_object_registry_ptr) {}
+    : mock_obj_(NULL), name_(""), g_mock_object_registry_valid_(g_mock_object_registry_valid) {}
 
 UntypedFunctionMockerBase::~UntypedFunctionMockerBase() {}
 
@@ -514,6 +514,9 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
 
 }  // namespace internal
 
+// Class Mock.
+
+namespace {
 
 typedef std::set<internal::UntypedFunctionMockerBase*> FunctionMockers;
 
@@ -544,7 +547,7 @@ class MockObjectRegistry {
   typedef std::map<const void*, MockObjectState> StateMap;
 
   MockObjectRegistry() {
-    g_mock_object_registry_ptr = this;
+    g_mock_object_registry_valid = true;
   }
   // This destructor will be called when a program exits, after all
   // tests in it have been run.  By then, there should be no mock
@@ -554,7 +557,7 @@ class MockObjectRegistry {
     // "using ::std::cout;" doesn't work with Symbian's STLport, where cout is
     // a macro.
 
-    g_mock_object_registry_ptr = 0;
+    g_mock_object_registry_valid = false;
 
     if (!GMOCK_FLAG(catch_leaked_mocks))
       return;
@@ -605,10 +608,6 @@ class MockObjectRegistry {
   StateMap states_;
 };
 
-
-// Class Mock.
-
-namespace {
 
 // Protected by g_gmock_mutex.
 MockObjectRegistry g_mock_object_registry;

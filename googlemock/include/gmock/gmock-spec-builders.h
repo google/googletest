@@ -79,8 +79,6 @@
 
 namespace testing {
 
-class MockObjectRegistry; // forward declaration
-
 // An abstract handle of an expectation.
 class Expectation;
 
@@ -242,7 +240,7 @@ class GTEST_API_ UntypedFunctionMockerBase {
   // All expectations for this function mocker.
   UntypedExpectations untyped_expectations_;
 
-  MockObjectRegistry *&g_mock_object_registry_p;
+  bool &g_mock_object_registry_valid_;
 };  // class UntypedFunctionMockerBase
 
 // Untyped base class for OnCallSpec<F>.
@@ -1472,7 +1470,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
         GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
     MutexLock l(&g_gmock_mutex);
     VerifyAndClearExpectationsLocked();
-    if (g_mock_object_registry_p)
+    if (g_mock_object_registry_valid_)
       Mock::UnregisterLocked(this);
     ClearDefaultActionsLocked();
   }

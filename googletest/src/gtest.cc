@@ -3995,9 +3995,12 @@ UnitTest* UnitTest::GetInstance() {
 
 #if (_MSC_VER == 1310 && !defined(_DEBUG)) || defined(__BORLANDC__)
   static UnitTest* const instance = new UnitTest(true);
-  return instance;
+  return ut_instance;
 #else
   static UnitTest instance(true);
+
+  // return pointer to static instance which is set to nullptr
+  // when static instance is destructed
   return ut_instance;
 #endif  // (_MSC_VER == 1310 && !defined(_DEBUG)) || defined(__BORLANDC__)
 }
