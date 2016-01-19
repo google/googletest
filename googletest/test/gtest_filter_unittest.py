@@ -44,7 +44,10 @@ __author__ = 'wan@google.com (Zhanyong Wan)'
 
 import os
 import re
-import sets
+try:
+  from sets import Set as set  # For Python 2.3 compatibility
+except ImportError:
+  pass
 import sys
 
 import gtest_test_utils
@@ -58,7 +61,7 @@ import gtest_test_utils
 # exception is thrown if the input is anything other than 'True' nor 'False'.
 os.environ['EMPTY_VAR'] = ''
 child = gtest_test_utils.Subprocess(
-    [sys.executable, '-c', 'import os; print \'EMPTY_VAR\' in os.environ'])
+    [sys.executable, '-c', 'import os; print(\'EMPTY_VAR\' in os.environ)'])
 CAN_PASS_EMPTY_ENV = eval(child.output)
 
 
@@ -71,7 +74,7 @@ CAN_PASS_EMPTY_ENV = eval(child.output)
 os.environ['UNSET_VAR'] = 'X'
 del os.environ['UNSET_VAR']
 child = gtest_test_utils.Subprocess(
-    [sys.executable, '-c', 'import os; print \'UNSET_VAR\' not in os.environ'])
+    [sys.executable, '-c', 'import os; print(\'UNSET_VAR\' not in os.environ)'])
 CAN_UNSET_ENV = eval(child.output)
 
 
@@ -243,14 +246,14 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
     for slice_var in list_of_sets:
       full_partition.extend(slice_var)
     self.assertEqual(len(set_var), len(full_partition))
-    self.assertEqual(sets.Set(set_var), sets.Set(full_partition))
+    self.assertEqual(set(set_var), set(full_partition))
 
   def AdjustForParameterizedTests(self, tests_to_run):
     """Adjust tests_to_run in case value parameterized tests are disabled."""
 
     global param_tests_present
     if not param_tests_present:
-      return list(sets.Set(tests_to_run) - sets.Set(PARAM_TESTS))
+      return list(set(tests_to_run) - set(PARAM_TESTS))
     else:
       return tests_to_run
 
