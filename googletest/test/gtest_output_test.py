@@ -279,7 +279,7 @@ class GTestOutputTest(gtest_test_utils.TestCase):
   def testOutput(self):
     output = GetOutputOfAllCommands()
 
-    golden_file = open(GOLDEN_PATH, 'rb')
+    golden_file = open(GOLDEN_PATH, 'r')
     # A mis-configured source control system can cause \r appear in EOL
     # sequences when we read the golden file irrespective of an operating
     # system used. Therefore, we need to strip those \r's from newlines
