@@ -15,10 +15,12 @@ also an IRC channel on OFTC (irc.oftc.net) #gtest available.  Please
 join us!
 
 **Google Mock** is an extension to Google Test for writing and using C++ mock
-classes.  See the separate [Google Mock documentation](googlemock/README.md).
+classes. 
 
-More detailed documentation for googletest (including build instructions) are
-in its interior [googletest/README.md](googletest/README.md) file.
+## Documentation ## 
+
+  * Google Test ([Readme](googletest/README.md) [Samples](googletest/docs/Samples.md) [AdvancedGuide](googletest/docs/AdvancedGuide.md) [More](googletest/docs/Documentation.md))
+  * Google Mock ([Readme](googlemock/README.md) [More](googlemock/docs/Documentation.md))
 
 ## Features ##
 
