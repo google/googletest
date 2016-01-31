@@ -2930,6 +2930,8 @@ bool ShouldUseColor(bool stdout_is_tty) {
         String::CStringEquals(term, "xterm-256color") ||
         String::CStringEquals(term, "screen") ||
         String::CStringEquals(term, "screen-256color") ||
+        String::CStringEquals(term, "tmux") ||
+        String::CStringEquals(term, "tmux-256color") ||
         String::CStringEquals(term, "rxvt-unicode") ||
         String::CStringEquals(term, "rxvt-unicode-256color") ||
         String::CStringEquals(term, "linux") ||

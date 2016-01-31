@@ -6840,6 +6840,12 @@ TEST(ColoredOutputTest, UsesColorsWhenTermSupportsColors) {
   SetEnv("TERM", "screen-256color");  // TERM supports colors.
   EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
 
+  SetEnv("TERM", "tmux");  // TERM supports colors.
+  EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
+
+  SetEnv("TERM", "tmux-256color");  // TERM supports colors.
+  EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
+
   SetEnv("TERM", "rxvt-unicode");  // TERM supports colors.
   EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
 
