@@ -2593,7 +2593,7 @@ class AllArgsHelper {
  public:
   AllArgsHelper() {}
 
-  MOCK_METHOD2(Helper, int(char x, int y));
+  MOCK_NOOVERRIDE_METHOD2(Helper, int(char x, int y));
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(AllArgsHelper);
