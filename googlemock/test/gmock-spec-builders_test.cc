@@ -111,7 +111,7 @@ class MockIncomplete {
  public:
   // This line verifies that a mock method can take a by-reference
   // argument of an incomplete type.
-  MOCK_METHOD1(ByRefFunc, void(const Incomplete& x));
+  MOCK_NOOVERRIDE_METHOD1(ByRefFunc, void(const Incomplete& x));
 };
 
 // Tells Google Mock how to print a value of type Incomplete.
@@ -145,11 +145,11 @@ class MockA {
  public:
   MockA() {}
 
-  MOCK_METHOD1(DoA, void(int n));
-  MOCK_METHOD1(ReturnResult, Result(int n));
-  MOCK_METHOD0(ReturnNonDefaultConstructible, NonDefaultConstructible());
-  MOCK_METHOD2(Binary, bool(int x, int y));
-  MOCK_METHOD2(ReturnInt, int(int x, int y));
+  MOCK_NOOVERRIDE_METHOD1(DoA, void(int n));
+  MOCK_NOOVERRIDE_METHOD1(ReturnResult, Result(int n));
+  MOCK_NOOVERRIDE_METHOD0(ReturnNonDefaultConstructible, NonDefaultConstructible());
+  MOCK_NOOVERRIDE_METHOD2(Binary, bool(int x, int y));
+  MOCK_NOOVERRIDE_METHOD2(ReturnInt, int(int x, int y));
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockA);
@@ -159,8 +159,8 @@ class MockB {
  public:
   MockB() {}
 
-  MOCK_CONST_METHOD0(DoB, int());  // NOLINT
-  MOCK_METHOD1(DoB, int(int n));  // NOLINT
+  MOCK_CONST_NOOVERRIDE_METHOD0(DoB, int());  // NOLINT
+  MOCK_NOOVERRIDE_METHOD1(DoB, int(int n));  // NOLINT
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockB);
@@ -170,7 +170,7 @@ class ReferenceHoldingMock {
  public:
   ReferenceHoldingMock() {}
 
-  MOCK_METHOD1(AcceptReference, void(linked_ptr<MockA>*));
+  MOCK_NOOVERRIDE_METHOD1(AcceptReference, void(linked_ptr<MockA>*));
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ReferenceHoldingMock);
@@ -1954,9 +1954,9 @@ class MockC {
  public:
   MockC() {}
 
-  MOCK_METHOD6(VoidMethod, void(bool cond, int n, string s, void* p,
+  MOCK_NOOVERRIDE_METHOD6(VoidMethod, void(bool cond, int n, string s, void* p,
                                 const Printable& x, Unprintable y));
-  MOCK_METHOD0(NonVoidMethod, int());  // NOLINT
+  MOCK_NOOVERRIDE_METHOD0(NonVoidMethod, int());  // NOLINT
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockC);
@@ -2195,7 +2195,7 @@ class LogTestHelper {
  public:
   LogTestHelper() {}
 
-  MOCK_METHOD1(Foo, PrintMeNot(PrintMeNot));
+  MOCK_NOOVERRIDE_METHOD1(Foo, PrintMeNot(PrintMeNot));
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(LogTestHelper);

@@ -499,7 +499,7 @@ class NativeArrayPassedAsPointerAndSize {
  public:
   NativeArrayPassedAsPointerAndSize() {}
 
-  MOCK_METHOD2(Helper, void(int* array, int size));
+  MOCK_NOOVERRIDE_METHOD2(Helper, void(int* array, int size));
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(NativeArrayPassedAsPointerAndSize);

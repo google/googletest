@@ -143,8 +143,8 @@ class MockFoo : public FooInterface {
 #endif
 
   // Tests that the function return type can contain unprotected comma.
-  MOCK_METHOD0(ReturnTypeWithComma, std::map<int, string>());
-  MOCK_CONST_METHOD1(ReturnTypeWithComma,
+  MOCK_NOOVERRIDE_METHOD0(ReturnTypeWithComma, std::map<int, string>());
+  MOCK_CONST_NOOVERRIDE_METHOD1(ReturnTypeWithComma,
                      std::map<int, string>(int));  // NOLINT
 
   MOCK_METHOD0(OverloadedOnArgumentNumber, int());  // NOLINT
@@ -168,7 +168,7 @@ class MockFoo : public FooInterface {
   MOCK_CONST_METHOD1_WITH_CALLTYPE(STDMETHODCALLTYPE, CTConst, char(int));
 
   // Tests that the function return type can contain unprotected comma.
-  MOCK_METHOD0_WITH_CALLTYPE(STDMETHODCALLTYPE, CTReturnTypeWithComma,
+  MOCK_NOOVERRIDE_METHOD0_WITH_CALLTYPE(STDMETHODCALLTYPE, CTReturnTypeWithComma,
                              std::map<int, string>());
 #endif  // GTEST_OS_WINDOWS
 
@@ -354,7 +354,7 @@ class MockB {
  public:
   MockB() {}
 
-  MOCK_METHOD0(DoB, void());
+  MOCK_NOOVERRIDE_METHOD0(DoB, void());
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockB);
@@ -405,8 +405,8 @@ class MockStack : public StackInterface<T> {
   MOCK_CONST_METHOD0_T(GetTop, const T&());
 
   // Tests that the function return type can contain unprotected comma.
-  MOCK_METHOD0_T(ReturnTypeWithComma, std::map<int, int>());
-  MOCK_CONST_METHOD1_T(ReturnTypeWithComma, std::map<int, int>(int));  // NOLINT
+  MOCK_NOOVERRIDE_METHOD0_T(ReturnTypeWithComma, std::map<int, int>());
+  MOCK_CONST_NOOVERRIDE_METHOD1_T(ReturnTypeWithComma, std::map<int, int>(int));  // NOLINT
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockStack);
@@ -503,9 +503,9 @@ TEST(TemplateMockTestWithCallType, Works) {
 #endif  // GTEST_OS_WINDOWS
 
 #define MY_MOCK_METHODS1_ \
-    MOCK_METHOD0(Overloaded, void()); \
-    MOCK_CONST_METHOD1(Overloaded, int(int n)); \
-    MOCK_METHOD2(Overloaded, bool(bool f, int n))
+    MOCK_NOOVERRIDE_METHOD0(Overloaded, void()); \
+    MOCK_CONST_NOOVERRIDE_METHOD1(Overloaded, int(int n)); \
+    MOCK_NOOVERRIDE_METHOD2(Overloaded, bool(bool f, int n))
 
 class MockOverloadedOnArgNumber {
  public:
@@ -529,8 +529,8 @@ TEST(OverloadedMockMethodTest, CanOverloadOnArgNumberInMacroBody) {
 }
 
 #define MY_MOCK_METHODS2_ \
-    MOCK_CONST_METHOD1(Overloaded, int(int n)); \
-    MOCK_METHOD1(Overloaded, int(int n));
+    MOCK_CONST_NOOVERRIDE_METHOD1(Overloaded, int(int n)); \
+    MOCK_NOOVERRIDE_METHOD1(Overloaded, int(int n));
 
 class MockOverloadedOnConstness {
  public:

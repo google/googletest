@@ -557,8 +557,8 @@ std::string GrabOutput(void(*logger)(), const char* verbosity) {
 
 class DummyMock {
  public:
-  MOCK_METHOD0(TestMethod, void());
-  MOCK_METHOD1(TestMethodArg, void(int dummy));
+  MOCK_NOOVERRIDE_METHOD0(TestMethod, void());
+  MOCK_NOOVERRIDE_METHOD1(TestMethodArg, void(int dummy));
 };
 
 void ExpectCallLogger() {
