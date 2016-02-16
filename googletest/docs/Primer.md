@@ -127,18 +127,14 @@ This section describes assertions that compare two values.
 
 | **Fatal assertion** | **Nonfatal assertion** | **Verifies** |
 |:--------------------|:-----------------------|:-------------|
-|`ASSERT_EQ(`_expected_`, `_actual_`);`|`EXPECT_EQ(`_expected_`, `_actual_`);`| _expected_ `==` _actual_ |
-|`ASSERT_NE(`_val1_`, `_val2_`);`      |`EXPECT_NE(`_val1_`, `_val2_`);`      | _val1_ `!=` _val2_ |
-|`ASSERT_LT(`_val1_`, `_val2_`);`      |`EXPECT_LT(`_val1_`, `_val2_`);`      | _val1_ `<` _val2_ |
-|`ASSERT_LE(`_val1_`, `_val2_`);`      |`EXPECT_LE(`_val1_`, `_val2_`);`      | _val1_ `<=` _val2_ |
-|`ASSERT_GT(`_val1_`, `_val2_`);`      |`EXPECT_GT(`_val1_`, `_val2_`);`      | _val1_ `>` _val2_ |
-|`ASSERT_GE(`_val1_`, `_val2_`);`      |`EXPECT_GE(`_val1_`, `_val2_`);`      | _val1_ `>=` _val2_ |
+|`ASSERT_EQ(`_val1_`, `_val2_`);`|`EXPECT_EQ(`_val1_`, `_val2_`);`| _val1_ `==` _val2_ |
+|`ASSERT_NE(`_val1_`, `_val2_`);`|`EXPECT_NE(`_val1_`, `_val2_`);`| _val1_ `!=` _val2_ |
+|`ASSERT_LT(`_val1_`, `_val2_`);`|`EXPECT_LT(`_val1_`, `_val2_`);`| _val1_ `<` _val2_ |
+|`ASSERT_LE(`_val1_`, `_val2_`);`|`EXPECT_LE(`_val1_`, `_val2_`);`| _val1_ `<=` _val2_ |
+|`ASSERT_GT(`_val1_`, `_val2_`);`|`EXPECT_GT(`_val1_`, `_val2_`);`| _val1_ `>` _val2_ |
+|`ASSERT_GE(`_val1_`, `_val2_`);`|`EXPECT_GE(`_val1_`, `_val2_`);`| _val1_ `>=` _val2_ |
 
-In the event of a failure, Google Test prints both _val1_ and _val2_
-. In `ASSERT_EQ*` and `EXPECT_EQ*` (and all other equality assertions
-we'll introduce later), you should put the expression you want to test
-in the position of _actual_, and put its expected value in _expected_,
-as Google Test's failure messages are optimized for this convention.
+In the event of a failure, Google Test prints both _val1_ and _val2_.
 
 Value arguments must be comparable by the assertion's comparison
 operator or you'll get a compiler error.  We used to require the
@@ -172,6 +168,10 @@ and `wstring`).
 
 _Availability_: Linux, Windows, Mac.
 
+_Historical note_: Before February 2016 `*_EQ` had a convention of calling it as
+`ASSERT_EQ(expected, actual)`, so lots of existing code uses this order.
+Now `*_EQ` treats both parameters in the same way.
+
 ## String Comparison ##
 
 The assertions in this group compare two **C strings**. If you want to compare
@@ -179,9 +179,9 @@ two `string` objects, use `EXPECT_EQ`, `EXPECT_NE`, and etc instead.
 
 | **Fatal assertion** | **Nonfatal assertion** | **Verifies** |
 |:--------------------|:-----------------------|:-------------|
-| `ASSERT_STREQ(`_expected\_str_`, `_actual\_str_`);`    | `EXPECT_STREQ(`_expected\_str_`, `_actual\_str_`);`     | the two C strings have the same content |
+| `ASSERT_STREQ(`_str1_`, `_str2_`);`    | `EXPECT_STREQ(`_str1_`, `_str_2`);`     | the two C strings have the same content |
 | `ASSERT_STRNE(`_str1_`, `_str2_`);`    | `EXPECT_STRNE(`_str1_`, `_str2_`);`     | the two C strings have different content |
-| `ASSERT_STRCASEEQ(`_expected\_str_`, `_actual\_str_`);`| `EXPECT_STRCASEEQ(`_expected\_str_`, `_actual\_str_`);` | the two C strings have the same content, ignoring case |
+| `ASSERT_STRCASEEQ(`_str1_`, `_str2_`);`| `EXPECT_STRCASEEQ(`_str1_`, `_str2_`);` | the two C strings have the same content, ignoring case |
 | `ASSERT_STRCASENE(`_str1_`, `_str2_`);`| `EXPECT_STRCASENE(`_str1_`, `_str2_`);` | the two C strings have different content, ignoring case |
 
 Note that "CASE" in an assertion name means that case is ignored.
