@@ -312,8 +312,8 @@ want to learn more, see
 
 | **Fatal assertion** | **Nonfatal assertion** | **Verifies** |
 |:--------------------|:-----------------------|:-------------|
-| `ASSERT_FLOAT_EQ(`_expected, actual_`);`  | `EXPECT_FLOAT_EQ(`_expected, actual_`);` | the two `float` values are almost equal |
-| `ASSERT_DOUBLE_EQ(`_expected, actual_`);` | `EXPECT_DOUBLE_EQ(`_expected, actual_`);` | the two `double` values are almost equal |
+| `ASSERT_FLOAT_EQ(`_val1, val2_`);`  | `EXPECT_FLOAT_EQ(`_val1, val2_`);` | the two `float` values are almost equal |
+| `ASSERT_DOUBLE_EQ(`_val1, val2_`);` | `EXPECT_DOUBLE_EQ(`_val1, val2_`);` | the two `double` values are almost equal |
 
 By "almost equal", we mean the two values are within 4 ULP's from each
 other.
