@@ -989,7 +989,7 @@ you can use the _horrible_ hack of sniffing your executable name
 ## Google Test defines a macro that clashes with one defined by another library. How do I deal with that? ##
 
 In C++, macros don't obey namespaces.  Therefore two libraries that
-both define a macro of the same name will clash if you #include both
+both define a macro of the same name will clash if you `#include` both
 definitions.  In case a Google Test macro clashes with another
 library, you can force Google Test to rename its macro to avoid the
 conflict.
