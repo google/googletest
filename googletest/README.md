@@ -221,7 +221,7 @@ your build script.
 ### Avoiding Macro Name Clashes ###
 
 In C++, macros don't obey namespaces.  Therefore two libraries that
-both define a macro of the same name will clash if you #include both
+both define a macro of the same name will clash if you `#include` both
 definitions.  In case a Google Test macro clashes with another
 library, you can force Google Test to rename its macro to avoid the
 conflict.
