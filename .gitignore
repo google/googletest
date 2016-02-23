@@ -1,2 +1,13 @@
 # Ignore CI build directory
 build/
+
+# Visual Studio files
+*.sdf
+*.opensdf
+*.suo
+*.user
+_ReSharper.Caches/
+Win32-Debug/
+Win32-Release/
+x64-Debug/
+x64-Release/

@@ -1,0 +1,96 @@
+version: '{build}'
+
+os: Visual Studio 2015
+
+environment:
+  matrix:
+  - Toolset: v140
+  - Toolset: v120
+  - Toolset: v110
+  - Toolset: v100
+
+platform:
+  - Win32
+  - x64
+
+configuration:
+  - Release
+  - Debug
+
+build:
+  verbosity: minimal
+
+build_script:
+- ps: |
+    Write-Output "Configuration: $env:CONFIGURATION"
+    Write-Output "Platform: $env:PLATFORM"
+    if (($env:Toolset -eq "v100") -and ($env:PLATFORM -eq "x64"))
+    {
+        return
+    }
+    & .\change_toolset.ps1 $env:Toolset
+    $solutions = @("googletest\msvc\2010\gtest.sln",
+      "googletest\msvc\2010\gtest-md.sln",
+      "googlemock\msvc\2010\gmock.sln")
+
+    foreach ($sln in $solutions) {
+        msbuild /v:m /p:"Configuration=$env:CONFIGURATION" /p:Platform="$env:PLATFORM" "$sln" /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+        if ($LastExitCode -ne 0) {
+            throw "Exec: $ErrorMessage"
+        }
+    }
+
+test_script:
+- ps: |
+    if (($env:Toolset -eq "v100") -and ($env:PLATFORM -eq "x64"))
+    {
+        return
+    }
+
+    function Add-GTest-Result($testResult)
+    {
+        $testsuites = ([xml](get-content $testResult)).testsuites
+        $testsCount = 0
+        $anyFailures = $FALSE
+
+        foreach ($testsuite in $testsuites.testsuite) {
+            foreach ($testcase in $testsuite.testcase) {
+                $testsCount++
+                if ($testcase.failure) {
+                    $time = ([double]$testcase.time * 1000)
+                    Add-AppveyorTest $testcase.name -Outcome Failed -FileName $testsuite.name -Duration $time -ErrorMessage $testcase.failure.message
+                    Add-AppveyorMessage "$($testcase.name) failed" -Category Error
+                    $anyFailures = $TRUE
+                }
+                elseif ($testcase.skipped) {
+                    Add-AppveyorTest $testcase.name -Outcome Ignored -Filename $testsuite.name
+                }
+                else {
+                    $time = ([double]$testcase.time * 1000)
+                    Add-AppveyorTest $testcase.name -Outcome Passed -FileName $testsuite.name -Duration $time
+                }
+            }
+        }
+        return $testsCount, $anyFailures
+    }
+
+    $testsCount = 0
+    $anyFailures = $FALSE
+
+    # Run tests and upload results to AppVeyor one by one
+    Get-ChildItem ".\*test.exe" -Recurse | foreach {
+        $testfile = "$($_.FullName).xml"
+        & $_.FullName "--gtest_output=`"xml:$testfile`""
+        if (Test-Path $testfile)
+        {
+            $count, $testsResult = Add-GTest-Result $testfile
+            Write-Output "Found $testfile with $count tests"
+            $testsCount = $testsCount + $count
+            $anyFailures = $anyFailures -or $testsResult
+        }
+    }
+
+    if ($anyFailures -eq $TRUE){
+        Write-Output "Failing build as there are broken tests"
+        $host.SetShouldExit(1)
+    }
