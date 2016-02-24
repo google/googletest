@@ -1235,5 +1235,24 @@ const char* StringFromGTestEnv(const char* flag, const char* default_value) {
   return value == NULL ? default_value : value;
 }
 
+// Reads and returns GTEST_OUTPUT and/or XML_OUTPUT_FILE environment
+// variables; if neither is set, returns default value.
+// XML_OUTPUT_FILE is set by the Bazel build system, and its format is
+// a filename without the "xml:" prefix of GTEST_OUTPUT.
+std::string OutputFromGTestEnv(const char* default_value) {
+#if defined(GTEST_GET_STRING_FROM_ENV_)
+  return GTEST_GET_STRING_FROM_ENV_("output", default_value);
+#endif  // defined(GTEST_GET_STRING_FROM_ENV_)
+  const char* value = StringFromGTestEnv("output", NULL);
+  if (value) {
+    return value;
+  }
+  value = posix::GetEnv("XML_OUTPUT_FILE");
+  if (value) {
+    return std::string("xml:") + value;
+  }
+  return default_value;
+}
+
 }  // namespace internal
 }  // namespace testing
