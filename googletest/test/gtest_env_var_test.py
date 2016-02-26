@@ -99,18 +99,24 @@ class GTestEnvVarTest(gtest_test_utils.TestCase):
       TestFlag('stack_trace_depth', '0', '100')
 
   def testXmlOutputFile(self):
-      """Test that $XML_OUTPUT_FILE affects the output flag."""
+    """Test that $XML_OUTPUT_FILE affects the output flag."""
 
-      # $XML_OUTPUT_FILE sets output flag
-      SetEnvVar('XML_OUTPUT_FILE', 'tmp/bar.xml')
-      AssertEq('xml:tmp/bar.xml', GetFlag('output'))
+    try:
       # $XML_OUTPUT_FILE is overridden by $GTEST_OUTPUT
       SetEnvVar('GTEST_OUTPUT', 'xml:tmp/foo.xml')
+      SetEnvVar('XML_OUTPUT_FILE', 'tmp/bar.xml')
       AssertEq('xml:tmp/foo.xml', GetFlag('output'))
+
+      # $XML_OUTPUT_FILE without $GTEST_OUTPUT sets output flag
+      SetEnvVar('GTEST_OUTPUT', None)
+      AssertEq('xml:tmp/bar.xml', GetFlag('output'))
+
       # If neither set, flag has default value
       SetEnvVar('XML_OUTPUT_FILE', None)
-      SetEnvVar('GTEST_OUTPUT', None)
       AssertEq('', GetFlag('output'))
+    finally:
+      SetEnvVar('GTEST_OUTPUT', None)
+      SetEnvVar('XML_OUTPUT_FILE', None)
 
 if __name__ == '__main__':
   gtest_test_utils.Main()

@@ -237,7 +237,7 @@ GTEST_DEFINE_bool_(list_tests, false,
 
 GTEST_DEFINE_string_(
     output,
-    internal::OutputFromGTestEnv(""),
+    internal::StringFromGTestEnv("output", ""),
     "A format (currently must be \"xml\"), optionally followed "
     "by a colon and an output file name or directory. A directory "
     "is indicated by a trailing pathname separator. "
