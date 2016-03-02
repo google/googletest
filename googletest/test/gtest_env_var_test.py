@@ -84,6 +84,8 @@ class GTestEnvVarTest(gtest_test_utils.TestCase):
   def testEnvVarAffectsFlag(self):
     """Tests that environment variable should affect the corresponding flag."""
 
+    SetEnvVar('XML_OUTPUT_FILE', None)
+
     TestFlag('break_on_failure', '1', '0')
     TestFlag('color', 'yes', 'auto')
     TestFlag('filter', 'FooTest.Bar', '*')
