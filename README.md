@@ -105,7 +105,7 @@ package (as described below):
 ### Mac OS X Requirements ###
 
   * Mac OS X v10.4 Tiger or newer
-  * XCode Developer Tools
+  * Xcode Developer Tools
 
 ### Requirements for Contributors ###
 
