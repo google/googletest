@@ -2103,7 +2103,7 @@ For better readability, Google Mock also gives you:
   * `WithArg<N>(action)` (no `s` after `Arg`) when the inner `action` takes _one_ argument.
 
 As you may have realized, `InvokeWithoutArgs(...)` is just syntactic
-sugar for `WithoutArgs(Inovke(...))`.
+sugar for `WithoutArgs(Invoke(...))`.
 
 Here are more tips:
 
