@@ -2591,9 +2591,10 @@ class ContainerEqMatcher {
           UniversalPrint(*it, os);
         }
       }
+      return !printed_header2 && !printed_header;
     }
-
     return false;
+
   }
 
  private:
