@@ -2593,8 +2593,8 @@ class ContainerEqMatcher {
       }
       return !printed_header2 && !printed_header;
     }
-    return false;
 
+    return false;
   }
 
  private:
