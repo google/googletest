@@ -2558,10 +2558,13 @@ class ContainerEqMatcher {
     ::std::ostream* const os = listener->stream();
     if (os != NULL) {
       // Something is different. Check for extra values first.
+      size_t lhs_size = 0, expected_size = 0;
+
       bool printed_header = false;
       for (typename LhsStlContainer::const_iterator it =
                lhs_stl_container.begin();
            it != lhs_stl_container.end(); ++it) {
+        lhs_size++;
         if (internal::ArrayAwareFind(expected_.begin(), expected_.end(), *it) ==
             expected_.end()) {
           if (printed_header) {
@@ -2578,6 +2581,7 @@ class ContainerEqMatcher {
       bool printed_header2 = false;
       for (typename StlContainer::const_iterator it = expected_.begin();
            it != expected_.end(); ++it) {
+        expected_size++;
         if (internal::ArrayAwareFind(
                 lhs_stl_container.begin(), lhs_stl_container.end(), *it) ==
             lhs_stl_container.end()) {
@@ -2590,6 +2594,13 @@ class ContainerEqMatcher {
           }
           UniversalPrint(*it, os);
         }
+      }
+      if (!printed_header && !printed_header2) {
+        *os << " which has the same elements but apparently in different order";
+      }
+      if (expected_size != lhs_size) {
+        *os << " which has different size: actual size = " << lhs_size <<
+          ", expected size = " << expected_size;
       }
     }
 
