@@ -1571,15 +1571,14 @@ For technical reasons, there are some caveats:
   1. _statement_ in `EXPECT_FATAL_FAILURE()` cannot reference local non-static variables or non-static members of `this` object.
   1. _statement_ in `EXPECT_FATAL_FAILURE()` cannot return a value.
 
-_Note:_ Google Test is designed with threads in mind.  Once the
+_Note:_ Google Test is designed with threads in mind. Once the
 synchronization primitives in `"gtest/internal/gtest-port.h"` have
 been implemented, Google Test will become thread-safe, meaning that
-you can then use assertions in multiple threads concurrently.  Before
-
-that, however, Google Test only supports single-threaded usage.  Once
+you can then use assertions in multiple threads concurrently. Before
+that, however, Google Test only supports single-threaded usage. Once
 thread-safe, `EXPECT_FATAL_FAILURE()` and `EXPECT_NONFATAL_FAILURE()`
 will capture failures in the current thread only. If _statement_
-creates new threads, failures in these threads will be ignored.  If
+creates new threads, failures in these threads will be ignored. If
 you want to capture failures from all threads instead, you should use
 the following macros:
 
