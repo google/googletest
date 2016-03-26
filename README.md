@@ -62,7 +62,7 @@ the following notable projects:
 
 ## Related Open Source Projects ##
 
-[gtest-runner](https://github.com/nholthaus/gtest-runner) is a Qt5 based automated test-runner and Graphical User Interface with powerful features for Windows and Linux platforms.
+[GTest Runner](https://github.com/nholthaus/gtest-runner) is a Qt5 based automated test-runner and Graphical User Interface with powerful features for Windows and Linux platforms.
 
 [Google Test UI](https://github.com/ospector/gtest-gbar) is test runner that runs
 your test binary, allows you to track its progress via a progress bar, and
