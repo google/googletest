@@ -1,1 +1,1 @@
-include 'googletest'
+include 'googletest', 'googlemock'

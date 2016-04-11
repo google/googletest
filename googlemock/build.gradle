@@ -1,0 +1,51 @@
+project(':googlemock')
+{
+  model{
+    components{
+      main(NativeLibrarySpec){
+        baseName = "googlemock"
+        targetPlatform "x86"
+        targetPlatform "x64"
+        sources{
+          cpp{
+            source{
+              srcDirs "src"
+              include "gmock-all.cc"
+            }
+            exportedHeaders{
+              srcDirs "include"
+              srcDirs "../googlemock"
+              srcDirs "../googletest/include"
+            }
+          }
+        }
+        
+        // Special for each library
+        binaries.withType(SharedLibraryBinarySpec){
+          binary -> buildable = false;
+        }
+        binaries.withType(StaticLibraryBinarySpec){
+          cppCompiler.define "_LIB"        
+          if(buildType == buildTypes.Debug){
+            if(targetPlatform == platforms.x86){
+              cppCompiler.args "/Fd${buildDir}/objs/main/static/x86/debug/googlemock.pdb", "/FS"
+            }
+            else{
+              staticLibArchiver.args "/MACHINE:X64"
+              cppCompiler.args "/Fd${buildDir}/objs/main/static/x64/debug/googlemock.pdb", "/FS"
+            }
+          }
+          else{
+            if(targetPlatform == platforms.x86){
+              cppCompiler.args "/Fd${buildDir}/objs/main/static/x86/release/googlemock.pdb", "/FS"
+            }
+            else{
+              staticLibArchiver.args "/MACHINE:X64"
+              cppCompiler.args "/Fd${buildDir}/objs/main/static/x64/release/googlemock.pdb", "/FS"
+            }
+          }
+        }
+      }
+    }
+  }
+}
