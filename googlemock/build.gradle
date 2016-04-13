@@ -25,23 +25,25 @@ project(':googlemock')
           binary -> buildable = false;
         }
         binaries.withType(StaticLibraryBinarySpec){
-          cppCompiler.define "_LIB"        
-          if(buildType == buildTypes.Debug){
-            if(targetPlatform == platforms.x86){
-              cppCompiler.args "/Fd${buildDir}/objs/main/static/x86/debug/googlemock.pdb", "/FS"
+          if(toolChain in VisualCpp){
+            cppCompiler.define "_LIB"        
+            if(buildType == buildTypes.Debug){
+              if(targetPlatform == platforms.x86){
+                cppCompiler.args "/Fd${buildDir}/objs/main/static/x86/debug/googlemock.pdb", "/FS"
+              }
+              else{
+                staticLibArchiver.args "/MACHINE:X64"
+                cppCompiler.args "/Fd${buildDir}/objs/main/static/x64/debug/googlemock.pdb", "/FS"
+              }
             }
             else{
-              staticLibArchiver.args "/MACHINE:X64"
-              cppCompiler.args "/Fd${buildDir}/objs/main/static/x64/debug/googlemock.pdb", "/FS"
-            }
-          }
-          else{
-            if(targetPlatform == platforms.x86){
-              cppCompiler.args "/Fd${buildDir}/objs/main/static/x86/release/googlemock.pdb", "/FS"
-            }
-            else{
-              staticLibArchiver.args "/MACHINE:X64"
-              cppCompiler.args "/Fd${buildDir}/objs/main/static/x64/release/googlemock.pdb", "/FS"
+              if(targetPlatform == platforms.x86){
+                cppCompiler.args "/Fd${buildDir}/objs/main/static/x86/release/googlemock.pdb", "/FS"
+              }
+              else{
+                staticLibArchiver.args "/MACHINE:X64"
+                cppCompiler.args "/Fd${buildDir}/objs/main/static/x64/release/googlemock.pdb", "/FS"
+              }
             }
           }
         }

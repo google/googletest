@@ -1,11 +1,20 @@
 allprojects{
   apply plugin: 'cpp'
-  apply plugin: 'visual-studio'
+  
   model{
+    toolChains{
+      visualCpp(VisualCpp){
+        apply plugin: 'visual-studio'
+      }
+      gcc(Gcc){
+      }
+    }
+    
     buildTypes {
         Debug
         Release
     }
+    
     platforms{
       x86{
         architecture "x86"
@@ -14,33 +23,36 @@ allprojects{
         architecture "x86_64"
       }
     }
+    
     binaries{
       all{
-        cppCompiler.define "WIN32"
-        cppCompiler.define "_UNICODE"
-        cppCompiler.define "UNICODE"
-        cppCompiler.define "_CRT_SECURE_NO_WARNINGS"
-        cppCompiler.args "/GS", "/analyze-", "/W3", "/Zc:wchar_t", "/fp:precise", "/WX-", "/Zc:forScope", "/Gd", "/Oy-", "/EHsc", "/MT"
-        linker.args "/NXCOMPAT", "/DYNAMICBASE", "/DEBUG"
-        if(targetPlatform == platforms.x86){
-          linker.args "/MACHINE:X86"
-        }
-        else{
-          linker.args "/MACHINE:X64"
-        }
-        if(buildType == buildTypes.Debug){
-          cppCompiler.define "_DEBUG"
-          cppCompiler.args "/Gm", "/Od", "/sdl", "/RTC1"
+        if(toolChain in VisualCpp){
+          cppCompiler.define "WIN32"
+          cppCompiler.define "_UNICODE"
+          cppCompiler.define "UNICODE"
+          cppCompiler.define "_CRT_SECURE_NO_WARNINGS"
+          cppCompiler.args "/GS", "/analyze-", "/W3", "/Zc:wchar_t", "/fp:precise", "/WX-", "/Zc:forScope", "/Gd", "/Oy-", "/EHsc", "/MT"
+          linker.args "/NXCOMPAT", "/DYNAMICBASE", "/DEBUG"
           if(targetPlatform == platforms.x86){
-            cppCompiler.args "/ZI"
+            linker.args "/MACHINE:X86"
           }
           else{
-            cppCompiler.args "/Zi"
+            linker.args "/MACHINE:X64"
           }
-        }
-        else{
-          cppCompiler.define "NDEBUG"
-          cppCompiler.args "/Zi", "/Gm-", "/GL", "/Gy", "/O2", "/sdl", "/Oi"
+          if(buildType == buildTypes.Debug){
+            cppCompiler.define "_DEBUG"
+            cppCompiler.args "/Gm", "/Od", "/sdl", "/RTC1"
+            if(targetPlatform == platforms.x86){
+              cppCompiler.args "/ZI"
+            }
+            else{
+              cppCompiler.args "/Zi"
+            }
+          }
+          else{
+            cppCompiler.define "NDEBUG"
+            cppCompiler.args "/Zi", "/Gm-", "/GL", "/Gy", "/O2", "/sdl", "/Oi"
+          }
         }
       }
     }

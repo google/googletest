@@ -24,21 +24,23 @@ project(':googletest')
           binary -> buildable = false;
         }
         binaries.withType(StaticLibraryBinarySpec){
-          cppCompiler.define "_LIB"        
-          if(buildType == buildTypes.Debug){
-            if(targetPlatform == platforms.x86){
-              cppCompiler.args "/Fd${buildDir}/objs/main/static/x86/debug/googletest.pdb", "/FS"
+          if(toolChain in VisualCpp){
+            cppCompiler.define "_LIB"        
+            if(buildType == buildTypes.Debug){
+              if(targetPlatform == platforms.x86){
+                cppCompiler.args "/Fd${buildDir}/objs/main/static/x86/debug/googletest.pdb", "/FS"
+              }
+              else{
+                cppCompiler.args "/Fd${buildDir}/objs/main/static/x64/debug/googletest.pdb", "/FS"
+              }
             }
             else{
-              cppCompiler.args "/Fd${buildDir}/objs/main/static/x64/debug/googletest.pdb", "/FS"
-            }
-          }
-          else{
-            if(targetPlatform == platforms.x86){
-              cppCompiler.args "/Fd${buildDir}/objs/main/static/x86/release/googletest.pdb", "/FS"
-            }
-            else{
-              cppCompiler.args "/Fd${buildDir}/objs/main/static/x64/release/googletest.pdb", "/FS"
+              if(targetPlatform == platforms.x86){
+                cppCompiler.args "/Fd${buildDir}/objs/main/static/x86/release/googletest.pdb", "/FS"
+              }
+              else{
+                cppCompiler.args "/Fd${buildDir}/objs/main/static/x64/release/googletest.pdb", "/FS"
+              }
             }
           }
         }
