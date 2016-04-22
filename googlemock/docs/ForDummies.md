@@ -1,6 +1,6 @@
 
 
-(**Note:** If you get compiler errors that you don't understand, be sure to consult [Google Mock Doctor](http://code.google.com/p/googlemock/wiki/FrequentlyAskedQuestions#How_am_I_supposed_to_make_sense_of_these_horrible_template_error).)
+(**Note:** If you get compiler errors that you don't understand, be sure to consult [Google Mock Doctor](FrequentlyAskedQuestions.md#how-am-i-supposed-to-make-sense-of-these-horrible-template-errors).)
 
 # What Is Google C++ Mocking Framework? #
 When you write a prototype or test, often it's not feasible or wise to rely on real objects entirely. A **mock object** implements the same interface as a real object (so it can be used as one), but lets you specify at run time how it will be used and what it should do (which methods will be called? in which order? how many times? with what arguments? what will they return? etc).
@@ -44,7 +44,7 @@ We encourage you to use Google Mock as:
   * a _testing_ tool to cut your tests' outbound dependencies and probe the interaction between your module and its collaborators.
 
 # Getting Started #
-Using Google Mock is easy! Inside your C++ source file, just #include `"gtest/gtest.h"` and `"gmock/gmock.h"`, and you are ready to go.
+Using Google Mock is easy! Inside your C++ source file, just `#include` `"gtest/gtest.h"` and `"gmock/gmock.h"`, and you are ready to go.
 
 # A Case for Mock Turtles #
 Let's look at an example. Suppose you are developing a graphics program that relies on a LOGO-like API for drawing. How would you test that it does the right thing? Well, you can run it and compare the screen with a golden screen snapshot, but let's admit it: tests like this are expensive to run and fragile (What if you just upgraded to a shiny new graphics card that has better anti-aliasing? Suddenly you have to update all your golden images.). It would be too painful if all your tests are like this. Fortunately, you learned about Dependency Injection and know the right thing to do: instead of having your application talk to the drawing API directly, wrap the API in an interface (say, `Turtle`) and code to that interface:
@@ -76,7 +76,7 @@ If you are lucky, the mocks you need to use have already been implemented by som
 Using the `Turtle` interface as example, here are the simple steps you need to follow:
 
   1. Derive a class `MockTurtle` from `Turtle`.
-  1. Take a _virtual_ function of `Turtle` (while it's possible to [mock non-virtual methods using templates](http://code.google.com/p/googlemock/wiki/CookBook#Mocking_Nonvirtual_Methods), it's much more involved). Count how many arguments it has.
+  1. Take a _virtual_ function of `Turtle` (while it's possible to [mock non-virtual methods using templates](CookBook.md#mocking-nonvirtual-methods), it's much more involved). Count how many arguments it has.
   1. In the `public:` section of the child class, write `MOCK_METHODn();` (or `MOCK_CONST_METHODn();` if you are mocking a `const` method), where `n` is the number of the arguments; if you counted wrong, shame on you, and a compiler error will tell you so.
   1. Now comes the fun part: you take the function signature, cut-and-paste the _function name_ as the _first_ argument to the macro, and leave what's left as the _second_ argument (in case you're curious, this is the _type of the function_).
   1. Repeat until all virtual functions you want to mock are done.
@@ -105,7 +105,7 @@ You don't need to define these mock methods somewhere else - the `MOCK_METHOD*` 
 tool requires that you have Python 2.4 installed.  You give it a C++ file and the name of an abstract class defined in it,
 and it will print the definition of the mock class for you.  Due to the
 complexity of the C++ language, this script may not always work, but
-it can be quite handy when it does.  For more details, read the [user documentation](http://code.google.com/p/googlemock/source/browse/trunk/scripts/generator/README).
+it can be quite handy when it does.  For more details, read the [user documentation](../scripts/generator/README).
 
 ## Where to Put It ##
 When you define a mock class, you need to decide where to put its definition. Some people put it in a `*_test.cc`. This is fine when the interface being mocked (say, `Foo`) is owned by the same person or team. Otherwise, when the owner of `Foo` changes it, your test could break. (You can't really expect `Foo`'s maintainer to fix every test that uses `Foo`, can you?)
@@ -169,7 +169,7 @@ This means `EXPECT_CALL()` should be read as expecting that a call will occur _i
 Admittedly, this test is contrived and doesn't do much. You can easily achieve the same effect without using Google Mock. However, as we shall reveal soon, Google Mock allows you to do _much more_ with the mocks.
 
 ## Using Google Mock with Any Testing Framework ##
-If you want to use something other than Google Test (e.g. [CppUnit](http://apps.sourceforge.net/mediawiki/cppunit/index.php?title=Main_Page) or
+If you want to use something other than Google Test (e.g. [CppUnit](http://sourceforge.net/projects/cppunit/) or
 [CxxTest](http://cxxtest.tigris.org/)) as your testing framework, just change the `main()` function in the previous section to:
 ```
 int main(int argc, char** argv) {
@@ -187,7 +187,7 @@ sometimes causes the test program to crash.  You'll still be able to
 notice that the test has failed, but it's not a graceful failure.
 
 A better solution is to use Google Test's
-[event listener API](http://code.google.com/p/googletest/wiki/AdvancedGuide#Extending_Google_Test_by_Handling_Test_Events)
+[event listener API](../../googletest/docs/AdvancedGuide.md#extending-google-test-by-handling-test-events)
 to report a test failure to your testing framework properly.  You'll need to
 implement the `OnTestPartResult()` method of the event listener interface, but it
 should be straightforward.
@@ -301,7 +301,7 @@ says that `turtle.GetY()` will be called _at least twice_ (Google Mock knows thi
 
 Of course, if you explicitly write a `Times()`, Google Mock will not try to infer the cardinality itself. What if the number you specified is larger than there are `WillOnce()` clauses? Well, after all `WillOnce()`s are used up, Google Mock will do the _default_ action for the function every time (unless, of course, you have a `WillRepeatedly()`.).
 
-What can we do inside `WillOnce()` besides `Return()`? You can return a reference using `ReturnRef(variable)`, or invoke a pre-defined function, among [others](http://code.google.com/p/googlemock/wiki/CheatSheet#Actions).
+What can we do inside `WillOnce()` besides `Return()`? You can return a reference using `ReturnRef(variable)`, or invoke a pre-defined function, among [others](CheatSheet.md#actions).
 
 **Important note:** The `EXPECT_CALL()` statement evaluates the action clause only once, even though the action may be performed many times. Therefore you must be careful about side effects. The following may not do what you want:
 

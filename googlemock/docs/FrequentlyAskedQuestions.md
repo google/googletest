@@ -7,7 +7,7 @@ tried [Google Mock Doctor](#How_am_I_supposed_to_make_sense_of_these_horrible_te
 
 ## When I call a method on my mock object, the method for the real object is invoked instead.  What's the problem? ##
 
-In order for a method to be mocked, it must be _virtual_, unless you use the [high-perf dependency injection technique](http://code.google.com/p/googlemock/wiki/CookBook#Mocking_Nonvirtual_Methods).
+In order for a method to be mocked, it must be _virtual_, unless you use the [high-perf dependency injection technique](CookBook.md#mocking-nonvirtual-methods).
 
 ## I wrote some matchers.  After I upgraded to a new version of Google Mock, they no longer compile.  What's going on? ##
 
@@ -196,8 +196,8 @@ class MyGreatMatcher {
 ```
 
 For more information, you can read these
-[two](http://code.google.com/p/googlemock/wiki/CookBook#Writing_New_Monomorphic_Matchers)
-[recipes](http://code.google.com/p/googlemock/wiki/CookBook#Writing_New_Polymorphic_Matchers)
+[two](CookBook.md#writing-new-monomorphic-matchers)
+[recipes](CookBook.md#writing-new-polymorphic-matchers)
 from the cookbook.  As always, you
 are welcome to post questions on `googlemock@googlegroups.com` if you
 need any help.
@@ -206,7 +206,7 @@ need any help.
 
 Google Mock works out of the box with Google Test.  However, it's easy
 to configure it to work with any testing framework of your choice.
-[Here](http://code.google.com/p/googlemock/wiki/ForDummies#Using_Google_Mock_with_Any_Testing_Framework) is how.
+[Here](ForDummies.md#using-google-mock-with-any-testing-framework) is how.
 
 ## How am I supposed to make sense of these horrible template errors? ##
 
@@ -474,10 +474,10 @@ verbose level.
 If you find yourself needing to perform some action that's not
 supported by Google Mock directly, remember that you can define your own
 actions using
-[MakeAction()](http://code.google.com/p/googlemock/wiki/CookBook#Writing_New_Actions) or
-[MakePolymorphicAction()](http://code.google.com/p/googlemock/wiki/CookBook#Writing_New_Polymorphic_Actions),
+[MakeAction()](CookBook.md#writing-new-actions) or
+[MakePolymorphicAction()](CookBook.md#writing_new_polymorphic_actions),
 or you can write a stub function and invoke it using
-[Invoke()](http://code.google.com/p/googlemock/wiki/CookBook#Using_Functions_Methods_Functors).
+[Invoke()](CookBook.md#using-functions_methods_functors).
 
 ## MOCK\_METHODn()'s second argument looks funny.  Why don't you use the MOCK\_METHODn(Method, return\_type, arg\_1, ..., arg\_n) syntax? ##
 
@@ -599,7 +599,7 @@ when the mock method is called.  `SetArgPointee()` says what the
 side effect is, but doesn't say what the return value should be.  You
 need `DoAll()` to chain a `SetArgPointee()` with a `Return()`.
 
-See this [recipe](http://code.google.com/p/googlemock/wiki/CookBook#Mocking_Side_Effects) for more details and an example.
+See this [recipe](CookBook.md#mocking_side_effects) for more details and an example.
 
 
 ## My question is not in your FAQ! ##
@@ -607,12 +607,12 @@ See this [recipe](http://code.google.com/p/googlemock/wiki/CookBook#Mocking_Side
 If you cannot find the answer to your question in this FAQ, there are
 some other resources you can use:
 
-  1. read other [wiki pages](http://code.google.com/p/googlemock/w/list),
+  1. read other [documentation](Documentation.md),
   1. search the mailing list [archive](http://groups.google.com/group/googlemock/topics),
   1. ask it on [googlemock@googlegroups.com](mailto:googlemock@googlegroups.com) and someone will answer it (to prevent spam, we require you to join the [discussion group](http://groups.google.com/group/googlemock) before you can post.).
 
 Please note that creating an issue in the
-[issue tracker](http://code.google.com/p/googlemock/issues/list) is _not_
+[issue tracker](https://github.com/google/googletest/issues) is _not_
 a good way to get your answer, as it is monitored infrequently by a
 very small number of people.
 

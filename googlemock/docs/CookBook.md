@@ -905,7 +905,7 @@ Matches(AllOf(Ge(0), Le(100), Ne(50)))
 
 Since matchers are basically predicates that also know how to describe
 themselves, there is a way to take advantage of them in
-[Google Test](http://code.google.com/p/googletest/) assertions. It's
+[Google Test](../../googletest/) assertions. It's
 called `ASSERT_THAT` and `EXPECT_THAT`:
 
 ```
@@ -948,7 +948,7 @@ Expected: starts with "Hello"
 ```
 
 **Credit:** The idea of `(ASSERT|EXPECT)_THAT` was stolen from the
-[Hamcrest](http://code.google.com/p/hamcrest/) project, which adds
+[Hamcrest](https://github.com/hamcrest/) project, which adds
 `assertThat()` to JUnit.
 
 ## Using Predicates as Matchers ##
@@ -1343,7 +1343,7 @@ Remember that `_` is the wildcard matcher that matches anything. With this, if `
 
 Note that the order of the two `EXPECT_CALLs` is important, as a newer `EXPECT_CALL` takes precedence over an older one.
 
-For more on uninteresting calls, nice mocks, and strict mocks, read ["The Nice, the Strict, and the Naggy"](https://code.google.com/p/googlemock/wiki/CookBook#The_Nice,_the_Strict,_and_the_Naggy).
+For more on uninteresting calls, nice mocks, and strict mocks, read ["The Nice, the Strict, and the Naggy"](#the-nice-the-strict-and-the-naggy).
 
 ## Expecting Ordered Calls ##
 
@@ -1387,7 +1387,7 @@ instead of being overly constraining.
 
 Google Mock allows you to impose an arbitrary DAG (directed acyclic
 graph) on the calls. One way to express the DAG is to use the
-[After](http://code.google.com/p/googlemock/wiki/CheatSheet#The_After_Clause) clause of `EXPECT_CALL`.
+[After](CheatSheet.md#the-after-clause) clause of `EXPECT_CALL`.
 
 Another way is via the `InSequence()` clause (not the same as the
 `InSequence` class), which we borrowed from jMock 2. It's less
@@ -2103,7 +2103,7 @@ For better readability, Google Mock also gives you:
   * `WithArg<N>(action)` (no `s` after `Arg`) when the inner `action` takes _one_ argument.
 
 As you may have realized, `InvokeWithoutArgs(...)` is just syntactic
-sugar for `WithoutArgs(Inovke(...))`.
+sugar for `WithoutArgs(Invoke(...))`.
 
 Here are more tips:
 
@@ -2484,7 +2484,7 @@ MockFoo::~MockFoo() {}
 
 When it's being destoyed, your friendly mock object will automatically
 verify that all expectations on it have been satisfied, and will
-generate [Google Test](http://code.google.com/p/googletest/) failures
+generate [Google Test](../../googletest/) failures
 if not. This is convenient as it leaves you with one less thing to
 worry about. That is, unless you are not sure if your mock object will
 be destoyed.
@@ -2803,7 +2803,7 @@ obvious that the third `EXPECT_CALL` is written wrong. Case solved.
 ## Running Tests in Emacs ##
 
 If you build and run your tests in Emacs, the source file locations of
-Google Mock and [Google Test](http://code.google.com/p/googletest/)
+Google Mock and [Google Test](../../googletest/)
 errors will be highlighted. Just press `<Enter>` on one of them and
 you'll be taken to the offending line. Or, you can just type `C-x ``
 to jump to the next error.
@@ -2838,7 +2838,7 @@ and you should see an `OUTPUT_DIR` directory being created with files
 These three files contain everything you need to use Google Mock (and
 Google Test).  Just copy them to anywhere you want and you are ready
 to write tests and use mocks.  You can use the
-[scrpts/test/Makefile](http://code.google.com/p/googlemock/source/browse/trunk/scripts/test/Makefile) file as an example on how to compile your tests
+[scrpts/test/Makefile](../scripts/test/Makefile) file as an example on how to compile your tests
 against them.
 
 # Extending Google Mock #
@@ -3670,6 +3670,6 @@ This printer knows how to print built-in C++ types, native arrays, STL
 containers, and any type that supports the `<<` operator.  For other
 types, it prints the raw bytes in the value and hopes that you the
 user can figure it out.
-[Google Test's advanced guide](http://code.google.com/p/googletest/wiki/AdvancedGuide#Teaching_Google_Test_How_to_Print_Your_Values)
+[Google Test's advanced guide](../../googletest/docs/AdvancedGuide.md#teaching-google-test-how-to-print-your-values)
 explains how to extend the printer to do a better job at
 printing your particular type than to dump the bytes.

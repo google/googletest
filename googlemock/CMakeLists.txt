@@ -92,6 +92,22 @@ cxx_library(gmock_main
             src/gmock-all.cc
             src/gmock_main.cc)
 
+# If the CMake version supports it, attach header directory information
+# to the targets for when we are part of a parent build (ie being pulled
+# in via add_subdirectory() rather than being a standalone build).
+if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
+  target_include_directories(gmock      INTERFACE "${gmock_SOURCE_DIR}/include")
+  target_include_directories(gmock_main INTERFACE "${gmock_SOURCE_DIR}/include")
+endif()
+
+########################################################################
+#
+# Install rules
+install(TARGETS gmock gmock_main
+  DESTINATION lib)
+install(DIRECTORY ${gmock_SOURCE_DIR}/include/gmock
+  DESTINATION include)
+
 ########################################################################
 #
 # Google Mock's own tests.
