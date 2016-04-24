@@ -1004,6 +1004,28 @@ class TypedExpectation : public ExpectationBase {
     return *this;
   }
 
+  TypedExpectation& WillOnce(const Action<F>& action1,
+                             const Action<F>& action2) {
+    return WillOnce(DoAll(action1, action2));
+  }
+
+  TypedExpectation& WillOnce(const Action<F>& action1, const Action<F>& action2,
+                             const Action<F>& action3) {
+    return WillOnce(DoAll(action1, action2, action3));
+  }
+
+  TypedExpectation& WillOnce(const Action<F>& action1, const Action<F>& action2,
+                             const Action<F>& action3,
+                             const Action<F>& action4) {
+    return WillOnce(DoAll(action1, action2, action3, action4));
+  }
+
+  TypedExpectation& WillOnce(const Action<F>& action1, const Action<F>& action2,
+                             const Action<F>& action3, const Action<F>& action4,
+                             const Action<F>& action5) {
+    return WillOnce(DoAll(action1, action2, action3, action4, action5));
+  }
+
   // Implements the .WillRepeatedly() clause.
   TypedExpectation& WillRepeatedly(const Action<F>& action) {
     if (last_clause_ == kWillRepeatedly) {
@@ -1027,6 +1049,32 @@ class TypedExpectation : public ExpectationBase {
     // whether their count makes sense.
     CheckActionCountIfNotDone();
     return *this;
+  }
+
+  TypedExpectation& WillRepeatedly(const Action<F>& action1,
+                                   const Action<F>& action2) {
+    return WillRepeatedly(DoAll(action1, action2));
+  }
+
+  TypedExpectation& WillRepeatedly(const Action<F>& action1,
+                                   const Action<F>& action2,
+                                   const Action<F>& action3) {
+    return WillRepeatedly(DoAll(action1, action2, action3));
+  }
+
+  TypedExpectation& WillRepeatedly(const Action<F>& action1,
+                                   const Action<F>& action2,
+                                   const Action<F>& action3,
+                                   const Action<F>& action4) {
+    return WillRepeatedly(DoAll(action1, action2, action3, action4));
+  }
+
+  TypedExpectation& WillRepeatedly(const Action<F>& action1,
+                                   const Action<F>& action2,
+                                   const Action<F>& action3,
+                                   const Action<F>& action4,
+                                   const Action<F>& action5) {
+    return WillRepeatedly(DoAll(action1, action2, action3, action4, action5));
   }
 
   // Implements the .RetiresOnSaturation() clause.

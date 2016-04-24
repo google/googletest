@@ -479,6 +479,26 @@ TEST(ExpectCallSyntaxTest, WillCanAppearMultipleTimes) {
       .WillOnce(Return());
 }
 
+ACTION(Dummy) {}
+
+TEST(ExpectCallSyntaxTest, WillOnceCanHaveMultipleActions) {
+  MockA a;
+
+  EXPECT_CALL(a, DoA(1)).WillOnce(Dummy(), Return());
+  EXPECT_CALL(a, DoA(2)).WillOnce(Dummy(), Dummy(), Return());
+  a.DoA(1);
+  a.DoA(2);
+}
+
+TEST(ExpectCallSyntaxTest, WillRepeatedlyCanHaveMultipleActions) {
+  MockA a;
+
+  EXPECT_CALL(a, DoA(1)).WillRepeatedly(Dummy(), Return());
+  EXPECT_CALL(a, DoA(2)).WillRepeatedly(Dummy(), Dummy(), Return());
+  a.DoA(1);
+  a.DoA(2);
+}
+
 TEST(ExpectCallSyntaxTest, WillMustBeBeforeWillRepeatedly) {
   MockA a;
 
