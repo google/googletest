@@ -288,7 +288,7 @@ class MaxBipartiteMatchState {
   // Each element of the left_ vector represents a left hand side node
   // (i.e. an element) and each element of right_ is a right hand side
   // node (i.e. a matcher). The values in the left_ vector indicate
-  // outflow from that node to a node on the the right_ side. The values
+  // outflow from that node to a node on the right_ side. The values
   // in the right_ indicate inflow, and specify which left_ node is
   // feeding that right_ node, if any. For example, left_[3] == 1 means
   // there's a flow from element #3 to matcher #1. Such a flow would also

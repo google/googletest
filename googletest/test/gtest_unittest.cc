@@ -1388,7 +1388,7 @@ class TestResultTest : public Test {
     delete r2;
   }
 
-  // Helper that compares two two TestPartResults.
+  // Helper that compares two TestPartResults.
   static void CompareTestPartResult(const TestPartResult& expected,
                                     const TestPartResult& actual) {
     EXPECT_EQ(expected.type(), actual.type());
