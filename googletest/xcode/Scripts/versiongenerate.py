@@ -88,7 +88,7 @@ file_data = """//
 // is executed in a "Run Script" build phase when creating gtest.framework. This
 // header file is not used during compilation of C-source. Rather, it simply
 // defines some version strings for substitution in the Info.plist. Because of
-// this, we are not not restricted to C-syntax nor are we using include guards.
+// this, we are not restricted to C-syntax nor are we using include guards.
 //
 
 #define GTEST_VERSIONINFO_SHORT %s.%s
