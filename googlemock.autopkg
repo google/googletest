@@ -1,0 +1,65 @@
+configurations 
+{
+    // This node contains custom pivot information.
+    Toolset 
+    {
+        key : "PlatformToolset"; // this is CoApp pre-defined key
+        choices: { v140 };
+    };
+};
+nuget {
+    nuspec {
+        id = googlemock.v140.windesktop.static.rt-dyn;
+        version : 1.7.0.${BUILD_VERSION};
+        title : "Google Mock v140";
+        authors : "Google Inc.";
+        owners : "Google Inc.";
+        licenseUrl : "https://en.wikipedia.org/wiki/Google_Test";
+        projectUrl: "https://github.com/google/googletest";
+        iconUrl: "https://www.google.ca/images/branding/product/ico/googleg_lodp.ico";
+        requireLicenseAcceptance: false;
+        summary: @"Google Mock vc140 libraries";
+
+        description: @"Google's framework for writing and using C++ mock classes. It can help you derive better designs of your system and write better tests.";
+
+        releaseNotes: "https://github.com/google/googletest/tree/master/googlemock";
+
+        copyright: "Copyright 2016 Google Inc. All rights reserved.";
+
+        tags: { native, c, cpp, google, mock, gmock, googlemock, test, unittest, unit };
+    };
+
+    files {
+		#defines {
+			SDK_ROOT = .\;
+		};
+		nestedInclude: {
+			#destination : ${d_include}gtest;
+			"${SDK_ROOT}googlemock\include\**\*.h*";
+		};
+		
+        [x64,v140,release] { 
+            lib: { ${SDK_ROOT}build_v140_x64\googlemock\RelWithDebInfo\gmock.lib };
+			symbols: { ${SDK_ROOT}build_v140_x64\googlemock\gmock.dir\RelWithDebInfo\gmock.pdb };
+        };
+
+        [x64,v140,debug] { 
+            lib: { ${SDK_ROOT}build_v140_x64\googlemock\Debug\gmock.lib };
+			symbols: { ${SDK_ROOT}build_v140_x64\googlemock\gmock.dir\Debug\gmock.pdb };
+        };
+
+        [win32,v140,release] { 
+            lib: { ${SDK_ROOT}build_v140_x86\googlemock\RelWithDebInfo\gmock.lib };
+			symbols: { ${SDK_ROOT}build_v140_x86\googlemock\gmock.dir\RelWithDebInfo\gmock.pdb };
+        };
+
+        [win32,v140,debug] { 
+            lib: { ${SDK_ROOT}build_v140_x86\googlemock\Debug\gmock.lib };
+			symbols: { ${SDK_ROOT}build_v140_x86\googlemock\gmock.dir\Debug\gmock.pdb };
+        };
+    };
+
+	targets {
+		Defines += HAS_GOOGLEMOCK;
+	};
+}
