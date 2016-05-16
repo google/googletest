@@ -1856,18 +1856,40 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 // Boolean assertions. Condition can be either a Boolean expression or an
 // AssertionResult. For more information on how to use AssertionResult with
 // these macros see comments on that class.
-#define EXPECT_TRUE(condition) \
+#define GTEST_EXPECT_TRUE(condition) \
   GTEST_TEST_BOOLEAN_(condition, #condition, false, true, \
                       GTEST_NONFATAL_FAILURE_)
-#define EXPECT_FALSE(condition) \
+#define GTEST_EXPECT_FALSE(condition) \
   GTEST_TEST_BOOLEAN_(!(condition), #condition, true, false, \
                       GTEST_NONFATAL_FAILURE_)
-#define ASSERT_TRUE(condition) \
+#define GTEST_ASSERT_TRUE(condition) \
   GTEST_TEST_BOOLEAN_(condition, #condition, false, true, \
                       GTEST_FATAL_FAILURE_)
-#define ASSERT_FALSE(condition) \
+#define GTEST_ASSERT_FALSE(condition) \
   GTEST_TEST_BOOLEAN_(!(condition), #condition, true, false, \
                       GTEST_FATAL_FAILURE_)
+
+// Define macro GTEST_DONT_DEFINE_EXPECT_XY to 1 to omit the definition of
+// EXPECT_XY(), which clashes with some users' own code.
+
+#if !GTEST_DONT_DEFINE_EXPECT_TRUE
+# define EXPECT_TRUE(condition) GTEST_EXPECT_TRUE(condition)
+#endif
+
+#if !GTEST_DONT_DEFINE_EXPECT_FALSE
+# define EXPECT_FALSE(condition) GTEST_EXPECT_FALSE(condition)
+#endif
+
+// Define macro GTEST_DONT_DEFINE_ASSERT_XY to 1 to omit the definition of
+// ASSERT_XY(), which clashes with some users' own code.
+
+#if !GTEST_DONT_DEFINE_ASSERT_TRUE
+# define ASSERT_TRUE(condition) GTEST_ASSERT_TRUE(condition)
+#endif
+
+#if !GTEST_DONT_DEFINE_ASSERT_FALSE
+# define ASSERT_FALSE(condition) GTEST_ASSERT_FALSE(condition)
+#endif
 
 // Includes the auto-generated header that implements a family of
 // generic predicate assertion macros.
@@ -1919,19 +1941,19 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 //   ASSERT_LT(i, array_size);
 //   ASSERT_GT(records.size(), 0) << "There is no record left.";
 
-#define EXPECT_EQ(val1, val2) \
+#define GTEST_EXPECT_EQ(val1, val2) \
   EXPECT_PRED_FORMAT2(::testing::internal:: \
                       EqHelper<GTEST_IS_NULL_LITERAL_(val1)>::Compare, \
                       val1, val2)
-#define EXPECT_NE(val1, val2) \
+#define GTEST_EXPECT_NE(val1, val2) \
   EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperNE, val1, val2)
-#define EXPECT_LE(val1, val2) \
+#define GTEST_EXPECT_LE(val1, val2) \
   EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperLE, val1, val2)
-#define EXPECT_LT(val1, val2) \
+#define GTEST_EXPECT_LT(val1, val2) \
   EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperLT, val1, val2)
-#define EXPECT_GE(val1, val2) \
+#define GTEST_EXPECT_GE(val1, val2) \
   EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperGE, val1, val2)
-#define EXPECT_GT(val1, val2) \
+#define GTEST_EXPECT_GT(val1, val2) \
   EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperGT, val1, val2)
 
 #define GTEST_ASSERT_EQ(val1, val2) \
@@ -1948,6 +1970,33 @@ class TestWithParam : public Test, public WithParamInterface<T> {
   ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperGE, val1, val2)
 #define GTEST_ASSERT_GT(val1, val2) \
   ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperGT, val1, val2)
+
+// Define macro GTEST_DONT_DEFINE_EXPECT_XY to 1 to omit the definition of
+// EXPECT_XY(), which clashes with some users' own code.
+
+#if !GTEST_DONT_DEFINE_EXPECT_EQ
+# define EXPECT_EQ(val1, val2) GTEST_EXPECT_EQ(val1, val2)
+#endif
+
+#if !GTEST_DONT_DEFINE_EXPECT_NE
+# define EXPECT_NE(val1, val2) GTEST_EXPECT_NE(val1, val2)
+#endif
+
+#if !GTEST_DONT_DEFINE_EXPECT_LE
+# define EXPECT_LE(val1, val2) GTEST_EXPECT_LE(val1, val2)
+#endif
+
+#if !GTEST_DONT_DEFINE_EXPECT_LT
+# define EXPECT_LT(val1, val2) GTEST_EXPECT_LT(val1, val2)
+#endif
+
+#if !GTEST_DONT_DEFINE_EXPECT_GE
+# define EXPECT_GE(val1, val2) GTEST_EXPECT_GE(val1, val2)
+#endif
+
+#if !GTEST_DONT_DEFINE_EXPECT_GT
+# define EXPECT_GT(val1, val2) GTEST_EXPECT_GT(val1, val2)
+#endif
 
 // Define macro GTEST_DONT_DEFINE_ASSERT_XY to 1 to omit the definition of
 // ASSERT_XY(), which clashes with some users' own code.
