@@ -1392,6 +1392,8 @@ internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
                   __FILE__, __LINE__))->AddTestPattern(\
                       #test_case_name, \
                       #test_name, \
+                      ::testing::internal::CodeLocation(\
+                          __FILE__, __LINE__), \
                       new ::testing::internal::TestMetaFactory< \
                           GTEST_TEST_CLASS_NAME_(\
                               test_case_name, test_name)>()); \
