@@ -1025,6 +1025,20 @@ TEST_F(ParameterizedDeathTest, GetParamDiesFromTestF) {
 
 INSTANTIATE_TEST_CASE_P(RangeZeroToFive, ParameterizedDerivedTest, Range(0, 5));
 
+// Test capture of test location in case of multiple test cases sharing one fixture
+
+class LocationCaptureTest : public TestWithParam<int> {};
+
+TEST_P(LocationCaptureTest, Case1) {
+  EXPECT_EQ(__LINE__ - 1, ::testing::UnitTest::GetInstance()->current_test_info()->line());
+}
+
+TEST_P(LocationCaptureTest, Case2) {
+  EXPECT_EQ(__LINE__ - 1, ::testing::UnitTest::GetInstance()->current_test_info()->line());
+}
+
+INSTANTIATE_TEST_CASE_P(TwoCases, LocationCaptureTest, Values(0));
+
 #endif  // GTEST_HAS_PARAM_TEST
 
 TEST(CompileTest, CombineIsDefinedOnlyWhenGtestHasParamTestIsDefined) {
