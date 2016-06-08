@@ -1422,9 +1422,9 @@ internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
   ::testing::internal::ParamGenerator<test_case_name::ParamType> \
       gtest_##prefix##test_case_name##_EvalGenerator_() { return generator; } \
   ::std::string gtest_##prefix##test_case_name##_EvalGenerateName_( \
-      const ::testing::TestParamInfo<test_case_name::ParamType>& info) { \
+      const ::testing::TestParamInfo<test_case_name::ParamType>& info_) { \
     return ::testing::internal::GetParamNameGen<test_case_name::ParamType> \
-        (__VA_ARGS__)(info); \
+        (__VA_ARGS__)(info_); \
   } \
   int gtest_##prefix##test_case_name##_dummy_ GTEST_ATTRIBUTE_UNUSED_ = \
       ::testing::UnitTest::GetInstance()->parameterized_test_registry(). \
