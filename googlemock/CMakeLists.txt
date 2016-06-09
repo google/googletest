@@ -96,8 +96,9 @@ cxx_library(gmock_main
 # to the targets for when we are part of a parent build (ie being pulled
 # in via add_subdirectory() rather than being a standalone build).
 if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
-  target_include_directories(gmock      INTERFACE "${gmock_SOURCE_DIR}/include")
-  target_include_directories(gmock_main INTERFACE "${gmock_SOURCE_DIR}/include")
+  set(all_includes "${gtest_SOURCE_DIR}/include" "${gmock_SOURCE_DIR}/include")
+  target_include_directories(gmock      INTERFACE "${all_includes}")
+  target_include_directories(gmock_main INTERFACE "${all_includes}")
 endif()
 
 ########################################################################
