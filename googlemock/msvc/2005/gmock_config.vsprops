@@ -10,6 +10,6 @@
 	/>
 	<UserMacro
 		Name="GTestDir"
-		Value="../../../googletest"
+		Value="../../gtest"
 	/>
 </VisualStudioPropertySheet>
