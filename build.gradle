@@ -31,7 +31,7 @@ allprojects{
           cppCompiler.define "_UNICODE"
           cppCompiler.define "UNICODE"
           cppCompiler.define "_CRT_SECURE_NO_WARNINGS"
-          cppCompiler.args "/GS", "/analyze-", "/W3", "/Zc:wchar_t", "/fp:precise", "/WX-", "/Zc:forScope", "/Gd", "/Oy-", "/EHsc", "/MT"
+          cppCompiler.args "/GS", "/analyze-", "/W3", "/Zc:wchar_t", "/fp:precise", "/WX-", "/Zc:forScope", "/Gd", "/Oy-", "/EHsc"
           linker.args "/NXCOMPAT", "/DYNAMICBASE", "/DEBUG"
           if(targetPlatform == platforms.x86){
             linker.args "/MACHINE:X86"
@@ -41,7 +41,7 @@ allprojects{
           }
           if(buildType == buildTypes.Debug){
             cppCompiler.define "_DEBUG"
-            cppCompiler.args "/Gm", "/Od", "/sdl", "/RTC1"
+            cppCompiler.args "/Gm", "/Od", "/sdl", "/RTC1", "/MTd"
             if(targetPlatform == platforms.x86){
               cppCompiler.args "/ZI"
             }
@@ -51,6 +51,7 @@ allprojects{
           }
           else{
             cppCompiler.define "NDEBUG"
+            cppCompiler.args "/MT"
             cppCompiler.args "/Zi", "/Gm-", "/GL", "/Gy", "/O2", "/sdl", "/Oi"
           }
         }
