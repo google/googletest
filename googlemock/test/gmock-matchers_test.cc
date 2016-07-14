@@ -613,7 +613,7 @@ TEST(MatcherCastTest, FromSameType) {
 struct ConvertibleFromAny {
   ConvertibleFromAny(int a_value) : value(a_value) {}
   template <typename T>
-  ConvertibleFromAny(const T& /*a_value*/) : value(-1) {
+  explicit ConvertibleFromAny(const T& /*a_value*/) : value(-1) {
     ADD_FAILURE() << "Conversion constructor called";
   }
   int value;
@@ -867,10 +867,11 @@ class Unprintable {
  public:
   Unprintable() : c_('a') {}
 
-  bool operator==(const Unprintable& /* rhs */) { return true; }
  private:
   char c_;
 };
+
+inline bool operator==(const Unprintable&, /* lhs */ const Unprintable& /* rhs */) { return true; }
 
 TEST(EqTest, CanDescribeSelf) {
   Matcher<Unprintable> m = Eq(Unprintable());
