@@ -54,7 +54,7 @@ Underscore (`_`) is special, as C++ reserves the following to be used by
 the compiler and the standard library:
 
   1. any identifier that starts with an `_` followed by an upper-case letter, and
-  1. any identifier that containers two consecutive underscores (i.e. `__`) _anywhere_ in its name.
+  1. any identifier that contains two consecutive underscores (i.e. `__`) _anywhere_ in its name.
 
 User code is _prohibited_ from using such identifiers.
 
