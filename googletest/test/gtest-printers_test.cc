@@ -222,7 +222,7 @@ using ::std::hash_map;
 using ::std::hash_set;
 using ::std::hash_multimap;
 using ::std::hash_multiset;
-#elif _MSC_VER < 1900
+#elif _MSC_VER && _MSC_VER < 1900
 using ::stdext::hash_map;
 using ::stdext::hash_set;
 using ::stdext::hash_multimap;
