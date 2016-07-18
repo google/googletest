@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.6.2)
 
 project( googletest-distribution )
+set( CMAKE_MACOSX_RPATH 1)
 
 enable_testing()
 
