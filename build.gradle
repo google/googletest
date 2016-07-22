@@ -55,6 +55,11 @@ allprojects{
             cppCompiler.args "/Zi", "/Gm-", "/GL", "/Gy", "/O2", "/sdl", "/Oi"
           }
         }
+        if(toolChain in Gcc){
+          if(buildType == buildTypes.Debug){
+            cppCompiler.args "-g"
+          }
+        }
       }
     }
   }
