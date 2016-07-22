@@ -1865,7 +1865,32 @@ bool String::WideCStringEquals(const wchar_t * lhs, const wchar_t * rhs) {
   return wcscmp(lhs, rhs) == 0;
 }
 
-// Helper function for *_STREQ on wide strings.
+// Compares two char16_t C strings.  Returns true if they have the same
+// content.
+//
+#ifndef _MSC_VER
+bool String::Char16CStringEquals(const char16_t* lhs, const char16_t* rhs){
+  if (lhs == NULL) return rhs == NULL;
+
+  if (rhs == NULL) return false;
+  std::u16string s1(lhs);
+
+  return s1.compare(rhs) == 0;
+  }
+#else
+#if(_MSC_VER == 1900)
+bool String::Char16CStringEquals(const char16_t* lhs, const char16_t* rhs) {
+  if (lhs == NULL) return rhs == NULL;
+
+  if (rhs == NULL) return false;
+  std::u16string s1(lhs);
+
+  return s1.compare(rhs) == 0;
+  }
+#endif
+#endif
+
+  // Helper function for *_STREQ on wide strings.
 AssertionResult CmpHelperSTREQ(const char* lhs_expression,
                                const char* rhs_expression,
                                const wchar_t* lhs,
@@ -1896,7 +1921,59 @@ AssertionResult CmpHelperSTRNE(const char* s1_expression,
                             << " vs " << PrintToString(s2);
 }
 
-// Compares two C strings, ignoring case.  Returns true iff they have
+#ifndef _MSC_VER
+  AssertionResult CmpHelperSTREQ(const char* s1_expression, const char* s2_expression, const char16_t* s1, const char16_t* s2)
+  {
+  if (String::Char16CStringEquals(s1, s2)) {
+    return AssertionSuccess();
+    }
+
+  return AssertionFailure() << "Expected: (" << s1_expression << ") != ("
+    << s2_expression << "), actual: "
+    << PrintToString(s1)
+    << " vs " << PrintToString(s2);
+  }
+
+  AssertionResult CmpHelperSTRNE(const char* s1_expression, const char* s2_expression, const char16_t* s1, const char16_t* s2)
+  {
+  if (!String::Char16CStringEquals(s1, s2)) {
+    return AssertionSuccess();
+    }
+
+  return AssertionFailure() << "Expected: (" << s1_expression << ") != ("
+    << s2_expression << "), actual: "
+    << PrintToString(s1)
+    << " vs " << PrintToString(s2);
+  }
+#else
+#if(_MSC_VER == 1900)
+AssertionResult CmpHelperSTREQ(const char* s1_expression, const char* s2_expression, const char16_t* s1, const char16_t* s2)
+  {
+  if (String::Char16CStringEquals(s1, s2)) {
+    return AssertionSuccess();
+    }
+
+  return AssertionFailure() << "Expected: (" << s1_expression << ") != ("
+    << s2_expression << "), actual: "
+    << PrintToString(s1)
+    << " vs " << PrintToString(s2);
+  }
+
+AssertionResult CmpHelperSTRNE(const char* s1_expression, const char* s2_expression, const char16_t* s1, const char16_t* s2)
+  {
+  if (!String::Char16CStringEquals(s1, s2)) {
+    return AssertionSuccess();
+    }
+
+  return AssertionFailure() << "Expected: (" << s1_expression << ") != ("
+    << s2_expression << "), actual: "
+    << PrintToString(s1)
+    << " vs " << PrintToString(s2);
+  }
+#endif
+#endif
+
+  // Compares two C strings, ignoring case.  Returns true iff they have
 // the same content.
 //
 // Unlike strcasecmp(), this function can handle NULL argument(s).  A
