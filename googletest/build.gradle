@@ -1,44 +1,40 @@
-project(':googletest')
-{
-  model{
-    components{
-      main(NativeLibrarySpec){
+project(':googletest') {
+  model {
+    components {
+      main(NativeLibrarySpec) {
         baseName = "googletest"
         targetPlatform "x86"
         targetPlatform "x64"
-        sources{
-          cpp{
-            source{
+        sources {
+          cpp {
+            source {
               srcDirs "src"
               include "gtest-all.cc"
             }
-            exportedHeaders{
+            exportedHeaders {
               srcDirs "include"
               srcDirs "../googletest"
             }
           }
         }
-        
+
         // Special for each library
-        binaries.withType(SharedLibraryBinarySpec){
+        binaries.withType(SharedLibraryBinarySpec) {
           binary -> buildable = false;
         }
-        binaries.withType(StaticLibraryBinarySpec){
-          if(toolChain in VisualCpp){
-            cppCompiler.define "_LIB"        
-            if(buildType == buildTypes.Debug){
-              if(targetPlatform == platforms.x86){
+        binaries.withType(StaticLibraryBinarySpec) {
+          if (toolChain in VisualCpp) {
+            cppCompiler.define "_LIB"
+            if (buildType == buildTypes.Debug) {
+              if (targetPlatform == platforms.x86) {
                 cppCompiler.args "/Fd${buildDir}/objs/main/static/x86/debug/googletest.pdb", "/FS"
-              }
-              else{
+              } else {
                 cppCompiler.args "/Fd${buildDir}/objs/main/static/x64/debug/googletest.pdb", "/FS"
               }
-            }
-            else{
-              if(targetPlatform == platforms.x86){
+            } else {
+              if (targetPlatform == platforms.x86) {
                 cppCompiler.args "/Fd${buildDir}/objs/main/static/x86/release/googletest.pdb", "/FS"
-              }
-              else{
+              } else {
                 cppCompiler.args "/Fd${buildDir}/objs/main/static/x64/release/googletest.pdb", "/FS"
               }
             }

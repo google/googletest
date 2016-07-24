@@ -1,46 +1,42 @@
-project(':googlemock')
-{
-  model{
-    components{
-      main(NativeLibrarySpec){
+project(':googlemock') {
+  model {
+    components {
+      main(NativeLibrarySpec) {
         baseName = "googlemock"
         targetPlatform "x86"
         targetPlatform "x64"
-        sources{
-          cpp{
-            source{
+        sources {
+          cpp {
+            source {
               srcDirs "src"
               include "gmock-all.cc"
             }
-            exportedHeaders{
+            exportedHeaders {
               srcDirs "include"
               srcDirs "../googlemock"
               srcDirs "../googletest/include"
             }
           }
         }
-        
+
         // Special for each library
-        binaries.withType(SharedLibraryBinarySpec){
+        binaries.withType(SharedLibraryBinarySpec) {
           binary -> buildable = false;
         }
-        binaries.withType(StaticLibraryBinarySpec){
-          if(toolChain in VisualCpp){
-            cppCompiler.define "_LIB"        
-            if(buildType == buildTypes.Debug){
-              if(targetPlatform == platforms.x86){
+        binaries.withType(StaticLibraryBinarySpec) {
+          if (toolChain in VisualCpp) {
+            cppCompiler.define "_LIB"
+            if (buildType == buildTypes.Debug) {
+              if (targetPlatform == platforms.x86) {
                 cppCompiler.args "/Fd${buildDir}/objs/main/static/x86/debug/googlemock.pdb", "/FS"
-              }
-              else{
+              } else {
                 staticLibArchiver.args "/MACHINE:X64"
                 cppCompiler.args "/Fd${buildDir}/objs/main/static/x64/debug/googlemock.pdb", "/FS"
               }
-            }
-            else{
-              if(targetPlatform == platforms.x86){
+            } else {
+              if (targetPlatform == platforms.x86) {
                 cppCompiler.args "/Fd${buildDir}/objs/main/static/x86/release/googlemock.pdb", "/FS"
-              }
-              else{
+              } else {
                 staticLibArchiver.args "/MACHINE:X64"
                 cppCompiler.args "/Fd${buildDir}/objs/main/static/x64/release/googlemock.pdb", "/FS"
               }

@@ -4,132 +4,124 @@ def _MSC_VER = 1900
 def VS_2015_INCLUDE_DIR = ""
 def VS_2015_LIB_DIR = ""
 
-allprojects{
-  if(_MSC_VER == 1900){
+allprojects {
+  if (_MSC_VER == 1900) {
     VS_2015_INCLUDE_DIR = "C:/Program Files (x86)/Windows Kits/10/Include/10.0.10586.0/ucrt"
     VS_2015_LIB_DIR = "C:/Program Files (x86)/Windows Kits/10/Lib/10.0.10586.0/ucrt"
-    }
+  }
   apply plugin: 'cpp'
-  model{
-    toolChains{
-      if(OperatingSystem.current().isWindows()){
-        visualCpp(VisualCpp){
-          if(_MSC_VER == 1900){
+  model {
+    toolChains {
+      if (OperatingSystem.current().isWindows()) {
+        visualCpp(VisualCpp) {
+          if (_MSC_VER == 1900) {
             installDir "C:/Program Files (x86)/Microsoft Visual Studio 14.0"
-            }
-          else{
+          } else {
             installDir "C:/Program Files (x86)/Microsoft Visual Studio 12.0"
-            }
           }
         }
-      else{
+      } else {
         gcc(Gcc)
-        }
       }
-      
-    if(OperatingSystem.current().isWindows()){
+    }
+
+    if (OperatingSystem.current().isWindows()) {
       apply plugin: 'visual-studio'
-      if(_MSC_VER == 1900){
-        visualStudio{
-          solutions.all{
-            solutionFile.withContent{ TextProvider content ->
+      if (_MSC_VER == 1900) {
+        visualStudio {
+          solutions.all {
+            solutionFile.withContent { TextProvider content ->
               content.asBuilder().insert(0, "# GENERATED FILE: DO NOT EDIT\n")
               content.text = content.text.replaceFirst("Format Version [1][1][.][0][0]", "Format Version 12.00")
               content.text = content.text.replaceFirst("[# ] Visual C[+][+] Express 2010", "# Visual Studio 14\nVisualStudioVersion = 14.0.25123.0\nMinimumVisualStudioVersion = 10.0.40219.1")
-              }
             }
-          projects.all{
-            projectFile.withXml{
+          }
+          projects.all {
+            projectFile.withXml {
               asNode().@ToolsVersion = "14.0"
-              asNode().PropertyGroup.findAll({ it.@Label == 'Configuration'}).each{ configNode ->
-                configNode.appendNode("PlatformToolset","v140")
-                }
+              asNode().PropertyGroup.findAll({ it.@Label == 'Configuration' }).each { configNode ->
+                configNode.appendNode("PlatformToolset", "v140")
               }
             }
           }
         }
-      else{
-        visualStudio{
-          solutionFile.withContent{ TextProvider content ->
-            solutions.all
-            {
-            content.asBuilder().insert(0, "# GENERATED FILE: DO NOT EDIT\n")
-            content.text = content.text.replaceFirst("Format Version [1][1][.][0][0]", "Format Version 12.00")
-            content.text = content.text.replaceFirst("[# ] Visual C[+][+] Express 2010", "# Visual Studio 2013\nVisualStudioVersion = 12.0.40629.0\nMinimumVisualStudioVersion = 10.0.40219.1")
+      } else {
+        visualStudio {
+          solutionFile.withContent { TextProvider content ->
+            solutions.all {
+              content.asBuilder().insert(0, "# GENERATED FILE: DO NOT EDIT\n")
+              content.text = content.text.replaceFirst("Format Version [1][1][.][0][0]", "Format Version 12.00")
+              content.text = content.text.replaceFirst("[# ] Visual C[+][+] Express 2010", "# Visual Studio 2013\nVisualStudioVersion = 12.0.40629.0\nMinimumVisualStudioVersion = 10.0.40219.1")
             }
           }
-          projects.all{
-            projectFile.withXml
-              {
+          projects.all {
+            projectFile.withXml {
               asNode().@ToolsVersion = "12.0"
-              asNode().PropertyGroup.findAll({it.@Label == 'Configuration'}).each{ configNode ->
-                configNode.appendNode("PlatformToolset","v120")
-                }
+              asNode().PropertyGroup.findAll({ it.@Label == 'Configuration' }).each { configNode ->
+                configNode.appendNode("PlatformToolset", "v120")
               }
             }
           }
         }
       }
-      
-    buildTypes{
+    }
+
+    buildTypes {
       Debug
       Release
-      }
-    
-    platforms{
-      x86{
+    }
+
+    platforms {
+      x86 {
         architecture "x86"
-        }
-      x64{
-        architecture "x86_64"
-        }
       }
-    binaries{
-      all{
-        if(toolChain in VisualCpp){
+      x64 {
+        architecture "x86_64"
+      }
+    }
+    binaries {
+      all {
+        if (toolChain in VisualCpp) {
           cppCompiler.define "WIN32"
           cppCompiler.define "_UNICODE"
           cppCompiler.define "UNICODE"
           cppCompiler.define "_CRT_SECURE_NO_WARNINGS"
-          if(_MSC_VER == 1900){
+          if (_MSC_VER == 1900) {
             cppCompiler.args "-I" + VS_2015_INCLUDE_DIR
-            }
+          }
           cppCompiler.args "/GS", "/analyze-", "/W3", "/Zc:wchar_t", "/fp:precise", "/WX-", "/Zc:forScope", "/Gd", "/Oy-", "/EHsc"
           linker.args "/NXCOMPAT", "/DYNAMICBASE", "/DEBUG"
-          if(targetPlatform == platforms.x86){
+          if (targetPlatform == platforms.x86) {
             linker.args "/MACHINE:X86"
-            if(_MSC_VER == 1900){
+            if (_MSC_VER == 1900) {
               linker.args "/LIBPATH:" + VS_2015_LIB_DIR + "/x86"
-              }
             }
-          else{
+          } else {
             linker.args "/MACHINE:X64"
-            if(_MSC_VER == 1900){
+            if (_MSC_VER == 1900) {
               linker.args "/LIBPATH:" + VS_2015_LIB_DIR + "/x64"
-              }
             }
-          if(buildType == buildTypes.Debug){
+          }
+          if (buildType == buildTypes.Debug) {
             cppCompiler.define "_DEBUG"
             cppCompiler.args "/Gm", "/Od", "/sdl", "/RTC1", "/MTd"
-            if(targetPlatform == platforms.x86){
+            if (targetPlatform == platforms.x86) {
               cppCompiler.args "/ZI"
-              }
-            else{
+            } else {
               cppCompiler.args "/Zi"
-              }
             }
-          else{
+          } else {
             cppCompiler.define "NDEBUG"
             cppCompiler.args "/MT"
             cppCompiler.args "/Zi", "/Gm-", "/GL", "/Gy", "/O2", "/sdl", "/Oi"
-            }
           }
-        if(toolChain in Gcc){
-          if(buildType == buildTypes.Debug){
+        }
+        if (toolChain in Gcc) {
+          if (buildType == buildTypes.Debug) {
             cppCompiler.args "-g"
-            }
           }
         }
       }
     }
   }
+}
