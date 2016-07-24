@@ -117,6 +117,7 @@ allprojects {
           }
         }
         if (toolChain in Gcc) {
+          cppCompiler.args "-std=c++11", "-Wall", "-Wconversion"
           if (buildType == buildTypes.Debug) {
             cppCompiler.args "-g"
           }
