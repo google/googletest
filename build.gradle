@@ -1,6 +1,17 @@
 import org.gradle.internal.os.OperatingSystem;
 
-def _MSC_VER = 1900
+// Create file to use Visual Studio 2015
+def vs2015Name = "VisualStudo2015.txt"
+
+File vs2015File = new File(vs2015Name)
+
+ext {
+  _MSC_VER = 1800
+  if (vs2015File.exists()) {
+    _MSC_VER = 1900
+  }
+}
+
 def VS_2015_INCLUDE_DIR = ""
 def VS_2015_LIB_DIR = ""
 
