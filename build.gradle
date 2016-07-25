@@ -1,6 +1,21 @@
 import org.gradle.internal.os.OperatingSystem;
 
-def _MSC_VER = 1900
+// Create file to use Visual Studio 2015
+def vs2015Name = project.rootDir.toString() + "/VisualStudio2015.txt"
+
+File vs2015File = new File(vs2015Name)
+
+ext {
+  _MSC_VER = 1800
+  if (vs2015File.exists()) {
+    println "Using Visual Studio 2015"
+    _MSC_VER = 1900
+  }
+  else {
+    println "Using Visual Studio 2013"
+  }
+}
+
 def VS_2015_INCLUDE_DIR = ""
 def VS_2015_LIB_DIR = ""
 
@@ -47,8 +62,8 @@ allprojects {
         }
       } else {
         visualStudio {
-          solutionFile.withContent { TextProvider content ->
-            solutions.all {
+          solutions.all {
+            solutionFile.withContent { TextProvider content ->
               content.asBuilder().insert(0, "# GENERATED FILE: DO NOT EDIT\n")
               content.text = content.text.replaceFirst("Format Version [1][1][.][0][0]", "Format Version 12.00")
               content.text = content.text.replaceFirst("[# ] Visual C[+][+] Express 2010", "# Visual Studio 2013\nVisualStudioVersion = 12.0.40629.0\nMinimumVisualStudioVersion = 10.0.40219.1")
