@@ -119,7 +119,9 @@ class GTEST_API_ String {
   // content.
   //
 #ifndef _MSC_VER
+  #if __cplusplus==201103L
   static bool Char16CStringEquals(const char16_t* s1, const char16_t* s2);
+  #endif
 #else
 #if(_MSC_VER == 1900)
   static bool Char16CStringEquals(const char16_t* lhs, const char16_t* rhs);

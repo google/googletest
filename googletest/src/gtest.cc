@@ -1869,6 +1869,7 @@ bool String::WideCStringEquals(const wchar_t * lhs, const wchar_t * rhs) {
 // content.
 //
 #ifndef _MSC_VER
+#if __cplusplus==201103L
 bool String::Char16CStringEquals(const char16_t* lhs, const char16_t* rhs){
   if (lhs == NULL) return rhs == NULL;
 
@@ -1877,6 +1878,7 @@ bool String::Char16CStringEquals(const char16_t* lhs, const char16_t* rhs){
 
   return s1.compare(rhs) == 0;
   }
+#endif
 #else
 #if(_MSC_VER == 1900)
 bool String::Char16CStringEquals(const char16_t* lhs, const char16_t* rhs) {
@@ -1922,6 +1924,7 @@ AssertionResult CmpHelperSTRNE(const char* s1_expression,
 }
 
 #ifndef _MSC_VER
+#if __cplusplus==201103L
   AssertionResult CmpHelperSTREQ(const char* s1_expression, const char* s2_expression, const char16_t* s1, const char16_t* s2)
   {
   if (String::Char16CStringEquals(s1, s2)) {
@@ -1945,6 +1948,7 @@ AssertionResult CmpHelperSTRNE(const char* s1_expression,
     << PrintToString(s1)
     << " vs " << PrintToString(s2);
   }
+#endif
 #else
 #if(_MSC_VER == 1900)
 AssertionResult CmpHelperSTREQ(const char* s1_expression, const char* s2_expression, const char16_t* s1, const char16_t* s2)
