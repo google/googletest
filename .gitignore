@@ -1,2 +1,4 @@
 # Ignore CI build directory
 build/
+
+*.txt.user
