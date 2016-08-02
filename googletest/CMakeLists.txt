@@ -20,7 +20,16 @@ option(gtest_build_tests "Build all of gtest's own tests." OFF)
 
 option(gtest_build_samples "Build gtest's sample programs." OFF)
 
-option(gtest_disable_pthreads "Disable uses of pthreads in gtest." OFF)
+if (MINGW)
+    # On MinGW, we can have both GTEST_OS_WINDOWS and GTEST_HAS_PTHREAD
+    # defined, but we don't want to use MinGW's pthreads implementation, which
+    # has conformance problems with some versions of the POSIX standard.
+
+    option(gtest_disable_pthreads "Disable uses of pthreads in gtest." ON)
+else()
+    option(gtest_disable_pthreads "Disable uses of pthreads in gtest." OFF)
+endif (MINGW)
+
 
 option(
   gtest_hide_internal_symbols
