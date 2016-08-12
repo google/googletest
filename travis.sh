@@ -12,4 +12,4 @@ cmake -Dgtest_build_samples=ON \
       -DCMAKE_CXX_FLAGS=$CXX_FLAGS \
       ../../$GTEST_TARGET
 make
-make test
+CTEST_OUTPUT_ON_FAILURE=1 make test
