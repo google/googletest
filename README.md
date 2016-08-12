@@ -1,5 +1,6 @@
-
-# Google Test #
+# Google Test U #
+The 'U' stands for 'Unofficial'. This repository will be more actively as I'm using Google Test heavily in my daily work.
+Issues and PRs are welcome! And I'll always be responsive.
 
 [![Build Status](https://travis-ci.org/google/googletest.svg?branch=master)](https://travis-ci.org/google/googletest)
 [![Build status](https://ci.appveyor.com/api/projects/status/4o38plt0xbo1ubc8/branch/master?svg=true)](https://ci.appveyor.com/project/BillyDonahue/googletest/branch/master)
@@ -15,7 +16,7 @@ mailing list for questions, discussions, and development.  There is
 also an IRC channel on OFTC (irc.oftc.net) #gtest available.  Please
 join us!
 
-Getting started information for **Google Test** is available in the 
+Getting started information for **Google Test** is available in the
 [Google Test Primer](googletest/docs/Primer.md) documentation.
 
 **Google Mock** is an extension to Google Test for writing and using C++ mock
