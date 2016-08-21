@@ -1365,7 +1365,7 @@ two cases to consider:
 
 Both static functions and definitions/declarations in an unnamed namespace are
 only visible within the same translation unit. To test them, you can `#include`
-the entire `.cc` file being tested in your `*_test.cc` file. (#including `.cc`
+the entire `.cc` file being tested in your `*_test.cc` file. (`#include`ing `.cc`
 files is not a good way to reuse code - you should not do this in production
 code!)
 
@@ -1467,7 +1467,7 @@ Test doesn't use exceptions, so how do we test that a piece of code
 generates an expected failure?
 
 `<gtest/gtest-spi.h>` contains some constructs to do this.  After
-#including this header, you can use
+`#include`ing this header, you can use
 
 | `EXPECT_FATAL_FAILURE(`_statement, substring_`);` |
 |:--------------------------------------------------|

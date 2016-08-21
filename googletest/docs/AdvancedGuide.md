@@ -312,8 +312,8 @@ want to learn more, see
 
 | **Fatal assertion** | **Nonfatal assertion** | **Verifies** |
 |:--------------------|:-----------------------|:-------------|
-| `ASSERT_FLOAT_EQ(`_expected, actual_`);`  | `EXPECT_FLOAT_EQ(`_expected, actual_`);` | the two `float` values are almost equal |
-| `ASSERT_DOUBLE_EQ(`_expected, actual_`);` | `EXPECT_DOUBLE_EQ(`_expected, actual_`);` | the two `double` values are almost equal |
+| `ASSERT_FLOAT_EQ(`_val1, val2_`);`  | `EXPECT_FLOAT_EQ(`_val1, val2_`);` | the two `float` values are almost equal |
+| `ASSERT_DOUBLE_EQ(`_val1, val2_`);` | `EXPECT_DOUBLE_EQ(`_val1, val2_`);` | the two `double` values are almost equal |
 
 By "almost equal", we mean the two values are within 4 ULP's from each
 other.
@@ -1450,7 +1450,7 @@ two cases to consider:
 
 Both static functions and definitions/declarations in an unnamed namespace are
 only visible within the same translation unit. To test them, you can `#include`
-the entire `.cc` file being tested in your `*_test.cc` file. (#including `.cc`
+the entire `.cc` file being tested in your `*_test.cc` file. (`#include`ing `.cc`
 files is not a good way to reuse code - you should not do this in production
 code!)
 
@@ -1551,8 +1551,8 @@ exception, you could catch the exception and assert on it.  But Google
 Test doesn't use exceptions, so how do we test that a piece of code
 generates an expected failure?
 
-`"gtest/gtest-spi.h"` contains some constructs to do this.  After
-#including this header, you can use
+`"gtest/gtest-spi.h"` contains some constructs to do this.  After 
+`#include`ing this header, you can use
 
 | `EXPECT_FATAL_FAILURE(`_statement, substring_`);` |
 |:--------------------------------------------------|
@@ -1571,15 +1571,14 @@ For technical reasons, there are some caveats:
   1. _statement_ in `EXPECT_FATAL_FAILURE()` cannot reference local non-static variables or non-static members of `this` object.
   1. _statement_ in `EXPECT_FATAL_FAILURE()` cannot return a value.
 
-_Note:_ Google Test is designed with threads in mind.  Once the
+_Note:_ Google Test is designed with threads in mind. Once the
 synchronization primitives in `"gtest/internal/gtest-port.h"` have
 been implemented, Google Test will become thread-safe, meaning that
-you can then use assertions in multiple threads concurrently.  Before
-
-that, however, Google Test only supports single-threaded usage.  Once
+you can then use assertions in multiple threads concurrently. Before
+that, however, Google Test only supports single-threaded usage. Once
 thread-safe, `EXPECT_FATAL_FAILURE()` and `EXPECT_NONFATAL_FAILURE()`
 will capture failures in the current thread only. If _statement_
-creates new threads, failures in these threads will be ignored.  If
+creates new threads, failures in these threads will be ignored. If
 you want to capture failures from all threads instead, you should use
 the following macros:
 

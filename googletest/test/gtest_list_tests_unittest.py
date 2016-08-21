@@ -71,7 +71,7 @@ FooTest\.
 TypedTest/0\.  # TypeParam = (VeryLo{245}|class VeryLo{239})\.\.\.
   TestA
   TestB
-TypedTest/1\.  # TypeParam = int\s*\*
+TypedTest/1\.  # TypeParam = int\s*\*( __ptr64)?
   TestA
   TestB
 TypedTest/2\.  # TypeParam = .*MyArray<bool,\s*42>
@@ -80,7 +80,7 @@ TypedTest/2\.  # TypeParam = .*MyArray<bool,\s*42>
 My/TypeParamTest/0\.  # TypeParam = (VeryLo{245}|class VeryLo{239})\.\.\.
   TestA
   TestB
-My/TypeParamTest/1\.  # TypeParam = int\s*\*
+My/TypeParamTest/1\.  # TypeParam = int\s*\*( __ptr64)?
   TestA
   TestB
 My/TypeParamTest/2\.  # TypeParam = .*MyArray<bool,\s*42>
