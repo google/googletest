@@ -427,7 +427,7 @@ void AssertHelper::operator=(const Message& message) const {
 GTEST_API_ GTEST_DEFINE_STATIC_MUTEX_(g_linked_ptr_mutex);
 
 // A copy of all command line arguments.  Set by InitGoogleTest().
-::std::vector<std::string> g_argvs;
+static ::std::vector<std::string> g_argvs;
 
 ::std::vector<std::string> GetArgvs() {
 #if defined(GTEST_CUSTOM_GET_ARGVS_)
