@@ -12,7 +12,7 @@ maintain and release them together.
 
 Please see the project page above for more information as well as the
 mailing list for questions, discussions, and development.  There is
-also an IRC channel on OFTC (irc.oftc.net) #gtest available.  Please
+also an IRC channel on [OFTC](https://webchat.oftc.net/) (irc.oftc.net) #gtest available.  Please
 join us!
 
 Getting started information for **Google Test** is available in the 
@@ -82,7 +82,7 @@ effort to support other platforms (e.g. Solaris, AIX, and z/OS).
 However, since core members of the Google Test project have no access
 to these platforms, Google Test may have outstanding issues there.  If
 you notice any problems on your platform, please notify
-<googletestframework@googlegroups.com>. Patches for fixing them are
+[googletestframework@googlegroups.com](https://groups.google.com/forum/#!forum/googletestframework). Patches for fixing them are
 even more welcome!
 
 ### Linux Requirements ###
@@ -97,7 +97,7 @@ package (as described below):
 
 ### Windows Requirements ###
 
-  * Microsoft Visual C++ v7.1 or newer
+  * Microsoft Visual C++ 2010 or newer
 
 ### Cygwin Requirements ###
 
