@@ -99,6 +99,15 @@ $if i >= 1 [[
 
 
 ]]
+
+template<typename T> T& RemoveVolatileCast(T & v) {
+  return v;
+}
+template <typename T>
+T& RemoveVolatileCast(T volatile& v) {
+  return const_cast<T&>(v);
+}
+
 }  // namespace internal
 
 // The style guide prohibits "using" statements in a namespace scope
@@ -128,9 +137,8 @@ using internal::FunctionMocker;
 
 // The variable for mocking the given method.
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
-#define GMOCK_MOCKER_(arity, constness, Method) \
-    GTEST_CONCAT_TOKEN_(gmock##constness##arity##_##Method##_, __LINE__)
-
+#define GMOCK_MOCKER_(arity, Method) \
+    GTEST_CONCAT_TOKEN_(gmock##arity##_##Method##_, __LINE__)
 
 $for i [[
 $range j 1..i
@@ -140,24 +148,34 @@ $var as = [[$for j, [[gmock_a$j]]]]
 $var matcher_as = [[$for j, \
                      [[GMOCK_MATCHER_(tn, $j, __VA_ARGS__) gmock_a$j]]]]
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
-#define GMOCK_METHOD$i[[]]_(tn, constness, ct, Method, ...) \
+#define GMOCK_METHOD$i[[]]_(tn, qualifiers, ct, Method, ...) \
   GMOCK_RESULT_(tn, __VA_ARGS__) ct Method( \
-      $arg_as) constness { \
+      $arg_as) qualifiers { \
     GTEST_COMPILE_ASSERT_((::testing::tuple_size<                          \
         tn ::testing::internal::Function<__VA_ARGS__>::ArgumentTuple>::value == $i), \
         this_method_does_not_take_$i[[]]_argument[[$if i != 1 [[s]]]]); \
-    GMOCK_MOCKER_($i, constness, Method).SetOwnerAndName(this, #Method); \
-    return GMOCK_MOCKER_($i, constness, Method).Invoke($as); \
+    ::testing::internal::RemoveVolatileCast(*this) \
+        .GMOCK_MOCKER_($i, Method) \
+        .SetOwnerAndName(& ::testing::internal::RemoveVolatileCast(*this), #Method); \
+    return ::testing::internal::RemoveVolatileCast(*this) \
+        .GMOCK_MOCKER_($i, Method) \
+        .Invoke($as); \
   } \
   ::testing::MockSpec<__VA_ARGS__>& \
-      gmock_##Method($matcher_as) constness { \
-    GMOCK_MOCKER_($i, constness, Method).RegisterOwner(this); \
-    return GMOCK_MOCKER_($i, constness, Method).With($as); \
+      gmock_##Method($matcher_as) qualifiers { \
+    ::testing::internal::RemoveVolatileCast(*this) \
+        .GMOCK_MOCKER_($i, Method) \
+        .RegisterOwner(& ::testing::internal::RemoveVolatileCast(*this); \
+    return ::testing::internal::RemoveVolatileCast(*this) \
+        .GMOCK_MOCKER_($i, Method) \
+        .With($as); \
   } \
-  mutable ::testing::FunctionMocker<__VA_ARGS__> GMOCK_MOCKER_($i, constness, Method)
+  mutable ::testing::FunctionMocker<__VA_ARGS__> GMOCK_MOCKER_($i, Method)
 
 
 ]]
+
+
 $for i [[
 #define MOCK_METHOD$i(m, ...) GMOCK_METHOD$i[[]]_(, , , m, __VA_ARGS__)
 
@@ -209,6 +227,35 @@ $for i [[
     GMOCK_METHOD$i[[]]_(typename, const, ct, m, __VA_ARGS__)
 
 ]]
+
+
+$for i [[
+#define MOCK_QUALIFIED_METHOD$i[[]](m, qualifiers, ...) \
+    GMOCK_METHOD$i[[]]_(, qualifiers, , m, __VA_ARGS__)
+
+]]
+
+
+$for i [[
+#define MOCK_QUALIFIED_METHOD$i[[]]_T(m, qualifiers, ...) \
+    GMOCK_METHOD$i[[]]_(typename, qualifiers, , m, __VA_ARGS__)
+
+]]
+
+
+$for i [[
+#define MOCK_QUALIFIED_METHOD$i[[]]_WITH_CALLTYPE(ct, m, qualifiers, ...) \
+    GMOCK_METHOD$i[[]]_(, qualifiers, ct, m, __VA_ARGS__)
+
+]]
+
+
+$for i [[
+#define MOCK_QUALIFIED_METHOD$i[[]]_T_WITH_CALLTYPE(ct, m, qualifiers, ...) \
+    GMOCK_METHOD$i[[]]_(typename, qualifiers, ct, m, __VA_ARGS__)
+
+]]
+
 
 // A MockFunction<F> class has one mock method whose type is F.  It is
 // useful when you just want your test code to emit some messages and
