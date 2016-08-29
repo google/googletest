@@ -70,6 +70,8 @@
 #include "gtest/gtest.h"  // NOLINT
 #include "gtest/gtest-spi.h"
 
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 /* class A needs to have dll-interface to be used by clients of class B */)
+
 namespace testing {
 
 // Declares the flags.
@@ -1179,5 +1181,7 @@ class GTEST_API_ StreamingListener : public EmptyTestEventListener {
 
 }  // namespace internal
 }  // namespace testing
+
+GTEST_DISABLE_MSC_WARNINGS_POP_()
 
 #endif  // GTEST_SRC_GTEST_INTERNAL_INL_H_
