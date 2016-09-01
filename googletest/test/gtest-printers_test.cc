@@ -222,11 +222,11 @@ using ::std::hash_map;
 using ::std::hash_set;
 using ::std::hash_multimap;
 using ::std::hash_multiset;
-#elif _MSC_VER
-using ::stdext::hash_map;
-using ::stdext::hash_set;
-using ::stdext::hash_multimap;
-using ::stdext::hash_multiset;
+#elif _MSC_VER && GTEST_HAS_HASH_MAP_
+	using ::stdext::hash_map;
+	using ::stdext::hash_set;
+	using ::stdext::hash_multimap;
+	using ::stdext::hash_multiset;
 #endif
 
 // Prints a value to a string using the universal value printer.  This
