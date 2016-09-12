@@ -79,7 +79,7 @@ posting a question on the
 Google Mock is not a testing framework itself.  Instead, it needs a
 testing framework for writing tests.  Google Mock works seamlessly
 with [Google Test](http://code.google.com/p/googletest/), but
-you can also use it with [any C++ testing framework](../../tree/master/googlemock/docs/ForDummies.md#Using_Google_Mock_with_Any_Testing_Framework).
+you can also use it with [any C++ testing framework](../../tree/master/googlemock/docs/ForDummies.md#using-google-mock-with-any-testing-framework).
 
 ### Requirements for End Users ###
 
@@ -90,7 +90,7 @@ You must use the bundled version of Google Test when using Google Mock.
 You can also easily configure Google Mock to work with another testing
 framework, although it will still need Google Test.  Please read
 ["Using_Google_Mock_with_Any_Testing_Framework"](
-    ../../tree/master/googlemock/docs/ForDummies.md#Using_Google_Mock_with_Any_Testing_Framework)
+    ../../tree/master/googlemock/docs/ForDummies.md#using-google-mock-with-any-testing-framework)
 for instructions.
 
 Google Mock depends on advanced C++ features and thus requires a more
