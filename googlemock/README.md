@@ -68,8 +68,8 @@ Once you understand the basics, check out the rest of the docs:
     including advanced techniques.
 
 If you need help, please check the
-[KnownIssues](../../tree/master/googlemock/docs/KnownIssues.md) and
-[FrequentlyAskedQuestions](../../tree/master/googlemock/docs/FrequentlyAskedQuestions.md) before
+[KnownIssues](docs/KnownIssues.md) and
+[FrequentlyAskedQuestions](docs/FrequentlyAskedQuestions.md) before
 posting a question on the
 [discussion group](http://groups.google.com/group/googlemock).
 
