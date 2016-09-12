@@ -90,7 +90,7 @@ You must use the bundled version of Google Test when using Google Mock.
 You can also easily configure Google Mock to work with another testing
 framework, although it will still need Google Test.  Please read
 ["Using_Google_Mock_with_Any_Testing_Framework"](
-    ../../tree/master/googlemock/docs/ForDummies.md#using-google-mock-with-any-testing-framework)
+    ../../master/googlemock/docs/ForDummies.md#using-google-mock-with-any-testing-framework)
 for instructions.
 
 Google Mock depends on advanced C++ features and thus requires a more
