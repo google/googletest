@@ -53,7 +53,7 @@ the Apache License, which is different from Google Mock's license.
 If you are new to the project, we suggest that you read the user
 documentation in the following order:
 
-  * Learn the [basics](../../../googletest/docs/Primer.md) of
+  * Learn the [basics](../../googletest/docs/Primer.md) of
     Google Test, if you choose to use Google Mock with it (recommended).
   * Read [Google Mock for Dummies](docs/ForDummies.md).
   * Read the instructions below on how to build Google Mock.
