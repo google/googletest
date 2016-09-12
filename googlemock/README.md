@@ -62,14 +62,14 @@ You can also watch Zhanyong's [talk](http://www.youtube.com/watch?v=sYpCyLI47rM)
 
 Once you understand the basics, check out the rest of the docs:
 
-  * [CheatSheet](docs/CheatSheet.md) - all the commonly used stuff
+  * [CheatSheet](../../tree/master/googlemock/docs/CheatSheet.md) - all the commonly used stuff
     at a glance.
-  * [CookBook](docs/CookBook.md) - recipes for getting things done,
+  * [CookBook](../../tree/master/googlemock/docs/CookBook.md) - recipes for getting things done,
     including advanced techniques.
 
 If you need help, please check the
-[KnownIssues](docs/KnownIssues.md) and
-[FrequentlyAskedQuestions](docs/FrequentlyAskedQuestions.md) before
+[KnownIssues](../../tree/master/googlemock/docs/KnownIssues.md) and
+[FrequentlyAskedQuestions](../../tree/master/googlemock/docs/FrequentlyAskedQuestions.md) before
 posting a question on the
 [discussion group](http://groups.google.com/group/googlemock).
 
@@ -79,7 +79,7 @@ posting a question on the
 Google Mock is not a testing framework itself.  Instead, it needs a
 testing framework for writing tests.  Google Mock works seamlessly
 with [Google Test](http://code.google.com/p/googletest/), but
-you can also use it with [any C++ testing framework](googlemock/ForDummies.md#Using_Google_Mock_with_Any_Testing_Framework).
+you can also use it with [any C++ testing framework](../../tree/master/googlemock/docs/ForDummies.md#Using_Google_Mock_with_Any_Testing_Framework).
 
 ### Requirements for End Users ###
 
@@ -90,7 +90,7 @@ You must use the bundled version of Google Test when using Google Mock.
 You can also easily configure Google Mock to work with another testing
 framework, although it will still need Google Test.  Please read
 ["Using_Google_Mock_with_Any_Testing_Framework"](
-    docs/ForDummies.md#Using_Google_Mock_with_Any_Testing_Framework)
+    ../../tree/master/googlemock/docs/ForDummies.md#Using_Google_Mock_with_Any_Testing_Framework)
 for instructions.
 
 Google Mock depends on advanced C++ features and thus requires a more
