@@ -3128,13 +3128,14 @@ void PrettyUnitTestResultPrinter::OnTestPartResult(
 }
 
 void PrettyUnitTestResultPrinter::OnTestEnd(const TestInfo& test_info) {
-  if (test_info.result()->Passed()) {
+  const bool testFailed = test_info.result()->Failed();
+  if (!testFailed) {
     ColoredPrintf(COLOR_GREEN, "[       OK ] ");
   } else {
     ColoredPrintf(COLOR_RED, "[  FAILED  ] ");
   }
   PrintTestName(test_info.test_case_name(), test_info.name());
-  if (test_info.result()->Failed())
+  if (testFailed)
     PrintFullTestCommentIfPresent(test_info);
 
   if (GTEST_FLAG(print_time)) {
@@ -3143,6 +3144,10 @@ void PrettyUnitTestResultPrinter::OnTestEnd(const TestInfo& test_info) {
   } else {
     printf("\n");
   }
+  
+  if (testFailed && !GTEST_FLAG(print_time))
+    printf("\n");
+    
   fflush(stdout);
 }
 
