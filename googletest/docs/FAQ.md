@@ -48,7 +48,7 @@ It is not always possible to make Google Test warning-free for everyone.  Or, it
 
 If you see warnings when compiling Google Test, we suggest that you use the `-isystem` flag (assuming your are using GCC) to mark Google Test headers as system headers.  That'll suppress warnings from Google Test headers.
 
-## Why should not test case names and test names contain underscore? ##
+## Why should test case names and test names not contain underscores? ##
 
 Underscore (`_`) is special, as C++ reserves the following to be used by
 the compiler and the standard library:
@@ -211,14 +211,15 @@ combined. Therefore we want to invest more in the matchers than in the
 
 ## Does Google Test support running tests in parallel? ##
 
-Test runners tend to be tightly coupled with the build/test
-environment, and Google Test doesn't try to solve the problem of
-running tests in parallel.  Instead, we tried to make Google Test work
-nicely with test runners.  For example, Google Test's XML report
-contains the time spent on each test, and its `gtest_list_tests` and
-`gtest_filter` flags can be used for splitting the execution of test
-methods into multiple processes.  These functionalities can help the
-test runner run the tests in parallel.
+Test runners tend to be tightly coupled with the build/test environment, and
+Google Test doesn't try to solve the problem of running tests in parallel. An
+external tool has however been formulated to help with running tests in parallel,
+this is called [gtest-parallel](https://github.com/google/gtest-parallel).
+Additionally, we tried to make Google Test work nicely with test runners.  For
+example, Google Test's XML report contains the time spent on each test, and its
+`gtest_list_tests` and `gtest_filter` flags can be used for splitting the
+execution of test methods into multiple processes.  These functionalities can
+help the test runner run the tests in parallel.
 
 ## Why don't Google Test run the tests in different threads to speed things up? ##
 
