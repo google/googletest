@@ -740,6 +740,9 @@ def WrapComment(line, output):
 
 def WrapCode(line, line_concat, output):
   indent = len(line) - len(line.lstrip())
+  if indent > 80:
+    indent %= 80
+    
   prefix = indent*' '  # Prefix of the current line
   max_len = 80 - indent - len(line_concat)  # Maximum length of the current line
   new_prefix = prefix + 4*' '  # Prefix of a continuation line
