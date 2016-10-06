@@ -105,10 +105,9 @@
 
 // cpplint thinks that the header is already included, so we want to
 // silence it.
-// Add require of at least Win 2000 to enable OpenThread
-# include <w32api.h> // windows names: Windows2000
+// Add require of at least Win 2000 0x0500 to enable OpenThread
 # ifndef WINVER
-# define WINVER Windows2000
+# define WINVER 0x0500
 # endif
 # include <windows.h>  // NOLINT
 # undef min
