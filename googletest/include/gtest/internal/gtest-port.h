@@ -622,10 +622,11 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // Determines if hash_map/hash_set are available.
 // Only used for testing against those containers.
 #if !defined(GTEST_HAS_HASH_MAP_)
-# if _MSC_VER
+// Deprecated as of MSVC 17.00
+# if _MSC_VER && _MSC_VER < 1700
 #  define GTEST_HAS_HASH_MAP_ 1  // Indicates that hash_map is available.
 #  define GTEST_HAS_HASH_SET_ 1  // Indicates that hash_set is available.
-# endif  // _MSC_VER
+# endif  // _MSC_VER && _MSC_VER < 1700
 #endif  // !defined(GTEST_HAS_HASH_MAP_)
 
 // Determines whether Google Test can use tr1/tuple.  You can define
