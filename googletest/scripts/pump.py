@@ -739,14 +739,14 @@ def WrapComment(line, output):
 
 
 def FindSplitPos(seg, max_len, splitter):
-  space_at = seg.find(splitter)
-  if space_at == -1:
+  splitter_at = seg.find(splitter)
+  if splitter_at == -1:
     return len(seg)
-  else:
-    if space_at > max_len:
-      return space_at
-    else:
-      return seg.rfind(splitter, 0, max_len)
+
+  if splitter_at > max_len:
+    return splitter_at
+
+  return seg.rfind(splitter, 0, max_len)
 
 
 def WrapCode(line, line_concat, output):
@@ -758,7 +758,8 @@ def WrapCode(line, line_concat, output):
     indent = 0
 
   prefix = indent*' '  # Prefix of the current line
-  max_len = max_line_length - indent - len(line_concat)  # Maximum length of the current line
+  # Maximum length of the current line
+  max_len = max_line_length - indent - len(line_concat)
   new_prefix = prefix + 4*' '  # Prefix of a continuation line
   new_max_len = max_len - 4  # Maximum length of a continuation line
   # Prefers to wrap a line after a ',' or ';'.
@@ -769,7 +770,6 @@ def WrapCode(line, line_concat, output):
     while cur_line == '' and len(seg.strip()) > max_len:
       seg = seg.lstrip()
       split_at = FindSplitPos(seg, max_len, ' ')
-
       output.append(prefix + seg[:split_at].strip() + line_concat)
       seg = seg[split_at + 1:]
       prefix = new_prefix
