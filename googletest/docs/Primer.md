@@ -382,7 +382,7 @@ When invoked, the `RUN_ALL_TESTS()` macro:
   1. Restores the state of all Google Test flags.
   1. Repeats the above steps for the next test, until all tests have run.
 
-In addition, if the text fixture's constructor generates a fatal failure in
+In addition, if the test fixture's constructor generates a fatal failure in
 step 2, there is no point for step 3 - 5 and they are thus skipped. Similarly,
 if step 3 generates a fatal failure, step 4 will be skipped.
 
