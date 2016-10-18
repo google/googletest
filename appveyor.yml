@@ -4,7 +4,7 @@ os: Visual Studio 2015
 
 environment:
   matrix:
-  - Toolset: v140
+  #- Toolset: v140
   - Toolset: v120
   - Toolset: v110
   - Toolset: v100
