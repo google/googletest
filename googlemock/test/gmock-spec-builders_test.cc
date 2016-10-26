@@ -2626,7 +2626,7 @@ TEST(SynchronizationTest, CanCallMockMethodInAction) {
 #if GTEST_LANG_CXX11
 
 class MockM {
- public:
+public:
   MockM() {}
 
   MockM(MockM&& other) = default;
@@ -2634,7 +2634,7 @@ class MockM {
   MOCK_CONST_METHOD0(DoM, int());  // NOLINT
   MOCK_METHOD1(DoM, int(int n));  // NOLINT
 
- private:
+private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockM);
 };
 
