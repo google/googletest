@@ -128,6 +128,11 @@ class GTEST_API_ UntypedFunctionMockerBase {
   UntypedFunctionMockerBase();
   virtual ~UntypedFunctionMockerBase();
 
+#ifdef GTEST_LANG_CXX11
+  // Allows moving mock objects.
+  UntypedFunctionMockerBase(UntypedFunctionMockerBase&& other) = default;
+#endif
+
   // Verifies that all expectations on this mock function have been
   // satisfied.  Reports one or more Google Test non-fatal failures
   // and returns false if not.
@@ -1460,6 +1465,11 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   typedef typename Function<F>::ArgumentMatcherTuple ArgumentMatcherTuple;
 
   FunctionMockerBase() : current_spec_(this) {}
+
+#ifdef GTEST_LANG_CXX11
+  // Allows moving mock objects.
+  FunctionMockerBase(FunctionMockerBase&& other) = default;
+#endif
 
   // The destructor verifies that all expectations on this mock
   // function have been satisfied.  If not, it will report Google Test

@@ -2623,6 +2623,45 @@ TEST(SynchronizationTest, CanCallMockMethodInAction) {
   // EXPECT_CALL() did not specify an action.
 }
 
+#ifdef GTEST_LANG_CXX11
+
+class MockM {
+ public:
+  MockM() {}
+
+  MockM(MockM&& other) = default;
+
+  MOCK_CONST_METHOD0(DoM, int());  // NOLINT
+  MOCK_METHOD1(DoM, int(int n));  // NOLINT
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockM);
+};
+
+TEST(MoveSemanticsTest, MoveTransfersState) {
+  MockM m1;
+  EXPECT_CALL(m1, DoM())
+    .WillOnce(Return(1));
+
+  MockM m2(std::move(m1));
+  // Now m1 has no expectations anymore.
+  ASSERT_TRUE(Mock::VerifyAndClear(&m1));
+
+  EXPECT_EQ(1, m2.DoM());
+
+  CaptureStdout();
+  // DoM() returns the default value (not 1) as it has no expectations.
+  EXPECT_EQ(0, m1.DoM());
+  const std::string output = GetCapturedStdout();
+  EXPECT_PRED_FORMAT2(
+      IsSubstring,
+      "Uninteresting mock function call - returning default value.\n"
+      "    Function call: DoM()\n"
+      "          Returns: 0\n", output.c_str());
+}
+
+#endif
+
 }  // namespace
 
 // Allows the user to define his own main and then invoke gmock_main
