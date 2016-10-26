@@ -128,7 +128,7 @@ class GTEST_API_ UntypedFunctionMockerBase {
   UntypedFunctionMockerBase();
   virtual ~UntypedFunctionMockerBase();
 
-#ifdef GTEST_LANG_CXX11
+#if GTEST_LANG_CXX11
   // Allows moving mock objects.
   UntypedFunctionMockerBase(UntypedFunctionMockerBase&& other) = default;
 #endif
@@ -1466,7 +1466,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
 
   FunctionMockerBase() : current_spec_(this) {}
 
-#ifdef GTEST_LANG_CXX11
+#if GTEST_LANG_CXX11
   // Allows moving mock objects.
   FunctionMockerBase(FunctionMockerBase&& other) = default;
 #endif
