@@ -216,7 +216,7 @@ find_package(PythonInterp)
 # from the given source files with the given compiler flags.
 function(cxx_test_with_flags name cxx_flags libs)
   cxx_executable_with_flags(${name} "${cxx_flags}" "${libs}" ${ARGN})
-  add_test(${name} ${name})
+  add_test(NAME ${name} COMMAND ${name})
 endfunction()
 
 # cxx_test(name libs srcs...)
