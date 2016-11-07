@@ -1680,7 +1680,7 @@ This also works when the argument is an output iterator:
 
 ```
 using ::testing::_;
-using ::testing::SeArrayArgument;
+using ::testing::SetArrayArgument;
 
 class MockRolodex : public Rolodex {
  public:
