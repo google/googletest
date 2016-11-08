@@ -22,6 +22,11 @@ option(gtest_build_samples "Build gtest's sample programs." OFF)
 
 option(gtest_disable_pthreads "Disable uses of pthreads in gtest." OFF)
 
+option(
+  gtest_hide_internal_symbols
+  "Build gtest with internal symbols hidden in shared libraries."
+  OFF)
+
 # Defines pre_project_set_up_hermetic_build() and set_up_hermetic_build().
 include(cmake/hermetic_build.cmake OPTIONAL)
 
@@ -44,6 +49,11 @@ cmake_minimum_required(VERSION 2.6.2)
 
 if (COMMAND set_up_hermetic_build)
   set_up_hermetic_build()
+endif()
+
+if (gtest_hide_internal_symbols)
+  set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+  set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 endif()
 
 # Define helper functions and macros used by Google Test.
@@ -80,6 +90,22 @@ endif()
 cxx_library(gtest "${cxx_strict}" src/gtest-all.cc)
 cxx_library(gtest_main "${cxx_strict}" src/gtest_main.cc)
 target_link_libraries(gtest_main gtest)
+
+# If the CMake version supports it, attach header directory information
+# to the targets for when we are part of a parent build (ie being pulled
+# in via add_subdirectory() rather than being a standalone build).
+if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
+  target_include_directories(gtest      INTERFACE "${gtest_SOURCE_DIR}/include")
+  target_include_directories(gtest_main INTERFACE "${gtest_SOURCE_DIR}/include")
+endif()
+
+########################################################################
+#
+# Install rules
+install(TARGETS gtest gtest_main
+  DESTINATION lib)
+install(DIRECTORY ${gtest_SOURCE_DIR}/include/gtest
+  DESTINATION include)
 
 ########################################################################
 #

@@ -2,6 +2,7 @@
 # Google Test #
 
 [![Build Status](https://travis-ci.org/google/googletest.svg?branch=master)](https://travis-ci.org/google/googletest)
+[![Build status](https://ci.appveyor.com/api/projects/status/4o38plt0xbo1ubc8/branch/master?svg=true)](https://ci.appveyor.com/project/BillyDonahue/googletest/branch/master)
 
 Welcome to **Google Test**, Google's C++ test framework!
 
@@ -13,6 +14,9 @@ Please see the project page above for more information as well as the
 mailing list for questions, discussions, and development.  There is
 also an IRC channel on OFTC (irc.oftc.net) #gtest available.  Please
 join us!
+
+Getting started information for **Google Test** is available in the 
+[Google Test Primer](googletest/docs/Primer.md) documentation.
 
 **Google Mock** is an extension to Google Test for writing and using C++ mock
 classes.  See the separate [Google Mock documentation](googlemock/README.md).
@@ -53,7 +57,7 @@ the following notable projects:
   * The [Chromium projects](http://www.chromium.org/) (behind the Chrome
     browser and Chrome OS).
   * The [LLVM](http://llvm.org/) compiler.
-  * [Protocol Buffers](http://code.google.com/p/protobuf/), Google's data
+  * [Protocol Buffers](https://github.com/google/protobuf), Google's data
     interchange format.
   * The [OpenCV](http://opencv.org/) computer vision library.
 
@@ -66,7 +70,7 @@ Test UI is written in C#.
 
 [GTest TAP Listener](https://github.com/kinow/gtest-tap-listener) is an event
 listener for Google Test that implements the
-[TAP protocol](http://en.wikipedia.org/wiki/Test_Anything_Protocol) for test
+[TAP protocol](https://en.wikipedia.org/wiki/Test_Anything_Protocol) for test
 result output. If your test runner understands TAP, you may find it useful.
 
 ## Requirements ##
@@ -102,7 +106,7 @@ package (as described below):
 ### Mac OS X Requirements ###
 
   * Mac OS X v10.4 Tiger or newer
-  * XCode Developer Tools
+  * Xcode Developer Tools
 
 ### Requirements for Contributors ###
 
@@ -110,9 +114,9 @@ We welcome patches.  If you plan to contribute a patch, you need to
 build Google Test and its own tests from a git checkout (described
 below), which has further requirements:
 
-  * [Python](http://python.org/) v2.3 or newer (for running some of
+  * [Python](https://www.python.org/) v2.3 or newer (for running some of
     the tests and re-generating certain source files from templates)
-  * [CMake](http://www.cmake.org/) v2.6.4 or newer
+  * [CMake](https://cmake.org/) v2.6.4 or newer
 
 ## Regenerating Source Files ##
 

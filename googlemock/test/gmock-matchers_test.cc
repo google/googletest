@@ -1042,14 +1042,14 @@ TEST(IsNullTest, ReferenceToConstLinkedPtr) {
   EXPECT_FALSE(m.Matches(non_null_p));
 }
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_FUNCTION_
 TEST(IsNullTest, StdFunction) {
   const Matcher<std::function<void()>> m = IsNull();
 
   EXPECT_TRUE(m.Matches(std::function<void()>()));
   EXPECT_FALSE(m.Matches([]{}));
 }
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_STD_FUNCTION_
 
 // Tests that IsNull() describes itself properly.
 TEST(IsNullTest, CanDescribeSelf) {
@@ -1090,14 +1090,14 @@ TEST(NotNullTest, ReferenceToConstLinkedPtr) {
   EXPECT_TRUE(m.Matches(non_null_p));
 }
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_FUNCTION_
 TEST(NotNullTest, StdFunction) {
   const Matcher<std::function<void()>> m = NotNull();
 
   EXPECT_TRUE(m.Matches([]{}));
   EXPECT_FALSE(m.Matches(std::function<void()>()));
 }
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_STD_FUNCTION_
 
 // Tests that NotNull() describes itself properly.
 TEST(NotNullTest, CanDescribeSelf) {
@@ -2708,22 +2708,18 @@ class FloatingPointTest : public testing::Test {
         zero_bits_(Floating(0).bits()),
         one_bits_(Floating(1).bits()),
         infinity_bits_(Floating(Floating::Infinity()).bits()),
-        close_to_positive_zero_(
-            Floating::ReinterpretBits(zero_bits_ + max_ulps_/2)),
-        close_to_negative_zero_(
-            -Floating::ReinterpretBits(zero_bits_ + max_ulps_ - max_ulps_/2)),
-        further_from_negative_zero_(-Floating::ReinterpretBits(
+        close_to_positive_zero_(AsBits(zero_bits_ + max_ulps_/2)),
+        close_to_negative_zero_(AsBits(zero_bits_ + max_ulps_ - max_ulps_/2)),
+        further_from_negative_zero_(-AsBits(
             zero_bits_ + max_ulps_ + 1 - max_ulps_/2)),
-        close_to_one_(Floating::ReinterpretBits(one_bits_ + max_ulps_)),
-        further_from_one_(Floating::ReinterpretBits(one_bits_ + max_ulps_ + 1)),
+        close_to_one_(AsBits(one_bits_ + max_ulps_)),
+        further_from_one_(AsBits(one_bits_ + max_ulps_ + 1)),
         infinity_(Floating::Infinity()),
-        close_to_infinity_(
-            Floating::ReinterpretBits(infinity_bits_ - max_ulps_)),
-        further_from_infinity_(
-            Floating::ReinterpretBits(infinity_bits_ - max_ulps_ - 1)),
+        close_to_infinity_(AsBits(infinity_bits_ - max_ulps_)),
+        further_from_infinity_(AsBits(infinity_bits_ - max_ulps_ - 1)),
         max_(Floating::Max()),
-        nan1_(Floating::ReinterpretBits(Floating::kExponentBitMask | 1)),
-        nan2_(Floating::ReinterpretBits(Floating::kExponentBitMask | 200)) {
+        nan1_(AsBits(Floating::kExponentBitMask | 1)),
+        nan2_(AsBits(Floating::kExponentBitMask | 200)) {
   }
 
   void TestSize() {
@@ -2804,6 +2800,12 @@ class FloatingPointTest : public testing::Test {
   // Some NaNs.
   const RawType nan1_;
   const RawType nan2_;
+
+ private:
+  template <typename T>
+  static RawType AsBits(T value) {
+    return Floating::ReinterpretBits(static_cast<Bits>(value));
+  }
 };
 
 // Tests floating-point matchers with fixed epsilons.
@@ -3179,6 +3181,8 @@ MATCHER_P(FieldIIs, inner_matcher, "") {
   return ExplainMatchResult(inner_matcher, arg.i, result_listener);
 }
 
+#if GTEST_HAS_RTTI
+
 TEST(WhenDynamicCastToTest, SameType) {
   Derived derived;
   derived.i = 4;
@@ -3236,12 +3240,8 @@ TEST(WhenDynamicCastToTest, AmbiguousCast) {
 
 TEST(WhenDynamicCastToTest, Describe) {
   Matcher<Base*> matcher = WhenDynamicCastTo<Derived*>(Pointee(_));
-#if GTEST_HAS_RTTI
   const string prefix =
       "when dynamic_cast to " + internal::GetTypeName<Derived*>() + ", ";
-#else  // GTEST_HAS_RTTI
-  const string prefix = "when dynamic_cast, ";
-#endif  // GTEST_HAS_RTTI
   EXPECT_EQ(prefix + "points to a value that is anything", Describe(matcher));
   EXPECT_EQ(prefix + "does not point to a value that is anything",
             DescribeNegation(matcher));
@@ -3274,6 +3274,8 @@ TEST(WhenDynamicCastToTest, BadReference) {
   Base& as_base_ref = derived;
   EXPECT_THAT(as_base_ref, Not(WhenDynamicCastTo<const OtherDerived&>(_)));
 }
+
+#endif  // GTEST_HAS_RTTI
 
 // Minimal const-propagating pointer.
 template <typename T>

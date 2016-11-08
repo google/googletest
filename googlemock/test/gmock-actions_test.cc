@@ -214,7 +214,7 @@ class MyNonDefaultConstructible {
   int value_;
 };
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_STD_TYPE_TRAITS_
 
 TEST(BuiltInDefaultValueTest, ExistsForDefaultConstructibleType) {
   EXPECT_TRUE(BuiltInDefaultValue<MyDefaultConstructible>::Exists());
@@ -224,7 +224,7 @@ TEST(BuiltInDefaultValueTest, IsDefaultConstructedForDefaultConstructibleType) {
   EXPECT_EQ(42, BuiltInDefaultValue<MyDefaultConstructible>::Get().value());
 }
 
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_STD_TYPE_TRAITS_
 
 TEST(BuiltInDefaultValueTest, DoesNotExistForNonDefaultConstructibleType) {
   EXPECT_FALSE(BuiltInDefaultValue<MyNonDefaultConstructible>::Exists());

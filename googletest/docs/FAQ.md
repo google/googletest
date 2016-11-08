@@ -28,11 +28,11 @@ list can help you decide whether it is for you too.
   * `SCOPED_TRACE` helps you understand the context of an assertion failure when it comes from inside a sub-routine or loop.
   * You can decide which tests to run using name patterns.  This saves time when you want to quickly reproduce a test failure.
   * Google Test can generate XML test result reports that can be parsed by popular continuous build system like Hudson.
-  * Simple things are easy in Google Test, while hard things are possible: in addition to advanced features like [global test environments](http://code.google.com/p/googletest/wiki/AdvancedGuide#Global_Set-Up_and_Tear-Down) and tests parameterized by [values](http://code.google.com/p/googletest/wiki/AdvancedGuide#Value_Parameterized_Tests) or [types](http://code.google.com/p/googletest/wiki/AdvancedGuide#Typed_Tests), Google Test supports various ways for the user to extend the framework -- if Google Test doesn't do something out of the box, chances are that a user can implement the feature using Google Test's public API, without changing Google Test itself.  In particular, you can:
-    * expand your testing vocabulary by defining [custom predicates](http://code.google.com/p/googletest/wiki/AdvancedGuide#Predicate_Assertions_for_Better_Error_Messages),
-    * teach Google Test how to [print your types](http://code.google.com/p/googletest/wiki/AdvancedGuide#Teaching_Google_Test_How_to_Print_Your_Values),
-    * define your own testing macros or utilities and verify them using Google Test's [Service Provider Interface](http://code.google.com/p/googletest/wiki/AdvancedGuide#Catching_Failures), and
-    * reflect on the test cases or change the test output format by intercepting the [test events](http://code.google.com/p/googletest/wiki/AdvancedGuide#Extending_Google_Test_by_Handling_Test_Events).
+  * Simple things are easy in Google Test, while hard things are possible: in addition to advanced features like [global test environments](AdvancedGuide.md#global-set-up-and-tear-down) and tests parameterized by [values](AdvancedGuide.md#value-parameterized-tests) or [types](docs/AdvancedGuide.md#typed-tests), Google Test supports various ways for the user to extend the framework -- if Google Test doesn't do something out of the box, chances are that a user can implement the feature using Google Test's public API, without changing Google Test itself.  In particular, you can:
+    * expand your testing vocabulary by defining [custom predicates](AdvancedGuide.md#predicate-assertions-for-better-error-messages),
+    * teach Google Test how to [print your types](AdvancedGuide.md#teaching-google-test-how-to-print-your-values),
+    * define your own testing macros or utilities and verify them using Google Test's [Service Provider Interface](AdvancedGuide.md#catching-failures), and
+    * reflect on the test cases or change the test output format by intercepting the [test events](AdvancedGuide.md#extending-google-test-by-handling-test-events).
 
 ## I'm getting warnings when compiling Google Test.  Would you fix them? ##
 
@@ -76,7 +76,7 @@ for simplicity we just say that it cannot start with `_`.).
 
 It may seem fine for `TestCaseName` and `TestName` to contain `_` in the
 middle.  However, consider this:
-```
+``` cpp
 TEST(Time, Flies_Like_An_Arrow) { ... }
 TEST(Time_Flies, Like_An_Arrow) { ... }
 ```
@@ -201,7 +201,7 @@ we don't have a convention on the order of the two arguments for
 twice in the implementation, making it even harder to understand and
 maintain. We believe the benefit doesn't justify the cost.
 
-Finally, with the growth of Google Mock's [matcher](http://code.google.com/p/googlemock/wiki/CookBook#Using_Matchers_in_Google_Test_Assertions) library, we are
+Finally, with the growth of Google Mock's [matcher](../../googlemock/docs/CookBook.md#using-matchers-in-google-test-assertions) library, we are
 encouraging people to use the unified `EXPECT_THAT(value, matcher)`
 syntax more often in tests. One significant advantage of the matcher
 approach is that matchers can be easily combined to form new matchers,
@@ -242,7 +242,7 @@ of this approach:
   1. Throwing in a destructor is undefined behavior in C++.  Not using exceptions means Google Test's assertions are safe to use in destructors.
   1. The `EXPECT_*` family of macros will continue even after a failure, allowing multiple failures in a `TEST` to be reported in a single run. This is a popular feature, as in C++ the edit-compile-test cycle is usually quite long and being able to fixing more than one thing at a time is a blessing.
   1. If assertions are implemented using exceptions, a test may falsely ignore a failure if it's caught by user code:
-```
+``` cpp
 try { ... ASSERT_TRUE(...) ... }
 catch (...) { ... }
 ```
@@ -259,13 +259,13 @@ macro for both cases.  One possibility is to provide only one macro
 for tests with fixtures, and require the user to define an empty
 fixture sometimes:
 
-```
+``` cpp
 class FooTest : public ::testing::Test {};
 
 TEST_F(FooTest, DoesThis) { ... }
 ```
 or
-```
+``` cpp
 typedef ::testing::Test FooTest;
 
 TEST_F(FooTest, DoesThat) { ... }
@@ -293,7 +293,7 @@ possibly allows.  In particular:
   * The runner-style requires to split the information into two pieces: the definition of the death test itself, and the specification for the runner on how to run the death test and what to expect.  The death test would be written in C++, while the runner spec may or may not be.  A user needs to carefully keep the two in sync. `ASSERT_DEATH(statement, expected_message)` specifies all necessary information in one place, in one language, without boilerplate code. It is very declarative.
   * `ASSERT_DEATH` has a similar syntax and error-reporting semantics as other Google Test assertions, and thus is easy to learn.
   * `ASSERT_DEATH` can be mixed with other assertions and other logic at your will.  You are not limited to one death test per test method. For example, you can write something like:
-```
+``` cpp
     if (FooCondition()) {
       ASSERT_DEATH(Bar(), "blah");
     } else {
@@ -302,7 +302,7 @@ possibly allows.  In particular:
 ```
 If you prefer one death test per test method, you can write your tests in that style too, but we don't want to impose that on the users.  The fewer artificial limitations the better.
   * `ASSERT_DEATH` can reference local variables in the current function, and you can decide how many death tests you want based on run-time information.  For example,
-```
+``` cpp
     const int count = GetCount();  // Only known at run time.
     for (int i = 1; i <= count; i++) {
       ASSERT_DEATH({
@@ -335,7 +335,7 @@ as running in a parallel universe, more or less.
 
 If your class has a static data member:
 
-```
+``` cpp
 // foo.h
 class Foo {
   ...
@@ -345,7 +345,7 @@ class Foo {
 
 You also need to define it _outside_ of the class body in `foo.cc`:
 
-```
+``` cpp
 const int Foo::kBar;  // No initializer here.
 ```
 
@@ -376,7 +376,7 @@ to write tests using each derived fixture.
 
 Typically, your code looks like this:
 
-```
+``` cpp
 // Defines a base test fixture.
 class BaseTest : public ::testing::Test {
   protected:
@@ -409,7 +409,7 @@ If necessary, you can continue to derive test fixtures from a derived fixture.
 Google Test has no limit on how deep the hierarchy can be.
 
 For a complete example using derived test fixtures, see
-[sample5](http://code.google.com/p/googletest/source/browse/trunk/samples/sample5_unittest.cc).
+[sample5](../samples/sample5_unittest.cc).
 
 ## My compiler complains "void value not ignored as it ought to be." What does this mean? ##
 
@@ -476,7 +476,7 @@ explicitly telling the compiler which version to pick.
 
 For example, suppose you have
 
-```
+``` cpp
 bool IsPositive(int n) {
   return n > 0;
 }
@@ -487,13 +487,13 @@ bool IsPositive(double x) {
 
 you will get a compiler error if you write
 
-```
+``` cpp
 EXPECT_PRED1(IsPositive, 5);
 ```
 
 However, this will work:
 
-```
+``` cpp
 EXPECT_PRED1(*static_cast<bool (*)(int)>*(IsPositive), 5);
 ```
 
@@ -502,7 +502,7 @@ type of the function pointer for the `int`-version of `IsPositive()`.)
 
 As another example, when you have a template function
 
-```
+``` cpp
 template <typename T>
 bool IsNegative(T x) {
   return x < 0;
@@ -511,14 +511,14 @@ bool IsNegative(T x) {
 
 you can use it in a predicate assertion like this:
 
-```
+``` cpp
 ASSERT_PRED1(IsNegative*<int>*, -5);
 ```
 
 Things are more interesting if your template has more than one parameters. The
 following won't compile:
 
-```
+``` cpp
 ASSERT_PRED2(*GreaterThan<int, int>*, 5, 0);
 ```
 
@@ -527,7 +527,7 @@ as the C++ pre-processor thinks you are giving `ASSERT_PRED2` 4 arguments,
 which is one more than expected. The workaround is to wrap the predicate
 function in parentheses:
 
-```
+``` cpp
 ASSERT_PRED2(*(GreaterThan<int, int>)*, 5, 0);
 ```
 
@@ -537,13 +537,13 @@ ASSERT_PRED2(*(GreaterThan<int, int>)*, 5, 0);
 Some people had been ignoring the return value of `RUN_ALL_TESTS()`. That is,
 instead of
 
-```
+``` cpp
 return RUN_ALL_TESTS();
 ```
 
 they write
 
-```
+``` cpp
 RUN_ALL_TESTS();
 ```
 
@@ -562,7 +562,7 @@ is used as the return value of `main()`.
 Due to a peculiarity of C++, in order to support the syntax for streaming
 messages to an `ASSERT_*`, e.g.
 
-```
+``` cpp
 ASSERT_EQ(1, Foo()) << "blah blah" << foo;
 ```
 
@@ -591,7 +591,7 @@ the corresponding source code, or use `C-x `` to jump to the next failure.
 
 You don't have to. Instead of
 
-```
+``` cpp
 class FooTest : public BaseTest {};
 
 TEST_F(FooTest, Abc) { ... }
@@ -604,7 +604,7 @@ TEST_F(BarTest, Def) { ... }
 ```
 
 you can simply `typedef` the test fixtures:
-```
+``` cpp
 typedef BaseTest FooTest;
 
 TEST_F(FooTest, Abc) { ... }
@@ -646,7 +646,7 @@ members of the helper class public.
 
 You have several other options that don't require using `FRIEND_TEST`:
   * Write the tests as members of the fixture class:
-```
+``` cpp
 class Foo {
   friend class FooTest;
   ...
@@ -668,7 +668,7 @@ TEST_F(FooTest, Test2) {
 }
 ```
   * In the fixture class, write accessors for the tested class' private members, then use the accessors in your tests:
-```
+``` cpp
 class Foo {
   friend class FooTest;
   ...
@@ -689,7 +689,7 @@ TEST_F(FooTest, Test1) {
 }
 ```
   * If the methods are declared **protected**, you can change their access level in a test-only subclass:
-```
+``` cpp
 class YourClass {
   ...
  protected: // protected access for testability.
@@ -717,7 +717,7 @@ implementation details and ideally should be kept out of a .h. So often I make
 them free functions instead.
 
 Instead of:
-```
+``` cpp
 // foo.h
 class Foo {
   ...
@@ -733,7 +733,7 @@ EXPECT_TRUE(Foo::Func(12345));
 ```
 
 You probably should better write:
-```
+``` cpp
 // foo.h
 class Foo {
   ...
@@ -754,7 +754,7 @@ EXPECT_TRUE(internal::Func(12345));
 
 ## I would like to run a test several times with different parameters. Do I need to write several similar copies of it? ##
 
-No. You can use a feature called [value-parameterized tests](AdvancedGuide#Value_Parameterized_Tests.md) which
+No. You can use a feature called [value-parameterized tests](AdvancedGuide.md#Value_Parameterized_Tests) which
 lets you repeat your tests with different parameters, without defining it more than once.
 
 ## How do I test a file that defines main()? ##
@@ -774,7 +774,7 @@ Then `foo.cc` can be easily tested.
 If you are adding tests to an existing file and don't want an intrusive change
 like this, there is a hack: just include the entire `foo.cc` file in your unit
 test. For example:
-```
+``` cpp
 // File foo_unittest.cc
 
 // The headers section
@@ -803,8 +803,9 @@ reference global and/or local variables, and can be:
   * a complex expression, or
   * a compound statement.
 
-> Some examples are shown here:
-```
+Some examples are shown here:
+
+``` cpp
 // A death test can be a simple function call.
 TEST(MyDeathTest, FunctionCall) {
   ASSERT_DEATH(Xyz(5), "Xyz failed");
@@ -848,7 +849,7 @@ expression syntax
 (http://en.wikipedia.org/wiki/Regular_expression#POSIX_Extended_Regular_Expressions).
 On Windows, it uses a limited variant of regular expression
 syntax. For more details, see the
-[regular expression syntax](AdvancedGuide#Regular_Expression_Syntax.md).
+[regular expression syntax](AdvancedGuide.md#Regular_Expression_Syntax).
 
 ## I have a fixture class Foo, but TEST\_F(Foo, Bar) gives me error "no matching function for call to Foo::Foo()". Why? ##
 
@@ -883,7 +884,7 @@ inefficient and makes the semantics unclean.
 If we were to determine the order of tests based on test name instead of test
 case name, then we would have a problem with the following situation:
 
-```
+``` cpp
 TEST_F(FooTest, AbcDeathTest) { ... }
 TEST_F(FooTest, Uvw) { ... }
 
@@ -902,7 +903,7 @@ You don't have to, but if you like, you may split up the test case into
 `FooTest` and `FooDeathTest`, where the names make it clear that they are
 related:
 
-```
+``` cpp
 class FooTest : public ::testing::Test { ... };
 
 TEST_F(FooTest, Abc) { ... }
@@ -955,13 +956,12 @@ using gtest-md.vcproj instead of gtest.vcproj.
 
 ## I put my tests in a library and Google Test doesn't run them. What's happening? ##
 Have you read a
-[warning](http://code.google.com/p/googletest/wiki/Primer#Important_note_for_Visual_C++_users) on
+[warning](Primer.md#important-note-for-visual-c-users) on
 the Google Test Primer page?
 
 ## I want to use Google Test with Visual Studio but don't know where to start. ##
 Many people are in your position and one of the posted his solution to
-our mailing list. Here is his link:
-http://hassanjamilahmad.blogspot.com/2009/07/gtest-starters-help.html.
+our mailing list.
 
 ## I am seeing compile errors mentioning std::type\_traits when I try to use Google Test on Solaris. ##
 Google Test uses parts of the standard C++ library that SunStudio does not support.
@@ -994,7 +994,7 @@ you can use the _horrible_ hack of sniffing your executable name
 ## Google Test defines a macro that clashes with one defined by another library. How do I deal with that? ##
 
 In C++, macros don't obey namespaces.  Therefore two libraries that
-both define a macro of the same name will clash if you #include both
+both define a macro of the same name will clash if you `#include` both
 definitions.  In case a Google Test macro clashes with another
 library, you can force Google Test to rename its macro to avoid the
 conflict.
@@ -1006,11 +1006,11 @@ Specifically, if both Google Test and some other code define macro
 ```
 to the compiler flags to tell Google Test to change the macro's name
 from `FOO` to `GTEST_FOO`. For example, with `-DGTEST_DONT_DEFINE_TEST=1`, you'll need to write
-```
+``` cpp
   GTEST_TEST(SomeTest, DoesThis) { ... }
 ```
 instead of
-```
+``` cpp
   TEST(SomeTest, DoesThis) { ... }
 ```
 in order to define a test.
@@ -1024,7 +1024,7 @@ Yes.
 
 The rule is **all test methods in the same test case must use the same fixture class**. This means that the following is **allowed** because both tests use the same fixture class (`::testing::Test`).
 
-```
+``` cpp
 namespace foo {
 TEST(CoolTest, DoSomething) {
   SUCCEED();
@@ -1040,7 +1040,7 @@ TEST(CoolTest, DoSomething) {
 
 However, the following code is **not allowed** and will produce a runtime error from Google Test because the test methods are using different test fixture classes with the same test case name.
 
-```
+``` cpp
 namespace foo {
 class CoolTest : public ::testing::Test {};  // Fixture foo::CoolTest
 TEST_F(CoolTest, DoSomething) {
@@ -1059,19 +1059,19 @@ TEST_F(CoolTest, DoSomething) {
 ## How do I build Google Testing Framework with Xcode 4? ##
 
 If you try to build Google Test's Xcode project with Xcode 4.0 or later, you may encounter an error message that looks like
-"Missing SDK in target gtest\_framework: /Developer/SDKs/MacOSX10.4u.sdk". That means that Xcode does not support the SDK the project is targeting. See the Xcode section in the [README](http://code.google.com/p/googletest/source/browse/trunk/README) file on how to resolve this.
+"Missing SDK in target gtest\_framework: /Developer/SDKs/MacOSX10.4u.sdk". That means that Xcode does not support the SDK the project is targeting. See the Xcode section in the [README](../README.md) file on how to resolve this.
 
 ## My question is not covered in your FAQ! ##
 
 If you cannot find the answer to your question in this FAQ, there are
 some other resources you can use:
 
-  1. read other [wiki pages](http://code.google.com/p/googletest/w/list),
-  1. search the mailing list [archive](http://groups.google.com/group/googletestframework/topics),
+  1. read other [wiki pages](../docs),
+  1. search the mailing list [archive](https://groups.google.com/forum/#!forum/googletestframework),
   1. ask it on [googletestframework@googlegroups.com](mailto:googletestframework@googlegroups.com) and someone will answer it (to prevent spam, we require you to join the [discussion group](http://groups.google.com/group/googletestframework) before you can post.).
 
 Please note that creating an issue in the
-[issue tracker](http://code.google.com/p/googletest/issues/list) is _not_
+[issue tracker](https://github.com/google/googletest/issues) is _not_
 a good way to get your answer, as it is monitored infrequently by a
 very small number of people.
 
@@ -1079,7 +1079,7 @@ When asking a question, it's helpful to provide as much of the
 following information as possible (people cannot help you if there's
 not enough information in your question):
 
-  * the version (or the revision number if you check out from SVN directly) of Google Test you use (Google Test is under active development, so it's possible that your problem has been solved in a later version),
+  * the version (or the commit hash if you check out from Git directly) of Google Test you use (Google Test is under active development, so it's possible that your problem has been solved in a later version),
   * your operating system,
   * the name and version of your compiler,
   * the complete command line flags you give to your compiler,

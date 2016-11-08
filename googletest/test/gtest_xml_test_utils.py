@@ -101,7 +101,7 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
     self.assertEquals(
         len(expected_children), len(actual_children),
         'number of child elements differ in element ' + actual_node.tagName)
-    for child_id, child in expected_children.iteritems():
+    for child_id, child in expected_children.items():
       self.assert_(child_id in actual_children,
                    '<%s> is not in <%s> (in element %s)' %
                    (child_id, actual_children, actual_node.tagName))

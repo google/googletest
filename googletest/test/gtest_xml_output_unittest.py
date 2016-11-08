@@ -64,20 +64,20 @@ EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
   </testsuite>
   <testsuite name="FailedTest" tests="1" failures="1" disabled="0" errors="0" time="*">
     <testcase name="Fails" status="run" time="*" classname="FailedTest">
-      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Value of: 2&#x0A;Expected: 1" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
-Value of: 2
-Expected: 1%(stack)s]]></failure>
+      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;      Expected: 1&#x0A;To be equal to: 2" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
+      Expected: 1
+To be equal to: 2%(stack)s]]></failure>
     </testcase>
   </testsuite>
   <testsuite name="MixedResultTest" tests="3" failures="1" disabled="1" errors="0" time="*">
     <testcase name="Succeeds" status="run" time="*" classname="MixedResultTest"/>
     <testcase name="Fails" status="run" time="*" classname="MixedResultTest">
-      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Value of: 2&#x0A;Expected: 1" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
-Value of: 2
-Expected: 1%(stack)s]]></failure>
-      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Value of: 3&#x0A;Expected: 2" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
-Value of: 3
-Expected: 2%(stack)s]]></failure>
+      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;      Expected: 1&#x0A;To be equal to: 2" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
+      Expected: 1
+To be equal to: 2%(stack)s]]></failure>
+      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;      Expected: 2&#x0A;To be equal to: 3" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
+      Expected: 2
+To be equal to: 3%(stack)s]]></failure>
     </testcase>
     <testcase name="DISABLED_test" status="notrun" time="*" classname="MixedResultTest"/>
   </testsuite>
@@ -209,7 +209,8 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
         'gtest_no_test_unittest')
     try:
       os.remove(output_file)
-    except OSError, e:
+    except OSError:
+      e = sys.exc_info()[1]
       if e.errno != errno.ENOENT:
         raise
 

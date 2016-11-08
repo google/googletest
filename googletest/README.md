@@ -54,7 +54,7 @@ it.
 ### Using CMake ###
 
 Google Test comes with a CMake build script (
-[CMakeLists.txt](master/CMakeLists.txt)) that can be used on a wide range of platforms ("C" stands for
+[CMakeLists.txt](CMakeLists.txt)) that can be used on a wide range of platforms ("C" stands for
 cross-platform.). If you don't have CMake installed already, you can
 download it for free from <http://www.cmake.org/>.
 
@@ -136,7 +136,7 @@ these macros are named like `GTEST_XYZ` and you define them to either 1
 or 0 to enable or disable a certain feature.
 
 We list the most frequently used macros below.  For a complete list,
-see file [include/gtest/internal/gtest-port.h](https://github.com/google/googletest/blob/master/include/gtest/internal/gtest-port.h).
+see file [include/gtest/internal/gtest-port.h](include/gtest/internal/gtest-port.h).
 
 ### Choosing a TR1 Tuple Library ###
 
@@ -221,7 +221,7 @@ your build script.
 ### Avoiding Macro Name Clashes ###
 
 In C++, macros don't obey namespaces.  Therefore two libraries that
-both define a macro of the same name will clash if you #include both
+both define a macro of the same name will clash if you `#include` both
 definitions.  In case a Google Test macro clashes with another
 library, you can force Google Test to rename its macro to avoid the
 conflict.
