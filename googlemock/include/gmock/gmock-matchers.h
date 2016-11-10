@@ -2515,7 +2515,7 @@ class BeginEndDistanceIsMatcher {
 // elements in the containers (which don't properly matter to sets, but can
 // occur if the containers are vectors or lists, for example).
 //
-// Uses the container's const_iterator, value_type, operator ==,
+// Uses the container's const_iterator, value_type, operator ==, operator !=
 // begin(), and end().
 template <typename Container>
 class ContainerEqMatcher {
