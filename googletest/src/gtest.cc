@@ -5018,10 +5018,12 @@ const char* ParseFlagValue(const char* str,
   // str and flag must not be NULL.
   if (str == NULL || flag == NULL) return NULL;
 
-  // The flag must start with "--" followed by GTEST_FLAG_PREFIX_.
+  // The flag must start with "--" followed by GTEST_FLAG_PREFIX_ or GTEST_FLAG_PREFIX_DASH_.
   const std::string flag_str = std::string("--") + GTEST_FLAG_PREFIX_ + flag;
+  const std::string flag_str_dash = std::string("--") + GTEST_FLAG_PREFIX_DASH_ + flag;
   const size_t flag_len = flag_str.length();
-  if (strncmp(str, flag_str.c_str(), flag_len) != 0) return NULL;
+  if (strncmp(str, flag_str.c_str(), flag_len) != 0 &&
+      strncmp(str, flag_str_dash.c_str(), flag_len) != 0) return NULL;
 
   // Skips the flag name.
   const char* flag_end = str + flag_len;

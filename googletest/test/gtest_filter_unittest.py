@@ -93,8 +93,8 @@ TOTAL_SHARDS_ENV_VAR = 'GTEST_TOTAL_SHARDS'
 SHARD_INDEX_ENV_VAR = 'GTEST_SHARD_INDEX'
 SHARD_STATUS_FILE_ENV_VAR = 'GTEST_SHARD_STATUS_FILE'
 
-# The command line flag for specifying the test filters.
-FILTER_FLAG = 'gtest_filter'
+# The command line flags for specifying the test filters.
+FILTER_FLAG = ['gtest_filter', 'gtest-filter']
 
 # The command line flag for including disabled tests.
 ALSO_RUN_DISABED_TESTS_FLAG = 'gtest_also_run_disabled_tests'
@@ -277,15 +277,16 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
       self.AssertSetEqual(tests_run, tests_to_run)
     # pylint: enable-msg=C6403
 
-    # Next, tests using the command line flag.
+    # Next, tests using the command line flags.
 
-    if gtest_filter is None:
-      args = []
-    else:
-      args = ['--%s=%s' % (FILTER_FLAG, gtest_filter)]
+    for flag in FILTER_FLAG:
+        if gtest_filter is None:
+          args = []
+        else:
+          args = ['--%s=%s' % (flag, gtest_filter)]
 
-    tests_run = RunAndExtractTestList(args)[0]
-    self.AssertSetEqual(tests_run, tests_to_run)
+        tests_run = RunAndExtractTestList(args)[0]
+        self.AssertSetEqual(tests_run, tests_to_run)
 
   def RunAndVerifyWithSharding(self, gtest_filter, total_shards, tests_to_run,
                                args=None, check_exit_0=False):
@@ -338,13 +339,14 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
 
     tests_to_run = self.AdjustForParameterizedTests(tests_to_run)
 
-    # Construct the command line.
-    args = ['--%s' % ALSO_RUN_DISABED_TESTS_FLAG]
-    if gtest_filter is not None:
-      args.append('--%s=%s' % (FILTER_FLAG, gtest_filter))
-
-    tests_run = RunAndExtractTestList(args)[0]
-    self.AssertSetEqual(tests_run, tests_to_run)
+    for flag in FILTER_FLAG:
+        # Construct the command line.
+        args = ['--%s' % ALSO_RUN_DISABED_TESTS_FLAG]
+        if gtest_filter is not None:
+          args.append('--%s=%s' % (flag, gtest_filter))
+    
+        tests_run = RunAndExtractTestList(args)[0]
+        self.AssertSetEqual(tests_run, tests_to_run)
 
   def setUp(self):
     """Sets up test case.
@@ -566,12 +568,13 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
   def testFlagOverridesEnvVar(self):
     """Tests that the filter flag overrides the filtering env. variable."""
 
-    SetEnvVar(FILTER_ENV_VAR, 'Foo*')
-    args = ['--%s=%s' % (FILTER_FLAG, '*One')]
-    tests_run = RunAndExtractTestList(args)[0]
-    SetEnvVar(FILTER_ENV_VAR, None)
-
-    self.AssertSetEqual(tests_run, ['BarTest.TestOne', 'BazTest.TestOne'])
+    for flag in FILTER_FLAG:
+        SetEnvVar(FILTER_ENV_VAR, 'Foo*')
+        args = ['--%s=%s' % (flag, '*One')]
+        tests_run = RunAndExtractTestList(args)[0]
+        SetEnvVar(FILTER_ENV_VAR, None)
+    
+        self.AssertSetEqual(tests_run, ['BarTest.TestOne', 'BazTest.TestOne'])
 
   def testShardStatusFileIsCreated(self):
     """Tests that the shard file is created if specified in the environment."""
