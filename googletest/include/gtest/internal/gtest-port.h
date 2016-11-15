@@ -1438,6 +1438,7 @@ GTEST_API_ std::string GetCapturedStderr();
 
 #endif  // GTEST_HAS_STREAM_REDIRECTION
 
+#if GTEST_HAS_FILE_SYSTEM
 // Returns a path to temporary directory.
 GTEST_API_ std::string TempDir();
 
@@ -1446,6 +1447,7 @@ GTEST_API_ size_t GetFileSize(FILE* file);
 
 // Reads the entire content of a file as a string.
 GTEST_API_ std::string ReadEntireFile(FILE* file);
+#endif // GTEST_HAS_FILE_SYSTEM
 
 // All command line arguments.
 GTEST_API_ const ::std::vector<testing::internal::string>& GetArgvs();
@@ -2370,7 +2372,7 @@ inline bool IsDir(const StatStruct& st) { return S_ISDIR(st.st_mode); }
 #else // GTEST_HAS_FILE_SYSTEM
 
 inline char* StrDup(const char* src) {
-  char* dst = (char*)malloc(strlen(src) + 1);
+  char* dst = static_cast<char*>(malloc(strlen(src) + 1));
   if (dst != NULL)
     strcpy(dst, src);
   return dst;
@@ -2378,7 +2380,7 @@ inline char* StrDup(const char* src) {
 
 inline int StrCaseCmp(const char* s1, const char* s2) {
   while (*s1 != '\0' && *s2 != '\0') {
-    if (toupper(*s1) && toupper(*s2)) {
+    if (toupper(*s1) == toupper(*s2)) {
       s1++;
       s2++;
     }

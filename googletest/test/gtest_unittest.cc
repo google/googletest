@@ -1929,7 +1929,11 @@ TEST(ShouldRunTestOnShardTest, IsPartitionWhenThereAreFiveShards) {
 
 TEST(UnitTestTest, CanGetOriginalWorkingDir) {
   ASSERT_TRUE(UnitTest::GetInstance()->original_working_dir() != NULL);
+#if GTEST_HAS_FILE_SYSTEM
   EXPECT_STRNE(UnitTest::GetInstance()->original_working_dir(), "");
+#else
+  EXPECT_STREQ(UnitTest::GetInstance()->original_working_dir(), "");
+#endif // GTEST_HAS_FILE_SYSTEM
 }
 
 TEST(UnitTestTest, ReturnsPlausibleTimestamp) {

@@ -3553,6 +3553,7 @@ std::string XmlUnitTestResultPrinter::RemoveInvalidXmlCharacters(
 //     </testcase>
 //   </testsuite>
 // </testsuites>
+#endif // GTEST_HAS_FILE_SYSTEM
 
 // Formats the given time in milliseconds as seconds.
 std::string FormatTimeInMillisAsSeconds(TimeInMillis ms) {
@@ -3592,6 +3593,7 @@ std::string FormatEpochTimeInMillisAsIso8601(TimeInMillis ms) {
       String::FormatIntWidth2(time_struct.tm_sec);
 }
 
+#if GTEST_HAS_FILE_SYSTEM
 // Streams an XML CDATA section, escaping invalid CDATA sequences as needed.
 void XmlUnitTestResultPrinter::OutputXmlCDataSection(::std::ostream* stream,
                                                      const char* data) {
