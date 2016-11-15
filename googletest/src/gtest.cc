@@ -394,6 +394,7 @@ const ::std::vector<testing::internal::string>& GetArgvs() {
 #endif  // defined(GTEST_CUSTOM_GET_ARGVS_)
 }
 
+#if GTEST_HAS_FILE_SYSTEM
 // Returns the current application's name, removing directory path if that
 // is present.
 FilePath GetCurrentExecutableName() {
@@ -407,6 +408,7 @@ FilePath GetCurrentExecutableName() {
 
   return result.RemoveDirectoryName();
 }
+#endif // GTEST_HAS_FILE_SYSTEM
 
 // Functions for processing the gtest_output flag.
 
@@ -421,6 +423,7 @@ std::string UnitTestOptions::GetOutputFormat() {
       std::string(gtest_output_flag, colon - gtest_output_flag);
 }
 
+#if GTEST_HAS_FILE_SYSTEM
 // Returns the name of the requested output file, or the default if none
 // was explicitly specified.
 std::string UnitTestOptions::GetAbsolutePathToOutputFile() {
@@ -453,6 +456,7 @@ std::string UnitTestOptions::GetAbsolutePathToOutputFile() {
       GetOutputFormat().c_str()));
   return result.string();
 }
+#endif // GTEST_HAS_FILE_SYSTEM
 
 // Returns true iff the wildcard pattern matches the string.  The
 // first ':' or '\0' character in pattern marks the end of it.
@@ -2912,7 +2916,7 @@ const char* GetAnsiColorCode(GTestColor color) {
 
 #endif  // GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE
 
-// Returns true iff Google Test should use colors in the output.
+// Returns true if Google Test should use colors in the output.
 bool ShouldUseColor(bool stdout_is_tty) {
   const char* const gtest_color = GTEST_FLAG(color).c_str();
 
@@ -2960,9 +2964,12 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
 #if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_SYMBIAN || GTEST_OS_ZOS || \
     GTEST_OS_IOS || GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_RT
   const bool use_color = AlwaysFalse();
-#else
+#elif GTEST_HAS_FILE_SYSTEM
   static const bool in_color_mode =
       ShouldUseColor(posix::IsATTY(posix::FileNo(stdout)) != 0);
+  const bool use_color = in_color_mode && (color != COLOR_DEFAULT);
+#else
+  static const bool in_color_mode = ShouldUseColor(false);
   const bool use_color = in_color_mode && (color != COLOR_DEFAULT);
 #endif  // GTEST_OS_WINDOWS_MOBILE || GTEST_OS_SYMBIAN || GTEST_OS_ZOS
   // The '!= 0' comparison is necessary to satisfy MSVC 7.1.
@@ -3345,6 +3352,7 @@ void TestEventRepeater::OnTestIterationEnd(const UnitTest& unit_test,
 
 // End TestEventRepeater
 
+#if GTEST_HAS_FILE_SYSTEM
 // This class generates an XML output file.
 class XmlUnitTestResultPrinter : public EmptyTestEventListener {
  public:
@@ -3750,6 +3758,7 @@ std::string XmlUnitTestResultPrinter::TestPropertiesAsXmlAttributes(
 }
 
 // End XmlUnitTestResultPrinter
+#endif // GTEST_HAS_FILE_SYSTEM
 
 #if GTEST_CAN_STREAM_RESULTS_
 
@@ -3854,6 +3863,7 @@ string OsStackTraceGetter::CurrentStackTrace(int /*max_depth*/,
 
 void OsStackTraceGetter::UponLeavingGTest() {}
 
+#if GTEST_HAS_FILE_SYSTEM
 // A helper class that creates the premature-exit file in its
 // constructor and deletes the file in its destructor.
 class ScopedPrematureExitFile {
@@ -3882,6 +3892,7 @@ class ScopedPrematureExitFile {
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ScopedPrematureExitFile);
 };
+#endif // GTEST_HAS_FILE_SYSTEM
 
 }  // namespace internal
 
@@ -4183,6 +4194,7 @@ void UnitTest::RecordProperty(const std::string& key,
 // We don't protect this under mutex_, as we only support calling it
 // from the main thread.
 int UnitTest::Run() {
+#if GTEST_HAS_FILE_SYSTEM
   const bool in_death_test_child_process =
       internal::GTEST_FLAG(internal_run_death_test).length() > 0;
 
@@ -4210,6 +4222,7 @@ int UnitTest::Run() {
   const internal::ScopedPrematureExitFile premature_exit_file(
       in_death_test_child_process ?
       NULL : internal::posix::GetEnv("TEST_PREMATURE_EXIT_FILE"));
+#endif // GTEST_HAS_FILE_SYSTEM
 
   // Captures the value of GTEST_FLAG(catch_exceptions).  This value will be
   // used for the duration of the program.
@@ -4395,6 +4408,7 @@ void UnitTestImpl::SuppressTestEventsIfInSubprocess() {
 }
 #endif  // GTEST_HAS_DEATH_TEST
 
+#if GTEST_HAS_FILE_SYSTEM
 // Initializes event listeners performing XML output as specified by
 // UnitTestOptions. Must not be called before InitGoogleTest.
 void UnitTestImpl::ConfigureXmlOutput() {
@@ -4408,6 +4422,7 @@ void UnitTestImpl::ConfigureXmlOutput() {
     fflush(stdout);
   }
 }
+#endif  // GTEST_HAS_FILE_SYSTEM
 
 #if GTEST_CAN_STREAM_RESULTS_
 // Initializes event listeners for streaming test results in string form.
@@ -4453,9 +4468,11 @@ void UnitTestImpl::PostFlagParsingInit() {
     // RUN_ALL_TESTS.
     RegisterParameterizedTests();
 
+#if GTEST_HAS_FILE_SYSTEM
     // Configures listeners for XML output. This makes it possible for users
     // to shut down the default XML output before invoking RUN_ALL_TESTS.
     ConfigureXmlOutput();
+#endif // GTEST_HAS_FILE_SYSTEM
 
 #if GTEST_CAN_STREAM_RESULTS_
     // Configures listeners for streaming test results to the specified server.
@@ -4565,10 +4582,12 @@ bool UnitTestImpl::RunAllTests() {
   // user didn't call InitGoogleTest.
   PostFlagParsingInit();
 
+#if GTEST_HAS_FILE_SYSTEM
   // Even if sharding is not on, test runners may want to use the
   // GTEST_SHARD_STATUS_FILE to query whether the test supports the sharding
   // protocol.
   internal::WriteToShardStatusFileIfNeeded();
+#endif // GTEST_HAS_FILE_SYSTEM
 
   // True iff we are in a subprocess for running a thread-safe-style
   // death test.
@@ -4686,6 +4705,7 @@ bool UnitTestImpl::RunAllTests() {
   return !failed;
 }
 
+#if GTEST_HAS_FILE_SYSTEM
 // Reads the GTEST_SHARD_STATUS_FILE environment variable, and creates the file
 // if the variable is present. If a file already exists at this location, this
 // function will write over it. If the variable is present, but the file cannot
@@ -4705,6 +4725,7 @@ void WriteToShardStatusFileIfNeeded() {
     fclose(file);
   }
 }
+#endif // GTEST_HAS_FILE_SYSTEM
 
 // Checks whether sharding is enabled by examining the relevant
 // environment variable values. If the variables are present,
@@ -5186,10 +5207,12 @@ static const char kColorEncodedHelpMessage[] =
 "      Enable/disable colored output. The default is @Gauto@D.\n"
 "  -@G-" GTEST_FLAG_PREFIX_ "print_time=0@D\n"
 "      Don't print the elapsed time of each test.\n"
+#if GTEST_HAS_FILE_SYSTEM
 "  @G--" GTEST_FLAG_PREFIX_ "output=xml@Y[@G:@YDIRECTORY_PATH@G"
     GTEST_PATH_SEP_ "@Y|@G:@YFILE_PATH]@D\n"
 "      Generate an XML report in the given directory or with the given file\n"
 "      name. @YFILE_PATH@D defaults to @Gtest_details.xml@D.\n"
+#endif  // GTEST_HAS_FILE_SYSTEM
 #if GTEST_CAN_STREAM_RESULTS_
 "  @G--" GTEST_FLAG_PREFIX_ "stream_result_to=@YHOST@G:@YPORT@D\n"
 "      Stream test results to the given server.\n"

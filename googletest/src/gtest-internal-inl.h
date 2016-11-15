@@ -247,11 +247,13 @@ GTEST_API_ std::string CodePointToUtf8(UInt32 code_point);
 // will be encoded as individual Unicode characters from Basic Normal Plane.
 GTEST_API_ std::string WideStringToUtf8(const wchar_t* str, int num_chars);
 
+#if GTEST_HAS_FILE_SYSTEM
 // Reads the GTEST_SHARD_STATUS_FILE environment variable, and creates the file
 // if the variable is present. If a file already exists at this location, this
 // function will write over it. If the variable is present, but the file cannot
 // be created, prints an error and exits.
 void WriteToShardStatusFileIfNeeded();
+#endif // GTEST_HAS_FILE_SYSTEM
 
 // Checks whether sharding is enabled by examining the relevant
 // environment variable values. If the variables are present,
@@ -377,10 +379,12 @@ class GTEST_API_ UnitTestOptions {
   // Returns the output format, or "" for normal printed output.
   static std::string GetOutputFormat();
 
+#if GTEST_HAS_FILE_SYSTEM
   // Returns the absolute path of the requested output file, or the
   // default (test_detail.xml in the original working directory) if
   // none was explicitly specified.
   static std::string GetAbsolutePathToOutputFile();
+#endif // GTEST_HAS_FILE_SYSTEM
 
   // Functions for processing the gtest_filter flag.
 
@@ -410,9 +414,11 @@ class GTEST_API_ UnitTestOptions {
   static bool MatchesFilter(const std::string& name, const char* filter);
 };
 
+#if GTEST_HAS_FILE_SYSTEM
 // Returns the current application's name, removing directory path if that
 // is present.  Used by UnitTestOptions::GetOutputFile.
 GTEST_API_ FilePath GetCurrentExecutableName();
+#endif // GTEST_HAS_FILE_SYSTEM
 
 // The role interface for getting the OS stack trace as a string.
 class OsStackTraceGetterInterface {
@@ -652,11 +658,13 @@ class GTEST_API_ UnitTestImpl {
     // RUN_ALL_TESTS().  Therefore we capture the current directory in
     // AddTestInfo(), which is called to register a TEST or TEST_F
     // before main() is reached.
+#if GTEST_HAS_FILE_SYSTEM
     if (original_working_dir_.IsEmpty()) {
       original_working_dir_.Set(FilePath::GetCurrentDir());
       GTEST_CHECK_(!original_working_dir_.IsEmpty())
           << "Failed to get the current working directory.";
     }
+#endif // GTEST_HAS_FILE_SYSTEM
 
     GetTestCase(test_info->test_case_name(),
                 test_info->type_param(),
@@ -768,9 +776,11 @@ class GTEST_API_ UnitTestImpl {
   friend class ReplaceDeathTestFactory;
 #endif  // GTEST_HAS_DEATH_TEST
 
+#if GTEST_HAS_FILE_SYSTEM
   // Initializes the event listener performing XML output as specified by
   // UnitTestOptions. Must not be called before InitGoogleTest.
   void ConfigureXmlOutput();
+#endif  // GTEST_HAS_FILE_SYSTEM
 
 #if GTEST_CAN_STREAM_RESULTS_
   // Initializes the event listener for streaming test results to a socket.

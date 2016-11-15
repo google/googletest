@@ -536,6 +536,15 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
     (GTEST_HAS_STD_WSTRING && GTEST_HAS_GLOBAL_STRING)
 #endif  // GTEST_HAS_GLOBAL_WSTRING
 
+#ifndef GTEST_HAS_FILE_SYSTEM
+# define GTEST_HAS_FILE_SYSTEM \
+	(GTEST_OS_CYGWIN || GTEST_OS_SYMBIAN || GTEST_OS_WINDOWS || \
+	GTEST_OS_MAC || GTEST_OS_FREEBSD || GTEST_OS_LINUX || \
+	GTEST_OS_ZOS || GTEST_OS_SOLARIS || GTEST_OS_AIX || \
+	GTEST_OS_HPUX || GTEST_OS_NACL || GTEST_OS_OPENBSD || \
+	GTEST_OS_QNX)
+#endif  // GTEST_HAS_FILE_SYSTEM
+
 // Determines whether RTTI is available.
 #ifndef GTEST_HAS_RTTI
 // The user didn't tell us whether RTTI is enabled, so we need to
@@ -785,7 +794,8 @@ using ::std::tuple_size;
 // By default, we assume that stream redirection is supported on all
 // platforms except known mobile ones.
 # if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_SYMBIAN || \
-    GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_RT
+    GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_RT || \
+	!GTEST_HAS_FILE_SYSTEM
 #  define GTEST_HAS_STREAM_REDIRECTION 0
 # else
 #  define GTEST_HAS_STREAM_REDIRECTION 1
@@ -2343,7 +2353,7 @@ inline bool IsDir(const StatStruct& st) {
 }
 # endif  // GTEST_OS_WINDOWS_MOBILE
 
-#else
+#elif GTEST_HAS_FILE_SYSTEM
 
 typedef struct stat StatStruct;
 
@@ -2357,6 +2367,28 @@ inline char* StrDup(const char* src) { return strdup(src); }
 inline int RmDir(const char* dir) { return rmdir(dir); }
 inline bool IsDir(const StatStruct& st) { return S_ISDIR(st.st_mode); }
 
+#else // GTEST_HAS_FILE_SYSTEM
+
+inline char* StrDup(const char* src) {
+  char* dst = (char*)malloc(strlen(src) + 1);
+  if (dst != NULL)
+    strcpy(dst, src);
+  return dst;
+}
+
+inline int StrCaseCmp(const char* s1, const char* s2) {
+  while (*s1 != '\0' && *s2 != '\0') {
+    if (toupper(*s1) && toupper(*s2)) {
+      s1++;
+      s2++;
+    }
+    else
+      return (*s1 - *s2);
+  }
+
+  return (*s1 - *s2);
+}
+
 #endif  // GTEST_OS_WINDOWS
 
 // Functions deprecated by MSVC 8.0.
@@ -2367,6 +2399,7 @@ inline const char* StrNCpy(char* dest, const char* src, size_t n) {
   return strncpy(dest, src, n);
 }
 
+#if GTEST_HAS_FILE_SYSTEM
 // ChDir(), FReopen(), FDOpen(), Read(), Write(), Close(), and
 // StrError() aren't needed on Windows CE at this time and thus not
 // defined there.
@@ -2394,6 +2427,8 @@ inline int Write(int fd, const void* buf, unsigned int count) {
 inline int Close(int fd) { return close(fd); }
 inline const char* StrError(int errnum) { return strerror(errnum); }
 #endif
+#endif // GTEST_HAS_FILE_SYSTEM
+
 inline const char* GetEnv(const char* name) {
 #if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE | GTEST_OS_WINDOWS_RT
   // We are on Windows CE, which has no environment variables.
@@ -2514,7 +2549,7 @@ typedef TypeWithSize<8>::Int TimeInMillis;  // Represents time in milliseconds.
 # define GTEST_FLAG(name) FLAGS_gtest_##name
 #endif  // !defined(GTEST_FLAG)
 
-#if !defined(GTEST_USE_OWN_FLAGFILE_FLAG_)
+#if !defined(GTEST_USE_OWN_FLAGFILE_FLAG_) && GTEST_HAS_FILE_SYSTEM
 # define GTEST_USE_OWN_FLAGFILE_FLAG_ 1
 #endif  // !defined(GTEST_USE_OWN_FLAGFILE_FLAG_)
 
