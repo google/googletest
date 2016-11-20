@@ -2213,10 +2213,20 @@ bool StaticAssertTypeEq() {
 //     EXPECT_EQ(1, b_.size());
 //   }
 
-#define TEST_F(test_fixture, test_name)\
-  GTEST_TEST_(test_fixture, test_name, test_fixture, \
-              ::testing::internal::GetTypeId<test_fixture>())
+#define TEST_F_TEMPLATE_1(test_fixture, test_name, template_parameter)\
+  GTEST_TEST_TEMPLATE_1(test_fixture, test_name, template_parameter, test_fixture , ::testing::internal::GetTypeId<test_fixture<template_parameter>>())
 
+#define TEST_F_TEMPLATE_2(test_fixture, test_name, template_parameter1, template_paramter2)\
+  GTEST_TEST_TEMPLATE_2(test_fixture, test_name, template_parameter1, template_paramter2, test_fixture , ::testing::internal::GetTypeId<test_fixture<template_parameter1, template_parameter2>>())
+
+#define TEST_F_TEMPLATE_3(test_fixture, test_name, template_parameter1, template_paramter2, template_parameter3)\
+  GTEST_TEST_TEMPLATE_3(test_fixture, test_name, template_parameter1, template_paramter2, template_parameter3, test_fixture , ::testing::internal::GetTypeId<test_fixture<template_parameter1, template_parameter2, template_parameter3>>())
+
+#define TEST_F_TEMPLATE_4(test_fixture, test_name, template_parameter1, template_paramter2, template_parameter3, template_parameter4)\
+  GTEST_TEST_TEMPLATE_4(test_fixture, test_name, template_parameter1, template_paramter2, template_parameter3, template_parameter4, test_fixture , ::testing::internal::GetTypeId<test_fixture<template_parameter1, template_parameter2, template_parameter3, template_parameter4>>())
+
+#define TEST_F(test_fixture, test_name)\
+  GTEST_TEST_(test_fixture, test_name, test_fixture, ::testing::internal::GetTypeId<test_fixture>())
 }  // namespace testing
 
 // Use this function in main() to run all tests.  It returns 0 if all

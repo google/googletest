@@ -1210,6 +1210,20 @@ class NativeArray {
 #define GTEST_TEST_CLASS_NAME_(test_case_name, test_name) \
   test_case_name##_##test_name##_Test
 
+#define GTEST_TEST_CLASS_NAME_TEMPLATE_1(test_case_name, test_name, template_parameter1) \
+  test_case_name##_##test_name##_##template_parameter1##_Test
+
+#define GTEST_TEST_CLASS_NAME_TEMPLATE_2(test_case_name, test_name, template_parameter1, template_parameter2) \
+  test_case_name##_##test_name##_##template_parameter1##_##template_parameter2##_Test
+
+#define GTEST_TEST_CLASS_NAME_TEMPLATE_3(test_case_name, test_name, template_parameter1, template_parameter2, template_parameter3) \
+  test_case_name##_##test_name##_##template_parameter1##_##template_parameter2##_##template_parameter3##_Test
+
+#define GTEST_TEST_CLASS_NAME_TEMPLATE_4(test_case_name, test_name, template_parameter1, template_parameter2, template_parameter3, template_parameter4) \
+  test_case_name##_##test_name##_##template_parameter1##_##template_parameter2##_##template_parameter3##_##template_parameter4##_Test
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Helper macro for defining tests.
 #define GTEST_TEST_(test_case_name, test_name, parent_class, parent_id)\
 class GTEST_TEST_CLASS_NAME_(test_case_name, test_name) : public parent_class {\
@@ -1233,6 +1247,103 @@ class GTEST_TEST_CLASS_NAME_(test_case_name, test_name) : public parent_class {\
         new ::testing::internal::TestFactoryImpl<\
             GTEST_TEST_CLASS_NAME_(test_case_name, test_name)>);\
 void GTEST_TEST_CLASS_NAME_(test_case_name, test_name)::TestBody()
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#define GTEST_TEST_TEMPLATE_1(test_case_name, test_name, template_parameter, parent_class, parent_id)\
+    class GTEST_TEST_CLASS_NAME_TEMPLATE_1(test_case_name, test_name, template_parameter) : public parent_class<template_parameter> {\
+    public:\
+      GTEST_TEST_CLASS_NAME_TEMPLATE_1(test_case_name, test_name, template_parameter)() {}\
+    private:\
+      virtual void TestBody();\
+      static ::testing::TestInfo* const test_info_ GTEST_ATTRIBUTE_UNUSED_;\
+        GTEST_DISALLOW_COPY_AND_ASSIGN_(\
+        GTEST_TEST_CLASS_NAME_TEMPLATE_1(test_case_name, test_name, template_parameter));\
+    };\
+    \
+    ::testing::TestInfo* const GTEST_TEST_CLASS_NAME_TEMPLATE_1(test_case_name, test_name, template_parameter)\
+      ::test_info_ =\
+      ::testing::internal::MakeAndRegisterTestInfo(\
+      #test_case_name ## #template_parameter, #test_name, NULL, NULL, \
+      ::testing::internal::CodeLocation(__FILE__, __LINE__), \
+      (::testing::internal::GetTypeId<test_case_name<template_parameter>>()), \
+      test_case_name<template_parameter>::SetUpTestCase, \
+      test_case_name<template_parameter>::TearDownTestCase, \
+      new ::testing::internal::TestFactoryImpl<GTEST_TEST_CLASS_NAME_TEMPLATE_1(test_case_name, test_name, template_parameter)>);\
+    void GTEST_TEST_CLASS_NAME_TEMPLATE_1(test_case_name, test_name, template_parameter)::TestBody()
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#define GTEST_TEST_TEMPLATE_2(test_case_name, test_name, template_parameter1, template_parameter2, parent_class, parent_id)\
+  class GTEST_TEST_CLASS_NAME_TEMPLATE_2(test_case_name, test_name, template_parameter1, template_parameter2) : public parent_class<template_parameter1, template_parameter2> {\
+  public:\
+  GTEST_TEST_CLASS_NAME_TEMPLATE_2(test_case_name, test_name, template_parameter1, template_parameter2)() {}\
+  private:\
+  virtual void TestBody();\
+  static ::testing::TestInfo* const test_info_ GTEST_ATTRIBUTE_UNUSED_;\
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(\
+  GTEST_TEST_CLASS_NAME_TEMPLATE_2(test_case_name, test_name, template_parameter1, template_parameter2));\
+  };\
+  \
+  ::testing::TestInfo* const GTEST_TEST_CLASS_NAME_TEMPLATE_2(test_case_name, test_name, template_parameter1, template_parameter2)\
+  ::test_info_ =\
+  ::testing::internal::MakeAndRegisterTestInfo(\
+  #test_case_name ## #template_parameter1 ## #template_parameter2, #test_name, NULL, NULL, \
+  ::testing::internal::CodeLocation(__FILE__, __LINE__), \
+  (::testing::internal::GetTypeId<test_case_name<template_parameter1, template_parameter2>>()), \
+  test_case_name<template_parameter1, template_parameter2>::SetUpTestCase, \
+  test_case_name<template_parameter1, template_parameter2>::TearDownTestCase, \
+  new ::testing::internal::TestFactoryImpl<GTEST_TEST_CLASS_NAME_TEMPLATE_2(test_case_name, test_name, template_parameter1, template_parameter2)>);\
+  void GTEST_TEST_CLASS_NAME_TEMPLATE_2(test_case_name, test_name, template_parameter1, template_parameter2)::TestBody()
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#define GTEST_TEST_TEMPLATE_3(test_case_name, test_name, template_parameter1, template_parameter2, template_parameter3, parent_class, parent_id)\
+    class GTEST_TEST_CLASS_NAME_TEMPLATE_3(test_case_name, test_name, template_parameter1, template_parameter2, template_parameter3) : public parent_class<template_parameter1, template_parameter2, template_parameter3> {\
+    public:\
+    GTEST_TEST_CLASS_NAME_TEMPLATE_3(test_case_name, test_name, template_parameter1, template_parameter2, template_parameter3)() {}\
+    private:\
+    virtual void TestBody();\
+    static ::testing::TestInfo* const test_info_ GTEST_ATTRIBUTE_UNUSED_;\
+    GTEST_DISALLOW_COPY_AND_ASSIGN_(\
+    GTEST_TEST_CLASS_NAME_TEMPLATE_3(test_case_name, test_name, template_parameter1, template_parameter2, template_parameter3));\
+    };\
+    \
+    ::testing::TestInfo* const GTEST_TEST_CLASS_NAME_TEMPLATE_3(test_case_name, test_name, template_parameter1, template_parameter2, template_parameter3)\
+    ::test_info_ =\
+    ::testing::internal::MakeAndRegisterTestInfo(\
+#test_case_name ## #template_parameter1 ## #template_parameter2 ## #template_parameter3, #test_name, NULL, NULL, \
+  ::testing::internal::CodeLocation(__FILE__, __LINE__), \
+  (::testing::internal::GetTypeId<test_case_name<template_parameter1, template_parameter2, template_parameter3>>()), \
+  test_case_name<template_parameter1, template_parameter2, template_parameter3>::SetUpTestCase, \
+  test_case_name<template_parameter1, template_parameter2, template_parameter3>::TearDownTestCase, \
+  new ::testing::internal::TestFactoryImpl<GTEST_TEST_CLASS_NAME_TEMPLATE_3(test_case_name, test_name, template_parameter1, template_parameter2, template_parameter3)>);\
+  void GTEST_TEST_CLASS_NAME_TEMPLATE_3(test_case_name, test_name, template_parameter1, template_parameter2, template_parameter3)::TestBody()
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#define GTEST_TEST_TEMPLATE_4(test_case_name, test_name, template_parameter1, template_parameter2, template_parameter3, template_parameter4, parent_class, parent_id)\
+  class GTEST_TEST_CLASS_NAME_TEMPLATE_4(test_case_name, test_name, template_parameter1, template_parameter2, template_parameter3, template_parameter4) : public parent_class<template_parameter1, template_parameter2, template_parameter3, template_parameter4> {\
+  public:\
+  GTEST_TEST_CLASS_NAME_TEMPLATE_4(test_case_name, test_name, template_parameter1, template_parameter2, template_parameter3, template_parameter4)() {}\
+  private:\
+  virtual void TestBody();\
+  static ::testing::TestInfo* const test_info_ GTEST_ATTRIBUTE_UNUSED_;\
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(\
+  GTEST_TEST_CLASS_NAME_TEMPLATE_4(test_case_name, test_name, template_parameter1, template_parameter2, template_parameter3, template_parameter4));\
+  };\
+  \
+  ::testing::TestInfo* const GTEST_TEST_CLASS_NAME_TEMPLATE_4(test_case_name, test_name, template_parameter1, template_parameter2, template_parameter3, template_parameter4)\
+       ::test_info_ =\
+       ::testing::internal::MakeAndRegisterTestInfo(\
+#test_case_name ## #template_parameter1 ## #template_parameter2 ## #template_parameter3 ## #template_parameter4, #test_name, NULL, NULL, \
+  ::testing::internal::CodeLocation(__FILE__, __LINE__), \
+  (::testing::internal::GetTypeId<test_case_name<template_parameter1, template_parameter2, template_parameter3, template_parameter4>>()), \
+  test_case_name<template_parameter1, template_parameter2, template_parameter3, template_parameter4>::SetUpTestCase, \
+  test_case_name<template_parameter1, template_parameter2, template_parameter3, template_parameter4>::TearDownTestCase, \
+  new ::testing::internal::TestFactoryImpl<GTEST_TEST_CLASS_NAME_TEMPLATE_4(test_case_name, test_name, template_parameter1, template_parameter2, template_parameter3, template_parameter4)>);\
+  void GTEST_TEST_CLASS_NAME_TEMPLATE_4(test_case_name, test_name, template_parameter1, template_parameter2, template_parameter3, template_parameter4)::TestBody()
+
 
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
 
