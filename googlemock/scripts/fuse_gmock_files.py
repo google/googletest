@@ -63,7 +63,10 @@ __author__ = 'wan@google.com (Zhanyong Wan)'
 
 import os
 import re
-import sets
+try:
+  from sets import Set as set  # For Python 2.3 compatibility
+except ImportError:
+  pass
 import sys
 
 # We assume that this file is in the scripts/ directory in the Google
@@ -119,8 +122,8 @@ def ValidateOutputDir(output_dir):
 def FuseGMockH(gmock_root, output_dir):
   """Scans folder gmock_root to generate gmock/gmock.h in output_dir."""
 
-  output_file = file(os.path.join(output_dir, GMOCK_H_OUTPUT), 'w')
-  processed_files = sets.Set()  # Holds all gmock headers we've processed.
+  output_file = open(os.path.join(output_dir, GMOCK_H_OUTPUT), 'w')
+  processed_files = set()  # Holds all gmock headers we've processed.
 
   def ProcessFile(gmock_header_path):
     """Processes the given gmock header file."""
@@ -132,7 +135,7 @@ def FuseGMockH(gmock_root, output_dir):
     processed_files.add(gmock_header_path)
 
     # Reads each line in the given gmock header.
-    for line in file(os.path.join(gmock_root, gmock_header_path), 'r'):
+    for line in open(os.path.join(gmock_root, gmock_header_path), 'r'):
       m = INCLUDE_GMOCK_FILE_REGEX.match(line)
       if m:
         # It's '#include "gmock/..."' - let's process it recursively.
@@ -159,7 +162,7 @@ def FuseGMockH(gmock_root, output_dir):
 def FuseGMockAllCcToFile(gmock_root, output_file):
   """Scans folder gmock_root to fuse gmock-all.cc into output_file."""
 
-  processed_files = sets.Set()
+  processed_files = set()
 
   def ProcessFile(gmock_source_file):
     """Processes the given gmock source file."""
@@ -171,7 +174,7 @@ def FuseGMockAllCcToFile(gmock_root, output_file):
     processed_files.add(gmock_source_file)
 
     # Reads each line in the given gmock source file.
-    for line in file(os.path.join(gmock_root, gmock_source_file), 'r'):
+    for line in open(os.path.join(gmock_root, gmock_source_file), 'r'):
       m = INCLUDE_GMOCK_FILE_REGEX.match(line)
       if m:
         # It's '#include "gmock/foo.h"'.  We treat it as '#include
@@ -204,7 +207,7 @@ def FuseGMockAllCcToFile(gmock_root, output_file):
 def FuseGMockGTestAllCc(gmock_root, output_dir):
   """Scans folder gmock_root to generate gmock-gtest-all.cc in output_dir."""
 
-  output_file = file(os.path.join(output_dir, GMOCK_GTEST_ALL_CC_OUTPUT), 'w')
+  output_file = open(os.path.join(output_dir, GMOCK_GTEST_ALL_CC_OUTPUT), 'w')
   # First, fuse gtest-all.cc into gmock-gtest-all.cc.
   gtest.FuseGTestAllCcToFile(GetGTestRootDir(gmock_root), output_file)
   # Next, append fused gmock-all.cc to gmock-gtest-all.cc.
@@ -232,7 +235,7 @@ def main():
     # fuse_gmock_files.py GMOCK_ROOT_DIR OUTPUT_DIR
     FuseGMock(sys.argv[1], sys.argv[2])
   else:
-    print __doc__
+    print(__doc__)
     sys.exit(1)
 
 
