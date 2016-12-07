@@ -2106,7 +2106,13 @@ static const char* const kReservedTestCaseAttributes[] = {
 
 template <int kSize>
 std::vector<std::string> ArrayAsVector(const char* const (&array)[kSize]) {
-  return std::vector<std::string>(array, array + kSize);
+  // The following code is fix work on SunOS with SunPro compiler
+  std::vector<std::string> ret_result;
+  ret_result.reserve(kSize);
+  for (int i = 0; i < kSize; ++i) {
+    ret_result.push_back(array[i]);
+  }
+  return ret_result;
 }
 
 static std::vector<std::string> GetReservedAttributesForElement(

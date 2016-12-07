@@ -562,7 +562,7 @@ class GTEST_API_ TypedTestCasePState {
       posix::Abort();
     }
     registered_tests_.insert(
-        ::std::make_pair(test_name, CodeLocation(file, line)));
+        ::std::make_pair(std::string(test_name), CodeLocation(file, line)));
     return true;
   }
 

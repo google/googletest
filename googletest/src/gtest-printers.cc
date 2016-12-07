@@ -187,9 +187,14 @@ static CharFormat PrintAsCharLiteralTo(Char c, ostream* os) {
   return kSpecialEscape;
 }
 
-// Prints a wchar_t c as if it's part of a string literal, escaping it when
+// Prints a char c or wchar_t c as if it's part of a string literal, escaping it when
 // necessary; returns how c was formatted.
-static CharFormat PrintAsStringLiteralTo(wchar_t c, ostream* os) {
+template <typename CharType>
+GTEST_ATTRIBUTE_NO_SANITIZE_MEMORY_
+GTEST_ATTRIBUTE_NO_SANITIZE_ADDRESS_
+GTEST_ATTRIBUTE_NO_SANITIZE_THREAD_
+static CharFormat PrintAsStringLiteralTo(CharType cc, ostream* os) {
+  wchar_t c = (sizeof(CharType) == 1) ? static_cast<wchar_t>(static_cast<unsigned char>(cc)) : cc;
   switch (c) {
     case L'\'':
       *os << "'";
@@ -200,13 +205,6 @@ static CharFormat PrintAsStringLiteralTo(wchar_t c, ostream* os) {
     default:
       return PrintAsCharLiteralTo<wchar_t>(c, os);
   }
-}
-
-// Prints a char c as if it's part of a string literal, escaping it when
-// necessary; returns how c was formatted.
-static CharFormat PrintAsStringLiteralTo(char c, ostream* os) {
-  return PrintAsStringLiteralTo(
-      static_cast<wchar_t>(static_cast<unsigned char>(c)), os);
 }
 
 // Prints a wide or narrow character c and its code.  '\0' is printed
