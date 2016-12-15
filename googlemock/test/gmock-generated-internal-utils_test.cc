@@ -124,4 +124,39 @@ TEST(FunctionTest, LongArgumentList) {
       F::MakeResultIgnoredValue>();
 }
 
+// Tests for argument counting macros
+
+TEST(ArgumentMacros, Count) {
+	EXPECT_EQ(0,  __GMOCK_NARGS());
+	EXPECT_EQ(1,  __GMOCK_NARGS(a));
+	EXPECT_EQ(2,  __GMOCK_NARGS(a, b));
+	EXPECT_EQ(3,  __GMOCK_NARGS(a, b, c));
+	EXPECT_EQ(4,  __GMOCK_NARGS(a, b, c, d));
+	EXPECT_EQ(5,  __GMOCK_NARGS(a, b, c, d, e));
+	EXPECT_EQ(6,  __GMOCK_NARGS(a, b, c, d, e, f));
+	EXPECT_EQ(7,  __GMOCK_NARGS(a, b, c, d, e, f, g));
+	EXPECT_EQ(8,  __GMOCK_NARGS(a, b, c, d, e, f, g, h));
+	EXPECT_EQ(9,  __GMOCK_NARGS(a, b, c, d, e, f, g, h, i));
+	EXPECT_EQ(10, __GMOCK_NARGS(a, b, c, d, e, f, g, h, i, j));
+}
+
+TEST(ArgumentMacros, FirstN)
+{
+	EXPECT_EQ(0,  __GMOCK_NARGS(__GMOCK_FIRST(0,  a, b, c, d, e, f, g, h, i, j)));
+	EXPECT_EQ(1,  __GMOCK_NARGS(__GMOCK_FIRST(1,  a, b, c, d, e, f, g, h, i, j)));
+	EXPECT_EQ(2,  __GMOCK_NARGS(__GMOCK_FIRST(2,  a, b, c, d, e, f, g, h, i, j)));
+	EXPECT_EQ(3,  __GMOCK_NARGS(__GMOCK_FIRST(3,  a, b, c, d, e, f, g, h, i, j)));
+	EXPECT_EQ(4,  __GMOCK_NARGS(__GMOCK_FIRST(4,  a, b, c, d, e, f, g, h, i, j)));
+	EXPECT_EQ(5,  __GMOCK_NARGS(__GMOCK_FIRST(5,  a, b, c, d, e, f, g, h, i, j)));
+	EXPECT_EQ(6,  __GMOCK_NARGS(__GMOCK_FIRST(6,  a, b, c, d, e, f, g, h, i, j)));
+	EXPECT_EQ(7,  __GMOCK_NARGS(__GMOCK_FIRST(7,  a, b, c, d, e, f, g, h, i, j)));
+	EXPECT_EQ(8,  __GMOCK_NARGS(__GMOCK_FIRST(8,  a, b, c, d, e, f, g, h, i, j)));
+	EXPECT_EQ(9,  __GMOCK_NARGS(__GMOCK_FIRST(9,  a, b, c, d, e, f, g, h, i, j)));
+	EXPECT_EQ(10, __GMOCK_NARGS(__GMOCK_FIRST(10, a, b, c, d, e, f, g, h, i, j)));
+
+#define X 3
+	EXPECT_EQ(3,  __GMOCK_NARGS(__GMOCK_FIRST(X,  a, b, c, d, e, f, g, h, i, j)));
+#undef X
+}
+
 }  // Unnamed namespace

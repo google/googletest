@@ -108,6 +108,8 @@ struct Function<R()> {
   typedef IgnoredValue MakeResultIgnoredValue();
 };
 
+template <typename R>
+struct Function<R(*)()> : Function<R()> {};
 
 $range i 1..n
 $for i [[
@@ -127,10 +129,52 @@ struct Function<R($As)>
   typedef IgnoredValue MakeResultIgnoredValue($As);
 };
 
+template <typename R$typename_As>
+struct Function<R(*)($As)> : Function<R($As)> {};
+
 
 ]]
 }  // namespace internal
 
 }  // namespace testing
+
+//
+// Argument counting preprocessing macros
+//
+
+#define __GMOCK_CONCAT(a, b) a##b
+
+#ifdef _MSC_VER
+
+$range i 1..n
+$var arg_list = [[$for i, [[_$i]]]]
+$var countdown = [[$for i, [[$(n-i)]]]]
+#define __GMOCK_EXPAND(x) x
+#define __GMOCK_AUGMENTER(...) unused, __VA_ARGS__
+#define __GMOCK_NARGS_0(...) __GMOCK_NARGS_1(__GMOCK_AUGMENTER(__VA_ARGS__))
+#define __GMOCK_NARGS_1(...) __GMOCK_EXPAND(__GMOCK_NARGS_2(__VA_ARGS__, $countdown))
+#define __GMOCK_NARGS_2($arg_list, VAL, ...) VAL
+
+#else // _MSC_VER
+
+#define __GMOCK_NARGS_0(...) __GMOCK_NARGS_1(0, ## __VA_ARGS__, $n, $countdown)
+#define __GMOCK_NARGS_1(_0, $arg_list, N,...) N
+
+#endif // _MSC_VER
+
+#define __GMOCK_NARGS(...) __GMOCK_NARGS_0(__VA_ARGS__)
+
+// Get the first N arguments
+
+#define __GMOCK_FIRST(n, ...) __GMOCK_CONCAT(__GMOCK_FIRST_, n)(__VA_ARGS__)
+#define __GMOCK_FIRST_0(...)
+
+$range i 1..n
+$for i [[
+$range j 1..i
+$var as = [[$for j, [[_$j]]]]
+#define __GMOCK_FIRST_$i($as, ...) $as
+
+]]
 
 #endif  // GMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_GENERATED_INTERNAL_UTILS_H_
