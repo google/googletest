@@ -103,6 +103,11 @@ class FooInterface {
   virtual int TypeWithHole(int (*func)()) = 0;
   virtual int TypeWithComma(const std::map<int, string>& a_map) = 0;
 
+  virtual int generic0() = 0;
+  virtual int generic1(bool) = 0;
+  virtual int generic2(bool, char) = 0;
+  virtual int generic10(string, string, string, string, string, string, string, string, string, string) = 0;
+
 #if GTEST_OS_WINDOWS
   STDMETHOD_(int, CTNullary)() = 0;
   STDMETHOD_(bool, CTUnary)(int x) = 0;
@@ -158,6 +163,11 @@ class MockFoo : public FooInterface {
 
   MOCK_METHOD1(TypeWithHole, int(int (*)()));  // NOLINT
   MOCK_METHOD1(TypeWithComma, int(const std::map<int, string>&));  // NOLINT
+
+  GMOCK_METHOD_BASE((), 0,  generic0,  int, NA1, NA2, NA3, NA4, NA5, NA6, NA7, NA8, NA9, NA10);
+  GMOCK_METHOD_BASE((), 1,  generic1,  int, bool, NA2, NA3, NA4, NA5, NA6, NA7, NA8, NA9, NA10);
+  GMOCK_METHOD_BASE((), 2,  generic2,  int, bool, char, NA3, NA4, NA5, NA6, NA7, NA8, NA9, NA10);
+  GMOCK_METHOD_BASE((), 10, generic10, int, string, string, string, string, string, string, string, string, string, string);
 
 #if GTEST_OS_WINDOWS
   MOCK_METHOD0_WITH_CALLTYPE(STDMETHODCALLTYPE, CTNullary, int());
@@ -299,6 +309,20 @@ TEST_F(FunctionMockerTest, MocksReturnTypeWithComma) {
 
   EXPECT_EQ(a_map, mock_foo_.ReturnTypeWithComma());
   EXPECT_EQ(a_map, mock_foo_.ReturnTypeWithComma(42));
+}
+
+TEST_F(FunctionMockerTest, MocksGeneric) {
+	EXPECT_CALL(mock_foo_, generic0()).WillOnce(Return(0));
+	EXPECT_EQ(0, mock_foo_.generic0());
+
+	EXPECT_CALL(mock_foo_, generic1(false)).WillOnce(Return(1));
+	EXPECT_EQ(1, mock_foo_.generic1(false));
+
+	EXPECT_CALL(mock_foo_, generic2(true, 'x')).WillOnce(Return(2));
+	EXPECT_EQ(2, mock_foo_.generic2(true, 'x'));
+
+	EXPECT_CALL(mock_foo_, generic10("one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten")).WillOnce(Return(100));
+	EXPECT_EQ(100, mock_foo_.generic10("one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"));
 }
 
 #if GTEST_OS_WINDOWS

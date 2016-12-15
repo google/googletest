@@ -130,6 +130,7 @@ using internal::FunctionMocker;
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
 #define GMOCK_MOCKER_(arity, constness, Method) \
     GTEST_CONCAT_TOKEN_(gmock##constness##arity##_##Method##_, __LINE__)
+#define GMOCK_MOCKER__(arity, constness, Method) GMOCK_MOCKER_(arity, constness, Method)
 
 
 $for i [[
@@ -158,11 +159,39 @@ $var matcher_as = [[$for j, \
 
 
 ]]
+
+// XXX: No calltype/const
+#define __GMOCK_MOD_CALLTYPE(modifiers) 
+#define __GMOCK_MOD_CONSTNESS(modifiers)
+
+$range k 1..n
+$var gen_arg_types = [[$for k, [[T$k]]]]
+$var gen_arg_as = [[$for k, [[T$k gmock_a$k]]]]
+$var gen_as = [[$for k, [[gmock_a$k]]]]
+$var gen_matcher_as = [[$for k, \
+                     [[const ::testing::Matcher<T$k>& gmock_a$k]]]]
+#define GMOCK_METHOD_BASE(modifiers, nargs, Method, rtype, $gen_arg_types) \
+ rtype __GMOCK_MOD_CALLTYPE(modifiers) Method( \
+      __GMOCK_FIRST(nargs, $gen_arg_as)) __GMOCK_MOD_CONSTNESS(modifiers) { \
+    GMOCK_MOCKER__(nargs, __GMOCK_MOD_CONSTNESS(modifiers), Method).SetOwnerAndName(this, #Method); \
+    return GMOCK_MOCKER__(nargs, __GMOCK_MOD_CONSTNESS(modifiers), Method).Invoke(__GMOCK_FIRST(nargs, $gen_as)); \
+  } \
+  ::testing::MockSpec<rtype(__GMOCK_FIRST(nargs, $gen_arg_types))>& \
+      gmock_##Method(__GMOCK_FIRST(nargs, $gen_matcher_as)) __GMOCK_MOD_CONSTNESS(modifiers) { \
+    GMOCK_MOCKER__(nargs, __GMOCK_MOD_CONSTNESS(modifiers), Method).RegisterOwner(this); \
+    return GMOCK_MOCKER__(nargs, __GMOCK_MOD_CONSTNESS(modifiers), Method).With(__GMOCK_FIRST(nargs, $gen_as)); \
+  } \
+  mutable ::testing::FunctionMocker<rtype(__GMOCK_FIRST(nargs, $gen_arg_types))> GMOCK_MOCKER__(nargs, __GMOCK_MOD_CONSTNESS(modifiers), Method)
+     
+
 $for i [[
-#define MOCK_METHOD$i(m, ...) GMOCK_METHOD$i[[]]_(, , , m, __VA_ARGS__)
+$range k 1..n
+$var types = [[$for k, [[GMOCK_ARG_(typename, $k, GMOCK_ARG_(typename, 1, void(__VA_ARGS__)))]]]]
+#define MOCK_METHOD$i(m, ...) GMOCK_METHOD_BASE((), $i, m, \
+	GMOCK_RESULT_(, GMOCK_ARG_(typename, 1, void(__VA_ARGS__))), \
+	$types)
 
 ]]
-
 
 $for i [[
 #define MOCK_CONST_METHOD$i(m, ...) GMOCK_METHOD$i[[]]_(, const, , m, __VA_ARGS__)
