@@ -186,7 +186,7 @@ $var gen_matcher_as = [[$for k, \
 
 $for i [[
 $range k 1..n
-$var types = [[$for k, [[GMOCK_ARG_(typename, $k, GMOCK_ARG_(typename, 1, void(__VA_ARGS__)))]]]]
+$var types = [[$for k, [[GMOCK_ARG_(, $k, GMOCK_ARG_(typename, 1, void(__VA_ARGS__)))]]]]
 #define MOCK_METHOD$i(m, ...) GMOCK_METHOD_BASE((), $i, m, \
 	GMOCK_RESULT_(, GMOCK_ARG_(typename, 1, void(__VA_ARGS__))), \
 	$types)
