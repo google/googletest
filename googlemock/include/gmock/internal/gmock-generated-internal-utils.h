@@ -176,6 +176,7 @@ struct Function<R(A1)>
 
 template <typename R, typename A1>
 struct Function<R(*)(A1)> : Function<R(A1)> {};
+
 template <typename R, typename A1, typename A2>
 struct Function<R(A1, A2)>
     : Function<R(A1)> {
@@ -188,6 +189,7 @@ struct Function<R(A1, A2)>
 
 template <typename R, typename A1, typename A2>
 struct Function<R(*)(A1, A2)> : Function<R(A1, A2)> {};
+
 template <typename R, typename A1, typename A2, typename A3>
 struct Function<R(A1, A2, A3)>
     : Function<R(A1, A2)> {
@@ -200,6 +202,7 @@ struct Function<R(A1, A2, A3)>
 
 template <typename R, typename A1, typename A2, typename A3>
 struct Function<R(*)(A1, A2, A3)> : Function<R(A1, A2, A3)> {};
+
 template <typename R, typename A1, typename A2, typename A3, typename A4>
 struct Function<R(A1, A2, A3, A4)>
     : Function<R(A1, A2, A3)> {
@@ -212,6 +215,7 @@ struct Function<R(A1, A2, A3, A4)>
 
 template <typename R, typename A1, typename A2, typename A3, typename A4>
 struct Function<R(*)(A1, A2, A3, A4)> : Function<R(A1, A2, A3, A4)> {};
+
 template <typename R, typename A1, typename A2, typename A3, typename A4,
     typename A5>
 struct Function<R(A1, A2, A3, A4, A5)>
@@ -226,6 +230,7 @@ struct Function<R(A1, A2, A3, A4, A5)>
 template <typename R, typename A1, typename A2, typename A3, typename A4,
     typename A5>
 struct Function<R(*)(A1, A2, A3, A4, A5)> : Function<R(A1, A2, A3, A4, A5)> {};
+
 template <typename R, typename A1, typename A2, typename A3, typename A4,
     typename A5, typename A6>
 struct Function<R(A1, A2, A3, A4, A5, A6)>
@@ -241,6 +246,7 @@ template <typename R, typename A1, typename A2, typename A3, typename A4,
     typename A5, typename A6>
 struct Function<R(*)(A1, A2, A3, A4, A5, A6)> : Function<R(A1, A2, A3, A4, A5,
     A6)> {};
+
 template <typename R, typename A1, typename A2, typename A3, typename A4,
     typename A5, typename A6, typename A7>
 struct Function<R(A1, A2, A3, A4, A5, A6, A7)>
@@ -256,6 +262,7 @@ template <typename R, typename A1, typename A2, typename A3, typename A4,
     typename A5, typename A6, typename A7>
 struct Function<R(*)(A1, A2, A3, A4, A5, A6, A7)> : Function<R(A1, A2, A3, A4,
     A5, A6, A7)> {};
+
 template <typename R, typename A1, typename A2, typename A3, typename A4,
     typename A5, typename A6, typename A7, typename A8>
 struct Function<R(A1, A2, A3, A4, A5, A6, A7, A8)>
@@ -271,6 +278,7 @@ template <typename R, typename A1, typename A2, typename A3, typename A4,
     typename A5, typename A6, typename A7, typename A8>
 struct Function<R(*)(A1, A2, A3, A4, A5, A6, A7, A8)> : Function<R(A1, A2, A3,
     A4, A5, A6, A7, A8)> {};
+
 template <typename R, typename A1, typename A2, typename A3, typename A4,
     typename A5, typename A6, typename A7, typename A8, typename A9>
 struct Function<R(A1, A2, A3, A4, A5, A6, A7, A8, A9)>
@@ -287,6 +295,7 @@ template <typename R, typename A1, typename A2, typename A3, typename A4,
     typename A5, typename A6, typename A7, typename A8, typename A9>
 struct Function<R(*)(A1, A2, A3, A4, A5, A6, A7, A8, A9)> : Function<R(A1, A2,
     A3, A4, A5, A6, A7, A8, A9)> {};
+
 template <typename R, typename A1, typename A2, typename A3, typename A4,
     typename A5, typename A6, typename A7, typename A8, typename A9,
     typename A10>
@@ -306,6 +315,7 @@ template <typename R, typename A1, typename A2, typename A3, typename A4,
     typename A10>
 struct Function<R(*)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)> : Function<R(A1,
     A2, A3, A4, A5, A6, A7, A8, A9, A10)> {};
+
 }  // namespace internal
 
 }  // namespace testing
@@ -320,15 +330,17 @@ struct Function<R(*)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)> : Function<R(A1,
 #define __GMOCK_EXPAND(x) x
 #define __GMOCK_AUGMENTER(...) unused, __VA_ARGS__
 #define __GMOCK_NARGS_0(...) __GMOCK_NARGS_1(__GMOCK_AUGMENTER(__VA_ARGS__))
-#define __GMOCK_NARGS_1(...) __GMOCK_EXPAND(__GMOCK_NARGS_2(__VA_ARGS__, 9, \
-    8, 7, 6, 5, 4, 3, 2, 1, 0))
-#define __GMOCK_NARGS_2(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, VAL, ...) VAL
+#define __GMOCK_NARGS_1(...) __GMOCK_EXPAND(__GMOCK_NARGS_2(__VA_ARGS__, 10, \
+    9, 8, 7, 6, 5, 4, 3, 2, 1, 0))
+#define __GMOCK_NARGS_2(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, VAL, \
+    ...) VAL
 
 #else // _MSC_VER
 
-#define __GMOCK_NARGS_0(...) __GMOCK_NARGS_1(0, ## __VA_ARGS__, 10, 9, 8, 7, \
-    6, 5, 4, 3, 2, 1, 0)
-#define __GMOCK_NARGS_1(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, N,...) N
+#define __GMOCK_NARGS_0(...) __GMOCK_NARGS_1(0, ## __VA_ARGS__, 10, 10, 9, 8, \
+    7, 6, 5, 4, 3, 2, 1, 0)
+#define __GMOCK_NARGS_1(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, N, \
+    ...) N
 
 #endif // _MSC_VER
 
@@ -336,7 +348,13 @@ struct Function<R(*)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)> : Function<R(A1,
 
 // Get the first N arguments
 
+#ifdef _MSC_VER
+#define __GMOCK_FIRST(n, ...) __GMOCK_EXPAND(__GMOCK_CONCAT(__GMOCK_FIRST_, \
+    n)(__VA_ARGS__))
+#else // _MSC_VER
 #define __GMOCK_FIRST(n, ...) __GMOCK_CONCAT(__GMOCK_FIRST_, n)(__VA_ARGS__)
+#endif // _MSC_VER
+
 #define __GMOCK_FIRST_0(...)
 #define __GMOCK_FIRST_1(_1, ...) _1
 #define __GMOCK_FIRST_2(_1, _2, ...) _1, _2
