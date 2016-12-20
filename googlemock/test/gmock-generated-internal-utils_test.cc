@@ -127,11 +127,7 @@ TEST(FunctionTest, LongArgumentList) {
 // Tests for argument counting macros
 
 TEST(ArgumentMacros, Count) {
-#if __GMOCK_NARGS() == 1
-    // XXX: gcc with -std=c++11 (rather than gnu++11) doesn't support 
-    //  the ##__VA_ARGS__ extension, and fails this test.
-    // Disabling the test is easy. MOCK_METHOD that distinguishes between 0 and 1 parameters is harder.
-#else
+#if !defined(__GMOCK_NARGS_0_ARGS_BROKEN)
 	EXPECT_EQ(0,  __GMOCK_NARGS());
 #endif
 	EXPECT_EQ(1,  __GMOCK_NARGS(a));
@@ -148,34 +144,35 @@ TEST(ArgumentMacros, Count) {
 
 TEST(ArgumentMacros, FirstN)
 {
-    int a0[]  = { __GMOCK_FIRST(0,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10) };
-    int a1[]  = { __GMOCK_FIRST(1,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10) };
-    int a2[]  = { __GMOCK_FIRST(2,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10) };
-    int a3[]  = { __GMOCK_FIRST(3,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10) };
-    int a4[]  = { __GMOCK_FIRST(4,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10) };
-    int a5[]  = { __GMOCK_FIRST(5,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10) };
-    int a6[]  = { __GMOCK_FIRST(6,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10) };
-    int a7[]  = { __GMOCK_FIRST(7,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10) };
-    int a8[]  = { __GMOCK_FIRST(8,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10) };
-    int a9[]  = { __GMOCK_FIRST(9,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10) };
-    int a10[] = { __GMOCK_FIRST(10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10) };
+    // Initiallize first N values, the rest are 0. We get null-terminated strings
+    char s0[11]  = { __GMOCK_FIRST(0,  'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j') };
+    char s1[11]  = { __GMOCK_FIRST(1,  'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j') };
+    char s2[11]  = { __GMOCK_FIRST(2,  'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j') };
+    char s3[11]  = { __GMOCK_FIRST(3,  'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j') };
+    char s4[11]  = { __GMOCK_FIRST(4,  'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j') };
+    char s5[11]  = { __GMOCK_FIRST(5,  'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j') };
+    char s6[11]  = { __GMOCK_FIRST(6,  'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j') };
+    char s7[11]  = { __GMOCK_FIRST(7,  'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j') };
+    char s8[11]  = { __GMOCK_FIRST(8,  'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j') };
+    char s9[11]  = { __GMOCK_FIRST(9,  'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j') };
+    char s10[11] = { __GMOCK_FIRST(10, 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j') };
 
-    EXPECT_EQ(0 * sizeof(int),  sizeof(a0));
-    EXPECT_EQ(1 * sizeof(int),  sizeof(a1));
-    EXPECT_EQ(2 * sizeof(int),  sizeof(a2));
-    EXPECT_EQ(3 * sizeof(int),  sizeof(a3));
-    EXPECT_EQ(4 * sizeof(int),  sizeof(a4));
-    EXPECT_EQ(5 * sizeof(int),  sizeof(a5));
-    EXPECT_EQ(6 * sizeof(int),  sizeof(a6));
-    EXPECT_EQ(7 * sizeof(int),  sizeof(a7));
-    EXPECT_EQ(8 * sizeof(int),  sizeof(a8));
-    EXPECT_EQ(9 * sizeof(int),  sizeof(a9));
-    EXPECT_EQ(10 * sizeof(int), sizeof(a10));
+    EXPECT_EQ(0,  strlen(s0));
+    EXPECT_EQ(1,  strlen(s1));
+    EXPECT_EQ(2,  strlen(s2));
+    EXPECT_EQ(3,  strlen(s3));
+    EXPECT_EQ(4,  strlen(s4));
+    EXPECT_EQ(5,  strlen(s5));
+    EXPECT_EQ(6,  strlen(s6));
+    EXPECT_EQ(7,  strlen(s7));
+    EXPECT_EQ(8,  strlen(s8));
+    EXPECT_EQ(9,  strlen(s9));
+    EXPECT_EQ(10, strlen(s10));
 
     // See that it works even if the size is a macro
 #define X 3
-    int ax[] = { __GMOCK_FIRST(X, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10) };
-	EXPECT_EQ(X * sizeof(int), sizeof(ax));
+    char sx[11]  = { __GMOCK_FIRST(X,  'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j') };
+    EXPECT_EQ(3, strlen(sx));
 #undef X
 }
 
