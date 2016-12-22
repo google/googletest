@@ -324,6 +324,18 @@ struct Function<R(*)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)> : Function<R(A1,
 // Argument counting preprocessing macros
 //
 
+#if !defined(_MSC_VER)
+#define GMOCK_USE_P99
+#endif
+
+#if defined(GMOCK_USE_P99)
+
+#include "gmock-p99.h"
+#define __GMOCK_NARGS P99_NARG
+#define __GMOCK_FIRST P99_SELS
+
+#else // GMOCK_USE_P99
+
 #define __GMOCK_CONCAT(a, b) a##b
 
 #ifdef _MSC_VER
@@ -370,6 +382,8 @@ struct Function<R(*)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)> : Function<R(A1,
     _4, _5, _6, _7, _8, _9
 #define __GMOCK_FIRST_10(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, ...) _1, \
     _2, _3, _4, _5, _6, _7, _8, _9, _10
+
+#endif // GMOCK_USE_P99
 
 // GCC without extensions (e.g. -std=c++11) fails at counting 0 args. Allow
 // testing it
