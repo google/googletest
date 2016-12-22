@@ -142,6 +142,18 @@ struct Function<R(*)($As)> : Function<R($As)> {};
 // Argument counting preprocessing macros
 //
 
+#if !defined(_MSC_VER)
+#define GMOCK_USE_P99
+#endif
+
+#if defined(GMOCK_USE_P99)
+
+#include "gmock-p99.h"
+#define __GMOCK_NARGS P99_NARG
+#define __GMOCK_FIRST P99_SELS
+
+#else // GMOCK_USE_P99
+
 #define __GMOCK_CONCAT(a, b) a##b
 
 #ifdef _MSC_VER
@@ -182,6 +194,8 @@ $var as = [[$for j, [[_$j]]]]
 #define __GMOCK_FIRST_$i($as, ...) $as
 
 ]]
+
+#endif // GMOCK_USE_P99
 
 // GCC without extensions (e.g. -std=c++11) fails at counting 0 args. Allow testing it
 #if __GMOCK_NARGS() == 1
