@@ -2683,10 +2683,12 @@ void TestInfo::Run() {
     test->Run();
   }
 
+  if (test != NULL) {
     // Deletes the test object.
     impl->os_stack_trace_getter()->UponLeavingGTest();
     internal::HandleExceptionsInMethodIfSupported(
-        test, &Test::DeleteSelf_, "the test fixture's destructor");
+	test, &Test::DeleteSelf_, "the test fixture's destructor");
+  }
 
   result_.set_elapsed_time(internal::GetTimeInMillis() - start);
   result_.executed_ = true;
