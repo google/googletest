@@ -32,6 +32,7 @@
 // The Google C++ Testing Framework (Google Test)
 
 #include "gtest/gtest-test-part.h"
+#include "gtest/internal/gtest-port.h"
 
 // Indicates that this translation unit is part of Google Test's
 // implementation.  It must come before gtest-internal-inl.h is
@@ -57,7 +58,7 @@ std::string TestPartResult::ExtractSummary(const char* message) {
 // Prints a TestPartResult object.
 std::ostream& operator<<(std::ostream& os, const TestPartResult& result) {
   return os
-      << result.file_name() << ":" << result.line_number() << ": "
+      << internal::FormatFileLocation(result.file_name(), result.line_number()) << " "
       << (result.type() == TestPartResult::kSuccess ? "Success" :
           result.type() == TestPartResult::kFatalFailure ? "Fatal failure" :
           "Non-fatal failure") << ":\n"
