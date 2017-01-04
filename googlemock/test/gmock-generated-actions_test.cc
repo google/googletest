@@ -1120,7 +1120,7 @@ TEST(ActionTemplateTest, WorksForIntegralTemplateParams) {
   EXPECT_FALSE(b);  // Verifies that resetter is deleted.
 }
 
-// Tests that ACTION_TEMPLATES works for template template parameters.
+// Tests that ACTION_TEMPLATE works for a template with template parameters.
 ACTION_TEMPLATE(ReturnSmartPointer,
                 HAS_1_TEMPLATE_PARAMS(template <typename Pointee> class,
                                       Pointer),
