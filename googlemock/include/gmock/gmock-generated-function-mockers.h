@@ -321,7 +321,8 @@ class FunctionMocker<R(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)> : public
 };
 
 
-template<typename T> T& RemoveVolatileCast(T & v) {
+template <typename T>
+T& RemoveVolatileCast(T& v) {
   return v;
 }
 template <typename T>

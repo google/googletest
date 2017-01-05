@@ -100,7 +100,8 @@ $if i >= 1 [[
 
 ]]
 
-template<typename T> T& RemoveVolatileCast(T & v) {
+template <typename T>
+T& RemoveVolatileCast(T& v) {
   return v;
 }
 template <typename T>
