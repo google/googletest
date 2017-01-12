@@ -1295,9 +1295,16 @@ TEST(WindowsTypesTest, HANDLEIsVoidStar) {
   StaticAssertTypeEq<HANDLE, void*>();
 }
 
+#if GTEST_OS_WINDOWS_MINGW && !defined(__MINGW64_VERSION_MAJOR)
+TEST(WindowsTypesTest, _CRITICAL_SECTIONIs_CRITICAL_SECTION) {
+  StaticAssertTypeEq<CRITICAL_SECTION, _CRITICAL_SECTION>();
+}
+#else
 TEST(WindowsTypesTest, CRITICAL_SECTIONIs_RTL_CRITICAL_SECTION) {
   StaticAssertTypeEq<CRITICAL_SECTION, _RTL_CRITICAL_SECTION>();
 }
+#endif
+
 #endif  // GTEST_OS_WINDOWS
 
 }  // namespace internal

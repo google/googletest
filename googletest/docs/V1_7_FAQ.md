@@ -28,11 +28,11 @@ list can help you decide whether it is for you too.
   * `SCOPED_TRACE` helps you understand the context of an assertion failure when it comes from inside a sub-routine or loop.
   * You can decide which tests to run using name patterns.  This saves time when you want to quickly reproduce a test failure.
   * Google Test can generate XML test result reports that can be parsed by popular continuous build system like Hudson.
-  * Simple things are easy in Google Test, while hard things are possible: in addition to advanced features like [global test environments](http://code.google.com/p/googletest/wiki/V1_7_AdvancedGuide#Global_Set-Up_and_Tear-Down) and tests parameterized by [values](http://code.google.com/p/googletest/wiki/V1_7_AdvancedGuide#Value_Parameterized_Tests) or [types](http://code.google.com/p/googletest/wiki/V1_7_AdvancedGuide#Typed_Tests), Google Test supports various ways for the user to extend the framework -- if Google Test doesn't do something out of the box, chances are that a user can implement the feature using Google Test's public API, without changing Google Test itself.  In particular, you can:
-    * expand your testing vocabulary by defining [custom predicates](http://code.google.com/p/googletest/wiki/V1_7_AdvancedGuide#Predicate_Assertions_for_Better_Error_Messages),
-    * teach Google Test how to [print your types](http://code.google.com/p/googletest/wiki/V1_7_AdvancedGuide#Teaching_Google_Test_How_to_Print_Your_Values),
-    * define your own testing macros or utilities and verify them using Google Test's [Service Provider Interface](http://code.google.com/p/googletest/wiki/V1_7_AdvancedGuide#Catching_Failures), and
-    * reflect on the test cases or change the test output format by intercepting the [test events](http://code.google.com/p/googletest/wiki/V1_7_AdvancedGuide#Extending_Google_Test_by_Handling_Test_Events).
+  * Simple things are easy in Google Test, while hard things are possible: in addition to advanced features like [global test environments](V1_7_AdvancedGuide.md#global-set-up-and-tear-down) and tests parameterized by [values](V1_7_AdvancedGuide.md#value-parameterized-tests) or [types](V1_7_AdvancedGuide.md#typed-tests), Google Test supports various ways for the user to extend the framework -- if Google Test doesn't do something out of the box, chances are that a user can implement the feature using Google Test's public API, without changing Google Test itself.  In particular, you can:
+    * expand your testing vocabulary by defining [custom predicates](V1_7_AdvancedGuide.md#predicate-assertions-for-better-error-messages),
+    * teach Google Test how to [print your types](V1_7_AdvancedGuide.md#teaching-google-test-how-to-print-your-values),
+    * define your own testing macros or utilities and verify them using Google Test's [Service Provider Interface](V1_7_AdvancedGuide.md#catching-failures), and
+    * reflect on the test cases or change the test output format by intercepting the [test events](V1_7_AdvancedGuide.md#extending-google-test-by-handling-test-events).
 
 ## I'm getting warnings when compiling Google Test.  Would you fix them? ##
 
@@ -201,7 +201,7 @@ we don't have a convention on the order of the two arguments for
 twice in the implementation, making it even harder to understand and
 maintain. We believe the benefit doesn't justify the cost.
 
-Finally, with the growth of Google Mock's [matcher](http://code.google.com/p/googlemock/wiki/CookBook#Using_Matchers_in_Google_Test_Assertions) library, we are
+Finally, with the growth of Google Mock's [matcher](../../CookBook.md#using-matchers-in-google-test-assertions) library, we are
 encouraging people to use the unified `EXPECT_THAT(value, matcher)`
 syntax more often in tests. One significant advantage of the matcher
 approach is that matchers can be easily combined to form new matchers,
@@ -409,7 +409,7 @@ If necessary, you can continue to derive test fixtures from a derived fixture.
 Google Test has no limit on how deep the hierarchy can be.
 
 For a complete example using derived test fixtures, see
-[sample5](http://code.google.com/p/googletest/source/browse/trunk/samples/sample5_unittest.cc).
+[sample5](../samples/sample5_unittest.cc).
 
 ## My compiler complains "void value not ignored as it ought to be." What does this mean? ##
 
@@ -748,7 +748,7 @@ EXPECT_TRUE(internal::Func(12345));
 
 ## I would like to run a test several times with different parameters. Do I need to write several similar copies of it? ##
 
-No. You can use a feature called [value-parameterized tests](V1_7_AdvancedGuide#Value_Parameterized_Tests.md) which
+No. You can use a feature called [value-parameterized tests](V1_7_AdvancedGuide.md#Value_Parameterized_Tests) which
 lets you repeat your tests with different parameters, without defining it more than once.
 
 ## How do I test a file that defines main()? ##
@@ -798,6 +798,7 @@ reference global and/or local variables, and can be:
   * a compound statement.
 
 > Some examples are shown here:
+
 ```
 // A death test can be a simple function call.
 TEST(MyDeathTest, FunctionCall) {
@@ -842,7 +843,7 @@ expression syntax
 (http://en.wikipedia.org/wiki/Regular_expression#POSIX_Extended_Regular_Expressions).
 On Windows, it uses a limited variant of regular expression
 syntax. For more details, see the
-[regular expression syntax](V1_7_AdvancedGuide#Regular_Expression_Syntax.md).
+[regular expression syntax](V1_7_AdvancedGuide.md#Regular_Expression_Syntax).
 
 ## I have a fixture class Foo, but TEST\_F(Foo, Bar) gives me error "no matching function for call to Foo::Foo()". Why? ##
 
@@ -949,7 +950,7 @@ using gtest-md.vcproj instead of gtest.vcproj.
 
 ## I put my tests in a library and Google Test doesn't run them. What's happening? ##
 Have you read a
-[warning](http://code.google.com/p/googletest/wiki/V1_7_Primer#Important_note_for_Visual_C++_users) on
+[warning](V1_7_Primer.md#important-note-for-visual-c-users) on
 the Google Test Primer page?
 
 ## I want to use Google Test with Visual Studio but don't know where to start. ##
@@ -988,7 +989,7 @@ you can use the _horrible_ hack of sniffing your executable name
 ## Google Test defines a macro that clashes with one defined by another library. How do I deal with that? ##
 
 In C++, macros don't obey namespaces.  Therefore two libraries that
-both define a macro of the same name will clash if you #include both
+both define a macro of the same name will clash if you `#include` both
 definitions.  In case a Google Test macro clashes with another
 library, you can force Google Test to rename its macro to avoid the
 conflict.
@@ -1053,7 +1054,7 @@ TEST_F(CoolTest, DoSomething) {
 ## How do I build Google Testing Framework with Xcode 4? ##
 
 If you try to build Google Test's Xcode project with Xcode 4.0 or later, you may encounter an error message that looks like
-"Missing SDK in target gtest\_framework: /Developer/SDKs/MacOSX10.4u.sdk". That means that Xcode does not support the SDK the project is targeting. See the Xcode section in the [README](http://code.google.com/p/googletest/source/browse/trunk/README) file on how to resolve this.
+"Missing SDK in target gtest\_framework: /Developer/SDKs/MacOSX10.4u.sdk". That means that Xcode does not support the SDK the project is targeting. See the Xcode section in the [README](../../README.MD) file on how to resolve this.
 
 ## My question is not covered in your FAQ! ##
 

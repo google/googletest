@@ -38,7 +38,7 @@ endif()
 # ${gmock_BINARY_DIR}.
 # Language "C" is required for find_package(Threads).
 project(gmock CXX C)
-cmake_minimum_required(VERSION 2.6.2)
+cmake_minimum_required(VERSION 2.6.4)
 
 if (COMMAND set_up_hermetic_build)
   set_up_hermetic_build()
@@ -91,6 +91,22 @@ cxx_library(gmock_main
             "${gtest_dir}/src/gtest-all.cc"
             src/gmock-all.cc
             src/gmock_main.cc)
+
+# If the CMake version supports it, attach header directory information
+# to the targets for when we are part of a parent build (ie being pulled
+# in via add_subdirectory() rather than being a standalone build).
+if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
+  target_include_directories(gmock      INTERFACE "${gmock_SOURCE_DIR}/include")
+  target_include_directories(gmock_main INTERFACE "${gmock_SOURCE_DIR}/include")
+endif()
+
+########################################################################
+#
+# Install rules
+install(TARGETS gmock gmock_main
+  DESTINATION lib)
+install(DIRECTORY ${gmock_SOURCE_DIR}/include/gmock
+  DESTINATION include)
 
 ########################################################################
 #
