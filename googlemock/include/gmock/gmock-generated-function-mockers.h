@@ -725,6 +725,20 @@ using internal::FunctionMocker;
       __GMOCK_MOD_CONSTNESS(modifiers), Method)
 
 
+#define MOCK_METHOD_NEW_BASE(modifiers, rtype, m, args) \
+    GMOCK_METHOD_BASE(modifiers, __GMOCK_NARGS args, m, rtype,		\
+  GMOCK_ARG_(__GMOCK_MOD_TYPENAME(modifiers), 1, rtype args), \
+      GMOCK_ARG_(__GMOCK_MOD_TYPENAME(modifiers), 2, rtype args), \
+      GMOCK_ARG_(__GMOCK_MOD_TYPENAME(modifiers), 3, rtype args), \
+      GMOCK_ARG_(__GMOCK_MOD_TYPENAME(modifiers), 4, rtype args), \
+      GMOCK_ARG_(__GMOCK_MOD_TYPENAME(modifiers), 5, rtype args), \
+      GMOCK_ARG_(__GMOCK_MOD_TYPENAME(modifiers), 6, rtype args), \
+      GMOCK_ARG_(__GMOCK_MOD_TYPENAME(modifiers), 7, rtype args), \
+      GMOCK_ARG_(__GMOCK_MOD_TYPENAME(modifiers), 8, rtype args), \
+      GMOCK_ARG_(__GMOCK_MOD_TYPENAME(modifiers), 9, rtype args), \
+      GMOCK_ARG_(__GMOCK_MOD_TYPENAME(modifiers), 10, rtype args)		\
+    )
+
 #define MOCK_METHOD_BC_BASE0(modifiers, m, ...) \
     GMOCK_METHOD_BASE(modifiers, 0, m, \
         GMOCK_RESULT_(__GMOCK_MOD_TYPENAME(modifiers), \
@@ -1021,6 +1035,8 @@ using internal::FunctionMocker;
       GMOCK_ARG_(__GMOCK_MOD_TYPENAME(modifiers), 10, \
       GMOCK_ARG_(__GMOCK_MOD_TYPENAME(modifiers), 1, void(__VA_ARGS__))) \
     )
+
+#define MOCK_METHOD(rtype, m, args) MOCK_METHOD_NEW_BASE((,,), rtype, m, args)
 #define MOCK_METHOD0(m, ...) MOCK_METHOD_BC_BASE0((,,),  m, __VA_ARGS__)
 #define MOCK_METHOD1(m, ...) MOCK_METHOD_BC_BASE1((,,),  m, __VA_ARGS__)
 #define MOCK_METHOD2(m, ...) MOCK_METHOD_BC_BASE2((,,),  m, __VA_ARGS__)
@@ -1032,6 +1048,9 @@ using internal::FunctionMocker;
 #define MOCK_METHOD8(m, ...) MOCK_METHOD_BC_BASE8((,,),  m, __VA_ARGS__)
 #define MOCK_METHOD9(m, ...) MOCK_METHOD_BC_BASE9((,,),  m, __VA_ARGS__)
 #define MOCK_METHOD10(m, ...) MOCK_METHOD_BC_BASE10((,,),  m, __VA_ARGS__)
+
+#define MOCK_CONST_METHOD(rtype, m, args) MOCK_METHOD_NEW_BASE((const,,), \
+    rtype, m, args)
 #define MOCK_CONST_METHOD0(m, ...) MOCK_METHOD_BC_BASE0((const,,), m, \
     __VA_ARGS__)
 #define MOCK_CONST_METHOD1(m, ...) MOCK_METHOD_BC_BASE1((const,,), m, \
@@ -1054,6 +1073,9 @@ using internal::FunctionMocker;
     __VA_ARGS__)
 #define MOCK_CONST_METHOD10(m, ...) MOCK_METHOD_BC_BASE10((const,,), m, \
     __VA_ARGS__)
+
+#define MOCK_METHOD_T(rtype, m, args) MOCK_METHOD_NEW_BASE((,typename,), \
+    rtype, m, args)
 #define MOCK_METHOD0_T(m, ...) MOCK_METHOD_BC_BASE0((,typename,), m, \
     __VA_ARGS__)
 #define MOCK_METHOD1_T(m, ...) MOCK_METHOD_BC_BASE1((,typename,), m, \
@@ -1076,6 +1098,9 @@ using internal::FunctionMocker;
     __VA_ARGS__)
 #define MOCK_METHOD10_T(m, ...) MOCK_METHOD_BC_BASE10((,typename,), m, \
     __VA_ARGS__)
+
+#define MOCK_CONST_METHOD_T(rtype, m, args) MOCK_METHOD_NEW_BASE((const, \
+    typename,), rtype, m, args)
 #define MOCK_CONST_METHOD0_T(m, ...) \
     MOCK_METHOD_BC_BASE0((const,typename,), m, __VA_ARGS__)
 #define MOCK_CONST_METHOD1_T(m, ...) \
@@ -1099,6 +1124,9 @@ using internal::FunctionMocker;
 #define MOCK_CONST_METHOD10_T(m, ...) \
     MOCK_METHOD_BC_BASE10((const,typename,), m, __VA_ARGS__)
 
+
+#define MOCK_METHOD_WITH_CALLTYPE(ct, rtype, m, args) MOCK_METHOD_NEW_BASE((, \
+    ,ct), rtype, m, args)
 #define MOCK_METHOD0_WITH_CALLTYPE(ct, m, ...) \
     MOCK_METHOD_BC_BASE0((,,ct),  m, __VA_ARGS__)
 #define MOCK_METHOD1_WITH_CALLTYPE(ct, m, ...) \
@@ -1122,6 +1150,9 @@ using internal::FunctionMocker;
 #define MOCK_METHOD10_WITH_CALLTYPE(ct, m, ...) \
     MOCK_METHOD_BC_BASE10((,,ct),  m, __VA_ARGS__)
 
+
+#define MOCK_CONST_METHOD_WITH_CALLTYPE(ct, rtype, m, \
+    args) MOCK_METHOD_NEW_BASE((const,,ct), rtype, m, args)
 #define MOCK_CONST_METHOD0_WITH_CALLTYPE(ct, m, ...) \
     MOCK_METHOD_BC_BASE0((const,,ct),  m, __VA_ARGS__)
 #define MOCK_CONST_METHOD1_WITH_CALLTYPE(ct, m, ...) \
@@ -1145,6 +1176,9 @@ using internal::FunctionMocker;
 #define MOCK_CONST_METHOD10_WITH_CALLTYPE(ct, m, ...) \
     MOCK_METHOD_BC_BASE10((const,,ct),  m, __VA_ARGS__)
 
+
+#define MOCK_METHOD_T_WITH_CALLTYPE(ct, rtype, m, \
+    args) MOCK_METHOD_NEW_BASE((,typename,ct), rtype, m, args)
 #define MOCK_METHOD0_T_WITH_CALLTYPE(ct, m, ...) \
     MOCK_METHOD_BC_BASE0((,typename,ct),  m, __VA_ARGS__)
 #define MOCK_METHOD1_T_WITH_CALLTYPE(ct, m, ...) \
@@ -1168,6 +1202,9 @@ using internal::FunctionMocker;
 #define MOCK_METHOD10_T_WITH_CALLTYPE(ct, m, ...) \
     MOCK_METHOD_BC_BASE10((,typename,ct),  m, __VA_ARGS__)
 
+
+#define MOCK_CONST_METHOD_T_WITH_CALLTYPE(ct, rtype, m, \
+    args) MOCK_METHOD_NEW_BASE((const,typename,ct), rtype, m, args)
 #define MOCK_CONST_METHOD0_T_WITH_CALLTYPE(ct, m, ...) \
     MOCK_METHOD_BC_BASE0((const,typename,ct),  m, __VA_ARGS__)
 #define MOCK_CONST_METHOD1_T_WITH_CALLTYPE(ct, m, ...) \

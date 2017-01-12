@@ -190,8 +190,12 @@ $var gen_matcher_as = [[$for k, \
   mutable ::testing::FunctionMocker<rtype(__GMOCK_FIRST(nargs, $gen_arg_types))> GMOCK_MOCKER_EXPAND(nargs, __GMOCK_MOD_CONSTNESS(modifiers), Method)
      
 
+#define MOCK_METHOD_NEW_BASE(modifiers, rtype, m, args) \
+    GMOCK_METHOD_BASE(modifiers, __GMOCK_NARGS args, m, rtype,		\
+		[[$for k, [[GMOCK_ARG_(__GMOCK_MOD_TYPENAME(modifiers), $k, rtype args)]]]]		\
+    )
+
 $for i [[
-$range k 1..n
 
 #define MOCK_METHOD_BC_BASE$i(modifiers, m, ...) \
     GMOCK_METHOD_BASE(modifiers, $i, m, \
@@ -201,20 +205,28 @@ $range k 1..n
 
 ]]
 
+#define MOCK_METHOD(rtype, m, args) MOCK_METHOD_NEW_BASE((,,), rtype, m, args)
+
 $for i [[
 #define MOCK_METHOD$i(m, ...) MOCK_METHOD_BC_BASE$i((,,),  m, __VA_ARGS__)
 
 ]]
+
+#define MOCK_CONST_METHOD(rtype, m, args) MOCK_METHOD_NEW_BASE((const,,), rtype, m, args)
 
 $for i [[
 #define MOCK_CONST_METHOD$i(m, ...) MOCK_METHOD_BC_BASE$i((const,,), m, __VA_ARGS__)
 
 ]]
 
+#define MOCK_METHOD_T(rtype, m, args) MOCK_METHOD_NEW_BASE((,typename,), rtype, m, args)
+
 $for i [[
 #define MOCK_METHOD$i[[]]_T(m, ...) MOCK_METHOD_BC_BASE$i((,typename,), m, __VA_ARGS__)
 
 ]]
+
+#define MOCK_CONST_METHOD_T(rtype, m, args) MOCK_METHOD_NEW_BASE((const,typename,), rtype, m, args)
 
 $for i [[
 #define MOCK_CONST_METHOD$i[[]]_T(m, ...) \
@@ -223,12 +235,16 @@ $for i [[
 ]]
 
 
+#define MOCK_METHOD_WITH_CALLTYPE(ct, rtype, m, args) MOCK_METHOD_NEW_BASE((,,ct), rtype, m, args)
+
 $for i [[
 #define MOCK_METHOD$i[[]]_WITH_CALLTYPE(ct, m, ...) \
     MOCK_METHOD_BC_BASE$i((,,ct),  m, __VA_ARGS__)
 
 ]]
 
+
+#define MOCK_CONST_METHOD_WITH_CALLTYPE(ct, rtype, m, args) MOCK_METHOD_NEW_BASE((const,,ct), rtype, m, args)
 
 $for i [[
 #define MOCK_CONST_METHOD$i[[]]_WITH_CALLTYPE(ct, m, ...) \
@@ -237,12 +253,16 @@ $for i [[
 ]]
 
 
+#define MOCK_METHOD_T_WITH_CALLTYPE(ct, rtype, m, args) MOCK_METHOD_NEW_BASE((,typename,ct), rtype, m, args)
+
 $for i [[
 #define MOCK_METHOD$i[[]]_T_WITH_CALLTYPE(ct, m, ...) \
     MOCK_METHOD_BC_BASE$i((,typename,ct),  m, __VA_ARGS__)
 
 ]]
 
+
+#define MOCK_CONST_METHOD_T_WITH_CALLTYPE(ct, rtype, m, args) MOCK_METHOD_NEW_BASE((const,typename,ct), rtype, m, args)
 
 $for i [[
 #define MOCK_CONST_METHOD$i[[]]_T_WITH_CALLTYPE(ct, m, ...) \
