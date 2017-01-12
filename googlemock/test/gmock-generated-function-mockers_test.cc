@@ -125,6 +125,64 @@ class MockFoo : public FooInterface {
   MockFoo() {}
 
   // Makes sure that a mock function parameter can be named.
+  MOCK_METHOD(void, VoidReturning, (int n));  // NOLINT
+
+  MOCK_METHOD(int, Nullary, ());  // NOLINT
+
+  // Makes sure that a mock function parameter can be unnamed.
+  MOCK_METHOD(bool, Unary, (int));  // NOLINT
+  MOCK_METHOD(long, Binary, (short, int));  // NOLINT
+  MOCK_METHOD(int, Decimal, (bool, char, short, int, long, float,  // NOLINT
+                             double, unsigned, char*, const string& str));
+
+  MOCK_METHOD(bool, TakesNonConstReference, (int&));  // NOLINT
+  MOCK_METHOD(string, TakesConstReference, (const int&));
+
+#ifdef GMOCK_ALLOWS_CONST_PARAM_FUNCTIONS
+  MOCK_METHOD(bool, TakesConst, (const int));  // NOLINT
+#endif
+
+  // The function return type can't contain an unprotected comma.
+  // A typedef can be used to work around this.
+  typedef std::map<int, string> MapIntString;
+  MOCK_METHOD(MapIntString, ReturnTypeWithComma, ());
+  MOCK_CONST_METHOD(MapIntString, ReturnTypeWithComma, (int));  // NOLINT
+
+  MOCK_METHOD(int, OverloadedOnArgumentNumber, ());  // NOLINT
+  MOCK_METHOD(int, OverloadedOnArgumentNumber, (int));  // NOLINT
+
+  MOCK_METHOD(int, OverloadedOnArgumentType, (int));  // NOLINT
+  MOCK_METHOD(char, OverloadedOnArgumentType, (char));  // NOLINT
+
+  MOCK_METHOD(int, OverloadedOnConstness, ());  // NOLINT
+  MOCK_CONST_METHOD(char, OverloadedOnConstness, ());  // NOLINT
+
+  MOCK_METHOD(int, TypeWithHole, (int (*)()));  // NOLINT
+  MOCK_METHOD(int, TypeWithComma, (const MapIntString&));  // NOLINT
+
+#if GTEST_OS_WINDOWS
+  MOCK_METHOD_WITH_CALLTYPE(STDMETHODCALLTYPE, int, CTNullary, ());
+  MOCK_METHOD_WITH_CALLTYPE(STDMETHODCALLTYPE, bool, CTUnary, (int));
+  MOCK_METHOD_WITH_CALLTYPE(STDMETHODCALLTYPE, int, CTDecimal, (bool b, char c,
+      short d, int e, long f, float g, double h, unsigned i, char* j,
+      const string& k));
+  MOCK_CONST_METHOD_WITH_CALLTYPE(STDMETHODCALLTYPE, char, CTConst, (int));
+
+  // Tests that the function return type can contain unprotected comma.
+  MOCK_METHOD_WITH_CALLTYPE(STDMETHODCALLTYPE, MapIntString, CTReturnTypeWithComma,
+                             ());
+#endif  // GTEST_OS_WINDOWS
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFoo);
+};
+
+// Test BC macros, which expect an argument count.
+class MockFooBC : public FooInterface {
+ public:
+  MockFooBC() {}
+
+  // Makes sure that a mock function parameter can be named.
   MOCK_METHOD1(VoidReturning, void(int n));  // NOLINT
 
   MOCK_METHOD0(Nullary, int());  // NOLINT
@@ -173,7 +231,7 @@ class MockFoo : public FooInterface {
 #endif  // GTEST_OS_WINDOWS
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFoo);
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFooBC);
 };
 #ifdef _MSC_VER
 # pragma warning(pop)
@@ -350,6 +408,50 @@ TEST_F(FunctionMockerTest, MocksReturnTypeWithCommaAndCallType) {
 
 #endif  // GTEST_OS_WINDOWS
 
+// Repeat some MockFoo tests with MockFooBC
+class FunctionMockerBCTest : public testing::Test {
+ protected:
+  FunctionMockerBCTest() : foo_(&mock_foo_) {}
+
+  FooInterface* const foo_;
+  MockFooBC mock_foo_;
+};
+
+// Tests mocking a void-returning function.
+TEST_F(FunctionMockerBCTest, MocksVoidFunction) {
+  EXPECT_CALL(mock_foo_, VoidReturning(Lt(100)));
+  foo_->VoidReturning(0);
+}
+
+// Tests mocking a nullary function.
+TEST_F(FunctionMockerBCTest, MocksNullaryFunction) {
+  EXPECT_CALL(mock_foo_, Nullary())
+      .WillOnce(DoDefault())
+      .WillOnce(Return(1));
+
+  EXPECT_EQ(0, foo_->Nullary());
+  EXPECT_EQ(1, foo_->Nullary());
+}
+
+// Tests mocking a unary function.
+TEST_F(FunctionMockerBCTest, MocksUnaryFunction) {
+  EXPECT_CALL(mock_foo_, Unary(Eq(2)))
+      .Times(2)
+      .WillOnce(Return(true));
+
+  EXPECT_TRUE(foo_->Unary(2));
+  EXPECT_FALSE(foo_->Unary(2));
+}
+
+// Tests mocking a binary function.
+TEST_F(FunctionMockerBCTest, MocksBinaryFunction) {
+  EXPECT_CALL(mock_foo_, Binary(2, _))
+      .WillOnce(Return(3));
+
+  EXPECT_EQ(3, foo_->Binary(2, 1));
+}
+
+
 class MockB {
  public:
   MockB() {}
@@ -399,14 +501,15 @@ class MockStack : public StackInterface<T> {
  public:
   MockStack() {}
 
-  MOCK_METHOD1_T(Push, void(const T& elem));
-  MOCK_METHOD0_T(Pop, void());
-  MOCK_CONST_METHOD0_T(GetSize, int());  // NOLINT
-  MOCK_CONST_METHOD0_T(GetTop, const T&());
+  MOCK_METHOD_T(void, Push, (const T& elem));
+  MOCK_METHOD_T(void, Pop, ());
+  MOCK_CONST_METHOD_T(int, GetSize, ());  // NOLINT
+  MOCK_CONST_METHOD_T(const T&, GetTop, ());
 
   // Tests that the function return type can contain unprotected comma.
-  MOCK_METHOD0_T(ReturnTypeWithComma, std::map<int, int>());
-  MOCK_CONST_METHOD1_T(ReturnTypeWithComma, std::map<int, int>(int));  // NOLINT
+  typedef std::map<int, int> MapIntInt;
+  MOCK_METHOD_T(MapIntInt, ReturnTypeWithComma, ());
+  MOCK_CONST_METHOD_T(MapIntInt, ReturnTypeWithComma, (int));  // NOLINT
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockStack);
@@ -469,10 +572,10 @@ class MockStackWithCallType : public StackInterfaceWithCallType<T> {
  public:
   MockStackWithCallType() {}
 
-  MOCK_METHOD1_T_WITH_CALLTYPE(STDMETHODCALLTYPE, Push, void(const T& elem));
-  MOCK_METHOD0_T_WITH_CALLTYPE(STDMETHODCALLTYPE, Pop, void());
-  MOCK_CONST_METHOD0_T_WITH_CALLTYPE(STDMETHODCALLTYPE, GetSize, int());
-  MOCK_CONST_METHOD0_T_WITH_CALLTYPE(STDMETHODCALLTYPE, GetTop, const T&());
+  MOCK_METHOD_T_WITH_CALLTYPE(STDMETHODCALLTYPE, void, Push, (const T& elem));
+  MOCK_METHOD_T_WITH_CALLTYPE(STDMETHODCALLTYPE, void, Pop, ());
+  MOCK_CONST_METHOD_T_WITH_CALLTYPE(STDMETHODCALLTYPE, int, GetSize, ());
+  MOCK_CONST_METHOD_T_WITH_CALLTYPE(STDMETHODCALLTYPE, const T&, GetTop, ());
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockStackWithCallType);
@@ -503,9 +606,9 @@ TEST(TemplateMockTestWithCallType, Works) {
 #endif  // GTEST_OS_WINDOWS
 
 #define MY_MOCK_METHODS1_ \
-    MOCK_METHOD0(Overloaded, void()); \
-    MOCK_CONST_METHOD1(Overloaded, int(int n)); \
-    MOCK_METHOD2(Overloaded, bool(bool f, int n))
+    MOCK_METHOD(void, Overloaded, ()); \
+    MOCK_CONST_METHOD(int, Overloaded, (int n)); \
+    MOCK_METHOD(bool, Overloaded, (bool f, int n))
 
 class MockOverloadedOnArgNumber {
  public:
@@ -529,8 +632,8 @@ TEST(OverloadedMockMethodTest, CanOverloadOnArgNumberInMacroBody) {
 }
 
 #define MY_MOCK_METHODS2_ \
-    MOCK_CONST_METHOD1(Overloaded, int(int n)); \
-    MOCK_METHOD1(Overloaded, int(int n));
+    MOCK_CONST_METHOD(int, Overloaded, (int n)); \
+    MOCK_METHOD(int, Overloaded, (int n));
 
 class MockOverloadedOnConstness {
  public:
