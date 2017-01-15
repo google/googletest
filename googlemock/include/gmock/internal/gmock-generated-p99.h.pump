@@ -1,0 +1,218 @@
+$$ -*- mode: c++; -*-
+$$ This is a Pump source file.  Please use Pump to convert it to
+$$ gmock-generated-p99.h.
+$$
+$var n = 10  $$ The maximum arity we support.
+
+/* Except for parts copied from previous work and as explicitly stated below, */
+/* the authors and copyright holders for this work are as follows:            */
+/* (C) copyright  2010-2012 Jens Gustedt, INRIA, France                       */
+/* (C) copyright  2012 William Morris                                         */
+/*                                                                            */
+/* This file is free software; it is part of the P99 project.                 */
+/* You can redistribute it and/or modify it under the terms of the QPL as     */
+/* given in the file LICENSE. It is distributed without any warranty;         */
+/* without even the implied warranty of merchantability or fitness for a      */
+/* particular purpose.                                                        */
+
+// P99 code ported into Google Mock
+// This is a temporry file, until we figure out exactly how to use P99 in 
+//  Google Mock, considering licensing etc.
+// 
+// The macros actually used in Google Mock are:
+//   P99_NARG
+//   P99_SELS
+
+#ifndef GMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_GENERATED_P99_H_
+#define GMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_GENERATED_P99_H_
+
+//
+// Taken from p99_paste.h
+//
+
+
+/**
+ ** @brief Paste two token sequences at their junction.
+ **
+ ** This macro does the paste operation first, and then an evaluation
+ ** of the result. Thus
+ ** @code
+ ** #define B(x) toto(x)
+ ** P99_CAT2(A, B(6));
+ ** @endcode
+ ** will result in
+ ** @code
+ ** AB(6);
+ ** @endcode
+ ** and not in
+ ** @code
+ ** Atoto(6)
+ ** @endcode
+ **/
+#define P99_CAT2(_1, _2) _1 ## _2
+
+/**
+ ** @brief Paste two token sequences at their junction.
+ **
+ ** This macro does the evaluation of the arguments first and then
+ ** proceeds with the concatenation
+ ** of the results. Thus
+ ** @code
+ ** #define B(x) toto(x)
+ ** P99_CAT2(A, B(6));
+ ** @endcode
+ ** will result in
+ ** @code
+ ** Atoto(6)
+ ** @endcode
+ ** and not in
+ ** @code
+ ** AB(6);
+ ** @endcode
+ **/
+#define P99_PASTE2(_1, _2) P99_CAT2(_1, _2)
+#define P99_PASTE3(_1,  _2, _3)                                \
+  P99_PASTE2(P99_PASTE2(_1, _2), _3)
+#define P99_PASTE4(_1,  _2, _3, _4)                            \
+  P99_PASTE2(P99_PASTE3(_1, _2, _3), _4)
+#define P99_PASTE5(_1,  _2, _3, _4, _5)                        \
+  P99_PASTE2(P99_PASTE4(_1, _2, _3, _4), _5)
+#define P99_PASTE6(_1,  _2, _3, _4, _5, _6)                    \
+  P99_PASTE2(P99_PASTE5(_1, _2, _3, _4, _5), _6)
+
+//
+// Taken from p99_generated.h
+// Rewritten to be pump-generated.
+//
+
+$var n1 = n+1
+$range r1 1..n1
+#define P00_ARG([[$for r1, [[_$r1]]]], ...) _$n1
+
+#define P00_NARG_1(...) P00_ARG(__VA_ARGS__, [[$for r1, [[$(n1-r1)]]]], )
+
+$var halfn = n/2
+$range halfr 1..halfn
+
+#define P00_NARG_2(...) P00_ARG(__VA_ARGS__,  [[$for halfr, [[$(halfn-halfr+1), P00_INV(2)]]]], 0,)
+
+/** @brief Determine of the argument list has a comma, i.e at least two arguments. */
+#define P99_HAS_COMMA(...) P00_ARG(__VA_ARGS__, [[$for r1, [[$((r1<=n1-2) & 1)]]]])
+
+#define P00_PRE2(_0, ...) _0, P00_PRE1(__VA_ARGS__)
+#define P00_PRE3(_0, ...) _0, P00_PRE2(__VA_ARGS__)
+#define P00_PRE4(_0, ...) _0, P00_PRE3(__VA_ARGS__)
+#define P00_PRE5(_0, ...) _0, P00_PRE4(__VA_ARGS__)
+#define P00_PRE6(_0, ...) _0, P00_PRE5(__VA_ARGS__)
+#define P00_PRE7(_0, ...) _0, P00_PRE6(__VA_ARGS__)
+#define P00_PRE8(_0, ...) _0, P00_PRE7(__VA_ARGS__)
+#define P00_PRE9(_0, ...) _0, P00_PRE8(__VA_ARGS__)
+#define P00_PRE10(_0, ...) _0, P00_PRE9(__VA_ARGS__)
+
+
+//
+// Taken from p99_args.h
+//
+
+/**
+ ** @brief Return the length of the variate argument list.
+ **
+ ** This supposes that the length is less than ::P99_MAX_NUMBER.
+ **
+ ** Idea is due to Laurent Deniau, CERN, and taken from a discussion
+ ** in comp.lang.c.
+ **
+ ** @warning this also counts an empty argument list as having one (=
+ ** the empty) argument
+ ** @see P99_NARG for a macro that returns 0 if the list is empty
+ **/
+#define P00_NARG(...) P00_NARG_1(__VA_ARGS__)
+
+
+#define P00_IS__EQ__(...) ,
+
+/**
+ ** @brief Test if the argument list is empty.
+ **
+ ** This expands to token 1 if the list was empty and to token 0 if
+ ** there was anything other than a comment in the list.
+ **
+ ** The implementation of this macro is kind of tricky and relies heavily
+ ** on the fact that a function macro (@c P00_IS__EQ__ in this case) is
+ ** left untouched if it is not followed by a parenthesis. See
+ ** http://gustedt.wordpress.com/2010/06/08/detect-empty-macro-arguments/
+ **
+ ** @return tokens 0 or 1
+ **
+ ** @warning This macro should work for most reasonable invocations
+ ** (balanced parenthesis and stuff like that). The only case that
+ ** definitely does not work is when called with another macro @c X
+ ** at the end of its argument list, where X itself expects more than one
+ ** argument.
+ ** The particular cases where X receives @c 0, @c 1 or a
+ ** variable number of arguments should be fine.
+ **/
+#define P99_IS_EMPTY(...)                                                 \
+P00_ISEMPTY(                                                              \
+            /* test if there is just one argument, that might be empty */ \
+             P99_HAS_COMMA(__VA_ARGS__),                                  \
+             /* test if P99_IS__EQ__ together with the argument           \
+                adds a comma */                                           \
+             P99_HAS_COMMA(P00_IS__EQ__ __VA_ARGS__),                     \
+             /* test if the argument together with a parenthesis          \
+                adds a comma */                                           \
+             P99_HAS_COMMA(__VA_ARGS__ (/*empty*/)),                      \
+             /* test if placing it between P99_IS__EQ__ and the           \
+                parenthesis adds a comma */                               \
+             P99_HAS_COMMA(P00_IS__EQ__ __VA_ARGS__ (/*empty*/))          \
+             )
+
+#define P00_ISEMPTY(_0, _1, _2, _3) P99_HAS_COMMA(P99_PASTE5(P00_IS_EMPTY_CASE_, _0, _1, _2, _3))
+#define P00_IS_EMPTY_CASE_0000 P00_IS_EMPTY_CASE_0000
+#define P00_IS_EMPTY_CASE_0001 ,
+#define P00_IS_EMPTY_CASE_0010 P00_IS_EMPTY_CASE_0010
+#define P00_IS_EMPTY_CASE_0011 P00_IS_EMPTY_CASE_0011
+#define P00_IS_EMPTY_CASE_0100 P00_IS_EMPTY_CASE_0100
+#define P00_IS_EMPTY_CASE_0101 P00_IS_EMPTY_CASE_0101
+#define P00_IS_EMPTY_CASE_0110 P00_IS_EMPTY_CASE_0110
+#define P00_IS_EMPTY_CASE_0111 P00_IS_EMPTY_CASE_0111
+#define P00_IS_EMPTY_CASE_1000 P00_IS_EMPTY_CASE_1000
+#define P00_IS_EMPTY_CASE_1001 P00_IS_EMPTY_CASE_1001
+#define P00_IS_EMPTY_CASE_1010 P00_IS_EMPTY_CASE_1010
+#define P00_IS_EMPTY_CASE_1011 P00_IS_EMPTY_CASE_1011
+#define P00_IS_EMPTY_CASE_1100 P00_IS_EMPTY_CASE_1100
+#define P00_IS_EMPTY_CASE_1101 P00_IS_EMPTY_CASE_1101
+#define P00_IS_EMPTY_CASE_1110 P00_IS_EMPTY_CASE_1110
+#define P00_IS_EMPTY_CASE_1111 P00_IS_EMPTY_CASE_1111
+
+
+#define P00_NARG_EMPTY_1(VAL) 0
+#define P00_NARG_EMPTY_0(VAL) VAL
+
+/**
+ ** @brief Return the length of the variable length argument list, where an empty
+ ** argument list is considered to have 0 arguments.
+ **
+ ** This supposes that the length of the list is less than ::P99_MAX_NUMBER.
+ **
+ ** @see P00_NARG for a macro in which an empty list is considered to have 1 argument.
+ **/
+#define P99_NARG(...) P00_NARG__1(P99_IS_EMPTY(__VA_ARGS__), P00_NARG(__VA_ARGS__))
+#define P00_NARG__1(B, VAL) P00_NARG__2(P99_PASTE2(P00_NARG_EMPTY_, B), VAL)
+#define P00_NARG__2(B, VAL) B(VAL)
+
+
+//
+// Taken from p99_list.h
+//
+
+#define P00_PRE0(...)
+#define P00_PRE1(_0, ...) _0
+
+/**
+ ** Cut the argument list at position @a N
+ **/
+#define P99_SELS(N, ...) P99_PASTE2(P00_PRE, N)(__VA_ARGS__)
+
+
+#endif // GMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_GENERATED_P99_H_
