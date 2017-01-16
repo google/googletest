@@ -88,6 +88,8 @@
 # define GTEST_OS_OPENBSD 1
 #elif defined __QNX__
 # define GTEST_OS_QNX 1
+#elif defined __VXWORKS__
+# define GTEST_OS_VXWORKS 1
 #endif  // __CYGWIN__
 
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_ARCH_H_

@@ -139,6 +139,7 @@
 //     GTEST_OS_WINDOWS_PHONE    - Windows Phone
 //     GTEST_OS_WINDOWS_RT       - Windows Store App/WinRT
 //   GTEST_OS_ZOS      - z/OS
+//   GTEST_OS_VXWORKS  - Wind River VxWorks
 //
 // Among the platforms, Cygwin, Linux, Max OS X, and Windows have the
 // most stable support.  Since core members of the Google Test project
@@ -785,7 +786,7 @@ using ::std::tuple_size;
 // By default, we assume that stream redirection is supported on all
 // platforms except known mobile ones.
 # if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_SYMBIAN || \
-    GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_RT
+    GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_RT || GTEST_OS_VXWORKS
 #  define GTEST_HAS_STREAM_REDIRECTION 0
 # else
 #  define GTEST_HAS_STREAM_REDIRECTION 1
