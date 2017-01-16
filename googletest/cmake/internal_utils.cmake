@@ -158,6 +158,9 @@ function(cxx_library_with_type name type cxx_flags)
   if (CMAKE_USE_PTHREADS_INIT)
     target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT})
   endif()
+  if( COMMAND make_universal )
+      make_universal( ${name} )
+  endif()
 endfunction()
 
 ########################################################################
