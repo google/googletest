@@ -625,6 +625,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # if _MSC_VER
 #  define GTEST_HAS_HASH_MAP_ 1  // Indicates that hash_map is available.
 #  define GTEST_HAS_HASH_SET_ 1  // Indicates that hash_set is available.
+#  define _SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS // Note that hash_map and hash_map are deprecated and will be removed!
 # endif  // _MSC_VER
 #endif  // !defined(GTEST_HAS_HASH_MAP_)
 
