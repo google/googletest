@@ -125,6 +125,14 @@ build Google Mock and its tests, which has further requirements:
 
 ### Building Google Mock ###
 
+If you have CMake available, it is recommended that you follow the
+[build instructions][gtest_cmakebuild]
+as described for Google Test. If are using Google Mock with an
+existing CMake project, the section
+[Incorporating Into An Existing CMake Project][gtest_incorpcmake]
+may be of particular interest. Otherwise, the following sections
+detail how to build Google Mock without CMake.
+
 #### Preparing to Build (Unix only) ####
 
 If you are using a Unix system and plan to use the GNU Autotools build
@@ -331,3 +339,5 @@ patch.
 Happy testing!
 
 [gtest_readme]: ../googletest/README.md "googletest"
+[gtest_cmakebuild]:  ../googletest/README.md#using-cmake "Using CMake"
+[gtest_incorpcmake]: ../googletest/README.md#incorporating-into-an-existing-cmake-project "Incorporating Into An Existing CMake Project"
