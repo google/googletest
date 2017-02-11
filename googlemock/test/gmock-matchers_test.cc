@@ -65,10 +65,6 @@
 
 namespace testing {
 
-namespace internal {
-GTEST_API_ string JoinAsTuple(const Strings& fields);
-}  // namespace internal
-
 namespace gmock_matchers_test {
 
 using std::greater;
