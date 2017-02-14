@@ -955,21 +955,8 @@ class CapturedStream {
     // instead. We use /tmp on most systems, and /sdcard on Android.
     // That's because Android doesn't have /tmp.
 #  if GTEST_OS_LINUX_ANDROID
-    // Note: Android applications are expected to call the framework's
-    // Context.getExternalStorageDirectory() method through JNI to get
-    // the location of the world-writable SD Card directory. However,
-    // this requires a Context handle, which cannot be retrieved
-    // globally from native code. Doing so also precludes running the
-    // code as part of a regular standalone executable, which doesn't
-    // run in a Dalvik process (e.g. when running it through 'adb shell').
-    //
-    // The location /sdcard is directly accessible from native code
-    // and is the only location (unofficially) supported by the Android
-    // team. It's generally a symlink to the real SD Card mount point
-    // which can be /mnt/sdcard, /mnt/sdcard0, /system/media/sdcard, or
-    // other OEM-customized locations. Never rely on these, and always
-    // use /sdcard.
-    char name_template[] = "/sdcard/gtest_captured_stream.XXXXXX";
+    ::std::string name_template_buf = TempDir() + "gtest_captured_stream.XXXXXX";
+    char* name_template = &name_template_buf[0];
 #  else
     char name_template[] = "/tmp/captured_stream.XXXXXX";
 #  endif  // GTEST_OS_LINUX_ANDROID
@@ -1067,7 +1054,22 @@ std::string TempDir() {
   else
     return std::string(temp_dir) + "\\";
 #elif GTEST_OS_LINUX_ANDROID
-  return "/sdcard/";
+  // Android doesn't have /tmp, and /sdcard is no longer accessible from
+  // app context starting from Android O. On Android, /data/local/tmp
+  // is usually used as the temporary directory. But processes running
+  // in app context can't write to /data/local/tmp, so also try the
+  // current directory.
+  if (access("/data/local/tmp", R_OK | W_OK | X_OK) == 0) {
+    return "/data/local/tmp/";
+  }
+  std::string result = "./";
+  char* cwd = getcwd(NULL, 0);
+  if (cwd != NULL) {
+    result = cwd;
+    result += "/";
+    free(cwd);
+  }
+  return result;
 #else
   return "/tmp/";
 #endif  // GTEST_OS_WINDOWS_MOBILE
