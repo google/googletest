@@ -53,18 +53,18 @@ the Apache License, which is different from Google Mock's license.
 If you are new to the project, we suggest that you read the user
 documentation in the following order:
 
-  * Learn the [basics](../../tree/master/googletest/docs/Primer.md) of
+  * Learn the [basics](docs/Primer.md) of
     Google Test, if you choose to use Google Mock with it (recommended).
-  * Read [Google Mock for Dummies](../../tree/master/googlemock/docs/ForDummies.md).
+  * Read [Google Mock for Dummies](docs/ForDummies.md).
   * Read the instructions below on how to build Google Mock.
 
 You can also watch Zhanyong's [talk](http://www.youtube.com/watch?v=sYpCyLI47rM) on Google Mock's usage and implementation.
 
 Once you understand the basics, check out the rest of the docs:
 
-  * [CheatSheet](../../tree/master/googlemock/docs/CheatSheet.md) - all the commonly used stuff
+  * [CheatSheet](docs/CheatSheet.md) - all the commonly used stuff
     at a glance.
-  * [CookBook](../../tree/master/googlemock/docs/CookBook.md) - recipes for getting things done,
+  * [CookBook](docs/CookBook.md) - recipes for getting things done,
     including advanced techniques.
 
 If you need help, please check the
@@ -78,8 +78,8 @@ posting a question on the
 
 Google Mock is not a testing framework itself.  Instead, it needs a
 testing framework for writing tests.  Google Mock works seamlessly
-with [Google Test](http://code.google.com/p/googletest/), but
-you can also use it with [any C++ testing framework](../../master/googlemock/docs/ForDummies.md#using-google-mock-with-any-testing-framework).
+with [Google Test](../googletest/), but
+you can also use it with [any C++ testing framework](docs/ForDummies.md#using-google-mock-with-any-testing-framework).
 
 ### Requirements for End Users ###
 
