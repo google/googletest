@@ -242,7 +242,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
   typedef ::testing::internal::Templates<__VA_ARGS__>::type gtest_AllTests_; \
   } \
   static const char* const GTEST_REGISTERED_TEST_NAMES_(CaseName) \
-      GTEST_ATTRIBUTE_UNUSED = \
+      GTEST_ATTRIBUTE_UNUSED_ = \
           GTEST_TYPED_TEST_CASE_P_STATE_(CaseName).VerifyRegisteredTestNames(\
               __FILE__, __LINE__, #__VA_ARGS__)
 
