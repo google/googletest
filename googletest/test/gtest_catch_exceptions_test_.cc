@@ -138,7 +138,7 @@ TEST_F(CxxExceptionInConstructorTest, ThrowsExceptionInConstructor) {
 }
 
 // Exceptions in destructors are not supported in C++11.
-#if !defined(__GXX_EXPERIMENTAL_CXX0X__) &&  __cplusplus < 201103L
+#if !defined(__GXX_EXPERIMENTAL_CXX0X__) && !(_MSC_VER >= 1400) &&  __cplusplus < 201103L
 class CxxExceptionInDestructorTest : public Test {
  public:
   static void TearDownTestCase() {
