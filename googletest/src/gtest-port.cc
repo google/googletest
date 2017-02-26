@@ -1055,6 +1055,7 @@ std::string GetCapturedStderr() {
 
 #endif  // GTEST_HAS_STREAM_REDIRECTION
 
+#if GTEST_HAS_FILE_SYSTEM
 std::string TempDir() {
 #if GTEST_OS_WINDOWS_MOBILE
   return "\\temp\\";
@@ -1099,6 +1100,7 @@ std::string ReadEntireFile(FILE* file) {
 
   return content;
 }
+#endif // GTEST_HAS_FILE_SYSTEM
 
 #if GTEST_HAS_DEATH_TEST
 

@@ -33,6 +33,7 @@
 #include "gtest/internal/gtest-filepath.h"
 #include "gtest/internal/gtest-port.h"
 
+#if GTEST_HAS_FILE_SYSTEM
 #include <stdlib.h>
 
 #if GTEST_OS_WINDOWS_MOBILE
@@ -385,3 +386,4 @@ void FilePath::Normalize() {
 
 }  // namespace internal
 }  // namespace testing
+#endif // GTEST_HAS_FILE_SYSTEM
