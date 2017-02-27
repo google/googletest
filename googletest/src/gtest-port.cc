@@ -239,8 +239,8 @@ Mutex::Mutex()
     : owner_thread_id_(0),
       type_(kDynamic),
       critical_section_init_phase_(0),
-      critical_section_(new CRITICAL_SECTION) {
-  ::InitializeCriticalSection(critical_section_);
+      critical_section_((GTEST_CRITICAL_SECTION*)new CRITICAL_SECTION) {
+  ::InitializeCriticalSection((CRITICAL_SECTION*)critical_section_);
 }
 
 Mutex::~Mutex() {
@@ -250,7 +250,7 @@ Mutex::~Mutex() {
   // nothing to clean it up but is available only on Vista and later.
   // http://msdn.microsoft.com/en-us/library/windows/desktop/aa904937.aspx
   if (type_ == kDynamic) {
-    ::DeleteCriticalSection(critical_section_);
+    ::DeleteCriticalSection((CRITICAL_SECTION*)critical_section_);
     delete critical_section_;
     critical_section_ = NULL;
   }
@@ -258,7 +258,7 @@ Mutex::~Mutex() {
 
 void Mutex::Lock() {
   ThreadSafeLazyInit();
-  ::EnterCriticalSection(critical_section_);
+  ::EnterCriticalSection((CRITICAL_SECTION*)critical_section_);
   owner_thread_id_ = ::GetCurrentThreadId();
 }
 
@@ -268,7 +268,7 @@ void Mutex::Unlock() {
   // caller's responsibility to ensure that the current thread holds the
   // mutex when this is called.
   owner_thread_id_ = 0;
-  ::LeaveCriticalSection(critical_section_);
+  ::LeaveCriticalSection((CRITICAL_SECTION*)critical_section_);
 }
 
 // Does nothing if the current thread holds the mutex. Otherwise, crashes
@@ -289,8 +289,8 @@ void Mutex::ThreadSafeLazyInit() {
         // If critical_section_init_phase_ was 0 before the exchange, we
         // are the first to test it and need to perform the initialization.
         owner_thread_id_ = 0;
-        critical_section_ = new CRITICAL_SECTION;
-        ::InitializeCriticalSection(critical_section_);
+        critical_section_ = (GTEST_CRITICAL_SECTION*)new CRITICAL_SECTION;
+        ::InitializeCriticalSection((CRITICAL_SECTION*)critical_section_);
         // Updates the critical_section_init_phase_ to 2 to signal
         // initialization complete.
         GTEST_CHECK_(::InterlockedCompareExchange(
