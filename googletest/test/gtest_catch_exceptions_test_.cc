@@ -137,8 +137,10 @@ TEST_F(CxxExceptionInConstructorTest, ThrowsExceptionInConstructor) {
                 << "called unexpectedly.";
 }
 
-// Exceptions in destructors are not supported in C++11.
-#if !defined(__GXX_EXPERIMENTAL_CXX0X__) &&  __cplusplus < 201103L
+// Exceptions in destructors are not supported in C++11 and as of MSVC 19.00,
+// which claims not to be C++11-compliant, although it introduced support for
+// noexcept and adds noexcept(true) on destructors by default.
+#if !GTEST_LANG_CXX11 && (!defined(_MSC_VER) || _MSC_VER < 1900)
 class CxxExceptionInDestructorTest : public Test {
  public:
   static void TearDownTestCase() {
