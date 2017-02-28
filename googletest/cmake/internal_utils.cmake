@@ -125,7 +125,7 @@ macro(config_compiler_and_linker)
     set(cxx_no_rtti_flags "")
   endif()
 
-  if (CMAKE_USE_PTHREADS_INIT)  # The pthreads library is available and allowed.
+  if (CMAKE_USE_PTHREADS_INIT AND NOT MINGW)  # The pthreads library is available and allowed.
     set(cxx_base_flags "${cxx_base_flags} -DGTEST_HAS_PTHREAD=1")
   else()
     set(cxx_base_flags "${cxx_base_flags} -DGTEST_HAS_PTHREAD=0")
@@ -157,7 +157,7 @@ function(cxx_library_with_type name type cxx_flags)
       PROPERTIES
       COMPILE_DEFINITIONS "GTEST_CREATE_SHARED_LIBRARY=1")
   endif()
-  if (CMAKE_USE_PTHREADS_INIT)
+  if (CMAKE_USE_PTHREADS_INIT AND NOT MINGW)
     target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT})
   endif()
 endfunction()
