@@ -196,7 +196,10 @@ def _NeedToReturnSomethingDiagnoser(msg):
                r'|(error: control reaches end of non-void function)')
   clang_regex1 = (_CLANG_FILE_LINE_RE +
                   r'error: cannot initialize return object '
-                  r'of type \'Result\' \(aka \'(?P<return_type>.*)\'\) '
+                  # Note that the return type is likely within a polymorphic
+                  # action, which is not in the internal namespace.
+                  r'of type \'(?:Result|testing::.*::Result)\' '
+                  r'\(aka \'(?P<return_type>.*)\'\) '
                   r'with an rvalue of type \'void\'')
   clang_regex2 = (_CLANG_FILE_LINE_RE +
                   r'error: cannot initialize return object '
@@ -223,14 +226,16 @@ def _NeedToReturnNothingDiagnoser(msg):
                r'\'testing::internal::ReturnAction<R>::Impl<F>::value_\' '
                r'as type \'void\'')
   clang_regex1 = (r'error: field has incomplete type '
-                  r'\'Result\' \(aka \'void\'\)(\r)?\n'
+                  r'\'(?:Result|testing::internal::.*::Result)\' '
+                  r'\(aka \'void\'\)(\r)?\n'
                   r'(.*\n)*?' +
                   _CLANG_NON_GMOCK_FILE_LINE_RE + r'note: in instantiation '
                   r'of function template specialization '
                   r'\'testing::internal::ReturnAction<(?P<return_type>.*)>'
                   r'::operator Action<void \(.*\)>\' requested here')
   clang_regex2 = (r'error: field has incomplete type '
-                  r'\'Result\' \(aka \'void\'\)(\r)?\n'
+                  r'\'(?:Result|testing::internal::.*::Result)\' '
+                  r'\(aka \'void\'\)(\r)?\n'
                   r'(.*\n)*?' +
                   _CLANG_NON_GMOCK_FILE_LINE_RE + r'note: in instantiation '
                   r'of function template specialization '
@@ -469,7 +474,9 @@ def _TypeInTemplatedBaseDiagnoser(msg):
       r'error: use of undeclared identifier \'(?P<type>.*)\'\n'
       r'(.*\n)*?'
       r'(?P=file):(?P=line):\d+: error: '
-      r'non-friend class member \'Result\' cannot have a qualified name'
+      r'non-friend class member '
+      r'\'(?:Result|testing::internal::.*::Result)\' '
+      r'cannot have a qualified name'
       )
   clang_regex_type_of_a_param = (
       _CLANG_FILE_LINE_RE +
