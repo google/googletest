@@ -147,8 +147,8 @@ However, we also recommend adding the following lines (if using CMake 2.8.11 or 
 
     target_include_directories(gtest      SYSTEM INTERFACE "${gtest_SOURCE_DIR}/include")
     target_include_directories(gtest_main SYSTEM INTERFACE "${gtest_SOURCE_DIR}/include")
-   	target_include_directories(gmock      SYSTEM INTERFACE "${gmock_SOURCE_DIR}/include")
-   	target_include_directories(gmock_main SYSTEM INTERFACE "${gmock_SOURCE_DIR}/include")
+    target_include_directories(gmock      SYSTEM INTERFACE "${gmock_SOURCE_DIR}/include")
+    target_include_directories(gmock_main SYSTEM INTERFACE "${gmock_SOURCE_DIR}/include")
 
 This marks Google Mock includes as system, which will silence compiler warnings when 
 compiling your tests using clang with `-Wpedantic -Wall -Wextra -Wconversion`.
