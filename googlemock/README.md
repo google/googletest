@@ -135,23 +135,35 @@ If are using Google Mock with an
 existing CMake project, the section
 [Incorporating Into An Existing CMake Project][gtest_incorpcmake]
 may be of particular interest. 
-The only modification you will need is to change 
+To make it work for Google Mock you will need to change 
 
     target_link_libraries(example gtest_main)
 
 to 
 
-    target_link_libraries(example gtest gmock_main)
+    target_link_libraries(example gmock_main)
+    
+This works because `gmock_main` library is compiled with Google Test.
+However, it does not automatically add Google Test includes.
+Therefore you will also have to change
 
-However, we also recommend adding the following lines (if using CMake 2.8.11 or later):
+    if (CMAKE_VERSION VERSION_LESS 2.8.11)
+      include_directories("${gtest_SOURCE_DIR}/include")
+    endif()
 
-    target_include_directories(gtest      SYSTEM INTERFACE "${gtest_SOURCE_DIR}/include")
-    target_include_directories(gtest_main SYSTEM INTERFACE "${gtest_SOURCE_DIR}/include")
-    target_include_directories(gmock      SYSTEM INTERFACE "${gmock_SOURCE_DIR}/include")
-    target_include_directories(gmock_main SYSTEM INTERFACE "${gmock_SOURCE_DIR}/include")
+to
 
-This marks Google Mock includes as system, which will silence compiler warnings when 
-compiling your tests using clang with `-Wpedantic -Wall -Wextra -Wconversion`.
+    if (CMAKE_VERSION VERSION_LESS 2.8.11)
+      include_directories(BEFORE SYSTEM
+        "${gtest_SOURCE_DIR}/include" "${gmock_SOURCE_DIR}/include")
+    else()
+      target_include_directories(gmock_main SYSTEM BEFORE INTERFACE
+        "${gtest_SOURCE_DIR}/include" "${gmock_SOURCE_DIR}/include")
+    endif()
+
+This will addtionally mark Google Mock includes as system, which will 
+silence compiler warnings when compiling your tests using clang with 
+`-Wpedantic -Wall -Wextra -Wconversion`.
 
 
 #### Preparing to Build (Unix only) ####
