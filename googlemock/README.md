@@ -141,7 +141,7 @@ The only modification you will need is to change
 
 to 
 
-    target_link_libraries(example gmock_main)
+    target_link_libraries(example gtest gmock_main)
 
 However, we also recommend adding the following lines (if using CMake 2.8.11 or later):
 
