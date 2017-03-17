@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="gtest_main-md"
-	ProjectGUID="{3AF54C8A-10BF-4332-9147-F68ED9862033}"
+	Name="gtest_main"
+	ProjectGUID="{3AF54C8A-10BF-4332-9147-F68ED9862032}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -23,7 +23,7 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="5"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="FALSE"
@@ -58,11 +58,11 @@
 			IntermediateDirectory="$(OutDir)/$(ProjectName)"
 			ConfigurationType="4"
 			CharacterSet="2"
-			ReferencesPath="&quot;..\include&quot;;&quot;..&quot;">
+			ReferencesPath="&quot;..\..\include&quot;;&quot;..\..&quot;">
 			<Tool
 				Name="VCCLCompilerTool"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
-				RuntimeLibrary="2"
+				RuntimeLibrary="4"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="FALSE"
@@ -94,8 +94,8 @@
 	</Configurations>
 	<References>
 		<ProjectReference
-			ReferencedProjectIdentifier="{C8F6C172-56F2-4E76-B5FA-C3B423B31BE8}"
-			Name="gtest-md"/>
+			ReferencedProjectIdentifier="{C8F6C172-56F2-4E76-B5FA-C3B423B31BE7}"
+			Name="gtest"/>
 	</References>
 	<Files>
 		<Filter
@@ -103,18 +103,18 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath="..\src\gtest_main.cc">
+				RelativePath="..\..\src\gtest_main.cc">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories="&quot;..&quot;;&quot;..\include&quot;"/>
+						AdditionalIncludeDirectories="&quot;..\..&quot;;&quot;..\..\include&quot;"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories="&quot;..&quot;;&quot;..\include&quot;"/>
+						AdditionalIncludeDirectories="&quot;..\..&quot;;&quot;..\..\include&quot;"/>
 				</FileConfiguration>
 			</File>
 		</Filter>

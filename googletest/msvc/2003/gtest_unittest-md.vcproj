@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="gtest_unittest"
-	ProjectGUID="{4D9FDFB5-986A-4139-823C-F4EE0ED481A1}"
+	Name="gtest_unittest-md"
+	ProjectGUID="{4D9FDFB5-986A-4139-823C-F4EE0ED481A2}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -22,7 +22,7 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="5"
+				RuntimeLibrary="3"
 				UsePrecompiledHeader="3"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="FALSE"
@@ -67,7 +67,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
-				RuntimeLibrary="4"
+				RuntimeLibrary="2"
 				UsePrecompiledHeader="3"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="FALSE"
@@ -107,8 +107,8 @@
 	</Configurations>
 	<References>
 		<ProjectReference
-			ReferencedProjectIdentifier="{3AF54C8A-10BF-4332-9147-F68ED9862032}"
-			Name="gtest_main"/>
+			ReferencedProjectIdentifier="{3AF54C8A-10BF-4332-9147-F68ED9862033}"
+			Name="gtest_main-md"/>
 	</References>
 	<Files>
 		<Filter
@@ -116,13 +116,13 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath="..\test\gtest_unittest.cc">
+				RelativePath="..\..\test\gtest_unittest.cc">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="1"
-						AdditionalIncludeDirectories="&quot;..&quot;;&quot;..\include&quot;"
+						AdditionalIncludeDirectories="&quot;..\..&quot;;&quot;..\..\include&quot;"
 						BasicRuntimeChecks="0"
 						UsePrecompiledHeader="0"
 						DebugInformationFormat="3"/>
@@ -131,7 +131,7 @@
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories="&quot;..&quot;;&quot;..\include&quot;"
+						AdditionalIncludeDirectories="&quot;..\..&quot;;&quot;..\..\include&quot;"
 						UsePrecompiledHeader="0"/>
 				</FileConfiguration>
 			</File>
