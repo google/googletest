@@ -212,7 +212,7 @@ class File : public FileInterface {
 Your code should talk to `FileInterface` to open a file.  Now it's
 easy to mock out the function.
 
-This may seem much hassle, but in practice you often have multiple
+This may seem like a hassle, but in practice you often have multiple
 related functions that you can put in the same interface, so the
 per-function syntactic overhead will be much lower.
 
