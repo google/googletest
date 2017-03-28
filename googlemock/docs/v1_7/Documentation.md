@@ -8,5 +8,5 @@ This page lists all documentation wiki pages for Google Mock **(the SVN trunk ve
 
 To contribute code to Google Mock, read:
 
-  * [DevGuide](DevGuide.md) -- read this _before_ writing your first patch.
+  * [DevGuide](../DevGuide.md) -- read this _before_ writing your first patch.
   * [Pump Manual](http://code.google.com/p/googletest/wiki/PumpManual) -- how we generate some of Google Mock's source files.
