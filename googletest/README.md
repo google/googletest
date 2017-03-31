@@ -140,7 +140,7 @@ New file `CMakeLists.txt.in`:
 Existing build's `CMakeLists.txt`:
 
     # Download and unpack googletest at configure time
-    configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
+    configure_file(CMakeLists.txt.in ${CMAKE_BINARY_DIR}/googletest-download/CMakeLists.txt)
     execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
       RESULT_VARIABLE result
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
