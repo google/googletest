@@ -147,8 +147,8 @@ class DeathTestFactory {
 // A concrete DeathTestFactory implementation for normal use.
 class DefaultDeathTestFactory : public DeathTestFactory {
  public:
-  virtual bool Create(const char* statement, const RE* regex,
-                      const char* file, int line, DeathTest** test);
+  virtual bool Create (const char* statement, const RE* regex,
+                      const char* file, int line, DeathTest** test) GTEST_OVERRIDE;
 };
 
 // Returns true if exit_status describes a process that was terminated

@@ -173,7 +173,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
    private: \
     typedef CaseName<gtest_TypeParam_> TestFixture; \
     typedef gtest_TypeParam_ TypeParam; \
-    virtual void TestBody(); \
+    virtual void TestBody() GTEST_OVERRIDE; \
   }; \
   bool gtest_##CaseName##_##TestName##_registered_ GTEST_ATTRIBUTE_UNUSED_ = \
       ::testing::internal::TypeParameterizedTest< \
@@ -228,7 +228,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
    private: \
     typedef CaseName<gtest_TypeParam_> TestFixture; \
     typedef gtest_TypeParam_ TypeParam; \
-    virtual void TestBody(); \
+    virtual void TestBody() GTEST_OVERRIDE; \
   }; \
   static bool gtest_##TestName##_defined_ GTEST_ATTRIBUTE_UNUSED_ = \
       GTEST_TYPED_TEST_CASE_P_STATE_(CaseName).AddTestName(\
