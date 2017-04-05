@@ -211,7 +211,9 @@ using ::testing::internal::Strings;
 using ::testing::internal::UniversalPrint;
 using ::testing::internal::UniversalPrinter;
 using ::testing::internal::UniversalTersePrint;
+#if GTEST_HAS_TR1_TUPLE || GTEST_HAS_STD_TUPLE_
 using ::testing::internal::UniversalTersePrintTupleFieldsToStrings;
+#endif
 using ::testing::internal::string;
 
 // The hash_* classes are not part of the C++ standard.  STLport

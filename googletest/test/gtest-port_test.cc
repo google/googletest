@@ -1295,7 +1295,7 @@ TEST(WindowsTypesTest, HANDLEIsVoidStar) {
   StaticAssertTypeEq<HANDLE, void*>();
 }
 
-#if GTEST_OS_WINDOWS_MINGW
+#if GTEST_OS_WINDOWS_MINGW && !defined(__MINGW64_VERSION_MAJOR)
 TEST(WindowsTypesTest, _CRITICAL_SECTIONIs_CRITICAL_SECTION) {
   StaticAssertTypeEq<CRITICAL_SECTION, _CRITICAL_SECTION>();
 }
