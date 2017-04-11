@@ -995,6 +995,19 @@ using ::std::tuple_size;
 # define GTEST_ATTRIBUTE_NO_SANITIZE_THREAD_
 #endif  // __clang__
 
+// A function level attribute to disable UndefinedBehaviorSanitizer's (defined)
+// unsigned integer overflow instrumentation.
+#if defined(__clang__)
+# if defined(__has_attribute) && __has_attribute(no_sanitize)
+#  define GTEST_ATTRIBUTE_NO_SANITIZE_UNSIGNED_OVERFLOW_ \
+       __attribute__((no_sanitize("unsigned-integer-overflow")))
+# else
+#  define GTEST_ATTRIBUTE_NO_SANITIZE_UNSIGNED_OVERFLOW_
+# endif  // defined(__has_attribute) && __has_attribute(no_sanitize)
+#else
+# define GTEST_ATTRIBUTE_NO_SANITIZE_UNSIGNED_OVERFLOW_
+#endif  // __clang__
+
 namespace testing {
 
 class Message;
