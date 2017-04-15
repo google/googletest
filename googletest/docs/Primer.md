@@ -160,8 +160,8 @@ evaluation order.
 tests if they are in the same memory location, not if they have the same value.
 Therefore, if you want to compare C strings (e.g. `const char*`) by value, use
 `ASSERT_STREQ()` , which will be described later on. In particular, to assert
-that a C string is `NULL`, use `ASSERT_STREQ(NULL, c_string)` . However, to
-compare two `string` objects, you should use `ASSERT_EQ`.
+that a C string is `NULL`, use `ASSERT_EQ(NULL, c_string)` . However, to
+compare two `string` objects, you should use `ASSERT_STREQ`.
 
 Macros in this section work with both narrow and wide string objects (`string`
 and `wstring`).
