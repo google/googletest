@@ -216,6 +216,7 @@ using ::testing::internal::UniversalTersePrintTupleFieldsToStrings;
 #endif
 using ::testing::internal::string;
 
+#if GTEST_HAS_HASH_MAP_
 // The hash_* classes are not part of the C++ standard.  STLport
 // defines them in namespace std.  MSVC defines them in ::stdext.  GCC
 // defines them in ::.
@@ -229,6 +230,7 @@ using ::stdext::hash_map;
 using ::stdext::hash_set;
 using ::stdext::hash_multimap;
 using ::stdext::hash_multiset;
+#endif
 #endif
 
 // Prints a value to a string using the universal value printer.  This
