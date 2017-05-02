@@ -1428,9 +1428,6 @@ GTEST_API_ std::string GetCapturedStderr();
 
 #endif  // GTEST_HAS_STREAM_REDIRECTION
 
-// Returns a path to temporary directory.
-GTEST_API_ std::string TempDir();
-
 // Returns the size (in bytes) of a file.
 GTEST_API_ size_t GetFileSize(FILE* file);
 
@@ -2559,6 +2556,11 @@ GTEST_API_ Int32 Int32FromGTestEnv(const char* flag, Int32 default_val);
 std::string StringFromGTestEnv(const char* flag, const char* default_val);
 
 }  // namespace internal
+
+// Returns a path to temporary directory.
+// Tries to determine an appropriate directory for the platform.
+GTEST_API_ std::string TempDir();
+
 }  // namespace testing
 
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
