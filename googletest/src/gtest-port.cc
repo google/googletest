@@ -1055,24 +1055,6 @@ std::string GetCapturedStderr() {
 
 #endif  // GTEST_HAS_STREAM_REDIRECTION
 
-std::string TempDir() {
-#if GTEST_OS_WINDOWS_MOBILE
-  return "\\temp\\";
-#elif GTEST_OS_WINDOWS
-  const char* temp_dir = posix::GetEnv("TEMP");
-  if (temp_dir == NULL || temp_dir[0] == '\0')
-    return "\\temp\\";
-  else if (temp_dir[strlen(temp_dir) - 1] == '\\')
-    return temp_dir;
-  else
-    return std::string(temp_dir) + "\\";
-#elif GTEST_OS_LINUX_ANDROID
-  return "/sdcard/";
-#else
-  return "/tmp/";
-#endif  // GTEST_OS_WINDOWS_MOBILE
-}
-
 size_t GetFileSize(FILE* file) {
   fseek(file, 0, SEEK_END);
   return static_cast<size_t>(ftell(file));
