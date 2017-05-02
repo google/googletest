@@ -6411,7 +6411,7 @@ class FlagfileTest : public InitGoogleTestTest {
     InitGoogleTestTest::SetUp();
 
     testdata_path_.Set(internal::FilePath(
-        internal::TempDir() + internal::GetCurrentExecutableName().string() +
+        testing::TempDir() + internal::GetCurrentExecutableName().string() +
         "_flagfile_test"));
     testing::internal::posix::RmDir(testdata_path_.c_str());
     EXPECT_TRUE(testdata_path_.CreateFolder());
