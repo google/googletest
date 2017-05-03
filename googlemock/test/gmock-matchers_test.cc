@@ -58,6 +58,11 @@
 # include <forward_list>  // NOLINT
 #endif
 
+// Disable MSVC2015 warning for std::pair: "decorated name length exceeded, name was truncated".
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+# pragma warning(disable:4503)
+#endif
+
 namespace testing {
 
 namespace internal {
