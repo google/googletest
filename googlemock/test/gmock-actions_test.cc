@@ -214,7 +214,7 @@ class MyNonDefaultConstructible {
   int value_;
 };
 
-#if GTEST_HAS_STD_TYPE_TRAITS_
+#if GTEST_LANG_CXX11
 
 TEST(BuiltInDefaultValueTest, ExistsForDefaultConstructibleType) {
   EXPECT_TRUE(BuiltInDefaultValue<MyDefaultConstructible>::Exists());
@@ -224,7 +224,7 @@ TEST(BuiltInDefaultValueTest, IsDefaultConstructedForDefaultConstructibleType) {
   EXPECT_EQ(42, BuiltInDefaultValue<MyDefaultConstructible>::Get().value());
 }
 
-#endif  // GTEST_HAS_STD_TYPE_TRAITS_
+#endif  // GTEST_LANG_CXX11
 
 TEST(BuiltInDefaultValueTest, DoesNotExistForNonDefaultConstructibleType) {
   EXPECT_FALSE(BuiltInDefaultValue<MyNonDefaultConstructible>::Exists());
@@ -694,12 +694,12 @@ class MockClass {
  public:
   MockClass() {}
 
-  MOCK_METHOD1(IntFunc, int(bool flag));  // NOLINT
-  MOCK_METHOD0(Foo, MyNonDefaultConstructible());
+  MOCK_NOOVERRIDE_METHOD1(IntFunc, int(bool flag));  // NOLINT
+  MOCK_NOOVERRIDE_METHOD0(Foo, MyNonDefaultConstructible());
 #if GTEST_HAS_STD_UNIQUE_PTR_
-  MOCK_METHOD0(MakeUnique, std::unique_ptr<int>());
-  MOCK_METHOD0(MakeUniqueBase, std::unique_ptr<Base>());
-  MOCK_METHOD0(MakeVectorUnique, std::vector<std::unique_ptr<int>>());
+  MOCK_NOOVERRIDE_METHOD0(MakeUnique, std::unique_ptr<int>());
+  MOCK_NOOVERRIDE_METHOD0(MakeUniqueBase, std::unique_ptr<Base>());
+  MOCK_NOOVERRIDE_METHOD0(MakeVectorUnique, std::vector<std::unique_ptr<int>>());
 #endif
 
  private:
