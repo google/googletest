@@ -259,7 +259,9 @@ class GTEST_API_ AssertionResult {
   // Used in EXPECT_TRUE/FALSE(assertion_result).
   AssertionResult(const AssertionResult& other);
 
+#if defined(_MSC_VER) && _MSC_VER < 1910
   GTEST_DISABLE_MSC_WARNINGS_PUSH_(4800 /* forcing value to bool */)
+#endif
 
   // Used in the EXPECT_TRUE/FALSE(bool_expression).
   //
@@ -276,7 +278,9 @@ class GTEST_API_ AssertionResult {
           /*enabler*/ = NULL)
       : success_(success) {}
 
+#if defined(_MSC_VER) && _MSC_VER < 1910
   GTEST_DISABLE_MSC_WARNINGS_POP_()
+#endif
 
   // Assignment operator.
   AssertionResult& operator=(AssertionResult other) {
