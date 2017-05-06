@@ -125,7 +125,7 @@ std::ostream& operator<<(std::ostream& os, const TestPartResult& result);
 // virtual.
 class GTEST_API_ TestPartResultArray {
  public:
-  TestPartResultArray() {}
+  TestPartResultArray() : array_() {}
 
   // Appends the given TestPartResult to the array.
   void Append(const TestPartResult& result);
