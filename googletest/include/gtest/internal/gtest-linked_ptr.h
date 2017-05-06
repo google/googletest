@@ -149,12 +149,12 @@ class linked_ptr {
 
   // Take over ownership of a raw pointer.  This should happen as soon as
   // possible after the object is created.
-  explicit linked_ptr(T* ptr = NULL) { capture(ptr); }
+  explicit linked_ptr(T* ptr = NULL) : value_(), link_() { capture(ptr); }
   ~linked_ptr() { depart(); }
 
   // Copy an existing linked_ptr<>, adding ourselves to the list of references.
-  template <typename U> linked_ptr(linked_ptr<U> const& ptr) { copy(&ptr); }
-  linked_ptr(linked_ptr const& ptr) {  // NOLINT
+  template <typename U> linked_ptr(linked_ptr<U> const& ptr) : value_(), link_() { copy(&ptr); }
+  linked_ptr(linked_ptr const& ptr) : value_(), link_() {  // NOLINT
     assert(&ptr != this);
     copy(&ptr);
   }

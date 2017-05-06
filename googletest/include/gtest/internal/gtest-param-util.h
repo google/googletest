@@ -310,7 +310,7 @@ class ValuesInIteratorRangeGenerator : public ParamGeneratorInterface<T> {
    public:
     Iterator(const ParamGeneratorInterface<T>* base,
              typename ContainerType::const_iterator iterator)
-        : base_(base), iterator_(iterator) {}
+        : base_(base), iterator_(iterator), value_() {}
     virtual ~Iterator() {}
 
     virtual const ParamGeneratorInterface<T>* BaseGenerator() const {
@@ -346,12 +346,15 @@ class ValuesInIteratorRangeGenerator : public ParamGeneratorInterface<T> {
     }
 
    private:
+    Iterator& operator=(const Iterator&);
+
     Iterator(const Iterator& other)
           // The explicit constructor call suppresses a false warning
           // emitted by gcc when supplied with the -Wextra option.
         : ParamIteratorInterface<T>(),
           base_(other.base_),
-          iterator_(other.iterator_) {}
+          iterator_(other.iterator_),
+          value_() {}
 
     const ParamGeneratorInterface<T>* const base_;
     typename ContainerType::const_iterator iterator_;
@@ -361,6 +364,7 @@ class ValuesInIteratorRangeGenerator : public ParamGeneratorInterface<T> {
     // Use of scoped_ptr helps manage cached value's lifetime,
     // which is bound by the lifespan of the iterator itself.
     mutable scoped_ptr<const T> value_;
+
   };  // class ValuesInIteratorRangeGenerator::Iterator
 
   // No implementation - assignment is unsupported.
@@ -667,7 +671,7 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
 // descriptors.
 class ParameterizedTestCaseRegistry {
  public:
-  ParameterizedTestCaseRegistry() {}
+  ParameterizedTestCaseRegistry() : test_case_infos_() {}
   ~ParameterizedTestCaseRegistry() {
     for (TestCaseInfoContainer::iterator it = test_case_infos_.begin();
          it != test_case_infos_.end(); ++it) {

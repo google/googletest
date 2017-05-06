@@ -274,7 +274,7 @@ class GTEST_API_ AssertionResult {
       typename internal::EnableIf<
           !internal::ImplicitlyConvertible<T, AssertionResult>::value>::type*
           /*enabler*/ = NULL)
-      : success_(success) {}
+      : success_(success), message_() {}
 
   GTEST_DISABLE_MSC_WARNINGS_POP_()
 
@@ -1676,7 +1676,7 @@ class GTEST_API_ AssertHelper {
 
   // Message assignment is a semantic trick to enable assertion
   // streaming; see the GTEST_MESSAGE_ macro below.
-  void operator=(const Message& message) const;
+  const AssertHelper& operator=(const Message& message) const;
 
  private:
   // We put our data in a struct so that the size of the AssertHelper class can
