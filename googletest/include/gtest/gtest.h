@@ -1580,6 +1580,47 @@ GTEST_API_ AssertionResult CmpHelperSTRNE(const char* s1_expression,
                                           const wchar_t* s1,
                                           const wchar_t* s2);
 
+// Helper function for *_STRNE on char16_t strings.
+//
+// INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
+#ifndef _MSC_VER
+#if __cplusplus==201103L
+// Helper function for *_STREQ on char16_t strings.
+//
+// INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
+GTEST_API_ AssertionResult CmpHelperSTREQ(const char* s1_expression,
+  const char* s2_expression,
+  const char16_t* s1,
+  const char16_t* s2);
+
+// Helper function for *_STRNE on wide strings.
+//
+// INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
+GTEST_API_ AssertionResult CmpHelperSTRNE(const char* s1_expression,
+  const char* s2_expression,
+  const char16_t* s1,
+  const char16_t* s2);
+#endif
+#else
+#if(_MSC_VER == 1900)
+// Helper function for *_STREQ on char16_t strings.
+//
+// INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
+GTEST_API_ AssertionResult CmpHelperSTREQ(const char* s1_expression,
+  const char* s2_expression,
+  const char16_t* s1,
+  const char16_t* s2);
+
+// Helper function for *_STRNE on wide strings.
+//
+// INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
+GTEST_API_ AssertionResult CmpHelperSTRNE(const char* s1_expression,
+  const char* s2_expression,
+  const char16_t* s1,
+  const char16_t* s2);
+#endif
+#endif
+
 }  // namespace internal
 
 // IsSubstring() and IsNotSubstring() are intended to be used as the

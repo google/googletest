@@ -115,6 +115,19 @@ class GTEST_API_ String {
   // including the empty string.
   static bool WideCStringEquals(const wchar_t* lhs, const wchar_t* rhs);
 
+  // Compares two char16_t C strings.  Returns true if they have the same
+  // content.
+  //
+#ifndef _MSC_VER
+  #if __cplusplus==201103L
+  static bool Char16CStringEquals(const char16_t* s1, const char16_t* s2);
+  #endif
+#else
+#if(_MSC_VER == 1900)
+  static bool Char16CStringEquals(const char16_t* lhs, const char16_t* rhs);
+#endif
+#endif
+
   // Compares two C strings, ignoring case.  Returns true iff they
   // have the same content.
   //
