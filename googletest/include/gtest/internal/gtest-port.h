@@ -1584,10 +1584,7 @@ class GTEST_API_ Notification {
 };
 # endif  // GTEST_HAS_NOTIFICATION_
 
-// On MinGW, we can have both GTEST_OS_WINDOWS and GTEST_HAS_PTHREAD
-// defined, but we don't want to use MinGW's pthreads implementation, which
-// has conformance problems with some versions of the POSIX standard.
-# if GTEST_HAS_PTHREAD && !GTEST_OS_WINDOWS_MINGW
+# if GTEST_HAS_PTHREAD
 
 // As a C-function, ThreadFuncWithCLinkage cannot be templated itself.
 // Consequently, it cannot select a correct instantiation of ThreadWithParam
@@ -1665,8 +1662,7 @@ class ThreadWithParam : public ThreadWithParamBase {
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadWithParam);
 };
-# endif  // !GTEST_OS_WINDOWS && GTEST_HAS_PTHREAD ||
-         // GTEST_HAS_MUTEX_AND_THREAD_LOCAL_
+# endif  // GTEST_HAS_PTHREAD
 
 # if GTEST_HAS_MUTEX_AND_THREAD_LOCAL_
 // Mutex and ThreadLocal have already been imported into the namespace.
