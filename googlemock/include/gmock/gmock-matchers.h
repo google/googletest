@@ -186,7 +186,7 @@ class StringMatchResultListener : public MatchResultListener {
   StringMatchResultListener() : MatchResultListener(&ss_) {}
 
   // Returns the explanation accumulated so far.
-  internal::string str() const { return ss_.str(); }
+  std::string str() const { return ss_.str(); }
 
   // Clears the explanation accumulated so far.
   void Clear() { ss_.str(""); }
@@ -675,7 +675,7 @@ Matcher<T> A();
 namespace internal {
 
 // If the explanation is not empty, prints it to the ostream.
-inline void PrintIfNotEmpty(const internal::string& explanation,
+inline void PrintIfNotEmpty(const std::string& explanation,
                             ::std::ostream* os) {
   if (explanation != "" && os != NULL) {
     *os << ", " << explanation;
@@ -685,11 +685,11 @@ inline void PrintIfNotEmpty(const internal::string& explanation,
 // Returns true if the given type name is easy to read by a human.
 // This is used to decide whether printing the type of a value might
 // be helpful.
-inline bool IsReadableTypeName(const string& type_name) {
+inline bool IsReadableTypeName(const std::string& type_name) {
   // We consider a type name readable if it's short or doesn't contain
   // a template or function type.
   return (type_name.length() <= 20 ||
-          type_name.find_first_of("<(") == string::npos);
+          type_name.find_first_of("<(") == std::string::npos);
 }
 
 // Matches the value against the given matcher, prints the value and explains
@@ -711,7 +711,7 @@ bool MatchPrintAndExplain(Value& value, const Matcher<T>& matcher,
 
   UniversalPrint(value, listener->stream());
 #if GTEST_HAS_RTTI
-  const string& type_name = GetTypeName<Value>();
+  const std::string& type_name = GetTypeName<Value>();
   if (IsReadableTypeName(type_name))
     *listener->stream() << " (of type " << type_name << ")";
 #endif
@@ -1335,17 +1335,17 @@ class MatchesRegexMatcher {
   //   wchar_t*
   template <typename CharType>
   bool MatchAndExplain(CharType* s, MatchResultListener* listener) const {
-    return s != NULL && MatchAndExplain(internal::string(s), listener);
+    return s != NULL && MatchAndExplain(std::string(s), listener);
   }
 
-  // Matches anything that can convert to internal::string.
+  // Matches anything that can convert to std::string.
   //
-  // This is a template, not just a plain function with const internal::string&,
+  // This is a template, not just a plain function with const std::string&,
   // because StringPiece has some interfering non-explicit constructors.
   template <class MatcheeStringType>
   bool MatchAndExplain(const MatcheeStringType& s,
                        MatchResultListener* /* listener */) const {
-    const internal::string& s2(s);
+    const std::string& s2(s);
     return full_match_ ? RE::FullMatch(s2, *regex_) :
         RE::PartialMatch(s2, *regex_);
   }
@@ -1353,13 +1353,13 @@ class MatchesRegexMatcher {
   void DescribeTo(::std::ostream* os) const {
     *os << (full_match_ ? "matches" : "contains")
         << " regular expression ";
-    UniversalPrinter<internal::string>::Print(regex_->pattern(), os);
+    UniversalPrinter<std::string>::Print(regex_->pattern(), os);
   }
 
   void DescribeNegationTo(::std::ostream* os) const {
     *os << "doesn't " << (full_match_ ? "match" : "contain")
         << " regular expression ";
-    UniversalPrinter<internal::string>::Print(regex_->pattern(), os);
+    UniversalPrinter<std::string>::Print(regex_->pattern(), os);
   }
 
  private:
@@ -1526,8 +1526,8 @@ class BothOfMatcherImpl : public MatcherInterface<T> {
     }
 
     // Otherwise we need to explain why *both* of them match.
-    const internal::string s1 = listener1.str();
-    const internal::string s2 = listener2.str();
+    const std::string s1 = listener1.str();
+    const std::string s2 = listener2.str();
 
     if (s1 == "") {
       *listener << s2;
@@ -1698,8 +1698,8 @@ class EitherOfMatcherImpl : public MatcherInterface<T> {
     }
 
     // Otherwise we need to explain why *both* of them fail.
-    const internal::string s1 = listener1.str();
-    const internal::string s2 = listener2.str();
+    const std::string s1 = listener1.str();
+    const std::string s2 = listener2.str();
 
     if (s1 == "") {
       *listener << s2;
@@ -2123,7 +2123,7 @@ class WhenDynamicCastToMatcherBase {
  protected:
   const Matcher<To> matcher_;
 
-  static string GetToName() {
+  static std::string GetToName() {
 #if GTEST_HAS_RTTI
     return GetTypeName<To>();
 #else  // GTEST_HAS_RTTI
@@ -2953,7 +2953,7 @@ class KeyMatcherImpl : public MatcherInterface<PairType> {
     StringMatchResultListener inner_listener;
     const bool match = inner_matcher_.MatchAndExplain(key_value.first,
                                                       &inner_listener);
-    const internal::string explanation = inner_listener.str();
+    const std::string explanation = inner_listener.str();
     if (explanation != "") {
       *listener << "whose first field is a value " << explanation;
     }
@@ -3058,8 +3058,8 @@ class PairMatcherImpl : public MatcherInterface<PairType> {
   }
 
  private:
-  void ExplainSuccess(const internal::string& first_explanation,
-                      const internal::string& second_explanation,
+  void ExplainSuccess(const std::string& first_explanation,
+                      const std::string& second_explanation,
                       MatchResultListener* listener) const {
     *listener << "whose both fields match";
     if (first_explanation != "") {
@@ -3166,7 +3166,7 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
     const bool listener_interested = listener->IsInterested();
 
     // explanations[i] is the explanation of the element at index i.
-    ::std::vector<internal::string> explanations(count());
+    ::std::vector<std::string> explanations(count());
     StlContainerReference stl_container = View::ConstReference(container);
     typename StlContainer::const_iterator it = stl_container.begin();
     size_t exam_pos = 0;
@@ -3225,7 +3225,7 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
     if (listener_interested) {
       bool reason_printed = false;
       for (size_t i = 0; i != count(); ++i) {
-        const internal::string& s = explanations[i];
+        const std::string& s = explanations[i];
         if (!s.empty()) {
           if (reason_printed) {
             *listener << ",\nand ";
@@ -3278,7 +3278,7 @@ class GTEST_API_ MatchMatrix {
 
   void Randomize();
 
-  string DebugString() const;
+  std::string DebugString() const;
 
  private:
   size_t SpaceIndex(size_t ilhs, size_t irhs) const {
@@ -3322,9 +3322,8 @@ class GTEST_API_ UnorderedElementsAreMatcherImplBase {
   void DescribeNegationToImpl(::std::ostream* os) const;
 
   bool VerifyAllElementsAndMatchersAreMatched(
-      const ::std::vector<string>& element_printouts,
-      const MatchMatrix& matrix,
-      MatchResultListener* listener) const;
+      const ::std::vector<std::string>& element_printouts,
+      const MatchMatrix& matrix, MatchResultListener* listener) const;
 
   MatcherDescriberVec& matcher_describers() {
     return matcher_describers_;
@@ -3376,7 +3375,7 @@ class UnorderedElementsAreMatcherImpl
   virtual bool MatchAndExplain(Container container,
                                MatchResultListener* listener) const {
     StlContainerReference stl_container = View::ConstReference(container);
-    ::std::vector<string> element_printouts;
+    ::std::vector<std::string> element_printouts;
     MatchMatrix matrix = AnalyzeElements(stl_container.begin(),
                                          stl_container.end(),
                                          &element_printouts,
@@ -3407,7 +3406,7 @@ class UnorderedElementsAreMatcherImpl
 
   template <typename ElementIter>
   MatchMatrix AnalyzeElements(ElementIter elem_first, ElementIter elem_last,
-                              ::std::vector<string>* element_printouts,
+                              ::std::vector<std::string>* element_printouts,
                               MatchResultListener* listener) const {
     element_printouts->clear();
     ::std::vector<char> did_match;
@@ -3619,9 +3618,9 @@ BoundSecondMatcher<Tuple2Matcher, Second> MatcherBindSecond(
 // 'negation' is false; otherwise returns the description of the
 // negation of the matcher.  'param_values' contains a list of strings
 // that are the print-out of the matcher's parameters.
-GTEST_API_ string FormatMatcherDescription(bool negation,
-                                           const char* matcher_name,
-                                           const Strings& param_values);
+GTEST_API_ std::string FormatMatcherDescription(bool negation,
+                                                const char* matcher_name,
+                                                const Strings& param_values);
 
 }  // namespace internal
 
@@ -3951,53 +3950,52 @@ internal::ResultOfMatcher<Callable> ResultOf(
 // String matchers.
 
 // Matches a string equal to str.
-inline PolymorphicMatcher<internal::StrEqualityMatcher<internal::string> >
-    StrEq(const internal::string& str) {
-  return MakePolymorphicMatcher(internal::StrEqualityMatcher<internal::string>(
-      str, true, true));
+inline PolymorphicMatcher<internal::StrEqualityMatcher<std::string> > StrEq(
+    const std::string& str) {
+  return MakePolymorphicMatcher(
+      internal::StrEqualityMatcher<std::string>(str, true, true));
 }
 
 // Matches a string not equal to str.
-inline PolymorphicMatcher<internal::StrEqualityMatcher<internal::string> >
-    StrNe(const internal::string& str) {
-  return MakePolymorphicMatcher(internal::StrEqualityMatcher<internal::string>(
-      str, false, true));
+inline PolymorphicMatcher<internal::StrEqualityMatcher<std::string> > StrNe(
+    const std::string& str) {
+  return MakePolymorphicMatcher(
+      internal::StrEqualityMatcher<std::string>(str, false, true));
 }
 
 // Matches a string equal to str, ignoring case.
-inline PolymorphicMatcher<internal::StrEqualityMatcher<internal::string> >
-    StrCaseEq(const internal::string& str) {
-  return MakePolymorphicMatcher(internal::StrEqualityMatcher<internal::string>(
-      str, true, false));
+inline PolymorphicMatcher<internal::StrEqualityMatcher<std::string> > StrCaseEq(
+    const std::string& str) {
+  return MakePolymorphicMatcher(
+      internal::StrEqualityMatcher<std::string>(str, true, false));
 }
 
 // Matches a string not equal to str, ignoring case.
-inline PolymorphicMatcher<internal::StrEqualityMatcher<internal::string> >
-    StrCaseNe(const internal::string& str) {
-  return MakePolymorphicMatcher(internal::StrEqualityMatcher<internal::string>(
-      str, false, false));
+inline PolymorphicMatcher<internal::StrEqualityMatcher<std::string> > StrCaseNe(
+    const std::string& str) {
+  return MakePolymorphicMatcher(
+      internal::StrEqualityMatcher<std::string>(str, false, false));
 }
 
 // Creates a matcher that matches any string, std::string, or C string
 // that contains the given substring.
-inline PolymorphicMatcher<internal::HasSubstrMatcher<internal::string> >
-    HasSubstr(const internal::string& substring) {
-  return MakePolymorphicMatcher(internal::HasSubstrMatcher<internal::string>(
-      substring));
+inline PolymorphicMatcher<internal::HasSubstrMatcher<std::string> > HasSubstr(
+    const std::string& substring) {
+  return MakePolymorphicMatcher(
+      internal::HasSubstrMatcher<std::string>(substring));
 }
 
 // Matches a string that starts with 'prefix' (case-sensitive).
-inline PolymorphicMatcher<internal::StartsWithMatcher<internal::string> >
-    StartsWith(const internal::string& prefix) {
-  return MakePolymorphicMatcher(internal::StartsWithMatcher<internal::string>(
-      prefix));
+inline PolymorphicMatcher<internal::StartsWithMatcher<std::string> > StartsWith(
+    const std::string& prefix) {
+  return MakePolymorphicMatcher(
+      internal::StartsWithMatcher<std::string>(prefix));
 }
 
 // Matches a string that ends with 'suffix' (case-sensitive).
-inline PolymorphicMatcher<internal::EndsWithMatcher<internal::string> >
-    EndsWith(const internal::string& suffix) {
-  return MakePolymorphicMatcher(internal::EndsWithMatcher<internal::string>(
-      suffix));
+inline PolymorphicMatcher<internal::EndsWithMatcher<std::string> > EndsWith(
+    const std::string& suffix) {
+  return MakePolymorphicMatcher(internal::EndsWithMatcher<std::string>(suffix));
 }
 
 // Matches a string that fully matches regular expression 'regex'.
@@ -4007,7 +4005,7 @@ inline PolymorphicMatcher<internal::MatchesRegexMatcher> MatchesRegex(
   return MakePolymorphicMatcher(internal::MatchesRegexMatcher(regex, true));
 }
 inline PolymorphicMatcher<internal::MatchesRegexMatcher> MatchesRegex(
-    const internal::string& regex) {
+    const std::string& regex) {
   return MatchesRegex(new internal::RE(regex));
 }
 
@@ -4018,7 +4016,7 @@ inline PolymorphicMatcher<internal::MatchesRegexMatcher> ContainsRegex(
   return MakePolymorphicMatcher(internal::MatchesRegexMatcher(regex, false));
 }
 inline PolymorphicMatcher<internal::MatchesRegexMatcher> ContainsRegex(
-    const internal::string& regex) {
+    const std::string& regex) {
   return ContainsRegex(new internal::RE(regex));
 }
 
