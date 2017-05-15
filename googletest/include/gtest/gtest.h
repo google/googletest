@@ -2194,7 +2194,7 @@ bool StaticAssertTypeEq() {
 // name of the test within the test case.
 //
 // A test fixture class must be declared earlier.  The user should put
-// his test code between braces after using this macro.  Example:
+// the test code between braces after using this macro.  Example:
 //
 //   class FooTest : public testing::Test {
 //    protected:
