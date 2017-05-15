@@ -379,7 +379,7 @@ void MatchMatrix::Randomize() {
   }
 }
 
-string MatchMatrix::DebugString() const {
+std::string MatchMatrix::DebugString() const {
   ::std::stringstream ss;
   const char *sep = "";
   for (size_t i = 0; i < LhsSize(); ++i) {
@@ -441,10 +441,9 @@ void UnorderedElementsAreMatcherImplBase::DescribeNegationToImpl(
 // Returns false, writing an explanation to 'listener', if and only
 // if the success criteria are not met.
 bool UnorderedElementsAreMatcherImplBase::
-VerifyAllElementsAndMatchersAreMatched(
-    const ::std::vector<string>& element_printouts,
-    const MatchMatrix& matrix,
-    MatchResultListener* listener) const {
+    VerifyAllElementsAndMatchersAreMatched(
+        const ::std::vector<std::string>& element_printouts,
+        const MatchMatrix& matrix, MatchResultListener* listener) const {
   bool result = true;
   ::std::vector<char> element_matched(matrix.LhsSize(), 0);
   ::std::vector<char> matcher_matched(matrix.RhsSize(), 0);
