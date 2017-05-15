@@ -42,7 +42,7 @@ class Mock {
  public:
   Mock() {}
 
-  MOCK_METHOD0(DoThis, void());
+  MOCK_NOOVERRIDE_METHOD0(DoThis, void());
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(Mock);
@@ -99,8 +99,8 @@ class MockBar {
 
   const string& str() const { return str_; }
 
-  MOCK_METHOD0(This, int());
-  MOCK_METHOD2(That, string(int, bool));
+  MOCK_NOOVERRIDE_METHOD0(This, int());
+  MOCK_NOOVERRIDE_METHOD2(That, string(int, bool));
 
  private:
   string str_;
