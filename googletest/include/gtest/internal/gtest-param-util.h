@@ -507,8 +507,8 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
   typedef typename ParamNameGenFunc<ParamType>::Type ParamNameGeneratorFunc;
 
   explicit ParameterizedTestCaseInfo(
-      const char* name, CodeLocation code_location)
-      : test_case_name_(name), code_location_(code_location) {}
+      const char* name)
+      : test_case_name_(name) {}
 
   // Test case base name for display purposes.
   virtual const string& GetTestCaseName() const { return test_case_name_; }
@@ -522,9 +522,11 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
   // test case base name and DoBar is test base name.
   void AddTestPattern(const char* test_case_name,
                       const char* test_base_name,
+                      const CodeLocation code_location,
                       TestMetaFactoryBase<ParamType>* meta_factory) {
     tests_.push_back(linked_ptr<TestInfo>(new TestInfo(test_case_name,
                                                        test_base_name,
+                                                       code_location,
                                                        meta_factory)));
   }
   // INSTANTIATE_TEST_CASE_P macro uses AddGenerator() to record information
@@ -588,7 +590,7 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
               test_name_stream.GetString().c_str(),
               NULL,  // No type parameter.
               PrintToString(*param_it).c_str(),
-              code_location_,
+              test_info->code_location,
               GetTestCaseTypeId(),
               TestCase::SetUpTestCase,
               TestCase::TearDownTestCase,
@@ -604,13 +606,16 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
   struct TestInfo {
     TestInfo(const char* a_test_case_base_name,
              const char* a_test_base_name,
+             const CodeLocation a_code_location,
              TestMetaFactoryBase<ParamType>* a_test_meta_factory) :
         test_case_base_name(a_test_case_base_name),
         test_base_name(a_test_base_name),
+        code_location(a_code_location),
         test_meta_factory(a_test_meta_factory) {}
 
     const string test_case_base_name;
     const string test_base_name;
+    const CodeLocation code_location;
     const scoped_ptr<TestMetaFactoryBase<ParamType> > test_meta_factory;
   };
   typedef ::std::vector<linked_ptr<TestInfo> > TestInfoContainer;
@@ -652,7 +657,6 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
   }
 
   const string test_case_name_;
-  CodeLocation code_location_;
   TestInfoContainer tests_;
   InstantiationContainer instantiations_;
 
@@ -703,7 +707,7 @@ class ParameterizedTestCaseRegistry {
     }
     if (typed_test_info == NULL) {
       typed_test_info = new ParameterizedTestCaseInfo<TestCase>(
-          test_case_name, code_location);
+          test_case_name);
       test_case_infos_.push_back(typed_test_info);
     }
     return typed_test_info;
