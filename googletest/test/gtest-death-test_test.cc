@@ -505,7 +505,7 @@ TEST_F(TestForDeathTest, AcceptsAnythingConvertibleToRE) {
 
 # if GTEST_HAS_GLOBAL_STRING
 
-  const string regex_str(regex_c_str);
+  const ::string regex_str(regex_c_str);
   EXPECT_DEATH(GlobalFunction(), regex_str);
 
 # endif  // GTEST_HAS_GLOBAL_STRING

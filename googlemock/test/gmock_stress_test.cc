@@ -51,7 +51,7 @@ const int kRepeat = 50;
 class MockFoo {
  public:
   MOCK_METHOD1(Bar, int(int n));  // NOLINT
-  MOCK_METHOD2(Baz, char(const char* s1, const internal::string& s2));  // NOLINT
+  MOCK_METHOD2(Baz, char(const char* s1, const std::string& s2));  // NOLINT
 };
 
 // Helper for waiting for the given thread to finish and then deleting it.
