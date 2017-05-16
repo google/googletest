@@ -52,16 +52,17 @@ namespace {
 class TersePrinter : public EmptyTestEventListener {
  private:
   // Called before any test activity starts.
-  virtual void OnTestProgramStart(const UnitTest& /* unit_test */) {}
+  virtual void OnTestProgramStart(const UnitTest& /* unit_test */)
+                                                    GTEST_OVERRIDE {}
 
   // Called after all test activities have ended.
-  virtual void OnTestProgramEnd(const UnitTest& unit_test) {
+  virtual void OnTestProgramEnd(const UnitTest& unit_test) GTEST_OVERRIDE {
     fprintf(stdout, "TEST %s\n", unit_test.Passed() ? "PASSED" : "FAILED");
     fflush(stdout);
   }
 
   // Called before a test starts.
-  virtual void OnTestStart(const TestInfo& test_info) {
+  virtual void OnTestStart(const TestInfo& test_info) GTEST_OVERRIDE {
     fprintf(stdout,
             "*** Test %s.%s starting.\n",
             test_info.test_case_name(),
@@ -70,7 +71,8 @@ class TersePrinter : public EmptyTestEventListener {
   }
 
   // Called after a failed assertion or a SUCCEED() invocation.
-  virtual void OnTestPartResult(const TestPartResult& test_part_result) {
+  virtual void OnTestPartResult(const TestPartResult& test_part_result)
+                                                         GTEST_OVERRIDE {
     fprintf(stdout,
             "%s in %s:%d\n%s\n",
             test_part_result.failed() ? "*** Failure" : "Success",
@@ -81,7 +83,7 @@ class TersePrinter : public EmptyTestEventListener {
   }
 
   // Called after a test ends.
-  virtual void OnTestEnd(const TestInfo& test_info) {
+  virtual void OnTestEnd(const TestInfo& test_info) GTEST_OVERRIDE {
     fprintf(stdout,
             "*** Test %s.%s ending.\n",
             test_info.test_case_name(),

@@ -207,6 +207,23 @@ function(cxx_executable name dir libs)
     ${name} "${cxx_default}" "${libs}" "${dir}/${name}.cc" ${ARGN})
 endfunction()
 
+
+# cxx_sample(name dir lib srcs...)
+#
+# same as cxx_executable, but obeys gtest_build_samples_cxx11
+# by turning on a semistrict C++11 mode when building samples.
+function(cxx_sample name dir libs)
+  if (gtest_build_samples_cxx11)
+    if (MSVC)
+      set("cxx11_flag" "")
+    else()
+      set("cxx11_flag" "-std=c++11 -Wsuggest-override")
+    endif()
+  endif()
+  cxx_executable_with_flags(
+    ${name} "${cxx_default} ${cxx11_flag}" "${libs}" "${dir}/${name}.cc" ${ARGN})
+endfunction()
+
 # Sets PYTHONINTERP_FOUND and PYTHON_EXECUTABLE.
 find_package(PythonInterp)
 

@@ -296,10 +296,10 @@ class ValuesInIteratorRangeGenerator : public ParamGeneratorInterface<T> {
       : container_(begin, end) {}
   virtual ~ValuesInIteratorRangeGenerator() {}
 
-  virtual ParamIteratorInterface<T>* Begin() const {
+  virtual ParamIteratorInterface<T>* Begin() const GTEST_OVERRIDE {
     return new Iterator(this, container_.begin());
   }
-  virtual ParamIteratorInterface<T>* End() const {
+  virtual ParamIteratorInterface<T>* End() const GTEST_OVERRIDE {
     return new Iterator(this, container_.end());
   }
 
@@ -313,14 +313,14 @@ class ValuesInIteratorRangeGenerator : public ParamGeneratorInterface<T> {
         : base_(base), iterator_(iterator) {}
     virtual ~Iterator() {}
 
-    virtual const ParamGeneratorInterface<T>* BaseGenerator() const {
+    virtual const ParamGeneratorInterface<T>* BaseGenerator() const GTEST_OVERRIDE {
       return base_;
     }
-    virtual void Advance() {
+    virtual void Advance() GTEST_OVERRIDE {
       ++iterator_;
       value_.reset();
     }
-    virtual ParamIteratorInterface<T>* Clone() const {
+    virtual ParamIteratorInterface<T>* Clone() const GTEST_OVERRIDE {
       return new Iterator(*this);
     }
     // We need to use cached value referenced by iterator_ because *iterator_
@@ -330,12 +330,12 @@ class ValuesInIteratorRangeGenerator : public ParamGeneratorInterface<T> {
     // can advance iterator_ beyond the end of the range, and we cannot
     // detect that fact. The client code, on the other hand, is
     // responsible for not calling Current() on an out-of-range iterator.
-    virtual const T* Current() const {
+    virtual const T* Current() const GTEST_OVERRIDE {
       if (value_.get() == NULL)
         value_.reset(new T(*iterator_));
       return value_.get();
     }
-    virtual bool Equals(const ParamIteratorInterface<T>& other) const {
+    virtual bool Equals(const ParamIteratorInterface<T>& other) const GTEST_OVERRIDE {
       // Having the same base generator guarantees that the other
       // iterator is of the same type and we can downcast.
       GTEST_CHECK_(BaseGenerator() == other.BaseGenerator())
@@ -511,9 +511,13 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
       : test_case_name_(name), code_location_(code_location) {}
 
   // Test case base name for display purposes.
-  virtual const string& GetTestCaseName() const { return test_case_name_; }
+  virtual const string& GetTestCaseName() const GTEST_OVERRIDE {
+    return test_case_name_;
+  }
   // Test case id to verify identity.
-  virtual TypeId GetTestCaseTypeId() const { return GetTypeId<TestCase>(); }
+  virtual TypeId GetTestCaseTypeId() const GTEST_OVERRIDE {
+    return GetTypeId<TestCase>();
+  }
   // TEST_P macro uses AddTestPattern() to record information
   // about a single test in a LocalTestInfo structure.
   // test_case_name is the base name of the test case (without invocation
@@ -543,7 +547,7 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
   // This method should not be called more then once on any single
   // instance of a ParameterizedTestCaseInfoBase derived class.
   // UnitTest has a guard to prevent from calling this method more then once.
-  virtual void RegisterTests() {
+  virtual void RegisterTests() GTEST_OVERRIDE {
     for (typename TestInfoContainer::iterator test_it = tests_.begin();
          test_it != tests_.end(); ++test_it) {
       linked_ptr<TestInfo> test_info = *test_it;

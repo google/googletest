@@ -476,12 +476,12 @@ class TestFactoryBase {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(TestFactoryBase);
 };
 
-// This class provides implementation of TeastFactoryBase interface.
+// This class provides implementation of TestFactoryBase interface.
 // It is used in TEST and TEST_F macros.
 template <class TestClass>
 class TestFactoryImpl : public TestFactoryBase {
  public:
-  virtual Test* CreateTest() { return new TestClass; }
+  virtual Test* CreateTest() GTEST_OVERRIDE { return new TestClass; }
 };
 
 #if GTEST_OS_WINDOWS
@@ -1216,7 +1216,7 @@ class GTEST_TEST_CLASS_NAME_(test_case_name, test_name) : public parent_class {\
  public:\
   GTEST_TEST_CLASS_NAME_(test_case_name, test_name)() {}\
  private:\
-  virtual void TestBody();\
+  virtual void TestBody() GTEST_OVERRIDE;\
   static ::testing::TestInfo* const test_info_ GTEST_ATTRIBUTE_UNUSED_;\
   GTEST_DISALLOW_COPY_AND_ASSIGN_(\
       GTEST_TEST_CLASS_NAME_(test_case_name, test_name));\

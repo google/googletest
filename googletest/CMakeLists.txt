@@ -20,6 +20,8 @@ option(gtest_build_tests "Build all of gtest's own tests." OFF)
 
 option(gtest_build_samples "Build gtest's sample programs." OFF)
 
+option(gtest_build_samples_cxx11 "Build gtest's sample programs as C++11." OFF)
+
 option(gtest_disable_pthreads "Disable uses of pthreads in gtest." OFF)
 
 option(
@@ -116,16 +118,16 @@ install(DIRECTORY ${gtest_SOURCE_DIR}/include/gtest
 # or specifying the -Dgtest_build_samples=ON flag when running cmake.
 
 if (gtest_build_samples)
-  cxx_executable(sample1_unittest samples gtest_main samples/sample1.cc)
-  cxx_executable(sample2_unittest samples gtest_main samples/sample2.cc)
-  cxx_executable(sample3_unittest samples gtest_main)
-  cxx_executable(sample4_unittest samples gtest_main samples/sample4.cc)
-  cxx_executable(sample5_unittest samples gtest_main samples/sample1.cc)
-  cxx_executable(sample6_unittest samples gtest_main)
-  cxx_executable(sample7_unittest samples gtest_main)
-  cxx_executable(sample8_unittest samples gtest_main)
-  cxx_executable(sample9_unittest samples gtest)
-  cxx_executable(sample10_unittest samples gtest)
+  cxx_sample(sample1_unittest samples gtest_main samples/sample1.cc)
+  cxx_sample(sample2_unittest samples gtest_main samples/sample2.cc)
+  cxx_sample(sample3_unittest samples gtest_main)
+  cxx_sample(sample4_unittest samples gtest_main samples/sample4.cc)
+  cxx_sample(sample5_unittest samples gtest_main samples/sample1.cc)
+  cxx_sample(sample6_unittest samples gtest_main)
+  cxx_sample(sample7_unittest samples gtest_main)
+  cxx_sample(sample8_unittest samples gtest_main)
+  cxx_sample(sample9_unittest samples gtest)
+  cxx_sample(sample10_unittest samples gtest)
 endif()
 
 ########################################################################

@@ -668,6 +668,15 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #  define GTEST_ENV_HAS_STD_TUPLE_ 1
 # endif
 
+// C++11 allows the override specifier when overriding virtual methods.
+// This is enforced by clang's -Winconsistent-missing-override and gcc's
+// -Wsuggest-override, even if gtest is included with -isystem.
+# if GTEST_LANG_CXX11
+#  define GTEST_OVERRIDE override
+#else
+#  define GTEST_OVERRIDE
+#endif
+
 # if GTEST_ENV_HAS_TR1_TUPLE_ || GTEST_ENV_HAS_STD_TUPLE_
 #  define GTEST_USE_OWN_TR1_TUPLE 0
 # else
