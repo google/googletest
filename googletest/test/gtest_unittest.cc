@@ -86,9 +86,9 @@ class StreamingListenerTest : public Test {
   class FakeSocketWriter : public StreamingListener::AbstractSocketWriter {
    public:
     // Sends a string to the socket.
-    virtual void Send(const string& message) { output_ += message; }
+    virtual void Send(const std::string& message) { output_ += message; }
 
-    string output_;
+    std::string output_;
   };
 
   StreamingListenerTest()
@@ -98,7 +98,7 @@ class StreamingListenerTest : public Test {
                        CodeLocation(__FILE__, __LINE__), 0, NULL) {}
 
  protected:
-  string* output() { return &(fake_sock_writer_->output_); }
+  std::string* output() { return &(fake_sock_writer_->output_); }
 
   FakeSocketWriter* const fake_sock_writer_;
   StreamingListener streamer_;
@@ -7703,4 +7703,3 @@ TEST(SkipPrefixTest, DoesNotSkipWhenPrefixDoesNotMatch) {
   EXPECT_FALSE(SkipPrefix("world!", &p));
   EXPECT_EQ(str, p);
 }
-
