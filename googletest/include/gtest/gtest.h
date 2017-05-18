@@ -1678,6 +1678,16 @@ class GTEST_API_ AssertHelper {
   // streaming; see the GTEST_MESSAGE_ macro below.
   void operator=(const Message& message) const;
 
+  // This overload of operator= allows users of ASSERT_ macros to specify an optional
+  // return value that is returned if the assertion fails. This allows using ASSERT_ macros
+  // in subroutines that return error code to propagate the state of the test execution.
+  // The syntax for returning an error code is
+  // ASSERT_XX(...) [ << <optional message> ] [ || <optional error code> ]
+  template<typename T>
+  const T& operator=(const ReturnValueAndMessageWrapper<T>& wrappedReturnValueAndMessage) const {
+      *this = wrappedReturnValueAndMessage.message();
+      return wrappedReturnValueAndMessage;
+  }
  private:
   // We put our data in a struct so that the size of the AssertHelper class can
   // be as small as possible.  This is important because gcc is incapable of

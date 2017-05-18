@@ -7703,3 +7703,18 @@ TEST(SkipPrefixTest, DoesNotSkipWhenPrefixDoesNotMatch) {
   EXPECT_FALSE(SkipPrefix("world!", &p));
   EXPECT_EQ(str, p);
 }
+
+static bool subroutine1(bool fails) {
+  ASSERT_FALSE(fails) << "with message" || false;
+  return true;
+}
+
+static bool subroutine2(bool fails) {
+  ASSERT_FALSE(fails) /*without message*/ || false;
+  return true;
+}
+
+TEST(SubroutineAssertTest, SubroutineSucceeds) {
+  ASSERT_TRUE(subroutine1(false));
+  ASSERT_TRUE(subroutine2(false));
+}
