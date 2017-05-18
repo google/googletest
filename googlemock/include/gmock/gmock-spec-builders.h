@@ -1471,7 +1471,8 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   virtual ~FunctionMockerBase()
         GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
     MutexLock l(&g_gmock_mutex);
-    VerifyAndClearExpectationsLocked();
+    if(!std::uncaught_exception())
+        VerifyAndClearExpectationsLocked();
     Mock::UnregisterLocked(this);
     ClearDefaultActionsLocked();
   }
