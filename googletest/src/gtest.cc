@@ -146,7 +146,40 @@
 # define vsnprintf _vsnprintf
 #endif  // GTEST_OS_WINDOWS
 
+#if defined( GTEST_REDIRECT_TO_ANDROID_LOG )
+# include <android/log.h>
+#endif // GTEST_REDIRECT_TO_ANDROID_LOG
+
 namespace testing {
+
+#if defined( GTEST_REDIRECT_TO_ANDROID_LOG )
+namespace internal {
+void vprintf( char const * const fmt, va_list /*const*/ args )
+{
+    __android_log_vprint( ANDROID_LOG_INFO, "GTest", fmt, args );
+}
+
+void printf( char const * const fmt, ... )
+{
+    va_list args;
+    va_start( args, fmt );
+    vprintf( fmt, args );
+    va_end( args );
+}
+
+template <typename ... Args>
+int fprintf( FILE * const p_stream, char const * const fmt, Args ... args )
+{
+    if ( p_stream == stderr )
+        __android_log_print( ANDROID_LOG_ERROR, "GTest", fmt, args... );
+    else
+        ::fprintf( p_stream, fmt, args... );
+}
+} // namespace internal
+using internal::vprintf;
+using internal::printf;
+using internal::fprintf;
+#endif // GTEST_REDIRECT_TO_ANDROID_LOG
 
 using internal::CountIf;
 using internal::ForEach;

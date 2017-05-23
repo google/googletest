@@ -82,9 +82,9 @@ macro(config_compiler_and_linker)
       # http://stackoverflow.com/questions/3232669 explains the issue.
       set(cxx_base_flags "${cxx_base_flags} -wd4702")
     endif()
-    if (NOT (MSVC_VERSION GREATER 1900))  # 1900 is Visual Studio 2015
+    if (NOT (MSVC_VERSION GREATER_EQUAL 1900))  # 1900 is Visual Studio 2015
       # BigObj required for tests.
-      set(cxx_base_flags "${cxx_base_flags} -bigobj")
+      set(cxx_base_flags "${cxx_base_flags} -bigobj -std:c++latest")
     endif()
 
     set(cxx_base_flags "${cxx_base_flags} -D_UNICODE -DUNICODE -DWIN32 -D_WIN32")
@@ -159,6 +159,9 @@ function(cxx_library_with_type name type cxx_flags)
   endif()
   if (CMAKE_USE_PTHREADS_INIT)
     target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT})
+  endif()
+  if( COMMAND make_universal )
+      make_universal( ${name} )
   endif()
 endfunction()
 
