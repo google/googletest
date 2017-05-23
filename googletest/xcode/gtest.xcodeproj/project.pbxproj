@@ -1025,6 +1025,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 40D4CDF20E30E07400294801 /* FrameworkTarget.xcconfig */;
 			buildSettings = {
+				CLANG_CXX_LIBRARY = "libc++";
 				COMBINE_HIDPI_IMAGES = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -1036,6 +1037,7 @@
 				INFOPLIST_FILE = Resources/Info.plist;
 				INFOPLIST_PREFIX_HEADER = "$(PROJECT_TEMP_DIR)/Version.h";
 				INFOPLIST_PREPROCESS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = gtest;
 				SDKROOT = macosx;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -1046,6 +1048,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 40D4CDF20E30E07400294801 /* FrameworkTarget.xcconfig */;
 			buildSettings = {
+				CLANG_CXX_LIBRARY = "libc++";
 				COMBINE_HIDPI_IMAGES = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -1057,6 +1060,7 @@
 				INFOPLIST_FILE = Resources/Info.plist;
 				INFOPLIST_PREFIX_HEADER = "$(PROJECT_TEMP_DIR)/Version.h";
 				INFOPLIST_PREPROCESS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = gtest;
 				SDKROOT = macosx;
 				VERSIONING_SYSTEM = "apple-generic";
