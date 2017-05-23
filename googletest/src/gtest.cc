@@ -370,7 +370,7 @@ AssertHelper::~AssertHelper() {
 }
 
 // Message assignment, for assertion streaming support.
-void AssertHelper::operator=(const Message& message) const {
+const AssertHelper& AssertHelper::operator=(const Message& message) const {
   UnitTest::GetInstance()->
     AddTestPartResult(data_->type, data_->file, data_->line,
                       AppendUserMessage(data_->message, message),
@@ -378,6 +378,7 @@ void AssertHelper::operator=(const Message& message) const {
                       ->CurrentOsStackTraceExceptTop(1)
                       // Skips the stack frame for this function itself.
                       );  // NOLINT
+  return *this;
 }
 
 // Mutex for linked pointers.
@@ -563,6 +564,7 @@ int UnitTestOptions::GTestShouldProcessSEH(DWORD exception_code) {
 ScopedFakeTestPartResultReporter::ScopedFakeTestPartResultReporter(
     TestPartResultArray* result)
     : intercept_mode_(INTERCEPT_ONLY_CURRENT_THREAD),
+      old_reporter_(),
       result_(result) {
   Init();
 }
@@ -573,6 +575,7 @@ ScopedFakeTestPartResultReporter::ScopedFakeTestPartResultReporter(
 ScopedFakeTestPartResultReporter::ScopedFakeTestPartResultReporter(
     InterceptMode intercept_mode, TestPartResultArray* result)
     : intercept_mode_(intercept_mode),
+      old_reporter_(),
       result_(result) {
   Init();
 }
@@ -1091,6 +1094,7 @@ class InternalStrings {
     return ids_[str] = id;
   }
 
+  InternalStrings() : ids_() { }
  private:
   typedef std::map<std::string, size_t> IdMap;
   IdMap ids_;
@@ -1127,7 +1131,10 @@ class Hunk {
         right_start_(right_start),
         adds_(),
         removes_(),
-        common_() {}
+        common_(),
+        hunk_(),
+        hunk_adds_(),
+        hunk_removes_() {}
 
   void PushLine(char edit, const char* line) {
     switch (edit) {
@@ -2012,7 +2019,10 @@ std::string AppendUserMessage(const std::string& gtest_msg,
 
 // Creates an empty TestResult.
 TestResult::TestResult()
-    : death_test_count_(0),
+    : test_properites_mutex_(),
+      test_part_results_(),
+      test_properties_(),
+      death_test_count_(0),
       elapsed_time_(0) {
 }
 
@@ -2719,10 +2729,13 @@ TestCase::TestCase(const char* a_name, const char* a_type_param,
                    Test::TearDownTestCaseFunc tear_down_tc)
     : name_(a_name),
       type_param_(a_type_param ? new std::string(a_type_param) : NULL),
+      test_info_list_(),
+      test_indices_(),
       set_up_tc_(set_up_tc),
       tear_down_tc_(tear_down_tc),
       should_run_(false),
-      elapsed_time_(0) {
+      elapsed_time_(0),
+      ad_hoc_test_result_() {
 }
 
 // Destructor of TestCase.
@@ -3233,7 +3246,7 @@ void PrettyUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
 // This class forwards events to other event listeners.
 class TestEventRepeater : public TestEventListener {
  public:
-  TestEventRepeater() : forwarding_enabled_(true) {}
+  TestEventRepeater() : forwarding_enabled_(true), listeners_() {}
   virtual ~TestEventRepeater();
   void Append(TestEventListener *listener);
   TestEventListener* Release(TestEventListener* listener);
@@ -4295,7 +4308,7 @@ internal::ParameterizedTestCaseRegistry&
 #endif  // GTEST_HAS_PARAM_TEST
 
 // Creates an empty UnitTest.
-UnitTest::UnitTest() {
+UnitTest::UnitTest() : mutex_(), impl_() {
   impl_ = new internal::UnitTestImpl(this);
 }
 
@@ -4323,14 +4336,19 @@ namespace internal {
 
 UnitTestImpl::UnitTestImpl(UnitTest* parent)
     : parent_(parent),
+      original_working_dir_(),
       GTEST_DISABLE_MSC_WARNINGS_PUSH_(4355 /* using this in initializer */)
       default_global_test_part_result_reporter_(this),
       default_per_thread_test_part_result_reporter_(this),
       GTEST_DISABLE_MSC_WARNINGS_POP_()
       global_test_part_result_repoter_(
           &default_global_test_part_result_reporter_),
+      global_test_part_result_reporter_mutex_(),
       per_thread_test_part_result_reporter_(
           &default_per_thread_test_part_result_reporter_),
+      environments_(),
+      test_cases_(),
+      test_case_indices_(),
 #if GTEST_HAS_PARAM_TEST
       parameterized_test_registry_(),
       parameterized_tests_registered_(false),
@@ -4339,6 +4357,7 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
       current_test_case_(NULL),
       current_test_info_(NULL),
       ad_hoc_test_result_(),
+      listeners_(),
       os_stack_trace_getter_(NULL),
       post_flag_parse_init_performed_(false),
       random_seed_(0),  // Will be overridden by the flag before first use.
@@ -4346,8 +4365,10 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
       start_timestamp_(0),
       elapsed_time_(0),
 #if GTEST_HAS_DEATH_TEST
+      internal_run_death_test_flag_(),
       death_test_factory_(new DefaultDeathTestFactory),
 #endif
+      gtest_trace_stack_(),
       // Will be overridden by the flag before first use.
       catch_exceptions_(false) {
   listeners()->SetDefaultResultPrinter(new PrettyUnitTestResultPrinter);

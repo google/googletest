@@ -933,7 +933,7 @@ GTEST_DISABLE_MSC_WARNINGS_PUSH_(4996)
 class CapturedStream {
  public:
   // The ctor redirects the stream to a temporary file.
-  explicit CapturedStream(int fd) : fd_(fd), uncaptured_fd_(dup(fd)) {
+  explicit CapturedStream(int fd) : fd_(fd), uncaptured_fd_(dup(fd)), filename_() {
 # if GTEST_OS_WINDOWS
     char temp_dir_path[MAX_PATH + 1] = { '\0' };  // NOLINT
     char temp_file_path[MAX_PATH + 1] = { '\0' };  // NOLINT

@@ -162,25 +162,25 @@ inline int GetNextRandomSeed(int seed) {
 class GTestFlagSaver {
  public:
   // The c'tor.
-  GTestFlagSaver() {
-    also_run_disabled_tests_ = GTEST_FLAG(also_run_disabled_tests);
-    break_on_failure_ = GTEST_FLAG(break_on_failure);
-    catch_exceptions_ = GTEST_FLAG(catch_exceptions);
-    color_ = GTEST_FLAG(color);
-    death_test_style_ = GTEST_FLAG(death_test_style);
-    death_test_use_fork_ = GTEST_FLAG(death_test_use_fork);
-    filter_ = GTEST_FLAG(filter);
-    internal_run_death_test_ = GTEST_FLAG(internal_run_death_test);
-    list_tests_ = GTEST_FLAG(list_tests);
-    output_ = GTEST_FLAG(output);
-    print_time_ = GTEST_FLAG(print_time);
-    random_seed_ = GTEST_FLAG(random_seed);
-    repeat_ = GTEST_FLAG(repeat);
-    shuffle_ = GTEST_FLAG(shuffle);
-    stack_trace_depth_ = GTEST_FLAG(stack_trace_depth);
-    stream_result_to_ = GTEST_FLAG(stream_result_to);
-    throw_on_failure_ = GTEST_FLAG(throw_on_failure);
-  }
+  GTestFlagSaver() :
+    also_run_disabled_tests_(GTEST_FLAG(also_run_disabled_tests)),
+    break_on_failure_(GTEST_FLAG(break_on_failure)),
+    catch_exceptions_(GTEST_FLAG(catch_exceptions)),
+    color_(GTEST_FLAG(color)),
+    death_test_style_(GTEST_FLAG(death_test_style)),
+    death_test_use_fork_(GTEST_FLAG(death_test_use_fork)),
+    filter_(GTEST_FLAG(filter)),
+    internal_run_death_test_(GTEST_FLAG(internal_run_death_test)),
+    list_tests_(GTEST_FLAG(list_tests)),
+    output_(GTEST_FLAG(output)),
+    print_time_(GTEST_FLAG(print_time)),
+    random_seed_(GTEST_FLAG(random_seed)),
+    repeat_(GTEST_FLAG(repeat)),
+    shuffle_(GTEST_FLAG(shuffle)),
+    stack_trace_depth_(GTEST_FLAG(stack_trace_depth)),
+    stream_result_to_(GTEST_FLAG(stream_result_to)),
+    throw_on_failure_(GTEST_FLAG(throw_on_failure))
+  { }
 
   // The d'tor is not virtual.  DO NOT INHERIT FROM THIS CLASS.
   ~GTestFlagSaver() {
@@ -458,6 +458,10 @@ struct TraceInfo {
   const char* file;
   int line;
   std::string message;
+  TraceInfo() : file(), line(), message() { }
+  TraceInfo(const TraceInfo& other) : file(other.file), line(other.line), message(other.message) { }
+ private:
+  TraceInfo& operator=(const TraceInfo&);
 };
 
 // This is the default global test part result reporter used in UnitTestImpl.
