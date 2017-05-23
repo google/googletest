@@ -56,7 +56,8 @@ add_subdirectory("${gtest_dir}" "${gmock_BINARY_DIR}/gtest")
 config_compiler_and_linker()  # from ${gtest_dir}/cmake/internal_utils.cmake
 
 # Adds Google Mock's and Google Test's header directories to the search path.
-include_directories("${gmock_SOURCE_DIR}/include"
+include_directories(SYSTEM
+                    "${gmock_SOURCE_DIR}/include"
                     "${gmock_SOURCE_DIR}"
                     "${gtest_SOURCE_DIR}/include"
                     # This directory is needed to build directly from Google
