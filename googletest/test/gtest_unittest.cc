@@ -86,9 +86,9 @@ class StreamingListenerTest : public Test {
   class FakeSocketWriter : public StreamingListener::AbstractSocketWriter {
    public:
     // Sends a string to the socket.
-    virtual void Send(const string& message) { output_ += message; }
+    virtual void Send(const std::string& message) { output_ += message; }
 
-    string output_;
+    std::string output_;
   };
 
   StreamingListenerTest()
@@ -98,7 +98,7 @@ class StreamingListenerTest : public Test {
                        CodeLocation(__FILE__, __LINE__), 0, NULL) {}
 
  protected:
-  string* output() { return &(fake_sock_writer_->output_); }
+  std::string* output() { return &(fake_sock_writer_->output_); }
 
   FakeSocketWriter* const fake_sock_writer_;
   StreamingListener streamer_;
@@ -442,7 +442,7 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
     // tzset() distinguishes between the TZ variable being present and empty
     // and not being present, so we have to consider the case of time_zone
     // being NULL.
-#if _MSC_VER
+#if _MSC_VER || GTEST_OS_WINDOWS_MINGW
     // ...Unless it's MSVC, whose standard library's _putenv doesn't
     // distinguish between an empty and a missing variable.
     const std::string env_var =
@@ -6411,7 +6411,7 @@ class FlagfileTest : public InitGoogleTestTest {
     InitGoogleTestTest::SetUp();
 
     testdata_path_.Set(internal::FilePath(
-        internal::TempDir() + internal::GetCurrentExecutableName().string() +
+        testing::TempDir() + internal::GetCurrentExecutableName().string() +
         "_flagfile_test"));
     testing::internal::posix::RmDir(testdata_path_.c_str());
     EXPECT_TRUE(testdata_path_.CreateFolder());
@@ -7703,4 +7703,3 @@ TEST(SkipPrefixTest, DoesNotSkipWhenPrefixDoesNotMatch) {
   EXPECT_FALSE(SkipPrefix("world!", &p));
   EXPECT_EQ(str, p);
 }
-

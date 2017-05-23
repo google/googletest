@@ -51,7 +51,6 @@ class Mock {
 namespace testing {
 namespace gmock_nice_strict_test {
 
-using testing::internal::string;
 using testing::GMOCK_FLAG(verbose);
 using testing::HasSubstr;
 using testing::NaggyMock;
@@ -87,23 +86,23 @@ class MockFoo : public Foo {
 
 class MockBar {
  public:
-  explicit MockBar(const string& s) : str_(s) {}
+  explicit MockBar(const std::string& s) : str_(s) {}
 
-  MockBar(char a1, char a2, string a3, string a4, int a5, int a6,
-          const string& a7, const string& a8, bool a9, bool a10) {
-    str_ = string() + a1 + a2 + a3 + a4 + static_cast<char>(a5) +
+  MockBar(char a1, char a2, std::string a3, std::string a4, int a5, int a6,
+          const std::string& a7, const std::string& a8, bool a9, bool a10) {
+    str_ = std::string() + a1 + a2 + a3 + a4 + static_cast<char>(a5) +
         static_cast<char>(a6) + a7 + a8 + (a9 ? 'T' : 'F') + (a10 ? 'T' : 'F');
   }
 
   virtual ~MockBar() {}
 
-  const string& str() const { return str_; }
+  const std::string& str() const { return str_; }
 
   MOCK_METHOD0(This, int());
-  MOCK_METHOD2(That, string(int, bool));
+  MOCK_METHOD2(That, std::string(int, bool));
 
  private:
-  string str_;
+  std::string str_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockBar);
 };
@@ -112,7 +111,7 @@ class MockBar {
 
 // Tests that a raw mock generates warnings for uninteresting calls.
 TEST(RawMockTest, WarningForUninterestingCall) {
-  const string saved_flag = GMOCK_FLAG(verbose);
+  const std::string saved_flag = GMOCK_FLAG(verbose);
   GMOCK_FLAG(verbose) = "warning";
 
   MockFoo raw_foo;
@@ -129,7 +128,7 @@ TEST(RawMockTest, WarningForUninterestingCall) {
 // Tests that a raw mock generates warnings for uninteresting calls
 // that delete the mock object.
 TEST(RawMockTest, WarningForUninterestingCallAfterDeath) {
-  const string saved_flag = GMOCK_FLAG(verbose);
+  const std::string saved_flag = GMOCK_FLAG(verbose);
   GMOCK_FLAG(verbose) = "warning";
 
   MockFoo* const raw_foo = new MockFoo;
@@ -150,7 +149,7 @@ TEST(RawMockTest, WarningForUninterestingCallAfterDeath) {
 TEST(RawMockTest, InfoForUninterestingCall) {
   MockFoo raw_foo;
 
-  const string saved_flag = GMOCK_FLAG(verbose);
+  const std::string saved_flag = GMOCK_FLAG(verbose);
   GMOCK_FLAG(verbose) = "info";
   CaptureStdout();
   raw_foo.DoThis();
@@ -188,7 +187,7 @@ TEST(NiceMockTest, NoWarningForUninterestingCallAfterDeath) {
 TEST(NiceMockTest, InfoForUninterestingCall) {
   NiceMock<MockFoo> nice_foo;
 
-  const string saved_flag = GMOCK_FLAG(verbose);
+  const std::string saved_flag = GMOCK_FLAG(verbose);
   GMOCK_FLAG(verbose) = "info";
   CaptureStdout();
   nice_foo.DoThis();
@@ -257,7 +256,7 @@ TEST(NiceMockTest, AcceptsClassNamedMock) {
 
 // Tests that a naggy mock generates warnings for uninteresting calls.
 TEST(NaggyMockTest, WarningForUninterestingCall) {
-  const string saved_flag = GMOCK_FLAG(verbose);
+  const std::string saved_flag = GMOCK_FLAG(verbose);
   GMOCK_FLAG(verbose) = "warning";
 
   NaggyMock<MockFoo> naggy_foo;
@@ -274,7 +273,7 @@ TEST(NaggyMockTest, WarningForUninterestingCall) {
 // Tests that a naggy mock generates a warning for an uninteresting call
 // that deletes the mock object.
 TEST(NaggyMockTest, WarningForUninterestingCallAfterDeath) {
-  const string saved_flag = GMOCK_FLAG(verbose);
+  const std::string saved_flag = GMOCK_FLAG(verbose);
   GMOCK_FLAG(verbose) = "warning";
 
   NaggyMock<MockFoo>* const naggy_foo = new NaggyMock<MockFoo>;
