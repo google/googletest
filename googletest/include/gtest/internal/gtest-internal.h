@@ -76,6 +76,10 @@
 #define GTEST_CONCAT_TOKEN_(foo, bar) GTEST_CONCAT_TOKEN_IMPL_(foo, bar)
 #define GTEST_CONCAT_TOKEN_IMPL_(foo, bar) foo ## bar
 
+#define GTEST_VA_SIZE_(...) GTEST_VA_SIZE_IMPL_(__VA_ARGS__, 9, 8, 7, 6, 5, 4, 3, 2, 1)
+#define GTEST_VA_SIZE_IMPL_(_1, _2, _3, _4, _5, _6, _7, _8, _9, SIZE, ...) SIZE
+#define GTEST_VA_SELECT_(name, ...) GTEST_CONCAT_TOKEN_(name ## _, GTEST_VA_SIZE_(__VA_ARGS__))(__VA_ARGS__)
+
 class ProtocolMessage;
 namespace proto2 { class Message; }
 
