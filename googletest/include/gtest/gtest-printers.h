@@ -95,6 +95,7 @@
 #ifndef GTEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
 #define GTEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
 
+#include <cstdint>
 #include <ostream>  // NOLINT
 #include <sstream>
 #include <string>
@@ -432,7 +433,7 @@ void DefaultPrintTo(WrapPrinterType<kPrintFunctionPointer> /* dummy */,
     // (e.g. 3.4.5) cannot compile the cast when p is a function
     // pointer.  Casting to UInt64 first solves the problem.
     *os << reinterpret_cast<const void*>(
-        reinterpret_cast<internal::UInt64>(p));
+        reinterpret_cast<uintptr_t>(p));
   }
 }
 
