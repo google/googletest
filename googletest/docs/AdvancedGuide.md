@@ -306,7 +306,7 @@ carefully choose the error bound. If they don't want or care to, comparing in
 terms of Units in the Last Place (ULPs) is a good default, and Google Test
 provides assertions to do this. Full details about ULPs are quite long; if you
 want to learn more, see
-[this article on float comparison](http://www.cygnus-software.com/papers/comparingfloats/comparingfloats.htm).
+[this article on float comparison](https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/).
 
 ### Floating-Point Macros ###
 
