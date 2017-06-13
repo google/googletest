@@ -267,7 +267,7 @@ class FailureReporterInterface {
 
   // Reports a failure that occurred at the given source file location.
   virtual void ReportFailure(FailureType type, const char* file, int line,
-                             const string& message) = 0;
+                             const std::string& message) = 0;
 };
 
 // Returns the failure reporter used by Google Mock.
@@ -279,7 +279,7 @@ GTEST_API_ FailureReporterInterface* GetFailureReporter();
 // inline this function to prevent it from showing up in the stack
 // trace.
 inline void Assert(bool condition, const char* file, int line,
-                   const string& msg) {
+                   const std::string& msg) {
   if (!condition) {
     GetFailureReporter()->ReportFailure(FailureReporterInterface::kFatal,
                                         file, line, msg);
@@ -292,7 +292,7 @@ inline void Assert(bool condition, const char* file, int line) {
 // Verifies that condition is true; generates a non-fatal failure if
 // condition is false.
 inline void Expect(bool condition, const char* file, int line,
-                   const string& msg) {
+                   const std::string& msg) {
   if (!condition) {
     GetFailureReporter()->ReportFailure(FailureReporterInterface::kNonfatal,
                                         file, line, msg);
@@ -328,8 +328,7 @@ GTEST_API_ bool LogIsVisible(LogSeverity severity);
 // stack_frames_to_skip is treated as 0, since we don't know which
 // function calls will be inlined by the compiler and need to be
 // conservative.
-GTEST_API_ void Log(LogSeverity severity,
-                    const string& message,
+GTEST_API_ void Log(LogSeverity severity, const std::string& message,
                     int stack_frames_to_skip);
 
 // TODO(wan@google.com): group all type utilities together.

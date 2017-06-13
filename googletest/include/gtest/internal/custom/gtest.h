@@ -33,6 +33,10 @@
 // GTEST_OS_STACK_TRACE_GETTER_  - The name of an implementation of
 //                                 OsStackTraceGetterInterface.
 //
+// GTEST_CUSTOM_TEMPDIR_FUNCTION_ - An override for testing::TempDir().
+//                                  See testing::TempDir for semantics and
+//                                  signature.
+// 
 // ** Custom implementation starts here **
 
 #ifndef GTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_
