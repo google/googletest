@@ -47,6 +47,10 @@ endif()
 project(gtest CXX C)
 cmake_minimum_required(VERSION 2.6.4)
 
+if (POLICY CMP0063)
+  cmake_policy(SET CMP0063 NEW)
+endif()
+
 if (COMMAND set_up_hermetic_build)
   set_up_hermetic_build()
 endif()
