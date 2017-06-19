@@ -365,7 +365,7 @@ By creating an object of type `InSequence`, all expectations in its scope are pu
 
 In this example, we test that `Foo()` calls the three expected functions in the order as written. If a call is made out-of-order, it will be an error.
 
-(What if you care about the relative order of some of the calls, but not all of them? Can you specify an arbitrary partial order? The answer is ... yes! If you are impatient, the details can be found in the [CookBook](CookBook#Expecting_Partially_Ordered_Calls.md).)
+(What if you care about the relative order of some of the calls, but not all of them? Can you specify an arbitrary partial order? The answer is ... yes! If you are impatient, the details can be found in the [CookBook](CookBook#expecting-partially-ordered-calls.md).)
 
 ## All Expectations Are Sticky (Unless Said Otherwise) ##
 Now let's do a quick quiz to see how well you can use this mock stuff already. How would you test that the turtle is asked to go to the origin _exactly twice_ (you want to ignore any other instructions it receives)?
