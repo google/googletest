@@ -200,17 +200,13 @@ std::string OfType(const std::string& type_name) {
 // Returns the description of the given matcher.
 template <typename T>
 std::string Describe(const Matcher<T>& m) {
-  stringstream ss;
-  m.DescribeTo(&ss);
-  return ss.str();
+  return DescribeMatcher<T>(m);
 }
 
 // Returns the description of the negation of the given matcher.
 template <typename T>
 std::string DescribeNegation(const Matcher<T>& m) {
-  stringstream ss;
-  m.DescribeNegationTo(&ss);
-  return ss.str();
+  return DescribeMatcher<T>(m, true);
 }
 
 // Returns the reason why x matches, or doesn't match, m.
@@ -2581,6 +2577,22 @@ MATCHER_P(Really, inner_matcher, "") {
 
 TEST(ExplainMatchResultTest, WorksInsideMATCHER) {
   EXPECT_THAT(0, Really(Eq(0)));
+}
+
+TEST(DescribeMatcherTest, WorksWithValue) {
+  EXPECT_EQ("is equal to 42", DescribeMatcher<int>(42));
+  EXPECT_EQ("isn't equal to 42", DescribeMatcher<int>(42, true));
+}
+
+TEST(DescribeMatcherTest, WorksWithMonomorphicMatcher) {
+  const Matcher<int> monomorphic = Le(0);
+  EXPECT_EQ("is <= 0", DescribeMatcher<int>(monomorphic));
+  EXPECT_EQ("isn't <= 0", DescribeMatcher<int>(monomorphic, true));
+}
+
+TEST(DescribeMatcherTest, WorksWithPolymorphicMatcher) {
+  EXPECT_EQ("is even", DescribeMatcher<int>(PolymorphicIsEven()));
+  EXPECT_EQ("is odd", DescribeMatcher<int>(PolymorphicIsEven(), true));
 }
 
 TEST(AllArgsTest, WorksForTuple) {
