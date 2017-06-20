@@ -2979,13 +2979,15 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   CONSOLE_SCREEN_BUFFER_INFO buffer_info;
   GetConsoleScreenBufferInfo(stdout_handle, &buffer_info);
   const WORD old_color_attrs = buffer_info.wAttributes;
-
+  // Let's reuse the BG
+  const WORD existing_bg = old_color_attrs & 0x00F0;
+  
   // We need to flush the stream buffers into the console before each
   // SetConsoleTextAttribute call lest it affect the text that is already
   // printed but has not yet reached the console.
   fflush(stdout);
   SetConsoleTextAttribute(stdout_handle,
-                          GetColorAttribute(color) | FOREGROUND_INTENSITY);
+                          GetColorAttribute(color) | existing_bg | FOREGROUND_INTENSITY);
   vprintf(fmt, args);
 
   fflush(stdout);
