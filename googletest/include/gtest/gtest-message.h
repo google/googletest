@@ -111,8 +111,12 @@ class GTEST_API_ Message {
   }
 #else
   // Streams a non-pointer value to this object.
-  template <typename T>
-  inline Message& operator <<(const T& val) {
+  //
+  // We use perfect-forwarding here so that objects which can only be
+  // streamed as rvalue-references work.
+  template <typename T,
+    typename std::enable_if<!std::is_pointer<T>::value, int>::type = 0>
+  inline Message& operator <<(T&& val) {
     // Some libraries overload << for STL containers.  These
     // overloads are defined in the global namespace instead of ::std.
     //
@@ -128,7 +132,7 @@ class GTEST_API_ Message {
     // overloads of << defined in the global namespace and those
     // visible via Koenig lookup are both exposed in this function.
     using ::operator <<;
-    *ss_ << val;
+    *ss_ << std::forward<T>(val);
     return *this;
   }
 
