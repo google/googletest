@@ -5266,6 +5266,26 @@ TEST(MessageTest, NullPointers) {
                msg.GetString().c_str());
 }
 
+#if __cplusplus >= 201103L
+namespace {
+  struct rvalue_streamable {};
+  std::ostream& operator<<(std::ostream& os, rvalue_streamable const&&) {
+    os << "rvalue";
+    return os;
+  }
+  std::ostream& operator<<(std::ostream&& os, rvalue_streamable const&& x) {
+    return os << std::move(x);
+  }
+} // anonymous namespace
+// Tests streaming NULL pointers to testing::Message.
+TEST(MessageTest, RvalueStreaming) {
+  Message msg;
+
+  msg << rvalue_streamable();
+  ASSERT_STREQ("rvalue", msg.GetString().c_str());
+}
+#endif
+
 // Tests streaming wide strings to testing::Message.
 TEST(MessageTest, WideStrings) {
   // Streams a NULL of type const wchar_t*.
