@@ -2980,7 +2980,8 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   GetConsoleScreenBufferInfo(stdout_handle, &buffer_info);
   const WORD old_color_attrs = buffer_info.wAttributes;
   // Let's reuse the BG
-  const WORD existing_bg = old_color_attrs & 0x00F0;
+  const WORD background_mask = BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_INTENSITY;   
+  const WORD existing_bg = old_color_attrs & background_mask;
   
   // We need to flush the stream buffers into the console before each
   // SetConsoleTextAttribute call lest it affect the text that is already
