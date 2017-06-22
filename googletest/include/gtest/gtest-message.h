@@ -115,7 +115,9 @@ class GTEST_API_ Message {
   // We use perfect-forwarding here so that objects which can only be
   // streamed as rvalue-references work.
   template <typename T,
-    typename std::enable_if<!std::is_pointer<T>::value, int>::type = 0>
+    typename std::enable_if<
+      !std::is_pointer<typename std::decay<T>::type>::value,
+      int>::type = 0>
   inline Message& operator <<(T&& val) {
     // Some libraries overload << for STL containers.  These
     // overloads are defined in the global namespace instead of ::std.
