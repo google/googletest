@@ -92,7 +92,7 @@ errors.
 
 To provide a custom failure message, simply stream it into the macro using the
 `<<` operator, or a sequence of such operators. An example:
-```
+```cppcpp
 ASSERT_EQ(x.size(), y.size()) << "Vectors x and y are of unequal length";
 
 for (int i = 0; i < x.size(); ++i) {
@@ -204,7 +204,7 @@ To create a test:
   1. In this function, along with any valid C++ statements you want to include, use the various Google Test assertions to check values.
   1. The test's result is determined by the assertions; if any assertion in the test fails (either fatally or non-fatally), or if the test crashes, the entire test fails. Otherwise, it succeeds.
 
-```
+```cppcpp
 TEST(test_case_name, test_name) {
  ... test body ...
 }
@@ -218,12 +218,12 @@ individual name. Tests from different test cases can have the same individual
 name.
 
 For example, let's take a simple integer function:
-```
+```cpp
 int Factorial(int n); // Returns the factorial of n
 ```
 
 A test case for this function might look like:
-```
+```cpp
 // Tests factorial of 0.
 TEST(FactorialTest, HandlesZeroInput) {
   EXPECT_EQ(1, Factorial(0));
@@ -261,7 +261,7 @@ To create a fixture, just:
 
 When using a fixture, use `TEST_F()` instead of `TEST()` as it allows you to
 access objects and subroutines in the test fixture:
-```
+```cpp
 TEST_F(test_case_name, test_name) {
  ... test body ...
 }
@@ -288,7 +288,7 @@ For each test defined with `TEST_F()`, Google Test will:
 
 As an example, let's write tests for a FIFO queue class named `Queue`, which
 has the following interface:
-```
+```cpp
 template <typename E> // E is the element type.
 class Queue {
  public:
@@ -302,7 +302,7 @@ class Queue {
 
 First, define a fixture class. By convention, you should give it the name
 `FooTest` where `Foo` is the class being tested.
-```
+```cpp
 class QueueTest : public ::testing::Test {
  protected:
   virtual void SetUp() {
@@ -323,7 +323,7 @@ In this case, `TearDown()` is not needed since we don't have to clean up after
 each test, other than what's already done by the destructor.
 
 Now we'll write tests using `TEST_F()` and this fixture.
-```
+```cpp
 TEST_F(QueueTest, IsEmptyInitially) {
   EXPECT_EQ(0, q0_.size());
 }
@@ -401,7 +401,7 @@ _Availability_: Linux, Windows, Mac.
 # Writing the main() Function #
 
 You can start from this boilerplate:
-```
+```cpp
 #include "this/package/foo.h"
 #include "gtest/gtest.h"
 
@@ -471,11 +471,11 @@ But maybe you think that writing all those main() functions is too much work? We
 
 ## Important note for Visual C++ users ##
 If you put your tests into a library and your `main()` function is in a different library or in your .exe file, those tests will not run. The reason is a [bug](https://connect.microsoft.com/feedback/viewfeedback.aspx?FeedbackID=244410&siteid=210) in Visual C++. When you define your tests, Google Test creates certain static objects to register them. These objects are not referenced from elsewhere but their constructors are still supposed to run. When Visual C++ linker sees that nothing in the library is referenced from other places it throws the library out. You have to reference your library with tests from your main program to keep the linker from discarding it. Here is how to do it. Somewhere in your library code declare a function:
-```
+```cpp
 __declspec(dllexport) int PullInMyLibrary() { return 0; }
 ```
 If you put your tests in a static library (not DLL) then `__declspec(dllexport)` is not required. Now, in your main program, write a code that invokes that function:
-```
+```cpp
 int PullInMyLibrary();
 static int dummy = PullInMyLibrary();
 ```
