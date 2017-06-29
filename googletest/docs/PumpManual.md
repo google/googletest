@@ -48,7 +48,7 @@ maintain.
 
 The following Pump code (where meta keywords start with `$`, `[[` and `]]` are meta brackets, and `$$` starts a meta comment that ends with the line):
 
-```
+```cpp
 $var n = 3     $$ Defines a meta variable n.
 $range i 0..n  $$ Declares the range of meta iterator i (inclusive).
 $for i [[
@@ -71,7 +71,7 @@ $if i == 0 [[
 
 will be translated by the Pump compiler to:
 
-```
+```cpp
 // Foo0 does blah for 0-ary predicates.
 template <size_t N>
 class Foo0 {
@@ -99,7 +99,7 @@ class Foo3 {
 
 In another example,
 
-```
+```cpp
 $range i 1..n
 Func($for i + [[a$i]]);
 $$ The text between i and [[ is the separator between iterations.
@@ -107,7 +107,7 @@ $$ The text between i and [[ is the separator between iterations.
 
 will generate one of the following lines (without the comments), depending on the value of `n`:
 
-```
+```cpp
 Func();              // If n is 0.
 Func(a1);            // If n is 1.
 Func(a1 + a2);       // If n is 2.
@@ -140,7 +140,7 @@ up in your output.
 
 ## Grammar ##
 
-```
+```cpp
 code ::= atomic_code*
 atomic_code ::= $var id = exp
     | $var id = [[ code ]]
