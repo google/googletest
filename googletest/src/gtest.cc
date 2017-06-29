@@ -2905,7 +2905,7 @@ int GetBgOffset(WORD background_mask) {
   return bitOffset;
 }
 
-WORD GetNewColor(const GTestColor color, const WORD old_color_attrs) {
+WORD GetNewColor(GTestColor color, WORD old_color_attrs) {
   // Let's reuse the BG
   static const WORD background_mask = BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_INTENSITY;
   static const WORD foreground_mask = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
