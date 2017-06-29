@@ -2894,6 +2894,30 @@ WORD GetColorAttribute(GTestColor color) {
   }
 }
 
+int GetBgOffset(WORD background_mask) {
+  if (background_mask == 0) return 0; //let's not fall into infinite loop
+
+  int bitOffset = 0;
+  while((background_mask & 1) == 0) {
+    background_mask >>= 1;
+    ++bitOffset;
+  }
+  return bitOffset;
+}
+
+WORD GetNewColor(const GTestColor color, const WORD old_color_attrs) {
+  // Let's reuse the BG
+  static const WORD background_mask = BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_INTENSITY;
+  static const WORD foreground_mask = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
+  const WORD existing_bg = old_color_attrs & background_mask;
+
+  WORD new_color = GetColorAttribute(color) | existing_bg | FOREGROUND_INTENSITY;
+  static const int bg_bitOffset = GetBgOffset(background_mask); //it does not change 
+
+  if (((new_color & background_mask) >> bg_bitOffset) == (new_color & foreground_mask)) new_color ^= FOREGROUND_INTENSITY; //revert intensity
+  return new_color;
+}
+	
 #else
 
 // Returns the ANSI color code for the given color.  COLOR_DEFAULT is
@@ -2979,31 +3003,8 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   CONSOLE_SCREEN_BUFFER_INFO buffer_info;
   GetConsoleScreenBufferInfo(stdout_handle, &buffer_info);
   const WORD old_color_attrs = buffer_info.wAttributes;
- 
-  // Let's reuse the BG
-  const WORD background_mask = BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_INTENSITY;
-  const WORD foreground_mask = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
-
-  const WORD existing_bg = old_color_attrs & background_mask;
-
-  WORD new_color = GetColorAttribute(color) | existing_bg | FOREGROUND_INTENSITY;
-
-#if 1 // do we really need to waste these cpu cycles every time?
-  int bg_bitOffset = 0;
-  WORD bg_mask = background_mask;
-  while((bg_mask & 0x01) == 0x00) {
-	  bg_mask >>= 1;
-	  ++bg_bitOffset;
-  }
-#else
-  const int bg_bitOffset = 4;
-#endif
+  const WORD new_color = GetNewColor(color, old_color_attrs);
   
-  if (((new_color & background_mask) >> bg_bitOffset) == (new_color & foreground_mask)) {
-	  //revert intensity
-	  new_color ^= FOREGROUND_INTENSITY;
-  }
-
   // We need to flush the stream buffers into the console before each
   // SetConsoleTextAttribute call lest it affect the text that is already
   // printed but has not yet reached the console.
