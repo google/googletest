@@ -279,6 +279,43 @@ void Mutex::AssertHeld() {
       << "The current thread is not holding the mutex @" << this;
 }
 
+namespace {
+
+// Use the RAII idiom to flag mem allocs that are intentionally never 
+// deallocated. The motivation is to silence the false positive mem leaks 
+// that are reported by the debug version of MS's CRT which can only detect
+// if an alloc is missing a matching deallocation.
+// Example:
+//    MemoryIsNotDeallocated memory_is_not_deallocated;
+//    critical_section_ = new CRITICAL_SECTION;
+//
+class MemoryIsNotDeallocated
+{
+public:
+  MemoryIsNotDeallocated() : old_crtdbg_flag_(0) {
+#ifdef _MSC_VER
+    old_crtdbg_flag_ = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
+    // Set heap allocation block type to _IGNORE_BLOCK so that MS debug CRT
+    // doesn't report mem leak if there's no matching deallocation.
+    _CrtSetDbgFlag(old_crtdbg_flag_ & ~_CRTDBG_ALLOC_MEM_DF);
+#endif // _MSC_VER
+  }
+
+  ~MemoryIsNotDeallocated() {
+#ifdef _MSC_VER
+    // Restore the original _CRTDBG_ALLOC_MEM_DF flag
+    _CrtSetDbgFlag(old_crtdbg_flag_);
+#endif // _MSC_VER
+  }
+
+private:
+  int old_crtdbg_flag_;
+
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MemoryIsNotDeallocated);
+};
+
+}  // namespace
+
 // Initializes owner_thread_id_ and critical_section_ in static mutexes.
 void Mutex::ThreadSafeLazyInit() {
   // Dynamic mutexes are initialized in the constructor.
@@ -289,7 +326,11 @@ void Mutex::ThreadSafeLazyInit() {
         // If critical_section_init_phase_ was 0 before the exchange, we
         // are the first to test it and need to perform the initialization.
         owner_thread_id_ = 0;
-        critical_section_ = new CRITICAL_SECTION;
+        {
+          // Use RAII to flag that following mem alloc is never deallocated.
+          MemoryIsNotDeallocated memory_is_not_deallocated;
+          critical_section_ = new CRITICAL_SECTION;
+        }
         ::InitializeCriticalSection(critical_section_);
         // Updates the critical_section_init_phase_ to 2 to signal
         // initialization complete.
@@ -528,10 +569,17 @@ class ThreadLocalRegistryImpl {
     return 0;
   }
 
+  // Return a newly constructed ThreadIdToThreadLocals that's intentionally never deleted
+  static ThreadIdToThreadLocals* NewThreadIdToThreadLocals() {
+    // Use RAII to flag that following mem alloc is never deallocated.
+    MemoryIsNotDeallocated memory_is_not_deallocated;
+    return new ThreadIdToThreadLocals;
+  }
+
   // Returns map of thread local instances.
   static ThreadIdToThreadLocals* GetThreadLocalsMapLocked() {
     mutex_.AssertHeld();
-    static ThreadIdToThreadLocals* map = new ThreadIdToThreadLocals;
+    static ThreadIdToThreadLocals* map = NewThreadIdToThreadLocals();
     return map;
   }
 
