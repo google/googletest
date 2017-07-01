@@ -1773,9 +1773,9 @@ using ::testing::_;
   // second argument DoThis() receives.
 ```
 
-Arghh, you need to refer to a mock function argument but C++ has no
-lambda (yet), so you have to define your own action. :-( Or do you
-really?
+Arghh, you need to refer to a mock function argument but your version
+of C++ has no lambdas, so you have to define your own action. :-(
+Or do you really?
 
 Well, Google Mock has an action to solve _exactly_ this problem:
 
