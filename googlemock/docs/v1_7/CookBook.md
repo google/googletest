@@ -2240,12 +2240,12 @@ MockFoo::~MockFoo() {}
 
 ## Forcing a Verification ##
 
-When it's being destoyed, your friendly mock object will automatically
+When it's being destroyed, your friendly mock object will automatically
 verify that all expectations on it have been satisfied, and will
 generate [Google Test](http://code.google.com/p/googletest/) failures
 if not. This is convenient as it leaves you with one less thing to
 worry about. That is, unless you are not sure if your mock object will
-be destoyed.
+be destroyed.
 
 How could it be that your mock object won't eventually be destroyed?
 Well, it might be created on the heap and owned by the code you are
