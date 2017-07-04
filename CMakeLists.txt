@@ -4,6 +4,9 @@ project( googletest-distribution )
 
 enable_testing()
 
+include(GNUInstallDirs)
+
+option(ENABLE_GOOGLETEST_INSTALL "Turn off to skip installation" ON)
 option(BUILD_GTEST "Builds the googletest subproject" OFF)
 
 #Note that googlemock target already builds googletest

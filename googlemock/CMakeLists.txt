@@ -103,10 +103,14 @@ endif()
 ########################################################################
 #
 # Install rules
-install(TARGETS gmock gmock_main
-  DESTINATION lib)
-install(DIRECTORY ${gmock_SOURCE_DIR}/include/gmock
-  DESTINATION include)
+if(ENABLE_GOOGLETEST_INSTALL)
+  install(TARGETS gmock gmock_main
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+  install(DIRECTORY ${gmock_SOURCE_DIR}/include/gmock
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+endif(ENABLE_GOOGLETEST_INSTALL)
 
 ########################################################################
 #
