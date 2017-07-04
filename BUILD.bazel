@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc. 
+# Copyright 2017 Google Inc.
 # All Rights Reserved.
 #
 #
@@ -41,7 +41,7 @@ config_setting(
     values = {"cpu": "x64_windows_msvc"},
 )
 
-# Google Test including Google Mock 
+# Google Test including Google Mock
 cc_library(
     name = "gtest",
     srcs = glob(
