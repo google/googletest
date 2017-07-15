@@ -2895,7 +2895,7 @@ WORD GetColorAttribute(GTestColor color) {
 }
 
 int GetBgOffset(WORD background_mask) {
-  if (background_mask == 0) return 0; //let's not fall into infinite loop
+  if (background_mask == 0) return 0;
 
   int bitOffset = 0;
   while((background_mask & 1) == 0) {
@@ -2905,6 +2905,16 @@ int GetBgOffset(WORD background_mask) {
   return bitOffset;
 }
 
+int GetFgOffset(WORD foreground_mask) {
+  if (foreground_mask == 0) return 0;
+
+  int bitOffset = 0;
+  while((foreground_mask & 1) == 0) {
+    foreground_mask >>= 1;
+    ++bitOffset;
+  }
+  return bitOffset;
+}
 WORD GetNewColor(GTestColor color, WORD old_color_attrs) {
   // Let's reuse the BG
   static const WORD background_mask = BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_INTENSITY;
@@ -2912,9 +2922,12 @@ WORD GetNewColor(GTestColor color, WORD old_color_attrs) {
   const WORD existing_bg = old_color_attrs & background_mask;
 
   WORD new_color = GetColorAttribute(color) | existing_bg | FOREGROUND_INTENSITY;
-  static const int bg_bitOffset = GetBgOffset(background_mask); //it does not change 
+  static const int bg_bitOffset = GetBgOffset(background_mask);
+  static const int fg_bitOffset = GetFgOffset(foreground_mask);
 
-  if (((new_color & background_mask) >> bg_bitOffset) == (new_color & foreground_mask)) new_color ^= FOREGROUND_INTENSITY; //revert intensity
+  if (((new_color & background_mask) >> bg_bitOffset) == ((new_color & foreground_mask) >> fg_bitOffset)) {
+    new_color ^= FOREGROUND_INTENSITY; //invert intensity
+  }
   return new_color;
 }
 	
