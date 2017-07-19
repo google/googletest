@@ -5183,7 +5183,7 @@ static const char kColorEncodedHelpMessage[] =
 "Test Output:\n"
 "  @G--" GTEST_FLAG_PREFIX_ "color=@Y(@Gyes@Y|@Gno@Y|@Gauto@Y)@D\n"
 "      Enable/disable colored output. The default is @Gauto@D.\n"
-"  -@G-" GTEST_FLAG_PREFIX_ "print_time=0@D\n"
+"  @G--" GTEST_FLAG_PREFIX_ "print_time=0@D\n"
 "      Don't print the elapsed time of each test.\n"
 "  @G--" GTEST_FLAG_PREFIX_ "output=xml@Y[@G:@YDIRECTORY_PATH@G"
     GTEST_PATH_SEP_ "@Y|@G:@YFILE_PATH]@D\n"
@@ -5385,6 +5385,9 @@ void InitGoogleTest(int* argc, wchar_t** argv) {
 }
 
 std::string TempDir() {
+#if defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_)
+    return GTEST_CUSTOM_TEMPDIR_FUNCTION_();
+#endif
 #if GTEST_OS_WINDOWS_MOBILE
   return "\\temp\\";
 #elif GTEST_OS_WINDOWS
@@ -5401,6 +5404,5 @@ std::string TempDir() {
   return "/tmp/";
 #endif  // GTEST_OS_WINDOWS_MOBILE
 }
-
 
 }  // namespace testing
