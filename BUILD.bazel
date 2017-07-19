@@ -1,0 +1,226 @@
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+cc_library(
+    name = "googletest_no_main",
+    srcs = glob(
+        include = [
+            "googletest/src/*.cc",
+            "googletest/src/*.h",
+            "googletest/include/gtest/**/*.h",
+        ],
+        exclude = [
+            "googletest/src/gtest-all.cc",
+            "googletest/src/gtest_main.cc",
+        ],
+    ),
+    hdrs = glob([
+        "googletest/include/gtest/*.h",
+    ]),
+    copts = [
+        "-g",
+        "-Wall",
+        "-Wextra",
+        "-pthread",
+    ],
+    includes = [
+        "googletest",
+        "googletest/include",
+    ],
+    linkopts = [
+        "-pthread",
+    ],
+)
+
+cc_library(
+    name = "googletest_main",
+    srcs = glob(
+        include = [
+            "googletest/src/gtest_main.cc",
+        ],
+    ),
+    hdrs = glob([
+        "googletest/include/gtest/*.h",
+        "googletest/include/gtest/**/*.h",
+    ]),
+    copts = [
+        "-Wextra",
+        "-Wno-unused-parameter",
+        "-Wno-missing-field-initializers",
+    ],
+    includes = [
+        "googletest",
+        "googletest/include",
+    ],
+    deps = [":googletest_no_main"],
+)
+
+"""googletest own tests """
+
+cc_test(
+    name = "gtest_all_test",
+    size = "small",
+    srcs = glob(
+        include = [
+            "googletest/test/gtest-*.cc",
+            "googletest/test/*.h",
+            "googletest/include/gtest/**/*.h",
+        ],
+        exclude = [
+            "googletest/src/gtest-all.cc",
+            "googletest/test/gtest_all_test.cc",
+            "googletest/test/gtest-death-test_ex_test.cc",
+            "googletest/test/gtest-listener_test.cc",
+            "googletest/test/gtest-unittest-api_test.cc",
+            "googletest/test/gtest-param-test_test.cc",
+        ],
+    ),
+    copts = [
+        "-DGTEST_USE_OWN_TR1_TUPLE=1",
+    ],
+    includes = [
+        "googletest",
+        "googletest/include",
+        "googletest/include/internal",
+        "googletest/test",
+    ],
+    linkopts = [
+        "-pthread",
+    ],
+    deps = [":googletest_main"],
+)
+
+""" these googletest tests have their own main()"""
+
+cc_test(
+    name = "gtest-death-test_ex_test",
+    size = "small",
+    srcs = [
+        "googletest/test/gtest-death-test_ex_test.cc",
+    ],
+    copts = [
+        "-DGTEST_ENABLE_CATCH_EXCEPTIONS_=1",
+    ],
+    deps = [
+        ":googletest_main",
+    ],
+)
+
+cc_test(
+    name = "gtest-listener_test",
+    size = "small",
+    srcs = [
+        "googletest/test/gtest-listener_test.cc",
+    ],
+    deps = [
+        ":googletest_main",
+    ],
+)
+
+cc_test(
+    name = "gtest-unittest-api_test",
+    size = "small",
+    srcs = [
+        "googletest/test/gtest-unittest-api_test.cc",
+    ],
+    deps = [
+        ":googletest_main",
+    ],
+)
+
+cc_test(
+    name = "gtest-param-test_test",
+    size = "small",
+    srcs = [
+        "googletest/test/gtest-param-test2_test.cc",
+        "googletest/test/gtest-param-test_test.cc",
+        "googletest/test/gtest-param-test_test.h",
+    ],
+    deps = [
+        ":googletest_main",
+    ],
+)
+
+""" googletest samples"""
+
+cc_library(
+    name = "googletest_sample_lib",
+    srcs = [
+        "googletest/samples/sample1.cc",
+        "googletest/samples/sample2.cc",
+        "googletest/samples/sample4.cc",
+    ],
+    hdrs = [
+        "googletest/samples/prime_tables.h",
+        "googletest/samples/sample1.h",
+        "googletest/samples/sample2.h",
+        "googletest/samples/sample3-inl.h",
+        "googletest/samples/sample4.h",
+    ],
+    deps = ["googletest_no_main"],
+)
+
+cc_test(
+    name = "googletest_samples",
+    size = "small",
+    srcs = glob(
+        include = [
+            "googletest/samples/sample*.cc",
+            "googletest/samples/sample*.h",
+        ],
+        exclude = [
+            "googletest/samples/sample1.cc",
+            "googletest/samples/sample2.cc",
+            "googletest/samples/sample4.cc",
+            "googletest/samples/prime_tables.h",
+            "googletest/samples/sample1.h",
+            "googletest/samples/sample2.h",
+            "googletest/samples/sample3-inl.h",
+            "googletest/samples/sample4.h",
+            "googletest/samples/sample9_unittest.cc",
+            "googletest/samples/sample10_unittest.cc",
+        ],
+    ),
+    includes = [
+        "googletest/samples",
+    ],
+    deps = [
+        ":googletest_main",
+        ":googletest_sample_lib",
+    ],
+)
+
+""" googletest samples 9 and 10 have their own main()"""
+
+cc_test(
+    name = "googletest_sample9",
+    size = "small",
+    srcs = glob(
+        include = [
+            "googletest/samples/sample9_unittest.cc",
+        ],
+    ),
+    includes = [
+        "googletest/samples",
+    ],
+    deps = [
+        ":googletest_no_main",
+    ],
+)
+
+cc_test(
+    name = "googletest_sample10",
+    size = "small",
+    srcs = glob(
+        include = [
+            "googletest/samples/sample10_unittest.cc",
+        ],
+    ),
+    includes = [
+        "googletest/samples",
+    ],
+    deps = [
+        ":googletest_no_main",
+    ],
+)

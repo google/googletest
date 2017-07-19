@@ -60,6 +60,7 @@
 // the name "QuickTest".  This is OK.
 //
 // Later, we will derive multiple test fixtures from QuickTest.
+namespace {
 class QuickTest : public testing::Test {
  protected:
   // Remember that SetUp() is run immediately before a test starts.
@@ -135,13 +136,13 @@ TEST_F(IntegerFunctionTest, IsPrime) {
 }
 
 
-// The next test case (named "QueueTest") also needs to be quick, so
+// The next test case (named "QueueTestSample5") also needs to be quick, so
 // we derive another fixture from QuickTest.
 //
-// The QueueTest test fixture has some logic and shared objects in
+// The QueueTestSample5 test fixture has some logic and shared objects in
 // addition to what's in QuickTest already.  We define the additional
 // stuff inside the body of the test fixture, as usual.
-class QueueTest : public QuickTest {
+class QueueTestSample5 : public QuickTest {
  protected:
   virtual void SetUp() {
     // First, we need to set up the super fixture (QuickTest).
@@ -155,7 +156,7 @@ class QueueTest : public QuickTest {
 
   // By default, TearDown() inherits the behavior of
   // QuickTest::TearDown().  As we have no additional cleaning work
-  // for QueueTest, we omit it here.
+  // for QueueTestSample5, we omit it here.
   //
   // virtual void TearDown() {
   //   QuickTest::TearDown();
@@ -167,15 +168,15 @@ class QueueTest : public QuickTest {
 };
 
 
-// Now, let's write tests using the QueueTest fixture.
+// Now, let's write tests using the QueueTestSample5 fixture.
 
 // Tests the default constructor.
-TEST_F(QueueTest, DefaultConstructor) {
+TEST_F(QueueTestSample5, DefaultConstructor) {
   EXPECT_EQ(0u, q0_.Size());
 }
 
 // Tests Dequeue().
-TEST_F(QueueTest, Dequeue) {
+TEST_F(QueueTestSample5, Dequeue) {
   int* n = q0_.Dequeue();
   EXPECT_TRUE(n == NULL);
 
@@ -194,6 +195,7 @@ TEST_F(QueueTest, Dequeue) {
 
 // If necessary, you can derive further test fixtures from a derived
 // fixture itself.  For example, you can derive another fixture from
-// QueueTest.  Google Test imposes no limit on how deep the hierarchy
+// QueueTestSample5.  Google Test imposes no limit on how deep the hierarchy
 // can be.  In practice, however, you probably don't want it to be too
 // deep as to be confusing.
+}
