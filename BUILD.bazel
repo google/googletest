@@ -2,6 +2,40 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
 
+
+cc_library(
+    name = "googlemock",
+    srcs = glob(
+        include=[
+        "googlemock/src/*.cc",
+        "googlemock/include/gmock/**/*.h",
+    ],
+            exclude = [
+                "googlemock/src/gmock-all.cc",
+            ],
+    ),
+    hdrs = glob([
+        "googlemock/include/gmock/*.h"
+    ]),
+    includes = [
+        "googlemock",
+        "googlemock/include",
+    ],
+    copts = [
+        "-std=c++11",
+        "-g",
+        "-Wall",
+        "-Wextra",
+    ],
+    linkopts = [
+        "-pthread",
+    ],
+    deps = [
+        ":googletest_no_main",
+    ],
+)
+
+
 cc_library(
     name = "googletest_no_main",
     srcs = glob(
@@ -53,7 +87,7 @@ cc_library(
         "googletest",
         "googletest/include",
     ],
-    deps = [":googletest_no_main"],
+    deps = [":googlemock"],
 )
 
 """googletest own tests """
