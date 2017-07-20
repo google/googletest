@@ -110,9 +110,10 @@ cc_test(
             "googletest/test/gtest-param-test_test.cc",
         ],
     ),
-    copts = [
-        "-DGTEST_USE_OWN_TR1_TUPLE=1",
-    ],
+    copts = select({
+        ":msvc": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
+        "//conditions:default": ["-DGTEST_USE_OWN_TR1_TUPLE=1"]
+    })
     includes = [
         "googletest",
         "googletest/include",
