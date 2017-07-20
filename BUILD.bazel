@@ -100,7 +100,7 @@ cc_test(
             "googletest/test/gtest-*.cc",
             "googletest/test/*.h",
             "googletest/include/gtest/**/*.h",
-        ],
+        ], 
         exclude = [
             "googletest/src/gtest-all.cc",
             "googletest/test/gtest_all_test.cc",
@@ -111,9 +111,9 @@ cc_test(
         ],
     ),
     copts = select({
-        ":msvc": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
+        ":win": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
         "//conditions:default": ["-DGTEST_USE_OWN_TR1_TUPLE=1"]
-    })
+    }),
     includes = [
         "googletest",
         "googletest/include",
@@ -125,6 +125,14 @@ cc_test(
     ],
     deps = [":googletest_main"],
 )
+
+config_setting(
+    name = "win",
+    values = {"cpu": "x64_windows_msvc"}
+    
+)
+
+
 
 """ these googletest tests have their own main()"""
 
