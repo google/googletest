@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6.2)
+cmake_minimum_required(VERSION 2.6.4)
 
 project( googletest-distribution )
 
