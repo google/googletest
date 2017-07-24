@@ -2,39 +2,43 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
 
+config_setting(
+    name = "win",
+    values = {"cpu": "x64_windows_msvc"},
+)
 
 cc_library(
     name = "googlemock",
     srcs = glob(
-        include=[
-        "googlemock/src/*.cc",
-        "googlemock/include/gmock/**/*.h",
-    ],
-            exclude = [
-                "googlemock/src/gmock-all.cc",
-            ],
+        include = [
+            "googlemock/src/*.cc",
+            "googlemock/include/gmock/**/*.h",
+        ],
+        exclude = [
+            "googlemock/src/gmock-all.cc",
+        ],
     ),
     hdrs = glob([
-        "googlemock/include/gmock/*.h"
+        "googlemock/include/gmock/*.h",
     ]),
-    includes = [
-        "googlemock",
-        "googlemock/include",
-    ],
     copts = [
         "-std=c++11",
         "-g",
         "-Wall",
         "-Wextra",
     ],
-    linkopts = [
-        "-pthread",
+    includes = [
+        "googlemock",
+        "googlemock/include",
     ],
+    linkopts = select({
+        ":win": [],
+        "//conditions:default": ["-pthread"],
+    }),
     deps = [
         ":googletest_no_main",
     ],
 )
-
 
 cc_library(
     name = "googletest_no_main",
@@ -56,15 +60,22 @@ cc_library(
         "-g",
         "-Wall",
         "-Wextra",
-        "-pthread",
-    ],
+    ] + select(
+        {
+            ":win": [],
+            "//conditions:default": ["-pthread"],
+        },
+    ),
     includes = [
         "googletest",
         "googletest/include",
     ],
-    linkopts = [
-        "-pthread",
-    ],
+    linkopts = select({
+        ":win": [],
+        "//conditions:default": [
+            "-pthread",
+        ],
+    }),
 )
 
 cc_library(
@@ -95,24 +106,85 @@ cc_library(
 cc_test(
     name = "gtest_all_test",
     size = "small",
-    srcs = glob(
-        include = [
-            "googletest/test/gtest-*.cc",
-            "googletest/test/*.h",
-            "googletest/include/gtest/**/*.h",
-        ], 
-        exclude = [
-            "googletest/src/gtest-all.cc",
-            "googletest/test/gtest_all_test.cc",
-            "googletest/test/gtest-death-test_ex_test.cc",
-            "googletest/test/gtest-listener_test.cc",
-            "googletest/test/gtest-unittest-api_test.cc",
-            "googletest/test/gtest-param-test_test.cc",
-        ],
-    ),
+    #    srcs = glob(
+    #        include = [
+    #            "googletest/test/gtest-*.cc",
+    #            "googletest/test/*.h",
+    #            "googletest/include/gtest/**/*.h",
+    #        ],
+    #        exclude = [
+    #            "googletest/src/gtest-unittest-api_test.cc",
+    #            "googletest/src/gtest-all.cc",
+    #            "googletest/test/gtest_all_test.cc",
+    #            "googletest/test/gtest-death-test_ex_test.cc",
+    #            "googletest/test/gtest-listener_test.cc",
+    #            "googletest/test/gtest-unittest-api_test.cc",
+    #            "googletest/test/gtest-param-test_test.cc",
+    #        ] + select({
+    #            ":win": [
+    #                "googletest/include/gtest/internal/gtest-tuple.h",
+    #                "googletest/test/gtest-tuple_test.cc",
+    #            ],
+    #            "//conditions:default": [],
+    #        }),
+    #    ),
+    #    copts = select({
+    #        ":win": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
+    #        "//conditions:default": ["-DGTEST_USE_OWN_TR1_TUPLE=1"],
+    #    }),
+    #    includes = [
+    #        "googletest",
+    #        "googletest/include",
+    #        "googletest/include/internal",
+    #        "googletest/test",
+    #    ],
+    #    linkopts = select({
+    #        ":win": [],
+    #        "//conditions:default": [
+    #            "-pthread",
+    #        ],
+    #    }),
+    #    deps = [":googletest_main"],
+    #)
+    srcs = select({
+        ":win": glob(
+            include = [
+                "googletest/test/gtest-*.cc",
+                "googletest/test/*.h",
+                "googletest/include/gtest/**/*.h",
+            ],
+            exclude = [
+                "googletest/src/gtest-unittest-api_test.cc",
+                "googletest/include/gtest/internal/gtest-tuple.h",
+                "googletest/test/gtest-tuple_test.cc",
+                "googletest/src/gtest-all.cc",
+                "googletest/test/gtest_all_test.cc",
+                "googletest/test/gtest-death-test_ex_test.cc",
+                "googletest/test/gtest-listener_test.cc",
+                "googletest/test/gtest-unittest-api_test.cc",
+                "googletest/test/gtest-param-test_test.cc",
+            ],
+        ),
+        "//conditions:default": glob(
+            include = [
+                "googletest/test/gtest-*.cc",
+                "googletest/test/*.h",
+                "googletest/include/gtest/**/*.h",
+            ],
+            exclude = [
+                "googletest/src/gtest-unittest-api_test.cc",
+                "googletest/src/gtest-all.cc",
+                "googletest/test/gtest_all_test.cc",
+                "googletest/test/gtest-death-test_ex_test.cc",
+                "googletest/test/gtest-listener_test.cc",
+                "googletest/test/gtest-unittest-api_test.cc",
+                "googletest/test/gtest-param-test_test.cc",
+            ],
+        ),
+    }),
     copts = select({
         ":win": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
-        "//conditions:default": ["-DGTEST_USE_OWN_TR1_TUPLE=1"]
+        "//conditions:default": ["-DGTEST_USE_OWN_TR1_TUPLE=1"],
     }),
     includes = [
         "googletest",
@@ -120,19 +192,14 @@ cc_test(
         "googletest/include/internal",
         "googletest/test",
     ],
-    linkopts = [
-        "-pthread",
-    ],
+    linkopts = select({
+        ":win": [],
+        "//conditions:default": [
+            "-pthread",
+        ],
+    }),
     deps = [":googletest_main"],
 )
-
-config_setting(
-    name = "win",
-    values = {"cpu": "x64_windows_msvc"}
-    
-)
-
-
 
 """ these googletest tests have their own main()"""
 
