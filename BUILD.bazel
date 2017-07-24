@@ -103,84 +103,56 @@ cc_library(
 
 """googletest own tests """
 
+"""on windows exclude gtest-tuple.h and gtest-tuple_test.cc """
+
+filegroup(
+    name = "win_only_test_files",
+    srcs = glob(
+        include = [
+            "googletest/test/gtest-*.cc",
+            "googletest/test/*.h",
+            "googletest/include/gtest/**/*.h",
+        ],
+        exclude = [
+            "googletest/src/gtest-unittest-api_test.cc",
+            "googletest/include/gtest/internal/gtest-tuple.h",
+            "googletest/test/gtest-tuple_test.cc",
+            "googletest/src/gtest-all.cc",
+            "googletest/test/gtest_all_test.cc",
+            "googletest/test/gtest-death-test_ex_test.cc",
+            "googletest/test/gtest-listener_test.cc",
+            "googletest/test/gtest-unittest-api_test.cc",
+            "googletest/test/gtest-param-test_test.cc",
+        ],
+    ),
+)
+
+filegroup(
+    name = "default_test_files",
+    srcs = glob(
+        include = [
+            "googletest/test/gtest-*.cc",
+            "googletest/test/*.h",
+            "googletest/include/gtest/**/*.h",
+        ],
+        exclude = [
+            "googletest/src/gtest-unittest-api_test.cc",
+            "googletest/src/gtest-all.cc",
+            "googletest/test/gtest_all_test.cc",
+            "googletest/test/gtest-death-test_ex_test.cc",
+            "googletest/test/gtest-listener_test.cc",
+            "googletest/test/gtest-unittest-api_test.cc",
+            "googletest/test/gtest-param-test_test.cc",
+        ],
+    ),
+)
+
 cc_test(
     name = "gtest_all_test",
     size = "small",
-    #    srcs = glob(
-    #        include = [
-    #            "googletest/test/gtest-*.cc",
-    #            "googletest/test/*.h",
-    #            "googletest/include/gtest/**/*.h",
-    #        ],
-    #        exclude = [
-    #            "googletest/src/gtest-unittest-api_test.cc",
-    #            "googletest/src/gtest-all.cc",
-    #            "googletest/test/gtest_all_test.cc",
-    #            "googletest/test/gtest-death-test_ex_test.cc",
-    #            "googletest/test/gtest-listener_test.cc",
-    #            "googletest/test/gtest-unittest-api_test.cc",
-    #            "googletest/test/gtest-param-test_test.cc",
-    #        ] + select({
-    #            ":win": [
-    #                "googletest/include/gtest/internal/gtest-tuple.h",
-    #                "googletest/test/gtest-tuple_test.cc",
-    #            ],
-    #            "//conditions:default": [],
-    #        }),
-    #    ),
-    #    copts = select({
-    #        ":win": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
-    #        "//conditions:default": ["-DGTEST_USE_OWN_TR1_TUPLE=1"],
-    #    }),
-    #    includes = [
-    #        "googletest",
-    #        "googletest/include",
-    #        "googletest/include/internal",
-    #        "googletest/test",
-    #    ],
-    #    linkopts = select({
-    #        ":win": [],
-    #        "//conditions:default": [
-    #            "-pthread",
-    #        ],
-    #    }),
-    #    deps = [":googletest_main"],
-    #)
     srcs = select({
-        ":win": glob(
-            include = [
-                "googletest/test/gtest-*.cc",
-                "googletest/test/*.h",
-                "googletest/include/gtest/**/*.h",
-            ],
-            exclude = [
-                "googletest/src/gtest-unittest-api_test.cc",
-                "googletest/include/gtest/internal/gtest-tuple.h",
-                "googletest/test/gtest-tuple_test.cc",
-                "googletest/src/gtest-all.cc",
-                "googletest/test/gtest_all_test.cc",
-                "googletest/test/gtest-death-test_ex_test.cc",
-                "googletest/test/gtest-listener_test.cc",
-                "googletest/test/gtest-unittest-api_test.cc",
-                "googletest/test/gtest-param-test_test.cc",
-            ],
-        ),
-        "//conditions:default": glob(
-            include = [
-                "googletest/test/gtest-*.cc",
-                "googletest/test/*.h",
-                "googletest/include/gtest/**/*.h",
-            ],
-            exclude = [
-                "googletest/src/gtest-unittest-api_test.cc",
-                "googletest/src/gtest-all.cc",
-                "googletest/test/gtest_all_test.cc",
-                "googletest/test/gtest-death-test_ex_test.cc",
-                "googletest/test/gtest-listener_test.cc",
-                "googletest/test/gtest-unittest-api_test.cc",
-                "googletest/test/gtest-param-test_test.cc",
-            ],
-        ),
+        ":win": [":win_only_test_files"],
+        "//conditions:default": [":default_test_files"],
     }),
     copts = select({
         ":win": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
