@@ -21,10 +21,20 @@ cc_library(
     hdrs = glob([
         "googlemock/include/gmock/*.h",
     ]),
+    copts = [
+        "-std=c++11",
+        "-g",
+        "-Wall",
+        "-Wextra",
+    ],
     includes = [
         "googlemock",
         "googlemock/include",
     ],
+    linkopts = select({
+        ":win": [],
+        "//conditions:default": ["-pthread"],
+    }),
     deps = [
         ":gunit",
     ],
@@ -46,10 +56,22 @@ cc_library(
     hdrs = glob([
         "googletest/include/gtest/*.h",
     ]),
+    copts = select(
+        {
+            ":win": [],
+            "//conditions:default": ["-pthread"],
+        },
+    ),
     includes = [
         "googletest",
         "googletest/include",
     ],
+    linkopts = select({
+        ":win": [],
+        "//conditions:default": [
+            "-pthread",
+        ],
+    }),
 )
 
 cc_library(
