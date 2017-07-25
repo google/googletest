@@ -36,12 +36,12 @@ cc_library(
         "//conditions:default": ["-pthread"],
     }),
     deps = [
-        ":googletest_no_main",
+        ":gunit",
     ],
 )
 
 cc_library(
-    name = "googletest_no_main",
+    name = "gunit",
     srcs = glob(
         include = [
             "googletest/src/*.cc",
@@ -79,7 +79,7 @@ cc_library(
 )
 
 cc_library(
-    name = "googletest_main",
+    name = "gunit_main",
     srcs = glob(
         include = [
             "googletest/src/gtest_main.cc",
@@ -170,8 +170,23 @@ cc_test(
             "-pthread",
         ],
     }),
-    deps = [":googletest_main"],
+    deps = [":gunit_main"],
 )
+
+""" testing"""
+cc_test(
+    name = "gtest-path-test",
+    size = "small",
+    srcs = [
+        "googletest/test/gtest-filepath_test.cc",
+    ],
+    deps = [
+        ":gunit_main",
+    ],
+)
+
+
+
 
 """ these googletest tests have their own main()"""
 
@@ -185,7 +200,7 @@ cc_test(
         "-DGTEST_ENABLE_CATCH_EXCEPTIONS_=1",
     ],
     deps = [
-        ":googletest_main",
+        ":gunit_main",
     ],
 )
 
@@ -196,7 +211,7 @@ cc_test(
         "googletest/test/gtest-listener_test.cc",
     ],
     deps = [
-        ":googletest_main",
+        ":gunit_main",
     ],
 )
 
@@ -207,7 +222,7 @@ cc_test(
         "googletest/test/gtest-unittest-api_test.cc",
     ],
     deps = [
-        ":googletest_main",
+        ":gunit_main",
     ],
 )
 
@@ -220,7 +235,7 @@ cc_test(
         "googletest/test/gtest-param-test_test.h",
     ],
     deps = [
-        ":googletest_main",
+        ":gunit_main",
     ],
 )
 
@@ -240,7 +255,7 @@ cc_library(
         "googletest/samples/sample3-inl.h",
         "googletest/samples/sample4.h",
     ],
-    deps = ["googletest_no_main"],
+    deps = ["gunit"],
 )
 
 cc_test(
@@ -268,7 +283,7 @@ cc_test(
         "googletest/samples",
     ],
     deps = [
-        ":googletest_main",
+        ":gunit_main",
         ":googletest_sample_lib",
     ],
 )
@@ -287,7 +302,7 @@ cc_test(
         "googletest/samples",
     ],
     deps = [
-        ":googletest_no_main",
+        ":gunit",
     ],
 )
 
@@ -303,6 +318,6 @@ cc_test(
         "googletest/samples",
     ],
     deps = [
-        ":googletest_no_main",
+        ":gunit",
     ],
 )
