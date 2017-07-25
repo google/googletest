@@ -21,12 +21,6 @@ cc_library(
     hdrs = glob([
         "googlemock/include/gmock/*.h",
     ]),
-    copts = [
-        "-std=c++11",
-        "-g",
-        "-Wall",
-        "-Wextra",
-    ],
     includes = [
         "googlemock",
         "googlemock/include",
