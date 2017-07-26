@@ -1,1 +1,1 @@
-workspace(name = "com_google_googletest_gennadiy")
+workspace(name = "com_google_googletest")

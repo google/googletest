@@ -7,6 +7,16 @@ config_setting(
     values = {"cpu": "x64_windows_msvc"},
 )
 
+alias(
+    name = "gunit_main",
+    actual = ":googletest_main",
+)
+
+alias(
+    name = "gunit",
+    actual = ":googletest",
+)
+
 cc_library(
     name = "googlemock",
     srcs = glob(
@@ -30,12 +40,12 @@ cc_library(
         "//conditions:default": ["-pthread"],
     }),
     deps = [
-        ":gunit",
+        ":googletest",
     ],
 )
 
 cc_library(
-    name = "gunit",
+    name = "googletest",
     srcs = glob(
         include = [
             "googletest/src/*.cc",
@@ -69,7 +79,7 @@ cc_library(
 )
 
 cc_library(
-    name = "gunit_main",
+    name = "googletest_main",
     srcs = glob(
         include = [
             "googletest/src/gtest_main.cc",
@@ -88,8 +98,7 @@ cc_library(
 
 """googletest own tests """
 
-"""on windows exclude gtest-tuple.h and gtest-tuple_test.cc """
-
+#on windows exclude gtest-tuple.h and gtest-tuple_test.cc
 filegroup(
     name = "win_only_test_files",
     srcs = glob(
@@ -133,7 +142,7 @@ filegroup(
 )
 
 cc_test(
-    name = "gtest_all_test",
+    name = "googletest_all_test",
     size = "small",
     srcs = select({
         ":win": [":win_only_test_files"],
@@ -158,25 +167,10 @@ cc_test(
     deps = [":gunit_main"],
 )
 
-""" testing"""
-cc_test(
-    name = "gtest-path-test",
-    size = "small",
-    srcs = [
-        "googletest/test/gtest-filepath_test.cc",
-    ],
-    deps = [
-        ":gunit_main",
-    ],
-)
-
-
-
-
 """ these googletest tests have their own main()"""
 
 cc_test(
-    name = "gtest-death-test_ex_test",
+    name = "googletest-death-test",
     size = "small",
     srcs = [
         "googletest/test/gtest-death-test_ex_test.cc",
@@ -190,7 +184,7 @@ cc_test(
 )
 
 cc_test(
-    name = "gtest-listener_test",
+    name = "googletest-listener_test",
     size = "small",
     srcs = [
         "googletest/test/gtest-listener_test.cc",
@@ -201,7 +195,7 @@ cc_test(
 )
 
 cc_test(
-    name = "gtest-unittest-api_test",
+    name = "googletest-unittest-api_test",
     size = "small",
     srcs = [
         "googletest/test/gtest-unittest-api_test.cc",
@@ -212,7 +206,7 @@ cc_test(
 )
 
 cc_test(
-    name = "gtest-param-test_test",
+    name = "googletest-param-test_test",
     size = "small",
     srcs = [
         "googletest/test/gtest-param-test2_test.cc",
@@ -268,8 +262,8 @@ cc_test(
         "googletest/samples",
     ],
     deps = [
-        ":gunit_main",
         ":googletest_sample_lib",
+        ":gunit_main",
     ],
 )
 
