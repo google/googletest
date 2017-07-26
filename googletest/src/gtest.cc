@@ -2817,7 +2817,7 @@ static std::string FormatTestCount(int test_count) {
 
 // Formats the count of test cases.
 static std::string FormatTestCaseCount(int test_case_count) {
-  return FormatCountableNoun(test_case_count, "test case", "test cases");
+  return FormatCountableNoun(test_case_count, "test suite", "test suites");
 }
 
 // Converts a TestPartResult::Type enum to human-friendly string
