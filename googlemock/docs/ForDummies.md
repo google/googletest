@@ -50,9 +50,9 @@ Using Google Mock is easy! Inside your C++ source file, just `#include` `"gtest/
 Let's look at an example. Suppose you are developing a graphics program that relies on a LOGO-like API for drawing. How would you test that it does the right thing? Well, you can run it and compare the screen with a golden screen snapshot, but let's admit it: tests like this are expensive to run and fragile (What if you just upgraded to a shiny new graphics card that has better anti-aliasing? Suddenly you have to update all your golden images.). It would be too painful if all your tests are like this. Fortunately, you learned about Dependency Injection and know the right thing to do: instead of having your application talk to the drawing API directly, wrap the API in an interface (say, `Turtle`) and code to that interface:
 
 ```
-class Turtle {
+class ITurtle {
   ...
-  virtual ~Turtle() {}
+  virtual ~ITurtle() {}
   virtual void PenUp() = 0;
   virtual void PenDown() = 0;
   virtual void Forward(int distance) = 0;
@@ -63,7 +63,7 @@ class Turtle {
 };
 ```
 
-(Note that the destructor of `Turtle` **must** be virtual, as is the case for **all** classes you intend to inherit from - otherwise the destructor of the derived class will not be called when you delete an object through a base pointer, and you'll get corrupted program states like memory leaks.)
+(Note that the destructor of `ITurtle` **must** be virtual, as is the case for **all** classes you intend to inherit from - otherwise the destructor of the derived class will not be called when you delete an object through a base pointer, and you'll get corrupted program states like memory leaks.)
 
 You can control whether the turtle's movement will leave a trace using `PenUp()` and `PenDown()`, and control its movement using `Forward()`, `Turn()`, and `GoTo()`. Finally, `GetX()` and `GetY()` tell you the current position of the turtle.
 
@@ -73,10 +73,10 @@ Your program will normally use a real implementation of this interface. In tests
 If you are lucky, the mocks you need to use have already been implemented by some nice people. If, however, you find yourself in the position to write a mock class, relax - Google Mock turns this task into a fun game! (Well, almost.)
 
 ## How to Define It ##
-Using the `Turtle` interface as example, here are the simple steps you need to follow:
+Using the `ITurtle` interface as example, here are the simple steps you need to follow:
 
-  1. Derive a class `MockTurtle` from `Turtle`.
-  1. Take a _virtual_ function of `Turtle` (while it's possible to [mock non-virtual methods using templates](CookBook.md#mocking-nonvirtual-methods), it's much more involved). Count how many arguments it has.
+  1. Derive a class `MockTurtle` from `ITurtle`.
+  1. Take a _virtual_ function of `ITurtle` (while it's possible to [mock non-virtual methods using templates](CookBook.md#mocking-nonvirtual-methods), it's much more involved). Count how many arguments it has.
   1. In the `public:` section of the child class, write `MOCK_METHODn();` (or `MOCK_CONST_METHODn();` if you are mocking a `const` method), where `n` is the number of the arguments; if you counted wrong, shame on you, and a compiler error will tell you so.
   1. Now comes the fun part: you take the function signature, cut-and-paste the _function name_ as the _first_ argument to the macro, and leave what's left as the _second_ argument (in case you're curious, this is the _type of the function_).
   1. Repeat until all virtual functions you want to mock are done.
@@ -85,7 +85,7 @@ After the process, you should have something like:
 
 ```
 #include "gmock/gmock.h"  // Brings in Google Mock.
-class MockTurtle : public Turtle {
+class MockTurtle : public ITurtle {
  public:
   ...
   MOCK_METHOD0(PenUp, void());
