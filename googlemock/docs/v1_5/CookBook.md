@@ -1032,9 +1032,10 @@ a value that satisfies matcher `m`.
 
 For example:
 
-> | `Field(&Foo::number, Ge(3))` | Matches `x` where `x.number >= 3`. |
+| Expression                   | Description                        |
 |:-----------------------------|:-----------------------------------|
-> | `Property(&Foo::name, StartsWith("John "))` | Matches `x` where `x.name()` starts with `"John "`. |
+| `Field(&Foo::number, Ge(3))` | Matches `x` where `x.number >= 3`. |
+| `Property(&Foo::name, StartsWith("John "))` | Matches `x` where `x.name()` starts with `"John "`. |
 
 Note that in `Property(&Foo::baz, ...)`, method `baz()` must take no
 argument and be declared as `const`.
@@ -1772,9 +1773,9 @@ using ::testing::_;
   // second argument DoThis() receives.
 ```
 
-Arghh, you need to refer to a mock function argument but C++ has no
-lambda (yet), so you have to define your own action. :-( Or do you
-really?
+Arghh, you need to refer to a mock function argument but your version
+of C++ has no lambdas, so you have to define your own action. :-(
+Or do you really?
 
 Well, Google Mock has an action to solve _exactly_ this problem:
 
@@ -2080,12 +2081,12 @@ versus
 
 ## Forcing a Verification ##
 
-When it's being destoyed, your friendly mock object will automatically
+When it's being destroyed, your friendly mock object will automatically
 verify that all expectations on it have been satisfied, and will
 generate [Google Test](http://code.google.com/p/googletest/) failures
 if not. This is convenient as it leaves you with one less thing to
 worry about. That is, unless you are not sure if your mock object will
-be destoyed.
+be destroyed.
 
 How could it be that your mock object won't eventually be destroyed?
 Well, it might be created on the heap and owned by the code you are
@@ -2863,6 +2864,7 @@ For example, when using an `ACTION` as a stub action for mock function:
 int DoSomething(bool flag, int* ptr);
 ```
 we have:
+
 | **Pre-defined Symbol** | **Is Bound To** |
 |:-----------------------|:----------------|
 | `arg0`                 | the value of `flag` |
@@ -3024,6 +3026,7 @@ is asked to infer the type of `x`?
 If you are writing a function that returns an `ACTION` object, you'll
 need to know its type.  The type depends on the macro used to define
 the action and the parameter types.  The rule is relatively simple:
+
 | **Given Definition** | **Expression** | **Has Type** |
 |:---------------------|:---------------|:-------------|
 | `ACTION(Foo)`        | `Foo()`        | `FooAction`  |
