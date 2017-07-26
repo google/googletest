@@ -15,7 +15,7 @@ assertions.
 
 These three assertions do not actually test a value or expression. Instead,
 they generate a success or failure directly. Like the macros that actually
-perform a test, you may stream a custom failure message into the them.
+perform a test, you may stream a custom failure message into them.
 
 | `SUCCEED();` |
 |:-------------|
