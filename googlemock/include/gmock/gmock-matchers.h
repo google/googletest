@@ -2897,6 +2897,112 @@ class EachMatcherImpl : public QuantifierMatcherImpl<Container> {
   GTEST_DISALLOW_ASSIGN_(EachMatcherImpl);
 };
 
+// Implements ContainsSequence for the given argument type Container.
+template <typename Container>
+class ContainsSequenceMatcherImpl : public MatcherInterface<Container> {
+ public:
+  typedef GTEST_REMOVE_REFERENCE_AND_CONST_(Container) RawContainer;
+  typedef internal::StlContainerView<RawContainer> View;
+  typedef typename View::type StlContainer;
+  typedef typename View::const_reference StlContainerReference;
+  typedef typename StlContainer::value_type Element;
+  typedef typename ::std::vector<Matcher<const Element&> >::const_iterator
+  SeqPos;  // A position in sequence_.
+
+  // Constructs the matcher from a sequence of element values or
+  // element matchers.
+  template <typename InputIter>
+  ContainsSequenceMatcherImpl(InputIter first, InputIter last) {
+    while (first != last) {
+      sequence_.push_back(MatcherCast<const Element&>(*first++));
+    }
+  }
+
+  // Describes what this matcher does.
+  virtual void DescribeTo(::std::ostream* os) const {
+    *os << "contains a sequence of " << Elements(count()) <<
+      " elements where\n";
+    for (size_t i = 0; i != count(); ++i) {
+      *os << "element #" << i << " ";
+      sequence_[i].DescribeTo(os);
+      if (i + 1 < count()) {
+	*os << ",\n";
+      }
+    }
+  }
+
+  // Describes what the negation of this matcher does.
+  virtual void DescribeNegationTo(::std::ostream* os) const {
+    *os << "doesn't contain a sequence of " << Elements(count()) <<
+      " elements where\n";
+    for (size_t i = 0; i != count(); ++i) {
+      *os << "element #" << i << " ";
+      sequence_[i].DescribeTo(os);
+      if (i + 1 < count()) {
+        *os << ",\n";
+      }
+    }
+  }
+
+  virtual bool MatchAndExplain(Container container,
+                               MatchResultListener* listener) const {
+    if (sequence_.empty()) return true;
+
+    const bool listener_interested = listener->IsInterested();
+
+    StlContainerReference stl_container = View::ConstReference(container);
+    // Tracks positions that match the container so far.
+    ::std::vector<SeqPos> ongoing_matches;
+    for (typename StlContainer::const_iterator current = stl_container.begin();
+         current != stl_container.end(); ++current) {
+      // Assume current begins an ongoing match at position 0.
+      ongoing_matches.push_back(sequence_.begin());
+      // Terminate any ongoing matches that don't extend to current.
+      ongoing_matches.erase(
+          std::remove_if(ongoing_matches.begin(),
+                         ongoing_matches.end(),
+                         DoesntMatch(*current)),
+          ongoing_matches.end());
+      // Increment ongoing matches.
+      for (typename ::std::vector<SeqPos>::iterator pos
+               = ongoing_matches.begin();
+           pos != ongoing_matches.end(); ++pos) {
+	if (++*pos == sequence_.end()) return true;
+      }
+    }
+    return false;
+  }
+
+ private:
+
+  // Functor checking for a match of a container element by a sequence_ element.
+  class DoesntMatch {
+   public:
+    // Initializes with the container element.
+    DoesntMatch(const typename StlContainer::value_type& element) :
+        element_(element) {}
+
+    // True if pos doesn't match the container element.
+    bool operator()(const SeqPos& pos) {
+      // TODO(dmircevski): inform listener.
+      return !pos->Matches(element_);
+    }
+
+   private:
+    const typename StlContainer::value_type& element_;
+  };
+
+  static Message Elements(size_t count) {
+    return Message() << count << (count == 1 ? " element" : " elements");
+  }
+
+  size_t count() const { return sequence_.size(); }
+
+  ::std::vector<Matcher<const Element&> > sequence_;
+
+  GTEST_DISALLOW_ASSIGN_(ContainsSequenceMatcherImpl);
+};
+
 // Implements polymorphic Contains(element_matcher).
 template <typename M>
 class ContainsMatcher {
@@ -3445,6 +3551,53 @@ struct CastAndAppendTransform {
   }
 };
 
+template <typename T>
+class ContainsSequenceArrayMatcher {
+ public:
+  template <typename Iter>
+  ContainsSequenceArrayMatcher(Iter first, Iter last)
+      : sequence_(first, last) {}
+
+  template <typename Container>
+  operator Matcher<Container>() const {
+    typedef GTEST_REMOVE_REFERENCE_AND_CONST_(Container) RawContainer;
+    typedef typename internal::StlContainerView<RawContainer>::type View;
+    typedef typename View::value_type Element;
+    typedef ::std::vector<Matcher<const Element&> > MatcherVec;
+    return MakeMatcher(new ContainsSequenceMatcherImpl<Container>(
+                           sequence_.begin(), sequence_.end()));
+  }
+
+ private:
+  const ::std::vector<T> sequence_;
+  GTEST_DISALLOW_ASSIGN_(ContainsSequenceArrayMatcher);
+};
+
+// Implements polymorphic ContainsSequence(matchers).
+template <typename MatcherTuple>
+class ContainsSequenceMatcher {
+ public:
+  explicit ContainsSequenceMatcher(const MatcherTuple& args) : matchers_(args) {}
+
+  template <typename Container>
+  operator Matcher<Container>() const {
+    typedef GTEST_REMOVE_REFERENCE_AND_CONST_(Container) RawContainer;
+    typedef typename internal::StlContainerView<RawContainer>::type View;
+    typedef typename View::value_type Element;
+    typedef ::std::vector<Matcher<const Element&> > MatcherVec;
+    MatcherVec matchers;
+    matchers.reserve(::testing::tuple_size<MatcherTuple>::value);
+    TransformTupleValues(CastAndAppendTransform<const Element&>(), matchers_,
+                         ::std::back_inserter(matchers));
+    return MakeMatcher(new ContainsSequenceMatcherImpl<Container>(
+                           matchers.begin(), matchers.end()));
+  }
+
+ private:
+  const MatcherTuple matchers_;
+  GTEST_DISALLOW_ASSIGN_(ContainsSequenceMatcher);
+};
+
 // Implements UnorderedElementsAre.
 template <typename MatcherTuple>
 class UnorderedElementsAreMatcher {
@@ -3670,6 +3823,56 @@ template <typename T>
 inline internal::ElementsAreArrayMatcher<T>
 ElementsAreArray(::std::initializer_list<T> xs) {
   return ElementsAreArray(xs.begin(), xs.end());
+}
+#endif
+
+// ContainsSequence(first, last)
+// ContainsSequence(pointer, count)
+// ContainsSequence(array)
+// ContainsSequence(container)
+// ContainsSequence({ e1, e2, ..., en })
+//
+// The ContainsSequence() functions matchers search for a specific sequence of
+// elements within a container.  They match if there is an iterator i into the
+// container such that *i matches the first matcher in sequence, *(i+1) the
+// second, etc.  The sequence can be specified as an array, a pointer and count,
+// a vector, an initializer list, or an STL iterator range. In each of these
+// cases, the underlying sequence can be either a sequence of values or a
+// sequence of matchers.
+//
+// All forms of ContainsSequence() make a copy of the input matcher sequence.
+
+template <typename Iter>
+inline internal::ContainsSequenceArrayMatcher<
+    typename ::std::iterator_traits<Iter>::value_type>
+ContainsSequenceArray(Iter first, Iter last) {
+  typedef typename ::std::iterator_traits<Iter>::value_type T;
+  return internal::ContainsSequenceArrayMatcher<T>(first, last);
+}
+
+template <typename T>
+inline internal::ContainsSequenceArrayMatcher<T> ContainsSequenceArray(
+    const T* pointer, size_t count) {
+  return ContainsSequenceArray(pointer, pointer + count);
+}
+
+template <typename T, size_t N>
+inline internal::ContainsSequenceArrayMatcher<T> ContainsSequenceArray(
+    const T (&array)[N]) {
+  return ContainsSequenceArray(array, N);
+}
+
+template <typename Container>
+inline internal::ContainsSequenceArrayMatcher<typename Container::value_type>
+ContainsSequenceArray(const Container& container) {
+  return ContainsSequenceArray(container.begin(), container.end());
+}
+
+#if GTEST_HAS_STD_INITIALIZER_LIST_
+template <typename T>
+inline internal::ContainsSequenceArrayMatcher<T>
+ContainsSequenceArray(::std::initializer_list<T> xs) {
+  return ContainsSequenceArray(xs.begin(), xs.end());
 }
 #endif
 

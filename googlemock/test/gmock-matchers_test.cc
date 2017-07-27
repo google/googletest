@@ -5654,5 +5654,132 @@ TEST(UnorderedPointwiseTest, AllowsMonomorphicInnerMatcher) {
   EXPECT_THAT(lhs, UnorderedPointwise(m2, rhs));
 }
 
+// Tests ContainsSequenceArray().
+TEST(ContainsSequenceArrayTest, SingleElementSequence) {
+  vector<int> a;  // = { 1, 2, 3, 4, 5 };
+  for (size_t i = 1; i <= 5; ++i) { a.push_back(i); }
+  int s[] = { 1 };
+  EXPECT_THAT(a, ContainsSequenceArray(s));
+  s[0] = 2;
+  EXPECT_THAT(a, ContainsSequenceArray(s));
+  s[0] = 3;
+  EXPECT_THAT(a, ContainsSequenceArray(s));
+  s[0] = 4;
+  EXPECT_THAT(a, ContainsSequenceArray(s));
+  s[0] = 5;
+  EXPECT_THAT(a, ContainsSequenceArray(s));
+  s[0] = 6;
+  EXPECT_THAT(a, Not(ContainsSequenceArray(s)));
+}
+
+TEST(ContainsSequenceArrayTest, LongSequence) {
+  vector<int> a;  // = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2 };
+  for (size_t i = 1; i <= 10; ++i) { a.push_back(1); }
+  a.push_back(2);
+
+  vector<int> s(7);
+  s[0] = s[1] = s[2] = s[3] = s[4] = s[5] = s[6] = 1;
+  EXPECT_THAT(a, ContainsSequenceArray(s));
+  EXPECT_THAT(a, ContainsSequenceArray(s.begin(), s.end()));
+  s[6] = 2;
+  EXPECT_THAT(a, ContainsSequenceArray(s));
+  EXPECT_THAT(a, ContainsSequenceArray(s.begin(), s.end()));
+  s[6] = -1;
+  EXPECT_THAT(a, Not(ContainsSequenceArray(s)));
+  EXPECT_THAT(a, Not(ContainsSequenceArray(s.begin(), s.end())));
+}
+
+TEST(ContainsSequenceArrayTest, SingleElementVector) {
+  vector<int> a(1, 1);  // = { 1 };
+  int s[] = { 1, 1 };
+  EXPECT_THAT(a, ContainsSequenceArray(s, 1));
+  EXPECT_THAT(a, ContainsSequenceArray(s, s+1));
+  EXPECT_THAT(a, Not(ContainsSequenceArray(s, 2)));
+  EXPECT_THAT(a, Not(ContainsSequenceArray(s, s+2)));
+}
+
+TEST(ContainsSequenceArrayTest, SingleElementSet) {
+  set<double> a;  // = { .1 };
+  a.insert(.1);
+  double s[] = { .1, 100 };
+  EXPECT_THAT(a, ContainsSequenceArray(s, 1));
+  EXPECT_THAT(a, ContainsSequenceArray(s, s+1));
+  EXPECT_THAT(a, Not(ContainsSequenceArray(s+1, 1)));
+  EXPECT_THAT(a, Not(ContainsSequenceArray(s+1, s+2)));
+  EXPECT_THAT(a, Not(ContainsSequenceArray(s)));
+  EXPECT_THAT(a, Not(ContainsSequenceArray(s, 2)));
+}
+
+TEST(ContainsSequenceArrayTest, SingleElementNativeArray) {
+  char a[] = { '1' };
+  EXPECT_THAT(a, ContainsSequenceArray(std::string("1")));
+  EXPECT_THAT(a, Not(ContainsSequenceArray(std::string("2"))));
+  EXPECT_THAT(a, Not(ContainsSequenceArray(std::string("12"))));
+}
+
+TEST(ContainsSequenceArrayTest, SingleElementList) {
+  list<int> a;  // = { 1 };
+  a.push_back(1);
+  int s[] = { 1, 1 };
+  EXPECT_THAT(a, ContainsSequenceArray(s, 1));
+  EXPECT_THAT(a, ContainsSequenceArray(s, s+1));
+  EXPECT_THAT(a, Not(ContainsSequenceArray(s, 2)));
+  EXPECT_THAT(a, Not(ContainsSequenceArray(s, s+2)));
+}
+
+TEST(ContainsSequenceArrayTest, VariousSequenceTypes) {
+  int a[] = { 1, 2, 3 };
+  int sa[] = { 2, 3 };
+  EXPECT_THAT(a, ContainsSequenceArray(sa));
+  EXPECT_THAT(a, ContainsSequenceArray(a));
+
+  set<int> ss;
+  ss.insert(1);
+  EXPECT_THAT(a, ContainsSequenceArray(ss));
+  ss.insert(3);
+  EXPECT_THAT(a, Not(ContainsSequenceArray(ss)));
+  ss.insert(2);
+  EXPECT_THAT(a, ContainsSequenceArray(ss));
+  ss.insert(-1);
+  EXPECT_THAT(a, Not(ContainsSequenceArray(ss)));
+
+  list<int> sl;
+  sl.push_back(2);
+  EXPECT_THAT(a, ContainsSequenceArray(sl));
+  sl.push_back(1);
+  EXPECT_THAT(a, Not(ContainsSequenceArray(sl)));
+
+  vector<int> sv;
+  EXPECT_THAT(a, ContainsSequenceArray(sv));
+  sv = vector<int>(a, a+3);
+  EXPECT_THAT(a, ContainsSequenceArray(sv));
+  sv.push_back(4);
+  EXPECT_THAT(a, Not(ContainsSequenceArray(sv)));
+
+#if GTEST_HAS_STD_INITIALIZER_LIST_
+  EXPECT_THAT(a, ContainsSequenceArray({1, 2, 3}));
+  EXPECT_THAT(a, ContainsSequenceArray({2}));
+  EXPECT_THAT(a, Not(ContainsSequenceArray({3, 2, 1, 0})));
+#endif  // GTEST_HAS_STD_INITIALIZER_LIST_
+}
+
+TEST(ContainsSequenceArrayTest, EmptyContainer) {
+  int s[] = { 0 };
+  EXPECT_THAT(list<int>(), Not(ContainsSequenceArray(s)));
+  EXPECT_THAT(vector<int>(), Not(ContainsSequenceArray(s)));
+  EXPECT_THAT(set<int>(), Not(ContainsSequenceArray(s)));
+}
+
+TEST(ContainsSequenceArrayTest, EmptySequence) {
+  int a[3];
+  EXPECT_THAT(a, ContainsSequenceArray(vector<int>()));
+  EXPECT_THAT(a, ContainsSequenceArray(set<int>()));
+  EXPECT_THAT(a, ContainsSequenceArray(list<int>()));
+}
+
+// TODO(dmircevski): test stream containers.
+// TODO(dmircevski): test composition with other matchers.
+// TODO(dmircevski): test description of match/mismatch.
+// TODO(dmircevski): test explanation.
 }  // namespace gmock_matchers_test
 }  // namespace testing

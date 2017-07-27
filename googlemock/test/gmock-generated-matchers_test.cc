@@ -59,6 +59,7 @@ using testing::tuple;
 using testing::_;
 using testing::Args;
 using testing::Contains;
+using testing::ContainsSequence;
 using testing::ElementsAre;
 using testing::ElementsAreArray;
 using testing::Eq;
@@ -1234,6 +1235,59 @@ TEST(ContainsTest, WorksForTwoDimensionalNativeArray) {
   EXPECT_THAT(a, Contains(Contains(5)));
   EXPECT_THAT(a, Not(Contains(ElementsAre(3, 4, 5))));
   EXPECT_THAT(a, Contains(Not(Contains(5))));
+}
+
+TEST(ContainsSequenceTest, AllSequenceLengths) {
+  vector<int> a;  // = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2 };
+  for (size_t i = 1; i <= 10; ++i) { a.push_back(1); }
+  a.push_back(2);
+
+  EXPECT_THAT(a, ContainsSequence(1));
+  EXPECT_THAT(a, ContainsSequence(2));
+  EXPECT_THAT(a, Not(ContainsSequence(3)));
+
+  EXPECT_THAT(a, ContainsSequence(1, 1));
+  EXPECT_THAT(a, ContainsSequence(1, 2));
+  EXPECT_THAT(a, Not(ContainsSequence(2, 1)));
+
+  EXPECT_THAT(a, ContainsSequence(1, 1, 1));
+  EXPECT_THAT(a, ContainsSequence(1, 1, 2));
+  EXPECT_THAT(a, Not(ContainsSequence(1, 2, 1)));
+
+  EXPECT_THAT(a, ContainsSequence(1, 1, 1, 1));
+  EXPECT_THAT(a, ContainsSequence(1, 1, 1, 2));
+  EXPECT_THAT(a, Not(ContainsSequence(1, 1, 2, 1)));
+
+  EXPECT_THAT(a, Not(ContainsSequence(1, 2, 3, 4, 5)));
+  EXPECT_THAT(a, ContainsSequence(1, 1, 1, 1, 1));
+  EXPECT_THAT(a, ContainsSequence(1, 1, 1, 1, 2));
+
+  EXPECT_THAT(a, Not(ContainsSequence(1, 2, 3, 4, 5, 6)));
+  EXPECT_THAT(a, ContainsSequence(1, 1, 1, 1, 1, 1));
+  EXPECT_THAT(a, ContainsSequence(1, 1, 1, 1, 1, 2));
+
+  EXPECT_THAT(a, Not(ContainsSequence(1, 2, 3, 4, 5, 6, 7)));
+  EXPECT_THAT(a, ContainsSequence(1, 1, 1, 1, 1, 1, 1));
+  EXPECT_THAT(a, ContainsSequence(1, 1, 1, 1, 1, 1, 2));
+
+  EXPECT_THAT(a, Not(ContainsSequence(1, 2, 3, 4, 5, 6, 7, 8)));
+  EXPECT_THAT(a, ContainsSequence(1, 1, 1, 1, 1, 1, 1, 1));
+  EXPECT_THAT(a, ContainsSequence(1, 1, 1, 1, 1, 1, 1, 2));
+
+  EXPECT_THAT(a, Not(ContainsSequence(1, 2, 3, 4, 5, 6, 7, 8, 9)));
+  EXPECT_THAT(a, ContainsSequence(1, 1, 1, 1, 1, 1, 1, 1, 1));
+  EXPECT_THAT(a, ContainsSequence(1, 1, 1, 1, 1, 1, 1, 1, 2));
+
+  EXPECT_THAT(a, Not(ContainsSequence(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
+  EXPECT_THAT(a, ContainsSequence(1, 1, 1, 1, 1, 1, 1, 1, 1, 1));
+  EXPECT_THAT(a, ContainsSequence(1, 1, 1, 1, 1, 1, 1, 1, 1, 2));
+}
+
+TEST(ContainsSequenceTest, HeterogeneousMatchers) {
+  vector<int> a;  // = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+  for (size_t i = 1; i <= 10; ++i) { a.push_back(1); }
+  EXPECT_THAT(a, ContainsSequence(_, Gt(0), Ne(32), 1));
+  EXPECT_THAT(a, Not(ContainsSequence(_, Gt(4), Ne(32), 1)));
 }
 
 TEST(AllOfTest, HugeMatcher) {

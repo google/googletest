@@ -329,6 +329,45 @@ $for j, [[
 
 ]]
 
+// ContainsSequence(e_1, e_2, ... e_n) matches an STL-style container that
+// contains a specific sequence of elements anywhere in it.  Each argument of
+// ContainsSequence() can be either a value or a matcher.  We support up to $n
+// arguments.
+//
+// The use of DecayArray in the implementation allows ContainsSequence()
+// to accept string literals, whose type is const char[N], but we
+// want to treat them as const char*.
+//
+// NOTE: Since ContainsSequence() cares about the order of the elements, it
+// must not be used with containers whose elements's order is
+// undefined (e.g. hash_map).
+
+$range i 0..n
+$for i [[
+
+$range j 1..i
+
+$if i>0 [[
+
+template <$for j, [[typename T$j]]>
+]]
+
+inline internal::ContainsSequenceMatcher<
+    ::testing::tuple<
+$for j, [[
+
+        typename internal::DecayArray<T$j[[]]>::type]]> >
+ContainsSequence($for j, [[const T$j& e$j]]) {
+  typedef ::testing::tuple<
+$for j, [[
+
+      typename internal::DecayArray<T$j[[]]>::type]]> Args;
+  return internal::ContainsSequenceMatcher<Args>(Args($for j, [[e$j]]));
+}
+
+]]
+
+
 // AllOf(m1, m2, ..., mk) matches any value that matches all of the given
 // sub-matchers.  AllOf is called fully qualified to prevent ADL from firing.
 
