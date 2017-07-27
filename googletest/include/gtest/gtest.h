@@ -1747,6 +1747,11 @@ class WithParamInterface {
   typedef T ParamType;
   virtual ~WithParamInterface() {}
 
+  // Returns true if the test is called with a parameter,
+  // i.e. within TEST_P.
+  // This function is helpful for test fixture member functions.
+  bool HasParam() const { return parameter_; }
+
   // The current parameter value. Is also available in the test fixture's
   // constructor. This member function is non-static, even though it only
   // references static data, to reduce the opportunity for incorrect uses
