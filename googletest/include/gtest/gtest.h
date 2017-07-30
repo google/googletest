@@ -2154,11 +2154,11 @@ bool StaticAssertTypeEq() {
 
 // Defines a test.
 //
-// The first parameter is the name of the test case, and the second
-// parameter is the name of the test within the test case.
+// The first parameter is the name of the test suite, and the second
+// parameter is the name of the test within the test suite.
 //
-// The convention is to end the test case name with "Test".  For
-// example, a test case for the Foo class can be named FooTest.
+// The convention is to end the test suite name with "Test".  For
+// example, a test suite for the Foo class can be named FooTest.
 //
 // Test code should appear between braces after an invocation of
 // this macro.  Example:
@@ -2177,21 +2177,21 @@ bool StaticAssertTypeEq() {
 // code.  GetTestTypeId() is guaranteed to always return the same
 // value, as it always calls GetTypeId<>() from the Google Test
 // framework.
-#define GTEST_TEST(test_case_name, test_name)\
-  GTEST_TEST_(test_case_name, test_name, \
+#define GTEST_TEST(test_suite_name, test_name)\
+  GTEST_TEST_(test_suite_name, test_name, \
               ::testing::Test, ::testing::internal::GetTestTypeId())
 
 // Define this macro to 1 to omit the definition of TEST(), which
 // is a generic name and clashes with some other libraries.
 #if !GTEST_DONT_DEFINE_TEST
-# define TEST(test_case_name, test_name) GTEST_TEST(test_case_name, test_name)
+# define TEST(test_suite_name, test_name) GTEST_TEST(test_suite_name, test_name)
 #endif
 
 // Defines a test that uses a test fixture.
 //
 // The first parameter is the name of the test fixture class, which
-// also doubles as the test case name.  The second parameter is the
-// name of the test within the test case.
+// also doubles as the test suite name.  The second parameter is the
+// name of the test within the test suite.
 //
 // A test fixture class must be declared earlier.  The user should put
 // the test code between braces after using this macro.  Example:
