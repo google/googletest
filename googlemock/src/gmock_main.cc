@@ -43,7 +43,7 @@
 
 GTEST_API_ int _tmain(int argc, TCHAR** argv) {
 #else
-GTEST_API_ int main(int argc, char** argv) {
+GTEST_API_ int GTEST_CRUNTIME_CALLING_CONV_ main(int argc, char** argv) {
 #endif  // GTEST_OS_WINDOWS_MOBILE
   std::cout << "Running main() from gmock_main.cc\n";
   // Since Google Mock depends on Google Test, InitGoogleMock() is

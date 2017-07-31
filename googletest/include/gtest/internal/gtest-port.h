@@ -1020,6 +1020,12 @@ using ::std::tuple_size;
 # define GTEST_ATTRIBUTE_NO_SANITIZE_THREAD_
 #endif  // __clang__
 
+#if defined(_MSC_VER) && defined(_M_IX86)
+#  define GTEST_CRUNTIME_CALLING_CONV_ __cdecl
+#else
+#  define GTEST_CRUNTIME_CALLING_CONV_
+#endif
+
 namespace testing {
 
 class Message;
