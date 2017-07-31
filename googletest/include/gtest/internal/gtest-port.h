@@ -388,6 +388,10 @@
 # endif
 #endif
 
+#if GTEST_HAS_STD_TUPLE_
+# define GTEST_HAS_TR1_TUPLE 0
+#endif
+
 // Brings in definitions for functions used in the testing::internal::posix
 // namespace (read, write, close, chdir, isatty, stat). We do not currently
 // use them on Windows Mobile.
@@ -696,20 +700,6 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #  include "gtest/internal/gtest-tuple.h"  // IWYU pragma: export  // NOLINT
 # elif GTEST_ENV_HAS_STD_TUPLE_
 #  include <tuple>
-// C++11 puts its tuple into the ::std namespace rather than
-// ::std::tr1.  gtest expects tuple to live in ::std::tr1, so put it there.
-// This causes undefined behavior, but supported compilers react in
-// the way we intend.
-namespace std {
-namespace tr1 {
-using ::std::get;
-using ::std::make_tuple;
-using ::std::tuple;
-using ::std::tuple_element;
-using ::std::tuple_size;
-}
-}
-
 # elif GTEST_OS_SYMBIAN
 
 // On Symbian, BOOST_HAS_TR1_TUPLE causes Boost's TR1 tuple library to
