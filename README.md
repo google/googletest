@@ -106,7 +106,7 @@ package (as described below):
 ### Mac OS X Requirements ###
 
   * Mac OS X v10.4 Tiger or newer
-  * Xcode Developer Tools
+  * XCode Developer Tools
 
 ### Requirements for Contributors ###
 
@@ -140,3 +140,5 @@ the Contributor License Agreement, or we won't be able to accept the
 patch.
 
 Happy testing!
+Modify for test Travis-CI!
+Modify for test Travis-CI Another!
