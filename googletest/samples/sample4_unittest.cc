@@ -31,6 +31,7 @@
 
 #include "gtest/gtest.h"
 #include "sample4.h"
+namespace {
 
 // Tests the Increment() method.
 TEST(Counter, Increment) {
@@ -42,4 +43,5 @@ TEST(Counter, Increment) {
   EXPECT_EQ(0, c.Increment());
   EXPECT_EQ(1, c.Increment());
   EXPECT_EQ(2, c.Increment());
+}
 }

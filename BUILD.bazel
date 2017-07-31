@@ -1,0 +1,302 @@
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+config_setting(
+    name = "win",
+    values = {"cpu": "x64_windows_msvc"},
+)
+
+alias(
+    name = "gunit_main",
+    actual = ":googletest_main",
+)
+
+alias(
+    name = "gunit",
+    actual = ":googletest",
+)
+
+cc_library(
+    name = "googlemock",
+    srcs = glob(
+        include = [
+            "googlemock/src/*.cc",
+            "googlemock/include/gmock/**/*.h",
+        ],
+        exclude = [
+            "googlemock/src/gmock-all.cc",
+        ],
+    ),
+    hdrs = glob([
+        "googlemock/include/gmock/*.h",
+    ]),
+    includes = [
+        "googlemock",
+        "googlemock/include",
+    ],
+    linkopts = select({
+        ":win": [],
+        "//conditions:default": ["-pthread"],
+    }),
+    deps = [
+        ":googletest",
+    ],
+)
+
+cc_library(
+    name = "googletest",
+    srcs = glob(
+        include = [
+            "googletest/src/*.cc",
+            "googletest/src/*.h",
+            "googletest/include/gtest/**/*.h",
+        ],
+        exclude = [
+            "googletest/src/gtest-all.cc",
+            "googletest/src/gtest_main.cc",
+        ],
+    ),
+    hdrs = glob([
+        "googletest/include/gtest/*.h",
+    ]),
+    copts = select(
+        {
+            ":win": [],
+            "//conditions:default": ["-pthread"],
+        },
+    ),
+    includes = [
+        "googletest",
+        "googletest/include",
+    ],
+    linkopts = select({
+        ":win": [],
+        "//conditions:default": [
+            "-pthread",
+        ],
+    }),
+)
+
+cc_library(
+    name = "googletest_main",
+    srcs = glob(
+        include = [
+            "googletest/src/gtest_main.cc",
+        ],
+    ),
+    hdrs = glob([
+        "googletest/include/gtest/*.h",
+        "googletest/include/gtest/**/*.h",
+    ]),
+    includes = [
+        "googletest",
+        "googletest/include",
+    ],
+    deps = [":googlemock"],
+)
+
+"""googletest own tests """
+
+#on windows exclude gtest-tuple.h and gtest-tuple_test.cc
+filegroup(
+    name = "win_only_test_files",
+    srcs = glob(
+        include = [
+            "googletest/test/gtest-*.cc",
+            "googletest/test/*.h",
+            "googletest/include/gtest/**/*.h",
+        ],
+        exclude = [
+            "googletest/src/gtest-unittest-api_test.cc",
+            "googletest/include/gtest/internal/gtest-tuple.h",
+            "googletest/test/gtest-tuple_test.cc",
+            "googletest/src/gtest-all.cc",
+            "googletest/test/gtest_all_test.cc",
+            "googletest/test/gtest-death-test_ex_test.cc",
+            "googletest/test/gtest-listener_test.cc",
+            "googletest/test/gtest-unittest-api_test.cc",
+            "googletest/test/gtest-param-test_test.cc",
+        ],
+    ),
+)
+
+filegroup(
+    name = "default_test_files",
+    srcs = glob(
+        include = [
+            "googletest/test/gtest-*.cc",
+            "googletest/test/*.h",
+            "googletest/include/gtest/**/*.h",
+        ],
+        exclude = [
+            "googletest/src/gtest-unittest-api_test.cc",
+            "googletest/src/gtest-all.cc",
+            "googletest/test/gtest_all_test.cc",
+            "googletest/test/gtest-death-test_ex_test.cc",
+            "googletest/test/gtest-listener_test.cc",
+            "googletest/test/gtest-unittest-api_test.cc",
+            "googletest/test/gtest-param-test_test.cc",
+        ],
+    ),
+)
+
+cc_test(
+    name = "googletest_all_test",
+    size = "small",
+    srcs = select({
+        ":win": [":win_only_test_files"],
+        "//conditions:default": [":default_test_files"],
+    }),
+    copts = select({
+        ":win": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
+        "//conditions:default": ["-DGTEST_USE_OWN_TR1_TUPLE=1"],
+    }),
+    includes = [
+        "googletest",
+        "googletest/include",
+        "googletest/include/internal",
+        "googletest/test",
+    ],
+    linkopts = select({
+        ":win": [],
+        "//conditions:default": [
+            "-pthread",
+        ],
+    }),
+    deps = [":gunit_main"],
+)
+
+""" these googletest tests have their own main()"""
+
+cc_test(
+    name = "googletest-death-test",
+    size = "small",
+    srcs = [
+        "googletest/test/gtest-death-test_ex_test.cc",
+    ],
+    copts = [
+        "-DGTEST_ENABLE_CATCH_EXCEPTIONS_=1",
+    ],
+    deps = [
+        ":gunit_main",
+    ],
+)
+
+cc_test(
+    name = "googletest-listener_test",
+    size = "small",
+    srcs = [
+        "googletest/test/gtest-listener_test.cc",
+    ],
+    deps = [
+        ":gunit_main",
+    ],
+)
+
+cc_test(
+    name = "googletest-unittest-api_test",
+    size = "small",
+    srcs = [
+        "googletest/test/gtest-unittest-api_test.cc",
+    ],
+    deps = [
+        ":gunit_main",
+    ],
+)
+
+cc_test(
+    name = "googletest-param-test_test",
+    size = "small",
+    srcs = [
+        "googletest/test/gtest-param-test2_test.cc",
+        "googletest/test/gtest-param-test_test.cc",
+        "googletest/test/gtest-param-test_test.h",
+    ],
+    deps = [
+        ":gunit_main",
+    ],
+)
+
+""" googletest samples"""
+
+cc_library(
+    name = "googletest_sample_lib",
+    srcs = [
+        "googletest/samples/sample1.cc",
+        "googletest/samples/sample2.cc",
+        "googletest/samples/sample4.cc",
+    ],
+    hdrs = [
+        "googletest/samples/prime_tables.h",
+        "googletest/samples/sample1.h",
+        "googletest/samples/sample2.h",
+        "googletest/samples/sample3-inl.h",
+        "googletest/samples/sample4.h",
+    ],
+    deps = ["gunit"],
+)
+
+cc_test(
+    name = "googletest_samples",
+    size = "small",
+    srcs = glob(
+        include = [
+            "googletest/samples/sample*.cc",
+            "googletest/samples/sample*.h",
+        ],
+        exclude = [
+            "googletest/samples/sample1.cc",
+            "googletest/samples/sample2.cc",
+            "googletest/samples/sample4.cc",
+            "googletest/samples/prime_tables.h",
+            "googletest/samples/sample1.h",
+            "googletest/samples/sample2.h",
+            "googletest/samples/sample3-inl.h",
+            "googletest/samples/sample4.h",
+            "googletest/samples/sample9_unittest.cc",
+            "googletest/samples/sample10_unittest.cc",
+        ],
+    ),
+    includes = [
+        "googletest/samples",
+    ],
+    deps = [
+        ":googletest_sample_lib",
+        ":gunit_main",
+    ],
+)
+
+""" googletest samples 9 and 10 have their own main()"""
+
+cc_test(
+    name = "googletest_sample9",
+    size = "small",
+    srcs = glob(
+        include = [
+            "googletest/samples/sample9_unittest.cc",
+        ],
+    ),
+    includes = [
+        "googletest/samples",
+    ],
+    deps = [
+        ":gunit",
+    ],
+)
+
+cc_test(
+    name = "googletest_sample10",
+    size = "small",
+    srcs = glob(
+        include = [
+            "googletest/samples/sample10_unittest.cc",
+        ],
+    ),
+    includes = [
+        "googletest/samples",
+    ],
+    deps = [
+        ":gunit",
+    ],
+)

@@ -110,7 +110,8 @@ TEST(OutputFileHelpersTest, GetCurrentExecutableName) {
       _strcmpi("gtest-options_test", exe_str.c_str()) == 0 ||
       _strcmpi("gtest-options-ex_test", exe_str.c_str()) == 0 ||
       _strcmpi("gtest_all_test", exe_str.c_str()) == 0 ||
-      _strcmpi("gtest_dll_test", exe_str.c_str()) == 0;
+      _strcmpi("gtest_dll_test", exe_str.c_str()) == 0 ||
+      _strcmpi("googletest_all_test", exe_str.c_str()) == 0;
 #else
   // TODO(wan@google.com): remove the hard-coded "lt-" prefix when
   //   Chandler Carruth's libtool replacement is ready.
@@ -118,7 +119,8 @@ TEST(OutputFileHelpersTest, GetCurrentExecutableName) {
       exe_str == "gtest-options_test" ||
       exe_str == "gtest_all_test" ||
       exe_str == "lt-gtest_all_test" ||
-      exe_str == "gtest_dll_test";
+      exe_str == "gtest_dll_test"    ||
+      exe_str == "googletest_all_test";
 #endif  // GTEST_OS_WINDOWS
   if (!success)
     FAIL() << "GetCurrentExecutableName() returns " << exe_str;

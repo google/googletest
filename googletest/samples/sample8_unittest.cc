@@ -37,7 +37,7 @@
 #include "prime_tables.h"
 
 #include "gtest/gtest.h"
-
+namespace {
 #if GTEST_HAS_COMBINE
 
 // Suppose we want to introduce a new, improved implementation of PrimeTable
@@ -90,7 +90,7 @@ using ::testing::Combine;
 // PreCalculatedPrimeTable disabled. We do this by defining fixture which will
 // accept different combinations of parameters for instantiating a
 // HybridPrimeTable instance.
-class PrimeTableTest : public TestWithParam< ::testing::tuple<bool, int> > {
+class PrimeTableTestSample8 : public TestWithParam< ::testing::tuple<bool, int> > {
  protected:
   virtual void SetUp() {
     // This can be written as
@@ -112,7 +112,7 @@ class PrimeTableTest : public TestWithParam< ::testing::tuple<bool, int> > {
   HybridPrimeTable* table_;
 };
 
-TEST_P(PrimeTableTest, ReturnsFalseForNonPrimes) {
+TEST_P(PrimeTableTestSample8, ReturnsFalseForNonPrimes) {
   // Inside the test body, you can refer to the test parameter by GetParam().
   // In this case, the test parameter is a PrimeTable interface pointer which
   // we can use directly.
@@ -127,7 +127,7 @@ TEST_P(PrimeTableTest, ReturnsFalseForNonPrimes) {
   EXPECT_FALSE(table_->IsPrime(100));
 }
 
-TEST_P(PrimeTableTest, ReturnsTrueForPrimes) {
+TEST_P(PrimeTableTestSample8, ReturnsTrueForPrimes) {
   EXPECT_TRUE(table_->IsPrime(2));
   EXPECT_TRUE(table_->IsPrime(3));
   EXPECT_TRUE(table_->IsPrime(5));
@@ -136,7 +136,7 @@ TEST_P(PrimeTableTest, ReturnsTrueForPrimes) {
   EXPECT_TRUE(table_->IsPrime(131));
 }
 
-TEST_P(PrimeTableTest, CanGetNextPrime) {
+TEST_P(PrimeTableTestSample8, CanGetNextPrime) {
   EXPECT_EQ(2, table_->GetNextPrime(0));
   EXPECT_EQ(3, table_->GetNextPrime(2));
   EXPECT_EQ(5, table_->GetNextPrime(3));
@@ -157,7 +157,7 @@ TEST_P(PrimeTableTest, CanGetNextPrime) {
 // PrecalcPrimeTable instance and some inside it (10). Combine will produce all
 // possible combinations.
 INSTANTIATE_TEST_CASE_P(MeaningfulTestParameters,
-                        PrimeTableTest,
+                        PrimeTableTestSample8,
                         Combine(Bool(), Values(1, 10)));
 
 #else
@@ -171,3 +171,4 @@ INSTANTIATE_TEST_CASE_P(MeaningfulTestParameters,
 TEST(DummyTest, CombineIsNotSupportedOnThisPlatform) {}
 
 #endif  // GTEST_HAS_COMBINE
+}
