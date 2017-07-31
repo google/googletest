@@ -109,6 +109,7 @@ class FooInterface {
   (bool b, char c, short d, int e, long f,  // NOLINT
    float g, double h, unsigned i, char* j, const std::string& k) = 0;
   STDMETHOD_(char, CTConst)(int x) const = 0;
+  STDMETHOD_(char, CTVolatile)(int x) volatile = 0;
 #endif  // GTEST_OS_WINDOWS
 };
 
@@ -168,6 +169,8 @@ class MockFoo : public FooInterface {
                                   float g, double h, unsigned i, char* j,
                                   const std::string& k));
   MOCK_CONST_METHOD1_WITH_CALLTYPE(STDMETHODCALLTYPE, CTConst, char(int));
+  MOCK_QUALIFIED_METHOD1_WITH_CALLTYPE(STDMETHODCALLTYPE, CTVolatile,
+                                       volatile, char(int x));
 
   // Tests that the function return type can contain unprotected comma.
   MOCK_METHOD0_WITH_CALLTYPE(STDMETHODCALLTYPE, CTReturnTypeWithComma,
@@ -342,6 +345,13 @@ TEST_F(FunctionMockerTest, MocksFunctionsConstFunctionWithCallType) {
   EXPECT_EQ('a', Const(*foo_).CTConst(0));
 }
 
+TEST_F(FunctionMockerTest, MocksFunctionsVolatileFunctionWithCallType) {
+  EXPECT_CALL(mock_foo_, CTVolatile(_))
+      .WillOnce(Return('v'));
+
+  EXPECT_EQ('v', foo_->CTVolatile(0));
+}
+
 TEST_F(FunctionMockerTest, MocksReturnTypeWithCommaAndCallType) {
   const std::map<int, std::string> a_map;
   EXPECT_CALL(mock_foo_, CTReturnTypeWithComma())
@@ -394,6 +404,7 @@ class StackInterface {
   virtual int GetSize() const = 0;
   // Template parameter appears in function return type.
   virtual const T& GetTop() const = 0;
+  virtual void Clear() volatile = 0;
 };
 
 template <typename T>
@@ -405,6 +416,7 @@ class MockStack : public StackInterface<T> {
   MOCK_METHOD0_T(Pop, void());
   MOCK_CONST_METHOD0_T(GetSize, int());  // NOLINT
   MOCK_CONST_METHOD0_T(GetTop, const T&());
+  MOCK_QUALIFIED_METHOD0_T(Clear, volatile, void());
 
   // Tests that the function return type can contain unprotected comma.
   MOCK_METHOD0_T(ReturnTypeWithComma, std::map<int, int>());
@@ -428,6 +440,8 @@ TEST(TemplateMockTest, Works) {
       .WillOnce(ReturnRef(n));
   EXPECT_CALL(mock, Pop())
       .Times(AnyNumber());
+  EXPECT_CALL(mock, Clear())
+      .Times(1);
 
   EXPECT_EQ(0, mock.GetSize());
   mock.Push(5);
@@ -435,6 +449,7 @@ TEST(TemplateMockTest, Works) {
   EXPECT_EQ(5, mock.GetTop());
   mock.Pop();
   EXPECT_EQ(0, mock.GetSize());
+  mock.Clear();
 }
 
 TEST(TemplateMockTest, MethodWithCommaInReturnTypeWorks) {
@@ -464,6 +479,7 @@ class StackInterfaceWithCallType {
   STDMETHOD_(int, GetSize)() const = 0;
   // Template parameter appears in function return type.
   STDMETHOD_(const T&, GetTop)() const = 0;
+  STDMETHOD_(void, Clear)() volatile = 0;
 };
 
 template <typename T>
@@ -475,6 +491,7 @@ class MockStackWithCallType : public StackInterfaceWithCallType<T> {
   MOCK_METHOD0_T_WITH_CALLTYPE(STDMETHODCALLTYPE, Pop, void());
   MOCK_CONST_METHOD0_T_WITH_CALLTYPE(STDMETHODCALLTYPE, GetSize, int());
   MOCK_CONST_METHOD0_T_WITH_CALLTYPE(STDMETHODCALLTYPE, GetTop, const T&());
+  MOCK_QUALIFIED_METHOD0_T_WITH_CALLTYPE(STDMETHODCALLTYPE, Clear, volatile, void());
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockStackWithCallType);
@@ -494,6 +511,8 @@ TEST(TemplateMockTestWithCallType, Works) {
       .WillOnce(ReturnRef(n));
   EXPECT_CALL(mock, Pop())
       .Times(AnyNumber());
+  EXPECT_CALL(mock, Clear())
+      .Times(1);
 
   EXPECT_EQ(0, mock.GetSize());
   mock.Push(5);
@@ -501,6 +520,7 @@ TEST(TemplateMockTestWithCallType, Works) {
   EXPECT_EQ(5, mock.GetTop());
   mock.Pop();
   EXPECT_EQ(0, mock.GetSize());
+  mock.Clear();
 }
 #endif  // GTEST_OS_WINDOWS
 
@@ -530,29 +550,92 @@ TEST(OverloadedMockMethodTest, CanOverloadOnArgNumberInMacroBody) {
   EXPECT_TRUE(mock.Overloaded(true, 1));
 }
 
-#define MY_MOCK_METHODS2_ \
-    MOCK_CONST_METHOD1(Overloaded, int(int n)); \
-    MOCK_METHOD1(Overloaded, int(int n));
-
-class MockOverloadedOnConstness {
+class MockOverloadedOnQualifiers {
  public:
-  MockOverloadedOnConstness() {}
+  MockOverloadedOnQualifiers() {}
 
-  MY_MOCK_METHODS2_;
+  MOCK_CONST_METHOD1(Overloaded, int(int n));
+  MOCK_METHOD1(Overloaded, int(int n));
+  MOCK_QUALIFIED_METHOD1(Overloaded, volatile, int(int n));
+  MOCK_QUALIFIED_METHOD1(Overloaded, const volatile, int(int n));
+
+#if GTEST_LANG_CXX11
+  MOCK_QUALIFIED_METHOD0(OverloadedRefQualifier, &, int());
+  MOCK_QUALIFIED_METHOD0(OverloadedRefQualifier, &&, int());
+#endif // GTEST_LANG_CXX11
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockOverloadedOnConstness);
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockOverloadedOnQualifiers);
 };
 
 TEST(OverloadedMockMethodTest, CanOverloadOnConstnessInMacroBody) {
-  MockOverloadedOnConstness mock;
-  const MockOverloadedOnConstness* const_mock = &mock;
+  MockOverloadedOnQualifiers mock;
+  const MockOverloadedOnQualifiers* const_mock = &mock;
+  volatile MockOverloadedOnQualifiers* volatile_mock = &mock;
+  const volatile MockOverloadedOnQualifiers* const_volatile_mock = &mock;
   EXPECT_CALL(mock, Overloaded(1)).WillOnce(Return(2));
   EXPECT_CALL(*const_mock, Overloaded(1)).WillOnce(Return(3));
+  EXPECT_CALL(*volatile_mock, Overloaded(1)).WillOnce(Return(4));
+  EXPECT_CALL(*const_volatile_mock, Overloaded(1)).WillOnce(Return(5));
 
   EXPECT_EQ(2, mock.Overloaded(1));
   EXPECT_EQ(3, const_mock->Overloaded(1));
+  EXPECT_EQ(4, volatile_mock->Overloaded(1));
+  EXPECT_EQ(5, const_volatile_mock->Overloaded(1));
 }
+
+
+#if GTEST_LANG_CXX11
+TEST(OverloadedMockMethodTest, CanOverloadRefQualified) {
+  MockOverloadedOnQualifiers mock;
+
+  EXPECT_CALL(mock, OverloadedRefQualifier()).WillOnce(Return(1));
+  EXPECT_CALL(std::move(mock), OverloadedRefQualifier()).WillOnce(Return(2));
+
+  EXPECT_EQ(1, mock.OverloadedRefQualifier());
+  EXPECT_EQ(2, std::move(mock).OverloadedRefQualifier());
+}
+#endif // GTEST_LANG_CXX11
+
+class MockExceptionSpec {
+ public:
+  MockExceptionSpec() {}
+
+  MOCK_QUALIFIED_METHOD0(EmptyCXX98Throw, throw(), int());
+
+#if GTEST_LANG_CXX11
+  MOCK_QUALIFIED_METHOD0(Noexcept, noexcept, int());
+  MOCK_QUALIFIED_METHOD0(NoexceptEvaluatesFalse, noexcept(false), int());
+#endif // GTEST_LANG_CXX11
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockExceptionSpec);
+};
+
+TEST(QualifiersMockMethodTest, CanMockExceptionSpec) {
+  MockExceptionSpec mock;
+
+  EXPECT_CALL(mock, EmptyCXX98Throw()).WillOnce(Return(1));
+  EXPECT_EQ(1, mock.EmptyCXX98Throw());
+}
+
+#if GTEST_LANG_CXX11
+
+TEST(QualifiersMockMethodTest, CanMockNoexcept) {
+  MockExceptionSpec mock;
+
+  EXPECT_CALL(mock, Noexcept()).WillOnce(Return(1));
+  EXPECT_CALL(mock, NoexceptEvaluatesFalse()).WillOnce(Return(2));
+
+  EXPECT_EQ(1, mock.Noexcept());
+  EXPECT_EQ(2, mock.NoexceptEvaluatesFalse());
+
+  GTEST_COMPILE_ASSERT_(noexcept(mock.Noexcept()), expected_noexcept);
+  GTEST_COMPILE_ASSERT_(!noexcept(mock.NoexceptEvaluatesFalse()),
+                        expected_noexcept_false);
+}
+
+#endif  // GTEST_LANG_CXX11
 
 TEST(MockFunctionTest, WorksForVoidNullary) {
   MockFunction<void()> foo;
