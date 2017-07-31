@@ -1389,10 +1389,19 @@ AssertionResult CmpHelperEQ(const char* lhs_expression,
                             const T1& lhs,
                             const T2& rhs) {
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4389 /* signed/unsigned mismatch */)
+#if !defined _MSC_VER
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wsign-compare"
+#endif
+
   if (lhs == rhs) {
     return AssertionSuccess();
   }
+
 GTEST_DISABLE_MSC_WARNINGS_POP_()
+#if !defined _MSC_VER
+  #pragma GCC diagnostic pop
+#endif
 
   return CmpHelperEQFailure(lhs_expression, rhs_expression, lhs, rhs);
 }
