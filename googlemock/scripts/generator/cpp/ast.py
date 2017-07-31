@@ -1461,19 +1461,24 @@ class AstBuilder(object):
             token = self._GetNextToken()
             assert token.token_type == tokenize.NAME, token
             # TODO(nnorwitz): store kind of inheritance...maybe.
-            if token.name not in ('public', 'protected', 'private'):
-                # If inheritance type is not specified, it is private.
-                # Just put the token back so we can form a name.
-                # TODO(nnorwitz): it would be good to warn about this.
-                self._AddBackToken(token)
-            else:
-                # Check for virtual inheritance.
-                token = self._GetNextToken()
-                if token.name != 'virtual':
-                    self._AddBackToken(token)
+            if token.name in ('public', 'protected', 'private', 'virtual'):
+                # virtual can appear before or after inheritance type.
+                if token.name == 'virtual':
+                    # Check for inheritance type.
+                    token = self._GetNextToken()
+                    if token.name not in ('public', 'protected', 'private'):
+                        # If inheritance type is not specified, it is private.
+                        # Just put the token back so we can form a name.
+                        # TODO(nnorwitz): it would be good to warn about this.
+                        self._AddBackToken(token)
                 else:
-                    # TODO(nnorwitz): store that we got virtual for this base.
-                    pass
+                    # Check for virtual inheritance.
+                    token = self._GetNextToken()
+                    if token.name != 'virtual':
+                        self._AddBackToken(token)
+                    else:
+                        # TODO(nnorwitz): store that we got virtual for this base.
+                        pass
             base, next_token = self.GetName()
             bases_ast = self.converter.ToType(base)
             assert len(bases_ast) == 1, bases_ast
