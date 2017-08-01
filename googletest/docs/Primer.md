@@ -1,4 +1,20 @@
 
+# Table of Contents #
+
+- [Introduction: Why Google C++ Testing Framework?](#introduction-why-google-c-testing-framework)
+- [Setting up a New Test Project](#setting-up-a-new-test-project)
+- [Basic Concepts](#basic-concepts)
+- [Assertions](#assertions)
+    - [Basic Assertions](#basic-assertions)
+    - [Binary Comparison](#binary-comparison)
+    - [String Comparison](#string-comparison)
+- [Simple Tests](#simple-tests)
+- [Test Fixtures: Using the Same Data Configuration for Multiple Tests](#test-fixtures-using-the-same-data-configuration-for-multiple-tests)
+- [Invoking the Tests](#invoking-the-tests)
+- [Writing the main() Function](#writing-the-main-function)
+    - [Important note for Visual C++ users](#important-note-for-visual-c-users)
+- [Where to Go from Here](#where-to-go-from-here)
+- [Known Limitations](#known-limitations)
 
 # Introduction: Why Google C++ Testing Framework? #
 

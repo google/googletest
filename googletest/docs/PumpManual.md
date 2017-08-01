@@ -2,6 +2,18 @@
 
 <b>P</b>ump is <b>U</b>seful for <b>M</b>eta <b>P</b>rogramming.
 
+# Table of Contents
+
+- [The Problem](#the-problem)
+- [Our Solution](#our-solution)
+    - [Highlights](#highlights)
+    - [Examples](#examples)
+    - [Constructs](#constructs)
+    - [Grammar](#grammar)
+    - [Code](#code)
+    - [Real Examples](#real-examples)
+    - [Tips](#tips)
+
 # The Problem #
 
 Template and macro libraries often need to define many classes,

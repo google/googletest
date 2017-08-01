@@ -4,6 +4,24 @@ If you are interested in understanding the internals of Google Mock,
 building from source, or contributing ideas or modifications to the
 project, then this document is for you.
 
+# Table of Contents
+
+- [Introduction](#introduction)
+    - [Licensing](#licensing)
+    - [The Google Mock Community](#the-google-mock-community)
+        - [Please Be Friendly](#please-be-friendly)
+        - [Where to Discuss Google Mock](#where-to-discuss-google-mock)
+- [Working with the Code](#working-with-the-code)
+    - [Checking Out the Source from Subversion](#checking-out-the-source-from-subversion)
+    - [Compiling from Source](#compiling-from-source)
+    - [Testing](#testing)
+- [Contributing Code](#contributing-code)
+    - [Contributor License Agreements](#contributor-license-agreements)
+    - [Coding Style](#coding-style)
+    - [Submitting Patches](#submitting-patches)
+    - [Google Mock Committers](#google-mock-committers)
+- [Release Process](#release-process)
+
 # Introduction #
 
 First, let's give you some background of the project.
