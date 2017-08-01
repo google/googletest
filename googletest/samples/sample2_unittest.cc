@@ -42,7 +42,7 @@
 
 #include "sample2.h"
 #include "gtest/gtest.h"
-
+namespace {
 // In this example, we test the MyString class (a simple string).
 
 // Tests the default c'tor.
@@ -107,3 +107,4 @@ TEST(MyString, Set) {
   s.Set(NULL);
   EXPECT_STREQ(NULL, s.c_string());
 }
+}  // namespace

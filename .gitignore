@@ -1,3 +1,5 @@
 # Ignore CI build directory
 build/
 xcuserdata
+cmake-build-debug/
+.idea/

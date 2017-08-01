@@ -35,7 +35,7 @@
 #include <stdio.h>
 
 #include "gtest/gtest.h"
-
+namespace {
 using ::testing::EmptyTestEventListener;
 using ::testing::InitGoogleTest;
 using ::testing::Test;
@@ -158,3 +158,4 @@ int main(int argc, char **argv) {
 
   return ret_val;
 }
+}  // namespace
