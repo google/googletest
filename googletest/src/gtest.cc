@@ -308,6 +308,7 @@ namespace internal {
 // Generates a random number from [0, range), using a Linear
 // Congruential Generator (LCG).  Crashes if 'range' is 0 or greater
 // than kMaxRange.
+GTEST_ATTRIBUTE_NO_SANITIZE_UNSIGNED_OVERFLOW_
 UInt32 Random::Generate(UInt32 range) {
   // These constants are the same as are used in glibc's rand(3).
   state_ = (1103515245U*state_ + 12345U) % kMaxRange;
