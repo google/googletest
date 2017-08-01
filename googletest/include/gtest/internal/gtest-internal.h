@@ -130,7 +130,7 @@ char (&IsNullLiteralHelper(...))[2];  // NOLINT
 # define GTEST_IS_NULL_LITERAL_(x) false
 #else
 # define GTEST_IS_NULL_LITERAL_(x) \
-    (sizeof(::testing::internal::IsNullLiteralHelper(x)) == 1)
+    (sizeof(::testing::internal::IsNullLiteralHelper(x)) == 1)  // NOLINT
 #endif  // GTEST_ELLIPSIS_NEEDS_POD_
 
 // Appends the user-supplied message to the Google-Test-generated message.
