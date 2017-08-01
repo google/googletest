@@ -86,7 +86,7 @@ cc_library(
     deps = [":gmock"],
 )
 
-"""googletest own tests """
+"""gtest own tests """
 
 #on windows exclude gtest-tuple.h and gtest-tuple_test.cc
 filegroup(
@@ -211,7 +211,7 @@ cc_test(
 """ googletest samples"""
 
 cc_library(
-    name = "googletest_sample_lib",
+    name = "gtest_sample_lib",
     srcs = [
         "googletest/samples/sample1.cc",
         "googletest/samples/sample2.cc",
@@ -228,7 +228,7 @@ cc_library(
 )
 
 cc_test(
-    name = "googletest_samples",
+    name = "gtest_samples",
     size = "small",
     srcs = glob(
         include = [
@@ -252,7 +252,7 @@ cc_test(
         "googletest/samples",
     ],
     deps = [
-        ":googletest_sample_lib",
+        ":gtest_sample_lib",
         ":gtest_main",
     ],
 )
@@ -260,7 +260,7 @@ cc_test(
 """ googletest samples 9 and 10 have their own main()"""
 
 cc_test(
-    name = "googletest_sample9",
+    name = "gtest_sample9",
     size = "small",
     srcs = glob(
         include = [
@@ -271,12 +271,12 @@ cc_test(
         "googletest/samples",
     ],
     deps = [
-        ":gtest",
+        ":gtest_main",
     ],
 )
 
 cc_test(
-    name = "googletest_sample10",
+    name = "gtest_sample10",
     size = "small",
     srcs = glob(
         include = [
@@ -287,6 +287,6 @@ cc_test(
         "googletest/samples",
     ],
     deps = [
-        ":gtest",
+        ":gtest_main",
     ],
 )
