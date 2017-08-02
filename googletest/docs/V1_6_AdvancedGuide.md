@@ -672,7 +672,7 @@ syntax only.
 ## How It Works ##
 
 Under the hood, `ASSERT_EXIT()` spawns a new process and executes the
-death test statement in that process. The details of of how precisely
+death test statement in that process. The details of how precisely
 that happens depend on the platform and the variable
 `::testing::GTEST_FLAG(death_test_style)` (which is initialized from the
 command-line flag `--gtest_death_test_style`).
