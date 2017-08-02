@@ -207,6 +207,7 @@ cc_test(
     ],
 )
 
+
 # The following rules build samples of how to use gTest.
 cc_library(
     name = "gtest_sample_lib",
@@ -228,57 +229,40 @@ cc_test(
     name = "gtest_samples",
     size = "small",
     srcs = glob(
-        # All Samples here except
-        # Sample9 is designed to fail on purpose
-        # Sample10 can be run with --check_for_leaks command line flag, should be separate
         include = [
-            "googletest/samples/sample1_unitest.cc",
-            "googletest/samples/sample2_unitest.cc",
-            "googletest/samples/sample3_unitest.cc",
-            "googletest/samples/sample4_unitest.cc",
-            "googletest/samples/sample5_unitest.cc",
-            "googletest/samples/sample6_unitest.cc",
-            "googletest/samples/sample7_unitest.cc",
-            "googletest/samples/sample8_unitest.cc",
+            #All Samples here except:
+            #sample9 designed to fail
+            #sample10 takes a command line option and needs to be separate
+            "googletest/samples/sample1_unittest.cc",
+            "googletest/samples/sample2_unittest.cc",
+            "googletest/samples/sample3_unittest.cc",
+            "googletest/samples/sample4_unittest.cc",
+            "googletest/samples/sample5_unittest.cc",
+            "googletest/samples/sample6_unittest.cc",
+            "googletest/samples/sample7_unittest.cc",
+            "googletest/samples/sample8_unittest.cc",
         ],
     ),
-    includes = [
-        "googletest/samples",
-    ],
     deps = [
-        ":gtest_main",
-        ":gtest_sample_lib",
-    ],
-)
-
-cc_test(
-    name = "gtest_sample9",
-    size = "small",
-    srcs = glob(
-        include = [
-            "googletest/samples/sample9_unittest.cc",
-        ],
-    ),
-    includes = [
-        "googletest/samples",
-    ],
-    deps = [
+        "gtest_sample_lib",
         ":gtest_main",
     ],
 )
 
 cc_test(
-    name = "gtest_sample10",
+    name = "sample9_unittest",
     size = "small",
-    srcs = glob(
-        include = [
-            "googletest/samples/sample10_unittest.cc",
-        ],
-    ),
-    includes = [
-        "googletest/samples",
-    ],
+    srcs = ["googletest/samples/sample9_unittest.cc"],
+    deps = [":gtest_main"],
+)
+
+cc_test(
+    name = "sample10_unittest",
+    size = "small",
+    srcs = ["googletest/samples/sample10_unittest.cc"],
     deps = [
         ":gtest_main",
     ],
 )
+
+
