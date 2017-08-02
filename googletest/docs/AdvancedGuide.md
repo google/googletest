@@ -32,7 +32,7 @@ output in the future.
 
 `FAIL()` generates a fatal failure, while `ADD_FAILURE()` and `ADD_FAILURE_AT()` generate a nonfatal
 failure. These are useful when control flow, rather than a Boolean expression,
-deteremines the test's success or failure. For example, you might want to write
+determines the test's success or failure. For example, you might want to write
 something like:
 
 ```
