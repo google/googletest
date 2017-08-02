@@ -1344,7 +1344,7 @@ TYPED_TEST(FooTest, DoesBlah) {
 TYPED_TEST(FooTest, HasPropertyA) { ... }
 ```
 
-You can see `samples/sample6_unittest.cc` for a complete example.
+You can see [`samples/sample6_unittest.cc`](../samples/sample6_unittest.cc) for a complete example.
 
 _Availability:_ Linux, Windows (requires MSVC 8.0 or above), Mac;
 since version 1.1.0.
@@ -1551,7 +1551,7 @@ exception, you could catch the exception and assert on it.  But Google
 Test doesn't use exceptions, so how do we test that a piece of code
 generates an expected failure?
 
-`"gtest/gtest-spi.h"` contains some constructs to do this.  After 
+`"gtest/gtest-spi.h"` contains some constructs to do this.  After
 `#include`ing this header, you can use
 
 | `EXPECT_FATAL_FAILURE(`_statement, substring_`);` |
