@@ -23,7 +23,7 @@ Using Google Mock involves three basic steps:
 # Why Google Mock? #
 While mock objects help you remove unnecessary dependencies in tests and make them fast and reliable, using mocks manually in C++ is _hard_:
 
-  * Someone has to implement the mocks. The job is usually tedious and error-prone. No wonder people go great distance to avoid it.
+  * Someone has to implement the mocks. The job is usually tedious and error-prone. No wonder people go great distances to avoid it.
   * The quality of those manually written mocks is a bit, uh, unpredictable. You may see some really polished ones, but you may also see some that were hacked up in a hurry and have all sorts of ad hoc restrictions.
   * The knowledge you gained from using one mock doesn't transfer to the next.
 
