@@ -3689,7 +3689,7 @@ TEST(AssertionTest, ASSERT_EQ) {
 TEST(AssertionTest, ASSERT_EQ_NULL) {
   // A success.
   const char* p = NULL;
-  // Some older GCC versions may issue a spurious waring in this or the next
+  // Some older GCC versions may issue a spurious warning in this or the next
   // assertion statement. This warning should not be suppressed with
   // static_cast since the test verifies the ability to use bare NULL as the
   // expected parameter to the macro.
