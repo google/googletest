@@ -1,3 +1,5 @@
 # Ignore CI build directory
 build/
 xcuserdata
+# QtCreator user specific settings
+CMakeLists.txt.user
