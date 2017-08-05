@@ -23,6 +23,40 @@ So let's go!
 _Note:_ We sometimes refer to Google C++ Testing Framework informally
 as _Google Test_.
 
+# Beware of the nomenclature #
+
+_Note:_ There might be some confusion of idea due to different
+definitions of the terms _Test_, _Test Case_ and _Test Suite_, so beware
+of misunderstanding these.
+
+Historically, the Google C++ Testing Framework started to use the term
+_Test Case_ for grouping related tests, i.e. in the same sense as
+current publications, including the International Software Testing
+Qualifications Board ([ISTQB](http://www.istqb.org/)) and different
+textbooks on Software Quality, are using the term _[Test
+Suite](http://glossary.istqb.org/search/test%20suite)_.
+
+The related term _Test_, as it is used in the Google C++ Testing
+Framework, is corresponding to the term _[Test
+Case](http://glossary.istqb.org/search/test%20case)_ of ISTQB and
+others.
+
+The term _Test_ is commonly of broad enough sense, including ISTQB's
+definition of _Test Case_, so it's not much of a problem here. But the
+term _Test Case_ is of contradictory sense and thus confusing.
+
+Unfortunately replacing the term _Test Case_ by _Test Suite_ throughout
+the Google C++ Testing Framework is not easy without breaking dependent
+projects, as `TestCase` is part of the public API at various places.
+
+So for the time being, please be aware of the different definitions of
+the terms:
+
+Meaning | Google Test Term | [ISTQB](http://www.istqb.org/) Term
+------- | ---------------- | -----------------------------------
+Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests) | [Test Case](http://glossary.istqb.org/search/test%20case)
+A set of several tests related to one component | [Test Case](#basic-concepts) | [Test Suite](http://glossary.istqb.org/search/test%20suite)
+
 # Setting up a New Test Project #
 
 To write a test program using Google Test, you need to compile Google
