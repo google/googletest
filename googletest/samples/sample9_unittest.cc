@@ -34,7 +34,7 @@
 
 #include <stdio.h>
 
-#include "third_party/gtest/include/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 using ::testing::EmptyTestEventListener;
 using ::testing::InitGoogleTest;
