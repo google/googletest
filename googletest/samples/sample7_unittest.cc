@@ -127,4 +127,4 @@ INSTANTIATE_TEST_CASE_P(OnTheFlyAndPreCalculated, PrimeTableTestSmpl7,
 TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}
 
 #endif  // GTEST_HAS_PARAM_TEST
-}
+}  // namespace
