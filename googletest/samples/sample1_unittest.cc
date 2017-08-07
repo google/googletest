@@ -72,6 +72,7 @@ namespace {
 //
 // </TechnicalDetails>
 
+
 // Tests Factorial().
 
 // Tests factorial of negative numbers.
@@ -99,7 +100,9 @@ TEST(FactorialTest, Negative) {
 }
 
 // Tests factorial of 0.
-TEST(FactorialTest, Zero) { EXPECT_EQ(1, Factorial(0)); }
+TEST(FactorialTest, Zero) {
+  EXPECT_EQ(1, Factorial(0));
+}
 
 // Tests factorial of positive numbers.
 TEST(FactorialTest, Positive) {
@@ -108,6 +111,7 @@ TEST(FactorialTest, Positive) {
   EXPECT_EQ(6, Factorial(3));
   EXPECT_EQ(40320, Factorial(8));
 }
+
 
 // Tests IsPrime()
 

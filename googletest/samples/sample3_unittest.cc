@@ -65,7 +65,7 @@
 
 #include "sample3-inl.h"
 #include "gtest/gtest.h"
-
+namespace{
 // To use a test fixture, derive a class from testing::Test.
 class QueueTestSmpl3 : public testing::Test {
  protected:  // You should make the members protected s.t. they can be
@@ -149,3 +149,4 @@ TEST_F(QueueTestSmpl3, Map) {
   MapTester(&q1_);
   MapTester(&q2_);
 }
+}  // namespace

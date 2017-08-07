@@ -171,4 +171,4 @@ INSTANTIATE_TEST_CASE_P(MeaningfulTestParameters,
 TEST(DummyTest, CombineIsNotSupportedOnThisPlatform) {}
 
 #endif  // GTEST_HAS_COMBINE
-}
+}  // namespace
