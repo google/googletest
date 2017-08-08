@@ -118,7 +118,10 @@ cc_test(
     name = "gtest-death-test_ex_catch_test",
     size = "small",
     srcs = ["gtest-death-test_ex_test.cc"],
-    copts = ["-fexceptions"],
+    copts = select({
+        "//:win": [],
+        "//conditions:default": [""-fexceptions""],
+    }),
     defines = ["GTEST_ENABLE_CATCH_EXCEPTIONS_=0"],
     deps = ["//:gtest_ex"],
 )
@@ -127,7 +130,10 @@ cc_test(
     name = "gtest-death-test_ex_nocatch_test",
     size = "small",
     srcs = ["gtest-death-test_ex_test.cc"],
-    copts = ["-fexceptions"],
-    defines = ["GTEST_ENABLE_CATCH_EXCEPTIONS_=1"],
+    copts = select({
+        "//:win": [],
+        "//conditions:default": [""-fexceptions""],
+    }),
+   defines = ["GTEST_ENABLE_CATCH_EXCEPTIONS_=1"],
     deps = ["//:gtest_ex"],
 )
