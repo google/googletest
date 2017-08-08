@@ -119,7 +119,7 @@ cc_test(
     size = "small",
     srcs = ["gtest-death-test_ex_test.cc"],
     copts = select({
-        "//:win": [],
+        "//:win": ["-DGTEST_ENABLE_CATCH_EXCEPTIONS_=1"],
         "//conditions:default": ["-fexceptions"],
     }),
     defines = ["GTEST_ENABLE_CATCH_EXCEPTIONS_=0"],
@@ -131,7 +131,7 @@ cc_test(
     size = "small",
     srcs = ["gtest-death-test_ex_test.cc"],
     copts = select({
-        "//:win": [],
+        "//:win": ["-DGTEST_ENABLE_CATCH_EXCEPTIONS_=1"],
         "//conditions:default": ["-fexceptions"],
     }),
    defines = ["GTEST_ENABLE_CATCH_EXCEPTIONS_=1"],
