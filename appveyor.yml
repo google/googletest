@@ -4,6 +4,7 @@ os: Visual Studio 2015
 
 environment:
   matrix:
+  - Toolset: mingw64
   - Toolset: v140
   - Toolset: v120
   - Toolset: v110
@@ -12,6 +13,11 @@ environment:
 platform:
   - Win32
   - x64
+
+matrix:
+  allow_failures:  # AppVeyor doesn't have 'exclude', sadly.
+    - Toolset: v100
+      platform: x64
 
 configuration:
 #  - Release
@@ -34,38 +40,50 @@ before_build:
         "v120" {"Visual Studio 12 2013"}
         "v110" {"Visual Studio 11 2012"}
         "v100" {"Visual Studio 10 2010"}
+        "mingw64" {"MSYS Makefiles"}
     }
-    if ($env:PLATFORM -eq "x64")
+
+    if ($env:TOOLSET -eq "mingw64")
+    {
+        $env:PATH="C:\msys64\mingw64\bin;C:\msys64\usr\bin;$env:PATH"
+    }
+    elseif ($env:PLATFORM -eq "x64")
     {
         $generator = "$generator Win64"
     }
 
 build_script:
 - ps: |
-    if (($env:TOOLSET -eq "v100") -and ($env:PLATFORM -eq "x64"))
-    {
-        return
-    }
     md _build -Force | Out-Null
     cd _build
 
-    & cmake -G "$generator" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -Dgtest_build_tests=ON -Dgtest_build_samples=ON -Dgmock_build_tests=ON ..
+    $components="-Dgtest_build_tests=ON -Dgtest_build_samples=ON -Dgmock_build_tests=ON"
+    if ($env:TOOLSET -eq "mingw64")
+    {
+        & cmake -G "$generator" -DCMAKE_BUILD_TYPE=$env:CONFIGURATION  $components ..
+
+    }
+    else
+    {
+        & cmake -G "$generator" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" $components ..
+    }
+
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
-    & cmake --build . --config $env:CONFIGURATION
+
+    if ($env:TOOLSET -eq "mingw64")
+    {
+        & make -j 2
+    }
+    else
+    {
+        & cmake --build . --config $env:CONFIGURATION
+    }
+
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
 
 test_script:
-- ps: |
-    if (($env:Toolset -eq "v100") -and ($env:PLATFORM -eq "x64"))
-    {
-        return
-    }
-
-    & ctest -C $env:CONFIGURATION --output-on-failure
-    if ($LastExitCode -ne 0) {
-        throw "Exec: $ErrorMessage"
-    }
+  - ctest -C %CONFIGURATION% --output-on-failure
