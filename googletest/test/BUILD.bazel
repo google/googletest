@@ -116,7 +116,19 @@ cc_test(
 #Verifies interaction of death tests and exceptions.
 cc_test(
     name = "gtest-death-test_ex_catch_test",
-    size = "small",
+    size = "medium",
+    srcs = ["gtest-death-test_ex_test.cc"],
+    copts = select({
+        "//:win": ["-DGTEST_ENABLE_CATCH_EXCEPTIONS_=1"],
+        "//conditions:default": ["-fexceptions"],
+    }),
+    defines = ["GTEST_ENABLE_CATCH_EXCEPTIONS_=1"],
+    deps = ["//:gtest_ex"],
+)
+
+cc_test(
+    name = "gtest-death-test_ex_nocatch_test",
+    size = "medium",
     srcs = ["gtest-death-test_ex_test.cc"],
     copts = select({
         "//:win": ["-DGTEST_ENABLE_CATCH_EXCEPTIONS_=1"],
@@ -126,14 +138,5 @@ cc_test(
     deps = ["//:gtest_ex"],
 )
 
-cc_test(
-    name = "gtest-death-test_ex_nocatch_test",
-    size = "small",
-    srcs = ["gtest-death-test_ex_test.cc"],
-    copts = select({
-        "//:win": ["-DGTEST_ENABLE_CATCH_EXCEPTIONS_=1"],
-        "//conditions:default": ["-fexceptions"],
-    }),
-   defines = ["GTEST_ENABLE_CATCH_EXCEPTIONS_=1"],
-    deps = ["//:gtest_ex"],
-)
+
+
