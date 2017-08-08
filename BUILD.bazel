@@ -94,10 +94,10 @@ cc_library(
         ],
     ),
     hdrs = GTEST_HDRS,
-    copts = ["-fexceptions"] + select(
+    copts = select(
         {
-            ":win": [],
-            "//conditions:default": ["-pthread"],
+            ":win": ["-DGTEST_ENABLE_CATCH_EXCEPTIONS_=1"],
+            "//conditions:default": ["-fexceptions","-pthread"],
         },
     ),
     includes = [
