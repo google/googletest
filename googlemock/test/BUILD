@@ -15,10 +15,6 @@ cc_test(
             "gmock-*.cc",
         ],
     ),
-    copts = select({
-        "//:win": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
-        "//conditions:default": ["-DGTEST_USE_OWN_TR1_TUPLE=1"],
-    }),
     linkopts = select({
         "//:win": [],
         "//conditions:default": [
