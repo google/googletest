@@ -8,19 +8,12 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
 
-# gtest public API.
-GTEST_HDRS = \
-    glob([
-        "googletest/include/gtest/*.h",
-        "googlemock/include/gmock/*.h",
-    ])
-
 config_setting(
     name = "win",
     values = {"cpu": "x64_windows_msvc"},
 )
 
-# Google Test
+# Google Test including Google Mock 
 cc_library(
     name = "gtest",
     srcs = glob(
@@ -35,9 +28,13 @@ cc_library(
             "googletest/src/gtest-all.cc",
             "googletest/src/gtest_main.cc",
             "googlemock/src/gmock-all.cc",
+            "googlemock/src/gmock_main.cc",
         ],
     ),
-    hdrs = GTEST_HDRS,
+    hdrs =glob([
+        "googletest/include/gtest/*.h",
+        "googlemock/include/gmock/*.h",
+    ]),
     copts = select(
         {
             ":win": [],
