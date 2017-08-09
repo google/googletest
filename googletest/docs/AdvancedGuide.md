@@ -32,7 +32,7 @@ output in the future.
 
 `FAIL()` generates a fatal failure, while `ADD_FAILURE()` and `ADD_FAILURE_AT()` generate a nonfatal
 failure. These are useful when control flow, rather than a Boolean expression,
-deteremines the test's success or failure. For example, you might want to write
+determines the test's success or failure. For example, you might want to write
 something like:
 
 ```
@@ -675,7 +675,7 @@ syntax only.
 ## How It Works ##
 
 Under the hood, `ASSERT_EXIT()` spawns a new process and executes the
-death test statement in that process. The details of of how precisely
+death test statement in that process. The details of how precisely
 that happens depend on the platform and the variable
 `::testing::GTEST_FLAG(death_test_style)` (which is initialized from the
 command-line flag `--gtest_death_test_style`).
@@ -1344,7 +1344,7 @@ TYPED_TEST(FooTest, DoesBlah) {
 TYPED_TEST(FooTest, HasPropertyA) { ... }
 ```
 
-You can see `samples/sample6_unittest.cc` for a complete example.
+You can see [`samples/sample6_unittest.cc`](../samples/sample6_unittest.cc) for a complete example.
 
 _Availability:_ Linux, Windows (requires MSVC 8.0 or above), Mac;
 since version 1.1.0.
@@ -1551,7 +1551,7 @@ exception, you could catch the exception and assert on it.  But Google
 Test doesn't use exceptions, so how do we test that a piece of code
 generates an expected failure?
 
-`"gtest/gtest-spi.h"` contains some constructs to do this.  After 
+`"gtest/gtest-spi.h"` contains some constructs to do this.  After
 `#include`ing this header, you can use
 
 | `EXPECT_FATAL_FAILURE(`_statement, substring_`);` |
