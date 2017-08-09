@@ -43,7 +43,7 @@ others.
 
 The term _Test_ is commonly of broad enough sense, including ISTQB's
 definition of _Test Case_, so it's not much of a problem here. But the
-term _Test Case_ is of contradictory sense and thus confusing.
+term _Test Case_ as used in Google Test is of contradictory sense and thus confusing.
 
 Unfortunately replacing the term _Test Case_ by _Test Suite_ throughout
 the Google C++ Testing Framework is not easy without breaking dependent
