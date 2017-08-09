@@ -18,8 +18,9 @@ You must always put a mock method definition (`MOCK_METHOD*`) in a
 `public:` section of the mock class, regardless of the method being
 mocked being `public`, `protected`, or `private` in the base class.
 This allows `ON_CALL` and `EXPECT_CALL` to reference the mock function
-from outside of the mock class.  (Yes, C++ allows a subclass to change
-the access level of a virtual function in the base class.)  Example:
+from outside of the mock class.  (Yes, C++ allows a subclass to specify
+a different access level than the base class on a virtual function.)
+Example:
 
 ```
 class Foo {
@@ -294,7 +295,7 @@ There are some caveats though (I don't like them just as much as the
 next guy, but sadly they are side effects of C++'s limitations):
 
   1. `NiceMock<MockFoo>` and `StrictMock<MockFoo>` only work for mock methods defined using the `MOCK_METHOD*` family of macros **directly** in the `MockFoo` class. If a mock method is defined in a **base class** of `MockFoo`, the "nice" or "strict" modifier may not affect it, depending on the compiler. In particular, nesting `NiceMock` and `StrictMock` (e.g. `NiceMock<StrictMock<MockFoo> >`) is **not** supported.
-  1. The constructors of the base mock (`MockFoo`) cannot have arguments passed by non-const reference, which happens to be banned by the [Google C++ style guide](http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml).
+  1. The constructors of the base mock (`MockFoo`) cannot have arguments passed by non-const reference, which happens to be banned by the [Google C++ style guide](https://google.github.io/styleguide/cppguide.html).
   1. During the constructor or destructor of `MockFoo`, the mock object is _not_ nice or strict.  This may cause surprises if the constructor or destructor calls a mock method on `this` object. (This behavior, however, is consistent with C++'s general rule: if a constructor or destructor calls a virtual method of `this` object, that method is treated as non-virtual.  In other words, to the base class's constructor or destructor, `this` object behaves like an instance of the base class, not the derived class.  This rule is required for safety.  Otherwise a base constructor may use members of a derived class before they are initialized, or a base destructor may use members of a derived class after they have been destroyed.)
 
 Finally, you should be **very cautious** about when to use naggy or strict mocks, as they tend to make tests more brittle and harder to maintain. When you refactor your code without changing its externally visible behavior, ideally you should't need to update any tests. If your code interacts with a naggy mock, however, you may start to get spammed with warnings as the result of your change. Worse, if your code interacts with a strict mock, your tests may start to fail and you'll be forced to fix them. Our general recommendation is to use nice mocks (not yet the default) most of the time, use naggy mocks (the current default) when developing or debugging tests, and use strict mocks only as the last resort.
@@ -2366,7 +2367,7 @@ Now there’s one topic we haven’t covered: how do you set expectations on `Sh
   // When one calls ShareBuzz() on the MockBuzzer like this, the call is
   // forwarded to DoShareBuzz(), which is mocked.  Therefore this statement
   // will trigger the above EXPECT_CALL.
-  mock_buzzer_.ShareBuzz(MakeUnique&lt;Buzz&gt;(AccessLevel::kInternal),
+  mock_buzzer_.ShareBuzz(MakeUnique<Buzz>(AccessLevel::kInternal),
                          ::base::Now());
 ```
 
@@ -2405,7 +2406,7 @@ Now, the mock `DoShareBuzz()` method is free to save the buzz argument for later
 ```
   std::unique_ptr<Buzz> intercepted_buzz;
   EXPECT_CALL(mock_buzzer_, DoShareBuzz(NotNull(), _))
-      .WillOnce(Invoke([&amp;intercepted_buzz](Buzz* buzz, Time timestamp) {
+      .WillOnce(Invoke([&intercepted_buzz](Buzz* buzz, Time timestamp) {
         // Save buzz in intercepted_buzz for analysis later.
         intercepted_buzz.reset(buzz);
         return false;

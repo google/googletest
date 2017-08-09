@@ -237,7 +237,7 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
                '--shut_down_xml']
     p = gtest_test_utils.Subprocess(command)
     if p.terminated_by_signal:
-      # p.signal is avalable only if p.terminated_by_signal is True.
+      # p.signal is available only if p.terminated_by_signal is True.
       self.assertFalse(
           p.terminated_by_signal,
           '%s was killed by signal %d' % (GTEST_PROGRAM_NAME, p.signal))

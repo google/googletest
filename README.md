@@ -60,6 +60,7 @@ the following notable projects:
   * [Protocol Buffers](https://github.com/google/protobuf), Google's data
     interchange format.
   * The [OpenCV](http://opencv.org/) computer vision library.
+  * [tiny-dnn](https://github.com/tiny-dnn/tiny-dnn): header only, dependency-free deep learning framework in C++11
 
 ## Related Open Source Projects ##
 
@@ -72,6 +73,9 @@ Test UI is written in C#.
 listener for Google Test that implements the
 [TAP protocol](https://en.wikipedia.org/wiki/Test_Anything_Protocol) for test
 result output. If your test runner understands TAP, you may find it useful.
+
+[gtest-parallel](https://github.com/google/gtest-parallel) is a test runner that
+runs tests from your binary in parallel to provide significant speed-up.
 
 ## Requirements ##
 
