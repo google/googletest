@@ -37,55 +37,31 @@ licenses(["notice"])
 """ gtest own tests """
 
 #on windows exclude gtest-tuple.h and gtest-tuple_test.cc
-filegroup(
-    name = "win_only_test_files",
-    srcs = glob(
-        include = [
-            "gtest-*.cc",
-            "*.h",
-            "googletest/include/gtest/**/*.h",
-        ],
-        exclude = [
-            "googletest/src/gtest-unittest-api_test.cc",
-            "googletest/include/gtest/internal/gtest-tuple.h",
-            "gtest-tuple_test.cc",
-            "googletest/src/gtest-all.cc",
-            "gtest_all_test.cc",
-            "gtest-death-test_ex_test.cc",
-            "gtest-listener_test.cc",
-            "gtest-unittest-api_test.cc",
-            "gtest-param-test_test.cc",
-        ],
-    ),
-)
-
-filegroup(
-    name = "default_test_files",
-    srcs = glob(
-        include = [
-            "gtest-*.cc",
-            "*.h",
-            "googletest/include/gtest/**/*.h",
-        ],
-        exclude = [
-            "googletest/src/gtest-unittest-api_test.cc",
-            "googletest/src/gtest-all.cc",
-            "gtest_all_test.cc",
-            "gtest-death-test_ex_test.cc",
-            "gtest-listener_test.cc",
-            "gtest-unittest-api_test.cc",
-            "gtest-param-test_test.cc",
-        ],
-    ),
-)
-
 cc_test(
     name = "gtest_all_test",
     size = "small",
-    srcs = select({
-        "//:win": [":win_only_test_files"],
-        "//conditions:default": [":default_test_files"],
-    }),
+    srcs =  glob(
+                    include = [
+                        "gtest-*.cc",
+                        "*.h",
+                        "googletest/include/gtest/**/*.h",
+                    ],
+                    exclude = [
+                        "gtest-unittest-api_test.cc",
+                        "gtest-tuple_test.cc",
+                        "googletest/src/gtest-all.cc",
+                        "gtest_all_test.cc",
+                        "gtest-death-test_ex_test.cc",
+                        "gtest-listener_test.cc",
+                        "gtest-unittest-api_test.cc",
+                        "gtest-param-test_test.cc",
+                    ],
+                ) + select({
+        "//:win": [],
+        "//conditions:default": [
+            "gtest-tuple_test.cc",
+        ],
+        }),
     copts = select({
         "//:win": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
         "//conditions:default": ["-DGTEST_USE_OWN_TR1_TUPLE=1"],
