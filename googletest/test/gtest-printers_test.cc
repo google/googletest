@@ -202,7 +202,7 @@ class PathLike {
   iterator end() const { return iterator(); }
 
   friend 
-  ::std::ostream& operator<<(::std::ostream& os, const PathLike& p)
+  ::std::ostream& operator<<(::std::ostream& os, const PathLike&)
   {
     return os << "Streamable-PathLike";
   }
@@ -1187,6 +1187,8 @@ TEST(PrintStreamableTypeTest, TemplateTypeInUserNamespace) {
 TEST(PrintStreamableTypeTest, PathLikeInUserNamespace) {
   ::foo::PathLike x;
   EXPECT_EQ("Streamable-PathLike", Print(x));
+  const ::foo::PathLike cx;
+  EXPECT_EQ("Streamable-PathLike", Print(cx));
 }
 
 // Tests printing user-defined types that have a PrintTo() function.
