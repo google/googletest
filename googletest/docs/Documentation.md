@@ -1,6 +1,6 @@
 This page lists all documentation markdown files for Google Test **(the
 current git version)**
--- **if you use a released version of Google Test, please read the
+-- **if you use a former version of Google Test, please read the
 documentation for that specific version instead (e.g. by checking out
 the respective git branch/tag).**
 
