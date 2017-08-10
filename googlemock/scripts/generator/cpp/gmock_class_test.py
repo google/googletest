@@ -444,5 +444,23 @@ void(const FooType& test_arg));
     self.assertEqualIgnoreLeadingWhitespace(
         expected, self.GenerateMocks(source))
 
+  def testEnumClass(self):
+    source = """
+class Test {
+ public:
+  enum class Baz { BAZINGA };
+  virtual void Bar(const FooType& test_arg);
+};
+"""
+    expected = """\
+class MockTest : public Test {
+public:
+MOCK_METHOD1(Bar,
+void(const FooType& test_arg));
+};
+"""
+    self.assertEqualIgnoreLeadingWhitespace(
+        expected, self.GenerateMocks(source))
+
 if __name__ == '__main__':
   unittest.main()
