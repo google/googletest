@@ -10,9 +10,93 @@ your file before using the name `Foo` defined by Google Mock. We omit
 such `using` statements in this page for brevity, but you should do it
 in your own code.
 
+##### Table of Contents  
+###### Creating Mock Classes #
+[Mocking Private or Protected Methods](#mocking_private_or_protected_methods)  
+[Mocking Nonvirtual Methods](#mocking_nonvirtual_methods)  
+[Mocking Free Functions](#mocking_free_functions)  
+[Simplifying the Interface without Breaking Existing Code](#simplifying_the_interface)  
+[Alternative to Mocking Concrete Classes](#alternative_to_mocking_concrete_classes)  
+[Delegating Calls to a Fake](#delegating_calls_to_a_fake)  
+[Delegating Calls to a Real Object](#delegating_calls_to_a_real_object)  
+[Delegating Calls to a Parent Class](#delegating_calls_to_a_parent_class)  
+
+###### Using Matchers
+[Matching Argument Values Exactly](#matching_argument_values_exactly)  
+[Using Simple Matchers](#using_simple_matchers)  
+[Combining Matchers](#combining_matchers)  
+[Casting Matchers](#casting_matchers)  
+[Selecting Between Overloaded Functions](#selecting_between_overloaded_functions)  
+[Performing Different Actions Based on the Arguments](#performing_different_actions_based_on_the_arguments)  
+[Matching Multiple Arguments as a Whole](#matching_multiple_arguments_as_a_whole)  
+[Using Matchers as Predicates](#using_matchers_as_predicates)  
+[Using Matchers in Google Test Assertions](#using_matchers_in_google_test_assertions)  
+[Using Predicates as Matchers](#using_predicates_as_matchers)  
+[Matching Arguments that Are Not Copyable](#matching_arguments_that_are_not_copyable)  
+[Validating a Member of an Object](#validating_a_member_of_an_object)  
+[Validating the Value Pointed to by a Pointer Argument](#validating_the_value_pointed_to_by_a_pointer_argument)  
+[Testing a Certain Property of an Object](#testing_a_certain_property_of_an_object)  
+[Matching Containers](#matching_containers)  
+[Sharing Matchers](#sharing_matchers)  
+
+###### Setting Expectations
+[Knowing When to Expect](#knowing_when_to_expect)  
+[Ignoring Uninteresting Calls](#ignoring_uninteresting_calls)  
+[Disallowing Unexpected Calls](#disallowing_unexpected_calls)  
+[Understanding Uninteresting vs Unexpected Calls](#understanding_uninteresting_vs_unexpected_calls)  
+[Expecting Ordered Calls](#expecting_ordered_calls)  
+[Expecting Partially Ordered Calls](#expecting_partially_ordered_calls)  
+[Controlling When an Expectation Retires](#controlling_when_an_expectation_retires)  
+
+###### Using Actions
+[Returning References from Mock Methods](#returning_references_from_mock_methods)  
+[Returning Live Values from Mock Methods](#returning_live_values_from_mock_methods)  
+[Combining Actions](#combining_actions)  
+[Mocking Side Effects](#mocking_side_effects)  
+[Changing a Mock Object's Behavior Based on the State](#changing_a_mock_object)  
+[Setting the Default Value for a Return Type](#setting_the_default_value_for_a_return_type)  
+[Setting the Default Actions for a Mock Method](#setting_the_default_actions_for_a_mock_method)  
+[Using Functions/Methods/Functors as Actions](#using_functions/methods/functors_as_actions)  
+[Invoking a Function/Method/Functor Without Arguments](#invoking_a_function/method/functor_without_arguments)  
+[Invoking an Argument of the Mock Function](#invoking_an_argument_of_the_mock_function)  
+[Ignoring an Action's Result](#ignoring_an_action)  
+[Selecting an Action's Arguments](#selecting_an_action)  
+[Ignoring Arguments in Action Functions](#ignoring_arguments_in_action_functions)  
+[Sharing Actions](#sharing_actions)  
+  
+###### Misc Recipes on Using Google Mock  
+[Mocking Methods That Use Move-Only Types](#mocking_methods_that_use_move-only_types)  
+[Making the Compilation Faster](#making_the_compilation_faster)  
+[Forcing a Verification](#forcing_a_verification)  
+[Using Check Points](#using_check_points)  
+[Mocking Destructors](#mocking_destructors)  
+[Using Google Mock and Threads](#using_google_mock_and_threads)  
+[Controlling How Much Information Google Mock Prints](#controlling_how_much_information_google_mock_prints)  
+[Gaining Super Vision into Mock Calls](#gaining_super_vision_into_mock_calls)  
+[Running Tests in Emacs](#running_tests_in_emacs)  
+[Fusing Google Mock Source Files](#fusing_google_mock_source_files)  
+  
+###### Extending Google Mock  
+[Writing New Matchers Quickly](#writing_new_matchers_quickly)  
+[Writing New Parameterized Matchers Quickly](#writing_new_parameterized_matchers_quickly)  
+[Writing New Monomorphic Matchers](#writing_new_monomorphic_matchers)  
+[Writing New Polymorphic Matchers](#writing_new_polymorphic_matchers)  
+[Writing New Cardinalities](#writing_new_cardinalities)  
+[Writing New Actions Quickly](#writing_new_actions_quickly)  
+[Writing New Parameterized Actions Quickly](#writing_new_parameterized_actions_quickly)  
+[Restricting the Type of an Argument or Parameter in an ACTION](#restricting_the_type_of_an_argument_or_parameter_in_an_action)  
+[Writing New Action Templates Quickly](#writing_new_action_templates_quickly)  
+[Using the ACTION Object's Type](#using_the_action_object)  
+[Writing New Monomorphic Actions](#writing_new_monomorphic_actions)  
+[Writing New Polymorphic Actions](#writing_new_polymorphic_actions)  
+[Teaching Google Mock How to Print Your Values](#teaching_google_mock_how_to_print_your_values)  
+
+
 # Creating Mock Classes #
 
+<a name="mocking_private_or_protected_methods"/>
 ## Mocking Private or Protected Methods ##
+
 
 You must always put a mock method definition (`MOCK_METHOD*`) in a
 `public:` section of the mock class, regardless of the method being
@@ -113,7 +197,7 @@ class MockStack : public StackInterface<Elem> {
   MOCK_METHOD1_T(Push, void(const Elem& x));
 };
 ```
-
+<a name="mocking_nonvirtual_methods"/>
 ## Mocking Nonvirtual Methods ##
 
 Google Mock can mock non-virtual functions to be used in what we call _hi-perf
@@ -184,6 +268,7 @@ Then you can use `CreateConnection<ConcretePacketStream>()` and
   ... exercise reader ...
 ```
 
+<a name="mocking_free_functions"/>
 ## Mocking Free Functions ##
 
 It's possible to use Google Mock to mock a free function (i.e. a
@@ -221,6 +306,7 @@ If you are concerned about the performance overhead incurred by
 virtual functions, and profiling confirms your concern, you can
 combine this with the recipe for [mocking non-virtual methods](#mocking-nonvirtual-methods).
 
+<a name="the_nice_the_strict_and_the_naggy"/>
 ## The Nice, the Strict, and the Naggy ##
 
 If a mock method has no `EXPECT_CALL` spec but is called, Google Mock
@@ -300,6 +386,7 @@ next guy, but sadly they are side effects of C++'s limitations):
 
 Finally, you should be **very cautious** about when to use naggy or strict mocks, as they tend to make tests more brittle and harder to maintain. When you refactor your code without changing its externally visible behavior, ideally you should't need to update any tests. If your code interacts with a naggy mock, however, you may start to get spammed with warnings as the result of your change. Worse, if your code interacts with a strict mock, your tests may start to fail and you'll be forced to fix them. Our general recommendation is to use nice mocks (not yet the default) most of the time, use naggy mocks (the current default) when developing or debugging tests, and use strict mocks only as the last resort.
 
+<a name="simplifying_the_interface"/>
 ## Simplifying the Interface without Breaking Existing Code ##
 
 Sometimes a method has a long list of arguments that is mostly
@@ -349,6 +436,7 @@ class ScopedMockLog : public LogSink {
 By defining a new mock method with a trimmed argument list, we make
 the mock class much more user-friendly.
 
+<a name="alternative_to_mocking_concrete_classes"/>
 ## Alternative to Mocking Concrete Classes ##
 
 Often you may find yourself using classes that don't implement
@@ -398,6 +486,7 @@ problem, but I'd like to assure you that the Java community has been
 practicing this for a long time and it's a proven effective technique
 applicable in a wide variety of situations. :-)
 
+<a name="delegating_calls_to_a_fake"/>
 ## Delegating Calls to a Fake ##
 
 Some times you have a non-trivial fake implementation of an
@@ -500,6 +589,7 @@ Instead, you can define a `FileOps` interface and an `IOOps` interface
 and split `System`'s functionalities into the two. Then you can mock
 `IOOps` without mocking `FileOps`.
 
+<a name="delegating_calls_to_a_real_object"/>
 ## Delegating Calls to a Real Object ##
 
 When using testing doubles (mocks, fakes, stubs, and etc), sometimes
@@ -553,6 +643,7 @@ of times, etc), and a real object will answer the calls (so the
 behavior will be the same as in production). This gives you the best
 of both worlds.
 
+<a name="delegating_calls_to_a_parent_class"/>
 ## Delegating Calls to a Parent Class ##
 
 Ideally, you should code to interfaces, whose methods are all pure
@@ -625,6 +716,7 @@ works.)
 
 # Using Matchers #
 
+<a name="matching_argument_values_exactly"/>
 ## Matching Argument Values Exactly ##
 
 You can specify exactly which arguments a mock method is expecting:
@@ -637,6 +729,7 @@ using ::testing::Return;
   EXPECT_CALL(foo, DoThat("Hello", bar));
 ```
 
+<a name="using_simple_matchers"/>
 ## Using Simple Matchers ##
 
 You can use matchers to match arguments that have a certain property:
@@ -661,6 +754,7 @@ using ::testing::NotNull;
   EXPECT_CALL(foo, DoThat(_, NotNull()));
 ```
 
+<a name="combining_matchers"/>
 ## Combining Matchers ##
 
 You can build complex matchers from existing ones using `AllOf()`,
@@ -682,6 +776,7 @@ using ::testing::Not;
                           NULL));
 ```
 
+<a name="casting_matchers"/>
 ## Casting Matchers ##
 
 Google Mock matchers are statically typed, meaning that the compiler
@@ -736,6 +831,7 @@ as long as you can `static_cast` type `T` to type `U`.
 (`static_cast` isn't always safe as it could throw away information,
 for example), so be careful not to misuse/abuse it.
 
+<a name="selecting_between_overloaded_functions"/>
 ## Selecting Between Overloaded Functions ##
 
 If you expect an overloaded function to be called, the compiler may
@@ -796,6 +892,7 @@ TEST(PrinterTest, Print) {
 }
 ```
 
+<a name="performing_different_actions_based_on_the_arguments"/>
 ## Performing Different Actions Based on the Arguments ##
 
 When a mock method is called, the _last_ matching expectation that's
@@ -820,6 +917,7 @@ using ::testing::Return;
 Now, if `foo.DoThis()` is called with a value less than 5, `'a'` will
 be returned; otherwise `'b'` will be returned.
 
+<a name="matching_multiple_arguments_as_a_whole"/>
 ## Matching Multiple Arguments as a Whole ##
 
 Sometimes it's not enough to match the arguments individually. For
@@ -871,6 +969,7 @@ Note that if you want to pass the arguments to a predicate of your own
 (e.g. `.With(Args<0, 1>(Truly(&MyPredicate)))`), that predicate MUST be
 written to take a `::testing::tuple` as its argument; Google Mock will pass the `n` selected arguments as _one_ single tuple to the predicate.
 
+<a name="using_matchers_as_predicates"/>
 ## Using Matchers as Predicates ##
 
 Have you noticed that a matcher is just a fancy predicate that also
@@ -902,6 +1001,7 @@ number that is >= 0, <= 100, and != 50:
 Matches(AllOf(Ge(0), Le(100), Ne(50)))
 ```
 
+<a name="using_matchers_in_google_test_assertions"/>
 ## Using Matchers in Google Test Assertions ##
 
 Since matchers are basically predicates that also know how to describe
@@ -952,6 +1052,7 @@ Expected: starts with "Hello"
 [Hamcrest](https://github.com/hamcrest/) project, which adds
 `assertThat()` to JUnit.
 
+<a name="using_predicates_as_matchers"/>
 ## Using Predicates as Matchers ##
 
 Google Mock provides a built-in set of matchers. In case you find them
@@ -974,6 +1075,7 @@ Note that the predicate function / functor doesn't have to return
 `bool`. It works as long as the return value can be used as the
 condition in statement `if (condition) ...`.
 
+<a name="matching_arguments_that_are_not_copyable"/>
 ## Matching Arguments that Are Not Copyable ##
 
 When you do an `EXPECT_CALL(mock_obj, Foo(bar))`, Google Mock saves
@@ -1005,6 +1107,7 @@ using ::testing::Lt;
 Remember: if you do this, don't change `bar` after the
 `EXPECT_CALL()`, or the result is undefined.
 
+<a name="validating_a_member_of_an_object"/>
 ## Validating a Member of an Object ##
 
 Often a mock function takes a reference to object as an argument. When
@@ -1051,6 +1154,7 @@ the match will always fail regardless of the inner matcher.
 What if you want to validate more than one members at the same time?
 Remember that there is `AllOf()`.
 
+<a name="validating_the_value_pointed_to_by_a_pointer_argument"/>
 ## Validating the Value Pointed to by a Pointer Argument ##
 
 C++ functions often take pointers as arguments. You can use matchers
@@ -1090,6 +1194,7 @@ nested `Pointee()` to probe deeper inside the value. For example,
 `Pointee(Pointee(Lt(3)))` matches a pointer that points to a pointer
 that points to a number less than 3 (what a mouthful...).
 
+<a name="testing_a_certain_property_of_an_object"/>
 ## Testing a Certain Property of an Object ##
 
 Sometimes you want to specify that an object argument has a certain
@@ -1136,6 +1241,7 @@ inline Matcher<const Foo&> BarPlusBazEq(int expected_sum) {
   EXPECT_CALL(..., DoThis(BarPlusBazEq(5)))...;
 ```
 
+<a name="matching_containers"/>
 ## Matching Containers ##
 
 Sometimes an STL container (e.g. list, vector, map, ...) is passed to
@@ -1222,6 +1328,7 @@ using ::testing::ElementsAreArray;
   * If the container is passed by pointer instead of by reference, just write `Pointee(ElementsAre*(...))`.
   * The order of elements _matters_ for `ElementsAre*()`. Therefore don't use it with containers whose element order is undefined (e.g. `hash_map`).
 
+<a name="sharing_matchers"/>
 ## Sharing Matchers ##
 
 Under the hood, a Google Mock matcher object consists of a pointer to
@@ -1241,6 +1348,7 @@ matcher variable and use that variable repeatedly! For example,
 
 # Setting Expectations #
 
+<a name="knowing_when_to_expect"/>
 ## Knowing When to Expect ##
 
 `ON_CALL` is likely the single most under-utilized construct in Google Mock.
@@ -1259,6 +1367,7 @@ So use `ON_CALL` by default, and only use `EXPECT_CALL` when you actually intend
 
 If you are bothered by the "Uninteresting mock function call" message printed when a mock method without an `EXPECT_CALL` is called, you may use a `NiceMock` instead to suppress all such messages for the mock object, or suppress the message for specific methods by adding `EXPECT_CALL(...).Times(AnyNumber())`. DO NOT suppress it by blindly adding an `EXPECT_CALL(...)`, or you'll have a test that's a pain to maintain.
 
+<a name="ignoring_uninteresting_calls"/>
 ## Ignoring Uninteresting Calls ##
 
 If you are not interested in how a mock method is called, just don't
@@ -1273,6 +1382,7 @@ method (via `EXPECT_CALL()`), all invocations to it must match some
 expectation. If this function is called but the arguments don't match
 any `EXPECT_CALL()` statement, it will be an error.
 
+<a name="disallowing_unexpected_calls"/>
 ## Disallowing Unexpected Calls ##
 
 If a mock method shouldn't be called at all, explicitly say so:
@@ -1299,6 +1409,7 @@ using ::testing::Gt;
 A call to `foo.Bar()` that doesn't match any of the `EXPECT_CALL()`
 statements will be an error.
 
+<a name="understanding_uninteresting_vs_unexpected_calls"/>
 ## Understanding Uninteresting vs Unexpected Calls ##
 
 _Uninteresting_ calls and _unexpected_ calls are different concepts in Google Mock. _Very_ different.
@@ -1347,6 +1458,7 @@ Note that the order of the two `EXPECT_CALLs` is important, as a newer `EXPECT_C
 
 For more on uninteresting calls, nice mocks, and strict mocks, read ["The Nice, the Strict, and the Naggy"](#the-nice-the-strict-and-the-naggy).
 
+<a name="expecting_ordered_calls"/>
 ## Expecting Ordered Calls ##
 
 Although an `EXPECT_CALL()` statement defined earlier takes precedence
@@ -1379,6 +1491,7 @@ calls to `bar.DoThat()` where the argument can be anything, which are
 in turn followed by a call to `foo.DoThis(6)`. If a call occurred
 out-of-order, Google Mock will report an error.
 
+<a name="expecting_partially_ordered_calls"/>
 ## Expecting Partially Ordered Calls ##
 
 Sometimes requiring everything to occur in a predetermined order can
@@ -1440,6 +1553,7 @@ C -> D`):
 This means that A must occur before B and C, and C must occur before
 D. There's no restriction about the order other than these.
 
+<a name="controlling_when_an_expectation_retires"/>
 ## Controlling When an Expectation Retires ##
 
 When a mock method is called, Google Mock only consider expectations
@@ -1496,6 +1610,7 @@ will match #1 - there will be no error.
 
 # Using Actions #
 
+<a name="returning_references_from_mock_methods"/>
 ## Returning References from Mock Methods ##
 
 If a mock function's return type is a reference, you need to use
@@ -1516,6 +1631,7 @@ class MockFoo : public Foo {
       .WillOnce(ReturnRef(bar));
 ```
 
+<a name="returning_live_values_from_mock_methods"/>
 ## Returning Live Values from Mock Methods ##
 
 The `Return(x)` action saves a copy of `x` when the action is
@@ -1579,6 +1695,7 @@ using testing::ReturnPointee;
   EXPECT_EQ(42, foo.GetValue());  // This will succeed now.
 ```
 
+<a name="combining_actions"/>
 ## Combining Actions ##
 
 Want to do more than one thing when a function is called? That's
@@ -1601,6 +1718,7 @@ class MockFoo : public Foo {
                       action_n));
 ```
 
+<a name="mocking_side_effects"/>
 ## Mocking Side Effects ##
 
 Sometimes a method exhibits its effect not via returning a value but
@@ -1700,6 +1818,7 @@ class MockRolodex : public Rolodex {
       .WillOnce(SetArrayArgument<0>(names.begin(), names.end()));
 ```
 
+<a name="changing_a_mock_object's_behavior_based_on_the_state"/>
 ## Changing a Mock Object's Behavior Based on the State ##
 
 If you expect a call to change the behavior of a mock object, you can use `::testing::InSequence` to specify different behaviors before and after the call:
@@ -1741,6 +1860,7 @@ ACTION_P(ReturnPointee, p) { return *p; }
 
 Here `my_mock.GetPrevValue()` will always return the argument of the last `UpdateValue()` call.
 
+<a name="setting_the_default_value_for_a_return_type"/>
 ## Setting the Default Value for a Return Type ##
 
 If a mock method's return type is a built-in C++ type or pointer, by
@@ -1782,6 +1902,7 @@ tests hard to understand. We recommend you to use this feature
 judiciously. For example, you may want to make sure the `Set()` and
 `Clear()` calls are right next to the code that uses your mock.
 
+<a name="setting_the_default_actions_for_a_mock_method"/>
 ## Setting the Default Actions for a Mock Method ##
 
 You've learned how to change the default value of a given
@@ -1818,6 +1939,7 @@ be used. This matching order allows you to set up the common behavior
 in a mock object's constructor or the test fixture's set-up phase and
 specialize the mock's behavior later.
 
+<a name="using_functions/methods/functors_as_actions"/>
 ## Using Functions/Methods/Functors as Actions ##
 
 If the built-in actions don't suit you, you can easily use an existing
@@ -1860,6 +1982,7 @@ implicitly converted to that of the latter. So, you can invoke
 something whose type is _not_ exactly the same as the mock function,
 as long as it's safe to do so - nice, huh?
 
+<a name="invoking_a_function/method/functor_without_arguments"/>
 ## Invoking a Function/Method/Functor Without Arguments ##
 
 `Invoke()` is very useful for doing actions that are more complex. It
@@ -1897,6 +2020,7 @@ bool Job1() { ... }
   foo.ComplexJob(10);  // Invokes Job1().
 ```
 
+<a name="invoking_an_argument_of_the_mock_function"/>
 ## Invoking an Argument of the Mock Function ##
 
 Sometimes a mock function will receive a function pointer or a functor
@@ -1993,6 +2117,7 @@ using ::testing::InvokeArgument;
   // are kept inside the InvokeArgument action.
 ```
 
+<a name="ignoring_an_action's_result"/>
 ## Ignoring an Action's Result ##
 
 Sometimes you have an action that returns _something_, but you need an
@@ -2032,6 +2157,7 @@ class MockFoo : public Foo {
 Note that you **cannot** use `IgnoreResult()` on an action that already
 returns `void`. Doing so will lead to ugly compiler errors.
 
+<a name="selecting_an_action's_arguments"/>
 ## Selecting an Action's Arguments ##
 
 Say you have a mock function `Foo()` that takes seven arguments, and
@@ -2114,6 +2240,7 @@ Here are more tips:
   * You can change the order of the arguments, e.g. `WithArgs<3, 2, 1>(...)`.
   * The types of the selected arguments do _not_ have to match the signature of the inner action exactly. It works as long as they can be implicitly converted to the corresponding arguments of the inner action. For example, if the 4-th argument of the mock function is an `int` and `my_action` takes a `double`, `WithArg<4>(my_action)` will work.
 
+<a name="ignoring_arguments_in_action_functions"/>
 ## Ignoring Arguments in Action Functions ##
 
 The selecting-an-action's-arguments recipe showed us one way to make a
@@ -2173,6 +2300,7 @@ double DistanceToOrigin(Unused, double x, double y) {
       .WillOnce(Invoke(DistanceToOrigin));
 ```
 
+<a name="sharing_actions"/>
 ## Sharing Actions ##
 
 Just like matchers, a Google Mock action object consists of a pointer
@@ -2227,6 +2355,7 @@ versus
 
 # Misc Recipes on Using Google Mock #
 
+<a name="mocking_methods_that_use_move-only_types"/>
 ## Mocking Methods That Use Move-Only Types ##
 
 C++11 introduced <em>move-only types</em>.  A move-only-typed value can be moved from one object to another, but cannot be copied.  `std::unique_ptr<T>` is probably the most commonly used move-only type.
@@ -2419,6 +2548,7 @@ Now, the mock `DoShareBuzz()` method is free to save the buzz argument for later
 
 Using the tricks covered in this recipe, you are now able to mock methods that take and/or return move-only types.  Put your newly-acquired power to good use - when you design a new API, you can now feel comfortable using `unique_ptrs` as appropriate, without fearing that doing so will compromise your tests.
 
+<a name="making_the_compilation_faster"/>
 ## Making the Compilation Faster ##
 
 Believe it or not, the _vast majority_ of the time spent on compiling
@@ -2482,6 +2612,7 @@ MockFoo::MockFoo() {}
 MockFoo::~MockFoo() {}
 ```
 
+<a name="forcing_a_verification"/>
 ## Forcing a Verification ##
 
 When it's being destroyed, your friendly mock object will automatically
@@ -2526,6 +2657,7 @@ TEST(MyServerTest, ProcessesRequest) {
 yes), so you can wrap that function call inside a `ASSERT_TRUE()` if
 there is no point going further when the verification has failed.
 
+<a name="using_check_points"/>
 ## Using Check Points ##
 
 Sometimes you may want to "reset" a mock object at various check
@@ -2595,6 +2727,7 @@ and nothing should happen between the two check points. The explicit
 check points make it easy to tell which `Bar("a")` is called by which
 call to `Foo()`.
 
+<a name="mocking_destructors"/>
 ## Mocking Destructors ##
 
 Sometimes you want to make sure a mock object is destructed at the
@@ -2644,6 +2777,7 @@ object dies to testing when its `Die()` method is called:
 
 And that's that.
 
+<a name="using_google_mock_and_threads"/>
 ## Using Google Mock and Threads ##
 
 **IMPORTANT NOTE:** What we describe in this recipe is **ONLY** true on
@@ -2707,6 +2841,7 @@ potentially affects _all_ living mock objects in your
 program. Naturally, you won't want to mess with it from multiple
 threads or when there still are mocks in action.
 
+<a name="controlling_how_much_information_google_mock_prints"/>
 ## Controlling How Much Information Google Mock Prints ##
 
 When Google Mock sees something that has the potential of being an
@@ -2740,6 +2875,7 @@ tests like so:
 
 Now, judiciously use the right flag to enable Google Mock serve you better!
 
+<a name="gaining_super_vision_into_mock_calls"/>
 ## Gaining Super Vision into Mock Calls ##
 
 You have a test using Google Mock. It fails: Google Mock tells you
@@ -2802,6 +2938,7 @@ that the actual `F("a", "good")` call is matched by the first
 `EXPECT_CALL`, not the third as you thought. From that it should be
 obvious that the third `EXPECT_CALL` is written wrong. Case solved.
 
+<a name="running_tests_in_emacs"/>
 ## Running Tests in Emacs ##
 
 If you build and run your tests in Emacs, the source file locations of
@@ -2822,6 +2959,7 @@ To make it even easier, you can add the following lines to your
 Then you can type `M-m` to start a build, or `M-up`/`M-down` to move
 back and forth between errors.
 
+<a name="fusing_google_mock_source_files"/>
 ## Fusing Google Mock Source Files ##
 
 Google Mock's implementation consists of dozens of files (excluding
@@ -2845,6 +2983,7 @@ against them.
 
 # Extending Google Mock #
 
+<a name="writing_new_matchers_quickly"/>
 ## Writing New Matchers Quickly ##
 
 The `MATCHER*` family of macros can be used to define custom matchers
@@ -2942,6 +3081,7 @@ Google Mock already prints it for you.
   1. The type of the value being matched (`arg_type`) is determined by the context in which you use the matcher and is supplied to you by the compiler, so you don't need to worry about declaring it (nor can you).  This allows the matcher to be polymorphic.  For example, `IsDivisibleBy7()` can be used to match any type where the value of `(arg % 7) == 0` can be implicitly converted to a `bool`.  In the `Bar(IsDivisibleBy7())` example above, if method `Bar()` takes an `int`, `arg_type` will be `int`; if it takes an `unsigned long`, `arg_type` will be `unsigned long`; and so on.
   1. Google Mock doesn't guarantee when or how many times a matcher will be invoked. Therefore the matcher logic must be _purely functional_ (i.e. it cannot have any side effect, and the result must not depend on anything other than the value being matched and the matcher parameters). This requirement must be satisfied no matter how you define the matcher (e.g. using one of the methods described in the following recipes). In particular, a matcher can never call a mock function, as that will affect the state of the mock object and Google Mock.
 
+<a name="writing_new_parameterized_matchers_quickly"/>
 ## Writing New Parameterized Matchers Quickly ##
 
 Sometimes you'll want to define a matcher that has parameters.  For that you
@@ -3067,6 +3207,7 @@ that pay off in the long run.  They also allow overloading matchers
 based on parameter types (as opposed to just based on the number of
 parameters).
 
+<a name="writing_new_monomorphic_matchers"/>
 ## Writing New Monomorphic Matchers ##
 
 A matcher of argument type `T` implements
@@ -3171,6 +3312,7 @@ Expected: is divisible by 7
   Actual: 23 (the remainder is 2)
 ```
 
+<a name="writing_new_polymorphic_matchers"/>
 ## Writing New Polymorphic Matchers ##
 
 You've learned how to write your own matchers in the previous
@@ -3233,6 +3375,7 @@ Like in a monomorphic matcher, you may explain the match result by
 streaming additional information to the `listener` argument in
 `MatchAndExplain()`.
 
+<a name="writing_new_cardinalities"/>
 ## Writing New Cardinalities ##
 
 A cardinality is used in `Times()` to tell Google Mock how many times
@@ -3291,6 +3434,7 @@ Cardinality EvenNumber() {
       .Times(EvenNumber());
 ```
 
+<a name="writing_new_actions_quickly"/>
 ## Writing New Actions Quickly ##
 
 If the built-in actions don't work for you, and you find it
@@ -3361,6 +3505,7 @@ we have:
 | `return_type`          | the type `int`  |
 | `function_type`        | the type `int(bool, int*)` |
 
+<a name="writing_new_parameterized_actions_quickly"/>
 ## Writing New Parameterized Actions Quickly ##
 
 Sometimes you'll want to parameterize an action you define.  For that
@@ -3412,6 +3557,7 @@ ACTION_P(Plus, a) { ... }
 ACTION_P2(Plus, a, b) { ... }
 ```
 
+<a name="restricting_the_type_of_an_argument_or_parameter_in_an_action"/>
 ## Restricting the Type of an Argument or Parameter in an ACTION ##
 
 For maximum brevity and reusability, the `ACTION*` macros don't ask
@@ -3438,6 +3584,7 @@ ACTION_P(Bar, param) {
 where `StaticAssertTypeEq` is a compile-time assertion in Google Test
 that verifies two types are the same.
 
+<a name="writing_new_action_templates_quickly"/>
 ## Writing New Action Templates Quickly ##
 
 Sometimes you want to give an action explicit template parameters that
@@ -3506,6 +3653,7 @@ Are we using a single-template-parameter action where `bool` refers to
 the type of `x`, or a two-template-parameter action where the compiler
 is asked to infer the type of `x`?
 
+<a name="using_the_action_object's_type"/>
 ## Using the ACTION Object's Type ##
 
 If you are writing a function that returns an `ACTION` object, you'll
@@ -3527,6 +3675,7 @@ Note that we have to pick different suffixes (`Action`, `ActionP`,
 parameters, or the action definitions cannot be overloaded on the
 number of them.
 
+<a name="writing_new_monomorphic_actions"/>
 ## Writing New Monomorphic Actions ##
 
 While the `ACTION*` macros are very convenient, sometimes they are
@@ -3581,6 +3730,7 @@ Action<IncrementMethod> IncrementArgument() {
   foo.Baz(&n);  // Should return 5 and change n to 6.
 ```
 
+<a name="writing_new_polymorphic_actions"/>
 ## Writing New Polymorphic Actions ##
 
 The previous recipe showed you how to define your own action. This is
@@ -3662,6 +3812,7 @@ class MockFoo : public Foo {
   foo.DoThat(1, "Hi", "Bye");  // Will return "Hi".
 ```
 
+<a name="teaching_google_mock_how_to_print_your_values"/>
 ## Teaching Google Mock How to Print Your Values ##
 
 When an uninteresting or unexpected call occurs, Google Mock prints the
