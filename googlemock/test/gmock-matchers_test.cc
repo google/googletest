@@ -58,6 +58,11 @@
 # include <forward_list>  // NOLINT
 #endif
 
+// Disable MSVC2015 warning for std::pair: "decorated name length exceeded, name was truncated".
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+# pragma warning(disable:4503)
+#endif
+
 namespace testing {
 
 namespace internal {
@@ -3911,8 +3916,11 @@ TEST(ResultOfTest, WorksForFunctionReferences) {
 
 // Tests that ResultOf(f, ...) compiles and works as expected when f is a
 // function object.
-struct Functor : public ::std::unary_function<int, std::string> {
-  result_type operator()(argument_type input) const {
+struct Functor {
+  typedef std::string result_type;
+  typedef int argument_type;
+
+  std::string operator()(int input) const {
     return IntToStringFunction(input);
   }
 };
