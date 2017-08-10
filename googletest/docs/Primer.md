@@ -30,11 +30,11 @@ definitions of the terms _Test_, _Test Case_ and _Test Suite_, so beware
 of misunderstanding these.
 
 Historically, the Google C++ Testing Framework started to use the term
-_Test Case_ for grouping related tests, i.e. in the same sense as
-current publications, including the International Software Testing
-Qualifications Board ([ISTQB](http://www.istqb.org/)) and different
-textbooks on Software Quality, are using the term _[Test
-Suite](http://glossary.istqb.org/search/test%20suite)_.
+_Test Case_ for grouping related tests, whereas current publications
+including the International Software Testing Qualifications Board
+([ISTQB](http://www.istqb.org/)) and various textbooks on Software
+Quality use the term _[Test
+Suite](http://glossary.istqb.org/search/test%20suite)_ for this.
 
 The related term _Test_, as it is used in the Google C++ Testing
 Framework, is corresponding to the term _[Test
