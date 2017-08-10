@@ -86,11 +86,7 @@ cc_library(
 cc_library(
     name = "gtest_main",
     srcs = [
-        "googletest/src/gtest_main.cc",
-    ],
-    includes = [
-        "googletest",
-        "googletest/include",
+        "googlemock/src/gmock_main.cc",
     ],
     deps = ["//:gtest"],
 )
