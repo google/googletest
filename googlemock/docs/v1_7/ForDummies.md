@@ -365,7 +365,7 @@ By creating an object of type `InSequence`, all expectations in its scope are pu
 
 In this example, we test that `Foo()` calls the three expected functions in the order as written. If a call is made out-of-order, it will be an error.
 
-(What if you care about the relative order of some of the calls, but not all of them? Can you specify an arbitrary partial order? The answer is ... yes! If you are impatient, the details can be found in the [CookBook](V1_7_CookBook#Expecting_Partially_Ordered_Calls.md).)
+(What if you care about the relative order of some of the calls, but not all of them? Can you specify an arbitrary partial order? The answer is ... yes! If you are impatient, the details can be found in the [CookBook](CookBook.md#expecting-partially-ordered-calls).)
 
 ## All Expectations Are Sticky (Unless Said Otherwise) ##
 Now let's do a quick quiz to see how well you can use this mock stuff already. How would you test that the turtle is asked to go to the origin _exactly twice_ (you want to ignore any other instructions it receives)?
@@ -436,4 +436,4 @@ In Google Mock, if you are not interested in a method, just don't say anything a
 # What Now? #
 Congratulations! You've learned enough about Google Mock to start using it. Now, you might want to join the [googlemock](http://groups.google.com/group/googlemock) discussion group and actually write some tests using Google Mock - it will be fun. Hey, it may even be addictive - you've been warned.
 
-Then, if you feel like increasing your mock quotient, you should move on to the [CookBook](V1_7_CookBook.md). You can learn many advanced features of Google Mock there -- and advance your level of enjoyment and testing bliss.
+Then, if you feel like increasing your mock quotient, you should move on to the [CookBook](CookBook.md). You can learn many advanced features of Google Mock there -- and advance your level of enjoyment and testing bliss.
