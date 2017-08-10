@@ -1,6 +1,6 @@
 This page lists all documentation markdown files for Google Mock **(the
 current git version)**
--- **if you use a released version of Google Mock, please read the
+-- **if you use a former version of Google Mock, please read the
 documentation for that specific version instead (e.g. by checking out
 the respective git branch/tag).**
 
