@@ -96,14 +96,19 @@ cxx_library(gmock_main
 # to the targets for when we are part of a parent build (ie being pulled
 # in via add_subdirectory() rather than being a standalone build).
 if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
-  target_include_directories(gmock      INTERFACE "${gmock_SOURCE_DIR}/include")
-  target_include_directories(gmock_main INTERFACE "${gmock_SOURCE_DIR}/include")
+  target_include_directories(gmock INTERFACE
+    "$<BUILD_INTERFACE:${gmock_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:include>")
+  target_include_directories(gmock_main INTERFACE
+    "$<BUILD_INTERFACE:${gmock_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:include>")
 endif()
 
 ########################################################################
 #
 # Install rules
 install(TARGETS gmock gmock_main
+  EXPORT gmockConfig
   DESTINATION lib)
 install(DIRECTORY ${gmock_SOURCE_DIR}/include/gmock
   DESTINATION include)
@@ -200,3 +205,6 @@ if (gmock_build_tests)
   cxx_executable(gmock_output_test_ test gmock)
   py_test(gmock_output_test)
 endif()
+
+install(EXPORT gmockConfig
+  DESTINATION lib/cmake)
