@@ -1,0 +1,65 @@
+configurations 
+{
+    // This node contains custom pivot information.
+    Toolset 
+    {
+        key : "PlatformToolset"; // this is CoApp pre-defined key
+        choices: { v140 };
+    };
+};
+nuget {
+    nuspec {
+        id = googletest.v140.windesktop.static.rt-dyn;
+        version : 1.7.0.${BUILD_VERSION};
+        title : "Google Test v140";
+        authors : "Google Inc.";
+        owners : "Google Inc.";
+        licenseUrl : "https://en.wikipedia.org/wiki/Google_Test";
+        projectUrl: "https://github.com/google/googletest";
+        iconUrl: "https://www.google.ca/images/branding/product/ico/googleg_lodp.ico";
+        requireLicenseAcceptance: false;
+        summary: @"Google Test vc140 libraries";
+
+        description: @"Google C++ Testing Framework helps you write better C++ tests.";
+
+        releaseNotes: "https://github.com/google/googletest/blob/master/googletest/docs/Primer.md";
+
+        copyright: "Copyright 2016 Google Inc. All rights reserved.";
+
+        tags: { native, c, cpp, google, test, unittest, unit, gtest };
+    };
+
+    files {
+		#defines {
+			SDK_ROOT = .\;
+		};
+		nestedInclude: {
+			#destination : ${d_include}gtest;
+			"${SDK_ROOT}googletest\include\**\*.h*";
+		};
+		
+        [x64,v140,release] { 
+            lib: { ${SDK_ROOT}build_v140_x64\googlemock\gtest\RelWithDebInfo\gtest.lib };			
+			symbols: { ${SDK_ROOT}build_v140_x64\googlemock\gtest\gtest.dir\RelWithDebInfo\gtest.pdb };
+        };
+
+        [x64,v140,debug] { 
+            lib: { ${SDK_ROOT}build_v140_x64\googlemock\gtest\Debug\gtest.lib };			
+			symbols: { ${SDK_ROOT}build_v140_x64\googlemock\gtest\gtest.dir\Debug\gtest.pdb };
+        };
+
+        [win32,v140,release] { 
+            lib: { ${SDK_ROOT}build_v140_x86\googlemock\gtest\RelWithDebInfo\gtest.lib };			
+			symbols: { ${SDK_ROOT}build_v140_x86\googlemock\gtest\gtest.dir\RelWithDebInfo\gtest.pdb };
+        };
+
+        [win32,v140,debug] { 
+            lib: { ${SDK_ROOT}build_v140_x86\googlemock\gtest\Debug\gtest.lib };			
+			symbols: { ${SDK_ROOT}build_v140_x86\googlemock\gtest\gtest.dir\Debug\gtest.pdb };
+        };
+    };
+
+	targets {
+		Defines += HAS_GOOGLETEST;
+	};
+}
