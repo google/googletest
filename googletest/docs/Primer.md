@@ -315,7 +315,7 @@ declaration`".
 
 For each test defined with `TEST_F()`, Google Test will:
   1. Create a _fresh_ test fixture at runtime
-  1. Immediately initialize it via `SetUp()` ,
+  1. Immediately initialize it via `SetUp()`
   1. Run the test
   1. Clean up by calling `TearDown()`
   1. Delete the test fixture.  Note that different tests in the same test case have different test fixture objects, and Google Test always deletes a test fixture before it creates the next one. Google Test does not reuse the same test fixture for multiple tests. Any changes one test makes to the fixture do not affect other tests.

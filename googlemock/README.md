@@ -35,7 +35,7 @@ We hope you find it useful!
   * Does automatic verification of expectations (no record-and-replay needed).
   * Allows arbitrary (partial) ordering constraints on
     function calls to be expressed,.
-  * Lets a user extend it by defining new matchers and actions.
+  * Lets an user extend it by defining new matchers and actions.
   * Does not use exceptions.
   * Is easy to learn and use.
 
