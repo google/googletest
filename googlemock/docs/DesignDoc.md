@@ -100,6 +100,7 @@ For example, when using an `ACTION` as a stub action for mock function:
 int DoSomething(bool flag, int* ptr);
 ```
 we have:
+
 | **Pre-defined Symbol** | **Is Bound To** |
 |:-----------------------|:----------------|
 | `arg0`                 | the value of `flag` |
@@ -196,6 +197,7 @@ Google Test (the name is chosen to match `static_assert` in C++0x).
 If you are writing a function that returns an `ACTION` object, you'll
 need to know its type.  The type depends on the macro used to define
 the action and the parameter types.  The rule is relatively simple:
+
 | **Given Definition** | **Expression** | **Has Type** |
 |:---------------------|:---------------|:-------------|
 | `ACTION(Foo)`        | `Foo()`        | `FooAction`  |
