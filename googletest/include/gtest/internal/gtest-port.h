@@ -70,6 +70,8 @@
 //
 //   GTEST_HAS_CLONE          - Define it to 1/0 to indicate that clone(2)
 //                              is/isn't available.
+//   GTEST_HAS_ENV_VAR        - Define it to 1/0 to indicate that modifiable
+//                              environment variables are available.
 //   GTEST_HAS_EXCEPTIONS     - Define it to 1/0 to indicate that exceptions
 //                              are enabled.
 //   GTEST_HAS_GLOBAL_STRING  - Define it to 1/0 to indicate that ::string
@@ -457,6 +459,13 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 #endif  // GTEST_USES_PCRE
 
+#ifndef GTEST_HAS_ENV_VAR
+// The user didn't tell us whether modifiable environment variables
+// are enabled, so assume they are enabled everywhere except the three
+// Windows CE platforms.
+# define GTEST_HAS_ENV_VAR (!(GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_RT))
+#endif // GTEST_HAS_ENV_VAR
+ 
 #ifndef GTEST_HAS_EXCEPTIONS
 // The user didn't tell us whether exceptions are enabled, so we need
 // to figure it out.
@@ -2417,8 +2426,7 @@ inline int Close(int fd) { return close(fd); }
 inline const char* StrError(int errnum) { return strerror(errnum); }
 #endif
 inline const char* GetEnv(const char* name) {
-#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE | GTEST_OS_WINDOWS_RT
-  // We are on Windows CE, which has no environment variables.
+#if !GTEST_HAS_ENV_VAR
   static_cast<void>(name);  // To prevent 'unused argument' warning.
   return NULL;
 #elif defined(__BORLANDC__) || defined(__SunOS_5_8) || defined(__SunOS_5_9)

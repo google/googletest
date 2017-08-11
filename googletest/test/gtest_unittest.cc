@@ -1623,8 +1623,9 @@ TEST_F(GTestFlagSaverTest, VerifyGTestFlags) {
 // value.  If the value argument is "", unsets the environment
 // variable.  The caller must ensure that both arguments are not NULL.
 static void SetEnv(const char* name, const char* value) {
-#if GTEST_OS_WINDOWS_MOBILE
-  // Environment variables are not supported on Windows CE.
+#if !GTEST_HAS_ENV_VAR
+  static_cast<void>(name);  // To prevent 'unused argument' warning.
+  static_cast<void>(value); // To prevent 'unused argument' warning.
   return;
 #elif defined(__BORLANDC__) || defined(__SunOS_5_8) || defined(__SunOS_5_9)
   // C++Builder's putenv only stores a pointer to its parameter; we have to
@@ -1654,11 +1655,10 @@ static void SetEnv(const char* name, const char* value) {
   } else {
     setenv(name, value, 1);
   }
-#endif  // GTEST_OS_WINDOWS_MOBILE
+#endif  // !GTEST_HAS_ENV_VAR
 }
 
-#if !GTEST_OS_WINDOWS_MOBILE
-// Environment variables are not supported on Windows CE.
+#if GTEST_HAS_ENV_VAR
 
 using testing::internal::Int32FromGTestEnv;
 
@@ -1709,7 +1709,7 @@ TEST(Int32FromGTestEnvTest, ParsesAndReturnsValidValue) {
   SetEnv(GTEST_FLAG_PREFIX_UPPER_ "TEMP", "-321");
   EXPECT_EQ(-321, Int32FromGTestEnv("temp", 0));
 }
-#endif  // !GTEST_OS_WINDOWS_MOBILE
+#endif  // GTEST_HAS_ENV_VAR
 
 // Tests ParseInt32Flag().
 
@@ -1766,8 +1766,7 @@ TEST(ParseInt32FlagTest, ParsesAndReturnsValidValue) {
 
 // Tests that Int32FromEnvOrDie() parses the value of the var or
 // returns the correct default.
-// Environment variables are not supported on Windows CE.
-#if !GTEST_OS_WINDOWS_MOBILE
+#if GTEST_HAS_ENV_VAR
 TEST(Int32FromEnvOrDieTest, ParsesAndReturnsValidValue) {
   EXPECT_EQ(333, Int32FromEnvOrDie(GTEST_FLAG_PREFIX_UPPER_ "UnsetVar", 333));
   SetEnv(GTEST_FLAG_PREFIX_UPPER_ "UnsetVar", "123");
@@ -1775,7 +1774,7 @@ TEST(Int32FromEnvOrDieTest, ParsesAndReturnsValidValue) {
   SetEnv(GTEST_FLAG_PREFIX_UPPER_ "UnsetVar", "-123");
   EXPECT_EQ(-123, Int32FromEnvOrDie(GTEST_FLAG_PREFIX_UPPER_ "UnsetVar", 333));
 }
-#endif  // !GTEST_OS_WINDOWS_MOBILE
+#endif  // GTEST_HAS_ENV_VAR
 
 // Tests that Int32FromEnvOrDie() aborts with an error message
 // if the variable is not an Int32.
@@ -1841,8 +1840,7 @@ TEST_F(ShouldShardTest, ReturnsFalseWhenTotalShardIsOne) {
 
 // Tests that sharding is enabled if total_shards > 1 and
 // we are not in a death test subprocess.
-// Environment variables are not supported on Windows CE.
-#if !GTEST_OS_WINDOWS_MOBILE
+#if GTEST_HAS_ENV_VAR
 TEST_F(ShouldShardTest, WorksWhenShardEnvVarsAreValid) {
   SetEnv(index_var_, "4");
   SetEnv(total_var_, "22");
@@ -1859,7 +1857,7 @@ TEST_F(ShouldShardTest, WorksWhenShardEnvVarsAreValid) {
   EXPECT_TRUE(ShouldShard(total_var_, index_var_, false));
   EXPECT_FALSE(ShouldShard(total_var_, index_var_, true));
 }
-#endif  // !GTEST_OS_WINDOWS_MOBILE
+#endif  // GTEST_HAS_ENV_VAR
 
 // Tests that we exit in error if the sharding values are not valid.
 
