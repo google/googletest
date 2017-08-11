@@ -27,6 +27,8 @@ option(
   "Build gtest with internal symbols hidden in shared libraries."
   OFF)
 
+option(gtest_enable_install "Enable gtest install targets" ON)
+
 # Defines pre_project_set_up_hermetic_build() and set_up_hermetic_build().
 include(cmake/hermetic_build.cmake OPTIONAL)
 
@@ -102,10 +104,12 @@ endif()
 ########################################################################
 #
 # Install rules
-install(TARGETS gtest gtest_main
-  DESTINATION lib)
-install(DIRECTORY ${gtest_SOURCE_DIR}/include/gtest
-  DESTINATION include)
+if (gtest_enable_install)
+  install(TARGETS gtest gtest_main
+    DESTINATION lib)
+  install(DIRECTORY ${gtest_SOURCE_DIR}/include/gtest
+    DESTINATION include)
+endif()
 
 ########################################################################
 #
