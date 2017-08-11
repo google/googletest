@@ -301,7 +301,7 @@ as a shared library (known as a DLL on Windows) if you prefer.
 
 To compile *gtest* as a shared library, add
 
-    -DGTEST_CREATE_SHARED_LIBRARY=1
+    -DBUILD_SHARED_LIBS=ON
 
 to the compiler flags.  You'll also need to tell the linker to produce
 a shared library instead - consult your linker's manual for how to do
