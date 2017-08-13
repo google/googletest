@@ -63,7 +63,7 @@ using testing::internal::AlwaysTrue;
 // prevent a user from accidentally including gtest-internal-inl.h in
 // his code.
 # define GTEST_IMPLEMENTATION_ 1
-# include "src/gtest-internal-inl.h"
+# include "../src/gtest-internal-inl.h"
 # undef GTEST_IMPLEMENTATION_
 
 namespace posix = ::testing::internal::posix;

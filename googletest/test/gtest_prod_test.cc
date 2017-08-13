@@ -32,7 +32,7 @@
 // Unit test for include/gtest/gtest_prod.h.
 
 #include "gtest/gtest.h"
-#include "test/production.h"
+#include "production.h"
 
 // Tests that private members can be accessed from a TEST declared as
 // a friend of the class.

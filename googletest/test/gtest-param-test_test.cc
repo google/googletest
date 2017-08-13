@@ -46,10 +46,10 @@
 
 // To include gtest-internal-inl.h.
 # define GTEST_IMPLEMENTATION_ 1
-# include "src/gtest-internal-inl.h"  // for UnitTestOptions
+# include "../src/gtest-internal-inl.h"  // for UnitTestOptions
 # undef GTEST_IMPLEMENTATION_
 
-# include "test/gtest-param-test_test.h"
+# include "gtest-param-test_test.h"
 
 using ::std::vector;
 using ::std::sort;
