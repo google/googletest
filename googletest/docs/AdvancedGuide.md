@@ -32,7 +32,7 @@ output in the future.
 
 `FAIL()` generates a fatal failure, while `ADD_FAILURE()` and `ADD_FAILURE_AT()` generate a nonfatal
 failure. These are useful when control flow, rather than a Boolean expression,
-deteremines the test's success or failure. For example, you might want to write
+determines the test's success or failure. For example, you might want to write
 something like:
 
 ```
@@ -128,7 +128,7 @@ c is 10<br>
   1. If you see a compiler error "no matching function to call" when using `ASSERT_PRED*` or `EXPECT_PRED*`, please see [this FAQ](FAQ.md#the-compiler-complains-no-matching-function-to-call-when-i-use-assert_predn-how-do-i-fix-it) for how to resolve it.
   1. Currently we only provide predicate assertions of arity <= 5. If you need a higher-arity assertion, let us know.
 
-_Availability_: Linux, Windows, Mac
+_Availability_: Linux, Windows, Mac.
 
 ### Using a Function That Returns an AssertionResult ###
 
@@ -675,7 +675,7 @@ syntax only.
 ## How It Works ##
 
 Under the hood, `ASSERT_EXIT()` spawns a new process and executes the
-death test statement in that process. The details of of how precisely
+death test statement in that process. The details of how precisely
 that happens depend on the platform and the variable
 `::testing::GTEST_FLAG(death_test_style)` (which is initialized from the
 command-line flag `--gtest_death_test_style`).
@@ -1344,7 +1344,7 @@ TYPED_TEST(FooTest, DoesBlah) {
 TYPED_TEST(FooTest, HasPropertyA) { ... }
 ```
 
-You can see `samples/sample6_unittest.cc` for a complete example.
+You can see [`samples/sample6_unittest.cc`](../samples/sample6_unittest.cc) for a complete example.
 
 _Availability:_ Linux, Windows (requires MSVC 8.0 or above), Mac;
 since version 1.1.0.
@@ -1444,7 +1444,7 @@ absolutely have to test non-public interface code though, you can. There are
 two cases to consider:
 
   * Static functions (_not_ the same as static member functions!) or unnamed namespaces, and
-  * Private or protected class members
+  * Private or protected class members.
 
 ## Static Functions ##
 
@@ -1551,7 +1551,7 @@ exception, you could catch the exception and assert on it.  But Google
 Test doesn't use exceptions, so how do we test that a piece of code
 generates an expected failure?
 
-`"gtest/gtest-spi.h"` contains some constructs to do this.  After 
+`"gtest/gtest-spi.h"` contains some constructs to do this.  After
 `#include`ing this header, you can use
 
 | `EXPECT_FATAL_FAILURE(`_statement, substring_`);` |

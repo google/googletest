@@ -216,7 +216,7 @@ pkginclude_internal_HEADERS = \
 lib_libgtest_main_la_SOURCES = src/gtest_main.cc
 lib_libgtest_main_la_LIBADD = lib/libgtest.la
 
-# Bulid rules for samples and tests. Automake's naming for some of
+# Build rules for samples and tests. Automake's naming for some of
 # these variables isn't terribly obvious, so this is a brief
 # reference:
 #
