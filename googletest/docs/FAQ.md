@@ -960,12 +960,11 @@ Have you read a
 the Google Test Primer page?
 
 ## I want to use Google Test with Visual Studio but don't know where to start. ##
-Many people are in your position and one of the posted his solution to
-our mailing list.
+Many people are in your position and one of them posted his solution to our mailing list.
 
 ## I am seeing compile errors mentioning std::type\_traits when I try to use Google Test on Solaris. ##
 Google Test uses parts of the standard C++ library that SunStudio does not support.
-Our users reported success using alternative implementations. Try running the build after runing this commad:
+Our users reported success using alternative implementations. Try running the build after running this command:
 
 `export CC=cc CXX=CC CXXFLAGS='-library=stlport4'`
 
@@ -1015,7 +1014,7 @@ instead of
 ```
 in order to define a test.
 
-Currently, the following `TEST`, `FAIL`, `SUCCEED`, and the basic comparison assertion macros can have alternative names. You can see the full list of covered macros [here](http://www.google.com/codesearch?q=if+!GTEST_DONT_DEFINE_\w%2B+package:http://googletest\.googlecode\.com+file:/include/gtest/gtest.h). More information can be found in the "Avoiding Macro Name Clashes" section of the README file.
+Currently, the following `TEST`, `FAIL`, `SUCCEED`, and the basic comparison assertion macros can have . You can see the full list of covered macros [here](../include/gtest/gtest.h). More information can be found in the "Avoiding Macro Name Clashes" section of the README file.
 
 
 ## Is it OK if I have two separate `TEST(Foo, Bar)` test methods defined in different namespaces? ##
@@ -1060,6 +1059,12 @@ TEST_F(CoolTest, DoSomething) {
 
 If you try to build Google Test's Xcode project with Xcode 4.0 or later, you may encounter an error message that looks like
 "Missing SDK in target gtest\_framework: /Developer/SDKs/MacOSX10.4u.sdk". That means that Xcode does not support the SDK the project is targeting. See the Xcode section in the [README](../README.md) file on how to resolve this.
+
+## How do I easily discover the flags needed for GoogleTest? ##
+
+GoogleTest (and GoogleMock) now support discovering all necessary flags using pkg-config.
+See the [pkg-config guide](Pkgconfig.md) on how you can easily discover all compiler and
+linker flags using pkg-config.
 
 ## My question is not covered in your FAQ! ##
 

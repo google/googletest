@@ -18,8 +18,9 @@ You must always put a mock method definition (`MOCK_METHOD*`) in a
 `public:` section of the mock class, regardless of the method being
 mocked being `public`, `protected`, or `private` in the base class.
 This allows `ON_CALL` and `EXPECT_CALL` to reference the mock function
-from outside of the mock class.  (Yes, C++ allows a subclass to change
-the access level of a virtual function in the base class.)  Example:
+from outside of the mock class.  (Yes, C++ allows a subclass to specify
+a different access level than the base class on a virtual function.)
+Example:
 
 ```
 class Foo {
@@ -1681,7 +1682,7 @@ This also works when the argument is an output iterator:
 
 ```
 using ::testing::_;
-using ::testing::SeArrayArgument;
+using ::testing::SetArrayArgument;
 
 class MockRolodex : public Rolodex {
  public:
@@ -2366,7 +2367,7 @@ Now there’s one topic we haven’t covered: how do you set expectations on `Sh
   // When one calls ShareBuzz() on the MockBuzzer like this, the call is
   // forwarded to DoShareBuzz(), which is mocked.  Therefore this statement
   // will trigger the above EXPECT_CALL.
-  mock_buzzer_.ShareBuzz(MakeUnique&lt;Buzz&gt;(AccessLevel::kInternal),
+  mock_buzzer_.ShareBuzz(MakeUnique<Buzz>(AccessLevel::kInternal),
                          ::base::Now());
 ```
 
@@ -2405,7 +2406,7 @@ Now, the mock `DoShareBuzz()` method is free to save the buzz argument for later
 ```
   std::unique_ptr<Buzz> intercepted_buzz;
   EXPECT_CALL(mock_buzzer_, DoShareBuzz(NotNull(), _))
-      .WillOnce(Invoke([&amp;intercepted_buzz](Buzz* buzz, Time timestamp) {
+      .WillOnce(Invoke([&intercepted_buzz](Buzz* buzz, Time timestamp) {
         // Save buzz in intercepted_buzz for analysis later.
         intercepted_buzz.reset(buzz);
         return false;
