@@ -32,7 +32,7 @@ list can help you decide whether it is for you too.
     * expand your testing vocabulary by defining [custom predicates](AdvancedGuide.md#predicate-assertions-for-better-error-messages),
     * teach Google Test how to [print your types](AdvancedGuide.md#teaching-google-test-how-to-print-your-values),
     * define your own testing macros or utilities and verify them using Google Test's [Service Provider Interface](AdvancedGuide.md#catching-failures), and
-    * reflect on the test cases or change the test output format by intercepting the [test events](AdvancedGuide.md#extending-google-test-by-handling-test-events).
+    * reflect on the test suites or change the test output format by intercepting the [test events](AdvancedGuide.md#extending-google-test-by-handling-test-events).
 
 ## I'm getting warnings when compiling Google Test.  Would you fix them? ##
 
@@ -48,7 +48,7 @@ It is not always possible to make Google Test warning-free for everyone.  Or, it
 
 If you see warnings when compiling Google Test, we suggest that you use the `-isystem` flag (assuming your are using GCC) to mark Google Test headers as system headers.  That'll suppress warnings from Google Test headers.
 
-## Why should not test case names and test names contain underscore? ##
+## Why should not test suite names and test names contain underscore? ##
 
 Underscore (`_`) is special, as C++ reserves the following to be used by
 the compiler and the standard library:
@@ -60,21 +60,21 @@ User code is _prohibited_ from using such identifiers.
 
 Now let's look at what this means for `TEST` and `TEST_F`.
 
-Currently `TEST(TestCaseName, TestName)` generates a class named
-`TestCaseName_TestName_Test`.  What happens if `TestCaseName` or `TestName`
+Currently `TEST(TestSuiteName, TestName)` generates a class named
+`TestSuiteName_TestName_Test`.  What happens if `TestSuiteName` or `TestName`
 contains `_`?
 
-  1. If `TestCaseName` starts with an `_` followed by an upper-case letter (say, `_Foo`), we end up with `_Foo_TestName_Test`, which is reserved and thus invalid.
-  1. If `TestCaseName` ends with an `_` (say, `Foo_`), we get `Foo__TestName_Test`, which is invalid.
-  1. If `TestName` starts with an `_` (say, `_Bar`), we get `TestCaseName__Bar_Test`, which is invalid.
-  1. If `TestName` ends with an `_` (say, `Bar_`), we get `TestCaseName_Bar__Test`, which is invalid.
+  1. If `TestSuiteName` starts with an `_` followed by an upper-case letter (say, `_Foo`), we end up with `_Foo_TestName_Test`, which is reserved and thus invalid.
+  1. If `TestSuiteName` ends with an `_` (say, `Foo_`), we get `Foo__TestName_Test`, which is invalid.
+  1. If `TestName` starts with an `_` (say, `_Bar`), we get `TestSuiteName__Bar_Test`, which is invalid.
+  1. If `TestName` ends with an `_` (say, `Bar_`), we get `TestSuiteName_Bar__Test`, which is invalid.
 
-So clearly `TestCaseName` and `TestName` cannot start or end with `_`
-(Actually, `TestCaseName` can start with `_` -- as long as the `_` isn't
+So clearly `TestSuiteName` and `TestName` cannot start or end with `_`
+(Actually, `TestSuiteName` can start with `_` -- as long as the `_` isn't
 followed by an upper-case letter.  But that's getting complicated.  So
 for simplicity we just say that it cannot start with `_`.).
 
-It may seem fine for `TestCaseName` and `TestName` to contain `_` in the
+It may seem fine for `TestSuiteName` and `TestName` to contain `_` in the
 middle.  However, consider this:
 ``` cpp
 TEST(Time, Flies_Like_An_Arrow) { ... }
@@ -84,7 +84,7 @@ TEST(Time_Flies, Like_An_Arrow) { ... }
 Now, the two `TEST`s will both generate the same class
 (`Time_Files_Like_An_Arrow_Test`).  That's not good.
 
-So for simplicity, we just ask the users to avoid `_` in `TestCaseName`
+So for simplicity, we just ask the users to avoid `_` in `TestSuiteName`
 and `TestName`.  The rule is more constraining than necessary, but it's
 simple and easy to remember.  It also gives Google Test some wiggle
 room in case its implementation needs to change in the future.
@@ -363,15 +363,15 @@ area soon.
 
 Yes.
 
-Each test fixture has a corresponding and same named test case. This means only
-one test case can use a particular fixture. Sometimes, however, multiple test
-cases may want to use the same or slightly different fixtures. For example, you
-may want to make sure that all of a GUI library's test cases don't leak
+Each test fixture has a corresponding and same named test suite. This means only
+one test suite can use a particular fixture. Sometimes, however, multiple test
+suites may want to use the same or slightly different fixtures. For example, you
+may want to make sure that all of a GUI library's test suites don't leak
 important system resources like fonts and brushes.
 
-In Google Test, you share a fixture among test cases by putting the shared
+In Google Test, you share a fixture among test suites by putting the shared
 logic in a base test fixture, then deriving from that base a separate fixture
-for each test case that wants to use this common logic. You then use `TEST_F()`
+for each test suite that wants to use this common logic. You then use `TEST_F()`
 to write tests using each derived fixture.
 
 Typically, your code looks like this:
@@ -577,7 +577,7 @@ it.
 C++ is case-sensitive. It should be spelled as `SetUp()`.  Did you
 spell it as `Setup()`?
 
-Similarly, sometimes people spell `SetUpTestCase()` as `SetupTestCase()` and
+Similarly, sometimes people spell `SetUpTestSuite()` as `SetupTestSuite()` and
 wonder why it's never called.
 
 ## How do I jump to the line of a failure in Emacs directly? ##
@@ -587,7 +587,7 @@ IDEs, like acme and XCode. If a Google Test message is in a compilation buffer
 in Emacs, then it's clickable. You can now hit `enter` on a message to jump to
 the corresponding source code, or use `C-x `` to jump to the next failure.
 
-## I have several test cases which share the same test fixture logic, do I have to define a new test fixture class for each of them? This seems pretty tedious. ##
+## I have several test suites which share the same test fixture logic, do I have to define a new test fixture class for each of them? This seems pretty tedious. ##
 
 You don't have to. Instead of
 
@@ -635,7 +635,7 @@ example:
 There are several good reasons:
   1. It's likely your test needs to change the states of its global variables. This makes it difficult to keep side effects from escaping one test and contaminating others, making debugging difficult. By using fixtures, each test has a fresh set of variables that's different (but with the same names). Thus, tests are kept independent of each other.
   1. Global variables pollute the global namespace.
-  1. Test fixtures can be reused via subclassing, which cannot be done easily with global variables. This is useful if many test cases have something in common.
+  1. Test fixtures can be reused via subclassing, which cannot be done easily with global variables. This is useful if many test suites have something in common.
 
 ## How do I test private class members without writing FRIEND\_TEST()s? ##
 
@@ -872,17 +872,17 @@ The new NPTL thread library doesn't suffer from this problem, as it doesn't
 create a manager thread. However, if you don't control which machine your test
 runs on, you shouldn't depend on this.
 
-## Why does Google Test require the entire test case, instead of individual tests, to be named FOODeathTest when it uses ASSERT\_DEATH? ##
+## Why does Google Test require the entire test suite, instead of individual tests, to be named FOODeathTest when it uses ASSERT\_DEATH? ##
 
-Google Test does not interleave tests from different test cases. That is, it
-runs all tests in one test case first, and then runs all tests in the next test
-case, and so on. Google Test does this because it needs to set up a test case
+Google Test does not interleave tests from different test suites. That is, it
+runs all tests in one test suite first, and then runs all tests in the next test
+suite, and so on. Google Test does this because it needs to set up a test suite
 before the first test in it is run, and tear it down afterwords. Splitting up
-the test case would require multiple set-up and tear-down processes, which is
+the test suite would require multiple set-up and tear-down processes, which is
 inefficient and makes the semantics unclean.
 
 If we were to determine the order of tests based on test name instead of test
-case name, then we would have a problem with the following situation:
+suite name, then we would have a problem with the following situation:
 
 ``` cpp
 TEST_F(FooTest, AbcDeathTest) { ... }
@@ -893,13 +893,13 @@ TEST_F(BarTest, Xyz) { ... }
 ```
 
 Since `FooTest.AbcDeathTest` needs to run before `BarTest.Xyz`, and we don't
-interleave tests from different test cases, we need to run all tests in the
-`FooTest` case before running any test in the `BarTest` case. This contradicts
+interleave tests from different test suites, we need to run all tests in the
+`FooTest` suite before running any test in the `BarTest` suite. This contradicts
 with the requirement to run `BarTest.DefDeathTest` before `FooTest.Uvw`.
 
-## But I don't like calling my entire test case FOODeathTest when it contains both death tests and non-death tests. What do I do? ##
+## But I don't like calling my entire test suite FOODeathTest when it contains both death tests and non-death tests. What do I do? ##
 
-You don't have to, but if you like, you may split up the test case into
+You don't have to, but if you like, you may split up the test suite into
 `FooTest` and `FooDeathTest`, where the names make it clear that they are
 related:
 
@@ -1021,7 +1021,7 @@ Currently, the following `TEST`, `FAIL`, `SUCCEED`, and the basic comparison ass
 
 Yes.
 
-The rule is **all test methods in the same test case must use the same fixture class**. This means that the following is **allowed** because both tests use the same fixture class (`::testing::Test`).
+The rule is **all test methods in the same test suite must use the same fixture class**. This means that the following is **allowed** because both tests use the same fixture class (`::testing::Test`).
 
 ``` cpp
 namespace foo {
@@ -1037,7 +1037,7 @@ TEST(CoolTest, DoSomething) {
 }  // namespace foo
 ```
 
-However, the following code is **not allowed** and will produce a runtime error from Google Test because the test methods are using different test fixture classes with the same test case name.
+However, the following code is **not allowed** and will produce a runtime error from Google Test because the test methods are using different test fixture classes with the same test suite name.
 
 ``` cpp
 namespace foo {
