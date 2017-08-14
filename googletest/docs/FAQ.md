@@ -1060,6 +1060,12 @@ TEST_F(CoolTest, DoSomething) {
 If you try to build Google Test's Xcode project with Xcode 4.0 or later, you may encounter an error message that looks like
 "Missing SDK in target gtest\_framework: /Developer/SDKs/MacOSX10.4u.sdk". That means that Xcode does not support the SDK the project is targeting. See the Xcode section in the [README](../README.md) file on how to resolve this.
 
+## How do I easily discover the flags needed for GoogleTest? ##
+
+GoogleTest (and GoogleMock) now support discovering all necessary flags using pkg-config.
+See the [pkg-config guide](Pkgconfig.md) on how you can easily discover all compiler and
+linker flags using pkg-config.
+
 ## My question is not covered in your FAQ! ##
 
 If you cannot find the answer to your question in this FAQ, there are
