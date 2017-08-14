@@ -93,7 +93,7 @@ const int kStdErrFileno = STDERR_FILENO;
 
 namespace {
 template <typename T>
-T ReadProcFileField(const string& filename, int field) {
+T ReadProcFileField(const std::string& filename, int field) {
   std::string dummy;
   std::ifstream file(filename.c_str());
   while (field-- > 0) {
@@ -107,7 +107,7 @@ T ReadProcFileField(const string& filename, int field) {
 
 // Returns the number of active threads, or 0 when there is an error.
 size_t GetThreadCount() {
-  const string filename =
+  const std::string filename =
       (Message() << "/proc/" << getpid() << "/stat").GetString();
   return ReadProcFileField<int>(filename, 19);
 }
@@ -496,7 +496,7 @@ class ThreadLocalRegistryImpl {
                                  FALSE,
                                  thread_id);
     GTEST_CHECK_(thread != NULL);
-    // We need to to pass a valid thread ID pointer into CreateThread for it
+    // We need to pass a valid thread ID pointer into CreateThread for it
     // to work correctly under Win98.
     DWORD watcher_thread_id;
     HANDLE watcher_thread = ::CreateThread(
@@ -1054,24 +1054,6 @@ std::string GetCapturedStderr() {
 }
 
 #endif  // GTEST_HAS_STREAM_REDIRECTION
-
-std::string TempDir() {
-#if GTEST_OS_WINDOWS_MOBILE
-  return "\\temp\\";
-#elif GTEST_OS_WINDOWS
-  const char* temp_dir = posix::GetEnv("TEMP");
-  if (temp_dir == NULL || temp_dir[0] == '\0')
-    return "\\temp\\";
-  else if (temp_dir[strlen(temp_dir) - 1] == '\\')
-    return temp_dir;
-  else
-    return std::string(temp_dir) + "\\";
-#elif GTEST_OS_LINUX_ANDROID
-  return "/sdcard/";
-#else
-  return "/tmp/";
-#endif  // GTEST_OS_WINDOWS_MOBILE
-}
 
 size_t GetFileSize(FILE* file) {
   fseek(file, 0, SEEK_END);
