@@ -5387,8 +5387,70 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, CodeLocationForTYPEDTESTP, int);
 
 #undef VERIFY_CODE_LOCATION
 
-// Tests setting up and tearing down a test case.
+// Tests setting up and tearing down a test suite.
 
+class SetUpTestSuiteTest : public Test {
+ protected:
+  // This will be called once before the first test in this test suite
+  // is run.
+  static void SetUpTestSuite() {
+    printf("Setting up the test suite . . .\n");
+
+    // Initializes some shared resource.  In this simple example, we
+    // just create a C string.  More complex stuff can be done if
+    // desired.
+    shared_resource_ = "123";
+
+    // Increments the number of test suites that have been set up.
+    counter_++;
+
+    // SetUpTestSuite() should be called only once.
+    EXPECT_EQ(1, counter_);
+  }
+
+  // This will be called once after the last test in this test suite is
+  // run.
+  static void TearDownTestSuite() {
+    printf("Tearing down the test suite . . .\n");
+
+    // Decrements the number of test suites that have been set up.
+    counter_--;
+
+    // TearDownTestSuite() should be called only once.
+    EXPECT_EQ(0, counter_);
+
+    // Cleans up the shared resource.
+    shared_resource_ = NULL;
+  }
+
+  // This will be called before each test in this test suite.
+  virtual void SetUp() {
+    // SetUpTestSuite() should be called only once, so counter_ should
+    // always be 1.
+    EXPECT_EQ(1, counter_);
+  }
+
+  // Number of test suites that have been set up.
+  static int counter_;
+
+  // Some resource to be shared by all tests in this test suite.
+  static const char* shared_resource_;
+};
+
+int SetUpTestSuiteTest::counter_ = 0;
+const char* SetUpTestSuiteTest::shared_resource_ = NULL;
+
+// A test that uses the shared resource.
+TEST_F(SetUpTestSuiteTest, Test1) {
+  EXPECT_STRNE(NULL, shared_resource_);
+}
+
+// Another test that uses the shared resource.
+TEST_F(SetUpTestSuiteTest, Test2) {
+  EXPECT_STREQ("123", shared_resource_);
+}
+
+#if GTEST_HAS_TESTCASE
 class SetUpTestCaseTest : public Test {
  protected:
   // This will be called once before the first test in this test case
@@ -5449,6 +5511,7 @@ TEST_F(SetUpTestCaseTest, Test1) {
 TEST_F(SetUpTestCaseTest, Test2) {
   EXPECT_STREQ("123", shared_resource_);
 }
+#endif
 
 // The InitGoogleTestTest test case tests testing::InitGoogleTest().
 

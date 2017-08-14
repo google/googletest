@@ -620,31 +620,51 @@ class GTEST_API_ UnitTestImpl {
   // trace but Bar() and CurrentOsStackTraceExceptTop() won't.
   std::string CurrentOsStackTraceExceptTop(int skip_count) GTEST_NO_INLINE_;
 
-  // Finds and returns a TestCase with the given name.  If one doesn't
+  // Finds and returns a TestSuite with the given name.  If one doesn't
   // exist, creates one and returns it.
   //
   // Arguments:
   //
-  //   test_case_name: name of the test case
-  //   type_param:     the name of the test's type parameter, or NULL if
-  //                   this is not a typed or a type-parameterized test.
-  //   set_up_tc:      pointer to the function that sets up the test case
-  //   tear_down_tc:   pointer to the function that tears down the test case
-  TestCase* GetTestCase(const char* test_case_name,
+  //   test_suite_name: name of the test case
+  //   type_param:      the name of the test's type parameter, or NULL if
+  //                    this is not a typed or a type-parameterized test.
+  //   set_up_ts:       pointer to the function that sets up the test suite
+  //   tear_down_ts:    pointer to the function that tears down the test suite
+  //   set_up_tc:       pointer to the function that sets up the test case
+  //                    (for backward compatibility)
+  //   tear_down_tc:    pointer to the function that tears down the test case
+  //                    (for backward compatibility)
+  TestCase* GetTestCase(const char* test_suite_name,
                         const char* type_param,
-                        Test::SetUpTestCaseFunc set_up_tc,
-                        Test::TearDownTestCaseFunc tear_down_tc);
+                        Test::SetUpTestSuiteFunc set_up_ts,
+                        Test::TearDownTestSuiteFunc tear_down_ts
+#if GTEST_HAS_TESTCASE
+                        ,
+                        Test::SetUpTestCaseFunc set_up_tc = NULL,
+                        Test::TearDownTestCaseFunc tear_down_tc = NULL
+#endif
+                        );
 
   // Adds a TestInfo to the unit test.
   //
   // Arguments:
   //
+  //   set_up_ts:    pointer to the function that sets up the test suite
+  //   tear_down_ts: pointer to the function that tears down the test suite
   //   set_up_tc:    pointer to the function that sets up the test case
+  //                 (for backward compatibility)
   //   tear_down_tc: pointer to the function that tears down the test case
+  //                 (for backward compatibility)
   //   test_info:    the TestInfo object
-  void AddTestInfo(Test::SetUpTestCaseFunc set_up_tc,
-                   Test::TearDownTestCaseFunc tear_down_tc,
-                   TestInfo* test_info) {
+  void AddTestInfo(Test::SetUpTestSuiteFunc set_up_ts,
+                   Test::TearDownTestSuiteFunc tear_down_ts,
+                   TestInfo* test_info
+#if GTEST_HAS_TESTCASE
+                   // backward compatibility
+                   , Test::SetUpTestCaseFunc set_up_tc,
+                   Test::TearDownTestCaseFunc tear_down_tc
+#endif
+                   ) {
     // In order to support thread-safe death tests, we need to
     // remember the original working directory when the test program
     // was first invoked.  We cannot do this in RUN_ALL_TESTS(), as
@@ -660,9 +680,16 @@ class GTEST_API_ UnitTestImpl {
 
     GetTestCase(test_info->test_case_name(),
                 test_info->type_param(),
-                set_up_tc,
-                tear_down_tc)->AddTestInfo(test_info);
+                set_up_ts,
+                tear_down_ts
+#if GTEST_HAS_TESTCASE
+                // backward compatibility
+                , set_up_tc,
+                tear_down_tc
+#endif
+                )->AddTestInfo(test_info);
   }
+
 
 #if GTEST_HAS_PARAM_TEST
   // Returns ParameterizedTestCaseRegistry object used to keep track of

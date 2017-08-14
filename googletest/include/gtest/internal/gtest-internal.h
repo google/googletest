@@ -497,9 +497,15 @@ GTEST_API_ AssertionResult IsHRESULTFailure(const char* expr,
 
 #endif  // GTEST_OS_WINDOWS
 
+// Types of SetUpTestSuite() and TearDownTestSuite() functions.
+typedef void (*SetUpTestSuiteFunc)();
+typedef void (*TearDownTestSuiteFunc)();
+#if GTEST_HAS_TESTCASE
+// Backward compatibility:
 // Types of SetUpTestCase() and TearDownTestCase() functions.
-typedef void (*SetUpTestCaseFunc)();
-typedef void (*TearDownTestCaseFunc)();
+typedef SetUpTestSuiteFunc SetUpTestCaseFunc;
+typedef TearDownTestSuiteFunc TearDownTestCaseFunc;
+#endif
 
 struct CodeLocation {
   CodeLocation(const std::string& a_file, int a_line)
@@ -514,7 +520,7 @@ struct CodeLocation {
 //
 // Arguments:
 //
-//   test_case_name:   name of the test case
+//   test_suite_name:  name of the test suite
 //   name:             name of the test
 //   type_param        the name of the test's type parameter, or NULL if
 //                     this is not a typed or a type-parameterized test.
@@ -522,21 +528,31 @@ struct CodeLocation {
 //                     or NULL if this is not a type-parameterized test.
 //   code_location:    code location where the test is defined
 //   fixture_class_id: ID of the test fixture class
-//   set_up_tc:        pointer to the function that sets up the test case
-//   tear_down_tc:     pointer to the function that tears down the test case
+//   set_up_ts:        pointer to the function that sets up the test suite
+//   tear_down_ts:     pointer to the function that tears down the test suite
 //   factory:          pointer to the factory that creates a test object.
 //                     The newly created TestInfo instance will assume
 //                     ownership of the factory object.
+//   set_up_tc:        pointer to the function that sets up the test case
+//                     (for backward compatibility)
+//   tear_down_tc:     pointer to the function that tears down the test case
+//                     (for backward compatibility)
 GTEST_API_ TestInfo* MakeAndRegisterTestInfo(
-    const char* test_case_name,
+    const char* test_suite_name,
     const char* name,
     const char* type_param,
     const char* value_param,
     CodeLocation code_location,
     TypeId fixture_class_id,
-    SetUpTestCaseFunc set_up_tc,
-    TearDownTestCaseFunc tear_down_tc,
-    TestFactoryBase* factory);
+    SetUpTestSuiteFunc set_up_ts,
+    TearDownTestSuiteFunc tear_down_ts,
+    TestFactoryBase* factory
+#if GTEST_HAS_TESTCASE
+    // backward compatibility
+    , SetUpTestCaseFunc set_up_tc = NULL,
+    TearDownTestCaseFunc tear_down_tc = NULL
+    );
+#endif
 
 // If *pstr starts with the given prefix, modifies *pstr to be right
 // past the prefix and returns true; otherwise leaves *pstr unchanged
@@ -1212,28 +1228,59 @@ class NativeArray {
   test_case_name##_##test_name##_Test
 
 // Helper macro for defining tests.
-#define GTEST_TEST_(test_case_name, test_name, parent_class, parent_id)\
-class GTEST_TEST_CLASS_NAME_(test_case_name, test_name) : public parent_class {\
+#if GTEST_HAS_TESTCASE
+
+#define GTEST_TEST_(test_suite_name, test_name, parent_class, parent_id)\
+class GTEST_TEST_CLASS_NAME_(test_suite_name, test_name) : public parent_class {\
  public:\
-  GTEST_TEST_CLASS_NAME_(test_case_name, test_name)() {}\
+  GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)() {}\
  private:\
   virtual void TestBody();\
   static ::testing::TestInfo* const test_info_ GTEST_ATTRIBUTE_UNUSED_;\
   GTEST_DISALLOW_COPY_AND_ASSIGN_(\
-      GTEST_TEST_CLASS_NAME_(test_case_name, test_name));\
+      GTEST_TEST_CLASS_NAME_(test_suite_name, test_name));\
 };\
 \
-::testing::TestInfo* const GTEST_TEST_CLASS_NAME_(test_case_name, test_name)\
+::testing::TestInfo* const GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)\
   ::test_info_ =\
     ::testing::internal::MakeAndRegisterTestInfo(\
-        #test_case_name, #test_name, NULL, NULL, \
+        #test_suite_name, #test_name, NULL, NULL, \
         ::testing::internal::CodeLocation(__FILE__, __LINE__), \
         (parent_id), \
-        parent_class::SetUpTestCase, \
-        parent_class::TearDownTestCase, \
+        parent_class::SetUpTestSuite, \
+        parent_class::TearDownTestSuite, \
         new ::testing::internal::TestFactoryImpl<\
-            GTEST_TEST_CLASS_NAME_(test_case_name, test_name)>);\
-void GTEST_TEST_CLASS_NAME_(test_case_name, test_name)::TestBody()
+            GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)>, \
+        parent_class::SetUpTestCase, \
+        parent_class::TearDownTestCase);\
+void GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::TestBody()
+
+#else
+
+#define GTEST_TEST_(test_suite_name, test_name, parent_class, parent_id)\
+class GTEST_TEST_CLASS_NAME_(test_suite_name, test_name) : public parent_class {\
+ public:\
+  GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)() {}\
+ private:\
+  virtual void TestBody();\
+  static ::testing::TestInfo* const test_info_ GTEST_ATTRIBUTE_UNUSED_;\
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(\
+      GTEST_TEST_CLASS_NAME_(test_suite_name, test_name));\
+};\
+\
+::testing::TestInfo* const GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)\
+  ::test_info_ =\
+    ::testing::internal::MakeAndRegisterTestInfo(\
+        #test_suite_name, #test_name, NULL, NULL, \
+        ::testing::internal::CodeLocation(__FILE__, __LINE__), \
+        (parent_id), \
+        parent_class::SetUpTestSuite, \
+        parent_class::TearDownTestSuite, \
+        new ::testing::internal::TestFactoryImpl<\
+            GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)>);\
+void GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::TestBody()
+
+#endif
 
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
 

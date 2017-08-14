@@ -2533,26 +2533,41 @@ namespace internal {
 //                     or NULL if this is not a value-parameterized test.
 //   code_location:    code location where the test is defined
 //   fixture_class_id: ID of the test fixture class
+//   set_up_ts:        pointer to the function that sets up the test suite
+//   tear_down_ts:     pointer to the function that tears down the test suite
 //   set_up_tc:        pointer to the function that sets up the test case
+//                     (for backward compatibility)
 //   tear_down_tc:     pointer to the function that tears down the test case
+//                     (for backward compatibility)
 //   factory:          pointer to the factory that creates a test object.
 //                     The newly created TestInfo instance will assume
 //                     ownership of the factory object.
 TestInfo* MakeAndRegisterTestInfo(
-    const char* test_case_name,
+    const char* test_suite_name,
     const char* name,
     const char* type_param,
     const char* value_param,
     CodeLocation code_location,
     TypeId fixture_class_id,
-    SetUpTestCaseFunc set_up_tc,
-    TearDownTestCaseFunc tear_down_tc,
-    TestFactoryBase* factory) {
-  TestInfo* const test_info =
-      new TestInfo(test_case_name, name, type_param, value_param,
-                   code_location, fixture_class_id, factory);
-  GetUnitTestImpl()->AddTestInfo(set_up_tc, tear_down_tc, test_info);
-  return test_info;
+    SetUpTestSuiteFunc set_up_ts,
+    TearDownTestSuiteFunc tear_down_ts,
+    TestFactoryBase* factory
+#if GTEST_HAS_TESTCASE
+    // backward compatibility
+    , Test::SetUpTestCaseFunc set_up_tc,
+    Test::TearDownTestCaseFunc tear_down_tc
+  #endif
+    ) {
+    TestInfo* const test_info =
+        new TestInfo(test_suite_name, name, type_param, value_param,
+                     code_location, fixture_class_id, factory);
+    GetUnitTestImpl()->AddTestInfo(set_up_ts, tear_down_ts, test_info
+#if GTEST_HAS_TESTCASE
+                                   // backward compatibility
+                                   , set_up_tc, tear_down_tc
+#endif
+                                   );
+    return test_info;
 }
 
 #if GTEST_HAS_PARAM_TEST
@@ -2710,18 +2725,27 @@ int TestCase::total_test_count() const {
 //
 // Arguments:
 //
-//   name:         name of the test case
+//   name:         name of the test suite
 //   a_type_param: the name of the test case's type parameter, or NULL if
 //                 this is not a typed or a type-parameterized test case.
 //   set_up_tc:    pointer to the function that sets up the test case
 //   tear_down_tc: pointer to the function that tears down the test case
 TestCase::TestCase(const char* a_name, const char* a_type_param,
-                   Test::SetUpTestCaseFunc set_up_tc,
-                   Test::TearDownTestCaseFunc tear_down_tc)
+                   Test::SetUpTestSuiteFunc set_up_ts,
+                   Test::TearDownTestSuiteFunc tear_down_ts
+#if GTEST_HAS_TESTCASE
+                   , Test::SetUpTestCaseFunc set_up_tc,
+                   Test::TearDownTestCaseFunc tear_down_tc
+#endif
+                   )
     : name_(a_name),
       type_param_(a_type_param ? new std::string(a_type_param) : NULL),
+      set_up_ts_(set_up_ts),
+      tear_down_ts_(tear_down_ts),
+#if GTEST_HAS_TESTCASE
       set_up_tc_(set_up_tc),
       tear_down_tc_(tear_down_tc),
+#endif
       should_run_(false),
       elapsed_time_(0) {
 }
@@ -4522,29 +4546,43 @@ class TestCaseNameIs {
 //
 // Arguments:
 //
-//   test_case_name: name of the test case
-//   type_param:     the name of the test case's type parameter, or NULL if
-//                   this is not a typed or a type-parameterized test case.
-//   set_up_tc:      pointer to the function that sets up the test case
-//   tear_down_tc:   pointer to the function that tears down the test case
-TestCase* UnitTestImpl::GetTestCase(const char* test_case_name,
+//   test_suite_name: name of the test case
+//   type_param:      the name of the test's type parameter, or NULL if
+//                    this is not a typed or a type-parameterized test.
+//   set_up_ts:       pointer to the function that sets up the test suite
+//   tear_down_ts:    pointer to the function that tears down the test suite
+//   set_up_tc:       pointer to the function that sets up the test case
+//                    (for backward compatibility)
+//   tear_down_tc:    pointer to the function that tears down the test case
+//                    (for backward compatibility)
+TestCase* UnitTestImpl::GetTestCase(const char* test_suite_name,
                                     const char* type_param,
+                                    Test::SetUpTestSuiteFunc set_up_ts,
+                                    Test::TearDownTestSuiteFunc tear_down_ts
+#if GTEST_HAS_TESTCASE
+                                    ,
                                     Test::SetUpTestCaseFunc set_up_tc,
-                                    Test::TearDownTestCaseFunc tear_down_tc) {
+                                    Test::TearDownTestCaseFunc tear_down_tc
+#endif
+                                    ) {
   // Can we find a TestCase with the given name?
   const std::vector<TestCase*>::const_iterator test_case =
       std::find_if(test_cases_.begin(), test_cases_.end(),
-                   TestCaseNameIs(test_case_name));
+                   TestCaseNameIs(test_suite_name));
 
   if (test_case != test_cases_.end())
     return *test_case;
 
   // No.  Let's create one.
   TestCase* const new_test_case =
-      new TestCase(test_case_name, type_param, set_up_tc, tear_down_tc);
+      new TestCase(test_suite_name, type_param, set_up_ts, tear_down_ts
+#if GTEST_HAS_TESTCASE
+                   , set_up_tc, tear_down_tc
+#endif
+                   );
 
   // Is this a death test case?
-  if (internal::UnitTestOptions::MatchesFilter(test_case_name,
+  if (internal::UnitTestOptions::MatchesFilter(test_suite_name,
                                                kDeathTestCaseFilter)) {
     // Yes.  Inserts the test case after the last death test case
     // defined so far.  This only works when the test cases haven't

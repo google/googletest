@@ -373,28 +373,41 @@ class GTEST_API_ Test {
   friend class TestInfo;
 
   // Defines types for pointers to functions that set up and tear down
-  // a test case.
-  typedef internal::SetUpTestCaseFunc SetUpTestCaseFunc;
-  typedef internal::TearDownTestCaseFunc TearDownTestCaseFunc;
+  // a test suite.
+  typedef internal::SetUpTestSuiteFunc SetUpTestSuiteFunc;
+  typedef internal::TearDownTestSuiteFunc TearDownTestSuiteFunc;
+
+#if GTEST_HAS_TESTCASE
+  // Formerly, the term TestCase was used for what is named TestSuite now.
+  typedef SetUpTestSuiteFunc SetUpTestCaseFunc;
+  typedef TearDownTestSuiteFunc TearDownTestCaseFunc;
+#endif
 
   // The d'tor is virtual as we intend to inherit from Test.
   virtual ~Test();
 
-  // Sets up the stuff shared by all tests in this test case.
+  // Sets up the stuff shared by all tests in this test suite.
   //
-  // Google Test will call Foo::SetUpTestCase() before running the first
-  // test in test case Foo.  Hence a sub-class can define its own
-  // SetUpTestCase() method to shadow the one defined in the super
+  // Google Test will call Foo::SetUpTestSuite() before running the first
+  // test in test suite Foo.  Hence a sub-class can define its own
+  // SetUpTestSuite() method to shadow the one defined in the super
   // class.
-  static void SetUpTestCase() {}
+  static void SetUpTestSuite() {}
 
-  // Tears down the stuff shared by all tests in this test case.
+  // Tears down the stuff shared by all tests in this test suite.
   //
-  // Google Test will call Foo::TearDownTestCase() after running the last
-  // test in test case Foo.  Hence a sub-class can define its own
-  // TearDownTestCase() method to shadow the one defined in the super
+  // Google Test will call Foo::TearDownTestSuite() after running the last
+  // test in test suite Foo.  Hence a sub-class can define its own
+  // TearDownTestSuite() method to shadow the one defined in the super
   // class.
+  static void TearDownTestSuite() {}
+
+#if GTEST_HAS_TESTCASE
+  // For backward compatibility, provide the former *TestCase functions
+  // in parallel to the new *TestSuite.
+  static void SetUpTestCase() {}
   static void TearDownTestCase() {}
+#endif
 
   // Returns true iff the current test has a fatal failure.
   static bool HasFatalFailure();
@@ -713,15 +726,21 @@ class GTEST_API_ TestInfo {
   friend class internal::UnitTestImpl;
   friend class internal::StreamingListenerTest;
   friend TestInfo* internal::MakeAndRegisterTestInfo(
-      const char* test_case_name,
+      const char* test_suite_name,
       const char* name,
       const char* type_param,
       const char* value_param,
       internal::CodeLocation code_location,
       internal::TypeId fixture_class_id,
-      Test::SetUpTestCaseFunc set_up_tc,
-      Test::TearDownTestCaseFunc tear_down_tc,
-      internal::TestFactoryBase* factory);
+      Test::SetUpTestSuiteFunc set_up_ts,
+      Test::TearDownTestSuiteFunc tear_down_ts,
+      internal::TestFactoryBase* factory
+#if GTEST_HAS_TESTCASE
+      // backward compatibility
+      , Test::SetUpTestCaseFunc set_up_tc,
+      Test::TearDownTestCaseFunc tear_down_tc
+#endif
+          );
 
   // Constructs a TestInfo object. The newly constructed instance assumes
   // ownership of the factory object.
@@ -784,14 +803,23 @@ class GTEST_API_ TestCase {
   //
   // Arguments:
   //
-  //   name:         name of the test case
+  //   name:         name of the test suite
   //   a_type_param: the name of the test's type parameter, or NULL if
   //                 this is not a type-parameterized test.
+  //   set_up_ts:    pointer to the function that sets up the test suite
+  //   tear_down_ts: pointer to the function that tears down the test suite
   //   set_up_tc:    pointer to the function that sets up the test case
+  //                 (for backward compatibility)
   //   tear_down_tc: pointer to the function that tears down the test case
+  //                 (for backward compatibility)
   TestCase(const char* name, const char* a_type_param,
-           Test::SetUpTestCaseFunc set_up_tc,
-           Test::TearDownTestCaseFunc tear_down_tc);
+           Test::SetUpTestSuiteFunc set_up_ts,
+           Test::TearDownTestSuiteFunc tear_down_ts
+#if GTEST_HAS_TESTCASE
+           , Test::SetUpTestCaseFunc set_up_tc = NULL,
+           Test::TearDownTestCaseFunc tear_down_tc = NULL
+#endif
+           );
 
   // Destructor of TestCase.
   virtual ~TestCase();
@@ -884,11 +912,25 @@ class GTEST_API_ TestCase {
 
   // Runs SetUpTestCase() for this TestCase.  This wrapper is needed
   // for catching exceptions thrown from SetUpTestCase().
-  void RunSetUpTestCase() { (*set_up_tc_)(); }
+  void RunSetUpTestCase() {
+    (*set_up_ts_)();
+#if GTEST_HAS_TESTCASE
+    // for backward compatibility
+    if(set_up_tc_)
+      (*set_up_tc_)();
+#endif
+  }
 
   // Runs TearDownTestCase() for this TestCase.  This wrapper is
   // needed for catching exceptions thrown from TearDownTestCase().
-  void RunTearDownTestCase() { (*tear_down_tc_)(); }
+  void RunTearDownTestCase() {
+#if GTEST_HAS_TESTCASE
+    // for backward compatibility
+    if(tear_down_tc_)
+      (*tear_down_tc_)();
+#endif
+    (*tear_down_ts_)();
+  }
 
   // Returns true iff test passed.
   static bool TestPassed(const TestInfo* test_info) {
@@ -939,10 +981,17 @@ class GTEST_API_ TestCase {
   // shuffling and restoring the test order.  The i-th element in this
   // vector is the index of the i-th test in the shuffled test list.
   std::vector<int> test_indices_;
+  // Pointer to the function that sets up the test suite.
+  Test::SetUpTestCaseFunc set_up_ts_;
+  // Pointer to the function that tears down the test suite.
+  Test::TearDownTestCaseFunc tear_down_ts_;
+#if GTEST_HAS_TESTCASE
+  // For backward compatibiliy:
   // Pointer to the function that sets up the test case.
   Test::SetUpTestCaseFunc set_up_tc_;
   // Pointer to the function that tears down the test case.
   Test::TearDownTestCaseFunc tear_down_tc_;
+#endif
   // True iff any test in this test case should run.
   bool should_run_;
   // Elapsed time, in milliseconds.
