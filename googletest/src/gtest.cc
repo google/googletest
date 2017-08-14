@@ -2571,10 +2571,10 @@ void ReportInvalidTestCaseType(const char* test_case_name,
       << "probably rename one of the classes to put the tests into different\n"
       << "test cases.";
 
-  fprintf(stderr, "%s %s",
-          FormatFileLocation(code_location.file.c_str(),
-                             code_location.line).c_str(),
-          errors.GetString().c_str());
+  GTEST_LOG_(ERROR) 
+       << FormatFileLocation(code_location.file.c_str(),
+                             code_location.line),
+       << " " << errors.GetString();
 }
 #endif  // GTEST_HAS_PARAM_TEST
 
@@ -3422,8 +3422,10 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
 XmlUnitTestResultPrinter::XmlUnitTestResultPrinter(const char* output_file)
     : output_file_(output_file) {
   if (output_file_.c_str() == NULL || output_file_.empty()) {
-    fprintf(stderr, "XML output file may not be null\n");
-    fflush(stderr);
+    {
+      // scoped to make sure the log is flushed before we exit
+      GTEST_LOG_(FATAL) << "XML output file may not be null";
+    }
     exit(EXIT_FAILURE);
   }
 }
@@ -3449,10 +3451,10 @@ void XmlUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
     //   3. To interpret the meaning of errno in a thread-safe way,
     //      we need the strerror_r() function, which is not available on
     //      Windows.
-    fprintf(stderr,
-            "Unable to open file \"%s\"\n",
-            output_file_.c_str());
-    fflush(stderr);
+    { // scoped to ensure the log is flushed before we exit
+      GTEST_LOG_(FATAL) << "Unable to open file \"" 
+                        << output_file_ << "\"";
+    }
     exit(EXIT_FAILURE);
   }
   std::stringstream stream;
@@ -4403,9 +4405,9 @@ void UnitTestImpl::ConfigureXmlOutput() {
     listeners()->SetDefaultXmlGenerator(new XmlUnitTestResultPrinter(
         UnitTestOptions::GetAbsolutePathToOutputFile().c_str()));
   } else if (output_format != "") {
-    printf("WARNING: unrecognized output format \"%s\" ignored.\n",
-           output_format.c_str());
-    fflush(stdout);
+    GTEST_LOG_(WARNING) << "WARNING: unrecognized output format \"" 
+                        << output_format 
+                        << "\" ignored.";
   }
 }
 
@@ -4420,9 +4422,9 @@ void UnitTestImpl::ConfigureStreamingOutput() {
       listeners()->Append(new StreamingListener(target.substr(0, pos),
                                                 target.substr(pos+1)));
     } else {
-      printf("WARNING: unrecognized streaming target \"%s\" ignored.\n",
-             target.c_str());
-      fflush(stdout);
+      GTEST_LOG_(WARNING) << "unrecognized streaming target \"" 
+                          << target 
+                          << "\" ignored.";
     }
   }
 }
@@ -4551,9 +4553,9 @@ static void TearDownEnvironment(Environment* env) { env->TearDown(); }
 bool UnitTestImpl::RunAllTests() {
   // Makes sure InitGoogleTest() was called.
   if (!GTestIsInitialized()) {
-    printf("%s",
-           "\nThis test program did NOT call ::testing::InitGoogleTest "
-           "before calling RUN_ALL_TESTS().  Please fix it.\n");
+    GTEST_LOG_(ERROR) << 
+      "\nThis test program did NOT call ::testing::InitGoogleTest "
+      "before calling RUN_ALL_TESTS().  Please fix it.";
     return false;
   }
 
@@ -5253,10 +5255,11 @@ bool ParseGoogleTestFlag(const char* const arg) {
 void LoadFlagsFromFile(const std::string& path) {
   FILE* flagfile = posix::FOpen(path.c_str(), "r");
   if (!flagfile) {
-    fprintf(stderr,
-            "Unable to open file \"%s\"\n",
-            GTEST_FLAG(flagfile).c_str());
-    fflush(stderr);
+    { // scoped to ensure the log is flushed before we exit
+      GTEST_LOG_(FATAL) << "Unable to open file \"" 
+                        << GTEST_FLAG(flagfile) 
+                        << "\"";
+    }
     exit(EXIT_FAILURE);
   }
   std::string contents(ReadEntireFile(flagfile));
