@@ -2571,7 +2571,7 @@ void ReportInvalidTestCaseType(const char* test_case_name,
 
   GTEST_LOG_(ERROR) 
        << FormatFileLocation(code_location.file.c_str(),
-                             code_location.line),
+                             code_location.line)
        << " " << errors.GetString();
 }
 #endif  // GTEST_HAS_PARAM_TEST
