@@ -2210,12 +2210,13 @@ class ThreadLocal {
 GTEST_API_ size_t GetThreadCount();
 
 // Passing non-POD classes through ellipsis (...) crashes the ARM
-// compiler and generates a warning in Sun Studio.  The Nokia Symbian
+// compiler and generates a warning in Sun Studio before 12u4. The Nokia Symbian
 // and the IBM XL C/C++ compiler try to instantiate a copy constructor
 // for objects passed through ellipsis (...), failing for uncopyable
 // objects.  We define this to ensure that only POD is passed through
 // ellipsis on these systems.
-#if defined(__SYMBIAN32__) || defined(__IBMCPP__) || defined(__SUNPRO_CC)
+#if defined(__SYMBIAN32__) || defined(__IBMCPP__) || \
+     (defined(__SUNPRO_CC) && __SUNPRO_CC < 0x5130)
 // We lose support for NULL detection where the compiler doesn't like
 // passing non-POD classes through ellipsis (...).
 # define GTEST_ELLIPSIS_NEEDS_POD_ 1
@@ -2417,7 +2418,7 @@ inline int Close(int fd) { return close(fd); }
 inline const char* StrError(int errnum) { return strerror(errnum); }
 #endif
 inline const char* GetEnv(const char* name) {
-#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE | GTEST_OS_WINDOWS_RT
+#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_RT
   // We are on Windows CE, which has no environment variables.
   static_cast<void>(name);  // To prevent 'unused argument' warning.
   return NULL;
