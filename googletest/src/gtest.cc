@@ -5280,6 +5280,7 @@ bool ParseGoogleTestFlag(const char* const arg) {
 #if GTEST_USE_OWN_FLAGFILE_FLAG_
 void LoadFlagsFromFile(const std::string& path) {
   FILE* flagfile = posix::FOpen(path.c_str(), "r");
+  if (!flagfile) {
     fprintf(stderr,
             "Unable to open file \"%s\"\n",
             GTEST_FLAG(flagfile).c_str());
