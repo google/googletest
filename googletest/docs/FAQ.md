@@ -54,7 +54,7 @@ Underscore (`_`) is special, as C++ reserves the following to be used by
 the compiler and the standard library:
 
   1. any identifier that starts with an `_` followed by an upper-case letter, and
-  1. any identifier that containers two consecutive underscores (i.e. `__`) _anywhere_ in its name.
+  1. any identifier that contains two consecutive underscores (i.e. `__`) _anywhere_ in its name.
 
 User code is _prohibited_ from using such identifiers.
 
@@ -960,12 +960,11 @@ Have you read a
 the Google Test Primer page?
 
 ## I want to use Google Test with Visual Studio but don't know where to start. ##
-Many people are in your position and one of the posted his solution to
-our mailing list.
+Many people are in your position and one of them posted his solution to our mailing list.
 
 ## I am seeing compile errors mentioning std::type\_traits when I try to use Google Test on Solaris. ##
 Google Test uses parts of the standard C++ library that SunStudio does not support.
-Our users reported success using alternative implementations. Try running the build after runing this commad:
+Our users reported success using alternative implementations. Try running the build after running this command:
 
 `export CC=cc CXX=CC CXXFLAGS='-library=stlport4'`
 
@@ -1015,7 +1014,7 @@ instead of
 ```
 in order to define a test.
 
-Currently, the following `TEST`, `FAIL`, `SUCCEED`, and the basic comparison assertion macros can have alternative names. You can see the full list of covered macros [here](http://www.google.com/codesearch?q=if+!GTEST_DONT_DEFINE_\w%2B+package:http://googletest\.googlecode\.com+file:/include/gtest/gtest.h). More information can be found in the "Avoiding Macro Name Clashes" section of the README file.
+Currently, the following `TEST`, `FAIL`, `SUCCEED`, and the basic comparison assertion macros can have . You can see the full list of covered macros [here](../include/gtest/gtest.h). More information can be found in the "Avoiding Macro Name Clashes" section of the README file.
 
 
 ## Is it OK if I have two separate `TEST(Foo, Bar)` test methods defined in different namespaces? ##

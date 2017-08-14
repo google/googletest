@@ -97,7 +97,6 @@ using testing::internal::kErrorVerbosity;
 using testing::internal::kInfoVerbosity;
 using testing::internal::kWarningVerbosity;
 using testing::internal::linked_ptr;
-using testing::internal::string;
 
 #if GTEST_HAS_STREAM_REDIRECTION
 using testing::HasSubstr;
@@ -1954,7 +1953,7 @@ class MockC {
  public:
   MockC() {}
 
-  MOCK_METHOD6(VoidMethod, void(bool cond, int n, string s, void* p,
+  MOCK_METHOD6(VoidMethod, void(bool cond, int n, std::string s, void* p,
                                 const Printable& x, Unprintable y));
   MOCK_METHOD0(NonVoidMethod, int());  // NOLINT
 
@@ -1970,7 +1969,7 @@ class VerboseFlagPreservingFixture : public testing::Test {
   ~VerboseFlagPreservingFixture() { GMOCK_FLAG(verbose) = saved_verbose_flag_; }
 
  private:
-  const string saved_verbose_flag_;
+  const std::string saved_verbose_flag_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(VerboseFlagPreservingFixture);
 };
@@ -2062,8 +2061,8 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
   // contain the given function name in the stack trace.  When it's
   // false, the output should be empty.)
   void VerifyOutput(const std::string& output, bool should_print,
-                    const string& expected_substring,
-                    const string& function_name) {
+                    const std::string& expected_substring,
+                    const std::string& function_name) {
     if (should_print) {
       EXPECT_THAT(output.c_str(), HasSubstr(expected_substring));
 # ifndef NDEBUG
@@ -2113,7 +2112,7 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
   // Tests how the flag affects uninteresting calls on a naggy mock.
   void TestUninterestingCallOnNaggyMock(bool should_print) {
     NaggyMock<MockA> a;
-    const string note =
+    const std::string note =
         "NOTE: You can safely ignore the above warning unless this "
         "call should not happen.  Do not suppress it by blindly adding "
         "an EXPECT_CALL() if you don't mean to enforce the call.  "
