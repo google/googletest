@@ -108,6 +108,10 @@
 # include <windows.h>  // NOLINT
 # undef min
 
+#elif GTEST_HAS_CHRONO_
+
+#include <chrono>
+
 #else
 
 // Assume other platforms have gettimeofday().
@@ -841,6 +845,10 @@ TimeInMillis GetTimeInMillis() {
   struct timeval now;
   gettimeofday(&now, NULL);
   return static_cast<TimeInMillis>(now.tv_sec) * 1000 + now.tv_usec / 1000;
+#elif GTEST_HAS_CHRONO_
+	std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
+	auto duration = now.time_since_epoch();
+	return duration.count();
 #else
 # error "Don't know how to get the current time on your system."
 #endif
