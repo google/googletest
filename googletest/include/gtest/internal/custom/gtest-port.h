@@ -50,6 +50,11 @@
 //     GTEST_LOG_(severity)
 //     GTEST_CHECK_(condition)
 //     Functions LogToStderr() and FlushInfoLog() have to be provided too.
+// 
+//   Output:
+//     GTEST_PRINTF              - defaults to printf
+//     GTEST_VPRINTF             - defaults to vprintf
+//     GTEST_FLUSH_STDOUT        - defaults to fflush(stdout)
 //
 //   Threading:
 //     GTEST_HAS_NOTIFICATION_ - Enabled if Notification is already provided.
