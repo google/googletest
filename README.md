@@ -12,7 +12,7 @@ maintain and release them together.
 
 Please see the project page above for more information as well as the
 mailing list for questions, discussions, and development.  There is
-also an IRC channel on OFTC (irc.oftc.net) #gtest available.  Please
+also an IRC channel on [OFTC](https://webchat.oftc.net/) (irc.oftc.net) #gtest available.  Please
 join us!
 
 Getting started information for **Google Test** is available in the 
@@ -60,8 +60,11 @@ the following notable projects:
   * [Protocol Buffers](https://github.com/google/protobuf), Google's data
     interchange format.
   * The [OpenCV](http://opencv.org/) computer vision library.
+  * [tiny-dnn](https://github.com/tiny-dnn/tiny-dnn): header only, dependency-free deep learning framework in C++11.
 
 ## Related Open Source Projects ##
+
+[GTest Runner](https://github.com/nholthaus/gtest-runner) is a Qt5 based automated test-runner and Graphical User Interface with powerful features for Windows and Linux platforms.
 
 [Google Test UI](https://github.com/ospector/gtest-gbar) is test runner that runs
 your test binary, allows you to track its progress via a progress bar, and
@@ -85,7 +88,7 @@ effort to support other platforms (e.g. Solaris, AIX, and z/OS).
 However, since core members of the Google Test project have no access
 to these platforms, Google Test may have outstanding issues there.  If
 you notice any problems on your platform, please notify
-<googletestframework@googlegroups.com>. Patches for fixing them are
+[googletestframework@googlegroups.com](https://groups.google.com/forum/#!forum/googletestframework). Patches for fixing them are
 even more welcome!
 
 ### Linux Requirements ###
@@ -100,7 +103,7 @@ package (as described below):
 
 ### Windows Requirements ###
 
-  * Microsoft Visual C++ v7.1 or newer
+  * Microsoft Visual C++ 2010 or newer
 
 ### Cygwin Requirements ###
 
