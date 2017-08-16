@@ -722,6 +722,26 @@ TEST(ExpectCallSyntaxTest, WarningIsErrorWithFlag) {
     a.DoA(0);
   },"Uninteresting mock function call");
 
+  // Out of bounds values are converted to kWarn
+  testing::GMOCK_FLAG(default_mock_behavior) = -1;
+  CaptureStdout();
+  {
+    MockA a;
+    a.DoA(0);
+  }
+  warning_output = GetCapturedStdout();
+  EXPECT_PRED_FORMAT2(IsSubstring, "GMOCK WARNING", warning_output);
+  EXPECT_PRED_FORMAT2(IsSubstring, "Uninteresting mock function call", warning_output);
+  testing::GMOCK_FLAG(default_mock_behavior) = 3;
+  CaptureStdout();
+  {
+    MockA a;
+    a.DoA(0);
+  }
+  warning_output = GetCapturedStdout();
+  EXPECT_PRED_FORMAT2(IsSubstring, "GMOCK WARNING", warning_output);
+  EXPECT_PRED_FORMAT2(IsSubstring, "Uninteresting mock function call", warning_output);
+
   testing::GMOCK_FLAG(default_mock_behavior) = original_behavior;
 }
 

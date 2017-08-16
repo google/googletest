@@ -508,6 +508,13 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
   return expectations_met;
 }
 
+CallReaction intToCallReaction(int mock_behavior) {
+  if (mock_behavior >= kAllow && mock_behavior <= kFail) {
+    return static_cast<internal::CallReaction>(mock_behavior);
+  }
+  return kWarn;
+}
+
 }  // namespace internal
 
 // Class Mock.
@@ -648,7 +655,7 @@ internal::CallReaction Mock::GetReactionOnUninterestingCalls(
         GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   internal::MutexLock l(&internal::g_gmock_mutex);
   return (g_uninteresting_call_reaction.count(mock_obj) == 0) ?
-      static_cast<internal::CallReaction>(GMOCK_FLAG(default_mock_behavior)) :
+      internal::intToCallReaction(GMOCK_FLAG(default_mock_behavior)) :
       g_uninteresting_call_reaction[mock_obj];
 }
 
