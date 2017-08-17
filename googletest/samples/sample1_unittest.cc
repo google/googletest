@@ -46,7 +46,7 @@
 #include <limits.h>
 #include "sample1.h"
 #include "gtest/gtest.h"
-
+namespace {
 
 // Step 2. Use the TEST macro to define your tests.
 //
@@ -139,6 +139,7 @@ TEST(IsPrimeTest, Positive) {
   EXPECT_FALSE(IsPrime(6));
   EXPECT_TRUE(IsPrime(23));
 }
+}  // namespace
 
 // Step 3. Call RUN_ALL_TESTS() in main().
 //
