@@ -79,6 +79,7 @@ class MockFoo : public Foo {
 
   MOCK_METHOD0(DoThis, void());
   MOCK_METHOD1(DoThat, int(bool flag));
+  MOCK_METHOD0(ReturnSomething, Mock());
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFoo);
@@ -205,6 +206,20 @@ TEST(NiceMockTest, AllowsExpectedCall) {
 
   EXPECT_CALL(nice_foo, DoThis());
   nice_foo.DoThis();
+}
+
+// Tests that an unexpected call on a nice mock which returns a non-built in
+// default value throws an exception and the exception contains the name of
+// the method.
+TEST(NiceMockTest, ThrowsExceptionForUnknownReturnTypes) {
+	NiceMock<MockFoo> nice_foo;
+	try	{
+		nice_foo.ReturnSomething();
+		FAIL();
+	} catch (const std::runtime_error& ex) {
+		const std::string exception_msg(ex.what());
+		EXPECT_NE(exception_msg.find("ReturnSomething"), std::string::npos);
+	}
 }
 
 // Tests that an unexpected call on a nice mock fails.
