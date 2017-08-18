@@ -213,6 +213,7 @@ TEST(NiceMockTest, AllowsExpectedCall) {
 // the method.
 TEST(NiceMockTest, ThrowsExceptionForUnknownReturnTypes) {
 	NiceMock<MockFoo> nice_foo;
+#if GTEST_HAS_EXCEPTIONS
 	try	{
 		nice_foo.ReturnSomething();
 		FAIL();
@@ -220,6 +221,11 @@ TEST(NiceMockTest, ThrowsExceptionForUnknownReturnTypes) {
 		const std::string exception_msg(ex.what());
 		EXPECT_NE(exception_msg.find("ReturnSomething"), std::string::npos);
 	}
+#else
+	EXPECT_DEATH_IF_SUPPORTED({
+		nice_foo.ReturnSomething();
+	}, "");
+#endif
 }
 
 // Tests that an unexpected call on a nice mock fails.
