@@ -62,6 +62,12 @@ using testing::internal::CaptureStdout;
 using testing::internal::GetCapturedStdout;
 #endif
 
+// Dummy class without default constructor.
+class Dummy {
+ public:
+  Dummy(int) {}
+};
+
 // Defines some mock classes needed by the tests.
 
 class Foo {
@@ -79,7 +85,7 @@ class MockFoo : public Foo {
 
   MOCK_METHOD0(DoThis, void());
   MOCK_METHOD1(DoThat, int(bool flag));
-  MOCK_METHOD0(ReturnSomething, Mock());
+  MOCK_METHOD0(ReturnSomething, Dummy());
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFoo);
