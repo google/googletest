@@ -218,19 +218,19 @@ TEST(NiceMockTest, AllowsExpectedCall) {
 // default value throws an exception and the exception contains the name of
 // the method.
 TEST(NiceMockTest, ThrowsExceptionForUnknownReturnTypes) {
-	NiceMock<MockFoo> nice_foo;
+  NiceMock<MockFoo> nice_foo;
 #if GTEST_HAS_EXCEPTIONS
-	try	{
-		nice_foo.ReturnSomething();
-		FAIL();
-	} catch (const std::runtime_error& ex) {
-		const std::string exception_msg(ex.what());
-		EXPECT_NE(exception_msg.find("ReturnSomething"), std::string::npos);
-	}
+  try {
+    nice_foo.ReturnSomething();
+    FAIL();
+  } catch (const std::runtime_error& ex) {
+    const std::string exception_msg(ex.what());
+    EXPECT_NE(exception_msg.find("ReturnSomething"), std::string::npos);
+  }
 #else
-	EXPECT_DEATH_IF_SUPPORTED({
-		nice_foo.ReturnSomething();
-	}, "");
+  EXPECT_DEATH_IF_SUPPORTED({
+    nice_foo.ReturnSomething();
+  }, "");
 #endif
 }
 
