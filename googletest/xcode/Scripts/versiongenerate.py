@@ -29,7 +29,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-"""A script to prepare version informtion for use the gtest Info.plist file.
+"""A script to prepare version information for use the gtest Info.plist file.
 
   This script extracts the version information from the configure.ac file and
   uses it to generate a header file containing the same information. The

@@ -1267,7 +1267,7 @@ TEST(FormatForComparisonFailureMessageTest, FormatsNonCharArrayAsPointer) {
 }
 
 // Tests formatting a char pointer when it's compared with another pointer.
-// In this case we want to print it as a raw pointer, as the comparision is by
+// In this case we want to print it as a raw pointer, as the comparison is by
 // pointer.
 
 // char pointer vs pointer
