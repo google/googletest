@@ -65,7 +65,7 @@ using testing::internal::GetCapturedStdout;
 // Class without default constructor.
 class NotDefaultConstructible {
  public:
-  NotDefaultConstructible(int) {}
+  explicit NotDefaultConstructible(int) {}
 };
 
 // Defines some mock classes needed by the tests.
