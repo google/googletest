@@ -118,6 +118,7 @@ TEST_F(StreamingListenerTest, OnTestIterationEnd) {
   EXPECT_EQ("event=TestIterationEnd&passed=1&elapsed_time=0ms\n", *output());
 }
 
+#if GTEST_HAS_TESTCASE
 TEST_F(StreamingListenerTest, OnTestCaseStart) {
   *output() = "";
   streamer_.OnTestCaseStart(TestCase("FooTest", "Bar", NULL, NULL));
@@ -128,6 +129,19 @@ TEST_F(StreamingListenerTest, OnTestCaseEnd) {
   *output() = "";
   streamer_.OnTestCaseEnd(TestCase("FooTest", "Bar", NULL, NULL));
   EXPECT_EQ("event=TestCaseEnd&passed=1&elapsed_time=0ms\n", *output());
+}
+#endif
+
+TEST_F(StreamingListenerTest, OnTestSuiteStart) {
+  *output() = "";
+  streamer_.OnTestSuiteStart(TestSuite("FooTest", "Bar", NULL, NULL));
+  EXPECT_EQ("event=TestSuiteStart&name=FooTest\n", *output());
+}
+
+TEST_F(StreamingListenerTest, OnTestSuiteEnd) {
+  *output() = "";
+  streamer_.OnTestSuiteEnd(TestSuite("FooTest", "Bar", NULL, NULL));
+  EXPECT_EQ("event=TestSuiteEnd&passed=1&elapsed_time=0ms\n", *output());
 }
 
 TEST_F(StreamingListenerTest, OnTestStart) {
@@ -226,6 +240,7 @@ using testing::ScopedFakeTestPartResultReporter;
 using testing::StaticAssertTypeEq;
 using testing::Test;
 using testing::TestCase;
+using testing::TestSuite;
 using testing::TestEventListeners;
 using testing::TestInfo;
 using testing::TestPartResult;

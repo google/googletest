@@ -727,7 +727,7 @@ class GTEST_API_ UnitTestImpl {
 
   // Clears the results of all tests, except the ad hoc tests.
   void ClearNonAdHocTestResult() {
-    ForEach(test_cases_, TestCase::ClearTestCaseResult);
+    ForEach(test_cases_, TestSuite::ClearTestSuiteResult);
   }
 
   // Clears the results of ad-hoc test assertions.
@@ -1157,15 +1157,28 @@ class GTEST_API_ StreamingListener : public EmptyTestEventListener {
            StreamableToString(unit_test.elapsed_time()) + "ms");
   }
 
-  void OnTestCaseStart(const TestCase& test_case) {
-    SendLn(std::string("event=TestCaseStart&name=") + test_case.name());
+  void OnTestSuiteStart(const TestSuite& test_suite) {
+    SendLn(std::string("event=TestSuiteStart&name=") + test_suite.name());
   }
 
-  void OnTestCaseEnd(const TestCase& test_case) {
-    SendLn("event=TestCaseEnd&passed=" + FormatBool(test_case.Passed())
-           + "&elapsed_time=" + StreamableToString(test_case.elapsed_time())
+  void OnTestSuiteEnd(const TestSuite& test_suite) {
+    SendLn("event=TestSuiteEnd&passed=" + FormatBool(test_suite.Passed())
+           + "&elapsed_time=" + StreamableToString(test_suite.elapsed_time())
            + "ms");
   }
+
+#if GTEST_HAS_TESTCASE
+  // backward compatibility - provide old API
+  void OnTestCaseStart(const TestSuite& test_suite) {
+    SendLn(std::string("event=TestCaseStart&name=") + test_suite.name());
+  }
+
+  void OnTestCaseEnd(const TestSuite& test_suite) {
+    SendLn("event=TestCaseEnd&passed=" + FormatBool(test_suite.Passed())
+           + "&elapsed_time=" + StreamableToString(test_suite.elapsed_time())
+           + "ms");
+  }
+#endif
 
   void OnTestStart(const TestInfo& test_info) {
     SendLn(std::string("event=TestStart&name=") + test_info.name());

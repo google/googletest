@@ -170,7 +170,11 @@ void ReportFailureInUnknownLocation(TestPartResult::Type result_type,
 // If we don't forward declare them the compiler might confuse the classes
 // in friendship clauses with same named classes on the scope.
 class Test;
-class TestCase;
+class TestSuite;
+#if GTEST_HAS_TESTCASE
+// for backward compatibility
+typedef TestSuite TestCase;
+#endif
 class TestInfo;
 class UnitTest;
 
@@ -575,7 +579,7 @@ class GTEST_API_ TestResult {
 
  private:
   friend class TestInfo;
-  friend class TestCase;
+  friend class TestSuite;
   friend class UnitTest;
   friend class internal::DefaultGlobalTestPartResultReporter;
   friend class internal::ExecDeathTest;
@@ -722,7 +726,7 @@ class GTEST_API_ TestInfo {
   friend class internal::DefaultDeathTestFactory;
 #endif  // GTEST_HAS_DEATH_TEST
   friend class Test;
-  friend class TestCase;
+  friend class TestSuite;
   friend class internal::UnitTestImpl;
   friend class internal::StreamingListenerTest;
   friend TestInfo* internal::MakeAndRegisterTestInfo(
@@ -791,15 +795,15 @@ class GTEST_API_ TestInfo {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(TestInfo);
 };
 
-// A test case, which consists of a vector of TestInfos.
+// A test suite, which consists of a vector of TestInfos.
 //
-// TestCase is not copyable.
-class GTEST_API_ TestCase {
+// TestSuite is not copyable.
+class GTEST_API_ TestSuite {
  public:
-  // Creates a TestCase with the given name.
+  // Creates a TestSuite with the given name.
   //
-  // TestCase does NOT have a default constructor.  Always use this
-  // constructor to create a TestCase object.
+  // TestSuite does NOT have a default constructor.  Always use this
+  // constructor to create a TestSuite object.
   //
   // Arguments:
   //
@@ -812,7 +816,7 @@ class GTEST_API_ TestCase {
   //                 (for backward compatibility)
   //   tear_down_tc: pointer to the function that tears down the test case
   //                 (for backward compatibility)
-  TestCase(const char* name, const char* a_type_param,
+  TestSuite(const char* name, const char* a_type_param,
            Test::SetUpTestSuiteFunc set_up_ts,
            Test::TearDownTestSuiteFunc tear_down_ts
 #if GTEST_HAS_TESTCASE
@@ -821,48 +825,48 @@ class GTEST_API_ TestCase {
 #endif
            );
 
-  // Destructor of TestCase.
-  virtual ~TestCase();
+  // Destructor of TestSuite.
+  virtual ~TestSuite();
 
-  // Gets the name of the TestCase.
+  // Gets the name of the TestSuite.
   const char* name() const { return name_.c_str(); }
 
   // Returns the name of the parameter type, or NULL if this is not a
-  // type-parameterized test case.
+  // type-parameterized test suite.
   const char* type_param() const {
     if (type_param_.get() != NULL)
       return type_param_->c_str();
     return NULL;
   }
 
-  // Returns true if any test in this test case should run.
+  // Returns true if any test in this test suite should run.
   bool should_run() const { return should_run_; }
 
-  // Gets the number of successful tests in this test case.
+  // Gets the number of successful tests in this test suite.
   int successful_test_count() const;
 
-  // Gets the number of failed tests in this test case.
+  // Gets the number of failed tests in this test suite.
   int failed_test_count() const;
 
   // Gets the number of disabled tests that will be reported in the XML report.
   int reportable_disabled_test_count() const;
 
-  // Gets the number of disabled tests in this test case.
+  // Gets the number of disabled tests in this test suite.
   int disabled_test_count() const;
 
   // Gets the number of tests to be printed in the XML report.
   int reportable_test_count() const;
 
-  // Get the number of tests in this test case that should run.
+  // Get the number of tests in this test suite that should run.
   int test_to_run_count() const;
 
-  // Gets the number of all tests in this test case.
+  // Gets the number of all tests in this test suite.
   int total_test_count() const;
 
-  // Returns true iff the test case passed.
+  // Returns true iff the test suite passed.
   bool Passed() const { return !Failed(); }
 
-  // Returns true iff the test case failed.
+  // Returns true iff the test suite failed.
   bool Failed() const { return failed_test_count() > 0; }
 
   // Returns the elapsed time, in milliseconds.
@@ -873,17 +877,18 @@ class GTEST_API_ TestCase {
   const TestInfo* GetTestInfo(int i) const;
 
   // Returns the TestResult that holds test properties recorded during
-  // execution of SetUpTestCase and TearDownTestCase.
+  // execution of SetUpTestSuite and TearDownTestSuite
+  // resp. the former SetUpTestCase and TearDownTestCase.
   const TestResult& ad_hoc_test_result() const { return ad_hoc_test_result_; }
 
  private:
   friend class Test;
   friend class internal::UnitTestImpl;
 
-  // Gets the (mutable) vector of TestInfos in this TestCase.
+  // Gets the (mutable) vector of TestInfos in this TestSuite.
   std::vector<TestInfo*>& test_info_list() { return test_info_list_; }
 
-  // Gets the (immutable) vector of TestInfos in this TestCase.
+  // Gets the (immutable) vector of TestInfos in this TestSuite.
   const std::vector<TestInfo*>& test_info_list() const {
     return test_info_list_;
   }
@@ -895,24 +900,25 @@ class GTEST_API_ TestCase {
   // Sets the should_run member.
   void set_should_run(bool should) { should_run_ = should; }
 
-  // Adds a TestInfo to this test case.  Will delete the TestInfo upon
-  // destruction of the TestCase object.
+  // Adds a TestInfo to this test suite.  Will delete the TestInfo upon
+  // destruction of the TestSuite object.
   void AddTestInfo(TestInfo * test_info);
 
-  // Clears the results of all tests in this test case.
+  // Clears the results of all tests in this test suite.
   void ClearResult();
 
-  // Clears the results of all tests in the given test case.
-  static void ClearTestCaseResult(TestCase* test_case) {
-    test_case->ClearResult();
+  // Clears the results of all tests in the given test suite.
+  static void ClearTestSuiteResult(TestSuite* test_suite) {
+    test_suite->ClearResult();
   }
 
-  // Runs every test in this TestCase.
+  // Runs every test in this TestSuite.
   void Run();
 
-  // Runs SetUpTestCase() for this TestCase.  This wrapper is needed
-  // for catching exceptions thrown from SetUpTestCase().
-  void RunSetUpTestCase() {
+  // Runs SetUpTestSuite() for this TestSuite.  This wrapper is needed
+  // for catching exceptions thrown from SetUpTestSuite().
+  // The former SetUpTestCase() is also called if available.
+  void RunSetUpTestSuite() {
     (*set_up_ts_)();
 #if GTEST_HAS_TESTCASE
     // for backward compatibility
@@ -921,9 +927,10 @@ class GTEST_API_ TestCase {
 #endif
   }
 
-  // Runs TearDownTestCase() for this TestCase.  This wrapper is
+  // Runs TearDownTestSuite() for this TestSuite.  This wrapper is
   // needed for catching exceptions thrown from TearDownTestCase().
-  void RunTearDownTestCase() {
+  // The former TearDownTestCase() is also called if available.
+  void RunTearDownTestSuite() {
 #if GTEST_HAS_TESTCASE
     // for backward compatibility
     if(tear_down_tc_)
@@ -963,13 +970,13 @@ class GTEST_API_ TestCase {
     return test_info->should_run();
   }
 
-  // Shuffles the tests in this test case.
+  // Shuffles the tests in this test suite.
   void ShuffleTests(internal::Random* random);
 
   // Restores the test order to before the first shuffle.
   void UnshuffleTests();
 
-  // Name of the test case.
+  // Name of the test suite.
   std::string name_;
   // Name of the parameter type, or NULL if this is not a typed or a
   // type-parameterized test.
@@ -996,12 +1003,12 @@ class GTEST_API_ TestCase {
   bool should_run_;
   // Elapsed time, in milliseconds.
   TimeInMillis elapsed_time_;
-  // Holds test properties recorded during execution of SetUpTestCase and
-  // TearDownTestCase.
+  // Holds test properties recorded during execution of SetUpTestSuite and
+  // TearDownTestSuite resp. the former SetUpTestCase and TearDownTestCase.
   TestResult ad_hoc_test_result_;
 
-  // We disallow copying TestCases.
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(TestCase);
+  // We disallow copying TestSuite.
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(TestSuite);
 };
 
 // An Environment object is capable of setting up and tearing down an
@@ -1056,8 +1063,13 @@ class TestEventListener {
   // Fired after environment set-up for each iteration of tests ends.
   virtual void OnEnvironmentsSetUpEnd(const UnitTest& unit_test) = 0;
 
-  // Fired before the test case starts.
-  virtual void OnTestCaseStart(const TestCase& test_case) = 0;
+  // Fired before the test suite starts.
+  virtual void OnTestSuiteStart(const TestSuite& test_suite) = 0;
+
+#if GTEST_HAS_TESTCASE
+  // Backward compatibility - use OnTestSuiteStart() now
+  virtual void OnTestCaseStart(const TestSuite& test_suite) = 0;
+#endif
 
   // Fired before the test starts.
   virtual void OnTestStart(const TestInfo& test_info) = 0;
@@ -1068,8 +1080,13 @@ class TestEventListener {
   // Fired after the test ends.
   virtual void OnTestEnd(const TestInfo& test_info) = 0;
 
-  // Fired after the test case ends.
-  virtual void OnTestCaseEnd(const TestCase& test_case) = 0;
+  // Fired after the test suite ends.
+  virtual void OnTestSuiteEnd(const TestSuite& test_suite) = 0;
+
+#if GTEST_HAS_TESTCASE
+    // Backward compatibility - use OnTestSuiteEnd() now
+  virtual void OnTestCaseEnd(const TestSuite& test_suite) = 0;
+#endif
 
   // Fired before environment tear-down for each iteration of tests starts.
   virtual void OnEnvironmentsTearDownStart(const UnitTest& unit_test) = 0;
@@ -1097,11 +1114,19 @@ class EmptyTestEventListener : public TestEventListener {
                                     int /*iteration*/) {}
   virtual void OnEnvironmentsSetUpStart(const UnitTest& /*unit_test*/) {}
   virtual void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) {}
-  virtual void OnTestCaseStart(const TestCase& /*test_case*/) {}
+  virtual void OnTestSuiteStart(const TestSuite& /*test_suite*/) {}
+#if GTEST_HAS_TESTCASE
+    // Backward compatibility - use OnTestSuiteStart() now
+  virtual void OnTestCaseStart(const TestSuite& /*test_suite*/) {}
+#endif
   virtual void OnTestStart(const TestInfo& /*test_info*/) {}
   virtual void OnTestPartResult(const TestPartResult& /*test_part_result*/) {}
   virtual void OnTestEnd(const TestInfo& /*test_info*/) {}
-  virtual void OnTestCaseEnd(const TestCase& /*test_case*/) {}
+  virtual void OnTestSuiteEnd(const TestSuite& /*test_suite*/) {}
+#if GTEST_HAS_TESTCASE
+    // Backward compatibility - use OnTestSuiteEnd() now
+  virtual void OnTestCaseEnd(const TestSuite& /*test_suite*/) {}
+#endif
   virtual void OnEnvironmentsTearDownStart(const UnitTest& /*unit_test*/) {}
   virtual void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) {}
   virtual void OnTestIterationEnd(const UnitTest& /*unit_test*/,
@@ -1146,7 +1171,7 @@ class GTEST_API_ TestEventListeners {
   }
 
  private:
-  friend class TestCase;
+  friend class TestSuite;
   friend class TestInfo;
   friend class internal::DefaultGlobalTestPartResultReporter;
   friend class internal::NoExecDeathTest;

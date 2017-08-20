@@ -2721,16 +2721,21 @@ int TestCase::total_test_count() const {
   return static_cast<int>(test_info_list_.size());
 }
 
-// Creates a TestCase with the given name.
+// Creates a TestSuite with the given name.
 //
 // Arguments:
 //
 //   name:         name of the test suite
-//   a_type_param: the name of the test case's type parameter, or NULL if
-//                 this is not a typed or a type-parameterized test case.
+//   a_type_param: the name of the test's type parameter, or NULL if
+//                 this is not a type-parameterized test.
+//   set_up_ts:    pointer to the function that sets up the test suite
+//   tear_down_ts: pointer to the function that tears down the test suite
 //   set_up_tc:    pointer to the function that sets up the test case
+//                 (for backward compatibility)
 //   tear_down_tc: pointer to the function that tears down the test case
-TestCase::TestCase(const char* a_name, const char* a_type_param,
+//                 (for backward compatibility)
+//
+TestSuite::TestSuite(const char* a_name, const char* a_type_param,
                    Test::SetUpTestSuiteFunc set_up_ts,
                    Test::TearDownTestSuiteFunc tear_down_ts
 #if GTEST_HAS_TESTCASE
@@ -2777,8 +2782,8 @@ void TestCase::AddTestInfo(TestInfo * test_info) {
   test_indices_.push_back(static_cast<int>(test_indices_.size()));
 }
 
-// Runs every test in this TestCase.
-void TestCase::Run() {
+// Runs every test in this TestSuite.
+void TestSuite::Run() {
   if (!should_run_) return;
 
   internal::UnitTestImpl* const impl = internal::GetUnitTestImpl();
@@ -2786,10 +2791,14 @@ void TestCase::Run() {
 
   TestEventListener* repeater = UnitTest::GetInstance()->listeners().repeater();
 
+#if GTEST_HAS_TESTCASE
+  // For backward compatibility
   repeater->OnTestCaseStart(*this);
+#endif
+  repeater->OnTestSuiteStart(*this);
   impl->os_stack_trace_getter()->UponLeavingGTest();
   internal::HandleExceptionsInMethodIfSupported(
-      this, &TestCase::RunSetUpTestCase, "SetUpTestCase()");
+      this, &TestSuite::RunSetUpTestSuite, "SetUpTestSuite()");
 
   const internal::TimeInMillis start = internal::GetTimeInMillis();
   for (int i = 0; i < total_test_count(); i++) {
@@ -2799,9 +2808,13 @@ void TestCase::Run() {
 
   impl->os_stack_trace_getter()->UponLeavingGTest();
   internal::HandleExceptionsInMethodIfSupported(
-      this, &TestCase::RunTearDownTestCase, "TearDownTestCase()");
+      this, &TestSuite::RunTearDownTestSuite, "TearDownTestSuite()");
 
+  repeater->OnTestSuiteEnd(*this);
+#if GTEST_HAS_TESTCASE
+  // For backward compatibility
   repeater->OnTestCaseEnd(*this);
+#endif
   impl->set_current_test_case(NULL);
 }
 
@@ -3089,11 +3102,19 @@ class PrettyUnitTestResultPrinter : public TestEventListener {
   virtual void OnTestIterationStart(const UnitTest& unit_test, int iteration);
   virtual void OnEnvironmentsSetUpStart(const UnitTest& unit_test);
   virtual void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) {}
-  virtual void OnTestCaseStart(const TestCase& test_case);
+  virtual void OnTestSuiteStart(const TestSuite& test_suite);
+#if GTEST_HAS_TESTCASE
+  // Backward compatibility - use OnTestSuiteStart() now
+  virtual void OnTestCaseStart(const TestSuite& test_suite);
+#endif
   virtual void OnTestStart(const TestInfo& test_info);
   virtual void OnTestPartResult(const TestPartResult& result);
   virtual void OnTestEnd(const TestInfo& test_info);
-  virtual void OnTestCaseEnd(const TestCase& test_case);
+  virtual void OnTestSuiteEnd(const TestSuite& test_suite);
+#if GTEST_HAS_TESTCASE
+  // Backward compatibility - use OnTestSuiteEnd() now
+  virtual void OnTestCaseEnd(const TestSuite& test_suite);
+#endif
   virtual void OnEnvironmentsTearDownStart(const UnitTest& unit_test);
   virtual void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) {}
   virtual void OnTestIterationEnd(const UnitTest& unit_test, int iteration);
@@ -3146,18 +3167,23 @@ void PrettyUnitTestResultPrinter::OnEnvironmentsSetUpStart(
   fflush(stdout);
 }
 
-void PrettyUnitTestResultPrinter::OnTestCaseStart(const TestCase& test_case) {
+void PrettyUnitTestResultPrinter::OnTestSuiteStart(const TestSuite& test_suite) {
   const std::string counts =
-      FormatCountableNoun(test_case.test_to_run_count(), "test", "tests");
+      FormatCountableNoun(test_suite.test_to_run_count(), "test", "tests");
   ColoredPrintf(COLOR_GREEN, "[----------] ");
-  printf("%s from %s", counts.c_str(), test_case.name());
-  if (test_case.type_param() == NULL) {
+  printf("%s from %s", counts.c_str(), test_suite.name());
+  if (test_suite.type_param() == NULL) {
     printf("\n");
   } else {
-    printf(", where %s = %s\n", kTypeParamLabel, test_case.type_param());
+    printf(", where %s = %s\n", kTypeParamLabel, test_suite.type_param());
   }
   fflush(stdout);
 }
+
+#if GTEST_HAS_TESTCASE
+void PrettyUnitTestResultPrinter::OnTestCaseStart(const TestSuite& test_suite) {
+}
+#endif
 
 void PrettyUnitTestResultPrinter::OnTestStart(const TestInfo& test_info) {
   ColoredPrintf(COLOR_GREEN,  "[ RUN      ] ");
@@ -3197,17 +3223,22 @@ void PrettyUnitTestResultPrinter::OnTestEnd(const TestInfo& test_info) {
   fflush(stdout);
 }
 
-void PrettyUnitTestResultPrinter::OnTestCaseEnd(const TestCase& test_case) {
+void PrettyUnitTestResultPrinter::OnTestSuiteEnd(const TestSuite& test_suite) {
   if (!GTEST_FLAG(print_time)) return;
 
   const std::string counts =
-      FormatCountableNoun(test_case.test_to_run_count(), "test", "tests");
+      FormatCountableNoun(test_suite.test_to_run_count(), "test", "tests");
   ColoredPrintf(COLOR_GREEN, "[----------] ");
   printf("%s from %s (%s ms total)\n\n",
-         counts.c_str(), test_case.name(),
-         internal::StreamableToString(test_case.elapsed_time()).c_str());
+         counts.c_str(), test_suite.name(),
+         internal::StreamableToString(test_suite.elapsed_time()).c_str());
   fflush(stdout);
 }
+
+#if GTEST_HAS_TESTCASE
+void PrettyUnitTestResultPrinter::OnTestCaseEnd(const TestSuite& test_suite) {
+}
+#endif
 
 void PrettyUnitTestResultPrinter::OnEnvironmentsTearDownStart(
     const UnitTest& /*unit_test*/) {
@@ -3300,11 +3331,19 @@ class TestEventRepeater : public TestEventListener {
   virtual void OnTestIterationStart(const UnitTest& unit_test, int iteration);
   virtual void OnEnvironmentsSetUpStart(const UnitTest& unit_test);
   virtual void OnEnvironmentsSetUpEnd(const UnitTest& unit_test);
-  virtual void OnTestCaseStart(const TestCase& test_case);
+  virtual void OnTestSuiteStart(const TestSuite& test_suite);
+#if GTEST_HAS_TESTCASE
+  // Backward compatibility - use OnTestSuiteStart() now
+  virtual void OnTestCaseStart(const TestSuite& test_suite);
+#endif
   virtual void OnTestStart(const TestInfo& test_info);
   virtual void OnTestPartResult(const TestPartResult& result);
   virtual void OnTestEnd(const TestInfo& test_info);
-  virtual void OnTestCaseEnd(const TestCase& test_case);
+  virtual void OnTestSuiteEnd(const TestSuite& test_suite);
+#if GTEST_HAS_TESTCASE
+  // Backward compatibility - use OnTestSuiteEnd() now
+  virtual void OnTestCaseEnd(const TestSuite& test_suite);
+#endif
   virtual void OnEnvironmentsTearDownStart(const UnitTest& unit_test);
   virtual void OnEnvironmentsTearDownEnd(const UnitTest& unit_test);
   virtual void OnTestIterationEnd(const UnitTest& unit_test, int iteration);
@@ -3363,14 +3402,22 @@ void TestEventRepeater::Name(const Type& parameter) { \
 
 GTEST_REPEATER_METHOD_(OnTestProgramStart, UnitTest)
 GTEST_REPEATER_METHOD_(OnEnvironmentsSetUpStart, UnitTest)
-GTEST_REPEATER_METHOD_(OnTestCaseStart, TestCase)
+GTEST_REPEATER_METHOD_(OnTestSuiteStart, TestSuite)
+#if GTEST_HAS_TESTCASE
+// Backward compatibility - use OnTestSuiteStart() now
+GTEST_REPEATER_METHOD_(OnTestCaseStart, TestSuite)
+#endif
 GTEST_REPEATER_METHOD_(OnTestStart, TestInfo)
 GTEST_REPEATER_METHOD_(OnTestPartResult, TestPartResult)
 GTEST_REPEATER_METHOD_(OnEnvironmentsTearDownStart, UnitTest)
 GTEST_REVERSE_REPEATER_METHOD_(OnEnvironmentsSetUpEnd, UnitTest)
 GTEST_REVERSE_REPEATER_METHOD_(OnEnvironmentsTearDownEnd, UnitTest)
 GTEST_REVERSE_REPEATER_METHOD_(OnTestEnd, TestInfo)
-GTEST_REVERSE_REPEATER_METHOD_(OnTestCaseEnd, TestCase)
+GTEST_REVERSE_REPEATER_METHOD_(OnTestSuiteEnd, TestSuite)
+#if GTEST_HAS_TESTCASE
+// Backward compatibility - use OnTestSuiteEnd() now
+GTEST_REVERSE_REPEATER_METHOD_(OnTestCaseEnd, TestSuite)
+#endif
 GTEST_REVERSE_REPEATER_METHOD_(OnTestProgramEnd, UnitTest)
 
 #undef GTEST_REPEATER_METHOD_
