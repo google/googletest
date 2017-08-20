@@ -3591,6 +3591,10 @@ static bool PortableLocaltime(time_t seconds, struct tm* out) {
     return false;
   *out = *tm_ptr;
   return true;
+#elif __BORLANDC__
+  // C++Builder contains a POSIX-compliant localtime_s() but no localtime_r()
+  // http://docwiki.embarcadero.com/RADStudio/Tokyo/en/Localtime_s
+  return localtime_s(&seconds, out);
 #else
   return localtime_r(&seconds, out) != NULL;
 #endif
