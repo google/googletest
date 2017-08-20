@@ -62,10 +62,10 @@ using testing::internal::CaptureStdout;
 using testing::internal::GetCapturedStdout;
 #endif
 
-// Dummy class without default constructor.
-class Dummy {
+// Class without default constructor.
+class NotDefaultConstructible {
  public:
-  Dummy(int) {}
+  NotDefaultConstructible(int) {}
 };
 
 // Defines some mock classes needed by the tests.
@@ -85,7 +85,7 @@ class MockFoo : public Foo {
 
   MOCK_METHOD0(DoThis, void());
   MOCK_METHOD1(DoThat, int(bool flag));
-  MOCK_METHOD0(ReturnSomething, Dummy());
+  MOCK_METHOD0(ReturnNonDefaultConstructible, NotDefaultConstructible());
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFoo);
@@ -214,23 +214,20 @@ TEST(NiceMockTest, AllowsExpectedCall) {
   nice_foo.DoThis();
 }
 
-// Tests that an unexpected call on a nice mock which returns a non-built in
-// default value throws an exception and the exception contains the name of
-// the method.
+// Tests that an unexpected call on a nice mock which returns a not-default-constructible
+// type throws an exception and the exception contains the method's name.
 TEST(NiceMockTest, ThrowsExceptionForUnknownReturnTypes) {
   NiceMock<MockFoo> nice_foo;
 #if GTEST_HAS_EXCEPTIONS
   try {
-    nice_foo.ReturnSomething();
+    nice_foo.ReturnNonDefaultConstructible();
     FAIL();
   } catch (const std::runtime_error& ex) {
     const std::string exception_msg(ex.what());
-    EXPECT_NE(exception_msg.find("ReturnSomething"), std::string::npos);
+    EXPECT_THAT(ex.what(), HasSubstr("ReturnNonDefaultConstructible"));
   }
 #else
-  EXPECT_DEATH_IF_SUPPORTED({
-    nice_foo.ReturnSomething();
-  }, "");
+  EXPECT_DEATH_IF_SUPPORTED({ nice_foo.ReturnNonDefaultConstructible(); }, "");
 #endif
 }
 
