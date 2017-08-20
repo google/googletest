@@ -3115,19 +3115,32 @@ TEST(DISABLED_TestCase, DISABLED_TestShouldNotRun) {
   FAIL() << "Unexpected failure: Test in disabled test case should not be run.";
 }
 
-// Check that when all tests in a test case are disabled, SetUpTestCase() and
-// TearDownTestCase() are not called.
+// Check that when all tests in a test suite are disabled,
+// SetUpTestSuite() and TearDownTestSuite() are not called.
+// Also former SetUpTestCase() and TearDownTestCase() are not called.
 class DisabledTestsTest : public Test {
  protected:
+  static void SetUpTestSuite() {
+    FAIL() << "Unexpected failure: All tests disabled in test suite. "
+              "SetUpTestSuite() should not be called.";
+  }
+
+  static void TearDownTestSuite() {
+    FAIL() << "Unexpected failure: All tests disabled in test suite. "
+              "TearDownTestSuite() should not be called.";
+  }
+
+#if GTEST_HAS_TESTCASE
   static void SetUpTestCase() {
-    FAIL() << "Unexpected failure: All tests disabled in test case. "
+    FAIL() << "Unexpected failure: All tests disabled in test suite. "
               "SetUpTestCase() should not be called.";
   }
 
   static void TearDownTestCase() {
-    FAIL() << "Unexpected failure: All tests disabled in test case. "
+    FAIL() << "Unexpected failure: All tests disabled in test suite. "
               "TearDownTestCase() should not be called.";
   }
+#endif
 };
 
 TEST_F(DisabledTestsTest, DISABLED_TestShouldNotRun_1) {
