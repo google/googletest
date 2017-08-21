@@ -6,7 +6,9 @@
   <ItemGroup>
     <Projects Include="gtest.cbproj" />
     <Projects Include="gtest_main.cbproj" />
-    <Projects Include="gtest_unittest.cbproj" />
+    <Projects Include="gtest_unittest.cbproj">
+        <Dependencies>gtest.cbproj;gtest_main.cbproj</Dependencies>
+    </Projects>
   </ItemGroup>
   <ProjectExtensions>
     <Borland.Personality>Default.Personality</Borland.Personality>
@@ -32,13 +34,13 @@
   <Target Name="gtest_main:Make">
     <MSBuild Projects="gtest_main.cbproj" Targets="Make" />
   </Target>
-  <Target Name="gtest_unittest">
+  <Target Name="gtest_unittest" DependsOnTargets="gtest;gtest_main">
     <MSBuild Projects="gtest_unittest.cbproj" Targets="" />
   </Target>
-  <Target Name="gtest_unittest:Clean">
+  <Target Name="gtest_unittest:Clean" DependsOnTargets="gtest:Clean;gtest_main:Clean">
     <MSBuild Projects="gtest_unittest.cbproj" Targets="Clean" />
   </Target>
-  <Target Name="gtest_unittest:Make">
+  <Target Name="gtest_unittest:Make" DependsOnTargets="gtest:Make;gtest_main:Make">
     <MSBuild Projects="gtest_unittest.cbproj" Targets="Make" />
   </Target>
   <Target Name="Build">
