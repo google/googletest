@@ -1,0 +1,7 @@
+Debug
+Release
+*.local
+*.res
+*.stat
+*.ico
+*.otares
