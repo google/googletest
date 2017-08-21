@@ -91,7 +91,7 @@ instructions for how to sign and return it.
 
 To keep the source consistent, readable, diffable and easy to merge,
 we use a fairly rigid coding style, as defined by the [google-styleguide](https://github.com/google/styleguide) project.  All patches will be expected
-to conform to the style outlined [here](https://github.com/google/styleguide/blob/gh-pages/cppguide.xml).
+to conform to the style outlined [here](https://google.github.io/styleguide/cppguide.html).
 
 ## Submitting Patches ##
 

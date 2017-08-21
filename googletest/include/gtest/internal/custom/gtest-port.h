@@ -61,6 +61,9 @@
 //     GTEST_EXCLUSIVE_LOCK_REQUIRED_(locks)
 //     GTEST_LOCK_EXCLUDED_(locks)
 //
+//   Exporting API symbols:
+//     GTEST_API_ - Specifier for exported symbols.
+//
 // ** Custom implementation starts here **
 
 #ifndef GTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_PORT_H_
