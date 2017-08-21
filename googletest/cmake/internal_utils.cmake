@@ -78,12 +78,12 @@ macro(config_compiler_and_linker)
       # we disable the warning project-wide.
       set(cxx_base_flags "${cxx_base_flags} -wd4127")
     endif()
-    if (NOT (MSVC_VERSION LESS 1700))  # 1700 is Visual Studio 2012.
+    if (NOT MSVC_VERSION LESS 1700)  # 1700 is Visual Studio 2012.
       # Suppress "unreachable code" warning on VS 2012 and later.
       # http://stackoverflow.com/questions/3232669 explains the issue.
       set(cxx_base_flags "${cxx_base_flags} -wd4702")
     endif()
-    if (NOT (MSVC_VERSION GREATER 1900))  # 1900 is Visual Studio 2015
+    if (NOT MSVC_VERSION GREATER 1900)  # 1900 is Visual Studio 2015
       # BigObj required for tests.
       set(cxx_base_flags "${cxx_base_flags} -bigobj")
     endif()
