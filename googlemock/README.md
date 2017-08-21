@@ -35,7 +35,7 @@ We hope you find it useful!
   * Does automatic verification of expectations (no record-and-replay needed).
   * Allows arbitrary (partial) ordering constraints on
     function calls to be expressed,.
-  * Lets a user extend it by defining new matchers and actions.
+  * Lets an user extend it by defining new matchers and actions.
   * Does not use exceptions.
   * Is easy to learn and use.
 
@@ -125,13 +125,46 @@ build Google Mock and its tests, which has further requirements:
 
 ### Building Google Mock ###
 
+#### Using CMake ####
+
 If you have CMake available, it is recommended that you follow the
 [build instructions][gtest_cmakebuild]
-as described for Google Test. If are using Google Mock with an
+as described for Google Test. 
+
+If are using Google Mock with an
 existing CMake project, the section
 [Incorporating Into An Existing CMake Project][gtest_incorpcmake]
-may be of particular interest. Otherwise, the following sections
-detail how to build Google Mock without CMake.
+may be of particular interest. 
+To make it work for Google Mock you will need to change 
+
+    target_link_libraries(example gtest_main)
+
+to 
+
+    target_link_libraries(example gmock_main)
+    
+This works because `gmock_main` library is compiled with Google Test.
+However, it does not automatically add Google Test includes.
+Therefore you will also have to change
+
+    if (CMAKE_VERSION VERSION_LESS 2.8.11)
+      include_directories("${gtest_SOURCE_DIR}/include")
+    endif()
+
+to
+
+    if (CMAKE_VERSION VERSION_LESS 2.8.11)
+      include_directories(BEFORE SYSTEM
+        "${gtest_SOURCE_DIR}/include" "${gmock_SOURCE_DIR}/include")
+    else()
+      target_include_directories(gmock_main SYSTEM BEFORE INTERFACE
+        "${gtest_SOURCE_DIR}/include" "${gmock_SOURCE_DIR}/include")
+    endif()
+
+This will addtionally mark Google Mock includes as system, which will 
+silence compiler warnings when compiling your tests using clang with 
+`-Wpedantic -Wall -Wextra -Wconversion`.
+
 
 #### Preparing to Build (Unix only) ####
 
