@@ -175,7 +175,7 @@ namespace edit_distance {
 // Returns the optimal edits to go from 'left' to 'right'.
 // All edits cost the same, with replace having lower priority than
 // add/remove.
-// Simple implementation of the Wagner–Fischer algorithm.
+// Simple implementation of the Wagner-Fischer algorithm.
 // See http://en.wikipedia.org/wiki/Wagner-Fischer_algorithm
 enum EditType { kMatch, kAdd, kRemove, kReplace };
 GTEST_API_ std::vector<EditType> CalculateOptimalEdits(
@@ -502,9 +502,10 @@ typedef void (*SetUpTestCaseFunc)();
 typedef void (*TearDownTestCaseFunc)();
 
 struct CodeLocation {
-  CodeLocation(const string& a_file, int a_line) : file(a_file), line(a_line) {}
+  CodeLocation(const std::string& a_file, int a_line)
+      : file(a_file), line(a_line) {}
 
-  string file;
+  std::string file;
   int line;
 };
 

@@ -79,6 +79,13 @@
 		4539C9390EC280E200A70F4C /* gtest-param-util-generated.h in Copy Headers Internal */ = {isa = PBXBuildFile; fileRef = 4539C9360EC280E200A70F4C /* gtest-param-util-generated.h */; };
 		4539C93A0EC280E200A70F4C /* gtest-param-util.h in Copy Headers Internal */ = {isa = PBXBuildFile; fileRef = 4539C9370EC280E200A70F4C /* gtest-param-util.h */; };
 		4567C8181264FF71007740BE /* gtest-printers.h in Headers */ = {isa = PBXBuildFile; fileRef = 4567C8171264FF71007740BE /* gtest-printers.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		F67D4F3E1C7F5D8B0017C729 /* gtest-port-arch.h in Headers */ = {isa = PBXBuildFile; fileRef = F67D4F3D1C7F5D8B0017C729 /* gtest-port-arch.h */; };
+		F67D4F3F1C7F5DA70017C729 /* gtest-port-arch.h in Copy Headers Internal */ = {isa = PBXBuildFile; fileRef = F67D4F3D1C7F5D8B0017C729 /* gtest-port-arch.h */; };
+		F67D4F441C7F5DD00017C729 /* gtest-port.h in Headers */ = {isa = PBXBuildFile; fileRef = F67D4F411C7F5DD00017C729 /* gtest-port.h */; };
+		F67D4F451C7F5DD00017C729 /* gtest-printers.h in Headers */ = {isa = PBXBuildFile; fileRef = F67D4F421C7F5DD00017C729 /* gtest-printers.h */; };
+		F67D4F461C7F5DD00017C729 /* gtest.h in Headers */ = {isa = PBXBuildFile; fileRef = F67D4F431C7F5DD00017C729 /* gtest.h */; };
+		F67D4F481C7F5E160017C729 /* gtest-port.h in Copy Headers Internal Custom */ = {isa = PBXBuildFile; fileRef = F67D4F411C7F5DD00017C729 /* gtest-port.h */; };
+		F67D4F491C7F5E260017C729 /* gtest-printers.h in Copy Headers Internal Custom */ = {isa = PBXBuildFile; fileRef = F67D4F421C7F5DD00017C729 /* gtest-printers.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -182,6 +189,7 @@
 			dstPath = Headers/internal;
 			dstSubfolderSpec = 6;
 			files = (
+				F67D4F3F1C7F5DA70017C729 /* gtest-port-arch.h in Copy Headers Internal */,
 				404884A00E2F7BE600CF7658 /* gtest-death-test-internal.h in Copy Headers Internal */,
 				404884A10E2F7BE600CF7658 /* gtest-filepath.h in Copy Headers Internal */,
 				404884A20E2F7BE600CF7658 /* gtest-internal.h in Copy Headers Internal */,
@@ -194,6 +202,18 @@
 				3BF6F2A00E79B5AD000F2EEE /* gtest-type-util.h in Copy Headers Internal */,
 			);
 			name = "Copy Headers Internal";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F67D4F471C7F5DF60017C729 /* Copy Headers Internal Custom */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Headers/internal/custom;
+			dstSubfolderSpec = 6;
+			files = (
+				F67D4F491C7F5E260017C729 /* gtest-printers.h in Copy Headers Internal Custom */,
+				F67D4F481C7F5E160017C729 /* gtest-port.h in Copy Headers Internal Custom */,
+			);
+			name = "Copy Headers Internal Custom";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -244,6 +264,10 @@
 		4539C9360EC280E200A70F4C /* gtest-param-util-generated.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-param-util-generated.h"; sourceTree = "<group>"; };
 		4539C9370EC280E200A70F4C /* gtest-param-util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-param-util.h"; sourceTree = "<group>"; };
 		4567C8171264FF71007740BE /* gtest-printers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-printers.h"; sourceTree = "<group>"; };
+		F67D4F3D1C7F5D8B0017C729 /* gtest-port-arch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-port-arch.h"; sourceTree = "<group>"; };
+		F67D4F411C7F5DD00017C729 /* gtest-port.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-port.h"; sourceTree = "<group>"; };
+		F67D4F421C7F5DD00017C729 /* gtest-printers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-printers.h"; sourceTree = "<group>"; };
+		F67D4F431C7F5DD00017C729 /* gtest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gtest.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -375,6 +399,7 @@
 		404883E10E2F799B00CF7658 /* internal */ = {
 			isa = PBXGroup;
 			children = (
+				F67D4F401C7F5DD00017C729 /* custom */,
 				404883E20E2F799B00CF7658 /* gtest-death-test-internal.h */,
 				404883E30E2F799B00CF7658 /* gtest-filepath.h */,
 				404883E40E2F799B00CF7658 /* gtest-internal.h */,
@@ -382,6 +407,7 @@
 				4539C9360EC280E200A70F4C /* gtest-param-util-generated.h */,
 				4539C9370EC280E200A70F4C /* gtest-param-util.h */,
 				404883E50E2F799B00CF7658 /* gtest-port.h */,
+				F67D4F3D1C7F5D8B0017C729 /* gtest-port-arch.h */,
 				404883E60E2F799B00CF7658 /* gtest-string.h */,
 				40899F4D0FFA7271000B29AE /* gtest-tuple.h */,
 				3BF6F29F0E79B5AD000F2EEE /* gtest-type-util.h */,
@@ -430,6 +456,16 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		F67D4F401C7F5DD00017C729 /* custom */ = {
+			isa = PBXGroup;
+			children = (
+				F67D4F411C7F5DD00017C729 /* gtest-port.h */,
+				F67D4F421C7F5DD00017C729 /* gtest-printers.h */,
+				F67D4F431C7F5DD00017C729 /* gtest.h */,
+			);
+			path = custom;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -437,10 +473,14 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F67D4F451C7F5DD00017C729 /* gtest-printers.h in Headers */,
 				404884380E2F799B00CF7658 /* gtest-death-test.h in Headers */,
 				404884390E2F799B00CF7658 /* gtest-message.h in Headers */,
 				4539C9340EC280AE00A70F4C /* gtest-param-test.h in Headers */,
+				F67D4F461C7F5DD00017C729 /* gtest.h in Headers */,
+				F67D4F441C7F5DD00017C729 /* gtest-port.h in Headers */,
 				4567C8181264FF71007740BE /* gtest-printers.h in Headers */,
+				F67D4F3E1C7F5D8B0017C729 /* gtest-port-arch.h in Headers */,
 				3BF6F2A50E79B616000F2EEE /* gtest-typed-test.h in Headers */,
 				4048843A0E2F799B00CF7658 /* gtest-spi.h in Headers */,
 				4048843B0E2F799B00CF7658 /* gtest.h in Headers */,
@@ -560,6 +600,7 @@
 				8D07F2C10486CC7A007CD1D0 /* Sources */,
 				8D07F2BD0486CC7A007CD1D0 /* Headers */,
 				404884A50E2F7C0400CF7658 /* Copy Headers Internal */,
+				F67D4F471C7F5DF60017C729 /* Copy Headers Internal Custom */,
 				8D07F2BF0486CC7A007CD1D0 /* Resources */,
 			);
 			buildRules = (
@@ -1026,6 +1067,9 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 40D4CDF10E30E07400294801 /* DebugProject.xcconfig */;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 			};
 			name = Debug;
 		};
@@ -1033,6 +1077,9 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 40D4CDF40E30E07400294801 /* ReleaseProject.xcconfig */;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 			};
 			name = Release;
 		};
