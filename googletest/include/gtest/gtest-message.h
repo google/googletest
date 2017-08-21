@@ -154,6 +154,25 @@ class GTEST_API_ Message {
     }
     return *this;
   }
+
+#if __cplusplus >= 201103L
+  // Streams a non-pointer rvalue to this object.
+  //
+  // This is so that objects which can only be streamed as rvalue-references
+  // work.
+  template <typename T>
+  inline Message& operator <<(const T&& val) {
+    using ::operator <<;
+    *ss_ << std::move(val);
+    return *this;
+  }
+
+  // Streams a pointer rvalue to this object.
+  template <typename T>
+  inline Message& operator <<(T* const&& pointer) {
+    return *this << pointer;
+  }
+#endif  // __cplusplus >= 201103L
 #endif  // GTEST_OS_SYMBIAN
 
   // Since the basic IO manipulators are overloaded for both narrow
