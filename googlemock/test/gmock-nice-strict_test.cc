@@ -223,7 +223,6 @@ TEST(NiceMockTest, ThrowsExceptionForUnknownReturnTypes) {
     nice_foo.ReturnNonDefaultConstructible();
     FAIL();
   } catch (const std::runtime_error& ex) {
-    const std::string exception_msg(ex.what());
     EXPECT_THAT(ex.what(), HasSubstr("ReturnNonDefaultConstructible"));
   }
 #else
