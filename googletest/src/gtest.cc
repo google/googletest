@@ -5428,7 +5428,22 @@ std::string TempDir() {
   else
     return std::string(temp_dir) + "\\";
 #elif GTEST_OS_LINUX_ANDROID
-  return "/sdcard/";
+  // Android doesn't have /tmp, and /sdcard is no longer accessible from
+  // app context starting from Android O. On Android, /data/local/tmp
+  // is usually used as the temporary directory. But processes running
+  // in app context can't write to /data/local/tmp, so also try the
+  // current directory.
+  if (access("/data/local/tmp", R_OK | W_OK | X_OK) == 0) {
+    return "/data/local/tmp/";
+  }
+  std::string result = "./";
+  char* cwd = getcwd(NULL, 0);
+  if (cwd != NULL) {
+    result = cwd;
+    result += "/";
+    free(cwd);
+  }
+  return result;
 #else
   return "/tmp/";
 #endif  // GTEST_OS_WINDOWS_MOBILE
