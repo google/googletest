@@ -245,7 +245,7 @@ class Subprocess:
       p = subprocess.Popen(command,
                            stdout=subprocess.PIPE, stderr=stderr,
                            cwd=working_dir, universal_newlines=True, env=env)
-      # communicate returns a tuple with the file obect for the child's
+      # communicate returns a tuple with the file object for the child's
       # output.
       self.output = p.communicate()[0]
       self._return_code = p.returncode

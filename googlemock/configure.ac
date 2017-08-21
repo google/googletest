@@ -130,7 +130,7 @@ AS_IF([test "x${HAVE_BUILT_GTEST}" = "xyes"],
       GTEST_LIBS=`${GTEST_CONFIG} --libs`
       GTEST_VERSION=`${GTEST_CONFIG} --version`],
       [AC_CONFIG_SUBDIRS([../googletest])
-      # GTEST_CONFIG needs to be executable both in a Makefile environmont and
+      # GTEST_CONFIG needs to be executable both in a Makefile environment and
       # in a shell script environment, so resolve an absolute path for it here.
       GTEST_CONFIG="`pwd -P`/../googletest/scripts/gtest-config"
       GTEST_CPPFLAGS='-I$(top_srcdir)/../googletest/include'
