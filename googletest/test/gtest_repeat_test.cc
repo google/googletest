@@ -132,7 +132,7 @@ TEST_P(MyParamTest, ShouldPass) {
   GTEST_CHECK_INT_EQ_(g_param_test_count % kNumberOfParamTests, GetParam());
   g_param_test_count++;
 }
-INSTANTIATE_TEST_CASE_P(MyParamSequence,
+INSTANTIATE_TEST_SUITE_P(MyParamSequence,
                         MyParamTest,
                         testing::Range(0, kNumberOfParamTests));
 #endif  // GTEST_HAS_PARAM_TEST

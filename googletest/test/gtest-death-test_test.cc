@@ -1018,12 +1018,12 @@ class MacroLogicDeathTest : public testing::Test {
   static testing::internal::ReplaceDeathTestFactory* replacer_;
   static MockDeathTestFactory* factory_;
 
-  static void SetUpTestCase() {
+  static void SetUpTestSuite() {
     factory_ = new MockDeathTestFactory;
     replacer_ = new testing::internal::ReplaceDeathTestFactory(factory_);
   }
 
-  static void TearDownTestCase() {
+  static void TearDownTestSuite() {
     delete replacer_;
     replacer_ = NULL;
     delete factory_;

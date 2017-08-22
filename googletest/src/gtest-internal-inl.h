@@ -574,16 +574,16 @@ class GTEST_API_ UnitTestImpl {
 
   // Gets the i-th test case among all the test cases. i can range from 0 to
   // total_test_case_count() - 1. If i is not in that range, returns NULL.
-  const TestCase* GetTestCase(int i) const {
+  const TestSuite* GetTestCase(int i) const {
     const int index = GetElementOr(test_case_indices_, i, -1);
-    return index < 0 ? NULL : test_cases_[i];
+    return index < 0 ? NULL : test_suites_[i];
   }
 
   // Gets the i-th test case among all the test cases. i can range from 0 to
   // total_test_case_count() - 1. If i is not in that range, returns NULL.
-  TestCase* GetMutableTestCase(int i) {
+  TestSuite* GetMutableTestCase(int i) {
     const int index = GetElementOr(test_case_indices_, i, -1);
-    return index < 0 ? NULL : test_cases_[index];
+    return index < 0 ? NULL : test_suites_[index];
   }
 
   // Provides access to the event listener list.
@@ -634,7 +634,7 @@ class GTEST_API_ UnitTestImpl {
   //                    (for backward compatibility)
   //   tear_down_tc:    pointer to the function that tears down the test case
   //                    (for backward compatibility)
-  TestCase* GetTestCase(const char* test_suite_name,
+  TestSuite* GetTestCase(const char* test_suite_name,
                         const char* type_param,
                         Test::SetUpTestSuiteFunc set_up_ts,
                         Test::TearDownTestSuiteFunc tear_down_ts
@@ -700,7 +700,7 @@ class GTEST_API_ UnitTestImpl {
 #endif  // GTEST_HAS_PARAM_TEST
 
   // Sets the TestCase object for the test that's currently running.
-  void set_current_test_case(TestCase* a_current_test_case) {
+  void set_current_test_case(TestSuite* a_current_test_case) {
     current_test_case_ = a_current_test_case;
   }
 
@@ -727,7 +727,7 @@ class GTEST_API_ UnitTestImpl {
 
   // Clears the results of all tests, except the ad hoc tests.
   void ClearNonAdHocTestResult() {
-    ForEach(test_cases_, TestSuite::ClearTestSuiteResult);
+    ForEach(test_suites_, TestSuite::ClearTestSuiteResult);
   }
 
   // Clears the results of ad-hoc test assertions.
@@ -757,7 +757,7 @@ class GTEST_API_ UnitTestImpl {
   // Prints the names of the tests matching the user-specified filter flag.
   void ListTestsMatchingFilter();
 
-  const TestCase* current_test_case() const { return current_test_case_; }
+  const TestSuite* current_test_case() const { return current_test_case_; }
   TestInfo* current_test_info() { return current_test_info_; }
   const TestInfo* current_test_info() const { return current_test_info_; }
 
@@ -862,9 +862,9 @@ class GTEST_API_ UnitTestImpl {
   // before/after the tests are run.
   std::vector<Environment*> environments_;
 
-  // The vector of TestCases in their original order.  It owns the
+  // The vector of TestSuites in their original order.  It owns the
   // elements in the vector.
-  std::vector<TestCase*> test_cases_;
+  std::vector<TestSuite*> test_suites_;
 
   // Provides a level of indirection for the test case list to allow
   // easy shuffling and restoring the test case order.  The i-th
@@ -888,7 +888,7 @@ class GTEST_API_ UnitTestImpl {
   // changes as Google Test goes through one test case after another.
   // When no test is running, this is set to NULL and Google Test
   // stores assertion results in ad_hoc_test_result_.  Initially NULL.
-  TestCase* current_test_case_;
+  TestSuite* current_test_case_;
 
   // This points to the TestInfo for the currently running test.  It
   // changes as Google Test goes through one test after another.  When

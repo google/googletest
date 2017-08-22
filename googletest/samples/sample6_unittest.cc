@@ -93,7 +93,7 @@ using testing::Types;
 // The list of types we want to test.
 typedef Types<OnTheFlyPrimeTable, PreCalculatedPrimeTable> Implementations;
 
-TYPED_TEST_CASE(PrimeTableTest, Implementations);
+TYPED_TEST_SUITE(PrimeTableTest, Implementations);
 
 // Then use TYPED_TEST(TestCaseName, TestName) to define a typed test,
 // similar to TEST_F.
@@ -164,7 +164,7 @@ class PrimeTableTest2 : public PrimeTableTest<T> {
 // Then, declare the test case.  The argument is the name of the test
 // fixture, and also the name of the test case (as usual).  The _P
 // suffix is for "parameterized" or "pattern".
-TYPED_TEST_CASE_P(PrimeTableTest2);
+TYPED_TEST_SUITE_P(PrimeTableTest2);
 
 // Next, use TYPED_TEST_P(TestCaseName, TestName) to define a test,
 // similar to what you do with TEST_F.
@@ -197,7 +197,7 @@ TYPED_TEST_P(PrimeTableTest2, CanGetNextPrime) {
 
 // Type-parameterized tests involve one extra step: you have to
 // enumerate the tests you defined:
-REGISTER_TYPED_TEST_CASE_P(
+REGISTER_TYPED_TEST_SUITE_P(
     PrimeTableTest2,  // The first argument is the test case name.
     // The rest of the arguments are the test names.
     ReturnsFalseForNonPrimes, ReturnsTrueForPrimes, CanGetNextPrime);
@@ -217,9 +217,9 @@ REGISTER_TYPED_TEST_CASE_P(
 // defined at the time we write the TYPED_TEST_P()s.
 typedef Types<OnTheFlyPrimeTable, PreCalculatedPrimeTable>
     PrimeTableImplementations;
-INSTANTIATE_TYPED_TEST_CASE_P(OnTheFlyAndPreCalculated,    // Instance name
-                              PrimeTableTest2,             // Test case name
-                              PrimeTableImplementations);  // Type list
+INSTANTIATE_TYPED_TEST_SUITE_P(OnTheFlyAndPreCalculated,    // Instance name
+                               PrimeTableTest2,             // Test case name
+                               PrimeTableImplementations);  // Type list
 
 #endif  // GTEST_HAS_TYPED_TEST_P
 }  // namespace

@@ -40,7 +40,6 @@ using ::testing::AddGlobalTestEnvironment;
 using ::testing::Environment;
 using ::testing::InitGoogleTest;
 using ::testing::Test;
-using ::testing::TestCase;
 using ::testing::TestEventListener;
 using ::testing::TestInfo;
 using ::testing::TestPartResult;

@@ -551,8 +551,8 @@ GTEST_API_ TestInfo* MakeAndRegisterTestInfo(
     // backward compatibility
     , SetUpTestCaseFunc set_up_tc = NULL,
     TearDownTestCaseFunc tear_down_tc = NULL
-    );
 #endif
+    );
 
 // If *pstr starts with the given prefix, modifies *pstr to be right
 // past the prefix and returns true; otherwise leaves *pstr unchanged
@@ -640,7 +640,7 @@ template <GTEST_TEMPLATE_ Fixture, class TestSel, typename Types>
 class TypeParameterizedTest {
  public:
   // 'index' is the index of the test in the type list 'Types'
-  // specified in INSTANTIATE_TYPED_TEST_CASE_P(Prefix, TestCase,
+  // specified in INSTANTIATE_TYPED_TEST_CASE_P(Prefix, TestSuite,
   // Types).  Valid values for 'index' are [0, N - 1] where N is the
   // length of Types.
   static bool Register(const char* prefix,
@@ -661,9 +661,14 @@ class TypeParameterizedTest {
         NULL,  // No value parameter.
         code_location,
         GetTypeId<FixtureClass>(),
-        TestClass::SetUpTestCase,
-        TestClass::TearDownTestCase,
-        new TestFactoryImpl<TestClass>);
+        TestClass::SetUpTestSuite,
+        TestClass::TearDownTestSuite,
+        new TestFactoryImpl<TestClass>
+#if GTEST_HAS_TESTCASE
+        , TestClass::SetUpTestCase,
+        TestClass::TearDownTestCase
+#endif
+    );
 
     // Next, recurses (at compile time) with the tail of the type list.
     return TypeParameterizedTest<Fixture, TestSel, typename Types::Tail>

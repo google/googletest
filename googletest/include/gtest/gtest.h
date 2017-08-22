@@ -989,9 +989,9 @@ class GTEST_API_ TestSuite {
   // vector is the index of the i-th test in the shuffled test list.
   std::vector<int> test_indices_;
   // Pointer to the function that sets up the test suite.
-  Test::SetUpTestCaseFunc set_up_ts_;
+  Test::SetUpTestSuiteFunc set_up_ts_;
   // Pointer to the function that tears down the test suite.
-  Test::TearDownTestCaseFunc tear_down_ts_;
+  Test::TearDownTestSuiteFunc tear_down_ts_;
 #if GTEST_HAS_TESTCASE
   // For backward compatibiliy:
   // Pointer to the function that sets up the test case.
@@ -1212,7 +1212,7 @@ class GTEST_API_ TestEventListeners {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(TestEventListeners);
 };
 
-// A UnitTest consists of a vector of TestCases.
+// A UnitTest consists of a vector of TestSuites.
 //
 // This is a singleton class.  The only instance of UnitTest is
 // created when UnitTest::GetInstance() is first called.  This
@@ -1241,9 +1241,9 @@ class GTEST_API_ UnitTest {
   // was executed.  The UnitTest object owns the string.
   const char* original_working_dir() const;
 
-  // Returns the TestCase object for the test that's currently running,
+  // Returns the TestSuite object for the test that's currently running,
   // or NULL if no test is running.
-  const TestCase* current_test_case() const
+  const TestSuite* current_test_case() const
       GTEST_LOCK_EXCLUDED_(mutex_);
 
   // Returns the TestInfo object for the test that's currently running,
@@ -1313,7 +1313,7 @@ class GTEST_API_ UnitTest {
 
   // Gets the i-th test case among all the test cases. i can range from 0 to
   // total_test_case_count() - 1. If i is not in that range, returns NULL.
-  const TestCase* GetTestCase(int i) const;
+  const TestSuite* GetTestCase(int i) const;
 
   // Returns the TestResult containing information on test failures and
   // properties logged outside of individual test cases.
@@ -1355,7 +1355,7 @@ class GTEST_API_ UnitTest {
 
   // Gets the i-th test case among all the test cases. i can range from 0 to
   // total_test_case_count() - 1. If i is not in that range, returns NULL.
-  TestCase* GetMutableTestCase(int i);
+  TestSuite* GetMutableTestCase(int i);
 
   // Accessors for the implementation object.
   internal::UnitTestImpl* impl() { return impl_; }
