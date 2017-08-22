@@ -162,9 +162,15 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
 // The 'Types' template argument below must have spaces around it
 // since some compilers may choke on '>>' when passing a template
 // instance (e.g. Types<int>)
-# define TYPED_TEST_CASE(CaseName, Types) \
+# define TYPED_TEST_SUITE(CaseName, Types) \
   typedef ::testing::internal::TypeList< Types >::type \
       GTEST_TYPE_PARAMS_(CaseName)
+
+#if GTEST_HAS_TESTCASE
+// backward compatibility
+# define TYPED_TEST_CASE(CaseName, Types) \
+  TYPED_TEST_SUITE(CaseName, Types)
+#endif // GTEST_HAS_TESTCASE
 
 # define TYPED_TEST(CaseName, TestName) \
   template <typename gtest_TypeParam_> \
@@ -217,9 +223,15 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
 // The variables defined in the type-parameterized test macros are
 // static as typically these macros are used in a .h file that can be
 // #included in multiple translation units linked together.
-# define TYPED_TEST_CASE_P(CaseName) \
+# define TYPED_TEST_SUITE_P(CaseName) \
   static ::testing::internal::TypedTestCasePState \
       GTEST_TYPED_TEST_CASE_P_STATE_(CaseName)
+
+#if GTEST_HAS_TESTCASE
+// backward compatibility
+# define TYPED_TEST_CASE_P(CaseName) \
+  TYPED_TEST_SUITE_P(CaseName)
+#endif // GTEST_HAS_TESTCASE
 
 # define TYPED_TEST_P(CaseName, TestName) \
   namespace GTEST_CASE_NAMESPACE_(CaseName) { \
@@ -237,7 +249,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
   template <typename gtest_TypeParam_> \
   void GTEST_CASE_NAMESPACE_(CaseName)::TestName<gtest_TypeParam_>::TestBody()
 
-# define REGISTER_TYPED_TEST_CASE_P(CaseName, ...) \
+# define REGISTER_TYPED_TEST_SUITE_P(CaseName, ...) \
   namespace GTEST_CASE_NAMESPACE_(CaseName) { \
   typedef ::testing::internal::Templates<__VA_ARGS__>::type gtest_AllTests_; \
   } \
@@ -246,10 +258,16 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
           GTEST_TYPED_TEST_CASE_P_STATE_(CaseName).VerifyRegisteredTestNames(\
               __FILE__, __LINE__, #__VA_ARGS__)
 
+#if GTEST_HAS_TESTCASE
+// backward compatibility
+# define REGISTER_TYPED_TEST_CASE_P(...) \
+  REGISTER_TYPED_TEST_SUITE_P(__VA_ARGS__)
+#endif // GTEST_HAS_TESTCASE
+
 // The 'Types' template argument below must have spaces around it
 // since some compilers may choke on '>>' when passing a template
 // instance (e.g. Types<int>)
-# define INSTANTIATE_TYPED_TEST_CASE_P(Prefix, CaseName, Types) \
+# define INSTANTIATE_TYPED_TEST_SUITE_P(Prefix, CaseName, Types) \
   bool gtest_##Prefix##_##CaseName GTEST_ATTRIBUTE_UNUSED_ = \
       ::testing::internal::TypeParameterizedTestCase<CaseName, \
           GTEST_CASE_NAMESPACE_(CaseName)::gtest_AllTests_, \
@@ -258,6 +276,12 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
               ::testing::internal::CodeLocation(__FILE__, __LINE__), \
               &GTEST_TYPED_TEST_CASE_P_STATE_(CaseName), \
               #CaseName, GTEST_REGISTERED_TEST_NAMES_(CaseName))
+
+#if GTEST_HAS_TESTCASE
+// backward compatibility
+# define INSTANTIATE_TYPED_TEST_CASE_P(Prefix, CaseName, Types) \
+  INSTANTIATE_TYPED_TEST_SUITE_P(Prefix, CaseName, Types)
+#endif // GTEST_HAS_TESTCASE
 
 #endif  // GTEST_HAS_TYPED_TEST_P
 
