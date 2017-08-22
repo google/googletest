@@ -1209,7 +1209,7 @@ class DestructorTracker {
       : index_(GetNewIndex()) {}
   ~DestructorTracker() {
     // We never access DestructorCall::List() concurrently, so we don't need
-    // to protect this acccess with a mutex.
+    // to protect this access with a mutex.
     DestructorCall::List()[index_]->ReportDestroyed();
   }
 
