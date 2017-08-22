@@ -198,6 +198,8 @@ class PathLike {
   };
   typedef iterator const_iterator;
 
+  PathLike() {}
+
   iterator begin() const { return iterator(); }
   iterator end() const { return iterator(); }
 

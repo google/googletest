@@ -364,7 +364,7 @@ UntypedFunctionMockerBase::UntypedInvokeWith(const void* const untyped_args)
 
     if (!need_to_report_uninteresting_call) {
       // Perform the action without printing the call information.
-      return this->UntypedPerformDefaultAction(untyped_args, "");
+      return this->UntypedPerformDefaultAction(untyped_args, "Function call: " + std::string(Name()));
     }
 
     // Warns about the uninteresting call.

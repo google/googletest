@@ -310,7 +310,8 @@ namespace internal {
 // than kMaxRange.
 UInt32 Random::Generate(UInt32 range) {
   // These constants are the same as are used in glibc's rand(3).
-  state_ = (1103515245U*state_ + 12345U) % kMaxRange;
+  // Use wider types than necessary to prevent unsigned overflow diagnostics.
+  state_ = static_cast<UInt32>(1103515245ULL*state_ + 12345U) % kMaxRange;
 
   GTEST_CHECK_(range > 0)
       << "Cannot generate a number in the range [0, 0).";
@@ -1168,7 +1169,7 @@ class Hunk {
   // Print a unified diff header for one hunk.
   // The format is
   //   "@@ -<left_start>,<left_length> +<right_start>,<right_length> @@"
-  // where the left/right parts are ommitted if unnecessary.
+  // where the left/right parts are omitted if unnecessary.
   void PrintHeader(std::ostream* ss) const {
     *ss << "@@ ";
     if (removes_) {
@@ -1781,7 +1782,7 @@ std::string CodePointToUtf8(UInt32 code_point) {
   return str;
 }
 
-// The following two functions only make sense if the the system
+// The following two functions only make sense if the system
 // uses UTF-16 for wide string encoding. All supported systems
 // with 16 bit wchar_t (Windows, Cygwin, Symbian OS) do use UTF-16.
 
@@ -2894,6 +2895,33 @@ WORD GetColorAttribute(GTestColor color) {
   }
 }
 
+int GetBitOffset(WORD color_mask) {
+  if (color_mask == 0) return 0;
+
+  int bitOffset = 0;
+  while((color_mask & 1) == 0) {
+    color_mask >>= 1;
+    ++bitOffset;
+  }
+  return bitOffset;
+}
+
+WORD GetNewColor(GTestColor color, WORD old_color_attrs) {
+  // Let's reuse the BG
+  static const WORD background_mask = BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_INTENSITY;
+  static const WORD foreground_mask = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
+  const WORD existing_bg = old_color_attrs & background_mask;
+
+  WORD new_color = GetColorAttribute(color) | existing_bg | FOREGROUND_INTENSITY;
+  static const int bg_bitOffset = GetBitOffset(background_mask);
+  static const int fg_bitOffset = GetBitOffset(foreground_mask);
+
+  if (((new_color & background_mask) >> bg_bitOffset) == ((new_color & foreground_mask) >> fg_bitOffset)) {
+    new_color ^= FOREGROUND_INTENSITY; //invert intensity
+  }
+  return new_color;
+}
+	
 #else
 
 // Returns the ANSI color code for the given color.  COLOR_DEFAULT is
@@ -2979,13 +3007,14 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   CONSOLE_SCREEN_BUFFER_INFO buffer_info;
   GetConsoleScreenBufferInfo(stdout_handle, &buffer_info);
   const WORD old_color_attrs = buffer_info.wAttributes;
-
+  const WORD new_color = GetNewColor(color, old_color_attrs);
+  
   // We need to flush the stream buffers into the console before each
   // SetConsoleTextAttribute call lest it affect the text that is already
   // printed but has not yet reached the console.
   fflush(stdout);
-  SetConsoleTextAttribute(stdout_handle,
-                          GetColorAttribute(color) | FOREGROUND_INTENSITY);
+  SetConsoleTextAttribute(stdout_handle, new_color);
+
   vprintf(fmt, args);
 
   fflush(stdout);
@@ -5188,7 +5217,7 @@ static const char kColorEncodedHelpMessage[] =
 "  @G--" GTEST_FLAG_PREFIX_ "output=xml@Y[@G:@YDIRECTORY_PATH@G"
     GTEST_PATH_SEP_ "@Y|@G:@YFILE_PATH]@D\n"
 "      Generate an XML report in the given directory or with the given file\n"
-"      name. @YFILE_PATH@D defaults to @Gtest_details.xml@D.\n"
+"      name. @YFILE_PATH@D defaults to @Gtest_detail.xml@D.\n"
 #if GTEST_CAN_STREAM_RESULTS_
 "  @G--" GTEST_FLAG_PREFIX_ "stream_result_to=@YHOST@G:@YPORT@D\n"
 "      Stream test results to the given server.\n"
