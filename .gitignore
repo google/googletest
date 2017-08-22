@@ -1,3 +1,10 @@
 # Ignore CI build directory
 build/
 xcuserdata
+cmake-build-debug/
+.idea/
+bazel-bin
+bazel-genfiles
+bazel-googletest
+bazel-out
+bazel-testlogs
