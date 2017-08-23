@@ -31,7 +31,7 @@
 
 // This sample shows how to test common properties of multiple
 // implementations of an interface (aka interface tests) using
-// value-parameterized tests. Each test in the test case has
+// value-parameterized tests. Each test in the test suite has
 // a parameter that is an interface pointer to an implementation
 // tested.
 
