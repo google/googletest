@@ -3156,7 +3156,7 @@ void PrettyUnitTestResultPrinter::OnTestIterationStart(
   ColoredPrintf(COLOR_GREEN,  "[==========] ");
   printf("Running %s from %s.\n",
          FormatTestCount(unit_test.test_to_run_count()).c_str(),
-         FormatTestCaseCount(unit_test.test_case_to_run_count()).c_str());
+         FormatTestCaseCount(unit_test.test_suite_to_run_count()).c_str());
   fflush(stdout);
 }
 
@@ -3254,7 +3254,7 @@ void PrettyUnitTestResultPrinter::PrintFailedTests(const UnitTest& unit_test) {
     return;
   }
 
-  for (int i = 0; i < unit_test.total_test_case_count(); ++i) {
+  for (int i = 0; i < unit_test.total_test_suite_count(); ++i) {
     const TestSuite& test_suite = *unit_test.GetTestCase(i);
     if (!test_suite.should_run() || (test_suite.failed_test_count() == 0)) {
       continue;
@@ -3277,7 +3277,7 @@ void PrettyUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
   ColoredPrintf(COLOR_GREEN,  "[==========] ");
   printf("%s from %s ran.",
          FormatTestCount(unit_test.test_to_run_count()).c_str(),
-         FormatTestCaseCount(unit_test.test_case_to_run_count()).c_str());
+         FormatTestCaseCount(unit_test.test_suite_to_run_count()).c_str());
   if (GTEST_FLAG(print_time)) {
     printf(" (%s ms total)",
            internal::StreamableToString(unit_test.elapsed_time()).c_str());
@@ -3828,7 +3828,7 @@ void XmlUnitTestResultPrinter::PrintXmlUnitTest(std::ostream* stream,
   OutputXmlAttribute(stream, kTestsuites, "name", "AllTests");
   *stream << ">\n";
 
-  for (int i = 0; i < unit_test.total_test_case_count(); ++i) {
+  for (int i = 0; i < unit_test.total_test_suite_count(); ++i) {
     if (unit_test.GetTestCase(i)->reportable_test_count() > 0)
       PrintXmlTestSuite(stream, *unit_test.GetTestCase(i));
   }
@@ -4089,24 +4089,24 @@ UnitTest* UnitTest::GetInstance() {
 #endif  // (_MSC_VER == 1310 && !defined(_DEBUG)) || defined(__BORLANDC__)
 }
 
-// Gets the number of successful test cases.
-int UnitTest::successful_test_case_count() const {
+// Gets the number of successful test suites.
+int UnitTest::successful_test_suite_count() const {
   return impl()->successful_test_case_count();
 }
 
-// Gets the number of failed test cases.
-int UnitTest::failed_test_case_count() const {
+// Gets the number of failed test suites.
+int UnitTest::failed_test_suite_count() const {
   return impl()->failed_test_case_count();
 }
 
-// Gets the number of all test cases.
-int UnitTest::total_test_case_count() const {
+// Gets the number of all test suites.
+int UnitTest::total_test_suite_count() const {
   return impl()->total_test_case_count();
 }
 
-// Gets the number of all test cases that contain at least one test
+// Gets the number of all test suites that contain at least one test
 // that should run.
-int UnitTest::test_case_to_run_count() const {
+int UnitTest::test_suite_to_run_count() const {
   return impl()->test_case_to_run_count();
 }
 
@@ -4158,7 +4158,7 @@ bool UnitTest::Passed() const { return impl()->Passed(); }
 bool UnitTest::Failed() const { return impl()->Failed(); }
 
 // Gets the i-th test case among all the test cases. i can range from 0 to
-// total_test_case_count() - 1. If i is not in that range, returns NULL.
+// total_test_suite_count() - 1. If i is not in that range, returns NULL.
 const TestSuite* UnitTest::GetTestCase(int i) const {
   return impl()->GetTestCase(i);
 }
@@ -4170,7 +4170,7 @@ const TestResult& UnitTest::ad_hoc_test_result() const {
 }
 
 // Gets the i-th test case among all the test cases. i can range from 0 to
-// total_test_case_count() - 1. If i is not in that range, returns NULL.
+// total_test_suite_count() - 1. If i is not in that range, returns NULL.
 TestSuite* UnitTest::GetMutableTestCase(int i) {
   return impl()->GetMutableTestCase(i);
 }

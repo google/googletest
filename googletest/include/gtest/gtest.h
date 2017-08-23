@@ -1306,19 +1306,26 @@ class GTEST_API_ UnitTest {
       GTEST_LOCK_EXCLUDED_(mutex_);
 #endif  // GTEST_HAS_PARAM_TEST
 
-  // Gets the number of successful test cases.
-  int successful_test_case_count() const;
+  // Gets the number of successful test suites.
+  int successful_test_suite_count() const;
 
-  // Gets the number of failed test cases.
-  int failed_test_case_count() const;
+  // Gets the number of failed test suites.
+  int failed_test_suite_count() const;
 
-  // Gets the number of all test cases.
-  int total_test_case_count() const;
+  // Gets the number of all test suites.
+  int total_test_suite_count() const;
 
-  // Gets the number of all test cases that contain at least one test
+  // Gets the number of all test suites that contain at least one test
   // that should run.
-  int test_case_to_run_count() const;
+  int test_suite_to_run_count() const;
 
+#if GTEST_HAS_TESTCASE
+  // backward compatibility
+  int successful_test_case_count() const { return successful_test_suite_count(); }
+  int failed_test_case_count() const { return failed_test_suite_count(); }
+  int total_test_case_count() const { return total_test_suite_count(); }
+  int test_case_to_run_count() const { return test_case_to_run_count(); }
+#endif
   // Gets the number of successful tests.
   int successful_test_count() const;
 

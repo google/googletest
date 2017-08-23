@@ -867,7 +867,7 @@ TEST(CustomNamingTest, CheckNameRegistry) {
   ::testing::UnitTest* unit_test = ::testing::UnitTest::GetInstance();
   std::set<std::string> test_names;
   for (int case_num = 0;
-       case_num < unit_test->total_test_case_count();
+       case_num < unit_test->total_test_suite_count();
        ++case_num) {
     const ::testing::TestSuite* test_suite = unit_test->GetTestCase(case_num);
     for (int test_num = 0;

@@ -57,13 +57,13 @@ class UnitTestHelper {
   static TestSuite const** GetSortedTestCases() {
     UnitTest& unit_test = *UnitTest::GetInstance();
     TestSuite const** const test_suites =
-        new const TestSuite*[unit_test.total_test_case_count()];
+        new const TestSuite*[unit_test.total_test_suite_count()];
 
-    for (int i = 0; i < unit_test.total_test_case_count(); ++i)
+    for (int i = 0; i < unit_test.total_test_suite_count(); ++i)
       test_suites[i] = unit_test.GetTestCase(i);
 
     std::sort(test_suites,
-              test_suites + unit_test.total_test_case_count(),
+              test_suites + unit_test.total_test_suite_count(),
               LessByName<TestSuite>());
     return test_suites;
   }
@@ -72,7 +72,7 @@ class UnitTestHelper {
   // pointer.
   static const TestSuite* FindTestCase(const char* name) {
     UnitTest& unit_test = *UnitTest::GetInstance();
-    for (int i = 0; i < unit_test.total_test_case_count(); ++i) {
+    for (int i = 0; i < unit_test.total_test_suite_count(); ++i) {
       const TestSuite* test_case = unit_test.GetTestCase(i);
       if (0 == strcmp(test_case->name(), name))
         return test_case;
@@ -114,8 +114,8 @@ const int kTypedTests = 0;
 TEST(ApiTest, UnitTestImmutableAccessorsWork) {
   UnitTest* unit_test = UnitTest::GetInstance();
 
-  ASSERT_EQ(2 + kTypedTestCases, unit_test->total_test_case_count());
-  EXPECT_EQ(1 + kTypedTestCases, unit_test->test_case_to_run_count());
+  ASSERT_EQ(2 + kTypedTestCases, unit_test->total_test_suite_count());
+  EXPECT_EQ(1 + kTypedTestCases, unit_test->test_suite_to_run_count());
   EXPECT_EQ(2, unit_test->disabled_test_count());
   EXPECT_EQ(5 + kTypedTests, unit_test->total_test_count());
   EXPECT_EQ(3 + kTypedTests, unit_test->test_to_run_count());
@@ -236,13 +236,13 @@ class FinalSuccessChecker : public Environment {
   virtual void TearDown() {
     UnitTest* unit_test = UnitTest::GetInstance();
 
-    EXPECT_EQ(1 + kTypedTestCases, unit_test->successful_test_case_count());
+    EXPECT_EQ(1 + kTypedTestCases, unit_test->successful_test_suite_count());
     EXPECT_EQ(3 + kTypedTests, unit_test->successful_test_count());
-    EXPECT_EQ(0, unit_test->failed_test_case_count());
+    EXPECT_EQ(0, unit_test->failed_test_suite_count());
     EXPECT_EQ(0, unit_test->failed_test_count());
     EXPECT_TRUE(unit_test->Passed());
     EXPECT_FALSE(unit_test->Failed());
-    ASSERT_EQ(2 + kTypedTestCases, unit_test->total_test_case_count());
+    ASSERT_EQ(2 + kTypedTestCases, unit_test->total_test_suite_count());
 
     const TestSuite** const test_suites = UnitTestHelper::GetSortedTestCases();
 
