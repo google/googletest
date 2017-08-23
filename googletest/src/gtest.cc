@@ -3181,7 +3181,7 @@ void PrettyUnitTestResultPrinter::OnTestSuiteStart(const TestSuite& test_suite) 
 }
 
 #if GTEST_HAS_TESTCASE
-void PrettyUnitTestResultPrinter::OnTestCaseStart(const TestSuite& test_suite) {
+void PrettyUnitTestResultPrinter::OnTestCaseStart(const TestSuite& /* test_suite */) {
 }
 #endif
 
@@ -3236,7 +3236,7 @@ void PrettyUnitTestResultPrinter::OnTestSuiteEnd(const TestSuite& test_suite) {
 }
 
 #if GTEST_HAS_TESTCASE
-void PrettyUnitTestResultPrinter::OnTestCaseEnd(const TestSuite& test_suite) {
+void PrettyUnitTestResultPrinter::OnTestCaseEnd(const TestSuite& /* test_suite */) {
 }
 #endif
 
