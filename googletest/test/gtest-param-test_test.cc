@@ -643,7 +643,7 @@ class TestGenerationTest : public TestWithParam<int> {
     EXPECT_EQ(current_parameter_, GetParam());
   }
 
-  static void SetUpTestCase() {
+  static void SetUpTestSuite() {
     bool all_tests_in_test_case_selected = true;
 
     for (int i = 0; i < PARAMETER_COUNT; ++i) {
@@ -664,7 +664,7 @@ class TestGenerationTest : public TestWithParam<int> {
     collected_parameters_.clear();
   }
 
-  static void TearDownTestCase() {
+  static void TearDownTestSuite() {
     vector<int> expected_values(test_generation_params,
                                 test_generation_params + PARAMETER_COUNT);
     // Test execution order is not guaranteed by Google Test,
@@ -767,7 +767,7 @@ class SeparateInstanceTest : public TestWithParam<int> {
  public:
   SeparateInstanceTest() : count_(0) {}
 
-  static void TearDownTestCase() {
+  static void TearDownTestSuite() {
     EXPECT_GE(global_count_, 2)
         << "If some (but not all) SeparateInstanceTest tests have been "
         << "filtered out this test will fail. Make sure that all "

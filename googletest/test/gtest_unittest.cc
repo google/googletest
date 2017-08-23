@@ -1992,7 +1992,7 @@ void ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
 class UnitTestRecordPropertyTest :
     public testing::internal::UnitTestRecordPropertyTestHelper {
  public:
-  static void SetUpTestCase() {
+  static void SetUpTestSuite() {
     ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestSuite(
         "disabled");
     ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestSuite(
@@ -6602,8 +6602,8 @@ TEST_F(FlagfileTest, SeveralFlags) {
 class CurrentTestInfoTest : public Test {
  protected:
   // Tests that current_test_info() returns NULL before the first test in
-  // the test case is run.
-  static void SetUpTestCase() {
+  // the test suite is run.
+  static void SetUpTestSuite() {
     // There should be no tests running at this point.
     const TestInfo* test_info =
       UnitTest::GetInstance()->current_test_info();
@@ -6612,8 +6612,8 @@ class CurrentTestInfoTest : public Test {
   }
 
   // Tests that current_test_info() returns NULL after the last test in
-  // the test case has run.
-  static void TearDownTestCase() {
+  // the test suite has run.
+  static void TearDownTestSuite() {
     const TestInfo* test_info =
       UnitTest::GetInstance()->current_test_info();
     EXPECT_TRUE(test_info == NULL)
