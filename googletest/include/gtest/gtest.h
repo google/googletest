@@ -657,7 +657,7 @@ class GTEST_API_ TestResult {
 
 // A TestInfo object stores the following information about a test:
 //
-//   Test case name
+//   Test suite name
 //   Test name
 //   Whether the test should be run
 //   A function pointer that creates the test object when invoked
@@ -672,8 +672,12 @@ class GTEST_API_ TestInfo {
   // don't inherit from TestInfo.
   ~TestInfo();
 
-  // Returns the test case name.
-  const char* test_case_name() const { return test_case_name_.c_str(); }
+  // Returns the test suite name.
+  const char* test_suite_name() const { return test_case_name_.c_str(); }
+#if GTEST_HAS_TESTCASE
+  // for backward compatibility
+  const char* test_case_name() const { return test_suite_name(); }
+#endif
 
   // Returns the test name.
   const char* name() const { return name_.c_str(); }

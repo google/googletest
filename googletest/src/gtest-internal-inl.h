@@ -678,7 +678,7 @@ class GTEST_API_ UnitTestImpl {
           << "Failed to get the current working directory.";
     }
 
-    GetTestCase(test_info->test_case_name(),
+    GetTestCase(test_info->test_suite_name(),
                 test_info->type_param(),
                 set_up_ts,
                 tear_down_ts

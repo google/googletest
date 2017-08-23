@@ -571,23 +571,23 @@ TEST_F(MixedUpTestCaseWithSameTestNameTest,
 // test case checks the scenario where TEST_F appears before TEST, and
 // the second one checks where TEST appears before TEST_F.
 
-class TEST_F_before_TEST_in_same_test_case : public testing::Test {
+class TEST_F_before_TEST_in_same_test_suite : public testing::Test {
 };
 
-TEST_F(TEST_F_before_TEST_in_same_test_case, DefinedUsingTEST_F) {}
+TEST_F(TEST_F_before_TEST_in_same_test_suite, DefinedUsingTEST_F) {}
 
 // Expected to fail.  We rely on the golden file to check that Google Test
 // generates the right error message.
-TEST(TEST_F_before_TEST_in_same_test_case, DefinedUsingTESTAndShouldFail) {}
+TEST(TEST_F_before_TEST_in_same_test_suite, DefinedUsingTESTAndShouldFail) {}
 
-class TEST_before_TEST_F_in_same_test_case : public testing::Test {
+class TEST_before_TEST_F_in_same_test_suite : public testing::Test {
 };
 
-TEST(TEST_before_TEST_F_in_same_test_case, DefinedUsingTEST) {}
+TEST(TEST_before_TEST_F_in_same_test_suite, DefinedUsingTEST) {}
 
 // Expected to fail.  We rely on the golden file to check that Google Test
 // generates the right error message.
-TEST_F(TEST_before_TEST_F_in_same_test_case, DefinedUsingTEST_FAndShouldFail) {
+TEST_F(TEST_before_TEST_F_in_same_test_suite, DefinedUsingTEST_FAndShouldFail) {
 }
 
 // Used for testing EXPECT_NONFATAL_FAILURE() and EXPECT_FATAL_FAILURE().

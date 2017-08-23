@@ -158,25 +158,25 @@ TEST(ApiTest, TestCaseImmutableAccessorsWork) {
   const TestInfo** tests = UnitTestHelper::GetSortedTests(test_suite);
 
   EXPECT_STREQ("DISABLED_Dummy1", tests[0]->name());
-  EXPECT_STREQ("ApiTest", tests[0]->test_case_name());
+  EXPECT_STREQ("ApiTest", tests[0]->test_suite_name());
   EXPECT_TRUE(IsNull(tests[0]->value_param()));
   EXPECT_TRUE(IsNull(tests[0]->type_param()));
   EXPECT_FALSE(tests[0]->should_run());
 
   EXPECT_STREQ("TestCaseDisabledAccessorsWork", tests[1]->name());
-  EXPECT_STREQ("ApiTest", tests[1]->test_case_name());
+  EXPECT_STREQ("ApiTest", tests[1]->test_suite_name());
   EXPECT_TRUE(IsNull(tests[1]->value_param()));
   EXPECT_TRUE(IsNull(tests[1]->type_param()));
   EXPECT_TRUE(tests[1]->should_run());
 
   EXPECT_STREQ("TestCaseImmutableAccessorsWork", tests[2]->name());
-  EXPECT_STREQ("ApiTest", tests[2]->test_case_name());
+  EXPECT_STREQ("ApiTest", tests[2]->test_suite_name());
   EXPECT_TRUE(IsNull(tests[2]->value_param()));
   EXPECT_TRUE(IsNull(tests[2]->type_param()));
   EXPECT_TRUE(tests[2]->should_run());
 
   EXPECT_STREQ("UnitTestImmutableAccessorsWork", tests[3]->name());
-  EXPECT_STREQ("ApiTest", tests[3]->test_case_name());
+  EXPECT_STREQ("ApiTest", tests[3]->test_suite_name());
   EXPECT_TRUE(IsNull(tests[3]->value_param()));
   EXPECT_TRUE(IsNull(tests[3]->type_param()));
   EXPECT_TRUE(tests[3]->should_run());
@@ -198,7 +198,7 @@ TEST(ApiTest, TestCaseImmutableAccessorsWork) {
   tests = UnitTestHelper::GetSortedTests(test_suite);
 
   EXPECT_STREQ("Dummy", tests[0]->name());
-  EXPECT_STREQ("TestCaseWithCommentTest/0", tests[0]->test_case_name());
+  EXPECT_STREQ("TestCaseWithCommentTest/0", tests[0]->test_suite_name());
   EXPECT_TRUE(IsNull(tests[0]->value_param()));
   EXPECT_STREQ(GetTypeName<int>().c_str(), tests[0]->type_param());
   EXPECT_TRUE(tests[0]->should_run());
@@ -220,7 +220,7 @@ TEST(ApiTest, TestCaseDisabledAccessorsWork) {
 
   const TestInfo* const test_info = test_suite->GetTestInfo(0);
   EXPECT_STREQ("Dummy2", test_info->name());
-  EXPECT_STREQ("DISABLED_Test", test_info->test_case_name());
+  EXPECT_STREQ("DISABLED_Test", test_info->test_suite_name());
   EXPECT_TRUE(IsNull(test_info->value_param()));
   EXPECT_TRUE(IsNull(test_info->type_param()));
   EXPECT_FALSE(test_info->should_run());
@@ -279,11 +279,11 @@ class FinalSuccessChecker : public Environment {
     const TestSuite* test_suite = UnitTestHelper::FindTestCase("ApiTest");
     const TestInfo** tests = UnitTestHelper::GetSortedTests(test_suite);
     EXPECT_STREQ("DISABLED_Dummy1", tests[0]->name());
-    EXPECT_STREQ("ApiTest", tests[0]->test_case_name());
+    EXPECT_STREQ("ApiTest", tests[0]->test_suite_name());
     EXPECT_FALSE(tests[0]->should_run());
 
     EXPECT_STREQ("TestCaseDisabledAccessorsWork", tests[1]->name());
-    EXPECT_STREQ("ApiTest", tests[1]->test_case_name());
+    EXPECT_STREQ("ApiTest", tests[1]->test_suite_name());
     EXPECT_TRUE(IsNull(tests[1]->value_param()));
     EXPECT_TRUE(IsNull(tests[1]->type_param()));
     EXPECT_TRUE(tests[1]->should_run());
@@ -291,7 +291,7 @@ class FinalSuccessChecker : public Environment {
     EXPECT_EQ(0, tests[1]->result()->test_property_count());
 
     EXPECT_STREQ("TestCaseImmutableAccessorsWork", tests[2]->name());
-    EXPECT_STREQ("ApiTest", tests[2]->test_case_name());
+    EXPECT_STREQ("ApiTest", tests[2]->test_suite_name());
     EXPECT_TRUE(IsNull(tests[2]->value_param()));
     EXPECT_TRUE(IsNull(tests[2]->type_param()));
     EXPECT_TRUE(tests[2]->should_run());
@@ -299,7 +299,7 @@ class FinalSuccessChecker : public Environment {
     EXPECT_EQ(0, tests[2]->result()->test_property_count());
 
     EXPECT_STREQ("UnitTestImmutableAccessorsWork", tests[3]->name());
-    EXPECT_STREQ("ApiTest", tests[3]->test_case_name());
+    EXPECT_STREQ("ApiTest", tests[3]->test_suite_name());
     EXPECT_TRUE(IsNull(tests[3]->value_param()));
     EXPECT_TRUE(IsNull(tests[3]->type_param()));
     EXPECT_TRUE(tests[3]->should_run());
@@ -316,7 +316,7 @@ class FinalSuccessChecker : public Environment {
     tests = UnitTestHelper::GetSortedTests(test_suite);
 
     EXPECT_STREQ("Dummy", tests[0]->name());
-    EXPECT_STREQ("TestCaseWithCommentTest/0", tests[0]->test_case_name());
+    EXPECT_STREQ("TestCaseWithCommentTest/0", tests[0]->test_suite_name());
     EXPECT_TRUE(IsNull(tests[0]->value_param()));
     EXPECT_STREQ(GetTypeName<int>().c_str(), tests[0]->type_param());
     EXPECT_TRUE(tests[0]->should_run());

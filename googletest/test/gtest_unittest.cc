@@ -5345,11 +5345,11 @@ class TestInfoTest : public Test {
   }
 };
 
-// Tests TestInfo::test_case_name() and TestInfo::name().
+// Tests TestInfo::test_suite_name() and TestInfo::name().
 TEST_F(TestInfoTest, Names) {
   const TestInfo* const test_info = GetTestInfo("Names");
 
-  ASSERT_STREQ("TestInfoTest", test_info->test_case_name());
+  ASSERT_STREQ("TestInfoTest", test_info->test_suite_name());
   ASSERT_STREQ("Names", test_info->name());
 }
 
@@ -6628,7 +6628,7 @@ TEST_F(CurrentTestInfoTest, WorksForFirstTestInATestCase) {
     UnitTest::GetInstance()->current_test_info();
   ASSERT_TRUE(NULL != test_info)
       << "There is a test running so we should have a valid TestInfo.";
-  EXPECT_STREQ("CurrentTestInfoTest", test_info->test_case_name())
+  EXPECT_STREQ("CurrentTestInfoTest", test_info->test_suite_name())
       << "Expected the name of the currently running test case.";
   EXPECT_STREQ("WorksForFirstTestInATestCase", test_info->name())
       << "Expected the name of the currently running test.";
@@ -6643,7 +6643,7 @@ TEST_F(CurrentTestInfoTest, WorksForSecondTestInATestCase) {
     UnitTest::GetInstance()->current_test_info();
   ASSERT_TRUE(NULL != test_info)
       << "There is a test running so we should have a valid TestInfo.";
-  EXPECT_STREQ("CurrentTestInfoTest", test_info->test_case_name())
+  EXPECT_STREQ("CurrentTestInfoTest", test_info->test_suite_name())
       << "Expected the name of the currently running test case.";
   EXPECT_STREQ("WorksForSecondTestInATestCase", test_info->name())
       << "Expected the name of the currently running test.";

@@ -798,7 +798,7 @@ TEST_P(NamingTest, TestsReportCorrectNamesAndParameters) {
   const ::testing::TestInfo* const test_info =
      ::testing::UnitTest::GetInstance()->current_test_info();
 
-  EXPECT_STREQ("ZeroToFiveSequence/NamingTest", test_info->test_case_name());
+  EXPECT_STREQ("ZeroToFiveSequence/NamingTest", test_info->test_suite_name());
 
   Message index_stream;
   index_stream << "TestsReportCorrectNamesAndParameters/" << GetParam();

@@ -62,7 +62,7 @@ class TersePrinter : public EmptyTestEventListener {
   virtual void OnTestStart(const TestInfo& test_info) {
     fprintf(stdout,
             "*** Test %s.%s starting.\n",
-            test_info.test_case_name(),
+            test_info.test_suite_name(),
             test_info.name());
     fflush(stdout);
   }
@@ -82,7 +82,7 @@ class TersePrinter : public EmptyTestEventListener {
   virtual void OnTestEnd(const TestInfo& test_info) {
     fprintf(stdout,
             "*** Test %s.%s ending.\n",
-            test_info.test_case_name(),
+            test_info.test_suite_name(),
             test_info.name());
     fflush(stdout);
   }

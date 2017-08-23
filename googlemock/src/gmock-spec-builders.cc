@@ -731,7 +731,7 @@ void Mock::RegisterUseByOnCallOrExpectCall(const void* mock_obj,
       // TODO(wan@google.com): record the test case name when the
       // ON_CALL or EXPECT_CALL is invoked from SetUpTestCase() or
       // TearDownTestCase().
-      state.first_used_test_case = test_info->test_case_name();
+      state.first_used_test_case = test_info->test_suite_name();
       state.first_used_test = test_info->name();
     }
   }
