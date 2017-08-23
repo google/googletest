@@ -1112,7 +1112,7 @@ TEST(PrintStdTupleTest, NestedTuple) {
   EXPECT_EQ("((5, true), 'a' (97, 0x61))", Print(nested));
 }
 
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_STD_TUPLE_
 
 // Tests printing user-defined unprintable types.
 
