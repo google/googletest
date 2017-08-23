@@ -64,19 +64,19 @@ class SehExceptionInDestructorTest : public Test {
 
 TEST_F(SehExceptionInDestructorTest, ThrowsExceptionInDestructor) {}
 
-class SehExceptionInSetUpTestCaseTest : public Test {
+class SehExceptionInSetUpTestSuiteTest : public Test {
  public:
-  static void SetUpTestCase() { RaiseException(42, 0, 0, NULL); }
+  static void SetUpTestSuite() { RaiseException(42, 0, 0, NULL); }
 };
 
-TEST_F(SehExceptionInSetUpTestCaseTest, ThrowsExceptionInSetUpTestCase) {}
+TEST_F(SehExceptionInSetUpTestSuiteTest, ThrowsExceptionInSetUpTestSuite) {}
 
-class SehExceptionInTearDownTestCaseTest : public Test {
+class SehExceptionInTearDownTestSuiteTest : public Test {
  public:
-  static void TearDownTestCase() { RaiseException(42, 0, 0, NULL); }
+  static void TearDownTestSuite() { RaiseException(42, 0, 0, NULL); }
 };
 
-TEST_F(SehExceptionInTearDownTestCaseTest, ThrowsExceptionInTearDownTestCase) {}
+TEST_F(SehExceptionInTearDownTestSuiteTest, ThrowsExceptionInTearDownTestSuite) {}
 
 class SehExceptionInSetUpTest : public Test {
  protected:
