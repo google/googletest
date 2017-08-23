@@ -1325,7 +1325,8 @@ class GTEST_API_ UnitTest {
   int failed_test_case_count() const { return failed_test_suite_count(); }
   int total_test_case_count() const { return total_test_suite_count(); }
   int test_case_to_run_count() const { return test_case_to_run_count(); }
-#endif
+#endif // GTEST_HAS_TESTCASE
+
   // Gets the number of successful tests.
   int successful_test_count() const;
 
@@ -1361,9 +1362,14 @@ class GTEST_API_ UnitTest {
   // or something outside of all tests failed).
   bool Failed() const;
 
-  // Gets the i-th test case among all the test cases. i can range from 0 to
-  // total_test_case_count() - 1. If i is not in that range, returns NULL.
-  const TestSuite* GetTestCase(int i) const;
+  // Gets the i-th test suite among all the test suites. i can range from 0 to
+  // total_test_suite_count() - 1. If i is not in that range, returns NULL.
+  const TestSuite* GetTestSuite(int i) const;
+
+#if GTEST_HAS_TESTCASE
+  // backward compatibility
+  const TestSuite* GetTestCase(int i) const { return GetTestSuite(i); }
+#endif // GTEST_HAS_TESTCASE
 
   // Returns the TestResult containing information on test failures and
   // properties logged outside of individual test cases.

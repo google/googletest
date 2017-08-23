@@ -3255,7 +3255,7 @@ void PrettyUnitTestResultPrinter::PrintFailedTests(const UnitTest& unit_test) {
   }
 
   for (int i = 0; i < unit_test.total_test_suite_count(); ++i) {
-    const TestSuite& test_suite = *unit_test.GetTestCase(i);
+    const TestSuite& test_suite = *unit_test.GetTestSuite(i);
     if (!test_suite.should_run() || (test_suite.failed_test_count() == 0)) {
       continue;
     }
@@ -3829,8 +3829,8 @@ void XmlUnitTestResultPrinter::PrintXmlUnitTest(std::ostream* stream,
   *stream << ">\n";
 
   for (int i = 0; i < unit_test.total_test_suite_count(); ++i) {
-    if (unit_test.GetTestCase(i)->reportable_test_count() > 0)
-      PrintXmlTestSuite(stream, *unit_test.GetTestCase(i));
+    if (unit_test.GetTestSuite(i)->reportable_test_count() > 0)
+      PrintXmlTestSuite(stream, *unit_test.GetTestSuite(i));
   }
   *stream << "</" << kTestsuites << ">\n";
 }
@@ -4157,9 +4157,9 @@ bool UnitTest::Passed() const { return impl()->Passed(); }
 // or something outside of all tests failed).
 bool UnitTest::Failed() const { return impl()->Failed(); }
 
-// Gets the i-th test case among all the test cases. i can range from 0 to
+// Gets the i-th test case among all the test suites. i can range from 0 to
 // total_test_suite_count() - 1. If i is not in that range, returns NULL.
-const TestSuite* UnitTest::GetTestCase(int i) const {
+const TestSuite* UnitTest::GetTestSuite(int i) const {
   return impl()->GetTestCase(i);
 }
 

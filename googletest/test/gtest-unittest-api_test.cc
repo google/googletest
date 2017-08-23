@@ -60,7 +60,7 @@ class UnitTestHelper {
         new const TestSuite*[unit_test.total_test_suite_count()];
 
     for (int i = 0; i < unit_test.total_test_suite_count(); ++i)
-      test_suites[i] = unit_test.GetTestCase(i);
+      test_suites[i] = unit_test.GetTestSuite(i);
 
     std::sort(test_suites,
               test_suites + unit_test.total_test_suite_count(),
@@ -73,7 +73,7 @@ class UnitTestHelper {
   static const TestSuite* FindTestCase(const char* name) {
     UnitTest& unit_test = *UnitTest::GetInstance();
     for (int i = 0; i < unit_test.total_test_suite_count(); ++i) {
-      const TestSuite* test_case = unit_test.GetTestCase(i);
+      const TestSuite* test_case = unit_test.GetTestSuite(i);
       if (0 == strcmp(test_case->name(), name))
         return test_case;
     }

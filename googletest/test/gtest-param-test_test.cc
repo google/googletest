@@ -869,7 +869,7 @@ TEST(CustomNamingTest, CheckNameRegistry) {
   for (int case_num = 0;
        case_num < unit_test->total_test_suite_count();
        ++case_num) {
-    const ::testing::TestSuite* test_suite = unit_test->GetTestCase(case_num);
+    const ::testing::TestSuite* test_suite = unit_test->GetTestSuite(case_num);
     for (int test_num = 0;
          test_num < test_suite->total_test_count();
          ++test_num) {
