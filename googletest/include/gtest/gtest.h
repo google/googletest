@@ -411,7 +411,15 @@ class GTEST_API_ Test {
   // in parallel to the new *TestSuite.
   static void SetUpTestCase() {}
   static void TearDownTestCase() {}
-#endif
+#else
+  // Provoke a syntax error in case somebody didn't switch from *TestCase
+  // to *TestSuite.
+  // In case you see a syntax error due to expanding these macros, you
+  // probably still have SetUpTestCase() resp. TearDownTestCase() functions
+  // which should be renamed to SetupTestSuite() resp. TearDownTestSuite().
+#define SetUpTestCase() please(); Please_rename_to_SetUpTestSuite()
+#define TearDownTestCase() please(); Please_rename_to_TearDownTestSuite()
+#endif // GTEST_HAS_TESTCASE
 
   // Returns true iff the current test has a fatal failure.
   static bool HasFatalFailure();
@@ -1100,6 +1108,37 @@ class TestEventListener {
 
   // Fired after all test activities have ended.
   virtual void OnTestProgramEnd(const UnitTest& unit_test) = 0;
+
+ private:
+#if ! GTEST_HAS_TESTCASE
+  // During conversion of test projects from the former TestCase API to
+  // the new TestSuite API, it is helpful to signal if some of the former
+  // virtual methods are still in use.
+  // The mechanism is copied from class Test above:
+  // The declaration of the following method is solely for catching such
+  // an error at compile time:
+  //
+  //   - The return type is deliberately chosen to be not void, so it
+  //   will be a conflict if void OnTestCaseStart() is declared in the user's
+  //   test fixture.
+  //
+  //   - This method is private, so it will be another compiler error
+  //   if the method is called from the user's test fixture.
+  //
+  // DO NOT OVERRIDE THESE FUNCTIONS.
+  //
+  // If you see an error about overriding the following functions or
+  // about it being private, you have to rename OnTestCaseStart to OnTestSuiteStart
+  // and OnTestCaseEnd to OnTestSuiteEnd respectively in your code.
+  struct Please_convert_to_the_new_method_names {};
+  virtual Please_convert_to_the_new_method_names* OnTestCaseStart(const TestSuite& /*test_suite*/) {
+    return NULL;
+  }
+  virtual Please_convert_to_the_new_method_names* OnTestCaseEnd(const TestSuite& /*test_suite*/) {
+    return NULL;
+  }
+
+#endif // GTEST_HAS_TESTCASE
 };
 
 // The convenience class for users who need to override just one or two
