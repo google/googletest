@@ -27,7 +27,7 @@ list can help you decide whether it is for you too.
   * Death tests are pretty handy for ensuring that your asserts in production code are triggered by the right conditions.
   * `SCOPED_TRACE` helps you understand the context of an assertion failure when it comes from inside a sub-routine or loop.
   * You can decide which tests to run using name patterns.  This saves time when you want to quickly reproduce a test failure.
-  * Google Test can generate XML test result reports that can be parsed by popular continuous build system like Hudson.
+  * Google Test can generate XML test result reports that can be parsed by popular continuous build system like Hudson or Jenkins.
   * Simple things are easy in Google Test, while hard things are possible: in addition to advanced features like [global test environments](AdvancedGuide.md#global-set-up-and-tear-down) and tests parameterized by [values](AdvancedGuide.md#value-parameterized-tests) or [types](docs/AdvancedGuide.md#typed-tests), Google Test supports various ways for the user to extend the framework -- if Google Test doesn't do something out of the box, chances are that a user can implement the feature using Google Test's public API, without changing Google Test itself.  In particular, you can:
     * expand your testing vocabulary by defining [custom predicates](AdvancedGuide.md#predicate-assertions-for-better-error-messages),
     * teach Google Test how to [print your types](AdvancedGuide.md#teaching-google-test-how-to-print-your-values),

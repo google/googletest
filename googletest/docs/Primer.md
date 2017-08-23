@@ -43,19 +43,22 @@ others.
 
 The term _Test_ is commonly of broad enough sense, including ISTQB's
 definition of _Test Case_, so it's not much of a problem here. But the
-term _Test Case_ as used in Google Test is of contradictory sense and thus confusing.
+term _Test Case_ as it was used in Google Test is of contradictory sense
+and thus confusing.
 
 Unfortunately replacing the term _Test Case_ by _Test Suite_ throughout
 the Google C++ Testing Framework is not easy without breaking dependent
 projects, as `TestCase` is part of the public API at various places.
+Therefore the former API (`TestCase`) is still available, while the
+changed API (`TestSuite`) should now be used.
 
 So for the time being, please be aware of the different definitions of
 the terms:
 
-Meaning | Google Test Term | [ISTQB](http://www.istqb.org/) Term
-------- | ---------------- | -----------------------------------
-Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests) | [Test Case](http://glossary.istqb.org/search/test%20case)
-A set of several tests related to one component | [Test Case](#basic-concepts) | [Test Suite](http://glossary.istqb.org/search/test%20suite)
+Meaning | [ISTQB](http://www.istqb.org/) Term | Current Google Test Term | Former Google Test Term 
+------- | ----------------------------------- | ------------------------ | ----------------------- 
+Exercise a particular program path with specific input values and verify the results | [Test Case](http://glossary.istqb.org/search/test%20case) | [TEST()](#simple-tests) | [TEST()](#simple-tests)
+A set of several tests related to one component | [Test Suite](http://glossary.istqb.org/search/test%20suite) | [Test Suite](#basic-concepts) | [Test Case](#basic-concepts)
 
 # Setting up a New Test Project #
 

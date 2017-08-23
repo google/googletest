@@ -74,7 +74,7 @@ Now, when you click "Build and Go", the test will be executed. Dumping out somet
 
 ```
 [Session started at 2008-08-06 06:36:13 -0600.]
-[==========] Running 2 tests from 1 test case.
+[==========] Running 2 tests from 1 test suite.
 [----------] Global test environment set-up.
 [----------] 2 tests from WidgetInitializerTest
 [ RUN      ] WidgetInitializerTest.TestConstructor
@@ -82,7 +82,7 @@ Now, when you click "Build and Go", the test will be executed. Dumping out somet
 [ RUN      ] WidgetInitializerTest.TestConversion
 [       OK ] WidgetInitializerTest.TestConversion
 [----------] Global test environment tear-down
-[==========] 2 tests from 1 test case ran.
+[==========] 2 tests from 1 test suite ran.
 [  PASSED  ] 2 tests.
 
 The Debugger has exited with status 0.  
