@@ -93,9 +93,9 @@ if SUPPORTS_SEH_EXCEPTIONS:
       self.assert_('SEH exception with code 0x2a thrown '
                    'in the test fixture\'s destructor'
                    in test_output)
-      self.assert_('SEH exception with code 0x2a thrown in SetUpTestCase()'
+      self.assert_('SEH exception with code 0x2a thrown in SetUpTestSuite()'
                    in test_output)
-      self.assert_('SEH exception with code 0x2a thrown in TearDownTestCase()'
+      self.assert_('SEH exception with code 0x2a thrown in TearDownTestSuite()'
                    in test_output)
       self.assert_('SEH exception with code 0x2a thrown in SetUp()'
                    in test_output)
@@ -165,7 +165,7 @@ class CatchCxxExceptionsTest(gtest_test_utils.TestCase):
                  'called as expected.'
                  in EX_BINARY_OUTPUT)
 
-  def testCatchesCxxExceptionsInTearDownTestCase(self):
+  def testCatchesCxxExceptionsInTearDownTestSuite(self):
     self.assert_('C++ exception with description "Standard C++ exception"'
                  ' thrown in TearDownTestSuite()'
                  in EX_BINARY_OUTPUT)
