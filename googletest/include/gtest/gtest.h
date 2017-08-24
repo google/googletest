@@ -1324,7 +1324,7 @@ class GTEST_API_ UnitTest {
   int successful_test_case_count() const { return successful_test_suite_count(); }
   int failed_test_case_count() const { return failed_test_suite_count(); }
   int total_test_case_count() const { return total_test_suite_count(); }
-  int test_case_to_run_count() const { return test_case_to_run_count(); }
+  int test_case_to_run_count() const { return test_suite_to_run_count(); }
 #endif // GTEST_HAS_TESTCASE
 
   // Gets the number of successful tests.
