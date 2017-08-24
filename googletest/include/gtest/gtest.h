@@ -416,7 +416,7 @@ class GTEST_API_ Test {
   // to *TestSuite.
   // In case you see a syntax error due to expanding these macros, you
   // probably still have SetUpTestCase() resp. TearDownTestCase() functions
-  // which should be renamed to SetupTestSuite() resp. TearDownTestSuite().
+  // which should be renamed to SetUpTestSuite() resp. TearDownTestSuite().
 #define SetUpTestCase() please(); Please_rename_to_SetUpTestSuite()
 #define TearDownTestCase() please(); Please_rename_to_TearDownTestSuite()
 #endif // GTEST_HAS_TESTCASE
