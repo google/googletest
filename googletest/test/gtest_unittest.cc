@@ -5541,7 +5541,7 @@ TEST_F(SetUpTestCaseTest, Test1) {
 TEST_F(SetUpTestCaseTest, Test2) {
   EXPECT_STREQ("123", shared_resource_);
 }
-#endif
+#endif // GTEST_HAS_TESTCASE
 
 // The InitGoogleTestTest test case tests testing::InitGoogleTest().
 
