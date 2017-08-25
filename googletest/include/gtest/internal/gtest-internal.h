@@ -1173,6 +1173,41 @@ class NativeArray {
     GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__): \
       fail(gtest_msg.value)
 
+#define GTEST_TEST_THROW_MSG_(statement, expected_exception, regex, fail) \
+  GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
+  if (::testing::Message buffer = ::testing::Message()) { \
+    bool gtest_caught_expected = false; \
+    try { \
+      GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
+    } \
+    catch (expected_exception const& e) { \
+      const ::testing::internal::RE& gtest_regex = (regex); \
+      const std::string err_string = ::testing::PrintToString(e); \
+      const bool matched = ::testing::internal::RE::PartialMatch(err_string, gtest_regex); \
+      if (matched) { \
+        gtest_caught_expected = true; \
+      } else { \
+        buffer << "Result: " #statement " threw correct exception type " \
+                  #expected_exception " with wrong message. " \
+               << "Expected: " << gtest_regex.pattern() << ".\n " \
+               << "Actual: " << err_string << "."; \
+        goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
+      } \
+    } \
+    catch (...) { \
+      buffer << "Expected: " #statement " throws an exception of type " \
+          #expected_exception ".\n Actual: it throws a different type."; \
+      goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
+    } \
+    if (!gtest_caught_expected) { \
+      buffer << "Expected: " #statement " throws an exception of type " \
+          #expected_exception ".\n Actual: it throws nothing."; \
+      goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
+    } \
+  } else \
+    GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__): \
+      fail(buffer.GetString().c_str()) \
+
 #define GTEST_TEST_NO_THROW_(statement, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (::testing::internal::AlwaysTrue()) { \

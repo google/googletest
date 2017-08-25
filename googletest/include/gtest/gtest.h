@@ -1835,6 +1835,9 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 //
 //    * {ASSERT|EXPECT}_THROW(statement, expected_exception):
 //         Tests that the statement throws the expected exception.
+//    * {ASSERT|EXPECT}_THROW_MSG(statement, expected_exception, regex):
+//         Tests that the statement throws the expected exception with a
+//         matching message.
 //    * {ASSERT|EXPECT}_NO_THROW(statement):
 //         Tests that the statement doesn't throw any exception.
 //    * {ASSERT|EXPECT}_ANY_THROW(statement):
@@ -1842,12 +1845,18 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 
 #define EXPECT_THROW(statement, expected_exception) \
   GTEST_TEST_THROW_(statement, expected_exception, GTEST_NONFATAL_FAILURE_)
+#define EXPECT_THROW_MSG(statement, expected_exception, regex) \
+  GTEST_TEST_THROW_MSG_(statement, expected_exception, regex, \
+                         GTEST_NONFATAL_FAILURE_)
 #define EXPECT_NO_THROW(statement) \
   GTEST_TEST_NO_THROW_(statement, GTEST_NONFATAL_FAILURE_)
 #define EXPECT_ANY_THROW(statement) \
   GTEST_TEST_ANY_THROW_(statement, GTEST_NONFATAL_FAILURE_)
 #define ASSERT_THROW(statement, expected_exception) \
   GTEST_TEST_THROW_(statement, expected_exception, GTEST_FATAL_FAILURE_)
+#define ASSERT_THROW_MSG(statement, expected_exception, regex) \
+  GTEST_TEST_THROW_MSG_(statement, expected_exception, regex, \
+                         GTEST_FATAL_FAILURE_)
 #define ASSERT_NO_THROW(statement) \
   GTEST_TEST_NO_THROW_(statement, GTEST_FATAL_FAILURE_)
 #define ASSERT_ANY_THROW(statement) \
