@@ -1313,13 +1313,14 @@ AssertionResult EqFailure(const char* lhs_expression,
                           const std::string& rhs_value,
                           bool ignoring_case) {
   Message msg;
-  msg << "      Expected: " << lhs_expression;
+  msg << "Expected equality of these values:";
+  msg << "\n " << lhs_expression;
   if (lhs_value != lhs_expression) {
-    msg << "\n      Which is: " << lhs_value;
+    msg << "\n    Which is: " << lhs_value;
   }
-  msg << "\nTo be equal to: " << rhs_expression;
+  msg << "\n " << rhs_expression;
   if (rhs_value != rhs_expression) {
-    msg << "\n      Which is: " << rhs_value;
+    msg << "\n    Which is: " << rhs_value;
   }
 
   if (ignoring_case) {
