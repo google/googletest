@@ -2098,7 +2098,7 @@ TEST(AllOfTest, MatchesWhenAllMatch) {
                          Ne(9), Ne(10)));
 }
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_VARIADIC_TEMPLATES
 // Tests the variadic version of the AllOfMatcher.
 TEST(AllOfTest, VariadicMatchesWhenAllMatch) {
   // Make sure AllOf is defined in the right namespace and does not depend on
@@ -2118,7 +2118,7 @@ TEST(AllOfTest, VariadicMatchesWhenAllMatch) {
                          Ne(50)));
 }
 
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_VARIADIC_TEMPLATES
 
 // Tests that AllOf(m1, ..., mn) describes itself properly.
 TEST(AllOfTest, CanDescribeSelf) {
@@ -2293,7 +2293,7 @@ TEST(AnyOfTest, MatchesWhenAnyMatches) {
   AnyOfMatches(10, AnyOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
 }
 
-#if GTEST_LANG_CXX11
+#if GTEST_HAS_VARIADIC_TEMPLATES
 // Tests the variadic version of the AnyOfMatcher.
 TEST(AnyOfTest, VariadicMatchesWhenAnyMatches) {
   // Also make sure AnyOf is defined in the right namespace and does not depend
@@ -2309,7 +2309,7 @@ TEST(AnyOfTest, VariadicMatchesWhenAnyMatches) {
                          41, 42, 43, 44, 45, 46, 47, 48, 49, 50));
 }
 
-#endif  // GTEST_LANG_CXX11
+#endif  // GTEST_HAS_VARIADIC_TEMPLATES
 
 // Tests that AnyOf(m1, ..., mn) describes itself properly.
 TEST(AnyOfTest, CanDescribeSelf) {
