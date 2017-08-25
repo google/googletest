@@ -441,7 +441,10 @@ internal::CartesianProductHolder$i<$for j, [[Generator$j]]> Combine(
 ]]
 # endif  // GTEST_HAS_COMBINE
 
-
+// Use a macro to stringify the test (case) name, because direct stringification
+// does not work if one of the arguments is itself a macro
+// (https://gcc.gnu.org/onlinedocs/cpp/Stringification.html).
+# define GTEST_STRINGIFY_(name) #name
 
 # define TEST_P(test_case_name, test_name) \
   class GTEST_TEST_CLASS_NAME_(test_case_name, test_name) \
@@ -456,8 +459,8 @@ internal::CartesianProductHolder$i<$for j, [[Generator$j]]> Combine(
               #test_case_name, \
               ::testing::internal::CodeLocation(\
                   __FILE__, __LINE__))->AddTestPattern(\
-                      #test_case_name, \
-                      #test_name, \
+                      GTEST_STRINGIFY_(test_case_name), \
+                      GTEST_STRINGIFY_(test_name), \
                       new ::testing::internal::TestMetaFactory< \
                           GTEST_TEST_CLASS_NAME_(\
                               test_case_name, test_name)>()); \
