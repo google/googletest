@@ -239,20 +239,29 @@ function(py_test name)
   # We are not supporting Python tests on Linux yet as they consider
   # all Linux environments to be google3 and try to use google3 features.
   if (PYTHONINTERP_FOUND)
-    # ${CMAKE_BINARY_DIR} is known at configuration time, so we can
-    # directly bind it from cmake. ${CTEST_CONFIGURATION_TYPE} is known
-    # only at ctest runtime (by calling ctest -c <Configuration>), so
-    # we have to escape $ to delay variable substitution here.
-    if (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 3.1)
-      add_test(
-        NAME ${name}
-        COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
-            --build_dir=${CMAKE_CURRENT_BINARY_DIR}/$<CONFIGURATION>)
-    else (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 3.1)
+    if (DEFINED CMAKE_CONFIGURATION_TYPES)
+      # The generator is a multi-configuration type like Visual Studio.
+      # ${CMAKE_BINARY_DIR} is known at configuration time, so we can
+      # directly bind it from cmake. ${CTEST_CONFIGURATION_TYPE} is known
+      # only at ctest runtime (by calling ctest -c <Configuration>), so
+      # we have to escape $ to delay variable substitution here.
+      if (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 3.1)
+        add_test(
+          NAME ${name}
+          COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+              --build_dir=${CMAKE_CURRENT_BINARY_DIR}/$<CONFIGURATION>)
+      else (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 3.1)
+        add_test(
+          ${name}
+          ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+            --build_dir=${CMAKE_CURRENT_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE})
+      endif (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 3.1)
+    else (DEFINED CMAKE_CONFIGURATION_TYPES)
+      # The generator is a single-configuiration type like Makefiles or Ninja.
       add_test(
         ${name}
         ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
-          --build_dir=${CMAKE_CURRENT_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE})
-    endif (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 3.1)
+          --build_dir=${CMAKE_CURRENT_BINARY_DIR})
+    endif (DEFINED CMAKE_CONFIGURATION_TYPES)
   endif()
 endfunction()
