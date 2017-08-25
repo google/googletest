@@ -169,6 +169,20 @@ $for i [[
 
 ]]
 
+#ifdef GTEST_LANG_CXX11
+
+$for i [[
+#define MOCK_NOEXCEPT_METHOD$i(m, ...) GMOCK_METHOD$i[[]]_(, noexcept, , m, __VA_ARGS__)
+
+]]
+
+$for i [[
+#define MOCK_NOEXCEPT_CONST_METHOD$i(m, ...) GMOCK_METHOD$i[[]]_(, noexcept const, , m, __VA_ARGS__)
+
+]]
+
+#endif // GTEST_LANG_CXX11
+
 
 $for i [[
 #define MOCK_METHOD$i[[]]_T(m, ...) GMOCK_METHOD$i[[]]_(typename, , , m, __VA_ARGS__)
@@ -182,6 +196,21 @@ $for i [[
 
 ]]
 
+#ifdef GTEST_LANG_CXX11
+
+$for i [[
+#define MOCK_NOEXCEPT_CONST_METHOD$i[[]]_T(m, ...) \
+    GMOCK_METHOD$i[[]]_(typename, noexcept const, , m, __VA_ARGS__)
+
+]]
+
+$for i [[
+#define MOCK_NOEXCEPT_METHOD$i[[]]_T(m, ...) \
+    GMOCK_METHOD$i[[]]_(typename, noexcept, , m, __VA_ARGS__)
+
+]]
+
+#endif // GTEST_LANG_CXX11
 
 $for i [[
 #define MOCK_METHOD$i[[]]_WITH_CALLTYPE(ct, m, ...) \
@@ -196,6 +225,22 @@ $for i [[
 
 ]]
 
+#ifdef GTEST_LANG_CXX11
+
+$for i [[
+#define MOCK_NOEXCEPT_CONST_METHOD$i[[]]_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD$i[[]]_(, noexcept const, ct, m, __VA_ARGS__)
+
+]]
+
+$for i [[
+#define MOCK_NOEXCEPT_METHOD$i[[]]_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD$i[[]]_(, noexcept, ct, m, __VA_ARGS__)
+
+]]
+
+#endif // GTEST_LANG_CXX11
+
 
 $for i [[
 #define MOCK_METHOD$i[[]]_T_WITH_CALLTYPE(ct, m, ...) \
@@ -203,12 +248,27 @@ $for i [[
 
 ]]
 
-
 $for i [[
 #define MOCK_CONST_METHOD$i[[]]_T_WITH_CALLTYPE(ct, m, ...) \
     GMOCK_METHOD$i[[]]_(typename, const, ct, m, __VA_ARGS__)
 
 ]]
+
+#ifdef GTEST_LANG_CXX11
+
+$for i [[
+#define MOCK_NOEXCEPT_CONST_METHOD$i[[]]_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD$i[[]]_(typename, noexcept const, ct, m, __VA_ARGS__)
+
+]]
+
+$for i [[
+#define MOCK_NOEXCEPT_METHOD$i[[]]_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD$i[[]]_(typename, noexcept, ct, m, __VA_ARGS__)
+
+]]
+
+#endif // GTEST_LANG_CXX11
 
 // A MockFunction<F> class has one mock method whose type is F.  It is
 // useful when you just want your test code to emit some messages and

@@ -696,6 +696,55 @@ using internal::FunctionMocker;
 #define MOCK_CONST_METHOD9(m, ...) GMOCK_METHOD9_(, const, , m, __VA_ARGS__)
 #define MOCK_CONST_METHOD10(m, ...) GMOCK_METHOD10_(, const, , m, __VA_ARGS__)
 
+#ifdef GTEST_LANG_CXX11
+
+#define MOCK_NOEXCEPT_METHOD0(m, ...) GMOCK_METHOD0_(, noexcept, , m, \
+    __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD1(m, ...) GMOCK_METHOD1_(, noexcept, , m, \
+    __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD2(m, ...) GMOCK_METHOD2_(, noexcept, , m, \
+    __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD3(m, ...) GMOCK_METHOD3_(, noexcept, , m, \
+    __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD4(m, ...) GMOCK_METHOD4_(, noexcept, , m, \
+    __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD5(m, ...) GMOCK_METHOD5_(, noexcept, , m, \
+    __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD6(m, ...) GMOCK_METHOD6_(, noexcept, , m, \
+    __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD7(m, ...) GMOCK_METHOD7_(, noexcept, , m, \
+    __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD8(m, ...) GMOCK_METHOD8_(, noexcept, , m, \
+    __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD9(m, ...) GMOCK_METHOD9_(, noexcept, , m, \
+    __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD10(m, ...) GMOCK_METHOD10_(, noexcept, , m, \
+    __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD0(m, ...) GMOCK_METHOD0_(, noexcept const, \
+    , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD1(m, ...) GMOCK_METHOD1_(, noexcept const, \
+    , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD2(m, ...) GMOCK_METHOD2_(, noexcept const, \
+    , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD3(m, ...) GMOCK_METHOD3_(, noexcept const, \
+    , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD4(m, ...) GMOCK_METHOD4_(, noexcept const, \
+    , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD5(m, ...) GMOCK_METHOD5_(, noexcept const, \
+    , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD6(m, ...) GMOCK_METHOD6_(, noexcept const, \
+    , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD7(m, ...) GMOCK_METHOD7_(, noexcept const, \
+    , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD8(m, ...) GMOCK_METHOD8_(, noexcept const, \
+    , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD9(m, ...) GMOCK_METHOD9_(, noexcept const, \
+    , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD10(m, ...) GMOCK_METHOD10_(, \
+    noexcept const, , m, __VA_ARGS__)
+
+#endif // GTEST_LANG_CXX11
+
 #define MOCK_METHOD0_T(m, ...) GMOCK_METHOD0_(typename, , , m, __VA_ARGS__)
 #define MOCK_METHOD1_T(m, ...) GMOCK_METHOD1_(typename, , , m, __VA_ARGS__)
 #define MOCK_METHOD2_T(m, ...) GMOCK_METHOD2_(typename, , , m, __VA_ARGS__)
@@ -731,6 +780,53 @@ using internal::FunctionMocker;
 #define MOCK_CONST_METHOD10_T(m, ...) \
     GMOCK_METHOD10_(typename, const, , m, __VA_ARGS__)
 
+#ifdef GTEST_LANG_CXX11
+#define MOCK_NOEXCEPT_CONST_METHOD0_T(m, ...) \
+    GMOCK_METHOD0_(typename, noexcept const, , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD1_T(m, ...) \
+    GMOCK_METHOD1_(typename, noexcept const, , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD2_T(m, ...) \
+    GMOCK_METHOD2_(typename, noexcept const, , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD3_T(m, ...) \
+    GMOCK_METHOD3_(typename, noexcept const, , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD4_T(m, ...) \
+    GMOCK_METHOD4_(typename, noexcept const, , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD5_T(m, ...) \
+    GMOCK_METHOD5_(typename, noexcept const, , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD6_T(m, ...) \
+    GMOCK_METHOD6_(typename, noexcept const, , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD7_T(m, ...) \
+    GMOCK_METHOD7_(typename, noexcept const, , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD8_T(m, ...) \
+    GMOCK_METHOD8_(typename, noexcept const, , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD9_T(m, ...) \
+    GMOCK_METHOD9_(typename, noexcept const, , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD10_T(m, ...) \
+    GMOCK_METHOD10_(typename, noexcept const, , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD0_T(m, ...) \
+    GMOCK_METHOD0_(typename, noexcept, , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD1_T(m, ...) \
+    GMOCK_METHOD1_(typename, noexcept, , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD2_T(m, ...) \
+    GMOCK_METHOD2_(typename, noexcept, , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD3_T(m, ...) \
+    GMOCK_METHOD3_(typename, noexcept, , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD4_T(m, ...) \
+    GMOCK_METHOD4_(typename, noexcept, , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD5_T(m, ...) \
+    GMOCK_METHOD5_(typename, noexcept, , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD6_T(m, ...) \
+    GMOCK_METHOD6_(typename, noexcept, , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD7_T(m, ...) \
+    GMOCK_METHOD7_(typename, noexcept, , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD8_T(m, ...) \
+    GMOCK_METHOD8_(typename, noexcept, , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD9_T(m, ...) \
+    GMOCK_METHOD9_(typename, noexcept, , m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD10_T(m, ...) \
+    GMOCK_METHOD10_(typename, noexcept, , m, __VA_ARGS__)
+
+#endif // GTEST_LANG_CXX11
 #define MOCK_METHOD0_WITH_CALLTYPE(ct, m, ...) \
     GMOCK_METHOD0_(, , ct, m, __VA_ARGS__)
 #define MOCK_METHOD1_WITH_CALLTYPE(ct, m, ...) \
@@ -777,6 +873,54 @@ using internal::FunctionMocker;
 #define MOCK_CONST_METHOD10_WITH_CALLTYPE(ct, m, ...) \
     GMOCK_METHOD10_(, const, ct, m, __VA_ARGS__)
 
+#ifdef GTEST_LANG_CXX11
+#define MOCK_NOEXCEPT_CONST_METHOD0_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD0_(, noexcept const, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD1_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD1_(, noexcept const, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD2_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD2_(, noexcept const, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD3_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD3_(, noexcept const, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD4_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD4_(, noexcept const, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD5_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD5_(, noexcept const, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD6_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD6_(, noexcept const, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD7_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD7_(, noexcept const, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD8_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD8_(, noexcept const, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD9_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD9_(, noexcept const, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD10_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD10_(, noexcept const, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD0_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD0_(, noexcept, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD1_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD1_(, noexcept, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD2_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD2_(, noexcept, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD3_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD3_(, noexcept, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD4_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD4_(, noexcept, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD5_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD5_(, noexcept, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD6_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD6_(, noexcept, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD7_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD7_(, noexcept, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD8_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD8_(, noexcept, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD9_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD9_(, noexcept, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD10_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD10_(, noexcept, ct, m, __VA_ARGS__)
+
+#endif // GTEST_LANG_CXX11
+
 #define MOCK_METHOD0_T_WITH_CALLTYPE(ct, m, ...) \
     GMOCK_METHOD0_(typename, , ct, m, __VA_ARGS__)
 #define MOCK_METHOD1_T_WITH_CALLTYPE(ct, m, ...) \
@@ -799,7 +943,6 @@ using internal::FunctionMocker;
     GMOCK_METHOD9_(typename, , ct, m, __VA_ARGS__)
 #define MOCK_METHOD10_T_WITH_CALLTYPE(ct, m, ...) \
     GMOCK_METHOD10_(typename, , ct, m, __VA_ARGS__)
-
 #define MOCK_CONST_METHOD0_T_WITH_CALLTYPE(ct, m, ...) \
     GMOCK_METHOD0_(typename, const, ct, m, __VA_ARGS__)
 #define MOCK_CONST_METHOD1_T_WITH_CALLTYPE(ct, m, ...) \
@@ -822,6 +965,54 @@ using internal::FunctionMocker;
     GMOCK_METHOD9_(typename, const, ct, m, __VA_ARGS__)
 #define MOCK_CONST_METHOD10_T_WITH_CALLTYPE(ct, m, ...) \
     GMOCK_METHOD10_(typename, const, ct, m, __VA_ARGS__)
+
+#ifdef GTEST_LANG_CXX11
+#define MOCK_NOEXCEPT_CONST_METHOD0_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD0_(typename, noexcept const, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD1_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD1_(typename, noexcept const, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD2_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD2_(typename, noexcept const, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD3_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD3_(typename, noexcept const, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD4_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD4_(typename, noexcept const, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD5_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD5_(typename, noexcept const, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD6_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD6_(typename, noexcept const, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD7_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD7_(typename, noexcept const, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD8_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD8_(typename, noexcept const, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD9_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD9_(typename, noexcept const, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_CONST_METHOD10_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD10_(typename, noexcept const, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD0_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD0_(typename, noexcept, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD1_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD1_(typename, noexcept, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD2_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD2_(typename, noexcept, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD3_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD3_(typename, noexcept, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD4_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD4_(typename, noexcept, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD5_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD5_(typename, noexcept, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD6_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD6_(typename, noexcept, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD7_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD7_(typename, noexcept, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD8_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD8_(typename, noexcept, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD9_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD9_(typename, noexcept, ct, m, __VA_ARGS__)
+#define MOCK_NOEXCEPT_METHOD10_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD10_(typename, noexcept, ct, m, __VA_ARGS__)
+
+#endif // GTEST_LANG_CXX11
 
 // A MockFunction<F> class has one mock method whose type is F.  It is
 // useful when you just want your test code to emit some messages and
