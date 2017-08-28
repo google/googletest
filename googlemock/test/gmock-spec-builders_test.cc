@@ -714,13 +714,14 @@ TEST(ExpectCallSyntaxTest, WarningIsErrorWithFlag) {
   }
   std::string warning_output = GetCapturedStdout();
   EXPECT_PRED_FORMAT2(IsSubstring, "GMOCK WARNING", warning_output);
-  EXPECT_PRED_FORMAT2(IsSubstring, "Uninteresting mock function call", warning_output);
+  EXPECT_PRED_FORMAT2(IsSubstring, "Uninteresting mock function call",
+                      warning_output);
 
   testing::GMOCK_FLAG(default_mock_behavior) = kFail;
   EXPECT_NONFATAL_FAILURE({
     MockA a;
     a.DoA(0);
-  },"Uninteresting mock function call");
+  }, "Uninteresting mock function call");
 
   // Out of bounds values are converted to kWarn
   testing::GMOCK_FLAG(default_mock_behavior) = -1;
@@ -731,7 +732,8 @@ TEST(ExpectCallSyntaxTest, WarningIsErrorWithFlag) {
   }
   warning_output = GetCapturedStdout();
   EXPECT_PRED_FORMAT2(IsSubstring, "GMOCK WARNING", warning_output);
-  EXPECT_PRED_FORMAT2(IsSubstring, "Uninteresting mock function call", warning_output);
+  EXPECT_PRED_FORMAT2(IsSubstring, "Uninteresting mock function call",
+                      warning_output);
   testing::GMOCK_FLAG(default_mock_behavior) = 3;
   CaptureStdout();
   {
@@ -740,7 +742,8 @@ TEST(ExpectCallSyntaxTest, WarningIsErrorWithFlag) {
   }
   warning_output = GetCapturedStdout();
   EXPECT_PRED_FORMAT2(IsSubstring, "GMOCK WARNING", warning_output);
-  EXPECT_PRED_FORMAT2(IsSubstring, "Uninteresting mock function call", warning_output);
+  EXPECT_PRED_FORMAT2(IsSubstring, "Uninteresting mock function call",
+                      warning_output);
 
   testing::GMOCK_FLAG(default_mock_behavior) = original_behavior;
 }
