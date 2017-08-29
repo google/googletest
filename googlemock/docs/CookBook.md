@@ -706,7 +706,7 @@ type `m` accepts):
   1. When both `T` and `U` are built-in arithmetic types (`bool`, integers, and floating-point numbers), the conversion from `T` to `U` is not lossy (in other words, any value representable by `T` can also be represented by `U`); and
   1. When `U` is a reference, `T` must also be a reference (as the underlying matcher may be interested in the address of the `U` value).
 
-The code won't compile if any of these conditions isn't met.
+The code won't compile if any of these conditions aren't met.
 
 Here's one example:
 
