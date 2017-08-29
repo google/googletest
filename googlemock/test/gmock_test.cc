@@ -40,6 +40,7 @@
 
 #if !defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
 
+using testing::GMOCK_FLAG(default_mock_behavior);
 using testing::GMOCK_FLAG(verbose);
 using testing::InitGoogleMock;
 
@@ -101,6 +102,26 @@ TEST(InitGoogleMockTest, ParsesSingleFlag) {
   };
 
   TestInitGoogleMock(argv, new_argv, "info");
+}
+
+TEST(InitGoogleMockTest, ParsesMultipleFlags) {
+  int old_default_behavior = GMOCK_FLAG(default_mock_behavior);
+  const wchar_t* argv[] = {
+    L"foo.exe",
+    L"--gmock_verbose=info",
+    L"--gmock_default_mock_behavior=2",
+    NULL
+  };
+
+  const wchar_t* new_argv[] = {
+    L"foo.exe",
+    NULL
+  };
+
+  TestInitGoogleMock(argv, new_argv, "info");
+  EXPECT_EQ(2, GMOCK_FLAG(default_mock_behavior));
+  EXPECT_NE(2, old_default_behavior);
+  GMOCK_FLAG(default_mock_behavior) = old_default_behavior;
 }
 
 TEST(InitGoogleMockTest, ParsesUnrecognizedFlag) {
@@ -175,6 +196,26 @@ TEST(WideInitGoogleMockTest, ParsesSingleFlag) {
   };
 
   TestInitGoogleMock(argv, new_argv, "info");
+}
+
+TEST(WideInitGoogleMockTest, ParsesMultipleFlags) {
+  int old_default_behavior = GMOCK_FLAG(default_mock_behavior);
+  const wchar_t* argv[] = {
+    L"foo.exe",
+    L"--gmock_verbose=info",
+    L"--gmock_default_mock_behavior=2",
+    NULL
+  };
+
+  const wchar_t* new_argv[] = {
+    L"foo.exe",
+    NULL
+  };
+
+  TestInitGoogleMock(argv, new_argv, "info");
+  EXPECT_EQ(2, GMOCK_FLAG(default_mock_behavior));
+  EXPECT_NE(2, old_default_behavior);
+  GMOCK_FLAG(default_mock_behavior) = old_default_behavior;
 }
 
 TEST(WideInitGoogleMockTest, ParsesUnrecognizedFlag) {
