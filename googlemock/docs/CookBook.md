@@ -148,7 +148,7 @@ Note that the mock class doesn't define `AppendPacket()`, unlike the
 real class. That's fine as long as the test doesn't need to call it.
 
 Next, you need a way to say that you want to use
-`ConcretePacketStream` in production code, and use `MockPacketStream`
+`ConcretePacketStream` in production code and to use `MockPacketStream`
 in tests.  Since the functions are not virtual and the two classes are
 unrelated, you must specify your choice at _compile time_ (as opposed
 to run time).
