@@ -26,7 +26,7 @@ in its interior [googletest/README.md](googletest/README.md) file.
 
 ## Features ##
 
-  * An [XUnit](https://en.wikipedia.org/wiki/XUnit) test framework.
+  * An [xUnit](https://en.wikipedia.org/wiki/XUnit) test framework.
   * Test discovery.
   * A rich set of assertions.
   * User-defined assertions.
