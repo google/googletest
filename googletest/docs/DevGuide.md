@@ -103,7 +103,7 @@ Please do submit code. Here's what you need to do:
 
 If you are a Googler, it is preferable to first create an internal change and
 have it reviewed and submitted, and then create a trivial upstreaming pull
-request here. See go/gmock-contribute.
+request here. 
 
 ## Google Test Committers ##
 
