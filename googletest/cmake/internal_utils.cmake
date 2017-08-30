@@ -245,7 +245,7 @@ function(py_test name)
       add_test(
         NAME ${name}
         COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
-            --build_dir=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
+            --build_dir=${CMAKE_CURRENT_BINARY_DIR}/$<CONFIGURATION>)
     else (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 3.1)
       add_test(
         ${name}
