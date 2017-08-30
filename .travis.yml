@@ -38,6 +38,7 @@ env:
   matrix:
     - SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug VERBOSE=1
     - SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug VERBOSE=1 CXX_FLAGS=-std=c++11
+    - SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug VERBOSE=1 CXX_FLAGS=-std=c++11 CMAKE_FLAGS=-Dgtest_disable_former_test_case=ON
 notifications:
   email: false
 sudo: false
