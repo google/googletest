@@ -148,7 +148,7 @@ Note that the mock class doesn't define `AppendPacket()`, unlike the
 real class. That's fine as long as the test doesn't need to call it.
 
 Next, you need a way to say that you want to use
-`ConcretePacketStream` in production code, and use `MockPacketStream`
+`ConcretePacketStream` in production code and to use `MockPacketStream`
 in tests.  Since the functions are not virtual and the two classes are
 unrelated, you must specify your choice at _compile time_ (as opposed
 to run time).
@@ -706,7 +706,7 @@ type `m` accepts):
   1. When both `T` and `U` are built-in arithmetic types (`bool`, integers, and floating-point numbers), the conversion from `T` to `U` is not lossy (in other words, any value representable by `T` can also be represented by `U`); and
   1. When `U` is a reference, `T` must also be a reference (as the underlying matcher may be interested in the address of the `U` value).
 
-The code won't compile if any of these conditions isn't met.
+The code won't compile if any of these conditions aren't met.
 
 Here's one example:
 

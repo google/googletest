@@ -1623,8 +1623,8 @@ printf("We are in test %s of test suite %s.\n",
 ```
 
 `current_test_info()` returns a null pointer if no test is running. In
-particular, you cannot find the test suite name in `TestSuiteSetUp()`,
-`TestSuiteTearDown()` (where you know the test suite name implicitly), or
+particular, you cannot find the test suite name in `SetUpTestSuite()`,
+`TearDownTestSuite()` (where you know the test suite name implicitly), or
 functions called from them.
 
 _Availability:_ Linux, Windows, Mac.
