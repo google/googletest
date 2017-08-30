@@ -236,8 +236,6 @@ endfunction()
 # creates a Python test with the given name whose main module is in
 # test/name.py.  It does nothing if Python is not installed.
 function(py_test name)
-  # We are not supporting Python tests on Linux yet as they consider
-  # all Linux environments to be google3 and try to use google3 features.
   if (PYTHONINTERP_FOUND)
     # ${CMAKE_BINARY_DIR} is known at configuration time, so we can
     # directly bind it from cmake. ${CTEST_CONFIGURATION_TYPE} is known
