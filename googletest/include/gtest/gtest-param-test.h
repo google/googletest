@@ -1418,23 +1418,28 @@ internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
 // Note: test names must be non-empty, unique, and may only contain ASCII
 // alphanumeric characters or underscore.
 
-# define INSTANTIATE_TEST_CASE_P(prefix, test_case_name, generator, ...) \
-  ::testing::internal::ParamGenerator<test_case_name::ParamType> \
-      gtest_##prefix##test_case_name##_EvalGenerator_() { return generator; } \
-  ::std::string gtest_##prefix##test_case_name##_EvalGenerateName_( \
-      const ::testing::TestParamInfo<test_case_name::ParamType>& info) { \
-    return ::testing::internal::GetParamNameGen<test_case_name::ParamType> \
+#if GTEST_HAS_TESTCASE
+# define INSTANTIATE_TEST_CASE_P(prefix, test_suite_name, generator, ...) \
+  INSTANTIATE_TEST_SUITE_P(prefix, test_suite_name, generator, __VA_ARGS__)
+#endif
+
+# define INSTANTIATE_TEST_SUITE_P(prefix, test_suite_name, generator, ...) \
+  ::testing::internal::ParamGenerator<test_suite_name::ParamType> \
+      gtest_##prefix##test_suite_name##_EvalGenerator_() { return generator; } \
+  ::std::string gtest_##prefix##test_suite_name##_EvalGenerateName_( \
+      const ::testing::TestParamInfo<test_suite_name::ParamType>& info) { \
+    return ::testing::internal::GetParamNameGen<test_suite_name::ParamType> \
         (__VA_ARGS__)(info); \
   } \
-  int gtest_##prefix##test_case_name##_dummy_ GTEST_ATTRIBUTE_UNUSED_ = \
+  int gtest_##prefix##test_suite_name##_dummy_ GTEST_ATTRIBUTE_UNUSED_ = \
       ::testing::UnitTest::GetInstance()->parameterized_test_registry(). \
-          GetTestCasePatternHolder<test_case_name>(\
-              #test_case_name, \
+          GetTestCasePatternHolder<test_suite_name>(\
+              #test_suite_name, \
               ::testing::internal::CodeLocation(\
                   __FILE__, __LINE__))->AddTestCaseInstantiation(\
                       #prefix, \
-                      &gtest_##prefix##test_case_name##_EvalGenerator_, \
-                      &gtest_##prefix##test_case_name##_EvalGenerateName_, \
+                      &gtest_##prefix##test_suite_name##_EvalGenerator_, \
+                      &gtest_##prefix##test_suite_name##_EvalGenerateName_, \
                       __FILE__, __LINE__)
 
 }  // namespace testing

@@ -31,7 +31,7 @@
 
 // This sample shows how to test common properties of multiple
 // implementations of an interface (aka interface tests) using
-// value-parameterized tests. Each test in the test case has
+// value-parameterized tests. Each test in the test suite has
 // a parameter that is an interface pointer to an implementation
 // tested.
 
@@ -112,9 +112,9 @@ TEST_P(PrimeTableTestSmpl7, CanGetNextPrime) {
 //
 // Here, we instantiate our tests with a list of two PrimeTable object
 // factory functions:
-INSTANTIATE_TEST_CASE_P(OnTheFlyAndPreCalculated, PrimeTableTestSmpl7,
-                        Values(&CreateOnTheFlyPrimeTable,
-                               &CreatePreCalculatedPrimeTable<1000>));
+INSTANTIATE_TEST_SUITE_P(OnTheFlyAndPreCalculated, PrimeTableTestSmpl7,
+                         Values(&CreateOnTheFlyPrimeTable,
+                                &CreatePreCalculatedPrimeTable<1000>));
 
 #else
 

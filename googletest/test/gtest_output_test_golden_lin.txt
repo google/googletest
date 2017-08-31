@@ -7,7 +7,7 @@ Expected: true
 gtest_output_test_.cc:#: Failure
       Expected: 2
 To be equal to: 3
-[0;32m[==========] [mRunning 66 tests from 29 test cases.
+[0;32m[==========] [mRunning 66 tests from 29 test suites.
 [0;32m[----------] [mGlobal test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -273,24 +273,24 @@ Expected failure in foo.cc
 [0;32m[ RUN      ] [mMixedUpTestCaseTest.ThisShouldFail
 gtest.cc:#: Failure
 Failed
-All tests in the same test case must use the same test fixture
-class.  However, in test case MixedUpTestCaseTest,
+All tests in the same test suite must use the same test fixture
+class.  However, in test suite MixedUpTestCaseTest,
 you defined test FirstTestFromNamespaceFoo and test ThisShouldFail
 using two different test fixture classes.  This can happen if
 the two classes are from different namespaces or translation
 units and have the same name.  You should probably rename one
-of the classes to put the tests into different test cases.
+of the classes to put the tests into different test suites.
 [0;31m[  FAILED  ] [mMixedUpTestCaseTest.ThisShouldFail
 [0;32m[ RUN      ] [mMixedUpTestCaseTest.ThisShouldFailToo
 gtest.cc:#: Failure
 Failed
-All tests in the same test case must use the same test fixture
-class.  However, in test case MixedUpTestCaseTest,
+All tests in the same test suite must use the same test fixture
+class.  However, in test suite MixedUpTestCaseTest,
 you defined test FirstTestFromNamespaceFoo and test ThisShouldFailToo
 using two different test fixture classes.  This can happen if
 the two classes are from different namespaces or translation
 units and have the same name.  You should probably rename one
-of the classes to put the tests into different test cases.
+of the classes to put the tests into different test suites.
 [0;31m[  FAILED  ] [mMixedUpTestCaseTest.ThisShouldFailToo
 [0;32m[----------] [m2 tests from MixedUpTestCaseWithSameTestNameTest
 [0;32m[ RUN      ] [mMixedUpTestCaseWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
@@ -298,42 +298,42 @@ of the classes to put the tests into different test cases.
 [0;32m[ RUN      ] [mMixedUpTestCaseWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
 gtest.cc:#: Failure
 Failed
-All tests in the same test case must use the same test fixture
-class.  However, in test case MixedUpTestCaseWithSameTestNameTest,
+All tests in the same test suite must use the same test fixture
+class.  However, in test suite MixedUpTestCaseWithSameTestNameTest,
 you defined test TheSecondTestWithThisNameShouldFail and test TheSecondTestWithThisNameShouldFail
 using two different test fixture classes.  This can happen if
 the two classes are from different namespaces or translation
 units and have the same name.  You should probably rename one
-of the classes to put the tests into different test cases.
+of the classes to put the tests into different test suites.
 [0;31m[  FAILED  ] [mMixedUpTestCaseWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
-[0;32m[----------] [m2 tests from TEST_F_before_TEST_in_same_test_case
-[0;32m[ RUN      ] [mTEST_F_before_TEST_in_same_test_case.DefinedUsingTEST_F
-[0;32m[       OK ] [mTEST_F_before_TEST_in_same_test_case.DefinedUsingTEST_F
-[0;32m[ RUN      ] [mTEST_F_before_TEST_in_same_test_case.DefinedUsingTESTAndShouldFail
+[0;32m[----------] [m2 tests from TEST_F_before_TEST_in_same_test_suite
+[0;32m[ RUN      ] [mTEST_F_before_TEST_in_same_test_suite.DefinedUsingTEST_F
+[0;32m[       OK ] [mTEST_F_before_TEST_in_same_test_suite.DefinedUsingTEST_F
+[0;32m[ RUN      ] [mTEST_F_before_TEST_in_same_test_suite.DefinedUsingTESTAndShouldFail
 gtest.cc:#: Failure
 Failed
-All tests in the same test case must use the same test fixture
-class, so mixing TEST_F and TEST in the same test case is
-illegal.  In test case TEST_F_before_TEST_in_same_test_case,
+All tests in the same test suite must use the same test fixture
+class, so mixing TEST_F and TEST in the same test suite is
+illegal.  In test suite TEST_F_before_TEST_in_same_test_suite,
 test DefinedUsingTEST_F is defined using TEST_F but
 test DefinedUsingTESTAndShouldFail is defined using TEST.  You probably
 want to change the TEST to TEST_F or move it to another test
-case.
-[0;31m[  FAILED  ] [mTEST_F_before_TEST_in_same_test_case.DefinedUsingTESTAndShouldFail
-[0;32m[----------] [m2 tests from TEST_before_TEST_F_in_same_test_case
-[0;32m[ RUN      ] [mTEST_before_TEST_F_in_same_test_case.DefinedUsingTEST
-[0;32m[       OK ] [mTEST_before_TEST_F_in_same_test_case.DefinedUsingTEST
-[0;32m[ RUN      ] [mTEST_before_TEST_F_in_same_test_case.DefinedUsingTEST_FAndShouldFail
+suite.
+[0;31m[  FAILED  ] [mTEST_F_before_TEST_in_same_test_suite.DefinedUsingTESTAndShouldFail
+[0;32m[----------] [m2 tests from TEST_before_TEST_F_in_same_test_suite
+[0;32m[ RUN      ] [mTEST_before_TEST_F_in_same_test_suite.DefinedUsingTEST
+[0;32m[       OK ] [mTEST_before_TEST_F_in_same_test_suite.DefinedUsingTEST
+[0;32m[ RUN      ] [mTEST_before_TEST_F_in_same_test_suite.DefinedUsingTEST_FAndShouldFail
 gtest.cc:#: Failure
 Failed
-All tests in the same test case must use the same test fixture
-class, so mixing TEST_F and TEST in the same test case is
-illegal.  In test case TEST_before_TEST_F_in_same_test_case,
+All tests in the same test suite must use the same test fixture
+class, so mixing TEST_F and TEST in the same test suite is
+illegal.  In test suite TEST_before_TEST_F_in_same_test_suite,
 test DefinedUsingTEST_FAndShouldFail is defined using TEST_F but
 test DefinedUsingTEST is defined using TEST.  You probably
 want to change the TEST to TEST_F or move it to another test
-case.
-[0;31m[  FAILED  ] [mTEST_before_TEST_F_in_same_test_case.DefinedUsingTEST_FAndShouldFail
+suite.
+[0;31m[  FAILED  ] [mTEST_before_TEST_F_in_same_test_suite.DefinedUsingTEST_FAndShouldFail
 [0;32m[----------] [m8 tests from ExpectNonfatalFailureTest
 [0;32m[ RUN      ] [mExpectNonfatalFailureTest.CanReferenceGlobalVariables
 [0;32m[       OK ] [mExpectNonfatalFailureTest.CanReferenceGlobalVariables
@@ -620,7 +620,7 @@ FooEnvironment::TearDown() called.
 gtest_output_test_.cc:#: Failure
 Failed
 Expected fatal failure.
-[0;32m[==========] [m66 tests from 29 test cases ran.
+[0;32m[==========] [m66 tests from 29 test suites ran.
 [0;32m[  PASSED  ] [m22 tests.
 [0;31m[  FAILED  ] [m44 tests, listed below:
 [0;31m[  FAILED  ] [mNonfatalFailureTest.EscapesStringOperands
@@ -643,8 +643,8 @@ Expected fatal failure.
 [0;31m[  FAILED  ] [mMixedUpTestCaseTest.ThisShouldFail
 [0;31m[  FAILED  ] [mMixedUpTestCaseTest.ThisShouldFailToo
 [0;31m[  FAILED  ] [mMixedUpTestCaseWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
-[0;31m[  FAILED  ] [mTEST_F_before_TEST_in_same_test_case.DefinedUsingTESTAndShouldFail
-[0;31m[  FAILED  ] [mTEST_before_TEST_F_in_same_test_case.DefinedUsingTEST_FAndShouldFail
+[0;31m[  FAILED  ] [mTEST_F_before_TEST_in_same_test_suite.DefinedUsingTESTAndShouldFail
+[0;31m[  FAILED  ] [mTEST_before_TEST_F_in_same_test_suite.DefinedUsingTEST_FAndShouldFail
 [0;31m[  FAILED  ] [mExpectNonfatalFailureTest.FailsWhenThereIsNoNonfatalFailure
 [0;31m[  FAILED  ] [mExpectNonfatalFailureTest.FailsWhenThereAreTwoNonfatalFailures
 [0;31m[  FAILED  ] [mExpectNonfatalFailureTest.FailsWhenThereIsOneFatalFailure
@@ -672,7 +672,7 @@ Expected fatal failure.
 [0;33m  YOU HAVE 1 DISABLED TEST
 
 [mNote: Google Test filter = FatalFailureTest.*:LoggingTest.*
-[==========] Running 4 tests from 2 test cases.
+[==========] Running 4 tests from 2 test suites.
 [----------] Global test environment set-up.
 [----------] 3 tests from FatalFailureTest
 [ RUN      ] FatalFailureTest.FatalFailureInSubroutine
@@ -713,7 +713,7 @@ Expected: (3) >= (a[i]), actual: 3 vs 6
 [----------] 1 test from LoggingTest (? ms total)
 
 [----------] Global test environment tear-down
-[==========] 4 tests from 2 test cases ran. (? ms total)
+[==========] 4 tests from 2 test suites ran. (? ms total)
 [  PASSED  ] 0 tests.
 [  FAILED  ] 4 tests, listed below:
 [  FAILED  ] FatalFailureTest.FatalFailureInSubroutine
@@ -723,21 +723,21 @@ Expected: (3) >= (a[i]), actual: 3 vs 6
 
  4 FAILED TESTS
 Note: Google Test filter = *DISABLED_*
-[==========] Running 1 test from 1 test case.
+[==========] Running 1 test from 1 test suite.
 [----------] Global test environment set-up.
 [----------] 1 test from DisabledTestsWarningTest
 [ RUN      ] DisabledTestsWarningTest.DISABLED_AlsoRunDisabledTestsFlagSuppressesWarning
 [       OK ] DisabledTestsWarningTest.DISABLED_AlsoRunDisabledTestsFlagSuppressesWarning
 [----------] Global test environment tear-down
-[==========] 1 test from 1 test case ran.
+[==========] 1 test from 1 test suite ran.
 [  PASSED  ] 1 test.
 Note: Google Test filter = PassingTest.*
 Note: This is test shard 2 of 2.
-[==========] Running 1 test from 1 test case.
+[==========] Running 1 test from 1 test suite.
 [----------] Global test environment set-up.
 [----------] 1 test from PassingTest
 [ RUN      ] PassingTest.PassingTest2
 [       OK ] PassingTest.PassingTest2
 [----------] Global test environment tear-down
-[==========] 1 test from 1 test case ran.
+[==========] 1 test from 1 test suite ran.
 [  PASSED  ] 1 test.

@@ -98,7 +98,7 @@ TEST_P(FailingParamTest, Fails) {
 
 // This generates a test which will fail. Google Test is expected to print
 // its parameter when it outputs the list of all failed tests.
-INSTANTIATE_TEST_CASE_P(PrintingFailingParams,
+INSTANTIATE_TEST_SUITE_P(PrintingFailingParams,
                         FailingParamTest,
                         testing::Values(2));
 
@@ -571,23 +571,23 @@ TEST_F(MixedUpTestCaseWithSameTestNameTest,
 // test case checks the scenario where TEST_F appears before TEST, and
 // the second one checks where TEST appears before TEST_F.
 
-class TEST_F_before_TEST_in_same_test_case : public testing::Test {
+class TEST_F_before_TEST_in_same_test_suite : public testing::Test {
 };
 
-TEST_F(TEST_F_before_TEST_in_same_test_case, DefinedUsingTEST_F) {}
+TEST_F(TEST_F_before_TEST_in_same_test_suite, DefinedUsingTEST_F) {}
 
 // Expected to fail.  We rely on the golden file to check that Google Test
 // generates the right error message.
-TEST(TEST_F_before_TEST_in_same_test_case, DefinedUsingTESTAndShouldFail) {}
+TEST(TEST_F_before_TEST_in_same_test_suite, DefinedUsingTESTAndShouldFail) {}
 
-class TEST_before_TEST_F_in_same_test_case : public testing::Test {
+class TEST_before_TEST_F_in_same_test_suite : public testing::Test {
 };
 
-TEST(TEST_before_TEST_F_in_same_test_case, DefinedUsingTEST) {}
+TEST(TEST_before_TEST_F_in_same_test_suite, DefinedUsingTEST) {}
 
 // Expected to fail.  We rely on the golden file to check that Google Test
 // generates the right error message.
-TEST_F(TEST_before_TEST_F_in_same_test_case, DefinedUsingTEST_FAndShouldFail) {
+TEST_F(TEST_before_TEST_F_in_same_test_suite, DefinedUsingTEST_FAndShouldFail) {
 }
 
 // Used for testing EXPECT_NONFATAL_FAILURE() and EXPECT_FATAL_FAILURE().
@@ -774,7 +774,7 @@ TEST_P(ParamTest, Failure) {
   EXPECT_EQ("b", GetParam()) << "Expected failure";
 }
 
-INSTANTIATE_TEST_CASE_P(PrintingStrings,
+INSTANTIATE_TEST_SUITE_P(PrintingStrings,
                         ParamTest,
                         testing::Values(std::string("a")),
                         ParamNameFunc);
@@ -788,7 +788,7 @@ template <typename T>
 class TypedTest : public testing::Test {
 };
 
-TYPED_TEST_CASE(TypedTest, testing::Types<int>);
+TYPED_TEST_SUITE(TypedTest, testing::Types<int>);
 
 TYPED_TEST(TypedTest, Success) {
   EXPECT_EQ(0, TypeParam());
@@ -807,7 +807,7 @@ template <typename T>
 class TypedTestP : public testing::Test {
 };
 
-TYPED_TEST_CASE_P(TypedTestP);
+TYPED_TEST_SUITE_P(TypedTestP);
 
 TYPED_TEST_P(TypedTestP, Success) {
   EXPECT_EQ(0U, TypeParam());
@@ -817,10 +817,10 @@ TYPED_TEST_P(TypedTestP, Failure) {
   EXPECT_EQ(1U, TypeParam()) << "Expected failure";
 }
 
-REGISTER_TYPED_TEST_CASE_P(TypedTestP, Success, Failure);
+REGISTER_TYPED_TEST_SUITE_P(TypedTestP, Success, Failure);
 
 typedef testing::Types<unsigned char, unsigned int> UnsignedTypes;
-INSTANTIATE_TYPED_TEST_CASE_P(Unsigned, TypedTestP, UnsignedTypes);
+INSTANTIATE_TYPED_TEST_SUITE_P(Unsigned, TypedTestP, UnsignedTypes);
 
 #endif  // GTEST_HAS_TYPED_TEST_P
 
@@ -842,7 +842,7 @@ class ATypedDeathTest : public testing::Test {
 };
 
 typedef testing::Types<int, double> NumericTypes;
-TYPED_TEST_CASE(ATypedDeathTest, NumericTypes);
+TYPED_TEST_SUITE(ATypedDeathTest, NumericTypes);
 
 TYPED_TEST(ATypedDeathTest, ShouldRunFirst) {
 }
@@ -859,14 +859,14 @@ template <typename T>
 class ATypeParamDeathTest : public testing::Test {
 };
 
-TYPED_TEST_CASE_P(ATypeParamDeathTest);
+TYPED_TEST_SUITE_P(ATypeParamDeathTest);
 
 TYPED_TEST_P(ATypeParamDeathTest, ShouldRunFirst) {
 }
 
-REGISTER_TYPED_TEST_CASE_P(ATypeParamDeathTest, ShouldRunFirst);
+REGISTER_TYPED_TEST_SUITE_P(ATypeParamDeathTest, ShouldRunFirst);
 
-INSTANTIATE_TYPED_TEST_CASE_P(My, ATypeParamDeathTest, NumericTypes);
+INSTANTIATE_TYPED_TEST_SUITE_P(My, ATypeParamDeathTest, NumericTypes);
 
 # endif  // GTEST_HAS_TYPED_TEST_P
 

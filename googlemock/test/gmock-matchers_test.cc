@@ -4198,7 +4198,7 @@ typedef testing::Types<
     list<int> >
     ContainerEqTestTypes;
 
-TYPED_TEST_CASE(ContainerEqTest, ContainerEqTestTypes);
+TYPED_TEST_SUITE(ContainerEqTest, ContainerEqTestTypes);
 
 // Tests that the filled container is equal to itself.
 TYPED_TEST(ContainerEqTest, EqualsSelf) {
@@ -5150,7 +5150,7 @@ TEST_P(BipartiteTest, Exhaustive) {
   } while (graph.NextGraph());
 }
 
-INSTANTIATE_TEST_CASE_P(AllGraphs, BipartiteTest,
+INSTANTIATE_TEST_SUITE_P(AllGraphs, BipartiteTest,
                         ::testing::Range(0, 5));
 
 // Parameterized by a pair interpreted as (LhsSize, RhsSize).
@@ -5193,7 +5193,7 @@ TEST_P(BipartiteNonSquareTest, Exhaustive) {
   } while (graph.NextGraph());
 }
 
-INSTANTIATE_TEST_CASE_P(AllGraphs, BipartiteNonSquareTest,
+INSTANTIATE_TEST_SUITE_P(AllGraphs, BipartiteNonSquareTest,
     testing::Values(
         std::make_pair(1, 2),
         std::make_pair(2, 1),
@@ -5231,7 +5231,7 @@ TEST_P(BipartiteRandomTest, LargerNets) {
 }
 
 // Test argument is a std::pair<int, int> representing (nodes, iters).
-INSTANTIATE_TEST_CASE_P(Samples, BipartiteRandomTest,
+INSTANTIATE_TEST_SUITE_P(Samples, BipartiteRandomTest,
     testing::Values(
         std::make_pair(5, 10000),
         std::make_pair(6, 5000),

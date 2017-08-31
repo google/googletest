@@ -30,7 +30,7 @@
 
 // This sample shows how to use Google Test listener API to implement
 // an alternative console output and how to use the UnitTest reflection API
-// to enumerate test cases and tests and to inspect their results.
+// to enumerate test suites and tests and to inspect their results.
 
 #include <stdio.h>
 
@@ -39,7 +39,7 @@
 using ::testing::EmptyTestEventListener;
 using ::testing::InitGoogleTest;
 using ::testing::Test;
-using ::testing::TestCase;
+using ::testing::TestSuite;
 using ::testing::TestEventListeners;
 using ::testing::TestInfo;
 using ::testing::TestPartResult;
@@ -62,7 +62,7 @@ class TersePrinter : public EmptyTestEventListener {
   virtual void OnTestStart(const TestInfo& test_info) {
     fprintf(stdout,
             "*** Test %s.%s starting.\n",
-            test_info.test_case_name(),
+            test_info.test_suite_name(),
             test_info.name());
     fflush(stdout);
   }
@@ -82,7 +82,7 @@ class TersePrinter : public EmptyTestEventListener {
   virtual void OnTestEnd(const TestInfo& test_info) {
     fprintf(stdout,
             "*** Test %s.%s ending.\n",
-            test_info.test_case_name(),
+            test_info.test_suite_name(),
             test_info.name());
     fflush(stdout);
   }
@@ -136,10 +136,10 @@ int main(int argc, char **argv) {
   // This is an example of using the UnitTest reflection API to inspect test
   // results. Here we discount failures from the tests we expected to fail.
   int unexpectedly_failed_tests = 0;
-  for (int i = 0; i < unit_test.total_test_case_count(); ++i) {
-    const TestCase& test_case = *unit_test.GetTestCase(i);
-    for (int j = 0; j < test_case.total_test_count(); ++j) {
-      const TestInfo& test_info = *test_case.GetTestInfo(j);
+  for (int i = 0; i < unit_test.total_test_suite_count(); ++i) {
+    const TestSuite& test_suite = *unit_test.GetTestSuite(i);
+    for (int j = 0; j < test_suite.total_test_count(); ++j) {
+      const TestInfo& test_info = *test_suite.GetTestInfo(j);
       // Counts failed tests that were not meant to fail (those without
       // 'Fails' in the name).
       if (test_info.result()->Failed() &&

@@ -440,8 +440,8 @@ user-extensible value printer.
 
 This printer knows how to print built-in C++ types, native arrays, STL
 containers, and any type that supports the `<<` operator.  For other
-types, it prints the raw bytes in the value and hopes that you the
-user can figure it out.
+types, it prints the raw bytes in the value and hopes that you
+can figure it out.
 
 As mentioned earlier, the printer is _extensible_.  That means
 you can teach it to do a better job at printing your particular type
@@ -605,7 +605,7 @@ The test function body may contain other assertions and statements as well, if
 necessary.
 
 _Important:_ We strongly recommend you to follow the convention of naming your
-test case (not test) `*DeathTest` when it contains a death test, as
+test suite (not test) `*DeathTest` when it contains a death test, as
 demonstrated in the above example. The `Death Tests And Threads` section below
 explains why.
 
@@ -710,7 +710,7 @@ it may be difficult or impossible to clean them up.
 Google Test has three features intended to raise awareness of threading issues.
 
   1. A warning is emitted if multiple threads are running when a death test is encountered.
-  1. Test cases with a name ending in "DeathTest" are run before all other tests.
+  1. Test suites with a name ending in "DeathTest" are run before all other tests.
   1. It uses `clone()` instead of `fork()` to spawn the child process on Linux (`clone()` is not available on Cygwin and Mac), as `fork()` is more likely to cause the child to hang when the parent process has multiple threads.
 
 It's perfectly fine to create threads inside a death test statement; they are
@@ -978,11 +978,11 @@ will output XML like this:
 _Note_:
   * `RecordProperty()` is a static member of the `Test` class. Therefore it needs to be prefixed with `::testing::Test::` if used outside of the `TEST` body and the test fixture class.
   * `key` must be a valid XML attribute name, and cannot conflict with the ones already used by Google Test (`name`, `status`, `time`, `classname`, `type_param`, and `value_param`).
-  * Calling `RecordProperty()` outside of the lifespan of a test is allowed. If it's called outside of a test but between a test case's `SetUpTestCase()` and `TearDownTestCase()` methods, it will be attributed to the XML element for the test case. If it's called outside of all test cases (e.g. in a test environment), it will be attributed to the top-level XML element.
+  * Calling `RecordProperty()` outside of the lifespan of a test is allowed. If it's called outside of a test but between a test suite's `SetUpTestSuite()` and `TearDownTestSuite()` methods, it will be attributed to the XML element for the test suite. If it's called outside of all test suites (e.g. in a test environment), it will be attributed to the top-level XML element.
 
 _Availability_: Linux, Windows, Mac.
 
-# Sharing Resources Between Tests in the Same Test Case #
+# Sharing Resources Between Tests in the Same Test Suite #
 
 
 
@@ -993,14 +993,14 @@ expensive.
 
 If the tests don't change the resource, there's no harm in them sharing a
 single resource copy. So, in addition to per-test set-up/tear-down, Google Test
-also supports per-test-case set-up/tear-down. To use it:
+also supports per-test-suite set-up/tear-down. To use it:
 
   1. In your test fixture class (say `FooTest` ), define as `static` some member variables to hold the shared resources.
-  1. In the same test fixture class, define a `static void SetUpTestCase()` function (remember not to spell it as **`SetupTestCase`** with a small `u`!) to set up the shared resources and a `static void TearDownTestCase()` function to tear them down.
+  1. In the same test fixture class, define a `static void SetUpTestSuite()` function (remember not to spell it as **`SetupTestSuite`** with a lower-case `u`!) to set up the shared resources and a `static void TearDownTestSuite()` function to tear them down.
 
-That's it! Google Test automatically calls `SetUpTestCase()` before running the
-_first test_ in the `FooTest` test case (i.e. before creating the first
-`FooTest` object), and calls `TearDownTestCase()` after running the _last test_
+That's it! Google Test automatically calls `SetUpTestSuite()` before running the
+_first test_ in the `FooTest` test suite (i.e. before creating the first
+`FooTest` object), and calls `TearDownTestSuite()` after running the _last test_
 in it (i.e. after deleting the last `FooTest` object). In between, the tests
 can use the shared resources.
 
@@ -1010,21 +1010,21 @@ state of any shared resource, or, if they do modify the state, they must
 restore the state to its original value before passing control to the next
 test.
 
-Here's an example of per-test-case set-up and tear-down:
+Here's an example of per-test-suite set-up and tear-down:
 ```
 class FooTest : public ::testing::Test {
  protected:
-  // Per-test-case set-up.
-  // Called before the first test in this test case.
+  // Per-test-suite set-up.
+  // Called before the first test in this test suite.
   // Can be omitted if not needed.
-  static void SetUpTestCase() {
+  static void SetUpTestSuite() {
     shared_resource_ = new ...;
   }
 
-  // Per-test-case tear-down.
-  // Called after the last test in this test case.
+  // Per-test-suite tear-down.
+  // Called after the last test in this test suite.
   // Can be omitted if not needed.
-  static void TearDownTestCase() {
+  static void TearDownTestSuite() {
     delete shared_resource_;
     shared_resource_ = NULL;
   }
@@ -1051,7 +1051,7 @@ _Availability:_ Linux, Windows, Mac.
 
 # Global Set-Up and Tear-Down #
 
-Just as you can do set-up and tear-down at the test level and the test case
+Just as you can do set-up and tear-down at the test level and the test suite
 level, you can also do it at the test program level. Here's how.
 
 First, you subclass the `::testing::Environment` class to define a test
@@ -1188,8 +1188,8 @@ TEST_P(FooTest, HasBlahBlah) {
 }
 ```
 
-Finally, you can use `INSTANTIATE_TEST_CASE_P` to instantiate the test
-case with any set of parameters you want. Google Test defines a number of
+Finally, you can use `INSTANTIATE_TEST_SUITE_P` to instantiate the test
+suite with any set of parameters you want. Google Test defines a number of
 functions for generating test parameters. They return what we call
 (surprise!) _parameter generators_. Here is a summary of them,
 which are all in the `testing` namespace:
@@ -1203,19 +1203,19 @@ which are all in the `testing` namespace:
 
 For more details, see the comments at the definitions of these functions in the [source code](../include/gtest/gtest-param-test.h).
 
-The following statement will instantiate tests from the `FooTest` test case
+The following statement will instantiate tests from the `FooTest` test suite
 each with parameter values `"meeny"`, `"miny"`, and `"moe"`.
 
 ```
-INSTANTIATE_TEST_CASE_P(InstantiationName,
-                        FooTest,
-                        ::testing::Values("meeny", "miny", "moe"));
+INSTANTIATE_TEST_SUITE_P(InstantiationName,
+                         FooTest,
+                         ::testing::Values("meeny", "miny", "moe"));
 ```
 
 To distinguish different instances of the pattern (yes, you can
 instantiate it more than once), the first argument to
-`INSTANTIATE_TEST_CASE_P` is a prefix that will be added to the actual
-test case name. Remember to pick unique prefixes for different
+`INSTANTIATE_TEST_SUITE_P` is a prefix that will be added to the actual
+test suite name. Remember to pick unique prefixes for different
 instantiations. The tests from the instantiation above will have these
 names:
 
@@ -1233,7 +1233,7 @@ with parameter values `"cat"` and `"dog"`:
 
 ```
 const char* pets[] = {"cat", "dog"};
-INSTANTIATE_TEST_CASE_P(AnotherInstantiationName, FooTest,
+INSTANTIATE_TEST_SUITE_P(AnotherInstantiationName, FooTest,
                         ::testing::ValuesIn(pets));
 ```
 
@@ -1244,9 +1244,9 @@ The tests from the instantiation above will have these names:
   * `AnotherInstantiationName/FooTest.HasBlahBlah/0` for `"cat"`
   * `AnotherInstantiationName/FooTest.HasBlahBlah/1` for `"dog"`
 
-Please note that `INSTANTIATE_TEST_CASE_P` will instantiate _all_
-tests in the given test case, whether their definitions come before or
-_after_ the `INSTANTIATE_TEST_CASE_P` statement.
+Please note that `INSTANTIATE_TEST_SUITE_P` will instantiate _all_
+tests in the given test suite, whether their definitions come before or
+_after_ the `INSTANTIATE_TEST_SUITE_P` statement.
 
 You can see
 [these](../samples/sample7_unittest.cc)
@@ -1272,9 +1272,9 @@ To define abstract tests, you should organize your code like this:
   1. Put the `TEST_P` definitions in `foo_param_test.cc`, which includes `foo_param_test.h`. Think of this as _implementing_ your abstract tests.
 
 Once they are defined, you can instantiate them by including
-`foo_param_test.h`, invoking `INSTANTIATE_TEST_CASE_P()`, and linking
+`foo_param_test.h`, invoking `INSTANTIATE_TEST_SUITE_P()`, and linking
 with `foo_param_test.cc`. You can instantiate the same abstract test
-case multiple times, possibly in different source files.
+suite multiple times, possibly in different source files.
 
 # Typed Tests #
 
@@ -1308,20 +1308,20 @@ class FooTest : public ::testing::Test {
 };
 ```
 
-Next, associate a list of types with the test case, which will be
+Next, associate a list of types with the test suite, which will be
 repeated for each type in the list:
 
 ```
 typedef ::testing::Types<char, int, unsigned int> MyTypes;
-TYPED_TEST_CASE(FooTest, MyTypes);
+TYPED_TEST_SUITE(FooTest, MyTypes);
 ```
 
-The `typedef` is necessary for the `TYPED_TEST_CASE` macro to parse
+The `typedef` is necessary for the `TYPED_TEST_SUITE` macro to parse
 correctly.  Otherwise the compiler will think that each comma in the
 type list introduces a new macro argument.
 
 Then, use `TYPED_TEST()` instead of `TEST_F()` to define a typed test
-for this test case.  You can repeat this as many times as you want:
+for this test suite.  You can repeat this as many times as you want:
 
 ```
 TYPED_TEST(FooTest, DoesBlah) {
@@ -1373,10 +1373,10 @@ class FooTest : public ::testing::Test {
 };
 ```
 
-Next, declare that you will define a type-parameterized test case:
+Next, declare that you will define a type-parameterized test suite:
 
 ```
-TYPED_TEST_CASE_P(FooTest);
+TYPED_TEST_SUITE_P(FooTest);
 ```
 
 The `_P` suffix is for "parameterized" or "pattern", whichever you
@@ -1396,13 +1396,13 @@ TYPED_TEST_P(FooTest, HasPropertyA) { ... }
 ```
 
 Now the tricky part: you need to register all test patterns using the
-`REGISTER_TYPED_TEST_CASE_P` macro before you can instantiate them.
-The first argument of the macro is the test case name; the rest are
-the names of the tests in this test case:
+`REGISTER_TYPED_TEST_SUITE_P` macro before you can instantiate them.
+The first argument of the macro is the test suite name; the rest are
+the names of the tests in this test suite:
 
 ```
-REGISTER_TYPED_TEST_CASE_P(FooTest,
-                           DoesBlah, HasPropertyA);
+REGISTER_TYPED_TEST_SUITE_P(FooTest,
+                            DoesBlah, HasPropertyA);
 ```
 
 Finally, you are free to instantiate the pattern with the types you
@@ -1411,22 +1411,22 @@ it in multiple C++ source files and instantiate it multiple times.
 
 ```
 typedef ::testing::Types<char, int, unsigned int> MyTypes;
-INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
+INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
 ```
 
 To distinguish different instances of the pattern, the first argument
-to the `INSTANTIATE_TYPED_TEST_CASE_P` macro is a prefix that will be
-added to the actual test case name.  Remember to pick unique prefixes
+to the `INSTANTIATE_TYPED_TEST_SUITE_P` macro is a prefix that will be
+added to the actual test suite name.  Remember to pick unique prefixes
 for different instances.
 
 In the special case where the type list contains only one type, you
 can write that type directly without `::testing::Types<...>`, like this:
 
 ```
-INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, int);
+INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, int);
 ```
 
-You can see `samples/sample6_unittest.cc` for a complete example.
+You can see [`samples/sample6_unittest.cc`](../samples/sample6_unittest.cc) for a complete example.
 
 _Availability:_ Linux, Windows (requires MSVC 8.0 or above), Mac;
 since version 1.1.0.
@@ -1480,7 +1480,7 @@ Or, you can declare an individual test as a friend of your class by adding this
 line in the class body:
 
 ```
-FRIEND_TEST(TestCaseName, TestName);
+FRIEND_TEST(TestSuiteName, TestName);
 ```
 
 For example,
@@ -1598,11 +1598,11 @@ namespace testing {
 
 class TestInfo {
  public:
-  // Returns the test case name and the test name, respectively.
+  // Returns the test suite name and the test name, respectively.
   //
   // Do NOT delete or free the return value - it's managed by the
   // TestInfo class.
-  const char* test_case_name() const;
+  const char* test_suite_name() const;
   const char* name() const;
 };
 
@@ -1618,13 +1618,13 @@ class TestInfo {
 // Do NOT delete the returned object - it's managed by the UnitTest class.
 const ::testing::TestInfo* const test_info =
   ::testing::UnitTest::GetInstance()->current_test_info();
-printf("We are in test %s of test case %s.\n",
-       test_info->name(), test_info->test_case_name());
+printf("We are in test %s of test suite %s.\n",
+       test_info->name(), test_info->test_suite_name());
 ```
 
 `current_test_info()` returns a null pointer if no test is running. In
-particular, you cannot find the test case name in `SetUpTestCase()`,
-`TearDownTestCase()` (where you know the test case name implicitly), or
+particular, you cannot find the test suite name in `SetUpTestSuite()`,
+`TearDownTestSuite()` (where you know the test suite name implicitly), or
 functions called from them.
 
 _Availability:_ Linux, Windows, Mac.
@@ -1634,7 +1634,7 @@ _Availability:_ Linux, Windows, Mac.
 Google Test provides an <b>event listener API</b> to let you receive
 notifications about the progress of a test program and test
 failures. The events you can listen to include the start and end of
-the test program, a test case, or a test method, among others. You may
+the test program, a test suite, or a test method, among others. You may
 use this API to augment or replace the standard console output,
 replace the XML output, or provide a completely different form of
 output, such as a GUI or a database. You can also use test events as
@@ -1655,10 +1655,10 @@ subclass only needs to override the methods it cares about.
 
 When an event is fired, its context is passed to the handler function
 as an argument. The following argument types are used:
-  * [UnitTest](../include/gtest/gtest.h#L1151) reflects the state of the entire test program,
-  * [TestCase](../include/gtest/gtest.h#L778) has information about a test case, which can contain one or more tests,
-  * [TestInfo](../include/gtest/gtest.h#L644) contains the state of a test, and
-  * [TestPartResult](../include/gtest/gtest-test-part.h#L47) represents the result of a test assertion.
+  * [UnitTest](../include/gtest/gtest.h#L1258) reflects the state of the entire test program,
+  * [TestSuite](../include/gtest/gtest.h#L810) has information about a test suite, which can contain one or more tests,
+  * [TestInfo](../include/gtest/gtest.h#L658) contains the state of a test, and
+  * [TestPartResult](../include/gtest/gtest-test-part.h#L43) represents the result of a test assertion.
 
 An event handler function can examine the argument it receives to find
 out interesting information about the event and the test program's
@@ -1669,7 +1669,7 @@ state.  Here's an example:
     // Called before a test starts.
     virtual void OnTestStart(const ::testing::TestInfo& test_info) {
       printf("*** Test %s.%s starting.\n",
-             test_info.test_case_name(), test_info.name());
+             test_info.test_suite_name(), test_info.name());
     }
 
     // Called after a failed assertion or a SUCCEED() invocation.
@@ -1685,7 +1685,7 @@ state.  Here's an example:
     // Called after a test ends.
     virtual void OnTestEnd(const ::testing::TestInfo& test_info) {
       printf("*** Test %s.%s ending.\n",
-             test_info.test_case_name(), test_info.name());
+             test_info.test_suite_name(), test_info.name());
     }
   };
 ```
@@ -1694,8 +1694,8 @@ state.  Here's an example:
 
 To use the event listener you have defined, add an instance of it to
 the Google Test event listener list (represented by class
-[TestEventListeners](../include/gtest/gtest.h#L1064)
-- note the "s" at the end of the name) in your
+[TestEventListeners](../include/gtest/gtest.h#L1180) - 
+note the 's' at the end of the name) in your
 `main()` function, before calling `RUN_ALL_TESTS()`:
 ```
 int main(int argc, char** argv) {
@@ -1789,10 +1789,10 @@ running them so that a filter may be applied if needed. Including the flag
 `--gtest_list_tests` overrides all other flags and lists tests in the following
 format:
 ```
-TestCase1.
+TestSuite1.
   TestName1
   TestName2
-TestCase2.
+TestSuite2.
   TestName
 ```
 
@@ -1807,7 +1807,7 @@ By default, a Google Test program runs all tests the user has defined.
 Sometimes, you want to run only a subset of the tests (e.g. for debugging or
 quickly verifying a change). If you set the `GTEST_FILTER` environment variable
 or the `--gtest_filter` flag to a filter string, Google Test will only run the
-tests whose full names (in the form of `TestCaseName.TestName`) match the
+tests whose full names (in the form of `TestSuiteName.TestName`) match the
 filter.
 
 The format of a filter is a '`:`'-separated list of wildcard patterns (called
@@ -1824,10 +1824,10 @@ For example:
 
   * `./foo_test` Has no flag, and thus runs all its tests.
   * `./foo_test --gtest_filter=*` Also runs everything, due to the single match-everything `*` value.
-  * `./foo_test --gtest_filter=FooTest.*` Runs everything in test case `FooTest`.
+  * `./foo_test --gtest_filter=FooTest.*` Runs everything in test suite `FooTest`.
   * `./foo_test --gtest_filter=*Null*:*Constructor*` Runs any test whose full name contains either `"Null"` or `"Constructor"`.
   * `./foo_test --gtest_filter=-*DeathTest.*` Runs all non-death tests.
-  * `./foo_test --gtest_filter=FooTest.*-FooTest.Bar` Runs everything in test case `FooTest` except `FooTest.Bar`.
+  * `./foo_test --gtest_filter=FooTest.*-FooTest.Bar` Runs everything in test suite `FooTest` except `FooTest.Bar`.
 
 _Availability:_ Linux, Windows, Mac.
 
@@ -1838,9 +1838,9 @@ If you have a broken test that you cannot fix right away, you can add the
 better than commenting out the code or using `#if 0`, as disabled tests are
 still compiled (and thus won't rot).
 
-If you need to disable all tests in a test case, you can either add `DISABLED_`
+If you need to disable all tests in a test suite, you can either add `DISABLED_`
 to the front of the name of each test, or alternatively add it to the front of
-the test case name.
+the test suite name.
 
 For example, the following tests won't be run by Google Test, even though they
 will still be compiled:
@@ -1970,13 +1970,14 @@ over from a previous run), Google Test will pick a different name (e.g.
 
 The report uses the format described here.  It is based on the
 `junitreport` Ant task and can be parsed by popular continuous build
-systems like [Hudson](https://hudson.dev.java.net/). Since that format
-was originally intended for Java, a little interpretation is required
+systems like [Hudson](https://www.eclipse.org/hudson/) and
+[Jenkins](https://jenkins.io/). Since that format was originally
+intended for Java, a little interpretation is required
 to make it apply to Google Test tests, as shown here:
 
 ```
 <testsuites name="AllTests" ...>
-  <testsuite name="test_case_name" ...>
+  <testsuite name="test_suite_name" ...>
     <testcase name="test_name" ...>
       <failure message="..."/>
       <failure message="..."/>
@@ -1987,7 +1988,7 @@ to make it apply to Google Test tests, as shown here:
 ```
 
   * The root `<testsuites>` element corresponds to the entire test program.
-  * `<testsuite>` elements correspond to Google Test test cases.
+  * `<testsuite>` elements correspond to Google Test test suites.
   * `<testcase>` elements correspond to Google Test test functions.
 
 For instance, the following program
@@ -2020,8 +2021,8 @@ could generate this report:
 
 Things to note:
 
-  * The `tests` attribute of a `<testsuites>` or `<testsuite>` element tells how many test functions the Google Test program or test case contains, while the `failures` attribute tells how many of them failed.
-  * The `time` attribute expresses the duration of the test, test case, or entire test program in milliseconds.
+  * The `tests` attribute of a `<testsuites>` or `<testsuite>` element tells how many test functions the Google Test program or test suite contains, while the `failures` attribute tells how many of them failed.
+  * The `time` attribute expresses the duration of the test, test suite, or entire test program in milliseconds.
   * Each `<failure>` element corresponds to a single failed Google Test assertion.
   * Some JUnit concepts don't apply to Google Test, yet we have to conform to the DTD. Therefore you'll see some dummy elements and attributes in the report. You can safely ignore these parts.
 

@@ -30,18 +30,18 @@
 // Author: wan@google.com (Zhanyong Wan)
 
 // This sample teaches how to reuse a test fixture in multiple test
-// cases by deriving sub-fixtures from it.
+// suites by deriving sub-fixtures from it.
 //
 // When you define a test fixture, you specify the name of the test
-// case that will use this fixture.  Therefore, a test fixture can
-// be used by only one test case.
+// suite that will use this fixture.  Therefore, a test fixture can
+// be used by only one test suite.
 //
-// Sometimes, more than one test cases may want to use the same or
+// Sometimes, more than one test suites may want to use the same or
 // slightly different test fixtures.  For example, you may want to
 // make sure that all tests for a GUI library don't leak important
 // system resources like fonts and brushes.  In Google Test, you do
 // this by putting the shared logic in a super (as in "super class")
-// test fixture, and then have each test case use a fixture derived
+// test fixture, and then have each test suite use a fixture derived
 // from this super fixture.
 
 #include <limits.h>
@@ -56,7 +56,7 @@ namespace {
 //
 // We put the code for timing a test in a test fixture called
 // "QuickTest".  QuickTest is intended to be the super fixture that
-// other fixtures derive from, therefore there is no test case with
+// other fixtures derive from, therefore there is no test suite with
 // the name "QuickTest".  This is OK.
 //
 // Later, we will derive multiple test fixtures from QuickTest.
@@ -94,7 +94,7 @@ class IntegerFunctionTest : public QuickTest {
 };
 
 
-// Now we can write tests in the IntegerFunctionTest test case.
+// Now we can write tests in the IntegerFunctionTest test suite.
 
 // Tests Factorial()
 TEST_F(IntegerFunctionTest, Factorial) {
@@ -135,7 +135,7 @@ TEST_F(IntegerFunctionTest, IsPrime) {
 }
 
 
-// The next test case (named "QueueTest") also needs to be quick, so
+// The next test suite (named "QueueTest") also needs to be quick, so
 // we derive another fixture from QuickTest.
 //
 // The QueueTest test fixture has some logic and shared objects in

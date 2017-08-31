@@ -574,16 +574,16 @@ class GTEST_API_ UnitTestImpl {
 
   // Gets the i-th test case among all the test cases. i can range from 0 to
   // total_test_case_count() - 1. If i is not in that range, returns NULL.
-  const TestCase* GetTestCase(int i) const {
+  const TestSuite* GetTestCase(int i) const {
     const int index = GetElementOr(test_case_indices_, i, -1);
-    return index < 0 ? NULL : test_cases_[i];
+    return index < 0 ? NULL : test_suites_[i];
   }
 
   // Gets the i-th test case among all the test cases. i can range from 0 to
   // total_test_case_count() - 1. If i is not in that range, returns NULL.
-  TestCase* GetMutableTestCase(int i) {
+  TestSuite* GetMutableTestCase(int i) {
     const int index = GetElementOr(test_case_indices_, i, -1);
-    return index < 0 ? NULL : test_cases_[index];
+    return index < 0 ? NULL : test_suites_[index];
   }
 
   // Provides access to the event listener list.
@@ -620,31 +620,51 @@ class GTEST_API_ UnitTestImpl {
   // trace but Bar() and CurrentOsStackTraceExceptTop() won't.
   std::string CurrentOsStackTraceExceptTop(int skip_count) GTEST_NO_INLINE_;
 
-  // Finds and returns a TestCase with the given name.  If one doesn't
+  // Finds and returns a TestSuite with the given name.  If one doesn't
   // exist, creates one and returns it.
   //
   // Arguments:
   //
-  //   test_case_name: name of the test case
-  //   type_param:     the name of the test's type parameter, or NULL if
-  //                   this is not a typed or a type-parameterized test.
-  //   set_up_tc:      pointer to the function that sets up the test case
-  //   tear_down_tc:   pointer to the function that tears down the test case
-  TestCase* GetTestCase(const char* test_case_name,
+  //   test_suite_name: name of the test case
+  //   type_param:      the name of the test's type parameter, or NULL if
+  //                    this is not a typed or a type-parameterized test.
+  //   set_up_ts:       pointer to the function that sets up the test suite
+  //   tear_down_ts:    pointer to the function that tears down the test suite
+  //   set_up_tc:       pointer to the function that sets up the test case
+  //                    (for backward compatibility)
+  //   tear_down_tc:    pointer to the function that tears down the test case
+  //                    (for backward compatibility)
+  TestSuite* GetTestCase(const char* test_suite_name,
                         const char* type_param,
-                        Test::SetUpTestCaseFunc set_up_tc,
-                        Test::TearDownTestCaseFunc tear_down_tc);
+                        Test::SetUpTestSuiteFunc set_up_ts,
+                        Test::TearDownTestSuiteFunc tear_down_ts
+#if GTEST_HAS_TESTCASE
+                        ,
+                        Test::SetUpTestCaseFunc set_up_tc = NULL,
+                        Test::TearDownTestCaseFunc tear_down_tc = NULL
+#endif
+                        );
 
   // Adds a TestInfo to the unit test.
   //
   // Arguments:
   //
+  //   set_up_ts:    pointer to the function that sets up the test suite
+  //   tear_down_ts: pointer to the function that tears down the test suite
   //   set_up_tc:    pointer to the function that sets up the test case
+  //                 (for backward compatibility)
   //   tear_down_tc: pointer to the function that tears down the test case
+  //                 (for backward compatibility)
   //   test_info:    the TestInfo object
-  void AddTestInfo(Test::SetUpTestCaseFunc set_up_tc,
-                   Test::TearDownTestCaseFunc tear_down_tc,
-                   TestInfo* test_info) {
+  void AddTestInfo(Test::SetUpTestSuiteFunc set_up_ts,
+                   Test::TearDownTestSuiteFunc tear_down_ts,
+                   TestInfo* test_info
+#if GTEST_HAS_TESTCASE
+                   // backward compatibility
+                   , Test::SetUpTestCaseFunc set_up_tc,
+                   Test::TearDownTestCaseFunc tear_down_tc
+#endif
+                   ) {
     // In order to support thread-safe death tests, we need to
     // remember the original working directory when the test program
     // was first invoked.  We cannot do this in RUN_ALL_TESTS(), as
@@ -658,11 +678,18 @@ class GTEST_API_ UnitTestImpl {
           << "Failed to get the current working directory.";
     }
 
-    GetTestCase(test_info->test_case_name(),
+    GetTestCase(test_info->test_suite_name(),
                 test_info->type_param(),
-                set_up_tc,
-                tear_down_tc)->AddTestInfo(test_info);
+                set_up_ts,
+                tear_down_ts
+#if GTEST_HAS_TESTCASE
+                // backward compatibility
+                , set_up_tc,
+                tear_down_tc
+#endif
+                )->AddTestInfo(test_info);
   }
+
 
 #if GTEST_HAS_PARAM_TEST
   // Returns ParameterizedTestCaseRegistry object used to keep track of
@@ -673,7 +700,7 @@ class GTEST_API_ UnitTestImpl {
 #endif  // GTEST_HAS_PARAM_TEST
 
   // Sets the TestCase object for the test that's currently running.
-  void set_current_test_case(TestCase* a_current_test_case) {
+  void set_current_test_case(TestSuite* a_current_test_case) {
     current_test_case_ = a_current_test_case;
   }
 
@@ -700,7 +727,7 @@ class GTEST_API_ UnitTestImpl {
 
   // Clears the results of all tests, except the ad hoc tests.
   void ClearNonAdHocTestResult() {
-    ForEach(test_cases_, TestCase::ClearTestCaseResult);
+    ForEach(test_suites_, TestSuite::ClearTestSuiteResult);
   }
 
   // Clears the results of ad-hoc test assertions.
@@ -730,7 +757,7 @@ class GTEST_API_ UnitTestImpl {
   // Prints the names of the tests matching the user-specified filter flag.
   void ListTestsMatchingFilter();
 
-  const TestCase* current_test_case() const { return current_test_case_; }
+  const TestSuite* current_test_case() const { return current_test_case_; }
   TestInfo* current_test_info() { return current_test_info_; }
   const TestInfo* current_test_info() const { return current_test_info_; }
 
@@ -835,9 +862,9 @@ class GTEST_API_ UnitTestImpl {
   // before/after the tests are run.
   std::vector<Environment*> environments_;
 
-  // The vector of TestCases in their original order.  It owns the
+  // The vector of TestSuites in their original order.  It owns the
   // elements in the vector.
-  std::vector<TestCase*> test_cases_;
+  std::vector<TestSuite*> test_suites_;
 
   // Provides a level of indirection for the test case list to allow
   // easy shuffling and restoring the test case order.  The i-th
@@ -861,7 +888,7 @@ class GTEST_API_ UnitTestImpl {
   // changes as Google Test goes through one test case after another.
   // When no test is running, this is set to NULL and Google Test
   // stores assertion results in ad_hoc_test_result_.  Initially NULL.
-  TestCase* current_test_case_;
+  TestSuite* current_test_case_;
 
   // This points to the TestInfo for the currently running test.  It
   // changes as Google Test goes through one test after another.  When
@@ -1130,15 +1157,28 @@ class GTEST_API_ StreamingListener : public EmptyTestEventListener {
            StreamableToString(unit_test.elapsed_time()) + "ms");
   }
 
-  void OnTestCaseStart(const TestCase& test_case) {
-    SendLn(std::string("event=TestCaseStart&name=") + test_case.name());
+  void OnTestSuiteStart(const TestSuite& test_suite) {
+    SendLn(std::string("event=TestSuiteStart&name=") + test_suite.name());
   }
 
-  void OnTestCaseEnd(const TestCase& test_case) {
-    SendLn("event=TestCaseEnd&passed=" + FormatBool(test_case.Passed())
-           + "&elapsed_time=" + StreamableToString(test_case.elapsed_time())
+  void OnTestSuiteEnd(const TestSuite& test_suite) {
+    SendLn("event=TestSuiteEnd&passed=" + FormatBool(test_suite.Passed())
+           + "&elapsed_time=" + StreamableToString(test_suite.elapsed_time())
            + "ms");
   }
+
+#if GTEST_HAS_TESTCASE
+  // backward compatibility - provide old API
+  void OnTestCaseStart(const TestSuite& test_suite) {
+    SendLn(std::string("event=TestCaseStart&name=") + test_suite.name());
+  }
+
+  void OnTestCaseEnd(const TestSuite& test_suite) {
+    SendLn("event=TestCaseEnd&passed=" + FormatBool(test_suite.Passed())
+           + "&elapsed_time=" + StreamableToString(test_suite.elapsed_time())
+           + "ms");
+  }
+#endif
 
   void OnTestStart(const TestInfo& test_info) {
     SendLn(std::string("event=TestStart&name=") + test_info.name());

@@ -9,7 +9,7 @@ Google Test can help you.
 
 So what makes a good test, and how does Google C++ Testing Framework fit in? We believe:
   1. Tests should be _independent_ and _repeatable_. It's a pain to debug a test that succeeds or fails as a result of other tests.  Google C++ Testing Framework isolates the tests by running each of them on a different object. When a test fails, Google C++ Testing Framework allows you to run it in isolation for quick debugging.
-  1. Tests should be well _organized_ and reflect the structure of the tested code.  Google C++ Testing Framework groups related tests into test cases that can share data and subroutines. This common pattern is easy to recognize and makes tests easy to maintain. Such consistency is especially helpful when people switch projects and start to work on a new code base.
+  1. Tests should be well _organized_ and reflect the structure of the tested code.  Google C++ Testing Framework groups related tests into test suites that can share data and subroutines. This common pattern is easy to recognize and makes tests easy to maintain. Such consistency is especially helpful when people switch projects and start to work on a new code base.
   1. Tests should be _portable_ and _reusable_. The open-source community has a lot of code that is platform-neutral, its tests should also be platform-neutral.  Google C++ Testing Framework works on different OSes, with different compilers (gcc, MSVC, and others), with or without exceptions, so Google C++ Testing Framework tests can easily work with a variety of configurations.  (Note that the current release only contains build scripts for Linux - we are actively working on scripts for other platforms.)
   1. When tests fail, they should provide as much _information_ about the problem as possible. Google C++ Testing Framework doesn't stop at the first test failure. Instead, it only stops the current test and continues with the next. You can also set up tests that report non-fatal failures after which the current test continues. Thus, you can detect and fix multiple bugs in a single run-edit-compile cycle.
   1. The testing framework should liberate test writers from housekeeping chores and let them focus on the test _content_.  Google C++ Testing Framework automatically keeps track of all tests defined, and doesn't require the user to enumerate them in order to run them.
@@ -43,19 +43,22 @@ others.
 
 The term _Test_ is commonly of broad enough sense, including ISTQB's
 definition of _Test Case_, so it's not much of a problem here. But the
-term _Test Case_ as used in Google Test is of contradictory sense and thus confusing.
+term _Test Case_ as it was used in Google Test is of contradictory sense
+and thus confusing.
 
 Unfortunately replacing the term _Test Case_ by _Test Suite_ throughout
 the Google C++ Testing Framework is not easy without breaking dependent
 projects, as `TestCase` is part of the public API at various places.
+Therefore the former API (`TestCase`) is still available, while the
+changed API (`TestSuite`) should now be used.
 
 So for the time being, please be aware of the different definitions of
 the terms:
 
-Meaning | Google Test Term | [ISTQB](http://www.istqb.org/) Term
-------- | ---------------- | -----------------------------------
-Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests) | [Test Case](http://glossary.istqb.org/search/test%20case)
-A set of several tests related to one component | [Test Case](#basic-concepts) | [Test Suite](http://glossary.istqb.org/search/test%20suite)
+Meaning | [ISTQB](http://www.istqb.org/) Term | Current Google Test Term | Former Google Test Term 
+------- | ----------------------------------- | ------------------------ | ----------------------- 
+Exercise a particular program path with specific input values and verify the results | [Test Case](http://glossary.istqb.org/search/test%20case) | [TEST()](#simple-tests) | [TEST()](#simple-tests)
+A set of several tests related to one component | [Test Suite](http://glossary.istqb.org/search/test%20suite) | [Test Suite](#basic-concepts) | [Test Case](#basic-concepts)
 
 # Setting up a New Test Project #
 
@@ -92,15 +95,15 @@ the current function; otherwise the program continues normally.
 _Tests_ use assertions to verify the tested code's behavior. If a test crashes
 or has a failed assertion, then it _fails_; otherwise it _succeeds_.
 
-A _test case_ contains one or many tests. You should group your tests into test
-cases that reflect the structure of the tested code. When multiple tests in a
-test case need to share common objects and subroutines, you can put them into a
+A _test suite_ contains one or many tests. You should group your tests into test
+suites that reflect the structure of the tested code. When multiple tests in a
+test suite need to share common objects and subroutines, you can put them into a
 _test fixture_ class.
 
-A _test program_ can contain multiple test cases.
+A _test program_ can contain multiple test suites.
 
 We'll now explain how to write a test program, starting at the individual
-assertion level and building up to tests and test cases.
+assertion level and building up to tests and test suites.
 
 # Assertions #
 
@@ -239,16 +242,16 @@ To create a test:
   1. The test's result is determined by the assertions; if any assertion in the test fails (either fatally or non-fatally), or if the test crashes, the entire test fails. Otherwise, it succeeds.
 
 ```
-TEST(test_case_name, test_name) {
+TEST(test_suite_name, test_name) {
  ... test body ...
 }
 ```
 
 
 `TEST()` arguments go from general to specific. The _first_ argument is the
-name of the test case, and the _second_ argument is the test's name within the
-test case. Both names must be valid C++ identifiers, and they should not contain underscore (`_`). A test's _full name_ consists of its containing test case and its
-individual name. Tests from different test cases can have the same individual
+name of the test suite, and the _second_ argument is the test's name within the
+test suite. Both names must be valid C++ identifiers, and they should not contain underscore (`_`). A test's _full name_ consists of its containing test suite and its
+individual name. Tests from different test suites can have the same individual
 name.
 
 For example, let's take a simple integer function:
@@ -256,7 +259,7 @@ For example, let's take a simple integer function:
 int Factorial(int n); // Returns the factorial of n
 ```
 
-A test case for this function might look like:
+A test suite for this function might look like:
 ```
 // Tests factorial of 0.
 TEST(FactorialTest, HandlesZeroInput) {
@@ -272,11 +275,11 @@ TEST(FactorialTest, HandlesPositiveInput) {
 }
 ```
 
-Google Test groups the test results by test cases, so logically-related tests
-should be in the same test case; in other words, the first argument to their
+Google Test groups the test results by test suites, so logically-related tests
+should be in the same test suite; in other words, the first argument to their
 `TEST()` should be the same. In the above example, we have two tests,
 `HandlesZeroInput` and `HandlesPositiveInput`, that belong to the same test
-case `FactorialTest`.
+suite `FactorialTest`.
 
 _Availability_: Linux, Windows, Mac.
 
@@ -296,12 +299,12 @@ To create a fixture, just:
 When using a fixture, use `TEST_F()` instead of `TEST()` as it allows you to
 access objects and subroutines in the test fixture:
 ```
-TEST_F(test_case_name, test_name) {
+TEST_F(test_suite_name, test_name) {
  ... test body ...
 }
 ```
 
-Like `TEST()`, the first argument is the test case name, but for `TEST_F()`
+Like `TEST()`, the first argument is the test suite name, but for `TEST_F()`
 this must be the name of the test fixture class. You've probably guessed: `_F`
 is for fixture.
 
@@ -318,7 +321,7 @@ For each test defined with `TEST_F()`, Google Test will:
   1. Immediately initialize it via `SetUp()`
   1. Run the test
   1. Clean up by calling `TearDown()`
-  1. Delete the test fixture.  Note that different tests in the same test case have different test fixture objects, and Google Test always deletes a test fixture before it creates the next one. Google Test does not reuse the same test fixture for multiple tests. Any changes one test makes to the fixture do not affect other tests.
+  1. Delete the test fixture.  Note that different tests in the same test suite have different test fixture objects, and Google Test always deletes a test fixture before it creates the next one. Google Test does not reuse the same test fixture for multiple tests. Any changes one test makes to the fixture do not affect other tests.
 
 As an example, let's write tests for a FIFO queue class named `Queue`, which
 has the following interface:
@@ -404,7 +407,7 @@ object is constructed, and restores them when it is destructed.
 
 `TEST()` and `TEST_F()` implicitly register their tests with Google Test. So, unlike with many other C++ testing frameworks, you don't have to re-list all your defined tests in order to run them.
 
-After defining your tests, you can run them with `RUN_ALL_TESTS()` , which returns `0` if all the tests are successful, or `1` otherwise. Note that `RUN_ALL_TESTS()` runs _all tests_ in your link unit -- they can be from different test cases, or even different source files.
+After defining your tests, you can run them with `RUN_ALL_TESTS()` , which returns `0` if all the tests are successful, or `1` otherwise. Note that `RUN_ALL_TESTS()` runs _all tests_ in your link unit -- they can be from different test suites, or even different source files.
 
 When invoked, the `RUN_ALL_TESTS()` macro:
   1. Saves the state of all  Google Test flags.
@@ -468,7 +471,7 @@ class FooTest : public ::testing::Test {
     // before the destructor).
   }
 
-  // Objects declared here can be used by all tests in the test case for Foo.
+  // Objects declared here can be used by all tests in the test suite for Foo.
 };
 
 // Tests that the Foo::Bar() method does Abc.

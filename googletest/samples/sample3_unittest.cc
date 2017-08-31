@@ -36,7 +36,7 @@
 // test fixture.
 //
 // A test fixture is a place to hold objects and functions shared by
-// all tests in a test case.  Using a test fixture avoids duplicating
+// all tests in a test suite.  Using a test fixture avoids duplicating
 // the test code necessary to initialize and cleanup those common
 // objects for each test.  It is also useful for defining sub-routines
 // that your tests need to invoke a lot.

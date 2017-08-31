@@ -40,7 +40,6 @@ using ::testing::AddGlobalTestEnvironment;
 using ::testing::Environment;
 using ::testing::InitGoogleTest;
 using ::testing::Test;
-using ::testing::TestCase;
 using ::testing::TestEventListener;
 using ::testing::TestInfo;
 using ::testing::TestPartResult;
@@ -77,9 +76,15 @@ class EventRecordingListener : public TestEventListener {
     g_events->push_back(GetFullMethodName("OnEnvironmentsSetUpEnd"));
   }
 
-  virtual void OnTestCaseStart(const TestCase& /*test_case*/) {
+  virtual void OnTestSuiteStart(const TestSuite& /*test_suite*/) {
+    g_events->push_back(GetFullMethodName("OnTestSuiteStart"));
+  }
+
+#if GTEST_HAS_TESTCASE
+  virtual void OnTestCaseStart(const TestSuite& /*test_suite*/) {
     g_events->push_back(GetFullMethodName("OnTestCaseStart"));
   }
+#endif
 
   virtual void OnTestStart(const TestInfo& /*test_info*/) {
     g_events->push_back(GetFullMethodName("OnTestStart"));
@@ -93,9 +98,15 @@ class EventRecordingListener : public TestEventListener {
     g_events->push_back(GetFullMethodName("OnTestEnd"));
   }
 
-  virtual void OnTestCaseEnd(const TestCase& /*test_case*/) {
+  virtual void OnTestSuiteEnd(const TestSuite& /*test_suite*/) {
+    g_events->push_back(GetFullMethodName("OnTestSuiteEnd"));
+  }
+
+#if GTEST_HAS_TESTCASE
+  virtual void OnTestCaseEnd(const TestSuite& /*test_suite*/) {
     g_events->push_back(GetFullMethodName("OnTestCaseEnd"));
   }
+#endif
 
   virtual void OnEnvironmentsTearDownStart(const UnitTest& /*unit_test*/) {
     g_events->push_back(GetFullMethodName("OnEnvironmentsTearDownStart"));
@@ -138,12 +149,12 @@ class EnvironmentInvocationCatcher : public Environment {
 
 class ListenerTest : public Test {
  protected:
-  static void SetUpTestCase() {
-    g_events->push_back("ListenerTest::SetUpTestCase");
+  static void SetUpTestSuite() {
+    g_events->push_back("ListenerTest::SetUpTestSuite");
   }
 
-  static void TearDownTestCase() {
-    g_events->push_back("ListenerTest::TearDownTestCase");
+  static void TearDownTestSuite() {
+    g_events->push_back("ListenerTest::TearDownTestSuite");
   }
 
   virtual void SetUp() {
@@ -187,7 +198,7 @@ void VerifyResults(const std::vector<std::string>& data,
       expected_data_size : actual_size;
   size_t i = 0;
   for (; i < shorter_size; ++i) {
-    ASSERT_STREQ(expected_data[i], data[i].c_str())
+    EXPECT_STREQ(expected_data[i], data[i].c_str())
         << "at position " << i;
   }
 
@@ -226,9 +237,13 @@ int main(int argc, char **argv) {
     "Environment::SetUp",
     "2nd.OnEnvironmentsSetUpEnd",
     "1st.OnEnvironmentsSetUpEnd",
+#if GTEST_HAS_TESTCASE
     "1st.OnTestCaseStart",
     "2nd.OnTestCaseStart",
-    "ListenerTest::SetUpTestCase",
+#endif
+    "1st.OnTestSuiteStart",
+    "2nd.OnTestSuiteStart",
+    "ListenerTest::SetUpTestSuite",
     "1st.OnTestStart",
     "2nd.OnTestStart",
     "ListenerTest::SetUp",
@@ -247,9 +262,13 @@ int main(int argc, char **argv) {
     "ListenerTest::TearDown",
     "2nd.OnTestEnd",
     "1st.OnTestEnd",
-    "ListenerTest::TearDownTestCase",
+    "ListenerTest::TearDownTestSuite",
+    "2nd.OnTestSuiteEnd",
+    "1st.OnTestSuiteEnd",
+#if GTEST_HAS_TESTCASE
     "2nd.OnTestCaseEnd",
     "1st.OnTestCaseEnd",
+#endif
     "1st.OnEnvironmentsTearDownStart",
     "2nd.OnEnvironmentsTearDownStart",
     "Environment::TearDown",
@@ -264,9 +283,13 @@ int main(int argc, char **argv) {
     "Environment::SetUp",
     "2nd.OnEnvironmentsSetUpEnd",
     "1st.OnEnvironmentsSetUpEnd",
+#if GTEST_HAS_TESTCASE
     "1st.OnTestCaseStart",
     "2nd.OnTestCaseStart",
-    "ListenerTest::SetUpTestCase",
+#endif
+    "1st.OnTestSuiteStart",
+    "2nd.OnTestSuiteStart",
+    "ListenerTest::SetUpTestSuite",
     "1st.OnTestStart",
     "2nd.OnTestStart",
     "ListenerTest::SetUp",
@@ -285,9 +308,13 @@ int main(int argc, char **argv) {
     "ListenerTest::TearDown",
     "2nd.OnTestEnd",
     "1st.OnTestEnd",
-    "ListenerTest::TearDownTestCase",
+    "ListenerTest::TearDownTestSuite",
+    "2nd.OnTestSuiteEnd",
+    "1st.OnTestSuiteEnd",
+#if GTEST_HAS_TESTCASE
     "2nd.OnTestCaseEnd",
     "1st.OnTestCaseEnd",
+#endif
     "1st.OnEnvironmentsTearDownStart",
     "2nd.OnEnvironmentsTearDownStart",
     "Environment::TearDown",

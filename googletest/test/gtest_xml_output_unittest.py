@@ -98,7 +98,7 @@ Invalid characters in brackets []%(stack)s]]></failure>
   <testsuite name="DisabledTest" tests="1" failures="0" disabled="1" errors="0" time="*">
     <testcase name="DISABLED_test_not_run" status="notrun" time="*" classname="DisabledTest"/>
   </testsuite>
-  <testsuite name="PropertyRecordingTest" tests="4" failures="0" disabled="0" errors="0" time="*" SetUpTestCase="yes" TearDownTestCase="aye">
+  <testsuite name="PropertyRecordingTest" tests="4" failures="0" disabled="0" errors="0" time="*" SetUpTestSuite="yes" TearDownTestSuite="aye">
     <testcase name="OneProperty" status="run" time="*" classname="PropertyRecordingTest" key_1="1"/>
     <testcase name="IntValuedProperty" status="run" time="*" classname="PropertyRecordingTest" key_int="1"/>
     <testcase name="ThreeProperties" status="run" time="*" classname="PropertyRecordingTest" key_1="1" key_2="2" key_3="3"/>

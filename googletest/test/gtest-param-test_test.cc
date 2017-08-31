@@ -557,7 +557,7 @@ TEST(ParamGeneratorTest, AssignmentWorks) {
 
 // This test verifies that the tests are expanded and run as specified:
 // one test per element from the sequence produced by the generator
-// specified in INSTANTIATE_TEST_CASE_P. It also verifies that the test's
+// specified in INSTANTIATE_TEST_SUITE_P. It also verifies that the test's
 // fixture constructor, SetUp(), and TearDown() have run and have been
 // supplied with the correct parameters.
 
@@ -643,7 +643,7 @@ class TestGenerationTest : public TestWithParam<int> {
     EXPECT_EQ(current_parameter_, GetParam());
   }
 
-  static void SetUpTestCase() {
+  static void SetUpTestSuite() {
     bool all_tests_in_test_case_selected = true;
 
     for (int i = 0; i < PARAMETER_COUNT; ++i) {
@@ -664,7 +664,7 @@ class TestGenerationTest : public TestWithParam<int> {
     collected_parameters_.clear();
   }
 
-  static void TearDownTestCase() {
+  static void TearDownTestSuite() {
     vector<int> expected_values(test_generation_params,
                                 test_generation_params + PARAMETER_COUNT);
     // Test execution order is not guaranteed by Google Test,
@@ -690,17 +690,17 @@ TEST_P(TestGenerationTest, TestsExpandedAndRun) {
   EXPECT_EQ(current_parameter_, GetParam());
   collected_parameters_.push_back(GetParam());
 }
-INSTANTIATE_TEST_CASE_P(TestExpansionModule, TestGenerationTest,
+INSTANTIATE_TEST_SUITE_P(TestExpansionModule, TestGenerationTest,
                         ValuesIn(test_generation_params));
 
 // This test verifies that the element sequence (third parameter of
-// INSTANTIATE_TEST_CASE_P) is evaluated in InitGoogleTest() and neither at
-// the call site of INSTANTIATE_TEST_CASE_P nor in RUN_ALL_TESTS().  For
+// INSTANTIATE_TEST_SUITE_P) is evaluated in InitGoogleTest() and neither at
+// the call site of INSTANTIATE_TEST_SUITE_P nor in RUN_ALL_TESTS().  For
 // that, we declare param_value_ to be a static member of
 // GeneratorEvaluationTest and initialize it to 0.  We set it to 1 in
 // main(), just before invocation of InitGoogleTest().  After calling
 // InitGoogleTest(), we set the value to 2.  If the sequence is evaluated
-// before or after InitGoogleTest, INSTANTIATE_TEST_CASE_P will create a
+// before or after InitGoogleTest, INSTANTIATE_TEST_SUITE_P will create a
 // test with parameter other than 1, and the test body will fail the
 // assertion.
 class GeneratorEvaluationTest : public TestWithParam<int> {
@@ -716,7 +716,7 @@ int GeneratorEvaluationTest::param_value_ = 0;
 TEST_P(GeneratorEvaluationTest, GeneratorsEvaluatedInMain) {
   EXPECT_EQ(1, GetParam());
 }
-INSTANTIATE_TEST_CASE_P(GenEvalModule,
+INSTANTIATE_TEST_SUITE_P(GenEvalModule,
                         GeneratorEvaluationTest,
                         Values(GeneratorEvaluationTest::param_value()));
 
@@ -729,7 +729,7 @@ TEST_P(ExternalGeneratorTest, ExternalGenerator) {
   // which we verify here.
   EXPECT_EQ(GetParam(), 33);
 }
-INSTANTIATE_TEST_CASE_P(ExternalGeneratorModule,
+INSTANTIATE_TEST_SUITE_P(ExternalGeneratorModule,
                         ExternalGeneratorTest,
                         extern_gen);
 
@@ -746,8 +746,8 @@ TEST_P(ExternalInstantiationTest, IsMultipleOf33) {
 class MultipleInstantiationTest : public TestWithParam<int> {};
 TEST_P(MultipleInstantiationTest, AllowsMultipleInstances) {
 }
-INSTANTIATE_TEST_CASE_P(Sequence1, MultipleInstantiationTest, Values(1, 2));
-INSTANTIATE_TEST_CASE_P(Sequence2, MultipleInstantiationTest, Range(3, 5));
+INSTANTIATE_TEST_SUITE_P(Sequence1, MultipleInstantiationTest, Values(1, 2));
+INSTANTIATE_TEST_SUITE_P(Sequence2, MultipleInstantiationTest, Range(3, 5));
 
 // Tests that a parameterized test case can be instantiated
 // in multiple translation units. This test will be instantiated
@@ -757,7 +757,7 @@ INSTANTIATE_TEST_CASE_P(Sequence2, MultipleInstantiationTest, Range(3, 5));
 TEST_P(InstantiationInMultipleTranslaionUnitsTest, IsMultipleOf42) {
   EXPECT_EQ(0, GetParam() % 42);
 }
-INSTANTIATE_TEST_CASE_P(Sequence1,
+INSTANTIATE_TEST_SUITE_P(Sequence1,
                         InstantiationInMultipleTranslaionUnitsTest,
                         Values(42, 42*2));
 
@@ -767,7 +767,7 @@ class SeparateInstanceTest : public TestWithParam<int> {
  public:
   SeparateInstanceTest() : count_(0) {}
 
-  static void TearDownTestCase() {
+  static void TearDownTestSuite() {
     EXPECT_GE(global_count_, 2)
         << "If some (but not all) SeparateInstanceTest tests have been "
         << "filtered out this test will fail. Make sure that all "
@@ -785,11 +785,11 @@ TEST_P(SeparateInstanceTest, TestsRunInSeparateInstances) {
   EXPECT_EQ(0, count_++);
   global_count_++;
 }
-INSTANTIATE_TEST_CASE_P(FourElemSequence, SeparateInstanceTest, Range(1, 4));
+INSTANTIATE_TEST_SUITE_P(FourElemSequence, SeparateInstanceTest, Range(1, 4));
 
 // Tests that all instantiations of a test have named appropriately. Test
 // defined with TEST_P(TestCaseName, TestName) and instantiated with
-// INSTANTIATE_TEST_CASE_P(SequenceName, TestCaseName, generator) must be named
+// INSTANTIATE_TEST_SUITE_P(SequenceName, TestCaseName, generator) must be named
 // SequenceName/TestCaseName.TestName/i, where i is the 0-based index of the
 // sequence element used to instantiate the test.
 class NamingTest : public TestWithParam<int> {};
@@ -798,7 +798,7 @@ TEST_P(NamingTest, TestsReportCorrectNamesAndParameters) {
   const ::testing::TestInfo* const test_info =
      ::testing::UnitTest::GetInstance()->current_test_info();
 
-  EXPECT_STREQ("ZeroToFiveSequence/NamingTest", test_info->test_case_name());
+  EXPECT_STREQ("ZeroToFiveSequence/NamingTest", test_info->test_suite_name());
 
   Message index_stream;
   index_stream << "TestsReportCorrectNamesAndParameters/" << GetParam();
@@ -807,7 +807,7 @@ TEST_P(NamingTest, TestsReportCorrectNamesAndParameters) {
   EXPECT_EQ(::testing::PrintToString(GetParam()), test_info->value_param());
 }
 
-INSTANTIATE_TEST_CASE_P(ZeroToFiveSequence, NamingTest, Range(0, 5));
+INSTANTIATE_TEST_SUITE_P(ZeroToFiveSequence, NamingTest, Range(0, 5));
 
 // Tests that user supplied custom parameter names are working correctly.
 // Runs the test with a builtin helper method which uses PrintToString,
@@ -822,12 +822,12 @@ struct CustomParamNameFunctor {
   }
 };
 
-INSTANTIATE_TEST_CASE_P(CustomParamNameFunctor,
+INSTANTIATE_TEST_SUITE_P(CustomParamNameFunctor,
                         CustomFunctorNamingTest,
                         Values(std::string("FunctorName")),
                         CustomParamNameFunctor());
 
-INSTANTIATE_TEST_CASE_P(AllAllowedCharacters,
+INSTANTIATE_TEST_SUITE_P(AllAllowedCharacters,
                         CustomFunctorNamingTest,
                         Values("abcdefghijklmnopqrstuvwxyz",
                                "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -842,7 +842,7 @@ inline std::string CustomParamNameFunction(
 class CustomFunctionNamingTest : public TestWithParam<std::string> {};
 TEST_P(CustomFunctionNamingTest, CustomTestNames) {}
 
-INSTANTIATE_TEST_CASE_P(CustomParamNameFunction,
+INSTANTIATE_TEST_SUITE_P(CustomParamNameFunction,
                         CustomFunctionNamingTest,
                         Values(std::string("FunctionName")),
                         CustomParamNameFunction);
@@ -854,7 +854,7 @@ INSTANTIATE_TEST_CASE_P(CustomParamNameFunction,
 class CustomLambdaNamingTest : public TestWithParam<std::string> {};
 TEST_P(CustomLambdaNamingTest, CustomTestNames) {}
 
-INSTANTIATE_TEST_CASE_P(CustomParamNameLambda,
+INSTANTIATE_TEST_SUITE_P(CustomParamNameLambda,
                         CustomLambdaNamingTest,
                         Values(std::string("LambdaName")),
                         [](const ::testing::TestParamInfo<std::string>& info) {
@@ -867,13 +867,13 @@ TEST(CustomNamingTest, CheckNameRegistry) {
   ::testing::UnitTest* unit_test = ::testing::UnitTest::GetInstance();
   std::set<std::string> test_names;
   for (int case_num = 0;
-       case_num < unit_test->total_test_case_count();
+       case_num < unit_test->total_test_suite_count();
        ++case_num) {
-    const ::testing::TestCase* test_case = unit_test->GetTestCase(case_num);
+    const ::testing::TestSuite* test_suite = unit_test->GetTestSuite(case_num);
     for (int test_num = 0;
-         test_num < test_case->total_test_count();
+         test_num < test_suite->total_test_count();
          ++test_num) {
-      const ::testing::TestInfo* test_info = test_case->GetTestInfo(test_num);
+      const ::testing::TestInfo* test_info = test_suite->GetTestInfo(test_num);
       test_names.insert(std::string(test_info->name()));
     }
   }
@@ -896,7 +896,7 @@ TEST_P(CustomIntegerNamingTest, TestsReportCorrectNames) {
   EXPECT_STREQ(test_name_stream.GetString().c_str(), test_info->name());
 }
 
-INSTANTIATE_TEST_CASE_P(PrintToString,
+INSTANTIATE_TEST_SUITE_P(PrintToString,
                         CustomIntegerNamingTest,
                         Range(0, 5),
                         ::testing::PrintToStringParamName());
@@ -923,7 +923,7 @@ TEST_P(CustomStructNamingTest, TestsReportCorrectNames) {
   EXPECT_STREQ(test_name_stream.GetString().c_str(), test_info->name());
 }
 
-INSTANTIATE_TEST_CASE_P(PrintToString,
+INSTANTIATE_TEST_SUITE_P(PrintToString,
                         CustomStructNamingTest,
                         Values(CustomStruct(0), CustomStruct(1)),
                         ::testing::PrintToStringParamName());
@@ -955,7 +955,7 @@ TEST_P(StatefulNamingTest, TestsReportCorrectNames) {
   EXPECT_STREQ(test_name_stream.GetString().c_str(), test_info->name());
 }
 
-INSTANTIATE_TEST_CASE_P(StatefulNamingFunctor,
+INSTANTIATE_TEST_SUITE_P(StatefulNamingFunctor,
                         StatefulNamingTest,
                         Range(0, 5),
                         StatefulNamingFunctor());
@@ -981,7 +981,7 @@ TEST_P(CommentTest, TestsCorrectlyReportUnstreamableParams) {
   EXPECT_EQ(::testing::PrintToString(GetParam()), test_info->value_param());
 }
 
-INSTANTIATE_TEST_CASE_P(InstantiationWithComments,
+INSTANTIATE_TEST_SUITE_P(InstantiationWithComments,
                         CommentTest,
                         Values(Unstreamable(1)));
 
@@ -1023,7 +1023,7 @@ TEST_F(ParameterizedDeathTest, GetParamDiesFromTestF) {
                             ".* value-parameterized test .*");
 }
 
-INSTANTIATE_TEST_CASE_P(RangeZeroToFive, ParameterizedDerivedTest, Range(0, 5));
+INSTANTIATE_TEST_SUITE_P(RangeZeroToFive, ParameterizedDerivedTest, Range(0, 5));
 
 #endif  // GTEST_HAS_PARAM_TEST
 
