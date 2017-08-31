@@ -189,7 +189,7 @@ Matcher<int> GreaterThan(int n) {
   return MakeMatcher(new GreaterThanMatcher(n));
 }
 
-string OfType(const string& type_name) {
+std::string OfType(const std::string& type_name) {
 #if GTEST_HAS_RTTI
   return " (of type " + type_name + ")";
 #else
@@ -199,7 +199,7 @@ string OfType(const string& type_name) {
 
 // Returns the description of the given matcher.
 template <typename T>
-string Describe(const Matcher<T>& m) {
+std::string Describe(const Matcher<T>& m) {
   stringstream ss;
   m.DescribeTo(&ss);
   return ss.str();
@@ -207,7 +207,7 @@ string Describe(const Matcher<T>& m) {
 
 // Returns the description of the negation of the given matcher.
 template <typename T>
-string DescribeNegation(const Matcher<T>& m) {
+std::string DescribeNegation(const Matcher<T>& m) {
   stringstream ss;
   m.DescribeNegationTo(&ss);
   return ss.str();
@@ -215,7 +215,7 @@ string DescribeNegation(const Matcher<T>& m) {
 
 // Returns the reason why x matches, or doesn't match, m.
 template <typename MatcherType, typename Value>
-string Explain(const MatcherType& m, const Value& x) {
+std::string Explain(const MatcherType& m, const Value& x) {
   StringMatchResultListener listener;
   ExplainMatchResult(m, x, &listener);
   return listener.str();
@@ -973,7 +973,7 @@ TEST(LeTest, CanDescribeSelf) {
 
 // Tests that Lt(v) matches anything < v.
 TEST(LtTest, ImplementsLessThan) {
-  Matcher<const string&> m1 = Lt("Hello");
+  Matcher<const std::string&> m1 = Lt("Hello");
   EXPECT_TRUE(m1.Matches("Abc"));
   EXPECT_FALSE(m1.Matches("Hello"));
   EXPECT_FALSE(m1.Matches("Hello, world!"));
@@ -1125,7 +1125,7 @@ TEST(RefTest, CanDescribeSelf) {
   Matcher<int&> m = Ref(n);
   stringstream ss;
   ss << "references the variable @" << &n << " 5";
-  EXPECT_EQ(string(ss.str()), Describe(m));
+  EXPECT_EQ(ss.str(), Describe(m));
 }
 
 // Test that Ref(non_const_varialbe) can be used as a matcher for a
@@ -1169,27 +1169,27 @@ TEST(RefTest, ExplainsResult) {
 // Tests string comparison matchers.
 
 TEST(StrEqTest, MatchesEqualString) {
-  Matcher<const char*> m = StrEq(string("Hello"));
+  Matcher<const char*> m = StrEq(std::string("Hello"));
   EXPECT_TRUE(m.Matches("Hello"));
   EXPECT_FALSE(m.Matches("hello"));
   EXPECT_FALSE(m.Matches(NULL));
 
-  Matcher<const string&> m2 = StrEq("Hello");
+  Matcher<const std::string&> m2 = StrEq("Hello");
   EXPECT_TRUE(m2.Matches("Hello"));
   EXPECT_FALSE(m2.Matches("Hi"));
 }
 
 TEST(StrEqTest, CanDescribeSelf) {
-  Matcher<string> m = StrEq("Hi-\'\"?\\\a\b\f\n\r\t\v\xD3");
+  Matcher<std::string> m = StrEq("Hi-\'\"?\\\a\b\f\n\r\t\v\xD3");
   EXPECT_EQ("is equal to \"Hi-\'\\\"?\\\\\\a\\b\\f\\n\\r\\t\\v\\xD3\"",
       Describe(m));
 
-  string str("01204500800");
+  std::string str("01204500800");
   str[3] = '\0';
-  Matcher<string> m2 = StrEq(str);
+  Matcher<std::string> m2 = StrEq(str);
   EXPECT_EQ("is equal to \"012\\04500800\"", Describe(m2));
   str[0] = str[6] = str[7] = str[9] = str[10] = '\0';
-  Matcher<string> m3 = StrEq(str);
+  Matcher<std::string> m3 = StrEq(str);
   EXPECT_EQ("is equal to \"\\012\\045\\0\\08\\0\\0\"", Describe(m3));
 }
 
@@ -1199,7 +1199,7 @@ TEST(StrNeTest, MatchesUnequalString) {
   EXPECT_TRUE(m.Matches(NULL));
   EXPECT_FALSE(m.Matches("Hello"));
 
-  Matcher<string> m2 = StrNe(string("Hello"));
+  Matcher<std::string> m2 = StrNe(std::string("Hello"));
   EXPECT_TRUE(m2.Matches("hello"));
   EXPECT_FALSE(m2.Matches("Hello"));
 }
@@ -1222,32 +1222,32 @@ TEST(StrCaseEqTest, MatchesEqualStringIgnoringCase) {
 }
 
 TEST(StrCaseEqTest, MatchesEqualStringWith0IgnoringCase) {
-  string str1("oabocdooeoo");
-  string str2("OABOCDOOEOO");
-  Matcher<const string&> m0 = StrCaseEq(str1);
-  EXPECT_FALSE(m0.Matches(str2 + string(1, '\0')));
+  std::string str1("oabocdooeoo");
+  std::string str2("OABOCDOOEOO");
+  Matcher<const std::string&> m0 = StrCaseEq(str1);
+  EXPECT_FALSE(m0.Matches(str2 + std::string(1, '\0')));
 
   str1[3] = str2[3] = '\0';
-  Matcher<const string&> m1 = StrCaseEq(str1);
+  Matcher<const std::string&> m1 = StrCaseEq(str1);
   EXPECT_TRUE(m1.Matches(str2));
 
   str1[0] = str1[6] = str1[7] = str1[10] = '\0';
   str2[0] = str2[6] = str2[7] = str2[10] = '\0';
-  Matcher<const string&> m2 = StrCaseEq(str1);
+  Matcher<const std::string&> m2 = StrCaseEq(str1);
   str1[9] = str2[9] = '\0';
   EXPECT_FALSE(m2.Matches(str2));
 
-  Matcher<const string&> m3 = StrCaseEq(str1);
+  Matcher<const std::string&> m3 = StrCaseEq(str1);
   EXPECT_TRUE(m3.Matches(str2));
 
   EXPECT_FALSE(m3.Matches(str2 + "x"));
   str2.append(1, '\0');
   EXPECT_FALSE(m3.Matches(str2));
-  EXPECT_FALSE(m3.Matches(string(str2, 0, 9)));
+  EXPECT_FALSE(m3.Matches(std::string(str2, 0, 9)));
 }
 
 TEST(StrCaseEqTest, CanDescribeSelf) {
-  Matcher<string> m = StrCaseEq("Hi");
+  Matcher<std::string> m = StrCaseEq("Hi");
   EXPECT_EQ("is equal to (ignoring case) \"Hi\"", Describe(m));
 }
 
@@ -1258,7 +1258,7 @@ TEST(StrCaseNeTest, MatchesUnequalStringIgnoringCase) {
   EXPECT_FALSE(m.Matches("Hello"));
   EXPECT_FALSE(m.Matches("hello"));
 
-  Matcher<string> m2 = StrCaseNe(string("Hello"));
+  Matcher<std::string> m2 = StrCaseNe(std::string("Hello"));
   EXPECT_TRUE(m2.Matches(""));
   EXPECT_FALSE(m2.Matches("Hello"));
 }
@@ -1270,9 +1270,9 @@ TEST(StrCaseNeTest, CanDescribeSelf) {
 
 // Tests that HasSubstr() works for matching string-typed values.
 TEST(HasSubstrTest, WorksForStringClasses) {
-  const Matcher<string> m1 = HasSubstr("foo");
-  EXPECT_TRUE(m1.Matches(string("I love food.")));
-  EXPECT_FALSE(m1.Matches(string("tofo")));
+  const Matcher<std::string> m1 = HasSubstr("foo");
+  EXPECT_TRUE(m1.Matches(std::string("I love food.")));
+  EXPECT_FALSE(m1.Matches(std::string("tofo")));
 
   const Matcher<const std::string&> m2 = HasSubstr("foo");
   EXPECT_TRUE(m2.Matches(std::string("I love food.")));
@@ -1294,7 +1294,7 @@ TEST(HasSubstrTest, WorksForCStrings) {
 
 // Tests that HasSubstr(s) describes itself properly.
 TEST(HasSubstrTest, CanDescribeSelf) {
-  Matcher<string> m = HasSubstr("foo\n\"");
+  Matcher<std::string> m = HasSubstr("foo\n\"");
   EXPECT_EQ("has substring \"foo\\n\\\"\"", Describe(m));
 }
 
@@ -1460,12 +1460,12 @@ TEST(PairTest, InsideContainsUsingMap) {
 // Tests StartsWith(s).
 
 TEST(StartsWithTest, MatchesStringWithGivenPrefix) {
-  const Matcher<const char*> m1 = StartsWith(string(""));
+  const Matcher<const char*> m1 = StartsWith(std::string(""));
   EXPECT_TRUE(m1.Matches("Hi"));
   EXPECT_TRUE(m1.Matches(""));
   EXPECT_FALSE(m1.Matches(NULL));
 
-  const Matcher<const string&> m2 = StartsWith("Hi");
+  const Matcher<const std::string&> m2 = StartsWith("Hi");
   EXPECT_TRUE(m2.Matches("Hi"));
   EXPECT_TRUE(m2.Matches("Hi Hi!"));
   EXPECT_TRUE(m2.Matches("High"));
@@ -1507,14 +1507,14 @@ TEST(MatchesRegexTest, MatchesStringMatchingGivenRegex) {
   EXPECT_TRUE(m1.Matches("abcz"));
   EXPECT_FALSE(m1.Matches(NULL));
 
-  const Matcher<const string&> m2 = MatchesRegex(new RE("a.*z"));
+  const Matcher<const std::string&> m2 = MatchesRegex(new RE("a.*z"));
   EXPECT_TRUE(m2.Matches("azbz"));
   EXPECT_FALSE(m2.Matches("az1"));
   EXPECT_FALSE(m2.Matches("1az"));
 }
 
 TEST(MatchesRegexTest, CanDescribeSelf) {
-  Matcher<const std::string> m1 = MatchesRegex(string("Hi.*"));
+  Matcher<const std::string> m1 = MatchesRegex(std::string("Hi.*"));
   EXPECT_EQ("matches regular expression \"Hi.*\"", Describe(m1));
 
   Matcher<const char*> m2 = MatchesRegex(new RE("a.*"));
@@ -1524,12 +1524,12 @@ TEST(MatchesRegexTest, CanDescribeSelf) {
 // Tests ContainsRegex().
 
 TEST(ContainsRegexTest, MatchesStringContainingGivenRegex) {
-  const Matcher<const char*> m1 = ContainsRegex(string("a.*z"));
+  const Matcher<const char*> m1 = ContainsRegex(std::string("a.*z"));
   EXPECT_TRUE(m1.Matches("az"));
   EXPECT_TRUE(m1.Matches("0abcz1"));
   EXPECT_FALSE(m1.Matches(NULL));
 
-  const Matcher<const string&> m2 = ContainsRegex(new RE("a.*z"));
+  const Matcher<const std::string&> m2 = ContainsRegex(new RE("a.*z"));
   EXPECT_TRUE(m2.Matches("azbz"));
   EXPECT_TRUE(m2.Matches("az1"));
   EXPECT_FALSE(m2.Matches("1a"));
@@ -2685,9 +2685,9 @@ TEST(MatcherAssertionTest, WorksForMonomorphicMatcher) {
   Matcher<const char*> starts_with_he = StartsWith("he");
   ASSERT_THAT("hello", starts_with_he);
 
-  Matcher<const string&> ends_with_ok = EndsWith("ok");
+  Matcher<const std::string&> ends_with_ok = EndsWith("ok");
   ASSERT_THAT("book", ends_with_ok);
-  const string bad = "bad";
+  const std::string bad = "bad";
   EXPECT_NONFATAL_FAILURE(EXPECT_THAT(bad, ends_with_ok),
                           "Value of: bad\n"
                           "Expected: ends with \"ok\"\n"
@@ -3099,7 +3099,8 @@ TEST_F(DoubleNearTest, ExplainsResultWhenMatchFails) {
   EXPECT_EQ("which is 0.2 from 2", Explain(DoubleNear(2.0, 0.1), 2.2));
   EXPECT_EQ("which is -0.3 from 2", Explain(DoubleNear(2.0, 0.1), 1.7));
 
-  const string explanation = Explain(DoubleNear(2.1, 1e-10), 2.1 + 1.2e-10);
+  const std::string explanation =
+      Explain(DoubleNear(2.1, 1e-10), 2.1 + 1.2e-10);
   // Different C++ implementations may print floating-point numbers
   // slightly differently.
   EXPECT_TRUE(explanation == "which is 1.2e-10 from 2.1" ||  // GCC
@@ -3337,9 +3338,9 @@ TEST(PointeeTest, CanDescribeSelf) {
 }
 
 TEST(PointeeTest, CanExplainMatchResult) {
-  const Matcher<const string*> m = Pointee(StartsWith("Hi"));
+  const Matcher<const std::string*> m = Pointee(StartsWith("Hi"));
 
-  EXPECT_EQ("", Explain(m, static_cast<const string*>(NULL)));
+  EXPECT_EQ("", Explain(m, static_cast<const std::string*>(NULL)));
 
   const Matcher<long*> m2 = Pointee(GreaterThan(1));  // NOLINT
   long n = 3;  // NOLINT
@@ -3585,15 +3586,20 @@ class AClass {
   void set_n(int new_n) { n_ = new_n; }
 
   // A getter that returns a reference to const.
-  const string& s() const { return s_; }
+  const std::string& s() const { return s_; }
 
-  void set_s(const string& new_s) { s_ = new_s; }
+#if GTEST_LANG_CXX11
+  const std::string& s_ref() const & { return s_; }
+#endif
+
+  void set_s(const std::string& new_s) { s_ = new_s; }
 
   // A getter that returns a reference to non-const.
   double& x() const { return x_; }
+
  private:
   int n_;
-  string s_;
+  std::string s_;
 
   static double x_;
 };
@@ -3633,6 +3639,21 @@ TEST(PropertyTest, WorksForReferenceToConstProperty) {
   a.set_s("hole");
   EXPECT_FALSE(m.Matches(a));
 }
+
+#if GTEST_LANG_CXX11
+// Tests that Property(&Foo::property, ...) works when property() is
+// ref-qualified.
+TEST(PropertyTest, WorksForRefQualifiedProperty) {
+  Matcher<const AClass&> m = Property(&AClass::s_ref, StartsWith("hi"));
+
+  AClass a;
+  a.set_s("hill");
+  EXPECT_TRUE(m.Matches(a));
+
+  a.set_s("hole");
+  EXPECT_FALSE(m.Matches(a));
+}
+#endif
 
 // Tests that Property(&Foo::property, ...) works when property()
 // returns a reference to non-const.
@@ -3799,10 +3820,12 @@ TEST(PropertyForPointerTest, CanExplainMatchResult) {
 
 // Tests that ResultOf(f, ...) compiles and works as expected when f is a
 // function pointer.
-string IntToStringFunction(int input) { return input == 1 ? "foo" : "bar"; }
+std::string IntToStringFunction(int input) {
+  return input == 1 ? "foo" : "bar";
+}
 
 TEST(ResultOfTest, WorksForFunctionPointers) {
-  Matcher<int> matcher = ResultOf(&IntToStringFunction, Eq(string("foo")));
+  Matcher<int> matcher = ResultOf(&IntToStringFunction, Eq(std::string("foo")));
 
   EXPECT_TRUE(matcher.Matches(1));
   EXPECT_FALSE(matcher.Matches(2));
@@ -3868,12 +3891,12 @@ TEST(ResultOfTest, WorksForReferenceToNonConstResults) {
 
 // Tests that ResultOf(f, ...) compiles and works as expected when f(x)
 // returns a reference to const.
-const string& StringFunction(const string& input) { return input; }
+const std::string& StringFunction(const std::string& input) { return input; }
 
 TEST(ResultOfTest, WorksForReferenceToConstResults) {
-  string s = "foo";
-  string s2 = s;
-  Matcher<const string&> matcher = ResultOf(&StringFunction, Ref(s));
+  std::string s = "foo";
+  std::string s2 = s;
+  Matcher<const std::string&> matcher = ResultOf(&StringFunction, Ref(s));
 
   EXPECT_TRUE(matcher.Matches(s));
   EXPECT_FALSE(matcher.Matches(s2));
@@ -3893,8 +3916,9 @@ TEST(ResultOfTest, WorksForCompatibleMatcherTypes) {
 // a NULL function pointer.
 TEST(ResultOfDeathTest, DiesOnNullFunctionPointers) {
   EXPECT_DEATH_IF_SUPPORTED(
-      ResultOf(static_cast<string(*)(int dummy)>(NULL), Eq(string("foo"))),
-               "NULL function pointer is passed into ResultOf\\(\\)\\.");
+      ResultOf(static_cast<std::string (*)(int dummy)>(NULL),
+               Eq(std::string("foo"))),
+      "NULL function pointer is passed into ResultOf\\(\\)\\.");
 }
 
 // Tests that ResultOf(f, ...) compiles and works as expected when f is a
@@ -3907,14 +3931,14 @@ TEST(ResultOfTest, WorksForFunctionReferences) {
 
 // Tests that ResultOf(f, ...) compiles and works as expected when f is a
 // function object.
-struct Functor : public ::std::unary_function<int, string> {
+struct Functor : public ::std::unary_function<int, std::string> {
   result_type operator()(argument_type input) const {
     return IntToStringFunction(input);
   }
 };
 
 TEST(ResultOfTest, WorksForFunctors) {
-  Matcher<int> matcher = ResultOf(Functor(), Eq(string("foo")));
+  Matcher<int> matcher = ResultOf(Functor(), Eq(std::string("foo")));
 
   EXPECT_TRUE(matcher.Matches(1));
   EXPECT_FALSE(matcher.Matches(2));
@@ -4080,11 +4104,11 @@ TEST(IsEmptyTest, ImplementsIsEmpty) {
 }
 
 TEST(IsEmptyTest, WorksWithString) {
-  string text;
+  std::string text;
   EXPECT_THAT(text, IsEmpty());
   text = "foo";
   EXPECT_THAT(text, Not(IsEmpty()));
-  text = string("\0", 1);
+  text = std::string("\0", 1);
   EXPECT_THAT(text, Not(IsEmpty()));
 }
 
@@ -4115,7 +4139,7 @@ TEST(SizeIsTest, ImplementsSizeIs) {
 }
 
 TEST(SizeIsTest, WorksWithMap) {
-  map<string, int> container;
+  map<std::string, int> container;
   EXPECT_THAT(container, SizeIs(0));
   EXPECT_THAT(container, Not(SizeIs(1)));
   container.insert(make_pair("foo", 1));
@@ -4380,13 +4404,13 @@ TEST(WhenSortedByTest, WorksForNonEmptyContainer) {
 }
 
 TEST(WhenSortedByTest, WorksForNonVectorContainer) {
-  list<string> words;
+  list<std::string> words;
   words.push_back("say");
   words.push_back("hello");
   words.push_back("world");
-  EXPECT_THAT(words, WhenSortedBy(less<string>(),
+  EXPECT_THAT(words, WhenSortedBy(less<std::string>(),
                                   ElementsAre("hello", "say", "world")));
-  EXPECT_THAT(words, Not(WhenSortedBy(less<string>(),
+  EXPECT_THAT(words, Not(WhenSortedBy(less<std::string>(),
                                       ElementsAre("say", "hello", "world"))));
 }
 
@@ -4429,7 +4453,7 @@ TEST(WhenSortedTest, WorksForEmptyContainer) {
 }
 
 TEST(WhenSortedTest, WorksForNonEmptyContainer) {
-  list<string> words;
+  list<std::string> words;
   words.push_back("3");
   words.push_back("1");
   words.push_back("2");
@@ -4439,14 +4463,16 @@ TEST(WhenSortedTest, WorksForNonEmptyContainer) {
 }
 
 TEST(WhenSortedTest, WorksForMapTypes) {
-    map<string, int> word_counts;
-    word_counts["and"] = 1;
-    word_counts["the"] = 1;
-    word_counts["buffalo"] = 2;
-    EXPECT_THAT(word_counts, WhenSorted(ElementsAre(
-            Pair("and", 1), Pair("buffalo", 2), Pair("the", 1))));
-    EXPECT_THAT(word_counts, Not(WhenSorted(ElementsAre(
-            Pair("and", 1), Pair("the", 1), Pair("buffalo", 2)))));
+  map<std::string, int> word_counts;
+  word_counts["and"] = 1;
+  word_counts["the"] = 1;
+  word_counts["buffalo"] = 2;
+  EXPECT_THAT(word_counts,
+              WhenSorted(ElementsAre(Pair("and", 1), Pair("buffalo", 2),
+                                     Pair("the", 1))));
+  EXPECT_THAT(word_counts,
+              Not(WhenSorted(ElementsAre(Pair("and", 1), Pair("the", 1),
+                                         Pair("buffalo", 2)))));
 }
 
 TEST(WhenSortedTest, WorksForMultiMapTypes) {
@@ -4763,7 +4789,7 @@ TEST(UnorderedElementsAreArrayTest, TakesInitializerList) {
 }
 
 TEST(UnorderedElementsAreArrayTest, TakesInitializerListOfCStrings) {
-  const string a[5] = {"a", "b", "c", "d", "e"};
+  const std::string a[5] = {"a", "b", "c", "d", "e"};
   EXPECT_THAT(a, UnorderedElementsAreArray({"a", "b", "c", "d", "e"}));
   EXPECT_THAT(a, Not(UnorderedElementsAreArray({"a", "b", "c", "d", "ef"})));
 }
@@ -4937,7 +4963,7 @@ TEST_F(UnorderedElementsAreTest, FailMessageUnmatchedMatcherAndElement) {
 }
 
 // Test helper for formatting element, matcher index pairs in expectations.
-static string EMString(int element, int matcher) {
+static std::string EMString(int element, int matcher) {
   stringstream ss;
   ss << "(element #" << element << ", matcher #" << matcher << ")";
   return ss.str();
@@ -4946,7 +4972,7 @@ static string EMString(int element, int matcher) {
 TEST_F(UnorderedElementsAreTest, FailMessageImperfectMatchOnly) {
   // A situation where all elements and matchers have a match
   // associated with them, but the max matching is not perfect.
-  std::vector<string> v;
+  std::vector<std::string> v;
   v.push_back("a");
   v.push_back("b");
   v.push_back("c");
@@ -4955,7 +4981,7 @@ TEST_F(UnorderedElementsAreTest, FailMessageImperfectMatchOnly) {
       UnorderedElementsAre("a", "a", AnyOf("b", "c")), v, &listener))
       << listener.str();
 
-  string prefix =
+  std::string prefix =
       "where no permutation of the elements can satisfy all matchers, "
       "and the closest match is 2 of 3 matchers with the "
       "pairings:\n";
@@ -5366,13 +5392,13 @@ TEST(EachTest, MatchesVectorWhenAllElementsMatch) {
   EXPECT_THAT(some_vector, Not(Each(3)));
   EXPECT_THAT(some_vector, Each(Lt(3.5)));
 
-  vector<string> another_vector;
+  vector<std::string> another_vector;
   another_vector.push_back("fee");
-  EXPECT_THAT(another_vector, Each(string("fee")));
+  EXPECT_THAT(another_vector, Each(std::string("fee")));
   another_vector.push_back("fie");
   another_vector.push_back("foe");
   another_vector.push_back("fum");
-  EXPECT_THAT(another_vector, Not(Each(string("fee"))));
+  EXPECT_THAT(another_vector, Not(Each(std::string("fee"))));
 }
 
 TEST(EachTest, MatchesMapWhenAllElementsMatch) {
@@ -5381,15 +5407,15 @@ TEST(EachTest, MatchesMapWhenAllElementsMatch) {
   my_map[bar] = 2;
   EXPECT_THAT(my_map, Each(make_pair(bar, 2)));
 
-  map<string, int> another_map;
-  EXPECT_THAT(another_map, Each(make_pair(string("fee"), 1)));
+  map<std::string, int> another_map;
+  EXPECT_THAT(another_map, Each(make_pair(std::string("fee"), 1)));
   another_map["fee"] = 1;
-  EXPECT_THAT(another_map, Each(make_pair(string("fee"), 1)));
+  EXPECT_THAT(another_map, Each(make_pair(std::string("fee"), 1)));
   another_map["fie"] = 2;
   another_map["foe"] = 3;
   another_map["fum"] = 4;
-  EXPECT_THAT(another_map, Not(Each(make_pair(string("fee"), 1))));
-  EXPECT_THAT(another_map, Not(Each(make_pair(string("fum"), 1))));
+  EXPECT_THAT(another_map, Not(Each(make_pair(std::string("fee"), 1))));
+  EXPECT_THAT(another_map, Not(Each(make_pair(std::string("fum"), 1))));
   EXPECT_THAT(another_map, Each(Pair(_, Gt(0))));
 }
 
