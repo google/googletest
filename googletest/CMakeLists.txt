@@ -22,6 +22,8 @@ option(gtest_build_samples "Build gtest's sample programs." OFF)
 
 option(gtest_disable_pthreads "Disable uses of pthreads in gtest." OFF)
 
+option(gtest_disable_former_test_case "Disable former TestCase API." OFF)
+
 option(
   gtest_hide_internal_symbols
   "Build gtest with internal symbols hidden in shared libraries."

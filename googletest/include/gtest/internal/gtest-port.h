@@ -172,6 +172,8 @@
 //                            tests)
 //   GTEST_HAS_DEATH_TEST   - death tests
 //   GTEST_HAS_PARAM_TEST   - value-parameterized tests
+//   GTEST_HAS_TESTCASE     - the former TestCase API is provided in parallel
+//                            to the new TestSuite API
 //   GTEST_HAS_TYPED_TEST   - typed tests
 //   GTEST_HAS_TYPED_TEST_P - type-parameterized tests
 //   GTEST_IS_THREADSAFE    - Google Test is thread-safe.

@@ -133,6 +133,11 @@ macro(config_compiler_and_linker)
   endif()
   set(cxx_base_flags "${cxx_base_flags} ${GTEST_HAS_PTHREAD_MACRO}")
 
+  if (NOT gtest_disable_former_test_case)
+      set(cxx_base_flags "${cxx_base_flags} -DGTEST_HAS_TESTCASE=1")
+      # else GTEST_HAS_TESTCASE is undefined (never defined to 0, see gtest-port.h)
+  endif()
+
   # For building gtest's own tests and samples.
   set(cxx_exception "${CMAKE_CXX_FLAGS} ${cxx_base_flags} ${cxx_exception_flags}")
   set(cxx_no_exception
