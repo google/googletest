@@ -877,10 +877,10 @@ typedef ::std::vector<string> Strings;
 // TuplePolicy<TupleT> must provide:
 // - tuple_size
 //     size of tuple TupleT.
-// - get<size_t I>(const TupleT& t)
-//     static function extracting element I of tuple TupleT.
-// - tuple_element<size_t I>::type
-//     type of element I of tuple TupleT.
+// - get<size_t I_>(const TupleT& t)
+//     static function extracting element I_ of tuple TupleT.
+// - tuple_element<size_t I_>::type
+//     type of element I_ of tuple TupleT.
 template <typename TupleT>
 struct TuplePolicy;
 
@@ -890,14 +890,14 @@ struct TuplePolicy {
   typedef TupleT Tuple;
   static const size_t tuple_size = ::std::tr1::tuple_size<Tuple>::value;
 
-  template <size_t I>
-  struct tuple_element : ::std::tr1::tuple_element<I, Tuple> {};
+  template <size_t I_>
+  struct tuple_element : ::std::tr1::tuple_element<I_, Tuple> {};
 
-  template <size_t I>
+  template <size_t I_>
   static typename AddReference<
-      const typename ::std::tr1::tuple_element<I, Tuple>::type>::type get(
+      const typename ::std::tr1::tuple_element<I_, Tuple>::type>::type get(
       const Tuple& tuple) {
-    return ::std::tr1::get<I>(tuple);
+    return ::std::tr1::get<I_>(tuple);
   }
 };
 template <typename TupleT>
@@ -910,13 +910,13 @@ struct TuplePolicy< ::std::tuple<Types...> > {
   typedef ::std::tuple<Types...> Tuple;
   static const size_t tuple_size = ::std::tuple_size<Tuple>::value;
 
-  template <size_t I>
-  struct tuple_element : ::std::tuple_element<I, Tuple> {};
+  template <size_t I_>
+  struct tuple_element : ::std::tuple_element<I_, Tuple> {};
 
-  template <size_t I>
-  static const typename ::std::tuple_element<I, Tuple>::type& get(
+  template <size_t I_>
+  static const typename ::std::tuple_element<I_, Tuple>::type& get(
       const Tuple& tuple) {
-    return ::std::get<I>(tuple);
+    return ::std::get<I_>(tuple);
   }
 };
 template <typename... Types>
