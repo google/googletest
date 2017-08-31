@@ -304,6 +304,7 @@ TEST(FormatCompilerIndependentFileLocationTest, FormatsUknownFileAndLine) {
   EXPECT_EQ("unknown file", FormatCompilerIndependentFileLocation(NULL, -1));
 }
 
+#if GTEST_HAS_PTHREAD
 #if GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_QNX
 void* ThreadFunc(void* data) {
   internal::Mutex* mutex = static_cast<internal::Mutex*>(data);
@@ -349,6 +350,7 @@ TEST(GetThreadCountTest, ReturnsZeroWhenUnableToCountThreads) {
   EXPECT_EQ(0U, GetThreadCount());
 }
 #endif  // GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_QNX
+#endif  // GTEST_HAS_PTHREAD
 
 TEST(GtestCheckDeathTest, DiesWithCorrectOutputOnFailure) {
   const bool a_false_condition = false;
