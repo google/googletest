@@ -101,6 +101,10 @@ Please do submit code. Here's what you need to do:
   1. Sign a Contributor License Agreement.
   1. Create a Pull Request in the usual way.
 
+If you are a Googler, it is preferable to first create an internal change and
+have it reviewed and submitted, and then create an upstreaming pull
+request here. 
+
 ## Google Test Committers ##
 
 The current members of the Google Test engineering team are the only
