@@ -187,6 +187,29 @@ inline ::std::ostream& operator<<(::std::ostream& os,
   return os << "StreamableTemplateInFoo: " << x.value();
 }
 
+// A user-defined streamable but recursivly-defined container type in 
+// a user namespace, it mimics therefore std::filesystem::path or
+// boost::filesystem::path.
+class PathLike {
+ public:
+  struct iterator
+  {
+    typedef PathLike value_type;
+  };
+  typedef iterator const_iterator;
+
+  PathLike() {}
+
+  iterator begin() const { return iterator(); }
+  iterator end() const { return iterator(); }
+
+  friend 
+  ::std::ostream& operator<<(::std::ostream& os, const PathLike&)
+  {
+    return os << "Streamable-PathLike";
+  }
+};
+
 }  // namespace foo
 
 namespace testing {
@@ -1159,6 +1182,15 @@ TEST(PrintStreamableTypeTest, InGlobalNamespace) {
 TEST(PrintStreamableTypeTest, TemplateTypeInUserNamespace) {
   EXPECT_EQ("StreamableTemplateInFoo: 0",
             Print(::foo::StreamableTemplateInFoo<int>()));
+}
+
+// Tests printing a user-defined recursive container type that has a <<
+// operator.
+TEST(PrintStreamableTypeTest, PathLikeInUserNamespace) {
+  ::foo::PathLike x;
+  EXPECT_EQ("Streamable-PathLike", Print(x));
+  const ::foo::PathLike cx;
+  EXPECT_EQ("Streamable-PathLike", Print(cx));
 }
 
 // Tests printing user-defined types that have a PrintTo() function.
