@@ -78,7 +78,7 @@ posting a question on the
 
 Google Mock is not a testing framework itself.  Instead, it needs a
 testing framework for writing tests.  Google Mock works seamlessly
-with [Google Test](http://code.google.com/p/googletest/), but
+with [Google Test](https://github.com/google/googletest), but
 you can also use it with [any C++ testing framework](../../master/googlemock/docs/ForDummies.md#using-google-mock-with-any-testing-framework).
 
 ### Requirements for End Users ###
@@ -333,8 +333,8 @@ may need to tweak your compiler and/or linker flags.  Please see the
 If you have custom matchers defined using `MatcherInterface` or
 `MakePolymorphicMatcher()`, you'll need to update their definitions to
 use the new matcher API (
-[monomorphic](http://code.google.com/p/googlemock/wiki/CookBook#Writing_New_Monomorphic_Matchers),
-[polymorphic](http://code.google.com/p/googlemock/wiki/CookBook#Writing_New_Polymorphic_Matchers)).
+[monomorphic](./docs/CookBook.md#writing-new-monomorphic-matchers),
+[polymorphic](./docs/CookBook.md#writing-new-polymorphic-matchers)).
 Matchers defined using `MATCHER()` or `MATCHER_P*()` aren't affected.
 
 ### Developing Google Mock ###
