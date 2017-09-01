@@ -10,3 +10,5 @@ bazel-out
 bazel-testlogs
 # python
 *.pyc
+/googletest/msvc/2010/gtest.VC.VC.opendb
+/googletest/msvc/2010/gtest.VC.db
