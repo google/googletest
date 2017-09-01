@@ -13,3 +13,6 @@ bazel-testlogs
 /googletest/msvc/2010/gtest.VC.VC.opendb
 /googletest/msvc/2010/gtest.VC.db
 /googletest/msvc/2010/gtest/Win32-Debug
+/googletest/msvc/2010/Debug
+/googletest/msvc/2010/.vs/gtest/v14
+/googletest/msvc/2010/Win32/Debug/v140
