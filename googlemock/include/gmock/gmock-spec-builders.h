@@ -363,7 +363,6 @@ enum CallReaction {
   kAllow,
   kWarn,
   kFail,
-  kDefault = kWarn  // By default, warn about uninteresting calls.
 };
 
 }  // namespace internal

@@ -50,6 +50,7 @@ macro(config_compiler_and_linker)
   # instead, we use windows threading primitives
   if (NOT gtest_disable_pthreads AND NOT MINGW)
     # Defines CMAKE_USE_PTHREADS_INIT and CMAKE_THREAD_LIBS_INIT.
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads)
   endif()
 
@@ -126,10 +127,11 @@ macro(config_compiler_and_linker)
   endif()
 
   if (CMAKE_USE_PTHREADS_INIT)  # The pthreads library is available and allowed.
-    set(cxx_base_flags "${cxx_base_flags} -DGTEST_HAS_PTHREAD=1")
+    set(GTEST_HAS_PTHREAD_MACRO "-DGTEST_HAS_PTHREAD=1")
   else()
-    set(cxx_base_flags "${cxx_base_flags} -DGTEST_HAS_PTHREAD=0")
+    set(GTEST_HAS_PTHREAD_MACRO "-DGTEST_HAS_PTHREAD=0")
   endif()
+  set(cxx_base_flags "${cxx_base_flags} ${GTEST_HAS_PTHREAD_MACRO}")
 
   # For building gtest's own tests and samples.
   set(cxx_exception "${CMAKE_CXX_FLAGS} ${cxx_base_flags} ${cxx_exception_flags}")
@@ -234,23 +236,33 @@ endfunction()
 # creates a Python test with the given name whose main module is in
 # test/name.py.  It does nothing if Python is not installed.
 function(py_test name)
-  # We are not supporting Python tests on Linux yet as they consider
-  # all Linux environments to be google3 and try to use google3 features.
   if (PYTHONINTERP_FOUND)
-    # ${CMAKE_BINARY_DIR} is known at configuration time, so we can
-    # directly bind it from cmake. ${CTEST_CONFIGURATION_TYPE} is known
-    # only at ctest runtime (by calling ctest -c <Configuration>), so
-    # we have to escape $ to delay variable substitution here.
     if (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 3.1)
-      add_test(
-        NAME ${name}
-        COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
-            --build_dir=${CMAKE_CURRENT_BINARY_DIR}/$<CONFIGURATION>)
+      if (CMAKE_CONFIGURATION_TYPES)
+	# Multi-configuration build generators as for Visual Studio save
+	# output in a subdirectory of CMAKE_CURRENT_BINARY_DIR (Debug,
+	# Release etc.), so we have to provide it here.
+        add_test(
+          NAME ${name}
+          COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+              --build_dir=${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>)
+      else (CMAKE_CONFIGURATION_TYPES)
+	# Single-configuration build generators like Makefile generators
+	# don't have subdirs below CMAKE_CURRENT_BINARY_DIR.
+        add_test(
+          NAME ${name}
+          COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+              --build_dir=${CMAKE_CURRENT_BINARY_DIR})
+      endif (CMAKE_CONFIGURATION_TYPES)
     else (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 3.1)
+      # ${CMAKE_CURRENT_BINARY_DIR} is known at configuration time, so we can
+      # directly bind it from cmake. ${CTEST_CONFIGURATION_TYPE} is known
+      # only at ctest runtime (by calling ctest -c <Configuration>), so
+      # we have to escape $ to delay variable substitution here.
       add_test(
         ${name}
         ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
           --build_dir=${CMAKE_CURRENT_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE})
     endif (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 3.1)
-  endif()
+  endif(PYTHONINTERP_FOUND)
 endfunction()

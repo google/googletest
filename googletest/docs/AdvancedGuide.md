@@ -128,7 +128,7 @@ c is 10<br>
   1. If you see a compiler error "no matching function to call" when using `ASSERT_PRED*` or `EXPECT_PRED*`, please see [this FAQ](FAQ.md#the-compiler-complains-no-matching-function-to-call-when-i-use-assert_predn-how-do-i-fix-it) for how to resolve it.
   1. Currently we only provide predicate assertions of arity <= 5. If you need a higher-arity assertion, let us know.
 
-_Availability_: Linux, Windows, Mac
+_Availability_: Linux, Windows, Mac.
 
 ### Using a Function That Returns an AssertionResult ###
 
@@ -1444,7 +1444,7 @@ absolutely have to test non-public interface code though, you can. There are
 two cases to consider:
 
   * Static functions (_not_ the same as static member functions!) or unnamed namespaces, and
-  * Private or protected class members
+  * Private or protected class members.
 
 ## Static Functions ##
 
@@ -1623,8 +1623,8 @@ printf("We are in test %s of test case %s.\n",
 ```
 
 `current_test_info()` returns a null pointer if no test is running. In
-particular, you cannot find the test case name in `TestCaseSetUp()`,
-`TestCaseTearDown()` (where you know the test case name implicitly), or
+particular, you cannot find the test case name in `SetUpTestCase()`,
+`TearDownTestCase()` (where you know the test case name implicitly), or
 functions called from them.
 
 _Availability:_ Linux, Windows, Mac.
