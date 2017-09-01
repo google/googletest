@@ -12,3 +12,4 @@ bazel-testlogs
 *.pyc
 /googletest/msvc/2010/gtest.VC.VC.opendb
 /googletest/msvc/2010/gtest.VC.db
+/googletest/msvc/2010/gtest/Win32-Debug
