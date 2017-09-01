@@ -64,7 +64,7 @@ compile it in the [README](../README.md) file.
 A mocking framework is of no good if itself is not thoroughly tested.
 Tests should be written for any new code, and changes should be
 verified to not break existing tests before they are submitted for
-review. To perform the tests, follow the instructions in [README](http://code.google.com/p/googlemock/source/browse/trunk/README) and
+review. To perform the tests, follow the instructions in [README](../README.md) and
 verify that there are no failures.
 
 # Contributing Code #
@@ -98,7 +98,7 @@ to conform to the style outlined [here](https://google.github.io/styleguide/cppg
 Please do submit code. Here's what you need to do:
 
   1. Normally you should make your change against the SVN trunk instead of a branch or a tag, as the latter two are for release control and should be treated mostly as read-only.
-  1. Decide which code you want to submit. A submission should be a set of changes that addresses one issue in the [Google Mock issue tracker](http://code.google.com/p/googlemock/issues/list). Please don't mix more than one logical change per submittal, because it makes the history hard to follow. If you want to make a change that doesn't have a corresponding issue in the issue tracker, please create one.
+  1. Decide which code you want to submit. A submission should be a set of changes that addresses one issue in the [Google Mock issue tracker](https://github.com/google/googletest/issues). Please don't mix more than one logical change per submittal, because it makes the history hard to follow. If you want to make a change that doesn't have a corresponding issue in the issue tracker, please create one.
   1. Also, coordinate with team members that are listed on the issue in question. This ensures that work isn't being duplicated and communicating your plan early also generally leads to better patches.
   1. Ensure that your code adheres to the [Google Mock source code style](#Coding_Style.md).
   1. Ensure that there are unit tests for your code.
