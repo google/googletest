@@ -164,7 +164,7 @@ if (gmock_build_tests)
   cxx_test(gmock_link_test gmock_main test/gmock_link2_test.cc)
   cxx_test(gmock_test gmock_main)
 
-  if (CMAKE_USE_PTHREADS_INIT)
+  if (CMAKE_USE_PTHREADS_INIT AND NOT MINGW)
     cxx_test(gmock_stress_test gmock)
   endif()
 
