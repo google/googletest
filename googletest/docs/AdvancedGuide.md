@@ -1623,8 +1623,8 @@ printf("We are in test %s of test case %s.\n",
 ```
 
 `current_test_info()` returns a null pointer if no test is running. In
-particular, you cannot find the test case name in `TestCaseSetUp()`,
-`TestCaseTearDown()` (where you know the test case name implicitly), or
+particular, you cannot find the test case name in `SetUpTestCase()`,
+`TearDownTestCase()` (where you know the test case name implicitly), or
 functions called from them.
 
 _Availability:_ Linux, Windows, Mac.
