@@ -977,9 +977,10 @@ bool ParseNaturalNumber(const ::std::string& str, Integer* number) {
   // BiggestConvertible is the largest integer type that system-provided
   // string-to-number conversion routines can return.
 
-# if GTEST_OS_WINDOWS && !defined(__GNUC__)
+# if GTEST_OS_WINDOWS && !defined(__GNUC__) && \
+     !(defined(__BORLANDC__) && defined(__clang__))
 
-  // MSVC and C++ Builder define __int64 instead of the standard long long.
+  // MSVC and old C++ Builder define __int64 instead of the standard long long.
   typedef unsigned __int64 BiggestConvertible;
   const BiggestConvertible parsed = _strtoui64(str.c_str(), &end, 10);
 
