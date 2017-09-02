@@ -30,6 +30,7 @@ os:
   - linux
   - osx
 language: cpp
+cache: ccache
 compiler:
   - gcc
   - clang
