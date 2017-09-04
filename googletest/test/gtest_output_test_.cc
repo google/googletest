@@ -757,8 +757,6 @@ TEST(ExpectFatalFailureTest, FailsWhenStatementThrows) {
 
 // This #ifdef block tests the output of value-parameterized tests.
 
-#if GTEST_HAS_PARAM_TEST
-
 std::string ParamNameFunc(const testing::TestParamInfo<std::string>& info) {
   return info.param;
 }
@@ -778,8 +776,6 @@ INSTANTIATE_TEST_CASE_P(PrintingStrings,
                         ParamTest,
                         testing::Values(std::string("a")),
                         ParamNameFunc);
-
-#endif  // GTEST_HAS_PARAM_TEST
 
 // This #ifdef block tests the output of typed tests.
 #if GTEST_HAS_TYPED_TEST
