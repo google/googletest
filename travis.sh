@@ -1,5 +1,16 @@
 #!/usr/bin/env sh
 set -evx
+
+# if possible, ask for the precise number of processors,
+# otherwise take 2 processors as reasonable default; see
+# https://docs.travis-ci.com/user/speeding-up-the-build/#Makefile-optimization
+if [ -x /usr/bin/getconf ]; then
+    MAKEFLAGS=j$(/usr/bin/getconf _NPROCESSORS_ONLN)
+else
+    MAKEFLAGS="j2"
+fi
+export MAKEFLAGS
+
 env | sort
 
 mkdir build || true
