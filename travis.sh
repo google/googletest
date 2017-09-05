@@ -8,6 +8,7 @@ cmake -Dgtest_build_samples=ON \
       -Dgtest_build_tests=ON \
       -Dgmock_build_tests=ON \
       -DCMAKE_CXX_FLAGS=$CXX_FLAGS \
+      -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
       ..
 make
 CTEST_OUTPUT_ON_FAILURE=1 make test
