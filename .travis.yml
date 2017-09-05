@@ -33,6 +33,9 @@ os:
   - osx
 language: cpp
 cache: ccache
+before_cache:
+  # print statistics before uploading new cache
+  - ccache --show-stats
 compiler:
   - gcc
   - clang
