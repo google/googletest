@@ -587,7 +587,7 @@ $$   // show up in the generated code.
 // ================
 //
 // To learn more about using these macros, please search for 'MATCHER'
-// on http://code.google.com/p/googlemock/wiki/CookBook.
+// on https://github.com/google/googletest/blob/master/googlemock/docs/CookBook.md
 
 $range i 0..n
 $for i
