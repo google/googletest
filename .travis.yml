@@ -7,7 +7,7 @@ install:
 # /usr/bin/gcc is 4.6 always, but gcc-X.Y is available.
 - if [ "$CXX" = "g++" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
 # /usr/bin/clang is 3.4, lets override with modern one.
-- if [ "$CXX" = "clang++" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CXX="clang++-3.7" CC="clang-3.7"; fi
+- if [ "$CXX" = "clang++" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CXX="clang++-3.7" CC="clang-3.7"; ln -sf /usr/bin/ccache /$HOME/bin/$CXX; ln -sf /usr/bin/ccache /$HOME/bin/$CC; fi
 # ccache on OS X needs installation first
 - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install ccache; export PATH="/usr/local/opt/ccache/libexec:$PATH"; fi
 - echo ${PATH}
