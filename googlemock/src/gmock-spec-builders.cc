@@ -364,7 +364,7 @@ UntypedFunctionMockerBase::UntypedInvokeWith(const void* const untyped_args)
 
     if (!need_to_report_uninteresting_call) {
       // Perform the action without printing the call information.
-      return this->UntypedPerformDefaultAction(untyped_args, "");
+      return this->UntypedPerformDefaultAction(untyped_args, "Function call: " + std::string(Name()));
     }
 
     // Warns about the uninteresting call.
@@ -508,6 +508,13 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
   return expectations_met;
 }
 
+CallReaction intToCallReaction(int mock_behavior) {
+  if (mock_behavior >= kAllow && mock_behavior <= kFail) {
+    return static_cast<internal::CallReaction>(mock_behavior);
+  }
+  return kWarn;
+}
+
 }  // namespace internal
 
 // Class Mock.
@@ -648,7 +655,8 @@ internal::CallReaction Mock::GetReactionOnUninterestingCalls(
         GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   internal::MutexLock l(&internal::g_gmock_mutex);
   return (g_uninteresting_call_reaction.count(mock_obj) == 0) ?
-      internal::kDefault : g_uninteresting_call_reaction[mock_obj];
+      internal::intToCallReaction(GMOCK_FLAG(default_mock_behavior)) :
+      g_uninteresting_call_reaction[mock_obj];
 }
 
 // Tells Google Mock to ignore mock_obj when checking for leaked mock
