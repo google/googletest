@@ -1034,7 +1034,7 @@ namespace bar {
 TEST(CoolTest, DoSomething) {
   SUCCEED();
 }
-}  // namespace foo
+}  // namespace bar
 ```
 
 However, the following code is **not allowed** and will produce a runtime error from Google Test because the test methods are using different test fixture classes with the same test case name.
@@ -1052,7 +1052,7 @@ class CoolTest : public ::testing::Test {};  // Fixture: bar::CoolTest
 TEST_F(CoolTest, DoSomething) {
   SUCCEED();
 }
-}  // namespace foo
+}  // namespace bar
 ```
 
 ## How do I build Google Testing Framework with Xcode 4? ##
