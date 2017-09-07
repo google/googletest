@@ -2096,7 +2096,7 @@ class UnitTestRecordPropertyTestEnvironment : public Environment {
 };
 
 // This will test property recording outside of any test or test case.
-Environment* record_property_env =
+Environment* record_property_env GTEST_ATTRIBUTE_UNUSED_ =
     AddGlobalTestEnvironment(new UnitTestRecordPropertyTestEnvironment);
 
 // This group of tests is for predicate assertions (ASSERT_PRED*, etc)
@@ -4187,12 +4187,6 @@ TEST(AssertionSyntaxTest, WorksWithConst) {
 #endif  // GTEST_HAS_EXCEPTIONS
 
 }  // namespace
-
-// we don't use the variable further, just avoid compiler warning
-// by defining a function which uses it
-void dummy_use_of_record_property_env() {
-	(void) record_property_env;
-}
 
 namespace testing {
 
