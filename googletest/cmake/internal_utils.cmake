@@ -48,10 +48,14 @@ endmacro()
 macro(config_compiler_and_linker)
   # Note: pthreads on MinGW is not supported, even if available
   # instead, we use windows threading primitives
+  unset(GTEST_HAS_PTHREAD)
   if (NOT gtest_disable_pthreads AND NOT MINGW)
     # Defines CMAKE_USE_PTHREADS_INIT and CMAKE_THREAD_LIBS_INIT.
     set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads)
+    if (CMAKE_USE_PTHREADS_INIT)
+      set(GTEST_HAS_PTHREAD ON)
+    endif()
   endif()
 
   fix_default_compiler_settings_()
@@ -126,7 +130,8 @@ macro(config_compiler_and_linker)
     set(cxx_no_rtti_flags "")
   endif()
 
-  if (CMAKE_USE_PTHREADS_INIT)  # The pthreads library is available and allowed.
+  # The pthreads library is available and allowed?
+  if (DEFINED GTEST_HAS_PTHREAD)
     set(GTEST_HAS_PTHREAD_MACRO "-DGTEST_HAS_PTHREAD=1")
   else()
     set(GTEST_HAS_PTHREAD_MACRO "-DGTEST_HAS_PTHREAD=0")
@@ -159,7 +164,7 @@ function(cxx_library_with_type name type cxx_flags)
       PROPERTIES
       COMPILE_DEFINITIONS "GTEST_CREATE_SHARED_LIBRARY=1")
   endif()
-  if (CMAKE_USE_PTHREADS_INIT)
+  if (DEFINED GTEST_HAS_PTHREAD)
     target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT})
   endif()
 endfunction()
