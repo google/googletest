@@ -7655,7 +7655,7 @@ TEST(NativeArrayTest, MethodsWork) {
   EXPECT_EQ(0, *it);
   ++it;
   EXPECT_EQ(1, *it);
-  it++;
+  ++it;
   EXPECT_EQ(2, *it);
   ++it;
   EXPECT_EQ(na.end(), it);
