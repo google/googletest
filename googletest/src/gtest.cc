@@ -3449,11 +3449,7 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
 XmlUnitTestResultPrinter::XmlUnitTestResultPrinter(const char* output_file)
     : output_file_(output_file) {
   if (output_file_.c_str() == NULL || output_file_.empty()) {
-    {
-      // scoped to make sure the log is flushed before we exit
-      GTEST_LOG_(FATAL) << "XML output file may not be null";
-    }
-    exit(EXIT_FAILURE);
+    GTEST_LOG_(FATAL) << "XML output file may not be null";
   }
 }
 
@@ -3478,11 +3474,8 @@ void XmlUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
     //   3. To interpret the meaning of errno in a thread-safe way,
     //      we need the strerror_r() function, which is not available on
     //      Windows.
-    { // scoped to ensure the log is flushed before we exit
-      GTEST_LOG_(FATAL) << "Unable to open file \"" 
-                        << output_file_ << "\"";
-    }
-    exit(EXIT_FAILURE);
+    GTEST_LOG_(FATAL) << "Unable to open file \"" 
+                      << output_file_ << "\"";
   }
   std::stringstream stream;
   PrintXmlUnitTest(&stream, unit_test);
@@ -5283,12 +5276,9 @@ bool ParseGoogleTestFlag(const char* const arg) {
 void LoadFlagsFromFile(const std::string& path) {
   FILE* flagfile = posix::FOpen(path.c_str(), "r");
   if (!flagfile) {
-    { // scoped to ensure the log is flushed before we exit
-      GTEST_LOG_(FATAL) << "Unable to open file \"" 
-                        << GTEST_FLAG(flagfile) 
-                        << "\"";
-    }
-    exit(EXIT_FAILURE);
+    GTEST_LOG_(FATAL) << "Unable to open file \"" 
+                      << GTEST_FLAG(flagfile) 
+                      << "\"";
   }
   std::string contents(ReadEntireFile(flagfile));
   posix::FClose(flagfile);
