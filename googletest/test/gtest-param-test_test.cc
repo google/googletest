@@ -141,7 +141,7 @@ void VerifyGenerator(const ParamGenerator<T>& generator,
         << ", expected_values[i] is " << PrintValue(expected_values[i])
         << ", *it is " << PrintValue(*it)
         << ", and 'it' is an iterator created with the copy constructor.\n";
-    it++;
+    ++it;
   }
   EXPECT_TRUE(it == generator.end())
         << "At the presumed end of sequence when accessing via an iterator "
@@ -161,7 +161,7 @@ void VerifyGenerator(const ParamGenerator<T>& generator,
         << ", expected_values[i] is " << PrintValue(expected_values[i])
         << ", *it is " << PrintValue(*it)
         << ", and 'it' is an iterator created with the copy constructor.\n";
-    it++;
+    ++it;
   }
   EXPECT_TRUE(it == generator.end())
         << "At the presumed end of sequence when accessing via an iterator "
@@ -196,7 +196,7 @@ TEST(IteratorTest, ParamIteratorConformsToForwardIteratorConcept) {
                            << "element same as its source points to";
 
   // Verifies that iterator assignment works as expected.
-  it++;
+  ++it;
   EXPECT_FALSE(*it == *it2);
   it2 = it;
   EXPECT_TRUE(*it == *it2) << "Assigned iterators must point to the "
@@ -215,7 +215,7 @@ TEST(IteratorTest, ParamIteratorConformsToForwardIteratorConcept) {
   // Verifies that prefix and postfix operator++() advance an iterator
   // all the same.
   it2 = it;
-  it++;
+  ++it;
   ++it2;
   EXPECT_TRUE(*it == *it2);
 }
