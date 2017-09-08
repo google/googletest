@@ -26,10 +26,8 @@ addons:
     - ubuntu-toolchain-r-test
     - llvm-toolchain-precise-3.7
     packages:
-    - gcc-4.9
     - g++-4.9
     - clang-3.7
-    - valgrind
 os:
   - linux
   - osx
@@ -45,7 +43,7 @@ script: ./travis.sh
 env:
   matrix:
     - SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=Debug VERBOSE=1
-    - SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=Debug VERBOSE=1 CXX_FLAGS=-std=c++11
+    - SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
 notifications:
   email: false
 sudo: false
