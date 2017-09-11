@@ -18,3 +18,8 @@ bazel-testlogs
 *.suo
 /googletest/msvc/2015/Win32/Debug/v140
 /googletest/output/Win32/Debug/v140
+/googletest/msvc/2015/Win32/gtest
+/googletest/msvc/2015/Win32
+/googletest/msvc/2015/x64
+/googletest/output
+/googletest/msvc/2015/gtest.vcxproj.user
