@@ -86,9 +86,9 @@ class StreamingListenerTest : public Test {
   class FakeSocketWriter : public StreamingListener::AbstractSocketWriter {
    public:
     // Sends a string to the socket.
-    virtual void Send(const string& message) { output_ += message; }
+    virtual void Send(const std::string& message) { output_ += message; }
 
-    string output_;
+    std::string output_;
   };
 
   StreamingListenerTest()
@@ -98,7 +98,7 @@ class StreamingListenerTest : public Test {
                        CodeLocation(__FILE__, __LINE__), 0, NULL) {}
 
  protected:
-  string* output() { return &(fake_sock_writer_->output_); }
+  std::string* output() { return &(fake_sock_writer_->output_); }
 
   FakeSocketWriter* const fake_sock_writer_;
   StreamingListener streamer_;
@@ -1388,7 +1388,7 @@ class TestResultTest : public Test {
     delete r2;
   }
 
-  // Helper that compares two two TestPartResults.
+  // Helper that compares two TestPartResults.
   static void CompareTestPartResult(const TestPartResult& expected,
                                     const TestPartResult& actual) {
     EXPECT_EQ(expected.type(), actual.type());
@@ -2096,7 +2096,7 @@ class UnitTestRecordPropertyTestEnvironment : public Environment {
 };
 
 // This will test property recording outside of any test or test case.
-static Environment* record_property_env =
+Environment* record_property_env GTEST_ATTRIBUTE_UNUSED_ =
     AddGlobalTestEnvironment(new UnitTestRecordPropertyTestEnvironment);
 
 // This group of tests is for predicate assertions (ASSERT_PRED*, etc)
@@ -3115,13 +3115,13 @@ TEST(DISABLED_TestCase, DISABLED_TestShouldNotRun) {
   FAIL() << "Unexpected failure: Test in disabled test case should not be run.";
 }
 
-// Check that when all tests in a test case are disabled, SetupTestCase() and
+// Check that when all tests in a test case are disabled, SetUpTestCase() and
 // TearDownTestCase() are not called.
 class DisabledTestsTest : public Test {
  protected:
   static void SetUpTestCase() {
     FAIL() << "Unexpected failure: All tests disabled in test case. "
-              "SetupTestCase() should not be called.";
+              "SetUpTestCase() should not be called.";
   }
 
   static void TearDownTestCase() {
@@ -3689,7 +3689,7 @@ TEST(AssertionTest, ASSERT_EQ) {
 TEST(AssertionTest, ASSERT_EQ_NULL) {
   // A success.
   const char* p = NULL;
-  // Some older GCC versions may issue a spurious waring in this or the next
+  // Some older GCC versions may issue a spurious warning in this or the next
   // assertion statement. This warning should not be suppressed with
   // static_cast since the test verifies the ability to use bare NULL as the
   // expected parameter to the macro.
@@ -6411,7 +6411,7 @@ class FlagfileTest : public InitGoogleTestTest {
     InitGoogleTestTest::SetUp();
 
     testdata_path_.Set(internal::FilePath(
-        internal::TempDir() + internal::GetCurrentExecutableName().string() +
+        testing::TempDir() + internal::GetCurrentExecutableName().string() +
         "_flagfile_test"));
     testing::internal::posix::RmDir(testdata_path_.c_str());
     EXPECT_TRUE(testdata_path_.CreateFolder());
@@ -7655,7 +7655,7 @@ TEST(NativeArrayTest, MethodsWork) {
   EXPECT_EQ(0, *it);
   ++it;
   EXPECT_EQ(1, *it);
-  it++;
+  ++it;
   EXPECT_EQ(2, *it);
   ++it;
   EXPECT_EQ(na.end(), it);
@@ -7703,4 +7703,3 @@ TEST(SkipPrefixTest, DoesNotSkipWhenPrefixDoesNotMatch) {
   EXPECT_FALSE(SkipPrefix("world!", &p));
   EXPECT_EQ(str, p);
 }
-
