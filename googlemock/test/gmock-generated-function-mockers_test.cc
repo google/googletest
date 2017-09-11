@@ -133,10 +133,10 @@ class MockFoo : public FooInterface {
   MOCK_METHOD(bool, Unary, (int));  // NOLINT
   MOCK_METHOD(long, Binary, (short, int));  // NOLINT
   MOCK_METHOD(int, Decimal, (bool, char, short, int, long, float,  // NOLINT
-                             double, unsigned, char*, const string& str));
+                             double, unsigned, char*, const std::string& str));
 
   MOCK_METHOD(bool, TakesNonConstReference, (int&));  // NOLINT
-  MOCK_METHOD(string, TakesConstReference, (const int&));
+  MOCK_METHOD(std::string, TakesConstReference, (const int&));
 
 #ifdef GMOCK_ALLOWS_CONST_PARAM_FUNCTIONS
   MOCK_METHOD(bool, TakesConst, (const int));  // NOLINT
@@ -144,7 +144,7 @@ class MockFoo : public FooInterface {
 
   // The function return type can't contain an unprotected comma.
   // A typedef can be used to work around this.
-  typedef std::map<int, string> MapIntString;
+  typedef std::map<int, std::string> MapIntString;
   MOCK_METHOD(MapIntString, ReturnTypeWithComma, ());
   MOCK_CONST_METHOD(MapIntString, ReturnTypeWithComma, (int));  // NOLINT
 
@@ -165,7 +165,7 @@ class MockFoo : public FooInterface {
   MOCK_METHOD_WITH_CALLTYPE(STDMETHODCALLTYPE, bool, CTUnary, (int));
   MOCK_METHOD_WITH_CALLTYPE(STDMETHODCALLTYPE, int, CTDecimal, (bool b, char c,
       short d, int e, long f, float g, double h, unsigned i, char* j,
-      const string& k));
+      const std::string& k));
   MOCK_CONST_METHOD_WITH_CALLTYPE(STDMETHODCALLTYPE, char, CTConst, (int));
 
   // Tests that the function return type can contain unprotected comma.
