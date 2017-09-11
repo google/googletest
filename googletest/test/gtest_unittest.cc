@@ -2096,7 +2096,7 @@ class UnitTestRecordPropertyTestEnvironment : public Environment {
 };
 
 // This will test property recording outside of any test or test case.
-static Environment* record_property_env =
+Environment* record_property_env GTEST_ATTRIBUTE_UNUSED_ =
     AddGlobalTestEnvironment(new UnitTestRecordPropertyTestEnvironment);
 
 // This group of tests is for predicate assertions (ASSERT_PRED*, etc)
@@ -7655,7 +7655,7 @@ TEST(NativeArrayTest, MethodsWork) {
   EXPECT_EQ(0, *it);
   ++it;
   EXPECT_EQ(1, *it);
-  it++;
+  ++it;
   EXPECT_EQ(2, *it);
   ++it;
   EXPECT_EQ(na.end(), it);
