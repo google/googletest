@@ -10,3 +10,16 @@ bazel-out
 bazel-testlogs
 # python
 *.pyc
+/googletest/msvc/2010/gtest.VC.VC.opendb
+/googletest/msvc/2010/gtest.VC.db
+/googletest/msvc/2015/gtest.VC.VC.opendb
+/googletest/msvc/2015/gtest.VC.db
+/googletest/msvc/2015/.vs/gtest/v14/.suo
+*.suo
+/googletest/msvc/2015/Win32/Debug/v140
+/googletest/output/Win32/Debug/v140
+/googletest/msvc/2015/Win32/gtest
+/googletest/msvc/2015/Win32
+/googletest/msvc/2015/x64
+/googletest/output
+/googletest/msvc/2015/gtest.vcxproj.user
