@@ -75,9 +75,6 @@ include_directories(
   ${gtest_SOURCE_DIR}/include
   ${gtest_SOURCE_DIR})
 
-# Where Google Test's libraries can be found.
-link_directories(${gtest_BINARY_DIR}/src)
-
 # Summary of tuple support for Microsoft Visual Studio:
 # Compiler    version(MS)  version(cmake)  Support
 # ----------  -----------  --------------  -----------------------------
