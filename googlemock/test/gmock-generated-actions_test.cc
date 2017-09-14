@@ -366,7 +366,7 @@ TEST(WithArgsTest, TenArgs) {
 }
 
 // Tests using WithArgs with an action that is not Invoke().
-class SubstractAction : public ActionInterface<int(int, int)> {  // NOLINT
+class SubtractAction : public ActionInterface<int(int, int)> {  // NOLINT
  public:
   virtual int Perform(const tuple<int, int>& args) {
     return get<0>(args) - get<1>(args);
@@ -375,7 +375,7 @@ class SubstractAction : public ActionInterface<int(int, int)> {  // NOLINT
 
 TEST(WithArgsTest, NonInvokeAction) {
   Action<int(const string&, int, int)> a =  // NOLINT
-      WithArgs<2, 1>(MakeAction(new SubstractAction));
+      WithArgs<2, 1>(MakeAction(new SubtractAction));
   string s("hello");
   EXPECT_EQ(8, a.Perform(tuple<const string&, int, int>(s, 2, 10)));
 }
