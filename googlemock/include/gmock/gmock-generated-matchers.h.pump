@@ -1,6 +1,6 @@
 $$ -*- mode: c++; -*-
 $$ This is a Pump source file.  Please use Pump to convert it to
-$$ gmock-generated-actions.h.
+$$ gmock-generated-matchersf.h.
 $$
 $var n = 10  $$ The maximum arity we support.
 $$ }} This line fixes auto-indentation of the following code in Emacs.
@@ -612,12 +612,12 @@ $var param_types_and_names = [[$for j, [[p$j##_type p$j]]]]
 $var param_field_decls = [[$for j
 [[
 
-      p$j##_type p$j;\
+      p$j##_type const p$j;\
 ]]]]
 $var param_field_decls2 = [[$for j
 [[
 
-    p$j##_type p$j;\
+    p$j##_type const p$j;\
 ]]]]
 
 #define $macro_name(name$for j [[, p$j]], description)\$template
@@ -646,7 +646,6 @@ $var param_field_decls2 = [[$for j
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
                 ::testing::tuple<$for j, [[p$j##_type]]>($for j, [[p$j]])));\
       }\
-      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -656,7 +655,6 @@ $var param_field_decls2 = [[$for j
     [[$if i==1 [[explicit ]]]]$class_name($ctor_param_list)$inits {\
     }\$param_field_decls2
    private:\
-    GTEST_DISALLOW_ASSIGN_($class_name);\
   };\$template
   inline $class_name$param_types name($param_types_and_names) {\
     return $class_name$param_types($params);\
