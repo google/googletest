@@ -263,6 +263,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #ifndef _WIN32_WCE
 # include <sys/types.h>
 # include <sys/stat.h>
@@ -2344,16 +2345,16 @@ namespace posix {
 typedef struct _stat StatStruct;
 
 # ifdef __BORLANDC__
-inline int IsATTY(int fd) { return isatty(fd); }
+inline int DoIsATTY(int fd) { return isatty(fd); }
 inline int StrCaseCmp(const char* s1, const char* s2) {
   return stricmp(s1, s2);
 }
 inline char* StrDup(const char* src) { return strdup(src); }
 # else  // !__BORLANDC__
 #  if GTEST_OS_WINDOWS_MOBILE
-inline int IsATTY(int /* fd */) { return 0; }
+inline int DoIsATTY(int /* fd */) { return 0; }
 #  else
-inline int IsATTY(int fd) { return _isatty(fd); }
+inline int DoIsATTY(int fd) { return _isatty(fd); }
 #  endif  // GTEST_OS_WINDOWS_MOBILE
 inline int StrCaseCmp(const char* s1, const char* s2) {
   return _stricmp(s1, s2);
@@ -2379,7 +2380,7 @@ inline bool IsDir(const StatStruct& st) {
 typedef struct stat StatStruct;
 
 inline int FileNo(FILE* file) { return fileno(file); }
-inline int IsATTY(int fd) { return isatty(fd); }
+inline int DoIsATTY(int fd) { return isatty(fd); }
 inline int Stat(const char* path, StatStruct* buf) { return stat(path, buf); }
 inline int StrCaseCmp(const char* s1, const char* s2) {
   return strcasecmp(s1, s2);
@@ -2389,6 +2390,18 @@ inline int RmDir(const char* dir) { return rmdir(dir); }
 inline bool IsDir(const StatStruct& st) { return S_ISDIR(st.st_mode); }
 
 #endif  // GTEST_OS_WINDOWS
+
+inline int IsATTY(int fd)
+{
+    // DoIsATTY might change errno (for example ENOTTY in case you redirect stdout
+    // to a file on Linux), which is unexpected, so save the previous value, and
+    // restore it after the call.
+    int savedErrno = errno;
+    int isAttyValue = DoIsATTY(fd);
+    errno = savedErrno;
+
+    return isAttyValue;
+}
 
 // Functions deprecated by MSVC 8.0.
 
