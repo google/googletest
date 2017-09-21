@@ -1375,7 +1375,10 @@ internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
 }
 # endif  // GTEST_HAS_COMBINE
 
-
+// Use a macro to stringify the test (case) name, because direct stringification
+// does not work if one of the arguments is itself a macro
+// (https://gcc.gnu.org/onlinedocs/cpp/Stringification.html).
+# define GTEST_STRINGIFY_(name) #name
 
 # define TEST_P(test_case_name, test_name) \
   class GTEST_TEST_CLASS_NAME_(test_case_name, test_name) \
@@ -1390,8 +1393,8 @@ internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
               #test_case_name, \
               ::testing::internal::CodeLocation(\
                   __FILE__, __LINE__))->AddTestPattern(\
-                      #test_case_name, \
-                      #test_name, \
+                      GTEST_STRINGIFY_(test_case_name), \
+                      GTEST_STRINGIFY_(test_name), \
                       new ::testing::internal::TestMetaFactory< \
                           GTEST_TEST_CLASS_NAME_(\
                               test_case_name, test_name)>()); \
@@ -1412,11 +1415,11 @@ internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
 // type testing::TestParamInfo<class ParamType>, and return std::string.
 //
 // testing::PrintToStringParamName is a builtin test suffix generator that
-// returns the value of testing::PrintToString(GetParam()). It does not work
-// for std::string or C strings.
+// returns the value of testing::PrintToString(GetParam()).
 //
 // Note: test names must be non-empty, unique, and may only contain ASCII
-// alphanumeric characters or underscore.
+// alphanumeric characters or underscore. Because PrintToString adds quotes
+// to std::string and C strings, it won't work for these types.
 
 # define INSTANTIATE_TEST_CASE_P(prefix, test_case_name, generator, ...) \
   ::testing::internal::ParamGenerator<test_case_name::ParamType> \
