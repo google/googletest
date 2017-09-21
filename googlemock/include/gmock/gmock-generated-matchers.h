@@ -1382,8 +1382,8 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
 // Disables a warning in old versions of MSVC that there is no copy assignment
 // generated for the matcher -- this is exactly what we want!
 #ifdef MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4512)
+#pragma warning( push )
+#pragma warning( disable : 4512 )
 #endif
 
 #define MATCHER(name, description)\
@@ -2162,7 +2162,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 #ifdef MSC_VER
-#pragma warning(pop)
+#pragma warning( pop )
 #endif
 
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_MATCHERS_H_

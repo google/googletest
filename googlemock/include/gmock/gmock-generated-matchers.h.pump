@@ -592,8 +592,8 @@ $$   // show up in the generated code.
 // Disables a warning in old versions of MSVC that there is no copy assignment
 // generated for the matcher -- this is exactly what we want!
 #ifdef MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4512)
+#pragma warning( push )
+#pragma warning( disable : 4512 )
 #endif
 
 $range i 0..n
@@ -674,7 +674,7 @@ $var param_field_decls2 = [[$for j
 ]]
 
 #ifdef MSC_VER
-#pragma warning(pop)
+#pragma warning( pop )
 #endif
 
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_MATCHERS_H_
