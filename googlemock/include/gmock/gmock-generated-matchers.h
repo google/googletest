@@ -44,6 +44,13 @@
 #include <vector>
 #include "gmock/gmock-matchers.h"
 
+// Disables a warning in old versions of MSVC that there is no copy assignment
+// generated for the matcher -- this is exactly what we want!
+#ifdef MSC_VER
+#pragma warning( push )
+#pragma warning( disable : 4512 )
+#endif
+
 namespace testing {
 namespace internal {
 
@@ -1378,13 +1385,6 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
 // To learn more about using these macros, please search for 'MATCHER'
 // on https://github.com/google/googletest/blob/master/googlemock/docs/
 // CookBook.md
-
-// Disables a warning in old versions of MSVC that there is no copy assignment
-// generated for the matcher -- this is exactly what we want!
-#ifdef MSC_VER
-#pragma warning( push )
-#pragma warning( disable : 4512 )
-#endif
 
 #define MATCHER(name, description)\
   class name##Matcher {\
