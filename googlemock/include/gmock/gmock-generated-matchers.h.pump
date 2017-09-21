@@ -589,6 +589,13 @@ $$   // show up in the generated code.
 // To learn more about using these macros, please search for 'MATCHER'
 // on https://github.com/google/googletest/blob/master/googlemock/docs/CookBook.md
 
+// Disables a warning in old versions of MSVC that there is no copy assignment
+// generated for the matcher -- this is exactly what we want!
+#ifdef MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4512)
+#endif
+
 $range i 0..n
 $for i
 
@@ -665,6 +672,10 @@ $var param_field_decls2 = [[$for j
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 ]]
+
+#ifdef MSC_VER
+#pragma warning(pop)
+#endif
 
 
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_MATCHERS_H_
