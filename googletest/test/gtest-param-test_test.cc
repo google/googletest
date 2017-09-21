@@ -809,6 +809,34 @@ TEST_P(NamingTest, TestsReportCorrectNamesAndParameters) {
 
 INSTANTIATE_TEST_CASE_P(ZeroToFiveSequence, NamingTest, Range(0, 5));
 
+// Tests that macros in test names are expanded correctly.
+class MacroNamingTest : public TestWithParam<int> {};
+
+#define PREFIX_WITH_FOO(test_name) FOO_##test_name
+#define PREFIX_WITH_MACRO(test_name) Macro##test_name
+
+TEST_P(PREFIX_WITH_MACRO(NamingTest), PREFIX_WITH_FOO(SomeTestName)) {
+  const ::testing::TestInfo* const test_info =
+     ::testing::UnitTest::GetInstance()->current_test_info();
+
+  EXPECT_STREQ("FortyTwo/MacroNamingTest", test_info->test_case_name());
+  EXPECT_STREQ("FOO_SomeTestName", test_info->name());
+}
+
+INSTANTIATE_TEST_CASE_P(FortyTwo, MacroNamingTest, Values(42));
+
+// Tests the same thing for non-parametrized tests.
+class MacroNamingTestNonParametrized : public ::testing::Test {};
+
+TEST_F(PREFIX_WITH_MACRO(NamingTestNonParametrized),
+       PREFIX_WITH_FOO(SomeTestName)) {
+  const ::testing::TestInfo* const test_info =
+     ::testing::UnitTest::GetInstance()->current_test_info();
+
+  EXPECT_STREQ("MacroNamingTestNonParametrized", test_info->test_case_name());
+  EXPECT_STREQ("FOO_SomeTestName", test_info->name());
+}
+
 // Tests that user supplied custom parameter names are working correctly.
 // Runs the test with a builtin helper method which uses PrintToString,
 // as well as a custom function and custom functor to ensure all possible
