@@ -37,7 +37,12 @@ endif()
 # as ${gmock_SOURCE_DIR} and to the root binary directory as
 # ${gmock_BINARY_DIR}.
 # Language "C" is required for find_package(Threads).
-project(gmock CXX C)
+if (CMAKE_VERSION VERSION_LESS 3.0)
+  project(gmock CXX C)
+else()
+  cmake_policy(SET CMP0048 NEW)
+  project(gmock VERSION 1.9.0 LANGUAGES CXX C)
+endif()
 cmake_minimum_required(VERSION 2.6.4)
 
 if (COMMAND set_up_hermetic_build)
@@ -110,6 +115,18 @@ if(INSTALL_GMOCK)
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
   install(DIRECTORY ${gmock_SOURCE_DIR}/include/gmock
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+  # configure and install pkgconfig files
+  configure_file(
+    cmake/gmock.pc.in
+    "${CMAKE_BINARY_DIR}/gmock.pc"
+    @ONLY)
+  configure_file(
+    cmake/gmock_main.pc.in
+    "${CMAKE_BINARY_DIR}/gmock_main.pc"
+    @ONLY)
+  install(FILES "${CMAKE_BINARY_DIR}/gmock.pc" "${CMAKE_BINARY_DIR}/gmock_main.pc"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 endif()
 
 ########################################################################
@@ -147,7 +164,7 @@ if (gmock_build_tests)
   cxx_test(gmock_link_test gmock_main test/gmock_link2_test.cc)
   cxx_test(gmock_test gmock_main)
 
-  if (CMAKE_USE_PTHREADS_INIT)
+  if (DEFINED GTEST_HAS_PTHREAD)
     cxx_test(gmock_stress_test gmock)
   endif()
 
