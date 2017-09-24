@@ -2584,10 +2584,6 @@ std::string StringFromGTestEnv(const char* flag, const char* default_val);
 
 }  // namespace internal
 
-// Returns a path to temporary directory.
-// Tries to determine an appropriate directory for the platform.
-GTEST_API_ std::string TempDir();
-
 }  // namespace testing
 
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_

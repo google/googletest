@@ -64,20 +64,23 @@ EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
   </testsuite>
   <testsuite name="FailedTest" tests="1" failures="1" disabled="0" errors="0" time="*">
     <testcase name="Fails" status="run" time="*" classname="FailedTest">
-      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;      Expected: 1&#x0A;To be equal to: 2" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
-      Expected: 1
-To be equal to: 2%(stack)s]]></failure>
+      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  2" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
+Expected equality of these values:
+  1
+  2%(stack)s]]></failure>
     </testcase>
   </testsuite>
   <testsuite name="MixedResultTest" tests="3" failures="1" disabled="1" errors="0" time="*">
     <testcase name="Succeeds" status="run" time="*" classname="MixedResultTest"/>
     <testcase name="Fails" status="run" time="*" classname="MixedResultTest">
-      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;      Expected: 1&#x0A;To be equal to: 2" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
-      Expected: 1
-To be equal to: 2%(stack)s]]></failure>
-      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;      Expected: 2&#x0A;To be equal to: 3" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
-      Expected: 2
-To be equal to: 3%(stack)s]]></failure>
+      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  2" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
+Expected equality of these values:
+  1
+  2%(stack)s]]></failure>
+      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Expected equality of these values:&#x0A;  2&#x0A;  3" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
+Expected equality of these values:
+  2
+  3%(stack)s]]></failure>
     </testcase>
     <testcase name="DISABLED_test" status="notrun" time="*" classname="MixedResultTest"/>
   </testsuite>
