@@ -27,6 +27,8 @@ option(
   "Build gtest with internal symbols hidden in shared libraries."
   OFF)
 
+set(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "Generate debug library name with a postfix.")
+
 # Defines pre_project_set_up_hermetic_build() and set_up_hermetic_build().
 include(cmake/hermetic_build.cmake OPTIONAL)
 
@@ -52,6 +54,10 @@ else()
 endif()
 cmake_minimum_required(VERSION 2.6.4)
 
+if (POLICY CMP0063) # Visibility
+  cmake_policy(SET CMP0063 NEW)
+endif (POLICY CMP0063)
+
 if (COMMAND set_up_hermetic_build)
   set_up_hermetic_build()
 endif()
@@ -70,9 +76,6 @@ config_compiler_and_linker()  # Defined in internal_utils.cmake.
 include_directories(
   ${gtest_SOURCE_DIR}/include
   ${gtest_SOURCE_DIR})
-
-# Where Google Test's libraries can be found.
-link_directories(${gtest_BINARY_DIR}/src)
 
 # Summary of tuple support for Microsoft Visual Studio:
 # Compiler    version(MS)  version(cmake)  Support

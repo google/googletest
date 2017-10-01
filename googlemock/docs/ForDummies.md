@@ -217,7 +217,8 @@ The macro can be followed by some optional _clauses_ that provide more informati
 This syntax is designed to make an expectation read like English. For example, you can probably guess that
 
 ```
-using ::testing::Return;...
+using ::testing::Return;
+...
 EXPECT_CALL(turtle, GetX())
     .Times(5)
     .WillOnce(Return(100))
@@ -251,7 +252,8 @@ EXPECT_CALL(turtle, Forward(_));
 A list of built-in matchers can be found in the [CheatSheet](CheatSheet.md). For example, here's the `Ge` (greater than or equal) matcher:
 
 ```
-using ::testing::Ge;...
+using ::testing::Ge;
+...
 EXPECT_CALL(turtle, Forward(Ge(100)));
 ```
 
@@ -280,7 +282,8 @@ First, if the return type of a mock function is a built-in type or a pointer, th
 Second, if a mock function doesn't have a default action, or the default action doesn't suit you, you can specify the action to be taken each time the expectation matches using a series of `WillOnce()` clauses followed by an optional `WillRepeatedly()`. For example,
 
 ```
-using ::testing::Return;...
+using ::testing::Return;
+...
 EXPECT_CALL(turtle, GetX())
     .WillOnce(Return(100))
     .WillOnce(Return(200))
@@ -290,7 +293,8 @@ EXPECT_CALL(turtle, GetX())
 This says that `turtle.GetX()` will be called _exactly three times_ (Google Mock inferred this from how many `WillOnce()` clauses we've written, since we didn't explicitly write `Times()`), and will return 100, 200, and 300 respectively.
 
 ```
-using ::testing::Return;...
+using ::testing::Return;
+...
 EXPECT_CALL(turtle, GetY())
     .WillOnce(Return(100))
     .WillOnce(Return(200))
@@ -317,7 +321,8 @@ Instead of returning 100, 101, 102, ..., consecutively, this mock function will 
 Time for another quiz! What do you think the following means?
 
 ```
-using ::testing::Return;...
+using ::testing::Return;
+...
 EXPECT_CALL(turtle, GetY())
 .Times(4)
 .WillOnce(Return(100));
@@ -331,7 +336,8 @@ So far we've only shown examples where you have a single expectation. More reali
 By default, when a mock method is invoked, Google Mock will search the expectations in the **reverse order** they are defined, and stop when an active expectation that matches the arguments is found (you can think of it as "newer rules override older ones."). If the matching expectation cannot take any more calls, you will get an upper-bound-violated failure. Here's an example:
 
 ```
-using ::testing::_;...
+using ::testing::_;
+...
 EXPECT_CALL(turtle, Forward(_));  // #1
 EXPECT_CALL(turtle, Forward(10))  // #2
     .Times(2);
@@ -347,7 +353,8 @@ By default, an expectation can match a call even though an earlier expectation h
 Sometimes, you may want all the expected calls to occur in a strict order. To say this in Google Mock is easy:
 
 ```
-using ::testing::InSequence;...
+using ::testing::InSequence;
+...
 TEST(FooTest, DrawsLineSegment) {
   ...
   {
@@ -373,7 +380,8 @@ Now let's do a quick quiz to see how well you can use this mock stuff already. H
 After you've come up with your answer, take a look at ours and compare notes (solve it yourself first - don't cheat!):
 
 ```
-using ::testing::_;...
+using ::testing::_;
+...
 EXPECT_CALL(turtle, GoTo(_, _))  // #1
     .Times(AnyNumber());
 EXPECT_CALL(turtle, GoTo(0, 0))  // #2
