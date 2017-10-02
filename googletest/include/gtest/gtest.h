@@ -1155,6 +1155,12 @@ class GTEST_API_ UnitTest {
   // Consecutive calls will return the same object.
   static UnitTest* GetInstance();
 
+  // Delete the static UnitTest singleton instance. This effectively
+  // cleans up Google Test, and all loaded test cases are unloaded.
+  //
+  // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
+  static void DeinitializeInstance();
+
   // Runs all tests in this UnitTest object and prints the result.
   // Returns 0 if successful, or 1 otherwise.
   //
@@ -1266,10 +1272,6 @@ class GTEST_API_ UnitTest {
     UnitTest *t_;
   };
 
-  // Delete the static UnitTest singleton instance. This effectively
-  // cleans up Google Test, and all loaded test cases are unloaded.
-  static void DeinitializeInstance();
-
   static Container singletonContainer_;
 
 
@@ -1322,7 +1324,6 @@ class GTEST_API_ UnitTest {
   friend void internal::ReportFailureInUnknownLocation(
       TestPartResult::Type result_type,
       const std::string& message);
-  friend void UnloadGoogleTest();
 
   // Creates an empty UnitTest.
   UnitTest();
