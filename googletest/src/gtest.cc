@@ -4486,6 +4486,9 @@ void TestEventListeners::SuppressEventForwarding() {
 
 // class UnitTest
 
+UnitTest::Container UnitTest::singleton_container_;
+UnitTest* UnitTest::Container::unit_test_singleton_;
+
 // Gets the singleton UnitTest object.  The first time this method is
 // called, a UnitTest object is constructed and returned.  Consecutive
 // calls will return the same object.
@@ -4494,24 +4497,17 @@ void TestEventListeners::SuppressEventForwarding() {
 // call this before main() starts, from which point on the return
 // value will never change.
 UnitTest* UnitTest::GetInstance() {
-  // When compiled with MSVC 7.1 in optimized mode, destroying the
-  // UnitTest object upon exiting the program messes up the exit code,
-  // causing successful tests to appear failed.  We have to use a
-  // different implementation in this case to bypass the compiler bug.
-  // This implementation makes the compiler happy, at the cost of
-  // leaking the UnitTest object.
+  if (singleton_container_.Get() == NULL) {
+    singleton_container_.Set(new UnitTest);
+  }
 
-  // CodeGear C++Builder insists on a public destructor for the
-  // default implementation.  Use this implementation to keep good OO
-  // design with private destructor.
+  return singleton_container_.Get();
+}
 
-#if (_MSC_VER == 1310 && !defined(_DEBUG)) || defined(__BORLANDC__)
-  static UnitTest* const instance = new UnitTest;
-  return instance;
-#else
-  static UnitTest instance;
-  return &instance;
-#endif  // (_MSC_VER == 1310 && !defined(_DEBUG)) || defined(__BORLANDC__)
+void UnitTest::DeinitializeInstance() {
+  if (singleton_container_.Get()) {
+    singleton_container_.Clear();
+  }
 }
 
 // Gets the number of successful test cases.
@@ -4846,6 +4842,29 @@ void UnitTest::PopGTestTrace()
   internal::MutexLock lock(&mutex_);
   impl_->gtest_trace_stack().pop_back();
 }
+
+
+// UnitTest::Container
+UnitTest::Container::~Container() {
+  Clear();
+}
+
+void UnitTest::Container::Set(UnitTest *ut) {
+  unit_test_singleton_ = ut;
+}
+
+UnitTest* UnitTest::Container::Get() {
+  return unit_test_singleton_;
+}
+
+void UnitTest::Container::Clear() {
+  if (unit_test_singleton_) {
+    delete unit_test_singleton_;
+    unit_test_singleton_ = NULL;
+  }
+}
+
+
 
 namespace internal {
 
@@ -5961,6 +5980,11 @@ void InitGoogleTest(int* argc, wchar_t** argv) {
 #else  // defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
   internal::InitGoogleTestImpl(argc, argv);
 #endif  // defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
+}
+
+void UnloadGoogleTest()
+{
+    testing::UnitTest::DeinitializeInstance();
 }
 
 std::string TempDir() {
