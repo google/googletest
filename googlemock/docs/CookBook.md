@@ -227,7 +227,7 @@ If a mock method has no `EXPECT_CALL` spec but is called, Google Mock
 will print a warning about the "uninteresting call". The rationale is:
 
   * New methods may be added to an interface after a test is written. We shouldn't fail a test just because a method it doesn't know about is called.
-  * However, this may also mean there's a bug in the test, so Google Mock shouldn't be silent either. If the user believes these calls are harmless, he can add an `EXPECT_CALL()` to suppress the warning.
+  * However, this may also mean there's a bug in the test, so Google Mock shouldn't be silent either. If the user believes these calls are harmless, they can add an `EXPECT_CALL()` to suppress the warning.
 
 However, sometimes you may want to suppress all "uninteresting call"
 warnings, while sometimes you may want the opposite, i.e. to treat all
