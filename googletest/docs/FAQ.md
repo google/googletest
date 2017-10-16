@@ -102,9 +102,9 @@ Then every user of your machine can write tests without
 recompiling Google Test.
 
 This seemed like a good idea, but it has a
-got-cha: every user needs to compile his tests using the _same_ compiler
+got-cha: every user needs to compile their tests using the _same_ compiler
 flags used to compile the installed Google Test libraries; otherwise
-he may run into undefined behaviors (i.e. the tests can behave
+they may run into undefined behaviors (i.e. the tests can behave
 strangely and may even crash for no obvious reasons).
 
 Why?  Because C++ has this thing called the One-Definition Rule: if

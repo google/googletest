@@ -1263,7 +1263,7 @@ known as <i>abstract tests</i>. As an example of its application, when you
 are designing an interface you can write a standard suite of abstract
 tests (perhaps using a factory function as the test parameter) that
 all implementations of the interface are expected to pass. When
-someone implements the interface, he can instantiate your suite to get
+someone implements the interface, they can instantiate your suite to get
 all the interface-conformance tests for free.
 
 To define abstract tests, you should organize your code like this:

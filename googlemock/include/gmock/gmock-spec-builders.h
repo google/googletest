@@ -1774,7 +1774,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   // There is no generally useful and implementable semantics of
   // copying a mock object, so copying a mock is usually a user error.
   // Thus we disallow copying function mockers.  If the user really
-  // wants to copy a mock object, he should implement his own copy
+  // wants to copy a mock object, they should implement their own copy
   // operation, for example:
   //
   //   class MockFoo : public Foo {
