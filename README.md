@@ -129,8 +129,8 @@ below), which has further requirements:
 Some of Google Test's source files are generated from templates (not
 in the C++ sense) using a script.
 For example, the
-file include/gtest/internal/gtest-type-util.h.pump is used to generate
-gtest-type-util.h in the same directory.
+file `include/gtest/internal/gtest-type-util.h.pump` is used to generate
+`gtest-type-util.h` in the same directory.
 
 You don't need to worry about regenerating the source files
 unless you need to modify them.  You would then modify the
