@@ -274,7 +274,7 @@ class GTEST_API_ AssertionResult {
       typename internal::EnableIf<
           !internal::ImplicitlyConvertible<T, AssertionResult>::value>::type*
           /*enabler*/ = NULL)
-      : success_(success) {}
+      : success_(success), message_() {}
 
   GTEST_DISABLE_MSC_WARNINGS_POP_()
 

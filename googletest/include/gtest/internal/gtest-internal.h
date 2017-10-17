@@ -307,7 +307,7 @@ class FloatingPoint {
   // around may change its bits, although the new value is guaranteed
   // to be also a NAN.  Therefore, don't expect this constructor to
   // preserve the bits in x when x is a NAN.
-  explicit FloatingPoint(const RawType& x) { u_.value_ = x; }
+  explicit FloatingPoint(const RawType& x) : u_(x) { }
 
   // Static methods
 
@@ -369,6 +369,7 @@ class FloatingPoint {
   union FloatingPointUnion {
     RawType value_;  // The raw floating-point number.
     Bits bits_;      // The bits that represent the number.
+    explicit FloatingPointUnion(const RawType& v) : value_(v) { }
   };
 
   // Converts an integer from the sign-and-magnitude representation to
@@ -548,7 +549,7 @@ GTEST_API_ bool SkipPrefix(const char* prefix, const char** pstr);
 // State of the definition of a type-parameterized test case.
 class GTEST_API_ TypedTestCasePState {
  public:
-  TypedTestCasePState() : registered_(false) {}
+  TypedTestCasePState() : registered_(false), registered_tests_() {}
 
   // Adds the given test name to defined_test_names_ and return true
   // if the test case hasn't been registered; otherwise aborts the

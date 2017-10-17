@@ -1194,18 +1194,55 @@ class GTEST_API_ RE {
  public:
   // A copy constructor is required by the Standard to initialize object
   // references from r-values.
-  RE(const RE& other) { Init(other.pattern()); }
+  RE(const RE& other) :
+    pattern_(),
+    is_valid_(),
+#if GTEST_USES_POSIX_RE
+    full_regex_(),
+    partial_regex_()
+#else  // GTEST_USES_SIMPLE_RE
+    full_pattern_()
+#endif
+  { Init(other.pattern()); }
 
   // Constructs an RE from a string.
-  RE(const ::std::string& regex) { Init(regex.c_str()); }  // NOLINT
+  RE(const ::std::string& regex) :
+    pattern_(),
+    is_valid_(),
+#if GTEST_USES_POSIX_RE
+    full_regex_(),
+    partial_regex_()
+#else  // GTEST_USES_SIMPLE_RE
+    full_pattern_()
+#endif
+  { Init(regex.c_str()); }  // NOLINT
 
 #if GTEST_HAS_GLOBAL_STRING
 
-  RE(const ::string& regex) { Init(regex.c_str()); }  // NOLINT
+  RE(const ::string& regex) : 
+    pattern_(),
+    is_valid_(),
+#if GTEST_USES_POSIX_RE
+    full_regex_(),
+    partial_regex_()
+#else  // GTEST_USES_SIMPLE_RE
+    full_pattern_()
+#endif
+  { Init(regex.c_str()); }  // NOLINT
 
 #endif  // GTEST_HAS_GLOBAL_STRING
 
-  RE(const char* regex) { Init(regex); }  // NOLINT
+  RE(const char* regex) : 
+    pattern_(),
+    is_valid_(),
+#if GTEST_USES_POSIX_RE
+    full_regex_(),
+    partial_regex_()
+#else  // GTEST_USES_SIMPLE_RE
+    full_pattern_()
+#endif
+  { Init(regex); }  // NOLINT
+
   ~RE();
 
   // Returns the string representation of the regex.
@@ -1501,7 +1538,7 @@ inline void SleepMilliseconds(int n) {
 // use it in user tests, either directly or indirectly.
 class Notification {
  public:
-  Notification() : notified_(false) {
+  Notification() : mutex_(), notified_(false) {
     GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_init(&mutex_, NULL));
   }
   ~Notification() {

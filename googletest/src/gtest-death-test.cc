@@ -407,6 +407,8 @@ class DeathTestImpl : public DeathTest {
   void ReadAndInterpretStatusByte();
 
  private:
+  DeathTestImpl(const DeathTestImpl&);
+  DeathTestImpl& operator=(const DeathTestImpl&);
   // The textual content of the code this object is testing.  This class
   // doesn't own this string and should not attempt to delete it.
   const char* const statement_;
@@ -892,6 +894,8 @@ class ExecDeathTest : public ForkingDeathTest {
 #  endif  // defined(GTEST_EXTRA_DEATH_TEST_COMMAND_LINE_ARGS_)
     return args;
   }
+  ExecDeathTest& operator=(const ExecDeathTest&);
+  ExecDeathTest(const ExecDeathTest&);
   // The name of the file in which the death test is located.
   const char* const file_;
   // The line number on which the death test is located.
@@ -901,7 +905,7 @@ class ExecDeathTest : public ForkingDeathTest {
 // Utility class for accumulating command-line arguments.
 class Arguments {
  public:
-  Arguments() {
+  Arguments() : args_() {
     args_.push_back(NULL);
   }
 
