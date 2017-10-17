@@ -1877,7 +1877,7 @@ class ThreadWithParam : public ThreadWithParamBase {
 // object managed by Google Test will be leaked as long as all threads
 // using Google Test have exited when main() returns.
 template <typename T>
-class ThreadLocal : public ThreadLocalBase {
+class GTEST_API_ ThreadLocal : public ThreadLocalBase {
  public:
   ThreadLocal() : default_factory_(new DefaultValueHolderFactory()) {}
   explicit ThreadLocal(const T& value)
@@ -2061,7 +2061,7 @@ extern "C" inline void DeleteThreadLocalValue(void* value_holder) {
 
 // Implements thread-local storage on pthreads-based systems.
 template <typename T>
-class ThreadLocal {
+class GTEST_API_ ThreadLocal {
  public:
   ThreadLocal()
       : key_(CreateKey()), default_factory_(new DefaultValueHolderFactory()) {}
@@ -2193,7 +2193,7 @@ class GTestMutexLock {
 typedef GTestMutexLock MutexLock;
 
 template <typename T>
-class ThreadLocal {
+class GTEST_API_ ThreadLocal {
  public:
   ThreadLocal() : value_() {}
   explicit ThreadLocal(const T& value) : value_(value) {}
