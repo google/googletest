@@ -148,8 +148,7 @@ class GTEST_API_ UntypedFunctionMockerBase {
   // action fails.
   // L = *
   virtual UntypedActionResultHolderBase* UntypedPerformDefaultAction(
-      const void* untyped_args,
-      const string& call_description) const = 0;
+      const void* untyped_args, const std::string& call_description) const = 0;
 
   // Performs the given action with the given arguments and returns
   // the action's result.
@@ -263,12 +262,14 @@ class UntypedOnCallSpecBase {
   };
 
   // Asserts that the ON_CALL() statement has a certain property.
-  void AssertSpecProperty(bool property, const string& failure_message) const {
+  void AssertSpecProperty(bool property,
+                          const std::string& failure_message) const {
     Assert(property, file_, line_, failure_message);
   }
 
   // Expects that the ON_CALL() statement has a certain property.
-  void ExpectSpecProperty(bool property, const string& failure_message) const {
+  void ExpectSpecProperty(bool property,
+                          const std::string& failure_message) const {
     Expect(property, file_, line_, failure_message);
   }
 
@@ -362,7 +363,6 @@ enum CallReaction {
   kAllow,
   kWarn,
   kFail,
-  kDefault = kWarn  // By default, warn about uninteresting calls.
 };
 
 }  // namespace internal
@@ -690,7 +690,7 @@ GTEST_API_ extern ThreadLocal<Sequence*> g_gmock_implicit_sequence;
 class GTEST_API_ ExpectationBase {
  public:
   // source_text is the EXPECT_CALL(...) source that created this Expectation.
-  ExpectationBase(const char* file, int line, const string& source_text);
+  ExpectationBase(const char* file, int line, const std::string& source_text);
 
   virtual ~ExpectationBase();
 
@@ -738,12 +738,14 @@ class GTEST_API_ ExpectationBase {
   virtual Expectation GetHandle() = 0;
 
   // Asserts that the EXPECT_CALL() statement has the given property.
-  void AssertSpecProperty(bool property, const string& failure_message) const {
+  void AssertSpecProperty(bool property,
+                          const std::string& failure_message) const {
     Assert(property, file_, line_, failure_message);
   }
 
   // Expects that the EXPECT_CALL() statement has the given property.
-  void ExpectSpecProperty(bool property, const string& failure_message) const {
+  void ExpectSpecProperty(bool property,
+                          const std::string& failure_message) const {
     Expect(property, file_, line_, failure_message);
   }
 
@@ -845,7 +847,7 @@ class GTEST_API_ ExpectationBase {
   // an EXPECT_CALL() statement finishes.
   const char* file_;          // The file that contains the expectation.
   int line_;                  // The line number of the expectation.
-  const string source_text_;  // The EXPECT_CALL(...) source text.
+  const std::string source_text_;  // The EXPECT_CALL(...) source text.
   // True iff the cardinality is specified explicitly.
   bool cardinality_specified_;
   Cardinality cardinality_;            // The cardinality of the expectation.
@@ -880,8 +882,8 @@ class TypedExpectation : public ExpectationBase {
   typedef typename Function<F>::ArgumentMatcherTuple ArgumentMatcherTuple;
   typedef typename Function<F>::Result Result;
 
-  TypedExpectation(FunctionMockerBase<F>* owner,
-                   const char* a_file, int a_line, const string& a_source_text,
+  TypedExpectation(FunctionMockerBase<F>* owner, const char* a_file, int a_line,
+                   const std::string& a_source_text,
                    const ArgumentMatcherTuple& m)
       : ExpectationBase(a_file, a_line, a_source_text),
         owner_(owner),
@@ -1240,7 +1242,7 @@ class TypedExpectation : public ExpectationBase {
 // Logs a message including file and line number information.
 GTEST_API_ void LogWithLocation(testing::internal::LogSeverity severity,
                                 const char* file, int line,
-                                const string& message);
+                                const std::string& message);
 
 template <typename F>
 class MockSpec {
@@ -1259,7 +1261,7 @@ class MockSpec {
   internal::OnCallSpec<F>& InternalDefaultActionSetAt(
       const char* file, int line, const char* obj, const char* call) {
     LogWithLocation(internal::kInfo, file, line,
-        string("ON_CALL(") + obj + ", " + call + ") invoked");
+                    std::string("ON_CALL(") + obj + ", " + call + ") invoked");
     return function_mocker_->AddNewOnCallSpec(file, line, matchers_);
   }
 
@@ -1267,7 +1269,8 @@ class MockSpec {
   // the newly created spec.
   internal::TypedExpectation<F>& InternalExpectedAt(
       const char* file, int line, const char* obj, const char* call) {
-    const string source_text(string("EXPECT_CALL(") + obj + ", " + call + ")");
+    const std::string source_text(std::string("EXPECT_CALL(") + obj + ", " +
+                                  call + ")");
     LogWithLocation(internal::kInfo, file, line, source_text + " invoked");
     return function_mocker_->AddNewExpectation(
         file, line, source_text, matchers_);
@@ -1389,7 +1392,7 @@ class ActionResultHolder : public UntypedActionResultHolderBase {
   static ActionResultHolder* PerformDefaultAction(
       const FunctionMockerBase<F>* func_mocker,
       const typename Function<F>::ArgumentTuple& args,
-      const string& call_description) {
+      const std::string& call_description) {
     return new ActionResultHolder(Wrapper(
         func_mocker->PerformDefaultAction(args, call_description)));
   }
@@ -1429,7 +1432,7 @@ class ActionResultHolder<void> : public UntypedActionResultHolderBase {
   static ActionResultHolder* PerformDefaultAction(
       const FunctionMockerBase<F>* func_mocker,
       const typename Function<F>::ArgumentTuple& args,
-      const string& call_description) {
+      const std::string& call_description) {
     func_mocker->PerformDefaultAction(args, call_description);
     return new ActionResultHolder;
   }
@@ -1496,13 +1499,14 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   // without locking.
   // L = *
   Result PerformDefaultAction(const ArgumentTuple& args,
-                              const string& call_description) const {
+                              const std::string& call_description) const {
     const OnCallSpec<F>* const spec =
         this->FindOnCallSpec(args);
     if (spec != NULL) {
       return spec->GetAction().Perform(args);
     }
-    const string message = call_description +
+    const std::string message =
+        call_description +
         "\n    The mock function has no default action "
         "set, and its return type has no default value set.";
 #if GTEST_HAS_EXCEPTIONS
@@ -1522,7 +1526,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   // L = *
   virtual UntypedActionResultHolderBase* UntypedPerformDefaultAction(
       const void* untyped_args,  // must point to an ArgumentTuple
-      const string& call_description) const {
+      const std::string& call_description) const {
     const ArgumentTuple& args =
         *static_cast<const ArgumentTuple*>(untyped_args);
     return ResultHolder::PerformDefaultAction(this, args, call_description);
@@ -1598,12 +1602,10 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   }
 
   // Adds and returns an expectation spec for this mock function.
-  TypedExpectation<F>& AddNewExpectation(
-      const char* file,
-      int line,
-      const string& source_text,
-      const ArgumentMatcherTuple& m)
-          GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
+  TypedExpectation<F>& AddNewExpectation(const char* file, int line,
+                                         const std::string& source_text,
+                                         const ArgumentMatcherTuple& m)
+      GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
     Mock::RegisterUseByOnCallOrExpectCall(MockObject(), file, line);
     TypedExpectation<F>* const expectation =
         new TypedExpectation<F>(this, file, line, source_text, m);
@@ -1772,7 +1774,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   // There is no generally useful and implementable semantics of
   // copying a mock object, so copying a mock is usually a user error.
   // Thus we disallow copying function mockers.  If the user really
-  // wants to copy a mock object, he should implement his own copy
+  // wants to copy a mock object, they should implement their own copy
   // operation, for example:
   //
   //   class MockFoo : public Foo {
@@ -1796,7 +1798,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
 
 // Reports an uninteresting call (whose description is in msg) in the
 // manner specified by 'reaction'.
-void ReportUninterestingCall(CallReaction reaction, const string& msg);
+void ReportUninterestingCall(CallReaction reaction, const std::string& msg);
 
 }  // namespace internal
 

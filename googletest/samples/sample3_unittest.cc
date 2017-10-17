@@ -65,14 +65,14 @@
 
 #include "sample3-inl.h"
 #include "gtest/gtest.h"
-
+namespace {
 // To use a test fixture, derive a class from testing::Test.
-class QueueTest : public testing::Test {
+class QueueTestSmpl3 : public testing::Test {
  protected:  // You should make the members protected s.t. they can be
              // accessed from sub-classes.
 
   // virtual void SetUp() will be called before each test is run.  You
-  // should define it if you need to initialize the varaibles.
+  // should define it if you need to initialize the variables.
   // Otherwise, this can be skipped.
   virtual void SetUp() {
     q1_.Enqueue(1);
@@ -120,13 +120,13 @@ class QueueTest : public testing::Test {
 // instead of TEST.
 
 // Tests the default c'tor.
-TEST_F(QueueTest, DefaultConstructor) {
+TEST_F(QueueTestSmpl3, DefaultConstructor) {
   // You can access data in the test fixture here.
   EXPECT_EQ(0u, q0_.Size());
 }
 
 // Tests Dequeue().
-TEST_F(QueueTest, Dequeue) {
+TEST_F(QueueTestSmpl3, Dequeue) {
   int * n = q0_.Dequeue();
   EXPECT_TRUE(n == NULL);
 
@@ -144,8 +144,9 @@ TEST_F(QueueTest, Dequeue) {
 }
 
 // Tests the Queue::Map() function.
-TEST_F(QueueTest, Map) {
+TEST_F(QueueTestSmpl3, Map) {
   MapTester(&q0_);
   MapTester(&q1_);
   MapTester(&q2_);
 }
+}  // namespace

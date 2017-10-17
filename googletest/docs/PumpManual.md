@@ -40,7 +40,7 @@ maintain.
 ## Highlights ##
 
   * The implementation is in a single Python script and thus ultra portable: no build or installation is needed and it works cross platforms.
-  * Pump tries to be smart with respect to [Google's style guide](http://code.google.com/p/google-styleguide/): it breaks long lines (easy to have when they are generated) at acceptable places to fit within 80 columns and indent the continuation lines correctly.
+  * Pump tries to be smart with respect to [Google's style guide](https://github.com/google/styleguide): it breaks long lines (easy to have when they are generated) at acceptable places to fit within 80 columns and indent the continuation lines correctly.
   * The format is human-readable and more concise than XML.
   * The format works relatively well with Emacs' C++ mode.
 
@@ -169,7 +169,7 @@ improving Pump.
 
 ## Real Examples ##
 
-You can find real-world applications of Pump in [Google Test](http://www.google.com/codesearch?q=file%3A\.pump%24+package%3Ahttp%3A%2F%2Fgoogletest\.googlecode\.com) and [Google Mock](http://www.google.com/codesearch?q=file%3A\.pump%24+package%3Ahttp%3A%2F%2Fgooglemock\.googlecode\.com).  The source file `foo.h.pump` generates `foo.h`.
+You can find real-world applications of Pump in [Google Test](https://github.com/google/googletest/tree/master/googletest) and [Google Mock](https://github.com/google/googletest/tree/master/googlemock). The source file `foo.h.pump` generates `foo.h`.
 
 ## Tips ##
 

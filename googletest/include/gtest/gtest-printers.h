@@ -137,7 +137,8 @@ class TypeWithoutFormatter {
  public:
   // This default version is called when kTypeKind is kOtherType.
   static void PrintValue(const T& value, ::std::ostream* os) {
-    PrintBytesInObjectTo(reinterpret_cast<const unsigned char*>(&value),
+    PrintBytesInObjectTo(static_cast<const unsigned char*>(
+                             reinterpret_cast<const void *>(&value)),
                          sizeof(value), os);
   }
 };
@@ -151,10 +152,10 @@ template <typename T>
 class TypeWithoutFormatter<T, kProtobuf> {
  public:
   static void PrintValue(const T& value, ::std::ostream* os) {
-    const ::testing::internal::string short_str = value.ShortDebugString();
-    const ::testing::internal::string pretty_str =
-        short_str.length() <= kProtobufOneLinerMaxLength ?
-        short_str : ("\n" + value.DebugString());
+    std::string pretty_str = value.ShortDebugString();
+    if (pretty_str.length() > kProtobufOneLinerMaxLength) {
+      pretty_str = "\n" + value.DebugString();
+    }
     *os << ("<" + pretty_str + ">");
   }
 };
@@ -364,11 +365,18 @@ class UniversalPrinter;
 template <typename T>
 void UniversalPrint(const T& value, ::std::ostream* os);
 
+enum DefaultPrinterType {
+  kPrintContainer,
+  kPrintPointer,
+  kPrintFunctionPointer,
+  kPrintOther,
+};
+template <DefaultPrinterType type> struct WrapPrinterType {};
+
 // Used to print an STL-style container when the user doesn't define
 // a PrintTo() for it.
 template <typename C>
-void DefaultPrintTo(IsContainer /* dummy */,
-                    false_type /* is not a pointer */,
+void DefaultPrintTo(WrapPrinterType<kPrintContainer> /* dummy */,
                     const C& container, ::std::ostream* os) {
   const size_t kMaxCount = 32;  // The maximum number of elements to print.
   *os << '{';
@@ -401,40 +409,38 @@ void DefaultPrintTo(IsContainer /* dummy */,
 // implementation-defined.  Therefore they will be printed as raw
 // bytes.)
 template <typename T>
-void DefaultPrintTo(IsNotContainer /* dummy */,
-                    true_type /* is a pointer */,
+void DefaultPrintTo(WrapPrinterType<kPrintPointer> /* dummy */,
                     T* p, ::std::ostream* os) {
   if (p == NULL) {
     *os << "NULL";
   } else {
-    // C++ doesn't allow casting from a function pointer to any object
-    // pointer.
-    //
-    // IsTrue() silences warnings: "Condition is always true",
-    // "unreachable code".
-    if (IsTrue(ImplicitlyConvertible<T*, const void*>::value)) {
-      // T is not a function type.  We just call << to print p,
-      // relying on ADL to pick up user-defined << for their pointer
-      // types, if any.
-      *os << p;
-    } else {
-      // T is a function type, so '*os << p' doesn't do what we want
-      // (it just prints p as bool).  We want to print p as a const
-      // void*.  However, we cannot cast it to const void* directly,
-      // even using reinterpret_cast, as earlier versions of gcc
-      // (e.g. 3.4.5) cannot compile the cast when p is a function
-      // pointer.  Casting to UInt64 first solves the problem.
-      *os << reinterpret_cast<const void*>(
-          reinterpret_cast<internal::UInt64>(p));
-    }
+    // T is not a function type.  We just call << to print p,
+    // relying on ADL to pick up user-defined << for their pointer
+    // types, if any.
+    *os << p;
+  }
+}
+template <typename T>
+void DefaultPrintTo(WrapPrinterType<kPrintFunctionPointer> /* dummy */,
+                    T* p, ::std::ostream* os) {
+  if (p == NULL) {
+    *os << "NULL";
+  } else {
+    // T is a function type, so '*os << p' doesn't do what we want
+    // (it just prints p as bool).  We want to print p as a const
+    // void*.  However, we cannot cast it to const void* directly,
+    // even using reinterpret_cast, as earlier versions of gcc
+    // (e.g. 3.4.5) cannot compile the cast when p is a function
+    // pointer.  Casting to UInt64 first solves the problem.
+    *os << reinterpret_cast<const void*>(
+        reinterpret_cast<internal::UInt64>(p));
   }
 }
 
 // Used to print a non-container, non-pointer value when the user
 // doesn't define PrintTo() for it.
 template <typename T>
-void DefaultPrintTo(IsNotContainer /* dummy */,
-                    false_type /* is not a pointer */,
+void DefaultPrintTo(WrapPrinterType<kPrintOther> /* dummy */,
                     const T& value, ::std::ostream* os) {
   ::testing_internal::DefaultPrintNonContainerTo(value, os);
 }
@@ -452,29 +458,40 @@ void DefaultPrintTo(IsNotContainer /* dummy */,
 // wants).
 template <typename T>
 void PrintTo(const T& value, ::std::ostream* os) {
-  // DefaultPrintTo() is overloaded.  The type of its first two
-  // arguments determine which version will be picked.  If T is an
-  // STL-style container, the version for container will be called; if
-  // T is a pointer, the pointer version will be called; otherwise the
-  // generic version will be called.
+  // DefaultPrintTo() is overloaded.  The type of its first argument
+  // determines which version will be picked.
   //
-  // Note that we check for container types here, prior to we check
-  // for protocol message types in our operator<<.  The rationale is:
+  // Note that we check for recursive and other container types here, prior 
+  // to we check for protocol message types in our operator<<.  The rationale is:
   //
   // For protocol messages, we want to give people a chance to
   // override Google Mock's format by defining a PrintTo() or
   // operator<<.  For STL containers, other formats can be
   // incompatible with Google Mock's format for the container
   // elements; therefore we check for container types here to ensure
-  // that our format is used.
+  // that our format is used. To prevent an infinite runtime recursion
+  // during the output of recursive container types, we check first for
+  // those.
   //
-  // The second argument of DefaultPrintTo() is needed to bypass a bug
-  // in Symbian's C++ compiler that prevents it from picking the right
-  // overload between:
-  //
-  //   PrintTo(const T& x, ...);
-  //   PrintTo(T* x, ...);
-  DefaultPrintTo(IsContainerTest<T>(0), is_pointer<T>(), value, os);
+  // Note that MSVC and clang-cl do allow an implicit conversion from
+  // pointer-to-function to pointer-to-object, but clang-cl warns on it.
+  // So don't use ImplicitlyConvertible if it can be helped since it will
+  // cause this warning, and use a separate overload of DefaultPrintTo for
+  // function pointers so that the `*os << p` in the object pointer overload
+  // doesn't cause that warning either.
+  DefaultPrintTo(
+      WrapPrinterType<
+          (sizeof(IsContainerTest<T>(0)) == sizeof(IsContainer)) && !IsRecursiveContainer<T>::value
+            ? kPrintContainer : !is_pointer<T>::value
+              ? kPrintOther
+#if GTEST_LANG_CXX11
+                : std::is_function<typename std::remove_pointer<T>::type>::value
+#else
+                : !internal::ImplicitlyConvertible<T, const void*>::value
+#endif
+                    ? kPrintFunctionPointer
+                    : kPrintPointer>(),
+      value, os);
 }
 
 // The following list of PrintTo() overloads tells
@@ -805,7 +822,7 @@ class UniversalTersePrinter<const char*> {
     if (str == NULL) {
       *os << "NULL";
     } else {
-      UniversalPrint(string(str), os);
+      UniversalPrint(std::string(str), os);
     }
   }
 };

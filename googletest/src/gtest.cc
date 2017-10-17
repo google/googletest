@@ -137,7 +137,7 @@
 // implementation.  It must come before gtest-internal-inl.h is
 // included, or there will be a compiler error.  This trick is to
 // prevent a user from accidentally including gtest-internal-inl.h in
-// his code.
+// their code.
 #define GTEST_IMPLEMENTATION_ 1
 #include "src/gtest-internal-inl.h"
 #undef GTEST_IMPLEMENTATION_
@@ -310,7 +310,8 @@ namespace internal {
 // than kMaxRange.
 UInt32 Random::Generate(UInt32 range) {
   // These constants are the same as are used in glibc's rand(3).
-  state_ = (1103515245U*state_ + 12345U) % kMaxRange;
+  // Use wider types than necessary to prevent unsigned overflow diagnostics.
+  state_ = static_cast<UInt32>(1103515245ULL*state_ + 12345U) % kMaxRange;
 
   GTEST_CHECK_(range > 0)
       << "Cannot generate a number in the range [0, 0).";
@@ -635,7 +636,7 @@ AssertionResult HasOneFailure(const char* /* results_expr */,
                               const char* /* substr_expr */,
                               const TestPartResultArray& results,
                               TestPartResult::Type type,
-                              const string& substr) {
+                              const std::string& substr) {
   const std::string expected(type == TestPartResult::kFatalFailure ?
                         "1 fatal failure" :
                         "1 non-fatal failure");
@@ -669,13 +670,10 @@ AssertionResult HasOneFailure(const char* /* results_expr */,
 // The constructor of SingleFailureChecker remembers where to look up
 // test part results, what type of failure we expect, and what
 // substring the failure message should contain.
-SingleFailureChecker:: SingleFailureChecker(
-    const TestPartResultArray* results,
-    TestPartResult::Type type,
-    const string& substr)
-    : results_(results),
-      type_(type),
-      substr_(substr) {}
+SingleFailureChecker::SingleFailureChecker(const TestPartResultArray* results,
+                                           TestPartResult::Type type,
+                                           const std::string& substr)
+    : results_(results), type_(type), substr_(substr) {}
 
 // The destructor of SingleFailureChecker verifies that the given
 // TestPartResultArray contains exactly one failure that has the given
@@ -1177,7 +1175,7 @@ class Hunk {
   // Print a unified diff header for one hunk.
   // The format is
   //   "@@ -<left_start>,<left_length> +<right_start>,<right_length> @@"
-  // where the left/right parts are ommitted if unnecessary.
+  // where the left/right parts are omitted if unnecessary.
   void PrintHeader(std::ostream* ss) const {
     *ss << "@@ ";
     if (removes_) {
@@ -1321,13 +1319,14 @@ AssertionResult EqFailure(const char* lhs_expression,
                           const std::string& rhs_value,
                           bool ignoring_case) {
   Message msg;
-  msg << "      Expected: " << lhs_expression;
+  msg << "Expected equality of these values:";
+  msg << "\n  " << lhs_expression;
   if (lhs_value != lhs_expression) {
-    msg << "\n      Which is: " << lhs_value;
+    msg << "\n    Which is: " << lhs_value;
   }
-  msg << "\nTo be equal to: " << rhs_expression;
+  msg << "\n  " << rhs_expression;
   if (rhs_value != rhs_expression) {
-    msg << "\n      Which is: " << rhs_value;
+    msg << "\n    Which is: " << rhs_value;
   }
 
   if (ignoring_case) {
@@ -1790,7 +1789,7 @@ std::string CodePointToUtf8(UInt32 code_point) {
   return str;
 }
 
-// The following two functions only make sense if the the system
+// The following two functions only make sense if the system
 // uses UTF-16 for wide string encoding. All supported systems
 // with 16 bit wchar_t (Windows, Cygwin, Symbian OS) do use UTF-16.
 
@@ -2580,10 +2579,10 @@ void ReportInvalidTestCaseType(const char* test_case_name,
       << "probably rename one of the classes to put the tests into different\n"
       << "test cases.";
 
-  fprintf(stderr, "%s %s",
-          FormatFileLocation(code_location.file.c_str(),
-                             code_location.line).c_str(),
-          errors.GetString().c_str());
+  GTEST_LOG_(ERROR) 
+       << FormatFileLocation(code_location.file.c_str(),
+                             code_location.line)
+       << " " << errors.GetString();
 }
 #endif  // GTEST_HAS_PARAM_TEST
 
@@ -2909,6 +2908,33 @@ WORD GetColorAttribute(GTestColor color) {
   }
 }
 
+int GetBitOffset(WORD color_mask) {
+  if (color_mask == 0) return 0;
+
+  int bitOffset = 0;
+  while((color_mask & 1) == 0) {
+    color_mask >>= 1;
+    ++bitOffset;
+  }
+  return bitOffset;
+}
+
+WORD GetNewColor(GTestColor color, WORD old_color_attrs) {
+  // Let's reuse the BG
+  static const WORD background_mask = BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_INTENSITY;
+  static const WORD foreground_mask = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
+  const WORD existing_bg = old_color_attrs & background_mask;
+
+  WORD new_color = GetColorAttribute(color) | existing_bg | FOREGROUND_INTENSITY;
+  static const int bg_bitOffset = GetBitOffset(background_mask);
+  static const int fg_bitOffset = GetBitOffset(foreground_mask);
+
+  if (((new_color & background_mask) >> bg_bitOffset) == ((new_color & foreground_mask) >> fg_bitOffset)) {
+    new_color ^= FOREGROUND_INTENSITY; //invert intensity
+  }
+  return new_color;
+}
+	
 #else
 
 // Returns the ANSI color code for the given color.  COLOR_DEFAULT is
@@ -2965,6 +2991,7 @@ bool ShouldUseColor(bool stdout_is_tty) {
 // cannot simply emit special characters and have the terminal change colors.
 // This routine must actually emit the characters rather than return a string
 // that would be colored when printed, as can be done on Linux.
+GTEST_ATTRIBUTE_PRINTF_(2, 3)
 void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   va_list args;
   va_start(args, fmt);
@@ -2993,13 +3020,14 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   CONSOLE_SCREEN_BUFFER_INFO buffer_info;
   GetConsoleScreenBufferInfo(stdout_handle, &buffer_info);
   const WORD old_color_attrs = buffer_info.wAttributes;
-
+  const WORD new_color = GetNewColor(color, old_color_attrs);
+  
   // We need to flush the stream buffers into the console before each
   // SetConsoleTextAttribute call lest it affect the text that is already
   // printed but has not yet reached the console.
   fflush(stdout);
-  SetConsoleTextAttribute(stdout_handle,
-                          GetColorAttribute(color) | FOREGROUND_INTENSITY);
+  SetConsoleTextAttribute(stdout_handle, new_color);
+
   vprintf(fmt, args);
 
   fflush(stdout);
@@ -3434,9 +3462,7 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
 XmlUnitTestResultPrinter::XmlUnitTestResultPrinter(const char* output_file)
     : output_file_(output_file) {
   if (output_file_.c_str() == NULL || output_file_.empty()) {
-    fprintf(stderr, "XML output file may not be null\n");
-    fflush(stderr);
-    exit(EXIT_FAILURE);
+    GTEST_LOG_(FATAL) << "XML output file may not be null";
   }
 }
 
@@ -3461,11 +3487,8 @@ void XmlUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
     //   3. To interpret the meaning of errno in a thread-safe way,
     //      we need the strerror_r() function, which is not available on
     //      Windows.
-    fprintf(stderr,
-            "Unable to open file \"%s\"\n",
-            output_file_.c_str());
-    fflush(stderr);
-    exit(EXIT_FAILURE);
+    GTEST_LOG_(FATAL) << "Unable to open file \"" 
+                      << output_file_ << "\"";
   }
   std::stringstream stream;
   PrintXmlUnitTest(&stream, unit_test);
@@ -3665,13 +3688,14 @@ void XmlUnitTestResultPrinter::OutputXmlTestInfo(::std::ostream* stream,
       if (++failures == 1) {
         *stream << ">\n";
       }
-      const string location = internal::FormatCompilerIndependentFileLocation(
-          part.file_name(), part.line_number());
-      const string summary = location + "\n" + part.summary();
+      const std::string location =
+          internal::FormatCompilerIndependentFileLocation(part.file_name(),
+                                                          part.line_number());
+      const std::string summary = location + "\n" + part.summary();
       *stream << "      <failure message=\""
               << EscapeXmlAttribute(summary.c_str())
               << "\" type=\"\">";
-      const string detail = location + "\n" + part.message();
+      const std::string detail = location + "\n" + part.message();
       OutputXmlCDataSection(stream, RemoveInvalidXmlCharacters(detail).c_str());
       *stream << "</failure>\n";
     }
@@ -3770,8 +3794,8 @@ std::string XmlUnitTestResultPrinter::TestPropertiesAsXmlAttributes(
 // example, replaces "=" with "%3D".  This algorithm is O(strlen(str))
 // in both time and space -- important as the input str may contain an
 // arbitrarily long test failure message and stack trace.
-string StreamingListener::UrlEncode(const char* str) {
-  string result;
+std::string StreamingListener::UrlEncode(const char* str) {
+  std::string result;
   result.reserve(strlen(str) + 1);
   for (char ch = *str; ch != '\0'; ch = *++str) {
     switch (ch) {
@@ -3859,8 +3883,8 @@ ScopedTrace::~ScopedTrace()
 const char* const OsStackTraceGetterInterface::kElidedFramesMarker =
     "... " GTEST_NAME_ " internal frames ...";
 
-string OsStackTraceGetter::CurrentStackTrace(int /*max_depth*/,
-                                             int /*skip_count*/) {
+std::string OsStackTraceGetter::CurrentStackTrace(int /*max_depth*/,
+                                                  int /*skip_count*/) {
   return "";
 }
 
@@ -4423,9 +4447,9 @@ void UnitTestImpl::ConfigureXmlOutput() {
     listeners()->SetDefaultXmlGenerator(new XmlUnitTestResultPrinter(
         UnitTestOptions::GetAbsolutePathToOutputFile().c_str()));
   } else if (output_format != "") {
-    printf("WARNING: unrecognized output format \"%s\" ignored.\n",
-           output_format.c_str());
-    fflush(stdout);
+    GTEST_LOG_(WARNING) << "WARNING: unrecognized output format \"" 
+                        << output_format 
+                        << "\" ignored.";
   }
 }
 
@@ -4440,9 +4464,9 @@ void UnitTestImpl::ConfigureStreamingOutput() {
       listeners()->Append(new StreamingListener(target.substr(0, pos),
                                                 target.substr(pos+1)));
     } else {
-      printf("WARNING: unrecognized streaming target \"%s\" ignored.\n",
-             target.c_str());
-      fflush(stdout);
+      GTEST_LOG_(WARNING) << "unrecognized streaming target \"" 
+                          << target 
+                          << "\" ignored.";
     }
   }
 }
@@ -4571,9 +4595,9 @@ static void TearDownEnvironment(Environment* env) { env->TearDown(); }
 bool UnitTestImpl::RunAllTests() {
   // Makes sure InitGoogleTest() was called.
   if (!GTestIsInitialized()) {
-    printf("%s",
-           "\nThis test program did NOT call ::testing::InitGoogleTest "
-           "before calling RUN_ALL_TESTS().  Please fix it.\n");
+    GTEST_LOG_(ERROR) << 
+      "\nThis test program did NOT call ::testing::InitGoogleTest "
+      "before calling RUN_ALL_TESTS().  Please fix it.";
     return false;
   }
 
@@ -4749,7 +4773,7 @@ bool ShouldShard(const char* total_shards_env,
       << "Invalid environment variables: you have "
       << kTestShardIndex << " = " << shard_index
       << ", but have left " << kTestTotalShards << " unset.\n";
-    ColoredPrintf(COLOR_RED, msg.GetString().c_str());
+    ColoredPrintf(COLOR_RED, "%s", msg.GetString().c_str());
     fflush(stdout);
     exit(EXIT_FAILURE);
   } else if (total_shards != -1 && shard_index == -1) {
@@ -4757,7 +4781,7 @@ bool ShouldShard(const char* total_shards_env,
       << "Invalid environment variables: you have "
       << kTestTotalShards << " = " << total_shards
       << ", but have left " << kTestShardIndex << " unset.\n";
-    ColoredPrintf(COLOR_RED, msg.GetString().c_str());
+    ColoredPrintf(COLOR_RED, "%s", msg.GetString().c_str());
     fflush(stdout);
     exit(EXIT_FAILURE);
   } else if (shard_index < 0 || shard_index >= total_shards) {
@@ -4766,7 +4790,7 @@ bool ShouldShard(const char* total_shards_env,
       << kTestShardIndex << " < " << kTestTotalShards
       << ", but you have " << kTestShardIndex << "=" << shard_index
       << ", " << kTestTotalShards << "=" << total_shards << ".\n";
-    ColoredPrintf(COLOR_RED, msg.GetString().c_str());
+    ColoredPrintf(COLOR_RED, "%s", msg.GetString().c_str());
     fflush(stdout);
     exit(EXIT_FAILURE);
   }
@@ -4804,7 +4828,7 @@ bool ShouldRunTestOnShard(int total_shards, int shard_index, int test_id) {
 // each TestCase and TestInfo object.
 // If shard_tests == true, further filters tests based on sharding
 // variables in the environment - see
-// http://code.google.com/p/googletest/wiki/GoogleTestAdvancedGuide.
+// https://github.com/google/googletest/blob/master/googletest/docs/AdvancedGuide.md .
 // Returns the number of tests that should run.
 int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
   const Int32 total_shards = shard_tests == HONOR_SHARDING_PROTOCOL ?
@@ -5204,12 +5228,12 @@ static const char kColorEncodedHelpMessage[] =
 "Test Output:\n"
 "  @G--" GTEST_FLAG_PREFIX_ "color=@Y(@Gyes@Y|@Gno@Y|@Gauto@Y)@D\n"
 "      Enable/disable colored output. The default is @Gauto@D.\n"
-"  -@G-" GTEST_FLAG_PREFIX_ "print_time=0@D\n"
+"  @G--" GTEST_FLAG_PREFIX_ "print_time=0@D\n"
 "      Don't print the elapsed time of each test.\n"
 "  @G--" GTEST_FLAG_PREFIX_ "output=xml@Y[@G:@YDIRECTORY_PATH@G"
     GTEST_PATH_SEP_ "@Y|@G:@YFILE_PATH]@D\n"
 "      Generate an XML report in the given directory or with the given file\n"
-"      name. @YFILE_PATH@D defaults to @Gtest_details.xml@D.\n"
+"      name. @YFILE_PATH@D defaults to @Gtest_detail.xml@D.\n"
 #if GTEST_CAN_STREAM_RESULTS_
 "  @G--" GTEST_FLAG_PREFIX_ "stream_result_to=@YHOST@G:@YPORT@D\n"
 "      Stream test results to the given server.\n"
@@ -5273,11 +5297,9 @@ bool ParseGoogleTestFlag(const char* const arg) {
 void LoadFlagsFromFile(const std::string& path) {
   FILE* flagfile = posix::FOpen(path.c_str(), "r");
   if (!flagfile) {
-    fprintf(stderr,
-            "Unable to open file \"%s\"\n",
-            GTEST_FLAG(flagfile).c_str());
-    fflush(stderr);
-    exit(EXIT_FAILURE);
+    GTEST_LOG_(FATAL) << "Unable to open file \"" 
+                      << GTEST_FLAG(flagfile) 
+                      << "\"";
   }
   std::string contents(ReadEntireFile(flagfile));
   posix::FClose(flagfile);
@@ -5406,6 +5428,9 @@ void InitGoogleTest(int* argc, wchar_t** argv) {
 }
 
 std::string TempDir() {
+#if defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_)
+    return GTEST_CUSTOM_TEMPDIR_FUNCTION_();
+#endif
 #if GTEST_OS_WINDOWS_MOBILE
   return "\\temp\\";
 #elif GTEST_OS_WINDOWS
@@ -5422,6 +5447,5 @@ std::string TempDir() {
   return "/tmp/";
 #endif  // GTEST_OS_WINDOWS_MOBILE
 }
-
 
 }  // namespace testing
