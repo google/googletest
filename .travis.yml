@@ -31,8 +31,6 @@ addons:
 os:
   - linux
   - osx
-    before_install:
-    - brew update
 language: cpp
 cache: ccache
 before_cache:
