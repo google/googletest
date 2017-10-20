@@ -183,6 +183,17 @@ technique is discussed in more detail in
 which also contains a link to a fully generalized implementation
 of the technique.
 
+##### Visual Studio Dynamic vs Static Runtimes #####
+
+By default, new Visual Studio projects link the C runtimes dynamically
+but Google Test links them statically.
+This will generate an error that looks something like the following:
+    gtest.lib(gtest-all.obj) : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MTd_StaticDebug' doesn't match value 'MDd_DynamicDebug' in main.obj
+
+Google Test already has a CMake option for this: `gtest_force_shared_crt`
+
+Enabling this option will make gtest link the runtimes dynamically too,
+and match the project in which it is included.
 
 ### Legacy Build Scripts ###
 
