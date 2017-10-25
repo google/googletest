@@ -353,10 +353,10 @@ UntypedFunctionMockerBase::UntypedInvokeWith(const void* const untyped_args)
     // the behavior of ReportUninterestingCall().
     const bool need_to_report_uninteresting_call =
         // If the user allows this uninteresting call, we print it
-        // only when he wants informational messages.
+        // only when they want informational messages.
         reaction == kAllow ? LogIsVisible(kInfo) :
         // If the user wants this to be a warning, we print it only
-        // when he wants to see warnings.
+        // when they want to see warnings.
         reaction == kWarn ? LogIsVisible(kWarning) :
         // Otherwise, the user wants this to be an error, and we
         // should always print detailed information in the error.
