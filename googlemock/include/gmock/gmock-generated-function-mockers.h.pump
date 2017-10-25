@@ -158,55 +158,37 @@ $var matcher_as = [[$for j, \
 
 
 ]]
+
+$$ For each function postfix, create a version of each MOCK_*_METHOD: regular, CONST
+$range po 0..1
+$for po [[
+
 $for i [[
-#define MOCK_METHOD$i(m, ...) GMOCK_METHOD$i[[]]_(, , , m, __VA_ARGS__)
+#define MOCK_[[$if po == 1 [[CONST_]]]]METHOD$i(m, ...) \
+    GMOCK_METHOD$i[[]]_(, [[$if po == 1 [[const]]]], , m, __VA_ARGS__)
 
 ]]
 
 
 $for i [[
-#define MOCK_CONST_METHOD$i(m, ...) GMOCK_METHOD$i[[]]_(, const, , m, __VA_ARGS__)
+#define MOCK_[[$if po == 1 [[CONST_]]]]METHOD$i[[]]_T(m, ...) \
+    GMOCK_METHOD$i[[]]_(typename, [[$if po == 1 [[const]]]], , m, __VA_ARGS__)
 
 ]]
 
 
 $for i [[
-#define MOCK_METHOD$i[[]]_T(m, ...) GMOCK_METHOD$i[[]]_(typename, , , m, __VA_ARGS__)
+#define MOCK_[[$if po == 1 [[CONST_]]]]METHOD$i[[]]_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD$i[[]]_(, [[$if po == 1 [[const]]]], ct, m, __VA_ARGS__)
 
 ]]
 
 
 $for i [[
-#define MOCK_CONST_METHOD$i[[]]_T(m, ...) \
-    GMOCK_METHOD$i[[]]_(typename, const, , m, __VA_ARGS__)
+#define MOCK_[[$if po == 1 [[CONST_]]]]METHOD$i[[]]_T_WITH_CALLTYPE(ct, m, ...) \
+    GMOCK_METHOD$i[[]]_(typename, [[$if po == 1 [[const]]]], ct, m, __VA_ARGS__)
 
 ]]
-
-
-$for i [[
-#define MOCK_METHOD$i[[]]_WITH_CALLTYPE(ct, m, ...) \
-    GMOCK_METHOD$i[[]]_(, , ct, m, __VA_ARGS__)
-
-]]
-
-
-$for i [[
-#define MOCK_CONST_METHOD$i[[]]_WITH_CALLTYPE(ct, m, ...) \
-    GMOCK_METHOD$i[[]]_(, const, ct, m, __VA_ARGS__)
-
-]]
-
-
-$for i [[
-#define MOCK_METHOD$i[[]]_T_WITH_CALLTYPE(ct, m, ...) \
-    GMOCK_METHOD$i[[]]_(typename, , ct, m, __VA_ARGS__)
-
-]]
-
-
-$for i [[
-#define MOCK_CONST_METHOD$i[[]]_T_WITH_CALLTYPE(ct, m, ...) \
-    GMOCK_METHOD$i[[]]_(typename, const, ct, m, __VA_ARGS__)
 
 ]]
 
