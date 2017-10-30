@@ -30,6 +30,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """Converts compiler's errors in code using Google Mock to plain English."""
+from __future__ import print_function
 
 __author__ = 'wan@google.com (Zhanyong Wan)'
 
@@ -618,7 +619,7 @@ If you send your source code and the compiler's error messages to
 win-win for us!""" % (msg, _EMAIL))
   else:
     print ('------------------------------------------------------------')
-    print ('Your code appears to have the following',)
+    print(('Your code appears to have the following',))
     if count > 1:
       print ('%s diseases:' % (count,))
     else:
