@@ -531,8 +531,8 @@ class ThreadLocalRegistryImpl {
   // Returns map of thread local instances.
   static ThreadIdToThreadLocals* GetThreadLocalsMapLocked() {
     mutex_.AssertHeld();
-    static ThreadIdToThreadLocals* map = new ThreadIdToThreadLocals;
-    return map;
+    static ThreadIdToThreadLocals map;
+    return &map;
   }
 
   // Protects access to GetThreadLocalsMapLocked() and its return value.
