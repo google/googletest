@@ -2454,7 +2454,11 @@ Result HandleExceptionsInMethodIfSupported(
     return HandleSehExceptionsInMethodIfSupported(object, method, location);
 #endif  // GTEST_HAS_EXCEPTIONS
   } else {
-    return (object->*method)();
+    if (object != NULL) {
+        return (object->*method)();
+    } else {
+        return static_cast<Result>(0);
+    }
   }
 }
 
@@ -4177,7 +4181,10 @@ void UnitTest::AddTestPartResult(
       // from removing. We use this rather than abort() or __builtin_trap() for
       // portability: Symbian doesn't implement abort() well, and some debuggers
       // don't correctly trap abort().
+
+#ifndef __clang_analyzer__
       *static_cast<volatile int*>(NULL) = 1;
+#endif
 #endif  // GTEST_OS_WINDOWS
     } else if (GTEST_FLAG(throw_on_failure)) {
 #if GTEST_HAS_EXCEPTIONS
@@ -5024,9 +5031,11 @@ bool AlwaysTrue() {
 // and returns false.  None of pstr, *pstr, and prefix can be NULL.
 bool SkipPrefix(const char* prefix, const char** pstr) {
   const size_t prefix_len = strlen(prefix);
-  if (strncmp(*pstr, prefix, prefix_len) == 0) {
-    *pstr += prefix_len;
-    return true;
+  if (*pstr != NULL) {
+      if (strncmp(*pstr, prefix, prefix_len) == 0) {
+        *pstr += prefix_len;
+        return true;
+      }
   }
   return false;
 }
