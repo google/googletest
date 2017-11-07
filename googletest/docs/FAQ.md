@@ -494,7 +494,7 @@ EXPECT_PRED1(IsPositive, 5);
 However, this will work:
 
 ``` cpp
-EXPECT_PRED1(*static_cast<bool (*)(int)>*(IsPositive), 5);
+EXPECT_PRED1(static_cast<bool (*)(int)>(IsPositive), 5);
 ```
 
 (The stuff inside the angled brackets for the `static_cast` operator is the
@@ -512,14 +512,14 @@ bool IsNegative(T x) {
 you can use it in a predicate assertion like this:
 
 ``` cpp
-ASSERT_PRED1(IsNegative*<int>*, -5);
+ASSERT_PRED1(IsNegative<int>, -5);
 ```
 
 Things are more interesting if your template has more than one parameters. The
 following won't compile:
 
 ``` cpp
-ASSERT_PRED2(*GreaterThan<int, int>*, 5, 0);
+ASSERT_PRED2(GreaterThan<int, int>, 5, 0);
 ```
 
 
@@ -528,7 +528,7 @@ which is one more than expected. The workaround is to wrap the predicate
 function in parentheses:
 
 ``` cpp
-ASSERT_PRED2(*(GreaterThan<int, int>)*, 5, 0);
+ASSERT_PRED2((GreaterThan<int, int>), 5, 0);
 ```
 
 
