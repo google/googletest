@@ -1096,7 +1096,7 @@ class NativeArray {
  private:
   enum {
     kCheckTypeIsNotConstOrAReference = StaticAssertTypeEqHelper<
-        Element, GTEST_REMOVE_REFERENCE_AND_CONST_(Element)>::value,
+        Element, GTEST_REMOVE_REFERENCE_AND_CONST_(Element)>::value
   };
 
   // Initializes this object with a copy of the input.
