@@ -1843,7 +1843,13 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 
 // Define this macro to 1 to omit the definition of FAIL(), which is a
 // generic name and clashes with some other libraries.
-#if !GTEST_DONT_DEFINE_FAIL
+#if defined(GTEST_DONT_DEFINE_FAIL)
+# if GTEST_DONT_DEFINE_FAIL == 1
+   // no-op
+# else
+#  error "Macro GTEST_DONT_DEFINE_FAIL set to unknown value. Use 1 or keep it undefined."
+# endif
+#else
 # define FAIL() GTEST_FAIL()
 #endif
 
@@ -1852,7 +1858,13 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 
 // Define this macro to 1 to omit the definition of SUCCEED(), which
 // is a generic name and clashes with some other libraries.
-#if !GTEST_DONT_DEFINE_SUCCEED
+#if defined(GTEST_DONT_DEFINE_SUCCEED)
+# if GTEST_DONT_DEFINE_SUCCEED == 1
+   // no-op
+# else
+#  error "Macro GTEST_DONT_DEFINE_SUCCEED set to unknown value. Use 1 or keep it undefined."
+# endif
+#else
 # define SUCCEED() GTEST_SUCCEED()
 #endif
 
@@ -1973,27 +1985,63 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 // Define macro GTEST_DONT_DEFINE_ASSERT_XY to 1 to omit the definition of
 // ASSERT_XY(), which clashes with some users' own code.
 
-#if !GTEST_DONT_DEFINE_ASSERT_EQ
+#if defined(GTEST_DONT_DEFINE_ASSERT_EQ)
+# if GTEST_DONT_DEFINE_ASSERT_EQ == 1
+   // no-op
+# else
+#  error "Macro GTEST_DONT_DEFINE_ASSERT_EQ set to unknown value. Use 1 or keep it undefined."
+# endif
+#else
 # define ASSERT_EQ(val1, val2) GTEST_ASSERT_EQ(val1, val2)
 #endif
 
-#if !GTEST_DONT_DEFINE_ASSERT_NE
+#if defined(GTEST_DONT_DEFINE_ASSERT_NE)
+# if GTEST_DONT_DEFINE_ASSERT_NE == 1
+   // no-op
+# else
+#  error "Macro GTEST_DONT_DEFINE_ASSERT_NE set to unknown value. Use 1 or keep it undefined."
+# endif
+#else
 # define ASSERT_NE(val1, val2) GTEST_ASSERT_NE(val1, val2)
 #endif
 
-#if !GTEST_DONT_DEFINE_ASSERT_LE
+#if defined(GTEST_DONT_DEFINE_ASSERT_LE)
+# if GTEST_DONT_DEFINE_ASSERT_LE == 1
+   // no-op
+# else
+#  error "Macro GTEST_DONT_DEFINE_ASSERT_LE set to unknown value. Use 1 or keep it undefined."
+# endif
+#else
 # define ASSERT_LE(val1, val2) GTEST_ASSERT_LE(val1, val2)
 #endif
 
-#if !GTEST_DONT_DEFINE_ASSERT_LT
+#if defined(GTEST_DONT_DEFINE_ASSERT_LT)
+# if GTEST_DONT_DEFINE_ASSERT_LT == 1
+   // no-op
+# else
+#  error "Macro GTEST_DONT_DEFINE_ASSERT_LT set to unknown value. Use 1 or keep it undefined."
+# endif
+#else
 # define ASSERT_LT(val1, val2) GTEST_ASSERT_LT(val1, val2)
 #endif
 
-#if !GTEST_DONT_DEFINE_ASSERT_GE
+#if defined(GTEST_DONT_DEFINE_ASSERT_GE)
+# if GTEST_DONT_DEFINE_ASSERT_GE == 1
+   // no-op
+# else
+#  error "Macro GTEST_DONT_DEFINE_ASSERT_GE set to unknown value. Use 1 or keep it undefined."
+# endif
+#else
 # define ASSERT_GE(val1, val2) GTEST_ASSERT_GE(val1, val2)
 #endif
 
-#if !GTEST_DONT_DEFINE_ASSERT_GT
+#if defined(GTEST_DONT_DEFINE_ASSERT_GT)
+# if GTEST_DONT_DEFINE_ASSERT_GT == 1
+   // no-op
+# else
+#  error "Macro GTEST_DONT_DEFINE_ASSERT_GT set to unknown value. Use 1 or keep it undefined."
+# endif
+#else
 # define ASSERT_GT(val1, val2) GTEST_ASSERT_GT(val1, val2)
 #endif
 
@@ -2260,7 +2308,13 @@ bool StaticAssertTypeEq() {
 
 // Define this macro to 1 to omit the definition of TEST(), which
 // is a generic name and clashes with some other libraries.
-#if !GTEST_DONT_DEFINE_TEST
+#if defined(GTEST_DONT_DEFINE_TEST)
+# if GTEST_DONT_DEFINE_TEST == 1
+   // no-op
+# else
+#  error "Macro GTEST_DONT_DEFINE_TEST set to unknown value. Use 1 or keep it undefined."
+# endif
+#else
 # define TEST(test_case_name, test_name) GTEST_TEST(test_case_name, test_name)
 #endif
 
