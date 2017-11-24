@@ -1507,9 +1507,10 @@ Derived* CheckedDowncastToActualType(Base* base) {
   GTEST_CHECK_(typeid(*base) == typeid(Derived));
 #endif
 
-#if GTEST_HAS_DOWNCAST_
-  return ::down_cast<Derived*>(base);
-#elif GTEST_HAS_RTTI
+#if defined(GTEST_HAS_DOWNCAST_)
+#error "Undocumented internal macro GTEST_HAS_DOWNCAST_ is set."
+#endif
+#if GTEST_HAS_RTTI
   return dynamic_cast<Derived*>(base);  // NOLINT
 #else
   return static_cast<Derived*>(base);  // Poor man's downcast.
