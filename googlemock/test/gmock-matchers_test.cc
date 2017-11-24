@@ -58,6 +58,11 @@
 # include <forward_list>  // NOLINT
 #endif
 
+// Disable MSVC2015 warning for std::pair: "decorated name length exceeded, name was truncated".
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+# pragma warning(disable:4503)
+#endif
+
 namespace testing {
 
 namespace internal {
@@ -3588,10 +3593,15 @@ class AClass {
   // A getter that returns a reference to const.
   const std::string& s() const { return s_; }
 
+#if GTEST_LANG_CXX11
+  const std::string& s_ref() const & { return s_; }
+#endif
+
   void set_s(const std::string& new_s) { s_ = new_s; }
 
   // A getter that returns a reference to non-const.
   double& x() const { return x_; }
+
  private:
   int n_;
   std::string s_;
@@ -3634,6 +3644,21 @@ TEST(PropertyTest, WorksForReferenceToConstProperty) {
   a.set_s("hole");
   EXPECT_FALSE(m.Matches(a));
 }
+
+#if GTEST_LANG_CXX11
+// Tests that Property(&Foo::property, ...) works when property() is
+// ref-qualified.
+TEST(PropertyTest, WorksForRefQualifiedProperty) {
+  Matcher<const AClass&> m = Property(&AClass::s_ref, StartsWith("hi"));
+
+  AClass a;
+  a.set_s("hill");
+  EXPECT_TRUE(m.Matches(a));
+
+  a.set_s("hole");
+  EXPECT_FALSE(m.Matches(a));
+}
+#endif
 
 // Tests that Property(&Foo::property, ...) works when property()
 // returns a reference to non-const.
@@ -3911,8 +3936,11 @@ TEST(ResultOfTest, WorksForFunctionReferences) {
 
 // Tests that ResultOf(f, ...) compiles and works as expected when f is a
 // function object.
-struct Functor : public ::std::unary_function<int, std::string> {
-  result_type operator()(argument_type input) const {
+struct Functor {
+  typedef std::string result_type;
+  typedef int argument_type;
+
+  std::string operator()(int input) const {
     return IntToStringFunction(input);
   }
 };

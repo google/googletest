@@ -50,7 +50,7 @@
 // implementation.  It must come before gtest-internal-inl.h is
 // included, or there will be a compiler error.  This trick is to
 // prevent a user from accidentally including gtest-internal-inl.h in
-// his code.
+// their code.
 #define GTEST_IMPLEMENTATION_ 1
 #include "src/gtest-internal-inl.h"
 #undef GTEST_IMPLEMENTATION_
@@ -1209,7 +1209,7 @@ class DestructorTracker {
       : index_(GetNewIndex()) {}
   ~DestructorTracker() {
     // We never access DestructorCall::List() concurrently, so we don't need
-    // to protect this acccess with a mutex.
+    // to protect this access with a mutex.
     DestructorCall::List()[index_]->ReportDestroyed();
   }
 

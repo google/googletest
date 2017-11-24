@@ -27,6 +27,8 @@ option(
   "Build gtest with internal symbols hidden in shared libraries."
   OFF)
 
+set(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "Generate debug library name with a postfix.")
+
 # Defines pre_project_set_up_hermetic_build() and set_up_hermetic_build().
 include(cmake/hermetic_build.cmake OPTIONAL)
 
@@ -44,8 +46,17 @@ endif()
 # as ${gtest_SOURCE_DIR} and to the root binary directory as
 # ${gtest_BINARY_DIR}.
 # Language "C" is required for find_package(Threads).
-project(gtest CXX C)
+if (CMAKE_VERSION VERSION_LESS 3.0)
+  project(gtest CXX C)
+else()
+  cmake_policy(SET CMP0048 NEW)
+  project(gtest VERSION 1.9.0 LANGUAGES CXX C)
+endif()
 cmake_minimum_required(VERSION 2.6.4)
+
+if (POLICY CMP0063) # Visibility
+  cmake_policy(SET CMP0063 NEW)
+endif (POLICY CMP0063)
 
 if (COMMAND set_up_hermetic_build)
   set_up_hermetic_build()
@@ -65,9 +76,6 @@ config_compiler_and_linker()  # Defined in internal_utils.cmake.
 include_directories(
   ${gtest_SOURCE_DIR}/include
   ${gtest_SOURCE_DIR})
-
-# Where Google Test's libraries can be found.
-link_directories(${gtest_BINARY_DIR}/src)
 
 # Summary of tuple support for Microsoft Visual Studio:
 # Compiler    version(MS)  version(cmake)  Support
@@ -102,10 +110,26 @@ endif()
 ########################################################################
 #
 # Install rules
-install(TARGETS gtest gtest_main
-  DESTINATION lib)
-install(DIRECTORY ${gtest_SOURCE_DIR}/include/gtest
-  DESTINATION include)
+if(INSTALL_GTEST)
+  install(TARGETS gtest gtest_main
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+  install(DIRECTORY ${gtest_SOURCE_DIR}/include/gtest
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+  # configure and install pkgconfig files
+  configure_file(
+    cmake/gtest.pc.in
+    "${CMAKE_BINARY_DIR}/gtest.pc"
+    @ONLY)
+  configure_file(
+    cmake/gtest_main.pc.in
+    "${CMAKE_BINARY_DIR}/gtest_main.pc"
+    @ONLY)
+  install(FILES "${CMAKE_BINARY_DIR}/gtest.pc" "${CMAKE_BINARY_DIR}/gtest_main.pc"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+endif()
 
 ########################################################################
 #
