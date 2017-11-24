@@ -80,8 +80,8 @@ instructions for how to sign and return it.
 ## Coding Style ##
 
 To keep the source consistent, readable, diffable and easy to merge,
-we use a fairly rigid coding style, as defined by the [google-styleguide](http://code.google.com/p/google-styleguide/) project.  All patches will be expected
-to conform to the style outlined [here](http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml).
+we use a fairly rigid coding style, as defined by the [google-styleguide](https://github.com/google/styleguide) project.  All patches will be expected
+to conform to the style outlined [here](https://google.github.io/styleguide/cppguide.html).
 
 ## Updating Generated Code ##
 
@@ -100,6 +100,10 @@ Please do submit code. Here's what you need to do:
   1. Ensure that there are unit tests for your code.
   1. Sign a Contributor License Agreement.
   1. Create a Pull Request in the usual way.
+
+If you are a Googler, it is preferable to first create an internal change and
+have it reviewed and submitted, and then create an upstreaming pull
+request here. 
 
 ## Google Test Committers ##
 
