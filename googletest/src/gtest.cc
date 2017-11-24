@@ -385,13 +385,25 @@ void AssertHelper::operator=(const Message& message) const {
 GTEST_API_ GTEST_DEFINE_STATIC_MUTEX_(g_linked_ptr_mutex);
 
 // A copy of all command line arguments.  Set by InitGoogleTest().
-::std::vector<testing::internal::string> g_argvs;
+#if GTEST_LANG_CXX11
+::std::vector<testing::internal::string>& g_argvs() {
+  static ::std::vector<testing::internal::string>* const gargvs =
+      new ::std::vector<testing::internal::string>();
+  return *gargvs;
+}
+#else
+	::std::vector<testing::internal::string> g_argvs;
+#endif
 
 const ::std::vector<testing::internal::string>& GetArgvs() {
 #if defined(GTEST_CUSTOM_GET_ARGVS_)
   return GTEST_CUSTOM_GET_ARGVS_();
 #else  // defined(GTEST_CUSTOM_GET_ARGVS_)
+#if GTEST_LANG_CXX11
+  return g_argvs();
+#else
   return g_argvs;
+#endif
 #endif  // defined(GTEST_CUSTOM_GET_ARGVS_)
 }
 
@@ -5369,9 +5381,17 @@ void InitGoogleTestImpl(int* argc, CharType** argv) {
 
   if (*argc <= 0) return;
 
+#if GTEST_LANG_CXX11
+  g_argvs().clear();
+#else
   g_argvs.clear();
+#endif
   for (int i = 0; i != *argc; i++) {
+#if GTEST_LANG_CXX11
+    g_argvs().push_back(StreamableToString(argv[i]));
+#else
     g_argvs.push_back(StreamableToString(argv[i]));
+#endif
   }
 
   ParseGoogleTestFlagsOnly(argc, argv);
