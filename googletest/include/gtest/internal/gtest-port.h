@@ -454,18 +454,14 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # include <regex.h>  // NOLINT
 
 # define GTEST_USES_POSIX_RE 1
-
-#elif GTEST_OS_WINDOWS
-
-// <regex.h> is not available on Windows.  Use our own simple regex
-// implementation instead.
-# define GTEST_USES_SIMPLE_RE 1
+# define GTEST_USES_SIMPLE_RE 0
 
 #else
 
 // <regex.h> may not be available on this platform.  Use our own
 // simple regex implementation instead.
 # define GTEST_USES_SIMPLE_RE 1
+# define GTEST_USES_POSIX_RE 0
 
 #endif  // GTEST_HAS_POSIX_RE
 
@@ -1282,7 +1278,7 @@ class GTEST_API_ RE {
   regex_t full_regex_;     // For FullMatch().
   regex_t partial_regex_;  // For PartialMatch().
 
-# else  // GTEST_USES_SIMPLE_RE
+# elif GTEST_USES_SIMPLE_RE
 
   const char* full_pattern_;  // For FullMatch();
 
