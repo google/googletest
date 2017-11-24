@@ -1818,7 +1818,7 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 
 // Define this macro to 1 to omit the definition of FAIL(), which is a
 // generic name and clashes with some other libraries.
-#if !GTEST_DONT_DEFINE_FAIL
+#if defined(GTEST_DONT_DEFINE_FAIL) && !GTEST_DONT_DEFINE_FAIL
 # define FAIL() GTEST_FAIL()
 #endif
 
@@ -1827,7 +1827,7 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 
 // Define this macro to 1 to omit the definition of SUCCEED(), which
 // is a generic name and clashes with some other libraries.
-#if !GTEST_DONT_DEFINE_SUCCEED
+#if defined(GTEST_DONT_DEFINE_SUCCEED) && !GTEST_DONT_DEFINE_SUCCEED
 # define SUCCEED() GTEST_SUCCEED()
 #endif
 
@@ -1952,27 +1952,27 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 // Define macro GTEST_DONT_DEFINE_ASSERT_XY to 1 to omit the definition of
 // ASSERT_XY(), which clashes with some users' own code.
 
-#if !GTEST_DONT_DEFINE_ASSERT_EQ
+#if define(GTEST_DONT_DEFINE_ASSERT_EQ) && !GTEST_DONT_DEFINE_ASSERT_EQ
 # define ASSERT_EQ(val1, val2) GTEST_ASSERT_EQ(val1, val2)
 #endif
 
-#if !GTEST_DONT_DEFINE_ASSERT_NE
+#if define(GTEST_DONT_DEFINE_ASSERT_NE) && !GTEST_DONT_DEFINE_ASSERT_NE
 # define ASSERT_NE(val1, val2) GTEST_ASSERT_NE(val1, val2)
 #endif
 
-#if !GTEST_DONT_DEFINE_ASSERT_LE
+#if define(GTEST_DONT_DEFINE_ASSERT_LE) && !GTEST_DONT_DEFINE_ASSERT_LE
 # define ASSERT_LE(val1, val2) GTEST_ASSERT_LE(val1, val2)
 #endif
 
-#if !GTEST_DONT_DEFINE_ASSERT_LT
+#if define(GTEST_DONT_DEFINE_ASSERT_LT) && !GTEST_DONT_DEFINE_ASSERT_LT
 # define ASSERT_LT(val1, val2) GTEST_ASSERT_LT(val1, val2)
 #endif
 
-#if !GTEST_DONT_DEFINE_ASSERT_GE
+#if define(GTEST_DONT_DEFINE_ASSERT_GE) && !GTEST_DONT_DEFINE_ASSERT_GE
 # define ASSERT_GE(val1, val2) GTEST_ASSERT_GE(val1, val2)
 #endif
 
-#if !GTEST_DONT_DEFINE_ASSERT_GT
+#if define(GTEST_DONT_DEFINE_ASSERT_GT) && !GTEST_DONT_DEFINE_ASSERT_GT
 # define ASSERT_GT(val1, val2) GTEST_ASSERT_GT(val1, val2)
 #endif
 
@@ -2183,7 +2183,7 @@ bool StaticAssertTypeEq() {
 
 // Define this macro to 1 to omit the definition of TEST(), which
 // is a generic name and clashes with some other libraries.
-#if !GTEST_DONT_DEFINE_TEST
+#if define(GTEST_DONT_DEFINE_TEST) && !GTEST_DONT_DEFINE_TEST
 # define TEST(test_case_name, test_name) GTEST_TEST(test_case_name, test_name)
 #endif
 
