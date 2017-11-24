@@ -435,10 +435,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # endif
 #endif
 
-#if GTEST_USES_PCRE
-// The appropriate headers have already been included.
-
-#elif GTEST_HAS_POSIX_RE
+#if GTEST_HAS_POSIX_RE
 
 // On some platforms, <regex.h> needs someone to define size_t, and
 // won't compile otherwise.  We can #include it here as we already
@@ -460,7 +457,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // simple regex implementation instead.
 # define GTEST_USES_SIMPLE_RE 1
 
-#endif  // GTEST_USES_PCRE
+#endif  // GTEST_HAS_POSIX_RE
 
 #ifndef GTEST_HAS_EXCEPTIONS
 // The user didn't tell us whether exceptions are enabled, so we need
