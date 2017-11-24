@@ -119,9 +119,8 @@
 //
 // Macros indicating the platform on which Google Test is being used
 // (a macro is defined to 1 if compiled on the given platform;
-// otherwise UNDEFINED -- it's never defined to 0.).  Google Test
-// defines these macros automatically.  Code outside Google Test MUST
-// NOT define them.
+// otherwise 0.).  Google Test defines these macros automatically.
+// Code outside Google Test MUST NOT define or use them.
 //
 //   GTEST_OS_AIX      - IBM AIX
 //   GTEST_OS_CYGWIN   - Cygwin

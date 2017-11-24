@@ -177,4 +177,86 @@
 # define GTEST_OS_QNX 1
 #endif  // __CYGWIN__
 
+// Ensure all the macros are defined
+
+#ifndef GTEST_OS_CYGWIN
+# define GTEST_OS_CYGWIN 0
+#endif  //  GTEST_OS_CYGWIN
+
+#ifndef GTEST_OS_SYMBIAN
+# define GTEST_OS_SYMBIAN 0
+#endif  // GTEST_OS_SYMBIAN
+
+#ifndef GTEST_OS_WINDOWS
+# define GTEST_OS_WINDOWS 0
+#endif  // GTEST_OS_WINDOWS
+
+#ifndef GTEST_OS_WINDOWS_MOBILE
+# define GTEST_OS_WINDOWS_MOBILE 0
+#endif  // GTEST_OS_WINDOWS_MOBILE
+
+#ifndef GTEST_OS_WINDOWS_MINGW
+# define GTEST_OS_WINDOWS_MINGW 0
+#endif  // GTEST_OS_WINDOWS_MINGW
+
+#ifndef GTEST_OS_WINDOWS_DESKTOP
+# define GTEST_OS_WINDOWS_DESKTOP 0
+#endif  // GTEST_OS_WINDOWS_DESKTOP
+
+#ifndef GTEST_OS_WINDOWS_PHONE
+# define GTEST_OS_WINDOWS_PHONE 0
+#endif  // GTEST_OS_WINDOWS_PHONE
+
+#ifndef GTEST_OS_WINDOWS_RT
+# define GTEST_OS_WINDOWS_RT 0
+#endif  // GTEST_OS_WINDOWS_RT
+
+#ifndef GTEST_OS_MAC
+# define GTEST_OS_MAC 0
+#endif  // GTEST_OS_MAC
+
+#ifndef GTEST_OS_IOS
+# define GTEST_OS_IOS 0
+#endif  // GTEST_OS_IOS
+
+#ifndef GTEST_OS_FREEBSD
+# define GTEST_OS_FREEBSD 0
+#endif  // GTEST_OS_FREEBSD
+
+#ifndef GTEST_OS_LINUX
+# define GTEST_OS_LINUX 0
+#endif  // GTEST_OS_LINUX
+
+#ifndef GTEST_OS_LINUX_ANDROID
+# define GTEST_OS_LINUX_ANDROID 0
+#endif  // GTEST_OS_LINUX_ANDROID
+
+#ifndef GTEST_OS_ZOS
+# define GTEST_OS_ZOS 0
+#endif  // GTEST_OS_ZOS
+
+#ifndef GTEST_OS_SOLARIS
+# define GTEST_OS_SOLARIS 0
+#endif  // GTEST_OS_SOLARIS
+
+#ifndef GTEST_OS_AIX
+# define GTEST_OS_AIX 0
+#endif  // GTEST_OS_AIX
+
+#ifndef GTEST_OS_HPUX
+# define GTEST_OS_HPUX 0
+#endif  // GTEST_OS_HPUX
+
+#ifndef GTEST_OS_NACL
+# define GTEST_OS_NACL 0
+#endif  // GTEST_OS_NACL
+
+#ifndef GTEST_OS_OPENBSD
+# define GTEST_OS_OPENBSD 0
+#endif  // GTEST_OS_OPENBSD
+
+#ifndef GTEST_OS_QNX
+# define GTEST_OS_QNX 0
+#endif  // GTEST_OS_QNX
+
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_ARCH_H_
