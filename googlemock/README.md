@@ -34,8 +34,8 @@ We hope you find it useful!
   * Uses an intuitive syntax for controlling the behavior of a mock.
   * Does automatic verification of expectations (no record-and-replay needed).
   * Allows arbitrary (partial) ordering constraints on
-    function calls to be expressed,.
-  * Lets an user extend it by defining new matchers and actions.
+    function calls to be expressed.
+  * Lets a user extend it by defining new matchers and actions.
   * Does not use exceptions.
   * Is easy to learn and use.
 
