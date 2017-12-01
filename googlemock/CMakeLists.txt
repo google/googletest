@@ -54,15 +54,11 @@ add_subdirectory("${gtest_dir}" "${gmock_BINARY_DIR}/gtest")
 
 # These commands only run if this is the main project
 if(CMAKE_PROJECT_NAME STREQUAL "gmock" OR CMAKE_PROJECT_NAME STREQUAL "googletest-distribution")
-
   # BUILD_SHARED_LIBS is a standard CMake variable, but we declare it here to
   # make it prominent in the GUI.
   option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
-
 else()
-
   mark_as_advanced(gmock_build_tests)
-
 endif()
 
 # Although Google Test's CMakeLists.txt calls this function, the
@@ -71,12 +67,13 @@ endif()
 config_compiler_and_linker()  # from ${gtest_dir}/cmake/internal_utils.cmake
 
 # Adds Google Mock's and Google Test's header directories to the search path.
-include_directories("${gmock_SOURCE_DIR}/include"
-                    "${gmock_SOURCE_DIR}"
-                    "${gtest_SOURCE_DIR}/include"
-                    # This directory is needed to build directly from Google
-                    # Test sources.
-                    "${gtest_SOURCE_DIR}")
+set(gmock_build_include_dirs
+  "${gmock_SOURCE_DIR}/include"
+  "${gmock_SOURCE_DIR}"
+  "${gtest_SOURCE_DIR}/include"
+  # This directory is needed to build directly from Google Test sources.
+  "${gtest_SOURCE_DIR}")
+include_directories(${gmock_build_include_dirs})
 
 # Summary of tuple support for Microsoft Visual Studio:
 # Compiler    version(MS)  version(cmake)  Support
@@ -111,69 +108,26 @@ if (MSVC)
               src/gmock_main.cc)
 else()
   cxx_library(gmock "${cxx_strict}" src/gmock-all.cc)
-  target_link_libraries(gmock gtest)
+  target_link_libraries(gmock PUBLIC gtest)
   cxx_library(gmock_main "${cxx_strict}" src/gmock_main.cc)
-  target_link_libraries(gmock_main gmock)
+  target_link_libraries(gmock_main PUBLIC gmock)
 endif()
-
 # If the CMake version supports it, attach header directory information
 # to the targets for when we are part of a parent build (ie being pulled
 # in via add_subdirectory() rather than being a standalone build).
 if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
-  target_include_directories(gmock SYSTEM
-    INTERFACE
-      $<BUILD_INTERFACE:${gmock_SOURCE_DIR}/include>
-      $<BUILD_INTERFACE:${gmock_SOURCE_DIR}>
-      $<BUILD_INTERFACE:${gtest_SOURCE_DIR}/include>
-      $<BUILD_INTERFACE:${gtest_SOURCE_DIR}>
-      $<INSTALL_INTERFACE:include>)
-  target_include_directories(gmock_main SYSTEM
-    INTERFACE
-      $<BUILD_INTERFACE:${gmock_SOURCE_DIR}/include>
-      $<BUILD_INTERFACE:${gmock_SOURCE_DIR}>
-      $<BUILD_INTERFACE:${gtest_SOURCE_DIR}/include>
-      $<BUILD_INTERFACE:${gtest_SOURCE_DIR}>
-      $<INSTALL_INTERFACE:include>)
+  target_include_directories(gmock SYSTEM INTERFACE
+    "$<BUILD_INTERFACE:${gmock_build_include_dirs}>"
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+  target_include_directories(gmock_main SYSTEM INTERFACE
+    "$<BUILD_INTERFACE:${gmock_build_include_dirs}>"
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 endif()
 
 ########################################################################
 #
 # Install rules
-if(INSTALL_GMOCK)
-  install(TARGETS gmock
-    EXPORT gmockConfigInternal
-    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-  install(EXPORT gmockConfigInternal
-    DESTINATION "${INSTALL_CMAKE_DIR}"
-    NAMESPACE googletest_)
-  install(TARGETS gmock_main
-    EXPORT gmock_mainConfigInternal
-    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-  install(EXPORT gmock_mainConfigInternal
-    DESTINATION "${INSTALL_CMAKE_DIR}"
-    NAMESPACE googletest_)
-  set(googletest_install_targets
-    ${googletest_install_targets} gmock gmock_main PARENT_SCOPE)
-
-  install(DIRECTORY "${gmock_SOURCE_DIR}/include/gmock"
-    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
-
-  # configure and install pkgconfig files
-  configure_file(
-    cmake/gmock.pc.in
-    "${gmock_BINARY_DIR}/gmock.pc"
-    @ONLY)
-  configure_file(
-    cmake/gmock_main.pc.in
-    "${gmock_BINARY_DIR}/gmock_main.pc"
-    @ONLY)
-  install(FILES "${gmock_BINARY_DIR}/gmock.pc" "${gmock_BINARY_DIR}/gmock_main.pc"
-    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
-endif()
+install_project(gmock gmock_main)
 
 ########################################################################
 #
@@ -240,13 +194,13 @@ if (gmock_build_tests)
     endif()
   else()
     cxx_library(gmock_main_no_exception "${cxx_no_exception}" src/gmock_main.cc)
-    target_link_libraries(gmock_main_no_exception gmock)
+    target_link_libraries(gmock_main_no_exception PUBLIC gmock)
 
     cxx_library(gmock_main_no_rtti "${cxx_no_rtti}" src/gmock_main.cc)
-    target_link_libraries(gmock_main_no_rtti gmock)
+    target_link_libraries(gmock_main_no_rtti PUBLIC gmock)
 
     cxx_library(gmock_main_use_own_tuple "${cxx_use_own_tuple}" src/gmock_main.cc)
-    target_link_libraries(gmock_main_use_own_tuple gmock)
+    target_link_libraries(gmock_main_use_own_tuple PUBLIC gmock)
   endif()
   cxx_test_with_flags(gmock-more-actions_no_exception_test "${cxx_no_exception}"
     gmock_main_no_exception test/gmock-more-actions_test.cc)
