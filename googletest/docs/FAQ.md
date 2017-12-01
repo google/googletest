@@ -102,9 +102,9 @@ Then every user of your machine can write tests without
 recompiling Google Test.
 
 This seemed like a good idea, but it has a
-got-cha: every user needs to compile his tests using the _same_ compiler
+got-cha: every user needs to compile their tests using the _same_ compiler
 flags used to compile the installed Google Test libraries; otherwise
-he may run into undefined behaviors (i.e. the tests can behave
+they may run into undefined behaviors (i.e. the tests can behave
 strangely and may even crash for no obvious reasons).
 
 Why?  Because C++ has this thing called the One-Definition Rule: if
@@ -494,7 +494,7 @@ EXPECT_PRED1(IsPositive, 5);
 However, this will work:
 
 ``` cpp
-EXPECT_PRED1(*static_cast<bool (*)(int)>*(IsPositive), 5);
+EXPECT_PRED1(static_cast<bool (*)(int)>(IsPositive), 5);
 ```
 
 (The stuff inside the angled brackets for the `static_cast` operator is the
@@ -512,14 +512,14 @@ bool IsNegative(T x) {
 you can use it in a predicate assertion like this:
 
 ``` cpp
-ASSERT_PRED1(IsNegative*<int>*, -5);
+ASSERT_PRED1(IsNegative<int>, -5);
 ```
 
 Things are more interesting if your template has more than one parameters. The
 following won't compile:
 
 ``` cpp
-ASSERT_PRED2(*GreaterThan<int, int>*, 5, 0);
+ASSERT_PRED2(GreaterThan<int, int>, 5, 0);
 ```
 
 
@@ -528,7 +528,7 @@ which is one more than expected. The workaround is to wrap the predicate
 function in parentheses:
 
 ``` cpp
-ASSERT_PRED2(*(GreaterThan<int, int>)*, 5, 0);
+ASSERT_PRED2((GreaterThan<int, int>), 5, 0);
 ```
 
 
@@ -1034,7 +1034,7 @@ namespace bar {
 TEST(CoolTest, DoSomething) {
   SUCCEED();
 }
-}  // namespace foo
+}  // namespace bar
 ```
 
 However, the following code is **not allowed** and will produce a runtime error from Google Test because the test methods are using different test fixture classes with the same test case name.
@@ -1052,7 +1052,7 @@ class CoolTest : public ::testing::Test {};  // Fixture: bar::CoolTest
 TEST_F(CoolTest, DoSomething) {
   SUCCEED();
 }
-}  // namespace foo
+}  // namespace bar
 ```
 
 ## How do I build Google Testing Framework with Xcode 4? ##

@@ -875,7 +875,7 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
 // MORE INFORMATION:
 //
 // To learn more about using these macros, please search for 'ACTION'
-// on http://code.google.com/p/googlemock/wiki/CookBook.
+// on https://github.com/google/googletest/blob/master/googlemock/docs/CookBook.md
 
 // An internal macro needed for implementing ACTION*().
 #define GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_\

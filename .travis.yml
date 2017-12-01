@@ -7,7 +7,11 @@ install:
 # /usr/bin/gcc is 4.6 always, but gcc-X.Y is available.
 - if [ "$CXX" = "g++" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
 # /usr/bin/clang is 3.4, lets override with modern one.
-- if [ "$CXX" = "clang++" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CXX="clang++-3.7" CC="clang-3.7"; fi
+- if [ "$CXX" = "clang++" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CXX="clang++-3.7" CC="clang-3.7"; ln -sf /usr/bin/ccache /$HOME/bin/$CXX; ln -sf /usr/bin/ccache /$HOME/bin/$CC; fi
+# ccache on OS X needs installation first
+- if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update; brew install ccache; export PATH="/usr/local/opt/ccache/libexec:$PATH"; fi
+# reset ccache statistics
+- ccache --zero-stats
 - echo ${PATH}
 - echo ${CXX}
 - ${CXX} --version
@@ -22,25 +26,24 @@ addons:
     - ubuntu-toolchain-r-test
     - llvm-toolchain-precise-3.7
     packages:
-    - gcc-4.9
     - g++-4.9
     - clang-3.7
-    - valgrind
 os:
   - linux
   - osx
 language: cpp
+cache: ccache
+before_cache:
+  # print statistics before uploading new cache
+  - ccache --show-stats
 compiler:
   - gcc
   - clang
 script: ./travis.sh
 env:
   matrix:
-    - GTEST_TARGET=googletest SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug   VERBOSE_MAKE=true VERBOSE
-    - GTEST_TARGET=googlemock SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug   VERBOSE_MAKE=true VERBOSE
-    - GTEST_TARGET=googlemock SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug CXX_FLAGS=-std=c++11  VERBOSE_MAKE=true VERBOSE
-#    - GTEST_TARGET=googletest SHARED_LIB=ON  STATIC_LIB=ON CMAKE_PKG=ON  BUILD_TYPE=release VERBOSE_MAKE=false
-#    - GTEST_TARGET=googlemock SHARED_LIB=ON  STATIC_LIB=ON CMAKE_PKG=ON  BUILD_TYPE=release VERBOSE_MAKE=false
+    - BUILD_TYPE=Debug VERBOSE=1
+    - BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
 notifications:
   email: false
 sudo: false
