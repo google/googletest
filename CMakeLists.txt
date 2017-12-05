@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6.2)
 
-project( googletest-distribution )
+project( googletest )
 
 set(CPACK_PACKAGE_VERSION_MAJOR 1)
 set(CPACK_PACKAGE_VERSION_MINOR 8)
