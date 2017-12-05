@@ -19,4 +19,4 @@ elseif(BUILD_GTEST)
   add_subdirectory( googletest )
 endif()
 
-include(CPACK)
+include(CPack)
