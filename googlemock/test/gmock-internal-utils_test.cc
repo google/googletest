@@ -49,7 +49,7 @@
 // implementation.  It must come before gtest-internal-inl.h is
 // included, or there will be a compiler error.  This trick is to
 // prevent a user from accidentally including gtest-internal-inl.h in
-// his code.
+// their code.
 #define GTEST_IMPLEMENTATION_ 1
 #include "src/gtest-internal-inl.h"
 #undef GTEST_IMPLEMENTATION_
@@ -319,11 +319,10 @@ TEST(TupleMatchesTest, WorksForSize2) {
 
 TEST(TupleMatchesTest, WorksForSize5) {
   tuple<Matcher<int>, Matcher<char>, Matcher<bool>, Matcher<long>,  // NOLINT
-      Matcher<string> >
+        Matcher<std::string> >
       matchers(Eq(1), Eq('a'), Eq(true), Eq(2L), Eq("hi"));
-  tuple<int, char, bool, long, string>  // NOLINT
-      values1(1, 'a', true, 2L, "hi"),
-      values2(1, 'a', true, 2L, "hello"),
+  tuple<int, char, bool, long, std::string>  // NOLINT
+      values1(1, 'a', true, 2L, "hi"), values2(1, 'a', true, 2L, "hello"),
       values3(2, 'a', true, 2L, "hi");
 
   EXPECT_TRUE(TupleMatches(matchers, values1));
@@ -375,7 +374,7 @@ class LogIsVisibleTest : public ::testing::Test {
 
   virtual void TearDown() { GMOCK_FLAG(verbose) = original_verbose_; }
 
-  string original_verbose_;
+  std::string original_verbose_;
 };
 
 TEST_F(LogIsVisibleTest, AlwaysReturnsTrueIfVerbosityIsInfo) {
@@ -402,9 +401,9 @@ TEST_F(LogIsVisibleTest, WorksWhenVerbosityIsWarning) {
 
 // Verifies that Log() behaves correctly for the given verbosity level
 // and log severity.
-void TestLogWithSeverity(const string& verbosity, LogSeverity severity,
+void TestLogWithSeverity(const std::string& verbosity, LogSeverity severity,
                          bool should_print) {
-  const string old_flag = GMOCK_FLAG(verbose);
+  const std::string old_flag = GMOCK_FLAG(verbose);
   GMOCK_FLAG(verbose) = verbosity;
   CaptureStdout();
   Log(severity, "Test log.\n", 0);
@@ -423,7 +422,7 @@ void TestLogWithSeverity(const string& verbosity, LogSeverity severity,
 // Tests that when the stack_frames_to_skip parameter is negative,
 // Log() doesn't include the stack trace in the output.
 TEST(LogTest, NoStackTraceWhenStackFramesToSkipIsNegative) {
-  const string saved_flag = GMOCK_FLAG(verbose);
+  const std::string saved_flag = GMOCK_FLAG(verbose);
   GMOCK_FLAG(verbose) = kInfoVerbosity;
   CaptureStdout();
   Log(kInfo, "Test log.\n", -1);
@@ -432,7 +431,7 @@ TEST(LogTest, NoStackTraceWhenStackFramesToSkipIsNegative) {
 }
 
 struct MockStackTraceGetter : testing::internal::OsStackTraceGetterInterface {
-  virtual string CurrentStackTrace(int max_depth, int skip_count) {
+  virtual std::string CurrentStackTrace(int max_depth, int skip_count) {
     return (testing::Message() << max_depth << "::" << skip_count << "\n")
         .GetString();
   }
@@ -447,11 +446,11 @@ TEST(LogTest, NoSkippingStackFrameInOptMode) {
 
   CaptureStdout();
   Log(kWarning, "Test log.\n", 100);
-  const string log = GetCapturedStdout();
+  const std::string log = GetCapturedStdout();
 
-  string expected_trace =
+  std::string expected_trace =
       (testing::Message() << GTEST_FLAG(stack_trace_depth) << "::").GetString();
-  string expected_message =
+  std::string expected_message =
       "\nGMOCK WARNING:\n"
       "Test log.\n"
       "Stack trace:\n" +
@@ -547,7 +546,7 @@ TEST(TypeTraitsTest, remove_reference) {
 // Verifies that Log() behaves correctly for the given verbosity level
 // and log severity.
 std::string GrabOutput(void(*logger)(), const char* verbosity) {
-  const string saved_flag = GMOCK_FLAG(verbose);
+  const std::string saved_flag = GMOCK_FLAG(verbose);
   GMOCK_FLAG(verbose) = verbosity;
   CaptureStdout();
   logger();

@@ -71,12 +71,12 @@ GTEST_API_ string ConvertIdentifierNameToWords(const char* id_name) {
 }
 
 // This class reports Google Mock failures as Google Test failures.  A
-// user can define another class in a similar fashion if he intends to
+// user can define another class in a similar fashion if they intend to
 // use Google Mock with a testing framework other than Google Test.
 class GoogleTestFailureReporter : public FailureReporterInterface {
  public:
   virtual void ReportFailure(FailureType type, const char* file, int line,
-                             const string& message) {
+                             const std::string& message) {
     AssertHelper(type == kFatal ?
                  TestPartResult::kFatalFailure :
                  TestPartResult::kNonFatalFailure,
@@ -128,8 +128,7 @@ GTEST_API_ bool LogIsVisible(LogSeverity severity) {
 // stack_frames_to_skip is treated as 0, since we don't know which
 // function calls will be inlined by the compiler and need to be
 // conservative.
-GTEST_API_ void Log(LogSeverity severity,
-                    const string& message,
+GTEST_API_ void Log(LogSeverity severity, const std::string& message,
                     int stack_frames_to_skip) {
   if (!LogIsVisible(severity))
     return;

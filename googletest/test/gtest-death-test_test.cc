@@ -61,7 +61,7 @@ using testing::internal::AlwaysTrue;
 // implementation.  It must come before gtest-internal-inl.h is
 // included, or there will be a compiler error.  This trick is to
 // prevent a user from accidentally including gtest-internal-inl.h in
-// his code.
+// their code.
 # define GTEST_IMPLEMENTATION_ 1
 # include "src/gtest-internal-inl.h"
 # undef GTEST_IMPLEMENTATION_
@@ -505,7 +505,7 @@ TEST_F(TestForDeathTest, AcceptsAnythingConvertibleToRE) {
 
 # if GTEST_HAS_GLOBAL_STRING
 
-  const string regex_str(regex_c_str);
+  const ::string regex_str(regex_c_str);
   EXPECT_DEATH(GlobalFunction(), regex_str);
 
 # endif  // GTEST_HAS_GLOBAL_STRING

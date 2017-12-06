@@ -79,11 +79,10 @@ using testing::StaticAssertTypeEq;
 using testing::StrEq;
 using testing::Value;
 using testing::internal::ElementsAreArrayMatcher;
-using testing::internal::string;
 
 // Returns the description of the given matcher.
 template <typename T>
-string Describe(const Matcher<T>& m) {
+std::string Describe(const Matcher<T>& m) {
   stringstream ss;
   m.DescribeTo(&ss);
   return ss.str();
@@ -91,7 +90,7 @@ string Describe(const Matcher<T>& m) {
 
 // Returns the description of the negation of the given matcher.
 template <typename T>
-string DescribeNegation(const Matcher<T>& m) {
+std::string DescribeNegation(const Matcher<T>& m) {
   stringstream ss;
   m.DescribeNegationTo(&ss);
   return ss.str();
@@ -99,7 +98,7 @@ string DescribeNegation(const Matcher<T>& m) {
 
 // Returns the reason why x matches, or doesn't match, m.
 template <typename MatcherType, typename Value>
-string Explain(const MatcherType& m, const Value& x) {
+std::string Explain(const MatcherType& m, const Value& x) {
   stringstream ss;
   m.ExplainMatchResultTo(x, &ss);
   return ss.str();
@@ -121,7 +120,7 @@ TEST(ArgsTest, AcceptsOneTemplateArg) {
 }
 
 TEST(ArgsTest, AcceptsTwoTemplateArgs) {
-  const tuple<short, int, long> t(4, 5, 6L);  // NOLINT
+  const tuple<short, int, long> t(static_cast<short>(4), 5, 6L);  // NOLINT
 
   EXPECT_THAT(t, (Args<0, 1>(Lt())));
   EXPECT_THAT(t, (Args<1, 2>(Lt())));
@@ -129,13 +128,13 @@ TEST(ArgsTest, AcceptsTwoTemplateArgs) {
 }
 
 TEST(ArgsTest, AcceptsRepeatedTemplateArgs) {
-  const tuple<short, int, long> t(4, 5, 6L);  // NOLINT
+  const tuple<short, int, long> t(static_cast<short>(4), 5, 6L);  // NOLINT
   EXPECT_THAT(t, (Args<0, 0>(Eq())));
   EXPECT_THAT(t, Not(Args<1, 1>(Ne())));
 }
 
 TEST(ArgsTest, AcceptsDecreasingTemplateArgs) {
-  const tuple<short, int, long> t(4, 5, 6L);  // NOLINT
+  const tuple<short, int, long> t(static_cast<short>(4), 5, 6L);  // NOLINT
   EXPECT_THAT(t, (Args<2, 0>(Gt())));
   EXPECT_THAT(t, Not(Args<2, 1>(Lt())));
 }
@@ -160,7 +159,7 @@ TEST(ArgsTest, AcceptsMoreTemplateArgsThanArityOfOriginalTuple) {
 }
 
 TEST(ArgsTest, CanBeNested) {
-  const tuple<short, int, long, int> t(4, 5, 6L, 6);  // NOLINT
+  const tuple<short, int, long, int> t(static_cast<short>(4), 5, 6L, 6);  // NOLINT
   EXPECT_THAT(t, (Args<1, 2, 3>(Args<1, 2>(Eq()))));
   EXPECT_THAT(t, (Args<0, 1, 3>(Args<0, 2>(Lt()))));
 }
@@ -296,7 +295,7 @@ TEST(ElementsAreTest, CanDescribeExpectingOneElement) {
 }
 
 TEST(ElementsAreTest, CanDescribeExpectingManyElements) {
-  Matcher<list<string> > m = ElementsAre(StrEq("one"), "two");
+  Matcher<list<std::string> > m = ElementsAre(StrEq("one"), "two");
   EXPECT_EQ("has 2 elements where\n"
             "element #0 is equal to \"one\",\n"
             "element #1 is equal to \"two\"", Describe(m));
@@ -314,7 +313,7 @@ TEST(ElementsAreTest, CanDescribeNegationOfExpectingOneElment) {
 }
 
 TEST(ElementsAreTest, CanDescribeNegationOfExpectingManyElements) {
-  Matcher<const list<string>& > m = ElementsAre("one", "two");
+  Matcher<const list<std::string>&> m = ElementsAre("one", "two");
   EXPECT_EQ("doesn't have 2 elements, or\n"
             "element #0 isn't equal to \"one\", or\n"
             "element #1 isn't equal to \"two\"", DescribeNegation(m));
@@ -365,21 +364,21 @@ TEST(ElementsAreTest, CanExplainMismatchRightSize) {
 }
 
 TEST(ElementsAreTest, MatchesOneElementVector) {
-  vector<string> test_vector;
+  vector<std::string> test_vector;
   test_vector.push_back("test string");
 
   EXPECT_THAT(test_vector, ElementsAre(StrEq("test string")));
 }
 
 TEST(ElementsAreTest, MatchesOneElementList) {
-  list<string> test_list;
+  list<std::string> test_list;
   test_list.push_back("test string");
 
   EXPECT_THAT(test_list, ElementsAre("test string"));
 }
 
 TEST(ElementsAreTest, MatchesThreeElementVector) {
-  vector<string> test_vector;
+  vector<std::string> test_vector;
   test_vector.push_back("one");
   test_vector.push_back("two");
   test_vector.push_back("three");
@@ -428,30 +427,30 @@ TEST(ElementsAreTest, MatchesTenElementVector) {
 }
 
 TEST(ElementsAreTest, DoesNotMatchWrongSize) {
-  vector<string> test_vector;
+  vector<std::string> test_vector;
   test_vector.push_back("test string");
   test_vector.push_back("test string");
 
-  Matcher<vector<string> > m = ElementsAre(StrEq("test string"));
+  Matcher<vector<std::string> > m = ElementsAre(StrEq("test string"));
   EXPECT_FALSE(m.Matches(test_vector));
 }
 
 TEST(ElementsAreTest, DoesNotMatchWrongValue) {
-  vector<string> test_vector;
+  vector<std::string> test_vector;
   test_vector.push_back("other string");
 
-  Matcher<vector<string> > m = ElementsAre(StrEq("test string"));
+  Matcher<vector<std::string> > m = ElementsAre(StrEq("test string"));
   EXPECT_FALSE(m.Matches(test_vector));
 }
 
 TEST(ElementsAreTest, DoesNotMatchWrongOrder) {
-  vector<string> test_vector;
+  vector<std::string> test_vector;
   test_vector.push_back("one");
   test_vector.push_back("three");
   test_vector.push_back("two");
 
-  Matcher<vector<string> > m = ElementsAre(
-    StrEq("one"), StrEq("two"), StrEq("three"));
+  Matcher<vector<std::string> > m =
+      ElementsAre(StrEq("one"), StrEq("two"), StrEq("three"));
   EXPECT_FALSE(m.Matches(test_vector));
 }
 
@@ -527,7 +526,7 @@ TEST(ElementsAreTest, WorksWithTwoDimensionalNativeArray) {
 }
 
 TEST(ElementsAreTest, AcceptsStringLiteral) {
-  string array[] = { "hi", "one", "two" };
+  std::string array[] = {"hi", "one", "two"};
   EXPECT_THAT(array, ElementsAre("hi", "one", "two"));
   EXPECT_THAT(array, Not(ElementsAre("hi", "one", "too")));
 }
@@ -546,10 +545,10 @@ TEST(ElementsAreTest, AcceptsArrayWithUnknownSize) {
   // The size of kHi is not known in this test, but ElementsAre() should
   // still accept it.
 
-  string array1[] = { "hi" };
+  std::string array1[] = {"hi"};
   EXPECT_THAT(array1, ElementsAre(kHi));
 
-  string array2[] = { "ho" };
+  std::string array2[] = {"ho"};
   EXPECT_THAT(array2, Not(ElementsAre(kHi)));
 }
 
@@ -589,7 +588,7 @@ TEST(ElementsAreArrayTest, CanBeCreatedWithValueArray) {
 TEST(ElementsAreArrayTest, CanBeCreatedWithArraySize) {
   const char* a[] = { "one", "two", "three" };
 
-  vector<string> test_vector(a, a + GTEST_ARRAY_SIZE_(a));
+  vector<std::string> test_vector(a, a + GTEST_ARRAY_SIZE_(a));
   EXPECT_THAT(test_vector, ElementsAreArray(a, GTEST_ARRAY_SIZE_(a)));
 
   const char** p = a;
@@ -600,7 +599,7 @@ TEST(ElementsAreArrayTest, CanBeCreatedWithArraySize) {
 TEST(ElementsAreArrayTest, CanBeCreatedWithoutArraySize) {
   const char* a[] = { "one", "two", "three" };
 
-  vector<string> test_vector(a, a + GTEST_ARRAY_SIZE_(a));
+  vector<std::string> test_vector(a, a + GTEST_ARRAY_SIZE_(a));
   EXPECT_THAT(test_vector, ElementsAreArray(a));
 
   test_vector[0] = "1";
@@ -608,10 +607,10 @@ TEST(ElementsAreArrayTest, CanBeCreatedWithoutArraySize) {
 }
 
 TEST(ElementsAreArrayTest, CanBeCreatedWithMatcherArray) {
-  const Matcher<string> kMatcherArray[] =
-    { StrEq("one"), StrEq("two"), StrEq("three") };
+  const Matcher<std::string> kMatcherArray[] = {StrEq("one"), StrEq("two"),
+                                                StrEq("three")};
 
-  vector<string> test_vector;
+  vector<std::string> test_vector;
   test_vector.push_back("one");
   test_vector.push_back("two");
   test_vector.push_back("three");
@@ -640,7 +639,7 @@ TEST(ElementsAreArrayTest, TakesInitializerList) {
 }
 
 TEST(ElementsAreArrayTest, TakesInitializerListOfCStrings) {
-  const string a[5] = { "a", "b", "c", "d", "e" };
+  const std::string a[5] = {"a", "b", "c", "d", "e"};
   EXPECT_THAT(a, ElementsAreArray({ "a", "b", "c", "d", "e" }));
   EXPECT_THAT(a, Not(ElementsAreArray({ "a", "b", "c", "e", "d" })));
   EXPECT_THAT(a, Not(ElementsAreArray({ "a", "b", "c", "d", "ef" })));
@@ -751,9 +750,9 @@ MATCHER(IsEven2, negation ? "is odd" : "is even") {
 
 // This also tests that the description string can reference matcher
 // parameters.
-MATCHER_P2(EqSumOf, x, y,
-           string(negation ? "doesn't equal" : "equals") + " the sum of " +
-           PrintToString(x) + " and " + PrintToString(y)) {
+MATCHER_P2(EqSumOf, x, y, std::string(negation ? "doesn't equal" : "equals") +
+                              " the sum of " + PrintToString(x) + " and " +
+                              PrintToString(y)) {
   if (arg == (x + y)) {
     *result_listener << "OK";
     return true;
@@ -1117,12 +1116,12 @@ TEST(ContainsTest, ListMatchesWhenElementIsInContainer) {
   EXPECT_THAT(some_list, Contains(Gt(2.5)));
   EXPECT_THAT(some_list, Contains(Eq(2.0f)));
 
-  list<string> another_list;
+  list<std::string> another_list;
   another_list.push_back("fee");
   another_list.push_back("fie");
   another_list.push_back("foe");
   another_list.push_back("fum");
-  EXPECT_THAT(another_list, Contains(string("fee")));
+  EXPECT_THAT(another_list, Contains(std::string("fee")));
 }
 
 TEST(ContainsTest, ListDoesNotMatchWhenElementIsNotInContainer) {
@@ -1146,7 +1145,7 @@ TEST(ContainsTest, SetMatchesWhenElementIsInContainer) {
   another_set.insert("fie");
   another_set.insert("foe");
   another_set.insert("fum");
-  EXPECT_THAT(another_set, Contains(Eq(string("fum"))));
+  EXPECT_THAT(another_set, Contains(Eq(std::string("fum"))));
 }
 
 TEST(ContainsTest, SetDoesNotMatchWhenElementIsNotInContainer) {
@@ -1157,7 +1156,7 @@ TEST(ContainsTest, SetDoesNotMatchWhenElementIsNotInContainer) {
 
   set<const char*> c_string_set;
   c_string_set.insert("hello");
-  EXPECT_THAT(c_string_set, Not(Contains(string("hello").c_str())));
+  EXPECT_THAT(c_string_set, Not(Contains(std::string("hello").c_str())));
 }
 
 TEST(ContainsTest, ExplainsMatchResultCorrectly) {
@@ -1189,13 +1188,14 @@ TEST(ContainsTest, MapMatchesWhenElementIsInContainer) {
   my_map[bar] = 2;
   EXPECT_THAT(my_map, Contains(pair<const char* const, int>(bar, 2)));
 
-  map<string, int> another_map;
+  map<std::string, int> another_map;
   another_map["fee"] = 1;
   another_map["fie"] = 2;
   another_map["foe"] = 3;
   another_map["fum"] = 4;
-  EXPECT_THAT(another_map, Contains(pair<const string, int>(string("fee"), 1)));
-  EXPECT_THAT(another_map, Contains(pair<const string, int>("fie", 2)));
+  EXPECT_THAT(another_map,
+              Contains(pair<const std::string, int>(std::string("fee"), 1)));
+  EXPECT_THAT(another_map, Contains(pair<const std::string, int>("fie", 2)));
 }
 
 TEST(ContainsTest, MapDoesNotMatchWhenElementIsNotInContainer) {
@@ -1207,7 +1207,7 @@ TEST(ContainsTest, MapDoesNotMatchWhenElementIsNotInContainer) {
 
 TEST(ContainsTest, ArrayMatchesWhenElementIsInContainer) {
   const char* string_array[] = { "fee", "fie", "foe", "fum" };
-  EXPECT_THAT(string_array, Contains(Eq(string("fum"))));
+  EXPECT_THAT(string_array, Contains(Eq(std::string("fum"))));
 }
 
 TEST(ContainsTest, ArrayDoesNotMatchWhenElementIsNotInContainer) {

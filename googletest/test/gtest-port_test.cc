@@ -50,7 +50,7 @@
 // implementation.  It must come before gtest-internal-inl.h is
 // included, or there will be a compiler error.  This trick is to
 // prevent a user from accidentally including gtest-internal-inl.h in
-// his code.
+// their code.
 #define GTEST_IMPLEMENTATION_ 1
 #include "src/gtest-internal-inl.h"
 #undef GTEST_IMPLEMENTATION_
@@ -1209,7 +1209,7 @@ class DestructorTracker {
       : index_(GetNewIndex()) {}
   ~DestructorTracker() {
     // We never access DestructorCall::List() concurrently, so we don't need
-    // to protect this acccess with a mutex.
+    // to protect this access with a mutex.
     DestructorCall::List()[index_]->ReportDestroyed();
   }
 
@@ -1295,9 +1295,16 @@ TEST(WindowsTypesTest, HANDLEIsVoidStar) {
   StaticAssertTypeEq<HANDLE, void*>();
 }
 
+#if GTEST_OS_WINDOWS_MINGW && !defined(__MINGW64_VERSION_MAJOR)
+TEST(WindowsTypesTest, _CRITICAL_SECTIONIs_CRITICAL_SECTION) {
+  StaticAssertTypeEq<CRITICAL_SECTION, _CRITICAL_SECTION>();
+}
+#else
 TEST(WindowsTypesTest, CRITICAL_SECTIONIs_RTL_CRITICAL_SECTION) {
   StaticAssertTypeEq<CRITICAL_SECTION, _RTL_CRITICAL_SECTION>();
 }
+#endif
+
 #endif  // GTEST_OS_WINDOWS
 
 }  // namespace internal

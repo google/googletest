@@ -122,12 +122,14 @@
 //   GTEST_OS_AIX      - IBM AIX
 //   GTEST_OS_CYGWIN   - Cygwin
 //   GTEST_OS_FREEBSD  - FreeBSD
+//   GTEST_OS_FUCHSIA  - Fuchsia
 //   GTEST_OS_HPUX     - HP-UX
 //   GTEST_OS_LINUX    - Linux
 //     GTEST_OS_LINUX_ANDROID - Google Android
 //   GTEST_OS_MAC      - Mac OS X
 //     GTEST_OS_IOS    - iOS
 //   GTEST_OS_NACL     - Google Native Client (NaCl)
+//   GTEST_OS_NETBSD   - NetBSD
 //   GTEST_OS_OPENBSD  - OpenBSD
 //   GTEST_OS_QNX      - QNX
 //   GTEST_OS_SOLARIS  - Sun Solaris
@@ -323,7 +325,7 @@
 // -std={c,gnu}++{0x,11} is passed.  The C++11 standard specifies a
 // value for __cplusplus, and recent versions of clang, gcc, and
 // probably other compilers set that too in C++11 mode.
-# if __GXX_EXPERIMENTAL_CXX0X__ || __cplusplus >= 201103L
+# if __GXX_EXPERIMENTAL_CXX0X__ || __cplusplus >= 201103L || _MSC_VER >= 1900
 // Compiling in at least C++11 mode.
 #  define GTEST_LANG_CXX11 1
 # else
@@ -355,12 +357,16 @@
 #if GTEST_STDLIB_CXX11
 # define GTEST_HAS_STD_BEGIN_AND_END_ 1
 # define GTEST_HAS_STD_FORWARD_LIST_ 1
-# define GTEST_HAS_STD_FUNCTION_ 1
+# if !defined(_MSC_VER) || (_MSC_FULL_VER >= 190023824) // works only with VS2015U2 and better
+#   define GTEST_HAS_STD_FUNCTION_ 1
+# endif
 # define GTEST_HAS_STD_INITIALIZER_LIST_ 1
 # define GTEST_HAS_STD_MOVE_ 1
 # define GTEST_HAS_STD_SHARED_PTR_ 1
 # define GTEST_HAS_STD_TYPE_TRAITS_ 1
 # define GTEST_HAS_STD_UNIQUE_PTR_ 1
+# define GTEST_HAS_UNORDERED_MAP_ 1
+# define GTEST_HAS_UNORDERED_SET_ 1
 #endif
 
 // C++11 specifies that <tuple> provides std::tuple.
@@ -396,10 +402,16 @@
 #  include <io.h>
 # endif
 // In order to avoid having to include <windows.h>, use forward declaration
-// assuming CRITICAL_SECTION is a typedef of _RTL_CRITICAL_SECTION.
+#if GTEST_OS_WINDOWS_MINGW && !defined(__MINGW64_VERSION_MAJOR)
+// MinGW defined _CRITICAL_SECTION and _RTL_CRITICAL_SECTION as two
+// separate (equivalent) structs, instead of using typedef
+typedef struct _CRITICAL_SECTION GTEST_CRITICAL_SECTION;
+#else
+// Assume CRITICAL_SECTION is a typedef of _RTL_CRITICAL_SECTION.
 // This assumption is verified by
 // WindowsTypesTest.CRITICAL_SECTIONIs_RTL_CRITICAL_SECTION.
-struct _RTL_CRITICAL_SECTION;
+typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
+#endif
 #else
 // This assumes that non-Windows OSes provide unistd.h. For OSes where this
 // is not the case, we need to include headers that provide the functions
@@ -600,8 +612,9 @@ struct _RTL_CRITICAL_SECTION;
 //
 // To disable threading support in Google Test, add -DGTEST_HAS_PTHREAD=0
 // to your compiler flags.
-# define GTEST_HAS_PTHREAD (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_HPUX \
-    || GTEST_OS_QNX || GTEST_OS_FREEBSD || GTEST_OS_NACL)
+#define GTEST_HAS_PTHREAD                                                      \
+  (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_HPUX || GTEST_OS_QNX ||          \
+   GTEST_OS_FREEBSD || GTEST_OS_NACL || GTEST_OS_NETBSD || GTEST_OS_FUCHSIA)
 #endif  // GTEST_HAS_PTHREAD
 
 #if GTEST_HAS_PTHREAD
@@ -616,7 +629,7 @@ struct _RTL_CRITICAL_SECTION;
 // Determines if hash_map/hash_set are available.
 // Only used for testing against those containers.
 #if !defined(GTEST_HAS_HASH_MAP_)
-# if _MSC_VER
+# if defined(_MSC_VER) && (_MSC_VER < 1900)
 #  define GTEST_HAS_HASH_MAP_ 1  // Indicates that hash_map is available.
 #  define GTEST_HAS_HASH_SET_ 1  // Indicates that hash_set is available.
 # endif  // _MSC_VER
@@ -651,7 +664,8 @@ struct _RTL_CRITICAL_SECTION;
 // support TR1 tuple.  libc++ only provides std::tuple, in C++11 mode,
 // and it can be used with some compilers that define __GNUC__.
 # if (defined(__GNUC__) && !defined(__CUDACC__) && (GTEST_GCC_VER_ >= 40000) \
-      && !GTEST_OS_QNX && !defined(_LIBCPP_VERSION)) || _MSC_VER >= 1600
+      && !GTEST_OS_QNX && !defined(_LIBCPP_VERSION)) \
+      || (_MSC_VER >= 1600 && _MSC_VER < 1900)
 #  define GTEST_ENV_HAS_TR1_TUPLE_ 1
 # endif
 
@@ -732,7 +746,7 @@ using ::std::tuple_size;
 #   define _TR1_FUNCTIONAL 1
 #   include <tr1/tuple>
 #   undef _TR1_FUNCTIONAL  // Allows the user to #include
-                        // <tr1/functional> if he chooses to.
+                        // <tr1/functional> if they choose to.
 #  else
 #   include <tr1/tuple>  // NOLINT
 #  endif  // !GTEST_HAS_RTTI && GTEST_GCC_VER_ < 40302
@@ -754,8 +768,12 @@ using ::std::tuple_size;
 
 # if GTEST_OS_LINUX && !defined(__ia64__)
 #  if GTEST_OS_LINUX_ANDROID
-// On Android, clone() is only available on ARM starting with Gingerbread.
-#    if defined(__arm__) && __ANDROID_API__ >= 9
+// On Android, clone() became available at different API levels for each 32-bit
+// architecture.
+#    if defined(__LP64__) || \
+        (defined(__arm__) && __ANDROID_API__ >= 9) || \
+        (defined(__mips__) && __ANDROID_API__ >= 12) || \
+        (defined(__i386__) && __ANDROID_API__ >= 17)
 #     define GTEST_HAS_CLONE 1
 #    else
 #     define GTEST_HAS_CLONE 0
@@ -790,7 +808,7 @@ using ::std::tuple_size;
      (GTEST_OS_MAC && !GTEST_OS_IOS) || \
      (GTEST_OS_WINDOWS_DESKTOP && _MSC_VER >= 1400) || \
      GTEST_OS_WINDOWS_MINGW || GTEST_OS_AIX || GTEST_OS_HPUX || \
-     GTEST_OS_OPENBSD || GTEST_OS_QNX || GTEST_OS_FREEBSD)
+     GTEST_OS_OPENBSD || GTEST_OS_QNX || GTEST_OS_FREEBSD || GTEST_OS_NETBSD)
 # define GTEST_HAS_DEATH_TEST 1
 #endif
 
@@ -864,6 +882,23 @@ using ::std::tuple_size;
 # define GTEST_ATTRIBUTE_UNUSED_
 #endif
 
+// Use this annotation before a function that takes a printf format string.
+#if defined(__GNUC__) && !defined(COMPILER_ICC)
+# if defined(__MINGW_PRINTF_FORMAT)
+// MinGW has two different printf implementations. Ensure the format macro
+// matches the selected implementation. See
+// https://sourceforge.net/p/mingw-w64/wiki2/gnu%20printf/.
+#  define GTEST_ATTRIBUTE_PRINTF_(string_index, first_to_check) \
+       __attribute__((__format__(__MINGW_PRINTF_FORMAT, string_index, \
+                                 first_to_check)))
+# else
+#  define GTEST_ATTRIBUTE_PRINTF_(string_index, first_to_check) \
+       __attribute__((__format__(__printf__, string_index, first_to_check)))
+# endif
+#else
+# define GTEST_ATTRIBUTE_PRINTF_(string_index, first_to_check)
+#endif
+
 // A macro to disallow operator=
 // This should be used in the private: declarations for a class.
 #define GTEST_DISALLOW_ASSIGN_(type)\
@@ -920,6 +955,11 @@ using ::std::tuple_size;
 
 #endif  // GTEST_HAS_SEH
 
+// GTEST_API_ qualifies all symbols that must be exported. The definitions below
+// are guarded by #ifndef to give embedders a chance to define GTEST_API_ in
+// gtest/internal/custom/gtest-port.h
+#ifndef GTEST_API_
+
 #ifdef _MSC_VER
 # if GTEST_LINKED_AS_SHARED_LIBRARY
 #  define GTEST_API_ __declspec(dllimport)
@@ -930,9 +970,11 @@ using ::std::tuple_size;
 # define GTEST_API_ __attribute__((visibility ("default")))
 #endif // _MSC_VER
 
+#endif // GTEST_API_
+
 #ifndef GTEST_API_
 # define GTEST_API_
-#endif
+#endif // GTEST_API_
 
 #ifdef __GNUC__
 // Ask the compiler to never inline a given function.
@@ -1418,9 +1460,6 @@ GTEST_API_ std::string GetCapturedStderr();
 
 #endif  // GTEST_HAS_STREAM_REDIRECTION
 
-// Returns a path to temporary directory.
-GTEST_API_ std::string TempDir();
-
 // Returns the size (in bytes) of a file.
 GTEST_API_ size_t GetFileSize(FILE* file);
 
@@ -1693,7 +1732,7 @@ class GTEST_API_ Mutex {
   // by the linker.
   MutexType type_;
   long critical_section_init_phase_;  // NOLINT
-  _RTL_CRITICAL_SECTION* critical_section_;
+  GTEST_CRITICAL_SECTION* critical_section_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(Mutex);
 };
@@ -2027,7 +2066,7 @@ extern "C" inline void DeleteThreadLocalValue(void* value_holder) {
 
 // Implements thread-local storage on pthreads-based systems.
 template <typename T>
-class ThreadLocal {
+class GTEST_API_ ThreadLocal {
  public:
   ThreadLocal()
       : key_(CreateKey()), default_factory_(new DefaultValueHolderFactory()) {}
@@ -2159,7 +2198,7 @@ class GTestMutexLock {
 typedef GTestMutexLock MutexLock;
 
 template <typename T>
-class ThreadLocal {
+class GTEST_API_ ThreadLocal {
  public:
   ThreadLocal() : value_() {}
   explicit ThreadLocal(const T& value) : value_(value) {}
@@ -2178,12 +2217,13 @@ class ThreadLocal {
 GTEST_API_ size_t GetThreadCount();
 
 // Passing non-POD classes through ellipsis (...) crashes the ARM
-// compiler and generates a warning in Sun Studio.  The Nokia Symbian
+// compiler and generates a warning in Sun Studio before 12u4. The Nokia Symbian
 // and the IBM XL C/C++ compiler try to instantiate a copy constructor
 // for objects passed through ellipsis (...), failing for uncopyable
 // objects.  We define this to ensure that only POD is passed through
 // ellipsis on these systems.
-#if defined(__SYMBIAN32__) || defined(__IBMCPP__) || defined(__SUNPRO_CC)
+#if defined(__SYMBIAN32__) || defined(__IBMCPP__) || \
+     (defined(__SUNPRO_CC) && __SUNPRO_CC < 0x5130)
 // We lose support for NULL detection where the compiler doesn't like
 // passing non-POD classes through ellipsis (...).
 # define GTEST_ELLIPSIS_NEEDS_POD_ 1
@@ -2208,6 +2248,12 @@ template <bool bool_value> const bool bool_constant<bool_value>::value;
 
 typedef bool_constant<false> false_type;
 typedef bool_constant<true> true_type;
+
+template <typename T, typename U>
+struct is_same : public false_type {};
+
+template <typename T>
+struct is_same<T, T> : public true_type {};
 
 template <typename T>
 struct is_pointer : public false_type {};
@@ -2385,7 +2431,7 @@ inline int Close(int fd) { return close(fd); }
 inline const char* StrError(int errnum) { return strerror(errnum); }
 #endif
 inline const char* GetEnv(const char* name) {
-#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE | GTEST_OS_WINDOWS_RT
+#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_RT
   // We are on Windows CE, which has no environment variables.
   static_cast<void>(name);  // To prevent 'unused argument' warning.
   return NULL;
@@ -2549,6 +2595,7 @@ GTEST_API_ Int32 Int32FromGTestEnv(const char* flag, Int32 default_val);
 std::string StringFromGTestEnv(const char* flag, const char* default_val);
 
 }  // namespace internal
+
 }  // namespace testing
 
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_

@@ -54,7 +54,7 @@ Underscore (`_`) is special, as C++ reserves the following to be used by
 the compiler and the standard library:
 
   1. any identifier that starts with an `_` followed by an upper-case letter, and
-  1. any identifier that containers two consecutive underscores (i.e. `__`) _anywhere_ in its name.
+  1. any identifier that contains two consecutive underscores (i.e. `__`) _anywhere_ in its name.
 
 User code is _prohibited_ from using such identifiers.
 
@@ -102,9 +102,9 @@ Then every user of your machine can write tests without
 recompiling Google Test.
 
 This seemed like a good idea, but it has a
-got-cha: every user needs to compile his tests using the _same_ compiler
+got-cha: every user needs to compile their tests using the _same_ compiler
 flags used to compile the installed Google Test libraries; otherwise
-he may run into undefined behaviors (i.e. the tests can behave
+they may run into undefined behaviors (i.e. the tests can behave
 strangely and may even crash for no obvious reasons).
 
 Why?  Because C++ has this thing called the One-Definition Rule: if
@@ -494,7 +494,7 @@ EXPECT_PRED1(IsPositive, 5);
 However, this will work:
 
 ``` cpp
-EXPECT_PRED1(*static_cast<bool (*)(int)>*(IsPositive), 5);
+EXPECT_PRED1(static_cast<bool (*)(int)>(IsPositive), 5);
 ```
 
 (The stuff inside the angled brackets for the `static_cast` operator is the
@@ -512,14 +512,14 @@ bool IsNegative(T x) {
 you can use it in a predicate assertion like this:
 
 ``` cpp
-ASSERT_PRED1(IsNegative*<int>*, -5);
+ASSERT_PRED1(IsNegative<int>, -5);
 ```
 
 Things are more interesting if your template has more than one parameters. The
 following won't compile:
 
 ``` cpp
-ASSERT_PRED2(*GreaterThan<int, int>*, 5, 0);
+ASSERT_PRED2(GreaterThan<int, int>, 5, 0);
 ```
 
 
@@ -528,7 +528,7 @@ which is one more than expected. The workaround is to wrap the predicate
 function in parentheses:
 
 ``` cpp
-ASSERT_PRED2(*(GreaterThan<int, int>)*, 5, 0);
+ASSERT_PRED2((GreaterThan<int, int>), 5, 0);
 ```
 
 
@@ -960,12 +960,11 @@ Have you read a
 the Google Test Primer page?
 
 ## I want to use Google Test with Visual Studio but don't know where to start. ##
-Many people are in your position and one of the posted his solution to
-our mailing list.
+Many people are in your position and one of them posted his solution to our mailing list.
 
 ## I am seeing compile errors mentioning std::type\_traits when I try to use Google Test on Solaris. ##
 Google Test uses parts of the standard C++ library that SunStudio does not support.
-Our users reported success using alternative implementations. Try running the build after runing this commad:
+Our users reported success using alternative implementations. Try running the build after running this command:
 
 `export CC=cc CXX=CC CXXFLAGS='-library=stlport4'`
 
@@ -1015,7 +1014,7 @@ instead of
 ```
 in order to define a test.
 
-Currently, the following `TEST`, `FAIL`, `SUCCEED`, and the basic comparison assertion macros can have alternative names. You can see the full list of covered macros [here](http://www.google.com/codesearch?q=if+!GTEST_DONT_DEFINE_\w%2B+package:http://googletest\.googlecode\.com+file:/include/gtest/gtest.h). More information can be found in the "Avoiding Macro Name Clashes" section of the README file.
+Currently, the following `TEST`, `FAIL`, `SUCCEED`, and the basic comparison assertion macros can have . You can see the full list of covered macros [here](../include/gtest/gtest.h). More information can be found in the "Avoiding Macro Name Clashes" section of the README file.
 
 
 ## Is it OK if I have two separate `TEST(Foo, Bar)` test methods defined in different namespaces? ##
@@ -1035,7 +1034,7 @@ namespace bar {
 TEST(CoolTest, DoSomething) {
   SUCCEED();
 }
-}  // namespace foo
+}  // namespace bar
 ```
 
 However, the following code is **not allowed** and will produce a runtime error from Google Test because the test methods are using different test fixture classes with the same test case name.
@@ -1053,13 +1052,19 @@ class CoolTest : public ::testing::Test {};  // Fixture: bar::CoolTest
 TEST_F(CoolTest, DoSomething) {
   SUCCEED();
 }
-}  // namespace foo
+}  // namespace bar
 ```
 
 ## How do I build Google Testing Framework with Xcode 4? ##
 
 If you try to build Google Test's Xcode project with Xcode 4.0 or later, you may encounter an error message that looks like
 "Missing SDK in target gtest\_framework: /Developer/SDKs/MacOSX10.4u.sdk". That means that Xcode does not support the SDK the project is targeting. See the Xcode section in the [README](../README.md) file on how to resolve this.
+
+## How do I easily discover the flags needed for GoogleTest? ##
+
+GoogleTest (and GoogleMock) now support discovering all necessary flags using pkg-config.
+See the [pkg-config guide](Pkgconfig.md) on how you can easily discover all compiler and
+linker flags using pkg-config.
 
 ## My question is not covered in your FAQ! ##
 

@@ -35,7 +35,7 @@ We hope you find it useful!
   * Does automatic verification of expectations (no record-and-replay needed).
   * Allows arbitrary (partial) ordering constraints on
     function calls to be expressed,.
-  * Lets a user extend it by defining new matchers and actions.
+  * Lets an user extend it by defining new matchers and actions.
   * Does not use exceptions.
   * Is easy to learn and use.
 
@@ -53,18 +53,18 @@ the Apache License, which is different from Google Mock's license.
 If you are new to the project, we suggest that you read the user
 documentation in the following order:
 
-  * Learn the [basics](../googletest/docs/Primer.md) of
+  * Learn the [basics](../../master/googletest/docs/Primer.md) of
     Google Test, if you choose to use Google Mock with it (recommended).
-  * Read [Google Mock for Dummies](docs/ForDummies.md).
+  * Read [Google Mock for Dummies](../../master/googlemock/docs/ForDummies.md).
   * Read the instructions below on how to build Google Mock.
 
 You can also watch Zhanyong's [talk](http://www.youtube.com/watch?v=sYpCyLI47rM) on Google Mock's usage and implementation.
 
 Once you understand the basics, check out the rest of the docs:
 
-  * [CheatSheet](docs/CheatSheet.md) - all the commonly used stuff
+  * [CheatSheet](../../master/googlemock/docs/CheatSheet.md) - all the commonly used stuff
     at a glance.
-  * [CookBook](docs/CookBook.md) - recipes for getting things done,
+  * [CookBook](../../master/googlemock/docs/CookBook.md) - recipes for getting things done,
     including advanced techniques.
 
 If you need help, please check the
@@ -78,8 +78,8 @@ posting a question on the
 
 Google Mock is not a testing framework itself.  Instead, it needs a
 testing framework for writing tests.  Google Mock works seamlessly
-with [Google Test](http://code.google.com/p/googletest/), but
-you can also use it with [any C++ testing framework](googlemock/ForDummies.md#Using_Google_Mock_with_Any_Testing_Framework).
+with [Google Test](https://github.com/google/googletest), but
+you can also use it with [any C++ testing framework](../../master/googlemock/docs/ForDummies.md#using-google-mock-with-any-testing-framework).
 
 ### Requirements for End Users ###
 
@@ -90,7 +90,7 @@ You must use the bundled version of Google Test when using Google Mock.
 You can also easily configure Google Mock to work with another testing
 framework, although it will still need Google Test.  Please read
 ["Using_Google_Mock_with_Any_Testing_Framework"](
-    docs/ForDummies.md#Using_Google_Mock_with_Any_Testing_Framework)
+    ../../master/googlemock/docs/ForDummies.md#using-google-mock-with-any-testing-framework)
 for instructions.
 
 Google Mock depends on advanced C++ features and thus requires a more
@@ -124,6 +124,47 @@ build Google Mock and its tests, which has further requirements:
     re-generating certain source files from templates)
 
 ### Building Google Mock ###
+
+#### Using CMake ####
+
+If you have CMake available, it is recommended that you follow the
+[build instructions][gtest_cmakebuild]
+as described for Google Test. 
+
+If are using Google Mock with an
+existing CMake project, the section
+[Incorporating Into An Existing CMake Project][gtest_incorpcmake]
+may be of particular interest. 
+To make it work for Google Mock you will need to change 
+
+    target_link_libraries(example gtest_main)
+
+to 
+
+    target_link_libraries(example gmock_main)
+    
+This works because `gmock_main` library is compiled with Google Test.
+However, it does not automatically add Google Test includes.
+Therefore you will also have to change
+
+    if (CMAKE_VERSION VERSION_LESS 2.8.11)
+      include_directories("${gtest_SOURCE_DIR}/include")
+    endif()
+
+to
+
+    if (CMAKE_VERSION VERSION_LESS 2.8.11)
+      include_directories(BEFORE SYSTEM
+        "${gtest_SOURCE_DIR}/include" "${gmock_SOURCE_DIR}/include")
+    else()
+      target_include_directories(gmock_main SYSTEM BEFORE INTERFACE
+        "${gtest_SOURCE_DIR}/include" "${gmock_SOURCE_DIR}/include")
+    endif()
+
+This will addtionally mark Google Mock includes as system, which will 
+silence compiler warnings when compiling your tests using clang with 
+`-Wpedantic -Wall -Wextra -Wconversion`.
+
 
 #### Preparing to Build (Unix only) ####
 
@@ -292,8 +333,8 @@ may need to tweak your compiler and/or linker flags.  Please see the
 If you have custom matchers defined using `MatcherInterface` or
 `MakePolymorphicMatcher()`, you'll need to update their definitions to
 use the new matcher API (
-[monomorphic](http://code.google.com/p/googlemock/wiki/CookBook#Writing_New_Monomorphic_Matchers),
-[polymorphic](http://code.google.com/p/googlemock/wiki/CookBook#Writing_New_Polymorphic_Matchers)).
+[monomorphic](./docs/CookBook.md#writing-new-monomorphic-matchers),
+[polymorphic](./docs/CookBook.md#writing-new-polymorphic-matchers)).
 Matchers defined using `MATCHER()` or `MATCHER_P*()` aren't affected.
 
 ### Developing Google Mock ###
@@ -331,3 +372,5 @@ patch.
 Happy testing!
 
 [gtest_readme]: ../googletest/README.md "googletest"
+[gtest_cmakebuild]:  ../googletest/README.md#using-cmake "Using CMake"
+[gtest_incorpcmake]: ../googletest/README.md#incorporating-into-an-existing-cmake-project "Incorporating Into An Existing CMake Project"
