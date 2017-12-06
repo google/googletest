@@ -5,6 +5,12 @@
 // TODO - Need to migrate to a standardize Debian package deployment script.
 
 
+xenial_image = 'ubuntu16-build-env'
+xenial_docker = 'Dockerfile.xenial'
+trusty_image = 'ubuntu14-build-env'
+trusty_docker = 'Dockerfile.trusty'
+
+
 node('build && docker') {
 
     def is_rc = false
@@ -29,27 +35,9 @@ node('build && docker') {
     }
 
     stage('Prepare build env') {
-        // We're checking to see if an old image exists. If so, delete it to
-        // reduce total space usage.
+        buildImage(xenial_image, xenial_docker)
+        buildImage(trusty_image, trusty_docker)
 
-        def OLD_IMAGE = sh (script: 'docker images -q ubuntu16-build-env',
-                            returnStdout: true)
-        echo "Old docker image: ${OLD_IMAGE}"
-
-        docker.build("ubuntu16-build-env", "-f Dockerfile.xenial .")
-
-        def NEW_IMAGE = sh (script: 'docker images -q ubuntu16-build-env',
-                            returnStdout: true)
-
-        echo "New docker image: ${NEW_IMAGE}"
-
-        if (OLD_IMAGE.length() > 0 && OLD_IMAGE != NEW_IMAGE) {
-            def children = sh(script: "docker images --filter 'dangling=true' -q --no-trunc", returnStdout: true)
-            echo "Removing children: ${children}"
-            sh("docker rmi ${children}")
-            echo "Removing old image: ${OLD_IMAGE}"
-            sh("docker rmi ${OLD_IMAGE}")
-        }
     }
 
     stage('Build') {
@@ -68,7 +56,10 @@ node('build && docker') {
                  'RELEASE_KEY_ALIAS=demoapp',
                  'RELEASE_STORE_PASSWORD=ditto1',
                  'RELEASE_KEY_PASSWORD=ditto1']) {
-            docker.image('ubuntu16-build-env').inside {
+            docker.image(xenial_image).inside {
+                sh('./run_build.sh')
+            }
+            docker.image(trusty_image).inside {
                 sh('./run_build.sh')
             }
         }
@@ -81,6 +72,7 @@ node('build && docker') {
     stage('Publish') {
         withAWS(credentials:'package-uploads') {
             sh('./publish_xenial.sh')
+            sh('./publish_trusty.sh')
         }
 	
     }
@@ -104,4 +96,27 @@ def getGitTag() {
 
 def getGitBranch() {
     return sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
+}
+
+def buildImage(build_env, docker_file) {
+    // We're checking to see if an old image exists. If so, delete it to
+    // reduce total space usage.
+    def OLD_IMAGE = sh (script: 'docker images -q ' + build_env,
+                        returnStdout: true)
+    echo "Old docker image: ${OLD_IMAGE}"
+
+    docker.build(build_env, "-f " + docker_file + " .")
+
+    def NEW_IMAGE = sh (script: 'docker images -q ' + build_env,
+                        returnStdout: true)
+
+    echo "New docker image: ${NEW_IMAGE}"
+
+    if (OLD_IMAGE.length() > 0 && OLD_IMAGE != NEW_IMAGE) {
+        def children = sh(script: "docker images --filter 'dangling=true' -q --no-trunc", returnStdout: true)
+        echo "Removing children: ${children}"
+        sh("docker rmi ${children}")
+        echo "Removing old image: ${OLD_IMAGE}"
+        sh("docker rmi ${OLD_IMAGE}")
+    }
 }
