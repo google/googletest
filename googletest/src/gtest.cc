@@ -2884,7 +2884,7 @@ enum GTestColor {
 };
 
 #if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE && \
-    !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT
+    !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT && !GTEST_OS_WINDOWS_MINGW
 
 // Returns the character attribute for the given color.
 WORD GetColorAttribute(GTestColor color) {
@@ -2943,7 +2943,7 @@ bool ShouldUseColor(bool stdout_is_tty) {
   const char* const gtest_color = GTEST_FLAG(color).c_str();
 
   if (String::CaseInsensitiveCStringEquals(gtest_color, "auto")) {
-#if GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MINGW
     // On Windows the TERM variable is usually not set, but the
     // console there does support colors.
     return stdout_is_tty;
@@ -3001,7 +3001,7 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   }
 
 #if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE && \
-    !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT
+    !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT && !GTEST_OS_WINDOWS_MINGW
   const HANDLE stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 
   // Gets the current text color.
