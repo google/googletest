@@ -9,10 +9,10 @@
 SNAPSHOTID=`date +%Y%m%d-%H%M`
 REPO='3rdparty-14.04'
 
-if [ `aptly repo list | grep 3rdparty | wc -l` == 0 ]; then
-    aptly repo create 3rdparty-14.04
+if [ `aptly repo list | grep ${REPO} | wc -l` == 0 ]; then
+    aptly repo create ${REPO}
 else
-    aptly repo remove 3rdparty-14.04 googletest
+    aptly repo remove ${REPO} googletest
 fi
 
 BUILD_DIR=build
