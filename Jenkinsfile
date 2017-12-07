@@ -9,6 +9,8 @@ xenial_image = 'ubuntu16-build-env'
 xenial_docker = 'Dockerfile.xenial'
 trusty_image = 'ubuntu14-build-env'
 trusty_docker = 'Dockerfile.trusty'
+build_vars = [['ubuntu16-build-env', 'Dockerfile.xenial', '3rdparty-16.04'],
+              ['ubuntu14-build-env', 'Dockerfile.trusty', '3rdparty-14.04']]
 
 
 node('build && docker') {
@@ -34,47 +36,45 @@ node('build && docker') {
         echo "Current tag is a Release tag: ${is_release}"
     }
 
-    stage('Prepare build env') {
-        buildImage(xenial_image, xenial_docker)
-        buildImage(trusty_image, trusty_docker)
+    for (build_var in build_vars) {
 
-    }
+        stage('Prepare build env: ' + build_var[0]) {
+            buildImage(build_var[0], build_var[1])
 
-    stage('Build') {
+        }
 
-        def USER_ID = sh (
-            script: 'id -u',
-            returnStdout: true
-        ).trim()
-        def GROUP_ID = sh (
-            script: 'id -g',
-            returnStdout: true
-        ).trim()
+        stage('Build: ' + build_var[0]) {
 
-        withEnv(['USER_ID=${USER_ID}','GROUP_ID=${GROUP_ID}',
-                 'RELEASE_KEYSTORE=keystore.jks',
-                 'RELEASE_KEY_ALIAS=demoapp',
-                 'RELEASE_STORE_PASSWORD=ditto1',
-                 'RELEASE_KEY_PASSWORD=ditto1']) {
-            docker.image(xenial_image).inside {
-                sh('./run_build.sh')
-            }
-            docker.image(trusty_image).inside {
-                sh('./run_build.sh')
+            def USER_ID = sh (
+                script: 'id -u',
+                returnStdout: true
+            ).trim()
+            def GROUP_ID = sh (
+                script: 'id -g',
+                returnStdout: true
+            ).trim()
+
+            withEnv(['USER_ID=${USER_ID}','GROUP_ID=${GROUP_ID}',
+                     'RELEASE_KEYSTORE=keystore.jks',
+                     'RELEASE_KEY_ALIAS=demoapp',
+                     'RELEASE_STORE_PASSWORD=ditto1',
+                     'RELEASE_KEY_PASSWORD=ditto1']) {
+                docker.image(build_var[0]).inside {
+                    sh('./run_build.sh')
+                }
             }
         }
-    }
 
-    stage('ArchiveArtifacts') {
-        archiveArtifacts(artifacts: 'build/*.deb')
-    }
-
-    stage('Publish') {
-        withAWS(credentials:'package-uploads') {
-            sh('./publish_xenial.sh')
-            sh('./publish_trusty.sh')
+        stage('ArchiveArtifacts ' + build_var[0]) {
+            archiveArtifacts(artifacts: 'build/*.deb')
         }
-	
+
+        stage('Publish ' + build_var[0]) {
+            withAWS(credentials:'package-uploads') {
+                sh('./publish.sh ' + build_var[2])
+            }
+    	
+        }
     }
 
 }
