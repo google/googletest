@@ -5347,16 +5347,6 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
     }
   }
 
-// Fix the value of *_NSGetArgc() on macOS, but iff 
-// *_NSGetArgv() == argv
-#if GTEST_OS_MAC
-# ifndef GTEST_OS_IOS
-  if (*_NSGetArgv() == argv) {
-    *_NSGetArgc() = *argc;
-  }
-# endif
-#endif
-
   if (g_help_flag) {
     // We print the help here instead of in RUN_ALL_TESTS(), as the
     // latter may not be called at all if the user is using Google
@@ -5369,6 +5359,17 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
 // other parts of Google Test.
 void ParseGoogleTestFlagsOnly(int* argc, char** argv) {
   ParseGoogleTestFlagsOnlyImpl(argc, argv);
+  
+  // Fix the value of *_NSGetArgc() on macOS, but iff 
+  // *_NSGetArgv() == argv
+  // Only applicable to char** version of argv
+#if GTEST_OS_MAC
+# ifndef GTEST_OS_IOS
+  if (*_NSGetArgv() == argv) {
+    *_NSGetArgc() = *argc;
+  }
+# endif
+#endif
 }
 void ParseGoogleTestFlagsOnly(int* argc, wchar_t** argv) {
   ParseGoogleTestFlagsOnlyImpl(argc, argv);
