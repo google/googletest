@@ -146,6 +146,12 @@
 # define vsnprintf _vsnprintf
 #endif  // GTEST_OS_WINDOWS
 
+#if GTEST_OS_MAC
+# ifndef GTEST_OS_IOS
+#  include <crt_externs.h>
+# endif
+#endif
+
 namespace testing {
 
 using internal::CountIf;
@@ -5340,6 +5346,16 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
       i--;
     }
   }
+
+// Fix the value of *_NSGetArgc() on macOS, but iff 
+// *_NSGetArgv() == argv
+#if GTEST_OS_MAC
+# ifndef GTEST_OS_IOS
+  if (*_NSGetArgv() == argv) {
+    *_NSGetArgc() = *argc;
+  }
+# endif
+#endif
 
   if (g_help_flag) {
     // We print the help here instead of in RUN_ALL_TESTS(), as the
