@@ -1364,6 +1364,27 @@ AssertionResult DoubleNearPredFormat(const char* expr1,
                                      double val1,
                                      double val2,
                                      double abs_error) {
+  const double max_val = std::max(fabs(val1), fabs(val2));
+  const double max_val_next = nextafter(max_val, INFINITY);
+  // Calculate the difference between adjacent doubles and make sure that
+  // abs_error is not smaller than that. If max_val_next is infinite then the
+  // difference calculation is meaningless but also unnecessary.
+  if (isfinite(max_val_next))
+  {
+    // This subtraction is exact.
+    double min_epsilon = max_val_next - max_val;
+    // Check for min_epsilon > 0 because disabled denormals could give an
+    // epsilon calculation of 0.0 which is wrong.
+    if (min_epsilon > 0 && abs_error < min_epsilon)
+      return AssertionFailure()
+      << "The epsilon used to compare " << expr1 << " and " << expr2
+      << " is less than the minimum epsilon in this range, which is "
+      << min_epsilon << ", where\n"
+      << expr1 << " evaluates to " << val1 << ",\n"
+      << expr2 << " evaluates to " << val2 << ", and\n"
+      << abs_error_expr << " evaluates to " << abs_error << ".";
+  }
+
   const double diff = fabs(val1 - val2);
   if (diff <= abs_error) return AssertionSuccess();
 
