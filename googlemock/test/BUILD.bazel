@@ -32,6 +32,8 @@
 #   
 #   Bazel Build for Google C++ Testing Framework(Google Test)-googlemock
 
+licenses(["notice"])
+
 """ gmock own tests """
 
 cc_test(
