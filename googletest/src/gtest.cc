@@ -1369,7 +1369,7 @@ AssertionResult DoubleNearPredFormat(const char* expr1,
   // Calculate the difference between adjacent doubles and make sure that
   // abs_error is not smaller than that. If max_val_next is infinite then the
   // difference calculation is meaningless but also unnecessary.
-  if (std::isfinite(max_val_next))
+  if (max_val_next < INFINITY)
   {
     // This subtraction is exact.
     double min_epsilon = max_val_next - max_val;
