@@ -5,12 +5,20 @@
 // TODO - Need to migrate to a standardize Debian package deployment script.
 
 
-xenial_image = 'ubuntu16-build-env'
-xenial_docker = 'Dockerfile.xenial'
-trusty_image = 'ubuntu14-build-env'
-trusty_docker = 'Dockerfile.trusty'
-build_vars = [['ubuntu16-build-env', 'Dockerfile.xenial', '3rdparty-16.04'],
-              ['ubuntu14-build-env', 'Dockerfile.trusty', '3rdparty-14.04']]
+build_vars = [
+    ubuntu16: [
+        env: 'ubuntu16-build-env',
+        docker_filename: 'Dockerfile.xenial',
+        repo: '3rdparty-16.04',
+        dist: 'xenial'
+    ],
+    ubuntu14: [
+        env:'ubuntu14-build-env',
+        docker_filename: 'Dockerfile.trusty',
+        repo: '3rdparty-14.04',
+        dist: 'trusty'
+    ]
+]
 
 
 node('build && docker') {
@@ -36,10 +44,11 @@ node('build && docker') {
         echo "Current tag is a Release tag: ${is_release}"
     }
 
-    for (build_var in build_vars) {
+    for (build_var_map in build_vars) {
+        def build_var = build_var_map.value
 
-        stage('Prepare build env: ' + build_var[0]) {
-            buildImage(build_var[0], build_var[1])
+        stage('Prepare build env: ' + build_var.env) {
+            buildImage(build_var.env, build_var.docker_filename)
 
         }
 
@@ -59,21 +68,24 @@ node('build && docker') {
                      'RELEASE_KEY_ALIAS=demoapp',
                      'RELEASE_STORE_PASSWORD=ditto1',
                      'RELEASE_KEY_PASSWORD=ditto1']) {
-                docker.image(build_var[0]).inside {
+                docker.image(build_var.env).inside {
                     sh('./run_build.sh')
                 }
             }
         }
 
-        stage('ArchiveArtifacts ' + build_var[0]) {
+        stage('ArchiveArtifacts ' + build_var.env) {
             archiveArtifacts(artifacts: 'build/*.deb')
         }
 
-        stage('Publish ' + build_var[0]) {
+        stage('Publish ' + build_var.env) {
             withAWS(credentials:'package-uploads') {
-                sh('./publish.sh ' + build_var[2])
+                sh('./publish.sh ' + build_var.repo + ' ' + build_var.dist)
             }
-    	
+        }    	
+
+        stage('Cleanup') {
+            deleteDir()
         }
     }
 
