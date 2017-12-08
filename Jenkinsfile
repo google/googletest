@@ -10,7 +10,7 @@ build_envs = [
         'docker_name' : 'ubuntu16-build-env',
         'docker_file' : 'Dockerfile.xenial',
         'working_dir' : 'ubuntu16',
-        'repo'        : '3rdparty-16.04-staging',
+        'repo'        : '3rdparty-16.04',
         'dist'        : 'xenial',
     ],
     'ubuntu14' : [
