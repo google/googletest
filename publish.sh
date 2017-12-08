@@ -16,7 +16,7 @@ PASSPHRASE=waldorf-fantastic-optimization-caviar
 if [ `aptly repo list | grep ${REPO} | wc -l` == 0 ]; then
     aptly repo create ${REPO}
 else
-    aptly repo remove ${REPO} 'Name (% opencv-*)'
+    aptly repo remove ${REPO} googletest
 fi
 
 echo "Build dir is:"
