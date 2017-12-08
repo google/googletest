@@ -28,10 +28,8 @@ node('build && docker') {
     // Set max number of builds to keep to 5.
     properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5']]]);
 
-    parallel (
-        'ubuntu16' : build(build_envs['ubuntu16']),
-        'ubuntu14' : build(build_envs['ubuntu14']),
-    )
+    build(build_envs['ubuntu16'])
+    build(build_envs['ubuntu14'])
 }
 
 def getGitHash() {
