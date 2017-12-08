@@ -29,7 +29,7 @@
       "forceSigV2": false,
       "debug": false
     },
-      "3rdparty-14.04": {
+    "3rdparty-14.04": {
       "region": "us-east-1",
       "bucket": "3rdparty-14.04",
       "endpoint": "",
