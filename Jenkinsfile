@@ -70,7 +70,7 @@ def build(build_vars) {
             echo "Current tag is a Release tag: ${is_release}"
         }
 
-        stage('Prepare build env: ${build_vars.docker_name}') {
+        stage('Prepare build env: ' + build_vars.docker_name) {
             // We're checking to see if an old image exists. If so, delete it to
             // reduce total space usage.
 
@@ -99,7 +99,7 @@ def build(build_vars) {
             }
         }
 
-        stage('Build: ${build_vars.docker_name}') {
+        stage('Build:' + build_vars.docker_name) {
 
             def USER_ID = sh (
                 script: 'id -u',
@@ -121,17 +121,17 @@ def build(build_vars) {
             }
         }
 
-        stage('ArchiveArtifacts: ${build_vars.docker_name}') {
+        stage('ArchiveArtifacts:' + build_vars.docker_name) {
             archiveArtifacts(artifacts: 'build/*.deb')
         }
 
-        stage('Publish: ${build_vars.docker_name}') {
+        stage('Publish:' + build_vars.docker_name) {
             withAWS(credentials:'package-uploads') {
                 sh("./publish.sh ${build_vars.repo} ${build_vars.dist}")
             }
         }
 
-        stage('CleanUp: ${build_vars.docker_name}') {
+        stage('CleanUp:' + build_vars.docker_name) {
             def current_dir = pwd()
             echo "Cleaning up ${current_dir}"
             deleteDir()
