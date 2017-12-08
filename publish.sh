@@ -8,6 +8,8 @@
 # Adding updated package to our aptly repo
 SNAPSHOTID=`date +%Y%m%d-%H%M`
 REPO=$1
+DIST=$2
+
 
 if [ `aptly repo list | grep ${REPO} | wc -l` == 0 ]; then
     aptly repo create ${REPO}
@@ -27,6 +29,6 @@ for x in echo ' '; do
 	echo "STAGE $x"
 	$x aptly -config=./aptly-conf repo add ${REPO} ${BUILD_DIR}/*.deb
 	$x aptly -config=./aptly-conf snapshot create $REPO-$SNAPSHOTID from repo $REPO
-	$x aptly -config=./aptly-conf publish drop xenial s3:${REPO}:
-	$x aptly -config=./aptly-conf publish snapshot -force-overwrite -passphrase=waldorf-fantastic-optimization-caviar -batch=true --distribution=xenial $REPO-$SNAPSHOTID s3:${REPO}:
+	$x aptly -config=./aptly-conf publish drop $DIST s3:${REPO}:
+	$x aptly -config=./aptly-conf publish snapshot -force-overwrite -passphrase=waldorf-fantastic-optimization-caviar -batch=true --distribution=$DIST $REPO-$SNAPSHOTID s3:${REPO}:
 done
