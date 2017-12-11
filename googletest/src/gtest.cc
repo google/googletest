@@ -36,6 +36,7 @@
 #include "gtest/gtest-spi.h"
 
 #include <ctype.h>
+#include <float.h>
 #include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -107,6 +108,12 @@
 // silence it.
 # include <windows.h>  // NOLINT
 # undef min
+
+// Prior to VC++ 2015 (MSC_VER = 1900) _nextafter is available instead of
+// nextafter.
+#if _MSC_VER < 1900
+#define nextafter _nextafter
+#endif
 
 #else
 
@@ -1365,11 +1372,12 @@ AssertionResult DoubleNearPredFormat(const char* expr1,
                                      double val2,
                                      double abs_error) {
   const double max_val = fabs(val1) > fabs(val2) ? fabs(val1) : fabs(val2);
-  const double max_val_next = nextafter(max_val, INFINITY);
+  const double infinity = std::numeric_limits<double>::infinity();
+  const double max_val_next = nextafter(max_val, infinity);
   // Calculate the difference between adjacent doubles and make sure that
   // abs_error is not smaller than that. If max_val_next is infinite then the
   // difference calculation is meaningless but also unnecessary.
-  if (max_val_next < INFINITY)
+  if (max_val_next < infinity)
   {
     // This subtraction is exact.
     double min_epsilon = max_val_next - max_val;
