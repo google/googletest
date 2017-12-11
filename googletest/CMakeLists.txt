@@ -74,8 +74,8 @@ config_compiler_and_linker()  # Defined in internal_utils.cmake.
 
 # Where Google Test's .h files can be found.
 include_directories(
-  ${gtest_SOURCE_DIR}/include
-  ${gtest_SOURCE_DIR})
+  "${gtest_SOURCE_DIR}/include"
+  "${gtest_SOURCE_DIR}")
 
 # Summary of tuple support for Microsoft Visual Studio:
 # Compiler    version(MS)  version(cmake)  Support
@@ -85,10 +85,11 @@ include_directories(
 # VS 2013     12           1800            std::tr1::tuple
 # VS 2015     14           1900            std::tuple
 # VS 2017     15           >= 1910         std::tuple
+
 if (MSVC AND MSVC_VERSION EQUAL 1700)
   add_definitions(/D _VARIADIC_MAX=10)
 endif()
-
+ 
 ########################################################################
 #
 # Defines the gtest & gtest_main libraries.  User tests should link
@@ -114,11 +115,11 @@ endif()
 # Install rules
 if(INSTALL_GTEST)
   install(TARGETS gtest gtest_main
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-  install(DIRECTORY ${gtest_SOURCE_DIR}/include/gtest
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+  install(DIRECTORY "${gtest_SOURCE_DIR}/include/gtest"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
   # configure and install pkgconfig files
   configure_file(

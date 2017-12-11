@@ -1092,8 +1092,8 @@ TEST(PrintTr1TupleTest, VariousSizes) {
   ::std::tr1::tuple<bool, char, short, testing::internal::Int32,  // NOLINT
                     testing::internal::Int64, float, double, const char*, void*,
                     std::string>
-      t10(false, 'a', static_cast<short>(3), 4, 5, 1.5F, -2.5, str, 
-          ImplicitCast_<void*>(NULL), "10");
+      t10(false, 'a', ImplicitCast_<short>(3), 4, 5, 1.5F, -2.5, str, ImplicitCast_<void*>(NULL),
+          "10");
   EXPECT_EQ("(false, 'a' (97, 0x61), 3, 4, 5, 1.5, -2.5, " + PrintPointer(str) +
             " pointing to \"8\", NULL, \"10\")",
             Print(t10));
@@ -1152,7 +1152,7 @@ TEST(PrintStdTupleTest, VariousSizes) {
   ::std::tuple<bool, char, short, testing::internal::Int32,  // NOLINT
                testing::internal::Int64, float, double, const char*, void*,
                std::string>
-      t10(false, 'a', static_cast<short>(3), 4, 5, 1.5F, -2.5, str,
+      t10(false, 'a', ImplicitCast_<short>(3), 4, 5, 1.5F, -2.5, str,
           ImplicitCast_<void*>(NULL), "10");
   EXPECT_EQ("(false, 'a' (97, 0x61), 3, 4, 5, 1.5, -2.5, " + PrintPointer(str) +
             " pointing to \"8\", NULL, \"10\")",

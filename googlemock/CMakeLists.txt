@@ -76,6 +76,7 @@ include_directories("${gmock_SOURCE_DIR}/include"
 # VS 2013     12           1800            std::tr1::tuple
 # VS 2015     14           1900            std::tuple
 # VS 2017     15           >= 1910         std::tuple
+
 if (MSVC AND MSVC_VERSION EQUAL 1700)
   add_definitions(/D _VARIADIC_MAX=10)
 endif()
@@ -112,11 +113,11 @@ endif()
 # Install rules
 if(INSTALL_GMOCK)
   install(TARGETS gmock gmock_main
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-  install(DIRECTORY ${gmock_SOURCE_DIR}/include/gmock
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+  install(DIRECTORY "${gmock_SOURCE_DIR}/include/gmock"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
   # configure and install pkgconfig files
   configure_file(
