@@ -76,7 +76,6 @@ include_directories("${gmock_SOURCE_DIR}/include"
 # VS 2013     12           1800            std::tr1::tuple
 # VS 2015     14           1900            std::tuple
 # VS 2017     15           >= 1910         std::tuple
-
 if (MSVC AND MSVC_VERSION EQUAL 1700)
   add_definitions(/D _VARIADIC_MAX=10)
 endif()
