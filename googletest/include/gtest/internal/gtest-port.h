@@ -646,7 +646,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // Prevent `warning C4996: 'std::tr1': warning STL4002: The non-Standard std::tr1 namespace and TR1-only machinery are deprecated and will be REMOVED.`
 #  define GTEST_HAS_TR1_TUPLE 0
 # else
-   // The user didn't tell us not to do it, so we assume it's OK.
+// The user didn't tell us not to do it, so we assume it's OK.
 #  define GTEST_HAS_TR1_TUPLE 1
 # endif
 #endif  // GTEST_HAS_TR1_TUPLE
