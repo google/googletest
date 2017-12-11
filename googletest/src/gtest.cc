@@ -1364,7 +1364,7 @@ AssertionResult DoubleNearPredFormat(const char* expr1,
                                      double val1,
                                      double val2,
                                      double abs_error) {
-  const double max_val = std::max(fabs(val1), fabs(val2));
+  const double max_val = fabs(val1) > fabs(val2) ? fabs(val1) : fabs(val2);
   const double max_val_next = nextafter(max_val, INFINITY);
   // Calculate the difference between adjacent doubles and make sure that
   // abs_error is not smaller than that. If max_val_next is infinite then the
