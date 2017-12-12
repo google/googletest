@@ -51,10 +51,15 @@
 #include "gtest/gtest.h"
 
 // hash_map and hash_set are available under Visual C++, or on Linux.
-#if GTEST_HAS_HASH_MAP_
+#if GTEST_HAS_UNORDERED_MAP_
+# include <unordered_map>       // NOLINT
+#elif GTEST_HAS_HASH_MAP_
 # include <hash_map>            // NOLINT
 #endif  // GTEST_HAS_HASH_MAP_
-#if GTEST_HAS_HASH_SET_
+
+#if GTEST_HAS_UNORDERED_SET_
+# include <unordered_set>       // NOLINT
+#elif GTEST_HAS_HASH_SET_
 # include <hash_set>            // NOLINT
 #endif  // GTEST_HAS_HASH_SET_
 
@@ -187,6 +192,29 @@ inline ::std::ostream& operator<<(::std::ostream& os,
   return os << "StreamableTemplateInFoo: " << x.value();
 }
 
+// A user-defined streamable but recursivly-defined container type in 
+// a user namespace, it mimics therefore std::filesystem::path or
+// boost::filesystem::path.
+class PathLike {
+ public:
+  struct iterator
+  {
+    typedef PathLike value_type;
+  };
+  typedef iterator const_iterator;
+
+  PathLike() {}
+
+  iterator begin() const { return iterator(); }
+  iterator end() const { return iterator(); }
+
+  friend 
+  ::std::ostream& operator<<(::std::ostream& os, const PathLike&)
+  {
+    return os << "Streamable-PathLike";
+  }
+};
+
 }  // namespace foo
 
 namespace testing {
@@ -216,21 +244,47 @@ using ::testing::internal::UniversalTersePrintTupleFieldsToStrings;
 #endif
 using ::testing::internal::string;
 
-#if GTEST_HAS_HASH_MAP_
 // The hash_* classes are not part of the C++ standard.  STLport
 // defines them in namespace std.  MSVC defines them in ::stdext.  GCC
 // defines them in ::.
+#if GTEST_HAS_UNORDERED_MAP_
+
+#define GTEST_HAS_HASH_MAP_ 1
+template<class Key, class T>
+using hash_map = ::std::unordered_map<Key, T>;
+template<class Key, class T>
+using hash_multimap = ::std::unordered_multimap<Key, T>;
+
+#elif GTEST_HAS_HASH_MAP_
+
 #ifdef _STLP_HASH_MAP  // We got <hash_map> from STLport.
 using ::std::hash_map;
-using ::std::hash_set;
 using ::std::hash_multimap;
-using ::std::hash_multiset;
 #elif _MSC_VER
 using ::stdext::hash_map;
-using ::stdext::hash_set;
 using ::stdext::hash_multimap;
+#endif
+
+#endif
+
+#if GTEST_HAS_UNORDERED_SET_
+
+#define GTEST_HAS_HASH_SET_ 1
+template<class Key>
+using hash_set = ::std::unordered_set<Key>;
+template<class Key>
+using hash_multiset = ::std::unordered_multiset<Key>;
+
+#elif GTEST_HAS_HASH_SET_
+
+#ifdef _STLP_HASH_MAP  // We got <hash_map> from STLport.
+using ::std::hash_set;
+using ::std::hash_multiset;
+#elif _MSC_VER
+using ::stdext::hash_set;
 using ::stdext::hash_multiset;
 #endif
+
 #endif
 
 // Prints a value to a string using the universal value printer.  This
@@ -1038,8 +1092,8 @@ TEST(PrintTr1TupleTest, VariousSizes) {
   ::std::tr1::tuple<bool, char, short, testing::internal::Int32,  // NOLINT
                     testing::internal::Int64, float, double, const char*, void*,
                     std::string>
-      t10(false, 'a', 3, 4, 5, 1.5F, -2.5, str, ImplicitCast_<void*>(NULL),
-          "10");
+      t10(false, 'a', static_cast<short>(3), 4, 5, 1.5F, -2.5, str, 
+          ImplicitCast_<void*>(NULL), "10");
   EXPECT_EQ("(false, 'a' (97, 0x61), 3, 4, 5, 1.5, -2.5, " + PrintPointer(str) +
             " pointing to \"8\", NULL, \"10\")",
             Print(t10));
@@ -1098,8 +1152,8 @@ TEST(PrintStdTupleTest, VariousSizes) {
   ::std::tuple<bool, char, short, testing::internal::Int32,  // NOLINT
                testing::internal::Int64, float, double, const char*, void*,
                std::string>
-      t10(false, 'a', 3, 4, 5, 1.5F, -2.5, str, ImplicitCast_<void*>(NULL),
-          "10");
+      t10(false, 'a', static_cast<short>(3), 4, 5, 1.5F, -2.5, str,
+          ImplicitCast_<void*>(NULL), "10");
   EXPECT_EQ("(false, 'a' (97, 0x61), 3, 4, 5, 1.5, -2.5, " + PrintPointer(str) +
             " pointing to \"8\", NULL, \"10\")",
             Print(t10));
@@ -1159,6 +1213,15 @@ TEST(PrintStreamableTypeTest, InGlobalNamespace) {
 TEST(PrintStreamableTypeTest, TemplateTypeInUserNamespace) {
   EXPECT_EQ("StreamableTemplateInFoo: 0",
             Print(::foo::StreamableTemplateInFoo<int>()));
+}
+
+// Tests printing a user-defined recursive container type that has a <<
+// operator.
+TEST(PrintStreamableTypeTest, PathLikeInUserNamespace) {
+  ::foo::PathLike x;
+  EXPECT_EQ("Streamable-PathLike", Print(x));
+  const ::foo::PathLike cx;
+  EXPECT_EQ("Streamable-PathLike", Print(cx));
 }
 
 // Tests printing user-defined types that have a PrintTo() function.
