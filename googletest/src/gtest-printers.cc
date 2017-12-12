@@ -180,7 +180,10 @@ static CharFormat PrintAsCharLiteralTo(Char c, ostream* os) {
         *os << static_cast<char>(c);
         return kAsIs;
       } else {
-        *os << "\\x" + String::FormatHexInt(static_cast<UnsignedChar>(c));
+        ostream::fmtflags flags = os->flags();
+        *os << "\\x" << std::hex << std::uppercase
+            << static_cast<int>(static_cast<UnsignedChar>(c));
+        os->flags(flags);
         return kHexEscape;
       }
   }
