@@ -107,6 +107,10 @@
 # include <tuple>
 #endif
 
+#if _MSC_VER && ! _WIN64 && ! GTEST_NO_PRINT_ENVIRONMENT_DETECTION
+  #define GTEST_PRINT_ENVIRONMENT_32
+#endif
+
 namespace testing {
 
 // Definitions in the 'internal' and 'internal2' name spaces are
@@ -432,8 +436,17 @@ void DefaultPrintTo(WrapPrinterType<kPrintFunctionPointer> /* dummy */,
     // even using reinterpret_cast, as earlier versions of gcc
     // (e.g. 3.4.5) cannot compile the cast when p is a function
     // pointer.  Casting to UInt64 first solves the problem.
+    // On 32 bits platforms, a prior casting to UInt32 before 
+    // casting to UInt64 might be required to avoid some warnings
+    // (esp. for visual studio with elevated warning levels)
+   #ifdef GTEST_PRINT_ENVIRONMENT_32
+     *os << reinterpret_cast<const void*>(
+       static_cast<internal::UInt64>(
+         reinterpret_cast<internal::UInt32>(p)));
+    #else
     *os << reinterpret_cast<const void*>(
         reinterpret_cast<internal::UInt64>(p));
+    #endif
   }
 }
 
