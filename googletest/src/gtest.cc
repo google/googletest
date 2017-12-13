@@ -1,4 +1,5 @@
 // Copyright 2005, Google Inc.
+// Copyright (c) 2017, VMware, Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -824,17 +825,19 @@ TimeInMillis GetTimeInMillis() {
   }
   return 0;
 #elif GTEST_OS_WINDOWS && !GTEST_HAS_GETTIMEOFDAY_
-  __timeb64 now;
+  static LARGE_INTEGER sPerfFrequency;
+  LARGE_INTEGER perfCounter;
 
-  // MSVC 8 deprecates _ftime64(), so we want to suppress warning 4996
-  // (deprecated function) there.
-  // TODO(kenton@google.com): Use GetTickCount()?  Or use
-  //   SystemTimeToFileTime()
-  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4996)
-  _ftime64(&now);
-  GTEST_DISABLE_MSC_WARNINGS_POP_()
+  if (!sPerfFrequency.QuadPart) {
+    assert(QueryPerformanceFrequency(&sPerfFrequency));
+  }
 
-  return static_cast<TimeInMillis>(now.time) * 1000 + now.millitm;
+  assert(QueryPerformanceCounter(&perfCounter));
+  // Do the division in two times to avoid integer division
+  // cutting off valuable milliseconds.
+  const TimeInMillis secs = perfCounter.QuadPart / sPerfFrequency.QuadPart;
+  const TimeInMillis rem = perfCounter.QuadPart % sPerfFrequency.QuadPart;
+  return secs * 1000 + (rem * 1000) / sPerfFrequency.QuadPart;
 #elif GTEST_HAS_GETTIMEOFDAY_
   struct timeval now;
   gettimeofday(&now, NULL);
