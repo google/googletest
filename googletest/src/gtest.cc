@@ -45,6 +45,9 @@
 #include <wctype.h>
 
 #include <algorithm>
+#if GTEST_LANG_CXX11
+  #include <chrono>
+#endif
 #include <iomanip>
 #include <limits>
 #include <list>
@@ -802,7 +805,10 @@ std::string UnitTestImpl::CurrentOsStackTraceExceptTop(int skip_count) {
 
 // Returns the current time in milliseconds.
 TimeInMillis GetTimeInMillis() {
-#if GTEST_OS_WINDOWS_MOBILE || defined(__BORLANDC__)
+#if GTEST_LANG_CXX11
+  auto now{ std::chrono::high_resolution_clock::now().time_since_epoch() };
+  return std::chrono::duration_cast<std::chrono::milliseconds, TimeInMillis>(now).count();
+#elif GTEST_OS_WINDOWS_MOBILE || defined(__BORLANDC__)
   // Difference between 1970-01-01 and 1601-01-01 in milliseconds.
   // http://analogous.blogspot.com/2005/04/epoch.html
   const TimeInMillis kJavaEpochToWinFileTimeDelta =
@@ -824,17 +830,16 @@ TimeInMillis GetTimeInMillis() {
   }
   return 0;
 #elif GTEST_OS_WINDOWS && !GTEST_HAS_GETTIMEOFDAY_
-  __timeb64 now;
+  // 100ns ticks between 1/1/1601 00:00 UTC and 1/1/1970 00:00 UTC
+  const unsigned __int64 epochTime = 0x19DB1DED53E8000; 
+    
+  // get the system time, convert to system time period and convert to number of 100ns ticks since 1/1/1970 00:00 UTC
+  FILETIME now;
+  GetSystemTimeAsFileTime(&now);
+  unsigned _int64 fileTimeTicks = (static_cast<unsigned _int64>(now.dwHighDateTime) << (sizeof(DWORD) * 8)) +
+                                  static_cast<unsigned _int64>(now.dwLowDateTime) - epochTime;
 
-  // MSVC 8 deprecates _ftime64(), so we want to suppress warning 4996
-  // (deprecated function) there.
-  // TODO(kenton@google.com): Use GetTickCount()?  Or use
-  //   SystemTimeToFileTime()
-  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4996)
-  _ftime64(&now);
-  GTEST_DISABLE_MSC_WARNINGS_POP_()
-
-  return static_cast<TimeInMillis>(now.time) * 1000 + now.millitm;
+  return static_cast<TimeInMillis>(fileTimeTicks / 10000);
 #elif GTEST_HAS_GETTIMEOFDAY_
   struct timeval now;
   gettimeofday(&now, NULL);
