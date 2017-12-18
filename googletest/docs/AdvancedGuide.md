@@ -1263,7 +1263,7 @@ known as <i>abstract tests</i>. As an example of its application, when you
 are designing an interface you can write a standard suite of abstract
 tests (perhaps using a factory function as the test parameter) that
 all implementations of the interface are expected to pass. When
-someone implements the interface, he can instantiate your suite to get
+someone implements the interface, they can instantiate your suite to get
 all the interface-conformance tests for free.
 
 To define abstract tests, you should organize your code like this:
@@ -1623,8 +1623,8 @@ printf("We are in test %s of test case %s.\n",
 ```
 
 `current_test_info()` returns a null pointer if no test is running. In
-particular, you cannot find the test case name in `TestCaseSetUp()`,
-`TestCaseTearDown()` (where you know the test case name implicitly), or
+particular, you cannot find the test case name in `SetUpTestCase()`,
+`TearDownTestCase()` (where you know the test case name implicitly), or
 functions called from them.
 
 _Availability:_ Linux, Windows, Mac.
