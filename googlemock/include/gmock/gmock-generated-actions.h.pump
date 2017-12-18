@@ -357,7 +357,7 @@ $range j2 2..i
 // MORE INFORMATION:
 //
 // To learn more about using these macros, please search for 'ACTION'
-// on http://code.google.com/p/googlemock/wiki/CookBook.
+// on https://github.com/google/googletest/blob/master/googlemock/docs/CookBook.md
 
 $range i 0..n
 $range k 0..n-1
