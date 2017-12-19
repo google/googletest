@@ -2556,7 +2556,6 @@ TestInfo* MakeAndRegisterTestInfo(
   return test_info;
 }
 
-#if GTEST_HAS_PARAM_TEST
 void ReportInvalidTestCaseType(const char* test_case_name,
                                CodeLocation code_location) {
   Message errors;
@@ -2575,7 +2574,6 @@ void ReportInvalidTestCaseType(const char* test_case_name,
                              code_location.line)
        << " " << errors.GetString();
 }
-#endif  // GTEST_HAS_PARAM_TEST
 
 }  // namespace internal
 
@@ -2614,12 +2612,10 @@ namespace internal {
 // and INSTANTIATE_TEST_CASE_P into regular tests and registers those.
 // This will be done just once during the program runtime.
 void UnitTestImpl::RegisterParameterizedTests() {
-#if GTEST_HAS_PARAM_TEST
   if (!parameterized_tests_registered_) {
     parameterized_test_registry_.RegisterTests();
     parameterized_tests_registered_ = true;
   }
-#endif
 }
 
 }  // namespace internal
@@ -4309,7 +4305,6 @@ const TestInfo* UnitTest::current_test_info() const
 // Returns the random seed used at the start of the current test run.
 int UnitTest::random_seed() const { return impl_->random_seed(); }
 
-#if GTEST_HAS_PARAM_TEST
 // Returns ParameterizedTestCaseRegistry object used to keep track of
 // value-parameterized tests and instantiate and register them.
 internal::ParameterizedTestCaseRegistry&
@@ -4317,7 +4312,6 @@ internal::ParameterizedTestCaseRegistry&
         GTEST_LOCK_EXCLUDED_(mutex_) {
   return impl_->parameterized_test_registry();
 }
-#endif  // GTEST_HAS_PARAM_TEST
 
 // Creates an empty UnitTest.
 UnitTest::UnitTest() {
@@ -4356,10 +4350,8 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
           &default_global_test_part_result_reporter_),
       per_thread_test_part_result_reporter_(
           &default_per_thread_test_part_result_reporter_),
-#if GTEST_HAS_PARAM_TEST
       parameterized_test_registry_(),
       parameterized_tests_registered_(false),
-#endif  // GTEST_HAS_PARAM_TEST
       last_death_test_case_(-1),
       current_test_case_(NULL),
       current_test_info_(NULL),
