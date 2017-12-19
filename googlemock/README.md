@@ -337,38 +337,6 @@ use the new matcher API (
 [polymorphic](./docs/CookBook.md#writing-new-polymorphic-matchers)).
 Matchers defined using `MATCHER()` or `MATCHER_P*()` aren't affected.
 
-### Developing Google Mock ###
-
-This section discusses how to make your own changes to Google Mock.
-
-#### Testing Google Mock Itself ####
-
-To make sure your changes work as intended and don't break existing
-functionality, you'll want to compile and run Google Test's own tests.
-For that you'll need Autotools.  First, make sure you have followed
-the instructions above to configure Google Mock.
-Then, create a build output directory and enter it.  Next,
-
-    ${GMOCK_DIR}/configure  # try --help for more info
-
-Once you have successfully configured Google Mock, the build steps are
-standard for GNU-style OSS packages.
-
-    make        # Standard makefile following GNU conventions
-    make check  # Builds and runs all tests - all should pass.
-
-Note that when building your project against Google Mock, you are building
-against Google Test as well.  There is no need to configure Google Test
-separately.
-
-#### Contributing a Patch ####
-
-We welcome patches.
-Please read the [Developer's Guide](docs/DevGuide.md)
-for how you can contribute. In particular, make sure you have signed
-the Contributor License Agreement, or we won't be able to accept the
-patch.
-
 Happy testing!
 
 [gtest_readme]: ../googletest/README.md "googletest"
