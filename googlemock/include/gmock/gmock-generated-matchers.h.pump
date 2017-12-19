@@ -646,8 +646,9 @@ $var param_field_decls2 = [[$for j
      private:\
       ::testing::internal::string FormatDescription(bool negation) const {\
         const ::testing::internal::string gmock_description = (description);\
-        if (!gmock_description.empty())\
+        if (!gmock_description.empty()) {\
           return gmock_description;\
+        }\
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\

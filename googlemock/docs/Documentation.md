@@ -11,5 +11,5 @@ the respective git branch/tag).**
 
 To contribute code to Google Mock, read:
 
-  * [DevGuide](DevGuide.md) -- read this _before_ writing your first patch.
+  * [CONTRIBUTING](../CONTRIBUTING.md) -- read this _before_ writing your first patch.
   * [Pump Manual](../../googletest/docs/PumpManual.md) -- how we generate some of Google Mock's source files.
