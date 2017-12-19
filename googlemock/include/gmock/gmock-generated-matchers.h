@@ -44,6 +44,13 @@
 #include <vector>
 #include "gmock/gmock-matchers.h"
 
+// Disables a warning in old versions of MSVC that there is no copy assignment
+// generated for the matcher -- this is exactly what we want!
+#ifdef MSC_VER
+#pragma warning( push )
+#pragma warning( disable : 4512 )
+#endif
+
 namespace testing {
 namespace internal {
 
@@ -1406,7 +1413,6 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
                 ::testing::tuple<>()));\
       }\
-      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -1416,7 +1422,6 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
     name##Matcher() {\
     }\
    private:\
-    GTEST_DISALLOW_ASSIGN_(name##Matcher);\
   };\
   inline name##Matcher name() {\
     return name##Matcher();\
@@ -1444,7 +1449,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
       virtual void DescribeNegationTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(true);\
       }\
-      p0##_type p0;\
+      p0##_type const p0;\
      private:\
       ::testing::internal::string FormatDescription(bool negation) const {\
         const ::testing::internal::string gmock_description = (description);\
@@ -1456,7 +1461,6 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
                 ::testing::tuple<p0##_type>(p0)));\
       }\
-      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -1465,9 +1469,8 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
     }\
     explicit name##MatcherP(p0##_type gmock_p0) : p0(gmock_p0) {\
     }\
-    p0##_type p0;\
+    p0##_type const p0;\
    private:\
-    GTEST_DISALLOW_ASSIGN_(name##MatcherP);\
   };\
   template <typename p0##_type>\
   inline name##MatcherP<p0##_type> name(p0##_type p0) {\
@@ -1497,8 +1500,8 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
       virtual void DescribeNegationTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(true);\
       }\
-      p0##_type p0;\
-      p1##_type p1;\
+      p0##_type const p0;\
+      p1##_type const p1;\
      private:\
       ::testing::internal::string FormatDescription(bool negation) const {\
         const ::testing::internal::string gmock_description = (description);\
@@ -1510,7 +1513,6 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
                 ::testing::tuple<p0##_type, p1##_type>(p0, p1)));\
       }\
-      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -1520,10 +1522,9 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
     name##MatcherP2(p0##_type gmock_p0, p1##_type gmock_p1) : p0(gmock_p0), \
         p1(gmock_p1) {\
     }\
-    p0##_type p0;\
-    p1##_type p1;\
+    p0##_type const p0;\
+    p1##_type const p1;\
    private:\
-    GTEST_DISALLOW_ASSIGN_(name##MatcherP2);\
   };\
   template <typename p0##_type, typename p1##_type>\
   inline name##MatcherP2<p0##_type, p1##_type> name(p0##_type p0, \
@@ -1555,9 +1556,9 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
       virtual void DescribeNegationTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(true);\
       }\
-      p0##_type p0;\
-      p1##_type p1;\
-      p2##_type p2;\
+      p0##_type const p0;\
+      p1##_type const p1;\
+      p2##_type const p2;\
      private:\
       ::testing::internal::string FormatDescription(bool negation) const {\
         const ::testing::internal::string gmock_description = (description);\
@@ -1570,7 +1571,6 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
                 ::testing::tuple<p0##_type, p1##_type, p2##_type>(p0, p1, \
                     p2)));\
       }\
-      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -1580,11 +1580,10 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
     name##MatcherP3(p0##_type gmock_p0, p1##_type gmock_p1, \
         p2##_type gmock_p2) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2) {\
     }\
-    p0##_type p0;\
-    p1##_type p1;\
-    p2##_type p2;\
+    p0##_type const p0;\
+    p1##_type const p1;\
+    p2##_type const p2;\
    private:\
-    GTEST_DISALLOW_ASSIGN_(name##MatcherP3);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type>\
   inline name##MatcherP3<p0##_type, p1##_type, p2##_type> name(p0##_type p0, \
@@ -1618,10 +1617,10 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
       virtual void DescribeNegationTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(true);\
       }\
-      p0##_type p0;\
-      p1##_type p1;\
-      p2##_type p2;\
-      p3##_type p3;\
+      p0##_type const p0;\
+      p1##_type const p1;\
+      p2##_type const p2;\
+      p3##_type const p3;\
      private:\
       ::testing::internal::string FormatDescription(bool negation) const {\
         const ::testing::internal::string gmock_description = (description);\
@@ -1634,7 +1633,6 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
                 ::testing::tuple<p0##_type, p1##_type, p2##_type, \
                     p3##_type>(p0, p1, p2, p3)));\
       }\
-      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -1645,12 +1643,11 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         p2##_type gmock_p2, p3##_type gmock_p3) : p0(gmock_p0), p1(gmock_p1), \
         p2(gmock_p2), p3(gmock_p3) {\
     }\
-    p0##_type p0;\
-    p1##_type p1;\
-    p2##_type p2;\
-    p3##_type p3;\
+    p0##_type const p0;\
+    p1##_type const p1;\
+    p2##_type const p2;\
+    p3##_type const p3;\
    private:\
-    GTEST_DISALLOW_ASSIGN_(name##MatcherP4);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type>\
@@ -1689,11 +1686,11 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
       virtual void DescribeNegationTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(true);\
       }\
-      p0##_type p0;\
-      p1##_type p1;\
-      p2##_type p2;\
-      p3##_type p3;\
-      p4##_type p4;\
+      p0##_type const p0;\
+      p1##_type const p1;\
+      p2##_type const p2;\
+      p3##_type const p3;\
+      p4##_type const p4;\
      private:\
       ::testing::internal::string FormatDescription(bool negation) const {\
         const ::testing::internal::string gmock_description = (description);\
@@ -1706,7 +1703,6 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
                 ::testing::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
                     p4##_type>(p0, p1, p2, p3, p4)));\
       }\
-      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -1718,13 +1714,12 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         p4##_type gmock_p4) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), \
         p3(gmock_p3), p4(gmock_p4) {\
     }\
-    p0##_type p0;\
-    p1##_type p1;\
-    p2##_type p2;\
-    p3##_type p3;\
-    p4##_type p4;\
+    p0##_type const p0;\
+    p1##_type const p1;\
+    p2##_type const p2;\
+    p3##_type const p3;\
+    p4##_type const p4;\
    private:\
-    GTEST_DISALLOW_ASSIGN_(name##MatcherP5);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type>\
@@ -1763,12 +1758,12 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
       virtual void DescribeNegationTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(true);\
       }\
-      p0##_type p0;\
-      p1##_type p1;\
-      p2##_type p2;\
-      p3##_type p3;\
-      p4##_type p4;\
-      p5##_type p5;\
+      p0##_type const p0;\
+      p1##_type const p1;\
+      p2##_type const p2;\
+      p3##_type const p3;\
+      p4##_type const p4;\
+      p5##_type const p5;\
      private:\
       ::testing::internal::string FormatDescription(bool negation) const {\
         const ::testing::internal::string gmock_description = (description);\
@@ -1781,7 +1776,6 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
                 ::testing::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
                     p4##_type, p5##_type>(p0, p1, p2, p3, p4, p5)));\
       }\
-      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -1793,14 +1787,13 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         p5##_type gmock_p5) : p0(gmock_p0), p1(gmock_p1), p2(gmock_p2), \
         p3(gmock_p3), p4(gmock_p4), p5(gmock_p5) {\
     }\
-    p0##_type p0;\
-    p1##_type p1;\
-    p2##_type p2;\
-    p3##_type p3;\
-    p4##_type p4;\
-    p5##_type p5;\
+    p0##_type const p0;\
+    p1##_type const p1;\
+    p2##_type const p2;\
+    p3##_type const p3;\
+    p4##_type const p4;\
+    p5##_type const p5;\
    private:\
-    GTEST_DISALLOW_ASSIGN_(name##MatcherP6);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type>\
@@ -1841,13 +1834,13 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
       virtual void DescribeNegationTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(true);\
       }\
-      p0##_type p0;\
-      p1##_type p1;\
-      p2##_type p2;\
-      p3##_type p3;\
-      p4##_type p4;\
-      p5##_type p5;\
-      p6##_type p6;\
+      p0##_type const p0;\
+      p1##_type const p1;\
+      p2##_type const p2;\
+      p3##_type const p3;\
+      p4##_type const p4;\
+      p5##_type const p5;\
+      p6##_type const p6;\
      private:\
       ::testing::internal::string FormatDescription(bool negation) const {\
         const ::testing::internal::string gmock_description = (description);\
@@ -1861,7 +1854,6 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
                     p4##_type, p5##_type, p6##_type>(p0, p1, p2, p3, p4, p5, \
                     p6)));\
       }\
-      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -1874,15 +1866,14 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         p2(gmock_p2), p3(gmock_p3), p4(gmock_p4), p5(gmock_p5), \
         p6(gmock_p6) {\
     }\
-    p0##_type p0;\
-    p1##_type p1;\
-    p2##_type p2;\
-    p3##_type p3;\
-    p4##_type p4;\
-    p5##_type p5;\
-    p6##_type p6;\
+    p0##_type const p0;\
+    p1##_type const p1;\
+    p2##_type const p2;\
+    p3##_type const p3;\
+    p4##_type const p4;\
+    p5##_type const p5;\
+    p6##_type const p6;\
    private:\
-    GTEST_DISALLOW_ASSIGN_(name##MatcherP7);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
@@ -1926,14 +1917,14 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
       virtual void DescribeNegationTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(true);\
       }\
-      p0##_type p0;\
-      p1##_type p1;\
-      p2##_type p2;\
-      p3##_type p3;\
-      p4##_type p4;\
-      p5##_type p5;\
-      p6##_type p6;\
-      p7##_type p7;\
+      p0##_type const p0;\
+      p1##_type const p1;\
+      p2##_type const p2;\
+      p3##_type const p3;\
+      p4##_type const p4;\
+      p5##_type const p5;\
+      p6##_type const p6;\
+      p7##_type const p7;\
      private:\
       ::testing::internal::string FormatDescription(bool negation) const {\
         const ::testing::internal::string gmock_description = (description);\
@@ -1947,7 +1938,6 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
                     p4##_type, p5##_type, p6##_type, p7##_type>(p0, p1, p2, \
                     p3, p4, p5, p6, p7)));\
       }\
-      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -1961,16 +1951,15 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         p3(gmock_p3), p4(gmock_p4), p5(gmock_p5), p6(gmock_p6), \
         p7(gmock_p7) {\
     }\
-    p0##_type p0;\
-    p1##_type p1;\
-    p2##_type p2;\
-    p3##_type p3;\
-    p4##_type p4;\
-    p5##_type p5;\
-    p6##_type p6;\
-    p7##_type p7;\
+    p0##_type const p0;\
+    p1##_type const p1;\
+    p2##_type const p2;\
+    p3##_type const p3;\
+    p4##_type const p4;\
+    p5##_type const p5;\
+    p6##_type const p6;\
+    p7##_type const p7;\
    private:\
-    GTEST_DISALLOW_ASSIGN_(name##MatcherP8);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
@@ -2017,15 +2006,15 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
       virtual void DescribeNegationTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(true);\
       }\
-      p0##_type p0;\
-      p1##_type p1;\
-      p2##_type p2;\
-      p3##_type p3;\
-      p4##_type p4;\
-      p5##_type p5;\
-      p6##_type p6;\
-      p7##_type p7;\
-      p8##_type p8;\
+      p0##_type const p0;\
+      p1##_type const p1;\
+      p2##_type const p2;\
+      p3##_type const p3;\
+      p4##_type const p4;\
+      p5##_type const p5;\
+      p6##_type const p6;\
+      p7##_type const p7;\
+      p8##_type const p8;\
      private:\
       ::testing::internal::string FormatDescription(bool negation) const {\
         const ::testing::internal::string gmock_description = (description);\
@@ -2039,7 +2028,6 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
                     p4##_type, p5##_type, p6##_type, p7##_type, \
                     p8##_type>(p0, p1, p2, p3, p4, p5, p6, p7, p8)));\
       }\
-      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -2053,17 +2041,16 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         p3(gmock_p3), p4(gmock_p4), p5(gmock_p5), p6(gmock_p6), p7(gmock_p7), \
         p8(gmock_p8) {\
     }\
-    p0##_type p0;\
-    p1##_type p1;\
-    p2##_type p2;\
-    p3##_type p3;\
-    p4##_type p4;\
-    p5##_type p5;\
-    p6##_type p6;\
-    p7##_type p7;\
-    p8##_type p8;\
+    p0##_type const p0;\
+    p1##_type const p1;\
+    p2##_type const p2;\
+    p3##_type const p3;\
+    p4##_type const p4;\
+    p5##_type const p5;\
+    p6##_type const p6;\
+    p7##_type const p7;\
+    p8##_type const p8;\
    private:\
-    GTEST_DISALLOW_ASSIGN_(name##MatcherP9);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
@@ -2113,16 +2100,16 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
       virtual void DescribeNegationTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(true);\
       }\
-      p0##_type p0;\
-      p1##_type p1;\
-      p2##_type p2;\
-      p3##_type p3;\
-      p4##_type p4;\
-      p5##_type p5;\
-      p6##_type p6;\
-      p7##_type p7;\
-      p8##_type p8;\
-      p9##_type p9;\
+      p0##_type const p0;\
+      p1##_type const p1;\
+      p2##_type const p2;\
+      p3##_type const p3;\
+      p4##_type const p4;\
+      p5##_type const p5;\
+      p6##_type const p6;\
+      p7##_type const p7;\
+      p8##_type const p8;\
+      p9##_type const p9;\
      private:\
       ::testing::internal::string FormatDescription(bool negation) const {\
         const ::testing::internal::string gmock_description = (description);\
@@ -2136,7 +2123,6 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
                     p4##_type, p5##_type, p6##_type, p7##_type, p8##_type, \
                     p9##_type>(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9)));\
       }\
-      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -2150,18 +2136,17 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         p2(gmock_p2), p3(gmock_p3), p4(gmock_p4), p5(gmock_p5), p6(gmock_p6), \
         p7(gmock_p7), p8(gmock_p8), p9(gmock_p9) {\
     }\
-    p0##_type p0;\
-    p1##_type p1;\
-    p2##_type p2;\
-    p3##_type p3;\
-    p4##_type p4;\
-    p5##_type p5;\
-    p6##_type p6;\
-    p7##_type p7;\
-    p8##_type p8;\
-    p9##_type p9;\
+    p0##_type const p0;\
+    p1##_type const p1;\
+    p2##_type const p2;\
+    p3##_type const p3;\
+    p4##_type const p4;\
+    p5##_type const p5;\
+    p6##_type const p6;\
+    p7##_type const p7;\
+    p8##_type const p8;\
+    p9##_type const p9;\
    private:\
-    GTEST_DISALLOW_ASSIGN_(name##MatcherP10);\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
@@ -2187,5 +2172,8 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
       arg_type arg, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
+#ifdef MSC_VER
+#pragma warning( pop )
+#endif
 
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_MATCHERS_H_

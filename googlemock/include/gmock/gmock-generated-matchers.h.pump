@@ -1,6 +1,6 @@
 $$ -*- mode: c++; -*-
 $$ This is a Pump source file.  Please use Pump to convert it to
-$$ gmock-generated-actions.h.
+$$ gmock-generated-matchers.h.
 $$
 $var n = 10  $$ The maximum arity we support.
 $$ }} This line fixes auto-indentation of the following code in Emacs.
@@ -589,6 +589,13 @@ $$   // show up in the generated code.
 // To learn more about using these macros, please search for 'MATCHER'
 // on https://github.com/google/googletest/blob/master/googlemock/docs/CookBook.md
 
+// Disables a warning in old versions of MSVC that there is no copy assignment
+// generated for the matcher -- this is exactly what we want!
+#ifdef MSC_VER
+#pragma warning( push )
+#pragma warning( disable : 4512 )
+#endif
+
 $range i 0..n
 $for i
 
@@ -612,12 +619,12 @@ $var param_types_and_names = [[$for j, [[p$j##_type p$j]]]]
 $var param_field_decls = [[$for j
 [[
 
-      p$j##_type p$j;\
+      p$j##_type const p$j;\
 ]]]]
 $var param_field_decls2 = [[$for j
 [[
 
-    p$j##_type p$j;\
+    p$j##_type const p$j;\
 ]]]]
 
 #define $macro_name(name$for j [[, p$j]], description)\$template
@@ -647,7 +654,6 @@ $var param_field_decls2 = [[$for j
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
                 ::testing::tuple<$for j, [[p$j##_type]]>($for j, [[p$j]])));\
       }\
-      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -657,7 +663,6 @@ $var param_field_decls2 = [[$for j
     [[$if i==1 [[explicit ]]]]$class_name($ctor_param_list)$inits {\
     }\$param_field_decls2
    private:\
-    GTEST_DISALLOW_ASSIGN_($class_name);\
   };\$template
   inline $class_name$param_types name($param_types_and_names) {\
     return $class_name$param_types($params);\
@@ -669,5 +674,8 @@ $var param_field_decls2 = [[$for j
           const
 ]]
 
+#ifdef MSC_VER
+#pragma warning( pop )
+#endif
 
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_MATCHERS_H_
