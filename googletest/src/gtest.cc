@@ -806,46 +806,24 @@ std::string UnitTestImpl::CurrentOsStackTraceExceptTop(int skip_count) {
 // Returns the current time in milliseconds.
 TimeInMillis GetTimeInMillis() {
 #if GTEST_LANG_CXX11
-  auto now{ std::chrono::high_resolution_clock::now().time_since_epoch() };
+  auto now{ std::chrono::steady_clock::now().time_since_epoch() };
   return std::chrono::duration_cast<std::chrono::milliseconds, TimeInMillis>(now).count();
-#elif GTEST_OS_WINDOWS_MOBILE || defined(__BORLANDC__)
-  // Difference between 1970-01-01 and 1601-01-01 in milliseconds.
-  // http://analogous.blogspot.com/2005/04/epoch.html
-  const TimeInMillis kJavaEpochToWinFileTimeDelta =
-    static_cast<TimeInMillis>(116444736UL) * 100000UL;
-  const DWORD kTenthMicrosInMilliSecond = 10000;
-
-  SYSTEMTIME now_systime;
-  FILETIME now_filetime;
-  ULARGE_INTEGER now_int64;
-  // TODO(kenton@google.com): Shouldn't this just use
-  //   GetSystemTimeAsFileTime()?
-  GetSystemTime(&now_systime);
-  if (SystemTimeToFileTime(&now_systime, &now_filetime)) {
-    now_int64.LowPart = now_filetime.dwLowDateTime;
-    now_int64.HighPart = now_filetime.dwHighDateTime;
-    now_int64.QuadPart = (now_int64.QuadPart / kTenthMicrosInMilliSecond) -
-      kJavaEpochToWinFileTimeDelta;
-    return now_int64.QuadPart;
-  }
-  return 0;
-#elif GTEST_OS_WINDOWS && !GTEST_HAS_GETTIMEOFDAY_
-  // 100ns ticks between 1/1/1601 00:00 UTC and 1/1/1970 00:00 UTC
-  const unsigned __int64 epochTime = 0x19DB1DED53E8000; 
-    
-  // get the system time, convert to system time period and convert to number of 100ns ticks since 1/1/1970 00:00 UTC
-  FILETIME now;
-  GetSystemTimeAsFileTime(&now);
-  unsigned _int64 fileTimeTicks = (static_cast<unsigned _int64>(now.dwHighDateTime) << (sizeof(DWORD) * 8)) +
-                                  static_cast<unsigned _int64>(now.dwLowDateTime) - epochTime;
-
-  return static_cast<TimeInMillis>(fileTimeTicks / 10000);
+#elif GTEST_OS_WINDOWS || defined(__BORLANDC__)
+  static const __int64 _Freq = _Query_perf_frequency(); // doesn't change after system boot
+  const __int64 _Ctr = _Query_perf_counter();
+  const __int64 _Whole = (_Ctr / _Freq);
+  const __int64 _Part = (_Ctr % _Freq);
+  return static_cast< TimeInMillis >(_Whole * 1000 + (_Part * 1000) / _Freq);
+#elif GTEST_OS_LINUX
+  timespec now;
+  clock_gettime(CLOCK_MONOTONIC, &tp);
+  return static_cast<TimeInMillis>(now.tv_sec) * 1000 + static_cast<TimeInMillis>(now.tv_nsec / 1000000);
 #elif GTEST_HAS_GETTIMEOFDAY_
   struct timeval now;
   gettimeofday(&now, NULL);
-  return static_cast<TimeInMillis>(now.tv_sec) * 1000 + now.tv_usec / 1000;
+  return static_cast<TimeInMillis>(now.tv_sec) * 1000 + static_cast<TimeInMillis>(now.tv_usec / 1000);
 #else
-# error "Don't know how to get the current time on your system."
+  # error "Don't know how to get the current time on your system."
 #endif
 }
 
