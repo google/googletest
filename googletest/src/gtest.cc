@@ -806,8 +806,9 @@ std::string UnitTestImpl::CurrentOsStackTraceExceptTop(int skip_count) {
 // Returns the current time in milliseconds.
 TimeInMillis GetTimeInMillis() {
 #if GTEST_LANG_CXX11
-  auto now{ std::chrono::steady_clock::now().time_since_epoch() };
-  return std::chrono::duration_cast<std::chrono::milliseconds, TimeInMillis>(now).count();
+  std::chrono::steady_clock::duration now{ std::chrono::steady_clock::now().time_since_epoch() };
+  std::chrono::milliseconds nowMs{ std::chrono::duration_cast<std::chrono::milliseconds>(now) };
+  return static_cast<TimeInMillis>(nowMs.count());
 #elif GTEST_OS_WINDOWS || defined(__BORLANDC__)
   static const __int64 _Freq = _Query_perf_frequency(); // doesn't change after system boot
   const __int64 _Ctr = _Query_perf_counter();
