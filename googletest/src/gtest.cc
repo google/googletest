@@ -817,7 +817,7 @@ TimeInMillis GetTimeInMillis() {
   return static_cast< TimeInMillis >(_Whole * 1000 + (_Part * 1000) / _Freq);
 #elif GTEST_OS_LINUX
   timespec now;
-  clock_gettime(CLOCK_MONOTONIC, &tp);
+  clock_gettime(CLOCK_MONOTONIC, &now);
   return static_cast<TimeInMillis>(now.tv_sec) * 1000 + static_cast<TimeInMillis>(now.tv_nsec / 1000000);
 #elif GTEST_HAS_GETTIMEOFDAY_
   struct timeval now;
