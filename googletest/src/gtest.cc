@@ -45,6 +45,9 @@
 #include <wctype.h>
 
 #include <algorithm>
+#if GTEST_LANG_CXX11
+  #include <chrono>
+#endif
 #include <iomanip>
 #include <limits>
 #include <list>
@@ -802,45 +805,41 @@ std::string UnitTestImpl::CurrentOsStackTraceExceptTop(int skip_count) {
 
 // Returns the current time in milliseconds.
 TimeInMillis GetTimeInMillis() {
-#if GTEST_OS_WINDOWS_MOBILE || defined(__BORLANDC__)
-  // Difference between 1970-01-01 and 1601-01-01 in milliseconds.
-  // http://analogous.blogspot.com/2005/04/epoch.html
-  const TimeInMillis kJavaEpochToWinFileTimeDelta =
-    static_cast<TimeInMillis>(116444736UL) * 100000UL;
-  const DWORD kTenthMicrosInMilliSecond = 10000;
-
-  SYSTEMTIME now_systime;
-  FILETIME now_filetime;
-  ULARGE_INTEGER now_int64;
-  // TODO(kenton@google.com): Shouldn't this just use
-  //   GetSystemTimeAsFileTime()?
-  GetSystemTime(&now_systime);
-  if (SystemTimeToFileTime(&now_systime, &now_filetime)) {
-    now_int64.LowPart = now_filetime.dwLowDateTime;
-    now_int64.HighPart = now_filetime.dwHighDateTime;
-    now_int64.QuadPart = (now_int64.QuadPart / kTenthMicrosInMilliSecond) -
-      kJavaEpochToWinFileTimeDelta;
-    return now_int64.QuadPart;
+#if GTEST_LANG_CXX11
+  static const std::chrono::steady_clock::time_point nowStart{ std::chrono::steady_clock::now() };
+  const std::chrono::steady_clock::time_point now{ std::chrono::steady_clock::now() };
+  const std::chrono::milliseconds nowMs{ std::chrono::duration_cast<std::chrono::milliseconds>(now - nowStart) };
+  return static_cast<TimeInMillis>(nowMs.count());
+#elif GTEST_OS_WINDOWS || defined(__BORLANDC__)
+  static const __int64 _Freq = _Query_perf_frequency(); // doesn't change after system boot
+  static const __int64 _CtrStart = _Query_perf_counter();
+  const __int64 _Ctr = _Query_perf_counter() - _CtrStart;
+  const __int64 _Whole = (_Ctr / _Freq);
+  const __int64 _Part = (_Ctr % _Freq);
+  return static_cast< TimeInMillis >(_Whole * 1000 + (_Part * 1000) / _Freq);
+#elif GTEST_OS_LINUX
+  static bool nowStartFlag = false;
+  static timespec nowStart;
+  if (!nowStartFlag)
+  {
+      clock_gettime(CLOCK_MONOTONIC, &nowStart);
+      nowStartFlag = true;
   }
-  return 0;
-#elif GTEST_OS_WINDOWS && !GTEST_HAS_GETTIMEOFDAY_
-  __timeb64 now;
-
-  // MSVC 8 deprecates _ftime64(), so we want to suppress warning 4996
-  // (deprecated function) there.
-  // TODO(kenton@google.com): Use GetTickCount()?  Or use
-  //   SystemTimeToFileTime()
-  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4996)
-  _ftime64(&now);
-  GTEST_DISABLE_MSC_WARNINGS_POP_()
-
-  return static_cast<TimeInMillis>(now.time) * 1000 + now.millitm;
+  timespec now;
+  clock_gettime(CLOCK_MONOTONIC, &now);
+  if (now.tv_nsec < nowStart.tv_nsec)
+  {
+      --now.tv_sec;
+      now.tv_nsec += 1000000000;
+  }
+  return static_cast<TimeInMillis>(now.tv_sec - nowStart.tv_sec) * 1000 + 
+         static_cast<TimeInMillis>((now.tv_nsec - nowStart.tv_nsec) / 1000000);
 #elif GTEST_HAS_GETTIMEOFDAY_
   struct timeval now;
   gettimeofday(&now, NULL);
-  return static_cast<TimeInMillis>(now.tv_sec) * 1000 + now.tv_usec / 1000;
+  return static_cast<TimeInMillis>(now.tv_sec) * 1000 + static_cast<TimeInMillis>(now.tv_usec / 1000);
 #else
-# error "Don't know how to get the current time on your system."
+  # error "Don't know how to get the current time on your system."
 #endif
 }
 
