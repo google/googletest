@@ -57,9 +57,11 @@
 #include <vector>
 
 #if GTEST_OS_MAC
-#include <mach/mach.h>
-#include <mach/mach_time.h>
-#include <unistd.h>
+# define GTEST_HAS_GETTIMEOFDAY_ 1
+# include <mach/mach.h>
+# include <mach/mach_time.h>
+# include <sys/time.h>  // NOLINT
+# include <unistd.h>
 
 #elif GTEST_OS_LINUX
 // TODO(kenton@google.com): Use autoconf to detect availability of
@@ -4638,7 +4640,7 @@ bool UnitTestImpl::RunAllTests() {
 
   TestEventListener* repeater = listeners()->repeater();
 
-  start_timestamp_ = GetMonotonicTimeInMillis();
+  start_timestamp_ = GetTimeInMillis();
   repeater->OnTestProgramStart(*parent_);
 
   // How many times to repeat the tests?  We don't want to repeat them
