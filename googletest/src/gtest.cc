@@ -830,7 +830,7 @@ TimeInMillis GetTimeInMillis() {
   if (now.tv_nsec < nowStart.tv_nsec)
   {
       --now.tv_sec;
-      now.tv_nsec += 1000000;
+      now.tv_nsec += 1000000000;
   }
   return static_cast<TimeInMillis>(now.tv_sec - nowStart.tv_sec) * 1000 + 
          static_cast<TimeInMillis>((now.tv_nsec - nowStart.tv_nsec) / 1000000);

@@ -1933,7 +1933,7 @@ TEST(UnitTestTest, CanGetOriginalWorkingDir) {
 }
 
 TEST(UnitTestTest, ReturnsPlausibleTimestamp) {
-  EXPECT_LT(0, UnitTest::GetInstance()->start_timestamp());
+  EXPECT_LE(0, UnitTest::GetInstance()->start_timestamp());
   EXPECT_LE(UnitTest::GetInstance()->start_timestamp(), GetTimeInMillis());
 }
 
