@@ -46,7 +46,8 @@
 
 #include <algorithm>
 #if GTEST_LANG_CXX11
-  #include <chrono>
+# include <ctime>
+# include <chrono>
 #endif
 #include <iomanip>
 #include <limits>
@@ -849,7 +850,36 @@ TimeInMillis GetMonotonicTimeInMillis() {
 
 // Returns the current time in milliseconds.
 TimeInMillis GetTimeInMillis() {
-#if (GTEST_OS_WINDOWS || defined(__BORLANDC__)) && !GTEST_HAS_GETTIMEOFDAY_
+#if GTEST_LANG_CXX11
+  static bool initEpoch = true;
+  static std::chrono::system_clock::time_point epochTime;
+  if (initEpoch)
+  {
+    initEpoch = false;
+    // create tm with 1/2/1970 00:00 UTC since mktime will fail in some timezones with 1/1/1970
+    std::tm timeinfo = std::tm();
+    timeinfo.tm_year = 70;   // year: 1970
+    timeinfo.tm_mon = 0;     // month: January
+    timeinfo.tm_mday = 2;    // day: 2st
+    std::time_t epochTime_t = std::mktime(&timeinfo);
+    // correct for timezone
+    GTEST_DISABLE_MSC_WARNINGS_PUSH_(4996) // suppress secure CRT warning
+    const tm* const pTm = gmtime(&epochTime_t);
+    GTEST_DISABLE_MSC_WARNINGS_POP_()
+    if (pTm->tm_mday == 1) {
+        // - from UTC
+        epochTime_t += 86400 - pTm->tm_hour * 3600;
+    }
+    else {
+        // + from UTC
+        epochTime_t -= pTm->tm_hour * 3600;
+    }
+    epochTime = std::chrono::system_clock::from_time_t(epochTime_t - 86400); // -1 day since added day aboce
+  }
+  const std::chrono::system_clock::duration now{ std::chrono::system_clock::now() - epochTime };
+  const std::chrono::milliseconds nowMs{ std::chrono::duration_cast<std::chrono::milliseconds>(now) };
+  return static_cast<TimeInMillis>(nowMs.count());
+#elif (GTEST_OS_WINDOWS || defined(__BORLANDC__)) && !GTEST_HAS_GETTIMEOFDAY_
   // 100ns ticks between 1/1/1601 00:00 UTC and 1/1/1970 00:00 UTC
   // http://analogous.blogspot.com/2005/04/epoch.html
   const unsigned long long epochTime = 0x19DB1DED53E8000ULL; 
