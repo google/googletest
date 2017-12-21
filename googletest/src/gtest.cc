@@ -837,7 +837,6 @@ TimeInMillis GetMonotonicTimeInMillis() {
   // fall back to non monotonic time
   return GetTimeInMillis();
 #endif
-
 }
 
 // Returns the current time in milliseconds.
@@ -2650,7 +2649,7 @@ void TestInfo::Run() {
   // Notifies the unit test event listeners that a test is about to start.
   repeater->OnTestStart(*this);
 
-  const TimeInMillis start = internal::GetTimeInMillis();
+  const TimeInMillis start = internal::GetMonotonicTimeInMillis();
 
   impl->os_stack_trace_getter()->UponLeavingGTest();
 
@@ -2672,7 +2671,7 @@ void TestInfo::Run() {
   internal::HandleExceptionsInMethodIfSupported(
       test, &Test::DeleteSelf_, "the test fixture's destructor");
 
-  result_.set_elapsed_time(internal::GetTimeInMillis() - start);
+  result_.set_elapsed_time(internal::GetMonotonicTimeInMillis() - start);
 
   // Notifies the unit test event listener that a test has just finished.
   repeater->OnTestEnd(*this);
@@ -2780,11 +2779,11 @@ void TestCase::Run() {
   internal::HandleExceptionsInMethodIfSupported(
       this, &TestCase::RunSetUpTestCase, "SetUpTestCase()");
 
-  const internal::TimeInMillis start = internal::GetTimeInMillis();
+  const internal::TimeInMillis start = internal::GetMonotonicTimeInMillis();
   for (int i = 0; i < total_test_count(); i++) {
     GetMutableTestInfo(i)->Run();
   }
-  elapsed_time_ = internal::GetTimeInMillis() - start;
+  elapsed_time_ = internal::GetMonotonicTimeInMillis() - start;
 
   impl->os_stack_trace_getter()->UponLeavingGTest();
   internal::HandleExceptionsInMethodIfSupported(
@@ -4639,7 +4638,7 @@ bool UnitTestImpl::RunAllTests() {
 
   TestEventListener* repeater = listeners()->repeater();
 
-  start_timestamp_ = GetTimeInMillis();
+  start_timestamp_ = GetMonotonicTimeInMillis();
   repeater->OnTestProgramStart(*parent_);
 
   // How many times to repeat the tests?  We don't want to repeat them
@@ -4652,7 +4651,7 @@ bool UnitTestImpl::RunAllTests() {
     // assertions executed before RUN_ALL_TESTS().
     ClearNonAdHocTestResult();
 
-    const TimeInMillis start = GetTimeInMillis();
+    const TimeInMillis start = GetMonotonicTimeInMillis();
 
     // Shuffles test cases and tests if requested.
     if (has_tests_to_run && GTEST_FLAG(shuffle)) {
@@ -4689,7 +4688,7 @@ bool UnitTestImpl::RunAllTests() {
       repeater->OnEnvironmentsTearDownEnd(*parent_);
     }
 
-    elapsed_time_ = GetTimeInMillis() - start;
+    elapsed_time_ = GetMonotonicTimeInMillis() - start;
 
     // Tells the unit test event listener that the tests have just finished.
     repeater->OnTestIterationEnd(*parent_, i);
