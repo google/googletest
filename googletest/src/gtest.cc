@@ -806,19 +806,34 @@ std::string UnitTestImpl::CurrentOsStackTraceExceptTop(int skip_count) {
 // Returns the current time in milliseconds.
 TimeInMillis GetTimeInMillis() {
 #if GTEST_LANG_CXX11
-  std::chrono::steady_clock::duration now{ std::chrono::steady_clock::now().time_since_epoch() };
-  std::chrono::milliseconds nowMs{ std::chrono::duration_cast<std::chrono::milliseconds>(now) };
+  static const std::chrono::steady_clock::time_point nowStart{ std::chrono::steady_clock::now() };
+  const std::chrono::steady_clock::time_point now{ std::chrono::steady_clock::now() };
+  const std::chrono::milliseconds nowMs{ std::chrono::duration_cast<std::chrono::milliseconds>(now - nowStart) };
   return static_cast<TimeInMillis>(nowMs.count());
 #elif GTEST_OS_WINDOWS || defined(__BORLANDC__)
   static const __int64 _Freq = _Query_perf_frequency(); // doesn't change after system boot
-  const __int64 _Ctr = _Query_perf_counter();
+  static const __int64 _CtrStart = _Query_perf_counter();
+  const __int64 _Ctr = _Query_perf_counter() - _CtrStart;
   const __int64 _Whole = (_Ctr / _Freq);
   const __int64 _Part = (_Ctr % _Freq);
   return static_cast< TimeInMillis >(_Whole * 1000 + (_Part * 1000) / _Freq);
 #elif GTEST_OS_LINUX
+  static bool nowStartFlag = false;
+  static timespec nowStart;
+  if (!nowStartFlag)
+  {
+      clock_gettime(CLOCK_MONOTONIC, &nowStart);
+      nowStartFlag = true;
+  }
   timespec now;
   clock_gettime(CLOCK_MONOTONIC, &now);
-  return static_cast<TimeInMillis>(now.tv_sec) * 1000 + static_cast<TimeInMillis>(now.tv_nsec / 1000000);
+  if (now.tv_nsec < nowStart.tv_nsec)
+  {
+      --now.tv_sec;
+      now.tv_nsec += 1000000;
+  }
+  return static_cast<TimeInMillis>(now.tv_sec - nowStart.tv_sec) * 1000 + 
+         static_cast<TimeInMillis>((now.tv_nsec - nowStart.tv_nsec) / 1000000);
 #elif GTEST_HAS_GETTIMEOFDAY_
   struct timeval now;
   gettimeofday(&now, NULL);
