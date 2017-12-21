@@ -816,11 +816,17 @@ TimeInMillis GetMonotonicTimeInMillis() {
   const std::chrono::milliseconds nowMs{ std::chrono::duration_cast<std::chrono::milliseconds>(now) };
   return static_cast<TimeInMillis>(nowMs.count());
 #elif GTEST_OS_WINDOWS 
-  static const long long _Freq = _Query_perf_frequency(); // doesn't change after system boot
-  const long long _Ctr = _Query_perf_counter();
-  const long long _Whole = (_Ctr / _Freq);
-  const long long _Part = (_Ctr % _Freq);
-  return static_cast<TimeInMillis>(_Whole * 1000 + (_Part * 1000) / _Freq);
+  static bool freqInit = true;
+  static LARGE_INTEGER freq;
+  if (freqInit) {
+    freqInit = false;
+    QueryPerformanceFrequency(&freq);
+  }
+  LARGE_INTEGER now;
+  QueryPerformanceCounter(&now);
+  LONGLONG whole = (now.QuadPart / freq.QuadPart);
+  LONGLONG part = (now.QuadPart % freq.QuadPart);
+  return static_cast<TimeInMillis>(whole * 1000 + (part * 1000) / freq.QuadPart);
 #elif GTEST_OS_LINUX
   timespec now;
   clock_gettime(CLOCK_MONOTONIC, &now);
