@@ -4066,6 +4066,8 @@ TEST(AssertionSyntaxTest, BasicAssertionsBehavesLikeSingleStatement) {
   if (AlwaysFalse())
     ASSERT_TRUE(false) << "This should never be executed; "
                           "It's a compilation test only.";
+  else
+    ;  // NOLINT
 
   if (AlwaysTrue())
     EXPECT_FALSE(false);
@@ -4074,6 +4076,8 @@ TEST(AssertionSyntaxTest, BasicAssertionsBehavesLikeSingleStatement) {
 
   if (AlwaysFalse())
     ASSERT_LT(1, 3);
+  else
+    ;  // NOLINT
 
   if (AlwaysFalse())
     ;  // NOLINT
@@ -4099,6 +4103,8 @@ TEST(ExpectThrowTest, DoesNotGenerateUnreachableCodeWarning) {
 TEST(AssertionSyntaxTest, ExceptionAssertionsBehavesLikeSingleStatement) {
   if (AlwaysFalse())
     EXPECT_THROW(ThrowNothing(), bool);
+  else
+    ;  // NOLINT
 
   if (AlwaysTrue())
     EXPECT_THROW(ThrowAnInteger(), int);
@@ -4107,6 +4113,8 @@ TEST(AssertionSyntaxTest, ExceptionAssertionsBehavesLikeSingleStatement) {
 
   if (AlwaysFalse())
     EXPECT_NO_THROW(ThrowAnInteger());
+  else
+    ;  // NOLINT
 
   if (AlwaysTrue())
     EXPECT_NO_THROW(ThrowNothing());
@@ -4115,6 +4123,8 @@ TEST(AssertionSyntaxTest, ExceptionAssertionsBehavesLikeSingleStatement) {
 
   if (AlwaysFalse())
     EXPECT_ANY_THROW(ThrowNothing());
+  else
+    ;  // NOLINT
 
   if (AlwaysTrue())
     EXPECT_ANY_THROW(ThrowAnInteger());
