@@ -856,22 +856,32 @@ TimeInMillis GetTimeInMillis() {
   if (initEpoch) {
     initEpoch = false;
     // create tm with 1/2/1970 00:00 UTC since mktime will fail in some timezones with 1/1/1970
-    std::tm timeinfo = std::tm();
+    std::tm timeinfo{};
     timeinfo.tm_year = 70;   // year: 1970
     timeinfo.tm_mon = 0;     // month: January
     timeinfo.tm_mday = 2;    // day: 2nd
     std::time_t epochTime_t = std::mktime(&timeinfo);
     // correct for timezone
-    GTEST_DISABLE_MSC_WARNINGS_PUSH_(4996) // suppress secure CRT warning
-    const tm* const pTm = gmtime(&epochTime_t);
-    GTEST_DISABLE_MSC_WARNINGS_POP_()
-    if (pTm->tm_mday == 1) {
+#ifdef GTEST_OS_WINDOWS
+    // windows secure version
+    std::tm utcTm{};
+    gmtime_s(&utcTm, &epochTime_t);
+    const std::tm* const pTM{ &utcTm };
+#elif GTEST_OS_LINUX
+    // linux secure version
+    std::tm utcTm{};
+    const std::tm* const pTM{ gmtime_r(&epochTime_t, &utcTm) };
+#else
+    // unsecure std version
+    const std::tm* const pTM{ gmtime(&epochTime_t) };
+#endif
+    if (pTM->tm_mday == 1) {
         // - from UTC
-        epochTime_t += 86400 - pTm->tm_hour * 3600;
+        epochTime_t += 86400 - pTM->tm_hour * 3600;
     }
     else {
         // + from UTC
-        epochTime_t -= pTm->tm_hour * 3600;
+        epochTime_t -= pTM->tm_hour * 3600;
     }
     epochTime = std::chrono::system_clock::from_time_t(epochTime_t - 86400); // -1 day since added day above
   }
