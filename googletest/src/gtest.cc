@@ -817,7 +817,7 @@ TimeInMillis GetMonotonicTimeInMillis() {
   const std::chrono::milliseconds nowMs{ std::chrono::duration_cast<std::chrono::milliseconds>(now) };
   return static_cast<TimeInMillis>(nowMs.count());
 #elif GTEST_OS_WINDOWS 
-  static bool freqInit = true;
+  static bool freqInit = true; // Note: LARGE_INTEGER is a union so bool needed to avoid punning
   static LARGE_INTEGER freq;
   if (freqInit) {
     freqInit = false;
@@ -833,10 +833,8 @@ TimeInMillis GetMonotonicTimeInMillis() {
   clock_gettime(CLOCK_MONOTONIC, &now);
   return static_cast<TimeInMillis>(now.tv_sec) * 1000 + static_cast<TimeInMillis>(now.tv_nsec / 1000000);
 #elif GTEST_OS_MAC
-  static bool initTimeBase = true;
   static mach_timebase_info_data_t timebaseInfo;
-  if (initTimeBase) {
-      initTimeBase = false;
+  if (timebaseInfo.denom == 0) {
       mach_timebase_info(&timebaseInfo);
   }
   // returns time in scaled nanoseconds
