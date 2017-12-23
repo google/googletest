@@ -163,6 +163,11 @@ using internal::ForEach;
 using internal::GetElementOr;
 using internal::Shuffle;
 
+#if GTEST_LANG_CXX11
+  // timepoint of POSIX time 1/1/1970 00:00 UTC
+  static std::chrono::system_clock::time_point s_EpochTime;
+#endif
+
 // Constants.
 
 // A test whose test case name or test name matches this filter is
@@ -850,7 +855,6 @@ TimeInMillis GetMonotonicTimeInMillis() {
 TimeInMillis GetTimeInMillis() {
 #if GTEST_LANG_CXX11
   static bool initEpoch = true;
-  static std::chrono::system_clock::time_point epochTime;
   if (initEpoch) {
     initEpoch = false;
     // create tm with 1/2/1970 00:00 UTC since mktime will fail in some timezones with 1/1/1970
@@ -881,9 +885,9 @@ TimeInMillis GetTimeInMillis() {
         // + from UTC
         epochTime_t -= pTM->tm_hour * 3600;
     }
-    epochTime = std::chrono::system_clock::from_time_t(epochTime_t - 86400); // -1 day since added day above
+    s_EpochTime = std::chrono::system_clock::from_time_t(epochTime_t - 86400); // -1 day since added day above
   }
-  const std::chrono::system_clock::duration now{ std::chrono::system_clock::now() - epochTime };
+  const std::chrono::system_clock::duration now{ std::chrono::system_clock::now() - s_EpochTime };
   const std::chrono::milliseconds nowMs{ std::chrono::duration_cast<std::chrono::milliseconds>(now) };
   return static_cast<TimeInMillis>(nowMs.count());
 #elif (GTEST_OS_WINDOWS || defined(__BORLANDC__)) && !GTEST_HAS_GETTIMEOFDAY_
