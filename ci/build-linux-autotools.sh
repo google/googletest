@@ -33,8 +33,6 @@ set -e
 
 . ci/get-nprocessors.sh
 
-cd googlemock
-
 # Create the configuration script
 autoreconf -i
 
