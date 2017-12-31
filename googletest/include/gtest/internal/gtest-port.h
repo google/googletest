@@ -171,7 +171,6 @@
 //   GTEST_HAS_COMBINE      - the Combine() function (for value-parameterized
 //                            tests)
 //   GTEST_HAS_DEATH_TEST   - death tests
-//   GTEST_HAS_PARAM_TEST   - value-parameterized tests
 //   GTEST_HAS_TYPED_TEST   - typed tests
 //   GTEST_HAS_TYPED_TEST_P - type-parameterized tests
 //   GTEST_IS_THREADSAFE    - Google Test is thread-safe.
@@ -642,6 +641,9 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # if GTEST_OS_LINUX_ANDROID && defined(_STLPORT_MAJOR)
 // STLport, provided with the Android NDK, has neither <tr1/tuple> or <tuple>.
 #  define GTEST_HAS_TR1_TUPLE 0
+# elif defined(_MSC_VER) && (_MSC_VER >= 1910)
+// Prevent `warning C4996: 'std::tr1': warning STL4002: The non-Standard std::tr1 namespace and TR1-only machinery are deprecated and will be REMOVED.`
+#  define GTEST_HAS_TR1_TUPLE 0
 # else
 // The user didn't tell us not to do it, so we assume it's OK.
 #  define GTEST_HAS_TR1_TUPLE 1
@@ -812,11 +814,6 @@ using ::std::tuple_size;
 # define GTEST_HAS_DEATH_TEST 1
 #endif
 
-// We don't support MSVC 7.1 with exceptions disabled now.  Therefore
-// all the compilers we care about are adequate for supporting
-// value-parameterized tests.
-#define GTEST_HAS_PARAM_TEST 1
-
 // Determines whether to support type-driven tests.
 
 // Typed tests need <typeinfo> and variadic macros, which GCC, VC++ 8.0,
@@ -827,11 +824,10 @@ using ::std::tuple_size;
 # define GTEST_HAS_TYPED_TEST_P 1
 #endif
 
-// Determines whether to support Combine(). This only makes sense when
-// value-parameterized tests are enabled.  The implementation doesn't
-// work on Sun Studio since it doesn't understand templated conversion
-// operators.
-#if GTEST_HAS_PARAM_TEST && GTEST_HAS_TR1_TUPLE && !defined(__SUNPRO_CC)
+// Determines whether to support Combine().
+// The implementation doesn't work on Sun Studio since it doesn't
+// understand templated conversion operators.
+#if GTEST_HAS_TR1_TUPLE && !defined(__SUNPRO_CC)
 # define GTEST_HAS_COMBINE 1
 #endif
 
