@@ -1,0 +1,118 @@
+# Copyright 2017 Google Inc. 
+# All Rights Reserved.
+#
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#
+#     * Redistributions of source code must retain the above copyright
+# notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+# copyright notice, this list of conditions and the following disclaimer
+# in the documentation and/or other materials provided with the
+# distribution.
+#     * Neither the name of Google Inc. nor the names of its
+# contributors may be used to endorse or promote products derived from
+# this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# Author: misterg@google.com (Gennadiy Civil)
+#
+# Bazel BUILD for The Google C++ Testing Framework (Google Test)
+
+licenses(["notice"])
+
+""" gtest own tests """
+
+#on windows exclude gtest-tuple.h and gtest-tuple_test.cc
+cc_test(
+    name = "gtest_all_test",
+    size = "small",
+    srcs =  glob(
+                    include = [
+                        "gtest-*.cc",
+                        "*.h",
+                        "googletest/include/gtest/**/*.h",
+                    ],
+                    exclude = [
+                        "gtest-unittest-api_test.cc",
+                        "gtest-tuple_test.cc",
+                        "googletest/src/gtest-all.cc",
+                        "gtest_all_test.cc",
+                        "gtest-death-test_ex_test.cc",
+                        "gtest-listener_test.cc",
+                        "gtest-unittest-api_test.cc",
+                        "gtest-param-test_test.cc",
+                    ],
+                ) + select({
+        "//:win": [],
+        "//conditions:default": [
+            "gtest-tuple_test.cc",
+        ],
+        }),
+    copts = select({
+        "//:win": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
+        "//conditions:default": ["-DGTEST_USE_OWN_TR1_TUPLE=1"],
+    }),
+    includes = [
+        "googletest",
+        "googletest/include",
+        "googletest/include/internal",
+        "googletest/test",
+    ],
+    linkopts = select({
+        "//:win": [],
+        "//conditions:default": [
+            "-pthread",
+        ],
+    }),
+    deps = ["//:gtest_main"],
+)
+
+#These googletest tests have their own main()
+cc_test(
+    name = "gtest-listener_test",
+    size = "small",
+    srcs = [
+        "gtest-listener_test.cc",
+    ],
+    deps = [
+        "//:gtest",
+    ],
+)
+
+cc_test(
+    name = "gtest-unittest-api_test",
+    size = "small",
+    srcs = [
+        "gtest-unittest-api_test.cc",
+    ],
+    deps = [
+        "//:gtest",
+    ],
+)
+
+cc_test(
+    name = "gtest-param-test_test",
+    size = "small",
+    srcs = [
+        "gtest-param-test2_test.cc",
+        "gtest-param-test_test.cc",
+        "gtest-param-test_test.h",
+    ],
+    deps = [
+        "//:gtest",
+    ],
+)

@@ -62,6 +62,12 @@ using testing::internal::CaptureStdout;
 using testing::internal::GetCapturedStdout;
 #endif
 
+// Class without default constructor.
+class NotDefaultConstructible {
+ public:
+  explicit NotDefaultConstructible(int) {}
+};
+
 // Defines some mock classes needed by the tests.
 
 class Foo {
@@ -79,6 +85,7 @@ class MockFoo : public Foo {
 
   MOCK_METHOD0(DoThis, void());
   MOCK_METHOD1(DoThat, int(bool flag));
+  MOCK_METHOD0(ReturnNonDefaultConstructible, NotDefaultConstructible());
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFoo);
@@ -205,6 +212,22 @@ TEST(NiceMockTest, AllowsExpectedCall) {
 
   EXPECT_CALL(nice_foo, DoThis());
   nice_foo.DoThis();
+}
+
+// Tests that an unexpected call on a nice mock which returns a not-default-constructible
+// type throws an exception and the exception contains the method's name.
+TEST(NiceMockTest, ThrowsExceptionForUnknownReturnTypes) {
+  NiceMock<MockFoo> nice_foo;
+#if GTEST_HAS_EXCEPTIONS
+  try {
+    nice_foo.ReturnNonDefaultConstructible();
+    FAIL();
+  } catch (const std::runtime_error& ex) {
+    EXPECT_THAT(ex.what(), HasSubstr("ReturnNonDefaultConstructible"));
+  }
+#else
+  EXPECT_DEATH_IF_SUPPORTED({ nice_foo.ReturnNonDefaultConstructible(); }, "");
+#endif
 }
 
 // Tests that an unexpected call on a nice mock fails.

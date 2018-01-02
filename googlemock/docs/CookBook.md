@@ -148,7 +148,7 @@ Note that the mock class doesn't define `AppendPacket()`, unlike the
 real class. That's fine as long as the test doesn't need to call it.
 
 Next, you need a way to say that you want to use
-`ConcretePacketStream` in production code, and use `MockPacketStream`
+`ConcretePacketStream` in production code and to use `MockPacketStream`
 in tests.  Since the functions are not virtual and the two classes are
 unrelated, you must specify your choice at _compile time_ (as opposed
 to run time).
@@ -227,7 +227,7 @@ If a mock method has no `EXPECT_CALL` spec but is called, Google Mock
 will print a warning about the "uninteresting call". The rationale is:
 
   * New methods may be added to an interface after a test is written. We shouldn't fail a test just because a method it doesn't know about is called.
-  * However, this may also mean there's a bug in the test, so Google Mock shouldn't be silent either. If the user believes these calls are harmless, he can add an `EXPECT_CALL()` to suppress the warning.
+  * However, this may also mean there's a bug in the test, so Google Mock shouldn't be silent either. If the user believes these calls are harmless, they can add an `EXPECT_CALL()` to suppress the warning.
 
 However, sometimes you may want to suppress all "uninteresting call"
 warnings, while sometimes you may want the opposite, i.e. to treat all
@@ -706,7 +706,7 @@ type `m` accepts):
   1. When both `T` and `U` are built-in arithmetic types (`bool`, integers, and floating-point numbers), the conversion from `T` to `U` is not lossy (in other words, any value representable by `T` can also be represented by `U`); and
   1. When `U` is a reference, `T` must also be a reference (as the underlying matcher may be interested in the address of the `U` value).
 
-The code won't compile if any of these conditions isn't met.
+The code won't compile if any of these conditions aren't met.
 
 Here's one example:
 
@@ -1682,7 +1682,7 @@ This also works when the argument is an output iterator:
 
 ```
 using ::testing::_;
-using ::testing::SeArrayArgument;
+using ::testing::SetArrayArgument;
 
 class MockRolodex : public Rolodex {
  public:

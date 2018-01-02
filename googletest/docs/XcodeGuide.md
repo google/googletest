@@ -6,13 +6,13 @@ This guide will explain how to use the Google Testing Framework in your Xcode pr
 
 Here is the quick guide for using Google Test in your Xcode project.
 
-  1. Download the source from the [website](http://code.google.com/p/googletest) using this command: `svn checkout http://googletest.googlecode.com/svn/trunk/ googletest-read-only`
+  1. Download the source from the [website](http://code.google.com/p/googletest) using this command: `svn checkout http://googletest.googlecode.com/svn/trunk/ googletest-read-only`.
   1. Open up the `gtest.xcodeproj` in the `googletest-read-only/xcode/` directory and build the gtest.framework.
-  1. Create a new "Shell Tool" target in your Xcode project called something like "UnitTests"
-  1. Add the gtest.framework to your project and add it to the "Link Binary with Libraries" build phase of "UnitTests"
-  1. Add your unit test source code to the "Compile Sources" build phase of "UnitTests"
+  1. Create a new "Shell Tool" target in your Xcode project called something like "UnitTests".
+  1. Add the gtest.framework to your project and add it to the "Link Binary with Libraries" build phase of "UnitTests".
+  1. Add your unit test source code to the "Compile Sources" build phase of "UnitTests".
   1. Edit the "UnitTests" executable and add an environment variable named "DYLD\_FRAMEWORK\_PATH" with a value equal to the path to the framework containing the gtest.framework relative to the compiled executable.
-  1. Build and Go
+  1. Build and Go.
 
 The following sections further explain each of the steps listed above in depth, describing in more detail how to complete it including some variations.
 
@@ -66,7 +66,7 @@ If you haven't set up the DYLD\_FRAMEWORK\_PATH, correctly, you might get a mess
     Reason: image not found
 ```
 
-To correct this problem, got to the directory containing the executable named in "Referenced from:" value in the error message above. Then, with the terminal in this location, find the relative path to the directory containing the gtest.framework. That is the value you'll need to set as the DYLD\_FRAMEWORK\_PATH.
+To correct this problem, go to to the directory containing the executable named in "Referenced from:" value in the error message above. Then, with the terminal in this location, find the relative path to the directory containing the gtest.framework. That is the value you'll need to set as the DYLD\_FRAMEWORK\_PATH.
 
 # Build and Go #
 
