@@ -93,8 +93,11 @@ using testing::Sequence;
 using testing::SetArgPointee;
 using testing::internal::ExpectationTester;
 using testing::internal::FormatFileLocation;
+using testing::internal::kAllow;
 using testing::internal::kErrorVerbosity;
+using testing::internal::kFail;
 using testing::internal::kInfoVerbosity;
+using testing::internal::kWarn;
 using testing::internal::kWarningVerbosity;
 using testing::internal::linked_ptr;
 
@@ -690,6 +693,61 @@ TEST(ExpectCallSyntaxTest, WarnsOnTooFewActions) {
       output);
   b.DoB();
 }
+
+TEST(ExpectCallSyntaxTest, WarningIsErrorWithFlag) {
+  int original_behavior = testing::GMOCK_FLAG(default_mock_behavior);
+
+  testing::GMOCK_FLAG(default_mock_behavior) = kAllow;
+  CaptureStdout();
+  {
+    MockA a;
+    a.DoA(0);
+  }
+  std::string output = GetCapturedStdout();
+  EXPECT_TRUE(output.empty()) << output;
+
+  testing::GMOCK_FLAG(default_mock_behavior) = kWarn;
+  CaptureStdout();
+  {
+    MockA a;
+    a.DoA(0);
+  }
+  std::string warning_output = GetCapturedStdout();
+  EXPECT_PRED_FORMAT2(IsSubstring, "GMOCK WARNING", warning_output);
+  EXPECT_PRED_FORMAT2(IsSubstring, "Uninteresting mock function call",
+                      warning_output);
+
+  testing::GMOCK_FLAG(default_mock_behavior) = kFail;
+  EXPECT_NONFATAL_FAILURE({
+    MockA a;
+    a.DoA(0);
+  }, "Uninteresting mock function call");
+
+  // Out of bounds values are converted to kWarn
+  testing::GMOCK_FLAG(default_mock_behavior) = -1;
+  CaptureStdout();
+  {
+    MockA a;
+    a.DoA(0);
+  }
+  warning_output = GetCapturedStdout();
+  EXPECT_PRED_FORMAT2(IsSubstring, "GMOCK WARNING", warning_output);
+  EXPECT_PRED_FORMAT2(IsSubstring, "Uninteresting mock function call",
+                      warning_output);
+  testing::GMOCK_FLAG(default_mock_behavior) = 3;
+  CaptureStdout();
+  {
+    MockA a;
+    a.DoA(0);
+  }
+  warning_output = GetCapturedStdout();
+  EXPECT_PRED_FORMAT2(IsSubstring, "GMOCK WARNING", warning_output);
+  EXPECT_PRED_FORMAT2(IsSubstring, "Uninteresting mock function call",
+                      warning_output);
+
+  testing::GMOCK_FLAG(default_mock_behavior) = original_behavior;
+}
+
 
 #endif  // GTEST_HAS_STREAM_REDIRECTION
 
@@ -2624,7 +2682,7 @@ TEST(SynchronizationTest, CanCallMockMethodInAction) {
 
 }  // namespace
 
-// Allows the user to define his own main and then invoke gmock_main
+// Allows the user to define their own main and then invoke gmock_main
 // from it. This might be necessary on some platforms which require
 // specific setup and teardown.
 #if GMOCK_RENAME_MAIN
