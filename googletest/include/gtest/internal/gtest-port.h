@@ -827,7 +827,7 @@ using ::std::tuple_size;
 // Determines whether to support Combine().
 // The implementation doesn't work on Sun Studio since it doesn't
 // understand templated conversion operators.
-#if GTEST_HAS_TR1_TUPLE && !defined(__SUNPRO_CC)
+#if (GTEST_HAS_TR1_TUPLE || GTEST_HAS_STD_TUPLE_) && !defined(__SUNPRO_CC)
 # define GTEST_HAS_COMBINE 1
 #endif
 
