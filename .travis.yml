@@ -24,10 +24,11 @@ matrix:
       script: ./ci/build-linux-bazel.sh
     - os: linux
       compiler: gcc
-      env: BUILD_TYPE=Debug VERBOSE=1
+      install: ./ci/install-linux.sh && ./ci/log-config.sh
+      script: ./ci/build-linux-autotools.sh
     - os: linux
       compiler: gcc
-      env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
+      env: BUILD_TYPE=Debug VERBOSE=1 CXX_FLAGS=-std=c++11
     - os: linux
       compiler: clang
       env: BUILD_TYPE=Debug VERBOSE=1
