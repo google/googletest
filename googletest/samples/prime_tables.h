@@ -103,11 +103,15 @@ class PreCalculatedPrimeTable : public PrimeTable {
     ::std::fill(is_prime_, is_prime_ + is_prime_size_, true);
     is_prime_[0] = is_prime_[1] = false;
 
-    for (int i = 2; i <= max; i++) {
+    // Checks every candidate for prime number (we know that 2 is the only even
+    // prime).
+    for (int i = 2; i*i <= max; i += i%2+1) {
       if (!is_prime_[i]) continue;
 
       // Marks all multiples of i (except i itself) as non-prime.
-      for (int j = 2*i; j <= max; j += i) {
+      // We are starting here from i-th multiplier, because all smaller
+      // complex numbers were already marked.
+      for (int j = i*i; j <= max; j += i) {
         is_prime_[j] = false;
       }
     }

@@ -427,13 +427,8 @@ void DefaultPrintTo(WrapPrinterType<kPrintFunctionPointer> /* dummy */,
     *os << "NULL";
   } else {
     // T is a function type, so '*os << p' doesn't do what we want
-    // (it just prints p as bool).  We want to print p as a const
-    // void*.  However, we cannot cast it to const void* directly,
-    // even using reinterpret_cast, as earlier versions of gcc
-    // (e.g. 3.4.5) cannot compile the cast when p is a function
-    // pointer.  Casting to UInt64 first solves the problem.
-    *os << reinterpret_cast<const void*>(
-        reinterpret_cast<internal::UInt64>(p));
+    // (it just prints p as bool).  Cast p to const void* to print it.
+    *os << reinterpret_cast<const void*>(p);
   }
 }
 
