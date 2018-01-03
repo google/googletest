@@ -133,14 +133,7 @@
 # include <sys/types.h>  // NOLINT
 #endif
 
-// Indicates that this translation unit is part of Google Test's
-// implementation.  It must come before gtest-internal-inl.h is
-// included, or there will be a compiler error.  This trick is to
-// prevent a user from accidentally including gtest-internal-inl.h in
-// their code.
-#define GTEST_IMPLEMENTATION_ 1
 #include "src/gtest-internal-inl.h"
-#undef GTEST_IMPLEMENTATION_
 
 #if GTEST_OS_WINDOWS
 # define vsnprintf _vsnprintf
@@ -2569,7 +2562,7 @@ void ReportInvalidTestCaseType(const char* test_case_name,
       << "probably rename one of the classes to put the tests into different\n"
       << "test cases.";
 
-  GTEST_LOG_(ERROR) 
+  GTEST_LOG_(ERROR)
        << FormatFileLocation(code_location.file.c_str(),
                              code_location.line)
        << " " << errors.GetString();
@@ -2918,7 +2911,7 @@ WORD GetNewColor(GTestColor color, WORD old_color_attrs) {
   }
   return new_color;
 }
-	
+
 #else
 
 // Returns the ANSI color code for the given color.  COLOR_DEFAULT is
@@ -3005,7 +2998,7 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   GetConsoleScreenBufferInfo(stdout_handle, &buffer_info);
   const WORD old_color_attrs = buffer_info.wAttributes;
   const WORD new_color = GetNewColor(color, old_color_attrs);
-  
+
   // We need to flush the stream buffers into the console before each
   // SetConsoleTextAttribute call lest it affect the text that is already
   // printed but has not yet reached the console.
@@ -3471,7 +3464,7 @@ void XmlUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
     //   3. To interpret the meaning of errno in a thread-safe way,
     //      we need the strerror_r() function, which is not available on
     //      Windows.
-    GTEST_LOG_(FATAL) << "Unable to open file \"" 
+    GTEST_LOG_(FATAL) << "Unable to open file \""
                       << output_file_ << "\"";
   }
   std::stringstream stream;
@@ -4419,8 +4412,8 @@ void UnitTestImpl::ConfigureXmlOutput() {
     listeners()->SetDefaultXmlGenerator(new XmlUnitTestResultPrinter(
         UnitTestOptions::GetAbsolutePathToOutputFile().c_str()));
   } else if (output_format != "") {
-    GTEST_LOG_(WARNING) << "WARNING: unrecognized output format \"" 
-                        << output_format 
+    GTEST_LOG_(WARNING) << "WARNING: unrecognized output format \""
+                        << output_format
                         << "\" ignored.";
   }
 }
@@ -4436,8 +4429,8 @@ void UnitTestImpl::ConfigureStreamingOutput() {
       listeners()->Append(new StreamingListener(target.substr(0, pos),
                                                 target.substr(pos+1)));
     } else {
-      GTEST_LOG_(WARNING) << "unrecognized streaming target \"" 
-                          << target 
+      GTEST_LOG_(WARNING) << "unrecognized streaming target \""
+                          << target
                           << "\" ignored.";
     }
   }
@@ -4567,7 +4560,7 @@ static void TearDownEnvironment(Environment* env) { env->TearDown(); }
 bool UnitTestImpl::RunAllTests() {
   // Makes sure InitGoogleTest() was called.
   if (!GTestIsInitialized()) {
-    GTEST_LOG_(ERROR) << 
+    GTEST_LOG_(ERROR) <<
       "\nThis test program did NOT call ::testing::InitGoogleTest "
       "before calling RUN_ALL_TESTS().  Please fix it.";
     return false;
@@ -5269,8 +5262,8 @@ bool ParseGoogleTestFlag(const char* const arg) {
 void LoadFlagsFromFile(const std::string& path) {
   FILE* flagfile = posix::FOpen(path.c_str(), "r");
   if (!flagfile) {
-    GTEST_LOG_(FATAL) << "Unable to open file \"" 
-                      << GTEST_FLAG(flagfile) 
+    GTEST_LOG_(FATAL) << "Unable to open file \""
+                      << GTEST_FLAG(flagfile)
                       << "\"";
   }
   std::string contents(ReadEntireFile(flagfile));
