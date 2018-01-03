@@ -171,7 +171,8 @@ class TypeWithoutFormatter<T, kConvertibleToInteger> {
   // T is not an enum, printing it as an integer is the best we can do
   // given that it has no user-defined printer.
   static void PrintValue(const T& value, ::std::ostream* os) {
-    const internal::BiggestInt kBigInt = value;
+    const internal::BiggestInt kBigInt =
+        static_cast<internal::BiggestInt>(value);
     *os << kBigInt;
   }
 };
