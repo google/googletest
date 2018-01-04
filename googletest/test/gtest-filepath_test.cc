@@ -27,16 +27,14 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Authors: keith.ray@gmail.com (Keith Ray)
 //
 // Google Test filepath utilities
 //
 // This file tests classes and functions used internally by
 // Google Test.  They are subject to change without notice.
 //
-// This file is #included from gtest_unittest.cc, to avoid changing
-// build or make-files for some existing Google Test clients. Do not
-// #include this file anywhere else!
+// This file is #included from gtest-internal.h.
+// Do not #include this file anywhere else!
 
 #include "gtest/internal/gtest-filepath.h"
 #include "gtest/gtest.h"
