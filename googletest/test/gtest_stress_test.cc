@@ -34,7 +34,6 @@
 
 #include "gtest/gtest.h"
 
-#include <iostream>
 #include <vector>
 
 #include "src/gtest-internal-inl.h"
