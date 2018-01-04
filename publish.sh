@@ -1,35 +1,33 @@
 #!/bin/bash
+# Publishes packages to server.
+# TODO(frankie): This is NOT a good way to do things. It's just a place holder.
 #
-#
-# This is NOT a good way to do things. It's just a place holder.
-#
+# Copyright: 2017 Ditto Technologies. All Rights Reserved.
+# Author: Frankie Li, Daran He
 
 
-# Adding updated package to our aptly repo
+# Adding updated package to our s3 repo.
 REPO=$1
 DISTRI=$2
 
+KEY_ID=`gpg --list-keys | grep "pub " | grep -oP "(?<=\/)[A-Z0-9]+(?=\s)"`
 BUILD_DIR=build
-SNAPSHOTID=`date +%Y%m%d-%H%M`
-PASSPHRASE=waldorf-fantastic-optimization-caviar
 
-if [ `aptly repo list | grep ${REPO} | wc -l` == 0 ]; then
-    aptly repo create ${REPO}
-else
-    aptly repo remove ${REPO} googletest
-fi
-
+# Show folder content.
 echo "Build dir is:"
-ls -la ${BUILD_DIR}
+ls -lLa ${BUILD_DIR}
 echo "HERE is:"
 pwd
-ls -la .
-echo "Aptly Publishish:"
+ls -la
+
+# Publish.
+echo "Publishing:"
 for x in echo ' '; do
     echo "STAGE $x"
-    
-    $x aptly -config=./aptly-conf repo add $REPO $BUILD_DIR/*.deb
-    $x aptly -config=./aptly-conf snapshot create $REPO-$SNAPSHOTID from repo $REPO
-    $x aptly -config=./aptly-conf publish drop $DISTRI s3:$REPO:
-    $x aptly -config=./aptly-conf publish snapshot -force-overwrite -passphrase=${PASSPHRASE} -batch=true --distribution=$DISTRI $REPO-$SNAPSHOTID s3:${REPO}:
+
+    $x deb-s3 upload \
+        --sign $KEY_ID \
+        --gpg-options "\-\-batch \-\-passphrase waldorf\-fantastic\-optimization\-caviar" \
+        --codename $DISTRI --bucket $REPO --lock \
+        $BUILD_DIR/*.deb
 done

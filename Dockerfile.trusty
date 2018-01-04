@@ -1,12 +1,11 @@
 # Recipe of the enviornment needed to build ar.
 #
-# Author: Frankie Li
+# Author: Frankie Li, Daran He
 FROM ubuntu:trusty
 
 # Standard issued requirements for all build enviornments in Ditto. We need
 # to maintain consistent sets of numerical libraries.
 
-RUN dpkg --add-architecture i386
 RUN apt-get update -qq
 RUN apt-get install -y build-essential
 RUN apt-get install -y cmake git libgtk2.0-dev pkg-config libavcodec-dev \

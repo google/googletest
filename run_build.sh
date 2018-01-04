@@ -1,12 +1,24 @@
 #!/bin/bash
 #
-# Build script to generate dlib Debian package.
+# Build script to generate googletest Debian package.
+#
+# Copyright: 2017 Ditto Technologies. All Rights Reserved.
+# Author: Frankie Li, Daran He
 
+# We need a non-root path for make install and make package.
+INSTALL_DIR=${PWD}/install
+mkdir -p ${INSTALL_DIR}
 
-DLIB_BLD=build
-mkdir -p ${DLIB_BLD}
-cd ${DLIB_BLD}
-cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCPACK_GENERATOR="DEB" -DCPACK_BINARY_DEB="ON" -DCPACK_DEBIAN_PACKAGE_SHLIBDEPS="ON" -DCPACK_PACKAGE_CONTACT="eng@ditto.com"
+BUILD_DIR=build
+mkdir -p ${BUILD_DIR}
+cd ${BUILD_DIR}
+cmake .. \
+	-DCMAKE_BUILD_TYPE=Release \
+	-DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
+	-DBUILD_SHARED_LIBS=ON \
+	-DCPACK_GENERATOR="DEB" \
+	-DCPACK_BINARY_DEB="ON" \
+	-DCPACK_DEBIAN_PACKAGE_SHLIBDEPS="ON" \
+	-DCPACK_PACKAGE_CONTACT="eng@ditto.com"
 
-make -j 4
-make package
+make -j$(nproc) install package
