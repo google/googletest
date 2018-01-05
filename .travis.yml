@@ -38,19 +38,19 @@ matrix:
     - os: osx
       compiler: gcc
       env: BUILD_TYPE=Debug VERBOSE=1
-      if: event != pull_request
+      if: type != pull_request
     - os: osx
       compiler: gcc
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
-      if: event != pull_request
+      if: type != pull_request
     - os: osx
       compiler: clang
       env: BUILD_TYPE=Debug VERBOSE=1
-      if: event != pull_request
+      if: type != pull_request
     - os: osx
       compiler: clang
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
-      if: event != pull_request
+      if: type != pull_request
 
 # These are the install and build (script) phases for the most common entries in the matrix.  They could be included
 # in each entry in the matrix, but that is just repetitive.
