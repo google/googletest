@@ -52,15 +52,13 @@ install:
 - ps: |
     Write-Output "Compiler: $env:compiler"
     Write-Output "Generator: $env:generator"
-    Write-Output "Pull Request: <$env:APPVEYOR_PULL_REQUEST_NUMBER>"
-    Write-Output "Enabled on PR: <$env:enabled_on_pr>"
     if (-not (Test-Path env:APPVEYOR_PULL_REQUEST_NUMBER)) {
+      Write-Output "This is *NOT* a pull request build"
+    } else {
       Write-Output "This is a pull request build"
       if (-not (Test-Path env:enabled_on_pr) -or $env:enabled_on_pr -ne "yes") {
         Write-Output "PR builds are *NOT* explicitly enabled"
       }
-    } else {
-      Write-Output "This is *NOT* a pull request build"
     }
 
     # git bash conflicts with MinGW makefiles
@@ -74,7 +72,7 @@ install:
 build_script:
 - ps: |
     # Only enable some builds for pull requests, the AppVeyor queue is too long.
-    if (-not (Test-Path env:APPVEYOR_PULL_REQUEST_NUMBER) -And (-not (Test-Path env:enabled_on_pr) -or $env:enabled_on_pr -ne "")) {
+    if (-not (Test-Path env:APPVEYOR_PULL_REQUEST_NUMBER) -And (-not (Test-Path env:enabled_on_pr) -or $env:enabled_on_pr -ne "yes")) {
       return
     }
     md _build -Force | Out-Null
@@ -96,7 +94,7 @@ build_script:
 test_script:
 - ps: |
     # Only enable some builds for pull requests, the AppVeyor queue is too long.
-    if (-not (Test-Path env:APPVEYOR_PULL_REQUEST_NUMBER) -And (-not (Test-Path env:enabled_on_pr) -or $env:enabled_on_pr -ne "")) {
+    if (-not (Test-Path env:APPVEYOR_PULL_REQUEST_NUMBER) -And (-not (Test-Path env:enabled_on_pr) -or $env:enabled_on_pr -ne "yes")) {
       return
     }
     if ($env:generator -eq "MinGW Makefiles") {
