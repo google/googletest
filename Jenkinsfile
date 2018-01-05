@@ -74,24 +74,21 @@ def build(target, build_config) {
 
 
         def old_image = sh (script: "docker images -q ${build_config.docker_name}",
-                            returnStdout: true).replace("\n", " ")
+                            returnStdout: true)
         echo "Old docker image: ${old_image}"
 
         docker.build("${build_config.docker_name}", "-f ${build_config.docker_file} .")
 
         def new_image = sh (script: "docker images -q ${build_config.docker_name}",
-                            returnStdout: true).replace("\n", " ")
-
+                            returnStdout: true)
         echo "New docker image: ${new_image}"
 
         if (old_image.length() > 0 && old_image != new_image) {
-            def children = sh(script: "docker images --filter 'dangling=true' -q --no-trunc",
-                              returnStdout: true).replace("\n", " ").replace(" ", "")
-            echo "Removing children: ${children}"
-            sh("docker rmi ${children}")
             echo "Removing old image: ${old_image}"
             sh("docker rmi ${old_image}")
         }
+
+        deleteDockerOutdated()
     }
 
     stage("Build ${target}") {
@@ -155,4 +152,11 @@ def getGitTag() {
 
 def getGitBranch() {
     return sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
+}
+
+def deleteDockerOutdated() {
+    // Delete stopped docker containers.
+    sh(script: "docker ps -aq --no-trunc | xargs --no-run-if-empty docker rm")
+    // Delete dangling docker images.
+    sh(script: "docker images -q --filter dangling=true | xargs --no-run-if-empty docker rmi")
 }
