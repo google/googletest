@@ -305,14 +305,14 @@ void DieWithEmbeddedNul() {
 }
 
 # if GTEST_USES_PCRE
+
 // Tests that EXPECT_DEATH and ASSERT_DEATH work when the error
 // message has a NUL character in it.
 TEST_F(TestForDeathTest, EmbeddedNulInMessage) {
-  // TODO(wan@google.com): <regex.h> doesn't support matching strings
-  // with embedded NUL characters - find a way to workaround it.
   EXPECT_DEATH(DieWithEmbeddedNul(), "my null world");
   ASSERT_DEATH(DieWithEmbeddedNul(), "my null world");
 }
+
 # endif  // GTEST_USES_PCRE
 
 // Tests that death test macros expand to code which interacts well with switch
