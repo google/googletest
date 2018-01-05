@@ -11,7 +11,7 @@ It is inspired by:
 
   * [jMock](http://www.jmock.org/),
   * [EasyMock](http://www.easymock.org/), and
-  * [Hamcrest](http://code.google.com/p/hamcrest/),
+  * [Hamcrest](https://code.google.com/archive/p/hamcrest/),
 
 and designed with C++'s specifics in mind.
 
@@ -45,7 +45,7 @@ also an IRC channel on OFTC (irc.oftc.net) #gtest available.  Please
 join us!
 
 Please note that code under [scripts/generator](scripts/generator/) is
-from [cppclean](http://code.google.com/p/cppclean/) and released under
+from [cppclean](https://code.google.com/archive/p/cppclean/) and released under
 the Apache License, which is different from Google Mock's license.
 
 ## Getting Started ##
@@ -58,7 +58,7 @@ documentation in the following order:
   * Read [Google Mock for Dummies](../../master/googlemock/docs/ForDummies.md).
   * Read the instructions below on how to build Google Mock.
 
-You can also watch Zhanyong's [talk](http://www.youtube.com/watch?v=sYpCyLI47rM) on Google Mock's usage and implementation.
+You can also watch Zhanyong's [talk](https://www.youtube.com/watch?v=sYpCyLI47rM) on Google Mock's usage and implementation.
 
 Once you understand the basics, check out the rest of the docs:
 
@@ -71,7 +71,7 @@ If you need help, please check the
 [KnownIssues](docs/KnownIssues.md) and
 [FrequentlyAskedQuestions](docs/FrequentlyAskedQuestions.md) before
 posting a question on the
-[discussion group](http://groups.google.com/group/googlemock).
+[discussion group](https://groups.google.com/forum/#!forum/googlemock).
 
 
 ### Using Google Mock Without Google Test ###
@@ -161,7 +161,7 @@ to
         "${gtest_SOURCE_DIR}/include" "${gmock_SOURCE_DIR}/include")
     endif()
 
-This will addtionally mark Google Mock includes as system, which will 
+This will additionally mark Google Mock includes as system, which will 
 silence compiler warnings when compiling your tests using clang with 
 `-Wpedantic -Wall -Wextra -Wconversion`.
 
@@ -211,16 +211,16 @@ something like the following will do:
         -pthread -c ${GMOCK_DIR}/src/gmock-all.cc
     ar -rv libgmock.a gtest-all.o gmock-all.o
 
-(We need -pthread as Google Test and Google Mock use threads.)
+(We need `-pthread` as Google Test and Google Mock use threads.)
 
 Next, you should compile your test source file with
-${GTEST\_DIR}/include and ${GMOCK\_DIR}/include in the header search
+`${GTEST\_DIR}/include` and `${GMOCK\_DIR}/include` in the header search
 path, and link it with gmock and any other necessary libraries:
 
     g++ -isystem ${GTEST_DIR}/include -isystem ${GMOCK_DIR}/include \
         -pthread path/to/your_test.cc libgmock.a -o your_test
 
-As an example, the make/ directory contains a Makefile that you can
+As an example, the `make/` directory contains a Makefile that you can
 use to build Google Mock on systems where GNU make is available
 (e.g. Linux, Mac OS X, and Cygwin).  It doesn't try to build Google
 Mock's own tests.  Instead, it just builds the Google Mock library and
@@ -239,20 +239,20 @@ If you see errors, try to tweak the contents of
 
 ### Windows ###
 
-The msvc/2005 directory contains VC++ 2005 projects and the msvc/2010
+The `msvc/2005` directory contains VC++ 2005 projects and the `msvc/2010`
 directory contains VC++ 2010 projects for building Google Mock and
 selected tests.
 
-Change to the appropriate directory and run "msbuild gmock.sln" to
-build the library and tests (or open the gmock.sln in the MSVC IDE).
+Change to the appropriate directory and run `msbuild gmock.sln` to
+build the library and tests (or open the `gmock.sln` in the MSVC IDE).
 If you want to create your own project to use with Google Mock, you'll
-have to configure it to use the `gmock_config` propety sheet.  For that:
+have to configure it to use the `gmock_config` property sheet.  For that:
 
- * Open the Property Manager window (View | Other Windows | Property Manager)
- * Right-click on your project and select "Add Existing Property Sheet..."
+ * Open the Property Manager window (`View` | `Other Windows` | `Property Manager`)
+ * Right-click on your project and select `Add Existing Property Sheet...`
  * Navigate to `gmock_config.vsprops` or `gmock_config.props` and select it.
- * In Project Properties | Configuration Properties | General | Additional
-   Include Directories, type <path to Google Mock>/include.
+ * In `Project Properties` | `Configuration Properties` | `General` | `Additional`
+   Include `Directories`, type `<path to Google Mock>/include.
 
 ### Tweaking Google Mock ###
 
@@ -327,8 +327,7 @@ Library](../googletest/#choosing-a-tr1-tuple-library)".
 On platforms where the pthread library is available, Google Test and
 Google Mock use it in order to be thread-safe.  For this to work, you
 may need to tweak your compiler and/or linker flags.  Please see the
-"[Multi-threaded Tests](../googletest#multi-threaded-tests
-)" section in file Google Test's README for what you may need to do.
+"[Multi-threaded Tests](../googletest#multi-threaded-tests)" section in file Google Test's README for what you may need to do.
 
 If you have custom matchers defined using `MatcherInterface` or
 `MakePolymorphicMatcher()`, you'll need to update their definitions to
