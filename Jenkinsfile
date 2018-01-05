@@ -69,24 +69,8 @@ def build(target, build_config) {
     stage("Prepare Build Env ${target}") {
         // We're checking to see if an old image exists. If so, delete it to
         // reduce total space usage.
-        def docker_name = build_config.docker_name
-        def docker_file = build_config.docker_file
-
-
-        def old_image = sh (script: "docker images -q ${build_config.docker_name}",
-                            returnStdout: true)
-        echo "Old docker image: ${old_image}"
 
         docker.build("${build_config.docker_name}", "-f ${build_config.docker_file} .")
-
-        def new_image = sh (script: "docker images -q ${build_config.docker_name}",
-                            returnStdout: true)
-        echo "New docker image: ${new_image}"
-
-        if (old_image.length() > 0 && old_image != new_image) {
-            echo "Removing old image: ${old_image}"
-            sh("docker rmi ${old_image}")
-        }
 
         deleteDockerOutdated()
     }
