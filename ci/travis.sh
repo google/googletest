@@ -1,6 +1,8 @@
 #!/usr/bin/env sh
 set -evx
 
+. ci/get-nprocessors.sh
+
 # if possible, ask for the precise number of processors,
 # otherwise take 2 processors as reasonable default; see
 # https://docs.travis-ci.com/user/speeding-up-the-build/#Makefile-optimization
