@@ -508,7 +508,7 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
   return expectations_met;
 }
 
-CallReaction intToCallReaction(int mock_behavior) {
+static CallReaction intToCallReaction(int mock_behavior) {
   if (mock_behavior >= kAllow && mock_behavior <= kFail) {
     return static_cast<internal::CallReaction>(mock_behavior);
   }
