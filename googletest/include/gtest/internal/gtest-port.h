@@ -879,7 +879,7 @@ using ::std::tuple_size;
 #endif
 
 // Use this annotation before a function that takes a printf format string.
-#if defined(__GNUC__) && !defined(COMPILER_ICC)
+#if (defined(__GNUC__) || defined(__clang__)) && !defined(COMPILER_ICC)
 # if defined(__MINGW_PRINTF_FORMAT)
 // MinGW has two different printf implementations. Ensure the format macro
 // matches the selected implementation. See
