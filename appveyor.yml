@@ -72,7 +72,7 @@ install:
 build_script:
 - ps: |
     # Only enable some builds for pull requests, the AppVeyor queue is too long.
-    if (-not (Test-Path env:APPVEYOR_PULL_REQUEST_NUMBER) -And (-not (Test-Path env:enabled_on_pr) -or $env:enabled_on_pr -ne "yes")) {
+    if ((Test-Path env:APPVEYOR_PULL_REQUEST_NUMBER) -And (-not (Test-Path env:enabled_on_pr) -or $env:enabled_on_pr -ne "yes")) {
       return
     }
     md _build -Force | Out-Null
@@ -94,7 +94,7 @@ build_script:
 test_script:
 - ps: |
     # Only enable some builds for pull requests, the AppVeyor queue is too long.
-    if (-not (Test-Path env:APPVEYOR_PULL_REQUEST_NUMBER) -And (-not (Test-Path env:enabled_on_pr) -or $env:enabled_on_pr -ne "yes")) {
+    if ((Test-Path env:APPVEYOR_PULL_REQUEST_NUMBER) -And (-not (Test-Path env:enabled_on_pr) -or $env:enabled_on_pr -ne "yes")) {
       return
     }
     if ($env:generator -eq "MinGW Makefiles") {
