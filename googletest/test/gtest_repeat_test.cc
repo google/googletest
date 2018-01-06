@@ -210,6 +210,7 @@ void TestRepeatWithFilterForFailedTests(int repeat) {
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
+
   testing::AddGlobalTestEnvironment(new MyEnvironment);
 
   TestRepeatUnspecified();
