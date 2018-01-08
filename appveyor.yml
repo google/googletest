@@ -11,6 +11,7 @@ environment:
     - compiler: msvc-15-seh
       generator: "Visual Studio 15 2017 Win64"
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      enabled_on_pr: yes
 
     - compiler: msvc-14-seh
       generator: "Visual Studio 14 2015"
@@ -43,7 +44,6 @@ environment:
 
 configuration:
   - Debug
-  #- Release
 
 build:
   verbosity: minimal
@@ -52,6 +52,14 @@ install:
 - ps: |
     Write-Output "Compiler: $env:compiler"
     Write-Output "Generator: $env:generator"
+    if (-not (Test-Path env:APPVEYOR_PULL_REQUEST_NUMBER)) {
+      Write-Output "This is *NOT* a pull request build"
+    } else {
+      Write-Output "This is a pull request build"
+      if (-not (Test-Path env:enabled_on_pr) -or $env:enabled_on_pr -ne "yes") {
+        Write-Output "PR builds are *NOT* explicitly enabled"
+      }
+    }
 
     # git bash conflicts with MinGW makefiles
     if ($env:generator -eq "MinGW Makefiles") {
@@ -63,6 +71,10 @@ install:
 
 build_script:
 - ps: |
+    # Only enable some builds for pull requests, the AppVeyor queue is too long.
+    if ((Test-Path env:APPVEYOR_PULL_REQUEST_NUMBER) -And (-not (Test-Path env:enabled_on_pr) -or $env:enabled_on_pr -ne "yes")) {
+      return
+    }
     md _build -Force | Out-Null
     cd _build
 
@@ -81,6 +93,10 @@ build_script:
 
 test_script:
 - ps: |
+    # Only enable some builds for pull requests, the AppVeyor queue is too long.
+    if ((Test-Path env:APPVEYOR_PULL_REQUEST_NUMBER) -And (-not (Test-Path env:enabled_on_pr) -or $env:enabled_on_pr -ne "yes")) {
+      return
+    }
     if ($env:generator -eq "MinGW Makefiles") {
         return # No test available for MinGW
     }
