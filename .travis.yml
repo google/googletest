@@ -24,10 +24,11 @@ matrix:
       script: ./ci/build-linux-bazel.sh
     - os: linux
       compiler: gcc
-      env: BUILD_TYPE=Debug VERBOSE=1
+      install: ./ci/install-linux.sh && ./ci/log-config.sh
+      script: ./ci/build-linux-autotools.sh
     - os: linux
       compiler: gcc
-      env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
+      env: BUILD_TYPE=Debug VERBOSE=1 CXX_FLAGS=-std=c++11
     - os: linux
       compiler: clang
       env: BUILD_TYPE=Debug VERBOSE=1
@@ -37,15 +38,19 @@ matrix:
     - os: osx
       compiler: gcc
       env: BUILD_TYPE=Debug VERBOSE=1
+      if: type != pull_request
     - os: osx
       compiler: gcc
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
+      if: type != pull_request
     - os: osx
       compiler: clang
       env: BUILD_TYPE=Debug VERBOSE=1
+      if: type != pull_request
     - os: osx
       compiler: clang
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
+      if: type != pull_request
 
 # These are the install and build (script) phases for the most common entries in the matrix.  They could be included
 # in each entry in the matrix, but that is just repetitive.

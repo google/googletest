@@ -259,7 +259,9 @@ class GTEST_API_ AssertionResult {
   // Used in EXPECT_TRUE/FALSE(assertion_result).
   AssertionResult(const AssertionResult& other);
 
+#if defined(_MSC_VER) && _MSC_VER < 1910
   GTEST_DISABLE_MSC_WARNINGS_PUSH_(4800 /* forcing value to bool */)
+#endif
 
   // Used in the EXPECT_TRUE/FALSE(bool_expression).
   //
@@ -276,7 +278,9 @@ class GTEST_API_ AssertionResult {
           /*enabler*/ = NULL)
       : success_(success) {}
 
+#if defined(_MSC_VER) && _MSC_VER < 1910
   GTEST_DISABLE_MSC_WARNINGS_POP_()
+#endif
 
   // Assignment operator.
   AssertionResult& operator=(AssertionResult other) {
@@ -1386,11 +1390,9 @@ AssertionResult CmpHelperEQ(const char* lhs_expression,
                             const char* rhs_expression,
                             const T1& lhs,
                             const T2& rhs) {
-GTEST_DISABLE_MSC_WARNINGS_PUSH_(4389 /* signed/unsigned mismatch */)
   if (lhs == rhs) {
     return AssertionSuccess();
   }
-GTEST_DISABLE_MSC_WARNINGS_POP_()
 
   return CmpHelperEQFailure(lhs_expression, rhs_expression, lhs, rhs);
 }
