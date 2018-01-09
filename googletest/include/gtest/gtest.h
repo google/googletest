@@ -359,7 +359,7 @@ GTEST_API_ AssertionResult AssertionFailure(const Message& msg);
 // this for you.
 //
 // The only time you derive from Test is when defining a test fixture
-// to be used in a TEST_F.  For example:
+// to be used a TEST_F.  For example:
 //
 //   class FooTest : public testing::Test {
 //    protected:
@@ -699,7 +699,7 @@ class GTEST_API_ TestInfo {
 
   // Returns true iff this test will appear in the XML report.
   bool is_reportable() const {
-    // The XML report includes all tests matching the filter.
+    // For now, the XML report includes all tests matching the filter.
     // In the future, we may trim tests that are excluded because of
     // sharding.
     return matches_filter_;
@@ -1781,6 +1781,7 @@ const T* WithParamInterface<T>::parameter_ = NULL;
 template <typename T>
 class TestWithParam : public Test, public WithParamInterface<T> {
 };
+
 
 // Macros for indicating success/failure in test code.
 
