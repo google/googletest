@@ -185,14 +185,9 @@ TEST_P(DerivedTest, DoesBlah) {
 # include <utility>
 #endif
 
-// scripts/fuse_gtest.py depends on gtest's own header being #included
-// *unconditionally*.  Therefore these #includes cannot be moved
-// inside #if GTEST_HAS_PARAM_TEST.
 #include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-param-util.h"
 #include "gtest/internal/gtest-param-util-generated.h"
-
-#if GTEST_HAS_PARAM_TEST
 
 namespace testing {
 
@@ -1412,21 +1407,21 @@ internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
 // type testing::TestParamInfo<class ParamType>, and return std::string.
 //
 // testing::PrintToStringParamName is a builtin test suffix generator that
-// returns the value of testing::PrintToString(GetParam()). It does not work
-// for std::string or C strings.
+// returns the value of testing::PrintToString(GetParam()).
 //
 // Note: test names must be non-empty, unique, and may only contain ASCII
-// alphanumeric characters or underscore.
+// alphanumeric characters or underscore. Because PrintToString adds quotes
+// to std::string and C strings, it won't work for these types.
 
 # define INSTANTIATE_TEST_CASE_P(prefix, test_case_name, generator, ...) \
-  ::testing::internal::ParamGenerator<test_case_name::ParamType> \
+  static ::testing::internal::ParamGenerator<test_case_name::ParamType> \
       gtest_##prefix##test_case_name##_EvalGenerator_() { return generator; } \
-  ::std::string gtest_##prefix##test_case_name##_EvalGenerateName_( \
+  static ::std::string gtest_##prefix##test_case_name##_EvalGenerateName_( \
       const ::testing::TestParamInfo<test_case_name::ParamType>& info) { \
     return ::testing::internal::GetParamNameGen<test_case_name::ParamType> \
         (__VA_ARGS__)(info); \
   } \
-  int gtest_##prefix##test_case_name##_dummy_ GTEST_ATTRIBUTE_UNUSED_ = \
+  static int gtest_##prefix##test_case_name##_dummy_ GTEST_ATTRIBUTE_UNUSED_ = \
       ::testing::UnitTest::GetInstance()->parameterized_test_registry(). \
           GetTestCasePatternHolder<test_case_name>(\
               #test_case_name, \
@@ -1438,7 +1433,5 @@ internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
                       __FILE__, __LINE__)
 
 }  // namespace testing
-
-#endif  // GTEST_HAS_PARAM_TEST
 
 #endif  // GTEST_INCLUDE_GTEST_GTEST_PARAM_TEST_H_

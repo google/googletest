@@ -46,13 +46,8 @@
 #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_GENERATED_H_
 #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_GENERATED_H_
 
-// scripts/fuse_gtest.py depends on gtest's own header being #included
-// *unconditionally*.  Therefore these #includes cannot be moved
-// inside #if GTEST_HAS_PARAM_TEST.
 #include "gtest/internal/gtest-param-util.h"
 #include "gtest/internal/gtest-port.h"
-
-#if GTEST_HAS_PARAM_TEST
 
 namespace testing {
 
@@ -5140,7 +5135,5 @@ CartesianProductHolder10(const Generator1& g1, const Generator2& g2,
 
 }  // namespace internal
 }  // namespace testing
-
-#endif  //  GTEST_HAS_PARAM_TEST
 
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_GENERATED_H_

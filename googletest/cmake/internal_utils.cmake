@@ -87,10 +87,6 @@ macro(config_compiler_and_linker)
       # http://stackoverflow.com/questions/3232669 explains the issue.
       set(cxx_base_flags "${cxx_base_flags} -wd4702")
     endif()
-    if (NOT (MSVC_VERSION GREATER 1900))  # 1900 is Visual Studio 2015
-      # BigObj required for tests.
-      set(cxx_base_flags "${cxx_base_flags} -bigobj")
-    endif()
 
     set(cxx_base_flags "${cxx_base_flags} -D_UNICODE -DUNICODE -DWIN32 -D_WIN32")
     set(cxx_base_flags "${cxx_base_flags} -DSTRICT -DWIN32_LEAN_AND_MEAN")
@@ -98,7 +94,7 @@ macro(config_compiler_and_linker)
     set(cxx_no_exception_flags "-D_HAS_EXCEPTIONS=0")
     set(cxx_no_rtti_flags "-GR-")
   elseif (CMAKE_COMPILER_IS_GNUCXX)
-    set(cxx_base_flags "-Wall -Wshadow")
+    set(cxx_base_flags "-Wall -Wshadow -Werror")
     set(cxx_exception_flags "-fexceptions")
     set(cxx_no_exception_flags "-fno-exceptions")
     # Until version 4.3.2, GCC doesn't define a macro to indicate
@@ -187,6 +183,10 @@ endfunction()
 # is built from the given source files with the given compiler flags.
 function(cxx_executable_with_flags name cxx_flags libs)
   add_executable(${name} ${ARGN})
+  if (MSVC AND (NOT (MSVC_VERSION LESS 1700)))  # 1700 is Visual Studio 2012.
+    # BigObj required for tests.
+    set(cxx_flags "${cxx_flags} -bigobj")
+  endif()
   if (cxx_flags)
     set_target_properties(${name}
       PROPERTIES
