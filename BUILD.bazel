@@ -37,7 +37,12 @@ package(default_visibility = ["//visibility:public"])
 licenses(["notice"])
 
 config_setting(
-    name = "win",
+    name = "windows",
+    values = { "cpu": "x64_windows" },
+)
+
+config_setting(
+    name = "windows_msvc",
     values = {"cpu": "x64_windows_msvc"},
 )
 
@@ -65,7 +70,8 @@ cc_library(
     ]),
     copts = select(
         {
-            ":win": [],
+            ":windows": [],
+            ":windows_msvc": [],
             "//conditions:default": ["-pthread"],
         },
     ),
@@ -76,7 +82,8 @@ cc_library(
         "googletest/include",
     ],
     linkopts = select({
-        ":win": [],
+        ":windows": [],
+        ":windows_msvc": [],
         "//conditions:default": [
             "-pthread",
         ],
