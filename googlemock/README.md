@@ -78,7 +78,7 @@ posting a question on the
 
 Google Mock is not a testing framework itself.  Instead, it needs a
 testing framework for writing tests.  Google Mock works seamlessly
-with [Google Test](http://code.google.com/p/googletest/), but
+with [Google Test](https://github.com/google/googletest), but
 you can also use it with [any C++ testing framework](../../master/googlemock/docs/ForDummies.md#using-google-mock-with-any-testing-framework).
 
 ### Requirements for End Users ###
@@ -333,41 +333,9 @@ may need to tweak your compiler and/or linker flags.  Please see the
 If you have custom matchers defined using `MatcherInterface` or
 `MakePolymorphicMatcher()`, you'll need to update their definitions to
 use the new matcher API (
-[monomorphic](http://code.google.com/p/googlemock/wiki/CookBook#Writing_New_Monomorphic_Matchers),
-[polymorphic](http://code.google.com/p/googlemock/wiki/CookBook#Writing_New_Polymorphic_Matchers)).
+[monomorphic](./docs/CookBook.md#writing-new-monomorphic-matchers),
+[polymorphic](./docs/CookBook.md#writing-new-polymorphic-matchers)).
 Matchers defined using `MATCHER()` or `MATCHER_P*()` aren't affected.
-
-### Developing Google Mock ###
-
-This section discusses how to make your own changes to Google Mock.
-
-#### Testing Google Mock Itself ####
-
-To make sure your changes work as intended and don't break existing
-functionality, you'll want to compile and run Google Test's own tests.
-For that you'll need Autotools.  First, make sure you have followed
-the instructions above to configure Google Mock.
-Then, create a build output directory and enter it.  Next,
-
-    ${GMOCK_DIR}/configure  # try --help for more info
-
-Once you have successfully configured Google Mock, the build steps are
-standard for GNU-style OSS packages.
-
-    make        # Standard makefile following GNU conventions
-    make check  # Builds and runs all tests - all should pass.
-
-Note that when building your project against Google Mock, you are building
-against Google Test as well.  There is no need to configure Google Test
-separately.
-
-#### Contributing a Patch ####
-
-We welcome patches.
-Please read the [Developer's Guide](docs/DevGuide.md)
-for how you can contribute. In particular, make sure you have signed
-the Contributor License Agreement, or we won't be able to accept the
-patch.
 
 Happy testing!
 

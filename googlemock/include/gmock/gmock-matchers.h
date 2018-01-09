@@ -2232,7 +2232,10 @@ class FieldMatcher {
 
 // Implements the Property() matcher for matching a property
 // (i.e. return value of a getter method) of an object.
-template <typename Class, typename PropertyType>
+//
+// Property is a const-qualified member function of Class returning
+// PropertyType.
+template <typename Class, typename PropertyType, typename Property>
 class PropertyMatcher {
  public:
   // The property may have a reference type, so 'const PropertyType&'
@@ -2241,8 +2244,7 @@ class PropertyMatcher {
   // PropertyType being a reference or not.
   typedef GTEST_REFERENCE_TO_CONST_(PropertyType) RefToConstProperty;
 
-  PropertyMatcher(PropertyType (Class::*property)() const,
-                  const Matcher<RefToConstProperty>& matcher)
+  PropertyMatcher(Property property, const Matcher<RefToConstProperty>& matcher)
       : property_(property), matcher_(matcher) {}
 
   void DescribeTo(::std::ostream* os) const {
@@ -2295,7 +2297,7 @@ class PropertyMatcher {
     return MatchAndExplainImpl(false_type(), *p, listener);
   }
 
-  PropertyType (Class::*property_)() const;
+  Property property_;
   const Matcher<RefToConstProperty> matcher_;
 
   GTEST_DISALLOW_ASSIGN_(PropertyMatcher);
@@ -3613,6 +3615,10 @@ BoundSecondMatcher<Tuple2Matcher, Second> MatcherBindSecond(
   return BoundSecondMatcher<Tuple2Matcher, Second>(tm, second);
 }
 
+// Joins a vector of strings as if they are fields of a tuple; returns
+// the joined string.  This function is exported for testing.
+GTEST_API_ string JoinAsTuple(const Strings& fields);
+
 // Returns the description for a matcher defined using the MATCHER*()
 // macro where the user-supplied description string is "", if
 // 'negation' is false; otherwise returns the description of the
@@ -3908,11 +3914,13 @@ inline PolymorphicMatcher<
 //   Property(&Foo::str, StartsWith("hi"))
 // matches a Foo object x iff x.str() starts with "hi".
 template <typename Class, typename PropertyType, typename PropertyMatcher>
-inline PolymorphicMatcher<
-  internal::PropertyMatcher<Class, PropertyType> > Property(
-    PropertyType (Class::*property)() const, const PropertyMatcher& matcher) {
+inline PolymorphicMatcher<internal::PropertyMatcher<
+    Class, PropertyType, PropertyType (Class::*)() const> >
+Property(PropertyType (Class::*property)() const,
+         const PropertyMatcher& matcher) {
   return MakePolymorphicMatcher(
-      internal::PropertyMatcher<Class, PropertyType>(
+      internal::PropertyMatcher<Class, PropertyType,
+                                PropertyType (Class::*)() const>(
           property,
           MatcherCast<GTEST_REFERENCE_TO_CONST_(PropertyType)>(matcher)));
   // The call to MatcherCast() is required for supporting inner
@@ -3920,6 +3928,21 @@ inline PolymorphicMatcher<
   //   Property(&Foo::bar, m)
   // to compile where bar() returns an int32 and m is a matcher for int64.
 }
+
+#if GTEST_LANG_CXX11
+// The same as above but for reference-qualified member functions.
+template <typename Class, typename PropertyType, typename PropertyMatcher>
+inline PolymorphicMatcher<internal::PropertyMatcher<
+    Class, PropertyType, PropertyType (Class::*)() const &> >
+Property(PropertyType (Class::*property)() const &,
+         const PropertyMatcher& matcher) {
+  return MakePolymorphicMatcher(
+      internal::PropertyMatcher<Class, PropertyType,
+                                PropertyType (Class::*)() const &>(
+          property,
+          MatcherCast<GTEST_REFERENCE_TO_CONST_(PropertyType)>(matcher)));
+}
+#endif
 
 // Creates a matcher that matches an object iff the result of applying
 // a callable to x matches 'matcher'.

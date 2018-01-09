@@ -240,7 +240,7 @@ You cannot mock a variadic function (i.e. a function taking ellipsis
 The problem is that in general, there is _no way_ for a mock object to
 know how many arguments are passed to the variadic method, and what
 the arguments' types are.  Only the _author of the base class_ knows
-the protocol, and we cannot look into his head.
+the protocol, and we cannot look into their head.
 
 Therefore, to mock such a function, the _user_ must teach the mock
 object how to figure out the number of arguments and their types.  One
