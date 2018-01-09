@@ -74,6 +74,8 @@ include_directories("${gmock_SOURCE_DIR}/include"
 # <= VS 2010  <= 10        <= 1600         Use Google Tests's own tuple.
 # VS 2012     11           1700            std::tr1::tuple + _VARIADIC_MAX=10
 # VS 2013     12           1800            std::tr1::tuple
+# VS 2015     14           1900            std::tuple
+# VS 2017     15           >= 1910         std::tuple
 if (MSVC AND MSVC_VERSION EQUAL 1700)
   add_definitions(/D _VARIADIC_MAX=10)
 endif()
@@ -101,8 +103,8 @@ cxx_library(gmock_main
 # to the targets for when we are part of a parent build (ie being pulled
 # in via add_subdirectory() rather than being a standalone build).
 if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
-  target_include_directories(gmock      INTERFACE "${gmock_SOURCE_DIR}/include")
-  target_include_directories(gmock_main INTERFACE "${gmock_SOURCE_DIR}/include")
+  target_include_directories(gmock      SYSTEM INTERFACE "${gmock_SOURCE_DIR}/include")
+  target_include_directories(gmock_main SYSTEM INTERFACE "${gmock_SOURCE_DIR}/include")
 endif()
 
 ########################################################################
@@ -110,11 +112,11 @@ endif()
 # Install rules
 if(INSTALL_GMOCK)
   install(TARGETS gmock gmock_main
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-  install(DIRECTORY ${gmock_SOURCE_DIR}/include/gmock
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+  install(DIRECTORY "${gmock_SOURCE_DIR}/include/gmock"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
   # configure and install pkgconfig files
   configure_file(

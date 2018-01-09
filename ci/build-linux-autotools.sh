@@ -1,4 +1,5 @@
-# Copyright 2017 Google Inc. 
+#!/usr/bin/env bash
+# Copyright 2017 Google Inc.
 # All Rights Reserved.
 #
 #
@@ -27,29 +28,17 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-# Author: misterg@google.com (Gennadiy Civil)
-#   
-#   Bazel Build for Google C++ Testing Framework(Google Test)-googlemock
 
-licenses(["notice"])
+set -e
 
-""" gmock own tests """
+. ci/get-nprocessors.sh
 
-cc_test(
-    name = "gmock_all_test",
-    size = "small",
-    srcs = glob(
-        include = [
-            "gmock-*.cc",
-        ],
-    ),
-    linkopts = select({
-        "//:windows": [],
-        "//:windows_msvc": [],
-        "//conditions:default": [
-            "-pthread",
-        ],
-    }),
-    deps = ["//:gtest"],
-)
+# Create the configuration script
+autoreconf -i
+
+# Run in a subdirectory to keep the sources clean
+mkdir build || true
+cd build
+../configure
+
+make -j ${NPROCESSORS:-2}

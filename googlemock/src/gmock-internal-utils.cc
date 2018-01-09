@@ -71,7 +71,7 @@ GTEST_API_ string ConvertIdentifierNameToWords(const char* id_name) {
 }
 
 // This class reports Google Mock failures as Google Test failures.  A
-// user can define another class in a similar fashion if he intends to
+// user can define another class in a similar fashion if they intend to
 // use Google Mock with a testing framework other than Google Test.
 class GoogleTestFailureReporter : public FailureReporterInterface {
  public:

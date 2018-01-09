@@ -57,13 +57,15 @@ cc_test(
                         "gtest-param-test_test.cc",
                     ],
                 ) + select({
-        "//:win": [],
+        "//:windows": [],
+        "//:windows_msvc": [],
         "//conditions:default": [
             "gtest-tuple_test.cc",
         ],
         }),
     copts = select({
-        "//:win": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
+        "//:windows": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
+        "//:windows_msvc": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
         "//conditions:default": ["-DGTEST_USE_OWN_TR1_TUPLE=1"],
     }),
     includes = [
@@ -73,7 +75,8 @@ cc_test(
         "googletest/test",
     ],
     linkopts = select({
-        "//:win": [],
+        "//:windows": [],
+        "//:windows_msvc": [],
         "//conditions:default": [
             "-pthread",
         ],
