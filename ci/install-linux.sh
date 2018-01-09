@@ -1,4 +1,5 @@
-# Copyright 2017 Google Inc. 
+#!/usr/bin/env bash
+# Copyright 2017 Google Inc.
 # All Rights Reserved.
 #
 #
@@ -27,29 +28,22 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-# Author: misterg@google.com (Gennadiy Civil)
-#   
-#   Bazel Build for Google C++ Testing Framework(Google Test)-googlemock
 
-licenses(["notice"])
+set -eu
 
-""" gmock own tests """
+if [ "${TRAVIS_OS_NAME}" != linux ]; then
+    echo "Not a Linux build; skipping installation"
+    exit 0
+fi
 
-cc_test(
-    name = "gmock_all_test",
-    size = "small",
-    srcs = glob(
-        include = [
-            "gmock-*.cc",
-        ],
-    ),
-    linkopts = select({
-        "//:windows": [],
-        "//:windows_msvc": [],
-        "//conditions:default": [
-            "-pthread",
-        ],
-    }),
-    deps = ["//:gtest"],
-)
+
+if [ "${TRAVIS_SUDO}" = "true" ]; then
+    echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" | \
+        sudo tee /etc/apt/sources.list.d/bazel.list
+    curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
+    sudo apt-get update && sudo apt-get install -y bazel gcc-4.9 g++-4.9 clang-3.7
+elif [ "${CXX}" = "clang++" ]; then
+    # Use ccache, assuming $HOME/bin is in the path, which is true in the Travis build environment.
+    ln -sf /usr/bin/ccache $HOME/bin/${CXX};
+    ln -sf /usr/bin/ccache $HOME/bin/${CC};
+fi

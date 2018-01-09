@@ -34,6 +34,7 @@ EXTRA_DIST += $(GTEST_SRC)
 # Sample files that we don't compile.
 EXTRA_DIST += \
   samples/prime_tables.h \
+  samples/sample1_unittest.cc \
   samples/sample2_unittest.cc \
   samples/sample3_unittest.cc \
   samples/sample4_unittest.cc \
@@ -120,16 +121,16 @@ EXTRA_DIST += \
 
 # MSVC project files
 EXTRA_DIST += \
-  msvc/gtest-md.sln \
-  msvc/gtest-md.vcproj \
-  msvc/gtest.sln \
-  msvc/gtest.vcproj \
-  msvc/gtest_main-md.vcproj \
-  msvc/gtest_main.vcproj \
-  msvc/gtest_prod_test-md.vcproj \
-  msvc/gtest_prod_test.vcproj \
-  msvc/gtest_unittest-md.vcproj \
-  msvc/gtest_unittest.vcproj
+  msvc/2010/gtest-md.sln \
+  msvc/2010/gtest-md.vcxproj \
+  msvc/2010/gtest.sln \
+  msvc/2010/gtest.vcxproj \
+  msvc/2010/gtest_main-md.vcxproj \
+  msvc/2010/gtest_main.vcxproj \
+  msvc/2010/gtest_prod_test-md.vcxproj \
+  msvc/2010/gtest_prod_test.vcxproj \
+  msvc/2010/gtest_unittest-md.vcxproj \
+  msvc/2010/gtest_unittest.vcxproj
 
 # xcode project files
 EXTRA_DIST += \
@@ -223,33 +224,61 @@ lib_libgtest_main_la_LIBADD = lib/libgtest.la
 # TESTS -- Programs run automatically by "make check"
 # check_PROGRAMS -- Programs built by "make check" but not necessarily run
 
-noinst_LTLIBRARIES = samples/libsamples.la
-
-samples_libsamples_la_SOURCES = \
-  samples/sample1.cc \
-  samples/sample1.h \
-  samples/sample2.cc \
-  samples/sample2.h \
-  samples/sample3-inl.h \
-  samples/sample4.cc \
-  samples/sample4.h
-
 TESTS=
 TESTS_ENVIRONMENT = GTEST_SOURCE_DIR="$(srcdir)/test" \
                     GTEST_BUILD_DIR="$(top_builddir)/test"
 check_PROGRAMS=
 
 # A simple sample on using gtest.
-TESTS += samples/sample1_unittest
-check_PROGRAMS += samples/sample1_unittest
-samples_sample1_unittest_SOURCES = samples/sample1_unittest.cc
-samples_sample1_unittest_LDADD = lib/libgtest_main.la \
-                                 lib/libgtest.la \
-                                 samples/libsamples.la
+TESTS += samples/sample1_unittest \
+    samples/sample2_unittest \
+    samples/sample3_unittest \
+    samples/sample4_unittest \
+    samples/sample5_unittest \
+    samples/sample6_unittest \
+    samples/sample7_unittest \
+    samples/sample8_unittest \
+    samples/sample9_unittest \
+    samples/sample10_unittest
+check_PROGRAMS += samples/sample1_unittest \
+    samples/sample2_unittest \
+    samples/sample3_unittest \
+    samples/sample4_unittest \
+    samples/sample5_unittest \
+    samples/sample6_unittest \
+    samples/sample7_unittest \
+    samples/sample8_unittest \
+    samples/sample9_unittest \
+    samples/sample10_unittest
 
-# Another sample.  It also verifies that libgtest works.
-TESTS += samples/sample10_unittest
-check_PROGRAMS += samples/sample10_unittest
+samples_sample1_unittest_SOURCES = samples/sample1_unittest.cc samples/sample1.cc
+samples_sample1_unittest_LDADD = lib/libgtest_main.la \
+                                 lib/libgtest.la
+samples_sample2_unittest_SOURCES = samples/sample2_unittest.cc samples/sample2.cc
+samples_sample2_unittest_LDADD = lib/libgtest_main.la \
+                                 lib/libgtest.la
+samples_sample3_unittest_SOURCES = samples/sample3_unittest.cc
+samples_sample3_unittest_LDADD = lib/libgtest_main.la \
+                                 lib/libgtest.la
+samples_sample4_unittest_SOURCES = samples/sample4_unittest.cc samples/sample4.cc
+samples_sample4_unittest_LDADD = lib/libgtest_main.la \
+                                 lib/libgtest.la
+samples_sample5_unittest_SOURCES = samples/sample5_unittest.cc samples/sample1.cc
+samples_sample5_unittest_LDADD = lib/libgtest_main.la \
+                                 lib/libgtest.la
+samples_sample6_unittest_SOURCES = samples/sample6_unittest.cc
+samples_sample6_unittest_LDADD = lib/libgtest_main.la \
+                                 lib/libgtest.la
+samples_sample7_unittest_SOURCES = samples/sample7_unittest.cc
+samples_sample7_unittest_LDADD = lib/libgtest_main.la \
+                                 lib/libgtest.la
+samples_sample8_unittest_SOURCES = samples/sample8_unittest.cc
+samples_sample8_unittest_LDADD = lib/libgtest_main.la \
+                                 lib/libgtest.la
+
+# Also verify that libgtest works by itself.
+samples_sample9_unittest_SOURCES = samples/sample9_unittest.cc
+samples_sample9_unittest_LDADD = lib/libgtest.la
 samples_sample10_unittest_SOURCES = samples/sample10_unittest.cc
 samples_sample10_unittest_LDADD = lib/libgtest.la
 
