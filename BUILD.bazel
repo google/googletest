@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc. 
+# Copyright 2017 Google Inc.
 # All Rights Reserved.
 #
 #
@@ -37,11 +37,16 @@ package(default_visibility = ["//visibility:public"])
 licenses(["notice"])
 
 config_setting(
-    name = "win",
+    name = "windows",
+    values = { "cpu": "x64_windows" },
+)
+
+config_setting(
+    name = "windows_msvc",
     values = {"cpu": "x64_windows_msvc"},
 )
 
-# Google Test including Google Mock 
+# Google Test including Google Mock
 cc_library(
     name = "gtest",
     srcs = glob(
@@ -65,7 +70,8 @@ cc_library(
     ]),
     copts = select(
         {
-            ":win": [],
+            ":windows": [],
+            ":windows_msvc": [],
             "//conditions:default": ["-pthread"],
         },
     ),
@@ -76,7 +82,8 @@ cc_library(
         "googletest/include",
     ],
     linkopts = select({
-        ":win": [],
+        ":windows": [],
+        ":windows_msvc": [],
         "//conditions:default": [
             "-pthread",
         ],
@@ -88,7 +95,7 @@ cc_library(
     srcs = [
         "googlemock/src/gmock_main.cc",
     ],
-    deps = ["//:gtest"],
+    deps = [":gtest"],
 )
 
 # The following rules build samples of how to use gTest.
