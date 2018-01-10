@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Authors: wan@google.com (Zhanyong Wan), eefacm@gmail.com (Sean Mcafee)
 //
 // The Google C++ Testing Framework (Google Test)
 //
@@ -61,8 +60,8 @@
 #include <vector>
 
 #include "gtest/gtest-message.h"
-#include "gtest/internal/gtest-string.h"
 #include "gtest/internal/gtest-filepath.h"
+#include "gtest/internal/gtest-string.h"
 #include "gtest/internal/gtest-type-util.h"
 
 // Due to C++ preprocessor weirdness, we need double indirection to
@@ -157,7 +156,28 @@ class GTEST_API_ ScopedTrace {
  public:
   // The c'tor pushes the given source file location and message onto
   // a trace stack maintained by Google Test.
-  ScopedTrace(const char* file, int line, const Message& message);
+
+  // Template version. Uses Message() to convert the values into strings.
+  // Slow, but flexible.
+  template <typename T>
+  ScopedTrace(const char* file, int line, const T& message) {
+    PushTrace(file, line, (Message() << message).GetString());
+  }
+
+  // Optimize for some known types.
+  ScopedTrace(const char* file, int line, const char* message) {
+    PushTrace(file, line, message ? message : "(null)");
+  }
+
+#if GTEST_HAS_GLOBAL_STRING
+  ScopedTrace(const char* file, int line, const ::string& message) {
+    PushTrace(file, line, message);
+  }
+#endif
+
+  ScopedTrace(const char* file, int line, const std::string& message) {
+    PushTrace(file, line, message);
+  }
 
   // The d'tor pops the info pushed by the c'tor.
   //
@@ -166,6 +186,8 @@ class GTEST_API_ ScopedTrace {
   ~ScopedTrace();
 
  private:
+  void PushTrace(const char* file, int line, std::string message);
+
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ScopedTrace);
 } GTEST_ATTRIBUTE_UNUSED_;  // A ScopedTrace object does its job in its
                             // c'tor and d'tor.  Therefore it doesn't
@@ -175,7 +197,7 @@ namespace edit_distance {
 // Returns the optimal edits to go from 'left' to 'right'.
 // All edits cost the same, with replace having lower priority than
 // add/remove.
-// Simple implementation of the Wagner-Fischer algorithm.
+// Simple implementation of the Wagner–Fischer algorithm.
 // See http://en.wikipedia.org/wiki/Wagner-Fischer_algorithm
 enum EditType { kMatch, kAdd, kRemove, kReplace };
 GTEST_API_ std::vector<EditType> CalculateOptimalEdits(
@@ -628,7 +650,7 @@ class TypeParameterizedTest {
   // Types).  Valid values for 'index' are [0, N - 1] where N is the
   // length of Types.
   static bool Register(const char* prefix,
-                       CodeLocation code_location,
+                       const CodeLocation& code_location,
                        const char* case_name, const char* test_names,
                        int index) {
     typedef typename Types::Head Type;
@@ -659,7 +681,7 @@ class TypeParameterizedTest {
 template <GTEST_TEMPLATE_ Fixture, class TestSel>
 class TypeParameterizedTest<Fixture, TestSel, Types0> {
  public:
-  static bool Register(const char* /*prefix*/, CodeLocation,
+  static bool Register(const char* /*prefix*/, const CodeLocation&,
                        const char* /*case_name*/, const char* /*test_names*/,
                        int /*index*/) {
     return true;
@@ -705,7 +727,7 @@ class TypeParameterizedTestCase {
 template <GTEST_TEMPLATE_ Fixture, typename Types>
 class TypeParameterizedTestCase<Fixture, Templates0, Types> {
  public:
-  static bool Register(const char* /*prefix*/, CodeLocation,
+  static bool Register(const char* /*prefix*/, const CodeLocation&,
                        const TypedTestCasePState* /*state*/,
                        const char* /*case_name*/, const char* /*test_names*/) {
     return true;
@@ -918,8 +940,11 @@ struct IsAProtocolMessage
 // a container class by checking the type of IsContainerTest<C>(0).
 // The value of the expression is insignificant.
 //
-// Note that we look for both C::iterator and C::const_iterator.  The
-// reason is that C++ injects the name of a class as a member of the
+// In C++11 mode we check the existence of a const_iterator and that an
+// iterator is properly implemented for the container.
+//
+// For pre-C++11 that we look for both C::iterator and C::const_iterator.
+// The reason is that C++ injects the name of a class as a member of the
 // class itself (e.g. you can refer to class iterator as either
 // 'iterator' or 'iterator::iterator').  If we look for C::iterator
 // only, for example, we would mistakenly think that a class named
@@ -929,16 +954,50 @@ struct IsAProtocolMessage
 // IsContainerTest(typename C::const_iterator*) and
 // IsContainerTest(...) doesn't work with Visual Age C++ and Sun C++.
 typedef int IsContainer;
+#if GTEST_LANG_CXX11
+template <class C,
+          class Iterator = decltype(::std::declval<const C&>().begin()),
+          class = decltype(::std::declval<const C&>().end()),
+          class = decltype(++::std::declval<Iterator&>()),
+          class = decltype(*::std::declval<Iterator>()),
+          class = typename C::const_iterator>
+IsContainer IsContainerTest(int /* dummy */) {
+  return 0;
+}
+#else
 template <class C>
 IsContainer IsContainerTest(int /* dummy */,
                             typename C::iterator* /* it */ = NULL,
                             typename C::const_iterator* /* const_it */ = NULL) {
   return 0;
 }
+#endif  // GTEST_LANG_CXX11
 
 typedef char IsNotContainer;
 template <class C>
 IsNotContainer IsContainerTest(long /* dummy */) { return '\0'; }
+
+// Trait to detect whether a type T is a hash table.
+// The heuristic used is that the type contains an inner type `hasher` and does
+// not contain an inner type `reverse_iterator`.
+// If the container is iterable in reverse, then order might actually matter.
+template <typename T>
+struct IsHashTable {
+ private:
+  template <typename U>
+  static char test(typename U::hasher*, typename U::reverse_iterator*);
+  template <typename U>
+  static int test(typename U::hasher*, ...);
+  template <typename U>
+  static char test(...);
+
+ public:
+  static const bool value = sizeof(test<T>(0, 0)) == sizeof(int);
+};
+
+template <typename T>
+const bool IsHashTable<T>::value;
+
 
 template <typename C, bool = 
   sizeof(IsContainerTest<C>(0)) == sizeof(IsContainer)
