@@ -78,7 +78,7 @@ TEST_P(FooTest, HasBlahBlah) {
 // Finally, you can use INSTANTIATE_TEST_CASE_P to instantiate the test
 // case with any set of parameters you want. Google Test defines a number
 // of functions for generating test parameters. They return what we call
-// (surprise!) parameter generators. Here is a  summary of them, which
+// (surprise!) parameter generators. Here is a summary of them, which
 // are all in the testing namespace:
 //
 //
@@ -267,7 +267,7 @@ internal::ParamGenerator<T> Range(T start, T end) {
 // each with C-string values of "foo", "bar", and "baz":
 //
 // const char* strings[] = {"foo", "bar", "baz"};
-// INSTANTIATE_TEST_CASE_P(StringSequence, SrtingTest, ValuesIn(strings));
+// INSTANTIATE_TEST_CASE_P(StringSequence, StringTest, ValuesIn(strings));
 //
 // This instantiates tests from test case StlStringTest
 // each with STL strings with values "a" and "b":
