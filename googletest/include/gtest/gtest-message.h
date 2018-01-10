@@ -113,7 +113,7 @@ class GTEST_API_ Message {
   // Streams a non-pointer value to this object.
   template <typename T>
   inline Message& operator <<(const T& val) {
-    // Some libraries overloads << for STL containers.  These
+    // Some libraries overload << for STL containers.  These
     // overloads are defined in the global namespace instead of ::std.
     //
     // C++'s symbol lookup rule (i.e. Koenig lookup) says that these
