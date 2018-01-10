@@ -113,7 +113,7 @@ class GTEST_API_ Message {
   // Streams a non-pointer value to this object.
   template <typename T>
   inline Message& operator <<(const T& val) {
-    // Some libraries overload << for STL containers.  These
+    // Some libraries overloads << for STL containers.  These
     // overloads are defined in the global namespace instead of ::std.
     //
     // C++'s symbol lookup rule (i.e. Koenig lookup) says that these
@@ -196,7 +196,6 @@ class GTEST_API_ Message {
   std::string GetString() const;
 
  private:
-
 #if GTEST_OS_SYMBIAN
   // These are needed as the Nokia Symbian Compiler cannot decide between
   // const T& and const T* in a function template. The Nokia compiler _can_
