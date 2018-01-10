@@ -41,8 +41,8 @@
 # include <sstream>
 # include <string>
 # include <vector>
-# include "src/gtest-internal-inl.h"  // for UnitTestOptions
 
+# include "src/gtest-internal-inl.h"  // for UnitTestOptions
 # include "test/gtest-param-test_test.h"
 
 using ::std::vector;
@@ -536,6 +536,48 @@ TEST(CombineTest, CombineWithMaxNumberOfParameters) {
   VerifyGenerator(gen, expected_values);
 }
 
+class NonDefaultConstructAssignString {
+ public:
+  NonDefaultConstructAssignString(const std::string& str) : str_(str) {}
+
+  const std::string& str() const { return str_; }
+
+ private:
+  std::string str_;
+
+  // Not default constructible
+  NonDefaultConstructAssignString();
+  // Not assignable
+  void operator=(const NonDefaultConstructAssignString&);
+};
+
+TEST(CombineTest, NonDefaultConstructAssign) {
+  const ParamGenerator<tuple<int, NonDefaultConstructAssignString>> gen =
+      Combine(Values(0, 1), Values(NonDefaultConstructAssignString("A"),
+                                   NonDefaultConstructAssignString("B")));
+
+  ParamGenerator<tuple<int, NonDefaultConstructAssignString>>::iterator it =
+      gen.begin();
+
+  EXPECT_EQ(0, std::get<0>(*it));
+  EXPECT_EQ("A", std::get<1>(*it).str());
+  ++it;
+
+  EXPECT_EQ(0, std::get<0>(*it));
+  EXPECT_EQ("B", std::get<1>(*it).str());
+  ++it;
+
+  EXPECT_EQ(1, std::get<0>(*it));
+  EXPECT_EQ("A", std::get<1>(*it).str());
+  ++it;
+
+  EXPECT_EQ(1, std::get<0>(*it));
+  EXPECT_EQ("B", std::get<1>(*it).str());
+  ++it;
+
+  EXPECT_TRUE(it == gen.end());
+}
+
 # endif  // GTEST_HAS_COMBINE
 
 // Tests that an generator produces correct sequence after being
@@ -851,8 +893,8 @@ TEST_P(CustomLambdaNamingTest, CustomTestNames) {}
 INSTANTIATE_TEST_CASE_P(CustomParamNameLambda,
                         CustomLambdaNamingTest,
                         Values(std::string("LambdaName")),
-                        [](const ::testing::TestParamInfo<std::string>& tpinfo) {
-                          return tpinfo.param;
+                        [](const ::testing::TestParamInfo<std::string>& info) {
+                          return info.param;
                         });
 
 #endif  // GTEST_LANG_CXX11
@@ -1018,6 +1060,7 @@ TEST_F(ParameterizedDeathTest, GetParamDiesFromTestF) {
 }
 
 INSTANTIATE_TEST_CASE_P(RangeZeroToFive, ParameterizedDerivedTest, Range(0, 5));
+
 
 int main(int argc, char **argv) {
   // Used in TestGenerationTest test case.
