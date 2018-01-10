@@ -45,7 +45,8 @@ cc_test(
         ],
     ),
     linkopts = select({
-        "//:win": [],
+        "//:windows": [],
+        "//:windows_msvc": [],
         "//conditions:default": [
             "-pthread",
         ],
