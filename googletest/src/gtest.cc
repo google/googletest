@@ -3903,12 +3903,11 @@ void StreamingListener::SocketWriter::MakeConnection() {
 
 // Pushes the given source file location and message onto a per-thread
 // trace stack maintained by Google Test.
-ScopedTrace::ScopedTrace(const char* file, int line, const Message& message)
-    GTEST_LOCK_EXCLUDED_(&UnitTest::mutex_) {
+void ScopedTrace::PushTrace(const char* file, int line, std::string message) {
   TraceInfo trace;
   trace.file = file;
   trace.line = line;
-  trace.message = message.GetString();
+  trace.message.swap(message);
 
   UnitTest::GetInstance()->PushGTestTrace(trace);
 }

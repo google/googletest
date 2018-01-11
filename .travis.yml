@@ -11,17 +11,13 @@ language: cpp
 matrix:
   include:
     - os: linux
-      group: deprecated-2017Q4
       compiler: gcc
-      sudo: true
-      cache:
+      sudo : true
       install: ./ci/install-linux.sh && ./ci/log-config.sh
       script: ./ci/build-linux-bazel.sh
     - os: linux
-      group: deprecated-2017Q4
       compiler: clang
-      sudo: true
-      cache:
+      sudo : true
       install: ./ci/install-linux.sh && ./ci/log-config.sh
       script: ./ci/build-linux-bazel.sh
     - os: linux
