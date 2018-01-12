@@ -56,15 +56,7 @@ using testing::internal::AlwaysTrue;
 # endif  // GTEST_OS_LINUX
 
 # include "gtest/gtest-spi.h"
-
-// Indicates that this translation unit is part of Google Test's
-// implementation.  It must come before gtest-internal-inl.h is
-// included, or there will be a compiler error.  This trick is to
-// prevent a user from accidentally including gtest-internal-inl.h in
-// their code.
-# define GTEST_IMPLEMENTATION_ 1
 # include "src/gtest-internal-inl.h"
-# undef GTEST_IMPLEMENTATION_
 
 namespace posix = ::testing::internal::posix;
 
@@ -313,14 +305,14 @@ void DieWithEmbeddedNul() {
 }
 
 # if GTEST_USES_PCRE
+
 // Tests that EXPECT_DEATH and ASSERT_DEATH work when the error
 // message has a NUL character in it.
 TEST_F(TestForDeathTest, EmbeddedNulInMessage) {
-  // TODO(wan@google.com): <regex.h> doesn't support matching strings
-  // with embedded NUL characters - find a way to workaround it.
   EXPECT_DEATH(DieWithEmbeddedNul(), "my null world");
   ASSERT_DEATH(DieWithEmbeddedNul(), "my null world");
 }
+
 # endif  // GTEST_USES_PCRE
 
 // Tests that death test macros expand to code which interacts well with switch

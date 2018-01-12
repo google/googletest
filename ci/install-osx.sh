@@ -1,4 +1,5 @@
-# Copyright 2017 Google Inc. 
+#!/usr/bin/env bash
+# Copyright 2017 Google Inc.
 # All Rights Reserved.
 #
 #
@@ -27,29 +28,12 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-# Author: misterg@google.com (Gennadiy Civil)
-#   
-#   Bazel Build for Google C++ Testing Framework(Google Test)-googlemock
 
-licenses(["notice"])
+set -eu
 
-""" gmock own tests """
+if [ "${TRAVIS_OS_NAME}" != "osx" ]; then
+    echo "Not a macOS build; skipping installation"
+    exit 0
+fi
 
-cc_test(
-    name = "gmock_all_test",
-    size = "small",
-    srcs = glob(
-        include = [
-            "gmock-*.cc",
-        ],
-    ),
-    linkopts = select({
-        "//:windows": [],
-        "//:windows_msvc": [],
-        "//conditions:default": [
-            "-pthread",
-        ],
-    }),
-    deps = ["//:gtest"],
-)
+brew install ccache

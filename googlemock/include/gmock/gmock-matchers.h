@@ -3615,6 +3615,10 @@ BoundSecondMatcher<Tuple2Matcher, Second> MatcherBindSecond(
   return BoundSecondMatcher<Tuple2Matcher, Second>(tm, second);
 }
 
+// Joins a vector of strings as if they are fields of a tuple; returns
+// the joined string.  This function is exported for testing.
+GTEST_API_ string JoinAsTuple(const Strings& fields);
+
 // Returns the description for a matcher defined using the MATCHER*()
 // macro where the user-supplied description string is "", if
 // 'negation' is false; otherwise returns the description of the

@@ -45,15 +45,7 @@
 
 #include "gtest/gtest.h"
 #include "gtest/gtest-spi.h"
-
-// Indicates that this translation unit is part of Google Test's
-// implementation.  It must come before gtest-internal-inl.h is
-// included, or there will be a compiler error.  This trick is to
-// prevent a user from accidentally including gtest-internal-inl.h in
-// their code.
-#define GTEST_IMPLEMENTATION_ 1
 #include "src/gtest-internal-inl.h"
-#undef GTEST_IMPLEMENTATION_
 
 using std::make_pair;
 using std::pair;
@@ -75,8 +67,8 @@ TEST(IsXDigitTest, WorksForNarrowAscii) {
 }
 
 TEST(IsXDigitTest, ReturnsFalseForNarrowNonAscii) {
-  EXPECT_FALSE(IsXDigit('\x80'));
-  EXPECT_FALSE(IsXDigit(static_cast<char>('0' | '\x80')));
+  EXPECT_FALSE(IsXDigit(static_cast<char>(0x80)));
+  EXPECT_FALSE(IsXDigit(static_cast<char>('0' | 0x80)));
 }
 
 TEST(IsXDigitTest, WorksForWideAscii) {
