@@ -52,13 +52,13 @@
 
 // hash_map and hash_set are available under Visual C++, or on Linux.
 #if GTEST_HAS_UNORDERED_MAP_
-# include <unordered_map>       // NOLINT
+# include <unordered_map>  // NOLINT
 #elif GTEST_HAS_HASH_MAP_
 # include <hash_map>            // NOLINT
 #endif  // GTEST_HAS_HASH_MAP_
 
 #if GTEST_HAS_UNORDERED_SET_
-# include <unordered_set>       // NOLINT
+# include <unordered_set>  // NOLINT
 #elif GTEST_HAS_HASH_SET_
 # include <hash_set>            // NOLINT
 #endif  // GTEST_HAS_HASH_SET_
@@ -192,13 +192,12 @@ inline ::std::ostream& operator<<(::std::ostream& os,
   return os << "StreamableTemplateInFoo: " << x.value();
 }
 
-// A user-defined streamable but recursivly-defined container type in 
+// A user-defined streamable but recursivly-defined container type in
 // a user namespace, it mimics therefore std::filesystem::path or
 // boost::filesystem::path.
 class PathLike {
  public:
-  struct iterator
-  {
+  struct iterator {
     typedef PathLike value_type;
   };
   typedef iterator const_iterator;
@@ -208,9 +207,7 @@ class PathLike {
   iterator begin() const { return iterator(); }
   iterator end() const { return iterator(); }
 
-  friend 
-  ::std::ostream& operator<<(::std::ostream& os, const PathLike&)
-  {
+  friend ::std::ostream& operator<<(::std::ostream& os, const PathLike&) {
     return os << "Streamable-PathLike";
   }
 };
@@ -250,9 +247,9 @@ using ::testing::internal::string;
 #if GTEST_HAS_UNORDERED_MAP_
 
 #define GTEST_HAS_HASH_MAP_ 1
-template<class Key, class T>
+template <class Key, class T>
 using hash_map = ::std::unordered_map<Key, T>;
-template<class Key, class T>
+template <class Key, class T>
 using hash_multimap = ::std::unordered_multimap<Key, T>;
 
 #elif GTEST_HAS_HASH_MAP_
@@ -270,9 +267,9 @@ using ::stdext::hash_multimap;
 #if GTEST_HAS_UNORDERED_SET_
 
 #define GTEST_HAS_HASH_SET_ 1
-template<class Key>
+template <class Key>
 using hash_set = ::std::unordered_set<Key>;
-template<class Key>
+template <class Key>
 using hash_multiset = ::std::unordered_multiset<Key>;
 
 #elif GTEST_HAS_HASH_SET_
@@ -1092,7 +1089,7 @@ TEST(PrintTr1TupleTest, VariousSizes) {
   ::std::tr1::tuple<bool, char, short, testing::internal::Int32,  // NOLINT
                     testing::internal::Int64, float, double, const char*, void*,
                     std::string>
-      t10(false, 'a', static_cast<short>(3), 4, 5, 1.5F, -2.5, str, 
+      t10(false, 'a', static_cast<short>(3), 4, 5, 1.5F, -2.5, str,  // NOLINT
           ImplicitCast_<void*>(NULL), "10");
   EXPECT_EQ("(false, 'a' (97, 0x61), 3, 4, 5, 1.5, -2.5, " + PrintPointer(str) +
             " pointing to \"8\", NULL, \"10\")",
@@ -1152,7 +1149,7 @@ TEST(PrintStdTupleTest, VariousSizes) {
   ::std::tuple<bool, char, short, testing::internal::Int32,  // NOLINT
                testing::internal::Int64, float, double, const char*, void*,
                std::string>
-      t10(false, 'a', static_cast<short>(3), 4, 5, 1.5F, -2.5, str,
+      t10(false, 'a', static_cast<short>(3), 4, 5, 1.5F, -2.5, str,  // NOLINT
           ImplicitCast_<void*>(NULL), "10");
   EXPECT_EQ("(false, 'a' (97, 0x61), 3, 4, 5, 1.5, -2.5, " + PrintPointer(str) +
             " pointing to \"8\", NULL, \"10\")",

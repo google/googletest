@@ -160,7 +160,7 @@ $for k [[
     virtual ParamIteratorInterface<ParamType>* Clone() const {
       return new Iterator(*this);
     }
-    virtual const ParamType* Current() const { return &current_value_; }
+    virtual const ParamType* Current() const { return current_value_.get(); }
     virtual bool Equals(const ParamIteratorInterface<ParamType>& other) const {
       // Having the same base generator guarantees that the other
       // iterator is of the same type and we can downcast.
@@ -192,7 +192,7 @@ $for k [[
 
     void ComputeCurrentValue() {
       if (!AtEnd())
-        current_value_ = ParamType($for j, [[*current$(j)_]]);
+        current_value_.reset(new ParamType($for j, [[*current$(j)_]]));
     }
     bool AtEnd() const {
       // We must report iterator past the end of the range when either of the
@@ -217,7 +217,7 @@ $for j [[
     typename ParamGenerator<T$j>::iterator current$(j)_;
 ]]
 
-    ParamType current_value_;
+    linked_ptr<ParamType> current_value_;
   };  // class CartesianProductGenerator$i::Iterator
 
   // No implementation - assignment is unsupported.
