@@ -197,7 +197,7 @@ namespace edit_distance {
 // Returns the optimal edits to go from 'left' to 'right'.
 // All edits cost the same, with replace having lower priority than
 // add/remove.
-// Simple implementation of the Wagner-Fischer algorithm.
+// Simple implementation of the Wagner–Fischer algorithm.
 // See http://en.wikipedia.org/wiki/Wagner-Fischer_algorithm
 enum EditType { kMatch, kAdd, kRemove, kReplace };
 GTEST_API_ std::vector<EditType> CalculateOptimalEdits(
@@ -650,7 +650,7 @@ class TypeParameterizedTest {
   // Types).  Valid values for 'index' are [0, N - 1] where N is the
   // length of Types.
   static bool Register(const char* prefix,
-                       CodeLocation code_location,
+                       const CodeLocation& code_location,
                        const char* case_name, const char* test_names,
                        int index) {
     typedef typename Types::Head Type;
@@ -681,7 +681,7 @@ class TypeParameterizedTest {
 template <GTEST_TEMPLATE_ Fixture, class TestSel>
 class TypeParameterizedTest<Fixture, TestSel, Types0> {
  public:
-  static bool Register(const char* /*prefix*/, CodeLocation,
+  static bool Register(const char* /*prefix*/, const CodeLocation&,
                        const char* /*case_name*/, const char* /*test_names*/,
                        int /*index*/) {
     return true;
@@ -727,7 +727,7 @@ class TypeParameterizedTestCase {
 template <GTEST_TEMPLATE_ Fixture, typename Types>
 class TypeParameterizedTestCase<Fixture, Templates0, Types> {
  public:
-  static bool Register(const char* /*prefix*/, CodeLocation,
+  static bool Register(const char* /*prefix*/, const CodeLocation&,
                        const TypedTestCasePState* /*state*/,
                        const char* /*case_name*/, const char* /*test_names*/) {
     return true;
