@@ -709,7 +709,7 @@ class GTEST_API_ TestInfo {
   bool is_reportable() const {
     // The XML report includes tests matching the filter.
     // In the future, we may trim tests that are excluded because of
- -  // sharding.
+    // sharding.
     return matches_filter_;
   }
 
