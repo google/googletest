@@ -707,8 +707,9 @@ class GTEST_API_ TestInfo {
 
   // Returns true iff this test will appear in the XML report.
   bool is_reportable() const {
-    // The XML report includes tests matching the filter, excluding those
-    // run in other shards.
+    // The XML report includes tests matching the filter.
+    // In the future, we may trim tests that are excluded because of
+ -  // sharding.
     return matches_filter_;
   }
 
