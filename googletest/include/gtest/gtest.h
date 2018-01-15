@@ -687,9 +687,6 @@ class GTEST_API_ TestInfo {
   // Returns the line where this test is defined.
   int line() const { return location_.line; }
 
-  // Return true if this test should not be run because it's in another shard.
-  bool is_in_another_shard() const { return is_in_another_shard_; }
-
   // Returns true if this test should run, that is if the test is not
   // disabled (or it is disabled but the also_run_disabled_tests flag has
   // been specified) and its full name matches the user-specified filter.
@@ -712,7 +709,7 @@ class GTEST_API_ TestInfo {
   bool is_reportable() const {
     // The XML report includes tests matching the filter, excluding those
     // run in other shards.
-    return matches_filter_ && !is_in_another_shard_;
+    return matches_filter_;
   }
 
   // Returns the result of the test.
