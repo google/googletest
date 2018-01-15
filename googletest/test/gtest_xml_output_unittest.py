@@ -141,6 +141,19 @@ EXPECTED_FILTERED_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
   </testsuite>
 </testsuites>"""
 
+EXPECTED_SHARDED_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="3" failures="0" disabled="0" errors="0" time="*" timestamp="*" name="AllTests" ad_hoc_property="42">
+  <testsuite name="SuccessfulTest" tests="1" failures="0" disabled="0" errors="0" time="*">
+    <testcase name="Succeeds" status="run" time="*" classname="SuccessfulTest"/>
+  </testsuite>
+  <testsuite name="NoFixtureTest" tests="1" failures="0" disabled="0" errors="0" time="*">
+     <testcase name="RecordProperty" status="run" time="*" classname="NoFixtureTest" key="1"/>
+  </testsuite>
+  <testsuite name="Single/ValueParamTest" tests="1" failures="0" disabled="0" errors="0" time="*">
+    <testcase name="AnotherTestThatHasValueParamAttribute/1" value_param="42" status="run" time="*" classname="Single/ValueParamTest" />
+  </testsuite>
+</testsuites>"""
+
 EXPECTED_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="0" failures="0" disabled="0" errors="0" time="*"
             timestamp="*" name="AllTests">
