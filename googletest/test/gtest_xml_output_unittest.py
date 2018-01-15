@@ -40,6 +40,8 @@ import re
 import sys
 from xml.dom import minidom, Node
 
+IS_LINUX = os.name == 'posix' and os.uname()[0] == 'Linux'
+
 import gtest_test_utils
 import gtest_xml_test_utils
 
