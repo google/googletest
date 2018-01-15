@@ -349,6 +349,15 @@ GTEST_API_ AssertionResult AssertionFailure();
 // Deprecated; use AssertionFailure() << msg.
 GTEST_API_ AssertionResult AssertionFailure(const Message& msg);
 
+}  // namespace testing
+
+// Includes the auto-generated header that implements a family of generic
+// predicate assertion macros. This include comes late because it relies on
+// APIs declared above.
+#include "gtest/gtest_pred_impl.h"
+
+namespace testing {
+
 // The abstract class that all tests inherit from.
 //
 // In Google Test, a unit test program contains one or many TestCases, and
@@ -359,7 +368,7 @@ GTEST_API_ AssertionResult AssertionFailure(const Message& msg);
 // this for you.
 //
 // The only time you derive from Test is when defining a test fixture
-// to be used a TEST_F.  For example:
+// to be used in a TEST_F.  For example:
 //
 //   class FooTest : public testing::Test {
 //    protected:
