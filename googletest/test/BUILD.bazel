@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc. 
+# Copyright 2017 Google Inc.
 # All Rights Reserved.
 #
 #
@@ -119,4 +119,3 @@ cc_test(
         "//:gtest",
     ],
 )
-#  Py tests
