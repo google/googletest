@@ -95,7 +95,6 @@ template <typename T>
 namespace internal {
 
 struct TraceInfo;                      // Information about a trace point.
-class ScopedTrace;                     // Implements scoped trace.
 class TestInfoImpl;                    // Opaque implementation of TestInfo
 class UnitTestImpl;                    // Opaque implementation of UnitTest
 
@@ -150,48 +149,6 @@ class GTEST_API_ GoogleTestFailureException : public ::std::runtime_error {
 };
 
 #endif  // GTEST_HAS_EXCEPTIONS
-
-// A helper class for creating scoped traces in user programs.
-class GTEST_API_ ScopedTrace {
- public:
-  // The c'tor pushes the given source file location and message onto
-  // a trace stack maintained by Google Test.
-
-  // Template version. Uses Message() to convert the values into strings.
-  // Slow, but flexible.
-  template <typename T>
-  ScopedTrace(const char* file, int line, const T& message) {
-    PushTrace(file, line, (Message() << message).GetString());
-  }
-
-  // Optimize for some known types.
-  ScopedTrace(const char* file, int line, const char* message) {
-    PushTrace(file, line, message ? message : "(null)");
-  }
-
-#if GTEST_HAS_GLOBAL_STRING
-  ScopedTrace(const char* file, int line, const ::string& message) {
-    PushTrace(file, line, message);
-  }
-#endif
-
-  ScopedTrace(const char* file, int line, const std::string& message) {
-    PushTrace(file, line, message);
-  }
-
-  // The d'tor pops the info pushed by the c'tor.
-  //
-  // Note that the d'tor is not virtual in order to be efficient.
-  // Don't inherit from ScopedTrace!
-  ~ScopedTrace();
-
- private:
-  void PushTrace(const char* file, int line, std::string message);
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ScopedTrace);
-} GTEST_ATTRIBUTE_UNUSED_;  // A ScopedTrace object does its job in its
-                            // c'tor and d'tor.  Therefore it doesn't
-                            // need to be used otherwise.
 
 namespace edit_distance {
 // Returns the optimal edits to go from 'left' to 'right'.
