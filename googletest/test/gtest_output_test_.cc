@@ -315,6 +315,13 @@ TEST(SCOPED_TRACETest, WorksConcurrently) {
 }
 #endif  // GTEST_IS_THREADSAFE
 
+// Tests basic functionality of the ScopedTrace utility (most of its features
+// are already tested in SCOPED_TRACETest).
+TEST(ScopedTraceTest, WithExplicitFileAndLine) {
+  testing::ScopedTrace trace("explicit_file.cc", 123, "expected trace message");
+  ADD_FAILURE() << "Check that the trace is attached to a particular location.";
+}
+
 TEST(DisabledTestsWarningTest,
      DISABLED_AlsoRunDisabledTestsFlagSuppressesWarning) {
   // This test body is intentionally empty.  Its sole purpose is for
