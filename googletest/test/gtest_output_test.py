@@ -99,7 +99,8 @@ def RemoveLocations(test_output):
        'FILE_NAME:#: '.
   """
 
-  return re.sub(r'.*[/\\](.+)(\:\d+|\(\d+\))\: ', r'\1:#: ', test_output)
+  return re.sub(r'.*[/\\]((gtest_output_test_|gtest).cc)(\:\d+|\(\d+\))\: ',
+                r'\1:#: ', test_output)
 
 
 def RemoveStackTraceDetails(output):
