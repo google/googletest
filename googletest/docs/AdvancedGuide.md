@@ -790,8 +790,8 @@ extra logging or custom failure messages, but that usually clutters up
 your tests. A better solution is to use the `SCOPED_TRACE` macro or
 the `ScopedTrace` utility:
 
-| `SCOPED_TRACE(`_message_`);` | `ScopedTrace trace(`_"file\_path"_`, `_line\_number_`, `_message_`);` |
-|:-----------------------------|:----------------------------------------------------------------------|
+| `SCOPED_TRACE(`_message_`);` | `::testing::ScopedTrace trace(`_"file\_path"_`, `_line\_number_`, `_message_`);` |
+|:-----------------------------|:---------------------------------------------------------------------------------|
 
 where `message` can be anything streamable to `std::ostream`. `SCOPED_TRACE`
 macro will cause the current file name, line number, and the given message to be
