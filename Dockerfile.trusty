@@ -1,0 +1,51 @@
+# Recipe of the enviornment needed to build ar.
+#
+# Author: Frankie Li, Daran He
+FROM ubuntu:trusty
+
+# Standard issued requirements for all build enviornments in Ditto. We need
+# to maintain consistent sets of numerical libraries.
+
+RUN apt-get update -qq && apt-get install -y \
+	build-essential \
+	cmake \
+	git \
+	libavcodec-dev \
+	libavformat-dev \
+	libgflags-dev \
+	libgtk2.0-dev \
+	libswscale-dev \
+	pkg-config \
+	wget
+
+RUN apt-get update -qq && apt-get install -y \
+	libblas-dev \
+	libeigen3-dev \
+	libglm-dev \
+	liblapack-dev
+
+RUN apt-get update -qq && apt-get install -y \
+	libtbb2 \
+	libtbb-dev \
+	libjpeg-dev \
+	libpng-dev \
+	libtiff-dev \
+	libjasper-dev \
+	libdc1394-22-dev \
+	python-dev \
+	python-numpy
+
+RUN apt-get update -qq && apt-get install -y \
+	libprotobuf-dev \
+	protobuf-compiler
+
+# Ceres dependencies.
+RUN apt-get update -qq && apt-get install -y \
+	libatlas-base-dev \
+	libgoogle-glog-dev \
+	libsuitesparse-dev
+
+# Make build dir for the actual software we want to build.
+ENV BUILD_ROOT=/opt/build
+RUN mkdir ${BUILD_ROOT}
+WORKDIR ${BUILD_ROOT}

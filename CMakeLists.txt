@@ -4,7 +4,11 @@ if (POLICY CMP0048)
   cmake_policy(SET CMP0048 NEW)
 endif (POLICY CMP0048)
 
-project( googletest-distribution )
+project( googletest )
+
+set(CPACK_PACKAGE_VERSION_MAJOR 1)
+set(CPACK_PACKAGE_VERSION_MINOR 8)
+set(CPACK_PACKAGE_VERSION_PATCH 0)
 
 enable_testing()
 
@@ -31,3 +35,5 @@ if(BUILD_GMOCK)
 elseif(BUILD_GTEST)
   add_subdirectory( googletest )
 endif()
+
+include(CPack)
