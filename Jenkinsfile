@@ -2,145 +2,114 @@
 //
 // Copyright: 2017 Ditto Technologies. All Rights Reserved.
 // Author: Frankie Li, Daran He, John Inacay
-// TODO - Need to migrate to a standardize Debian package deployment script.
 
+// TODO: Need to migrate to a standardize Debian package deployment script.
 
-build_configs = [
-    'ubuntu_16_04' : [
-        'docker_name' : 'ubuntu16-build-env',
-        'docker_file' : 'Dockerfile.xenial',
-        'repo'        : '3rdparty-16.04',
-        'staging_repo': '3rdparty-16.04-staging',
-        'dist'        : 'xenial',
+properties([[
+  $class: 'BuildDiscarderProperty',
+  strategy: [
+    $class: 'LogRotator',
+    artifactDaysToKeepStr: '',
+    artifactNumToKeepStr: '',
+    daysToKeepStr: '',
+    numToKeepStr: '5'
+  ]
+]]);
+
+@Library('jenkins-shared-library@release/v1.0') _
+
+def GIT_CREDENTIALS_ID = 'dittovto-buildbot'
+
+def BUILD_CONFIGS = [
+    'ubuntu-16-04' : [
+        'docker_file'   : 'Dockerfile.xenial',
+        'apt_prod_repo' : '3rdparty-16.04',
+        'apt_test_repo' : '3rdparty-16.04-staging',
+        'dist'          : 'xenial',
     ],
-    'ubuntu_14_04' : [
-        'docker_name' : 'ubuntu14-build-env',
-        'docker_file' : 'Dockerfile.trusty',
-        'repo'        : '3rdparty-14.04',
-        'staging_repo': '3rdparty-14.04-staging',
-        'dist'        : 'trusty',
+    'ubuntu-14-04' : [
+        'docker_file'   : 'Dockerfile.trusty',
+        'apt_prod_repo' : '3rdparty-14.04',
+        'apt_test_repo' : '3rdparty-14.04-staging',
+        'dist'          : 'trusty',
     ]
 ]
 
+node('build && docker') {
+  BUILD_CONFIGS.each { platform, build_config ->
+    dir(platform) {
+      stage("Checking out ${platform}") {
+        git_info = ditto_git.checkoutRepo()
+      }
+
+      stage("Building and publishing ${platform} dev revision") {
+        version = ditto_deb.getAndValidateVersion()
+        revision = ditto_deb.buildDevRevisionString(git_info.commit)
+
+        image_name =
+          ditto_utils.buildDockerImageName(git_info.repo_name, platform)
+        ditto_deb.buildInsideDocker(image_name, build_config.docker_file)
+        ditto_deb.generatePackageInsideDocker(image_name, version, revision)
+        ditto_deb.publishPackageToS3(build_config.apt_test_repo,
+                                     build_config.dist)
+      }
+
+      stage("Installing from ${platform} repo and test") {
+        ditto_deb.installPackageInsideDocker(
+          image_name, build_config.apt_test_repo,
+          build_config.dist, version, revision)
+      }
+    }
+  }
+}
+
+stage("Tag and deploy?") {
+  deploy_mode = "SKIP"
+  if (git_info.is_release_branch) {
+    ditto_utils.checkVersionInReleaseBranchName(git_info.branch, version)
+    deploy_mode = input(
+      message: "User input required",
+      parameters: [
+        choice(
+          name: "Deploy \"${version}\" at hash \"${git_info.commit}\"?",
+          choices: [ "SKIP", "RC", "RELEASE" ].join("\n"))])
+  }
+}
 
 node('build && docker') {
-    // Set max number of builds to keep to 5.
-    properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5']]]);
+  stage("Building and publishing to rc or release") {
+    if (!(deploy_mode == "RC" || deploy_mode == "RELEASE")) return;
 
-    build_configs.each { target, build_config ->
-        git_info = checkoutRepo(target)
-
-        build(target, build_config)
-
-        publish(target, build_config, git_info)
-
-        cleanUp(target)
-    }
-}
-
-def checkoutRepo(target) {
-    def is_rc = false
-    def is_release = false
-
-    stage("Checkout ${target}") {
-        // Pull the code from the repo. `checkout` is a special Jenkins cmd.
-        def scm_vars = checkout scm
-        git_tag = getGitTag()
-        git_branch = getGitBranch()
-
-        if(git_tag) {
-            is_rc = (git_tag.indexOf("-rc") >= 0)
-            is_release = (git_tag.indexOf("release") >= 0)
+    // Do this only once inside a git directory.
+    BUILD_CONFIGS.any { platform, build_config ->
+      dir(platform) {
+        if (deploy_mode == "RC") {
+          new_rc_number = ditto_git.calcRcNumber(version)
+          tag = ditto_git.getRcTag(version, new_rc_number)
+          revision = ditto_deb.buildRcRevisionString(new_rc_number)
+        } else if (deploy_mode == "RELEASE") {
+          tag = ditto_git.getReleaseTag(version)
+          revision = ditto_deb.buildReleaseRevisionString()
         }
-        echo "Current branch is: ${git_branch}, current tag is: ${git_tag}"
-        echo "Current tag is a RC tag: ${is_rc}"
-        echo "Current tag is a Release tag: ${is_release}"
+        ditto_git.pushTag(tag, GIT_CREDENTIALS_ID)
+        return true
+      }
     }
 
-    git_info = [
-        'is_release': is_release,
-        'is_rc': is_rc,
-    ]
+    BUILD_CONFIGS.each { platform, build_config ->
+      dir(platform) {
+        image_name =
+          ditto_utils.buildDockerImageName(git_info.repo_name, platform)
+        apt_repo_to_publish = deploy_mode == "RC" ?
+          build_config.apt_test_repo : build_config.apt_prod_repo
 
-    return git_info
-}
-
-def build(target, build_config) {
-    stage("Prepare Build Env ${target}") {
-        // We're checking to see if an old image exists. If so, delete it to
-        // reduce total space usage.
-
-        docker.build("${build_config.docker_name}", "-f ${build_config.docker_file} .")
-
-        deleteDockerOutdated()
+        ditto_deb.generatePackageInsideDocker(image_name, version, revision)
+        ditto_deb.publishPackageToS3(apt_repo_to_publish, build_config.dist)
+      }
     }
+  }
 
-    stage("Build ${target}") {
-        def USER_ID = sh (
-            script: 'id -u',
-            returnStdout: true
-        ).trim()
-        def GROUP_ID = sh (
-            script: 'id -g',
-            returnStdout: true
-        ).trim()
-
-        withEnv(['USER_ID=${USER_ID}','GROUP_ID=${GROUP_ID}',
-                 'RELEASE_KEYSTORE=keystore.jks',
-                 'RELEASE_KEY_ALIAS=demoapp',
-                 'RELEASE_STORE_PASSWORD=ditto1',
-                 'RELEASE_KEY_PASSWORD=ditto1']) {
-            docker.image("${build_config.docker_name}").inside {
-                sh('./run_build.sh')
-            }
-        }
-    }
-
-    stage("ArchiveArtifacts ${target}") {
-        archiveArtifacts(artifacts: 'build/*.deb')
-    }
-}
-
-def publish(target, build_config, git_info) {
-    stage("Publish ${target}") {
-        def repo = git_info.is_release ? build_config.repo : build_config.staging_repo
-
-        withAWS(credentials:'package-uploads') {
-            sh("./publish.sh ${repo} ${build_config.dist}")
-        }
-    }
-}
-
-def cleanUp(target) {
-    stage("CleanUp ${target}") {
-        def current_dir = pwd()
-        echo "Cleaning up ${current_dir}"
-        deleteDir()
-    }
-}
-
-def getGitHash() {
-    return sh(script: "git log -n1 --pretty='%h'", returnStdout: true).trim()
-}
-
-def getGitTag() {
-    def hash = getGitHash()
-    def tag = ""
-    try {
-        tag = sh(script: "git describe --exact-match --tags ${hash}", returnStdout: true).trim()
-    } catch (e) {
-      echo "No current tag."
-    }
-    return tag
-}
-
-def getGitBranch() {
-    return sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
-}
-
-def deleteDockerOutdated() {
-    // Delete stopped docker containers.
-    sh(script: "docker ps -aq --no-trunc | xargs --no-run-if-empty docker rm")
-    // Delete dangling docker images.
-    sh(script: "docker images -q --filter dangling=true | xargs --no-run-if-empty docker rmi")
+  stage("Cleaning up") {
+    deleteDir()
+  }
 }

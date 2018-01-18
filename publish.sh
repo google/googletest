@@ -29,5 +29,5 @@ for x in echo ' '; do
         --sign $KEY_ID \
         --gpg-options "\-\-batch \-\-passphrase waldorf\-fantastic\-optimization\-caviar" \
         --codename $DISTRI --bucket $REPO --lock \
-        $BUILD_DIR/*.deb
+        "$BUILD_DIR/*.deb"
 done
