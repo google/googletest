@@ -3899,26 +3899,6 @@ void StreamingListener::SocketWriter::MakeConnection() {
 // End of class Streaming Listener
 #endif  // GTEST_CAN_STREAM_RESULTS__
 
-// Class ScopedTrace
-
-// Pushes the given source file location and message onto a per-thread
-// trace stack maintained by Google Test.
-void ScopedTrace::PushTrace(const char* file, int line, std::string message) {
-  TraceInfo trace;
-  trace.file = file;
-  trace.line = line;
-  trace.message.swap(message);
-
-  UnitTest::GetInstance()->PushGTestTrace(trace);
-}
-
-// Pops the info pushed by the c'tor.
-ScopedTrace::~ScopedTrace()
-    GTEST_LOCK_EXCLUDED_(&UnitTest::mutex_) {
-  UnitTest::GetInstance()->PopGTestTrace();
-}
-
-
 // class OsStackTraceGetter
 
 const char* const OsStackTraceGetterInterface::kElidedFramesMarker =
@@ -5477,6 +5457,25 @@ std::string TempDir() {
 #else
   return "/tmp/";
 #endif  // GTEST_OS_WINDOWS_MOBILE
+}
+
+// Class ScopedTrace
+
+// Pushes the given source file location and message onto a per-thread
+// trace stack maintained by Google Test.
+void ScopedTrace::PushTrace(const char* file, int line, std::string message) {
+  internal::TraceInfo trace;
+  trace.file = file;
+  trace.line = line;
+  trace.message.swap(message);
+
+  UnitTest::GetInstance()->PushGTestTrace(trace);
+}
+
+// Pops the info pushed by the c'tor.
+ScopedTrace::~ScopedTrace()
+    GTEST_LOCK_EXCLUDED_(&UnitTest::mutex_) {
+  UnitTest::GetInstance()->PopGTestTrace();
 }
 
 }  // namespace testing
