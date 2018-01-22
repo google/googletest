@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-#
 # Copyright 2006, Google Inc.
 # All rights reserved.
 #
@@ -33,10 +31,15 @@
 
 __author__ = 'wan@google.com (Zhanyong Wan)'
 
-import atexit
 import os
-import shutil
 import sys
+
+IS_LINUX = os.name == 'posix' and os.uname()[0] == 'Linux'
+IS_WINDOWS = os.name == 'nt'
+IS_CYGWIN = os.name == 'posix' and 'CYGWIN' in os.uname()[0]
+
+import atexit
+import shutil
 import tempfile
 import unittest
 _test_module = unittest
@@ -52,9 +55,6 @@ except:
 # pylint: enable-msg=C6204
 
 GTEST_OUTPUT_VAR_NAME = 'GTEST_OUTPUT'
-
-IS_WINDOWS = os.name == 'nt'
-IS_CYGWIN = os.name == 'posix' and 'CYGWIN' in os.uname()[0]
 
 # The environment variable for specifying the path to the premature-exit file.
 PREMATURE_EXIT_FILE_ENV_VAR = 'TEST_PREMATURE_EXIT_FILE'
@@ -178,7 +178,7 @@ def GetTestExecutablePath(executable_name, build_dir=None):
         'Unable to find the test binary "%s". Please make sure to provide\n'
         'a path to the binary via the --build_dir flag or the BUILD_DIR\n'
         'environment variable.' % path)
-    sys.stdout.write(message)
+    print >> sys.stderr, message
     sys.exit(1)
 
   return path
