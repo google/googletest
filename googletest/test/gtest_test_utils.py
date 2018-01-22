@@ -28,6 +28,8 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """Unit test utilities for Google C++ Testing Framework."""
+# Suppresses the 'Import not at the top of the file' lint complaint.
+# pylint: disable-msg=C6204
 
 __author__ = 'wan@google.com (Zhanyong Wan)'
 
@@ -44,8 +46,6 @@ import tempfile
 import unittest
 _test_module = unittest
 
-# Suppresses the 'Import not at the top of the file' lint complaint.
-# pylint: disable-msg=C6204
 try:
   import subprocess
   _SUBPROCESS_MODULE_AVAILABLE = True
