@@ -41,7 +41,6 @@ from xml.dom import minidom, Node
 import gtest_test_utils
 import gtest_xml_test_utils
 
-
 GTEST_FILTER_FLAG = '--gtest_filter'
 GTEST_LIST_TESTS_FLAG = '--gtest_list_tests'
 GTEST_OUTPUT_FLAG = '--gtest_output'
@@ -228,8 +227,7 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
         'gtest_no_test_unittest')
     try:
       os.remove(output_file)
-    except OSError:
-      e = sys.exc_info()[1]
+    except OSError, e:
       if e.errno != errno.ENOENT:
         raise
 
