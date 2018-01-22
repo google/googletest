@@ -145,8 +145,6 @@ atexit.register(_RemoveTempDir)
 
 
 def GetTempDir():
-  """Returns a directory for temporary files."""
-
   global _temp_dir
   if not _temp_dir:
     _temp_dir = tempfile.mkdtemp()
