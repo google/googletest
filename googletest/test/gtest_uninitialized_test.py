@@ -33,6 +33,7 @@
 
 __author__ = 'wan@google.com (Zhanyong Wan)'
 
+import os
 import gtest_test_utils
 
 
@@ -46,8 +47,8 @@ def Assert(condition):
 
 def AssertEq(expected, actual):
   if expected != actual:
-    print('Expected: %s' % (expected,))
-    print('  Actual: %s' % (actual,))
+    print 'Expected: %s' % (expected,)
+    print '  Actual: %s' % (actual,)
     raise AssertionError
 
 

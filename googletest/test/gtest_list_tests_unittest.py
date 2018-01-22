@@ -39,9 +39,8 @@ Google Test) the command line flags.
 
 __author__ = 'phanna@google.com (Patrick Hanna)'
 
-import gtest_test_utils
 import re
-
+import gtest_test_utils
 
 # Constants.
 
@@ -71,7 +70,7 @@ FooTest\.
 TypedTest/0\.  # TypeParam = (VeryLo{245}|class VeryLo{239})\.\.\.
   TestA
   TestB
-TypedTest/1\.  # TypeParam = int\s*\*( __ptr64)?
+TypedTest/1\.  # TypeParam = int\s*\*
   TestA
   TestB
 TypedTest/2\.  # TypeParam = .*MyArray<bool,\s*42>
@@ -80,7 +79,7 @@ TypedTest/2\.  # TypeParam = .*MyArray<bool,\s*42>
 My/TypeParamTest/0\.  # TypeParam = (VeryLo{245}|class VeryLo{239})\.\.\.
   TestA
   TestB
-My/TypeParamTest/1\.  # TypeParam = int\s*\*( __ptr64)?
+My/TypeParamTest/1\.  # TypeParam = int\s*\*
   TestA
   TestB
 My/TypeParamTest/2\.  # TypeParam = .*MyArray<bool,\s*42>
@@ -122,6 +121,7 @@ def Run(args):
 
 
 # The unit test.
+
 
 class GTestListTestsUnitTest(gtest_test_utils.TestCase):
   """Tests using the --gtest_list_tests flag to list all tests."""
