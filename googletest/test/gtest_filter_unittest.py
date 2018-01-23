@@ -44,12 +44,8 @@ __author__ = 'wan@google.com (Zhanyong Wan)'
 
 import os
 import re
-try:
-  from sets import Set as set  # For Python 2.3 compatibility
-except ImportError:
-  pass
+import sets
 import sys
-
 import gtest_test_utils
 
 # Constants.
@@ -59,10 +55,12 @@ import gtest_test_utils
 # script in a subprocess to print whether the variable is STILL in
 # os.environ.  We then use 'eval' to parse the child's output so that an
 # exception is thrown if the input is anything other than 'True' nor 'False'.
-os.environ['EMPTY_VAR'] = ''
-child = gtest_test_utils.Subprocess(
-    [sys.executable, '-c', 'import os; print(\'EMPTY_VAR\' in os.environ)'])
-CAN_PASS_EMPTY_ENV = eval(child.output)
+CAN_PASS_EMPTY_ENV = False
+if sys.executable:
+  os.environ['EMPTY_VAR'] = ''
+  child = gtest_test_utils.Subprocess(
+      [sys.executable, '-c', 'import os; print \'EMPTY_VAR\' in os.environ'])
+  CAN_PASS_EMPTY_ENV = eval(child.output)
 
 
 # Check if this platform can unset environment variables in child processes.
@@ -71,11 +69,14 @@ CAN_PASS_EMPTY_ENV = eval(child.output)
 # is NO LONGER in os.environ.
 # We use 'eval' to parse the child's output so that an exception
 # is thrown if the input is neither 'True' nor 'False'.
-os.environ['UNSET_VAR'] = 'X'
-del os.environ['UNSET_VAR']
-child = gtest_test_utils.Subprocess(
-    [sys.executable, '-c', 'import os; print(\'UNSET_VAR\' not in os.environ)'])
-CAN_UNSET_ENV = eval(child.output)
+CAN_UNSET_ENV = False
+if sys.executable:
+  os.environ['UNSET_VAR'] = 'X'
+  del os.environ['UNSET_VAR']
+  child = gtest_test_utils.Subprocess(
+      [sys.executable, '-c', 'import os; print \'UNSET_VAR\' not in os.environ'
+      ])
+  CAN_UNSET_ENV = eval(child.output)
 
 
 # Checks if we should test with an empty filter. This doesn't
@@ -97,7 +98,7 @@ SHARD_STATUS_FILE_ENV_VAR = 'GTEST_SHARD_STATUS_FILE'
 FILTER_FLAG = 'gtest_filter'
 
 # The command line flag for including disabled tests.
-ALSO_RUN_DISABED_TESTS_FLAG = 'gtest_also_run_disabled_tests'
+ALSO_RUN_DISABLED_TESTS_FLAG = 'gtest_also_run_disabled_tests'
 
 # Command to run the gtest_filter_unittest_ program.
 COMMAND = gtest_test_utils.GetTestExecutablePath('gtest_filter_unittest_')
@@ -246,14 +247,14 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
     for slice_var in list_of_sets:
       full_partition.extend(slice_var)
     self.assertEqual(len(set_var), len(full_partition))
-    self.assertEqual(set(set_var), set(full_partition))
+    self.assertEqual(sets.Set(set_var), sets.Set(full_partition))
 
   def AdjustForParameterizedTests(self, tests_to_run):
     """Adjust tests_to_run in case value parameterized tests are disabled."""
 
     global param_tests_present
     if not param_tests_present:
-      return list(set(tests_to_run) - set(PARAM_TESTS))
+      return list(sets.Set(tests_to_run) - sets.Set(PARAM_TESTS))
     else:
       return tests_to_run
 
@@ -294,6 +295,7 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
     Runs all shards of gtest_filter_unittest_ with the given filter, and
     verifies that the right set of tests were run. The union of tests run
     on each shard should be identical to tests_to_run, without duplicates.
+    If check_exit_0, .
 
     Args:
       gtest_filter: A filter to apply to the tests.
@@ -339,7 +341,7 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
     tests_to_run = self.AdjustForParameterizedTests(tests_to_run)
 
     # Construct the command line.
-    args = ['--%s' % ALSO_RUN_DISABED_TESTS_FLAG]
+    args = ['--%s' % ALSO_RUN_DISABLED_TESTS_FLAG]
     if gtest_filter is not None:
       args.append('--%s=%s' % (FILTER_FLAG, gtest_filter))
 
