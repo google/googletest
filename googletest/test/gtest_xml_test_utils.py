@@ -35,7 +35,6 @@ import gtest_test_utils
 from xml.dom import minidom, Node
 
 
-GTEST_OUTPUT_FLAG         = '--gtest_output'
 GTEST_DEFAULT_OUTPUT_FILE = 'test_detail.xml'
 
 class GTestXMLTestCase(gtest_test_utils.TestCase):

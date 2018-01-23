@@ -36,7 +36,6 @@ __author__ = 'wan@google.com (Zhanyong Wan)'
 import os
 import gtest_test_utils
 
-
 COMMAND = gtest_test_utils.GetTestExecutablePath('gtest_uninitialized_test_')
 
 
@@ -57,8 +56,8 @@ def TestExitCodeAndOutput(command):
 
   # Verifies that 'command' exits with code 1.
   p = gtest_test_utils.Subprocess(command)
-  Assert(p.exited)
-  AssertEq(1, p.exit_code)
+  if p.exited and p.exit_code == 0:
+    Assert('IMPORTANT NOTICE' in p.output);
   Assert('InitGoogleTest' in p.output)
 
 

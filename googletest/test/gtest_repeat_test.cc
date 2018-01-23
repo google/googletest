@@ -67,7 +67,7 @@ namespace {
 
 
 // Used for verifying that global environment set-up and tear-down are
-// inside the gtest_repeat loop.
+// inside the --gtest_repeat loop.
 
 int g_environment_set_up_count = 0;
 int g_environment_tear_down_count = 0;
