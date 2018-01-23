@@ -34,9 +34,9 @@
 
 #include "gtest/gtest.h"
 
-// Verifies that the command line flag variables can be accessed
-// in code once <gtest/gtest.h> has been #included.
-// Do not move it after other #includes.
+// Verifies that the command line flag variables can be accessed in
+// code once "gtest/gtest.h" has been
+// #included.  Do not move it after other gtest #includes.
 TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
   bool dummy = testing::GTEST_FLAG(also_run_disabled_tests)
       || testing::GTEST_FLAG(break_on_failure)
