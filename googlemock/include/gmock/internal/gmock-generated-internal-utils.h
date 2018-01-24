@@ -331,8 +331,8 @@ struct Function<R(*)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)> : Function<R(A1,
 #if defined(GMOCK_USE_P99)
 
 #include "gmock-generated-p99.h"
-#define __GMOCK_NARGS P99_NARG
-#define __GMOCK_FIRST P99_SELS
+#define __GMOCK_NARGS __GMOCK_P99_NARG
+#define __GMOCK_FIRST __GMOCK_P99_SELS
 
 #else // GMOCK_USE_P99
 

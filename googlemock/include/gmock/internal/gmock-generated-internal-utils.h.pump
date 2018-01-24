@@ -149,8 +149,8 @@ struct Function<R(*)($As)> : Function<R($As)> {};
 #if defined(GMOCK_USE_P99)
 
 #include "gmock-generated-p99.h"
-#define __GMOCK_NARGS P99_NARG
-#define __GMOCK_FIRST P99_SELS
+#define __GMOCK_NARGS __GMOCK_P99_NARG
+#define __GMOCK_FIRST __GMOCK_P99_SELS
 
 #else // GMOCK_USE_P99
 
