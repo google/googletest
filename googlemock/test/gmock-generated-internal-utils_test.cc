@@ -127,9 +127,7 @@ TEST(FunctionTest, LongArgumentList) {
 // Tests for argument counting macros
 
 TEST(ArgumentMacros, Count) {
-#if !defined(__GMOCK_NARGS_0_ARGS_BROKEN)
 	EXPECT_EQ(0,  __GMOCK_NARGS());
-#endif
 	EXPECT_EQ(1,  __GMOCK_NARGS(a));
 	EXPECT_EQ(2,  __GMOCK_NARGS(a, b));
 	EXPECT_EQ(3,  __GMOCK_NARGS(a, b, c));
