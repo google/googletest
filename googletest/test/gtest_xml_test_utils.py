@@ -29,11 +29,9 @@
 
 """Unit test utilities for gtest_xml_output"""
 
-import os
 import re
-import gtest_test_utils
 from xml.dom import minidom, Node
-
+import gtest_test_utils
 
 GTEST_DEFAULT_OUTPUT_FILE = 'test_detail.xml'
 

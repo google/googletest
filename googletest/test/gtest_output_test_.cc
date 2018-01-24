@@ -168,6 +168,16 @@ void SubWithTrace(int n) {
   SubWithoutTrace(n);
 }
 
+TEST(SCOPED_TRACETest, AcceptedValues) {
+  SCOPED_TRACE("literal string");
+  SCOPED_TRACE(std::string("std::string"));
+  SCOPED_TRACE(1337);  // streamable type
+  const char* null_value = NULL;
+  SCOPED_TRACE(null_value);
+
+  ADD_FAILURE() << "Just checking that all these values work fine.";
+}
+
 // Tests that SCOPED_TRACE() obeys lexical scopes.
 TEST(SCOPED_TRACETest, ObeysScopes) {
   printf("(expected to fail)\n");
