@@ -1619,7 +1619,7 @@ TEST(IsValidUTF8Test, IllFormedUTF8) {
     {"\xEE\x80\x80", "\"\\xEE\\x80\\x80\"\n    As Text: \"\""}
   };
 
-  for (int i = 0; i < sizeof(kTestdata)/sizeof(kTestdata[0]); ++i) {
+  for (int i = 0; i < int(sizeof(kTestdata)/sizeof(kTestdata[0])); ++i) {
     EXPECT_PRINT_TO_STRING_(kTestdata[i][0], kTestdata[i][1]);
   }
 }
