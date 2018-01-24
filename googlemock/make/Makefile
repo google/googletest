@@ -17,14 +17,14 @@
 # Points to the root of Google Test, relative to where this file is.
 # Remember to tweak this if you move this file, or if you want to use
 # a copy of Google Test at a different location.
-GTEST_DIR = $(GMOCK_ROOT)/../../googletest
+GTEST_DIR = ../../googletest
 
 # Points to the root of Google Mock, relative to where this file is.
 # Remember to tweak this if you move this file.
-GMOCK_DIR = $(GMOCK_ROOT)/..
+GMOCK_DIR = ..
 
 # Where to find user code.
-USER_DIR = $(GMOCK_ROOT)/../test
+USER_DIR = ../test
 
 # Flags passed to the preprocessor.
 # Set Google Test and Google Mock's header directories as system
@@ -53,7 +53,7 @@ GMOCK_HEADERS = $(GMOCK_DIR)/include/gmock/*.h \
 
 # House-keeping build targets.
 
-all : $(TESTS) run_tests
+all : $(TESTS)
 
 clean :
 	rm -f $(TESTS) gmock.a gmock_main.a *.o
@@ -99,6 +99,3 @@ gmock_test.o : $(USER_DIR)/gmock_test.cc $(GMOCK_HEADERS)
 
 gmock_test : gmock_test.o gmock_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
-
-run_tests: $(TESTS)
-	./gmock_test
