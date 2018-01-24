@@ -115,6 +115,9 @@ GTEST_DECLARE_string_(output);
 // test.
 GTEST_DECLARE_bool_(print_time);
 
+// This flags control whether Google Test prints UTF8 characters as text.
+GTEST_DECLARE_bool_(print_utf8);
+
 // This flag specifies the random number seed.
 GTEST_DECLARE_int32_(random_seed);
 
