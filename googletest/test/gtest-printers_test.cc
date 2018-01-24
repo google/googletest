@@ -275,11 +275,11 @@ using hash_multiset = ::std::unordered_multiset<Key>;
 #elif GTEST_HAS_HASH_SET_
 
 #ifdef _STLP_HASH_MAP  // We got <hash_map> from STLport.
-using ::std::hash_set;
-using ::std::hash_multiset;
+using ::std::hash_map;
+using ::std::hash_multimap;
 #elif _MSC_VER
-using ::stdext::hash_set;
-using ::stdext::hash_multiset;
+using ::stdext::hash_map;
+using ::stdext::hash_multimap;
 #endif
 
 #endif
