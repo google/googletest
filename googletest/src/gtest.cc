@@ -246,6 +246,12 @@ GTEST_DEFINE_bool_(
     "True iff " GTEST_NAME_
     " should display elapsed time in text output.");
 
+GTEST_DEFINE_bool_(
+    print_utf8,
+    internal::BoolFromGTestEnv("print_utf8", true),
+    "True iff " GTEST_NAME_
+    " prints UTF8 characters as text.");
+
 GTEST_DEFINE_int32_(
     random_seed,
     internal::Int32FromGTestEnv("random_seed", 0),
@@ -5230,6 +5236,7 @@ static bool ParseGoogleTestFlag(const char* const arg) {
       ParseBoolFlag(arg, kListTestsFlag, &GTEST_FLAG(list_tests)) ||
       ParseStringFlag(arg, kOutputFlag, &GTEST_FLAG(output)) ||
       ParseBoolFlag(arg, kPrintTimeFlag, &GTEST_FLAG(print_time)) ||
+      ParseBoolFlag(arg, kPrintUTF8Flag, &GTEST_FLAG(print_utf8)) ||
       ParseInt32Flag(arg, kRandomSeedFlag, &GTEST_FLAG(random_seed)) ||
       ParseInt32Flag(arg, kRepeatFlag, &GTEST_FLAG(repeat)) ||
       ParseBoolFlag(arg, kShuffleFlag, &GTEST_FLAG(shuffle)) ||
