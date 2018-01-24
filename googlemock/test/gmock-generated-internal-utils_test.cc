@@ -155,22 +155,22 @@ TEST(ArgumentMacros, FirstN)
     char s9[11]  = { __GMOCK_FIRST(9,  'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j') };
     char s10[11] = { __GMOCK_FIRST(10, 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j') };
 
-    EXPECT_EQ(0,  strlen(s0));
-    EXPECT_EQ(1,  strlen(s1));
-    EXPECT_EQ(2,  strlen(s2));
-    EXPECT_EQ(3,  strlen(s3));
-    EXPECT_EQ(4,  strlen(s4));
-    EXPECT_EQ(5,  strlen(s5));
-    EXPECT_EQ(6,  strlen(s6));
-    EXPECT_EQ(7,  strlen(s7));
-    EXPECT_EQ(8,  strlen(s8));
-    EXPECT_EQ(9,  strlen(s9));
-    EXPECT_EQ(10, strlen(s10));
+    EXPECT_EQ(0u,  strlen(s0));
+    EXPECT_EQ(1u,  strlen(s1));
+    EXPECT_EQ(2u,  strlen(s2));
+    EXPECT_EQ(3u,  strlen(s3));
+    EXPECT_EQ(4u,  strlen(s4));
+    EXPECT_EQ(5u,  strlen(s5));
+    EXPECT_EQ(6u,  strlen(s6));
+    EXPECT_EQ(7u,  strlen(s7));
+    EXPECT_EQ(8u,  strlen(s8));
+    EXPECT_EQ(9u,  strlen(s9));
+    EXPECT_EQ(10u, strlen(s10));
 
     // See that it works even if the size is a macro
 #define X 3
     char sx[11]  = { __GMOCK_FIRST(X,  'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j') };
-    EXPECT_EQ(3, strlen(sx));
+    EXPECT_EQ(3u, strlen(sx));
 #undef X
 }
 
