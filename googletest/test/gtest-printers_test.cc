@@ -1552,6 +1552,78 @@ TEST(PrintToStringTest, WorksForCharArrayWithEmbeddedNul) {
   EXPECT_PRINT_TO_STRING_(mutable_str_with_nul, "\"hello\\0 world\"");
 }
 
+  TEST(PrintToStringTest, ContainsNonLatin) {
+  // Sanity test with valid UTF-8. Prints both in hex and as text.
+  std::string non_ascii_str = ::std::string("오전 4:30");
+  EXPECT_PRINT_TO_STRING_(non_ascii_str,
+                          "\"\\xEC\\x98\\xA4\\xEC\\xA0\\x84 4:30\"\n"
+                          "    As Text: \"오전 4:30\"");
+  non_ascii_str = ::std::string("From ä — ẑ");
+  EXPECT_PRINT_TO_STRING_(non_ascii_str,
+                          "\"From \\xC3\\xA4 \\xE2\\x80\\x94 \\xE1\\xBA\\x91\""
+                          "\n    As Text: \"From ä — ẑ\"");
+}
+
+TEST(IsValidUTF8Test, IllFormedUTF8) {
+  // The following test strings are ill-formed UTF-8 and are printed
+  // as hex only (or ASCII, in case of ASCII bytes) because IsValidUTF8() is
+  // expected to fail, thus output does not contain "As Text:".
+
+  static const char *const kTestdata[][2] = {
+    // 2-byte lead byte followed by a single-byte character.
+    {"\xC3\x74", "\"\\xC3t\""},
+    // Valid 2-byte character followed by an orphan trail byte.
+    {"\xC3\x84\xA4", "\"\\xC3\\x84\\xA4\""},
+    // Lead byte without trail byte.
+    {"abc\xC3", "\"abc\\xC3\""},
+    // 3-byte lead byte, single-byte character, orphan trail byte.
+    {"x\xE2\x70\x94", "\"x\\xE2p\\x94\""},
+    // Truncated 3-byte character.
+    {"\xE2\x80", "\"\\xE2\\x80\""},
+    // Truncated 3-byte character followed by valid 2-byte char.
+    {"\xE2\x80\xC3\x84", "\"\\xE2\\x80\\xC3\\x84\""},
+    // Truncated 3-byte character followed by a single-byte character.
+    {"\xE2\x80\x7A", "\"\\xE2\\x80z\""},
+    // 3-byte lead byte followed by valid 3-byte character.
+    {"\xE2\xE2\x80\x94", "\"\\xE2\\xE2\\x80\\x94\""},
+    // 4-byte lead byte followed by valid 3-byte character.
+    {"\xF0\xE2\x80\x94", "\"\\xF0\\xE2\\x80\\x94\""},
+    // Truncated 4-byte character.
+    {"\xF0\xE2\x80", "\"\\xF0\\xE2\\x80\""},
+     // Invalid UTF-8 byte sequences embedded in other chars.
+    {"abc\xE2\x80\x94\xC3\x74xyc", "\"abc\\xE2\\x80\\x94\\xC3txyc\""},
+    {"abc\xC3\x84\xE2\x80\xC3\x84xyz",
+     "\"abc\\xC3\\x84\\xE2\\x80\\xC3\\x84xyz\""},
+    // Non-shortest UTF-8 byte sequences are also ill-formed.
+    // The classics: xC0, xC1 lead byte.
+    {"\xC0\x80", "\"\\xC0\\x80\""},
+    {"\xC1\x81", "\"\\xC1\\x81\""},
+    // Non-shortest sequences.
+    {"\xE0\x80\x80", "\"\\xE0\\x80\\x80\""},
+    {"\xf0\x80\x80\x80", "\"\\xF0\\x80\\x80\\x80\""},
+    // Last valid code point before surrogate range, should be printed as text,
+    // too.
+    {"\xED\x9F\xBF", "\"\\xED\\x9F\\xBF\"\n    As Text: \"퟿\""},
+    // Start of surrogate lead. Surrogates are not printed as text.
+    {"\xED\xA0\x80", "\"\\xED\\xA0\\x80\""},
+    // Last non-private surrogate lead.
+    {"\xED\xAD\xBF", "\"\\xED\\xAD\\xBF\""},
+    // First private-use surrogate lead.
+    {"\xED\xAE\x80", "\"\\xED\\xAE\\x80\""},
+    // Last private-use surrogate lead.
+    {"\xED\xAF\xBF", "\"\\xED\\xAF\\xBF\""},
+    // Mid-point of surrogate trail.
+    {"\xED\xB3\xBF", "\"\\xED\\xB3\\xBF\""},
+    // First valid code point after surrogate range, should be printed as text,
+    // too.
+    {"\xEE\x80\x80", "\"\\xEE\\x80\\x80\"\n    As Text: \"\""}
+  };
+
+  for (int i = 0; i < int(sizeof(kTestdata)/sizeof(kTestdata[0])); ++i) {
+    EXPECT_PRINT_TO_STRING_(kTestdata[i][0], kTestdata[i][1]);
+  }
+}
+
 #undef EXPECT_PRINT_TO_STRING_
 
 TEST(UniversalTersePrintTest, WorksForNonReference) {
