@@ -34,9 +34,9 @@
 
 #include "gtest/gtest.h"
 
-// Verifies that the command line flag variables can be accessed
-// in code once <gtest/gtest.h> has been #included.
-// Do not move it after other #includes.
+// Verifies that the command line flag variables can be accessed in
+// code once "gtest/gtest.h" has been
+// #included.  Do not move it after other gtest #includes.
 TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
   bool dummy = testing::GTEST_FLAG(also_run_disabled_tests)
       || testing::GTEST_FLAG(break_on_failure)
@@ -66,15 +66,7 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 #include <ostream>
 
 #include "gtest/gtest-spi.h"
-
-// Indicates that this translation unit is part of Google Test's
-// implementation.  It must come before gtest-internal-inl.h is
-// included, or there will be a compiler error.  This trick is to
-// prevent a user from accidentally including gtest-internal-inl.h in
-// his code.
-#define GTEST_IMPLEMENTATION_ 1
 #include "src/gtest-internal-inl.h"
-#undef GTEST_IMPLEMENTATION_
 
 namespace testing {
 namespace internal {
@@ -2429,8 +2421,9 @@ TEST(StringAssertionTest, ASSERT_STREQ) {
   const char p2[] = "good";
   ASSERT_STREQ(p1, p2);
 
-  EXPECT_FATAL_FAILURE(ASSERT_STREQ("bad", "good"),
-                       "Expected: \"bad\"");
+  EXPECT_FATAL_FAILURE(
+      ASSERT_STREQ("bad", "good"),
+      "Expected equality of these values:\n  \"bad\"\n  \"good\"");
 }
 
 // Tests ASSERT_STREQ with NULL arguments.
@@ -3528,35 +3521,39 @@ TEST(AssertionTest, EqFailure) {
       EqFailure("foo", "bar", foo_val, bar_val, false)
       .failure_message());
   EXPECT_STREQ(
-      "      Expected: foo\n"
-      "      Which is: 5\n"
-      "To be equal to: bar\n"
-      "      Which is: 6",
+      "Expected equality of these values:\n"
+      "  foo\n"
+      "    Which is: 5\n"
+      "  bar\n"
+      "    Which is: 6",
       msg1.c_str());
 
   const std::string msg2(
       EqFailure("foo", "6", foo_val, bar_val, false)
       .failure_message());
   EXPECT_STREQ(
-      "      Expected: foo\n"
-      "      Which is: 5\n"
-      "To be equal to: 6",
+      "Expected equality of these values:\n"
+      "  foo\n"
+      "    Which is: 5\n"
+      "  6",
       msg2.c_str());
 
   const std::string msg3(
       EqFailure("5", "bar", foo_val, bar_val, false)
       .failure_message());
   EXPECT_STREQ(
-      "      Expected: 5\n"
-      "To be equal to: bar\n"
-      "      Which is: 6",
+      "Expected equality of these values:\n"
+      "  5\n"
+      "  bar\n"
+      "    Which is: 6",
       msg3.c_str());
 
   const std::string msg4(
       EqFailure("5", "6", foo_val, bar_val, false).failure_message());
   EXPECT_STREQ(
-      "      Expected: 5\n"
-      "To be equal to: 6",
+      "Expected equality of these values:\n"
+      "  5\n"
+      "  6",
       msg4.c_str());
 
   const std::string msg5(
@@ -3564,10 +3561,11 @@ TEST(AssertionTest, EqFailure) {
                 std::string("\"x\""), std::string("\"y\""),
                 true).failure_message());
   EXPECT_STREQ(
-      "      Expected: foo\n"
-      "      Which is: \"x\"\n"
-      "To be equal to: bar\n"
-      "      Which is: \"y\"\n"
+      "Expected equality of these values:\n"
+      "  foo\n"
+      "    Which is: \"x\"\n"
+      "  bar\n"
+      "    Which is: \"y\"\n"
       "Ignoring case",
       msg5.c_str());
 }
@@ -3580,11 +3578,12 @@ TEST(AssertionTest, EqFailureWithDiff) {
   const std::string msg1(
       EqFailure("left", "right", left, right, false).failure_message());
   EXPECT_STREQ(
-      "      Expected: left\n"
-      "      Which is: "
+      "Expected equality of these values:\n"
+      "  left\n"
+      "    Which is: "
       "1\\n2XXX\\n3\\n5\\n6\\n7\\n8\\n9\\n10\\n11\\n12XXX\\n13\\n14\\n15\n"
-      "To be equal to: right\n"
-      "      Which is: 1\\n2\\n3\\n4\\n5\\n6\\n7\\n8\\n9\\n11\\n12\\n13\\n14\n"
+      "  right\n"
+      "    Which is: 1\\n2\\n3\\n4\\n5\\n6\\n7\\n8\\n9\\n11\\n12\\n13\\n14\n"
       "With diff:\n@@ -1,5 +1,6 @@\n 1\n-2XXX\n+2\n 3\n+4\n 5\n 6\n"
       "@@ -7,8 +8,6 @@\n 8\n 9\n-10\n 11\n-12XXX\n+12\n 13\n 14\n-15\n",
       msg1.c_str());
@@ -3679,9 +3678,10 @@ TEST(ExpectTest, ASSERT_EQ_Double) {
 TEST(AssertionTest, ASSERT_EQ) {
   ASSERT_EQ(5, 2 + 3);
   EXPECT_FATAL_FAILURE(ASSERT_EQ(5, 2*3),
-                       "      Expected: 5\n"
-                       "To be equal to: 2*3\n"
-                       "      Which is: 6");
+                       "Expected equality of these values:\n"
+                       "  5\n"
+                       "  2*3\n"
+                       "    Which is: 6");
 }
 
 // Tests ASSERT_EQ(NULL, pointer).
@@ -3698,7 +3698,7 @@ TEST(AssertionTest, ASSERT_EQ_NULL) {
   // A failure.
   static int n = 0;
   EXPECT_FATAL_FAILURE(ASSERT_EQ(NULL, &n),
-                       "To be equal to: &n\n");
+                       "  &n\n    Which is:");
 }
 #endif  // GTEST_CAN_COMPARE_NULL
 
@@ -3714,7 +3714,7 @@ TEST(ExpectTest, ASSERT_EQ_0) {
 
   // A failure.
   EXPECT_FATAL_FAILURE(ASSERT_EQ(0, 5.6),
-                       "Expected: 0");
+                       "  0\n  5.6");
 }
 
 // Tests ASSERT_NE.
@@ -3813,7 +3813,7 @@ void TestEq1(int x) {
 // Tests calling a test subroutine that's not part of a fixture.
 TEST(AssertionTest, NonFixtureSubroutine) {
   EXPECT_FATAL_FAILURE(TestEq1(2),
-                       "To be equal to: x");
+                       "Which is: 2");
 }
 
 // An uncopyable class.
@@ -3862,7 +3862,8 @@ TEST(AssertionTest, AssertWorksWithUncopyableObject) {
   EXPECT_FATAL_FAILURE(TestAssertNonPositive(),
     "IsPositiveUncopyable(y) evaluates to false, where\ny evaluates to -1");
   EXPECT_FATAL_FAILURE(TestAssertEqualsUncopyable(),
-    "Expected: x\n      Which is: 5\nTo be equal to: y\n      Which is: -1");
+                       "Expected equality of these values:\n"
+                       "  x\n    Which is: 5\n  y\n    Which is: -1");
 }
 
 // Tests that uncopyable objects can be used in expects.
@@ -3874,7 +3875,8 @@ TEST(AssertionTest, ExpectWorksWithUncopyableObject) {
     "IsPositiveUncopyable(y) evaluates to false, where\ny evaluates to -1");
   EXPECT_EQ(x, x);
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(x, y),
-    "Expected: x\n      Which is: 5\nTo be equal to: y\n      Which is: -1");
+                          "Expected equality of these values:\n"
+                          "  x\n    Which is: 5\n  y\n    Which is: -1");
 }
 
 enum NamedEnum {
@@ -3950,7 +3952,7 @@ TEST(AssertionTest, AnonymousEnum) {
 
   // ICE's in C++Builder.
   EXPECT_FATAL_FAILURE(ASSERT_EQ(kCaseA, kCaseB),
-                       "To be equal to: kCaseB");
+                       "kCaseB");
   EXPECT_FATAL_FAILURE(ASSERT_EQ(kCaseA, kCaseC),
                        "Which is: 42");
 # endif
@@ -4390,9 +4392,10 @@ TEST(ExpectTest, ExpectFalseWithAssertionResult) {
 TEST(ExpectTest, EXPECT_EQ) {
   EXPECT_EQ(5, 2 + 3);
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(5, 2*3),
-                          "      Expected: 5\n"
-                          "To be equal to: 2*3\n"
-                          "      Which is: 6");
+                          "Expected equality of these values:\n"
+                          "  5\n"
+                          "  2*3\n"
+                          "    Which is: 6");
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(5, 2 - 3),
                           "2 - 3");
 }
@@ -4423,7 +4426,7 @@ TEST(ExpectTest, EXPECT_EQ_NULL) {
   // A failure.
   int n = 0;
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(NULL, &n),
-                          "To be equal to: &n\n");
+                          "&n\n");
 }
 #endif  // GTEST_CAN_COMPARE_NULL
 
@@ -4439,7 +4442,7 @@ TEST(ExpectTest, EXPECT_EQ_0) {
 
   // A failure.
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(0, 5.6),
-                          "Expected: 0");
+                          "Expected equality of these values:\n  0\n  5.6");
 }
 
 // Tests EXPECT_NE.
@@ -4539,7 +4542,7 @@ TEST(ExpectTest, EXPECT_ANY_THROW) {
 TEST(ExpectTest, ExpectPrecedence) {
   EXPECT_EQ(1 < 2, true);
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(true, true && false),
-                          "To be equal to: true && false");
+                          "true && false");
 }
 
 
@@ -4686,7 +4689,7 @@ TEST(EqAssertionTest, Bool) {
   EXPECT_FATAL_FAILURE({
       bool false_value = false;
       ASSERT_EQ(false_value, true);
-    }, "To be equal to: true");
+    }, "Which is: false");
 }
 
 // Tests using int values in {EXPECT|ASSERT}_EQ.
@@ -4720,10 +4723,11 @@ TEST(EqAssertionTest, WideChar) {
   EXPECT_EQ(L'b', L'b');
 
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(L'\0', L'x'),
-                          "      Expected: L'\0'\n"
-                          "      Which is: L'\0' (0, 0x0)\n"
-                          "To be equal to: L'x'\n"
-                          "      Which is: L'x' (120, 0x78)");
+                          "Expected equality of these values:\n"
+                          "  L'\0'\n"
+                          "    Which is: L'\0' (0, 0x0)\n"
+                          "  L'x'\n"
+                          "    Which is: L'x' (120, 0x78)");
 
   static wchar_t wchar;
   wchar = L'b';
@@ -4731,7 +4735,7 @@ TEST(EqAssertionTest, WideChar) {
                           "wchar");
   wchar = 0x8119;
   EXPECT_FATAL_FAILURE(ASSERT_EQ(static_cast<wchar_t>(0x8120), wchar),
-                       "To be equal to: wchar");
+                       "wchar");
 }
 
 // Tests using ::std::string values in {EXPECT|ASSERT}_EQ.
@@ -4760,8 +4764,8 @@ TEST(EqAssertionTest, StdString) {
   static ::std::string str3(str1);
   str3.at(2) = '\0';
   EXPECT_FATAL_FAILURE(ASSERT_EQ(str1, str3),
-                       "To be equal to: str3\n"
-                       "      Which is: \"A \\0 in the middle\"");
+                       "  str3\n"
+                       "    Which is: \"A \\0 in the middle\"");
 }
 
 #if GTEST_HAS_STD_WSTRING
@@ -4881,7 +4885,7 @@ TEST(EqAssertionTest, CharPointer) {
   ASSERT_EQ(p1, p1);
 
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(p0, p2),
-                          "To be equal to: p2");
+                          "p2");
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(p1, p2),
                           "p2");
   EXPECT_FATAL_FAILURE(ASSERT_EQ(reinterpret_cast<char*>(0x1234),
@@ -4903,7 +4907,7 @@ TEST(EqAssertionTest, WideCharPointer) {
   EXPECT_EQ(p0, p0);
 
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(p0, p2),
-                          "To be equal to: p2");
+                          "p2");
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(p1, p2),
                           "p2");
   void* pv3 = (void*)0x1234;  // NOLINT

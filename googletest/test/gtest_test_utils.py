@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-#
 # Copyright 2006, Google Inc.
 # All rights reserved.
 #
@@ -30,19 +28,24 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """Unit test utilities for Google C++ Testing Framework."""
+# Suppresses the 'Import not at the top of the file' lint complaint.
+# pylint: disable-msg=C6204
 
 __author__ = 'wan@google.com (Zhanyong Wan)'
 
-import atexit
 import os
-import shutil
 import sys
+
+IS_LINUX = os.name == 'posix' and os.uname()[0] == 'Linux'
+IS_WINDOWS = os.name == 'nt'
+IS_CYGWIN = os.name == 'posix' and 'CYGWIN' in os.uname()[0]
+
+import atexit
+import shutil
 import tempfile
 import unittest
 _test_module = unittest
 
-# Suppresses the 'Import not at the top of the file' lint complaint.
-# pylint: disable-msg=C6204
 try:
   import subprocess
   _SUBPROCESS_MODULE_AVAILABLE = True
@@ -52,9 +55,6 @@ except:
 # pylint: enable-msg=C6204
 
 GTEST_OUTPUT_VAR_NAME = 'GTEST_OUTPUT'
-
-IS_WINDOWS = os.name == 'nt'
-IS_CYGWIN = os.name == 'posix' and 'CYGWIN' in os.uname()[0]
 
 # The environment variable for specifying the path to the premature-exit file.
 PREMATURE_EXIT_FILE_ENV_VAR = 'TEST_PREMATURE_EXIT_FILE'
@@ -145,8 +145,6 @@ atexit.register(_RemoveTempDir)
 
 
 def GetTempDir():
-  """Returns a directory for temporary files."""
-
   global _temp_dir
   if not _temp_dir:
     _temp_dir = tempfile.mkdtemp()
@@ -178,7 +176,7 @@ def GetTestExecutablePath(executable_name, build_dir=None):
         'Unable to find the test binary "%s". Please make sure to provide\n'
         'a path to the binary via the --build_dir flag or the BUILD_DIR\n'
         'environment variable.' % path)
-    sys.stdout.write(message)
+    print >> sys.stderr, message
     sys.exit(1)
 
   return path

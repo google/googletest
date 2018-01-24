@@ -37,15 +37,7 @@
 
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest.h"
-
-// Indicates that this translation unit is part of Google Test's
-// implementation.  It must come before gtest-internal-inl.h is
-// included, or there will be a compiler error.  This trick is to
-// prevent a user from accidentally including gtest-internal-inl.h in
-// his code.
-#define GTEST_IMPLEMENTATION_ 1
 #include "src/gtest-internal-inl.h"
-#undef GTEST_IMPLEMENTATION_
 
 #include <stdlib.h>
 
@@ -322,6 +314,13 @@ TEST(SCOPED_TRACETest, WorksConcurrently) {
   thread.Join();
 }
 #endif  // GTEST_IS_THREADSAFE
+
+// Tests basic functionality of the ScopedTrace utility (most of its features
+// are already tested in SCOPED_TRACETest).
+TEST(ScopedTraceTest, WithExplicitFileAndLine) {
+  testing::ScopedTrace trace("explicit_file.cc", 123, "expected trace message");
+  ADD_FAILURE() << "Check that the trace is attached to a particular location.";
+}
 
 TEST(DisabledTestsWarningTest,
      DISABLED_AlsoRunDisabledTestsFlagSuppressesWarning) {
@@ -757,8 +756,6 @@ TEST(ExpectFatalFailureTest, FailsWhenStatementThrows) {
 
 // This #ifdef block tests the output of value-parameterized tests.
 
-#if GTEST_HAS_PARAM_TEST
-
 std::string ParamNameFunc(const testing::TestParamInfo<std::string>& info) {
   return info.param;
 }
@@ -778,8 +775,6 @@ INSTANTIATE_TEST_CASE_P(PrintingStrings,
                         ParamTest,
                         testing::Values(std::string("a")),
                         ParamNameFunc);
-
-#endif  // GTEST_HAS_PARAM_TEST
 
 // This #ifdef block tests the output of typed tests.
 #if GTEST_HAS_TYPED_TEST

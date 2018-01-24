@@ -27,28 +27,18 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Authors: keith.ray@gmail.com (Keith Ray)
 //
 // Google Test filepath utilities
 //
 // This file tests classes and functions used internally by
 // Google Test.  They are subject to change without notice.
 //
-// This file is #included from gtest_unittest.cc, to avoid changing
-// build or make-files for some existing Google Test clients. Do not
-// #include this file anywhere else!
+// This file is #included from gtest-internal.h.
+// Do not #include this file anywhere else!
 
 #include "gtest/internal/gtest-filepath.h"
 #include "gtest/gtest.h"
-
-// Indicates that this translation unit is part of Google Test's
-// implementation.  It must come before gtest-internal-inl.h is
-// included, or there will be a compiler error.  This trick is to
-// prevent a user from accidentally including gtest-internal-inl.h in
-// his code.
-#define GTEST_IMPLEMENTATION_ 1
 #include "src/gtest-internal-inl.h"
-#undef GTEST_IMPLEMENTATION_
 
 #if GTEST_OS_WINDOWS_MOBILE
 # include <windows.h>  // NOLINT

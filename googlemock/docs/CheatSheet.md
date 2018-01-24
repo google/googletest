@@ -65,7 +65,7 @@ can specify it by appending `_WITH_CALLTYPE` to any of the macros
 described in the previous two sections and supplying the calling
 convention as the first argument to the macro. For example,
 ```
-  MOCK_METHOD_1_WITH_CALLTYPE(STDMETHODCALLTYPE, Foo, bool(int n));
+  MOCK_METHOD1_WITH_CALLTYPE(STDMETHODCALLTYPE, Foo, bool(int n));
   MOCK_CONST_METHOD2_WITH_CALLTYPE(STDMETHODCALLTYPE, Bar, int(double x, double y));
 ```
 where `STDMETHODCALLTYPE` is defined by `<objbase.h>` on Windows.

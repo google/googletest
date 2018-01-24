@@ -787,15 +787,17 @@ If a test sub-routine is called from several places, when an assertion
 inside it fails, it can be hard to tell which invocation of the
 sub-routine the failure is from.  You can alleviate this problem using
 extra logging or custom failure messages, but that usually clutters up
-your tests. A better solution is to use the `SCOPED_TRACE` macro:
+your tests. A better solution is to use the `SCOPED_TRACE` macro or
+the `ScopedTrace` utility:
 
-| `SCOPED_TRACE(`_message_`);` |
-|:-----------------------------|
+| `SCOPED_TRACE(`_message_`);` | `::testing::ScopedTrace trace(`_"file\_path"_`, `_line\_number_`, `_message_`);` |
+|:-----------------------------|:---------------------------------------------------------------------------------|
 
-where _message_ can be anything streamable to `std::ostream`. This
-macro will cause the current file name, line number, and the given
-message to be added in every failure message. The effect will be
-undone when the control leaves the current lexical scope.
+where `message` can be anything streamable to `std::ostream`. `SCOPED_TRACE`
+macro will cause the current file name, line number, and the given message to be
+added in every failure message. `ScopedTrace` accepts explicit file name and
+line number in arguments, which is useful for writing test helpers. The effect
+will be undone when the control leaves the current lexical scope.
 
 For example,
 
@@ -1263,7 +1265,7 @@ known as <i>abstract tests</i>. As an example of its application, when you
 are designing an interface you can write a standard suite of abstract
 tests (perhaps using a factory function as the test parameter) that
 all implementations of the interface are expected to pass. When
-someone implements the interface, he can instantiate your suite to get
+someone implements the interface, they can instantiate your suite to get
 all the interface-conformance tests for free.
 
 To define abstract tests, you should organize your code like this:
