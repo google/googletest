@@ -19,21 +19,6 @@ environment:
     - compiler: msvc-14-seh
       generator: "Visual Studio 14 2015 Win64"
 
-    - compiler: msvc-12-seh
-      generator: "Visual Studio 12 2013"
-
-    - compiler: msvc-12-seh
-      generator: "Visual Studio 12 2013 Win64"
-
-    - compiler: msvc-11-seh
-      generator: "Visual Studio 11 2012"
-
-    - compiler: msvc-11-seh
-      generator: "Visual Studio 11 2012 Win64"
-
-    - compiler: msvc-10-seh
-      generator: "Visual Studio 10 2010"
-
     - compiler: gcc-5.3.0-posix
       generator: "MinGW Makefiles"
       cxx_path: 'C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\mingw32\bin'
