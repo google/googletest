@@ -787,15 +787,17 @@ If a test sub-routine is called from several places, when an assertion
 inside it fails, it can be hard to tell which invocation of the
 sub-routine the failure is from.  You can alleviate this problem using
 extra logging or custom failure messages, but that usually clutters up
-your tests. A better solution is to use the `SCOPED_TRACE` macro:
+your tests. A better solution is to use the `SCOPED_TRACE` macro or
+the `ScopedTrace` utility:
 
-| `SCOPED_TRACE(`_message_`);` |
-|:-----------------------------|
+| `SCOPED_TRACE(`_message_`);` | `::testing::ScopedTrace trace(`_"file\_path"_`, `_line\_number_`, `_message_`);` |
+|:-----------------------------|:---------------------------------------------------------------------------------|
 
-where _message_ can be anything streamable to `std::ostream`. This
-macro will cause the current file name, line number, and the given
-message to be added in every failure message. The effect will be
-undone when the control leaves the current lexical scope.
+where `message` can be anything streamable to `std::ostream`. `SCOPED_TRACE`
+macro will cause the current file name, line number, and the given message to be
+added in every failure message. `ScopedTrace` accepts explicit file name and
+line number in arguments, which is useful for writing test helpers. The effect
+will be undone when the control leaves the current lexical scope.
 
 For example,
 
@@ -1948,6 +1950,17 @@ variable to `0` has the same effect.
 
 _Availability:_ Linux, Windows, Mac.  (In Google Test 1.3.0 and lower,
 the default behavior is that the elapsed time is **not** printed.)
+
+**Availability**: Linux, Windows, Mac.
+
+#### Suppressing UTF-8 Text Output
+
+In case of assertion failures, gUnit prints expected and actual values of type
+`string` both as hex-encoded strings as well as in readable UTF-8 text if they
+contain valid non-ASCII UTF-8 characters. If you want to suppress the UTF-8 text
+because, for example, you don't have an UTF-8 compatible output medium, run the
+test program with `--gunit_print_utf8=0` or set the `GUNIT_PRINT_UTF8`
+environment variable to `0`.
 
 ### Generating an XML Report ###
 

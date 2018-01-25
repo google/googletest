@@ -32,6 +32,8 @@
 #   
 #   Bazel Build for Google C++ Testing Framework(Google Test)-googlemock
 
+licenses(["notice"])
+
 """ gmock own tests """
 
 cc_test(
@@ -43,7 +45,8 @@ cc_test(
         ],
     ),
     linkopts = select({
-        "//:win": [],
+        "//:windows": [],
+        "//:windows_msvc": [],
         "//conditions:default": [
             "-pthread",
         ],
