@@ -281,6 +281,8 @@ TEST_F(TestForDeathTest, SingleStatement) {
   if (AlwaysFalse())
     // This would fail if executed; this is a compilation test only
     ASSERT_DEATH(return, "");
+  else
+    ;  // NOLINT
 
   if (AlwaysTrue())
     EXPECT_DEATH(_exit(1), "");
@@ -291,6 +293,8 @@ TEST_F(TestForDeathTest, SingleStatement) {
 
   if (AlwaysFalse())
     ASSERT_DEATH(return, "") << "did not die";
+  else
+    ;  // NOLINT
 
   if (AlwaysFalse())
     ;
@@ -1376,6 +1380,8 @@ TEST(ConditionalDeathMacrosSyntaxDeathTest, SingleStatement) {
   if (AlwaysFalse())
     // This would fail if executed; this is a compilation test only
     ASSERT_DEATH_IF_SUPPORTED(return, "");
+  else
+    ;  // NOLINT
 
   if (AlwaysTrue())
     EXPECT_DEATH_IF_SUPPORTED(_exit(1), "");
@@ -1386,6 +1392,8 @@ TEST(ConditionalDeathMacrosSyntaxDeathTest, SingleStatement) {
 
   if (AlwaysFalse())
     ASSERT_DEATH_IF_SUPPORTED(return, "") << "did not die";
+  else
+    ;  // NOLINT
 
   if (AlwaysFalse())
     ;  // NOLINT

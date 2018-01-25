@@ -233,6 +233,8 @@ TEST(GtestCheckSyntaxTest, BehavesLikeASingleStatement) {
   if (AlwaysFalse())
     GTEST_CHECK_(false) << "This should never be executed; "
                            "It's a compilation test only.";
+  else
+    ;  // NOLINT
 
   if (AlwaysTrue())
     GTEST_CHECK_(true);
