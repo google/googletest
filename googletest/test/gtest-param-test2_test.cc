@@ -33,7 +33,7 @@
 // Google Test work.
 
 #include "gtest/gtest.h"
-#include "test/gtest-param-test_test.h"
+#include "gtest-param-test_test.h"
 
 using ::testing::Values;
 using ::testing::internal::ParamGenerator;

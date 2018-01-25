@@ -1951,6 +1951,17 @@ variable to `0` has the same effect.
 _Availability:_ Linux, Windows, Mac.  (In Google Test 1.3.0 and lower,
 the default behavior is that the elapsed time is **not** printed.)
 
+**Availability**: Linux, Windows, Mac.
+
+#### Suppressing UTF-8 Text Output
+
+In case of assertion failures, gUnit prints expected and actual values of type
+`string` both as hex-encoded strings as well as in readable UTF-8 text if they
+contain valid non-ASCII UTF-8 characters. If you want to suppress the UTF-8 text
+because, for example, you don't have an UTF-8 compatible output medium, run the
+test program with `--gunit_print_utf8=0` or set the `GUNIT_PRINT_UTF8`
+environment variable to `0`.
+
 ### Generating an XML Report ###
 
 Google Test can emit a detailed XML report to a file in addition to its normal

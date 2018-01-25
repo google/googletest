@@ -115,6 +115,9 @@ GTEST_DECLARE_string_(output);
 // test.
 GTEST_DECLARE_bool_(print_time);
 
+// This flags control whether Google Test prints UTF8 characters as text.
+GTEST_DECLARE_bool_(print_utf8);
+
 // This flag specifies the random number seed.
 GTEST_DECLARE_int32_(random_seed);
 
@@ -687,6 +690,9 @@ class GTEST_API_ TestInfo {
   // Returns the line where this test is defined.
   int line() const { return location_.line; }
 
+  // Return true if this test should not be run because it's in another shard.
+  bool is_in_another_shard() const { return is_in_another_shard_; }
+
   // Returns true if this test should run, that is if the test is not
   // disabled (or it is disabled but the also_run_disabled_tests flag has
   // been specified) and its full name matches the user-specified filter.
@@ -707,10 +713,9 @@ class GTEST_API_ TestInfo {
 
   // Returns true iff this test will appear in the XML report.
   bool is_reportable() const {
-    // The XML report includes tests matching the filter.
-    // In the future, we may trim tests that are excluded because of
-    // sharding.
-    return matches_filter_;
+    // The XML report includes tests matching the filter, excluding those
+    // run in other shards.
+    return matches_filter_ && !is_in_another_shard_;
   }
 
   // Returns the result of the test.
@@ -774,6 +779,7 @@ class GTEST_API_ TestInfo {
   bool is_disabled_;                // True iff this test is disabled
   bool matches_filter_;             // True if this test matches the
                                     // user-specified filter.
+  bool is_in_another_shard_;        // Will be run in another shard.
   internal::TestFactoryBase* const factory_;  // The factory that creates
                                               // the test object
 
