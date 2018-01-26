@@ -65,17 +65,16 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
-#if GTEST_HAS_EXCEPTIONS
-# include <stdexcept>  // NOLINT
-#endif
-
 #include "gmock/gmock-actions.h"
 #include "gmock/gmock-cardinalities.h"
 #include "gmock/gmock-matchers.h"
 #include "gmock/internal/gmock-internal-utils.h"
 #include "gmock/internal/gmock-port.h"
 #include "gtest/gtest.h"
+
+#if GTEST_HAS_EXCEPTIONS
+# include <stdexcept>  // NOLINT
+#endif
 
 namespace testing {
 
