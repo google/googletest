@@ -47,10 +47,9 @@
 #include <string>
 #include <utility>
 #include <vector>
-
+#include "gtest/gtest.h"
 #include "gmock/internal/gmock-internal-utils.h"
 #include "gmock/internal/gmock-port.h"
-#include "gtest/gtest.h"
 
 #if GTEST_HAS_STD_INITIALIZER_LIST_
 # include <initializer_list>  // NOLINT -- must be after gtest.h
