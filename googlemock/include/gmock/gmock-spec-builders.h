@@ -77,6 +77,8 @@
 #include "gmock/internal/gmock-port.h"
 #include "gtest/gtest.h"
 
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 /* class A needs to have dll-interface to be used by clients of class B */)
+
 namespace testing {
 
 // An abstract handle of an expectation.
@@ -1347,11 +1349,7 @@ class ReferenceOrValueWrapper<T&> {
 // we need to temporarily disable the warning.  We have to do it for
 // the entire class to suppress the warning, even though it's about
 // the constructor only.
-
-#ifdef _MSC_VER
-# pragma warning(push)          // Saves the current warning state.
-# pragma warning(disable:4355)  // Temporarily disables warning 4355.
-#endif  // _MSV_VER
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4355)
 
 // C++ treats the void type specially.  For example, you cannot define
 // a void-typed variable or pass a void value to a function.
@@ -1786,9 +1784,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(FunctionMockerBase);
 };  // class FunctionMockerBase
 
-#ifdef _MSC_VER
-# pragma warning(pop)  // Restores the warning state.
-#endif  // _MSV_VER
+GTEST_DISABLE_MSC_WARNINGS_POP_()
 
 // Implements methods of FunctionMockerBase.
 
@@ -1832,6 +1828,8 @@ inline Expectation::Expectation(internal::ExpectationBase& exp)  // NOLINT
     : expectation_base_(exp.GetHandle().expectation_base()) {}
 
 }  // namespace testing
+
+GTEST_DISABLE_MSC_WARNINGS_POP_()
 
 // A separate macro is required to avoid compile errors when the name
 // of the method used in call is a result of macro expansion.

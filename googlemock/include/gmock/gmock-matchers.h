@@ -56,6 +56,8 @@
 # include <initializer_list>  // NOLINT -- must be after gtest.h
 #endif
 
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 /* class A needs to have dll-interface to be used by clients of class B */)
+
 namespace testing {
 
 // To implement a matcher Foo for type T, define:
@@ -4412,6 +4414,8 @@ inline InnerMatcher AllArgs(const InnerMatcher& matcher) { return matcher; }
     ::testing::internal::MakePredicateFormatterFromMatcher(matcher), value)
 
 }  // namespace testing
+
+GTEST_DISABLE_MSC_WARNINGS_POP_()
 
 // Include any custom callback matchers added by the local installation.
 // We must include this header at the end to make sure it can use the
