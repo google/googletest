@@ -596,6 +596,9 @@ class GTEST_API_ TestResult {
   // UNIX epoch.
   TimeInMillis start_timestamp() const { return start_timestamp_; }
 
+  // Return the number of assert executed with no errors in this test.
+  int success_assert_count() const { return success_assert_count_; }
+
   // Returns the i-th test part result among all the results. i can range from 0
   // to total_part_count() - 1. If i is not in that range, aborts the program.
   const TestPartResult& GetTestPartResult(int i) const;
@@ -656,6 +659,9 @@ class GTEST_API_ TestResult {
   // Increments the death test count, returning the new count.
   int increment_death_test_count() { return ++death_test_count_; }
 
+  // Increments the successful assert count, returning the new count.
+  int increment_success_assert_count(int v = 1) { return success_assert_count_ += v; }
+
   // Clears the test part results.
   void ClearTestPartResults();
 
@@ -674,6 +680,8 @@ class GTEST_API_ TestResult {
   int death_test_count_;
   // The start time, in milliseconds since UNIX Epoch.
   TimeInMillis start_timestamp_;
+  // Running count of number of successful asserts.
+  int success_assert_count_;
   // The elapsed time, in milliseconds.
   TimeInMillis elapsed_time_;
 
@@ -760,6 +768,13 @@ class GTEST_API_ TestInfo {
   // Returns the result of the test.
   const TestResult* result() const { return &result_; }
 
+  // Returns the number of executed assertions that has passed silently:
+  int success_assert_count() const { return result_.success_assert_count(); }
+
+  // Increment the number of assertions executed without errors:
+  int increment_success_assert_count(int v = 1) {
+    return result_.increment_success_assert_count(v);
+  }
  private:
 #if GTEST_HAS_DEATH_TEST
   friend class internal::DefaultDeathTestFactory;
@@ -1348,6 +1363,10 @@ class GTEST_API_ UnitTest {
 
   // Gets the elapsed time, in milliseconds.
   TimeInMillis elapsed_time() const;
+
+  // Increment the number of assertions executed without errors:
+  int increment_success_assert_count(int v = 1)
+      GTEST_LOCK_EXCLUDED_(mutex_);
 
   // Returns true if and only if the unit test passed (i.e. all test suites
   // passed).
