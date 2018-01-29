@@ -2032,6 +2032,7 @@ std::string AppendUserMessage(const std::string& gtest_msg,
 // Creates an empty TestResult.
 TestResult::TestResult()
     : death_test_count_(0),
+      success_assert_count_(0),
       elapsed_time_(0) {
 }
 
@@ -3205,6 +3206,8 @@ void PrettyUnitTestResultPrinter::OnTestEnd(const TestInfo& test_info) {
   if (test_info.result()->Failed())
     PrintFullTestCommentIfPresent(test_info);
 
+  printf(", %zd assertions",
+	 test_info.result()->total_part_count() + test_info.result()->success_assert_count());
   if (GTEST_FLAG(print_time)) {
     printf(" (%s ms)\n", internal::StreamableToString(
            test_info.result()->elapsed_time()).c_str());
@@ -4624,6 +4627,13 @@ int UnitTest::test_to_run_count() const { return impl()->test_to_run_count(); }
 // UNIX epoch.
 internal::TimeInMillis UnitTest::start_timestamp() const {
     return impl()->start_timestamp();
+}
+
+// Increment the number of assertions executed without errors:
+size_t UnitTest::increment_success_assert_count(size_t v)
+  GTEST_LOCK_EXCLUDED_(mutex_) {
+  internal::MutexLock lock(&mutex_);
+  return impl_->increment_success_assert_count(v);
 }
 
 // Gets the elapsed time, in milliseconds.

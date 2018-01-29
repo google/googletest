@@ -75,7 +75,7 @@ namespace testing {
 #define GTEST_ASSERT_(expression, on_failure) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (const ::testing::AssertionResult gtest_ar = (expression)) \
-    ; \
+    ::testing::UnitTest::GetInstance()->increment_success_assert_count(); \
   else \
     on_failure(gtest_ar.failure_message())
 

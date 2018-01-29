@@ -1346,6 +1346,7 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
     } \
     catch (expected_exception const&) { \
       gtest_caught_expected = true; \
+      ::testing::UnitTest::GetInstance()->increment_success_assert_count(); \
     } \
     catch (...) { \
       gtest_msg.value = \
@@ -1386,6 +1387,7 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
     } \
     catch (...) { \
       gtest_caught_any = true; \
+      ::testing::UnitTest::GetInstance()->increment_success_assert_count(); \
     } \
     if (!gtest_caught_any) { \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testanythrow_, __LINE__); \
@@ -1403,7 +1405,7 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (const ::testing::AssertionResult gtest_ar_ = \
       ::testing::AssertionResult(expression)) \
-    ; \
+    ::testing::UnitTest::GetInstance()->increment_success_assert_count(); \
   else \
     fail(::testing::internal::GetBoolAssertionFailureMessage(\
         gtest_ar_, text, #actual, #expected).c_str())
