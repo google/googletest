@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-#
 # Copyright 2006, Google Inc.
 # All rights reserved.
 #
@@ -41,11 +39,11 @@ import sys
 SCRIPT_DIR = os.path.dirname(__file__) or '.'
 
 # isdir resolves symbolic links.
-gtest_tests_util_dir = os.path.join(SCRIPT_DIR, '../gtest/test')
+gtest_tests_util_dir = os.path.join(SCRIPT_DIR, '../googletest/test')
 if os.path.isdir(gtest_tests_util_dir):
   GTEST_TESTS_UTIL_DIR = gtest_tests_util_dir
 else:
-  GTEST_TESTS_UTIL_DIR = os.path.join(SCRIPT_DIR, '../../gtest/test')
+  GTEST_TESTS_UTIL_DIR = os.path.join(SCRIPT_DIR, '../../googletest/test')
 
 sys.path.append(GTEST_TESTS_UTIL_DIR)
 import gtest_test_utils  # pylint: disable-msg=C6204
