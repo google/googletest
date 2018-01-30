@@ -133,7 +133,11 @@ enum TypeKind {
   kProtobuf,              // a protobuf type
   kConvertibleToInteger,  // a type implicitly convertible to BiggestInt
                           // (e.g. a named or unnamed enum type)
-  kOtherType              // anything else
+#if GTEST_HAS_ABSL
+  kConvertibleToStringView,  // a type implicitly convertible to
+                             // absl::string_view
+#endif
+  kOtherType  // anything else
 };
 
 // TypeWithoutFormatter<T, kTypeKind>::PrintValue(value, os) is called
@@ -146,7 +150,7 @@ class TypeWithoutFormatter {
   // This default version is called when kTypeKind is kOtherType.
   static void PrintValue(const T& value, ::std::ostream* os) {
     PrintBytesInObjectTo(static_cast<const unsigned char*>(
-                             reinterpret_cast<const void *>(&value)),
+                             reinterpret_cast<const void*>(&value)),
                          sizeof(value), os);
   }
 };
@@ -184,6 +188,19 @@ class TypeWithoutFormatter<T, kConvertibleToInteger> {
   }
 };
 
+#if GTEST_HAS_ABSL
+template <typename T>
+class TypeWithoutFormatter<T, kConvertibleToStringView> {
+ public:
+  // Since T has neither operator<< nor PrintTo() but can be implicitly
+  // converted to absl::string_view, we print it as a absl::string_view.
+  //
+  // Note: the implementation is further below, as it depends on
+  // internal::PrintTo symbol which is defined later in the file.
+  static void PrintValue(const T& value, ::std::ostream* os);
+};
+#endif
+
 // Prints the given value to the given ostream.  If the value is a
 // protocol message, its debug string is printed; if it's an enum or
 // of a type implicitly convertible to BiggestInt, it's printed as an
@@ -211,10 +228,19 @@ class TypeWithoutFormatter<T, kConvertibleToInteger> {
 template <typename Char, typename CharTraits, typename T>
 ::std::basic_ostream<Char, CharTraits>& operator<<(
     ::std::basic_ostream<Char, CharTraits>& os, const T& x) {
-  TypeWithoutFormatter<T,
-      (internal::IsAProtocolMessage<T>::value ? kProtobuf :
-       internal::ImplicitlyConvertible<const T&, internal::BiggestInt>::value ?
-       kConvertibleToInteger : kOtherType)>::PrintValue(x, &os);
+  TypeWithoutFormatter<T, (internal::IsAProtocolMessage<T>::value
+                               ? kProtobuf
+                               : internal::ImplicitlyConvertible<
+                                     const T&, internal::BiggestInt>::value
+                                     ? kConvertibleToInteger
+                                     :
+#if GTEST_HAS_ABSL
+                                     internal::ImplicitlyConvertible<
+                                         const T&, absl::string_view>::value
+                                         ? kConvertibleToStringView
+                                         :
+#endif
+                                         kOtherType)>::PrintValue(x, &os);
   return os;
 }
 
@@ -435,7 +461,8 @@ void DefaultPrintTo(WrapPrinterType<kPrintFunctionPointer> /* dummy */,
     *os << "NULL";
   } else {
     // T is a function type, so '*os << p' doesn't do what we want
-    // (it just prints p as bool).  Cast p to const void* to print it.
+    // (it just prints p as bool).  We want to print p as a const
+    // void*.
     *os << reinterpret_cast<const void*>(p);
   }
 }
@@ -464,17 +491,15 @@ void PrintTo(const T& value, ::std::ostream* os) {
   // DefaultPrintTo() is overloaded.  The type of its first argument
   // determines which version will be picked.
   //
-  // Note that we check for recursive and other container types here, prior 
-  // to we check for protocol message types in our operator<<.  The rationale is:
+  // Note that we check for container types here, prior to we check
+  // for protocol message types in our operator<<.  The rationale is:
   //
   // For protocol messages, we want to give people a chance to
   // override Google Mock's format by defining a PrintTo() or
   // operator<<.  For STL containers, other formats can be
   // incompatible with Google Mock's format for the container
   // elements; therefore we check for container types here to ensure
-  // that our format is used. To prevent an infinite runtime recursion
-  // during the output of recursive container types, we check first for
-  // those.
+  // that our format is used.
   //
   // Note that MSVC and clang-cl do allow an implicit conversion from
   // pointer-to-function to pointer-to-object, but clang-cl warns on it.
@@ -492,8 +517,8 @@ void PrintTo(const T& value, ::std::ostream* os) {
 #else
                 : !internal::ImplicitlyConvertible<T, const void*>::value
 #endif
-                    ? kPrintFunctionPointer
-                    : kPrintPointer>(),
+                      ? kPrintFunctionPointer
+                      : kPrintPointer>(),
       value, os);
 }
 
@@ -600,6 +625,13 @@ inline void PrintTo(const ::std::wstring& s, ::std::ostream* os) {
   PrintWideStringTo(s, os);
 }
 #endif  // GTEST_HAS_STD_WSTRING
+
+#if GTEST_HAS_ABSL
+// Overload for absl::string_view.
+inline void PrintTo(absl::string_view sp, ::std::ostream* os) {
+  PrintTo(string(sp), os);
+}
+#endif  // GTEST_HAS_ABSL
 
 #if GTEST_HAS_TR1_TUPLE || GTEST_HAS_STD_TUPLE_
 // Helper function for printing a tuple.  T must be instantiated with
@@ -896,7 +928,7 @@ void UniversalPrint(const T& value, ::std::ostream* os) {
   UniversalPrinter<T1>::Print(value, os);
 }
 
-typedef ::std::vector<string> Strings;
+typedef ::std::vector< ::std::string> Strings;
 
 // TuplePolicy<TupleT> must provide:
 // - tuple_size
@@ -1015,6 +1047,16 @@ Strings UniversalTersePrintTupleFieldsToStrings(const Tuple& value) {
 #endif  // GTEST_HAS_TR1_TUPLE || GTEST_HAS_STD_TUPLE_
 
 }  // namespace internal
+
+#if GTEST_HAS_ABSL
+namespace internal2 {
+template <typename T>
+void TypeWithoutFormatter<T, kConvertibleToStringView>::PrintValue(
+    const T& value, ::std::ostream* os) {
+  internal::PrintTo(absl::string_view(value), os);
+}
+}  // namespace internal2
+#endif
 
 template <typename T>
 ::std::string PrintToString(const T& value) {
