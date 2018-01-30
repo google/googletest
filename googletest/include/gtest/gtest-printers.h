@@ -46,6 +46,10 @@
 //   2. operator<<(ostream&, const T&) defined in either foo or the
 //      global namespace.
 //
+// However if T is an STL-style container then it is printed element-wise
+// unless foo::PrintTo(const T&, ostream*) is defined. Note that
+// operator<<() is ignored for container types.
+//
 // If none of the above is defined, it will print the debug string of
 // the value if it is a protocol buffer, or print the raw bytes in the
 // value otherwise.
@@ -106,6 +110,10 @@
 #if GTEST_HAS_STD_TUPLE_
 # include <tuple>
 #endif
+
+#if GTEST_HAS_ABSL
+#include "absl/types/optional.h"
+#endif  // GTEST_HAS_ABSL
 
 namespace testing {
 
@@ -721,6 +729,26 @@ class UniversalPrinter {
 
   GTEST_DISABLE_MSC_WARNINGS_POP_()
 };
+
+#if GTEST_HAS_ABSL
+
+// Printer for absl::optional
+
+template <typename T>
+class UniversalPrinter<::absl::optional<T>> {
+ public:
+  static void Print(const ::absl::optional<T>& value, ::std::ostream* os) {
+    *os << '(';
+    if (!value) {
+      *os << "nullopt";
+    } else {
+      UniversalPrint(*value, os);
+    }
+    *os << ')';
+  }
+};
+
+#endif  // GTEST_HAS_ABSL
 
 // UniversalPrintArray(begin, len, os) prints an array of 'len'
 // elements, starting at address 'begin'.
