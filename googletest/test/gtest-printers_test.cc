@@ -1765,5 +1765,17 @@ TEST(UniversalTersePrintTupleFieldsToStringsTestWithStd, PrintsTersely) {
 
 #endif  // GTEST_HAS_STD_TUPLE_
 
+#if GTEST_HAS_ABSL
+
+TEST(PrintOptionalTest, Basic) {
+  absl::optional<int> value;
+  EXPECT_EQ("(nullopt)", PrintToString(value));
+  value = {7};
+  EXPECT_EQ("(7)", PrintToString(value));
+  EXPECT_EQ("(1.1)", PrintToString(absl::optional<double>{1.1}));
+  EXPECT_EQ("(\"A\")", PrintToString(absl::optional<std::string>{"A"}));
+}
+#endif  // GTEST_HAS_ABSL
+
 }  // namespace gtest_printers_test
 }  // namespace testing
