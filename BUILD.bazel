@@ -104,6 +104,7 @@ cc_library(
     deps = select ({
         ":has_absl": [
         "@com_google_absl//absl/types:optional",
+        "@com_google_absl//absl/strings"
         ],
         "//conditions:default": [],
     }
