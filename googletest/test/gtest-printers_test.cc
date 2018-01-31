@@ -837,22 +837,22 @@ TEST(PrintTypeWithGenericStreamingTest, TypeImplicitlyConvertible) {
   EXPECT_EQ("AllowsGenericStreamingAndImplicitConversionTemplate", Print(a));
 }
 
-#if GTEST_HAS_STRING_PIECE_
+#if GTEST_HAS_ABSL
 
-// Tests printing StringPiece.
+// Tests printing ::absl::string_view.
 
-TEST(PrintStringPieceTest, SimpleStringPiece) {
-  const StringPiece sp = "Hello";
+TEST(PrintStringViewTest, SimpleStringView) {
+  const ::absl::string_view sp = "Hello";
   EXPECT_EQ("\"Hello\"", Print(sp));
 }
 
-TEST(PrintStringPieceTest, UnprintableCharacters) {
+TEST(PrintStringViewTest, UnprintableCharacters) {
   const char str[] = "NUL (\0) and \r\t";
-  const StringPiece sp(str, sizeof(str) - 1);
+  const ::absl::string_view sp(str, sizeof(str) - 1);
   EXPECT_EQ("\"NUL (\\0) and \\r\\t\"", Print(sp));
 }
 
-#endif  // GTEST_HAS_STRING_PIECE_
+#endif  // GTEST_HAS_ABSL
 
 // Tests printing STL containers.
 
