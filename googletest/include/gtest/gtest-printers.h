@@ -113,6 +113,7 @@
 
 #if GTEST_HAS_ABSL
 #include "absl/types/optional.h"
+#include "absl/strings/string_view.h"
 #endif  // GTEST_HAS_ABSL
 
 namespace testing {
@@ -629,7 +630,7 @@ inline void PrintTo(const ::std::wstring& s, ::std::ostream* os) {
 #if GTEST_HAS_ABSL
 // Overload for absl::string_view.
 inline void PrintTo(absl::string_view sp, ::std::ostream* os) {
-  PrintTo(string(sp), os);
+  PrintTo(::std::string(sp), os);
 }
 #endif  // GTEST_HAS_ABSL
 
