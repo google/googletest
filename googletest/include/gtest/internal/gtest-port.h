@@ -1315,6 +1315,19 @@ inline void FlushInfoLog() { fflush(NULL); }
 
 #endif  // !defined(GTEST_LOG_)
 
+
+#ifndef GTEST_PRINTF
+#define GTEST_PRINTF printf
+#endif // GTEST_PRINTF
+
+#ifndef GTEST_VPRINTF
+#define GTEST_VPRINTF vprintf
+#endif // GTEST_VPRINTF
+
+#ifndef GTEST_FLUSH_STDOUT
+#define GTEST_FLUSH_STDOUT fflush(stdout)
+#endif // GTEST_FLUSH_STDOUT
+
 #if !defined(GTEST_CHECK_)
 // INTERNAL IMPLEMENTATION - DO NOT USE.
 //
