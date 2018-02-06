@@ -544,7 +544,7 @@ template <typename T, typename M>
 class MatcherCastImpl {
  public:
   static Matcher<T> Cast(const M& polymorphic_matcher_or_value) {
-    // M can be a polymorhic matcher, in which case we want to use
+    // M can be a polymorphic matcher, in which case we want to use
     // its conversion operator to create Matcher<T>.  Or it can be a value
     // that should be passed to the Matcher<T>'s constructor.
     //
@@ -560,21 +560,18 @@ class MatcherCastImpl {
     return CastImpl(
         polymorphic_matcher_or_value,
         BooleanConstant<
-            internal::ImplicitlyConvertible<M, Matcher<T> >::value>());
+            internal::ImplicitlyConvertible<M, Matcher<T> >::value>(),
+        BooleanConstant<
+            internal::ImplicitlyConvertible<M, T>::value>());
   }
 
  private:
-  static Matcher<T> CastImpl(const M& value, BooleanConstant<false>) {
-    // M can't be implicitly converted to Matcher<T>, so M isn't a polymorphic
-    // matcher.  It must be a value then.  Use direct initialization to create
-    // a matcher.
-    return Matcher<T>(ImplicitCast_<T>(value));
-  }
-
+  template <bool Ignore>
   static Matcher<T> CastImpl(const M& polymorphic_matcher_or_value,
-                             BooleanConstant<true>) {
+                             BooleanConstant<true> /* convertible_to_matcher */,
+                             BooleanConstant<Ignore>) {
     // M is implicitly convertible to Matcher<T>, which means that either
-    // M is a polymorhpic matcher or Matcher<T> has an implicit constructor
+    // M is a polymorphic matcher or Matcher<T> has an implicit constructor
     // from M.  In both cases using the implicit conversion will produce a
     // matcher.
     //
@@ -583,6 +580,29 @@ class MatcherCastImpl {
     // (first to create T from M and then to create Matcher<T> from T).
     return polymorphic_matcher_or_value;
   }
+
+  // M can't be implicitly converted to Matcher<T>, so M isn't a polymorphic
+  // matcher. It's a value of a type implicitly convertible to T. Use direct
+  // initialization to create a matcher.
+  static Matcher<T> CastImpl(
+      const M& value, BooleanConstant<false> /* convertible_to_matcher */,
+      BooleanConstant<true> /* convertible_to_T */) {
+    return Matcher<T>(ImplicitCast_<T>(value));
+  }
+
+  // M can't be implicitly converted to either Matcher<T> or T. Attempt to use
+  // polymorphic matcher Eq(value) in this case.
+  //
+  // Note that we first attempt to perform an implicit cast on the value and
+  // only fall back to the polymorphic Eq() matcher afterwards because the
+  // latter calls bool operator==(const Lhs& lhs, const Rhs& rhs) in the end
+  // which might be undefined even when Rhs is implicitly convertible to Lhs
+  // (e.g. std::pair<const int, int> vs. std::pair<int, int>).
+  //
+  // We don't define this method inline as we need the declaration of Eq().
+  static Matcher<T> CastImpl(
+      const M& value, BooleanConstant<false> /* convertible_to_matcher */,
+      BooleanConstant<false> /* convertible_to_T */);
 };
 
 // This more specialized version is used when MatcherCast()'s argument
