@@ -2837,7 +2837,7 @@ class FloatingPointTest : public testing::Test {
 
   // Pre-calculated numbers to be used by the tests.
 
-  const size_t max_ulps_;
+  const Bits max_ulps_;
 
   const Bits zero_bits_;  // The bits that represent 0.0.
   const Bits one_bits_;  // The bits that represent 1.0.
