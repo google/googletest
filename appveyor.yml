@@ -15,6 +15,7 @@ environment:
 
     - compiler: msvc-14-seh
       generator: "Visual Studio 14 2015"
+      enabled_on_pr: yes
 
     - compiler: msvc-14-seh
       generator: "Visual Studio 14 2015 Win64"
