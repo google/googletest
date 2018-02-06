@@ -623,6 +623,22 @@ class MatcherCastImpl<T, Matcher<U> > {
 
     // We delegate the matching logic to the source matcher.
     virtual bool MatchAndExplain(T x, MatchResultListener* listener) const {
+#if GTEST_LANG_CXX11
+      using FromType = typename std::remove_cv<typename std::remove_pointer<
+          typename std::remove_reference<T>::type>::type>::type;
+      using ToType = typename std::remove_cv<typename std::remove_pointer<
+          typename std::remove_reference<U>::type>::type>::type;
+      // Do not allow implicitly converting base*/& to derived*/&.
+      static_assert(
+          // Do not trigger if only one of them is a pointer. That implies a
+          // regular conversion and not a down_cast.
+          (std::is_pointer<typename std::remove_reference<T>::type>::value !=
+           std::is_pointer<typename std::remove_reference<U>::type>::value) ||
+              std::is_same<FromType, ToType>::value ||
+              !std::is_base_of<FromType, ToType>::value,
+          "Can't implicitly convert from <base> to <derived>");
+#endif  // GTEST_LANG_CXX11
+
       return source_matcher_.MatchAndExplain(static_cast<U>(x), listener);
     }
 
