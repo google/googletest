@@ -683,46 +683,6 @@ TEST(MatcherCastTest, NonImplicitlyConstructibleTypeWithOperatorEq) {
   EXPECT_FALSE(m3.Matches(239));
 }
 
-// The below ConvertibleFromAny struct is implicitly constructible from anything
-// and when in the same namespace can interact with other tests. In particular,
-// if it is in the same namespace as other tests and one removes
-//   NonImplicitlyConstructibleTypeWithOperatorEq::operator==(int lhs, ...);
-// then the corresponding test still compiles (and it should not!) by implicitly
-// converting NonImplicitlyConstructibleTypeWithOperatorEq to ConvertibleFromAny
-// in m3.Matcher().
-namespace convertible_from_any {
-// Implicitly convertible from any type.
-struct ConvertibleFromAny {
-  ConvertibleFromAny(int a_value) : value(a_value) {}
-  template <typename T>
-  ConvertibleFromAny(const T& /*a_value*/) : value(-1) {
-    ADD_FAILURE() << "Conversion constructor called";
-  }
-  int value;
-};
-
-bool operator==(const ConvertibleFromAny& a, const ConvertibleFromAny& b) {
-  return a.value == b.value;
-}
-
-ostream& operator<<(ostream& os, const ConvertibleFromAny& a) {
-  return os << a.value;
-}
-
-TEST(MatcherCastTest, ConversionConstructorIsUsed) {
-  Matcher<ConvertibleFromAny> m = MatcherCast<ConvertibleFromAny>(1);
-  EXPECT_TRUE(m.Matches(ConvertibleFromAny(1)));
-  EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
-}
-
-TEST(MatcherCastTest, FromConvertibleFromAny) {
-  Matcher<ConvertibleFromAny> m =
-      MatcherCast<ConvertibleFromAny>(Eq(ConvertibleFromAny(1)));
-  EXPECT_TRUE(m.Matches(ConvertibleFromAny(1)));
-  EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
-}
-}  // namespace convertible_from_any
-
 struct IntReferenceWrapper {
   IntReferenceWrapper(const int& a_value) : value(&a_value) {}
   const int* value;
@@ -826,21 +786,6 @@ TEST(SafeMatcherCastTest, FromSameType) {
   EXPECT_TRUE(m2.Matches(0));
   EXPECT_FALSE(m2.Matches(1));
 }
-
-namespace convertible_from_any {
-TEST(SafeMatcherCastTest, ConversionConstructorIsUsed) {
-  Matcher<ConvertibleFromAny> m = SafeMatcherCast<ConvertibleFromAny>(1);
-  EXPECT_TRUE(m.Matches(ConvertibleFromAny(1)));
-  EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
-}
-
-TEST(SafeMatcherCastTest, FromConvertibleFromAny) {
-  Matcher<ConvertibleFromAny> m =
-      SafeMatcherCast<ConvertibleFromAny>(Eq(ConvertibleFromAny(1)));
-  EXPECT_TRUE(m.Matches(ConvertibleFromAny(1)));
-  EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
-}
-}  // namespace convertible_from_any
 
 TEST(SafeMatcherCastTest, ValueIsNotCopied) {
   int n = 42;
