@@ -45,6 +45,7 @@
 #include <limits>
 #include <list>
 #include <map>
+#include <memory>
 #include <set>
 #include <sstream>
 #include <string>
@@ -58,13 +59,11 @@
 # include <forward_list>  // NOLINT
 #endif
 
-// Disable MSVC2015 warning for std::pair: "decorated name length exceeded, name was truncated".
-#if defined(_MSC_VER) && (_MSC_VER == 1900)
-# pragma warning(disable:4503)
+#if GTEST_LANG_CXX11
+# include <type_traits>
 #endif
 
 namespace testing {
-
 namespace gmock_matchers_test {
 
 using std::greater;
@@ -153,8 +152,6 @@ using testing::internal::RE;
 using testing::internal::scoped_ptr;
 using testing::internal::StreamMatchResultListener;
 using testing::internal::Strings;
-using testing::internal::linked_ptr;
-using testing::internal::scoped_ptr;
 using testing::internal::string;
 using testing::make_tuple;
 using testing::tuple;
@@ -201,17 +198,13 @@ std::string OfType(const std::string& type_name) {
 // Returns the description of the given matcher.
 template <typename T>
 std::string Describe(const Matcher<T>& m) {
-  stringstream ss;
-  m.DescribeTo(&ss);
-  return ss.str();
+  return DescribeMatcher<T>(m);
 }
 
 // Returns the description of the negation of the given matcher.
 template <typename T>
 std::string DescribeNegation(const Matcher<T>& m) {
-  stringstream ss;
-  m.DescribeNegationTo(&ss);
-  return ss.str();
+  return DescribeMatcher<T>(m, true);
 }
 
 // Returns the reason why x matches, or doesn't match, m.
@@ -333,6 +326,22 @@ TEST(MatcherTest, CanBeImplicitlyConstructedFromNULL) {
   EXPECT_FALSE(m1.Matches(&n));
 }
 
+// Tests that matchers can be constructed from a variable that is not properly
+// defined. This should be illegal, but many users rely on this accidentally.
+struct Undefined {
+  virtual ~Undefined() = 0;
+  static const int kInt = 1;
+};
+
+TEST(MatcherTest, CanBeConstructedFromUndefinedVariable) {
+  Matcher<int> m1 = Undefined::kInt;
+  EXPECT_TRUE(m1.Matches(1));
+  EXPECT_FALSE(m1.Matches(2));
+}
+
+// Test that a matcher parameterized with an abstract class compiles.
+TEST(MatcherTest, CanAcceptAbstractClass) { Matcher<const Undefined&> m = _; }
+
 // Tests that matchers are copyable.
 TEST(MatcherTest, IsCopyable) {
   // Tests the copy constructor.
@@ -366,66 +375,80 @@ TEST(MatcherTest, MatchAndExplain) {
 }
 
 // Tests that a C-string literal can be implicitly converted to a
-// Matcher<string> or Matcher<const string&>.
+// Matcher<std::string> or Matcher<const std::string&>.
 TEST(StringMatcherTest, CanBeImplicitlyConstructedFromCStringLiteral) {
-  Matcher<string> m1 = "hi";
+  Matcher<std::string> m1 = "hi";
   EXPECT_TRUE(m1.Matches("hi"));
   EXPECT_FALSE(m1.Matches("hello"));
 
-  Matcher<const string&> m2 = "hi";
+  Matcher<const std::string&> m2 = "hi";
   EXPECT_TRUE(m2.Matches("hi"));
   EXPECT_FALSE(m2.Matches("hello"));
 }
 
 // Tests that a string object can be implicitly converted to a
-// Matcher<string> or Matcher<const string&>.
+// Matcher<std::string> or Matcher<const std::string&>.
 TEST(StringMatcherTest, CanBeImplicitlyConstructedFromString) {
-  Matcher<string> m1 = string("hi");
+  Matcher<std::string> m1 = std::string("hi");
   EXPECT_TRUE(m1.Matches("hi"));
   EXPECT_FALSE(m1.Matches("hello"));
 
-  Matcher<const string&> m2 = string("hi");
+  Matcher<const std::string&> m2 = std::string("hi");
   EXPECT_TRUE(m2.Matches("hi"));
   EXPECT_FALSE(m2.Matches("hello"));
 }
 
-#if GTEST_HAS_STRING_PIECE_
+#if GTEST_HAS_GLOBAL_STRING
+// Tests that a ::string object can be implicitly converted to a
+// Matcher<std::string> or Matcher<const std::string&>.
+TEST(StringMatcherTest, CanBeImplicitlyConstructedFromGlobalString) {
+  Matcher<std::string> m1 = ::string("hi");
+  EXPECT_TRUE(m1.Matches("hi"));
+  EXPECT_FALSE(m1.Matches("hello"));
+
+  Matcher<const std::string&> m2 = ::string("hi");
+  EXPECT_TRUE(m2.Matches("hi"));
+  EXPECT_FALSE(m2.Matches("hello"));
+}
+#endif  // GTEST_HAS_GLOBAL_STRING
+
+#if GTEST_HAS_GLOBAL_STRING
 // Tests that a C-string literal can be implicitly converted to a
-// Matcher<StringPiece> or Matcher<const StringPiece&>.
-TEST(StringPieceMatcherTest, CanBeImplicitlyConstructedFromCStringLiteral) {
-  Matcher<StringPiece> m1 = "cats";
-  EXPECT_TRUE(m1.Matches("cats"));
-  EXPECT_FALSE(m1.Matches("dogs"));
+// Matcher<::string> or Matcher<const ::string&>.
+TEST(GlobalStringMatcherTest, CanBeImplicitlyConstructedFromCStringLiteral) {
+  Matcher< ::string> m1 = "hi";
+  EXPECT_TRUE(m1.Matches("hi"));
+  EXPECT_FALSE(m1.Matches("hello"));
 
-  Matcher<const StringPiece&> m2 = "cats";
-  EXPECT_TRUE(m2.Matches("cats"));
-  EXPECT_FALSE(m2.Matches("dogs"));
+  Matcher<const ::string&> m2 = "hi";
+  EXPECT_TRUE(m2.Matches("hi"));
+  EXPECT_FALSE(m2.Matches("hello"));
 }
 
-// Tests that a string object can be implicitly converted to a
-// Matcher<StringPiece> or Matcher<const StringPiece&>.
-TEST(StringPieceMatcherTest, CanBeImplicitlyConstructedFromString) {
-  Matcher<StringPiece> m1 = string("cats");
-  EXPECT_TRUE(m1.Matches("cats"));
-  EXPECT_FALSE(m1.Matches("dogs"));
+// Tests that a std::string object can be implicitly converted to a
+// Matcher<::string> or Matcher<const ::string&>.
+TEST(GlobalStringMatcherTest, CanBeImplicitlyConstructedFromString) {
+  Matcher< ::string> m1 = std::string("hi");
+  EXPECT_TRUE(m1.Matches("hi"));
+  EXPECT_FALSE(m1.Matches("hello"));
 
-  Matcher<const StringPiece&> m2 = string("cats");
-  EXPECT_TRUE(m2.Matches("cats"));
-  EXPECT_FALSE(m2.Matches("dogs"));
+  Matcher<const ::string&> m2 = std::string("hi");
+  EXPECT_TRUE(m2.Matches("hi"));
+  EXPECT_FALSE(m2.Matches("hello"));
 }
 
-// Tests that a StringPiece object can be implicitly converted to a
-// Matcher<StringPiece> or Matcher<const StringPiece&>.
-TEST(StringPieceMatcherTest, CanBeImplicitlyConstructedFromStringPiece) {
-  Matcher<StringPiece> m1 = StringPiece("cats");
-  EXPECT_TRUE(m1.Matches("cats"));
-  EXPECT_FALSE(m1.Matches("dogs"));
+// Tests that a ::string object can be implicitly converted to a
+// Matcher<::string> or Matcher<const ::string&>.
+TEST(GlobalStringMatcherTest, CanBeImplicitlyConstructedFromGlobalString) {
+  Matcher< ::string> m1 = ::string("hi");
+  EXPECT_TRUE(m1.Matches("hi"));
+  EXPECT_FALSE(m1.Matches("hello"));
 
-  Matcher<const StringPiece&> m2 = StringPiece("cats");
-  EXPECT_TRUE(m2.Matches("cats"));
-  EXPECT_FALSE(m2.Matches("dogs"));
+  Matcher<const ::string&> m2 = ::string("hi");
+  EXPECT_TRUE(m2.Matches("hi"));
+  EXPECT_FALSE(m2.Matches("hello"));
 }
-#endif  // GTEST_HAS_STRING_PIECE_
+#endif  // GTEST_HAS_GLOBAL_STRING
 
 // Tests that MakeMatcher() constructs a Matcher<T> from a
 // MatcherInterface* without requiring the user to explicitly
@@ -610,35 +633,54 @@ TEST(MatcherCastTest, FromSameType) {
   EXPECT_FALSE(m2.Matches(1));
 }
 
-// Implicitly convertible from any type.
-struct ConvertibleFromAny {
-  ConvertibleFromAny(int a_value) : value(a_value) {}
-  template <typename T>
-  explicit ConvertibleFromAny(const T& /*a_value*/) : value(-1) {
-    ADD_FAILURE() << "Conversion constructor called";
+// Tests that MatcherCast<T>(m) works when m is a value of the same type as the
+// value type of the Matcher.
+TEST(MatcherCastTest, FromAValue) {
+  Matcher<int> m = MatcherCast<int>(42);
+  EXPECT_TRUE(m.Matches(42));
+  EXPECT_FALSE(m.Matches(239));
+}
+
+// Tests that MatcherCast<T>(m) works when m is a value of the type implicitly
+// convertible to the value type of the Matcher.
+TEST(MatcherCastTest, FromAnImplicitlyConvertibleValue) {
+  const int kExpected = 'c';
+  Matcher<int> m = MatcherCast<int>('c');
+  EXPECT_TRUE(m.Matches(kExpected));
+  EXPECT_FALSE(m.Matches(kExpected + 1));
+}
+
+struct NonImplicitlyConstructibleTypeWithOperatorEq {
+  friend bool operator==(
+      const NonImplicitlyConstructibleTypeWithOperatorEq& /* ignored */,
+      int rhs) {
+    return 42 == rhs;
   }
-  int value;
+  friend bool operator==(
+      int lhs,
+      const NonImplicitlyConstructibleTypeWithOperatorEq& /* ignored */) {
+    return lhs == 42;
+  }
 };
 
-bool operator==(const ConvertibleFromAny& a, const ConvertibleFromAny& b) {
-  return a.value == b.value;
-}
+// Tests that MatcherCast<T>(m) works when m is a neither a matcher nor
+// implicitly convertible to the value type of the Matcher, but the value type
+// of the matcher has operator==() overload accepting m.
+TEST(MatcherCastTest, NonImplicitlyConstructibleTypeWithOperatorEq) {
+  Matcher<NonImplicitlyConstructibleTypeWithOperatorEq> m1 =
+      MatcherCast<NonImplicitlyConstructibleTypeWithOperatorEq>(42);
+  EXPECT_TRUE(m1.Matches(NonImplicitlyConstructibleTypeWithOperatorEq()));
 
-ostream& operator<<(ostream& os, const ConvertibleFromAny& a) {
-  return os << a.value;
-}
+  Matcher<NonImplicitlyConstructibleTypeWithOperatorEq> m2 =
+      MatcherCast<NonImplicitlyConstructibleTypeWithOperatorEq>(239);
+  EXPECT_FALSE(m2.Matches(NonImplicitlyConstructibleTypeWithOperatorEq()));
 
-TEST(MatcherCastTest, ConversionConstructorIsUsed) {
-  Matcher<ConvertibleFromAny> m = MatcherCast<ConvertibleFromAny>(1);
-  EXPECT_TRUE(m.Matches(ConvertibleFromAny(1)));
-  EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
-}
-
-TEST(MatcherCastTest, FromConvertibleFromAny) {
-  Matcher<ConvertibleFromAny> m =
-      MatcherCast<ConvertibleFromAny>(Eq(ConvertibleFromAny(1)));
-  EXPECT_TRUE(m.Matches(ConvertibleFromAny(1)));
-  EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
+  // When updating the following lines please also change the comment to
+  // namespace convertible_from_any.
+  Matcher<int> m3 =
+      MatcherCast<int>(NonImplicitlyConstructibleTypeWithOperatorEq());
+  EXPECT_TRUE(m3.Matches(42));
+  EXPECT_FALSE(m3.Matches(239));
 }
 
 struct IntReferenceWrapper {
@@ -743,19 +785,6 @@ TEST(SafeMatcherCastTest, FromSameType) {
   Matcher<int> m2 = SafeMatcherCast<int>(m1);
   EXPECT_TRUE(m2.Matches(0));
   EXPECT_FALSE(m2.Matches(1));
-}
-
-TEST(SafeMatcherCastTest, ConversionConstructorIsUsed) {
-  Matcher<ConvertibleFromAny> m = SafeMatcherCast<ConvertibleFromAny>(1);
-  EXPECT_TRUE(m.Matches(ConvertibleFromAny(1)));
-  EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
-}
-
-TEST(SafeMatcherCastTest, FromConvertibleFromAny) {
-  Matcher<ConvertibleFromAny> m =
-      SafeMatcherCast<ConvertibleFromAny>(Eq(ConvertibleFromAny(1)));
-  EXPECT_TRUE(m.Matches(ConvertibleFromAny(1)));
-  EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
 }
 
 TEST(SafeMatcherCastTest, ValueIsNotCopied) {
@@ -868,14 +897,10 @@ class Unprintable {
  public:
   Unprintable() : c_('a') {}
 
+  bool operator==(const Unprintable& /* rhs */) const { return true; }
  private:
   char c_;
 };
-
-inline bool operator==(const Unprintable& /* lhs */, 
-                       const Unprintable& /* rhs */) { 
-    return true; 
-}
 
 TEST(EqTest, CanDescribeSelf) {
   Matcher<Unprintable> m = Eq(Unprintable());
@@ -1047,14 +1072,14 @@ TEST(IsNullTest, ReferenceToConstLinkedPtr) {
   EXPECT_FALSE(m.Matches(non_null_p));
 }
 
-#if GTEST_HAS_STD_FUNCTION_
+#if GTEST_LANG_CXX11
 TEST(IsNullTest, StdFunction) {
   const Matcher<std::function<void()>> m = IsNull();
 
   EXPECT_TRUE(m.Matches(std::function<void()>()));
   EXPECT_FALSE(m.Matches([]{}));
 }
-#endif  // GTEST_HAS_STD_FUNCTION_
+#endif  // GTEST_LANG_CXX11
 
 // Tests that IsNull() describes itself properly.
 TEST(IsNullTest, CanDescribeSelf) {
@@ -1095,14 +1120,14 @@ TEST(NotNullTest, ReferenceToConstLinkedPtr) {
   EXPECT_TRUE(m.Matches(non_null_p));
 }
 
-#if GTEST_HAS_STD_FUNCTION_
+#if GTEST_LANG_CXX11
 TEST(NotNullTest, StdFunction) {
   const Matcher<std::function<void()>> m = NotNull();
 
   EXPECT_TRUE(m.Matches([]{}));
   EXPECT_FALSE(m.Matches(std::function<void()>()));
 }
-#endif  // GTEST_HAS_STD_FUNCTION_
+#endif  // GTEST_LANG_CXX11
 
 // Tests that NotNull() describes itself properly.
 TEST(NotNullTest, CanDescribeSelf) {
@@ -1211,13 +1236,13 @@ TEST(StrNeTest, CanDescribeSelf) {
 }
 
 TEST(StrCaseEqTest, MatchesEqualStringIgnoringCase) {
-  Matcher<const char*> m = StrCaseEq(string("Hello"));
+  Matcher<const char*> m = StrCaseEq(std::string("Hello"));
   EXPECT_TRUE(m.Matches("Hello"));
   EXPECT_TRUE(m.Matches("hello"));
   EXPECT_FALSE(m.Matches("Hi"));
   EXPECT_FALSE(m.Matches(NULL));
 
-  Matcher<const string&> m2 = StrCaseEq("Hello");
+  Matcher<const std::string&> m2 = StrCaseEq("Hello");
   EXPECT_TRUE(m2.Matches("hello"));
   EXPECT_FALSE(m2.Matches("Hi"));
 }
@@ -1320,6 +1345,35 @@ TEST(KeyTest, MatchesCorrectly) {
   EXPECT_THAT(p, Key(Ge(20)));
   EXPECT_THAT(p, Not(Key(Lt(25))));
 }
+
+#if GTEST_LANG_CXX11
+template <size_t I>
+struct Tag {};
+
+struct PairWithGet {
+  int member_1;
+  string member_2;
+  using first_type = int;
+  using second_type = string;
+
+  const int& GetImpl(Tag<0>) const { return member_1; }
+  const string& GetImpl(Tag<1>) const { return member_2; }
+};
+template <size_t I>
+auto get(const PairWithGet& value) -> decltype(value.GetImpl(Tag<I>())) {
+  return value.GetImpl(Tag<I>());
+}
+TEST(PairTest, MatchesPairWithGetCorrectly) {
+  PairWithGet p{25, "foo"};
+  EXPECT_THAT(p, Key(25));
+  EXPECT_THAT(p, Not(Key(42)));
+  EXPECT_THAT(p, Key(Ge(20)));
+  EXPECT_THAT(p, Not(Key(Lt(25))));
+
+  std::vector<PairWithGet> v = {{11, "Foo"}, {29, "gMockIsBestMock"}};
+  EXPECT_THAT(v, Contains(Key(29)));
+}
+#endif  // GTEST_LANG_CXX11
 
 TEST(KeyTest, SafelyCastsInnerMatcher) {
   Matcher<int> is_positive = Gt(0);
@@ -1487,12 +1541,14 @@ TEST(EndsWithTest, MatchesStringWithGivenSuffix) {
   EXPECT_TRUE(m1.Matches(""));
   EXPECT_FALSE(m1.Matches(NULL));
 
-  const Matcher<const string&> m2 = EndsWith(string("Hi"));
+  const Matcher<const std::string&> m2 = EndsWith(std::string("Hi"));
   EXPECT_TRUE(m2.Matches("Hi"));
   EXPECT_TRUE(m2.Matches("Wow Hi Hi"));
   EXPECT_TRUE(m2.Matches("Super Hi"));
   EXPECT_FALSE(m2.Matches("i"));
   EXPECT_FALSE(m2.Matches("Hi "));
+
+
 }
 
 TEST(EndsWithTest, CanDescribeSelf) {
@@ -2713,18 +2769,22 @@ class FloatingPointTest : public testing::Test {
         zero_bits_(Floating(0).bits()),
         one_bits_(Floating(1).bits()),
         infinity_bits_(Floating(Floating::Infinity()).bits()),
-        close_to_positive_zero_(AsBits(zero_bits_ + max_ulps_/2)),
-        close_to_negative_zero_(AsBits(zero_bits_ + max_ulps_ - max_ulps_/2)),
-        further_from_negative_zero_(-AsBits(
+        close_to_positive_zero_(
+            Floating::ReinterpretBits(zero_bits_ + max_ulps_/2)),
+        close_to_negative_zero_(
+            -Floating::ReinterpretBits(zero_bits_ + max_ulps_ - max_ulps_/2)),
+        further_from_negative_zero_(-Floating::ReinterpretBits(
             zero_bits_ + max_ulps_ + 1 - max_ulps_/2)),
-        close_to_one_(AsBits(one_bits_ + max_ulps_)),
-        further_from_one_(AsBits(one_bits_ + max_ulps_ + 1)),
+        close_to_one_(Floating::ReinterpretBits(one_bits_ + max_ulps_)),
+        further_from_one_(Floating::ReinterpretBits(one_bits_ + max_ulps_ + 1)),
         infinity_(Floating::Infinity()),
-        close_to_infinity_(AsBits(infinity_bits_ - max_ulps_)),
-        further_from_infinity_(AsBits(infinity_bits_ - max_ulps_ - 1)),
+        close_to_infinity_(
+            Floating::ReinterpretBits(infinity_bits_ - max_ulps_)),
+        further_from_infinity_(
+            Floating::ReinterpretBits(infinity_bits_ - max_ulps_ - 1)),
         max_(Floating::Max()),
-        nan1_(AsBits(Floating::kExponentBitMask | 1)),
-        nan2_(AsBits(Floating::kExponentBitMask | 200)) {
+        nan1_(Floating::ReinterpretBits(Floating::kExponentBitMask | 1)),
+        nan2_(Floating::ReinterpretBits(Floating::kExponentBitMask | 200)) {
   }
 
   void TestSize() {
@@ -2779,7 +2839,7 @@ class FloatingPointTest : public testing::Test {
 
   // Pre-calculated numbers to be used by the tests.
 
-  const size_t max_ulps_;
+  const Bits max_ulps_;
 
   const Bits zero_bits_;  // The bits that represent 0.0.
   const Bits one_bits_;  // The bits that represent 1.0.
@@ -2805,12 +2865,6 @@ class FloatingPointTest : public testing::Test {
   // Some NaNs.
   const RawType nan1_;
   const RawType nan2_;
-
- private:
-  template <typename T>
-  static RawType AsBits(T value) {
-    return Floating::ReinterpretBits(static_cast<Bits>(value));
-  }
 };
 
 // Tests floating-point matchers with fixed epsilons.
