@@ -633,6 +633,63 @@ TEST(MatcherCastTest, FromSameType) {
   EXPECT_FALSE(m2.Matches(1));
 }
 
+// Tests that MatcherCast<T>(m) works when m is a value of the same type as the
+// value type of the Matcher.
+TEST(MatcherCastTest, FromAValue) {
+  Matcher<int> m = MatcherCast<int>(42);
+  EXPECT_TRUE(m.Matches(42));
+  EXPECT_FALSE(m.Matches(239));
+}
+
+// Tests that MatcherCast<T>(m) works when m is a value of the type implicitly
+// convertible to the value type of the Matcher.
+TEST(MatcherCastTest, FromAnImplicitlyConvertibleValue) {
+  const int kExpected = 'c';
+  Matcher<int> m = MatcherCast<int>('c');
+  EXPECT_TRUE(m.Matches(kExpected));
+  EXPECT_FALSE(m.Matches(kExpected + 1));
+}
+
+struct NonImplicitlyConstructibleTypeWithOperatorEq {
+  friend bool operator==(
+      const NonImplicitlyConstructibleTypeWithOperatorEq& /* ignored */,
+      int rhs) {
+    return 42 == rhs;
+  }
+  friend bool operator==(
+      int lhs,
+      const NonImplicitlyConstructibleTypeWithOperatorEq& /* ignored */) {
+    return lhs == 42;
+  }
+};
+
+// Tests that MatcherCast<T>(m) works when m is a neither a matcher nor
+// implicitly convertible to the value type of the Matcher, but the value type
+// of the matcher has operator==() overload accepting m.
+TEST(MatcherCastTest, NonImplicitlyConstructibleTypeWithOperatorEq) {
+  Matcher<NonImplicitlyConstructibleTypeWithOperatorEq> m1 =
+      MatcherCast<NonImplicitlyConstructibleTypeWithOperatorEq>(42);
+  EXPECT_TRUE(m1.Matches(NonImplicitlyConstructibleTypeWithOperatorEq()));
+
+  Matcher<NonImplicitlyConstructibleTypeWithOperatorEq> m2 =
+      MatcherCast<NonImplicitlyConstructibleTypeWithOperatorEq>(239);
+  EXPECT_FALSE(m2.Matches(NonImplicitlyConstructibleTypeWithOperatorEq()));
+
+  // When updating the following lines please also change the comment to
+  // namespace convertible_from_any.
+  Matcher<int> m3 =
+      MatcherCast<int>(NonImplicitlyConstructibleTypeWithOperatorEq());
+  EXPECT_TRUE(m3.Matches(42));
+  EXPECT_FALSE(m3.Matches(239));
+}
+
+// The below ConvertibleFromAny struct is implicitly constructible from anything
+// and when in the same namespace can interact with other tests. In particular,
+// if it is in the same namespace as other tests and one removes
+//   NonImplicitlyConstructibleTypeWithOperatorEq::operator==(int lhs, ...);
+// then the corresponding test still compiles (and it should not!) by implicitly
+// converting NonImplicitlyConstructibleTypeWithOperatorEq to ConvertibleFromAny
+// in m3.Matcher().
 namespace convertible_from_any {
 // Implicitly convertible from any type.
 struct ConvertibleFromAny {
@@ -2071,6 +2128,70 @@ TEST(Ne2Test, MatchesUnequalArguments) {
 TEST(Ne2Test, CanDescribeSelf) {
   Matcher<const Tuple2&> m = Ne();
   EXPECT_EQ("are an unequal pair", Describe(m));
+}
+
+// Tests that FloatEq() matches a 2-tuple where
+// FloatEq(first field) matches the second field.
+TEST(FloatEq2Test, MatchesEqualArguments) {
+  typedef ::testing::tuple<float, float> Tpl;
+  Matcher<const Tpl&> m = FloatEq();
+  EXPECT_TRUE(m.Matches(Tpl(1.0f, 1.0f)));
+  EXPECT_TRUE(m.Matches(Tpl(0.3f, 0.1f + 0.1f + 0.1f)));
+  EXPECT_FALSE(m.Matches(Tpl(1.1f, 1.0f)));
+}
+
+// Tests that FloatEq() describes itself properly.
+TEST(FloatEq2Test, CanDescribeSelf) {
+  Matcher<const ::testing::tuple<float, float>&> m = FloatEq();
+  EXPECT_EQ("are an almost-equal pair", Describe(m));
+}
+
+// Tests that DoubleEq() matches a 2-tuple where
+// DoubleEq(first field) matches the second field.
+TEST(DoubleEq2Test, MatchesEqualArguments) {
+  typedef ::testing::tuple<double, double> Tpl;
+  Matcher<const Tpl&> m = DoubleEq();
+  EXPECT_TRUE(m.Matches(Tpl(1.0, 1.0)));
+  EXPECT_TRUE(m.Matches(Tpl(0.3, 0.1 + 0.1 + 0.1)));
+  EXPECT_FALSE(m.Matches(Tpl(1.1, 1.0)));
+}
+
+// Tests that DoubleEq() describes itself properly.
+TEST(DoubleEq2Test, CanDescribeSelf) {
+  Matcher<const ::testing::tuple<double, double>&> m = DoubleEq();
+  EXPECT_EQ("are an almost-equal pair", Describe(m));
+}
+
+// Tests that FloatEq() matches a 2-tuple where
+// FloatNear(first field, max_abs_error) matches the second field.
+TEST(FloatNear2Test, MatchesEqualArguments) {
+  typedef ::testing::tuple<float, float> Tpl;
+  Matcher<const Tpl&> m = FloatNear(0.5f);
+  EXPECT_TRUE(m.Matches(Tpl(1.0f, 1.0f)));
+  EXPECT_TRUE(m.Matches(Tpl(1.3f, 1.0f)));
+  EXPECT_FALSE(m.Matches(Tpl(1.8f, 1.0f)));
+}
+
+// Tests that FloatNear() describes itself properly.
+TEST(FloatNear2Test, CanDescribeSelf) {
+  Matcher<const ::testing::tuple<float, float>&> m = FloatNear(0.5f);
+  EXPECT_EQ("are an almost-equal pair", Describe(m));
+}
+
+// Tests that FloatEq() matches a 2-tuple where
+// DoubleNear(first field, max_abs_error) matches the second field.
+TEST(DoubleNear2Test, MatchesEqualArguments) {
+  typedef ::testing::tuple<double, double> Tpl;
+  Matcher<const Tpl&> m = DoubleNear(0.5);
+  EXPECT_TRUE(m.Matches(Tpl(1.0, 1.0)));
+  EXPECT_TRUE(m.Matches(Tpl(1.3, 1.0)));
+  EXPECT_FALSE(m.Matches(Tpl(1.8, 1.0)));
+}
+
+// Tests that DoubleNear() describes itself properly.
+TEST(DoubleNear2Test, CanDescribeSelf) {
+  Matcher<const ::testing::tuple<double, double>&> m = DoubleNear(0.5);
+  EXPECT_EQ("are an almost-equal pair", Describe(m));
 }
 
 // Tests that Not(m) matches any value that doesn't match m.
