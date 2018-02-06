@@ -1616,7 +1616,7 @@ class BothOfMatcherImpl : public MatcherInterface<T> {
 // MatcherList provides mechanisms for storing a variable number of matchers in
 // a list structure (ListType) and creating a combining matcher from such a
 // list.
-// The template is defined recursively using the following template paramters:
+// The template is defined recursively using the following template parameters:
 //   * kSize is the length of the MatcherList.
 //   * Head is the type of the first matcher of the list.
 //   * Tail denotes the types of the remaining matchers of the list.
@@ -4004,6 +4004,14 @@ inline internal::EqMatcher<T> Eq(T x) { return internal::EqMatcher<T>(x); }
 // matcher matches any value that's equal to 'value'.
 template <typename T>
 Matcher<T>::Matcher(T value) { *this = Eq(value); }
+
+template <typename T, typename M>
+Matcher<T> internal::MatcherCastImpl<T, M>::CastImpl(
+    const M& value,
+    internal::BooleanConstant<false> /* convertible_to_matcher */,
+    internal::BooleanConstant<false> /* convertible_to_T */) {
+  return Eq(value);
+}
 
 // Creates a monomorphic matcher that matches anything with type Lhs
 // and equal to rhs.  A user may need to use this instead of Eq(...)
