@@ -375,6 +375,9 @@ class Action {
   // Constructs an Action from its implementation.
   explicit Action(ActionInterface<F>* impl) : impl_(impl) {}
 
+  // Copy constructor.
+  Action(const Action& action) : impl_(action.impl_) {}
+
   // This constructor allows us to turn an Action<Func> object into an
   // Action<F>, as long as F's arguments can be implicitly converted
   // to Func's and Func's return type can be implicitly converted to

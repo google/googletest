@@ -51,8 +51,8 @@ namespace internal {
 // words.  Each maximum substring of the form [A-Za-z][a-z]*|\d+ is
 // treated as one word.  For example, both "FooBar123" and
 // "foo_bar_123" are converted to "foo bar 123".
-GTEST_API_ std::string ConvertIdentifierNameToWords(const char* id_name) {
-  std::string result;
+GTEST_API_ string ConvertIdentifierNameToWords(const char* id_name) {
+  string result;
   char prev_char = '\0';
   for (const char* p = id_name; *p != '\0'; prev_char = *(p++)) {
     // We don't care about the current locale as the input is
