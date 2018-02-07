@@ -230,9 +230,10 @@ TEST(ScopedPtrTest, DefinesElementType) {
 // TODO(vladl@google.com): Implement THE REST of scoped_ptr tests.
 
 TEST(GtestCheckSyntaxTest, BehavesLikeASingleStatement) {
-  if (AlwaysFalse())
+  if (AlwaysFalse()) {
     GTEST_CHECK_(false) << "This should never be executed; "
                            "It's a compilation test only.";
+  }
 
   if (AlwaysTrue())
     GTEST_CHECK_(true);

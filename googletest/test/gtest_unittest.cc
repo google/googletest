@@ -4063,17 +4063,19 @@ TEST(HRESULTAssertionTest, Streaming) {
 
 // Tests that the assertion macros behave like single statements.
 TEST(AssertionSyntaxTest, BasicAssertionsBehavesLikeSingleStatement) {
-  if (AlwaysFalse())
+  if (AlwaysFalse()) {
     ASSERT_TRUE(false) << "This should never be executed; "
                           "It's a compilation test only.";
+  }
 
   if (AlwaysTrue())
     EXPECT_FALSE(false);
   else
     ;  // NOLINT
 
-  if (AlwaysFalse())
+  if (AlwaysFalse()) {
     ASSERT_LT(1, 3);
+  }
 
   if (AlwaysFalse())
     ;  // NOLINT
@@ -4097,24 +4099,27 @@ TEST(ExpectThrowTest, DoesNotGenerateUnreachableCodeWarning) {
 }
 
 TEST(AssertionSyntaxTest, ExceptionAssertionsBehavesLikeSingleStatement) {
-  if (AlwaysFalse())
+  if (AlwaysFalse()) {
     EXPECT_THROW(ThrowNothing(), bool);
+  }
 
   if (AlwaysTrue())
     EXPECT_THROW(ThrowAnInteger(), int);
   else
     ;  // NOLINT
 
-  if (AlwaysFalse())
+  if (AlwaysFalse()) {
     EXPECT_NO_THROW(ThrowAnInteger());
+  }
 
   if (AlwaysTrue())
     EXPECT_NO_THROW(ThrowNothing());
   else
     ;  // NOLINT
 
-  if (AlwaysFalse())
+  if (AlwaysFalse()) {
     EXPECT_ANY_THROW(ThrowNothing());
+  }
 
   if (AlwaysTrue())
     EXPECT_ANY_THROW(ThrowAnInteger());
