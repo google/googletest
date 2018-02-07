@@ -169,5 +169,15 @@ GTEST_API_ void Log(LogSeverity severity, const std::string& message,
   std::cout << ::std::flush;
 }
 
+void IllegalDoDefault(const char* file, int line) {
+  internal::Assert(
+      false, file, line,
+      "You are using DoDefault() inside a composite action like "
+      "DoAll() or WithArgs().  This is not supported for technical "
+      "reasons.  Please instead spell out the default action, or "
+      "assign the default action to an Action variable and use "
+      "the variable in various places.");
+}
+
 }  // namespace internal
 }  // namespace testing
