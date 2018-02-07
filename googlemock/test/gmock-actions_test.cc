@@ -65,6 +65,7 @@ using testing::ReturnRef;
 using testing::ReturnRefOfCopy;
 using testing::SetArgPointee;
 using testing::SetArgumentPointee;
+using testing::Unused;
 using testing::_;
 using testing::get;
 using testing::internal::BuiltInDefaultValue;
@@ -214,7 +215,7 @@ class MyNonDefaultConstructible {
   int value_;
 };
 
-#if GTEST_HAS_STD_TYPE_TRAITS_
+#if GTEST_LANG_CXX11
 
 TEST(BuiltInDefaultValueTest, ExistsForDefaultConstructibleType) {
   EXPECT_TRUE(BuiltInDefaultValue<MyDefaultConstructible>::Exists());
@@ -224,7 +225,7 @@ TEST(BuiltInDefaultValueTest, IsDefaultConstructedForDefaultConstructibleType) {
   EXPECT_EQ(42, BuiltInDefaultValue<MyDefaultConstructible>::Get().value());
 }
 
-#endif  // GTEST_HAS_STD_TYPE_TRAITS_
+#endif  // GTEST_LANG_CXX11
 
 TEST(BuiltInDefaultValueTest, DoesNotExistForNonDefaultConstructibleType) {
   EXPECT_FALSE(BuiltInDefaultValue<MyNonDefaultConstructible>::Exists());
@@ -1407,5 +1408,102 @@ TEST(MockMethodTest, CanReturnMoveOnlyValue_Invoke) {
 }
 
 #endif  // GTEST_HAS_STD_UNIQUE_PTR_
+
+#if GTEST_LANG_CXX11
+// Tests for std::function based action.
+
+int Add(int val, int& ref, int* ptr) {  // NOLINT
+  int result = val + ref + *ptr;
+  ref = 42;
+  *ptr = 43;
+  return result;
+}
+
+int Deref(std::unique_ptr<int> ptr) { return *ptr; }
+
+struct Double {
+  template <typename T>
+  T operator()(T t) { return 2 * t; }
+};
+
+std::unique_ptr<int> UniqueInt(int i) {
+  return std::unique_ptr<int>(new int(i));
+}
+
+TEST(FunctorActionTest, ActionFromFunction) {
+  Action<int(int, int&, int*)> a = &Add;
+  int x = 1, y = 2, z = 3;
+  EXPECT_EQ(6, a.Perform(std::forward_as_tuple(x, y, &z)));
+  EXPECT_EQ(42, y);
+  EXPECT_EQ(43, z);
+
+  Action<int(std::unique_ptr<int>)> a1 = &Deref;
+  EXPECT_EQ(7, a1.Perform(std::make_tuple(UniqueInt(7))));
+}
+
+TEST(FunctorActionTest, ActionFromLambda) {
+  Action<int(bool, int)> a1 = [](bool b, int i) { return b ? i : 0; };
+  EXPECT_EQ(5, a1.Perform(make_tuple(true, 5)));
+  EXPECT_EQ(0, a1.Perform(make_tuple(false, 5)));
+
+  std::unique_ptr<int> saved;
+  Action<void(std::unique_ptr<int>)> a2 = [&saved](std::unique_ptr<int> p) {
+    saved = std::move(p);
+  };
+  a2.Perform(make_tuple(UniqueInt(5)));
+  EXPECT_EQ(5, *saved);
+}
+
+TEST(FunctorActionTest, PolymorphicFunctor) {
+  Action<int(int)> ai = Double();
+  EXPECT_EQ(2, ai.Perform(make_tuple(1)));
+  Action<double(double)> ad = Double();  // Double? Double double!
+  EXPECT_EQ(3.0, ad.Perform(make_tuple(1.5)));
+}
+
+TEST(FunctorActionTest, TypeConversion) {
+  // Numeric promotions are allowed.
+  const Action<bool(int)> a1 = [](int i) { return i > 1; };
+  const Action<int(bool)> a2 = Action<int(bool)>(a1);
+  EXPECT_EQ(1, a1.Perform(make_tuple(42)));
+  EXPECT_EQ(0, a2.Perform(make_tuple(42)));
+
+  // Implicit constructors are allowed.
+  const Action<bool(std::string)> s1 = [](std::string s) { return !s.empty(); };
+  const Action<int(const char*)> s2 = Action<int(const char*)>(s1);
+  EXPECT_EQ(0, s2.Perform(make_tuple("")));
+  EXPECT_EQ(1, s2.Perform(make_tuple("hello")));
+
+  // Also between the lambda and the action itself.
+  const Action<bool(std::string)> x = [](Unused) { return 42; };
+  EXPECT_TRUE(x.Perform(make_tuple("hello")));
+}
+
+TEST(FunctorActionTest, UnusedArguments) {
+  // Verify that users can ignore uninteresting arguments.
+  Action<int(int, std::unique_ptr<int>, const int&)> a =
+      [](int i, Unused, Unused) { return 2 * i; };
+  EXPECT_EQ(6, a.Perform(make_tuple(3, UniqueInt(7), 9)));
+}
+
+// Test that basic built-in actions work with move-only arguments.
+// TODO(rburny): Currently, almost all ActionInterface-based actions will not
+// work, even if they only try to use other, copyable arguments. Implement them
+// if necessary (but note that DoAll cannot work on non-copyable types anyway -
+// so maybe it's better to make users use lambdas instead.
+TEST(MoveOnlyArgumentsTest, ReturningActions) {
+  Action<int(std::unique_ptr<int>)> a = Return(1);
+  EXPECT_EQ(1, a.Perform(make_tuple(nullptr)));
+
+  a = testing::WithoutArgs([]() { return 7; });
+  EXPECT_EQ(7, a.Perform(make_tuple(nullptr)));
+
+  Action<void(std::unique_ptr<int>, int*)> a2 = testing::SetArgPointee<1>(3);
+  int x = 0;
+  a2.Perform(make_tuple(nullptr, &x));
+  EXPECT_EQ(x, 3);
+}
+
+#endif  // GTEST_LANG_CXX11
 
 }  // Unnamed namespace
