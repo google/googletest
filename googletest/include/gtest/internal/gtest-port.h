@@ -176,7 +176,7 @@
 //                            GTEST_HAS_POSIX_RE (see above) which users can
 //                            define themselves.
 //   GTEST_USES_SIMPLE_RE   - our own simple regex is used;
-//                            the above _RE(s) are mutually exclusive.
+//                            the above RE\b(s) are mutually exclusive.
 //   GTEST_CAN_COMPARE_NULL - accepts untyped NULL in EXPECT_EQ().
 
 // Misc public macros
@@ -205,6 +205,7 @@
 //
 // C++11 feature wrappers:
 //
+//   testing::internal::forward - portability wrapper for std::forward.
 //   testing::internal::move  - portability wrapper for std::move.
 //
 // Synchronization:
@@ -611,8 +612,8 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 //
 // To disable threading support in Google Test, add -DGTEST_HAS_PTHREAD=0
 // to your compiler flags.
-#define GTEST_HAS_PTHREAD                                                      \
-  (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_HPUX || GTEST_OS_QNX ||          \
+#define GTEST_HAS_PTHREAD                                             \
+  (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_HPUX || GTEST_OS_QNX || \
    GTEST_OS_FREEBSD || GTEST_OS_NACL || GTEST_OS_NETBSD || GTEST_OS_FUCHSIA)
 #endif  // GTEST_HAS_PTHREAD
 
@@ -1127,6 +1128,16 @@ struct StaticAssertTypeEqHelper<T, T> {
   enum { value = true };
 };
 
+// Same as std::is_same<>.
+template <typename T, typename U>
+struct IsSame {
+  enum { value = false };
+};
+template <typename T>
+struct IsSame<T, T> {
+  enum { value = true };
+};
+
 // Evaluates to the number of elements in 'array'.
 #define GTEST_ARRAY_SIZE_(array) (sizeof(array) / sizeof(array[0]))
 
@@ -1190,6 +1201,10 @@ class scoped_ptr {
 
 // Defines RE.
 
+#if GTEST_USES_PCRE
+using ::RE;
+#elif GTEST_USES_POSIX_RE || GTEST_USES_SIMPLE_RE
+
 // A simple C++ wrapper for <regex.h>.  It uses the POSIX Extended
 // Regular Expression syntax.
 class GTEST_API_ RE {
@@ -1201,11 +1216,11 @@ class GTEST_API_ RE {
   // Constructs an RE from a string.
   RE(const ::std::string& regex) { Init(regex.c_str()); }  // NOLINT
 
-#if GTEST_HAS_GLOBAL_STRING
+# if GTEST_HAS_GLOBAL_STRING
 
   RE(const ::string& regex) { Init(regex.c_str()); }  // NOLINT
 
-#endif  // GTEST_HAS_GLOBAL_STRING
+# endif  // GTEST_HAS_GLOBAL_STRING
 
   RE(const char* regex) { Init(regex); }  // NOLINT
   ~RE();
@@ -1227,7 +1242,7 @@ class GTEST_API_ RE {
     return PartialMatch(str.c_str(), re);
   }
 
-#if GTEST_HAS_GLOBAL_STRING
+# if GTEST_HAS_GLOBAL_STRING
 
   static bool FullMatch(const ::string& str, const RE& re) {
     return FullMatch(str.c_str(), re);
@@ -1236,7 +1251,7 @@ class GTEST_API_ RE {
     return PartialMatch(str.c_str(), re);
   }
 
-#endif  // GTEST_HAS_GLOBAL_STRING
+# endif  // GTEST_HAS_GLOBAL_STRING
 
   static bool FullMatch(const char* str, const RE& re);
   static bool PartialMatch(const char* str, const RE& re);
@@ -1250,19 +1265,21 @@ class GTEST_API_ RE {
   const char* pattern_;
   bool is_valid_;
 
-#if GTEST_USES_POSIX_RE
+# if GTEST_USES_POSIX_RE
 
   regex_t full_regex_;     // For FullMatch().
   regex_t partial_regex_;  // For PartialMatch().
 
-#else  // GTEST_USES_SIMPLE_RE
+# else  // GTEST_USES_SIMPLE_RE
 
   const char* full_pattern_;  // For FullMatch();
 
-#endif
+# endif
 
   GTEST_DISALLOW_ASSIGN_(RE);
 };
+
+#endif  // GTEST_USES_PCRE
 
 // Formats a source file path and a line number as they would appear
 // in an error message from the compiler used to compile this code.
@@ -1350,12 +1367,25 @@ inline void FlushInfoLog() { fflush(NULL); }
                       << gtest_error
 
 #if GTEST_HAS_STD_MOVE_
+using std::forward;
 using std::move;
+
+template <typename T>
+struct RvalueRef {
+  typedef T&& type;
+};
 #else  // GTEST_HAS_STD_MOVE_
 template <typename T>
 const T& move(const T& t) {
   return t;
 }
+template <typename T>
+GTEST_ADD_REFERENCE_(T) forward(GTEST_ADD_REFERENCE_(T) t) { return t; }
+
+template <typename T>
+struct RvalueRef {
+  typedef const T& type;
+};
 #endif  // GTEST_HAS_STD_MOVE_
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
@@ -1456,7 +1486,6 @@ GTEST_API_ void CaptureStderr();
 GTEST_API_ std::string GetCapturedStderr();
 
 #endif  // GTEST_HAS_STREAM_REDIRECTION
-
 // Returns the size (in bytes) of a file.
 GTEST_API_ size_t GetFileSize(FILE* file);
 
