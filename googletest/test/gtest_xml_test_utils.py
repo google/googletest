@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-#
 # Copyright 2006, Google Inc.
 # All rights reserved.
 #
@@ -31,15 +29,10 @@
 
 """Unit test utilities for gtest_xml_output"""
 
-__author__ = 'eefacm@gmail.com (Sean Mcafee)'
-
 import re
 from xml.dom import minidom, Node
-
 import gtest_test_utils
 
-
-GTEST_OUTPUT_FLAG         = '--gtest_output'
 GTEST_DEFAULT_OUTPUT_FILE = 'test_detail.xml'
 
 class GTestXMLTestCase(gtest_test_utils.TestCase):
@@ -101,7 +94,7 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
     self.assertEquals(
         len(expected_children), len(actual_children),
         'number of child elements differ in element ' + actual_node.tagName)
-    for child_id, child in expected_children.items():
+    for child_id, child in expected_children.iteritems():
       self.assert_(child_id in actual_children,
                    '<%s> is not in <%s> (in element %s)' %
                    (child_id, actual_children, actual_node.tagName))
@@ -187,8 +180,8 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
           # Replaces the source line information with a normalized form.
           cdata = re.sub(source_line_pat, '\\1*\n', child.nodeValue)
           # Removes the actual stack trace.
-          child.nodeValue = re.sub(r'\nStack trace:\n(.|\n)*',
-                                   '', cdata)
+          child.nodeValue = re.sub(r'Stack trace:\n(.|\n)*',
+                                   'Stack trace:\n*', cdata)
     for child in element.childNodes:
       if child.nodeType == Node.ELEMENT_NODE:
         self.NormalizeXml(child)

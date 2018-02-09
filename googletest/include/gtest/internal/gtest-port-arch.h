@@ -54,6 +54,9 @@
 #   define GTEST_OS_WINDOWS_PHONE 1
 #  elif WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
 #   define GTEST_OS_WINDOWS_RT 1
+#  elif WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_TV_TITLE)
+#   define GTEST_OS_WINDOWS_PHONE 1
+#   define GTEST_OS_WINDOWS_TV_TITLE 1
 #  else
     // WINAPI_FAMILY defined but no known partition matched.
     // Default to desktop.
@@ -69,6 +72,8 @@
 # endif
 #elif defined __FreeBSD__
 # define GTEST_OS_FREEBSD 1
+#elif defined __Fuchsia__
+# define GTEST_OS_FUCHSIA 1
 #elif defined __linux__
 # define GTEST_OS_LINUX 1
 # if defined __ANDROID__

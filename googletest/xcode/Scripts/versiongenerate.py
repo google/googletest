@@ -29,7 +29,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-"""A script to prepare version informtion for use the gtest Info.plist file.
+"""A script to prepare version information for use the gtest Info.plist file.
 
   This script extracts the version information from the configure.ac file and
   uses it to generate a header file containing the same information. The
@@ -42,7 +42,7 @@
     1. The AC_INIT macro will be contained within the first 1024 characters
        of configure.ac
     2. The version string will be 3 integers separated by periods and will be
-       surrounded by squre brackets, "[" and "]" (e.g. [1.0.1]). The first
+       surrounded by square brackets, "[" and "]" (e.g. [1.0.1]). The first
        segment represents the major version, the second represents the minor
        version and the third represents the fix version.
     3. No ")" character exists between the opening "(" and closing ")" of
@@ -68,7 +68,7 @@ config_file.close()
 
 # Extract the version string from the AC_INIT macro
 #   The following init_expression means:
-#     Extract three integers separated by periods and surrounded by squre
+#     Extract three integers separated by periods and surrounded by square
 #     brackets(e.g. "[1.0.1]") between "AC_INIT(" and ")". Do not be greedy
 #     (*? is the non-greedy flag) since that would pull in everything between
 #     the first "(" and the last ")" in the file.
@@ -88,7 +88,7 @@ file_data = """//
 // is executed in a "Run Script" build phase when creating gtest.framework. This
 // header file is not used during compilation of C-source. Rather, it simply
 // defines some version strings for substitution in the Info.plist. Because of
-// this, we are not not restricted to C-syntax nor are we using include guards.
+// this, we are not restricted to C-syntax nor are we using include guards.
 //
 
 #define GTEST_VERSIONINFO_SHORT %s.%s

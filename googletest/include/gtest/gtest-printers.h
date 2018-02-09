@@ -46,6 +46,10 @@
 //   2. operator<<(ostream&, const T&) defined in either foo or the
 //      global namespace.
 //
+// However if T is an STL-style container then it is printed element-wise
+// unless foo::PrintTo(const T&, ostream*) is defined. Note that
+// operator<<() is ignored for container types.
+//
 // If none of the above is defined, it will print the debug string of
 // the value if it is a protocol buffer, or print the raw bytes in the
 // value otherwise.
@@ -107,6 +111,11 @@
 # include <tuple>
 #endif
 
+#if GTEST_HAS_ABSL
+#include "absl/types/optional.h"
+#include "absl/strings/string_view.h"
+#endif  // GTEST_HAS_ABSL
+
 namespace testing {
 
 // Definitions in the 'internal' and 'internal2' name spaces are
@@ -125,7 +134,11 @@ enum TypeKind {
   kProtobuf,              // a protobuf type
   kConvertibleToInteger,  // a type implicitly convertible to BiggestInt
                           // (e.g. a named or unnamed enum type)
-  kOtherType              // anything else
+#if GTEST_HAS_ABSL
+  kConvertibleToStringView,  // a type implicitly convertible to
+                             // absl::string_view
+#endif
+  kOtherType  // anything else
 };
 
 // TypeWithoutFormatter<T, kTypeKind>::PrintValue(value, os) is called
@@ -137,7 +150,8 @@ class TypeWithoutFormatter {
  public:
   // This default version is called when kTypeKind is kOtherType.
   static void PrintValue(const T& value, ::std::ostream* os) {
-    PrintBytesInObjectTo(reinterpret_cast<const unsigned char*>(&value),
+    PrintBytesInObjectTo(static_cast<const unsigned char*>(
+                             reinterpret_cast<const void*>(&value)),
                          sizeof(value), os);
   }
 };
@@ -175,6 +189,19 @@ class TypeWithoutFormatter<T, kConvertibleToInteger> {
   }
 };
 
+#if GTEST_HAS_ABSL
+template <typename T>
+class TypeWithoutFormatter<T, kConvertibleToStringView> {
+ public:
+  // Since T has neither operator<< nor PrintTo() but can be implicitly
+  // converted to absl::string_view, we print it as a absl::string_view.
+  //
+  // Note: the implementation is further below, as it depends on
+  // internal::PrintTo symbol which is defined later in the file.
+  static void PrintValue(const T& value, ::std::ostream* os);
+};
+#endif
+
 // Prints the given value to the given ostream.  If the value is a
 // protocol message, its debug string is printed; if it's an enum or
 // of a type implicitly convertible to BiggestInt, it's printed as an
@@ -202,10 +229,19 @@ class TypeWithoutFormatter<T, kConvertibleToInteger> {
 template <typename Char, typename CharTraits, typename T>
 ::std::basic_ostream<Char, CharTraits>& operator<<(
     ::std::basic_ostream<Char, CharTraits>& os, const T& x) {
-  TypeWithoutFormatter<T,
-      (internal::IsAProtocolMessage<T>::value ? kProtobuf :
-       internal::ImplicitlyConvertible<const T&, internal::BiggestInt>::value ?
-       kConvertibleToInteger : kOtherType)>::PrintValue(x, &os);
+  TypeWithoutFormatter<T, (internal::IsAProtocolMessage<T>::value
+                               ? kProtobuf
+                               : internal::ImplicitlyConvertible<
+                                     const T&, internal::BiggestInt>::value
+                                     ? kConvertibleToInteger
+                                     :
+#if GTEST_HAS_ABSL
+                                     internal::ImplicitlyConvertible<
+                                         const T&, absl::string_view>::value
+                                         ? kConvertibleToStringView
+                                         :
+#endif
+                                         kOtherType)>::PrintValue(x, &os);
   return os;
 }
 
@@ -427,12 +463,8 @@ void DefaultPrintTo(WrapPrinterType<kPrintFunctionPointer> /* dummy */,
   } else {
     // T is a function type, so '*os << p' doesn't do what we want
     // (it just prints p as bool).  We want to print p as a const
-    // void*.  However, we cannot cast it to const void* directly,
-    // even using reinterpret_cast, as earlier versions of gcc
-    // (e.g. 3.4.5) cannot compile the cast when p is a function
-    // pointer.  Casting to UInt64 first solves the problem.
-    *os << reinterpret_cast<const void*>(
-        reinterpret_cast<internal::UInt64>(p));
+    // void*.
+    *os << reinterpret_cast<const void*>(p);
   }
 }
 
@@ -477,9 +509,10 @@ void PrintTo(const T& value, ::std::ostream* os) {
   // function pointers so that the `*os << p` in the object pointer overload
   // doesn't cause that warning either.
   DefaultPrintTo(
-      WrapPrinterType<sizeof(IsContainerTest<T>(0)) == sizeof(IsContainer)
-          ? kPrintContainer : !is_pointer<T>::value
-                ? kPrintOther
+      WrapPrinterType<
+          (sizeof(IsContainerTest<T>(0)) == sizeof(IsContainer)) && !IsRecursiveContainer<T>::value
+            ? kPrintContainer : !is_pointer<T>::value
+              ? kPrintOther
 #if GTEST_LANG_CXX11
                 : std::is_function<typename std::remove_pointer<T>::type>::value
 #else
@@ -593,6 +626,13 @@ inline void PrintTo(const ::std::wstring& s, ::std::ostream* os) {
   PrintWideStringTo(s, os);
 }
 #endif  // GTEST_HAS_STD_WSTRING
+
+#if GTEST_HAS_ABSL
+// Overload for absl::string_view.
+inline void PrintTo(absl::string_view sp, ::std::ostream* os) {
+  PrintTo(::std::string(sp), os);
+}
+#endif  // GTEST_HAS_ABSL
 
 #if GTEST_HAS_TR1_TUPLE || GTEST_HAS_STD_TUPLE_
 // Helper function for printing a tuple.  T must be instantiated with
@@ -722,6 +762,26 @@ class UniversalPrinter {
 
   GTEST_DISABLE_MSC_WARNINGS_POP_()
 };
+
+#if GTEST_HAS_ABSL
+
+// Printer for absl::optional
+
+template <typename T>
+class UniversalPrinter<::absl::optional<T>> {
+ public:
+  static void Print(const ::absl::optional<T>& value, ::std::ostream* os) {
+    *os << '(';
+    if (!value) {
+      *os << "nullopt";
+    } else {
+      UniversalPrint(*value, os);
+    }
+    *os << ')';
+  }
+};
+
+#endif  // GTEST_HAS_ABSL
 
 // UniversalPrintArray(begin, len, os) prints an array of 'len'
 // elements, starting at address 'begin'.
@@ -869,7 +929,7 @@ void UniversalPrint(const T& value, ::std::ostream* os) {
   UniversalPrinter<T1>::Print(value, os);
 }
 
-typedef ::std::vector<string> Strings;
+typedef ::std::vector< ::std::string> Strings;
 
 // TuplePolicy<TupleT> must provide:
 // - tuple_size
@@ -988,6 +1048,16 @@ Strings UniversalTersePrintTupleFieldsToStrings(const Tuple& value) {
 #endif  // GTEST_HAS_TR1_TUPLE || GTEST_HAS_STD_TUPLE_
 
 }  // namespace internal
+
+#if GTEST_HAS_ABSL
+namespace internal2 {
+template <typename T>
+void TypeWithoutFormatter<T, kConvertibleToStringView>::PrintValue(
+    const T& value, ::std::ostream* os) {
+  internal::PrintTo(absl::string_view(value), os);
+}
+}  // namespace internal2
+#endif
 
 template <typename T>
 ::std::string PrintToString(const T& value) {

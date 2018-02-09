@@ -5,9 +5,10 @@ Value of: false
   Actual: false
 Expected: true
 gtest_output_test_.cc:#: Failure
-      Expected: 2
-To be equal to: 3
-[0;32m[==========] [mRunning 66 tests from 29 test cases.
+Expected equality of these values:
+  2
+  3
+[0;32m[==========] [mRunning 68 tests from 30 test cases.
 [0;32m[----------] [mGlobal test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -34,21 +35,24 @@ BarEnvironment::SetUp() called.
 [0;32m[----------] [m2 tests from NonfatalFailureTest
 [0;32m[ RUN      ] [mNonfatalFailureTest.EscapesStringOperands
 gtest_output_test_.cc:#: Failure
-      Expected: kGoldenString
-      Which is: "\"Line"
-To be equal to: actual
-      Which is: "actual \"string\""
+Expected equality of these values:
+  kGoldenString
+    Which is: "\"Line"
+  actual
+    Which is: "actual \"string\""
 gtest_output_test_.cc:#: Failure
-      Expected: golden
-      Which is: "\"Line"
-To be equal to: actual
-      Which is: "actual \"string\""
+Expected equality of these values:
+  golden
+    Which is: "\"Line"
+  actual
+    Which is: "actual \"string\""
 [0;31m[  FAILED  ] [mNonfatalFailureTest.EscapesStringOperands
 [0;32m[ RUN      ] [mNonfatalFailureTest.DiffForLongStrings
 gtest_output_test_.cc:#: Failure
-      Expected: golden_str
-      Which is: "\"Line\0 1\"\nLine 2"
-To be equal to: "Line 2"
+Expected equality of these values:
+  golden_str
+    Which is: "\"Line\0 1\"\nLine 2"
+  "Line 2"
 With diff:
 @@ -1,2 @@
 -\"Line\0 1\"
@@ -59,16 +63,18 @@ With diff:
 [0;32m[ RUN      ] [mFatalFailureTest.FatalFailureInSubroutine
 (expecting a failure that x should be 1)
 gtest_output_test_.cc:#: Failure
-      Expected: 1
-To be equal to: x
-      Which is: 2
+Expected equality of these values:
+  1
+  x
+    Which is: 2
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInSubroutine
 [0;32m[ RUN      ] [mFatalFailureTest.FatalFailureInNestedSubroutine
 (expecting a failure that x should be 1)
 gtest_output_test_.cc:#: Failure
-      Expected: 1
-To be equal to: x
-      Which is: 2
+Expected equality of these values:
+  1
+  x
+    Which is: 2
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInNestedSubroutine
 [0;32m[ RUN      ] [mFatalFailureTest.NonfatalFailureInSubroutine
 (expecting a failure on false)
@@ -89,7 +95,17 @@ i == 3
 gtest_output_test_.cc:#: Failure
 Expected: (3) >= (a[i]), actual: 3 vs 6
 [0;31m[  FAILED  ] [mLoggingTest.InterleavingLoggingAndAssertions
-[0;32m[----------] [m6 tests from SCOPED_TRACETest
+[0;32m[----------] [m7 tests from SCOPED_TRACETest
+[0;32m[ RUN      ] [mSCOPED_TRACETest.AcceptedValues
+gtest_output_test_.cc:#: Failure
+Failed
+Just checking that all these values work fine.
+Google Test trace:
+gtest_output_test_.cc:#: (null)
+gtest_output_test_.cc:#: 1337
+gtest_output_test_.cc:#: std::string
+gtest_output_test_.cc:#: literal string
+[0;31m[  FAILED  ] [mSCOPED_TRACETest.AcceptedValues
 [0;32m[ RUN      ] [mSCOPED_TRACETest.ObeysScopes
 (expected to fail)
 gtest_output_test_.cc:#: Failure
@@ -107,39 +123,44 @@ This failure is expected, and shouldn't have a trace.
 [0;32m[ RUN      ] [mSCOPED_TRACETest.WorksInLoop
 (expected to fail)
 gtest_output_test_.cc:#: Failure
-      Expected: 2
-To be equal to: n
-      Which is: 1
+Expected equality of these values:
+  2
+  n
+    Which is: 1
 Google Test trace:
 gtest_output_test_.cc:#: i = 1
 gtest_output_test_.cc:#: Failure
-      Expected: 1
-To be equal to: n
-      Which is: 2
+Expected equality of these values:
+  1
+  n
+    Which is: 2
 Google Test trace:
 gtest_output_test_.cc:#: i = 2
 [0;31m[  FAILED  ] [mSCOPED_TRACETest.WorksInLoop
 [0;32m[ RUN      ] [mSCOPED_TRACETest.WorksInSubroutine
 (expected to fail)
 gtest_output_test_.cc:#: Failure
-      Expected: 2
-To be equal to: n
-      Which is: 1
+Expected equality of these values:
+  2
+  n
+    Which is: 1
 Google Test trace:
 gtest_output_test_.cc:#: n = 1
 gtest_output_test_.cc:#: Failure
-      Expected: 1
-To be equal to: n
-      Which is: 2
+Expected equality of these values:
+  1
+  n
+    Which is: 2
 Google Test trace:
 gtest_output_test_.cc:#: n = 2
 [0;31m[  FAILED  ] [mSCOPED_TRACETest.WorksInSubroutine
 [0;32m[ RUN      ] [mSCOPED_TRACETest.CanBeNested
 (expected to fail)
 gtest_output_test_.cc:#: Failure
-      Expected: 1
-To be equal to: n
-      Which is: 2
+Expected equality of these values:
+  1
+  n
+    Which is: 2
 Google Test trace:
 gtest_output_test_.cc:#: n = 2
 gtest_output_test_.cc:#: 
@@ -201,6 +222,14 @@ gtest_output_test_.cc:#: Failure
 Failed
 Expected failure #6 (in thread A, no trace alive).
 [0;31m[  FAILED  ] [mSCOPED_TRACETest.WorksConcurrently
+[0;32m[----------] [m1 test from ScopedTraceTest
+[0;32m[ RUN      ] [mScopedTraceTest.WithExplicitFileAndLine
+gtest_output_test_.cc:#: Failure
+Failed
+Check that the trace is attached to a particular location.
+Google Test trace:
+explicit_file.cc:123: expected trace message
+[0;31m[  FAILED  ] [mScopedTraceTest.WithExplicitFileAndLine
 [0;32m[----------] [m1 test from NonFatalFailureInFixtureConstructorTest
 [0;32m[ RUN      ] [mNonFatalFailureInFixtureConstructorTest.FailureInConstructor
 (expecting 5 failures)
@@ -437,9 +466,10 @@ Expected: 1 fatal failure
 [0;32m[       OK ] [mTypedTest/0.Success
 [0;32m[ RUN      ] [mTypedTest/0.Failure
 gtest_output_test_.cc:#: Failure
-      Expected: 1
-To be equal to: TypeParam()
-      Which is: 0
+Expected equality of these values:
+  1
+  TypeParam()
+    Which is: 0
 Expected failure
 [0;31m[  FAILED  ] [mTypedTest/0.Failure, where TypeParam = int
 [0;32m[----------] [m2 tests from Unsigned/TypedTestP/0, where TypeParam = unsigned char
@@ -447,23 +477,25 @@ Expected failure
 [0;32m[       OK ] [mUnsigned/TypedTestP/0.Success
 [0;32m[ RUN      ] [mUnsigned/TypedTestP/0.Failure
 gtest_output_test_.cc:#: Failure
-      Expected: 1U
-      Which is: 1
-To be equal to: TypeParam()
-      Which is: '\0'
+Expected equality of these values:
+  1U
+    Which is: 1
+  TypeParam()
+    Which is: '\0'
 Expected failure
 [0;31m[  FAILED  ] [mUnsigned/TypedTestP/0.Failure, where TypeParam = unsigned char
-[0;32m[----------] [m2 tests from Unsigned/TypedTestP/1, where TypeParam = unsigned int
+[0;32m[----------] [m2 tests from Unsigned/TypedTestP/1, where TypeParam = unsigned
 [0;32m[ RUN      ] [mUnsigned/TypedTestP/1.Success
 [0;32m[       OK ] [mUnsigned/TypedTestP/1.Success
 [0;32m[ RUN      ] [mUnsigned/TypedTestP/1.Failure
 gtest_output_test_.cc:#: Failure
-      Expected: 1U
-      Which is: 1
-To be equal to: TypeParam()
-      Which is: 0
+Expected equality of these values:
+  1U
+    Which is: 1
+  TypeParam()
+    Which is: 0
 Expected failure
-[0;31m[  FAILED  ] [mUnsigned/TypedTestP/1.Failure, where TypeParam = unsigned int
+[0;31m[  FAILED  ] [mUnsigned/TypedTestP/1.Failure, where TypeParam = unsigned
 [0;32m[----------] [m4 tests from ExpectFailureTest
 [0;32m[ RUN      ] [mExpectFailureTest.ExpectFatalFailure
 (expecting 1 failure)
@@ -597,18 +629,20 @@ Expected non-fatal failure.
 [0;32m[----------] [m1 test from PrintingFailingParams/FailingParamTest
 [0;32m[ RUN      ] [mPrintingFailingParams/FailingParamTest.Fails/0
 gtest_output_test_.cc:#: Failure
-      Expected: 1
-To be equal to: GetParam()
-      Which is: 2
+Expected equality of these values:
+  1
+  GetParam()
+    Which is: 2
 [0;31m[  FAILED  ] [mPrintingFailingParams/FailingParamTest.Fails/0, where GetParam() = 2
 [0;32m[----------] [m2 tests from PrintingStrings/ParamTest
 [0;32m[ RUN      ] [mPrintingStrings/ParamTest.Success/a
 [0;32m[       OK ] [mPrintingStrings/ParamTest.Success/a
 [0;32m[ RUN      ] [mPrintingStrings/ParamTest.Failure/a
 gtest_output_test_.cc:#: Failure
-      Expected: "b"
-To be equal to: GetParam()
-      Which is: "a"
+Expected equality of these values:
+  "b"
+  GetParam()
+    Which is: "a"
 Expected failure
 [0;31m[  FAILED  ] [mPrintingStrings/ParamTest.Failure/a, where GetParam() = "a"
 [0;32m[----------] [mGlobal test environment tear-down
@@ -620,21 +654,23 @@ FooEnvironment::TearDown() called.
 gtest_output_test_.cc:#: Failure
 Failed
 Expected fatal failure.
-[0;32m[==========] [m66 tests from 29 test cases ran.
+[0;32m[==========] [m68 tests from 30 test cases ran.
 [0;32m[  PASSED  ] [m22 tests.
-[0;31m[  FAILED  ] [m44 tests, listed below:
+[0;31m[  FAILED  ] [m46 tests, listed below:
 [0;31m[  FAILED  ] [mNonfatalFailureTest.EscapesStringOperands
 [0;31m[  FAILED  ] [mNonfatalFailureTest.DiffForLongStrings
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInSubroutine
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInNestedSubroutine
 [0;31m[  FAILED  ] [mFatalFailureTest.NonfatalFailureInSubroutine
 [0;31m[  FAILED  ] [mLoggingTest.InterleavingLoggingAndAssertions
+[0;31m[  FAILED  ] [mSCOPED_TRACETest.AcceptedValues
 [0;31m[  FAILED  ] [mSCOPED_TRACETest.ObeysScopes
 [0;31m[  FAILED  ] [mSCOPED_TRACETest.WorksInLoop
 [0;31m[  FAILED  ] [mSCOPED_TRACETest.WorksInSubroutine
 [0;31m[  FAILED  ] [mSCOPED_TRACETest.CanBeNested
 [0;31m[  FAILED  ] [mSCOPED_TRACETest.CanBeRepeated
 [0;31m[  FAILED  ] [mSCOPED_TRACETest.WorksConcurrently
+[0;31m[  FAILED  ] [mScopedTraceTest.WithExplicitFileAndLine
 [0;31m[  FAILED  ] [mNonFatalFailureInFixtureConstructorTest.FailureInConstructor
 [0;31m[  FAILED  ] [mFatalFailureInFixtureConstructorTest.FailureInConstructor
 [0;31m[  FAILED  ] [mNonFatalFailureInSetUpTest.FailureInSetUp
@@ -657,7 +693,7 @@ Expected fatal failure.
 [0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenStatementThrows
 [0;31m[  FAILED  ] [mTypedTest/0.Failure, where TypeParam = int
 [0;31m[  FAILED  ] [mUnsigned/TypedTestP/0.Failure, where TypeParam = unsigned char
-[0;31m[  FAILED  ] [mUnsigned/TypedTestP/1.Failure, where TypeParam = unsigned int
+[0;31m[  FAILED  ] [mUnsigned/TypedTestP/1.Failure, where TypeParam = unsigned
 [0;31m[  FAILED  ] [mExpectFailureTest.ExpectFatalFailure
 [0;31m[  FAILED  ] [mExpectFailureTest.ExpectNonFatalFailure
 [0;31m[  FAILED  ] [mExpectFailureTest.ExpectFatalFailureOnAllThreads
@@ -668,7 +704,7 @@ Expected fatal failure.
 [0;31m[  FAILED  ] [mPrintingFailingParams/FailingParamTest.Fails/0, where GetParam() = 2
 [0;31m[  FAILED  ] [mPrintingStrings/ParamTest.Failure/a, where GetParam() = "a"
 
-44 FAILED TESTS
+46 FAILED TESTS
 [0;33m  YOU HAVE 1 DISABLED TEST
 
 [mNote: Google Test filter = FatalFailureTest.*:LoggingTest.*
@@ -678,16 +714,18 @@ Expected fatal failure.
 [ RUN      ] FatalFailureTest.FatalFailureInSubroutine
 (expecting a failure that x should be 1)
 gtest_output_test_.cc:#: Failure
-      Expected: 1
-To be equal to: x
-      Which is: 2
+Expected equality of these values:
+  1
+  x
+    Which is: 2
 [  FAILED  ] FatalFailureTest.FatalFailureInSubroutine (? ms)
 [ RUN      ] FatalFailureTest.FatalFailureInNestedSubroutine
 (expecting a failure that x should be 1)
 gtest_output_test_.cc:#: Failure
-      Expected: 1
-To be equal to: x
-      Which is: 2
+Expected equality of these values:
+  1
+  x
+    Which is: 2
 [  FAILED  ] FatalFailureTest.FatalFailureInNestedSubroutine (? ms)
 [ RUN      ] FatalFailureTest.NonfatalFailureInSubroutine
 (expecting a failure on false)

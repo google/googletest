@@ -31,8 +31,6 @@
 
 """Unit test for the gtest_xml_output module"""
 
-__author__ = 'eefacm@gmail.com (Sean Mcafee)'
-
 import datetime
 import errno
 import os
@@ -43,12 +41,16 @@ from xml.dom import minidom, Node
 import gtest_test_utils
 import gtest_xml_test_utils
 
-
 GTEST_FILTER_FLAG = '--gtest_filter'
 GTEST_LIST_TESTS_FLAG = '--gtest_list_tests'
-GTEST_OUTPUT_FLAG         = "--gtest_output"
-GTEST_DEFAULT_OUTPUT_FILE = "test_detail.xml"
-GTEST_PROGRAM_NAME = "gtest_xml_output_unittest_"
+GTEST_OUTPUT_FLAG = '--gtest_output'
+GTEST_DEFAULT_OUTPUT_FILE = 'test_detail.xml'
+GTEST_PROGRAM_NAME = 'gtest_xml_output_unittest_'
+
+# The environment variables for test sharding.
+TOTAL_SHARDS_ENV_VAR = 'GTEST_TOTAL_SHARDS'
+SHARD_INDEX_ENV_VAR = 'GTEST_SHARD_INDEX'
+SHARD_STATUS_FILE_ENV_VAR = 'GTEST_SHARD_STATUS_FILE'
 
 SUPPORTS_STACK_TRACES = False
 
@@ -64,20 +66,23 @@ EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
   </testsuite>
   <testsuite name="FailedTest" tests="1" failures="1" disabled="0" errors="0" time="*">
     <testcase name="Fails" status="run" time="*" classname="FailedTest">
-      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;      Expected: 1&#x0A;To be equal to: 2" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
-      Expected: 1
-To be equal to: 2%(stack)s]]></failure>
+      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  2" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
+Expected equality of these values:
+  1
+  2%(stack)s]]></failure>
     </testcase>
   </testsuite>
   <testsuite name="MixedResultTest" tests="3" failures="1" disabled="1" errors="0" time="*">
     <testcase name="Succeeds" status="run" time="*" classname="MixedResultTest"/>
     <testcase name="Fails" status="run" time="*" classname="MixedResultTest">
-      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;      Expected: 1&#x0A;To be equal to: 2" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
-      Expected: 1
-To be equal to: 2%(stack)s]]></failure>
-      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;      Expected: 2&#x0A;To be equal to: 3" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
-      Expected: 2
-To be equal to: 3%(stack)s]]></failure>
+      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  2" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
+Expected equality of these values:
+  1
+  2%(stack)s]]></failure>
+      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Expected equality of these values:&#x0A;  2&#x0A;  3" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
+Expected equality of these values:
+  2
+  3%(stack)s]]></failure>
     </testcase>
     <testcase name="DISABLED_test" status="notrun" time="*" classname="MixedResultTest"/>
   </testsuite>
@@ -138,6 +143,19 @@ EXPECTED_FILTERED_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
   </testsuite>
 </testsuites>"""
 
+EXPECTED_SHARDED_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="3" failures="0" disabled="0" errors="0" time="*" timestamp="*" name="AllTests" ad_hoc_property="42">
+  <testsuite name="SuccessfulTest" tests="1" failures="0" disabled="0" errors="0" time="*">
+    <testcase name="Succeeds" status="run" time="*" classname="SuccessfulTest"/>
+  </testsuite>
+  <testsuite name="NoFixtureTest" tests="1" failures="0" disabled="0" errors="0" time="*">
+     <testcase name="RecordProperty" status="run" time="*" classname="NoFixtureTest" key="1"/>
+  </testsuite>
+  <testsuite name="Single/ValueParamTest" tests="1" failures="0" disabled="0" errors="0" time="*">
+    <testcase name="AnotherTestThatHasValueParamAttribute/1" value_param="42" status="run" time="*" classname="Single/ValueParamTest" />
+  </testsuite>
+</testsuites>"""
+
 EXPECTED_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="0" failures="0" disabled="0" errors="0" time="*"
             timestamp="*" name="AllTests">
@@ -179,7 +197,7 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     Runs a test program that generates an empty XML output, and checks if
     the timestamp attribute in the testsuites tag is valid.
     """
-    actual = self._GetXmlOutput('gtest_no_test_unittest', [], 0)
+    actual = self._GetXmlOutput('gtest_no_test_unittest', [], {}, 0)
     date_time_str = actual.documentElement.getAttributeNode('timestamp').value
     # datetime.strptime() is only available in Python 2.5+ so we have to
     # parse the expected datetime manually.
@@ -209,8 +227,7 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
         'gtest_no_test_unittest')
     try:
       os.remove(output_file)
-    except OSError:
-      e = sys.exc_info()[1]
+    except OSError, e:
       if e.errno != errno.ENOENT:
         raise
 
@@ -237,7 +254,7 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
                '--shut_down_xml']
     p = gtest_test_utils.Subprocess(command)
     if p.terminated_by_signal:
-      # p.signal is avalable only if p.terminated_by_signal is True.
+      # p.signal is available only if p.terminated_by_signal is True.
       self.assertFalse(
           p.terminated_by_signal,
           '%s was killed by signal %d' % (GTEST_PROGRAM_NAME, p.signal))
@@ -260,7 +277,22 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     self._TestXmlOutput(GTEST_PROGRAM_NAME, EXPECTED_FILTERED_TEST_XML, 0,
                         extra_args=['%s=SuccessfulTest.*' % GTEST_FILTER_FLAG])
 
-  def _GetXmlOutput(self, gtest_prog_name, extra_args, expected_exit_code):
+  def testShardedTestXmlOutput(self):
+    """Verifies XML output when run using multiple shards.
+
+    Runs a test program that executes only one shard and verifies that tests
+    from other shards do not show up in the XML output.
+    """
+
+    self._TestXmlOutput(
+        GTEST_PROGRAM_NAME,
+        EXPECTED_SHARDED_TEST_XML,
+        0,
+        extra_env={SHARD_INDEX_ENV_VAR: '0',
+                   TOTAL_SHARDS_ENV_VAR: '10'})
+
+  def _GetXmlOutput(self, gtest_prog_name, extra_args, extra_env,
+                    expected_exit_code):
     """
     Returns the xml output generated by running the program gtest_prog_name.
     Furthermore, the program's exit code must be expected_exit_code.
@@ -271,7 +303,11 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
 
     command = ([gtest_prog_path, '%s=xml:%s' % (GTEST_OUTPUT_FLAG, xml_path)] +
                extra_args)
-    p = gtest_test_utils.Subprocess(command)
+    environ_copy = os.environ.copy()
+    if extra_env:
+      environ_copy.update(extra_env)
+    p = gtest_test_utils.Subprocess(command, env=environ_copy)
+
     if p.terminated_by_signal:
       self.assert_(False,
                    '%s was killed by signal %d' % (gtest_prog_name, p.signal))
@@ -285,7 +321,7 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     return actual
 
   def _TestXmlOutput(self, gtest_prog_name, expected_xml,
-                     expected_exit_code, extra_args=None):
+                     expected_exit_code, extra_args=None, extra_env=None):
     """
     Asserts that the XML document generated by running the program
     gtest_prog_name matches expected_xml, a string containing another
@@ -294,7 +330,7 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     """
 
     actual = self._GetXmlOutput(gtest_prog_name, extra_args or [],
-                                expected_exit_code)
+                                extra_env or {}, expected_exit_code)
     expected = minidom.parseString(expected_xml)
     self.NormalizeXml(actual.documentElement)
     self.AssertEquivalentNodes(expected.documentElement,

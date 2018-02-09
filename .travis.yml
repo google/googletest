@@ -3,15 +3,67 @@
 # This file can be validated on:
 # http://lint.travis-ci.org/
 
+sudo: false
+language: cpp
+
+# Define the matrix explicitly, manually expanding the combinations of (os, compiler, env).
+# It is more tedious, but grants us far more flexibility.
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+      sudo : true
+      install: ./ci/install-linux.sh && ./ci/log-config.sh
+      script: ./ci/build-linux-bazel.sh
+    - os: linux
+      compiler: clang
+      sudo : true
+      install: ./ci/install-linux.sh && ./ci/log-config.sh
+      script: ./ci/build-linux-bazel.sh
+    - os: linux
+      group: deprecated-2017Q4
+      compiler: gcc
+      install: ./ci/install-linux.sh && ./ci/log-config.sh
+      script: ./ci/build-linux-autotools.sh
+    - os: linux
+      group: deprecated-2017Q4
+      compiler: gcc
+      env: BUILD_TYPE=Debug VERBOSE=1 CXX_FLAGS=-std=c++11
+    - os: linux
+      group: deprecated-2017Q4
+      compiler: clang
+      env: BUILD_TYPE=Debug VERBOSE=1
+    - os: linux
+      group: deprecated-2017Q4
+      compiler: clang
+      env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
+    - os: osx
+      compiler: gcc
+      env: BUILD_TYPE=Debug VERBOSE=1
+      if: type != pull_request
+    - os: osx
+      compiler: gcc
+      env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
+      if: type != pull_request
+    - os: osx
+      compiler: clang
+      env: BUILD_TYPE=Debug VERBOSE=1
+      if: type != pull_request
+    - os: osx
+      compiler: clang
+      env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
+      if: type != pull_request
+
+# These are the install and build (script) phases for the most common entries in the matrix.  They could be included
+# in each entry in the matrix, but that is just repetitive.
 install:
-# /usr/bin/gcc is 4.6 always, but gcc-X.Y is available.
-- if [ "$CXX" = "g++" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
-# /usr/bin/clang is 3.4, lets override with modern one.
-- if [ "$CXX" = "clang++" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CXX="clang++-3.7" CC="clang-3.7"; fi
-- echo ${PATH}
-- echo ${CXX}
-- ${CXX} --version
-- ${CXX} -v
+  - ./ci/install-${TRAVIS_OS_NAME}.sh
+  - . ./ci/env-${TRAVIS_OS_NAME}.sh
+  - ./ci/log-config.sh
+
+script: ./ci/travis.sh
+
+# For sudo=false builds this section installs the necessary dependencies.
 addons:
   apt:
     # List of whitelisted in travis packages for ubuntu-precise can be found here:
@@ -22,25 +74,8 @@ addons:
     - ubuntu-toolchain-r-test
     - llvm-toolchain-precise-3.7
     packages:
-    - gcc-4.9
     - g++-4.9
     - clang-3.7
-    - valgrind
-os:
-  - linux
-  - osx
-language: cpp
-compiler:
-  - gcc
-  - clang
-script: ./travis.sh
-env:
-  matrix:
-    - GTEST_TARGET=googletest SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug   VERBOSE_MAKE=true VERBOSE
-    - GTEST_TARGET=googlemock SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug   VERBOSE_MAKE=true VERBOSE
-    - GTEST_TARGET=googlemock SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug CXX_FLAGS=-std=c++11  VERBOSE_MAKE=true VERBOSE
-#    - GTEST_TARGET=googletest SHARED_LIB=ON  STATIC_LIB=ON CMAKE_PKG=ON  BUILD_TYPE=release VERBOSE_MAKE=false
-#    - GTEST_TARGET=googlemock SHARED_LIB=ON  STATIC_LIB=ON CMAKE_PKG=ON  BUILD_TYPE=release VERBOSE_MAKE=false
+
 notifications:
   email: false
-sudo: false

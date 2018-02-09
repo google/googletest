@@ -35,19 +35,13 @@
 
 #include "gtest/gtest.h"
 
-#if GTEST_HAS_PARAM_TEST
-
 # include <algorithm>
 # include <iostream>
 # include <list>
 # include <sstream>
 # include <string>
 # include <vector>
-
-// To include gtest-internal-inl.h.
-# define GTEST_IMPLEMENTATION_ 1
 # include "src/gtest-internal-inl.h"  // for UnitTestOptions
-# undef GTEST_IMPLEMENTATION_
 
 # include "test/gtest-param-test_test.h"
 
@@ -141,7 +135,7 @@ void VerifyGenerator(const ParamGenerator<T>& generator,
         << ", expected_values[i] is " << PrintValue(expected_values[i])
         << ", *it is " << PrintValue(*it)
         << ", and 'it' is an iterator created with the copy constructor.\n";
-    it++;
+    ++it;
   }
   EXPECT_TRUE(it == generator.end())
         << "At the presumed end of sequence when accessing via an iterator "
@@ -161,7 +155,7 @@ void VerifyGenerator(const ParamGenerator<T>& generator,
         << ", expected_values[i] is " << PrintValue(expected_values[i])
         << ", *it is " << PrintValue(*it)
         << ", and 'it' is an iterator created with the copy constructor.\n";
-    it++;
+    ++it;
   }
   EXPECT_TRUE(it == generator.end())
         << "At the presumed end of sequence when accessing via an iterator "
@@ -196,7 +190,7 @@ TEST(IteratorTest, ParamIteratorConformsToForwardIteratorConcept) {
                            << "element same as its source points to";
 
   // Verifies that iterator assignment works as expected.
-  it++;
+  ++it;
   EXPECT_FALSE(*it == *it2);
   it2 = it;
   EXPECT_TRUE(*it == *it2) << "Assigned iterators must point to the "
@@ -215,7 +209,7 @@ TEST(IteratorTest, ParamIteratorConformsToForwardIteratorConcept) {
   // Verifies that prefix and postfix operator++() advance an iterator
   // all the same.
   it2 = it;
-  it++;
+  ++it;
   ++it2;
   EXPECT_TRUE(*it == *it2);
 }
@@ -857,8 +851,8 @@ TEST_P(CustomLambdaNamingTest, CustomTestNames) {}
 INSTANTIATE_TEST_CASE_P(CustomParamNameLambda,
                         CustomLambdaNamingTest,
                         Values(std::string("LambdaName")),
-                        [](const ::testing::TestParamInfo<std::string>& info) {
-                          return info.param;
+                        [](const ::testing::TestParamInfo<std::string>& tpinfo) {
+                          return tpinfo.param;
                         });
 
 #endif  // GTEST_LANG_CXX11
@@ -1025,31 +1019,19 @@ TEST_F(ParameterizedDeathTest, GetParamDiesFromTestF) {
 
 INSTANTIATE_TEST_CASE_P(RangeZeroToFive, ParameterizedDerivedTest, Range(0, 5));
 
-#endif  // GTEST_HAS_PARAM_TEST
-
-TEST(CompileTest, CombineIsDefinedOnlyWhenGtestHasParamTestIsDefined) {
-#if GTEST_HAS_COMBINE && !GTEST_HAS_PARAM_TEST
-  FAIL() << "GTEST_HAS_COMBINE is defined while GTEST_HAS_PARAM_TEST is not\n"
-#endif
-}
-
 int main(int argc, char **argv) {
-#if GTEST_HAS_PARAM_TEST
   // Used in TestGenerationTest test case.
   AddGlobalTestEnvironment(TestGenerationTest::Environment::Instance());
   // Used in GeneratorEvaluationTest test case. Tests that the updated value
   // will be picked up for instantiating tests in GeneratorEvaluationTest.
   GeneratorEvaluationTest::set_param_value(1);
-#endif  // GTEST_HAS_PARAM_TEST
 
   ::testing::InitGoogleTest(&argc, argv);
 
-#if GTEST_HAS_PARAM_TEST
   // Used in GeneratorEvaluationTest test case. Tests that value updated
   // here will NOT be used for instantiating tests in
   // GeneratorEvaluationTest.
   GeneratorEvaluationTest::set_param_value(2);
-#endif  // GTEST_HAS_PARAM_TEST
 
   return RUN_ALL_TESTS();
 }

@@ -65,17 +65,16 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
-#if GTEST_HAS_EXCEPTIONS
-# include <stdexcept>  // NOLINT
-#endif
-
 #include "gmock/gmock-actions.h"
 #include "gmock/gmock-cardinalities.h"
 #include "gmock/gmock-matchers.h"
 #include "gmock/internal/gmock-internal-utils.h"
 #include "gmock/internal/gmock-port.h"
 #include "gtest/gtest.h"
+
+#if GTEST_HAS_EXCEPTIONS
+# include <stdexcept>  // NOLINT
+#endif
 
 namespace testing {
 
@@ -368,7 +367,6 @@ enum CallReaction {
   kAllow,
   kWarn,
   kFail,
-  kDefault = kWarn  // By default, warn about uninteresting calls.
 };
 
 }  // namespace internal
@@ -1785,7 +1783,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   // There is no generally useful and implementable semantics of
   // copying a mock object, so copying a mock is usually a user error.
   // Thus we disallow copying function mockers.  If the user really
-  // wants to copy a mock object, he should implement his own copy
+  // wants to copy a mock object, they should implement their own copy
   // operation, for example:
   //
   //   class MockFoo : public Foo {

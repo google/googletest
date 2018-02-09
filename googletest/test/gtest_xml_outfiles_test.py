@@ -31,14 +31,10 @@
 
 """Unit test for the gtest_xml_output module."""
 
-__author__ = "keith.ray@gmail.com (Keith Ray)"
-
 import os
 from xml.dom import minidom, Node
-
 import gtest_test_utils
 import gtest_xml_test_utils
-
 
 GTEST_OUTPUT_SUBDIR = "xml_outfiles"
 GTEST_OUTPUT_1_TEST = "gtest_xml_outfile1_test_"
@@ -105,7 +101,7 @@ class GTestXMLOutFilesTest(gtest_xml_test_utils.GTestXMLTestCase):
 
     # TODO(wan@google.com): libtool causes the built test binary to be
     #   named lt-gtest_xml_outfiles_test_ instead of
-    #   gtest_xml_outfiles_test_.  To account for this possibillity, we
+    #   gtest_xml_outfiles_test_.  To account for this possibility, we
     #   allow both names in the following code.  We should remove this
     #   hack when Chandler Carruth's libtool replacement tool is ready.
     output_file_name1 = test_name + ".xml"
