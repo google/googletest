@@ -460,7 +460,7 @@ following benefits:
 You may still want to use `SetUp()/TearDown()` in the following rare cases:
   * If the tear-down operation could throw an exception, you must use `TearDown()` as opposed to the destructor, as throwing in a destructor leads to undefined behavior and usually will kill your program right away. Note that many standard libraries (like STL) may throw when exceptions are enabled in the compiler. Therefore you should prefer `TearDown()` if you want to write portable tests that work with or without exceptions.
   * The assertion macros throw an exception when flag `--gtest_throw_on_failure` is specified. Therefore, you shouldn't use Google Test assertions in a destructor if you plan to run your tests with this flag.
-  * In a constructor or destructor, you cannot make a virtual function call on this object. (You can call a method declared as virtual, but it will be statically bound.) Therefore, if you need to call a method that will be overriden in a derived class, you have to use `SetUp()/TearDown()`.
+  * In a constructor or destructor, you cannot make a virtual function call on this object. (You can call a method declared as virtual, but it will be statically bound.) Therefore, if you need to call a method that will be overridden in a derived class, you have to use `SetUp()/TearDown()`.
 
 ## The compiler complains "no matching function to call" when I use ASSERT\_PREDn. How do I fix it? ##
 
