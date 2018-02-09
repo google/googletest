@@ -2188,6 +2188,30 @@ you want and you are ready to write tests.  You can use the
 [scripts/test/Makefile](../scripts/test/Makefile)
 file as an example on how to compile your tests against them.
 
+# Dynamically Loading Shared Test Libraries #
+
+If you have unit-test implementations in shared libraries *(.dll on Windows, .dylib
+on MacOS, .so on Linux)*, you are required to call `::testing::UnloadGoogleTest()`
+before unloading your shared libraries, or you will run into issues when Google
+Test gets unloaded.
+
+Example:
+```
+int main(int argc, char **argv) {
+  LoadLibrary("TestContainer1.dll");
+  LoadLibrary("AnotherTestContainer.dll");
+
+  ::testing::InitGoogleTest(&argc, argv);
+  const int ret = RUN_ALL_TESTS();
+  ::testing::UnloadGoogleTest();
+
+  UnloadLibrary("AnotherTestContainer.dll");
+  UnloadLibrary("TestContainer1.dll");
+  return ret;
+}
+```
+
+
 # Where to Go from Here #
 
 Congratulations! You've now learned more advanced Google Test tools and are
