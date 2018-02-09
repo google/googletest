@@ -1379,8 +1379,6 @@ template <typename T>
 const T& move(const T& t) {
   return t;
 }
-template <typename T>
-GTEST_ADD_REFERENCE_(T) forward(GTEST_ADD_REFERENCE_(T) t) { return t; }
 
 template <typename T>
 struct RvalueRef {
