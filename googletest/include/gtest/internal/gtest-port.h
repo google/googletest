@@ -73,11 +73,9 @@
 //   GTEST_HAS_EXCEPTIONS     - Define it to 1/0 to indicate that exceptions
 //                              are enabled.
 //   GTEST_HAS_GLOBAL_STRING  - Define it to 1/0 to indicate that ::string
-//                              is/isn't available (some systems define
-//                              ::string, which is different to std::string).
-//   GTEST_HAS_GLOBAL_WSTRING - Define it to 1/0 to indicate that ::string
-//                              is/isn't available (some systems define
-//                              ::wstring, which is different to std::wstring).
+//                              is/isn't available
+//   GTEST_HAS_GLOBAL_WSTRING - Define it to 1/0 to indicate that ::wstring
+//                              is/isn't available
 //   GTEST_HAS_POSIX_RE       - Define it to 1/0 to indicate that POSIX regular
 //                              expressions are/aren't available.
 //   GTEST_HAS_PTHREAD        - Define it to 1/0 to indicate that <pthread.h>
@@ -178,7 +176,7 @@
 //                            GTEST_HAS_POSIX_RE (see above) which users can
 //                            define themselves.
 //   GTEST_USES_SIMPLE_RE   - our own simple regex is used;
-//                            the above two are mutually exclusive.
+//                            the above _RE(s) are mutually exclusive.
 //   GTEST_CAN_COMPARE_NULL - accepts untyped NULL in EXPECT_EQ().
 
 // Misc public macros
@@ -272,10 +270,12 @@
 # include <TargetConditionals.h>
 #endif
 
+// Brings in the definition of HAS_GLOBAL_STRING.  This must be done
+// BEFORE we test HAS_GLOBAL_STRING.
+#include <string>  // NOLINT
 #include <algorithm>  // NOLINT
 #include <iostream>  // NOLINT
 #include <sstream>  // NOLINT
-#include <string>  // NOLINT
 #include <utility>
 #include <vector>  // NOLINT
 
@@ -806,9 +806,9 @@ using ::std::tuple_size;
 // Google Test does not support death tests for VC 7.1 and earlier as
 // abort() in a VC 7.1 application compiled as GUI in debug config
 // pops up a dialog window that cannot be suppressed programmatically.
-#if (GTEST_OS_LINUX || GTEST_OS_CYGWIN || GTEST_OS_SOLARIS || \
-     (GTEST_OS_MAC && !GTEST_OS_IOS) || \
-     (GTEST_OS_WINDOWS_DESKTOP && _MSC_VER >= 1400) || \
+#if (GTEST_OS_LINUX || GTEST_OS_CYGWIN || GTEST_OS_SOLARIS ||   \
+     (GTEST_OS_MAC && !GTEST_OS_IOS) ||                         \
+     (GTEST_OS_WINDOWS_DESKTOP && _MSC_VER >= 1400) ||          \
      GTEST_OS_WINDOWS_MINGW || GTEST_OS_AIX || GTEST_OS_HPUX || \
      GTEST_OS_OPENBSD || GTEST_OS_QNX || GTEST_OS_FREEBSD || GTEST_OS_NETBSD)
 # define GTEST_HAS_DEATH_TEST 1
@@ -824,9 +824,10 @@ using ::std::tuple_size;
 # define GTEST_HAS_TYPED_TEST_P 1
 #endif
 
-// Determines whether to support Combine().
-// The implementation doesn't work on Sun Studio since it doesn't
-// understand templated conversion operators.
+// Determines whether to support Combine(). This only makes sense when
+// value-parameterized tests are enabled.  The implementation doesn't
+// work on Sun Studio since it doesn't understand templated conversion
+// operators.
 #if (GTEST_HAS_TR1_TUPLE || GTEST_HAS_STD_TUPLE_) && !defined(__SUNPRO_CC)
 # define GTEST_HAS_COMBINE 1
 #endif
