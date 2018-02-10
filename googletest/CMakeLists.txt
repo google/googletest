@@ -40,8 +40,12 @@ endif()
 # as ${gtest_SOURCE_DIR} and to the root binary directory as
 # ${gtest_BINARY_DIR}.
 # Language "C" is required for find_package(Threads).
+
+# Project version:
+
 if (CMAKE_VERSION VERSION_LESS 3.0)
   project(gtest CXX C)
+  set(PROJECT_VERSION ${GOOGLETEST_VERSION})
 else()
   cmake_policy(SET CMP0048 NEW)
   project(gtest VERSION ${GOOGLETEST_VERSION} LANGUAGES CXX C)
