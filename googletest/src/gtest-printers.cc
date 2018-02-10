@@ -357,8 +357,10 @@ void PrintTo(const wchar_t* s, ostream* os) {
 namespace {
 
 bool ContainsUnprintableControlCodes(const char* str, size_t length) {
+  const unsigned char *s = reinterpret_cast<const unsigned char *>(str);
+
   for (size_t i = 0; i < length; i++) {
-    char ch = *str++;
+    unsigned char ch = *s++;
     if (std::iscntrl(ch)) {
         switch (ch) {
         case '\t':
