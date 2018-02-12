@@ -88,16 +88,23 @@ endif()
 # Google Mock libraries.  We build them using more strict warnings than what
 # are used for other targets, to ensure that Google Mock can be compiled by
 # a user aggressive about warnings.
-cxx_library(gmock
-            "${cxx_strict}"
-            "${gtest_dir}/src/gtest-all.cc"
-            src/gmock-all.cc)
+if (MSVC)
+  cxx_library(gmock
+              "${cxx_strict}"
+              "${gtest_dir}/src/gtest-all.cc"
+              src/gmock-all.cc)
 
-cxx_library(gmock_main
-            "${cxx_strict}"
-            "${gtest_dir}/src/gtest-all.cc"
-            src/gmock-all.cc
-            src/gmock_main.cc)
+  cxx_library(gmock_main
+              "${cxx_strict}"
+              "${gtest_dir}/src/gtest-all.cc"
+              src/gmock-all.cc
+              src/gmock_main.cc)
+else()
+  cxx_library(gmock "${cxx_strict}" src/gmock-all.cc)
+  target_link_libraries(gmock gtest)
+  cxx_library(gmock_main "${cxx_strict}" src/gmock_main.cc)
+  target_link_libraries(gmock_main gmock)
+endif()
 
 # If the CMake version supports it, attach header directory information
 # to the targets for when we are part of a parent build (ie being pulled
@@ -177,23 +184,33 @@ if (gmock_build_tests)
   ############################################################
   # C++ tests built with non-standard compiler flags.
 
-  cxx_library(gmock_main_no_exception "${cxx_no_exception}"
-    "${gtest_dir}/src/gtest-all.cc" src/gmock-all.cc src/gmock_main.cc)
-
-  cxx_library(gmock_main_no_rtti "${cxx_no_rtti}"
-    "${gtest_dir}/src/gtest-all.cc" src/gmock-all.cc src/gmock_main.cc)
-
-  if (NOT MSVC OR MSVC_VERSION LESS 1600)  # 1600 is Visual Studio 2010.
-    # Visual Studio 2010, 2012, and 2013 define symbols in std::tr1 that
-    # conflict with our own definitions. Therefore using our own tuple does not
-    # work on those compilers.
-    cxx_library(gmock_main_use_own_tuple "${cxx_use_own_tuple}"
+  if (MSVC)
+    cxx_library(gmock_main_no_exception "${cxx_no_exception}"
       "${gtest_dir}/src/gtest-all.cc" src/gmock-all.cc src/gmock_main.cc)
 
-    cxx_test_with_flags(gmock_use_own_tuple_test "${cxx_use_own_tuple}"
-      gmock_main_use_own_tuple test/gmock-spec-builders_test.cc)
-  endif()
+    cxx_library(gmock_main_no_rtti "${cxx_no_rtti}"
+      "${gtest_dir}/src/gtest-all.cc" src/gmock-all.cc src/gmock_main.cc)
 
+    if (MSVC_VERSION LESS 1600)  # 1600 is Visual Studio 2010.
+      # Visual Studio 2010, 2012, and 2013 define symbols in std::tr1 that
+      # conflict with our own definitions. Therefore using our own tuple does not
+      # work on those compilers.
+      cxx_library(gmock_main_use_own_tuple "${cxx_use_own_tuple}"
+        "${gtest_dir}/src/gtest-all.cc" src/gmock-all.cc src/gmock_main.cc)
+
+      cxx_test_with_flags(gmock_use_own_tuple_test "${cxx_use_own_tuple}"
+        gmock_main_use_own_tuple test/gmock-spec-builders_test.cc)
+    endif()
+  else()
+    cxx_library(gmock_main_no_exception "${cxx_no_exception}" src/gmock_main.cc)
+    target_link_libraries(gmock_main_no_exception gmock)
+
+    cxx_library(gmock_main_no_rtti "${cxx_no_rtti}" src/gmock_main.cc)
+    target_link_libraries(gmock_main_no_rtti gmock)
+
+    cxx_library(gmock_main_use_own_tuple "${cxx_use_own_tuple}" src/gmock_main.cc)
+    target_link_libraries(gmock_main_use_own_tuple gmock)
+  endif()
   cxx_test_with_flags(gmock-more-actions_no_exception_test "${cxx_no_exception}"
     gmock_main_no_exception test/gmock-more-actions_test.cc)
 
