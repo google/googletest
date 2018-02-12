@@ -36,8 +36,7 @@ __author__ = 'wan@google.com (Zhanyong Wan)'
 import os
 import gtest_test_utils
 
-
-IS_WINDOWS = os.name = 'nt'
+IS_WINDOWS = os.name == 'nt'
 
 COLOR_ENV_VAR = 'GTEST_COLOR'
 COLOR_FLAG = 'gtest_color'

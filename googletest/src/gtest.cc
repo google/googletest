@@ -252,6 +252,12 @@ GTEST_DEFINE_bool_(
     "True iff " GTEST_NAME_
     " should display elapsed time in text output.");
 
+GTEST_DEFINE_bool_(
+    print_utf8,
+    internal::BoolFromGTestEnv("print_utf8", true),
+    "True iff " GTEST_NAME_
+    " prints UTF8 characters as text.");
+
 GTEST_DEFINE_int32_(
     random_seed,
     internal::Int32FromGTestEnv("random_seed", 0),
@@ -293,7 +299,7 @@ GTEST_DEFINE_bool_(
     internal::BoolFromGTestEnv("throw_on_failure", false),
     "When this flag is specified, a failed assertion will throw an exception "
     "if exceptions are enabled or exit the program with a non-zero code "
-    "otherwise.");
+    "otherwise. For use with an external test framework.");
 
 #if GTEST_USE_OWN_FLAGFILE_FLAG_
 GTEST_DEFINE_string_(
@@ -1661,7 +1667,7 @@ namespace {
 AssertionResult HRESULTFailureHelper(const char* expr,
                                      const char* expected,
                                      long hr) {  // NOLINT
-# if GTEST_OS_WINDOWS_MOBILE
+# if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_TV_TITLE
 
   // Windows CE doesn't support FormatMessage.
   const char error_text[] = "";
@@ -1718,7 +1724,7 @@ AssertionResult IsHRESULTFailure(const char* expr, long hr) {  // NOLINT
 // Utility functions for encoding Unicode text (wide strings) in
 // UTF-8.
 
-// A Unicode code-point can have upto 21 bits, and is encoded in UTF-8
+// A Unicode code-point can have up to 21 bits, and is encoded in UTF-8
 // like this:
 //
 // Code-point length   Encoding
@@ -2435,6 +2441,8 @@ Result HandleExceptionsInMethodIfSupported(
 #if GTEST_HAS_EXCEPTIONS
     try {
       return HandleSehExceptionsInMethodIfSupported(object, method, location);
+    } catch (const AssertionException&) {  // NOLINT
+      // This failure was reported already.
     } catch (const internal::GoogleTestFailureException&) {  // NOLINT
       // This exception type can only be thrown by a failed Google
       // Test assertion with the intention of letting another testing
@@ -3841,26 +3849,6 @@ void StreamingListener::SocketWriter::MakeConnection() {
 // End of class Streaming Listener
 #endif  // GTEST_CAN_STREAM_RESULTS__
 
-// Class ScopedTrace
-
-// Pushes the given source file location and message onto a per-thread
-// trace stack maintained by Google Test.
-void ScopedTrace::PushTrace(const char* file, int line, std::string message) {
-  TraceInfo trace;
-  trace.file = file;
-  trace.line = line;
-  trace.message.swap(message);
-
-  UnitTest::GetInstance()->PushGTestTrace(trace);
-}
-
-// Pops the info pushed by the c'tor.
-ScopedTrace::~ScopedTrace()
-    GTEST_LOCK_EXCLUDED_(&UnitTest::mutex_) {
-  UnitTest::GetInstance()->PopGTestTrace();
-}
-
-
 // class OsStackTraceGetter
 
 const char* const OsStackTraceGetterInterface::kElidedFramesMarker =
@@ -4839,10 +4827,11 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
           (GTEST_FLAG(also_run_disabled_tests) || !is_disabled) &&
           matches_filter;
 
-      const bool is_selected = is_runnable &&
-          (shard_tests == IGNORE_SHARDING_PROTOCOL ||
-           ShouldRunTestOnShard(total_shards, shard_index,
-                                num_runnable_tests));
+      const bool is_in_another_shard =
+          shard_tests != IGNORE_SHARDING_PROTOCOL &&
+          !ShouldRunTestOnShard(total_shards, shard_index, num_runnable_tests);
+      test_info->is_in_another_shard_ = is_in_another_shard;
+      const bool is_selected = is_runnable && !is_in_another_shard;
 
       num_runnable_tests += is_runnable;
       num_selected_tests += is_selected;
@@ -5220,7 +5209,8 @@ static const char kColorEncodedHelpMessage[] =
 "  @G--" GTEST_FLAG_PREFIX_ "break_on_failure@D\n"
 "      Turn assertion failures into debugger break-points.\n"
 "  @G--" GTEST_FLAG_PREFIX_ "throw_on_failure@D\n"
-"      Turn assertion failures into C++ exceptions.\n"
+"      Turn assertion failures into C++ exceptions for use by an external\n"
+"      test framework.\n"
 "  @G--" GTEST_FLAG_PREFIX_ "catch_exceptions=0@D\n"
 "      Do not report exceptions as test failures. Instead, allow them\n"
 "      to crash the program or throw a pop-up (on Windows).\n"
@@ -5255,6 +5245,7 @@ static bool ParseGoogleTestFlag(const char* const arg) {
       ParseBoolFlag(arg, kListTestsFlag, &GTEST_FLAG(list_tests)) ||
       ParseStringFlag(arg, kOutputFlag, &GTEST_FLAG(output)) ||
       ParseBoolFlag(arg, kPrintTimeFlag, &GTEST_FLAG(print_time)) ||
+      ParseBoolFlag(arg, kPrintUTF8Flag, &GTEST_FLAG(print_utf8)) ||
       ParseInt32Flag(arg, kRandomSeedFlag, &GTEST_FLAG(random_seed)) ||
       ParseInt32Flag(arg, kRepeatFlag, &GTEST_FLAG(repeat)) ||
       ParseBoolFlag(arg, kShuffleFlag, &GTEST_FLAG(shuffle)) ||
@@ -5430,6 +5421,25 @@ std::string TempDir() {
 #else
   return "/tmp/";
 #endif  // GTEST_OS_WINDOWS_MOBILE
+}
+
+// Class ScopedTrace
+
+// Pushes the given source file location and message onto a per-thread
+// trace stack maintained by Google Test.
+void ScopedTrace::PushTrace(const char* file, int line, std::string message) {
+  internal::TraceInfo trace;
+  trace.file = file;
+  trace.line = line;
+  trace.message.swap(message);
+
+  UnitTest::GetInstance()->PushGTestTrace(trace);
+}
+
+// Pops the info pushed by the c'tor.
+ScopedTrace::~ScopedTrace()
+    GTEST_LOCK_EXCLUDED_(&UnitTest::mutex_) {
+  UnitTest::GetInstance()->PopGTestTrace();
 }
 
 }  // namespace testing
