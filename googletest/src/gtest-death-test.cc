@@ -983,7 +983,6 @@ static int ExecDeathTestChildMain(void* child_arg) {
 }
 #  endif  // !GTEST_OS_QNX
 
-#  if GTEST_HAS_CLONE
 // Two utility routines that together determine the direction the stack
 // grows.
 // This could be accomplished more elegantly by a single recursive
@@ -1008,7 +1007,6 @@ static bool StackGrowsDown() {
   StackLowerThanAddress(&dummy, &result);
   return result;
 }
-#  endif  // GTEST_HAS_CLONE
 
 // Spawns a child process with the same executable as the current process in
 // a thread-safe manner and instructs it to run the death test.  The
@@ -1225,11 +1223,11 @@ bool DefaultDeathTestFactory::Create(const char* statement, const RE* regex,
 // signals the event, and returns a file descriptor wrapped around the pipe
 // handle. This function is called in the child process only.
 static int GetStatusFileDescriptor(unsigned int parent_process_id,
-                                   size_t write_handle_as_size_t,
-                                   size_t event_handle_as_size_t) {
+                            size_t write_handle_as_size_t,
+                            size_t event_handle_as_size_t) {
   AutoHandle parent_process_handle(::OpenProcess(PROCESS_DUP_HANDLE,
-                                                 FALSE,  // Non-inheritable.
-                                                 parent_process_id));
+                                                   FALSE,  // Non-inheritable.
+                                                   parent_process_id));
   if (parent_process_handle.Get() == INVALID_HANDLE_VALUE) {
     DeathTestAbort("Unable to open parent process " +
                    StreamableToString(parent_process_id));

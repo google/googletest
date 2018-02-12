@@ -617,7 +617,11 @@ TEST_F(TestForDeathTest, ReturnIsFailure) {
 TEST_F(TestForDeathTest, TestExpectDebugDeath) {
   int sideeffect = 0;
 
-  EXPECT_DEBUG_DEATH(DieInDebugElse12(&sideeffect), "death.*DieInDebugElse12")
+  // Put the regex in a local variable to make sure we don't get an "unused"
+  // warning in opt mode.
+  const char* regex = "death.*DieInDebugElse12";
+
+  EXPECT_DEBUG_DEATH(DieInDebugElse12(&sideeffect), regex)
       << "Must accept a streamed message";
 
 # ifdef NDEBUG
