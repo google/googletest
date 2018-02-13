@@ -552,7 +552,7 @@ class NonDefaultConstructAssignString {
 };
 
 TEST(CombineTest, NonDefaultConstructAssign) {
-  const ParamGenerator<tuple<int, NonDefaultConstructAssignString>> gen =
+  const ParamGenerator<tuple<int, NonDefaultConstructAssignString> > gen =
       Combine(Values(0, 1), Values(NonDefaultConstructAssignString("A"),
                                    NonDefaultConstructAssignString("B")));
 
