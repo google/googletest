@@ -146,7 +146,6 @@ using testing::internal::ExplainMatchFailureTupleTo;
 using testing::internal::FloatingEqMatcher;
 using testing::internal::FormatMatcherDescription;
 using testing::internal::IsReadableTypeName;
-using testing::internal::JoinAsTuple;
 using testing::internal::linked_ptr;
 using testing::internal::MatchMatrix;
 using testing::internal::RE;
@@ -872,9 +871,9 @@ class Unprintable {
   char c_;
 };
 
-inline bool operator==(const Unprintable& /* lhs */, 
-                       const Unprintable& /* rhs */) { 
-    return true; 
+inline bool operator==(const Unprintable& /* lhs */,
+                       const Unprintable& /* rhs */) {
+    return true;
 }
 
 TEST(EqTest, CanDescribeSelf) {
@@ -5266,28 +5265,6 @@ TEST(IsReadableTypeNameTest, ReturnsFalseForLongTemplateNames) {
 
 TEST(IsReadableTypeNameTest, ReturnsFalseForLongFunctionTypeNames) {
   EXPECT_FALSE(IsReadableTypeName("void (&)(int, bool, char, float)"));
-}
-
-// Tests JoinAsTuple().
-
-TEST(JoinAsTupleTest, JoinsEmptyTuple) {
-  EXPECT_EQ("", JoinAsTuple(Strings()));
-}
-
-TEST(JoinAsTupleTest, JoinsOneTuple) {
-  const char* fields[] = {"1"};
-  EXPECT_EQ("1", JoinAsTuple(Strings(fields, fields + 1)));
-}
-
-TEST(JoinAsTupleTest, JoinsTwoTuple) {
-  const char* fields[] = {"1", "a"};
-  EXPECT_EQ("(1, a)", JoinAsTuple(Strings(fields, fields + 2)));
-}
-
-TEST(JoinAsTupleTest, JoinsTenTuple) {
-  const char* fields[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
-  EXPECT_EQ("(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)",
-            JoinAsTuple(Strings(fields, fields + 10)));
 }
 
 // Tests FormatMatcherDescription().
