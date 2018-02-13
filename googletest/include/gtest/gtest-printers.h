@@ -112,8 +112,8 @@
 #endif
 
 #if GTEST_HAS_ABSL
-#include "absl/types/optional.h"
 #include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 #endif  // GTEST_HAS_ABSL
 
 namespace testing {
