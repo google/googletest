@@ -1366,6 +1366,39 @@ inline void FlushInfoLog() { fflush(NULL); }
     GTEST_LOG_(FATAL) << #posix_call << "failed with error " \
                       << gtest_error
 
+// Adds reference to a type if it is not a reference type,
+// otherwise leaves it unchanged.  This is the same as
+// tr1::add_reference, which is not widely available yet.
+template <typename T>
+struct AddReference { typedef T& type; };  // NOLINT
+template <typename T>
+struct AddReference<T&> { typedef T& type; };  // NOLINT
+
+// A handy wrapper around AddReference that works when the argument T
+// depends on template parameters.
+#define GTEST_ADD_REFERENCE_(T) \
+    typename ::testing::internal::AddReference<T>::type
+
+// Transforms "T" into "const T&" according to standard reference collapsing
+// rules (this is only needed as a backport for C++98 compilers that do not
+// support reference collapsing). Specifically, it transforms:
+//
+//   char         ==> const char&
+//   const char   ==> const char&
+//   char&        ==> char&
+//   const char&  ==> const char&
+//
+// Note that the non-const reference will not have "const" added. This is
+// standard, and necessary so that "T" can always bind to "const T&".
+template <typename T>
+struct ConstRef { typedef const T& type; };
+template <typename T>
+struct ConstRef<T&> { typedef T& type; };
+
+// The argument T must depend on some template parameters.
+#define GTEST_REFERENCE_TO_CONST_(T) \
+  typename ::testing::internal::ConstRef<T>::type
+
 #if GTEST_HAS_STD_MOVE_
 using std::forward;
 using std::move;
