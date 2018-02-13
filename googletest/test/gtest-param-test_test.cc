@@ -853,8 +853,8 @@ class CustomFunctorNamingTest : public TestWithParam<std::string> {};
 TEST_P(CustomFunctorNamingTest, CustomTestNames) {}
 
 struct CustomParamNameFunctor {
-  std::string operator()(const ::testing::TestParamInfo<std::string>& info) {
-    return info.param;
+  std::string operator()(const ::testing::TestParamInfo<std::string>& inf) {
+    return inf.param;
   }
 };
 
@@ -893,8 +893,8 @@ TEST_P(CustomLambdaNamingTest, CustomTestNames) {}
 INSTANTIATE_TEST_CASE_P(CustomParamNameLambda,
                         CustomLambdaNamingTest,
                         Values(std::string("LambdaName")),
-                        [](const ::testing::TestParamInfo<std::string>& info) {
-                          return info.param;
+                        [](const ::testing::TestParamInfo<std::string>& inf) {
+                          return inf.param;
                         });
 
 #endif  // GTEST_LANG_CXX11
