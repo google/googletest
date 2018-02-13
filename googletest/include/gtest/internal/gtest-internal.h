@@ -894,30 +894,26 @@ typedef char IsNotContainer;
 template <class C>
 IsNotContainer IsContainerTest(long /* dummy */) { return '\0'; }
 
-template <typename C, bool = 
-  sizeof(IsContainerTest<C>(0)) == sizeof(IsContainer)
->
-struct IsRecursiveContainerImpl;
+// Trait to detect whether a type T is a hash table.
+// The heuristic used is that the type contains an inner type `hasher` and does
+// not contain an inner type `reverse_iterator`.
+// If the container is iterable in reverse, then order might actually matter.
+template <typename T>
+struct IsHashTable {
+ private:
+  template <typename U>
+  static char test(typename U::hasher*, typename U::reverse_iterator*);
+  template <typename U>
+  static int test(typename U::hasher*, ...);
+  template <typename U>
+  static char test(...);
 
-template <typename C>
-struct IsRecursiveContainerImpl<C, false> : public false_type {};
-
-template <typename C>
-struct IsRecursiveContainerImpl<C, true> {
-  typedef
-    typename IteratorTraits<typename C::iterator>::value_type
-  value_type;
-  typedef is_same<value_type, C> type;
+ public:
+  static const bool value = sizeof(test<T>(0, 0)) == sizeof(int);
 };
 
-// IsRecursiveContainer<Type> is a unary compile-time predicate that
-// evaluates whether C is a recursive container type. A recursive container 
-// type is a container type whose value_type is equal to the container type
-// itself. An example for a recursive container type is 
-// boost::filesystem::path, whose iterator has a value_type that is equal to 
-// boost::filesystem::path.
-template<typename C>
-struct IsRecursiveContainer : public IsRecursiveContainerImpl<C>::type {};
+template <typename T>
+const bool IsHashTable<T>::value;
 
 // EnableIf<condition>::type is void when 'Cond' is true, and
 // undefined when 'Cond' is false.  To use SFINAE to make a function
