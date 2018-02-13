@@ -538,7 +538,7 @@ TEST(CombineTest, CombineWithMaxNumberOfParameters) {
 
 class NonDefaultConstructAssignString {
  public:
-  NonDefaultConstructAssignString(const std::string& str) : str_(str) {}
+  NonDefaultConstructAssignString(const std::string& s) : str_(s) {}
 
   const std::string& str() const { return str_; }
 
