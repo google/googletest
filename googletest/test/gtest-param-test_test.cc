@@ -556,7 +556,7 @@ TEST(CombineTest, NonDefaultConstructAssign) {
       Combine(Values(0, 1), Values(NonDefaultConstructAssignString("A"),
                                    NonDefaultConstructAssignString("B")));
 
-  ParamGenerator<tuple<int, NonDefaultConstructAssignString>>::iterator it =
+  ParamGenerator<tuple<int, NonDefaultConstructAssignString> >::iterator it =
       gen.begin();
 
   EXPECT_EQ(0, std::get<0>(*it));
@@ -871,8 +871,8 @@ INSTANTIATE_TEST_CASE_P(AllAllowedCharacters,
                         CustomParamNameFunctor());
 
 inline std::string CustomParamNameFunction(
-    const ::testing::TestParamInfo<std::string>& info) {
-  return info.param;
+    const ::testing::TestParamInfo<std::string>& inf) {
+  return inf.param;
 }
 
 class CustomFunctionNamingTest : public TestWithParam<std::string> {};
@@ -893,8 +893,8 @@ TEST_P(CustomLambdaNamingTest, CustomTestNames) {}
 INSTANTIATE_TEST_CASE_P(CustomParamNameLambda,
                         CustomLambdaNamingTest,
                         Values(std::string("LambdaName")),
-                        [](const ::testing::TestParamInfo<std::string>& inf) {
-                          return inf.param;
+                        [](const ::testing::TestParamInfo<std::string>& info) {
+                          return info.param;
                         });
 
 #endif  // GTEST_LANG_CXX11
