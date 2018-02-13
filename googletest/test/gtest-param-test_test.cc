@@ -893,8 +893,7 @@ INSTANTIATE_TEST_CASE_P(CustomParamNameFunction,
 class CustomLambdaNamingTest : public TestWithParam<std::string> {};
 TEST_P(CustomLambdaNamingTest, CustomTestNames) {}
 
-INSTANTIATE_TEST_CASE_P(CustomParamNameLambda,
-                        CustomLambdaNamingTest,
+INSTANTIATE_TEST_CASE_P(CustomParamNameLambda, CustomLambdaNamingTest,
                         Values(std::string("LambdaName")),
                         [](const ::testing::TestParamInfo<std::string>& inf) {
                           return inf.param;
