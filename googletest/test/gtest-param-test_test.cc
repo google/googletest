@@ -536,6 +536,8 @@ TEST(CombineTest, CombineWithMaxNumberOfParameters) {
   VerifyGenerator(gen, expected_values);
 }
 
+#if GTEST_LANG_CXX11
+
 class NonDefaultConstructAssignString {
  public:
   NonDefaultConstructAssignString(const std::string& s) : str_(s) {}
@@ -578,6 +580,7 @@ TEST(CombineTest, NonDefaultConstructAssign) {
   EXPECT_TRUE(it == gen.end());
 }
 
+#endif   // GTEST_LANG_CXX11
 # endif  // GTEST_HAS_COMBINE
 
 // Tests that an generator produces correct sequence after being
