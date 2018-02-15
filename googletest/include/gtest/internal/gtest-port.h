@@ -704,7 +704,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 # if GTEST_USE_OWN_TR1_TUPLE
 #  include "gtest/internal/gtest-tuple.h"  // IWYU pragma: export  // NOLINT
-# elif GTEST_ENV_HAS_STD_TUPLE_
+# elif GTEST_ENV_HAS_STD_TUPLE_ && !GTEST_ENV_HAS_TR1_TUPLE_
 #  include <tuple>
 // C++11 puts its tuple into the ::std namespace rather than
 // ::std::tr1.  gtest expects tuple to live in ::std::tr1, so put it there.
