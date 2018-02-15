@@ -7562,10 +7562,10 @@ struct NotReallyAHashTable {
   typedef void reverse_iterator;
 };
 TEST(IsHashTable, Basic) {
-  EXPECT_FALSE(testing::internal::IsHashTable<std::vector<int>>::value);
   EXPECT_TRUE(testing::internal::IsHashTable<AHashTable>::value);
   EXPECT_FALSE(testing::internal::IsHashTable<NotReallyAHashTable>::value);
 #if GTEST_LANG_CXX11
+  EXPECT_FALSE(testing::internal::IsHashTable<std::vector<int>>::value);
   EXPECT_TRUE(testing::internal::IsHashTable<std::unordered_set<int>>::value);
 #endif  // GTEST_LANG_CXX11
 #if GTEST_HAS_HASH_SET_
