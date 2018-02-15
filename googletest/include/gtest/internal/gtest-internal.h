@@ -872,8 +872,11 @@ struct IsAProtocolMessage
 // a container class by checking the type of IsContainerTest<C>(0).
 // The value of the expression is insignificant.
 //
-// Note that we look for both C::iterator and C::const_iterator.  The
-// reason is that C++ injects the name of a class as a member of the
+// In C++11 mode we check the existence of a const_iterator and that an
+// iterator is properly implemented for the container.
+//
+// For pre-C++11 that we look for both C::iterator and C::const_iterator.
+// The reason is that C++ injects the name of a class as a member of the
 // class itself (e.g. you can refer to class iterator as either
 // 'iterator' or 'iterator::iterator').  If we look for C::iterator
 // only, for example, we would mistakenly think that a class named
@@ -883,41 +886,49 @@ struct IsAProtocolMessage
 // IsContainerTest(typename C::const_iterator*) and
 // IsContainerTest(...) doesn't work with Visual Age C++ and Sun C++.
 typedef int IsContainer;
+#if GTEST_LANG_CXX11
+template <class C,
+          class Iterator = decltype(::std::declval<const C&>().begin()),
+          class = decltype(::std::declval<const C&>().end()),
+          class = decltype(++::std::declval<Iterator&>()),
+          class = decltype(*::std::declval<Iterator>()),
+          class = typename C::const_iterator>
+IsContainer IsContainerTest(int /* dummy */) {
+  return 0;
+}
+#else
 template <class C>
 IsContainer IsContainerTest(int /* dummy */,
                             typename C::iterator* /* it */ = NULL,
                             typename C::const_iterator* /* const_it */ = NULL) {
   return 0;
 }
+#endif  // GTEST_LANG_CXX11
 
 typedef char IsNotContainer;
 template <class C>
 IsNotContainer IsContainerTest(long /* dummy */) { return '\0'; }
 
-template <typename C, bool = 
-  sizeof(IsContainerTest<C>(0)) == sizeof(IsContainer)
->
-struct IsRecursiveContainerImpl;
+// Trait to detect whether a type T is a hash table.
+// The heuristic used is that the type contains an inner type `hasher` and does
+// not contain an inner type `reverse_iterator`.
+// If the container is iterable in reverse, then order might actually matter.
+template <typename T>
+struct IsHashTable {
+ private:
+  template <typename U>
+  static char test(typename U::hasher*, typename U::reverse_iterator*);
+  template <typename U>
+  static int test(typename U::hasher*, ...);
+  template <typename U>
+  static char test(...);
 
-template <typename C>
-struct IsRecursiveContainerImpl<C, false> : public false_type {};
-
-template <typename C>
-struct IsRecursiveContainerImpl<C, true> {
-  typedef
-    typename IteratorTraits<typename C::iterator>::value_type
-  value_type;
-  typedef is_same<value_type, C> type;
+ public:
+  static const bool value = sizeof(test<T>(0, 0)) == sizeof(int);
 };
 
-// IsRecursiveContainer<Type> is a unary compile-time predicate that
-// evaluates whether C is a recursive container type. A recursive container 
-// type is a container type whose value_type is equal to the container type
-// itself. An example for a recursive container type is 
-// boost::filesystem::path, whose iterator has a value_type that is equal to 
-// boost::filesystem::path.
-template<typename C>
-struct IsRecursiveContainer : public IsRecursiveContainerImpl<C>::type {};
+template <typename T>
+const bool IsHashTable<T>::value;
 
 // EnableIf<condition>::type is void when 'Cond' is true, and
 // undefined when 'Cond' is false.  To use SFINAE to make a function
