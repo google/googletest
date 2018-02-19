@@ -3203,7 +3203,7 @@ class CartesianProductGenerator2
     virtual ParamIteratorInterface<ParamType>* Clone() const {
       return new Iterator(*this);
     }
-    virtual const ParamType* Current() const { return &current_value_; }
+    virtual const ParamType* Current() const { return current_value_.get(); }
     virtual bool Equals(const ParamIteratorInterface<ParamType>& other) const {
       // Having the same base generator guarantees that the other
       // iterator is of the same type and we can downcast.
@@ -3235,7 +3235,7 @@ class CartesianProductGenerator2
 
     void ComputeCurrentValue() {
       if (!AtEnd())
-        current_value_ = ParamType(*current1_, *current2_);
+        current_value_.reset(new ParamType(*current1_, *current2_));
     }
     bool AtEnd() const {
       // We must report iterator past the end of the range when either of the
@@ -3257,7 +3257,7 @@ class CartesianProductGenerator2
     const typename ParamGenerator<T2>::iterator begin2_;
     const typename ParamGenerator<T2>::iterator end2_;
     typename ParamGenerator<T2>::iterator current2_;
-    ParamType current_value_;
+    linked_ptr<ParamType> current_value_;
   };  // class CartesianProductGenerator2::Iterator
 
   // No implementation - assignment is unsupported.
@@ -3326,7 +3326,7 @@ class CartesianProductGenerator3
     virtual ParamIteratorInterface<ParamType>* Clone() const {
       return new Iterator(*this);
     }
-    virtual const ParamType* Current() const { return &current_value_; }
+    virtual const ParamType* Current() const { return current_value_.get(); }
     virtual bool Equals(const ParamIteratorInterface<ParamType>& other) const {
       // Having the same base generator guarantees that the other
       // iterator is of the same type and we can downcast.
@@ -3362,7 +3362,7 @@ class CartesianProductGenerator3
 
     void ComputeCurrentValue() {
       if (!AtEnd())
-        current_value_ = ParamType(*current1_, *current2_, *current3_);
+        current_value_.reset(new ParamType(*current1_, *current2_, *current3_));
     }
     bool AtEnd() const {
       // We must report iterator past the end of the range when either of the
@@ -3388,7 +3388,7 @@ class CartesianProductGenerator3
     const typename ParamGenerator<T3>::iterator begin3_;
     const typename ParamGenerator<T3>::iterator end3_;
     typename ParamGenerator<T3>::iterator current3_;
-    ParamType current_value_;
+    linked_ptr<ParamType> current_value_;
   };  // class CartesianProductGenerator3::Iterator
 
   // No implementation - assignment is unsupported.
@@ -3467,7 +3467,7 @@ class CartesianProductGenerator4
     virtual ParamIteratorInterface<ParamType>* Clone() const {
       return new Iterator(*this);
     }
-    virtual const ParamType* Current() const { return &current_value_; }
+    virtual const ParamType* Current() const { return current_value_.get(); }
     virtual bool Equals(const ParamIteratorInterface<ParamType>& other) const {
       // Having the same base generator guarantees that the other
       // iterator is of the same type and we can downcast.
@@ -3507,8 +3507,8 @@ class CartesianProductGenerator4
 
     void ComputeCurrentValue() {
       if (!AtEnd())
-        current_value_ = ParamType(*current1_, *current2_, *current3_,
-            *current4_);
+        current_value_.reset(new ParamType(*current1_, *current2_, *current3_,
+            *current4_));
     }
     bool AtEnd() const {
       // We must report iterator past the end of the range when either of the
@@ -3538,7 +3538,7 @@ class CartesianProductGenerator4
     const typename ParamGenerator<T4>::iterator begin4_;
     const typename ParamGenerator<T4>::iterator end4_;
     typename ParamGenerator<T4>::iterator current4_;
-    ParamType current_value_;
+    linked_ptr<ParamType> current_value_;
   };  // class CartesianProductGenerator4::Iterator
 
   // No implementation - assignment is unsupported.
@@ -3625,7 +3625,7 @@ class CartesianProductGenerator5
     virtual ParamIteratorInterface<ParamType>* Clone() const {
       return new Iterator(*this);
     }
-    virtual const ParamType* Current() const { return &current_value_; }
+    virtual const ParamType* Current() const { return current_value_.get(); }
     virtual bool Equals(const ParamIteratorInterface<ParamType>& other) const {
       // Having the same base generator guarantees that the other
       // iterator is of the same type and we can downcast.
@@ -3669,8 +3669,8 @@ class CartesianProductGenerator5
 
     void ComputeCurrentValue() {
       if (!AtEnd())
-        current_value_ = ParamType(*current1_, *current2_, *current3_,
-            *current4_, *current5_);
+        current_value_.reset(new ParamType(*current1_, *current2_, *current3_,
+            *current4_, *current5_));
     }
     bool AtEnd() const {
       // We must report iterator past the end of the range when either of the
@@ -3704,7 +3704,7 @@ class CartesianProductGenerator5
     const typename ParamGenerator<T5>::iterator begin5_;
     const typename ParamGenerator<T5>::iterator end5_;
     typename ParamGenerator<T5>::iterator current5_;
-    ParamType current_value_;
+    linked_ptr<ParamType> current_value_;
   };  // class CartesianProductGenerator5::Iterator
 
   // No implementation - assignment is unsupported.
@@ -3802,7 +3802,7 @@ class CartesianProductGenerator6
     virtual ParamIteratorInterface<ParamType>* Clone() const {
       return new Iterator(*this);
     }
-    virtual const ParamType* Current() const { return &current_value_; }
+    virtual const ParamType* Current() const { return current_value_.get(); }
     virtual bool Equals(const ParamIteratorInterface<ParamType>& other) const {
       // Having the same base generator guarantees that the other
       // iterator is of the same type and we can downcast.
@@ -3850,8 +3850,8 @@ class CartesianProductGenerator6
 
     void ComputeCurrentValue() {
       if (!AtEnd())
-        current_value_ = ParamType(*current1_, *current2_, *current3_,
-            *current4_, *current5_, *current6_);
+        current_value_.reset(new ParamType(*current1_, *current2_, *current3_,
+            *current4_, *current5_, *current6_));
     }
     bool AtEnd() const {
       // We must report iterator past the end of the range when either of the
@@ -3889,7 +3889,7 @@ class CartesianProductGenerator6
     const typename ParamGenerator<T6>::iterator begin6_;
     const typename ParamGenerator<T6>::iterator end6_;
     typename ParamGenerator<T6>::iterator current6_;
-    ParamType current_value_;
+    linked_ptr<ParamType> current_value_;
   };  // class CartesianProductGenerator6::Iterator
 
   // No implementation - assignment is unsupported.
@@ -3996,7 +3996,7 @@ class CartesianProductGenerator7
     virtual ParamIteratorInterface<ParamType>* Clone() const {
       return new Iterator(*this);
     }
-    virtual const ParamType* Current() const { return &current_value_; }
+    virtual const ParamType* Current() const { return current_value_.get(); }
     virtual bool Equals(const ParamIteratorInterface<ParamType>& other) const {
       // Having the same base generator guarantees that the other
       // iterator is of the same type and we can downcast.
@@ -4048,8 +4048,8 @@ class CartesianProductGenerator7
 
     void ComputeCurrentValue() {
       if (!AtEnd())
-        current_value_ = ParamType(*current1_, *current2_, *current3_,
-            *current4_, *current5_, *current6_, *current7_);
+        current_value_.reset(new ParamType(*current1_, *current2_, *current3_,
+            *current4_, *current5_, *current6_, *current7_));
     }
     bool AtEnd() const {
       // We must report iterator past the end of the range when either of the
@@ -4091,7 +4091,7 @@ class CartesianProductGenerator7
     const typename ParamGenerator<T7>::iterator begin7_;
     const typename ParamGenerator<T7>::iterator end7_;
     typename ParamGenerator<T7>::iterator current7_;
-    ParamType current_value_;
+    linked_ptr<ParamType> current_value_;
   };  // class CartesianProductGenerator7::Iterator
 
   // No implementation - assignment is unsupported.
@@ -4209,7 +4209,7 @@ class CartesianProductGenerator8
     virtual ParamIteratorInterface<ParamType>* Clone() const {
       return new Iterator(*this);
     }
-    virtual const ParamType* Current() const { return &current_value_; }
+    virtual const ParamType* Current() const { return current_value_.get(); }
     virtual bool Equals(const ParamIteratorInterface<ParamType>& other) const {
       // Having the same base generator guarantees that the other
       // iterator is of the same type and we can downcast.
@@ -4265,8 +4265,8 @@ class CartesianProductGenerator8
 
     void ComputeCurrentValue() {
       if (!AtEnd())
-        current_value_ = ParamType(*current1_, *current2_, *current3_,
-            *current4_, *current5_, *current6_, *current7_, *current8_);
+        current_value_.reset(new ParamType(*current1_, *current2_, *current3_,
+            *current4_, *current5_, *current6_, *current7_, *current8_));
     }
     bool AtEnd() const {
       // We must report iterator past the end of the range when either of the
@@ -4312,7 +4312,7 @@ class CartesianProductGenerator8
     const typename ParamGenerator<T8>::iterator begin8_;
     const typename ParamGenerator<T8>::iterator end8_;
     typename ParamGenerator<T8>::iterator current8_;
-    ParamType current_value_;
+    linked_ptr<ParamType> current_value_;
   };  // class CartesianProductGenerator8::Iterator
 
   // No implementation - assignment is unsupported.
@@ -4438,7 +4438,7 @@ class CartesianProductGenerator9
     virtual ParamIteratorInterface<ParamType>* Clone() const {
       return new Iterator(*this);
     }
-    virtual const ParamType* Current() const { return &current_value_; }
+    virtual const ParamType* Current() const { return current_value_.get(); }
     virtual bool Equals(const ParamIteratorInterface<ParamType>& other) const {
       // Having the same base generator guarantees that the other
       // iterator is of the same type and we can downcast.
@@ -4498,9 +4498,9 @@ class CartesianProductGenerator9
 
     void ComputeCurrentValue() {
       if (!AtEnd())
-        current_value_ = ParamType(*current1_, *current2_, *current3_,
+        current_value_.reset(new ParamType(*current1_, *current2_, *current3_,
             *current4_, *current5_, *current6_, *current7_, *current8_,
-            *current9_);
+            *current9_));
     }
     bool AtEnd() const {
       // We must report iterator past the end of the range when either of the
@@ -4550,7 +4550,7 @@ class CartesianProductGenerator9
     const typename ParamGenerator<T9>::iterator begin9_;
     const typename ParamGenerator<T9>::iterator end9_;
     typename ParamGenerator<T9>::iterator current9_;
-    ParamType current_value_;
+    linked_ptr<ParamType> current_value_;
   };  // class CartesianProductGenerator9::Iterator
 
   // No implementation - assignment is unsupported.
@@ -4685,7 +4685,7 @@ class CartesianProductGenerator10
     virtual ParamIteratorInterface<ParamType>* Clone() const {
       return new Iterator(*this);
     }
-    virtual const ParamType* Current() const { return &current_value_; }
+    virtual const ParamType* Current() const { return current_value_.get(); }
     virtual bool Equals(const ParamIteratorInterface<ParamType>& other) const {
       // Having the same base generator guarantees that the other
       // iterator is of the same type and we can downcast.
@@ -4749,9 +4749,9 @@ class CartesianProductGenerator10
 
     void ComputeCurrentValue() {
       if (!AtEnd())
-        current_value_ = ParamType(*current1_, *current2_, *current3_,
+        current_value_.reset(new ParamType(*current1_, *current2_, *current3_,
             *current4_, *current5_, *current6_, *current7_, *current8_,
-            *current9_, *current10_);
+            *current9_, *current10_));
     }
     bool AtEnd() const {
       // We must report iterator past the end of the range when either of the
@@ -4805,7 +4805,7 @@ class CartesianProductGenerator10
     const typename ParamGenerator<T10>::iterator begin10_;
     const typename ParamGenerator<T10>::iterator end10_;
     typename ParamGenerator<T10>::iterator current10_;
-    ParamType current_value_;
+    linked_ptr<ParamType> current_value_;
   };  // class CartesianProductGenerator10::Iterator
 
   // No implementation - assignment is unsupported.
