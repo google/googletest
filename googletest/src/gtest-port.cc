@@ -915,6 +915,7 @@ GTestLog::~GTestLog() {
     posix::Abort();
   }
 }
+
 // Disable Microsoft deprecation warnings for POSIX functions called from
 // this class (creat, dup, dup2, and close)
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4996)
@@ -1007,8 +1008,7 @@ static CapturedStream* g_captured_stderr = NULL;
 static CapturedStream* g_captured_stdout = NULL;
 
 // Starts capturing an output stream (stdout/stderr).
-static void CaptureStream(int fd,
-                          const char* stream_name,
+static void CaptureStream(int fd, const char* stream_name,
                           CapturedStream** stream) {
   if (*stream != NULL) {
     GTEST_LOG_(FATAL) << "Only one " << stream_name
@@ -1048,6 +1048,10 @@ std::string GetCapturedStderr() {
 }
 
 #endif  // GTEST_HAS_STREAM_REDIRECTION
+
+
+
+
 
 size_t GetFileSize(FILE* file) {
   fseek(file, 0, SEEK_END);

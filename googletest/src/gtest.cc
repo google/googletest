@@ -308,7 +308,7 @@ GTEST_DEFINE_bool_(
     internal::BoolFromGTestEnv("throw_on_failure", false),
     "When this flag is specified, a failed assertion will throw an exception "
     "if exceptions are enabled or exit the program with a non-zero code "
-    "otherwise.");
+    "otherwise. For use with an external test framework.");
 
 #if GTEST_USE_OWN_FLAGFILE_FLAG_
 GTEST_DEFINE_string_(
@@ -1782,7 +1782,7 @@ AssertionResult IsHRESULTFailure(const char* expr, long hr) {  // NOLINT
 // Utility functions for encoding Unicode text (wide strings) in
 // UTF-8.
 
-// A Unicode code-point can have upto 21 bits, and is encoded in UTF-8
+// A Unicode code-point can have up to 21 bits, and is encoded in UTF-8
 // like this:
 //
 // Code-point length   Encoding
@@ -2499,6 +2499,8 @@ Result HandleExceptionsInMethodIfSupported(
 #if GTEST_HAS_EXCEPTIONS
     try {
       return HandleSehExceptionsInMethodIfSupported(object, method, location);
+    } catch (const AssertionException&) {  // NOLINT
+      // This failure was reported already.
     } catch (const internal::GoogleTestFailureException&) {  // NOLINT
       // This exception type can only be thrown by a failed Google
       // Test assertion with the intention of letting another testing
@@ -2633,12 +2635,10 @@ void ReportInvalidTestCaseType(const char* test_case_name,
       << "probably rename one of the classes to put the tests into different\n"
       << "test cases.";
 
-  GTEST_LOG_(ERROR)
-       << FormatFileLocation(code_location.file.c_str(),
-                             code_location.line)
-       << " " << errors.GetString();
+  GTEST_LOG_(ERROR) << FormatFileLocation(code_location.file.c_str(),
+                                          code_location.line)
+                    << " " << errors.GetString();
 }
-
 }  // namespace internal
 
 namespace {
@@ -2960,7 +2960,7 @@ static int GetBitOffset(WORD color_mask) {
   if (color_mask == 0) return 0;
 
   int bitOffset = 0;
-  while((color_mask & 1) == 0) {
+  while ((color_mask & 1) == 0) {
     color_mask >>= 1;
     ++bitOffset;
   }
@@ -3168,7 +3168,6 @@ void PrettyUnitTestResultPrinter::OnTestIterationStart(
                   "Note: Randomizing tests' orders with a seed of %d .\n",
                   unit_test.random_seed());
   }
-
   ColoredPrintf(COLOR_GREEN,  "[==========] ");
   printf("Running %s from %s.\n",
          FormatTestCount(unit_test.test_to_run_count()).c_str(),
@@ -3535,8 +3534,8 @@ void XmlUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
     //   3. To interpret the meaning of errno in a thread-safe way,
     //      we need the strerror_r() function, which is not available on
     //      Windows.
-    GTEST_LOG_(FATAL) << "Unable to open file \""
-                      << output_file_ << "\"";
+
+    GTEST_LOG_(FATAL) << "Unable to open file \"" << output_file_ << "\"";
   }
   std::stringstream stream;
   PrintXmlUnitTest(&stream, unit_test);
@@ -3834,6 +3833,7 @@ std::string XmlUnitTestResultPrinter::TestPropertiesAsXmlAttributes(
 }
 
 // End XmlUnitTestResultPrinter
+
 
 #if GTEST_CAN_STREAM_RESULTS_
 
@@ -4463,8 +4463,7 @@ void UnitTestImpl::ConfigureXmlOutput() {
         UnitTestOptions::GetAbsolutePathToOutputFile().c_str()));
   } else if (output_format != "") {
     GTEST_LOG_(WARNING) << "WARNING: unrecognized output format \""
-                        << output_format
-                        << "\" ignored.";
+                        << output_format << "\" ignored.";
   }
 }
 
@@ -4479,8 +4478,7 @@ void UnitTestImpl::ConfigureStreamingOutput() {
       listeners()->Append(new StreamingListener(target.substr(0, pos),
                                                 target.substr(pos+1)));
     } else {
-      GTEST_LOG_(WARNING) << "unrecognized streaming target \""
-                          << target
+      GTEST_LOG_(WARNING) << "unrecognized streaming target \"" << target
                           << "\" ignored.";
     }
   }
@@ -5265,7 +5263,8 @@ static const char kColorEncodedHelpMessage[] =
 "  @G--" GTEST_FLAG_PREFIX_ "break_on_failure@D\n"
 "      Turn assertion failures into debugger break-points.\n"
 "  @G--" GTEST_FLAG_PREFIX_ "throw_on_failure@D\n"
-"      Turn assertion failures into C++ exceptions.\n"
+"      Turn assertion failures into C++ exceptions for use by an external\n"
+"      test framework.\n"
 "  @G--" GTEST_FLAG_PREFIX_ "catch_exceptions=0@D\n"
 "      Do not report exceptions as test failures. Instead, allow them\n"
 "      to crash the program or throw a pop-up (on Windows).\n"
@@ -5316,8 +5315,7 @@ static bool ParseGoogleTestFlag(const char* const arg) {
 static void LoadFlagsFromFile(const std::string& path) {
   FILE* flagfile = posix::FOpen(path.c_str(), "r");
   if (!flagfile) {
-    GTEST_LOG_(FATAL) << "Unable to open file \""
-                      << GTEST_FLAG(flagfile)
+    GTEST_LOG_(FATAL) << "Unable to open file \"" << GTEST_FLAG(flagfile)
                       << "\"";
   }
   std::string contents(ReadEntireFile(flagfile));
@@ -5448,8 +5446,9 @@ void InitGoogleTest(int* argc, wchar_t** argv) {
 
 std::string TempDir() {
 #if defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_)
-    return GTEST_CUSTOM_TEMPDIR_FUNCTION_();
+  return GTEST_CUSTOM_TEMPDIR_FUNCTION_();
 #endif
+
 #if GTEST_OS_WINDOWS_MOBILE
   return "\\temp\\";
 #elif GTEST_OS_WINDOWS

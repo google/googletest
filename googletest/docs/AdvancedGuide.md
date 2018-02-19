@@ -872,12 +872,32 @@ TEST(FooTest, Bar) {
 }
 ```
 
-Since we don't use exceptions, it is technically impossible to
-implement the intended behavior here.  To alleviate this, Google Test
-provides two solutions.  You could use either the
-`(ASSERT|EXPECT)_NO_FATAL_FAILURE` assertions or the
-`HasFatalFailure()` function.  They are described in the following two
+To alleviate this, gUnit provides three different solutions. You could use
+either exceptions, the `(ASSERT|EXPECT)_NO_FATAL_FAILURE` assertions or the
+`HasFatalFailure()` function. They are described in the following two
 subsections.
+
+#### Asserting on Subroutines with an exception
+
+The following code can turn ASSERT-failure into an exception:
+
+```c++
+class ThrowListener : public testing::EmptyTestEventListener {
+  void OnTestPartResult(const testing::TestPartResult& result) override {
+    if (result.type() == testing::TestPartResult::kFatalFailure) {
+      throw testing::AssertionException(result);
+    }
+  }
+};
+int main(int argc, char** argv) {
+  ...
+  testing::UnitTest::GetInstance()->listeners().Append(new ThrowListener);
+  return RUN_ALL_TESTS();
+}
+```
+
+This listener should be added after other listeners if you have any, otherwise
+they won't see failed `OnTestPartResult`.
 
 ### Asserting on Subroutines ###
 

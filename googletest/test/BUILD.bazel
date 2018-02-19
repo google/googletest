@@ -219,6 +219,13 @@ py_test(
     deps = [":gtest_test_utils"],
 )
 
+cc_test(
+    name = "gtest_assert_by_exception_test",
+    size = "small",
+    srcs = ["gtest_assert_by_exception_test.cc"],
+    deps = ["//:gtest"],
+)
+
 cc_binary(
     name = "gtest_throw_on_failure_test_",
     testonly = 1,
