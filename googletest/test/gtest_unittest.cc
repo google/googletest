@@ -2088,7 +2088,7 @@ class UnitTestRecordPropertyTestEnvironment : public Environment {
 };
 
 // This will test property recording outside of any test or test case.
-Environment* record_property_env GTEST_ATTRIBUTE_UNUSED_ =
+static Environment* record_property_env =
     AddGlobalTestEnvironment(new UnitTestRecordPropertyTestEnvironment);
 
 // This group of tests is for predicate assertions (ASSERT_PRED*, etc)
@@ -3361,7 +3361,7 @@ class NoFatalFailureTest : public Test {
 
   void DoAssertNoFatalFailureOnFails() {
     ASSERT_NO_FATAL_FAILURE(Fails());
-    ADD_FAILURE() << "shold not reach here.";
+    ADD_FAILURE() << "should not reach here.";
   }
 
   void DoExpectNoFatalFailureOnFails() {
@@ -6893,14 +6893,6 @@ TEST(StaticAssertTypeEqTest, CompilesForEqualTypes) {
   StaticAssertTypeEq<int*, IntAlias*>();
 }
 
-TEST(GetCurrentOsStackTraceExceptTopTest, ReturnsTheStackTrace) {
-  testing::UnitTest* const unit_test = testing::UnitTest::GetInstance();
-
-  // We don't have a stack walker in Google Test yet.
-  EXPECT_STREQ("", GetCurrentOsStackTraceExceptTop(unit_test, 0).c_str());
-  EXPECT_STREQ("", GetCurrentOsStackTraceExceptTop(unit_test, 1).c_str());
-}
-
 TEST(HasNonfatalFailureTest, ReturnsFalseWhenThereIsNoFailure) {
   EXPECT_FALSE(HasNonfatalFailure());
 }
@@ -7660,7 +7652,7 @@ TEST(NativeArrayTest, MethodsWork) {
   EXPECT_EQ(0, *it);
   ++it;
   EXPECT_EQ(1, *it);
-  ++it;
+  it++;
   EXPECT_EQ(2, *it);
   ++it;
   EXPECT_EQ(na.end(), it);
