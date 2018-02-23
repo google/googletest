@@ -3697,7 +3697,7 @@ TEST(AssertionTest, ASSERT_EQ_NULL) {
   // A failure.
   static int n = 0;
   EXPECT_FATAL_FAILURE(ASSERT_EQ(NULL, &n),
-                       "  &n\n    Which is: 0x");
+                       "  &n\n    Which is:");
 }
 #endif  // GTEST_CAN_COMPARE_NULL
 
@@ -3812,7 +3812,7 @@ void TestEq1(int x) {
 // Tests calling a test subroutine that's not part of a fixture.
 TEST(AssertionTest, NonFixtureSubroutine) {
   EXPECT_FATAL_FAILURE(TestEq1(2),
-                       "Which is: 2");
+                       "  x\n    Which is: 2");
 }
 
 // An uncopyable class.
@@ -3951,13 +3951,13 @@ TEST(AssertionTest, AnonymousEnum) {
 
   // ICE's in C++Builder.
   EXPECT_FATAL_FAILURE(ASSERT_EQ(kCaseA, kCaseB),
-                       "kCaseB");
+                       "  kCaseB\n    Which is: ");
   EXPECT_FATAL_FAILURE(ASSERT_EQ(kCaseA, kCaseC),
-                       "Which is: 42");
+                       "\n    Which is: 42");
 # endif
 
   EXPECT_FATAL_FAILURE(ASSERT_EQ(kCaseA, kCaseC),
-                       "Which is: -1");
+                       "\n    Which is: -1");
 }
 
 #endif  // !GTEST_OS_MAC && !defined(__SUNPRO_CC)
@@ -4441,7 +4441,7 @@ TEST(ExpectTest, EXPECT_EQ_0) {
 
   // A failure.
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(0, 5.6),
-                          "Expected equality of these values:\n  0\n  5.6");
+                          "  0\n  5.6");
 }
 
 // Tests EXPECT_NE.
@@ -4541,7 +4541,7 @@ TEST(ExpectTest, EXPECT_ANY_THROW) {
 TEST(ExpectTest, ExpectPrecedence) {
   EXPECT_EQ(1 < 2, true);
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(true, true && false),
-                          "true && false");
+                          "  true && false\n    Which is: false");
 }
 
 
@@ -4688,14 +4688,14 @@ TEST(EqAssertionTest, Bool) {
   EXPECT_FATAL_FAILURE({
       bool false_value = false;
       ASSERT_EQ(false_value, true);
-    }, "Which is: false");
+    }, "  false_value\n    Which is: false\n  true");
 }
 
 // Tests using int values in {EXPECT|ASSERT}_EQ.
 TEST(EqAssertionTest, Int) {
   ASSERT_EQ(32, 32);
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(32, 33),
-                          "33");
+                          "  32\n  33");
 }
 
 // Tests using time_t values in {EXPECT|ASSERT}_EQ.
@@ -4712,9 +4712,9 @@ TEST(EqAssertionTest, Char) {
   ASSERT_EQ('z', 'z');
   const char ch = 'b';
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ('\0', ch),
-                          "ch");
+                          "  ch\n    Which is: 'b'");
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ('a', ch),
-                          "ch");
+                          "  ch\n    Which is: 'b'");
 }
 
 // Tests using wchar_t values in {EXPECT|ASSERT}_EQ.
@@ -4734,7 +4734,7 @@ TEST(EqAssertionTest, WideChar) {
                           "wchar");
   wchar = 0x8119;
   EXPECT_FATAL_FAILURE(ASSERT_EQ(static_cast<wchar_t>(0x8120), wchar),
-                       "wchar");
+                       "  wchar\n    Which is: L'");
 }
 
 // Tests using ::std::string values in {EXPECT|ASSERT}_EQ.
@@ -4763,8 +4763,7 @@ TEST(EqAssertionTest, StdString) {
   static ::std::string str3(str1);
   str3.at(2) = '\0';
   EXPECT_FATAL_FAILURE(ASSERT_EQ(str1, str3),
-                       "  str3\n"
-                       "    Which is: \"A \\0 in the middle\"");
+                       "  str3\n    Which is: \"A \\0 in the middle\"");
 }
 
 #if GTEST_HAS_STD_WSTRING
