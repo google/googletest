@@ -2421,9 +2421,8 @@ TEST(StringAssertionTest, ASSERT_STREQ) {
   const char p2[] = "good";
   ASSERT_STREQ(p1, p2);
 
-  EXPECT_FATAL_FAILURE(
-      ASSERT_STREQ("bad", "good"),
-      "Expected equality of these values:\n  \"bad\"\n  \"good\"");
+  EXPECT_FATAL_FAILURE(ASSERT_STREQ("bad", "good"),
+                       "  \"bad\"\n  \"good\"");
 }
 
 // Tests ASSERT_STREQ with NULL arguments.
@@ -3698,7 +3697,7 @@ TEST(AssertionTest, ASSERT_EQ_NULL) {
   // A failure.
   static int n = 0;
   EXPECT_FATAL_FAILURE(ASSERT_EQ(NULL, &n),
-                       "  &n\n    Which is:");
+                       "  &n\n    Which is: 0x");
 }
 #endif  // GTEST_CAN_COMPARE_NULL
 
