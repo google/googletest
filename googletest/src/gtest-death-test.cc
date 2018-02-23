@@ -73,7 +73,11 @@ namespace testing {
 // Constants.
 
 // The default death test style.
-static const char kDefaultDeathTestStyle[] = "threadsafe";
+//
+// This is defined in internal/gtest-port.h as "fast", but can be overridden by
+// a definition in internal/custom/gtest-port.h. The recommended value, which is
+// used internally at Google, is "threadsafe".
+static const char kDefaultDeathTestStyle[] = GTEST_DEFAULT_DEATH_TEST_STYLE;
 
 GTEST_DEFINE_string_(
     death_test_style,
