@@ -4425,7 +4425,7 @@ TEST(ExpectTest, EXPECT_EQ_NULL) {
   // A failure.
   int n = 0;
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(NULL, &n),
-                          "&n\n");
+                          "  &n\n    Which is:");
 }
 #endif  // GTEST_CAN_COMPARE_NULL
 
@@ -4883,9 +4883,9 @@ TEST(EqAssertionTest, CharPointer) {
   ASSERT_EQ(p1, p1);
 
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(p0, p2),
-                          "p2");
+                          "  p2\n    Which is:");
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(p1, p2),
-                          "p2");
+                          "  p2\n    Which is:");
   EXPECT_FATAL_FAILURE(ASSERT_EQ(reinterpret_cast<char*>(0x1234),
                                  reinterpret_cast<char*>(0xABC0)),
                        "ABC0");
@@ -4905,9 +4905,9 @@ TEST(EqAssertionTest, WideCharPointer) {
   EXPECT_EQ(p0, p0);
 
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(p0, p2),
-                          "p2");
+                          "  p2\n    Which is:");
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(p1, p2),
-                          "p2");
+                          "  p2\n    Which is:");
   void* pv3 = (void*)0x1234;  // NOLINT
   void* pv4 = (void*)0xABC0;  // NOLINT
   const wchar_t* p3 = reinterpret_cast<const wchar_t*>(pv3);
