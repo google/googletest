@@ -100,25 +100,6 @@ Matcher<StringPiece>::Matcher(StringPiece s) {
 
 namespace internal {
 
-// Joins a vector of strings as if they are fields of a tuple; returns
-// the joined string.
-GTEST_API_ string JoinAsTuple(const Strings& fields) {
-  switch (fields.size()) {
-    case 0:
-      return "";
-    case 1:
-      return fields[0];
-    default:
-      string result = "(" + fields[0];
-      for (size_t i = 1; i < fields.size(); i++) {
-        result += ", ";
-        result += fields[i];
-      }
-      result += ")";
-      return result;
-  }
-}
-
 // Returns the description for a matcher defined using the MATCHER*()
 // macro where the user-supplied description string is "", if
 // 'negation' is false; otherwise returns the description of the

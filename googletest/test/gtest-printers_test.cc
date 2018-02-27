@@ -837,22 +837,22 @@ TEST(PrintTypeWithGenericStreamingTest, TypeImplicitlyConvertible) {
   EXPECT_EQ("AllowsGenericStreamingAndImplicitConversionTemplate", Print(a));
 }
 
-#if GTEST_HAS_STRING_PIECE_
+#if GTEST_HAS_ABSL
 
-// Tests printing StringPiece.
+// Tests printing ::absl::string_view.
 
-TEST(PrintStringPieceTest, SimpleStringPiece) {
-  const StringPiece sp = "Hello";
+TEST(PrintStringViewTest, SimpleStringView) {
+  const ::absl::string_view sp = "Hello";
   EXPECT_EQ("\"Hello\"", Print(sp));
 }
 
-TEST(PrintStringPieceTest, UnprintableCharacters) {
+TEST(PrintStringViewTest, UnprintableCharacters) {
   const char str[] = "NUL (\0) and \r\t";
-  const StringPiece sp(str, sizeof(str) - 1);
+  const ::absl::string_view sp(str, sizeof(str) - 1);
   EXPECT_EQ("\"NUL (\\0) and \\r\\t\"", Print(sp));
 }
 
-#endif  // GTEST_HAS_STRING_PIECE_
+#endif  // GTEST_HAS_ABSL
 
 // Tests printing STL containers.
 
@@ -1327,7 +1327,7 @@ TEST(FormatForComparisonFailureMessageTest, FormatsNonCharArrayAsPointer) {
 }
 
 // Tests formatting a char pointer when it's compared with another pointer.
-// In this case we want to print it as a raw pointer, as the comparision is by
+// In this case we want to print it as a raw pointer, as the comparison is by
 // pointer.
 
 // char pointer vs pointer
@@ -1764,6 +1764,18 @@ TEST(UniversalTersePrintTupleFieldsToStringsTestWithStd, PrintsTersely) {
 }
 
 #endif  // GTEST_HAS_STD_TUPLE_
+
+#if GTEST_HAS_ABSL
+
+TEST(PrintOptionalTest, Basic) {
+  absl::optional<int> value;
+  EXPECT_EQ("(nullopt)", PrintToString(value));
+  value = {7};
+  EXPECT_EQ("(7)", PrintToString(value));
+  EXPECT_EQ("(1.1)", PrintToString(absl::optional<double>{1.1}));
+  EXPECT_EQ("(\"A\")", PrintToString(absl::optional<std::string>{"A"}));
+}
+#endif  // GTEST_HAS_ABSL
 
 }  // namespace gtest_printers_test
 }  // namespace testing
