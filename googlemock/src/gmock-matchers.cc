@@ -421,10 +421,9 @@ void UnorderedElementsAreMatcherImplBase::DescribeNegationToImpl(
 // and better error reporting.
 // Returns false, writing an explanation to 'listener', if and only
 // if the success criteria are not met.
-bool UnorderedElementsAreMatcherImplBase::
-    VerifyAllElementsAndMatchersAreMatched(
-        const ::std::vector<std::string>& element_printouts,
-        const MatchMatrix& matrix, MatchResultListener* listener) const {
+bool UnorderedElementsAreMatcherImplBase::VerifyMatchMatrix(
+    const ::std::vector<std::string>& element_printouts,
+    const MatchMatrix& matrix, MatchResultListener* listener) const {
   bool result = true;
   ::std::vector<char> element_matched(matrix.LhsSize(), 0);
   ::std::vector<char> matcher_matched(matrix.RhsSize(), 0);
@@ -437,12 +436,11 @@ bool UnorderedElementsAreMatcherImplBase::
     }
   }
 
-  {
+  if (match_flags() & UnorderedMatcherRequire::Superset) {
     const char* sep =
         "where the following matchers don't match any elements:\n";
     for (size_t mi = 0; mi < matcher_matched.size(); ++mi) {
-      if (matcher_matched[mi])
-        continue;
+      if (matcher_matched[mi]) continue;
       result = false;
       if (listener->IsInterested()) {
         *listener << sep << "matcher #" << mi << ": ";
@@ -452,7 +450,7 @@ bool UnorderedElementsAreMatcherImplBase::
     }
   }
 
-  {
+  if (match_flags() & UnorderedMatcherRequire::Subset) {
     const char* sep =
         "where the following elements don't match any matchers:\n";
     const char* outer_sep = "";
@@ -460,8 +458,7 @@ bool UnorderedElementsAreMatcherImplBase::
       outer_sep = "\nand ";
     }
     for (size_t ei = 0; ei < element_matched.size(); ++ei) {
-      if (element_matched[ei])
-        continue;
+      if (element_matched[ei]) continue;
       result = false;
       if (listener->IsInterested()) {
         *listener << outer_sep << sep << "element #" << ei << ": "
@@ -472,6 +469,47 @@ bool UnorderedElementsAreMatcherImplBase::
     }
   }
   return result;
+}
+
+bool UnorderedElementsAreMatcherImplBase::FindPairing(
+    const MatchMatrix& matrix, MatchResultListener* listener) const {
+  ElementMatcherPairs matches = FindMaxBipartiteMatching(matrix);
+
+  size_t max_flow = matches.size();
+  if ((match_flags() & UnorderedMatcherRequire::Superset) &&
+      max_flow < matrix.RhsSize()) {
+    if (listener->IsInterested()) {
+      *listener << "where no permutation of the elements can satisfy all "
+                   "matchers, and the closest match is "
+                << max_flow << " of " << matrix.RhsSize()
+                << " matchers with the pairings:\n";
+      LogElementMatcherPairVec(matches, listener->stream());
+    }
+    return false;
+  }
+  if ((match_flags() & UnorderedMatcherRequire::Subset) &&
+      max_flow < matrix.LhsSize()) {
+    if (listener->IsInterested()) {
+      *listener
+          << "where not all elements can be matched, and the closest match is "
+          << max_flow << " of " << matrix.RhsSize()
+          << " matchers with the pairings:\n";
+      LogElementMatcherPairVec(matches, listener->stream());
+    }
+    return false;
+  }
+
+  if (matches.size() > 1) {
+    if (listener->IsInterested()) {
+      const char* sep = "where:\n";
+      for (size_t mi = 0; mi < matches.size(); ++mi) {
+        *listener << sep << " - element #" << matches[mi].first
+                  << " is matched by matcher #" << matches[mi].second;
+        sep = ",\n";
+      }
+    }
+  }
+  return true;
 }
 
 }  // namespace internal
