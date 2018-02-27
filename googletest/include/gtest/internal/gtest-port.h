@@ -107,6 +107,12 @@
 //   GTEST_CREATE_SHARED_LIBRARY
 //                            - Define to 1 when compiling Google Test itself
 //                              as a shared library.
+//   GTEST_DEFAULT_DEATH_TEST_STYLE
+//                            - The default value of --gtest_death_test_style.
+//                              The legacy default has been "fast" in the open
+//                              source version since 2008. The recommended value
+//                              is "threadsafe", and can be set in
+//                              custom/gtest-port.h.
 
 // Platform-indicating macros
 // --------------------------
@@ -973,6 +979,10 @@ using ::std::tuple_size;
 #ifndef GTEST_API_
 # define GTEST_API_
 #endif // GTEST_API_
+
+#ifndef GTEST_DEFAULT_DEATH_TEST_STYLE
+# define GTEST_DEFAULT_DEATH_TEST_STYLE  "fast"
+#endif  // GTEST_DEFAULT_DEATH_TEST_STYLE
 
 #ifdef __GNUC__
 // Ask the compiler to never inline a given function.
