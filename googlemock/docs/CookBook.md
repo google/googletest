@@ -1231,7 +1231,7 @@ that references the implementation object dies, the implementation
 object will be deleted.
 
 Therefore, if you have some complex matcher that you want to use again
-and again, there is no need to build it everytime. Just assign it to a
+and again, there is no need to build it every time. Just assign it to a
 matcher variable and use that variable repeatedly! For example,
 
 ```
@@ -1403,7 +1403,7 @@ edge from node A to node B wherever A must occur before B, we can get
 a DAG. We use the term "sequence" to mean a directed path in this
 DAG. Now, if we decompose the DAG into sequences, we just need to know
 which sequences each `EXPECT_CALL()` belongs to in order to be able to
-reconstruct the orginal DAG.
+reconstruct the original DAG.
 
 So, to specify the partial order on the expectations we need to do two
 things: first to define some `Sequence` objects, and then for each
@@ -2182,7 +2182,7 @@ the implementation object dies, the implementation object will be
 deleted.
 
 If you have some complex action that you want to use again and again,
-you may not have to build it from scratch everytime. If the action
+you may not have to build it from scratch every time. If the action
 doesn't have an internal state (i.e. if it always does the same thing
 no matter how many times it has been called), you can assign it to an
 action variable and use that variable repeatedly. For example:
