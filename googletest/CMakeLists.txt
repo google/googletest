@@ -27,8 +27,6 @@ option(
   "Build gtest with internal symbols hidden in shared libraries."
   OFF)
 
-set(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "Generate debug library name with a postfix.")
-
 # Defines pre_project_set_up_hermetic_build() and set_up_hermetic_build().
 include(cmake/hermetic_build.cmake OPTIONAL)
 
