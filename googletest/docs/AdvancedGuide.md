@@ -2060,6 +2060,207 @@ Things to note:
 
 _Availability:_ Linux, Windows, Mac.
 
+#### Generating an JSON Report {#JsonReport}
+
+gUnit can also emit a JSON report as an alternative format to XML. To generate
+the JSON report, set the `GUNIT_OUTPUT` environment variable or the
+`--gunit_output` flag to the string `"json:path_to_output_file"`, which will
+create the file at the given location. You can also just use the string
+`"json"`, in which case the output can be found in the `test_detail.json` file
+in the current directory.
+
+The report format conforms to the following JSON Schema:
+
+```json
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "definitions": {
+    "TestCase": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "tests": { "type": "integer" },
+        "failures": { "type": "integer" },
+        "disabled": { "type": "integer" },
+        "time": { "type": "string" },
+        "testsuite": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TestInfo"
+          }
+        }
+      }
+    },
+    "TestInfo": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["RUN", "NOTRUN"]
+        },
+        "time": { "type": "string" },
+        "classname": { "type": "string" },
+        "failures": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Failure"
+          }
+        }
+      }
+    },
+    "Failure": {
+      "type": "object",
+      "properties": {
+        "failures": { "type": "string" },
+        "type": { "type": "string" }
+      }
+    }
+  },
+  "properties": {
+    "tests": { "type": "integer" },
+    "failures": { "type": "integer" },
+    "disabled": { "type": "integer" },
+    "errors": { "type": "integer" },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "time": { "type": "string" },
+    "name": { "type": "string" },
+    "testsuites": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/TestCase"
+      }
+    }
+  }
+}
+```
+
+The report uses the format that conforms to the following Proto3 using the
+[JSON encoding](https://developers.google.com/protocol-buffers/docs/proto3#json):
+
+```proto
+syntax = "proto3";
+
+package googletest;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+message UnitTest {
+  int32 tests = 1;
+  int32 failures = 2;
+  int32 disabled = 3;
+  int32 errors = 4;
+  google.protobuf.Timestamp timestamp = 5;
+  google.protobuf.Duration time = 6;
+  string name = 7;
+  repeated TestCase testsuites = 8;
+}
+
+message TestCase {
+  string name = 1;
+  int32 tests = 2;
+  int32 failures = 3;
+  int32 disabled = 4;
+  int32 errors = 5;
+  google.protobuf.Duration time = 6;
+  repeated TestInfo testsuite = 7;
+}
+
+message TestInfo {
+  string name = 1;
+  enum Status {
+    RUN = 0;
+    NOTRUN = 1;
+  }
+  Status status = 2;
+  google.protobuf.Duration time = 3;
+  string classname = 4;
+  message Failure {
+    string failures = 1;
+    string type = 2;
+  }
+  repeated Failure failures = 5;
+}
+```
+
+For instance, the following program
+
+```c++
+TEST(MathTest, Addition) { ... }
+TEST(MathTest, Subtraction) { ... }
+TEST(LogicTest, NonContradiction) { ... }
+```
+
+could generate this report:
+
+```json
+{
+  "tests": 3,
+  "failures": 1,
+  "errors": 0,
+  "time": "0.035s",
+  "timestamp": "2011-10-31T18:52:42Z"
+  "name": "AllTests",
+  "testsuites": [
+    {
+      "name": "MathTest",
+      "tests": 2,
+      "failures": 1,
+      "errors": 0,
+      "time": "0.015s",
+      "testsuite": [
+        {
+          "name": "Addition",
+          "status": "RUN",
+          "time": "0.007s",
+          "classname": "",
+          "failures": [
+            {
+              "message": "Value of: add(1, 1)\x0A  Actual: 3\x0AExpected: 2",
+              "type": ""
+            },
+            {
+              "message": "Value of: add(1, -1)\x0A  Actual: 1\x0AExpected: 0",
+              "type": ""
+            }
+          ]
+        },
+        {
+          "name": "Subtraction",
+          "status": "RUN",
+          "time": "0.005s",
+          "classname": ""
+        }
+      ]
+    }
+    {
+      "name": "LogicTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "time": "0.005s",
+      "testsuite": [
+        {
+          "name": "NonContradiction",
+          "status": "RUN",
+          "time": "0.005s",
+          "classname": ""
+        }
+      ]
+    }
+  ]
+}
+```
+
+IMPORTANT: The exact format of the JSON document is subject to change.
+
+**Availability**: Linux, Windows, Mac.
+
 ## Controlling How Failures Are Reported ##
 
 ### Turning Assertion Failures into Break-Points ###
