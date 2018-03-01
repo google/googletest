@@ -5655,5 +5655,69 @@ TEST(UnorderedPointwiseTest, AllowsMonomorphicInnerMatcher) {
   EXPECT_THAT(lhs, UnorderedPointwise(m2, rhs));
 }
 
+class SampleVariantIntString {
+ public:
+  SampleVariantIntString(int i) : i_(i), has_int_(true) {}
+  SampleVariantIntString(const std::string& s) : s_(s), has_int_(false) {}
+
+  template <typename T>
+  friend bool holds_alternative(const SampleVariantIntString& value) {
+    return value.has_int_ == internal::IsSame<T, int>::value;
+  }
+
+  template <typename T>
+  friend const T& get(const SampleVariantIntString& value) {
+    return value.get_impl(static_cast<T*>(NULL));
+  }
+
+ private:
+  const int& get_impl(int*) const { return i_; }
+  const std::string& get_impl(std::string*) const { return s_; }
+
+  int i_;
+  std::string s_;
+  bool has_int_;
+};
+
+TEST(VariantTest, DescribesSelf) {
+  const Matcher<SampleVariantIntString> m = VariantWith<int>(Eq(1));
+  EXPECT_THAT(Describe(m), ContainsRegex("is a variant<> with value of type "
+                                         "'.*' and the value is equal to 1"));
+}
+
+TEST(VariantTest, ExplainsSelf) {
+  const Matcher<SampleVariantIntString> m = VariantWith<int>(Eq(1));
+  EXPECT_THAT(Explain(m, SampleVariantIntString(1)),
+              ContainsRegex("whose value 1"));
+  EXPECT_THAT(Explain(m, SampleVariantIntString("A")),
+              HasSubstr("whose value is not of type '"));
+  EXPECT_THAT(Explain(m, SampleVariantIntString(2)),
+              "whose value 2 doesn't match");
+}
+
+TEST(VariantTest, FullMatch) {
+  Matcher<SampleVariantIntString> m = VariantWith<int>(Eq(1));
+  EXPECT_TRUE(m.Matches(SampleVariantIntString(1)));
+
+  m = VariantWith<std::string>(Eq("1"));
+  EXPECT_TRUE(m.Matches(SampleVariantIntString("1")));
+}
+
+TEST(VariantTest, TypeDoesNotMatch) {
+  Matcher<SampleVariantIntString> m = VariantWith<int>(Eq(1));
+  EXPECT_FALSE(m.Matches(SampleVariantIntString("1")));
+
+  m = VariantWith<std::string>(Eq("1"));
+  EXPECT_FALSE(m.Matches(SampleVariantIntString(1)));
+}
+
+TEST(VariantTest, InnerDoesNotMatch) {
+  Matcher<SampleVariantIntString> m = VariantWith<int>(Eq(1));
+  EXPECT_FALSE(m.Matches(SampleVariantIntString(2)));
+
+  m = VariantWith<std::string>(Eq("1"));
+  EXPECT_FALSE(m.Matches(SampleVariantIntString("2")));
+}
+
 }  // namespace gmock_matchers_test
 }  // namespace testing
