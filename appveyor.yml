@@ -72,7 +72,8 @@ build_script:
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
-    & cmake --build . --config $env:configuration
+    $cmake_parallel = if ($env:generator -eq "MinGW Makefiles") {"-j2"} else  {"/m"}
+    & cmake --build . --config $env:configuration -- $cmake_parallel
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
