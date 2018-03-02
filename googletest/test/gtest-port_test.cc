@@ -374,17 +374,15 @@ TEST(GtestCheckDeathTest, LivesSilentlyOnSuccess) {
 // the platform. The test will produce compiler errors in case of failure.
 // For simplicity, we only cover the most important platforms here.
 TEST(RegexEngineSelectionTest, SelectsCorrectRegexEngine) {
-#if !GTEST_USES_PCRE
-# if GTEST_HAS_POSIX_RE
+#if GTEST_HAS_POSIX_RE
 
   EXPECT_TRUE(GTEST_USES_POSIX_RE);
 
-# else
+#else
 
   EXPECT_TRUE(GTEST_USES_SIMPLE_RE);
 
-# endif
-#endif  // !GTEST_USES_PCRE
+#endif
 }
 
 #if GTEST_USES_POSIX_RE

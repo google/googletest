@@ -304,17 +304,6 @@ void DieWithEmbeddedNul() {
   _exit(1);
 }
 
-# if GTEST_USES_PCRE
-
-// Tests that EXPECT_DEATH and ASSERT_DEATH work when the error
-// message has a NUL character in it.
-TEST_F(TestForDeathTest, EmbeddedNulInMessage) {
-  EXPECT_DEATH(DieWithEmbeddedNul(), "my null world");
-  ASSERT_DEATH(DieWithEmbeddedNul(), "my null world");
-}
-
-# endif  // GTEST_USES_PCRE
-
 // Tests that death test macros expand to code which interacts well with switch
 // statements.
 TEST_F(TestForDeathTest, SwitchStatement) {
@@ -502,12 +491,8 @@ TEST_F(TestForDeathTest, AcceptsAnythingConvertibleToRE) {
 
 # endif  // GTEST_HAS_GLOBAL_STRING
 
-# if !GTEST_USES_PCRE
-
   const ::std::string regex_std_str(regex_c_str);
   EXPECT_DEATH(GlobalFunction(), regex_std_str);
-
-# endif  // !GTEST_USES_PCRE
 }
 
 // Tests that a non-void function can be used in a death test.

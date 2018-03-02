@@ -1215,9 +1215,7 @@ class scoped_ptr {
 
 // Defines RE.
 
-#if GTEST_USES_PCRE
-using ::RE;
-#elif GTEST_USES_POSIX_RE || GTEST_USES_SIMPLE_RE
+#if GTEST_USES_POSIX_RE || GTEST_USES_SIMPLE_RE
 
 // A simple C++ wrapper for <regex.h>.  It uses the POSIX Extended
 // Regular Expression syntax.
@@ -1293,7 +1291,7 @@ class GTEST_API_ RE {
   GTEST_DISALLOW_ASSIGN_(RE);
 };
 
-#endif  // GTEST_USES_PCRE
+#endif  // GTEST_USES_POSIX_RE || GTEST_USES_SIMPLE_RE
 
 // Formats a source file path and a line number as they would appear
 // in an error message from the compiler used to compile this code.

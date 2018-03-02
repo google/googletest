@@ -559,13 +559,7 @@ bool DeathTestImpl::Passed(bool status_ok) {
       break;
     case DIED:
       if (status_ok) {
-# if GTEST_USES_PCRE
-        // PCRE regexes support embedded NULs.
-        // GTEST_USES_PCRE is defined only in google3 mode
-        const bool matched = RE::PartialMatch(error_message, *regex());
-# else
         const bool matched = RE::PartialMatch(error_message.c_str(), *regex());
-# endif  // GTEST_USES_PCRE
         if (matched) {
           success = true;
         } else {
