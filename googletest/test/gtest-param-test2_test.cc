@@ -33,8 +33,7 @@
 // Google Test work.
 
 #include "gtest/gtest.h"
-
-#include "test/gtest-param-test_test.h"
+#include "gtest-param-test_test.h"
 
 using ::testing::Values;
 using ::testing::internal::ParamGenerator;
@@ -59,3 +58,4 @@ INSTANTIATE_TEST_CASE_P(MultiplesOf33,
 INSTANTIATE_TEST_CASE_P(Sequence2,
                         InstantiationInMultipleTranslaionUnitsTest,
                         Values(42*3, 42*4, 42*5));
+

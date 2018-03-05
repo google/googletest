@@ -37,8 +37,6 @@ Google Test) and verifies their output.
 
 __author__ = 'vladl@google.com (Vlad Losev)'
 
-import os
-
 import gtest_test_utils
 
 # Constants.

@@ -29,7 +29,7 @@
 //
 // Author: wan@google.com (Zhanyong Wan)
 
-#include "test/gtest-typed-test_test.h"
+#include "gtest-typed-test_test.h"
 
 #include <set>
 #include <vector>

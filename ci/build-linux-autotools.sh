@@ -31,6 +31,14 @@
 
 set -e
 
-bazel build --curses=no //...:all
-bazel test --curses=no //...:all
-bazel test --curses=no //...:all --define absl=1
+. ci/get-nprocessors.sh
+
+# Create the configuration script
+autoreconf -i
+
+# Run in a subdirectory to keep the sources clean
+mkdir build || true
+cd build
+../configure
+
+make -j ${NPROCESSORS:-2}
