@@ -4012,9 +4012,9 @@ void JsonUnitTestResultPrinter::OutputJsonTestInfo(::std::ostream* stream,
       const std::string location =
           internal::FormatCompilerIndependentFileLocation(part.file_name(),
                                                           part.line_number());
-      const std::string summary = EscapeJson(location + "\n" + part.summary());
+      const std::string message = EscapeJson(location + "\n" + part.message());
       *stream << kIndent << "  {\n"
-              << kIndent << "    \"failure\": \"" << summary << "\",\n"
+              << kIndent << "    \"failure\": \"" << message << "\",\n"
               << kIndent << "    \"type\": \"\"\n"
               << kIndent << "  }";
     }

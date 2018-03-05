@@ -107,7 +107,11 @@ TEST(BuiltInDefaultValueTest, IsZeroForNumericTypes) {
   EXPECT_EQ(0, BuiltInDefaultValue<signed wchar_t>::Get());
 #endif
 #if GMOCK_WCHAR_T_IS_NATIVE_
+#if !defined(__WCHAR_UNSIGNED__)
   EXPECT_EQ(0, BuiltInDefaultValue<wchar_t>::Get());
+#else
+  EXPECT_EQ(0U, BuiltInDefaultValue<wchar_t>::Get());
+#endif
 #endif
   EXPECT_EQ(0U, BuiltInDefaultValue<unsigned short>::Get());  // NOLINT
   EXPECT_EQ(0, BuiltInDefaultValue<signed short>::Get());  // NOLINT
