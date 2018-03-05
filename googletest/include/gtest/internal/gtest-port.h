@@ -1537,14 +1537,18 @@ GTEST_API_ size_t GetFileSize(FILE* file);
 GTEST_API_ std::string ReadEntireFile(FILE* file);
 
 // All command line arguments.
-GTEST_API_ const ::std::vector<testing::internal::string>& GetArgvs();
+GTEST_API_ std::vector<std::string> GetArgvs();
 
 #if GTEST_HAS_DEATH_TEST
 
-const ::std::vector<testing::internal::string>& GetInjectableArgvs();
-void SetInjectableArgvs(const ::std::vector<testing::internal::string>*
-                             new_argvs);
-
+std::vector<std::string> GetInjectableArgvs();
+// Deprecated: pass the args vector by value instead.
+void SetInjectableArgvs(const std::vector<std::string>* new_argvs);
+void SetInjectableArgvs(const std::vector<std::string>& new_argvs);
+#if GTEST_HAS_GLOBAL_STRING
+void SetInjectableArgvs(const std::vector< ::string>& new_argvs);
+#endif  // GTEST_HAS_GLOBAL_STRING
+void ClearInjectableArgvs();
 
 #endif  // GTEST_HAS_DEATH_TEST
 

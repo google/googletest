@@ -1081,21 +1081,35 @@ std::string ReadEntireFile(FILE* file) {
 }
 
 #if GTEST_HAS_DEATH_TEST
+static const std::vector<std::string>* g_injected_test_argvs = NULL;  // Owned.
 
-static const ::std::vector<testing::internal::string>* g_injected_test_argvs =
-                                        NULL;  // Owned.
-
-void SetInjectableArgvs(const ::std::vector<testing::internal::string>* argvs) {
-  if (g_injected_test_argvs != argvs)
-    delete g_injected_test_argvs;
-  g_injected_test_argvs = argvs;
-}
-
-const ::std::vector<testing::internal::string>& GetInjectableArgvs() {
+std::vector<std::string> GetInjectableArgvs() {
   if (g_injected_test_argvs != NULL) {
     return *g_injected_test_argvs;
   }
   return GetArgvs();
+}
+
+void SetInjectableArgvs(const std::vector<std::string>* new_argvs) {
+  if (g_injected_test_argvs != new_argvs) delete g_injected_test_argvs;
+  g_injected_test_argvs = new_argvs;
+}
+
+void SetInjectableArgvs(const std::vector<std::string>& new_argvs) {
+  SetInjectableArgvs(
+      new std::vector<std::string>(new_argvs.begin(), new_argvs.end()));
+}
+
+#if GTEST_HAS_GLOBAL_STRING
+void SetInjectableArgvs(const std::vector< ::string>& new_argvs) {
+  SetInjectableArgvs(
+      new std::vector<std::string>(new_argvs.begin(), new_argvs.end()));
+}
+#endif  // GTEST_HAS_GLOBAL_STRING
+
+void ClearInjectableArgvs() {
+  delete g_injected_test_argvs;
+  g_injected_test_argvs = NULL;
 }
 #endif  // GTEST_HAS_DEATH_TEST
 
