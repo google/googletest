@@ -33,7 +33,6 @@
 
 __author__ = 'wan@google.com (Zhanyong Wan)'
 
-import os
 import gtest_test_utils
 
 COMMAND = gtest_test_utils.GetTestExecutablePath('gtest_uninitialized_test_')
