@@ -787,15 +787,17 @@ If a test sub-routine is called from several places, when an assertion
 inside it fails, it can be hard to tell which invocation of the
 sub-routine the failure is from.  You can alleviate this problem using
 extra logging or custom failure messages, but that usually clutters up
-your tests. A better solution is to use the `SCOPED_TRACE` macro:
+your tests. A better solution is to use the `SCOPED_TRACE` macro or
+the `ScopedTrace` utility:
 
-| `SCOPED_TRACE(`_message_`);` |
-|:-----------------------------|
+| `SCOPED_TRACE(`_message_`);` | `::testing::ScopedTrace trace(`_"file\_path"_`, `_line\_number_`, `_message_`);` |
+|:-----------------------------|:---------------------------------------------------------------------------------|
 
-where _message_ can be anything streamable to `std::ostream`. This
-macro will cause the current file name, line number, and the given
-message to be added in every failure message. The effect will be
-undone when the control leaves the current lexical scope.
+where `message` can be anything streamable to `std::ostream`. `SCOPED_TRACE`
+macro will cause the current file name, line number, and the given message to be
+added in every failure message. `ScopedTrace` accepts explicit file name and
+line number in arguments, which is useful for writing test helpers. The effect
+will be undone when the control leaves the current lexical scope.
 
 For example,
 
@@ -870,12 +872,32 @@ TEST(FooTest, Bar) {
 }
 ```
 
-Since we don't use exceptions, it is technically impossible to
-implement the intended behavior here.  To alleviate this, Google Test
-provides two solutions.  You could use either the
-`(ASSERT|EXPECT)_NO_FATAL_FAILURE` assertions or the
-`HasFatalFailure()` function.  They are described in the following two
+To alleviate this, gUnit provides three different solutions. You could use
+either exceptions, the `(ASSERT|EXPECT)_NO_FATAL_FAILURE` assertions or the
+`HasFatalFailure()` function. They are described in the following two
 subsections.
+
+#### Asserting on Subroutines with an exception
+
+The following code can turn ASSERT-failure into an exception:
+
+```c++
+class ThrowListener : public testing::EmptyTestEventListener {
+  void OnTestPartResult(const testing::TestPartResult& result) override {
+    if (result.type() == testing::TestPartResult::kFatalFailure) {
+      throw testing::AssertionException(result);
+    }
+  }
+};
+int main(int argc, char** argv) {
+  ...
+  testing::UnitTest::GetInstance()->listeners().Append(new ThrowListener);
+  return RUN_ALL_TESTS();
+}
+```
+
+This listener should be added after other listeners if you have any, otherwise
+they won't see failed `OnTestPartResult`.
 
 ### Asserting on Subroutines ###
 
@@ -1949,6 +1971,17 @@ variable to `0` has the same effect.
 _Availability:_ Linux, Windows, Mac.  (In Google Test 1.3.0 and lower,
 the default behavior is that the elapsed time is **not** printed.)
 
+**Availability**: Linux, Windows, Mac.
+
+#### Suppressing UTF-8 Text Output
+
+In case of assertion failures, gUnit prints expected and actual values of type
+`string` both as hex-encoded strings as well as in readable UTF-8 text if they
+contain valid non-ASCII UTF-8 characters. If you want to suppress the UTF-8 text
+because, for example, you don't have an UTF-8 compatible output medium, run the
+test program with `--gunit_print_utf8=0` or set the `GUNIT_PRINT_UTF8`
+environment variable to `0`.
+
 ### Generating an XML Report ###
 
 Google Test can emit a detailed XML report to a file in addition to its normal
@@ -2026,6 +2059,207 @@ Things to note:
   * Some JUnit concepts don't apply to Google Test, yet we have to conform to the DTD. Therefore you'll see some dummy elements and attributes in the report. You can safely ignore these parts.
 
 _Availability:_ Linux, Windows, Mac.
+
+#### Generating an JSON Report {#JsonReport}
+
+gUnit can also emit a JSON report as an alternative format to XML. To generate
+the JSON report, set the `GUNIT_OUTPUT` environment variable or the
+`--gunit_output` flag to the string `"json:path_to_output_file"`, which will
+create the file at the given location. You can also just use the string
+`"json"`, in which case the output can be found in the `test_detail.json` file
+in the current directory.
+
+The report format conforms to the following JSON Schema:
+
+```json
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "definitions": {
+    "TestCase": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "tests": { "type": "integer" },
+        "failures": { "type": "integer" },
+        "disabled": { "type": "integer" },
+        "time": { "type": "string" },
+        "testsuite": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TestInfo"
+          }
+        }
+      }
+    },
+    "TestInfo": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["RUN", "NOTRUN"]
+        },
+        "time": { "type": "string" },
+        "classname": { "type": "string" },
+        "failures": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Failure"
+          }
+        }
+      }
+    },
+    "Failure": {
+      "type": "object",
+      "properties": {
+        "failures": { "type": "string" },
+        "type": { "type": "string" }
+      }
+    }
+  },
+  "properties": {
+    "tests": { "type": "integer" },
+    "failures": { "type": "integer" },
+    "disabled": { "type": "integer" },
+    "errors": { "type": "integer" },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "time": { "type": "string" },
+    "name": { "type": "string" },
+    "testsuites": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/TestCase"
+      }
+    }
+  }
+}
+```
+
+The report uses the format that conforms to the following Proto3 using the
+[JSON encoding](https://developers.google.com/protocol-buffers/docs/proto3#json):
+
+```proto
+syntax = "proto3";
+
+package googletest;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+message UnitTest {
+  int32 tests = 1;
+  int32 failures = 2;
+  int32 disabled = 3;
+  int32 errors = 4;
+  google.protobuf.Timestamp timestamp = 5;
+  google.protobuf.Duration time = 6;
+  string name = 7;
+  repeated TestCase testsuites = 8;
+}
+
+message TestCase {
+  string name = 1;
+  int32 tests = 2;
+  int32 failures = 3;
+  int32 disabled = 4;
+  int32 errors = 5;
+  google.protobuf.Duration time = 6;
+  repeated TestInfo testsuite = 7;
+}
+
+message TestInfo {
+  string name = 1;
+  enum Status {
+    RUN = 0;
+    NOTRUN = 1;
+  }
+  Status status = 2;
+  google.protobuf.Duration time = 3;
+  string classname = 4;
+  message Failure {
+    string failures = 1;
+    string type = 2;
+  }
+  repeated Failure failures = 5;
+}
+```
+
+For instance, the following program
+
+```c++
+TEST(MathTest, Addition) { ... }
+TEST(MathTest, Subtraction) { ... }
+TEST(LogicTest, NonContradiction) { ... }
+```
+
+could generate this report:
+
+```json
+{
+  "tests": 3,
+  "failures": 1,
+  "errors": 0,
+  "time": "0.035s",
+  "timestamp": "2011-10-31T18:52:42Z"
+  "name": "AllTests",
+  "testsuites": [
+    {
+      "name": "MathTest",
+      "tests": 2,
+      "failures": 1,
+      "errors": 0,
+      "time": "0.015s",
+      "testsuite": [
+        {
+          "name": "Addition",
+          "status": "RUN",
+          "time": "0.007s",
+          "classname": "",
+          "failures": [
+            {
+              "message": "Value of: add(1, 1)\x0A  Actual: 3\x0AExpected: 2",
+              "type": ""
+            },
+            {
+              "message": "Value of: add(1, -1)\x0A  Actual: 1\x0AExpected: 0",
+              "type": ""
+            }
+          ]
+        },
+        {
+          "name": "Subtraction",
+          "status": "RUN",
+          "time": "0.005s",
+          "classname": ""
+        }
+      ]
+    }
+    {
+      "name": "LogicTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "time": "0.005s",
+      "testsuite": [
+        {
+          "name": "NonContradiction",
+          "status": "RUN",
+          "time": "0.005s",
+          "classname": ""
+        }
+      ]
+    }
+  ]
+}
+```
+
+IMPORTANT: The exact format of the JSON document is subject to change.
+
+**Availability**: Linux, Windows, Mac.
 
 ## Controlling How Failures Are Reported ##
 

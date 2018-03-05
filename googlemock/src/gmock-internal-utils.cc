@@ -47,6 +47,25 @@
 namespace testing {
 namespace internal {
 
+// Joins a vector of strings as if they are fields of a tuple; returns
+// the joined string.
+GTEST_API_ std::string JoinAsTuple(const Strings& fields) {
+  switch (fields.size()) {
+    case 0:
+      return "";
+    case 1:
+      return fields[0];
+    default:
+      std::string result = "(" + fields[0];
+      for (size_t i = 1; i < fields.size(); i++) {
+        result += ", ";
+        result += fields[i];
+      }
+      result += ")";
+      return result;
+  }
+}
+
 // Converts an identifier name to a space-separated list of lower-case
 // words.  Each maximum substring of the form [A-Za-z][a-z]*|\d+ is
 // treated as one word.  For example, both "FooBar123" and

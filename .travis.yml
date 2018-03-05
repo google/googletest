@@ -12,40 +12,47 @@ matrix:
   include:
     - os: linux
       compiler: gcc
-      sudo: true
-      cache:
+      sudo : true
       install: ./ci/install-linux.sh && ./ci/log-config.sh
       script: ./ci/build-linux-bazel.sh
     - os: linux
       compiler: clang
-      sudo: true
-      cache:
+      sudo : true
       install: ./ci/install-linux.sh && ./ci/log-config.sh
       script: ./ci/build-linux-bazel.sh
     - os: linux
+      group: deprecated-2017Q4
       compiler: gcc
+      install: ./ci/install-linux.sh && ./ci/log-config.sh
+      script: ./ci/build-linux-autotools.sh
+    - os: linux
+      group: deprecated-2017Q4
+      compiler: gcc
+      env: BUILD_TYPE=Debug VERBOSE=1 CXX_FLAGS=-std=c++11
+    - os: linux
+      group: deprecated-2017Q4
+      compiler: clang
       env: BUILD_TYPE=Debug VERBOSE=1
     - os: linux
-      compiler: gcc
-      env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
-    - os: linux
-      compiler: clang
-      env: BUILD_TYPE=Debug VERBOSE=1
-    - os: linux
+      group: deprecated-2017Q4
       compiler: clang
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
     - os: osx
       compiler: gcc
       env: BUILD_TYPE=Debug VERBOSE=1
+      if: type != pull_request
     - os: osx
       compiler: gcc
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
+      if: type != pull_request
     - os: osx
       compiler: clang
       env: BUILD_TYPE=Debug VERBOSE=1
+      if: type != pull_request
     - os: osx
       compiler: clang
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
+      if: type != pull_request
 
 # These are the install and build (script) phases for the most common entries in the matrix.  They could be included
 # in each entry in the matrix, but that is just repetitive.

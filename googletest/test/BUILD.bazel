@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc. 
+# Copyright 2017 Google Inc.
 # All Rights Reserved.
 #
 #
@@ -57,13 +57,15 @@ cc_test(
                         "gtest-param-test_test.cc",
                     ],
                 ) + select({
-        "//:win": [],
+        "//:windows": [],
+        "//:windows_msvc": [],
         "//conditions:default": [
             "gtest-tuple_test.cc",
         ],
         }),
     copts = select({
-        "//:win": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
+        "//:windows": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
+        "//:windows_msvc": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
         "//conditions:default": ["-DGTEST_USE_OWN_TR1_TUPLE=1"],
     }),
     includes = [
@@ -73,7 +75,8 @@ cc_test(
         "googletest/test",
     ],
     linkopts = select({
-        "//:win": [],
+        "//:windows": [],
+        "//:windows_msvc": [],
         "//conditions:default": [
             "-pthread",
         ],
@@ -115,4 +118,263 @@ cc_test(
     deps = [
         "//:gtest",
     ],
+)
+
+cc_test(
+    name = "gtest_unittest",
+    size = "small",
+    srcs = ["gtest_unittest.cc"],
+    args = ["--heap_check=strict"],
+    shard_count = 2,
+    deps = ["//:gtest_main"],
+)
+
+#  Py tests
+
+py_library(
+    name = "gtest_test_utils",
+    testonly = 1,
+    srcs = ["gtest_test_utils.py"],
+
+)
+
+cc_binary(
+    name = "gtest_help_test_",
+    testonly = 1,
+    srcs = ["gtest_help_test_.cc"],
+    deps = ["//:gtest_main"],
+)
+py_test(
+    name = "gtest_help_test",
+    size = "small",
+    srcs = ["gtest_help_test.py"],
+    data = [":gtest_help_test_"],
+    deps = [":gtest_test_utils"],
+)
+
+cc_binary(
+    name = "gtest_output_test_",
+    testonly = 1,
+    srcs = ["gtest_output_test_.cc"],
+    deps = ["//:gtest"],
+)
+
+py_test(
+    name = "gtest_output_test",
+    size = "small",
+    srcs = ["gtest_output_test.py"],
+    data = [
+        "gtest_output_test_golden_lin.txt",
+        ":gtest_output_test_",
+    ],
+    deps = [":gtest_test_utils"],
+)
+
+cc_binary(
+    name = "gtest_color_test_",
+    testonly = 1,
+    srcs = ["gtest_color_test_.cc"],
+    deps = ["//:gtest"],
+)
+py_test(
+    name = "gtest_color_test",
+    size = "small",
+    srcs = ["gtest_color_test.py"],
+    data = [":gtest_color_test_"],
+    deps = [":gtest_test_utils"],
+)
+
+cc_binary(
+    name = "gtest_env_var_test_",
+    testonly = 1,
+    srcs = ["gtest_env_var_test_.cc"],
+    deps = ["//:gtest"],
+)
+
+py_test(
+    name = "gtest_env_var_test",
+    size = "small",
+    srcs = ["gtest_env_var_test.py"],
+    data = [":gtest_env_var_test_"],
+    deps = [":gtest_test_utils"],
+)
+
+cc_binary(
+    name = "gtest_filter_unittest_",
+    testonly = 1,
+    srcs = ["gtest_filter_unittest_.cc"],
+    deps = ["//:gtest"],
+)
+
+py_test(
+    name = "gtest_filter_unittest",
+    size = "small",
+    srcs = ["gtest_filter_unittest.py"],
+    data = [":gtest_filter_unittest_"],
+    deps = [":gtest_test_utils"],
+)
+
+cc_binary(
+    name = "gtest_break_on_failure_unittest_",
+    testonly = 1,
+    srcs = ["gtest_break_on_failure_unittest_.cc"],
+    deps = ["//:gtest"],
+)
+
+py_test(
+    name = "gtest_break_on_failure_unittest",
+    size = "small",
+    srcs = ["gtest_break_on_failure_unittest.py"],
+    data = [":gtest_break_on_failure_unittest_"],
+    deps = [":gtest_test_utils"],
+)
+
+cc_test(
+    name = "gtest_assert_by_exception_test",
+    size = "small",
+    srcs = ["gtest_assert_by_exception_test.cc"],
+    deps = ["//:gtest"],
+)
+
+cc_binary(
+    name = "gtest_throw_on_failure_test_",
+    testonly = 1,
+    srcs = ["gtest_throw_on_failure_test_.cc"],
+    deps = ["//:gtest"],
+)
+
+py_test(
+    name = "gtest_throw_on_failure_test",
+    size = "small",
+    srcs = ["gtest_throw_on_failure_test.py"],
+    data = [":gtest_throw_on_failure_test_"],
+    deps = [":gtest_test_utils"],
+)
+
+cc_binary(
+    name = "gtest_list_tests_unittest_",
+    testonly = 1,
+    srcs = ["gtest_list_tests_unittest_.cc"],
+    deps = ["//:gtest"],
+)
+
+py_test(
+    name = "gtest_list_tests_unittest",
+    size = "small",
+    srcs = ["gtest_list_tests_unittest.py"],
+    data = [":gtest_list_tests_unittest_"],
+    deps = [":gtest_test_utils"],
+)
+
+cc_binary(
+    name = "gtest_shuffle_test_",
+    srcs = ["gtest_shuffle_test_.cc"],
+    deps = ["//:gtest"],
+)
+
+py_test(
+    name = "gtest_shuffle_test",
+    size = "small",
+    srcs = ["gtest_shuffle_test.py"],
+    data = [":gtest_shuffle_test_"],
+    deps = [":gtest_test_utils"],
+)
+
+cc_binary(
+    name = "gtest_catch_exceptions_no_ex_test_",
+    testonly = 1,
+    srcs = ["gtest_catch_exceptions_test_.cc"],
+    deps = ["//:gtest_main"],
+)
+
+cc_binary(
+    name = "gtest_catch_exceptions_ex_test_",
+    testonly = 1,
+    srcs = ["gtest_catch_exceptions_test_.cc"],
+    copts = ["-fexceptions"],
+    deps = ["//:gtest_main"],
+)
+
+py_test(
+    name = "gtest_catch_exceptions_test",
+    size = "small",
+    srcs = ["gtest_catch_exceptions_test.py"],
+    data = [
+        ":gtest_catch_exceptions_ex_test_",
+        ":gtest_catch_exceptions_no_ex_test_",
+    ],
+    deps = [":gtest_test_utils"],
+)
+
+cc_binary(
+    name = "gtest_xml_output_unittest_",
+    testonly = 1,
+    srcs = ["gtest_xml_output_unittest_.cc"],
+    deps = ["//:gtest"],
+)
+
+cc_test(
+    name = "gtest_no_test_unittest",
+    size = "small",
+    srcs = ["gtest_no_test_unittest.cc"],
+    deps = ["//:gtest"],
+)
+
+py_test(
+    name = "gtest_xml_output_unittest",
+    size = "small",
+    srcs = [
+        "gtest_xml_output_unittest.py",
+        "gtest_xml_test_utils.py",
+    ],
+    data = [
+        # We invoke gtest_no_test_unittest to verify the XML output
+        # when the test program contains no test definition.
+        ":gtest_no_test_unittest",
+        ":gtest_xml_output_unittest_",
+    ],
+    deps = [":gtest_test_utils"],
+)
+
+cc_binary(
+    name = "gtest_xml_outfile1_test_",
+    testonly = 1,
+    srcs = ["gtest_xml_outfile1_test_.cc"],
+    deps = ["//:gtest_main"],
+)
+
+cc_binary(
+    name = "gtest_xml_outfile2_test_",
+    testonly = 1,
+    srcs = ["gtest_xml_outfile2_test_.cc"],
+    deps = ["//:gtest_main"],
+)
+
+py_test(
+    name = "gtest_xml_outfiles_test",
+    size = "small",
+    srcs = [
+        "gtest_xml_outfiles_test.py",
+        "gtest_xml_test_utils.py",
+    ],
+    data = [
+        ":gtest_xml_outfile1_test_",
+        ":gtest_xml_outfile2_test_",
+    ],
+    deps = [":gtest_test_utils"],
+)
+
+cc_binary(
+    name = "gtest_uninitialized_test_",
+    testonly = 1,
+    srcs = ["gtest_uninitialized_test_.cc"],
+    deps = ["//:gtest"],
+)
+
+py_test(
+    name = "gtest_uninitialized_test",
+    size = "medium",
+    srcs = ["gtest_uninitialized_test.py"],
+    data = [":gtest_uninitialized_test_"],
+    deps = [":gtest_test_utils"],
 )
