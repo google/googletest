@@ -12,5 +12,5 @@ the respective git branch/tag).**
 
 To contribute code to Google Test, read:
 
-  * [DevGuide](DevGuide.md) -- read this _before_ writing your first patch.
+  * [CONTRIBUTING](../../CONTRIBUTING.md) -- read this _before_ writing your first patch.
   * [PumpManual](PumpManual.md) -- how we generate some of Google Test's source files.

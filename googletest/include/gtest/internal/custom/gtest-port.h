@@ -61,6 +61,9 @@
 //     GTEST_EXCLUSIVE_LOCK_REQUIRED_(locks)
 //     GTEST_LOCK_EXCLUDED_(locks)
 //
+//   Underlying library support features:
+//     GTEST_HAS_CXXABI_H_
+//
 //   Exporting API symbols:
 //     GTEST_API_ - Specifier for exported symbols.
 //

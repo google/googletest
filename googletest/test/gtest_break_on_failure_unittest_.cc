@@ -80,8 +80,7 @@ int main(int argc, char **argv) {
   SetUnhandledExceptionFilter(ExitWithExceptionCode);
 
 # endif
-#endif
-
+#endif  // GTEST_OS_WINDOWS
   testing::InitGoogleTest(&argc, argv);
 
   return RUN_ALL_TESTS();
