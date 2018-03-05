@@ -34,15 +34,9 @@
 
 #include "gtest/gtest.h"
 
-#include <iostream>
 #include <vector>
 
-// We must define this macro in order to #include
-// gtest-internal-inl.h.  This is how Google Test prevents a user from
-// accidentally depending on its internal implementation.
-#define GTEST_IMPLEMENTATION_ 1
 #include "src/gtest-internal-inl.h"
-#undef GTEST_IMPLEMENTATION_
 
 #if GTEST_IS_THREADSAFE
 

@@ -58,11 +58,12 @@
 # include <forward_list>  // NOLINT
 #endif
 
-namespace testing {
+// Disable MSVC2015 warning for std::pair: "decorated name length exceeded, name was truncated".
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+# pragma warning(disable:4503)
+#endif
 
-namespace internal {
-GTEST_API_ string JoinAsTuple(const Strings& fields);
-}  // namespace internal
+namespace testing {
 
 namespace gmock_matchers_test {
 
@@ -145,7 +146,6 @@ using testing::internal::ExplainMatchFailureTupleTo;
 using testing::internal::FloatingEqMatcher;
 using testing::internal::FormatMatcherDescription;
 using testing::internal::IsReadableTypeName;
-using testing::internal::JoinAsTuple;
 using testing::internal::linked_ptr;
 using testing::internal::MatchMatrix;
 using testing::internal::RE;
@@ -871,9 +871,9 @@ class Unprintable {
   char c_;
 };
 
-inline bool operator==(const Unprintable& /* lhs */, 
-                       const Unprintable& /* rhs */) { 
-    return true; 
+inline bool operator==(const Unprintable& /* lhs */,
+                       const Unprintable& /* rhs */) {
+    return true;
 }
 
 TEST(EqTest, CanDescribeSelf) {
@@ -914,7 +914,7 @@ TEST(TypedEqTest, CanDescribeSelf) {
 // Type<T>::IsTypeOf(v) compiles iff the type of value v is T, where T
 // is a "bare" type (i.e. not in the form of const U or U&).  If v's
 // type is not T, the compiler will generate a message about
-// "undefined referece".
+// "undefined reference".
 template <typename T>
 struct Type {
   static bool IsTypeOf(const T& /* v */) { return true; }
@@ -1423,7 +1423,7 @@ TEST(PairTest, MatchesCorrectly) {
   EXPECT_THAT(p, Pair(25, "foo"));
   EXPECT_THAT(p, Pair(Ge(20), HasSubstr("o")));
 
-  // 'first' doesnt' match, but 'second' matches.
+  // 'first' does not match, but 'second' matches.
   EXPECT_THAT(p, Not(Pair(42, "foo")));
   EXPECT_THAT(p, Not(Pair(Lt(25), "foo")));
 
@@ -3931,8 +3931,11 @@ TEST(ResultOfTest, WorksForFunctionReferences) {
 
 // Tests that ResultOf(f, ...) compiles and works as expected when f is a
 // function object.
-struct Functor : public ::std::unary_function<int, std::string> {
-  result_type operator()(argument_type input) const {
+struct Functor {
+  typedef std::string result_type;
+  typedef int argument_type;
+
+  std::string operator()(int input) const {
     return IntToStringFunction(input);
   }
 };
@@ -4259,7 +4262,7 @@ TYPED_TEST(ContainerEqTest, DuplicateDifference) {
 #endif  // GTEST_HAS_TYPED_TEST
 
 // Tests that mutliple missing values are reported.
-// Using just vector here, so order is predicatble.
+// Using just vector here, so order is predictable.
 TEST(ContainerEqExtraTest, MultipleValuesMissing) {
   static const int vals[] = {1, 1, 2, 3, 5, 8};
   static const int test_vals[] = {2, 1, 5};
@@ -4272,7 +4275,7 @@ TEST(ContainerEqExtraTest, MultipleValuesMissing) {
 }
 
 // Tests that added values are reported.
-// Using just vector here, so order is predicatble.
+// Using just vector here, so order is predictable.
 TEST(ContainerEqExtraTest, MultipleValuesAdded) {
   static const int vals[] = {1, 1, 2, 3, 5, 8};
   static const int test_vals[] = {1, 2, 92, 3, 5, 8, 46};
@@ -5264,28 +5267,6 @@ TEST(IsReadableTypeNameTest, ReturnsFalseForLongFunctionTypeNames) {
   EXPECT_FALSE(IsReadableTypeName("void (&)(int, bool, char, float)"));
 }
 
-// Tests JoinAsTuple().
-
-TEST(JoinAsTupleTest, JoinsEmptyTuple) {
-  EXPECT_EQ("", JoinAsTuple(Strings()));
-}
-
-TEST(JoinAsTupleTest, JoinsOneTuple) {
-  const char* fields[] = {"1"};
-  EXPECT_EQ("1", JoinAsTuple(Strings(fields, fields + 1)));
-}
-
-TEST(JoinAsTupleTest, JoinsTwoTuple) {
-  const char* fields[] = {"1", "a"};
-  EXPECT_EQ("(1, a)", JoinAsTuple(Strings(fields, fields + 2)));
-}
-
-TEST(JoinAsTupleTest, JoinsTenTuple) {
-  const char* fields[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
-  EXPECT_EQ("(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)",
-            JoinAsTuple(Strings(fields, fields + 10)));
-}
-
 // Tests FormatMatcherDescription().
 
 TEST(FormatMatcherDescriptionTest, WorksForEmptyDescription) {
@@ -5672,6 +5653,70 @@ TEST(UnorderedPointwiseTest, AllowsMonomorphicInnerMatcher) {
   // implicitly cast to tuple<double, int>.
   const Matcher<tuple<double, int> > m2 = IsHalfOf();
   EXPECT_THAT(lhs, UnorderedPointwise(m2, rhs));
+}
+
+class SampleVariantIntString {
+ public:
+  SampleVariantIntString(int i) : i_(i), has_int_(true) {}
+  SampleVariantIntString(const std::string& s) : s_(s), has_int_(false) {}
+
+  template <typename T>
+  friend bool holds_alternative(const SampleVariantIntString& value) {
+    return value.has_int_ == internal::IsSame<T, int>::value;
+  }
+
+  template <typename T>
+  friend const T& get(const SampleVariantIntString& value) {
+    return value.get_impl(static_cast<T*>(NULL));
+  }
+
+ private:
+  const int& get_impl(int*) const { return i_; }
+  const std::string& get_impl(std::string*) const { return s_; }
+
+  int i_;
+  std::string s_;
+  bool has_int_;
+};
+
+TEST(VariantTest, DescribesSelf) {
+  const Matcher<SampleVariantIntString> m = VariantWith<int>(Eq(1));
+  EXPECT_THAT(Describe(m), ContainsRegex("is a variant<> with value of type "
+                                         "'.*' and the value is equal to 1"));
+}
+
+TEST(VariantTest, ExplainsSelf) {
+  const Matcher<SampleVariantIntString> m = VariantWith<int>(Eq(1));
+  EXPECT_THAT(Explain(m, SampleVariantIntString(1)),
+              ContainsRegex("whose value 1"));
+  EXPECT_THAT(Explain(m, SampleVariantIntString("A")),
+              HasSubstr("whose value is not of type '"));
+  EXPECT_THAT(Explain(m, SampleVariantIntString(2)),
+              "whose value 2 doesn't match");
+}
+
+TEST(VariantTest, FullMatch) {
+  Matcher<SampleVariantIntString> m = VariantWith<int>(Eq(1));
+  EXPECT_TRUE(m.Matches(SampleVariantIntString(1)));
+
+  m = VariantWith<std::string>(Eq("1"));
+  EXPECT_TRUE(m.Matches(SampleVariantIntString("1")));
+}
+
+TEST(VariantTest, TypeDoesNotMatch) {
+  Matcher<SampleVariantIntString> m = VariantWith<int>(Eq(1));
+  EXPECT_FALSE(m.Matches(SampleVariantIntString("1")));
+
+  m = VariantWith<std::string>(Eq("1"));
+  EXPECT_FALSE(m.Matches(SampleVariantIntString(1)));
+}
+
+TEST(VariantTest, InnerDoesNotMatch) {
+  Matcher<SampleVariantIntString> m = VariantWith<int>(Eq(1));
+  EXPECT_FALSE(m.Matches(SampleVariantIntString(2)));
+
+  m = VariantWith<std::string>(Eq("1"));
+  EXPECT_FALSE(m.Matches(SampleVariantIntString("2")));
 }
 
 }  // namespace gmock_matchers_test
