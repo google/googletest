@@ -90,8 +90,10 @@
 //      Field
 //      Property
 //      ResultOf(function)
+//      ResultOf(callback)
 //      Pointee
 //      Truly(predicate)
+//      AddressSatisfies
 //      AllOf
 //      AnyOf
 //      Not
