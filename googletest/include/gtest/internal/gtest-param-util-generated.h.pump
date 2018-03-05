@@ -45,13 +45,8 @@ $var maxtuple = 10  $$ Maximum number of Combine arguments we want to support.
 #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_GENERATED_H_
 #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_GENERATED_H_
 
-// scripts/fuse_gtest.py depends on gtest's own header being #included
-// *unconditionally*.  Therefore these #includes cannot be moved
-// inside #if GTEST_HAS_PARAM_TEST.
 #include "gtest/internal/gtest-param-util.h"
 #include "gtest/internal/gtest-port.h"
-
-#if GTEST_HAS_PARAM_TEST
 
 namespace testing {
 
@@ -165,7 +160,7 @@ $for k [[
     virtual ParamIteratorInterface<ParamType>* Clone() const {
       return new Iterator(*this);
     }
-    virtual const ParamType* Current() const { return &current_value_; }
+    virtual const ParamType* Current() const { return current_value_.get(); }
     virtual bool Equals(const ParamIteratorInterface<ParamType>& other) const {
       // Having the same base generator guarantees that the other
       // iterator is of the same type and we can downcast.
@@ -197,7 +192,7 @@ $for k [[
 
     void ComputeCurrentValue() {
       if (!AtEnd())
-        current_value_ = ParamType($for j, [[*current$(j)_]]);
+        current_value_.reset(new ParamType($for j, [[*current$(j)_]]));
     }
     bool AtEnd() const {
       // We must report iterator past the end of the range when either of the
@@ -222,7 +217,7 @@ $for j [[
     typename ParamGenerator<T$j>::iterator current$(j)_;
 ]]
 
-    ParamType current_value_;
+    linked_ptr<ParamType> current_value_;
   };  // class CartesianProductGenerator$i::Iterator
 
   // No implementation - assignment is unsupported.
@@ -280,7 +275,5 @@ $for j [[
 
 }  // namespace internal
 }  // namespace testing
-
-#endif  //  GTEST_HAS_PARAM_TEST
 
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_GENERATED_H_

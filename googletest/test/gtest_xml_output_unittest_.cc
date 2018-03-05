@@ -27,8 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// Author: eefacm@gmail.com (Sean Mcafee)
-
 // Unit test for Google Test XML output.
 //
 // A user can specify XML output in a Google Test program to run via

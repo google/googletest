@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc. 
+# Copyright 2017 Google Inc.
 # All Rights Reserved.
 #
 #
@@ -37,11 +37,22 @@ package(default_visibility = ["//visibility:public"])
 licenses(["notice"])
 
 config_setting(
-    name = "win",
+    name = "windows",
+    values = { "cpu": "x64_windows" },
+)
+
+config_setting(
+    name = "windows_msvc",
     values = {"cpu": "x64_windows_msvc"},
 )
 
-# Google Test including Google Mock 
+config_setting(
+    name = "has_absl",
+    values = {"define": "absl=1"},
+)
+
+
+# Google Test including Google Mock
 cc_library(
     name = "gtest",
     srcs = glob(
@@ -65,7 +76,8 @@ cc_library(
     ]),
     copts = select(
         {
-            ":win": [],
+            ":windows": [],
+            ":windows_msvc": [],
             "//conditions:default": ["-pthread"],
         },
     ),
@@ -76,11 +88,27 @@ cc_library(
         "googletest/include",
     ],
     linkopts = select({
-        ":win": [],
+        ":windows": [],
+        ":windows_msvc": [],
         "//conditions:default": [
             "-pthread",
         ],
     }),
+    defines = select ({
+        ":has_absl": [
+        "GTEST_HAS_ABSL=1",
+        ],
+        "//conditions:default": [],
+    }
+    ),
+    deps = select ({
+        ":has_absl": [
+        "@com_google_absl//absl/types:optional",
+        "@com_google_absl//absl/strings"
+        ],
+        "//conditions:default": [],
+    }
+    )
 )
 
 cc_library(
@@ -88,7 +116,7 @@ cc_library(
     srcs = [
         "googlemock/src/gmock_main.cc",
     ],
-    deps = ["//:gtest"],
+    deps = [":gtest"],
 )
 
 # The following rules build samples of how to use gTest.
