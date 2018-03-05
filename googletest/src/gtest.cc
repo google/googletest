@@ -386,12 +386,15 @@ void AssertHelper::operator=(const Message& message) const {
 GTEST_API_ GTEST_DEFINE_STATIC_MUTEX_(g_linked_ptr_mutex);
 
 // A copy of all command line arguments.  Set by InitGoogleTest().
-::std::vector<testing::internal::string> g_argvs;
+::std::vector<std::string> g_argvs;
 
-const ::std::vector<testing::internal::string>& GetArgvs() {
+::std::vector<std::string> GetArgvs() {
 #if defined(GTEST_CUSTOM_GET_ARGVS_)
-  return GTEST_CUSTOM_GET_ARGVS_();
-#else  // defined(GTEST_CUSTOM_GET_ARGVS_)
+  // GTEST_CUSTOM_GET_ARGVS_() may return a container of std::string or
+  // ::string. This code converts it to the appropriate type.
+  const auto& custom = GTEST_CUSTOM_GET_ARGVS_();
+  return ::std::vector<std::string>(custom.begin(), custom.end());
+#else   // defined(GTEST_CUSTOM_GET_ARGVS_)
   return g_argvs;
 #endif  // defined(GTEST_CUSTOM_GET_ARGVS_)
 }
@@ -3035,7 +3038,7 @@ static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   va_end(args);
 }
 
-// Text printed in Google Test's text output and --gunit_list_tests
+// Text printed in Google Test's text output and --gtest_list_tests
 // output to label the type parameter and value parameter for a test.
 static const char kTypeParamLabel[] = "TypeParam";
 static const char kValueParamLabel[] = "GetParam()";
@@ -5449,9 +5452,8 @@ bool ParseInt32Flag(const char* str, const char* flag, Int32* value) {
 //
 // On success, stores the value of the flag in *value, and returns
 // true.  On failure, returns false without changing *value.
-static bool ParseStringFlag(const char* str,
-                            const char* flag,
-                            std::string* value) {
+template <typename String>
+static bool ParseStringFlag(const char* str, const char* flag, String* value) {
   // Gets the value of the flag as a string.
   const char* const value_str = ParseFlagValue(str, flag, false);
 
@@ -5557,16 +5559,16 @@ static const char kColorEncodedHelpMessage[] =
     GTEST_PATH_SEP_ "@Y|@G:@YFILE_PATH]@D\n"
 "      Generate a JSON or XML report in the given directory or with the given\n"
 "      file name. @YFILE_PATH@D defaults to @Gtest_details.xml@D.\n"
-#if GTEST_CAN_STREAM_RESULTS_
+# if GTEST_CAN_STREAM_RESULTS_
 "  @G--" GTEST_FLAG_PREFIX_ "stream_result_to=@YHOST@G:@YPORT@D\n"
 "      Stream test results to the given server.\n"
-#endif  // GTEST_CAN_STREAM_RESULTS_
+# endif  // GTEST_CAN_STREAM_RESULTS_
 "\n"
 "Assertion Behavior:\n"
-#if GTEST_HAS_DEATH_TEST && !GTEST_OS_WINDOWS
+# if GTEST_HAS_DEATH_TEST && !GTEST_OS_WINDOWS
 "  @G--" GTEST_FLAG_PREFIX_ "death_test_style=@Y(@Gfast@Y|@Gthreadsafe@Y)@D\n"
 "      Set the default death test style.\n"
-#endif  // GTEST_HAS_DEATH_TEST && !GTEST_OS_WINDOWS
+# endif  // GTEST_HAS_DEATH_TEST && !GTEST_OS_WINDOWS
 "  @G--" GTEST_FLAG_PREFIX_ "break_on_failure@D\n"
 "      Turn assertion failures into debugger break-points.\n"
 "  @G--" GTEST_FLAG_PREFIX_ "throw_on_failure@D\n"
