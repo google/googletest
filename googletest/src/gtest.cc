@@ -175,8 +175,10 @@ static const char kDeathTestCaseFilter[] = "*DeathTest:*DeathTest/*";
 // A test filter that matches everything.
 static const char kUniversalFilter[] = "*";
 
-// The default output file for XML output.
-static const char kDefaultOutputFile[] = "test_detail.xml";
+// The default output format.
+static const char kDefaultOutputFormat[] = "xml";
+// The default output file.
+static const char kDefaultOutputFile[] = "test_detail";
 
 // The environment variable name for the test shard index.
 static const char kTestShardIndex[] = "GTEST_SHARD_INDEX";
@@ -246,9 +248,9 @@ GTEST_DEFINE_bool_(list_tests, false,
 GTEST_DEFINE_string_(
     output,
     internal::StringFromGTestEnv("output", ""),
-    "A format (currently must be \"xml\"), optionally followed "
-    "by a colon and an output file name or directory. A directory "
-    "is indicated by a trailing pathname separator. "
+    "A format (defaults to \"xml\" but can be specified to be \"json\"), "
+    "optionally followed by a colon and an output file name or directory. "
+    "A directory is indicated by a trailing pathname separator. "
     "Examples: \"xml:filename.xml\", \"xml::directoryname/\". "
     "If a directory is specified, output files will be created "
     "within that directory, with file-names based on the test "
@@ -399,12 +401,15 @@ void AssertHelper::operator=(const Message& message) const {
 GTEST_API_ GTEST_DEFINE_STATIC_MUTEX_(g_linked_ptr_mutex);
 
 // A copy of all command line arguments.  Set by InitGoogleTest().
-::std::vector<testing::internal::string> g_argvs;
+::std::vector<std::string> g_argvs;
 
-const ::std::vector<testing::internal::string>& GetArgvs() {
+::std::vector<std::string> GetArgvs() {
 #if defined(GTEST_CUSTOM_GET_ARGVS_)
-  return GTEST_CUSTOM_GET_ARGVS_();
-#else  // defined(GTEST_CUSTOM_GET_ARGVS_)
+  // GTEST_CUSTOM_GET_ARGVS_() may return a container of std::string or
+  // ::string. This code converts it to the appropriate type.
+  const auto& custom = GTEST_CUSTOM_GET_ARGVS_();
+  return ::std::vector<std::string>(custom.begin(), custom.end());
+#else   // defined(GTEST_CUSTOM_GET_ARGVS_)
   return g_argvs;
 #endif  // defined(GTEST_CUSTOM_GET_ARGVS_)
 }
@@ -443,12 +448,17 @@ std::string UnitTestOptions::GetAbsolutePathToOutputFile() {
   if (gtest_output_flag == NULL)
     return "";
 
+  std::string format = GetOutputFormat();
+  if (format.empty())
+    format = std::string(kDefaultOutputFormat);
+
   const char* const colon = strchr(gtest_output_flag, ':');
   if (colon == NULL)
-    return internal::FilePath::ConcatPaths(
+    return internal::FilePath::MakeFileName(
         internal::FilePath(
             UnitTest::GetInstance()->original_working_dir()),
-        internal::FilePath(kDefaultOutputFile)).string();
+        internal::FilePath(kDefaultOutputFile), 0,
+        format.c_str()).string();
 
   internal::FilePath output_name(colon + 1);
   if (!output_name.IsAbsolutePath())
@@ -2969,16 +2979,20 @@ static int GetBitOffset(WORD color_mask) {
 
 static WORD GetNewColor(GTestColor color, WORD old_color_attrs) {
   // Let's reuse the BG
-  static const WORD background_mask = BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_INTENSITY;
-  static const WORD foreground_mask = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
+  static const WORD background_mask = BACKGROUND_BLUE | BACKGROUND_GREEN |
+                                      BACKGROUND_RED | BACKGROUND_INTENSITY;
+  static const WORD foreground_mask = FOREGROUND_BLUE | FOREGROUND_GREEN |
+                                      FOREGROUND_RED | FOREGROUND_INTENSITY;
   const WORD existing_bg = old_color_attrs & background_mask;
 
-  WORD new_color = GetColorAttribute(color) | existing_bg | FOREGROUND_INTENSITY;
+  WORD new_color =
+      GetColorAttribute(color) | existing_bg | FOREGROUND_INTENSITY;
   static const int bg_bitOffset = GetBitOffset(background_mask);
   static const int fg_bitOffset = GetBitOffset(foreground_mask);
 
-  if (((new_color & background_mask) >> bg_bitOffset) == ((new_color & foreground_mask) >> fg_bitOffset)) {
-    new_color ^= FOREGROUND_INTENSITY; //invert intensity
+  if (((new_color & background_mask) >> bg_bitOffset) ==
+      ((new_color & foreground_mask) >> fg_bitOffset)) {
+    new_color ^= FOREGROUND_INTENSITY;  // invert intensity
   }
   return new_color;
 }
@@ -3039,7 +3053,6 @@ bool ShouldUseColor(bool stdout_is_tty) {
 // cannot simply emit special characters and have the terminal change colors.
 // This routine must actually emit the characters rather than return a string
 // that would be colored when printed, as can be done on Linux.
-GTEST_ATTRIBUTE_PRINTF_(2, 3)
 static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   va_list args;
   va_start(args, fmt);
@@ -3089,7 +3102,7 @@ static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   va_end(args);
 }
 
-// Text printed in Google Test's text output and --gunit_list_tests
+// Text printed in Google Test's text output and --gtest_list_tests
 // output to label the type parameter and value parameter for a test.
 static const char kTypeParamLabel[] = "TypeParam";
 static const char kValueParamLabel[] = "GetParam()";
@@ -3806,7 +3819,6 @@ void XmlUnitTestResultPrinter::PrintXmlUnitTest(std::ostream* stream,
     OutputXmlAttribute(stream, kTestsuites, "random_seed",
                        StreamableToString(unit_test.random_seed()));
   }
-
   *stream << TestPropertiesAsXmlAttributes(unit_test.ad_hoc_test_result());
 
   OutputXmlAttribute(stream, kTestsuites, "name", "AllTests");
@@ -3834,6 +3846,351 @@ std::string XmlUnitTestResultPrinter::TestPropertiesAsXmlAttributes(
 
 // End XmlUnitTestResultPrinter
 
+
+// This class generates an JSON output file.
+class JsonUnitTestResultPrinter : public EmptyTestEventListener {
+ public:
+  explicit JsonUnitTestResultPrinter(const char* output_file);
+
+  virtual void OnTestIterationEnd(const UnitTest& unit_test, int iteration);
+
+ private:
+  // Returns an JSON-escaped copy of the input string str.
+  static std::string EscapeJson(const std::string& str);
+
+  //// Verifies that the given attribute belongs to the given element and
+  //// streams the attribute as JSON.
+  static void OutputJsonKey(std::ostream* stream,
+                            const std::string& element_name,
+                            const std::string& name,
+                            const std::string& value,
+                            const std::string& indent,
+                            bool comma = true);
+  static void OutputJsonKey(std::ostream* stream,
+                            const std::string& element_name,
+                            const std::string& name,
+                            int value,
+                            const std::string& indent,
+                            bool comma = true);
+
+  // Streams a JSON representation of a TestInfo object.
+  static void OutputJsonTestInfo(::std::ostream* stream,
+                                 const char* test_case_name,
+                                 const TestInfo& test_info);
+
+  // Prints a JSON representation of a TestCase object
+  static void PrintJsonTestCase(::std::ostream* stream,
+                                const TestCase& test_case);
+
+  // Prints a JSON summary of unit_test to output stream out.
+  static void PrintJsonUnitTest(::std::ostream* stream,
+                                const UnitTest& unit_test);
+
+  // Produces a string representing the test properties in a result as
+  // a JSON dictionary.
+  static std::string TestPropertiesAsJson(const TestResult& result,
+                                          const std::string& indent);
+
+  // The output file.
+  const std::string output_file_;
+
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(JsonUnitTestResultPrinter);
+};
+
+// Creates a new JsonUnitTestResultPrinter.
+JsonUnitTestResultPrinter::JsonUnitTestResultPrinter(const char* output_file)
+    : output_file_(output_file) {
+  if (output_file_.empty()) {
+    GTEST_LOG_(FATAL) << "JSON output file may not be null";
+  }
+}
+
+void JsonUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
+                                                  int /*iteration*/) {
+  FILE* jsonout = NULL;
+  FilePath output_file(output_file_);
+  FilePath output_dir(output_file.RemoveFileName());
+
+  if (output_dir.CreateDirectoriesRecursively()) {
+    jsonout = posix::FOpen(output_file_.c_str(), "w");
+  }
+  if (jsonout == NULL) {
+    // TODO(phosek): report the reason of the failure.
+    //
+    // We don't do it for now as:
+    //
+    //   1. There is no urgent need for it.
+    //   2. It's a bit involved to make the errno variable thread-safe on
+    //      all three operating systems (Linux, Windows, and Mac OS).
+    //   3. To interpret the meaning of errno in a thread-safe way,
+    //      we need the strerror_r() function, which is not available on
+    //      Windows.
+    GTEST_LOG_(FATAL) << "Unable to open file \""
+                      << output_file_ << "\"";
+  }
+  std::stringstream stream;
+  PrintJsonUnitTest(&stream, unit_test);
+  fprintf(jsonout, "%s", StringStreamToString(&stream).c_str());
+  fclose(jsonout);
+}
+
+// Returns an JSON-escaped copy of the input string str.
+std::string JsonUnitTestResultPrinter::EscapeJson(const std::string& str) {
+  Message m;
+
+  for (size_t i = 0; i < str.size(); ++i) {
+    const char ch = str[i];
+    switch (ch) {
+      case '\\':
+      case '"':
+      case '/':
+        m << '\\' << ch;
+        break;
+      case '\b':
+        m << "\\b";
+        break;
+      case '\t':
+        m << "\\t";
+        break;
+      case '\n':
+        m << "\\n";
+        break;
+      case '\f':
+        m << "\\f";
+        break;
+      case '\r':
+        m << "\\r";
+        break;
+      default:
+        if (ch < ' ') {
+          m << "\\u00" << String::FormatByte(static_cast<unsigned char>(ch));
+        } else {
+          m << ch;
+        }
+        break;
+    }
+  }
+
+  return m.GetString();
+}
+
+// The following routines generate an JSON representation of a UnitTest
+// object.
+
+// Formats the given time in milliseconds as seconds.
+static std::string FormatTimeInMillisAsDuration(TimeInMillis ms) {
+  ::std::stringstream ss;
+  ss << (static_cast<double>(ms) * 1e-3) << "s";
+  return ss.str();
+}
+
+// Converts the given epoch time in milliseconds to a date string in the
+// RFC3339 format, without the timezone information.
+static std::string FormatEpochTimeInMillisAsRFC3339(TimeInMillis ms) {
+  struct tm time_struct;
+  if (!PortableLocaltime(static_cast<time_t>(ms / 1000), &time_struct))
+    return "";
+  // YYYY-MM-DDThh:mm:ss
+  return StreamableToString(time_struct.tm_year + 1900) + "-" +
+      String::FormatIntWidth2(time_struct.tm_mon + 1) + "-" +
+      String::FormatIntWidth2(time_struct.tm_mday) + "T" +
+      String::FormatIntWidth2(time_struct.tm_hour) + ":" +
+      String::FormatIntWidth2(time_struct.tm_min) + ":" +
+      String::FormatIntWidth2(time_struct.tm_sec) + "Z";
+}
+
+static inline std::string Indent(int width) {
+  return std::string(width, ' ');
+}
+
+void JsonUnitTestResultPrinter::OutputJsonKey(
+    std::ostream* stream,
+    const std::string& element_name,
+    const std::string& name,
+    const std::string& value,
+    const std::string& indent,
+    bool comma) {
+  const std::vector<std::string>& allowed_names =
+      GetReservedAttributesForElement(element_name);
+
+  GTEST_CHECK_(std::find(allowed_names.begin(), allowed_names.end(), name) !=
+                   allowed_names.end())
+      << "Key \"" << name << "\" is not allowed for value \"" << element_name
+      << "\".";
+
+  *stream << indent << "\"" << name << "\": \"" << EscapeJson(value) << "\"";
+  if (comma)
+    *stream << ",\n";
+}
+
+void JsonUnitTestResultPrinter::OutputJsonKey(
+    std::ostream* stream,
+    const std::string& element_name,
+    const std::string& name,
+    int value,
+    const std::string& indent,
+    bool comma) {
+  const std::vector<std::string>& allowed_names =
+      GetReservedAttributesForElement(element_name);
+
+  GTEST_CHECK_(std::find(allowed_names.begin(), allowed_names.end(), name) !=
+                   allowed_names.end())
+      << "Key \"" << name << "\" is not allowed for value \"" << element_name
+      << "\".";
+
+  *stream << indent << "\"" << name << "\": " << StreamableToString(value);
+  if (comma)
+    *stream << ",\n";
+}
+
+// Prints a JSON representation of a TestInfo object.
+void JsonUnitTestResultPrinter::OutputJsonTestInfo(::std::ostream* stream,
+                                                   const char* test_case_name,
+                                                   const TestInfo& test_info) {
+  const TestResult& result = *test_info.result();
+  const std::string kTestcase = "testcase";
+  const std::string kIndent = Indent(10);
+
+  *stream << Indent(8) << "{\n";
+  OutputJsonKey(stream, kTestcase, "name", test_info.name(), kIndent);
+
+  if (test_info.value_param() != NULL) {
+    OutputJsonKey(stream, kTestcase, "value_param",
+                  test_info.value_param(), kIndent);
+  }
+  if (test_info.type_param() != NULL) {
+    OutputJsonKey(stream, kTestcase, "type_param", test_info.type_param(),
+                  kIndent);
+  }
+
+  OutputJsonKey(stream, kTestcase, "status",
+                test_info.should_run() ? "RUN" : "NOTRUN", kIndent);
+  OutputJsonKey(stream, kTestcase, "time",
+                FormatTimeInMillisAsDuration(result.elapsed_time()), kIndent);
+  OutputJsonKey(stream, kTestcase, "classname", test_case_name, kIndent, false);
+  *stream << TestPropertiesAsJson(result, kIndent);
+
+  int failures = 0;
+  for (int i = 0; i < result.total_part_count(); ++i) {
+    const TestPartResult& part = result.GetTestPartResult(i);
+    if (part.failed()) {
+      *stream << ",\n";
+      if (++failures == 1) {
+        *stream << kIndent << "\"" << "failures" << "\": [\n";
+      }
+      const std::string location =
+          internal::FormatCompilerIndependentFileLocation(part.file_name(),
+                                                          part.line_number());
+      const std::string message = EscapeJson(location + "\n" + part.message());
+      *stream << kIndent << "  {\n"
+              << kIndent << "    \"failure\": \"" << message << "\",\n"
+              << kIndent << "    \"type\": \"\"\n"
+              << kIndent << "  }";
+    }
+  }
+
+  if (failures > 0)
+    *stream << "\n" << kIndent << "]";
+  *stream << "\n" << Indent(8) << "}";
+}
+
+// Prints an JSON representation of a TestCase object
+void JsonUnitTestResultPrinter::PrintJsonTestCase(std::ostream* stream,
+                                                  const TestCase& test_case) {
+  const std::string kTestsuite = "testsuite";
+  const std::string kIndent = Indent(6);
+
+  *stream << Indent(4) << "{\n";
+  OutputJsonKey(stream, kTestsuite, "name", test_case.name(), kIndent);
+  OutputJsonKey(stream, kTestsuite, "tests", test_case.reportable_test_count(),
+                kIndent);
+  OutputJsonKey(stream, kTestsuite, "failures", test_case.failed_test_count(),
+                kIndent);
+  OutputJsonKey(stream, kTestsuite, "disabled",
+                test_case.reportable_disabled_test_count(), kIndent);
+  OutputJsonKey(stream, kTestsuite, "errors", 0, kIndent);
+  OutputJsonKey(stream, kTestsuite, "time",
+                FormatTimeInMillisAsDuration(test_case.elapsed_time()), kIndent,
+                false);
+  *stream << TestPropertiesAsJson(test_case.ad_hoc_test_result(), kIndent)
+          << ",\n";
+
+  *stream << kIndent << "\"" << kTestsuite << "\": [\n";
+
+  bool comma = false;
+  for (int i = 0; i < test_case.total_test_count(); ++i) {
+    if (test_case.GetTestInfo(i)->is_reportable()) {
+      if (comma) {
+        *stream << ",\n";
+      } else {
+        comma = true;
+      }
+      OutputJsonTestInfo(stream, test_case.name(), *test_case.GetTestInfo(i));
+    }
+  }
+  *stream << "\n" << kIndent << "]\n" << Indent(4) << "}";
+}
+
+// Prints a JSON summary of unit_test to output stream out.
+void JsonUnitTestResultPrinter::PrintJsonUnitTest(std::ostream* stream,
+                                                  const UnitTest& unit_test) {
+  const std::string kTestsuites = "testsuites";
+  const std::string kIndent = Indent(2);
+  *stream << "{\n";
+
+  OutputJsonKey(stream, kTestsuites, "tests", unit_test.reportable_test_count(),
+                kIndent);
+  OutputJsonKey(stream, kTestsuites, "failures", unit_test.failed_test_count(),
+                kIndent);
+  OutputJsonKey(stream, kTestsuites, "disabled",
+                unit_test.reportable_disabled_test_count(), kIndent);
+  OutputJsonKey(stream, kTestsuites, "errors", 0, kIndent);
+  if (GTEST_FLAG(shuffle)) {
+    OutputJsonKey(stream, kTestsuites, "random_seed", unit_test.random_seed(),
+                  kIndent);
+  }
+  OutputJsonKey(stream, kTestsuites, "timestamp",
+                FormatEpochTimeInMillisAsRFC3339(unit_test.start_timestamp()),
+                kIndent);
+  OutputJsonKey(stream, kTestsuites, "time",
+                FormatTimeInMillisAsDuration(unit_test.elapsed_time()), kIndent,
+                false);
+
+  *stream << TestPropertiesAsJson(unit_test.ad_hoc_test_result(), kIndent)
+          << ",\n";
+
+  OutputJsonKey(stream, kTestsuites, "name", "AllTests", kIndent);
+  *stream << kIndent << "\"" << kTestsuites << "\": [\n";
+
+  bool comma = false;
+  for (int i = 0; i < unit_test.total_test_case_count(); ++i) {
+    if (unit_test.GetTestCase(i)->reportable_test_count() > 0) {
+      if (comma) {
+        *stream << ",\n";
+      } else {
+        comma = true;
+      }
+      PrintJsonTestCase(stream, *unit_test.GetTestCase(i));
+    }
+  }
+
+  *stream << "\n" << kIndent << "]\n" << "}\n";
+}
+
+// Produces a string representing the test properties in a result as
+// a JSON dictionary.
+std::string JsonUnitTestResultPrinter::TestPropertiesAsJson(
+    const TestResult& result, const std::string& indent) {
+  Message attributes;
+  for (int i = 0; i < result.test_property_count(); ++i) {
+    const TestProperty& property = result.GetTestProperty(i);
+    attributes << ",\n" << indent << "\"" << property.key() << "\": "
+               << "\"" << EscapeJson(property.value()) << "\"";
+  }
+  return attributes.GetString();
+}
+
+// End JsonUnitTestResultPrinter
 
 #if GTEST_CAN_STREAM_RESULTS_
 
@@ -3922,9 +4279,10 @@ void OsStackTraceGetter::UponLeavingGTest() {}
 class ScopedPrematureExitFile {
  public:
   explicit ScopedPrematureExitFile(const char* premature_exit_filepath)
-      : premature_exit_filepath_(premature_exit_filepath) {
+      : premature_exit_filepath_(premature_exit_filepath ?
+                                 premature_exit_filepath : "") {
     // If a path to the premature-exit file is specified...
-    if (premature_exit_filepath != NULL && *premature_exit_filepath != '\0') {
+    if (!premature_exit_filepath_.empty()) {
       // create the file with a single "0" character in it.  I/O
       // errors are ignored as there's nothing better we can do and we
       // don't want to fail the test because of this.
@@ -3935,13 +4293,18 @@ class ScopedPrematureExitFile {
   }
 
   ~ScopedPrematureExitFile() {
-    if (premature_exit_filepath_ != NULL && *premature_exit_filepath_ != '\0') {
-      remove(premature_exit_filepath_);
+    if (!premature_exit_filepath_.empty()) {
+      int retval = remove(premature_exit_filepath_.c_str());
+      if (retval) {
+        GTEST_LOG_(ERROR) << "Failed to remove premature exit filepath \""
+                          << premature_exit_filepath_ << "\" with error "
+                          << retval;
+      }
     }
   }
 
  private:
-  const char* const premature_exit_filepath_;
+  const std::string premature_exit_filepath_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ScopedPrematureExitFile);
 };
@@ -4461,6 +4824,9 @@ void UnitTestImpl::ConfigureXmlOutput() {
   if (output_format == "xml") {
     listeners()->SetDefaultXmlGenerator(new XmlUnitTestResultPrinter(
         UnitTestOptions::GetAbsolutePathToOutputFile().c_str()));
+  } else if (output_format == "json") {
+    listeners()->SetDefaultXmlGenerator(new JsonUnitTestResultPrinter(
+        UnitTestOptions::GetAbsolutePathToOutputFile().c_str()));
   } else if (output_format != "") {
     GTEST_LOG_(WARNING) << "WARNING: unrecognized output format \""
                         << output_format << "\" ignored.";
@@ -4606,13 +4972,8 @@ static void TearDownEnvironment(Environment* env) { env->TearDown(); }
 // All other functions called from RunAllTests() may safely assume that
 // parameterized tests are ready to be counted and run.
 bool UnitTestImpl::RunAllTests() {
-  // Makes sure InitGoogleTest() was called.
-  if (!GTestIsInitialized()) {
-    GTEST_LOG_(ERROR) <<
-      "\nThis test program did NOT call ::testing::InitGoogleTest "
-      "before calling RUN_ALL_TESTS().  Please fix it.";
-    return false;
-  }
+  // True iff Google Test is initialized before RUN_ALL_TESTS() is called.
+  const bool gtest_is_initialized_before_run_all_tests = GTestIsInitialized();
 
   // Do not run any test if the --help flag was specified.
   if (g_help_flag)
@@ -4740,6 +5101,20 @@ bool UnitTestImpl::RunAllTests() {
 
   repeater->OnTestProgramEnd(*parent_);
 
+  if (!gtest_is_initialized_before_run_all_tests) {
+    ColoredPrintf(
+        COLOR_RED,
+        "\nIMPORTANT NOTICE - DO NOT IGNORE:\n"
+        "This test program did NOT call " GTEST_INIT_GOOGLE_TEST_NAME_
+        "() before calling RUN_ALL_TESTS(). This is INVALID. Soon " GTEST_NAME_
+        " will start to enforce the valid usage. "
+        "Please fix it ASAP, or IT WILL START TO FAIL.\n");  // NOLINT
+#if GTEST_FOR_GOOGLE_
+    ColoredPrintf(COLOR_RED,
+                  "For more details, see http://wiki/Main/ValidGUnitMain.\n");
+#endif  // GTEST_FOR_GOOGLE_
+  }
+
   return !failed;
 }
 
@@ -4786,7 +5161,7 @@ bool ShouldShard(const char* total_shards_env,
       << "Invalid environment variables: you have "
       << kTestShardIndex << " = " << shard_index
       << ", but have left " << kTestTotalShards << " unset.\n";
-    ColoredPrintf(COLOR_RED, "%s", msg.GetString().c_str());
+    ColoredPrintf(COLOR_RED, msg.GetString().c_str());
     fflush(stdout);
     exit(EXIT_FAILURE);
   } else if (total_shards != -1 && shard_index == -1) {
@@ -4794,7 +5169,7 @@ bool ShouldShard(const char* total_shards_env,
       << "Invalid environment variables: you have "
       << kTestTotalShards << " = " << total_shards
       << ", but have left " << kTestShardIndex << " unset.\n";
-    ColoredPrintf(COLOR_RED, "%s", msg.GetString().c_str());
+    ColoredPrintf(COLOR_RED, msg.GetString().c_str());
     fflush(stdout);
     exit(EXIT_FAILURE);
   } else if (shard_index < 0 || shard_index >= total_shards) {
@@ -4803,7 +5178,7 @@ bool ShouldShard(const char* total_shards_env,
       << kTestShardIndex << " < " << kTestTotalShards
       << ", but you have " << kTestShardIndex << "=" << shard_index
       << ", " << kTestTotalShards << "=" << total_shards << ".\n";
-    ColoredPrintf(COLOR_RED, "%s", msg.GetString().c_str());
+    ColoredPrintf(COLOR_RED, msg.GetString().c_str());
     fflush(stdout);
     exit(EXIT_FAILURE);
   }
@@ -5070,8 +5445,7 @@ bool SkipPrefix(const char* prefix, const char** pstr) {
 // part can be omitted.
 //
 // Returns the value of the flag, or NULL if the parsing failed.
-static const char* ParseFlagValue(const char* str,
-                                  const char* flag,
+static const char* ParseFlagValue(const char* str, const char* flag,
                                   bool def_optional) {
   // str and flag must not be NULL.
   if (str == NULL || flag == NULL) return NULL;
@@ -5142,9 +5516,8 @@ bool ParseInt32Flag(const char* str, const char* flag, Int32* value) {
 //
 // On success, stores the value of the flag in *value, and returns
 // true.  On failure, returns false without changing *value.
-static bool ParseStringFlag(const char* str,
-                            const char* flag,
-                            std::string* value) {
+template <typename String>
+static bool ParseStringFlag(const char* str, const char* flag, String* value) {
   // Gets the value of the flag as a string.
   const char* const value_str = ParseFlagValue(str, flag, false);
 
@@ -5244,22 +5617,22 @@ static const char kColorEncodedHelpMessage[] =
 "Test Output:\n"
 "  @G--" GTEST_FLAG_PREFIX_ "color=@Y(@Gyes@Y|@Gno@Y|@Gauto@Y)@D\n"
 "      Enable/disable colored output. The default is @Gauto@D.\n"
-"  @G--" GTEST_FLAG_PREFIX_ "print_time=0@D\n"
+"  -@G-" GTEST_FLAG_PREFIX_ "print_time=0@D\n"
 "      Don't print the elapsed time of each test.\n"
-"  @G--" GTEST_FLAG_PREFIX_ "output=xml@Y[@G:@YDIRECTORY_PATH@G"
+"  @G--" GTEST_FLAG_PREFIX_ "output=@Y(@Gjson@Y|@Gxml@Y)[@G:@YDIRECTORY_PATH@G"
     GTEST_PATH_SEP_ "@Y|@G:@YFILE_PATH]@D\n"
-"      Generate an XML report in the given directory or with the given file\n"
-"      name. @YFILE_PATH@D defaults to @Gtest_detail.xml@D.\n"
-#if GTEST_CAN_STREAM_RESULTS_
+"      Generate a JSON or XML report in the given directory or with the given\n"
+"      file name. @YFILE_PATH@D defaults to @Gtest_details.xml@D.\n"
+# if GTEST_CAN_STREAM_RESULTS_
 "  @G--" GTEST_FLAG_PREFIX_ "stream_result_to=@YHOST@G:@YPORT@D\n"
 "      Stream test results to the given server.\n"
-#endif  // GTEST_CAN_STREAM_RESULTS_
+# endif  // GTEST_CAN_STREAM_RESULTS_
 "\n"
 "Assertion Behavior:\n"
-#if GTEST_HAS_DEATH_TEST && !GTEST_OS_WINDOWS
+# if GTEST_HAS_DEATH_TEST && !GTEST_OS_WINDOWS
 "  @G--" GTEST_FLAG_PREFIX_ "death_test_style=@Y(@Gfast@Y|@Gthreadsafe@Y)@D\n"
 "      Set the default death test style.\n"
-#endif  // GTEST_HAS_DEATH_TEST && !GTEST_OS_WINDOWS
+# endif  // GTEST_HAS_DEATH_TEST && !GTEST_OS_WINDOWS
 "  @G--" GTEST_FLAG_PREFIX_ "break_on_failure@D\n"
 "      Turn assertion failures into debugger break-points.\n"
 "  @G--" GTEST_FLAG_PREFIX_ "throw_on_failure@D\n"
