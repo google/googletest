@@ -56,6 +56,28 @@ void operator<<(const testing::internal::Secret&, int);
 
 namespace testing {
 
+namespace internal {
+
+template<typename T>
+class ReturnValueAndMessageWrapper {
+public:
+  ReturnValueAndMessageWrapper(const T& v, const Message& msg)
+          : v_(v), message_(msg) {}
+  operator const T&() const { return v_; }
+  const ::testing::Message& message() const { return message_; }
+private:
+  // private and non functional assignement operator to silence warning 4512 on
+  // MSVC < 14.0
+  ReturnValueAndMessageWrapper& operator=(const ReturnValueAndMessageWrapper&) {
+    return *this;
+  }
+  const T& v_;
+  const Message& message_;
+};
+
+} // namespace internal
+
+
 // The Message class works like an ostream repeater.
 //
 // Typical usage:
@@ -155,6 +177,11 @@ class GTEST_API_ Message {
     return *this;
   }
 #endif  // GTEST_OS_SYMBIAN
+
+  template<typename T>
+  internal::ReturnValueAndMessageWrapper<T> operator||(const T& value) {
+    return internal::ReturnValueAndMessageWrapper<T>(value, *this);
+  }
 
   // Since the basic IO manipulators are overloaded for both narrow
   // and wide streams, we have to provide this specialized definition
