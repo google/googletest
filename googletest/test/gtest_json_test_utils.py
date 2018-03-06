@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# Copyright 2008, Google Inc.
+# Copyright 2018, Google Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,41 +27,34 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-"""Verifies that Google Test warns the user when not initialized properly."""
+"""Unit test utilities for gtest_json_output."""
 
-__author__ = 'wan@google.com (Zhanyong Wan)'
-
-import gtest_test_utils
-
-COMMAND = gtest_test_utils.GetTestExecutablePath('gtest_uninitialized_test_')
+import re
 
 
-def Assert(condition):
-  if not condition:
-    raise AssertionError
+def normalize(obj):
+  """Normalize output object.
 
+  Args:
+     obj: Google Test's JSON output object to normalize.
 
-def AssertEq(expected, actual):
-  if expected != actual:
-    print 'Expected: %s' % (expected,)
-    print '  Actual: %s' % (actual,)
-    raise AssertionError
-
-
-def TestExitCodeAndOutput(command):
-  """Runs the given command and verifies its exit code and output."""
-
-  # Verifies that 'command' exits with code 1.
-  p = gtest_test_utils.Subprocess(command)
-  if p.exited and p.exit_code == 0:
-    Assert('IMPORTANT NOTICE' in p.output);
-  Assert('InitGoogleTest' in p.output)
-
-
-class GTestUninitializedTest(gtest_test_utils.TestCase):
-  def testExitCodeAndOutput(self):
-    TestExitCodeAndOutput(COMMAND)
-
-
-if __name__ == '__main__':
-  gtest_test_utils.Main()
+  Returns:
+     Normalized output without any references to transient information that may
+     change from run to run.
+  """
+  def _normalize(key, value):
+    if key == 'time':
+      return re.sub(r'^\d+(\.\d+)?s$', '*', value)
+    elif key == 'timestamp':
+      return re.sub(r'^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$', '*', value)
+    elif key == 'failure':
+      value = re.sub(r'^.*[/\\](.*:)\d+\n', '\\1*\n', value)
+      return re.sub(r'Stack trace:\n(.|\n)*', 'Stack trace:\n*', value)
+    else:
+      return normalize(value)
+  if isinstance(obj, dict):
+    return {k: _normalize(k, v) for k, v in obj.items()}
+  if isinstance(obj, list):
+    return [normalize(x) for x in obj]
+  else:
+    return obj

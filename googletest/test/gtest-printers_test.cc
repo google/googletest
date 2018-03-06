@@ -239,7 +239,7 @@ using ::testing::internal::UniversalTersePrint;
 #if GTEST_HAS_TR1_TUPLE || GTEST_HAS_STD_TUPLE_
 using ::testing::internal::UniversalTersePrintTupleFieldsToStrings;
 #endif
-using ::testing::internal::string;
+
 
 // The hash_* classes are not part of the C++ standard.  STLport
 // defines them in namespace std.  MSVC defines them in ::stdext.  GCC
