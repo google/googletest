@@ -1640,6 +1640,7 @@ If the mock method also needs to return a value as well, you can chain
 
 ```
 using ::testing::_;
+using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::SetArgPointee;
 
