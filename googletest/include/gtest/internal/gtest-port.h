@@ -266,7 +266,7 @@
 #include <stddef.h>  // for ptrdiff_t
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
+#include <cstring>
 #ifndef _WIN32_WCE
 # include <sys/types.h>
 # include <sys/stat.h>
