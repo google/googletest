@@ -104,15 +104,45 @@ Invalid characters in brackets []%(stack)s]]></failure>
     <testcase name="DISABLED_test_not_run" status="notrun" time="*" classname="DisabledTest"/>
   </testsuite>
   <testsuite name="PropertyRecordingTest" tests="4" failures="0" disabled="0" errors="0" time="*" SetUpTestCase="yes" TearDownTestCase="aye">
-    <testcase name="OneProperty" status="run" time="*" classname="PropertyRecordingTest" key_1="1"/>
-    <testcase name="IntValuedProperty" status="run" time="*" classname="PropertyRecordingTest" key_int="1"/>
-    <testcase name="ThreeProperties" status="run" time="*" classname="PropertyRecordingTest" key_1="1" key_2="2" key_3="3"/>
-    <testcase name="TwoValuesForOneKeyUsesLastValue" status="run" time="*" classname="PropertyRecordingTest" key_1="2"/>
+    <testcase name="OneProperty" status="run" time="*" classname="PropertyRecordingTest">
+      <properties>
+        <property name="key_1" value="1"/>
+      </properties>
+    </testcase>
+    <testcase name="IntValuedProperty" status="run" time="*" classname="PropertyRecordingTest">
+      <properties>
+        <property name="key_int" value="1"/>
+      </properties>
+    </testcase>
+    <testcase name="ThreeProperties" status="run" time="*" classname="PropertyRecordingTest">
+      <properties>
+        <property name="key_1" value="1"/>
+        <property name="key_2" value="2"/>
+        <property name="key_3" value="3"/>
+      </properties>
+    </testcase>
+    <testcase name="TwoValuesForOneKeyUsesLastValue" status="run" time="*" classname="PropertyRecordingTest">
+      <properties>
+        <property name="key_1" value="2"/>
+      </properties>
+    </testcase>
   </testsuite>
   <testsuite name="NoFixtureTest" tests="3" failures="0" disabled="0" errors="0" time="*">
-     <testcase name="RecordProperty" status="run" time="*" classname="NoFixtureTest" key="1"/>
-     <testcase name="ExternalUtilityThatCallsRecordIntValuedProperty" status="run" time="*" classname="NoFixtureTest" key_for_utility_int="1"/>
-     <testcase name="ExternalUtilityThatCallsRecordStringValuedProperty" status="run" time="*" classname="NoFixtureTest" key_for_utility_string="1"/>
+     <testcase name="RecordProperty" status="run" time="*" classname="NoFixtureTest">
+       <properties>
+         <property name="key" value="1"/>
+       </properties>
+     </testcase>
+     <testcase name="ExternalUtilityThatCallsRecordIntValuedProperty" status="run" time="*" classname="NoFixtureTest">
+       <properties>
+         <property name="key_for_utility_int" value="1"/>
+       </properties>
+     </testcase>
+     <testcase name="ExternalUtilityThatCallsRecordStringValuedProperty" status="run" time="*" classname="NoFixtureTest">
+       <properties>
+         <property name="key_for_utility_string" value="1"/>
+       </properties>
+     </testcase>
   </testsuite>
   <testsuite name="Single/ValueParamTest" tests="4" failures="0" disabled="0" errors="0" time="*">
     <testcase name="HasValueParamAttribute/0" value_param="33" status="run" time="*" classname="Single/ValueParamTest" />
@@ -149,7 +179,11 @@ EXPECTED_SHARDED_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
     <testcase name="Succeeds" status="run" time="*" classname="SuccessfulTest"/>
   </testsuite>
   <testsuite name="NoFixtureTest" tests="1" failures="0" disabled="0" errors="0" time="*">
-     <testcase name="RecordProperty" status="run" time="*" classname="NoFixtureTest" key="1"/>
+     <testcase name="RecordProperty" status="run" time="*" classname="NoFixtureTest">
+       <properties>
+         <property name="key" value="1"/>
+       </properties>
+     </testcase>
   </testsuite>
   <testsuite name="Single/ValueParamTest" tests="1" failures="0" disabled="0" errors="0" time="*">
     <testcase name="AnotherTestThatHasValueParamAttribute/1" value_param="42" status="run" time="*" classname="Single/ValueParamTest" />

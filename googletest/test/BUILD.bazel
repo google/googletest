@@ -119,6 +119,16 @@ cc_test(
         "//:gtest",
     ],
 )
+
+cc_test(
+    name = "gtest_unittest",
+    size = "small",
+    srcs = ["gtest_unittest.cc"],
+    args = ["--heap_check=strict"],
+    shard_count = 2,
+    deps = ["//:gtest_main"],
+)
+
 #  Py tests
 
 py_library(
@@ -217,6 +227,13 @@ py_test(
     srcs = ["gtest_break_on_failure_unittest.py"],
     data = [":gtest_break_on_failure_unittest_"],
     deps = [":gtest_test_utils"],
+)
+
+cc_test(
+    name = "gtest_assert_by_exception_test",
+    size = "small",
+    srcs = ["gtest_assert_by_exception_test.cc"],
+    deps = ["//:gtest"],
 )
 
 cc_binary(

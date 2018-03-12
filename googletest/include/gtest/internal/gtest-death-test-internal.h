@@ -217,14 +217,18 @@ GTEST_API_ bool ExitedUnsuccessfully(int exit_status);
 // can be streamed.
 
 // This macro is for implementing ASSERT/EXPECT_DEBUG_DEATH when compiled in
-// NDEBUG mode. In this case we need the statements to be executed, the regex is
-// ignored, and the macro must accept a streamed message even though the message
-// is never printed.
-# define GTEST_EXECUTE_STATEMENT_(statement, regex) \
-  GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-  if (::testing::internal::AlwaysTrue()) { \
-     GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
-  } else \
+// NDEBUG mode. In this case we need the statements to be executed and the macro
+// must accept a streamed message even though the message is never printed.
+// The regex object is not evaluated, but it is used to prevent "unused"
+// warnings and to avoid an expression that doesn't compile in debug mode.
+#define GTEST_EXECUTE_STATEMENT_(statement, regex)             \
+  GTEST_AMBIGUOUS_ELSE_BLOCKER_                                \
+  if (::testing::internal::AlwaysTrue()) {                     \
+    GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
+  } else if (!::testing::internal::AlwaysTrue()) {             \
+    const ::testing::internal::RE& gtest_regex = (regex);      \
+    static_cast<void>(gtest_regex);                            \
+  } else                                                       \
     ::testing::Message()
 
 // A class representing the parsed contents of the

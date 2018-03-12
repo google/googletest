@@ -239,7 +239,7 @@ To create a test:
   1. The test's result is determined by the assertions; if any assertion in the test fails (either fatally or non-fatally), or if the test crashes, the entire test fails. Otherwise, it succeeds.
 
 ```
-TEST(test_case_name, test_name) {
+TEST(testCaseName, testName) {
  ... test body ...
 }
 ```
