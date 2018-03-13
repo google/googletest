@@ -371,6 +371,8 @@
 # define GTEST_HAS_STD_MOVE_ 1
 # define GTEST_HAS_STD_UNIQUE_PTR_ 1
 # define GTEST_HAS_STD_SHARED_PTR_ 1
+# define GTEST_HAS_UNORDERED_MAP_ 1
+# define GTEST_HAS_UNORDERED_SET_ 1
 #endif
 
 // C++11 specifies that <tuple> provides std::tuple.
