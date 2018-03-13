@@ -50,6 +50,15 @@
 
 #include "gtest/gtest.h"
 
+// hash_set are available under Visual C++, or on Linux.
+#if GTEST_HAS_HASH_MAP_
+# include <hash_map>            // NOLINT
+#endif  // GTEST_HAS_HASH_MAP_
+
+#if GTEST_HAS_HASH_SET_
+# include <hash_set>            // NOLINT
+#endif  // GTEST_HAS_HASH_SET_
+
 #if GTEST_HAS_STD_FORWARD_LIST_
 # include <forward_list> // NOLINT
 #endif  // GTEST_HAS_STD_FORWARD_LIST_
@@ -225,6 +234,34 @@ using ::testing::internal::UniversalPrinter;
 using ::testing::internal::UniversalTersePrint;
 #if GTEST_HAS_TR1_TUPLE || GTEST_HAS_STD_TUPLE_
 using ::testing::internal::UniversalTersePrintTupleFieldsToStrings;
+#endif
+
+
+// The hash_* classes are not part of the C++ standard.  STLport
+// defines them in namespace std.  MSVC defines them in ::stdext.  GCC
+// defines them in ::.
+#if GTEST_HAS_HASH_MAP_
+
+#ifdef _STLP_HASH_MAP  // We got <hash_map> from STLport.
+using ::std::hash_map;
+using ::std::hash_multimap;
+#elif _MSC_VER
+using ::stdext::hash_map;
+using ::stdext::hash_multimap;
+#endif
+
+#endif
+
+#if GTEST_HAS_HASH_SET_
+
+#ifdef _STLP_HASH_MAP  // We got <hash_map> from STLport.
+using ::std::hash_map;
+using ::std::hash_multimap;
+#elif _MSC_VER
+using ::stdext::hash_map;
+using ::stdext::hash_multimap;
+#endif
+
 #endif
 
 // Prints a value to a string using the universal value printer.  This
