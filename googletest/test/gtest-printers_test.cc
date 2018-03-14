@@ -821,20 +821,14 @@ TEST(PrintStlContainerTest, NonEmptyDeque) {
 
 #if GTEST_HAS_UNORDERED_MAP_
 
-template <class Key, class T>
-using hash_map = ::std::unordered_map<Key, T>;
-template <class Key, class T>
-using hash_multimap = ::std::unordered_multimap<Key, T>;
-
-
 TEST(PrintStlContainerTest, OneElementHashMap) {
-  hash_map<int, char> map1;
+  ::std::unordered_map<int, char> map1;
   map1[1] = 'a';
   EXPECT_EQ("{ (1, 'a' (97, 0x61)) }", Print(map1));
 }
 
 TEST(PrintStlContainerTest, HashMultiMap) {
-  hash_multimap<int, bool> map1;
+  ::std::unordered_multimap<int, bool> map1;
   map1.insert(make_pair(5, true));
   map1.insert(make_pair(5, false));
 
@@ -849,13 +843,8 @@ TEST(PrintStlContainerTest, HashMultiMap) {
 
 #if GTEST_HAS_UNORDERED_SET_
 
-template <class Key>
-using hash_set = ::std::unordered_set<Key>;
-template <class Key>
-using hash_multiset = ::std::unordered_multiset<Key>;
-
 TEST(PrintStlContainerTest, HashSet) {
-  hash_set<int> set1;
+  ::std::unordered_set<int> set1;
   set1.insert(1);
   EXPECT_EQ("{ 1 }", Print(set1));
 }
@@ -863,7 +852,7 @@ TEST(PrintStlContainerTest, HashSet) {
 TEST(PrintStlContainerTest, HashMultiSet) {
   const int kSize = 5;
   int a[kSize] = { 1, 1, 2, 5, 1 };
-  hash_multiset<int> set1(a, a + kSize);
+  ::std::unordered_multiset<int> set1(a, a + kSize);
 
   // Elements of hash_multiset can be printed in any order.
   const std::string result = Print(set1);
