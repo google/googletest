@@ -213,10 +213,12 @@ GTEST_DEFINE_bool_(
 GTEST_DEFINE_string_(
     color,
     internal::StringFromGTestEnv("color", "auto"),
-    "Whether to use colors in the output.  Valid values: yes, no, "
+    "Whether to use colors in the output.  Valid values: yes, no, force-ansi"
     "and auto.  'auto' means to use colors if the output is "
     "being sent to a terminal and the TERM environment variable "
-    "is set to a terminal type that supports colors.");
+    "is set to a terminal type that supports colors."
+    " 'force-ansi' uses ansi escape codes always and "
+    " doesn't need a terminal connected to the output stream");
 
 GTEST_DEFINE_string_(
     filter,
@@ -2933,7 +2935,7 @@ static WORD GetNewColor(GTestColor color, WORD old_color_attrs) {
   return new_color;
 }
 
-#else
+#endif  // GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE
 
 // Returns the ANSI color code for the given color.  COLOR_DEFAULT is
 // an invalid input.
@@ -2945,8 +2947,6 @@ static const char* GetAnsiColorCode(GTestColor color) {
     default:            return NULL;
   };
 }
-
-#endif  // GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE
 
 // Returns true iff Google Test should use colors in the output.
 bool ShouldUseColor(bool stdout_is_tty) {
@@ -2992,6 +2992,17 @@ bool ShouldUseColor(bool stdout_is_tty) {
 static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   va_list args;
   va_start(args, fmt);
+
+  static const bool force_ansi_colors =
+    String::CaseInsensitiveCStringEquals(GTEST_FLAG(color).c_str(), "force-ansi");
+
+  if (force_ansi_colors)
+  {
+    printf("\033[0;3%sm", GetAnsiColorCode(color));
+    vprintf(fmt, args);
+    printf("\033[m");  // Resets the terminal to default.
+    return;
+  }
 
 #if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_SYMBIAN || GTEST_OS_ZOS || \
     GTEST_OS_IOS || GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_RT

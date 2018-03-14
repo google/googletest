@@ -35,6 +35,7 @@ __author__ = 'wan@google.com (Zhanyong Wan)'
 
 import os
 import gtest_test_utils
+import re
 
 IS_WINDOWS = os.name == 'nt'
 
@@ -51,10 +52,7 @@ def SetEnvVar(env_var, value):
   elif env_var in os.environ:
     del os.environ[env_var]
 
-
-def UsesColor(term, color_env_var, color_flag):
-  """Runs gtest_color_test_ and returns its exit code."""
-
+def ColorProcess(term, color_env_var, color_flag):
   SetEnvVar('TERM', term)
   SetEnvVar(COLOR_ENV_VAR, color_env_var)
 
@@ -62,11 +60,23 @@ def UsesColor(term, color_env_var, color_flag):
     args = []
   else:
     args = ['--%s=%s' % (COLOR_FLAG, color_flag)]
-  p = gtest_test_utils.Subprocess([COMMAND] + args)
+  return gtest_test_utils.Subprocess([COMMAND] + args)
+
+def UsesColor(term, color_env_var, color_flag):
+  """Runs gtest_color_test_ and returns its exit code."""
+  p = ColorProcess(term, color_env_var, color_flag)
   return not p.exited or p.exit_code
 
-
 class GTestColorTest(gtest_test_utils.TestCase):
+  def testForceAnsiEscapeColors(self):
+    ansiColorRegex = re.compile(r'\033\[[0-9;]*m')
+
+    self.assertTrue(ansiColorRegex.search(
+      ColorProcess('dumb', None, "force-ansi").output))
+
+    self.assertTrue(ansiColorRegex.search(
+      ColorProcess('dumb', "force-ansi", None).output))
+
   def testNoEnvVarNoFlag(self):
     """Tests the case when there's neither GTEST_COLOR nor --gtest_color."""
 

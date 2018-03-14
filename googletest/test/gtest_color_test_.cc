@@ -45,11 +45,13 @@ using testing::internal::ShouldUseColor;
 // works the same way as in a real Google-Test-based test.  We don't actual
 // run the TEST itself.
 TEST(GTestColorTest, Dummy) {
+  ASSERT_EQ(1, 1);
 }
 
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
-
+  if (RUN_ALL_TESTS() != 0)
+    return -1;
   if (ShouldUseColor(true)) {
     // Google Test decides to use colors in the output (assuming it
     // goes to a TTY).
