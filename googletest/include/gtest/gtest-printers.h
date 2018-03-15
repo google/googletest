@@ -509,17 +509,19 @@ void PrintTo(const T& value, ::std::ostream* os) {
   // function pointers so that the `*os << p` in the object pointer overload
   // doesn't cause that warning either.
   DefaultPrintTo(
-      WrapPrinterType<
-          (sizeof(IsContainerTest<T>(0)) == sizeof(IsContainer)) && !IsRecursiveContainer<T>::value
-            ? kPrintContainer : !is_pointer<T>::value
-              ? kPrintOther
+      WrapPrinterType <
+                  (sizeof(IsContainerTest<T>(0)) == sizeof(IsContainer)) &&
+              !IsRecursiveContainer<T>::value
+          ? kPrintContainer
+          : !is_pointer<T>::value
+                ? kPrintOther
 #if GTEST_LANG_CXX11
                 : std::is_function<typename std::remove_pointer<T>::type>::value
 #else
                 : !internal::ImplicitlyConvertible<T, const void*>::value
 #endif
                       ? kPrintFunctionPointer
-                      : kPrintPointer>(),
+                      : kPrintPointer > (),
       value, os);
 }
 
