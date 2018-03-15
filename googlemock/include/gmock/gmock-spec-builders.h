@@ -563,6 +563,7 @@ class ExpectationSet {
  public:
   // A bidirectional iterator that can read a const element in the set.
   typedef Expectation::Set::const_iterator const_iterator;
+  typedef Expectation::Set::iterator iterator;
 
   // An object stored in the set.  This is an alias of Expectation.
   typedef Expectation::Set::value_type value_type;
