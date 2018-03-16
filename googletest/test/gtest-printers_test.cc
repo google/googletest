@@ -195,7 +195,6 @@ class PathLike {
   struct iterator {
     typedef PathLike value_type;
   };
-  typedef iterator const_iterator;
 
   PathLike() {}
 
