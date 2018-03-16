@@ -4526,7 +4526,6 @@ class Streamlike {
   class ConstIter;
  public:
   typedef ConstIter const_iterator;
-  typedef ConstIter iterator;
   typedef T value_type;
 
   template <typename InIter>

@@ -940,27 +940,19 @@ struct IsRecursiveContainerImpl;
 template <typename C>
 struct IsRecursiveContainerImpl<C, false> : public false_type {};
 
+// Since the IsRecursiveContainerImpl depends on the IsContainerTest we need to
+// obey the same inconsistencies as the IsContainerTest, namely check if
+// something is a container is relying on only const_iterator in C++11 and
+// is relying on both const_iterator and iterator otherwise
 template <typename C>
 struct IsRecursiveContainerImpl<C, true> {
-  template <typename T>
-  struct VoidT {
-    typedef void value_type;
-  };
-  template <typename C1, typename VT = void>
-  struct PathTraits {
-    typedef typename C1::const_iterator::value_type value_type;
-  };
-  template <typename C2>
-  struct PathTraits<
-      C2, typename VoidT<typename C2::iterator::value_type>::value_type> {
-    typedef typename C2::iterator::value_type value_type;
-  };
-  typedef typename IteratorTraits<typename C::iterator>::value_type value_type;
-#if GTEST_LANG_CXX11
-  typedef std::is_same<value_type, C> type;
+  #if GTEST_LANG_CXX11
+  typedef typename IteratorTraits<typename C::const_iterator>::value_type
+      value_type;
 #else
-  typedef is_same<value_type, C> type;
+  typedef typename IteratorTraits<typename C::iterator>::value_type value_type;
 #endif
+  typedef is_same<value_type, C> type;
 };
 
 // IsRecursiveContainer<Type> is a unary compile-time predicate that
