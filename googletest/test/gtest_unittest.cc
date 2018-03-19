@@ -64,6 +64,9 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 #include <map>
 #include <vector>
 #include <ostream>
+#if GTEST_LANG_CXX11
+#include <unordered_set>
+#endif  // GTEST_LANG_CXX11
 
 #include "gtest/gtest-spi.h"
 #include "src/gtest-internal-inl.h"
@@ -258,6 +261,8 @@ using testing::internal::IsContainer;
 using testing::internal::IsContainerTest;
 using testing::internal::IsNotContainer;
 using testing::internal::NativeArray;
+using testing::internal::OsStackTraceGetter;
+using testing::internal::OsStackTraceGetterInterface;
 using testing::internal::ParseInt32Flag;
 using testing::internal::RelationToSourceCopy;
 using testing::internal::RelationToSourceReference;
@@ -274,6 +279,7 @@ using testing::internal::String;
 using testing::internal::TestEventListenersAccessor;
 using testing::internal::TestResultAccessor;
 using testing::internal::UInt32;
+using testing::internal::UnitTestImpl;
 using testing::internal::WideStringToUtf8;
 using testing::internal::edit_distance::CalculateOptimalEdits;
 using testing::internal::edit_distance::CreateUnifiedDiff;
@@ -7524,6 +7530,50 @@ TEST(IsContainerTestTest, WorksForContainer) {
             sizeof(IsContainerTest<std::vector<bool> >(0)));
   EXPECT_EQ(sizeof(IsContainer),
             sizeof(IsContainerTest<std::map<int, double> >(0)));
+}
+
+#if GTEST_LANG_CXX11
+struct ConstOnlyContainerWithPointerIterator {
+  using const_iterator = int*;
+  const_iterator begin() const;
+  const_iterator end() const;
+};
+
+struct ConstOnlyContainerWithClassIterator {
+  struct const_iterator {
+    const int& operator*() const;
+    const_iterator& operator++(/* pre-increment */);
+  };
+  const_iterator begin() const;
+  const_iterator end() const;
+};
+
+TEST(IsContainerTestTest, ConstOnlyContainer) {
+  EXPECT_EQ(sizeof(IsContainer),
+            sizeof(IsContainerTest<ConstOnlyContainerWithPointerIterator>(0)));
+  EXPECT_EQ(sizeof(IsContainer),
+            sizeof(IsContainerTest<ConstOnlyContainerWithClassIterator>(0)));
+}
+#endif  // GTEST_LANG_CXX11
+
+// Tests IsHashTable.
+struct AHashTable {
+  typedef void hasher;
+};
+struct NotReallyAHashTable {
+  typedef void hasher;
+  typedef void reverse_iterator;
+};
+TEST(IsHashTable, Basic) {
+  EXPECT_TRUE(testing::internal::IsHashTable<AHashTable>::value);
+  EXPECT_FALSE(testing::internal::IsHashTable<NotReallyAHashTable>::value);
+#if GTEST_LANG_CXX11
+  EXPECT_FALSE(testing::internal::IsHashTable<std::vector<int>>::value);
+  EXPECT_TRUE(testing::internal::IsHashTable<std::unordered_set<int>>::value);
+#endif  // GTEST_LANG_CXX11
+#if GTEST_HAS_HASH_SET_
+  EXPECT_TRUE(testing::internal::IsHashTable<hash_set<int>>::value);
+#endif  // GTEST_HAS_HASH_SET_
 }
 
 // Tests ArrayEq().
