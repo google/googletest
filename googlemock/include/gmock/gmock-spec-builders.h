@@ -1462,6 +1462,9 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   typedef typename Function<F>::ArgumentMatcherTuple ArgumentMatcherTuple;
 
   FunctionMockerBase() : current_spec_(this) {}
+#if GTEST_LANG_CXX11
+  FunctionMockerBase(FunctionMockerBase&&) = default;
+#endif
 
   // The destructor verifies that all expectations on this mock
   // function have been satisfied.  If not, it will report Google Test
