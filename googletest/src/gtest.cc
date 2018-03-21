@@ -230,9 +230,15 @@ GTEST_DEFINE_string_(
 GTEST_DEFINE_bool_(list_tests, false,
                    "List all tests without running them.");
 
+// The net priority order after flag processing is thus:
+//   --gtest_output command line flag
+//   GTEST_OUTPUT environment variable
+//   XML_OUTPUT_FILE environment variable
+//   ''
 GTEST_DEFINE_string_(
     output,
-    internal::StringFromGTestEnv("output", ""),
+    internal::StringFromGTestEnv("output",
+      internal::SpecialCase_Output_Flag_XML_OUTPUT_FILE_Env().c_str()),
     "A format (defaults to \"xml\" but can be specified to be \"json\"), "
     "optionally followed by a colon and an output file name or directory. "
     "A directory is indicated by a trailing pathname separator. "
