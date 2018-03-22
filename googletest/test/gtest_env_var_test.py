@@ -81,13 +81,14 @@ def TestFlag(flag, test_val, default_val):
 
 
 class GTestEnvVarTest(gtest_test_utils.TestCase):
+
   def testEnvVarAffectsFlag(self):
     """Tests that environment variable should affect the corresponding flag."""
 
     TestFlag('break_on_failure', '1', '0')
     TestFlag('color', 'yes', 'auto')
     TestFlag('filter', 'FooTest.Bar', '*')
-    SetEnvVar('XML_OUTPUT_FILE', None) # For 'output' test
+    SetEnvVar('XML_OUTPUT_FILE', None)  # For 'output' test
     TestFlag('output', 'xml:tmp/foo.xml', '')
     TestFlag('print_time', '0', '1')
     TestFlag('repeat', '999', '1')
@@ -107,7 +108,7 @@ class GTestEnvVarTest(gtest_test_utils.TestCase):
     AssertEq('xml:tmp/bar.xml', GetFlag('output'))
 
   def testXmlOutputFileOverride(self):
-    """Tests that $XML_OUTPUT_FILE is overridden by $GTEST_OUTPUT"""
+    """Tests that $XML_OUTPUT_FILE is overridden by $GTEST_OUTPUT."""
 
     SetEnvVar('GTEST_OUTPUT', 'xml:tmp/foo.xml')
     SetEnvVar('XML_OUTPUT_FILE', 'tmp/bar.xml')
