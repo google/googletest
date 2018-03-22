@@ -87,7 +87,7 @@ test_script:
     if ($env:generator -eq "MinGW Makefiles") {
         return # No test available for MinGW
     }
-    & ctest -C $env:configuration --timeout 300 --output-on-failure
+    & ctest -C $env:configuration --timeout 600 --output-on-failure
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
