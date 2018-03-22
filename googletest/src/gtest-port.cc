@@ -1228,7 +1228,7 @@ Int32 Int32FromGTestEnv(const char* flag, Int32 default_value) {
 // not check that the flag is 'output'
 // In essence this checks env. variable called XML_OUTPUT_FILE
 // if it is set we prepend "xml:" to its value , if it not set we return ""
-std::string SpecialCase_Output_Flag_XML_OUTPUT_FILE_Env(){
+std::string OutputFlagAlsoCheckEnvVar(){
   std::string default_value_for_output_flag = "";
   const char* xml_output_file_env = posix::GetEnv("XML_OUTPUT_FILE");
   if (NULL != xml_output_file_env) {
