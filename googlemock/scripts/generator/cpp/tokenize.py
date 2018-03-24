@@ -16,6 +16,7 @@
 # limitations under the License.
 
 """Tokenize C++ source code."""
+from __future__ import print_function
 
 __author__ = 'nnorwitz@google.com (Neal Norwitz)'
 

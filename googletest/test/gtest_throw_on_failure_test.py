@@ -34,6 +34,7 @@
 This script invokes gtest_throw_on_failure_test_ (a program written with
 Google Test) with different environments and command line flags.
 """
+from __future__ import print_function
 
 __author__ = 'wan@google.com (Zhanyong Wan)'
 
