@@ -305,7 +305,6 @@ def GenerateFile(path, content):
      overwrites it with the given content.
   """
   print 'Updating file %s . . .' % path
-
   f = file(path, 'w+')
   print >>f, content,
   f.close()
@@ -428,7 +427,7 @@ def TestsForArity(n):
     }
 
   tests = (
-      """// Sample functions/functors for testing %(arity)s predicate assertions.
+"""// Sample functions/functors for testing %(arity)s predicate assertions.
 
 // A %(arity)s predicate function.
 template <%(types)s>
@@ -589,7 +588,7 @@ typedef Predicate%(n)sTest ASSERT_PRED%(n)sTest;
 
     if use_assert:
       assrt = 'ASSERT'  # 'assert' is reserved, so we cannot use
-      # that identifier here.
+                        # that identifier here.
     else:
       assrt = 'EXPECT'
 
