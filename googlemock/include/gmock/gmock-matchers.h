@@ -2138,17 +2138,17 @@ class FloatingEqMatcher {
 template <typename FloatType>
 class FloatingEq2Matcher {
  public:
-  FloatingEq2Matcher() : FloatingEq2Matcher(-1, false) {}
+  FloatingEq2Matcher() { Init(-1, false); }
 
-  explicit FloatingEq2Matcher(bool nan_eq_nan)
-      : FloatingEq2Matcher(-1, nan_eq_nan) {}
+  explicit FloatingEq2Matcher(bool nan_eq_nan) { Init(-1, nan_eq_nan); }
 
-  explicit FloatingEq2Matcher(FloatType max_abs_error)
-      : FloatingEq2Matcher(max_abs_error, false) {}
+  explicit FloatingEq2Matcher(FloatType max_abs_error) {
+    Init(max_abs_error, false);
+  }
 
-  FloatingEq2Matcher(FloatType max_abs_error, bool nan_eq_nan)
-      : max_abs_error_(max_abs_error),
-        nan_eq_nan_(nan_eq_nan) {}
+  FloatingEq2Matcher(FloatType max_abs_error, bool nan_eq_nan) {
+    Init(max_abs_error, nan_eq_nan);
+  }
 
   template <typename T1, typename T2>
   operator Matcher< ::testing::tuple<T1, T2> >() const {
@@ -2198,8 +2198,12 @@ class FloatingEq2Matcher {
     const bool nan_eq_nan_;
   };
 
+  void Init(FloatType max_abs_error_val, bool nan_eq_nan_val) {
+    max_abs_error_ = max_abs_error_val;
+    nan_eq_nan_ = nan_eq_nan_val;
+  }
   FloatType max_abs_error_;
-  const bool nan_eq_nan_;
+  bool nan_eq_nan_;
 };
 
 // Implements the Pointee(m) matcher for matching a pointer whose
