@@ -175,9 +175,13 @@ function(cxx_library_with_type name type cxx_flags)
       COMPILE_DEFINITIONS "GTEST_CREATE_SHARED_LIBRARY=1")
   endif()
   if (DEFINED GTEST_HAS_PTHREAD)
+    # add pthread to this library and all librariers which link to this library if needed
+    set_property(TARGET ${name} APPEND PROPERTY LINK_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
     set_property(TARGET ${name} APPEND PROPERTY INTERFACE_LINK_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
   endif()
   if (DEFINED GTEST_HAS_LIBRT)
+      # add librt to this library and all librariers which link to this library if needed
+    set_property(TARGET ${name} APPEND PROPERTY LINK_LIBRARIES ${LIBRT_LIBRARIES})
     set_property(TARGET ${name} APPEND PROPERTY INTERFACE_LINK_LIBRARIES ${LIBRT_LIBRARIES})
   endif()
 endfunction()
