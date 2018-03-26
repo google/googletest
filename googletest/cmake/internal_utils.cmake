@@ -175,10 +175,10 @@ function(cxx_library_with_type name type cxx_flags)
       COMPILE_DEFINITIONS "GTEST_CREATE_SHARED_LIBRARY=1")
   endif()
   if (DEFINED GTEST_HAS_PTHREAD)
-    target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT})
+    set_property(TARGET ${name} APPEND INTERFACE_LINK_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
   endif()
   if (DEFINED GTEST_HAS_LIBRT)
-    target_link_libraries(${name} ${LIBRT_LIBRARIES})
+    set_property(TARGET ${name} APPEND INTERFACE_LINK_LIBRARIES ${LIBRT_LIBRARIES})
   endif()
 endfunction()
 
@@ -217,7 +217,7 @@ function(cxx_executable_with_flags name cxx_flags libs)
   # To support mixing linking in static and dynamic libraries, link each
   # library in with an extra call to target_link_libraries.
   foreach (lib "${libs}")
-    target_link_libraries(${name} ${lib})
+    set_property(TARGET ${name} APPEND LINK_LIBRARIES ${lib})
   endforeach()
 endfunction()
 
