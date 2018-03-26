@@ -100,6 +100,7 @@ class GTestEnvVarTest(gtest_test_utils.TestCase):
       TestFlag('death_test_use_fork', '1', '0')
       TestFlag('stack_trace_depth', '0', '100')
 
+
   def testXmlOutputFile(self):
     """Tests that $XML_OUTPUT_FILE affects the output flag."""
 
