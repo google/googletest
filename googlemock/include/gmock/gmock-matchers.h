@@ -281,7 +281,8 @@ class MatcherBase {
  public:
   // Returns true iff the matcher matches x; also explains the match
   // result to 'listener'.
-  bool MatchAndExplain(T x, MatchResultListener* listener) const {
+  bool MatchAndExplain(GTEST_REFERENCE_TO_CONST_(T) x,
+                       MatchResultListener* listener) const {
     return impl_->MatchAndExplain(x, listener);
   }
 
@@ -2351,15 +2352,21 @@ class FieldMatcher {
  public:
   FieldMatcher(FieldType Class::*field,
                const Matcher<const FieldType&>& matcher)
-      : field_(field), matcher_(matcher) {}
+      : field_(field), matcher_(matcher), whose_field_("whose given field ") {}
+
+  FieldMatcher(const std::string& field_name, FieldType Class::*field,
+               const Matcher<const FieldType&>& matcher)
+      : field_(field),
+        matcher_(matcher),
+        whose_field_("whose field `" + field_name + "` ") {}
 
   void DescribeTo(::std::ostream* os) const {
-    *os << "is an object whose given field ";
+    *os << "is an object " << whose_field_;
     matcher_.DescribeTo(os);
   }
 
   void DescribeNegationTo(::std::ostream* os) const {
-    *os << "is an object whose given field ";
+    *os << "is an object " << whose_field_;
     matcher_.DescribeNegationTo(os);
   }
 
@@ -2377,7 +2384,7 @@ class FieldMatcher {
   // true_type iff the Field() matcher is used to match a pointer.
   bool MatchAndExplainImpl(false_type /* is_not_pointer */, const Class& obj,
                            MatchResultListener* listener) const {
-    *listener << "whose given field is ";
+    *listener << whose_field_ << "is ";
     return MatchPrintAndExplain(obj.*field_, matcher_, listener);
   }
 
@@ -2395,6 +2402,10 @@ class FieldMatcher {
 
   const FieldType Class::*field_;
   const Matcher<const FieldType&> matcher_;
+
+  // Contains either "whose given field " if the name of the field is unknown
+  // or "whose field `name_of_field` " if the name is known.
+  const std::string whose_field_;
 
   GTEST_DISALLOW_ASSIGN_(FieldMatcher);
 };
@@ -2414,15 +2425,23 @@ class PropertyMatcher {
   typedef GTEST_REFERENCE_TO_CONST_(PropertyType) RefToConstProperty;
 
   PropertyMatcher(Property property, const Matcher<RefToConstProperty>& matcher)
-      : property_(property), matcher_(matcher) {}
+      : property_(property),
+        matcher_(matcher),
+        whose_property_("whose given property ") {}
+
+  PropertyMatcher(const std::string& property_name, Property property,
+                  const Matcher<RefToConstProperty>& matcher)
+      : property_(property),
+        matcher_(matcher),
+        whose_property_("whose property `" + property_name + "` ") {}
 
   void DescribeTo(::std::ostream* os) const {
-    *os << "is an object whose given property ";
+    *os << "is an object " << whose_property_;
     matcher_.DescribeTo(os);
   }
 
   void DescribeNegationTo(::std::ostream* os) const {
-    *os << "is an object whose given property ";
+    *os << "is an object " << whose_property_;
     matcher_.DescribeNegationTo(os);
   }
 
@@ -2440,7 +2459,7 @@ class PropertyMatcher {
   // true_type iff the Property() matcher is used to match a pointer.
   bool MatchAndExplainImpl(false_type /* is_not_pointer */, const Class& obj,
                            MatchResultListener* listener) const {
-    *listener << "whose given property is ";
+    *listener << whose_property_ << "is ";
     // Cannot pass the return value (for example, int) to MatchPrintAndExplain,
     // which takes a non-const reference as argument.
 #if defined(_PREFAST_ ) && _MSC_VER == 1800
@@ -2468,6 +2487,10 @@ class PropertyMatcher {
 
   Property property_;
   const Matcher<RefToConstProperty> matcher_;
+
+  // Contains either "whose given property " if the name of the property is
+  // unknown or "whose property `name_of_property` " if the name is known.
+  const std::string whose_property_;
 
   GTEST_DISALLOW_ASSIGN_(PropertyMatcher);
 };
@@ -3263,18 +3286,18 @@ class PairMatcherImpl : public MatcherInterface<PairType> {
     if (!listener->IsInterested()) {
       // If the listener is not interested, we don't need to construct the
       // explanation.
-      return first_matcher_.Matches(a_pair.first) &&
-             second_matcher_.Matches(a_pair.second);
+      return first_matcher_.Matches(pair_getters::First(a_pair, Rank0())) &&
+             second_matcher_.Matches(pair_getters::Second(a_pair, Rank0()));
     }
     StringMatchResultListener first_inner_listener;
-    if (!first_matcher_.MatchAndExplain(a_pair.first,
+    if (!first_matcher_.MatchAndExplain(pair_getters::First(a_pair, Rank0()),
                                         &first_inner_listener)) {
       *listener << "whose first field does not match";
       PrintIfNotEmpty(first_inner_listener.str(), listener->stream());
       return false;
     }
     StringMatchResultListener second_inner_listener;
-    if (!second_matcher_.MatchAndExplain(a_pair.second,
+    if (!second_matcher_.MatchAndExplain(pair_getters::Second(a_pair, Rank0()),
                                          &second_inner_listener)) {
       *listener << "whose second field does not match";
       PrintIfNotEmpty(second_inner_listener.str(), listener->stream());
