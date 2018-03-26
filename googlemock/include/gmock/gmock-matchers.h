@@ -2862,6 +2862,10 @@ class WhenSortedByMatcher {
 // container and the RHS container respectively.
 template <typename TupleMatcher, typename RhsContainer>
 class PointwiseMatcher {
+  GTEST_COMPILE_ASSERT_(
+      !IsHashTable<GTEST_REMOVE_REFERENCE_AND_CONST_(RhsContainer)>::value,
+      use_UnorderedPointwise_with_hash_tables);
+
  public:
   typedef internal::StlContainerView<RhsContainer> RhsView;
   typedef typename RhsView::type RhsStlContainer;
@@ -2879,6 +2883,10 @@ class PointwiseMatcher {
 
   template <typename LhsContainer>
   operator Matcher<LhsContainer>() const {
+    GTEST_COMPILE_ASSERT_(
+        !IsHashTable<GTEST_REMOVE_REFERENCE_AND_CONST_(LhsContainer)>::value,
+        use_UnorderedPointwise_with_hash_tables);
+
     return MakeMatcher(new Impl<LhsContainer>(tuple_matcher_, rhs_));
   }
 
@@ -2929,12 +2937,15 @@ class PointwiseMatcher {
       typename LhsStlContainer::const_iterator left = lhs_stl_container.begin();
       typename RhsStlContainer::const_iterator right = rhs_.begin();
       for (size_t i = 0; i != actual_size; ++i, ++left, ++right) {
-        const InnerMatcherArg value_pair(*left, *right);
-
         if (listener->IsInterested()) {
           StringMatchResultListener inner_listener;
+          // Create InnerMatcherArg as a temporarily object to avoid it outlives
+          // *left and *right. Dereference or the conversion to `const T&` may
+          // return temp objects, e.g for vector<bool>.
           if (!mono_tuple_matcher_.MatchAndExplain(
-                  value_pair, &inner_listener)) {
+                  InnerMatcherArg(ImplicitCast_<const LhsValue&>(*left),
+                                  ImplicitCast_<const RhsValue&>(*right)),
+                  &inner_listener)) {
             *listener << "where the value pair (";
             UniversalPrint(*left, listener->stream());
             *listener << ", ";
@@ -2944,7 +2955,9 @@ class PointwiseMatcher {
             return false;
           }
         } else {
-          if (!mono_tuple_matcher_.Matches(value_pair))
+          if (!mono_tuple_matcher_.Matches(
+                  InnerMatcherArg(ImplicitCast_<const LhsValue&>(*left),
+                                  ImplicitCast_<const RhsValue&>(*right))))
             return false;
         }
       }
@@ -3166,8 +3179,8 @@ class KeyMatcherImpl : public MatcherInterface<PairType> {
   virtual bool MatchAndExplain(PairType key_value,
                                MatchResultListener* listener) const {
     StringMatchResultListener inner_listener;
-    const bool match = inner_matcher_.MatchAndExplain(key_value.first,
-                                                      &inner_listener);
+    const bool match = inner_matcher_.MatchAndExplain(
+        pair_getters::First(key_value, Rank0()), &inner_listener);
     const std::string explanation = inner_listener.str();
     if (explanation != "") {
       *listener << "whose first field is a value " << explanation;
@@ -3708,6 +3721,11 @@ class ElementsAreMatcher {
 
   template <typename Container>
   operator Matcher<Container>() const {
+    GTEST_COMPILE_ASSERT_(
+        !IsHashTable<GTEST_REMOVE_REFERENCE_AND_CONST_(Container)>::value ||
+            ::testing::tuple_size<MatcherTuple>::value < 2,
+        use_UnorderedElementsAre_with_hash_tables);
+
     typedef GTEST_REMOVE_REFERENCE_AND_CONST_(Container) RawContainer;
     typedef typename internal::StlContainerView<RawContainer>::type View;
     typedef typename View::value_type Element;
@@ -3756,6 +3774,10 @@ class ElementsAreArrayMatcher {
 
   template <typename Container>
   operator Matcher<Container>() const {
+    GTEST_COMPILE_ASSERT_(
+        !IsHashTable<GTEST_REMOVE_REFERENCE_AND_CONST_(Container)>::value,
+        use_UnorderedElementsAreArray_with_hash_tables);
+
     return MakeMatcher(new ElementsAreMatcherImpl<Container>(
         matchers_.begin(), matchers_.end()));
   }
@@ -3953,7 +3975,7 @@ class VariantMatcher {
   }
 
  private:
-  static string GetTypeName() {
+  static std::string GetTypeName() {
 #if GTEST_HAS_RTTI
     return internal::GetTypeName<T>();
 #endif
@@ -4349,6 +4371,21 @@ Property(PropertyType (Class::*property)() const,
   // matchers of compatible types.  For example, it allows
   //   Property(&Foo::bar, m)
   // to compile where bar() returns an int32 and m is a matcher for int64.
+}
+
+// Same as Property() above, but also takes the name of the property to provide
+// better error messages.
+template <typename Class, typename PropertyType, typename PropertyMatcher>
+inline PolymorphicMatcher<internal::PropertyMatcher<
+    Class, PropertyType, PropertyType (Class::*)() const> >
+Property(const std::string& property_name,
+         PropertyType (Class::*property)() const,
+         const PropertyMatcher& matcher) {
+  return MakePolymorphicMatcher(
+      internal::PropertyMatcher<Class, PropertyType,
+                                PropertyType (Class::*)() const>(
+          property_name, property,
+          MatcherCast<GTEST_REFERENCE_TO_CONST_(PropertyType)>(matcher)));
 }
 
 #if GTEST_LANG_CXX11
