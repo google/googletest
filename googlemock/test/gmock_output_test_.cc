@@ -47,6 +47,7 @@ using testing::NaggyMock;
 using testing::Ref;
 using testing::Return;
 using testing::Sequence;
+using testing::Value;
 
 class MockFoo {
  public:
@@ -268,6 +269,10 @@ TEST_F(GMockOutputTest, CatchesLeakedMocks) {
   // Both foo1 and foo2 are deliberately leaked.
 }
 
+MATCHER_P2(IsPair, first, second, "") {
+  return Value(arg.first, first) && Value(arg.second, second);
+}
+
 void TestCatchesLeakedMocksInAdHocTests() {
   MockFoo* foo = new MockFoo;
 
@@ -280,7 +285,6 @@ void TestCatchesLeakedMocksInAdHocTests() {
 
 int main(int argc, char **argv) {
   testing::InitGoogleMock(&argc, argv);
-
   // Ensures that the tests pass no matter what value of
   // --gmock_catch_leaked_mocks and --gmock_verbose the user specifies.
   testing::GMOCK_FLAG(catch_leaked_mocks) = true;
