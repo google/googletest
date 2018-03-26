@@ -1434,6 +1434,8 @@ template <typename T>
 const T& move(const T& t) {
   return t;
 }
+template <typename T>
+GTEST_ADD_REFERENCE_(T) forward(GTEST_ADD_REFERENCE_(T) t) { return t; }
 
 template <typename T>
 struct RvalueRef {
@@ -2338,6 +2340,7 @@ struct is_same : public false_type {};
 template <typename T>
 struct is_same<T, T> : public true_type {};
 
+
 template <typename T>
 struct is_pointer : public false_type {};
 
@@ -2348,6 +2351,7 @@ template <typename Iterator>
 struct IteratorTraits {
   typedef typename Iterator::value_type value_type;
 };
+
 
 template <typename T>
 struct IteratorTraits<T*> {

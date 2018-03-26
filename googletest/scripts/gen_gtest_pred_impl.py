@@ -115,10 +115,9 @@ def HeaderPreamble(n):
 #ifndef GTEST_INCLUDE_GTEST_GTEST_PRED_IMPL_H_
 #define GTEST_INCLUDE_GTEST_GTEST_PRED_IMPL_H_
 
-// Makes sure this header is not included before gtest.h.
-#ifndef GTEST_INCLUDE_GTEST_GTEST_H_
-# error Do not include gtest_pred_impl.h directly.  Include gtest.h instead.
-#endif  // GTEST_INCLUDE_GTEST_GTEST_H_
+#include "gtest/gtest.h"
+
+namespace testing {
 
 // This header implements a family of generic predicate assertion
 // macros:
@@ -295,14 +294,16 @@ def HeaderPostamble():
 
   return """
 
+}  // namespace testing
+
 #endif  // GTEST_INCLUDE_GTEST_GTEST_PRED_IMPL_H_
 """
 
 
 def GenerateFile(path, content):
-  """Given a file path and a content string, overwrites it with the
-  given content."""
-
+  """Given a file path and a content string
+     overwrites it with the given content.
+  """
   print 'Updating file %s . . .' % path
 
   f = file(path, 'w+')
@@ -314,8 +315,8 @@ def GenerateFile(path, content):
 
 def GenerateHeader(n):
   """Given the maximum arity n, updates the header file that implements
-  the predicate assertions."""
-
+  the predicate assertions.
+  """
   GenerateFile(HEADER,
                HeaderPreamble(n)
                + ''.join([ImplementationForArity(i) for i in OneTo(n)])
@@ -427,7 +428,7 @@ def TestsForArity(n):
     }
 
   tests = (
-"""// Sample functions/functors for testing %(arity)s predicate assertions.
+      """// Sample functions/functors for testing %(arity)s predicate assertions.
 
 // A %(arity)s predicate function.
 template <%(types)s>
@@ -588,7 +589,7 @@ typedef Predicate%(n)sTest ASSERT_PRED%(n)sTest;
 
     if use_assert:
       assrt = 'ASSERT'  # 'assert' is reserved, so we cannot use
-                        # that identifier here.
+      # that identifier here.
     else:
       assrt = 'EXPECT'
 
