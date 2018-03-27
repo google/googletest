@@ -228,9 +228,9 @@
 //
 // Regular expressions:
 //   RE             - a simple regular expression class using the POSIX
-//                    Extended Regular Expression syntax on UNIX-like
-//                    platforms, or a reduced regular exception syntax on
-//                    other platforms, including Windows.
+//                    Extended Regular Expression syntax on UNIX-like platforms
+//                    or a reduced regular exception syntax on other
+//                    platforms, including Windows.
 //
 // Logging:
 //   GTEST_LOG_()   - logs messages at the specified severity level.
@@ -651,8 +651,8 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # if GTEST_OS_LINUX_ANDROID && defined(_STLPORT_MAJOR)
 // STLport, provided with the Android NDK, has neither <tr1/tuple> or <tuple>.
 #  define GTEST_HAS_TR1_TUPLE 0
-# elif defined(_MSC_VER) && (_MSC_VER >= 1910)
-// Prevent `warning C4996: 'std::tr1': warning STL4002: The non-Standard std::tr1 namespace and TR1-only machinery are deprecated and will be REMOVED.`
+# elif defined(_LIBCPP_VERSION) || (defined(_MSC_VER) && (_MSC_VER >= 1910))
+// libc++ doesn't support TR1, and MCVS causes warning C4996
 #  define GTEST_HAS_TR1_TUPLE 0
 # else
 // The user didn't tell us not to do it, so we assume it's OK.
@@ -696,9 +696,8 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 #endif  // GTEST_USE_OWN_TR1_TUPLE
 
-// To avoid conditional compilation everywhere, we make it
-// gtest-port.h's responsibility to #include the header implementing
-// tuple.
+// To avoid conditional compilation we make it gtest-port.h's responsibility
+// to #include the header implementing tuple.
 #if GTEST_HAS_STD_TUPLE_
 # include <tuple>  // IWYU pragma: export
 # define GTEST_TUPLE_NAMESPACE_ ::std
@@ -767,6 +766,7 @@ using ::std::tuple_size;
 // If the compiler is not GCC 4.0+, we assume the user is using a
 // spec-conforming TR1 implementation.
 #  include <tuple>  // IWYU pragma: export  // NOLINT
+
 # endif  // GTEST_USE_OWN_TR1_TUPLE
 
 #endif  // GTEST_HAS_TR1_TUPLE
@@ -2093,8 +2093,13 @@ class MutexBase {
      extern ::testing::internal::MutexBase mutex
 
 // Defines and statically (i.e. at link time) initializes a static mutex.
+// The initialization list here does not explicitly initialize each field,
+// instead relying on default initialization for the unspecified fields. In
+// particular, the owner_ field (a pthread_t) is not explicitly initialized.
+// This allows initialization to work whether pthread_t is a scalar or struct.
+// The flag -Wmissing-field-initializers must not be specified for this to work.
 #  define GTEST_DEFINE_STATIC_MUTEX_(mutex) \
-     ::testing::internal::MutexBase mutex = { PTHREAD_MUTEX_INITIALIZER, false, pthread_t() }
+     ::testing::internal::MutexBase mutex = { PTHREAD_MUTEX_INITIALIZER, false }
 
 // The Mutex class can only be used for mutexes created at runtime. It
 // shares its API with MutexBase otherwise.
