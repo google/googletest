@@ -1035,7 +1035,7 @@ class Unstreamable {
   explicit Unstreamable(int value) : value_(value) {}
 
  private:
-  int value_;
+  GTEST_ATTRIBUTE_UNUSED_ int value_;
 };
 
 class CommentTest : public TestWithParam<Unstreamable> {};
