@@ -651,7 +651,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # if GTEST_OS_LINUX_ANDROID && defined(_STLPORT_MAJOR)
 // STLport, provided with the Android NDK, has neither <tr1/tuple> or <tuple>.
 #  define GTEST_HAS_TR1_TUPLE 0
-# elif (defined(_LIBCPP_VERSION) || (defined(_MSC_VER) && (_MSC_VER >= 1910)))
+# elif defined(_MSC_VER) && (_MSC_VER >= 1910)
 // libc++ doesn't support TR1, and MCVS causes warning C4996
 #  define GTEST_HAS_TR1_TUPLE 0
 # else
