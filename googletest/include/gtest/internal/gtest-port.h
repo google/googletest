@@ -700,9 +700,6 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # endif
 
 
-# if GTEST_OS_SYMBIAN
-#  define GTEST_USE_OWN_TR1_TUPLE 1
-# endif  // GTEST_OS_SYMBIAN
 #endif  // GTEST_USE_OWN_TR1_TUPLE
 
 // To avoid conditional compilation we make it gtest-port.h's responsibility
