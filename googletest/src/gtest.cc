@@ -4550,7 +4550,7 @@ void UnitTest::AddTestPartResult(
       // the --gtest_catch_exceptions flags are specified.
       DebugBreak();
 #elif (defined(__clang__) || defined(__GNUC__)) && (defined(__x86_64__) || defined(__i386__))
-      // with clang/gcc we can acchieve the same effect on x86 by invoking int3
+      // with clang/gcc we can achieve the same effect on x86 by invoking int3
       asm("int3");
 #else
       // Dereference NULL through a volatile pointer to prevent the compiler
