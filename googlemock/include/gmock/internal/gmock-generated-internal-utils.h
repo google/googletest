@@ -90,48 +90,42 @@ struct MatcherTuple< ::testing::tuple<A1, A2, A3> > {
 
 template <typename A1, typename A2, typename A3, typename A4>
 struct MatcherTuple< ::testing::tuple<A1, A2, A3, A4> > {
-  typedef ::testing::tuple<Matcher<A1>, Matcher<A2>, Matcher<A3>, Matcher<A4> >
-      type;
+  typedef ::testing::tuple<Matcher<A1>, Matcher<A2>, Matcher<A3>,
+      Matcher<A4> > type;
 };
 
 template <typename A1, typename A2, typename A3, typename A4, typename A5>
 struct MatcherTuple< ::testing::tuple<A1, A2, A3, A4, A5> > {
   typedef ::testing::tuple<Matcher<A1>, Matcher<A2>, Matcher<A3>, Matcher<A4>,
-                           Matcher<A5> >
-      type;
+      Matcher<A5> > type;
 };
 
 template <typename A1, typename A2, typename A3, typename A4, typename A5,
     typename A6>
 struct MatcherTuple< ::testing::tuple<A1, A2, A3, A4, A5, A6> > {
   typedef ::testing::tuple<Matcher<A1>, Matcher<A2>, Matcher<A3>, Matcher<A4>,
-                           Matcher<A5>, Matcher<A6> >
-      type;
+      Matcher<A5>, Matcher<A6> > type;
 };
 
 template <typename A1, typename A2, typename A3, typename A4, typename A5,
     typename A6, typename A7>
 struct MatcherTuple< ::testing::tuple<A1, A2, A3, A4, A5, A6, A7> > {
   typedef ::testing::tuple<Matcher<A1>, Matcher<A2>, Matcher<A3>, Matcher<A4>,
-                           Matcher<A5>, Matcher<A6>, Matcher<A7> >
-      type;
+      Matcher<A5>, Matcher<A6>, Matcher<A7> > type;
 };
 
 template <typename A1, typename A2, typename A3, typename A4, typename A5,
     typename A6, typename A7, typename A8>
 struct MatcherTuple< ::testing::tuple<A1, A2, A3, A4, A5, A6, A7, A8> > {
   typedef ::testing::tuple<Matcher<A1>, Matcher<A2>, Matcher<A3>, Matcher<A4>,
-                           Matcher<A5>, Matcher<A6>, Matcher<A7>, Matcher<A8> >
-      type;
+      Matcher<A5>, Matcher<A6>, Matcher<A7>, Matcher<A8> > type;
 };
 
 template <typename A1, typename A2, typename A3, typename A4, typename A5,
     typename A6, typename A7, typename A8, typename A9>
 struct MatcherTuple< ::testing::tuple<A1, A2, A3, A4, A5, A6, A7, A8, A9> > {
   typedef ::testing::tuple<Matcher<A1>, Matcher<A2>, Matcher<A3>, Matcher<A4>,
-                           Matcher<A5>, Matcher<A6>, Matcher<A7>, Matcher<A8>,
-                           Matcher<A9> >
-      type;
+      Matcher<A5>, Matcher<A6>, Matcher<A7>, Matcher<A8>, Matcher<A9> > type;
 };
 
 template <typename A1, typename A2, typename A3, typename A4, typename A5,
@@ -139,9 +133,8 @@ template <typename A1, typename A2, typename A3, typename A4, typename A5,
 struct MatcherTuple< ::testing::tuple<A1, A2, A3, A4, A5, A6, A7, A8, A9,
     A10> > {
   typedef ::testing::tuple<Matcher<A1>, Matcher<A2>, Matcher<A3>, Matcher<A4>,
-                           Matcher<A5>, Matcher<A6>, Matcher<A7>, Matcher<A8>,
-                           Matcher<A9>, Matcher<A10> >
-      type;
+      Matcher<A5>, Matcher<A6>, Matcher<A7>, Matcher<A8>, Matcher<A9>,
+      Matcher<A10> > type;
 };
 
 // Template struct Function<F>, where F must be a function type, contains
@@ -344,8 +337,6 @@ struct Function<R(*)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)> : Function<R(A1,
 #else // GMOCK_USE_P99
 
 #define __GMOCK_CONCAT(a, b) a##b
-
-#ifdef // GMOCK_USE_P99
 #define __GMOCK_EXPAND(x) x
 #define __GMOCK_AUGMENTER(...) unused, __VA_ARGS__
 #define __GMOCK_NARGS_0(...) __GMOCK_NARGS_1(__GMOCK_AUGMENTER(__VA_ARGS__))
@@ -353,26 +344,11 @@ struct Function<R(*)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)> : Function<R(A1,
     9, 8, 7, 6, 5, 4, 3, 2, 1, 0))
 #define __GMOCK_NARGS_2(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, VAL, \
     ...) VAL
-
-#else // _MSC_VER
-
-#define __GMOCK_NARGS_0(...) __GMOCK_NARGS_1(0, ## __VA_ARGS__, 10, 10, 9, 8, \
-    7, 6, 5, 4, 3, 2, 1, 0)
-#define __GMOCK_NARGS_1(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, N, \
-    ...) N
-
-#endif // _MSC_VER
-
 #define __GMOCK_NARGS(...) __GMOCK_NARGS_0(__VA_ARGS__)
 
 // Get the first N arguments
-
-#ifdef _MSC_VER
 #define __GMOCK_FIRST(n, ...) __GMOCK_EXPAND(__GMOCK_CONCAT(__GMOCK_FIRST_, \
     n)(__VA_ARGS__))
-#else // _MSC_VER
-#define __GMOCK_FIRST(n, ...) __GMOCK_CONCAT(__GMOCK_FIRST_, n)(__VA_ARGS__)
-#endif // _MSC_VER
 
 #define __GMOCK_FIRST_0(...)
 #define __GMOCK_FIRST_1(_1, ...) _1

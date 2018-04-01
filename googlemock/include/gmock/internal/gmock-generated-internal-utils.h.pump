@@ -156,8 +156,6 @@ struct Function<R(*)($As)> : Function<R($As)> {};
 
 #define __GMOCK_CONCAT(a, b) a##b
 
-#ifdef // GMOCK_USE_P99
-
 $var n1 = n+1
 $range i 1..n1
 $var arg_list = [[$for i, [[_$i]]]]
@@ -167,23 +165,10 @@ $var countdown = [[$for i, [[$(n1-i)]]]]
 #define __GMOCK_NARGS_0(...) __GMOCK_NARGS_1(__GMOCK_AUGMENTER(__VA_ARGS__))
 #define __GMOCK_NARGS_1(...) __GMOCK_EXPAND(__GMOCK_NARGS_2(__VA_ARGS__, $countdown))
 #define __GMOCK_NARGS_2($arg_list, VAL, ...) VAL
-
-#else // _MSC_VER
-
-#define __GMOCK_NARGS_0(...) __GMOCK_NARGS_1(0, ## __VA_ARGS__, $n, $countdown)
-#define __GMOCK_NARGS_1(_0, $arg_list, N,...) N
-
-#endif // _MSC_VER
-
 #define __GMOCK_NARGS(...) __GMOCK_NARGS_0(__VA_ARGS__)
 
 // Get the first N arguments
-
-#ifdef _MSC_VER
 #define __GMOCK_FIRST(n, ...) __GMOCK_EXPAND(__GMOCK_CONCAT(__GMOCK_FIRST_, n)(__VA_ARGS__))
-#else // _MSC_VER
-#define __GMOCK_FIRST(n, ...) __GMOCK_CONCAT(__GMOCK_FIRST_, n)(__VA_ARGS__)
-#endif // _MSC_VER
 
 #define __GMOCK_FIRST_0(...)
 
