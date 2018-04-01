@@ -44,7 +44,7 @@ def normalize(obj):
   """
   def _normalize(key, value):
     if key == 'time':
-      return re.sub(r'^\d+(\.\d+)?s$', u'*', value)
+      return re.sub(r'^\d+(\.\d+)?s$', '*', value)
     elif key == 'timestamp':
       return re.sub(r'^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$', '*', value)
     elif key == 'failure':

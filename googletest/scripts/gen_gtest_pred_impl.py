@@ -115,10 +115,9 @@ def HeaderPreamble(n):
 #ifndef GTEST_INCLUDE_GTEST_GTEST_PRED_IMPL_H_
 #define GTEST_INCLUDE_GTEST_GTEST_PRED_IMPL_H_
 
-// Makes sure this header is not included before gtest.h.
-#ifndef GTEST_INCLUDE_GTEST_GTEST_H_
-# error Do not include gtest_pred_impl.h directly.  Include gtest.h instead.
-#endif  // GTEST_INCLUDE_GTEST_GTEST_H_
+#include "gtest/gtest.h"
+
+namespace testing {
 
 // This header implements a family of generic predicate assertion
 // macros:
@@ -295,16 +294,17 @@ def HeaderPostamble():
 
   return """
 
+}  // namespace testing
+
 #endif  // GTEST_INCLUDE_GTEST_GTEST_PRED_IMPL_H_
 """
 
 
 def GenerateFile(path, content):
-  """Given a file path and a content string, overwrites it with the
-  given content."""
-
+  """Given a file path and a content string
+     overwrites it with the given content.
+  """
   print 'Updating file %s . . .' % path
-
   f = file(path, 'w+')
   print >>f, content,
   f.close()
@@ -314,8 +314,8 @@ def GenerateFile(path, content):
 
 def GenerateHeader(n):
   """Given the maximum arity n, updates the header file that implements
-  the predicate assertions."""
-
+  the predicate assertions.
+  """
   GenerateFile(HEADER,
                HeaderPreamble(n)
                + ''.join([ImplementationForArity(i) for i in OneTo(n)])

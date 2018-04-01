@@ -117,8 +117,10 @@ struct LinkedPtrLessThan {
 // To gcc,
 //   wchar_t == signed wchar_t != unsigned wchar_t == unsigned int
 #ifdef __GNUC__
+#if !defined(__WCHAR_UNSIGNED__)
 // signed/unsigned wchar_t are valid types.
 # define GMOCK_HAS_SIGNED_WCHAR_T_ 1
+#endif
 #endif
 
 // In what follows, we use the term "kind" to indicate whether a type
