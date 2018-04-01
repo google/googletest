@@ -94,9 +94,13 @@ TEST(XmlOutputTest, GetOutputFileFromDirectoryPath) {
 #endif
 }
 
+#if GTEST_OS_OS2
+# define _strcmpi strcasecmp
+#endif
+
 TEST(OutputFileHelpersTest, GetCurrentExecutableName) {
   const std::string exe_str = GetCurrentExecutableName().string();
-#if GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS || GTEST_OS_OS2
   const bool success =
       _strcmpi("googletest-options-test", exe_str.c_str()) == 0 ||
       _strcmpi("gtest-options-ex_test", exe_str.c_str()) == 0 ||
