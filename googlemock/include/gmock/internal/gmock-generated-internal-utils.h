@@ -338,7 +338,7 @@ struct Function<R(*)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)> : Function<R(A1,
 
 #define __GMOCK_CONCAT(a, b) a##b
 
-#ifdef _MSC_VER
+#ifdef // GMOCK_USE_P99
 #define __GMOCK_EXPAND(x) x
 #define __GMOCK_AUGMENTER(...) unused, __VA_ARGS__
 #define __GMOCK_NARGS_0(...) __GMOCK_NARGS_1(__GMOCK_AUGMENTER(__VA_ARGS__))
@@ -384,11 +384,5 @@ struct Function<R(*)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)> : Function<R(A1,
     _2, _3, _4, _5, _6, _7, _8, _9, _10
 
 #endif // GMOCK_USE_P99
-
-// GCC without extensions (e.g. -std=c++11) fails at counting 0 args. Allow
-// testing it
-#if __GMOCK_NARGS() == 1
-#define __GMOCK_NARGS_0_ARGS_BROKEN
-#endif
 
 #endif  // GMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_GENERATED_INTERNAL_UTILS_H_
