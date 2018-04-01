@@ -50,14 +50,10 @@
 // portability utilities to Google Test's gtest-port.h instead of
 // here, as Google Mock depends on Google Test.  Only add a utility
 // here if it's truly specific to Google Mock.
+
 #include "gtest/internal/gtest-linked_ptr.h"
 #include "gtest/internal/gtest-port.h"
 #include "gmock/internal/custom/gmock-port.h"
-
-// To avoid conditional compilation everywhere, we make it
-// gmock-port.h's responsibility to #include the header implementing
-// tr1/tuple.  gmock-port.h does this via gtest-port.h, which is
-// guaranteed to pull in the tuple header.
 
 // For MS Visual C++, check the compiler version. At least VS 2003 is
 // required to compile Google Mock.
@@ -72,18 +68,18 @@
 #if !defined(GMOCK_DECLARE_bool_)
 
 // Macros for declaring flags.
-#define GMOCK_DECLARE_bool_(name) extern GTEST_API_ bool GMOCK_FLAG(name)
-#define GMOCK_DECLARE_int32_(name) \
+# define GMOCK_DECLARE_bool_(name) extern GTEST_API_ bool GMOCK_FLAG(name)
+# define GMOCK_DECLARE_int32_(name) \
     extern GTEST_API_ ::testing::internal::Int32 GMOCK_FLAG(name)
-#define GMOCK_DECLARE_string_(name) \
+# define GMOCK_DECLARE_string_(name) \
     extern GTEST_API_ ::std::string GMOCK_FLAG(name)
 
 // Macros for defining flags.
-#define GMOCK_DEFINE_bool_(name, default_val, doc) \
+# define GMOCK_DEFINE_bool_(name, default_val, doc) \
     GTEST_API_ bool GMOCK_FLAG(name) = (default_val)
-#define GMOCK_DEFINE_int32_(name, default_val, doc) \
+# define GMOCK_DEFINE_int32_(name, default_val, doc) \
     GTEST_API_ ::testing::internal::Int32 GMOCK_FLAG(name) = (default_val)
-#define GMOCK_DEFINE_string_(name, default_val, doc) \
+# define GMOCK_DEFINE_string_(name, default_val, doc) \
     GTEST_API_ ::std::string GMOCK_FLAG(name) = (default_val)
 
 #endif  // !defined(GMOCK_DECLARE_bool_)

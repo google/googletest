@@ -29,11 +29,9 @@
 
 """Unit test utilities for gtest_xml_output"""
 
-import os
 import re
-import gtest_test_utils
 from xml.dom import minidom, Node
-
+import gtest_test_utils
 
 GTEST_DEFAULT_OUTPUT_FILE = 'test_detail.xml'
 
@@ -103,19 +101,22 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
       self.AssertEquivalentNodes(child, actual_children[child_id])
 
   identifying_attribute = {
-    'testsuites': 'name',
-    'testsuite': 'name',
-    'testcase':  'name',
-    'failure':   'message',
-    }
+      'testsuites': 'name',
+      'testsuite': 'name',
+      'testcase': 'name',
+      'failure': 'message',
+      'property': 'name',
+  }
 
   def _GetChildren(self, element):
     """
     Fetches all of the child nodes of element, a DOM Element object.
     Returns them as the values of a dictionary keyed by the IDs of the
-    children.  For <testsuites>, <testsuite> and <testcase> elements, the ID
-    is the value of their "name" attribute; for <failure> elements, it is
-    the value of the "message" attribute; CDATA sections and non-whitespace
+    children.  For <testsuites>, <testsuite>, <testcase>, and <property>
+    elements, the ID is the value of their "name" attribute; for <failure>
+    elements, it is the value of the "message" attribute; for <properties>
+    elements, it is the value of their parent's "name" attribute plus the
+    literal string "properties"; CDATA sections and non-whitespace
     text nodes are concatenated into a single CDATA section with ID
     "detail".  An exception is raised if any element other than the above
     four is encountered, if two child elements with the same identifying
@@ -125,11 +126,17 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
     children = {}
     for child in element.childNodes:
       if child.nodeType == Node.ELEMENT_NODE:
-        self.assert_(child.tagName in self.identifying_attribute,
-                     'Encountered unknown element <%s>' % child.tagName)
-        childID = child.getAttribute(self.identifying_attribute[child.tagName])
-        self.assert_(childID not in children)
-        children[childID] = child
+        if child.tagName == 'properties':
+          self.assert_(child.parentNode is not None,
+                       'Encountered <properties> element without a parent')
+          child_id = child.parentNode.getAttribute('name') + '-properties'
+        else:
+          self.assert_(child.tagName in self.identifying_attribute,
+                       'Encountered unknown element <%s>' % child.tagName)
+          child_id = child.getAttribute(
+              self.identifying_attribute[child.tagName])
+        self.assert_(child_id not in children)
+        children[child_id] = child
       elif child.nodeType in [Node.TEXT_NODE, Node.CDATA_SECTION_NODE]:
         if 'detail' not in children:
           if (child.nodeType == Node.CDATA_SECTION_NODE or
