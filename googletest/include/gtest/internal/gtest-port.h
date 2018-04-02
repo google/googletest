@@ -228,9 +228,9 @@
 //
 // Regular expressions:
 //   RE             - a simple regular expression class using the POSIX
-//                    Extended Regular Expression syntax on UNIX-like platforms
-//                    or a reduced regular exception syntax on other
-//                    platforms, including Windows.
+//                    Extended Regular Expression syntax on UNIX-like
+//                    platforms, or a reduced regular exception syntax on
+//                    other platforms, including Windows.
 //
 // Logging:
 //   GTEST_LOG_()   - logs messages at the specified severity level.
@@ -652,10 +652,8 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // STLport, provided with the Android NDK, has neither <tr1/tuple> or <tuple>.
 #  define GTEST_HAS_TR1_TUPLE 0
 # elif defined(_MSC_VER) && (_MSC_VER >= 1910)
-// libc++ doesn't support TR1, and MCVS causes warning C4996
+// Prevent `warning C4996: 'std::tr1': warning STL4002: The non-Standard std::tr1 namespace and TR1-only machinery are deprecated and will be REMOVED.`
 #  define GTEST_HAS_TR1_TUPLE 0
-# elif (defined(_LIBCPP_VERSION) && (!GTEST_OS_MAC && !GTEST_LANG_CXX11))
-#   define GTEST_HAS_TR1_TUPLE 0
 # else
 // The user didn't tell us not to do it, so we assume it's OK.
 #  define GTEST_HAS_TR1_TUPLE 1
@@ -665,7 +663,6 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // Determines whether Google Test's own tr1 tuple implementation
 // should be used.
 #ifndef GTEST_USE_OWN_TR1_TUPLE
-
 // The user didn't tell us, so we need to figure it out.
 
 // We use our own TR1 tuple if we aren't sure the user has an
@@ -697,14 +694,11 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #  define GTEST_USE_OWN_TR1_TUPLE 1
 # endif
 
-
-# if GTEST_OS_SYMBIAN
-#  define GTEST_USE_OWN_TR1_TUPLE 1
-# endif  // GTEST_OS_SYMBIAN
 #endif  // GTEST_USE_OWN_TR1_TUPLE
 
-// To avoid conditional compilation we make it gtest-port.h's responsibility
-// to #include the header implementing tuple.
+// To avoid conditional compilation everywhere, we make it
+// gtest-port.h's responsibility to #include the header implementing
+// tuple.
 #if GTEST_HAS_STD_TUPLE_
 # include <tuple>  // IWYU pragma: export
 # define GTEST_TUPLE_NAMESPACE_ ::std
@@ -719,6 +713,22 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 # if GTEST_USE_OWN_TR1_TUPLE
 #  include "gtest/internal/gtest-tuple.h"  // IWYU pragma: export  // NOLINT
+# elif GTEST_ENV_HAS_STD_TUPLE_
+#  include <tuple>
+// C++11 puts its tuple into the ::std namespace rather than
+// ::std::tr1.  gtest expects tuple to live in ::std::tr1, so put it there.
+// This causes undefined behavior, but supported compilers react in
+// the way we intend.
+namespace std {
+namespace tr1 {
+using ::std::get;
+using ::std::make_tuple;
+using ::std::tuple;
+using ::std::tuple_element;
+using ::std::tuple_size;
+}
+}
+
 # elif GTEST_OS_SYMBIAN
 
 // On Symbian, BOOST_HAS_TR1_TUPLE causes Boost's TR1 tuple library to
@@ -735,12 +745,28 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #  define BOOST_TR1_DETAIL_CONFIG_HPP_INCLUDED
 #  include <tuple>  // IWYU pragma: export  // NOLINT
 
-// VS 2010 now has tr1 support.
-# elif _MSC_VER >= 1600
-#  include <tuple>  // IWYU pragma: export  // NOLINT
+# elif defined(__GNUC__) && (GTEST_GCC_VER_ >= 40000)
+// GCC 4.0+ implements tr1/tuple in the <tr1/tuple> header.  This does
+// not conform to the TR1 spec, which requires the header to be <tuple>.
 
-# else  // GTEST_USE_OWN_TR1_TUPLE
-#  include <tr1/tuple>  // IWYU pragma: export  // NOLINT
+#  if !GTEST_HAS_RTTI && GTEST_GCC_VER_ < 40302
+// Until version 4.3.2, gcc has a bug that causes <tr1/functional>,
+// which is #included by <tr1/tuple>, to not compile when RTTI is
+// disabled.  _TR1_FUNCTIONAL is the header guard for
+// <tr1/functional>.  Hence the following #define is a hack to prevent
+// <tr1/functional> from being included.
+#   define _TR1_FUNCTIONAL 1
+#   include <tr1/tuple>
+#   undef _TR1_FUNCTIONAL  // Allows the user to #include
+                        // <tr1/functional> if they choose to.
+#  else
+#   include <tr1/tuple>  // NOLINT
+#  endif  // !GTEST_HAS_RTTI && GTEST_GCC_VER_ < 40302
+
+# else
+// If the compiler is not GCC 4.0+, we assume the user is using a
+// spec-conforming TR1 implementation.
+#  include <tuple>  // IWYU pragma: export  // NOLINT
 # endif  // GTEST_USE_OWN_TR1_TUPLE
 
 #endif  // GTEST_HAS_TR1_TUPLE
@@ -2067,13 +2093,8 @@ class MutexBase {
      extern ::testing::internal::MutexBase mutex
 
 // Defines and statically (i.e. at link time) initializes a static mutex.
-// The initialization list here does not explicitly initialize each field,
-// instead relying on default initialization for the unspecified fields. In
-// particular, the owner_ field (a pthread_t) is not explicitly initialized.
-// This allows initialization to work whether pthread_t is a scalar or struct.
-// The flag -Wmissing-field-initializers must not be specified for this to work.
 #  define GTEST_DEFINE_STATIC_MUTEX_(mutex) \
-     ::testing::internal::MutexBase mutex = { PTHREAD_MUTEX_INITIALIZER, false }
+     ::testing::internal::MutexBase mutex = { PTHREAD_MUTEX_INITIALIZER, false, pthread_t() }
 
 // The Mutex class can only be used for mutexes created at runtime. It
 // shares its API with MutexBase otherwise.
