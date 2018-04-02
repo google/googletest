@@ -654,7 +654,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # elif defined(_MSC_VER) && (_MSC_VER >= 1910)
 // libc++ doesn't support TR1, and MCVS causes warning C4996
 #  define GTEST_HAS_TR1_TUPLE 0
-# elif defined(_LIBCPP_VERSION)
+# elif (defined(_LIBCPP_VERSION) && (!GTEST_OS_MAC && !GTEST_LANG_CXX11))
 #   define GTEST_HAS_TR1_TUPLE 0
 # else
 // The user didn't tell us not to do it, so we assume it's OK.
