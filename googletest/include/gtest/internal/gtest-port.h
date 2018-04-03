@@ -720,22 +720,6 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 # if GTEST_USE_OWN_TR1_TUPLE
 #  include "gtest/internal/gtest-tuple.h"  // IWYU pragma: export  // NOLINT
-# elif GTEST_ENV_HAS_STD_TUPLE_
-#  include <tuple>
-// C++11 puts its tuple into the ::std namespace rather than
-// ::std::tr1.  gtest expects tuple to live in ::std::tr1, so put it there.
-// This causes undefined behavior, but supported compilers react in
-// the way we intend.
-namespace std {
-namespace tr1 {
-using ::std::get;
-using ::std::make_tuple;
-using ::std::tuple;
-using ::std::tuple_element;
-using ::std::tuple_size;
-}
-}
-
 # elif GTEST_OS_SYMBIAN
 
 // On Symbian, BOOST_HAS_TR1_TUPLE causes Boost's TR1 tuple library to
@@ -770,10 +754,12 @@ using ::std::tuple_size;
 #   include <tr1/tuple>  // NOLINT
 #  endif  // !GTEST_HAS_RTTI && GTEST_GCC_VER_ < 40302
 
-# else
-// If the compiler is not GCC 4.0+, we assume the user is using a
-// spec-conforming TR1 implementation.
+// VS 2010 now has tr1 support.
+# elif _MSC_VER >= 1600
 #  include <tuple>  // IWYU pragma: export  // NOLINT
+
+# else  // GTEST_USE_OWN_TR1_TUPLE
+#  include <tr1/tuple>  // IWYU pragma: export  // NOLINT
 # endif  // GTEST_USE_OWN_TR1_TUPLE
 
 #endif  // GTEST_HAS_TR1_TUPLE
