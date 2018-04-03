@@ -754,10 +754,12 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #   include <tr1/tuple>  // NOLINT
 #  endif  // !GTEST_HAS_RTTI && GTEST_GCC_VER_ < 40302
 
-# else
-// If the compiler is not GCC 4.0+, we assume the user is using a
-// spec-conforming TR1 implementation.
+// VS 2010 now has tr1 support.
+# elif _MSC_VER >= 1600
 #  include <tuple>  // IWYU pragma: export  // NOLINT
+
+# else  // GTEST_USE_OWN_TR1_TUPLE
+#  include <tr1/tuple>  // IWYU pragma: export  // NOLINT
 # endif  // GTEST_USE_OWN_TR1_TUPLE
 
 #endif  // GTEST_HAS_TR1_TUPLE
