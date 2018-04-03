@@ -667,6 +667,10 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // Determines whether Google Test's own tr1 tuple implementation
 // should be used.
 #ifndef GTEST_USE_OWN_TR1_TUPLE
+// We use our own tuple implementation on Symbian.
+# if GTEST_OS_SYMBIAN
+#  define GTEST_USE_OWN_TR1_TUPLE 1
+# else
 // The user didn't tell us, so we need to figure it out.
 
 // We use our own TR1 tuple if we aren't sure the user has an
@@ -697,12 +701,11 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # else
 #  define GTEST_USE_OWN_TR1_TUPLE 1
 # endif
-
+# endif  // GTEST_OS_SYMBIAN
 #endif  // GTEST_USE_OWN_TR1_TUPLE
 
-// To avoid conditional compilation everywhere, we make it
-// gtest-port.h's responsibility to #include the header implementing
-// tuple.
+// To avoid conditional compilation we make it gtest-port.h's responsibility
+// to #include the header implementing tuple.
 #if GTEST_HAS_STD_TUPLE_
 # include <tuple>  // IWYU pragma: export
 # define GTEST_TUPLE_NAMESPACE_ ::std
