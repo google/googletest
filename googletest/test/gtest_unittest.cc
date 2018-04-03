@@ -7572,7 +7572,7 @@ TEST(IsHashTable, Basic) {
   EXPECT_TRUE(testing::internal::IsHashTable<std::unordered_set<int>>::value);
 #endif  // GTEST_LANG_CXX11
 #if GTEST_HAS_HASH_SET_
-  EXPECT_TRUE(testing::internal::IsHashTable<hash_set<int>>::value);
+  EXPECT_TRUE(testing::internal::IsHashTable<__gnu_cxx::hash_set<int>>::value);
 #endif  // GTEST_HAS_HASH_SET_
 }
 
