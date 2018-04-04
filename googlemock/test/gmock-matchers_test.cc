@@ -5382,6 +5382,7 @@ INSTANTIATE_TEST_CASE_P(AllGraphs, BipartiteTest,
                         ::testing::Range(0, 5));
 
 // Parameterized by a pair interpreted as (LhsSize, RhsSize).
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4503)
 class BipartiteNonSquareTest
     : public ::testing::TestWithParam<std::pair<size_t, size_t> > {
 };
@@ -5459,7 +5460,6 @@ TEST_P(BipartiteRandomTest, LargerNets) {
 }
 
 // Test argument is a std::pair<int, int> representing (nodes, iters).
-GTEST_DISABLE_MSC_WARNINGS_PUSH_(4503)
 INSTANTIATE_TEST_CASE_P(Samples, BipartiteRandomTest,
     testing::Values(
         std::make_pair(5, 10000),
