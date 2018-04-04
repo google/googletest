@@ -5459,6 +5459,7 @@ TEST_P(BipartiteRandomTest, LargerNets) {
 }
 
 // Test argument is a std::pair<int, int> representing (nodes, iters).
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4503)
 INSTANTIATE_TEST_CASE_P(Samples, BipartiteRandomTest,
     testing::Values(
         std::make_pair(5, 10000),
@@ -5466,6 +5467,7 @@ INSTANTIATE_TEST_CASE_P(Samples, BipartiteRandomTest,
         std::make_pair(7, 2000),
         std::make_pair(8, 500),
         std::make_pair(9, 100)));
+GTEST_DISABLE_MSC_WARNINGS_POP_()
 
 // Tests IsReadableTypeName().
 
