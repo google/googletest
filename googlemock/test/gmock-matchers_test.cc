@@ -59,6 +59,12 @@
 # include <forward_list>  // NOLINT
 #endif
 
+// Disable MSVC2015 warning for std::pair:
+// "decorated name length exceeded, name was truncated".
+#if defined(_MSC_VER) && (_MSC_VER == 1900)  +# include <type_traits>
+# pragma warning(disable:4503)
+#endif
+
 #if GTEST_LANG_CXX11
 # include <type_traits>
 #endif
@@ -5382,7 +5388,6 @@ INSTANTIATE_TEST_CASE_P(AllGraphs, BipartiteTest,
                         ::testing::Range(0, 5));
 
 // Parameterized by a pair interpreted as (LhsSize, RhsSize).
-GTEST_DISABLE_MSC_WARNINGS_PUSH_(4503)
 class BipartiteNonSquareTest
     : public ::testing::TestWithParam<std::pair<size_t, size_t> > {
 };
@@ -5467,7 +5472,6 @@ INSTANTIATE_TEST_CASE_P(Samples, BipartiteRandomTest,
         std::make_pair(7, 2000),
         std::make_pair(8, 500),
         std::make_pair(9, 100)));
-GTEST_DISABLE_MSC_WARNINGS_POP_()
 
 // Tests IsReadableTypeName().
 
