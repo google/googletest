@@ -1,5 +1,5 @@
-// Copyright 2009, Google Inc.
-// All rights reserved.
+// Copyright 2008 Google Inc.
+// All Rights Reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -27,22 +27,12 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Author: wan@google.com (Zhanyong Wan)
+// Author: arseny.aprelev@gmail.com (Arseny Aprelev)
 //
-// Tests for Google C++ Testing Framework (Google Test)
-//
-// Sometimes it's desirable to build most of Google Test's own tests
-// by compiling a single file.  This file serves this purpose.
-#include "gtest-filepath_test.cc"
-#include "gtest-linked_ptr_test.cc"
-#include "gtest-message_test.cc"
-#include "gtest-options_test.cc"
-#include "gtest-port_test.cc"
-#include "gtest_pred_impl_unittest.cc"
-#include "gtest_prod_test.cc"
-#include "gtest-test-part_test.cc"
-#include "gtest-typed-test_test.cc"
-#include "gtest-typed-test2_test.cc"
-#include "gtest_unittest.cc"
-#include "gtest_skip_test.cc"
-#include "production.cc"
+
+#include <gtest/gtest.h>
+
+TEST(SkipTest, DoesSkip) {
+    SKIP();
+    EXPECT_EQ(0, 1);
+}
