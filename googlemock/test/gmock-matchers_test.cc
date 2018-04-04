@@ -61,7 +61,7 @@
 
 // Disable MSVC2015 warning for std::pair:
 // "decorated name length exceeded, name was truncated".
-#if defined(_MSC_VER) && (_MSC_VER == 1900)  +# include <type_traits>
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
 # pragma warning(disable:4503)
 #endif
 
