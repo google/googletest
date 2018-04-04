@@ -45,6 +45,7 @@
 #include <limits>
 #include <list>
 #include <map>
+#include <memory>
 #include <set>
 #include <sstream>
 #include <string>
@@ -58,13 +59,11 @@
 # include <forward_list>  // NOLINT
 #endif
 
-// Disable MSVC2015 warning for std::pair: "decorated name length exceeded, name was truncated".
-#if defined(_MSC_VER) && (_MSC_VER == 1900)
-# pragma warning(disable:4503)
+#if GTEST_LANG_CXX11
+# include <type_traits>
 #endif
 
 namespace testing {
-
 namespace gmock_matchers_test {
 
 using std::greater;
@@ -200,17 +199,13 @@ std::string OfType(const std::string& type_name) {
 // Returns the description of the given matcher.
 template <typename T>
 std::string Describe(const Matcher<T>& m) {
-  stringstream ss;
-  m.DescribeTo(&ss);
-  return ss.str();
+  return DescribeMatcher<T>(m);
 }
 
 // Returns the description of the negation of the given matcher.
 template <typename T>
 std::string DescribeNegation(const Matcher<T>& m) {
-  stringstream ss;
-  m.DescribeNegationTo(&ss);
-  return ss.str();
+  return DescribeMatcher<T>(m, true);
 }
 
 // Returns the reason why x matches, or doesn't match, m.
@@ -219,6 +214,12 @@ std::string Explain(const MatcherType& m, const Value& x) {
   StringMatchResultListener listener;
   ExplainMatchResult(m, x, &listener);
   return listener.str();
+}
+
+TEST(MonotonicMatcherTest, IsPrintable) {
+  stringstream ss;
+  ss << GreaterThan(5);
+  EXPECT_EQ("is > 5", ss.str());
 }
 
 TEST(MatchResultListenerTest, StreamingWorks) {
@@ -332,6 +333,22 @@ TEST(MatcherTest, CanBeImplicitlyConstructedFromNULL) {
   EXPECT_FALSE(m1.Matches(&n));
 }
 
+// Tests that matchers can be constructed from a variable that is not properly
+// defined. This should be illegal, but many users rely on this accidentally.
+struct Undefined {
+  virtual ~Undefined() = 0;
+  static const int kInt = 1;
+};
+
+TEST(MatcherTest, CanBeConstructedFromUndefinedVariable) {
+  Matcher<int> m1 = Undefined::kInt;
+  EXPECT_TRUE(m1.Matches(1));
+  EXPECT_FALSE(m1.Matches(2));
+}
+
+// Test that a matcher parameterized with an abstract class compiles.
+TEST(MatcherTest, CanAcceptAbstractClass) { Matcher<const Undefined&> m = _; }
+
 // Tests that matchers are copyable.
 TEST(MatcherTest, IsCopyable) {
   // Tests the copy constructor.
@@ -365,66 +382,132 @@ TEST(MatcherTest, MatchAndExplain) {
 }
 
 // Tests that a C-string literal can be implicitly converted to a
-// Matcher<string> or Matcher<const string&>.
+// Matcher<std::string> or Matcher<const std::string&>.
 TEST(StringMatcherTest, CanBeImplicitlyConstructedFromCStringLiteral) {
-  Matcher<string> m1 = "hi";
+  Matcher<std::string> m1 = "hi";
   EXPECT_TRUE(m1.Matches("hi"));
   EXPECT_FALSE(m1.Matches("hello"));
 
-  Matcher<const string&> m2 = "hi";
+  Matcher<const std::string&> m2 = "hi";
   EXPECT_TRUE(m2.Matches("hi"));
   EXPECT_FALSE(m2.Matches("hello"));
 }
 
 // Tests that a string object can be implicitly converted to a
-// Matcher<string> or Matcher<const string&>.
+// Matcher<std::string> or Matcher<const std::string&>.
 TEST(StringMatcherTest, CanBeImplicitlyConstructedFromString) {
-  Matcher<string> m1 = string("hi");
+  Matcher<std::string> m1 = std::string("hi");
   EXPECT_TRUE(m1.Matches("hi"));
   EXPECT_FALSE(m1.Matches("hello"));
 
-  Matcher<const string&> m2 = string("hi");
+  Matcher<const std::string&> m2 = std::string("hi");
   EXPECT_TRUE(m2.Matches("hi"));
   EXPECT_FALSE(m2.Matches("hello"));
 }
 
-#if GTEST_HAS_STRING_PIECE_
+#if GTEST_HAS_GLOBAL_STRING
+// Tests that a ::string object can be implicitly converted to a
+// Matcher<std::string> or Matcher<const std::string&>.
+TEST(StringMatcherTest, CanBeImplicitlyConstructedFromGlobalString) {
+  Matcher<std::string> m1 = ::string("hi");
+  EXPECT_TRUE(m1.Matches("hi"));
+  EXPECT_FALSE(m1.Matches("hello"));
+
+  Matcher<const std::string&> m2 = ::string("hi");
+  EXPECT_TRUE(m2.Matches("hi"));
+  EXPECT_FALSE(m2.Matches("hello"));
+}
+#endif  // GTEST_HAS_GLOBAL_STRING
+
+#if GTEST_HAS_GLOBAL_STRING
 // Tests that a C-string literal can be implicitly converted to a
-// Matcher<StringPiece> or Matcher<const StringPiece&>.
-TEST(StringPieceMatcherTest, CanBeImplicitlyConstructedFromCStringLiteral) {
-  Matcher<StringPiece> m1 = "cats";
+// Matcher<::string> or Matcher<const ::string&>.
+TEST(GlobalStringMatcherTest, CanBeImplicitlyConstructedFromCStringLiteral) {
+  Matcher< ::string> m1 = "hi";
+  EXPECT_TRUE(m1.Matches("hi"));
+  EXPECT_FALSE(m1.Matches("hello"));
+
+  Matcher<const ::string&> m2 = "hi";
+  EXPECT_TRUE(m2.Matches("hi"));
+  EXPECT_FALSE(m2.Matches("hello"));
+}
+
+// Tests that a std::string object can be implicitly converted to a
+// Matcher<::string> or Matcher<const ::string&>.
+TEST(GlobalStringMatcherTest, CanBeImplicitlyConstructedFromString) {
+  Matcher< ::string> m1 = std::string("hi");
+  EXPECT_TRUE(m1.Matches("hi"));
+  EXPECT_FALSE(m1.Matches("hello"));
+
+  Matcher<const ::string&> m2 = std::string("hi");
+  EXPECT_TRUE(m2.Matches("hi"));
+  EXPECT_FALSE(m2.Matches("hello"));
+}
+
+// Tests that a ::string object can be implicitly converted to a
+// Matcher<::string> or Matcher<const ::string&>.
+TEST(GlobalStringMatcherTest, CanBeImplicitlyConstructedFromGlobalString) {
+  Matcher< ::string> m1 = ::string("hi");
+  EXPECT_TRUE(m1.Matches("hi"));
+  EXPECT_FALSE(m1.Matches("hello"));
+
+  Matcher<const ::string&> m2 = ::string("hi");
+  EXPECT_TRUE(m2.Matches("hi"));
+  EXPECT_FALSE(m2.Matches("hello"));
+}
+#endif  // GTEST_HAS_GLOBAL_STRING
+
+#if GTEST_HAS_ABSL
+// Tests that a C-string literal can be implicitly converted to a
+// Matcher<absl::string_view> or Matcher<const absl::string_view&>.
+TEST(StringViewMatcherTest, CanBeImplicitlyConstructedFromCStringLiteral) {
+  Matcher<absl::string_view> m1 = "cats";
   EXPECT_TRUE(m1.Matches("cats"));
   EXPECT_FALSE(m1.Matches("dogs"));
 
-  Matcher<const StringPiece&> m2 = "cats";
+  Matcher<const absl::string_view&> m2 = "cats";
   EXPECT_TRUE(m2.Matches("cats"));
   EXPECT_FALSE(m2.Matches("dogs"));
 }
 
-// Tests that a string object can be implicitly converted to a
-// Matcher<StringPiece> or Matcher<const StringPiece&>.
-TEST(StringPieceMatcherTest, CanBeImplicitlyConstructedFromString) {
-  Matcher<StringPiece> m1 = string("cats");
+// Tests that a std::string object can be implicitly converted to a
+// Matcher<absl::string_view> or Matcher<const absl::string_view&>.
+TEST(StringViewMatcherTest, CanBeImplicitlyConstructedFromString) {
+  Matcher<absl::string_view> m1 = std::string("cats");
   EXPECT_TRUE(m1.Matches("cats"));
   EXPECT_FALSE(m1.Matches("dogs"));
 
-  Matcher<const StringPiece&> m2 = string("cats");
+  Matcher<const absl::string_view&> m2 = std::string("cats");
   EXPECT_TRUE(m2.Matches("cats"));
   EXPECT_FALSE(m2.Matches("dogs"));
 }
 
-// Tests that a StringPiece object can be implicitly converted to a
-// Matcher<StringPiece> or Matcher<const StringPiece&>.
-TEST(StringPieceMatcherTest, CanBeImplicitlyConstructedFromStringPiece) {
-  Matcher<StringPiece> m1 = StringPiece("cats");
+#if GTEST_HAS_GLOBAL_STRING
+// Tests that a ::string object can be implicitly converted to a
+// Matcher<absl::string_view> or Matcher<const absl::string_view&>.
+TEST(StringViewMatcherTest, CanBeImplicitlyConstructedFromGlobalString) {
+  Matcher<absl::string_view> m1 = ::string("cats");
   EXPECT_TRUE(m1.Matches("cats"));
   EXPECT_FALSE(m1.Matches("dogs"));
 
-  Matcher<const StringPiece&> m2 = StringPiece("cats");
+  Matcher<const absl::string_view&> m2 = ::string("cats");
   EXPECT_TRUE(m2.Matches("cats"));
   EXPECT_FALSE(m2.Matches("dogs"));
 }
-#endif  // GTEST_HAS_STRING_PIECE_
+#endif  // GTEST_HAS_GLOBAL_STRING
+
+// Tests that a absl::string_view object can be implicitly converted to a
+// Matcher<absl::string_view> or Matcher<const absl::string_view&>.
+TEST(StringViewMatcherTest, CanBeImplicitlyConstructedFromStringView) {
+  Matcher<absl::string_view> m1 = absl::string_view("cats");
+  EXPECT_TRUE(m1.Matches("cats"));
+  EXPECT_FALSE(m1.Matches("dogs"));
+
+  Matcher<const absl::string_view&> m2 = absl::string_view("cats");
+  EXPECT_TRUE(m2.Matches("cats"));
+  EXPECT_FALSE(m2.Matches("dogs"));
+}
+#endif  // GTEST_HAS_ABSL
 
 // Tests that MakeMatcher() constructs a Matcher<T> from a
 // MatcherInterface* without requiring the user to explicitly
@@ -613,7 +696,7 @@ TEST(MatcherCastTest, FromSameType) {
 struct ConvertibleFromAny {
   ConvertibleFromAny(int a_value) : value(a_value) {}
   template <typename T>
-  explicit ConvertibleFromAny(const T& /*a_value*/) : value(-1) {
+  ConvertibleFromAny(const T& /*a_value*/) : value(-1) {
     ADD_FAILURE() << "Conversion constructor called";
   }
   int value;
@@ -1177,6 +1260,13 @@ TEST(StrEqTest, MatchesEqualString) {
   Matcher<const std::string&> m2 = StrEq("Hello");
   EXPECT_TRUE(m2.Matches("Hello"));
   EXPECT_FALSE(m2.Matches("Hi"));
+
+#if GTEST_HAS_ABSL
+  Matcher<const absl::string_view&> m3 = StrEq("Hello");
+  EXPECT_TRUE(m3.Matches(absl::string_view("Hello")));
+  EXPECT_FALSE(m3.Matches(absl::string_view("hello")));
+  EXPECT_FALSE(m3.Matches(absl::string_view()));
+#endif  // GTEST_HAS_ABSL
 }
 
 TEST(StrEqTest, CanDescribeSelf) {
@@ -1202,6 +1292,13 @@ TEST(StrNeTest, MatchesUnequalString) {
   Matcher<std::string> m2 = StrNe(std::string("Hello"));
   EXPECT_TRUE(m2.Matches("hello"));
   EXPECT_FALSE(m2.Matches("Hello"));
+
+#if GTEST_HAS_ABSL
+  Matcher<const absl::string_view> m3 = StrNe("Hello");
+  EXPECT_TRUE(m3.Matches(absl::string_view("")));
+  EXPECT_TRUE(m3.Matches(absl::string_view()));
+  EXPECT_FALSE(m3.Matches(absl::string_view("Hello")));
+#endif  // GTEST_HAS_ABSL
 }
 
 TEST(StrNeTest, CanDescribeSelf) {
@@ -1210,15 +1307,23 @@ TEST(StrNeTest, CanDescribeSelf) {
 }
 
 TEST(StrCaseEqTest, MatchesEqualStringIgnoringCase) {
-  Matcher<const char*> m = StrCaseEq(string("Hello"));
+  Matcher<const char*> m = StrCaseEq(std::string("Hello"));
   EXPECT_TRUE(m.Matches("Hello"));
   EXPECT_TRUE(m.Matches("hello"));
   EXPECT_FALSE(m.Matches("Hi"));
   EXPECT_FALSE(m.Matches(NULL));
 
-  Matcher<const string&> m2 = StrCaseEq("Hello");
+  Matcher<const std::string&> m2 = StrCaseEq("Hello");
   EXPECT_TRUE(m2.Matches("hello"));
   EXPECT_FALSE(m2.Matches("Hi"));
+
+#if GTEST_HAS_ABSL
+  Matcher<const absl::string_view&> m3 = StrCaseEq(std::string("Hello"));
+  EXPECT_TRUE(m3.Matches(absl::string_view("Hello")));
+  EXPECT_TRUE(m3.Matches(absl::string_view("hello")));
+  EXPECT_FALSE(m3.Matches(absl::string_view("Hi")));
+  EXPECT_FALSE(m3.Matches(absl::string_view()));
+#endif  // GTEST_HAS_ABSL
 }
 
 TEST(StrCaseEqTest, MatchesEqualStringWith0IgnoringCase) {
@@ -1261,6 +1366,14 @@ TEST(StrCaseNeTest, MatchesUnequalStringIgnoringCase) {
   Matcher<std::string> m2 = StrCaseNe(std::string("Hello"));
   EXPECT_TRUE(m2.Matches(""));
   EXPECT_FALSE(m2.Matches("Hello"));
+
+#if GTEST_HAS_ABSL
+  Matcher<const absl::string_view> m3 = StrCaseNe("Hello");
+  EXPECT_TRUE(m3.Matches(absl::string_view("Hi")));
+  EXPECT_TRUE(m3.Matches(absl::string_view()));
+  EXPECT_FALSE(m3.Matches(absl::string_view("Hello")));
+  EXPECT_FALSE(m3.Matches(absl::string_view("hello")));
+#endif  // GTEST_HAS_ABSL
 }
 
 TEST(StrCaseNeTest, CanDescribeSelf) {
@@ -1292,6 +1405,25 @@ TEST(HasSubstrTest, WorksForCStrings) {
   EXPECT_FALSE(m2.Matches(NULL));
 }
 
+#if GTEST_HAS_ABSL
+// Tests that HasSubstr() works for matching absl::string_view-typed values.
+TEST(HasSubstrTest, WorksForStringViewClasses) {
+  const Matcher<absl::string_view> m1 = HasSubstr("foo");
+  EXPECT_TRUE(m1.Matches(absl::string_view("I love food.")));
+  EXPECT_FALSE(m1.Matches(absl::string_view("tofo")));
+  EXPECT_FALSE(m1.Matches(absl::string_view()));
+
+  const Matcher<const absl::string_view&> m2 = HasSubstr("foo");
+  EXPECT_TRUE(m2.Matches(absl::string_view("I love food.")));
+  EXPECT_FALSE(m2.Matches(absl::string_view("tofo")));
+  EXPECT_FALSE(m2.Matches(absl::string_view()));
+
+  const Matcher<const absl::string_view&> m3 = HasSubstr("");
+  EXPECT_TRUE(m3.Matches(absl::string_view("foo")));
+  EXPECT_FALSE(m3.Matches(absl::string_view()));
+}
+#endif  // GTEST_HAS_ABSL
+
 // Tests that HasSubstr(s) describes itself properly.
 TEST(HasSubstrTest, CanDescribeSelf) {
   Matcher<std::string> m = HasSubstr("foo\n\"");
@@ -1319,6 +1451,35 @@ TEST(KeyTest, MatchesCorrectly) {
   EXPECT_THAT(p, Key(Ge(20)));
   EXPECT_THAT(p, Not(Key(Lt(25))));
 }
+
+#if GTEST_LANG_CXX11
+template <size_t I>
+struct Tag {};
+
+struct PairWithGet {
+  int member_1;
+  string member_2;
+  using first_type = int;
+  using second_type = string;
+
+  const int& GetImpl(Tag<0>) const { return member_1; }
+  const string& GetImpl(Tag<1>) const { return member_2; }
+};
+template <size_t I>
+auto get(const PairWithGet& value) -> decltype(value.GetImpl(Tag<I>())) {
+  return value.GetImpl(Tag<I>());
+}
+TEST(PairTest, MatchesPairWithGetCorrectly) {
+  PairWithGet p{25, "foo"};
+  EXPECT_THAT(p, Key(25));
+  EXPECT_THAT(p, Not(Key(42)));
+  EXPECT_THAT(p, Key(Ge(20)));
+  EXPECT_THAT(p, Not(Key(Lt(25))));
+
+  std::vector<PairWithGet> v = {{11, "Foo"}, {29, "gMockIsBestMock"}};
+  EXPECT_THAT(v, Contains(Key(29)));
+}
+#endif  // GTEST_LANG_CXX11
 
 TEST(KeyTest, SafelyCastsInnerMatcher) {
   Matcher<int> is_positive = Gt(0);
@@ -1423,7 +1584,7 @@ TEST(PairTest, MatchesCorrectly) {
   EXPECT_THAT(p, Pair(25, "foo"));
   EXPECT_THAT(p, Pair(Ge(20), HasSubstr("o")));
 
-  // 'first' does not match, but 'second' matches.
+  // 'first' doesnt' match, but 'second' matches.
   EXPECT_THAT(p, Not(Pair(42, "foo")));
   EXPECT_THAT(p, Not(Pair(Lt(25), "foo")));
 
@@ -1457,6 +1618,18 @@ TEST(PairTest, InsideContainsUsingMap) {
   EXPECT_THAT(container, Not(Contains(Pair(3, _))));
 }
 
+#if GTEST_LANG_CXX11
+TEST(PairTest, UseGetInsteadOfMembers) {
+  PairWithGet pair{7, "ABC"};
+  EXPECT_THAT(pair, Pair(7, "ABC"));
+  EXPECT_THAT(pair, Pair(Ge(7), HasSubstr("AB")));
+  EXPECT_THAT(pair, Not(Pair(Lt(7), "ABC")));
+
+  std::vector<PairWithGet> v = {{11, "Foo"}, {29, "gMockIsBestMock"}};
+  EXPECT_THAT(v, ElementsAre(Pair(11, string("Foo")), Pair(Ge(10), Not(""))));
+}
+#endif  // GTEST_LANG_CXX11
+
 // Tests StartsWith(s).
 
 TEST(StartsWithTest, MatchesStringWithGivenPrefix) {
@@ -1486,12 +1659,30 @@ TEST(EndsWithTest, MatchesStringWithGivenSuffix) {
   EXPECT_TRUE(m1.Matches(""));
   EXPECT_FALSE(m1.Matches(NULL));
 
-  const Matcher<const string&> m2 = EndsWith(string("Hi"));
+  const Matcher<const std::string&> m2 = EndsWith(std::string("Hi"));
   EXPECT_TRUE(m2.Matches("Hi"));
   EXPECT_TRUE(m2.Matches("Wow Hi Hi"));
   EXPECT_TRUE(m2.Matches("Super Hi"));
   EXPECT_FALSE(m2.Matches("i"));
   EXPECT_FALSE(m2.Matches("Hi "));
+
+#if GTEST_HAS_GLOBAL_STRING
+  const Matcher<const ::string&> m3 = EndsWith(::string("Hi"));
+  EXPECT_TRUE(m3.Matches("Hi"));
+  EXPECT_TRUE(m3.Matches("Wow Hi Hi"));
+  EXPECT_TRUE(m3.Matches("Super Hi"));
+  EXPECT_FALSE(m3.Matches("i"));
+  EXPECT_FALSE(m3.Matches("Hi "));
+#endif  // GTEST_HAS_GLOBAL_STRING
+
+#if GTEST_HAS_ABSL
+  const Matcher<const absl::string_view&> m4 = EndsWith("");
+  EXPECT_TRUE(m4.Matches("Hi"));
+  EXPECT_TRUE(m4.Matches(""));
+  // Default-constructed absl::string_view should not match anything, in order
+  // to distinguish it from an empty string.
+  EXPECT_FALSE(m4.Matches(absl::string_view()));
+#endif  // GTEST_HAS_ABSL
 }
 
 TEST(EndsWithTest, CanDescribeSelf) {
@@ -1511,6 +1702,18 @@ TEST(MatchesRegexTest, MatchesStringMatchingGivenRegex) {
   EXPECT_TRUE(m2.Matches("azbz"));
   EXPECT_FALSE(m2.Matches("az1"));
   EXPECT_FALSE(m2.Matches("1az"));
+
+#if GTEST_HAS_ABSL
+  const Matcher<const absl::string_view&> m3 = MatchesRegex("a.*z");
+  EXPECT_TRUE(m3.Matches(absl::string_view("az")));
+  EXPECT_TRUE(m3.Matches(absl::string_view("abcz")));
+  EXPECT_FALSE(m3.Matches(absl::string_view("1az")));
+  // Default-constructed absl::string_view should not match anything, in order
+  // to distinguish it from an empty string.
+  EXPECT_FALSE(m3.Matches(absl::string_view()));
+  const Matcher<const absl::string_view&> m4 = MatchesRegex("");
+  EXPECT_FALSE(m4.Matches(absl::string_view()));
+#endif  // GTEST_HAS_ABSL
 }
 
 TEST(MatchesRegexTest, CanDescribeSelf) {
@@ -1519,6 +1722,11 @@ TEST(MatchesRegexTest, CanDescribeSelf) {
 
   Matcher<const char*> m2 = MatchesRegex(new RE("a.*"));
   EXPECT_EQ("matches regular expression \"a.*\"", Describe(m2));
+
+#if GTEST_HAS_ABSL
+  Matcher<const absl::string_view> m3 = MatchesRegex(new RE("0.*"));
+  EXPECT_EQ("matches regular expression \"0.*\"", Describe(m3));
+#endif  // GTEST_HAS_ABSL
 }
 
 // Tests ContainsRegex().
@@ -1533,6 +1741,18 @@ TEST(ContainsRegexTest, MatchesStringContainingGivenRegex) {
   EXPECT_TRUE(m2.Matches("azbz"));
   EXPECT_TRUE(m2.Matches("az1"));
   EXPECT_FALSE(m2.Matches("1a"));
+
+#if GTEST_HAS_ABSL
+  const Matcher<const absl::string_view&> m3 = ContainsRegex(new RE("a.*z"));
+  EXPECT_TRUE(m3.Matches(absl::string_view("azbz")));
+  EXPECT_TRUE(m3.Matches(absl::string_view("az1")));
+  EXPECT_FALSE(m3.Matches(absl::string_view("1a")));
+  // Default-constructed absl::string_view should not match anything, in order
+  // to distinguish it from an empty string.
+  EXPECT_FALSE(m3.Matches(absl::string_view()));
+  const Matcher<const absl::string_view&> m4 = ContainsRegex("");
+  EXPECT_FALSE(m4.Matches(absl::string_view()));
+#endif  // GTEST_HAS_ABSL
 }
 
 TEST(ContainsRegexTest, CanDescribeSelf) {
@@ -1541,6 +1761,11 @@ TEST(ContainsRegexTest, CanDescribeSelf) {
 
   Matcher<const char*> m2 = ContainsRegex(new RE("a.*"));
   EXPECT_EQ("contains regular expression \"a.*\"", Describe(m2));
+
+#if GTEST_HAS_ABSL
+  Matcher<const absl::string_view> m3 = ContainsRegex(new RE("0.*"));
+  EXPECT_EQ("contains regular expression \"0.*\"", Describe(m3));
+#endif  // GTEST_HAS_ABSL
 }
 
 // Tests for wide strings.
