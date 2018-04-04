@@ -105,6 +105,53 @@ Matcher<::string>::Matcher(const ::string& s) { *this = Eq(s); }
 Matcher<::string>::Matcher(const char* s) { *this = Eq(::string(s)); }
 #endif  // GTEST_HAS_GLOBAL_STRING
 
+#if GTEST_HAS_ABSL
+// Constructs a matcher that matches a const absl::string_view& whose value is
+// equal to s.
+Matcher<const absl::string_view&>::Matcher(const std::string& s) {
+  *this = Eq(s);
+}
+
+#if GTEST_HAS_GLOBAL_STRING
+// Constructs a matcher that matches a const absl::string_view& whose value is
+// equal to s.
+Matcher<const absl::string_view&>::Matcher(const ::string& s) { *this = Eq(s); }
+#endif  // GTEST_HAS_GLOBAL_STRING
+
+// Constructs a matcher that matches a const absl::string_view& whose value is
+// equal to s.
+Matcher<const absl::string_view&>::Matcher(const char* s) {
+  *this = Eq(std::string(s));
+}
+
+// Constructs a matcher that matches a const absl::string_view& whose value is
+// equal to s.
+Matcher<const absl::string_view&>::Matcher(absl::string_view s) {
+  *this = Eq(std::string(s));
+}
+
+// Constructs a matcher that matches a absl::string_view whose value is equal to
+// s.
+Matcher<absl::string_view>::Matcher(const std::string& s) { *this = Eq(s); }
+
+#if GTEST_HAS_GLOBAL_STRING
+// Constructs a matcher that matches a absl::string_view whose value is equal to
+// s.
+Matcher<absl::string_view>::Matcher(const ::string& s) { *this = Eq(s); }
+#endif  // GTEST_HAS_GLOBAL_STRING
+
+// Constructs a matcher that matches a absl::string_view whose value is equal to
+// s.
+Matcher<absl::string_view>::Matcher(const char* s) {
+  *this = Eq(std::string(s));
+}
+
+// Constructs a matcher that matches a absl::string_view whose value is equal to
+// s.
+Matcher<absl::string_view>::Matcher(absl::string_view s) {
+  *this = Eq(std::string(s));
+}
+#endif  // GTEST_HAS_ABSL
 
 namespace internal {
 
@@ -113,12 +160,11 @@ namespace internal {
 // 'negation' is false; otherwise returns the description of the
 // negation of the matcher.  'param_values' contains a list of strings
 // that are the print-out of the matcher's parameters.
-GTEST_API_ string FormatMatcherDescription(bool negation,
-                                           const char* matcher_name,
-                                           const Strings& param_values) {
-  string result = ConvertIdentifierNameToWords(matcher_name);
-  if (param_values.size() >= 1)
-    result += " " + JoinAsTuple(param_values);
+GTEST_API_ std::string FormatMatcherDescription(bool negation,
+                                                const char* matcher_name,
+                                                const Strings& param_values) {
+  std::string result = ConvertIdentifierNameToWords(matcher_name);
+  if (param_values.size() >= 1) result += " " + JoinAsTuple(param_values);
   return negation ? "not (" + result + ")" : result;
 }
 
