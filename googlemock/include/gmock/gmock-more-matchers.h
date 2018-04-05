@@ -44,13 +44,12 @@
 namespace testing {
 
 // The macros trigger warning C4100 (unreferenced formal
-// parameter) in MSVC with -W4.  Unfortunately they cannot be fixed in
-// the macro definition, as the warnings are generated when the macro
-// is expanded and macro expansion cannot contain #pragma.  Therefore
-// we suppress them here.
+// parameter) in MSVC with -W4.
 #ifdef _MSC_VER
-# pragma warning(push)
 # pragma warning(disable:4100)
+#if (_MSC_VER == 1900)
+# pragma warning(disable:4800)
+  #endif
 #endif
 
 // Defines a matcher that matches an empty container. The container must
