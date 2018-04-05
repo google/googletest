@@ -704,6 +704,7 @@ class MockClass {
   MOCK_METHOD0(MakeUnique, std::unique_ptr<int>());
   MOCK_METHOD0(MakeUniqueBase, std::unique_ptr<Base>());
   MOCK_METHOD0(MakeVectorUnique, std::vector<std::unique_ptr<int>>());
+  MOCK_METHOD1(TakeUnique, int(std::unique_ptr<int>));
 #endif
 
  private:
