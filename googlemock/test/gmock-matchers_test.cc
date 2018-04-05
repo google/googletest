@@ -157,6 +157,9 @@ using testing::internal::RE;
 using testing::internal::scoped_ptr;
 using testing::internal::StreamMatchResultListener;
 using testing::internal::Strings;
+using testing::internal::linked_ptr;
+using testing::internal::scoped_ptr;
+using testing::internal::string;
 using testing::make_tuple;
 using testing::tuple;
 
