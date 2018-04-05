@@ -43,8 +43,8 @@
 
 namespace testing {
 
-// The macros trigger warning C4100 (unreferenced formal
-// parameter) in MSVC with -W4.
+// Silence C4100 (unreferenced formal
+// parameter) for MSVC
 #ifdef _MSC_VER
 # pragma warning(disable:4100)
 #if (_MSC_VER == 1900)
