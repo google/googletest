@@ -758,7 +758,7 @@ TEST(MatcherCastTest, NonImplicitlyConstructibleTypeWithOperatorEq) {
 namespace convertible_from_any {
 // Implicitly convertible from any type.
 struct ConvertibleFromAny {
-  ConvertibleFromAny(int a_value) : value(a_value) {}
+  explicit ConvertibleFromAny(int a_value) : value(a_value) {}
   template <typename T>
   ConvertibleFromAny(const T& /*a_value*/) : value(-1) {
     ADD_FAILURE() << "Conversion constructor called";
