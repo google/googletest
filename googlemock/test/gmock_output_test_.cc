@@ -273,6 +273,11 @@ MATCHER_P2(IsPair, first, second, "") {
   return Value(arg.first, first) && Value(arg.second, second);
 }
 
+TEST_F(GMockOutputTest, PrintsMatcher) {
+  const testing::Matcher<int> m1 = Ge(48);
+  EXPECT_THAT((std::pair<int, bool>(42, true)), IsPair(m1, true));
+}
+
 void TestCatchesLeakedMocksInAdHocTests() {
   MockFoo* foo = new MockFoo;
 
