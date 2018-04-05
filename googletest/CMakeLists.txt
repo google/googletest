@@ -5,10 +5,6 @@
 # ctest.  You can select which tests to run using 'ctest -R regex'.
 # For more options, run 'ctest --help'.
 
-# BUILD_SHARED_LIBS is a standard CMake variable, but we declare it here to
-# make it prominent in the GUI.
-option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
-
 # When other libraries are using a shared version of runtime libraries,
 # Google Test also has to use one.
 option(
@@ -59,6 +55,25 @@ endif (POLICY CMP0063)
 if (COMMAND set_up_hermetic_build)
   set_up_hermetic_build()
 endif()
+
+# These commands only run if this is the main project
+if(CMAKE_PROJECT_NAME STREQUAL "gtest" OR CMAKE_PROJECT_NAME STREQUAL "googletest-distribution")
+
+  # BUILD_SHARED_LIBS is a standard CMake variable, but we declare it here to
+  # make it prominent in the GUI.
+  option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
+
+else()
+
+  mark_as_advanced(
+    gtest_force_shared_crt
+    gtest_build_tests
+    gtest_build_samples
+    gtest_disable_pthreads
+    gtest_hide_internal_symbols)
+
+endif()
+
 
 if (gtest_hide_internal_symbols)
   set(CMAKE_CXX_VISIBILITY_PRESET hidden)
