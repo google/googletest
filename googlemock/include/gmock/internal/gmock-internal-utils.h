@@ -52,8 +52,7 @@ namespace internal {
 // C4805('==': unsafe mix of type 'const int' and type 'const bool')
 #ifdef _MSC_VER
 # pragma warning(push)
-# pragma warning(disable:4100)
-# pragma warning(disable:C4805)
+# pragma warning(disable: 4100 C4805)
 #endif
 
 // Joins a vector of strings as if they are fields of a tuple; returns
