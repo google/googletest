@@ -48,6 +48,12 @@
 namespace testing {
 namespace internal {
 
+// Silence C4100 (unreferenced formal
+// parameter) for MSVC
+#ifdef _MSC_VER
+# pragma warning(disable:4100)
+#endif
+
 // Joins a vector of strings as if they are fields of a tuple; returns
 // the joined string.
 GTEST_API_ std::string JoinAsTuple(const Strings& fields);
