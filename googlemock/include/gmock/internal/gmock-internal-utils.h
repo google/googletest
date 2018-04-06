@@ -48,10 +48,12 @@
 namespace testing {
 namespace internal {
 
-// Silence C4100 (unreferenced formal
-// parameter) for MSVC
+// Silence MSVC C4100 (unreferenced formal parameter) and
+// C4805('==': unsafe mix of type 'const int' and type 'const bool')
 #ifdef _MSC_VER
+# pragma warning(push)
 # pragma warning(disable:4100)
+# pragma warning(disable:C4805)
 #endif
 
 // Joins a vector of strings as if they are fields of a tuple; returns
@@ -545,6 +547,12 @@ auto Apply(F&& f, Tuple&& args)
                    make_int_pack<std::tuple_size<Tuple>::value>());
 }
 #endif
+
+
+#ifdef _MSC_VER
+# pragma warning(pop)
+#endif
+
 }  // namespace internal
 }  // namespace testing
 
