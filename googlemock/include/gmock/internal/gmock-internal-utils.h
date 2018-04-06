@@ -518,7 +518,7 @@ struct BooleanConstant {};
 
 // Emit an assertion failure due to incorrect DoDefault() usage. Out-of-lined to
 // reduce code size.
-void IllegalDoDefault(const char* file, int line);
+GTEST_API_ void IllegalDoDefault(const char* file, int line);
 
 #if GTEST_LANG_CXX11
 // Helper types for Apply() below.
