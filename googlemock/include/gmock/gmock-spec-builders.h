@@ -103,6 +103,11 @@ class ExpectationTester;
 // Base class for function mockers.
 template <typename F> class FunctionMockerBase;
 
+// Uninteresting call behavior mixins.
+template <typename M> class NiceMockBase;
+template <typename M> class NaggyMockBase;
+template <typename M> class StrictMockBase;
+
 // Protects the mock object registry (in class Mock), all function
 // mockers, and all expectations.
 //
@@ -147,14 +152,13 @@ class GTEST_API_ UntypedFunctionMockerBase {
   // action fails.
   // L = *
   virtual UntypedActionResultHolderBase* UntypedPerformDefaultAction(
-      const void* untyped_args, const std::string& call_description) const = 0;
+      void* untyped_args, const std::string& call_description) const = 0;
 
   // Performs the given action with the given arguments and returns
   // the action's result.
   // L = *
   virtual UntypedActionResultHolderBase* UntypedPerformAction(
-      const void* untyped_action,
-      const void* untyped_args) const = 0;
+      const void* untyped_action, void* untyped_args) const = 0;
 
   // Writes a message that the call is uninteresting (i.e. neither
   // explicitly expected nor explicitly unexpected) to the given
@@ -209,9 +213,8 @@ class GTEST_API_ UntypedFunctionMockerBase {
   // arguments.  This function can be safely called from multiple
   // threads concurrently.  The caller is responsible for deleting the
   // result.
-  UntypedActionResultHolderBase* UntypedInvokeWith(
-      const void* untyped_args)
-          GTEST_LOCK_EXCLUDED_(g_gmock_mutex);
+  UntypedActionResultHolderBase* UntypedInvokeWith(void* untyped_args)
+      GTEST_LOCK_EXCLUDED_(g_gmock_mutex);
 
  protected:
   typedef std::vector<const void*> UntypedOnCallSpecs;
@@ -236,6 +239,14 @@ class GTEST_API_ UntypedFunctionMockerBase {
   UntypedOnCallSpecs untyped_on_call_specs_;
 
   // All expectations for this function mocker.
+  //
+  // It's undefined behavior to interleave expectations (EXPECT_CALLs
+  // or ON_CALLs) and mock function calls.  Also, the order of
+  // expectations is important.  Therefore it's a logic race condition
+  // to read/write untyped_expectations_ concurrently.  In order for
+  // tools like tsan to catch concurrent read/write accesses to
+  // untyped_expectations, we deliberately leave accesses to it
+  // unprotected.
   UntypedExpectations untyped_expectations_;
 };  // class UntypedFunctionMockerBase
 
@@ -397,13 +408,13 @@ class GTEST_API_ Mock {
   friend class internal::FunctionMockerBase;
 
   template <typename M>
-  friend class NiceMock;
+  friend class internal::NiceMockBase;
 
   template <typename M>
-  friend class NaggyMock;
+  friend class internal::NaggyMockBase;
 
   template <typename M>
-  friend class StrictMock;
+  friend class internal::StrictMockBase;
 
   // Tells Google Mock to allow uninteresting calls on the given mock
   // object.
@@ -1252,8 +1263,9 @@ class MockSpec {
 
   // Constructs a MockSpec object, given the function mocker object
   // that the spec is associated with.
-  explicit MockSpec(internal::FunctionMockerBase<F>* function_mocker)
-      : function_mocker_(function_mocker) {}
+  MockSpec(internal::FunctionMockerBase<F>* function_mocker,
+           const ArgumentMatcherTuple& matchers)
+      : function_mocker_(function_mocker), matchers_(matchers) {}
 
   // Adds a new default action spec to the function mocker and returns
   // the newly created spec.
@@ -1278,10 +1290,6 @@ class MockSpec {
  private:
   template <typename Function>
   friend class internal::FunctionMocker;
-
-  void SetMatchers(const ArgumentMatcherTuple& matchers) {
-    matchers_ = matchers;
-  }
 
   // The function mocker that owns this spec.
   internal::FunctionMockerBase<F>* const function_mocker_;
@@ -1390,19 +1398,20 @@ class ActionResultHolder : public UntypedActionResultHolderBase {
   template <typename F>
   static ActionResultHolder* PerformDefaultAction(
       const FunctionMockerBase<F>* func_mocker,
-      const typename Function<F>::ArgumentTuple& args,
+      typename RvalueRef<typename Function<F>::ArgumentTuple>::type args,
       const std::string& call_description) {
-    return new ActionResultHolder(Wrapper(
-        func_mocker->PerformDefaultAction(args, call_description)));
+    return new ActionResultHolder(Wrapper(func_mocker->PerformDefaultAction(
+        internal::move(args), call_description)));
   }
 
   // Performs the given action and returns the result in a new-ed
   // ActionResultHolder.
   template <typename F>
-  static ActionResultHolder*
-  PerformAction(const Action<F>& action,
-                const typename Function<F>::ArgumentTuple& args) {
-    return new ActionResultHolder(Wrapper(action.Perform(args)));
+  static ActionResultHolder* PerformAction(
+      const Action<F>& action,
+      typename RvalueRef<typename Function<F>::ArgumentTuple>::type args) {
+    return new ActionResultHolder(
+        Wrapper(action.Perform(internal::move(args))));
   }
 
  private:
@@ -1430,9 +1439,9 @@ class ActionResultHolder<void> : public UntypedActionResultHolderBase {
   template <typename F>
   static ActionResultHolder* PerformDefaultAction(
       const FunctionMockerBase<F>* func_mocker,
-      const typename Function<F>::ArgumentTuple& args,
+      typename RvalueRef<typename Function<F>::ArgumentTuple>::type args,
       const std::string& call_description) {
-    func_mocker->PerformDefaultAction(args, call_description);
+    func_mocker->PerformDefaultAction(internal::move(args), call_description);
     return new ActionResultHolder;
   }
 
@@ -1441,8 +1450,8 @@ class ActionResultHolder<void> : public UntypedActionResultHolderBase {
   template <typename F>
   static ActionResultHolder* PerformAction(
       const Action<F>& action,
-      const typename Function<F>::ArgumentTuple& args) {
-    action.Perform(args);
+      typename RvalueRef<typename Function<F>::ArgumentTuple>::type args) {
+    action.Perform(internal::move(args));
     return new ActionResultHolder;
   }
 
@@ -1461,7 +1470,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   typedef typename Function<F>::ArgumentTuple ArgumentTuple;
   typedef typename Function<F>::ArgumentMatcherTuple ArgumentMatcherTuple;
 
-  FunctionMockerBase() : current_spec_(this) {}
+  FunctionMockerBase() {}
 
   // The destructor verifies that all expectations on this mock
   // function have been satisfied.  If not, it will report Google Test
@@ -1497,12 +1506,13 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   // mutable state of this object, and thus can be called concurrently
   // without locking.
   // L = *
-  Result PerformDefaultAction(const ArgumentTuple& args,
-                              const std::string& call_description) const {
+  Result PerformDefaultAction(
+      typename RvalueRef<typename Function<F>::ArgumentTuple>::type args,
+      const std::string& call_description) const {
     const OnCallSpec<F>* const spec =
         this->FindOnCallSpec(args);
     if (spec != NULL) {
-      return spec->GetAction().Perform(args);
+      return spec->GetAction().Perform(internal::move(args));
     }
     const std::string message =
         call_description +
@@ -1524,11 +1534,11 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   // action fails.  The caller is responsible for deleting the result.
   // L = *
   virtual UntypedActionResultHolderBase* UntypedPerformDefaultAction(
-      const void* untyped_args,  // must point to an ArgumentTuple
+      void* untyped_args,  // must point to an ArgumentTuple
       const std::string& call_description) const {
-    const ArgumentTuple& args =
-        *static_cast<const ArgumentTuple*>(untyped_args);
-    return ResultHolder::PerformDefaultAction(this, args, call_description);
+    ArgumentTuple* args = static_cast<ArgumentTuple*>(untyped_args);
+    return ResultHolder::PerformDefaultAction(this, internal::move(*args),
+                                              call_description);
   }
 
   // Performs the given action with the given arguments and returns
@@ -1536,13 +1546,12 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   // result.
   // L = *
   virtual UntypedActionResultHolderBase* UntypedPerformAction(
-      const void* untyped_action, const void* untyped_args) const {
+      const void* untyped_action, void* untyped_args) const {
     // Make a copy of the action before performing it, in case the
     // action deletes the mock object (and thus deletes itself).
     const Action<F> action = *static_cast<const Action<F>*>(untyped_action);
-    const ArgumentTuple& args =
-        *static_cast<const ArgumentTuple*>(untyped_args);
-    return ResultHolder::PerformAction(action, args);
+    ArgumentTuple* args = static_cast<ArgumentTuple*>(untyped_args);
+    return ResultHolder::PerformAction(action, internal::move(*args));
   }
 
   // Implements UntypedFunctionMockerBase::ClearDefaultActionsLocked():
@@ -1582,10 +1591,14 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   // Returns the result of invoking this mock function with the given
   // arguments.  This function can be safely called from multiple
   // threads concurrently.
-  Result InvokeWith(const ArgumentTuple& args)
-        GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
+  Result InvokeWith(
+      typename RvalueRef<typename Function<F>::ArgumentTuple>::type args)
+      GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
+    // const_cast is required since in C++98 we still pass ArgumentTuple around
+    // by const& instead of rvalue reference.
+    void* untyped_args = const_cast<void*>(static_cast<const void*>(&args));
     scoped_ptr<ResultHolder> holder(
-        DownCast_<ResultHolder*>(this->UntypedInvokeWith(&args)));
+        DownCast_<ResultHolder*>(this->UntypedInvokeWith(untyped_args)));
     return holder->Unwrap();
   }
 
@@ -1609,6 +1622,8 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
     TypedExpectation<F>* const expectation =
         new TypedExpectation<F>(this, file, line, source_text, m);
     const linked_ptr<ExpectationBase> untyped_expectation(expectation);
+    // See the definition of untyped_expectations_ for why access to
+    // it is unprotected here.
     untyped_expectations_.push_back(untyped_expectation);
 
     // Adds this expectation into the implicit sequence if there is one.
@@ -1619,10 +1634,6 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
 
     return *expectation;
   }
-
-  // The current spec (either default action spec or expectation spec)
-  // being described on this function mocker.
-  MockSpec<F>& current_spec() { return current_spec_; }
 
  private:
   template <typename Func> friend class TypedExpectation;
@@ -1716,6 +1727,8 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
       const ArgumentTuple& args) const
           GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
     g_gmock_mutex.AssertHeld();
+    // See the definition of untyped_expectations_ for why access to
+    // it is unprotected here.
     for (typename UntypedExpectations::const_reverse_iterator it =
              untyped_expectations_.rbegin();
          it != untyped_expectations_.rend(); ++it) {
@@ -1765,10 +1778,6 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
       expectation->DescribeCallCountTo(why);
     }
   }
-
-  // The current spec (either default action spec or expectation spec)
-  // being described on this function mocker.
-  MockSpec<F> current_spec_;
 
   // There is no generally useful and implementable semantics of
   // copying a mock object, so copying a mock is usually a user error.
