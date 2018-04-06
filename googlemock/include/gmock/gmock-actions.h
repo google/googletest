@@ -360,14 +360,20 @@ class Action {
 
   // Constructs a null Action.  Needed for storing Action objects in
   // STL containers.
-  Action() : impl_(NULL) {}
+  Action() {}
 
-  // Constructs an Action from its implementation.  A NULL impl is
-  // used to represent the "do-default" action.
+#if GTEST_LANG_CXX11
+  // Construct an Action from a specified callable.
+  // This cannot take std::function directly, because then Action would not be
+  // directly constructible from lambda (it would require two conversions).
+  template <typename G,
+            typename = typename ::std::enable_if<
+                ::std::is_constructible<::std::function<F>, G>::value>::type>
+  Action(G&& fun) : fun_(::std::forward<G>(fun)) {}  // NOLINT
+#endif
+
+  // Constructs an Action from its implementation.
   explicit Action(ActionInterface<F>* impl) : impl_(impl) {}
-
-  // Copy constructor.
-  Action(const Action& action) : impl_(action.impl_) {}
 
   // This constructor allows us to turn an Action<Func> object into an
   // Action<F>, as long as F's arguments can be implicitly converted
@@ -377,7 +383,13 @@ class Action {
   explicit Action(const Action<Func>& action);
 
   // Returns true iff this is the DoDefault() action.
-  bool IsDoDefault() const { return impl_.get() == NULL; }
+  bool IsDoDefault() const {
+#if GTEST_LANG_CXX11
+    return impl_ == nullptr && fun_ == nullptr;
+#else
+    return impl_ == NULL;
+#endif
+  }
 
   // Performs the action.  Note that this method is const even though
   // the corresponding method in ActionInterface is not.  The reason
@@ -385,14 +397,15 @@ class Action {
   // another concrete action, not that the concrete action it binds to
   // cannot change state.  (Think of the difference between a const
   // pointer and a pointer to const.)
-  Result Perform(const ArgumentTuple& args) const {
-    internal::Assert(
-        !IsDoDefault(), __FILE__, __LINE__,
-        "You are using DoDefault() inside a composite action like "
-        "DoAll() or WithArgs().  This is not supported for technical "
-        "reasons.  Please instead spell out the default action, or "
-        "assign the default action to an Action variable and use "
-        "the variable in various places.");
+  Result Perform(ArgumentTuple args) const {
+    if (IsDoDefault()) {
+      internal::IllegalDoDefault(__FILE__, __LINE__);
+    }
+#if GTEST_LANG_CXX11
+    if (fun_ != nullptr) {
+      return internal::Apply(fun_, ::std::move(args));
+    }
+#endif
     return impl_->Perform(args);
   }
 
@@ -400,6 +413,18 @@ class Action {
   template <typename F1, typename F2>
   friend class internal::ActionAdaptor;
 
+  template <typename G>
+  friend class Action;
+
+  // In C++11, Action can be implemented either as a generic functor (through
+  // std::function), or legacy ActionInterface. In C++98, only ActionInterface
+  // is available. The invariants are as follows:
+  // * in C++98, impl_ is null iff this is the default action
+  // * in C++11, at most one of fun_ & impl_ may be nonnull; both are null iff
+  //   this is the default action
+#if GTEST_LANG_CXX11
+  ::std::function<F> fun_;
+#endif
   internal::linked_ptr<ActionInterface<F> > impl_;
 };
 
@@ -530,6 +555,9 @@ struct ByMoveWrapper {
 // need to make sure that the type conversion happens inside the EXPECT_CALL
 // statement, and conversion of the result of Return to Action<T(U)> is a
 // good place for that.
+//
+// The real life example of the above scenario happens when an invocation
+// of gtl::Container() is passed into Return.
 //
 template <typename R>
 class ReturnAction {
@@ -750,7 +778,7 @@ class DoDefaultAction {
   // This template type conversion operator allows DoDefault() to be
   // used in any function.
   template <typename F>
-  operator Action<F>() const { return Action<F>(NULL); }
+  operator Action<F>() const { return Action<F>(); }  // NOLINT
 };
 
 // Implements the Assign action to set a given pointer referent to a
@@ -884,6 +912,28 @@ class InvokeMethodWithoutArgsAction {
   const MethodPtr method_ptr_;
 
   GTEST_DISALLOW_ASSIGN_(InvokeMethodWithoutArgsAction);
+};
+
+// Implements the InvokeWithoutArgs(callback) action.
+template <typename CallbackType>
+class InvokeCallbackWithoutArgsAction {
+ public:
+  // The c'tor takes ownership of the callback.
+  explicit InvokeCallbackWithoutArgsAction(CallbackType* callback)
+      : callback_(callback) {
+    callback->CheckIsRepeatable();  // Makes sure the callback is permanent.
+  }
+
+  // This type conversion operator template allows Invoke(callback) to
+  // be used wherever the callback's return type can be implicitly
+  // converted to that of the mock function.
+  template <typename Result, typename ArgumentTuple>
+  Result Perform(const ArgumentTuple&) const { return callback_->Run(); }
+
+ private:
+  const internal::linked_ptr<CallbackType> callback_;
+
+  GTEST_DISALLOW_ASSIGN_(InvokeCallbackWithoutArgsAction);
 };
 
 // Implements the IgnoreResult(action) action.
@@ -1053,7 +1103,13 @@ typedef internal::IgnoredValue Unused;
 template <typename To>
 template <typename From>
 Action<To>::Action(const Action<From>& from)
-    : impl_(new internal::ActionAdaptor<To, From>(from)) {}
+    :
+#if GTEST_LANG_CXX11
+      fun_(from.fun_),
+#endif
+      impl_(from.impl_ == NULL ? NULL
+                               : new internal::ActionAdaptor<To, From>(from)) {
+}
 
 // Creates an action that returns 'value'.  'value' is passed by value
 // instead of const reference - otherwise Return("string literal")
