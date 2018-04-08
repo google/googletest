@@ -755,7 +755,7 @@ using internal::FunctionMocker;
         gmock_a10)); \
   } \
   ::testing::MockSpec<rtype(__GMOCK_FIRST(nargs, T1, T2, T3, T4, T5, T6, T7, \
-      T8, T9, T10))>& \
+      T8, T9, T10))> \
       gmock_##Method(__GMOCK_FIRST(nargs, \
           const ::testing::Matcher<T1>& gmock_a1, \
                      const ::testing::Matcher<T2>& gmock_a2, \
