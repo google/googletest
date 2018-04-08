@@ -750,9 +750,17 @@ using internal::FunctionMocker;
     GMOCK_MOCKER_EXPAND(nargs, __GMOCK_MOD_CONSTNESS(modifiers), \
         Method).SetOwnerAndName(this, #Method); \
     return GMOCK_MOCKER_EXPAND(nargs, __GMOCK_MOD_CONSTNESS(modifiers), \
-        Method).Invoke(__GMOCK_FIRST(nargs, gmock_a1, gmock_a2, gmock_a3, \
-        gmock_a4, gmock_a5, gmock_a6, gmock_a7, gmock_a8, gmock_a9, \
-        gmock_a10)); \
+        Method).Invoke(__GMOCK_FIRST(nargs, \
+        ::testing::internal::forward<T1>(gmock_a1), \
+        ::testing::internal::forward<T2>(gmock_a2), \
+        ::testing::internal::forward<T3>(gmock_a3), \
+        ::testing::internal::forward<T4>(gmock_a4), \
+        ::testing::internal::forward<T5>(gmock_a5), \
+        ::testing::internal::forward<T6>(gmock_a6), \
+        ::testing::internal::forward<T7>(gmock_a7), \
+        ::testing::internal::forward<T8>(gmock_a8), \
+        ::testing::internal::forward<T9>(gmock_a9), \
+        ::testing::internal::forward<T10>(gmock_a10))); \
   } \
   ::testing::MockSpec<rtype(__GMOCK_FIRST(nargs, T1, T2, T3, T4, T5, T6, T7, \
       T8, T9, T10))> \
