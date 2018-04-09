@@ -36,8 +36,6 @@
 // includes most such tests, making it easier for these users to maintain
 // their build scripts (they just need to build this file, even though the
 // below list of actual *_test.cc files might change).
-// Silence C4800 (C4800: 'int *const ': forcing value
-// to bool 'true' or 'false') for MSVC 14,15
 #include "test/gmock-actions_test.cc"
 #include "test/gmock-cardinalities_test.cc"
 #include "test/gmock-generated-actions_test.cc"
@@ -51,4 +49,3 @@
 #include "test/gmock-port_test.cc"
 #include "test/gmock-spec-builders_test.cc"
 #include "test/gmock_test.cc"
-
