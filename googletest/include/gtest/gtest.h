@@ -83,12 +83,12 @@
 namespace testing {
 
 // Silence C4100 (unreferenced formal parameter) and 4805
-// unsafe mix of bool and type int for MSVC 14 and 15
+// unsafe mix of type 'const int' and type 'const bool'
 #ifdef _MSC_VER
+# pragma warning(push)
+# pragma warning(disable:4805)
 # if _MSC_VER <= 1900
-#  pragma warning(push)
 #  pragma warning(disable:4100)
-#  pragma warning(disable:4805)
 # endif
 #endif
 
