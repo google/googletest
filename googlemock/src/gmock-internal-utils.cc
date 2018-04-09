@@ -188,7 +188,7 @@ GTEST_API_ void Log(LogSeverity severity, const std::string& message,
   std::cout << ::std::flush;
 }
 
-void IllegalDoDefault(const char* file, int line) {
+GTEST_API_ void IllegalDoDefault(const char* file, int line) {
   internal::Assert(
       false, file, line,
       "You are using DoDefault() inside a composite action like "
