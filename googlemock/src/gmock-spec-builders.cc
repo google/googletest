@@ -56,7 +56,6 @@
 # pragma warning(disable:4800)
 #endif
 
-
 namespace testing {
 namespace internal {
 
