@@ -82,7 +82,8 @@
 
 namespace testing {
 
-// Silence C4100 (unreferenced formal parameter) for MSVC 14 and 15
+// Silence C4100 (unreferenced formal parameter) and 4805
+// unsafe mix of bool and type int for MSVC 14 and 15
 #ifdef _MSC_VER
 # if _MSC_VER <= 1900
 #  pragma warning(push)
@@ -90,6 +91,7 @@ namespace testing {
 #  pragma warning(disable:4805)
 # endif
 #endif
+
 
 // Declares the flags.
 
