@@ -43,6 +43,16 @@
 #include "gtest/gtest.h"
 #include "gtest/gtest-spi.h"
 
+// Silence C4800 (C4800: 'int *const ': forcing value
+// to bool 'true' or 'false') for MSVC 14,15
+#ifdef _MSC_VER
+#if _MSC_VER <= 1900
+#  pragma warning(push)
+#  pragma warning(disable:4800)
+#endif
+#endif
+
+
 namespace {
 
 // This list should be kept sorted.
@@ -1556,3 +1566,9 @@ TEST(MoveOnlyArgumentsTest, ReturningActions) {
 #endif  // GTEST_LANG_CXX11
 
 }  // Unnamed namespace
+
+#ifdef _MSC_VER
+#if _MSC_VER == 1900
+#  pragma warning(pop)
+#endif
+#endif
