@@ -1,6 +1,6 @@
 $$ -*- mode: c++; -*-
-$$ This is a Pump source file.  Please use Pump to convert it to
-$$ gmock-generated-actions.h.
+$$ This is a Pump source file. Please use Pump to convert
+$$ it to gmock-generated-matchers.h.
 $$
 $var n = 10  $$ The maximum arity we support.
 $$ }} This line fixes auto-indentation of the following code in Emacs.
