@@ -37,6 +37,16 @@
 
 // This line ensures that gmock.h can be compiled on its own, even
 // when it's fused.
+
+// Silence C4800 (C4800: 'int *const ': forcing value
+// to bool 'true' or 'false') for MSVC 14,15
+#ifdef _MSC_VER
+#if _MSC_VER <= 1900
+#  pragma warning(push)
+#  pragma warning(disable:4800)
+#endif
+#endif
+
 #include "gmock/gmock.h"
 
 // The following lines pull in the real gmock *.cc files.
@@ -45,3 +55,9 @@
 #include "src/gmock-matchers.cc"
 #include "src/gmock-spec-builders.cc"
 #include "src/gmock.cc"
+
+#ifdef _MSC_VER
+#if _MSC_VER == 1900
+#  pragma warning(pop)
+#endif
+#endif
