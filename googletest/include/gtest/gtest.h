@@ -87,9 +87,7 @@ namespace testing {
 #ifdef _MSC_VER
 # pragma warning(push)
 # pragma warning(disable:4805)
-# if _MSC_VER <= 1900
 #  pragma warning(disable:4100)
-# endif
 #endif
 
 
@@ -2310,9 +2308,7 @@ bool StaticAssertTypeEq() {
 GTEST_API_ std::string TempDir();
 
 #ifdef _MSC_VER
-# if _MSC_VER <= 1900
 #  pragma warning(pop)
-# endif
 #endif
 
 }  // namespace testing
