@@ -42,8 +42,10 @@
 
 // Silence C4100 (unreferenced formal parameter) for MSVC
 #ifdef _MSC_VER
-# pragma warning(push)
-# pragma warning(disable:4100)
+# if _MSC_VER <= 1900
+#  pragma warning(push)
+#  pragma warning(disable:4100)
+# endif
 #endif
 
 
@@ -308,5 +310,7 @@ int main(int argc, char **argv) {
 }
 
 #ifdef _MSC_VER
-# pragma warning(pop)
+# if _MSC_VER <= 1900
+#  pragma warning(pop)
+# endif
 #endif
