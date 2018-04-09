@@ -33,6 +33,13 @@
 //
 // This file tests the built-in actions.
 
+#ifdef _MSC_VER
+#if _MSC_VER <= 1900
+#  pragma warning(push)
+#  pragma warning(disable:4800)
+#endif
+#endif
+
 #include "gmock/gmock-actions.h"
 #include <algorithm>
 #include <iterator>
@@ -1556,3 +1563,9 @@ TEST(MoveOnlyArgumentsTest, ReturningActions) {
 #endif  // GTEST_LANG_CXX11
 
 }  // Unnamed namespace
+
+#ifdef _MSC_VER
+#if _MSC_VER == 1900
+#  pragma warning(pop)
+#endif
+#endif
