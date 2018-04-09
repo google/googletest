@@ -33,6 +33,8 @@
 //
 // This file tests the built-in actions.
 
+// Silence C4800 (C4800: 'int *const ': forcing value
+// to bool 'true' or 'false') for MSVC 14,15
 #ifdef _MSC_VER
 #if _MSC_VER <= 1900
 #  pragma warning(push)
@@ -1569,3 +1571,4 @@ TEST(MoveOnlyArgumentsTest, ReturningActions) {
 #  pragma warning(pop)
 #endif
 #endif
+

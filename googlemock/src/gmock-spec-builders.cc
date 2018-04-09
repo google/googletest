@@ -877,7 +877,7 @@ InSequence::~InSequence() {
 }  // namespace testing
 
 #ifdef _MSC_VER
-#if _MSC_VER == 1900
+#if _MSC_VER <= 1900
 #  pragma warning(pop)
 #endif
 #endif
