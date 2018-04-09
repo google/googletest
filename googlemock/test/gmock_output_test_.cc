@@ -39,12 +39,10 @@
 
 #include "gtest/gtest.h"
 
-// Silence C4100 (unreferenced formal parameter) for MSVC 14 and 15
+// Silence C4100 (unreferenced formal parameter)
 #ifdef _MSC_VER
-# if _MSC_VER <= 1900
-#  pragma warning(push)
-#  pragma warning(disable:4100)
-# endif
+# pragma warning(push)
+# pragma warning(disable:4100)
 #endif
 
 using testing::_;
@@ -308,7 +306,5 @@ int main(int argc, char **argv) {
 }
 
 #ifdef _MSC_VER
-# if _MSC_VER <= 1900
-#  pragma warning(pop)
-# endif
+# pragma warning(pop)
 #endif
