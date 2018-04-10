@@ -176,13 +176,11 @@ function(cxx_library_with_type name type cxx_flags)
   endif()
   if (DEFINED GTEST_HAS_PTHREAD)
     # add pthread to this library and all librariers which link to this library if needed
-    set_property(TARGET ${name} APPEND PROPERTY LINK_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
-    set_property(TARGET ${name} APPEND PROPERTY INTERFACE_LINK_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
+    target_link_libraries(${name} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
   endif()
   if (DEFINED GTEST_HAS_LIBRT)
-      # add librt to this library and all librariers which link to this library if needed
-    set_property(TARGET ${name} APPEND PROPERTY LINK_LIBRARIES ${LIBRT_LIBRARIES})
-    set_property(TARGET ${name} APPEND PROPERTY INTERFACE_LINK_LIBRARIES ${LIBRT_LIBRARIES})
+    # add librt to this library and all librariers which link to this library if needed
+    target_link_libraries(${name} PUBLIC ${LIBRT_LIBRARIES})
   endif()
 endfunction()
 
@@ -221,7 +219,7 @@ function(cxx_executable_with_flags name cxx_flags libs)
   # To support mixing linking in static and dynamic libraries, link each
   # library in with an extra call to target_link_libraries.
   foreach (lib "${libs}")
-    set_property(TARGET ${name} APPEND PROPERTY LINK_LIBRARIES ${lib})
+    target_link_libraries(${name} PUBLIC ${lib})
   endforeach()
 endfunction()
 
