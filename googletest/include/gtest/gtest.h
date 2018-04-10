@@ -82,15 +82,6 @@
 
 namespace testing {
 
-// Silence C4100 (unreferenced formal parameter) and 4805
-// unsafe mix of type 'const int' and type 'const bool'
-#ifdef _MSC_VER
-# pragma warning(push)
-# pragma warning(disable:4805)
-#  pragma warning(disable:4100)
-#endif
-
-
 // Declares the flags.
 
 // This flag temporary enables the disabled tests.
@@ -2306,10 +2297,6 @@ bool StaticAssertTypeEq() {
 // Returns a path to temporary directory.
 // Tries to determine an appropriate directory for the platform.
 GTEST_API_ std::string TempDir();
-
-#ifdef _MSC_VER
-#  pragma warning(pop)
-#endif
 
 }  // namespace testing
 

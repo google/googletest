@@ -1,5 +1,5 @@
 $$ -*- mode: c++; -*-
-$$ This is a Pump source file. Please use Pump to convert it to
+$$ This is a Pump source file.  Please use Pump to convert it to
 $$ gmock-generated-actions.h.
 $$
 $var n = 10  $$ The maximum arity we support.
