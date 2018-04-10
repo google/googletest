@@ -82,11 +82,12 @@
 
 namespace testing {
 
-// Silence C4100 (unreferenced formal parameter) for MSVC
+// Silence C4100 (unreferenced formal parameter) and 4805
+// unsafe mix of type 'const int' and type 'const bool'
 #ifdef _MSC_VER
 # pragma warning(push)
-# pragma warning(disable:4100)
 # pragma warning(disable:4805)
+# pragma warning(disable:4100)
 #endif
 
 
@@ -2307,7 +2308,7 @@ bool StaticAssertTypeEq() {
 GTEST_API_ std::string TempDir();
 
 #ifdef _MSC_VER
-# pragma warning(pop)
+#  pragma warning(pop)
 #endif
 
 }  // namespace testing
