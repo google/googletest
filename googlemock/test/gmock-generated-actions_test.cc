@@ -797,7 +797,8 @@ TEST(ActionPnMacroTest, WorksFor3Parameters) {
 
   Action<std::string(const std::string& s)> a2 = Plus("tail", "-", ">");
   const std::string re = "re";
-  EXPECT_EQ("retail->", a2.Perform(make_tuple(re)));
+  tuple<const std> dummy = make_tuple(re);
+  EXPECT_EQ("retail->", a2.Perform(dummy));
 }
 
 ACTION_P4(Plus, p0, p1, p2, p3) { return arg0 + p0 + p1 + p2 + p3; }
