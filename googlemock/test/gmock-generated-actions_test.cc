@@ -754,7 +754,8 @@ TEST(ActionPMacroTest, CanReferenceArgumentAndParameterTypes) {
 TEST(ActionPMacroTest, WorksInCompatibleMockFunction) {
   Action<std::string(const std::string& s)> a1 = Plus("tail");
   const std::string re = "re";
-  EXPECT_EQ("retail", a1.Perform(make_tuple(re)));
+  tuple<const std::string> dummy = make_tuple(re);
+  EXPECT_EQ("retail", a1.Perform(dummy));
 }
 
 // Tests that we can use ACTION*() to define actions overloaded on the
