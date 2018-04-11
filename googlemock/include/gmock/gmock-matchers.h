@@ -4140,7 +4140,8 @@ class VariantMatcher {
  private:
   static std::string GetTypeName() {
 #if GTEST_HAS_RTTI
-    return internal::GetTypeName<T>();
+    GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(
+        return internal::GetTypeName<T>());
 #endif
     return "the element type";
   }
@@ -4200,7 +4201,8 @@ class AnyCastMatcher {
  private:
   static std::string GetTypeName() {
 #if GTEST_HAS_RTTI
-    return internal::GetTypeName<T>();
+    GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(
+        return internal::GetTypeName<T>());
 #endif
     return "the element type";
   }
