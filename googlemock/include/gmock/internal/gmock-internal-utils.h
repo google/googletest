@@ -48,6 +48,14 @@
 namespace testing {
 namespace internal {
 
+// Silence MSVC C4100 (unreferenced formal parameter) and
+// C4805('==': unsafe mix of type 'const int' and type 'const bool')
+#ifdef _MSC_VER
+# pragma warning(push)
+# pragma warning(disable:4100)
+# pragma warning(disable:4805)
+#endif
+
 // Joins a vector of strings as if they are fields of a tuple; returns
 // the joined string.
 GTEST_API_ std::string JoinAsTuple(const Strings& fields);
@@ -510,7 +518,7 @@ struct BooleanConstant {};
 
 // Emit an assertion failure due to incorrect DoDefault() usage. Out-of-lined to
 // reduce code size.
-void IllegalDoDefault(const char* file, int line);
+GTEST_API_ void IllegalDoDefault(const char* file, int line);
 
 #if GTEST_LANG_CXX11
 // Helper types for Apply() below.
@@ -539,6 +547,12 @@ auto Apply(F&& f, Tuple&& args)
                    make_int_pack<std::tuple_size<Tuple>::value>());
 }
 #endif
+
+
+#ifdef _MSC_VER
+# pragma warning(pop)
+#endif
+
 }  // namespace internal
 }  // namespace testing
 
