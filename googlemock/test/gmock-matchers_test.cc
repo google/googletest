@@ -61,7 +61,7 @@
 
 // Disable MSVC2015 warning for std::pair:
 // "decorated name length exceeded, name was truncated".
-#if defined(_MSC_VER) && (_MSC_VER <= 1900)
+#if defined _MSC_VER
 # pragma warning(push)
 # pragma warning(disable:4503)
 #endif
@@ -6696,7 +6696,7 @@ TEST(NotTest, WorksOnMoveOnlyType) {
 }  // namespace gmock_matchers_test
 }  // namespace testing
 
-#if defined(_MSC_VER) && (_MSC_VER <= 1900)
+#if defined_MSC_VER
 # pragma warning(pop)
 #endif
 
