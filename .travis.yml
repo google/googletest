@@ -43,7 +43,6 @@ matrix:
     - os: osx
       compiler: gcc
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
-      if: type != pull_request
     - os: osx
       compiler: clang
       env: BUILD_TYPE=Debug VERBOSE=1
