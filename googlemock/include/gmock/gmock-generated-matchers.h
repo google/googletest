@@ -1423,7 +1423,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
   }\
   template <typename arg_type>\
   bool name##Matcher::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg, \
+      arg_type arg GTEST_ATTRIBUTE_UNUSED_, \
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 

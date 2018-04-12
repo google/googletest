@@ -1032,7 +1032,9 @@ INSTANTIATE_TEST_CASE_P(StatefulNamingFunctor,
 // what we need.
 class Unstreamable {
  public:
-  explicit Unstreamable(int value) : value_(value) {}
+  explicit Unstreamable(int value) : value_(value) {
+    (void)(value_);
+  }
 
  private:
   int value_;
