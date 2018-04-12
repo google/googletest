@@ -229,6 +229,18 @@ bool operator!=(T* ptr, const linked_ptr<T>& x) {
   return ptr != x.get();
 }
 
+#if GTEST_LANG_CXX11
+template<class T> inline
+bool operator==(const linked_ptr<T>& x, std::nullptr_t) {
+  return x.get() == nullptr;
+}
+
+template<class T> inline
+bool operator==(std::nullptr_t, const linked_ptr<T>& x) {
+  return x.get() == nullptr;
+}
+#endif
+
 // A function to convert T* into linked_ptr<T>
 // Doing e.g. make_linked_ptr(new FooBarBaz<type>(arg)) is a shorter notation
 // for linked_ptr<FooBarBaz<type> >(new FooBarBaz<type>(arg))
