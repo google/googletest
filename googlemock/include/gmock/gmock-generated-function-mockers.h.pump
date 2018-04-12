@@ -68,7 +68,7 @@ $for i [[
 $range j 1..i
 $var typename_As = [[$for j [[, typename A$j]]]]
 $var As = [[$for j, [[A$j]]]]
-$var as = [[$for j, [[a$j]]]]
+$var as = [[$for j, [[internal::forward<A$j>(a$j)]]]]
 $var Aas = [[$for j, [[A$j a$j]]]]
 $var ms = [[$for j, [[m$j]]]]
 $var matchers = [[$for j, [[const Matcher<A$j>& m$j]]]]
@@ -79,13 +79,8 @@ class FunctionMocker<R($As)> : public
   typedef R F($As);
   typedef typename internal::Function<F>::ArgumentTuple ArgumentTuple;
 
-  MockSpec<F>& With($matchers) {
-
-$if i >= 1 [[
-    this->current_spec().SetMatchers(::testing::make_tuple($ms));
-
-]]
-    return this->current_spec();
+  MockSpec<F> With($matchers) {
+    return MockSpec<F>(this, ::testing::make_tuple($ms));
   }
 
   R Invoke($Aas) {
@@ -134,11 +129,12 @@ using internal::FunctionMocker;
 
 $for i [[
 $range j 1..i
-$var arg_as = [[$for j, \
-      [[GMOCK_ARG_(tn, $j, __VA_ARGS__) gmock_a$j]]]]
-$var as = [[$for j, [[gmock_a$j]]]]
-$var matcher_as = [[$for j, \
+$var arg_as = [[$for j, [[GMOCK_ARG_(tn, $j, __VA_ARGS__) gmock_a$j]]]]
+$var as = [[$for j, \
+  [[::testing::internal::forward<GMOCK_ARG_(tn, $j, __VA_ARGS__)>(gmock_a$j)]]]]
+$var matcher_arg_as = [[$for j, \
                      [[GMOCK_MATCHER_(tn, $j, __VA_ARGS__) gmock_a$j]]]]
+$var matcher_as = [[$for j, [[gmock_a$j]]]]
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
 #define GMOCK_METHOD$i[[]]_(tn, constness, ct, Method, ...) \
   GMOCK_RESULT_(tn, __VA_ARGS__) ct Method( \
@@ -149,10 +145,10 @@ $var matcher_as = [[$for j, \
     GMOCK_MOCKER_($i, constness, Method).SetOwnerAndName(this, #Method); \
     return GMOCK_MOCKER_($i, constness, Method).Invoke($as); \
   } \
-  ::testing::MockSpec<__VA_ARGS__>& \
-      gmock_##Method($matcher_as) constness { \
+  ::testing::MockSpec<__VA_ARGS__> \
+      gmock_##Method($matcher_arg_as) constness { \
     GMOCK_MOCKER_($i, constness, Method).RegisterOwner(this); \
-    return GMOCK_MOCKER_($i, constness, Method).With($as); \
+    return GMOCK_MOCKER_($i, constness, Method).With($matcher_as); \
   } \
   mutable ::testing::FunctionMocker<__VA_ARGS__> GMOCK_MOCKER_($i, constness, Method)
 
@@ -263,7 +259,7 @@ class MockFunction;
 $for i [[
 $range j 0..i-1
 $var ArgTypes = [[$for j, [[A$j]]]]
-$var ArgNames = [[$for j, [[a$j]]]]
+$var ArgValues = [[$for j, [[::std::move(a$j)]]]]
 $var ArgDecls = [[$for j, [[A$j a$j]]]]
 template <typename R$for j [[, typename A$j]]>
 class MockFunction<R($ArgTypes)> {
@@ -273,9 +269,9 @@ class MockFunction<R($ArgTypes)> {
   MOCK_METHOD$i[[]]_T(Call, R($ArgTypes));
 
 #if GTEST_HAS_STD_FUNCTION_
-  std::function<R($ArgTypes)> AsStdFunction() {
+  ::std::function<R($ArgTypes)> AsStdFunction() {
     return [this]($ArgDecls) -> R {
-      return this->Call($ArgNames);
+      return this->Call($ArgValues);
     };
   }
 #endif  // GTEST_HAS_STD_FUNCTION_
