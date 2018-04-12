@@ -379,7 +379,8 @@ TEST(InvokeMethodTest, Binary) {
   Foo foo;
   Action<std::string(const std::string&, char)> a = Invoke(&foo, &Foo::Binary);
   std::string s("Hell");
-  EXPECT_EQ("Hello", a.Perform(make_tuple(s, 'o')));
+  tuple<std::string, char> dummy = make_tuple(s, 'o');
+  EXPECT_EQ("Hello", a.Perform(dummy));
 }
 
 // Tests using Invoke() with a ternary method.
