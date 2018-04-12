@@ -46,8 +46,11 @@ namespace testing {
 // Silence C4100 (unreferenced formal
 // parameter) for MSVC
 #ifdef _MSC_VER
+# pragma warning(push)
 # pragma warning(disable:4100)
 #if (_MSC_VER == 1900)
+// and silence C4800 (C4800: 'int *const ': forcing value
+// to bool 'true' or 'false') for MSVC 14
 # pragma warning(disable:4800)
   #endif
 #endif
@@ -77,6 +80,11 @@ MATCHER(IsTrue, negation ? "is false" : "is true") {
 MATCHER(IsFalse, negation ? "is true" : "is false") {
   return !static_cast<bool>(arg);
 }
+
+#ifdef _MSC_VER
+# pragma warning(pop)
+#endif
+
 
 }  // namespace testing
 

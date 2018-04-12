@@ -61,7 +61,8 @@
 
 // Disable MSVC2015 warning for std::pair:
 // "decorated name length exceeded, name was truncated".
-#if defined(_MSC_VER) && (_MSC_VER == 1900)
+#if defined _MSC_VER
+# pragma warning(push)
 # pragma warning(disable:4503)
 #endif
 
@@ -6656,7 +6657,7 @@ TEST(AnyWithTest, TestUseInContainers) {
                                    AnyWith<std::string>("merhaba"),
                                    AnyWith<std::string>("salut")}));
 }
-#endif //  GTEST_LANG_CXX11
+#endif  //  GTEST_LANG_CXX11
 TEST(AnyWithTest, TestCompare) {
   EXPECT_THAT(SampleAnyType(1), AnyWith<int>(Gt(0)));
 }
@@ -6694,3 +6695,8 @@ TEST(NotTest, WorksOnMoveOnlyType) {
 
 }  // namespace gmock_matchers_test
 }  // namespace testing
+
+#if defined_MSC_VER
+# pragma warning(pop)
+#endif
+
