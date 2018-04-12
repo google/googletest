@@ -39,6 +39,12 @@
 
 #include "gtest/gtest.h"
 
+// Silence C4100 (unreferenced formal parameter)
+#ifdef _MSC_VER
+# pragma warning(push)
+# pragma warning(disable:4100)
+#endif
+
 using testing::_;
 using testing::AnyNumber;
 using testing::Ge;
@@ -298,3 +304,7 @@ int main(int argc, char **argv) {
   TestCatchesLeakedMocksInAdHocTests();
   return RUN_ALL_TESTS();
 }
+
+#ifdef _MSC_VER
+# pragma warning(pop)
+#endif
