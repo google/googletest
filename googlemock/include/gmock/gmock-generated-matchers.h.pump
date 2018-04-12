@@ -303,6 +303,9 @@ $for j, [[
 
 // UnorderedElementsAre(e_1, e_2, ..., e_n) is an ElementsAre extension
 // that matches n elements in any order.  We support up to n=$n arguments.
+//
+// If you have >$n elements, consider UnorderedElementsAreArray() or
+// UnorderedPointwise() instead.
 
 $range i 0..n
 $for i [[
@@ -479,7 +482,7 @@ $$   // show up in the generated code.
 //   using testing::PrintToString;
 //
 //   MATCHER_P2(InClosedRange, low, hi,
-//       string(negation ? "is not" : "is") + " in range [" +
+//       std::string(negation ? "is not" : "is") + " in range [" +
 //       PrintToString(low) + ", " + PrintToString(hi) + "]") {
 //     return low <= arg && arg <= hi;
 //   }
@@ -604,32 +607,34 @@ $var template = [[$if i==0 [[]] $else [[
 ]]]]
 $var ctor_param_list = [[$for j, [[p$j##_type gmock_p$j]]]]
 $var impl_ctor_param_list = [[$for j, [[p$j##_type gmock_p$j]]]]
-$var impl_inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(gmock_p$j)]]]]]]
-$var inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(gmock_p$j)]]]]]]
+$var impl_inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(::testing::internal::move(gmock_p$j))]]]]]]
+$var inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(::testing::internal::move(gmock_p$j))]]]]]]
 $var params = [[$for j, [[p$j]]]]
 $var param_types = [[$if i==0 [[]] $else [[<$for j, [[p$j##_type]]>]]]]
 $var param_types_and_names = [[$for j, [[p$j##_type p$j]]]]
 $var param_field_decls = [[$for j
 [[
 
-      p$j##_type p$j;\
+      p$j##_type const p$j;\
 ]]]]
 $var param_field_decls2 = [[$for j
 [[
 
-    p$j##_type p$j;\
+    p$j##_type const p$j;\
 ]]]]
 
 #define $macro_name(name$for j [[, p$j]], description)\$template
   class $class_name {\
    public:\
     template <typename arg_type>\
-    class gmock_Impl : public ::testing::MatcherInterface<arg_type> {\
+    class gmock_Impl : public ::testing::MatcherInterface<\
+        GTEST_REFERENCE_TO_CONST_(arg_type)> {\
      public:\
       [[$if i==1 [[explicit ]]]]gmock_Impl($impl_ctor_param_list)\
           $impl_inits {}\
       virtual bool MatchAndExplain(\
-          arg_type arg, ::testing::MatchResultListener* result_listener) const;\
+          GTEST_REFERENCE_TO_CONST_(arg_type) arg,\
+          ::testing::MatchResultListener* result_listener) const;\
       virtual void DescribeTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(false);\
       }\
@@ -637,17 +642,15 @@ $var param_field_decls2 = [[$for j
         *gmock_os << FormatDescription(true);\
       }\$param_field_decls
      private:\
-      ::testing::internal::string FormatDescription(bool negation) const {\
-        const ::testing::internal::string gmock_description = (description);\
-        if (!gmock_description.empty()) {\
+      ::std::string FormatDescription(bool negation) const {\
+        ::std::string gmock_description = (description);\
+        if (!gmock_description.empty())\
           return gmock_description;\
-        }\
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
                 ::testing::tuple<$for j, [[p$j##_type]]>($for j, [[p$j]])));\
       }\
-      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -657,14 +660,13 @@ $var param_field_decls2 = [[$for j
     [[$if i==1 [[explicit ]]]]$class_name($ctor_param_list)$inits {\
     }\$param_field_decls2
    private:\
-    GTEST_DISALLOW_ASSIGN_($class_name);\
   };\$template
   inline $class_name$param_types name($param_types_and_names) {\
     return $class_name$param_types($params);\
   }\$template
   template <typename arg_type>\
   bool $class_name$param_types::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg, \
+      GTEST_REFERENCE_TO_CONST_(arg_type) arg,\
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 ]]
