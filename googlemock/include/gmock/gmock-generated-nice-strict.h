@@ -71,328 +71,344 @@
 
 namespace testing {
 
-namespace internal {
-
-// NiceMockBase serves as a mix-in to establish the "uninteresting call"
-// behavior for NiceMock on construction. It accomplishes this via CRTP to get
-// access to the derived MockClass.
 template <class MockClass>
-class NiceMockBase {
- protected:
-  NiceMockBase();
-
-  ~NiceMockBase();
-};
-
-}  // namespace internal
-
-template <class MockClass>
-class NiceMock : public MockClass, public internal::NiceMockBase<MockClass> {
+class NiceMock : public MockClass {
  public:
-  NiceMock() : MockClass() {}
+  NiceMock() : MockClass() {
+    ::testing::Mock::AllowUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
 #if GTEST_LANG_CXX11
-  // Ideally, we would inherit base class's constructors through a using
-  // declaration, which would preserve their visibility. However, many existing
-  // tests rely on the fact that current implementation reexports protected
-  // constructors as public. These tests would need to be cleaned up first.
-
   // Single argument constructor is special-cased so that it can be
   // made explicit.
   template <typename A>
-  explicit NiceMock(A&& arg) : MockClass(std::forward<A>(arg)) {}
+  explicit NiceMock(A&& arg) : MockClass(std::forward<A>(arg)) {
+    ::testing::Mock::AllowUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename... An>
   NiceMock(A1&& arg1, A2&& arg2, An&&... args)
       : MockClass(std::forward<A1>(arg1), std::forward<A2>(arg2),
-                  std::forward<An>(args)...) {}
+                  std::forward<An>(args)...) {
+    ::testing::Mock::AllowUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 #else
   // C++98 doesn't have variadic templates, so we have to define one
   // for each arity.
   template <typename A1>
-  explicit NiceMock(const A1& a1) : MockClass(a1) {}
+  explicit NiceMock(const A1& a1) : MockClass(a1) {
+    ::testing::Mock::AllowUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
   template <typename A1, typename A2>
-  NiceMock(const A1& a1, const A2& a2) : MockClass(a1, a2) {}
+  NiceMock(const A1& a1, const A2& a2) : MockClass(a1, a2) {
+    ::testing::Mock::AllowUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3>
-  NiceMock(const A1& a1, const A2& a2, const A3& a3) : MockClass(a1, a2, a3) {}
+  NiceMock(const A1& a1, const A2& a2, const A3& a3) : MockClass(a1, a2, a3) {
+    ::testing::Mock::AllowUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3, typename A4>
   NiceMock(const A1& a1, const A2& a2, const A3& a3,
-      const A4& a4) : MockClass(a1, a2, a3, a4) {}
+      const A4& a4) : MockClass(a1, a2, a3, a4) {
+    ::testing::Mock::AllowUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3, typename A4, typename A5>
   NiceMock(const A1& a1, const A2& a2, const A3& a3, const A4& a4,
-      const A5& a5) : MockClass(a1, a2, a3, a4, a5) {}
+      const A5& a5) : MockClass(a1, a2, a3, a4, a5) {
+    ::testing::Mock::AllowUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3, typename A4, typename A5,
       typename A6>
   NiceMock(const A1& a1, const A2& a2, const A3& a3, const A4& a4,
-      const A5& a5, const A6& a6) : MockClass(a1, a2, a3, a4, a5, a6) {}
+      const A5& a5, const A6& a6) : MockClass(a1, a2, a3, a4, a5, a6) {
+    ::testing::Mock::AllowUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3, typename A4, typename A5,
       typename A6, typename A7>
   NiceMock(const A1& a1, const A2& a2, const A3& a3, const A4& a4,
       const A5& a5, const A6& a6, const A7& a7) : MockClass(a1, a2, a3, a4, a5,
-      a6, a7) {}
+      a6, a7) {
+    ::testing::Mock::AllowUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3, typename A4, typename A5,
       typename A6, typename A7, typename A8>
   NiceMock(const A1& a1, const A2& a2, const A3& a3, const A4& a4,
       const A5& a5, const A6& a6, const A7& a7, const A8& a8) : MockClass(a1,
-      a2, a3, a4, a5, a6, a7, a8) {}
+      a2, a3, a4, a5, a6, a7, a8) {
+    ::testing::Mock::AllowUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3, typename A4, typename A5,
       typename A6, typename A7, typename A8, typename A9>
   NiceMock(const A1& a1, const A2& a2, const A3& a3, const A4& a4,
       const A5& a5, const A6& a6, const A7& a7, const A8& a8,
-      const A9& a9) : MockClass(a1, a2, a3, a4, a5, a6, a7, a8, a9) {}
+      const A9& a9) : MockClass(a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+    ::testing::Mock::AllowUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3, typename A4, typename A5,
       typename A6, typename A7, typename A8, typename A9, typename A10>
   NiceMock(const A1& a1, const A2& a2, const A3& a3, const A4& a4,
       const A5& a5, const A6& a6, const A7& a7, const A8& a8, const A9& a9,
-      const A10& a10) : MockClass(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) {}
+      const A10& a10) : MockClass(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) {
+    ::testing::Mock::AllowUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
 #endif  // GTEST_LANG_CXX11
+
+  ~NiceMock() {
+    ::testing::Mock::UnregisterCallReaction(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(NiceMock);
 };
 
-namespace internal {
-
-template <typename MockClass>
-NiceMockBase<MockClass>::NiceMockBase() {
-  ::testing::Mock::AllowUninterestingCalls(
-      internal::ImplicitCast_<MockClass*>(
-          static_cast<NiceMock<MockClass> *>(this)));
-}
-
-template <typename MockClass>
-NiceMockBase<MockClass>::~NiceMockBase() {
-  ::testing::Mock::UnregisterCallReaction(
-      internal::ImplicitCast_<MockClass*>(
-          static_cast<NiceMock<MockClass>*>(this)));
-}
-
-}  // namespace internal
-
-namespace internal {
-
-// NaggyMockBase serves as a mix-in to establish the "uninteresting call"
-// behavior for NaggyMock on construction. It accomplishes this via CRTP to get
-// access to the derived MockClass.
 template <class MockClass>
-class NaggyMockBase {
- protected:
-  NaggyMockBase();
-
-  ~NaggyMockBase();
-};
-
-}  // namespace internal
-
-template <class MockClass>
-class NaggyMock : public MockClass, public internal::NaggyMockBase<MockClass> {
+class NaggyMock : public MockClass {
  public:
-  NaggyMock() : MockClass() {}
+  NaggyMock() : MockClass() {
+    ::testing::Mock::WarnUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
 #if GTEST_LANG_CXX11
-  // Ideally, we would inherit base class's constructors through a using
-  // declaration, which would preserve their visibility. However, many existing
-  // tests rely on the fact that current implementation reexports protected
-  // constructors as public. These tests would need to be cleaned up first.
-
   // Single argument constructor is special-cased so that it can be
   // made explicit.
   template <typename A>
-  explicit NaggyMock(A&& arg) : MockClass(std::forward<A>(arg)) {}
+  explicit NaggyMock(A&& arg) : MockClass(std::forward<A>(arg)) {
+    ::testing::Mock::WarnUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename... An>
   NaggyMock(A1&& arg1, A2&& arg2, An&&... args)
       : MockClass(std::forward<A1>(arg1), std::forward<A2>(arg2),
-                  std::forward<An>(args)...) {}
+                  std::forward<An>(args)...) {
+    ::testing::Mock::WarnUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 #else
   // C++98 doesn't have variadic templates, so we have to define one
   // for each arity.
   template <typename A1>
-  explicit NaggyMock(const A1& a1) : MockClass(a1) {}
+  explicit NaggyMock(const A1& a1) : MockClass(a1) {
+    ::testing::Mock::WarnUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
   template <typename A1, typename A2>
-  NaggyMock(const A1& a1, const A2& a2) : MockClass(a1, a2) {}
+  NaggyMock(const A1& a1, const A2& a2) : MockClass(a1, a2) {
+    ::testing::Mock::WarnUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3>
-  NaggyMock(const A1& a1, const A2& a2, const A3& a3) : MockClass(a1, a2, a3) {}
+  NaggyMock(const A1& a1, const A2& a2, const A3& a3) : MockClass(a1, a2, a3) {
+    ::testing::Mock::WarnUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3, typename A4>
   NaggyMock(const A1& a1, const A2& a2, const A3& a3,
-      const A4& a4) : MockClass(a1, a2, a3, a4) {}
+      const A4& a4) : MockClass(a1, a2, a3, a4) {
+    ::testing::Mock::WarnUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3, typename A4, typename A5>
   NaggyMock(const A1& a1, const A2& a2, const A3& a3, const A4& a4,
-      const A5& a5) : MockClass(a1, a2, a3, a4, a5) {}
+      const A5& a5) : MockClass(a1, a2, a3, a4, a5) {
+    ::testing::Mock::WarnUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3, typename A4, typename A5,
       typename A6>
   NaggyMock(const A1& a1, const A2& a2, const A3& a3, const A4& a4,
-      const A5& a5, const A6& a6) : MockClass(a1, a2, a3, a4, a5, a6) {}
+      const A5& a5, const A6& a6) : MockClass(a1, a2, a3, a4, a5, a6) {
+    ::testing::Mock::WarnUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3, typename A4, typename A5,
       typename A6, typename A7>
   NaggyMock(const A1& a1, const A2& a2, const A3& a3, const A4& a4,
       const A5& a5, const A6& a6, const A7& a7) : MockClass(a1, a2, a3, a4, a5,
-      a6, a7) {}
+      a6, a7) {
+    ::testing::Mock::WarnUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3, typename A4, typename A5,
       typename A6, typename A7, typename A8>
   NaggyMock(const A1& a1, const A2& a2, const A3& a3, const A4& a4,
       const A5& a5, const A6& a6, const A7& a7, const A8& a8) : MockClass(a1,
-      a2, a3, a4, a5, a6, a7, a8) {}
+      a2, a3, a4, a5, a6, a7, a8) {
+    ::testing::Mock::WarnUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3, typename A4, typename A5,
       typename A6, typename A7, typename A8, typename A9>
   NaggyMock(const A1& a1, const A2& a2, const A3& a3, const A4& a4,
       const A5& a5, const A6& a6, const A7& a7, const A8& a8,
-      const A9& a9) : MockClass(a1, a2, a3, a4, a5, a6, a7, a8, a9) {}
+      const A9& a9) : MockClass(a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+    ::testing::Mock::WarnUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3, typename A4, typename A5,
       typename A6, typename A7, typename A8, typename A9, typename A10>
   NaggyMock(const A1& a1, const A2& a2, const A3& a3, const A4& a4,
       const A5& a5, const A6& a6, const A7& a7, const A8& a8, const A9& a9,
-      const A10& a10) : MockClass(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) {}
+      const A10& a10) : MockClass(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) {
+    ::testing::Mock::WarnUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
 #endif  // GTEST_LANG_CXX11
+
+  ~NaggyMock() {
+    ::testing::Mock::UnregisterCallReaction(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(NaggyMock);
 };
 
-namespace internal {
-
-template <typename MockClass>
-NaggyMockBase<MockClass>::NaggyMockBase() {
-  ::testing::Mock::WarnUninterestingCalls(
-      internal::ImplicitCast_<MockClass*>(
-          static_cast<NaggyMock<MockClass> *>(this)));
-}
-
-template <typename MockClass>
-NaggyMockBase<MockClass>::~NaggyMockBase() {
-  ::testing::Mock::UnregisterCallReaction(
-      internal::ImplicitCast_<MockClass*>(
-          static_cast<NaggyMock<MockClass>*>(this)));
-}
-
-}  // namespace internal
-
-namespace internal {
-
-// StrictMockBase serves as a mix-in to establish the "uninteresting call"
-// behavior for StrictMock on construction. It accomplishes this via CRTP to get
-// access to the derived MockClass.
 template <class MockClass>
-class StrictMockBase {
- protected:
-  StrictMockBase();
-
-  ~StrictMockBase();
-};
-
-}  // namespace internal
-
-template <class MockClass>
-class StrictMock : public MockClass,
-    public internal::StrictMockBase<MockClass> {
+class StrictMock : public MockClass {
  public:
-  StrictMock() : MockClass() {}
+  StrictMock() : MockClass() {
+    ::testing::Mock::FailUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
 #if GTEST_LANG_CXX11
-  // Ideally, we would inherit base class's constructors through a using
-  // declaration, which would preserve their visibility. However, many existing
-  // tests rely on the fact that current implementation reexports protected
-  // constructors as public. These tests would need to be cleaned up first.
-
   // Single argument constructor is special-cased so that it can be
   // made explicit.
   template <typename A>
-  explicit StrictMock(A&& arg) : MockClass(std::forward<A>(arg)) {}
+  explicit StrictMock(A&& arg) : MockClass(std::forward<A>(arg)) {
+    ::testing::Mock::FailUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename... An>
   StrictMock(A1&& arg1, A2&& arg2, An&&... args)
       : MockClass(std::forward<A1>(arg1), std::forward<A2>(arg2),
-                  std::forward<An>(args)...) {}
+                  std::forward<An>(args)...) {
+    ::testing::Mock::FailUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 #else
   // C++98 doesn't have variadic templates, so we have to define one
   // for each arity.
   template <typename A1>
-  explicit StrictMock(const A1& a1) : MockClass(a1) {}
+  explicit StrictMock(const A1& a1) : MockClass(a1) {
+    ::testing::Mock::FailUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
   template <typename A1, typename A2>
-  StrictMock(const A1& a1, const A2& a2) : MockClass(a1, a2) {}
+  StrictMock(const A1& a1, const A2& a2) : MockClass(a1, a2) {
+    ::testing::Mock::FailUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3>
-  StrictMock(const A1& a1, const A2& a2, const A3& a3) : MockClass(a1, a2,
-      a3) {}
+  StrictMock(const A1& a1, const A2& a2, const A3& a3) : MockClass(a1, a2, a3) {
+    ::testing::Mock::FailUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3, typename A4>
   StrictMock(const A1& a1, const A2& a2, const A3& a3,
-      const A4& a4) : MockClass(a1, a2, a3, a4) {}
+      const A4& a4) : MockClass(a1, a2, a3, a4) {
+    ::testing::Mock::FailUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3, typename A4, typename A5>
   StrictMock(const A1& a1, const A2& a2, const A3& a3, const A4& a4,
-      const A5& a5) : MockClass(a1, a2, a3, a4, a5) {}
+      const A5& a5) : MockClass(a1, a2, a3, a4, a5) {
+    ::testing::Mock::FailUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3, typename A4, typename A5,
       typename A6>
   StrictMock(const A1& a1, const A2& a2, const A3& a3, const A4& a4,
-      const A5& a5, const A6& a6) : MockClass(a1, a2, a3, a4, a5, a6) {}
+      const A5& a5, const A6& a6) : MockClass(a1, a2, a3, a4, a5, a6) {
+    ::testing::Mock::FailUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3, typename A4, typename A5,
       typename A6, typename A7>
   StrictMock(const A1& a1, const A2& a2, const A3& a3, const A4& a4,
       const A5& a5, const A6& a6, const A7& a7) : MockClass(a1, a2, a3, a4, a5,
-      a6, a7) {}
+      a6, a7) {
+    ::testing::Mock::FailUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3, typename A4, typename A5,
       typename A6, typename A7, typename A8>
   StrictMock(const A1& a1, const A2& a2, const A3& a3, const A4& a4,
       const A5& a5, const A6& a6, const A7& a7, const A8& a8) : MockClass(a1,
-      a2, a3, a4, a5, a6, a7, a8) {}
+      a2, a3, a4, a5, a6, a7, a8) {
+    ::testing::Mock::FailUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3, typename A4, typename A5,
       typename A6, typename A7, typename A8, typename A9>
   StrictMock(const A1& a1, const A2& a2, const A3& a3, const A4& a4,
       const A5& a5, const A6& a6, const A7& a7, const A8& a8,
-      const A9& a9) : MockClass(a1, a2, a3, a4, a5, a6, a7, a8, a9) {}
+      const A9& a9) : MockClass(a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+    ::testing::Mock::FailUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename A3, typename A4, typename A5,
       typename A6, typename A7, typename A8, typename A9, typename A10>
   StrictMock(const A1& a1, const A2& a2, const A3& a3, const A4& a4,
       const A5& a5, const A6& a6, const A7& a7, const A8& a8, const A9& a9,
-      const A10& a10) : MockClass(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) {}
+      const A10& a10) : MockClass(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) {
+    ::testing::Mock::FailUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
 #endif  // GTEST_LANG_CXX11
+
+  ~StrictMock() {
+    ::testing::Mock::UnregisterCallReaction(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(StrictMock);
 };
-
-namespace internal {
-
-template <typename MockClass>
-StrictMockBase<MockClass>::StrictMockBase() {
-  ::testing::Mock::FailUninterestingCalls(
-      internal::ImplicitCast_<MockClass*>(
-          static_cast<StrictMock<MockClass> *>(this)));
-}
-
-template <typename MockClass>
-StrictMockBase<MockClass>::~StrictMockBase() {
-  ::testing::Mock::UnregisterCallReaction(
-      internal::ImplicitCast_<MockClass*>(
-          static_cast<StrictMock<MockClass>*>(this)));
-}
-
-}  // namespace internal
 
 // The following specializations catch some (relatively more common)
 // user errors of nesting nice and strict mocks.  They do NOT catch
