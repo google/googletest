@@ -80,6 +80,11 @@ class NiceMock : public MockClass {
   }
 
 #if GTEST_LANG_CXX11
+  // Ideally, we would inherit base class's constructors through a using
+  // declaration, which would preserve their visibility. However, many existing
+  // tests rely on the fact that current implementation reexports protected
+  // constructors as public. These tests would need to be cleaned up first.
+
   // Single argument constructor is special-cased so that it can be
   // made explicit.
   template <typename A>
@@ -193,6 +198,11 @@ class NaggyMock : public MockClass {
   }
 
 #if GTEST_LANG_CXX11
+  // Ideally, we would inherit base class's constructors through a using
+  // declaration, which would preserve their visibility. However, many existing
+  // tests rely on the fact that current implementation reexports protected
+  // constructors as public. These tests would need to be cleaned up first.
+
   // Single argument constructor is special-cased so that it can be
   // made explicit.
   template <typename A>
@@ -306,6 +316,11 @@ class StrictMock : public MockClass {
   }
 
 #if GTEST_LANG_CXX11
+  // Ideally, we would inherit base class's constructors through a using
+  // declaration, which would preserve their visibility. However, many existing
+  // tests rely on the fact that current implementation reexports protected
+  // constructors as public. These tests would need to be cleaned up first.
+
   // Single argument constructor is special-cased so that it can be
   // made explicit.
   template <typename A>
