@@ -259,6 +259,13 @@ TEST(NiceMockTest, NonDefaultConstructor10) {
   nice_bar.That(5, true);
 }
 
+TEST(NiceMockTest, AllowLeak) {
+  NiceMock<MockFoo>* leaked = new NiceMock<MockFoo>;
+  Mock::AllowLeak(leaked);
+  EXPECT_CALL(*leaked, DoThis());
+  leaked->DoThis();
+}
+
 #if !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 // Tests that NiceMock<Mock> compiles where Mock is a user-defined
 // class (as opposed to ::testing::Mock).  We had to work around an
@@ -352,6 +359,13 @@ TEST(NaggyMockTest, NonDefaultConstructor10) {
   naggy_bar.That(5, true);
 }
 
+TEST(NaggyMockTest, AllowLeak) {
+  NaggyMock<MockFoo>* leaked = new NaggyMock<MockFoo>;
+  Mock::AllowLeak(leaked);
+  EXPECT_CALL(*leaked, DoThis());
+  leaked->DoThis();
+}
+
 #if !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 // Tests that NaggyMock<Mock> compiles where Mock is a user-defined
 // class (as opposed to ::testing::Mock).  We had to work around an
@@ -424,6 +438,13 @@ TEST(StrictMockTest, NonDefaultConstructor10) {
 
   EXPECT_NONFATAL_FAILURE(strict_bar.That(5, true),
                           "Uninteresting mock function call");
+}
+
+TEST(StrictMockTest, AllowLeak) {
+  StrictMock<MockFoo>* leaked = new StrictMock<MockFoo>;
+  Mock::AllowLeak(leaked);
+  EXPECT_CALL(*leaked, DoThis());
+  leaked->DoThis();
 }
 
 #if !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE

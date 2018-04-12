@@ -103,11 +103,6 @@ class ExpectationTester;
 // Base class for function mockers.
 template <typename F> class FunctionMockerBase;
 
-// Uninteresting call behavior mixins.
-template <typename M> class NiceMockBase;
-template <typename M> class NaggyMockBase;
-template <typename M> class StrictMockBase;
-
 // Protects the mock object registry (in class Mock), all function
 // mockers, and all expectations.
 //
@@ -408,13 +403,13 @@ class GTEST_API_ Mock {
   friend class internal::FunctionMockerBase;
 
   template <typename M>
-  friend class internal::NiceMockBase;
+  friend class NiceMock;
 
   template <typename M>
-  friend class internal::NaggyMockBase;
+  friend class NaggyMock;
 
   template <typename M>
-  friend class internal::StrictMockBase;
+  friend class StrictMock;
 
   // Tells Google Mock to allow uninteresting calls on the given mock
   // object.
