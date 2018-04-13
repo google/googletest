@@ -1539,10 +1539,9 @@ TEST(FunctorActionTest, TypeConversion) {
 
 TEST(FunctorActionTest, UnusedArguments) {
   // Verify that users can ignore uninteresting arguments.
-  Action<int(int, double y, const int&)> a =
+  Action<int(int, double y, double z)> a =
       [](int i, Unused, Unused) { return 2 * i; };
-  int nine = 9;
-  tuple<int, double, const int&> dummy = make_tuple(3, 7.3, nine);
+  tuple<int, double, double> dummy = make_tuple(3, 7.3, 9);
   EXPECT_EQ(6, a.Perform(dummy));
 }
 
