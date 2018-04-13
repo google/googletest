@@ -74,6 +74,7 @@ using testing::ReturnRef;
 using testing::ReturnRefOfCopy;
 using testing::SetArgPointee;
 using testing::SetArgumentPointee;
+using testing::Unused;
 using testing::_;
 using testing::get;
 using testing::internal::BuiltInDefaultValue;
