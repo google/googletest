@@ -1539,9 +1539,10 @@ TEST(FunctorActionTest, TypeConversion) {
 
 TEST(FunctorActionTest, UnusedArguments) {
   // Verify that users can ignore uninteresting arguments.
-  Action<int(int, std::unique_ptr<int>, const int&)> a =
+  Action<int(int, double y, const int&)> a =
       [](int i, Unused, Unused) { return 2 * i; };
-  EXPECT_EQ(6, a.Perform(make_tuple(3, UniqueInt(7), 9)));
+  tuple<int, double, const int&> dummy = make_tuple(3, 7.3, 9);
+  EXPECT_EQ(6, a.Perform(dummy));
 }
 
 // Test that basic built-in actions work with move-only arguments.
