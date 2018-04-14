@@ -2657,6 +2657,22 @@ TEST(VerifyAndClearTest,
   // should be no deadlock.
 }
 
+TEST(VerifyAndClearTest, MocksCanBeMoved) {
+  MockA* mock1 = new MockA();
+  void* mock1_buffer = static_cast<void*>(mock1);
+
+  void* mock2_buffer = malloc(sizeof(MockA));
+  memcpy(mock2_buffer, mock1_buffer, sizeof(MockA));
+  MockA* mock2 = static_cast<MockA*>(mock2_buffer);
+
+  // This test assumes that static_casting between void* and MockA* works.
+  ASSERT_EQ(mock1, new (mock1_buffer) MockA());
+
+  EXPECT_CALL(*mock2, DoA(_)).Times(0);
+  delete mock1;
+  delete mock2;
+}
+
 // Tests that a mock function's action can call a mock function
 // (either the same function or a different one) either as an explicit
 // action or as a default action without causing a dead lock.  It
