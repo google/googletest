@@ -1541,7 +1541,7 @@ TEST(FunctorActionTest, UnusedArguments) {
   // Verify that users can ignore uninteresting arguments.
   Action<int(int, double y, double z)> a =
       [](int i, Unused, Unused) { return 2 * i; };
-  tuple<int, double, double> dummy = make_tuple(3, 7.3, 9);
+  tuple<int, double, double> dummy = make_tuple(3, 7.3, 9.44);
   EXPECT_EQ(6, a.Perform(dummy));
 }
 
