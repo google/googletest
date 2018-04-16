@@ -5211,6 +5211,12 @@ inline internal::AnyOfMatcher<Args...> AnyOf(const Args&... matchers) {
   return internal::AnyOfMatcher<Args...>(matchers...);
 }
 
+template <typename... Args>
+inline internal::UnorderedElementsAreMatcher<Args...>
+UnorderedElementsAreMatcher(const Args&... matchers) {
+  return internal::UnorderedElementsAreMatcher<Args...>(matchers...);
+}
+
 #endif  // GTEST_LANG_CXX11
 
 // AllArgs(m) is a synonym of m.  This is useful in
