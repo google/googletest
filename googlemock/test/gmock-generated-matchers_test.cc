@@ -35,6 +35,7 @@
 
 #include <list>
 #include <map>
+#include <memory>
 #include <set>
 #include <sstream>
 #include <string>
@@ -57,6 +58,8 @@ using testing::get;
 using testing::make_tuple;
 using testing::tuple;
 using testing::_;
+using testing::AllOf;
+using testing::AnyOf;
 using testing::Args;
 using testing::Contains;
 using testing::ElementsAre;
@@ -120,7 +123,7 @@ TEST(ArgsTest, AcceptsOneTemplateArg) {
 }
 
 TEST(ArgsTest, AcceptsTwoTemplateArgs) {
-  const tuple<short, int, long> t(static_cast<short>(4), 5, 6L);  // NOLINT
+  const tuple<short, int, long> t(4, 5, 6L);  // NOLINT
 
   EXPECT_THAT(t, (Args<0, 1>(Lt())));
   EXPECT_THAT(t, (Args<1, 2>(Lt())));
@@ -128,13 +131,13 @@ TEST(ArgsTest, AcceptsTwoTemplateArgs) {
 }
 
 TEST(ArgsTest, AcceptsRepeatedTemplateArgs) {
-  const tuple<short, int, long> t(static_cast<short>(4), 5, 6L);  // NOLINT
+  const tuple<short, int, long> t(4, 5, 6L);  // NOLINT
   EXPECT_THAT(t, (Args<0, 0>(Eq())));
   EXPECT_THAT(t, Not(Args<1, 1>(Ne())));
 }
 
 TEST(ArgsTest, AcceptsDecreasingTemplateArgs) {
-  const tuple<short, int, long> t(static_cast<short>(4), 5, 6L);  // NOLINT
+  const tuple<short, int, long> t(4, 5, 6L);  // NOLINT
   EXPECT_THAT(t, (Args<2, 0>(Gt())));
   EXPECT_THAT(t, Not(Args<2, 1>(Lt())));
 }
@@ -159,7 +162,7 @@ TEST(ArgsTest, AcceptsMoreTemplateArgsThanArityOfOriginalTuple) {
 }
 
 TEST(ArgsTest, CanBeNested) {
-  const tuple<short, int, long, int> t(static_cast<short>(4), 5, 6L, 6);  // NOLINT
+  const tuple<short, int, long, int> t(4, 5, 6L, 6);  // NOLINT
   EXPECT_THAT(t, (Args<1, 2, 3>(Args<1, 2>(Eq()))));
   EXPECT_THAT(t, (Args<0, 1, 3>(Args<0, 2>(Lt()))));
 }
@@ -1282,5 +1285,45 @@ TEST(AnyOfTest, DoesNotCallAnyOfUnqualified) {
 #ifdef _MSC_VER
 # pragma warning(pop)
 #endif
+
+#if GTEST_LANG_CXX11
+
+TEST(AllOfTest, WorksOnMoveOnlyType) {
+  std::unique_ptr<int> p(new int(3));
+  EXPECT_THAT(p, AllOf(Pointee(Eq(3)), Pointee(Gt(0)), Pointee(Lt(5))));
+  EXPECT_THAT(p, Not(AllOf(Pointee(Eq(3)), Pointee(Gt(0)), Pointee(Lt(3)))));
+}
+
+TEST(AnyOfTest, WorksOnMoveOnlyType) {
+  std::unique_ptr<int> p(new int(3));
+  EXPECT_THAT(p, AnyOf(Pointee(Eq(5)), Pointee(Lt(0)), Pointee(Lt(5))));
+  EXPECT_THAT(p, Not(AnyOf(Pointee(Eq(5)), Pointee(Lt(0)), Pointee(Gt(5)))));
+}
+
+MATCHER(IsNotNull, "") {
+  return arg != nullptr;
+}
+
+// Verifies that a matcher defined using MATCHER() can work on
+// move-only types.
+TEST(MatcherMacroTest, WorksOnMoveOnlyType) {
+  std::unique_ptr<int> p(new int(3));
+  EXPECT_THAT(p, IsNotNull());
+  EXPECT_THAT(std::unique_ptr<int>(), Not(IsNotNull()));
+}
+
+MATCHER_P(UniquePointee, pointee, "") {
+  return *arg == pointee;
+}
+
+// Verifies that a matcher defined using MATCHER_P*() can work on
+// move-only types.
+TEST(MatcherPMacroTest, WorksOnMoveOnlyType) {
+  std::unique_ptr<int> p(new int(3));
+  EXPECT_THAT(p, UniquePointee(3));
+  EXPECT_THAT(p, Not(UniquePointee(2)));
+}
+
+#endif  // GTEST_LASNG_CXX11
 
 }  // namespace
