@@ -2744,44 +2744,20 @@ TEST(AnyOfTest, VariadicMatchesWhenAnyMatches) {
 
 // Tests the variadic version of the ElementsAreMatcher
 TEST(ElementsAreTest, HugeMatcher) {
-  vector<int> test_vector;
-  test_vector.push_back(1);
-  test_vector.push_back(2);
-  test_vector.push_back(3);
-  test_vector.push_back(4);
-  test_vector.push_back(5);
-  test_vector.push_back(6);
-  test_vector.push_back(7);
-  test_vector.push_back(8);
-  test_vector.push_back(9);
-  test_vector.push_back(10);
-  test_vector.push_back(11);
-  test_vector.push_back(12);
+  vector<int> test_vector{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
   EXPECT_THAT(test_vector,
               ElementsAre(Eq(1), Eq(2), Lt(13), Eq(4), Eq(5), Eq(6), Eq(7),
-                          Eq(8), Eq(9), Eq(10), Gt(1), Eq(12) ));
+                          Eq(8), Eq(9), Eq(10), Gt(1), Eq(12)));
 }
 
 // Tests the variadic version of the UnorderedElementsAreMatcher
 TEST(ElementsAreTest, HugeMatcherUnordered) {
-  vector<int> test_vector;
-  test_vector.push_back(1);
-  test_vector.push_back(2);
-  test_vector.push_back(3);
-  test_vector.push_back(4);
-  test_vector.push_back(5);
-  test_vector.push_back(6);
-  test_vector.push_back(7);
-  test_vector.push_back(8);
-  test_vector.push_back(9);
-  test_vector.push_back(10);
-  test_vector.push_back(11);
-  test_vector.push_back(12);
+  vector<int> test_vector{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
-  EXPECT_THAT(test_vector,
-              UnorderedElementsAre(Eq(1), Eq(2), Eq(3), Eq(4), Eq(5), Eq(6), Eq(7),
-                          Eq(8), Eq(9), Eq(10), Eq(11), Ne(122) ));
+  EXPECT_THAT(test_vector, UnorderedElementsAre(
+                               Eq(1), Eq(2), Eq(3), Eq(4), Eq(5), Eq(6), Eq(7),
+                               Eq(8), Eq(9), Eq(10), Eq(11), Ne(122)));
 }
 
 #endif  // GTEST_LANG_CXX11
