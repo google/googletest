@@ -902,6 +902,8 @@ TEST(SafeMatcherCastTest, FromSameType) {
   EXPECT_FALSE(m2.Matches(1));
 }
 
+#if !defined _MSC_VER
+
 namespace convertible_from_any {
 TEST(SafeMatcherCastTest, ConversionConstructorIsUsed) {
   Matcher<ConvertibleFromAny> m = SafeMatcherCast<ConvertibleFromAny>(1);
@@ -916,6 +918,8 @@ TEST(SafeMatcherCastTest, FromConvertibleFromAny) {
   EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
 }
 }  // namespace convertible_from_any
+
+#endif  // !defined _MSC_VER
 
 TEST(SafeMatcherCastTest, ValueIsNotCopied) {
   int n = 42;
