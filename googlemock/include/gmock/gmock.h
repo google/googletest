@@ -33,6 +33,8 @@
 //
 // This is the main header file a user should include.
 
+// DO NOT SUBMIT: hello world
+
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_H_
 
