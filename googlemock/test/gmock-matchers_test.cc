@@ -2752,6 +2752,15 @@ TEST(ElementsAreTest, HugeMatcher) {
 }
 
 // Tests the variadic version of the UnorderedElementsAreMatcher
+TEST(ElementsAreTest, HugeMatcherStr) {
+  vector<string> test_vector{
+      "literal_string", "", "", "", "", "", "", "", "", "", "", ""};
+
+  EXPECT_THAT(test_vector, UnorderedElementsAre("literal_string", _, _, _, _, _,
+                                                _, _, _, _, _, _));
+}
+
+// Tests the variadic version of the UnorderedElementsAreMatcher
 TEST(ElementsAreTest, HugeMatcherUnordered) {
   vector<int> test_vector{2, 1, 8, 5, 4, 6, 7, 3, 9, 12, 11, 10};
 
