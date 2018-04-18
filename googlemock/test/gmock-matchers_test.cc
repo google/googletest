@@ -35,7 +35,7 @@
 
 // Disable MSVC2014 warning for std::pair:
 // "decorated name length exceeded, name was truncated".
-ifdef _MSC_VER
+#ifdef _MSC_VER
 #if _MSC_VER < 1900
 #  pragma warning(push)
 #  pragma warning(disable:4503)
