@@ -83,25 +83,13 @@ $var method=[[$if kind==0 [[AllowUninterestingCalls]]
              $elif kind==1 [[WarnUninterestingCalls]]
              $else [[FailUninterestingCalls]]]]
 
-namespace internal {
-
-// $clazz[[]]Base serves as a mix-in to establish the "uninteresting call"
-// behavior for $clazz on construction. It accomplishes this via CRTP to get
-// access to the derived MockClass.
 template <class MockClass>
-class $clazz[[]]Base {
- protected:
-  $clazz[[]]Base();
-
-  ~$clazz[[]]Base();
-};
-
-}  // namespace internal
-
-template <class MockClass>
-class $clazz : public MockClass, public internal::$clazz[[]]Base<MockClass> {
+class $clazz : public MockClass {
  public:
-  $clazz() : MockClass() {}
+  $clazz() : MockClass() {
+    ::testing::Mock::$method(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
 #if GTEST_LANG_CXX11
   // Ideally, we would inherit base class's constructors through a using
@@ -112,49 +100,48 @@ class $clazz : public MockClass, public internal::$clazz[[]]Base<MockClass> {
   // Single argument constructor is special-cased so that it can be
   // made explicit.
   template <typename A>
-  explicit $clazz(A&& arg) : MockClass(std::forward<A>(arg)) {}
+  explicit $clazz(A&& arg) : MockClass(std::forward<A>(arg)) {
+    ::testing::Mock::$method(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
   template <typename A1, typename A2, typename... An>
   $clazz(A1&& arg1, A2&& arg2, An&&... args)
       : MockClass(std::forward<A1>(arg1), std::forward<A2>(arg2),
-                  std::forward<An>(args)...) {}
+                  std::forward<An>(args)...) {
+    ::testing::Mock::$method(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 #else
   // C++98 doesn't have variadic templates, so we have to define one
   // for each arity.
   template <typename A1>
-  explicit $clazz(const A1& a1) : MockClass(a1) {}
+  explicit $clazz(const A1& a1) : MockClass(a1) {
+    ::testing::Mock::$method(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
 $range i 2..n
 $for i [[
 $range j 1..i
   template <$for j, [[typename A$j]]>
-  $clazz($for j, [[const A$j& a$j]]) : MockClass($for j, [[a$j]]) {}
+  $clazz($for j, [[const A$j& a$j]]) : MockClass($for j, [[a$j]]) {
+    ::testing::Mock::$method(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
 
 
 ]]
 #endif  // GTEST_LANG_CXX11
 
+  ~$clazz() {
+    ::testing::Mock::UnregisterCallReaction(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
+
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_($clazz);
 };
-
-namespace internal {
-
-template <typename MockClass>
-$clazz[[]]Base<MockClass>::$clazz[[]]Base() {
-  ::testing::Mock::$method(
-      internal::ImplicitCast_<MockClass*>(
-          static_cast<$clazz<MockClass> *>(this)));
-}
-
-template <typename MockClass>
-$clazz[[]]Base<MockClass>::~$clazz[[]]Base() {
-  ::testing::Mock::UnregisterCallReaction(
-      internal::ImplicitCast_<MockClass*>(
-          static_cast<$clazz<MockClass>*>(this)));
-}
-
-}  // namespace internal
 
 ]]
 
