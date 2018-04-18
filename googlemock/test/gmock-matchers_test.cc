@@ -33,6 +33,13 @@
 //
 // This file tests some commonly used argument matchers.
 
+// Disable MSVC2015 warning for std::pair:
+// "decorated name length exceeded, name was truncated".
+#if defined _MSC_VER
+# pragma warning(push)
+# pragma warning(disable:4503)
+#endif
+
 #include "gmock/gmock-matchers.h"
 #include "gmock/gmock-more-matchers.h"
 
@@ -57,13 +64,6 @@
 
 #if GTEST_HAS_STD_FORWARD_LIST_
 # include <forward_list>  // NOLINT
-#endif
-
-// Disable MSVC2015 warning for std::pair:
-// "decorated name length exceeded, name was truncated".
-#if defined _MSC_VER
-# pragma warning(push)
-# pragma warning(disable:4503)
 #endif
 
 #if GTEST_LANG_CXX11
