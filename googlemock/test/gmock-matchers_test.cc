@@ -33,11 +33,13 @@
 //
 // This file tests some commonly used argument matchers.
 
-// Disable MSVC2015 warning for std::pair:
+// Disable MSVC2014 warning for std::pair:
 // "decorated name length exceeded, name was truncated".
-#ifdef _MSC_VER
-# pragma warning(push)
-# pragma warning(disable:4503)
+ifdef _MSC_VER
+#if _MSC_VER < 1900
+#  pragma warning(push)
+#  pragma warning(disable:4503)
+#endif
 #endif
 
 #include "gmock/gmock-matchers.h"
@@ -6735,7 +6737,3 @@ TEST(NotTest, WorksOnMoveOnlyType) {
 
 }  // namespace gmock_matchers_test
 }  // namespace testing
-
-#ifdef _MSC_VER
-# pragma warning(pop)
-#endif
