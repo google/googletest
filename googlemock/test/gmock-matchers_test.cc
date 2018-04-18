@@ -61,7 +61,8 @@
 
 // Disable MSVC2015 warning for std::pair:
 // "decorated name length exceeded, name was truncated".
-#if defined(_MSC_VER) && (_MSC_VER == 1900)
+#if defined _MSC_VER
+# pragma warning(push)
 # pragma warning(disable:4503)
 #endif
 
@@ -2739,6 +2740,24 @@ TEST(AnyOfTest, VariadicMatchesWhenAnyMatches) {
                          21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
                          31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
                          41, 42, 43, 44, 45, 46, 47, 48, 49, 50));
+}
+
+// Tests the variadic version of the ElementsAreMatcher
+TEST(ElementsAreTest, HugeMatcher) {
+  vector<int> test_vector{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+
+  EXPECT_THAT(test_vector,
+              ElementsAre(Eq(1), Eq(2), Lt(13), Eq(4), Eq(5), Eq(6), Eq(7),
+                          Eq(8), Eq(9), Eq(10), Gt(1), Eq(12)));
+}
+
+// Tests the variadic version of the UnorderedElementsAreMatcher
+TEST(ElementsAreTest, HugeMatcherUnordered) {
+  vector<int> test_vector{2, 1, 8, 5, 4, 6, 7, 3, 9, 12, 11, 10};
+
+  EXPECT_THAT(test_vector, UnorderedElementsAre(
+                               Eq(2), Eq(1), Gt(7), Eq(5), Eq(4), Eq(6), Eq(7),
+                               Eq(3), Eq(9), Eq(12), Eq(11), Ne(122)));
 }
 
 #endif  // GTEST_LANG_CXX11
@@ -6656,7 +6675,7 @@ TEST(AnyWithTest, TestUseInContainers) {
                                    AnyWith<std::string>("merhaba"),
                                    AnyWith<std::string>("salut")}));
 }
-#endif //  GTEST_LANG_CXX11
+#endif  //  GTEST_LANG_CXX11
 TEST(AnyWithTest, TestCompare) {
   EXPECT_THAT(SampleAnyType(1), AnyWith<int>(Gt(0)));
 }
@@ -6694,3 +6713,8 @@ TEST(NotTest, WorksOnMoveOnlyType) {
 
 }  // namespace gmock_matchers_test
 }  // namespace testing
+
+#if defined_MSC_VER
+# pragma warning(pop)
+#endif
+
