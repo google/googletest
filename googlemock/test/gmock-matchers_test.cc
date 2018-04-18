@@ -749,6 +749,13 @@ TEST(MatcherCastTest, NonImplicitlyConstructibleTypeWithOperatorEq) {
   EXPECT_FALSE(m3.Matches(239));
 }
 
+// ConvertibleFromAny does not work with MSVC. resulting in
+// error C2440: 'initializing': cannot convert from 'Eq' to 'M'
+// No constructor could take the source type, or constructor overload
+// resolution was ambiguous
+
+#if !defined _MSC_VER
+
 // The below ConvertibleFromAny struct is implicitly constructible from anything
 // and when in the same namespace can interact with other tests. In particular,
 // if it is in the same namespace as other tests and one removes
@@ -788,6 +795,8 @@ TEST(MatcherCastTest, FromConvertibleFromAny) {
   EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
 }
 }  // namespace convertible_from_any
+
+#endif  // !defined _MSC_VER
 
 struct IntReferenceWrapper {
   IntReferenceWrapper(const int& a_value) : value(&a_value) {}
