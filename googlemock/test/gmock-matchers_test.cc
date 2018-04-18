@@ -2742,6 +2742,33 @@ TEST(AnyOfTest, VariadicMatchesWhenAnyMatches) {
                          41, 42, 43, 44, 45, 46, 47, 48, 49, 50));
 }
 
+// Tests the variadic version of the ElementsAreMatcher
+TEST(ElementsAreTest, HugeMatcher) {
+  vector<int> test_vector{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+
+  EXPECT_THAT(test_vector,
+              ElementsAre(Eq(1), Eq(2), Lt(13), Eq(4), Eq(5), Eq(6), Eq(7),
+                          Eq(8), Eq(9), Eq(10), Gt(1), Eq(12)));
+}
+
+// Tests the variadic version of the UnorderedElementsAreMatcher
+TEST(ElementsAreTest, HugeMatcherStr) {
+  vector<string> test_vector{
+      "literal_string", "", "", "", "", "", "", "", "", "", "", ""};
+
+  EXPECT_THAT(test_vector, UnorderedElementsAre("literal_string", _, _, _, _, _,
+                                                _, _, _, _, _, _));
+}
+
+// Tests the variadic version of the UnorderedElementsAreMatcher
+TEST(ElementsAreTest, HugeMatcherUnordered) {
+  vector<int> test_vector{2, 1, 8, 5, 4, 6, 7, 3, 9, 12, 11, 10};
+
+  EXPECT_THAT(test_vector, UnorderedElementsAre(
+                               Eq(2), Eq(1), Gt(7), Eq(5), Eq(4), Eq(6), Eq(7),
+                               Eq(3), Eq(9), Eq(12), Eq(11), Ne(122)));
+}
+
 #endif  // GTEST_LANG_CXX11
 
 // Tests that AnyOf(m1, ..., mn) describes itself properly.
