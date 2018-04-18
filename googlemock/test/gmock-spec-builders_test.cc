@@ -89,6 +89,7 @@ using testing::Mock;
 using testing::NaggyMock;
 using testing::Ne;
 using testing::Return;
+using testing::SaveArg;
 using testing::Sequence;
 using testing::SetArgPointee;
 using testing::internal::ExpectationTester;
@@ -2679,6 +2680,75 @@ TEST(SynchronizationTest, CanCallMockMethodInAction) {
   // which will in turn match the first EXPECT_CALL() and trigger a call to
   // c.NonVoidMethod() that was specified by the ON_CALL() since the first
   // EXPECT_CALL() did not specify an action.
+}
+
+TEST(ParameterlessExpectationsTest, CanSetExpectationsWithoutMatchers) {
+  MockA a;
+  int do_a_arg0 = 0;
+  ON_CALL(a, DoA).WillByDefault(SaveArg<0>(&do_a_arg0));
+  int do_a_47_arg0 = 0;
+  ON_CALL(a, DoA(47)).WillByDefault(SaveArg<0>(&do_a_47_arg0));
+
+  a.DoA(17);
+  EXPECT_THAT(do_a_arg0, 17);
+  EXPECT_THAT(do_a_47_arg0, 0);
+  a.DoA(47);
+  EXPECT_THAT(do_a_arg0, 17);
+  EXPECT_THAT(do_a_47_arg0, 47);
+
+  ON_CALL(a, Binary).WillByDefault(Return(true));
+  ON_CALL(a, Binary(_, 14)).WillByDefault(Return(false));
+  EXPECT_THAT(a.Binary(14, 17), true);
+  EXPECT_THAT(a.Binary(17, 14), false);
+}
+
+TEST(ParameterlessExpectationsTest, CanSetExpectationsForOverloadedMethods) {
+  MockB b;
+  ON_CALL(b, DoB()).WillByDefault(Return(9));
+  ON_CALL(b, DoB(5)).WillByDefault(Return(11));
+
+  EXPECT_THAT(b.DoB(), 9);
+  EXPECT_THAT(b.DoB(1), 0);  // default value
+  EXPECT_THAT(b.DoB(5), 11);
+}
+
+struct MockWithConstMethods {
+ public:
+  MOCK_CONST_METHOD1(Foo, int(int));
+  MOCK_CONST_METHOD2(Bar, int(int, const char*));
+};
+
+TEST(ParameterlessExpectationsTest, CanSetExpectationsForConstMethods) {
+  MockWithConstMethods mock;
+  ON_CALL(mock, Foo).WillByDefault(Return(7));
+  ON_CALL(mock, Bar).WillByDefault(Return(33));
+
+  EXPECT_THAT(mock.Foo(17), 7);
+  EXPECT_THAT(mock.Bar(27, "purple"), 33);
+}
+
+class MockConstOverload {
+ public:
+  MOCK_METHOD1(Overloaded, int(int));
+  MOCK_CONST_METHOD1(Overloaded, int(int));
+};
+
+TEST(ParameterlessExpectationsTest,
+     CanSetExpectationsForConstOverloadedMethods) {
+  MockConstOverload mock;
+  ON_CALL(mock, Overloaded(_)).WillByDefault(Return(7));
+  ON_CALL(mock, Overloaded(5)).WillByDefault(Return(9));
+  ON_CALL(Const(mock), Overloaded(5)).WillByDefault(Return(11));
+  ON_CALL(Const(mock), Overloaded(7)).WillByDefault(Return(13));
+
+  EXPECT_THAT(mock.Overloaded(1), 7);
+  EXPECT_THAT(mock.Overloaded(5), 9);
+  EXPECT_THAT(mock.Overloaded(7), 7);
+
+  const MockConstOverload& const_mock = mock;
+  EXPECT_THAT(const_mock.Overloaded(1), 0);
+  EXPECT_THAT(const_mock.Overloaded(5), 11);
+  EXPECT_THAT(const_mock.Overloaded(7), 13);
 }
 
 }  // namespace
