@@ -749,11 +749,6 @@ TEST(MatcherCastTest, NonImplicitlyConstructibleTypeWithOperatorEq) {
   EXPECT_FALSE(m3.Matches(239));
 }
 
-// ConvertibleFromAny does not work with MSVC. resulting in
-// error C2440: 'initializing': cannot convert from 'Eq' to 'M'
-// No constructor could take the source type, or constructor overload
-// resolution was ambiguous
-
 // The below ConvertibleFromAny struct is implicitly constructible from anything
 // and when in the same namespace can interact with other tests. In particular,
 // if it is in the same namespace as other tests and one removes
@@ -764,9 +759,9 @@ TEST(MatcherCastTest, NonImplicitlyConstructibleTypeWithOperatorEq) {
 namespace convertible_from_any {
 // Implicitly convertible from any type.
 struct ConvertibleFromAny {
-explicit  ConvertibleFromAny(int a_value) : value(a_value) {}
+  ConvertibleFromAny(int a_value) : value(a_value) {}
   template <typename T>
-  ConvertibleFromAny(const T& /*a_value*/) : value(-1) {
+  explicit ConvertibleFromAny(const T& /*a_value*/) : value(-1) {
     ADD_FAILURE() << "Conversion constructor called";
   }
   int value;
@@ -793,7 +788,6 @@ TEST(MatcherCastTest, FromConvertibleFromAny) {
   EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
 }
 }  // namespace convertible_from_any
-
 
 struct IntReferenceWrapper {
   IntReferenceWrapper(const int& a_value) : value(&a_value) {}
@@ -899,8 +893,6 @@ TEST(SafeMatcherCastTest, FromSameType) {
   EXPECT_FALSE(m2.Matches(1));
 }
 
-#if !defined _MSC_VER
-
 namespace convertible_from_any {
 TEST(SafeMatcherCastTest, ConversionConstructorIsUsed) {
   Matcher<ConvertibleFromAny> m = SafeMatcherCast<ConvertibleFromAny>(1);
@@ -915,8 +907,6 @@ TEST(SafeMatcherCastTest, FromConvertibleFromAny) {
   EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
 }
 }  // namespace convertible_from_any
-
-#endif  // !defined _MSC_VER
 
 TEST(SafeMatcherCastTest, ValueIsNotCopied) {
   int n = 42;
@@ -6733,7 +6723,7 @@ TEST(NotTest, WorksOnMoveOnlyType) {
 }  // namespace gmock_matchers_test
 }  // namespace testing
 
-#if defined _MSC_VER
+#if defined_MSC_VER
 # pragma warning(pop)
 #endif
 
