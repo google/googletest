@@ -357,7 +357,7 @@ class WithoutMatchers {
 };
 
 // Internal use only: access the singleton instance of WithoutMatchers.
-WithoutMatchers GetWithoutMatchers();
+GTEST_API_ WithoutMatchers GetWithoutMatchers();
 
 // TODO(wan@google.com): group all type utilities together.
 
