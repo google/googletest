@@ -353,7 +353,7 @@ GTEST_API_ void Log(LogSeverity severity, const std::string& message,
 class WithoutMatchers {
  private:
   WithoutMatchers() {}
-  friend WithoutMatchers GetWithoutMatchers();
+  friend GTEST_API_ WithoutMatchers GetWithoutMatchers();
 };
 
 // Internal use only: access the singleton instance of WithoutMatchers.
