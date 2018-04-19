@@ -59,12 +59,7 @@
 # include <forward_list>  // NOLINT
 #endif
 
-// Disable MSVC2015 warning for std::pair:
-// "decorated name length exceeded, name was truncated".
-#if defined _MSC_VER
-# pragma warning(push)
-# pragma warning(disable:4503)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4503)
 
 #if GTEST_LANG_CXX11
 # include <type_traits>
@@ -6723,7 +6718,4 @@ TEST(NotTest, WorksOnMoveOnlyType) {
 }  // namespace gmock_matchers_test
 }  // namespace testing
 
-#if defined _MSC_VER
-# pragma warning(pop)
-#endif
-
+GTEST_DISABLE_MSC_WARNINGS_POP_()
