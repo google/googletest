@@ -33,15 +33,6 @@
 //
 // This file tests some commonly used argument matchers.
 
-// Disable MSVC2014 warning for std::pair:
-// "decorated name length exceeded, name was truncated".
-#ifdef _MSC_VER
-#if _MSC_VER < 1900
-#  pragma warning(push)
-#  pragma warning(disable:4503)
-#endif
-#endif
-
 #include "gmock/gmock-matchers.h"
 #include "gmock/gmock-more-matchers.h"
 
@@ -66,6 +57,13 @@
 
 #if GTEST_HAS_STD_FORWARD_LIST_
 # include <forward_list>  // NOLINT
+#endif
+
+// Disable MSVC2015 warning for std::pair:
+// "decorated name length exceeded, name was truncated".
+#if defined _MSC_VER
+# pragma warning(push)
+# pragma warning(disable:4503)
 #endif
 
 #if GTEST_LANG_CXX11
@@ -756,8 +754,6 @@ TEST(MatcherCastTest, NonImplicitlyConstructibleTypeWithOperatorEq) {
 // No constructor could take the source type, or constructor overload
 // resolution was ambiguous
 
-#if !defined _MSC_VER
-
 // The below ConvertibleFromAny struct is implicitly constructible from anything
 // and when in the same namespace can interact with other tests. In particular,
 // if it is in the same namespace as other tests and one removes
@@ -798,7 +794,6 @@ TEST(MatcherCastTest, FromConvertibleFromAny) {
 }
 }  // namespace convertible_from_any
 
-#endif  // !defined _MSC_VER
 
 struct IntReferenceWrapper {
   IntReferenceWrapper(const int& a_value) : value(&a_value) {}
@@ -6737,3 +6732,8 @@ TEST(NotTest, WorksOnMoveOnlyType) {
 
 }  // namespace gmock_matchers_test
 }  // namespace testing
+
+#if defined _MSC_VER
+# pragma warning(pop)
+#endif
+
