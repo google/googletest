@@ -6723,7 +6723,7 @@ TEST(NotTest, WorksOnMoveOnlyType) {
 }  // namespace gmock_matchers_test
 }  // namespace testing
 
-#if defined_MSC_VER
+#if defined _MSC_VER
 # pragma warning(pop)
 #endif
 
