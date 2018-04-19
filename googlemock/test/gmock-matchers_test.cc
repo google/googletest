@@ -33,6 +33,8 @@
 //
 // This file tests some commonly used argument matchers.
 
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4503)
+
 #include "gmock/gmock-matchers.h"
 #include "gmock/gmock-more-matchers.h"
 
@@ -58,8 +60,6 @@
 #if GTEST_HAS_STD_FORWARD_LIST_
 # include <forward_list>  // NOLINT
 #endif
-
-GTEST_DISABLE_MSC_WARNINGS_PUSH_(4503)
 
 #if GTEST_LANG_CXX11
 # include <type_traits>
@@ -6718,4 +6718,5 @@ TEST(NotTest, WorksOnMoveOnlyType) {
 }  // namespace gmock_matchers_test
 }  // namespace testing
 
+GTEST_DISABLE_MSC_WARNINGS_POP()
 
