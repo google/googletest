@@ -33,9 +33,10 @@
 //
 // This file tests some commonly used argument matchers.
 
+#include "gmock/gmock-matchers.h"
+
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4503)
 
-#include "gmock/gmock-matchers.h"
 #include "gmock/gmock-more-matchers.h"
 
 #include <string.h>
@@ -6718,5 +6719,5 @@ TEST(NotTest, WorksOnMoveOnlyType) {
 }  // namespace gmock_matchers_test
 }  // namespace testing
 
-GTEST_DISABLE_MSC_WARNINGS_POP()
+GTEST_DISABLE_MSC_WARNINGS_POP_()
 
