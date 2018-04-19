@@ -350,7 +350,7 @@ GTEST_API_ void Log(LogSeverity severity, const std::string& message,
 //
 //    ON_CALL(mock, Method({}, nullptr))…
 //
-class WithoutMatchers {
+class GTEST_API_ WithoutMatchers {
  private:
   WithoutMatchers() {}
   friend WithoutMatchers GetWithoutMatchers();
