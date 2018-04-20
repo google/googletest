@@ -5212,17 +5212,20 @@ internal::AnyOfMatcher<Args...> AnyOf(const Args&... matchers) {
 }
 
 template <typename... Args>
-internal::ElementsAreMatcher<tuple<typename std::decay<Args>::type...>>
+internal::ElementsAreMatcher<tuple<typename std::decay<const Args&>::type...>>
 ElementsAre(const Args&... matchers) {
   return internal::ElementsAreMatcher<
-      tuple<typename std::decay<Args>::type...>>(make_tuple(matchers...));
+      tuple<typename std::decay<const Args&>::type...>>(
+      make_tuple(matchers...));
 }
 
 template <typename... Args>
-internal::UnorderedElementsAreMatcher<tuple<typename std::decay<Args>::type...>>
+internal::UnorderedElementsAreMatcher<
+    tuple<typename std::decay<const Args&>::type...>>
 UnorderedElementsAre(const Args&... matchers) {
   return internal::UnorderedElementsAreMatcher<
-      tuple<typename std::decay<Args>::type...>>(make_tuple(matchers...));
+      tuple<typename std::decay<const Args&>::type...>>(
+      make_tuple(matchers...));
 }
 
 #endif  // GTEST_LANG_CXX11
