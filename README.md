@@ -103,7 +103,7 @@ package (as described below):
 
 ### Windows Requirements ###
 
-  * Microsoft Visual C++ 2010 or newer
+  * Microsoft Visual C++ 2015 or newer
 
 ### Cygwin Requirements ###
 

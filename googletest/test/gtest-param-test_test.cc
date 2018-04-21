@@ -42,11 +42,7 @@
 # include <string>
 # include <vector>
 
-// To include gtest-internal-inl.h.
-# define GTEST_IMPLEMENTATION_ 1
 # include "src/gtest-internal-inl.h"  // for UnitTestOptions
-# undef GTEST_IMPLEMENTATION_
-
 # include "test/gtest-param-test_test.h"
 
 using ::std::vector;
@@ -540,6 +536,51 @@ TEST(CombineTest, CombineWithMaxNumberOfParameters) {
   VerifyGenerator(gen, expected_values);
 }
 
+#if GTEST_LANG_CXX11
+
+class NonDefaultConstructAssignString {
+ public:
+  NonDefaultConstructAssignString(const std::string& s) : str_(s) {}
+
+  const std::string& str() const { return str_; }
+
+ private:
+  std::string str_;
+
+  // Not default constructible
+  NonDefaultConstructAssignString();
+  // Not assignable
+  void operator=(const NonDefaultConstructAssignString&);
+};
+
+TEST(CombineTest, NonDefaultConstructAssign) {
+  const ParamGenerator<tuple<int, NonDefaultConstructAssignString> > gen =
+      Combine(Values(0, 1), Values(NonDefaultConstructAssignString("A"),
+                                   NonDefaultConstructAssignString("B")));
+
+  ParamGenerator<tuple<int, NonDefaultConstructAssignString> >::iterator it =
+      gen.begin();
+
+  EXPECT_EQ(0, std::get<0>(*it));
+  EXPECT_EQ("A", std::get<1>(*it).str());
+  ++it;
+
+  EXPECT_EQ(0, std::get<0>(*it));
+  EXPECT_EQ("B", std::get<1>(*it).str());
+  ++it;
+
+  EXPECT_EQ(1, std::get<0>(*it));
+  EXPECT_EQ("A", std::get<1>(*it).str());
+  ++it;
+
+  EXPECT_EQ(1, std::get<0>(*it));
+  EXPECT_EQ("B", std::get<1>(*it).str());
+  ++it;
+
+  EXPECT_TRUE(it == gen.end());
+}
+
+#endif   // GTEST_LANG_CXX11
 # endif  // GTEST_HAS_COMBINE
 
 // Tests that an generator produces correct sequence after being
@@ -807,6 +848,34 @@ TEST_P(NamingTest, TestsReportCorrectNamesAndParameters) {
 
 INSTANTIATE_TEST_CASE_P(ZeroToFiveSequence, NamingTest, Range(0, 5));
 
+// Tests that macros in test names are expanded correctly.
+class MacroNamingTest : public TestWithParam<int> {};
+
+#define PREFIX_WITH_FOO(test_name) Foo##test_name
+#define PREFIX_WITH_MACRO(test_name) Macro##test_name
+
+TEST_P(PREFIX_WITH_MACRO(NamingTest), PREFIX_WITH_FOO(SomeTestName)) {
+  const ::testing::TestInfo* const test_info =
+     ::testing::UnitTest::GetInstance()->current_test_info();
+
+  EXPECT_STREQ("FortyTwo/MacroNamingTest", test_info->test_case_name());
+  EXPECT_STREQ("FooSomeTestName", test_info->name());
+}
+
+INSTANTIATE_TEST_CASE_P(FortyTwo, MacroNamingTest, Values(42));
+
+// Tests the same thing for non-parametrized tests.
+class MacroNamingTestNonParametrized : public ::testing::Test {};
+
+TEST_F(PREFIX_WITH_MACRO(NamingTestNonParametrized),
+       PREFIX_WITH_FOO(SomeTestName)) {
+  const ::testing::TestInfo* const test_info =
+     ::testing::UnitTest::GetInstance()->current_test_info();
+
+  EXPECT_STREQ("MacroNamingTestNonParametrized", test_info->test_case_name());
+  EXPECT_STREQ("FooSomeTestName", test_info->name());
+}
+
 // Tests that user supplied custom parameter names are working correctly.
 // Runs the test with a builtin helper method which uses PrintToString,
 // as well as a custom function and custom functor to ensure all possible
@@ -815,8 +884,8 @@ class CustomFunctorNamingTest : public TestWithParam<std::string> {};
 TEST_P(CustomFunctorNamingTest, CustomTestNames) {}
 
 struct CustomParamNameFunctor {
-  std::string operator()(const ::testing::TestParamInfo<std::string>& info) {
-    return info.param;
+  std::string operator()(const ::testing::TestParamInfo<std::string>& inf) {
+    return inf.param;
   }
 };
 
@@ -833,8 +902,8 @@ INSTANTIATE_TEST_CASE_P(AllAllowedCharacters,
                         CustomParamNameFunctor());
 
 inline std::string CustomParamNameFunction(
-    const ::testing::TestParamInfo<std::string>& info) {
-  return info.param;
+    const ::testing::TestParamInfo<std::string>& inf) {
+  return inf.param;
 }
 
 class CustomFunctionNamingTest : public TestWithParam<std::string> {};
@@ -852,11 +921,10 @@ INSTANTIATE_TEST_CASE_P(CustomParamNameFunction,
 class CustomLambdaNamingTest : public TestWithParam<std::string> {};
 TEST_P(CustomLambdaNamingTest, CustomTestNames) {}
 
-INSTANTIATE_TEST_CASE_P(CustomParamNameLambda,
-                        CustomLambdaNamingTest,
+INSTANTIATE_TEST_CASE_P(CustomParamNameLambda, CustomLambdaNamingTest,
                         Values(std::string("LambdaName")),
-                        [](const ::testing::TestParamInfo<std::string>& tpinfo) {
-                          return tpinfo.param;
+                        [](const ::testing::TestParamInfo<std::string>& inf) {
+                          return inf.param;
                         });
 
 #endif  // GTEST_LANG_CXX11
@@ -1022,6 +1090,7 @@ TEST_F(ParameterizedDeathTest, GetParamDiesFromTestF) {
 }
 
 INSTANTIATE_TEST_CASE_P(RangeZeroToFive, ParameterizedDerivedTest, Range(0, 5));
+
 
 int main(int argc, char **argv) {
   // Used in TestGenerationTest test case.

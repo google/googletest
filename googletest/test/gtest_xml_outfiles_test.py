@@ -31,14 +31,10 @@
 
 """Unit test for the gtest_xml_output module."""
 
-__author__ = "keith.ray@gmail.com (Keith Ray)"
-
 import os
 from xml.dom import minidom, Node
-
 import gtest_test_utils
 import gtest_xml_test_utils
-
 
 GTEST_OUTPUT_SUBDIR = "xml_outfiles"
 GTEST_OUTPUT_1_TEST = "gtest_xml_outfile1_test_"
@@ -47,7 +43,13 @@ GTEST_OUTPUT_2_TEST = "gtest_xml_outfile2_test_"
 EXPECTED_XML_1 = """<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="1" failures="0" disabled="0" errors="0" time="*" timestamp="*" name="AllTests">
   <testsuite name="PropertyOne" tests="1" failures="0" disabled="0" errors="0" time="*">
-    <testcase name="TestSomeProperties" status="run" time="*" classname="PropertyOne" SetUpProp="1" TestSomeProperty="1" TearDownProp="1" />
+    <testcase name="TestSomeProperties" status="run" time="*" classname="PropertyOne">
+      <properties>
+        <property name="SetUpProp" value="1"/>
+        <property name="TestSomeProperty" value="1"/>
+        <property name="TearDownProp" value="1"/>
+      </properties>
+    </testcase>
   </testsuite>
 </testsuites>
 """
@@ -55,7 +57,13 @@ EXPECTED_XML_1 = """<?xml version="1.0" encoding="UTF-8"?>
 EXPECTED_XML_2 = """<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="1" failures="0" disabled="0" errors="0" time="*" timestamp="*" name="AllTests">
   <testsuite name="PropertyTwo" tests="1" failures="0" disabled="0" errors="0" time="*">
-    <testcase name="TestSomeProperties" status="run" time="*" classname="PropertyTwo" SetUpProp="2" TestSomeProperty="2" TearDownProp="2" />
+    <testcase name="TestSomeProperties" status="run" time="*" classname="PropertyTwo">
+      <properties>
+        <property name="SetUpProp" value="2"/>
+        <property name="TestSomeProperty" value="2"/>
+        <property name="TearDownProp" value="2"/>
+      </properties>
+    </testcase>
   </testsuite>
 </testsuites>
 """
