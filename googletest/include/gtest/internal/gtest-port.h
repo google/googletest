@@ -758,6 +758,10 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # elif _MSC_VER >= 1600
 #  include <tuple>  // IWYU pragma: export  // NOLINT
 
+// C++Builder has ::std::tr1::tuple inside <tuple>
+# elif defined(__BORLANDC__)
+#  include <tuple>  // IWYU pragma: export  // NOLINT
+
 # else  // GTEST_USE_OWN_TR1_TUPLE
 #  include <tr1/tuple>  // IWYU pragma: export  // NOLINT
 # endif  // GTEST_USE_OWN_TR1_TUPLE
