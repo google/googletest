@@ -233,6 +233,7 @@ $var gen_as = [[$for k, [[gmock_a$k]]]]
 $var gen_matcher_as = [[$for k, \
                      [[const ::testing::Matcher<T$k>& gmock_a$k]]]]
 $var forward_as = [[$for k, [[::testing::internal::forward<T$k>(gmock_a$k)]]]]
+$var anything_matchers = [[$for k, [[::testing::A<T$k>()]]]]
 #define GMOCK_METHOD_BASE(modifiers, nargs, Method, rtype, $gen_arg_types) \
  rtype __GMOCK_MOD_CALLTYPE(modifiers) Method( \
       __GMOCK_FIRST(nargs, $gen_arg_as)) __GMOCK_MOD_CONSTNESS(modifiers) { \
@@ -243,6 +244,12 @@ $var forward_as = [[$for k, [[::testing::internal::forward<T$k>(gmock_a$k)]]]]
       gmock_##Method(__GMOCK_FIRST(nargs, $gen_matcher_as)) __GMOCK_MOD_CONSTNESS(modifiers) { \
     GMOCK_MOCKER_EXPAND(nargs, __GMOCK_MOD_CONSTNESS(modifiers), Method).RegisterOwner(this); \
     return GMOCK_MOCKER_EXPAND(nargs, __GMOCK_MOD_CONSTNESS(modifiers), Method).With(__GMOCK_FIRST(nargs, $gen_as)); \
+  } \
+  ::testing::MockSpec<rtype(__GMOCK_FIRST(nargs, $gen_arg_types))> \
+  gmock_##Method(const ::testing::internal::WithoutMatchers&, \
+      __GMOCK_MOD_CONSTNESS(modifiers) ::testing::internal::Function<rtype(__GMOCK_FIRST(nargs, $gen_arg_types))>* const) { \
+    return ::testing::internal::GTEST_CONCAT_TOKEN_(AdjustConstness_, __GMOCK_MOD_CONSTNESS(modifiers))(this)-> \
+      gmock_##Method(__GMOCK_FIRST(nargs, $anything_matchers)); \
   } \
   mutable ::testing::FunctionMocker<rtype(__GMOCK_FIRST(nargs, $gen_arg_types))> GMOCK_MOCKER_EXPAND(nargs, __GMOCK_MOD_CONSTNESS(modifiers), Method)
      

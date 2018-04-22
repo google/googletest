@@ -114,7 +114,7 @@ class MockIncomplete {
  public:
   // This line verifies that a mock method can take a by-reference
   // argument of an incomplete type.
-  MOCK_METHOD1(ByRefFunc, void(const Incomplete& x));
+  MOCK_METHOD(void, ByRefFunc, (const Incomplete& x));
 };
 
 // Tells Google Mock how to print a value of type Incomplete.
@@ -148,11 +148,11 @@ class MockA {
  public:
   MockA() {}
 
-  MOCK_METHOD1(DoA, void(int n));
-  MOCK_METHOD1(ReturnResult, Result(int n));
-  MOCK_METHOD0(ReturnNonDefaultConstructible, NonDefaultConstructible());
-  MOCK_METHOD2(Binary, bool(int x, int y));
-  MOCK_METHOD2(ReturnInt, int(int x, int y));
+  MOCK_METHOD(void, DoA, (int n));
+  MOCK_METHOD(Result, ReturnResult, (int n));
+  MOCK_METHOD(NonDefaultConstructible, ReturnNonDefaultConstructible, ());
+  MOCK_METHOD(bool, Binary, (int x, int y));
+  MOCK_METHOD(int, ReturnInt, (int x, int y));
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockA);
@@ -162,8 +162,8 @@ class MockB {
  public:
   MockB() {}
 
-  MOCK_CONST_METHOD0(DoB, int());  // NOLINT
-  MOCK_METHOD1(DoB, int(int n));  // NOLINT
+  MOCK_CONST_METHOD(int, DoB, ());  // NOLINT
+  MOCK_METHOD(int, DoB, (int n));  // NOLINT
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockB);
@@ -173,7 +173,7 @@ class ReferenceHoldingMock {
  public:
   ReferenceHoldingMock() {}
 
-  MOCK_METHOD1(AcceptReference, void(linked_ptr<MockA>*));
+  MOCK_METHOD(void, AcceptReference, (linked_ptr<MockA>*));
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ReferenceHoldingMock);
@@ -195,7 +195,7 @@ class MockCC : public CC {
  public:
   MockCC() {}
 
-  MOCK_METHOD0(Method, int());
+  MOCK_METHOD(int, Method, ());
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockCC);
@@ -2011,9 +2011,9 @@ class MockC {
  public:
   MockC() {}
 
-  MOCK_METHOD6(VoidMethod, void(bool cond, int n, std::string s, void* p,
+  MOCK_METHOD(void, VoidMethod, (bool cond, int n, std::string s, void* p,
                                 const Printable& x, Unprintable y));
-  MOCK_METHOD0(NonVoidMethod, int());  // NOLINT
+  MOCK_METHOD(int, NonVoidMethod, ());  // NOLINT
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockC);
@@ -2254,7 +2254,7 @@ class LogTestHelper {
  public:
   LogTestHelper() {}
 
-  MOCK_METHOD1(Foo, PrintMeNot(PrintMeNot));
+  MOCK_METHOD(PrintMeNot, Foo, (PrintMeNot));
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(LogTestHelper);
@@ -2714,8 +2714,8 @@ TEST(ParameterlessExpectationsTest, CanSetExpectationsForOverloadedMethods) {
 
 struct MockWithConstMethods {
  public:
-  MOCK_CONST_METHOD1(Foo, int(int));
-  MOCK_CONST_METHOD2(Bar, int(int, const char*));
+  MOCK_CONST_METHOD(int, Foo, (int));
+  MOCK_CONST_METHOD(int, Bar, (int, const char*));
 };
 
 TEST(ParameterlessExpectationsTest, CanSetExpectationsForConstMethods) {
@@ -2729,8 +2729,8 @@ TEST(ParameterlessExpectationsTest, CanSetExpectationsForConstMethods) {
 
 class MockConstOverload {
  public:
-  MOCK_METHOD1(Overloaded, int(int));
-  MOCK_CONST_METHOD1(Overloaded, int(int));
+  MOCK_METHOD(int, Overloaded, (int));
+  MOCK_CONST_METHOD(int, Overloaded, (int));
 };
 
 TEST(ParameterlessExpectationsTest,

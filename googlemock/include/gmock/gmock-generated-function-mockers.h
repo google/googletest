@@ -946,6 +946,19 @@ using internal::FunctionMocker;
         gmock_a4, gmock_a5, gmock_a6, gmock_a7, gmock_a8, gmock_a9, \
         gmock_a10)); \
   } \
+  ::testing::MockSpec<rtype(__GMOCK_FIRST(nargs, T1, T2, T3, T4, T5, T6, T7, \
+      T8, T9, T10))> \
+  gmock_##Method(const ::testing::internal::WithoutMatchers&, \
+      __GMOCK_MOD_CONSTNESS(modifiers) \
+          ::testing::internal::Function<rtype(__GMOCK_FIRST(nargs, T1, T2, \
+          T3, T4, T5, T6, T7, T8, T9, T10))>* const) { \
+    return ::testing::internal::GTEST_CONCAT_TOKEN_(AdjustConstness_, \
+        __GMOCK_MOD_CONSTNESS(modifiers))(this)-> \
+      gmock_##Method(__GMOCK_FIRST(nargs, ::testing::A<T1>(), \
+          ::testing::A<T2>(), ::testing::A<T3>(), ::testing::A<T4>(), \
+          ::testing::A<T5>(), ::testing::A<T6>(), ::testing::A<T7>(), \
+          ::testing::A<T8>(), ::testing::A<T9>(), ::testing::A<T10>())); \
+  } \
   mutable ::testing::FunctionMocker<rtype(__GMOCK_FIRST(nargs, T1, T2, T3, \
       T4, T5, T6, T7, T8, T9, T10))> GMOCK_MOCKER_EXPAND(nargs, \
       __GMOCK_MOD_CONSTNESS(modifiers), Method)
