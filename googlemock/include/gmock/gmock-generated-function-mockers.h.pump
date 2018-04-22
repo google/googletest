@@ -226,6 +226,9 @@ $var anything_matchers = [[$for j, \
 #define __GMOCK_MOD_TYPENAME_(_constness, typename, calltype) typename
 #define __GMOCK_MOD_CALLTYPE_(_constness, typename, calltype) calltype
 
+// MSVC needs this extra layer in case the parameters need to be expanded.
+#define __GMOCK_CONCAT_TOKEN_(x, y) GTEST_CONCAT_TOKEN_(x, y)
+
 $range k 1..n
 $var gen_arg_types = [[$for k, [[T$k]]]]
 $var gen_arg_as = [[$for k, [[T$k gmock_a$k]]]]
@@ -248,7 +251,7 @@ $var anything_matchers = [[$for k, [[::testing::A<T$k>()]]]]
   ::testing::MockSpec<rtype(__GMOCK_FIRST(nargs, $gen_arg_types))> \
   gmock_##Method(const ::testing::internal::WithoutMatchers&, \
       __GMOCK_MOD_CONSTNESS(modifiers) ::testing::internal::Function<rtype(__GMOCK_FIRST(nargs, $gen_arg_types))>* const) { \
-    return ::testing::internal::GTEST_CONCAT_TOKEN_(AdjustConstness_, __GMOCK_MOD_CONSTNESS(modifiers))(this)-> \
+    return ::testing::internal::__GMOCK_CONCAT_TOKEN_(AdjustConstness_, __GMOCK_MOD_CONSTNESS(modifiers))(this)-> \
       gmock_##Method(__GMOCK_FIRST(nargs, $anything_matchers)); \
   } \
   mutable ::testing::FunctionMocker<rtype(__GMOCK_FIRST(nargs, $gen_arg_types))> GMOCK_MOCKER_EXPAND(nargs, __GMOCK_MOD_CONSTNESS(modifiers), Method)

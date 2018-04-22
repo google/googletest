@@ -904,6 +904,9 @@ using internal::FunctionMocker;
 #define __GMOCK_MOD_CONSTNESS_(constness, typename, calltype) constness
 #define __GMOCK_MOD_TYPENAME_(_constness, typename, calltype) typename
 #define __GMOCK_MOD_CALLTYPE_(_constness, typename, calltype) calltype
+
+// MSVC needs this extra layer in case the parameters need to be expanded.
+#define __GMOCK_CONCAT_TOKEN_(x, y) GTEST_CONCAT_TOKEN_(x, y)
 #define GMOCK_METHOD_BASE(modifiers, nargs, Method, rtype, T1, T2, T3, T4, \
     T5, T6, T7, T8, T9, T10) \
  rtype __GMOCK_MOD_CALLTYPE(modifiers) Method( \
@@ -952,7 +955,7 @@ using internal::FunctionMocker;
       __GMOCK_MOD_CONSTNESS(modifiers) \
           ::testing::internal::Function<rtype(__GMOCK_FIRST(nargs, T1, T2, \
           T3, T4, T5, T6, T7, T8, T9, T10))>* const) { \
-    return ::testing::internal::GTEST_CONCAT_TOKEN_(AdjustConstness_, \
+    return ::testing::internal::__GMOCK_CONCAT_TOKEN_(AdjustConstness_, \
         __GMOCK_MOD_CONSTNESS(modifiers))(this)-> \
       gmock_##Method(__GMOCK_FIRST(nargs, ::testing::A<T1>(), \
           ::testing::A<T2>(), ::testing::A<T3>(), ::testing::A<T4>(), \
