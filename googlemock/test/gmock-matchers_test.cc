@@ -3086,6 +3086,44 @@ TEST(AllArgsTest, WorksInWithClause) {
   EXPECT_EQ(2, helper.Helper('a', 1));
 }
 
+class OptionalMatchersHelper {
+ public:
+  OptionalMatchersHelper() {}
+
+  MOCK_METHOD0(NoArgs, int());
+
+  MOCK_METHOD1(OneArg, int(int y));
+
+  MOCK_METHOD2(TwoArgs, int(char x, int y));
+
+  MOCK_METHOD1(Overloaded, int(char x));
+  MOCK_METHOD2(Overloaded, int(char x, int y));
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(OptionalMatchersHelper);
+};
+
+TEST(AllArgsTest, WorksWithoutMatchers) {
+  OptionalMatchersHelper helper;
+
+  ON_CALL(helper, NoArgs).WillByDefault(Return(10));
+  ON_CALL(helper, OneArg).WillByDefault(Return(20));
+  ON_CALL(helper, TwoArgs).WillByDefault(Return(30));
+
+  EXPECT_EQ(10, helper.NoArgs());
+  EXPECT_EQ(20, helper.OneArg(1));
+  EXPECT_EQ(30, helper.TwoArgs('\1', 2));
+
+  EXPECT_CALL(helper, NoArgs).Times(1);
+  EXPECT_CALL(helper, OneArg).WillOnce(Return(100));
+  EXPECT_CALL(helper, OneArg(17)).WillOnce(Return(200));
+  EXPECT_CALL(helper, TwoArgs).Times(0);
+
+  EXPECT_EQ(10, helper.NoArgs());
+  EXPECT_EQ(100, helper.OneArg(1));
+  EXPECT_EQ(200, helper.OneArg(17));
+}
+
 // Tests that ASSERT_THAT() and EXPECT_THAT() work when the value
 // matches the matcher.
 TEST(MatcherAssertionTest, WorksWhenMatcherIsSatisfied) {
