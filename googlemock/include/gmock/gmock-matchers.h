@@ -1718,25 +1718,27 @@ class NotMatcher {
 // that will prevent different instantiations of BothOfMatcher from
 // sharing the same BothOfMatcherImpl<T> class.
 template <typename T>
-class BothOfMatcherImpl
+class AllOfMatcherImpl
     : public MatcherInterface<GTEST_REFERENCE_TO_CONST_(T)> {
  public:
-  BothOfMatcherImpl(const Matcher<T>& matcher1, const Matcher<T>& matcher2)
-      : matcher1_(matcher1), matcher2_(matcher2) {}
+  explicit AllOfMatcherImpl(std::vector<Matcher<T> > matchers)
+      : matchers_(internal::move(matchers)) {}
 
   virtual void DescribeTo(::std::ostream* os) const {
     *os << "(";
-    matcher1_.DescribeTo(os);
-    *os << ") and (";
-    matcher2_.DescribeTo(os);
+    for (size_t i = 0; i < matchers_.size(); ++i) {
+      if (i != 0) *os << ") and (";
+      matchers_[i].DescribeTo(os);
+    }
     *os << ")";
   }
 
   virtual void DescribeNegationTo(::std::ostream* os) const {
     *os << "(";
-    matcher1_.DescribeNegationTo(os);
-    *os << ") or (";
-    matcher2_.DescribeNegationTo(os);
+    for (size_t i = 0; i < matchers_.size(); ++i) {
+      if (i != 0) *os << ") or (";
+      matchers_[i].DescribeNegationTo(os);
+    }
     *os << ")";
   }
 
@@ -1744,38 +1746,35 @@ class BothOfMatcherImpl
                                MatchResultListener* listener) const {
     // If either matcher1_ or matcher2_ doesn't match x, we only need
     // to explain why one of them fails.
-    StringMatchResultListener listener1;
-    if (!matcher1_.MatchAndExplain(x, &listener1)) {
-      *listener << listener1.str();
-      return false;
-    }
+    std::string all_match_result;
 
-    StringMatchResultListener listener2;
-    if (!matcher2_.MatchAndExplain(x, &listener2)) {
-      *listener << listener2.str();
-      return false;
+    for (size_t i = 0; i < matchers_.size(); ++i) {
+      StringMatchResultListener slistener;
+      if (matchers_[i].MatchAndExplain(x, &slistener)) {
+        if (all_match_result.empty()) {
+          all_match_result = slistener.str();
+        } else {
+          std::string result = slistener.str();
+          if (!result.empty()) {
+            all_match_result += ", and ";
+            all_match_result += result;
+          }
+        }
+      } else {
+        *listener << slistener.str();
+        return false;
+      }
     }
 
     // Otherwise we need to explain why *both* of them match.
-    const std::string s1 = listener1.str();
-    const std::string s2 = listener2.str();
-
-    if (s1 == "") {
-      *listener << s2;
-    } else {
-      *listener << s1;
-      if (s2 != "") {
-        *listener << ", and " << s2;
-      }
-    }
+    *listener << all_match_result;
     return true;
   }
 
  private:
-  const Matcher<T> matcher1_;
-  const Matcher<T> matcher2_;
+  const std::vector<Matcher<T> > matchers_;
 
-  GTEST_DISALLOW_ASSIGN_(BothOfMatcherImpl);
+  GTEST_DISALLOW_ASSIGN_(AllOfMatcherImpl);
 };
 
 #if GTEST_LANG_CXX11
@@ -1787,30 +1786,32 @@ template <template <typename T> class CombiningMatcher, typename... Args>
 class VariadicMatcher {
  public:
   VariadicMatcher(const Args&... matchers)  // NOLINT
-      : matchers_(matchers...) {}
+      : matchers_(matchers...) {
+    static_assert(sizeof...(Args) > 0, "Must have at least one matcher.");
+  }
 
   // This template type conversion operator allows an
   // VariadicMatcher<Matcher1, Matcher2...> object to match any type that
   // all of the provided matchers (Matcher1, Matcher2, ...) can match.
   template <typename T>
   operator Matcher<T>() const {
-    return CreateVariadicMatcher<T>(std::integral_constant<size_t, 0>());
+    std::vector<Matcher<T> > values;
+    CreateVariadicMatcher<T>(&values, std::integral_constant<size_t, 0>());
+    return Matcher<T>(new CombiningMatcher<T>(internal::move(values)));
   }
 
  private:
   template <typename T, size_t I>
-  Matcher<T> CreateVariadicMatcher(std::integral_constant<size_t, I>) const {
-    return Matcher<T>(new CombiningMatcher<T>(
-        SafeMatcherCast<T>(std::get<I>(matchers_)),
-        CreateVariadicMatcher<T>(std::integral_constant<size_t, I + 1>())));
+  void CreateVariadicMatcher(std::vector<Matcher<T> >* values,
+                             std::integral_constant<size_t, I>) const {
+    values->push_back(SafeMatcherCast<T>(std::get<I>(matchers_)));
+    CreateVariadicMatcher<T>(values, std::integral_constant<size_t, I + 1>());
   }
 
   template <typename T>
-  Matcher<T> CreateVariadicMatcher(
-      std::integral_constant<size_t, sizeof...(Args) - 1>) const {
-    return Matcher<T>(
-        SafeMatcherCast<T>(std::get<sizeof...(Args) - 1>(matchers_)));
-  }
+  void CreateVariadicMatcher(
+      std::vector<Matcher<T> >*,
+      std::integral_constant<size_t, sizeof...(Args)>) const {}
 
   tuple<Args...> matchers_;
 
@@ -1818,7 +1819,7 @@ class VariadicMatcher {
 };
 
 template <typename... Args>
-using AllOfMatcher = VariadicMatcher<BothOfMatcherImpl, Args...>;
+using AllOfMatcher = VariadicMatcher<AllOfMatcherImpl, Args...>;
 
 #endif  // GTEST_LANG_CXX11
 
@@ -1835,8 +1836,10 @@ class BothOfMatcher {
   // both Matcher1 and Matcher2 can match.
   template <typename T>
   operator Matcher<T>() const {
-    return Matcher<T>(new BothOfMatcherImpl<T>(SafeMatcherCast<T>(matcher1_),
-                                               SafeMatcherCast<T>(matcher2_)));
+    std::vector<Matcher<T> > values;
+    values.push_back(SafeMatcherCast<T>(matcher1_));
+    values.push_back(SafeMatcherCast<T>(matcher2_));
+    return Matcher<T>(new AllOfMatcherImpl<T>(internal::move(values)));
   }
 
  private:
@@ -1851,70 +1854,69 @@ class BothOfMatcher {
 // that will prevent different instantiations of AnyOfMatcher from
 // sharing the same EitherOfMatcherImpl<T> class.
 template <typename T>
-class EitherOfMatcherImpl
+class AnyOfMatcherImpl
     : public MatcherInterface<GTEST_REFERENCE_TO_CONST_(T)> {
  public:
-  EitherOfMatcherImpl(const Matcher<T>& matcher1, const Matcher<T>& matcher2)
-      : matcher1_(matcher1), matcher2_(matcher2) {}
+  explicit AnyOfMatcherImpl(std::vector<Matcher<T> > matchers)
+      : matchers_(internal::move(matchers)) {}
 
   virtual void DescribeTo(::std::ostream* os) const {
     *os << "(";
-    matcher1_.DescribeTo(os);
-    *os << ") or (";
-    matcher2_.DescribeTo(os);
+    for (size_t i = 0; i < matchers_.size(); ++i) {
+      if (i != 0) *os << ") or (";
+      matchers_[i].DescribeTo(os);
+    }
     *os << ")";
   }
 
   virtual void DescribeNegationTo(::std::ostream* os) const {
     *os << "(";
-    matcher1_.DescribeNegationTo(os);
-    *os << ") and (";
-    matcher2_.DescribeNegationTo(os);
+    for (size_t i = 0; i < matchers_.size(); ++i) {
+      if (i != 0) *os << ") and (";
+      matchers_[i].DescribeNegationTo(os);
+    }
     *os << ")";
   }
 
   virtual bool MatchAndExplain(GTEST_REFERENCE_TO_CONST_(T) x,
                                MatchResultListener* listener) const {
+    std::string no_match_result;
+
     // If either matcher1_ or matcher2_ matches x, we just need to
     // explain why *one* of them matches.
-    StringMatchResultListener listener1;
-    if (matcher1_.MatchAndExplain(x, &listener1)) {
-      *listener << listener1.str();
-      return true;
-    }
-
-    StringMatchResultListener listener2;
-    if (matcher2_.MatchAndExplain(x, &listener2)) {
-      *listener << listener2.str();
-      return true;
+    for (size_t i = 0; i < matchers_.size(); ++i) {
+      StringMatchResultListener slistener;
+      if (matchers_[i].MatchAndExplain(x, &slistener)) {
+        *listener << slistener.str();
+        return true;
+      } else {
+        if (no_match_result.empty()) {
+          no_match_result = slistener.str();
+        } else {
+          std::string result = slistener.str();
+          if (!result.empty()) {
+            no_match_result += ", and ";
+            no_match_result += result;
+          }
+        }
+      }
     }
 
     // Otherwise we need to explain why *both* of them fail.
-    const std::string s1 = listener1.str();
-    const std::string s2 = listener2.str();
-
-    if (s1 == "") {
-      *listener << s2;
-    } else {
-      *listener << s1;
-      if (s2 != "") {
-        *listener << ", and " << s2;
-      }
-    }
+    *listener << no_match_result;
     return false;
   }
 
  private:
-  const Matcher<T> matcher1_;
-  const Matcher<T> matcher2_;
+  const std::vector<Matcher<T> > matchers_;
 
-  GTEST_DISALLOW_ASSIGN_(EitherOfMatcherImpl);
+  GTEST_DISALLOW_ASSIGN_(AnyOfMatcherImpl);
 };
 
 #if GTEST_LANG_CXX11
 // AnyOfMatcher is used for the variadic implementation of AnyOf(m_1, m_2, ...).
 template <typename... Args>
-using AnyOfMatcher = VariadicMatcher<EitherOfMatcherImpl, Args...>;
+using AnyOfMatcher = VariadicMatcher<AnyOfMatcherImpl, Args...>;
 
 #endif  // GTEST_LANG_CXX11
 
@@ -1932,8 +1934,10 @@ class EitherOfMatcher {
   // both Matcher1 and Matcher2 can match.
   template <typename T>
   operator Matcher<T>() const {
-    return Matcher<T>(new EitherOfMatcherImpl<T>(
-        SafeMatcherCast<T>(matcher1_), SafeMatcherCast<T>(matcher2_)));
+    std::vector<Matcher<T> > values;
+    values.push_back(SafeMatcherCast<T>(matcher1_));
+    values.push_back(SafeMatcherCast<T>(matcher2_));
+    return Matcher<T>(new AnyOfMatcherImpl<T>(internal::move(values)));
   }
 
  private:
