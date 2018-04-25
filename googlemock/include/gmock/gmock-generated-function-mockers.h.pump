@@ -94,6 +94,58 @@ class FunctionMocker<R($As)> : public
 
 
 ]]
+// Removes the given pointer; this is a helper for the expectation setter method
+// for parameterless matchers.
+//
+// We want to make sure that the user cannot set a parameterless expectation on
+// overloaded methods, including methods which are overloaded on const. Example:
+//
+//   class MockClass {
+//     MOCK_METHOD0(GetName, string&());
+//     MOCK_CONST_METHOD0(GetName, const string&());
+//   };
+//
+//   TEST() {
+//     // This should be an error, as it's not clear which overload is expected.
+//     EXPECT_CALL(mock, GetName).WillOnce(ReturnRef(value));
+//   }
+//
+// Here are the generated expectation-setter methods:
+//
+//   class MockClass {
+//     // Overload 1
+//     MockSpec<string&()> gmock_GetName() { … }
+//     // Overload 2. Declared const so that the compiler will generate an
+//     // error when trying to resolve between this and overload 4 in
+//     // 'gmock_GetName(WithoutMatchers(), nullptr)'.
+//     MockSpec<string&()> gmock_GetName(
+//         const WithoutMatchers&, const Function<string&()>*) const {
+//       // Removes const from this, calls overload 1
+//       return AdjustConstness_(this)->gmock_GetName();
+//     }
+//
+//     // Overload 3
+//     const string& gmock_GetName() const { … }
+//     // Overload 4
+//     MockSpec<const string&()> gmock_GetName(
+//         const WithoutMatchers&, const Function<const string&()>*) const {
+//       // Does not remove const, calls overload 3
+//       return AdjustConstness_const(this)->gmock_GetName();
+//     }
+//   }
+//
+template <typename MockType>
+const MockType* AdjustConstness_const(const MockType* mock) {
+  return mock;
+}
+
+// Removes const from and returns the given pointer; this is a helper for the 
+// expectation setter method for parameterless matchers.
+template <typename MockType>
+MockType* AdjustConstness_(const MockType* mock) {
+  return const_cast<MockType*>(mock);
+}
+
 }  // namespace internal
 
 // The style guide prohibits "using" statements in a namespace scope
@@ -135,6 +187,8 @@ $var as = [[$for j, \
 $var matcher_arg_as = [[$for j, \
                      [[GMOCK_MATCHER_(tn, $j, __VA_ARGS__) gmock_a$j]]]]
 $var matcher_as = [[$for j, [[gmock_a$j]]]]
+$var anything_matchers = [[$for j, \
+                     [[::testing::A<GMOCK_ARG_(tn, $j, __VA_ARGS__)>()]]]]
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
 #define GMOCK_METHOD$i[[]]_(tn, constness, ct, Method, ...) \
   GMOCK_RESULT_(tn, __VA_ARGS__) ct Method( \
@@ -150,6 +204,12 @@ $var matcher_as = [[$for j, [[gmock_a$j]]]]
     GMOCK_MOCKER_($i, constness, Method).RegisterOwner(this); \
     return GMOCK_MOCKER_($i, constness, Method).With($matcher_as); \
   } \
+  ::testing::MockSpec<__VA_ARGS__> gmock_##Method( \
+      const ::testing::internal::WithoutMatchers&, \
+      constness ::testing::internal::Function<__VA_ARGS__>* ) const { \
+        return ::testing::internal::AdjustConstness_##constness(this)-> \
+            gmock_##Method($anything_matchers); \
+      } \
   mutable ::testing::FunctionMocker<__VA_ARGS__> GMOCK_MOCKER_($i, constness, Method)
 
 
