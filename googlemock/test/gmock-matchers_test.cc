@@ -6767,4 +6767,3 @@ TEST(NotTest, WorksOnMoveOnlyType) {
 }  // namespace gmock_matchers_test
 }  // namespace testing
 
-
