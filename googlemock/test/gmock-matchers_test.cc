@@ -59,13 +59,6 @@
 # include <forward_list>  // NOLINT
 #endif
 
-// Disable MSVC2015 warning for std::pair:
-// "decorated name length exceeded, name was truncated".
-#if defined _MSC_VER
-# pragma warning(push)
-# pragma warning(disable:4503)
-#endif
-
 #if GTEST_LANG_CXX11
 # include <type_traits>
 #endif
@@ -749,6 +742,13 @@ TEST(MatcherCastTest, NonImplicitlyConstructibleTypeWithOperatorEq) {
   EXPECT_FALSE(m3.Matches(239));
 }
 
+// ConvertibleFromAny does not work with MSVC. resulting in
+// error C2440: 'initializing': cannot convert from 'Eq' to 'M'
+// No constructor could take the source type, or constructor overload
+// resolution was ambiguous
+
+#if !defined _MSC_VER
+
 // The below ConvertibleFromAny struct is implicitly constructible from anything
 // and when in the same namespace can interact with other tests. In particular,
 // if it is in the same namespace as other tests and one removes
@@ -761,7 +761,7 @@ namespace convertible_from_any {
 struct ConvertibleFromAny {
   ConvertibleFromAny(int a_value) : value(a_value) {}
   template <typename T>
-  explicit ConvertibleFromAny(const T& /*a_value*/) : value(-1) {
+  ConvertibleFromAny(const T& /*a_value*/) : value(-1) {
     ADD_FAILURE() << "Conversion constructor called";
   }
   int value;
@@ -788,6 +788,8 @@ TEST(MatcherCastTest, FromConvertibleFromAny) {
   EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
 }
 }  // namespace convertible_from_any
+
+#endif  // !defined _MSC_VER
 
 struct IntReferenceWrapper {
   IntReferenceWrapper(const int& a_value) : value(&a_value) {}
@@ -893,6 +895,8 @@ TEST(SafeMatcherCastTest, FromSameType) {
   EXPECT_FALSE(m2.Matches(1));
 }
 
+#if !defined _MSC_VER
+
 namespace convertible_from_any {
 TEST(SafeMatcherCastTest, ConversionConstructorIsUsed) {
   Matcher<ConvertibleFromAny> m = SafeMatcherCast<ConvertibleFromAny>(1);
@@ -907,6 +911,8 @@ TEST(SafeMatcherCastTest, FromConvertibleFromAny) {
   EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
 }
 }  // namespace convertible_from_any
+
+#endif  // !defined _MSC_VER
 
 TEST(SafeMatcherCastTest, ValueIsNotCopied) {
   int n = 42;
@@ -2539,7 +2545,7 @@ TEST(AllOfTest, VariadicMatchesWhenAllMatch) {
   ::testing::AllOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
   Matcher<int> m = AllOf(Ne(1), Ne(2), Ne(3), Ne(4), Ne(5), Ne(6), Ne(7), Ne(8),
                          Ne(9), Ne(10), Ne(11));
-  EXPECT_THAT(Describe(m), EndsWith("and (isn't equal to 11))))))))))"));
+  EXPECT_THAT(Describe(m), EndsWith("and (isn't equal to 11)"));
   AllOfMatches(11, m);
   AllOfMatches(50, AllOf(Ne(1), Ne(2), Ne(3), Ne(4), Ne(5), Ne(6), Ne(7), Ne(8),
                          Ne(9), Ne(10), Ne(11), Ne(12), Ne(13), Ne(14), Ne(15),
@@ -2733,7 +2739,7 @@ TEST(AnyOfTest, VariadicMatchesWhenAnyMatches) {
   // on ADL.
   Matcher<int> m = ::testing::AnyOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
 
-  EXPECT_THAT(Describe(m), EndsWith("or (is equal to 11))))))))))"));
+  EXPECT_THAT(Describe(m), EndsWith("or (is equal to 11)"));
   AnyOfMatches(11, m);
   AnyOfMatches(50, AnyOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
                          11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
@@ -6761,6 +6767,3 @@ TEST(NotTest, WorksOnMoveOnlyType) {
 }  // namespace gmock_matchers_test
 }  // namespace testing
 
-#if defined_MSC_VER
-# pragma warning(pop)
-#endif
