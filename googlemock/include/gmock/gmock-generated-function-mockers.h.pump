@@ -119,7 +119,7 @@ class FunctionMocker<R($As)> : public
 //     // error when trying to resolve between this and overload 4 in
 //     // 'gmock_GetName(WithoutMatchers(), nullptr)'.
 //     MockSpec<string&()> gmock_GetName(
-//         const WithoutMatchers&, const Function<string&()>*) const {
+//         const WithoutMatchers&, const Function<string&()>*) const {
 //       // Removes const from this, calls overload 1
 //       return AdjustConstness_(this)->gmock_GetName();
 //     }
@@ -128,7 +128,7 @@ class FunctionMocker<R($As)> : public
 //     const string& gmock_GetName() const { … }
 //     // Overload 4
 //     MockSpec<const string&()> gmock_GetName(
-//         const WithoutMatchers&, const Function<const string&()>*) const {
+//         const WithoutMatchers&, const Function<const string&()>*) const {
 //       // Does not remove const, calls overload 3
 //       return AdjustConstness_const(this)->gmock_GetName();
 //     }
@@ -139,7 +139,7 @@ const MockType* AdjustConstness_const(const MockType* mock) {
   return mock;
 }
 
-// Removes const from and returns the given pointer; this is a helper for the
+// Removes const from and returns the given pointer; this is a helper for the 
 // expectation setter method for parameterless matchers.
 template <typename MockType>
 MockType* AdjustConstness_(const MockType* mock) {
