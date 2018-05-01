@@ -62,6 +62,11 @@
 #  include <spawn.h>
 # endif  // GTEST_OS_QNX
 
+# if GTEST_OS_FUCHSIA
+#  include <launchpad/launchpad.h>
+#  include <zircon/syscalls.h>
+# endif  // GTEST_OS_FUCHSIA
+
 #endif  // GTEST_HAS_DEATH_TEST
 
 #include "gtest/gtest-message.h"
@@ -127,7 +132,7 @@ static bool g_in_fast_death_test_child = false;
 // tests.  IMPORTANT: This is an internal utility.  Using it may break the
 // implementation of death tests.  User code MUST NOT use it.
 bool InDeathTestChild() {
-# if GTEST_OS_WINDOWS
+# if GTEST_OS_WINDOWS || GTEST_OS_FUCHSIA
 
   // On Windows, death tests are thread-safe regardless of the value of the
   // death_test_style flag.
@@ -216,7 +221,7 @@ bool ExitedUnsuccessfully(int exit_status) {
   return !ExitedWithCode(0)(exit_status);
 }
 
-# if !GTEST_OS_WINDOWS
+# if !GTEST_OS_WINDOWS && !GTEST_OS_FUCHSIA
 // Generates a textual failure message when a death test finds more than
 // one thread running, or cannot determine the number of threads, prior
 // to executing the given statement.  It is the responsibility of the
@@ -781,7 +786,178 @@ DeathTest::TestRole WindowsDeathTest::AssumeRole() {
   set_spawned(true);
   return OVERSEE_TEST;
 }
-# else  // We are not on Windows.
+
+# elif GTEST_OS_FUCHSIA
+
+class FuchsiaDeathTest : public DeathTestImpl {
+ public:
+  FuchsiaDeathTest(const char* a_statement,
+                   const RE* a_regex,
+                   const char* file,
+                   int line)
+      : DeathTestImpl(a_statement, a_regex), file_(file), line_(line) {}
+
+  // All of these virtual functions are inherited from DeathTest.
+  virtual int Wait();
+  virtual TestRole AssumeRole();
+
+ private:
+  // The name of the file in which the death test is located.
+  const char* const file_;
+  // The line number on which the death test is located.
+  const int line_;
+
+  zx_handle_t child_process_;
+  // zx_handle_t crash_port_;
+};
+
+// Utility class for accumulating command-line arguments.
+class Arguments {
+ public:
+  Arguments() {
+    args_.push_back(NULL);
+  }
+
+  ~Arguments() {
+    for (std::vector<char*>::iterator i = args_.begin(); i != args_.end();
+         ++i) {
+      free(*i);
+    }
+  }
+  void AddArgument(const char* argument) {
+    args_.insert(args_.end() - 1, posix::StrDup(argument));
+  }
+
+  template <typename Str>
+  void AddArguments(const ::std::vector<Str>& arguments) {
+    for (typename ::std::vector<Str>::const_iterator i = arguments.begin();
+         i != arguments.end();
+         ++i) {
+      args_.insert(args_.end() - 1, posix::StrDup(i->c_str()));
+    }
+  }
+  char* const* Argv() {
+    return &args_[0];
+  }
+
+ private:
+  std::vector<char*> args_;
+};
+
+// Waits for the child in a death test to exit, returning its exit
+// status, or 0 if no child process exists.  As a side effect, sets the
+// outcome data member.
+int FuchsiaDeathTest::Wait() {
+  if (!spawned())
+    return 0;
+
+  ReadAndInterpretStatusByte();
+
+  // Wait for child process to terminate.
+  zx_status_t status_zx;
+  zx_signals_t signals;
+  status_zx = zx_object_wait_one(
+    child_process_,
+    ZX_PROCESS_TERMINATED,
+    ZX_TIME_INFINITE,
+    &signals);
+  GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
+
+  // Do we need this?
+  // // Attempt to read the crash port.
+  // zx_port_packet_t packet;
+  // status = zx_port_wait(crash_port_, past, &packet, 1)
+  // if (status == ZX_ERR_TIMED_OUT) {
+  //   // Process did not crash.
+  //   set_outcome(LIVED);
+  //   return status();
+  // }
+
+  zx_info_process_t buffer;
+  size_t actual;
+  size_t avail;
+  status_zx = zx_object_get_info(child_process_, ZX_INFO_PROCESS, &buffer, sizeof(buffer), &actual, &avail);
+  GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
+
+  GTEST_DEATH_TEST_CHECK_(buffer.exited);
+  set_status(buffer.return_code);
+  return status();
+}
+
+// The AssumeRole process for a Fuchsia death test.  It creates a child
+// process with the same executable as the current process to run the
+// death test.  The child process is given the --gtest_filter and
+// --gtest_internal_run_death_test flags such that it knows to run the
+// current death test only.
+DeathTest::TestRole FuchsiaDeathTest::AssumeRole() {
+  const UnitTestImpl* const impl = GetUnitTestImpl();
+  const InternalRunDeathTestFlag* const flag =
+      impl->internal_run_death_test_flag();
+  const TestInfo* const info = impl->current_test_info();
+  const int death_test_index = info->result()->death_test_count();
+
+  if (flag != NULL) {
+    // ParseInternalRunDeathTestFlag() has performed all the necessary
+    // processing.
+    set_write_fd(flag->write_fd());
+    return EXECUTE_TEST;
+  }
+
+  // Create the crash port to report on.
+  // zx_status_t status = zx_port_create(0, &crash_port_);
+  // GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
+
+  CaptureStderr();
+  // Flush the log buffers since the log streams are shared with the child.
+  FlushInfoLog();
+
+  // Build the child process launcher.
+  launchpad_t* lp;
+  zx_status_t status;
+  status = launchpad_create(ZX_HANDLE_INVALID, "processname", &lp);
+  GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
+
+  // Build the writing pipe for the child.
+  int write_fd;
+  status = launchpad_add_pipe(lp, &write_fd, read_fd());
+  GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
+
+  // Build the child command line.
+  const std::string filter_flag =
+      std::string("--") + GTEST_FLAG_PREFIX_ + kFilterFlag + "="
+      + info->test_case_name() + "." + info->name();
+  const std::string internal_flag =
+      std::string("--") + GTEST_FLAG_PREFIX_ + kInternalRunDeathTestFlag + "="
+      + file_ + "|" + StreamableToString(line_) + "|"
+      + StreamableToString(death_test_index) + "|"
+      + StreamableToString(write_fd);
+  Arguments args;
+  args.AddArguments(GetInjectableArgvs());
+  args.AddArgument(filter_flag.c_str());
+  args.AddArgument(internal_flag.c_str());
+
+  status = launchpad_load_from_file(lp, args.Argv()[0]);
+  GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
+  status = launchpad_set_args(lp, GetArgvs().size() + 2, args.Argv());
+  GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
+
+  // Launch the child process.
+  zx_handle_t proc;
+  const char* errmsg;
+  status = launchpad_go(lp, &proc, &errmsg);
+  GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
+  child_process_ = proc;
+
+  // bind the crash port. This should be moved to before launching the process.
+  // FIXME: I don't think this is necessary
+  // status = zx_task_bind_exception_port(child_process_, crash_port_, 0xabcabc, 0);
+  // GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
+
+  set_spawned(true);
+  return OVERSEE_TEST;
+}
+
+#else  // We are neither on Windows, nor on Fuchsia.
 
 // ForkingDeathTest provides implementations for most of the abstract
 // methods of the DeathTest interface.  Only the AssumeRole method is
@@ -1202,6 +1378,13 @@ bool DefaultDeathTestFactory::Create(const char* statement, const RE* regex,
   if (GTEST_FLAG(death_test_style) == "threadsafe" ||
       GTEST_FLAG(death_test_style) == "fast") {
     *test = new WindowsDeathTest(statement, regex, file, line);
+  }
+
+# elif GTEST_OS_FUCHSIA
+
+  if (GTEST_FLAG(death_test_style) == "threadsafe" ||
+      GTEST_FLAG(death_test_style) == "fast") {
+    *test = new FuchsiaDeathTest(statement, regex, file, line);
   }
 
 # else
