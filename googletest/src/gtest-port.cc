@@ -63,6 +63,10 @@
 # include <sys/types.h>
 #endif  // GTEST_OS_AIX
 
+#if GTEST_OS_FUCHSIA
+# include <zircon/syscalls.h>
+#endif
+
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest-message.h"
 #include "gtest/internal/gtest-internal.h"
@@ -154,6 +158,12 @@ size_t GetThreadCount() {
   } else {
     return 0;
   }
+}
+
+#elif GTEST_OS_FUCHSIA
+
+size_t GetThreadCount() {
+  return static_cast<size_t>(zx_system_get_num_cpus());
 }
 
 #else
