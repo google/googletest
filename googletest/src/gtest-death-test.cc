@@ -1229,21 +1229,9 @@ struct ExecDeathTestArgs {
   int close_fd;       // File descriptor to close; the read end of a pipe
 };
 
-#  if GTEST_OS_MAC
-inline char** GetEnviron() {
-  // When Google Test is built as a framework on MacOS X, the environ variable
-  // is unavailable. Apple's documentation (man environ) recommends using
-  // _NSGetEnviron() instead.
-  return *_NSGetEnviron();
-}
-#  else
-// Some POSIX platforms expect you to declare environ. extern "C" makes
-// it reside in the global namespace.
+#  if GTEST_OS_QNX
 extern "C" char** environ;
-inline char** GetEnviron() { return environ; }
-#  endif  // GTEST_OS_MAC
-
-#  if !GTEST_OS_QNX
+#  else  // GTEST_OS_QNX
 // The main function for a threadsafe-style death test child process.
 // This function is called in a clone()-ed process and thus must avoid
 // any potentially unsafe operations like malloc or libc functions.
@@ -1263,18 +1251,18 @@ static int ExecDeathTestChildMain(void* child_arg) {
     return EXIT_FAILURE;
   }
 
-  // We can safely call execve() as it's a direct system call.  We
+  // We can safely call execv() as it's almost a direct system call. We
   // cannot use execvp() as it's a libc function and thus potentially
-  // unsafe.  Since execve() doesn't search the PATH, the user must
+  // unsafe.  Since execv() doesn't search the PATH, the user must
   // invoke the test program via a valid path that contains at least
   // one path separator.
-  execve(args->argv[0], args->argv, GetEnviron());
-  DeathTestAbort(std::string("execve(") + args->argv[0] + ", ...) in " +
+  execv(args->argv[0], args->argv);
+  DeathTestAbort(std::string("execv(") + args->argv[0] + ", ...) in " +
                  original_dir + " failed: " +
                  GetLastErrnoDescription());
   return EXIT_FAILURE;
 }
-#  endif  // !GTEST_OS_QNX
+#  endif  // GTEST_OS_QNX
 
 #  if GTEST_HAS_CLONE
 // Two utility routines that together determine the direction the stack
