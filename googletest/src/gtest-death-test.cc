@@ -63,6 +63,7 @@
 # endif  // GTEST_OS_QNX
 
 # if GTEST_OS_FUCHSIA
+#  include <fdio/io.h>
 #  include <launchpad/launchpad.h>
 #  include <zircon/syscalls.h>
 # endif  // GTEST_OS_FUCHSIA
@@ -543,7 +544,9 @@ bool DeathTestImpl::Passed(bool status_ok) {
   if (!spawned())
     return false;
 
-  const std::string error_message = GetCapturedStderr();
+  // FIXME: This isn't working.
+  //const std::string error_message = GetCapturedStderr();
+  const std::string error_message = "";
 
   bool success = false;
   Message buffer;
@@ -808,7 +811,7 @@ class FuchsiaDeathTest : public DeathTestImpl {
   const int line_;
 
   zx_handle_t child_process_;
-  // zx_handle_t crash_port_;
+  zx_handle_t pipe_handle_;
 };
 
 // Utility class for accumulating command-line arguments.
@@ -840,6 +843,10 @@ class Arguments {
     return &args_[0];
   }
 
+  int size() {
+    return args_.size() - 1;
+  }
+
  private:
   std::vector<char*> args_;
 };
@@ -851,8 +858,6 @@ int FuchsiaDeathTest::Wait() {
   if (!spawned())
     return 0;
 
-  ReadAndInterpretStatusByte();
-
   // Wait for child process to terminate.
   zx_status_t status_zx;
   zx_signals_t signals;
@@ -863,15 +868,11 @@ int FuchsiaDeathTest::Wait() {
     &signals);
   GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
 
-  // Do we need this?
-  // // Attempt to read the crash port.
-  // zx_port_packet_t packet;
-  // status = zx_port_wait(crash_port_, past, &packet, 1)
-  // if (status == ZX_ERR_TIMED_OUT) {
-  //   // Process did not crash.
-  //   set_outcome(LIVED);
-  //   return status();
-  // }
+  // Close the pipe.
+  status_zx = zx_handle_close(pipe_handle_);
+  GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
+
+  ReadAndInterpretStatusByte();
 
   zx_info_process_t buffer;
   size_t actual;
@@ -903,17 +904,21 @@ DeathTest::TestRole FuchsiaDeathTest::AssumeRole() {
     return EXECUTE_TEST;
   }
 
-  // Create the crash port to report on.
-  // zx_status_t status = zx_port_create(0, &crash_port_);
-  // GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
+  // FIXME: This isn't working on Fuchsia.
+  // CaptureStderr();
 
-  CaptureStderr();
   // Flush the log buffers since the log streams are shared with the child.
   FlushInfoLog();
 
+  // Create the pipe
+  zx_status_t status;
+  uint32_t id;
+  status = fdio_pipe_half(&pipe_handle_, &id);
+  GTEST_DEATH_TEST_CHECK_(status >= 0);
+  set_read_fd(status);
+
   // Build the child process launcher.
   launchpad_t* lp;
-  zx_status_t status;
   status = launchpad_create(ZX_HANDLE_INVALID, "processname", &lp);
   GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
 
@@ -922,7 +927,7 @@ DeathTest::TestRole FuchsiaDeathTest::AssumeRole() {
   status = launchpad_add_pipe(lp, &write_fd, read_fd());
   GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
 
-  // Build the child command line.
+  // Build the child process command line.
   const std::string filter_flag =
       std::string("--") + GTEST_FLAG_PREFIX_ + kFilterFlag + "="
       + info->test_case_name() + "." + info->name();
@@ -936,22 +941,15 @@ DeathTest::TestRole FuchsiaDeathTest::AssumeRole() {
   args.AddArgument(filter_flag.c_str());
   args.AddArgument(internal_flag.c_str());
 
+  // Set the command line arguments.
   status = launchpad_load_from_file(lp, args.Argv()[0]);
   GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
-  status = launchpad_set_args(lp, GetArgvs().size() + 2, args.Argv());
+  status = launchpad_set_args(lp, args.size(), args.Argv());
   GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
 
   // Launch the child process.
-  zx_handle_t proc;
-  const char* errmsg;
-  status = launchpad_go(lp, &proc, &errmsg);
+  status = launchpad_go(lp, &child_process_, nullptr);
   GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
-  child_process_ = proc;
-
-  // bind the crash port. This should be moved to before launching the process.
-  // FIXME: I don't think this is necessary
-  // status = zx_task_bind_exception_port(child_process_, crash_port_, 0xabcabc, 0);
-  // GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
 
   set_spawned(true);
   return OVERSEE_TEST;
