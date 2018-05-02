@@ -3704,6 +3704,7 @@ MATCHER_P(FieldIIs, inner_matcher, "") {
   return ExplainMatchResult(inner_matcher, arg.i, result_listener);
 }
 
+#if GTEST_HAS_RTTI
 TEST(WhenDynamicCastToTest, SameType) {
   Derived derived;
   derived.i = 4;
@@ -3761,12 +3762,8 @@ TEST(WhenDynamicCastToTest, AmbiguousCast) {
 
 TEST(WhenDynamicCastToTest, Describe) {
   Matcher<Base*> matcher = WhenDynamicCastTo<Derived*>(Pointee(_));
-#if GTEST_HAS_RTTI
   const std::string prefix =
       "when dynamic_cast to " + internal::GetTypeName<Derived*>() + ", ";
-#else  // GTEST_HAS_RTTI
-  const std::string prefix = "when dynamic_cast, ";
-#endif  // GTEST_HAS_RTTI
   EXPECT_EQ(prefix + "points to a value that is anything", Describe(matcher));
   EXPECT_EQ(prefix + "does not point to a value that is anything",
             DescribeNegation(matcher));
@@ -3799,6 +3796,7 @@ TEST(WhenDynamicCastToTest, BadReference) {
   Base& as_base_ref = derived;
   EXPECT_THAT(as_base_ref, Not(WhenDynamicCastTo<const OtherDerived&>(_)));
 }
+#endif  // GTEST_HAS_RTTI
 
 // Minimal const-propagating pointer.
 template <typename T>
