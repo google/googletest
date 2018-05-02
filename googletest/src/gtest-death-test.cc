@@ -245,6 +245,13 @@ static const char kDeathTestReturned = 'R';
 static const char kDeathTestThrew = 'T';
 static const char kDeathTestInternalError = 'I';
 
+#if GTEST_OS_FUCHSIA
+
+// File descriptor used for the pipe in the child process.
+static const int kFuchsiaReadPipeFd = 3;
+
+#endif
+
 // An enumeration describing all of the possible ways that a death test can
 // conclude.  DIED means that the process died while executing the test
 // code; LIVED means that process lived beyond the end of the test code;
@@ -544,9 +551,7 @@ bool DeathTestImpl::Passed(bool status_ok) {
   if (!spawned())
     return false;
 
-  // FIXME: This isn't working.
-  //const std::string error_message = GetCapturedStderr();
-  const std::string error_message = "";
+  const std::string error_message = GetCapturedStderr();
 
   bool success = false;
   Message buffer;
@@ -811,7 +816,6 @@ class FuchsiaDeathTest : public DeathTestImpl {
   const int line_;
 
   zx_handle_t child_process_;
-  zx_handle_t pipe_handle_;
 };
 
 // Utility class for accumulating command-line arguments.
@@ -868,16 +872,16 @@ int FuchsiaDeathTest::Wait() {
     &signals);
   GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
 
-  // Close the pipe.
-  status_zx = zx_handle_close(pipe_handle_);
-  GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
-
   ReadAndInterpretStatusByte();
 
   zx_info_process_t buffer;
-  size_t actual;
-  size_t avail;
-  status_zx = zx_object_get_info(child_process_, ZX_INFO_PROCESS, &buffer, sizeof(buffer), &actual, &avail);
+  status_zx = zx_object_get_info(
+      child_process_,
+      ZX_INFO_PROCESS,
+      &buffer,
+      sizeof(buffer),
+      nullptr,
+      nullptr);
   GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
 
   GTEST_DEATH_TEST_CHECK_(buffer.exited);
@@ -900,32 +904,13 @@ DeathTest::TestRole FuchsiaDeathTest::AssumeRole() {
   if (flag != NULL) {
     // ParseInternalRunDeathTestFlag() has performed all the necessary
     // processing.
-    set_write_fd(flag->write_fd());
+    set_write_fd(kFuchsiaReadPipeFd);
     return EXECUTE_TEST;
   }
 
-  // FIXME: This isn't working on Fuchsia.
-  // CaptureStderr();
-
+  CaptureStderr();
   // Flush the log buffers since the log streams are shared with the child.
   FlushInfoLog();
-
-  // Create the pipe
-  zx_status_t status;
-  uint32_t id;
-  status = fdio_pipe_half(&pipe_handle_, &id);
-  GTEST_DEATH_TEST_CHECK_(status >= 0);
-  set_read_fd(status);
-
-  // Build the child process launcher.
-  launchpad_t* lp;
-  status = launchpad_create(ZX_HANDLE_INVALID, "processname", &lp);
-  GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
-
-  // Build the writing pipe for the child.
-  int write_fd;
-  status = launchpad_add_pipe(lp, &write_fd, read_fd());
-  GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
 
   // Build the child process command line.
   const std::string filter_flag =
@@ -933,19 +918,34 @@ DeathTest::TestRole FuchsiaDeathTest::AssumeRole() {
       + info->test_case_name() + "." + info->name();
   const std::string internal_flag =
       std::string("--") + GTEST_FLAG_PREFIX_ + kInternalRunDeathTestFlag + "="
-      + file_ + "|" + StreamableToString(line_) + "|"
-      + StreamableToString(death_test_index) + "|"
-      + StreamableToString(write_fd);
+      + file_ + "|"
+      + StreamableToString(line_) + "|"
+      + StreamableToString(death_test_index);
   Arguments args;
   args.AddArguments(GetInjectableArgvs());
   args.AddArgument(filter_flag.c_str());
   args.AddArgument(internal_flag.c_str());
+
+  // Build the child process launcher.
+  zx_status_t status;
+  launchpad_t* lp;
+  status = launchpad_create(ZX_HANDLE_INVALID, args.Argv()[0], &lp);
+  GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
+
+  // Build the pipe for communication with the child.
+  int read_fd;
+  status = launchpad_add_pipe(lp, &read_fd, 3);
+  GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
+  set_read_fd(read_fd);
 
   // Set the command line arguments.
   status = launchpad_load_from_file(lp, args.Argv()[0]);
   GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
   status = launchpad_set_args(lp, args.size(), args.Argv());
   GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
+
+  // Clone all the things (environment, stdio, namespace, ...).
+  launchpad_clone(lp, LP_CLONE_ALL);
 
   // Launch the child process.
   status = launchpad_go(lp, &child_process_, nullptr);
@@ -1505,6 +1505,16 @@ InternalRunDeathTestFlag* ParseInternalRunDeathTestFlag() {
   write_fd = GetStatusFileDescriptor(parent_process_id,
                                      write_handle_as_size_t,
                                      event_handle_as_size_t);
+
+# elif GTEST_OS_FUCHSIA
+
+  if (fields.size() != 3
+      || !ParseNaturalNumber(fields[1], &line)
+      || !ParseNaturalNumber(fields[2], &index)) {
+    DeathTestAbort("Bad --gtest_internal_run_death_test flag: "
+        + GTEST_FLAG(internal_run_death_test));
+  }
+
 # else
 
   if (fields.size() != 4
