@@ -934,7 +934,7 @@ DeathTest::TestRole FuchsiaDeathTest::AssumeRole() {
 
   // Build the pipe for communication with the child.
   int read_fd;
-  status = launchpad_add_pipe(lp, &read_fd, 3);
+  status = launchpad_add_pipe(lp, &read_fd, kFuchsiaReadPipeFd);
   GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
   set_read_fd(read_fd);
 
