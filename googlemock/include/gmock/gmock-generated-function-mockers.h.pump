@@ -175,8 +175,14 @@ using internal::FunctionMocker;
 
 // The variable for mocking the given method.
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
+#define GMOCK_SUFFIXED_MOCKER_(arity, constness, Method, suffix) \
+    GTEST_CONCAT_TOKEN_(gmock##constness##arity##_##Method##_, suffix)
+
+// The variable for mocking the given method.
+// INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
 #define GMOCK_MOCKER_(arity, constness, Method) \
-    GTEST_CONCAT_TOKEN_(gmock##constness##arity##_##Method##_, __LINE__)
+    GMOCK_SUFFIXED_MOCKER_(arity, constness, Method, __LINE__)
+
 
 
 $for i [[
@@ -212,10 +218,63 @@ $var anything_matchers = [[$for j, \
       } \
   mutable ::testing::FunctionMocker<__VA_ARGS__> GMOCK_MOCKER_($i, constness, Method)
 
+// --------------- SPLIT GMOCK MACROS: ---------------------
+
+#define GMOCK_DECLARE_METHOD$i[[]]_(tn, constness, ct, Method, ...) \
+  GMOCK_RESULT_(tn, __VA_ARGS__) ct Method( \
+      $arg_as) constness; \
+  ::testing::MockSpec<__VA_ARGS__> \
+      gmock_##Method($matcher_arg_as) constness; \
+  ::testing::MockSpec<__VA_ARGS__> gmock_##Method( \
+      const ::testing::internal::WithoutMatchers&, \
+      constness ::testing::internal::Function<__VA_ARGS__>* ) const; \
+  mutable ::testing::FunctionMocker<__VA_ARGS__> \
+    GMOCK_MOCKER_($i, constness, Method); \
+  template <typename Dummy, typename... Args> \
+  struct GMOCK_SUFFIXED_MOCKER_($i, constness, Method, accessor); \
+  template <typename Dummy> \
+  struct GMOCK_SUFFIXED_MOCKER_($i, constness, Method, accessor)<Dummy, __VA_ARGS__> \
+  { \
+    template <typename T> \
+    static inline ::testing::FunctionMocker<__VA_ARGS__>& mocker (T *obj) \
+    { \
+        return obj->GMOCK_MOCKER_($i, constness, Method); \
+    } \
+  }
+
+
+#define GMOCK_DEFINE_METHOD$i[[]]_(tn, constness, ct, ClassName, Method, ...) \
+  GMOCK_RESULT_(tn, __VA_ARGS__) ct \
+      ClassName::Method($arg_as) constness { \
+    GTEST_COMPILE_ASSERT_((::testing::tuple_size< \
+        tn ::testing::internal::Function<__VA_ARGS__>::ArgumentTuple>::value == $i), \
+        this_method_does_not_take_$i[[]]_argument[[$if i != 1 [[s]]]]); \
+    auto& mocker = GMOCK_SUFFIXED_MOCKER_($i, constness, Method, accessor)<void, __VA_ARGS__>::mocker(this); \
+    mocker.SetOwnerAndName(this, #Method); \
+    return mocker.Invoke($as); \
+  } \
+  ::testing::MockSpec<__VA_ARGS__> \
+      ClassName::gmock_##Method($matcher_arg_as) constness { \
+    auto& mocker = GMOCK_SUFFIXED_MOCKER_($i, constness, Method, accessor)<void, __VA_ARGS__>::mocker(this); \
+    mocker.RegisterOwner(this); \
+    return mocker.With($matcher_as); \
+  } \
+  ::testing::MockSpec<__VA_ARGS__> \
+      ClassName::gmock_##Method( \
+    const ::testing::internal::WithoutMatchers&, \
+    constness ::testing::internal::Function<__VA_ARGS__>* ) const { \
+        return ::testing::internal::AdjustConstness_##constness(this)-> \
+	    gmock_##Method($anything_matchers);	\
+  }
 
 ]]
+
+
 $for i [[
 #define MOCK_METHOD$i(m, ...) GMOCK_METHOD$i[[]]_(, , , m, __VA_ARGS__)
+
+#define MOCK_DECLARE_METHOD$i(m, ...) GMOCK_DECLARE_METHOD$i[[]]_(, , , m, __VA_ARGS__)
+#define MOCK_DEFINE_METHOD$i(class_name, m, ...) GMOCK_DEFINE_METHOD$i[[]]_(, , , class_name, m, __VA_ARGS__)
 
 ]]
 
@@ -223,11 +282,17 @@ $for i [[
 $for i [[
 #define MOCK_CONST_METHOD$i(m, ...) GMOCK_METHOD$i[[]]_(, const, , m, __VA_ARGS__)
 
+#define MOCK_CONST_DECLARE_METHOD$i(m, ...) GMOCK_DECLARE_METHOD$i[[]]_(, const, , m, __VA_ARGS__)
+#define MOCK_CONST_DEFINE_METHOD$i(class_name, m, ...) GMOCK_DEFINE_METHOD$i[[]]_(, const, , class_name, m, __VA_ARGS__)
+
 ]]
 
 
 $for i [[
 #define MOCK_METHOD$i[[]]_T(m, ...) GMOCK_METHOD$i[[]]_(typename, , , m, __VA_ARGS__)
+
+#define MOCK_DECLARE_METHOD$i[[]]_T(m, ...) GMOCK_DECLARE_METHOD$i[[]]_(typename, , , m, __VA_ARGS__)
+#define MOCK_DEFINE_METHOD$i[[]]_T(class_name, m, ...) GMOCK_DEFINE_METHOD$i[[]]_(typename, , , class_name, m, __VA_ARGS__)
 
 ]]
 

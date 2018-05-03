@@ -96,6 +96,9 @@ class FooInterface {
   virtual int OverloadedOnArgumentType(int n) = 0;
   virtual char OverloadedOnArgumentType(char c) = 0;
 
+  virtual int SplitDefinitionOverloadedOnArgumentType(int i) = 0;
+  virtual double SplitDefinitionOverloadedOnArgumentType(double l) = 0;
+
   virtual int OverloadedOnConstness() = 0;
   virtual char OverloadedOnConstness() const = 0;
 
@@ -160,6 +163,10 @@ class MockFoo : public FooInterface {
   MOCK_METHOD1(TypeWithComma,
                int(const std::map<int, std::string>&));  // NOLINT
 
+  // Tests for split declaration/definition of mock methods
+  MOCK_DECLARE_METHOD1(SplitDefinitionOverloadedOnArgumentType, int(int));  // NOLINT
+  MOCK_DECLARE_METHOD1(SplitDefinitionOverloadedOnArgumentType, double(double));  // NOLINT
+
 #if GTEST_OS_WINDOWS
   MOCK_METHOD0_WITH_CALLTYPE(STDMETHODCALLTYPE, CTNullary, int());
   MOCK_METHOD1_WITH_CALLTYPE(STDMETHODCALLTYPE, CTUnary, bool(int));
@@ -180,6 +187,9 @@ class MockFoo : public FooInterface {
 #ifdef _MSC_VER
 # pragma warning(pop)
 #endif
+
+MOCK_DEFINE_METHOD1(MockFoo, SplitDefinitionOverloadedOnArgumentType, int(int));  // NOLINT
+MOCK_DEFINE_METHOD1(MockFoo, SplitDefinitionOverloadedOnArgumentType, double(double));  // NOLINT
 
 class FunctionMockerTest : public testing::Test {
  protected:
@@ -349,6 +359,18 @@ TEST_F(FunctionMockerTest, MocksReturnTypeWithCommaAndCallType) {
 
   EXPECT_EQ(a_map, mock_foo_.CTReturnTypeWithComma());
 }
+
+// Tests splitting declaration and definition of mocked overloaded functions.
+TEST_F(FunctionMockerTest, MocksSplitDefinitionResolvesOverloadsOnArgumentType) {
+  EXPECT_CALL(mock_foo_, SplitDefinitionOverloadedOnArgumentType(An<int>()))
+      .WillOnce(Return(1));
+  EXPECT_CALL(mock_foo_, SplitDefinitionOverloadedOnArgumentType(TypedEq<double>(24)))
+      .WillOnce(Return(42));
+
+  EXPECT_EQ(1, foo_->OverloadedOnArgumentType(0));
+  EXPECT_EQ(42, foo_->OverloadedOnArgumentType(24));
+}
+
 
 #endif  // GTEST_OS_WINDOWS
 
