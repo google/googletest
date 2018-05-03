@@ -156,7 +156,7 @@ ExitedWithCode::ExitedWithCode(int exit_code) : exit_code_(exit_code) {
 
 // ExitedWithCode function-call operator.
 bool ExitedWithCode::operator()(int exit_status) const {
-# if GTEST_OS_WINDOWS
+# if GTEST_OS_WINDOWS || GTEST_OS_FUCHSIA
 
   return exit_status == exit_code_;
 
@@ -167,7 +167,7 @@ bool ExitedWithCode::operator()(int exit_status) const {
 # endif  // GTEST_OS_WINDOWS
 }
 
-# if !GTEST_OS_WINDOWS
+# if !GTEST_OS_WINDOWS && !GTEST_OS_FUCHSIA
 // KilledBySignal constructor.
 KilledBySignal::KilledBySignal(int signum) : signum_(signum) {
 }
@@ -195,7 +195,7 @@ namespace internal {
 static std::string ExitSummary(int exit_code) {
   Message m;
 
-# if GTEST_OS_WINDOWS
+# if GTEST_OS_WINDOWS || GTEST_OS_FUCHSIA
 
   m << "Exited with exit status " << exit_code;
 
@@ -866,10 +866,10 @@ int FuchsiaDeathTest::Wait() {
   zx_status_t status_zx;
   zx_signals_t signals;
   status_zx = zx_object_wait_one(
-    child_process_,
-    ZX_PROCESS_TERMINATED,
-    ZX_TIME_INFINITE,
-    &signals);
+      child_process_,
+      ZX_PROCESS_TERMINATED,
+      ZX_TIME_INFINITE,
+      &signals);
   GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
 
   ReadAndInterpretStatusByte();
