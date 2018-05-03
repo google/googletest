@@ -135,8 +135,8 @@ static bool g_in_fast_death_test_child = false;
 bool InDeathTestChild() {
 # if GTEST_OS_WINDOWS || GTEST_OS_FUCHSIA
 
-  // On Windows, death tests are thread-safe regardless of the value of the
-  // death_test_style flag.
+  // On Windows and Fuchsia, death tests are thread-safe regardless of the value
+  // of the death_test_style flag.
   return !GTEST_FLAG(internal_run_death_test).empty();
 
 # else
@@ -164,7 +164,7 @@ bool ExitedWithCode::operator()(int exit_status) const {
 
   return WIFEXITED(exit_status) && WEXITSTATUS(exit_status) == exit_code_;
 
-# endif  // GTEST_OS_WINDOWS
+# endif  // GTEST_OS_WINDOWS || GTEST_OS_FUCHSIA
 }
 
 # if !GTEST_OS_WINDOWS && !GTEST_OS_FUCHSIA
@@ -211,7 +211,7 @@ static std::string ExitSummary(int exit_code) {
     m << " (core dumped)";
   }
 #  endif
-# endif  // GTEST_OS_WINDOWS
+# endif  // GTEST_OS_WINDOWS || GTEST_OS_FUCHSIA
 
   return m.GetString();
 }
@@ -237,7 +237,7 @@ static std::string DeathTestThreadWarning(size_t thread_count) {
     msg << "detected " << thread_count << " threads.";
   return msg.GetString();
 }
-# endif  // !GTEST_OS_WINDOWS
+# endif  // !GTEST_OS_WINDOWS && !GTEST_OS_FUCHSIA
 
 // Flag characters for reporting a death test that did not die.
 static const char kDeathTestLived = 'L';

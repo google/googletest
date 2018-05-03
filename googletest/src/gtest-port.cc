@@ -66,7 +66,7 @@
 #if GTEST_OS_FUCHSIA
 # include <zircon/process.h>
 # include <zircon/syscalls.h>
-#endif
+#endif  // GTEST_OS_FUCHSIA
 
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest-message.h"
