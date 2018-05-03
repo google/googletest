@@ -64,6 +64,7 @@
 #endif  // GTEST_OS_AIX
 
 #if GTEST_OS_FUCHSIA
+# include <zircon/process.h>
 # include <zircon/syscalls.h>
 #endif
 
@@ -163,7 +164,20 @@ size_t GetThreadCount() {
 #elif GTEST_OS_FUCHSIA
 
 size_t GetThreadCount() {
-  return static_cast<size_t>(zx_system_get_num_cpus());
+  int dummy_buffer;
+  size_t avail;
+  zx_status_t status = zx_object_get_info(
+      zx_process_self(),
+      ZX_INFO_PROCESS_THREADS,
+      &dummy_buffer,
+      0,
+      nullptr,
+      &avail);
+  if(status == ZX_OK) {
+    return avail;
+  } else {
+    return 0;
+  }
 }
 
 #else
