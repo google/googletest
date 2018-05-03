@@ -173,7 +173,7 @@ size_t GetThreadCount() {
       0,
       nullptr,
       &avail);
-  if(status == ZX_OK) {
+  if (status == ZX_OK) {
     return avail;
   } else {
     return 0;
