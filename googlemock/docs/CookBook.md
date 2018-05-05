@@ -2229,13 +2229,20 @@ versus
 
 ## Mocking Methods That Use Move-Only Types ##
 
-C++11 introduced <em>move-only types</em>.  A move-only-typed value can be moved from one object to another, but cannot be copied.  `std::unique_ptr<T>` is probably the most commonly used move-only type.
+C++11 introduced *move-only types*. A move-only-typed value can be moved from
+one object to another, but cannot be copied. `std::unique_ptr<T>` is
+probably the most commonly used move-only type.
 
-Mocking a method that takes and/or returns move-only types presents some challenges, but nothing insurmountable.  This recipe shows you how you can do it.
+Mocking a method that takes and/or returns move-only types presents some
+challenges, but nothing insurmountable. This recipe shows you how you can do it.
+Note that the support for move-only method arguments was only introduced to
+gMock in April 2017; in older code, you may find more complex
+[workarounds](#LegacyMoveOnly) for lack of this feature.
 
-Let’s say we are working on a fictional project that lets one post and share snippets called “buzzes”.  Your code uses these types:
+Let’s say we are working on a fictional project that lets one post and share
+snippets called “buzzes”. Your code uses these types:
 
-```
+```cpp
 enum class AccessLevel { kInternal, kPublic };
 
 class Buzz {
@@ -2247,59 +2254,46 @@ class Buzz {
 class Buzzer {
  public:
   virtual ~Buzzer() {}
-  virtual std::unique_ptr<Buzz> MakeBuzz(const std::string& text) = 0;
-  virtual bool ShareBuzz(std::unique_ptr<Buzz> buzz, Time timestamp) = 0;
+  virtual std::unique_ptr<Buzz> MakeBuzz(StringPiece text) = 0;
+  virtual bool ShareBuzz(std::unique_ptr<Buzz> buzz, int64_t timestamp) = 0;
   ...
 };
 ```
 
-A `Buzz` object represents a snippet being posted.  A class that implements the `Buzzer` interface is capable of creating and sharing `Buzz`.  Methods in `Buzzer` may return a `unique_ptr<Buzz>` or take a `unique_ptr<Buzz>`.  Now we need to mock `Buzzer` in our tests.
+A `Buzz` object represents a snippet being posted. A class that implements the
+`Buzzer` interface is capable of creating and sharing `Buzz`es. Methods in
+`Buzzer` may return a `unique_ptr<Buzz>` or take a
+`unique_ptr<Buzz>`. Now we need to mock `Buzzer` in our tests.
 
-To mock a method that returns a move-only type, you just use the familiar `MOCK_METHOD` syntax as usual:
+To mock a method that accepts or returns move-only types, you just use the
+familiar `MOCK_METHOD` syntax as usual:
 
-```
+```cpp
 class MockBuzzer : public Buzzer {
  public:
-  MOCK_METHOD1(MakeBuzz, std::unique_ptr<Buzz>(const std::string& text));
-  …
+  MOCK_METHOD1(MakeBuzz, std::unique_ptr<Buzz>(StringPiece text));
+  MOCK_METHOD2(ShareBuzz, bool(std::unique_ptr<Buzz> buzz, int64_t timestamp));
 };
 ```
 
-However, if you attempt to use the same `MOCK_METHOD` pattern to mock a method that takes a move-only parameter, you’ll get a compiler error currently:
+Now that we have the mock class defined, we can use it in tests. In the
+following code examples, we assume that we have defined a `MockBuzzer` object
+named `mock_buzzer_`:
 
-```
-  // Does NOT compile!
-  MOCK_METHOD2(ShareBuzz, bool(std::unique_ptr<Buzz> buzz, Time timestamp));
-```
-
-While it’s highly desirable to make this syntax just work, it’s not trivial and the work hasn’t been done yet.  Fortunately, there is a trick you can apply today to get something that works nearly as well as this.
-
-The trick, is to delegate the `ShareBuzz()` method to a mock method (let’s call it `DoShareBuzz()`) that does not take move-only parameters:
-
-```
-class MockBuzzer : public Buzzer {
- public:
-  MOCK_METHOD1(MakeBuzz, std::unique_ptr<Buzz>(const std::string& text));
-  MOCK_METHOD2(DoShareBuzz, bool(Buzz* buzz, Time timestamp));
-  bool ShareBuzz(std::unique_ptr<Buzz> buzz, Time timestamp) {
-    return DoShareBuzz(buzz.get(), timestamp);
-  }
-};
-```
-
-Note that there's no need to define or declare `DoShareBuzz()` in a base class.  You only need to define it as a `MOCK_METHOD` in the mock class.
-
-Now that we have the mock class defined, we can use it in tests.  In the following code examples, we assume that we have defined a `MockBuzzer` object named `mock_buzzer_`:
-
-```
+```cpp
   MockBuzzer mock_buzzer_;
 ```
 
-First let’s see how we can set expectations on the `MakeBuzz()` method, which returns a `unique_ptr<Buzz>`.
+First let’s see how we can set expectations on the `MakeBuzz()` method, which
+returns a `unique_ptr<Buzz>`.
 
-As usual, if you set an expectation without an action (i.e. the `.WillOnce()` or `.WillRepeated()` clause), when that expectation fires, the default action for that method will be taken.  Since `unique_ptr<>` has a default constructor that returns a null `unique_ptr`, that’s what you’ll get if you don’t specify an action:
+As usual, if you set an expectation without an action (i.e. the `.WillOnce()` or
+`.WillRepeated()` clause), when that expectation fires, the default action for
+that method will be taken. Since `unique_ptr<>` has a default constructor
+that returns a null `unique_ptr`, that’s what you’ll get if you don’t specify an
+action:
 
-```
+```cpp
   // Use the default action.
   EXPECT_CALL(mock_buzzer_, MakeBuzz("hello"));
 
@@ -2307,32 +2301,13 @@ As usual, if you set an expectation without an action (i.e. the `.WillOnce()` or
   EXPECT_EQ(nullptr, mock_buzzer_.MakeBuzz("hello"));
 ```
 
-If you are not happy with the default action, you can tweak it.  Depending on what you need, you may either tweak the default action for a specific (mock object, mock method) combination using `ON_CALL()`, or you may tweak the default action for all mock methods that return a specific type.  The usage of `ON_CALL()` is similar to `EXPECT_CALL()`, so we’ll skip it and just explain how to do the latter (tweaking the default action for a specific return type).  You do this via the `DefaultValue<>::SetFactory()` and `DefaultValue<>::Clear()` API:
+If you are not happy with the default action, you can tweak it as usual; see
+[Setting Default Actions](#OnCall).
 
-```
-  // Sets the default action for return type std::unique_ptr<Buzz> to
-  // creating a new Buzz every time.
-  DefaultValue<std::unique_ptr<Buzz>>::SetFactory(
-      [] { return MakeUnique<Buzz>(AccessLevel::kInternal); });
+If you just need to return a pre-defined move-only value, you can use the
+`Return(ByMove(...))` action:
 
-  // When this fires, the default action of MakeBuzz() will run, which
-  // will return a new Buzz object.
-  EXPECT_CALL(mock_buzzer_, MakeBuzz("hello")).Times(AnyNumber());
-
-  auto buzz1 = mock_buzzer_.MakeBuzz("hello");
-  auto buzz2 = mock_buzzer_.MakeBuzz("hello");
-  EXPECT_NE(nullptr, buzz1);
-  EXPECT_NE(nullptr, buzz2);
-  EXPECT_NE(buzz1, buzz2);
-
-  // Resets the default action for return type std::unique_ptr<Buzz>,
-  // to avoid interfere with other tests.
-  DefaultValue<std::unique_ptr<Buzz>>::Clear();
-```
-
-What if you want the method to do something other than the default action?  If you just need to return a pre-defined move-only value, you can use the `Return(ByMove(...))` action:
-
-```
+```cpp
   // When this fires, the unique_ptr<> specified by ByMove(...) will
   // be returned.
   EXPECT_CALL(mock_buzzer_, MakeBuzz("world"))
@@ -2343,81 +2318,87 @@ What if you want the method to do something other than the default action?  If y
 
 Note that `ByMove()` is essential here - if you drop it, the code won’t compile.
 
-Quiz time!  What do you think will happen if a `Return(ByMove(...))` action is performed more than once (e.g. you write `….WillRepeatedly(Return(ByMove(...)));`)?  Come think of it, after the first time the action runs, the source value will be consumed (since it’s a move-only value), so the next time around, there’s no value to move from -- you’ll get a run-time error that `Return(ByMove(...))` can only be run once.
+Quiz time! What do you think will happen if a `Return(ByMove(...))` action is
+performed more than once (e.g. you write
+`….WillRepeatedly(Return(ByMove(...)));`)? Come think of it, after the first
+time the action runs, the source value will be consumed (since it’s a move-only
+value), so the next time around, there’s no value to move from -- you’ll get a
+run-time error that `Return(ByMove(...))` can only be run once.
 
-If you need your mock method to do more than just moving a pre-defined value, remember that you can always use `Invoke()` to call a lambda or a callable object, which can do pretty much anything you want:
+If you need your mock method to do more than just moving a pre-defined value,
+remember that you can always use a lambda or a callable object, which can do
+pretty much anything you want:
 
-```
+```cpp
   EXPECT_CALL(mock_buzzer_, MakeBuzz("x"))
-      .WillRepeatedly(Invoke([](const std::string& text) {
-        return std::make_unique<Buzz>(AccessLevel::kInternal);
-      }));
+      .WillRepeatedly([](StringPiece text) {
+        return MakeUnique<Buzz>(AccessLevel::kInternal);
+      });
 
   EXPECT_NE(nullptr, mock_buzzer_.MakeBuzz("x"));
   EXPECT_NE(nullptr, mock_buzzer_.MakeBuzz("x"));
 ```
 
-Every time this `EXPECT_CALL` fires, a new `unique_ptr<Buzz>` will be created and returned.  You cannot do this with `Return(ByMove(...))`.
+Every time this `EXPECT_CALL` fires, a new `unique_ptr<Buzz>` will be
+created and returned. You cannot do this with `Return(ByMove(...))`.
 
-Now there’s one topic we haven’t covered: how do you set expectations on `ShareBuzz()`, which takes a move-only-typed parameter?  The answer is you don’t.  Instead, you set expectations on the `DoShareBuzz()` mock method (remember that we defined a `MOCK_METHOD` for `DoShareBuzz()`, not `ShareBuzz()`):
+That covers returning move-only values; but how do we work with methods
+accepting move-only arguments? The answer is that they work normally, although
+some actions will not compile when any of method's arguments are move-only. You
+can always use `Return`, or a [lambda or functor](#FunctionsAsActions):
 
+```cpp
+  using ::testing::Unused;
+
+  EXPECT_CALL(mock_buzzer_, ShareBuzz(NotNull(), _)) .WillOnce(Return(true));
+  EXPECT_TRUE(mock_buzzer_.ShareBuzz(MakeUnique<Buzz>(AccessLevel::kInternal)),
+              0);
+
+  EXPECT_CALL(mock_buzzer_, ShareBuzz(_, _)) .WillOnce(
+      [](std::unique_ptr<Buzz> buzz, Unused) { return buzz != nullptr; });
+  EXPECT_FALSE(mock_buzzer_.ShareBuzz(nullptr, 0));
 ```
+
+Many built-in actions (`WithArgs`, `WithoutArgs`,`DeleteArg`, `SaveArg`, ...)
+could in principle support move-only arguments, but the support for this is not
+implemented yet. If this is blocking you, please file a bug.
+
+A few actions (e.g. `DoAll`) copy their arguments internally, so they can never
+work with non-copyable objects; you'll have to use functors instead.
+
+##### Legacy workarounds for move-only types {#LegacyMoveOnly}
+
+Support for move-only function arguments was only introduced to gMock in April
+2017. In older code, you may encounter the following workaround for the lack of
+this feature (it is no longer necessary - we're including it just for
+reference):
+
+```cpp
+class MockBuzzer : public Buzzer {
+ public:
+  MOCK_METHOD2(DoShareBuzz, bool(Buzz* buzz, Time timestamp));
+  bool ShareBuzz(std::unique_ptr<Buzz> buzz, Time timestamp) override {
+    return DoShareBuzz(buzz.get(), timestamp);
+  }
+};
+```
+
+The trick is to delegate the `ShareBuzz()` method to a mock method (let’s call
+it `DoShareBuzz()`) that does not take move-only parameters. Then, instead of
+setting expectations on `ShareBuzz()`, you set them on the `DoShareBuzz()` mock
+method:
+
+```cpp
+  MockBuzzer mock_buzzer_;
   EXPECT_CALL(mock_buzzer_, DoShareBuzz(NotNull(), _));
 
   // When one calls ShareBuzz() on the MockBuzzer like this, the call is
   // forwarded to DoShareBuzz(), which is mocked.  Therefore this statement
   // will trigger the above EXPECT_CALL.
-  mock_buzzer_.ShareBuzz(MakeUnique<Buzz>(AccessLevel::kInternal),
-                         ::base::Now());
+  mock_buzzer_.ShareBuzz(MakeUnique<Buzz>(AccessLevel::kInternal), 0);
 ```
 
-Some of you may have spotted one problem with this approach: the `DoShareBuzz()` mock method differs from the real `ShareBuzz()` method in that it cannot take ownership of the buzz parameter - `ShareBuzz()` will always delete buzz after `DoShareBuzz()` returns.  What if you need to save the buzz object somewhere for later use when `ShareBuzz()` is called?  Indeed, you'd be stuck.
 
-Another problem with the `DoShareBuzz()` we had is that it can surprise people reading or maintaining the test, as one would expect that `DoShareBuzz()` has (logically) the same contract as `ShareBuzz()`.
-
-Fortunately, these problems can be fixed with a bit more code.  Let's try to get it right this time:
-
-```
-class MockBuzzer : public Buzzer {
- public:
-  MockBuzzer() {
-    // Since DoShareBuzz(buzz, time) is supposed to take ownership of
-    // buzz, define a default behavior for DoShareBuzz(buzz, time) to
-    // delete buzz.
-    ON_CALL(*this, DoShareBuzz(_, _))
-        .WillByDefault(Invoke([](Buzz* buzz, Time timestamp) {
-          delete buzz;
-          return true;
-        }));
-  }
-
-  MOCK_METHOD1(MakeBuzz, std::unique_ptr<Buzz>(const std::string& text));
-
-  // Takes ownership of buzz.
-  MOCK_METHOD2(DoShareBuzz, bool(Buzz* buzz, Time timestamp));
-  bool ShareBuzz(std::unique_ptr<Buzz> buzz, Time timestamp) {
-    return DoShareBuzz(buzz.release(), timestamp);
-  }
-};
-```
-
-Now, the mock `DoShareBuzz()` method is free to save the buzz argument for later use if this is what you want:
-
-```
-  std::unique_ptr<Buzz> intercepted_buzz;
-  EXPECT_CALL(mock_buzzer_, DoShareBuzz(NotNull(), _))
-      .WillOnce(Invoke([&intercepted_buzz](Buzz* buzz, Time timestamp) {
-        // Save buzz in intercepted_buzz for analysis later.
-        intercepted_buzz.reset(buzz);
-        return false;
-      }));
-
-  mock_buzzer_.ShareBuzz(std::make_unique<Buzz>(AccessLevel::kInternal),
-                         Now());
-  EXPECT_NE(nullptr, intercepted_buzz);
-```
-
-Using the tricks covered in this recipe, you are now able to mock methods that take and/or return move-only types.  Put your newly-acquired power to good use - when you design a new API, you can now feel comfortable using `unique_ptrs` as appropriate, without fearing that doing so will compromise your tests.
 
 ## Making the Compilation Faster ##
 
