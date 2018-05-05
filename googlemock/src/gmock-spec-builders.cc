@@ -41,11 +41,21 @@
 #include <map>
 #include <set>
 #include <string>
+#include <vector>
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 #if GTEST_OS_CYGWIN || GTEST_OS_LINUX || GTEST_OS_MAC
 # include <unistd.h>  // NOLINT
+#endif
+
+// Silence C4800 (C4800: 'int *const ': forcing value
+// to bool 'true' or 'false') for MSVC 14,15
+#ifdef _MSC_VER
+#if _MSC_VER <= 1900
+#  pragma warning(push)
+#  pragma warning(disable:4800)
+#endif
 #endif
 
 namespace testing {
@@ -99,12 +109,19 @@ void ExpectationBase::RetireAllPreRequisites()
     return;
   }
 
-  for (ExpectationSet::const_iterator it = immediate_prerequisites_.begin();
-       it != immediate_prerequisites_.end(); ++it) {
-    ExpectationBase* const prerequisite = it->expectation_base().get();
-    if (!prerequisite->is_retired()) {
-      prerequisite->RetireAllPreRequisites();
-      prerequisite->Retire();
+  ::std::vector<ExpectationBase*> expectations(1, this);
+  while (!expectations.empty()) {
+    ExpectationBase* exp = expectations.back();
+    expectations.pop_back();
+
+    for (ExpectationSet::const_iterator it =
+             exp->immediate_prerequisites_.begin();
+         it != exp->immediate_prerequisites_.end(); ++it) {
+      ExpectationBase* next = it->expectation_base().get();
+      if (!next->is_retired()) {
+        next->Retire();
+        expectations.push_back(next);
+      }
     }
   }
 }
@@ -114,11 +131,18 @@ void ExpectationBase::RetireAllPreRequisites()
 bool ExpectationBase::AllPrerequisitesAreSatisfied() const
     GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
   g_gmock_mutex.AssertHeld();
-  for (ExpectationSet::const_iterator it = immediate_prerequisites_.begin();
-       it != immediate_prerequisites_.end(); ++it) {
-    if (!(it->expectation_base()->IsSatisfied()) ||
-        !(it->expectation_base()->AllPrerequisitesAreSatisfied()))
-      return false;
+  ::std::vector<const ExpectationBase*> expectations(1, this);
+  while (!expectations.empty()) {
+    const ExpectationBase* exp = expectations.back();
+    expectations.pop_back();
+
+    for (ExpectationSet::const_iterator it =
+             exp->immediate_prerequisites_.begin();
+         it != exp->immediate_prerequisites_.end(); ++it) {
+      const ExpectationBase* next = it->expectation_base().get();
+      if (!next->IsSatisfied()) return false;
+      expectations.push_back(next);
+    }
   }
   return true;
 }
@@ -127,19 +151,28 @@ bool ExpectationBase::AllPrerequisitesAreSatisfied() const
 void ExpectationBase::FindUnsatisfiedPrerequisites(ExpectationSet* result) const
     GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
   g_gmock_mutex.AssertHeld();
-  for (ExpectationSet::const_iterator it = immediate_prerequisites_.begin();
-       it != immediate_prerequisites_.end(); ++it) {
-    if (it->expectation_base()->IsSatisfied()) {
-      // If *it is satisfied and has a call count of 0, some of its
-      // pre-requisites may not be satisfied yet.
-      if (it->expectation_base()->call_count_ == 0) {
-        it->expectation_base()->FindUnsatisfiedPrerequisites(result);
+  ::std::vector<const ExpectationBase*> expectations(1, this);
+  while (!expectations.empty()) {
+    const ExpectationBase* exp = expectations.back();
+    expectations.pop_back();
+
+    for (ExpectationSet::const_iterator it =
+             exp->immediate_prerequisites_.begin();
+         it != exp->immediate_prerequisites_.end(); ++it) {
+      const ExpectationBase* next = it->expectation_base().get();
+
+      if (next->IsSatisfied()) {
+        // If *it is satisfied and has a call count of 0, some of its
+        // pre-requisites may not be satisfied yet.
+        if (next->call_count_ == 0) {
+          expectations.push_back(next);
+        }
+      } else {
+        // Now that we know next is unsatisfied, we are not so interested
+        // in whether its pre-requisites are satisfied.  Therefore we
+        // don't iterate into it here.
+        *result += *it;
       }
-    } else {
-      // Now that we know *it is unsatisfied, we are not so interested
-      // in whether its pre-requisites are satisfied.  Therefore we
-      // don't recursively call FindUnsatisfiedPrerequisites() here.
-      *result += *it;
     }
   }
 }
@@ -254,11 +287,13 @@ void ReportUninterestingCall(CallReaction reaction, const std::string& msg) {
     case kWarn:
       Log(kWarning,
           msg +
-          "\nNOTE: You can safely ignore the above warning unless this "
-          "call should not happen.  Do not suppress it by blindly adding "
-          "an EXPECT_CALL() if you don't mean to enforce the call.  "
-          "See https://github.com/google/googletest/blob/master/googlemock/docs/CookBook.md#"
-          "knowing-when-to-expect for details.\n",
+              "\nNOTE: You can safely ignore the above warning unless this "
+              "call should not happen.  Do not suppress it by blindly adding "
+              "an EXPECT_CALL() if you don't mean to enforce the call.  "
+              "See "
+              "https://github.com/google/googletest/blob/master/googlemock/"
+              "docs/CookBook.md#"
+              "knowing-when-to-expect for details.\n",
           stack_frames_to_skip);
       break;
     default:  // FAIL
@@ -334,9 +369,10 @@ const char* UntypedFunctionMockerBase::Name() const
 // Calculates the result of invoking this mock function with the given
 // arguments, prints it, and returns it.  The caller is responsible
 // for deleting the result.
-UntypedActionResultHolderBase*
-UntypedFunctionMockerBase::UntypedInvokeWith(const void* const untyped_args)
-    GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
+UntypedActionResultHolderBase* UntypedFunctionMockerBase::UntypedInvokeWith(
+    void* const untyped_args) GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
+  // See the definition of untyped_expectations_ for why access to it
+  // is unprotected here.
   if (untyped_expectations_.size() == 0) {
     // No expectation is set on this mock method - we have an
     // uninteresting call.
@@ -355,16 +391,19 @@ UntypedFunctionMockerBase::UntypedInvokeWith(const void* const untyped_args)
         // If the user allows this uninteresting call, we print it
         // only when they want informational messages.
         reaction == kAllow ? LogIsVisible(kInfo) :
-        // If the user wants this to be a warning, we print it only
-        // when they want to see warnings.
-        reaction == kWarn ? LogIsVisible(kWarning) :
-        // Otherwise, the user wants this to be an error, and we
-        // should always print detailed information in the error.
-        true;
+                           // If the user wants this to be a warning, we print
+                           // it only when they want to see warnings.
+            reaction == kWarn
+                ? LogIsVisible(kWarning)
+                :
+                // Otherwise, the user wants this to be an error, and we
+                // should always print detailed information in the error.
+                true;
 
     if (!need_to_report_uninteresting_call) {
       // Perform the action without printing the call information.
-      return this->UntypedPerformDefaultAction(untyped_args, "Function call: " + std::string(Name()));
+      return this->UntypedPerformDefaultAction(
+          untyped_args, "Function call: " + std::string(Name()));
     }
 
     // Warns about the uninteresting call.
@@ -446,6 +485,8 @@ UntypedFunctionMockerBase::UntypedInvokeWith(const void* const untyped_args)
 // Returns an Expectation object that references and co-owns exp,
 // which must be an expectation on this mock function.
 Expectation UntypedFunctionMockerBase::GetHandleOf(ExpectationBase* exp) {
+  // See the definition of untyped_expectations_ for why access to it
+  // is unprotected here.
   for (UntypedExpectations::const_iterator it =
            untyped_expectations_.begin();
        it != untyped_expectations_.end(); ++it) {
@@ -508,7 +549,7 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
   return expectations_met;
 }
 
-static CallReaction intToCallReaction(int mock_behavior) {
+CallReaction intToCallReaction(int mock_behavior) {
   if (mock_behavior >= kAllow && mock_behavior <= kFail) {
     return static_cast<internal::CallReaction>(mock_behavior);
   }
@@ -582,9 +623,15 @@ class MockObjectRegistry {
       leaked_count++;
     }
     if (leaked_count > 0) {
-      std::cout << "\nERROR: " << leaked_count
-           << " leaked mock " << (leaked_count == 1 ? "object" : "objects")
-           << " found at program exit.\n";
+      std::cout << "\nERROR: " << leaked_count << " leaked mock "
+                << (leaked_count == 1 ? "object" : "objects")
+                << " found at program exit. Expectations on a mock object is "
+                   "verified when the object is destructed. Leaking a mock "
+                   "means that its expectations aren't verified, which is "
+                   "usually a test bug. If you really intend to leak a mock, "
+                   "you can suppress this error using "
+                   "testing::Mock::AllowLeak(mock_object), or you may use a "
+                   "fake or stub instead of a mock.\n";
       std::cout.flush();
       ::std::cerr.flush();
       // RUN_ALL_TESTS() has already returned when this destructor is
@@ -828,3 +875,9 @@ InSequence::~InSequence() {
 }
 
 }  // namespace testing
+
+#ifdef _MSC_VER
+#if _MSC_VER <= 1900
+#  pragma warning(pop)
+#endif
+#endif

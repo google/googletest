@@ -327,11 +327,10 @@ TEST(InvokeTest, FunctionThatTakes10Arguments) {
 
 // Tests using Invoke() with functions with parameters declared as Unused.
 TEST(InvokeTest, FunctionWithUnusedParameters) {
-  Action<int(int, int, double, const string&)> a1 =
-      Invoke(SumOfFirst2);
-  string s("hi");
-  EXPECT_EQ(12, a1.Perform(
-    tuple<int, int, double, const string&>(10, 2, 5.6, s)));
+  Action<int(int, int, double, const std::string&)> a1 = Invoke(SumOfFirst2);
+  tuple<int, int, double, std::string> dummy =
+      make_tuple(10, 2, 5.6, std::string("hi"));
+  EXPECT_EQ(12, a1.Perform(dummy));
 
   Action<int(int, int, bool, int*)> a2 =
       Invoke(SumOfFirst2);
@@ -380,10 +379,10 @@ TEST(InvokeMethodTest, Unary) {
 // Tests using Invoke() with a binary method.
 TEST(InvokeMethodTest, Binary) {
   Foo foo;
-  Action<string(const string&, char)> a = Invoke(&foo, &Foo::Binary);
-  string s("Hell");
-  EXPECT_EQ("Hello", a.Perform(
-      tuple<const string&, char>(s, 'o')));
+  Action<std::string(const std::string&, char)> a = Invoke(&foo, &Foo::Binary);
+  std::string s("Hell");
+  tuple<std::string, char> dummy = make_tuple(s, 'o');
+  EXPECT_EQ("Hello", a.Perform(dummy));
 }
 
 // Tests using Invoke() with a ternary method.
