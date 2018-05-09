@@ -5342,10 +5342,10 @@ OsStackTraceGetterInterface* UnitTestImpl::os_stack_trace_getter() {
 
 // Returns the most specific TestResult currently running.
 TestResult* UnitTestImpl::current_test_result() {
-  if (current_test_info_ != nullptr) {
+  if (current_test_info_ != NULL) {
     return &current_test_info_->result_;
   }
-  if (current_test_case_ != nullptr) {
+  if (current_test_case_ != NULL) {
     return &current_test_case_->ad_hoc_test_result_;
   }
   return &ad_hoc_test_result_;
