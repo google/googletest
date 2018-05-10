@@ -119,9 +119,8 @@
 //
 // Macros indicating the platform on which Google Test is being used
 // (a macro is defined to 1 if compiled on the given platform;
-// otherwise UNDEFINED -- it's never defined to 0.).  Google Test
-// defines these macros automatically.  Code outside Google Test MUST
-// NOT define them.
+// otherwise 0.).  Google Test defines these macros automatically.
+// Code outside Google Test MUST NOT define or use them.
 //
 //   GTEST_OS_AIX      - IBM AIX
 //   GTEST_OS_CYGWIN   - Cygwin
@@ -441,9 +440,10 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #endif
 
 #if GTEST_USES_PCRE
-// The appropriate headers have already been included.
+#error "Undocumented internal macro GTEST_USES_PCRE is set."
+#endif
 
-#elif GTEST_HAS_POSIX_RE
+#if GTEST_HAS_POSIX_RE
 
 // On some platforms, <regex.h> needs someone to define size_t, and
 // won't compile otherwise.  We can #include it here as we already
@@ -452,20 +452,16 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # include <regex.h>  // NOLINT
 
 # define GTEST_USES_POSIX_RE 1
-
-#elif GTEST_OS_WINDOWS
-
-// <regex.h> is not available on Windows.  Use our own simple regex
-// implementation instead.
-# define GTEST_USES_SIMPLE_RE 1
+# define GTEST_USES_SIMPLE_RE 0
 
 #else
 
 // <regex.h> may not be available on this platform.  Use our own
 // simple regex implementation instead.
 # define GTEST_USES_SIMPLE_RE 1
+# define GTEST_USES_POSIX_RE 0
 
-#endif  // GTEST_USES_PCRE
+#endif  // GTEST_HAS_POSIX_RE
 
 #ifndef GTEST_HAS_EXCEPTIONS
 // The user didn't tell us whether exceptions are enabled, so we need
@@ -1217,9 +1213,7 @@ class scoped_ptr {
 
 // Defines RE.
 
-#if GTEST_USES_PCRE
-using ::RE;
-#elif GTEST_USES_POSIX_RE || GTEST_USES_SIMPLE_RE
+#if GTEST_USES_POSIX_RE || GTEST_USES_SIMPLE_RE
 
 // A simple C++ wrapper for <regex.h>.  It uses the POSIX Extended
 // Regular Expression syntax.
@@ -1286,7 +1280,7 @@ class GTEST_API_ RE {
   regex_t full_regex_;     // For FullMatch().
   regex_t partial_regex_;  // For PartialMatch().
 
-# else  // GTEST_USES_SIMPLE_RE
+# elif GTEST_USES_SIMPLE_RE
 
   const char* full_pattern_;  // For FullMatch();
 
@@ -1295,7 +1289,7 @@ class GTEST_API_ RE {
   GTEST_DISALLOW_ASSIGN_(RE);
 };
 
-#endif  // GTEST_USES_PCRE
+#endif  // GTEST_USES_POSIX_RE || GTEST_USES_SIMPLE_RE
 
 // Formats a source file path and a line number as they would appear
 // in an error message from the compiler used to compile this code.
@@ -1512,9 +1506,10 @@ Derived* CheckedDowncastToActualType(Base* base) {
   GTEST_CHECK_(typeid(*base) == typeid(Derived));
 #endif
 
-#if GTEST_HAS_DOWNCAST_
-  return ::down_cast<Derived*>(base);
-#elif GTEST_HAS_RTTI
+#if defined(GTEST_HAS_DOWNCAST_)
+#error "Undocumented internal macro GTEST_HAS_DOWNCAST_ is set."
+#endif
+#if GTEST_HAS_RTTI
   return dynamic_cast<Derived*>(base);  // NOLINT
 #else
   return static_cast<Derived*>(base);  // Poor man's downcast.

@@ -35,6 +35,86 @@
 #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_ARCH_H_
 #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_ARCH_H_
 
+#ifdef GTEST_OS_CYGWIN
+#error "Internal macro GTEST_OS_CYGWIN is set."
+#endif  //  GTEST_OS_CYGWIN
+
+#ifdef GTEST_OS_SYMBIAN
+#error "Internal macro GTEST_OS_SYMBIAN is set."
+#endif  // GTEST_OS_SYMBIAN
+
+#ifdef GTEST_OS_WINDOWS
+#error "Internal macro GTEST_OS_WINDOWS is set."
+#endif  // GTEST_OS_WINDOWS
+
+#ifdef GTEST_OS_WINDOWS_MOBILE
+#error "Internal macro GTEST_OS_WINDOWS_MOBILE is set."
+#endif  // GTEST_OS_WINDOWS_MOBILE
+
+#ifdef GTEST_OS_WINDOWS_MINGW
+#error "Internal macro GTEST_OS_WINDOWS_MINGW is set."
+#endif  // GTEST_OS_WINDOWS_MINGW
+
+#ifdef GTEST_OS_WINDOWS_DESKTOP
+#error "Internal macro GTEST_OS_WINDOWS_DESKTOP is set."
+#endif  // GTEST_OS_WINDOWS_DESKTOP
+
+#ifdef GTEST_OS_WINDOWS_PHONE
+#error "Internal macro GTEST_OS_WINDOWS_PHONE is set."
+#endif  // GTEST_OS_WINDOWS_PHONE
+
+#ifdef GTEST_OS_WINDOWS_RT
+#error "Internal macro GTEST_OS_WINDOWS_RT is set."
+#endif  // GTEST_OS_WINDOWS_RT
+
+#ifdef GTEST_OS_MAC
+#error "Internal macro GTEST_OS_MAC is set."
+#endif  // GTEST_OS_MAC
+
+#ifdef GTEST_OS_IOS
+#error "Internal macro GTEST_OS_IOS is set."
+#endif  // GTEST_OS_IOS
+
+#ifdef GTEST_OS_FREEBSD
+#error "Internal macro GTEST_OS_FREEBSD is set."
+#endif  // GTEST_OS_FREEBSD
+
+#ifdef GTEST_OS_LINUX
+#error "Internal macro GTEST_OS_LINUX is set."
+#endif  // GTEST_OS_LINUX
+
+#ifdef GTEST_OS_LINUX_ANDROID
+#error "Internal macro GTEST_OS_LINUX_ANDROID is set."
+#endif  // GTEST_OS_LINUX_ANDROID
+
+#ifdef GTEST_OS_ZOS
+#error "Internal macro GTEST_OS_ZOS is set."
+#endif  // GTEST_OS_ZOS
+
+#ifdef GTEST_OS_SOLARIS
+#error "Internal macro GTEST_OS_SOLARIS is set."
+#endif  // GTEST_OS_SOLARIS
+
+#ifdef GTEST_OS_AIX
+#error "Internal macro GTEST_OS_AIX is set."
+#endif  // GTEST_OS_AIX
+
+#ifdef GTEST_OS_HPUX
+#error "Internal macro GTEST_OS_HPUX is set."
+#endif  // GTEST_OS_HPUX
+
+#ifdef GTEST_OS_NACL
+#error "Internal macro GTEST_OS_NACL is set."
+#endif  // GTEST_OS_NACL
+
+#ifdef GTEST_OS_OPENBSD
+#error "Internal macro GTEST_OS_OPENBSD is set."
+#endif  // GTEST_OS_OPENBSD
+
+#ifdef GTEST_OS_QNX
+#error "Internal macro GTEST_OS_QNX is set."
+#endif  // GTEST_OS_QNX
+
 // Determines the platform on which Google Test is compiled.
 #ifdef __CYGWIN__
 # define GTEST_OS_CYGWIN 1
@@ -96,5 +176,87 @@
 #elif defined __QNX__
 # define GTEST_OS_QNX 1
 #endif  // __CYGWIN__
+
+// Ensure all the macros are defined
+
+#ifndef GTEST_OS_CYGWIN
+# define GTEST_OS_CYGWIN 0
+#endif  //  GTEST_OS_CYGWIN
+
+#ifndef GTEST_OS_SYMBIAN
+# define GTEST_OS_SYMBIAN 0
+#endif  // GTEST_OS_SYMBIAN
+
+#ifndef GTEST_OS_WINDOWS
+# define GTEST_OS_WINDOWS 0
+#endif  // GTEST_OS_WINDOWS
+
+#ifndef GTEST_OS_WINDOWS_MOBILE
+# define GTEST_OS_WINDOWS_MOBILE 0
+#endif  // GTEST_OS_WINDOWS_MOBILE
+
+#ifndef GTEST_OS_WINDOWS_MINGW
+# define GTEST_OS_WINDOWS_MINGW 0
+#endif  // GTEST_OS_WINDOWS_MINGW
+
+#ifndef GTEST_OS_WINDOWS_DESKTOP
+# define GTEST_OS_WINDOWS_DESKTOP 0
+#endif  // GTEST_OS_WINDOWS_DESKTOP
+
+#ifndef GTEST_OS_WINDOWS_PHONE
+# define GTEST_OS_WINDOWS_PHONE 0
+#endif  // GTEST_OS_WINDOWS_PHONE
+
+#ifndef GTEST_OS_WINDOWS_RT
+# define GTEST_OS_WINDOWS_RT 0
+#endif  // GTEST_OS_WINDOWS_RT
+
+#ifndef GTEST_OS_MAC
+# define GTEST_OS_MAC 0
+#endif  // GTEST_OS_MAC
+
+#ifndef GTEST_OS_IOS
+# define GTEST_OS_IOS 0
+#endif  // GTEST_OS_IOS
+
+#ifndef GTEST_OS_FREEBSD
+# define GTEST_OS_FREEBSD 0
+#endif  // GTEST_OS_FREEBSD
+
+#ifndef GTEST_OS_LINUX
+# define GTEST_OS_LINUX 0
+#endif  // GTEST_OS_LINUX
+
+#ifndef GTEST_OS_LINUX_ANDROID
+# define GTEST_OS_LINUX_ANDROID 0
+#endif  // GTEST_OS_LINUX_ANDROID
+
+#ifndef GTEST_OS_ZOS
+# define GTEST_OS_ZOS 0
+#endif  // GTEST_OS_ZOS
+
+#ifndef GTEST_OS_SOLARIS
+# define GTEST_OS_SOLARIS 0
+#endif  // GTEST_OS_SOLARIS
+
+#ifndef GTEST_OS_AIX
+# define GTEST_OS_AIX 0
+#endif  // GTEST_OS_AIX
+
+#ifndef GTEST_OS_HPUX
+# define GTEST_OS_HPUX 0
+#endif  // GTEST_OS_HPUX
+
+#ifndef GTEST_OS_NACL
+# define GTEST_OS_NACL 0
+#endif  // GTEST_OS_NACL
+
+#ifndef GTEST_OS_OPENBSD
+# define GTEST_OS_OPENBSD 0
+#endif  // GTEST_OS_OPENBSD
+
+#ifndef GTEST_OS_QNX
+# define GTEST_OS_QNX 0
+#endif  // GTEST_OS_QNX
 
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_ARCH_H_
