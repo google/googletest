@@ -7773,3 +7773,25 @@ TEST(SkipPrefixTest, DoesNotSkipWhenPrefixDoesNotMatch) {
   EXPECT_FALSE(SkipPrefix("world!", &p));
   EXPECT_EQ(str, p);
 }
+
+// Tests ad_hoc_test_result().
+
+class AdHocTestResultTest : public testing::Test {
+ protected:
+  static void SetUpTestCase() {
+    FAIL() << "A failure happened inside SetUpTestCase().";
+  }
+};
+
+TEST_F(AdHocTestResultTest, AdHocTestResultForTestCaseShowsFailure) {
+  const testing::TestResult& test_result = testing::UnitTest::GetInstance()
+                                               ->current_test_case()
+                                               ->ad_hoc_test_result();
+  EXPECT_TRUE(test_result.Failed());
+}
+
+TEST_F(AdHocTestResultTest, AdHocTestResultTestForUnitTestDoesNotShowFailure) {
+  const testing::TestResult& test_result =
+      testing::UnitTest::GetInstance()->ad_hoc_test_result();
+  EXPECT_FALSE(test_result.Failed());
+}
