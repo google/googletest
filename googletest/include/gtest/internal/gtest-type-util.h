@@ -62,12 +62,12 @@ namespace internal {
 // used by various standard libraries (e.g., `std::__1`).  Names outside
 // of namespace std are returned unmodified.
 inline std::string CanonicalizeForStdLibVersioning(std::string s) {
-  static constexpr char prefix[] = "std::__";
+  static const char prefix[] = "std::__";
   if (s.compare(0, strlen(prefix), prefix) == 0) {
-    auto end = s.find("::", strlen(prefix));
+    std::string::size_type end = s.find("::", strlen(prefix));
     if (end != s.npos) {
-      // Erase the `::__` plus whatever was between that and the next `::`.
-      s.erase(strlen("std"), strlen("::__") + end - strlen(prefix));
+      // Erase everything between the initial `std` and the second `::`.
+      s.erase(strlen("std"), end - strlen("std"));
     }
   }
   return s;
@@ -89,9 +89,9 @@ std::string GetTypeName() {
   using abi::__cxa_demangle;
 #   endif  // GTEST_HAS_CXXABI_H_
   char* const readable_name = __cxa_demangle(name, 0, 0, &status);
-  std::string name_str(status == 0 ? readable_name : name);
+  const std::string name_str(status == 0 ? readable_name : name);
   free(readable_name);
-  return CanonicalizeForStdLibVersioning(std::move(name_str));
+  return CanonicalizeForStdLibVersioning(name_str);
 #  else
   return name;
 #  endif  // GTEST_HAS_CXXABI_H_ || __HP_aCC
