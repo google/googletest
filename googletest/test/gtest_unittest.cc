@@ -380,6 +380,31 @@ TEST(GetTestTypeIdTest, ReturnsTheSameValueInsideOrOutsideOfGoogleTest) {
   EXPECT_EQ(kTestTypeIdInGoogleTest, GetTestTypeId());
 }
 
+// Tests CanonicalizeForStdLibVersioning.
+
+using ::testing::internal::CanonicalizeForStdLibVersioning;
+
+TEST(CanonicalizeForStdLibVersioning, LeavesUnversionedNamesUnchanged) {
+  EXPECT_EQ("std::bind", CanonicalizeForStdLibVersioning("std::bind"));
+  EXPECT_EQ("std::_", CanonicalizeForStdLibVersioning("std::_"));
+  EXPECT_EQ("std::__foo", CanonicalizeForStdLibVersioning("std::__foo"));
+  EXPECT_EQ("gtl::__1::x", CanonicalizeForStdLibVersioning("gtl::__1::x"));
+  EXPECT_EQ("__1::x", CanonicalizeForStdLibVersioning("__1::x"));
+  EXPECT_EQ("::__1::x", CanonicalizeForStdLibVersioning("::__1::x"));
+}
+
+TEST(CanonicalizeForStdLibVersioning, ElidesDoubleUnderNames) {
+  EXPECT_EQ("std::bind", CanonicalizeForStdLibVersioning("std::__1::bind"));
+  EXPECT_EQ("std::_", CanonicalizeForStdLibVersioning("std::__1::_"));
+
+  EXPECT_EQ("std::bind", CanonicalizeForStdLibVersioning("std::__g::bind"));
+  EXPECT_EQ("std::_", CanonicalizeForStdLibVersioning("std::__g::_"));
+
+  EXPECT_EQ("std::bind",
+            CanonicalizeForStdLibVersioning("std::__google::bind"));
+  EXPECT_EQ("std::_", CanonicalizeForStdLibVersioning("std::__google::_"));
+}
+  
 // Tests FormatTimeInMillisAsSeconds().
 
 TEST(FormatTimeInMillisAsSecondsTest, FormatsZero) {
