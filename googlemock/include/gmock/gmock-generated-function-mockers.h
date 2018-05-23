@@ -352,21 +352,21 @@ class FunctionMocker<R(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)> : public
 //
 //   class MockClass {
 //     // Overload 1
-//     MockSpec<string&()> gmock_GetName() { … }
+//     MockSpec<string&()> gmock_GetName() { ... }
 //     // Overload 2. Declared const so that the compiler will generate an
 //     // error when trying to resolve between this and overload 4 in
 //     // 'gmock_GetName(WithoutMatchers(), nullptr)'.
 //     MockSpec<string&()> gmock_GetName(
-//         const WithoutMatchers&, const Function<string&()>*) const {
+//         const WithoutMatchers&, const Function<string&()>*) const {
 //       // Removes const from this, calls overload 1
 //       return AdjustConstness_(this)->gmock_GetName();
 //     }
 //
 //     // Overload 3
-//     const string& gmock_GetName() const { … }
+//     const string& gmock_GetName() const { ... }
 //     // Overload 4
 //     MockSpec<const string&()> gmock_GetName(
-//         const WithoutMatchers&, const Function<const string&()>*) const {
+//         const WithoutMatchers&, const Function<const string&()>*) const {
 //       // Does not remove const, calls overload 3
 //       return AdjustConstness_const(this)->gmock_GetName();
 //     }
