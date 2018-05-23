@@ -404,7 +404,7 @@ TEST(CanonicalizeForStdLibVersioning, ElidesDoubleUnderNames) {
             CanonicalizeForStdLibVersioning("std::__google::bind"));
   EXPECT_EQ("std::_", CanonicalizeForStdLibVersioning("std::__google::_"));
 }
-  
+
 // Tests FormatTimeInMillisAsSeconds().
 
 TEST(FormatTimeInMillisAsSecondsTest, FormatsZero) {
