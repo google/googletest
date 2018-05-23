@@ -29,7 +29,7 @@
 //
 // Author: wan@google.com (Zhanyong Wan)
 
-// Google Test - The Google C++ Testing Framework
+// Google Test - The Google C++ Testing and Mocking Framework
 //
 // This file tests the universal value printer.
 

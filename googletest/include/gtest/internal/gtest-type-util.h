@@ -56,7 +56,7 @@
 
 namespace testing {
 namespace internal {
-  
+
 // Canonicalizes a given name with respect to the Standard C++ Library.
 // This handles removing the inline namespace within `std` that is
 // used by various standard libraries (e.g., `std::__1`).  Names outside
