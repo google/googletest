@@ -29,7 +29,7 @@
 //
 // Authors: vladl@google.com (Vlad Losev)
 //
-// The Google C++ Testing Framework (Google Test)
+// The Google C++ Testing and Mocking Framework (Google Test)
 //
 // This header file provides classes and functions used internally
 // for testing Google Test itself.
