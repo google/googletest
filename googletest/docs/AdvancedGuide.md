@@ -456,7 +456,7 @@ class Bar { ... };  // We want Google Test to be able to print instances of this
 
 // It's important that the << operator is defined in the SAME
 // namespace that defines Bar.  C++'s look-up rules rely on that.
-::std::ostream& operator<<(::std::ostream& os, const Bar& bar) {
+std::ostream& operator<<(std::ostream& os, const Bar& bar) {
   return os << bar.DebugString();  // whatever needed to print bar to os
 }
 
@@ -477,7 +477,7 @@ class Bar { ... };
 
 // It's important that PrintTo() is defined in the SAME
 // namespace that defines Bar.  C++'s look-up rules rely on that.
-void PrintTo(const Bar& bar, ::std::ostream* os) {
+void PrintTo(const Bar& bar, std::ostream* os) {
   *os << bar.DebugString();  // whatever needed to print bar to os
 }
 
