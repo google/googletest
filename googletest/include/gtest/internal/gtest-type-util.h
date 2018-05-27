@@ -57,6 +57,22 @@
 namespace testing {
 namespace internal {
 
+// Canonicalizes a given name with respect to the Standard C++ Library.
+// This handles removing the inline namespace within `std` that is
+// used by various standard libraries (e.g., `std::__1`).  Names outside
+// of namespace std are returned unmodified.
+inline std::string CanonicalizeForStdLibVersioning(std::string s) {
+  static const char prefix[] = "std::__";
+  if (s.compare(0, strlen(prefix), prefix) == 0) {
+    std::string::size_type end = s.find("::", strlen(prefix));
+    if (end != s.npos) {
+      // Erase everything between the initial `std` and the second `::`.
+      s.erase(strlen("std"), end - strlen("std"));
+    }
+  }
+  return s;
+}
+
 // GetTypeName<T>() returns a human-readable name of type T.
 // NB: This function is also used in Google Mock, so don't move it inside of
 // the typed-test-only section below.
@@ -75,7 +91,7 @@ std::string GetTypeName() {
   char* const readable_name = __cxa_demangle(name, 0, 0, &status);
   const std::string name_str(status == 0 ? readable_name : name);
   free(readable_name);
-  return name_str;
+  return CanonicalizeForStdLibVersioning(name_str);
 #  else
   return name;
 #  endif  // GTEST_HAS_CXXABI_H_ || __HP_aCC

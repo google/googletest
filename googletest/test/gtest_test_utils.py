@@ -27,7 +27,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-"""Unit test utilities for Google C++ Testing Framework."""
+"""Unit test utilities for Google C++ Testing and Mocking Framework."""
 # Suppresses the 'Import not at the top of the file' lint complaint.
 # pylint: disable-msg=C6204
 
