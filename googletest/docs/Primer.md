@@ -239,7 +239,7 @@ To create a test:
   1. The test's result is determined by the assertions; if any assertion in the test fails (either fatally or non-fatally), or if the test crashes, the entire test fails. Otherwise, it succeeds.
 
 ```
-TEST(testCaseName, testName) {
+TEST(TestCaseName, TestName) {
  ... test body ...
 }
 ```
@@ -296,7 +296,7 @@ To create a fixture, just:
 When using a fixture, use `TEST_F()` instead of `TEST()` as it allows you to
 access objects and subroutines in the test fixture:
 ```
-TEST_F(test_case_name, test_name) {
+TEST_F(TestCaseName, TestName) {
  ... test body ...
 }
 ```
@@ -383,8 +383,8 @@ TEST_F(QueueTest, DequeueWorks) {
 The above uses both `ASSERT_*` and `EXPECT_*` assertions. The rule of thumb is
 to use `EXPECT_*` when you want the test to continue to reveal more errors
 after the assertion failure, and use `ASSERT_*` when continuing after failure
-doesn't make sense. For example, the second assertion in the `Dequeue` test is
-`ASSERT_TRUE(n != NULL)`, as we need to dereference the pointer `n` later,
+doesn't make sense. For example, the second assertion in the `DequeueWorks` test
+is `ASSERT_TRUE(n != NULL)`, as we need to dereference the pointer `n` later,
 which would lead to a segfault when `n` is `NULL`.
 
 When these tests run, the following happens:
