@@ -864,7 +864,7 @@ class GTEST_API_ TestCase {
   bool Passed() const { return !Failed(); }
 
   // Returns true iff the test case failed.
-  bool Failed() const { return failed_test_count() > 0; }
+  bool Failed() const { return failed_test_count() > 0 || ad_hoc_test_result().Failed(); }
 
   // Returns the elapsed time, in milliseconds.
   TimeInMillis elapsed_time() const { return elapsed_time_; }
