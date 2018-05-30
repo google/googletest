@@ -994,6 +994,15 @@ TEST_F(ExpectFailureTest, ExpectNonFatalFailureOnAllThreads) {
                                          "Some other non-fatal failure.");
 }
 
+#if GTEST_LANG_CXX11
+TEST(PrintableTypesTest, NullptrEmission) {
+  // tests that the following do not fail to compile due to ambiguities
+  void * nullyVoid = nullptr;
+  EXPECT_EQ(nullptr, nullyVoid);
+  EXPECT_EQ(nullyVoid, nullptr);
+  EXPECT_EQ(nullptr, nullptr);
+}
+#endif
 
 // Two test environments for testing testing::AddGlobalTestEnvironment().
 

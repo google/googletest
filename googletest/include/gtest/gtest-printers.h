@@ -285,6 +285,13 @@ void DefaultPrintNonContainerTo(const T& value, ::std::ostream* os) {
   *os << value;
 }
 
+#if GTEST_LANG_CXX11
+inline void DefaultPrintNonContainerTo(nullptr_t, ::std::ostream* os) {
+  ::testing::internal2::TypeWithoutFormatter<nullptr_t,
+    ::testing::internal2::kOtherType>::PrintValue(nullptr, os);
+}
+#endif
+
 }  // namespace testing_internal
 
 namespace testing {
