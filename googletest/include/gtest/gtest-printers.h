@@ -286,8 +286,8 @@ void DefaultPrintNonContainerTo(const T& value, ::std::ostream* os) {
 }
 
 #if GTEST_LANG_CXX11
-inline void DefaultPrintNonContainerTo(nullptr_t, ::std::ostream* os) {
-  ::testing::internal2::TypeWithoutFormatter<nullptr_t,
+inline void DefaultPrintNonContainerTo(::std::nullptr_t, ::std::ostream* os) {
+  ::testing::internal2::TypeWithoutFormatter<::std::nullptr_t,
     ::testing::internal2::kOtherType>::PrintValue(nullptr, os);
 }
 #endif
