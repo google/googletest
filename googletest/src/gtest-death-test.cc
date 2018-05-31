@@ -945,13 +945,9 @@ DeathTest::TestRole FuchsiaDeathTest::AssumeRole() {
   };
 
   // Spawn the child process.
-  char err_msg[255];
   status = fdio_spawn_etc(ZX_HANDLE_INVALID, FDIO_SPAWN_CLONE_ALL,
                           args.Argv()[0], args.Argv(), nullptr, 1,
-                          &add_handle_action, &child_process_, err_msg);
-  if (status != ZX_OK) {
-    GTEST_LOG_(ERROR) << err_msg;
-  }
+                          &add_handle_action, &child_process_, nullptr);
   GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
 
   set_spawned(true);
