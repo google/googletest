@@ -103,6 +103,8 @@ TEST(OutputFileHelpersTest, GetCurrentExecutableName) {
       _strcmpi("gtest-options-ex_test", exe_str.c_str()) == 0 ||
       _strcmpi("gtest_all_test", exe_str.c_str()) == 0 ||
       _strcmpi("gtest_dll_test", exe_str.c_str()) == 0;
+#elif GTEST_OS_FUCHSIA
+  const bool success = exe_str == "app";
 #else
   // TODO(wan@google.com): remove the hard-coded "lt-" prefix when
   //   Chandler Carruth's libtool replacement is ready.
@@ -115,6 +117,8 @@ TEST(OutputFileHelpersTest, GetCurrentExecutableName) {
   if (!success)
     FAIL() << "GetCurrentExecutableName() returns " << exe_str;
 }
+
+#if !GTEST_OS_FUCHSIA
 
 class XmlOutputChangeDirTest : public Test {
  protected:
@@ -201,6 +205,8 @@ TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithAbsolutePath) {
   EXPECT_EQ(expected_output_file, output_file.c_str());
 #endif
 }
+
+#endif  // !GTEST_OS_FUCHSIA
 
 }  // namespace
 }  // namespace internal
