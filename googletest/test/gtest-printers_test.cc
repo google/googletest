@@ -1115,6 +1115,12 @@ TEST(PrintStdTupleTest, NestedTuple) {
 
 #endif  // GTEST_LANG_CXX11
 
+#if GTEST_LANG_CXX11
+TEST(PrintNullptrT, Basic) {
+  EXPECT_EQ("(nullptr)", Print(nullptr));
+}
+#endif  // GTEST_LANG_CXX11
+
 // Tests printing user-defined unprintable types.
 
 // Unprintable types in the global namespace.
