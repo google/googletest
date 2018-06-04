@@ -29,7 +29,7 @@
 //
 // Author: wan@google.com (Zhanyong Wan)
 //
-// The Google C++ Testing Framework (Google Test)
+// The Google C++ Testing and Mocking Framework (Google Test)
 
 #include "gtest/gtest.h"
 #include "gtest/internal/custom/gtest.h"
@@ -5404,11 +5404,15 @@ OsStackTraceGetterInterface* UnitTestImpl::os_stack_trace_getter() {
   return os_stack_trace_getter_;
 }
 
-// Returns the TestResult for the test that's currently running, or
-// the TestResult for the ad hoc test if no test is running.
+// Returns the most specific TestResult currently running.
 TestResult* UnitTestImpl::current_test_result() {
-  return current_test_info_ ?
-      &(current_test_info_->result_) : &ad_hoc_test_result_;
+  if (current_test_info_ != NULL) {
+    return &current_test_info_->result_;
+  }
+  if (current_test_case_ != NULL) {
+    return &current_test_case_->ad_hoc_test_result_;
+  }
+  return &ad_hoc_test_result_;
 }
 
 // Shuffles all test cases, and the tests within each test case,

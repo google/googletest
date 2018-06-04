@@ -123,7 +123,7 @@ namespace internal {
 
 // Valid only for fast death tests. Indicates the code is running in the
 // child process of a fast style death test.
-# if !GTEST_OS_WINDOWS
+# if !GTEST_OS_WINDOWS && !GTEST_OS_FUCHSIA
 static bool g_in_fast_death_test_child = false;
 # endif
 
@@ -184,7 +184,7 @@ bool KilledBySignal::operator()(int exit_status) const {
 #  endif  // defined(GTEST_KILLED_BY_SIGNAL_OVERRIDE_)
   return WIFSIGNALED(exit_status) && WTERMSIG(exit_status) == signum_;
 }
-# endif  // !GTEST_OS_WINDOWS
+# endif  // !GTEST_OS_WINDOWS && !GTEST_OS_FUCHSIA
 
 namespace internal {
 

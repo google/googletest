@@ -28,7 +28,7 @@
 //
 // Author: vladl@google.com (Vlad Losev)
 //
-// The Google C++ Testing Framework (Google Test)
+// The Google C++ Testing and Mocking Framework (Google Test)
 //
 // This file contains tests verifying correctness of data provided via
 // UnitTest's public methods.

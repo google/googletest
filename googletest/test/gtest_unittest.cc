@@ -380,6 +380,31 @@ TEST(GetTestTypeIdTest, ReturnsTheSameValueInsideOrOutsideOfGoogleTest) {
   EXPECT_EQ(kTestTypeIdInGoogleTest, GetTestTypeId());
 }
 
+// Tests CanonicalizeForStdLibVersioning.
+
+using ::testing::internal::CanonicalizeForStdLibVersioning;
+
+TEST(CanonicalizeForStdLibVersioning, LeavesUnversionedNamesUnchanged) {
+  EXPECT_EQ("std::bind", CanonicalizeForStdLibVersioning("std::bind"));
+  EXPECT_EQ("std::_", CanonicalizeForStdLibVersioning("std::_"));
+  EXPECT_EQ("std::__foo", CanonicalizeForStdLibVersioning("std::__foo"));
+  EXPECT_EQ("gtl::__1::x", CanonicalizeForStdLibVersioning("gtl::__1::x"));
+  EXPECT_EQ("__1::x", CanonicalizeForStdLibVersioning("__1::x"));
+  EXPECT_EQ("::__1::x", CanonicalizeForStdLibVersioning("::__1::x"));
+}
+
+TEST(CanonicalizeForStdLibVersioning, ElidesDoubleUnderNames) {
+  EXPECT_EQ("std::bind", CanonicalizeForStdLibVersioning("std::__1::bind"));
+  EXPECT_EQ("std::_", CanonicalizeForStdLibVersioning("std::__1::_"));
+
+  EXPECT_EQ("std::bind", CanonicalizeForStdLibVersioning("std::__g::bind"));
+  EXPECT_EQ("std::_", CanonicalizeForStdLibVersioning("std::__g::_"));
+
+  EXPECT_EQ("std::bind",
+            CanonicalizeForStdLibVersioning("std::__google::bind"));
+  EXPECT_EQ("std::_", CanonicalizeForStdLibVersioning("std::__google::_"));
+}
+
 // Tests FormatTimeInMillisAsSeconds().
 
 TEST(FormatTimeInMillisAsSecondsTest, FormatsZero) {
@@ -7747,4 +7772,26 @@ TEST(SkipPrefixTest, DoesNotSkipWhenPrefixDoesNotMatch) {
   p = str;
   EXPECT_FALSE(SkipPrefix("world!", &p));
   EXPECT_EQ(str, p);
+}
+
+// Tests ad_hoc_test_result().
+
+class AdHocTestResultTest : public testing::Test {
+ protected:
+  static void SetUpTestCase() {
+    FAIL() << "A failure happened inside SetUpTestCase().";
+  }
+};
+
+TEST_F(AdHocTestResultTest, AdHocTestResultForTestCaseShowsFailure) {
+  const testing::TestResult& test_result = testing::UnitTest::GetInstance()
+                                               ->current_test_case()
+                                               ->ad_hoc_test_result();
+  EXPECT_TRUE(test_result.Failed());
+}
+
+TEST_F(AdHocTestResultTest, AdHocTestResultTestForUnitTestDoesNotShowFailure) {
+  const testing::TestResult& test_result =
+      testing::UnitTest::GetInstance()->ad_hoc_test_result();
+  EXPECT_FALSE(test_result.Failed());
 }

@@ -29,7 +29,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-"""Tests the --help flag of Google C++ Testing Framework.
+"""Tests the --help flag of Google C++ Testing and Mocking Framework.
 
 SYNOPSIS
        gtest_help_test.py --build_dir=BUILD/DIR
