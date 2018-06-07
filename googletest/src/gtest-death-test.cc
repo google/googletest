@@ -63,8 +63,8 @@
 # endif  // GTEST_OS_QNX
 
 # if GTEST_OS_FUCHSIA
-#  include <fdio/io.h>
-#  include <fdio/spawn.h>
+#  include <lib/fdio/io.h>
+#  include <lib/fdio/spawn.h>
 #  include <zircon/processargs.h>
 #  include <zircon/syscalls.h>
 # endif  // GTEST_OS_FUCHSIA
