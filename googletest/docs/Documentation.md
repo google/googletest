@@ -8,7 +8,7 @@ the respective git branch/tag).**
   * [Samples](Samples.md) -- learn from examples.
   * [AdvancedGuide](advanced.md) -- learn more about Google Test.
   * [XcodeGuide](XcodeGuide.md) -- how to use Google Test in Xcode on Mac.
-  * [Frequently-Asked Questions](FAQ.md) -- check here before asking a question on the mailing list.
+  * [Frequently-Asked Questions](faq.md) -- check here before asking a question on the mailing list.
 
 To contribute code to Google Test, read:
 
