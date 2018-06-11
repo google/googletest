@@ -4,7 +4,7 @@ current git version)**
 documentation for that specific version instead (e.g. by checking out
 the respective git branch/tag).**
 
-  * [Primer](Primer.md) -- start here if you are new to Google Test.
+  * [Primer](primer.md) -- start here if you are new to Google Test.
   * [Samples](Samples.md) -- learn from examples.
   * [AdvancedGuide](AdvancedGuide.md) -- learn more about Google Test.
   * [XcodeGuide](XcodeGuide.md) -- how to use Google Test in Xcode on Mac.

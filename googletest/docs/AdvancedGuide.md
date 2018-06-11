@@ -1,6 +1,6 @@
 
 
-Now that you have read [Primer](Primer.md) and learned how to write tests
+Now that you have read [Primer](primer.md) and learned how to write tests
 using Google Test, it's time to learn some new tricks. This document
 will show you more assertions as well as how to construct complex
 failure messages, propagate fatal failures, reuse and speed up your
