@@ -349,7 +349,7 @@ You can make a matcher from one or more other matchers:
 
 ## Matchers as Test Assertions ##
 
-|`ASSERT_THAT(expression, m)`|Generates a [fatal failure](../../googletest/docs/Primer.md#assertions) if the value of `expression` doesn't match matcher `m`.|
+|`ASSERT_THAT(expression, m)`|Generates a [fatal failure](../../googletest/docs/primer.md#assertions) if the value of `expression` doesn't match matcher `m`.|
 |:---------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------|
 |`EXPECT_THAT(expression, m)`|Generates a non-fatal failure if the value of `expression` doesn't match matcher `m`.                                                          |
 

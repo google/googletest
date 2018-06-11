@@ -1,7 +1,7 @@
 
 
 If you cannot find the answer to your question here, and you have read
-[Primer](Primer.md) and [AdvancedGuide](AdvancedGuide.md), send it to
+[Primer](primer.md) and [AdvancedGuide](AdvancedGuide.md), send it to
 googletestframework@googlegroups.com.
 
 ## Why should I use Google Test instead of my favorite C++ testing framework? ##
@@ -956,7 +956,7 @@ using gtest-md.vcproj instead of gtest.vcproj.
 
 ## I put my tests in a library and Google Test doesn't run them. What's happening? ##
 Have you read a
-[warning](Primer.md#important-note-for-visual-c-users) on
+[warning](primer.md#important-note-for-visual-c-users) on
 the Google Test Primer page?
 
 ## I want to use Google Test with Visual Studio but don't know where to start. ##
