@@ -229,7 +229,7 @@ A `NULL` pointer and an empty string are considered _different_.
 _Availability_: Linux, Windows, Mac.
 
 See also: For more string comparison tricks (substring, prefix, suffix, and
-regular expression matching, for example), see the [Advanced Google Test Guide](AdvancedGuide.md).
+regular expression matching, for example), see the [Advanced Google Test Guide](advanced.md).
 
 # Simple Tests #
 
@@ -290,7 +290,7 @@ To create a fixture, just:
   1. Derive a class from `::testing::Test` . Start its body with `protected:` or `public:` as we'll want to access fixture members from sub-classes.
   1. Inside the class, declare any objects you plan to use.
   1. If necessary, write a default constructor or `SetUp()` function to prepare the objects for each test. A common mistake is to spell `SetUp()` as `Setup()` with a small `u` - don't let that happen to you.
-  1. If necessary, write a destructor or `TearDown()` function to release any resources you allocated in `SetUp()` . To learn when you should use the constructor/destructor and when you should use `SetUp()/TearDown()`, read this [FAQ entry](FAQ.md#should-i-use-the-constructordestructor-of-the-test-fixture-or-the-set-uptear-down-function).
+  1. If necessary, write a destructor or `TearDown()` function to release any resources you allocated in `SetUp()` . To learn when you should use the constructor/destructor and when you should use `SetUp()/TearDown()`, read this [FAQ entry](faq.md#should-i-use-the-constructordestructor-of-the-test-fixture-or-the-set-uptear-down-function).
   1. If needed, define subroutines for your tests to share.
 
 When using a fixture, use `TEST_F()` instead of `TEST()` as it allows you to
@@ -494,7 +494,7 @@ int main(int argc, char **argv) {
 
 The `::testing::InitGoogleTest()` function parses the command line for Google
 Test flags, and removes all recognized flags. This allows the user to control a
-test program's behavior via various flags, which we'll cover in [AdvancedGuide](AdvancedGuide.md).
+test program's behavior via various flags, which we'll cover in [AdvancedGuide](advanced.md).
 You must call this function before calling `RUN_ALL_TESTS()`, or the flags
 won't be properly initialized.
 
@@ -522,8 +522,8 @@ There is one more pitfall, though. If you use Google Test as a static library (t
 # Where to Go from Here #
 
 Congratulations! You've learned the Google Test basics. You can start writing
-and running Google Test tests, read some [samples](Samples.md), or continue with
-[AdvancedGuide](AdvancedGuide.md), which describes many more useful Google Test features.
+and running Google Test tests, read some [samples](samples.md), or continue with
+[AdvancedGuide](advanced.md), which describes many more useful Google Test features.
 
 # Known Limitations #
 
