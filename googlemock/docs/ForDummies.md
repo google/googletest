@@ -187,7 +187,7 @@ sometimes causes the test program to crash.  You'll still be able to
 notice that the test has failed, but it's not a graceful failure.
 
 A better solution is to use Google Test's
-[event listener API](../../googletest/docs/AdvancedGuide.md#extending-google-test-by-handling-test-events)
+[event listener API](../../googletest/docs/advanced.md#extending-google-test-by-handling-test-events)
 to report a test failure to your testing framework properly.  You'll need to
 implement the `OnTestPartResult()` method of the event listener interface, but it
 should be straightforward.

@@ -229,7 +229,7 @@ The `argument` can be either a C string or a C++ string object:
 
 `ContainsRegex()` and `MatchesRegex()` use the regular expression
 syntax defined
-[here](../../googletest/docs/AdvancedGuide.md#regular-expression-syntax).
+[here](../../googletest/docs/advanced.md#regular-expression-syntax).
 `StrCaseEq()`, `StrCaseNe()`, `StrEq()`, and `StrNe()` work for wide
 strings as well.
 
