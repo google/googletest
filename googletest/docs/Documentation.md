@@ -6,7 +6,7 @@ the respective git branch/tag).**
 
   * [Primer](primer.md) -- start here if you are new to Google Test.
   * [Samples](Samples.md) -- learn from examples.
-  * [AdvancedGuide](AdvancedGuide.md) -- learn more about Google Test.
+  * [AdvancedGuide](advanced.md) -- learn more about Google Test.
   * [XcodeGuide](XcodeGuide.md) -- how to use Google Test in Xcode on Mac.
   * [Frequently-Asked Questions](FAQ.md) -- check here before asking a question on the mailing list.
 
