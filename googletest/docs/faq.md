@@ -1,7 +1,7 @@
 
 
 If you cannot find the answer to your question here, and you have read
-[Primer](Primer.md) and [AdvancedGuide](AdvancedGuide.md), send it to
+[Primer](primer.md) and [AdvancedGuide](advanced.md), send it to
 googletestframework@googlegroups.com.
 
 ## Why should I use Google Test instead of my favorite C++ testing framework? ##
@@ -28,11 +28,11 @@ list can help you decide whether it is for you too.
   * `SCOPED_TRACE` helps you understand the context of an assertion failure when it comes from inside a sub-routine or loop.
   * You can decide which tests to run using name patterns.  This saves time when you want to quickly reproduce a test failure.
   * Google Test can generate XML test result reports that can be parsed by popular continuous build system like Hudson.
-  * Simple things are easy in Google Test, while hard things are possible: in addition to advanced features like [global test environments](AdvancedGuide.md#global-set-up-and-tear-down) and tests parameterized by [values](AdvancedGuide.md#value-parameterized-tests) or [types](docs/AdvancedGuide.md#typed-tests), Google Test supports various ways for the user to extend the framework -- if Google Test doesn't do something out of the box, chances are that a user can implement the feature using Google Test's public API, without changing Google Test itself.  In particular, you can:
-    * expand your testing vocabulary by defining [custom predicates](AdvancedGuide.md#predicate-assertions-for-better-error-messages),
-    * teach Google Test how to [print your types](AdvancedGuide.md#teaching-google-test-how-to-print-your-values),
-    * define your own testing macros or utilities and verify them using Google Test's [Service Provider Interface](AdvancedGuide.md#catching-failures), and
-    * reflect on the test cases or change the test output format by intercepting the [test events](AdvancedGuide.md#extending-google-test-by-handling-test-events).
+  * Simple things are easy in Google Test, while hard things are possible: in addition to advanced features like [global test environments](advanced.md#global-set-up-and-tear-down) and tests parameterized by [values](advanced.md#value-parameterized-tests) or [types](docs/advanced.md#typed-tests), Google Test supports various ways for the user to extend the framework -- if Google Test doesn't do something out of the box, chances are that a user can implement the feature using Google Test's public API, without changing Google Test itself.  In particular, you can:
+    * expand your testing vocabulary by defining [custom predicates](advanced.md#predicate-assertions-for-better-error-messages),
+    * teach Google Test how to [print your types](advanced.md#teaching-google-test-how-to-print-your-values),
+    * define your own testing macros or utilities and verify them using Google Test's [Service Provider Interface](advanced.md#catching-failures), and
+    * reflect on the test cases or change the test output format by intercepting the [test events](advanced.md#extending-google-test-by-handling-test-events).
 
 ## I'm getting warnings when compiling Google Test.  Would you fix them? ##
 
@@ -754,7 +754,7 @@ EXPECT_TRUE(internal::Func(12345));
 
 ## I would like to run a test several times with different parameters. Do I need to write several similar copies of it? ##
 
-No. You can use a feature called [value-parameterized tests](AdvancedGuide.md#Value_Parameterized_Tests) which
+No. You can use a feature called [value-parameterized tests](advanced.md#Value_Parameterized_Tests) which
 lets you repeat your tests with different parameters, without defining it more than once.
 
 ## How do I test a file that defines main()? ##
@@ -849,7 +849,7 @@ expression syntax
 (http://en.wikipedia.org/wiki/Regular_expression#POSIX_Extended_Regular_Expressions).
 On Windows, it uses a limited variant of regular expression
 syntax. For more details, see the
-[regular expression syntax](AdvancedGuide.md#Regular_Expression_Syntax).
+[regular expression syntax](advanced.md#Regular_Expression_Syntax).
 
 ## I have a fixture class Foo, but TEST\_F(Foo, Bar) gives me error "no matching function for call to Foo::Foo()". Why? ##
 
@@ -956,7 +956,7 @@ using gtest-md.vcproj instead of gtest.vcproj.
 
 ## I put my tests in a library and Google Test doesn't run them. What's happening? ##
 Have you read a
-[warning](Primer.md#important-note-for-visual-c-users) on
+[warning](primer.md#important-note-for-visual-c-users) on
 the Google Test Primer page?
 
 ## I want to use Google Test with Visual Studio but don't know where to start. ##

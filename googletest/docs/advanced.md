@@ -1,6 +1,6 @@
 
 
-Now that you have read [Primer](Primer.md) and learned how to write tests
+Now that you have read [Primer](primer.md) and learned how to write tests
 using Google Test, it's time to learn some new tricks. This document
 will show you more assertions as well as how to construct complex
 failure messages, propagate fatal failures, reuse and speed up your
@@ -125,7 +125,7 @@ c is 10<br>
 
 **Notes:**
 
-  1. If you see a compiler error "no matching function to call" when using `ASSERT_PRED*` or `EXPECT_PRED*`, please see [this FAQ](FAQ.md#the-compiler-complains-no-matching-function-to-call-when-i-use-assert_predn-how-do-i-fix-it) for how to resolve it.
+  1. If you see a compiler error "no matching function to call" when using `ASSERT_PRED*` or `EXPECT_PRED*`, please see [this FAQ](faq.md#the-compiler-complains-no-matching-function-to-call-when-i-use-assert_predn-how-do-i-fix-it) for how to resolve it.
   1. Currently we only provide predicate assertions of arity <= 5. If you need a higher-arity assertion, let us know.
 
 _Availability_: Linux, Windows, Mac.
@@ -2413,4 +2413,4 @@ file as an example on how to compile your tests against them.
 
 Congratulations! You've now learned more advanced Google Test tools and are
 ready to tackle more complex testing tasks. If you want to dive even deeper, you
-can read the [Frequently-Asked Questions](FAQ.md).
+can read the [Frequently-Asked Questions](faq.md).
