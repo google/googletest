@@ -550,6 +550,13 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
     (GTEST_HAS_STD_WSTRING && GTEST_HAS_GLOBAL_STRING)
 #endif  // GTEST_HAS_GLOBAL_WSTRING
 
+#ifndef GTEST_HAS_STD_STRINGVIEW
+// The user didn't tell us whether ::std::string_view is available, so we need
+// to figure it out.
+# define GTEST_HAS_STD_STRINGVIEW \
+    (__cplusplus >= 201703L)
+#endif  // GTEST_HAS_STD_STRINGVIEW
+
 // Determines whether RTTI is available.
 #ifndef GTEST_HAS_RTTI
 // The user didn't tell us whether RTTI is enabled, so we need to
