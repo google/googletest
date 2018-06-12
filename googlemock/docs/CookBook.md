@@ -3655,6 +3655,6 @@ This printer knows how to print built-in C++ types, native arrays, STL
 containers, and any type that supports the `<<` operator.  For other
 types, it prints the raw bytes in the value and hopes that you the
 user can figure it out.
-[Google Test's advanced guide](../../googletest/docs/AdvancedGuide.md#teaching-google-test-how-to-print-your-values)
+[Google Test's advanced guide](../../googletest/docs/advanced.md#teaching-google-test-how-to-print-your-values)
 explains how to extend the printer to do a better job at
 printing your particular type than to dump the bytes.

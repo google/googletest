@@ -54,7 +54,7 @@ it.
 ### Using CMake ###
 
 Google Test comes with a CMake build script (
-[CMakeLists.txt](CMakeLists.txt)) that can be used on a wide range of platforms ("C" stands for
+[CMakeLists.txt](https://github.com/google/googletest/blob/master/CMakeLists.txt)) that can be used on a wide range of platforms ("C" stands for
 cross-platform.). If you don't have CMake installed already, you can
 download it for free from <http://www.cmake.org/>.
 
