@@ -804,6 +804,23 @@ TEST(PrintStringViewTest, UnprintableCharacters) {
 
 #endif  // GTEST_HAS_ABSL
 
+#if GTEST_HAS_STD_STRINGVIEW
+
+// Tests printing ::std::string_view.
+
+TEST(PrintStdStringViewTest, SimpleStringView) {
+  const ::std::string_view sp = "Hello";
+  EXPECT_EQ("\"Hello\"", Print(sp));
+}
+
+TEST(PrintStdStringViewTest, UnprintableCharacters) {
+  const char str[] = "NUL (\0) and \r\t";
+  const ::std::string_view sp(str, sizeof(str) - 1);
+  EXPECT_EQ("\"NUL (\\0) and \\r\\t\"", Print(sp));
+}
+
+#endif  // GTEST_HAS_STD_STRINGVIEW
+
 // Tests printing STL containers.
 
 TEST(PrintStlContainerTest, EmptyDeque) {

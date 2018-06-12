@@ -116,6 +116,10 @@
 #include "absl/types/optional.h"
 #endif  // GTEST_HAS_ABSL
 
+#if GTEST_HAS_STD_STRINGVIEW
+#include <string_view>
+#endif  // GTEST_HAS_STD_STRINGVIEW
+
 namespace testing {
 
 // Definitions in the 'internal' and 'internal2' name spaces are
@@ -635,6 +639,13 @@ inline void PrintTo(absl::string_view sp, ::std::ostream* os) {
   PrintTo(::std::string(sp), os);
 }
 #endif  // GTEST_HAS_ABSL
+
+#if GTEST_HAS_STD_STRINGVIEW
+// Overload for std::string_view.
+inline void PrintTo(::std::string_view sp, ::std::ostream* os) {
+  PrintTo(::std::string(sp), os);
+}
+#endif  // GTEST_HAS_STD_STRINGVIEW
 
 #if GTEST_LANG_CXX11
 inline void PrintTo(std::nullptr_t, ::std::ostream* os) { *os << "(nullptr)"; }
