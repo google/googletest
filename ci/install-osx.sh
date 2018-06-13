@@ -29,9 +29,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-set -eux
-
-./ci/terminate-if-doconly.sh
+set -eu
 
 if [ "${TRAVIS_OS_NAME}" != "osx" ]; then
     echo "Not a macOS build; skipping installation"
