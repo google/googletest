@@ -31,6 +31,8 @@
 
 set -eu
 
+terminate-if-doconly.sh
+
 if [ "${TRAVIS_OS_NAME}" != "osx" ]; then
     echo "Not a macOS build; skipping installation"
     exit 0
