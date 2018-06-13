@@ -1023,7 +1023,7 @@ Yes.
 
 The rule is **all test methods in the same test case must use the same fixture class**. This means that the following is **allowed** because both tests use the same fixture class (`::testing::Test`).
 
-``` cpp
+```c++
 namespace foo {
 TEST(CoolTest, DoSomething) {
   SUCCEED();
@@ -1039,7 +1039,7 @@ TEST(CoolTest, DoSomething) {
 
 However, the following code is **not allowed** and will produce a runtime error from Google Test because the test methods are using different test fixture classes with the same test case name.
 
-``` cpp
+```c++
 namespace foo {
 class CoolTest : public ::testing::Test {};  // Fixture foo::CoolTest
 TEST_F(CoolTest, DoSomething) {
