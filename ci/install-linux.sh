@@ -31,7 +31,7 @@
 
 set -eu
 
-./terminate-if-doconly.sh
+./ci/terminate-if-doconly.sh
 
 if [ "${TRAVIS_OS_NAME}" != linux ]; then
     echo "Not a Linux build; skipping installation"
