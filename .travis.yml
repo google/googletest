@@ -55,7 +55,7 @@ matrix:
       if: type != pull_request
 
 before_install:
-  ./ci/terminate-if-doconly.sh
+  - ./ci/terminate-if-doconly.sh
 
 # These are the install and build (script) phases for the most common entries in the matrix.  They could be included
 # in each entry in the matrix, but that is just repetitive.
