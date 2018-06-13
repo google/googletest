@@ -55,8 +55,14 @@ matrix:
       if: type != pull_request
 
 before_install:
-  - ./ci/terminate-if-doconly.sh
-
+- |
+    if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+      TRAVIS_COMMIT_RANGE="FETCH_HEAD...$TRAVIS_BRANCH"
+    fi
+    git diff --name-only $TRAVIS_COMMIT_RANGE | grep -qvE '(\.md$)/' || {
+      echo "Only docs were updated, stopping build process."
+      exit
+    }
 # These are the install and build (script) phases for the most common entries in the matrix.  They could be included
 # in each entry in the matrix, but that is just repetitive.
 install:
