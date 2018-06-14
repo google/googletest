@@ -378,3 +378,19 @@ py_test(
     data = [":gtest_uninitialized_test_"],
     deps = [":gtest_test_utils"],
 )
+
+cc_binary(
+    name = "gtest_testbridge_test_",
+    testonly = 1,
+    srcs = ["gtest_testbridge_test_.cc"],
+    deps = ["//:gtest_main"],
+)
+
+# Tests that filtering via testbridge works
+py_test(
+    name = "gtest_testbridge_test",
+    size = "small",
+    srcs = ["gtest_testbridge_test.py"],
+    data = [":gtest_testbridge_test_"],
+    deps = [":gtest_test_utils"],
+)
