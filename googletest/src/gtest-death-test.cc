@@ -63,8 +63,9 @@
 # endif  // GTEST_OS_QNX
 
 # if GTEST_OS_FUCHSIA
-#  include <fdio/io.h>
-#  include <launchpad/launchpad.h>
+#  include <lib/fdio/io.h>
+#  include <lib/fdio/spawn.h>
+#  include <zircon/processargs.h>
 #  include <zircon/syscalls.h>
 # endif  // GTEST_OS_FUCHSIA
 
@@ -926,29 +927,27 @@ DeathTest::TestRole FuchsiaDeathTest::AssumeRole() {
   args.AddArgument(filter_flag.c_str());
   args.AddArgument(internal_flag.c_str());
 
-  // Build the child process launcher.
-  zx_status_t status;
-  launchpad_t* lp;
-  status = launchpad_create(ZX_HANDLE_INVALID, args.Argv()[0], &lp);
-  GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
-
   // Build the pipe for communication with the child.
-  int read_fd;
-  status = launchpad_add_pipe(lp, &read_fd, kFuchsiaReadPipeFd);
-  GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
-  set_read_fd(read_fd);
+  zx_status_t status;
+  zx_handle_t child_pipe_handle;
+  uint32_t type;
+  status = fdio_pipe_half(&child_pipe_handle, &type);
+  GTEST_DEATH_TEST_CHECK_(status >= 0);
+  set_read_fd(status);
 
-  // Set the command line arguments.
-  status = launchpad_load_from_file(lp, args.Argv()[0]);
-  GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
-  status = launchpad_set_args(lp, args.size(), args.Argv());
-  GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
+  // Set the pipe handle for the child.
+  fdio_spawn_action_t add_handle_action = {
+    .action = FDIO_SPAWN_ACTION_ADD_HANDLE,
+    .h = {
+      .id = PA_HND(type, kFuchsiaReadPipeFd),
+      .handle = child_pipe_handle
+    }
+  };
 
-  // Clone all the things (environment, stdio, namespace, ...).
-  launchpad_clone(lp, LP_CLONE_ALL);
-
-  // Launch the child process.
-  status = launchpad_go(lp, &child_process_, nullptr);
+  // Spawn the child process.
+  status = fdio_spawn_etc(ZX_HANDLE_INVALID, FDIO_SPAWN_CLONE_ALL,
+                          args.Argv()[0], args.Argv(), nullptr, 1,
+                          &add_handle_action, &child_process_, nullptr);
   GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
 
   set_spawned(true);
