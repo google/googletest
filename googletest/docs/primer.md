@@ -44,7 +44,7 @@ Since googletest is based on the popular xUnit architecture, you'll feel right
 at home if you've used JUnit or PyUnit before. If not, it will take you about 10
 minutes to learn the basics and get started. So let's go!
 
-# Beware of the nomenclature #
+## Beware of the nomenclature
 
 _Note:_ There might be some confusion of idea due to different
 definitions of the terms _Test_, _Test Case_ and _Test Suite_, so beware
