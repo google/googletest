@@ -560,23 +560,6 @@ gtest\_main library and you are good to go.
 
 NOTE: `ParseGUnitFlags()` is deprecated in favor of `InitGoogleTest()`.
 
-## Creating and Building Test Programs
-
-Now that we've learned how to write a test program, we need to tell the build
-system to build it. The exact steps differ from one OS to another.
-
-If you work on Linux, follow the instructions [here](howto_cpp#LinuxTarget).
-
-If you work on the Mac, follow the instructions [here](howto_cpp_mac).
-
-If you work on Windows, consult existing test programs in your project, as the
-syntax for a test program build target may differ slightly from project to
-project. When compiling googletest and your tests, please do **not** use the
-`/Wp64` MSVC flag. It is broken and
-[deprecated](http://msdn.microsoft.com/en-us/library/yt4xw8fh.aspx) by
-Microsoft. We don't guarantee that googletest will compile warning-free with
-that flag (as it's often technically infeasible given the flag's broken nature).
-
 ## Known Limitations
 
 *   Google Test is designed to be thread-safe. The implementation is thread-safe
