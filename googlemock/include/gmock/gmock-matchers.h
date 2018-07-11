@@ -47,7 +47,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <functional>
 #include "gtest/gtest.h"
 #include "gmock/internal/gmock-internal-utils.h"
 #include "gmock/internal/gmock-port.h"
@@ -2095,37 +2094,35 @@ ExpectThrowsWithMessageResult(M m, const string& exception_type,
   return AssertionFailure() << ss.str();
 }
 
-inline string GenerateUnexpectedExceptionTypeFailureString(
-    const Matcher<const string&>& matcher, const string& exception_type) {
-  ::std::stringstream ss;
-  ss << "Incorrect throwing behaviour\n"
-     << "Expected: " << exception_type << " whose message ";
-  matcher.DescribeTo(&ss);
-  ss << "\n  Actual: exception of an unexpected type was thrown";
-
-  return ss.str();
-}
-
-inline string GenerateNoExceptionFailureString(
-    const Matcher<const string&>& matcher, const string& exception_type) {
-  ::std::stringstream ss;
-  ss << "Incorrect throwing behaviour\n"
-     << "Expected: " << exception_type << " whose message ";
-  matcher.DescribeTo(&ss);
-  ss << "\n  Actual: No exception was thrown";
-
-  return ss.str();
-}
+enum ExceptionMessageFailure {
+  NO_EXCEPTION,
+  UNEXPECTED_EXCEPTION_TYPE
+};
 
 // Used to handle always-fail outcomes of {EXPECT|ASSERT}_THROWS_WITH_MESSAGE_THAT,
 // i.e. "no exception was thrown" and "unexpected exception type".
 template <typename M>
 inline AssertionResult
 ExpectThrowsWithMessageResult(M m,
-    std::function<string(const Matcher<const string&>&)> failure_string_fn) {
+    const string& exception_type,
+    ExceptionMessageFailure failure_type) {
   const Matcher<const string&> matcher = SafeMatcherCast<const string&>(m);
 
-  return AssertionFailure() << failure_string_fn(matcher);
+  ::std::stringstream ss;
+  ss << "Incorrect throwing behaviour\n"
+    << "Expected: " << exception_type << " whose message ";
+  matcher.DescribeTo(&ss);
+
+  switch (failure_type) {
+  case NO_EXCEPTION:
+    ss << "\n  Actual: No exception was thrown";
+    break;
+  case UNEXPECTED_EXCEPTION_TYPE:
+    ss << "\n  Actual: exception of an unexpected type was thrown";
+    break;
+  }
+
+  return AssertionFailure() << ss.str();
 }
 
 // Implements the polymorphic floating point equality matcher, which matches
@@ -5340,29 +5337,19 @@ PolymorphicMatcher<internal::variant_matcher::VariantMatcher<T> > VariantWith(
       }\
       \
       if (!has_thrown) {\
-        std::function<string(const Matcher<const string&>&)> failure_string_fn =\
-          std::bind(\
-            internal::GenerateNoExceptionFailureString,\
-            std::placeholders::_1,\
-            std::cref(et));\
-        \
         GTEST_ASSERT_(\
           ::testing::internal::ExpectThrowsWithMessageResult(\
             matcher,\
-            std::move(failure_string_fn)),\
+            et,\
+            ::testing::internal::ExceptionMessageFailure::NO_EXCEPTION),\
           on_failure);\
       }\
       if (has_thrown && !correct_exception_type) {\
-        std::function<string(const Matcher<const string&>&)> failure_string_fn =\
-          std::bind(\
-            internal::GenerateUnexpectedExceptionTypeFailureString,\
-            std::placeholders::_1,\
-            std::cref(et));\
-        \
         GTEST_ASSERT_(\
           ::testing::internal::ExpectThrowsWithMessageResult(\
             matcher,\
-            std::move(failure_string_fn)),\
+            et,\
+            ::testing::internal::ExceptionMessageFailure::UNEXPECTED_EXCEPTION_TYPE),\
           on_failure);\
       }\
     } while (false);
