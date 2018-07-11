@@ -233,6 +233,21 @@ syntax defined
 `StrCaseEq()`, `StrCaseNe()`, `StrEq()`, and `StrNe()` work for wide
 strings as well.
 
+### Testing Exception Messages ###
+
+Two macros are available for testing that an exception of a given type
+is not only thrown, but also has a message that meets certain expectations.
+These macros will work with any string matcher, e.g. `HasSubstr()` or `StrEq()`,
+and with composite matchers such as `AllOf()`.
+
+| `EXPECT_THROWS_WITH_MESSAGE_THAT(statement, type, matcher)` | Asserts that `statement` throws an exception of type `type`, and the exception's message type matches `matcher`. |
+|:------------------------------|:----------------------------------------|
+| `ASSERT_THROWS_WITH_MESSAGE_THAT(statement, type, matcher)` | The same as `EXPECT_THROWS_WITH_MESSAGE_THAT(statement, type, matcher)`, except that it generates a **fatal** failure. |
+
+These macros will work for any exception type that has a `what()` accessor,
+which returns a value convertible to string. This is true for all standard
+exceptions, where `what()` returns a pointer to a null-terminated string.
+
 ## Container Matchers ##
 
 Most STL-style containers support `==`, so you can use

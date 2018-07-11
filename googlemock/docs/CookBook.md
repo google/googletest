@@ -952,6 +952,99 @@ Expected: starts with "Hello"
 [Hamcrest](https://github.com/hamcrest/) project, which adds
 `assertThat()` to JUnit.
 
+## Using Matchers to Test Exception Message Strings ##
+
+Two macros exist to expose a thrown exception's message for
+verification using string matchers:
+
+```
+  // Asserts that statement will throw exception of a given type,
+  // and its message will match the matcher
+  ASSERT_THROWS_WITH_MESSAGE_THAT(statement, type, matcher);
+
+  // The non-fatal version.
+  EXPECT_THROWS_WITH_MESSAGE_THAT(statement, type, matcher);
+```
+
+These macros are used similarly to `{EXPECT|ASSERT}_THAT`, but the
+matcher acts upon the message of the exception thrown by `statement`.  
+
+```
+#include "gmock/gmock.h"
+
+#include <stdexcept>
+
+using ::testing::AllOf;
+using ::testing::Eq;
+using ::testing::HasSubstr;
+using ::testing::StartsWith;
+
+void ThrowIfNegative(const int x) {
+  if (x < 0) {
+    throw std::runtime_error("Negative number detected");
+  }
+}
+...
+
+  EXPECT_THROWS_WITH_MESSAGE_THAT(
+    ThrowIfNegative(-1),
+    std::runtime_error,
+    HasSubstr("number"));
+
+  ASSERT_THROWS_WITH_MESSAGE_THAT(
+    [](){ throw std::runtime_error("Ouch!"); }(),
+    std::runtime_error,
+    StrEq("Ouch!"));
+
+  EXPECT_THROWS_WITH_MESSAGE_THAT(
+    ThrowIfNegative(-1),
+    std::exception, // This will pass, because std::runtime_error
+                    // is derived from std::exception
+    AllOf(StartsWith("Negative"), HasSubstr("number")));
+```
+
+There is a number of ways for `{EXPECT|ASSERT}_THROWS_WITH_MESSAGE_THAT`
+assertions to cause a test failure:
+
+ * `statement` does not throw an exception
+ * `statement` throws an exception that is of a type that is neither
+   the specified type nor inherits from it
+ * `statement` throws an exception of a correct type, but the message
+   does not satisfy the matcher 
+
+Informative messages are printed in all cases.
+
+```
+  // Fails with message:
+  // Incorrect throwing behaviour
+  // Expected: std::runtime_error whose message is equal to "Ouch!"
+  //   Actual: No exception was thrown
+  ASSERT_THROWS_WITH_MESSAGE_THAT(
+    [](){
+      // non-throwing code
+    }(),
+    std::runtime_error,
+    StrEq("Ouch!"));
+
+  // Fails with message:
+  // Incorrect throwing behaviour
+  // Expected: std::logic_error whose message is equal to "Ouch!"
+  //   Actual: exception of an unexpected type was thrown
+  ASSERT_THROWS_WITH_MESSAGE_THAT(
+    [](){ throw std::runtime_error("Ouch!"); }(),
+    std::logic_error, // does not inherit from runtime_error
+    StrEq("Ouch!"));
+
+  // Fails with message:
+  // Incorrect throwing behaviour
+  //       Expected: std::runtime_error whose message is equal to "x"
+  // Actual message: "Ouch!"
+  ASSERT_THROWS_WITH_MESSAGE_THAT(
+    [](){ throw std::runtime_error("Ouch!"); }(),
+    std::runtime_error,
+    StrEq("x"));
+```
+
 ## Using Predicates as Matchers ##
 
 Google Mock provides a built-in set of matchers. In case you find them
