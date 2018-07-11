@@ -37,7 +37,9 @@
 namespace {
 
 using testing::HasSubstr;
+#if GTEST_HAS_EXCEPTIONS
 using testing::internal::GoogleTestFailureException;
+#endif
 
 // A type that cannot be default constructed.
 class NonDefaultConstructible {
