@@ -461,7 +461,7 @@ When invoked, the `RUN_ALL_TESTS()` macro:
 
 *   Deletes the fixture.
 
-1. Restores the state of all googletest flags
+* Restores the state of all googletest flags
 
 *   Repeats the above steps for the next test, until all tests have run.
 
