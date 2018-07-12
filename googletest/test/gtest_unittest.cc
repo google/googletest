@@ -2092,8 +2092,8 @@ TEST_F(UnitTestRecordPropertyTest,
        AddRecordWithReservedKeysGeneratesCorrectPropertyList) {
   EXPECT_NONFATAL_FAILURE(
       Test::RecordProperty("name", "1"),
-      "'classname', 'name', 'status', 'time', 'type_param', and 'value_param'"
-      " are reserved");
+      "'classname', 'name', 'status', 'time', 'type_param', 'value_param',"
+      " 'file', and 'line' are reserved");
 }
 
 class UnitTestRecordPropertyTestEnvironment : public Environment {
