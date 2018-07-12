@@ -31,15 +31,14 @@
 
 // Tests Google Mock's functionality that depends on exceptions.
 
+#if GTEST_HAS_EXCEPTIONS
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 namespace {
 
 using testing::HasSubstr;
-#if GTEST_HAS_EXCEPTIONS
 using testing::internal::GoogleTestFailureException;
-#endif
 
 // A type that cannot be default constructed.
 class NonDefaultConstructible {
@@ -54,7 +53,6 @@ class MockFoo {
   MOCK_METHOD0(GetNonDefaultConstructible, NonDefaultConstructible());
 };
 
-#if GTEST_HAS_EXCEPTIONS
 
 TEST(DefaultValueTest, ThrowsRuntimeErrorWhenNoDefaultValue) {
   MockFoo mock;
@@ -78,6 +76,5 @@ TEST(DefaultValueTest, ThrowsRuntimeErrorWhenNoDefaultValue) {
   }
 }
 
-#endif
-
 }  // unnamed namespace
+#endif
