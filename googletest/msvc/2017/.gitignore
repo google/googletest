@@ -1,3 +1,5 @@
 # Visual Studio artifacts
 ###########################
 .vs
+gtest
+gtest-md
