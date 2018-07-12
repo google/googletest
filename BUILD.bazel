@@ -104,9 +104,12 @@ cc_library(
     deps = select(
         {
             ":has_absl": [
+                "@com_google_absl//absl/debugging:failure_signal_handler",
+                "@com_google_absl//absl/debugging:stacktrace",
+                "@com_google_absl//absl/debugging:symbolize",
+                "@com_google_absl//absl/strings",
                 "@com_google_absl//absl/types:optional",
                 "@com_google_absl//absl/types:variant",
-                "@com_google_absl//absl/strings",
             ],
             "//conditions:default": [],
         },
