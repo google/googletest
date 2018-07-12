@@ -52,6 +52,9 @@ import gtest_test_utils
 GENGOLDEN_FLAG = '--gengolden'
 CATCH_EXCEPTIONS_ENV_VAR_NAME = 'GTEST_CATCH_EXCEPTIONS'
 
+# The flag indicating stacktraces are not supported
+NO_STACKTRACE_SUPPORT_FLAG = '--no_stacktrace_support'
+
 IS_LINUX = os.name == 'posix' and os.uname()[0] == 'Linux'
 IS_WINDOWS = os.name == 'nt'
 
@@ -252,13 +255,12 @@ test_list = GetShellCommandOutput(COMMAND_LIST_TESTS)
 SUPPORTS_DEATH_TESTS = 'DeathTest' in test_list
 SUPPORTS_TYPED_TESTS = 'TypedTest' in test_list
 SUPPORTS_THREADS = 'ExpectFailureWithThreadsTest' in test_list
-SUPPORTS_STACK_TRACES = IS_LINUX
+SUPPORTS_STACK_TRACES = NO_STACKTRACE_SUPPORT_FLAG not in sys.argv
 
 CAN_GENERATE_GOLDEN_FILE = (SUPPORTS_DEATH_TESTS and
                             SUPPORTS_TYPED_TESTS and
                             SUPPORTS_THREADS and
-                            SUPPORTS_STACK_TRACES and
-                            not IS_WINDOWS)
+                            SUPPORTS_STACK_TRACES)
 
 class GTestOutputTest(gtest_test_utils.TestCase):
   def RemoveUnsupportedTests(self, test_output):
@@ -325,7 +327,11 @@ class GTestOutputTest(gtest_test_utils.TestCase):
 
 
 if __name__ == '__main__':
-  if sys.argv[1:] == [GENGOLDEN_FLAG]:
+  if NO_STACKTRACE_SUPPORT_FLAG in sys.argv:
+    # unittest.main() can't handle unknown flags
+    sys.argv.remove(NO_STACKTRACE_SUPPORT_FLAG)
+
+  if GENGOLDEN_FLAG in sys.argv:
     if CAN_GENERATE_GOLDEN_FILE:
       output = GetOutputOfAllCommands()
       golden_file = open(GOLDEN_PATH, 'wb')
