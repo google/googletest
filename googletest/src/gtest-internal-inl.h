@@ -84,7 +84,6 @@ const char kCatchExceptionsFlag[] = "catch_exceptions";
 const char kColorFlag[] = "color";
 const char kFilterFlag[] = "filter";
 const char kListTestsFlag[] = "list_tests";
-const char kListTestsWithLocationFlag[] = "list_tests_with_location";
 const char kOutputFlag[] = "output";
 const char kPrintTimeFlag[] = "print_time";
 const char kPrintUTF8Flag[] = "print_utf8";
@@ -166,7 +165,6 @@ class GTestFlagSaver {
     filter_ = GTEST_FLAG(filter);
     internal_run_death_test_ = GTEST_FLAG(internal_run_death_test);
     list_tests_ = GTEST_FLAG(list_tests);
-    list_tests_with_location_ = GTEST_FLAG(list_tests_with_location);
     output_ = GTEST_FLAG(output);
     print_time_ = GTEST_FLAG(print_time);
     print_utf8_ = GTEST_FLAG(print_utf8);
@@ -189,7 +187,6 @@ class GTestFlagSaver {
     GTEST_FLAG(filter) = filter_;
     GTEST_FLAG(internal_run_death_test) = internal_run_death_test_;
     GTEST_FLAG(list_tests) = list_tests_;
-    GTEST_FLAG(list_tests_with_location) = list_tests_with_location_;
     GTEST_FLAG(output) = output_;
     GTEST_FLAG(print_time) = print_time_;
     GTEST_FLAG(print_utf8) = print_utf8_;
@@ -212,7 +209,6 @@ class GTestFlagSaver {
   std::string filter_;
   std::string internal_run_death_test_;
   bool list_tests_;
-  bool list_tests_with_location_;  
   std::string output_;
   bool print_time_;
   bool print_utf8_;
@@ -726,7 +722,7 @@ class GTEST_API_ UnitTestImpl {
   int FilterTests(ReactionToSharding shard_tests);
 
   // Prints the names of the tests matching the user-specified filter flag.
-  void ListTestsMatchingFilter(bool list_location);
+  void ListTestsMatchingFilter();
 
   const TestCase* current_test_case() const { return current_test_case_; }
   TestInfo* current_test_info() { return current_test_info_; }

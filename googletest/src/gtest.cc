@@ -231,9 +231,6 @@ GTEST_DEFINE_string_(
 GTEST_DEFINE_bool_(list_tests, false,
                    "List all tests without running them.");
 
-GTEST_DEFINE_bool_(list_tests_with_location, false,
-                   "List all tests, and their location, without running them.");
-
 // The net priority order after flag processing is thus:
 //   --gtest_output command line flag
 //   GTEST_OUTPUT environment variable
@@ -4997,15 +4994,9 @@ bool UnitTestImpl::RunAllTests() {
   // Lists the tests and exits if the --gtest_list_tests flag was specified.
   if (GTEST_FLAG(list_tests)) {
     // This must be called *after* FilterTests() has been called.
-    ListTestsMatchingFilter(false);
+    ListTestsMatchingFilter();
     return true;
   }
-    if (GTEST_FLAG(list_tests_with_location)) {
-    // This must be called *after* FilterTests() has been called.
-    ListTestsMatchingFilter(true);
-    return true;
-  }
-
 
   random_seed_ = GTEST_FLAG(shuffle) ?
       GetRandomSeedFromFlag(GTEST_FLAG(random_seed)) : 0;
@@ -5285,7 +5276,7 @@ static void PrintOnOneLine(const char* str, int max_length) {
 }
 
 // Prints the names of the tests matching the user-specified filter flag.
-void UnitTestImpl::ListTestsMatchingFilter(bool list_location) {
+void UnitTestImpl::ListTestsMatchingFilter() {
   // Print at most this many characters for each type/value parameter.
   const int kMaxParamLength = 250;
 
@@ -5308,11 +5299,7 @@ void UnitTestImpl::ListTestsMatchingFilter(bool list_location) {
           }
           printf("\n");
         }
-        printf("  ");
-        if (list_location) {
-          printf("%d;%s;", test_info->line(), test_info->file());
-        }
-        printf("%s", test_info->name());
+        printf("  %s", test_info->name());
         if (test_info->value_param() != NULL) {
           printf("  # %s = ", kValueParamLabel);
           // We print the value parameter on a single line to make the
@@ -5595,9 +5582,6 @@ static const char kColorEncodedHelpMessage[] =
 "  @G--" GTEST_FLAG_PREFIX_ "list_tests@D\n"
 "      List the names of all tests instead of running them. The name of\n"
 "      TEST(Foo, Bar) is \"Foo.Bar\".\n"
-"  @G--" GTEST_FLAG_PREFIX_ "list_tests_with_location@D\n"
-"      List the names of all tests, and their location instead of running them. The name of\n"
-"      TEST(Foo, Bar) is \"Foo.Bar\", and the lcation is lineNumber;fileName.\n"
 "  @G--" GTEST_FLAG_PREFIX_ "filter=@YPOSTIVE_PATTERNS"
     "[@G-@YNEGATIVE_PATTERNS]@D\n"
 "      Run only the tests whose name matches one of the positive patterns but\n"
@@ -5643,9 +5627,8 @@ static const char kColorEncodedHelpMessage[] =
 "      Do not report exceptions as test failures. Instead, allow them\n"
 "      to crash the program or throw a pop-up (on Windows).\n"
 "\n"
-"Except for @G--" GTEST_FLAG_PREFIX_ "list_tests@D, and "
-    "@G--" GTEST_FLAG_PREFIX_ "list_tests_with_location@D "
-    "you can alternatively set the corresponding\n"
+"Except for @G--" GTEST_FLAG_PREFIX_ "list_tests@D, you can alternatively set "
+    "the corresponding\n"
 "environment variable of a flag (all letters in upper-case). For example, to\n"
 "disable colored text output, you can either specify @G--" GTEST_FLAG_PREFIX_
     "color=no@D or set\n"
@@ -5672,8 +5655,6 @@ static bool ParseGoogleTestFlag(const char* const arg) {
       ParseStringFlag(arg, kInternalRunDeathTestFlag,
                       &GTEST_FLAG(internal_run_death_test)) ||
       ParseBoolFlag(arg, kListTestsFlag, &GTEST_FLAG(list_tests)) ||
-      ParseBoolFlag(arg, kListTestsWithLocationFlag,
-                      &GTEST_FLAG(list_tests_with_location)) ||
       ParseStringFlag(arg, kOutputFlag, &GTEST_FLAG(output)) ||
       ParseBoolFlag(arg, kPrintTimeFlag, &GTEST_FLAG(print_time)) ||
       ParseBoolFlag(arg, kPrintUTF8Flag, &GTEST_FLAG(print_utf8)) ||

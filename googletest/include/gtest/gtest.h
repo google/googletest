@@ -116,11 +116,6 @@ GTEST_DECLARE_string_(filter);
 // are actually run if the flag is provided.
 GTEST_DECLARE_bool_(list_tests);
 
-// This flag causes the Google Test to list tests with their location 
-// (file and line number). None of the tests listed
-// are actually run if the flag is provided.
-GTEST_DECLARE_bool_(list_tests_with_location);
-
 // This flag controls whether Google Test emits a detailed XML report to a file
 // in addition to its normal textual output.
 GTEST_DECLARE_string_(output);
