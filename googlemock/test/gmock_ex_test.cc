@@ -31,10 +31,10 @@
 
 // Tests Google Mock's functionality that depends on exceptions.
 
-#if GTEST_HAS_EXCEPTIONS
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#if GTEST_HAS_EXCEPTIONS
 namespace {
 
 using testing::HasSubstr;
