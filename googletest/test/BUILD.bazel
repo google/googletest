@@ -34,35 +34,48 @@
 
 licenses(["notice"])
 
-""" gtest own tests """
+config_setting(
+    name = "windows",
+    values = {"cpu": "x64_windows"},
+)
+
+config_setting(
+    name = "windows_msvc",
+    values = {"cpu": "x64_windows_msvc"},
+)
+
+config_setting(
+    name = "has_absl",
+    values = {"define": "absl=1"},
+)
 
 #on windows exclude gtest-tuple.h and gtest-tuple_test.cc
 cc_test(
     name = "gtest_all_test",
     size = "small",
-    srcs =  glob(
-                    include = [
-                        "gtest-*.cc",
-                        "*.h",
-                        "googletest/include/gtest/**/*.h",
-                    ],
-                    exclude = [
-                        "gtest-unittest-api_test.cc",
-                        "gtest-tuple_test.cc",
-                        "googletest/src/gtest-all.cc",
-                        "gtest_all_test.cc",
-                        "gtest-death-test_ex_test.cc",
-                        "gtest-listener_test.cc",
-                        "gtest-unittest-api_test.cc",
-                        "gtest-param-test_test.cc",
-                    ],
-                ) + select({
+    srcs = glob(
+        include = [
+            "gtest-*.cc",
+            "*.h",
+            "googletest/include/gtest/**/*.h",
+        ],
+        exclude = [
+            "gtest-unittest-api_test.cc",
+            "gtest-tuple_test.cc",
+            "googletest/src/gtest-all.cc",
+            "gtest_all_test.cc",
+            "gtest-death-test_ex_test.cc",
+            "gtest-listener_test.cc",
+            "gtest-unittest-api_test.cc",
+            "gtest-param-test_test.cc",
+        ],
+    ) + select({
         "//:windows": [],
         "//:windows_msvc": [],
         "//conditions:default": [
             "gtest-tuple_test.cc",
         ],
-        }),
+    }),
     copts = select({
         "//:windows": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
         "//:windows_msvc": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
@@ -135,7 +148,6 @@ py_library(
     name = "gtest_test_utils",
     testonly = 1,
     srcs = ["gtest_test_utils.py"],
-
 )
 
 cc_binary(
@@ -144,6 +156,7 @@ cc_binary(
     srcs = ["gtest_help_test_.cc"],
     deps = ["//:gtest_main"],
 )
+
 py_test(
     name = "gtest_help_test",
     size = "small",
@@ -163,6 +176,10 @@ py_test(
     name = "gtest_output_test",
     size = "small",
     srcs = ["gtest_output_test.py"],
+    args = select({
+        ":has_absl": [],
+        "//conditions:default": ["--no_stacktrace_support"],
+    }),
     data = [
         "gtest_output_test_golden_lin.txt",
         ":gtest_output_test_",
@@ -176,6 +193,7 @@ cc_binary(
     srcs = ["gtest_color_test_.cc"],
     deps = ["//:gtest"],
 )
+
 py_test(
     name = "gtest_color_test",
     size = "small",
@@ -342,6 +360,10 @@ py_test(
         "gtest_xml_output_unittest.py",
         "gtest_xml_test_utils.py",
     ],
+    args = select({
+        ":has_absl": [],
+        "//conditions:default": ["--no_stacktrace_support"],
+    }),
     data = [
         # We invoke gtest_no_test_unittest to verify the XML output
         # when the test program contains no test definition.
