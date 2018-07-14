@@ -283,6 +283,9 @@ if (gtest_build_tests)
   cxx_executable(gtest_list_tests_unittest_ test gtest)
   py_test(gtest_list_tests_unittest)
 
+  cxx_executable(gtest_list_output_unittest_ test gtest)
+  py_test(gtest_list_output_unittest)
+
   cxx_executable(gtest_output_test_ test gtest)
   py_test(gtest_output_test)
 

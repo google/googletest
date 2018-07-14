@@ -267,6 +267,21 @@ py_test(
 )
 
 cc_binary(
+    name = "gtest_list_output_unittest_",
+    testonly = 1,
+    srcs = ["gtest_list_output_unittest_.cc"],
+    deps = ["//:gtest"],
+)
+
+py_test(
+    name = "gtest_list_output_unittest",
+    size = "small",
+    srcs = ["gtest_list_output_unittest.py"],
+    data = [":gtest_list_output_unittest_"],
+    deps = [":gtest_test_utils"],
+)
+
+cc_binary(
     name = "gtest_shuffle_test_",
     srcs = ["gtest_shuffle_test_.cc"],
     deps = ["//:gtest"],

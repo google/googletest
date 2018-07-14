@@ -75,6 +75,7 @@ EXTRA_DIST += \
   test/gtest_filter_unittest_.cc \
   test/gtest_help_test_.cc \
   test/gtest_list_tests_unittest_.cc \
+  test/gtest_list_output_unittest_.cc \
   test/gtest_main_unittest.cc \
   test/gtest_no_test_unittest.cc \
   test/gtest_output_test_.cc \
@@ -104,6 +105,7 @@ EXTRA_DIST += \
   test/gtest_filter_unittest.py \
   test/gtest_help_test.py \
   test/gtest_list_tests_unittest.py \
+  test/gtest_list_output_unittest.py \
   test/gtest_output_test.py \
   test/gtest_output_test_golden_lin.txt \
   test/gtest_shuffle_test.py \
