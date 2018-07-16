@@ -34,6 +34,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#if GTEST_HAS_EXCEPTIONS
 namespace {
 
 using testing::HasSubstr;
@@ -52,7 +53,6 @@ class MockFoo {
   MOCK_METHOD0(GetNonDefaultConstructible, NonDefaultConstructible());
 };
 
-#if GTEST_HAS_EXCEPTIONS
 
 TEST(DefaultValueTest, ThrowsRuntimeErrorWhenNoDefaultValue) {
   MockFoo mock;
@@ -76,6 +76,5 @@ TEST(DefaultValueTest, ThrowsRuntimeErrorWhenNoDefaultValue) {
   }
 }
 
-#endif
-
 }  // unnamed namespace
+#endif
