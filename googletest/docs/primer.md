@@ -1,5 +1,6 @@
 # Googletest Primer
 
+
 ## Introduction: Why googletest?
 
 *googletest* helps you write better C++ tests.
@@ -436,6 +437,7 @@ When these tests run, the following happens:
 
 **Availability**: Linux, Windows, Mac.
 
+
 ## Invoking the Tests
 
 `TEST()` and `TEST_F()` implicitly register their tests with googletest. So,
@@ -544,6 +546,7 @@ int main(int argc, char **argv) {
 }
 ```
 
+
 The `::testing::InitGoogleTest()` function parses the command line for
 googletest flags, and removes all recognized flags. This allows the user to
 control a test program's behavior via various flags, which we'll cover in
@@ -559,6 +562,7 @@ implementation of main(). If it fits your needs, then just link your test with
 gtest\_main library and you are good to go.
 
 NOTE: `ParseGUnitFlags()` is deprecated in favor of `InitGoogleTest()`.
+
 
 ## Known Limitations
 
