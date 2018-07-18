@@ -1,5 +1,6 @@
 # Googletest Primer
 
+
 ## Introduction: Why googletest?
 
 *googletest* helps you write better C++ tests.
@@ -197,7 +198,7 @@ objects, you should use `ASSERT_EQ`.
 
 When doing pointer comparisons use `*_EQ(ptr, nullptr)` and `*_NE(ptr, nullptr)`
 instead of `*_EQ(ptr, NULL)` and `*_NE(ptr, NULL)`. This is because `nullptr` is
-typed while `NULL` is not. See [FAQ](faq#Why_does_googletest_support_EXPECT_EQ)
+typed while `NULL` is not. See [FAQ](faq.md#why-does-google-test-support-expect_eqnull-ptr-and-assert_eqnull-ptr-but-not-expect_nenull-ptr-and-assert_nenull-ptr)
 for more details.
 
 If you're working with floating point numbers, you may want to use the floating
@@ -322,7 +323,7 @@ To create a fixture:
 1.  If necessary, write a destructor or `TearDown()` function to release any
     resources you allocated in `SetUp()` . To learn when you should use the
     constructor/destructor and when you should use `SetUp()/TearDown()`, read
-    this [FAQ](faq#CtorVsSetUp) entry.
+    this [FAQ](faq.md#should-i-use-the-constructordestructor-of-the-test-fixture-or-the-set-uptear-down-function) entry.
 1.  If needed, define subroutines for your tests to share.
 
 When using a fixture, use `TEST_F()` instead of `TEST()` as it allows you to
@@ -436,6 +437,7 @@ When these tests run, the following happens:
 
 **Availability**: Linux, Windows, Mac.
 
+
 ## Invoking the Tests
 
 `TEST()` and `TEST_F()` implicitly register their tests with googletest. So,
@@ -544,6 +546,7 @@ int main(int argc, char **argv) {
 }
 ```
 
+
 The `::testing::InitGoogleTest()` function parses the command line for
 googletest flags, and removes all recognized flags. This allows the user to
 control a test program's behavior via various flags, which we'll cover in
@@ -559,6 +562,7 @@ implementation of main(). If it fits your needs, then just link your test with
 gtest\_main library and you are good to go.
 
 NOTE: `ParseGUnitFlags()` is deprecated in favor of `InitGoogleTest()`.
+
 
 ## Known Limitations
 
