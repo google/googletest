@@ -38,6 +38,7 @@
 namespace {
 
 using testing::HasSubstr;
+
 using testing::internal::GoogleTestFailureException;
 
 // A type that cannot be default constructed.
@@ -52,7 +53,6 @@ class MockFoo {
   // doesn't know what the default value for this type is.
   MOCK_METHOD0(GetNonDefaultConstructible, NonDefaultConstructible());
 };
-
 
 TEST(DefaultValueTest, ThrowsRuntimeErrorWhenNoDefaultValue) {
   MockFoo mock;
@@ -75,6 +75,7 @@ TEST(DefaultValueTest, ThrowsRuntimeErrorWhenNoDefaultValue) {
     EXPECT_THAT(ex.what(), HasSubstr("has no default value"));
   }
 }
+
 
 }  // unnamed namespace
 #endif
