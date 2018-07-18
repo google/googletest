@@ -198,7 +198,7 @@ objects, you should use `ASSERT_EQ`.
 
 When doing pointer comparisons use `*_EQ(ptr, nullptr)` and `*_NE(ptr, nullptr)`
 instead of `*_EQ(ptr, NULL)` and `*_NE(ptr, NULL)`. This is because `nullptr` is
-typed while `NULL` is not. See [FAQ](faq#Why_does_googletest_support_EXPECT_EQ)
+typed while `NULL` is not. See [FAQ](faq.md#why-does-google-test-support-expect_eqnull-ptr-and-assert_eqnull-ptr-but-not-expect_nenull-ptr-and-assert_nenull-ptr)
 for more details.
 
 If you're working with floating point numbers, you may want to use the floating
@@ -323,7 +323,7 @@ To create a fixture:
 1.  If necessary, write a destructor or `TearDown()` function to release any
     resources you allocated in `SetUp()` . To learn when you should use the
     constructor/destructor and when you should use `SetUp()/TearDown()`, read
-    this [FAQ](faq#CtorVsSetUp) entry.
+    this [FAQ](faq.md#should-i-use-the-constructordestructor-of-the-test-fixture-or-the-set-uptear-down-function) entry.
 1.  If needed, define subroutines for your tests to share.
 
 When using a fixture, use `TEST_F()` instead of `TEST()` as it allows you to
