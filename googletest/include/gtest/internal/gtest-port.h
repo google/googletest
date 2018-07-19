@@ -1218,7 +1218,7 @@ class scoped_ptr {
 // Defines RE.
 
 #if GTEST_USES_PCRE
-using ::RE;
+// if used, PCRE is injected by custom/gtest-port.h
 #elif GTEST_USES_POSIX_RE || GTEST_USES_SIMPLE_RE
 
 // A simple C++ wrapper for <regex.h>.  It uses the POSIX Extended
