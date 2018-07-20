@@ -2247,7 +2247,7 @@ enum class AccessLevel { kInternal, kPublic };
 
 class Buzz {
  public:
-  explicit Buzz(AccessLevel access) { … }
+  explicit Buzz(AccessLevel access) { ... }
   ...
 };
 
@@ -2320,7 +2320,7 @@ Note that `ByMove()` is essential here - if you drop it, the code won’t compil
 
 Quiz time! What do you think will happen if a `Return(ByMove(...))` action is
 performed more than once (e.g. you write
-`….WillRepeatedly(Return(ByMove(...)));`)? Come think of it, after the first
+`.WillRepeatedly(Return(ByMove(...)));`)? Come think of it, after the first
 time the action runs, the source value will be consumed (since it’s a move-only
 value), so the next time around, there’s no value to move from -- you’ll get a
 run-time error that `Return(ByMove(...))` can only be run once.

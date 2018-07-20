@@ -1854,22 +1854,22 @@ inline Expectation::Expectation(internal::ExpectationBase& exp)  // NOLINT
 // parameter. This technique may only be used for non-overloaded methods.
 //
 //   // These are the same:
-//   ON_CALL(mock, NoArgsMethod()).WillByDefault(…);
-//   ON_CALL(mock, NoArgsMethod).WillByDefault(…);
+//   ON_CALL(mock, NoArgsMethod()).WillByDefault(...);
+//   ON_CALL(mock, NoArgsMethod).WillByDefault(...);
 //
 //   // As are these:
-//   ON_CALL(mock, TwoArgsMethod(_, _)).WillByDefault(…);
-//   ON_CALL(mock, TwoArgsMethod).WillByDefault(…);
+//   ON_CALL(mock, TwoArgsMethod(_, _)).WillByDefault(...);
+//   ON_CALL(mock, TwoArgsMethod).WillByDefault(...);
 //
 //   // Can also specify args if you want, of course:
-//   ON_CALL(mock, TwoArgsMethod(_, 45)).WillByDefault(…);
+//   ON_CALL(mock, TwoArgsMethod(_, 45)).WillByDefault(...);
 //
 //   // Overloads work as long as you specify parameters:
-//   ON_CALL(mock, OverloadedMethod(_)).WillByDefault(…);
-//   ON_CALL(mock, OverloadedMethod(_, _)).WillByDefault(…);
+//   ON_CALL(mock, OverloadedMethod(_)).WillByDefault(...);
+//   ON_CALL(mock, OverloadedMethod(_, _)).WillByDefault(...);
 //
 //   // Oops! Which overload did you want?
-//   ON_CALL(mock, OverloadedMethod).WillByDefault(…);
+//   ON_CALL(mock, OverloadedMethod).WillByDefault(...);
 //     => ERROR: call to member function 'gmock_OverloadedMethod' is ambiguous
 //
 // How this works: The mock class uses two overloads of the gmock_Method
@@ -1877,28 +1877,28 @@ inline Expectation::Expectation(internal::ExpectationBase& exp)  // NOLINT
 // In the matcher list form, the macro expands to:
 //
 //   // This statement:
-//   ON_CALL(mock, TwoArgsMethod(_, 45))…
+//   ON_CALL(mock, TwoArgsMethod(_, 45))...
 //
-//   // …expands to:
-//   mock.gmock_TwoArgsMethod(_, 45)(WithoutMatchers(), nullptr)…
+//   // ...expands to:
+//   mock.gmock_TwoArgsMethod(_, 45)(WithoutMatchers(), nullptr)...
 //   |-------------v---------------||------------v-------------|
 //       invokes first overload        swallowed by operator()
 //
-//   // …which is essentially:
-//   mock.gmock_TwoArgsMethod(_, 45)…
+//   // ...which is essentially:
+//   mock.gmock_TwoArgsMethod(_, 45)...
 //
 // Whereas the form without a matcher list:
 //
 //   // This statement:
-//   ON_CALL(mock, TwoArgsMethod)…
+//   ON_CALL(mock, TwoArgsMethod)...
 //
-//   // …expands to:
-//   mock.gmock_TwoArgsMethod(WithoutMatchers(), nullptr)…
+//   // ...expands to:
+//   mock.gmock_TwoArgsMethod(WithoutMatchers(), nullptr)...
 //   |-----------------------v--------------------------|
 //                 invokes second overload
 //
-//   // …which is essentially:
-//   mock.gmock_TwoArgsMethod(_, _)…
+//   // ...which is essentially:
+//   mock.gmock_TwoArgsMethod(_, _)...
 //
 // The WithoutMatchers() argument is used to disambiguate overloads and to
 // block the caller from accidentally invoking the second overload directly. The

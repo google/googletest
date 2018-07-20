@@ -2795,7 +2795,6 @@ TEST(ElementsAreTest, HugeMatcherUnordered) {
 
 #endif  // GTEST_LANG_CXX11
 
-
 // Tests that AnyOf(m1, ..., mn) describes itself properly.
 TEST(AnyOfTest, CanDescribeSelf) {
   Matcher<int> m;
@@ -4239,13 +4238,17 @@ TEST(PropertyTest, WorksForReferenceToConstProperty) {
 // ref-qualified.
 TEST(PropertyTest, WorksForRefQualifiedProperty) {
   Matcher<const AClass&> m = Property(&AClass::s_ref, StartsWith("hi"));
+  Matcher<const AClass&> m_with_name =
+      Property("s", &AClass::s_ref, StartsWith("hi"));
 
   AClass a;
   a.set_s("hill");
   EXPECT_TRUE(m.Matches(a));
+  EXPECT_TRUE(m_with_name.Matches(a));
 
   a.set_s("hole");
   EXPECT_FALSE(m.Matches(a));
+  EXPECT_FALSE(m_with_name.Matches(a));
 }
 #endif
 
