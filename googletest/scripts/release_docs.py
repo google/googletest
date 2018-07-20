@@ -101,8 +101,8 @@ class WikiBrancher(object):
     # A link to Foo.wiki is in one of the following forms:
     #   [Foo words]
     #   [Foo#Anchor words]
-    #   [http://code.google.com/.../wiki/Foo words]
-    #   [http://code.google.com/.../wiki/Foo#Anchor words]
+    #   [https://code.google.com/.../wiki/Foo words]
+    #   [https://code.google.com/.../wiki/Foo#Anchor words]
     # We want to replace 'Foo' with 'V2_6_Foo' in the above cases.
     self.search_for_re = re.compile(
         # This regex matches either

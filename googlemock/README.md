@@ -11,7 +11,7 @@ It is inspired by:
 
   * [jMock](http://www.jmock.org/),
   * [EasyMock](http://www.easymock.org/), and
-  * [Hamcrest](http://code.google.com/p/hamcrest/),
+  * [Hamcrest](https://code.google.com/archive/p/hamcrest/),
 
 and designed with C++'s specifics in mind.
 
@@ -45,7 +45,7 @@ also an IRC channel on OFTC (irc.oftc.net) #gtest available.  Please
 join us!
 
 Please note that code under [scripts/generator](scripts/generator/) is
-from [cppclean](http://code.google.com/p/cppclean/) and released under
+from [cppclean](https://code.google.com/archive/p/cppclean/) and released under
 the Apache License, which is different from Google Mock's license.
 
 ## Getting Started ##
@@ -58,7 +58,7 @@ documentation in the following order:
   * Read [Google Mock for Dummies](../../master/googlemock/docs/ForDummies.md).
   * Read the instructions below on how to build Google Mock.
 
-You can also watch Zhanyong's [talk](http://www.youtube.com/watch?v=sYpCyLI47rM) on Google Mock's usage and implementation.
+You can also watch Zhanyong's [talk](https://www.youtube.com/watch?v=sYpCyLI47rM) on Google Mock's usage and implementation.
 
 Once you understand the basics, check out the rest of the docs:
 
@@ -71,7 +71,7 @@ If you need help, please check the
 [KnownIssues](docs/KnownIssues.md) and
 [FrequentlyAskedQuestions](docs/FrequentlyAskedQuestions.md) before
 posting a question on the
-[discussion group](http://groups.google.com/group/googlemock).
+[discussion group](https://groups.google.com/forum/#!forum/googlemock).
 
 
 ### Using Google Mock Without Google Test ###
@@ -84,7 +84,7 @@ you can also use it with [any C++ testing framework](../../master/googlemock/doc
 ### Requirements for End Users ###
 
 Google Mock is implemented on top of [Google Test](
-http://github.com/google/googletest/), and depends on it.
+https://github.com/google/googletest/), and depends on it.
 You must use the bundled version of Google Test when using Google Mock.
 
 You can also easily configure Google Mock to work with another testing
@@ -293,7 +293,7 @@ their own tuple library, just add
 to the compiler flags instead.
 
 If you want to use Boost's TR1 tuple library with Google Mock, please
-refer to the Boost website (http://www.boost.org/) for how to obtain
+refer to the Boost website (https://www.boost.org/) for how to obtain
 it and set it up.
 
 ### As a Shared Library (DLL) ###

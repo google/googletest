@@ -53,7 +53,7 @@ Google Test comes with a CMake build script (
 [CMakeLists.txt](https://github.com/google/googletest/blob/master/CMakeLists.txt))
 that can be used on a wide range of platforms ("C" stands for cross-platform.).
 If you don't have CMake installed already, you can download it for free from
-<http://www.cmake.org/>.
+<https://cmake.org/>.
 
 CMake works by generating native makefiles or build projects that can be used in
 the compiler environment of your choice. You can either build Google Test as a
@@ -172,7 +172,7 @@ Existing build's `CMakeLists.txt`:
 
 Note that this approach requires CMake 2.8.2 or later due to its use of the
 `ExternalProject_Add()` command. The above technique is discussed in more detail
-in [this separate article](http://crascit.com/2015/07/25/cmake-gtest/) which
+in [this separate article](https://crascit.com/2015/07/25/cmake-gtest/) which
 also contains a link to a fully generalized implementation of the technique.
 
 ##### Visual Studio Dynamic vs Static Runtimes
@@ -228,7 +228,7 @@ need to either:
     MacOS X.
 *   Install an SDK for an earlier version. This doesn't appear to be supported
     by Apple, but has been reported to work
-    (http://stackoverflow.com/questions/5378518).
+    (https://stackoverflow.com/questions/5378518).
 
 ### Tweaking Google Test
 
@@ -312,7 +312,7 @@ to the compiler flags.
 Note: while the above steps aren't technically necessary today when using some
 compilers (e.g. GCC), they may become necessary in the future, if we decide to
 improve the speed of loading the library (see
-<http://gcc.gnu.org/wiki/Visibility> for details). Therefore you are recommended
+<https://gcc.gnu.org/wiki/Visibility> for details). Therefore you are recommended
 to always add the above flags when using Google Test as a shared library.
 Otherwise a future release of Google Test may break your build script.
 
