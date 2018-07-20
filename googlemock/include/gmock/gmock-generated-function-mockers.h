@@ -352,7 +352,7 @@ class FunctionMocker<R(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)> : public
 //
 //   class MockClass {
 //     // Overload 1
-//     MockSpec<string&()> gmock_GetName() { … }
+//     MockSpec<string&()> gmock_GetName() { ... }
 //     // Overload 2. Declared const so that the compiler will generate an
 //     // error when trying to resolve between this and overload 4 in
 //     // 'gmock_GetName(WithoutMatchers(), nullptr)'.
@@ -363,7 +363,7 @@ class FunctionMocker<R(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)> : public
 //     }
 //
 //     // Overload 3
-//     const string& gmock_GetName() const { … }
+//     const string& gmock_GetName() const { ... }
 //     // Overload 4
 //     MockSpec<const string&()> gmock_GetName(
 //         const WithoutMatchers&, const Function<const string&()>*) const {
