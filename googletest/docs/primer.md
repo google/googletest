@@ -203,7 +203,7 @@ for more details.
 
 If you're working with floating point numbers, you may want to use the floating
 point variations of some of these macros in order to avoid problems caused by
-rounding. See [Advanced googletest Topics](advanced) for details.
+rounding. See [Advanced googletest Topics](advanced.md) for details.
 
 Macros in this section work with both narrow and wide string objects (`string`
 and `wstring`).
@@ -222,15 +222,15 @@ two `string` objects, use `EXPECT_EQ`, `EXPECT_NE`, and etc instead.
 | Fatal assertion         | Nonfatal assertion      | Verifies               |
 | ----------------------- | ----------------------- | ---------------------- |
 | `ASSERT_STREQ(str1,     | `EXPECT_STREQ(str1,     | the two C strings have |
-: str2);`                 : str2);`                 : the same content       :
+| str2);`                 | str2);`                 | the same content       |
 | `ASSERT_STRNE(str1,     | `EXPECT_STRNE(str1,     | the two C strings have |
-: str2);`                 : str2);`                 : different contents     :
+| str2);`                 | str2);`                 | different contents     |
 | `ASSERT_STRCASEEQ(str1, | `EXPECT_STRCASEEQ(str1, | the two C strings have |
-: str2);`                 : str2);`                 : the same content,      :
-:                         :                         : ignoring case          :
+| str2);`                 | str2);`                 | the same content,      |
+|                         |                         | ignoring case          |
 | `ASSERT_STRCASENE(str1, | `EXPECT_STRCASENE(str1, | the two C strings have |
-: str2);`                 : str2);`                 : different contents,    :
-:                         :                         : ignoring case          :
+| str2);`                 | str2);`                 | different contents,    |
+|                         |                         | ignoring case          |
 
 Note that "CASE" in an assertion name means that case is ignored. A `NULL`
 pointer and an empty string are considered *different*.
