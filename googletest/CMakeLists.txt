@@ -284,7 +284,7 @@ if (gtest_build_tests)
   py_test(gtest_list_tests_unittest)
 
   cxx_executable(gtest_output_test_ test gtest)
-  py_test(gtest_output_test)
+  py_test(gtest_output_test --no_stacktrace_support)
 
   cxx_executable(gtest_shuffle_test_ test gtest)
   py_test(gtest_shuffle_test)
@@ -307,6 +307,6 @@ if (gtest_build_tests)
   py_test(gtest_json_outfiles_test)
 
   cxx_executable(gtest_xml_output_unittest_ test gtest)
-  py_test(gtest_xml_output_unittest)
+  py_test(gtest_xml_output_unittest --no_stacktrace_support)
   py_test(gtest_json_output_unittest)
 endif()

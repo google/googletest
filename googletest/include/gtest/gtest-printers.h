@@ -114,6 +114,7 @@
 #if GTEST_HAS_ABSL
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
+#include "absl/types/variant.h"
 #endif  // GTEST_HAS_ABSL
 
 namespace testing {
@@ -785,6 +786,28 @@ class UniversalPrinter<::absl::optional<T>> {
     }
     *os << ')';
   }
+};
+
+// Printer for absl::variant
+
+template <typename... T>
+class UniversalPrinter<::absl::variant<T...>> {
+ public:
+  static void Print(const ::absl::variant<T...>& value, ::std::ostream* os) {
+    *os << '(';
+    absl::visit(Visitor{os}, value);
+    *os << ')';
+  }
+
+ private:
+  struct Visitor {
+    template <typename U>
+    void operator()(const U& u) const {
+      *os << "'" << GetTypeName<U>() << "' with value ";
+      UniversalPrint(u, os);
+    }
+    ::std::ostream* os;
+  };
 };
 
 #endif  // GTEST_HAS_ABSL
