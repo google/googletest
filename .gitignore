@@ -38,3 +38,6 @@ googletest/m4/lt~obsolete.m4
 # Ignore generated directories.
 googlemock/fused-src/
 googletest/fused-src/
+
+# macOS files
+.DS_Store
