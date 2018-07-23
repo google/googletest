@@ -522,11 +522,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #endif  // !defined(GTEST_HAS_STD_STRING)
 
 #ifndef GTEST_HAS_GLOBAL_STRING
-// The user didn't tell us whether ::string is available, so we need
-// to figure it out.
-
 # define GTEST_HAS_GLOBAL_STRING 0
-
 #endif  // GTEST_HAS_GLOBAL_STRING
 
 #ifndef GTEST_HAS_STD_WSTRING
@@ -1218,7 +1214,7 @@ class scoped_ptr {
 // Defines RE.
 
 #if GTEST_USES_PCRE
-using ::RE;
+// if used, PCRE is injected by custom/gtest-port.h
 #elif GTEST_USES_POSIX_RE || GTEST_USES_SIMPLE_RE
 
 // A simple C++ wrapper for <regex.h>.  It uses the POSIX Extended
