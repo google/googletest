@@ -37,7 +37,7 @@ if (CMAKE_VERSION VERSION_LESS 3.0)
   project(gmock CXX C)
 else()
   cmake_policy(SET CMP0048 NEW)
-  project(gmock VERSION 1.9.0 LANGUAGES CXX C)
+  project(gmock VERSION ${GOOGLETEST_VERSION} LANGUAGES CXX C)
 endif()
 cmake_minimum_required(VERSION 2.6.4)
 
@@ -120,18 +120,45 @@ endif()
 # to the targets for when we are part of a parent build (ie being pulled
 # in via add_subdirectory() rather than being a standalone build).
 if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
-  target_include_directories(gmock      SYSTEM INTERFACE "${gmock_SOURCE_DIR}/include")
-  target_include_directories(gmock_main SYSTEM INTERFACE "${gmock_SOURCE_DIR}/include")
+  target_include_directories(gmock SYSTEM
+    INTERFACE
+      $<BUILD_INTERFACE:${gmock_SOURCE_DIR}/include>
+      $<BUILD_INTERFACE:${gmock_SOURCE_DIR}>
+      $<BUILD_INTERFACE:${gtest_SOURCE_DIR}/include>
+      $<BUILD_INTERFACE:${gtest_SOURCE_DIR}>
+      $<INSTALL_INTERFACE:include>)
+  target_include_directories(gmock_main SYSTEM
+    INTERFACE
+      $<BUILD_INTERFACE:${gmock_SOURCE_DIR}/include>
+      $<BUILD_INTERFACE:${gmock_SOURCE_DIR}>
+      $<BUILD_INTERFACE:${gtest_SOURCE_DIR}/include>
+      $<BUILD_INTERFACE:${gtest_SOURCE_DIR}>
+      $<INSTALL_INTERFACE:include>)
 endif()
 
 ########################################################################
 #
 # Install rules
 if(INSTALL_GMOCK)
-  install(TARGETS gmock gmock_main
+  install(TARGETS gmock
+    EXPORT gmockConfigInternal
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+  install(EXPORT gmockConfigInternal
+    DESTINATION "${INSTALL_CMAKE_DIR}"
+    NAMESPACE googletest_)
+  install(TARGETS gmock_main
+    EXPORT gmock_mainConfigInternal
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+  install(EXPORT gmock_mainConfigInternal
+    DESTINATION "${INSTALL_CMAKE_DIR}"
+    NAMESPACE googletest_)
+  set(googletest_install_targets
+    ${googletest_install_targets} gmock gmock_main PARENT_SCOPE)
+
   install(DIRECTORY "${gmock_SOURCE_DIR}/include/gmock"
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
