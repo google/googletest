@@ -87,6 +87,11 @@ macro(config_compiler_and_linker)
       # http://stackoverflow.com/questions/3232669 explains the issue.
       set(cxx_base_flags "${cxx_base_flags} -wd4702")
     endif()
+    if (NOT (MSVC_VERSION LESS 1900))  # 1900 is Visual Studio 2015.
+	  # Suppress warning C4819 for none-English environment.
+      # see https://github.com/google/googletest/pull/1606#issuecomment-401526516
+	  set(cxx_base_flags "${cxx_base_flags} -utf-8")
+    endif()
 
     set(cxx_base_flags "${cxx_base_flags} -D_UNICODE -DUNICODE -DWIN32 -D_WIN32")
     set(cxx_base_flags "${cxx_base_flags} -DSTRICT -DWIN32_LEAN_AND_MEAN")
