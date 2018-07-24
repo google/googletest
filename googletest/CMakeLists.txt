@@ -44,7 +44,7 @@ if (CMAKE_VERSION VERSION_LESS 3.0)
   project(gtest CXX C)
 else()
   cmake_policy(SET CMP0048 NEW)
-  project(gtest VERSION 1.9.0 LANGUAGES CXX C)
+  project(gtest VERSION ${GOOGLETEST_VERSION} LANGUAGES CXX C)
 endif()
 cmake_minimum_required(VERSION 2.6.4)
 
@@ -118,18 +118,41 @@ target_link_libraries(gtest_main gtest)
 # to the targets for when we are part of a parent build (ie being pulled
 # in via add_subdirectory() rather than being a standalone build).
 if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
-  target_include_directories(gtest      SYSTEM INTERFACE "${gtest_SOURCE_DIR}/include")
-  target_include_directories(gtest_main SYSTEM INTERFACE "${gtest_SOURCE_DIR}/include")
+  target_include_directories(gtest SYSTEM
+    INTERFACE
+      $<BUILD_INTERFACE:${gtest_SOURCE_DIR}/include>
+      $<BUILD_INTERFACE:${gtest_SOURCE_DIR}>
+      $<INSTALL_INTERFACE:include>)
+  target_include_directories(gtest_main SYSTEM
+    INTERFACE
+      $<BUILD_INTERFACE:${gtest_SOURCE_DIR}/include>
+      $<BUILD_INTERFACE:${gtest_SOURCE_DIR}>
+      $<INSTALL_INTERFACE:include>)
 endif()
 
 ########################################################################
 #
 # Install rules
 if(INSTALL_GTEST)
-  install(TARGETS gtest gtest_main
+  install(TARGETS gtest
+    EXPORT gtestConfigInternal
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+  install(EXPORT gtestConfigInternal
+    DESTINATION "${INSTALL_CMAKE_DIR}"
+    NAMESPACE googletest_)
+  install(TARGETS gtest_main
+    EXPORT gtest_mainConfigInternal
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+  install(EXPORT gtest_mainConfigInternal
+    DESTINATION "${INSTALL_CMAKE_DIR}"
+    NAMESPACE googletest_)
+  set(googletest_install_targets
+    ${googletest_install_targets} gtest gtest_main PARENT_SCOPE)
+
   install(DIRECTORY "${gtest_SOURCE_DIR}/include/gtest"
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
