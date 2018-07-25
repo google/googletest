@@ -4,7 +4,7 @@
 //  These are General configuration settings for the gtest framework and
 //  examples.
 //  This file is based on the Xcode Configuration files in:
-//  http://code.google.com/p/google-toolbox-for-mac/
+//  https://github.com/google/google-toolbox-for-mac
 // 
 
 // Build for PPC and Intel, 32- and 64-bit
@@ -20,7 +20,7 @@ PREBINDING = NO
 WARNING_CFLAGS = -Wall -Werror -Wendif-labels -Wnewline-eof -Wno-sign-compare -Wshadow
 
 // Work around Xcode bugs by using external strip. See:
-// http://lists.apple.com/archives/Xcode-users/2006/Feb/msg00050.html
+// https://lists.apple.com/archives/Xcode-users/2006/Feb/msg00050.html
 SEPARATE_STRIP = YES
 
 // Force C99 dialect

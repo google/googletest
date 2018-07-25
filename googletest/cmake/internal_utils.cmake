@@ -20,7 +20,7 @@ macro(fix_default_compiler_settings_)
   if (MSVC)
     # For MSVC, CMake sets certain flags to defaults we want to override.
     # This replacement code is taken from sample in the CMake Wiki at
-    # http://www.cmake.org/Wiki/CMake_FAQ#Dynamic_Replace.
+    # https://gitlab.kitware.com/cmake/community/wikis/FAQ#dynamic-replace.
     foreach (flag_var
              CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
              CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
@@ -84,7 +84,7 @@ macro(config_compiler_and_linker)
     endif()
     if (NOT (MSVC_VERSION LESS 1700))  # 1700 is Visual Studio 2012.
       # Suppress "unreachable code" warning on VS 2012 and later.
-      # http://stackoverflow.com/questions/3232669 explains the issue.
+      # https://stackoverflow.com/questions/3232669 explains the issue.
       set(cxx_base_flags "${cxx_base_flags} -wd4702")
     endif()
 

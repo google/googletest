@@ -101,7 +101,7 @@ class MockTurtle : public Turtle {
 You don't need to define these mock methods somewhere else - the `MOCK_METHOD*` macros will generate the definitions for you. It's that simple! Once you get the hang of it, you can pump out mock classes faster than your source-control system can handle your check-ins.
 
 **Tip:** If even this is too much work for you, you'll find the
-`gmock_gen.py` tool in Google Mock's `scripts/generator/` directory (courtesy of the [cppclean](http://code.google.com/p/cppclean/) project) useful.  This command-line
+`gmock_gen.py` tool in Google Mock's `scripts/generator/` directory (courtesy of the [cppclean](https://code.google.com/archive/p/cppclean/) project) useful.  This command-line
 tool requires that you have Python 2.4 installed.  You give it a C++ file and the name of an abstract class defined in it,
 and it will print the definition of the mock class for you.  Due to the
 complexity of the C++ language, this script may not always work, but
@@ -169,8 +169,8 @@ This means `EXPECT_CALL()` should be read as expecting that a call will occur _i
 Admittedly, this test is contrived and doesn't do much. You can easily achieve the same effect without using Google Mock. However, as we shall reveal soon, Google Mock allows you to do _much more_ with the mocks.
 
 ## Using Google Mock with Any Testing Framework ##
-If you want to use something other than Google Test (e.g. [CppUnit](http://sourceforge.net/projects/cppunit/) or
-[CxxTest](http://cxxtest.tigris.org/)) as your testing framework, just change the `main()` function in the previous section to:
+If you want to use something other than Google Test (e.g. [CppUnit](https://sourceforge.net/projects/cppunit/) or
+[CxxTest](https://cxxtest.com/)) as your testing framework, just change the `main()` function in the previous section to:
 ```
 int main(int argc, char** argv) {
   // The following line causes Google Mock to throw an exception on failure,
@@ -442,6 +442,6 @@ A mock object may have many methods, and not all of them are that interesting. F
 In Google Mock, if you are not interested in a method, just don't say anything about it. If a call to this method occurs, you'll see a warning in the test output, but it won't be a failure.
 
 # What Now? #
-Congratulations! You've learned enough about Google Mock to start using it. Now, you might want to join the [googlemock](http://groups.google.com/group/googlemock) discussion group and actually write some tests using Google Mock - it will be fun. Hey, it may even be addictive - you've been warned.
+Congratulations! You've learned enough about Google Mock to start using it. Now, you might want to join the [googlemock](https://groups.google.com/forum/#!forum/googlemock) discussion group and actually write some tests using Google Mock - it will be fun. Hey, it may even be addictive - you've been warned.
 
 Then, if you feel like increasing your mock quotient, you should move on to the [CookBook](CookBook.md). You can learn many advanced features of Google Mock there -- and advance your level of enjoyment and testing bliss.
