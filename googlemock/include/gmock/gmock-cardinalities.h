@@ -35,6 +35,8 @@
 // cardinalities can be defined by the user implementing the
 // CardinalityInterface interface if necessary.
 
+// GOOGLETEST_CM0002 DO NOT DELETE
+
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_CARDINALITIES_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_CARDINALITIES_H_
 
