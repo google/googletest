@@ -57,6 +57,8 @@
 // where all clauses are optional, and .InSequence()/.After()/
 // .WillOnce() can appear any number of times.
 
+// GOOGLETEST_CM0002 DO NOT DELETE
+
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_
 
