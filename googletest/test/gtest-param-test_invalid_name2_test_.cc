@@ -31,7 +31,7 @@
 
 #include "gtest/gtest.h"
 
-namespace{
+namespace {
 class DummyTest : public ::testing::TestWithParam<const char *> {};
 
 std::string StringParamTestSuffix(
