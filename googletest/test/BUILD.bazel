@@ -416,3 +416,33 @@ py_test(
     data = [":gtest_testbridge_test_"],
     deps = [":gtest_test_utils"],
 )
+
+cc_binary(
+    name = "gtest-param-test_invalid_name1_test_",
+    testonly = 1,
+    srcs = ["gtest-param-test_invalid_name1_test_.cc"],
+    deps = ["//:gtest"],
+)
+
+py_test(
+    name = "gtest-param-test_invalid_name1_test",
+    size = "small",
+    srcs = ["gtest-param-test_invalid_name1_test.py"],
+    data = [":gtest-param-test_invalid_name1_test_"],
+    deps = [":gtest_test_utils"],
+)
+
+cc_binary(
+    name = "gtest-param-test_invalid_name2_test_",
+    testonly = 1,
+    srcs = ["gtest-param-test_invalid_name2_test_.cc"],
+    deps = ["//:gtest"],
+)
+
+py_test(
+    name = "gtest-param-test_invalid_name2_test",
+    size = "small",
+    srcs = ["gtest-param-test_invalid_name2_test.py"],
+    data = [":gtest-param-test_invalid_name2_test_"],
+    deps = [":gtest_test_utils"],
+)
