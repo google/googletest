@@ -130,8 +130,14 @@ class GTEST_API_ DeathTest {
   static void set_last_death_test_message(const std::string& message);
 
  private:
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251)
+#endif
   // A string containing a description of the outcome of the last death test.
   static std::string last_death_test_message_;
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
+#endif
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(DeathTest);
 };

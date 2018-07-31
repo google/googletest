@@ -820,6 +820,9 @@ class GTEST_API_ UnitTestImpl {
   // executed.
   internal::FilePath original_working_dir_;
 
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251)
+#endif
   // The default test part result reporters.
   DefaultGlobalTestPartResultReporter default_global_test_part_result_reporter_;
   DefaultPerThreadTestPartResultReporter
@@ -852,6 +855,9 @@ class GTEST_API_ UnitTestImpl {
   // ParameterizedTestRegistry object used to register value-parameterized
   // tests.
   internal::ParameterizedTestCaseRegistry parameterized_test_registry_;
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
+#endif
 
   // Indicates whether RegisterParameterizedTests() has been called already.
   bool parameterized_tests_registered_;
@@ -907,6 +913,10 @@ class GTEST_API_ UnitTestImpl {
   // How long the test took to run, in milliseconds.
   TimeInMillis elapsed_time_;
 
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251)
+#endif
+
 #if GTEST_HAS_DEATH_TEST
   // The decomposed components of the gtest_internal_run_death_test flag,
   // parsed when RUN_ALL_TESTS is called.
@@ -916,6 +926,10 @@ class GTEST_API_ UnitTestImpl {
 
   // A per-thread stack of traces created by the SCOPED_TRACE() macro.
   internal::ThreadLocal<std::vector<TraceInfo> > gtest_trace_stack_;
+
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
+#endif
 
   // The value of GTEST_FLAG(catch_exceptions) at the moment RunAllTests()
   // starts.

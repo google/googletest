@@ -108,6 +108,9 @@ class GTEST_API_ TestPartResult {
   // trace in it.
   static std::string ExtractSummary(const char* message);
 
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251)
+#endif
   // The name of the source file where the test part took place, or
   // "" if the source file is unknown.
   std::string file_name_;
@@ -116,6 +119,9 @@ class GTEST_API_ TestPartResult {
   int line_number_;
   std::string summary_;  // The test failure summary.
   std::string message_;  // The test failure message.
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
+#endif
 };
 
 // Prints a TestPartResult object.
@@ -138,8 +144,14 @@ class GTEST_API_ TestPartResultArray {
   // Returns the number of TestPartResult objects in the array.
   int size() const;
 
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251)
+#endif
  private:
   std::vector<TestPartResult> array_;
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
+#endif
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(TestPartResultArray);
 };
@@ -160,8 +172,14 @@ namespace internal {
 // reported, it only delegates the reporting to the former result reporter.
 // The original result reporter is restored in the destructor.
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4275)
+#endif
 class GTEST_API_ HasNewFatalFailureHelper
     : public TestPartResultReporterInterface {
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
+#endif
  public:
   HasNewFatalFailureHelper();
   virtual ~HasNewFatalFailureHelper();

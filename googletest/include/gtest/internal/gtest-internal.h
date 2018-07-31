@@ -148,11 +148,16 @@ GTEST_API_ std::string AppendUserMessage(
 // errors presumably detectable only at run time.  Since
 // std::runtime_error inherits from std::exception, many testing
 // frameworks know how to extract and print the message inside it.
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4275)
+#endif
 class GTEST_API_ GoogleTestFailureException : public ::std::runtime_error {
  public:
   explicit GoogleTestFailureException(const TestPartResult& failure);
 };
-
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
+#endif
 #endif  // GTEST_HAS_EXCEPTIONS
 
 namespace edit_distance {
@@ -571,7 +576,14 @@ class GTEST_API_ TypedTestCasePState {
   typedef ::std::map<std::string, CodeLocation> RegisteredTestsMap;
 
   bool registered_;
+
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251)
+#endif
   RegisteredTestsMap registered_tests_;
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
+#endif
 };
 
 // Skips to the first non-space char after the first comma in 'str';
