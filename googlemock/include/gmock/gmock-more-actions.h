@@ -33,6 +33,8 @@
 //
 // This file implements some actions that depend on gmock-generated-actions.h.
 
+// GOOGLETEST_CM0002 DO NOT DELETE
+
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_MORE_ACTIONS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_MORE_ACTIONS_H_
 

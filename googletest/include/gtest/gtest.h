@@ -48,6 +48,8 @@
 // registration from Barthelemy Dagenais' (barthelemy@prologique.com)
 // easyUnit framework.
 
+// GOOGLETEST_CM0001 DO NOT DELETE
+
 #ifndef GTEST_INCLUDE_GTEST_GTEST_H_
 #define GTEST_INCLUDE_GTEST_GTEST_H_
 

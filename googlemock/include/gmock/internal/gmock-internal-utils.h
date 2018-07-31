@@ -35,6 +35,8 @@
 // Mock.  They are subject to change without notice, so please DO NOT
 // USE THEM IN USER CODE.
 
+// GOOGLETEST_CM0002 DO NOT DELETE
+
 #ifndef GMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_INTERNAL_UTILS_H_
 #define GMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_INTERNAL_UTILS_H_
 
@@ -348,7 +350,7 @@ GTEST_API_ void Log(LogSeverity severity, const std::string& message,
 // correct overload. This must not be instantiable, to prevent client code from
 // accidentally resolving to the overload; for example:
 //
-//    ON_CALL(mock, Method({}, nullptr))…
+//    ON_CALL(mock, Method({}, nullptr))...
 //
 class WithoutMatchers {
  private:

@@ -40,6 +40,8 @@
 // files are expected to #include this.  Therefore, it cannot #include
 // any other Google Test header.
 
+// GOOGLETEST_CM0001 DO NOT DELETE
+
 #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
 #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
 
@@ -313,7 +315,7 @@
 //   GTEST_DISABLE_MSC_WARNINGS_PUSH_(4800 4385)
 //   /* code that triggers warnings C4800 and C4385 */
 //   GTEST_DISABLE_MSC_WARNINGS_POP_()
-#if _MSC_VER >= 1500
+#if _MSC_VER >= 1400
 # define GTEST_DISABLE_MSC_WARNINGS_PUSH_(warnings) \
     __pragma(warning(push))                        \
     __pragma(warning(disable: warnings))
@@ -522,11 +524,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #endif  // !defined(GTEST_HAS_STD_STRING)
 
 #ifndef GTEST_HAS_GLOBAL_STRING
-// The user didn't tell us whether ::string is available, so we need
-// to figure it out.
-
 # define GTEST_HAS_GLOBAL_STRING 0
-
 #endif  // GTEST_HAS_GLOBAL_STRING
 
 #ifndef GTEST_HAS_STD_WSTRING
@@ -1218,7 +1216,7 @@ class scoped_ptr {
 // Defines RE.
 
 #if GTEST_USES_PCRE
-using ::RE;
+// if used, PCRE is injected by custom/gtest-port.h
 #elif GTEST_USES_POSIX_RE || GTEST_USES_SIMPLE_RE
 
 // A simple C++ wrapper for <regex.h>.  It uses the POSIX Extended
