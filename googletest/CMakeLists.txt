@@ -86,7 +86,7 @@ include_directories(
 if (MSVC AND MSVC_VERSION EQUAL 1700)
   add_definitions(/D _VARIADIC_MAX=10)
 endif()
- 
+
 ########################################################################
 #
 # Defines the gtest & gtest_main libraries.  User tests should link
@@ -171,28 +171,28 @@ if (gtest_build_tests)
   ############################################################
   # C++ tests built with standard compiler flags.
 
-  cxx_test(gtest-death-test_test gtest_main)
+  cxx_test(googletest-death-test-test gtest_main)
   cxx_test(gtest_environment_test gtest)
-  cxx_test(gtest-filepath_test gtest_main)
-  cxx_test(gtest-linked_ptr_test gtest_main)
-  cxx_test(gtest-listener_test gtest_main)
+  cxx_test(googletest-filepath-test gtest_main)
+  cxx_test(googletest-linked-ptr-test gtest_main)
+  cxx_test(googletest-listener-test gtest_main)
   cxx_test(gtest_main_unittest gtest_main)
-  cxx_test(gtest-message_test gtest_main)
+  cxx_test(googletest-message-test gtest_main)
   cxx_test(gtest_no_test_unittest gtest)
-  cxx_test(gtest-options_test gtest_main)
-  cxx_test(gtest-param-test_test gtest
-    test/gtest-param-test2_test.cc)
-  cxx_test(gtest-port_test gtest_main)
+  cxx_test(googletest-options-test gtest_main)
+  cxx_test(googletest-param-test-test gtest
+    test/googletest-param-test2-test.cc)
+  cxx_test(googletest-port-test gtest_main)
   cxx_test(gtest_pred_impl_unittest gtest_main)
   cxx_test(gtest_premature_exit_test gtest
     test/gtest_premature_exit_test.cc)
-  cxx_test(gtest-printers_test gtest_main)
+  cxx_test(googletest-printers-test gtest_main)
   cxx_test(gtest_prod_test gtest_main
     test/production.cc)
   cxx_test(gtest_repeat_test gtest)
   cxx_test(gtest_sole_header_test gtest_main)
   cxx_test(gtest_stress_test gtest)
-  cxx_test(gtest-test-part_test gtest_main)
+  cxx_test(googletest-test-part-test gtest_main)
   cxx_test(gtest_throw_on_failure_ex_test gtest)
   cxx_test(gtest-typed-test_test gtest_main
     test/gtest-typed-test2_test.cc)
