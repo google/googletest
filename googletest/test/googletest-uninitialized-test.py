@@ -35,7 +35,7 @@ __author__ = 'wan@google.com (Zhanyong Wan)'
 
 import gtest_test_utils
 
-COMMAND = gtest_test_utils.GetTestExecutablePath('gtest_uninitialized_test_')
+COMMAND = gtest_test_utils.GetTestExecutablePath('googletest-uninitialized-test_')
 
 
 def Assert(condition):
