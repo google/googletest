@@ -97,6 +97,14 @@ cc_test(
     deps = ["//:gtest_main"],
 )
 
+
+cc_test(
+    name = "gtest_test_macro_stack_footprint_test",
+    size = "small",
+    srcs = ["gtest_test_macro_stack_footprint_test.cc"],
+    deps = ["//:gtest"],
+)
+
 #These googletest tests have their own main()
 cc_test(
     name = "gtest-listener_test",
