@@ -1,4 +1,4 @@
-// Copyright 2008, Google Inc.
+// Copyright 2015, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,17 +27,25 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Author: wan@google.com (Zhanyong Wan)
+// Author: jmadill@google.com (Jamie Madill)
 
 #include "gtest/gtest.h"
 
-TEST(DummyTest, Dummy) {
-  // This test doesn't verify anything.  We just need it to create a
-  // realistic stage for testing the behavior of Google Test when
-  // RUN_ALL_TESTS() is called without
-  // testing::InitGoogleTest() being called first.
+namespace {
+class DummyTest : public ::testing::TestWithParam<const char *> {};
+
+TEST_P(DummyTest, Dummy) {
 }
 
-int main() {
+INSTANTIATE_TEST_CASE_P(InvalidTestName,
+                        DummyTest,
+                        ::testing::Values("InvalidWithQuotes"),
+                        ::testing::PrintToStringParamName());
+
+}  // namespace
+
+int main(int argc, char *argv[]) {
+  testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
+
