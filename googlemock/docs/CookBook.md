@@ -2247,7 +2247,7 @@ enum class AccessLevel { kInternal, kPublic };
 
 class Buzz {
  public:
-  explicit Buzz(AccessLevel access) { … }
+  explicit Buzz(AccessLevel access) { ... }
   ...
 };
 
@@ -2320,7 +2320,7 @@ Note that `ByMove()` is essential here - if you drop it, the code won’t compil
 
 Quiz time! What do you think will happen if a `Return(ByMove(...))` action is
 performed more than once (e.g. you write
-`….WillRepeatedly(Return(ByMove(...)));`)? Come think of it, after the first
+`.WillRepeatedly(Return(ByMove(...)));`)? Come think of it, after the first
 time the action runs, the source value will be consumed (since it’s a move-only
 value), so the next time around, there’s no value to move from -- you’ll get a
 run-time error that `Return(ByMove(...))` can only be run once.
@@ -3655,6 +3655,6 @@ This printer knows how to print built-in C++ types, native arrays, STL
 containers, and any type that supports the `<<` operator.  For other
 types, it prints the raw bytes in the value and hopes that you the
 user can figure it out.
-[Google Test's advanced guide](../../googletest/docs/AdvancedGuide.md#teaching-google-test-how-to-print-your-values)
+[Google Test's advanced guide](../../googletest/docs/advanced.md#teaching-google-test-how-to-print-your-values)
 explains how to extend the printer to do a better job at
 printing your particular type than to dump the bytes.

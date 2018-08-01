@@ -29,7 +29,7 @@
 //
 // Author: mheule@google.com (Markus Heule)
 //
-// The Google C++ Testing Framework (Google Test)
+// The Google C++ Testing and Mocking Framework (Google Test)
 
 #include "gtest/gtest-test-part.h"
 #include "src/gtest-internal-inl.h"
