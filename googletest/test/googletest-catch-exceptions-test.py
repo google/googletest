@@ -48,12 +48,12 @@ FILTER_FLAG = FLAG_PREFIX + 'filter'
 # Path to the gtest_catch_exceptions_ex_test_ binary, compiled with
 # exceptions enabled.
 EX_EXE_PATH = gtest_test_utils.GetTestExecutablePath(
-    'gtest_catch_exceptions_ex_test_')
+    'googletest_catch_exceptions_ex_test_')
 
 # Path to the gtest_catch_exceptions_test_ binary, compiled with
 # exceptions disabled.
 EXE_PATH = gtest_test_utils.GetTestExecutablePath(
-    'gtest_catch_exceptions_no_ex_test_')
+    'googletest_catch_exceptions_no_ex_test_')
 
 environ = gtest_test_utils.environ
 SetEnvVar = gtest_test_utils.SetEnvVar

@@ -107,14 +107,10 @@ cc_test(
 
 #These googletest tests have their own main()
 cc_test(
-    name = "gtest-listener_test",
+    name = "googletest-listener-test",
     size = "small",
-    srcs = [
-        "gtest-listener_test.cc",
-    ],
-    deps = [
-        "//:gtest",
-    ],
+    srcs = ["googletest-listener-test.cc"],
+    deps = ["//:gtest_main"],
 )
 
 cc_test(
@@ -301,41 +297,41 @@ py_test(
 )
 
 cc_binary(
-    name = "gtest_shuffle_test_",
-    srcs = ["gtest_shuffle_test_.cc"],
+    name = "googletest-shuffle-test_",
+    srcs = ["googletest-shuffle-test_.cc"],
     deps = ["//:gtest"],
 )
 
 py_test(
-    name = "gtest_shuffle_test",
+    name = "googletest-shuffle-test",
     size = "small",
-    srcs = ["gtest_shuffle_test.py"],
-    data = [":gtest_shuffle_test_"],
+    srcs = ["googletest-shuffle-test.py"],
+    data = [":googletest-shuffle-test_"],
     deps = [":gtest_test_utils"],
 )
 
 cc_binary(
-    name = "gtest_catch_exceptions_no_ex_test_",
+    name = "googletest_catch_exceptions_no_ex_test_",
     testonly = 1,
-    srcs = ["gtest_catch_exceptions_test_.cc"],
+    srcs = ["googletest-catch-exceptions-test_.cc"],
     deps = ["//:gtest_main"],
 )
 
 cc_binary(
-    name = "gtest_catch_exceptions_ex_test_",
+    name = "googletest_catch_exceptions_ex_test_",
     testonly = 1,
-    srcs = ["gtest_catch_exceptions_test_.cc"],
+    srcs = ["googletest-catch-exceptions-test_.cc"],
     copts = ["-fexceptions"],
     deps = ["//:gtest_main"],
 )
 
 py_test(
-    name = "gtest_catch_exceptions_test",
+    name = "googletest-catch-exceptions-test",
     size = "small",
-    srcs = ["gtest_catch_exceptions_test.py"],
+    srcs = ["googletest-catch-exceptions-test.py"],
     data = [
-        ":gtest_catch_exceptions_ex_test_",
-        ":gtest_catch_exceptions_no_ex_test_",
+        ":googletest_catch_exceptions_ex_test_",
+        ":googletest_catch_exceptions_no_ex_test_",
     ],
     deps = [":gtest_test_utils"],
 )
