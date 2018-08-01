@@ -33,7 +33,7 @@
 
 A user can ask Google Test to list all tests by specifying the
 --gtest_list_tests flag.  This script tests such functionality
-by invoking gtest_list_tests_unittest_ (a program written with
+by invoking googletest-list-tests-unittest_ (a program written with
 Google Test) the command line flags.
 """
 
@@ -47,10 +47,10 @@ import gtest_test_utils
 # The command line flag for enabling/disabling listing all tests.
 LIST_TESTS_FLAG = 'gtest_list_tests'
 
-# Path to the gtest_list_tests_unittest_ program.
-EXE_PATH = gtest_test_utils.GetTestExecutablePath('gtest_list_tests_unittest_')
+# Path to the googletest-list-tests-unittest_ program.
+EXE_PATH = gtest_test_utils.GetTestExecutablePath('googletest-list-tests-unittest_')
 
-# The expected output when running gtest_list_tests_unittest_ with
+# The expected output when running googletest-list-tests-unittest_ with
 # --gtest_list_tests
 EXPECTED_OUTPUT_NO_FILTER_RE = re.compile(r"""FooDeathTest\.
   Test1
@@ -94,7 +94,7 @@ MyInstantiation/ValueParamTest\.
   TestB/2  # GetParam\(\) = a very\\nlo{241}\.\.\.
 """)
 
-# The expected output when running gtest_list_tests_unittest_ with
+# The expected output when running googletest-list-tests-unittest_ with
 # --gtest_list_tests and --gtest_filter=Foo*.
 EXPECTED_OUTPUT_FILTER_FOO_RE = re.compile(r"""FooDeathTest\.
   Test1
@@ -114,7 +114,7 @@ FooTest\.
 
 
 def Run(args):
-  """Runs gtest_list_tests_unittest_ and returns the list of tests printed."""
+  """Runs googletest-list-tests-unittest_ and returns the list of tests printed."""
 
   return gtest_test_utils.Subprocess([EXE_PATH] + args,
                                      capture_stderr=False).output
@@ -127,7 +127,7 @@ class GTestListTestsUnitTest(gtest_test_utils.TestCase):
   """Tests using the --gtest_list_tests flag to list all tests."""
 
   def RunAndVerify(self, flag_value, expected_output_re, other_flag):
-    """Runs gtest_list_tests_unittest_ and verifies that it prints
+    """Runs googletest-list-tests-unittest_ and verifies that it prints
     the correct tests.
 
     Args:
