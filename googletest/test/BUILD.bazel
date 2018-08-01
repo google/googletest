@@ -197,17 +197,17 @@ py_test(
 )
 
 cc_binary(
-    name = "gtest_color_test_",
+    name = "googletest-color-test_",
     testonly = 1,
-    srcs = ["gtest_color_test_.cc"],
+    srcs = ["googletest-color-test_.cc"],
     deps = ["//:gtest"],
 )
 
 py_test(
-    name = "gtest_color_test",
+    name = "googletest-color-test",
     size = "small",
-    srcs = ["gtest_color_test.py"],
-    data = [":gtest_color_test_"],
+    srcs = ["googletest-color-test.py"],
+    data = [":googletest-color-test_"],
     deps = [":gtest_test_utils"],
 )
 
