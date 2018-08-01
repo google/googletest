@@ -21,13 +21,13 @@ accept your pull requests.
 
 ## Contributing A Patch
 
-1. Submit an issue describing your proposed change to the
+1. Submit an issue by describing your proposed change to the
    [issue tracker](https://github.com/google/googletest).
-1. Please don't mix more than one logical change per submittal,
-   because it makes the history hard to follow. If you want to make a
+1. Please do not mix more than one logical change per submittal,
+   because it makes the history hard to follow. If you wish to make a
    change that doesn't have a corresponding issue in the issue
    tracker, please create one.
-1. Also, coordinate with team members that are listed on the issue in
+1. Also, please coordinate with team members that are listed on the issue in
    question. This ensures that work isn't being duplicated and
    communicating your plan early also generally leads to better
    patches.
@@ -36,7 +36,7 @@ accept your pull requests.
 1. Fork the desired repo, develop and test your code changes.
 1. Ensure that your code adheres to the existing style in the sample to which
    you are contributing.
-1. Ensure that your code has an appropriate set of unit tests which all pass.
+1. Please Ensure that your code has an appropriate set of unit tests which all pass.
 1. Submit a pull request.
 
 If you are a Googler, it is preferable to first create an internal change and
@@ -66,7 +66,7 @@ proposal may not be the best choice. There's never a reason to be
 antagonistic or dismissive toward anyone who is sincerely trying to
 contribute to a discussion.
 
-Sure, C++ testing is serious business and all that, but it's also
+Sure, C++ testing is a serious business and all that, but it's also provide
 a lot of fun. Let's keep it that way. Let's strive to be one of the
 friendliest communities in all of open source.
 
@@ -100,7 +100,7 @@ This section discusses how to make your own changes to Google Test.
 ### Testing Google Test Itself ###
 
 To make sure your changes work as intended and don't break existing
-functionality, you'll want to compile and run Google Test's own tests.
+functionality, you'll need to compile and run Google Test's own tests.
 For that you can use CMake:
 
     mkdir mybuild
