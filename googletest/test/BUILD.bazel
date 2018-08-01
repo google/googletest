@@ -227,34 +227,38 @@ py_test(
 )
 
 cc_binary(
-    name = "gtest_filter_unittest_",
+    name = "googletest-filter-unittest_",
     testonly = 1,
-    srcs = ["gtest_filter_unittest_.cc"],
+    srcs = ["googletest-filter-unittest_.cc"],
     deps = ["//:gtest"],
 )
 
 py_test(
-    name = "gtest_filter_unittest",
-    size = "small",
-    srcs = ["gtest_filter_unittest.py"],
-    data = [":gtest_filter_unittest_"],
+    name = "googletest-filter-unittest",
+    size = "medium",
+    srcs = ["googletest-filter-unittest.py"],
+    data = [":googletest-filter-unittest_"],
     deps = [":gtest_test_utils"],
 )
+
 
 cc_binary(
-    name = "gtest_break_on_failure_unittest_",
+    name = "googletest-break-on-failure-unittest_",
     testonly = 1,
-    srcs = ["gtest_break_on_failure_unittest_.cc"],
+    srcs = ["googletest-break-on-failure-unittest_.cc"],
     deps = ["//:gtest"],
 )
 
+
+
 py_test(
-    name = "gtest_break_on_failure_unittest",
+    name = "googletest-break-on-failure-unittest",
     size = "small",
-    srcs = ["gtest_break_on_failure_unittest.py"],
-    data = [":gtest_break_on_failure_unittest_"],
+    srcs = ["googletest-break-on-failure-unittest.py"],
+    data = [":googletest-break-on-failure-unittest_"],
     deps = [":gtest_test_utils"],
 )
+
 
 cc_test(
     name = "gtest_assert_by_exception_test",
@@ -263,20 +267,23 @@ cc_test(
     deps = ["//:gtest"],
 )
 
+
+
 cc_binary(
-    name = "gtest_throw_on_failure_test_",
+    name = "googletest-throw-on-failure-test_",
     testonly = 1,
-    srcs = ["gtest_throw_on_failure_test_.cc"],
+    srcs = ["googletest-throw-on-failure-test_.cc"],
     deps = ["//:gtest"],
 )
 
 py_test(
-    name = "gtest_throw_on_failure_test",
+    name = "googletest-throw-on-failure-test",
     size = "small",
-    srcs = ["gtest_throw_on_failure_test.py"],
-    data = [":gtest_throw_on_failure_test_"],
+    srcs = ["googletest-throw-on-failure-test.py"],
+    data = [":googletest-throw-on-failure-test_"],
     deps = [":gtest_test_utils"],
 )
+
 
 cc_binary(
     name = "gtest_list_tests_unittest_",
