@@ -29,7 +29,7 @@
 //
 // Author: wan@google.com (Zhanyong Wan)
 
-// Google Test - The Google C++ Testing Framework
+// Google Test - The Google C++ Testing and Mocking Framework
 //
 // This file tests the universal value printer.
 
@@ -1113,6 +1113,12 @@ TEST(PrintStdTupleTest, NestedTuple) {
   EXPECT_EQ("((5, true), 'a' (97, 0x61))", Print(nested));
 }
 
+#endif  // GTEST_LANG_CXX11
+
+#if GTEST_LANG_CXX11
+TEST(PrintNullptrT, Basic) {
+  EXPECT_EQ("(nullptr)", Print(nullptr));
+}
 #endif  // GTEST_LANG_CXX11
 
 // Tests printing user-defined unprintable types.

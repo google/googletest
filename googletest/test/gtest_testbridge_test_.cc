@@ -1,4 +1,4 @@
-// Copyright 2008, Google Inc.
+// Copyright 2018, Google LLC.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,14 +27,18 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Author: wan@google.com (Zhanyong Wan), vladl@google.com (Vlad Losev)
+// Author: rfj@google.com (Rohan Joyce)
 
-// Google Mock - a framework for writing C++ mock classes.
-//
-// This file is for verifying that various Google Mock constructs do not
-// produce linker errors when instantiated in different translation units.
-// Please see gmock_link_test.h for details.
+// This program is meant to be run by gtest_test_filter_test.py.  Do not run
+// it directly.
 
-#define LinkTest LinkTest2
+#include "gtest/gtest.h"
 
-#include "test/gmock_link_test.h"
+// These tests are used to detect if filtering is working. Only
+// 'TestThatSucceeds' should ever run.
+
+TEST(TestFilterTest, TestThatSucceeds) {}
+
+TEST(TestFilterTest, TestThatFails) {
+  ASSERT_TRUE(false) << "This test should never be run.";
+}

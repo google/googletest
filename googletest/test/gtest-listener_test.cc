@@ -28,7 +28,7 @@
 //
 // Author: vladl@google.com (Vlad Losev)
 //
-// The Google C++ Testing Framework (Google Test)
+// The Google C++ Testing and Mocking Framework (Google Test)
 //
 // This file verifies Google Test event listeners receive events at the
 // right times.
