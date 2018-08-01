@@ -154,7 +154,7 @@ c is 10
 >     `ASSERT_PRED*` or `EXPECT_PRED*`, please see
 >     [this](faq#OverloadedPredicate) for how to resolve it.
 > 1.  Currently we only provide predicate assertions of arity <= 5. If you need
->     a higher-arity assertion, let [us](http://g/opensource-gtest) know.
+>     a higher-arity assertion, let [us](https://github.com/google/googletest/issues) know.
 
 **Availability**: Linux, Windows, Mac.
 
@@ -382,7 +382,7 @@ Verifies that `val1` is less than, or almost equal to, `val2`. You can replace
 
 ### Asserting Using gMock Matchers
 
-Google-developed C++ mocking framework [gMock](http://go/gmock) comes with a
+Google-developed C++ mocking framework [gMock](../../googlemock) comes with a
 library of matchers for validating arguments passed to mock objects. A gMock
 *matcher* is basically a predicate that knows how to describe itself. It can be
 used in these assertion macros:
@@ -402,17 +402,17 @@ using ::testing::StartsWith;
     EXPECT_THAT(Foo(), StartsWith("Hello"));
 ```
 
-Read this [recipe](http://go/gmockguide#using-matchers-in-gunit-assertions) in
+Read this [recipe](../../googlemock/docs/CookBook.md#using-matchers-in-google-test-assertions) in
 the gMock Cookbook for more details.
 
 gMock has a rich set of matchers. You can do many things googletest cannot do
 alone with them. For a list of matchers gMock provides, read
-[this](http://go/gmockguide#using-matchers). Especially useful among them are
-some [protocol buffer matchers](http://go/protomatchers). It's easy to write
-your [own matchers](http://go/gmockguide#NewMatchers) too.
+[this](../../googlemock/docs/CookBook.md#using-matchers). Especially useful among them are
+some [protocol buffer matchers](https://github.com/google/nucleus/blob/master/nucleus/testing/protocol-buffer-matchers.h). It's easy to write
+your [own matchers](../../googlemock/docs/CookBook.md#writing-new-matchers-quickly) too.
 
 For example, you can use gMock's
-[EqualsProto](http://cs/#piper///depot/google3/testing/base/public/gmock_utils/protocol-buffer-matchers.h)
+[EqualsProto](https://github.com/google/nucleus/blob/master/nucleus/testing/protocol-buffer-matchers.h)
 to compare protos in your tests:
 
 ```c++
@@ -433,7 +433,7 @@ and you're ready to go.
 
 (Please read the [previous](#AssertThat) section first if you haven't.)
 
-You can use the gMock [string matchers](http://go/gmockguide#string-matchers)
+You can use the gMock [string matchers](../../googlemock/docs/CheatSheet.md#string-matchers)
 with `EXPECT_THAT()` or `ASSERT_THAT()` to do more string comparison tricks
 (sub-string, prefix, suffix, regular expression, and etc). For example,
 
