@@ -56,6 +56,7 @@ cc_test(
     srcs = glob(
         include = [
             "gtest-*.cc",
+            "googletest-*.cc",
             "*.h",
             "googletest/include/gtest/**/*.h",
         ],
@@ -68,6 +69,17 @@ cc_test(
             "gtest-listener_test.cc",
             "gtest-unittest-api_test.cc",
             "gtest-param-test_test.cc",
+            "googletest-catch-exceptions-test_.cc",
+            "googletest-color-test_.cc",
+            "googletest-env-var-test_.cc",
+            "googletest-filter-unittest_.cc",
+            "googletest-break-on-failure-unittest_.cc",
+             "googletest-listener-test.cc",
+             "googletest-output-test_.cc",
+             "googletest-list-tests-unittest_.cc",
+             "googletest-shuffle-test_.cc",
+             "googletest-uninitialized-test_.cc",
+
         ],
     ) + select({
         "//:windows": [],
@@ -97,6 +109,14 @@ cc_test(
     deps = ["//:gtest_main"],
 )
 
+
+# Tests death tests.
+cc_test(
+    name = "googletest-death-test-test",
+    size = "medium",
+    srcs = ["googletest-death-test-test.cc"],
+    deps = ["//:gtest_main"],
+)
 
 cc_test(
     name = "gtest_test_macro_stack_footprint_test",
@@ -399,17 +419,17 @@ py_test(
 )
 
 cc_binary(
-    name = "gtest_uninitialized_test_",
+    name = "googletest-uninitialized-test_",
     testonly = 1,
-    srcs = ["gtest_uninitialized_test_.cc"],
+    srcs = ["googletest-uninitialized-test_.cc"],
     deps = ["//:gtest"],
 )
 
 py_test(
-    name = "gtest_uninitialized_test",
+    name = "googletest-uninitialized-test",
     size = "medium",
-    srcs = ["gtest_uninitialized_test.py"],
-    data = [":gtest_uninitialized_test_"],
+    srcs = ["googletest-uninitialized-test.py"],
+    data = ["googletest-uninitialized-test_"],
     deps = [":gtest_test_utils"],
 )
 
