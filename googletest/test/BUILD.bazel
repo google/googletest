@@ -79,6 +79,11 @@ cc_test(
              "googletest-list-tests-unittest_.cc",
              "googletest-shuffle-test_.cc",
              "googletest-uninitialized-test_.cc",
+             "googletest-death-test_ex_test.cc",
+             "googletest-param-test-test",
+             "googletest-throw-on-failure-test_.cc",
+             "googletest-param-test-invalid-name1-test_.cc",
+             "googletest-param-test-invalid-name2-test_.cc",
 
         ],
     ) + select({
@@ -145,16 +150,14 @@ cc_test(
 )
 
 cc_test(
-    name = "gtest-param-test_test",
+    name = "googletest-param-test-test",
     size = "small",
     srcs = [
-        "gtest-param-test2_test.cc",
-        "gtest-param-test_test.cc",
-        "gtest-param-test_test.h",
+        "googletest-param-test-test.cc",
+        "googletest-param-test-test.h",
+        "googletest-param-test2-test.cc",
     ],
-    deps = [
-        "//:gtest",
-    ],
+    deps = ["//:gtest"],
 )
 
 cc_test(
@@ -481,5 +484,44 @@ py_test(
         ":has_absl": [],
         "//conditions:default": ["--no_stacktrace_support"],
     }),
+    deps = [":gtest_test_utils"],
+)
+# Verifies interaction of death tests and exceptions.
+cc_test(
+    name = "googletest-death-test_ex_catch_test",
+    size = "medium",
+    srcs = ["googletest-death-test_ex_test.cc"],
+    copts = ["-fexceptions"],
+    defines = ["GTEST_ENABLE_CATCH_EXCEPTIONS_=1"],
+    deps = ["//:gtest"],
+)
+
+cc_binary(
+    name = "googletest-param-test-invalid-name1-test_",
+    testonly = 1,
+    srcs = ["googletest-param-test-invalid-name1-test_.cc"],
+    deps = ["//:gtest"],
+)
+
+cc_binary(
+    name = "googletest-param-test-invalid-name2-test_",
+    testonly = 1,
+    srcs = ["googletest-param-test-invalid-name2-test_.cc"],
+    deps = ["//:gtest"],
+)
+
+py_test(
+    name = "googletest-param-test-invalid-name1-test",
+    size = "small",
+    srcs = ["googletest-param-test-invalid-name1-test.py"],
+    data = [":googletest-param-test-invalid-name1-test_"],
+    deps = [":gtest_test_utils"],
+)
+
+py_test(
+    name = "googletest-param-test-invalid-name2-test",
+    size = "small",
+    srcs = ["googletest-param-test-invalid-name2-test.py"],
+    data = [":googletest-param-test-invalid-name2-test_"],
     deps = [":gtest_test_utils"],
 )
