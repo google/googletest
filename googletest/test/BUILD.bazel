@@ -449,6 +449,7 @@ py_test(
     deps = [":gtest_test_utils"],
 )
 
+
 py_test(
     name = "googletest-json-outfiles-test",
     size = "small",
@@ -460,5 +461,25 @@ py_test(
         ":gtest_xml_outfile1_test_",
         ":gtest_xml_outfile2_test_",
     ],
+    deps = [":gtest_test_utils"],
+)
+
+py_test(
+    name = "googletest-json-output-unittest",
+    size = "medium",
+    srcs = [
+        "googletest-json-output-unittest.py",
+        "gtest_json_test_utils.py",
+    ],
+    data = [
+        # We invoke gtest_no_test_unittest to verify the JSON output
+        # when the test program contains no test definition.
+        ":gtest_no_test_unittest",
+        ":gtest_xml_output_unittest_",
+    ],
+    args = select({
+        ":has_absl": [],
+        "//conditions:default": ["--no_stacktrace_support"],
+    }),
     deps = [":gtest_test_utils"],
 )
