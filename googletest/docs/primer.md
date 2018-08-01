@@ -5,8 +5,8 @@
 
 *googletest* helps you write better C++ tests.
 
-googletest is a testing framework developed by the [Testing
-Technology](http://engdoc/eng/testing/TT/) team with Google's specific
+googletest is a testing framework developed by the Testing
+Technology team with Google's specific
 requirements and constraints in mind. No matter whether you work on Linux,
 Windows, or a Mac, if you write C++ code, googletest can help you. And it
 supports *any* kind of tests, not just unit tests.
@@ -75,7 +75,7 @@ the terms:
 Meaning                                                                              | googletest Term                                                                                            | [ISTQB](http://www.istqb.org/) Term
 :----------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------- | :----------------------------------
 Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests)                                                                                    | [Test Case](http://glossary.istqb.org/search/test%20case)
-A set of several tests related to one component                                      | [TestCase](https://g3doc.corp.google.com/third_party/googletest/googletest/g3doc/primer.md#basic-concepts) | [TestSuite](http://glossary.istqb.org/search/test%20suite)
+A set of several tests related to one component                                      | [TestCase](#basic-concepts) | [TestSuite](http://glossary.istqb.org/search/test%20suite)
 
 ## Basic Concepts
 
