@@ -212,17 +212,17 @@ py_test(
 )
 
 cc_binary(
-    name = "gtest_env_var_test_",
+    name = "googletest-env-var-test_",
     testonly = 1,
-    srcs = ["gtest_env_var_test_.cc"],
+    srcs = ["googletest-env-var-test_.cc"],
     deps = ["//:gtest"],
 )
 
 py_test(
-    name = "gtest_env_var_test",
-    size = "small",
-    srcs = ["gtest_env_var_test.py"],
-    data = [":gtest_env_var_test_"],
+    name = "googletest-env-var-test",
+    size = "medium",
+    srcs = ["googletest-env-var-test.py"],
+    data = [":googletest-env-var-test_"],
     deps = [":gtest_test_utils"],
 )
 
