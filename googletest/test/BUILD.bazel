@@ -174,23 +174,24 @@ py_test(
 )
 
 cc_binary(
-    name = "gtest_output_test_",
+    name = "googletest-output-test_",
     testonly = 1,
-    srcs = ["gtest_output_test_.cc"],
+    srcs = ["googletest-output-test_.cc"],
     deps = ["//:gtest"],
 )
 
+
 py_test(
-    name = "gtest_output_test",
+    name = "googletest-output-test",
     size = "small",
-    srcs = ["gtest_output_test.py"],
+    srcs = ["googletest-output-test.py"],
     args = select({
         ":has_absl": [],
         "//conditions:default": ["--no_stacktrace_support"],
     }),
     data = [
-        "gtest_output_test_golden_lin.txt",
-        ":gtest_output_test_",
+        "googletest-output-test-golden-lin.txt",
+        ":googletest-output-test_",
     ],
     deps = [":gtest_test_utils"],
 )
