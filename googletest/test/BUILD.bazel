@@ -282,17 +282,17 @@ py_test(
 
 
 cc_binary(
-    name = "gtest_list_tests_unittest_",
+    name = "googletest-list-tests-unittest_",
     testonly = 1,
-    srcs = ["gtest_list_tests_unittest_.cc"],
+    srcs = ["googletest-list-tests-unittest_.cc"],
     deps = ["//:gtest"],
 )
 
 py_test(
-    name = "gtest_list_tests_unittest",
+    name = "googletest-list-tests-unittest",
     size = "small",
-    srcs = ["gtest_list_tests_unittest.py"],
-    data = [":gtest_list_tests_unittest_"],
+    srcs = ["googletest-list-tests-unittest.py"],
+    data = [":googletest-list-tests-unittest_"],
     deps = [":gtest_test_utils"],
 )
 
