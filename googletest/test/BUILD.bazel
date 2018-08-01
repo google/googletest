@@ -448,3 +448,17 @@ py_test(
     data = [":gtest_testbridge_test_"],
     deps = [":gtest_test_utils"],
 )
+
+py_test(
+    name = "googletest-json-outfiles-test",
+    size = "small",
+    srcs = [
+        "googletest-json-outfiles-test.py",
+        "gtest_json_test_utils.py",
+    ],
+    data = [
+        ":gtest_xml_outfile1_test_",
+        ":gtest_xml_outfile2_test_",
+    ],
+    deps = [":gtest_test_utils"],
+)
