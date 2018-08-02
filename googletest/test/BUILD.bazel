@@ -68,7 +68,7 @@ cc_test(
             "gtest-death-test_ex_test.cc",
             "gtest-listener_test.cc",
             "gtest-unittest-api_test.cc",
-            "gtest-param-test_test.cc",
+            "googletest-param-test-test.cc",
             "googletest-catch-exceptions-test_.cc",
             "googletest-color-test_.cc",
             "googletest-env-var-test_.cc",

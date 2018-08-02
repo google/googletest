@@ -239,11 +239,11 @@ if (gtest_build_tests)
       src/gtest-all.cc src/gtest_main.cc)
 
     cxx_test_with_flags(gtest-tuple_test "${cxx_use_own_tuple}"
-      gtest_main_use_own_tuple test/gtest-tuple_test.cc)
+      gtest_main_use_own_tuple test/googletest-tuple-test.cc)
 
     cxx_test_with_flags(gtest_use_own_tuple_test "${cxx_use_own_tuple}"
       gtest_main_use_own_tuple
-      test/gtest-param-test_test.cc test/gtest-param-test2_test.cc)
+      test/googletest-param-test-test.cc test/gtest-param-test2_test.cc)
   endif()
 
   ############################################################
@@ -258,14 +258,14 @@ if (gtest_build_tests)
       gtest_catch_exceptions_no_ex_test_
       "${cxx_no_exception}"
       gtest_main_no_exception
-      test/gtest_catch_exceptions_test_.cc)
+      test/googletest-catch-exceptions-test_.cc)
   endif()
 
   cxx_executable_with_flags(
     gtest_catch_exceptions_ex_test_
     "${cxx_exception}"
     gtest_main
-    test/gtest_catch_exceptions_test_.cc)
+    test/googletest-catch-exceptions-test_.cc)
   py_test(gtest_catch_exceptions_test)
 
   cxx_executable(gtest_color_test_ test gtest)
