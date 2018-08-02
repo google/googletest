@@ -53,8 +53,8 @@ EXTRA_DIST += \
   test/gtest-listener_test.cc \
   test/gtest-message_test.cc \
   test/gtest-options_test.cc \
-  test/gtest-param-test2_test.cc \
-  test/gtest-param-test2_test.cc \
+  test/googletest-param-test2-test.cc \
+  test/googletest-param-test2-test.cc \
   test/googletest-param-test-test.cc \
   test/googletest-param-test-test.cc \
   test/gtest-param-test_test.h \
@@ -70,7 +70,7 @@ EXTRA_DIST += \
   test/googletest-break-on-failure-unittest_.cc \
   test/googletest-catch-exceptions-test_.cc \
   test/googletest-color-test_.cc \
-  test/gtest_env_var_test_.cc \
+  test/googletest-env-var-test_.cc \
   test/gtest_environment_test.cc \
   test/googletest-filter-unittest_.cc \
   test/gtest_help_test_.cc \

@@ -243,7 +243,7 @@ if (gtest_build_tests)
 
     cxx_test_with_flags(gtest_use_own_tuple_test "${cxx_use_own_tuple}"
       gtest_main_use_own_tuple
-      test/googletest-param-test-test.cc test/gtest-param-test2_test.cc)
+      test/googletest-param-test-test.cc test/googletest-param-test2-test.cc)
   endif()
 
   ############################################################
@@ -271,7 +271,7 @@ if (gtest_build_tests)
   cxx_executable(googletest-color-test_ test gtest)
   py_test(gtest_color_test)
 
-  cxx_executable(gtest_env_var_test_ test gtest)
+  cxx_executable(googletest-env-var-test_ test gtest)
   py_test(gtest_env_var_test)
 
   cxx_executable(googletest-filter-unittest_ test gtest)
