@@ -250,7 +250,7 @@ if (gtest_build_tests)
   # Python tests.
 
   cxx_executable(googletest-break-on-failure-unittest_ test gtest)
-  py_test(gtest_break_on_failure_unittest)
+  py_test(googletest-break-on-failure-unittest)
 
   # Visual Studio .NET 2003 does not support STL with exceptions disabled.
   if (NOT MSVC OR MSVC_VERSION GREATER 1310)  # 1310 is Visual Studio .NET 2003
@@ -266,28 +266,28 @@ if (gtest_build_tests)
     "${cxx_exception}"
     gtest_main
     test/googletest-catch-exceptions-test_.cc)
-  py_test(gtest_catch_exceptions_test)
+  py_test(googletest-catch-exceptions-test)
 
   cxx_executable(googletest-color-test_ test gtest)
-  py_test(gtest_color_test)
+  py_test(googletest-color-test)
 
   cxx_executable(googletest-env-var-test_ test gtest)
-  py_test(gtest_env_var_test)
+  py_test(googletest-env-var-test)
 
   cxx_executable(googletest-filter-unittest_ test gtest)
-  py_test(gtest_filter_unittest)
+  py_test(googletest-filter-unittest)
 
   cxx_executable(gtest_help_test_ test gtest_main)
   py_test(gtest_help_test)
 
   cxx_executable(googletest-list-tests-unittest_ test gtest)
-  py_test(gtest_list_tests_unittest)
+  py_test(googletest-list-tests-unittest)
 
   cxx_executable(googletest-output-test_ test gtest)
-  py_test(gtest_output_test --no_stacktrace_support)
+  py_test(googletest-output-test --no_stacktrace_support)
 
   cxx_executable(googletest-shuffle-test_ test gtest)
-  py_test(gtest_shuffle_test)
+  py_test(googletest-shuffle-test)
 
   # MSVC 7.1 does not support STL with exceptions disabled.
   if (NOT MSVC OR MSVC_VERSION GREATER 1310)
@@ -295,18 +295,18 @@ if (gtest_build_tests)
     set_target_properties(googletest-throw-on-failure-test_
       PROPERTIES
       COMPILE_FLAGS "${cxx_no_exception}")
-    py_test(gtest_throw_on_failure_test)
+    py_test(googletest-throw-on-failure-test)
   endif()
 
   cxx_executable(googletest-uninitialized-test_ test gtest)
-  py_test(gtest_uninitialized_test)
+  py_test(googletest-uninitialized-test)
 
   cxx_executable(gtest_xml_outfile1_test_ test gtest_main)
   cxx_executable(gtest_xml_outfile2_test_ test gtest_main)
   py_test(gtest_xml_outfiles_test)
-  py_test(gtest_json_outfiles_test)
+  py_test(googletest-json-outfiles-test)
 
   cxx_executable(gtest_xml_output_unittest_ test gtest)
   py_test(gtest_xml_output_unittest --no_stacktrace_support)
-  py_test(gtest_json_output_unittest)
+  py_test(googletest-json-output-unittest)
 endif()

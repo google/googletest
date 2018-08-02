@@ -97,19 +97,19 @@ EXTRA_DIST += \
 
 # Python tests that we don't run.
 EXTRA_DIST += \
-  test/gtest_break_on_failure_unittest.py \
-  test/gtest_catch_exceptions_test.py \
-  test/gtest_color_test.py \
-  test/gtest_env_var_test.py \
-  test/gtest_filter_unittest.py \
+  test/googletest-break-on-failure-unittest.py \
+  test/googletest-catch-exceptions-test.py \
+  test/googletest-color-test.py \
+  test/googletest-env-var-test.py \
+  test/googletest-filter-unittest.py \
   test/gtest_help_test.py \
-  test/gtest_list_tests_unittest.py \
-  test/gtest_output_test.py \
-  test/gtest_output_test_golden_lin.txt \
-  test/gtest_shuffle_test.py \
+  test/googletest-list-tests-unittest.py \
+  test/googletest-output-test.py \
+  test/googletest-output-test_golden_lin.txt \
+  test/googletest-shuffle-test.py \
   test/gtest_test_utils.py \
-  test/gtest_throw_on_failure_test.py \
-  test/gtest_uninitialized_test.py \
+  test/googletest-throw-on-failure-test.py \
+  test/googletest-uninitialized-test.py \
   test/gtest_xml_outfiles_test.py \
   test/gtest_xml_output_unittest.py \
   test/gtest_xml_test_utils.py

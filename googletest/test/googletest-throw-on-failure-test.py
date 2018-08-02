@@ -76,7 +76,7 @@ def Run(command):
 
 
 # The tests.  TODO(wan@google.com): refactor the class to share common
-# logic with code in gtest_break_on_failure_unittest.py.
+# logic with code in googletest-break-on-failure-unittest.py.
 class ThrowOnFailureTest(gtest_test_utils.TestCase):
   """Tests the throw-on-failure mode."""
 
