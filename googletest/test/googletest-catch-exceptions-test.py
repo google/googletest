@@ -48,7 +48,7 @@ FILTER_FLAG = FLAG_PREFIX + 'filter'
 # Path to the gtest_catch_exceptions_ex_test_ binary, compiled with
 # exceptions enabled.
 EX_EXE_PATH = gtest_test_utils.GetTestExecutablePath(
-    'googletest_catch_exceptions_ex_test_')
+    'googletest-catch-exceptions-ex-test_')
 
 # Path to the googletest-catch-exceptions-test_ binary, compiled with
 # exceptions disabled.
