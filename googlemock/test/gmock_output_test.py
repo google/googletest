@@ -43,7 +43,6 @@ __author__ = 'wan@google.com (Zhanyong Wan)'
 import os
 import re
 import sys
-
 import gmock_test_utils
 
 
