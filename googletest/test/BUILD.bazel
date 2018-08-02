@@ -334,7 +334,7 @@ py_test(
 )
 
 cc_binary(
-    name = "googletest_catch_exceptions_no_ex_test_",
+    name = "googletest-catch-exceptions-no-ex-test_",
     testonly = 1,
     srcs = ["googletest-catch-exceptions-test_.cc"],
     deps = ["//:gtest_main"],
@@ -354,7 +354,7 @@ py_test(
     srcs = ["googletest-catch-exceptions-test.py"],
     data = [
         ":googletest-catch-exceptions-ex-test_",
-        ":googletest_catch_exceptions_no_ex_test_",
+        ":googletest-catch-exceptions-no-ex-test_",
     ],
     deps = [":gtest_test_utils"],
 )
