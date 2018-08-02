@@ -262,7 +262,7 @@ if (gtest_build_tests)
   endif()
 
   cxx_executable_with_flags(
-    gtest_catch_exceptions_ex_test_
+    googletest-catch-exceptions-ex-test_
     "${cxx_exception}"
     gtest_main
     test/googletest-catch-exceptions-test_.cc)

@@ -31,7 +31,7 @@
 """Tests Google Test's exception catching behavior.
 
 This script invokes googletest-catch-exceptions-test_ and
-gtest_catch_exceptions_ex_test_ (programs written with
+googletest-catch-exceptions-ex-test_ (programs written with
 Google Test) and verifies their output.
 """
 
@@ -45,7 +45,7 @@ LIST_TESTS_FLAG = FLAG_PREFIX + 'list_tests'
 NO_CATCH_EXCEPTIONS_FLAG = FLAG_PREFIX + 'catch_exceptions=0'
 FILTER_FLAG = FLAG_PREFIX + 'filter'
 
-# Path to the gtest_catch_exceptions_ex_test_ binary, compiled with
+# Path to the googletest-catch-exceptions-ex-test_ binary, compiled with
 # exceptions enabled.
 EX_EXE_PATH = gtest_test_utils.GetTestExecutablePath(
     'googletest-catch-exceptions-ex-test_')
