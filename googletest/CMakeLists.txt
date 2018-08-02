@@ -308,5 +308,5 @@ if (gtest_build_tests)
 
   cxx_executable(gtest_xml_output_unittest_ test gtest)
   py_test(gtest_xml_output_unittest --no_stacktrace_support)
-  py_test(googletest-json-output-unittest)
+  py_test(googletest-json-output-unittest --no_stacktrace_support)
 endif()
