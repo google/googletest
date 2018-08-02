@@ -53,7 +53,7 @@ EX_EXE_PATH = gtest_test_utils.GetTestExecutablePath(
 # Path to the googletest-catch-exceptions-test_ binary, compiled with
 # exceptions disabled.
 EXE_PATH = gtest_test_utils.GetTestExecutablePath(
-    'googletest_catch_exceptions_no_ex_test_')
+    'googletest-catch-exceptions-no-ex-test_')
 
 environ = gtest_test_utils.environ
 SetEnvVar = gtest_test_utils.SetEnvVar
