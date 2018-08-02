@@ -214,10 +214,10 @@ if (gtest_build_tests)
 
   cxx_test_with_flags(gtest-death-test_ex_nocatch_test
     "${cxx_exception} -DGTEST_ENABLE_CATCH_EXCEPTIONS_=0"
-    gtest test/gtest-death-test_ex_test.cc)
+    gtest test/googletest-death-test_ex_test.cc)
   cxx_test_with_flags(gtest-death-test_ex_catch_test
     "${cxx_exception} -DGTEST_ENABLE_CATCH_EXCEPTIONS_=1"
-    gtest test/gtest-death-test_ex_test.cc)
+    gtest test/googletest-death-test_ex_test.cc)
 
   cxx_test_with_flags(gtest_no_rtti_unittest "${cxx_no_rtti}"
     gtest_main_no_rtti test/gtest_unittest.cc)
@@ -238,7 +238,7 @@ if (gtest_build_tests)
     cxx_library(gtest_main_use_own_tuple "${cxx_use_own_tuple}"
       src/gtest-all.cc src/gtest_main.cc)
 
-    cxx_test_with_flags(gtest-tuple_test "${cxx_use_own_tuple}"
+    cxx_test_with_flags(googletest-tuple-test "${cxx_use_own_tuple}"
       gtest_main_use_own_tuple test/googletest-tuple-test.cc)
 
     cxx_test_with_flags(gtest_use_own_tuple_test "${cxx_use_own_tuple}"
@@ -249,7 +249,7 @@ if (gtest_build_tests)
   ############################################################
   # Python tests.
 
-  cxx_executable(gtest_break_on_failure_unittest_ test gtest)
+  cxx_executable(googletest-break-on-failure-unittest_ test gtest)
   py_test(gtest_break_on_failure_unittest)
 
   # Visual Studio .NET 2003 does not support STL with exceptions disabled.
@@ -268,37 +268,37 @@ if (gtest_build_tests)
     test/googletest-catch-exceptions-test_.cc)
   py_test(gtest_catch_exceptions_test)
 
-  cxx_executable(gtest_color_test_ test gtest)
+  cxx_executable(googletest-color-test_ test gtest)
   py_test(gtest_color_test)
 
   cxx_executable(gtest_env_var_test_ test gtest)
   py_test(gtest_env_var_test)
 
-  cxx_executable(gtest_filter_unittest_ test gtest)
+  cxx_executable(googletest-filter-unittest_ test gtest)
   py_test(gtest_filter_unittest)
 
   cxx_executable(gtest_help_test_ test gtest_main)
   py_test(gtest_help_test)
 
-  cxx_executable(gtest_list_tests_unittest_ test gtest)
+  cxx_executable(googletest-list-tests-unittest_ test gtest)
   py_test(gtest_list_tests_unittest)
 
-  cxx_executable(gtest_output_test_ test gtest)
+  cxx_executable(googletest-output-test_ test gtest)
   py_test(gtest_output_test --no_stacktrace_support)
 
-  cxx_executable(gtest_shuffle_test_ test gtest)
+  cxx_executable(googletest-shuffle-test_ test gtest)
   py_test(gtest_shuffle_test)
 
   # MSVC 7.1 does not support STL with exceptions disabled.
   if (NOT MSVC OR MSVC_VERSION GREATER 1310)
-    cxx_executable(gtest_throw_on_failure_test_ test gtest_no_exception)
-    set_target_properties(gtest_throw_on_failure_test_
+    cxx_executable(googletest-throw-on-failure-test_ test gtest_no_exception)
+    set_target_properties(googletest-throw-on-failure-test_
       PROPERTIES
       COMPILE_FLAGS "${cxx_no_exception}")
     py_test(gtest_throw_on_failure_test)
   endif()
 
-  cxx_executable(gtest_uninitialized_test_ test gtest)
+  cxx_executable(googletest-uninitialized-test_ test gtest)
   py_test(gtest_uninitialized_test)
 
   cxx_executable(gtest_xml_outfile1_test_ test gtest_main)
