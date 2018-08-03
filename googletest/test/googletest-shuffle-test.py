@@ -35,8 +35,8 @@ __author__ = 'wan@google.com (Zhanyong Wan)'
 import os
 import gtest_test_utils
 
-# Command to run the gtest_shuffle_test_ program.
-COMMAND = gtest_test_utils.GetTestExecutablePath('gtest_shuffle_test_')
+# Command to run the googletest-shuffle-test_ program.
+COMMAND = gtest_test_utils.GetTestExecutablePath('googletest-shuffle-test_')
 
 # The environment variables for test sharding.
 TOTAL_SHARDS_ENV_VAR = 'GTEST_TOTAL_SHARDS'
@@ -89,7 +89,7 @@ def GetTestsForAllIterations(extra_env, args):
 
   Args:
     extra_env: a map from environment variables to their values
-    args: command line flags to pass to gtest_shuffle_test_
+    args: command line flags to pass to googletest-shuffle-test_
 
   Returns:
     A list where the i-th element is the list of tests run in the i-th
