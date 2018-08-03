@@ -99,7 +99,7 @@ TEST(OutputFileHelpersTest, GetCurrentExecutableName) {
   const std::string exe_str = GetCurrentExecutableName().string();
 #if GTEST_OS_WINDOWS
   const bool success =
-      _strcmpi("gtest-options_test", exe_str.c_str()) == 0 ||
+      _strcmpi("googletest-options-test", exe_str.c_str()) == 0 ||
       _strcmpi("gtest-options-ex_test", exe_str.c_str()) == 0 ||
       _strcmpi("gtest_all_test", exe_str.c_str()) == 0 ||
       _strcmpi("gtest_dll_test", exe_str.c_str()) == 0;
@@ -109,7 +109,7 @@ TEST(OutputFileHelpersTest, GetCurrentExecutableName) {
   // TODO(wan@google.com): remove the hard-coded "lt-" prefix when
   //   Chandler Carruth's libtool replacement is ready.
   const bool success =
-      exe_str == "gtest-options_test" ||
+      exe_str == "googletest-options-test" ||
       exe_str == "gtest_all_test" ||
       exe_str == "lt-gtest_all_test" ||
       exe_str == "gtest_dll_test";

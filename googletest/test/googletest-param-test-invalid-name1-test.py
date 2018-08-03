@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2008, Google Inc.
-# All rights reserved.
+# Copyright 2015 Google Inc. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -31,11 +30,19 @@
 
 """Verifies that Google Test warns the user when not initialized properly."""
 
-__author__ = 'wan@google.com (Zhanyong Wan)'
+__author__ = 'jmadill@google.com (Jamie Madill)'
 
-import gtest_test_utils
+import os
 
-COMMAND = gtest_test_utils.GetTestExecutablePath('gtest_uninitialized_test_')
+IS_LINUX = os.name == 'posix' and os.uname()[0] == 'Linux'
+
+if IS_LINUX:
+  import gtest_test_utils
+else:
+  import gtest_test_utils
+
+binary_name = 'googletest-param-test-invalid-name1-test_'
+COMMAND = gtest_test_utils.GetTestExecutablePath(binary_name)
 
 
 def Assert(condition):
@@ -43,24 +50,20 @@ def Assert(condition):
     raise AssertionError
 
 
-def AssertEq(expected, actual):
-  if expected != actual:
-    print 'Expected: %s' % (expected,)
-    print '  Actual: %s' % (actual,)
-    raise AssertionError
-
-
 def TestExitCodeAndOutput(command):
   """Runs the given command and verifies its exit code and output."""
 
-  # Verifies that 'command' exits with code 1.
+  err = ('Parameterized test name \'"InvalidWithQuotes"\' is invalid')
+
   p = gtest_test_utils.Subprocess(command)
-  if p.exited and p.exit_code == 0:
-    Assert('IMPORTANT NOTICE' in p.output);
-  Assert('InitGoogleTest' in p.output)
+  Assert(p.terminated_by_signal)
+
+  # Verify the output message contains appropriate output
+  Assert(err in p.output)
 
 
-class GTestUninitializedTest(gtest_test_utils.TestCase):
+class GTestParamTestInvalidName1Test(gtest_test_utils.TestCase):
+
   def testExitCodeAndOutput(self):
     TestExitCodeAndOutput(COMMAND)
 

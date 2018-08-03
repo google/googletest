@@ -46,7 +46,10 @@ GTEST_OUTPUT_FLAG = '--gtest_output'
 GTEST_DEFAULT_OUTPUT_FILE = 'test_detail.json'
 GTEST_PROGRAM_NAME = 'gtest_xml_output_unittest_'
 
-SUPPORTS_STACK_TRACES = False
+# The flag indicating stacktraces are not supported
+NO_STACKTRACE_SUPPORT_FLAG = '--no_stacktrace_support'
+
+SUPPORTS_STACK_TRACES = NO_STACKTRACE_SUPPORT_FLAG not in sys.argv
 
 if SUPPORTS_STACK_TRACES:
   STACK_TRACE_TEMPLATE = '\nStack trace:\n*'
@@ -607,5 +610,9 @@ class GTestJsonOutputUnitTest(gtest_test_utils.TestCase):
 
 
 if __name__ == '__main__':
+  if NO_STACKTRACE_SUPPORT_FLAG in sys.argv:
+    # unittest.main() can't handle unknown flags
+    sys.argv.remove(NO_STACKTRACE_SUPPORT_FLAG)
+
   os.environ['GTEST_STACK_TRACE_DEPTH'] = '1'
   gtest_test_utils.Main()

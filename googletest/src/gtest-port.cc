@@ -264,7 +264,7 @@ Mutex::~Mutex() {
   // to clean them up.
   // TODO(yukawa): Switch to Slim Reader/Writer (SRW) Locks, which requires
   // nothing to clean it up but is available only on Vista and later.
-  // http://msdn.microsoft.com/en-us/library/windows/desktop/aa904937.aspx
+  // https://docs.microsoft.com/en-us/windows/desktop/Sync/slim-reader-writer--srw--locks
   if (type_ == kDynamic) {
     ::DeleteCriticalSection(critical_section_);
     delete critical_section_;

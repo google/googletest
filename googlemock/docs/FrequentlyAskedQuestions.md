@@ -528,7 +528,7 @@ interface, which then can be easily mocked.  It's a bit of work
 initially, but usually pays for itself quickly.
 
 This Google Testing Blog
-[post](http://googletesting.blogspot.com/2008/06/defeat-static-cling.html)
+[post](https://testing.googleblog.com/2008/06/defeat-static-cling.html)
 says it excellently.  Check it out.
 
 ## My mock object needs to do complex stuff.  It's a lot of pain to specify the actions.  Google Mock sucks! ##
