@@ -30,7 +30,7 @@
 // Author: vladl@google.com (Vlad Losev)
 //
 // Tests for Google Test itself. Tests in this file throw C++ or SEH
-// exceptions, and the output is verified by gtest_catch_exceptions_test.py.
+// exceptions, and the output is verified by googletest-catch-exceptions-test.py.
 
 #include "gtest/gtest.h"
 

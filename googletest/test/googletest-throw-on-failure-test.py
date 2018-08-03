@@ -31,7 +31,7 @@
 
 """Tests Google Test's throw-on-failure mode with exceptions disabled.
 
-This script invokes gtest_throw_on_failure_test_ (a program written with
+This script invokes googletest-throw-on-failure-test_ (a program written with
 Google Test) with different environments and command line flags.
 """
 
@@ -46,10 +46,10 @@ import gtest_test_utils
 # The command line flag for enabling/disabling the throw-on-failure mode.
 THROW_ON_FAILURE = 'gtest_throw_on_failure'
 
-# Path to the gtest_throw_on_failure_test_ program, compiled with
+# Path to the googletest-throw-on-failure-test_ program, compiled with
 # exceptions disabled.
 EXE_PATH = gtest_test_utils.GetTestExecutablePath(
-    'gtest_throw_on_failure_test_')
+    'googletest-throw-on-failure-test_')
 
 
 # Utilities.
@@ -76,12 +76,12 @@ def Run(command):
 
 
 # The tests.  TODO(wan@google.com): refactor the class to share common
-# logic with code in gtest_break_on_failure_unittest.py.
+# logic with code in googletest-break-on-failure-unittest.py.
 class ThrowOnFailureTest(gtest_test_utils.TestCase):
   """Tests the throw-on-failure mode."""
 
   def RunAndVerify(self, env_var_value, flag_value, should_fail):
-    """Runs gtest_throw_on_failure_test_ and verifies that it does
+    """Runs googletest-throw-on-failure-test_ and verifies that it does
     (or does not) exit with a non-zero code.
 
     Args:
