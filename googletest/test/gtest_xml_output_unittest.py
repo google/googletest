@@ -47,17 +47,22 @@ GTEST_OUTPUT_FLAG = '--gtest_output'
 GTEST_DEFAULT_OUTPUT_FILE = 'test_detail.xml'
 GTEST_PROGRAM_NAME = 'gtest_xml_output_unittest_'
 
+# The flag indicating stacktraces are not supported
+NO_STACKTRACE_SUPPORT_FLAG = '--no_stacktrace_support'
+
 # The environment variables for test sharding.
 TOTAL_SHARDS_ENV_VAR = 'GTEST_TOTAL_SHARDS'
 SHARD_INDEX_ENV_VAR = 'GTEST_SHARD_INDEX'
 SHARD_STATUS_FILE_ENV_VAR = 'GTEST_SHARD_STATUS_FILE'
 
-SUPPORTS_STACK_TRACES = False
+SUPPORTS_STACK_TRACES = NO_STACKTRACE_SUPPORT_FLAG not in sys.argv
 
 if SUPPORTS_STACK_TRACES:
   STACK_TRACE_TEMPLATE = '\nStack trace:\n*'
 else:
   STACK_TRACE_TEMPLATE = ''
+  # unittest.main() can't handle unknown flags
+  sys.argv.remove(NO_STACKTRACE_SUPPORT_FLAG)
 
 EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="23" failures="4" disabled="2" errors="0" time="*" timestamp="*" name="AllTests" ad_hoc_property="42">

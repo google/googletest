@@ -33,10 +33,10 @@
 
 
 SYNOPSIS
-       gtest_output_test.py --build_dir=BUILD/DIR --gengolden
-         # where BUILD/DIR contains the built gtest_output_test_ file.
-       gtest_output_test.py --gengolden
-       gtest_output_test.py
+       googletest_output_test.py --build_dir=BUILD/DIR --gengolden
+         # where BUILD/DIR contains the built googletest-output-test_ file.
+       googletest_output_test.py --gengolden
+       googletest_output_test.py
 """
 
 __author__ = 'wan@google.com (Zhanyong Wan)'
@@ -52,13 +52,16 @@ import gtest_test_utils
 GENGOLDEN_FLAG = '--gengolden'
 CATCH_EXCEPTIONS_ENV_VAR_NAME = 'GTEST_CATCH_EXCEPTIONS'
 
+# The flag indicating stacktraces are not supported
+NO_STACKTRACE_SUPPORT_FLAG = '--no_stacktrace_support'
+
 IS_LINUX = os.name == 'posix' and os.uname()[0] == 'Linux'
 IS_WINDOWS = os.name == 'nt'
 
 # TODO(vladl@google.com): remove the _lin suffix.
-GOLDEN_NAME = 'gtest_output_test_golden_lin.txt'
+GOLDEN_NAME = 'googletest-output-test-golden-lin.txt'
 
-PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath('gtest_output_test_')
+PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath('googletest-output-test_')
 
 # At least one command we exercise must not have the
 # 'internal_skip_environment_and_ad_hoc_tests' argument.
@@ -101,7 +104,7 @@ def RemoveLocations(test_output):
        'FILE_NAME:#: '.
   """
 
-  return re.sub(r'.*[/\\]((gtest_output_test_|gtest).cc)(\:\d+|\(\d+\))\: ',
+  return re.sub(r'.*[/\\]((googletest-output-test_|gtest).cc)(\:\d+|\(\d+\))\: ',
                 r'\1:#: ', test_output)
 
 
@@ -192,7 +195,7 @@ def RemoveMatchingTests(test_output, pattern):
 
 
 def NormalizeOutput(output):
-  """Normalizes output (the output of gtest_output_test_.exe)."""
+  """Normalizes output (the output of googletest-output-test_.exe)."""
 
   output = ToUnixLineEnding(output)
   output = RemoveLocations(output)
@@ -252,13 +255,12 @@ test_list = GetShellCommandOutput(COMMAND_LIST_TESTS)
 SUPPORTS_DEATH_TESTS = 'DeathTest' in test_list
 SUPPORTS_TYPED_TESTS = 'TypedTest' in test_list
 SUPPORTS_THREADS = 'ExpectFailureWithThreadsTest' in test_list
-SUPPORTS_STACK_TRACES = IS_LINUX
+SUPPORTS_STACK_TRACES = NO_STACKTRACE_SUPPORT_FLAG not in sys.argv
 
 CAN_GENERATE_GOLDEN_FILE = (SUPPORTS_DEATH_TESTS and
                             SUPPORTS_TYPED_TESTS and
                             SUPPORTS_THREADS and
-                            SUPPORTS_STACK_TRACES and
-                            not IS_WINDOWS)
+                            SUPPORTS_STACK_TRACES)
 
 class GTestOutputTest(gtest_test_utils.TestCase):
   def RemoveUnsupportedTests(self, test_output):
@@ -314,18 +316,22 @@ class GTestOutputTest(gtest_test_utils.TestCase):
       if os.getenv('DEBUG_GTEST_OUTPUT_TEST'):
         open(os.path.join(
             gtest_test_utils.GetSourceDir(),
-            '_gtest_output_test_normalized_actual.txt'), 'wb').write(
+            '_googletest-output-test_normalized_actual.txt'), 'wb').write(
                 normalized_actual)
         open(os.path.join(
             gtest_test_utils.GetSourceDir(),
-            '_gtest_output_test_normalized_golden.txt'), 'wb').write(
+            '_googletest-output-test_normalized_golden.txt'), 'wb').write(
                 normalized_golden)
 
       self.assertEqual(normalized_golden, normalized_actual)
 
 
 if __name__ == '__main__':
-  if sys.argv[1:] == [GENGOLDEN_FLAG]:
+  if NO_STACKTRACE_SUPPORT_FLAG in sys.argv:
+    # unittest.main() can't handle unknown flags
+    sys.argv.remove(NO_STACKTRACE_SUPPORT_FLAG)
+
+  if GENGOLDEN_FLAG in sys.argv:
     if CAN_GENERATE_GOLDEN_FILE:
       output = GetOutputOfAllCommands()
       golden_file = open(GOLDEN_PATH, 'wb')
