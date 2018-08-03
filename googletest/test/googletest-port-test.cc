@@ -346,11 +346,11 @@ TEST(GtestCheckDeathTest, DiesWithCorrectOutputOnFailure) {
   const bool a_false_condition = false;
   const char regex[] =
 #ifdef _MSC_VER
-     "gtest-port_test\\.cc\\(\\d+\\):"
+     "googletest-port-test\\.cc\\(\\d+\\):"
 #elif GTEST_USES_POSIX_RE
-     "gtest-port_test\\.cc:[0-9]+"
+     "googletest-port-test\\.cc:[0-9]+"
 #else
-     "gtest-port_test\\.cc:\\d+"
+     "googletest-port-test\\.cc:\\d+"
 #endif  // _MSC_VER
      ".*a_false_condition.*Extra info.*";
 
