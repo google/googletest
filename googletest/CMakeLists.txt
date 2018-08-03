@@ -255,7 +255,7 @@ if (gtest_build_tests)
   # Visual Studio .NET 2003 does not support STL with exceptions disabled.
   if (NOT MSVC OR MSVC_VERSION GREATER 1310)  # 1310 is Visual Studio .NET 2003
     cxx_executable_with_flags(
-      gtest_catch_exceptions_no_ex_test_
+      googletest-catch-exceptions-no-ex-test_
       "${cxx_no_exception}"
       gtest_main_no_exception
       test/googletest-catch-exceptions-test_.cc)
