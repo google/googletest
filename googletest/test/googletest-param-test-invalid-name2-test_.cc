@@ -1,4 +1,4 @@
-// Copyright 2009, Google Inc.
+// Copyright 2015, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,21 +27,30 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Author: wan@google.com (Zhanyong Wan)
-//
-// Tests for Google C++ Testing and Mocking Framework (Google Test)
-//
-// Sometimes it's desirable to build most of Google Test's own tests
-// by compiling a single file.  This file serves this purpose.
-#include "googletest-filepath-test.cc"
-#include "googletest-linked-ptr-test.cc"
-#include "googletest-message-test.cc"
-#include "googletest-options-test.cc"
-#include "googletest-port-test.cc"
-#include "gtest_pred_impl_unittest.cc"
-#include "gtest_prod_test.cc"
-#include "googletest-test-part-test.cc"
-#include "gtest-typed-test_test.cc"
-#include "gtest-typed-test2_test.cc"
-#include "gtest_unittest.cc"
-#include "production.cc"
+// Author: jmadill@google.com (Jamie Madill)
+
+#include "gtest/gtest.h"
+
+namespace {
+class DummyTest : public ::testing::TestWithParam<const char *> {};
+
+std::string StringParamTestSuffix(
+    const testing::TestParamInfo<const char*>& info) {
+  return std::string(info.param);
+}
+
+TEST_P(DummyTest, Dummy) {
+}
+
+INSTANTIATE_TEST_CASE_P(DuplicateTestNames,
+                        DummyTest,
+                        ::testing::Values("a", "b", "a", "c"),
+                        StringParamTestSuffix);
+}  // namespace
+
+int main(int argc, char *argv[]) {
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}
+
+

@@ -40,7 +40,7 @@ IS_WINDOWS = os.name == 'nt'
 
 COLOR_ENV_VAR = 'GTEST_COLOR'
 COLOR_FLAG = 'gtest_color'
-COMMAND = gtest_test_utils.GetTestExecutablePath('gtest_color_test_')
+COMMAND = gtest_test_utils.GetTestExecutablePath('googletest-color-test_')
 
 
 def SetEnvVar(env_var, value):
@@ -53,7 +53,7 @@ def SetEnvVar(env_var, value):
 
 
 def UsesColor(term, color_env_var, color_flag):
-  """Runs gtest_color_test_ and returns its exit code."""
+  """Runs googletest-color-test_ and returns its exit code."""
 
   SetEnvVar('TERM', term)
   SetEnvVar(COLOR_ENV_VAR, color_env_var)
