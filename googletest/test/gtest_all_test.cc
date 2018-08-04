@@ -29,7 +29,7 @@
 //
 // Author: wan@google.com (Zhanyong Wan)
 //
-// Tests for Google C++ Testing Framework (Google Test)
+// Tests for Google C++ Testing and Mocking Framework (Google Test)
 //
 // Sometimes it's desirable to build most of Google Test's own tests
 // by compiling a single file.  This file serves this purpose.

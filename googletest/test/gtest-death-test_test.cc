@@ -784,7 +784,7 @@ static void TestExitMacros() {
 
   // Of all signals effects on the process exit code, only those of SIGABRT
   // are documented on Windows.
-  // See http://msdn.microsoft.com/en-us/library/dwwzkt4c(VS.71).aspx.
+  // See https://msdn.microsoft.com/en-us/query-bi/m/dwwzkt4c.
   EXPECT_EXIT(raise(SIGABRT), testing::ExitedWithCode(3), "") << "b_ar";
 
 # elif !GTEST_OS_FUCHSIA

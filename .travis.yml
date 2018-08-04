@@ -1,5 +1,5 @@
 # Build matrix / environment variable are explained on:
-# http://about.travis-ci.org/docs/user/build-configuration/
+# https://docs.travis-ci.com/user/customizing-the-build/
 # This file can be validated on:
 # http://lint.travis-ci.org/
 
