@@ -36,6 +36,8 @@
 // Note that tests are implemented in gmock-matchers_test.cc rather than
 // gmock-more-matchers-test.cc.
 
+// GOOGLETEST_CM0002 DO NOT DELETE
+
 #ifndef GMOCK_GMOCK_MORE_MATCHERS_H_
 #define GMOCK_GMOCK_MORE_MATCHERS_H_
 

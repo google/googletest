@@ -1,4 +1,4 @@
-// Copyright 2008, Google Inc.
+// Copyright 2018, Google LLC.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,35 +27,18 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Author: vladl@google.com (Vlad Losev)
-//
-// Tests for Google Test itself.  This verifies that the basic constructs of
-// Google Test work.
+// Author: rfj@google.com (Rohan Joyce)
+
+// This program is meant to be run by gtest_test_filter_test.py.  Do not run
+// it directly.
 
 #include "gtest/gtest.h"
-#include "gtest-param-test_test.h"
 
-using ::testing::Values;
-using ::testing::internal::ParamGenerator;
+// These tests are used to detect if filtering is working. Only
+// 'TestThatSucceeds' should ever run.
 
-// Tests that generators defined in a different translation unit
-// are functional. The test using extern_gen is defined
-// in gtest-param-test_test.cc.
-ParamGenerator<int> extern_gen = Values(33);
+TEST(TestFilterTest, TestThatSucceeds) {}
 
-// Tests that a parameterized test case can be defined in one translation unit
-// and instantiated in another. The test is defined in gtest-param-test_test.cc
-// and ExternalInstantiationTest fixture class is defined in
-// gtest-param-test_test.h.
-INSTANTIATE_TEST_CASE_P(MultiplesOf33,
-                        ExternalInstantiationTest,
-                        Values(33, 66));
-
-// Tests that a parameterized test case can be instantiated
-// in multiple translation units. Another instantiation is defined
-// in gtest-param-test_test.cc and InstantiationInMultipleTranslaionUnitsTest
-// fixture is defined in gtest-param-test_test.h
-INSTANTIATE_TEST_CASE_P(Sequence2,
-                        InstantiationInMultipleTranslaionUnitsTest,
-                        Values(42*3, 42*4, 42*5));
-
+TEST(TestFilterTest, TestThatFails) {
+  ASSERT_TRUE(false) << "This test should never be run.";
+}

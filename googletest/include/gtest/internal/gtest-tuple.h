@@ -35,6 +35,8 @@
 
 // Implements a subset of TR1 tuple needed by Google Test and Google Mock.
 
+// GOOGLETEST_CM0001 DO NOT DELETE
+
 #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_TUPLE_H_
 #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_TUPLE_H_
 

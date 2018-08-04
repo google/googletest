@@ -33,14 +33,14 @@
 //
 // Sometimes it's desirable to build most of Google Test's own tests
 // by compiling a single file.  This file serves this purpose.
-#include "gtest-filepath_test.cc"
-#include "gtest-linked_ptr_test.cc"
-#include "gtest-message_test.cc"
-#include "gtest-options_test.cc"
-#include "gtest-port_test.cc"
+#include "googletest-filepath-test.cc"
+#include "googletest-linked-ptr-test.cc"
+#include "googletest-message-test.cc"
+#include "googletest-options-test.cc"
+#include "googletest-port-test.cc"
 #include "gtest_pred_impl_unittest.cc"
 #include "gtest_prod_test.cc"
-#include "gtest-test-part_test.cc"
+#include "googletest-test-part-test.cc"
 #include "gtest-typed-test_test.cc"
 #include "gtest-typed-test2_test.cc"
 #include "gtest_unittest.cc"

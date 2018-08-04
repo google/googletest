@@ -43,7 +43,7 @@
 # include <vector>
 
 # include "src/gtest-internal-inl.h"  // for UnitTestOptions
-# include "test/gtest-param-test_test.h"
+# include "test/googletest-param-test-test.h"
 
 using ::std::vector;
 using ::std::sort;

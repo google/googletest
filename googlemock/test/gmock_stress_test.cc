@@ -33,13 +33,12 @@
 // threads concurrently.
 
 #include "gmock/gmock.h"
-
 #include "gtest/gtest.h"
 
 namespace testing {
 namespace {
 
-// From "gtest/internal/gtest-port.h".
+// From gtest-port.h.
 using ::testing::internal::ThreadWithParam;
 
 // The maximum number of test threads (not including helper threads)
