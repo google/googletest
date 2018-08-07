@@ -1731,6 +1731,21 @@ TEST(PrintOptionalTest, Basic) {
   EXPECT_EQ("(1.1)", PrintToString(absl::optional<double>{1.1}));
   EXPECT_EQ("(\"A\")", PrintToString(absl::optional<std::string>{"A"}));
 }
+
+struct NonPrintable {
+  unsigned char contents = 17;
+};
+
+TEST(PrintOneofTest, Basic) {
+  using Type = absl::variant<int, StreamableInGlobal, NonPrintable>;
+  EXPECT_EQ("('int' with value 7)", PrintToString(Type(7)));
+  EXPECT_EQ("('StreamableInGlobal' with value StreamableInGlobal)",
+            PrintToString(Type(StreamableInGlobal{})));
+  EXPECT_EQ(
+      "('testing::gtest_printers_test::NonPrintable' with value 1-byte object "
+      "<11>)",
+      PrintToString(Type(NonPrintable{})));
+}
 #endif  // GTEST_HAS_ABSL
 
 }  // namespace gtest_printers_test
