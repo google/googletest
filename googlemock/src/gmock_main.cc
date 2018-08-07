@@ -37,7 +37,8 @@
 // causes a link error when _tmain is defined in a static library and UNICODE
 // is enabled. For this reason instead of _tmain, main function is used on
 // Windows. See the following link to track the current status of this bug:
-// https://web.archive.org/web/20170912203238/connect.microsoft.com/VisualStudio/feedback/details/394464/wmain-link-error-in-the-static-library  // NOLINT
+// https://web.archive.org/web/20170912203238/connect.microsoft.com/VisualStudio/feedback/details/394464/wmain-link-error-in-the-static-library
+// // NOLINT
 #if GTEST_OS_WINDOWS_MOBILE
 # include <tchar.h>  // NOLINT
 
