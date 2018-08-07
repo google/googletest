@@ -33,7 +33,7 @@
 A user can specify which test(s) in a Google Test program to run via either
 the GTEST_FILTER environment variable or the --gtest_filter flag.
 This script tests such functionality by invoking
-gtest_filter_unittest_ (a program written with Google Test) with different
+googletest-filter-unittest_ (a program written with Google Test) with different
 environments and command line flags.
 
 Note that test sharding may also influence which tests are filtered. Therefore,
@@ -100,8 +100,8 @@ FILTER_FLAG = 'gtest_filter'
 # The command line flag for including disabled tests.
 ALSO_RUN_DISABLED_TESTS_FLAG = 'gtest_also_run_disabled_tests'
 
-# Command to run the gtest_filter_unittest_ program.
-COMMAND = gtest_test_utils.GetTestExecutablePath('gtest_filter_unittest_')
+# Command to run the googletest-filter-unittest_ program.
+COMMAND = gtest_test_utils.GetTestExecutablePath('googletest-filter-unittest_')
 
 # Regex for determining whether parameterized tests are enabled in the binary.
 PARAM_TEST_REGEX = re.compile(r'/ParamTest')
@@ -120,7 +120,7 @@ LIST_TESTS_FLAG = '--gtest_list_tests'
 SUPPORTS_DEATH_TESTS = 'HasDeathTest' in gtest_test_utils.Subprocess(
     [COMMAND, LIST_TESTS_FLAG]).output
 
-# Full names of all tests in gtest_filter_unittests_.
+# Full names of all tests in googletest-filter-unittests_.
 PARAM_TESTS = [
     'SeqP/ParamTest.TestX/0',
     'SeqP/ParamTest.TestX/1',
@@ -292,7 +292,7 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
                                args=None, check_exit_0=False):
     """Checks that binary runs correct tests for the given filter and shard.
 
-    Runs all shards of gtest_filter_unittest_ with the given filter, and
+    Runs all shards of googletest-filter-unittest_ with the given filter, and
     verifies that the right set of tests were run. The union of tests run
     on each shard should be identical to tests_to_run, without duplicates.
     If check_exit_0, .
@@ -330,7 +330,7 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
   def RunAndVerifyAllowingDisabled(self, gtest_filter, tests_to_run):
     """Checks that the binary runs correct set of tests for the given filter.
 
-    Runs gtest_filter_unittest_ with the given filter, and enables
+    Runs googletest-filter-unittest_ with the given filter, and enables
     disabled tests. Verifies that the right set of tests were run.
 
     Args:

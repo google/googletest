@@ -937,6 +937,8 @@ class Foo {
   int value_;
 };
 
+//  GOOGLETEST_CM0005 DO NOT DELETE
+
 // Tests InvokeWithoutArgs(function).
 TEST(InvokeWithoutArgsTest, Function) {
   // As an action that takes one argument.

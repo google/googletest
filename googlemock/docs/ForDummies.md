@@ -170,7 +170,7 @@ Admittedly, this test is contrived and doesn't do much. You can easily achieve t
 
 ## Using Google Mock with Any Testing Framework ##
 If you want to use something other than Google Test (e.g. [CppUnit](http://sourceforge.net/projects/cppunit/) or
-[CxxTest](http://cxxtest.tigris.org/)) as your testing framework, just change the `main()` function in the previous section to:
+[CxxTest](https://cxxtest.com/)) as your testing framework, just change the `main()` function in the previous section to:
 ```
 int main(int argc, char** argv) {
   // The following line causes Google Mock to throw an exception on failure,
