@@ -54,12 +54,12 @@ Google test has been used on a variety of platforms:
 In addition to many internal projects at Google, Google Test is also used by
 the following notable projects:
 
-  * The [Chromium projects](http://www.chromium.org/) (behind the Chrome
+  * The [Chromium projects](https://www.chromium.org/) (behind the Chrome
     browser and Chrome OS).
-  * The [LLVM](http://llvm.org/) compiler.
+  * The [LLVM](https://llvm.org/) compiler.
   * [Protocol Buffers](https://github.com/google/protobuf), Google's data
     interchange format.
-  * The [OpenCV](http://opencv.org/) computer vision library.
+  * The [OpenCV](https://opencv.org/) computer vision library.
   * [tiny-dnn](https://github.com/tiny-dnn/tiny-dnn): header only, dependency-free deep learning framework in C++11.
 
 ## Related Open Source Projects ##

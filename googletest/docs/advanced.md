@@ -449,7 +449,7 @@ using ::testing::MatchesRegex;
 
 If the string contains a well-formed HTML or XML document, you can check whether
 its DOM tree matches an [XPath
-expression](http://www.w3.org/TR/xpath/#contents):
+expression](https://www.w3.org/TR/xpath/all/#contents):
 
 ```c++
 // Currently still in //template/prototemplate/testing:xpath_matcher
@@ -789,7 +789,7 @@ TEST_F(FooDeathTest, DoesThat) {
 On POSIX systems (e.g. Linux, Cygwin, and Mac), googletest uses the
 [POSIX extended regular expression](http://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap09.html#tag_09_04)
 syntax. To learn about this syntax, you may want to read this
-[Wikipedia entry](http://en.wikipedia.org/wiki/Regular_expression#POSIX_Extended_Regular_Expressions).
+[Wikipedia entry](https://en.wikipedia.org/wiki/Regular_expression#POSIX_Extended_Regular_Expressions).
 
 On Windows, googletest uses its own simple regular expression implementation. It
 lacks many features. For example, we don't support union (`"x|y"`), grouping

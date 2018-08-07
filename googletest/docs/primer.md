@@ -53,12 +53,12 @@ of misunderstanding these.
 
 Historically, googletest started to use the term _Test Case_ for grouping
 related tests, whereas current publications including the International Software
-Testing Qualifications Board ([ISTQB](http://www.istqb.org/)) and various
+Testing Qualifications Board ([ISTQB](https://www.istqb.org/)) and various
 textbooks on Software Quality use the term _[Test
-Suite](http://glossary.istqb.org/search/test%20suite)_ for this.
+Suite](https://glossary.istqb.org/search/test%20suite)_ for this.
 
 The related term _Test_, as it is used in the googletest, is corresponding to
-the term _[Test Case](http://glossary.istqb.org/search/test%20case)_ of ISTQB
+the term _[Test Case](https://glossary.istqb.org/search/test%20case)_ of ISTQB
 and others.
 
 The term _Test_ is commonly of broad enough sense, including ISTQB's
@@ -72,10 +72,10 @@ part of the public API at various places.
 So for the time being, please be aware of the different definitions of
 the terms:
 
-Meaning                                                                              | googletest Term                                                                                            | [ISTQB](http://www.istqb.org/) Term
+Meaning                                                                              | googletest Term                                                                                            | [ISTQB](https://www.istqb.org/) Term
 :----------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------- | :----------------------------------
-Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests)                                                                                    | [Test Case](http://glossary.istqb.org/search/test%20case)
-A set of several tests related to one component                                      | [TestCase](#basic-concepts) | [TestSuite](http://glossary.istqb.org/search/test%20suite)
+Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests)                                                                                    | [Test Case](https://glossary.istqb.org/search/test%20case)
+A set of several tests related to one component                                      | [TestCase](#basic-concepts) | [TestSuite](https://glossary.istqb.org/search/test%20suite)
 
 ## Basic Concepts
 

@@ -84,7 +84,7 @@ macro(config_compiler_and_linker)
     endif()
     if (NOT (MSVC_VERSION LESS 1700))  # 1700 is Visual Studio 2012.
       # Suppress "unreachable code" warning on VS 2012 and later.
-      # http://stackoverflow.com/questions/3232669 explains the issue.
+      # https://stackoverflow.com/questions/3232669 explains the issue.
       set(cxx_base_flags "${cxx_base_flags} -wd4702")
     endif()
 
