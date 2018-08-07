@@ -40,7 +40,7 @@ import gtest_test_utils
 IS_WINDOWS = os.name == 'nt'
 IS_LINUX = os.name == 'posix' and os.uname()[0] == 'Linux'
 
-COMMAND = gtest_test_utils.GetTestExecutablePath('gtest_env_var_test_')
+COMMAND = gtest_test_utils.GetTestExecutablePath('googletest-env-var-test_')
 
 environ = os.environ.copy()
 
@@ -62,7 +62,7 @@ def SetEnvVar(env_var, value):
 
 
 def GetFlag(flag):
-  """Runs gtest_env_var_test_ and returns its output."""
+  """Runs googletest-env-var-test_ and returns its output."""
 
   args = [COMMAND]
   if flag is not None:

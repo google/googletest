@@ -27,28 +27,35 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Author: wan@google.com (Zhanyong Wan)
+// Author: vladl@google.com (Vlad Losev)
+//
+// Tests for Google Test itself.  This verifies that the basic constructs of
+// Google Test work.
 
-#include <iostream>
-#include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "googletest-param-test-test.h"
 
-// MS C++ compiler/linker has a bug on Windows (not on Windows CE), which
-// causes a link error when _tmain is defined in a static library and UNICODE
-// is enabled. For this reason instead of _tmain, main function is used on
-// Windows. See the following link to track the current status of this bug:
-// https://web.archive.org/web/20170912203238/connect.microsoft.com/VisualStudio/feedback/details/394464/wmain-link-error-in-the-static-library  // NOLINT
-#if GTEST_OS_WINDOWS_MOBILE
-# include <tchar.h>  // NOLINT
+using ::testing::Values;
+using ::testing::internal::ParamGenerator;
 
-GTEST_API_ int _tmain(int argc, TCHAR** argv) {
-#else
-GTEST_API_ int main(int argc, char** argv) {
-#endif  // GTEST_OS_WINDOWS_MOBILE
-  std::cout << "Running main() from gmock_main.cc\n";
-  // Since Google Mock depends on Google Test, InitGoogleMock() is
-  // also responsible for initializing Google Test.  Therefore there's
-  // no need for calling testing::InitGoogleTest() separately.
-  testing::InitGoogleMock(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+// Tests that generators defined in a different translation unit
+// are functional. The test using extern_gen is defined
+// in googletest-param-test-test.cc.
+ParamGenerator<int> extern_gen = Values(33);
+
+// Tests that a parameterized test case can be defined in one translation unit
+// and instantiated in another. The test is defined in googletest-param-test-test.cc
+// and ExternalInstantiationTest fixture class is defined in
+// gtest-param-test_test.h.
+INSTANTIATE_TEST_CASE_P(MultiplesOf33,
+                        ExternalInstantiationTest,
+                        Values(33, 66));
+
+// Tests that a parameterized test case can be instantiated
+// in multiple translation units. Another instantiation is defined
+// in googletest-param-test-test.cc and InstantiationInMultipleTranslaionUnitsTest
+// fixture is defined in gtest-param-test_test.h
+INSTANTIATE_TEST_CASE_P(Sequence2,
+                        InstantiationInMultipleTranslaionUnitsTest,
+                        Values(42*3, 42*4, 42*5));
+

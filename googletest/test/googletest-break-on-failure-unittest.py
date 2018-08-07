@@ -34,7 +34,7 @@
 A user can ask Google Test to seg-fault when an assertion fails, using
 either the GTEST_BREAK_ON_FAILURE environment variable or the
 --gtest_break_on_failure flag.  This script tests such functionality
-by invoking gtest_break_on_failure_unittest_ (a program written with
+by invoking googletest-break-on-failure-unittest_ (a program written with
 Google Test) with different environments and command line flags.
 """
 
@@ -59,9 +59,9 @@ THROW_ON_FAILURE_ENV_VAR = 'GTEST_THROW_ON_FAILURE'
 # The environment variable for enabling/disabling the catch-exceptions mode.
 CATCH_EXCEPTIONS_ENV_VAR = 'GTEST_CATCH_EXCEPTIONS'
 
-# Path to the gtest_break_on_failure_unittest_ program.
+# Path to the googletest-break-on-failure-unittest_ program.
 EXE_PATH = gtest_test_utils.GetTestExecutablePath(
-    'gtest_break_on_failure_unittest_')
+    'googletest-break-on-failure-unittest_')
 
 
 environ = gtest_test_utils.environ
@@ -95,7 +95,7 @@ class GTestBreakOnFailureUnitTest(gtest_test_utils.TestCase):
   """
 
   def RunAndVerify(self, env_var_value, flag_value, expect_seg_fault):
-    """Runs gtest_break_on_failure_unittest_ and verifies that it does
+    """Runs googletest-break-on-failure-unittest_ and verifies that it does
     (or does not) have a seg-fault.
 
     Args:
