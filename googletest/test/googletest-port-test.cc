@@ -30,10 +30,9 @@
 // Authors: vladl@google.com (Vlad Losev), wan@google.com (Zhanyong Wan)
 //
 // This file tests the internal cross-platform support utilities.
+#include <stdio.h>
 
 #include "gtest/internal/gtest-port.h"
-
-#include <stdio.h>
 
 #if GTEST_OS_MAC
 # include <time.h>
