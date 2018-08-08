@@ -4,7 +4,7 @@
 //  These are General configuration settings for the gtest framework and
 //  examples.
 //  This file is based on the Xcode Configuration files in:
-//  http://code.google.com/p/google-toolbox-for-mac/
+//  https://github.com/google/google-toolbox-for-mac
 // 
 
 // Build for PPC and Intel, 32- and 64-bit
