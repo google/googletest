@@ -3,7 +3,7 @@
 
 ## Introduction
 
-Now that you have read the [googletest Primer](primer) and learned how to write
+Now that you have read the [googletest Primer](primer.md) and learned how to write
 tests using googletest, it's time to learn some new tricks. This document will
 show you more assertions as well as how to construct complex failure messages,
 propagate fatal failures, reuse and speed up your test fixtures, and use various
