@@ -33,10 +33,10 @@
 // exceptions, and the output is verified by
 // googletest-catch-exceptions-test.py.
 
-#include "gtest/gtest.h"
-
 #include <stdio.h>  // NOLINT
 #include <stdlib.h>  // For exit().
+
+#include "gtest/gtest.h"
 
 #if GTEST_HAS_SEH
 # include <windows.h>
