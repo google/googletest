@@ -55,7 +55,7 @@ EXAMPLES
 This tool is experimental.  In particular, it assumes that there is no
 conditional inclusion of Google Mock or Google Test headers.  Please
 report any problems to googlemock@googlegroups.com.  You can read
-http://code.google.com/p/googlemock/wiki/CookBook for more
+https://github.com/google/googletest/blob/master/googlemock/docs/CookBook.md for more
 information.
 """
 

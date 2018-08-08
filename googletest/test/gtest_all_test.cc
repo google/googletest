@@ -29,19 +29,19 @@
 //
 // Author: wan@google.com (Zhanyong Wan)
 //
-// Tests for Google C++ Testing Framework (Google Test)
+// Tests for Google C++ Testing and Mocking Framework (Google Test)
 //
 // Sometimes it's desirable to build most of Google Test's own tests
 // by compiling a single file.  This file serves this purpose.
-#include "test/gtest-filepath_test.cc"
-#include "test/gtest-linked_ptr_test.cc"
-#include "test/gtest-message_test.cc"
-#include "test/gtest-options_test.cc"
-#include "test/gtest-port_test.cc"
-#include "test/gtest_pred_impl_unittest.cc"
-#include "test/gtest_prod_test.cc"
-#include "test/gtest-test-part_test.cc"
-#include "test/gtest-typed-test_test.cc"
-#include "test/gtest-typed-test2_test.cc"
-#include "test/gtest_unittest.cc"
-#include "test/production.cc"
+#include "googletest-filepath-test.cc"
+#include "googletest-linked-ptr-test.cc"
+#include "googletest-message-test.cc"
+#include "googletest-options-test.cc"
+#include "googletest-port-test.cc"
+#include "gtest_pred_impl_unittest.cc"
+#include "gtest_prod_test.cc"
+#include "googletest-test-part-test.cc"
+#include "gtest-typed-test_test.cc"
+#include "gtest-typed-test2_test.cc"
+#include "gtest_unittest.cc"
+#include "production.cc"

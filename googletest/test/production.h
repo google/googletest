@@ -29,7 +29,7 @@
 //
 // Author: wan@google.com (Zhanyong Wan)
 //
-// This is part of the unit test for include/gtest/gtest_prod.h.
+// This is part of the unit test for gtest_prod.h.
 
 #ifndef GTEST_TEST_PRODUCTION_H_
 #define GTEST_TEST_PRODUCTION_H_
