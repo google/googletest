@@ -63,6 +63,11 @@
 # include <sys/types.h>
 #endif  // GTEST_OS_AIX
 
+#if GTEST_OS_FUCHSIA
+# include <zircon/process.h>
+# include <zircon/syscalls.h>
+#endif  // GTEST_OS_FUCHSIA
+
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest-message.h"
 #include "gtest/internal/gtest-internal.h"
@@ -156,6 +161,25 @@ size_t GetThreadCount() {
   }
 }
 
+#elif GTEST_OS_FUCHSIA
+
+size_t GetThreadCount() {
+  int dummy_buffer;
+  size_t avail;
+  zx_status_t status = zx_object_get_info(
+      zx_process_self(),
+      ZX_INFO_PROCESS_THREADS,
+      &dummy_buffer,
+      0,
+      nullptr,
+      &avail);
+  if (status == ZX_OK) {
+    return avail;
+  } else {
+    return 0;
+  }
+}
+
 #else
 
 size_t GetThreadCount() {
@@ -240,7 +264,7 @@ Mutex::~Mutex() {
   // to clean them up.
   // TODO(yukawa): Switch to Slim Reader/Writer (SRW) Locks, which requires
   // nothing to clean it up but is available only on Vista and later.
-  // http://msdn.microsoft.com/en-us/library/windows/desktop/aa904937.aspx
+  // https://docs.microsoft.com/en-us/windows/desktop/Sync/slim-reader-writer--srw--locks
   if (type_ == kDynamic) {
     ::DeleteCriticalSection(critical_section_);
     delete critical_section_;

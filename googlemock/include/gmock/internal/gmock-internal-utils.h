@@ -35,6 +35,8 @@
 // Mock.  They are subject to change without notice, so please DO NOT
 // USE THEM IN USER CODE.
 
+// GOOGLETEST_CM0002 DO NOT DELETE
+
 #ifndef GMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_INTERNAL_UTILS_H_
 #define GMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_INTERNAL_UTILS_H_
 
@@ -343,6 +345,21 @@ GTEST_API_ bool LogIsVisible(LogSeverity severity);
 // conservative.
 GTEST_API_ void Log(LogSeverity severity, const std::string& message,
                     int stack_frames_to_skip);
+
+// A marker class that is used to resolve parameterless expectations to the
+// correct overload. This must not be instantiable, to prevent client code from
+// accidentally resolving to the overload; for example:
+//
+//    ON_CALL(mock, Method({}, nullptr))...
+//
+class WithoutMatchers {
+ private:
+  WithoutMatchers() {}
+  friend GTEST_API_ WithoutMatchers GetWithoutMatchers();
+};
+
+// Internal use only: access the singleton instance of WithoutMatchers.
+GTEST_API_ WithoutMatchers GetWithoutMatchers();
 
 // TODO(wan@google.com): group all type utilities together.
 

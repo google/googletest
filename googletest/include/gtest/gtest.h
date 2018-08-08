@@ -29,7 +29,7 @@
 //
 // Author: wan@google.com (Zhanyong Wan)
 //
-// The Google C++ Testing Framework (Google Test)
+// The Google C++ Testing and Mocking Framework (Google Test)
 //
 // This header file defines the public API for Google Test.  It should be
 // included by any test program that uses Google Test.
@@ -47,6 +47,8 @@
 // Acknowledgment: Google Test borrowed the idea of automatic test
 // registration from Barthelemy Dagenais' (barthelemy@prologique.com)
 // easyUnit framework.
+
+// GOOGLETEST_CM0001 DO NOT DELETE
 
 #ifndef GTEST_INCLUDE_GTEST_GTEST_H_
 #define GTEST_INCLUDE_GTEST_GTEST_H_
@@ -172,6 +174,7 @@ class TestEventListenersAccessor;
 class TestEventRepeater;
 class UnitTestRecordPropertyTestHelper;
 class WindowsDeathTest;
+class FuchsiaDeathTest;
 class UnitTestImpl* GetUnitTestImpl();
 void ReportFailureInUnknownLocation(TestPartResult::Type result_type,
                                     const std::string& message);
@@ -593,6 +596,7 @@ class GTEST_API_ TestResult {
   friend class internal::TestResultAccessor;
   friend class internal::UnitTestImpl;
   friend class internal::WindowsDeathTest;
+  friend class internal::FuchsiaDeathTest;
 
   // Gets the vector of TestPartResults.
   const std::vector<TestPartResult>& test_part_results() const {

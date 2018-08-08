@@ -188,6 +188,8 @@ GTEST_API_ void Log(LogSeverity severity, const std::string& message,
   std::cout << ::std::flush;
 }
 
+GTEST_API_ WithoutMatchers GetWithoutMatchers() { return WithoutMatchers(); }
+
 GTEST_API_ void IllegalDoDefault(const char* file, int line) {
   internal::Assert(
       false, file, line,
