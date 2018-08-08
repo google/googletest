@@ -900,7 +900,7 @@ int FuchsiaDeathTest::Wait() {
   } else {
     // Process terminated.
     GTEST_DEATH_TEST_CHECK_(ZX_PKT_IS_SIGNAL_ONE(packet.type));
-    GTEST_DEATH_TEST_CHECK_(packet.observed & ZX_PROCESS_TERMINATED);
+    GTEST_DEATH_TEST_CHECK_(packet.signal.observed & ZX_PROCESS_TERMINATED);
   }
 
   ReadAndInterpretStatusByte();
