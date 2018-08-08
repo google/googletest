@@ -105,6 +105,10 @@
 
 // cpplint thinks that the header is already included, so we want to
 // silence it.
+// For MinGW add min required OS as Win 2000 0x0500 to enable OpenThread
+# ifndef WINVER
+# define WINVER 0x0500
+# endif
 # include <windows.h>  // NOLINT
 # undef min
 
