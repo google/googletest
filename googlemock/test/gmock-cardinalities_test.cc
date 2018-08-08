@@ -391,7 +391,7 @@ TEST(ExactlyTest, HasCorrectBounds) {
   EXPECT_EQ(3, c.ConservativeUpperBound());
 }
 
-// Tests that a user can make his own cardinality by implementing
+// Tests that a user can make their own cardinality by implementing
 // CardinalityInterface and calling MakeCardinality().
 
 class EvenCardinality : public CardinalityInterface {

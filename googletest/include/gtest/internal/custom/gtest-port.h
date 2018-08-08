@@ -41,11 +41,6 @@
 //     GTEST_DEFINE_int32_(name, default_val, doc)
 //     GTEST_DEFINE_string_(name, default_val, doc)
 //
-//   Test filtering:
-//     GTEST_TEST_FILTER_ENV_VAR_ - The name of an environment variable that
-//                                  will be used if --GTEST_FLAG(test_filter)
-//                                  is not provided.
-//
 //   Logging:
 //     GTEST_LOG_(severity)
 //     GTEST_CHECK_(condition)
@@ -60,6 +55,12 @@
 //
 //     GTEST_EXCLUSIVE_LOCK_REQUIRED_(locks)
 //     GTEST_LOCK_EXCLUDED_(locks)
+//
+//   Underlying library support features:
+//     GTEST_HAS_CXXABI_H_
+//
+//   Exporting API symbols:
+//     GTEST_API_ - Specifier for exported symbols.
 //
 // ** Custom implementation starts here **
 

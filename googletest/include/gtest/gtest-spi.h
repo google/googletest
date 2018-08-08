@@ -32,6 +32,8 @@
 // Utilities for testing Google Test itself and code that uses Google Test
 // (e.g. frameworks built on top of Google Test).
 
+// GOOGLETEST_CM0004 DO NOT DELETE
+
 #ifndef GTEST_INCLUDE_GTEST_GTEST_SPI_H_
 #define GTEST_INCLUDE_GTEST_GTEST_SPI_H_
 
@@ -97,13 +99,12 @@ class GTEST_API_ SingleFailureChecker {
  public:
   // The constructor remembers the arguments.
   SingleFailureChecker(const TestPartResultArray* results,
-                       TestPartResult::Type type,
-                       const string& substr);
+                       TestPartResult::Type type, const std::string& substr);
   ~SingleFailureChecker();
  private:
   const TestPartResultArray* const results_;
   const TestPartResult::Type type_;
-  const string substr_;
+  const std::string substr_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(SingleFailureChecker);
 };

@@ -35,18 +35,15 @@
 #include <stdlib.h>
 
 #include "gtest/gtest.h"
-
 using ::testing::EmptyTestEventListener;
 using ::testing::InitGoogleTest;
 using ::testing::Test;
-using ::testing::TestCase;
 using ::testing::TestEventListeners;
 using ::testing::TestInfo;
 using ::testing::TestPartResult;
 using ::testing::UnitTest;
 
 namespace {
-
 // We will track memory used by this class.
 class Water {
  public:
@@ -106,7 +103,6 @@ TEST(ListenersTest, LeaksWater) {
   Water* water = new Water;
   EXPECT_TRUE(water != NULL);
 }
-
 }  // namespace
 
 int main(int argc, char **argv) {
