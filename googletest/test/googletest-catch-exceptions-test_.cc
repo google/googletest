@@ -30,12 +30,13 @@
 // Author: vladl@google.com (Vlad Losev)
 //
 // Tests for Google Test itself. Tests in this file throw C++ or SEH
-// exceptions, and the output is verified by googletest-catch-exceptions-test.py.
-
-#include "gtest/gtest.h"
+// exceptions, and the output is verified by
+// googletest-catch-exceptions-test.py.
 
 #include <stdio.h>  // NOLINT
 #include <stdlib.h>  // For exit().
+
+#include "gtest/gtest.h"
 
 #if GTEST_HAS_SEH
 # include <windows.h>
