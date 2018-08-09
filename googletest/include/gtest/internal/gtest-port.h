@@ -381,7 +381,8 @@
 #if GTEST_LANG_CXX11
 # define GTEST_HAS_STD_TUPLE_ 1
 # if defined(__clang__)
-// Inspired by https://clang.llvm.org/docs/LanguageExtensions.html#include-file-checking-macros
+// Inspired by
+// https://clang.llvm.org/docs/LanguageExtensions.html#include-file-checking-macros
 #  if defined(__has_include) && !__has_include(<tuple>)
 #   undef GTEST_HAS_STD_TUPLE_
 #  endif
