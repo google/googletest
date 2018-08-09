@@ -36,15 +36,13 @@ __author__ = 'wan@google.com (Zhanyong Wan)'
 import os
 import sys
 
-IS_LINUX = os.name == 'posix' and os.uname()[0] == 'Linux'
 IS_WINDOWS = os.name == 'nt'
 IS_CYGWIN = os.name == 'posix' and 'CYGWIN' in os.uname()[0]
 
 import atexit
 import shutil
 import tempfile
-import unittest
-_test_module = unittest
+import unittest as _test_module
 
 try:
   import subprocess
@@ -74,7 +72,7 @@ def SetEnvVar(env_var, value):
 # Here we expose a class from a particular module, depending on the
 # environment. The comment suppresses the 'Invalid variable name' lint
 # complaint.
-TestCase = _test_module.TestCase  # pylint: disable-msg=C6409
+TestCase = _test_module.TestCase  # pylint: disable=C6409
 
 # Initially maps a flag to its default value. After
 # _ParseAndStripGTestFlags() is called, maps a flag to its actual value.
@@ -88,7 +86,7 @@ def _ParseAndStripGTestFlags(argv):
 
   # Suppresses the lint complaint about a global variable since we need it
   # here to maintain module-wide state.
-  global _gtest_flags_are_parsed  # pylint: disable-msg=W0603
+  global _gtest_flags_are_parsed  # pylint: disable=W0603
   if _gtest_flags_are_parsed:
     return
 
