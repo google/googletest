@@ -33,9 +33,10 @@
 
 To update the golden file:
 gmock_output_test.py --build_dir=BUILD/DIR --gengolden
-# where BUILD/DIR contains the built gmock_output_test_ file.
+where BUILD/DIR contains the built gmock_output_test_ file.
 gmock_output_test.py --gengolden
 gmock_output_test.py
+
 """
 
 __author__ = 'wan@google.com (Zhanyong Wan)'
