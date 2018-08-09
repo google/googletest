@@ -233,16 +233,18 @@ static std::string DeathTestThreadWarning(size_t thread_count) {
   Message msg;
   msg << "Death tests use fork(), which is unsafe particularly"
       << " in a threaded context. For this test, " << GTEST_NAME_ << " ";
-  if (thread_count == 0)
+  if (thread_count == 0) {
     msg << "couldn't detect the number of threads.";
-  else
+  } else {
     msg << "detected " << thread_count << " threads.";
-    msg << " See https://github.com/google/googletest/blob/master/googletest/docs/advanced.md#death-tests-and-threads"
-        << " for more explanation and suggested solutions, especially if"
-        << " this is the last message you see before your test times out.";
+  }
+  msg << " See "
+         "https://github.com/google/googletest/blob/master/googletest/docs/"
+         "advanced.md#death-tests-and-threads"
+      << " for more explanation and suggested solutions, especially if"
+      << " this is the last message you see before your test times out.";
   return msg.GetString();
-}
-# endif  // !GTEST_OS_WINDOWS && !GTEST_OS_FUCHSIA
+}# endif  // !GTEST_OS_WINDOWS && !GTEST_OS_FUCHSIA
 
 // Flag characters for reporting a death test that did not die.
 static const char kDeathTestLived = 'L';
