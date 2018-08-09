@@ -244,7 +244,8 @@ static std::string DeathTestThreadWarning(size_t thread_count) {
       << " for more explanation and suggested solutions, especially if"
       << " this is the last message you see before your test times out.";
   return msg.GetString();
-}# endif  // !GTEST_OS_WINDOWS && !GTEST_OS_FUCHSIA
+}
+# endif  // !GTEST_OS_WINDOWS && !GTEST_OS_FUCHSIA
 
 // Flag characters for reporting a death test that did not die.
 static const char kDeathTestLived = 'L';
