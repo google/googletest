@@ -3,7 +3,7 @@
 
 ## Introduction
 
-Now that you have read the [googletest Primer](primer) and learned how to write
+Now that you have read the [googletest Primer](primer.md) and learned how to write
 tests using googletest, it's time to learn some new tricks. This document will
 show you more assertions as well as how to construct complex failure messages,
 propagate fatal failures, reuse and speed up your test fixtures, and use various
@@ -152,7 +152,7 @@ c is 10
 >
 > 1.  If you see a compiler error "no matching function to call" when using
 >     `ASSERT_PRED*` or `EXPECT_PRED*`, please see
->     [this](faq#OverloadedPredicate) for how to resolve it.
+>     [this](faq.md#OverloadedPredicate) for how to resolve it.
 > 1.  Currently we only provide predicate assertions of arity <= 5. If you need
 >     a higher-arity assertion, let [us](https://github.com/google/googletest/issues) know.
 
