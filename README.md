@@ -6,7 +6,7 @@
 
 **Future Plans**:
 * Tagged Release 1.8.x. 
-** The 1.8.x will be the last release that works with pre-C++11 compilers. The 1.8.1 will not accept any requests for any new features and any bugfix requests will only be accepted if proven "critical"
+The 1.8.x will be the last release that works with pre-C++11 compilers. The 1.8.1 will not accept any requests for any new features and any bugfix requests will only be accepted if proven "critical"
 * Post 1.8.x - work to improve/cleanup/pay technical debt. When this work is completed there will be a 1.9.x tagged release
 * Post 1.9.x googletest will follow [Abseil Live at Head philosophy](https://abseil.io/about/philosophy)
 
