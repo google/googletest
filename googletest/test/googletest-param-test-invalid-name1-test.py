@@ -32,14 +32,7 @@
 
 __author__ = 'jmadill@google.com (Jamie Madill)'
 
-import os
-
-IS_LINUX = os.name == 'posix' and os.uname()[0] == 'Linux'
-
-if IS_LINUX:
-  import gtest_test_utils
-else:
-  import gtest_test_utils
+import gtest_test_utils
 
 binary_name = 'googletest-param-test-invalid-name1-test_'
 COMMAND = gtest_test_utils.GetTestExecutablePath(binary_name)

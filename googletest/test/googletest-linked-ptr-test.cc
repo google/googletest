@@ -30,9 +30,9 @@
 // Authors: Dan Egnor (egnor@google.com)
 // Ported to Windows: Vadim Berman (vadimb@google.com)
 
-#include "gtest/internal/gtest-linked_ptr.h"
-
 #include <stdlib.h>
+
+#include "gtest/internal/gtest-linked_ptr.h"
 #include "gtest/gtest.h"
 
 namespace {
