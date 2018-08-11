@@ -1726,7 +1726,7 @@ To test them, we use the following special techniques:
     ```c++
     // foo.h
 
-#include "gtest/gtest_prod.h"
+    #include "gtest/gtest_prod.h"
 
     class Foo {
       ...
@@ -1779,7 +1779,7 @@ To test them, we use the following special techniques:
     ```
 
 
-    ## "Catching" Failures
+## "Catching" Failures
 
 If you are building a testing utility on top of googletest, you'll want to test
 your utility. What framework would you use to test it? googletest, of course.
