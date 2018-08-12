@@ -32,10 +32,9 @@
 // A helper program for testing that Google Test parses the environment
 // variables correctly.
 
-#include "gtest/gtest.h"
-
 #include <iostream>
 
+#include "gtest/gtest.h"
 #include "src/gtest-internal-inl.h"
 
 using ::std::cout;
@@ -115,7 +114,7 @@ int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
 
   if (argc != 2) {
-    cout << "Usage: gtest_env_var_test_ NAME_OF_FLAG\n";
+    cout << "Usage: googletest-env-var-test_ NAME_OF_FLAG\n";
     return 1;
   }
 

@@ -31,12 +31,11 @@
 
 """Tests the text output of Google C++ Testing and Mocking Framework.
 
-
-SYNOPSIS
-       gtest_output_test.py --build_dir=BUILD/DIR --gengolden
-         # where BUILD/DIR contains the built gtest_output_test_ file.
-       gtest_output_test.py --gengolden
-       gtest_output_test.py
+To update the golden file:
+googletest_output_test.py --build_dir=BUILD/DIR --gengolden
+where BUILD/DIR contains the built googletest-output-test_ file.
+googletest_output_test.py --gengolden
+googletest_output_test.py
 """
 
 __author__ = 'wan@google.com (Zhanyong Wan)'
@@ -59,9 +58,9 @@ IS_LINUX = os.name == 'posix' and os.uname()[0] == 'Linux'
 IS_WINDOWS = os.name == 'nt'
 
 # TODO(vladl@google.com): remove the _lin suffix.
-GOLDEN_NAME = 'gtest_output_test_golden_lin.txt'
+GOLDEN_NAME = 'googletest-output-test-golden-lin.txt'
 
-PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath('gtest_output_test_')
+PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath('googletest-output-test_')
 
 # At least one command we exercise must not have the
 # 'internal_skip_environment_and_ad_hoc_tests' argument.
@@ -104,7 +103,7 @@ def RemoveLocations(test_output):
        'FILE_NAME:#: '.
   """
 
-  return re.sub(r'.*[/\\]((gtest_output_test_|gtest).cc)(\:\d+|\(\d+\))\: ',
+  return re.sub(r'.*[/\\]((googletest-output-test_|gtest).cc)(\:\d+|\(\d+\))\: ',
                 r'\1:#: ', test_output)
 
 
@@ -195,7 +194,7 @@ def RemoveMatchingTests(test_output, pattern):
 
 
 def NormalizeOutput(output):
-  """Normalizes output (the output of gtest_output_test_.exe)."""
+  """Normalizes output (the output of googletest-output-test_.exe)."""
 
   output = ToUnixLineEnding(output)
   output = RemoveLocations(output)
@@ -316,11 +315,11 @@ class GTestOutputTest(gtest_test_utils.TestCase):
       if os.getenv('DEBUG_GTEST_OUTPUT_TEST'):
         open(os.path.join(
             gtest_test_utils.GetSourceDir(),
-            '_gtest_output_test_normalized_actual.txt'), 'wb').write(
+            '_googletest-output-test_normalized_actual.txt'), 'wb').write(
                 normalized_actual)
         open(os.path.join(
             gtest_test_utils.GetSourceDir(),
-            '_gtest_output_test_normalized_golden.txt'), 'wb').write(
+            '_googletest-output-test_normalized_golden.txt'), 'wb').write(
                 normalized_golden)
 
       self.assertEqual(normalized_golden, normalized_actual)

@@ -35,8 +35,8 @@
 #include "gtest/gtest.h"
 
 // Verifies that the command line flag variables can be accessed in
-// code once "gtest/gtest.h" has been
-// #included.  Do not move it after other gtest #includes.
+// code once "gtest.h" has been #included.
+// Do not move it after other gtest #includes.
 TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
   bool dummy = testing::GTEST_FLAG(also_run_disabled_tests)
       || testing::GTEST_FLAG(break_on_failure)
@@ -4689,7 +4689,7 @@ TEST(MacroTest, ADD_FAILURE_AT) {
   // Unfortunately, we cannot verify that the failure message contains
   // the right file path and line number the same way, as
   // EXPECT_NONFATAL_FAILURE() doesn't get to see the file path and
-  // line number.  Instead, we do that in gtest_output_test_.cc.
+  // line number.  Instead, we do that in googletest-output-test_.cc.
 }
 
 // Tests FAIL.

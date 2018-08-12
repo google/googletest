@@ -162,7 +162,7 @@ result, any in-memory side effects they incur are observable in their respective
 sub-processes, but not in the parent process. You can think of them as running
 in a parallel universe, more or less.
 
-In particular, if you use [gMock](http://go/gmock) and the death test statement
+In particular, if you use [gMock](../../googlemock) and the death test statement
 invokes some mock methods, the parent process will think the calls have never
 occurred. Therefore, you may want to move your `EXPECT_CALL` statements inside
 the `EXPECT_DEATH` macro.
@@ -289,7 +289,7 @@ Please make sure you have read [this](advanced.md#how-it-works).
 
 In particular, death tests don't like having multiple threads in the parent
 process. So the first thing you can try is to eliminate creating threads outside
-of `EXPECT_DEATH()`. For example, you may want to use [mocks](http://go/gmock)
+of `EXPECT_DEATH()`. For example, you may want to use [mocks](../../googlemock)
 or fake objects instead of real ones in your tests.
 
 Sometimes this is impossible as some library you must use may be creating
@@ -704,11 +704,12 @@ mistake in production. Such cleverness also leads to
 advise against the practice, and googletest doesn't provide a way to do it.
 
 In general, the recommended way to cause the code to behave differently under
-test is [Dependency Injection](http://go/dependency-injection). You can inject
+test is [Dependency Injection](https://en.wikipedia.org/wiki/Dependency_injection). You can inject
 different functionality from the test and from the production code. Since your
 production code doesn't link in the for-test logic at all (the
-[`testonly`](http://go/testonly) attribute for BUILD targets helps to ensure
-that), there is no danger in accidentally running it.
+[`testonly`](https://docs.bazel.build/versions/master/be/common-definitions.html#common.testonly)
+attribute for BUILD targets helps to ensure that), there is no danger in
+accidentally running it.
 
 However, if you *really*, *really*, *really* have no choice, and if you follow
 the rule of ending your test program names with `_test`, you can use the

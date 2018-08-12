@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #
-# Copyright 2018 Google LLC. All rights reserved.
+# Copyright 2008, Google Inc.
+# All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -27,17 +28,14 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-"""Verifies that Google Test uses filter provided via testbridge."""
 
-__author__ = 'rfj@google.com (Rohan Joyce)'
+"""Verifies that Google Test warns the user when not initialized properly."""
 
-import os
+__author__ = 'wan@google.com (Zhanyong Wan)'
 
 import gtest_test_utils
 
-binary_name = 'gtest_testbridge_test_'
-COMMAND = gtest_test_utils.GetTestExecutablePath(binary_name)
-TESTBRIDGE_NAME = 'TESTBRIDGE_TEST_ONLY'
+COMMAND = gtest_test_utils.GetTestExecutablePath('googletest-uninitialized-test_')
 
 
 def Assert(condition):
@@ -45,20 +43,26 @@ def Assert(condition):
     raise AssertionError
 
 
-class GTestTestFilterTest(gtest_test_utils.TestCase):
+def AssertEq(expected, actual):
+  if expected != actual:
+    print 'Expected: %s' % (expected,)
+    print '  Actual: %s' % (actual,)
+    raise AssertionError
 
-  def testTestExecutionIsFiltered(self):
-    """Tests that the test filter is picked up from the testbridge env var."""
-    subprocess_env = os.environ.copy()
 
-    subprocess_env[TESTBRIDGE_NAME] = '*.TestThatSucceeds'
-    p = gtest_test_utils.Subprocess(COMMAND, env=subprocess_env)
+def TestExitCodeAndOutput(command):
+  """Runs the given command and verifies its exit code and output."""
 
-    self.assertEquals(0, p.exit_code)
+  # Verifies that 'command' exits with code 1.
+  p = gtest_test_utils.Subprocess(command)
+  if p.exited and p.exit_code == 0:
+    Assert('IMPORTANT NOTICE' in p.output);
+  Assert('InitGoogleTest' in p.output)
 
-    Assert('filter = *.TestThatSucceeds' in p.output)
-    Assert('[       OK ] TestFilterTest.TestThatSucceeds' in p.output)
-    Assert('[  PASSED  ] 1 test.' in p.output)
+
+class GTestUninitializedTest(gtest_test_utils.TestCase):
+  def testExitCodeAndOutput(self):
+    TestExitCodeAndOutput(COMMAND)
 
 
 if __name__ == '__main__':
