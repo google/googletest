@@ -32,10 +32,9 @@
 // A helper program for testing that Google Test parses the environment
 // variables correctly.
 
-#include "gtest/gtest.h"
-
 #include <iostream>
 
+#include "gtest/gtest.h"
 #include "src/gtest-internal-inl.h"
 
 using ::std::cout;
