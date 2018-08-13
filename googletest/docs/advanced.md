@@ -103,13 +103,11 @@ If you already have a function or functor that returns `bool` (or a type that
 can be implicitly converted to `bool`), you can use it in a *predicate
 assertion* to get the function arguments printed for free:
 
-| Fatal assertion      | Nonfatal assertion   | Verifies                    |
-| -------------------- | -------------------- | --------------------------- |
-| `ASSERT_PRED1(pred1, | `EXPECT_PRED1(pred1, | `pred1(val1)` is true       |
-: val1);`              : val1);`              :                             :
-| `ASSERT_PRED2(pred2, | `EXPECT_PRED2(pred2, | `pred2(val1, val2)` is true |
-: val1, val2);`        : val1, val2);`        :                             :
-| `...`                | `...`                | ...                         |
+| Fatal assertion                    | Nonfatal assertion                 | Verifies                    |
+| ---------------------------------- | ---------------------------------- | --------------------------- |
+| `ASSERT_PRED1(pred1, val1);`       | `EXPECT_PRED1(pred1, val1);`       | `pred1(val1)` is true       |
+| `ASSERT_PRED2(pred2, val1, val2);` | `EXPECT_PRED2(pred2, val1, val2);` | `pred2(val1, val2)` is true |
+| `...`                              | `...`                              | ...                         |
 
 In the above, `predn` is an `n`-ary predicate function or functor, where `val1`,
 `val2`, ..., and `valn` are its arguments. The assertion succeeds if the
@@ -120,7 +118,7 @@ either case, the arguments are evaluated exactly once.
 Here's an example. Given
 
 ```c++
-// Returns true iff m and n have no common divisors except 1.
+// Returns true if m and n have no common divisors except 1.
 bool MutuallyPrime(int m, int n) { ... }
 
 const int a = 3;
@@ -339,12 +337,10 @@ want to learn more, see
 
 #### Floating-Point Macros
 
-| Fatal assertion         | Nonfatal assertion      | Verifies                |
-| ----------------------- | ----------------------- | ----------------------- |
-| `ASSERT_FLOAT_EQ(val1,  | `EXPECT_FLOAT_EQ(val1,  | the two `float` values  |
-: val2);`                 : val2);`                 : are almost equal        :
-| `ASSERT_DOUBLE_EQ(val1, | `EXPECT_DOUBLE_EQ(val1, | the two `double` values |
-: val2);`                 : val2);`                 : are almost equal        :
+| Fatal assertion                 | Nonfatal assertion             | Verifies                                 |
+| ------------------------------- | ------------------------------ | ---------------------------------------- |
+| `ASSERT_FLOAT_EQ(val1, val2);`  | `EXPECT_FLOAT_EQ(val1,val2);`  | the two `float` values are almost equal  |
+| `ASSERT_DOUBLE_EQ(val1, val2);` | `EXPECT_DOUBLE_EQ(val1, val2);`| the two `double` values are almost equal |
 
 By "almost equal" we mean the values are within 4 ULP's from each other.
 
@@ -354,12 +350,9 @@ unsafe and has been deprecated. Please don't use it any more.
 
 The following assertions allow you to choose the acceptable error bound:
 
-| Fatal assertion    | Nonfatal assertion       | Verifies                  |
-| ------------------ | ------------------------ | ------------------------- |
-| `ASSERT_NEAR(val1, | `EXPECT_NEAR(val1, val2, | the difference between    |
-: val2, abs_error);` : abs_error);`             : `val1` and `val2` doesn't :
-:                    :                          : exceed the given absolute :
-:                    :                          : error                     :
+| Fatal assertion                       | Nonfatal assertion                    | Verifies                  |
+| ------------------------------------- | ------------------------------------- | ------------------------- |
+| `ASSERT_NEAR(val1, val2, abs_error);` | `EXPECT_NEAR(val1, val2, abs_error);` | the difference between `val1` and `val2` doesn't exceed the given absolute error |
 
 **Availability**: Linux, Windows, Mac.
 
@@ -387,10 +380,9 @@ library of matchers for validating arguments passed to mock objects. A gMock
 *matcher* is basically a predicate that knows how to describe itself. It can be
 used in these assertion macros:
 
-| Fatal assertion     | Nonfatal assertion             | Verifies              |
-| ------------------- | ------------------------------ | --------------------- |
-| `ASSERT_THAT(value, | `EXPECT_THAT(value, matcher);` | value matches matcher |
-: matcher);`          :                                :                       :
+| Fatal assertion                | Nonfatal assertion             | Verifies              |
+| ------------------------------ | ------------------------------ | --------------------- |
+| `ASSERT_THAT(value, matcher);` | `EXPECT_THAT(value, matcher);` | value matches matcher |
 
 For example, `StartsWith(prefix)` is a matcher that matches a string starting
 with `prefix`, and you can write:
@@ -1396,17 +1388,11 @@ namespace:
 
 | Parameter Generator          | Behavior                                    |
 | ---------------------------- | ------------------------------------------- |
-| `Range(begin, end [, step])` | Yields values `{begin, begin+step,          |
-:                              : begin+step+step, ...}`. The values do not   :
-:                              : include `end`. `step` defaults to 1.        :
+| `Range(begin, end [, step])` | Yields values `{begin, begin+step, begin+step+step, ...}`. The values do not include `end`. `step` defaults to 1.      |
 | `Values(v1, v2, ..., vN)`    | Yields values `{v1, v2, ..., vN}`.          |
-| `ValuesIn(container)` and    | Yields values from a C-style array, an      |
-: `ValuesIn(begin,end)`        : STL-style container, or an iterator range   :
-:                              : `[begin, end)`.                             :
+| `ValuesIn(container)` and `ValuesIn(begin,end)`   | Yields values from a C-style array, an STL-style container, or an iterator range  `[begin, end)`. |
 | `Bool()`                     | Yields sequence `{false, true}`.            |
-| `Combine(g1, g2, ..., gN)`   | Yields all combinations (Cartesian product) |
-:                              : as std\:\:tuples of the values generated by :
-:                              : the `N` generators.                         :
+| `Combine(g1, g2, ..., gN)`   | Yields all combinations (Cartesian product) as std\:\:tuples of the values generated by the `N` generators.            |
 
 For more details, see the comments at the definitions of these functions.
 
@@ -1726,11 +1712,11 @@ To test them, we use the following special techniques:
     ```c++
     // foo.h
 
-#include "gtest/gtest_prod.h"
+    #include "gtest/gtest_prod.h"
 
     class Foo {
       ...
-     private:
+    private:
       FRIEND_TEST(FooTest, BarReturnsZeroOnNull);
 
       int Bar(void* x);
@@ -1779,7 +1765,7 @@ To test them, we use the following special techniques:
     ```
 
 
-    ## "Catching" Failures
+## "Catching" Failures
 
 If you are building a testing utility on top of googletest, you'll want to test
 your utility. What framework would you use to test it? googletest, of course.
@@ -2168,23 +2154,22 @@ random seed and re-shuffle the tests in each iteration.
 googletest can use colors in its terminal output to make it easier to spot the
 important information:
 
-...
-<span style="color:green">[----------]<span style="color:black"> 1 test from FooTest
-<span style="color:green">[ RUN      ]<span style="color:black"> FooTest.DoesAbc
-<span style="color:green">[       OK ]<span style="color:black"> FooTest.DoesAbc
-<span style="color:green">[----------]<span style="color:black"> 2 tests from BarTest
-<span style="color:green">[ RUN      ]<span style="color:black"> BarTest.HasXyzProperty
-<span style="color:green">[       OK ]<span style="color:black"> BarTest.HasXyzProperty
-<span style="color:green">[ RUN      ]<span style="color:black"> BarTest.ReturnsTrueOnSuccess
-... some error messages ...
-<span   style="color:red">[  FAILED  ] <span style="color:black">BarTest.ReturnsTrueOnSuccess
-...
-<span style="color:green">[==========]<span style="color:black"> 30 tests from 14 test cases ran.
-<span style="color:green">[  PASSED  ]<span style="color:black"> 28 tests.
-<span style="color:red">[  FAILED  ]<span style="color:black"> 2 tests, listed below:
-<span style="color:red">[  FAILED  ]<span style="color:black"> BarTest.ReturnsTrueOnSuccess
-<span style="color:red">[  FAILED  ]<span style="color:black"> AnotherTest.DoesXyz
-
+...<br/>
+<span style="color:green">[----------]<span style="color:black"> 1 test from FooTest<br/>
+<span style="color:green">[ RUN      ]<span style="color:black"> FooTest.DoesAbc<br/>
+<span style="color:green">[       OK ]<span style="color:black"> FooTest.DoesAbc<br/>
+<span style="color:green">[----------]<span style="color:black"> 2 tests from BarTest<br/>
+<span style="color:green">[ RUN      ]<span style="color:black"> BarTest.HasXyzProperty<br/>
+<span style="color:green">[       OK ]<span style="color:black"> BarTest.HasXyzProperty<br/>
+<span style="color:green">[ RUN      ]<span style="color:black"> BarTest.ReturnsTrueOnSuccess<br/>
+... some error messages ...<br/>
+<span   style="color:red">[  FAILED  ] <span style="color:black">BarTest.ReturnsTrueOnSuccess<br/>
+...<br/>
+<span style="color:green">[==========]<span style="color:black"> 30 tests from 14 test cases ran.<br/>
+<span style="color:green">[  PASSED  ]<span style="color:black"> 28 tests.<br/>
+<span style="color:red">[  FAILED  ]<span style="color:black"> 2 tests, listed below:<br/>
+<span style="color:red">[  FAILED  ]<span style="color:black"> BarTest.ReturnsTrueOnSuccess<br/>
+<span style="color:red">[  FAILED  ]<span style="color:black"> AnotherTest.DoesXyz<br/>
   2 FAILED TESTS
 
 You can set the `GTEST_COLOR` environment variable or the `--gtest_color`
@@ -2193,8 +2178,7 @@ disable colors, or let googletest decide. When the value is `auto`, googletest
 will use colors if and only if the output goes to a terminal and (on non-Windows
 platforms) the `TERM` environment variable is set to `xterm` or `xterm-color`.
 
->
-> **Availability**: Linux, Windows, Mac.
+ **Availability**: Linux, Windows, Mac.
 
 #### Suppressing the Elapsed Time
 
