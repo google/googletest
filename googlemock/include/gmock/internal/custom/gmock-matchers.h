@@ -27,9 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// ============================================================
-// An installation-specific extension point for gmock-matchers.h.
-// ============================================================
+// Injection point for custom user configurations. See README for details
 //
 // GOOGLETEST_CM0002 DO NOT DELETE
 
