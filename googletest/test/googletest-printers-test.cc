@@ -33,8 +33,6 @@
 //
 // This file tests the universal value printer.
 
-#include "gtest/gtest-printers.h"
-
 #include <ctype.h>
 #include <limits.h>
 #include <string.h>
@@ -48,6 +46,7 @@
 #include <utility>
 #include <vector>
 
+#include "gtest/gtest-printers.h"
 #include "gtest/gtest.h"
 
 #if GTEST_HAS_UNORDERED_MAP_
