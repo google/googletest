@@ -55,7 +55,14 @@ macro(config_compiler_and_linker)
     find_package(Threads)
     if (CMAKE_USE_PTHREADS_INIT)
       set(GTEST_HAS_PTHREAD ON)
-    endif()
+    endif()    
+  endif()
+  
+  unset(GTEST_HAS_LIBRT)
+  find_path (LIBRT_INCLUDES time.h)
+  find_library(LIBRT_LIBRARIES rt)
+  if (LIBRT_INCLUDES AND LIBRT_LIBRARIES)
+    set(GTEST_HAS_LIBRT ON)
   endif()
 
   fix_default_compiler_settings_()
@@ -168,7 +175,12 @@ function(cxx_library_with_type name type cxx_flags)
       COMPILE_DEFINITIONS "GTEST_CREATE_SHARED_LIBRARY=1")
   endif()
   if (DEFINED GTEST_HAS_PTHREAD)
-    target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT})
+    # add pthread to this library and all librariers which link to this library if needed
+    target_link_libraries(${name} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+  endif()
+  if (DEFINED GTEST_HAS_LIBRT)
+    # add librt to this library and all librariers which link to this library if needed
+    target_link_libraries(${name} PUBLIC ${LIBRT_LIBRARIES})
   endif()
 endfunction()
 
@@ -207,7 +219,7 @@ function(cxx_executable_with_flags name cxx_flags libs)
   # To support mixing linking in static and dynamic libraries, link each
   # library in with an extra call to target_link_libraries.
   foreach (lib "${libs}")
-    target_link_libraries(${name} ${lib})
+    target_link_libraries(${name} PUBLIC ${lib})
   endforeach()
 endfunction()
 
