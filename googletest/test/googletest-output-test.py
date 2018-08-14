@@ -31,12 +31,11 @@
 
 """Tests the text output of Google C++ Testing and Mocking Framework.
 
-
-SYNOPSIS
-       googletest_output_test.py --build_dir=BUILD/DIR --gengolden
-         # where BUILD/DIR contains the built googletest-output-test_ file.
-       googletest_output_test.py --gengolden
-       googletest_output_test.py
+To update the golden file:
+googletest_output_test.py --build_dir=BUILD/DIR --gengolden
+where BUILD/DIR contains the built googletest-output-test_ file.
+googletest_output_test.py --gengolden
+googletest_output_test.py
 """
 
 __author__ = 'wan@google.com (Zhanyong Wan)'

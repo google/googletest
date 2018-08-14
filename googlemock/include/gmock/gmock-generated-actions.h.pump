@@ -88,8 +88,7 @@ $if i <= max_callback_arity [[
            return callback->Run($gets);
   }
 ]] $else [[
-  // There is no InvokeCallback() for $i-tuples, as google3 callbacks
-  // support $max_callback_arity arguments at most.
+  // There is no InvokeCallback() for $i-tuples
 ]]
 
 };
