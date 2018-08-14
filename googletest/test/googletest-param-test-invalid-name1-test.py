@@ -30,8 +30,6 @@
 
 """Verifies that Google Test warns the user when not initialized properly."""
 
-__author__ = 'jmadill@google.com (Jamie Madill)'
-
 import gtest_test_utils
 
 binary_name = 'googletest-param-test-invalid-name1-test_'

@@ -1343,7 +1343,7 @@ TEST(FunctorActionTest, UnusedArguments) {
 }
 
 // Test that basic built-in actions work with move-only arguments.
-// TODO(rburny): Currently, almost all ActionInterface-based actions will not
+// FIXME: Currently, almost all ActionInterface-based actions will not
 // work, even if they only try to use other, copyable arguments. Implement them
 // if necessary (but note that DoAll cannot work on non-copyable types anyway -
 // so maybe it's better to make users use lambdas instead.

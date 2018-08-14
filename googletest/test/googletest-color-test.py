@@ -31,8 +31,6 @@
 
 """Verifies that Google Test correctly determines whether to use colors."""
 
-__author__ = 'wan@google.com (Zhanyong Wan)'
-
 import os
 import gtest_test_utils
 

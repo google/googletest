@@ -97,7 +97,7 @@ TEST(Test, Test) {
 int kTestForContinuingTest = 0;
 
 TEST(Test, Test2) {
-  // FIXME(sokolov): how to force Test2 to be after Test?
+  // FIXME: how to force Test2 to be after Test?
   kTestForContinuingTest = 1;
 }
 

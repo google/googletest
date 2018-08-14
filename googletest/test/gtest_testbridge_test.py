@@ -29,8 +29,6 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """Verifies that Google Test uses filter provided via testbridge."""
 
-__author__ = 'rfj@google.com (Rohan Joyce)'
-
 import os
 
 import gtest_test_utils

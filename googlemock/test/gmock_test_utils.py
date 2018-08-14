@@ -29,8 +29,6 @@
 
 """Unit test utilities for Google C++ Mocking Framework."""
 
-__author__ = 'wan@google.com (Zhanyong Wan)'
-
 import os
 import sys
 

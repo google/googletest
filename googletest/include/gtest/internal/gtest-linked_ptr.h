@@ -60,7 +60,7 @@
 //       raw pointer (e.g. via get()) concurrently, and
 //     - it's safe to write to two linked_ptrs that point to the same
 //       shared object concurrently.
-// TODO(wan@google.com): rename this to safe_linked_ptr to avoid
+// FIXME: rename this to safe_linked_ptr to avoid
 // confusion with normal linked_ptr.
 
 // GOOGLETEST_CM0001 DO NOT DELETE

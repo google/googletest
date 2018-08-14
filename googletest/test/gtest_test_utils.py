@@ -31,8 +31,6 @@
 # Suppresses the 'Import not at the top of the file' lint complaint.
 # pylint: disable-msg=C6204
 
-__author__ = 'wan@google.com (Zhanyong Wan)'
-
 import os
 import sys
 
@@ -308,7 +306,7 @@ def Main():
   _ParseAndStripGTestFlags(sys.argv)
   # The tested binaries should not be writing XML output files unless the
   # script explicitly instructs them to.
-  # TODO(vladl@google.com): Move this into Subprocess when we implement
+  # FIXME: Move this into Subprocess when we implement
   # passing environment into it as a parameter.
   if GTEST_OUTPUT_VAR_NAME in os.environ:
     del os.environ[GTEST_OUTPUT_VAR_NAME]

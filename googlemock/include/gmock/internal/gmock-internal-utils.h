@@ -360,7 +360,7 @@ class WithoutMatchers {
 // Internal use only: access the singleton instance of WithoutMatchers.
 GTEST_API_ WithoutMatchers GetWithoutMatchers();
 
-// TODO(wan@google.com): group all type utilities together.
+// FIXME: group all type utilities together.
 
 // Type traits.
 

@@ -30,8 +30,6 @@
 
 """Verifies that test shuffling works."""
 
-__author__ = 'wan@google.com (Zhanyong Wan)'
-
 import os
 import gtest_test_utils
 

@@ -40,8 +40,6 @@ Note that test sharding may also influence which tests are filtered. Therefore,
 we test that here also.
 """
 
-__author__ = 'wan@google.com (Zhanyong Wan)'
-
 import os
 import re
 import sets

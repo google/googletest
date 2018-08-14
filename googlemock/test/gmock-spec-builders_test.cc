@@ -1175,7 +1175,7 @@ TEST(UnexpectedCallTest, UnsatisifiedPrerequisites) {
 TEST(UndefinedReturnValueTest,
      ReturnValueIsMandatoryWhenNotDefaultConstructible) {
   MockA a;
-  // TODO(wan@google.com): We should really verify the output message,
+  // FIXME: We should really verify the output message,
   // but we cannot yet due to that EXPECT_DEATH only captures stderr
   // while Google Mock logs to stdout.
 #if GTEST_HAS_EXCEPTIONS

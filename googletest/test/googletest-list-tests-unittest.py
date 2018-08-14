@@ -37,8 +37,6 @@ by invoking googletest-list-tests-unittest_ (a program written with
 Google Test) the command line flags.
 """
 
-__author__ = 'phanna@google.com (Patrick Hanna)'
-
 import re
 import gtest_test_utils
 

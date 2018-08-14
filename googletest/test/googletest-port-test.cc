@@ -224,7 +224,7 @@ TEST(ScopedPtrTest, DefinesElementType) {
   StaticAssertTypeEq<int, ::testing::internal::scoped_ptr<int>::element_type>();
 }
 
-// TODO(vladl@google.com): Implement THE REST of scoped_ptr tests.
+// FIXME: Implement THE REST of scoped_ptr tests.
 
 TEST(GtestCheckSyntaxTest, BehavesLikeASingleStatement) {
   if (AlwaysFalse())

@@ -31,8 +31,6 @@
 
 """Verifies that Google Test correctly parses environment variables."""
 
-__author__ = 'wan@google.com (Zhanyong Wan)'
-
 import os
 import gtest_test_utils
 
