@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan), vladl@google.com (Vlad Losev)
+
 //
 // This file implements death tests.
 
@@ -582,7 +581,6 @@ bool DeathTestImpl::Passed(bool status_ok) {
       if (status_ok) {
 # if GTEST_USES_PCRE
         // PCRE regexes support embedded NULs.
-        // GTEST_USES_PCRE is defined only in google3 mode
         const bool matched = RE::PartialMatch(error_message, *regex());
 # else
         const bool matched = RE::PartialMatch(error_message.c_str(), *regex());

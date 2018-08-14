@@ -27,8 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Authors: wan@google.com (Zhanyong Wan)
-//
 // Low-level types and utilities for porting Google Test to various
 // platforms.  All macros ending with _ and symbols defined in an
 // internal namespace are subject to change without notice.  Code
@@ -327,6 +325,22 @@
 // Older versions of MSVC don't have __pragma.
 # define GTEST_DISABLE_MSC_WARNINGS_PUSH_(warnings)
 # define GTEST_DISABLE_MSC_WARNINGS_POP_()
+#endif
+
+// Clang on Windows does not understand MSVC's pragma warning.
+// We need clang-specific way to disable function deprecation warning.
+#ifdef __clang__
+# define GTEST_DISABLE_MSC_DEPRECATED_PUSH_()                         \
+    _Pragma("clang diagnostic push")                                  \
+    _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"") \
+    _Pragma("clang diagnostic ignored \"-Wdeprecated-implementations\"")
+#define GTEST_DISABLE_MSC_DEPRECATED_POP_() \
+    _Pragma("clang diagnostic pop")
+#else
+# define GTEST_DISABLE_MSC_DEPRECATED_PUSH_() \
+    GTEST_DISABLE_MSC_WARNINGS_PUSH_(4996)
+# define GTEST_DISABLE_MSC_DEPRECATED_POP_() \
+    GTEST_DISABLE_MSC_WARNINGS_POP_()
 #endif
 
 #ifndef GTEST_LANG_CXX11
@@ -2484,7 +2498,7 @@ inline bool IsDir(const StatStruct& st) { return S_ISDIR(st.st_mode); }
 
 // Functions deprecated by MSVC 8.0.
 
-GTEST_DISABLE_MSC_WARNINGS_PUSH_(4996 /* deprecated function */)
+GTEST_DISABLE_MSC_DEPRECATED_PUSH_()
 
 inline const char* StrNCpy(char* dest, const char* src, size_t n) {
   return strncpy(dest, src, n);
@@ -2532,7 +2546,7 @@ inline const char* GetEnv(const char* name) {
 #endif
 }
 
-GTEST_DISABLE_MSC_WARNINGS_POP_()
+GTEST_DISABLE_MSC_DEPRECATED_POP_()
 
 #if GTEST_OS_WINDOWS_MOBILE
 // Windows CE has no C library. The abort() function is used in
