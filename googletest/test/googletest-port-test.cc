@@ -27,8 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Authors: vladl@google.com (Vlad Losev), wan@google.com (Zhanyong Wan)
-//
 // This file tests the internal cross-platform support utilities.
 #include <stdio.h>
 

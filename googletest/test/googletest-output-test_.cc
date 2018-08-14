@@ -32,8 +32,6 @@
 // googletest-output-test.py to ensure that Google Test generates the
 // desired messages.  Therefore, most tests in this file are MEANT TO
 // FAIL.
-//
-// Author: wan@google.com (Zhanyong Wan)
 
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest.h"
