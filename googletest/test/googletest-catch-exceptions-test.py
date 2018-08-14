@@ -35,8 +35,6 @@ googletest-catch-exceptions-ex-test_ (programs written with
 Google Test) and verifies their output.
 """
 
-__author__ = 'vladl@google.com (Vlad Losev)'
-
 import gtest_test_utils
 
 # Constants.
