@@ -919,8 +919,6 @@ TEST(PrintStlContainerTest, MultiSet) {
 }
 
 #if GTEST_HAS_STD_FORWARD_LIST_
-// <slist> is available on Linux in the google3 mode, but not on
-// Windows or Mac OS X.
 
 TEST(PrintStlContainerTest, SinglyLinkedList) {
   int a[] = { 9, 2, 8 };
