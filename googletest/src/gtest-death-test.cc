@@ -233,11 +233,14 @@ static std::string DeathTestThreadWarning(size_t thread_count) {
   Message msg;
   msg << "Death tests use fork(), which is unsafe particularly"
       << " in a threaded context. For this test, " << GTEST_NAME_ << " ";
-  if (thread_count == 0)
+  if (thread_count == 0) {
     msg << "couldn't detect the number of threads.";
-  else
+  } else {
     msg << "detected " << thread_count << " threads.";
-    msg << " See https://github.com/google/googletest/blob/master/googletest/docs/advanced.md#death-tests-and-threads"
+  }
+  msg << " See "
+         "https://github.com/google/googletest/blob/master/googletest/docs/"
+         "advanced.md#death-tests-and-threads"
       << " for more explanation and suggested solutions, especially if"
       << " this is the last message you see before your test times out.";
   return msg.GetString();
@@ -579,7 +582,6 @@ bool DeathTestImpl::Passed(bool status_ok) {
       if (status_ok) {
 # if GTEST_USES_PCRE
         // PCRE regexes support embedded NULs.
-        // GTEST_USES_PCRE is defined only in google3 mode
         const bool matched = RE::PartialMatch(error_message, *regex());
 # else
         const bool matched = RE::PartialMatch(error_message.c_str(), *regex());
