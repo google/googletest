@@ -1279,7 +1279,7 @@ TEST(ParseNaturalNumberTest, WorksForShorterIntegers) {
 
 # if GTEST_OS_WINDOWS
 TEST(EnvironmentTest, HandleFitsIntoSizeT) {
-  // TODO(vladl@google.com): Remove this test after this condition is verified
+  // FIXME: Remove this test after this condition is verified
   // in a static assertion in gtest-death-test.cc in the function
   // GetStatusFileDescriptor.
   ASSERT_TRUE(sizeof(HANDLE) <= sizeof(size_t));
