@@ -106,7 +106,7 @@ TEST(OutputFileHelpersTest, GetCurrentExecutableName) {
   const bool success = exe_str == "app";
 #else
   // FIXME: remove the hard-coded "lt-" prefix when
-  //   Chandler Carruth's libtool replacement is ready.
+  // libtool replacement is ready.
   const bool success =
       exe_str == "googletest-options-test" ||
       exe_str == "gtest_all_test" ||
