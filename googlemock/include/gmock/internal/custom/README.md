@@ -2,7 +2,7 @@
 
 The custom directory is an injection point for custom user configurations.
 
-## Header gmock-port.h
+## Header `gmock-port.h`
 
 The following macros can be defined:
 
