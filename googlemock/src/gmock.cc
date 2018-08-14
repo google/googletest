@@ -33,7 +33,7 @@
 
 namespace testing {
 
-// TODO(wan@google.com): support using environment variables to
+// FIXME: support using environment variables to
 // control the flag values, like what Google Test does.
 
 GMOCK_DEFINE_bool_(catch_leaked_mocks, true,
