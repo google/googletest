@@ -44,17 +44,18 @@ using ::testing::internal::ParamGenerator;
 ParamGenerator<int> extern_gen_2 = Values(33);
 
 // Tests that a parameterized test case can be defined in one translation unit
-// and instantiated in another. The test is defined in googletest-param-test-test.cc
-// and ExternalInstantiationTest fixture class is defined in
-// gtest-param-test_test.h.
+// and instantiated in another. The test is defined in
+// googletest-param-test-test.cc and ExternalInstantiationTest fixture class is
+// defined in gtest-param-test_test.h.
 INSTANTIATE_TEST_CASE_P(MultiplesOf33,
                         ExternalInstantiationTest,
                         Values(33, 66));
 
 // Tests that a parameterized test case can be instantiated
 // in multiple translation units. Another instantiation is defined
-// in googletest-param-test-test.cc and InstantiationInMultipleTranslaionUnitsTest
-// fixture is defined in gtest-param-test_test.h
+// in googletest-param-test-test.cc and
+// InstantiationInMultipleTranslaionUnitsTest fixture is defined in
+// gtest-param-test_test.h
 INSTANTIATE_TEST_CASE_P(Sequence2,
                         InstantiationInMultipleTranslaionUnitsTest,
                         Values(42*3, 42*4, 42*5));

@@ -33,8 +33,6 @@
 //
 // This file tests the universal value printer.
 
-#include "gtest/gtest-printers.h"
-
 #include <ctype.h>
 #include <limits.h>
 #include <string.h>
@@ -48,6 +46,7 @@
 #include <utility>
 #include <vector>
 
+#include "gtest/gtest-printers.h"
 #include "gtest/gtest.h"
 
 #if GTEST_HAS_UNORDERED_MAP_
@@ -572,7 +571,7 @@ struct Foo {
 TEST(PrintPointerTest, MemberVariablePointer) {
   EXPECT_TRUE(HasPrefix(Print(&Foo::value),
                         Print(sizeof(&Foo::value)) + "-byte object "));
-  int (Foo::*p) = NULL;  // NOLINT
+  int Foo::*p = NULL;  // NOLINT
   EXPECT_TRUE(HasPrefix(Print(p),
                         Print(sizeof(p)) + "-byte object "));
 }
@@ -1250,7 +1249,7 @@ TEST(PrintReferenceTest, HandlesMemberFunctionPointer) {
 // Tests that the universal printer prints a member variable pointer
 // passed by reference.
 TEST(PrintReferenceTest, HandlesMemberVariablePointer) {
-  int (Foo::*p) = &Foo::value;  // NOLINT
+  int Foo::*p = &Foo::value;  // NOLINT
   EXPECT_TRUE(HasPrefix(
       PrintByRef(p),
       "@" + PrintPointer(&p) + " " + Print(sizeof(p)) + "-byte object "));
@@ -1730,6 +1729,21 @@ TEST(PrintOptionalTest, Basic) {
   EXPECT_EQ("(7)", PrintToString(value));
   EXPECT_EQ("(1.1)", PrintToString(absl::optional<double>{1.1}));
   EXPECT_EQ("(\"A\")", PrintToString(absl::optional<std::string>{"A"}));
+}
+
+struct NonPrintable {
+  unsigned char contents = 17;
+};
+
+TEST(PrintOneofTest, Basic) {
+  using Type = absl::variant<int, StreamableInGlobal, NonPrintable>;
+  EXPECT_EQ("('int' with value 7)", PrintToString(Type(7)));
+  EXPECT_EQ("('StreamableInGlobal' with value StreamableInGlobal)",
+            PrintToString(Type(StreamableInGlobal{})));
+  EXPECT_EQ(
+      "('testing::gtest_printers_test::NonPrintable' with value 1-byte object "
+      "<11>)",
+      PrintToString(Type(NonPrintable{})));
 }
 #endif  // GTEST_HAS_ABSL
 

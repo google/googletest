@@ -3202,6 +3202,7 @@ void PrettyUnitTestResultPrinter::OnTestIterationStart(
                   "Note: Randomizing tests' orders with a seed of %d .\n",
                   unit_test.random_seed());
   }
+
   ColoredPrintf(COLOR_GREEN,  "[==========] ");
   printf("Running %s from %s.\n",
          FormatTestCount(unit_test.test_to_run_count()).c_str(),
@@ -3653,6 +3654,7 @@ std::string XmlUnitTestResultPrinter::RemoveInvalidXmlCharacters(
 
 // The following routines generate an XML representation of a UnitTest
 // object.
+// GOOGLETEST_CM0009 DO NOT DELETE
 //
 // This is how Google Test concepts map to the DTD:
 //

@@ -180,6 +180,7 @@
 //   GTEST_HAS_TYPED_TEST   - typed tests
 //   GTEST_HAS_TYPED_TEST_P - type-parameterized tests
 //   GTEST_IS_THREADSAFE    - Google Test is thread-safe.
+//   GOOGLETEST_CM0007 DO NOT DELETE
 //   GTEST_USES_POSIX_RE    - enhanced POSIX regex is used. Do not confuse with
 //                            GTEST_HAS_POSIX_RE (see above) which users can
 //                            define themselves.
@@ -231,6 +232,7 @@
 // Regular expressions:
 //   RE             - a simple regular expression class using the POSIX
 //                    Extended Regular Expression syntax on UNIX-like platforms
+//                    GOOGLETEST_CM0008 DO NOT DELETE
 //                    or a reduced regular exception syntax on other
 //                    platforms, including Windows.
 // Logging:
@@ -381,7 +383,8 @@
 #if GTEST_LANG_CXX11
 # define GTEST_HAS_STD_TUPLE_ 1
 # if defined(__clang__)
-// Inspired by https://clang.llvm.org/docs/LanguageExtensions.html#include-file-checking-macros
+// Inspired by
+// https://clang.llvm.org/docs/LanguageExtensions.html#include-file-checking-macros
 #  if defined(__has_include) && !__has_include(<tuple>)
 #   undef GTEST_HAS_STD_TUPLE_
 #  endif
