@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
@@ -188,7 +187,9 @@ GTEST_API_ void Log(LogSeverity severity, const std::string& message,
   std::cout << ::std::flush;
 }
 
-void IllegalDoDefault(const char* file, int line) {
+GTEST_API_ WithoutMatchers GetWithoutMatchers() { return WithoutMatchers(); }
+
+GTEST_API_ void IllegalDoDefault(const char* file, int line) {
   internal::Assert(
       false, file, line,
       "You are using DoDefault() inside a composite action like "

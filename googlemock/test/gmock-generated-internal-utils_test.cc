@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
@@ -63,10 +62,10 @@ TEST(MatcherTupleTest, ForSize2) {
 }
 
 TEST(MatcherTupleTest, ForSize5) {
-  CompileAssertTypesEqual<tuple<Matcher<int>, Matcher<char>, Matcher<bool>,
-                                Matcher<double>, Matcher<char*> >,
-                          MatcherTuple<tuple<int, char, bool, double, char*>
-                                      >::type>();
+  CompileAssertTypesEqual<
+      tuple<Matcher<int>, Matcher<char>, Matcher<bool>, Matcher<double>,
+            Matcher<char*> >,
+      MatcherTuple<tuple<int, char, bool, double, char*> >::type>();
 }
 
 // Tests the Function template struct.
@@ -97,8 +96,9 @@ TEST(FunctionTest, Binary) {
   CompileAssertTypesEqual<bool, F::Argument1>();
   CompileAssertTypesEqual<const long&, F::Argument2>();  // NOLINT
   CompileAssertTypesEqual<tuple<bool, const long&>, F::ArgumentTuple>();  // NOLINT
-  CompileAssertTypesEqual<tuple<Matcher<bool>, Matcher<const long&> >,  // NOLINT
-                          F::ArgumentMatcherTuple>();
+  CompileAssertTypesEqual<
+      tuple<Matcher<bool>, Matcher<const long&> >,  // NOLINT
+      F::ArgumentMatcherTuple>();
   CompileAssertTypesEqual<void(bool, const long&), F::MakeResultVoid>();  // NOLINT
   CompileAssertTypesEqual<IgnoredValue(bool, const long&),  // NOLINT
       F::MakeResultIgnoredValue>();
@@ -114,9 +114,10 @@ TEST(FunctionTest, LongArgumentList) {
   CompileAssertTypesEqual<const long&, F::Argument5>();  // NOLINT
   CompileAssertTypesEqual<tuple<bool, int, char*, int&, const long&>,  // NOLINT
                           F::ArgumentTuple>();
-  CompileAssertTypesEqual<tuple<Matcher<bool>, Matcher<int>, Matcher<char*>,
-                                Matcher<int&>, Matcher<const long&> >,  // NOLINT
-                          F::ArgumentMatcherTuple>();
+  CompileAssertTypesEqual<
+      tuple<Matcher<bool>, Matcher<int>, Matcher<char*>, Matcher<int&>,
+            Matcher<const long&> >,  // NOLINT
+      F::ArgumentMatcherTuple>();
   CompileAssertTypesEqual<void(bool, int, char*, int&, const long&),  // NOLINT
                           F::MakeResultVoid>();
   CompileAssertTypesEqual<
