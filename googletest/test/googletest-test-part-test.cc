@@ -26,9 +26,6 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: mheule@google.com (Markus Heule)
-//
 
 #include "gtest/gtest-test-part.h"
 
@@ -203,6 +200,6 @@ TEST_F(TestPartResultArrayDeathTest, DiesWhenIndexIsOutOfBound) {
   EXPECT_DEATH_IF_SUPPORTED(results.GetTestPartResult(1), "");
 }
 
-// TODO(mheule@google.com): Add a test for the class HasNewFatalFailureHelper.
+// FIXME: Add a test for the class HasNewFatalFailureHelper.
 
 }  // namespace
