@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
@@ -56,6 +55,8 @@
 //
 // where all clauses are optional, and .InSequence()/.After()/
 // .WillOnce() can appear any number of times.
+
+// GOOGLETEST_CM0002 DO NOT DELETE
 
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_
@@ -102,11 +103,6 @@ class ExpectationTester;
 
 // Base class for function mockers.
 template <typename F> class FunctionMockerBase;
-
-// Uninteresting call behavior mixins.
-template <typename M> class NiceMockBase;
-template <typename M> class NaggyMockBase;
-template <typename M> class StrictMockBase;
 
 // Protects the mock object registry (in class Mock), all function
 // mockers, and all expectations.
@@ -188,7 +184,7 @@ class GTEST_API_ UntypedFunctionMockerBase {
   // this information in the global mock registry.  Will be called
   // whenever an EXPECT_CALL() or ON_CALL() is executed on this mock
   // method.
-  // TODO(wan@google.com): rename to SetAndRegisterOwner().
+  // FIXME: rename to SetAndRegisterOwner().
   void RegisterOwner(const void* mock_obj)
       GTEST_LOCK_EXCLUDED_(g_gmock_mutex);
 
@@ -408,13 +404,13 @@ class GTEST_API_ Mock {
   friend class internal::FunctionMockerBase;
 
   template <typename M>
-  friend class internal::NiceMockBase;
+  friend class NiceMock;
 
   template <typename M>
-  friend class internal::NaggyMockBase;
+  friend class NaggyMock;
 
   template <typename M>
-  friend class internal::StrictMockBase;
+  friend class StrictMock;
 
   // Tells Google Mock to allow uninteresting calls on the given mock
   // object.
@@ -1211,7 +1207,7 @@ class TypedExpectation : public ExpectationBase {
       mocker->DescribeDefaultActionTo(args, what);
       DescribeCallCountTo(why);
 
-      // TODO(wan@google.com): allow the user to control whether
+      // FIXME: allow the user to control whether
       // unexpected calls should fail immediately or continue using a
       // flag --gmock_unexpected_calls_are_fatal.
       return NULL;
@@ -1285,6 +1281,13 @@ class MockSpec {
     LogWithLocation(internal::kInfo, file, line, source_text + " invoked");
     return function_mocker_->AddNewExpectation(
         file, line, source_text, matchers_);
+  }
+
+  // This operator overload is used to swallow the superfluous parameter list
+  // introduced by the ON/EXPECT_CALL macros. See the macro comments for more
+  // explanation.
+  MockSpec<F>& operator()(const internal::WithoutMatchers&, void* const) {
+    return *this;
   }
 
  private:
@@ -1841,17 +1844,76 @@ inline Expectation::Expectation(internal::ExpectationBase& exp)  // NOLINT
 
 }  // namespace testing
 
-// A separate macro is required to avoid compile errors when the name
-// of the method used in call is a result of macro expansion.
-// See CompilesWithMethodNameExpandedFromMacro tests in
-// internal/gmock-spec-builders_test.cc for more details.
-#define GMOCK_ON_CALL_IMPL_(obj, call) \
-    ((obj).gmock_##call).InternalDefaultActionSetAt(__FILE__, __LINE__, \
-                                                    #obj, #call)
-#define ON_CALL(obj, call) GMOCK_ON_CALL_IMPL_(obj, call)
+// Implementation for ON_CALL and EXPECT_CALL macros. A separate macro is
+// required to avoid compile errors when the name of the method used in call is
+// a result of macro expansion. See CompilesWithMethodNameExpandedFromMacro
+// tests in internal/gmock-spec-builders_test.cc for more details.
+//
+// This macro supports statements both with and without parameter matchers. If
+// the parameter list is omitted, gMock will accept any parameters, which allows
+// tests to be written that don't need to encode the number of method
+// parameter. This technique may only be used for non-overloaded methods.
+//
+//   // These are the same:
+//   ON_CALL(mock, NoArgsMethod()).WillByDefault(...);
+//   ON_CALL(mock, NoArgsMethod).WillByDefault(...);
+//
+//   // As are these:
+//   ON_CALL(mock, TwoArgsMethod(_, _)).WillByDefault(...);
+//   ON_CALL(mock, TwoArgsMethod).WillByDefault(...);
+//
+//   // Can also specify args if you want, of course:
+//   ON_CALL(mock, TwoArgsMethod(_, 45)).WillByDefault(...);
+//
+//   // Overloads work as long as you specify parameters:
+//   ON_CALL(mock, OverloadedMethod(_)).WillByDefault(...);
+//   ON_CALL(mock, OverloadedMethod(_, _)).WillByDefault(...);
+//
+//   // Oops! Which overload did you want?
+//   ON_CALL(mock, OverloadedMethod).WillByDefault(...);
+//     => ERROR: call to member function 'gmock_OverloadedMethod' is ambiguous
+//
+// How this works: The mock class uses two overloads of the gmock_Method
+// expectation setter method plus an operator() overload on the MockSpec object.
+// In the matcher list form, the macro expands to:
+//
+//   // This statement:
+//   ON_CALL(mock, TwoArgsMethod(_, 45))...
+//
+//   // ...expands to:
+//   mock.gmock_TwoArgsMethod(_, 45)(WithoutMatchers(), nullptr)...
+//   |-------------v---------------||------------v-------------|
+//       invokes first overload        swallowed by operator()
+//
+//   // ...which is essentially:
+//   mock.gmock_TwoArgsMethod(_, 45)...
+//
+// Whereas the form without a matcher list:
+//
+//   // This statement:
+//   ON_CALL(mock, TwoArgsMethod)...
+//
+//   // ...expands to:
+//   mock.gmock_TwoArgsMethod(WithoutMatchers(), nullptr)...
+//   |-----------------------v--------------------------|
+//                 invokes second overload
+//
+//   // ...which is essentially:
+//   mock.gmock_TwoArgsMethod(_, _)...
+//
+// The WithoutMatchers() argument is used to disambiguate overloads and to
+// block the caller from accidentally invoking the second overload directly. The
+// second argument is an internal type derived from the method signature. The
+// failure to disambiguate two overloads of this method in the ON_CALL statement
+// is how we block callers from setting expectations on overloaded methods.
+#define GMOCK_ON_CALL_IMPL_(mock_expr, Setter, call)                          \
+  ((mock_expr).gmock_##call)(::testing::internal::GetWithoutMatchers(), NULL) \
+      .Setter(__FILE__, __LINE__, #mock_expr, #call)
 
-#define GMOCK_EXPECT_CALL_IMPL_(obj, call) \
-    ((obj).gmock_##call).InternalExpectedAt(__FILE__, __LINE__, #obj, #call)
-#define EXPECT_CALL(obj, call) GMOCK_EXPECT_CALL_IMPL_(obj, call)
+#define ON_CALL(obj, call) \
+  GMOCK_ON_CALL_IMPL_(obj, InternalDefaultActionSetAt, call)
+
+#define EXPECT_CALL(obj, call) \
+  GMOCK_ON_CALL_IMPL_(obj, InternalExpectedAt, call)
 
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_

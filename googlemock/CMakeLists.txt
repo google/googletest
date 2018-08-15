@@ -138,13 +138,13 @@ if(INSTALL_GMOCK)
   # configure and install pkgconfig files
   configure_file(
     cmake/gmock.pc.in
-    "${CMAKE_BINARY_DIR}/gmock.pc"
+    "${gmock_BINARY_DIR}/gmock.pc"
     @ONLY)
   configure_file(
     cmake/gmock_main.pc.in
-    "${CMAKE_BINARY_DIR}/gmock_main.pc"
+    "${gmock_BINARY_DIR}/gmock_main.pc"
     @ONLY)
-  install(FILES "${CMAKE_BINARY_DIR}/gmock.pc" "${CMAKE_BINARY_DIR}/gmock_main.pc"
+  install(FILES "${gmock_BINARY_DIR}/gmock.pc" "${gmock_BINARY_DIR}/gmock_main.pc"
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 endif()
 
