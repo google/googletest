@@ -121,13 +121,13 @@ if(INSTALL_GTEST)
   # configure and install pkgconfig files
   configure_file(
     cmake/gtest.pc.in
-    "${CMAKE_BINARY_DIR}/gtest.pc"
+    "${gtest_BINARY_DIR}/gtest.pc"
     @ONLY)
   configure_file(
     cmake/gtest_main.pc.in
-    "${CMAKE_BINARY_DIR}/gtest_main.pc"
+    "${gtest_BINARY_DIR}/gtest_main.pc"
     @ONLY)
-  install(FILES "${CMAKE_BINARY_DIR}/gtest.pc" "${CMAKE_BINARY_DIR}/gtest_main.pc"
+  install(FILES "${gtest_BINARY_DIR}/gtest.pc" "${gtest_BINARY_DIR}/gtest_main.pc"
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 endif()
 
