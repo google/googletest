@@ -25,16 +25,16 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: vladl@google.com (Vlad Losev)
+
 //
 // The Google C++ Testing and Mocking Framework (Google Test)
 //
 // This file verifies Google Test event listeners receive events at the
 // right times.
 
-#include "gtest/gtest.h"
 #include <vector>
+
+#include "gtest/gtest.h"
 
 using ::testing::AddGlobalTestEnvironment;
 using ::testing::Environment;
