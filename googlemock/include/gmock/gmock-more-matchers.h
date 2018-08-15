@@ -37,8 +37,8 @@
 
 // GOOGLETEST_CM0002 DO NOT DELETE
 
-#ifndef GMOCK_GMOCK_MORE_MATCHERS_H_
-#define GMOCK_GMOCK_MORE_MATCHERS_H_
+#ifndef GMOCK_INCLUDE_GMOCK_MORE_MATCHERS_H_
+#define GMOCK_INCLUDE_GMOCK_MORE_MATCHERS_H_
 
 #include "gmock/gmock-generated-matchers.h"
 
@@ -89,4 +89,4 @@ MATCHER(IsFalse, negation ? "is true" : "is false") {
 
 }  // namespace testing
 
-#endif  // GMOCK_GMOCK_MORE_MATCHERS_H_
+#endif  // GMOCK_INCLUDE_GMOCK_MORE_MATCHERS_H_
