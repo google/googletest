@@ -35,8 +35,6 @@ This script invokes googletest-throw-on-failure-test_ (a program written with
 Google Test) with different environments and command line flags.
 """
 
-__author__ = 'wan@google.com (Zhanyong Wan)'
-
 import os
 import gtest_test_utils
 
@@ -75,7 +73,7 @@ def Run(command):
   return p.exited and p.exit_code == 0
 
 
-# The tests.  TODO(wan@google.com): refactor the class to share common
+# The tests.  FIXME: refactor the class to share common
 # logic with code in googletest-break-on-failure-unittest.py.
 class ThrowOnFailureTest(gtest_test_utils.TestCase):
   """Tests the throw-on-failure mode."""
