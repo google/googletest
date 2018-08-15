@@ -47,6 +47,38 @@ class MockFoo : public Foo {
 };
 ```
 
+## Splitting declaration and definition ##
+
+If you find yourself mocking a lot of methods, and including several
+headers with mocks at once, you might end up with a rather slow
+compilation step which eats up a lot of memory.
+
+A way to ameliorate the issue is to split mock method declaration and
+definition. This can be done with ``MOCK_DECLARE_METHOD<n>`` and
+``MOCK_DEFINE_METHOD<n>`` respectively. Example:
+
+```
+class Foo {
+ public:
+  ...
+  virtual bool bar(int x);
+};
+
+// ---- foo.hh: -----
+
+class MockFoo : public Foo {
+ public:
+  ...
+  MOCK_DECLARE_METHOD1(bar, bool(int));
+};
+
+// ---- foo.cc: -----
+
+#include "foo.hh"
+
+MOCK_DEFINE_METHOD1(MockFoo, bar, bool(int));
+```
+
 ## Mocking Overloaded Methods ##
 
 You can mock overloaded functions as usual. No special attention is required:
