@@ -46,10 +46,10 @@ request here.
 ## The Google Test and Google Mock Communities ##
 
 The Google Test community exists primarily through the
-[discussion group](http://groups.google.com/group/googletestframework)
+[discussion group](https://groups.google.com/forum/#!forum/googletestframework)
 and the GitHub repository.
 Likewise, the Google Mock community exists primarily through their own
-[discussion group](http://groups.google.com/group/googlemock).
+[discussion group](https://groups.google.com/forum/#!forum/googlemock).
 You are definitely encouraged to contribute to the
 discussion and you can also help us to keep the effectiveness of the
 group high by following and promoting the guidelines listed here.

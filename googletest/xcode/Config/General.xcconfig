@@ -20,7 +20,7 @@ PREBINDING = NO
 WARNING_CFLAGS = -Wall -Werror -Wendif-labels -Wnewline-eof -Wno-sign-compare -Wshadow
 
 // Work around Xcode bugs by using external strip. See:
-// http://lists.apple.com/archives/Xcode-users/2006/Feb/msg00050.html
+// https://lists.apple.com/archives/Xcode-users/2006/Feb/msg00050.html
 SEPARATE_STRIP = YES
 
 // Force C99 dialect

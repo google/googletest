@@ -1,7 +1,7 @@
 
 
 Please send your questions to the
-[googlemock](http://groups.google.com/group/googlemock) discussion
+[googlemock](https://groups.google.com/forum/#!forum/googlemock) discussion
 group. If you need help with compiler errors, make sure you have
 tried [Google Mock Doctor](#How_am_I_supposed_to_make_sense_of_these_horrible_template_error.md) first.
 
@@ -607,8 +607,8 @@ See this [recipe](CookBook.md#mocking_side_effects) for more details and an exam
 If you cannot find the answer to your question in this FAQ, there are
 some other resources you can use:
 
-  1. search the mailing list [archive](http://groups.google.com/group/googlemock/topics),
-  1. ask it on [googlemock@googlegroups.com](mailto:googlemock@googlegroups.com) and someone will answer it (to prevent spam, we require you to join the [discussion group](http://groups.google.com/group/googlemock) before you can post.).
+  1. search the mailing list [archive](https://groups.google.com/forum/#!forum/googlemock),
+  1. ask it on [googlemock@googlegroups.com](mailto:googlemock@googlegroups.com) and someone will answer it (to prevent spam, we require you to join the [discussion group](https://groups.google.com/forum/#!forum/googlemock) before you can post.).
 
 Please note that creating an issue in the
 [issue tracker](https://github.com/google/googletest/issues) is _not_

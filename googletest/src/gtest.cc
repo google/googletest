@@ -569,7 +569,7 @@ int UnitTestOptions::GTestShouldProcessSEH(DWORD exception_code) {
   //      apparently).
   //
   // SEH exception code for C++ exceptions.
-  // (see http://support.microsoft.com/kb/185294 for more information).
+  // (see https://support.microsoft.com/kb/185294 for more information).
   const DWORD kCxxExceptionCode = 0xe06d7363;
 
   bool should_handle = true;
@@ -833,7 +833,7 @@ std::string UnitTestImpl::CurrentOsStackTraceExceptTop(int skip_count) {
 TimeInMillis GetTimeInMillis() {
 #if GTEST_OS_WINDOWS_MOBILE || defined(__BORLANDC__)
   // Difference between 1970-01-01 and 1601-01-01 in milliseconds.
-  // http://analogous.blogspot.com/2005/04/epoch.html
+  // https://analogous.blogspot.com/2005/04/epoch.html
   const TimeInMillis kJavaEpochToWinFileTimeDelta =
     static_cast<TimeInMillis>(116444736UL) * 100000UL;
   const DWORD kTenthMicrosInMilliSecond = 10000;

@@ -409,7 +409,7 @@
 #  endif
 # elif defined(__GLIBCXX__)
 // Inspired by boost/config/stdlib/libstdcpp3.hpp,
-// http://gcc.gnu.org/gcc-4.2/changes.html and
+// https://gcc.gnu.org/gcc-4.2/changes.html and
 // https://web.archive.org/web/20140227044429/gcc.gnu.org/onlinedocs/libstdc++/manual/bk01pt01ch01.html#manual.intro.status.standard.200x
 #  if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)
 #   undef GTEST_HAS_STD_TUPLE_
@@ -782,7 +782,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // Determines whether clone(2) is supported.
 // Usually it will only be available on Linux, excluding
 // Linux on the Itanium architecture.
-// Also see http://linux.die.net/man/2/clone.
+// Also see https://linux.die.net/man/2/clone.
 #ifndef GTEST_HAS_CLONE
 // The user didn't tell us, so we need to figure it out.
 

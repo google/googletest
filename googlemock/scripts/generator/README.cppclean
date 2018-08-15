@@ -6,7 +6,7 @@ Goal:
   to unnecessary #include directives.  Unnecessary #includes can cause
   considerable extra compiles increasing the edit-compile-run cycle.
 
-  The project home page is:   http://code.google.com/p/cppclean/
+  The project home page is:   https://code.google.com/archive/p/cppclean/
 
 
 Features:
@@ -26,7 +26,7 @@ Features:
  * (planned) Store AST in a SQL database so relationships can be queried
 
 AST is Abstract Syntax Tree, a representation of parsed source code.
-http://en.wikipedia.org/wiki/Abstract_syntax_tree
+https://en.wikipedia.org/wiki/Abstract_syntax_tree
 
 
 System Requirements:
