@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: marcus.boerger@google.com (Marcus Boerger)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
@@ -35,6 +34,8 @@
 //
 // Note that tests are implemented in gmock-matchers_test.cc rather than
 // gmock-more-matchers-test.cc.
+
+// GOOGLETEST_CM0002 DO NOT DELETE
 
 #ifndef GMOCK_GMOCK_MORE_MATCHERS_H_
 #define GMOCK_GMOCK_MORE_MATCHERS_H_

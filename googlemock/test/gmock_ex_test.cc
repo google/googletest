@@ -26,17 +26,18 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Tests Google Mock's functionality that depends on exceptions.
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#if GTEST_HAS_EXCEPTIONS
 namespace {
 
 using testing::HasSubstr;
+
 using testing::internal::GoogleTestFailureException;
 
 // A type that cannot be default constructed.
@@ -51,8 +52,6 @@ class MockFoo {
   // doesn't know what the default value for this type is.
   MOCK_METHOD0(GetNonDefaultConstructible, NonDefaultConstructible());
 };
-
-#if GTEST_HAS_EXCEPTIONS
 
 TEST(DefaultValueTest, ThrowsRuntimeErrorWhenNoDefaultValue) {
   MockFoo mock;
@@ -76,6 +75,6 @@ TEST(DefaultValueTest, ThrowsRuntimeErrorWhenNoDefaultValue) {
   }
 }
 
-#endif
 
 }  // unnamed namespace
+#endif

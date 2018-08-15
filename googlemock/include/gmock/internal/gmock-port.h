@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: vadimb@google.com (Vadim Berman)
+
 //
 // Low-level types and utilities for porting Google Mock to various
 // platforms.  All macros ending with _ and symbols defined in an
@@ -35,6 +34,8 @@
 // outside Google Mock MUST NOT USE THEM DIRECTLY.  Macros that don't
 // end with _ are part of Google Mock's public API and can be used by
 // code outside Google Mock.
+
+// GOOGLETEST_CM0002 DO NOT DELETE
 
 #ifndef GMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_PORT_H_
 #define GMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_PORT_H_
