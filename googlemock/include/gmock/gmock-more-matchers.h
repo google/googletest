@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: marcus.boerger@google.com (Marcus Boerger)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
@@ -35,6 +34,8 @@
 //
 // Note that tests are implemented in gmock-matchers_test.cc rather than
 // gmock-more-matchers-test.cc.
+
+// GOOGLETEST_CM0002 DO NOT DELETE
 
 #ifndef GMOCK_GMOCK_MORE_MATCHERS_H_
 #define GMOCK_GMOCK_MORE_MATCHERS_H_
@@ -46,8 +47,11 @@ namespace testing {
 // Silence C4100 (unreferenced formal
 // parameter) for MSVC
 #ifdef _MSC_VER
+# pragma warning(push)
 # pragma warning(disable:4100)
 #if (_MSC_VER == 1900)
+// and silence C4800 (C4800: 'int *const ': forcing value
+// to bool 'true' or 'false') for MSVC 14
 # pragma warning(disable:4800)
   #endif
 #endif
@@ -77,6 +81,11 @@ MATCHER(IsTrue, negation ? "is false" : "is true") {
 MATCHER(IsFalse, negation ? "is true" : "is false") {
   return !static_cast<bool>(arg);
 }
+
+#ifdef _MSC_VER
+# pragma warning(pop)
+#endif
+
 
 }  // namespace testing
 

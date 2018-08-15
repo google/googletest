@@ -26,15 +26,14 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 #include "gmock/gmock.h"
 #include "gmock/internal/gmock-port.h"
 
 namespace testing {
 
-// TODO(wan@google.com): support using environment variables to
+// FIXME: support using environment variables to
 // control the flag values, like what Google Test does.
 
 GMOCK_DEFINE_bool_(catch_leaked_mocks, true,
