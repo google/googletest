@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <ProjectGuid>{bca37a72-5b07-46cf-b44e-89f8e06451a2}</ProjectGuid>
+    <ProjectGuid>{2D65159B-F95B-43F7-8DFA-F6DA19A745E5}</ProjectGuid>
     <Config Condition="'$(Config)'==''">Release</Config>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
@@ -32,6 +32,7 @@
     <AllPackageLibs>rtl.lib;vcl.lib</AllPackageLibs>
     <TLIB_PageSize>32</TLIB_PageSize>
     <ILINK_LibraryPath>$(BDS)\lib;$(BDS)\lib\obj;$(BDS)\lib\psdk</ILINK_LibraryPath>
+    <BCC_UseClassicCompiler>false</BCC_UseClassicCompiler>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Cfg_1)'!=''">
     <BCC_OptimizeForSpeed>false</BCC_OptimizeForSpeed>

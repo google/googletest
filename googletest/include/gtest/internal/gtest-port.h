@@ -773,6 +773,10 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # elif _MSC_VER >= 1600
 #  include <tuple>  // IWYU pragma: export  // NOLINT
 
+// C++Builder has ::std::tr1::tuple inside <tuple>
+# elif defined(__BORLANDC__)
+#  include <tuple>  // IWYU pragma: export  // NOLINT
+
 # else  // GTEST_USE_OWN_TR1_TUPLE
 #  include <tr1/tuple>  // IWYU pragma: export  // NOLINT
 # endif  // GTEST_USE_OWN_TR1_TUPLE
@@ -827,6 +831,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #if (GTEST_OS_LINUX || GTEST_OS_CYGWIN || GTEST_OS_SOLARIS ||   \
      (GTEST_OS_MAC && !GTEST_OS_IOS) ||                         \
      (GTEST_OS_WINDOWS_DESKTOP && _MSC_VER >= 1400) ||          \
+     defined(__BORLANDC__) ||                                   \
      GTEST_OS_WINDOWS_MINGW || GTEST_OS_AIX || GTEST_OS_HPUX || \
      GTEST_OS_OPENBSD || GTEST_OS_QNX || GTEST_OS_FREEBSD || \
      GTEST_OS_NETBSD || GTEST_OS_FUCHSIA)
@@ -836,9 +841,10 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // Determines whether to support type-driven tests.
 
 // Typed tests need <typeinfo> and variadic macros, which GCC, VC++ 8.0,
-// Sun Pro CC, IBM Visual Age, and HP aCC support.
+// Sun Pro CC, IBM Visual Age, HP aCC, and Clang-based C++Builder support.
 #if defined(__GNUC__) || (_MSC_VER >= 1400) || defined(__SUNPRO_CC) || \
-    defined(__IBMCPP__) || defined(__HP_aCC)
+    defined(__IBMCPP__) || defined(__HP_aCC) || \
+    (defined(__BORLANDC__) && defined(__clang__))
 # define GTEST_HAS_TYPED_TEST 1
 # define GTEST_HAS_TYPED_TEST_P 1
 #endif

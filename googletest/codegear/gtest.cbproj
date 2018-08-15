@@ -32,6 +32,7 @@
     <AllPackageLibs>rtl.lib;vcl.lib</AllPackageLibs>
     <TLIB_PageSize>32</TLIB_PageSize>
     <ILINK_LibraryPath>$(BDS)\lib;$(BDS)\lib\obj;$(BDS)\lib\psdk</ILINK_LibraryPath>
+    <BCC_UseClassicCompiler>false</BCC_UseClassicCompiler>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Cfg_1)'!=''">
     <BCC_OptimizeForSpeed>false</BCC_OptimizeForSpeed>

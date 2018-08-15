@@ -67,6 +67,10 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 #include <unordered_set>
 #endif  // GTEST_LANG_CXX11
 
+#if __BORLANDC__
+#include <memory>  // For auto_ptr
+#endif
+
 #include "gtest/gtest-spi.h"
 #include "src/gtest-internal-inl.h"
 
@@ -473,6 +477,18 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
     GTEST_DISABLE_MSC_WARNINGS_PUSH_(4996 /* deprecated function */)
     tzset();
     GTEST_DISABLE_MSC_WARNINGS_POP_()
+#elif __BORLANDC__
+    // putenv() in C++Builder requires caller's C-string to persist
+    // http://docwiki.embarcadero.com/RADStudio/Tokyo/en/Putenv,_wputenv
+    static std::auto_ptr<std::string> env_var;
+    std::string * s =
+        new std::string(std::string("TZ=") + (time_zone ? time_zone : ""));
+    if (0 == putenv(s->c_str())) {
+        env_var.reset(s);
+    } else {
+        delete s;
+    }
+    _tzset();
 #else
     if (time_zone) {
       setenv(("TZ"), time_zone, 1);
