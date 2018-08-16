@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
@@ -391,7 +390,7 @@ TEST(ExactlyTest, HasCorrectBounds) {
   EXPECT_EQ(3, c.ConservativeUpperBound());
 }
 
-// Tests that a user can make his own cardinality by implementing
+// Tests that a user can make their own cardinality by implementing
 // CardinalityInterface and calling MakeCardinality().
 
 class EvenCardinality : public CardinalityInterface {

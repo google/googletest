@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
@@ -37,6 +36,7 @@
 
 #include <string>
 #include "gtest/gtest.h"
+#include "gtest/internal/custom/gtest.h"
 
 #if !defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
 
@@ -51,9 +51,9 @@ void TestInitGoogleMock(const Char* (&argv)[M], const Char* (&new_argv)[N],
                         const ::std::string& expected_gmock_verbose) {
   const ::std::string old_verbose = GMOCK_FLAG(verbose);
 
-  int argc = M;
+  int argc = M - 1;
   InitGoogleMock(&argc, const_cast<Char**>(argv));
-  ASSERT_EQ(N, argc) << "The new argv has wrong number of elements.";
+  ASSERT_EQ(N - 1, argc) << "The new argv has wrong number of elements.";
 
   for (int i = 0; i < N; i++) {
     EXPECT_STREQ(new_argv[i], argv[i]);

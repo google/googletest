@@ -26,8 +26,9 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
+
+// GOOGLETEST_CM0001 DO NOT DELETE
 
 #ifndef GTEST_INCLUDE_GTEST_GTEST_TYPED_TEST_H_
 #define GTEST_INCLUDE_GTEST_GTEST_TYPED_TEST_H_
@@ -243,7 +244,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
   } \
   static const char* const GTEST_REGISTERED_TEST_NAMES_(CaseName) \
       GTEST_ATTRIBUTE_UNUSED_ = \
-          GTEST_TYPED_TEST_CASE_P_STATE_(CaseName).VerifyRegisteredTestNames(\
+          GTEST_TYPED_TEST_CASE_P_STATE_(CaseName).VerifyRegisteredTestNames( \
               __FILE__, __LINE__, #__VA_ARGS__)
 
 // The 'Types' template argument below must have spaces around it
