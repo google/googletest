@@ -229,7 +229,7 @@ The `argument` can be either a C string or a C++ string object:
 
 `ContainsRegex()` and `MatchesRegex()` use the regular expression
 syntax defined
-[here](../../googletest/docs/AdvancedGuide.md#regular-expression-syntax).
+[here](../../googletest/docs/advanced.md#regular-expression-syntax).
 `StrCaseEq()`, `StrCaseNe()`, `StrEq()`, and `StrNe()` work for wide
 strings as well.
 
@@ -349,7 +349,7 @@ You can make a matcher from one or more other matchers:
 
 ## Matchers as Test Assertions ##
 
-|`ASSERT_THAT(expression, m)`|Generates a [fatal failure](../../googletest/docs/Primer.md#assertions) if the value of `expression` doesn't match matcher `m`.|
+|`ASSERT_THAT(expression, m)`|Generates a [fatal failure](../../googletest/docs/primer.md#assertions) if the value of `expression` doesn't match matcher `m`.|
 |:---------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------|
 |`EXPECT_THAT(expression, m)`|Generates a non-fatal failure if the value of `expression` doesn't match matcher `m`.                                                          |
 

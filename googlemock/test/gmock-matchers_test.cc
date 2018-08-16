@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
@@ -2680,7 +2679,7 @@ TEST(AllOfTest, ExplainsResult) {
 }
 
 // Helper to allow easy testing of AnyOf matchers with num parameters.
-void AnyOfMatches(int num, const Matcher<int>& m) {
+static void AnyOfMatches(int num, const Matcher<int>& m) {
   SCOPED_TRACE(Describe(m));
   EXPECT_FALSE(m.Matches(0));
   for (int i = 1; i <= num; ++i) {
@@ -2688,6 +2687,18 @@ void AnyOfMatches(int num, const Matcher<int>& m) {
   }
   EXPECT_FALSE(m.Matches(num + 1));
 }
+
+#if GTEST_LANG_CXX11
+static void AnyOfStringMatches(int num, const Matcher<std::string>& m) {
+  SCOPED_TRACE(Describe(m));
+  EXPECT_FALSE(m.Matches(std::to_string(0)));
+
+  for (int i = 1; i <= num; ++i) {
+    EXPECT_TRUE(m.Matches(std::to_string(i)));
+  }
+  EXPECT_FALSE(m.Matches(std::to_string(num + 1)));
+}
+#endif
 
 // Tests that AnyOf(m1, ..., mn) matches any value that matches at
 // least one of the given matchers.
@@ -2746,6 +2757,12 @@ TEST(AnyOfTest, VariadicMatchesWhenAnyMatches) {
                          21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
                          31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
                          41, 42, 43, 44, 45, 46, 47, 48, 49, 50));
+  AnyOfStringMatches(
+      50, AnyOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
+                "13", "14", "15", "16", "17", "18", "19", "20", "21", "22",
+                "23", "24", "25", "26", "27", "28", "29", "30", "31", "32",
+                "33", "34", "35", "36", "37", "38", "39", "40", "41", "42",
+                "43", "44", "45", "46", "47", "48", "49", "50"));
 }
 
 // Tests the variadic version of the ElementsAreMatcher
@@ -3704,6 +3721,7 @@ MATCHER_P(FieldIIs, inner_matcher, "") {
   return ExplainMatchResult(inner_matcher, arg.i, result_listener);
 }
 
+#if GTEST_HAS_RTTI
 TEST(WhenDynamicCastToTest, SameType) {
   Derived derived;
   derived.i = 4;
@@ -3761,12 +3779,8 @@ TEST(WhenDynamicCastToTest, AmbiguousCast) {
 
 TEST(WhenDynamicCastToTest, Describe) {
   Matcher<Base*> matcher = WhenDynamicCastTo<Derived*>(Pointee(_));
-#if GTEST_HAS_RTTI
   const std::string prefix =
       "when dynamic_cast to " + internal::GetTypeName<Derived*>() + ", ";
-#else  // GTEST_HAS_RTTI
-  const std::string prefix = "when dynamic_cast, ";
-#endif  // GTEST_HAS_RTTI
   EXPECT_EQ(prefix + "points to a value that is anything", Describe(matcher));
   EXPECT_EQ(prefix + "does not point to a value that is anything",
             DescribeNegation(matcher));
@@ -3799,6 +3813,7 @@ TEST(WhenDynamicCastToTest, BadReference) {
   Base& as_base_ref = derived;
   EXPECT_THAT(as_base_ref, Not(WhenDynamicCastTo<const OtherDerived&>(_)));
 }
+#endif  // GTEST_HAS_RTTI
 
 // Minimal const-propagating pointer.
 template <typename T>
@@ -4222,13 +4237,17 @@ TEST(PropertyTest, WorksForReferenceToConstProperty) {
 // ref-qualified.
 TEST(PropertyTest, WorksForRefQualifiedProperty) {
   Matcher<const AClass&> m = Property(&AClass::s_ref, StartsWith("hi"));
+  Matcher<const AClass&> m_with_name =
+      Property("s", &AClass::s_ref, StartsWith("hi"));
 
   AClass a;
   a.set_s("hill");
   EXPECT_TRUE(m.Matches(a));
+  EXPECT_TRUE(m_with_name.Matches(a));
 
   a.set_s("hole");
   EXPECT_FALSE(m.Matches(a));
+  EXPECT_FALSE(m_with_name.Matches(a));
 }
 #endif
 
@@ -4572,7 +4591,7 @@ TEST(ResultOfTest, WorksForFunctors) {
 }
 
 // Tests that ResultOf(f, ...) compiles and works as expected when f is a
-// functor with more then one operator() defined. ResultOf() must work
+// functor with more than one operator() defined. ResultOf() must work
 // for each defined operator().
 struct PolymorphicFunctor {
   typedef int result_type;
@@ -6766,4 +6785,3 @@ TEST(NotTest, WorksOnMoveOnlyType) {
 
 }  // namespace gmock_matchers_test
 }  // namespace testing
-

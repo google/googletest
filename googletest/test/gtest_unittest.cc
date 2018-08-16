@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 //
 // Tests for Google Test itself.  This verifies that the basic constructs of
 // Google Test work.
@@ -35,8 +34,8 @@
 #include "gtest/gtest.h"
 
 // Verifies that the command line flag variables can be accessed in
-// code once "gtest/gtest.h" has been
-// #included.  Do not move it after other gtest #includes.
+// code once "gtest.h" has been #included.
+// Do not move it after other gtest #includes.
 TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
   bool dummy = testing::GTEST_FLAG(also_run_disabled_tests)
       || testing::GTEST_FLAG(break_on_failure)
@@ -380,6 +379,31 @@ TEST(GetTestTypeIdTest, ReturnsTheSameValueInsideOrOutsideOfGoogleTest) {
   EXPECT_EQ(kTestTypeIdInGoogleTest, GetTestTypeId());
 }
 
+// Tests CanonicalizeForStdLibVersioning.
+
+using ::testing::internal::CanonicalizeForStdLibVersioning;
+
+TEST(CanonicalizeForStdLibVersioning, LeavesUnversionedNamesUnchanged) {
+  EXPECT_EQ("std::bind", CanonicalizeForStdLibVersioning("std::bind"));
+  EXPECT_EQ("std::_", CanonicalizeForStdLibVersioning("std::_"));
+  EXPECT_EQ("std::__foo", CanonicalizeForStdLibVersioning("std::__foo"));
+  EXPECT_EQ("gtl::__1::x", CanonicalizeForStdLibVersioning("gtl::__1::x"));
+  EXPECT_EQ("__1::x", CanonicalizeForStdLibVersioning("__1::x"));
+  EXPECT_EQ("::__1::x", CanonicalizeForStdLibVersioning("::__1::x"));
+}
+
+TEST(CanonicalizeForStdLibVersioning, ElidesDoubleUnderNames) {
+  EXPECT_EQ("std::bind", CanonicalizeForStdLibVersioning("std::__1::bind"));
+  EXPECT_EQ("std::_", CanonicalizeForStdLibVersioning("std::__1::_"));
+
+  EXPECT_EQ("std::bind", CanonicalizeForStdLibVersioning("std::__g::bind"));
+  EXPECT_EQ("std::_", CanonicalizeForStdLibVersioning("std::__g::_"));
+
+  EXPECT_EQ("std::bind",
+            CanonicalizeForStdLibVersioning("std::__google::bind"));
+  EXPECT_EQ("std::_", CanonicalizeForStdLibVersioning("std::__google::_"));
+}
+
 // Tests FormatTimeInMillisAsSeconds().
 
 TEST(FormatTimeInMillisAsSecondsTest, FormatsZero) {
@@ -419,10 +443,10 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
   virtual void SetUp() {
     saved_tz_ = NULL;
 
-    GTEST_DISABLE_MSC_WARNINGS_PUSH_(4996 /* getenv, strdup: deprecated */)
+    GTEST_DISABLE_MSC_DEPRECATED_PUSH_(/* getenv, strdup: deprecated */)
     if (getenv("TZ"))
       saved_tz_ = strdup(getenv("TZ"));
-    GTEST_DISABLE_MSC_WARNINGS_POP_()
+    GTEST_DISABLE_MSC_DEPRECATED_POP_()
 
     // Set up the time zone for FormatEpochTimeInMillisAsIso8601 to use.  We
     // cannot use the local time zone because the function's output depends
@@ -1360,8 +1384,7 @@ class TestResultTest : public Test {
     // In order to test TestResult, we need to modify its internal
     // state, in particular the TestPartResult vector it holds.
     // test_part_results() returns a const reference to this vector.
-    // We cast it to a non-const object s.t. it can be modified (yes,
-    // this is a hack).
+    // We cast it to a non-const object s.t. it can be modified
     TPRVector* results1 = const_cast<TPRVector*>(
         &TestResultAccessor::test_part_results(*r1));
     TPRVector* results2 = const_cast<TPRVector*>(
@@ -4664,7 +4687,7 @@ TEST(MacroTest, ADD_FAILURE_AT) {
   // Unfortunately, we cannot verify that the failure message contains
   // the right file path and line number the same way, as
   // EXPECT_NONFATAL_FAILURE() doesn't get to see the file path and
-  // line number.  Instead, we do that in gtest_output_test_.cc.
+  // line number.  Instead, we do that in googletest-output-test_.cc.
 }
 
 // Tests FAIL.
@@ -7348,7 +7371,7 @@ GTEST_TEST(AlternativeNameTest, Works) {  // GTEST_TEST is the same as TEST.
 
 // Tests for internal utilities necessary for implementation of the universal
 // printing.
-// TODO(vladl@google.com): Find a better home for them.
+// FIXME: Find a better home for them.
 
 class ConversionHelperBase {};
 class ConversionHelperDerived : public ConversionHelperBase {};
@@ -7747,4 +7770,26 @@ TEST(SkipPrefixTest, DoesNotSkipWhenPrefixDoesNotMatch) {
   p = str;
   EXPECT_FALSE(SkipPrefix("world!", &p));
   EXPECT_EQ(str, p);
+}
+
+// Tests ad_hoc_test_result().
+
+class AdHocTestResultTest : public testing::Test {
+ protected:
+  static void SetUpTestCase() {
+    FAIL() << "A failure happened inside SetUpTestCase().";
+  }
+};
+
+TEST_F(AdHocTestResultTest, AdHocTestResultForTestCaseShowsFailure) {
+  const testing::TestResult& test_result = testing::UnitTest::GetInstance()
+                                               ->current_test_case()
+                                               ->ad_hoc_test_result();
+  EXPECT_TRUE(test_result.Failed());
+}
+
+TEST_F(AdHocTestResultTest, AdHocTestResultTestForUnitTestDoesNotShowFailure) {
+  const testing::TestResult& test_result =
+      testing::UnitTest::GetInstance()->ad_hoc_test_result();
+  EXPECT_FALSE(test_result.Failed());
 }
