@@ -62,6 +62,10 @@
 # include <type_traits>
 #endif
 
+#if GTEST_HAS_EXCEPTIONS
+# include <stdexcept>
+#endif
+
 namespace testing {
 namespace gmock_matchers_test {
 
@@ -6782,6 +6786,124 @@ TEST(NotTest, WorksOnMoveOnlyType) {
 }
 
 #endif  // GTEST_LANG_CXX11
+
+#if GTEST_HAS_EXCEPTIONS
+
+class ExceptionMessageTest : public Test
+{
+public:
+  static void throw_runtime_error() {
+    throw std::runtime_error("Hello, World!");
+  }
+
+  static void throw_int() {
+    throw 123;
+  }
+
+  static void no_throw() {}
+};
+
+// Tests that ASSERT_THROWS_WITH_MESSAGE_THAT() and
+// EXPECT_THROWS_WITH_MESSAGE_THAT() work when the exception type
+// is exactly correct and the message matches the matcher.
+TEST_F(ExceptionMessageTest, exception_thrown_correct_type_and_correct_message) {
+  ASSERT_THROWS_WITH_MESSAGE_THAT(
+    ExceptionMessageTest::throw_runtime_error(),
+    std::runtime_error,
+    StrEq("Hello, World!"));
+
+  EXPECT_THROWS_WITH_MESSAGE_THAT(
+    ExceptionMessageTest::throw_runtime_error(),
+    std::runtime_error,
+    HasSubstr("Hello"));
+}
+
+// Tests that ASSERT_THROWS_WITH_MESSAGE_THAT() and
+// EXPECT_THROWS_WITH_MESSAGE_THAT() work when the exception type
+// is a derived type of the one specified in the assertion,
+// and the message matches the matcher.
+TEST_F(ExceptionMessageTest, exception_thrown_derived_type_and_correct_message) {
+  ASSERT_THROWS_WITH_MESSAGE_THAT(
+    ExceptionMessageTest::throw_runtime_error(),
+    std::exception, // std::runtime_error is derived from std::exception
+    StrEq("Hello, World!"));
+
+  EXPECT_THROWS_WITH_MESSAGE_THAT(
+    ExceptionMessageTest::throw_runtime_error(),
+    std::exception, // std::runtime_error is derived from std::exception
+    StartsWith("Hello"));
+}
+
+// Tests that ASSERT_THROWS_WITH_MESSAGE_THAT() and
+// EXPECT_THROWS_WITH_MESSAGE_THAT() work when the exception type
+// is correct, but the message doesn't match the matcher.
+TEST_F(ExceptionMessageTest, exception_thrown_correct_type_but_incorrect_message) {
+  EXPECT_FATAL_FAILURE(
+    ASSERT_THROWS_WITH_MESSAGE_THAT(
+      ExceptionMessageTest::throw_runtime_error(),
+      std::runtime_error,
+      HasSubstr("xxx")),
+    "Incorrect throwing behaviour\n"
+    "      Expected: std::runtime_error whose message has substring \"xxx\"\n"
+    "Actual message: \"Hello, World!\"");
+
+  EXPECT_NONFATAL_FAILURE(
+    EXPECT_THROWS_WITH_MESSAGE_THAT(
+      ExceptionMessageTest::throw_runtime_error(),
+      std::runtime_error,
+      StartsWith("xxx")),
+    "Incorrect throwing behaviour\n"
+    "      Expected: std::runtime_error whose message starts with \"xxx\"\n"
+    "Actual message: \"Hello, World!\"");
+}
+
+// Tests that ASSERT_THROWS_WITH_MESSAGE_THAT() and
+// EXPECT_THROWS_WITH_MESSAGE_THAT() work when the exception type
+// is neither of the type provided in the assertion, or a derived type.
+TEST_F(ExceptionMessageTest, exception_thrown_unexpected_type) {
+  EXPECT_FATAL_FAILURE(
+    ASSERT_THROWS_WITH_MESSAGE_THAT(
+      ExceptionMessageTest::throw_int(),
+      std::runtime_error,
+      StrEq("Hello, World!")),
+    "Incorrect throwing behaviour\n"
+    "Expected: std::runtime_error whose message is equal to \"Hello, World!\"\n"
+    "  Actual: exception of an unexpected type was thrown");
+
+  EXPECT_NONFATAL_FAILURE(
+    EXPECT_THROWS_WITH_MESSAGE_THAT(
+      ExceptionMessageTest::throw_runtime_error(),
+      std::logic_error, // logic_error is not derived from std::runtime_error
+      AllOf(HasSubstr("World"), StartsWith("Hello"))),
+    "Incorrect throwing behaviour\n"
+    "Expected: std::logic_error whose message (has substring \"World\")"
+                                        " and (starts with \"Hello\")\n"
+    "  Actual: exception of an unexpected type was thrown");
+}
+
+// Tests that ASSERT_THROWS_WITH_MESSAGE_THAT() and
+// EXPECT_THROWS_WITH_MESSAGE_THAT() work when no exception is thrown.
+TEST_F(ExceptionMessageTest, exception_not_thrown) {
+  EXPECT_FATAL_FAILURE(
+    ASSERT_THROWS_WITH_MESSAGE_THAT(
+      ExceptionMessageTest::no_throw(),
+      std::runtime_error,
+      HasSubstr("xxx")),
+    "Incorrect throwing behaviour\n"
+    "Expected: std::runtime_error whose message has substring \"xxx\"\n"
+    "  Actual: No exception was thrown");
+
+  EXPECT_NONFATAL_FAILURE(
+    EXPECT_THROWS_WITH_MESSAGE_THAT(
+      ExceptionMessageTest::no_throw(),
+      std::runtime_error,
+      HasSubstr("xxx")),
+    "Incorrect throwing behaviour\n"
+    "Expected: std::runtime_error whose message has substring \"xxx\"\n"
+    "  Actual: No exception was thrown");
+}
+
+#endif  // GTEST_HAS_EXCEPTIONS
 
 }  // namespace gmock_matchers_test
 }  // namespace testing

@@ -83,6 +83,11 @@ EXPECT_NO_THROW({
 **Availability**: Linux, Windows, Mac; requires exceptions to be enabled in the
 build environment (note that `google3` **disables** exceptions).
 
+Additionally, `gmock.h` also makes available the assertions
+ASSERT_THROWS_WITH_MESSAGE_THAT and EXPECT_THROWS_WITH_MESSAGE_THAT, which
+allow you to directly test an exception's message string returned by the
+`what()` member function that all standard exceptions have.
+
 ### Predicate Assertions for Better Error Messages
 
 Even though googletest has a rich set of assertions, they can never be complete,

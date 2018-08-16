@@ -2077,6 +2077,55 @@ MakePredicateFormatterFromMatcher(M matcher) {
   return PredicateFormatterFromMatcher<M>(internal::move(matcher));
 }
 
+template <typename M>
+inline AssertionResult
+ExpectThrowsWithMessageResult(M m, const string& exception_type,
+    const string& message) {
+  const Matcher<const string&> matcher = SafeMatcherCast<const string&>(m);
+  StringMatchResultListener listener;
+  if (MatchPrintAndExplain(message, matcher, &listener))
+    return AssertionSuccess();
+
+  ::std::stringstream ss;
+  ss << "Incorrect throwing behaviour\n"
+     << "      Expected: " << exception_type << " whose message ";
+  matcher.DescribeTo(&ss);
+  ss << "\nActual message: " << listener.str();
+
+  return AssertionFailure() << ss.str();
+}
+
+enum ExceptionMessageFailure {
+  NO_EXCEPTION,
+  UNEXPECTED_EXCEPTION_TYPE
+};
+
+// Used to handle always-fail outcomes of {EXPECT|ASSERT}_THROWS_WITH_MESSAGE_THAT,
+// i.e. "no exception was thrown" and "unexpected exception type".
+template <typename M>
+inline AssertionResult
+ExpectThrowsWithMessageResult(M m,
+    const string& exception_type,
+    ExceptionMessageFailure failure_type) {
+  const Matcher<const string&> matcher = SafeMatcherCast<const string&>(m);
+
+  ::std::stringstream ss;
+  ss << "Incorrect throwing behaviour\n"
+    << "Expected: " << exception_type << " whose message ";
+  matcher.DescribeTo(&ss);
+
+  switch (failure_type) {
+  case NO_EXCEPTION:
+    ss << "\n  Actual: No exception was thrown";
+    break;
+  case UNEXPECTED_EXCEPTION_TYPE:
+    ss << "\n  Actual: exception of an unexpected type was thrown";
+    break;
+  }
+
+  return AssertionFailure() << ss.str();
+}
+
 // Implements the polymorphic floating point equality matcher, which matches
 // two float values using ULP-based approximation or, optionally, a
 // user-specified epsilon.  The template is meant to be instantiated with
@@ -5263,6 +5312,62 @@ PolymorphicMatcher<internal::variant_matcher::VariantMatcher<T> > VariantWith(
     ::testing::internal::MakePredicateFormatterFromMatcher(matcher), value)
 #define EXPECT_THAT(value, matcher) EXPECT_PRED_FORMAT1(\
     ::testing::internal::MakePredicateFormatterFromMatcher(matcher), value)
+
+// Used to implement ASSERT_THROWS_WITH_MESSAGE_THAT and EXPECT_THROWS_WITH_MESSAGE_THAT
+#define ASSERT_EXCEPTION_TYPE_AND_MESSAGE_(statement, exception_type, matcher, on_failure)\
+    do {\
+      const string et(#exception_type);\
+      bool has_thrown = false;\
+      bool correct_exception_type = false;\
+      \
+      try {\
+        statement;\
+      } catch (const exception_type& e) {\
+        has_thrown = true;\
+        correct_exception_type = true;\
+        const string exception_message(e.what());\
+        \
+        GTEST_ASSERT_(\
+          ::testing::internal::ExpectThrowsWithMessageResult(\
+            matcher,\
+            et,\
+            exception_message),\
+          on_failure);\
+      } catch (...) {\
+        has_thrown = true;\
+      }\
+      \
+      if (!has_thrown) {\
+        GTEST_ASSERT_(\
+          ::testing::internal::ExpectThrowsWithMessageResult(\
+            matcher,\
+            et,\
+            ::testing::internal::ExceptionMessageFailure::NO_EXCEPTION),\
+          on_failure);\
+      }\
+      if (has_thrown && !correct_exception_type) {\
+        GTEST_ASSERT_(\
+          ::testing::internal::ExpectThrowsWithMessageResult(\
+            matcher,\
+            et,\
+            ::testing::internal::ExceptionMessageFailure::UNEXPECTED_EXCEPTION_TYPE),\
+          on_failure);\
+      }\
+    } while (false);
+
+// These macros allow using matchers against exception messages.
+// ASSERT_THROWS_WITH_MESSAGE_THAT(value, matcher) and
+// EXPECT_THROWS_WITH_MESSAGE_THAT(value, matcher) succeed iff an exception
+// e is thrown, e's type is exception_type or a derived type, and e.what() exists
+// and returns a value, which, when converted to a string, matches the matcher.  If
+// the assertion fails, a message describing the matcher's expectation and the
+// failure reason will be printed. Failure reasons include: no exception was
+// thrown; exception had the wrong type; message string did not match the matcher.
+#define ASSERT_THROWS_WITH_MESSAGE_THAT(statement, exception_type, matcher)\
+    ASSERT_EXCEPTION_TYPE_AND_MESSAGE_(statement, exception_type, matcher, GTEST_FATAL_FAILURE_)
+
+#define EXPECT_THROWS_WITH_MESSAGE_THAT(statement, exception_type, matcher)\
+    ASSERT_EXCEPTION_TYPE_AND_MESSAGE_(statement, exception_type, matcher, GTEST_NONFATAL_FAILURE_)
 
 }  // namespace testing
 
