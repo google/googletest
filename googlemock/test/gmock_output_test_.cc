@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Tests Google Mock's output in various scenarios.  This ensures that
 // Google Mock's messages are readable and useful.
@@ -39,6 +38,12 @@
 
 #include "gtest/gtest.h"
 
+// Silence C4100 (unreferenced formal parameter)
+#ifdef _MSC_VER
+# pragma warning(push)
+# pragma warning(disable:4100)
+#endif
+
 using testing::_;
 using testing::AnyNumber;
 using testing::Ge;
@@ -47,6 +52,7 @@ using testing::NaggyMock;
 using testing::Ref;
 using testing::Return;
 using testing::Sequence;
+using testing::Value;
 
 class MockFoo {
  public:
@@ -268,6 +274,15 @@ TEST_F(GMockOutputTest, CatchesLeakedMocks) {
   // Both foo1 and foo2 are deliberately leaked.
 }
 
+MATCHER_P2(IsPair, first, second, "") {
+  return Value(arg.first, first) && Value(arg.second, second);
+}
+
+TEST_F(GMockOutputTest, PrintsMatcher) {
+  const testing::Matcher<int> m1 = Ge(48);
+  EXPECT_THAT((std::pair<int, bool>(42, true)), IsPair(m1, true));
+}
+
 void TestCatchesLeakedMocksInAdHocTests() {
   MockFoo* foo = new MockFoo;
 
@@ -280,7 +295,6 @@ void TestCatchesLeakedMocksInAdHocTests() {
 
 int main(int argc, char **argv) {
   testing::InitGoogleMock(&argc, argv);
-
   // Ensures that the tests pass no matter what value of
   // --gmock_catch_leaked_mocks and --gmock_verbose the user specifies.
   testing::GMOCK_FLAG(catch_leaked_mocks) = true;
@@ -289,3 +303,7 @@ int main(int argc, char **argv) {
   TestCatchesLeakedMocksInAdHocTests();
   return RUN_ALL_TESTS();
 }
+
+#ifdef _MSC_VER
+# pragma warning(pop)
+#endif

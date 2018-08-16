@@ -40,7 +40,7 @@ maintain.
 ## Highlights ##
 
   * The implementation is in a single Python script and thus ultra portable: no build or installation is needed and it works cross platforms.
-  * Pump tries to be smart with respect to [Google's style guide](http://code.google.com/p/google-styleguide/): it breaks long lines (easy to have when they are generated) at acceptable places to fit within 80 columns and indent the continuation lines correctly.
+  * Pump tries to be smart with respect to [Google's style guide](https://github.com/google/styleguide): it breaks long lines (easy to have when they are generated) at acceptable places to fit within 80 columns and indent the continuation lines correctly.
   * The format is human-readable and more concise than XML.
   * The format works relatively well with Emacs' C++ mode.
 
