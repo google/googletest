@@ -296,8 +296,8 @@ void Mutex::AssertHeld() {
 
 namespace {
 
-// Use the RAII idiom to flag mem allocs that are intentionally never 
-// deallocated. The motivation is to silence the false positive mem leaks 
+// Use the RAII idiom to flag mem allocs that are intentionally never
+// deallocated. The motivation is to silence the false positive mem leaks
 // that are reported by the debug version of MS's CRT which can only detect
 // if an alloc is missing a matching deallocation.
 // Example:
@@ -306,24 +306,24 @@ namespace {
 //
 class MemoryIsNotDeallocated
 {
-public:
+ public:
   MemoryIsNotDeallocated() : old_crtdbg_flag_(0) {
 #ifdef _MSC_VER
     old_crtdbg_flag_ = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
     // Set heap allocation block type to _IGNORE_BLOCK so that MS debug CRT
     // doesn't report mem leak if there's no matching deallocation.
     _CrtSetDbgFlag(old_crtdbg_flag_ & ~_CRTDBG_ALLOC_MEM_DF);
-#endif // _MSC_VER
+#endif  //  _MSC_VER
   }
 
   ~MemoryIsNotDeallocated() {
 #ifdef _MSC_VER
     // Restore the original _CRTDBG_ALLOC_MEM_DF flag
     _CrtSetDbgFlag(old_crtdbg_flag_);
-#endif // _MSC_VER
+#endif  //  _MSC_VER
   }
 
-private:
+ private:
   int old_crtdbg_flag_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MemoryIsNotDeallocated);
@@ -584,17 +584,11 @@ class ThreadLocalRegistryImpl {
     return 0;
   }
 
-  // Return a newly constructed ThreadIdToThreadLocals that's intentionally never deleted
-  static ThreadIdToThreadLocals* NewThreadIdToThreadLocals() {
-    // Use RAII to flag that following mem alloc is never deallocated.
-    MemoryIsNotDeallocated memory_is_not_deallocated;
-    return new ThreadIdToThreadLocals;
-  }
-
   // Returns map of thread local instances.
   static ThreadIdToThreadLocals* GetThreadLocalsMapLocked() {
     mutex_.AssertHeld();
-    static ThreadIdToThreadLocals* map = NewThreadIdToThreadLocals();
+    MemoryIsNotDeallocated memory_is_not_deallocated;
+    static ThreadIdToThreadLocals* map = new ThreadIdToThreadLocals();
     return map;
   }
 
