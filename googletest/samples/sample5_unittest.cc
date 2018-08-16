@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // This sample teaches how to reuse a test fixture in multiple test
 // cases by deriving sub-fixtures from it.
@@ -46,9 +45,9 @@
 
 #include <limits.h>
 #include <time.h>
-#include "sample3-inl.h"
 #include "gtest/gtest.h"
 #include "sample1.h"
+#include "sample3-inl.h"
 namespace {
 // In this sample, we want to ensure that every test finishes within
 // ~5 seconds.  If a test takes longer to run, we consider it a
