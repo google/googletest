@@ -1,6 +1,6 @@
 $$ -*- mode: c++; -*-
-$$ This is a Pump source file.  Please use Pump to convert it to
-$$ gmock-generated-function-mockers.h.
+$$ This is a Pump source file.  Please use Pump to convert
+$$ it to gmock-generated-function-mockers.h.
 $$
 $var n = 10  $$ The maximum arity we support.
 // Copyright 2007, Google Inc.
@@ -31,12 +31,13 @@ $var n = 10  $$ The maximum arity we support.
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
 // This file implements function mockers of various arities.
+
+// GOOGLETEST_CM0002 DO NOT DELETE
 
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_FUNCTION_MOCKERS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_FUNCTION_MOCKERS_H_
@@ -68,7 +69,7 @@ $for i [[
 $range j 1..i
 $var typename_As = [[$for j [[, typename A$j]]]]
 $var As = [[$for j, [[A$j]]]]
-$var as = [[$for j, [[a$j]]]]
+$var as = [[$for j, [[internal::forward<A$j>(a$j)]]]]
 $var Aas = [[$for j, [[A$j a$j]]]]
 $var ms = [[$for j, [[m$j]]]]
 $var matchers = [[$for j, [[const Matcher<A$j>& m$j]]]]
@@ -79,13 +80,8 @@ class FunctionMocker<R($As)> : public
   typedef R F($As);
   typedef typename internal::Function<F>::ArgumentTuple ArgumentTuple;
 
-  MockSpec<F>& With($matchers) {
-
-$if i >= 1 [[
-    this->current_spec().SetMatchers(::testing::make_tuple($ms));
-
-]]
-    return this->current_spec();
+  MockSpec<F> With($matchers) {
+    return MockSpec<F>(this, ::testing::make_tuple($ms));
   }
 
   R Invoke($Aas) {
@@ -99,6 +95,58 @@ $if i >= 1 [[
 
 
 ]]
+// Removes the given pointer; this is a helper for the expectation setter method
+// for parameterless matchers.
+//
+// We want to make sure that the user cannot set a parameterless expectation on
+// overloaded methods, including methods which are overloaded on const. Example:
+//
+//   class MockClass {
+//     MOCK_METHOD0(GetName, string&());
+//     MOCK_CONST_METHOD0(GetName, const string&());
+//   };
+//
+//   TEST() {
+//     // This should be an error, as it's not clear which overload is expected.
+//     EXPECT_CALL(mock, GetName).WillOnce(ReturnRef(value));
+//   }
+//
+// Here are the generated expectation-setter methods:
+//
+//   class MockClass {
+//     // Overload 1
+//     MockSpec<string&()> gmock_GetName() { ... }
+//     // Overload 2. Declared const so that the compiler will generate an
+//     // error when trying to resolve between this and overload 4 in
+//     // 'gmock_GetName(WithoutMatchers(), nullptr)'.
+//     MockSpec<string&()> gmock_GetName(
+//         const WithoutMatchers&, const Function<string&()>*) const {
+//       // Removes const from this, calls overload 1
+//       return AdjustConstness_(this)->gmock_GetName();
+//     }
+//
+//     // Overload 3
+//     const string& gmock_GetName() const { ... }
+//     // Overload 4
+//     MockSpec<const string&()> gmock_GetName(
+//         const WithoutMatchers&, const Function<const string&()>*) const {
+//       // Does not remove const, calls overload 3
+//       return AdjustConstness_const(this)->gmock_GetName();
+//     }
+//   }
+//
+template <typename MockType>
+const MockType* AdjustConstness_const(const MockType* mock) {
+  return mock;
+}
+
+// Removes const from and returns the given pointer; this is a helper for the
+// expectation setter method for parameterless matchers.
+template <typename MockType>
+MockType* AdjustConstness_(const MockType* mock) {
+  return const_cast<MockType*>(mock);
+}
+
 }  // namespace internal
 
 // The style guide prohibits "using" statements in a namespace scope
@@ -134,11 +182,14 @@ using internal::FunctionMocker;
 
 $for i [[
 $range j 1..i
-$var arg_as = [[$for j, \
-      [[GMOCK_ARG_(tn, $j, __VA_ARGS__) gmock_a$j]]]]
-$var as = [[$for j, [[gmock_a$j]]]]
-$var matcher_as = [[$for j, \
+$var arg_as = [[$for j, [[GMOCK_ARG_(tn, $j, __VA_ARGS__) gmock_a$j]]]]
+$var as = [[$for j, \
+  [[::testing::internal::forward<GMOCK_ARG_(tn, $j, __VA_ARGS__)>(gmock_a$j)]]]]
+$var matcher_arg_as = [[$for j, \
                      [[GMOCK_MATCHER_(tn, $j, __VA_ARGS__) gmock_a$j]]]]
+$var matcher_as = [[$for j, [[gmock_a$j]]]]
+$var anything_matchers = [[$for j, \
+                     [[::testing::A<GMOCK_ARG_(tn, $j, __VA_ARGS__)>()]]]]
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
 #define GMOCK_METHOD$i[[]]_(tn, constness, ct, Method, ...) \
   GMOCK_RESULT_(tn, __VA_ARGS__) ct Method( \
@@ -149,11 +200,17 @@ $var matcher_as = [[$for j, \
     GMOCK_MOCKER_($i, constness, Method).SetOwnerAndName(this, #Method); \
     return GMOCK_MOCKER_($i, constness, Method).Invoke($as); \
   } \
-  ::testing::MockSpec<__VA_ARGS__>& \
-      gmock_##Method($matcher_as) constness { \
+  ::testing::MockSpec<__VA_ARGS__> \
+      gmock_##Method($matcher_arg_as) constness { \
     GMOCK_MOCKER_($i, constness, Method).RegisterOwner(this); \
-    return GMOCK_MOCKER_($i, constness, Method).With($as); \
+    return GMOCK_MOCKER_($i, constness, Method).With($matcher_as); \
   } \
+  ::testing::MockSpec<__VA_ARGS__> gmock_##Method( \
+      const ::testing::internal::WithoutMatchers&, \
+      constness ::testing::internal::Function<__VA_ARGS__>* ) const { \
+        return ::testing::internal::AdjustConstness_##constness(this)-> \
+            gmock_##Method($anything_matchers); \
+      } \
   mutable ::testing::FunctionMocker<__VA_ARGS__> GMOCK_MOCKER_($i, constness, Method)
 
 
@@ -263,7 +320,7 @@ class MockFunction;
 $for i [[
 $range j 0..i-1
 $var ArgTypes = [[$for j, [[A$j]]]]
-$var ArgNames = [[$for j, [[a$j]]]]
+$var ArgValues = [[$for j, [[::std::move(a$j)]]]]
 $var ArgDecls = [[$for j, [[A$j a$j]]]]
 template <typename R$for j [[, typename A$j]]>
 class MockFunction<R($ArgTypes)> {
@@ -273,9 +330,9 @@ class MockFunction<R($ArgTypes)> {
   MOCK_METHOD$i[[]]_T(Call, R($ArgTypes));
 
 #if GTEST_HAS_STD_FUNCTION_
-  std::function<R($ArgTypes)> AsStdFunction() {
+  ::std::function<R($ArgTypes)> AsStdFunction() {
     return [this]($ArgDecls) -> R {
-      return this->Call($ArgNames);
+      return this->Call($ArgValues);
     };
   }
 #endif  // GTEST_HAS_STD_FUNCTION_
