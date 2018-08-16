@@ -31,8 +31,6 @@
 
 """Unit test for the gtest_xml_output module"""
 
-__author__ = 'eefacm@gmail.com (Sean Mcafee)'
-
 import datetime
 import errno
 import os
@@ -43,19 +41,28 @@ from xml.dom import minidom, Node
 import gtest_test_utils
 import gtest_xml_test_utils
 
-
 GTEST_FILTER_FLAG = '--gtest_filter'
 GTEST_LIST_TESTS_FLAG = '--gtest_list_tests'
-GTEST_OUTPUT_FLAG         = "--gtest_output"
-GTEST_DEFAULT_OUTPUT_FILE = "test_detail.xml"
-GTEST_PROGRAM_NAME = "gtest_xml_output_unittest_"
+GTEST_OUTPUT_FLAG = '--gtest_output'
+GTEST_DEFAULT_OUTPUT_FILE = 'test_detail.xml'
+GTEST_PROGRAM_NAME = 'gtest_xml_output_unittest_'
 
-SUPPORTS_STACK_TRACES = False
+# The flag indicating stacktraces are not supported
+NO_STACKTRACE_SUPPORT_FLAG = '--no_stacktrace_support'
+
+# The environment variables for test sharding.
+TOTAL_SHARDS_ENV_VAR = 'GTEST_TOTAL_SHARDS'
+SHARD_INDEX_ENV_VAR = 'GTEST_SHARD_INDEX'
+SHARD_STATUS_FILE_ENV_VAR = 'GTEST_SHARD_STATUS_FILE'
+
+SUPPORTS_STACK_TRACES = NO_STACKTRACE_SUPPORT_FLAG not in sys.argv
 
 if SUPPORTS_STACK_TRACES:
   STACK_TRACE_TEMPLATE = '\nStack trace:\n*'
 else:
   STACK_TRACE_TEMPLATE = ''
+  # unittest.main() can't handle unknown flags
+  sys.argv.remove(NO_STACKTRACE_SUPPORT_FLAG)
 
 EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="23" failures="4" disabled="2" errors="0" time="*" timestamp="*" name="AllTests" ad_hoc_property="42">
@@ -102,15 +109,45 @@ Invalid characters in brackets []%(stack)s]]></failure>
     <testcase name="DISABLED_test_not_run" status="notrun" time="*" classname="DisabledTest"/>
   </testsuite>
   <testsuite name="PropertyRecordingTest" tests="4" failures="0" disabled="0" errors="0" time="*" SetUpTestCase="yes" TearDownTestCase="aye">
-    <testcase name="OneProperty" status="run" time="*" classname="PropertyRecordingTest" key_1="1"/>
-    <testcase name="IntValuedProperty" status="run" time="*" classname="PropertyRecordingTest" key_int="1"/>
-    <testcase name="ThreeProperties" status="run" time="*" classname="PropertyRecordingTest" key_1="1" key_2="2" key_3="3"/>
-    <testcase name="TwoValuesForOneKeyUsesLastValue" status="run" time="*" classname="PropertyRecordingTest" key_1="2"/>
+    <testcase name="OneProperty" status="run" time="*" classname="PropertyRecordingTest">
+      <properties>
+        <property name="key_1" value="1"/>
+      </properties>
+    </testcase>
+    <testcase name="IntValuedProperty" status="run" time="*" classname="PropertyRecordingTest">
+      <properties>
+        <property name="key_int" value="1"/>
+      </properties>
+    </testcase>
+    <testcase name="ThreeProperties" status="run" time="*" classname="PropertyRecordingTest">
+      <properties>
+        <property name="key_1" value="1"/>
+        <property name="key_2" value="2"/>
+        <property name="key_3" value="3"/>
+      </properties>
+    </testcase>
+    <testcase name="TwoValuesForOneKeyUsesLastValue" status="run" time="*" classname="PropertyRecordingTest">
+      <properties>
+        <property name="key_1" value="2"/>
+      </properties>
+    </testcase>
   </testsuite>
   <testsuite name="NoFixtureTest" tests="3" failures="0" disabled="0" errors="0" time="*">
-     <testcase name="RecordProperty" status="run" time="*" classname="NoFixtureTest" key="1"/>
-     <testcase name="ExternalUtilityThatCallsRecordIntValuedProperty" status="run" time="*" classname="NoFixtureTest" key_for_utility_int="1"/>
-     <testcase name="ExternalUtilityThatCallsRecordStringValuedProperty" status="run" time="*" classname="NoFixtureTest" key_for_utility_string="1"/>
+     <testcase name="RecordProperty" status="run" time="*" classname="NoFixtureTest">
+       <properties>
+         <property name="key" value="1"/>
+       </properties>
+     </testcase>
+     <testcase name="ExternalUtilityThatCallsRecordIntValuedProperty" status="run" time="*" classname="NoFixtureTest">
+       <properties>
+         <property name="key_for_utility_int" value="1"/>
+       </properties>
+     </testcase>
+     <testcase name="ExternalUtilityThatCallsRecordStringValuedProperty" status="run" time="*" classname="NoFixtureTest">
+       <properties>
+         <property name="key_for_utility_string" value="1"/>
+       </properties>
+     </testcase>
   </testsuite>
   <testsuite name="Single/ValueParamTest" tests="4" failures="0" disabled="0" errors="0" time="*">
     <testcase name="HasValueParamAttribute/0" value_param="33" status="run" time="*" classname="Single/ValueParamTest" />
@@ -138,6 +175,23 @@ EXPECTED_FILTERED_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
   <testsuite name="SuccessfulTest" tests="1" failures="0" disabled="0"
              errors="0" time="*">
     <testcase name="Succeeds" status="run" time="*" classname="SuccessfulTest"/>
+  </testsuite>
+</testsuites>"""
+
+EXPECTED_SHARDED_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="3" failures="0" disabled="0" errors="0" time="*" timestamp="*" name="AllTests" ad_hoc_property="42">
+  <testsuite name="SuccessfulTest" tests="1" failures="0" disabled="0" errors="0" time="*">
+    <testcase name="Succeeds" status="run" time="*" classname="SuccessfulTest"/>
+  </testsuite>
+  <testsuite name="NoFixtureTest" tests="1" failures="0" disabled="0" errors="0" time="*">
+     <testcase name="RecordProperty" status="run" time="*" classname="NoFixtureTest">
+       <properties>
+         <property name="key" value="1"/>
+       </properties>
+     </testcase>
+  </testsuite>
+  <testsuite name="Single/ValueParamTest" tests="1" failures="0" disabled="0" errors="0" time="*">
+    <testcase name="AnotherTestThatHasValueParamAttribute/1" value_param="42" status="run" time="*" classname="Single/ValueParamTest" />
   </testsuite>
 </testsuites>"""
 
@@ -182,7 +236,7 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     Runs a test program that generates an empty XML output, and checks if
     the timestamp attribute in the testsuites tag is valid.
     """
-    actual = self._GetXmlOutput('gtest_no_test_unittest', [], 0)
+    actual = self._GetXmlOutput('gtest_no_test_unittest', [], {}, 0)
     date_time_str = actual.documentElement.getAttributeNode('timestamp').value
     # datetime.strptime() is only available in Python 2.5+ so we have to
     # parse the expected datetime manually.
@@ -212,8 +266,7 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
         'gtest_no_test_unittest')
     try:
       os.remove(output_file)
-    except OSError:
-      e = sys.exc_info()[1]
+    except OSError, e:
       if e.errno != errno.ENOENT:
         raise
 
@@ -263,7 +316,22 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     self._TestXmlOutput(GTEST_PROGRAM_NAME, EXPECTED_FILTERED_TEST_XML, 0,
                         extra_args=['%s=SuccessfulTest.*' % GTEST_FILTER_FLAG])
 
-  def _GetXmlOutput(self, gtest_prog_name, extra_args, expected_exit_code):
+  def testShardedTestXmlOutput(self):
+    """Verifies XML output when run using multiple shards.
+
+    Runs a test program that executes only one shard and verifies that tests
+    from other shards do not show up in the XML output.
+    """
+
+    self._TestXmlOutput(
+        GTEST_PROGRAM_NAME,
+        EXPECTED_SHARDED_TEST_XML,
+        0,
+        extra_env={SHARD_INDEX_ENV_VAR: '0',
+                   TOTAL_SHARDS_ENV_VAR: '10'})
+
+  def _GetXmlOutput(self, gtest_prog_name, extra_args, extra_env,
+                    expected_exit_code):
     """
     Returns the xml output generated by running the program gtest_prog_name.
     Furthermore, the program's exit code must be expected_exit_code.
@@ -274,7 +342,11 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
 
     command = ([gtest_prog_path, '%s=xml:%s' % (GTEST_OUTPUT_FLAG, xml_path)] +
                extra_args)
-    p = gtest_test_utils.Subprocess(command)
+    environ_copy = os.environ.copy()
+    if extra_env:
+      environ_copy.update(extra_env)
+    p = gtest_test_utils.Subprocess(command, env=environ_copy)
+
     if p.terminated_by_signal:
       self.assert_(False,
                    '%s was killed by signal %d' % (gtest_prog_name, p.signal))
@@ -288,7 +360,7 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     return actual
 
   def _TestXmlOutput(self, gtest_prog_name, expected_xml,
-                     expected_exit_code, extra_args=None):
+                     expected_exit_code, extra_args=None, extra_env=None):
     """
     Asserts that the XML document generated by running the program
     gtest_prog_name matches expected_xml, a string containing another
@@ -297,7 +369,7 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     """
 
     actual = self._GetXmlOutput(gtest_prog_name, extra_args or [],
-                                expected_exit_code)
+                                extra_env or {}, expected_exit_code)
     expected = minidom.parseString(expected_xml)
     self.NormalizeXml(actual.documentElement)
     self.AssertEquivalentNodes(expected.documentElement,

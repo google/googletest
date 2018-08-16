@@ -34,6 +34,7 @@ EXTRA_DIST += $(GTEST_SRC)
 # Sample files that we don't compile.
 EXTRA_DIST += \
   samples/prime_tables.h \
+  samples/sample1_unittest.cc \
   samples/sample2_unittest.cc \
   samples/sample3_unittest.cc \
   samples/sample4_unittest.cc \
@@ -52,40 +53,40 @@ EXTRA_DIST += \
   test/gtest-listener_test.cc \
   test/gtest-message_test.cc \
   test/gtest-options_test.cc \
-  test/gtest-param-test2_test.cc \
-  test/gtest-param-test2_test.cc \
-  test/gtest-param-test_test.cc \
-  test/gtest-param-test_test.cc \
+  test/googletest-param-test2-test.cc \
+  test/googletest-param-test2-test.cc \
+  test/googletest-param-test-test.cc \
+  test/googletest-param-test-test.cc \
   test/gtest-param-test_test.h \
   test/gtest-port_test.cc \
   test/gtest_premature_exit_test.cc \
   test/gtest-printers_test.cc \
   test/gtest-test-part_test.cc \
-  test/gtest-tuple_test.cc \
+  test/googletest-tuple-test.cc \
   test/gtest-typed-test2_test.cc \
   test/gtest-typed-test_test.cc \
   test/gtest-typed-test_test.h \
   test/gtest-unittest-api_test.cc \
-  test/gtest_break_on_failure_unittest_.cc \
-  test/gtest_catch_exceptions_test_.cc \
-  test/gtest_color_test_.cc \
-  test/gtest_env_var_test_.cc \
+  test/googletest-break-on-failure-unittest_.cc \
+  test/googletest-catch-exceptions-test_.cc \
+  test/googletest-color-test_.cc \
+  test/googletest-env-var-test_.cc \
   test/gtest_environment_test.cc \
-  test/gtest_filter_unittest_.cc \
+  test/googletest-filter-unittest_.cc \
   test/gtest_help_test_.cc \
-  test/gtest_list_tests_unittest_.cc \
+  test/googletest-list-tests-unittest_.cc \
   test/gtest_main_unittest.cc \
   test/gtest_no_test_unittest.cc \
-  test/gtest_output_test_.cc \
+  test/googletest-output-test_.cc \
   test/gtest_pred_impl_unittest.cc \
   test/gtest_prod_test.cc \
   test/gtest_repeat_test.cc \
-  test/gtest_shuffle_test_.cc \
+  test/googletest-shuffle-test_.cc \
   test/gtest_sole_header_test.cc \
   test/gtest_stress_test.cc \
   test/gtest_throw_on_failure_ex_test.cc \
-  test/gtest_throw_on_failure_test_.cc \
-  test/gtest_uninitialized_test_.cc \
+  test/googletest-throw-on-failure-test_.cc \
+  test/googletest-uninitialized-test_.cc \
   test/gtest_unittest.cc \
   test/gtest_unittest.cc \
   test/gtest_xml_outfile1_test_.cc \
@@ -96,19 +97,19 @@ EXTRA_DIST += \
 
 # Python tests that we don't run.
 EXTRA_DIST += \
-  test/gtest_break_on_failure_unittest.py \
-  test/gtest_catch_exceptions_test.py \
-  test/gtest_color_test.py \
-  test/gtest_env_var_test.py \
-  test/gtest_filter_unittest.py \
+  test/googletest-break-on-failure-unittest.py \
+  test/googletest-catch-exceptions-test.py \
+  test/googletest-color-test.py \
+  test/googletest-env-var-test.py \
+  test/googletest-filter-unittest.py \
   test/gtest_help_test.py \
-  test/gtest_list_tests_unittest.py \
-  test/gtest_output_test.py \
-  test/gtest_output_test_golden_lin.txt \
-  test/gtest_shuffle_test.py \
+  test/googletest-list-tests-unittest.py \
+  test/googletest-output-test.py \
+  test/googletest-output-test_golden_lin.txt \
+  test/googletest-shuffle-test.py \
   test/gtest_test_utils.py \
-  test/gtest_throw_on_failure_test.py \
-  test/gtest_uninitialized_test.py \
+  test/googletest-throw-on-failure-test.py \
+  test/googletest-uninitialized-test.py \
   test/gtest_xml_outfiles_test.py \
   test/gtest_xml_output_unittest.py \
   test/gtest_xml_test_utils.py
@@ -120,16 +121,16 @@ EXTRA_DIST += \
 
 # MSVC project files
 EXTRA_DIST += \
-  msvc/gtest-md.sln \
-  msvc/gtest-md.vcproj \
-  msvc/gtest.sln \
-  msvc/gtest.vcproj \
-  msvc/gtest_main-md.vcproj \
-  msvc/gtest_main.vcproj \
-  msvc/gtest_prod_test-md.vcproj \
-  msvc/gtest_prod_test.vcproj \
-  msvc/gtest_unittest-md.vcproj \
-  msvc/gtest_unittest.vcproj
+  msvc/2010/gtest-md.sln \
+  msvc/2010/gtest-md.vcxproj \
+  msvc/2010/gtest.sln \
+  msvc/2010/gtest.vcxproj \
+  msvc/2010/gtest_main-md.vcxproj \
+  msvc/2010/gtest_main.vcxproj \
+  msvc/2010/gtest_prod_test-md.vcxproj \
+  msvc/2010/gtest_prod_test.vcxproj \
+  msvc/2010/gtest_unittest-md.vcxproj \
+  msvc/2010/gtest_unittest.vcxproj
 
 # xcode project files
 EXTRA_DIST += \
@@ -223,33 +224,61 @@ lib_libgtest_main_la_LIBADD = lib/libgtest.la
 # TESTS -- Programs run automatically by "make check"
 # check_PROGRAMS -- Programs built by "make check" but not necessarily run
 
-noinst_LTLIBRARIES = samples/libsamples.la
-
-samples_libsamples_la_SOURCES = \
-  samples/sample1.cc \
-  samples/sample1.h \
-  samples/sample2.cc \
-  samples/sample2.h \
-  samples/sample3-inl.h \
-  samples/sample4.cc \
-  samples/sample4.h
-
 TESTS=
 TESTS_ENVIRONMENT = GTEST_SOURCE_DIR="$(srcdir)/test" \
                     GTEST_BUILD_DIR="$(top_builddir)/test"
 check_PROGRAMS=
 
 # A simple sample on using gtest.
-TESTS += samples/sample1_unittest
-check_PROGRAMS += samples/sample1_unittest
-samples_sample1_unittest_SOURCES = samples/sample1_unittest.cc
-samples_sample1_unittest_LDADD = lib/libgtest_main.la \
-                                 lib/libgtest.la \
-                                 samples/libsamples.la
+TESTS += samples/sample1_unittest \
+    samples/sample2_unittest \
+    samples/sample3_unittest \
+    samples/sample4_unittest \
+    samples/sample5_unittest \
+    samples/sample6_unittest \
+    samples/sample7_unittest \
+    samples/sample8_unittest \
+    samples/sample9_unittest \
+    samples/sample10_unittest
+check_PROGRAMS += samples/sample1_unittest \
+    samples/sample2_unittest \
+    samples/sample3_unittest \
+    samples/sample4_unittest \
+    samples/sample5_unittest \
+    samples/sample6_unittest \
+    samples/sample7_unittest \
+    samples/sample8_unittest \
+    samples/sample9_unittest \
+    samples/sample10_unittest
 
-# Another sample.  It also verifies that libgtest works.
-TESTS += samples/sample10_unittest
-check_PROGRAMS += samples/sample10_unittest
+samples_sample1_unittest_SOURCES = samples/sample1_unittest.cc samples/sample1.cc
+samples_sample1_unittest_LDADD = lib/libgtest_main.la \
+                                 lib/libgtest.la
+samples_sample2_unittest_SOURCES = samples/sample2_unittest.cc samples/sample2.cc
+samples_sample2_unittest_LDADD = lib/libgtest_main.la \
+                                 lib/libgtest.la
+samples_sample3_unittest_SOURCES = samples/sample3_unittest.cc
+samples_sample3_unittest_LDADD = lib/libgtest_main.la \
+                                 lib/libgtest.la
+samples_sample4_unittest_SOURCES = samples/sample4_unittest.cc samples/sample4.cc
+samples_sample4_unittest_LDADD = lib/libgtest_main.la \
+                                 lib/libgtest.la
+samples_sample5_unittest_SOURCES = samples/sample5_unittest.cc samples/sample1.cc
+samples_sample5_unittest_LDADD = lib/libgtest_main.la \
+                                 lib/libgtest.la
+samples_sample6_unittest_SOURCES = samples/sample6_unittest.cc
+samples_sample6_unittest_LDADD = lib/libgtest_main.la \
+                                 lib/libgtest.la
+samples_sample7_unittest_SOURCES = samples/sample7_unittest.cc
+samples_sample7_unittest_LDADD = lib/libgtest_main.la \
+                                 lib/libgtest.la
+samples_sample8_unittest_SOURCES = samples/sample8_unittest.cc
+samples_sample8_unittest_LDADD = lib/libgtest_main.la \
+                                 lib/libgtest.la
+
+# Also verify that libgtest works by itself.
+samples_sample9_unittest_SOURCES = samples/sample9_unittest.cc
+samples_sample9_unittest_LDADD = lib/libgtest.la
 samples_sample10_unittest_SOURCES = samples/sample10_unittest.cc
 samples_sample10_unittest_LDADD = lib/libgtest.la
 
