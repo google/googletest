@@ -25,8 +25,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: vladl@google.com (Vlad Losev)
+
 
 // This sample shows how to use Google Test listener API to implement
 // a primitive leak checker.
@@ -35,18 +34,15 @@
 #include <stdlib.h>
 
 #include "gtest/gtest.h"
-
 using ::testing::EmptyTestEventListener;
 using ::testing::InitGoogleTest;
 using ::testing::Test;
-using ::testing::TestCase;
 using ::testing::TestEventListeners;
 using ::testing::TestInfo;
 using ::testing::TestPartResult;
 using ::testing::UnitTest;
 
 namespace {
-
 // We will track memory used by this class.
 class Water {
  public:
@@ -106,7 +102,6 @@ TEST(ListenersTest, LeaksWater) {
   Water* water = new Water;
   EXPECT_TRUE(water != NULL);
 }
-
 }  // namespace
 
 int main(int argc, char **argv) {

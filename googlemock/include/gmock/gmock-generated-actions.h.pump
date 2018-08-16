@@ -1,5 +1,5 @@
 $$ -*- mode: c++; -*-
-$$ This is a Pump source file.  Please use Pump to convert it to
+$$ This is a Pump source file. Please use Pump to convert it to
 $$ gmock-generated-actions.h.
 $$
 $var n = 10  $$ The maximum arity we support.
@@ -32,12 +32,13 @@ $$}} This meta comment fixes auto-indentation in editors.
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
 // This file implements some commonly used variadic actions.
+
+// GOOGLETEST_CM0002 DO NOT DELETE
 
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_ACTIONS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_ACTIONS_H_
@@ -49,12 +50,13 @@ namespace testing {
 namespace internal {
 
 // InvokeHelper<F> knows how to unpack an N-tuple and invoke an N-ary
-// function or method with the unpacked values, where F is a function
-// type that takes N arguments.
+// function, method, or callback with the unpacked values, where F is
+// a function type that takes N arguments.
 template <typename Result, typename ArgumentTuple>
 class InvokeHelper;
 
 
+$var max_callback_arity = 5
 $range i 0..n
 $for i [[
 $range j 1..i
@@ -76,10 +78,47 @@ class InvokeHelper<R, ::testing::tuple<$as> > {
                         const ::testing::tuple<$as>&$args) {
            return (obj_ptr->*method_ptr)($gets);
   }
+
+
+$if i <= max_callback_arity [[
+  template <typename CallbackType>
+  static R InvokeCallback(CallbackType* callback,
+                          const ::testing::tuple<$as>&$args) {
+           return callback->Run($gets);
+  }
+]] $else [[
+  // There is no InvokeCallback() for $i-tuples
+]]
+
 };
 
 
 ]]
+// Implements the Invoke(callback) action.
+template <typename CallbackType>
+class InvokeCallbackAction {
+ public:
+  // The c'tor takes ownership of the callback.
+  explicit InvokeCallbackAction(CallbackType* callback)
+      : callback_(callback) {
+    callback->CheckIsRepeatable();  // Makes sure the callback is permanent.
+  }
+
+  // This type conversion operator template allows Invoke(callback) to
+  // be used wherever the callback's type is compatible with that of
+  // the mock function, i.e. if the mock function's arguments can be
+  // implicitly converted to the callback's arguments and the
+  // callback's result can be implicitly converted to the mock
+  // function's result.
+  template <typename Result, typename ArgumentTuple>
+  Result Perform(const ArgumentTuple& args) const {
+    return InvokeHelper<Result, ArgumentTuple>::InvokeCallback(
+        callback_.get(), args);
+  }
+ private:
+  const linked_ptr<CallbackType> callback_;
+};
+
 // An INTERNAL macro for extracting the type of a tuple field.  It's
 // subject to change without notice - DO NOT USE IN USER CODE!
 #define GMOCK_FIELD_(Tuple, N) \
@@ -357,7 +396,7 @@ $range j2 2..i
 // MORE INFORMATION:
 //
 // To learn more about using these macros, please search for 'ACTION'
-// on http://code.google.com/p/googlemock/wiki/CookBook.
+// on https://github.com/google/googletest/blob/master/googlemock/docs/CookBook.md
 
 $range i 0..n
 $range k 0..n-1
@@ -486,7 +525,7 @@ _VALUE_PARAMS($for j, [[p$j]]) $for j [[, typename p$j##_type]]
 $for i [[
 $range j 0..i-1
 #define GMOCK_INTERNAL_INIT_AND_$i[[]]_VALUE_PARAMS($for j, [[p$j]])\
-    ($for j, [[p$j##_type gmock_p$j]])$if i>0 [[ : ]]$for j, [[p$j(gmock_p$j)]]
+    ($for j, [[p$j##_type gmock_p$j]])$if i>0 [[ : ]]$for j, [[p$j(::testing::internal::move(gmock_p$j))]]
 
 
 ]]
@@ -619,7 +658,7 @@ $var class_name = [[name##Action[[$if i==0 [[]] $elif i==1 [[P]]
 $range j 0..i-1
 $var ctor_param_list = [[$for j, [[p$j##_type gmock_p$j]]]]
 $var param_types_and_names = [[$for j, [[p$j##_type p$j]]]]
-$var inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(gmock_p$j)]]]]]]
+$var inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(::testing::internal::forward<p$j##_type>(gmock_p$j))]]]]]]
 $var param_field_decls = [[$for j
 [[
 

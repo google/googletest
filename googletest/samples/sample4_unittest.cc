@@ -26,13 +26,14 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
 
-#include "gtest/gtest.h"
+
 #include "sample4.h"
+#include "gtest/gtest.h"
 
+namespace {
 // Tests the Increment() method.
+
 TEST(Counter, Increment) {
   Counter c;
 
@@ -43,3 +44,5 @@ TEST(Counter, Increment) {
   EXPECT_EQ(1, c.Increment());
   EXPECT_EQ(2, c.Increment());
 }
+
+}  // namespace

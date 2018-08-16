@@ -94,7 +94,7 @@ Google Test):
  * New feature: --gmock_catch_leaked_mocks for detecting leaked mocks.
  * New feature: ACTION_TEMPLATE for defining templatized actions.
  * New feature: the .After() clause for specifying expectation order.
- * New feature: the .With() clause for for specifying inter-argument
+ * New feature: the .With() clause for specifying inter-argument
    constraints.
  * New feature: actions ReturnArg<k>(), ReturnNew<T>(...), and
    DeleteArg<k>().
