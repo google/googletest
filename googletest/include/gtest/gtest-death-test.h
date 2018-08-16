@@ -26,14 +26,14 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 //
-// Author: wan@google.com (Zhanyong Wan)
-//
-// The Google C++ Testing Framework (Google Test)
+// The Google C++ Testing and Mocking Framework (Google Test)
 //
 // This header file defines the public API for death tests.  It is
 // #included by gtest.h so a user doesn't need to include this
 // directly.
+// GOOGLETEST_CM0001 DO NOT DELETE
 
 #ifndef GTEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_
 #define GTEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_
@@ -99,6 +99,7 @@ GTEST_API_ bool InDeathTestChild();
 //
 // On the regular expressions used in death tests:
 //
+//   GOOGLETEST_CM0005 DO NOT DELETE
 //   On POSIX-compliant systems (*nix), we use the <regex.h> library,
 //   which uses the POSIX extended regex syntax.
 //
@@ -160,7 +161,7 @@ GTEST_API_ bool InDeathTestChild();
 //   is rarely a problem as people usually don't put the test binary
 //   directory in PATH.
 //
-// TODO(wan@google.com): make thread-safe death tests search the PATH.
+// FIXME: make thread-safe death tests search the PATH.
 
 // Asserts that a given statement causes the program to exit, with an
 // integer exit status that satisfies predicate, and emitting error output
@@ -198,9 +199,10 @@ class GTEST_API_ ExitedWithCode {
   const int exit_code_;
 };
 
-# if !GTEST_OS_WINDOWS
+# if !GTEST_OS_WINDOWS && !GTEST_OS_FUCHSIA
 // Tests that an exit code describes an exit due to termination by a
 // given signal.
+// GOOGLETEST_CM0006 DO NOT DELETE
 class GTEST_API_ KilledBySignal {
  public:
   explicit KilledBySignal(int signum);

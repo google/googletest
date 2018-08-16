@@ -27,10 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// Utility functions and classes used by the Google C++ testing framework.
-//
-// Author: wan@google.com (Zhanyong Wan)
-//
+// Utility functions and classes used by the Google C++ testing framework.//
 // This file contains purely Google Test's internal implementation.  Please
 // DO NOT #INCLUDE IT IN A USER PROGRAM.
 
@@ -59,7 +56,7 @@
 # include <windows.h>  // NOLINT
 #endif  // GTEST_OS_WINDOWS
 
-#include "gtest/gtest.h"  // NOLINT
+#include "gtest/gtest.h"
 #include "gtest/gtest-spi.h"
 
 namespace testing {
@@ -86,6 +83,7 @@ const char kFilterFlag[] = "filter";
 const char kListTestsFlag[] = "list_tests";
 const char kOutputFlag[] = "output";
 const char kPrintTimeFlag[] = "print_time";
+const char kPrintUTF8Flag[] = "print_utf8";
 const char kRandomSeedFlag[] = "random_seed";
 const char kRepeatFlag[] = "repeat";
 const char kShuffleFlag[] = "shuffle";
@@ -166,6 +164,7 @@ class GTestFlagSaver {
     list_tests_ = GTEST_FLAG(list_tests);
     output_ = GTEST_FLAG(output);
     print_time_ = GTEST_FLAG(print_time);
+    print_utf8_ = GTEST_FLAG(print_utf8);
     random_seed_ = GTEST_FLAG(random_seed);
     repeat_ = GTEST_FLAG(repeat);
     shuffle_ = GTEST_FLAG(shuffle);
@@ -187,6 +186,7 @@ class GTestFlagSaver {
     GTEST_FLAG(list_tests) = list_tests_;
     GTEST_FLAG(output) = output_;
     GTEST_FLAG(print_time) = print_time_;
+    GTEST_FLAG(print_utf8) = print_utf8_;
     GTEST_FLAG(random_seed) = random_seed_;
     GTEST_FLAG(repeat) = repeat_;
     GTEST_FLAG(shuffle) = shuffle_;
@@ -208,6 +208,7 @@ class GTestFlagSaver {
   bool list_tests_;
   std::string output_;
   bool print_time_;
+  bool print_utf8_;
   internal::Int32 random_seed_;
   internal::Int32 repeat_;
   bool shuffle_;
@@ -442,6 +443,16 @@ class OsStackTraceGetter : public OsStackTraceGetterInterface {
   virtual void UponLeavingGTest();
 
  private:
+#if GTEST_HAS_ABSL
+  Mutex mutex_;  // Protects all internal state.
+
+  // We save the stack frame below the frame that calls user code.
+  // We do this because the address of the frame immediately below
+  // the user code changes between the call to UponLeavingGTest()
+  // and any calls to the stack trace code from within the user code.
+  void* caller_frame_ = nullptr;
+#endif  // GTEST_HAS_ABSL
+
   GTEST_DISALLOW_COPY_AND_ASSIGN_(OsStackTraceGetter);
 };
 
@@ -980,7 +991,7 @@ bool ParseNaturalNumber(const ::std::string& str, Integer* number) {
 
   const bool parse_success = *end == '\0' && errno == 0;
 
-  // TODO(vladl@google.com): Convert this to compile time assertion when it is
+  // FIXME: Convert this to compile time assertion when it is
   // available.
   GTEST_CHECK_(sizeof(Integer) <= sizeof(parsed));
 
@@ -1020,7 +1031,7 @@ class TestResultAccessor {
 #if GTEST_CAN_STREAM_RESULTS_
 
 // Streams test results to the given port on the given host machine.
-class GTEST_API_ StreamingListener : public EmptyTestEventListener {
+class StreamingListener : public EmptyTestEventListener {
  public:
   // Abstract base class for writing strings to a socket.
   class AbstractSocketWriter {

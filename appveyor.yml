@@ -15,24 +15,10 @@ environment:
 
     - compiler: msvc-14-seh
       generator: "Visual Studio 14 2015"
+      enabled_on_pr: yes
 
     - compiler: msvc-14-seh
       generator: "Visual Studio 14 2015 Win64"
-
-    - compiler: msvc-12-seh
-      generator: "Visual Studio 12 2013"
-
-    - compiler: msvc-12-seh
-      generator: "Visual Studio 12 2013 Win64"
-
-    - compiler: msvc-11-seh
-      generator: "Visual Studio 11 2012"
-
-    - compiler: msvc-11-seh
-      generator: "Visual Studio 11 2012 Win64"
-
-    - compiler: msvc-10-seh
-      generator: "Visual Studio 10 2010"
 
     - compiler: gcc-5.3.0-posix
       generator: "MinGW Makefiles"
@@ -86,10 +72,16 @@ build_script:
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
-    & cmake --build . --config $env:configuration
+    $cmake_parallel = if ($env:generator -eq "MinGW Makefiles") {"-j2"} else  {"/m"}
+    & cmake --build . --config $env:configuration -- $cmake_parallel
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
+
+
+skip_commits:
+  files:
+    - '**/*.md'
 
 test_script:
 - ps: |
@@ -100,7 +92,7 @@ test_script:
     if ($env:generator -eq "MinGW Makefiles") {
         return # No test available for MinGW
     }
-    & ctest -C $env:configuration --timeout 300 --output-on-failure
+    & ctest -C $env:configuration --timeout 600 --output-on-failure
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }

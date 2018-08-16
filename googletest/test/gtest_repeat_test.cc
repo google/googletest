@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Tests the --gtest_repeat=number flag.
 
@@ -67,7 +66,7 @@ namespace {
 
 
 // Used for verifying that global environment set-up and tear-down are
-// inside the gtest_repeat loop.
+// inside the --gtest_repeat loop.
 
 int g_environment_set_up_count = 0;
 int g_environment_tear_down_count = 0;
@@ -118,8 +117,7 @@ const int kNumberOfParamTests = 10;
 class MyParamTest : public testing::TestWithParam<int> {};
 
 TEST_P(MyParamTest, ShouldPass) {
-  // TODO(vladl@google.com): Make parameter value checking robust
-  //                         WRT order of tests.
+  // FIXME: Make parameter value checking robust WRT order of tests.
   GTEST_CHECK_INT_EQ_(g_param_test_count % kNumberOfParamTests, GetParam());
   g_param_test_count++;
 }

@@ -4,6 +4,12 @@
 [![Build Status](https://travis-ci.org/google/googletest.svg?branch=master)](https://travis-ci.org/google/googletest)
 [![Build status](https://ci.appveyor.com/api/projects/status/4o38plt0xbo1ubc8/branch/master?svg=true)](https://ci.appveyor.com/project/GoogleTestAppVeyor/googletest/branch/master)
 
+**Future Plans**:
+* 1.8.x Release - the 1.8.x will be the last release that works with pre-C++11 compilers. The 1.8.1 will not accept any requests for any new features and any bugfix requests will only be accepted if proven "critical"
+* Post 1.8.x - work to improve/cleanup/pay technical debt. When this work is completed there will be a 1.9.x tagged release
+* Post 1.9.x googletest will follow [Abseil Live at Head philosophy](https://abseil.io/about/philosophy)
+
+
 Welcome to **Google Test**, Google's C++ test framework!
 
 This repository is a merger of the formerly separate GoogleTest and
@@ -15,8 +21,8 @@ mailing list for questions, discussions, and development.  There is
 also an IRC channel on [OFTC](https://webchat.oftc.net/) (irc.oftc.net) #gtest available.  Please
 join us!
 
-Getting started information for **Google Test** is available in the 
-[Google Test Primer](googletest/docs/Primer.md) documentation.
+Getting started information for **Google Test** is available in the
+[Google Test Primer](googletest/docs/primer.md) documentation.
 
 **Google Mock** is an extension to Google Test for writing and using C++ mock
 classes.  See the separate [Google Mock documentation](googlemock/README.md).
@@ -103,7 +109,7 @@ package (as described below):
 
 ### Windows Requirements ###
 
-  * Microsoft Visual C++ 2010 or newer
+  * Microsoft Visual C++ 2015 or newer
 
 ### Cygwin Requirements ###
 
