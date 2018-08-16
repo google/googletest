@@ -26,12 +26,20 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
 // This file tests the built-in actions.
+
+// Silence C4800 (C4800: 'int *const ': forcing value
+// to bool 'true' or 'false') for MSVC 14,15
+#ifdef _MSC_VER
+#if _MSC_VER <= 1900
+#  pragma warning(push)
+#  pragma warning(disable:4800)
+#endif
+#endif
 
 #include "gmock/gmock-actions.h"
 #include <algorithm>
@@ -65,6 +73,7 @@ using testing::ReturnRef;
 using testing::ReturnRefOfCopy;
 using testing::SetArgPointee;
 using testing::SetArgumentPointee;
+using testing::Unused;
 using testing::_;
 using testing::get;
 using testing::internal::BuiltInDefaultValue;
@@ -77,10 +86,6 @@ using testing::tuple_element;
 #if !GTEST_OS_WINDOWS_MOBILE
 using testing::SetErrnoAndReturn;
 #endif
-
-#if GTEST_HAS_PROTOBUF_
-using testing::internal::TestMessage;
-#endif  // GTEST_HAS_PROTOBUF_
 
 // Tests that BuiltInDefaultValue<T*>::Get() returns NULL.
 TEST(BuiltInDefaultValueTest, IsNullForPointerTypes) {
@@ -107,7 +112,11 @@ TEST(BuiltInDefaultValueTest, IsZeroForNumericTypes) {
   EXPECT_EQ(0, BuiltInDefaultValue<signed wchar_t>::Get());
 #endif
 #if GMOCK_WCHAR_T_IS_NATIVE_
+#if !defined(__WCHAR_UNSIGNED__)
   EXPECT_EQ(0, BuiltInDefaultValue<wchar_t>::Get());
+#else
+  EXPECT_EQ(0U, BuiltInDefaultValue<wchar_t>::Get());
+#endif
 #endif
   EXPECT_EQ(0U, BuiltInDefaultValue<unsigned short>::Get());  // NOLINT
   EXPECT_EQ(0, BuiltInDefaultValue<signed short>::Get());  // NOLINT
@@ -214,7 +223,7 @@ class MyNonDefaultConstructible {
   int value_;
 };
 
-#if GTEST_HAS_STD_TYPE_TRAITS_
+#if GTEST_LANG_CXX11
 
 TEST(BuiltInDefaultValueTest, ExistsForDefaultConstructibleType) {
   EXPECT_TRUE(BuiltInDefaultValue<MyDefaultConstructible>::Exists());
@@ -224,7 +233,7 @@ TEST(BuiltInDefaultValueTest, IsDefaultConstructedForDefaultConstructibleType) {
   EXPECT_EQ(42, BuiltInDefaultValue<MyDefaultConstructible>::Get().value());
 }
 
-#endif  // GTEST_HAS_STD_TYPE_TRAITS_
+#endif  // GTEST_LANG_CXX11
 
 TEST(BuiltInDefaultValueTest, DoesNotExistForNonDefaultConstructibleType) {
   EXPECT_FALSE(BuiltInDefaultValue<MyNonDefaultConstructible>::Exists());
@@ -700,6 +709,9 @@ class MockClass {
   MOCK_METHOD0(MakeUnique, std::unique_ptr<int>());
   MOCK_METHOD0(MakeUniqueBase, std::unique_ptr<Base>());
   MOCK_METHOD0(MakeVectorUnique, std::vector<std::unique_ptr<int>>());
+  MOCK_METHOD1(TakeUnique, int(std::unique_ptr<int>));
+  MOCK_METHOD2(TakeUnique,
+               int(const std::unique_ptr<int>&, std::unique_ptr<int>));
 #endif
 
  private:
@@ -878,105 +890,6 @@ TEST(SetArgPointeeTest, AcceptsWideCharPointer) {
 # endif
 }
 
-#if GTEST_HAS_PROTOBUF_
-
-// Tests that SetArgPointee<N>(proto_buffer) sets the v1 protobuf
-// variable pointed to by the N-th (0-based) argument to proto_buffer.
-TEST(SetArgPointeeTest, SetsTheNthPointeeOfProtoBufferType) {
-  TestMessage* const msg = new TestMessage;
-  msg->set_member("yes");
-  TestMessage orig_msg;
-  orig_msg.CopyFrom(*msg);
-
-  Action<void(bool, TestMessage*)> a = SetArgPointee<1>(*msg);
-  // SetArgPointee<N>(proto_buffer) makes a copy of proto_buffer
-  // s.t. the action works even when the original proto_buffer has
-  // died.  We ensure this behavior by deleting msg before using the
-  // action.
-  delete msg;
-
-  TestMessage dest;
-  EXPECT_FALSE(orig_msg.Equals(dest));
-  a.Perform(make_tuple(true, &dest));
-  EXPECT_TRUE(orig_msg.Equals(dest));
-}
-
-// Tests that SetArgPointee<N>(proto_buffer) sets the
-// ::ProtocolMessage variable pointed to by the N-th (0-based)
-// argument to proto_buffer.
-TEST(SetArgPointeeTest, SetsTheNthPointeeOfProtoBufferBaseType) {
-  TestMessage* const msg = new TestMessage;
-  msg->set_member("yes");
-  TestMessage orig_msg;
-  orig_msg.CopyFrom(*msg);
-
-  Action<void(bool, ::ProtocolMessage*)> a = SetArgPointee<1>(*msg);
-  // SetArgPointee<N>(proto_buffer) makes a copy of proto_buffer
-  // s.t. the action works even when the original proto_buffer has
-  // died.  We ensure this behavior by deleting msg before using the
-  // action.
-  delete msg;
-
-  TestMessage dest;
-  ::ProtocolMessage* const dest_base = &dest;
-  EXPECT_FALSE(orig_msg.Equals(dest));
-  a.Perform(make_tuple(true, dest_base));
-  EXPECT_TRUE(orig_msg.Equals(dest));
-}
-
-// Tests that SetArgPointee<N>(proto2_buffer) sets the v2
-// protobuf variable pointed to by the N-th (0-based) argument to
-// proto2_buffer.
-TEST(SetArgPointeeTest, SetsTheNthPointeeOfProto2BufferType) {
-  using testing::internal::FooMessage;
-  FooMessage* const msg = new FooMessage;
-  msg->set_int_field(2);
-  msg->set_string_field("hi");
-  FooMessage orig_msg;
-  orig_msg.CopyFrom(*msg);
-
-  Action<void(bool, FooMessage*)> a = SetArgPointee<1>(*msg);
-  // SetArgPointee<N>(proto2_buffer) makes a copy of
-  // proto2_buffer s.t. the action works even when the original
-  // proto2_buffer has died.  We ensure this behavior by deleting msg
-  // before using the action.
-  delete msg;
-
-  FooMessage dest;
-  dest.set_int_field(0);
-  a.Perform(make_tuple(true, &dest));
-  EXPECT_EQ(2, dest.int_field());
-  EXPECT_EQ("hi", dest.string_field());
-}
-
-// Tests that SetArgPointee<N>(proto2_buffer) sets the
-// proto2::Message variable pointed to by the N-th (0-based) argument
-// to proto2_buffer.
-TEST(SetArgPointeeTest, SetsTheNthPointeeOfProto2BufferBaseType) {
-  using testing::internal::FooMessage;
-  FooMessage* const msg = new FooMessage;
-  msg->set_int_field(2);
-  msg->set_string_field("hi");
-  FooMessage orig_msg;
-  orig_msg.CopyFrom(*msg);
-
-  Action<void(bool, ::proto2::Message*)> a = SetArgPointee<1>(*msg);
-  // SetArgPointee<N>(proto2_buffer) makes a copy of
-  // proto2_buffer s.t. the action works even when the original
-  // proto2_buffer has died.  We ensure this behavior by deleting msg
-  // before using the action.
-  delete msg;
-
-  FooMessage dest;
-  dest.set_int_field(0);
-  ::proto2::Message* const dest_base = &dest;
-  a.Perform(make_tuple(true, dest_base));
-  EXPECT_EQ(2, dest.int_field());
-  EXPECT_EQ("hi", dest.string_field());
-}
-
-#endif  // GTEST_HAS_PROTOBUF_
-
 // Tests that SetArgumentPointee<N>(v) sets the variable pointed to by
 // the N-th (0-based) argument to v.
 TEST(SetArgumentPointeeTest, SetsTheNthPointee) {
@@ -996,105 +909,6 @@ TEST(SetArgumentPointeeTest, SetsTheNthPointee) {
   EXPECT_EQ(0, n);
   EXPECT_EQ('a', ch);
 }
-
-#if GTEST_HAS_PROTOBUF_
-
-// Tests that SetArgumentPointee<N>(proto_buffer) sets the v1 protobuf
-// variable pointed to by the N-th (0-based) argument to proto_buffer.
-TEST(SetArgumentPointeeTest, SetsTheNthPointeeOfProtoBufferType) {
-  TestMessage* const msg = new TestMessage;
-  msg->set_member("yes");
-  TestMessage orig_msg;
-  orig_msg.CopyFrom(*msg);
-
-  Action<void(bool, TestMessage*)> a = SetArgumentPointee<1>(*msg);
-  // SetArgumentPointee<N>(proto_buffer) makes a copy of proto_buffer
-  // s.t. the action works even when the original proto_buffer has
-  // died.  We ensure this behavior by deleting msg before using the
-  // action.
-  delete msg;
-
-  TestMessage dest;
-  EXPECT_FALSE(orig_msg.Equals(dest));
-  a.Perform(make_tuple(true, &dest));
-  EXPECT_TRUE(orig_msg.Equals(dest));
-}
-
-// Tests that SetArgumentPointee<N>(proto_buffer) sets the
-// ::ProtocolMessage variable pointed to by the N-th (0-based)
-// argument to proto_buffer.
-TEST(SetArgumentPointeeTest, SetsTheNthPointeeOfProtoBufferBaseType) {
-  TestMessage* const msg = new TestMessage;
-  msg->set_member("yes");
-  TestMessage orig_msg;
-  orig_msg.CopyFrom(*msg);
-
-  Action<void(bool, ::ProtocolMessage*)> a = SetArgumentPointee<1>(*msg);
-  // SetArgumentPointee<N>(proto_buffer) makes a copy of proto_buffer
-  // s.t. the action works even when the original proto_buffer has
-  // died.  We ensure this behavior by deleting msg before using the
-  // action.
-  delete msg;
-
-  TestMessage dest;
-  ::ProtocolMessage* const dest_base = &dest;
-  EXPECT_FALSE(orig_msg.Equals(dest));
-  a.Perform(make_tuple(true, dest_base));
-  EXPECT_TRUE(orig_msg.Equals(dest));
-}
-
-// Tests that SetArgumentPointee<N>(proto2_buffer) sets the v2
-// protobuf variable pointed to by the N-th (0-based) argument to
-// proto2_buffer.
-TEST(SetArgumentPointeeTest, SetsTheNthPointeeOfProto2BufferType) {
-  using testing::internal::FooMessage;
-  FooMessage* const msg = new FooMessage;
-  msg->set_int_field(2);
-  msg->set_string_field("hi");
-  FooMessage orig_msg;
-  orig_msg.CopyFrom(*msg);
-
-  Action<void(bool, FooMessage*)> a = SetArgumentPointee<1>(*msg);
-  // SetArgumentPointee<N>(proto2_buffer) makes a copy of
-  // proto2_buffer s.t. the action works even when the original
-  // proto2_buffer has died.  We ensure this behavior by deleting msg
-  // before using the action.
-  delete msg;
-
-  FooMessage dest;
-  dest.set_int_field(0);
-  a.Perform(make_tuple(true, &dest));
-  EXPECT_EQ(2, dest.int_field());
-  EXPECT_EQ("hi", dest.string_field());
-}
-
-// Tests that SetArgumentPointee<N>(proto2_buffer) sets the
-// proto2::Message variable pointed to by the N-th (0-based) argument
-// to proto2_buffer.
-TEST(SetArgumentPointeeTest, SetsTheNthPointeeOfProto2BufferBaseType) {
-  using testing::internal::FooMessage;
-  FooMessage* const msg = new FooMessage;
-  msg->set_int_field(2);
-  msg->set_string_field("hi");
-  FooMessage orig_msg;
-  orig_msg.CopyFrom(*msg);
-
-  Action<void(bool, ::proto2::Message*)> a = SetArgumentPointee<1>(*msg);
-  // SetArgumentPointee<N>(proto2_buffer) makes a copy of
-  // proto2_buffer s.t. the action works even when the original
-  // proto2_buffer has died.  We ensure this behavior by deleting msg
-  // before using the action.
-  delete msg;
-
-  FooMessage dest;
-  dest.set_int_field(0);
-  ::proto2::Message* const dest_base = &dest;
-  a.Perform(make_tuple(true, dest_base));
-  EXPECT_EQ(2, dest.int_field());
-  EXPECT_EQ("hi", dest.string_field());
-}
-
-#endif  // GTEST_HAS_PROTOBUF_
 
 // Sample functions and functors for testing Invoke() and etc.
 int Nullary() { return 1; }
@@ -1406,6 +1220,153 @@ TEST(MockMethodTest, CanReturnMoveOnlyValue_Invoke) {
   EXPECT_EQ(7, *vresult[0]);
 }
 
+TEST(MockMethodTest, CanTakeMoveOnlyValue) {
+  MockClass mock;
+  auto make = [](int i) { return std::unique_ptr<int>(new int(i)); };
+
+  EXPECT_CALL(mock, TakeUnique(_)).WillRepeatedly([](std::unique_ptr<int> i) {
+    return *i;
+  });
+  // DoAll() does not compile, since it would move from its arguments twice.
+  // EXPECT_CALL(mock, TakeUnique(_, _))
+  //     .WillRepeatedly(DoAll(Invoke([](std::unique_ptr<int> j) {}),
+  //     Return(1)));
+  EXPECT_CALL(mock, TakeUnique(testing::Pointee(7)))
+      .WillOnce(Return(-7))
+      .RetiresOnSaturation();
+  EXPECT_CALL(mock, TakeUnique(testing::IsNull()))
+      .WillOnce(Return(-1))
+      .RetiresOnSaturation();
+
+  EXPECT_EQ(5, mock.TakeUnique(make(5)));
+  EXPECT_EQ(-7, mock.TakeUnique(make(7)));
+  EXPECT_EQ(7, mock.TakeUnique(make(7)));
+  EXPECT_EQ(7, mock.TakeUnique(make(7)));
+  EXPECT_EQ(-1, mock.TakeUnique({}));
+
+  // Some arguments are moved, some passed by reference.
+  auto lvalue = make(6);
+  EXPECT_CALL(mock, TakeUnique(_, _))
+      .WillOnce([](const std::unique_ptr<int>& i, std::unique_ptr<int> j) {
+        return *i * *j;
+      });
+  EXPECT_EQ(42, mock.TakeUnique(lvalue, make(7)));
+
+  // The unique_ptr can be saved by the action.
+  std::unique_ptr<int> saved;
+  EXPECT_CALL(mock, TakeUnique(_)).WillOnce([&saved](std::unique_ptr<int> i) {
+    saved = std::move(i);
+    return 0;
+  });
+  EXPECT_EQ(0, mock.TakeUnique(make(42)));
+  EXPECT_EQ(42, *saved);
+}
+
 #endif  // GTEST_HAS_STD_UNIQUE_PTR_
 
+#if GTEST_LANG_CXX11
+// Tests for std::function based action.
+
+int Add(int val, int& ref, int* ptr) {  // NOLINT
+  int result = val + ref + *ptr;
+  ref = 42;
+  *ptr = 43;
+  return result;
+}
+
+int Deref(std::unique_ptr<int> ptr) { return *ptr; }
+
+struct Double {
+  template <typename T>
+  T operator()(T t) { return 2 * t; }
+};
+
+std::unique_ptr<int> UniqueInt(int i) {
+  return std::unique_ptr<int>(new int(i));
+}
+
+TEST(FunctorActionTest, ActionFromFunction) {
+  Action<int(int, int&, int*)> a = &Add;
+  int x = 1, y = 2, z = 3;
+  EXPECT_EQ(6, a.Perform(std::forward_as_tuple(x, y, &z)));
+  EXPECT_EQ(42, y);
+  EXPECT_EQ(43, z);
+
+  Action<int(std::unique_ptr<int>)> a1 = &Deref;
+  EXPECT_EQ(7, a1.Perform(std::make_tuple(UniqueInt(7))));
+}
+
+TEST(FunctorActionTest, ActionFromLambda) {
+  Action<int(bool, int)> a1 = [](bool b, int i) { return b ? i : 0; };
+  EXPECT_EQ(5, a1.Perform(make_tuple(true, 5)));
+  EXPECT_EQ(0, a1.Perform(make_tuple(false, 5)));
+
+  std::unique_ptr<int> saved;
+  Action<void(std::unique_ptr<int>)> a2 = [&saved](std::unique_ptr<int> p) {
+    saved = std::move(p);
+  };
+  a2.Perform(make_tuple(UniqueInt(5)));
+  EXPECT_EQ(5, *saved);
+}
+
+TEST(FunctorActionTest, PolymorphicFunctor) {
+  Action<int(int)> ai = Double();
+  EXPECT_EQ(2, ai.Perform(make_tuple(1)));
+  Action<double(double)> ad = Double();  // Double? Double double!
+  EXPECT_EQ(3.0, ad.Perform(make_tuple(1.5)));
+}
+
+TEST(FunctorActionTest, TypeConversion) {
+  // Numeric promotions are allowed.
+  const Action<bool(int)> a1 = [](int i) { return i > 1; };
+  const Action<int(bool)> a2 = Action<int(bool)>(a1);
+  EXPECT_EQ(1, a1.Perform(make_tuple(42)));
+  EXPECT_EQ(0, a2.Perform(make_tuple(42)));
+
+  // Implicit constructors are allowed.
+  const Action<bool(std::string)> s1 = [](std::string s) { return !s.empty(); };
+  const Action<int(const char*)> s2 = Action<int(const char*)>(s1);
+  EXPECT_EQ(0, s2.Perform(make_tuple("")));
+  EXPECT_EQ(1, s2.Perform(make_tuple("hello")));
+
+  // Also between the lambda and the action itself.
+  const Action<bool(std::string)> x = [](Unused) { return 42; };
+  EXPECT_TRUE(x.Perform(make_tuple("hello")));
+}
+
+TEST(FunctorActionTest, UnusedArguments) {
+  // Verify that users can ignore uninteresting arguments.
+  Action<int(int, double y, double z)> a =
+      [](int i, Unused, Unused) { return 2 * i; };
+  tuple<int, double, double> dummy = make_tuple(3, 7.3, 9.44);
+  EXPECT_EQ(6, a.Perform(dummy));
+}
+
+// Test that basic built-in actions work with move-only arguments.
+// FIXME: Currently, almost all ActionInterface-based actions will not
+// work, even if they only try to use other, copyable arguments. Implement them
+// if necessary (but note that DoAll cannot work on non-copyable types anyway -
+// so maybe it's better to make users use lambdas instead.
+TEST(MoveOnlyArgumentsTest, ReturningActions) {
+  Action<int(std::unique_ptr<int>)> a = Return(1);
+  EXPECT_EQ(1, a.Perform(make_tuple(nullptr)));
+
+  a = testing::WithoutArgs([]() { return 7; });
+  EXPECT_EQ(7, a.Perform(make_tuple(nullptr)));
+
+  Action<void(std::unique_ptr<int>, int*)> a2 = testing::SetArgPointee<1>(3);
+  int x = 0;
+  a2.Perform(make_tuple(nullptr, &x));
+  EXPECT_EQ(x, 3);
+}
+
+#endif  // GTEST_LANG_CXX11
+
 }  // Unnamed namespace
+
+#ifdef _MSC_VER
+#if _MSC_VER == 1900
+#  pragma warning(pop)
+#endif
+#endif
+

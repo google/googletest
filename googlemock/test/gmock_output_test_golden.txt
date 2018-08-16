@@ -288,6 +288,12 @@ Stack trace:
 [       OK ] GMockOutputTest.ExplicitActionsRunOutWithDefaultAction
 [ RUN      ] GMockOutputTest.CatchesLeakedMocks
 [       OK ] GMockOutputTest.CatchesLeakedMocks
+[ RUN      ] GMockOutputTest.PrintsMatcher
+FILE:#: Failure
+Value of: (std::pair<int, bool>(42, true))
+Expected: is pair (is >= 48, true)
+  Actual: (42, true) (of type std::pair<int, bool>)
+[  FAILED  ] GMockOutputTest.PrintsMatcher
 [  FAILED  ] GMockOutputTest.UnexpectedCall
 [  FAILED  ] GMockOutputTest.UnexpectedCallToVoidFunction
 [  FAILED  ] GMockOutputTest.ExcessiveCall
@@ -302,9 +308,10 @@ Stack trace:
 [  FAILED  ] GMockOutputTest.MismatchArgumentsAndWith
 [  FAILED  ] GMockOutputTest.UnexpectedCallWithDefaultAction
 [  FAILED  ] GMockOutputTest.ExcessiveCallWithDefaultAction
+[  FAILED  ] GMockOutputTest.PrintsMatcher
 
 
 FILE:#: ERROR: this mock object should be deleted but never is. Its address is @0x#.
 FILE:#: ERROR: this mock object should be deleted but never is. Its address is @0x#.
 FILE:#: ERROR: this mock object should be deleted but never is. Its address is @0x#.
-ERROR: 3 leaked mock objects found at program exit.
+ERROR: 3 leaked mock objects found at program exit. Expectations on a mock object is verified when the object is destructed. Leaking a mock means that its expectations aren't verified, which is usually a test bug. If you really intend to leak a mock, you can suppress this error using testing::Mock::AllowLeak(mock_object), or you may use a fake or stub instead of a mock.

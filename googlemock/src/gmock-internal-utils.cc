@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
@@ -47,12 +46,31 @@
 namespace testing {
 namespace internal {
 
+// Joins a vector of strings as if they are fields of a tuple; returns
+// the joined string.
+GTEST_API_ std::string JoinAsTuple(const Strings& fields) {
+  switch (fields.size()) {
+    case 0:
+      return "";
+    case 1:
+      return fields[0];
+    default:
+      std::string result = "(" + fields[0];
+      for (size_t i = 1; i < fields.size(); i++) {
+        result += ", ";
+        result += fields[i];
+      }
+      result += ")";
+      return result;
+  }
+}
+
 // Converts an identifier name to a space-separated list of lower-case
 // words.  Each maximum substring of the form [A-Za-z][a-z]*|\d+ is
 // treated as one word.  For example, both "FooBar123" and
 // "foo_bar_123" are converted to "foo bar 123".
-GTEST_API_ string ConvertIdentifierNameToWords(const char* id_name) {
-  string result;
+GTEST_API_ std::string ConvertIdentifierNameToWords(const char* id_name) {
+  std::string result;
   char prev_char = '\0';
   for (const char* p = id_name; *p != '\0'; prev_char = *(p++)) {
     // We don't care about the current locale as the input is
@@ -167,6 +185,18 @@ GTEST_API_ void Log(LogSeverity severity, const std::string& message,
              ::testing::UnitTest::GetInstance(), actual_to_skip);
   }
   std::cout << ::std::flush;
+}
+
+GTEST_API_ WithoutMatchers GetWithoutMatchers() { return WithoutMatchers(); }
+
+GTEST_API_ void IllegalDoDefault(const char* file, int line) {
+  internal::Assert(
+      false, file, line,
+      "You are using DoDefault() inside a composite action like "
+      "DoAll() or WithArgs().  This is not supported for technical "
+      "reasons.  Please instead spell out the default action, or "
+      "assign the default action to an Action variable and use "
+      "the variable in various places.");
 }
 
 }  // namespace internal
