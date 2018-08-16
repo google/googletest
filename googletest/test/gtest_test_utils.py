@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-#
 # Copyright 2006, Google Inc.
 # All rights reserved.
 #
@@ -29,20 +27,21 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-"""Unit test utilities for Google C++ Testing Framework."""
-
-__author__ = 'wan@google.com (Zhanyong Wan)'
-
-import atexit
-import os
-import shutil
-import sys
-import tempfile
-import unittest
-_test_module = unittest
-
+"""Unit test utilities for Google C++ Testing and Mocking Framework."""
 # Suppresses the 'Import not at the top of the file' lint complaint.
 # pylint: disable-msg=C6204
+
+import os
+import sys
+
+IS_WINDOWS = os.name == 'nt'
+IS_CYGWIN = os.name == 'posix' and 'CYGWIN' in os.uname()[0]
+
+import atexit
+import shutil
+import tempfile
+import unittest as _test_module
+
 try:
   import subprocess
   _SUBPROCESS_MODULE_AVAILABLE = True
@@ -52,9 +51,6 @@ except:
 # pylint: enable-msg=C6204
 
 GTEST_OUTPUT_VAR_NAME = 'GTEST_OUTPUT'
-
-IS_WINDOWS = os.name == 'nt'
-IS_CYGWIN = os.name == 'posix' and 'CYGWIN' in os.uname()[0]
 
 # The environment variable for specifying the path to the premature-exit file.
 PREMATURE_EXIT_FILE_ENV_VAR = 'TEST_PREMATURE_EXIT_FILE'
@@ -74,7 +70,7 @@ def SetEnvVar(env_var, value):
 # Here we expose a class from a particular module, depending on the
 # environment. The comment suppresses the 'Invalid variable name' lint
 # complaint.
-TestCase = _test_module.TestCase  # pylint: disable-msg=C6409
+TestCase = _test_module.TestCase  # pylint: disable=C6409
 
 # Initially maps a flag to its default value. After
 # _ParseAndStripGTestFlags() is called, maps a flag to its actual value.
@@ -88,7 +84,7 @@ def _ParseAndStripGTestFlags(argv):
 
   # Suppresses the lint complaint about a global variable since we need it
   # here to maintain module-wide state.
-  global _gtest_flags_are_parsed  # pylint: disable-msg=W0603
+  global _gtest_flags_are_parsed  # pylint: disable=W0603
   if _gtest_flags_are_parsed:
     return
 
@@ -145,8 +141,6 @@ atexit.register(_RemoveTempDir)
 
 
 def GetTempDir():
-  """Returns a directory for temporary files."""
-
   global _temp_dir
   if not _temp_dir:
     _temp_dir = tempfile.mkdtemp()
@@ -178,7 +172,7 @@ def GetTestExecutablePath(executable_name, build_dir=None):
         'Unable to find the test binary "%s". Please make sure to provide\n'
         'a path to the binary via the --build_dir flag or the BUILD_DIR\n'
         'environment variable.' % path)
-    sys.stdout.write(message)
+    print >> sys.stderr, message
     sys.exit(1)
 
   return path
@@ -312,7 +306,7 @@ def Main():
   _ParseAndStripGTestFlags(sys.argv)
   # The tested binaries should not be writing XML output files unless the
   # script explicitly instructs them to.
-  # TODO(vladl@google.com): Move this into Subprocess when we implement
+  # FIXME: Move this into Subprocess when we implement
   # passing environment into it as a parameter.
   if GTEST_OUTPUT_VAR_NAME in os.environ:
     del os.environ[GTEST_OUTPUT_VAR_NAME]
