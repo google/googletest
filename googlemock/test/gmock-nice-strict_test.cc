@@ -38,6 +38,9 @@
 
 // This must not be defined inside the ::testing namespace, or it will
 // clash with ::testing::Mock.
+// Some tests below expect this not having virtual functions table so
+// that address of StrictMock<Mock> and address of its underlying Mock are
+// different.
 class Mock {
  public:
   Mock() {}
@@ -505,6 +508,16 @@ TEST(StrictMockTest, AcceptsClassNamedMock) {
   strict.DoThis();
 }
 #endif  // !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
+
+// Tests that Mock::VerifyAndClearExpectations called on StrictMock correctly
+// verifies and clears set expectations.
+TEST(StrictMockTest, VerifyAndClearExpectations) {
+  StrictMock< ::Mock> strict;
+  EXPECT_CALL(strict, DoThis());
+  EXPECT_NONFATAL_FAILURE(Mock::VerifyAndClearExpectations(&strict),
+      "never called");
+  EXPECT_NONFATAL_FAILURE(strict.DoThis(), "Uninteresting mock function call");
+}
 
 }  // namespace gmock_nice_strict_test
 }  // namespace testing
