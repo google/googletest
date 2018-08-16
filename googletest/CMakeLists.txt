@@ -72,11 +72,8 @@ config_compiler_and_linker()  # Defined in internal_utils.cmake.
 
 # Where Google Test's .h files can be found.
 include_directories(
-  ${gtest_SOURCE_DIR}/include
-  ${gtest_SOURCE_DIR})
-
-# Where Google Test's libraries can be found.
-link_directories(${gtest_BINARY_DIR}/src)
+  "${gtest_SOURCE_DIR}/include"
+  "${gtest_SOURCE_DIR}")
 
 # Summary of tuple support for Microsoft Visual Studio:
 # Compiler    version(MS)  version(cmake)  Support
@@ -84,6 +81,8 @@ link_directories(${gtest_BINARY_DIR}/src)
 # <= VS 2010  <= 10        <= 1600         Use Google Tests's own tuple.
 # VS 2012     11           1700            std::tr1::tuple + _VARIADIC_MAX=10
 # VS 2013     12           1800            std::tr1::tuple
+# VS 2015     14           1900            std::tuple
+# VS 2017     15           >= 1910         std::tuple
 if (MSVC AND MSVC_VERSION EQUAL 1700)
   add_definitions(/D _VARIADIC_MAX=10)
 endif()
@@ -104,8 +103,8 @@ target_link_libraries(gtest_main gtest)
 # to the targets for when we are part of a parent build (ie being pulled
 # in via add_subdirectory() rather than being a standalone build).
 if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
-  target_include_directories(gtest      INTERFACE "${gtest_SOURCE_DIR}/include")
-  target_include_directories(gtest_main INTERFACE "${gtest_SOURCE_DIR}/include")
+  target_include_directories(gtest      SYSTEM INTERFACE "${gtest_SOURCE_DIR}/include")
+  target_include_directories(gtest_main SYSTEM INTERFACE "${gtest_SOURCE_DIR}/include")
 endif()
 
 ########################################################################
@@ -113,22 +112,22 @@ endif()
 # Install rules
 if(INSTALL_GTEST)
   install(TARGETS gtest gtest_main
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-  install(DIRECTORY ${gtest_SOURCE_DIR}/include/gtest
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+  install(DIRECTORY "${gtest_SOURCE_DIR}/include/gtest"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
   # configure and install pkgconfig files
   configure_file(
     cmake/gtest.pc.in
-    "${CMAKE_BINARY_DIR}/gtest.pc"
+    "${gtest_BINARY_DIR}/gtest.pc"
     @ONLY)
   configure_file(
     cmake/gtest_main.pc.in
-    "${CMAKE_BINARY_DIR}/gtest_main.pc"
+    "${gtest_BINARY_DIR}/gtest_main.pc"
     @ONLY)
-  install(FILES "${CMAKE_BINARY_DIR}/gtest.pc" "${CMAKE_BINARY_DIR}/gtest_main.pc"
+  install(FILES "${gtest_BINARY_DIR}/gtest.pc" "${gtest_BINARY_DIR}/gtest_main.pc"
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 endif()
 
@@ -172,28 +171,28 @@ if (gtest_build_tests)
   ############################################################
   # C++ tests built with standard compiler flags.
 
-  cxx_test(gtest-death-test_test gtest_main)
+  cxx_test(googletest-death-test-test gtest_main)
   cxx_test(gtest_environment_test gtest)
-  cxx_test(gtest-filepath_test gtest_main)
-  cxx_test(gtest-linked_ptr_test gtest_main)
-  cxx_test(gtest-listener_test gtest_main)
+  cxx_test(googletest-filepath-test gtest_main)
+  cxx_test(googletest-linked-ptr-test gtest_main)
+  cxx_test(googletest-listener-test gtest_main)
   cxx_test(gtest_main_unittest gtest_main)
-  cxx_test(gtest-message_test gtest_main)
+  cxx_test(googletest-message-test gtest_main)
   cxx_test(gtest_no_test_unittest gtest)
-  cxx_test(gtest-options_test gtest_main)
-  cxx_test(gtest-param-test_test gtest
-    test/gtest-param-test2_test.cc)
-  cxx_test(gtest-port_test gtest_main)
+  cxx_test(googletest-options-test gtest_main)
+  cxx_test(googletest-param-test-test gtest
+    test/googletest-param-test2-test.cc)
+  cxx_test(googletest-port-test gtest_main)
   cxx_test(gtest_pred_impl_unittest gtest_main)
   cxx_test(gtest_premature_exit_test gtest
     test/gtest_premature_exit_test.cc)
-  cxx_test(gtest-printers_test gtest_main)
+  cxx_test(googletest-printers-test gtest_main)
   cxx_test(gtest_prod_test gtest_main
     test/production.cc)
   cxx_test(gtest_repeat_test gtest)
   cxx_test(gtest_sole_header_test gtest_main)
   cxx_test(gtest_stress_test gtest)
-  cxx_test(gtest-test-part_test gtest_main)
+  cxx_test(googletest-test-part-test gtest_main)
   cxx_test(gtest_throw_on_failure_ex_test gtest)
   cxx_test(gtest-typed-test_test gtest_main
     test/gtest-typed-test2_test.cc)
@@ -215,10 +214,10 @@ if (gtest_build_tests)
 
   cxx_test_with_flags(gtest-death-test_ex_nocatch_test
     "${cxx_exception} -DGTEST_ENABLE_CATCH_EXCEPTIONS_=0"
-    gtest test/gtest-death-test_ex_test.cc)
+    gtest test/googletest-death-test_ex_test.cc)
   cxx_test_with_flags(gtest-death-test_ex_catch_test
     "${cxx_exception} -DGTEST_ENABLE_CATCH_EXCEPTIONS_=1"
-    gtest test/gtest-death-test_ex_test.cc)
+    gtest test/googletest-death-test_ex_test.cc)
 
   cxx_test_with_flags(gtest_no_rtti_unittest "${cxx_no_rtti}"
     gtest_main_no_rtti test/gtest_unittest.cc)
@@ -239,73 +238,75 @@ if (gtest_build_tests)
     cxx_library(gtest_main_use_own_tuple "${cxx_use_own_tuple}"
       src/gtest-all.cc src/gtest_main.cc)
 
-    cxx_test_with_flags(gtest-tuple_test "${cxx_use_own_tuple}"
-      gtest_main_use_own_tuple test/gtest-tuple_test.cc)
+    cxx_test_with_flags(googletest-tuple-test "${cxx_use_own_tuple}"
+      gtest_main_use_own_tuple test/googletest-tuple-test.cc)
 
     cxx_test_with_flags(gtest_use_own_tuple_test "${cxx_use_own_tuple}"
       gtest_main_use_own_tuple
-      test/gtest-param-test_test.cc test/gtest-param-test2_test.cc)
+      test/googletest-param-test-test.cc test/googletest-param-test2-test.cc)
   endif()
 
   ############################################################
   # Python tests.
 
-  cxx_executable(gtest_break_on_failure_unittest_ test gtest)
-  py_test(gtest_break_on_failure_unittest)
+  cxx_executable(googletest-break-on-failure-unittest_ test gtest)
+  py_test(googletest-break-on-failure-unittest)
 
   # Visual Studio .NET 2003 does not support STL with exceptions disabled.
   if (NOT MSVC OR MSVC_VERSION GREATER 1310)  # 1310 is Visual Studio .NET 2003
     cxx_executable_with_flags(
-      gtest_catch_exceptions_no_ex_test_
+      googletest-catch-exceptions-no-ex-test_
       "${cxx_no_exception}"
       gtest_main_no_exception
-      test/gtest_catch_exceptions_test_.cc)
+      test/googletest-catch-exceptions-test_.cc)
   endif()
 
   cxx_executable_with_flags(
-    gtest_catch_exceptions_ex_test_
+    googletest-catch-exceptions-ex-test_
     "${cxx_exception}"
     gtest_main
-    test/gtest_catch_exceptions_test_.cc)
-  py_test(gtest_catch_exceptions_test)
+    test/googletest-catch-exceptions-test_.cc)
+  py_test(googletest-catch-exceptions-test)
 
-  cxx_executable(gtest_color_test_ test gtest)
-  py_test(gtest_color_test)
+  cxx_executable(googletest-color-test_ test gtest)
+  py_test(googletest-color-test)
 
-  cxx_executable(gtest_env_var_test_ test gtest)
-  py_test(gtest_env_var_test)
+  cxx_executable(googletest-env-var-test_ test gtest)
+  py_test(googletest-env-var-test)
 
-  cxx_executable(gtest_filter_unittest_ test gtest)
-  py_test(gtest_filter_unittest)
+  cxx_executable(googletest-filter-unittest_ test gtest)
+  py_test(googletest-filter-unittest)
 
   cxx_executable(gtest_help_test_ test gtest_main)
   py_test(gtest_help_test)
 
-  cxx_executable(gtest_list_tests_unittest_ test gtest)
-  py_test(gtest_list_tests_unittest)
+  cxx_executable(googletest-list-tests-unittest_ test gtest)
+  py_test(googletest-list-tests-unittest)
 
-  cxx_executable(gtest_output_test_ test gtest)
-  py_test(gtest_output_test)
+  cxx_executable(googletest-output-test_ test gtest)
+  py_test(googletest-output-test --no_stacktrace_support)
 
-  cxx_executable(gtest_shuffle_test_ test gtest)
-  py_test(gtest_shuffle_test)
+  cxx_executable(googletest-shuffle-test_ test gtest)
+  py_test(googletest-shuffle-test)
 
   # MSVC 7.1 does not support STL with exceptions disabled.
   if (NOT MSVC OR MSVC_VERSION GREATER 1310)
-    cxx_executable(gtest_throw_on_failure_test_ test gtest_no_exception)
-    set_target_properties(gtest_throw_on_failure_test_
+    cxx_executable(googletest-throw-on-failure-test_ test gtest_no_exception)
+    set_target_properties(googletest-throw-on-failure-test_
       PROPERTIES
       COMPILE_FLAGS "${cxx_no_exception}")
-    py_test(gtest_throw_on_failure_test)
+    py_test(googletest-throw-on-failure-test)
   endif()
 
-  cxx_executable(gtest_uninitialized_test_ test gtest)
-  py_test(gtest_uninitialized_test)
+  cxx_executable(googletest-uninitialized-test_ test gtest)
+  py_test(googletest-uninitialized-test)
 
   cxx_executable(gtest_xml_outfile1_test_ test gtest_main)
   cxx_executable(gtest_xml_outfile2_test_ test gtest_main)
   py_test(gtest_xml_outfiles_test)
+  py_test(googletest-json-outfiles-test)
 
   cxx_executable(gtest_xml_output_unittest_ test gtest)
-  py_test(gtest_xml_output_unittest)
+  py_test(gtest_xml_output_unittest --no_stacktrace_support)
+  py_test(googletest-json-output-unittest --no_stacktrace_support)
 endif()

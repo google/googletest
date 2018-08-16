@@ -4,6 +4,12 @@
 [![Build Status](https://travis-ci.org/google/googletest.svg?branch=master)](https://travis-ci.org/google/googletest)
 [![Build status](https://ci.appveyor.com/api/projects/status/4o38plt0xbo1ubc8/branch/master?svg=true)](https://ci.appveyor.com/project/GoogleTestAppVeyor/googletest/branch/master)
 
+**Future Plans**:
+* 1.8.x Release - the 1.8.x will be the last release that works with pre-C++11 compilers. The 1.8.1 will not accept any requests for any new features and any bugfix requests will only be accepted if proven "critical"
+* Post 1.8.x - work to improve/cleanup/pay technical debt. When this work is completed there will be a 1.9.x tagged release
+* Post 1.9.x googletest will follow [Abseil Live at Head philosophy](https://abseil.io/about/philosophy)
+
+
 Welcome to **Google Test**, Google's C++ test framework!
 
 This repository is a merger of the formerly separate GoogleTest and
@@ -15,8 +21,8 @@ mailing list for questions, discussions, and development.  There is
 also an IRC channel on [OFTC](https://webchat.oftc.net/) (irc.oftc.net) #gtest available.  Please
 join us!
 
-Getting started information for **Google Test** is available in the 
-[Google Test Primer](googletest/docs/Primer.md) documentation.
+Getting started information for **Google Test** is available in the
+[Google Test Primer](googletest/docs/primer.md) documentation.
 
 **Google Mock** is an extension to Google Test for writing and using C++ mock
 classes.  See the separate [Google Mock documentation](googlemock/README.md).
@@ -103,7 +109,7 @@ package (as described below):
 
 ### Windows Requirements ###
 
-  * Microsoft Visual C++ 2010 or newer
+  * Microsoft Visual C++ 2015 or newer
 
 ### Cygwin Requirements ###
 
@@ -114,35 +120,9 @@ package (as described below):
   * Mac OS X v10.4 Tiger or newer
   * Xcode Developer Tools
 
-### Requirements for Contributors ###
+## Contributing change
 
-We welcome patches.  If you plan to contribute a patch, you need to
-build Google Test and its own tests from a git checkout (described
-below), which has further requirements:
-
-  * [Python](https://www.python.org/) v2.3 or newer (for running some of
-    the tests and re-generating certain source files from templates)
-  * [CMake](https://cmake.org/) v2.6.4 or newer
-
-## Regenerating Source Files ##
-
-Some of Google Test's source files are generated from templates (not
-in the C++ sense) using a script.
-For example, the
-file include/gtest/internal/gtest-type-util.h.pump is used to generate
-gtest-type-util.h in the same directory.
-
-You don't need to worry about regenerating the source files
-unless you need to modify them.  You would then modify the
-corresponding `.pump` files and run the '[pump.py](googletest/scripts/pump.py)'
-generator script.  See the [Pump Manual](googletest/docs/PumpManual.md).
-
-### Contributing Code ###
-
-We welcome patches.  Please read the
-[Developer's Guide](googletest/docs/DevGuide.md)
-for how you can contribute. In particular, make sure you have signed
-the Contributor License Agreement, or we won't be able to accept the
-patch.
+Please read the [`CONTRIBUTING.md`](CONTRIBUTING.md) for details on
+how to contribute to this project.
 
 Happy testing!
