@@ -27,13 +27,10 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Authors: vladl@google.com (Vlad Losev), wan@google.com (Zhanyong Wan)
-//
 // This file tests the internal cross-platform support utilities.
+#include <stdio.h>
 
 #include "gtest/internal/gtest-port.h"
-
-#include <stdio.h>
 
 #if GTEST_OS_MAC
 # include <time.h>
@@ -227,7 +224,7 @@ TEST(ScopedPtrTest, DefinesElementType) {
   StaticAssertTypeEq<int, ::testing::internal::scoped_ptr<int>::element_type>();
 }
 
-// TODO(vladl@google.com): Implement THE REST of scoped_ptr tests.
+// FIXME: Implement THE REST of scoped_ptr tests.
 
 TEST(GtestCheckSyntaxTest, BehavesLikeASingleStatement) {
   if (AlwaysFalse())

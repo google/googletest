@@ -30,16 +30,7 @@
 
 """Verifies that Google Test warns the user when not initialized properly."""
 
-__author__ = 'jmadill@google.com (Jamie Madill)'
-
-import os
-
-IS_LINUX = os.name == 'posix' and os.uname()[0] == 'Linux'
-
-if IS_LINUX:
-  import gtest_test_utils
-else:
-  import gtest_test_utils
+import gtest_test_utils
 
 binary_name = 'googletest-param-test-invalid-name2-test_'
 COMMAND = gtest_test_utils.GetTestExecutablePath(binary_name)
