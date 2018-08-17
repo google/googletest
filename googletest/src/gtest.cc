@@ -5825,16 +5825,16 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
 // other parts of Google Test.
 void ParseGoogleTestFlagsOnly(int* argc, char** argv) {
   ParseGoogleTestFlagsOnlyImpl(argc, argv);
-  
-  // Fix the value of *_NSGetArgc() on macOS, but iff 
+
+  // Fix the value of *_NSGetArgc() on macOS, but iff
   // *_NSGetArgv() == argv
   // Only applicable to char** version of argv
 #if GTEST_OS_MAC
-# ifndef GTEST_OS_IOS
+#ifndef GTEST_OS_IOS
   if (*_NSGetArgv() == argv) {
     *_NSGetArgc() = *argc;
   }
-# endif
+#endif
 #endif
 }
 void ParseGoogleTestFlagsOnly(int* argc, wchar_t** argv) {
