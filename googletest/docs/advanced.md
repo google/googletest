@@ -572,7 +572,7 @@ namespace foo {
 class Bar {  // We want googletest to be able to print instances of this.
 ...
   // Create a free inline friend function.
-  friend ::std::ostream& operator<<(::std::ostream& os, const Bar& bar) {
+  friend std::ostream& operator<<(std::ostream& os, const Bar& bar) {
     return os << bar.DebugString();  // whatever needed to print bar to os
   }
 };
@@ -580,7 +580,7 @@ class Bar {  // We want googletest to be able to print instances of this.
 // If you can't declare the function in the class it's important that the
 // << operator is defined in the SAME namespace that defines Bar.  C++'s look-up
 // rules rely on that.
-::std::ostream& operator<<(::std::ostream& os, const Bar& bar) {
+std::ostream& operator<<(std::ostream& os, const Bar& bar) {
   return os << bar.DebugString();  // whatever needed to print bar to os
 }
 
@@ -601,7 +601,7 @@ namespace foo {
 
 class Bar {
   ...
-  friend void PrintTo(const Bar& bar, ::std::ostream* os) {
+  friend void PrintTo(const Bar& bar, std::ostream* os) {
     *os << bar.DebugString();  // whatever needed to print bar to os
   }
 };
@@ -609,7 +609,7 @@ class Bar {
 // If you can't declare the function in the class it's important that PrintTo()
 // is defined in the SAME namespace that defines Bar.  C++'s look-up rules rely
 // on that.
-void PrintTo(const Bar& bar, ::std::ostream* os) {
+void PrintTo(const Bar& bar, std::ostream* os) {
   *os << bar.DebugString();  // whatever needed to print bar to os
 }
 
