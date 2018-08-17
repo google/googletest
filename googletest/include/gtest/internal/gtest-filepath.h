@@ -42,6 +42,10 @@
 
 #include "gtest/internal/gtest-string.h"
 
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251)
+#endif
+
 namespace testing {
 namespace internal {
 
@@ -202,5 +206,9 @@ class GTEST_API_ FilePath {
 
 }  // namespace internal
 }  // namespace testing
+
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
+#endif
 
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_FILEPATH_H_

@@ -220,8 +220,14 @@ class GTEST_API_ Message {
   }
 #endif  // GTEST_OS_SYMBIAN
 
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251)
+#endif
   // We'll hold the text streamed to this object here.
   const internal::scoped_ptr< ::std::stringstream> ss_;
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
+#endif
 
   // We declare (but don't implement) this to prevent the compiler
   // from implementing the assignment operator.

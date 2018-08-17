@@ -119,8 +119,16 @@ class GTEST_API_ Cardinality {
   static void DescribeActualCallCountTo(int actual_call_count,
                                         ::std::ostream* os);
 
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251)
+#endif
+
  private:
   internal::linked_ptr<const CardinalityInterface> impl_;
+
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
+#endif
 };
 
 // Creates a cardinality that allows at least n calls.

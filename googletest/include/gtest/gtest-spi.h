@@ -49,8 +49,14 @@ namespace testing {
 // generated in the same thread that created this object or it can intercept
 // all generated failures. The scope of this mock object can be controlled with
 // the second argument to the two arguments constructor.
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4275)
+#endif
 class GTEST_API_ ScopedFakeTestPartResultReporter
     : public TestPartResultReporterInterface {
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
+#endif
  public:
   // The two possible mocking modes of this object.
   enum InterceptMode {
@@ -103,7 +109,14 @@ class GTEST_API_ SingleFailureChecker {
  private:
   const TestPartResultArray* const results_;
   const TestPartResult::Type type_;
+
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251)
+#endif
   const std::string substr_;
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
+#endif
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(SingleFailureChecker);
 };

@@ -986,8 +986,12 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #ifdef _MSC_VER
 # if GTEST_LINKED_AS_SHARED_LIBRARY
 #  define GTEST_API_ __declspec(dllimport)
+#undef GTEST_NEED_DLL_DECL
+#define GTEST_NEED_DLL_DECL 1
 # elif GTEST_CREATE_SHARED_LIBRARY
 #  define GTEST_API_ __declspec(dllexport)
+#undef GTEST_NEED_DLL_DECL
+#define GTEST_NEED_DLL_DECL 1
 # endif
 #elif __GNUC__ >= 4 || defined(__clang__)
 # define GTEST_API_ __attribute__((visibility ("default")))
@@ -997,6 +1001,8 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 #ifndef GTEST_API_
 # define GTEST_API_
+#undef GTEST_NEED_DLL_DECL
+#define GTEST_NEED_DLL_DECL 0
 #endif  // GTEST_API_
 
 #ifndef GTEST_DEFAULT_DEATH_TEST_STYLE

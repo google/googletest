@@ -231,6 +231,9 @@ class GTEST_API_ UntypedFunctionMockerBase {
   // method has been called.
   const char* name_;  // Protected by g_gmock_mutex.
 
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251)
+#endif
   // All default action specs for this function mocker.
   UntypedOnCallSpecs untyped_on_call_specs_;
 
@@ -244,6 +247,9 @@ class GTEST_API_ UntypedFunctionMockerBase {
   // untyped_expectations, we deliberately leave accesses to it
   // unprotected.
   UntypedExpectations untyped_expectations_;
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
+#endif
 };  // class UntypedFunctionMockerBase
 
 // Untyped base class for OnCallSpec<F>.
@@ -549,8 +555,14 @@ class GTEST_API_ Expectation {
     return expectation_base_;
   }
 
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251)
+#endif
   // A linked_ptr that co-owns the expectation this handle references.
   internal::linked_ptr<internal::ExpectationBase> expectation_base_;
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
+#endif
 };
 
 // A set of expectation handles.  Useful in the .After() clause of
@@ -636,7 +648,13 @@ class GTEST_API_ Sequence {
   // because Sequence objects are copyable and we want the copies to
   // be aliases.  The linked_ptr allows the copies to co-own and share
   // the same Expectation object.
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251)
+#endif
   internal::linked_ptr<Expectation> last_expectation_;
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
+#endif
 };  // class Sequence
 
 // An object of this type causes all EXPECT_CALL() statements
@@ -853,6 +871,11 @@ class GTEST_API_ ExpectationBase {
   // an EXPECT_CALL() statement finishes.
   const char* file_;          // The file that contains the expectation.
   int line_;                  // The line number of the expectation.
+
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251)
+#endif
+
   const std::string source_text_;  // The EXPECT_CALL(...) source text.
   // True iff the cardinality is specified explicitly.
   bool cardinality_specified_;
@@ -876,6 +899,10 @@ class GTEST_API_ ExpectationBase {
   Clause last_clause_;
   mutable bool action_count_checked_;  // Under mutex_.
   mutable Mutex mutex_;  // Protects action_count_checked_.
+
+#if GTEST_NEED_DLL_DECL
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
+#endif
 
   GTEST_DISALLOW_ASSIGN_(ExpectationBase);
 };  // class ExpectationBase
