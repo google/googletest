@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
@@ -607,7 +606,7 @@ class MockObjectRegistry {
       if (it->second.leakable)  // The user said it's fine to leak this object.
         continue;
 
-      // TODO(wan@google.com): Print the type of the leaked object.
+      // FIXME: Print the type of the leaked object.
       // This can help the user identify the leaked object.
       std::cout << "\n";
       const MockObjectState& state = it->second;
@@ -783,7 +782,7 @@ void Mock::RegisterUseByOnCallOrExpectCall(const void* mock_obj,
     const TestInfo* const test_info =
         UnitTest::GetInstance()->current_test_info();
     if (test_info != NULL) {
-      // TODO(wan@google.com): record the test case name when the
+      // FIXME: record the test case name when the
       // ON_CALL or EXPECT_CALL is invoked from SetUpTestCase() or
       // TearDownTestCase().
       state.first_used_test_case = test_info->test_case_name();
