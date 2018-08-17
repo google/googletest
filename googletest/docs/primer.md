@@ -1,11 +1,12 @@
 # Googletest Primer
 
+
 ## Introduction: Why googletest?
 
 *googletest* helps you write better C++ tests.
 
-googletest is a testing framework developed by the [Testing
-Technology](http://engdoc/eng/testing/TT/) team with Google's specific
+googletest is a testing framework developed by the Testing
+Technology team with Google's specific
 requirements and constraints in mind. No matter whether you work on Linux,
 Windows, or a Mac, if you write C++ code, googletest can help you. And it
 supports *any* kind of tests, not just unit tests.
@@ -74,7 +75,7 @@ the terms:
 Meaning                                                                              | googletest Term                                                                                            | [ISTQB](http://www.istqb.org/) Term
 :----------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------- | :----------------------------------
 Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests)                                                                                    | [Test Case](http://glossary.istqb.org/search/test%20case)
-A set of several tests related to one component                                      | [TestCase](https://g3doc.corp.google.com/third_party/googletest/googletest/g3doc/primer.md#basic-concepts) | [TestSuite](http://glossary.istqb.org/search/test%20suite)
+A set of several tests related to one component                                      | [TestCase](#basic-concepts) | [TestSuite](http://glossary.istqb.org/search/test%20suite)
 
 ## Basic Concepts
 
@@ -197,12 +198,12 @@ objects, you should use `ASSERT_EQ`.
 
 When doing pointer comparisons use `*_EQ(ptr, nullptr)` and `*_NE(ptr, nullptr)`
 instead of `*_EQ(ptr, NULL)` and `*_NE(ptr, NULL)`. This is because `nullptr` is
-typed while `NULL` is not. See [FAQ](faq#Why_does_googletest_support_EXPECT_EQ)
+typed while `NULL` is not. See [FAQ](faq.md#why-does-google-test-support-expect_eqnull-ptr-and-assert_eqnull-ptr-but-not-expect_nenull-ptr-and-assert_nenull-ptr)
 for more details.
 
 If you're working with floating point numbers, you may want to use the floating
 point variations of some of these macros in order to avoid problems caused by
-rounding. See [Advanced googletest Topics](advanced) for details.
+rounding. See [Advanced googletest Topics](advanced.md) for details.
 
 Macros in this section work with both narrow and wide string objects (`string`
 and `wstring`).
@@ -218,18 +219,12 @@ as `ASSERT_EQ(expected, actual)`, so lots of existing code uses this order. Now
 The assertions in this group compare two **C strings**. If you want to compare
 two `string` objects, use `EXPECT_EQ`, `EXPECT_NE`, and etc instead.
 
-| Fatal assertion         | Nonfatal assertion      | Verifies               |
-| ----------------------- | ----------------------- | ---------------------- |
-| `ASSERT_STREQ(str1,     | `EXPECT_STREQ(str1,     | the two C strings have |
-: str2);`                 : str2);`                 : the same content       :
-| `ASSERT_STRNE(str1,     | `EXPECT_STRNE(str1,     | the two C strings have |
-: str2);`                 : str2);`                 : different contents     :
-| `ASSERT_STRCASEEQ(str1, | `EXPECT_STRCASEEQ(str1, | the two C strings have |
-: str2);`                 : str2);`                 : the same content,      :
-:                         :                         : ignoring case          :
-| `ASSERT_STRCASENE(str1, | `EXPECT_STRCASENE(str1, | the two C strings have |
-: str2);`                 : str2);`                 : different contents,    :
-:                         :                         : ignoring case          :
+| Fatal assertion                 | Nonfatal assertion              | Verifies                                                 |
+| ------------------------------- | ------------------------------- | -------------------------------------------------------- |
+| `ASSERT_STREQ(str1, str2);`     | `EXPECT_STREQ(str1, str2);`     | the two C strings have the same content                  |
+| `ASSERT_STRNE(str1, str2);`     | `EXPECT_STRNE(str1, str2);`     | the two C strings have different contents                |
+| `ASSERT_STRCASEEQ(str1, str2);` | `EXPECT_STRCASEEQ(str1, str2);` | the two C strings have the same content, ignoring case   |
+| `ASSERT_STRCASENE(str1, str2);` | `EXPECT_STRCASENE(str1, str2);` | the two C strings have different contents, ignoring case |
 
 Note that "CASE" in an assertion name means that case is ignored. A `NULL`
 pointer and an empty string are considered *different*.
@@ -322,7 +317,7 @@ To create a fixture:
 1.  If necessary, write a destructor or `TearDown()` function to release any
     resources you allocated in `SetUp()` . To learn when you should use the
     constructor/destructor and when you should use `SetUp()/TearDown()`, read
-    this [FAQ](faq#CtorVsSetUp) entry.
+    this [FAQ](faq.md#should-i-use-the-constructordestructor-of-the-test-fixture-or-the-set-uptear-down-function) entry.
 1.  If needed, define subroutines for your tests to share.
 
 When using a fixture, use `TEST_F()` instead of `TEST()` as it allows you to
@@ -436,6 +431,7 @@ When these tests run, the following happens:
 
 **Availability**: Linux, Windows, Mac.
 
+
 ## Invoking the Tests
 
 `TEST()` and `TEST_F()` implicitly register their tests with googletest. So,
@@ -544,6 +540,7 @@ int main(int argc, char **argv) {
 }
 ```
 
+
 The `::testing::InitGoogleTest()` function parses the command line for
 googletest flags, and removes all recognized flags. This allows the user to
 control a test program's behavior via various flags, which we'll cover in
@@ -559,6 +556,7 @@ implementation of main(). If it fits your needs, then just link your test with
 gtest\_main library and you are good to go.
 
 NOTE: `ParseGUnitFlags()` is deprecated in favor of `InitGoogleTest()`.
+
 
 ## Known Limitations
 

@@ -5,10 +5,6 @@
 # ctest.  You can select which tests to run using 'ctest -R regex'.
 # For more options, run 'ctest --help'.
 
-# BUILD_SHARED_LIBS is a standard CMake variable, but we declare it here to
-# make it prominent in the GUI.
-option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
-
 option(gmock_build_tests "Build all of Google Mock's own tests." OFF)
 
 # A directory to find Google Test sources.
@@ -54,6 +50,20 @@ endif()
 # directory in a subdirectory of our own as VC compilation may break
 # if they are the same (the default).
 add_subdirectory("${gtest_dir}" "${gmock_BINARY_DIR}/gtest")
+
+
+# These commands only run if this is the main project
+if(CMAKE_PROJECT_NAME STREQUAL "gmock" OR CMAKE_PROJECT_NAME STREQUAL "googletest-distribution")
+
+  # BUILD_SHARED_LIBS is a standard CMake variable, but we declare it here to
+  # make it prominent in the GUI.
+  option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
+
+else()
+
+  mark_as_advanced(gmock_build_tests)
+
+endif()
 
 # Although Google Test's CMakeLists.txt calls this function, the
 # changes there don't affect the current scope.  Therefore we have to
@@ -128,13 +138,13 @@ if(INSTALL_GMOCK)
   # configure and install pkgconfig files
   configure_file(
     cmake/gmock.pc.in
-    "${CMAKE_BINARY_DIR}/gmock.pc"
+    "${gmock_BINARY_DIR}/gmock.pc"
     @ONLY)
   configure_file(
     cmake/gmock_main.pc.in
-    "${CMAKE_BINARY_DIR}/gmock_main.pc"
+    "${gmock_BINARY_DIR}/gmock_main.pc"
     @ONLY)
-  install(FILES "${CMAKE_BINARY_DIR}/gmock.pc" "${CMAKE_BINARY_DIR}/gmock_main.pc"
+  install(FILES "${gmock_BINARY_DIR}/gmock.pc" "${gmock_BINARY_DIR}/gmock_main.pc"
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 endif()
 
