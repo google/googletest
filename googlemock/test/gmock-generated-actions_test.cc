@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
@@ -374,10 +373,10 @@ class SubstractAction : public ActionInterface<int(int, int)> {  // NOLINT
 };
 
 TEST(WithArgsTest, NonInvokeAction) {
-  Action<int(const string&, int, int)> a =  // NOLINT
+  Action<int(const std::string&, int, int)> a =  // NOLINT
       WithArgs<2, 1>(MakeAction(new SubstractAction));
-  string s("hello");
-  EXPECT_EQ(8, a.Perform(tuple<const string&, int, int>(s, 2, 10)));
+  tuple<std::string, int, int> dummy = make_tuple(std::string("hi"), 2, 10);
+  EXPECT_EQ(8, a.Perform(dummy));
 }
 
 // Tests using WithArgs to pass all original arguments in the original order.
@@ -754,7 +753,8 @@ TEST(ActionPMacroTest, CanReferenceArgumentAndParameterTypes) {
 TEST(ActionPMacroTest, WorksInCompatibleMockFunction) {
   Action<std::string(const std::string& s)> a1 = Plus("tail");
   const std::string re = "re";
-  EXPECT_EQ("retail", a1.Perform(tuple<const std::string&>(re)));
+  tuple<const std::string> dummy = make_tuple(re);
+  EXPECT_EQ("retail", a1.Perform(dummy));
 }
 
 // Tests that we can use ACTION*() to define actions overloaded on the
@@ -796,7 +796,8 @@ TEST(ActionPnMacroTest, WorksFor3Parameters) {
 
   Action<std::string(const std::string& s)> a2 = Plus("tail", "-", ">");
   const std::string re = "re";
-  EXPECT_EQ("retail->", a2.Perform(tuple<const std::string&>(re)));
+  tuple<const std::string> dummy = make_tuple(re);
+  EXPECT_EQ("retail->", a2.Perform(dummy));
 }
 
 ACTION_P4(Plus, p0, p1, p2, p3) { return arg0 + p0 + p1 + p2 + p3; }
@@ -1120,7 +1121,7 @@ TEST(ActionTemplateTest, WorksForIntegralTemplateParams) {
   EXPECT_FALSE(b);  // Verifies that resetter is deleted.
 }
 
-// Tests that ACTION_TEMPLATE works for a template with template parameters.
+// Tests that ACTION_TEMPLATES works for template template parameters.
 ACTION_TEMPLATE(ReturnSmartPointer,
                 HAS_1_TEMPLATE_PARAMS(template <typename Pointee> class,
                                       Pointer),

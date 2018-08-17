@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc. 
+# Copyright 2017 Google Inc.
 # All Rights Reserved.
 #
 #
@@ -29,8 +29,10 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 # Author: misterg@google.com (Gennadiy Civil)
-#   
+#
 #   Bazel Build for Google C++ Testing Framework(Google Test)-googlemock
+
+licenses(["notice"])
 
 """ gmock own tests """
 
@@ -43,10 +45,79 @@ cc_test(
         ],
     ),
     linkopts = select({
-        "//:win": [],
+        "//:windows": [],
+        "//:windows_msvc": [],
         "//conditions:default": [
             "-pthread",
         ],
     }),
     deps = ["//:gtest"],
+)
+
+#  Py tests
+
+py_library(
+    name = "gmock_test_utils",
+    testonly = 1,
+    srcs = ["gmock_test_utils.py"],
+)
+
+cc_binary(
+    name = "gmock_leak_test_",
+    testonly = 1,
+    srcs = ["gmock_leak_test_.cc"],
+    deps = [
+        "//:gtest_main",
+    ],
+)
+
+py_test(
+    name = "gmock_leak_test",
+    size = "medium",
+    srcs = ["gmock_leak_test.py"],
+    data = [
+        ":gmock_leak_test_",
+        ":gmock_test_utils",
+    ],
+)
+
+cc_test(
+    name = "gmock_link_test",
+    size = "small",
+    srcs = [
+        "gmock_link2_test.cc",
+        "gmock_link_test.cc",
+        "gmock_link_test.h",
+    ],
+    deps = [
+        "//:gtest_main",
+    ],
+)
+
+cc_binary(
+    name = "gmock_output_test_",
+    srcs = ["gmock_output_test_.cc"],
+    deps = [
+        "//:gtest",
+    ],
+)
+
+py_test(
+    name = "gmock_output_test",
+    size = "medium",
+    srcs = ["gmock_output_test.py"],
+    data = [
+        ":gmock_output_test_",
+        ":gmock_output_test_golden.txt",
+    ],
+    deps = [":gmock_test_utils"],
+)
+
+cc_test(
+    name = "gmock_test",
+    size = "small",
+    srcs = ["gmock_test.cc"],
+    deps = [
+        "//:gtest_main",
+    ],
 )

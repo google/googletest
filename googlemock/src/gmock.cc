@@ -26,15 +26,14 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 #include "gmock/gmock.h"
 #include "gmock/internal/gmock-port.h"
 
 namespace testing {
 
-// TODO(wan@google.com): support using environment variables to
+// FIXME: support using environment variables to
 // control the flag values, like what Google Test does.
 
 GMOCK_DEFINE_bool_(catch_leaked_mocks, true,
@@ -136,8 +135,8 @@ static bool ParseGoogleMockIntFlag(const char* str, const char* flag,
   if (value_str == NULL) return false;
 
   // Sets *value to the value of the flag.
-  *value = atoi(value_str);
-  return true;
+  return ParseInt32(Message() << "The value of flag --" << flag,
+                    value_str, value);
 }
 
 // The internal implementation of InitGoogleMock().
