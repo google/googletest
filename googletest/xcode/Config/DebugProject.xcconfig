@@ -5,7 +5,7 @@
 //  examples. It is set in the "Based On:" dropdown in the "Project" info
 //  dialog.
 //  This file is based on the Xcode Configuration files in:
-//  http://code.google.com/p/google-toolbox-for-mac/
+//  https://github.com/google/google-toolbox-for-mac
 // 
 
 #include "General.xcconfig"

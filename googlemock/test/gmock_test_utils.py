@@ -29,8 +29,6 @@
 
 """Unit test utilities for Google C++ Mocking Framework."""
 
-__author__ = 'wan@google.com (Zhanyong Wan)'
-
 import os
 import sys
 
@@ -38,7 +36,7 @@ import sys
 SCRIPT_DIR = os.path.dirname(__file__) or '.'
 
 # isdir resolves symbolic links.
-gtest_tests_util_dir = os.path.join(SCRIPT_DIR, '../googletest/test')
+gtest_tests_util_dir = os.path.join(SCRIPT_DIR, '../../googletest/test')
 if os.path.isdir(gtest_tests_util_dir):
   GTEST_TESTS_UTIL_DIR = gtest_tests_util_dir
 else:
