@@ -242,7 +242,7 @@ class AbstractRpcServer(object):
     The authentication process works as follows:
      1) We get a username and password from the user
      2) We use ClientLogin to obtain an AUTH token for the user
-        (see http://code.google.com/apis/accounts/AuthForInstalledApps.html).
+        (see https://developers.google.com/identity/protocols/AuthForInstalledApps).
      3) We pass the auth token to /_ah/login on the server to obtain an
         authentication cookie. If login was successful, it tries to redirect
         us to the URL we provided.
@@ -506,7 +506,7 @@ def EncodeMultipartFormData(fields, files):
     (content_type, body) ready for httplib.HTTP instance.
 
   Source:
-    http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/146306
+    https://web.archive.org/web/20160116052001/code.activestate.com/recipes/146306
   """
   BOUNDARY = '-M-A-G-I-C---B-O-U-N-D-A-R-Y-'
   CRLF = '\r\n'
@@ -807,7 +807,7 @@ class SubversionVCS(VersionControlSystem):
     # svn cat translates keywords but svn diff doesn't. As a result of this
     # behavior patching.PatchChunks() fails with a chunk mismatch error.
     # This part was originally written by the Review Board development team
-    # who had the same problem (http://reviews.review-board.org/r/276/).
+    # who had the same problem (https://reviews.reviewboard.org/r/276/).
     # Mapping of keywords to known aliases
     svn_keywords = {
       # Standard keywords
@@ -860,7 +860,7 @@ class SubversionVCS(VersionControlSystem):
       status_lines = status.splitlines()
       # If file is in a cl, the output will begin with
       # "\n--- Changelist 'cl_name':\n".  See
-      # http://svn.collab.net/repos/svn/trunk/notes/changelist-design.txt
+      # https://web.archive.org/web/20090918234815/svn.collab.net/repos/svn/trunk/notes/changelist-design.txt
       if (len(status_lines) == 3 and
           not status_lines[0] and
           status_lines[1].startswith("--- Changelist")):

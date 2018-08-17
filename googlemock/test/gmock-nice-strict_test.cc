@@ -26,15 +26,15 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 #include "gmock/gmock-generated-nice-strict.h"
 
 #include <string>
+#include <utility>
 #include "gmock/gmock.h"
-#include "gtest/gtest.h"
 #include "gtest/gtest-spi.h"
+#include "gtest/gtest.h"
 
 // This must not be defined inside the ::testing namespace, or it will
 // clash with ::testing::Mock.
@@ -113,6 +113,24 @@ class MockBar {
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockBar);
 };
+
+#if GTEST_GTEST_LANG_CXX11
+
+class MockBaz {
+ public:
+  class MoveOnly {
+    MoveOnly() = default;
+
+    MoveOnly(const MoveOnly&) = delete;
+    operator=(const MoveOnly&) = delete;
+
+    MoveOnly(MoveOnly&&) = default;
+    operator=(MoveOnly&&) = default;
+  };
+
+  MockBaz(MoveOnly) {}
+}
+#endif  // GTEST_GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
 
 #if GTEST_HAS_STREAM_REDIRECTION
 
@@ -214,8 +232,9 @@ TEST(NiceMockTest, AllowsExpectedCall) {
   nice_foo.DoThis();
 }
 
-// Tests that an unexpected call on a nice mock which returns a not-default-constructible
-// type throws an exception and the exception contains the method's name.
+// Tests that an unexpected call on a nice mock which returns a
+// not-default-constructible type throws an exception and the exception contains
+// the method's name.
 TEST(NiceMockTest, ThrowsExceptionForUnknownReturnTypes) {
   NiceMock<MockFoo> nice_foo;
 #if GTEST_HAS_EXCEPTIONS
@@ -258,6 +277,21 @@ TEST(NiceMockTest, NonDefaultConstructor10) {
   nice_bar.This();
   nice_bar.That(5, true);
 }
+
+TEST(NiceMockTest, AllowLeak) {
+  NiceMock<MockFoo>* leaked = new NiceMock<MockFoo>;
+  Mock::AllowLeak(leaked);
+  EXPECT_CALL(*leaked, DoThis());
+  leaked->DoThis();
+}
+
+#if GTEST_GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
+
+TEST(NiceMockTest, MoveOnlyConstructor) {
+  NiceMock<MockBaz> nice_baz(MockBaz::MoveOnly());
+}
+
+#endif  // GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
 
 #if !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 // Tests that NiceMock<Mock> compiles where Mock is a user-defined
@@ -352,6 +386,21 @@ TEST(NaggyMockTest, NonDefaultConstructor10) {
   naggy_bar.That(5, true);
 }
 
+TEST(NaggyMockTest, AllowLeak) {
+  NaggyMock<MockFoo>* leaked = new NaggyMock<MockFoo>;
+  Mock::AllowLeak(leaked);
+  EXPECT_CALL(*leaked, DoThis());
+  leaked->DoThis();
+}
+
+#if GTEST_GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
+
+TEST(NaggyMockTest, MoveOnlyConstructor) {
+  NaggyMock<MockBaz> naggy_baz(MockBaz::MoveOnly());
+}
+
+#endif  // GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
+
 #if !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 // Tests that NaggyMock<Mock> compiles where Mock is a user-defined
 // class (as opposed to ::testing::Mock).  We had to work around an
@@ -425,6 +474,21 @@ TEST(StrictMockTest, NonDefaultConstructor10) {
   EXPECT_NONFATAL_FAILURE(strict_bar.That(5, true),
                           "Uninteresting mock function call");
 }
+
+TEST(StrictMockTest, AllowLeak) {
+  StrictMock<MockFoo>* leaked = new StrictMock<MockFoo>;
+  Mock::AllowLeak(leaked);
+  EXPECT_CALL(*leaked, DoThis());
+  leaked->DoThis();
+}
+
+#if GTEST_GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
+
+TEST(StrictMockTest, MoveOnlyConstructor) {
+  StrictMock<MockBaz> strict_baz(MockBaz::MoveOnly());
+}
+
+#endif  // GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
 
 #if !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 // Tests that StrictMock<Mock> compiles where Mock is a user-defined

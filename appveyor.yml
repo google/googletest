@@ -72,10 +72,16 @@ build_script:
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
-    & cmake --build . --config $env:configuration
+    $cmake_parallel = if ($env:generator -eq "MinGW Makefiles") {"-j2"} else  {"/m"}
+    & cmake --build . --config $env:configuration -- $cmake_parallel
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
+
+
+skip_commits:
+  files:
+    - '**/*.md'
 
 test_script:
 - ps: |
@@ -86,7 +92,7 @@ test_script:
     if ($env:generator -eq "MinGW Makefiles") {
         return # No test available for MinGW
     }
-    & ctest -C $env:configuration --timeout 300 --output-on-failure
+    & ctest -C $env:configuration --timeout 600 --output-on-failure
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }

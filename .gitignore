@@ -38,3 +38,17 @@ googletest/m4/lt~obsolete.m4
 # Ignore generated directories.
 googlemock/fused-src/
 googletest/fused-src/
+
+# macOS files
+.DS_Store
+
+# Ignore cmake generated directories and files.
+CMakeFiles
+CTestTestfile.cmake
+Makefile
+cmake_install.cmake
+googlemock/CMakeFiles
+googlemock/CTestTestfile.cmake
+googlemock/Makefile
+googlemock/cmake_install.cmake
+googlemock/gtest
