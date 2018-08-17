@@ -4,7 +4,7 @@
 //  These are static library target settings for libgtest.a. It
 //  is set in the "Based On:" dropdown in the "Target" info dialog.
 //  This file is based on the Xcode Configuration files in:
-//  http://code.google.com/p/google-toolbox-for-mac/
+//  https://github.com/google/google-toolbox-for-mac
 // 
 
 // Static libs can be included in bundles so make them position independent

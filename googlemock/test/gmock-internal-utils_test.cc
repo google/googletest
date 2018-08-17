@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
@@ -68,6 +67,26 @@ namespace testing {
 namespace internal {
 
 namespace {
+
+TEST(JoinAsTupleTest, JoinsEmptyTuple) {
+  EXPECT_EQ("", JoinAsTuple(Strings()));
+}
+
+TEST(JoinAsTupleTest, JoinsOneTuple) {
+  const char* fields[] = {"1"};
+  EXPECT_EQ("1", JoinAsTuple(Strings(fields, fields + 1)));
+}
+
+TEST(JoinAsTupleTest, JoinsTwoTuple) {
+  const char* fields[] = {"1", "a"};
+  EXPECT_EQ("(1, a)", JoinAsTuple(Strings(fields, fields + 2)));
+}
+
+TEST(JoinAsTupleTest, JoinsTenTuple) {
+  const char* fields[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+  EXPECT_EQ("(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)",
+            JoinAsTuple(Strings(fields, fields + 10)));
+}
 
 TEST(ConvertIdentifierNameToWordsTest, WorksWhenNameContainsNoWord) {
   EXPECT_EQ("", ConvertIdentifierNameToWords(""));

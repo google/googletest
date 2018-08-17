@@ -65,7 +65,7 @@ can specify it by appending `_WITH_CALLTYPE` to any of the macros
 described in the previous two sections and supplying the calling
 convention as the first argument to the macro. For example,
 ```
-  MOCK_METHOD_1_WITH_CALLTYPE(STDMETHODCALLTYPE, Foo, bool(int n));
+  MOCK_METHOD1_WITH_CALLTYPE(STDMETHODCALLTYPE, Foo, bool(int n));
   MOCK_CONST_METHOD2_WITH_CALLTYPE(STDMETHODCALLTYPE, Bar, int(double x, double y));
 ```
 where `STDMETHODCALLTYPE` is defined by `<objbase.h>` on Windows.
@@ -178,6 +178,8 @@ divided into several categories:
 |`Ne(value)`           |`argument != value`|
 |`IsNull()`            |`argument` is a `NULL` pointer (raw or smart).|
 |`NotNull()`           |`argument` is a non-null pointer (raw or smart).|
+|`VariantWith<T>(m)`   |`argument` is `variant<>` that holds the alternative of
+type T with a value matching `m`.|
 |`Ref(variable)`       |`argument` is a reference to `variable`.|
 |`TypedEq<type>(value)`|`argument` has type `type` and is equal to `value`. You may need to use this instead of `Eq(value)` when the mock function is overloaded.|
 
@@ -227,7 +229,7 @@ The `argument` can be either a C string or a C++ string object:
 
 `ContainsRegex()` and `MatchesRegex()` use the regular expression
 syntax defined
-[here](../../googletest/docs/AdvancedGuide.md#regular-expression-syntax).
+[here](../../googletest/docs/advanced.md#regular-expression-syntax).
 `StrCaseEq()`, `StrCaseNe()`, `StrEq()`, and `StrNe()` work for wide
 strings as well.
 
@@ -347,7 +349,7 @@ You can make a matcher from one or more other matchers:
 
 ## Matchers as Test Assertions ##
 
-|`ASSERT_THAT(expression, m)`|Generates a [fatal failure](../../googletest/docs/Primer.md#assertions) if the value of `expression` doesn't match matcher `m`.|
+|`ASSERT_THAT(expression, m)`|Generates a [fatal failure](../../googletest/docs/primer.md#assertions) if the value of `expression` doesn't match matcher `m`.|
 |:---------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------|
 |`EXPECT_THAT(expression, m)`|Generates a non-fatal failure if the value of `expression` doesn't match matcher `m`.                                                          |
 
