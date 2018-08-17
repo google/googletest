@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
@@ -361,7 +360,7 @@ class WithoutMatchers {
 // Internal use only: access the singleton instance of WithoutMatchers.
 GTEST_API_ WithoutMatchers GetWithoutMatchers();
 
-// TODO(wan@google.com): group all type utilities together.
+// FIXME: group all type utilities together.
 
 // Type traits.
 

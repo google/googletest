@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan), vladl@google.com (Vlad Losev)
+
 //
 // This file implements death tests.
 
@@ -67,6 +66,7 @@
 #  include <lib/fdio/spawn.h>
 #  include <zircon/processargs.h>
 #  include <zircon/syscalls.h>
+#  include <zircon/syscalls/port.h>
 # endif  // GTEST_OS_FUCHSIA
 
 #endif  // GTEST_HAS_DEATH_TEST
@@ -232,10 +232,16 @@ static std::string DeathTestThreadWarning(size_t thread_count) {
   Message msg;
   msg << "Death tests use fork(), which is unsafe particularly"
       << " in a threaded context. For this test, " << GTEST_NAME_ << " ";
-  if (thread_count == 0)
+  if (thread_count == 0) {
     msg << "couldn't detect the number of threads.";
-  else
+  } else {
     msg << "detected " << thread_count << " threads.";
+  }
+  msg << " See "
+         "https://github.com/google/googletest/blob/master/googletest/docs/"
+         "advanced.md#death-tests-and-threads"
+      << " for more explanation and suggested solutions, especially if"
+      << " this is the last message you see before your test times out.";
   return msg.GetString();
 }
 # endif  // !GTEST_OS_WINDOWS && !GTEST_OS_FUCHSIA
@@ -260,7 +266,7 @@ static const int kFuchsiaReadPipeFd = 3;
 // statement, which is not allowed; THREW means that the test statement
 // returned control by throwing an exception.  IN_PROGRESS means the test
 // has not yet concluded.
-// TODO(vladl@google.com): Unify names and possibly values for
+// FIXME: Unify names and possibly values for
 // AbortReason, DeathTestOutcome, and flag characters above.
 enum DeathTestOutcome { IN_PROGRESS, DIED, LIVED, RETURNED, THREW };
 
@@ -575,7 +581,6 @@ bool DeathTestImpl::Passed(bool status_ok) {
       if (status_ok) {
 # if GTEST_USES_PCRE
         // PCRE regexes support embedded NULs.
-        // GTEST_USES_PCRE is defined only in google3 mode
         const bool matched = RE::PartialMatch(error_message, *regex());
 # else
         const bool matched = RE::PartialMatch(error_message.c_str(), *regex());
@@ -805,6 +810,12 @@ class FuchsiaDeathTest : public DeathTestImpl {
                    const char* file,
                    int line)
       : DeathTestImpl(a_statement, a_regex), file_(file), line_(line) {}
+  virtual ~FuchsiaDeathTest() {
+    zx_status_t status = zx_handle_close(child_process_);
+    GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
+    status = zx_handle_close(port_);
+    GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
+  }
 
   // All of these virtual functions are inherited from DeathTest.
   virtual int Wait();
@@ -816,7 +827,8 @@ class FuchsiaDeathTest : public DeathTestImpl {
   // The line number on which the death test is located.
   const int line_;
 
-  zx_handle_t child_process_;
+  zx_handle_t child_process_ = ZX_HANDLE_INVALID;
+  zx_handle_t port_ = ZX_HANDLE_INVALID;
 };
 
 // Utility class for accumulating command-line arguments.
@@ -863,15 +875,37 @@ int FuchsiaDeathTest::Wait() {
   if (!spawned())
     return 0;
 
-  // Wait for child process to terminate.
+  // Register to wait for the child process to terminate.
   zx_status_t status_zx;
-  zx_signals_t signals;
-  status_zx = zx_object_wait_one(
-      child_process_,
-      ZX_PROCESS_TERMINATED,
-      ZX_TIME_INFINITE,
-      &signals);
+  status_zx = zx_object_wait_async(child_process_,
+                                   port_,
+                                   0 /* key */,
+                                   ZX_PROCESS_TERMINATED,
+                                   ZX_WAIT_ASYNC_ONCE);
   GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
+
+  // Wait for it to terminate, or an exception to be received.
+  zx_port_packet_t packet;
+  status_zx = zx_port_wait(port_, ZX_TIME_INFINITE, &packet);
+  GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
+
+  if (ZX_PKT_IS_EXCEPTION(packet.type)) {
+    // Process encountered an exception. Kill it directly rather than letting
+    // other handlers process the event.
+    status_zx = zx_task_kill(child_process_);
+    GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
+
+    // Now wait for |child_process_| to terminate.
+    zx_signals_t signals = 0;
+    status_zx = zx_object_wait_one(
+        child_process_, ZX_PROCESS_TERMINATED, ZX_TIME_INFINITE, &signals);
+    GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
+    GTEST_DEATH_TEST_CHECK_(signals & ZX_PROCESS_TERMINATED);
+  } else {
+    // Process terminated.
+    GTEST_DEATH_TEST_CHECK_(ZX_PKT_IS_SIGNAL_ONE(packet.type));
+    GTEST_DEATH_TEST_CHECK_(packet.signal.observed & ZX_PROCESS_TERMINATED);
+  }
 
   ReadAndInterpretStatusByte();
 
@@ -936,18 +970,23 @@ DeathTest::TestRole FuchsiaDeathTest::AssumeRole() {
   set_read_fd(status);
 
   // Set the pipe handle for the child.
-  fdio_spawn_action_t add_handle_action = {
-    .action = FDIO_SPAWN_ACTION_ADD_HANDLE,
-    .h = {
-      .id = PA_HND(type, kFuchsiaReadPipeFd),
-      .handle = child_pipe_handle
-    }
-  };
+  fdio_spawn_action_t add_handle_action = {};
+  add_handle_action.action = FDIO_SPAWN_ACTION_ADD_HANDLE;
+  add_handle_action.h.id = PA_HND(type, kFuchsiaReadPipeFd);
+  add_handle_action.h.handle = child_pipe_handle;
 
   // Spawn the child process.
   status = fdio_spawn_etc(ZX_HANDLE_INVALID, FDIO_SPAWN_CLONE_ALL,
                           args.Argv()[0], args.Argv(), nullptr, 1,
                           &add_handle_action, &child_process_, nullptr);
+  GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
+
+  // Create an exception port and attach it to the |child_process_|, to allow
+  // us to suppress the system default exception handler from firing.
+  status = zx_port_create(0, &port_);
+  GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
+  status = zx_task_bind_exception_port(
+      child_process_, port_, 0 /* key */, 0 /*options */);
   GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
 
   set_spawned(true);
@@ -1419,7 +1458,7 @@ static int GetStatusFileDescriptor(unsigned int parent_process_id,
                    StreamableToString(parent_process_id));
   }
 
-  // TODO(vladl@google.com): Replace the following check with a
+  // FIXME: Replace the following check with a
   // compile-time assertion when available.
   GTEST_CHECK_(sizeof(HANDLE) <= sizeof(size_t));
 
