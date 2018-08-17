@@ -26,10 +26,9 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
 
-// Google Test - The Google C++ Testing Framework
+
+// Google Test - The Google C++ Testing and Mocking Framework
 //
 // This file implements a universal value printer that can print a
 // value of any type T:
@@ -96,6 +95,8 @@
 // being defined as many user-defined container types don't have
 // value_type.
 
+// GOOGLETEST_CM0001 DO NOT DELETE
+
 #ifndef GTEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
 #define GTEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
 
@@ -112,8 +113,9 @@
 #endif
 
 #if GTEST_HAS_ABSL
-#include "absl/types/optional.h"
 #include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
+#include "absl/types/variant.h"
 #endif  // GTEST_HAS_ABSL
 
 namespace testing {
@@ -509,17 +511,19 @@ void PrintTo(const T& value, ::std::ostream* os) {
   // function pointers so that the `*os << p` in the object pointer overload
   // doesn't cause that warning either.
   DefaultPrintTo(
-      WrapPrinterType<
-          (sizeof(IsContainerTest<T>(0)) == sizeof(IsContainer)) && !IsRecursiveContainer<T>::value
-            ? kPrintContainer : !is_pointer<T>::value
-              ? kPrintOther
+      WrapPrinterType <
+                  (sizeof(IsContainerTest<T>(0)) == sizeof(IsContainer)) &&
+              !IsRecursiveContainer<T>::value
+          ? kPrintContainer
+          : !is_pointer<T>::value
+                ? kPrintOther
 #if GTEST_LANG_CXX11
                 : std::is_function<typename std::remove_pointer<T>::type>::value
 #else
                 : !internal::ImplicitlyConvertible<T, const void*>::value
 #endif
                       ? kPrintFunctionPointer
-                      : kPrintPointer>(),
+                      : kPrintPointer > (),
       value, os);
 }
 
@@ -633,6 +637,10 @@ inline void PrintTo(absl::string_view sp, ::std::ostream* os) {
   PrintTo(::std::string(sp), os);
 }
 #endif  // GTEST_HAS_ABSL
+
+#if GTEST_LANG_CXX11
+inline void PrintTo(std::nullptr_t, ::std::ostream* os) { *os << "(nullptr)"; }
+#endif  // GTEST_LANG_CXX11
 
 #if GTEST_HAS_TR1_TUPLE || GTEST_HAS_STD_TUPLE_
 // Helper function for printing a tuple.  T must be instantiated with
@@ -781,6 +789,28 @@ class UniversalPrinter<::absl::optional<T>> {
   }
 };
 
+// Printer for absl::variant
+
+template <typename... T>
+class UniversalPrinter<::absl::variant<T...>> {
+ public:
+  static void Print(const ::absl::variant<T...>& value, ::std::ostream* os) {
+    *os << '(';
+    absl::visit(Visitor{os}, value);
+    *os << ')';
+  }
+
+ private:
+  struct Visitor {
+    template <typename U>
+    void operator()(const U& u) const {
+      *os << "'" << GetTypeName<U>() << "' with value ";
+      UniversalPrint(u, os);
+    }
+    ::std::ostream* os;
+  };
+};
+
 #endif  // GTEST_HAS_ABSL
 
 // UniversalPrintArray(begin, len, os) prints an array of 'len'
@@ -796,7 +826,7 @@ void UniversalPrintArray(const T* begin, size_t len, ::std::ostream* os) {
     // If the array has more than kThreshold elements, we'll have to
     // omit some details by printing only the first and the last
     // kChunkSize elements.
-    // TODO(wan@google.com): let the user control the threshold using a flag.
+    // FIXME: let the user control the threshold using a flag.
     if (len <= kThreshold) {
       PrintRawArrayTo(begin, len, os);
     } else {

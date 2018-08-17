@@ -27,10 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// Utility functions and classes used by the Google C++ testing framework.
-//
-// Author: wan@google.com (Zhanyong Wan)
-//
+// Utility functions and classes used by the Google C++ testing framework.//
 // This file contains purely Google Test's internal implementation.  Please
 // DO NOT #INCLUDE IT IN A USER PROGRAM.
 
@@ -59,7 +56,7 @@
 # include <windows.h>  // NOLINT
 #endif  // GTEST_OS_WINDOWS
 
-#include "gtest/gtest.h"  // NOLINT
+#include "gtest/gtest.h"
 #include "gtest/gtest-spi.h"
 
 namespace testing {
@@ -446,6 +443,16 @@ class OsStackTraceGetter : public OsStackTraceGetterInterface {
   virtual void UponLeavingGTest();
 
  private:
+#if GTEST_HAS_ABSL
+  Mutex mutex_;  // Protects all internal state.
+
+  // We save the stack frame below the frame that calls user code.
+  // We do this because the address of the frame immediately below
+  // the user code changes between the call to UponLeavingGTest()
+  // and any calls to the stack trace code from within the user code.
+  void* caller_frame_ = nullptr;
+#endif  // GTEST_HAS_ABSL
+
   GTEST_DISALLOW_COPY_AND_ASSIGN_(OsStackTraceGetter);
 };
 
@@ -984,7 +991,7 @@ bool ParseNaturalNumber(const ::std::string& str, Integer* number) {
 
   const bool parse_success = *end == '\0' && errno == 0;
 
-  // TODO(vladl@google.com): Convert this to compile time assertion when it is
+  // FIXME: Convert this to compile time assertion when it is
   // available.
   GTEST_CHECK_(sizeof(Integer) <= sizeof(parsed));
 
@@ -1024,7 +1031,7 @@ class TestResultAccessor {
 #if GTEST_CAN_STREAM_RESULTS_
 
 // Streams test results to the given port on the given host machine.
-class GTEST_API_ StreamingListener : public EmptyTestEventListener {
+class StreamingListener : public EmptyTestEventListener {
  public:
   // Abstract base class for writing strings to a socket.
   class AbstractSocketWriter {
