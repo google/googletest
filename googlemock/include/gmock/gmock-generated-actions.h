@@ -30,12 +30,13 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
 // This file implements some commonly used variadic actions.
+
+// GOOGLETEST_CM0002 DO NOT DELETE
 
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_ACTIONS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_ACTIONS_H_
@@ -213,8 +214,7 @@ class InvokeHelper<R, ::testing::tuple<A1, A2, A3, A4, A5, A6> > {
                get<2>(args), get<3>(args), get<4>(args), get<5>(args));
   }
 
-  // There is no InvokeCallback() for 6-tuples, as google3 callbacks
-  // support 5 arguments at most.
+  // There is no InvokeCallback() for 6-tuples
 };
 
 template <typename R, typename A1, typename A2, typename A3, typename A4,
@@ -238,8 +238,7 @@ class InvokeHelper<R, ::testing::tuple<A1, A2, A3, A4, A5, A6, A7> > {
                get<6>(args));
   }
 
-  // There is no InvokeCallback() for 7-tuples, as google3 callbacks
-  // support 5 arguments at most.
+  // There is no InvokeCallback() for 7-tuples
 };
 
 template <typename R, typename A1, typename A2, typename A3, typename A4,
@@ -264,8 +263,7 @@ class InvokeHelper<R, ::testing::tuple<A1, A2, A3, A4, A5, A6, A7, A8> > {
                get<6>(args), get<7>(args));
   }
 
-  // There is no InvokeCallback() for 8-tuples, as google3 callbacks
-  // support 5 arguments at most.
+  // There is no InvokeCallback() for 8-tuples
 };
 
 template <typename R, typename A1, typename A2, typename A3, typename A4,
@@ -290,8 +288,7 @@ class InvokeHelper<R, ::testing::tuple<A1, A2, A3, A4, A5, A6, A7, A8, A9> > {
                get<6>(args), get<7>(args), get<8>(args));
   }
 
-  // There is no InvokeCallback() for 9-tuples, as google3 callbacks
-  // support 5 arguments at most.
+  // There is no InvokeCallback() for 9-tuples
 };
 
 template <typename R, typename A1, typename A2, typename A3, typename A4,
@@ -318,8 +315,7 @@ class InvokeHelper<R, ::testing::tuple<A1, A2, A3, A4, A5, A6, A7, A8, A9,
                get<6>(args), get<7>(args), get<8>(args), get<9>(args));
   }
 
-  // There is no InvokeCallback() for 10-tuples, as google3 callbacks
-  // support 5 arguments at most.
+  // There is no InvokeCallback() for 10-tuples
 };
 
 // Implements the Invoke(callback) action.
