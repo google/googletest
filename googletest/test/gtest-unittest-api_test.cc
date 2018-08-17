@@ -113,18 +113,19 @@ const int kTypedTests = 0;
 TEST(ApiTest, UnitTestImmutableAccessorsWork) {
   UnitTest* unit_test = UnitTest::GetInstance();
 
-  ASSERT_EQ(2 + kTypedTestCases, unit_test->total_test_case_count());
-  EXPECT_EQ(1 + kTypedTestCases, unit_test->test_case_to_run_count());
+  ASSERT_EQ(3 + kTypedTestCases, unit_test->total_test_case_count());
+  EXPECT_EQ(2 + kTypedTestCases, unit_test->test_case_to_run_count());
   EXPECT_EQ(2, unit_test->disabled_test_count());
-  EXPECT_EQ(5 + kTypedTests, unit_test->total_test_count());
-  EXPECT_EQ(3 + kTypedTests, unit_test->test_to_run_count());
+  EXPECT_EQ(7 + kTypedTests, unit_test->total_test_count());
+  EXPECT_EQ(5 + kTypedTests, unit_test->test_to_run_count());
 
   const TestCase** const test_cases = UnitTestHelper::GetSortedTestCases();
 
-  EXPECT_STREQ("ApiTest", test_cases[0]->name());
-  EXPECT_STREQ("DISABLED_Test", test_cases[1]->name());
+  EXPECT_STREQ("AdHocTestResultTest", test_cases[0]->name());
+  EXPECT_STREQ("ApiTest", test_cases[1]->name());
+  EXPECT_STREQ("DISABLED_Test", test_cases[2]->name());
 #if GTEST_HAS_TYPED_TEST
-  EXPECT_STREQ("TestCaseWithCommentTest/0", test_cases[2]->name());
+  EXPECT_STREQ("TestCaseWithCommentTest/0", test_cases[3]->name());
 #endif  // GTEST_HAS_TYPED_TEST
 
   delete[] test_cases;
@@ -230,6 +231,27 @@ TEST(ApiTest, TestCaseDisabledAccessorsWork) {
 TEST(ApiTest, DISABLED_Dummy1) {}
 TEST(DISABLED_Test, Dummy2) {}
 
+// Tests ad_hoc_test_result().
+class AdHocTestResultTest : public testing::Test {
+ protected:
+  static void SetUpTestCase() {
+    FAIL() << "A failure happened inside SetUpTestCase().";
+  }
+};
+
+TEST_F(AdHocTestResultTest, AdHocTestResultForTestCaseShowsFailure) {
+  const testing::TestResult& test_result = testing::UnitTest::GetInstance()
+                                               ->current_test_case()
+                                               ->ad_hoc_test_result();
+  EXPECT_TRUE(test_result.Failed());
+}
+
+TEST_F(AdHocTestResultTest, AdHocTestResultTestForUnitTestDoesNotShowFailure) {
+  const testing::TestResult& test_result =
+      testing::UnitTest::GetInstance()->ad_hoc_test_result();
+  EXPECT_FALSE(test_result.Failed());
+}
+
 class FinalSuccessChecker : public Environment {
  protected:
   virtual void TearDown() {
@@ -237,42 +259,52 @@ class FinalSuccessChecker : public Environment {
 
     EXPECT_EQ(1 + kTypedTestCases, unit_test->successful_test_case_count());
     EXPECT_EQ(3 + kTypedTests, unit_test->successful_test_count());
-    EXPECT_EQ(0, unit_test->failed_test_case_count());
-    EXPECT_EQ(0, unit_test->failed_test_count());
-    EXPECT_TRUE(unit_test->Passed());
-    EXPECT_FALSE(unit_test->Failed());
-    ASSERT_EQ(2 + kTypedTestCases, unit_test->total_test_case_count());
+    EXPECT_EQ(1, unit_test->failed_test_case_count());
+    EXPECT_EQ(2, unit_test->failed_test_count());
+    EXPECT_FALSE(unit_test->Passed());
+    EXPECT_TRUE(unit_test->Failed());
+    ASSERT_EQ(3 + kTypedTestCases, unit_test->total_test_case_count());
 
     const TestCase** const test_cases = UnitTestHelper::GetSortedTestCases();
 
-    EXPECT_STREQ("ApiTest", test_cases[0]->name());
+    EXPECT_STREQ("AdHocTestResultTest", test_cases[0]->name());
     EXPECT_TRUE(IsNull(test_cases[0]->type_param()));
     EXPECT_TRUE(test_cases[0]->should_run());
-    EXPECT_EQ(1, test_cases[0]->disabled_test_count());
-    ASSERT_EQ(4, test_cases[0]->total_test_count());
-    EXPECT_EQ(3, test_cases[0]->successful_test_count());
-    EXPECT_EQ(0, test_cases[0]->failed_test_count());
-    EXPECT_TRUE(test_cases[0]->Passed());
-    EXPECT_FALSE(test_cases[0]->Failed());
+    EXPECT_EQ(0, test_cases[0]->disabled_test_count());
+    ASSERT_EQ(2, test_cases[0]->total_test_count());
+    EXPECT_EQ(0, test_cases[0]->successful_test_count());
+    EXPECT_EQ(2, test_cases[0]->failed_test_count());
+    EXPECT_FALSE(test_cases[0]->Passed());
+    EXPECT_TRUE(test_cases[0]->Failed());
 
-    EXPECT_STREQ("DISABLED_Test", test_cases[1]->name());
+    EXPECT_STREQ("ApiTest", test_cases[1]->name());
     EXPECT_TRUE(IsNull(test_cases[1]->type_param()));
-    EXPECT_FALSE(test_cases[1]->should_run());
+    EXPECT_TRUE(test_cases[1]->should_run());
     EXPECT_EQ(1, test_cases[1]->disabled_test_count());
-    ASSERT_EQ(1, test_cases[1]->total_test_count());
-    EXPECT_EQ(0, test_cases[1]->successful_test_count());
+    ASSERT_EQ(4, test_cases[1]->total_test_count());
+    EXPECT_EQ(3, test_cases[1]->successful_test_count());
     EXPECT_EQ(0, test_cases[1]->failed_test_count());
+    EXPECT_TRUE(test_cases[1]->Passed());
+    EXPECT_FALSE(test_cases[1]->Failed());
+
+    EXPECT_STREQ("DISABLED_Test", test_cases[2]->name());
+    EXPECT_TRUE(IsNull(test_cases[2]->type_param()));
+    EXPECT_FALSE(test_cases[2]->should_run());
+    EXPECT_EQ(1, test_cases[2]->disabled_test_count());
+    ASSERT_EQ(1, test_cases[2]->total_test_count());
+    EXPECT_EQ(0, test_cases[2]->successful_test_count());
+    EXPECT_EQ(0, test_cases[2]->failed_test_count());
 
 #if GTEST_HAS_TYPED_TEST
-    EXPECT_STREQ("TestCaseWithCommentTest/0", test_cases[2]->name());
-    EXPECT_STREQ(GetTypeName<int>().c_str(), test_cases[2]->type_param());
-    EXPECT_TRUE(test_cases[2]->should_run());
-    EXPECT_EQ(0, test_cases[2]->disabled_test_count());
-    ASSERT_EQ(1, test_cases[2]->total_test_count());
-    EXPECT_EQ(1, test_cases[2]->successful_test_count());
-    EXPECT_EQ(0, test_cases[2]->failed_test_count());
-    EXPECT_TRUE(test_cases[2]->Passed());
-    EXPECT_FALSE(test_cases[2]->Failed());
+    EXPECT_STREQ("TestCaseWithCommentTest/0", test_cases[3]->name());
+    EXPECT_STREQ(GetTypeName<int>().c_str(), test_cases[3]->type_param());
+    EXPECT_TRUE(test_cases[3]->should_run());
+    EXPECT_EQ(0, test_cases[3]->disabled_test_count());
+    ASSERT_EQ(1, test_cases[3]->total_test_count());
+    EXPECT_EQ(1, test_cases[3]->successful_test_count());
+    EXPECT_EQ(0, test_cases[3]->failed_test_count());
+    EXPECT_TRUE(test_cases[3]->Passed());
+    EXPECT_FALSE(test_cases[3]->Failed());
 #endif  // GTEST_HAS_TYPED_TEST
 
     const TestCase* test_case = UnitTestHelper::FindTestCase("ApiTest");
@@ -336,5 +368,5 @@ int main(int argc, char **argv) {
 
   AddGlobalTestEnvironment(new testing::internal::FinalSuccessChecker());
 
-  return RUN_ALL_TESTS();
+  return RUN_ALL_TESTS() ? 0 : 1;
 }
