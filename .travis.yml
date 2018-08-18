@@ -53,6 +53,24 @@ matrix:
     - os: osx
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
       if: type != pull_request
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-8
+            - gcc-8
+      env: CXX=g++-8 CC=gcc-8 AR=gcc-ar-8 RANLIB=gcc-ranlib-8 BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
+    - os: osx
+      compiler: gcc
+      addons:
+        apt:
+          packages:
+            - g++-8
+            - gcc-8
+      env: CXX=g++-8 && CC=gcc-8 AR=gcc-ar-8 RANLIB=gcc-ranlib-8 BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
 
 # These are the install and build (script) phases for the most common entries in the matrix.  They could be included
 # in each entry in the matrix, but that is just repetitive.
@@ -74,7 +92,7 @@ addons:
     - ubuntu-toolchain-r-test
     - llvm-toolchain-precise-3.7
     packages:
-    - g++-4.9
+    - g++-8
     - clang-3.7
 
 notifications:
