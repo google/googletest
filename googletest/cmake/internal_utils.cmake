@@ -20,7 +20,7 @@ macro(fix_default_compiler_settings_)
   if (MSVC)
     # For MSVC, CMake sets certain flags to defaults we want to override.
     # This replacement code is taken from sample in the CMake Wiki at
-    # http://www.cmake.org/Wiki/CMake_FAQ#Dynamic_Replace.
+    # https://gitlab.kitware.com/cmake/community/wikis/FAQ#dynamic-replace.
     foreach (flag_var
              CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
              CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
@@ -38,6 +38,11 @@ macro(fix_default_compiler_settings_)
       # We prefer more strict warning checking for building Google Test.
       # Replaces /W3 with /W4 in defaults.
       string(REPLACE "/W3" "/W4" ${flag_var} "${${flag_var}}")
+
+      # Prevent D9025 warning for targets that have exception handling
+      # turned off (/EHs-c- flag). Where required, exceptions are explicitly
+      # re-enabled using the cxx_exception_flags variable.
+      string(REPLACE "/EHsc" "" ${flag_var} "${${flag_var}}")
     endforeach()
   endif()
 endmacro()
@@ -230,7 +235,7 @@ find_package(PythonInterp)
 # from the given source files with the given compiler flags.
 function(cxx_test_with_flags name cxx_flags libs)
   cxx_executable_with_flags(${name} "${cxx_flags}" "${libs}" ${ARGN})
-  add_test(${name} ${name})
+  add_test(NAME ${name} COMMAND ${name})
 endfunction()
 
 # cxx_test(name libs srcs...)

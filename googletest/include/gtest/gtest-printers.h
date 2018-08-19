@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Google Test - The Google C++ Testing and Mocking Framework
 //
@@ -95,6 +94,8 @@
 // actual need for it.  Note that this fix cannot rely on value_type
 // being defined as many user-defined container types don't have
 // value_type.
+
+// GOOGLETEST_CM0001 DO NOT DELETE
 
 #ifndef GTEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
 #define GTEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
@@ -825,7 +826,7 @@ void UniversalPrintArray(const T* begin, size_t len, ::std::ostream* os) {
     // If the array has more than kThreshold elements, we'll have to
     // omit some details by printing only the first and the last
     // kChunkSize elements.
-    // TODO(wan@google.com): let the user control the threshold using a flag.
+    // FIXME: let the user control the threshold using a flag.
     if (len <= kThreshold) {
       PrintRawArrayTo(begin, len, os);
     } else {
@@ -977,12 +978,13 @@ struct TuplePolicy {
   static const size_t tuple_size = ::std::tr1::tuple_size<Tuple>::value;
 
   template <size_t I>
-  struct tuple_element : ::std::tr1::tuple_element<I, Tuple> {};
+  struct tuple_element : ::std::tr1::tuple_element<static_cast<int>(I), Tuple> {
+  };
 
   template <size_t I>
-  static typename AddReference<
-      const typename ::std::tr1::tuple_element<I, Tuple>::type>::type get(
-      const Tuple& tuple) {
+  static typename AddReference<const typename ::std::tr1::tuple_element<
+      static_cast<int>(I), Tuple>::type>::type
+  get(const Tuple& tuple) {
     return ::std::tr1::get<I>(tuple);
   }
 };

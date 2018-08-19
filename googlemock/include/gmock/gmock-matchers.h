@@ -26,14 +26,15 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
 // This file implements some commonly used argument matchers.  More
 // matchers can be defined by the user implementing the
 // MatcherInterface<T> interface if necessary.
+
+// GOOGLETEST_CM0002 DO NOT DELETE
 
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_MATCHERS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_MATCHERS_H_
@@ -72,7 +73,7 @@ namespace testing {
 // MatchResultListener is an abstract class.  Its << operator can be
 // used by a matcher to explain why a value matches or doesn't match.
 //
-// TODO(wan@google.com): add method
+// FIXME: add method
 //   bool InterestedInWhy(bool result) const;
 // to indicate whether the listener is interested in why the match
 // result is 'result'.
@@ -921,7 +922,7 @@ class TuplePrefix {
     GTEST_REFERENCE_TO_CONST_(Value) value = get<N - 1>(values);
     StringMatchResultListener listener;
     if (!matcher.MatchAndExplain(value, &listener)) {
-      // TODO(wan): include in the message the name of the parameter
+      // FIXME: include in the message the name of the parameter
       // as used in MOCK_METHOD*() when possible.
       *os << "  Expected arg #" << N - 1 << ": ";
       get<N - 1>(matchers).DescribeTo(os);
@@ -2419,7 +2420,7 @@ class WhenDynamicCastToMatcher : public WhenDynamicCastToMatcherBase<To> {
 
   template <typename From>
   bool MatchAndExplain(From from, MatchResultListener* listener) const {
-    // TODO(sbenza): Add more detail on failures. ie did the dyn_cast fail?
+    // FIXME: Add more detail on failures. ie did the dyn_cast fail?
     To to = dynamic_cast<To>(from);
     return MatchPrintAndExplain(to, this->matcher_, listener);
   }

@@ -37,8 +37,6 @@ SYNOPSIS
        gtest_help_test.py
 """
 
-__author__ = 'wan@google.com (Zhanyong Wan)'
-
 import os
 import re
 import gtest_test_utils

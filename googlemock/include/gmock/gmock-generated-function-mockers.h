@@ -30,12 +30,13 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
 // This file implements function mockers of various arities.
+
+// GOOGLETEST_CM0002 DO NOT DELETE
 
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_FUNCTION_MOCKERS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_FUNCTION_MOCKERS_H_
@@ -357,7 +358,7 @@ class FunctionMocker<R(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)> : public
 //     // error when trying to resolve between this and overload 4 in
 //     // 'gmock_GetName(WithoutMatchers(), nullptr)'.
 //     MockSpec<string&()> gmock_GetName(
-//         const WithoutMatchers&, const Function<string&()>*) const {
+//         const WithoutMatchers&, const Function<string&()>*) const {
 //       // Removes const from this, calls overload 1
 //       return AdjustConstness_(this)->gmock_GetName();
 //     }
@@ -366,7 +367,7 @@ class FunctionMocker<R(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)> : public
 //     const string& gmock_GetName() const { ... }
 //     // Overload 4
 //     MockSpec<const string&()> gmock_GetName(
-//         const WithoutMatchers&, const Function<const string&()>*) const {
+//         const WithoutMatchers&, const Function<const string&()>*) const {
 //       // Does not remove const, calls overload 3
 //       return AdjustConstness_const(this)->gmock_GetName();
 //     }
