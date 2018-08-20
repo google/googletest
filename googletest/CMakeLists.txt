@@ -205,6 +205,7 @@ if (gtest_build_tests)
   cxx_test(gtest_prod_test gtest_main
     test/production.cc)
   cxx_test(gtest_repeat_test gtest)
+  cxx_test(gtest_setuptestcase_failure_test gtest)
   cxx_test(gtest_sole_header_test gtest_main)
   cxx_test(gtest_stress_test gtest)
   cxx_test(googletest-test-part-test gtest_main)

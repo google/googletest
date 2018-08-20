@@ -81,6 +81,7 @@ EXTRA_DIST += \
   test/gtest_pred_impl_unittest.cc \
   test/gtest_prod_test.cc \
   test/gtest_repeat_test.cc \
+  test/gtest_setuptestcase_failure_test.cc \
   test/googletest-shuffle-test_.cc \
   test/gtest_sole_header_test.cc \
   test/gtest_stress_test.cc \
