@@ -44,6 +44,9 @@
 #include "gmock/internal/gmock-port.h"
 #include "gtest/gtest.h"
 
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
+/* class A needs to have dll-interface to be used by clients of class B */)
+
 namespace testing {
 
 // To implement a cardinality Foo, define:
@@ -144,5 +147,7 @@ inline Cardinality MakeCardinality(const CardinalityInterface* c) {
 }
 
 }  // namespace testing
+
+GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_CARDINALITIES_H_
