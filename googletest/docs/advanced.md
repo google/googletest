@@ -649,7 +649,7 @@ _death tests_. More generally, any test that checks that a program terminates
 Note that if a piece of code throws an exception, we don't consider it "death"
 for the purpose of death tests, as the caller of the code could catch the
 exception and avoid the crash. If you want to verify exceptions thrown by your
-code, see [Exception Assertions](#ExceptionAssertions).
+code, see [Exception Assertions](#exception-assertions).
 
 If you want to test `EXPECT_*()/ASSERT_*()` failures in your test code, see
 Catching Failures
@@ -2120,7 +2120,7 @@ $ foo_test --gtest_repeat=1000 --gtest_filter=FooBar.*
 Repeat the tests whose name matches the filter 1000 times.
 ```
 
-If your test program contains [global set-up/tear-down](#GlobalSetUp) code, it
+If your test program contains [global set-up/tear-down](#global-set-up-and-tear-down) code, it
 will be repeated in each iteration as well, as the flakiness may be in it. You
 can also specify the repeat count by setting the `GTEST_REPEAT` environment
 variable.
