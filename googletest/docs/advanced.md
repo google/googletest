@@ -1147,7 +1147,7 @@ test has at least one failure of either kind.
 
 In your test code, you can call `RecordProperty("key", value)` to log additional
 information, where `value` can be either a string or an `int`. The *last* value
-recorded for a key will be emitted to the [XML output](#XmlReport) if you
+recorded for a key will be emitted to the [XML output](#generating-an-xml-report) if you
 specify one. For example, the test
 
 ```c++
@@ -1424,7 +1424,7 @@ will have these names:
 *   `InstantiationName/FooTest.HasBlahBlah/1` for `"miny"`
 *   `InstantiationName/FooTest.HasBlahBlah/2` for `"moe"`
 
-You can use these names in [`--gtest_filter`](#TestFilter).
+You can use these names in [`--gtest_filter`](#running-a-subset-of-the-tests).
 
 This statement will instantiate all tests from `FooTest` again, each with
 parameter values `"cat"` and `"dog"`:
@@ -1674,7 +1674,7 @@ To test them, we use the following special techniques:
 *   Both static functions and definitions/declarations in an unnamed namespace
     are only visible within the same translation unit. To test them, you can
     `#include` the entire `.cc` file being tested in your `*_test.cc` file.
-    (#including `.cc` files is not a good way to reuse code - you should not do
+    (including `.cc` files is not a good way to reuse code - you should not do
     this in production code!)
 
     However, a better approach is to move the private code into the
