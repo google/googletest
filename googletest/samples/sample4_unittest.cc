@@ -40,7 +40,6 @@ TEST(Counter, Increment) {
   // Test that counter 0 returns 0
   EXPECT_EQ(0, c.Decrement());
 
-
   // EXPECT_EQ() evaluates its arguments exactly once, so they
   // can have side effects.
 
