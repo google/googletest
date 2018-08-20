@@ -38,6 +38,9 @@
 
 #include "gtest/gtest.h"
 
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
+/* class A needs to have dll-interface to be used by clients of class B */)
+
 namespace testing {
 
 // This helper class can be used to mock out Google Test failure reporting
@@ -111,6 +114,8 @@ class GTEST_API_ SingleFailureChecker {
 }  // namespace internal
 
 }  // namespace testing
+
+GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 
 // A set of macros for testing Google Test assertions or code that's expected
 // to generate Google Test fatal failures.  It verifies that the given
