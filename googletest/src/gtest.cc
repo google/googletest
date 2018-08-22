@@ -138,6 +138,12 @@
 # define vsnprintf _vsnprintf
 #endif  // GTEST_OS_WINDOWS
 
+#if GTEST_OS_MAC
+#ifndef GTEST_OS_IOS
+#include <crt_externs.h>
+#endif
+#endif
+
 #if GTEST_HAS_ABSL
 #include "absl/debugging/failure_signal_handler.h"
 #include "absl/debugging/stacktrace.h"
@@ -2124,15 +2130,8 @@ static const char* const kReservedTestSuiteAttributes[] = {
 
 // The list of reserved attributes used in the <testcase> element of XML output.
 static const char* const kReservedTestCaseAttributes[] = {
-  "classname",
-  "name",
-  "status",
-  "time",
-  "type_param",
-  "value_param",
-  "file",
-  "line"
-};
+    "classname",  "name",        "status", "time",
+    "type_param", "value_param", "file",   "line"};
 
 template <int kSize>
 std::vector<std::string> ArrayAsVector(const char* const (&array)[kSize]) {
@@ -3506,7 +3505,8 @@ void XmlUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
   fclose(xmlout);
 }
 
-void XmlUnitTestResultPrinter::ListTestsMatchingFilter(const std::vector<TestCase*> test_cases) {
+void XmlUnitTestResultPrinter::ListTestsMatchingFilter(
+    const std::vector<TestCase*> test_cases) {
   FILE* xmlout = OpenFileForWriting(output_file_);
   std::stringstream stream;
   PrintXmlTestsList(&stream, test_cases);
@@ -3723,7 +3723,8 @@ void XmlUnitTestResultPrinter::OutputXmlTestInfo(::std::ostream* stream,
   }
   if (GTEST_FLAG(list_tests)) {
     OutputXmlAttribute(stream, kTestcase, "file", test_info.file());
-    OutputXmlAttribute(stream, kTestcase, "line", StreamableToString(test_info.line()));
+    OutputXmlAttribute(stream, kTestcase, "line",
+                       StreamableToString(test_info.line()));
     *stream << " />\n";
     return;
   }
@@ -3775,13 +3776,13 @@ void XmlUnitTestResultPrinter::PrintXmlTestCase(std::ostream* stream,
                      StreamableToString(test_case.reportable_test_count()));
   if (!GTEST_FLAG(list_tests)) {
     OutputXmlAttribute(stream, kTestsuite, "failures",
-                      StreamableToString(test_case.failed_test_count()));
+                       StreamableToString(test_case.failed_test_count()));
     OutputXmlAttribute(
         stream, kTestsuite, "disabled",
         StreamableToString(test_case.reportable_disabled_test_count()));
     OutputXmlAttribute(stream, kTestsuite, "errors", "0");
     OutputXmlAttribute(stream, kTestsuite, "time",
-                      FormatTimeInMillisAsSeconds(test_case.elapsed_time()));
+                       FormatTimeInMillisAsSeconds(test_case.elapsed_time()));
     *stream << TestPropertiesAsXmlAttributes(test_case.ad_hoc_test_result());
   }
   *stream << ">\n";
@@ -3830,8 +3831,8 @@ void XmlUnitTestResultPrinter::PrintXmlUnitTest(std::ostream* stream,
   *stream << "</" << kTestsuites << ">\n";
 }
 
-void XmlUnitTestResultPrinter::PrintXmlTestsList(std::ostream* stream,
-                                                 const std::vector<TestCase*> test_cases) {
+void XmlUnitTestResultPrinter::PrintXmlTestsList(
+    std::ostream* stream, const std::vector<TestCase*> test_cases) {
   const std::string kTestsuites = "testsuites";
 
   *stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
@@ -3961,7 +3962,8 @@ void JsonUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
   fclose(jsonout);
 }
 
-void JsonUnitTestResultPrinter::ListTestsMatchingFilter(const std::vector<TestCase*> test_cases) {
+void JsonUnitTestResultPrinter::ListTestsMatchingFilter(
+    const std::vector<TestCase*> test_cases) {
   FILE* jsonout = OpenFileForWriting(output_file_);
   std::stringstream stream;
   PrintJsonTestList(&stream, test_cases);
@@ -3993,7 +3995,6 @@ FILE* JsonUnitTestResultPrinter::OpenFileForWriting(std::string output_file) {
   }
   return jsonout;
 }
-
 
 // Returns an JSON-escaped copy of the input string str.
 std::string JsonUnitTestResultPrinter::EscapeJson(const std::string& str) {
@@ -4178,10 +4179,10 @@ void JsonUnitTestResultPrinter::PrintJsonTestCase(std::ostream* stream,
                   test_case.reportable_disabled_test_count(), kIndent);
     OutputJsonKey(stream, kTestsuite, "errors", 0, kIndent);
     OutputJsonKey(stream, kTestsuite, "time",
-                  FormatTimeInMillisAsDuration(test_case.elapsed_time()), kIndent,
-                  false);
+                  FormatTimeInMillisAsDuration(test_case.elapsed_time()),
+                  kIndent, false);
     *stream << TestPropertiesAsJson(test_case.ad_hoc_test_result(), kIndent)
-        << ",\n";
+            << ",\n";
   }
   //*stream << ",\n";
 
@@ -4247,8 +4248,8 @@ void JsonUnitTestResultPrinter::PrintJsonUnitTest(std::ostream* stream,
   *stream << "\n" << kIndent << "]\n" << "}\n";
 }
 
-void JsonUnitTestResultPrinter::PrintJsonTestList(std::ostream* stream,
-                                                  const std::vector<TestCase*> test_cases) {
+void JsonUnitTestResultPrinter::PrintJsonTestList(
+    std::ostream* stream, const std::vector<TestCase*> test_cases) {
   const std::string kTestsuites = "testsuites";
   const std::string kIndent = Indent(2);
   *stream << "{\n";
@@ -4256,8 +4257,7 @@ void JsonUnitTestResultPrinter::PrintJsonTestList(std::ostream* stream,
   for (size_t i = 0; i < test_cases.size(); ++i) {
     totalTests += test_cases[i]->total_test_count();
   }
-  OutputJsonKey(stream, kTestsuites, "tests", totalTests,
-                kIndent);
+  OutputJsonKey(stream, kTestsuites, "tests", totalTests, kIndent);
 
   OutputJsonKey(stream, kTestsuites, "name", "AllTests", kIndent);
   *stream << kIndent << "\"" << kTestsuites << "\": [\n";
@@ -4272,7 +4272,9 @@ void JsonUnitTestResultPrinter::PrintJsonTestList(std::ostream* stream,
     PrintJsonTestCase(stream, *test_cases[i]);
   }
 
-  *stream << "\n" << kIndent << "]\n" << "}\n";
+  *stream << "\n"
+          << kIndent << "]\n"
+          << "}\n";
 }
 // Produces a string representing the test properties in a result as
 // a JSON dictionary.
@@ -4798,7 +4800,7 @@ int UnitTest::Run() {
   // used for the duration of the program.
   impl()->set_catch_exceptions(GTEST_FLAG(catch_exceptions));
 
-#if GTEST_HAS_SEH
+#if GTEST_OS_WINDOWS
   // Either the user wants Google Test to catch exceptions thrown by the
   // tests or this is executing in the context of death test child
   // process. In either case the user does not want to see pop-up dialogs
@@ -4835,7 +4837,7 @@ int UnitTest::Run() {
           _WRITE_ABORT_MSG | _CALL_REPORTFAULT);  // pop-up window, core dump.
 # endif
   }
-#endif  // GTEST_HAS_SEH
+#endif  // GTEST_OS_WINDOWS
 
   return internal::HandleExceptionsInMethodIfSupported(
       impl(),
@@ -5496,10 +5498,12 @@ void UnitTestImpl::ListTestsMatchingFilter() {
   fflush(stdout);
   const std::string& output_format = UnitTestOptions::GetOutputFormat();
   if (output_format == "xml") {
-    XmlUnitTestResultPrinter* printer = new XmlUnitTestResultPrinter(UnitTestOptions::GetAbsolutePathToOutputFile().c_str());
+    XmlUnitTestResultPrinter* printer = new XmlUnitTestResultPrinter(
+        UnitTestOptions::GetAbsolutePathToOutputFile().c_str());
     printer->ListTestsMatchingFilter(test_cases_);
   } else if (output_format == "json") {
-    JsonUnitTestResultPrinter* printer = new JsonUnitTestResultPrinter(UnitTestOptions::GetAbsolutePathToOutputFile().c_str());
+    JsonUnitTestResultPrinter* printer = new JsonUnitTestResultPrinter(
+        UnitTestOptions::GetAbsolutePathToOutputFile().c_str());
     printer->ListTestsMatchingFilter(test_cases_);
   }
 }
@@ -5939,6 +5943,17 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
 // other parts of Google Test.
 void ParseGoogleTestFlagsOnly(int* argc, char** argv) {
   ParseGoogleTestFlagsOnlyImpl(argc, argv);
+
+  // Fix the value of *_NSGetArgc() on macOS, but iff
+  // *_NSGetArgv() == argv
+  // Only applicable to char** version of argv
+#if GTEST_OS_MAC
+#ifndef GTEST_OS_IOS
+  if (*_NSGetArgv() == argv) {
+    *_NSGetArgc() = *argc;
+  }
+#endif
+#endif
 }
 void ParseGoogleTestFlagsOnly(int* argc, wchar_t** argv) {
   ParseGoogleTestFlagsOnlyImpl(argc, argv);
