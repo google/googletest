@@ -138,7 +138,7 @@ macro(config_compiler_and_linker)
   set(cxx_base_flags "${cxx_base_flags} ${GTEST_HAS_PTHREAD_MACRO}")
 
   # For building gtest's own tests and samples.
-  set(cxx_exception "${CMAKE_CXX_FLAGS} ${cxx_base_flags} ${cxx_exception_flags}")
+  set(cxx_exception "${cxx_base_flags} ${cxx_exception_flags}")
   set(cxx_no_exception
     "${CMAKE_CXX_FLAGS} ${cxx_base_flags} ${cxx_no_exception_flags}")
   set(cxx_default "${cxx_exception}")
