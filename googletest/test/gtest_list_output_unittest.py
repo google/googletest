@@ -54,7 +54,7 @@ EXPECTED_XML = r"""<\?xml version="1.0" encoding="UTF-8"\?>
 </testsuites>
 """
 
-EXPECTED_JSON = r"""{
+EXPECTED_JSON = """{
   "tests": 2,
   "name": "AllTests",
   "testsuites": \[
