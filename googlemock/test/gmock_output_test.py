@@ -39,8 +39,6 @@ gmock_output_test.py
 
 """
 
-__author__ = 'wan@google.com (Zhanyong Wan)'
-
 import os
 import re
 import sys
