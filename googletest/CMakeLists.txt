@@ -5,10 +5,6 @@
 # ctest.  You can select which tests to run using 'ctest -R regex'.
 # For more options, run 'ctest --help'.
 
-# BUILD_SHARED_LIBS is a standard CMake variable, but we declare it here to
-# make it prominent in the GUI.
-option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
-
 # When other libraries are using a shared version of runtime libraries,
 # Google Test also has to use one.
 option(
@@ -48,7 +44,7 @@ if (CMAKE_VERSION VERSION_LESS 3.0)
   project(gtest CXX C)
 else()
   cmake_policy(SET CMP0048 NEW)
-  project(gtest VERSION 1.9.0 LANGUAGES CXX C)
+  project(gtest VERSION ${GOOGLETEST_VERSION} LANGUAGES CXX C)
 endif()
 cmake_minimum_required(VERSION 2.6.4)
 
@@ -60,6 +56,25 @@ if (COMMAND set_up_hermetic_build)
   set_up_hermetic_build()
 endif()
 
+# These commands only run if this is the main project
+if(CMAKE_PROJECT_NAME STREQUAL "gtest" OR CMAKE_PROJECT_NAME STREQUAL "googletest-distribution")
+
+  # BUILD_SHARED_LIBS is a standard CMake variable, but we declare it here to
+  # make it prominent in the GUI.
+  option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
+
+else()
+
+  mark_as_advanced(
+    gtest_force_shared_crt
+    gtest_build_tests
+    gtest_build_samples
+    gtest_disable_pthreads
+    gtest_hide_internal_symbols)
+
+endif()
+
+
 if (gtest_hide_internal_symbols)
   set(CMAKE_CXX_VISIBILITY_PRESET hidden)
   set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
@@ -70,10 +85,30 @@ include(cmake/internal_utils.cmake)
 
 config_compiler_and_linker()  # Defined in internal_utils.cmake.
 
+# Create the CMake package file descriptors.
+if (INSTALL_GTEST)
+  include(CMakePackageConfigHelpers)
+  set(cmake_package_name GTest)
+  set(targets_export_name ${cmake_package_name}Targets CACHE INTERNAL "")
+  set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated" CACHE INTERNAL "")
+  set(cmake_files_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${cmake_package_name}")
+  set(version_file "${generated_dir}/${cmake_package_name}ConfigVersion.cmake")
+  write_basic_package_version_file(${version_file} COMPATIBILITY AnyNewerVersion)
+  install(EXPORT ${targets_export_name}
+    NAMESPACE ${cmake_package_name}::
+    DESTINATION ${cmake_files_install_dir})
+  set(config_file "${generated_dir}/${cmake_package_name}Config.cmake")
+  configure_package_config_file("${gtest_SOURCE_DIR}/cmake/Config.cmake.in"
+    "${config_file}" INSTALL_DESTINATION ${cmake_files_install_dir})
+  install(FILES ${version_file} ${config_file}
+    DESTINATION ${cmake_files_install_dir})
+endif()
+
 # Where Google Test's .h files can be found.
-include_directories(
+set(gtest_build_include_dirs
   "${gtest_SOURCE_DIR}/include"
   "${gtest_SOURCE_DIR}")
+include_directories(${gtest_build_include_dirs})
 
 # Summary of tuple support for Microsoft Visual Studio:
 # Compiler    version(MS)  version(cmake)  Support
@@ -97,39 +132,23 @@ endif()
 # aggressive about warnings.
 cxx_library(gtest "${cxx_strict}" src/gtest-all.cc)
 cxx_library(gtest_main "${cxx_strict}" src/gtest_main.cc)
-target_link_libraries(gtest_main gtest)
-
 # If the CMake version supports it, attach header directory information
 # to the targets for when we are part of a parent build (ie being pulled
 # in via add_subdirectory() rather than being a standalone build).
 if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
-  target_include_directories(gtest      SYSTEM INTERFACE "${gtest_SOURCE_DIR}/include")
-  target_include_directories(gtest_main SYSTEM INTERFACE "${gtest_SOURCE_DIR}/include")
+  target_include_directories(gtest SYSTEM INTERFACE
+    "$<BUILD_INTERFACE:${gtest_build_include_dirs}>"
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+  target_include_directories(gtest_main SYSTEM INTERFACE
+    "$<BUILD_INTERFACE:${gtest_build_include_dirs}>"
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 endif()
+target_link_libraries(gtest_main PUBLIC gtest)
 
 ########################################################################
 #
 # Install rules
-if(INSTALL_GTEST)
-  install(TARGETS gtest gtest_main
-    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-  install(DIRECTORY "${gtest_SOURCE_DIR}/include/gtest"
-    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
-
-  # configure and install pkgconfig files
-  configure_file(
-    cmake/gtest.pc.in
-    "${CMAKE_BINARY_DIR}/gtest.pc"
-    @ONLY)
-  configure_file(
-    cmake/gtest_main.pc.in
-    "${CMAKE_BINARY_DIR}/gtest_main.pc"
-    @ONLY)
-  install(FILES "${CMAKE_BINARY_DIR}/gtest.pc" "${CMAKE_BINARY_DIR}/gtest_main.pc"
-    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
-endif()
+install_project(gtest gtest_main)
 
 ########################################################################
 #

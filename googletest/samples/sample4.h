@@ -28,9 +28,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // A sample program demonstrating using Google C++ testing framework.
-//
-// Author: wan@google.com (Zhanyong Wan)
-
 #ifndef GTEST_SAMPLES_SAMPLE4_H_
 #define GTEST_SAMPLES_SAMPLE4_H_
 
@@ -45,6 +42,9 @@ class Counter {
 
   // Returns the current counter value, and increments it.
   int Increment();
+
+  // Returns the current counter value, and decrements it.
+  int Decrement();
 
   // Prints the current counter value to STDOUT.
   void Print() const;

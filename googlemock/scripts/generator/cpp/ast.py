@@ -1264,6 +1264,9 @@ class AstBuilder(object):
         return self._GetNestedType(Union)
 
     def handle_enum(self):
+        token = self._GetNextToken()
+        if not (token.token_type == tokenize.NAME and token.name == 'class'):
+            self._AddBackToken(token)
         return self._GetNestedType(Enum)
 
     def handle_auto(self):

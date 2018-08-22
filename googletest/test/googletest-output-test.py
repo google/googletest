@@ -38,8 +38,6 @@ googletest_output_test.py --gengolden
 googletest_output_test.py
 """
 
-__author__ = 'wan@google.com (Zhanyong Wan)'
-
 import difflib
 import os
 import re
@@ -57,7 +55,7 @@ NO_STACKTRACE_SUPPORT_FLAG = '--no_stacktrace_support'
 IS_LINUX = os.name == 'posix' and os.uname()[0] == 'Linux'
 IS_WINDOWS = os.name == 'nt'
 
-# TODO(vladl@google.com): remove the _lin suffix.
+# FIXME: remove the _lin suffix.
 GOLDEN_NAME = 'googletest-output-test-golden-lin.txt'
 
 PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath('googletest-output-test_')
