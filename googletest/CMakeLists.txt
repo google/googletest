@@ -302,6 +302,9 @@ if (gtest_build_tests)
   cxx_executable(googletest-list-tests-unittest_ test gtest)
   py_test(googletest-list-tests-unittest)
 
+  cxx_executable(gtest_list_output_unittest_ test gtest)
+  py_test(gtest_list_output_unittest)
+
   cxx_executable(googletest-output-test_ test gtest)
   py_test(googletest-output-test --no_stacktrace_support)
 
