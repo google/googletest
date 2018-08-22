@@ -1,4 +1,4 @@
-// Copyright 2006, Google Inc.
+// Copyright 2018, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -40,11 +40,9 @@
 
 #include "gtest/gtest.h"
 
-TEST(FooTest, Test1) {
-}
+TEST(FooTest, Test1) {}
 
-TEST(FooTest, Test2) {
-}
+TEST(FooTest, Test2) {}
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
