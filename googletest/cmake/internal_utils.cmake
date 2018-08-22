@@ -171,9 +171,18 @@ function(cxx_library_with_type name type cxx_flags)
     set_target_properties(${name}
       PROPERTIES
       COMPILE_DEFINITIONS "GTEST_CREATE_SHARED_LIBRARY=1")
+    if (NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
+      target_compile_definitions(${name} INTERFACE
+        $<INSTALL_INTERFACE:GTEST_LINKED_AS_SHARED_LIBRARY=1>)
+    endif()
   endif()
   if (DEFINED GTEST_HAS_PTHREAD)
-    target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT})
+    if ("${CMAKE_VERSION}" VERSION_LESS "3.1.0")
+      set(threads_spec ${CMAKE_THREAD_LIBS_INIT})
+    else()
+      set(threads_spec Threads::Threads)
+    endif()
+    target_link_libraries(${name} PUBLIC ${threads_spec})
   endif()
 endfunction()
 
@@ -282,4 +291,28 @@ function(py_test name)
           --build_dir=${CMAKE_CURRENT_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE} ${ARGN})
     endif (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 3.1)
   endif(PYTHONINTERP_FOUND)
+endfunction()
+
+# install_project(targets...)
+#
+# Installs the specified targets and configures the associated pkgconfig files.
+function(install_project)
+  if(INSTALL_GTEST)
+    install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
+      DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+    # Install the project targets.
+    install(TARGETS ${ARGN}
+      EXPORT ${targets_export_name}
+      RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+      ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+      LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+    # Configure and install pkgconfig files.
+    foreach(t ${ARGN})
+      set(configured_pc "${generated_dir}/${t}.pc")
+      configure_file("${PROJECT_SOURCE_DIR}/cmake/${t}.pc.in"
+        "${configured_pc}" @ONLY)
+      install(FILES "${configured_pc}"
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+    endforeach()
+  endif()
 endfunction()
