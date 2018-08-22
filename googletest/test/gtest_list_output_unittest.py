@@ -45,7 +45,7 @@ import gtest_test_utils
 GTEST_LIST_TESTS_FLAG = '--gtest_list_tests'
 GTEST_OUTPUT_FLAG = '--gtest_output'
 
-EXPECTED_XML = r"""<\?xml version="1.0" encoding="UTF-8"\?>
+EXPECTED_XML = """<\?xml version="1.0" encoding="UTF-8"\?>
 <testsuites tests="2" name="AllTests">
   <testsuite name="FooTest" tests="2">
     <testcase name="Test1" file=".*gtest_list_output_unittest_.cc" line="43" />
