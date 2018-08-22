@@ -49,7 +49,7 @@ EXPECTED_XML = """<\?xml version="1.0" encoding="UTF-8"\?>
 <testsuites tests="2" name="AllTests">
   <testsuite name="FooTest" tests="2">
     <testcase name="Test1" file=".*gtest_list_output_unittest_.cc" line="43" />
-    <testcase name="Test2" file=".*gtest_list_output_unittest_.cc" line="46" />
+    <testcase name="Test2" file=".*gtest_list_output_unittest_.cc" line="45" />
   </testsuite>
 </testsuites>
 """
@@ -70,7 +70,7 @@ EXPECTED_JSON = """{
         {
           "name": "Test2",
           "file": ".*gtest_list_output_unittest_.cc",
-          "line": 46
+          "line": 45
         }
       \]
     }
