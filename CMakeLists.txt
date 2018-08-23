@@ -23,7 +23,7 @@ cmake_dependent_option(INSTALL_GMOCK "Enable installation of googlemock. (Projec
 if(WIN32)
   set(INSTALL_CMAKE_DIR "cmake" CACHE PATH "CMake exported targets")
 else()
-  set(INSTALL_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/gtest" CACHE PATH "CMake exported targets")
+  set(INSTALL_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/googletest" CACHE PATH "CMake exported targets")
 endif()
 
 set(googletest_install_targets)
