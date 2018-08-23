@@ -138,10 +138,10 @@ cxx_library(gtest_main "${cxx_strict}" src/gtest_main.cc)
 if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
   target_include_directories(gtest SYSTEM INTERFACE
     "$<BUILD_INTERFACE:${gtest_build_include_dirs}>"
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+    "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
   target_include_directories(gtest_main SYSTEM INTERFACE
     "$<BUILD_INTERFACE:${gtest_build_include_dirs}>"
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+    "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
 endif()
 target_link_libraries(gtest_main PUBLIC gtest)
 
