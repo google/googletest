@@ -4597,6 +4597,7 @@ struct PolymorphicFunctor {
   typedef int result_type;
   int operator()(int n) { return n; }
   int operator()(const char* s) { return static_cast<int>(strlen(s)); }
+  std::string operator()(int *p) { return p ? "good ptr" : "null"; }
 };
 
 TEST(ResultOfTest, WorksForPolymorphicFunctors) {
@@ -4610,6 +4611,23 @@ TEST(ResultOfTest, WorksForPolymorphicFunctors) {
   EXPECT_TRUE(matcher_string.Matches("long string"));
   EXPECT_FALSE(matcher_string.Matches("shrt"));
 }
+
+#if GTEST_LANG_CXX11
+TEST(ResultOfTest, WorksForPolymorphicFunctorsIgnoringResultType) {
+  Matcher<int*> matcher = ResultOf(PolymorphicFunctor(), "good ptr");
+
+  int n = 0;
+  EXPECT_TRUE(matcher.Matches(&n));
+  EXPECT_FALSE(matcher.Matches(nullptr));
+}
+
+TEST(ResultOfTest, WorksForLambdas) {
+  Matcher<int> matcher =
+      ResultOf([](int str_len) { return std::string(str_len, 'x'); }, "xxx");
+  EXPECT_TRUE(matcher.Matches(3));
+  EXPECT_FALSE(matcher.Matches(1));
+}
+#endif
 
 const int* ReferencingFunction(const int& n) { return &n; }
 
