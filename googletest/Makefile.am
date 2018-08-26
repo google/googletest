@@ -116,8 +116,7 @@ EXTRA_DIST += \
 
 # CMake script
 EXTRA_DIST += \
-  CMakeLists.txt \
-  cmake/internal_utils.cmake
+  CMakeLists.txt
 
 # MSVC project files
 EXTRA_DIST += \

@@ -61,10 +61,7 @@ else()
   mark_as_advanced(gmock_build_tests)
 endif()
 
-# Although Google Test's CMakeLists.txt calls this function, the
-# changes there don't affect the current scope.  Therefore we have to
-# call it again here.
-config_compiler_and_linker()  # from ${gtest_dir}/cmake/internal_utils.cmake
+config_compiler_and_linker()  # Defined in internal_utils.cmake.
 
 # Adds Google Mock's and Google Test's header directories to the search path.
 set(gmock_build_include_dirs
@@ -112,16 +109,25 @@ else()
   cxx_library(gmock_main "${cxx_strict}" src/gmock_main.cc)
   target_link_libraries(gmock_main PUBLIC gmock)
 endif()
-# If the CMake version supports it, attach header directory information
-# to the targets for when we are part of a parent build (ie being pulled
-# in via add_subdirectory() rather than being a standalone build).
-if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
-  target_include_directories(gmock SYSTEM INTERFACE
-    "$<BUILD_INTERFACE:${gmock_build_include_dirs}>"
-    "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
-  target_include_directories(gmock_main SYSTEM INTERFACE
-    "$<BUILD_INTERFACE:${gmock_build_include_dirs}>"
-    "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+
+if (DEFINED CMAKE_VERSION)
+  if(NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
+    # If the CMake version supports it, attach header directory information
+    # to the targets for when we are part of a parent build (ie being pulled
+    # in via add_subdirectory() rather than being a standalone build).
+    target_include_directories(gmock SYSTEM INTERFACE
+      "$<BUILD_INTERFACE:${gmock_build_include_dirs}>"
+      "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+    target_include_directories(gmock_main SYSTEM INTERFACE
+      "$<BUILD_INTERFACE:${gmock_build_include_dirs}>"
+      "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+  endif()
+
+  if(NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.12")
+    # If the CMake version supports it, set export names to cased target names
+    set_target_properties(gmock PROPERTIES EXPORT_NAME GMock)
+    set_target_properties(gmock_main PROPERTIES EXPORT_NAME GMock_Main)
+  endif()
 endif()
 
 ########################################################################

@@ -293,26 +293,74 @@ function(py_test name)
   endif(PYTHONINTERP_FOUND)
 endfunction()
 
-# install_project(targets...)
-#
-# Installs the specified targets and configures the associated pkgconfig files.
-function(install_project)
-  if(INSTALL_GTEST)
-    install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
-      DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
-    # Install the project targets.
-    install(TARGETS ${ARGN}
-      EXPORT ${targets_export_name}
+set(_googletest_install_targets)
+macro(_install_subproject_targets)
+  set(targets ${ARGN})
+
+  set(_googletest_install_targets ${_googletest_install_targets} ${targets} PARENT_SCOPE)
+
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+
+  foreach(target ${targets})
+    # Install the project targets
+    install(TARGETS ${target}
+      EXPORT ${target}ConfigInternal
       RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
       ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
       LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-    # Configure and install pkgconfig files.
-    foreach(t ${ARGN})
-      set(configured_pc "${generated_dir}/${t}.pc")
-      configure_file("${PROJECT_SOURCE_DIR}/cmake/${t}.pc.in"
-        "${configured_pc}" @ONLY)
-      install(FILES "${configured_pc}"
-        DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
-    endforeach()
+
+    # Install target export
+    if(INSTALL_GTEST_CMAKE)
+      install(EXPORT ${target}ConfigInternal
+        DESTINATION "${INSTALL_CMAKE_DIR}"
+        NAMESPACE ${GTEST_PACKAGE_NAME}_)
+    endif()
+
+    # Configure and install pkg-config files
+    if(INSTALL_GTEST_PKGCONFIG)
+      set(pc_file_in "${PROJECT_SOURCE_DIR}/cmake/${target}.pc.in")
+      set(pc_file_out "${CMAKE_CURRENT_BINARY_DIR}/${target}.pc")
+      configure_file("${pc_file_in}" "${pc_file_out}" @ONLY)
+      install(FILES "${pc_file_out}"
+        DESTINATION "${INSTALL_PKGCONFIG_DIR}")
+    endif()
+  endforeach()
+endmacro()
+
+macro(_install_main_target_config)
+  include(CMakePackageConfigHelpers)
+  configure_package_config_file(
+    "${CMAKE_SOURCE_DIR}/cmake/googletestConfig.cmake.in"
+    "${CMAKE_BINARY_DIR}/${GTEST_PACKAGE_NAME}Config.cmake"
+    INSTALL_DESTINATION "${INSTALL_CMAKE_DIR}")
+  write_basic_package_version_file(
+    ${CMAKE_BINARY_DIR}/${GTEST_PACKAGE_NAME}ConfigVersion.cmake
+    VERSION "${GOOGLETEST_VERSION}"
+    COMPATIBILITY AnyNewerVersion)
+  install(FILES
+    ${CMAKE_BINARY_DIR}/${GTEST_PACKAGE_NAME}Config.cmake
+    ${CMAKE_BINARY_DIR}/${GTEST_PACKAGE_NAME}ConfigVersion.cmake
+    DESTINATION "${INSTALL_CMAKE_DIR}")
+endmacro()
+
+# install_project(targets...)
+#
+# Installs the specified targets and configures the associated pkgconfig files.
+#
+# Without arguments, installs the main target config.
+macro(install_project)
+  if(INSTALL_GTEST)
+    set(extra_args ${ARGN})
+    list(LENGTH extra_args num_extra_args)
+    if(${num_extra_args} GREATER 0)
+      _install_subproject_targets(${extra_args})
+    elseif(INSTALL_GTEST_CMAKE AND _googletest_install_targets)
+      if(NOT "${PROJECT_NAME}" STREQUAL "googletest-distribution")
+        message(FATAL_ERROR
+          "Call install_project() without arguments from the main CMakeLists.txt file.")
+      endif()
+      _install_main_target_config()
+    endif()
   endif()
-endfunction()
+endmacro()

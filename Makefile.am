@@ -11,4 +11,5 @@ EXTRA_DIST = \
   BUILD.bazel \
   CMakeLists.txt \
   README.md \
-  WORKSPACE
+  WORKSPACE \
+  cmake/internal_utils.cmake

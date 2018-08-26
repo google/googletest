@@ -1,0 +1,62 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+if (@GTEST_HAS_PTHREAD@)
+  set(THREADS_PREFER_PTHREAD_FLAG @THREADS_PREFER_PTHREAD_FLAG@)
+  find_dependency(Threads)
+endif()
+
+set(googletest_BUILD_SHARED_LIBS @BUILD_SHARED_LIBS@)
+
+set(googletest_NAMESPACE_TARGETS)
+set(googletest_ALL_INCLUDE_DIRS)
+
+foreach(target @_googletest_install_targets@)
+  include(${CMAKE_CURRENT_LIST_DIR}/${target}ConfigInternal.cmake)
+
+  if(DEFINED CMAKE_VERSION AND "${CMAKE_VERSION}" VERSION_LESS "2.8.12")
+    # Case the target names for old CMake versions
+    string(REPLACE "gtest" "GTest" target "${target}")
+    string(REPLACE "gmock" "GMock" target "${target}")
+    string(REPLACE "main" "Main" target "${target}")
+  endif()
+
+  # "GTest" -> "gtest", "GTest_Main" -> "gtest_main", etc.
+  string(TOLOWER ${target} target_LOWER)
+
+  # "GTest_Main" -> "Main"
+  string(REPLACE "@GTEST_PACKAGE_NAME@_" "" target "${target}")
+
+  # "GMock_Main" -> "GMock::Main"
+  string(REPLACE "_" "::" target "${target}")
+
+  add_library(@GTEST_PACKAGE_NAME@::${target} INTERFACE IMPORTED)
+  set_target_properties(@GTEST_PACKAGE_NAME@::${target}
+    PROPERTIES
+      INTERFACE_LINK_LIBRARIES @GTEST_PACKAGE_NAME@_${target}
+      IMPORTED_GLOBAL ON)
+  if(googletest_BUILD_SHARED_LIBS)
+    set_target_properties(@GTEST_PACKAGE_NAME@::${target}
+      PROPERTIES
+        INTERFACE_COMPILE_DEFINITIONS "GTEST_LINKED_AS_SHARED_LIBRARY=1")
+  endif()
+  add_library(${target_LOWER} ALIAS @GTEST_PACKAGE_NAME@::${target})
+
+  get_target_property(${target_LOWER}_INCLUDE_DIRS
+    @GTEST_PACKAGE_NAME@_${target}
+    INTERFACE_INCLUDE_DIRECTORIES)
+
+  list(APPEND googletest_ALL_INCLUDE_DIRS ${${target_LOWER}_INCLUDE_DIRS})
+  list(APPEND googletest_NAMESPACE_TARGETS @GTEST_PACKAGE_NAME@::${target})
+endforeach()
+
+list(REMOVE_DUPLICATES googletest_ALL_INCLUDE_DIRS)
+set(@GTEST_PACKAGE_NAME_UPPER@_INCLUDE_DIRS ${googletest_ALL_INCLUDE_DIRS})
+
+list(REMOVE_DUPLICATES googletest_NAMESPACE_TARGETS)
+set(@GTEST_PACKAGE_NAME_UPPER@_LIBRARIES ${googletest_NAMESPACE_TARGETS})
+
+set(@GTEST_PACKAGE_NAME_UPPER@_VERSION "@GOOGLETEST_VERSION@")
+
+check_required_components("@GTEST_PACKAGE_NAME@")
+set(@GTEST_PACKAGE_NAME_UPPER@_FOUND ${@GTEST_PACKAGE_NAME@_FOUND})
