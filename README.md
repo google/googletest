@@ -85,6 +85,8 @@ result output. If your test runner understands TAP, you may find it useful.
 [gtest-parallel](https://github.com/google/gtest-parallel) is a test runner that
 runs tests from your binary in parallel to provide significant speed-up.
 
+[GoogleTest Adapter](https://marketplace.visualstudio.com/items?itemName=DavidSchuldenfrei.gtest-adapter) is a VS Code extension allowing to view Google Tests in a tree view, and run/debug your tests.
+
 ## Requirements ##
 
 Google Test is designed to have fairly minimal requirements to build
