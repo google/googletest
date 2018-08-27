@@ -159,15 +159,15 @@ GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4275
 
 #endif  // GTEST_HAS_EXCEPTIONS
 
+namespace edit_distance {
 // Returns the optimal edits to go from 'left' to 'right'.
 // All edits cost the same, with replace having lower priority than
-// add/remove. Returns an approximation of the maximum memory used in
-// 'memory_usage' if non-null.
-// Uses a Dijkstra search, with a couple of simple bells and whistles added on.
-enum EditType { kEditMatch, kEditAdd, kEditRemove, kEditReplace };
+// add/remove.
+// Simple implementation of the Wagner-Fischer algorithm.
+// See http://en.wikipedia.org/wiki/Wagner-Fischer_algorithm
+enum EditType { kMatch, kAdd, kRemove, kReplace };
 GTEST_API_ std::vector<EditType> CalculateOptimalEdits(
-    const std::vector<size_t>& left, const std::vector<size_t>& right,
-    size_t* memory_usage = NULL);
+    const std::vector<size_t>& left, const std::vector<size_t>& right);
 
 // Same as above, but the input is represented as strings.
 GTEST_API_ std::vector<EditType> CalculateOptimalEdits(
@@ -178,6 +178,8 @@ GTEST_API_ std::vector<EditType> CalculateOptimalEdits(
 GTEST_API_ std::string CreateUnifiedDiff(const std::vector<std::string>& left,
                                          const std::vector<std::string>& right,
                                          size_t context = 2);
+
+}  // namespace edit_distance
 
 // Calculate the diff between 'left' and 'right' and return it in unified diff
 // format.
