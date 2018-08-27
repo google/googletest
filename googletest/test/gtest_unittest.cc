@@ -215,6 +215,7 @@ using testing::GTEST_FLAG(stream_result_to);
 using testing::GTEST_FLAG(throw_on_failure);
 using testing::IsNotSubstring;
 using testing::IsSubstring;
+using testing::kMaxStackTraceDepth;
 using testing::Message;
 using testing::ScopedFakeTestPartResultReporter;
 using testing::StaticAssertTypeEq;
@@ -234,16 +235,18 @@ using testing::internal::AlwaysTrue;
 using testing::internal::AppendUserMessage;
 using testing::internal::ArrayAwareFind;
 using testing::internal::ArrayEq;
+using testing::internal::CalculateOptimalEdits;
 using testing::internal::CodePointToUtf8;
 using testing::internal::CompileAssertTypesEqual;
 using testing::internal::CopyArray;
 using testing::internal::CountIf;
+using testing::internal::CreateUnifiedDiff;
+using testing::internal::EditType;
 using testing::internal::EqFailure;
 using testing::internal::FloatingPoint;
 using testing::internal::ForEach;
 using testing::internal::FormatEpochTimeInMillisAsIso8601;
 using testing::internal::FormatTimeInMillisAsSeconds;
-using testing::internal::GTestFlagSaver;
 using testing::internal::GetCurrentOsStackTraceExceptTop;
 using testing::internal::GetElementOr;
 using testing::internal::GetNextRandomSeed;
@@ -252,6 +255,7 @@ using testing::internal::GetTestTypeId;
 using testing::internal::GetTimeInMillis;
 using testing::internal::GetTypeId;
 using testing::internal::GetUnitTestImpl;
+using testing::internal::GTestFlagSaver;
 using testing::internal::ImplicitlyConvertible;
 using testing::internal::Int32;
 using testing::internal::Int32FromEnvOrDie;
@@ -259,6 +263,8 @@ using testing::internal::IsAProtocolMessage;
 using testing::internal::IsContainer;
 using testing::internal::IsContainerTest;
 using testing::internal::IsNotContainer;
+using testing::internal::kMaxRandomSeed;
+using testing::internal::kTestTypeIdInGoogleTest;
 using testing::internal::NativeArray;
 using testing::internal::OsStackTraceGetter;
 using testing::internal::OsStackTraceGetterInterface;
@@ -280,12 +286,6 @@ using testing::internal::TestResultAccessor;
 using testing::internal::UInt32;
 using testing::internal::UnitTestImpl;
 using testing::internal::WideStringToUtf8;
-using testing::internal::edit_distance::CalculateOptimalEdits;
-using testing::internal::edit_distance::CreateUnifiedDiff;
-using testing::internal::edit_distance::EditType;
-using testing::internal::kMaxRandomSeed;
-using testing::internal::kTestTypeIdInGoogleTest;
-using testing::kMaxStackTraceDepth;
 
 #if GTEST_HAS_STREAM_REDIRECTION
 using testing::internal::CaptureStdout;
@@ -3517,14 +3517,14 @@ TEST(EditDistance, TestCases) {
       {__LINE__, "ABCD", "abcd", "////",
        "@@ -1,4 +1,4 @@\n-A\n-B\n-C\n-D\n+a\n+b\n+c\n+d\n"},
       // Path finding.
-      {__LINE__, "ABCDEFGH", "ABXEGH1", "  -/ -  +",
+      {__LINE__, "ABCDEFGH", "ABXEGH1", "  /- -  +",
        "@@ -1,8 +1,7 @@\n A\n B\n-C\n-D\n+X\n E\n-F\n G\n H\n+1\n"},
-      {__LINE__, "AAAABCCCC", "ABABCDCDC", "- /   + / ",
-       "@@ -1,9 +1,9 @@\n-A\n A\n-A\n+B\n A\n B\n C\n+D\n C\n-C\n+D\n C\n"},
-      {__LINE__, "ABCDE", "BCDCD", "-   +/",
+      {__LINE__, "AAAABCCCC", "ABABCDCDC", " -/   + / ",
+       "@@ -1,9 +1,9 @@\n A\n-A\n-A\n+B\n A\n B\n C\n+D\n C\n-C\n+D\n C\n"},
+      {__LINE__, "ABCDE", "BCDCD", "-   /+",
        "@@ -1,5 +1,5 @@\n-A\n B\n C\n D\n-E\n+C\n+D\n"},
-      {__LINE__, "ABCDEFGHIJKL", "BCDCDEFGJKLJK", "- ++     --   ++",
-       "@@ -1,4 +1,5 @@\n-A\n B\n+C\n+D\n C\n D\n"
+      {__LINE__, "ABCDEFGHIJKL", "BGDCDEFGJKLJK", "- ++     --   ++",
+       "@@ -1,4 +1,5 @@\n-A\n B\n+G\n+D\n C\n D\n"
        "@@ -6,7 +7,7 @@\n F\n G\n-H\n-I\n J\n K\n L\n+J\n+K\n"},
       {}};
   for (const Case* c = kCases; c->left; ++c) {
@@ -3540,6 +3540,57 @@ TEST(EditDistance, TestCases) {
         << CreateUnifiedDiff(CharsToLines(c->left), CharsToLines(c->right))
         << ">";
   }
+}
+
+// Tests that we can run CalculateOptimalEdits for a large vector, i.e. we can
+// compute diffs for large strings.
+TEST(EditDistance, LargeVectorWithDiffs) {
+  const int kSize = 300000;
+  std::vector<size_t> left;
+  std::vector<size_t> right;
+  std::vector<EditType> expected(kSize, testing::internal::kEditMatch);
+
+  left.reserve(kSize);
+  right.reserve(kSize);
+  for (int i = 0; i < kSize; ++i) {
+    // Make the contents of the vectors unique. This greatly speeds up
+    // the algorithm, since it doesn't spend time finding matches for
+    // different alignments.
+    left.push_back(i);
+    right.push_back(i);
+  }
+
+  for (int i = 0; i < 10; ++i) {
+    right[i] = kSize + i;
+    expected[i] = testing::internal::kEditReplace;
+    right[kSize - i - 1] = kSize * 2 + i;
+    expected[kSize - i - 1] = testing::internal::kEditReplace;
+  }
+  size_t memory_usage;
+  EXPECT_EQ(CalculateOptimalEdits(left, right, &memory_usage), expected);
+  EXPECT_GT(memory_usage, kSize);
+  EXPECT_LT(memory_usage, kSize * 2);
+}
+
+// Tests that we can run CalculateOptimalEdits for two vectors N and M, where
+// M = N plus additional junk at the end. The current algorithm only does O(M)
+// "real" work in this case, but allocates some extra memory. We test that this
+// is still fast enough for common cases, and we aren't allocating an
+// excessive amount of extra memory.
+TEST(EditDistance, LargeVectorWithTrailingJunk) {
+  const int kSize = 200000;
+  const int kAdditionalSize = 2000;
+  std::vector<size_t> left(kSize, 0);
+  std::vector<size_t> right(kSize + kAdditionalSize, 0);
+  std::vector<EditType> expected(kSize + kAdditionalSize,
+                                 testing::internal::kEditMatch);
+  for (int i = 0; i < kAdditionalSize; ++i) {
+    expected[i + kSize] = testing::internal::kEditAdd;
+  }
+  size_t memory_usage;
+  EXPECT_EQ(CalculateOptimalEdits(left, right, &memory_usage), expected);
+  EXPECT_GT(memory_usage, kSize);
+  EXPECT_LT(memory_usage, 6000000);
 }
 
 // Tests EqFailure(), used for implementing *EQ* assertions.
