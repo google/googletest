@@ -801,6 +801,28 @@ TYPED_TEST(TypedTest, Failure) {
   EXPECT_EQ(1, TypeParam()) << "Expected failure";
 }
 
+typedef testing::Types<char, int> TypesForTestWithNames;
+
+template <typename T>
+class TypedTestWithNames : public testing::Test {};
+
+class TypedTestNames {
+ public:
+  template <typename T>
+  static std::string GetName(int i) {
+    if (testing::internal::IsSame<T, char>::value)
+      return std::string("char_") + ::testing::PrintToString(i);
+    if (testing::internal::IsSame<T, int>::value)
+      return std::string("int_") + ::testing::PrintToString(i);
+  }
+};
+
+TYPED_TEST_CASE(TypedTestWithNames, TypesForTestWithNames, TypedTestNames);
+
+TYPED_TEST(TypedTestWithNames, Success) {}
+
+TYPED_TEST(TypedTestWithNames, Failure) { FAIL(); }
+
 #endif  // GTEST_HAS_TYPED_TEST
 
 // This #ifdef block tests the output of type-parameterized tests.
@@ -824,6 +846,22 @@ REGISTER_TYPED_TEST_CASE_P(TypedTestP, Success, Failure);
 
 typedef testing::Types<unsigned char, unsigned int> UnsignedTypes;
 INSTANTIATE_TYPED_TEST_CASE_P(Unsigned, TypedTestP, UnsignedTypes);
+
+class TypedTestPNames {
+ public:
+  template <typename T>
+  static std::string GetName(int i) {
+    if (testing::internal::IsSame<T, unsigned char>::value) {
+      return std::string("unsigned_char_") + ::testing::PrintToString(i);
+    }
+    if (testing::internal::IsSame<T, unsigned int>::value) {
+      return std::string("unsigned_int_") + ::testing::PrintToString(i);
+    }
+  }
+};
+
+INSTANTIATE_TYPED_TEST_CASE_P(UnsignedCustomName, TypedTestP, UnsignedTypes,
+                              TypedTestPNames);
 
 #endif  // GTEST_HAS_TYPED_TEST_P
 
