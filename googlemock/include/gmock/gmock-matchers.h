@@ -145,6 +145,9 @@ class MatcherDescriberInterface {
 template <typename T>
 class MatcherInterface : public MatcherDescriberInterface {
  public:
+  // https://developercommunity.visualstudio.com/content/problem/288509/view.html
+  virtual ~MatcherInterface() {};
+
   // Returns true iff the matcher matches x; also explains the match
   // result to 'listener' if necessary (see the next paragraph), in
   // the form of a non-restrictive relative clause ("which ...",
