@@ -39,6 +39,10 @@
 
 #include <stdlib.h>
 
+#if _MSC_VER
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4127: /* conditional expression is constant */)
+#endif  // . _MSC_VER    
+
 #if GTEST_IS_THREADSAFE
 using testing::ScopedFakeTestPartResultReporter;
 using testing::TestPartResultArray;
@@ -1098,6 +1102,8 @@ int main(int argc, char **argv) {
   // are registered, and torn down in the reverse order.
   testing::AddGlobalTestEnvironment(new FooEnvironment);
   testing::AddGlobalTestEnvironment(new BarEnvironment);
-
+#if _MSC_VER
+  GTEST_DISABLE_MSC_WARNINGS_POP()
+#endif  // . _MSC_VER    
   return RunAllTests();
 }
