@@ -1103,7 +1103,7 @@ int main(int argc, char **argv) {
   testing::AddGlobalTestEnvironment(new FooEnvironment);
   testing::AddGlobalTestEnvironment(new BarEnvironment);
 #if _MSC_VER
-  GTEST_DISABLE_MSC_WARNINGS_POP()
+  GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4127
 #endif  // . _MSC_VER    
   return RunAllTests();
 }
