@@ -35,6 +35,10 @@
 
 #include "gtest/gtest.h"
 
+#if _MSC_VER
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4127 /* conditional expression is constant */)
+#endif  //  _MSC_VER
+
 using testing::Test;
 
 // Used for testing that SetUpTestCase()/TearDownTestCase(), fixture
@@ -449,5 +453,9 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, TrimmedTest, TrimTypes);
 // point defined in that library (fatal error LNK1561: entry point
 // must be defined). This dummy test keeps gtest_main linked in.
 TEST(DummyTest, TypedTestsAreNotSupportedOnThisPlatform) {}
+
+#if _MSC_VER
+GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4127
+#endif                             //  _MSC_VER
 
 #endif  // #if !defined(GTEST_HAS_TYPED_TEST) && !defined(GTEST_HAS_TYPED_TEST_P)
