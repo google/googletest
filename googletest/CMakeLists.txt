@@ -150,6 +150,28 @@ target_link_libraries(gtest_main PUBLIC gtest)
 # Install rules
 install_project(gtest gtest_main)
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+  if (MSVC_VERSION GREATER_EQUAL 1900)
+    set(PDB_gtest "gtest.pdb")
+    set(PDB_gtest_main "gtest_main.pdb")
+  else()
+    set(PDB_gtest "vc${MSVC_TOOLSET_VERSION}.pdb")
+    set(PDB_gtest_main "vc${MSVC_TOOLSET_VERSION}.pdb")
+  endif()
+
+  install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/gtest.dir/\${CMAKE_INSTALL_CONFIG_NAME}/${PDB_gtest}"
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RENAME "gtest.pdb"
+    OPTIONAL)
+
+  install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/gtest_main.dir/\${CMAKE_INSTALL_CONFIG_NAME}/${PDB_gtest_main}"
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RENAME "gtest_main.pdb"
+    OPTIONAL)
+endif()
+
 ########################################################################
 #
 # Samples on how to link user tests with gtest or gtest_main.
