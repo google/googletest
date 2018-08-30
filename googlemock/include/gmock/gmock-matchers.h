@@ -56,8 +56,10 @@
 # include <initializer_list>  // NOLINT -- must be after gtest.h
 #endif
 
-GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
-/* class A needs to have dll-interface to be used by clients of class B */)
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(
+    4251 5046 /* class A needs to have dll-interface to be used by clients of
+                 class B */
+    /* Symbol involving type with internal linkage not defined */)
 
 namespace testing {
 
@@ -5270,7 +5272,7 @@ PolymorphicMatcher<internal::variant_matcher::VariantMatcher<T> > VariantWith(
 
 }  // namespace testing
 
-GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
+GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251 5046
 
 // Include any custom callback matchers added by the local installation.
 // We must include this header at the end to make sure it can use the
