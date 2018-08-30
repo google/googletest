@@ -40,8 +40,8 @@
 #include <stdlib.h>
 
 #if _MSC_VER
-  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4127 /* conditional expression is constant */)
-#endif  // . _MSC_VER    
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4127 /* conditional expression is constant */)
+#endif  //  _MSC_VER
 
 #if GTEST_IS_THREADSAFE
 using testing::ScopedFakeTestPartResultReporter;
@@ -815,9 +815,9 @@ class TypedTestNames {
   template <typename T>
   static std::string GetName(int i) {
     if (testing::internal::IsSame<T, char>::value)
-      return std::string("char_") + ::testing::PrintToString(i);
+      return std::string("char") + ::testing::PrintToString(i);
     if (testing::internal::IsSame<T, int>::value)
-      return std::string("int_") + ::testing::PrintToString(i);
+      return std::string("int") + ::testing::PrintToString(i);
   }
 };
 
@@ -856,10 +856,10 @@ class TypedTestPNames {
   template <typename T>
   static std::string GetName(int i) {
     if (testing::internal::IsSame<T, unsigned char>::value) {
-      return std::string("unsigned_char_") + ::testing::PrintToString(i);
+      return std::string("unsignedChar") + ::testing::PrintToString(i);
     }
     if (testing::internal::IsSame<T, unsigned int>::value) {
-      return std::string("unsigned_int_") + ::testing::PrintToString(i);
+      return std::string("unsignedInt") + ::testing::PrintToString(i);
     }
   }
 };
@@ -1103,7 +1103,7 @@ int main(int argc, char **argv) {
   testing::AddGlobalTestEnvironment(new FooEnvironment);
   testing::AddGlobalTestEnvironment(new BarEnvironment);
 #if _MSC_VER
-  GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4127
-#endif  // . _MSC_VER    
+GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4127
+#endif  //  _MSC_VER
   return RunAllTests();
 }
