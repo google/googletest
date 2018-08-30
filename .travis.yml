@@ -30,8 +30,16 @@ matrix:
       compiler: gcc
       env: BUILD_TYPE=Debug VERBOSE=1 CXX_FLAGS=-std=c++11
     - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.7
+          packages:
+            - clang-3.7
+      env:
+        - MATRIX_EVAL="CC=clang-3.7 && CXX=clang++-3.7" BUILD_TYPE=Debug VERBOSE=1
       compiler: clang
-      env: BUILD_TYPE=Debug VERBOSE=1
     - os: linux
       compiler: clang
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
