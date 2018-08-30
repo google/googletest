@@ -35,6 +35,10 @@
 
 #include "gtest/gtest.h"
 
+#if _MSC_VER
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4127 /* conditional expression is constant */)
+#endif  //  _MSC_VER
+
 using testing::Test;
 
 // Used for testing that SetUpTestCase()/TearDownTestCase(), fixture
@@ -165,6 +169,40 @@ TYPED_TEST(NumericTest, DefaultIsZero) {
 
 }  // namespace library1
 
+// Tests that custom names work.
+template <typename T>
+class TypedTestWithNames : public Test {};
+
+class TypedTestNames {
+ public:
+  template <typename T>
+  static std::string GetName(int i) {
+    if (testing::internal::IsSame<T, char>::value) {
+      return std::string("char_") + ::testing::PrintToString(i);
+    }
+    if (testing::internal::IsSame<T, int>::value) {
+      return std::string("int_") + ::testing::PrintToString(i);
+    }
+  }
+};
+
+TYPED_TEST_CASE(TypedTestWithNames, TwoTypes, TypedTestNames);
+
+TYPED_TEST(TypedTestWithNames, TestCaseName) {
+  if (testing::internal::IsSame<TypeParam, char>::value) {
+    EXPECT_STREQ(::testing::UnitTest::GetInstance()
+                     ->current_test_info()
+                     ->test_case_name(),
+                 "TypedTestWithNames/char_0");
+  }
+  if (testing::internal::IsSame<TypeParam, int>::value) {
+    EXPECT_STREQ(::testing::UnitTest::GetInstance()
+                     ->current_test_info()
+                     ->test_case_name(),
+                 "TypedTestWithNames/int_1");
+  }
+}
+
 #endif  // GTEST_HAS_TYPED_TEST
 
 // This #ifdef block tests type-parameterized tests.
@@ -264,6 +302,46 @@ REGISTER_TYPED_TEST_CASE_P(DerivedTest,
 
 typedef Types<short, long> MyTwoTypes;
 INSTANTIATE_TYPED_TEST_CASE_P(My, DerivedTest, MyTwoTypes);
+
+// Tests that custom names work with type parametrized tests. We reuse the
+// TwoTypes from above here.
+template <typename T>
+class TypeParametrizedTestWithNames : public Test {};
+
+TYPED_TEST_CASE_P(TypeParametrizedTestWithNames);
+
+TYPED_TEST_P(TypeParametrizedTestWithNames, TestCaseName) {
+  if (testing::internal::IsSame<TypeParam, char>::value) {
+    EXPECT_STREQ(::testing::UnitTest::GetInstance()
+                     ->current_test_info()
+                     ->test_case_name(),
+                 "CustomName/TypeParametrizedTestWithNames/p_char_0");
+  }
+  if (testing::internal::IsSame<TypeParam, int>::value) {
+    EXPECT_STREQ(::testing::UnitTest::GetInstance()
+                     ->current_test_info()
+                     ->test_case_name(),
+                 "CustomName/TypeParametrizedTestWithNames/p_int_1");
+  }
+}
+
+REGISTER_TYPED_TEST_CASE_P(TypeParametrizedTestWithNames, TestCaseName);
+
+class TypeParametrizedTestNames {
+ public:
+  template <typename T>
+  static std::string GetName(int i) {
+    if (testing::internal::IsSame<T, char>::value) {
+      return std::string("p_char_") + ::testing::PrintToString(i);
+    }
+    if (testing::internal::IsSame<T, int>::value) {
+      return std::string("p_int_") + ::testing::PrintToString(i);
+    }
+  }
+};
+
+INSTANTIATE_TYPED_TEST_CASE_P(CustomName, TypeParametrizedTestWithNames,
+                              TwoTypes, TypeParametrizedTestNames);
 
 // Tests that multiple TYPED_TEST_CASE_P's can be defined in the same
 // translation unit.
@@ -375,5 +453,9 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, TrimmedTest, TrimTypes);
 // point defined in that library (fatal error LNK1561: entry point
 // must be defined). This dummy test keeps gtest_main linked in.
 TEST(DummyTest, TypedTestsAreNotSupportedOnThisPlatform) {}
+
+#if _MSC_VER
+GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4127
+#endif                             //  _MSC_VER
 
 #endif  // #if !defined(GTEST_HAS_TYPED_TEST) && !defined(GTEST_HAS_TYPED_TEST_P)
