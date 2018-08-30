@@ -129,6 +129,28 @@ endif()
 # Install rules
 install_project(gmock gmock_main)
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+  if (MSVC_VERSION GREATER_EQUAL 1900)
+    set(PDB_gmock "gmock.pdb")
+    set(PDB_gmock_main "gmock_main.pdb")
+  else()
+    set(PDB_gmock "vc${MSVC_TOOLSET_VERSION}.pdb")
+    set(PDB_gmock_main "vc${MSVC_TOOLSET_VERSION}.pdb")
+  endif()
+
+  install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/gmock.dir/\${CMAKE_INSTALL_CONFIG_NAME}/${PDB_gmock}"
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RENAME "gmock.pdb"
+    OPTIONAL)
+
+  install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/gmock_main.dir/\${CMAKE_INSTALL_CONFIG_NAME}/${PDB_gmock_main}"
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RENAME "gmock_main.pdb"
+    OPTIONAL)
+endif()
+
 ########################################################################
 #
 # Google Mock's own tests.
