@@ -178,10 +178,10 @@ class TypedTestNames {
   template <typename T>
   static std::string GetName(int i) {
     if (testing::internal::IsSame<T, char>::value) {
-      return std::string("char_") + ::testing::PrintToString(i);
+      return std::string("char") + ::testing::PrintToString(i);
     }
     if (testing::internal::IsSame<T, int>::value) {
-      return std::string("int_") + ::testing::PrintToString(i);
+      return std::string("int") + ::testing::PrintToString(i);
     }
   }
 };
@@ -193,13 +193,13 @@ TYPED_TEST(TypedTestWithNames, TestCaseName) {
     EXPECT_STREQ(::testing::UnitTest::GetInstance()
                      ->current_test_info()
                      ->test_case_name(),
-                 "TypedTestWithNames/char_0");
+                 "TypedTestWithNames/char0");
   }
   if (testing::internal::IsSame<TypeParam, int>::value) {
     EXPECT_STREQ(::testing::UnitTest::GetInstance()
                      ->current_test_info()
                      ->test_case_name(),
-                 "TypedTestWithNames/int_1");
+                 "TypedTestWithNames/int1");
   }
 }
 
@@ -315,13 +315,13 @@ TYPED_TEST_P(TypeParametrizedTestWithNames, TestCaseName) {
     EXPECT_STREQ(::testing::UnitTest::GetInstance()
                      ->current_test_info()
                      ->test_case_name(),
-                 "CustomName/TypeParametrizedTestWithNames/p_char_0");
+                 "CustomName/TypeParametrizedTestWithNames/parChar0");
   }
   if (testing::internal::IsSame<TypeParam, int>::value) {
     EXPECT_STREQ(::testing::UnitTest::GetInstance()
                      ->current_test_info()
                      ->test_case_name(),
-                 "CustomName/TypeParametrizedTestWithNames/p_int_1");
+                 "CustomName/TypeParametrizedTestWithNames/parInt1");
   }
 }
 
@@ -332,10 +332,10 @@ class TypeParametrizedTestNames {
   template <typename T>
   static std::string GetName(int i) {
     if (testing::internal::IsSame<T, char>::value) {
-      return std::string("p_char_") + ::testing::PrintToString(i);
+      return std::string("parChar") + ::testing::PrintToString(i);
     }
     if (testing::internal::IsSame<T, int>::value) {
-      return std::string("p_int_") + ::testing::PrintToString(i);
+      return std::string("parInt") + ::testing::PrintToString(i);
     }
   }
 };

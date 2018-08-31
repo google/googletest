@@ -56,9 +56,10 @@
 # include <initializer_list>  // NOLINT -- must be after gtest.h
 #endif
 
-GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 5046 \
-/* class A needs to have dll-interface to be used by clients of class B */ \
-/* Symbol involving type with internal linkage not defined */)
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(
+    4251 5046 /* class A needs to have dll-interface to be used by clients of
+                 class B */
+    /* Symbol involving type with internal linkage not defined */)
 
 namespace testing {
 
