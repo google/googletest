@@ -12,7 +12,7 @@ Expected equality of these values:
   3
 Stack trace: (omitted)
 
-[0;32m[==========] [mRunning 76 tests from 34 test cases.
+[0;32m[==========] [mRunning 74 tests from 34 test cases.
 [0;32m[----------] [mGlobal test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -463,7 +463,7 @@ case.
 Stack trace: (omitted)
 
 [0;31m[  FAILED  ] [mTEST_before_TEST_F_in_same_test_case.DefinedUsingTEST_FAndShouldFail
-[0;32m[----------] [m8 tests from ExpectNonfatalFailureTest
+[0;32m[----------] [m7 tests from ExpectNonfatalFailureTest
 [0;32m[ RUN      ] [mExpectNonfatalFailureTest.CanReferenceGlobalVariables
 [0;32m[       OK ] [mExpectNonfatalFailureTest.CanReferenceGlobalVariables
 [0;32m[ RUN      ] [mExpectNonfatalFailureTest.CanReferenceLocalVariables
@@ -520,15 +520,7 @@ Expected: 1 non-fatal failure
 Stack trace: (omitted)
 
 [0;31m[  FAILED  ] [mExpectNonfatalFailureTest.FailsWhenStatementReturns
-[0;32m[ RUN      ] [mExpectNonfatalFailureTest.FailsWhenStatementThrows
-(expecting a failure)
-gtest.cc:#: Failure
-Expected: 1 non-fatal failure
-  Actual: 0 failures
-Stack trace: (omitted)
-
-[0;31m[  FAILED  ] [mExpectNonfatalFailureTest.FailsWhenStatementThrows
-[0;32m[----------] [m8 tests from ExpectFatalFailureTest
+[0;32m[----------] [m7 tests from ExpectFatalFailureTest
 [0;32m[ RUN      ] [mExpectFatalFailureTest.CanReferenceGlobalVariables
 [0;32m[       OK ] [mExpectFatalFailureTest.CanReferenceGlobalVariables
 [0;32m[ RUN      ] [mExpectFatalFailureTest.CanReferenceLocalStaticVariables
@@ -585,14 +577,6 @@ Expected: 1 fatal failure
 Stack trace: (omitted)
 
 [0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenStatementReturns
-[0;32m[ RUN      ] [mExpectFatalFailureTest.FailsWhenStatementThrows
-(expecting a failure)
-gtest.cc:#: Failure
-Expected: 1 fatal failure
-  Actual: 0 failures
-Stack trace: (omitted)
-
-[0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenStatementThrows
 [0;32m[----------] [m2 tests from TypedTest/0, where TypeParam = int
 [0;32m[ RUN      ] [mTypedTest/0.Success
 [0;32m[       OK ] [mTypedTest/0.Success
@@ -906,9 +890,9 @@ Failed
 Expected fatal failure.
 Stack trace: (omitted)
 
-[0;32m[==========] [m76 tests from 34 test cases ran.
+[0;32m[==========] [m74 tests from 34 test cases ran.
 [0;32m[  PASSED  ] [m26 tests.
-[0;31m[  FAILED  ] [m50 tests, listed below:
+[0;31m[  FAILED  ] [m48 tests, listed below:
 [0;31m[  FAILED  ] [mNonfatalFailureTest.EscapesStringOperands
 [0;31m[  FAILED  ] [mNonfatalFailureTest.DiffForLongStrings
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInSubroutine
@@ -937,12 +921,10 @@ Stack trace: (omitted)
 [0;31m[  FAILED  ] [mExpectNonfatalFailureTest.FailsWhenThereAreTwoNonfatalFailures
 [0;31m[  FAILED  ] [mExpectNonfatalFailureTest.FailsWhenThereIsOneFatalFailure
 [0;31m[  FAILED  ] [mExpectNonfatalFailureTest.FailsWhenStatementReturns
-[0;31m[  FAILED  ] [mExpectNonfatalFailureTest.FailsWhenStatementThrows
 [0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenThereIsNoFatalFailure
 [0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenThereAreTwoFatalFailures
 [0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenThereIsOneNonfatalFailure
 [0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenStatementReturns
-[0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenStatementThrows
 [0;31m[  FAILED  ] [mTypedTest/0.Failure, where TypeParam = int
 [0;31m[  FAILED  ] [mTypedTestWithNames/char0.Failure, where TypeParam = char
 [0;31m[  FAILED  ] [mTypedTestWithNames/int1.Failure, where TypeParam = int
@@ -960,7 +942,7 @@ Stack trace: (omitted)
 [0;31m[  FAILED  ] [mPrintingFailingParams/FailingParamTest.Fails/0, where GetParam() = 2
 [0;31m[  FAILED  ] [mPrintingStrings/ParamTest.Failure/a, where GetParam() = "a"
 
-50 FAILED TESTS
+48 FAILED TESTS
 [0;33m  YOU HAVE 1 DISABLED TEST
 
 [mNote: Google Test filter = FatalFailureTest.*:LoggingTest.*
