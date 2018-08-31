@@ -96,7 +96,7 @@ TYPED_TEST(FooTest, HasPropertyA) { ... }
 //     static std::string GetName(int) {
 //       if (std::is_same<T, char>()) return "char";
 //       if (std::is_same<T, int>()) return "int";
-//       if (std::is_same<T, unsigned int>()) return "unsigned_int";
+//       if (std::is_same<T, unsigned int>()) return "unsignedInt";
 //     }
 //   };
 //   TYPED_TEST_CASE(FooTest, MyTypes, MyTypeNames);
