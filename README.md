@@ -5,7 +5,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/4o38plt0xbo1ubc8/branch/master?svg=true)](https://ci.appveyor.com/project/GoogleTestAppVeyor/googletest/branch/master)
 
 **Future Plans**:
-* 1.8.x Release - the 1.8.x will be the last release that works with pre-C++11 compilers. The 1.8.1 will not accept any requests for any new features and any bugfix requests will only be accepted if proven "critical"
+* 1.8.x Release - [the 1.8.x](https://github.com/google/googletest/releases/tag/release-1.8.1) is the last release that works with pre-C++11 compilers. The 1.8.x will not accept any requests for any new features and any bugfix requests will only be accepted if proven "critical"
 * Post 1.8.x - work to improve/cleanup/pay technical debt. When this work is completed there will be a 1.9.x tagged release
 * Post 1.9.x googletest will follow [Abseil Live at Head philosophy](https://abseil.io/about/philosophy)
 
@@ -84,6 +84,8 @@ result output. If your test runner understands TAP, you may find it useful.
 
 [gtest-parallel](https://github.com/google/gtest-parallel) is a test runner that
 runs tests from your binary in parallel to provide significant speed-up.
+
+[GoogleTest Adapter](https://marketplace.visualstudio.com/items?itemName=DavidSchuldenfrei.gtest-adapter) is a VS Code extension allowing to view Google Tests in a tree view, and run/debug your tests.
 
 ## Requirements ##
 

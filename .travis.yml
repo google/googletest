@@ -72,10 +72,10 @@ addons:
     #   https://github.com/travis-ci/apt-source-whitelist/blob/master/ubuntu.json
     sources:
     - ubuntu-toolchain-r-test
-    - llvm-toolchain-precise-3.7
+    - llvm-toolchain-precise-3.9
     packages:
     - g++-4.9
-    - clang-3.7
+    - clang-3.9
 
 notifications:
   email: false

@@ -66,6 +66,9 @@
 #include "gtest/gtest-test-part.h"
 #include "gtest/gtest-typed-test.h"
 
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
+/* class A needs to have dll-interface to be used by clients of class B */)
+
 // Depending on the platform, different string classes are available.
 // On Linux, in addition to ::std::string, Google also makes use of
 // class ::string, which has the same interface as ::std::string, but
@@ -113,6 +116,10 @@ GTEST_DECLARE_string_(color);
 // the tests to run. If the filter is not given all tests are executed.
 GTEST_DECLARE_string_(filter);
 
+// This flag controls whether Google Test installs a signal handler that dumps
+// debugging information when fatal signals are raised.
+GTEST_DECLARE_bool_(install_failure_signal_handler);
+
 // This flag causes the Google Test to list tests. None of the tests listed
 // are actually run if the flag is provided.
 GTEST_DECLARE_bool_(list_tests);
@@ -155,6 +162,10 @@ GTEST_DECLARE_bool_(throw_on_failure);
 // platforms test results are streamed to the specified port on
 // the specified host machine.
 GTEST_DECLARE_string_(stream_result_to);
+
+#if GTEST_USE_OWN_FLAGFILE_FLAG_
+GTEST_DECLARE_string_(flagfile);
+#endif  // GTEST_USE_OWN_FLAGFILE_FLAG_
 
 // The upper limit for valid stack trace depths.
 const int kMaxStackTraceDepth = 100;
@@ -2329,5 +2340,7 @@ int RUN_ALL_TESTS() GTEST_MUST_USE_RESULT_;
 inline int RUN_ALL_TESTS() {
   return ::testing::UnitTest::GetInstance()->Run();
 }
+
+GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 
 #endif  // GTEST_INCLUDE_GTEST_GTEST_H_

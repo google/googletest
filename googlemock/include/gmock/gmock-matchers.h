@@ -56,6 +56,11 @@
 # include <initializer_list>  // NOLINT -- must be after gtest.h
 #endif
 
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(
+    4251 5046 /* class A needs to have dll-interface to be used by clients of
+                 class B */
+    /* Symbol involving type with internal linkage not defined */)
+
 namespace testing {
 
 // To implement a matcher Foo for type T, define:
@@ -2599,16 +2604,20 @@ class PropertyMatcher {
 
 // Type traits specifying various features of different functors for ResultOf.
 // The default template specifies features for functor objects.
-// Functor classes have to typedef argument_type and result_type
-// to be compatible with ResultOf.
 template <typename Functor>
 struct CallableTraits {
-  typedef typename Functor::result_type ResultType;
   typedef Functor StorageType;
 
   static void CheckIsValid(Functor /* functor */) {}
+
+#if GTEST_LANG_CXX11
+  template <typename T>
+  static auto Invoke(Functor f, T arg) -> decltype(f(arg)) { return f(arg); }
+#else
+  typedef typename Functor::result_type ResultType;
   template <typename T>
   static ResultType Invoke(Functor f, T arg) { return f(arg); }
+#endif
 };
 
 // Specialization for function pointers.
@@ -2629,13 +2638,11 @@ struct CallableTraits<ResType(*)(ArgType)> {
 
 // Implements the ResultOf() matcher for matching a return value of a
 // unary function of an object.
-template <typename Callable>
+template <typename Callable, typename InnerMatcher>
 class ResultOfMatcher {
  public:
-  typedef typename CallableTraits<Callable>::ResultType ResultType;
-
-  ResultOfMatcher(Callable callable, const Matcher<ResultType>& matcher)
-      : callable_(callable), matcher_(matcher) {
+  ResultOfMatcher(Callable callable, InnerMatcher matcher)
+      : callable_(internal::move(callable)), matcher_(internal::move(matcher)) {
     CallableTraits<Callable>::CheckIsValid(callable_);
   }
 
@@ -2649,9 +2656,17 @@ class ResultOfMatcher {
 
   template <typename T>
   class Impl : public MatcherInterface<T> {
+#if GTEST_LANG_CXX11
+    using ResultType = decltype(CallableTraits<Callable>::template Invoke<T>(
+        std::declval<CallableStorageType>(), std::declval<T>()));
+#else
+    typedef typename CallableTraits<Callable>::ResultType ResultType;
+#endif
+
    public:
-    Impl(CallableStorageType callable, const Matcher<ResultType>& matcher)
-        : callable_(callable), matcher_(matcher) {}
+    template <typename M>
+    Impl(const CallableStorageType& callable, const M& matcher)
+        : callable_(callable), matcher_(MatcherCast<ResultType>(matcher)) {}
 
     virtual void DescribeTo(::std::ostream* os) const {
       *os << "is mapped by the given callable to a value that ";
@@ -2665,8 +2680,10 @@ class ResultOfMatcher {
 
     virtual bool MatchAndExplain(T obj, MatchResultListener* listener) const {
       *listener << "which is mapped by the given callable to ";
-      // Cannot pass the return value (for example, int) to
-      // MatchPrintAndExplain, which takes a non-const reference as argument.
+      // Cannot pass the return value directly to MatchPrintAndExplain, which
+      // takes a non-const reference as argument.
+      // Also, specifying template argument explicitly is needed because T could
+      // be a non-const reference (e.g. Matcher<Uncopyable&>).
       ResultType result =
           CallableTraits<Callable>::template Invoke<T>(callable_, obj);
       return MatchPrintAndExplain(result, matcher_, listener);
@@ -2676,7 +2693,7 @@ class ResultOfMatcher {
     // Functors often define operator() as non-const method even though
     // they are actually stateless. But we need to use them even when
     // 'this' is a const pointer. It's the user's responsibility not to
-    // use stateful callables with ResultOf(), which does't guarantee
+    // use stateful callables with ResultOf(), which doesn't guarantee
     // how many times the callable will be invoked.
     mutable CallableStorageType callable_;
     const Matcher<ResultType> matcher_;
@@ -2685,7 +2702,7 @@ class ResultOfMatcher {
   };  // class Impl
 
   const CallableStorageType callable_;
-  const Matcher<ResultType> matcher_;
+  const InnerMatcher matcher_;
 
   GTEST_DISALLOW_ASSIGN_(ResultOfMatcher);
 };
@@ -4551,26 +4568,15 @@ Property(const std::string& property_name,
 // For example,
 //   ResultOf(f, StartsWith("hi"))
 // matches a Foo object x iff f(x) starts with "hi".
-// callable parameter can be a function, function pointer, or a functor.
-// Callable has to satisfy the following conditions:
-//   * It is required to keep no state affecting the results of
-//     the calls on it and make no assumptions about how many calls
-//     will be made. Any state it keeps must be protected from the
-//     concurrent access.
-//   * If it is a function object, it has to define type result_type.
-//     We recommend deriving your functor classes from std::unary_function.
-//
-template <typename Callable, typename ResultOfMatcher>
-internal::ResultOfMatcher<Callable> ResultOf(
-    Callable callable, const ResultOfMatcher& matcher) {
-  return internal::ResultOfMatcher<Callable>(
-          callable,
-          MatcherCast<typename internal::CallableTraits<Callable>::ResultType>(
-              matcher));
-  // The call to MatcherCast() is required for supporting inner
-  // matchers of compatible types.  For example, it allows
-  //   ResultOf(Function, m)
-  // to compile where Function() returns an int32 and m is a matcher for int64.
+// `callable` parameter can be a function, function pointer, or a functor. It is
+// required to keep no state affecting the results of the calls on it and make
+// no assumptions about how many calls will be made. Any state it keeps must be
+// protected from the concurrent access.
+template <typename Callable, typename InnerMatcher>
+internal::ResultOfMatcher<Callable, InnerMatcher> ResultOf(
+    Callable callable, InnerMatcher matcher) {
+  return internal::ResultOfMatcher<Callable, InnerMatcher>(
+      internal::move(callable), internal::move(matcher));
 }
 
 // String matchers.
@@ -5265,6 +5271,8 @@ PolymorphicMatcher<internal::variant_matcher::VariantMatcher<T> > VariantWith(
     ::testing::internal::MakePredicateFormatterFromMatcher(matcher), value)
 
 }  // namespace testing
+
+GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251 5046
 
 // Include any custom callback matchers added by the local installation.
 // We must include this header at the end to make sure it can use the

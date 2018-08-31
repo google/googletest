@@ -12,7 +12,7 @@ Expected equality of these values:
   3
 Stack trace: (omitted)
 
-[0;32m[==========] [mRunning 68 tests from 30 test cases.
+[0;32m[==========] [mRunning 76 tests from 34 test cases.
 [0;32m[----------] [mGlobal test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -606,6 +606,24 @@ Expected failure
 Stack trace: (omitted)
 
 [0;31m[  FAILED  ] [mTypedTest/0.Failure, where TypeParam = int
+[0;32m[----------] [m2 tests from TypedTestWithNames/char0, where TypeParam = char
+[0;32m[ RUN      ] [mTypedTestWithNames/char0.Success
+[0;32m[       OK ] [mTypedTestWithNames/char0.Success
+[0;32m[ RUN      ] [mTypedTestWithNames/char0.Failure
+googletest-output-test_.cc:#: Failure
+Failed
+Stack trace: (omitted)
+
+[0;31m[  FAILED  ] [mTypedTestWithNames/char0.Failure, where TypeParam = char
+[0;32m[----------] [m2 tests from TypedTestWithNames/int1, where TypeParam = int
+[0;32m[ RUN      ] [mTypedTestWithNames/int1.Success
+[0;32m[       OK ] [mTypedTestWithNames/int1.Success
+[0;32m[ RUN      ] [mTypedTestWithNames/int1.Failure
+googletest-output-test_.cc:#: Failure
+Failed
+Stack trace: (omitted)
+
+[0;31m[  FAILED  ] [mTypedTestWithNames/int1.Failure, where TypeParam = int
 [0;32m[----------] [m2 tests from Unsigned/TypedTestP/0, where TypeParam = unsigned char
 [0;32m[ RUN      ] [mUnsigned/TypedTestP/0.Success
 [0;32m[       OK ] [mUnsigned/TypedTestP/0.Success
@@ -634,6 +652,34 @@ Expected failure
 Stack trace: (omitted)
 
 [0;31m[  FAILED  ] [mUnsigned/TypedTestP/1.Failure, where TypeParam = unsigned int
+[0;32m[----------] [m2 tests from UnsignedCustomName/TypedTestP/unsignedChar0, where TypeParam = unsigned char
+[0;32m[ RUN      ] [mUnsignedCustomName/TypedTestP/unsignedChar0.Success
+[0;32m[       OK ] [mUnsignedCustomName/TypedTestP/unsignedChar0.Success
+[0;32m[ RUN      ] [mUnsignedCustomName/TypedTestP/unsignedChar0.Failure
+googletest-output-test_.cc:#: Failure
+Expected equality of these values:
+  1U
+    Which is: 1
+  TypeParam()
+    Which is: '\0'
+Expected failure
+Stack trace: (omitted)
+
+[0;31m[  FAILED  ] [mUnsignedCustomName/TypedTestP/unsignedChar0.Failure, where TypeParam = unsigned char
+[0;32m[----------] [m2 tests from UnsignedCustomName/TypedTestP/unsignedInt1, where TypeParam = unsigned int
+[0;32m[ RUN      ] [mUnsignedCustomName/TypedTestP/unsignedInt1.Success
+[0;32m[       OK ] [mUnsignedCustomName/TypedTestP/unsignedInt1.Success
+[0;32m[ RUN      ] [mUnsignedCustomName/TypedTestP/unsignedInt1.Failure
+googletest-output-test_.cc:#: Failure
+Expected equality of these values:
+  1U
+    Which is: 1
+  TypeParam()
+    Which is: 0
+Expected failure
+Stack trace: (omitted)
+
+[0;31m[  FAILED  ] [mUnsignedCustomName/TypedTestP/unsignedInt1.Failure, where TypeParam = unsigned int
 [0;32m[----------] [m4 tests from ExpectFailureTest
 [0;32m[ RUN      ] [mExpectFailureTest.ExpectFatalFailure
 (expecting 1 failure)
@@ -860,9 +906,9 @@ Failed
 Expected fatal failure.
 Stack trace: (omitted)
 
-[0;32m[==========] [m68 tests from 30 test cases ran.
-[0;32m[  PASSED  ] [m22 tests.
-[0;31m[  FAILED  ] [m46 tests, listed below:
+[0;32m[==========] [m76 tests from 34 test cases ran.
+[0;32m[  PASSED  ] [m26 tests.
+[0;31m[  FAILED  ] [m50 tests, listed below:
 [0;31m[  FAILED  ] [mNonfatalFailureTest.EscapesStringOperands
 [0;31m[  FAILED  ] [mNonfatalFailureTest.DiffForLongStrings
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInSubroutine
@@ -898,8 +944,12 @@ Stack trace: (omitted)
 [0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenStatementReturns
 [0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenStatementThrows
 [0;31m[  FAILED  ] [mTypedTest/0.Failure, where TypeParam = int
+[0;31m[  FAILED  ] [mTypedTestWithNames/char0.Failure, where TypeParam = char
+[0;31m[  FAILED  ] [mTypedTestWithNames/int1.Failure, where TypeParam = int
 [0;31m[  FAILED  ] [mUnsigned/TypedTestP/0.Failure, where TypeParam = unsigned char
 [0;31m[  FAILED  ] [mUnsigned/TypedTestP/1.Failure, where TypeParam = unsigned int
+[0;31m[  FAILED  ] [mUnsignedCustomName/TypedTestP/unsignedChar0.Failure, where TypeParam = unsigned char
+[0;31m[  FAILED  ] [mUnsignedCustomName/TypedTestP/unsignedInt1.Failure, where TypeParam = unsigned int
 [0;31m[  FAILED  ] [mExpectFailureTest.ExpectFatalFailure
 [0;31m[  FAILED  ] [mExpectFailureTest.ExpectNonFatalFailure
 [0;31m[  FAILED  ] [mExpectFailureTest.ExpectFatalFailureOnAllThreads
@@ -910,7 +960,7 @@ Stack trace: (omitted)
 [0;31m[  FAILED  ] [mPrintingFailingParams/FailingParamTest.Fails/0, where GetParam() = 2
 [0;31m[  FAILED  ] [mPrintingStrings/ParamTest.Failure/a, where GetParam() = "a"
 
-46 FAILED TESTS
+50 FAILED TESTS
 [0;33m  YOU HAVE 1 DISABLED TEST
 
 [mNote: Google Test filter = FatalFailureTest.*:LoggingTest.*
