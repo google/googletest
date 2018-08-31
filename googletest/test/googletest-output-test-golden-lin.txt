@@ -944,12 +944,12 @@ Stack trace: (omitted)
 [0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenStatementReturns
 [0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenStatementThrows
 [0;31m[  FAILED  ] [mTypedTest/0.Failure, where TypeParam = int
-[0;31m[  FAILED  ] [mTypedTestWithNames/char_0.Failure, where TypeParam = char
-[0;31m[  FAILED  ] [mTypedTestWithNames/int_1.Failure, where TypeParam = int
+[0;31m[  FAILED  ] [mTypedTestWithNames/char0.Failure, where TypeParam = char
+[0;31m[  FAILED  ] [mTypedTestWithNames/int1.Failure, where TypeParam = int
 [0;31m[  FAILED  ] [mUnsigned/TypedTestP/0.Failure, where TypeParam = unsigned char
 [0;31m[  FAILED  ] [mUnsigned/TypedTestP/1.Failure, where TypeParam = unsigned int
-[0;31m[  FAILED  ] [mUnsignedCustomName/TypedTestP/unsigned_char_0.Failure, where TypeParam = unsigned char
-[0;31m[  FAILED  ] [mUnsignedCustomName/TypedTestP/unsigned_int_1.Failure, where TypeParam = unsigned int
+[0;31m[  FAILED  ] [mUnsignedCustomName/TypedTestP/unsignedChar0.Failure, where TypeParam = unsigned char
+[0;31m[  FAILED  ] [mUnsignedCustomName/TypedTestP/unsignedInt1.Failure, where TypeParam = unsigned int
 [0;31m[  FAILED  ] [mExpectFailureTest.ExpectFatalFailure
 [0;31m[  FAILED  ] [mExpectFailureTest.ExpectNonFatalFailure
 [0;31m[  FAILED  ] [mExpectFailureTest.ExpectFatalFailureOnAllThreads
