@@ -150,7 +150,7 @@ c is 10
 >
 > 1.  If you see a compiler error "no matching function to call" when using
 >     `ASSERT_PRED*` or `EXPECT_PRED*`, please see
->     [this](faq.md#OverloadedPredicate) for how to resolve it.
+>     [this](faq.md#the-compiler-complains-no-matching-function-to-call-when-i-use-assert_pred-how-do-i-fix-it) for how to resolve it.
 > 1.  Currently we only provide predicate assertions of arity <= 5. If you need
 >     a higher-arity assertion, let [us](https://github.com/google/googletest/issues) know.
 
@@ -423,7 +423,7 @@ and you're ready to go.
 
 ### More String Assertions
 
-(Please read the [previous](#AssertThat) section first if you haven't.)
+(Please read the [previous](#asserting-using-gmock-matchers) section first if you haven't.)
 
 You can use the gMock [string matchers](../../googlemock/docs/CheatSheet.md#string-matchers)
 with `EXPECT_THAT()` or `ASSERT_THAT()` to do more string comparison tricks
