@@ -771,13 +771,12 @@ GTEST_API_ bool AlwaysTrue();
 // Always returns false.
 inline bool AlwaysFalse() { return !AlwaysTrue(); }
 
-// Helper for suppressing false warning from Clang on a const char*
-// variable declared in a conditional expression always being NULL in
-// the else branch.
-struct GTEST_API_ ConstCharPtr {
-  ConstCharPtr(const char* str) : value(str) {}
+// Helper for creating strings in if() statement branches.  Always converts to
+// true.
+struct GTEST_API_ TrueString {
+  TrueString() {}
   operator bool() const { return true; }
-  const char* value;
+  std::string value;
 };
 
 // A simple Linear Congruential Generator for generating random
@@ -1214,31 +1213,45 @@ class NativeArray {
 #define GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement) \
   if (::testing::internal::AlwaysTrue()) { statement; }
 
-#define GTEST_TEST_THROW_(statement, expected_exception, fail) \
-  GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-  if (::testing::internal::ConstCharPtr gtest_msg = "") { \
-    bool gtest_caught_expected = false; \
-    try { \
-      GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
-    } \
-    catch (expected_exception const&) { \
-      gtest_caught_expected = true; \
-    } \
-    catch (...) { \
-      gtest_msg.value = \
-          "Expected: " #statement " throws an exception of type " \
-          #expected_exception ".\n  Actual: it throws a different type."; \
-      goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
-    } \
-    if (!gtest_caught_expected) { \
-      gtest_msg.value = \
-          "Expected: " #statement " throws an exception of type " \
-          #expected_exception ".\n  Actual: it throws nothing."; \
-      goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
-    } \
-  } else \
-    GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__): \
-      fail(gtest_msg.value)
+#define GTEST_WRONG_EXCEPTION_MESSAGE_(statement, expected_exception)         \
+  "Expected: " #statement " throws an exception of type " #expected_exception \
+  ".\n  Actual: it throws "
+
+// The nested try-catch block allows us to catch erroneous exceptions which
+// inherit from std::exception and feed what() to the failure description.  If
+// there was no nested try-catch and expected_exception was std::exception, then
+// this would fail to build due to two blocks both catching std::exceptions.
+#define GTEST_TEST_THROW_(statement, expected_exception, fail)              \
+  GTEST_AMBIGUOUS_ELSE_BLOCKER_                                             \
+  if (::testing::internal::TrueString gtest_msg =                           \
+          ::testing::internal::TrueString()) {                              \
+    bool gtest_caught_expected = false;                                     \
+    try {                                                                   \
+      GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement);            \
+    } catch (expected_exception const&) {                                   \
+      gtest_caught_expected = true;                                         \
+    } catch (...) {                                                         \
+      try {                                                                 \
+        throw;                                                              \
+      } catch (const std::exception& e) {                                   \
+        gtest_msg.value = std::string(GTEST_WRONG_EXCEPTION_MESSAGE_(       \
+                              statement, expected_expression)) +            \
+                          e.what() + ".";                                   \
+      } catch (...) {                                                       \
+        gtest_msg.value = GTEST_WRONG_EXCEPTION_MESSAGE_(                   \
+            statement, expected_exception) "a different type.";            \
+      }                                                                     \
+      goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__);           \
+    }                                                                       \
+    if (!gtest_caught_expected) {                                           \
+      gtest_msg.value = "Expected: " #statement                             \
+                        " throws an exception of type " #expected_exception \
+                        ".\n  Actual: it throws nothing.";                  \
+      goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__);           \
+    }                                                                       \
+  } else                                                                    \
+    GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__)                   \
+        : fail(gtest_msg.value.c_str())
 
 #define GTEST_TEST_NO_THROW_(statement, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
