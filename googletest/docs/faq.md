@@ -131,7 +131,7 @@ In August 2008 we had to switch the default death test style from `fast` to
 default. This caused many death tests to slow down. Unfortunately this change
 was necessary.
 
-Please read [Fixing Failing Death Tests](death_test_styles.md) for what you can
+Please read [Fixing Failing Death Tests](advanced.md#death-test-styles) for what you can
 do.
 
 ## I got some run-time errors about invalid proto descriptors when using `ProtocolMessageEquals`. Help!

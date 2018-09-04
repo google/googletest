@@ -264,7 +264,7 @@ Notes:
 
   * These matchers can also match:
     1. a native array passed by reference (e.g. in `Foo(const int (&a)[5])`), and
-    1. an array passed as a pointer and a count (e.g. in `Bar(const T* buffer, int len)` -- see [Multi-argument Matchers](#Multiargument_Matchers.md)).
+    1. an array passed as a pointer and a count (e.g. in `Bar(const T* buffer, int len)` -- see [Multi-argument Matchers](#multiargument-matchers)).
   * The array being matched may be multi-dimensional (i.e. its elements can be arrays).
   * `m` in `Pointwise(m, ...)` should be a matcher for `::testing::tuple<T, U>` where `T` and `U` are the element type of the actual container and the expected container, respectively. For example, to compare two `Foo` containers where `Foo` doesn't support `operator==` but has an `Equals()` method, one might write:
 

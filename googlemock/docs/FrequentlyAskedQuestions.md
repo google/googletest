@@ -3,7 +3,7 @@
 Please send your questions to the
 [googlemock](http://groups.google.com/group/googlemock) discussion
 group. If you need help with compiler errors, make sure you have
-tried [Google Mock Doctor](#How_am_I_supposed_to_make_sense_of_these_horrible_template_error.md) first.
+tried [Google Mock Doctor](#how-am-i-supposed-to-make-sense-of-these-horrible-template-errors) first.
 
 ## When I call a method on my mock object, the method for the real object is invoked instead.  What's the problem? ##
 
@@ -474,10 +474,10 @@ verbose level.
 If you find yourself needing to perform some action that's not
 supported by Google Mock directly, remember that you can define your own
 actions using
-[MakeAction()](CookBook.md#writing-new-actions) or
-[MakePolymorphicAction()](CookBook.md#writing_new_polymorphic_actions),
+[MakeAction()](CookBook.md#writing-new-actions-quickly) or
+[MakePolymorphicAction()](CookBook.md#writing-new-polymorphic-actions),
 or you can write a stub function and invoke it using
-[Invoke()](CookBook.md#using-functions_methods_functors).
+[Invoke()](CookBook.md#using-functionsmethodsfunctors-as-actions).
 
 ## MOCK\_METHODn()'s second argument looks funny.  Why don't you use the MOCK\_METHODn(Method, return\_type, arg\_1, ..., arg\_n) syntax? ##
 
@@ -599,7 +599,7 @@ when the mock method is called.  `SetArgPointee()` says what the
 side effect is, but doesn't say what the return value should be.  You
 need `DoAll()` to chain a `SetArgPointee()` with a `Return()`.
 
-See this [recipe](CookBook.md#mocking_side_effects) for more details and an example.
+See this [recipe](CookBook.md#mocking-side-effects) for more details and an example.
 
 
 ## My question is not in your FAQ! ##
