@@ -4541,19 +4541,10 @@ TEST(ExpectTest, EXPECT_THROW) {
   EXPECT_NONFATAL_FAILURE(EXPECT_THROW(ThrowAnInteger(), bool),
                           "Expected: ThrowAnInteger() throws an exception of "
                           "type bool.\n  Actual: it throws a different type.");
-  std::string expected = "what() arg";
-  EXPECT_NONFATAL_FAILURE(EXPECT_THROW(throw std::out_of_range(expected), bool),
-                          expected);
   EXPECT_NONFATAL_FAILURE(
       EXPECT_THROW(ThrowNothing(), bool),
       "Expected: ThrowNothing() throws an exception of type bool.\n"
       "  Actual: it throws nothing.");
-}
-
-// We need to make sure always to avoid having multiple blocks which catch a
-// std::exception
-TEST(ExpectTest, EXPECT_THROW_STD_EXCEPTION) {
-  EXPECT_THROW(throw std::exception(), std::exception);
 }
 
 // Tests EXPECT_NO_THROW.
