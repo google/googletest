@@ -1193,11 +1193,11 @@ class GTEST_API_ TestEventListeners {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(TestEventListeners);
 };
 
+
 // A UnitTest consists of a vector of TestCases.
 //
-// This is a singleton class.  The only instance of UnitTest is
-// created when UnitTest::GetInstance() is first called.  This
-// instance is never deleted.
+// This is a singleton class. The only instance of UnitTest is
+// created on the first call to GetInstance().
 //
 // UnitTest is not copyable.
 //
@@ -1209,6 +1209,12 @@ class GTEST_API_ UnitTest {
   // is called, a UnitTest object is constructed and returned.
   // Consecutive calls will return the same object.
   static UnitTest* GetInstance();
+
+  // Delete the static UnitTest singleton instance. This effectively
+  // cleans up Google Test, and all loaded test cases are unloaded.
+  //
+  // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
+  static void DeinitializeInstance();
 
   // Runs all tests in this UnitTest object and prints the result.
   // Returns 0 if successful, or 1 otherwise.
@@ -1303,6 +1309,27 @@ class GTEST_API_ UnitTest {
   TestEventListeners& listeners();
 
  private:
+  // The Container-class is used to allow for explicit and implicit deletion of
+  // the global UnitTest instance (Container::t_). Be aware of the fact that
+  // Container::Get() typically gets called before Container::Container() when
+  // the test-cases are registering themselves.
+  class Container {
+   public:
+    ~Container();
+
+    void Set(UnitTest *t);
+
+    UnitTest* Get();
+
+    void Clear();
+
+   private:
+    static UnitTest *unit_test_singleton_;
+  };
+
+  static Container singleton_container_;
+
+
   // Registers and returns a global test environment.  When a test
   // program is run, all global test environments will be set-up in
   // the order they were registered.  After all tests in the program
@@ -1418,6 +1445,9 @@ GTEST_API_ void InitGoogleTest(int* argc, char** argv);
 // This overloaded version can be used in Windows programs compiled in
 // UNICODE mode.
 GTEST_API_ void InitGoogleTest(int* argc, wchar_t** argv);
+
+// Unload all registered unit tests
+GTEST_API_ void UnloadGoogleTest();
 
 namespace internal {
 
@@ -2338,7 +2368,8 @@ GTEST_API_ std::string TempDir();
 int RUN_ALL_TESTS() GTEST_MUST_USE_RESULT_;
 
 inline int RUN_ALL_TESTS() {
-  return ::testing::UnitTest::GetInstance()->Run();
+  int ret = ::testing::UnitTest::GetInstance()->Run();
+  return ret;
 }
 
 GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251

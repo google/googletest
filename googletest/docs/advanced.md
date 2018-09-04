@@ -2518,3 +2518,31 @@ running the tests.
 
 **Availability**: Linux, Windows, Mac.
 
+## Dynamically Loading Shared Test Libraries #
+
+If you have unit-test implementations in shared libraries *(.dll on Windows, .dylib
+on MacOS, .so on Linux)*, you are required to call `::testing::UnloadGoogleTest()`
+before unloading your shared libraries, or you will run into issues when Google
+Test gets unloaded.
+
+Example:
+```
+// Where 'LoadLibrary(...)' and 'UnloadLibrary(...)' is your OS'
+// method of handling shared libraries.
+
+int main(int argc, char **argv) {
+  LoadLibrary("TestContainer1.dll");
+  LoadLibrary("AnotherTestContainer.dll");
+
+  ::testing::InitGoogleTest(&argc, argv);
+  const int ret = RUN_ALL_TESTS();
+  ::testing::UnloadGoogleTest();
+
+  UnloadLibrary("AnotherTestContainer.dll");
+  UnloadLibrary("TestContainer1.dll");
+  return ret;
+}
+```
+
+
+
