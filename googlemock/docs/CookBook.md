@@ -2237,7 +2237,7 @@ Mocking a method that takes and/or returns move-only types presents some
 challenges, but nothing insurmountable. This recipe shows you how you can do it.
 Note that the support for move-only method arguments was only introduced to
 gMock in April 2017; in older code, you may find more complex
-[workarounds](#LegacyMoveOnly) for lack of this feature.
+[workarounds](#legacy-workarounds-for-move-only-types) for lack of this feature.
 
 Let’s say we are working on a fictional project that lets one post and share
 snippets called “buzzes”. Your code uses these types:
@@ -2302,7 +2302,7 @@ action:
 ```
 
 If you are not happy with the default action, you can tweak it as usual; see
-[Setting Default Actions](#OnCall).
+[Setting Default Actions](#setting-the-default-actions-for-a-mock-method).
 
 If you just need to return a pre-defined move-only value, you can use the
 `Return(ByMove(...))` action:
@@ -2345,7 +2345,7 @@ created and returned. You cannot do this with `Return(ByMove(...))`.
 That covers returning move-only values; but how do we work with methods
 accepting move-only arguments? The answer is that they work normally, although
 some actions will not compile when any of method's arguments are move-only. You
-can always use `Return`, or a [lambda or functor](#FunctionsAsActions):
+can always use `Return`, or a [lambda or functor](#using-functionsmethodsfunctors-as-actions):
 
 ```cpp
   using ::testing::Unused;
@@ -2366,7 +2366,7 @@ implemented yet. If this is blocking you, please file a bug.
 A few actions (e.g. `DoAll`) copy their arguments internally, so they can never
 work with non-copyable objects; you'll have to use functors instead.
 
-##### Legacy workarounds for move-only types {#LegacyMoveOnly}
+##### Legacy workarounds for move-only types
 
 Support for move-only function arguments was only introduced to gMock in April
 2017. In older code, you may encounter the following workaround for the lack of
@@ -2821,7 +2821,7 @@ and you should see an `OUTPUT_DIR` directory being created with files
 These three files contain everything you need to use Google Mock (and
 Google Test).  Just copy them to anywhere you want and you are ready
 to write tests and use mocks.  You can use the
-[scrpts/test/Makefile](../scripts/test/Makefile) file as an example on how to compile your tests
+[make/Makefile](../make/Makefile) file as an example on how to compile your tests
 against them.
 
 # Extending Google Mock #
@@ -3655,6 +3655,6 @@ This printer knows how to print built-in C++ types, native arrays, STL
 containers, and any type that supports the `<<` operator.  For other
 types, it prints the raw bytes in the value and hopes that you the
 user can figure it out.
-[Google Test's advanced guide](../../googletest/docs/advanced.md#teaching-google-test-how-to-print-your-values)
+[Google Test's advanced guide](../../googletest/docs/advanced.md#teaching-googletest-how-to-print-your-values)
 explains how to extend the printer to do a better job at
 printing your particular type than to dump the bytes.
