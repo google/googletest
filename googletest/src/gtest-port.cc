@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 #include "gtest/internal/gtest-port.h"
 
@@ -62,6 +61,11 @@
 # include <procinfo.h>
 # include <sys/types.h>
 #endif  // GTEST_OS_AIX
+
+#if GTEST_OS_FUCHSIA
+# include <zircon/process.h>
+# include <zircon/syscalls.h>
+#endif  // GTEST_OS_FUCHSIA
 
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest-message.h"
@@ -156,6 +160,25 @@ size_t GetThreadCount() {
   }
 }
 
+#elif GTEST_OS_FUCHSIA
+
+size_t GetThreadCount() {
+  int dummy_buffer;
+  size_t avail;
+  zx_status_t status = zx_object_get_info(
+      zx_process_self(),
+      ZX_INFO_PROCESS_THREADS,
+      &dummy_buffer,
+      0,
+      nullptr,
+      &avail);
+  if (status == ZX_OK) {
+    return avail;
+  } else {
+    return 0;
+  }
+}
+
 #else
 
 size_t GetThreadCount() {
@@ -238,9 +261,9 @@ Mutex::Mutex()
 Mutex::~Mutex() {
   // Static mutexes are leaked intentionally. It is not thread-safe to try
   // to clean them up.
-  // TODO(yukawa): Switch to Slim Reader/Writer (SRW) Locks, which requires
+  // FIXME: Switch to Slim Reader/Writer (SRW) Locks, which requires
   // nothing to clean it up but is available only on Vista and later.
-  // http://msdn.microsoft.com/en-us/library/windows/desktop/aa904937.aspx
+  // https://docs.microsoft.com/en-us/windows/desktop/Sync/slim-reader-writer--srw--locks
   if (type_ == kDynamic) {
     ::DeleteCriticalSection(critical_section_);
     delete critical_section_;
@@ -271,6 +294,43 @@ void Mutex::AssertHeld() {
       << "The current thread is not holding the mutex @" << this;
 }
 
+namespace {
+
+// Use the RAII idiom to flag mem allocs that are intentionally never
+// deallocated. The motivation is to silence the false positive mem leaks
+// that are reported by the debug version of MS's CRT which can only detect
+// if an alloc is missing a matching deallocation.
+// Example:
+//    MemoryIsNotDeallocated memory_is_not_deallocated;
+//    critical_section_ = new CRITICAL_SECTION;
+//
+class MemoryIsNotDeallocated
+{
+ public:
+  MemoryIsNotDeallocated() : old_crtdbg_flag_(0) {
+#ifdef _MSC_VER
+    old_crtdbg_flag_ = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
+    // Set heap allocation block type to _IGNORE_BLOCK so that MS debug CRT
+    // doesn't report mem leak if there's no matching deallocation.
+    _CrtSetDbgFlag(old_crtdbg_flag_ & ~_CRTDBG_ALLOC_MEM_DF);
+#endif  //  _MSC_VER
+  }
+
+  ~MemoryIsNotDeallocated() {
+#ifdef _MSC_VER
+    // Restore the original _CRTDBG_ALLOC_MEM_DF flag
+    _CrtSetDbgFlag(old_crtdbg_flag_);
+#endif  //  _MSC_VER
+  }
+
+ private:
+  int old_crtdbg_flag_;
+
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MemoryIsNotDeallocated);
+};
+
+}  // namespace
+
 // Initializes owner_thread_id_ and critical_section_ in static mutexes.
 void Mutex::ThreadSafeLazyInit() {
   // Dynamic mutexes are initialized in the constructor.
@@ -281,7 +341,11 @@ void Mutex::ThreadSafeLazyInit() {
         // If critical_section_init_phase_ was 0 before the exchange, we
         // are the first to test it and need to perform the initialization.
         owner_thread_id_ = 0;
-        critical_section_ = new CRITICAL_SECTION;
+        {
+          // Use RAII to flag that following mem alloc is never deallocated.
+          MemoryIsNotDeallocated memory_is_not_deallocated;
+          critical_section_ = new CRITICAL_SECTION;
+        }
         ::InitializeCriticalSection(critical_section_);
         // Updates the critical_section_init_phase_ to 2 to signal
         // initialization complete.
@@ -320,7 +384,7 @@ class ThreadWithParamSupport : public ThreadWithParamBase {
                              Notification* thread_can_start) {
     ThreadMainParam* param = new ThreadMainParam(runnable, thread_can_start);
     DWORD thread_id;
-    // TODO(yukawa): Consider to use _beginthreadex instead.
+    // FIXME: Consider to use _beginthreadex instead.
     HANDLE thread_handle = ::CreateThread(
         NULL,    // Default security.
         0,       // Default stack size.
@@ -523,7 +587,8 @@ class ThreadLocalRegistryImpl {
   // Returns map of thread local instances.
   static ThreadIdToThreadLocals* GetThreadLocalsMapLocked() {
     mutex_.AssertHeld();
-    static ThreadIdToThreadLocals* map = new ThreadIdToThreadLocals;
+    MemoryIsNotDeallocated memory_is_not_deallocated;
+    static ThreadIdToThreadLocals* map = new ThreadIdToThreadLocals();
     return map;
   }
 
@@ -672,7 +737,7 @@ static std::string FormatRegexSyntaxError(const char* regex, int index) {
 // otherwise returns true.
 bool ValidateRegex(const char* regex) {
   if (regex == NULL) {
-    // TODO(wan@google.com): fix the source file location in the
+    // FIXME: fix the source file location in the
     // assertion failures to match where the regex is used in user
     // code.
     ADD_FAILURE() << "NULL is not a valid simple regular expression.";
@@ -918,7 +983,7 @@ GTestLog::~GTestLog() {
 
 // Disable Microsoft deprecation warnings for POSIX functions called from
 // this class (creat, dup, dup2, and close)
-GTEST_DISABLE_MSC_WARNINGS_PUSH_(4996)
+GTEST_DISABLE_MSC_DEPRECATED_PUSH_()
 
 #if GTEST_HAS_STREAM_REDIRECTION
 
@@ -1002,7 +1067,7 @@ class CapturedStream {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(CapturedStream);
 };
 
-GTEST_DISABLE_MSC_WARNINGS_POP_()
+GTEST_DISABLE_MSC_DEPRECATED_POP_()
 
 static CapturedStream* g_captured_stderr = NULL;
 static CapturedStream* g_captured_stdout = NULL;

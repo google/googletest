@@ -26,15 +26,18 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
 
-#include "gtest-typed-test_test.h"
+
+#include "test/gtest-typed-test_test.h"
 
 #include <set>
 #include <vector>
 
 #include "gtest/gtest.h"
+
+#if _MSC_VER
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4127 /* conditional expression is constant */)
+#endif  //  _MSC_VER
 
 using testing::Test;
 
@@ -166,6 +169,40 @@ TYPED_TEST(NumericTest, DefaultIsZero) {
 
 }  // namespace library1
 
+// Tests that custom names work.
+template <typename T>
+class TypedTestWithNames : public Test {};
+
+class TypedTestNames {
+ public:
+  template <typename T>
+  static std::string GetName(int i) {
+    if (testing::internal::IsSame<T, char>::value) {
+      return std::string("char") + ::testing::PrintToString(i);
+    }
+    if (testing::internal::IsSame<T, int>::value) {
+      return std::string("int") + ::testing::PrintToString(i);
+    }
+  }
+};
+
+TYPED_TEST_CASE(TypedTestWithNames, TwoTypes, TypedTestNames);
+
+TYPED_TEST(TypedTestWithNames, TestCaseName) {
+  if (testing::internal::IsSame<TypeParam, char>::value) {
+    EXPECT_STREQ(::testing::UnitTest::GetInstance()
+                     ->current_test_info()
+                     ->test_case_name(),
+                 "TypedTestWithNames/char0");
+  }
+  if (testing::internal::IsSame<TypeParam, int>::value) {
+    EXPECT_STREQ(::testing::UnitTest::GetInstance()
+                     ->current_test_info()
+                     ->test_case_name(),
+                 "TypedTestWithNames/int1");
+  }
+}
+
 #endif  // GTEST_HAS_TYPED_TEST
 
 // This #ifdef block tests type-parameterized tests.
@@ -265,6 +302,46 @@ REGISTER_TYPED_TEST_CASE_P(DerivedTest,
 
 typedef Types<short, long> MyTwoTypes;
 INSTANTIATE_TYPED_TEST_CASE_P(My, DerivedTest, MyTwoTypes);
+
+// Tests that custom names work with type parametrized tests. We reuse the
+// TwoTypes from above here.
+template <typename T>
+class TypeParametrizedTestWithNames : public Test {};
+
+TYPED_TEST_CASE_P(TypeParametrizedTestWithNames);
+
+TYPED_TEST_P(TypeParametrizedTestWithNames, TestCaseName) {
+  if (testing::internal::IsSame<TypeParam, char>::value) {
+    EXPECT_STREQ(::testing::UnitTest::GetInstance()
+                     ->current_test_info()
+                     ->test_case_name(),
+                 "CustomName/TypeParametrizedTestWithNames/parChar0");
+  }
+  if (testing::internal::IsSame<TypeParam, int>::value) {
+    EXPECT_STREQ(::testing::UnitTest::GetInstance()
+                     ->current_test_info()
+                     ->test_case_name(),
+                 "CustomName/TypeParametrizedTestWithNames/parInt1");
+  }
+}
+
+REGISTER_TYPED_TEST_CASE_P(TypeParametrizedTestWithNames, TestCaseName);
+
+class TypeParametrizedTestNames {
+ public:
+  template <typename T>
+  static std::string GetName(int i) {
+    if (testing::internal::IsSame<T, char>::value) {
+      return std::string("parChar") + ::testing::PrintToString(i);
+    }
+    if (testing::internal::IsSame<T, int>::value) {
+      return std::string("parInt") + ::testing::PrintToString(i);
+    }
+  }
+};
+
+INSTANTIATE_TYPED_TEST_CASE_P(CustomName, TypeParametrizedTestWithNames,
+                              TwoTypes, TypeParametrizedTestNames);
 
 // Tests that multiple TYPED_TEST_CASE_P's can be defined in the same
 // translation unit.
@@ -376,5 +453,9 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, TrimmedTest, TrimTypes);
 // point defined in that library (fatal error LNK1561: entry point
 // must be defined). This dummy test keeps gtest_main linked in.
 TEST(DummyTest, TypedTestsAreNotSupportedOnThisPlatform) {}
+
+#if _MSC_VER
+GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4127
+#endif                             //  _MSC_VER
 
 #endif  // #if !defined(GTEST_HAS_TYPED_TEST) && !defined(GTEST_HAS_TYPED_TEST_P)

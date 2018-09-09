@@ -78,6 +78,11 @@ build_script:
         throw "Exec: $ErrorMessage"
     }
 
+
+skip_commits:
+  files:
+    - '**/*.md'
+
 test_script:
 - ps: |
     # Only enable some builds for pull requests, the AppVeyor queue is too long.

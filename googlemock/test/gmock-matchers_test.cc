@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
@@ -57,12 +56,6 @@
 
 #if GTEST_HAS_STD_FORWARD_LIST_
 # include <forward_list>  // NOLINT
-#endif
-
-// Disable MSVC2015 warning for std::pair:
-// "decorated name length exceeded, name was truncated".
-#if defined(_MSC_VER) && (_MSC_VER == 1900)
-# pragma warning(disable:4503)
 #endif
 
 #if GTEST_LANG_CXX11
@@ -748,6 +741,13 @@ TEST(MatcherCastTest, NonImplicitlyConstructibleTypeWithOperatorEq) {
   EXPECT_FALSE(m3.Matches(239));
 }
 
+// ConvertibleFromAny does not work with MSVC. resulting in
+// error C2440: 'initializing': cannot convert from 'Eq' to 'M'
+// No constructor could take the source type, or constructor overload
+// resolution was ambiguous
+
+#if !defined _MSC_VER
+
 // The below ConvertibleFromAny struct is implicitly constructible from anything
 // and when in the same namespace can interact with other tests. In particular,
 // if it is in the same namespace as other tests and one removes
@@ -760,7 +760,7 @@ namespace convertible_from_any {
 struct ConvertibleFromAny {
   ConvertibleFromAny(int a_value) : value(a_value) {}
   template <typename T>
-  explicit ConvertibleFromAny(const T& /*a_value*/) : value(-1) {
+  ConvertibleFromAny(const T& /*a_value*/) : value(-1) {
     ADD_FAILURE() << "Conversion constructor called";
   }
   int value;
@@ -787,6 +787,8 @@ TEST(MatcherCastTest, FromConvertibleFromAny) {
   EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
 }
 }  // namespace convertible_from_any
+
+#endif  // !defined _MSC_VER
 
 struct IntReferenceWrapper {
   IntReferenceWrapper(const int& a_value) : value(&a_value) {}
@@ -892,6 +894,8 @@ TEST(SafeMatcherCastTest, FromSameType) {
   EXPECT_FALSE(m2.Matches(1));
 }
 
+#if !defined _MSC_VER
+
 namespace convertible_from_any {
 TEST(SafeMatcherCastTest, ConversionConstructorIsUsed) {
   Matcher<ConvertibleFromAny> m = SafeMatcherCast<ConvertibleFromAny>(1);
@@ -906,6 +910,8 @@ TEST(SafeMatcherCastTest, FromConvertibleFromAny) {
   EXPECT_FALSE(m.Matches(ConvertibleFromAny(2)));
 }
 }  // namespace convertible_from_any
+
+#endif  // !defined _MSC_VER
 
 TEST(SafeMatcherCastTest, ValueIsNotCopied) {
   int n = 42;
@@ -2538,7 +2544,7 @@ TEST(AllOfTest, VariadicMatchesWhenAllMatch) {
   ::testing::AllOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
   Matcher<int> m = AllOf(Ne(1), Ne(2), Ne(3), Ne(4), Ne(5), Ne(6), Ne(7), Ne(8),
                          Ne(9), Ne(10), Ne(11));
-  EXPECT_THAT(Describe(m), EndsWith("and (isn't equal to 11))))))))))"));
+  EXPECT_THAT(Describe(m), EndsWith("and (isn't equal to 11)"));
   AllOfMatches(11, m);
   AllOfMatches(50, AllOf(Ne(1), Ne(2), Ne(3), Ne(4), Ne(5), Ne(6), Ne(7), Ne(8),
                          Ne(9), Ne(10), Ne(11), Ne(12), Ne(13), Ne(14), Ne(15),
@@ -2673,7 +2679,7 @@ TEST(AllOfTest, ExplainsResult) {
 }
 
 // Helper to allow easy testing of AnyOf matchers with num parameters.
-void AnyOfMatches(int num, const Matcher<int>& m) {
+static void AnyOfMatches(int num, const Matcher<int>& m) {
   SCOPED_TRACE(Describe(m));
   EXPECT_FALSE(m.Matches(0));
   for (int i = 1; i <= num; ++i) {
@@ -2681,6 +2687,18 @@ void AnyOfMatches(int num, const Matcher<int>& m) {
   }
   EXPECT_FALSE(m.Matches(num + 1));
 }
+
+#if GTEST_LANG_CXX11
+static void AnyOfStringMatches(int num, const Matcher<std::string>& m) {
+  SCOPED_TRACE(Describe(m));
+  EXPECT_FALSE(m.Matches(std::to_string(0)));
+
+  for (int i = 1; i <= num; ++i) {
+    EXPECT_TRUE(m.Matches(std::to_string(i)));
+  }
+  EXPECT_FALSE(m.Matches(std::to_string(num + 1)));
+}
+#endif
 
 // Tests that AnyOf(m1, ..., mn) matches any value that matches at
 // least one of the given matchers.
@@ -2732,13 +2750,46 @@ TEST(AnyOfTest, VariadicMatchesWhenAnyMatches) {
   // on ADL.
   Matcher<int> m = ::testing::AnyOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
 
-  EXPECT_THAT(Describe(m), EndsWith("or (is equal to 11))))))))))"));
+  EXPECT_THAT(Describe(m), EndsWith("or (is equal to 11)"));
   AnyOfMatches(11, m);
   AnyOfMatches(50, AnyOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
                          11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
                          21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
                          31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
                          41, 42, 43, 44, 45, 46, 47, 48, 49, 50));
+  AnyOfStringMatches(
+      50, AnyOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
+                "13", "14", "15", "16", "17", "18", "19", "20", "21", "22",
+                "23", "24", "25", "26", "27", "28", "29", "30", "31", "32",
+                "33", "34", "35", "36", "37", "38", "39", "40", "41", "42",
+                "43", "44", "45", "46", "47", "48", "49", "50"));
+}
+
+// Tests the variadic version of the ElementsAreMatcher
+TEST(ElementsAreTest, HugeMatcher) {
+  vector<int> test_vector{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+
+  EXPECT_THAT(test_vector,
+              ElementsAre(Eq(1), Eq(2), Lt(13), Eq(4), Eq(5), Eq(6), Eq(7),
+                          Eq(8), Eq(9), Eq(10), Gt(1), Eq(12)));
+}
+
+// Tests the variadic version of the UnorderedElementsAreMatcher
+TEST(ElementsAreTest, HugeMatcherStr) {
+  vector<string> test_vector{
+      "literal_string", "", "", "", "", "", "", "", "", "", "", ""};
+
+  EXPECT_THAT(test_vector, UnorderedElementsAre("literal_string", _, _, _, _, _,
+                                                _, _, _, _, _, _));
+}
+
+// Tests the variadic version of the UnorderedElementsAreMatcher
+TEST(ElementsAreTest, HugeMatcherUnordered) {
+  vector<int> test_vector{2, 1, 8, 5, 4, 6, 7, 3, 9, 12, 11, 10};
+
+  EXPECT_THAT(test_vector, UnorderedElementsAre(
+                               Eq(2), Eq(1), Gt(7), Eq(5), Eq(4), Eq(6), Eq(7),
+                               Eq(3), Eq(9), Eq(12), Eq(11), Ne(122)));
 }
 
 #endif  // GTEST_LANG_CXX11
@@ -3063,6 +3114,44 @@ TEST(AllArgsTest, WorksInWithClause) {
 
   EXPECT_EQ(1, helper.Helper('\1', 2));
   EXPECT_EQ(2, helper.Helper('a', 1));
+}
+
+class OptionalMatchersHelper {
+ public:
+  OptionalMatchersHelper() {}
+
+  MOCK_METHOD0(NoArgs, int());
+
+  MOCK_METHOD1(OneArg, int(int y));
+
+  MOCK_METHOD2(TwoArgs, int(char x, int y));
+
+  MOCK_METHOD1(Overloaded, int(char x));
+  MOCK_METHOD2(Overloaded, int(char x, int y));
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(OptionalMatchersHelper);
+};
+
+TEST(AllArgsTest, WorksWithoutMatchers) {
+  OptionalMatchersHelper helper;
+
+  ON_CALL(helper, NoArgs).WillByDefault(Return(10));
+  ON_CALL(helper, OneArg).WillByDefault(Return(20));
+  ON_CALL(helper, TwoArgs).WillByDefault(Return(30));
+
+  EXPECT_EQ(10, helper.NoArgs());
+  EXPECT_EQ(20, helper.OneArg(1));
+  EXPECT_EQ(30, helper.TwoArgs('\1', 2));
+
+  EXPECT_CALL(helper, NoArgs).Times(1);
+  EXPECT_CALL(helper, OneArg).WillOnce(Return(100));
+  EXPECT_CALL(helper, OneArg(17)).WillOnce(Return(200));
+  EXPECT_CALL(helper, TwoArgs).Times(0);
+
+  EXPECT_EQ(10, helper.NoArgs());
+  EXPECT_EQ(100, helper.OneArg(1));
+  EXPECT_EQ(200, helper.OneArg(17));
 }
 
 // Tests that ASSERT_THAT() and EXPECT_THAT() work when the value
@@ -3632,6 +3721,7 @@ MATCHER_P(FieldIIs, inner_matcher, "") {
   return ExplainMatchResult(inner_matcher, arg.i, result_listener);
 }
 
+#if GTEST_HAS_RTTI
 TEST(WhenDynamicCastToTest, SameType) {
   Derived derived;
   derived.i = 4;
@@ -3689,12 +3779,8 @@ TEST(WhenDynamicCastToTest, AmbiguousCast) {
 
 TEST(WhenDynamicCastToTest, Describe) {
   Matcher<Base*> matcher = WhenDynamicCastTo<Derived*>(Pointee(_));
-#if GTEST_HAS_RTTI
   const std::string prefix =
       "when dynamic_cast to " + internal::GetTypeName<Derived*>() + ", ";
-#else  // GTEST_HAS_RTTI
-  const std::string prefix = "when dynamic_cast, ";
-#endif  // GTEST_HAS_RTTI
   EXPECT_EQ(prefix + "points to a value that is anything", Describe(matcher));
   EXPECT_EQ(prefix + "does not point to a value that is anything",
             DescribeNegation(matcher));
@@ -3727,6 +3813,7 @@ TEST(WhenDynamicCastToTest, BadReference) {
   Base& as_base_ref = derived;
   EXPECT_THAT(as_base_ref, Not(WhenDynamicCastTo<const OtherDerived&>(_)));
 }
+#endif  // GTEST_HAS_RTTI
 
 // Minimal const-propagating pointer.
 template <typename T>
@@ -4150,13 +4237,17 @@ TEST(PropertyTest, WorksForReferenceToConstProperty) {
 // ref-qualified.
 TEST(PropertyTest, WorksForRefQualifiedProperty) {
   Matcher<const AClass&> m = Property(&AClass::s_ref, StartsWith("hi"));
+  Matcher<const AClass&> m_with_name =
+      Property("s", &AClass::s_ref, StartsWith("hi"));
 
   AClass a;
   a.set_s("hill");
   EXPECT_TRUE(m.Matches(a));
+  EXPECT_TRUE(m_with_name.Matches(a));
 
   a.set_s("hole");
   EXPECT_FALSE(m.Matches(a));
+  EXPECT_FALSE(m_with_name.Matches(a));
 }
 #endif
 
@@ -4500,12 +4591,13 @@ TEST(ResultOfTest, WorksForFunctors) {
 }
 
 // Tests that ResultOf(f, ...) compiles and works as expected when f is a
-// functor with more then one operator() defined. ResultOf() must work
+// functor with more than one operator() defined. ResultOf() must work
 // for each defined operator().
 struct PolymorphicFunctor {
   typedef int result_type;
   int operator()(int n) { return n; }
   int operator()(const char* s) { return static_cast<int>(strlen(s)); }
+  std::string operator()(int *p) { return p ? "good ptr" : "null"; }
 };
 
 TEST(ResultOfTest, WorksForPolymorphicFunctors) {
@@ -4519,6 +4611,23 @@ TEST(ResultOfTest, WorksForPolymorphicFunctors) {
   EXPECT_TRUE(matcher_string.Matches("long string"));
   EXPECT_FALSE(matcher_string.Matches("shrt"));
 }
+
+#if GTEST_LANG_CXX11
+TEST(ResultOfTest, WorksForPolymorphicFunctorsIgnoringResultType) {
+  Matcher<int*> matcher = ResultOf(PolymorphicFunctor(), "good ptr");
+
+  int n = 0;
+  EXPECT_TRUE(matcher.Matches(&n));
+  EXPECT_FALSE(matcher.Matches(nullptr));
+}
+
+TEST(ResultOfTest, WorksForLambdas) {
+  Matcher<int> matcher =
+      ResultOf([](int str_len) { return std::string(str_len, 'x'); }, "xxx");
+  EXPECT_TRUE(matcher.Matches(3));
+  EXPECT_FALSE(matcher.Matches(1));
+}
+#endif
 
 const int* ReferencingFunction(const int& n) { return &n; }
 
@@ -6656,7 +6765,7 @@ TEST(AnyWithTest, TestUseInContainers) {
                                    AnyWith<std::string>("merhaba"),
                                    AnyWith<std::string>("salut")}));
 }
-#endif //  GTEST_LANG_CXX11
+#endif  //  GTEST_LANG_CXX11
 TEST(AnyWithTest, TestCompare) {
   EXPECT_THAT(SampleAnyType(1), AnyWith<int>(Gt(0)));
 }

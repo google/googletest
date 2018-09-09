@@ -3,7 +3,7 @@
 Please send your questions to the
 [googlemock](http://groups.google.com/group/googlemock) discussion
 group. If you need help with compiler errors, make sure you have
-tried [Google Mock Doctor](#How_am_I_supposed_to_make_sense_of_these_horrible_template_error.md) first.
+tried [Google Mock Doctor](#how-am-i-supposed-to-make-sense-of-these-horrible-template-errors) first.
 
 ## When I call a method on my mock object, the method for the real object is invoked instead.  What's the problem? ##
 
@@ -27,7 +27,7 @@ later.  Fortunately, it's usually not hard to migrate an existing
 matcher to the new API.  Here's what you need to do:
 
 If you wrote your matcher like this:
-```
+```cpp
 // Old matcher definition that doesn't work with the latest
 // Google Mock.
 using ::testing::MatcherInterface;
@@ -44,7 +44,7 @@ class MyWonderfulMatcher : public MatcherInterface<MyType> {
 ```
 
 you'll need to change it to:
-```
+```cpp
 // New matcher definition that works with the latest Google Mock.
 using ::testing::MatcherInterface;
 using ::testing::MatchResultListener;
@@ -65,7 +65,7 @@ argument of type `MatchResultListener*`.)
 
 If you were also using `ExplainMatchResultTo()` to improve the matcher
 message:
-```
+```cpp
 // Old matcher definition that doesn't work with the lastest
 // Google Mock.
 using ::testing::MatcherInterface;
@@ -91,7 +91,7 @@ class MyWonderfulMatcher : public MatcherInterface<MyType> {
 you should move the logic of `ExplainMatchResultTo()` into
 `MatchAndExplain()`, using the `MatchResultListener` argument where
 the `::std::ostream` was used:
-```
+```cpp
 // New matcher definition that works with the latest Google Mock.
 using ::testing::MatcherInterface;
 using ::testing::MatchResultListener;
@@ -110,7 +110,7 @@ class MyWonderfulMatcher : public MatcherInterface<MyType> {
 ```
 
 If your matcher is defined using `MakePolymorphicMatcher()`:
-```
+```cpp
 // Old matcher definition that doesn't work with the latest
 // Google Mock.
 using ::testing::MakePolymorphicMatcher;
@@ -130,7 +130,7 @@ class MyGreatMatcher {
 you should rename the `Matches()` method to `MatchAndExplain()` and
 add a `MatchResultListener*` argument (the same as what you need to do
 for matchers defined by implementing `MatcherInterface`):
-```
+```cpp
 // New matcher definition that works with the latest Google Mock.
 using ::testing::MakePolymorphicMatcher;
 using ::testing::MatchResultListener;
@@ -150,7 +150,7 @@ class MyGreatMatcher {
 
 If your polymorphic matcher uses `ExplainMatchResultTo()` for better
 failure messages:
-```
+```cpp
 // Old matcher definition that doesn't work with the latest
 // Google Mock.
 using ::testing::MakePolymorphicMatcher;
@@ -176,7 +176,7 @@ void ExplainMatchResultTo(const MyGreatMatcher& matcher,
 
 you'll need to move the logic inside `ExplainMatchResultTo()` to
 `MatchAndExplain()`:
-```
+```cpp
 // New matcher definition that works with the latest Google Mock.
 using ::testing::MakePolymorphicMatcher;
 using ::testing::MatchResultListener;
@@ -254,7 +254,7 @@ C++ as much as possible.
 ## MSVC gives me warning C4301 or C4373 when I define a mock method with a const parameter.  Why? ##
 
 If you compile this using Microsoft Visual C++ 2005 SP1:
-```
+```cpp
 class Foo {
   ...
   virtual void Bar(const int i) = 0;
@@ -279,7 +279,7 @@ warning C4373: 'MockFoo::Bar': virtual function overrides 'Foo::Bar', previous v
 In C++, if you _declare_ a function with a `const` parameter, the
 `const` modifier is _ignored_.  Therefore, the `Foo` base class above
 is equivalent to:
-```
+```cpp
 class Foo {
   ...
   virtual void Bar(int i) = 0;  // int or const int?  Makes no difference.
@@ -298,7 +298,7 @@ Note that we are talking about the _top-level_ `const` modifier here.
 If the function parameter is passed by pointer or reference, declaring
 the _pointee_ or _referee_ as `const` is still meaningful.  For
 example, the following two declarations are _not_ equivalent:
-```
+```cpp
 void Bar(int* p);        // Neither p nor *p is const.
 void Bar(const int* p);  // p is not const, but *p is.
 ```
@@ -318,7 +318,7 @@ you'll gain insights on why the expectations you set are not met.
 
 ## How can I assert that a function is NEVER called? ##
 
-```
+```cpp
 EXPECT_CALL(foo, Bar(_))
     .Times(0);
 ```
@@ -345,7 +345,7 @@ Whenever you derive from a base class, make sure its destructor is
 virtual.  Otherwise Bad Things will happen.  Consider the following
 code:
 
-```
+```cpp
 class Base {
  public:
   // Not virtual, but should be.
@@ -375,7 +375,7 @@ will be happy.
 
 When people complain about this, often they are referring to code like:
 
-```
+```cpp
 // foo.Bar() should be called twice, return 1 the first time, and return
 // 2 the second time.  However, I have to write the expectations in the
 // reverse order.  This sucks big time!!!
@@ -399,7 +399,7 @@ harder to do so.
 There are two better ways to write the test spec.  You could either
 put the expectations in sequence:
 
-```
+```cpp
 // foo.Bar() should be called twice, return 1 the first time, and return
 // 2 the second time.  Using a sequence, we can write the expectations
 // in their natural order.
@@ -416,7 +416,7 @@ put the expectations in sequence:
 
 or you can put the sequence of actions in the same expectation:
 
-```
+```cpp
 // foo.Bar() should be called twice, return 1 the first time, and return
 // 2 the second time.
 EXPECT_CALL(foo, Bar())
@@ -450,14 +450,14 @@ may creep in unnoticed.
 
 If, however, you are sure that the calls are OK, you can write
 
-```
+```cpp
 EXPECT_CALL(foo, Bar(_))
     .WillRepeatedly(...);
 ```
 
 instead of
 
-```
+```cpp
 ON_CALL(foo, Bar(_))
     .WillByDefault(...);
 ```
@@ -474,10 +474,10 @@ verbose level.
 If you find yourself needing to perform some action that's not
 supported by Google Mock directly, remember that you can define your own
 actions using
-[MakeAction()](CookBook.md#writing-new-actions) or
-[MakePolymorphicAction()](CookBook.md#writing_new_polymorphic_actions),
+[MakeAction()](CookBook.md#writing-new-actions-quickly) or
+[MakePolymorphicAction()](CookBook.md#writing-new-polymorphic-actions),
 or you can write a stub function and invoke it using
-[Invoke()](CookBook.md#using-functions_methods_functors).
+[Invoke()](CookBook.md#using-functionsmethodsfunctors-as-actions).
 
 ## MOCK\_METHODn()'s second argument looks funny.  Why don't you use the MOCK\_METHODn(Method, return\_type, arg\_1, ..., arg\_n) syntax? ##
 
@@ -488,12 +488,12 @@ extent, Google Mock's syntax was chosen for several practical advantages it
 has.
 
 Try to mock a function that takes a map as an argument:
-```
+```cpp
 virtual int GetSize(const map<int, std::string>& m);
 ```
 
 Using the proposed syntax, it would be:
-```
+```cpp
 MOCK_METHOD1(GetSize, int, const map<int, std::string>& m);
 ```
 
@@ -503,7 +503,7 @@ around this you can use `typedef` to give the map type a name, but
 that gets in the way of your work.  Google Mock's syntax avoids this
 problem as the function's argument types are protected inside a pair
 of parentheses:
-```
+```cpp
 // This compiles fine.
 MOCK_METHOD1(GetSize, int(const map<int, std::string>& m));
 ```
@@ -528,7 +528,7 @@ interface, which then can be easily mocked.  It's a bit of work
 initially, but usually pays for itself quickly.
 
 This Google Testing Blog
-[post](http://googletesting.blogspot.com/2008/06/defeat-static-cling.html)
+[post](https://testing.googleblog.com/2008/06/defeat-static-cling.html)
 says it excellently.  Check it out.
 
 ## My mock object needs to do complex stuff.  It's a lot of pain to specify the actions.  Google Mock sucks! ##
@@ -599,7 +599,7 @@ when the mock method is called.  `SetArgPointee()` says what the
 side effect is, but doesn't say what the return value should be.  You
 need `DoAll()` to chain a `SetArgPointee()` with a `Return()`.
 
-See this [recipe](CookBook.md#mocking_side_effects) for more details and an example.
+See this [recipe](CookBook.md#mocking-side-effects) for more details and an example.
 
 
 ## My question is not in your FAQ! ##
@@ -607,7 +607,6 @@ See this [recipe](CookBook.md#mocking_side_effects) for more details and an exam
 If you cannot find the answer to your question in this FAQ, there are
 some other resources you can use:
 
-  1. read other [documentation](Documentation.md),
   1. search the mailing list [archive](http://groups.google.com/group/googlemock/topics),
   1. ask it on [googlemock@googlegroups.com](mailto:googlemock@googlegroups.com) and someone will answer it (to prevent spam, we require you to join the [discussion group](http://groups.google.com/group/googlemock) before you can post.).
 

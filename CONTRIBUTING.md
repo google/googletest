@@ -19,6 +19,10 @@ Follow either of the two links above to access the appropriate CLA and
 instructions for how to sign and return it. Once we receive it, we'll be able to
 accept your pull requests.
 
+## Are you a Googler?
+If you are a Googler, you can either create an internal change or work on GitHub directly.
+
+
 ## Contributing A Patch
 
 1. Submit an issue describing your proposed change to the
@@ -38,10 +42,6 @@ accept your pull requests.
    you are contributing.
 1. Ensure that your code has an appropriate set of unit tests which all pass.
 1. Submit a pull request.
-
-If you are a Googler, it is preferable to first create an internal change and
-have it reviewed and submitted, and then create an upstreaming pull
-request here. 
 
 ## The Google Test and Google Mock Communities ##
 
