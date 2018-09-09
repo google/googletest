@@ -1653,7 +1653,7 @@ TEST(PairTest, MatchesCorrectly) {
   EXPECT_THAT(p, Pair(25, "foo"));
   EXPECT_THAT(p, Pair(Ge(20), HasSubstr("o")));
 
-  // 'first' doesnt' match, but 'second' matches.
+  // 'first' doesn't match, but 'second' matches.
   EXPECT_THAT(p, Not(Pair(42, "foo")));
   EXPECT_THAT(p, Not(Pair(Lt(25), "foo")));
 
@@ -4960,7 +4960,7 @@ TYPED_TEST(ContainerEqTest, DuplicateDifference) {
 }
 #endif  // GTEST_HAS_TYPED_TEST
 
-// Tests that mutliple missing values are reported.
+// Tests that multiple missing values are reported.
 // Using just vector here, so order is predictable.
 TEST(ContainerEqExtraTest, MultipleValuesMissing) {
   static const int vals[] = {1, 1, 2, 3, 5, 8};

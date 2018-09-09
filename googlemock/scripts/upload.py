@@ -732,7 +732,7 @@ class SubversionVCS(VersionControlSystem):
     else:
       self.rev_start = self.rev_end = None
     # Cache output from "svn list -r REVNO dirname".
-    # Keys: dirname, Values: 2-tuple (ouput for start rev and end rev).
+    # Keys: dirname, Values: 2-tuple (output for start rev and end rev).
     self.svnls_cache = {}
     # SVN base URL is required to fetch files deleted in an older revision.
     # Result is cached to not guess it over and over again in GetBaseFile().

@@ -428,7 +428,7 @@ TEST(FormatTimeInMillisAsSecondsTest, FormatsNegativeNumber) {
 
 // Tests FormatEpochTimeInMillisAsIso8601().  The correctness of conversion
 // for particular dates below was verified in Python using
-// datetime.datetime.fromutctimestamp(<timetamp>/1000).
+// datetime.datetime.fromutctimestamp(<timestamp>/1000).
 
 // FormatEpochTimeInMillisAsIso8601 depends on the current timezone, so we
 // have to set up a particular timezone to obtain predictable results.
@@ -1991,7 +1991,7 @@ void ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
 }
 
 // Tests that property recording functions in UnitTest outside of tests
-// functions correcly.  Creating a separate instance of UnitTest ensures it
+// functions correctly.  Creating a separate instance of UnitTest ensures it
 // is in a state similar to the UnitTest's singleton's between tests.
 class UnitTestRecordPropertyTest :
     public testing::internal::UnitTestRecordPropertyTestHelper {

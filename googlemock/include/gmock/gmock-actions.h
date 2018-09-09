@@ -1099,7 +1099,7 @@ typedef internal::IgnoredValue Unused;
 
 // This constructor allows us to turn an Action<From> object into an
 // Action<To>, as long as To's arguments can be implicitly converted
-// to From's and From's return type cann be implicitly converted to
+// to From's and From's return type can be implicitly converted to
 // To's.
 template <typename To>
 template <typename From>

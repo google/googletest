@@ -225,7 +225,7 @@ selected tests.
 Change to the appropriate directory and run "msbuild gmock.sln" to
 build the library and tests (or open the gmock.sln in the MSVC IDE).
 If you want to create your own project to use with Google Mock, you'll
-have to configure it to use the `gmock_config` propety sheet.  For that:
+have to configure it to use the `gmock_config` property sheet.  For that:
 
  * Open the Property Manager window (View | Other Windows | Property Manager)
  * Right-click on your project and select "Add Existing Property Sheet..."

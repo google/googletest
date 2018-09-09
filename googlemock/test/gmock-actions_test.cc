@@ -403,7 +403,7 @@ TEST(ActionInterfaceTest, MakeAction) {
   EXPECT_EQ(5, action.Perform(make_tuple(true, 5)));
 }
 
-// Tests that Action<F> can be contructed from a pointer to
+// Tests that Action<F> can be constructed from a pointer to
 // ActionInterface<F>.
 TEST(ActionTest, CanBeConstructedFromActionInterface) {
   Action<MyGlobalFunction> action(new MyActionImpl);
@@ -763,7 +763,7 @@ TEST(DoDefaultDeathTest, DiesIfUsedInCompositeAction) {
 }
 
 // Tests that DoDefault() returns the default value set by
-// DefaultValue<T>::Set() when it's not overriden by an ON_CALL().
+// DefaultValue<T>::Set() when it's not overridden by an ON_CALL().
 TEST(DoDefaultTest, ReturnsUserSpecifiedPerTypeDefaultValueWhenThereIsOne) {
   DefaultValue<int>::Set(1);
   MockClass mock;
