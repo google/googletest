@@ -1,0 +1,30 @@
+/*
+long going while loop 
+*/
+
+#include <iostream>
+#include <string>
+#include <time.h>
+#include <stdio.h>
+#include <conio.h>
+ 
+using namespace std;
+
+int main()
+{
+    int sleep = 100;
+	int current = 0;
+	int first = 1;
+	int second = 0;
+	int hold;
+	while (x < 75)
+	{
+		current = first + second;
+		first = second;
+		second = current;
+		cout << current << endl;
+		Sleep(sleep);
+		x++;
+		sleep = sleep * 0.9;
+	}
+}
