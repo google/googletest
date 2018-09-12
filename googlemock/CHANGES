@@ -25,7 +25,7 @@ Changes for 1.7.0:
   before the conversion to a Matcher.
 * Improvement: the Google Mock Generator can now generate mocks for
   some class templates.
-* Bug fix: mock object destruction triggerred by another mock object's
+* Bug fix: mock object destruction triggered by another mock object's
   destruction no longer hangs.
 * Improvement: Google Mock Doctor works better with newer Clang and
   GCC now.

@@ -298,7 +298,7 @@ next guy, but sadly they are side effects of C++'s limitations):
   1. The constructors of the base mock (`MockFoo`) cannot have arguments passed by non-const reference, which happens to be banned by the [Google C++ style guide](https://google.github.io/styleguide/cppguide.html).
   1. During the constructor or destructor of `MockFoo`, the mock object is _not_ nice or strict.  This may cause surprises if the constructor or destructor calls a mock method on `this` object. (This behavior, however, is consistent with C++'s general rule: if a constructor or destructor calls a virtual method of `this` object, that method is treated as non-virtual.  In other words, to the base class's constructor or destructor, `this` object behaves like an instance of the base class, not the derived class.  This rule is required for safety.  Otherwise a base constructor may use members of a derived class before they are initialized, or a base destructor may use members of a derived class after they have been destroyed.)
 
-Finally, you should be **very cautious** about when to use naggy or strict mocks, as they tend to make tests more brittle and harder to maintain. When you refactor your code without changing its externally visible behavior, ideally you should't need to update any tests. If your code interacts with a naggy mock, however, you may start to get spammed with warnings as the result of your change. Worse, if your code interacts with a strict mock, your tests may start to fail and you'll be forced to fix them. Our general recommendation is to use nice mocks (not yet the default) most of the time, use naggy mocks (the current default) when developing or debugging tests, and use strict mocks only as the last resort.
+Finally, you should be **very cautious** about when to use naggy or strict mocks, as they tend to make tests more brittle and harder to maintain. When you refactor your code without changing its externally visible behavior, ideally you shouldn't need to update any tests. If your code interacts with a naggy mock, however, you may start to get spammed with warnings as the result of your change. Worse, if your code interacts with a strict mock, your tests may start to fail and you'll be forced to fix them. Our general recommendation is to use nice mocks (not yet the default) most of the time, use naggy mocks (the current default) when developing or debugging tests, and use strict mocks only as the last resort.
 
 ## Simplifying the Interface without Breaking Existing Code ##
 
@@ -955,7 +955,7 @@ Expected: starts with "Hello"
 ## Using Predicates as Matchers ##
 
 Google Mock provides a built-in set of matchers. In case you find them
-lacking, you can use an arbitray unary predicate function or functor
+lacking, you can use an arbitrary unary predicate function or functor
 as a matcher - as long as the predicate accepts a value of the type
 you want. You do this by wrapping the predicate inside the `Truly()`
 function, for example:
