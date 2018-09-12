@@ -1798,11 +1798,8 @@ class WithParamInterface {
   virtual ~WithParamInterface() {}
 
   // The current parameter value. Is also available in the test fixture's
-  // constructor. This member function is non-static, even though it only
-  // references static data, to reduce the opportunity for incorrect uses
-  // like writing 'WithParamInterface<bool>::GetParam()' for a test that
-  // uses a fixture whose parameter type is int.
-  const ParamType& GetParam() const {
+  // constructor.
+  static const ParamType& GetParam() {
     GTEST_CHECK_(parameter_ != NULL)
         << "GetParam() can only be called inside a value-parameterized test "
         << "-- did you intend to write TEST_P instead of TEST_F?";
