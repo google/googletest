@@ -1189,6 +1189,19 @@ class NativeArray {
   GTEST_DISALLOW_ASSIGN_(NativeArray);
 };
 
+class AdditionalMessage
+{
+public:
+  AdditionalMessage(const std::string& message) : value(message) {}
+  AdditionalMessage& operator=(const std::string& message) { value = message; return *this; }
+  operator bool() const { return ::testing::internal::AlwaysTrue(); }
+
+  const std::string& get() const { return value; }
+
+private:
+  std::string value;
+};
+
 }  // namespace internal
 }  // namespace testing
 
@@ -1242,17 +1255,21 @@ class NativeArray {
 
 #define GTEST_TEST_NO_THROW_(statement, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-  if (::testing::internal::AlwaysTrue()) { \
+  if (::testing::internal::AdditionalMessage message = ".") { \
     try { \
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
+    } \
+    catch (const std::exception& e) { \
+      message = std::string(": ") + e.what(); \
+      goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__); \
     } \
     catch (...) { \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__); \
     } \
   } else \
     GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__): \
-      fail("Expected: " #statement " doesn't throw an exception.\n" \
-           "  Actual: it throws.")
+      fail(("Expected: " #statement " doesn't throw an exception.\n" \
+           "  Actual: it throws" + message.get()).c_str())
 
 #define GTEST_TEST_ANY_THROW_(statement, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
