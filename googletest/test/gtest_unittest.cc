@@ -3748,6 +3748,19 @@ TEST(ExpectTest, ASSERT_EQ_0) {
                        "  0\n  5.6");
 }
 
+TEST(AssertionTest, AdditionalMessage) {
+  ::testing::internal::AdditionalMessage m = "servus";
+  EXPECT_EQ(m.get(), "servus");
+
+  const char* cc = "hello";
+  m = cc;
+  EXPECT_EQ(m.get(), cc);
+
+  std::string s = "hi";
+  m = s;
+  EXPECT_EQ(m.get(), s);
+}
+
 // Tests ASSERT_NE.
 TEST(AssertionTest, ASSERT_NE) {
   ASSERT_NE(6, 7);
