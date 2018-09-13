@@ -1192,7 +1192,7 @@ class NativeArray {
 class AdditionalMessage
 {
 public:
-  AdditionalMessage(const std::string& message) : value(message) {}
+  AdditionalMessage(const char* message) : value(message) {}
   AdditionalMessage& operator=(const std::string& message) { value = message; return *this; }
   operator bool() const { return ::testing::internal::AlwaysTrue(); }
 
