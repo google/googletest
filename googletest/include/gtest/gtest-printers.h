@@ -983,7 +983,11 @@ struct TuplePolicy {
 
   template <size_t I>
   static typename AddReference<const typename ::std::tr1::tuple_element<
+#if defined(_MSC_VER) && _MSC_VER < 1900
+      I, Tuple>::type>::type
+#else
       static_cast<int>(I), Tuple>::type>::type
+#endif
   get(const Tuple& tuple) {
     return ::std::tr1::get<I>(tuple);
   }
