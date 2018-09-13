@@ -1559,7 +1559,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   // Implements UntypedFunctionMockerBase::ClearDefaultActionsLocked():
   // clears the ON_CALL()s set on this mock function.
   virtual void ClearDefaultActionsLocked()
-      GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
+      GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) final {
     g_gmock_mutex.AssertHeld();
 
     // Deleting our default actions may trigger other mock objects to be
