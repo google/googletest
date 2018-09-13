@@ -1307,9 +1307,6 @@ class StrEqualityMatcher {
 #if GTEST_HAS_ABSL
   bool MatchAndExplain(const absl::string_view& s,
                        MatchResultListener* listener) const {
-    if (s.data() == NULL) {
-      return !expect_eq_;
-    }
     // This should fail to compile if absl::string_view is used with wide
     // strings.
     const StringType& str = string(s);
@@ -1380,9 +1377,6 @@ class HasSubstrMatcher {
 #if GTEST_HAS_ABSL
   bool MatchAndExplain(const absl::string_view& s,
                        MatchResultListener* listener) const {
-    if (s.data() == NULL) {
-      return false;
-    }
     // This should fail to compile if absl::string_view is used with wide
     // strings.
     const StringType& str = string(s);
@@ -1440,9 +1434,6 @@ class StartsWithMatcher {
 #if GTEST_HAS_ABSL
   bool MatchAndExplain(const absl::string_view& s,
                        MatchResultListener* listener) const {
-    if (s.data() == NULL) {
-      return false;
-    }
     // This should fail to compile if absl::string_view is used with wide
     // strings.
     const StringType& str = string(s);
@@ -1499,9 +1490,6 @@ class EndsWithMatcher {
 #if GTEST_HAS_ABSL
   bool MatchAndExplain(const absl::string_view& s,
                        MatchResultListener* listener) const {
-    if (s.data() == NULL) {
-      return false;
-    }
     // This should fail to compile if absl::string_view is used with wide
     // strings.
     const StringType& str = string(s);
@@ -1558,7 +1546,7 @@ class MatchesRegexMatcher {
 #if GTEST_HAS_ABSL
   bool MatchAndExplain(const absl::string_view& s,
                        MatchResultListener* listener) const {
-    return s.data() && MatchAndExplain(string(s), listener);
+    return MatchAndExplain(string(s), listener);
   }
 #endif  // GTEST_HAS_ABSL
 
