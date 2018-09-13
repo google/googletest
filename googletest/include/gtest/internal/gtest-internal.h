@@ -1199,7 +1199,6 @@ public:
   const std::string& get() const { return value; }
 
 private:
-  AdditionalMessage& operator=(AdditionalMessage&&);
   std::string value;
 };
 
