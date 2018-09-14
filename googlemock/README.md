@@ -246,35 +246,6 @@ We list the most frequently used macros below.  For a complete list,
 see file [${GTEST\_DIR}/include/gtest/internal/gtest-port.h](
 ../googletest/include/gtest/internal/gtest-port.h).
 
-### Choosing a TR1 Tuple Library ###
-
-Google Mock uses the C++ Technical Report 1 (TR1) tuple library
-heavily.  Unfortunately TR1 tuple is not yet widely available with all
-compilers.  The good news is that Google Test 1.4.0+ implements a
-subset of TR1 tuple that's enough for Google Mock's need.  Google Mock
-will automatically use that implementation when the compiler doesn't
-provide TR1 tuple.
-
-Usually you don't need to care about which tuple library Google Test
-and Google Mock use.  However, if your project already uses TR1 tuple,
-you need to tell Google Test and Google Mock to use the same TR1 tuple
-library the rest of your project uses, or the two tuple
-implementations will clash.  To do that, add
-
-    -DGTEST_USE_OWN_TR1_TUPLE=0
-
-to the compiler flags while compiling Google Test, Google Mock, and
-your tests.  If you want to force Google Test and Google Mock to use
-their own tuple library, just add
-
-    -DGTEST_USE_OWN_TR1_TUPLE=1
-
-to the compiler flags instead.
-
-If you want to use Boost's TR1 tuple library with Google Mock, please
-refer to the Boost website (http://www.boost.org/) for how to obtain
-it and set it up.
-
 ### As a Shared Library (DLL) ###
 
 Google Mock is compact, so most users can build and link it as a static
