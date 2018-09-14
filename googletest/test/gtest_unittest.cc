@@ -63,9 +63,7 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 #include <map>
 #include <vector>
 #include <ostream>
-#if GTEST_LANG_CXX11
 #include <unordered_set>
-#endif  // GTEST_LANG_CXX11
 
 #include "gtest/gtest-spi.h"
 #include "src/gtest-internal-inl.h"
@@ -5156,8 +5154,7 @@ TEST(AssertionResultTest, CanStreamOstreamManipulators) {
   EXPECT_STREQ("Data\n\\0Will be visible", r.message());
 }
 
-// The next test uses explicit conversion operators -- a C++11 feature.
-#if GTEST_LANG_CXX11
+// The next test uses explicit conversion operators
 
 TEST(AssertionResultTest, ConstructibleFromContextuallyConvertibleToBool) {
   struct ExplicitlyConvertibleToBool {
@@ -5169,8 +5166,6 @@ TEST(AssertionResultTest, ConstructibleFromContextuallyConvertibleToBool) {
   EXPECT_FALSE(v1);
   EXPECT_TRUE(v2);
 }
-
-#endif  // GTEST_LANG_CXX11
 
 struct ConvertibleToAssertionResult {
   operator AssertionResult() const { return AssertionResult(true); }
@@ -7555,7 +7550,6 @@ TEST(IsContainerTestTest, WorksForContainer) {
             sizeof(IsContainerTest<std::map<int, double> >(0)));
 }
 
-#if GTEST_LANG_CXX11
 struct ConstOnlyContainerWithPointerIterator {
   using const_iterator = int*;
   const_iterator begin() const;
@@ -7577,7 +7571,6 @@ TEST(IsContainerTestTest, ConstOnlyContainer) {
   EXPECT_EQ(sizeof(IsContainer),
             sizeof(IsContainerTest<ConstOnlyContainerWithClassIterator>(0)));
 }
-#endif  // GTEST_LANG_CXX11
 
 // Tests IsHashTable.
 struct AHashTable {
@@ -7590,10 +7583,8 @@ struct NotReallyAHashTable {
 TEST(IsHashTable, Basic) {
   EXPECT_TRUE(testing::internal::IsHashTable<AHashTable>::value);
   EXPECT_FALSE(testing::internal::IsHashTable<NotReallyAHashTable>::value);
-#if GTEST_LANG_CXX11
   EXPECT_FALSE(testing::internal::IsHashTable<std::vector<int>>::value);
   EXPECT_TRUE(testing::internal::IsHashTable<std::unordered_set<int>>::value);
-#endif  // GTEST_LANG_CXX11
 #if GTEST_HAS_HASH_SET_
   EXPECT_TRUE(testing::internal::IsHashTable<__gnu_cxx::hash_set<int>>::value);
 #endif  // GTEST_HAS_HASH_SET_
