@@ -198,7 +198,7 @@ objects, you should use `ASSERT_EQ`.
 
 When doing pointer comparisons use `*_EQ(ptr, nullptr)` and `*_NE(ptr, nullptr)`
 instead of `*_EQ(ptr, NULL)` and `*_NE(ptr, NULL)`. This is because `nullptr` is
-typed while `NULL` is not. See [FAQ](faq.md#why-does-google-test-support-expect_eqnull-ptr-and-assert_eqnull-ptr-but-not-expect_nenull-ptr-and-assert_nenull-ptr)
+typed while `NULL` is not. See [FAQ](faq.md#why-does-googletest-support-expect_eqnull-ptr-and-assert_eqnull-ptr-but-not-expect_nenull-ptr-and-assert_nenull-ptr)
 for more details.
 
 If you're working with floating point numbers, you may want to use the floating
@@ -317,7 +317,7 @@ To create a fixture:
 1.  If necessary, write a destructor or `TearDown()` function to release any
     resources you allocated in `SetUp()` . To learn when you should use the
     constructor/destructor and when you should use `SetUp()/TearDown()`, read
-    this [FAQ](faq.md#should-i-use-the-constructordestructor-of-the-test-fixture-or-the-set-uptear-down-function) entry.
+    this [FAQ](faq.md#should-i-use-the-constructordestructor-of-the-test-fixture-or-setupteardown) entry.
 1.  If needed, define subroutines for your tests to share.
 
 When using a fixture, use `TEST_F()` instead of `TEST()` as it allows you to
@@ -471,7 +471,7 @@ If a fatal failure happens the subsequent steps will be skipped.
 >
 > Also, you should call `RUN_ALL_TESTS()` only **once**. Calling it more than
 > once conflicts with some advanced googletest features (e.g. thread-safe [death
-> tests](advanced#death-tests)) and thus is not supported.
+> tests](advanced.md#death-tests)) and thus is not supported.
 
 **Availability**: Linux, Windows, Mac.
 

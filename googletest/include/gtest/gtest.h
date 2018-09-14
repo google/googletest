@@ -116,6 +116,10 @@ GTEST_DECLARE_string_(color);
 // the tests to run. If the filter is not given all tests are executed.
 GTEST_DECLARE_string_(filter);
 
+// This flag controls whether Google Test installs a signal handler that dumps
+// debugging information when fatal signals are raised.
+GTEST_DECLARE_bool_(install_failure_signal_handler);
+
 // This flag causes the Google Test to list tests. None of the tests listed
 // are actually run if the flag is provided.
 GTEST_DECLARE_bool_(list_tests);
@@ -158,6 +162,10 @@ GTEST_DECLARE_bool_(throw_on_failure);
 // platforms test results are streamed to the specified port on
 // the specified host machine.
 GTEST_DECLARE_string_(stream_result_to);
+
+#if GTEST_USE_OWN_FLAGFILE_FLAG_
+GTEST_DECLARE_string_(flagfile);
+#endif  // GTEST_USE_OWN_FLAGFILE_FLAG_
 
 // The upper limit for valid stack trace depths.
 const int kMaxStackTraceDepth = 100;

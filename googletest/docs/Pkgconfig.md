@@ -19,7 +19,7 @@ all examples here we assume you want to compile the sample
 
 Using `pkg-config` in CMake is fairly easy:
 
-```
+``` cmake
 cmake_minimum_required(VERSION 3.0)
 
 cmake_policy(SET CMP0048 NEW)
@@ -102,7 +102,7 @@ test('first_and_only_test', testapp)
 Since `pkg-config` is a small Unix command-line utility, it can be used
 in handwritten `Makefile`s too:
 
-```
+``` Makefile
 GTEST_CFLAGS = `pkg-config --cflags gtest_main`
 GTEST_LIBS = `pkg-config --libs gtest_main`
 

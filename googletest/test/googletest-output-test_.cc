@@ -39,6 +39,10 @@
 
 #include <stdlib.h>
 
+#if _MSC_VER
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4127 /* conditional expression is constant */)
+#endif  //  _MSC_VER
+
 #if GTEST_IS_THREADSAFE
 using testing::ScopedFakeTestPartResultReporter;
 using testing::TestPartResultArray;
@@ -801,6 +805,28 @@ TYPED_TEST(TypedTest, Failure) {
   EXPECT_EQ(1, TypeParam()) << "Expected failure";
 }
 
+typedef testing::Types<char, int> TypesForTestWithNames;
+
+template <typename T>
+class TypedTestWithNames : public testing::Test {};
+
+class TypedTestNames {
+ public:
+  template <typename T>
+  static std::string GetName(int i) {
+    if (testing::internal::IsSame<T, char>::value)
+      return std::string("char") + ::testing::PrintToString(i);
+    if (testing::internal::IsSame<T, int>::value)
+      return std::string("int") + ::testing::PrintToString(i);
+  }
+};
+
+TYPED_TEST_CASE(TypedTestWithNames, TypesForTestWithNames, TypedTestNames);
+
+TYPED_TEST(TypedTestWithNames, Success) {}
+
+TYPED_TEST(TypedTestWithNames, Failure) { FAIL(); }
+
 #endif  // GTEST_HAS_TYPED_TEST
 
 // This #ifdef block tests the output of type-parameterized tests.
@@ -824,6 +850,22 @@ REGISTER_TYPED_TEST_CASE_P(TypedTestP, Success, Failure);
 
 typedef testing::Types<unsigned char, unsigned int> UnsignedTypes;
 INSTANTIATE_TYPED_TEST_CASE_P(Unsigned, TypedTestP, UnsignedTypes);
+
+class TypedTestPNames {
+ public:
+  template <typename T>
+  static std::string GetName(int i) {
+    if (testing::internal::IsSame<T, unsigned char>::value) {
+      return std::string("unsignedChar") + ::testing::PrintToString(i);
+    }
+    if (testing::internal::IsSame<T, unsigned int>::value) {
+      return std::string("unsignedInt") + ::testing::PrintToString(i);
+    }
+  }
+};
+
+INSTANTIATE_TYPED_TEST_CASE_P(UnsignedCustomName, TypedTestP, UnsignedTypes,
+                              TypedTestPNames);
 
 #endif  // GTEST_HAS_TYPED_TEST_P
 
@@ -1060,6 +1102,8 @@ int main(int argc, char **argv) {
   // are registered, and torn down in the reverse order.
   testing::AddGlobalTestEnvironment(new FooEnvironment);
   testing::AddGlobalTestEnvironment(new BarEnvironment);
-
+#if _MSC_VER
+GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4127
+#endif  //  _MSC_VER
   return RunAllTests();
 }

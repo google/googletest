@@ -80,6 +80,8 @@ class ValueArray1 {
     return ValuesIn(array);
   }
 
+  ValueArray1(const ValueArray1& other) : v1_(other.v1_) {}
+
  private:
   // No implementation - assignment is unsupported.
   void operator=(const ValueArray1& other);
@@ -97,6 +99,8 @@ class ValueArray2 {
     const T array[] = {static_cast<T>(v1_), static_cast<T>(v2_)};
     return ValuesIn(array);
   }
+
+  ValueArray2(const ValueArray2& other) : v1_(other.v1_), v2_(other.v2_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -117,6 +121,9 @@ class ValueArray3 {
         static_cast<T>(v3_)};
     return ValuesIn(array);
   }
+
+  ValueArray3(const ValueArray3& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -140,6 +147,9 @@ class ValueArray4 {
     return ValuesIn(array);
   }
 
+  ValueArray4(const ValueArray4& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_) {}
+
  private:
   // No implementation - assignment is unsupported.
   void operator=(const ValueArray4& other);
@@ -162,6 +172,9 @@ class ValueArray5 {
         static_cast<T>(v3_), static_cast<T>(v4_), static_cast<T>(v5_)};
     return ValuesIn(array);
   }
+
+  ValueArray5(const ValueArray5& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -189,6 +202,9 @@ class ValueArray6 {
     return ValuesIn(array);
   }
 
+  ValueArray6(const ValueArray6& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_) {}
+
  private:
   // No implementation - assignment is unsupported.
   void operator=(const ValueArray6& other);
@@ -215,6 +231,10 @@ class ValueArray7 {
         static_cast<T>(v6_), static_cast<T>(v7_)};
     return ValuesIn(array);
   }
+
+  ValueArray7(const ValueArray7& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -244,6 +264,10 @@ class ValueArray8 {
         static_cast<T>(v6_), static_cast<T>(v7_), static_cast<T>(v8_)};
     return ValuesIn(array);
   }
+
+  ValueArray8(const ValueArray8& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -276,6 +300,10 @@ class ValueArray9 {
     return ValuesIn(array);
   }
 
+  ValueArray9(const ValueArray9& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_) {}
+
  private:
   // No implementation - assignment is unsupported.
   void operator=(const ValueArray9& other);
@@ -307,6 +335,10 @@ class ValueArray10 {
         static_cast<T>(v9_), static_cast<T>(v10_)};
     return ValuesIn(array);
   }
+
+  ValueArray10(const ValueArray10& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -341,6 +373,11 @@ class ValueArray11 {
         static_cast<T>(v9_), static_cast<T>(v10_), static_cast<T>(v11_)};
     return ValuesIn(array);
   }
+
+  ValueArray11(const ValueArray11& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -377,6 +414,11 @@ class ValueArray12 {
         static_cast<T>(v12_)};
     return ValuesIn(array);
   }
+
+  ValueArray12(const ValueArray12& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -416,6 +458,11 @@ class ValueArray13 {
     return ValuesIn(array);
   }
 
+  ValueArray13(const ValueArray13& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_) {}
+
  private:
   // No implementation - assignment is unsupported.
   void operator=(const ValueArray13& other);
@@ -454,6 +501,11 @@ class ValueArray14 {
         static_cast<T>(v12_), static_cast<T>(v13_), static_cast<T>(v14_)};
     return ValuesIn(array);
   }
+
+  ValueArray14(const ValueArray14& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -495,6 +547,12 @@ class ValueArray15 {
         static_cast<T>(v15_)};
     return ValuesIn(array);
   }
+
+  ValueArray15(const ValueArray15& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -540,6 +598,12 @@ class ValueArray16 {
     return ValuesIn(array);
   }
 
+  ValueArray16(const ValueArray16& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_) {}
+
  private:
   // No implementation - assignment is unsupported.
   void operator=(const ValueArray16& other);
@@ -584,6 +648,12 @@ class ValueArray17 {
         static_cast<T>(v15_), static_cast<T>(v16_), static_cast<T>(v17_)};
     return ValuesIn(array);
   }
+
+  ValueArray17(const ValueArray17& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -632,6 +702,12 @@ class ValueArray18 {
     return ValuesIn(array);
   }
 
+  ValueArray18(const ValueArray18& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_) {}
+
  private:
   // No implementation - assignment is unsupported.
   void operator=(const ValueArray18& other);
@@ -679,6 +755,13 @@ class ValueArray19 {
         static_cast<T>(v18_), static_cast<T>(v19_)};
     return ValuesIn(array);
   }
+
+  ValueArray19(const ValueArray19& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -729,6 +812,13 @@ class ValueArray20 {
         static_cast<T>(v18_), static_cast<T>(v19_), static_cast<T>(v20_)};
     return ValuesIn(array);
   }
+
+  ValueArray20(const ValueArray20& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -783,6 +873,13 @@ class ValueArray21 {
     return ValuesIn(array);
   }
 
+  ValueArray21(const ValueArray21& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_) {}
+
  private:
   // No implementation - assignment is unsupported.
   void operator=(const ValueArray21& other);
@@ -836,6 +933,13 @@ class ValueArray22 {
         static_cast<T>(v21_), static_cast<T>(v22_)};
     return ValuesIn(array);
   }
+
+  ValueArray22(const ValueArray22& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -892,6 +996,14 @@ class ValueArray23 {
         static_cast<T>(v21_), static_cast<T>(v22_), static_cast<T>(v23_)};
     return ValuesIn(array);
   }
+
+  ValueArray23(const ValueArray23& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -951,6 +1063,14 @@ class ValueArray24 {
     return ValuesIn(array);
   }
 
+  ValueArray24(const ValueArray24& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_) {}
+
  private:
   // No implementation - assignment is unsupported.
   void operator=(const ValueArray24& other);
@@ -1009,6 +1129,14 @@ class ValueArray25 {
         static_cast<T>(v24_), static_cast<T>(v25_)};
     return ValuesIn(array);
   }
+
+  ValueArray25(const ValueArray25& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -1070,6 +1198,14 @@ class ValueArray26 {
         static_cast<T>(v24_), static_cast<T>(v25_), static_cast<T>(v26_)};
     return ValuesIn(array);
   }
+
+  ValueArray26(const ValueArray26& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -1134,6 +1270,15 @@ class ValueArray27 {
         static_cast<T>(v27_)};
     return ValuesIn(array);
   }
+
+  ValueArray27(const ValueArray27& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -1200,6 +1345,15 @@ class ValueArray28 {
     return ValuesIn(array);
   }
 
+  ValueArray28(const ValueArray28& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_) {}
+
  private:
   // No implementation - assignment is unsupported.
   void operator=(const ValueArray28& other);
@@ -1265,6 +1419,15 @@ class ValueArray29 {
         static_cast<T>(v27_), static_cast<T>(v28_), static_cast<T>(v29_)};
     return ValuesIn(array);
   }
+
+  ValueArray29(const ValueArray29& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_), v29_(other.v29_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -1334,6 +1497,15 @@ class ValueArray30 {
         static_cast<T>(v30_)};
     return ValuesIn(array);
   }
+
+  ValueArray30(const ValueArray30& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_), v29_(other.v29_), v30_(other.v30_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -1406,6 +1578,16 @@ class ValueArray31 {
     return ValuesIn(array);
   }
 
+  ValueArray31(const ValueArray31& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_), v29_(other.v29_), v30_(other.v30_),
+      v31_(other.v31_) {}
+
  private:
   // No implementation - assignment is unsupported.
   void operator=(const ValueArray31& other);
@@ -1477,6 +1659,16 @@ class ValueArray32 {
         static_cast<T>(v30_), static_cast<T>(v31_), static_cast<T>(v32_)};
     return ValuesIn(array);
   }
+
+  ValueArray32(const ValueArray32& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_), v29_(other.v29_), v30_(other.v30_),
+      v31_(other.v31_), v32_(other.v32_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -1552,6 +1744,16 @@ class ValueArray33 {
         static_cast<T>(v33_)};
     return ValuesIn(array);
   }
+
+  ValueArray33(const ValueArray33& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_), v29_(other.v29_), v30_(other.v30_),
+      v31_(other.v31_), v32_(other.v32_), v33_(other.v33_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -1629,6 +1831,16 @@ class ValueArray34 {
     return ValuesIn(array);
   }
 
+  ValueArray34(const ValueArray34& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_), v29_(other.v29_), v30_(other.v30_),
+      v31_(other.v31_), v32_(other.v32_), v33_(other.v33_), v34_(other.v34_) {}
+
  private:
   // No implementation - assignment is unsupported.
   void operator=(const ValueArray34& other);
@@ -1705,6 +1917,17 @@ class ValueArray35 {
         static_cast<T>(v33_), static_cast<T>(v34_), static_cast<T>(v35_)};
     return ValuesIn(array);
   }
+
+  ValueArray35(const ValueArray35& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_), v29_(other.v29_), v30_(other.v30_),
+      v31_(other.v31_), v32_(other.v32_), v33_(other.v33_), v34_(other.v34_),
+      v35_(other.v35_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -1785,6 +2008,17 @@ class ValueArray36 {
         static_cast<T>(v36_)};
     return ValuesIn(array);
   }
+
+  ValueArray36(const ValueArray36& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_), v29_(other.v29_), v30_(other.v30_),
+      v31_(other.v31_), v32_(other.v32_), v33_(other.v33_), v34_(other.v34_),
+      v35_(other.v35_), v36_(other.v36_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -1868,6 +2102,17 @@ class ValueArray37 {
     return ValuesIn(array);
   }
 
+  ValueArray37(const ValueArray37& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_), v29_(other.v29_), v30_(other.v30_),
+      v31_(other.v31_), v32_(other.v32_), v33_(other.v33_), v34_(other.v34_),
+      v35_(other.v35_), v36_(other.v36_), v37_(other.v37_) {}
+
  private:
   // No implementation - assignment is unsupported.
   void operator=(const ValueArray37& other);
@@ -1950,6 +2195,17 @@ class ValueArray38 {
         static_cast<T>(v36_), static_cast<T>(v37_), static_cast<T>(v38_)};
     return ValuesIn(array);
   }
+
+  ValueArray38(const ValueArray38& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_), v29_(other.v29_), v30_(other.v30_),
+      v31_(other.v31_), v32_(other.v32_), v33_(other.v33_), v34_(other.v34_),
+      v35_(other.v35_), v36_(other.v36_), v37_(other.v37_), v38_(other.v38_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -2035,6 +2291,18 @@ class ValueArray39 {
         static_cast<T>(v39_)};
     return ValuesIn(array);
   }
+
+  ValueArray39(const ValueArray39& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_), v29_(other.v29_), v30_(other.v30_),
+      v31_(other.v31_), v32_(other.v32_), v33_(other.v33_), v34_(other.v34_),
+      v35_(other.v35_), v36_(other.v36_), v37_(other.v37_), v38_(other.v38_),
+      v39_(other.v39_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -2122,6 +2390,18 @@ class ValueArray40 {
         static_cast<T>(v39_), static_cast<T>(v40_)};
     return ValuesIn(array);
   }
+
+  ValueArray40(const ValueArray40& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_), v29_(other.v29_), v30_(other.v30_),
+      v31_(other.v31_), v32_(other.v32_), v33_(other.v33_), v34_(other.v34_),
+      v35_(other.v35_), v36_(other.v36_), v37_(other.v37_), v38_(other.v38_),
+      v39_(other.v39_), v40_(other.v40_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -2211,6 +2491,18 @@ class ValueArray41 {
         static_cast<T>(v39_), static_cast<T>(v40_), static_cast<T>(v41_)};
     return ValuesIn(array);
   }
+
+  ValueArray41(const ValueArray41& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_), v29_(other.v29_), v30_(other.v30_),
+      v31_(other.v31_), v32_(other.v32_), v33_(other.v33_), v34_(other.v34_),
+      v35_(other.v35_), v36_(other.v36_), v37_(other.v37_), v38_(other.v38_),
+      v39_(other.v39_), v40_(other.v40_), v41_(other.v41_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -2303,6 +2595,18 @@ class ValueArray42 {
     return ValuesIn(array);
   }
 
+  ValueArray42(const ValueArray42& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_), v29_(other.v29_), v30_(other.v30_),
+      v31_(other.v31_), v32_(other.v32_), v33_(other.v33_), v34_(other.v34_),
+      v35_(other.v35_), v36_(other.v36_), v37_(other.v37_), v38_(other.v38_),
+      v39_(other.v39_), v40_(other.v40_), v41_(other.v41_), v42_(other.v42_) {}
+
  private:
   // No implementation - assignment is unsupported.
   void operator=(const ValueArray42& other);
@@ -2394,6 +2698,19 @@ class ValueArray43 {
         static_cast<T>(v42_), static_cast<T>(v43_)};
     return ValuesIn(array);
   }
+
+  ValueArray43(const ValueArray43& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_), v29_(other.v29_), v30_(other.v30_),
+      v31_(other.v31_), v32_(other.v32_), v33_(other.v33_), v34_(other.v34_),
+      v35_(other.v35_), v36_(other.v36_), v37_(other.v37_), v38_(other.v38_),
+      v39_(other.v39_), v40_(other.v40_), v41_(other.v41_), v42_(other.v42_),
+      v43_(other.v43_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -2488,6 +2805,19 @@ class ValueArray44 {
         static_cast<T>(v42_), static_cast<T>(v43_), static_cast<T>(v44_)};
     return ValuesIn(array);
   }
+
+  ValueArray44(const ValueArray44& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_), v29_(other.v29_), v30_(other.v30_),
+      v31_(other.v31_), v32_(other.v32_), v33_(other.v33_), v34_(other.v34_),
+      v35_(other.v35_), v36_(other.v36_), v37_(other.v37_), v38_(other.v38_),
+      v39_(other.v39_), v40_(other.v40_), v41_(other.v41_), v42_(other.v42_),
+      v43_(other.v43_), v44_(other.v44_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -2584,6 +2914,19 @@ class ValueArray45 {
         static_cast<T>(v45_)};
     return ValuesIn(array);
   }
+
+  ValueArray45(const ValueArray45& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_), v29_(other.v29_), v30_(other.v30_),
+      v31_(other.v31_), v32_(other.v32_), v33_(other.v33_), v34_(other.v34_),
+      v35_(other.v35_), v36_(other.v36_), v37_(other.v37_), v38_(other.v38_),
+      v39_(other.v39_), v40_(other.v40_), v41_(other.v41_), v42_(other.v42_),
+      v43_(other.v43_), v44_(other.v44_), v45_(other.v45_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -2682,6 +3025,19 @@ class ValueArray46 {
         static_cast<T>(v45_), static_cast<T>(v46_)};
     return ValuesIn(array);
   }
+
+  ValueArray46(const ValueArray46& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_), v29_(other.v29_), v30_(other.v30_),
+      v31_(other.v31_), v32_(other.v32_), v33_(other.v33_), v34_(other.v34_),
+      v35_(other.v35_), v36_(other.v36_), v37_(other.v37_), v38_(other.v38_),
+      v39_(other.v39_), v40_(other.v40_), v41_(other.v41_), v42_(other.v42_),
+      v43_(other.v43_), v44_(other.v44_), v45_(other.v45_), v46_(other.v46_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -2782,6 +3138,20 @@ class ValueArray47 {
         static_cast<T>(v45_), static_cast<T>(v46_), static_cast<T>(v47_)};
     return ValuesIn(array);
   }
+
+  ValueArray47(const ValueArray47& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_), v29_(other.v29_), v30_(other.v30_),
+      v31_(other.v31_), v32_(other.v32_), v33_(other.v33_), v34_(other.v34_),
+      v35_(other.v35_), v36_(other.v36_), v37_(other.v37_), v38_(other.v38_),
+      v39_(other.v39_), v40_(other.v40_), v41_(other.v41_), v42_(other.v42_),
+      v43_(other.v43_), v44_(other.v44_), v45_(other.v45_), v46_(other.v46_),
+      v47_(other.v47_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -2884,6 +3254,20 @@ class ValueArray48 {
         static_cast<T>(v48_)};
     return ValuesIn(array);
   }
+
+  ValueArray48(const ValueArray48& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_), v29_(other.v29_), v30_(other.v30_),
+      v31_(other.v31_), v32_(other.v32_), v33_(other.v33_), v34_(other.v34_),
+      v35_(other.v35_), v36_(other.v36_), v37_(other.v37_), v38_(other.v38_),
+      v39_(other.v39_), v40_(other.v40_), v41_(other.v41_), v42_(other.v42_),
+      v43_(other.v43_), v44_(other.v44_), v45_(other.v45_), v46_(other.v46_),
+      v47_(other.v47_), v48_(other.v48_) {}
 
  private:
   // No implementation - assignment is unsupported.
@@ -2988,6 +3372,20 @@ class ValueArray49 {
     return ValuesIn(array);
   }
 
+  ValueArray49(const ValueArray49& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_), v29_(other.v29_), v30_(other.v30_),
+      v31_(other.v31_), v32_(other.v32_), v33_(other.v33_), v34_(other.v34_),
+      v35_(other.v35_), v36_(other.v36_), v37_(other.v37_), v38_(other.v38_),
+      v39_(other.v39_), v40_(other.v40_), v41_(other.v41_), v42_(other.v42_),
+      v43_(other.v43_), v44_(other.v44_), v45_(other.v45_), v46_(other.v46_),
+      v47_(other.v47_), v48_(other.v48_), v49_(other.v49_) {}
+
  private:
   // No implementation - assignment is unsupported.
   void operator=(const ValueArray49& other);
@@ -3091,6 +3489,20 @@ class ValueArray50 {
         static_cast<T>(v48_), static_cast<T>(v49_), static_cast<T>(v50_)};
     return ValuesIn(array);
   }
+
+  ValueArray50(const ValueArray50& other) : v1_(other.v1_), v2_(other.v2_),
+      v3_(other.v3_), v4_(other.v4_), v5_(other.v5_), v6_(other.v6_),
+      v7_(other.v7_), v8_(other.v8_), v9_(other.v9_), v10_(other.v10_),
+      v11_(other.v11_), v12_(other.v12_), v13_(other.v13_), v14_(other.v14_),
+      v15_(other.v15_), v16_(other.v16_), v17_(other.v17_), v18_(other.v18_),
+      v19_(other.v19_), v20_(other.v20_), v21_(other.v21_), v22_(other.v22_),
+      v23_(other.v23_), v24_(other.v24_), v25_(other.v25_), v26_(other.v26_),
+      v27_(other.v27_), v28_(other.v28_), v29_(other.v29_), v30_(other.v30_),
+      v31_(other.v31_), v32_(other.v32_), v33_(other.v33_), v34_(other.v34_),
+      v35_(other.v35_), v36_(other.v36_), v37_(other.v37_), v38_(other.v38_),
+      v39_(other.v39_), v40_(other.v40_), v41_(other.v41_), v42_(other.v42_),
+      v43_(other.v43_), v44_(other.v44_), v45_(other.v45_), v46_(other.v46_),
+      v47_(other.v47_), v48_(other.v48_), v49_(other.v49_), v50_(other.v50_) {}
 
  private:
   // No implementation - assignment is unsupported.

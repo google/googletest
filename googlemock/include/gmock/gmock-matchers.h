@@ -56,8 +56,10 @@
 # include <initializer_list>  // NOLINT -- must be after gtest.h
 #endif
 
-GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
-/* class A needs to have dll-interface to be used by clients of class B */)
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(
+    4251 5046 /* class A needs to have dll-interface to be used by clients of
+                 class B */
+    /* Symbol involving type with internal linkage not defined */)
 
 namespace testing {
 
@@ -1305,9 +1307,6 @@ class StrEqualityMatcher {
 #if GTEST_HAS_ABSL
   bool MatchAndExplain(const absl::string_view& s,
                        MatchResultListener* listener) const {
-    if (s.data() == NULL) {
-      return !expect_eq_;
-    }
     // This should fail to compile if absl::string_view is used with wide
     // strings.
     const StringType& str = string(s);
@@ -1378,9 +1377,6 @@ class HasSubstrMatcher {
 #if GTEST_HAS_ABSL
   bool MatchAndExplain(const absl::string_view& s,
                        MatchResultListener* listener) const {
-    if (s.data() == NULL) {
-      return false;
-    }
     // This should fail to compile if absl::string_view is used with wide
     // strings.
     const StringType& str = string(s);
@@ -1438,9 +1434,6 @@ class StartsWithMatcher {
 #if GTEST_HAS_ABSL
   bool MatchAndExplain(const absl::string_view& s,
                        MatchResultListener* listener) const {
-    if (s.data() == NULL) {
-      return false;
-    }
     // This should fail to compile if absl::string_view is used with wide
     // strings.
     const StringType& str = string(s);
@@ -1497,9 +1490,6 @@ class EndsWithMatcher {
 #if GTEST_HAS_ABSL
   bool MatchAndExplain(const absl::string_view& s,
                        MatchResultListener* listener) const {
-    if (s.data() == NULL) {
-      return false;
-    }
     // This should fail to compile if absl::string_view is used with wide
     // strings.
     const StringType& str = string(s);
@@ -1556,7 +1546,7 @@ class MatchesRegexMatcher {
 #if GTEST_HAS_ABSL
   bool MatchAndExplain(const absl::string_view& s,
                        MatchResultListener* listener) const {
-    return s.data() && MatchAndExplain(string(s), listener);
+    return MatchAndExplain(string(s), listener);
   }
 #endif  // GTEST_HAS_ABSL
 
@@ -5270,7 +5260,7 @@ PolymorphicMatcher<internal::variant_matcher::VariantMatcher<T> > VariantWith(
 
 }  // namespace testing
 
-GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
+GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251 5046
 
 // Include any custom callback matchers added by the local installation.
 // We must include this header at the end to make sure it can use the
