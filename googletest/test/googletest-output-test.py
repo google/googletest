@@ -287,7 +287,7 @@ class GTestOutputTest(gtest_test_utils.TestCase):
     # sequences when we read the golden file irrespective of an operating
     # system used. Therefore, we need to strip those \r's from newlines
     # unconditionally.
-    golden = ToUnixLineEnding(golden_file.read())
+    golden = ToUnixLineEnding(golden_file.read().decode())
     golden_file.close()
 
     # We want the test to pass regardless of certain features being
