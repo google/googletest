@@ -45,8 +45,8 @@ environ = os.environ.copy()
 
 def AssertEq(expected, actual):
   if expected != actual:
-    print 'Expected: %s' % (expected,)
-    print '  Actual: %s' % (actual,)
+    print('Expected: %s' % (expected,))
+    print('  Actual: %s' % (actual,))
     raise AssertionError
 
 
