@@ -245,33 +245,6 @@ them to either 1 or 0 to enable or disable a certain feature.
 We list the most frequently used macros below. For a complete list, see file
 [include/gtest/internal/gtest-port.h](https://github.com/google/googletest/blob/master/include/gtest/internal/gtest-port.h).
 
-### Choosing a TR1 Tuple Library
-
-Some Google Test features require the C++ Technical Report 1 (TR1) tuple
-library, which is not yet available with all compilers. The good news is that
-Google Test implements a subset of TR1 tuple that's enough for its own need, and
-will automatically use this when the compiler doesn't provide TR1 tuple.
-
-Usually you don't need to care about which tuple library Google Test uses.
-However, if your project already uses TR1 tuple, you need to tell Google Test to
-use the same TR1 tuple library the rest of your project uses, or the two tuple
-implementations will clash. To do that, add
-
-    -DGTEST_USE_OWN_TR1_TUPLE=0
-
-to the compiler flags while compiling Google Test and your tests. If you want to
-force Google Test to use its own tuple library, just add
-
-    -DGTEST_USE_OWN_TR1_TUPLE=1
-
-to the compiler flags instead.
-
-If you don't want Google Test to use tuple at all, add
-
-    -DGTEST_HAS_TR1_TUPLE=0
-
-and all features using tuple will be disabled.
-
 ### Multi-threaded Tests
 
 Google Test is thread-safe where the pthread library is available. After
