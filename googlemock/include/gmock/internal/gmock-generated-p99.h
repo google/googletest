@@ -111,7 +111,6 @@
     i.e at least two arguments. */
 #define __GMOCK_P99_HAS_COMMA(...) __GMOCK_P00_ARG(__VA_ARGS__, 1, 1, 1, 1, \
     1, 1, 1, 1, 1, 0, 0)
-
 #define __GMOCK_P00_PRE2(_0, ...) _0, __GMOCK_P00_PRE1(__VA_ARGS__)
 #define __GMOCK_P00_PRE3(_0, ...) _0, __GMOCK_P00_PRE2(__VA_ARGS__)
 #define __GMOCK_P00_PRE4(_0, ...) _0, __GMOCK_P00_PRE3(__VA_ARGS__)
@@ -121,7 +120,6 @@
 #define __GMOCK_P00_PRE8(_0, ...) _0, __GMOCK_P00_PRE7(__VA_ARGS__)
 #define __GMOCK_P00_PRE9(_0, ...) _0, __GMOCK_P00_PRE8(__VA_ARGS__)
 #define __GMOCK_P00_PRE10(_0, ...) _0, __GMOCK_P00_PRE9(__VA_ARGS__)
-
 
 //
 // Taken from p99_args.h

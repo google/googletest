@@ -114,16 +114,13 @@ $range halfr 1..halfn
 /** @brief Determine of the argument list has a comma, i.e at least two arguments. */
 #define __GMOCK_P99_HAS_COMMA(...) __GMOCK_P00_ARG(__VA_ARGS__, [[$for r1, [[$((r1<=n1-2) & 1)]]]])
 
-#define __GMOCK_P00_PRE2(_0, ...) _0, __GMOCK_P00_PRE1(__VA_ARGS__)
-#define __GMOCK_P00_PRE3(_0, ...) _0, __GMOCK_P00_PRE2(__VA_ARGS__)
-#define __GMOCK_P00_PRE4(_0, ...) _0, __GMOCK_P00_PRE3(__VA_ARGS__)
-#define __GMOCK_P00_PRE5(_0, ...) _0, __GMOCK_P00_PRE4(__VA_ARGS__)
-#define __GMOCK_P00_PRE6(_0, ...) _0, __GMOCK_P00_PRE5(__VA_ARGS__)
-#define __GMOCK_P00_PRE7(_0, ...) _0, __GMOCK_P00_PRE6(__VA_ARGS__)
-#define __GMOCK_P00_PRE8(_0, ...) _0, __GMOCK_P00_PRE7(__VA_ARGS__)
-#define __GMOCK_P00_PRE9(_0, ...) _0, __GMOCK_P00_PRE8(__VA_ARGS__)
-#define __GMOCK_P00_PRE10(_0, ...) _0, __GMOCK_P00_PRE9(__VA_ARGS__)
+$var n_minus_1 = n-1
+$range j 1..n_minus_1
+$for j [[
+$var j1 = j+1
+#define __GMOCK_P00_PRE$j1(_0, ...) _0, __GMOCK_P00_PRE$j(__VA_ARGS__)
 
+]]
 
 //
 // Taken from p99_args.h
