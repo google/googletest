@@ -1193,7 +1193,7 @@ class AdditionalMessage
 {
 public:
   AdditionalMessage(const char* message) : value(message) {}
-  AdditionalMessage& operator=(const std::string& message) { value = message; return *this; }
+  void set(const std::string& message) { value = message; }
   operator bool() const { return true; }
 
   const std::string& get() const { return value; }
@@ -1242,22 +1242,22 @@ private:
     } \
     catch (const std::exception& e) { \
       if (!gtest_caught_expected) { \
-        message = \
+        message.set( \
             "it throws a different type " \
-            "with message: " + std::string(e.what()); \
+            "with message: " + std::string(e.what())); \
         goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
       } \
     } \
     catch (...) { \
       if (!gtest_caught_expected) { \
-        message = \
-            "it throws a different type."; \
+        message.set( \
+            "it throws a different type."); \
         goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
       } \
     } \
     if (!gtest_caught_expected) { \
-      message = \
-          "it throws nothing."; \
+      message.set( \
+          "it throws nothing."); \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
     } \
   } else \
@@ -1272,7 +1272,7 @@ private:
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
     } \
     catch (const std::exception& e) { \
-      message = std::string(": ") + e.what(); \
+      message.set(std::string(": ") + e.what()); \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__); \
     } \
     catch (...) { \
