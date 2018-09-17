@@ -1112,9 +1112,25 @@ TEST(PrintStdTupleTest, NestedTuple) {
 #endif  // GTEST_LANG_CXX11
 
 #if GTEST_LANG_CXX11
+
 TEST(PrintNullptrT, Basic) {
   EXPECT_EQ("(nullptr)", Print(nullptr));
 }
+
+TEST(PrintReferenceWrapper, Printable) {
+  int x = 5;
+  EXPECT_EQ("5", Print(std::ref(x)));
+  EXPECT_EQ("5", Print(std::cref(x)));
+}
+
+TEST(PrintReferenceWrapper, Unprintable) {
+  ::foo::UnprintableInFoo up;
+  EXPECT_EQ("16-byte object <EF-12 00-00 34-AB 00-00 00-00 00-00 00-00 00-00>",
+            Print(std::ref(up)));
+  EXPECT_EQ("16-byte object <EF-12 00-00 34-AB 00-00 00-00 00-00 00-00 00-00>",
+            Print(std::cref(up)));
+}
+
 #endif  // GTEST_LANG_CXX11
 
 // Tests printing user-defined unprintable types.
