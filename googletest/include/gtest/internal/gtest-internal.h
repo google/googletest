@@ -1242,22 +1242,19 @@ private:
     } \
     catch (const std::exception& e) { \
       if (!gtest_caught_expected) { \
-        message.set( \
-            "it throws a different type " \
+        message.set("it throws a different type " \
             "with message: " + std::string(e.what())); \
         goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
       } \
     } \
     catch (...) { \
       if (!gtest_caught_expected) { \
-        message.set( \
-            "it throws a different type."); \
+        message.set("it throws a different type."); \
         goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
       } \
     } \
     if (!gtest_caught_expected) { \
-      message.set( \
-          "it throws nothing."); \
+      message.set("it throws nothing."); \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
     } \
   } else \
