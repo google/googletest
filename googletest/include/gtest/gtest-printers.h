@@ -100,6 +100,7 @@
 #ifndef GTEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
 #define GTEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
 
+#include <functional>
 #include <ostream>  // NOLINT
 #include <sstream>
 #include <string>
