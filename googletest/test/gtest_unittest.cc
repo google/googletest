@@ -3328,6 +3328,9 @@ TEST_F(SingleEvaluationTest, OtherCases) {
 void ThrowAnInteger() {
   throw 1;
 }
+void ThrowAnException(const char* what) {
+  throw std::runtime_error(what);
+}
 
 // Tests that assertion arguments are evaluated exactly once.
 TEST_F(SingleEvaluationTest, ExceptionTests) {
@@ -3370,6 +3373,20 @@ TEST_F(SingleEvaluationTest, ExceptionTests) {
   // failed EXPECT_ANY_THROW
   EXPECT_NONFATAL_FAILURE(EXPECT_ANY_THROW(a_++), "it doesn't");
   EXPECT_EQ(7, a_);
+
+  // failed EXPECT_THROW std::exception, throws different
+  EXPECT_NONFATAL_FAILURE(EXPECT_THROW({  // NOLINT
+    a_++;
+    ThrowAnInteger();
+  }, std::exception), "throws a different type");
+  EXPECT_EQ(8, a_);
+
+  // failed EXPECT_THROW, throws std::exception
+  EXPECT_NONFATAL_FAILURE(EXPECT_THROW({  // NOLINT
+    a_++;
+    ThrowAnException("blablubb");
+  }, bool), "throws a different type with message: blablubb");
+  EXPECT_EQ(9, a_);
 }
 
 #endif  // GTEST_HAS_EXCEPTIONS
@@ -3802,6 +3819,11 @@ TEST(AssertionTest, ASSERT_THROW) {
       ASSERT_THROW(ThrowNothing(), bool),
       "Expected: ThrowNothing() throws an exception of type bool.\n"
       "  Actual: it throws nothing.");
+
+  EXPECT_FATAL_FAILURE(
+      ASSERT_THROW(ThrowAnException("buuh"), bool),
+      "Expected: ThrowAnException(\"buuh\") throws an exception of type bool.\n"
+      "  Actual: it throws a different type with message: buuh");
 }
 
 // Tests ASSERT_NO_THROW.
@@ -3810,6 +3832,9 @@ TEST(AssertionTest, ASSERT_NO_THROW) {
   EXPECT_FATAL_FAILURE(ASSERT_NO_THROW(ThrowAnInteger()),
                        "Expected: ThrowAnInteger() doesn't throw an exception."
                        "\n  Actual: it throws.");
+  EXPECT_FATAL_FAILURE(ASSERT_NO_THROW(ThrowAnException("blablubb")),
+                       "Expected: ThrowAnException(\"blablubb\") doesn't throw an exception."
+                       "\n  Actual: it throws: blablubb");
 }
 
 // Tests ASSERT_ANY_THROW.
@@ -4536,13 +4561,16 @@ TEST(ExpectTest, EXPECT_GT) {
 // Tests EXPECT_THROW.
 TEST(ExpectTest, EXPECT_THROW) {
   EXPECT_THROW(ThrowAnInteger(), int);
+  EXPECT_THROW(ThrowAnException(""), std::exception);
   EXPECT_NONFATAL_FAILURE(EXPECT_THROW(ThrowAnInteger(), bool),
-                          "Expected: ThrowAnInteger() throws an exception of "
-                          "type bool.\n  Actual: it throws a different type.");
-  EXPECT_NONFATAL_FAILURE(
-      EXPECT_THROW(ThrowNothing(), bool),
-      "Expected: ThrowNothing() throws an exception of type bool.\n"
-      "  Actual: it throws nothing.");
+                          "Expected: ThrowAnInteger() throws an exception of type bool.\n"
+                          "  Actual: it throws a different type.");
+  EXPECT_NONFATAL_FAILURE(EXPECT_THROW(ThrowNothing(), bool),
+                         "Expected: ThrowNothing() throws an exception of type bool.\n"
+                          "  Actual: it throws nothing.");
+  EXPECT_NONFATAL_FAILURE(EXPECT_THROW(ThrowAnException("buuh"), bool),
+                         "Expected: ThrowAnException(\"buuh\") throws an exception of type bool.\n"
+                          "  Actual: it throws a different type with message: buuh");
 }
 
 // Tests EXPECT_NO_THROW.
@@ -4551,6 +4579,9 @@ TEST(ExpectTest, EXPECT_NO_THROW) {
   EXPECT_NONFATAL_FAILURE(EXPECT_NO_THROW(ThrowAnInteger()),
                           "Expected: ThrowAnInteger() doesn't throw an "
                           "exception.\n  Actual: it throws.");
+  EXPECT_NONFATAL_FAILURE(EXPECT_NO_THROW(ThrowAnException("blablubb")),
+                          "Expected: ThrowAnException(\"blablubb\") doesn't throw an "
+                          "exception.\n  Actual: it throws: blablubb");
 }
 
 // Tests EXPECT_ANY_THROW.
