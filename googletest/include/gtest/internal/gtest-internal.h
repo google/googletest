@@ -32,14 +32,12 @@
 // This header file declares functions and macros used internally by
 // Google Test.  They are subject to change without notice.
 
-// IWYU pragma: private, include "testing/base/public/gunit.h"
-// IWYU pragma: friend third_party/googletest/googletest/.*
-// IWYU pragma: friend third_party/googletest/googlemock/.*
+// GOOGLETEST_CM0001 DO NOT DELETE
 
 #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
 #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
 
-#include "third_party/googletest/googletest/include/gtest/internal/gtest-port.h"
+#include "gtest/internal/gtest-port.h"
 
 #if GTEST_OS_LINUX
 # include <stdlib.h>
@@ -62,10 +60,10 @@
 #include <string>
 #include <vector>
 
-#include "third_party/googletest/googletest/include/gtest/gtest-message.h"
-#include "third_party/googletest/googletest/include/gtest/internal/gtest-filepath.h"
-#include "third_party/googletest/googletest/include/gtest/internal/gtest-string.h"
-#include "third_party/googletest/googletest/include/gtest/internal/gtest-type-util.h"
+#include "gtest/gtest-message.h"
+#include "gtest/internal/gtest-filepath.h"
+#include "gtest/internal/gtest-string.h"
+#include "gtest/internal/gtest-type-util.h"
 
 // Due to C++ preprocessor weirdness, we need double indirection to
 // concatenate two tokens when one of them is __LINE__.  Writing
@@ -754,7 +752,7 @@ class TypeParameterizedTestCase<Fixture, Templates0, Types> {
 // Returns the current OS stack trace as an std::string.
 //
 // The maximum number of stack frames to be included is specified by
-// the gunit_stack_trace_depth flag.  The skip_count parameter
+// the gtest_stack_trace_depth flag.  The skip_count parameter
 // specifies the number of top frames to be skipped, which doesn't
 // count against the number of frames to be included.
 //
