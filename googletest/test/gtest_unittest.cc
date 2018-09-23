@@ -31,7 +31,7 @@
 // Tests for Google Test itself.  This verifies that the basic constructs of
 // Google Test work.
 
-#include "third_party/googletest/googletest/include/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 // Verifies that the command line flag variables can be accessed in
 // code once "gtest.h" has been #included.
@@ -65,8 +65,8 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 #include <ostream>
 #include <unordered_set>
 
-#include "third_party/googletest/googletest/include/gtest/gtest-spi.h"
-#include "third_party/googletest/googletest/src/gtest-internal-inl.h"
+#include "gtest/gtest-spi.h"
+#include "src/gtest-internal-inl.h"
 
 namespace testing {
 namespace internal {
@@ -5535,7 +5535,7 @@ struct Flags {
 
   // Factory methods.
 
-  // Creates a Flags struct where the gunit_also_run_disabled_tests flag has
+  // Creates a Flags struct where the gtest_also_run_disabled_tests flag has
   // the given value.
   static Flags AlsoRunDisabledTests(bool also_run_disabled_tests) {
     Flags flags;
@@ -5543,7 +5543,7 @@ struct Flags {
     return flags;
   }
 
-  // Creates a Flags struct where the gunit_break_on_failure flag has
+  // Creates a Flags struct where the gtest_break_on_failure flag has
   // the given value.
   static Flags BreakOnFailure(bool break_on_failure) {
     Flags flags;
@@ -5551,7 +5551,7 @@ struct Flags {
     return flags;
   }
 
-  // Creates a Flags struct where the gunit_catch_exceptions flag has
+  // Creates a Flags struct where the gtest_catch_exceptions flag has
   // the given value.
   static Flags CatchExceptions(bool catch_exceptions) {
     Flags flags;
@@ -5559,7 +5559,7 @@ struct Flags {
     return flags;
   }
 
-  // Creates a Flags struct where the gunit_death_test_use_fork flag has
+  // Creates a Flags struct where the gtest_death_test_use_fork flag has
   // the given value.
   static Flags DeathTestUseFork(bool death_test_use_fork) {
     Flags flags;
@@ -5567,7 +5567,7 @@ struct Flags {
     return flags;
   }
 
-  // Creates a Flags struct where the gunit_filter flag has the given
+  // Creates a Flags struct where the gtest_filter flag has the given
   // value.
   static Flags Filter(const char* filter) {
     Flags flags;
@@ -5575,7 +5575,7 @@ struct Flags {
     return flags;
   }
 
-  // Creates a Flags struct where the gunit_list_tests flag has the
+  // Creates a Flags struct where the gtest_list_tests flag has the
   // given value.
   static Flags ListTests(bool list_tests) {
     Flags flags;
@@ -5583,7 +5583,7 @@ struct Flags {
     return flags;
   }
 
-  // Creates a Flags struct where the gunit_output flag has the given
+  // Creates a Flags struct where the gtest_output flag has the given
   // value.
   static Flags Output(const char* output) {
     Flags flags;
@@ -5591,7 +5591,7 @@ struct Flags {
     return flags;
   }
 
-  // Creates a Flags struct where the gunit_print_time flag has the given
+  // Creates a Flags struct where the gtest_print_time flag has the given
   // value.
   static Flags PrintTime(bool print_time) {
     Flags flags;
@@ -5599,7 +5599,7 @@ struct Flags {
     return flags;
   }
 
-  // Creates a Flags struct where the gunit_random_seed flag has the given
+  // Creates a Flags struct where the gtest_random_seed flag has the given
   // value.
   static Flags RandomSeed(Int32 random_seed) {
     Flags flags;
@@ -5607,7 +5607,7 @@ struct Flags {
     return flags;
   }
 
-  // Creates a Flags struct where the gunit_repeat flag has the given
+  // Creates a Flags struct where the gtest_repeat flag has the given
   // value.
   static Flags Repeat(Int32 repeat) {
     Flags flags;
@@ -5615,7 +5615,7 @@ struct Flags {
     return flags;
   }
 
-  // Creates a Flags struct where the gunit_shuffle flag has the given
+  // Creates a Flags struct where the gtest_shuffle flag has the given
   // value.
   static Flags Shuffle(bool shuffle) {
     Flags flags;
@@ -5639,7 +5639,7 @@ struct Flags {
     return flags;
   }
 
-  // Creates a Flags struct where the gunit_throw_on_failure flag has
+  // Creates a Flags struct where the gtest_throw_on_failure flag has
   // the given value.
   static Flags ThrowOnFailure(bool throw_on_failure) {
     Flags flags;
@@ -5799,28 +5799,28 @@ TEST_F(ParseFlagsTest, NoFlag) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags(), false);
 }
 
-// Tests parsing a bad --gunit_filter flag.
+// Tests parsing a bad --gtest_filter flag.
 TEST_F(ParseFlagsTest, FilterBad) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_filter",
+    "--gtest_filter",
     NULL
   };
 
   const char* argv2[] = {
     "foo.exe",
-    "--gunit_filter",
+    "--gtest_filter",
     NULL
   };
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Filter(""), true);
 }
 
-// Tests parsing an empty --gunit_filter flag.
+// Tests parsing an empty --gtest_filter flag.
 TEST_F(ParseFlagsTest, FilterEmpty) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_filter=",
+    "--gtest_filter=",
     NULL
   };
 
@@ -5832,11 +5832,11 @@ TEST_F(ParseFlagsTest, FilterEmpty) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Filter(""), false);
 }
 
-// Tests parsing a non-empty --gunit_filter flag.
+// Tests parsing a non-empty --gtest_filter flag.
 TEST_F(ParseFlagsTest, FilterNonEmpty) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_filter=abc",
+    "--gtest_filter=abc",
     NULL
   };
 
@@ -5848,11 +5848,11 @@ TEST_F(ParseFlagsTest, FilterNonEmpty) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Filter("abc"), false);
 }
 
-// Tests parsing --gunit_break_on_failure.
+// Tests parsing --gtest_break_on_failure.
 TEST_F(ParseFlagsTest, BreakOnFailureWithoutValue) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_break_on_failure",
+    "--gtest_break_on_failure",
     NULL
 };
 
@@ -5864,11 +5864,11 @@ TEST_F(ParseFlagsTest, BreakOnFailureWithoutValue) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::BreakOnFailure(true), false);
 }
 
-// Tests parsing --gunit_break_on_failure=0.
+// Tests parsing --gtest_break_on_failure=0.
 TEST_F(ParseFlagsTest, BreakOnFailureFalse_0) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_break_on_failure=0",
+    "--gtest_break_on_failure=0",
     NULL
   };
 
@@ -5880,11 +5880,11 @@ TEST_F(ParseFlagsTest, BreakOnFailureFalse_0) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::BreakOnFailure(false), false);
 }
 
-// Tests parsing --gunit_break_on_failure=f.
+// Tests parsing --gtest_break_on_failure=f.
 TEST_F(ParseFlagsTest, BreakOnFailureFalse_f) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_break_on_failure=f",
+    "--gtest_break_on_failure=f",
     NULL
   };
 
@@ -5896,11 +5896,11 @@ TEST_F(ParseFlagsTest, BreakOnFailureFalse_f) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::BreakOnFailure(false), false);
 }
 
-// Tests parsing --gunit_break_on_failure=F.
+// Tests parsing --gtest_break_on_failure=F.
 TEST_F(ParseFlagsTest, BreakOnFailureFalse_F) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_break_on_failure=F",
+    "--gtest_break_on_failure=F",
     NULL
   };
 
@@ -5912,12 +5912,12 @@ TEST_F(ParseFlagsTest, BreakOnFailureFalse_F) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::BreakOnFailure(false), false);
 }
 
-// Tests parsing a --gunit_break_on_failure flag that has a "true"
+// Tests parsing a --gtest_break_on_failure flag that has a "true"
 // definition.
 TEST_F(ParseFlagsTest, BreakOnFailureTrue) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_break_on_failure=1",
+    "--gtest_break_on_failure=1",
     NULL
   };
 
@@ -5929,11 +5929,11 @@ TEST_F(ParseFlagsTest, BreakOnFailureTrue) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::BreakOnFailure(true), false);
 }
 
-// Tests parsing --gunit_catch_exceptions.
+// Tests parsing --gtest_catch_exceptions.
 TEST_F(ParseFlagsTest, CatchExceptions) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_catch_exceptions",
+    "--gtest_catch_exceptions",
     NULL
   };
 
@@ -5945,11 +5945,11 @@ TEST_F(ParseFlagsTest, CatchExceptions) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::CatchExceptions(true), false);
 }
 
-// Tests parsing --gunit_death_test_use_fork.
+// Tests parsing --gtest_death_test_use_fork.
 TEST_F(ParseFlagsTest, DeathTestUseFork) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_death_test_use_fork",
+    "--gtest_death_test_use_fork",
     NULL
   };
 
@@ -5966,8 +5966,8 @@ TEST_F(ParseFlagsTest, DeathTestUseFork) {
 TEST_F(ParseFlagsTest, DuplicatedFlags) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_filter=a",
-    "--gunit_filter=b",
+    "--gtest_filter=a",
+    "--gtest_filter=b",
     NULL
   };
 
@@ -5983,9 +5983,9 @@ TEST_F(ParseFlagsTest, DuplicatedFlags) {
 TEST_F(ParseFlagsTest, UnrecognizedFlag) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_break_on_failure",
+    "--gtest_break_on_failure",
     "bar",  // Unrecognized by Google Test.
-    "--gunit_filter=b",
+    "--gtest_filter=b",
     NULL
   };
 
@@ -6001,11 +6001,11 @@ TEST_F(ParseFlagsTest, UnrecognizedFlag) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, flags, false);
 }
 
-// Tests having a --gunit_list_tests flag
+// Tests having a --gtest_list_tests flag
 TEST_F(ParseFlagsTest, ListTestsFlag) {
     const char* argv[] = {
       "foo.exe",
-      "--gunit_list_tests",
+      "--gtest_list_tests",
       NULL
     };
 
@@ -6017,11 +6017,11 @@ TEST_F(ParseFlagsTest, ListTestsFlag) {
     GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ListTests(true), false);
 }
 
-// Tests having a --gunit_list_tests flag with a "true" value
+// Tests having a --gtest_list_tests flag with a "true" value
 TEST_F(ParseFlagsTest, ListTestsTrue) {
     const char* argv[] = {
       "foo.exe",
-      "--gunit_list_tests=1",
+      "--gtest_list_tests=1",
       NULL
     };
 
@@ -6033,11 +6033,11 @@ TEST_F(ParseFlagsTest, ListTestsTrue) {
     GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ListTests(true), false);
 }
 
-// Tests having a --gunit_list_tests flag with a "false" value
+// Tests having a --gtest_list_tests flag with a "false" value
 TEST_F(ParseFlagsTest, ListTestsFalse) {
     const char* argv[] = {
       "foo.exe",
-      "--gunit_list_tests=0",
+      "--gtest_list_tests=0",
       NULL
     };
 
@@ -6049,11 +6049,11 @@ TEST_F(ParseFlagsTest, ListTestsFalse) {
     GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ListTests(false), false);
 }
 
-// Tests parsing --gunit_list_tests=f.
+// Tests parsing --gtest_list_tests=f.
 TEST_F(ParseFlagsTest, ListTestsFalse_f) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_list_tests=f",
+    "--gtest_list_tests=f",
     NULL
   };
 
@@ -6065,11 +6065,11 @@ TEST_F(ParseFlagsTest, ListTestsFalse_f) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ListTests(false), false);
 }
 
-// Tests parsing --gunit_list_tests=F.
+// Tests parsing --gtest_list_tests=F.
 TEST_F(ParseFlagsTest, ListTestsFalse_F) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_list_tests=F",
+    "--gtest_list_tests=F",
     NULL
   };
 
@@ -6081,28 +6081,28 @@ TEST_F(ParseFlagsTest, ListTestsFalse_F) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ListTests(false), false);
 }
 
-// Tests parsing --gunit_output (invalid).
+// Tests parsing --gtest_output (invalid).
 TEST_F(ParseFlagsTest, OutputEmpty) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_output",
+    "--gtest_output",
     NULL
   };
 
   const char* argv2[] = {
     "foo.exe",
-    "--gunit_output",
+    "--gtest_output",
     NULL
   };
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags(), true);
 }
 
-// Tests parsing --gunit_output=xml
+// Tests parsing --gtest_output=xml
 TEST_F(ParseFlagsTest, OutputXml) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_output=xml",
+    "--gtest_output=xml",
     NULL
   };
 
@@ -6114,11 +6114,11 @@ TEST_F(ParseFlagsTest, OutputXml) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Output("xml"), false);
 }
 
-// Tests parsing --gunit_output=xml:file
+// Tests parsing --gtest_output=xml:file
 TEST_F(ParseFlagsTest, OutputXmlFile) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_output=xml:file",
+    "--gtest_output=xml:file",
     NULL
   };
 
@@ -6130,11 +6130,11 @@ TEST_F(ParseFlagsTest, OutputXmlFile) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Output("xml:file"), false);
 }
 
-// Tests parsing --gunit_output=xml:directory/path/
+// Tests parsing --gtest_output=xml:directory/path/
 TEST_F(ParseFlagsTest, OutputXmlDirectory) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_output=xml:directory/path/",
+    "--gtest_output=xml:directory/path/",
     NULL
   };
 
@@ -6147,11 +6147,11 @@ TEST_F(ParseFlagsTest, OutputXmlDirectory) {
                             Flags::Output("xml:directory/path/"), false);
 }
 
-// Tests having a --gunit_print_time flag
+// Tests having a --gtest_print_time flag
 TEST_F(ParseFlagsTest, PrintTimeFlag) {
     const char* argv[] = {
       "foo.exe",
-      "--gunit_print_time",
+      "--gtest_print_time",
       NULL
     };
 
@@ -6163,11 +6163,11 @@ TEST_F(ParseFlagsTest, PrintTimeFlag) {
     GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::PrintTime(true), false);
 }
 
-// Tests having a --gunit_print_time flag with a "true" value
+// Tests having a --gtest_print_time flag with a "true" value
 TEST_F(ParseFlagsTest, PrintTimeTrue) {
     const char* argv[] = {
       "foo.exe",
-      "--gunit_print_time=1",
+      "--gtest_print_time=1",
       NULL
     };
 
@@ -6179,11 +6179,11 @@ TEST_F(ParseFlagsTest, PrintTimeTrue) {
     GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::PrintTime(true), false);
 }
 
-// Tests having a --gunit_print_time flag with a "false" value
+// Tests having a --gtest_print_time flag with a "false" value
 TEST_F(ParseFlagsTest, PrintTimeFalse) {
     const char* argv[] = {
       "foo.exe",
-      "--gunit_print_time=0",
+      "--gtest_print_time=0",
       NULL
     };
 
@@ -6195,11 +6195,11 @@ TEST_F(ParseFlagsTest, PrintTimeFalse) {
     GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::PrintTime(false), false);
 }
 
-// Tests parsing --gunit_print_time=f.
+// Tests parsing --gtest_print_time=f.
 TEST_F(ParseFlagsTest, PrintTimeFalse_f) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_print_time=f",
+    "--gtest_print_time=f",
     NULL
   };
 
@@ -6211,11 +6211,11 @@ TEST_F(ParseFlagsTest, PrintTimeFalse_f) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::PrintTime(false), false);
 }
 
-// Tests parsing --gunit_print_time=F.
+// Tests parsing --gtest_print_time=F.
 TEST_F(ParseFlagsTest, PrintTimeFalse_F) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_print_time=F",
+    "--gtest_print_time=F",
     NULL
   };
 
@@ -6227,11 +6227,11 @@ TEST_F(ParseFlagsTest, PrintTimeFalse_F) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::PrintTime(false), false);
 }
 
-// Tests parsing --gunit_random_seed=number
+// Tests parsing --gtest_random_seed=number
 TEST_F(ParseFlagsTest, RandomSeed) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_random_seed=1000",
+    "--gtest_random_seed=1000",
     NULL
   };
 
@@ -6243,11 +6243,11 @@ TEST_F(ParseFlagsTest, RandomSeed) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::RandomSeed(1000), false);
 }
 
-// Tests parsing --gunit_repeat=number
+// Tests parsing --gtest_repeat=number
 TEST_F(ParseFlagsTest, Repeat) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_repeat=1000",
+    "--gtest_repeat=1000",
     NULL
   };
 
@@ -6259,11 +6259,11 @@ TEST_F(ParseFlagsTest, Repeat) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Repeat(1000), false);
 }
 
-// Tests having a --gunit_also_run_disabled_tests flag
+// Tests having a --gtest_also_run_disabled_tests flag
 TEST_F(ParseFlagsTest, AlsoRunDisabledTestsFlag) {
     const char* argv[] = {
       "foo.exe",
-      "--gunit_also_run_disabled_tests",
+      "--gtest_also_run_disabled_tests",
       NULL
     };
 
@@ -6276,11 +6276,11 @@ TEST_F(ParseFlagsTest, AlsoRunDisabledTestsFlag) {
                               Flags::AlsoRunDisabledTests(true), false);
 }
 
-// Tests having a --gunit_also_run_disabled_tests flag with a "true" value
+// Tests having a --gtest_also_run_disabled_tests flag with a "true" value
 TEST_F(ParseFlagsTest, AlsoRunDisabledTestsTrue) {
     const char* argv[] = {
       "foo.exe",
-      "--gunit_also_run_disabled_tests=1",
+      "--gtest_also_run_disabled_tests=1",
       NULL
     };
 
@@ -6293,11 +6293,11 @@ TEST_F(ParseFlagsTest, AlsoRunDisabledTestsTrue) {
                               Flags::AlsoRunDisabledTests(true), false);
 }
 
-// Tests having a --gunit_also_run_disabled_tests flag with a "false" value
+// Tests having a --gtest_also_run_disabled_tests flag with a "false" value
 TEST_F(ParseFlagsTest, AlsoRunDisabledTestsFalse) {
     const char* argv[] = {
       "foo.exe",
-      "--gunit_also_run_disabled_tests=0",
+      "--gtest_also_run_disabled_tests=0",
       NULL
     };
 
@@ -6310,11 +6310,11 @@ TEST_F(ParseFlagsTest, AlsoRunDisabledTestsFalse) {
                               Flags::AlsoRunDisabledTests(false), false);
 }
 
-// Tests parsing --gunit_shuffle.
+// Tests parsing --gtest_shuffle.
 TEST_F(ParseFlagsTest, ShuffleWithoutValue) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_shuffle",
+    "--gtest_shuffle",
     NULL
 };
 
@@ -6326,11 +6326,11 @@ TEST_F(ParseFlagsTest, ShuffleWithoutValue) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Shuffle(true), false);
 }
 
-// Tests parsing --gunit_shuffle=0.
+// Tests parsing --gtest_shuffle=0.
 TEST_F(ParseFlagsTest, ShuffleFalse_0) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_shuffle=0",
+    "--gtest_shuffle=0",
     NULL
   };
 
@@ -6342,11 +6342,11 @@ TEST_F(ParseFlagsTest, ShuffleFalse_0) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Shuffle(false), false);
 }
 
-// Tests parsing a --gunit_shuffle flag that has a "true" definition.
+// Tests parsing a --gtest_shuffle flag that has a "true" definition.
 TEST_F(ParseFlagsTest, ShuffleTrue) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_shuffle=1",
+    "--gtest_shuffle=1",
     NULL
   };
 
@@ -6358,11 +6358,11 @@ TEST_F(ParseFlagsTest, ShuffleTrue) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Shuffle(true), false);
 }
 
-// Tests parsing --gunit_stack_trace_depth=number.
+// Tests parsing --gtest_stack_trace_depth=number.
 TEST_F(ParseFlagsTest, StackTraceDepth) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_stack_trace_depth=5",
+    "--gtest_stack_trace_depth=5",
     NULL
   };
 
@@ -6377,7 +6377,7 @@ TEST_F(ParseFlagsTest, StackTraceDepth) {
 TEST_F(ParseFlagsTest, StreamResultTo) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_stream_result_to=localhost:1234",
+    "--gtest_stream_result_to=localhost:1234",
     NULL
   };
 
@@ -6390,11 +6390,11 @@ TEST_F(ParseFlagsTest, StreamResultTo) {
       argv, argv2, Flags::StreamResultTo("localhost:1234"), false);
 }
 
-// Tests parsing --gunit_throw_on_failure.
+// Tests parsing --gtest_throw_on_failure.
 TEST_F(ParseFlagsTest, ThrowOnFailureWithoutValue) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_throw_on_failure",
+    "--gtest_throw_on_failure",
     NULL
 };
 
@@ -6406,11 +6406,11 @@ TEST_F(ParseFlagsTest, ThrowOnFailureWithoutValue) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ThrowOnFailure(true), false);
 }
 
-// Tests parsing --gunit_throw_on_failure=0.
+// Tests parsing --gtest_throw_on_failure=0.
 TEST_F(ParseFlagsTest, ThrowOnFailureFalse_0) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_throw_on_failure=0",
+    "--gtest_throw_on_failure=0",
     NULL
   };
 
@@ -6422,12 +6422,12 @@ TEST_F(ParseFlagsTest, ThrowOnFailureFalse_0) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ThrowOnFailure(false), false);
 }
 
-// Tests parsing a --gunit_throw_on_failure flag that has a "true"
+// Tests parsing a --gtest_throw_on_failure flag that has a "true"
 // definition.
 TEST_F(ParseFlagsTest, ThrowOnFailureTrue) {
   const char* argv[] = {
     "foo.exe",
-    "--gunit_throw_on_failure=1",
+    "--gtest_throw_on_failure=1",
     NULL
   };
 
@@ -6444,16 +6444,16 @@ TEST_F(ParseFlagsTest, ThrowOnFailureTrue) {
 TEST_F(ParseFlagsTest, WideStrings) {
   const wchar_t* argv[] = {
     L"foo.exe",
-    L"--gunit_filter=Foo*",
-    L"--gunit_list_tests=1",
-    L"--gunit_break_on_failure",
-    L"--non_gunit_flag",
+    L"--gtest_filter=Foo*",
+    L"--gtest_list_tests=1",
+    L"--gtest_break_on_failure",
+    L"--non_gtest_flag",
     NULL
   };
 
   const wchar_t* argv2[] = {
     L"foo.exe",
-    L"--non_gunit_flag",
+    L"--non_gtest_flag",
     NULL
   };
 
@@ -6517,7 +6517,7 @@ TEST_F(FlagfileTest, Empty) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags(), false);
 }
 
-// Tests passing a non-empty --gunit_filter flag via --gunit_flagfile.
+// Tests passing a non-empty --gtest_filter flag via --gtest_flagfile.
 TEST_F(FlagfileTest, FilterNonEmpty) {
   internal::FilePath flagfile_path(CreateFlagfile(
       "--"  GTEST_FLAG_PREFIX_  "filter=abc"));
@@ -6538,7 +6538,7 @@ TEST_F(FlagfileTest, FilterNonEmpty) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Filter("abc"), false);
 }
 
-// Tests passing several flags via --gunit_flagfile.
+// Tests passing several flags via --gtest_flagfile.
 TEST_F(FlagfileTest, SeveralFlags) {
   internal::FilePath flagfile_path(CreateFlagfile(
       "--"  GTEST_FLAG_PREFIX_  "filter=abc\n"
