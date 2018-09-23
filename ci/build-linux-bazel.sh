@@ -31,7 +31,7 @@
 
 set -evx
 
-test_format.sh
+./ci/test_format.sh
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
 
