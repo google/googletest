@@ -1,4 +1,7 @@
 #!/bin/bash
+set -evx 
+echo "Checking Code Formatting..."
+
 if [[ "${TRAVIS_OS_NAME}" == "linux" ]] && \
    [[ "${TEST_CLANG_FORMAT}" == "yes" ]]; then
 
