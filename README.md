@@ -107,7 +107,7 @@ package (as described below):
   * GNU-compatible Make or gmake
   * POSIX-standard shell
   * POSIX(-2) Regular Expressions (regex.h)
-  * A C++98-standard-compliant compiler
+  * A C++11-standard-compliant compiler
 
 ### Windows Requirements ###
 
