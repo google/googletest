@@ -32,12 +32,14 @@
 // This header file declares functions and macros used internally by
 // Google Test.  They are subject to change without notice.
 
-// GOOGLETEST_CM0001 DO NOT DELETE
+// IWYU pragma: private, include "testing/base/public/gunit.h"
+// IWYU pragma: friend third_party/googletest/googletest/.*
+// IWYU pragma: friend third_party/googletest/googlemock/.*
 
 #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
 #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
 
-#include "gtest/internal/gtest-port.h"
+#include "third_party/googletest/googletest/include/gtest/internal/gtest-port.h"
 
 #if GTEST_OS_LINUX
 # include <stdlib.h>
@@ -60,10 +62,10 @@
 #include <string>
 #include <vector>
 
-#include "gtest/gtest-message.h"
-#include "gtest/internal/gtest-filepath.h"
-#include "gtest/internal/gtest-string.h"
-#include "gtest/internal/gtest-type-util.h"
+#include "third_party/googletest/googletest/include/gtest/gtest-message.h"
+#include "third_party/googletest/googletest/include/gtest/internal/gtest-filepath.h"
+#include "third_party/googletest/googletest/include/gtest/internal/gtest-string.h"
+#include "third_party/googletest/googletest/include/gtest/internal/gtest-type-util.h"
 
 // Due to C++ preprocessor weirdness, we need double indirection to
 // concatenate two tokens when one of them is __LINE__.  Writing
@@ -752,7 +754,7 @@ class TypeParameterizedTestCase<Fixture, Templates0, Types> {
 // Returns the current OS stack trace as an std::string.
 //
 // The maximum number of stack frames to be included is specified by
-// the gtest_stack_trace_depth flag.  The skip_count parameter
+// the gunit_stack_trace_depth flag.  The skip_count parameter
 // specifies the number of top frames to be skipped, which doesn't
 // count against the number of frames to be included.
 //
@@ -1189,16 +1191,15 @@ class NativeArray {
   GTEST_DISALLOW_ASSIGN_(NativeArray);
 };
 
-class AdditionalMessage
-{
-public:
+class AdditionalMessage {
+ public:
   AdditionalMessage(const char* message) : msg(message) {}
   void set(const std::string& message) { msg = message; }
   operator bool() const { return true; }
 
   const std::string& get() const { return msg; }
 
-private:
+ private:
   std::string msg;
 };
 
@@ -1227,58 +1228,60 @@ private:
 #define GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement) \
   if (::testing::internal::AlwaysTrue()) { statement; }
 
-#define GTEST_TEST_THROW_(statement, expected_exception, fail) \
-  GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-  if (::testing::internal::AdditionalMessage message = "") { \
-    bool gtest_caught_expected = false; \
-    try { \
-      try { \
-        GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
-      } \
-      catch (expected_exception const&) { \
-        gtest_caught_expected = true; \
-        throw; \
-      } \
-    } \
-    catch (const std::exception& e) { \
-      if (!gtest_caught_expected) { \
-        message.set("it throws a different type " \
-            "with message: " + std::string(e.what())); \
+#define GTEST_TEST_THROW_(statement, expected_exception, fail)      \
+  GTEST_AMBIGUOUS_ELSE_BLOCKER_                                     \
+  if (::testing::internal::AdditionalMessage message = "") {        \
+    bool gtest_caught_expected = false;                             \
+    try {                                                           \
+      try {                                                         \
+        GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement);  \
+      } catch (expected_exception const&) {                         \
+        gtest_caught_expected = true;                               \
+        throw;                                                      \
+      }                                                             \
+    } catch (const std::exception& e) {                             \
+      if (!gtest_caught_expected) {                                 \
+        message.set(                                                \
+            "it throws a different type "                           \
+            "with message: " +                                      \
+            std::string(e.what()));                                 \
         goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
-      } \
-    } \
-    catch (...) { \
-      if (!gtest_caught_expected) { \
-        message.set("it throws a different type."); \
+      }                                                             \
+    } catch (...) {                                                 \
+      if (!gtest_caught_expected) {                                 \
+        message.set("it throws a different type.");                 \
         goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
-      } \
-    } \
-    if (!gtest_caught_expected) { \
-      message.set("it throws nothing."); \
-      goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
-    } \
-  } else \
-    GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__): \
-      fail(("Expected: " #statement " throws an exception of type " \
-            #expected_exception ".\n  Actual: " + message.get()).c_str())
+      }                                                             \
+    }                                                               \
+    if (!gtest_caught_expected) {                                   \
+      message.set("it throws nothing.");                            \
+      goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__);   \
+    }                                                               \
+  } else                                                            \
+    GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__)           \
+        : fail(("Expected: " #statement                             \
+                " throws an exception of type " #expected_exception \
+                ".\n  Actual: " +                                   \
+                message.get())                                      \
+                   .c_str())
 
-#define GTEST_TEST_NO_THROW_(statement, fail) \
-  GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-  if (::testing::internal::AdditionalMessage message = ".") { \
-    try { \
-      GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
-    } \
-    catch (const std::exception& e) { \
-      message.set(std::string(": ") + e.what()); \
-      goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__); \
-    } \
-    catch (...) { \
-      goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__); \
-    } \
-  } else \
-    GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__): \
-      fail(("Expected: " #statement " doesn't throw an exception.\n" \
-           "  Actual: it throws" + message.get()).c_str())
+#define GTEST_TEST_NO_THROW_(statement, fail)                            \
+  GTEST_AMBIGUOUS_ELSE_BLOCKER_                                          \
+  if (::testing::internal::AdditionalMessage message = ".") {            \
+    try {                                                                \
+      GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement);         \
+    } catch (const std::exception& e) {                                  \
+      message.set(std::string(": ") + e.what());                         \
+      goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__);      \
+    } catch (...) {                                                      \
+      goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__);      \
+    }                                                                    \
+  } else                                                                 \
+    GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__)              \
+        : fail(("Expected: " #statement " doesn't throw an exception.\n" \
+                "  Actual: it throws" +                                  \
+                message.get())                                           \
+                   .c_str())
 
 #define GTEST_TEST_ANY_THROW_(statement, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
