@@ -3834,7 +3834,7 @@ TEST(AssertionTest, ASSERT_NO_THROW) {
                        "\n  Actual: it throws.");
   EXPECT_FATAL_FAILURE(ASSERT_NO_THROW(ThrowAnException("blablubb")),
                        "Expected: ThrowAnException(\"blablubb\") doesn't throw"
-                       "an exception.\n  Actual: it throws: blablubb");
+                       " an exception.\n  Actual: it throws: blablubb");
 }
 
 // Tests ASSERT_ANY_THROW.
