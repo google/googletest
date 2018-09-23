@@ -1192,14 +1192,14 @@ class NativeArray {
 class AdditionalMessage
 {
 public:
-  AdditionalMessage(const char* message) : value(message) {}
-  void set(const std::string& message) { value = message; }
+  AdditionalMessage(const char* message) : msg(message) {}
+  void set(const std::string& message) { msg = message; }
   operator bool() const { return true; }
 
-  const std::string& get() const { return value; }
+  const std::string& get() const { return msg; }
 
 private:
-  std::string value;
+  std::string msg;
 };
 
 }  // namespace internal
