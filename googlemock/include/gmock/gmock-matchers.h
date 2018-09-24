@@ -5170,23 +5170,6 @@ std::string DescribeMatcher(const M& matcher, bool negation = false) {
   return ss.str();
 }
 
-#if GTEST_LANG_CXX11
-// Define variadic matcher versions. They are overloaded in
-// gmock-generated-matchers.h for the cases supported by pre C++11 compilers.
-template <typename... Args>
-internal::AllOfMatcher<typename std::decay<const Args&>::type...> AllOf(
-    const Args&... matchers) {
-  return internal::AllOfMatcher<typename std::decay<const Args&>::type...>(
-      matchers...);
-}
-
-template <typename... Args>
-internal::AnyOfMatcher<typename std::decay<const Args&>::type...> AnyOf(
-    const Args&... matchers) {
-  return internal::AnyOfMatcher<typename std::decay<const Args&>::type...>(
-      matchers...);
-}
-
 template <typename... Args>
 internal::ElementsAreMatcher<tuple<typename std::decay<const Args&>::type...>>
 ElementsAre(const Args&... matchers) {
@@ -5202,6 +5185,23 @@ UnorderedElementsAre(const Args&... matchers) {
   return internal::UnorderedElementsAreMatcher<
       tuple<typename std::decay<const Args&>::type...>>(
       make_tuple(matchers...));
+}
+
+#if GTEST_LANG_CXX11
+// Define variadic matcher versions. They are overloaded in
+// gmock-generated-matchers.h for the cases supported by pre C++11 compilers.
+template <typename... Args>
+internal::AllOfMatcher<typename std::decay<const Args&>::type...> AllOf(
+    const Args&... matchers) {
+  return internal::AllOfMatcher<typename std::decay<const Args&>::type...>(
+      matchers...);
+}
+
+template <typename... Args>
+internal::AnyOfMatcher<typename std::decay<const Args&>::type...> AnyOf(
+    const Args&... matchers) {
+  return internal::AnyOfMatcher<typename std::decay<const Args&>::type...>(
+      matchers...);
 }
 
 #endif  // GTEST_LANG_CXX11
