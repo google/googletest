@@ -78,7 +78,8 @@ itself is a valuable contribution.
 
 To keep the source consistent, readable, diffable and easy to merge,
 we use a fairly rigid coding style, as defined by the [google-styleguide](https://github.com/google/styleguide) project.  All patches will be expected
-to conform to the style outlined [here](https://google.github.io/styleguide/cppguide.html).
+to conform to the style outlined [here](https://google.github.io/styleguide/cppguide.html). 
+Use [.clang-format](https://github.com/google/googletest/blob/master/.clang-format) to check your formatting
 
 ## Requirements for Contributors ###
 
