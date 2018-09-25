@@ -1,5 +1,4 @@
 #!/bin/bash
-set -evx 
 echo "Checking Code Formatting..."
 
 if [[ "${TRAVIS_OS_NAME}" == "linux" ]] && \
