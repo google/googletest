@@ -41,4 +41,4 @@ mkdir build || true
 cd build
 ../configure
 
-make -j ${NPROCESSORS:-2}
+make -j -std=c++11 {NPROCESSORS:-2}
