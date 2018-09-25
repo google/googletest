@@ -23,6 +23,8 @@ environment:
     - compiler: gcc-5.3.0-posix
       generator: "MinGW Makefiles"
       cxx_path: 'C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\mingw32\bin'
+      cxx_options: "-std=gnu++11"
+      enabled_on_pr: yes
 
     - compiler: gcc-6.3.0-posix
       generator: "MinGW Makefiles"
