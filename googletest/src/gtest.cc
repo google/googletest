@@ -196,13 +196,12 @@ bool g_help_flag = false;
 
 // Utilty function to Open File for Writing
 static FILE* OpenFileForWriting(const std::string& output_file) {
-  FILE* fileout = NULL;
-  FilePath output_file_path(output_file);
-  FilePath output_dir(output_file_path.RemoveFileName());
+   FILE* fileout = NULL;
+       FilePath output_file_path(output_file);
+FilePath output_dir(output_file_path.RemoveFileName());
 
-  if (output_dir.CreateDirectoriesRecursively()) {
-    fileout = posix::FOpen(output_file.c_str(), "w");
-  }
+      if (output_dir.CreateDirectoriesRecursively()) {
+    fileout = posix::FOpen(output_file.c_str(), "w");}
   if (fileout == NULL) {
     GTEST_LOG_(FATAL) << "Unable to open file \"" << output_file << "\"";
   }

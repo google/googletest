@@ -29,7 +29,8 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-set -e
+set -evx
+
 
 bazel build --curses=no //...:all
 bazel test --curses=no //...:all
