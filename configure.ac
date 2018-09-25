@@ -13,7 +13,7 @@ AC_CONFIG_SUBDIRS([googletest googlemock])
 AM_INIT_AUTOMAKE
 
 # Check for C++11
-AX_CXX_COMPILE_STDCXX_11(,mandatory)
+AX_CXX_COMPILE_STDCXX_11()
 
 # Output the generated files. No further autoconf macros may be used.
 AC_OUTPUT
