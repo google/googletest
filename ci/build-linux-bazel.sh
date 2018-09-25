@@ -31,9 +31,6 @@
 
 set -evx
 
-./ci/test_format.sh
-rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-
 
 bazel build --curses=no //...:all
 bazel test --curses=no //...:all
