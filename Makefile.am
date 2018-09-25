@@ -1,4 +1,6 @@
 ## Process this file with automake to produce Makefile.in
+AM_CXXFLAGS = -std=gnu++11
+
 ACLOCAL_AMFLAGS = -I m4
 
 AUTOMAKE_OPTIONS = foreign

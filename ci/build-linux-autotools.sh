@@ -39,6 +39,6 @@ autoreconf -i
 # Run in a subdirectory to keep the sources clean
 mkdir build || true
 cd build
-../configure CXX="-std=c++11"
+../configure
 
 make -j {NPROCESSORS:-2}
