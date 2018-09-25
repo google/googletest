@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
@@ -57,6 +56,8 @@
 // where all clauses are optional, and .InSequence()/.After()/
 // .WillOnce() can appear any number of times.
 
+// GOOGLETEST_CM0002 DO NOT DELETE
+
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_
 
@@ -75,6 +76,9 @@
 #if GTEST_HAS_EXCEPTIONS
 # include <stdexcept>  // NOLINT
 #endif
+
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
+/* class A needs to have dll-interface to be used by clients of class B */)
 
 namespace testing {
 
@@ -183,7 +187,7 @@ class GTEST_API_ UntypedFunctionMockerBase {
   // this information in the global mock registry.  Will be called
   // whenever an EXPECT_CALL() or ON_CALL() is executed on this mock
   // method.
-  // TODO(wan@google.com): rename to SetAndRegisterOwner().
+  // FIXME: rename to SetAndRegisterOwner().
   void RegisterOwner(const void* mock_obj)
       GTEST_LOCK_EXCLUDED_(g_gmock_mutex);
 
@@ -1206,7 +1210,7 @@ class TypedExpectation : public ExpectationBase {
       mocker->DescribeDefaultActionTo(args, what);
       DescribeCallCountTo(why);
 
-      // TODO(wan@google.com): allow the user to control whether
+      // FIXME: allow the user to control whether
       // unexpected calls should fail immediately or continue using a
       // flag --gmock_unexpected_calls_are_fatal.
       return NULL;
@@ -1356,11 +1360,7 @@ class ReferenceOrValueWrapper<T&> {
 // we need to temporarily disable the warning.  We have to do it for
 // the entire class to suppress the warning, even though it's about
 // the constructor only.
-
-#ifdef _MSC_VER
-# pragma warning(push)          // Saves the current warning state.
-# pragma warning(disable:4355)  // Temporarily disables warning 4355.
-#endif  // _MSV_VER
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4355)
 
 // C++ treats the void type specially.  For example, you cannot define
 // a void-typed variable or pass a void value to a function.
@@ -1796,9 +1796,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(FunctionMockerBase);
 };  // class FunctionMockerBase
 
-#ifdef _MSC_VER
-# pragma warning(pop)  // Restores the warning state.
-#endif  // _MSV_VER
+GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4355
 
 // Implements methods of FunctionMockerBase.
 
@@ -1843,6 +1841,8 @@ inline Expectation::Expectation(internal::ExpectationBase& exp)  // NOLINT
 
 }  // namespace testing
 
+GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
+
 // Implementation for ON_CALL and EXPECT_CALL macros. A separate macro is
 // required to avoid compile errors when the name of the method used in call is
 // a result of macro expansion. See CompilesWithMethodNameExpandedFromMacro
@@ -1854,22 +1854,22 @@ inline Expectation::Expectation(internal::ExpectationBase& exp)  // NOLINT
 // parameter. This technique may only be used for non-overloaded methods.
 //
 //   // These are the same:
-//   ON_CALL(mock, NoArgsMethod()).WillByDefault(…);
-//   ON_CALL(mock, NoArgsMethod).WillByDefault(…);
+//   ON_CALL(mock, NoArgsMethod()).WillByDefault(...);
+//   ON_CALL(mock, NoArgsMethod).WillByDefault(...);
 //
 //   // As are these:
-//   ON_CALL(mock, TwoArgsMethod(_, _)).WillByDefault(…);
-//   ON_CALL(mock, TwoArgsMethod).WillByDefault(…);
+//   ON_CALL(mock, TwoArgsMethod(_, _)).WillByDefault(...);
+//   ON_CALL(mock, TwoArgsMethod).WillByDefault(...);
 //
 //   // Can also specify args if you want, of course:
-//   ON_CALL(mock, TwoArgsMethod(_, 45)).WillByDefault(…);
+//   ON_CALL(mock, TwoArgsMethod(_, 45)).WillByDefault(...);
 //
 //   // Overloads work as long as you specify parameters:
-//   ON_CALL(mock, OverloadedMethod(_)).WillByDefault(…);
-//   ON_CALL(mock, OverloadedMethod(_, _)).WillByDefault(…);
+//   ON_CALL(mock, OverloadedMethod(_)).WillByDefault(...);
+//   ON_CALL(mock, OverloadedMethod(_, _)).WillByDefault(...);
 //
 //   // Oops! Which overload did you want?
-//   ON_CALL(mock, OverloadedMethod).WillByDefault(…);
+//   ON_CALL(mock, OverloadedMethod).WillByDefault(...);
 //     => ERROR: call to member function 'gmock_OverloadedMethod' is ambiguous
 //
 // How this works: The mock class uses two overloads of the gmock_Method
@@ -1877,28 +1877,28 @@ inline Expectation::Expectation(internal::ExpectationBase& exp)  // NOLINT
 // In the matcher list form, the macro expands to:
 //
 //   // This statement:
-//   ON_CALL(mock, TwoArgsMethod(_, 45))…
+//   ON_CALL(mock, TwoArgsMethod(_, 45))...
 //
-//   // …expands to:
-//   mock.gmock_TwoArgsMethod(_, 45)(WithoutMatchers(), nullptr)…
+//   // ...expands to:
+//   mock.gmock_TwoArgsMethod(_, 45)(WithoutMatchers(), nullptr)...
 //   |-------------v---------------||------------v-------------|
 //       invokes first overload        swallowed by operator()
 //
-//   // …which is essentially:
-//   mock.gmock_TwoArgsMethod(_, 45)…
+//   // ...which is essentially:
+//   mock.gmock_TwoArgsMethod(_, 45)...
 //
 // Whereas the form without a matcher list:
 //
 //   // This statement:
-//   ON_CALL(mock, TwoArgsMethod)…
+//   ON_CALL(mock, TwoArgsMethod)...
 //
-//   // …expands to:
-//   mock.gmock_TwoArgsMethod(WithoutMatchers(), nullptr)…
+//   // ...expands to:
+//   mock.gmock_TwoArgsMethod(WithoutMatchers(), nullptr)...
 //   |-----------------------v--------------------------|
 //                 invokes second overload
 //
-//   // …which is essentially:
-//   mock.gmock_TwoArgsMethod(_, _)…
+//   // ...which is essentially:
+//   mock.gmock_TwoArgsMethod(_, _)...
 //
 // The WithoutMatchers() argument is used to disambiguate overloads and to
 // block the caller from accidentally invoking the second overload directly. The

@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 //
 // Tests for Google Test itself.  This verifies that the basic constructs of
 // Google Test work.
@@ -35,8 +34,8 @@
 #include "gtest/gtest.h"
 
 // Verifies that the command line flag variables can be accessed in
-// code once "gtest/gtest.h" has been
-// #included.  Do not move it after other gtest #includes.
+// code once "gtest.h" has been #included.
+// Do not move it after other gtest #includes.
 TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
   bool dummy = testing::GTEST_FLAG(also_run_disabled_tests)
       || testing::GTEST_FLAG(break_on_failure)
@@ -64,9 +63,7 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 #include <map>
 #include <vector>
 #include <ostream>
-#if GTEST_LANG_CXX11
 #include <unordered_set>
-#endif  // GTEST_LANG_CXX11
 
 #include "gtest/gtest-spi.h"
 #include "src/gtest-internal-inl.h"
@@ -444,10 +441,10 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
   virtual void SetUp() {
     saved_tz_ = NULL;
 
-    GTEST_DISABLE_MSC_WARNINGS_PUSH_(4996 /* getenv, strdup: deprecated */)
+    GTEST_DISABLE_MSC_DEPRECATED_PUSH_(/* getenv, strdup: deprecated */)
     if (getenv("TZ"))
       saved_tz_ = strdup(getenv("TZ"));
-    GTEST_DISABLE_MSC_WARNINGS_POP_()
+    GTEST_DISABLE_MSC_DEPRECATED_POP_()
 
     // Set up the time zone for FormatEpochTimeInMillisAsIso8601 to use.  We
     // cannot use the local time zone because the function's output depends
@@ -1385,8 +1382,7 @@ class TestResultTest : public Test {
     // In order to test TestResult, we need to modify its internal
     // state, in particular the TestPartResult vector it holds.
     // test_part_results() returns a const reference to this vector.
-    // We cast it to a non-const object s.t. it can be modified (yes,
-    // this is a hack).
+    // We cast it to a non-const object s.t. it can be modified
     TPRVector* results1 = const_cast<TPRVector*>(
         &TestResultAccessor::test_part_results(*r1));
     TPRVector* results2 = const_cast<TPRVector*>(
@@ -2092,8 +2088,8 @@ TEST_F(UnitTestRecordPropertyTest,
        AddRecordWithReservedKeysGeneratesCorrectPropertyList) {
   EXPECT_NONFATAL_FAILURE(
       Test::RecordProperty("name", "1"),
-      "'classname', 'name', 'status', 'time', 'type_param', and 'value_param'"
-      " are reserved");
+      "'classname', 'name', 'status', 'time', 'type_param', 'value_param',"
+      " 'file', and 'line' are reserved");
 }
 
 class UnitTestRecordPropertyTestEnvironment : public Environment {
@@ -2119,7 +2115,7 @@ class UnitTestRecordPropertyTestEnvironment : public Environment {
 };
 
 // This will test property recording outside of any test or test case.
-static Environment* record_property_env =
+static Environment* record_property_env GTEST_ATTRIBUTE_UNUSED_ =
     AddGlobalTestEnvironment(new UnitTestRecordPropertyTestEnvironment);
 
 // This group of tests is for predicate assertions (ASSERT_PRED*, etc)
@@ -3332,6 +3328,7 @@ TEST_F(SingleEvaluationTest, OtherCases) {
 void ThrowAnInteger() {
   throw 1;
 }
+void ThrowAnException(const char* what) { throw std::runtime_error(what); }
 
 // Tests that assertion arguments are evaluated exactly once.
 TEST_F(SingleEvaluationTest, ExceptionTests) {
@@ -3374,6 +3371,26 @@ TEST_F(SingleEvaluationTest, ExceptionTests) {
   // failed EXPECT_ANY_THROW
   EXPECT_NONFATAL_FAILURE(EXPECT_ANY_THROW(a_++), "it doesn't");
   EXPECT_EQ(7, a_);
+
+  // failed EXPECT_THROW std::exception, throws different
+  EXPECT_NONFATAL_FAILURE(EXPECT_THROW(
+                              {  // NOLINT
+                                a_++;
+                                ThrowAnInteger();
+                              },
+                              std::exception),
+                          "throws a different type");
+  EXPECT_EQ(8, a_);
+
+  // failed EXPECT_THROW, throws std::exception
+  EXPECT_NONFATAL_FAILURE(EXPECT_THROW(
+                              {  // NOLINT
+                                a_++;
+                                ThrowAnException("blablubb");
+                              },
+                              bool),
+                          "throws a different type with message: blablubb");
+  EXPECT_EQ(9, a_);
 }
 
 #endif  // GTEST_HAS_EXCEPTIONS
@@ -3806,6 +3823,11 @@ TEST(AssertionTest, ASSERT_THROW) {
       ASSERT_THROW(ThrowNothing(), bool),
       "Expected: ThrowNothing() throws an exception of type bool.\n"
       "  Actual: it throws nothing.");
+
+  EXPECT_FATAL_FAILURE(
+      ASSERT_THROW(ThrowAnException("b"), bool),
+      "Expected: ThrowAnException(\"b\") throws an exception of type bool.\n"
+      "  Actual: it throws a different type with message: b");
 }
 
 // Tests ASSERT_NO_THROW.
@@ -3814,6 +3836,9 @@ TEST(AssertionTest, ASSERT_NO_THROW) {
   EXPECT_FATAL_FAILURE(ASSERT_NO_THROW(ThrowAnInteger()),
                        "Expected: ThrowAnInteger() doesn't throw an exception."
                        "\n  Actual: it throws.");
+  EXPECT_FATAL_FAILURE(ASSERT_NO_THROW(ThrowAnException("blablubb")),
+                       "Expected: ThrowAnException(\"blablubb\") doesn't throw"
+                       " an exception.\n  Actual: it throws: blablubb");
 }
 
 // Tests ASSERT_ANY_THROW.
@@ -4540,13 +4565,17 @@ TEST(ExpectTest, EXPECT_GT) {
 // Tests EXPECT_THROW.
 TEST(ExpectTest, EXPECT_THROW) {
   EXPECT_THROW(ThrowAnInteger(), int);
+  EXPECT_THROW(ThrowAnException(""), std::exception);
   EXPECT_NONFATAL_FAILURE(EXPECT_THROW(ThrowAnInteger(), bool),
                           "Expected: ThrowAnInteger() throws an exception of "
                           "type bool.\n  Actual: it throws a different type.");
-  EXPECT_NONFATAL_FAILURE(
-      EXPECT_THROW(ThrowNothing(), bool),
-      "Expected: ThrowNothing() throws an exception of type bool.\n"
-      "  Actual: it throws nothing.");
+  EXPECT_NONFATAL_FAILURE(EXPECT_THROW(ThrowNothing(), bool),
+                          "Expected: ThrowNothing() throws an exception of "
+                          "type bool.\n  Actual: it throws nothing.");
+  EXPECT_NONFATAL_FAILURE(EXPECT_THROW(ThrowAnException("buuh"), bool),
+                          "Expected: ThrowAnException(\"buuh\") throws an "
+                          "exception of type bool.\n  Actual: "
+                          "it throws a different type with message: buuh");
 }
 
 // Tests EXPECT_NO_THROW.
@@ -4555,6 +4584,9 @@ TEST(ExpectTest, EXPECT_NO_THROW) {
   EXPECT_NONFATAL_FAILURE(EXPECT_NO_THROW(ThrowAnInteger()),
                           "Expected: ThrowAnInteger() doesn't throw an "
                           "exception.\n  Actual: it throws.");
+  EXPECT_NONFATAL_FAILURE(EXPECT_NO_THROW(ThrowAnException("blah")),
+                          "Expected: ThrowAnException(\"blah\") doesn't "
+                          "throw an exception.\n  Actual: it throws: blah");
 }
 
 // Tests EXPECT_ANY_THROW.
@@ -4689,7 +4721,7 @@ TEST(MacroTest, ADD_FAILURE_AT) {
   // Unfortunately, we cannot verify that the failure message contains
   // the right file path and line number the same way, as
   // EXPECT_NONFATAL_FAILURE() doesn't get to see the file path and
-  // line number.  Instead, we do that in gtest_output_test_.cc.
+  // line number.  Instead, we do that in googletest-output-test_.cc.
 }
 
 // Tests FAIL.
@@ -5158,8 +5190,7 @@ TEST(AssertionResultTest, CanStreamOstreamManipulators) {
   EXPECT_STREQ("Data\n\\0Will be visible", r.message());
 }
 
-// The next test uses explicit conversion operators -- a C++11 feature.
-#if GTEST_LANG_CXX11
+// The next test uses explicit conversion operators
 
 TEST(AssertionResultTest, ConstructibleFromContextuallyConvertibleToBool) {
   struct ExplicitlyConvertibleToBool {
@@ -5171,8 +5202,6 @@ TEST(AssertionResultTest, ConstructibleFromContextuallyConvertibleToBool) {
   EXPECT_FALSE(v1);
   EXPECT_TRUE(v2);
 }
-
-#endif  // GTEST_LANG_CXX11
 
 struct ConvertibleToAssertionResult {
   operator AssertionResult() const { return AssertionResult(true); }
@@ -6833,7 +6862,7 @@ TEST(ColoredOutputTest, UsesColorsWhenStdoutIsTty) {
 TEST(ColoredOutputTest, UsesColorsWhenTermSupportsColors) {
   GTEST_FLAG(color) = "auto";
 
-#if GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MINGW
   // On Windows, we ignore the TERM variable as it's usually not set.
 
   SetEnv("TERM", "dumb");
@@ -7373,7 +7402,7 @@ GTEST_TEST(AlternativeNameTest, Works) {  // GTEST_TEST is the same as TEST.
 
 // Tests for internal utilities necessary for implementation of the universal
 // printing.
-// TODO(vladl@google.com): Find a better home for them.
+// FIXME: Find a better home for them.
 
 class ConversionHelperBase {};
 class ConversionHelperDerived : public ConversionHelperBase {};
@@ -7557,7 +7586,6 @@ TEST(IsContainerTestTest, WorksForContainer) {
             sizeof(IsContainerTest<std::map<int, double> >(0)));
 }
 
-#if GTEST_LANG_CXX11
 struct ConstOnlyContainerWithPointerIterator {
   using const_iterator = int*;
   const_iterator begin() const;
@@ -7579,7 +7607,6 @@ TEST(IsContainerTestTest, ConstOnlyContainer) {
   EXPECT_EQ(sizeof(IsContainer),
             sizeof(IsContainerTest<ConstOnlyContainerWithClassIterator>(0)));
 }
-#endif  // GTEST_LANG_CXX11
 
 // Tests IsHashTable.
 struct AHashTable {
@@ -7592,10 +7619,8 @@ struct NotReallyAHashTable {
 TEST(IsHashTable, Basic) {
   EXPECT_TRUE(testing::internal::IsHashTable<AHashTable>::value);
   EXPECT_FALSE(testing::internal::IsHashTable<NotReallyAHashTable>::value);
-#if GTEST_LANG_CXX11
   EXPECT_FALSE(testing::internal::IsHashTable<std::vector<int>>::value);
   EXPECT_TRUE(testing::internal::IsHashTable<std::unordered_set<int>>::value);
-#endif  // GTEST_LANG_CXX11
 #if GTEST_HAS_HASH_SET_
   EXPECT_TRUE(testing::internal::IsHashTable<__gnu_cxx::hash_set<int>>::value);
 #endif  // GTEST_HAS_HASH_SET_
