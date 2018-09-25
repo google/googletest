@@ -1191,14 +1191,14 @@ class NativeArray {
 
 class AdditionalMessage {
  public:
-  AdditionalMessage(const char* message) : msg(message) {}
-  void set(const std::string& message) { msg = message; }
-  operator bool() const { return true; }
+  explicit AdditionalMessage(const char* message) : msg_value_(message) {}
+  void set(const std::string& message) { msg_value_ = message; }
+  explicit operator bool() const { return true; }
 
-  const std::string& get() const { return msg; }
+  const std::string& get() const { return msg_value_; }
 
  private:
-  std::string msg;
+  std::string msg_value_;
 };
 
 }  // namespace internal
@@ -1228,7 +1228,7 @@ class AdditionalMessage {
 
 #define GTEST_TEST_THROW_(statement, expected_exception, fail)      \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_                                     \
-  if (::testing::internal::AdditionalMessage message = "") {        \
+  if (::testing::internal::AdditionalMessage message{""}) {         \
     bool gtest_caught_expected = false;                             \
     try {                                                           \
       try {                                                         \
@@ -1239,10 +1239,8 @@ class AdditionalMessage {
       }                                                             \
     } catch (const std::exception& e) {                             \
       if (!gtest_caught_expected) {                                 \
-        message.set(                                                \
-            "it throws a different type "                           \
-            "with message: " +                                      \
-            std::string(e.what()));                                 \
+        message.set("it throws a different type with message: " +   \
+                    std::string(e.what()));                         \
         goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
       }                                                             \
     } catch (...) {                                                 \
@@ -1265,7 +1263,7 @@ class AdditionalMessage {
 
 #define GTEST_TEST_NO_THROW_(statement, fail)                            \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_                                          \
-  if (::testing::internal::AdditionalMessage message = ".") {            \
+  if (::testing::internal::AdditionalMessage message{"."}) {             \
     try {                                                                \
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement);         \
     } catch (const std::exception& e) {                                  \
