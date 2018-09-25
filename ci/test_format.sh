@@ -8,6 +8,10 @@ if [[ "${TRAVIS_OS_NAME}" == "linux" ]] && \
     RETURN=0
     CLANG_FORMAT="clang-format-3.9"
 
+    which clang-format
+    
+    which clang-format-3.9
+
     if [ ! -f ".clang-format" ]; then
         echo ".clang-format file not found!"
         exit 1
