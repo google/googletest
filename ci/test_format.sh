@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Checking Code Formatting..."
+echo "clang-format - checking Code Formatting..."
 
 if [[ "${TRAVIS_OS_NAME}" == "linux" ]] && \
    [[ "${TEST_CLANG_FORMAT}" == "yes" ]]; then
@@ -7,8 +7,6 @@ if [[ "${TRAVIS_OS_NAME}" == "linux" ]] && \
     RETURN=0
     CLANG_FORMAT="clang-format-3.9"
 
-    which clang-format
-    
     which clang-format-3.9
 
     if [ ! -f ".clang-format" ]; then
@@ -23,7 +21,7 @@ if [[ "${TRAVIS_OS_NAME}" == "linux" ]] && \
         $CLANG_FORMAT $FILE | cmp  $FILE >/dev/null
 
         if [ $? -ne 0 ]; then
-            echo "[!] INCORRECT FORMATTING! $FILE" >&2
+            echo "[!] Clang-Format Found INCORRECT FORMATTING. Please re-format and re-submit.  The following file failed: $FILE" >&2
             RETURN=1
         fi
 
