@@ -515,6 +515,7 @@ struct CodeLocation {
 //   factory:          pointer to the factory that creates a test object.
 //                     The newly created TestInfo instance will assume
 //                     ownership of the factory object.
+//   is_disabled:      indicates wether the test case is disabled or not
 GTEST_API_ TestInfo* MakeAndRegisterTestInfo(
     const char* test_case_name,
     const char* name,
@@ -525,6 +526,18 @@ GTEST_API_ TestInfo* MakeAndRegisterTestInfo(
     SetUpTestCaseFunc set_up_tc,
     TearDownTestCaseFunc tear_down_tc,
     TestFactoryBase* factory);
+
+GTEST_API_ TestInfo* MakeAndRegisterTestInfo(
+    const char* test_case_name,
+    const char* name,
+    const char* type_param,
+    const char* value_param,
+    CodeLocation code_location,
+    TypeId fixture_class_id,
+    SetUpTestCaseFunc set_up_tc,
+    TearDownTestCaseFunc tear_down_tc,
+    TestFactoryBase* factory,
+    bool is_disabled);
 
 // If *pstr starts with the given prefix, modifies *pstr to be right
 // past the prefix and returns true; otherwise leaves *pstr unchanged
@@ -1351,7 +1364,8 @@ class GTEST_TEST_CLASS_NAME_(test_case_name, test_name) : public parent_class {\
         parent_class::SetUpTestCase, \
         parent_class::TearDownTestCase, \
         new ::testing::internal::TestFactoryImpl<\
-            GTEST_TEST_CLASS_NAME_(test_case_name, test_name)>);\
+            GTEST_TEST_CLASS_NAME_(test_case_name, test_name)>, \
+        GTEST_TEST_CLASS_NAME_(test_case_name, test_name)::IsDisabled()); \
 void GTEST_TEST_CLASS_NAME_(test_case_name, test_name)::TestBody()
 
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_

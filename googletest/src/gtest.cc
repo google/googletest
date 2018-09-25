@@ -2548,6 +2548,26 @@ TestInfo::TestInfo(const std::string& a_test_case_name,
                    internal::CodeLocation a_code_location,
                    internal::TypeId fixture_class_id,
                    internal::TestFactoryBase* factory)
+  : test_case_name_(a_test_case_name),
+    name_(a_name),
+    type_param_(a_type_param ? new std::string(a_type_param) : NULL),
+    value_param_(a_value_param ? new std::string(a_value_param) : NULL),
+    location_(a_code_location),
+    fixture_class_id_(fixture_class_id),
+    should_run_(false),
+    is_disabled_(false),
+    matches_filter_(false),
+    factory_(factory),
+    result_() {}
+
+TestInfo::TestInfo(const std::string& a_test_case_name,
+                   const std::string& a_name,
+                   const char* a_type_param,
+                   const char* a_value_param,
+                   internal::CodeLocation a_code_location,
+                   internal::TypeId fixture_class_id,
+                   internal::TestFactoryBase* factory,
+                   bool is_disabled)
     : test_case_name_(a_test_case_name),
       name_(a_name),
       type_param_(a_type_param ? new std::string(a_type_param) : NULL),
@@ -2555,7 +2575,7 @@ TestInfo::TestInfo(const std::string& a_test_case_name,
       location_(a_code_location),
       fixture_class_id_(fixture_class_id),
       should_run_(false),
-      is_disabled_(false),
+      is_disabled_(is_disabled),
       matches_filter_(false),
       factory_(factory),
       result_() {}
@@ -2583,6 +2603,7 @@ namespace internal {
 //   factory:          pointer to the factory that creates a test object.
 //                     The newly created TestInfo instance will assume
 //                     ownership of the factory object.
+//   is_disabled:      flag indicates wether the test case is disabled or not
 TestInfo* MakeAndRegisterTestInfo(
     const char* test_case_name,
     const char* name,
@@ -2593,9 +2614,25 @@ TestInfo* MakeAndRegisterTestInfo(
     SetUpTestCaseFunc set_up_tc,
     TearDownTestCaseFunc tear_down_tc,
     TestFactoryBase* factory) {
+  return MakeAndRegisterTestInfo(test_case_name, name, type_param, value_param,
+                                 code_location, fixture_class_id,
+                                 set_up_tc, tear_down_tc, factory, false);
+}
+
+TestInfo* MakeAndRegisterTestInfo(
+    const char* test_case_name,
+    const char* name,
+    const char* type_param,
+    const char* value_param,
+    CodeLocation code_location,
+    TypeId fixture_class_id,
+    SetUpTestCaseFunc set_up_tc,
+    TearDownTestCaseFunc tear_down_tc,
+    TestFactoryBase* factory,
+    bool is_disabled) {
   TestInfo* const test_info =
       new TestInfo(test_case_name, name, type_param, value_param,
-                   code_location, fixture_class_id, factory);
+                   code_location, fixture_class_id, factory, is_disabled);
   GetUnitTestImpl()->AddTestInfo(set_up_tc, tear_down_tc, test_info);
   return test_info;
 }
@@ -5350,7 +5387,7 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
       const std::string test_name(test_info->name());
       // A test is disabled if test case name or test name matches
       // kDisableTestFilter.
-      const bool is_disabled =
+      const bool is_disabled = test_info->is_disabled_ ||
           internal::UnitTestOptions::MatchesFilter(test_case_name,
                                                    kDisableTestFilter) ||
           internal::UnitTestOptions::MatchesFilter(test_name,

@@ -944,7 +944,7 @@ handlers registered with `pthread_atfork(3)`.
 
 If a test sub-routine is called from several places, when an assertion inside it
 fails, it can be hard to tell which invocation of the sub-routine the failure is
-from. 
+from.
 You can alleviate this problem using extra logging or custom failure messages,
 but that usually clutters up your tests. A better solution is to use the
 `SCOPED_TRACE` macro or the `ScopedTrace` utility:
@@ -2048,7 +2048,7 @@ For example:
 *   `./foo_test --gtest_filter=FooTest.*:BarTest.*-FooTest.Bar:BarTest.Foo` Runs
     everything in test case `FooTest` except `FooTest.Bar` and everything in
     test case `BarTest` except `BarTest.Foo`.
-    
+
 #### Temporarily Disabling Tests
 
 If you have a broken test that you cannot fix right away, you can add the
@@ -2058,7 +2058,7 @@ still compiled (and thus won't rot).
 
 If you need to disable all tests in a test case, you can either add `DISABLED_`
 to the front of the name of each test, or alternatively add it to the front of
-the test case name.
+the test case name, or alternatively override `IsDisabled()` and return true.
 
 For example, the following tests won't be run by googletest, even though they
 will still be compiled:
@@ -2071,6 +2071,18 @@ class DISABLED_BarTest : public ::testing::Test { ... };
 
 // Tests that Bar does Xyz.
 TEST_F(DISABLED_BarTest, DoesXyz) { ... }
+
+class BazTest : public ::testing::Test {
+  ...
+  static bool IsDisabled() {
+    return true;
+  }
+  ...
+};
+
+// Tests that Baz does Efg.
+TEST_F(BazTest, DoesEfg) { ... }
+
 ```
 
 NOTE: This feature should only be used for temporary pain-relief. You still have
@@ -2517,4 +2529,3 @@ environment variable to `0`, or use the `--gtest_catch_exceptions=0` flag when
 running the tests.
 
 **Availability**: Linux, Windows, Mac.
-
