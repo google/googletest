@@ -64,8 +64,8 @@ build_script:
 
     $conf = if ($env:generator -eq "MinGW Makefiles") {"-DCMAKE_BUILD_TYPE=$env:configuration"} else {"-DCMAKE_CONFIGURATION_TYPES=Debug;Release"}
     # Disable test for MinGW (gtest tests fail, gmock tests can not build)
-    $gtest_build_tests = if ($env:generator -eq "MinGW Makefiles") {"-Dgtest_build_tests=OFF"} else {"-Dgtest_build_tests=ON"}
-    $gmock_build_tests = if ($env:generator -eq "MinGW Makefiles") {"-Dgmock_build_tests=OFF"} else {"-Dgmock_build_tests=ON"}
+    $gtest_build_tests = "-Dgtest_build_tests=ON"
+    $gmock_build_tests = "-Dgmock_build_tests=ON"
     & cmake -G "$env:generator" $conf -Dgtest_build_samples=ON $gtest_build_tests $gmock_build_tests ..
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
