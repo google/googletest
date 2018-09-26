@@ -41,7 +41,7 @@ install:
     Write-Output "Compiler: $env:compiler"
     Write-Output "Generator: $env:generator"
     Write-Output "Env:Configuation: $env:configuration"
-    Write-Outpit "Env: $env"
+    Write-Output "Env: $env"
     if (-not (Test-Path env:APPVEYOR_PULL_REQUEST_NUMBER)) {
       Write-Output "This is *NOT* a pull request build"
     } else {
