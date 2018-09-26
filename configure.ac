@@ -13,6 +13,8 @@ AC_CONFIG_SUBDIRS([googletest googlemock])
 AM_INIT_AUTOMAKE
 
 # Check for C++11
+AC_CONFIG_MACRO_DIR([m4])
+AC_PROG_CXX
 AX_CXX_COMPILE_STDCXX_11()
 
 # Output the generated files. No further autoconf macros may be used.
