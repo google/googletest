@@ -18,14 +18,14 @@ matrix:
     - os: linux
       compiler: clang
       sudo : true
-      env: TEST_CLANG_FORMAT="yes"
       install: ./ci/install-linux.sh && ./ci/log-config.sh
-      script: ./ci/test_format.sh && ./ci/build-linux-bazel.sh
+      script: ./ci/build-linux-bazel.sh
     - os: linux
       group: deprecated-2017Q4
       compiler: gcc
       install: ./ci/install-linux.sh && ./ci/log-config.sh
       script: ./ci/build-linux-autotools.sh
+      env: VERBOSE=1 CXXFLAGS=-std=c++11
     - os: linux
       group: deprecated-2017Q4
       compiler: gcc
@@ -66,7 +66,6 @@ addons:
     packages:
     - g++-4.9
     - clang-3.9
-    - clang-format-3.9
 
 notifications:
   email: false
