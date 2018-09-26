@@ -3157,6 +3157,34 @@ TEST_F(DisabledTestsTest, DISABLED_TestShouldNotRun_2) {
   FAIL() << "Unexpected failure: Disabled test should not be run.";
 }
 
+
+// Check that when IsDisabled() return true all tests in a test case should be disabled,
+// and SetUpTestCase() and TearDownTestCase() are not called.
+class IsDisabledTestsTest : public Test {
+protected:
+  static void SetUpTestCase() {
+    FAIL() << "Unexpected failure: All tests disabled in test case. "
+      "SetUpTestCase() should not be called.";
+  }
+
+  static void TearDownTestCase() {
+    FAIL() << "Unexpected failure: All tests disabled in test case. "
+      "TearDownTestCase() should not be called.";
+  }
+
+  static bool IsDisabled() {
+    return true;
+  }
+};
+
+TEST_F(IsDisabledTestsTest, IsDisabledTestShouldNotRun_1) {
+  FAIL() << "Unexpected failure: IsDisabled test should not be run.";
+}
+
+TEST_F(IsDisabledTestsTest, IsDisabledTestShouldNotRun_2) {
+  FAIL() << "Unexpected failure: IsDisabled test should not be run.";
+}
+
 // Tests that disabled typed tests aren't run.
 
 #if GTEST_HAS_TYPED_TEST

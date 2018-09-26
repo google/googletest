@@ -444,6 +444,9 @@ class GTEST_API_ Test {
   // non-fatal) failure.
   static bool HasFailure() { return HasFatalFailure() || HasNonfatalFailure(); }
 
+  // Returns true to disable the test case.
+  static bool IsDisabled() { return false; };
+
   // Logs a property for the current test, test case, or for the entire
   // invocation of the test program when used outside of the context of a
   // test case.  Only the last value for a given key is remembered.  These
@@ -761,7 +764,8 @@ class GTEST_API_ TestInfo {
       internal::TypeId fixture_class_id,
       Test::SetUpTestCaseFunc set_up_tc,
       Test::TearDownTestCaseFunc tear_down_tc,
-      internal::TestFactoryBase* factory);
+      internal::TestFactoryBase* factory,
+      bool is_disabled);
 
   // Constructs a TestInfo object. The newly constructed instance assumes
   // ownership of the factory object.
@@ -772,6 +776,15 @@ class GTEST_API_ TestInfo {
            internal::CodeLocation a_code_location,
            internal::TypeId fixture_class_id,
            internal::TestFactoryBase* factory);
+
+  TestInfo(const std::string& test_case_name,
+           const std::string& name,
+           const char* a_type_param,   // NULL if not a type-parameterized test
+           const char* a_value_param,  // NULL if not a value-parameterized test
+           internal::CodeLocation a_code_location,
+           internal::TypeId fixture_class_id,
+           internal::TestFactoryBase* factory,
+           bool is_disabled);
 
   // Increments the number of death tests encountered in this test so
   // far.
