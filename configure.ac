@@ -10,12 +10,10 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_SUBDIRS([googletest googlemock])
 
+CXXCPP="g++ -E -std=gnu++11"
+
 AM_INIT_AUTOMAKE
 
-# Check for C++11
-AC_CONFIG_MACRO_DIR([m4])
-AC_PROG_CXX
-AX_CXX_COMPILE_STDCXX_11()
 
 # Output the generated files. No further autoconf macros may be used.
 AC_OUTPUT
