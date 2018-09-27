@@ -56,9 +56,10 @@
 # include <initializer_list>  // NOLINT -- must be after gtest.h
 #endif
 
-GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 5046 \
-/* class A needs to have dll-interface to be used by clients of class B */ \
-/* Symbol involving type with internal linkage not defined */)
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(
+    4251 5046 /* class A needs to have dll-interface to be used by clients of
+                 class B */
+    /* Symbol involving type with internal linkage not defined */)
 
 namespace testing {
 
@@ -1306,9 +1307,6 @@ class StrEqualityMatcher {
 #if GTEST_HAS_ABSL
   bool MatchAndExplain(const absl::string_view& s,
                        MatchResultListener* listener) const {
-    if (s.data() == NULL) {
-      return !expect_eq_;
-    }
     // This should fail to compile if absl::string_view is used with wide
     // strings.
     const StringType& str = string(s);
@@ -1379,9 +1377,6 @@ class HasSubstrMatcher {
 #if GTEST_HAS_ABSL
   bool MatchAndExplain(const absl::string_view& s,
                        MatchResultListener* listener) const {
-    if (s.data() == NULL) {
-      return false;
-    }
     // This should fail to compile if absl::string_view is used with wide
     // strings.
     const StringType& str = string(s);
@@ -1439,9 +1434,6 @@ class StartsWithMatcher {
 #if GTEST_HAS_ABSL
   bool MatchAndExplain(const absl::string_view& s,
                        MatchResultListener* listener) const {
-    if (s.data() == NULL) {
-      return false;
-    }
     // This should fail to compile if absl::string_view is used with wide
     // strings.
     const StringType& str = string(s);
@@ -1498,9 +1490,6 @@ class EndsWithMatcher {
 #if GTEST_HAS_ABSL
   bool MatchAndExplain(const absl::string_view& s,
                        MatchResultListener* listener) const {
-    if (s.data() == NULL) {
-      return false;
-    }
     // This should fail to compile if absl::string_view is used with wide
     // strings.
     const StringType& str = string(s);
@@ -1557,7 +1546,7 @@ class MatchesRegexMatcher {
 #if GTEST_HAS_ABSL
   bool MatchAndExplain(const absl::string_view& s,
                        MatchResultListener* listener) const {
-    return s.data() && MatchAndExplain(string(s), listener);
+    return MatchAndExplain(string(s), listener);
   }
 #endif  // GTEST_HAS_ABSL
 
@@ -5181,23 +5170,6 @@ std::string DescribeMatcher(const M& matcher, bool negation = false) {
   return ss.str();
 }
 
-#if GTEST_LANG_CXX11
-// Define variadic matcher versions. They are overloaded in
-// gmock-generated-matchers.h for the cases supported by pre C++11 compilers.
-template <typename... Args>
-internal::AllOfMatcher<typename std::decay<const Args&>::type...> AllOf(
-    const Args&... matchers) {
-  return internal::AllOfMatcher<typename std::decay<const Args&>::type...>(
-      matchers...);
-}
-
-template <typename... Args>
-internal::AnyOfMatcher<typename std::decay<const Args&>::type...> AnyOf(
-    const Args&... matchers) {
-  return internal::AnyOfMatcher<typename std::decay<const Args&>::type...>(
-      matchers...);
-}
-
 template <typename... Args>
 internal::ElementsAreMatcher<tuple<typename std::decay<const Args&>::type...>>
 ElementsAre(const Args&... matchers) {
@@ -5213,6 +5185,23 @@ UnorderedElementsAre(const Args&... matchers) {
   return internal::UnorderedElementsAreMatcher<
       tuple<typename std::decay<const Args&>::type...>>(
       make_tuple(matchers...));
+}
+
+#if GTEST_LANG_CXX11
+// Define variadic matcher versions. They are overloaded in
+// gmock-generated-matchers.h for the cases supported by pre C++11 compilers.
+template <typename... Args>
+internal::AllOfMatcher<typename std::decay<const Args&>::type...> AllOf(
+    const Args&... matchers) {
+  return internal::AllOfMatcher<typename std::decay<const Args&>::type...>(
+      matchers...);
+}
+
+template <typename... Args>
+internal::AnyOfMatcher<typename std::decay<const Args&>::type...> AnyOf(
+    const Args&... matchers) {
+  return internal::AnyOfMatcher<typename std::decay<const Args&>::type...>(
+      matchers...);
 }
 
 #endif  // GTEST_LANG_CXX11

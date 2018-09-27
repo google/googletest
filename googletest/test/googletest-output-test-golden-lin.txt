@@ -606,24 +606,24 @@ Expected failure
 Stack trace: (omitted)
 
 [0;31m[  FAILED  ] [mTypedTest/0.Failure, where TypeParam = int
-[0;32m[----------] [m2 tests from TypedTestWithNames/char_0, where TypeParam = char
-[0;32m[ RUN      ] [mTypedTestWithNames/char_0.Success
-[0;32m[       OK ] [mTypedTestWithNames/char_0.Success
-[0;32m[ RUN      ] [mTypedTestWithNames/char_0.Failure
+[0;32m[----------] [m2 tests from TypedTestWithNames/char0, where TypeParam = char
+[0;32m[ RUN      ] [mTypedTestWithNames/char0.Success
+[0;32m[       OK ] [mTypedTestWithNames/char0.Success
+[0;32m[ RUN      ] [mTypedTestWithNames/char0.Failure
 googletest-output-test_.cc:#: Failure
 Failed
 Stack trace: (omitted)
 
-[0;31m[  FAILED  ] [mTypedTestWithNames/char_0.Failure, where TypeParam = char
-[0;32m[----------] [m2 tests from TypedTestWithNames/int_1, where TypeParam = int
-[0;32m[ RUN      ] [mTypedTestWithNames/int_1.Success
-[0;32m[       OK ] [mTypedTestWithNames/int_1.Success
-[0;32m[ RUN      ] [mTypedTestWithNames/int_1.Failure
+[0;31m[  FAILED  ] [mTypedTestWithNames/char0.Failure, where TypeParam = char
+[0;32m[----------] [m2 tests from TypedTestWithNames/int1, where TypeParam = int
+[0;32m[ RUN      ] [mTypedTestWithNames/int1.Success
+[0;32m[       OK ] [mTypedTestWithNames/int1.Success
+[0;32m[ RUN      ] [mTypedTestWithNames/int1.Failure
 googletest-output-test_.cc:#: Failure
 Failed
 Stack trace: (omitted)
 
-[0;31m[  FAILED  ] [mTypedTestWithNames/int_1.Failure, where TypeParam = int
+[0;31m[  FAILED  ] [mTypedTestWithNames/int1.Failure, where TypeParam = int
 [0;32m[----------] [m2 tests from Unsigned/TypedTestP/0, where TypeParam = unsigned char
 [0;32m[ RUN      ] [mUnsigned/TypedTestP/0.Success
 [0;32m[       OK ] [mUnsigned/TypedTestP/0.Success
@@ -652,10 +652,10 @@ Expected failure
 Stack trace: (omitted)
 
 [0;31m[  FAILED  ] [mUnsigned/TypedTestP/1.Failure, where TypeParam = unsigned int
-[0;32m[----------] [m2 tests from UnsignedCustomName/TypedTestP/unsigned_char_0, where TypeParam = unsigned char
-[0;32m[ RUN      ] [mUnsignedCustomName/TypedTestP/unsigned_char_0.Success
-[0;32m[       OK ] [mUnsignedCustomName/TypedTestP/unsigned_char_0.Success
-[0;32m[ RUN      ] [mUnsignedCustomName/TypedTestP/unsigned_char_0.Failure
+[0;32m[----------] [m2 tests from UnsignedCustomName/TypedTestP/unsignedChar0, where TypeParam = unsigned char
+[0;32m[ RUN      ] [mUnsignedCustomName/TypedTestP/unsignedChar0.Success
+[0;32m[       OK ] [mUnsignedCustomName/TypedTestP/unsignedChar0.Success
+[0;32m[ RUN      ] [mUnsignedCustomName/TypedTestP/unsignedChar0.Failure
 googletest-output-test_.cc:#: Failure
 Expected equality of these values:
   1U
@@ -665,11 +665,11 @@ Expected equality of these values:
 Expected failure
 Stack trace: (omitted)
 
-[0;31m[  FAILED  ] [mUnsignedCustomName/TypedTestP/unsigned_char_0.Failure, where TypeParam = unsigned char
-[0;32m[----------] [m2 tests from UnsignedCustomName/TypedTestP/unsigned_int_1, where TypeParam = unsigned int
-[0;32m[ RUN      ] [mUnsignedCustomName/TypedTestP/unsigned_int_1.Success
-[0;32m[       OK ] [mUnsignedCustomName/TypedTestP/unsigned_int_1.Success
-[0;32m[ RUN      ] [mUnsignedCustomName/TypedTestP/unsigned_int_1.Failure
+[0;31m[  FAILED  ] [mUnsignedCustomName/TypedTestP/unsignedChar0.Failure, where TypeParam = unsigned char
+[0;32m[----------] [m2 tests from UnsignedCustomName/TypedTestP/unsignedInt1, where TypeParam = unsigned int
+[0;32m[ RUN      ] [mUnsignedCustomName/TypedTestP/unsignedInt1.Success
+[0;32m[       OK ] [mUnsignedCustomName/TypedTestP/unsignedInt1.Success
+[0;32m[ RUN      ] [mUnsignedCustomName/TypedTestP/unsignedInt1.Failure
 googletest-output-test_.cc:#: Failure
 Expected equality of these values:
   1U
@@ -679,7 +679,7 @@ Expected equality of these values:
 Expected failure
 Stack trace: (omitted)
 
-[0;31m[  FAILED  ] [mUnsignedCustomName/TypedTestP/unsigned_int_1.Failure, where TypeParam = unsigned int
+[0;31m[  FAILED  ] [mUnsignedCustomName/TypedTestP/unsignedInt1.Failure, where TypeParam = unsigned int
 [0;32m[----------] [m4 tests from ExpectFailureTest
 [0;32m[ RUN      ] [mExpectFailureTest.ExpectFatalFailure
 (expecting 1 failure)
@@ -944,12 +944,12 @@ Stack trace: (omitted)
 [0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenStatementReturns
 [0;31m[  FAILED  ] [mExpectFatalFailureTest.FailsWhenStatementThrows
 [0;31m[  FAILED  ] [mTypedTest/0.Failure, where TypeParam = int
-[0;31m[  FAILED  ] [mTypedTestWithNames/char_0.Failure, where TypeParam = char
-[0;31m[  FAILED  ] [mTypedTestWithNames/int_1.Failure, where TypeParam = int
+[0;31m[  FAILED  ] [mTypedTestWithNames/char0.Failure, where TypeParam = char
+[0;31m[  FAILED  ] [mTypedTestWithNames/int1.Failure, where TypeParam = int
 [0;31m[  FAILED  ] [mUnsigned/TypedTestP/0.Failure, where TypeParam = unsigned char
 [0;31m[  FAILED  ] [mUnsigned/TypedTestP/1.Failure, where TypeParam = unsigned int
-[0;31m[  FAILED  ] [mUnsignedCustomName/TypedTestP/unsigned_char_0.Failure, where TypeParam = unsigned char
-[0;31m[  FAILED  ] [mUnsignedCustomName/TypedTestP/unsigned_int_1.Failure, where TypeParam = unsigned int
+[0;31m[  FAILED  ] [mUnsignedCustomName/TypedTestP/unsignedChar0.Failure, where TypeParam = unsigned char
+[0;31m[  FAILED  ] [mUnsignedCustomName/TypedTestP/unsignedInt1.Failure, where TypeParam = unsigned int
 [0;31m[  FAILED  ] [mExpectFailureTest.ExpectFatalFailure
 [0;31m[  FAILED  ] [mExpectFailureTest.ExpectNonFatalFailure
 [0;31m[  FAILED  ] [mExpectFailureTest.ExpectFatalFailureOnAllThreads

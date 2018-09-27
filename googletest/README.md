@@ -115,60 +115,64 @@ pulled into the main build with `add_subdirectory()`. For example:
 
 New file `CMakeLists.txt.in`:
 
-    cmake_minimum_required(VERSION 2.8.2)
+``` cmake
+cmake_minimum_required(VERSION 2.8.2)
 
-    project(googletest-download NONE)
+project(googletest-download NONE)
 
-    include(ExternalProject)
-    ExternalProject_Add(googletest
-      GIT_REPOSITORY    https://github.com/google/googletest.git
-      GIT_TAG           master
-      SOURCE_DIR        "${CMAKE_BINARY_DIR}/googletest-src"
-      BINARY_DIR        "${CMAKE_BINARY_DIR}/googletest-build"
-      CONFIGURE_COMMAND ""
-      BUILD_COMMAND     ""
-      INSTALL_COMMAND   ""
-      TEST_COMMAND      ""
-    )
+include(ExternalProject)
+ExternalProject_Add(googletest
+  GIT_REPOSITORY    https://github.com/google/googletest.git
+  GIT_TAG           master
+  SOURCE_DIR        "${CMAKE_BINARY_DIR}/googletest-src"
+  BINARY_DIR        "${CMAKE_BINARY_DIR}/googletest-build"
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND     ""
+  INSTALL_COMMAND   ""
+  TEST_COMMAND      ""
+)
+```
 
 Existing build's `CMakeLists.txt`:
 
-    # Download and unpack googletest at configure time
-    configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
-    if(result)
-      message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-    endif()
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
-    if(result)
-      message(FATAL_ERROR "Build step for googletest failed: ${result}")
-    endif()
+``` cmake
+# Download and unpack googletest at configure time
+configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
+execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+  RESULT_VARIABLE result
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
+if(result)
+  message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+endif()
+execute_process(COMMAND ${CMAKE_COMMAND} --build .
+  RESULT_VARIABLE result
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
+if(result)
+  message(FATAL_ERROR "Build step for googletest failed: ${result}")
+endif()
 
-    # Prevent overriding the parent project's compiler/linker
-    # settings on Windows
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+# Prevent overriding the parent project's compiler/linker
+# settings on Windows
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-    # Add googletest directly to our build. This defines
-    # the gtest and gtest_main targets.
-    add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
-                     ${CMAKE_BINARY_DIR}/googletest-build
-                     EXCLUDE_FROM_ALL)
+# Add googletest directly to our build. This defines
+# the gtest and gtest_main targets.
+add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
+                 ${CMAKE_BINARY_DIR}/googletest-build
+                 EXCLUDE_FROM_ALL)
 
-    # The gtest/gtest_main targets carry header search path
-    # dependencies automatically when using CMake 2.8.11 or
-    # later. Otherwise we have to add them here ourselves.
-    if (CMAKE_VERSION VERSION_LESS 2.8.11)
-      include_directories("${gtest_SOURCE_DIR}/include")
-    endif()
+# The gtest/gtest_main targets carry header search path
+# dependencies automatically when using CMake 2.8.11 or
+# later. Otherwise we have to add them here ourselves.
+if (CMAKE_VERSION VERSION_LESS 2.8.11)
+  include_directories("${gtest_SOURCE_DIR}/include")
+endif()
 
-    # Now simply link against gtest or gtest_main as needed. Eg
-    add_executable(example example.cpp)
-    target_link_libraries(example gtest_main)
-    add_test(NAME example_test COMMAND example)
+# Now simply link against gtest or gtest_main as needed. Eg
+add_executable(example example.cpp)
+target_link_libraries(example gtest_main)
+add_test(NAME example_test COMMAND example)
+```
 
 Note that this approach requires CMake 2.8.2 or later due to its use of the
 `ExternalProject_Add()` command. The above technique is discussed in more detail
@@ -240,33 +244,6 @@ them to either 1 or 0 to enable or disable a certain feature.
 
 We list the most frequently used macros below. For a complete list, see file
 [include/gtest/internal/gtest-port.h](https://github.com/google/googletest/blob/master/include/gtest/internal/gtest-port.h).
-
-### Choosing a TR1 Tuple Library
-
-Some Google Test features require the C++ Technical Report 1 (TR1) tuple
-library, which is not yet available with all compilers. The good news is that
-Google Test implements a subset of TR1 tuple that's enough for its own need, and
-will automatically use this when the compiler doesn't provide TR1 tuple.
-
-Usually you don't need to care about which tuple library Google Test uses.
-However, if your project already uses TR1 tuple, you need to tell Google Test to
-use the same TR1 tuple library the rest of your project uses, or the two tuple
-implementations will clash. To do that, add
-
-    -DGTEST_USE_OWN_TR1_TUPLE=0
-
-to the compiler flags while compiling Google Test and your tests. If you want to
-force Google Test to use its own tuple library, just add
-
-    -DGTEST_USE_OWN_TR1_TUPLE=1
-
-to the compiler flags instead.
-
-If you don't want Google Test to use tuple at all, add
-
-    -DGTEST_HAS_TR1_TUPLE=0
-
-and all features using tuple will be disabled.
 
 ### Multi-threaded Tests
 

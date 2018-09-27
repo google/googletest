@@ -83,6 +83,8 @@ class ValueArray$i {
     return ValuesIn(array);
   }
 
+  ValueArray$i(const ValueArray$i& other) : $for j, [[v$(j)_(other.v$(j)_)]] {}
+
  private:
   // No implementation - assignment is unsupported.
   void operator=(const ValueArray$i& other);
