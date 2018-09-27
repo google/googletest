@@ -20,13 +20,10 @@ environment:
     - compiler: msvc-14-seh
       generator: "Visual Studio 14 2015 Win64"
 
-    - compiler: gcc-5.3.0-posix
-      generator: "MinGW Makefiles"
-      cxx_path: 'C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\mingw32\bin'
-
     - compiler: gcc-6.3.0-posix
       generator: "MinGW Makefiles"
       cxx_path: 'C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\mingw32\bin'
+      enabled_on_pr: yes
 
 configuration:
   - Debug
@@ -38,6 +35,8 @@ install:
 - ps: |
     Write-Output "Compiler: $env:compiler"
     Write-Output "Generator: $env:generator"
+    Write-Output "Env:Configuation: $env:configuration"
+    Write-Output "Env: $env"
     if (-not (Test-Path env:APPVEYOR_PULL_REQUEST_NUMBER)) {
       Write-Output "This is *NOT* a pull request build"
     } else {

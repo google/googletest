@@ -553,452 +553,6 @@ Args(const InnerMatcher& matcher) {
       k9, k10>(matcher);
 }
 
-// ElementsAre(e_1, e_2, ... e_n) matches an STL-style container with
-// n elements, where the i-th element in the container must
-// match the i-th argument in the list.  Each argument of
-// ElementsAre() can be either a value or a matcher.  We support up to
-// 10 arguments.
-//
-// The use of DecayArray in the implementation allows ElementsAre()
-// to accept string literals, whose type is const char[N], but we
-// want to treat them as const char*.
-//
-// NOTE: Since ElementsAre() cares about the order of the elements, it
-// must not be used with containers whose elements's order is
-// undefined (e.g. hash_map).
-
-inline internal::ElementsAreMatcher<
-    ::testing::tuple<> >
-ElementsAre() {
-  typedef ::testing::tuple<> Args;
-  return internal::ElementsAreMatcher<Args>(Args());
-}
-
-template <typename T1>
-inline internal::ElementsAreMatcher<
-    ::testing::tuple<
-        typename internal::DecayArray<T1>::type> >
-ElementsAre(const T1& e1) {
-  typedef ::testing::tuple<
-      typename internal::DecayArray<T1>::type> Args;
-  return internal::ElementsAreMatcher<Args>(Args(e1));
-}
-
-template <typename T1, typename T2>
-inline internal::ElementsAreMatcher<
-    ::testing::tuple<
-        typename internal::DecayArray<T1>::type,
-        typename internal::DecayArray<T2>::type> >
-ElementsAre(const T1& e1, const T2& e2) {
-  typedef ::testing::tuple<
-      typename internal::DecayArray<T1>::type,
-      typename internal::DecayArray<T2>::type> Args;
-  return internal::ElementsAreMatcher<Args>(Args(e1, e2));
-}
-
-template <typename T1, typename T2, typename T3>
-inline internal::ElementsAreMatcher<
-    ::testing::tuple<
-        typename internal::DecayArray<T1>::type,
-        typename internal::DecayArray<T2>::type,
-        typename internal::DecayArray<T3>::type> >
-ElementsAre(const T1& e1, const T2& e2, const T3& e3) {
-  typedef ::testing::tuple<
-      typename internal::DecayArray<T1>::type,
-      typename internal::DecayArray<T2>::type,
-      typename internal::DecayArray<T3>::type> Args;
-  return internal::ElementsAreMatcher<Args>(Args(e1, e2, e3));
-}
-
-template <typename T1, typename T2, typename T3, typename T4>
-inline internal::ElementsAreMatcher<
-    ::testing::tuple<
-        typename internal::DecayArray<T1>::type,
-        typename internal::DecayArray<T2>::type,
-        typename internal::DecayArray<T3>::type,
-        typename internal::DecayArray<T4>::type> >
-ElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4) {
-  typedef ::testing::tuple<
-      typename internal::DecayArray<T1>::type,
-      typename internal::DecayArray<T2>::type,
-      typename internal::DecayArray<T3>::type,
-      typename internal::DecayArray<T4>::type> Args;
-  return internal::ElementsAreMatcher<Args>(Args(e1, e2, e3, e4));
-}
-
-template <typename T1, typename T2, typename T3, typename T4, typename T5>
-inline internal::ElementsAreMatcher<
-    ::testing::tuple<
-        typename internal::DecayArray<T1>::type,
-        typename internal::DecayArray<T2>::type,
-        typename internal::DecayArray<T3>::type,
-        typename internal::DecayArray<T4>::type,
-        typename internal::DecayArray<T5>::type> >
-ElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
-    const T5& e5) {
-  typedef ::testing::tuple<
-      typename internal::DecayArray<T1>::type,
-      typename internal::DecayArray<T2>::type,
-      typename internal::DecayArray<T3>::type,
-      typename internal::DecayArray<T4>::type,
-      typename internal::DecayArray<T5>::type> Args;
-  return internal::ElementsAreMatcher<Args>(Args(e1, e2, e3, e4, e5));
-}
-
-template <typename T1, typename T2, typename T3, typename T4, typename T5,
-    typename T6>
-inline internal::ElementsAreMatcher<
-    ::testing::tuple<
-        typename internal::DecayArray<T1>::type,
-        typename internal::DecayArray<T2>::type,
-        typename internal::DecayArray<T3>::type,
-        typename internal::DecayArray<T4>::type,
-        typename internal::DecayArray<T5>::type,
-        typename internal::DecayArray<T6>::type> >
-ElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
-    const T5& e5, const T6& e6) {
-  typedef ::testing::tuple<
-      typename internal::DecayArray<T1>::type,
-      typename internal::DecayArray<T2>::type,
-      typename internal::DecayArray<T3>::type,
-      typename internal::DecayArray<T4>::type,
-      typename internal::DecayArray<T5>::type,
-      typename internal::DecayArray<T6>::type> Args;
-  return internal::ElementsAreMatcher<Args>(Args(e1, e2, e3, e4, e5, e6));
-}
-
-template <typename T1, typename T2, typename T3, typename T4, typename T5,
-    typename T6, typename T7>
-inline internal::ElementsAreMatcher<
-    ::testing::tuple<
-        typename internal::DecayArray<T1>::type,
-        typename internal::DecayArray<T2>::type,
-        typename internal::DecayArray<T3>::type,
-        typename internal::DecayArray<T4>::type,
-        typename internal::DecayArray<T5>::type,
-        typename internal::DecayArray<T6>::type,
-        typename internal::DecayArray<T7>::type> >
-ElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
-    const T5& e5, const T6& e6, const T7& e7) {
-  typedef ::testing::tuple<
-      typename internal::DecayArray<T1>::type,
-      typename internal::DecayArray<T2>::type,
-      typename internal::DecayArray<T3>::type,
-      typename internal::DecayArray<T4>::type,
-      typename internal::DecayArray<T5>::type,
-      typename internal::DecayArray<T6>::type,
-      typename internal::DecayArray<T7>::type> Args;
-  return internal::ElementsAreMatcher<Args>(Args(e1, e2, e3, e4, e5, e6, e7));
-}
-
-template <typename T1, typename T2, typename T3, typename T4, typename T5,
-    typename T6, typename T7, typename T8>
-inline internal::ElementsAreMatcher<
-    ::testing::tuple<
-        typename internal::DecayArray<T1>::type,
-        typename internal::DecayArray<T2>::type,
-        typename internal::DecayArray<T3>::type,
-        typename internal::DecayArray<T4>::type,
-        typename internal::DecayArray<T5>::type,
-        typename internal::DecayArray<T6>::type,
-        typename internal::DecayArray<T7>::type,
-        typename internal::DecayArray<T8>::type> >
-ElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
-    const T5& e5, const T6& e6, const T7& e7, const T8& e8) {
-  typedef ::testing::tuple<
-      typename internal::DecayArray<T1>::type,
-      typename internal::DecayArray<T2>::type,
-      typename internal::DecayArray<T3>::type,
-      typename internal::DecayArray<T4>::type,
-      typename internal::DecayArray<T5>::type,
-      typename internal::DecayArray<T6>::type,
-      typename internal::DecayArray<T7>::type,
-      typename internal::DecayArray<T8>::type> Args;
-  return internal::ElementsAreMatcher<Args>(Args(e1, e2, e3, e4, e5, e6, e7,
-      e8));
-}
-
-template <typename T1, typename T2, typename T3, typename T4, typename T5,
-    typename T6, typename T7, typename T8, typename T9>
-inline internal::ElementsAreMatcher<
-    ::testing::tuple<
-        typename internal::DecayArray<T1>::type,
-        typename internal::DecayArray<T2>::type,
-        typename internal::DecayArray<T3>::type,
-        typename internal::DecayArray<T4>::type,
-        typename internal::DecayArray<T5>::type,
-        typename internal::DecayArray<T6>::type,
-        typename internal::DecayArray<T7>::type,
-        typename internal::DecayArray<T8>::type,
-        typename internal::DecayArray<T9>::type> >
-ElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
-    const T5& e5, const T6& e6, const T7& e7, const T8& e8, const T9& e9) {
-  typedef ::testing::tuple<
-      typename internal::DecayArray<T1>::type,
-      typename internal::DecayArray<T2>::type,
-      typename internal::DecayArray<T3>::type,
-      typename internal::DecayArray<T4>::type,
-      typename internal::DecayArray<T5>::type,
-      typename internal::DecayArray<T6>::type,
-      typename internal::DecayArray<T7>::type,
-      typename internal::DecayArray<T8>::type,
-      typename internal::DecayArray<T9>::type> Args;
-  return internal::ElementsAreMatcher<Args>(Args(e1, e2, e3, e4, e5, e6, e7,
-      e8, e9));
-}
-
-template <typename T1, typename T2, typename T3, typename T4, typename T5,
-    typename T6, typename T7, typename T8, typename T9, typename T10>
-inline internal::ElementsAreMatcher<
-    ::testing::tuple<
-        typename internal::DecayArray<T1>::type,
-        typename internal::DecayArray<T2>::type,
-        typename internal::DecayArray<T3>::type,
-        typename internal::DecayArray<T4>::type,
-        typename internal::DecayArray<T5>::type,
-        typename internal::DecayArray<T6>::type,
-        typename internal::DecayArray<T7>::type,
-        typename internal::DecayArray<T8>::type,
-        typename internal::DecayArray<T9>::type,
-        typename internal::DecayArray<T10>::type> >
-ElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
-    const T5& e5, const T6& e6, const T7& e7, const T8& e8, const T9& e9,
-    const T10& e10) {
-  typedef ::testing::tuple<
-      typename internal::DecayArray<T1>::type,
-      typename internal::DecayArray<T2>::type,
-      typename internal::DecayArray<T3>::type,
-      typename internal::DecayArray<T4>::type,
-      typename internal::DecayArray<T5>::type,
-      typename internal::DecayArray<T6>::type,
-      typename internal::DecayArray<T7>::type,
-      typename internal::DecayArray<T8>::type,
-      typename internal::DecayArray<T9>::type,
-      typename internal::DecayArray<T10>::type> Args;
-  return internal::ElementsAreMatcher<Args>(Args(e1, e2, e3, e4, e5, e6, e7,
-      e8, e9, e10));
-}
-
-// UnorderedElementsAre(e_1, e_2, ..., e_n) is an ElementsAre extension
-// that matches n elements in any order.  We support up to n=10 arguments.
-//
-// If you have >10 elements, consider UnorderedElementsAreArray() or
-// UnorderedPointwise() instead.
-
-inline internal::UnorderedElementsAreMatcher<
-    ::testing::tuple<> >
-UnorderedElementsAre() {
-  typedef ::testing::tuple<> Args;
-  return internal::UnorderedElementsAreMatcher<Args>(Args());
-}
-
-template <typename T1>
-inline internal::UnorderedElementsAreMatcher<
-    ::testing::tuple<
-        typename internal::DecayArray<T1>::type> >
-UnorderedElementsAre(const T1& e1) {
-  typedef ::testing::tuple<
-      typename internal::DecayArray<T1>::type> Args;
-  return internal::UnorderedElementsAreMatcher<Args>(Args(e1));
-}
-
-template <typename T1, typename T2>
-inline internal::UnorderedElementsAreMatcher<
-    ::testing::tuple<
-        typename internal::DecayArray<T1>::type,
-        typename internal::DecayArray<T2>::type> >
-UnorderedElementsAre(const T1& e1, const T2& e2) {
-  typedef ::testing::tuple<
-      typename internal::DecayArray<T1>::type,
-      typename internal::DecayArray<T2>::type> Args;
-  return internal::UnorderedElementsAreMatcher<Args>(Args(e1, e2));
-}
-
-template <typename T1, typename T2, typename T3>
-inline internal::UnorderedElementsAreMatcher<
-    ::testing::tuple<
-        typename internal::DecayArray<T1>::type,
-        typename internal::DecayArray<T2>::type,
-        typename internal::DecayArray<T3>::type> >
-UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3) {
-  typedef ::testing::tuple<
-      typename internal::DecayArray<T1>::type,
-      typename internal::DecayArray<T2>::type,
-      typename internal::DecayArray<T3>::type> Args;
-  return internal::UnorderedElementsAreMatcher<Args>(Args(e1, e2, e3));
-}
-
-template <typename T1, typename T2, typename T3, typename T4>
-inline internal::UnorderedElementsAreMatcher<
-    ::testing::tuple<
-        typename internal::DecayArray<T1>::type,
-        typename internal::DecayArray<T2>::type,
-        typename internal::DecayArray<T3>::type,
-        typename internal::DecayArray<T4>::type> >
-UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4) {
-  typedef ::testing::tuple<
-      typename internal::DecayArray<T1>::type,
-      typename internal::DecayArray<T2>::type,
-      typename internal::DecayArray<T3>::type,
-      typename internal::DecayArray<T4>::type> Args;
-  return internal::UnorderedElementsAreMatcher<Args>(Args(e1, e2, e3, e4));
-}
-
-template <typename T1, typename T2, typename T3, typename T4, typename T5>
-inline internal::UnorderedElementsAreMatcher<
-    ::testing::tuple<
-        typename internal::DecayArray<T1>::type,
-        typename internal::DecayArray<T2>::type,
-        typename internal::DecayArray<T3>::type,
-        typename internal::DecayArray<T4>::type,
-        typename internal::DecayArray<T5>::type> >
-UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
-    const T5& e5) {
-  typedef ::testing::tuple<
-      typename internal::DecayArray<T1>::type,
-      typename internal::DecayArray<T2>::type,
-      typename internal::DecayArray<T3>::type,
-      typename internal::DecayArray<T4>::type,
-      typename internal::DecayArray<T5>::type> Args;
-  return internal::UnorderedElementsAreMatcher<Args>(Args(e1, e2, e3, e4, e5));
-}
-
-template <typename T1, typename T2, typename T3, typename T4, typename T5,
-    typename T6>
-inline internal::UnorderedElementsAreMatcher<
-    ::testing::tuple<
-        typename internal::DecayArray<T1>::type,
-        typename internal::DecayArray<T2>::type,
-        typename internal::DecayArray<T3>::type,
-        typename internal::DecayArray<T4>::type,
-        typename internal::DecayArray<T5>::type,
-        typename internal::DecayArray<T6>::type> >
-UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
-    const T5& e5, const T6& e6) {
-  typedef ::testing::tuple<
-      typename internal::DecayArray<T1>::type,
-      typename internal::DecayArray<T2>::type,
-      typename internal::DecayArray<T3>::type,
-      typename internal::DecayArray<T4>::type,
-      typename internal::DecayArray<T5>::type,
-      typename internal::DecayArray<T6>::type> Args;
-  return internal::UnorderedElementsAreMatcher<Args>(Args(e1, e2, e3, e4, e5,
-      e6));
-}
-
-template <typename T1, typename T2, typename T3, typename T4, typename T5,
-    typename T6, typename T7>
-inline internal::UnorderedElementsAreMatcher<
-    ::testing::tuple<
-        typename internal::DecayArray<T1>::type,
-        typename internal::DecayArray<T2>::type,
-        typename internal::DecayArray<T3>::type,
-        typename internal::DecayArray<T4>::type,
-        typename internal::DecayArray<T5>::type,
-        typename internal::DecayArray<T6>::type,
-        typename internal::DecayArray<T7>::type> >
-UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
-    const T5& e5, const T6& e6, const T7& e7) {
-  typedef ::testing::tuple<
-      typename internal::DecayArray<T1>::type,
-      typename internal::DecayArray<T2>::type,
-      typename internal::DecayArray<T3>::type,
-      typename internal::DecayArray<T4>::type,
-      typename internal::DecayArray<T5>::type,
-      typename internal::DecayArray<T6>::type,
-      typename internal::DecayArray<T7>::type> Args;
-  return internal::UnorderedElementsAreMatcher<Args>(Args(e1, e2, e3, e4, e5,
-      e6, e7));
-}
-
-template <typename T1, typename T2, typename T3, typename T4, typename T5,
-    typename T6, typename T7, typename T8>
-inline internal::UnorderedElementsAreMatcher<
-    ::testing::tuple<
-        typename internal::DecayArray<T1>::type,
-        typename internal::DecayArray<T2>::type,
-        typename internal::DecayArray<T3>::type,
-        typename internal::DecayArray<T4>::type,
-        typename internal::DecayArray<T5>::type,
-        typename internal::DecayArray<T6>::type,
-        typename internal::DecayArray<T7>::type,
-        typename internal::DecayArray<T8>::type> >
-UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
-    const T5& e5, const T6& e6, const T7& e7, const T8& e8) {
-  typedef ::testing::tuple<
-      typename internal::DecayArray<T1>::type,
-      typename internal::DecayArray<T2>::type,
-      typename internal::DecayArray<T3>::type,
-      typename internal::DecayArray<T4>::type,
-      typename internal::DecayArray<T5>::type,
-      typename internal::DecayArray<T6>::type,
-      typename internal::DecayArray<T7>::type,
-      typename internal::DecayArray<T8>::type> Args;
-  return internal::UnorderedElementsAreMatcher<Args>(Args(e1, e2, e3, e4, e5,
-      e6, e7, e8));
-}
-
-template <typename T1, typename T2, typename T3, typename T4, typename T5,
-    typename T6, typename T7, typename T8, typename T9>
-inline internal::UnorderedElementsAreMatcher<
-    ::testing::tuple<
-        typename internal::DecayArray<T1>::type,
-        typename internal::DecayArray<T2>::type,
-        typename internal::DecayArray<T3>::type,
-        typename internal::DecayArray<T4>::type,
-        typename internal::DecayArray<T5>::type,
-        typename internal::DecayArray<T6>::type,
-        typename internal::DecayArray<T7>::type,
-        typename internal::DecayArray<T8>::type,
-        typename internal::DecayArray<T9>::type> >
-UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
-    const T5& e5, const T6& e6, const T7& e7, const T8& e8, const T9& e9) {
-  typedef ::testing::tuple<
-      typename internal::DecayArray<T1>::type,
-      typename internal::DecayArray<T2>::type,
-      typename internal::DecayArray<T3>::type,
-      typename internal::DecayArray<T4>::type,
-      typename internal::DecayArray<T5>::type,
-      typename internal::DecayArray<T6>::type,
-      typename internal::DecayArray<T7>::type,
-      typename internal::DecayArray<T8>::type,
-      typename internal::DecayArray<T9>::type> Args;
-  return internal::UnorderedElementsAreMatcher<Args>(Args(e1, e2, e3, e4, e5,
-      e6, e7, e8, e9));
-}
-
-template <typename T1, typename T2, typename T3, typename T4, typename T5,
-    typename T6, typename T7, typename T8, typename T9, typename T10>
-inline internal::UnorderedElementsAreMatcher<
-    ::testing::tuple<
-        typename internal::DecayArray<T1>::type,
-        typename internal::DecayArray<T2>::type,
-        typename internal::DecayArray<T3>::type,
-        typename internal::DecayArray<T4>::type,
-        typename internal::DecayArray<T5>::type,
-        typename internal::DecayArray<T6>::type,
-        typename internal::DecayArray<T7>::type,
-        typename internal::DecayArray<T8>::type,
-        typename internal::DecayArray<T9>::type,
-        typename internal::DecayArray<T10>::type> >
-UnorderedElementsAre(const T1& e1, const T2& e2, const T3& e3, const T4& e4,
-    const T5& e5, const T6& e6, const T7& e7, const T8& e8, const T9& e9,
-    const T10& e10) {
-  typedef ::testing::tuple<
-      typename internal::DecayArray<T1>::type,
-      typename internal::DecayArray<T2>::type,
-      typename internal::DecayArray<T3>::type,
-      typename internal::DecayArray<T4>::type,
-      typename internal::DecayArray<T5>::type,
-      typename internal::DecayArray<T6>::type,
-      typename internal::DecayArray<T7>::type,
-      typename internal::DecayArray<T8>::type,
-      typename internal::DecayArray<T9>::type,
-      typename internal::DecayArray<T10>::type> Args;
-  return internal::UnorderedElementsAreMatcher<Args>(Args(e1, e2, e3, e4, e5,
-      e6, e7, e8, e9, e10));
-}
-
 // AllOf(m1, m2, ..., mk) matches any value that matches all of the given
 // sub-matchers.  AllOf is called fully qualified to prevent ADL from firing.
 
@@ -1405,8 +959,9 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
      private:\
       ::std::string FormatDescription(bool negation) const {\
         ::std::string gmock_description = (description);\
-        if (!gmock_description.empty())\
+        if (!gmock_description.empty()) {\
           return gmock_description;\
+        }\
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
@@ -1454,8 +1009,9 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
      private:\
       ::std::string FormatDescription(bool negation) const {\
         ::std::string gmock_description = (description);\
-        if (!gmock_description.empty())\
+        if (!gmock_description.empty()) {\
           return gmock_description;\
+        }\
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
@@ -1509,8 +1065,9 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
      private:\
       ::std::string FormatDescription(bool negation) const {\
         ::std::string gmock_description = (description);\
-        if (!gmock_description.empty())\
+        if (!gmock_description.empty()) {\
           return gmock_description;\
+        }\
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
@@ -1570,8 +1127,9 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
      private:\
       ::std::string FormatDescription(bool negation) const {\
         ::std::string gmock_description = (description);\
-        if (!gmock_description.empty())\
+        if (!gmock_description.empty()) {\
           return gmock_description;\
+        }\
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
@@ -1638,8 +1196,9 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
      private:\
       ::std::string FormatDescription(bool negation) const {\
         ::std::string gmock_description = (description);\
-        if (!gmock_description.empty())\
+        if (!gmock_description.empty()) {\
           return gmock_description;\
+        }\
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
@@ -1715,8 +1274,9 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
      private:\
       ::std::string FormatDescription(bool negation) const {\
         ::std::string gmock_description = (description);\
-        if (!gmock_description.empty())\
+        if (!gmock_description.empty()) {\
           return gmock_description;\
+        }\
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
@@ -1796,8 +1356,9 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
      private:\
       ::std::string FormatDescription(bool negation) const {\
         ::std::string gmock_description = (description);\
-        if (!gmock_description.empty())\
+        if (!gmock_description.empty()) {\
           return gmock_description;\
+        }\
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
@@ -1883,8 +1444,9 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
      private:\
       ::std::string FormatDescription(bool negation) const {\
         ::std::string gmock_description = (description);\
-        if (!gmock_description.empty())\
+        if (!gmock_description.empty()) {\
           return gmock_description;\
+        }\
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
@@ -1979,8 +1541,9 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
      private:\
       ::std::string FormatDescription(bool negation) const {\
         ::std::string gmock_description = (description);\
-        if (!gmock_description.empty())\
+        if (!gmock_description.empty()) {\
           return gmock_description;\
+        }\
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
@@ -2081,8 +1644,9 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
      private:\
       ::std::string FormatDescription(bool negation) const {\
         ::std::string gmock_description = (description);\
-        if (!gmock_description.empty())\
+        if (!gmock_description.empty()) {\
           return gmock_description;\
+        }\
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
@@ -2190,8 +1754,9 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
      private:\
       ::std::string FormatDescription(bool negation) const {\
         ::std::string gmock_description = (description);\
-        if (!gmock_description.empty())\
+        if (!gmock_description.empty()) {\
           return gmock_description;\
+        }\
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
