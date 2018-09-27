@@ -702,6 +702,9 @@ class GTEST_API_ UnitTestImpl {
   // the rest of the tests will still be run.
   bool RunAllTests();
 
+  // Remove duplicate test cases (by name).
+  void RemoveDuplicateTests();
+
   // Clears the results of all tests, except the ad hoc tests.
   void ClearNonAdHocTestResult() {
     ForEach(test_cases_, TestCase::ClearTestCaseResult);

@@ -923,6 +923,8 @@ class GTEST_API_ TestCase {
   // Runs every test in this TestCase.
   void Run();
 
+  void RemoveDuplicateTests();
+
   // Runs SetUpTestCase() for this TestCase.  This wrapper is needed
   // for catching exceptions thrown from SetUpTestCase().
   void RunSetUpTestCase() { (*set_up_tc_)(); }
@@ -1217,6 +1219,9 @@ class GTEST_API_ UnitTest {
   //
   // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
   int Run() GTEST_MUST_USE_RESULT_;
+
+  // Remove duplicate test cases (by name).
+  void RemoveDuplicateTests();
 
   // Returns the working directory when the first TEST() or TEST_F()
   // was executed.  The UnitTest object owns the string.
