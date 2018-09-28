@@ -100,6 +100,7 @@
 #ifndef GTEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
 #define GTEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
 
+#include <functional>
 #include <ostream>  // NOLINT
 #include <sstream>
 #include <string>
@@ -639,7 +640,15 @@ inline void PrintTo(absl::string_view sp, ::std::ostream* os) {
 #endif  // GTEST_HAS_ABSL
 
 #if GTEST_LANG_CXX11
+
 inline void PrintTo(std::nullptr_t, ::std::ostream* os) { *os << "(nullptr)"; }
+
+template <typename T>
+void PrintTo(std::reference_wrapper<T> ref, ::std::ostream* os) {
+  // Delegate to wrapped value.
+  PrintTo(ref.get(), os);
+}
+
 #endif  // GTEST_LANG_CXX11
 
 #if GTEST_HAS_TR1_TUPLE || GTEST_HAS_STD_TUPLE_
