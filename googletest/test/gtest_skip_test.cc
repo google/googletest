@@ -33,6 +33,6 @@
 #include <gtest/gtest.h>
 
 TEST(SkipTest, DoesSkip) {
-    SKIP();
+    GTEST_SKIP();
     EXPECT_EQ(0, 1);
 }
