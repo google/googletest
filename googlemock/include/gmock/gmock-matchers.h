@@ -56,11 +56,17 @@
 # include <initializer_list>  // NOLINT -- must be after gtest.h
 #endif
 
+#if _MSC_VER >= 1900
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(
     4251 5046 /* class A needs to have dll-interface to be used by clients of
                  class B */
     /* Symbol involving type with internal linkage not defined */)
-
+#else //Pragma 5046 doesn't exist in version of MSC prior to 1900
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(
+    4251 /* class A needs to have dll-interface to be used by clients of
+                 class B */
+    /* Symbol involving type with internal linkage not defined */)
+#endif
 namespace testing {
 
 // To implement a matcher Foo for type T, define:
