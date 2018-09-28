@@ -1857,12 +1857,6 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 // Skipped tests are neither successful nor failed.
 #define GTEST_SKIP() GTEST_SKIP_("Skipped")
 
-// Define this macro to 1 to omit the definition of SKIP(), which is a
-// generic name and may clash with some other libraries.
-#if !GTEST_DONT_DEFINE_SKIP
-# define SKIP() GTEST_SKIP()
-#endif
-
 // ADD_FAILURE unconditionally adds a failure to the current test.
 // SUCCEED generates a success - it doesn't automatically make the
 // current test successful, as a test is only successful when it has
