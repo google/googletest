@@ -796,6 +796,11 @@ int UnitTestImpl::successful_test_count() const {
   return SumOverTestCaseList(test_cases_, &TestCase::successful_test_count);
 }
 
+// Gets the number of skipped tests.
+int UnitTestImpl::skipped_test_count() const {
+  return SumOverTestCaseList(test_cases_, &TestCase::skipped_test_count);
+}
+
 // Gets the number of failed tests.
 int UnitTestImpl::failed_test_count() const {
   return SumOverTestCaseList(test_cases_, &TestCase::failed_test_count);
@@ -2207,6 +2212,16 @@ void TestResult::Clear() {
   elapsed_time_ = 0;
 }
 
+// Returns true off the test part was skipped.
+static bool TestPartSkipped(const TestPartResult& result) {
+  return result.skipped();
+}
+
+// Returns true iff the test was skipped.
+bool TestResult::Skipped() const {
+  return !Failed() && CountIf(test_part_results_, TestPartSkipped) > 0;
+}
+
 // Returns true iff the test failed.
 bool TestResult::Failed() const {
   for (int i = 0; i < total_part_count(); ++i) {
@@ -2537,6 +2552,11 @@ bool Test::HasNonfatalFailure() {
       HasNonfatalFailure();
 }
 
+// Returns true iff the current test was skipped.
+bool Test::IsSkipped() {
+  return internal::GetUnitTestImpl()->current_test_result()->Skipped();
+}
+
 // class TestInfo
 
 // Constructs a TestInfo object. It assumes ownership of the test factory
@@ -2715,6 +2735,11 @@ int TestCase::successful_test_count() const {
   return CountIf(test_info_list_, TestPassed);
 }
 
+// Gets the number of successful tests in this test case.
+int TestCase::skipped_test_count() const {
+  return CountIf(test_info_list_, TestSkipped);
+}
+
 // Gets the number of failed tests in this test case.
 int TestCase::failed_test_count() const {
   return CountIf(test_info_list_, TestFailed);
@@ -2866,6 +2891,8 @@ static std::string FormatTestCaseCount(int test_case_count) {
 // between the two when viewing the test result.
 static const char * TestPartResultTypeToString(TestPartResult::Type type) {
   switch (type) {
+    case TestPartResult::kSkip:
+      return "Skipped";
     case TestPartResult::kSuccess:
       return "Success";
 
@@ -3119,6 +3146,7 @@ class PrettyUnitTestResultPrinter : public TestEventListener {
 
  private:
   static void PrintFailedTests(const UnitTest& unit_test);
+  static void PrintSkippedTests(const UnitTest& unit_test);
 };
 
   // Fired before each iteration of tests starts.
@@ -3187,18 +3215,25 @@ void PrettyUnitTestResultPrinter::OnTestStart(const TestInfo& test_info) {
 // Called after an assertion failure.
 void PrettyUnitTestResultPrinter::OnTestPartResult(
     const TestPartResult& result) {
-  // If the test part succeeded, we don't need to do anything.
-  if (result.type() == TestPartResult::kSuccess)
-    return;
-
-  // Print failure message from the assertion (e.g. expected this and got that).
-  PrintTestPartResult(result);
-  fflush(stdout);
+  switch(result.type()) {
+    // If the test part succeeded, or was skipped,
+    // we don't need to do anything.
+    case TestPartResult::kSkip:
+    case TestPartResult::kSuccess:
+      return;
+    default:
+      // Print failure message from the assertion
+      // (e.g. expected this and got that).
+      PrintTestPartResult(result);
+      fflush(stdout);
+  }
 }
 
 void PrettyUnitTestResultPrinter::OnTestEnd(const TestInfo& test_info) {
   if (test_info.result()->Passed()) {
     ColoredPrintf(COLOR_GREEN, "[       OK ] ");
+  } else if (test_info.result()->Skipped()) {
+    ColoredPrintf(COLOR_GREEN, "[  SKIPPED ] ");
   } else {
     ColoredPrintf(COLOR_RED, "[  FAILED  ] ");
   }
@@ -3248,12 +3283,36 @@ void PrettyUnitTestResultPrinter::PrintFailedTests(const UnitTest& unit_test) {
     }
     for (int j = 0; j < test_case.total_test_count(); ++j) {
       const TestInfo& test_info = *test_case.GetTestInfo(j);
-      if (!test_info.should_run() || test_info.result()->Passed()) {
+      if (!test_info.should_run() || !test_info.result()->Failed()) {
         continue;
       }
       ColoredPrintf(COLOR_RED, "[  FAILED  ] ");
       printf("%s.%s", test_case.name(), test_info.name());
       PrintFullTestCommentIfPresent(test_info);
+      printf("\n");
+    }
+  }
+}
+
+// Internal helper for printing the list of skipped tests.
+void PrettyUnitTestResultPrinter::PrintSkippedTests(const UnitTest& unit_test) {
+  const int skipped_test_count = unit_test.skipped_test_count();
+  if (skipped_test_count == 0) {
+    return;
+  }
+
+  for (int i = 0; i < unit_test.total_test_case_count(); ++i) {
+    const TestCase& test_case = *unit_test.GetTestCase(i);
+    if (!test_case.should_run() || (test_case.skipped_test_count() == 0)) {
+      continue;
+    }
+    for (int j = 0; j < test_case.total_test_count(); ++j) {
+      const TestInfo& test_info = *test_case.GetTestInfo(j);
+      if (!test_info.should_run() || !test_info.result()->Skipped()) {
+        continue;
+      }
+      ColoredPrintf(COLOR_GREEN, "[  SKIPPED ] ");
+      printf("%s.%s", test_case.name(), test_info.name());
       printf("\n");
     }
   }
@@ -3272,6 +3331,13 @@ void PrettyUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
   printf("\n");
   ColoredPrintf(COLOR_GREEN,  "[  PASSED  ] ");
   printf("%s.\n", FormatTestCount(unit_test.successful_test_count()).c_str());
+
+  const int skipped_test_count = unit_test.skipped_test_count();
+  if (skipped_test_count > 0) {
+    ColoredPrintf(COLOR_GREEN,  "[  SKIPPED ] ");
+    printf("%s, listed below:\n", FormatTestCount(skipped_test_count).c_str());
+    PrintSkippedTests(unit_test);
+  }
 
   int num_failures = unit_test.failed_test_count();
   if (!unit_test.Passed()) {
@@ -4540,6 +4606,11 @@ int UnitTest::successful_test_count() const {
   return impl()->successful_test_count();
 }
 
+// Gets the number of skipped tests.
+int UnitTest::skipped_test_count() const {
+    return impl()->skipped_test_count();
+}
+
 // Gets the number of failed tests.
 int UnitTest::failed_test_count() const { return impl()->failed_test_count(); }
 
@@ -4660,7 +4731,8 @@ void UnitTest::AddTestPartResult(
   impl_->GetTestPartResultReporterForCurrentThread()->
       ReportTestPartResult(result);
 
-  if (result_type != TestPartResult::kSuccess) {
+  if (result_type != TestPartResult::kSuccess &&
+      result_type != TestPartResult::kSkip) {
     // gtest_break_on_failure takes precedence over
     // gtest_throw_on_failure.  This allows a user to set the latter
     // in the code (perhaps in order to use Google Test assertions
