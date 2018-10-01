@@ -217,6 +217,7 @@ if (gtest_build_tests)
     test/gtest-typed-test2_test.cc)
   cxx_test(gtest_unittest gtest_main)
   cxx_test(gtest-unittest-api_test gtest)
+  cxx_test(gtest_skip_test gtest_main)
 
   ############################################################
   # C++ tests built with non-standard compiler flags.

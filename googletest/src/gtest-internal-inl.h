@@ -544,6 +544,9 @@ class GTEST_API_ UnitTestImpl {
   // Gets the number of successful tests.
   int successful_test_count() const;
 
+  // Gets the number of skipped tests.
+  int skipped_test_count() const;
+
   // Gets the number of failed tests.
   int failed_test_count() const;
 
