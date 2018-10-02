@@ -6,7 +6,8 @@ endif (POLICY CMP0048)
 
 project(googletest-distribution)
 set(GOOGLETEST_VERSION 1.9.0)
-set(CMAKE_CXX_STANDARD 11 CACHE STRING "Set the C++ standard to be used for compiling")
+
+add_compile_options(-std=c++11)
 
 enable_testing()
 
