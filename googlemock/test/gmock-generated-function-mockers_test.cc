@@ -608,6 +608,16 @@ TEST(MockFunctionTest, AsStdFunction) {
   EXPECT_EQ(-2, call(foo.AsStdFunction(), 2));
 }
 
+TEST(MockFunctionTest, AsStdFunctionWithReferenceParameter) {
+  MockFunction<int(int &)> foo;
+  auto call = [](const std::function<void(int)> &f, int &i) {
+    return f(i);
+  };
+  int i = 1;
+  EXPECT_CALL(foo, Call(i).WillOnce(Return(-1));
+  EXPECT_EQ(-1, call(foo.AsStdFunction(), i));
+}
+
 TEST(MockFunctionTest, AsStdFunctionReturnsReference) {
   MockFunction<int&()> foo;
   int value = 1;
