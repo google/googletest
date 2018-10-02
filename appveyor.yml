@@ -23,7 +23,6 @@ environment:
     - compiler: gcc-6.3.0-posix
       generator: "MinGW Makefiles"
       cxx_path: 'C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\mingw32\bin'
-      enabled_on_pr: yes
 
 configuration:
   - Debug

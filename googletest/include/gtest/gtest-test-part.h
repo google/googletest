@@ -53,7 +53,8 @@ class GTEST_API_ TestPartResult {
   enum Type {
     kSuccess,          // Succeeded.
     kNonFatalFailure,  // Failed but the test can continue.
-    kFatalFailure      // Failed and the test should be terminated.
+    kFatalFailure,     // Failed and the test should be terminated.
+    kSkip              // Skipped.
   };
 
   // C'tor.  TestPartResult does NOT have a default constructor.
@@ -89,17 +90,20 @@ class GTEST_API_ TestPartResult {
   // Gets the message associated with the test part.
   const char* message() const { return message_.c_str(); }
 
+  // Returns true iff the test part was skipped.
+  bool skipped() const { return type_ == kSkip; }
+
   // Returns true iff the test part passed.
   bool passed() const { return type_ == kSuccess; }
-
-  // Returns true iff the test part failed.
-  bool failed() const { return type_ != kSuccess; }
 
   // Returns true iff the test part non-fatally failed.
   bool nonfatally_failed() const { return type_ == kNonFatalFailure; }
 
   // Returns true iff the test part fatally failed.
   bool fatally_failed() const { return type_ == kFatalFailure; }
+
+  // Returns true iff the test part failed.
+  bool failed() const { return fatally_failed() || nonfatally_failed(); }
 
  private:
   Type type_;
