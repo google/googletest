@@ -6,11 +6,6 @@ endif (POLICY CMP0048)
 
 project(googletest-distribution)
 set(GOOGLETEST_VERSION 1.9.0)
-<<<<<<< HEAD
-=======
-
-add_compile_options(-std=c++11)
->>>>>>> 1e893191c0a72f6c94bbd69acc39ce425594f36d
 
 enable_testing()
 
