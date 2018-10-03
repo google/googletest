@@ -320,7 +320,7 @@ class MockFunction;
 $for i [[
 $range j 0..i-1
 $var ArgTypes = [[$for j, [[A$j]]]]
-$var ArgValues = [[$for j, [[::std::move(a$j)]]]]
+$var ArgValues = [[$for j, [[::std::forward<A$j>(a$j)]]]]
 $var ArgDecls = [[$for j, [[A$j a$j]]]]
 template <typename R$for j [[, typename A$j]]>
 class MockFunction<R($ArgTypes)> {
