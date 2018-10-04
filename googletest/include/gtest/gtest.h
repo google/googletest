@@ -440,6 +440,9 @@ class GTEST_API_ Test {
   // Returns true iff the current test has a non-fatal failure.
   static bool HasNonfatalFailure();
 
+  // Returns true iff the current test was skipped.
+  static bool IsSkipped();
+
   // Returns true iff the current test has a (either fatal or
   // non-fatal) failure.
   static bool HasFailure() { return HasFatalFailure() || HasNonfatalFailure(); }
@@ -574,7 +577,10 @@ class GTEST_API_ TestResult {
   int test_property_count() const;
 
   // Returns true iff the test passed (i.e. no test part failed).
-  bool Passed() const { return !Failed(); }
+  bool Passed() const { return !Skipped() && !Failed(); }
+
+  // Returns true iff the test was skipped.
+  bool Skipped() const;
 
   // Returns true iff the test failed.
   bool Failed() const;
@@ -854,6 +860,9 @@ class GTEST_API_ TestCase {
   // Gets the number of successful tests in this test case.
   int successful_test_count() const;
 
+  // Gets the number of skipped tests in this test case.
+  int skipped_test_count() const;
+
   // Gets the number of failed tests in this test case.
   int failed_test_count() const;
 
@@ -934,6 +943,11 @@ class GTEST_API_ TestCase {
   // Returns true iff test passed.
   static bool TestPassed(const TestInfo* test_info) {
     return test_info->should_run() && test_info->result()->Passed();
+  }
+
+  // Returns true iff test skipped.
+  static bool TestSkipped(const TestInfo* test_info) {
+    return test_info->should_run() && test_info->result()->Skipped();
   }
 
   // Returns true iff test failed.
@@ -1257,6 +1271,9 @@ class GTEST_API_ UnitTest {
 
   // Gets the number of successful tests.
   int successful_test_count() const;
+
+  // Gets the number of skipped tests.
+  int skipped_test_count() const;
 
   // Gets the number of failed tests.
   int failed_test_count() const;
@@ -1798,11 +1815,8 @@ class WithParamInterface {
   virtual ~WithParamInterface() {}
 
   // The current parameter value. Is also available in the test fixture's
-  // constructor. This member function is non-static, even though it only
-  // references static data, to reduce the opportunity for incorrect uses
-  // like writing 'WithParamInterface<bool>::GetParam()' for a test that
-  // uses a fixture whose parameter type is int.
-  const ParamType& GetParam() const {
+  // constructor.
+  static const ParamType& GetParam() {
     GTEST_CHECK_(parameter_ != NULL)
         << "GetParam() can only be called inside a value-parameterized test "
         << "-- did you intend to write TEST_P instead of TEST_F?";
@@ -1834,6 +1848,11 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 };
 
 // Macros for indicating success/failure in test code.
+
+// Skips test in runtime.
+// Skipping test aborts current function.
+// Skipped tests are neither successful nor failed.
+#define GTEST_SKIP() GTEST_SKIP_("Skipped")
 
 // ADD_FAILURE unconditionally adds a failure to the current test.
 // SUCCEED generates a success - it doesn't automatically make the
