@@ -5,7 +5,7 @@ if (POLICY CMP0048)
 endif (POLICY CMP0048)
 
 project(googletest-distribution)
-set(GOOGLETEST_VERSION 1.9.0)
+set(GOOGLETEST_VERSION 1.8.2)
 
 enable_testing()
 
