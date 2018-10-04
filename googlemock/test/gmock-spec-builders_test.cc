@@ -2041,7 +2041,7 @@ TEST(FunctionCallMessageTest,
   GMOCK_FLAG(verbose) = kWarningVerbosity;
   NaggyMock<MockC> c;
   CaptureStdout();
-  c.VoidMethod(false, 5, "Hi", NULL, Printable(), Unprintable());
+  c.VoidMethod(false, 5, "Hi", nullptr, Printable(), Unprintable());
   const std::string output = GetCapturedStdout();
   EXPECT_PRED_FORMAT2(IsSubstring, "GMOCK WARNING", output);
   EXPECT_PRED_FORMAT2(IsNotSubstring, "Stack trace:", output);
@@ -2055,7 +2055,7 @@ TEST(FunctionCallMessageTest,
   GMOCK_FLAG(verbose) = kInfoVerbosity;
   NaggyMock<MockC> c;
   CaptureStdout();
-  c.VoidMethod(false, 5, "Hi", NULL, Printable(), Unprintable());
+  c.VoidMethod(false, 5, "Hi", nullptr, Printable(), Unprintable());
   const std::string output = GetCapturedStdout();
   EXPECT_PRED_FORMAT2(IsSubstring, "GMOCK WARNING", output);
   EXPECT_PRED_FORMAT2(IsSubstring, "Stack trace:", output);
@@ -2098,7 +2098,7 @@ TEST(FunctionCallMessageTest,
   // A void mock function.
   NaggyMock<MockC> c;
   CaptureStdout();
-  c.VoidMethod(false, 5, "Hi", NULL, Printable(), Unprintable());
+  c.VoidMethod(false, 5, "Hi", nullptr, Printable(), Unprintable());
   const std::string output2 = GetCapturedStdout();
   EXPECT_THAT(output2.c_str(),
               ContainsRegex(

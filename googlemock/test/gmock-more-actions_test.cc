@@ -333,7 +333,8 @@ TEST(InvokeTest, FunctionWithUnusedParameters) {
 
   Action<int(int, int, bool, int*)> a2 =
       Invoke(SumOfFirst2);
-  EXPECT_EQ(23, a2.Perform(make_tuple(20, 3, true, static_cast<int*>(NULL))));
+  EXPECT_EQ(23,
+            a2.Perform(make_tuple(20, 3, true, static_cast<int*>(nullptr))));
 }
 
 // Tests using Invoke() with methods with parameters declared as Unused.

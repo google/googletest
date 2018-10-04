@@ -63,8 +63,7 @@ void TestFailureThrowsRuntimeError() {
   try {
     EXPECT_EQ(2, 3) << "Expected failure";
   } catch(const std::runtime_error& e) {
-    if (strstr(e.what(), "Expected failure") != NULL)
-      return;
+    if (strstr(e.what(), "Expected failure") != nullptr) return;
 
     printf("%s",
            "A failed assertion did throw an exception of the right type, "

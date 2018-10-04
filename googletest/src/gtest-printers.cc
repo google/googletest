@@ -327,7 +327,7 @@ void UniversalPrintArray(const wchar_t* begin, size_t len, ostream* os) {
 
 // Prints the given C string to the ostream.
 void PrintTo(const char* s, ostream* os) {
-  if (s == NULL) {
+  if (s == nullptr) {
     *os << "NULL";
   } else {
     *os << ImplicitCast_<const void*>(s) << " pointing to ";
@@ -344,7 +344,7 @@ void PrintTo(const char* s, ostream* os) {
 #if !defined(_MSC_VER) || defined(_NATIVE_WCHAR_T_DEFINED)
 // Prints the given wide C string to the ostream.
 void PrintTo(const wchar_t* s, ostream* os) {
-  if (s == NULL) {
+  if (s == nullptr) {
     *os << "NULL";
   } else {
     *os << ImplicitCast_<const void*>(s) << " pointing to ";

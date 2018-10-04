@@ -41,8 +41,7 @@ using internal::GetUnitTestImpl;
 // in it.
 std::string TestPartResult::ExtractSummary(const char* message) {
   const char* const stack_trace = strstr(message, internal::kStackTraceMarker);
-  return stack_trace == NULL ? message :
-      std::string(message, stack_trace);
+  return stack_trace == nullptr ? message : std::string(message, stack_trace);
 }
 
 // Prints a TestPartResult object.

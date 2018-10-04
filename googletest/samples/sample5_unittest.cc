@@ -63,15 +63,13 @@ class QuickTest : public testing::Test {
  protected:
   // Remember that SetUp() is run immediately before a test starts.
   // This is a good place to record the start time.
-  virtual void SetUp() {
-    start_time_ = time(NULL);
-  }
+  virtual void SetUp() { start_time_ = time(nullptr); }
 
   // TearDown() is invoked immediately after a test finishes.  Here we
   // check if the test was too slow.
   virtual void TearDown() {
     // Gets the time when the test finishes
-    const time_t end_time = time(NULL);
+    const time_t end_time = time(nullptr);
 
     // Asserts that the test took no more than ~5 seconds.  Did you
     // know that you can use assertions in SetUp() and TearDown() as
@@ -176,16 +174,16 @@ TEST_F(QueueTest, DefaultConstructor) {
 // Tests Dequeue().
 TEST_F(QueueTest, Dequeue) {
   int* n = q0_.Dequeue();
-  EXPECT_TRUE(n == NULL);
+  EXPECT_TRUE(n == nullptr);
 
   n = q1_.Dequeue();
-  EXPECT_TRUE(n != NULL);
+  EXPECT_TRUE(n != nullptr);
   EXPECT_EQ(1, *n);
   EXPECT_EQ(0u, q1_.Size());
   delete n;
 
   n = q2_.Dequeue();
-  EXPECT_TRUE(n != NULL);
+  EXPECT_TRUE(n != nullptr);
   EXPECT_EQ(2, *n);
   EXPECT_EQ(1u, q2_.Size());
   delete n;

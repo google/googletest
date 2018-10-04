@@ -56,7 +56,7 @@ class PrematureExitTest : public Test {
     premature_exit_file_path_ = GetEnv("TEST_PREMATURE_EXIT_FILE");
 
     // Normalize NULL to "" for ease of handling.
-    if (premature_exit_file_path_ == NULL) {
+    if (premature_exit_file_path_ == nullptr) {
       premature_exit_file_path_ = "";
     }
   }
@@ -113,7 +113,7 @@ int main(int argc, char **argv) {
   // Test that the premature-exit file is deleted upon return from
   // RUN_ALL_TESTS().
   const char* const filepath = GetEnv("TEST_PREMATURE_EXIT_FILE");
-  if (filepath != NULL && *filepath != '\0') {
+  if (filepath != nullptr && *filepath != '\0') {
     if (PrematureExitTest::FileExists(filepath)) {
       printf(
           "File %s shouldn't exist after the test program finishes, but does.",

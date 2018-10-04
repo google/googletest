@@ -100,7 +100,7 @@ TEST(ListenersTest, DoesNotLeak) {
 // specified.
 TEST(ListenersTest, LeaksWater) {
   Water* water = new Water;
-  EXPECT_TRUE(water != NULL);
+  EXPECT_TRUE(water != nullptr);
 }
 }  // namespace
 

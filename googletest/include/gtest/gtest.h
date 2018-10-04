@@ -300,7 +300,8 @@ class GTEST_API_ AssertionResult {
       const T& success,
       typename internal::EnableIf<
           !internal::ImplicitlyConvertible<T, AssertionResult>::value>::type*
-          /*enabler*/ = NULL)
+      /*enabler*/
+      = nullptr)
       : success_(success) {}
 
 #if defined(_MSC_VER) && _MSC_VER < 1910
@@ -324,7 +325,7 @@ class GTEST_API_ AssertionResult {
   // assertion's expectation). When nothing has been streamed into the
   // object, returns an empty string.
   const char* message() const {
-    return message_.get() != NULL ?  message_->c_str() : "";
+    return message_.get() != nullptr ? message_->c_str() : "";
   }
   // FIXME: Remove this after making sure no clients use it.
   // Deprecated; please use message() instead.
@@ -347,8 +348,7 @@ class GTEST_API_ AssertionResult {
  private:
   // Appends the contents of message to message_.
   void AppendMessage(const Message& a_message) {
-    if (message_.get() == NULL)
-      message_.reset(new ::std::string);
+    if (message_.get() == nullptr) message_.reset(new ::std::string);
     message_->append(a_message.GetString().c_str());
   }
 
@@ -512,7 +512,7 @@ class GTEST_API_ Test {
   // If you see an error about overriding the following function or
   // about it being private, you have mis-spelled SetUp() as Setup().
   struct Setup_should_be_spelled_SetUp {};
-  virtual Setup_should_be_spelled_SetUp* Setup() { return NULL; }
+  virtual Setup_should_be_spelled_SetUp* Setup() { return nullptr; }
 
   // We disallow copying Tests.
   GTEST_DISALLOW_COPY_AND_ASSIGN_(Test);
@@ -700,17 +700,15 @@ class GTEST_API_ TestInfo {
   // Returns the name of the parameter type, or NULL if this is not a typed
   // or a type-parameterized test.
   const char* type_param() const {
-    if (type_param_.get() != NULL)
-      return type_param_->c_str();
-    return NULL;
+    if (type_param_.get() != nullptr) return type_param_->c_str();
+    return nullptr;
   }
 
   // Returns the text representation of the value parameter, or NULL if this
   // is not a value-parameterized test.
   const char* value_param() const {
-    if (value_param_.get() != NULL)
-      return value_param_->c_str();
-    return NULL;
+    if (value_param_.get() != nullptr) return value_param_->c_str();
+    return nullptr;
   }
 
   // Returns the file name where this test is defined.
@@ -849,9 +847,8 @@ class GTEST_API_ TestCase {
   // Returns the name of the parameter type, or NULL if this is not a
   // type-parameterized test case.
   const char* type_param() const {
-    if (type_param_.get() != NULL)
-      return type_param_->c_str();
-    return NULL;
+    if (type_param_.get() != nullptr) return type_param_->c_str();
+    return nullptr;
   }
 
   // Returns true if any test in this test case should run.
@@ -1038,7 +1035,7 @@ class Environment {
   // If you see an error about overriding the following function or
   // about it being private, you have mis-spelled SetUp() as Setup().
   struct Setup_should_be_spelled_SetUp {};
-  virtual Setup_should_be_spelled_SetUp* Setup() { return NULL; }
+  virtual Setup_should_be_spelled_SetUp* Setup() { return nullptr; }
 };
 
 #if GTEST_HAS_EXCEPTIONS
@@ -1514,16 +1511,14 @@ class EqHelper<true> {
   // EXPECT_EQ(false, a_bool).
   template <typename T1, typename T2>
   static AssertionResult Compare(
-      const char* lhs_expression,
-      const char* rhs_expression,
-      const T1& lhs,
+      const char* lhs_expression, const char* rhs_expression, const T1& lhs,
       const T2& rhs,
       // The following line prevents this overload from being considered if T2
       // is not a pointer type.  We need this because ASSERT_EQ(NULL, my_ptr)
       // expands to Compare("", "", NULL, my_ptr), which requires a conversion
       // to match the Secret* in the other overload, which would otherwise make
       // this template match better.
-      typename EnableIf<!is_pointer<T2>::value>::type* = 0) {
+      typename EnableIf<!is_pointer<T2>::value>::type* = nullptr) {
     return CmpHelperEQ(lhs_expression, rhs_expression, lhs, rhs);
   }
 
@@ -1542,8 +1537,8 @@ class EqHelper<true> {
       Secret* /* lhs (NULL) */,
       T* rhs) {
     // We already know that 'lhs' is a null pointer.
-    return CmpHelperEQ(lhs_expression, rhs_expression,
-                       static_cast<T*>(NULL), rhs);
+    return CmpHelperEQ(lhs_expression, rhs_expression, static_cast<T*>(nullptr),
+                       rhs);
   }
 };
 
@@ -1817,7 +1812,7 @@ class WithParamInterface {
   // The current parameter value. Is also available in the test fixture's
   // constructor.
   static const ParamType& GetParam() {
-    GTEST_CHECK_(parameter_ != NULL)
+    GTEST_CHECK_(parameter_ != nullptr)
         << "GetParam() can only be called inside a value-parameterized test "
         << "-- did you intend to write TEST_P instead of TEST_F?";
     return *parameter_;
@@ -1838,7 +1833,7 @@ class WithParamInterface {
 };
 
 template <typename T>
-const T* WithParamInterface<T>::parameter_ = NULL;
+const T* WithParamInterface<T>::parameter_ = nullptr;
 
 // Most value-parameterized classes can ignore the existence of
 // WithParamInterface, and can just inherit from ::testing::TestWithParam.

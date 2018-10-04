@@ -158,7 +158,7 @@ TEST(TupleConstructorTest, DefaultConstructorDefaultInitializesEachField) {
   b3 = a3;
   EXPECT_EQ(0.0, get<0>(b3));
   EXPECT_EQ('\0', get<1>(b3));
-  EXPECT_TRUE(get<2>(b3) == NULL);
+  EXPECT_TRUE(get<2>(b3) == nullptr);
 
   tuple<int, int, int, int, int, int, int, int, int, int> a10, b10;
   b10 = a10;

@@ -111,7 +111,7 @@ FilePath FilePath::GetCurrentDir() {
   // however, so fallback only when failure is detected.
   return FilePath(result == NULL ? kCurrentDirectoryString : cwd);
 # endif  // GTEST_OS_NACL
-  return FilePath(result == NULL ? "" : cwd);
+  return FilePath(result == nullptr ? "" : cwd);
 #endif  // GTEST_OS_WINDOWS_MOBILE
 }
 
@@ -352,7 +352,7 @@ FilePath FilePath::RemoveTrailingPathSeparator() const {
 // redundancies that might be in a pathname involving "." or "..".
 // FIXME: handle Windows network shares (e.g. \\server\share).
 void FilePath::Normalize() {
-  if (pathname_.c_str() == NULL) {
+  if (pathname_.c_str() == nullptr) {
     pathname_ = "";
     return;
   }

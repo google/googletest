@@ -405,7 +405,7 @@ TEST(PrintCStringTest, NonConst) {
 
 // NULL C string.
 TEST(PrintCStringTest, Null) {
-  const char* p = NULL;
+  const char* p = nullptr;
   EXPECT_EQ("NULL", Print(p));
 }
 
@@ -440,7 +440,7 @@ TEST(PrintWideCStringTest, NonConst) {
 
 // NULL wide C string.
 TEST(PrintWideCStringTest, Null) {
-  const wchar_t* p = NULL;
+  const wchar_t* p = nullptr;
   EXPECT_EQ("NULL", Print(p));
 }
 
@@ -460,7 +460,7 @@ TEST(PrintWideCStringTest, EscapesProperly) {
 TEST(PrintCharPointerTest, SignedChar) {
   signed char* p = reinterpret_cast<signed char*>(0x1234);
   EXPECT_EQ(PrintPointer(p), Print(p));
-  p = NULL;
+  p = nullptr;
   EXPECT_EQ("NULL", Print(p));
 }
 
@@ -468,7 +468,7 @@ TEST(PrintCharPointerTest, SignedChar) {
 TEST(PrintCharPointerTest, ConstSignedChar) {
   signed char* p = reinterpret_cast<signed char*>(0x1234);
   EXPECT_EQ(PrintPointer(p), Print(p));
-  p = NULL;
+  p = nullptr;
   EXPECT_EQ("NULL", Print(p));
 }
 
@@ -476,7 +476,7 @@ TEST(PrintCharPointerTest, ConstSignedChar) {
 TEST(PrintCharPointerTest, UnsignedChar) {
   unsigned char* p = reinterpret_cast<unsigned char*>(0x1234);
   EXPECT_EQ(PrintPointer(p), Print(p));
-  p = NULL;
+  p = nullptr;
   EXPECT_EQ("NULL", Print(p));
 }
 
@@ -484,7 +484,7 @@ TEST(PrintCharPointerTest, UnsignedChar) {
 TEST(PrintCharPointerTest, ConstUnsignedChar) {
   const unsigned char* p = reinterpret_cast<const unsigned char*>(0x1234);
   EXPECT_EQ(PrintPointer(p), Print(p));
-  p = NULL;
+  p = nullptr;
   EXPECT_EQ("NULL", Print(p));
 }
 
@@ -494,7 +494,7 @@ TEST(PrintCharPointerTest, ConstUnsignedChar) {
 TEST(PrintPointerToBuiltInTypeTest, Bool) {
   bool* p = reinterpret_cast<bool*>(0xABCD);
   EXPECT_EQ(PrintPointer(p), Print(p));
-  p = NULL;
+  p = nullptr;
   EXPECT_EQ("NULL", Print(p));
 }
 
@@ -502,7 +502,7 @@ TEST(PrintPointerToBuiltInTypeTest, Bool) {
 TEST(PrintPointerToBuiltInTypeTest, Void) {
   void* p = reinterpret_cast<void*>(0xABCD);
   EXPECT_EQ(PrintPointer(p), Print(p));
-  p = NULL;
+  p = nullptr;
   EXPECT_EQ("NULL", Print(p));
 }
 
@@ -510,7 +510,7 @@ TEST(PrintPointerToBuiltInTypeTest, Void) {
 TEST(PrintPointerToBuiltInTypeTest, ConstVoid) {
   const void* p = reinterpret_cast<const void*>(0xABCD);
   EXPECT_EQ(PrintPointer(p), Print(p));
-  p = NULL;
+  p = nullptr;
   EXPECT_EQ("NULL", Print(p));
 }
 
@@ -518,7 +518,7 @@ TEST(PrintPointerToBuiltInTypeTest, ConstVoid) {
 TEST(PrintPointerToPointerTest, IntPointerPointer) {
   int** p = reinterpret_cast<int**>(0xABCD);
   EXPECT_EQ(PrintPointer(p), Print(p));
-  p = NULL;
+  p = nullptr;
   EXPECT_EQ("NULL", Print(p));
 }
 
@@ -1398,7 +1398,7 @@ TEST(FormatForComparisonFailureMessageTest, WorksForWCharPointerVsStdWString) {
 // char array vs pointer
 TEST(FormatForComparisonFailureMessageTest, WorksForCharArrayVsPointer) {
   char str[] = "hi \"world\"";
-  char* p = NULL;
+  char* p = nullptr;
   EXPECT_EQ(PrintPointer(str),
             FormatForComparisonFailureMessage(str, p).c_str());
 }
@@ -1413,7 +1413,7 @@ TEST(FormatForComparisonFailureMessageTest, WorksForCharArrayVsCharArray) {
 // wchar_t array vs pointer
 TEST(FormatForComparisonFailureMessageTest, WorksForWCharArrayVsPointer) {
   wchar_t str[] = L"hi \"world\"";
-  wchar_t* p = NULL;
+  wchar_t* p = nullptr;
   EXPECT_EQ(PrintPointer(str),
             FormatForComparisonFailureMessage(str, p).c_str());
 }
@@ -1614,7 +1614,7 @@ TEST(UniversalTersePrintTest, WorksForCString) {
   UniversalTersePrint(s2, &ss2);
   EXPECT_EQ("\"abc\"", ss2.str());
 
-  const char* s3 = NULL;
+  const char* s3 = nullptr;
   ::std::stringstream ss3;
   UniversalTersePrint(s3, &ss3);
   EXPECT_EQ("NULL", ss3.str());
@@ -1644,7 +1644,7 @@ TEST(UniversalPrintTest, WorksForCString) {
   UniversalPrint(s2, &ss2);
   EXPECT_EQ(PrintPointer(s2) + " pointing to \"abc\"", std::string(ss2.str()));
 
-  const char* s3 = NULL;
+  const char* s3 = nullptr;
   ::std::stringstream ss3;
   UniversalPrint(s3, &ss3);
   EXPECT_EQ("NULL", ss3.str());

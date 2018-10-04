@@ -210,7 +210,7 @@ void TestConcurrentCallsOnSameObject(Dummy /* dummy */) {
   int count1 = 0;
   const Helper1Param param = { &foo, &count1 };
   ThreadWithParam<Helper1Param>* const t =
-      new ThreadWithParam<Helper1Param>(Helper1, param, NULL);
+      new ThreadWithParam<Helper1Param>(Helper1, param, nullptr);
 
   int count2 = 0;
   const Helper1Param param2 = { &foo, &count2 };
@@ -264,7 +264,7 @@ void TestPartiallyOrderedExpectationsWithThreads(Dummy /* dummy */) {
   foo.Bar(1);
 
   ThreadWithParam<MockFoo*>* const t =
-      new ThreadWithParam<MockFoo*>(Helper2, &foo, NULL);
+      new ThreadWithParam<MockFoo*>(Helper2, &foo, nullptr);
   Helper2(&foo);
   JoinAndDelete(t);
 
@@ -288,8 +288,8 @@ TEST(StressTest, CanUseGMockWithThreads) {
   ThreadWithParam<Dummy>* threads[kTestThreads] = {};
   for (int i = 0; i < kTestThreads; i++) {
     // Creates a thread to run the test function.
-    threads[i] =
-        new ThreadWithParam<Dummy>(test_routines[i % kRoutines], Dummy(), NULL);
+    threads[i] = new ThreadWithParam<Dummy>(test_routines[i % kRoutines],
+                                            Dummy(), nullptr);
     GTEST_LOG_(INFO) << "Thread #" << i << " running . . .";
   }
 

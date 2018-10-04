@@ -174,7 +174,7 @@ TEST(SCOPED_TRACETest, AcceptedValues) {
   SCOPED_TRACE("literal string");
   SCOPED_TRACE(std::string("std::string"));
   SCOPED_TRACE(1337);  // streamable type
-  const char* null_value = NULL;
+  const char* null_value = nullptr;
   SCOPED_TRACE(null_value);
 
   ADD_FAILURE() << "Just checking that all these values work fine.";
@@ -306,9 +306,8 @@ TEST(SCOPED_TRACETest, WorksConcurrently) {
   printf("(expecting 6 failures)\n");
 
   CheckPoints check_points;
-  ThreadWithParam<CheckPoints*> thread(&ThreadWithScopedTrace,
-                                       &check_points,
-                                       NULL);
+  ThreadWithParam<CheckPoints*> thread(&ThreadWithScopedTrace, &check_points,
+                                       nullptr);
   check_points.n1.WaitForNotification();
 
   {
@@ -511,7 +510,7 @@ class DeathTestAndMultiThreadsTest : public testing::Test {
   // Starts a thread and waits for it to begin.
   virtual void SetUp() {
     thread_.reset(new ThreadWithParam<SpawnThreadNotifications*>(
-        &ThreadRoutine, &notifications_, NULL));
+        &ThreadRoutine, &notifications_, nullptr));
     notifications_.spawn_thread_started.WaitForNotification();
   }
   // Tells the thread to finish, and reaps it.
@@ -966,7 +965,7 @@ TEST_F(ExpectFailureTest, ExpectNonFatalFailure) {
 class ExpectFailureWithThreadsTest : public ExpectFailureTest {
  protected:
   static void AddFailureInOtherThread(FailureMode failure) {
-    ThreadWithParam<FailureMode> thread(&AddFailure, failure, NULL);
+    ThreadWithParam<FailureMode> thread(&AddFailure, failure, nullptr);
     thread.Join();
   }
 };

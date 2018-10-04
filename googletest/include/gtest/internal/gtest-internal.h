@@ -587,8 +587,8 @@ GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 // returns NULL if no comma is found in 'str'.
 inline const char* SkipComma(const char* str) {
   const char* comma = strchr(str, ',');
-  if (comma == NULL) {
-    return NULL;
+  if (comma == nullptr) {
+    return nullptr;
   }
   while (IsSpace(*(++comma))) {}
   return comma;
@@ -598,7 +598,7 @@ inline const char* SkipComma(const char* str) {
 // the entire string if it contains no comma.
 inline std::string GetPrefixUntilComma(const char* str) {
   const char* comma = strchr(str, ',');
-  return comma == NULL ? str : std::string(str, comma);
+  return comma == nullptr ? str : std::string(str, comma);
 }
 
 // Splits a given string on a given delimiter, populating a given
@@ -667,7 +667,7 @@ class TypeParameterizedTest {
             .c_str(),
         StripTrailingSpaces(GetPrefixUntilComma(test_names)).c_str(),
         GetTypeName<Type>().c_str(),
-        NULL,  // No value parameter.
+        nullptr,  // No value parameter.
         code_location, GetTypeId<FixtureClass>(), TestClass::SetUpTestCase,
         TestClass::TearDownTestCase, new TestFactoryImpl<TestClass>);
 
@@ -980,7 +980,7 @@ struct IsHashTable {
   static char test(...);
 
  public:
-  static const bool value = sizeof(test<T>(0, 0)) == sizeof(int);
+  static const bool value = sizeof(test<T>(nullptr, nullptr)) == sizeof(int);
 };
 
 template <typename T>

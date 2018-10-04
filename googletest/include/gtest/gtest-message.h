@@ -151,7 +151,7 @@ class GTEST_API_ Message {
   // as "(null)".
   template <typename T>
   inline Message& operator <<(T* const& pointer) {  // NOLINT
-    if (pointer == NULL) {
+    if (pointer == nullptr) {
       *ss_ << "(null)";
     } else {
       *ss_ << pointer;

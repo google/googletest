@@ -149,7 +149,7 @@ class linked_ptr {
 
   // Take over ownership of a raw pointer.  This should happen as soon as
   // possible after the object is created.
-  explicit linked_ptr(T* ptr = NULL) { capture(ptr); }
+  explicit linked_ptr(T* ptr = nullptr) { capture(ptr); }
   ~linked_ptr() { depart(); }
 
   // Copy an existing linked_ptr<>, adding ourselves to the list of references.
@@ -175,7 +175,7 @@ class linked_ptr {
   }
 
   // Smart pointer members.
-  void reset(T* ptr = NULL) {
+  void reset(T* ptr = nullptr) {
     depart();
     capture(ptr);
   }

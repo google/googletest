@@ -697,7 +697,7 @@ TEST(ElementsAreArrayTest, CanBeCreatedWithIteratorRange) {
   // Pointers are iterators, too.
   EXPECT_THAT(test_vector, ElementsAreArray(a, a + GTEST_ARRAY_SIZE_(a)));
   // The empty range of NULL pointers should also be okay.
-  int* const null_int = NULL;
+  int* const null_int = nullptr;
   EXPECT_THAT(test_vector, Not(ElementsAreArray(null_int, null_int)));
   EXPECT_THAT((vector<int>()), ElementsAreArray(null_int, null_int));
 }
@@ -770,7 +770,7 @@ MATCHER_P2(EqSumOf, x, y, std::string(negation ? "doesn't equal" : "equals") +
   } else {
     // Verifies that we can stream to the underlying stream of
     // result_listener.
-    if (result_listener->stream() != NULL) {
+    if (result_listener->stream() != nullptr) {
       *result_listener->stream() << "diff == " << (x + y - arg);
     }
     return false;

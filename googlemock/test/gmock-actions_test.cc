@@ -89,9 +89,9 @@ using testing::SetErrnoAndReturn;
 
 // Tests that BuiltInDefaultValue<T*>::Get() returns NULL.
 TEST(BuiltInDefaultValueTest, IsNullForPointerTypes) {
-  EXPECT_TRUE(BuiltInDefaultValue<int*>::Get() == NULL);
-  EXPECT_TRUE(BuiltInDefaultValue<const char*>::Get() == NULL);
-  EXPECT_TRUE(BuiltInDefaultValue<void*>::Get() == NULL);
+  EXPECT_TRUE(BuiltInDefaultValue<int*>::Get() == nullptr);
+  EXPECT_TRUE(BuiltInDefaultValue<const char*>::Get() == nullptr);
+  EXPECT_TRUE(BuiltInDefaultValue<void*>::Get() == nullptr);
 }
 
 // Tests that BuiltInDefaultValue<T*>::Exists() return true.
@@ -196,7 +196,7 @@ TEST(BuiltInDefaultValueTest, ExistsForString) {
 TEST(BuiltInDefaultValueTest, WorksForConstTypes) {
   EXPECT_EQ("", BuiltInDefaultValue<const std::string>::Get());
   EXPECT_EQ(0, BuiltInDefaultValue<const int>::Get());
-  EXPECT_TRUE(BuiltInDefaultValue<char* const>::Get() == NULL);
+  EXPECT_TRUE(BuiltInDefaultValue<char* const>::Get() == nullptr);
   EXPECT_FALSE(BuiltInDefaultValue<const bool>::Get());
 }
 
@@ -306,7 +306,7 @@ TEST(DefaultValueDeathTest, GetReturnsBuiltInDefaultValueWhenUnset) {
 #if GTEST_HAS_STD_UNIQUE_PTR_
 TEST(DefaultValueTest, GetWorksForMoveOnlyIfSet) {
   EXPECT_TRUE(DefaultValue<std::unique_ptr<int>>::Exists());
-  EXPECT_TRUE(DefaultValue<std::unique_ptr<int>>::Get() == NULL);
+  EXPECT_TRUE(DefaultValue<std::unique_ptr<int>>::Get() == nullptr);
   DefaultValue<std::unique_ptr<int>>::SetFactory([] {
     return std::unique_ptr<int>(new int(42));
   });
@@ -519,7 +519,7 @@ TEST(MakePolymorphicActionTest, WorksWhenPerformHasOneTemplateParameter) {
   EXPECT_EQ(0, a1.Perform(make_tuple()));
 
   Action<void*()> a2 = ReturnZeroFromNullaryFunction();
-  EXPECT_TRUE(a2.Perform(make_tuple()) == NULL);
+  EXPECT_TRUE(a2.Perform(make_tuple()) == nullptr);
 }
 
 // Tests that Return() works as an action for void-returning
@@ -636,10 +636,10 @@ TEST(ReturnTest, CanConvertArgumentUsingNonConstTypeCastOperator) {
 // Tests that ReturnNull() returns NULL in a pointer-returning function.
 TEST(ReturnNullTest, WorksInPointerReturningFunction) {
   const Action<int*()> a1 = ReturnNull();
-  EXPECT_TRUE(a1.Perform(make_tuple()) == NULL);
+  EXPECT_TRUE(a1.Perform(make_tuple()) == nullptr);
 
   const Action<const char*(bool)> a2 = ReturnNull();  // NOLINT
-  EXPECT_TRUE(a2.Perform(make_tuple(true)) == NULL);
+  EXPECT_TRUE(a2.Perform(make_tuple(true)) == nullptr);
 }
 
 #if GTEST_HAS_STD_UNIQUE_PTR_
@@ -819,10 +819,10 @@ TEST(SetArgPointeeTest, AcceptsStringLiteral) {
   typedef void MyFunction(std::string*, const char**);
   Action<MyFunction> a = SetArgPointee<0>("hi");
   std::string str;
-  const char* ptr = NULL;
+  const char* ptr = nullptr;
   a.Perform(make_tuple(&str, &ptr));
   EXPECT_EQ("hi", str);
-  EXPECT_TRUE(ptr == NULL);
+  EXPECT_TRUE(ptr == nullptr);
 
   a = SetArgPointee<1>("world");
   str = "";
@@ -834,7 +834,7 @@ TEST(SetArgPointeeTest, AcceptsStringLiteral) {
 TEST(SetArgPointeeTest, AcceptsWideStringLiteral) {
   typedef void MyFunction(const wchar_t**);
   Action<MyFunction> a = SetArgPointee<0>(L"world");
-  const wchar_t* ptr = NULL;
+  const wchar_t* ptr = nullptr;
   a.Perform(make_tuple(&ptr));
   EXPECT_STREQ(L"world", ptr);
 
@@ -856,10 +856,10 @@ TEST(SetArgPointeeTest, AcceptsCharPointer) {
   const char* const hi = "hi";
   Action<MyFunction> a = SetArgPointee<1>(hi);
   std::string str;
-  const char* ptr = NULL;
+  const char* ptr = nullptr;
   a.Perform(make_tuple(true, &str, &ptr));
   EXPECT_EQ("hi", str);
-  EXPECT_TRUE(ptr == NULL);
+  EXPECT_TRUE(ptr == nullptr);
 
   char world_array[] = "world";
   char* const world = world_array;
@@ -874,7 +874,7 @@ TEST(SetArgPointeeTest, AcceptsWideCharPointer) {
   typedef void MyFunction(bool, const wchar_t**);
   const wchar_t* const hi = L"hi";
   Action<MyFunction> a = SetArgPointee<1>(hi);
-  const wchar_t* ptr = NULL;
+  const wchar_t* ptr = nullptr;
   a.Perform(make_tuple(true, &ptr));
   EXPECT_EQ(hi, ptr);
 

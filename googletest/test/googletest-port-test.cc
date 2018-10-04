@@ -262,9 +262,9 @@ TEST(FormatFileLocationTest, FormatsFileLocation) {
 }
 
 TEST(FormatFileLocationTest, FormatsUnknownFile) {
-  EXPECT_PRED_FORMAT2(
-      IsSubstring, "unknown file", FormatFileLocation(NULL, 42));
-  EXPECT_PRED_FORMAT2(IsSubstring, "42", FormatFileLocation(NULL, 42));
+  EXPECT_PRED_FORMAT2(IsSubstring, "unknown file",
+                      FormatFileLocation(nullptr, 42));
+  EXPECT_PRED_FORMAT2(IsSubstring, "42", FormatFileLocation(nullptr, 42));
 }
 
 TEST(FormatFileLocationTest, FormatsUknownLine) {
@@ -272,7 +272,7 @@ TEST(FormatFileLocationTest, FormatsUknownLine) {
 }
 
 TEST(FormatFileLocationTest, FormatsUknownFileAndLine) {
-  EXPECT_EQ("unknown file:", FormatFileLocation(NULL, -1));
+  EXPECT_EQ("unknown file:", FormatFileLocation(nullptr, -1));
 }
 
 // Verifies behavior of FormatCompilerIndependentFileLocation.
@@ -282,7 +282,7 @@ TEST(FormatCompilerIndependentFileLocationTest, FormatsFileLocation) {
 
 TEST(FormatCompilerIndependentFileLocationTest, FormatsUknownFile) {
   EXPECT_EQ("unknown file:42",
-            FormatCompilerIndependentFileLocation(NULL, 42));
+            FormatCompilerIndependentFileLocation(nullptr, 42));
 }
 
 TEST(FormatCompilerIndependentFileLocationTest, FormatsUknownLine) {
@@ -290,7 +290,7 @@ TEST(FormatCompilerIndependentFileLocationTest, FormatsUknownLine) {
 }
 
 TEST(FormatCompilerIndependentFileLocationTest, FormatsUknownFileAndLine) {
-  EXPECT_EQ("unknown file", FormatCompilerIndependentFileLocation(NULL, -1));
+  EXPECT_EQ("unknown file", FormatCompilerIndependentFileLocation(nullptr, -1));
 }
 
 #if GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_QNX || GTEST_OS_FUCHSIA
@@ -298,7 +298,7 @@ void* ThreadFunc(void* data) {
   internal::Mutex* mutex = static_cast<internal::Mutex*>(data);
   mutex->Lock();
   mutex->Unlock();
-  return NULL;
+  return nullptr;
 }
 
 TEST(GetThreadCountTest, ReturnsCorrectValue) {
@@ -965,7 +965,7 @@ TEST(ThreadLocalTest, DefaultConstructorInitializesToDefaultValues) {
   EXPECT_EQ(0, t1.get());
 
   ThreadLocal<void*> t2;
-  EXPECT_TRUE(t2.get() == NULL);
+  EXPECT_TRUE(t2.get() == nullptr);
 }
 
 TEST(ThreadLocalTest, SingleParamConstructorInitializesToParam) {
@@ -1015,7 +1015,7 @@ void AddTwo(int* param) { *param += 2; }
 
 TEST(ThreadWithParamTest, ConstructorExecutesThreadFunc) {
   int i = 40;
-  ThreadWithParam<int*> thread(&AddTwo, &i, NULL);
+  ThreadWithParam<int*> thread(&AddTwo, &i, nullptr);
   thread.Join();
   EXPECT_EQ(42, i);
 }
@@ -1055,7 +1055,7 @@ class AtomicCounterWithMutex {
       // functionality as we are testing them here.
       pthread_mutex_t memory_barrier_mutex;
       GTEST_CHECK_POSIX_SUCCESS_(
-          pthread_mutex_init(&memory_barrier_mutex, NULL));
+          pthread_mutex_init(&memory_barrier_mutex, nullptr));
       GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_lock(&memory_barrier_mutex));
 
       SleepMilliseconds(random_.Generate(30));
@@ -1118,7 +1118,7 @@ TEST(MutexTest, OnlyOneThreadCanLockAtATime) {
 
 template <typename T>
 void RunFromThread(void (func)(T), T param) {
-  ThreadWithParam<T> thread(func, param, NULL);
+  ThreadWithParam<T> thread(func, param, nullptr);
   thread.Join();
 }
 
@@ -1250,8 +1250,8 @@ TEST(ThreadLocalTest, DestroysManagedObjectAtThreadExit) {
     ASSERT_EQ(0U, DestructorCall::List().size());
 
     // This creates another DestructorTracker object in the new thread.
-    ThreadWithParam<ThreadParam> thread(
-        &CallThreadLocalGet, &thread_local_tracker, NULL);
+    ThreadWithParam<ThreadParam> thread(&CallThreadLocalGet,
+                                        &thread_local_tracker, nullptr);
     thread.Join();
 
     // The thread has exited, and we should have a DestroyedTracker

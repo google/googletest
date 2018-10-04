@@ -327,8 +327,7 @@ class ValuesInIteratorRangeGenerator : public ParamGeneratorInterface<T> {
     // detect that fact. The client code, on the other hand, is
     // responsible for not calling Current() on an out-of-range iterator.
     virtual const T* Current() const {
-      if (value_.get() == NULL)
-        value_.reset(new T(*iterator_));
+      if (value_.get() == nullptr) value_.reset(new T(*iterator_));
       return value_.get();
     }
     virtual bool Equals(const ParamIteratorInterface<T>& other) const {
@@ -579,13 +578,10 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
 
           test_name_stream << test_info->test_base_name << "/" << param_name;
           MakeAndRegisterTestInfo(
-              test_case_name.c_str(),
-              test_name_stream.GetString().c_str(),
-              NULL,  // No type parameter.
-              PrintToString(*param_it).c_str(),
-              code_location_,
-              GetTestCaseTypeId(),
-              TestCase::SetUpTestCase,
+              test_case_name.c_str(), test_name_stream.GetString().c_str(),
+              nullptr,  // No type parameter.
+              PrintToString(*param_it).c_str(), code_location_,
+              GetTestCaseTypeId(), TestCase::SetUpTestCase,
               TestCase::TearDownTestCase,
               test_info->test_meta_factory->CreateTestFactory(*param_it));
         }  // for param_it
@@ -676,7 +672,7 @@ class ParameterizedTestCaseRegistry {
   ParameterizedTestCaseInfo<TestCase>* GetTestCasePatternHolder(
       const char* test_case_name,
       CodeLocation code_location) {
-    ParameterizedTestCaseInfo<TestCase>* typed_test_info = NULL;
+    ParameterizedTestCaseInfo<TestCase>* typed_test_info = nullptr;
     for (TestCaseInfoContainer::iterator it = test_case_infos_.begin();
          it != test_case_infos_.end(); ++it) {
       if ((*it)->GetTestCaseName() == test_case_name) {
@@ -696,7 +692,7 @@ class ParameterizedTestCaseRegistry {
         break;
       }
     }
-    if (typed_test_info == NULL) {
+    if (typed_test_info == nullptr) {
       typed_test_info = new ParameterizedTestCaseInfo<TestCase>(
           test_case_name, code_location);
       test_case_infos_.push_back(typed_test_info);

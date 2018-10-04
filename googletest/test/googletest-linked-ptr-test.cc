@@ -38,7 +38,7 @@ using testing::Message;
 using testing::internal::linked_ptr;
 
 int num;
-Message* history = NULL;
+Message* history = nullptr;
 
 // Class which tracks allocation/deallocation
 class A {
@@ -67,7 +67,7 @@ class LinkedPtrTest : public testing::Test {
 
   virtual ~LinkedPtrTest() {
     delete history;
-    history = NULL;
+    history = nullptr;
   }
 };
 
@@ -77,18 +77,18 @@ TEST_F(LinkedPtrTest, GeneralTest) {
     // Use explicit function call notation here to suppress self-assign warning.
     a0.operator=(a0);
     a1 = a2;
-    ASSERT_EQ(a0.get(), static_cast<A*>(NULL));
-    ASSERT_EQ(a1.get(), static_cast<A*>(NULL));
-    ASSERT_EQ(a2.get(), static_cast<A*>(NULL));
-    ASSERT_TRUE(a0 == NULL);
-    ASSERT_TRUE(a1 == NULL);
-    ASSERT_TRUE(a2 == NULL);
+    ASSERT_EQ(a0.get(), static_cast<A*>(nullptr));
+    ASSERT_EQ(a1.get(), static_cast<A*>(nullptr));
+    ASSERT_EQ(a2.get(), static_cast<A*>(nullptr));
+    ASSERT_TRUE(a0 == nullptr);
+    ASSERT_TRUE(a1 == nullptr);
+    ASSERT_TRUE(a2 == nullptr);
 
     {
       linked_ptr<A> a3(new A);
       a0 = a3;
       ASSERT_TRUE(a0 == a3);
-      ASSERT_TRUE(a0 != NULL);
+      ASSERT_TRUE(a0 != nullptr);
       ASSERT_TRUE(a0.get() == a3);
       ASSERT_TRUE(a0 == a3.get());
       linked_ptr<A> a4(a0);
@@ -101,7 +101,7 @@ TEST_F(LinkedPtrTest, GeneralTest) {
       linked_ptr<A> a6(b0);
       ASSERT_TRUE(b0 == a6);
       ASSERT_TRUE(a6 == b0);
-      ASSERT_TRUE(b0 != NULL);
+      ASSERT_TRUE(b0 != nullptr);
       a5 = b0;
       a5 = b0;
       a3->Use();

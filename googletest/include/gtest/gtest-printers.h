@@ -449,7 +449,7 @@ void DefaultPrintTo(WrapPrinterType<kPrintContainer> /* dummy */,
 template <typename T>
 void DefaultPrintTo(WrapPrinterType<kPrintPointer> /* dummy */,
                     T* p, ::std::ostream* os) {
-  if (p == NULL) {
+  if (p == nullptr) {
     *os << "NULL";
   } else {
     // T is not a function type.  We just call << to print p,
@@ -461,7 +461,7 @@ void DefaultPrintTo(WrapPrinterType<kPrintPointer> /* dummy */,
 template <typename T>
 void DefaultPrintTo(WrapPrinterType<kPrintFunctionPointer> /* dummy */,
                     T* p, ::std::ostream* os) {
-  if (p == NULL) {
+  if (p == nullptr) {
     *os << "NULL";
   } else {
     // T is a function type, so '*os << p' doesn't do what we want
@@ -914,7 +914,7 @@ template <>
 class UniversalTersePrinter<const char*> {
  public:
   static void Print(const char* str, ::std::ostream* os) {
-    if (str == NULL) {
+    if (str == nullptr) {
       *os << "NULL";
     } else {
       UniversalPrint(std::string(str), os);
@@ -934,7 +934,7 @@ template <>
 class UniversalTersePrinter<const wchar_t*> {
  public:
   static void Print(const wchar_t* str, ::std::ostream* os) {
-    if (str == NULL) {
+    if (str == nullptr) {
       *os << "NULL";
     } else {
       UniversalPrint(::std::wstring(str), os);

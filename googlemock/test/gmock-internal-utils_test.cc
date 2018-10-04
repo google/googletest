@@ -158,9 +158,9 @@ TEST(GetRawPointerTest, WorksForSmartPointers) {
 }
 
 TEST(GetRawPointerTest, WorksForRawPointers) {
-  int* p = NULL;
+  int* p = nullptr;
   // Don't use EXPECT_EQ as no NULL-testing magic on Symbian.
-  EXPECT_TRUE(NULL == GetRawPointer(p));
+  EXPECT_TRUE(nullptr == GetRawPointer(p));
   int n = 1;
   EXPECT_EQ(&n, GetRawPointer(&n));
 }
@@ -492,7 +492,7 @@ TEST(LogTest, NoSkippingStackFrameInOptMode) {
               AllOf(Ge(expected_skip_count), Le(expected_skip_count + 10)));
 
   // Restores the default OS stack trace getter.
-  GetUnitTestImpl()->set_os_stack_trace_getter(NULL);
+  GetUnitTestImpl()->set_os_stack_trace_getter(nullptr);
 }
 
 // Tests that all logs are printed when the value of the
