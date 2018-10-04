@@ -99,8 +99,8 @@ class QueueTestSmpl3 : public testing::Test {
     ASSERT_EQ(q->Size(), new_q->Size());
 
     // Verifies the relationship between the elements of the two queues.
-    for ( const QueueNode<int> * n1 = q->Head(), * n2 = new_q->Head();
-          n1 != NULL; n1 = n1->next(), n2 = n2->next() ) {
+    for (const QueueNode<int>*n1 = q->Head(), *n2 = new_q->Head();
+         n1 != nullptr; n1 = n1->next(), n2 = n2->next()) {
       EXPECT_EQ(2 * n1->element(), n2->element());
     }
 
@@ -125,16 +125,16 @@ TEST_F(QueueTestSmpl3, DefaultConstructor) {
 // Tests Dequeue().
 TEST_F(QueueTestSmpl3, Dequeue) {
   int * n = q0_.Dequeue();
-  EXPECT_TRUE(n == NULL);
+  EXPECT_TRUE(n == nullptr);
 
   n = q1_.Dequeue();
-  ASSERT_TRUE(n != NULL);
+  ASSERT_TRUE(n != nullptr);
   EXPECT_EQ(1, *n);
   EXPECT_EQ(0u, q1_.Size());
   delete n;
 
   n = q2_.Dequeue();
-  ASSERT_TRUE(n != NULL);
+  ASSERT_TRUE(n != nullptr);
   EXPECT_EQ(2, *n);
   EXPECT_EQ(1u, q2_.Size());
   delete n;

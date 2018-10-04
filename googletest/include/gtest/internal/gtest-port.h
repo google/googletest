@@ -1197,7 +1197,7 @@ class scoped_ptr {
  public:
   typedef T element_type;
 
-  explicit scoped_ptr(T* p = NULL) : ptr_(p) {}
+  explicit scoped_ptr(T* p = nullptr) : ptr_(p) {}
   ~scoped_ptr() { reset(); }
 
   T& operator*() const { return *ptr_; }
@@ -1206,11 +1206,11 @@ class scoped_ptr {
 
   T* release() {
     T* const ptr = ptr_;
-    ptr_ = NULL;
+    ptr_ = nullptr;
     return ptr;
   }
 
-  void reset(T* p = NULL) {
+  void reset(T* p = nullptr) {
     if (p != ptr_) {
       if (IsTrue(sizeof(T) > 0)) {  // Makes sure T is a complete type.
         delete ptr_;
@@ -1360,7 +1360,7 @@ class GTEST_API_ GTestLog {
                                   __FILE__, __LINE__).GetStream()
 
 inline void LogToStderr() {}
-inline void FlushInfoLog() { fflush(NULL); }
+inline void FlushInfoLog() { fflush(nullptr); }
 
 #endif  // !defined(GTEST_LOG_)
 
@@ -1511,7 +1511,7 @@ inline To DownCast_(From* f) {  // so we only accept pointers
 
 #if GTEST_HAS_RTTI
   // RTTI: debug mode only!
-  GTEST_CHECK_(f == NULL || dynamic_cast<To>(f) != NULL);
+  GTEST_CHECK_(f == nullptr || dynamic_cast<To>(f) != NULL);
 #endif
   return static_cast<To>(f);
 }
@@ -1583,7 +1583,7 @@ inline void SleepMilliseconds(int n) {
     0,                  // 0 seconds.
     n * 1000L * 1000L,  // And n ms.
   };
-  nanosleep(&time, NULL);
+  nanosleep(&time, nullptr);
 }
 # endif  // GTEST_HAS_PTHREAD
 
@@ -1601,7 +1601,7 @@ inline void SleepMilliseconds(int n) {
 class Notification {
  public:
   Notification() : notified_(false) {
-    GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_init(&mutex_, NULL));
+    GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_init(&mutex_, nullptr));
   }
   ~Notification() {
     pthread_mutex_destroy(&mutex_);
@@ -1710,7 +1710,7 @@ class ThreadWithParamBase {
 // pass into pthread_create().
 extern "C" inline void* ThreadFuncWithCLinkage(void* thread) {
   static_cast<ThreadWithParamBase*>(thread)->Run();
-  return NULL;
+  return nullptr;
 }
 
 // Helper class for testing Google Test's multi-threading constructs.
@@ -1739,20 +1739,19 @@ class ThreadWithParam : public ThreadWithParamBase {
     // The thread can be created only after all fields except thread_
     // have been initialized.
     GTEST_CHECK_POSIX_SUCCESS_(
-        pthread_create(&thread_, 0, &ThreadFuncWithCLinkage, base));
+        pthread_create(&thread_, nullptr, &ThreadFuncWithCLinkage, base));
   }
   ~ThreadWithParam() { Join(); }
 
   void Join() {
     if (!finished_) {
-      GTEST_CHECK_POSIX_SUCCESS_(pthread_join(thread_, 0));
+      GTEST_CHECK_POSIX_SUCCESS_(pthread_join(thread_, nullptr));
       finished_ = true;
     }
   }
 
   virtual void Run() {
-    if (thread_can_start_ != NULL)
-      thread_can_start_->WaitForNotification();
+    if (thread_can_start_ != nullptr) thread_can_start_->WaitForNotification();
     func_(param_);
   }
 
@@ -2115,7 +2114,7 @@ class MutexBase {
 class Mutex : public MutexBase {
  public:
   Mutex() {
-    GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_init(&mutex_, NULL));
+    GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_init(&mutex_, nullptr));
     has_owner_ = false;
   }
   ~Mutex() {
@@ -2213,7 +2212,7 @@ class GTEST_API_ ThreadLocal {
   T* GetOrCreateValue() const {
     ThreadLocalValueHolderBase* const holder =
         static_cast<ThreadLocalValueHolderBase*>(pthread_getspecific(key_));
-    if (holder != NULL) {
+    if (holder != nullptr) {
       return CheckedDowncastToActualType<ValueHolder>(holder)->pointer();
     }
 
