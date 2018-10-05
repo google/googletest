@@ -1767,6 +1767,12 @@ class GTEST_API_ AssertHelper {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(AssertHelper);
 };
 
+enum GTestColor { COLOR_DEFAULT, COLOR_RED, COLOR_GREEN, COLOR_YELLOW };
+
+GTEST_API_ GTEST_ATTRIBUTE_PRINTF_(2, 3) void ColoredPrintf(GTestColor color,
+                                                            const char* fmt,
+                                                            ...);
+
 }  // namespace internal
 
 // The pure interface class that all value-parameterized tests inherit from.

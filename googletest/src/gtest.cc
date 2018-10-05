@@ -2932,14 +2932,6 @@ static void PrintTestPartResult(const TestPartResult& test_part_result) {
 }
 
 // class PrettyUnitTestResultPrinter
-
-enum GTestColor {
-  COLOR_DEFAULT,
-  COLOR_RED,
-  COLOR_GREEN,
-  COLOR_YELLOW
-};
-
 #if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE && \
     !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT && !GTEST_OS_WINDOWS_MINGW
 
@@ -3041,7 +3033,7 @@ bool ShouldUseColor(bool stdout_is_tty) {
 // cannot simply emit special characters and have the terminal change colors.
 // This routine must actually emit the characters rather than return a string
 // that would be colored when printed, as can be done on Linux.
-static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
+void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   va_list args;
   va_start(args, fmt);
 
@@ -4714,9 +4706,8 @@ void UnitTest::AddTestPartResult(
     msg << internal::kStackTraceMarker << os_stack_trace;
   }
 
-  const TestPartResult result =
-    TestPartResult(result_type, file_name, line_number,
-                   msg.GetString().c_str());
+  const TestPartResult result = TestPartResult(
+      result_type, file_name, line_number, msg.GetString().c_str());
   impl_->GetTestPartResultReporterForCurrentThread()->
       ReportTestPartResult(result);
 
@@ -5334,7 +5325,7 @@ bool ShouldShard(const char* total_shards_env,
       << "Invalid environment variables: you have "
       << kTestShardIndex << " = " << shard_index
       << ", but have left " << kTestTotalShards << " unset.\n";
-    ColoredPrintf(COLOR_RED, msg.GetString().c_str());
+    ColoredPrintf(COLOR_RED, "%s", msg.GetString().c_str());
     fflush(stdout);
     exit(EXIT_FAILURE);
   } else if (total_shards != -1 && shard_index == -1) {
@@ -5342,7 +5333,7 @@ bool ShouldShard(const char* total_shards_env,
       << "Invalid environment variables: you have "
       << kTestTotalShards << " = " << total_shards
       << ", but have left " << kTestShardIndex << " unset.\n";
-    ColoredPrintf(COLOR_RED, msg.GetString().c_str());
+    ColoredPrintf(COLOR_RED, "%s", msg.GetString().c_str());
     fflush(stdout);
     exit(EXIT_FAILURE);
   } else if (shard_index < 0 || shard_index >= total_shards) {
@@ -5351,7 +5342,7 @@ bool ShouldShard(const char* total_shards_env,
       << kTestShardIndex << " < " << kTestTotalShards
       << ", but you have " << kTestShardIndex << "=" << shard_index
       << ", " << kTestTotalShards << "=" << total_shards << ".\n";
-    ColoredPrintf(COLOR_RED, msg.GetString().c_str());
+    ColoredPrintf(COLOR_RED, "%s", msg.GetString().c_str());
     fflush(stdout);
     exit(EXIT_FAILURE);
   }
