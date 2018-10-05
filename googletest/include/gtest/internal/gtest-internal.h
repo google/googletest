@@ -942,7 +942,6 @@ struct IsAProtocolMessage
 // IsContainerTest(typename C::const_iterator*) and
 // IsContainerTest(...) doesn't work with Visual Age C++ and Sun C++.
 typedef int IsContainer;
-#if GTEST_LANG_CXX11
 template <class C,
           class Iterator = decltype(::std::declval<const C&>().begin()),
           class = decltype(::std::declval<const C&>().end()),
@@ -952,14 +951,6 @@ template <class C,
 IsContainer IsContainerTest(int /* dummy */) {
   return 0;
 }
-#else
-template <class C>
-IsContainer IsContainerTest(int /* dummy */,
-                            typename C::iterator* /* it */ = NULL,
-                            typename C::const_iterator* /* const_it */ = NULL) {
-  return 0;
-}
-#endif  // GTEST_LANG_CXX11
 
 typedef char IsNotContainer;
 template <class C>
@@ -1014,12 +1005,8 @@ struct IsRecursiveContainerImpl<C, true, false> : public false_type {};
 
 template <typename C>
 struct IsRecursiveContainerImpl<C, true, true> {
-  #if GTEST_LANG_CXX11
   typedef typename IteratorTraits<typename C::const_iterator>::value_type
       value_type;
-#else
-  typedef typename IteratorTraits<typename C::iterator>::value_type value_type;
-#endif
   typedef is_same<value_type, C> type;
 };
 
