@@ -1213,7 +1213,7 @@ class TypedExpectation : public ExpectationBase {
       // FIXME: allow the user to control whether
       // unexpected calls should fail immediately or continue using a
       // flag --gmock_unexpected_calls_are_fatal.
-      return NULL;
+      return nullptr;
     }
 
     IncrementCallCount();
@@ -1498,7 +1498,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
         return spec;
     }
 
-    return NULL;
+    return nullptr;
   }
 
   // Performs the default action of this mock function on the given
@@ -1513,7 +1513,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
       const std::string& call_description) const {
     const OnCallSpec<F>* const spec =
         this->FindOnCallSpec(args);
-    if (spec != NULL) {
+    if (spec != nullptr) {
       return spec->GetAction().Perform(internal::move(args));
     }
     const std::string message =
@@ -1630,7 +1630,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
 
     // Adds this expectation into the implicit sequence if there is one.
     Sequence* const implicit_sequence = g_gmock_implicit_sequence.get();
-    if (implicit_sequence != NULL) {
+    if (implicit_sequence != nullptr) {
       implicit_sequence->AddExpectation(Expectation(untyped_expectation));
     }
 
@@ -1649,7 +1649,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
                                ::std::ostream* os) const {
     const OnCallSpec<F>* const spec = FindOnCallSpec(args);
 
-    if (spec == NULL) {
+    if (spec == nullptr) {
       *os << (internal::type_equals<Result, void>::value ?
               "returning directly.\n" :
               "returning default value.\n");
@@ -1699,9 +1699,9 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
         *static_cast<const ArgumentTuple*>(untyped_args);
     MutexLock l(&g_gmock_mutex);
     TypedExpectation<F>* exp = this->FindMatchingExpectationLocked(args);
-    if (exp == NULL) {  // A match wasn't found.
+    if (exp == nullptr) {  // A match wasn't found.
       this->FormatUnexpectedCallMessageLocked(args, what, why);
-      return NULL;
+      return nullptr;
     }
 
     // This line must be done before calling GetActionForArguments(),
@@ -1709,8 +1709,8 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
     // its saturation status.
     *is_excessive = exp->IsSaturated();
     const Action<F>* action = exp->GetActionForArguments(this, args, what, why);
-    if (action != NULL && action->IsDoDefault())
-      action = NULL;  // Normalize "do default" to NULL.
+    if (action != nullptr && action->IsDoDefault())
+      action = nullptr;  // Normalize "do default" to NULL.
     *untyped_action = action;
     return exp;
   }
@@ -1740,7 +1740,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
         return exp;
       }
     }
-    return NULL;
+    return nullptr;
   }
 
   // Returns a message that the arguments don't match any expectation.

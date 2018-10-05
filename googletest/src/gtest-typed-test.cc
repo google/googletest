@@ -48,7 +48,7 @@ static const char* SkipSpaces(const char* str) {
 static std::vector<std::string> SplitIntoTestNames(const char* src) {
   std::vector<std::string> name_vec;
   src = SkipSpaces(src);
-  for (; src != NULL; src = SkipComma(src)) {
+  for (; src != nullptr; src = SkipComma(src)) {
     name_vec.push_back(StripTrailingSpaces(GetPrefixUntilComma(src)));
   }
   return name_vec;
