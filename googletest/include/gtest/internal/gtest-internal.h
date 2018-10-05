@@ -587,8 +587,8 @@ GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 // returns NULL if no comma is found in 'str'.
 inline const char* SkipComma(const char* str) {
   const char* comma = strchr(str, ',');
-  if (comma == NULL) {
-    return NULL;
+  if (comma == nullptr) {
+    return nullptr;
   }
   while (IsSpace(*(++comma))) {}
   return comma;
@@ -598,7 +598,7 @@ inline const char* SkipComma(const char* str) {
 // the entire string if it contains no comma.
 inline std::string GetPrefixUntilComma(const char* str) {
   const char* comma = strchr(str, ',');
-  return comma == NULL ? str : std::string(str, comma);
+  return comma == nullptr ? str : std::string(str, comma);
 }
 
 // Splits a given string on a given delimiter, populating a given
@@ -667,7 +667,7 @@ class TypeParameterizedTest {
             .c_str(),
         StripTrailingSpaces(GetPrefixUntilComma(test_names)).c_str(),
         GetTypeName<Type>().c_str(),
-        NULL,  // No value parameter.
+        nullptr,  // No value parameter.
         code_location, GetTypeId<FixtureClass>(), TestClass::SetUpTestCase,
         TestClass::TearDownTestCase, new TestFactoryImpl<TestClass>);
 
@@ -942,7 +942,6 @@ struct IsAProtocolMessage
 // IsContainerTest(typename C::const_iterator*) and
 // IsContainerTest(...) doesn't work with Visual Age C++ and Sun C++.
 typedef int IsContainer;
-#if GTEST_LANG_CXX11
 template <class C,
           class Iterator = decltype(::std::declval<const C&>().begin()),
           class = decltype(::std::declval<const C&>().end()),
@@ -952,14 +951,6 @@ template <class C,
 IsContainer IsContainerTest(int /* dummy */) {
   return 0;
 }
-#else
-template <class C>
-IsContainer IsContainerTest(int /* dummy */,
-                            typename C::iterator* /* it */ = NULL,
-                            typename C::const_iterator* /* const_it */ = NULL) {
-  return 0;
-}
-#endif  // GTEST_LANG_CXX11
 
 typedef char IsNotContainer;
 template <class C>
@@ -980,7 +971,7 @@ struct IsHashTable {
   static char test(...);
 
  public:
-  static const bool value = sizeof(test<T>(0, 0)) == sizeof(int);
+  static const bool value = sizeof(test<T>(nullptr, nullptr)) == sizeof(int);
 };
 
 template <typename T>
@@ -1014,12 +1005,8 @@ struct IsRecursiveContainerImpl<C, true, false> : public false_type {};
 
 template <typename C>
 struct IsRecursiveContainerImpl<C, true, true> {
-  #if GTEST_LANG_CXX11
   typedef typename IteratorTraits<typename C::const_iterator>::value_type
       value_type;
-#else
-  typedef typename IteratorTraits<typename C::iterator>::value_type value_type;
-#endif
   typedef is_same<value_type, C> type;
 };
 

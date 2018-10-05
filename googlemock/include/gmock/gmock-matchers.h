@@ -94,8 +94,7 @@ class MatchResultListener {
   // is NULL.
   template <typename T>
   MatchResultListener& operator<<(const T& x) {
-    if (stream_ != NULL)
-      *stream_ << x;
+    if (stream_ != nullptr) *stream_ << x;
     return *this;
   }
 
@@ -106,7 +105,7 @@ class MatchResultListener {
   // the match result.  A matcher's MatchAndExplain() method can use
   // this information to avoid generating the explanation when no one
   // intends to hear it.
-  bool IsInterested() const { return stream_ != NULL; }
+  bool IsInterested() const { return stream_ != nullptr; }
 
  private:
   ::std::ostream* const stream_;
@@ -261,7 +260,7 @@ struct AnyGe {
 // A match result listener that ignores the explanation.
 class DummyMatchResultListener : public MatchResultListener {
  public:
-  DummyMatchResultListener() : MatchResultListener(NULL) {}
+  DummyMatchResultListener() : MatchResultListener(nullptr) {}
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(DummyMatchResultListener);
@@ -333,7 +332,7 @@ class MatcherBase {
       const MatcherInterface<U>* impl,
       typename internal::EnableIf<
           !internal::IsSame<U, GTEST_REFERENCE_TO_CONST_(U)>::value>::type* =
-          NULL)
+          nullptr)
       : impl_(new internal::MatcherInterfaceAdapter<U>(impl)) {}
 
   virtual ~MatcherBase() {}
@@ -375,9 +374,11 @@ class Matcher : public internal::MatcherBase<T> {
       : internal::MatcherBase<T>(impl) {}
 
   template <typename U>
-  explicit Matcher(const MatcherInterface<U>* impl,
-                   typename internal::EnableIf<!internal::IsSame<
-                       U, GTEST_REFERENCE_TO_CONST_(U)>::value>::type* = NULL)
+  explicit Matcher(
+      const MatcherInterface<U>* impl,
+      typename internal::EnableIf<
+          !internal::IsSame<U, GTEST_REFERENCE_TO_CONST_(U)>::value>::type* =
+          nullptr)
       : internal::MatcherBase<T>(impl) {}
 
   // Implicit constructor here allows people to write
@@ -850,7 +851,7 @@ namespace internal {
 // If the explanation is not empty, prints it to the ostream.
 inline void PrintIfNotEmpty(const std::string& explanation,
                             ::std::ostream* os) {
-  if (explanation != "" && os != NULL) {
+  if (explanation != "" && os != nullptr) {
     *os << ", " << explanation;
   }
 }
@@ -1321,7 +1322,7 @@ class StrEqualityMatcher {
   //   wchar_t*
   template <typename CharType>
   bool MatchAndExplain(CharType* s, MatchResultListener* listener) const {
-    if (s == NULL) {
+    if (s == nullptr) {
       return !expect_eq_;
     }
     return MatchAndExplain(StringType(s), listener);
@@ -1391,7 +1392,7 @@ class HasSubstrMatcher {
   //   wchar_t*
   template <typename CharType>
   bool MatchAndExplain(CharType* s, MatchResultListener* listener) const {
-    return s != NULL && MatchAndExplain(StringType(s), listener);
+    return s != nullptr && MatchAndExplain(StringType(s), listener);
   }
 
   // Matches anything that can convert to StringType.
@@ -1448,7 +1449,7 @@ class StartsWithMatcher {
   //   wchar_t*
   template <typename CharType>
   bool MatchAndExplain(CharType* s, MatchResultListener* listener) const {
-    return s != NULL && MatchAndExplain(StringType(s), listener);
+    return s != nullptr && MatchAndExplain(StringType(s), listener);
   }
 
   // Matches anything that can convert to StringType.
@@ -1504,7 +1505,7 @@ class EndsWithMatcher {
   //   wchar_t*
   template <typename CharType>
   bool MatchAndExplain(CharType* s, MatchResultListener* listener) const {
-    return s != NULL && MatchAndExplain(StringType(s), listener);
+    return s != nullptr && MatchAndExplain(StringType(s), listener);
   }
 
   // Matches anything that can convert to StringType.
@@ -1557,7 +1558,7 @@ class MatchesRegexMatcher {
   //   wchar_t*
   template <typename CharType>
   bool MatchAndExplain(CharType* s, MatchResultListener* listener) const {
-    return s != NULL && MatchAndExplain(std::string(s), listener);
+    return s != nullptr && MatchAndExplain(std::string(s), listener);
   }
 
   // Matches anything that can convert to std::string.
@@ -2347,8 +2348,7 @@ class PointeeMatcher {
 
     virtual bool MatchAndExplain(Pointer pointer,
                                  MatchResultListener* listener) const {
-      if (GetRawPointer(pointer) == NULL)
-        return false;
+      if (GetRawPointer(pointer) == nullptr) return false;
 
       *listener << "which points to ";
       return MatchPrintAndExplain(*pointer, matcher_, listener);
@@ -2431,7 +2431,7 @@ class WhenDynamicCastToMatcher<To&> : public WhenDynamicCastToMatcherBase<To&> {
   bool MatchAndExplain(From& from, MatchResultListener* listener) const {
     // We don't want an std::bad_cast here, so do the cast with pointers.
     To* to = dynamic_cast<To*>(&from);
-    if (to == NULL) {
+    if (to == nullptr) {
       *listener << "which cannot be dynamic_cast to " << this->GetToName();
       return false;
     }
@@ -2485,8 +2485,7 @@ class FieldMatcher {
 
   bool MatchAndExplainImpl(true_type /* is_pointer */, const Class* p,
                            MatchResultListener* listener) const {
-    if (p == NULL)
-      return false;
+    if (p == nullptr) return false;
 
     *listener << "which points to an object ";
     // Since *p has a field, it must be a class/struct/union type and
@@ -2570,8 +2569,7 @@ class PropertyMatcher {
 
   bool MatchAndExplainImpl(true_type /* is_pointer */, const Class* p,
                            MatchResultListener* listener) const {
-    if (p == NULL)
-      return false;
+    if (p == nullptr) return false;
 
     *listener << "which points to an object ";
     // Since *p has a property method, it must be a class/struct/union
@@ -2615,7 +2613,7 @@ struct CallableTraits<ResType(*)(ArgType)> {
   typedef ResType(*StorageType)(ArgType);
 
   static void CheckIsValid(ResType(*f)(ArgType)) {
-    GTEST_CHECK_(f != NULL)
+    GTEST_CHECK_(f != nullptr)
         << "NULL function pointer is passed into ResultOf().";
   }
   template <typename T>
@@ -2857,7 +2855,7 @@ class ContainerEqMatcher {
       return true;
 
     ::std::ostream* const os = listener->stream();
-    if (os != NULL) {
+    if (os != nullptr) {
       // Something is different. Check for extra values first.
       bool printed_header = false;
       for (typename LhsStlContainer::const_iterator it =
@@ -4136,11 +4134,11 @@ class AnyCastMatcher {
                        ::testing::MatchResultListener* listener) const {
     if (!listener->IsInterested()) {
       const T* ptr = any_cast<T>(&value);
-      return ptr != NULL && matcher_.Matches(*ptr);
+      return ptr != nullptr && matcher_.Matches(*ptr);
     }
 
     const T* elem = any_cast<T>(&value);
-    if (elem == NULL) {
+    if (elem == nullptr) {
       *listener << "whose value is not of type '" << GetTypeName() << "'";
       return false;
     }

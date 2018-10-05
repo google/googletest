@@ -137,25 +137,6 @@ TEST_F(CxxExceptionInConstructorTest, ThrowsExceptionInConstructor) {
                 << "called unexpectedly.";
 }
 
-// Exceptions in destructors are not supported in C++11.
-#if !GTEST_LANG_CXX11
-class CxxExceptionInDestructorTest : public Test {
- public:
-  static void TearDownTestCase() {
-    printf("%s",
-           "CxxExceptionInDestructorTest::TearDownTestCase() "
-           "called as expected.\n");
-  }
-
- protected:
-  ~CxxExceptionInDestructorTest() {
-    GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(
-        throw std::runtime_error("Standard C++ exception"));
-  }
-};
-
-TEST_F(CxxExceptionInDestructorTest, ThrowsExceptionInDestructor) {}
-#endif  // C++11 mode
 
 class CxxExceptionInSetUpTestCaseTest : public Test {
  public:
@@ -296,7 +277,7 @@ TEST(CxxExceptionTest, ThrowsNonStdCxxException) {
 // ones.
 void TerminateHandler() {
   fprintf(stderr, "%s\n", "Unhandled C++ exception terminating the program.");
-  fflush(NULL);
+  fflush(nullptr);
   exit(3);
 }
 
