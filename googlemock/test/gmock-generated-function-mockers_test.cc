@@ -720,6 +720,17 @@ TEST(MockFunctionTest, AsStdFunctionReturnsReference) {
   value = 2;
   EXPECT_EQ(2, ref);
 }
+
+TEST(MockFunctionTest, AsStdFunctionWithReferenceParameter) {
+  MockFunction<int(int &)> foo;
+  auto call = [](const std::function<int(int& )> &f, int &i) {
+    return f(i);
+  };
+  int i = 42;
+  EXPECT_CALL(foo, Call(i)).WillOnce(Return(-1));
+  EXPECT_EQ(-1, call(foo.AsStdFunction(), i));
+}
+
 #endif  // GTEST_HAS_STD_FUNCTION_
 
 struct MockMethodSizes0 {

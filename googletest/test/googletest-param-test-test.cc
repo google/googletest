@@ -535,8 +535,6 @@ TEST(CombineTest, CombineWithMaxNumberOfParameters) {
   VerifyGenerator(gen, expected_values);
 }
 
-#if GTEST_LANG_CXX11
-
 class NonDefaultConstructAssignString {
  public:
   NonDefaultConstructAssignString(const std::string& s) : str_(s) {}
@@ -579,7 +577,6 @@ TEST(CombineTest, NonDefaultConstructAssign) {
   EXPECT_TRUE(it == gen.end());
 }
 
-#endif   // GTEST_LANG_CXX11
 # endif  // GTEST_HAS_COMBINE
 
 // Tests that an generator produces correct sequence after being
@@ -913,8 +910,6 @@ INSTANTIATE_TEST_CASE_P(CustomParamNameFunction,
                         Values(std::string("FunctionName")),
                         CustomParamNameFunction);
 
-#if GTEST_LANG_CXX11
-
 // Test custom naming with a lambda
 
 class CustomLambdaNamingTest : public TestWithParam<std::string> {};
@@ -925,8 +920,6 @@ INSTANTIATE_TEST_CASE_P(CustomParamNameLambda, CustomLambdaNamingTest,
                         [](const ::testing::TestParamInfo<std::string>& inf) {
                           return inf.param;
                         });
-
-#endif  // GTEST_LANG_CXX11
 
 TEST(CustomNamingTest, CheckNameRegistry) {
   ::testing::UnitTest* unit_test = ::testing::UnitTest::GetInstance();
@@ -944,9 +937,7 @@ TEST(CustomNamingTest, CheckNameRegistry) {
   }
   EXPECT_EQ(1u, test_names.count("CustomTestNames/FunctorName"));
   EXPECT_EQ(1u, test_names.count("CustomTestNames/FunctionName"));
-#if GTEST_LANG_CXX11
   EXPECT_EQ(1u, test_names.count("CustomTestNames/LambdaName"));
-#endif  // GTEST_LANG_CXX11
 }
 
 // Test a numeric name to ensure PrintToStringParamName works correctly.

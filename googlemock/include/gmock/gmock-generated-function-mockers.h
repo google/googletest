@@ -1604,9 +1604,7 @@ class MockFunction<R(A0)> {
 
 #if GTEST_HAS_STD_FUNCTION_
   ::std::function<R(A0)> AsStdFunction() {
-    return [this](A0 a0) -> R {
-      return this->Call(::std::move(a0));
-    };
+    return [this](A0 a0) -> R { return this->Call(::std::forward<A0>(a0)); };
   }
 #endif  // GTEST_HAS_STD_FUNCTION_
 
@@ -1624,7 +1622,7 @@ class MockFunction<R(A0, A1)> {
 #if GTEST_HAS_STD_FUNCTION_
   ::std::function<R(A0, A1)> AsStdFunction() {
     return [this](A0 a0, A1 a1) -> R {
-      return this->Call(::std::move(a0), ::std::move(a1));
+      return this->Call(::std::forward<A0>(a0), ::std::forward<A1>(a1));
     };
   }
 #endif  // GTEST_HAS_STD_FUNCTION_
@@ -1643,7 +1641,8 @@ class MockFunction<R(A0, A1, A2)> {
 #if GTEST_HAS_STD_FUNCTION_
   ::std::function<R(A0, A1, A2)> AsStdFunction() {
     return [this](A0 a0, A1 a1, A2 a2) -> R {
-      return this->Call(::std::move(a0), ::std::move(a1), ::std::move(a2));
+      return this->Call(::std::forward<A0>(a0), ::std::forward<A1>(a1),
+                        ::std::forward<A2>(a2));
     };
   }
 #endif  // GTEST_HAS_STD_FUNCTION_
@@ -1662,8 +1661,8 @@ class MockFunction<R(A0, A1, A2, A3)> {
 #if GTEST_HAS_STD_FUNCTION_
   ::std::function<R(A0, A1, A2, A3)> AsStdFunction() {
     return [this](A0 a0, A1 a1, A2 a2, A3 a3) -> R {
-      return this->Call(::std::move(a0), ::std::move(a1), ::std::move(a2),
-          ::std::move(a3));
+      return this->Call(::std::forward<A0>(a0), ::std::forward<A1>(a1),
+                        ::std::forward<A2>(a2), ::std::forward<A3>(a3));
     };
   }
 #endif  // GTEST_HAS_STD_FUNCTION_
@@ -1683,8 +1682,9 @@ class MockFunction<R(A0, A1, A2, A3, A4)> {
 #if GTEST_HAS_STD_FUNCTION_
   ::std::function<R(A0, A1, A2, A3, A4)> AsStdFunction() {
     return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4) -> R {
-      return this->Call(::std::move(a0), ::std::move(a1), ::std::move(a2),
-          ::std::move(a3), ::std::move(a4));
+      return this->Call(::std::forward<A0>(a0), ::std::forward<A1>(a1),
+                        ::std::forward<A2>(a2), ::std::forward<A3>(a3),
+                        ::std::forward<A4>(a4));
     };
   }
 #endif  // GTEST_HAS_STD_FUNCTION_
@@ -1704,8 +1704,9 @@ class MockFunction<R(A0, A1, A2, A3, A4, A5)> {
 #if GTEST_HAS_STD_FUNCTION_
   ::std::function<R(A0, A1, A2, A3, A4, A5)> AsStdFunction() {
     return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) -> R {
-      return this->Call(::std::move(a0), ::std::move(a1), ::std::move(a2),
-          ::std::move(a3), ::std::move(a4), ::std::move(a5));
+      return this->Call(::std::forward<A0>(a0), ::std::forward<A1>(a1),
+                        ::std::forward<A2>(a2), ::std::forward<A3>(a3),
+                        ::std::forward<A4>(a4), ::std::forward<A5>(a5));
     };
   }
 #endif  // GTEST_HAS_STD_FUNCTION_
@@ -1725,8 +1726,10 @@ class MockFunction<R(A0, A1, A2, A3, A4, A5, A6)> {
 #if GTEST_HAS_STD_FUNCTION_
   ::std::function<R(A0, A1, A2, A3, A4, A5, A6)> AsStdFunction() {
     return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) -> R {
-      return this->Call(::std::move(a0), ::std::move(a1), ::std::move(a2),
-          ::std::move(a3), ::std::move(a4), ::std::move(a5), ::std::move(a6));
+      return this->Call(::std::forward<A0>(a0), ::std::forward<A1>(a1),
+                        ::std::forward<A2>(a2), ::std::forward<A3>(a3),
+                        ::std::forward<A4>(a4), ::std::forward<A5>(a5),
+                        ::std::forward<A6>(a6));
     };
   }
 #endif  // GTEST_HAS_STD_FUNCTION_
@@ -1746,9 +1749,10 @@ class MockFunction<R(A0, A1, A2, A3, A4, A5, A6, A7)> {
 #if GTEST_HAS_STD_FUNCTION_
   ::std::function<R(A0, A1, A2, A3, A4, A5, A6, A7)> AsStdFunction() {
     return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) -> R {
-      return this->Call(::std::move(a0), ::std::move(a1), ::std::move(a2),
-          ::std::move(a3), ::std::move(a4), ::std::move(a5), ::std::move(a6),
-          ::std::move(a7));
+      return this->Call(::std::forward<A0>(a0), ::std::forward<A1>(a1),
+                        ::std::forward<A2>(a2), ::std::forward<A3>(a3),
+                        ::std::forward<A4>(a4), ::std::forward<A5>(a5),
+                        ::std::forward<A6>(a6), ::std::forward<A7>(a7));
     };
   }
 #endif  // GTEST_HAS_STD_FUNCTION_
@@ -1768,10 +1772,12 @@ class MockFunction<R(A0, A1, A2, A3, A4, A5, A6, A7, A8)> {
 #if GTEST_HAS_STD_FUNCTION_
   ::std::function<R(A0, A1, A2, A3, A4, A5, A6, A7, A8)> AsStdFunction() {
     return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
-        A8 a8) -> R {
-      return this->Call(::std::move(a0), ::std::move(a1), ::std::move(a2),
-          ::std::move(a3), ::std::move(a4), ::std::move(a5), ::std::move(a6),
-          ::std::move(a7), ::std::move(a8));
+                  A8 a8) -> R {
+      return this->Call(::std::forward<A0>(a0), ::std::forward<A1>(a1),
+                        ::std::forward<A2>(a2), ::std::forward<A3>(a3),
+                        ::std::forward<A4>(a4), ::std::forward<A5>(a5),
+                        ::std::forward<A6>(a6), ::std::forward<A7>(a7),
+                        ::std::forward<A8>(a8));
     };
   }
 #endif  // GTEST_HAS_STD_FUNCTION_
@@ -1791,11 +1797,13 @@ class MockFunction<R(A0, A1, A2, A3, A4, A5, A6, A7, A8, A9)> {
 
 #if GTEST_HAS_STD_FUNCTION_
   ::std::function<R(A0, A1, A2, A3, A4, A5, A6, A7, A8, A9)> AsStdFunction() {
-    return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
-        A8 a8, A9 a9) -> R {
-      return this->Call(::std::move(a0), ::std::move(a1), ::std::move(a2),
-          ::std::move(a3), ::std::move(a4), ::std::move(a5), ::std::move(a6),
-          ::std::move(a7), ::std::move(a8), ::std::move(a9));
+    return [this](A0 a0, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8,
+                  A9 a9) -> R {
+      return this->Call(::std::forward<A0>(a0), ::std::forward<A1>(a1),
+                        ::std::forward<A2>(a2), ::std::forward<A3>(a3),
+                        ::std::forward<A4>(a4), ::std::forward<A5>(a5),
+                        ::std::forward<A6>(a6), ::std::forward<A7>(a7),
+                        ::std::forward<A8>(a8), ::std::forward<A9>(a9));
     };
   }
 #endif  // GTEST_HAS_STD_FUNCTION_
