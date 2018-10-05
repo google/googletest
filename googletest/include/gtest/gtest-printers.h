@@ -518,11 +518,7 @@ void PrintTo(const T& value, ::std::ostream* os) {
           ? kPrintContainer
           : !is_pointer<T>::value
                 ? kPrintOther
-#if GTEST_LANG_CXX11
                 : std::is_function<typename std::remove_pointer<T>::type>::value
-#else
-                : !internal::ImplicitlyConvertible<T, const void*>::value
-#endif
                       ? kPrintFunctionPointer
                       : kPrintPointer > (),
       value, os);
@@ -639,8 +635,6 @@ inline void PrintTo(absl::string_view sp, ::std::ostream* os) {
 }
 #endif  // GTEST_HAS_ABSL
 
-#if GTEST_LANG_CXX11
-
 inline void PrintTo(std::nullptr_t, ::std::ostream* os) { *os << "(nullptr)"; }
 
 template <typename T>
@@ -648,8 +642,6 @@ void PrintTo(std::reference_wrapper<T> ref, ::std::ostream* os) {
   // Delegate to wrapped value.
   PrintTo(ref.get(), os);
 }
-
-#endif  // GTEST_LANG_CXX11
 
 #if GTEST_HAS_TR1_TUPLE || GTEST_HAS_STD_TUPLE_
 // Helper function for printing a tuple.  T must be instantiated with
