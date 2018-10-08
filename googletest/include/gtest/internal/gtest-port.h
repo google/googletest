@@ -343,18 +343,7 @@
     GTEST_DISABLE_MSC_WARNINGS_POP_()
 #endif
 
-#ifndef GTEST_LANG_CXX11
-// gcc and clang define __GXX_EXPERIMENTAL_CXX0X__ when
-// -std={c,gnu}++{0x,11} is passed.  The C++11 standard specifies a
-// value for __cplusplus, and recent versions of clang, gcc, and
-// probably other compilers set that too in C++11 mode.
-# if __GXX_EXPERIMENTAL_CXX0X__ || __cplusplus >= 201103L || _MSC_VER >= 1900
-// Compiling in at least C++11 mode.
-#  define GTEST_LANG_CXX11 1
-# else
-#  define GTEST_LANG_CXX11 0
-# endif
-#endif
+#define GTEST_LANG_CXX11 1
 
 // Distinct from C++11 language support, some environments don't provide
 // proper C++11 library support. Notably, it's possible to build in
