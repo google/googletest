@@ -1772,7 +1772,6 @@ class AllOfMatcherImpl
   GTEST_DISALLOW_ASSIGN_(AllOfMatcherImpl);
 };
 
-#if GTEST_LANG_CXX11
 // VariadicMatcher is used for the variadic implementation of
 // AllOf(m_1, m_2, ...) and AnyOf(m_1, m_2, ...).
 // CombiningMatcher<T> is used to recursively combine the provided matchers
@@ -1815,8 +1814,6 @@ class VariadicMatcher {
 
 template <typename... Args>
 using AllOfMatcher = VariadicMatcher<AllOfMatcherImpl, Args...>;
-
-#endif  // GTEST_LANG_CXX11
 
 // Used for implementing the AllOf(m_1, ..., m_n) matcher, which
 // matches a value that matches all of the matchers m_1, ..., and m_n.
@@ -5185,9 +5182,7 @@ UnorderedElementsAre(const Args&... matchers) {
       make_tuple(matchers...));
 }
 
-#if GTEST_LANG_CXX11
-// Define variadic matcher versions. They are overloaded in
-// gmock-generated-matchers.h for the cases supported by pre C++11 compilers.
+// Define variadic matcher versions.
 template <typename... Args>
 internal::AllOfMatcher<typename std::decay<const Args&>::type...> AllOf(
     const Args&... matchers) {
@@ -5201,8 +5196,6 @@ internal::AnyOfMatcher<typename std::decay<const Args&>::type...> AnyOf(
   return internal::AnyOfMatcher<typename std::decay<const Args&>::type...>(
       matchers...);
 }
-
-#endif  // GTEST_LANG_CXX11
 
 // AllArgs(m) is a synonym of m.  This is useful in
 //
