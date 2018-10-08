@@ -187,36 +187,6 @@ class ArgsMatcher {
   GTEST_DISALLOW_ASSIGN_(ArgsMatcher);
 };
 
-// A set of metafunctions for computing the result type of AllOf.
-// AllOf(m1, ..., mN) returns
-// AllOfResultN<decltype(m1), ..., decltype(mN)>::type.
-
-// Although AllOf isn't defined for one argument, AllOfResult1 is defined
-// to simplify the implementation.
-template <typename M1>
-struct AllOfResult1 {
-  typedef M1 type;
-};
-
-$range i 1..n
-
-$range i 2..n
-$for i [[
-$range j 2..i
-$var m = i/2
-$range k 1..m
-$range t m+1..i
-
-template <typename M1$for j [[, typename M$j]]>
-struct AllOfResult$i {
-  typedef BothOfMatcher<
-      typename AllOfResult$m<$for k, [[M$k]]>::type,
-      typename AllOfResult$(i-m)<$for t, [[M$t]]>::type
-  > type;
-};
-
-]]
-
 // A set of metafunctions for computing the result type of AnyOf.
 // AnyOf(m1, ..., mN) returns
 // AnyOfResultN<decltype(m1), ..., decltype(mN)>::type.
@@ -262,26 +232,6 @@ Args(const InnerMatcher& matcher) {
   return internal::ArgsMatcher<InnerMatcher$for j [[, k$j]]>(matcher);
 }
 
-
-]]
-
-// AllOf(m1, m2, ..., mk) matches any value that matches all of the given
-// sub-matchers.  AllOf is called fully qualified to prevent ADL from firing.
-
-$range i 2..n
-$for i [[
-$range j 1..i
-$var m = i/2
-$range k 1..m
-$range t m+1..i
-
-template <$for j, [[typename M$j]]>
-inline typename internal::AllOfResult$i<$for j, [[M$j]]>::type
-AllOf($for j, [[M$j m$j]]) {
-  return typename internal::AllOfResult$i<$for j, [[M$j]]>::type(
-      $if m == 1 [[m1]] $else [[::testing::AllOf($for k, [[m$k]])]],
-      $if m+1 == i [[m$i]] $else [[::testing::AllOf($for t, [[m$t]])]]);
-}
 
 ]]
 
