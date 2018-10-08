@@ -2553,29 +2553,16 @@ TEST(AllOfTest, MatchesWhenAllMatch) {
                         Ne(8), Ne(9)));
   AllOfMatches(10, AllOf(Ne(1), Ne(2), Ne(3), Ne(4), Ne(5), Ne(6), Ne(7), Ne(8),
                          Ne(9), Ne(10)));
+  AllOfMatches(
+      50, AllOf(Ne(1), Ne(2), Ne(3), Ne(4), Ne(5), Ne(6), Ne(7), Ne(8), Ne(9),
+                Ne(10), Ne(11), Ne(12), Ne(13), Ne(14), Ne(15), Ne(16), Ne(17),
+                Ne(18), Ne(19), Ne(20), Ne(21), Ne(22), Ne(23), Ne(24), Ne(25),
+                Ne(26), Ne(27), Ne(28), Ne(29), Ne(30), Ne(31), Ne(32), Ne(33),
+                Ne(34), Ne(35), Ne(36), Ne(37), Ne(38), Ne(39), Ne(40), Ne(41),
+                Ne(42), Ne(43), Ne(44), Ne(45), Ne(46), Ne(47), Ne(48), Ne(49),
+                Ne(50)));
 }
 
-#if GTEST_LANG_CXX11
-// Tests the variadic version of the AllOfMatcher.
-TEST(AllOfTest, VariadicMatchesWhenAllMatch) {
-  // Make sure AllOf is defined in the right namespace and does not depend on
-  // ADL.
-  ::testing::AllOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
-  Matcher<int> m = AllOf(Ne(1), Ne(2), Ne(3), Ne(4), Ne(5), Ne(6), Ne(7), Ne(8),
-                         Ne(9), Ne(10), Ne(11));
-  EXPECT_THAT(Describe(m), EndsWith("and (isn't equal to 11)"));
-  AllOfMatches(11, m);
-  AllOfMatches(50, AllOf(Ne(1), Ne(2), Ne(3), Ne(4), Ne(5), Ne(6), Ne(7), Ne(8),
-                         Ne(9), Ne(10), Ne(11), Ne(12), Ne(13), Ne(14), Ne(15),
-                         Ne(16), Ne(17), Ne(18), Ne(19), Ne(20), Ne(21), Ne(22),
-                         Ne(23), Ne(24), Ne(25), Ne(26), Ne(27), Ne(28), Ne(29),
-                         Ne(30), Ne(31), Ne(32), Ne(33), Ne(34), Ne(35), Ne(36),
-                         Ne(37), Ne(38), Ne(39), Ne(40), Ne(41), Ne(42), Ne(43),
-                         Ne(44), Ne(45), Ne(46), Ne(47), Ne(48), Ne(49),
-                         Ne(50)));
-}
-
-#endif  // GTEST_LANG_CXX11
 
 // Tests that AllOf(m1, ..., mn) describes itself properly.
 TEST(AllOfTest, CanDescribeSelf) {
@@ -2584,59 +2571,51 @@ TEST(AllOfTest, CanDescribeSelf) {
   EXPECT_EQ("(is <= 2) and (is >= 1)", Describe(m));
 
   m = AllOf(Gt(0), Ne(1), Ne(2));
-  EXPECT_EQ("(is > 0) and "
-            "((isn't equal to 1) and "
-            "(isn't equal to 2))",
-            Describe(m));
-
+  std::string expected_descr1 =
+      "(is > 0) and (isn't equal to 1) and (isn't equal to 2)";
+  EXPECT_EQ(expected_descr1, Describe(m));
 
   m = AllOf(Gt(0), Ne(1), Ne(2), Ne(3));
-  EXPECT_EQ("((is > 0) and "
-            "(isn't equal to 1)) and "
-            "((isn't equal to 2) and "
-            "(isn't equal to 3))",
-            Describe(m));
-
+  std::string expected_descr2 =
+      "(is > 0) and (isn't equal to 1) and (isn't equal to 2) and (isn't equal "
+      "to 3)";
+  EXPECT_EQ(expected_descr2, Describe(m));
 
   m = AllOf(Ge(0), Lt(10), Ne(3), Ne(5), Ne(7));
-  EXPECT_EQ("((is >= 0) and "
-            "(is < 10)) and "
-            "((isn't equal to 3) and "
-            "((isn't equal to 5) and "
-            "(isn't equal to 7)))",
-            Describe(m));
+  std::string expected_descr3 =
+      "(is >= 0) and (is < 10) and (isn't equal to 3) and (isn't equal to 5) "
+      "and (isn't equal to 7)";
+  EXPECT_EQ(expected_descr3, Describe(m));
 }
 
 // Tests that AllOf(m1, ..., mn) describes its negation properly.
 TEST(AllOfTest, CanDescribeNegation) {
   Matcher<int> m;
   m = AllOf(Le(2), Ge(1));
-  EXPECT_EQ("(isn't <= 2) or "
-            "(isn't >= 1)",
-            DescribeNegation(m));
+  std::string expected_descr4 = "(isn't <= 2) or (isn't >= 1)";
+  EXPECT_EQ(expected_descr4, DescribeNegation(m));
 
   m = AllOf(Gt(0), Ne(1), Ne(2));
-  EXPECT_EQ("(isn't > 0) or "
-            "((is equal to 1) or "
-            "(is equal to 2))",
-            DescribeNegation(m));
-
+  std::string expected_descr5 =
+      "(isn't > 0) or (is equal to 1) or (is equal to 2)";
+  EXPECT_EQ(expected_descr5, DescribeNegation(m));
 
   m = AllOf(Gt(0), Ne(1), Ne(2), Ne(3));
-  EXPECT_EQ("((isn't > 0) or "
-            "(is equal to 1)) or "
-            "((is equal to 2) or "
-            "(is equal to 3))",
-            DescribeNegation(m));
-
+  std::string expected_descr6 =
+      "(isn't > 0) or (is equal to 1) or (is equal to 2) or (is equal to 3)";
+  EXPECT_EQ(expected_descr6, DescribeNegation(m));
 
   m = AllOf(Ge(0), Lt(10), Ne(3), Ne(5), Ne(7));
-  EXPECT_EQ("((isn't >= 0) or "
-            "(isn't < 10)) or "
-            "((is equal to 3) or "
-            "((is equal to 5) or "
-            "(is equal to 7)))",
-            DescribeNegation(m));
+  std::string expected_desr7 =
+      "(isn't >= 0) or (isn't < 10) or (is equal to 3) or (is equal to 5) or "
+      "(is equal to 7)";
+  EXPECT_EQ(expected_desr7, DescribeNegation(m));
+
+  m = AllOf(Ne(1), Ne(2), Ne(3), Ne(4), Ne(5), Ne(6), Ne(7), Ne(8), Ne(9),
+            Ne(10), Ne(11));
+  AllOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+  EXPECT_THAT(Describe(m), EndsWith("and (isn't equal to 11)"));
+  AllOfMatches(11, m);
 }
 
 // Tests that monomorphic matchers are safely cast by the AllOf matcher.
