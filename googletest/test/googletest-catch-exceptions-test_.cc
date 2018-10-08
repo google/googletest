@@ -277,7 +277,7 @@ TEST(CxxExceptionTest, ThrowsNonStdCxxException) {
 // ones.
 void TerminateHandler() {
   fprintf(stderr, "%s\n", "Unhandled C++ exception terminating the program.");
-  fflush(NULL);
+  fflush(nullptr);
   exit(3);
 }
 

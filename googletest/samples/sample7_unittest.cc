@@ -69,7 +69,7 @@ class PrimeTableTestSmpl7 : public TestWithParam<CreatePrimeTableFunc*> {
   virtual void SetUp() { table_ = (*GetParam())(); }
   virtual void TearDown() {
     delete table_;
-    table_ = NULL;
+    table_ = nullptr;
   }
 
  protected:
