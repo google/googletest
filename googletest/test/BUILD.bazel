@@ -49,7 +49,7 @@ config_setting(
     values = {"define": "absl=1"},
 )
 
-#on windows exclude gtest-tuple.h and googletest-tuple-test.cc
+#on windows exclude gtest-tuple.h
 cc_test(
     name = "gtest_all_test",
     size = "small",
@@ -62,7 +62,6 @@ cc_test(
         ],
         exclude = [
             "gtest-unittest-api_test.cc",
-            "googletest-tuple-test.cc",
             "googletest/src/gtest-all.cc",
             "gtest_all_test.cc",
             "gtest-death-test_ex_test.cc",
@@ -89,9 +88,7 @@ cc_test(
     ) + select({
         "//:windows": [],
         "//:windows_msvc": [],
-        "//conditions:default": [
-            "googletest-tuple-test.cc",
-        ],
+        "//conditions:default": [],
     }),
     copts = select({
         "//:windows": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
