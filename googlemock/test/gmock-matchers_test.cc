@@ -2790,28 +2790,22 @@ TEST(ElementsAreTest, HugeMatcherUnordered) {
 TEST(AnyOfTest, CanDescribeSelf) {
   Matcher<int> m;
   m = AnyOf(Le(1), Ge(3));
+
   EXPECT_EQ("(is <= 1) or (is >= 3)",
             Describe(m));
 
   m = AnyOf(Lt(0), Eq(1), Eq(2));
-  EXPECT_EQ("(is < 0) or "
-            "((is equal to 1) or (is equal to 2))",
-            Describe(m));
+  EXPECT_EQ("(is < 0) or (is equal to 1) or (is equal to 2)", Describe(m));
 
   m = AnyOf(Lt(0), Eq(1), Eq(2), Eq(3));
-  EXPECT_EQ("((is < 0) or "
-            "(is equal to 1)) or "
-            "((is equal to 2) or "
-            "(is equal to 3))",
+  EXPECT_EQ("(is < 0) or (is equal to 1) or (is equal to 2) or (is equal to 3)",
             Describe(m));
 
   m = AnyOf(Le(0), Gt(10), 3, 5, 7);
-  EXPECT_EQ("((is <= 0) or "
-            "(is > 10)) or "
-            "((is equal to 3) or "
-            "((is equal to 5) or "
-            "(is equal to 7)))",
-            Describe(m));
+  EXPECT_EQ(
+      "(is <= 0) or (is > 10) or (is equal to 3) or (is equal to 5) or (is "
+      "equal to 7)",
+      Describe(m));
 }
 
 // Tests that AnyOf(m1, ..., mn) describes its negation properly.
@@ -2822,24 +2816,20 @@ TEST(AnyOfTest, CanDescribeNegation) {
             DescribeNegation(m));
 
   m = AnyOf(Lt(0), Eq(1), Eq(2));
-  EXPECT_EQ("(isn't < 0) and "
-            "((isn't equal to 1) and (isn't equal to 2))",
+  EXPECT_EQ("(isn't < 0) and (isn't equal to 1) and (isn't equal to 2)",
             DescribeNegation(m));
 
   m = AnyOf(Lt(0), Eq(1), Eq(2), Eq(3));
-  EXPECT_EQ("((isn't < 0) and "
-            "(isn't equal to 1)) and "
-            "((isn't equal to 2) and "
-            "(isn't equal to 3))",
-            DescribeNegation(m));
+  EXPECT_EQ(
+      "(isn't < 0) and (isn't equal to 1) and (isn't equal to 2) and (isn't "
+      "equal to 3)",
+      DescribeNegation(m));
 
   m = AnyOf(Le(0), Gt(10), 3, 5, 7);
-  EXPECT_EQ("((isn't <= 0) and "
-            "(isn't > 10)) and "
-            "((isn't equal to 3) and "
-            "((isn't equal to 5) and "
-            "(isn't equal to 7)))",
-            DescribeNegation(m));
+  EXPECT_EQ(
+      "(isn't <= 0) and (isn't > 10) and (isn't equal to 3) and (isn't equal "
+      "to 5) and (isn't equal to 7)",
+      DescribeNegation(m));
 }
 
 // Tests that monomorphic matchers are safely cast by the AnyOf matcher.
