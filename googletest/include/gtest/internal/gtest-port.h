@@ -723,7 +723,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # endif  // GTEST_TUPLE_NAMESPACE_
 
 # if GTEST_USE_OWN_TR1_TUPLE
-#  include "gtest/internal/gtest-tuple.h"  // IWYU pragma: export  // NOLINT
+#  include "third_party/googletest/googletest/include/gtest/internal/gtest-tuple.h"  // IWYU pragma: export  // NOLINT
 # elif GTEST_OS_SYMBIAN
 
 // On Symbian, BOOST_HAS_TR1_TUPLE causes Boost's TR1 tuple library to
@@ -2540,9 +2540,9 @@ GTEST_DISABLE_MSC_DEPRECATED_POP_()
 // Windows CE has no C library. The abort() function is used in
 // several places in Google Test. This implementation provides a reasonable
 // imitation of standard behaviour.
-void Abort();
+[[noreturn]] void Abort();
 #else
-inline void Abort() { abort(); }
+[[noreturn]] inline void Abort() { abort(); }
 #endif  // GTEST_OS_WINDOWS_MOBILE
 
 }  // namespace posix
