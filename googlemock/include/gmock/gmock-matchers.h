@@ -1815,32 +1815,6 @@ class VariadicMatcher {
 template <typename... Args>
 using AllOfMatcher = VariadicMatcher<AllOfMatcherImpl, Args...>;
 
-// Used for implementing the AllOf(m_1, ..., m_n) matcher, which
-// matches a value that matches all of the matchers m_1, ..., and m_n.
-template <typename Matcher1, typename Matcher2>
-class BothOfMatcher {
- public:
-  BothOfMatcher(Matcher1 matcher1, Matcher2 matcher2)
-      : matcher1_(matcher1), matcher2_(matcher2) {}
-
-  // This template type conversion operator allows a
-  // BothOfMatcher<Matcher1, Matcher2> object to match any type that
-  // both Matcher1 and Matcher2 can match.
-  template <typename T>
-  operator Matcher<T>() const {
-    std::vector<Matcher<T> > values;
-    values.push_back(SafeMatcherCast<T>(matcher1_));
-    values.push_back(SafeMatcherCast<T>(matcher2_));
-    return Matcher<T>(new AllOfMatcherImpl<T>(internal::move(values)));
-  }
-
- private:
-  Matcher1 matcher1_;
-  Matcher2 matcher2_;
-
-  GTEST_DISALLOW_ASSIGN_(BothOfMatcher);
-};
-
 // Implements the AnyOf(m1, m2) matcher for a particular argument type
 // T.  We do not nest it inside the AnyOfMatcher class template, as
 // that will prevent different instantiations of AnyOfMatcher from
