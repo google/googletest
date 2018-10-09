@@ -439,7 +439,7 @@ class Action {
 //     template <typename Result, typename ArgumentTuple>
 //     Result Perform(const ArgumentTuple& args) const {
 //       // Processes the arguments and returns a result, using
-//       // tr1::get<N>(args) to get the N-th (0-based) argument in the tuple.
+//       // std::get<N>(args) to get the N-th (0-based) argument in the tuple.
 //     }
 //     ...
 //   };
@@ -838,7 +838,7 @@ class SetArgumentPointeeAction {
   template <typename Result, typename ArgumentTuple>
   void Perform(const ArgumentTuple& args) const {
     CompileAssertTypesEqual<void, Result>();
-    *::testing::get<N>(args) = value_;
+    *::std::get<N>(args) = value_;
   }
 
  private:
@@ -861,7 +861,7 @@ class SetArgumentPointeeAction<N, Proto, true> {
   template <typename Result, typename ArgumentTuple>
   void Perform(const ArgumentTuple& args) const {
     CompileAssertTypesEqual<void, Result>();
-    ::testing::get<N>(args)->CopyFrom(*proto_);
+    ::std::get<N>(args)->CopyFrom(*proto_);
   }
 
  private:

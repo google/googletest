@@ -136,7 +136,6 @@ using testing::Value;
 using testing::WhenSorted;
 using testing::WhenSortedBy;
 using testing::_;
-using testing::get;
 using testing::internal::DummyMatchResultListener;
 using testing::internal::ElementMatcherPair;
 using testing::internal::ElementMatcherPairs;
@@ -153,8 +152,6 @@ using testing::internal::Strings;
 using testing::internal::linked_ptr;
 using testing::internal::scoped_ptr;
 using testing::internal::string;
-using testing::make_tuple;
-using testing::tuple;
 
 // For testing ExplainMatchResultTo().
 class GreaterThanMatcher : public MatcherInterface<int> {
@@ -2239,8 +2236,7 @@ TEST(GlobalWideEndsWithTest, CanDescribeSelf) {
 
 #endif  // GTEST_HAS_GLOBAL_WSTRING
 
-
-typedef ::testing::tuple<long, int> Tuple2;  // NOLINT
+typedef ::std::tuple<long, int> Tuple2;  // NOLINT
 
 // Tests that Eq() matches a 2-tuple where the first field == the
 // second field.
@@ -2334,7 +2330,7 @@ TEST(Ne2Test, CanDescribeSelf) {
 // Tests that FloatEq() matches a 2-tuple where
 // FloatEq(first field) matches the second field.
 TEST(FloatEq2Test, MatchesEqualArguments) {
-  typedef ::testing::tuple<float, float> Tpl;
+  typedef ::std::tuple<float, float> Tpl;
   Matcher<const Tpl&> m = FloatEq();
   EXPECT_TRUE(m.Matches(Tpl(1.0f, 1.0f)));
   EXPECT_TRUE(m.Matches(Tpl(0.3f, 0.1f + 0.1f + 0.1f)));
@@ -2343,14 +2339,14 @@ TEST(FloatEq2Test, MatchesEqualArguments) {
 
 // Tests that FloatEq() describes itself properly.
 TEST(FloatEq2Test, CanDescribeSelf) {
-  Matcher<const ::testing::tuple<float, float>&> m = FloatEq();
+  Matcher<const ::std::tuple<float, float>&> m = FloatEq();
   EXPECT_EQ("are an almost-equal pair", Describe(m));
 }
 
 // Tests that NanSensitiveFloatEq() matches a 2-tuple where
 // NanSensitiveFloatEq(first field) matches the second field.
 TEST(NanSensitiveFloatEqTest, MatchesEqualArgumentsWithNaN) {
-  typedef ::testing::tuple<float, float> Tpl;
+  typedef ::std::tuple<float, float> Tpl;
   Matcher<const Tpl&> m = NanSensitiveFloatEq();
   EXPECT_TRUE(m.Matches(Tpl(1.0f, 1.0f)));
   EXPECT_TRUE(m.Matches(Tpl(std::numeric_limits<float>::quiet_NaN(),
@@ -2362,14 +2358,14 @@ TEST(NanSensitiveFloatEqTest, MatchesEqualArgumentsWithNaN) {
 
 // Tests that NanSensitiveFloatEq() describes itself properly.
 TEST(NanSensitiveFloatEqTest, CanDescribeSelfWithNaNs) {
-  Matcher<const ::testing::tuple<float, float>&> m = NanSensitiveFloatEq();
+  Matcher<const ::std::tuple<float, float>&> m = NanSensitiveFloatEq();
   EXPECT_EQ("are an almost-equal pair", Describe(m));
 }
 
 // Tests that DoubleEq() matches a 2-tuple where
 // DoubleEq(first field) matches the second field.
 TEST(DoubleEq2Test, MatchesEqualArguments) {
-  typedef ::testing::tuple<double, double> Tpl;
+  typedef ::std::tuple<double, double> Tpl;
   Matcher<const Tpl&> m = DoubleEq();
   EXPECT_TRUE(m.Matches(Tpl(1.0, 1.0)));
   EXPECT_TRUE(m.Matches(Tpl(0.3, 0.1 + 0.1 + 0.1)));
@@ -2378,14 +2374,14 @@ TEST(DoubleEq2Test, MatchesEqualArguments) {
 
 // Tests that DoubleEq() describes itself properly.
 TEST(DoubleEq2Test, CanDescribeSelf) {
-  Matcher<const ::testing::tuple<double, double>&> m = DoubleEq();
+  Matcher<const ::std::tuple<double, double>&> m = DoubleEq();
   EXPECT_EQ("are an almost-equal pair", Describe(m));
 }
 
 // Tests that NanSensitiveDoubleEq() matches a 2-tuple where
 // NanSensitiveDoubleEq(first field) matches the second field.
 TEST(NanSensitiveDoubleEqTest, MatchesEqualArgumentsWithNaN) {
-  typedef ::testing::tuple<double, double> Tpl;
+  typedef ::std::tuple<double, double> Tpl;
   Matcher<const Tpl&> m = NanSensitiveDoubleEq();
   EXPECT_TRUE(m.Matches(Tpl(1.0f, 1.0f)));
   EXPECT_TRUE(m.Matches(Tpl(std::numeric_limits<double>::quiet_NaN(),
@@ -2397,14 +2393,14 @@ TEST(NanSensitiveDoubleEqTest, MatchesEqualArgumentsWithNaN) {
 
 // Tests that DoubleEq() describes itself properly.
 TEST(NanSensitiveDoubleEqTest, CanDescribeSelfWithNaNs) {
-  Matcher<const ::testing::tuple<double, double>&> m = NanSensitiveDoubleEq();
+  Matcher<const ::std::tuple<double, double>&> m = NanSensitiveDoubleEq();
   EXPECT_EQ("are an almost-equal pair", Describe(m));
 }
 
 // Tests that FloatEq() matches a 2-tuple where
 // FloatNear(first field, max_abs_error) matches the second field.
 TEST(FloatNear2Test, MatchesEqualArguments) {
-  typedef ::testing::tuple<float, float> Tpl;
+  typedef ::std::tuple<float, float> Tpl;
   Matcher<const Tpl&> m = FloatNear(0.5f);
   EXPECT_TRUE(m.Matches(Tpl(1.0f, 1.0f)));
   EXPECT_TRUE(m.Matches(Tpl(1.3f, 1.0f)));
@@ -2413,14 +2409,14 @@ TEST(FloatNear2Test, MatchesEqualArguments) {
 
 // Tests that FloatNear() describes itself properly.
 TEST(FloatNear2Test, CanDescribeSelf) {
-  Matcher<const ::testing::tuple<float, float>&> m = FloatNear(0.5f);
+  Matcher<const ::std::tuple<float, float>&> m = FloatNear(0.5f);
   EXPECT_EQ("are an almost-equal pair", Describe(m));
 }
 
 // Tests that NanSensitiveFloatNear() matches a 2-tuple where
 // NanSensitiveFloatNear(first field) matches the second field.
 TEST(NanSensitiveFloatNearTest, MatchesNearbyArgumentsWithNaN) {
-  typedef ::testing::tuple<float, float> Tpl;
+  typedef ::std::tuple<float, float> Tpl;
   Matcher<const Tpl&> m = NanSensitiveFloatNear(0.5f);
   EXPECT_TRUE(m.Matches(Tpl(1.0f, 1.0f)));
   EXPECT_TRUE(m.Matches(Tpl(1.1f, 1.0f)));
@@ -2433,15 +2429,14 @@ TEST(NanSensitiveFloatNearTest, MatchesNearbyArgumentsWithNaN) {
 
 // Tests that NanSensitiveFloatNear() describes itself properly.
 TEST(NanSensitiveFloatNearTest, CanDescribeSelfWithNaNs) {
-  Matcher<const ::testing::tuple<float, float>&> m =
-      NanSensitiveFloatNear(0.5f);
+  Matcher<const ::std::tuple<float, float>&> m = NanSensitiveFloatNear(0.5f);
   EXPECT_EQ("are an almost-equal pair", Describe(m));
 }
 
 // Tests that FloatEq() matches a 2-tuple where
 // DoubleNear(first field, max_abs_error) matches the second field.
 TEST(DoubleNear2Test, MatchesEqualArguments) {
-  typedef ::testing::tuple<double, double> Tpl;
+  typedef ::std::tuple<double, double> Tpl;
   Matcher<const Tpl&> m = DoubleNear(0.5);
   EXPECT_TRUE(m.Matches(Tpl(1.0, 1.0)));
   EXPECT_TRUE(m.Matches(Tpl(1.3, 1.0)));
@@ -2450,14 +2445,14 @@ TEST(DoubleNear2Test, MatchesEqualArguments) {
 
 // Tests that DoubleNear() describes itself properly.
 TEST(DoubleNear2Test, CanDescribeSelf) {
-  Matcher<const ::testing::tuple<double, double>&> m = DoubleNear(0.5);
+  Matcher<const ::std::tuple<double, double>&> m = DoubleNear(0.5);
   EXPECT_EQ("are an almost-equal pair", Describe(m));
 }
 
 // Tests that NanSensitiveDoubleNear() matches a 2-tuple where
 // NanSensitiveDoubleNear(first field) matches the second field.
 TEST(NanSensitiveDoubleNearTest, MatchesNearbyArgumentsWithNaN) {
-  typedef ::testing::tuple<double, double> Tpl;
+  typedef ::std::tuple<double, double> Tpl;
   Matcher<const Tpl&> m = NanSensitiveDoubleNear(0.5f);
   EXPECT_TRUE(m.Matches(Tpl(1.0f, 1.0f)));
   EXPECT_TRUE(m.Matches(Tpl(1.1f, 1.0f)));
@@ -2470,8 +2465,7 @@ TEST(NanSensitiveDoubleNearTest, MatchesNearbyArgumentsWithNaN) {
 
 // Tests that NanSensitiveDoubleNear() describes itself properly.
 TEST(NanSensitiveDoubleNearTest, CanDescribeSelfWithNaNs) {
-  Matcher<const ::testing::tuple<double, double>&> m =
-      NanSensitiveDoubleNear(0.5f);
+  Matcher<const ::std::tuple<double, double>&> m = NanSensitiveDoubleNear(0.5f);
   EXPECT_EQ("are an almost-equal pair", Describe(m));
 }
 
@@ -3081,8 +3075,8 @@ TEST(DescribeMatcherTest, WorksWithPolymorphicMatcher) {
 }
 
 TEST(AllArgsTest, WorksForTuple) {
-  EXPECT_THAT(make_tuple(1, 2L), AllArgs(Lt()));
-  EXPECT_THAT(make_tuple(2L, 1), Not(AllArgs(Lt())));
+  EXPECT_THAT(std::make_tuple(1, 2L), AllArgs(Lt()));
+  EXPECT_THAT(std::make_tuple(2L, 1), Not(AllArgs(Lt())));
 }
 
 TEST(AllArgsTest, WorksForNonTuple) {
@@ -5060,11 +5054,11 @@ TEST(ContainerEqExtraTest, WorksForNativeArrayAsTuple) {
   const int b[] = {1, 2, 3, 4};
 
   const int* const p1 = a1;
-  EXPECT_THAT(make_tuple(p1, 3), ContainerEq(a2));
-  EXPECT_THAT(make_tuple(p1, 3), Not(ContainerEq(b)));
+  EXPECT_THAT(std::make_tuple(p1, 3), ContainerEq(a2));
+  EXPECT_THAT(std::make_tuple(p1, 3), Not(ContainerEq(b)));
 
   const int c[] = {1, 3, 2};
-  EXPECT_THAT(make_tuple(p1, 3), Not(ContainerEq(c)));
+  EXPECT_THAT(std::make_tuple(p1, 3), Not(ContainerEq(c)));
 }
 
 TEST(ContainerEqExtraTest, CopiesNativeArrayParameter) {
@@ -6246,13 +6240,15 @@ TEST(PolymorphicMatcherTest, CanAccessImpl) {
 
 TEST(MatcherTupleTest, ExplainsMatchFailure) {
   stringstream ss1;
-  ExplainMatchFailureTupleTo(make_tuple(Matcher<char>(Eq('a')), GreaterThan(5)),
-                             make_tuple('a', 10), &ss1);
+  ExplainMatchFailureTupleTo(
+      std::make_tuple(Matcher<char>(Eq('a')), GreaterThan(5)),
+      std::make_tuple('a', 10), &ss1);
   EXPECT_EQ("", ss1.str());  // Successful match.
 
   stringstream ss2;
-  ExplainMatchFailureTupleTo(make_tuple(GreaterThan(5), Matcher<char>(Eq('a'))),
-                             make_tuple(2, 'b'), &ss2);
+  ExplainMatchFailureTupleTo(
+      std::make_tuple(GreaterThan(5), Matcher<char>(Eq('a'))),
+      std::make_tuple(2, 'b'), &ss2);
   EXPECT_EQ("  Expected arg #0: is > 5\n"
             "           Actual: 2, which is 3 less than 5\n"
             "  Expected arg #1: is equal to 'a' (97, 0x61)\n"
@@ -6260,8 +6256,9 @@ TEST(MatcherTupleTest, ExplainsMatchFailure) {
             ss2.str());  // Failed match where both arguments need explanation.
 
   stringstream ss3;
-  ExplainMatchFailureTupleTo(make_tuple(GreaterThan(5), Matcher<char>(Eq('a'))),
-                             make_tuple(2, 'a'), &ss3);
+  ExplainMatchFailureTupleTo(
+      std::make_tuple(GreaterThan(5), Matcher<char>(Eq('a'))),
+      std::make_tuple(2, 'a'), &ss3);
   EXPECT_EQ("  Expected arg #0: is > 5\n"
             "           Actual: 2, which is 3 less than 5\n",
             ss3.str());  // Failed match where only one argument needs
@@ -6350,21 +6347,21 @@ TEST(EachTest, AcceptsMatcher) {
 TEST(EachTest, WorksForNativeArrayAsTuple) {
   const int a[] = {1, 2};
   const int* const pointer = a;
-  EXPECT_THAT(make_tuple(pointer, 2), Each(Gt(0)));
-  EXPECT_THAT(make_tuple(pointer, 2), Not(Each(Gt(1))));
+  EXPECT_THAT(std::make_tuple(pointer, 2), Each(Gt(0)));
+  EXPECT_THAT(std::make_tuple(pointer, 2), Not(Each(Gt(1))));
 }
 
 // For testing Pointwise().
 class IsHalfOfMatcher {
  public:
   template <typename T1, typename T2>
-  bool MatchAndExplain(const tuple<T1, T2>& a_pair,
+  bool MatchAndExplain(const std::tuple<T1, T2>& a_pair,
                        MatchResultListener* listener) const {
-    if (get<0>(a_pair) == get<1>(a_pair)/2) {
-      *listener << "where the second is " << get<1>(a_pair);
+    if (std::get<0>(a_pair) == std::get<1>(a_pair) / 2) {
+      *listener << "where the second is " << std::get<1>(a_pair);
       return true;
     } else {
-      *listener << "where the second/2 is " << get<1>(a_pair)/2;
+      *listener << "where the second/2 is " << std::get<1>(a_pair) / 2;
       return false;
     }
   }
@@ -6481,13 +6478,13 @@ TEST(PointwiseTest, AcceptsCorrectContent) {
 TEST(PointwiseTest, AllowsMonomorphicInnerMatcher) {
   const double lhs[3] = {1, 2, 3};
   const int rhs[3] = {2, 4, 6};
-  const Matcher<tuple<const double&, const int&> > m1 = IsHalfOf();
+  const Matcher<std::tuple<const double&, const int&>> m1 = IsHalfOf();
   EXPECT_THAT(lhs, Pointwise(m1, rhs));
   EXPECT_EQ("", Explain(Pointwise(m1, rhs), lhs));
 
-  // This type works as a tuple<const double&, const int&> can be
-  // implicitly cast to tuple<double, int>.
-  const Matcher<tuple<double, int> > m2 = IsHalfOf();
+  // This type works as a std::tuple<const double&, const int&> can be
+  // implicitly cast to std::tuple<double, int>.
+  const Matcher<std::tuple<double, int>> m2 = IsHalfOf();
   EXPECT_THAT(lhs, Pointwise(m2, rhs));
   EXPECT_EQ("", Explain(Pointwise(m2, rhs), lhs));
 }
@@ -6597,12 +6594,12 @@ TEST(UnorderedPointwiseTest, AcceptsCorrectContentInDifferentOrder) {
 TEST(UnorderedPointwiseTest, AllowsMonomorphicInnerMatcher) {
   const double lhs[3] = {1, 2, 3};
   const int rhs[3] = {4, 6, 2};
-  const Matcher<tuple<const double&, const int&> > m1 = IsHalfOf();
+  const Matcher<std::tuple<const double&, const int&>> m1 = IsHalfOf();
   EXPECT_THAT(lhs, UnorderedPointwise(m1, rhs));
 
-  // This type works as a tuple<const double&, const int&> can be
-  // implicitly cast to tuple<double, int>.
-  const Matcher<tuple<double, int> > m2 = IsHalfOf();
+  // This type works as a std::tuple<const double&, const int&> can be
+  // implicitly cast to std::tuple<double, int>.
+  const Matcher<std::tuple<double, int>> m2 = IsHalfOf();
   EXPECT_THAT(lhs, UnorderedPointwise(m2, rhs));
 }
 
