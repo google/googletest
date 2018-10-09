@@ -1879,39 +1879,9 @@ class AnyOfMatcherImpl
   GTEST_DISALLOW_ASSIGN_(AnyOfMatcherImpl);
 };
 
-#if GTEST_LANG_CXX11
 // AnyOfMatcher is used for the variadic implementation of AnyOf(m_1, m_2, ...).
 template <typename... Args>
 using AnyOfMatcher = VariadicMatcher<AnyOfMatcherImpl, Args...>;
-
-#endif  // GTEST_LANG_CXX11
-
-// Used for implementing the AnyOf(m_1, ..., m_n) matcher, which
-// matches a value that matches at least one of the matchers m_1, ...,
-// and m_n.
-template <typename Matcher1, typename Matcher2>
-class EitherOfMatcher {
- public:
-  EitherOfMatcher(Matcher1 matcher1, Matcher2 matcher2)
-      : matcher1_(matcher1), matcher2_(matcher2) {}
-
-  // This template type conversion operator allows a
-  // EitherOfMatcher<Matcher1, Matcher2> object to match any type that
-  // both Matcher1 and Matcher2 can match.
-  template <typename T>
-  operator Matcher<T>() const {
-    std::vector<Matcher<T> > values;
-    values.push_back(SafeMatcherCast<T>(matcher1_));
-    values.push_back(SafeMatcherCast<T>(matcher2_));
-    return Matcher<T>(new AnyOfMatcherImpl<T>(internal::move(values)));
-  }
-
- private:
-  Matcher1 matcher1_;
-  Matcher2 matcher2_;
-
-  GTEST_DISALLOW_ASSIGN_(EitherOfMatcher);
-};
 
 // Used for implementing Truly(pred), which turns a predicate into a
 // matcher.
