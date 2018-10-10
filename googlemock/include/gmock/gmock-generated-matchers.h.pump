@@ -55,7 +55,7 @@ $range i 0..n-1
 
 // The type of the i-th (0-based) field of Tuple.
 #define GMOCK_FIELD_TYPE_(Tuple, i) \
-    typename ::testing::tuple_element<i, Tuple>::type
+    typename ::std::tuple_element<i, Tuple>::type
 
 // TupleFields<Tuple, k0, ..., kn> is for selecting fields from a
 // tuple of type Tuple.  It has two members:
@@ -63,10 +63,11 @@ $range i 0..n-1
 //   type: a tuple type whose i-th field is the ki-th field of Tuple.
 //   GetSelectedFields(t): returns fields k0, ..., and kn of t as a tuple.
 //
-// For example, in class TupleFields<tuple<bool, char, int>, 2, 0>, we have:
+// For example, in class TupleFields<std::tuple<bool, char, int>, 2, 0>,
+// we have:
 //
-//   type is tuple<int, bool>, and
-//   GetSelectedFields(make_tuple(true, 'a', 42)) is (42, true).
+//   type is std::tuple<int, bool>, and
+//   GetSelectedFields(std::make_tuple(true, 'a', 42)) is (42, true).
 
 template <class Tuple$for i [[, int k$i = -1]]>
 class TupleFields;
@@ -75,9 +76,9 @@ class TupleFields;
 template <class Tuple$for i [[, int k$i]]>
 class TupleFields {
  public:
-  typedef ::testing::tuple<$for i, [[GMOCK_FIELD_TYPE_(Tuple, k$i)]]> type;
+  typedef ::std::tuple<$for i, [[GMOCK_FIELD_TYPE_(Tuple, k$i)]]> type;
   static type GetSelectedFields(const Tuple& t) {
-    return type($for i, [[get<k$i>(t)]]);
+    return type($for i, [[std::get<k$i>(t)]]);
   }
 };
 
@@ -91,9 +92,9 @@ $range k 0..n-1
 template <class Tuple$for j [[, int k$j]]>
 class TupleFields<Tuple, $for k, [[$if k < i [[k$k]] $else [[-1]]]]> {
  public:
-  typedef ::testing::tuple<$for j, [[GMOCK_FIELD_TYPE_(Tuple, k$j)]]> type;
+  typedef ::std::tuple<$for j, [[GMOCK_FIELD_TYPE_(Tuple, k$j)]]> type;
   static type GetSelectedFields(const Tuple& $if i==0 [[/* t */]] $else [[t]]) {
-    return type($for j, [[get<k$j>(t)]]);
+    return type($for j, [[std::get<k$j>(t)]]);
   }
 };
 
@@ -187,36 +188,6 @@ class ArgsMatcher {
   GTEST_DISALLOW_ASSIGN_(ArgsMatcher);
 };
 
-// A set of metafunctions for computing the result type of AnyOf.
-// AnyOf(m1, ..., mN) returns
-// AnyOfResultN<decltype(m1), ..., decltype(mN)>::type.
-
-// Although AnyOf isn't defined for one argument, AnyOfResult1 is defined
-// to simplify the implementation.
-template <typename M1>
-struct AnyOfResult1 {
-  typedef M1 type;
-};
-
-$range i 1..n
-
-$range i 2..n
-$for i [[
-$range j 2..i
-$var m = i/2
-$range k 1..m
-$range t m+1..i
-
-template <typename M1$for j [[, typename M$j]]>
-struct AnyOfResult$i {
-  typedef EitherOfMatcher<
-      typename AnyOfResult$m<$for k, [[M$k]]>::type,
-      typename AnyOfResult$(i-m)<$for t, [[M$t]]>::type
-  > type;
-};
-
-]]
-
 }  // namespace internal
 
 // Args<N1, N2, ..., Nk>(a_matcher) matches a tuple if the selected
@@ -232,26 +203,6 @@ Args(const InnerMatcher& matcher) {
   return internal::ArgsMatcher<InnerMatcher$for j [[, k$j]]>(matcher);
 }
 
-
-]]
-
-// AnyOf(m1, m2, ..., mk) matches any value that matches any of the given
-// sub-matchers.  AnyOf is called fully qualified to prevent ADL from firing.
-
-$range i 2..n
-$for i [[
-$range j 1..i
-$var m = i/2
-$range k 1..m
-$range t m+1..i
-
-template <$for j, [[typename M$j]]>
-inline typename internal::AnyOfResult$i<$for j, [[M$j]]>::type
-AnyOf($for j, [[M$j m$j]]) {
-  return typename internal::AnyOfResult$i<$for j, [[M$j]]>::type(
-      $if m == 1 [[m1]] $else [[::testing::AnyOf($for k, [[m$k]])]],
-      $if m+1 == i [[m$i]] $else [[::testing::AnyOf($for t, [[m$t]])]]);
-}
 
 ]]
 
@@ -534,7 +485,7 @@ $var param_field_decls2 = [[$for j
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::testing::tuple<$for j, [[p$j##_type]]>($for j, [[p$j]])));\
+                ::std::tuple<$for j, [[p$j##_type]]>($for j, [[p$j]])));\
       }\
     };\
     template <typename arg_type>\

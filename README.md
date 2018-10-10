@@ -16,10 +16,8 @@ This repository is a merger of the formerly separate GoogleTest and
 GoogleMock projects. These were so closely related that it makes sense to
 maintain and release them together.
 
-Please see the project page above for more information as well as the
-mailing list for questions, discussions, and development.  There is
-also an IRC channel on [OFTC](https://webchat.oftc.net/) (irc.oftc.net) #gtest available.  Please
-join us!
+Please the mailing list at googletestframework@googlegroups.com for questions, discussions, and development.  
+There is also an IRC channel on [OFTC](https://webchat.oftc.net/) (irc.oftc.net) #gtest available.  
 
 Getting started information for **Google Test** is available in the
 [Google Test Primer](googletest/docs/primer.md) documentation.
