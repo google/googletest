@@ -2837,6 +2837,54 @@ void TestCase::Run() {
   impl->set_current_test_case(nullptr);
 }
 
+// Remove duplicate tests (by name) in the test case.
+void TestCase::RemoveDuplicateTests() {
+  // Go through all tests, back to front, to remove any other test with
+  // the same name added before it.
+  for (int test_index = total_test_count() - 1; test_index > 0;
+       --test_index) {
+    auto test_info_iter = test_info_list_.begin();
+
+    std::advance(test_info_iter, test_index);
+
+    auto found_iter = test_info_list_.begin();
+    auto first_iter = test_info_list_.begin();
+
+    // Search for duplicates, starting from the first test to the current one.
+    do {
+      found_iter = std::find_if(first_iter, test_info_iter,
+        [test_info_iter](const TestInfo* comp) -> bool {
+          return strcmp((*test_info_iter)->name(), comp->name()) == 0;
+        });
+
+      if (found_iter != test_info_iter) {
+        // Duplicate test found, delete it.
+        internal::Delete<TestInfo>(*found_iter);
+        *found_iter = nullptr;
+
+        // Continue the search from the deleted test + 1.
+        first_iter = found_iter;
+        std::advance(first_iter, 1);
+      }
+    } while (found_iter != test_info_iter);
+  }
+
+  // Perform the actual removal of deleted tests form the container.
+  test_info_list_.erase(
+    std::remove(test_info_list_.begin(), test_info_list_.end(), nullptr),
+      test_info_list_.end());
+
+  // Remove out-of-range test indices
+  const auto test_count = total_test_count();
+
+  test_indices_.erase(
+    std::remove_if(test_indices_.begin(), test_indices_.end(),
+      [test_count](int index) -> bool {
+        return index >= test_count;
+      }),
+      test_indices_.end());
+}
+
 // Clears the results of all tests in this test case.
 void TestCase::ClearResult() {
   ad_hoc_test_result_.Clear();
@@ -4842,6 +4890,11 @@ int UnitTest::Run() {
       "auxiliary test code (environments or event listeners)") ? 0 : 1;
 }
 
+// Remove duplicate tests (by name) in the test case.
+void UnitTest::RemoveDuplicateTests() {
+  impl()->RemoveDuplicateTests();
+}
+
 // Returns the working directory when the first TEST() or TEST_F() was
 // executed.
 const char* UnitTest::original_working_dir() const {
@@ -5280,6 +5333,11 @@ bool UnitTestImpl::RunAllTests() {
   }
 
   return !failed;
+}
+
+// Remove duplicate tests (by name) in the test case.
+void UnitTestImpl::RemoveDuplicateTests() {
+  ForEach(test_cases_, [](TestCase* test_case) { test_case->RemoveDuplicateTests(); });
 }
 
 // Reads the GTEST_SHARD_STATUS_FILE environment variable, and creates the file
