@@ -370,13 +370,13 @@ void SetSigprofActionAndTimer() {
   timer.it_interval.tv_sec = 0;
   timer.it_interval.tv_usec = 1;
   timer.it_value = timer.it_interval;
-  ASSERT_EQ(0, setitimer(ITIMER_PROF, &timer, NULL));
+  ASSERT_EQ(0, setitimer(ITIMER_PROF, &timer, nullptr));
   struct sigaction signal_action;
   memset(&signal_action, 0, sizeof(signal_action));
   sigemptyset(&signal_action.sa_mask);
   signal_action.sa_sigaction = SigprofAction;
   signal_action.sa_flags = SA_RESTART | SA_SIGINFO;
-  ASSERT_EQ(0, sigaction(SIGPROF, &signal_action, NULL));
+  ASSERT_EQ(0, sigaction(SIGPROF, &signal_action, nullptr));
 }
 
 // Disables ITIMER_PROF timer and ignores SIGPROF signal.
@@ -385,7 +385,7 @@ void DisableSigprofActionAndTimer(struct sigaction* old_signal_action) {
   timer.it_interval.tv_sec = 0;
   timer.it_interval.tv_usec = 0;
   timer.it_value = timer.it_interval;
-  ASSERT_EQ(0, setitimer(ITIMER_PROF, &timer, NULL));
+  ASSERT_EQ(0, setitimer(ITIMER_PROF, &timer, nullptr));
   struct sigaction signal_action;
   memset(&signal_action, 0, sizeof(signal_action));
   sigemptyset(&signal_action.sa_mask);
@@ -466,7 +466,7 @@ TEST_F(TestForDeathTest, DoesNotExecuteAtforkHooks) {
   if (!testing::GTEST_FLAG(death_test_use_fork)) {
     testing::GTEST_FLAG(death_test_style) = "threadsafe";
     pthread_flag = false;
-    ASSERT_EQ(0, pthread_atfork(&SetPthreadFlag, NULL, NULL));
+    ASSERT_EQ(0, pthread_atfork(&SetPthreadFlag, nullptr, nullptr));
     ASSERT_DEATH(_exit(1), "");
     ASSERT_FALSE(pthread_flag);
   }
@@ -1001,7 +1001,7 @@ bool MockDeathTestFactory::Create(const char* /*statement*/,
   if (create_) {
     *test = new MockDeathTest(this, role_, status_, passed_);
   } else {
-    *test = NULL;
+    *test = nullptr;
   }
   return true;
 }
@@ -1021,9 +1021,9 @@ class MacroLogicDeathTest : public testing::Test {
 
   static void TearDownTestCase() {
     delete replacer_;
-    replacer_ = NULL;
+    replacer_ = nullptr;
     delete factory_;
-    factory_ = NULL;
+    factory_ = nullptr;
   }
 
   // Runs a death test that breaks the rules by returning.  Such a death
@@ -1037,10 +1037,9 @@ class MacroLogicDeathTest : public testing::Test {
   }
 };
 
-testing::internal::ReplaceDeathTestFactory* MacroLogicDeathTest::replacer_
-    = NULL;
-MockDeathTestFactory* MacroLogicDeathTest::factory_ = NULL;
-
+testing::internal::ReplaceDeathTestFactory* MacroLogicDeathTest::replacer_ =
+    nullptr;
+MockDeathTestFactory* MacroLogicDeathTest::factory_ = nullptr;
 
 // Test that nothing happens when the factory doesn't return a DeathTest:
 TEST_F(MacroLogicDeathTest, NothingHappens) {

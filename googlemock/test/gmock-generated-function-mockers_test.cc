@@ -286,7 +286,7 @@ TEST_F(FunctionMockerTest, MocksDecimalFunction) {
                                  Lt(100), 5U, NULL, "hi"))
       .WillOnce(Return(5));
 
-  EXPECT_EQ(5, foo_->Decimal(true, 'a', 0, 0, 1, 0, 0, 5, NULL, "hi"));
+  EXPECT_EQ(5, foo_->Decimal(true, 'a', 0, 0, 1, 0, 0, 5, nullptr, "hi"));
 }
 
 // Tests mocking a function that takes a non-const reference.

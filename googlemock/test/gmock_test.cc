@@ -64,59 +64,35 @@ void TestInitGoogleMock(const Char* (&argv)[M], const Char* (&new_argv)[N],
 }
 
 TEST(InitGoogleMockTest, ParsesInvalidCommandLine) {
-  const char* argv[] = {
-    NULL
-  };
+  const char* argv[] = {nullptr};
 
-  const char* new_argv[] = {
-    NULL
-  };
+  const char* new_argv[] = {nullptr};
 
   TestInitGoogleMock(argv, new_argv, GMOCK_FLAG(verbose));
 }
 
 TEST(InitGoogleMockTest, ParsesEmptyCommandLine) {
-  const char* argv[] = {
-    "foo.exe",
-    NULL
-  };
+  const char* argv[] = {"foo.exe", nullptr};
 
-  const char* new_argv[] = {
-    "foo.exe",
-    NULL
-  };
+  const char* new_argv[] = {"foo.exe", nullptr};
 
   TestInitGoogleMock(argv, new_argv, GMOCK_FLAG(verbose));
 }
 
 TEST(InitGoogleMockTest, ParsesSingleFlag) {
-  const char* argv[] = {
-    "foo.exe",
-    "--gmock_verbose=info",
-    NULL
-  };
+  const char* argv[] = {"foo.exe", "--gmock_verbose=info", nullptr};
 
-  const char* new_argv[] = {
-    "foo.exe",
-    NULL
-  };
+  const char* new_argv[] = {"foo.exe", nullptr};
 
   TestInitGoogleMock(argv, new_argv, "info");
 }
 
 TEST(InitGoogleMockTest, ParsesMultipleFlags) {
   int old_default_behavior = GMOCK_FLAG(default_mock_behavior);
-  const wchar_t* argv[] = {
-    L"foo.exe",
-    L"--gmock_verbose=info",
-    L"--gmock_default_mock_behavior=2",
-    NULL
-  };
+  const wchar_t* argv[] = {L"foo.exe", L"--gmock_verbose=info",
+                           L"--gmock_default_mock_behavior=2", nullptr};
 
-  const wchar_t* new_argv[] = {
-    L"foo.exe",
-    NULL
-  };
+  const wchar_t* new_argv[] = {L"foo.exe", nullptr};
 
   TestInitGoogleMock(argv, new_argv, "info");
   EXPECT_EQ(2, GMOCK_FLAG(default_mock_behavior));
@@ -125,92 +101,52 @@ TEST(InitGoogleMockTest, ParsesMultipleFlags) {
 }
 
 TEST(InitGoogleMockTest, ParsesUnrecognizedFlag) {
-  const char* argv[] = {
-    "foo.exe",
-    "--non_gmock_flag=blah",
-    NULL
-  };
+  const char* argv[] = {"foo.exe", "--non_gmock_flag=blah", nullptr};
 
-  const char* new_argv[] = {
-    "foo.exe",
-    "--non_gmock_flag=blah",
-    NULL
-  };
+  const char* new_argv[] = {"foo.exe", "--non_gmock_flag=blah", nullptr};
 
   TestInitGoogleMock(argv, new_argv, GMOCK_FLAG(verbose));
 }
 
 TEST(InitGoogleMockTest, ParsesGoogleMockFlagAndUnrecognizedFlag) {
-  const char* argv[] = {
-    "foo.exe",
-    "--non_gmock_flag=blah",
-    "--gmock_verbose=error",
-    NULL
-  };
+  const char* argv[] = {"foo.exe", "--non_gmock_flag=blah",
+                        "--gmock_verbose=error", nullptr};
 
-  const char* new_argv[] = {
-    "foo.exe",
-    "--non_gmock_flag=blah",
-    NULL
-  };
+  const char* new_argv[] = {"foo.exe", "--non_gmock_flag=blah", nullptr};
 
   TestInitGoogleMock(argv, new_argv, "error");
 }
 
 TEST(WideInitGoogleMockTest, ParsesInvalidCommandLine) {
-  const wchar_t* argv[] = {
-    NULL
-  };
+  const wchar_t* argv[] = {nullptr};
 
-  const wchar_t* new_argv[] = {
-    NULL
-  };
+  const wchar_t* new_argv[] = {nullptr};
 
   TestInitGoogleMock(argv, new_argv, GMOCK_FLAG(verbose));
 }
 
 TEST(WideInitGoogleMockTest, ParsesEmptyCommandLine) {
-  const wchar_t* argv[] = {
-    L"foo.exe",
-    NULL
-  };
+  const wchar_t* argv[] = {L"foo.exe", nullptr};
 
-  const wchar_t* new_argv[] = {
-    L"foo.exe",
-    NULL
-  };
+  const wchar_t* new_argv[] = {L"foo.exe", nullptr};
 
   TestInitGoogleMock(argv, new_argv, GMOCK_FLAG(verbose));
 }
 
 TEST(WideInitGoogleMockTest, ParsesSingleFlag) {
-  const wchar_t* argv[] = {
-    L"foo.exe",
-    L"--gmock_verbose=info",
-    NULL
-  };
+  const wchar_t* argv[] = {L"foo.exe", L"--gmock_verbose=info", nullptr};
 
-  const wchar_t* new_argv[] = {
-    L"foo.exe",
-    NULL
-  };
+  const wchar_t* new_argv[] = {L"foo.exe", nullptr};
 
   TestInitGoogleMock(argv, new_argv, "info");
 }
 
 TEST(WideInitGoogleMockTest, ParsesMultipleFlags) {
   int old_default_behavior = GMOCK_FLAG(default_mock_behavior);
-  const wchar_t* argv[] = {
-    L"foo.exe",
-    L"--gmock_verbose=info",
-    L"--gmock_default_mock_behavior=2",
-    NULL
-  };
+  const wchar_t* argv[] = {L"foo.exe", L"--gmock_verbose=info",
+                           L"--gmock_default_mock_behavior=2", nullptr};
 
-  const wchar_t* new_argv[] = {
-    L"foo.exe",
-    NULL
-  };
+  const wchar_t* new_argv[] = {L"foo.exe", nullptr};
 
   TestInitGoogleMock(argv, new_argv, "info");
   EXPECT_EQ(2, GMOCK_FLAG(default_mock_behavior));
@@ -219,34 +155,18 @@ TEST(WideInitGoogleMockTest, ParsesMultipleFlags) {
 }
 
 TEST(WideInitGoogleMockTest, ParsesUnrecognizedFlag) {
-  const wchar_t* argv[] = {
-    L"foo.exe",
-    L"--non_gmock_flag=blah",
-    NULL
-  };
+  const wchar_t* argv[] = {L"foo.exe", L"--non_gmock_flag=blah", nullptr};
 
-  const wchar_t* new_argv[] = {
-    L"foo.exe",
-    L"--non_gmock_flag=blah",
-    NULL
-  };
+  const wchar_t* new_argv[] = {L"foo.exe", L"--non_gmock_flag=blah", nullptr};
 
   TestInitGoogleMock(argv, new_argv, GMOCK_FLAG(verbose));
 }
 
 TEST(WideInitGoogleMockTest, ParsesGoogleMockFlagAndUnrecognizedFlag) {
-  const wchar_t* argv[] = {
-    L"foo.exe",
-    L"--non_gmock_flag=blah",
-    L"--gmock_verbose=error",
-    NULL
-  };
+  const wchar_t* argv[] = {L"foo.exe", L"--non_gmock_flag=blah",
+                           L"--gmock_verbose=error", nullptr};
 
-  const wchar_t* new_argv[] = {
-    L"foo.exe",
-    L"--non_gmock_flag=blah",
-    NULL
-  };
+  const wchar_t* new_argv[] = {L"foo.exe", L"--non_gmock_flag=blah", nullptr};
 
   TestInitGoogleMock(argv, new_argv, "error");
 }

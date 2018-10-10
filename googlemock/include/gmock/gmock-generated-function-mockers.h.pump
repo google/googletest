@@ -81,7 +81,7 @@ class FunctionMocker<R($As)> : public
   typedef typename internal::Function<F>::ArgumentTuple ArgumentTuple;
 
   MockSpec<F> With($matchers) {
-    return MockSpec<F>(this, ::testing::make_tuple($ms));
+    return MockSpec<F>(this, ::std::make_tuple($ms));
   }
 
   R Invoke($Aas) {
@@ -197,7 +197,7 @@ $var anything_matchers = [[$for j, \
 #define GMOCK_METHOD$i[[]]_(tn, constness, ct, Method, ...) \
   GMOCK_RESULT_(tn, __VA_ARGS__) ct Method( \
       $arg_as) constness { \
-    GTEST_COMPILE_ASSERT_((::testing::tuple_size<                          \
+    GTEST_COMPILE_ASSERT_((::std::tuple_size<                          \
         tn ::testing::internal::Function<__VA_ARGS__>::ArgumentTuple>::value == $i), \
         this_method_does_not_take_$i[[]]_argument[[$if i != 1 [[s]]]]); \
     GMOCK_MOCKER_($i, constness, Method).SetOwnerAndName(this, #Method); \
