@@ -51,7 +51,7 @@ namespace internal {
 
 // The type of the i-th (0-based) field of Tuple.
 #define GMOCK_FIELD_TYPE_(Tuple, i) \
-    typename ::testing::tuple_element<i, Tuple>::type
+    typename ::std::tuple_element<i, Tuple>::type
 
 // TupleFields<Tuple, k0, ..., kn> is for selecting fields from a
 // tuple of type Tuple.  It has two members:
@@ -59,10 +59,11 @@ namespace internal {
 //   type: a tuple type whose i-th field is the ki-th field of Tuple.
 //   GetSelectedFields(t): returns fields k0, ..., and kn of t as a tuple.
 //
-// For example, in class TupleFields<tuple<bool, char, int>, 2, 0>, we have:
+// For example, in class TupleFields<std::tuple<bool, char, int>, 2, 0>,
+// we have:
 //
-//   type is tuple<int, bool>, and
-//   GetSelectedFields(make_tuple(true, 'a', 42)) is (42, true).
+//   type is std::tuple<int, bool>, and
+//   GetSelectedFields(std::make_tuple(true, 'a', 42)) is (42, true).
 
 template <class Tuple, int k0 = -1, int k1 = -1, int k2 = -1, int k3 = -1,
     int k4 = -1, int k5 = -1, int k6 = -1, int k7 = -1, int k8 = -1,
@@ -74,15 +75,15 @@ template <class Tuple, int k0, int k1, int k2, int k3, int k4, int k5, int k6,
     int k7, int k8, int k9>
 class TupleFields {
  public:
-  typedef ::testing::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
-      GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2),
-      GMOCK_FIELD_TYPE_(Tuple, k3), GMOCK_FIELD_TYPE_(Tuple, k4),
-      GMOCK_FIELD_TYPE_(Tuple, k5), GMOCK_FIELD_TYPE_(Tuple, k6),
-      GMOCK_FIELD_TYPE_(Tuple, k7), GMOCK_FIELD_TYPE_(Tuple, k8),
-      GMOCK_FIELD_TYPE_(Tuple, k9)> type;
+  typedef ::std::tuple<GMOCK_FIELD_TYPE_(Tuple, k0), GMOCK_FIELD_TYPE_(Tuple,
+      k1), GMOCK_FIELD_TYPE_(Tuple, k2), GMOCK_FIELD_TYPE_(Tuple, k3),
+      GMOCK_FIELD_TYPE_(Tuple, k4), GMOCK_FIELD_TYPE_(Tuple, k5),
+      GMOCK_FIELD_TYPE_(Tuple, k6), GMOCK_FIELD_TYPE_(Tuple, k7),
+      GMOCK_FIELD_TYPE_(Tuple, k8), GMOCK_FIELD_TYPE_(Tuple, k9)> type;
   static type GetSelectedFields(const Tuple& t) {
-    return type(get<k0>(t), get<k1>(t), get<k2>(t), get<k3>(t), get<k4>(t),
-        get<k5>(t), get<k6>(t), get<k7>(t), get<k8>(t), get<k9>(t));
+    return type(std::get<k0>(t), std::get<k1>(t), std::get<k2>(t),
+        std::get<k3>(t), std::get<k4>(t), std::get<k5>(t), std::get<k6>(t),
+        std::get<k7>(t), std::get<k8>(t), std::get<k9>(t));
   }
 };
 
@@ -91,7 +92,7 @@ class TupleFields {
 template <class Tuple>
 class TupleFields<Tuple, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1> {
  public:
-  typedef ::testing::tuple<> type;
+  typedef ::std::tuple<> type;
   static type GetSelectedFields(const Tuple& /* t */) {
     return type();
   }
@@ -100,77 +101,77 @@ class TupleFields<Tuple, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1> {
 template <class Tuple, int k0>
 class TupleFields<Tuple, k0, -1, -1, -1, -1, -1, -1, -1, -1, -1> {
  public:
-  typedef ::testing::tuple<GMOCK_FIELD_TYPE_(Tuple, k0)> type;
+  typedef ::std::tuple<GMOCK_FIELD_TYPE_(Tuple, k0)> type;
   static type GetSelectedFields(const Tuple& t) {
-    return type(get<k0>(t));
+    return type(std::get<k0>(t));
   }
 };
 
 template <class Tuple, int k0, int k1>
 class TupleFields<Tuple, k0, k1, -1, -1, -1, -1, -1, -1, -1, -1> {
  public:
-  typedef ::testing::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
-      GMOCK_FIELD_TYPE_(Tuple, k1)> type;
+  typedef ::std::tuple<GMOCK_FIELD_TYPE_(Tuple, k0), GMOCK_FIELD_TYPE_(Tuple,
+      k1)> type;
   static type GetSelectedFields(const Tuple& t) {
-    return type(get<k0>(t), get<k1>(t));
+    return type(std::get<k0>(t), std::get<k1>(t));
   }
 };
 
 template <class Tuple, int k0, int k1, int k2>
 class TupleFields<Tuple, k0, k1, k2, -1, -1, -1, -1, -1, -1, -1> {
  public:
-  typedef ::testing::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
-      GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2)> type;
+  typedef ::std::tuple<GMOCK_FIELD_TYPE_(Tuple, k0), GMOCK_FIELD_TYPE_(Tuple,
+      k1), GMOCK_FIELD_TYPE_(Tuple, k2)> type;
   static type GetSelectedFields(const Tuple& t) {
-    return type(get<k0>(t), get<k1>(t), get<k2>(t));
+    return type(std::get<k0>(t), std::get<k1>(t), std::get<k2>(t));
   }
 };
 
 template <class Tuple, int k0, int k1, int k2, int k3>
 class TupleFields<Tuple, k0, k1, k2, k3, -1, -1, -1, -1, -1, -1> {
  public:
-  typedef ::testing::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
-      GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2),
-      GMOCK_FIELD_TYPE_(Tuple, k3)> type;
+  typedef ::std::tuple<GMOCK_FIELD_TYPE_(Tuple, k0), GMOCK_FIELD_TYPE_(Tuple,
+      k1), GMOCK_FIELD_TYPE_(Tuple, k2), GMOCK_FIELD_TYPE_(Tuple, k3)> type;
   static type GetSelectedFields(const Tuple& t) {
-    return type(get<k0>(t), get<k1>(t), get<k2>(t), get<k3>(t));
+    return type(std::get<k0>(t), std::get<k1>(t), std::get<k2>(t),
+        std::get<k3>(t));
   }
 };
 
 template <class Tuple, int k0, int k1, int k2, int k3, int k4>
 class TupleFields<Tuple, k0, k1, k2, k3, k4, -1, -1, -1, -1, -1> {
  public:
-  typedef ::testing::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
-      GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2),
-      GMOCK_FIELD_TYPE_(Tuple, k3), GMOCK_FIELD_TYPE_(Tuple, k4)> type;
+  typedef ::std::tuple<GMOCK_FIELD_TYPE_(Tuple, k0), GMOCK_FIELD_TYPE_(Tuple,
+      k1), GMOCK_FIELD_TYPE_(Tuple, k2), GMOCK_FIELD_TYPE_(Tuple, k3),
+      GMOCK_FIELD_TYPE_(Tuple, k4)> type;
   static type GetSelectedFields(const Tuple& t) {
-    return type(get<k0>(t), get<k1>(t), get<k2>(t), get<k3>(t), get<k4>(t));
+    return type(std::get<k0>(t), std::get<k1>(t), std::get<k2>(t),
+        std::get<k3>(t), std::get<k4>(t));
   }
 };
 
 template <class Tuple, int k0, int k1, int k2, int k3, int k4, int k5>
 class TupleFields<Tuple, k0, k1, k2, k3, k4, k5, -1, -1, -1, -1> {
  public:
-  typedef ::testing::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
-      GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2),
-      GMOCK_FIELD_TYPE_(Tuple, k3), GMOCK_FIELD_TYPE_(Tuple, k4),
-      GMOCK_FIELD_TYPE_(Tuple, k5)> type;
+  typedef ::std::tuple<GMOCK_FIELD_TYPE_(Tuple, k0), GMOCK_FIELD_TYPE_(Tuple,
+      k1), GMOCK_FIELD_TYPE_(Tuple, k2), GMOCK_FIELD_TYPE_(Tuple, k3),
+      GMOCK_FIELD_TYPE_(Tuple, k4), GMOCK_FIELD_TYPE_(Tuple, k5)> type;
   static type GetSelectedFields(const Tuple& t) {
-    return type(get<k0>(t), get<k1>(t), get<k2>(t), get<k3>(t), get<k4>(t),
-        get<k5>(t));
+    return type(std::get<k0>(t), std::get<k1>(t), std::get<k2>(t),
+        std::get<k3>(t), std::get<k4>(t), std::get<k5>(t));
   }
 };
 
 template <class Tuple, int k0, int k1, int k2, int k3, int k4, int k5, int k6>
 class TupleFields<Tuple, k0, k1, k2, k3, k4, k5, k6, -1, -1, -1> {
  public:
-  typedef ::testing::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
-      GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2),
-      GMOCK_FIELD_TYPE_(Tuple, k3), GMOCK_FIELD_TYPE_(Tuple, k4),
-      GMOCK_FIELD_TYPE_(Tuple, k5), GMOCK_FIELD_TYPE_(Tuple, k6)> type;
+  typedef ::std::tuple<GMOCK_FIELD_TYPE_(Tuple, k0), GMOCK_FIELD_TYPE_(Tuple,
+      k1), GMOCK_FIELD_TYPE_(Tuple, k2), GMOCK_FIELD_TYPE_(Tuple, k3),
+      GMOCK_FIELD_TYPE_(Tuple, k4), GMOCK_FIELD_TYPE_(Tuple, k5),
+      GMOCK_FIELD_TYPE_(Tuple, k6)> type;
   static type GetSelectedFields(const Tuple& t) {
-    return type(get<k0>(t), get<k1>(t), get<k2>(t), get<k3>(t), get<k4>(t),
-        get<k5>(t), get<k6>(t));
+    return type(std::get<k0>(t), std::get<k1>(t), std::get<k2>(t),
+        std::get<k3>(t), std::get<k4>(t), std::get<k5>(t), std::get<k6>(t));
   }
 };
 
@@ -178,14 +179,14 @@ template <class Tuple, int k0, int k1, int k2, int k3, int k4, int k5, int k6,
     int k7>
 class TupleFields<Tuple, k0, k1, k2, k3, k4, k5, k6, k7, -1, -1> {
  public:
-  typedef ::testing::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
-      GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2),
-      GMOCK_FIELD_TYPE_(Tuple, k3), GMOCK_FIELD_TYPE_(Tuple, k4),
-      GMOCK_FIELD_TYPE_(Tuple, k5), GMOCK_FIELD_TYPE_(Tuple, k6),
-      GMOCK_FIELD_TYPE_(Tuple, k7)> type;
+  typedef ::std::tuple<GMOCK_FIELD_TYPE_(Tuple, k0), GMOCK_FIELD_TYPE_(Tuple,
+      k1), GMOCK_FIELD_TYPE_(Tuple, k2), GMOCK_FIELD_TYPE_(Tuple, k3),
+      GMOCK_FIELD_TYPE_(Tuple, k4), GMOCK_FIELD_TYPE_(Tuple, k5),
+      GMOCK_FIELD_TYPE_(Tuple, k6), GMOCK_FIELD_TYPE_(Tuple, k7)> type;
   static type GetSelectedFields(const Tuple& t) {
-    return type(get<k0>(t), get<k1>(t), get<k2>(t), get<k3>(t), get<k4>(t),
-        get<k5>(t), get<k6>(t), get<k7>(t));
+    return type(std::get<k0>(t), std::get<k1>(t), std::get<k2>(t),
+        std::get<k3>(t), std::get<k4>(t), std::get<k5>(t), std::get<k6>(t),
+        std::get<k7>(t));
   }
 };
 
@@ -193,14 +194,15 @@ template <class Tuple, int k0, int k1, int k2, int k3, int k4, int k5, int k6,
     int k7, int k8>
 class TupleFields<Tuple, k0, k1, k2, k3, k4, k5, k6, k7, k8, -1> {
  public:
-  typedef ::testing::tuple<GMOCK_FIELD_TYPE_(Tuple, k0),
-      GMOCK_FIELD_TYPE_(Tuple, k1), GMOCK_FIELD_TYPE_(Tuple, k2),
-      GMOCK_FIELD_TYPE_(Tuple, k3), GMOCK_FIELD_TYPE_(Tuple, k4),
-      GMOCK_FIELD_TYPE_(Tuple, k5), GMOCK_FIELD_TYPE_(Tuple, k6),
-      GMOCK_FIELD_TYPE_(Tuple, k7), GMOCK_FIELD_TYPE_(Tuple, k8)> type;
+  typedef ::std::tuple<GMOCK_FIELD_TYPE_(Tuple, k0), GMOCK_FIELD_TYPE_(Tuple,
+      k1), GMOCK_FIELD_TYPE_(Tuple, k2), GMOCK_FIELD_TYPE_(Tuple, k3),
+      GMOCK_FIELD_TYPE_(Tuple, k4), GMOCK_FIELD_TYPE_(Tuple, k5),
+      GMOCK_FIELD_TYPE_(Tuple, k6), GMOCK_FIELD_TYPE_(Tuple, k7),
+      GMOCK_FIELD_TYPE_(Tuple, k8)> type;
   static type GetSelectedFields(const Tuple& t) {
-    return type(get<k0>(t), get<k1>(t), get<k2>(t), get<k3>(t), get<k4>(t),
-        get<k5>(t), get<k6>(t), get<k7>(t), get<k8>(t));
+    return type(std::get<k0>(t), std::get<k1>(t), std::get<k2>(t),
+        std::get<k3>(t), std::get<k4>(t), std::get<k5>(t), std::get<k6>(t),
+        std::get<k7>(t), std::get<k8>(t));
   }
 };
 
@@ -297,94 +299,6 @@ class ArgsMatcher {
   GTEST_DISALLOW_ASSIGN_(ArgsMatcher);
 };
 
-// A set of metafunctions for computing the result type of AnyOf.
-// AnyOf(m1, ..., mN) returns
-// AnyOfResultN<decltype(m1), ..., decltype(mN)>::type.
-
-// Although AnyOf isn't defined for one argument, AnyOfResult1 is defined
-// to simplify the implementation.
-template <typename M1>
-struct AnyOfResult1 {
-  typedef M1 type;
-};
-
-template <typename M1, typename M2>
-struct AnyOfResult2 {
-  typedef EitherOfMatcher<
-      typename AnyOfResult1<M1>::type,
-      typename AnyOfResult1<M2>::type
-  > type;
-};
-
-template <typename M1, typename M2, typename M3>
-struct AnyOfResult3 {
-  typedef EitherOfMatcher<
-      typename AnyOfResult1<M1>::type,
-      typename AnyOfResult2<M2, M3>::type
-  > type;
-};
-
-template <typename M1, typename M2, typename M3, typename M4>
-struct AnyOfResult4 {
-  typedef EitherOfMatcher<
-      typename AnyOfResult2<M1, M2>::type,
-      typename AnyOfResult2<M3, M4>::type
-  > type;
-};
-
-template <typename M1, typename M2, typename M3, typename M4, typename M5>
-struct AnyOfResult5 {
-  typedef EitherOfMatcher<
-      typename AnyOfResult2<M1, M2>::type,
-      typename AnyOfResult3<M3, M4, M5>::type
-  > type;
-};
-
-template <typename M1, typename M2, typename M3, typename M4, typename M5,
-    typename M6>
-struct AnyOfResult6 {
-  typedef EitherOfMatcher<
-      typename AnyOfResult3<M1, M2, M3>::type,
-      typename AnyOfResult3<M4, M5, M6>::type
-  > type;
-};
-
-template <typename M1, typename M2, typename M3, typename M4, typename M5,
-    typename M6, typename M7>
-struct AnyOfResult7 {
-  typedef EitherOfMatcher<
-      typename AnyOfResult3<M1, M2, M3>::type,
-      typename AnyOfResult4<M4, M5, M6, M7>::type
-  > type;
-};
-
-template <typename M1, typename M2, typename M3, typename M4, typename M5,
-    typename M6, typename M7, typename M8>
-struct AnyOfResult8 {
-  typedef EitherOfMatcher<
-      typename AnyOfResult4<M1, M2, M3, M4>::type,
-      typename AnyOfResult4<M5, M6, M7, M8>::type
-  > type;
-};
-
-template <typename M1, typename M2, typename M3, typename M4, typename M5,
-    typename M6, typename M7, typename M8, typename M9>
-struct AnyOfResult9 {
-  typedef EitherOfMatcher<
-      typename AnyOfResult4<M1, M2, M3, M4>::type,
-      typename AnyOfResult5<M5, M6, M7, M8, M9>::type
-  > type;
-};
-
-template <typename M1, typename M2, typename M3, typename M4, typename M5,
-    typename M6, typename M7, typename M8, typename M9, typename M10>
-struct AnyOfResult10 {
-  typedef EitherOfMatcher<
-      typename AnyOfResult5<M1, M2, M3, M4, M5>::type,
-      typename AnyOfResult5<M6, M7, M8, M9, M10>::type
-  > type;
-};
-
 }  // namespace internal
 
 // Args<N1, N2, ..., Nk>(a_matcher) matches a tuple if the selected
@@ -466,88 +380,6 @@ Args(const InnerMatcher& matcher) {
 }
 
 
-// AnyOf(m1, m2, ..., mk) matches any value that matches any of the given
-// sub-matchers.  AnyOf is called fully qualified to prevent ADL from firing.
-
-template <typename M1, typename M2>
-inline typename internal::AnyOfResult2<M1, M2>::type
-AnyOf(M1 m1, M2 m2) {
-  return typename internal::AnyOfResult2<M1, M2>::type(
-      m1,
-      m2);
-}
-
-template <typename M1, typename M2, typename M3>
-inline typename internal::AnyOfResult3<M1, M2, M3>::type
-AnyOf(M1 m1, M2 m2, M3 m3) {
-  return typename internal::AnyOfResult3<M1, M2, M3>::type(
-      m1,
-      ::testing::AnyOf(m2, m3));
-}
-
-template <typename M1, typename M2, typename M3, typename M4>
-inline typename internal::AnyOfResult4<M1, M2, M3, M4>::type
-AnyOf(M1 m1, M2 m2, M3 m3, M4 m4) {
-  return typename internal::AnyOfResult4<M1, M2, M3, M4>::type(
-      ::testing::AnyOf(m1, m2),
-      ::testing::AnyOf(m3, m4));
-}
-
-template <typename M1, typename M2, typename M3, typename M4, typename M5>
-inline typename internal::AnyOfResult5<M1, M2, M3, M4, M5>::type
-AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5) {
-  return typename internal::AnyOfResult5<M1, M2, M3, M4, M5>::type(
-      ::testing::AnyOf(m1, m2),
-      ::testing::AnyOf(m3, m4, m5));
-}
-
-template <typename M1, typename M2, typename M3, typename M4, typename M5,
-    typename M6>
-inline typename internal::AnyOfResult6<M1, M2, M3, M4, M5, M6>::type
-AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6) {
-  return typename internal::AnyOfResult6<M1, M2, M3, M4, M5, M6>::type(
-      ::testing::AnyOf(m1, m2, m3),
-      ::testing::AnyOf(m4, m5, m6));
-}
-
-template <typename M1, typename M2, typename M3, typename M4, typename M5,
-    typename M6, typename M7>
-inline typename internal::AnyOfResult7<M1, M2, M3, M4, M5, M6, M7>::type
-AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7) {
-  return typename internal::AnyOfResult7<M1, M2, M3, M4, M5, M6, M7>::type(
-      ::testing::AnyOf(m1, m2, m3),
-      ::testing::AnyOf(m4, m5, m6, m7));
-}
-
-template <typename M1, typename M2, typename M3, typename M4, typename M5,
-    typename M6, typename M7, typename M8>
-inline typename internal::AnyOfResult8<M1, M2, M3, M4, M5, M6, M7, M8>::type
-AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8) {
-  return typename internal::AnyOfResult8<M1, M2, M3, M4, M5, M6, M7, M8>::type(
-      ::testing::AnyOf(m1, m2, m3, m4),
-      ::testing::AnyOf(m5, m6, m7, m8));
-}
-
-template <typename M1, typename M2, typename M3, typename M4, typename M5,
-    typename M6, typename M7, typename M8, typename M9>
-inline typename internal::AnyOfResult9<M1, M2, M3, M4, M5, M6, M7, M8, M9>::type
-AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9) {
-  return typename internal::AnyOfResult9<M1, M2, M3, M4, M5, M6, M7, M8,
-      M9>::type(
-      ::testing::AnyOf(m1, m2, m3, m4),
-      ::testing::AnyOf(m5, m6, m7, m8, m9));
-}
-
-template <typename M1, typename M2, typename M3, typename M4, typename M5,
-    typename M6, typename M7, typename M8, typename M9, typename M10>
-inline typename internal::AnyOfResult10<M1, M2, M3, M4, M5, M6, M7, M8, M9,
-    M10>::type
-AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
-  return typename internal::AnyOfResult10<M1, M2, M3, M4, M5, M6, M7, M8, M9,
-      M10>::type(
-      ::testing::AnyOf(m1, m2, m3, m4, m5),
-      ::testing::AnyOf(m6, m7, m8, m9, m10));
-}
 
 }  // namespace testing
 
@@ -795,7 +627,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::testing::tuple<>()));\
+                ::std::tuple<>()));\
       }\
     };\
     template <typename arg_type>\
@@ -845,7 +677,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::testing::tuple<p0##_type>(p0)));\
+                ::std::tuple<p0##_type>(p0)));\
       }\
     };\
     template <typename arg_type>\
@@ -901,7 +733,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::testing::tuple<p0##_type, p1##_type>(p0, p1)));\
+                ::std::tuple<p0##_type, p1##_type>(p0, p1)));\
       }\
     };\
     template <typename arg_type>\
@@ -963,8 +795,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::testing::tuple<p0##_type, p1##_type, p2##_type>(p0, p1, \
-                    p2)));\
+                ::std::tuple<p0##_type, p1##_type, p2##_type>(p0, p1, p2)));\
       }\
     };\
     template <typename arg_type>\
@@ -1032,8 +863,8 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::testing::tuple<p0##_type, p1##_type, p2##_type, \
-                    p3##_type>(p0, p1, p2, p3)));\
+                ::std::tuple<p0##_type, p1##_type, p2##_type, p3##_type>(p0, \
+                    p1, p2, p3)));\
       }\
     };\
     template <typename arg_type>\
@@ -1110,7 +941,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::testing::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
+                ::std::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
                     p4##_type>(p0, p1, p2, p3, p4)));\
       }\
     };\
@@ -1192,7 +1023,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::testing::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
+                ::std::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
                     p4##_type, p5##_type>(p0, p1, p2, p3, p4, p5)));\
       }\
     };\
@@ -1280,7 +1111,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::testing::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
+                ::std::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
                     p4##_type, p5##_type, p6##_type>(p0, p1, p2, p3, p4, p5, \
                     p6)));\
       }\
@@ -1377,7 +1208,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::testing::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
+                ::std::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
                     p4##_type, p5##_type, p6##_type, p7##_type>(p0, p1, p2, \
                     p3, p4, p5, p6, p7)));\
       }\
@@ -1480,7 +1311,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::testing::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
+                ::std::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
                     p4##_type, p5##_type, p6##_type, p7##_type, \
                     p8##_type>(p0, p1, p2, p3, p4, p5, p6, p7, p8)));\
       }\
@@ -1590,7 +1421,7 @@ AnyOf(M1 m1, M2 m2, M3 m3, M4 m4, M5 m5, M6 m6, M7 m7, M8 m8, M9 m9, M10 m10) {
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::testing::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
+                ::std::tuple<p0##_type, p1##_type, p2##_type, p3##_type, \
                     p4##_type, p5##_type, p6##_type, p7##_type, p8##_type, \
                     p9##_type>(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9)));\
       }\
