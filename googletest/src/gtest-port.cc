@@ -41,6 +41,9 @@
 # include <io.h>
 # include <sys/stat.h>
 # include <map>  // Used in ThreadLocal.
+# ifdef _MSC_VER
+#  include <crtdbg.h>
+# endif  // _MSC_VER
 #else
 # include <unistd.h>
 #endif  // GTEST_OS_WINDOWS
