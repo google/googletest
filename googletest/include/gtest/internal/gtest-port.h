@@ -402,13 +402,6 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # include <strings.h>
 #endif  // GTEST_OS_WINDOWS
 
-#if GTEST_OS_OS2
-namespace std {
-// OS/2 kLIBC has wcslen(), but it is not in ::std namespace.
-using ::wcslen;
-}
-#endif
-
 #if GTEST_OS_LINUX_ANDROID
 // Used to define __ANDROID_API__ matching the target NDK API level.
 #  include <android/api-level.h>  // NOLINT
