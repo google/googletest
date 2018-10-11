@@ -110,18 +110,6 @@ set(gtest_build_include_dirs
   "${gtest_SOURCE_DIR}")
 include_directories(${gtest_build_include_dirs})
 
-# Summary of tuple support for Microsoft Visual Studio:
-# Compiler    version(MS)  version(cmake)  Support
-# ----------  -----------  --------------  -----------------------------
-# <= VS 2010  <= 10        <= 1600         Use Google Tests's own tuple.
-# VS 2012     11           1700            std::tr1::tuple + _VARIADIC_MAX=10
-# VS 2013     12           1800            std::tr1::tuple
-# VS 2015     14           1900            std::tuple
-# VS 2017     15           >= 1910         std::tuple
-if (MSVC AND MSVC_VERSION EQUAL 1700)
-  add_definitions(/D _VARIADIC_MAX=10)
-endif()
-
 ########################################################################
 #
 # Defines the gtest & gtest_main libraries.  User tests should link
@@ -187,6 +175,20 @@ if (gtest_build_tests)
   # 'make test' or ctest.
   enable_testing()
 
+  if (WIN32)
+    file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/RunTest.ps1"
+         CONTENT
+"$project_bin = \"${CMAKE_BINARY_DIR}/bin/$<CONFIG>\"
+$env:Path = \"$project_bin;$env:Path\"
+& $args")
+  elseif (MINGW)
+    file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/RunTest.ps1"
+         CONTENT
+"$project_bin = (cygpath --windows ${CMAKE_BINARY_DIR}/bin)
+$env:Path = \"$project_bin;$env:Path\"
+& $args")
+  endif()
+
   ############################################################
   # C++ tests built with standard compiler flags.
 
@@ -218,6 +220,7 @@ if (gtest_build_tests)
     test/gtest-typed-test2_test.cc)
   cxx_test(gtest_unittest gtest_main)
   cxx_test(gtest-unittest-api_test gtest)
+  cxx_test(gtest_skip_test gtest_main)
 
   ############################################################
   # C++ tests built with non-standard compiler flags.
@@ -250,21 +253,6 @@ if (gtest_build_tests)
   set_target_properties(gtest_dll_test_
                         PROPERTIES
                         COMPILE_DEFINITIONS "GTEST_LINKED_AS_SHARED_LIBRARY=1")
-
-  if (NOT MSVC OR MSVC_VERSION LESS 1600)  # 1600 is Visual Studio 2010.
-    # Visual Studio 2010, 2012, and 2013 define symbols in std::tr1 that
-    # conflict with our own definitions. Therefore using our own tuple does not
-    # work on those compilers.
-    cxx_library(gtest_main_use_own_tuple "${cxx_use_own_tuple}"
-      src/gtest-all.cc src/gtest_main.cc)
-
-    cxx_test_with_flags(googletest-tuple-test "${cxx_use_own_tuple}"
-      gtest_main_use_own_tuple test/googletest-tuple-test.cc)
-
-    cxx_test_with_flags(gtest_use_own_tuple_test "${cxx_use_own_tuple}"
-      gtest_main_use_own_tuple
-      test/googletest-param-test-test.cc test/googletest-param-test2-test.cc)
-  endif()
 
   ############################################################
   # Python tests.

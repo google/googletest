@@ -477,11 +477,8 @@ If a fatal failure happens the subsequent steps will be skipped.
 
 ## Writing the main() Function
 
-In `google3`, the simplest approach is to use the default main() function
-provided by linking in `"//testing/base/public:gtest_main"`. If that doesn't
-cover what you need, you should write your own main() function, which should
-return the value of `RUN_ALL_TESTS()`. Link to `"//testing/base/public:gunit"`.
-You can start from this boilerplate:
+Write your own main() function, which should
+return the value of `RUN_ALL_TESTS()`
 
 ```c++
 #include "this/package/foo.h"

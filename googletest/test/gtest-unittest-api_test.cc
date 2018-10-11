@@ -76,7 +76,7 @@ class UnitTestHelper {
       if (0 == strcmp(test_case->name(), name))
         return test_case;
     }
-    return NULL;
+    return nullptr;
   }
 
   // Returns the array of pointers to all tests in a particular test case
@@ -137,7 +137,7 @@ TEST(ApiTest, UnitTestImmutableAccessorsWork) {
 }
 
 AssertionResult IsNull(const char* str) {
-  if (str != NULL) {
+  if (str != nullptr) {
     return testing::AssertionFailure() << "argument is " << str;
   }
   return AssertionSuccess();
@@ -145,7 +145,7 @@ AssertionResult IsNull(const char* str) {
 
 TEST(ApiTest, TestCaseImmutableAccessorsWork) {
   const TestCase* test_case = UnitTestHelper::FindTestCase("ApiTest");
-  ASSERT_TRUE(test_case != NULL);
+  ASSERT_TRUE(test_case != nullptr);
 
   EXPECT_STREQ("ApiTest", test_case->name());
   EXPECT_TRUE(IsNull(test_case->type_param()));
@@ -181,11 +181,11 @@ TEST(ApiTest, TestCaseImmutableAccessorsWork) {
   EXPECT_TRUE(tests[3]->should_run());
 
   delete[] tests;
-  tests = NULL;
+  tests = nullptr;
 
 #if GTEST_HAS_TYPED_TEST
   test_case = UnitTestHelper::FindTestCase("TestCaseWithCommentTest/0");
-  ASSERT_TRUE(test_case != NULL);
+  ASSERT_TRUE(test_case != nullptr);
 
   EXPECT_STREQ("TestCaseWithCommentTest/0", test_case->name());
   EXPECT_STREQ(GetTypeName<int>().c_str(), test_case->type_param());
@@ -208,7 +208,7 @@ TEST(ApiTest, TestCaseImmutableAccessorsWork) {
 
 TEST(ApiTest, TestCaseDisabledAccessorsWork) {
   const TestCase* test_case = UnitTestHelper::FindTestCase("DISABLED_Test");
-  ASSERT_TRUE(test_case != NULL);
+  ASSERT_TRUE(test_case != nullptr);
 
   EXPECT_STREQ("DISABLED_Test", test_case->name());
   EXPECT_TRUE(IsNull(test_case->type_param()));
