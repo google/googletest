@@ -94,18 +94,20 @@ TEST(XmlOutputTest, GetOutputFileFromDirectoryPath) {
 #endif
 }
 
-#if GTEST_OS_OS2
-# define _strcmpi strcasecmp
-#endif
-
 TEST(OutputFileHelpersTest, GetCurrentExecutableName) {
   const std::string exe_str = GetCurrentExecutableName().string();
-#if GTEST_OS_WINDOWS || GTEST_OS_OS2
+#if GTEST_OS_WINDOWS
   const bool success =
       _strcmpi("googletest-options-test", exe_str.c_str()) == 0 ||
       _strcmpi("gtest-options-ex_test", exe_str.c_str()) == 0 ||
       _strcmpi("gtest_all_test", exe_str.c_str()) == 0 ||
       _strcmpi("gtest_dll_test", exe_str.c_str()) == 0;
+#elif GTEST_OS_OS2
+  const bool success =
+      strcasecmp("googletest-options-test", exe_str.c_str()) == 0 ||
+      strcasecmp("gtest-options-ex_test", exe_str.c_str()) == 0 ||
+      strcasecmp("gtest_all_test", exe_str.c_str()) == 0 ||
+      strcasecmp("gtest_dll_test", exe_str.c_str()) == 0;
 #elif GTEST_OS_FUCHSIA
   const bool success = exe_str == "app";
 #else
