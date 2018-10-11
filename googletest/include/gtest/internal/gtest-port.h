@@ -129,6 +129,7 @@
 //   GTEST_OS_NACL     - Google Native Client (NaCl)
 //   GTEST_OS_NETBSD   - NetBSD
 //   GTEST_OS_OPENBSD  - OpenBSD
+//   GTEST_OS_OS2      - OS/2
 //   GTEST_OS_QNX      - QNX
 //   GTEST_OS_SOLARIS  - Sun Solaris
 //   GTEST_OS_SYMBIAN  - Symbian
@@ -681,7 +682,8 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 // Determines whether the system compiler uses UTF-16 for encoding wide strings.
 #define GTEST_WIDE_STRING_USES_UTF16_ \
-    (GTEST_OS_WINDOWS || GTEST_OS_CYGWIN || GTEST_OS_SYMBIAN || GTEST_OS_AIX)
+    (GTEST_OS_WINDOWS || GTEST_OS_CYGWIN || GTEST_OS_SYMBIAN || \
+     GTEST_OS_AIX || GTEST_OS_OS2)
 
 // Determines whether test results can be streamed to a socket.
 #if GTEST_OS_LINUX

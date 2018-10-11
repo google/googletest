@@ -66,6 +66,8 @@
 # else
 #  define GTEST_OS_WINDOWS_DESKTOP 1
 # endif  // _WIN32_WCE
+#elif defined __OS2__
+# define GTEST_OS_OS2 1
 #elif defined __APPLE__
 # define GTEST_OS_MAC 1
 # if TARGET_OS_IPHONE
