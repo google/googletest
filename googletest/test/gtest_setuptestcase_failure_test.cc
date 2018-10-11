@@ -54,5 +54,11 @@ TEST_F(AdHocTestResultTest, AdHocTestResultTestForUnitTestDoesNotShowFailure) {
 
 int main(int argc, char **argv) {
   InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS() ? 0 : 1;
+  if (RUN_ALL_TESTS() == 0) {
+	  return 1;
+  }
+  if (testing::UnitTest::GetInstance()->failed_test_count() != 0) {
+    return 1;
+  }
+  return 0;
 }
