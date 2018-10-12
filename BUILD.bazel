@@ -144,9 +144,9 @@ cc_library(
 cc_test(
     name = "gtest_samples",
     size = "small",
-    #All Samples except:
-    #sample9 ( main )
-    #sample10 (main and takes a command line option and needs to be separate)
+    # All Samples except:
+    #   sample9 (main)
+    #   sample10 (main and takes a command line option and needs to be separate)
     srcs = [
         "googletest/samples/sample1_unittest.cc",
         "googletest/samples/sample2_unittest.cc",

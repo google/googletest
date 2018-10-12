@@ -148,7 +148,6 @@ macro(config_compiler_and_linker)
     "${CMAKE_CXX_FLAGS} ${cxx_base_flags} ${cxx_no_exception_flags}")
   set(cxx_default "${cxx_exception}")
   set(cxx_no_rtti "${cxx_default} ${cxx_no_rtti_flags}")
-  set(cxx_use_own_tuple "${cxx_default} -DGTEST_USE_OWN_TR1_TUPLE=1")
 
   # For building the gtest libraries.
   set(cxx_strict "${cxx_default} ${cxx_strict_flags}")
@@ -167,6 +166,22 @@ function(cxx_library_with_type name type cxx_flags)
   set_target_properties(${name}
     PROPERTIES
     DEBUG_POSTFIX "d")
+  # Set the output directory for build artifacts
+  set_target_properties(${name}
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+  # make PDBs match library name
+  get_target_property(pdb_debug_postfix ${name} DEBUG_POSTFIX)
+  set_target_properties(${name}
+    PROPERTIES
+    PDB_NAME "${name}"
+    PDB_NAME_DEBUG "${name}${pdb_debug_postfix}"
+    COMPILE_PDB_NAME "${name}"
+    COMPILE_PDB_NAME_DEBUG "${name}${pdb_debug_postfix}")
+
   if (BUILD_SHARED_LIBS OR type STREQUAL "SHARED")
     set_target_properties(${name}
       PROPERTIES
@@ -244,7 +259,13 @@ find_package(PythonInterp)
 # from the given source files with the given compiler flags.
 function(cxx_test_with_flags name cxx_flags libs)
   cxx_executable_with_flags(${name} "${cxx_flags}" "${libs}" ${ARGN})
-  add_test(NAME ${name} COMMAND ${name})
+  if (WIN32 OR MINGW)
+    add_test(NAME ${name}
+      COMMAND "powershell" "-Command" "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/RunTest.ps1" "$<TARGET_FILE:${name}>")
+  else()
+    add_test(NAME ${name}
+      COMMAND "$<TARGET_FILE:${name}>")
+  endif()
 endfunction()
 
 # cxx_test(name libs srcs...)
@@ -263,33 +284,51 @@ endfunction()
 # test/name.py.  It does nothing if Python is not installed.
 function(py_test name)
   if (PYTHONINTERP_FOUND)
-    if (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 3.1)
+    if ("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" VERSION_GREATER 3.1)
       if (CMAKE_CONFIGURATION_TYPES)
-	# Multi-configuration build generators as for Visual Studio save
-	# output in a subdirectory of CMAKE_CURRENT_BINARY_DIR (Debug,
-	# Release etc.), so we have to provide it here.
-        add_test(
-          NAME ${name}
-          COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+        # Multi-configuration build generators as for Visual Studio save
+        # output in a subdirectory of CMAKE_CURRENT_BINARY_DIR (Debug,
+        # Release etc.), so we have to provide it here.
+        if (WIN32 OR MINGW)
+          add_test(NAME ${name}
+            COMMAND powershell -Command ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/RunTest.ps1
+              ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
               --build_dir=${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG> ${ARGN})
+        else()
+          add_test(NAME ${name}
+            COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+              --build_dir=${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG> ${ARGN})
+        endif()
       else (CMAKE_CONFIGURATION_TYPES)
-	# Single-configuration build generators like Makefile generators
-	# don't have subdirs below CMAKE_CURRENT_BINARY_DIR.
-        add_test(
-          NAME ${name}
-          COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+        # Single-configuration build generators like Makefile generators
+        # don't have subdirs below CMAKE_CURRENT_BINARY_DIR.
+        if (WIN32 OR MINGW)
+          add_test(NAME ${name}
+            COMMAND powershell -Command ${CMAKE_CURRENT_BINARY_DIR}/RunTest.ps1
+              ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
               --build_dir=${CMAKE_CURRENT_BINARY_DIR} ${ARGN})
+        else()
+          add_test(NAME ${name}
+            COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+              --build_dir=${CMAKE_CURRENT_BINARY_DIR} ${ARGN})
+        endif()
       endif (CMAKE_CONFIGURATION_TYPES)
-    else (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 3.1)
+    else()
       # ${CMAKE_CURRENT_BINARY_DIR} is known at configuration time, so we can
       # directly bind it from cmake. ${CTEST_CONFIGURATION_TYPE} is known
       # only at ctest runtime (by calling ctest -c <Configuration>), so
       # we have to escape $ to delay variable substitution here.
-      add_test(
-        ${name}
-        ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
-          --build_dir=${CMAKE_CURRENT_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE} ${ARGN})
-    endif (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 3.1)
+      if (WIN32 OR MINGW)
+        add_test(NAME ${name}
+          COMMAND powershell -Command ${CMAKE_CURRENT_BINARY_DIR}/RunTest.ps1
+            ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+            --build_dir=${CMAKE_CURRENT_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE} ${ARGN})
+      else()
+        add_test(NAME ${name}
+          COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+            --build_dir=${CMAKE_CURRENT_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE} ${ARGN})
+      endif()
+    endif()
   endif(PYTHONINTERP_FOUND)
 endfunction()
 
@@ -306,6 +345,18 @@ function(install_project)
       RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
       ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
       LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+    if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+      # Install PDBs
+      foreach(t ${ARGN})
+        get_target_property(t_pdb_name ${t} COMPILE_PDB_NAME)
+        get_target_property(t_pdb_name_debug ${t} COMPILE_PDB_NAME_DEBUG)
+        get_target_property(t_pdb_output_directory ${t} PDB_OUTPUT_DIRECTORY)
+        install(FILES
+          "${t_pdb_output_directory}/\${CMAKE_INSTALL_CONFIG_NAME}/$<$<CONFIG:Debug>:${t_pdb_name_debug}>$<$<NOT:$<CONFIG:Debug>>:${t_pdb_name}>.pdb"
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          OPTIONAL)
+      endforeach()
+    endif()
     # Configure and install pkgconfig files.
     foreach(t ${ARGN})
       set(configured_pc "${generated_dir}/${t}.pc")

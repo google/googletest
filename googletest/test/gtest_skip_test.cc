@@ -1,5 +1,5 @@
-// Copyright 2005, Google Inc.
-// All rights reserved.
+// Copyright 2008 Google Inc.
+// All Rights Reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -26,29 +26,13 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// Author: arseny.aprelev@gmail.com (Arseny Aprelev)
+//
 
-// A sample program demonstrating using Google C++ testing framework.
+#include "gtest/gtest.h"
 
-#include "sample2.h"
-
-#include <string.h>
-
-// Clones a 0-terminated C string, allocating memory using new.
-const char* MyString::CloneCString(const char* a_c_string) {
-  if (a_c_string == nullptr) return nullptr;
-
-  const size_t len = strlen(a_c_string);
-  char* const clone = new char[ len + 1 ];
-  memcpy(clone, a_c_string, len + 1);
-
-  return clone;
-}
-
-// Sets the 0-terminated C string this MyString object
-// represents.
-void MyString::Set(const char* a_c_string) {
-  // Makes sure this works when c_string == c_string_
-  const char* const temp = MyString::CloneCString(a_c_string);
-  delete[] c_string_;
-  c_string_ = temp;
+TEST(SkipTest, DoesSkip) {
+  GTEST_SKIP();
+  EXPECT_EQ(0, 1);
 }

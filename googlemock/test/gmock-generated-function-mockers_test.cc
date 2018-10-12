@@ -228,7 +228,7 @@ TEST_F(FunctionMockerTest, MocksDecimalFunction) {
                                  Lt(100), 5U, NULL, "hi"))
       .WillOnce(Return(5));
 
-  EXPECT_EQ(5, foo_->Decimal(true, 'a', 0, 0, 1, 0, 0, 5, NULL, "hi"));
+  EXPECT_EQ(5, foo_->Decimal(true, 'a', 0, 0, 1, 0, 0, 5, nullptr, "hi"));
 }
 
 // Tests mocking a function that takes a non-const reference.
@@ -617,6 +617,17 @@ TEST(MockFunctionTest, AsStdFunctionReturnsReference) {
   value = 2;
   EXPECT_EQ(2, ref);
 }
+
+TEST(MockFunctionTest, AsStdFunctionWithReferenceParameter) {
+  MockFunction<int(int &)> foo;
+  auto call = [](const std::function<int(int& )> &f, int &i) {
+    return f(i);
+  };
+  int i = 42;
+  EXPECT_CALL(foo, Call(i)).WillOnce(Return(-1));
+  EXPECT_EQ(-1, call(foo.AsStdFunction(), i));
+}
+
 #endif  // GTEST_HAS_STD_FUNCTION_
 
 struct MockMethodSizes0 {
