@@ -1185,7 +1185,7 @@ class TypedExpectation : public ExpectationBase {
     }
 
     return count <= action_count ?
-        *static_cast<const Action<F>*>(untyped_actions_[count - 1]) :
+        *static_cast<const Action<F>*>(untyped_actions_[static_cast<size_t>(count - 1)]) :
         repeated_action();
   }
 
@@ -1762,12 +1762,12 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
       ::std::ostream* why) const
           GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
     g_gmock_mutex.AssertHeld();
-    const int count = static_cast<int>(untyped_expectations_.size());
+    const size_t count = untyped_expectations_.size();
     *why << "Google Mock tried the following " << count << " "
          << (count == 1 ? "expectation, but it didn't match" :
              "expectations, but none matched")
          << ":\n";
-    for (int i = 0; i < count; i++) {
+    for (size_t i = 0; i < count; i++) {
       TypedExpectation<F>* const expectation =
           static_cast<TypedExpectation<F>*>(untyped_expectations_[i].get());
       *why << "\n";
