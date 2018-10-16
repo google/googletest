@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
@@ -39,7 +38,6 @@
 
 namespace {
 
-using ::testing::tuple;
 using ::testing::Matcher;
 using ::testing::internal::CompileAssertTypesEqual;
 using ::testing::internal::MatcherTuple;
@@ -49,24 +47,24 @@ using ::testing::internal::IgnoredValue;
 // Tests the MatcherTuple template struct.
 
 TEST(MatcherTupleTest, ForSize0) {
-  CompileAssertTypesEqual<tuple<>, MatcherTuple<tuple<> >::type>();
+  CompileAssertTypesEqual<std::tuple<>, MatcherTuple<std::tuple<> >::type>();
 }
 
 TEST(MatcherTupleTest, ForSize1) {
-  CompileAssertTypesEqual<tuple<Matcher<int> >,
-                          MatcherTuple<tuple<int> >::type>();
+  CompileAssertTypesEqual<std::tuple<Matcher<int> >,
+                          MatcherTuple<std::tuple<int> >::type>();
 }
 
 TEST(MatcherTupleTest, ForSize2) {
-  CompileAssertTypesEqual<tuple<Matcher<int>, Matcher<char> >,
-                          MatcherTuple<tuple<int, char> >::type>();
+  CompileAssertTypesEqual<std::tuple<Matcher<int>, Matcher<char> >,
+                          MatcherTuple<std::tuple<int, char> >::type>();
 }
 
 TEST(MatcherTupleTest, ForSize5) {
-  CompileAssertTypesEqual<tuple<Matcher<int>, Matcher<char>, Matcher<bool>,
-                                Matcher<double>, Matcher<char*> >,
-                          MatcherTuple<tuple<int, char, bool, double, char*>
-                                      >::type>();
+  CompileAssertTypesEqual<
+      std::tuple<Matcher<int>, Matcher<char>, Matcher<bool>, Matcher<double>,
+                 Matcher<char*> >,
+      MatcherTuple<std::tuple<int, char, bool, double, char*> >::type>();
 }
 
 // Tests the Function template struct.
@@ -74,8 +72,8 @@ TEST(MatcherTupleTest, ForSize5) {
 TEST(FunctionTest, Nullary) {
   typedef Function<int()> F;  // NOLINT
   CompileAssertTypesEqual<int, F::Result>();
-  CompileAssertTypesEqual<tuple<>, F::ArgumentTuple>();
-  CompileAssertTypesEqual<tuple<>, F::ArgumentMatcherTuple>();
+  CompileAssertTypesEqual<std::tuple<>, F::ArgumentTuple>();
+  CompileAssertTypesEqual<std::tuple<>, F::ArgumentMatcherTuple>();
   CompileAssertTypesEqual<void(), F::MakeResultVoid>();
   CompileAssertTypesEqual<IgnoredValue(), F::MakeResultIgnoredValue>();
 }
@@ -84,8 +82,9 @@ TEST(FunctionTest, Unary) {
   typedef Function<int(bool)> F;  // NOLINT
   CompileAssertTypesEqual<int, F::Result>();
   CompileAssertTypesEqual<bool, F::Argument1>();
-  CompileAssertTypesEqual<tuple<bool>, F::ArgumentTuple>();
-  CompileAssertTypesEqual<tuple<Matcher<bool> >, F::ArgumentMatcherTuple>();
+  CompileAssertTypesEqual<std::tuple<bool>, F::ArgumentTuple>();
+  CompileAssertTypesEqual<std::tuple<Matcher<bool> >,
+                          F::ArgumentMatcherTuple>();
   CompileAssertTypesEqual<void(bool), F::MakeResultVoid>();  // NOLINT
   CompileAssertTypesEqual<IgnoredValue(bool),  // NOLINT
       F::MakeResultIgnoredValue>();
@@ -96,9 +95,11 @@ TEST(FunctionTest, Binary) {
   CompileAssertTypesEqual<int, F::Result>();
   CompileAssertTypesEqual<bool, F::Argument1>();
   CompileAssertTypesEqual<const long&, F::Argument2>();  // NOLINT
-  CompileAssertTypesEqual<tuple<bool, const long&>, F::ArgumentTuple>();  // NOLINT
-  CompileAssertTypesEqual<tuple<Matcher<bool>, Matcher<const long&> >,  // NOLINT
-                          F::ArgumentMatcherTuple>();
+  CompileAssertTypesEqual<std::tuple<bool, const long&>,  // NOLINT
+                          F::ArgumentTuple>();
+  CompileAssertTypesEqual<
+      std::tuple<Matcher<bool>, Matcher<const long&> >,  // NOLINT
+      F::ArgumentMatcherTuple>();
   CompileAssertTypesEqual<void(bool, const long&), F::MakeResultVoid>();  // NOLINT
   CompileAssertTypesEqual<IgnoredValue(bool, const long&),  // NOLINT
       F::MakeResultIgnoredValue>();
@@ -112,11 +113,13 @@ TEST(FunctionTest, LongArgumentList) {
   CompileAssertTypesEqual<char*, F::Argument3>();
   CompileAssertTypesEqual<int&, F::Argument4>();
   CompileAssertTypesEqual<const long&, F::Argument5>();  // NOLINT
-  CompileAssertTypesEqual<tuple<bool, int, char*, int&, const long&>,  // NOLINT
-                          F::ArgumentTuple>();
-  CompileAssertTypesEqual<tuple<Matcher<bool>, Matcher<int>, Matcher<char*>,
-                                Matcher<int&>, Matcher<const long&> >,  // NOLINT
-                          F::ArgumentMatcherTuple>();
+  CompileAssertTypesEqual<
+      std::tuple<bool, int, char*, int&, const long&>,  // NOLINT
+      F::ArgumentTuple>();
+  CompileAssertTypesEqual<
+      std::tuple<Matcher<bool>, Matcher<int>, Matcher<char*>, Matcher<int&>,
+                 Matcher<const long&> >,  // NOLINT
+      F::ArgumentMatcherTuple>();
   CompileAssertTypesEqual<void(bool, int, char*, int&, const long&),  // NOLINT
                           F::MakeResultVoid>();
   CompileAssertTypesEqual<

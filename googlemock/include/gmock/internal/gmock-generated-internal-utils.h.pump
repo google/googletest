@@ -31,13 +31,14 @@ $var n = 10  $$ The maximum arity we support.
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Google Mock - a framework for writing C++ mock classes.
 //
 // This file contains template meta-programming utility classes needed
 // for implementing Google Mock.
+
+// GOOGLETEST_CM0002 DO NOT DELETE
 
 #ifndef GMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_GENERATED_INTERNAL_UTILS_H_
 #define GMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_GENERATED_INTERNAL_UTILS_H_
@@ -77,8 +78,8 @@ $var typename_As = [[$for j, [[typename A$j]]]]
 $var As = [[$for j, [[A$j]]]]
 $var matcher_As = [[$for j, [[Matcher<A$j>]]]]
 template <$typename_As>
-struct MatcherTuple< ::testing::tuple<$As> > {
-  typedef ::testing::tuple<$matcher_As > type;
+struct MatcherTuple< ::std::tuple<$As> > {
+  typedef ::std::tuple<$matcher_As > type;
 };
 
 
@@ -102,7 +103,7 @@ struct Function;
 template <typename R>
 struct Function<R()> {
   typedef R Result;
-  typedef ::testing::tuple<> ArgumentTuple;
+  typedef ::std::tuple<> ArgumentTuple;
   typedef typename MatcherTuple<ArgumentTuple>::type ArgumentMatcherTuple;
   typedef void MakeResultVoid();
   typedef IgnoredValue MakeResultIgnoredValue();
@@ -121,7 +122,7 @@ template <typename R$typename_As>
 struct Function<R($As)>
     : Function<R($prev_As)> {
   typedef A$i Argument$i;
-  typedef ::testing::tuple<$As> ArgumentTuple;
+  typedef ::std::tuple<$As> ArgumentTuple;
   typedef typename MatcherTuple<ArgumentTuple>::type ArgumentMatcherTuple;
   typedef void MakeResultVoid($As);
   typedef IgnoredValue MakeResultIgnoredValue($As);

@@ -28,8 +28,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // A sample program demonstrating using Google C++ testing framework.
-//
-// Author: wan@google.com (Zhanyong Wan)
 
 #ifndef GTEST_SAMPLES_SAMPLE2_H_
 #define GTEST_SAMPLES_SAMPLE2_H_
@@ -52,15 +50,15 @@ class MyString {
   // C'tors
 
   // The default c'tor constructs a NULL string.
-  MyString() : c_string_(NULL) {}
+  MyString() : c_string_(nullptr) {}
 
   // Constructs a MyString by cloning a 0-terminated C string.
-  explicit MyString(const char* a_c_string) : c_string_(NULL) {
+  explicit MyString(const char* a_c_string) : c_string_(nullptr) {
     Set(a_c_string);
   }
 
   // Copy c'tor
-  MyString(const MyString& string) : c_string_(NULL) {
+  MyString(const MyString& string) : c_string_(nullptr) {
     Set(string.c_string_);
   }
 
@@ -73,9 +71,7 @@ class MyString {
   // Gets the 0-terminated C string this MyString object represents.
   const char* c_string() const { return c_string_; }
 
-  size_t Length() const {
-    return c_string_ == NULL ? 0 : strlen(c_string_);
-  }
+  size_t Length() const { return c_string_ == nullptr ? 0 : strlen(c_string_); }
 
   // Sets the 0-terminated C string this MyString object represents.
   void Set(const char* c_string);

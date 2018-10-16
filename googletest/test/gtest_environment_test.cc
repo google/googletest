@@ -26,18 +26,14 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 //
 // Tests using global test environments.
 
 #include <stdlib.h>
 #include <stdio.h>
 #include "gtest/gtest.h"
-
-#define GTEST_IMPLEMENTATION_ 1  // Required for the next #include.
 #include "src/gtest-internal-inl.h"
-#undef GTEST_IMPLEMENTATION_
 
 namespace testing {
 GTEST_DECLARE_string_(filter);

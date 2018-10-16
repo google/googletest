@@ -1,6 +1,6 @@
 $$ -*- mode: c++; -*-
-$$ This is a Pump source file.  Please use Pump to convert it to
-$$ gmock-generated-actions.h.
+$$ This is a Pump source file. Please use Pump to convert
+$$ it to gmock-generated-matchers.h.
 $$
 $var n = 10  $$ The maximum arity we support.
 $$ }} This line fixes auto-indentation of the following code in Emacs.
@@ -37,6 +37,8 @@ $$ }} This line fixes auto-indentation of the following code in Emacs.
 //
 // This file implements some commonly used variadic matchers.
 
+// GOOGLETEST_CM0002 DO NOT DELETE
+
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_MATCHERS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_MATCHERS_H_
 
@@ -53,7 +55,7 @@ $range i 0..n-1
 
 // The type of the i-th (0-based) field of Tuple.
 #define GMOCK_FIELD_TYPE_(Tuple, i) \
-    typename ::testing::tuple_element<i, Tuple>::type
+    typename ::std::tuple_element<i, Tuple>::type
 
 // TupleFields<Tuple, k0, ..., kn> is for selecting fields from a
 // tuple of type Tuple.  It has two members:
@@ -61,10 +63,11 @@ $range i 0..n-1
 //   type: a tuple type whose i-th field is the ki-th field of Tuple.
 //   GetSelectedFields(t): returns fields k0, ..., and kn of t as a tuple.
 //
-// For example, in class TupleFields<tuple<bool, char, int>, 2, 0>, we have:
+// For example, in class TupleFields<std::tuple<bool, char, int>, 2, 0>,
+// we have:
 //
-//   type is tuple<int, bool>, and
-//   GetSelectedFields(make_tuple(true, 'a', 42)) is (42, true).
+//   type is std::tuple<int, bool>, and
+//   GetSelectedFields(std::make_tuple(true, 'a', 42)) is (42, true).
 
 template <class Tuple$for i [[, int k$i = -1]]>
 class TupleFields;
@@ -73,9 +76,9 @@ class TupleFields;
 template <class Tuple$for i [[, int k$i]]>
 class TupleFields {
  public:
-  typedef ::testing::tuple<$for i, [[GMOCK_FIELD_TYPE_(Tuple, k$i)]]> type;
+  typedef ::std::tuple<$for i, [[GMOCK_FIELD_TYPE_(Tuple, k$i)]]> type;
   static type GetSelectedFields(const Tuple& t) {
-    return type($for i, [[get<k$i>(t)]]);
+    return type($for i, [[std::get<k$i>(t)]]);
   }
 };
 
@@ -89,9 +92,9 @@ $range k 0..n-1
 template <class Tuple$for j [[, int k$j]]>
 class TupleFields<Tuple, $for k, [[$if k < i [[k$k]] $else [[-1]]]]> {
  public:
-  typedef ::testing::tuple<$for j, [[GMOCK_FIELD_TYPE_(Tuple, k$j)]]> type;
+  typedef ::std::tuple<$for j, [[GMOCK_FIELD_TYPE_(Tuple, k$j)]]> type;
   static type GetSelectedFields(const Tuple& $if i==0 [[/* t */]] $else [[t]]) {
-    return type($for j, [[get<k$j>(t)]]);
+    return type($for j, [[std::get<k$j>(t)]]);
   }
 };
 
@@ -185,66 +188,6 @@ class ArgsMatcher {
   GTEST_DISALLOW_ASSIGN_(ArgsMatcher);
 };
 
-// A set of metafunctions for computing the result type of AllOf.
-// AllOf(m1, ..., mN) returns
-// AllOfResultN<decltype(m1), ..., decltype(mN)>::type.
-
-// Although AllOf isn't defined for one argument, AllOfResult1 is defined
-// to simplify the implementation.
-template <typename M1>
-struct AllOfResult1 {
-  typedef M1 type;
-};
-
-$range i 1..n
-
-$range i 2..n
-$for i [[
-$range j 2..i
-$var m = i/2
-$range k 1..m
-$range t m+1..i
-
-template <typename M1$for j [[, typename M$j]]>
-struct AllOfResult$i {
-  typedef BothOfMatcher<
-      typename AllOfResult$m<$for k, [[M$k]]>::type,
-      typename AllOfResult$(i-m)<$for t, [[M$t]]>::type
-  > type;
-};
-
-]]
-
-// A set of metafunctions for computing the result type of AnyOf.
-// AnyOf(m1, ..., mN) returns
-// AnyOfResultN<decltype(m1), ..., decltype(mN)>::type.
-
-// Although AnyOf isn't defined for one argument, AnyOfResult1 is defined
-// to simplify the implementation.
-template <typename M1>
-struct AnyOfResult1 {
-  typedef M1 type;
-};
-
-$range i 1..n
-
-$range i 2..n
-$for i [[
-$range j 2..i
-$var m = i/2
-$range k 1..m
-$range t m+1..i
-
-template <typename M1$for j [[, typename M$j]]>
-struct AnyOfResult$i {
-  typedef EitherOfMatcher<
-      typename AnyOfResult$m<$for k, [[M$k]]>::type,
-      typename AnyOfResult$(i-m)<$for t, [[M$t]]>::type
-  > type;
-};
-
-]]
-
 }  // namespace internal
 
 // Args<N1, N2, ..., Nk>(a_matcher) matches a tuple if the selected
@@ -260,112 +203,6 @@ Args(const InnerMatcher& matcher) {
   return internal::ArgsMatcher<InnerMatcher$for j [[, k$j]]>(matcher);
 }
 
-
-]]
-// ElementsAre(e_1, e_2, ... e_n) matches an STL-style container with
-// n elements, where the i-th element in the container must
-// match the i-th argument in the list.  Each argument of
-// ElementsAre() can be either a value or a matcher.  We support up to
-// $n arguments.
-//
-// The use of DecayArray in the implementation allows ElementsAre()
-// to accept string literals, whose type is const char[N], but we
-// want to treat them as const char*.
-//
-// NOTE: Since ElementsAre() cares about the order of the elements, it
-// must not be used with containers whose elements's order is
-// undefined (e.g. hash_map).
-
-$range i 0..n
-$for i [[
-
-$range j 1..i
-
-$if i>0 [[
-
-template <$for j, [[typename T$j]]>
-]]
-
-inline internal::ElementsAreMatcher<
-    ::testing::tuple<
-$for j, [[
-
-        typename internal::DecayArray<T$j[[]]>::type]]> >
-ElementsAre($for j, [[const T$j& e$j]]) {
-  typedef ::testing::tuple<
-$for j, [[
-
-      typename internal::DecayArray<T$j[[]]>::type]]> Args;
-  return internal::ElementsAreMatcher<Args>(Args($for j, [[e$j]]));
-}
-
-]]
-
-// UnorderedElementsAre(e_1, e_2, ..., e_n) is an ElementsAre extension
-// that matches n elements in any order.  We support up to n=$n arguments.
-
-$range i 0..n
-$for i [[
-
-$range j 1..i
-
-$if i>0 [[
-
-template <$for j, [[typename T$j]]>
-]]
-
-inline internal::UnorderedElementsAreMatcher<
-    ::testing::tuple<
-$for j, [[
-
-        typename internal::DecayArray<T$j[[]]>::type]]> >
-UnorderedElementsAre($for j, [[const T$j& e$j]]) {
-  typedef ::testing::tuple<
-$for j, [[
-
-      typename internal::DecayArray<T$j[[]]>::type]]> Args;
-  return internal::UnorderedElementsAreMatcher<Args>(Args($for j, [[e$j]]));
-}
-
-]]
-
-// AllOf(m1, m2, ..., mk) matches any value that matches all of the given
-// sub-matchers.  AllOf is called fully qualified to prevent ADL from firing.
-
-$range i 2..n
-$for i [[
-$range j 1..i
-$var m = i/2
-$range k 1..m
-$range t m+1..i
-
-template <$for j, [[typename M$j]]>
-inline typename internal::AllOfResult$i<$for j, [[M$j]]>::type
-AllOf($for j, [[M$j m$j]]) {
-  return typename internal::AllOfResult$i<$for j, [[M$j]]>::type(
-      $if m == 1 [[m1]] $else [[::testing::AllOf($for k, [[m$k]])]],
-      $if m+1 == i [[m$i]] $else [[::testing::AllOf($for t, [[m$t]])]]);
-}
-
-]]
-
-// AnyOf(m1, m2, ..., mk) matches any value that matches any of the given
-// sub-matchers.  AnyOf is called fully qualified to prevent ADL from firing.
-
-$range i 2..n
-$for i [[
-$range j 1..i
-$var m = i/2
-$range k 1..m
-$range t m+1..i
-
-template <$for j, [[typename M$j]]>
-inline typename internal::AnyOfResult$i<$for j, [[M$j]]>::type
-AnyOf($for j, [[M$j m$j]]) {
-  return typename internal::AnyOfResult$i<$for j, [[M$j]]>::type(
-      $if m == 1 [[m1]] $else [[::testing::AnyOf($for k, [[m$k]])]],
-      $if m+1 == i [[m$i]] $else [[::testing::AnyOf($for t, [[m$t]])]]);
-}
 
 ]]
 
@@ -479,7 +316,7 @@ $$   // show up in the generated code.
 //   using testing::PrintToString;
 //
 //   MATCHER_P2(InClosedRange, low, hi,
-//       string(negation ? "is not" : "is") + " in range [" +
+//       std::string(negation ? "is not" : "is") + " in range [" +
 //       PrintToString(low) + ", " + PrintToString(hi) + "]") {
 //     return low <= arg && arg <= hi;
 //   }
@@ -587,7 +424,8 @@ $$   // show up in the generated code.
 // ================
 //
 // To learn more about using these macros, please search for 'MATCHER'
-// on http://code.google.com/p/googlemock/wiki/CookBook.
+// on
+// https://github.com/google/googletest/blob/master/googlemock/docs/CookBook.md
 
 $range i 0..n
 $for i
@@ -604,32 +442,34 @@ $var template = [[$if i==0 [[]] $else [[
 ]]]]
 $var ctor_param_list = [[$for j, [[p$j##_type gmock_p$j]]]]
 $var impl_ctor_param_list = [[$for j, [[p$j##_type gmock_p$j]]]]
-$var impl_inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(gmock_p$j)]]]]]]
-$var inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(gmock_p$j)]]]]]]
+$var impl_inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(::testing::internal::move(gmock_p$j))]]]]]]
+$var inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(::testing::internal::move(gmock_p$j))]]]]]]
 $var params = [[$for j, [[p$j]]]]
 $var param_types = [[$if i==0 [[]] $else [[<$for j, [[p$j##_type]]>]]]]
 $var param_types_and_names = [[$for j, [[p$j##_type p$j]]]]
 $var param_field_decls = [[$for j
 [[
 
-      p$j##_type p$j;\
+      p$j##_type const p$j;\
 ]]]]
 $var param_field_decls2 = [[$for j
 [[
 
-    p$j##_type p$j;\
+    p$j##_type const p$j;\
 ]]]]
 
 #define $macro_name(name$for j [[, p$j]], description)\$template
   class $class_name {\
    public:\
     template <typename arg_type>\
-    class gmock_Impl : public ::testing::MatcherInterface<arg_type> {\
+    class gmock_Impl : public ::testing::MatcherInterface<\
+        GTEST_REFERENCE_TO_CONST_(arg_type)> {\
      public:\
       [[$if i==1 [[explicit ]]]]gmock_Impl($impl_ctor_param_list)\
           $impl_inits {}\
       virtual bool MatchAndExplain(\
-          arg_type arg, ::testing::MatchResultListener* result_listener) const;\
+          GTEST_REFERENCE_TO_CONST_(arg_type) arg,\
+          ::testing::MatchResultListener* result_listener) const;\
       virtual void DescribeTo(::std::ostream* gmock_os) const {\
         *gmock_os << FormatDescription(false);\
       }\
@@ -637,16 +477,16 @@ $var param_field_decls2 = [[$for j
         *gmock_os << FormatDescription(true);\
       }\$param_field_decls
      private:\
-      ::testing::internal::string FormatDescription(bool negation) const {\
-        const ::testing::internal::string gmock_description = (description);\
-        if (!gmock_description.empty())\
+      ::std::string FormatDescription(bool negation) const {\
+        ::std::string gmock_description = (description);\
+        if (!gmock_description.empty()) {\
           return gmock_description;\
+        }\
         return ::testing::internal::FormatMatcherDescription(\
             negation, #name, \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(\
-                ::testing::tuple<$for j, [[p$j##_type]]>($for j, [[p$j]])));\
+                ::std::tuple<$for j, [[p$j##_type]]>($for j, [[p$j]])));\
       }\
-      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename arg_type>\
     operator ::testing::Matcher<arg_type>() const {\
@@ -656,14 +496,13 @@ $var param_field_decls2 = [[$for j
     [[$if i==1 [[explicit ]]]]$class_name($ctor_param_list)$inits {\
     }\$param_field_decls2
    private:\
-    GTEST_DISALLOW_ASSIGN_($class_name);\
   };\$template
   inline $class_name$param_types name($param_types_and_names) {\
     return $class_name$param_types($params);\
   }\$template
   template <typename arg_type>\
   bool $class_name$param_types::gmock_Impl<arg_type>::MatchAndExplain(\
-      arg_type arg, \
+      GTEST_REFERENCE_TO_CONST_(arg_type) arg,\
       ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_)\
           const
 ]]
