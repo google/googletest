@@ -707,6 +707,35 @@ bool Mock::VerifyAndClearExpectationsLocked(void* mock_obj)
   return expectations_met;
 }
 
+namespace {
+// checks whether the specified mock_obj has a registered call reaction
+bool HasCallReaction(void* mock_obj, internal::CallReaction reaction) {
+  using internal::CallReaction;
+
+  const auto found = g_uninteresting_call_reaction.find(mock_obj);
+  if (found == g_uninteresting_call_reaction.cend()) {
+    return internal::CallReaction::kDefault == reaction;
+  }
+  return found->second == reaction;
+}
+}
+
+bool Mock::IsNaggy(void* mock_obj)
+    GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
+  internal::MutexLock l(&internal::g_gmock_mutex);
+  return HasCallReaction(mock_obj, internal::CallReaction::kWarn);
+}
+bool Mock::IsNice(void* mock_obj)
+    GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
+  internal::MutexLock l(&internal::g_gmock_mutex);
+  return HasCallReaction(mock_obj, internal::CallReaction::kAllow);
+}
+bool Mock::IsStrict(void* mock_obj)
+    GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
+  internal::MutexLock l(&internal::g_gmock_mutex);
+  return HasCallReaction(mock_obj, internal::CallReaction::kFail);
+}
+
 // Registers a mock object and a mock method it owns.
 void Mock::Register(const void* mock_obj,
                     internal::UntypedFunctionMockerBase* mocker)
