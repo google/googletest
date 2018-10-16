@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Tests that Google Mock constructs can be used in a large number of
 // threads concurrently.
@@ -38,7 +37,7 @@
 namespace testing {
 namespace {
 
-// From <gtest/internal/gtest-port.h>.
+// From gtest-port.h.
 using ::testing::internal::ThreadWithParam;
 
 // The maximum number of test threads (not including helper threads)
@@ -51,7 +50,7 @@ const int kRepeat = 50;
 class MockFoo {
  public:
   MOCK_METHOD1(Bar, int(int n));  // NOLINT
-  MOCK_METHOD2(Baz, char(const char* s1, const internal::string& s2));  // NOLINT
+  MOCK_METHOD2(Baz, char(const char* s1, const std::string& s2));  // NOLINT
 };
 
 // Helper for waiting for the given thread to finish and then deleting it.
@@ -211,7 +210,7 @@ void TestConcurrentCallsOnSameObject(Dummy /* dummy */) {
   int count1 = 0;
   const Helper1Param param = { &foo, &count1 };
   ThreadWithParam<Helper1Param>* const t =
-      new ThreadWithParam<Helper1Param>(Helper1, param, NULL);
+      new ThreadWithParam<Helper1Param>(Helper1, param, nullptr);
 
   int count2 = 0;
   const Helper1Param param2 = { &foo, &count2 };
@@ -265,7 +264,7 @@ void TestPartiallyOrderedExpectationsWithThreads(Dummy /* dummy */) {
   foo.Bar(1);
 
   ThreadWithParam<MockFoo*>* const t =
-      new ThreadWithParam<MockFoo*>(Helper2, &foo, NULL);
+      new ThreadWithParam<MockFoo*>(Helper2, &foo, nullptr);
   Helper2(&foo);
   JoinAndDelete(t);
 
@@ -289,8 +288,8 @@ TEST(StressTest, CanUseGMockWithThreads) {
   ThreadWithParam<Dummy>* threads[kTestThreads] = {};
   for (int i = 0; i < kTestThreads; i++) {
     // Creates a thread to run the test function.
-    threads[i] =
-        new ThreadWithParam<Dummy>(test_routines[i % kRoutines], Dummy(), NULL);
+    threads[i] = new ThreadWithParam<Dummy>(test_routines[i % kRoutines],
+                                            Dummy(), nullptr);
     GTEST_LOG_(INFO) << "Thread #" << i << " running . . .";
   }
 

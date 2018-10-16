@@ -18,10 +18,11 @@ You must always put a mock method definition (`MOCK_METHOD*`) in a
 `public:` section of the mock class, regardless of the method being
 mocked being `public`, `protected`, or `private` in the base class.
 This allows `ON_CALL` and `EXPECT_CALL` to reference the mock function
-from outside of the mock class.  (Yes, C++ allows a subclass to change
-the access level of a virtual function in the base class.)  Example:
+from outside of the mock class.  (Yes, C++ allows a subclass to specify
+a different access level than the base class on a virtual function.)
+Example:
 
-```
+```cpp
 class Foo {
  public:
   ...
@@ -50,7 +51,7 @@ class MockFoo : public Foo {
 
 You can mock overloaded functions as usual. No special attention is required:
 
-```
+```cpp
 class Foo {
   ...
 
@@ -80,7 +81,7 @@ class MockFoo : public Foo {
 compiler will give you a warning about some methods in the base class
 being hidden. To fix that, use `using` to bring them in scope:
 
-```
+```cpp
 class MockFoo : public Foo {
   ...
   using Foo::Add;
@@ -94,7 +95,7 @@ class MockFoo : public Foo {
 
 To mock a class template, append `_T` to the `MOCK_*` macros:
 
-```
+```cpp
 template <typename Elem>
 class StackInterface {
   ...
@@ -123,7 +124,7 @@ class, your mock class will be _unrelated_ to the real class, but
 contain methods with the same signatures.  The syntax for mocking
 non-virtual methods is the _same_ as mocking virtual methods:
 
-```
+```cpp
 // A simple packet stream class.  None of its members is virtual.
 class ConcretePacketStream {
  public:
@@ -147,7 +148,7 @@ Note that the mock class doesn't define `AppendPacket()`, unlike the
 real class. That's fine as long as the test doesn't need to call it.
 
 Next, you need a way to say that you want to use
-`ConcretePacketStream` in production code, and use `MockPacketStream`
+`ConcretePacketStream` in production code and to use `MockPacketStream`
 in tests.  Since the functions are not virtual and the two classes are
 unrelated, you must specify your choice at _compile time_ (as opposed
 to run time).
@@ -159,7 +160,7 @@ instantiate your template with `ConcretePacketStream` as the type
 argument.  In tests, you will instantiate the same template with
 `MockPacketStream`.  For example, you may write:
 
-```
+```cpp
 template <class PacketStream>
 void CreateConnection(PacketStream* stream) { ... }
 
@@ -175,7 +176,7 @@ Then you can use `CreateConnection<ConcretePacketStream>()` and
 `CreateConnection<MockPacketStream>()` and
 `PacketReader<MockPacketStream>` in tests.
 
-```
+```cpp
   MockPacketStream mock_stream;
   EXPECT_CALL(mock_stream, ...)...;
   .. set more expectations on mock_stream ...
@@ -193,7 +194,7 @@ Instead of calling a free function (say, `OpenFile`) directly,
 introduce an interface for it and have a concrete subclass that calls
 the free function:
 
-```
+```cpp
 class FileInterface {
  public:
   ...
@@ -226,7 +227,7 @@ If a mock method has no `EXPECT_CALL` spec but is called, Google Mock
 will print a warning about the "uninteresting call". The rationale is:
 
   * New methods may be added to an interface after a test is written. We shouldn't fail a test just because a method it doesn't know about is called.
-  * However, this may also mean there's a bug in the test, so Google Mock shouldn't be silent either. If the user believes these calls are harmless, he can add an `EXPECT_CALL()` to suppress the warning.
+  * However, this may also mean there's a bug in the test, so Google Mock shouldn't be silent either. If the user believes these calls are harmless, they can add an `EXPECT_CALL()` to suppress the warning.
 
 However, sometimes you may want to suppress all "uninteresting call"
 warnings, while sometimes you may want the opposite, i.e. to treat all
@@ -235,7 +236,7 @@ per-mock-object basis.
 
 Suppose your test uses a mock class `MockFoo`:
 
-```
+```cpp
 TEST(...) {
   MockFoo mock_foo;
   EXPECT_CALL(mock_foo, DoThis());
@@ -248,7 +249,7 @@ reported by Google Mock as a warning. However, if you rewrite your
 test to use `NiceMock<MockFoo>` instead, the warning will be gone,
 resulting in a cleaner test output:
 
-```
+```cpp
 using ::testing::NiceMock;
 
 TEST(...) {
@@ -264,7 +265,7 @@ wherever `MockFoo` is accepted.
 It also works if `MockFoo`'s constructor takes some arguments, as
 `NiceMock<MockFoo>` "inherits" `MockFoo`'s constructors:
 
-```
+```cpp
 using ::testing::NiceMock;
 
 TEST(...) {
@@ -277,7 +278,7 @@ TEST(...) {
 The usage of `StrictMock` is similar, except that it makes all
 uninteresting calls failures:
 
-```
+```cpp
 using ::testing::StrictMock;
 
 TEST(...) {
@@ -294,7 +295,7 @@ There are some caveats though (I don't like them just as much as the
 next guy, but sadly they are side effects of C++'s limitations):
 
   1. `NiceMock<MockFoo>` and `StrictMock<MockFoo>` only work for mock methods defined using the `MOCK_METHOD*` family of macros **directly** in the `MockFoo` class. If a mock method is defined in a **base class** of `MockFoo`, the "nice" or "strict" modifier may not affect it, depending on the compiler. In particular, nesting `NiceMock` and `StrictMock` (e.g. `NiceMock<StrictMock<MockFoo> >`) is **not** supported.
-  1. The constructors of the base mock (`MockFoo`) cannot have arguments passed by non-const reference, which happens to be banned by the [Google C++ style guide](http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml).
+  1. The constructors of the base mock (`MockFoo`) cannot have arguments passed by non-const reference, which happens to be banned by the [Google C++ style guide](https://google.github.io/styleguide/cppguide.html).
   1. During the constructor or destructor of `MockFoo`, the mock object is _not_ nice or strict.  This may cause surprises if the constructor or destructor calls a mock method on `this` object. (This behavior, however, is consistent with C++'s general rule: if a constructor or destructor calls a virtual method of `this` object, that method is treated as non-virtual.  In other words, to the base class's constructor or destructor, `this` object behaves like an instance of the base class, not the derived class.  This rule is required for safety.  Otherwise a base constructor may use members of a derived class before they are initialized, or a base destructor may use members of a derived class after they have been destroyed.)
 
 Finally, you should be **very cautious** about when to use naggy or strict mocks, as they tend to make tests more brittle and harder to maintain. When you refactor your code without changing its externally visible behavior, ideally you should't need to update any tests. If your code interacts with a naggy mock, however, you may start to get spammed with warnings as the result of your change. Worse, if your code interacts with a strict mock, your tests may start to fail and you'll be forced to fix them. Our general recommendation is to use nice mocks (not yet the default) most of the time, use naggy mocks (the current default) when developing or debugging tests, and use strict mocks only as the last resort.
@@ -304,7 +305,7 @@ Finally, you should be **very cautious** about when to use naggy or strict mocks
 Sometimes a method has a long list of arguments that is mostly
 uninteresting. For example,
 
-```
+```cpp
 class LogSink {
  public:
   ...
@@ -323,7 +324,7 @@ it, which is often infeasible.
 
 The trick is to re-dispatch the method in the mock class:
 
-```
+```cpp
 class ScopedMockLog : public LogSink {
  public:
   ...
@@ -402,7 +403,7 @@ applicable in a wide variety of situations. :-)
 Some times you have a non-trivial fake implementation of an
 interface. For example:
 
-```
+```cpp
 class Foo {
  public:
   virtual ~Foo() {}
@@ -432,7 +433,7 @@ When you define the mock class using Google Mock, you can have it
 delegate its default action to a fake class you already have, using
 this pattern:
 
-```
+```cpp
 using ::testing::_;
 using ::testing::Invoke;
 
@@ -459,7 +460,7 @@ With that, you can use `MockFoo` in your tests as usual. Just remember
 that if you don't explicitly set an action in an `ON_CALL()` or
 `EXPECT_CALL()`, the fake will be called upon to do it:
 
-```
+```cpp
 using ::testing::_;
 
 TEST(AbcTest, Xyz) {
@@ -514,7 +515,7 @@ ability to validate calls. This technique is very similar to the
 delegating-to-fake technique, the difference being that we use a real
 object instead of a fake. Here's an example:
 
-```
+```cpp
 using ::testing::_;
 using ::testing::AtLeast;
 using ::testing::Invoke;
@@ -558,7 +559,7 @@ Ideally, you should code to interfaces, whose methods are all pure
 virtual. In reality, sometimes you do need to mock a virtual method
 that is not pure (i.e, it already has an implementation). For example:
 
-```
+```cpp
 class Foo {
  public:
   virtual ~Foo();
@@ -585,7 +586,7 @@ whenever you don't need to mock one of its methods).
 The trick is to leave a back door in your mock class for accessing the
 real methods in the base class:
 
-```
+```cpp
 class MockFoo : public Foo {
  public:
   // Mocking a pure method.
@@ -600,7 +601,7 @@ class MockFoo : public Foo {
 
 Now, you can call `Foo::Concrete()` inside an action by:
 
-```
+```cpp
 using ::testing::_;
 using ::testing::Invoke;
 ...
@@ -610,7 +611,7 @@ using ::testing::Invoke;
 
 or tell the mock object that you don't want to mock `Concrete()`:
 
-```
+```cpp
 using ::testing::Invoke;
 ...
   ON_CALL(foo, Concrete(_))
@@ -628,7 +629,7 @@ works.)
 
 You can specify exactly which arguments a mock method is expecting:
 
-```
+```cpp
 using ::testing::Return;
 ...
   EXPECT_CALL(foo, DoThis(5))
@@ -640,7 +641,7 @@ using ::testing::Return;
 
 You can use matchers to match arguments that have a certain property:
 
-```
+```cpp
 using ::testing::Ge;
 using ::testing::NotNull;
 using ::testing::Return;
@@ -653,7 +654,7 @@ using ::testing::Return;
 
 A frequently used matcher is `_`, which matches anything:
 
-```
+```cpp
 using ::testing::_;
 using ::testing::NotNull;
 ...
@@ -665,7 +666,7 @@ using ::testing::NotNull;
 You can build complex matchers from existing ones using `AllOf()`,
 `AnyOf()`, and `Not()`:
 
-```
+```cpp
 using ::testing::AllOf;
 using ::testing::Gt;
 using ::testing::HasSubstr;
@@ -705,11 +706,11 @@ type `m` accepts):
   1. When both `T` and `U` are built-in arithmetic types (`bool`, integers, and floating-point numbers), the conversion from `T` to `U` is not lossy (in other words, any value representable by `T` can also be represented by `U`); and
   1. When `U` is a reference, `T` must also be a reference (as the underlying matcher may be interested in the address of the `U` value).
 
-The code won't compile if any of these conditions isn't met.
+The code won't compile if any of these conditions aren't met.
 
 Here's one example:
 
-```
+```cpp
 using ::testing::SafeMatcherCast;
 
 // A base class and a child class.
@@ -743,7 +744,7 @@ need some help on which overloaded version it is.
 To disambiguate functions overloaded on the const-ness of this object,
 use the `Const()` argument wrapper.
 
-```
+```cpp
 using ::testing::ReturnRef;
 
 class MockFoo : public Foo {
@@ -770,7 +771,7 @@ of a matcher, either by wrapping your matcher in `Matcher<type>()`, or
 using a matcher whose type is fixed (`TypedEq<type>`, `An<type>()`,
 etc):
 
-```
+```cpp
 using ::testing::An;
 using ::testing::Lt;
 using ::testing::Matcher;
@@ -802,7 +803,7 @@ still active will be selected (think "newer overrides older"). So, you
 can make a method do different things depending on its argument values
 like this:
 
-```
+```cpp
 using ::testing::_;
 using ::testing::Lt;
 using ::testing::Return;
@@ -826,7 +827,7 @@ example, we may want to say that the first argument must be less than
 the second argument. The `With()` clause allows us to match
 all arguments of a mock function as a whole. For example,
 
-```
+```cpp
 using ::testing::_;
 using ::testing::Lt;
 using ::testing::Ne;
@@ -849,7 +850,7 @@ than `.With(Lt())`.
 You can use `Args<k1, ..., kn>(m)` to match the `n` selected arguments
 (as a tuple) against `m`. For example,
 
-```
+```cpp
 using ::testing::_;
 using ::testing::AllOf;
 using ::testing::Args;
@@ -881,7 +882,7 @@ participate.
 Luckily, you can use a matcher where a unary predicate functor is
 expected by wrapping it inside the `Matches()` function. For example,
 
-```
+```cpp
 #include <algorithm>
 #include <vector>
 
@@ -897,7 +898,7 @@ predicates (doing the same using STL's `<functional>` header is just
 painful). For example, here's a predicate that's satisfied by any
 number that is >= 0, <= 100, and != 50:
 
-```
+```cpp
 Matches(AllOf(Ge(0), Le(100), Ne(50)))
 ```
 
@@ -908,14 +909,14 @@ themselves, there is a way to take advantage of them in
 [Google Test](../../googletest/) assertions. It's
 called `ASSERT_THAT` and `EXPECT_THAT`:
 
-```
+```cpp
   ASSERT_THAT(value, matcher);  // Asserts that value matches matcher.
   EXPECT_THAT(value, matcher);  // The non-fatal version.
 ```
 
 For example, in a Google Test test you can write:
 
-```
+```cpp
 #include "gmock/gmock.h"
 
 using ::testing::AllOf;
@@ -959,7 +960,7 @@ as a matcher - as long as the predicate accepts a value of the type
 you want. You do this by wrapping the predicate inside the `Truly()`
 function, for example:
 
-```
+```cpp
 using ::testing::Truly;
 
 int IsEven(int n) { return (n % 2) == 0 ? 1 : 0; }
@@ -989,7 +990,7 @@ away from it if you can guarantee that `bar` won't be changed after
 the `EXPECT_CALL()` is executed. Just tell Google Mock that it should
 save a reference to `bar`, instead of a copy of it. Here's how:
 
-```
+```cpp
 using ::testing::Eq;
 using ::testing::ByRef;
 using ::testing::Lt;
@@ -1013,14 +1014,14 @@ you may need to validate a certain member variable or the result of a
 certain getter method of the object. You can do this with `Field()`
 and `Property()`. More specifically,
 
-```
+```cpp
 Field(&Foo::bar, m)
 ```
 
 is a matcher that matches a `Foo` object whose `bar` member variable
 satisfies matcher `m`.
 
-```
+```cpp
 Property(&Foo::baz, m)
 ```
 
@@ -1029,9 +1030,10 @@ a value that satisfies matcher `m`.
 
 For example:
 
-> | `Field(&Foo::number, Ge(3))` | Matches `x` where `x.number >= 3`. |
+| Expression                   | Description                        |
 |:-----------------------------|:-----------------------------------|
-> | `Property(&Foo::name, StartsWith("John "))` | Matches `x` where `x.name()` starts with `"John "`. |
+| `Field(&Foo::number, Ge(3))` | Matches `x` where `x.number >= 3`. |
+| `Property(&Foo::name, StartsWith("John "))` | Matches `x` where `x.name()` starts with `"John "`. |
 
 Note that in `Property(&Foo::baz, ...)`, method `baz()` must take no
 argument and be declared as `const`.
@@ -1039,7 +1041,7 @@ argument and be declared as `const`.
 BTW, `Field()` and `Property()` can also match plain pointers to
 objects. For instance,
 
-```
+```cpp
 Field(&Foo::number, Ge(3))
 ```
 
@@ -1060,7 +1062,7 @@ Well, you can use the `Pointee(m)` matcher.
 `Pointee(m)` matches a pointer iff `m` matches the value the pointer
 points to. For example:
 
-```
+```cpp
 using ::testing::Ge;
 using ::testing::Pointee;
 ...
@@ -1073,7 +1075,7 @@ greater than or equal to 3.
 One nice thing about `Pointee()` is that it treats a `NULL` pointer as
 a match failure, so you can write `Pointee(m)` instead of
 
-```
+```cpp
   AllOf(NotNull(), Pointee(m))
 ```
 
@@ -1100,7 +1102,7 @@ which has an `int bar()` method and an `int baz()` method, and you
 want to constrain that the argument's `bar()` value plus its `baz()`
 value is a given number. Here's how you can define a matcher to do it:
 
-```
+```cpp
 using ::testing::MatcherInterface;
 using ::testing::MatchResultListener;
 
@@ -1151,7 +1153,7 @@ container out-of-line is a bit of a hassle.
 You can use the `ElementsAre()` or `UnorderedElementsAre()` matcher in
 such cases:
 
-```
+```cpp
 using ::testing::_;
 using ::testing::ElementsAre;
 using ::testing::Gt;
@@ -1168,7 +1170,7 @@ must be 1, greater than 0, anything, and 5 respectively.
 
 If you instead write:
 
-```
+```cpp
 using ::testing::_;
 using ::testing::Gt;
 using ::testing::UnorderedElementsAre;
@@ -1188,7 +1190,7 @@ to 10 arguments. If more are needed, you can place them in a C-style
 array and use `ElementsAreArray()` or `UnorderedElementsAreArray()`
 instead:
 
-```
+```cpp
 using ::testing::ElementsAreArray;
 ...
 
@@ -1205,7 +1207,7 @@ In case the array needs to be dynamically created (and therefore the
 array size cannot be inferred by the compiler), you can give
 `ElementsAreArray()` an additional argument to specify the array size:
 
-```
+```cpp
 using ::testing::ElementsAreArray;
 ...
   int* const expected_vector3 = new int[count];
@@ -1229,10 +1231,10 @@ that references the implementation object dies, the implementation
 object will be deleted.
 
 Therefore, if you have some complex matcher that you want to use again
-and again, there is no need to build it everytime. Just assign it to a
+and again, there is no need to build it every time. Just assign it to a
 matcher variable and use that variable repeatedly! For example,
 
-```
+```cpp
   Matcher<int> in_range = AllOf(Gt(5), Le(10));
   ... use in_range as a matcher in multiple EXPECT_CALLs ...
 ```
@@ -1275,7 +1277,7 @@ any `EXPECT_CALL()` statement, it will be an error.
 
 If a mock method shouldn't be called at all, explicitly say so:
 
-```
+```cpp
 using ::testing::_;
 ...
   EXPECT_CALL(foo, Bar(_))
@@ -1285,7 +1287,7 @@ using ::testing::_;
 If some calls to the method are allowed, but the rest are not, just
 list all the expected calls:
 
-```
+```cpp
 using ::testing::AnyNumber;
 using ::testing::Gt;
 ...
@@ -1317,7 +1319,7 @@ A **strict mock** turns uninteresting call warnings into errors. So making a moc
 
 Let's look at an example:
 
-```
+```cpp
 TEST(...) {
   NiceMock<MockDomainRegistry> mock_registry;
   EXPECT_CALL(mock_registry, GetDomainOwner("google.com"))
@@ -1332,7 +1334,7 @@ The sole `EXPECT_CALL` here says that all calls to `GetDomainOwner()` must have 
 
 So how do we tell Google Mock that `GetDomainOwner()` can be called with some other arguments as well? The standard technique is to add a "catch all" `EXPECT_CALL`:
 
-```
+```cpp
   EXPECT_CALL(mock_registry, GetDomainOwner(_))
         .Times(AnyNumber());  // catches all other calls to this method.
   EXPECT_CALL(mock_registry, GetDomainOwner("google.com"))
@@ -1358,7 +1360,7 @@ If you would rather have all calls occur in the order of the
 expectations, put the `EXPECT_CALL()` statements in a block where you
 define a variable of type `InSequence`:
 
-```
+```cpp
   using ::testing::_;
   using ::testing::InSequence;
 
@@ -1401,7 +1403,7 @@ edge from node A to node B wherever A must occur before B, we can get
 a DAG. We use the term "sequence" to mean a directed path in this
 DAG. Now, if we decompose the DAG into sequences, we just need to know
 which sequences each `EXPECT_CALL()` belongs to in order to be able to
-reconstruct the orginal DAG.
+reconstruct the original DAG.
 
 So, to specify the partial order on the expectations we need to do two
 things: first to define some `Sequence` objects, and then for each
@@ -1409,7 +1411,7 @@ things: first to define some `Sequence` objects, and then for each
 of. Expectations in the same sequence must occur in the order they are
 written. For example,
 
-```
+```cpp
   using ::testing::Sequence;
 
   Sequence s1, s2;
@@ -1445,7 +1447,7 @@ that are still active. An expectation is active when created, and
 becomes inactive (aka _retires_) when a call that has to occur later
 has occurred. For example, in
 
-```
+```cpp
   using ::testing::_;
   using ::testing::Sequence;
 
@@ -1466,7 +1468,7 @@ as soon as either #2 or #3 is matched, #1 will retire. If a warning
 Note that an expectation doesn't retire automatically when it's
 saturated. For example,
 
-```
+```cpp
 using ::testing::_;
 ...
   EXPECT_CALL(log, Log(WARNING, _, _));                  // #1
@@ -1480,7 +1482,7 @@ match again and result in an upper-bound-violated error.
 If this is not what you want, you can ask an expectation to retire as
 soon as it becomes saturated:
 
-```
+```cpp
 using ::testing::_;
 ...
   EXPECT_CALL(log, Log(WARNING, _, _));                 // #1
@@ -1499,7 +1501,7 @@ will match #1 - there will be no error.
 If a mock function's return type is a reference, you need to use
 `ReturnRef()` instead of `Return()` to return a result:
 
-```
+```cpp
 using ::testing::ReturnRef;
 
 class MockFoo : public Foo {
@@ -1529,7 +1531,7 @@ as doing that usually indicates a user error. So, what shall you do?
 
 You may be tempted to try `ByRef()`:
 
-```
+```cpp
 using testing::ByRef;
 using testing::Return;
 
@@ -1566,7 +1568,7 @@ and `Return(ByRef(x))` will always return 0.
 specifically. It returns the value pointed to by `pointer` at the time
 the action is _executed_:
 
-```
+```cpp
 using testing::ReturnPointee;
 ...
   int x = 0;
@@ -1583,7 +1585,7 @@ Want to do more than one thing when a function is called? That's
 fine. `DoAll()` allow you to do sequence of actions every time. Only
 the return value of the last action in the sequence will be used.
 
-```
+```cpp
 using ::testing::DoAll;
 
 class MockFoo : public Foo {
@@ -1609,7 +1611,7 @@ define your own action by implementing `::testing::ActionInterface`.
 If all you need to do is to change an output argument, the built-in
 `SetArgPointee()` action is convenient:
 
-```
+```cpp
 using ::testing::SetArgPointee;
 
 class MockMutator : public Mutator {
@@ -1636,7 +1638,7 @@ constructor and assignment operator.
 If the mock method also needs to return a value as well, you can chain
 `SetArgPointee()` with `Return()` using `DoAll()`:
 
-```
+```cpp
 using ::testing::_;
 using ::testing::Return;
 using ::testing::SetArgPointee;
@@ -1659,7 +1661,7 @@ If the output argument is an array, use the
 elements in source range `[first, last)` to the array pointed to by
 the `N`-th (0-based) argument:
 
-```
+```cpp
 using ::testing::NotNull;
 using ::testing::SetArrayArgument;
 
@@ -1678,9 +1680,9 @@ class MockArrayMutator : public ArrayMutator {
 
 This also works when the argument is an output iterator:
 
-```
+```cpp
 using ::testing::_;
-using ::testing::SeArrayArgument;
+using ::testing::SetArrayArgument;
 
 class MockRolodex : public Rolodex {
  public:
@@ -1702,7 +1704,7 @@ class MockRolodex : public Rolodex {
 
 If you expect a call to change the behavior of a mock object, you can use `::testing::InSequence` to specify different behaviors before and after the call:
 
-```
+```cpp
 using ::testing::InSequence;
 using ::testing::Return;
 
@@ -1722,7 +1724,7 @@ This makes `my_mock.IsDirty()` return `true` before `my_mock.Flush()` is called 
 
 If the behavior change is more complex, you can store the effects in a variable and make a mock method get its return value from that variable:
 
-```
+```cpp
 using ::testing::_;
 using ::testing::SaveArg;
 using ::testing::Return;
@@ -1752,7 +1754,7 @@ to specify a default value for types Google Mock doesn't know
 about. You can do this using the `::testing::DefaultValue` class
 template:
 
-```
+```cpp
 class MockFoo : public Foo {
  public:
   MOCK_METHOD0(CalculateBar, Bar());
@@ -1788,7 +1790,7 @@ have two mock methods with the same return type and you want them to
 have different behaviors. The `ON_CALL()` macro allows you to
 customize your mock's behavior at the method level:
 
-```
+```cpp
 using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::Gt;
@@ -1821,7 +1823,7 @@ specialize the mock's behavior later.
 If the built-in actions don't suit you, you can easily use an existing
 function, method, or functor as an action:
 
-```
+```cpp
 using ::testing::_;
 using ::testing::Invoke;
 
@@ -1876,7 +1878,7 @@ tedious and obscures the intent of the test.
 that it doesn't pass the mock function's arguments to the
 callee. Here's an example:
 
-```
+```cpp
 using ::testing::_;
 using ::testing::InvokeWithoutArgs;
 
@@ -1900,7 +1902,7 @@ bool Job1() { ... }
 Sometimes a mock function will receive a function pointer or a functor
 (in other words, a "callable") as an argument, e.g.
 
-```
+```cpp
 class MockFoo : public Foo {
  public:
   MOCK_METHOD2(DoThis, bool(int n, bool (*fp)(int)));
@@ -1909,7 +1911,7 @@ class MockFoo : public Foo {
 
 and you may want to invoke this callable argument:
 
-```
+```cpp
 using ::testing::_;
 ...
   MockFoo foo;
@@ -1919,13 +1921,13 @@ using ::testing::_;
   // second argument DoThis() receives.
 ```
 
-Arghh, you need to refer to a mock function argument but C++ has no
-lambda (yet), so you have to define your own action. :-( Or do you
-really?
+Arghh, you need to refer to a mock function argument but your version
+of C++ has no lambdas, so you have to define your own action. :-(
+Or do you really?
 
 Well, Google Mock has an action to solve _exactly_ this problem:
 
-```
+```cpp
   InvokeArgument<N>(arg_1, arg_2, ..., arg_m)
 ```
 
@@ -1935,7 +1937,7 @@ a function pointer or a functor, Google Mock handles them both.
 
 With that, you could write:
 
-```
+```cpp
 using ::testing::_;
 using ::testing::InvokeArgument;
 ...
@@ -1948,7 +1950,7 @@ using ::testing::InvokeArgument;
 What if the callable takes an argument by reference? No problem - just
 wrap it inside `ByRef()`:
 
-```
+```cpp
 ...
   MOCK_METHOD1(Bar, bool(bool (*fp)(int, const Helper&)));
 ...
@@ -1972,7 +1974,7 @@ copy_ of the argument, and pass a _reference to the copy_, instead of
 a reference to the original value, to the callable. This is especially
 handy when the argument is a temporary value:
 
-```
+```cpp
 ...
   MOCK_METHOD1(DoThat, bool(bool (*f)(const double& x, const string& s)));
 ...
@@ -1999,7 +2001,7 @@ function that returns `void`, or perhaps it needs to be used in
 `DoAll()` and it's not the last in the list). `IgnoreResult()` lets
 you do that. For example:
 
-```
+```cpp
 using ::testing::_;
 using ::testing::Invoke;
 using ::testing::Return;
@@ -2036,7 +2038,7 @@ Say you have a mock function `Foo()` that takes seven arguments, and
 you have a custom action that you want to invoke when `Foo()` is
 called. Trouble is, the custom action only wants three arguments:
 
-```
+```cpp
 using ::testing::_;
 using ::testing::Invoke;
 ...
@@ -2058,7 +2060,7 @@ To please the compiler God, you can to define an "adaptor" that has
 the same signature as `Foo()` and calls the custom action with the
 right arguments:
 
-```
+```cpp
 using ::testing::_;
 using ::testing::Invoke;
 
@@ -2079,7 +2081,7 @@ Google Mock provides a generic _action adaptor_, so you can spend your
 time minding more important business than writing your own
 adaptors. Here's the syntax:
 
-```
+```cpp
   WithArgs<N1, N2, ..., Nk>(action)
 ```
 
@@ -2087,7 +2089,7 @@ creates an action that passes the arguments of the mock function at
 the given indices (0-based) to the inner `action` and performs
 it. Using `WithArgs`, our original example can be written as:
 
-```
+```cpp
 using ::testing::_;
 using ::testing::Invoke;
 using ::testing::WithArgs;
@@ -2127,14 +2129,14 @@ case the types of the uninteresting arguments change. It could also
 increase the chance the action function can be reused. For example,
 given
 
-```
+```cpp
   MOCK_METHOD3(Foo, double(const string& label, double x, double y));
   MOCK_METHOD3(Bar, double(int index, double x, double y));
 ```
 
 instead of
 
-```
+```cpp
 using ::testing::_;
 using ::testing::Invoke;
 
@@ -2155,7 +2157,7 @@ double DistanceToOriginWithIndex(int index, double x, double y) {
 
 you could write
 
-```
+```cpp
 using ::testing::_;
 using ::testing::Invoke;
 using ::testing::Unused;
@@ -2180,12 +2182,12 @@ the implementation object dies, the implementation object will be
 deleted.
 
 If you have some complex action that you want to use again and again,
-you may not have to build it from scratch everytime. If the action
+you may not have to build it from scratch every time. If the action
 doesn't have an internal state (i.e. if it always does the same thing
 no matter how many times it has been called), you can assign it to an
 action variable and use that variable repeatedly. For example:
 
-```
+```cpp
   Action<bool(int*)> set_flag = DoAll(SetArgPointee<0>(5),
                                       Return(true));
   ... use set_flag in .WillOnce() and .WillRepeatedly() ...
@@ -2198,7 +2200,7 @@ returns a counter whose initial value is `init`, using two actions
 created from the same expression and using a shared action will
 exihibit different behaviors. Example:
 
-```
+```cpp
   EXPECT_CALL(foo, DoThis())
       .WillRepeatedly(IncrementCounter(0));
   EXPECT_CALL(foo, DoThat())
@@ -2211,7 +2213,7 @@ exihibit different behaviors. Example:
 
 versus
 
-```
+```cpp
   Action<int()> increment = IncrementCounter(0);
 
   EXPECT_CALL(foo, DoThis())
@@ -2227,77 +2229,71 @@ versus
 
 ## Mocking Methods That Use Move-Only Types ##
 
-C++11 introduced <em>move-only types</em>.  A move-only-typed value can be moved from one object to another, but cannot be copied.  `std::unique_ptr<T>` is probably the most commonly used move-only type.
+C++11 introduced *move-only types*. A move-only-typed value can be moved from
+one object to another, but cannot be copied. `std::unique_ptr<T>` is
+probably the most commonly used move-only type.
 
-Mocking a method that takes and/or returns move-only types presents some challenges, but nothing insurmountable.  This recipe shows you how you can do it.
+Mocking a method that takes and/or returns move-only types presents some
+challenges, but nothing insurmountable. This recipe shows you how you can do it.
+Note that the support for move-only method arguments was only introduced to
+gMock in April 2017; in older code, you may find more complex
+[workarounds](#legacy-workarounds-for-move-only-types) for lack of this feature.
 
-Let’s say we are working on a fictional project that lets one post and share snippets called “buzzes”.  Your code uses these types:
+Let’s say we are working on a fictional project that lets one post and share
+snippets called “buzzes”. Your code uses these types:
 
-```
+```cpp
 enum class AccessLevel { kInternal, kPublic };
 
 class Buzz {
  public:
-  explicit Buzz(AccessLevel access) { … }
+  explicit Buzz(AccessLevel access) { ... }
   ...
 };
 
 class Buzzer {
  public:
   virtual ~Buzzer() {}
-  virtual std::unique_ptr<Buzz> MakeBuzz(const std::string& text) = 0;
-  virtual bool ShareBuzz(std::unique_ptr<Buzz> buzz, Time timestamp) = 0;
+  virtual std::unique_ptr<Buzz> MakeBuzz(StringPiece text) = 0;
+  virtual bool ShareBuzz(std::unique_ptr<Buzz> buzz, int64_t timestamp) = 0;
   ...
 };
 ```
 
-A `Buzz` object represents a snippet being posted.  A class that implements the `Buzzer` interface is capable of creating and sharing `Buzz`.  Methods in `Buzzer` may return a `unique_ptr<Buzz>` or take a `unique_ptr<Buzz>`.  Now we need to mock `Buzzer` in our tests.
+A `Buzz` object represents a snippet being posted. A class that implements the
+`Buzzer` interface is capable of creating and sharing `Buzz`es. Methods in
+`Buzzer` may return a `unique_ptr<Buzz>` or take a
+`unique_ptr<Buzz>`. Now we need to mock `Buzzer` in our tests.
 
-To mock a method that returns a move-only type, you just use the familiar `MOCK_METHOD` syntax as usual:
+To mock a method that accepts or returns move-only types, you just use the
+familiar `MOCK_METHOD` syntax as usual:
 
-```
+```cpp
 class MockBuzzer : public Buzzer {
  public:
-  MOCK_METHOD1(MakeBuzz, std::unique_ptr<Buzz>(const std::string& text));
-  …
+  MOCK_METHOD1(MakeBuzz, std::unique_ptr<Buzz>(StringPiece text));
+  MOCK_METHOD2(ShareBuzz, bool(std::unique_ptr<Buzz> buzz, int64_t timestamp));
 };
 ```
 
-However, if you attempt to use the same `MOCK_METHOD` pattern to mock a method that takes a move-only parameter, you’ll get a compiler error currently:
+Now that we have the mock class defined, we can use it in tests. In the
+following code examples, we assume that we have defined a `MockBuzzer` object
+named `mock_buzzer_`:
 
-```
-  // Does NOT compile!
-  MOCK_METHOD2(ShareBuzz, bool(std::unique_ptr<Buzz> buzz, Time timestamp));
-```
-
-While it’s highly desirable to make this syntax just work, it’s not trivial and the work hasn’t been done yet.  Fortunately, there is a trick you can apply today to get something that works nearly as well as this.
-
-The trick, is to delegate the `ShareBuzz()` method to a mock method (let’s call it `DoShareBuzz()`) that does not take move-only parameters:
-
-```
-class MockBuzzer : public Buzzer {
- public:
-  MOCK_METHOD1(MakeBuzz, std::unique_ptr<Buzz>(const std::string& text));
-  MOCK_METHOD2(DoShareBuzz, bool(Buzz* buzz, Time timestamp));
-  bool ShareBuzz(std::unique_ptr<Buzz> buzz, Time timestamp) {
-    return DoShareBuzz(buzz.get(), timestamp);
-  }
-};
-```
-
-Note that there's no need to define or declare `DoShareBuzz()` in a base class.  You only need to define it as a `MOCK_METHOD` in the mock class.
-
-Now that we have the mock class defined, we can use it in tests.  In the following code examples, we assume that we have defined a `MockBuzzer` object named `mock_buzzer_`:
-
-```
+```cpp
   MockBuzzer mock_buzzer_;
 ```
 
-First let’s see how we can set expectations on the `MakeBuzz()` method, which returns a `unique_ptr<Buzz>`.
+First let’s see how we can set expectations on the `MakeBuzz()` method, which
+returns a `unique_ptr<Buzz>`.
 
-As usual, if you set an expectation without an action (i.e. the `.WillOnce()` or `.WillRepeated()` clause), when that expectation fires, the default action for that method will be taken.  Since `unique_ptr<>` has a default constructor that returns a null `unique_ptr`, that’s what you’ll get if you don’t specify an action:
+As usual, if you set an expectation without an action (i.e. the `.WillOnce()` or
+`.WillRepeated()` clause), when that expectation fires, the default action for
+that method will be taken. Since `unique_ptr<>` has a default constructor
+that returns a null `unique_ptr`, that’s what you’ll get if you don’t specify an
+action:
 
-```
+```cpp
   // Use the default action.
   EXPECT_CALL(mock_buzzer_, MakeBuzz("hello"));
 
@@ -2305,32 +2301,13 @@ As usual, if you set an expectation without an action (i.e. the `.WillOnce()` or
   EXPECT_EQ(nullptr, mock_buzzer_.MakeBuzz("hello"));
 ```
 
-If you are not happy with the default action, you can tweak it.  Depending on what you need, you may either tweak the default action for a specific (mock object, mock method) combination using `ON_CALL()`, or you may tweak the default action for all mock methods that return a specific type.  The usage of `ON_CALL()` is similar to `EXPECT_CALL()`, so we’ll skip it and just explain how to do the latter (tweaking the default action for a specific return type).  You do this via the `DefaultValue<>::SetFactory()` and `DefaultValue<>::Clear()` API:
+If you are not happy with the default action, you can tweak it as usual; see
+[Setting Default Actions](#setting-the-default-actions-for-a-mock-method).
 
-```
-  // Sets the default action for return type std::unique_ptr<Buzz> to
-  // creating a new Buzz every time.
-  DefaultValue<std::unique_ptr<Buzz>>::SetFactory(
-      [] { return MakeUnique<Buzz>(AccessLevel::kInternal); });
+If you just need to return a pre-defined move-only value, you can use the
+`Return(ByMove(...))` action:
 
-  // When this fires, the default action of MakeBuzz() will run, which
-  // will return a new Buzz object.
-  EXPECT_CALL(mock_buzzer_, MakeBuzz("hello")).Times(AnyNumber());
-
-  auto buzz1 = mock_buzzer_.MakeBuzz("hello");
-  auto buzz2 = mock_buzzer_.MakeBuzz("hello");
-  EXPECT_NE(nullptr, buzz1);
-  EXPECT_NE(nullptr, buzz2);
-  EXPECT_NE(buzz1, buzz2);
-
-  // Resets the default action for return type std::unique_ptr<Buzz>,
-  // to avoid interfere with other tests.
-  DefaultValue<std::unique_ptr<Buzz>>::Clear();
-```
-
-What if you want the method to do something other than the default action?  If you just need to return a pre-defined move-only value, you can use the `Return(ByMove(...))` action:
-
-```
+```cpp
   // When this fires, the unique_ptr<> specified by ByMove(...) will
   // be returned.
   EXPECT_CALL(mock_buzzer_, MakeBuzz("world"))
@@ -2341,81 +2318,87 @@ What if you want the method to do something other than the default action?  If y
 
 Note that `ByMove()` is essential here - if you drop it, the code won’t compile.
 
-Quiz time!  What do you think will happen if a `Return(ByMove(...))` action is performed more than once (e.g. you write `….WillRepeatedly(Return(ByMove(...)));`)?  Come think of it, after the first time the action runs, the source value will be consumed (since it’s a move-only value), so the next time around, there’s no value to move from -- you’ll get a run-time error that `Return(ByMove(...))` can only be run once.
+Quiz time! What do you think will happen if a `Return(ByMove(...))` action is
+performed more than once (e.g. you write
+`.WillRepeatedly(Return(ByMove(...)));`)? Come think of it, after the first
+time the action runs, the source value will be consumed (since it’s a move-only
+value), so the next time around, there’s no value to move from -- you’ll get a
+run-time error that `Return(ByMove(...))` can only be run once.
 
-If you need your mock method to do more than just moving a pre-defined value, remember that you can always use `Invoke()` to call a lambda or a callable object, which can do pretty much anything you want:
+If you need your mock method to do more than just moving a pre-defined value,
+remember that you can always use a lambda or a callable object, which can do
+pretty much anything you want:
 
-```
+```cpp
   EXPECT_CALL(mock_buzzer_, MakeBuzz("x"))
-      .WillRepeatedly(Invoke([](const std::string& text) {
-        return std::make_unique<Buzz>(AccessLevel::kInternal);
-      }));
+      .WillRepeatedly([](StringPiece text) {
+        return MakeUnique<Buzz>(AccessLevel::kInternal);
+      });
 
   EXPECT_NE(nullptr, mock_buzzer_.MakeBuzz("x"));
   EXPECT_NE(nullptr, mock_buzzer_.MakeBuzz("x"));
 ```
 
-Every time this `EXPECT_CALL` fires, a new `unique_ptr<Buzz>` will be created and returned.  You cannot do this with `Return(ByMove(...))`.
+Every time this `EXPECT_CALL` fires, a new `unique_ptr<Buzz>` will be
+created and returned. You cannot do this with `Return(ByMove(...))`.
 
-Now there’s one topic we haven’t covered: how do you set expectations on `ShareBuzz()`, which takes a move-only-typed parameter?  The answer is you don’t.  Instead, you set expectations on the `DoShareBuzz()` mock method (remember that we defined a `MOCK_METHOD` for `DoShareBuzz()`, not `ShareBuzz()`):
+That covers returning move-only values; but how do we work with methods
+accepting move-only arguments? The answer is that they work normally, although
+some actions will not compile when any of method's arguments are move-only. You
+can always use `Return`, or a [lambda or functor](#using-functionsmethodsfunctors-as-actions):
 
+```cpp
+  using ::testing::Unused;
+
+  EXPECT_CALL(mock_buzzer_, ShareBuzz(NotNull(), _)) .WillOnce(Return(true));
+  EXPECT_TRUE(mock_buzzer_.ShareBuzz(MakeUnique<Buzz>(AccessLevel::kInternal)),
+              0);
+
+  EXPECT_CALL(mock_buzzer_, ShareBuzz(_, _)) .WillOnce(
+      [](std::unique_ptr<Buzz> buzz, Unused) { return buzz != nullptr; });
+  EXPECT_FALSE(mock_buzzer_.ShareBuzz(nullptr, 0));
 ```
+
+Many built-in actions (`WithArgs`, `WithoutArgs`,`DeleteArg`, `SaveArg`, ...)
+could in principle support move-only arguments, but the support for this is not
+implemented yet. If this is blocking you, please file a bug.
+
+A few actions (e.g. `DoAll`) copy their arguments internally, so they can never
+work with non-copyable objects; you'll have to use functors instead.
+
+##### Legacy workarounds for move-only types
+
+Support for move-only function arguments was only introduced to gMock in April
+2017. In older code, you may encounter the following workaround for the lack of
+this feature (it is no longer necessary - we're including it just for
+reference):
+
+```cpp
+class MockBuzzer : public Buzzer {
+ public:
+  MOCK_METHOD2(DoShareBuzz, bool(Buzz* buzz, Time timestamp));
+  bool ShareBuzz(std::unique_ptr<Buzz> buzz, Time timestamp) override {
+    return DoShareBuzz(buzz.get(), timestamp);
+  }
+};
+```
+
+The trick is to delegate the `ShareBuzz()` method to a mock method (let’s call
+it `DoShareBuzz()`) that does not take move-only parameters. Then, instead of
+setting expectations on `ShareBuzz()`, you set them on the `DoShareBuzz()` mock
+method:
+
+```cpp
+  MockBuzzer mock_buzzer_;
   EXPECT_CALL(mock_buzzer_, DoShareBuzz(NotNull(), _));
 
   // When one calls ShareBuzz() on the MockBuzzer like this, the call is
   // forwarded to DoShareBuzz(), which is mocked.  Therefore this statement
   // will trigger the above EXPECT_CALL.
-  mock_buzzer_.ShareBuzz(MakeUnique&lt;Buzz&gt;(AccessLevel::kInternal),
-                         ::base::Now());
+  mock_buzzer_.ShareBuzz(MakeUnique<Buzz>(AccessLevel::kInternal), 0);
 ```
 
-Some of you may have spotted one problem with this approach: the `DoShareBuzz()` mock method differs from the real `ShareBuzz()` method in that it cannot take ownership of the buzz parameter - `ShareBuzz()` will always delete buzz after `DoShareBuzz()` returns.  What if you need to save the buzz object somewhere for later use when `ShareBuzz()` is called?  Indeed, you'd be stuck.
 
-Another problem with the `DoShareBuzz()` we had is that it can surprise people reading or maintaining the test, as one would expect that `DoShareBuzz()` has (logically) the same contract as `ShareBuzz()`.
-
-Fortunately, these problems can be fixed with a bit more code.  Let's try to get it right this time:
-
-```
-class MockBuzzer : public Buzzer {
- public:
-  MockBuzzer() {
-    // Since DoShareBuzz(buzz, time) is supposed to take ownership of
-    // buzz, define a default behavior for DoShareBuzz(buzz, time) to
-    // delete buzz.
-    ON_CALL(*this, DoShareBuzz(_, _))
-        .WillByDefault(Invoke([](Buzz* buzz, Time timestamp) {
-          delete buzz;
-          return true;
-        }));
-  }
-
-  MOCK_METHOD1(MakeBuzz, std::unique_ptr<Buzz>(const std::string& text));
-
-  // Takes ownership of buzz.
-  MOCK_METHOD2(DoShareBuzz, bool(Buzz* buzz, Time timestamp));
-  bool ShareBuzz(std::unique_ptr<Buzz> buzz, Time timestamp) {
-    return DoShareBuzz(buzz.release(), timestamp);
-  }
-};
-```
-
-Now, the mock `DoShareBuzz()` method is free to save the buzz argument for later use if this is what you want:
-
-```
-  std::unique_ptr<Buzz> intercepted_buzz;
-  EXPECT_CALL(mock_buzzer_, DoShareBuzz(NotNull(), _))
-      .WillOnce(Invoke([&amp;intercepted_buzz](Buzz* buzz, Time timestamp) {
-        // Save buzz in intercepted_buzz for analysis later.
-        intercepted_buzz.reset(buzz);
-        return false;
-      }));
-
-  mock_buzzer_.ShareBuzz(std::make_unique<Buzz>(AccessLevel::kInternal),
-                         Now());
-  EXPECT_NE(nullptr, intercepted_buzz);
-```
-
-Using the tricks covered in this recipe, you are now able to mock methods that take and/or return move-only types.  Put your newly-acquired power to good use - when you design a new API, you can now feel comfortable using `unique_ptrs` as appropriate, without fearing that doing so will compromise your tests.
 
 ## Making the Compilation Faster ##
 
@@ -2437,7 +2420,7 @@ and destructor once, resulting in a much faster compilation.
 Let's illustrate the idea using an example. Here's the definition of a
 mock class before applying this recipe:
 
-```
+```cpp
 // File mock_foo.h.
 ...
 class MockFoo : public Foo {
@@ -2454,7 +2437,7 @@ class MockFoo : public Foo {
 
 After the change, it would look like:
 
-```
+```cpp
 // File mock_foo.h.
 ...
 class MockFoo : public Foo {
@@ -2469,7 +2452,7 @@ class MockFoo : public Foo {
 };
 ```
 and
-```
+```cpp
 // File mock_foo.cpp.
 #include "path/to/mock_foo.h"
 
@@ -2482,12 +2465,12 @@ MockFoo::~MockFoo() {}
 
 ## Forcing a Verification ##
 
-When it's being destoyed, your friendly mock object will automatically
+When it's being destroyed, your friendly mock object will automatically
 verify that all expectations on it have been satisfied, and will
 generate [Google Test](../../googletest/) failures
 if not. This is convenient as it leaves you with one less thing to
 worry about. That is, unless you are not sure if your mock object will
-be destoyed.
+be destroyed.
 
 How could it be that your mock object won't eventually be destroyed?
 Well, it might be created on the heap and owned by the code you are
@@ -2501,7 +2484,7 @@ to _force_ Google Mock to verify a mock object before it is
 (hopefully) destructed. You can do this with
 `Mock::VerifyAndClearExpectations(&mock_object)`:
 
-```
+```cpp
 TEST(MyServerTest, ProcessesRequest) {
   using ::testing::Mock;
 
@@ -2554,7 +2537,7 @@ function at specific places. Then you can verify that the mock
 function calls do happen at the right time. For example, if you are
 exercising code:
 
-```
+```cpp
 Foo(1);
 Foo(2);
 Foo(3);
@@ -2563,7 +2546,7 @@ Foo(3);
 and want to verify that `Foo(1)` and `Foo(3)` both invoke
 `mock.Bar("a")`, but `Foo(2)` doesn't invoke anything. You can write:
 
-```
+```cpp
 using ::testing::MockFunction;
 
 TEST(FooTest, InvokesBarCorrectly) {
@@ -2605,7 +2588,7 @@ This sounds simple, except for one problem: a destructor is a special
 function with special syntax and special semantics, and the
 `MOCK_METHOD0` macro doesn't work for it:
 
-```
+```cpp
   MOCK_METHOD0(~MockFoo, void());  // Won't compile!
 ```
 
@@ -2613,7 +2596,7 @@ The good news is that you can use a simple pattern to achieve the same
 effect. First, add a mock function `Die()` to your mock class and call
 it in the destructor, like this:
 
-```
+```cpp
 class MockFoo : public Foo {
   ...
   // Add the following two lines to the mock class.
@@ -2626,7 +2609,7 @@ class MockFoo : public Foo {
 name.) Now, we have translated the problem of testing when a `MockFoo`
 object dies to testing when its `Die()` method is called:
 
-```
+```cpp
   MockFoo* foo = new MockFoo;
   MockBar* bar = new MockBar;
   ...
@@ -2681,7 +2664,7 @@ behavior. That's not fun, so don't do it.
 Google Mock guarantees that the action for a mock function is done in
 the same thread that called the mock function. For example, in
 
-```
+```cpp
   EXPECT_CALL(mock, Foo(1))
       .WillOnce(action1);
   EXPECT_CALL(mock, Foo(2))
@@ -2732,7 +2715,7 @@ with three possible values:
 Alternatively, you can adjust the value of that flag from within your
 tests like so:
 
-```
+```cpp
   ::testing::FLAGS_gmock_verbose = "error";
 ```
 
@@ -2754,7 +2737,7 @@ which `EXPECT_CALL` Google Mock thinks it matches?
 You can unlock this power by running your test with the
 `--gmock_verbose=info` flag. For example, given the test program:
 
-```
+```cpp
 using testing::_;
 using testing::HasSubstr;
 using testing::Return;
@@ -2838,7 +2821,7 @@ and you should see an `OUTPUT_DIR` directory being created with files
 These three files contain everything you need to use Google Mock (and
 Google Test).  Just copy them to anywhere you want and you are ready
 to write tests and use mocks.  You can use the
-[scrpts/test/Makefile](../scripts/test/Makefile) file as an example on how to compile your tests
+[make/Makefile](../make/Makefile) file as an example on how to compile your tests
 against them.
 
 # Extending Google Mock #
@@ -2848,7 +2831,7 @@ against them.
 The `MATCHER*` family of macros can be used to define custom matchers
 easily.  The syntax:
 
-```
+```cpp
 MATCHER(name, description_string_expression) { statements; }
 ```
 
@@ -2869,16 +2852,16 @@ in which case Google Mock will use the sequence of words in the
 matcher name as the description.
 
 For example:
-```
+```cpp
 MATCHER(IsDivisibleBy7, "") { return (arg % 7) == 0; }
 ```
 allows you to write
-```
+```cpp
   // Expects mock_foo.Bar(n) to be called where n is divisible by 7.
   EXPECT_CALL(mock_foo, Bar(IsDivisibleBy7()));
 ```
 or,
-```
+```cpp
 using ::testing::Not;
 ...
   EXPECT_THAT(some_expression, IsDivisibleBy7());
@@ -2901,7 +2884,7 @@ by 7)"` are automatically calculated from the matcher name
 As you may have noticed, the auto-generated descriptions (especially
 those for the negation) may not be so great. You can always override
 them with a string expression of your own:
-```
+```cpp
 MATCHER(IsDivisibleBy7, std::string(negation ? "isn't" : "is") +
                         " divisible by 7") {
   return (arg % 7) == 0;
@@ -2911,7 +2894,7 @@ MATCHER(IsDivisibleBy7, std::string(negation ? "isn't" : "is") +
 Optionally, you can stream additional information to a hidden argument
 named `result_listener` to explain the match result. For example, a
 better definition of `IsDivisibleBy7` is:
-```
+```cpp
 MATCHER(IsDivisibleBy7, "") {
   if ((arg % 7) == 0)
     return true;
@@ -2944,18 +2927,18 @@ Google Mock already prints it for you.
 
 Sometimes you'll want to define a matcher that has parameters.  For that you
 can use the macro:
-```
+```cpp
 MATCHER_P(name, param_name, description_string) { statements; }
 ```
 where the description string can be either `""` or a string expression
 that references `negation` and `param_name`.
 
 For example:
-```
+```cpp
 MATCHER_P(HasAbsoluteValue, value, "") { return abs(arg) == value; }
 ```
 will allow you to write:
-```
+```cpp
   EXPECT_THAT(Blah("a"), HasAbsoluteValue(n));
 ```
 which may lead to this message (assuming `n` is 10):
@@ -2975,7 +2958,7 @@ body of `MATCHER_P(HasAbsoluteValue, value)` above, you can write
 
 Google Mock also provides `MATCHER_P2`, `MATCHER_P3`, ..., up to
 `MATCHER_P10` to support multi-parameter matchers:
-```
+```cpp
 MATCHER_Pk(name, param_1, ..., param_k, description_string) { statements; }
 ```
 
@@ -2987,7 +2970,7 @@ referencing the matcher parameters in the description string
 expression.
 
 For example,
-```
+```cpp
   using ::testing::PrintToString;
   MATCHER_P2(InClosedRange, low, hi,
              std::string(negation ? "isn't" : "is") + " in range [" +
@@ -3005,7 +2988,7 @@ would generate a failure that contains the message:
 If you specify `""` as the description, the failure message will
 contain the sequence of words in the matcher name followed by the
 parameter values printed as a tuple.  For example,
-```
+```cpp
   MATCHER_P2(InClosedRange, low, hi, "") { ... }
   ...
   EXPECT_THAT(3, InClosedRange(4, 6));
@@ -3016,11 +2999,11 @@ would generate a failure that contains the text:
 ```
 
 For the purpose of typing, you can view
-```
+```cpp
 MATCHER_Pk(Foo, p1, ..., pk, description_string) { ... }
 ```
 as shorthand for
-```
+```cpp
 template <typename p1_type, ..., typename pk_type>
 FooMatcherPk<p1_type, ..., pk_type>
 Foo(p1_type p1, ..., pk_type pk) { ... }
@@ -3049,7 +3032,7 @@ matcher you will see the value of the referenced object but not its
 address.
 
 You can overload matchers with different numbers of parameters:
-```
+```cpp
 MATCHER_P(Blah, a, description_string_1) { ... }
 MATCHER_P2(Blah, a, b, description_string_2) { ... }
 ```
@@ -3075,7 +3058,7 @@ error messages when expectations are violated.
 
 The interface looks like this:
 
-```
+```cpp
 class MatchResultListener {
  public:
   ...
@@ -3115,7 +3098,7 @@ strictly needed but it makes the syntax of using the matcher nicer.
 
 For example, you can define a matcher to test whether an `int` is
 divisible by 7 and then use it like this:
-```
+```cpp
 using ::testing::MakeMatcher;
 using ::testing::Matcher;
 using ::testing::MatcherInterface;
@@ -3147,7 +3130,7 @@ inline Matcher<int> DivisibleBy7() {
 You may improve the matcher message by streaming additional
 information to the `listener` argument in `MatchAndExplain()`:
 
-```
+```cpp
 class DivisibleBy7Matcher : public MatcherInterface<int> {
  public:
   virtual bool MatchAndExplain(int n,
@@ -3184,7 +3167,7 @@ Fortunately, most of the time you can define a polymorphic matcher
 easily with the help of `MakePolymorphicMatcher()`. Here's how you can
 define `NotNull()` as an example:
 
-```
+```cpp
 using ::testing::MakePolymorphicMatcher;
 using ::testing::MatchResultListener;
 using ::testing::NotNull;
@@ -3241,7 +3224,7 @@ If the built-in set of cardinalities doesn't suit you, you are free to
 define your own by implementing the following interface (in namespace
 `testing`):
 
-```
+```cpp
 class CardinalityInterface {
  public:
   virtual ~CardinalityInterface();
@@ -3260,7 +3243,7 @@ class CardinalityInterface {
 For example, to specify that a call must occur even number of times,
 you can write
 
-```
+```cpp
 using ::testing::Cardinality;
 using ::testing::CardinalityInterface;
 using ::testing::MakeCardinality;
@@ -3297,7 +3280,7 @@ family to quickly define a new action that can be used in your code as
 if it's a built-in action.
 
 By writing
-```
+```cpp
 ACTION(name) { statements; }
 ```
 in a namespace scope (i.e. not inside a class or function), you will
@@ -3305,11 +3288,11 @@ define an action with the given name that executes the statements.
 The value returned by `statements` will be used as the return value of
 the action.  Inside the statements, you can refer to the K-th
 (0-based) argument of the mock function as `argK`.  For example:
-```
+```cpp
 ACTION(IncrementArg1) { return ++(*arg1); }
 ```
 allows you to write
-```
+```cpp
 ... WillOnce(IncrementArg1());
 ```
 
@@ -3320,7 +3303,7 @@ operator, or if the type of `++(*arg1)` isn't compatible with the mock
 function's return type.
 
 Another example:
-```
+```cpp
 ACTION(Foo) {
   (*arg2)(5);
   Blah();
@@ -3335,18 +3318,19 @@ with 5, calls function `Blah()`, sets the value pointed to by argument
 For more convenience and flexibility, you can also use the following
 pre-defined symbols in the body of `ACTION`:
 
-| `argK_type` | The type of the K-th (0-based) argument of the mock function |
-|:------------|:-------------------------------------------------------------|
-| `args`      | All arguments of the mock function as a tuple                |
-| `args_type` | The type of all arguments of the mock function as a tuple    |
-| `return_type` | The return type of the mock function                         |
+| `argK_type`     | The type of the K-th (0-based) argument of the mock function |
+|:----------------|:-------------------------------------------------------------|
+| `args`          | All arguments of the mock function as a tuple                |
+| `args_type`     | The type of all arguments of the mock function as a tuple    |
+| `return_type`   | The return type of the mock function                         |
 | `function_type` | The type of the mock function                                |
 
 For example, when using an `ACTION` as a stub action for mock function:
-```
+```cpp
 int DoSomething(bool flag, int* ptr);
 ```
 we have:
+
 | **Pre-defined Symbol** | **Is Bound To** |
 |:-----------------------|:----------------|
 | `arg0`                 | the value of `flag` |
@@ -3362,16 +3346,16 @@ we have:
 
 Sometimes you'll want to parameterize an action you define.  For that
 we have another macro
-```
+```cpp
 ACTION_P(name, param) { statements; }
 ```
 
 For example,
-```
+```cpp
 ACTION_P(Add, n) { return arg0 + n; }
 ```
 will allow you to write
-```
+```cpp
 // Returns argument #0 + 5.
 ... WillOnce(Add(5));
 ```
@@ -3388,7 +3372,7 @@ parameter as inferred by the compiler.  For example, in the body of
 
 Google Mock also provides `ACTION_P2`, `ACTION_P3`, and etc to support
 multi-parameter actions.  For example,
-```
+```cpp
 ACTION_P2(ReturnDistanceTo, x, y) {
   double dx = arg0 - x;
   double dy = arg1 - y;
@@ -3396,7 +3380,7 @@ ACTION_P2(ReturnDistanceTo, x, y) {
 }
 ```
 lets you write
-```
+```cpp
 ... WillOnce(ReturnDistanceTo(5.0, 26.5));
 ```
 
@@ -3404,7 +3388,7 @@ You can view `ACTION` as a degenerated parameterized action where the
 number of parameters is 0.
 
 You can also easily define actions overloaded on the number of parameters:
-```
+```cpp
 ACTION_P(Plus, a) { ... }
 ACTION_P2(Plus, a, b) { ... }
 ```
@@ -3417,7 +3401,7 @@ parameters.  Instead, we let the compiler infer the types for us.
 
 Sometimes, however, we may want to be more explicit about the types.
 There are several tricks to do that.  For example:
-```
+```cpp
 ACTION(Foo) {
   // Makes sure arg0 can be converted to int.
   int n = arg0;
@@ -3443,7 +3427,7 @@ supports that and can be viewed as an extension to `ACTION()` and
 `ACTION_P*()`.
 
 The syntax:
-```
+```cpp
 ACTION_TEMPLATE(ActionName,
                 HAS_m_TEMPLATE_PARAMS(kind1, name1, ..., kind_m, name_m),
                 AND_n_VALUE_PARAMS(p1, ..., p_n)) { statements; }
@@ -3457,7 +3441,7 @@ integral constant, or a template.  `p_i` is the name of the i-th value
 parameter.
 
 Example:
-```
+```cpp
 // DuplicateArg<k, T>(output) converts the k-th argument of the mock
 // function to type T and copies it to *output.
 ACTION_TEMPLATE(DuplicateArg,
@@ -3469,13 +3453,13 @@ ACTION_TEMPLATE(DuplicateArg,
 ```
 
 To create an instance of an action template, write:
-```
+```cpp
   ActionName<t1, ..., t_m>(v1, ..., v_n)
 ```
 where the `t`s are the template arguments and the
 `v`s are the value arguments.  The value argument
 types are inferred by the compiler.  For example:
-```
+```cpp
 using ::testing::_;
 ...
   int n;
@@ -3485,7 +3469,7 @@ using ::testing::_;
 
 If you want to explicitly specify the value argument types, you can
 provide additional template arguments:
-```
+```cpp
   ActionName<t1, ..., t_m, u1, ..., u_k>(v1, ..., v_n)
 ```
 where `u_i` is the desired type of `v_i`.
@@ -3495,7 +3479,7 @@ number of value parameters, but not on the number of template
 parameters.  Without the restriction, the meaning of the following is
 unclear:
 
-```
+```cpp
   OverloadedAction<int, bool>(x);
 ```
 
@@ -3508,15 +3492,16 @@ is asked to infer the type of `x`?
 If you are writing a function that returns an `ACTION` object, you'll
 need to know its type.  The type depends on the macro used to define
 the action and the parameter types.  The rule is relatively simple:
+
 | **Given Definition** | **Expression** | **Has Type** |
 |:---------------------|:---------------|:-------------|
-| `ACTION(Foo)`        | `Foo()`        | `FooAction`  |
+| `ACTION(Foo)` | `Foo()` | `FooAction` |
 | `ACTION_TEMPLATE(Foo, HAS_m_TEMPLATE_PARAMS(...), AND_0_VALUE_PARAMS())` |	`Foo<t1, ..., t_m>()` | `FooAction<t1, ..., t_m>` |
 | `ACTION_P(Bar, param)` | `Bar(int_value)` | `BarActionP<int>` |
 | `ACTION_TEMPLATE(Bar, HAS_m_TEMPLATE_PARAMS(...), AND_1_VALUE_PARAMS(p1))` | `Bar<t1, ..., t_m>(int_value)` | `FooActionP<t1, ..., t_m, int>` |
 | `ACTION_P2(Baz, p1, p2)` | `Baz(bool_value, int_value)` | `BazActionP2<bool, int>` |
-| `ACTION_TEMPLATE(Baz, HAS_m_TEMPLATE_PARAMS(...), AND_2_VALUE_PARAMS(p1, p2))` | `Baz<t1, ..., t_m>(bool_value, int_value)` | `FooActionP2<t1, ..., t_m, bool, int>` |
-| ...                  | ...            | ...          |
+| `ACTION_TEMPLATE(Baz, HAS_m_TEMPLATE_PARAMS(...), AND_2_VALUE_PARAMS(p1, p2))`| `Baz<t1, ..., t_m>(bool_value, int_value)` | `FooActionP2<t1, ..., t_m, bool, int>` |
+| ... | ... | ... |
 
 Note that we have to pick different suffixes (`Action`, `ActionP`,
 `ActionP2`, and etc) for actions with different numbers of value
@@ -3537,7 +3522,7 @@ An alternative to the `ACTION*` macros is to implement
 `::testing::ActionInterface<F>`, where `F` is the type of the mock
 function in which the action will be used. For example:
 
-```
+```cpp
 template <typename F>class ActionInterface {
  public:
   virtual ~ActionInterface();
@@ -3589,7 +3574,7 @@ If an action can be used in several types of mock functions, we say
 it's _polymorphic_. The `MakePolymorphicAction()` function template
 makes it easy to define such an action:
 
-```
+```cpp
 namespace testing {
 
 template <typename Impl>
@@ -3602,7 +3587,7 @@ As an example, let's define an action that returns the second argument
 in the mock function's argument list. The first step is to define an
 implementation class:
 
-```
+```cpp
 class ReturnSecondArgumentAction {
  public:
   template <typename Result, typename ArgumentTuple>
@@ -3626,7 +3611,7 @@ Next, we use `MakePolymorphicAction()` to turn an instance of the
 implementation class into the polymorphic action we need. It will be
 convenient to have a wrapper for this:
 
-```
+```cpp
 using ::testing::MakePolymorphicAction;
 using ::testing::PolymorphicAction;
 
@@ -3638,7 +3623,7 @@ PolymorphicAction<ReturnSecondArgumentAction> ReturnSecondArgument() {
 Now, you can use this polymorphic action the same way you use the
 built-in ones:
 
-```
+```cpp
 using ::testing::_;
 
 class MockFoo : public Foo {
@@ -3670,6 +3655,6 @@ This printer knows how to print built-in C++ types, native arrays, STL
 containers, and any type that supports the `<<` operator.  For other
 types, it prints the raw bytes in the value and hopes that you the
 user can figure it out.
-[Google Test's advanced guide](../../googletest/docs/AdvancedGuide.md#teaching-google-test-how-to-print-your-values)
+[Google Test's advanced guide](../../googletest/docs/advanced.md#teaching-googletest-how-to-print-your-values)
 explains how to extend the printer to do a better job at
 printing your particular type than to dump the bytes.

@@ -28,8 +28,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // A sample program demonstrating using Google C++ testing framework.
-//
-// Author: wan@google.com (Zhanyong Wan)
 
 #include "sample1.h"
 
@@ -55,7 +53,7 @@ bool IsPrime(int n) {
 
   // Try to divide n by every odd number i, starting from 3
   for (int i = 3; ; i += 2) {
-    // We only have to try i up to the squre root of n
+    // We only have to try i up to the square root of n
     if (i > n/i) break;
 
     // Now, we have i <= n/i < n.

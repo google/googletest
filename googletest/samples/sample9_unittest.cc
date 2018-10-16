@@ -25,8 +25,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: vladl@google.com (Vlad Losev)
+
 
 // This sample shows how to use Google Test listener API to implement
 // an alternative console output and how to use the UnitTest reflection API
@@ -44,9 +43,7 @@ using ::testing::TestEventListeners;
 using ::testing::TestInfo;
 using ::testing::TestPartResult;
 using ::testing::UnitTest;
-
 namespace {
-
 // Provides alternative output mode which produces minimal amount of
 // information about tests.
 class TersePrinter : public EmptyTestEventListener {
@@ -102,7 +99,6 @@ TEST(CustomOutputTest, Fails) {
   EXPECT_EQ(1, 2)
       << "This test fails in order to demonstrate alternative failure messages";
 }
-
 }  // namespace
 
 int main(int argc, char **argv) {
