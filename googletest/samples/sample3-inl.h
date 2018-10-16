@@ -28,8 +28,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // A sample program demonstrating using Google C++ testing framework.
-//
-// Author: wan@google.com (Zhanyong Wan)
 
 #ifndef GTEST_SAMPLES_SAMPLE3_INL_H_
 #define GTEST_SAMPLES_SAMPLE3_INL_H_
@@ -60,7 +58,8 @@ class QueueNode {
  private:
   // Creates a node with a given element value.  The next pointer is
   // set to NULL.
-  explicit QueueNode(const E& an_element) : element_(an_element), next_(NULL) {}
+  explicit QueueNode(const E& an_element)
+      : element_(an_element), next_(nullptr) {}
 
   // We disable the default assignment operator and copy c'tor.
   const QueueNode& operator = (const QueueNode&);
@@ -74,7 +73,7 @@ template <typename E>  // E is the element type.
 class Queue {
  public:
   // Creates an empty queue.
-  Queue() : head_(NULL), last_(NULL), size_(0) {}
+  Queue() : head_(nullptr), last_(nullptr), size_(0) {}
 
   // D'tor.  Clears the queue.
   ~Queue() { Clear(); }
@@ -88,12 +87,12 @@ class Queue {
       for (; ;) {
         delete node;
         node = next;
-        if (node == NULL) break;
+        if (node == nullptr) break;
         next = node->next();
       }
 
       // 2. Resets the member variables.
-      head_ = last_ = NULL;
+      head_ = last_ = nullptr;
       size_ = 0;
     }
   }
@@ -130,14 +129,14 @@ class Queue {
   // the queue is empty.
   E* Dequeue() {
     if (size_ == 0) {
-      return NULL;
+      return nullptr;
     }
 
     const QueueNode<E>* const old_head = head_;
     head_ = head_->next_;
     size_--;
     if (size_ == 0) {
-      last_ = NULL;
+      last_ = nullptr;
     }
 
     E* element = new E(old_head->element());
@@ -152,7 +151,8 @@ class Queue {
   template <typename F>
   Queue* Map(F function) const {
     Queue* new_queue = new Queue();
-    for (const QueueNode<E>* node = head_; node != NULL; node = node->next_) {
+    for (const QueueNode<E>* node = head_; node != nullptr;
+         node = node->next_) {
       new_queue->Enqueue(function(node->element()));
     }
 
