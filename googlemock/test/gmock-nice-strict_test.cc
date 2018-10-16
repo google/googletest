@@ -186,7 +186,6 @@ TEST(RawMockTest, InfoForUninterestingCall) {
 
 TEST(RawMockTest, IsNaggy_IsNice_IsStrict) {
   MockFoo raw_foo;
-  ASSERT_EQ(internal::kDefault, internal::kWarn) << "precondition";
   EXPECT_TRUE (Mock::IsNaggy(&raw_foo));
   EXPECT_FALSE(Mock::IsNice(&raw_foo));
   EXPECT_FALSE(Mock::IsStrict(&raw_foo));
