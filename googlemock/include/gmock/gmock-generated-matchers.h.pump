@@ -45,6 +45,7 @@ $$ }} This line fixes auto-indentation of the following code in Emacs.
 #include <iterator>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 #include "gmock/gmock-matchers.h"
 
@@ -442,8 +443,8 @@ $var template = [[$if i==0 [[]] $else [[
 ]]]]
 $var ctor_param_list = [[$for j, [[p$j##_type gmock_p$j]]]]
 $var impl_ctor_param_list = [[$for j, [[p$j##_type gmock_p$j]]]]
-$var impl_inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(::testing::internal::move(gmock_p$j))]]]]]]
-$var inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(::testing::internal::move(gmock_p$j))]]]]]]
+$var impl_inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(::std::move(gmock_p$j))]]]]]]
+$var inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(::std::move(gmock_p$j))]]]]]]
 $var params = [[$for j, [[p$j]]]]
 $var param_types = [[$if i==0 [[]] $else [[<$for j, [[p$j##_type]]>]]]]
 $var param_types_and_names = [[$for j, [[p$j##_type p$j]]]]
