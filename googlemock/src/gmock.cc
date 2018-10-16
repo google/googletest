@@ -26,15 +26,14 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 #include "gmock/gmock.h"
 #include "gmock/internal/gmock-port.h"
 
 namespace testing {
 
-// TODO(wan@google.com): support using environment variables to
+// FIXME: support using environment variables to
 // control the flag values, like what Google Test does.
 
 GMOCK_DEFINE_bool_(catch_leaked_mocks, true,
@@ -48,6 +47,13 @@ GMOCK_DEFINE_string_(verbose, internal::kWarningVerbosity,
                      "  warning - prints warnings and errors.\n"
                      "  error   - prints errors only.");
 
+GMOCK_DEFINE_int32_(default_mock_behavior, 1,
+                    "Controls the default behavior of mocks."
+                    "  Valid values:\n"
+                    "  0 - by default, mocks act as NiceMocks.\n"
+                    "  1 - by default, mocks act as NaggyMocks.\n"
+                    "  2 - by default, mocks act as StrictMocks.");
+
 namespace internal {
 
 // Parses a string as a command line flag.  The string should have the
@@ -59,12 +65,12 @@ static const char* ParseGoogleMockFlagValue(const char* str,
                                             const char* flag,
                                             bool def_optional) {
   // str and flag must not be NULL.
-  if (str == NULL || flag == NULL) return NULL;
+  if (str == nullptr || flag == nullptr) return nullptr;
 
   // The flag must start with "--gmock_".
   const std::string flag_str = std::string("--gmock_") + flag;
   const size_t flag_len = flag_str.length();
-  if (strncmp(str, flag_str.c_str(), flag_len) != 0) return NULL;
+  if (strncmp(str, flag_str.c_str(), flag_len) != 0) return nullptr;
 
   // Skips the flag name.
   const char* flag_end = str + flag_len;
@@ -77,7 +83,7 @@ static const char* ParseGoogleMockFlagValue(const char* str,
   // If def_optional is true and there are more characters after the
   // flag name, or if def_optional is false, there must be a '=' after
   // the flag name.
-  if (flag_end[0] != '=') return NULL;
+  if (flag_end[0] != '=') return nullptr;
 
   // Returns the string after "=".
   return flag_end + 1;
@@ -94,7 +100,7 @@ static bool ParseGoogleMockBoolFlag(const char* str, const char* flag,
   const char* const value_str = ParseGoogleMockFlagValue(str, flag, true);
 
   // Aborts if the parsing failed.
-  if (value_str == NULL) return false;
+  if (value_str == nullptr) return false;
 
   // Converts the string value to a bool.
   *value = !(*value_str == '0' || *value_str == 'f' || *value_str == 'F');
@@ -113,11 +119,24 @@ static bool ParseGoogleMockStringFlag(const char* str, const char* flag,
   const char* const value_str = ParseGoogleMockFlagValue(str, flag, false);
 
   // Aborts if the parsing failed.
-  if (value_str == NULL) return false;
+  if (value_str == nullptr) return false;
 
   // Sets *value to the value of the flag.
   *value = value_str;
   return true;
+}
+
+static bool ParseGoogleMockIntFlag(const char* str, const char* flag,
+                                   int* value) {
+  // Gets the value of the flag as a string.
+  const char* const value_str = ParseGoogleMockFlagValue(str, flag, true);
+
+  // Aborts if the parsing failed.
+  if (value_str == nullptr) return false;
+
+  // Sets *value to the value of the flag.
+  return ParseInt32(Message() << "The value of flag --" << flag,
+                    value_str, value);
 }
 
 // The internal implementation of InitGoogleMock().
@@ -138,7 +157,9 @@ void InitGoogleMockImpl(int* argc, CharType** argv) {
     // Do we see a Google Mock flag?
     if (ParseGoogleMockBoolFlag(arg, "catch_leaked_mocks",
                                 &GMOCK_FLAG(catch_leaked_mocks)) ||
-        ParseGoogleMockStringFlag(arg, "verbose", &GMOCK_FLAG(verbose))) {
+        ParseGoogleMockStringFlag(arg, "verbose", &GMOCK_FLAG(verbose)) ||
+        ParseGoogleMockIntFlag(arg, "default_mock_behavior",
+                               &GMOCK_FLAG(default_mock_behavior))) {
       // Yes.  Shift the remainder of the argv list left by one.  Note
       // that argv has (*argc + 1) elements, the last one always being
       // NULL.  The following loop moves the trailing NULL element as

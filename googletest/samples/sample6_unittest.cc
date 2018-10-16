@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // This sample shows how to test common properties of multiple
 // implementations of the same interface (aka interface tests).
@@ -36,7 +35,7 @@
 #include "prime_tables.h"
 
 #include "gtest/gtest.h"
-
+namespace {
 // First, we define some factory functions for creating instances of
 // the implementations.  You may be able to skip this step if all your
 // implementations can be constructed the same way.
@@ -222,3 +221,4 @@ INSTANTIATE_TYPED_TEST_CASE_P(OnTheFlyAndPreCalculated,    // Instance name
                               PrimeTableImplementations);  // Type list
 
 #endif  // GTEST_HAS_TYPED_TEST_P
+}  // namespace

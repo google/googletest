@@ -40,7 +40,7 @@ maintain.
 ## Highlights ##
 
   * The implementation is in a single Python script and thus ultra portable: no build or installation is needed and it works cross platforms.
-  * Pump tries to be smart with respect to [Google's style guide](http://code.google.com/p/google-styleguide/): it breaks long lines (easy to have when they are generated) at acceptable places to fit within 80 columns and indent the continuation lines correctly.
+  * Pump tries to be smart with respect to [Google's style guide](https://github.com/google/styleguide): it breaks long lines (easy to have when they are generated) at acceptable places to fit within 80 columns and indent the continuation lines correctly.
   * The format is human-readable and more concise than XML.
   * The format works relatively well with Emacs' C++ mode.
 
@@ -71,7 +71,7 @@ $if i == 0 [[
 
 will be translated by the Pump compiler to:
 
-```
+``` cpp
 // Foo0 does blah for 0-ary predicates.
 template <size_t N>
 class Foo0 {
@@ -107,7 +107,7 @@ $$ The text between i and [[ is the separator between iterations.
 
 will generate one of the following lines (without the comments), depending on the value of `n`:
 
-```
+``` cpp
 Func();              // If n is 0.
 Func(a1);            // If n is 1.
 Func(a1 + a2);       // If n is 2.
@@ -140,7 +140,7 @@ up in your output.
 
 ## Grammar ##
 
-```
+``` ebnf
 code ::= atomic_code*
 atomic_code ::= $var id = exp
     | $var id = [[ code ]]
@@ -169,7 +169,7 @@ improving Pump.
 
 ## Real Examples ##
 
-You can find real-world applications of Pump in [Google Test](http://www.google.com/codesearch?q=file%3A\.pump%24+package%3Ahttp%3A%2F%2Fgoogletest\.googlecode\.com) and [Google Mock](http://www.google.com/codesearch?q=file%3A\.pump%24+package%3Ahttp%3A%2F%2Fgooglemock\.googlecode\.com).  The source file `foo.h.pump` generates `foo.h`.
+You can find real-world applications of Pump in [Google Test](https://github.com/google/googletest/tree/master/googletest) and [Google Mock](https://github.com/google/googletest/tree/master/googlemock). The source file `foo.h.pump` generates `foo.h`.
 
 ## Tips ##
 

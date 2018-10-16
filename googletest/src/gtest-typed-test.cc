@@ -26,10 +26,10 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 #include "gtest/gtest-typed-test.h"
+
 #include "gtest/gtest.h"
 
 namespace testing {
@@ -48,7 +48,7 @@ static const char* SkipSpaces(const char* str) {
 static std::vector<std::string> SplitIntoTestNames(const char* src) {
   std::vector<std::string> name_vec;
   src = SkipSpaces(src);
-  for (; src != NULL; src = SkipComma(src)) {
+  for (; src != nullptr; src = SkipComma(src)) {
     name_vec.push_back(StripTrailingSpaces(GetPrefixUntilComma(src)));
   }
   return name_vec;

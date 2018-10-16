@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 // Tests Google Test's throw-on-failure mode with exceptions enabled.
 
@@ -64,8 +63,7 @@ void TestFailureThrowsRuntimeError() {
   try {
     EXPECT_EQ(2, 3) << "Expected failure";
   } catch(const std::runtime_error& e) {
-    if (strstr(e.what(), "Expected failure") != NULL)
-      return;
+    if (strstr(e.what(), "Expected failure") != nullptr) return;
 
     printf("%s",
            "A failed assertion did throw an exception of the right type, "
