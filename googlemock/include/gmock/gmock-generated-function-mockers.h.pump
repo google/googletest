@@ -42,6 +42,8 @@ $var n = 10  $$ The maximum arity we support.
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_FUNCTION_MOCKERS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_FUNCTION_MOCKERS_H_
 
+#include <utility>
+
 #include "gmock/gmock-spec-builders.h"
 #include "gmock/internal/gmock-internal-utils.h"
 
@@ -69,7 +71,7 @@ $for i [[
 $range j 1..i
 $var typename_As = [[$for j [[, typename A$j]]]]
 $var As = [[$for j, [[A$j]]]]
-$var as = [[$for j, [[internal::forward<A$j>(a$j)]]]]
+$var as = [[$for j, [[std::forward<A$j>(a$j)]]]]
 $var Aas = [[$for j, [[A$j a$j]]]]
 $var ms = [[$for j, [[m$j]]]]
 $var matchers = [[$for j, [[const Matcher<A$j>& m$j]]]]
@@ -184,7 +186,7 @@ $for i [[
 $range j 1..i
 $var arg_as = [[$for j, [[GMOCK_ARG_(tn, $j, __VA_ARGS__) gmock_a$j]]]]
 $var as = [[$for j, \
-  [[::testing::internal::forward<GMOCK_ARG_(tn, $j, __VA_ARGS__)>(gmock_a$j)]]]]
+  [[::std::forward<GMOCK_ARG_(tn, $j, __VA_ARGS__)>(gmock_a$j)]]]]
 $var matcher_arg_as = [[$for j, \
                      [[GMOCK_MATCHER_(tn, $j, __VA_ARGS__) gmock_a$j]]]]
 $var matcher_as = [[$for j, [[gmock_a$j]]]]

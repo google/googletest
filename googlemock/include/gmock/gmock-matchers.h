@@ -1717,7 +1717,7 @@ class AllOfMatcherImpl
     : public MatcherInterface<GTEST_REFERENCE_TO_CONST_(T)> {
  public:
   explicit AllOfMatcherImpl(std::vector<Matcher<T> > matchers)
-      : matchers_(internal::move(matchers)) {}
+      : matchers_(std::move(matchers)) {}
 
   virtual void DescribeTo(::std::ostream* os) const {
     *os << "(";
@@ -1791,7 +1791,7 @@ class VariadicMatcher {
   operator Matcher<T>() const {
     std::vector<Matcher<T> > values;
     CreateVariadicMatcher<T>(&values, std::integral_constant<size_t, 0>());
-    return Matcher<T>(new CombiningMatcher<T>(internal::move(values)));
+    return Matcher<T>(new CombiningMatcher<T>(std::move(values)));
   }
 
  private:
@@ -1824,7 +1824,7 @@ class AnyOfMatcherImpl
     : public MatcherInterface<GTEST_REFERENCE_TO_CONST_(T)> {
  public:
   explicit AnyOfMatcherImpl(std::vector<Matcher<T> > matchers)
-      : matchers_(internal::move(matchers)) {}
+      : matchers_(std::move(matchers)) {}
 
   virtual void DescribeTo(::std::ostream* os) const {
     *os << "(";
@@ -1965,7 +1965,7 @@ class MatcherAsPredicate {
 template <typename M>
 class PredicateFormatterFromMatcher {
  public:
-  explicit PredicateFormatterFromMatcher(M m) : matcher_(internal::move(m)) {}
+  explicit PredicateFormatterFromMatcher(M m) : matcher_(std::move(m)) {}
 
   // This template () operator allows a PredicateFormatterFromMatcher
   // object to act as a predicate-formatter suitable for using with
@@ -2009,7 +2009,7 @@ class PredicateFormatterFromMatcher {
 template <typename M>
 inline PredicateFormatterFromMatcher<M>
 MakePredicateFormatterFromMatcher(M matcher) {
-  return PredicateFormatterFromMatcher<M>(internal::move(matcher));
+  return PredicateFormatterFromMatcher<M>(std::move(matcher));
 }
 
 // Implements the polymorphic floating point equality matcher, which matches
@@ -2569,7 +2569,7 @@ template <typename Callable, typename InnerMatcher>
 class ResultOfMatcher {
  public:
   ResultOfMatcher(Callable callable, InnerMatcher matcher)
-      : callable_(internal::move(callable)), matcher_(internal::move(matcher)) {
+      : callable_(std::move(callable)), matcher_(std::move(matcher)) {
     CallableTraits<Callable>::CheckIsValid(callable_);
   }
 
@@ -4008,7 +4008,7 @@ template <typename T>
 class VariantMatcher {
  public:
   explicit VariantMatcher(::testing::Matcher<const T&> matcher)
-      : matcher_(internal::move(matcher)) {}
+      : matcher_(std::move(matcher)) {}
 
   template <typename Variant>
   bool MatchAndExplain(const Variant& value,
@@ -4504,7 +4504,7 @@ template <typename Callable, typename InnerMatcher>
 internal::ResultOfMatcher<Callable, InnerMatcher> ResultOf(
     Callable callable, InnerMatcher matcher) {
   return internal::ResultOfMatcher<Callable, InnerMatcher>(
-      internal::move(callable), internal::move(matcher));
+      std::move(callable), std::move(matcher));
 }
 
 // String matchers.

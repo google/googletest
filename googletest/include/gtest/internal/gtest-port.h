@@ -203,11 +203,6 @@
 //   GTEST_INTENTIONAL_CONST_COND_POP_  - finish code section where MSVC C4127
 //                                        is suppressed.
 //
-// C++11 feature wrappers:
-//
-//   testing::internal::forward - portability wrapper for std::forward.
-//   testing::internal::move  - portability wrapper for std::move.
-//
 // Synchronization:
 //   Mutex, MutexLock, ThreadLocal, GetThreadCount()
 //                            - synchronization primitives.
@@ -1256,28 +1251,6 @@ struct ConstRef<T&> { typedef T& type; };
 // The argument T must depend on some template parameters.
 #define GTEST_REFERENCE_TO_CONST_(T) \
   typename ::testing::internal::ConstRef<T>::type
-
-#if GTEST_HAS_STD_MOVE_
-using std::forward;
-using std::move;
-
-template <typename T>
-struct RvalueRef {
-  typedef T&& type;
-};
-#else  // GTEST_HAS_STD_MOVE_
-template <typename T>
-const T& move(const T& t) {
-  return t;
-}
-template <typename T>
-GTEST_ADD_REFERENCE_(T) forward(GTEST_ADD_REFERENCE_(T) t) { return t; }
-
-template <typename T>
-struct RvalueRef {
-  typedef const T& type;
-};
-#endif  // GTEST_HAS_STD_MOVE_
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 //
