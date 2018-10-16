@@ -707,31 +707,17 @@ bool Mock::VerifyAndClearExpectationsLocked(void* mock_obj)
   return expectations_met;
 }
 
-namespace {
-// checks whether the specified mock_obj has a registered call reaction
-bool HasCallReaction(void* mock_obj, internal::CallReaction reaction) {
-  const auto found = g_uninteresting_call_reaction.find(mock_obj);
-  if (found == g_uninteresting_call_reaction.cend()) {
-    return internal::kDefault == reaction;
-  }
-  return found->second == reaction;
-}
-}
-
 bool Mock::IsNaggy(void* mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
-  internal::MutexLock l(&internal::g_gmock_mutex);
-  return HasCallReaction(mock_obj, internal::kWarn);
+  return Mock::GetReactionOnUninterestingCalls(mock_obj) == internal::kWarn;
 }
 bool Mock::IsNice(void* mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
-  internal::MutexLock l(&internal::g_gmock_mutex);
-  return HasCallReaction(mock_obj, internal::kAllow);
+  return Mock::GetReactionOnUninterestingCalls(mock_obj) == internal::kAllow;
 }
 bool Mock::IsStrict(void* mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
-  internal::MutexLock l(&internal::g_gmock_mutex);
-  return HasCallReaction(mock_obj, internal::kFail);
+  return Mock::GetReactionOnUninterestingCalls(mock_obj) == internal::kFail;
 }
 
 // Registers a mock object and a mock method it owns.
