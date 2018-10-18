@@ -335,18 +335,11 @@ internal::ParamGenerator<typename Container::value_type> ValuesIn(
 //
 // INSTANTIATE_TEST_CASE_P(FloatingNumbers, BazTest, Values(1, 2, 3.5));
 //
-// Currently, Values() supports from 1 to $n parameters.
 //
-$range i 1..n
-$for i [[
-$range j 1..i
-
-template <$for j, [[typename T$j]]>
-internal::ValueArray$i<$for j, [[T$j]]> Values($for j, [[T$j v$j]]) {
-  return internal::ValueArray$i<$for j, [[T$j]]>($for j, [[v$j]]);
+template <typename... T>
+internal::ValueArray<T...> Values(T... v) {
+  return internal::ValueArray<T...>(std::move(v)...);
 }
-
-]]
 
 // Bool() allows generating tests with parameters in a set of (false, true).
 //
