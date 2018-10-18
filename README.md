@@ -123,6 +123,4 @@ package (as described below):
 ## Contributing change
 
 Please read the [`CONTRIBUTING.md`](CONTRIBUTING.md) for details on
-how to contribute to this project.
-
-Happy testing!
+how to contribute to this projec
