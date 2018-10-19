@@ -43,6 +43,8 @@ $$}} This meta comment fixes auto-indentation in editors.
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_ACTIONS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_ACTIONS_H_
 
+#include <utility>
+
 #include "gmock/gmock-actions.h"
 #include "gmock/internal/gmock-port.h"
 
@@ -63,19 +65,19 @@ $range j 1..i
 $var types = [[$for j [[, typename A$j]]]]
 $var as = [[$for j, [[A$j]]]]
 $var args = [[$if i==0 [[]] $else [[ args]]]]
-$var gets = [[$for j, [[get<$(j - 1)>(args)]]]]
+$var gets = [[$for j, [[std::get<$(j - 1)>(args)]]]]
 template <typename R$types>
-class InvokeHelper<R, ::testing::tuple<$as> > {
+class InvokeHelper<R, ::std::tuple<$as> > {
  public:
   template <typename Function>
-  static R Invoke(Function function, const ::testing::tuple<$as>&$args) {
+  static R Invoke(Function function, const ::std::tuple<$as>&$args) {
            return function($gets);
   }
 
   template <class Class, typename MethodPtr>
   static R InvokeMethod(Class* obj_ptr,
                         MethodPtr method_ptr,
-                        const ::testing::tuple<$as>&$args) {
+                        const ::std::tuple<$as>&$args) {
            return (obj_ptr->*method_ptr)($gets);
   }
 
@@ -83,7 +85,7 @@ class InvokeHelper<R, ::testing::tuple<$as> > {
 $if i <= max_callback_arity [[
   template <typename CallbackType>
   static R InvokeCallback(CallbackType* callback,
-                          const ::testing::tuple<$as>&$args) {
+                          const ::std::tuple<$as>&$args) {
            return callback->Run($gets);
   }
 ]] $else [[
@@ -122,7 +124,7 @@ class InvokeCallbackAction {
 // An INTERNAL macro for extracting the type of a tuple field.  It's
 // subject to change without notice - DO NOT USE IN USER CODE!
 #define GMOCK_FIELD_(Tuple, N) \
-    typename ::testing::tuple_element<N, Tuple>::type
+    typename ::std::tuple_element<N, Tuple>::type
 
 $range i 1..n
 
@@ -130,14 +132,14 @@ $range i 1..n
 // type of an n-ary function whose i-th (1-based) argument type is the
 // k{i}-th (0-based) field of ArgumentTuple, which must be a tuple
 // type, and whose return type is Result.  For example,
-//   SelectArgs<int, ::testing::tuple<bool, char, double, long>, 0, 3>::type
+//   SelectArgs<int, ::std::tuple<bool, char, double, long>, 0, 3>::type
 // is int(bool, long).
 //
 // SelectArgs<Result, ArgumentTuple, k1, k2, ..., k_n>::Select(args)
 // returns the selected fields (k1, k2, ..., k_n) of args as a tuple.
 // For example,
-//   SelectArgs<int, tuple<bool, char, double>, 2, 0>::Select(
-//       ::testing::make_tuple(true, 'a', 2.5))
+//   SelectArgs<int, std::tuple<bool, char, double>, 2, 0>::Select(
+//       ::std::make_tuple(true, 'a', 2.5))
 // returns tuple (2.5, true).
 //
 // The numbers in list k1, k2, ..., k_n must be >= 0, where n can be
@@ -150,7 +152,7 @@ class SelectArgs {
   typedef Result type($for i, [[GMOCK_FIELD_(ArgumentTuple, k$i)]]);
   typedef typename Function<type>::ArgumentTuple SelectedArgs;
   static SelectedArgs Select(const ArgumentTuple& args) {
-    return SelectedArgs($for i, [[get<k$i>(args)]]);
+    return SelectedArgs($for i, [[std::get<k$i>(args)]]);
   }
 };
 
@@ -166,7 +168,7 @@ class SelectArgs<Result, ArgumentTuple,
   typedef typename Function<type>::ArgumentTuple SelectedArgs;
   static SelectedArgs Select(const ArgumentTuple& [[]]
 $if i == 1 [[/* args */]] $else [[args]]) {
-    return SelectedArgs($for j1, [[get<k$j1>(args)]]);
+    return SelectedArgs($for j1, [[std::get<k$j1>(args)]]);
   }
 };
 
@@ -240,12 +242,12 @@ $range j 0..i-1
 ]]]]
 $range j 0..i-1
 $var As = [[$for j, [[A$j]]]]
-$var as = [[$for j, [[get<$j>(args)]]]]
+$var as = [[$for j, [[std::get<$j>(args)]]]]
 $range k 1..n-i
 $var eas = [[$for k, [[ExcessiveArg()]]]]
 $var arg_list = [[$if (i==0) | (i==n) [[$as$eas]] $else [[$as, $eas]]]]
 $template
-  static Result Perform(Impl* impl, const ::testing::tuple<$As>& args) {
+  static Result Perform(Impl* impl, const ::std::tuple<$As>& args) {
     return impl->template gmock_PerformImpl<$As>(args, $arg_list);
   }
 
@@ -395,8 +397,8 @@ $range j2 2..i
 //
 // MORE INFORMATION:
 //
-// To learn more about using these macros, please search for 'ACTION'
-// on https://github.com/google/googletest/blob/master/googlemock/docs/CookBook.md
+// To learn more about using these macros, please search for 'ACTION' on
+// https://github.com/google/googletest/blob/master/googlemock/docs/CookBook.md
 
 $range i 0..n
 $range k 0..n-1
@@ -432,7 +434,7 @@ $for k [[, \
 //   ACTION_TEMPLATE(DuplicateArg,
 //                   HAS_2_TEMPLATE_PARAMS(int, k, typename, T),
 //                   AND_1_VALUE_PARAMS(output)) {
-//     *output = T(::testing::get<k>(args));
+//     *output = T(::std::get<k>(args));
 //   }
 //   ...
 //     int n;
@@ -525,7 +527,7 @@ _VALUE_PARAMS($for j, [[p$j]]) $for j [[, typename p$j##_type]]
 $for i [[
 $range j 0..i-1
 #define GMOCK_INTERNAL_INIT_AND_$i[[]]_VALUE_PARAMS($for j, [[p$j]])\
-    ($for j, [[p$j##_type gmock_p$j]])$if i>0 [[ : ]]$for j, [[p$j(::testing::internal::move(gmock_p$j))]]
+    ($for j, [[p$j##_type gmock_p$j]])$if i>0 [[ : ]]$for j, [[p$j(::std::move(gmock_p$j))]]
 
 
 ]]
@@ -658,7 +660,7 @@ $var class_name = [[name##Action[[$if i==0 [[]] $elif i==1 [[P]]
 $range j 0..i-1
 $var ctor_param_list = [[$for j, [[p$j##_type gmock_p$j]]]]
 $var param_types_and_names = [[$for j, [[p$j##_type p$j]]]]
-$var inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(::testing::internal::forward<p$j##_type>(gmock_p$j))]]]]]]
+$var inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(::std::forward<p$j##_type>(gmock_p$j))]]]]]]
 $var param_field_decls = [[$for j
 [[
 
@@ -796,7 +798,7 @@ ACTION_TEMPLATE(InvokeArgument,
   using internal::invoke_argument::InvokeArgumentAdl;
   return InvokeArgumentAdl<return_type>(
       internal::invoke_argument::AdlTag(),
-      ::testing::get<k>(args)$for j [[, p$j]]);
+      ::std::get<k>(args)$for j [[, p$j]]);
 }
 
 ]]

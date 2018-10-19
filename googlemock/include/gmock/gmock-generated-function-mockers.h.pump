@@ -42,6 +42,8 @@ $var n = 10  $$ The maximum arity we support.
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_FUNCTION_MOCKERS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_FUNCTION_MOCKERS_H_
 
+#include <utility>
+
 #include "gmock/gmock-spec-builders.h"
 #include "gmock/internal/gmock-internal-utils.h"
 
@@ -69,7 +71,7 @@ $for i [[
 $range j 1..i
 $var typename_As = [[$for j [[, typename A$j]]]]
 $var As = [[$for j, [[A$j]]]]
-$var as = [[$for j, [[internal::forward<A$j>(a$j)]]]]
+$var as = [[$for j, [[std::forward<A$j>(a$j)]]]]
 $var Aas = [[$for j, [[A$j a$j]]]]
 $var ms = [[$for j, [[m$j]]]]
 $var matchers = [[$for j, [[const Matcher<A$j>& m$j]]]]
@@ -81,7 +83,7 @@ class FunctionMocker<R($As)> : public
   typedef typename internal::Function<F>::ArgumentTuple ArgumentTuple;
 
   MockSpec<F> With($matchers) {
-    return MockSpec<F>(this, ::testing::make_tuple($ms));
+    return MockSpec<F>(this, ::std::make_tuple($ms));
   }
 
   R Invoke($Aas) {
@@ -184,7 +186,7 @@ $for i [[
 $range j 1..i
 $var arg_as = [[$for j, [[GMOCK_ARG_(tn, $j, __VA_ARGS__) gmock_a$j]]]]
 $var as = [[$for j, \
-  [[::testing::internal::forward<GMOCK_ARG_(tn, $j, __VA_ARGS__)>(gmock_a$j)]]]]
+  [[::std::forward<GMOCK_ARG_(tn, $j, __VA_ARGS__)>(gmock_a$j)]]]]
 $var matcher_arg_as = [[$for j, \
                      [[GMOCK_MATCHER_(tn, $j, __VA_ARGS__) gmock_a$j]]]]
 $var matcher_as = [[$for j, [[gmock_a$j]]]]
@@ -194,7 +196,7 @@ $var anything_matchers = [[$for j, \
 #define GMOCK_METHOD$i[[]]_(tn, constness, ct, Method, ...) \
   GMOCK_RESULT_(tn, __VA_ARGS__) ct Method( \
       $arg_as) constness { \
-    GTEST_COMPILE_ASSERT_((::testing::tuple_size<                          \
+    GTEST_COMPILE_ASSERT_((::std::tuple_size<                          \
         tn ::testing::internal::Function<__VA_ARGS__>::ArgumentTuple>::value == $i), \
         this_method_does_not_take_$i[[]]_argument[[$if i != 1 [[s]]]]); \
     GMOCK_MOCKER_($i, constness, Method).SetOwnerAndName(this, #Method); \
