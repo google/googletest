@@ -41,6 +41,8 @@
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_ACTIONS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_ACTIONS_H_
 
+#include <utility>
+
 #include "gmock/gmock-actions.h"
 #include "gmock/internal/gmock-port.h"
 
@@ -1161,90 +1163,67 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
 #define GMOCK_INTERNAL_INIT_AND_0_VALUE_PARAMS()\
     ()
 #define GMOCK_INTERNAL_INIT_AND_1_VALUE_PARAMS(p0)\
-    (p0##_type gmock_p0) : p0(::testing::internal::move(gmock_p0))
+    (p0##_type gmock_p0) : p0(::std::move(gmock_p0))
 #define GMOCK_INTERNAL_INIT_AND_2_VALUE_PARAMS(p0, p1)\
-    (p0##_type gmock_p0, \
-        p1##_type gmock_p1) : p0(::testing::internal::move(gmock_p0)), \
-        p1(::testing::internal::move(gmock_p1))
+    (p0##_type gmock_p0, p1##_type gmock_p1) : p0(::std::move(gmock_p0)), \
+        p1(::std::move(gmock_p1))
 #define GMOCK_INTERNAL_INIT_AND_3_VALUE_PARAMS(p0, p1, p2)\
     (p0##_type gmock_p0, p1##_type gmock_p1, \
-        p2##_type gmock_p2) : p0(::testing::internal::move(gmock_p0)), \
-        p1(::testing::internal::move(gmock_p1)), \
-        p2(::testing::internal::move(gmock_p2))
+        p2##_type gmock_p2) : p0(::std::move(gmock_p0)), \
+        p1(::std::move(gmock_p1)), p2(::std::move(gmock_p2))
 #define GMOCK_INTERNAL_INIT_AND_4_VALUE_PARAMS(p0, p1, p2, p3)\
     (p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
-        p3##_type gmock_p3) : p0(::testing::internal::move(gmock_p0)), \
-        p1(::testing::internal::move(gmock_p1)), \
-        p2(::testing::internal::move(gmock_p2)), \
-        p3(::testing::internal::move(gmock_p3))
+        p3##_type gmock_p3) : p0(::std::move(gmock_p0)), \
+        p1(::std::move(gmock_p1)), p2(::std::move(gmock_p2)), \
+        p3(::std::move(gmock_p3))
 #define GMOCK_INTERNAL_INIT_AND_5_VALUE_PARAMS(p0, p1, p2, p3, p4)\
     (p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
-        p3##_type gmock_p3, \
-        p4##_type gmock_p4) : p0(::testing::internal::move(gmock_p0)), \
-        p1(::testing::internal::move(gmock_p1)), \
-        p2(::testing::internal::move(gmock_p2)), \
-        p3(::testing::internal::move(gmock_p3)), \
-        p4(::testing::internal::move(gmock_p4))
+        p3##_type gmock_p3, p4##_type gmock_p4) : p0(::std::move(gmock_p0)), \
+        p1(::std::move(gmock_p1)), p2(::std::move(gmock_p2)), \
+        p3(::std::move(gmock_p3)), p4(::std::move(gmock_p4))
 #define GMOCK_INTERNAL_INIT_AND_6_VALUE_PARAMS(p0, p1, p2, p3, p4, p5)\
     (p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
         p3##_type gmock_p3, p4##_type gmock_p4, \
-        p5##_type gmock_p5) : p0(::testing::internal::move(gmock_p0)), \
-        p1(::testing::internal::move(gmock_p1)), \
-        p2(::testing::internal::move(gmock_p2)), \
-        p3(::testing::internal::move(gmock_p3)), \
-        p4(::testing::internal::move(gmock_p4)), \
-        p5(::testing::internal::move(gmock_p5))
+        p5##_type gmock_p5) : p0(::std::move(gmock_p0)), \
+        p1(::std::move(gmock_p1)), p2(::std::move(gmock_p2)), \
+        p3(::std::move(gmock_p3)), p4(::std::move(gmock_p4)), \
+        p5(::std::move(gmock_p5))
 #define GMOCK_INTERNAL_INIT_AND_7_VALUE_PARAMS(p0, p1, p2, p3, p4, p5, p6)\
     (p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
         p3##_type gmock_p3, p4##_type gmock_p4, p5##_type gmock_p5, \
-        p6##_type gmock_p6) : p0(::testing::internal::move(gmock_p0)), \
-        p1(::testing::internal::move(gmock_p1)), \
-        p2(::testing::internal::move(gmock_p2)), \
-        p3(::testing::internal::move(gmock_p3)), \
-        p4(::testing::internal::move(gmock_p4)), \
-        p5(::testing::internal::move(gmock_p5)), \
-        p6(::testing::internal::move(gmock_p6))
+        p6##_type gmock_p6) : p0(::std::move(gmock_p0)), \
+        p1(::std::move(gmock_p1)), p2(::std::move(gmock_p2)), \
+        p3(::std::move(gmock_p3)), p4(::std::move(gmock_p4)), \
+        p5(::std::move(gmock_p5)), p6(::std::move(gmock_p6))
 #define GMOCK_INTERNAL_INIT_AND_8_VALUE_PARAMS(p0, p1, p2, p3, p4, p5, p6, p7)\
     (p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
         p3##_type gmock_p3, p4##_type gmock_p4, p5##_type gmock_p5, \
-        p6##_type gmock_p6, \
-        p7##_type gmock_p7) : p0(::testing::internal::move(gmock_p0)), \
-        p1(::testing::internal::move(gmock_p1)), \
-        p2(::testing::internal::move(gmock_p2)), \
-        p3(::testing::internal::move(gmock_p3)), \
-        p4(::testing::internal::move(gmock_p4)), \
-        p5(::testing::internal::move(gmock_p5)), \
-        p6(::testing::internal::move(gmock_p6)), \
-        p7(::testing::internal::move(gmock_p7))
+        p6##_type gmock_p6, p7##_type gmock_p7) : p0(::std::move(gmock_p0)), \
+        p1(::std::move(gmock_p1)), p2(::std::move(gmock_p2)), \
+        p3(::std::move(gmock_p3)), p4(::std::move(gmock_p4)), \
+        p5(::std::move(gmock_p5)), p6(::std::move(gmock_p6)), \
+        p7(::std::move(gmock_p7))
 #define GMOCK_INTERNAL_INIT_AND_9_VALUE_PARAMS(p0, p1, p2, p3, p4, p5, p6, \
     p7, p8)\
     (p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
         p3##_type gmock_p3, p4##_type gmock_p4, p5##_type gmock_p5, \
         p6##_type gmock_p6, p7##_type gmock_p7, \
-        p8##_type gmock_p8) : p0(::testing::internal::move(gmock_p0)), \
-        p1(::testing::internal::move(gmock_p1)), \
-        p2(::testing::internal::move(gmock_p2)), \
-        p3(::testing::internal::move(gmock_p3)), \
-        p4(::testing::internal::move(gmock_p4)), \
-        p5(::testing::internal::move(gmock_p5)), \
-        p6(::testing::internal::move(gmock_p6)), \
-        p7(::testing::internal::move(gmock_p7)), \
-        p8(::testing::internal::move(gmock_p8))
+        p8##_type gmock_p8) : p0(::std::move(gmock_p0)), \
+        p1(::std::move(gmock_p1)), p2(::std::move(gmock_p2)), \
+        p3(::std::move(gmock_p3)), p4(::std::move(gmock_p4)), \
+        p5(::std::move(gmock_p5)), p6(::std::move(gmock_p6)), \
+        p7(::std::move(gmock_p7)), p8(::std::move(gmock_p8))
 #define GMOCK_INTERNAL_INIT_AND_10_VALUE_PARAMS(p0, p1, p2, p3, p4, p5, p6, \
     p7, p8, p9)\
     (p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
         p3##_type gmock_p3, p4##_type gmock_p4, p5##_type gmock_p5, \
         p6##_type gmock_p6, p7##_type gmock_p7, p8##_type gmock_p8, \
-        p9##_type gmock_p9) : p0(::testing::internal::move(gmock_p0)), \
-        p1(::testing::internal::move(gmock_p1)), \
-        p2(::testing::internal::move(gmock_p2)), \
-        p3(::testing::internal::move(gmock_p3)), \
-        p4(::testing::internal::move(gmock_p4)), \
-        p5(::testing::internal::move(gmock_p5)), \
-        p6(::testing::internal::move(gmock_p6)), \
-        p7(::testing::internal::move(gmock_p7)), \
-        p8(::testing::internal::move(gmock_p8)), \
-        p9(::testing::internal::move(gmock_p9))
+        p9##_type gmock_p9) : p0(::std::move(gmock_p0)), \
+        p1(::std::move(gmock_p1)), p2(::std::move(gmock_p2)), \
+        p3(::std::move(gmock_p3)), p4(::std::move(gmock_p4)), \
+        p5(::std::move(gmock_p5)), p6(::std::move(gmock_p6)), \
+        p7(::std::move(gmock_p7)), p8(::std::move(gmock_p8)), \
+        p9(::std::move(gmock_p9))
 
 // Declares the fields for storing the value parameters.
 #define GMOCK_INTERNAL_DEFN_AND_0_VALUE_PARAMS()
@@ -1481,7 +1460,7 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
   class name##ActionP {\
    public:\
     explicit name##ActionP(p0##_type gmock_p0) : \
-        p0(::testing::internal::forward<p0##_type>(gmock_p0)) {}\
+        p0(::std::forward<p0##_type>(gmock_p0)) {}\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -1490,7 +1469,7 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       typedef typename ::testing::internal::Function<F>::ArgumentTuple\
           args_type;\
       explicit gmock_Impl(p0##_type gmock_p0) : \
-          p0(::testing::internal::forward<p0##_type>(gmock_p0)) {}\
+          p0(::std::forward<p0##_type>(gmock_p0)) {}\
       virtual return_type Perform(const args_type& args) {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
@@ -1533,8 +1512,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
   class name##ActionP2 {\
    public:\
     name##ActionP2(p0##_type gmock_p0, \
-        p1##_type gmock_p1) : p0(::testing::internal::forward<p0##_type>(gmock_p0)), \
-        p1(::testing::internal::forward<p1##_type>(gmock_p1)) {}\
+        p1##_type gmock_p1) : p0(::std::forward<p0##_type>(gmock_p0)), \
+        p1(::std::forward<p1##_type>(gmock_p1)) {}\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -1543,8 +1522,8 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       typedef typename ::testing::internal::Function<F>::ArgumentTuple\
           args_type;\
       gmock_Impl(p0##_type gmock_p0, \
-          p1##_type gmock_p1) : p0(::testing::internal::forward<p0##_type>(gmock_p0)), \
-          p1(::testing::internal::forward<p1##_type>(gmock_p1)) {}\
+          p1##_type gmock_p1) : p0(::std::forward<p0##_type>(gmock_p0)), \
+          p1(::std::forward<p1##_type>(gmock_p1)) {}\
       virtual return_type Perform(const args_type& args) {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
@@ -1590,9 +1569,9 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
   class name##ActionP3 {\
    public:\
     name##ActionP3(p0##_type gmock_p0, p1##_type gmock_p1, \
-        p2##_type gmock_p2) : p0(::testing::internal::forward<p0##_type>(gmock_p0)), \
-        p1(::testing::internal::forward<p1##_type>(gmock_p1)), \
-        p2(::testing::internal::forward<p2##_type>(gmock_p2)) {}\
+        p2##_type gmock_p2) : p0(::std::forward<p0##_type>(gmock_p0)), \
+        p1(::std::forward<p1##_type>(gmock_p1)), \
+        p2(::std::forward<p2##_type>(gmock_p2)) {}\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -1601,9 +1580,9 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       typedef typename ::testing::internal::Function<F>::ArgumentTuple\
           args_type;\
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, \
-          p2##_type gmock_p2) : p0(::testing::internal::forward<p0##_type>(gmock_p0)), \
-          p1(::testing::internal::forward<p1##_type>(gmock_p1)), \
-          p2(::testing::internal::forward<p2##_type>(gmock_p2)) {}\
+          p2##_type gmock_p2) : p0(::std::forward<p0##_type>(gmock_p0)), \
+          p1(::std::forward<p1##_type>(gmock_p1)), \
+          p2(::std::forward<p2##_type>(gmock_p2)) {}\
       virtual return_type Perform(const args_type& args) {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
@@ -1654,10 +1633,10 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
    public:\
     name##ActionP4(p0##_type gmock_p0, p1##_type gmock_p1, \
         p2##_type gmock_p2, \
-        p3##_type gmock_p3) : p0(::testing::internal::forward<p0##_type>(gmock_p0)), \
-        p1(::testing::internal::forward<p1##_type>(gmock_p1)), \
-        p2(::testing::internal::forward<p2##_type>(gmock_p2)), \
-        p3(::testing::internal::forward<p3##_type>(gmock_p3)) {}\
+        p3##_type gmock_p3) : p0(::std::forward<p0##_type>(gmock_p0)), \
+        p1(::std::forward<p1##_type>(gmock_p1)), \
+        p2(::std::forward<p2##_type>(gmock_p2)), \
+        p3(::std::forward<p3##_type>(gmock_p3)) {}\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -1666,10 +1645,10 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       typedef typename ::testing::internal::Function<F>::ArgumentTuple\
           args_type;\
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
-          p3##_type gmock_p3) : p0(::testing::internal::forward<p0##_type>(gmock_p0)), \
-          p1(::testing::internal::forward<p1##_type>(gmock_p1)), \
-          p2(::testing::internal::forward<p2##_type>(gmock_p2)), \
-          p3(::testing::internal::forward<p3##_type>(gmock_p3)) {}\
+          p3##_type gmock_p3) : p0(::std::forward<p0##_type>(gmock_p0)), \
+          p1(::std::forward<p1##_type>(gmock_p1)), \
+          p2(::std::forward<p2##_type>(gmock_p2)), \
+          p3(::std::forward<p3##_type>(gmock_p3)) {}\
       virtual return_type Perform(const args_type& args) {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
@@ -1726,11 +1705,11 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
    public:\
     name##ActionP5(p0##_type gmock_p0, p1##_type gmock_p1, \
         p2##_type gmock_p2, p3##_type gmock_p3, \
-        p4##_type gmock_p4) : p0(::testing::internal::forward<p0##_type>(gmock_p0)), \
-        p1(::testing::internal::forward<p1##_type>(gmock_p1)), \
-        p2(::testing::internal::forward<p2##_type>(gmock_p2)), \
-        p3(::testing::internal::forward<p3##_type>(gmock_p3)), \
-        p4(::testing::internal::forward<p4##_type>(gmock_p4)) {}\
+        p4##_type gmock_p4) : p0(::std::forward<p0##_type>(gmock_p0)), \
+        p1(::std::forward<p1##_type>(gmock_p1)), \
+        p2(::std::forward<p2##_type>(gmock_p2)), \
+        p3(::std::forward<p3##_type>(gmock_p3)), \
+        p4(::std::forward<p4##_type>(gmock_p4)) {}\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -1740,11 +1719,11 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
           args_type;\
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
           p3##_type gmock_p3, \
-          p4##_type gmock_p4) : p0(::testing::internal::forward<p0##_type>(gmock_p0)), \
-          p1(::testing::internal::forward<p1##_type>(gmock_p1)), \
-          p2(::testing::internal::forward<p2##_type>(gmock_p2)), \
-          p3(::testing::internal::forward<p3##_type>(gmock_p3)), \
-          p4(::testing::internal::forward<p4##_type>(gmock_p4)) {}\
+          p4##_type gmock_p4) : p0(::std::forward<p0##_type>(gmock_p0)), \
+          p1(::std::forward<p1##_type>(gmock_p1)), \
+          p2(::std::forward<p2##_type>(gmock_p2)), \
+          p3(::std::forward<p3##_type>(gmock_p3)), \
+          p4(::std::forward<p4##_type>(gmock_p4)) {}\
       virtual return_type Perform(const args_type& args) {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
@@ -1803,12 +1782,12 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
    public:\
     name##ActionP6(p0##_type gmock_p0, p1##_type gmock_p1, \
         p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
-        p5##_type gmock_p5) : p0(::testing::internal::forward<p0##_type>(gmock_p0)), \
-        p1(::testing::internal::forward<p1##_type>(gmock_p1)), \
-        p2(::testing::internal::forward<p2##_type>(gmock_p2)), \
-        p3(::testing::internal::forward<p3##_type>(gmock_p3)), \
-        p4(::testing::internal::forward<p4##_type>(gmock_p4)), \
-        p5(::testing::internal::forward<p5##_type>(gmock_p5)) {}\
+        p5##_type gmock_p5) : p0(::std::forward<p0##_type>(gmock_p0)), \
+        p1(::std::forward<p1##_type>(gmock_p1)), \
+        p2(::std::forward<p2##_type>(gmock_p2)), \
+        p3(::std::forward<p3##_type>(gmock_p3)), \
+        p4(::std::forward<p4##_type>(gmock_p4)), \
+        p5(::std::forward<p5##_type>(gmock_p5)) {}\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -1818,12 +1797,12 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
           args_type;\
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
           p3##_type gmock_p3, p4##_type gmock_p4, \
-          p5##_type gmock_p5) : p0(::testing::internal::forward<p0##_type>(gmock_p0)), \
-          p1(::testing::internal::forward<p1##_type>(gmock_p1)), \
-          p2(::testing::internal::forward<p2##_type>(gmock_p2)), \
-          p3(::testing::internal::forward<p3##_type>(gmock_p3)), \
-          p4(::testing::internal::forward<p4##_type>(gmock_p4)), \
-          p5(::testing::internal::forward<p5##_type>(gmock_p5)) {}\
+          p5##_type gmock_p5) : p0(::std::forward<p0##_type>(gmock_p0)), \
+          p1(::std::forward<p1##_type>(gmock_p1)), \
+          p2(::std::forward<p2##_type>(gmock_p2)), \
+          p3(::std::forward<p3##_type>(gmock_p3)), \
+          p4(::std::forward<p4##_type>(gmock_p4)), \
+          p5(::std::forward<p5##_type>(gmock_p5)) {}\
       virtual return_type Perform(const args_type& args) {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
@@ -1886,13 +1865,13 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
     name##ActionP7(p0##_type gmock_p0, p1##_type gmock_p1, \
         p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
         p5##_type gmock_p5, \
-        p6##_type gmock_p6) : p0(::testing::internal::forward<p0##_type>(gmock_p0)), \
-        p1(::testing::internal::forward<p1##_type>(gmock_p1)), \
-        p2(::testing::internal::forward<p2##_type>(gmock_p2)), \
-        p3(::testing::internal::forward<p3##_type>(gmock_p3)), \
-        p4(::testing::internal::forward<p4##_type>(gmock_p4)), \
-        p5(::testing::internal::forward<p5##_type>(gmock_p5)), \
-        p6(::testing::internal::forward<p6##_type>(gmock_p6)) {}\
+        p6##_type gmock_p6) : p0(::std::forward<p0##_type>(gmock_p0)), \
+        p1(::std::forward<p1##_type>(gmock_p1)), \
+        p2(::std::forward<p2##_type>(gmock_p2)), \
+        p3(::std::forward<p3##_type>(gmock_p3)), \
+        p4(::std::forward<p4##_type>(gmock_p4)), \
+        p5(::std::forward<p5##_type>(gmock_p5)), \
+        p6(::std::forward<p6##_type>(gmock_p6)) {}\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -1902,13 +1881,13 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
           args_type;\
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
           p3##_type gmock_p3, p4##_type gmock_p4, p5##_type gmock_p5, \
-          p6##_type gmock_p6) : p0(::testing::internal::forward<p0##_type>(gmock_p0)), \
-          p1(::testing::internal::forward<p1##_type>(gmock_p1)), \
-          p2(::testing::internal::forward<p2##_type>(gmock_p2)), \
-          p3(::testing::internal::forward<p3##_type>(gmock_p3)), \
-          p4(::testing::internal::forward<p4##_type>(gmock_p4)), \
-          p5(::testing::internal::forward<p5##_type>(gmock_p5)), \
-          p6(::testing::internal::forward<p6##_type>(gmock_p6)) {}\
+          p6##_type gmock_p6) : p0(::std::forward<p0##_type>(gmock_p0)), \
+          p1(::std::forward<p1##_type>(gmock_p1)), \
+          p2(::std::forward<p2##_type>(gmock_p2)), \
+          p3(::std::forward<p3##_type>(gmock_p3)), \
+          p4(::std::forward<p4##_type>(gmock_p4)), \
+          p5(::std::forward<p5##_type>(gmock_p5)), \
+          p6(::std::forward<p6##_type>(gmock_p6)) {}\
       virtual return_type Perform(const args_type& args) {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
@@ -1977,14 +1956,14 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
     name##ActionP8(p0##_type gmock_p0, p1##_type gmock_p1, \
         p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
         p5##_type gmock_p5, p6##_type gmock_p6, \
-        p7##_type gmock_p7) : p0(::testing::internal::forward<p0##_type>(gmock_p0)), \
-        p1(::testing::internal::forward<p1##_type>(gmock_p1)), \
-        p2(::testing::internal::forward<p2##_type>(gmock_p2)), \
-        p3(::testing::internal::forward<p3##_type>(gmock_p3)), \
-        p4(::testing::internal::forward<p4##_type>(gmock_p4)), \
-        p5(::testing::internal::forward<p5##_type>(gmock_p5)), \
-        p6(::testing::internal::forward<p6##_type>(gmock_p6)), \
-        p7(::testing::internal::forward<p7##_type>(gmock_p7)) {}\
+        p7##_type gmock_p7) : p0(::std::forward<p0##_type>(gmock_p0)), \
+        p1(::std::forward<p1##_type>(gmock_p1)), \
+        p2(::std::forward<p2##_type>(gmock_p2)), \
+        p3(::std::forward<p3##_type>(gmock_p3)), \
+        p4(::std::forward<p4##_type>(gmock_p4)), \
+        p5(::std::forward<p5##_type>(gmock_p5)), \
+        p6(::std::forward<p6##_type>(gmock_p6)), \
+        p7(::std::forward<p7##_type>(gmock_p7)) {}\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -1995,14 +1974,14 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
           p3##_type gmock_p3, p4##_type gmock_p4, p5##_type gmock_p5, \
           p6##_type gmock_p6, \
-          p7##_type gmock_p7) : p0(::testing::internal::forward<p0##_type>(gmock_p0)), \
-          p1(::testing::internal::forward<p1##_type>(gmock_p1)), \
-          p2(::testing::internal::forward<p2##_type>(gmock_p2)), \
-          p3(::testing::internal::forward<p3##_type>(gmock_p3)), \
-          p4(::testing::internal::forward<p4##_type>(gmock_p4)), \
-          p5(::testing::internal::forward<p5##_type>(gmock_p5)), \
-          p6(::testing::internal::forward<p6##_type>(gmock_p6)), \
-          p7(::testing::internal::forward<p7##_type>(gmock_p7)) {}\
+          p7##_type gmock_p7) : p0(::std::forward<p0##_type>(gmock_p0)), \
+          p1(::std::forward<p1##_type>(gmock_p1)), \
+          p2(::std::forward<p2##_type>(gmock_p2)), \
+          p3(::std::forward<p3##_type>(gmock_p3)), \
+          p4(::std::forward<p4##_type>(gmock_p4)), \
+          p5(::std::forward<p5##_type>(gmock_p5)), \
+          p6(::std::forward<p6##_type>(gmock_p6)), \
+          p7(::std::forward<p7##_type>(gmock_p7)) {}\
       virtual return_type Perform(const args_type& args) {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
@@ -2075,15 +2054,15 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
     name##ActionP9(p0##_type gmock_p0, p1##_type gmock_p1, \
         p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
         p5##_type gmock_p5, p6##_type gmock_p6, p7##_type gmock_p7, \
-        p8##_type gmock_p8) : p0(::testing::internal::forward<p0##_type>(gmock_p0)), \
-        p1(::testing::internal::forward<p1##_type>(gmock_p1)), \
-        p2(::testing::internal::forward<p2##_type>(gmock_p2)), \
-        p3(::testing::internal::forward<p3##_type>(gmock_p3)), \
-        p4(::testing::internal::forward<p4##_type>(gmock_p4)), \
-        p5(::testing::internal::forward<p5##_type>(gmock_p5)), \
-        p6(::testing::internal::forward<p6##_type>(gmock_p6)), \
-        p7(::testing::internal::forward<p7##_type>(gmock_p7)), \
-        p8(::testing::internal::forward<p8##_type>(gmock_p8)) {}\
+        p8##_type gmock_p8) : p0(::std::forward<p0##_type>(gmock_p0)), \
+        p1(::std::forward<p1##_type>(gmock_p1)), \
+        p2(::std::forward<p2##_type>(gmock_p2)), \
+        p3(::std::forward<p3##_type>(gmock_p3)), \
+        p4(::std::forward<p4##_type>(gmock_p4)), \
+        p5(::std::forward<p5##_type>(gmock_p5)), \
+        p6(::std::forward<p6##_type>(gmock_p6)), \
+        p7(::std::forward<p7##_type>(gmock_p7)), \
+        p8(::std::forward<p8##_type>(gmock_p8)) {}\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -2094,15 +2073,15 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
           p3##_type gmock_p3, p4##_type gmock_p4, p5##_type gmock_p5, \
           p6##_type gmock_p6, p7##_type gmock_p7, \
-          p8##_type gmock_p8) : p0(::testing::internal::forward<p0##_type>(gmock_p0)), \
-          p1(::testing::internal::forward<p1##_type>(gmock_p1)), \
-          p2(::testing::internal::forward<p2##_type>(gmock_p2)), \
-          p3(::testing::internal::forward<p3##_type>(gmock_p3)), \
-          p4(::testing::internal::forward<p4##_type>(gmock_p4)), \
-          p5(::testing::internal::forward<p5##_type>(gmock_p5)), \
-          p6(::testing::internal::forward<p6##_type>(gmock_p6)), \
-          p7(::testing::internal::forward<p7##_type>(gmock_p7)), \
-          p8(::testing::internal::forward<p8##_type>(gmock_p8)) {}\
+          p8##_type gmock_p8) : p0(::std::forward<p0##_type>(gmock_p0)), \
+          p1(::std::forward<p1##_type>(gmock_p1)), \
+          p2(::std::forward<p2##_type>(gmock_p2)), \
+          p3(::std::forward<p3##_type>(gmock_p3)), \
+          p4(::std::forward<p4##_type>(gmock_p4)), \
+          p5(::std::forward<p5##_type>(gmock_p5)), \
+          p6(::std::forward<p6##_type>(gmock_p6)), \
+          p7(::std::forward<p7##_type>(gmock_p7)), \
+          p8(::std::forward<p8##_type>(gmock_p8)) {}\
       virtual return_type Perform(const args_type& args) {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
@@ -2180,16 +2159,16 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
         p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
         p5##_type gmock_p5, p6##_type gmock_p6, p7##_type gmock_p7, \
         p8##_type gmock_p8, \
-        p9##_type gmock_p9) : p0(::testing::internal::forward<p0##_type>(gmock_p0)), \
-        p1(::testing::internal::forward<p1##_type>(gmock_p1)), \
-        p2(::testing::internal::forward<p2##_type>(gmock_p2)), \
-        p3(::testing::internal::forward<p3##_type>(gmock_p3)), \
-        p4(::testing::internal::forward<p4##_type>(gmock_p4)), \
-        p5(::testing::internal::forward<p5##_type>(gmock_p5)), \
-        p6(::testing::internal::forward<p6##_type>(gmock_p6)), \
-        p7(::testing::internal::forward<p7##_type>(gmock_p7)), \
-        p8(::testing::internal::forward<p8##_type>(gmock_p8)), \
-        p9(::testing::internal::forward<p9##_type>(gmock_p9)) {}\
+        p9##_type gmock_p9) : p0(::std::forward<p0##_type>(gmock_p0)), \
+        p1(::std::forward<p1##_type>(gmock_p1)), \
+        p2(::std::forward<p2##_type>(gmock_p2)), \
+        p3(::std::forward<p3##_type>(gmock_p3)), \
+        p4(::std::forward<p4##_type>(gmock_p4)), \
+        p5(::std::forward<p5##_type>(gmock_p5)), \
+        p6(::std::forward<p6##_type>(gmock_p6)), \
+        p7(::std::forward<p7##_type>(gmock_p7)), \
+        p8(::std::forward<p8##_type>(gmock_p8)), \
+        p9(::std::forward<p9##_type>(gmock_p9)) {}\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -2200,16 +2179,16 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
           p3##_type gmock_p3, p4##_type gmock_p4, p5##_type gmock_p5, \
           p6##_type gmock_p6, p7##_type gmock_p7, p8##_type gmock_p8, \
-          p9##_type gmock_p9) : p0(::testing::internal::forward<p0##_type>(gmock_p0)), \
-          p1(::testing::internal::forward<p1##_type>(gmock_p1)), \
-          p2(::testing::internal::forward<p2##_type>(gmock_p2)), \
-          p3(::testing::internal::forward<p3##_type>(gmock_p3)), \
-          p4(::testing::internal::forward<p4##_type>(gmock_p4)), \
-          p5(::testing::internal::forward<p5##_type>(gmock_p5)), \
-          p6(::testing::internal::forward<p6##_type>(gmock_p6)), \
-          p7(::testing::internal::forward<p7##_type>(gmock_p7)), \
-          p8(::testing::internal::forward<p8##_type>(gmock_p8)), \
-          p9(::testing::internal::forward<p9##_type>(gmock_p9)) {}\
+          p9##_type gmock_p9) : p0(::std::forward<p0##_type>(gmock_p0)), \
+          p1(::std::forward<p1##_type>(gmock_p1)), \
+          p2(::std::forward<p2##_type>(gmock_p2)), \
+          p3(::std::forward<p3##_type>(gmock_p3)), \
+          p4(::std::forward<p4##_type>(gmock_p4)), \
+          p5(::std::forward<p5##_type>(gmock_p5)), \
+          p6(::std::forward<p6##_type>(gmock_p6)), \
+          p7(::std::forward<p7##_type>(gmock_p7)), \
+          p8(::std::forward<p8##_type>(gmock_p8)), \
+          p9(::std::forward<p9##_type>(gmock_p9)) {}\
       virtual return_type Perform(const args_type& args) {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\

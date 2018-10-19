@@ -1031,6 +1031,18 @@ TEST_F(ParameterizedDeathTest, GetParamDiesFromTestF) {
 
 INSTANTIATE_TEST_CASE_P(RangeZeroToFive, ParameterizedDerivedTest, Range(0, 5));
 
+// Tests param generator working with Enums
+enum MyEnums {
+  ENUM1 = 1,
+  ENUM2 = 3,
+  ENUM3 = 8,
+};
+
+class MyEnumTest : public testing::TestWithParam<MyEnums> {};
+
+TEST_P(MyEnumTest, ChecksParamMoreThanZero) { EXPECT_GE(10, GetParam()); }
+INSTANTIATE_TEST_CASE_P(MyEnumTests, MyEnumTest,
+                        ::testing::Values(ENUM1, ENUM2, 0));
 
 int main(int argc, char **argv) {
   // Used in TestGenerationTest test case.

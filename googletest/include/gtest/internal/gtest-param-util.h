@@ -39,6 +39,7 @@
 
 #include <iterator>
 #include <set>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -48,7 +49,6 @@
 #include "gtest/gtest-printers.h"
 
 namespace testing {
-
 // Input to a parameterized test name generator, describing a test parameter.
 // Consists of the parameter value and the integer parameter index.
 template <class ParamType>
@@ -72,7 +72,29 @@ struct PrintToStringParamName {
 namespace internal {
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
-//
+// Utility Functions
+
+// Block of code creating for_each_in_tuple
+template <int... Is>
+struct sequence {};
+
+template <int N, int... Is>
+struct generate_sequence : generate_sequence<N - 1, N - 1, Is...> {};
+
+template <int... Is>
+struct generate_sequence<0, Is...> : sequence<Is...> {};
+
+template <typename T, typename F, int... Is>
+void ForEachInTupleImpl(T&& t, F f_gtest, sequence<Is...>) {
+  int l[] = {(f_gtest(std::get<Is>(t)), 0)...};
+  (void)l;  // silence "unused variable warning"
+}
+template <typename... T, typename F>
+void ForEachInTuple(const std::tuple<T...>& t, F f_gtest) {
+  internal::ForEachInTupleImpl(t, f_gtest,
+                               internal::generate_sequence<sizeof...(T)>());
+}
+
 // Outputs a message explaining invalid registration of different
 // fixture class for the same test case. This may happen when
 // TEST_P macro is used to define two tests with the same name
@@ -712,6 +734,43 @@ class ParameterizedTestCaseRegistry {
   TestCaseInfoContainer test_case_infos_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ParameterizedTestCaseRegistry);
+};
+
+}  // namespace internal
+
+// Forward declarations of ValuesIn(), which is implemented in
+// include/gtest/gtest-param-test.h.
+template <class Container>
+internal::ParamGenerator<typename Container::value_type> ValuesIn(
+    const Container& container);
+
+namespace internal {
+// Used in the Values() function to provide polymorphic capabilities.
+
+template <typename T>
+struct PushBack {
+  template <typename U>
+  void operator()(const U& u) {
+    v_.push_back(static_cast<T>(u));
+  }
+  std::vector<T>& v_;
+};
+
+template <typename... Ts>
+class ValueArray {
+ public:
+  ValueArray(Ts... v) : v_{std::move(v)...} {}
+
+  template <typename Tn>
+  operator ParamGenerator<Tn>() const {
+    std::vector<Tn> vc_accumulate;
+    PushBack<Tn> fnc{vc_accumulate};
+    ForEachInTuple(v_, fnc);
+    return ValuesIn(std::move(vc_accumulate));
+  }
+
+ private:
+  std::tuple<Ts...> v_;
 };
 
 }  // namespace internal
