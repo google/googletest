@@ -43,6 +43,7 @@
 
 #include <algorithm>
 #include <string>
+#include <utility>
 
 #include "gmock/internal/gmock-internal-utils.h"
 #include "gmock/internal/gmock-port.h"
@@ -439,7 +440,7 @@ class Action {
 //     template <typename Result, typename ArgumentTuple>
 //     Result Perform(const ArgumentTuple& args) const {
 //       // Processes the arguments and returns a result, using
-//       // tr1::get<N>(args) to get the N-th (0-based) argument in the tuple.
+//       // std::get<N>(args) to get the N-th (0-based) argument in the tuple.
 //     }
 //     ...
 //   };
@@ -527,7 +528,7 @@ class ActionAdaptor : public ActionInterface<F1> {
 // on return. Useful for move-only types, but could be used on any type.
 template <typename T>
 struct ByMoveWrapper {
-  explicit ByMoveWrapper(T value) : payload(internal::move(value)) {}
+  explicit ByMoveWrapper(T value) : payload(std::move(value)) {}
   T payload;
 };
 
@@ -564,7 +565,7 @@ class ReturnAction {
   // Constructs a ReturnAction object from the value to be returned.
   // 'value' is passed by value instead of by const reference in order
   // to allow Return("string literal") to compile.
-  explicit ReturnAction(R value) : value_(new R(internal::move(value))) {}
+  explicit ReturnAction(R value) : value_(new R(std::move(value))) {}
 
   // This template type conversion operator allows Return(x) to be
   // used in ANY function that returns x's type.
@@ -632,7 +633,7 @@ class ReturnAction {
       GTEST_CHECK_(!performed_)
           << "A ByMove() action should only be performed once.";
       performed_ = true;
-      return internal::move(wrapper_->payload);
+      return std::move(wrapper_->payload);
     }
 
    private:
@@ -838,7 +839,7 @@ class SetArgumentPointeeAction {
   template <typename Result, typename ArgumentTuple>
   void Perform(const ArgumentTuple& args) const {
     CompileAssertTypesEqual<void, Result>();
-    *::testing::get<N>(args) = value_;
+    *::std::get<N>(args) = value_;
   }
 
  private:
@@ -861,7 +862,7 @@ class SetArgumentPointeeAction<N, Proto, true> {
   template <typename Result, typename ArgumentTuple>
   void Perform(const ArgumentTuple& args) const {
     CompileAssertTypesEqual<void, Result>();
-    ::testing::get<N>(args)->CopyFrom(*proto_);
+    ::std::get<N>(args)->CopyFrom(*proto_);
   }
 
  private:
@@ -1116,7 +1117,7 @@ Action<To>::Action(const Action<From>& from)
 // will trigger a compiler error about using array as initializer.
 template <typename R>
 internal::ReturnAction<R> Return(R value) {
-  return internal::ReturnAction<R>(internal::move(value));
+  return internal::ReturnAction<R>(std::move(value));
 }
 
 // Creates an action that returns NULL.
@@ -1149,7 +1150,7 @@ inline internal::ReturnRefOfCopyAction<R> ReturnRefOfCopy(const R& x) {
 // invariant.
 template <typename R>
 internal::ByMoveWrapper<R> ByMove(R x) {
-  return internal::ByMoveWrapper<R>(internal::move(x));
+  return internal::ByMoveWrapper<R>(std::move(x));
 }
 
 // Creates an action that does the default action for the give mock function.

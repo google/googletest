@@ -80,7 +80,7 @@ TEST(GetCurrentDirTest, ReturnsCurrentDir) {
   const FilePath cwd = FilePath::GetCurrentDir();
   posix::ChDir(original_dir.c_str());
 
-# if GTEST_OS_WINDOWS
+# if GTEST_OS_WINDOWS || GTEST_OS_OS2
 
   // Skips the ":".
   const char* const cwd_without_drive = strchr(cwd.c_str(), ':');

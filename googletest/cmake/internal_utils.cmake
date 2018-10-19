@@ -148,7 +148,6 @@ macro(config_compiler_and_linker)
     "${CMAKE_CXX_FLAGS} ${cxx_base_flags} ${cxx_no_exception_flags}")
   set(cxx_default "${cxx_exception}")
   set(cxx_no_rtti "${cxx_default} ${cxx_no_rtti_flags}")
-  set(cxx_use_own_tuple "${cxx_default} -DGTEST_USE_OWN_TR1_TUPLE=1")
 
   # For building the gtest libraries.
   set(cxx_strict "${cxx_default} ${cxx_strict_flags}")
@@ -353,7 +352,7 @@ function(install_project)
         get_target_property(t_pdb_name_debug ${t} COMPILE_PDB_NAME_DEBUG)
         get_target_property(t_pdb_output_directory ${t} PDB_OUTPUT_DIRECTORY)
         install(FILES
-          "${t_pdb_output_directory}/\${CMAKE_INSTALL_CONFIG_NAME}/$<IF:$<CONFIG:Debug>,${t_pdb_name_debug},${t_pdb_name}>.pdb"
+          "${t_pdb_output_directory}/\${CMAKE_INSTALL_CONFIG_NAME}/$<$<CONFIG:Debug>:${t_pdb_name_debug}>$<$<NOT:$<CONFIG:Debug>>:${t_pdb_name}>.pdb"
           DESTINATION ${CMAKE_INSTALL_LIBDIR}
           OPTIONAL)
       endforeach()
