@@ -7,7 +7,7 @@
 **Future Plans**:
 * 1.8.x Release - [the 1.8.x](https://github.com/google/googletest/releases/tag/release-1.8.1) is the last release that works with pre-C++11 compilers. The 1.8.x will not accept any requests for any new features and any bugfix requests will only be accepted if proven "critical"
 * Post 1.8.x - work to improve/cleanup/pay technical debt. When this work is completed there will be a 1.9.x tagged release
-* Post 1.9.x googletest will follow [Abseil Live at Head philosophy](https://abseil.io/about/philosophy)
+* Post 1.9.x google test will follow [Abseil Live at Head philosophy](https://abseil.io/about/philosophy)
 
 
 Welcome to **Google Test**, Google's C++ test framework!
@@ -23,7 +23,7 @@ Getting started information for **Google Test** is available in the
 [Google Test Primer](googletest/docs/primer.md) documentation.
 
 **Google Mock** is an extension to Google Test for writing and using C++ mock
-classes.  See the separate [Google Mock documentation](googlemock/README.md).
+classes.  See the separate [Google Mock documentation](google mock/README.md).
 
 More detailed documentation for googletest (including build instructions) are
 in its interior [googletest/README.md](googletest/README.md) file.
@@ -70,7 +70,7 @@ the following notable projects:
 
 [GTest Runner](https://github.com/nholthaus/gtest-runner) is a Qt5 based automated test-runner and Graphical User Interface with powerful features for Windows and Linux platforms.
 
-[Google Test UI](https://github.com/ospector/gtest-gbar) is test runner that runs
+[Google Test UI](https://github.com/ospector/gtest-gbar) is a test runner that runs
 your test binary, allows you to track its progress via a progress bar, and
 displays a list of test failures. Clicking on one shows failure text. Google
 Test UI is written in C#.
@@ -91,7 +91,7 @@ Google Test is designed to have fairly minimal requirements to build
 and use with your projects, but there are some.  Currently, we support
 Linux, Windows, Mac OS X, and Cygwin.  We will also make our best
 effort to support other platforms (e.g. Solaris, AIX, and z/OS).
-However, since core members of the Google Test project have no access
+However, since the core members of the Google Test project have no access
 to these platforms, Google Test may have outstanding issues there.  If
 you notice any problems on your platform, please notify
 [googletestframework@googlegroups.com](https://groups.google.com/forum/#!forum/googletestframework). Patches for fixing them are
