@@ -39,6 +39,7 @@
 
 #include <iterator>
 #include <set>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -48,7 +49,6 @@
 #include "gtest/gtest-printers.h"
 
 namespace testing {
-
 // Input to a parameterized test name generator, describing a test parameter.
 // Consists of the parameter value and the integer parameter index.
 template <class ParamType>
@@ -72,7 +72,8 @@ struct PrintToStringParamName {
 namespace internal {
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
-//
+// Utility Functions
+
 // Outputs a message explaining invalid registration of different
 // fixture class for the same test case. This may happen when
 // TEST_P macro is used to define two tests with the same name
@@ -712,6 +713,36 @@ class ParameterizedTestCaseRegistry {
   TestCaseInfoContainer test_case_infos_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ParameterizedTestCaseRegistry);
+};
+
+}  // namespace internal
+
+// Forward declarations of ValuesIn(), which is implemented in
+// include/gtest/gtest-param-test.h.
+template <class Container>
+internal::ParamGenerator<typename Container::value_type> ValuesIn(
+    const Container& container);
+
+namespace internal {
+// Used in the Values() function to provide polymorphic capabilities.
+
+template <typename... Ts>
+class ValueArray {
+ public:
+  ValueArray(Ts... v) : v_{std::move(v)...} {}
+
+  template <typename T>
+  operator ParamGenerator<T>() const {  // NOLINT
+    return ValuesIn(MakeVector<T>(MakeIndexSequence<sizeof...(Ts)>()));
+  }
+
+ private:
+  template <typename T, size_t... I>
+  std::vector<T> MakeVector(IndexSequence<I...>) const {
+    return std::vector<T>{static_cast<T>(v_.template Get<I>())...};
+  }
+
+  FlatTuple<Ts...> v_;
 };
 
 }  // namespace internal
