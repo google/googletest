@@ -817,69 +817,47 @@ class SetArgumentPointeeAction<N, Proto, true> {
   GTEST_DISALLOW_ASSIGN_(SetArgumentPointeeAction);
 };
 
+// Implements the Invoke(object_ptr, &Class::Method) action.
+template <class Class, typename MethodPtr>
+struct InvokeMethodAction {
+  Class* const obj_ptr;
+  const MethodPtr method_ptr;
+
+  template <typename... Args>
+  auto operator()(Args&&... args) const
+      -> decltype((obj_ptr->*method_ptr)(std::forward<Args>(args)...)) {
+    return (obj_ptr->*method_ptr)(std::forward<Args>(args)...);
+  }
+};
+
 // Implements the InvokeWithoutArgs(f) action.  The template argument
 // FunctionImpl is the implementation type of f, which can be either a
 // function pointer or a functor.  InvokeWithoutArgs(f) can be used as an
-// Action<F> as long as f's type is compatible with F (i.e. f can be
-// assigned to a tr1::function<F>).
+// Action<F> as long as f's type is compatible with F.
 template <typename FunctionImpl>
-class InvokeWithoutArgsAction {
- public:
-  // The c'tor makes a copy of function_impl (either a function
-  // pointer or a functor).
-  explicit InvokeWithoutArgsAction(FunctionImpl function_impl)
-      : function_impl_(function_impl) {}
+struct InvokeWithoutArgsAction {
+  FunctionImpl function_impl;
 
   // Allows InvokeWithoutArgs(f) to be used as any action whose type is
   // compatible with f.
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple&) { return function_impl_(); }
-
- private:
-  FunctionImpl function_impl_;
-
-  GTEST_DISALLOW_ASSIGN_(InvokeWithoutArgsAction);
+  template <typename... Args>
+  auto operator()(const Args&...) -> decltype(function_impl()) {
+    return function_impl();
+  }
 };
 
 // Implements the InvokeWithoutArgs(object_ptr, &Class::Method) action.
 template <class Class, typename MethodPtr>
-class InvokeMethodWithoutArgsAction {
- public:
-  InvokeMethodWithoutArgsAction(Class* obj_ptr, MethodPtr method_ptr)
-      : obj_ptr_(obj_ptr), method_ptr_(method_ptr) {}
+struct InvokeMethodWithoutArgsAction {
+  Class* const obj_ptr;
+  const MethodPtr method_ptr;
 
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple&) const {
-    return (obj_ptr_->*method_ptr_)();
+  using ReturnType = typename std::result_of<MethodPtr(Class*)>::type;
+
+  template <typename... Args>
+  ReturnType operator()(const Args&...) const {
+    return (obj_ptr->*method_ptr)();
   }
-
- private:
-  Class* const obj_ptr_;
-  const MethodPtr method_ptr_;
-
-  GTEST_DISALLOW_ASSIGN_(InvokeMethodWithoutArgsAction);
-};
-
-// Implements the InvokeWithoutArgs(callback) action.
-template <typename CallbackType>
-class InvokeCallbackWithoutArgsAction {
- public:
-  // The c'tor takes ownership of the callback.
-  explicit InvokeCallbackWithoutArgsAction(CallbackType* callback)
-      : callback_(callback) {
-    callback->CheckIsRepeatable();  // Makes sure the callback is permanent.
-  }
-
-  // This type conversion operator template allows Invoke(callback) to
-  // be used wherever the callback's return type can be implicitly
-  // converted to that of the mock function.
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple&) const { return callback_->Run(); }
-
- private:
-  const std::shared_ptr<CallbackType> callback_;
-
-  GTEST_DISALLOW_ASSIGN_(InvokeCallbackWithoutArgsAction);
 };
 
 // Implements the IgnoreResult(action) action.
@@ -1157,24 +1135,38 @@ SetErrnoAndReturn(int errval, T result) {
 
 #endif  // !GTEST_OS_WINDOWS_MOBILE
 
-// Various overloads for InvokeWithoutArgs().
+// Various overloads for Invoke().
+
+// Legacy function.
+// Actions can now be implicitly constructed from callables. No need to create
+// wrapper objects.
+// This function exists for backwards compatibility.
+template <typename FunctionImpl>
+typename std::decay<FunctionImpl>::type Invoke(FunctionImpl&& function_impl) {
+  return std::forward<FunctionImpl>(function_impl);
+}
+
+// Creates an action that invokes the given method on the given object
+// with the mock function's arguments.
+template <class Class, typename MethodPtr>
+internal::InvokeMethodAction<Class, MethodPtr> Invoke(Class* obj_ptr,
+                                                      MethodPtr method_ptr) {
+  return {obj_ptr, method_ptr};
+}
 
 // Creates an action that invokes 'function_impl' with no argument.
 template <typename FunctionImpl>
-PolymorphicAction<internal::InvokeWithoutArgsAction<FunctionImpl> >
+internal::InvokeWithoutArgsAction<typename std::decay<FunctionImpl>::type>
 InvokeWithoutArgs(FunctionImpl function_impl) {
-  return MakePolymorphicAction(
-      internal::InvokeWithoutArgsAction<FunctionImpl>(function_impl));
+  return {std::move(function_impl)};
 }
 
 // Creates an action that invokes the given method on the given object
 // with no argument.
 template <class Class, typename MethodPtr>
-PolymorphicAction<internal::InvokeMethodWithoutArgsAction<Class, MethodPtr> >
-InvokeWithoutArgs(Class* obj_ptr, MethodPtr method_ptr) {
-  return MakePolymorphicAction(
-      internal::InvokeMethodWithoutArgsAction<Class, MethodPtr>(
-          obj_ptr, method_ptr));
+internal::InvokeMethodWithoutArgsAction<Class, MethodPtr> InvokeWithoutArgs(
+    Class* obj_ptr, MethodPtr method_ptr) {
+  return {obj_ptr, method_ptr};
 }
 
 // Creates an action that performs an_action and throws away its
