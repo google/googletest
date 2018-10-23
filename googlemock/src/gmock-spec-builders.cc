@@ -757,6 +757,19 @@ bool Mock::VerifyAndClearExpectationsLocked(void* mock_obj)
   return expectations_met;
 }
 
+bool Mock::IsNaggy(void* mock_obj)
+    GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
+  return Mock::GetReactionOnUninterestingCalls(mock_obj) == internal::kWarn;
+}
+bool Mock::IsNice(void* mock_obj)
+    GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
+  return Mock::GetReactionOnUninterestingCalls(mock_obj) == internal::kAllow;
+}
+bool Mock::IsStrict(void* mock_obj)
+    GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
+  return Mock::GetReactionOnUninterestingCalls(mock_obj) == internal::kFail;
+}
+
 // Registers a mock object and a mock method it owns.
 void Mock::Register(const void* mock_obj,
                     internal::UntypedFunctionMockerBase* mocker)
