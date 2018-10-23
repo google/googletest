@@ -184,6 +184,13 @@ TEST(RawMockTest, InfoForUninterestingCall) {
   GMOCK_FLAG(verbose) = saved_flag;
 }
 
+TEST(RawMockTest, IsNaggy_IsNice_IsStrict) {
+  MockFoo raw_foo;
+  EXPECT_TRUE(Mock::IsNaggy(&raw_foo));
+  EXPECT_FALSE(Mock::IsNice(&raw_foo));
+  EXPECT_FALSE(Mock::IsStrict(&raw_foo));
+}
+
 // Tests that a nice mock generates no warning for uninteresting calls.
 TEST(NiceMockTest, NoWarningForUninterestingCall) {
   NiceMock<MockFoo> nice_foo;
@@ -309,6 +316,13 @@ TEST(NiceMockTest, AcceptsClassNamedMock) {
 }
 #endif  // !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 
+TEST(NiceMockTest, IsNaggy_IsNice_IsStrict) {
+  NiceMock<MockFoo> nice_foo;
+  EXPECT_FALSE(Mock::IsNaggy(&nice_foo));
+  EXPECT_TRUE(Mock::IsNice(&nice_foo));
+  EXPECT_FALSE(Mock::IsStrict(&nice_foo));
+}
+
 #if GTEST_HAS_STREAM_REDIRECTION
 
 // Tests that a naggy mock generates warnings for uninteresting calls.
@@ -417,6 +431,13 @@ TEST(NaggyMockTest, AcceptsClassNamedMock) {
 }
 #endif  // !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 
+TEST(NaggyMockTest, IsNaggy_IsNice_IsStrict) {
+  NaggyMock<MockFoo> naggy_foo;
+  EXPECT_TRUE(Mock::IsNaggy(&naggy_foo));
+  EXPECT_FALSE(Mock::IsNice(&naggy_foo));
+  EXPECT_FALSE(Mock::IsStrict(&naggy_foo));
+}
+
 // Tests that a strict mock allows expected calls.
 TEST(StrictMockTest, AllowsExpectedCall) {
   StrictMock<MockFoo> strict_foo;
@@ -505,6 +526,13 @@ TEST(StrictMockTest, AcceptsClassNamedMock) {
   strict.DoThis();
 }
 #endif  // !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
+
+TEST(StrictMockTest, IsNaggy_IsNice_IsStrict) {
+  StrictMock<MockFoo> strict_foo;
+  EXPECT_FALSE(Mock::IsNaggy(&strict_foo));
+  EXPECT_FALSE(Mock::IsNice(&strict_foo));
+  EXPECT_TRUE(Mock::IsStrict(&strict_foo));
+}
 
 }  // namespace gmock_nice_strict_test
 }  // namespace testing
