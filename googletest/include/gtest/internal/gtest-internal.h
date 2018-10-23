@@ -1176,6 +1176,112 @@ class NativeArray {
   GTEST_DISALLOW_ASSIGN_(NativeArray);
 };
 
+// Backport of std::index_sequence.
+template <size_t... Is>
+struct IndexSequence {
+  using type = IndexSequence;
+};
+
+// Double the IndexSequence, and one if plus_one is true.
+template <bool plus_one, typename T, size_t sizeofT>
+struct DoubleSequence;
+template <size_t... I, size_t sizeofT>
+struct DoubleSequence<true, IndexSequence<I...>, sizeofT> {
+  using type = IndexSequence<I..., (sizeofT + I)..., 2 * sizeofT>;
+};
+template <size_t... I, size_t sizeofT>
+struct DoubleSequence<false, IndexSequence<I...>, sizeofT> {
+  using type = IndexSequence<I..., (sizeofT + I)...>;
+};
+
+// Backport of std::make_index_sequence.
+// It uses O(ln(N)) instantiation depth.
+template <size_t N>
+struct MakeIndexSequence
+    : DoubleSequence<N % 2 == 1, typename MakeIndexSequence<N / 2>::type,
+                     N / 2>::type {};
+
+template <>
+struct MakeIndexSequence<0> : IndexSequence<> {};
+
+// FIXME: This implementation of ElemFromList is O(1) in instantiation depth,
+// but it is O(N^2) in total instantiations. Not sure if this is the best
+// tradeoff, as it will make it somewhat slow to compile.
+template <typename T, size_t, size_t>
+struct ElemFromListImpl {};
+
+template <typename T, size_t I>
+struct ElemFromListImpl<T, I, I> {
+  using type = T;
+};
+
+// Get the Nth element from T...
+// It uses O(1) instantiation depth.
+template <size_t N, typename I, typename... T>
+struct ElemFromList;
+
+template <size_t N, size_t... I, typename... T>
+struct ElemFromList<N, IndexSequence<I...>, T...>
+    : ElemFromListImpl<T, N, I>... {};
+
+template <typename... T>
+class FlatTuple;
+
+template <typename Derived, size_t I>
+struct FlatTupleElemBase;
+
+template <typename... T, size_t I>
+struct FlatTupleElemBase<FlatTuple<T...>, I> {
+  using value_type =
+      typename ElemFromList<I, typename MakeIndexSequence<sizeof...(T)>::type,
+                            T...>::type;
+  FlatTupleElemBase() = default;
+  explicit FlatTupleElemBase(value_type t) : value(std::move(t)) {}
+  value_type value;
+};
+
+template <typename Derived, typename Idx>
+struct FlatTupleBase;
+
+template <size_t... Idx, typename... T>
+struct FlatTupleBase<FlatTuple<T...>, IndexSequence<Idx...>>
+    : FlatTupleElemBase<FlatTuple<T...>, Idx>... {
+  using Indices = IndexSequence<Idx...>;
+  FlatTupleBase() = default;
+  explicit FlatTupleBase(T... t)
+      : FlatTupleElemBase<FlatTuple<T...>, Idx>(std::move(t))... {}
+};
+
+// Analog to std::tuple but with different tradeoffs.
+// This class minimizes the template instantiation depth, thus allowing more
+// elements that std::tuple would. std::tuple has been seen to require an
+// instantiation depth of more than 10x the number of elements in some
+// implementations.
+// FlatTuple and ElemFromList are not recursive and have a fixed depth
+// regardless of T...
+// MakeIndexSequence, on the other hand, it is recursive but with an
+// instantiation depth of O(ln(N)).
+template <typename... T>
+class FlatTuple
+    : private FlatTupleBase<FlatTuple<T...>,
+                            typename MakeIndexSequence<sizeof...(T)>::type> {
+  using Indices = typename FlatTuple::FlatTupleBase::Indices;
+
+ public:
+  FlatTuple() = default;
+  explicit FlatTuple(T... t) : FlatTuple::FlatTupleBase(std::move(t)...) {}
+
+  template <size_t I>
+  const typename ElemFromList<I, Indices, T...>::type& Get() const {
+    return static_cast<const FlatTupleElemBase<FlatTuple, I>*>(this)->value;
+  }
+
+  template <size_t I>
+  typename ElemFromList<I, Indices, T...>::type& Get() {
+    return static_cast<FlatTupleElemBase<FlatTuple, I>*>(this)->value;
+  }
+};
+
 }  // namespace internal
 }  // namespace testing
 
