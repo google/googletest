@@ -1487,7 +1487,7 @@ returns the value of `testing::PrintToString(GetParam())`. It does not work for
 
 NOTE: test names must be non-empty, unique, and may only contain ASCII
 alphanumeric characters. In particular, they [should not contain
-underscores](https://g3doc.corp.google.com/third_party/googletest/googletest/g3doc/faq.md#no-underscores).
+underscores](https://github.com/google/googletest/blob/master/googletest/docs/faq.md#why-should-test-case-names-and-test-names-not-contain-underscore).
 
 ```c++
 class MyTestCase : public testing::TestWithParam<int> {};
