@@ -34,6 +34,7 @@
 
 #include "gmock/gmock-spec-builders.h"
 
+#include <memory>
 #include <ostream>  // NOLINT
 #include <sstream>
 #include <string>
@@ -99,7 +100,6 @@ using testing::internal::kFail;
 using testing::internal::kInfoVerbosity;
 using testing::internal::kWarn;
 using testing::internal::kWarningVerbosity;
-using testing::internal::linked_ptr;
 
 #if GTEST_HAS_STREAM_REDIRECTION
 using testing::HasSubstr;
@@ -172,7 +172,7 @@ class ReferenceHoldingMock {
  public:
   ReferenceHoldingMock() {}
 
-  MOCK_METHOD1(AcceptReference, void(linked_ptr<MockA>*));
+  MOCK_METHOD1(AcceptReference, void(std::shared_ptr<MockA>*));
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ReferenceHoldingMock);
@@ -2619,7 +2619,7 @@ TEST(VerifyAndClearTest, DoesNotAffectOtherMockObjects) {
 
 TEST(VerifyAndClearTest,
      DestroyingChainedMocksDoesNotDeadlockThroughExpectations) {
-  linked_ptr<MockA> a(new MockA);
+  std::shared_ptr<MockA> a(new MockA);
   ReferenceHoldingMock test_mock;
 
   // EXPECT_CALL stores a reference to a inside test_mock.
@@ -2639,7 +2639,7 @@ TEST(VerifyAndClearTest,
 
 TEST(VerifyAndClearTest,
      DestroyingChainedMocksDoesNotDeadlockThroughDefaultAction) {
-  linked_ptr<MockA> a(new MockA);
+  std::shared_ptr<MockA> a(new MockA);
   ReferenceHoldingMock test_mock;
 
   // ON_CALL stores a reference to a inside test_mock.

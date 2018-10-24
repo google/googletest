@@ -43,14 +43,15 @@
 #include <algorithm>
 #include <iterator>
 #include <limits>
+#include <memory>
 #include <ostream>  // NOLINT
 #include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
-#include "gtest/gtest.h"
 #include "gmock/internal/gmock-internal-utils.h"
 #include "gmock/internal/gmock-port.h"
+#include "gtest/gtest.h"
 
 #if GTEST_HAS_STD_INITIALIZER_LIST_
 # include <initializer_list>  // NOLINT -- must be after gtest.h
@@ -338,29 +339,15 @@ class MatcherBase {
   virtual ~MatcherBase() {}
 
  private:
-  // shared_ptr (util/gtl/shared_ptr.h) and linked_ptr have similar
-  // interfaces.  The former dynamically allocates a chunk of memory
-  // to hold the reference count, while the latter tracks all
-  // references using a circular linked list without allocating
-  // memory.  It has been observed that linked_ptr performs better in
-  // typical scenarios.  However, shared_ptr can out-perform
-  // linked_ptr when there are many more uses of the copy constructor
-  // than the default constructor.
-  //
-  // If performance becomes a problem, we should see if using
-  // shared_ptr helps.
-  ::testing::internal::linked_ptr<
-      const MatcherInterface<GTEST_REFERENCE_TO_CONST_(T)> >
-      impl_;
+  std::shared_ptr<const MatcherInterface<GTEST_REFERENCE_TO_CONST_(T)>> impl_;
 };
 
 }  // namespace internal
 
 // A Matcher<T> is a copyable and IMMUTABLE (except by assignment)
 // object that can check whether a value of type T matches.  The
-// implementation of Matcher<T> is just a linked_ptr to const
-// MatcherInterface<T>, so copying is fairly cheap.  Don't inherit
-// from Matcher!
+// implementation of Matcher<T> is just a std::shared_ptr to const
+// MatcherInterface<T>.  Don't inherit from Matcher!
 template <typename T>
 class Matcher : public internal::MatcherBase<T> {
  public:
@@ -1586,7 +1573,7 @@ class MatchesRegexMatcher {
   }
 
  private:
-  const internal::linked_ptr<const RE> regex_;
+  const std::shared_ptr<const RE> regex_;
   const bool full_match_;
 
   GTEST_DISALLOW_ASSIGN_(MatchesRegexMatcher);

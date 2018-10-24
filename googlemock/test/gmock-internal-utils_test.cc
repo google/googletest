@@ -123,8 +123,6 @@ TEST(ConvertIdentifierNameToWordsTest, WorksWhenNameIsMixture) {
 }
 
 TEST(PointeeOfTest, WorksForSmartPointers) {
-  CompileAssertTypesEqual<const char,
-      PointeeOf<internal::linked_ptr<const char> >::type>();
 #if GTEST_HAS_STD_UNIQUE_PTR_
   CompileAssertTypesEqual<int, PointeeOf<std::unique_ptr<int> >::type>();
 #endif  // GTEST_HAS_STD_UNIQUE_PTR_
@@ -151,10 +149,6 @@ TEST(GetRawPointerTest, WorksForSmartPointers) {
   const std::shared_ptr<double> p2(raw_p2);
   EXPECT_EQ(raw_p2, GetRawPointer(p2));
 #endif  // GTEST_HAS_STD_SHARED_PTR_
-
-  const char* const raw_p4 = new const char('a');  // NOLINT
-  const internal::linked_ptr<const char> p4(raw_p4);
-  EXPECT_EQ(raw_p4, GetRawPointer(p4));
 }
 
 TEST(GetRawPointerTest, WorksForRawPointers) {
@@ -687,7 +681,7 @@ TEST(StlContainerViewTest, WorksForDynamicNativeArray) {
                      StlContainerView<std::tuple<const int*, size_t> >::type>();
   StaticAssertTypeEq<
       NativeArray<double>,
-      StlContainerView<std::tuple<linked_ptr<double>, int> >::type>();
+      StlContainerView<std::tuple<std::shared_ptr<double>, int> >::type>();
 
   StaticAssertTypeEq<
       const NativeArray<int>,
