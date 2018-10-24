@@ -192,6 +192,15 @@ Google Test already has a CMake option for this: `gtest_force_shared_crt`
 Enabling this option will make gtest link the runtimes dynamically too, and
 match the project in which it is included.
 
+#### C++ Standard Version
+
+An environment that supports C++11 is required in order to successfully build
+Google Test. One way to ensure this is to specify the standard in the top-level
+project, for example by using the `set(CMAKE_CXX_STANDARD 11)` command. If this
+is not feasible, for example in a C project using Google Test for validation,
+then it can be specified by adding it to the options for cmake via the
+`DCMAKE_CXX_FLAGS` option.
+
 ### Legacy Build Scripts
 
 Before settling on CMake, we have been providing hand-maintained build
