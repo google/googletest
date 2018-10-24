@@ -49,6 +49,8 @@
 
 #include <memory>
 
+#include <assert.h> 
+
 #include "gtest/internal/gtest-param-util.h"
 #include "gtest/internal/gtest-port.h"
 
