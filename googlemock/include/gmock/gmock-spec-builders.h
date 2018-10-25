@@ -62,7 +62,6 @@
 #define GMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_
 
 #include <map>
-#include <memory>
 #include <set>
 #include <sstream>
 #include <string>
@@ -220,7 +219,8 @@ class GTEST_API_ UntypedFunctionMockerBase {
  protected:
   typedef std::vector<const void*> UntypedOnCallSpecs;
 
-  using UntypedExpectations = std::vector<std::shared_ptr<ExpectationBase>>;
+  typedef std::vector<internal::linked_ptr<ExpectationBase> >
+  UntypedExpectations;
 
   // Returns an Expectation object that references and co-owns exp,
   // which must be an expectation on this mock function.
@@ -498,7 +498,12 @@ class GTEST_API_ Mock {
 //   - Constness is shallow: a const Expectation object itself cannot
 //     be modified, but the mutable methods of the ExpectationBase
 //     object it references can be called via expectation_base().
-
+//   - The constructors and destructor are defined out-of-line because
+//     the Symbian WINSCW compiler wants to otherwise instantiate them
+//     when it sees this class definition, at which point it doesn't have
+//     ExpectationBase available yet, leading to incorrect destruction
+//     in the linked_ptr (or compilation errors if using a checking
+//     linked_ptr).
 class GTEST_API_ Expectation {
  public:
   // Constructs a null object that doesn't reference any expectation.
@@ -550,15 +555,16 @@ class GTEST_API_ Expectation {
   typedef ::std::set<Expectation, Less> Set;
 
   Expectation(
-      const std::shared_ptr<internal::ExpectationBase>& expectation_base);
+      const internal::linked_ptr<internal::ExpectationBase>& expectation_base);
 
   // Returns the expectation this object references.
-  const std::shared_ptr<internal::ExpectationBase>& expectation_base() const {
+  const internal::linked_ptr<internal::ExpectationBase>&
+  expectation_base() const {
     return expectation_base_;
   }
 
-  // A shared_ptr that co-owns the expectation this handle references.
-  std::shared_ptr<internal::ExpectationBase> expectation_base_;
+  // A linked_ptr that co-owns the expectation this handle references.
+  internal::linked_ptr<internal::ExpectationBase> expectation_base_;
 };
 
 // A set of expectation handles.  Useful in the .After() clause of
@@ -640,8 +646,11 @@ class GTEST_API_ Sequence {
   void AddExpectation(const Expectation& expectation) const;
 
  private:
-  // The last expectation in this sequence.
-  std::shared_ptr<Expectation> last_expectation_;
+  // The last expectation in this sequence.  We use a linked_ptr here
+  // because Sequence objects are copyable and we want the copies to
+  // be aliases.  The linked_ptr allows the copies to co-own and share
+  // the same Expectation object.
+  internal::linked_ptr<Expectation> last_expectation_;
 };  // class Sequence
 
 // An object of this type causes all EXPECT_CALL() statements
@@ -864,7 +873,7 @@ class GTEST_API_ ExpectationBase {
   Cardinality cardinality_;            // The cardinality of the expectation.
   // The immediate pre-requisites (i.e. expectations that must be
   // satisfied before this expectation can be matched) of this
-  // expectation.  We use std::shared_ptr in the set because we want an
+  // expectation.  We use linked_ptr in the set because we want an
   // Expectation object to be co-owned by its FunctionMocker and its
   // successors.  This allows multiple mock objects to be deleted at
   // different times.
@@ -1622,7 +1631,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
     Mock::RegisterUseByOnCallOrExpectCall(MockObject(), file, line);
     TypedExpectation<F>* const expectation =
         new TypedExpectation<F>(this, file, line, source_text, m);
-    const std::shared_ptr<ExpectationBase> untyped_expectation(expectation);
+    const linked_ptr<ExpectationBase> untyped_expectation(expectation);
     // See the definition of untyped_expectations_ for why access to
     // it is unprotected here.
     untyped_expectations_.push_back(untyped_expectation);
