@@ -41,7 +41,6 @@
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_ACTIONS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_ACTIONS_H_
 
-#include <memory>
 #include <utility>
 
 #include "gmock/gmock-actions.h"
@@ -349,7 +348,7 @@ class InvokeCallbackAction {
         callback_.get(), args);
   }
  private:
-  const std::shared_ptr<CallbackType> callback_;
+  const linked_ptr<CallbackType> callback_;
 };
 
 // An INTERNAL macro for extracting the type of a tuple field.  It's

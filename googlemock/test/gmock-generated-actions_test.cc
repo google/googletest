@@ -35,7 +35,6 @@
 #include "gmock/gmock-generated-actions.h"
 
 #include <functional>
-#include <memory>
 #include <sstream>
 #include <string>
 #include "gmock/gmock.h"
@@ -1130,9 +1129,9 @@ ACTION_TEMPLATE(ReturnSmartPointer,
 }
 
 TEST(ActionTemplateTest, WorksForTemplateTemplateParameters) {
-  const Action<std::shared_ptr<int>()> a =
-      ReturnSmartPointer<std::shared_ptr>(42);
-  std::shared_ptr<int> p = a.Perform(std::make_tuple());
+  using ::testing::internal::linked_ptr;
+  const Action<linked_ptr<int>()> a = ReturnSmartPointer<linked_ptr>(42);
+  linked_ptr<int> p = a.Perform(std::make_tuple());
   EXPECT_EQ(42, *p);
 }
 
@@ -1162,10 +1161,11 @@ ACTION_TEMPLATE(ReturnGiant,
 }
 
 TEST(ActionTemplateTest, WorksFor10TemplateParameters) {
-  using Giant = GiantTemplate<std::shared_ptr<int>, bool, double, 5, true, 6,
-                              char, unsigned, int>;
-  const Action<Giant()> a = ReturnGiant<int, bool, double, 5, true, 6, char,
-                                        unsigned, int, std::shared_ptr>(42);
+  using ::testing::internal::linked_ptr;
+  typedef GiantTemplate<linked_ptr<int>, bool, double, 5,
+      true, 6, char, unsigned, int> Giant;
+  const Action<Giant()> a = ReturnGiant<
+      int, bool, double, 5, true, 6, char, unsigned, int, linked_ptr>(42);
   Giant giant = a.Perform(std::make_tuple());
   EXPECT_EQ(42, giant.value);
 }

@@ -143,11 +143,13 @@ using testing::internal::ExplainMatchFailureTupleTo;
 using testing::internal::FloatingEqMatcher;
 using testing::internal::FormatMatcherDescription;
 using testing::internal::IsReadableTypeName;
+using testing::internal::linked_ptr;
 using testing::internal::MatchMatrix;
 using testing::internal::RE;
 using testing::internal::scoped_ptr;
 using testing::internal::StreamMatchResultListener;
 using testing::internal::Strings;
+using testing::internal::linked_ptr;
 using testing::internal::scoped_ptr;
 using testing::internal::string;
 
@@ -1175,6 +1177,24 @@ TEST(IsNullTest, MatchesNullPointer) {
 #endif
 }
 
+TEST(IsNullTest, LinkedPtr) {
+  const Matcher<linked_ptr<int> > m = IsNull();
+  const linked_ptr<int> null_p;
+  const linked_ptr<int> non_null_p(new int);
+
+  EXPECT_TRUE(m.Matches(null_p));
+  EXPECT_FALSE(m.Matches(non_null_p));
+}
+
+TEST(IsNullTest, ReferenceToConstLinkedPtr) {
+  const Matcher<const linked_ptr<double>&> m = IsNull();
+  const linked_ptr<double> null_p;
+  const linked_ptr<double> non_null_p(new double);
+
+  EXPECT_TRUE(m.Matches(null_p));
+  EXPECT_FALSE(m.Matches(non_null_p));
+}
+
 #if GTEST_LANG_CXX11
 TEST(IsNullTest, StdFunction) {
   const Matcher<std::function<void()>> m = IsNull();
@@ -1206,18 +1226,18 @@ TEST(NotNullTest, MatchesNonNullPointer) {
 }
 
 TEST(NotNullTest, LinkedPtr) {
-  const Matcher<std::shared_ptr<int>> m = NotNull();
-  const std::shared_ptr<int> null_p;
-  const std::shared_ptr<int> non_null_p(new int);
+  const Matcher<linked_ptr<int> > m = NotNull();
+  const linked_ptr<int> null_p;
+  const linked_ptr<int> non_null_p(new int);
 
   EXPECT_FALSE(m.Matches(null_p));
   EXPECT_TRUE(m.Matches(non_null_p));
 }
 
 TEST(NotNullTest, ReferenceToConstLinkedPtr) {
-  const Matcher<const std::shared_ptr<double>&> m = NotNull();
-  const std::shared_ptr<double> null_p;
-  const std::shared_ptr<double> non_null_p(new double);
+  const Matcher<const linked_ptr<double>&> m = NotNull();
+  const linked_ptr<double> null_p;
+  const linked_ptr<double> non_null_p(new double);
 
   EXPECT_FALSE(m.Matches(null_p));
   EXPECT_TRUE(m.Matches(non_null_p));
