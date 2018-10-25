@@ -38,13 +38,13 @@
 #include <ctype.h>
 
 #include <iterator>
-#include <memory>
 #include <set>
 #include <tuple>
 #include <utility>
 #include <vector>
 
 #include "gtest/internal/gtest-internal.h"
+#include "gtest/internal/gtest-linked_ptr.h"
 #include "gtest/internal/gtest-port.h"
 #include "gtest/gtest-printers.h"
 
@@ -193,7 +193,7 @@ class ParamGenerator {
   iterator end() const { return iterator(impl_->End()); }
 
  private:
-  std::shared_ptr<const ParamGeneratorInterface<T> > impl_;
+  linked_ptr<const ParamGeneratorInterface<T> > impl_;
 };
 
 // Generates values from a range of two comparable values. Can be used to
@@ -519,8 +519,9 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
   void AddTestPattern(const char* test_case_name,
                       const char* test_base_name,
                       TestMetaFactoryBase<ParamType>* meta_factory) {
-    tests_.push_back(std::shared_ptr<TestInfo>(
-        new TestInfo(test_case_name, test_base_name, meta_factory)));
+    tests_.push_back(linked_ptr<TestInfo>(new TestInfo(test_case_name,
+                                                       test_base_name,
+                                                       meta_factory)));
   }
   // INSTANTIATE_TEST_CASE_P macro uses AddGenerator() to record information
   // about a generator.
@@ -540,7 +541,7 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
   virtual void RegisterTests() {
     for (typename TestInfoContainer::iterator test_it = tests_.begin();
          test_it != tests_.end(); ++test_it) {
-      std::shared_ptr<TestInfo> test_info = *test_it;
+      linked_ptr<TestInfo> test_info = *test_it;
       for (typename InstantiationContainer::iterator gen_it =
                instantiations_.begin(); gen_it != instantiations_.end();
                ++gen_it) {
@@ -604,7 +605,7 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
     const std::string test_base_name;
     const scoped_ptr<TestMetaFactoryBase<ParamType> > test_meta_factory;
   };
-  using TestInfoContainer = ::std::vector<std::shared_ptr<TestInfo> >;
+  typedef ::std::vector<linked_ptr<TestInfo> > TestInfoContainer;
   // Records data received from INSTANTIATE_TEST_CASE_P macros:
   //  <Instantiation name, Sequence generator creation function,
   //     Name generator function, Source file, Source line>

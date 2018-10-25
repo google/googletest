@@ -38,7 +38,6 @@
 #include <stdlib.h>
 #include <iostream>  // NOLINT
 #include <map>
-#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -849,7 +848,7 @@ void Mock::ClearDefaultActionsLocked(void* mock_obj)
 Expectation::Expectation() {}
 
 Expectation::Expectation(
-    const std::shared_ptr<internal::ExpectationBase>& an_expectation_base)
+    const internal::linked_ptr<internal::ExpectationBase>& an_expectation_base)
     : expectation_base_(an_expectation_base) {}
 
 Expectation::~Expectation() {}
