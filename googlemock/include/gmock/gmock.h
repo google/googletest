@@ -66,6 +66,7 @@
 #include "gmock/gmock-more-actions.h"
 #include "gmock/gmock-more-matchers.h"
 #include "gmock/internal/gmock-internal-utils.h"
+#include "gmock/gmock-gtest-fusion.h"
 
 namespace testing {
 

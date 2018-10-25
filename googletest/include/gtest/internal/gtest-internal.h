@@ -779,6 +779,16 @@ struct GTEST_API_ ConstCharPtr {
   operator bool() const { return true; }
   const char* value;
 };
+class AdditionalMessage {
+ public:
+  AdditionalMessage(const char* message) : msg(message) {}
+  void set(const std::string& message) { msg = message; }
+  void append(const std::string& message) { msg += message; }
+  operator bool() const { return true; }
+  const std::string& get() const { return msg; }
+ private:
+  std::string msg;
+};
 
 // A simple Linear Congruential Generator for generating random
 // numbers with a uniform distribution.  Unlike rand() and srand(), it
