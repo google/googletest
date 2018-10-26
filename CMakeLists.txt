@@ -19,7 +19,7 @@ enable_testing()
 
 include(CMakeDependentOption)
 include(GNUInstallDirs)
-
+#greaat
 #Note that googlemock target already builds googletest
 option(BUILD_GMOCK "Builds the googlemock subproject" ON)
 option(INSTALL_GTEST "Enable installation of googletest. (Projects embedding googletest may want to turn this OFF.)" ON)
