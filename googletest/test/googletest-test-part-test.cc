@@ -121,7 +121,7 @@ TEST_F(TestPartResultTest, type) {
 // Tests TestPartResult::file_name().
 TEST_F(TestPartResultTest, file_name) {
   EXPECT_STREQ("foo/bar.cc", r1_.file_name());
-  EXPECT_STREQ(NULL, r3_.file_name());
+  EXPECT_STREQ(nullptr, r3_.file_name());
   EXPECT_STREQ("foo/bar.cc", r4_.file_name());
 }
 

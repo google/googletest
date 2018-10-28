@@ -6184,12 +6184,12 @@ TEST_F(FlagfileTest, Empty) {
   const char* argv[] = {
     "foo.exe",
     flagfile_flag.c_str(),
-    NULL
+    nullptr
   };
 
   const char* argv2[] = {
     "foo.exe",
-    NULL
+    nullptr
   };
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags(), false);
@@ -6205,12 +6205,12 @@ TEST_F(FlagfileTest, FilterNonEmpty) {
   const char* argv[] = {
     "foo.exe",
     flagfile_flag.c_str(),
-    NULL
+    nullptr
   };
 
   const char* argv2[] = {
     "foo.exe",
-    NULL
+    nullptr
   };
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Filter("abc"), false);
@@ -6228,12 +6228,12 @@ TEST_F(FlagfileTest, SeveralFlags) {
   const char* argv[] = {
     "foo.exe",
     flagfile_flag.c_str(),
-    NULL
+    nullptr
   };
 
   const char* argv2[] = {
     "foo.exe",
-    NULL
+    nullptr
   };
 
   Flags expected_flags;

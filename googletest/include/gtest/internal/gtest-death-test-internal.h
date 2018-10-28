@@ -195,7 +195,7 @@ GTEST_API_ bool ExitedUnsuccessfully(int exit_status);
         __FILE__, __LINE__, &gtest_dt)) { \
       goto GTEST_CONCAT_TOKEN_(gtest_label_, __LINE__); \
     } \
-    if (gtest_dt != NULL) { \
+    if (gtest_dt != nullptr) { \
       ::testing::internal::scoped_ptr< ::testing::internal::DeathTest> \
           gtest_dt_ptr(gtest_dt); \
       switch (gtest_dt->AssumeRole()) { \

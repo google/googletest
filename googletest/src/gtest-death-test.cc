@@ -731,7 +731,7 @@ DeathTest::TestRole WindowsDeathTest::AssumeRole() {
   const TestInfo* const info = impl->current_test_info();
   const int death_test_index = info->result()->death_test_count();
 
-  if (flag != NULL) {
+  if (flag != nullptr) {
     // ParseInternalRunDeathTestFlag() has performed all the necessary
     // processing.
     set_write_fd(flag->write_fd());
@@ -741,7 +741,7 @@ DeathTest::TestRole WindowsDeathTest::AssumeRole() {
   // WindowsDeathTest uses an anonymous pipe to communicate results of
   // a death test.
   SECURITY_ATTRIBUTES handles_are_inheritable = {
-    sizeof(SECURITY_ATTRIBUTES), NULL, TRUE };
+    sizeof(SECURITY_ATTRIBUTES), nullptr, TRUE };
   HANDLE read_handle, write_handle;
   GTEST_DEATH_TEST_CHECK_(
       ::CreatePipe(&read_handle, &write_handle, &handles_are_inheritable,
@@ -754,8 +754,8 @@ DeathTest::TestRole WindowsDeathTest::AssumeRole() {
       &handles_are_inheritable,
       TRUE,    // The event will automatically reset to non-signaled state.
       FALSE,   // The initial state is non-signalled.
-      NULL));  // The even is unnamed.
-  GTEST_DEATH_TEST_CHECK_(event_handle_.Get() != NULL);
+      nullptr));  // The even is unnamed.
+  GTEST_DEATH_TEST_CHECK_(event_handle_.Get() != nullptr);
   const std::string filter_flag =
       std::string("--") + GTEST_FLAG_PREFIX_ + kFilterFlag + "=" +
       info->test_case_name() + "." + info->name();
@@ -772,7 +772,7 @@ DeathTest::TestRole WindowsDeathTest::AssumeRole() {
 
   char executable_path[_MAX_PATH + 1];  // NOLINT
   GTEST_DEATH_TEST_CHECK_(
-      _MAX_PATH + 1 != ::GetModuleFileNameA(NULL,
+      _MAX_PATH + 1 != ::GetModuleFileNameA(nullptr,
                                             executable_path,
                                             _MAX_PATH));
 
@@ -798,11 +798,11 @@ DeathTest::TestRole WindowsDeathTest::AssumeRole() {
   GTEST_DEATH_TEST_CHECK_(::CreateProcessA(
       executable_path,
       const_cast<char*>(command_line.c_str()),
-      NULL,   // Retuned process handle is not inheritable.
-      NULL,   // Retuned thread handle is not inheritable.
-      TRUE,   // Child inherits all inheritable handles (for write_handle_).
-      0x0,    // Default creation flags.
-      NULL,   // Inherit the parent's environment.
+      nullptr,   // Retuned process handle is not inheritable.
+      nullptr,   // Retuned thread handle is not inheritable.
+      TRUE,      // Child inherits all inheritable handles (for write_handle_).
+      0x0,       // Default creation flags.
+      nullptr,   // Inherit the parent's environment.
       UnitTest::GetInstance()->original_working_dir(),
       &startup_info,
       &process_info) != FALSE);
@@ -843,7 +843,7 @@ class FuchsiaDeathTest : public DeathTestImpl {
 class Arguments {
  public:
   Arguments() {
-    args_.push_back(NULL);
+    args_.push_back(nullptr);
   }
 
   ~Arguments() {
@@ -967,7 +967,7 @@ DeathTest::TestRole FuchsiaDeathTest::AssumeRole() {
   const TestInfo* const info = impl->current_test_info();
   const int death_test_index = info->result()->death_test_count();
 
-  if (flag != NULL) {
+  if (flag != nullptr) {
     // ParseInternalRunDeathTestFlag() has performed all the necessary
     // processing.
     set_write_fd(kFuchsiaReadPipeFd);
@@ -1316,7 +1316,7 @@ static pid_t ExecDeathTestSpawnChild(char* const* argv, int close_fd) {
                                         fd_flags | FD_CLOEXEC));
   struct inheritance inherit = {0};
   // spawn is a system call.
-  child_pid = spawn(args.argv[0], 0, NULL, &inherit, args.argv, GetEnviron());
+  child_pid = spawn(args.argv[0], 0, nullptr, &inherit, args.argv, GetEnviron());
   // Restores the current working directory.
   GTEST_DEATH_TEST_CHECK_(fchdir(cwd_fd) != -1);
   GTEST_DEATH_TEST_CHECK_SYSCALL_(close(cwd_fd));
