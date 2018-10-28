@@ -414,7 +414,7 @@ TEST(LinkTest, TestThrow) {
   Mock mock;
 
   EXPECT_CALL(mock, VoidFromString(_)).WillOnce(Throw(42));
-  EXPECT_THROW(mock.VoidFromString(NULL), int);
+  EXPECT_THROW(mock.VoidFromString(nullptr), int);
 }
 #endif  // GTEST_HAS_EXCEPTIONS
 
