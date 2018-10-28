@@ -1914,7 +1914,7 @@ GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 // failure to disambiguate two overloads of this method in the ON_CALL statement
 // is how we block callers from setting expectations on overloaded methods.
 #define GMOCK_ON_CALL_IMPL_(mock_expr, Setter, call)                          \
-  ((mock_expr).gmock_##call)(::testing::internal::GetWithoutMatchers(), NULL) \
+  ((mock_expr).gmock_##call)(::testing::internal::GetWithoutMatchers(), nullptr) \
       .Setter(__FILE__, __LINE__, #mock_expr, #call)
 
 #define ON_CALL(obj, call) \

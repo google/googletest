@@ -323,7 +323,7 @@ TEST(MatcherTest, CanBeImplicitlyConstructedFromValue) {
 
 // Tests that NULL can be used in place of Eq(NULL).
 TEST(MatcherTest, CanBeImplicitlyConstructedFromNULL) {
-  Matcher<int*> m1 = NULL;
+  Matcher<int*> m1 = nullptr;
   EXPECT_TRUE(m1.Matches(nullptr));
   int n = 0;
   EXPECT_FALSE(m1.Matches(&n));
@@ -4779,8 +4779,8 @@ TEST(IsTrueTest, IsTrueIsFalse) {
   EXPECT_THAT(false, Not(IsTrue()));
   EXPECT_THAT(0, Not(IsTrue()));
   EXPECT_THAT(0, IsFalse());
-  EXPECT_THAT(NULL, Not(IsTrue()));
-  EXPECT_THAT(NULL, IsFalse());
+  EXPECT_THAT(nullptr, Not(IsTrue()));
+  EXPECT_THAT(nullptr, IsFalse());
   EXPECT_THAT(-1, IsTrue());
   EXPECT_THAT(-1, Not(IsFalse()));
   EXPECT_THAT(1, IsTrue());
