@@ -1305,13 +1305,13 @@ inline To DownCast_(From* f) {  // so we only accept pointers
   GTEST_INTENTIONAL_CONST_COND_PUSH_()
   if (false) {
   GTEST_INTENTIONAL_CONST_COND_POP_()
-    const To to = NULL;
+    const To to = nullptr;
     ::testing::internal::ImplicitCast_<From*>(to);
   }
 
 #if GTEST_HAS_RTTI
   // RTTI: debug mode only!
-  GTEST_CHECK_(f == nullptr || dynamic_cast<To>(f) != NULL);
+  GTEST_CHECK_(f == nullptr || dynamic_cast<To>(f) != nullptr);
 #endif
   return static_cast<To>(f);
 }
@@ -2334,12 +2334,12 @@ inline const char* GetEnv(const char* name) {
 #if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_RT
   // We are on Windows CE, which has no environment variables.
   static_cast<void>(name);  // To prevent 'unused argument' warning.
-  return NULL;
+  return nullptr;
 #elif defined(__BORLANDC__) || defined(__SunOS_5_8) || defined(__SunOS_5_9)
   // Environment variables which we programmatically clear will be set to the
   // empty string rather than unset (NULL).  Handle that case.
   const char* const env = getenv(name);
-  return (env != NULL && env[0] != '\0') ? env : NULL;
+  return (env != nullptr && env[0] != '\0') ? env : nullptr;
 #else
   return getenv(name);
 #endif
