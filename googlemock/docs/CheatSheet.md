@@ -181,6 +181,7 @@ divided into several categories:
 |`Ne(value)`           |`argument != value`|
 |`IsNull()`            |`argument` is a `NULL` pointer (raw or smart).|
 |`NotNull()`           |`argument` is a non-null pointer (raw or smart).|
+|`Optional(m)`         |`argument` is `optional<>` that contains a value matching `m`.|
 |`VariantWith<T>(m)`   |`argument` is `variant<>` that holds the alternative of type T with a value matching `m`.|
 |`Ref(variable)`       |`argument` is a reference to `variable`.|
 |`TypedEq<type>(value)`|`argument` has type `type` and is equal to `value`. You may need to use this instead of `Eq(value)` when the mock function is overloaded.|
