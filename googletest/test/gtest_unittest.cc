@@ -6181,16 +6181,9 @@ TEST_F(FlagfileTest, Empty) {
   std::string flagfile_flag =
       std::string("--" GTEST_FLAG_PREFIX_ "flagfile=") + flagfile_path.c_str();
 
-  const char* argv[] = {
-    "foo.exe",
-    flagfile_flag.c_str(),
-    NULL
-  };
+  const char* argv[] = {"foo.exe", flagfile_flag.c_str(), nullptr};
 
-  const char* argv2[] = {
-    "foo.exe",
-    NULL
-  };
+  const char* argv2[] = {"foo.exe", nullptr};
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags(), false);
 }
@@ -6202,16 +6195,9 @@ TEST_F(FlagfileTest, FilterNonEmpty) {
   std::string flagfile_flag =
       std::string("--" GTEST_FLAG_PREFIX_ "flagfile=") + flagfile_path.c_str();
 
-  const char* argv[] = {
-    "foo.exe",
-    flagfile_flag.c_str(),
-    NULL
-  };
+  const char* argv[] = {"foo.exe", flagfile_flag.c_str(), nullptr};
 
-  const char* argv2[] = {
-    "foo.exe",
-    NULL
-  };
+  const char* argv2[] = {"foo.exe", nullptr};
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Filter("abc"), false);
 }
@@ -6225,16 +6211,9 @@ TEST_F(FlagfileTest, SeveralFlags) {
   std::string flagfile_flag =
       std::string("--" GTEST_FLAG_PREFIX_ "flagfile=") + flagfile_path.c_str();
 
-  const char* argv[] = {
-    "foo.exe",
-    flagfile_flag.c_str(),
-    NULL
-  };
+  const char* argv[] = {"foo.exe", flagfile_flag.c_str(), nullptr};
 
-  const char* argv2[] = {
-    "foo.exe",
-    NULL
-  };
+  const char* argv2[] = {"foo.exe", nullptr};
 
   Flags expected_flags;
   expected_flags.break_on_failure = true;
