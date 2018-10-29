@@ -821,8 +821,9 @@ class FuchsiaDeathTest : public DeathTestImpl {
       : DeathTestImpl(a_statement, a_regex), file_(file), line_(line) {}
 
   // All of these virtual functions are inherited from DeathTest.
-  virtual int Wait();
-  virtual TestRole AssumeRole();
+  int Wait() override;
+  TestRole AssumeRole() override;
+  std::string GetErrorLogs() override;
 
  private:
   // The name of the file in which the death test is located.
