@@ -867,7 +867,7 @@ void Sequence::AddExpectation(const Expectation& expectation) const {
 
 // Creates the implicit sequence if there isn't one.
 InSequence::InSequence() {
-  if (internal::g_gmock_implicit_sequence.get() == NULL) {
+  if (internal::g_gmock_implicit_sequence.get() == nullptr) {
     internal::g_gmock_implicit_sequence.set(new Sequence);
     sequence_created_ = true;
   } else {
@@ -880,7 +880,7 @@ InSequence::InSequence() {
 InSequence::~InSequence() {
   if (sequence_created_) {
     delete internal::g_gmock_implicit_sequence.get();
-    internal::g_gmock_implicit_sequence.set(NULL);
+    internal::g_gmock_implicit_sequence.set(nullptr);
   }
 }
 
