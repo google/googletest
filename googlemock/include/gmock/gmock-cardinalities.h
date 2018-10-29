@@ -40,6 +40,7 @@
 #define GMOCK_INCLUDE_GMOCK_GMOCK_CARDINALITIES_H_
 
 #include <limits.h>
+#include <memory>
 #include <ostream>  // NOLINT
 #include "gmock/internal/gmock-port.h"
 #include "gtest/gtest.h"
@@ -81,9 +82,8 @@ class CardinalityInterface {
 
 // A Cardinality is a copyable and IMMUTABLE (except by assignment)
 // object that specifies how many times a mock function is expected to
-// be called.  The implementation of Cardinality is just a linked_ptr
-// to const CardinalityInterface, so copying is fairly cheap.
-// Don't inherit from Cardinality!
+// be called.  The implementation of Cardinality is just a std::shared_ptr
+// to const CardinalityInterface. Don't inherit from Cardinality!
 class GTEST_API_ Cardinality {
  public:
   // Constructs a null cardinality.  Needed for storing Cardinality
@@ -123,7 +123,7 @@ class GTEST_API_ Cardinality {
                                         ::std::ostream* os);
 
  private:
-  internal::linked_ptr<const CardinalityInterface> impl_;
+  std::shared_ptr<const CardinalityInterface> impl_;
 };
 
 // Creates a cardinality that allows at least n calls.

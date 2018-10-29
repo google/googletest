@@ -42,6 +42,7 @@
 #endif
 
 #include <algorithm>
+#include <memory>
 #include <string>
 #include <utility>
 
@@ -346,9 +347,7 @@ class ActionInterface {
 // An Action<F> is a copyable and IMMUTABLE (except by assignment)
 // object that represents an action to be taken when a mock function
 // of type F is called.  The implementation of Action<T> is just a
-// linked_ptr to const ActionInterface<T>, so copying is fairly cheap.
-// Don't inherit from Action!
-//
+// std::shared_ptr to const ActionInterface<T>. Don't inherit from Action!
 // You can view an object implementing ActionInterface<F> as a
 // concrete action (including its current state), and an Action<F>
 // object as a handle to it.
@@ -425,7 +424,7 @@ class Action {
 #if GTEST_LANG_CXX11
   ::std::function<F> fun_;
 #endif
-  internal::linked_ptr<ActionInterface<F> > impl_;
+  std::shared_ptr<ActionInterface<F>> impl_;
 };
 
 // The PolymorphicAction class template makes it easy to implement a
@@ -519,7 +518,7 @@ class ActionAdaptor : public ActionInterface<F1> {
   }
 
  private:
-  const internal::linked_ptr<ActionInterface<F2> > impl_;
+  const std::shared_ptr<ActionInterface<F2>> impl_;
 
   GTEST_DISALLOW_ASSIGN_(ActionAdaptor);
 };
@@ -601,7 +600,7 @@ class ReturnAction {
     // Result to call.  ImplicitCast_ forces the compiler to convert R to
     // Result without considering explicit constructors, thus resolving the
     // ambiguity. value_ is then initialized using its copy constructor.
-    explicit Impl(const linked_ptr<R>& value)
+    explicit Impl(const std::shared_ptr<R>& value)
         : value_before_cast_(*value),
           value_(ImplicitCast_<Result>(value_before_cast_)) {}
 
@@ -626,7 +625,7 @@ class ReturnAction {
     typedef typename Function<F>::Result Result;
     typedef typename Function<F>::ArgumentTuple ArgumentTuple;
 
-    explicit Impl(const linked_ptr<R>& wrapper)
+    explicit Impl(const std::shared_ptr<R>& wrapper)
         : performed_(false), wrapper_(wrapper) {}
 
     virtual Result Perform(const ArgumentTuple&) {
@@ -638,12 +637,12 @@ class ReturnAction {
 
    private:
     bool performed_;
-    const linked_ptr<R> wrapper_;
+    const std::shared_ptr<R> wrapper_;
 
     GTEST_DISALLOW_ASSIGN_(Impl);
   };
 
-  const linked_ptr<R> value_;
+  const std::shared_ptr<R> value_;
 
   GTEST_DISALLOW_ASSIGN_(ReturnAction);
 };
@@ -866,7 +865,7 @@ class SetArgumentPointeeAction<N, Proto, true> {
   }
 
  private:
-  const internal::linked_ptr<Proto> proto_;
+  const std::shared_ptr<Proto> proto_;
 
   GTEST_DISALLOW_ASSIGN_(SetArgumentPointeeAction);
 };
@@ -931,7 +930,7 @@ class InvokeCallbackWithoutArgsAction {
   Result Perform(const ArgumentTuple&) const { return callback_->Run(); }
 
  private:
-  const internal::linked_ptr<CallbackType> callback_;
+  const std::shared_ptr<CallbackType> callback_;
 
   GTEST_DISALLOW_ASSIGN_(InvokeCallbackWithoutArgsAction);
 };

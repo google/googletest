@@ -48,7 +48,6 @@ EXTRA_DIST += \
   test/gtest-death-test_ex_test.cc \
   test/gtest-death-test_test.cc \
   test/gtest-filepath_test.cc \
-  test/gtest-linked_ptr_test.cc \
   test/gtest-listener_test.cc \
   test/gtest-message_test.cc \
   test/gtest-options_test.cc \

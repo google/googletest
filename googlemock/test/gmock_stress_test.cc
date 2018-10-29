@@ -60,87 +60,8 @@ void JoinAndDelete(ThreadWithParam<T>* t) {
   delete t;
 }
 
-using internal::linked_ptr;
-
-// Helper classes for testing using linked_ptr concurrently.
-
-class Base {
- public:
-  explicit Base(int a_x) : x_(a_x) {}
-  virtual ~Base() {}
-  int x() const { return x_; }
- private:
-  int x_;
-};
-
-class Derived1 : public Base {
- public:
-  Derived1(int a_x, int a_y) : Base(a_x), y_(a_y) {}
-  int y() const { return y_; }
- private:
-  int y_;
-};
-
-class Derived2 : public Base {
- public:
-  Derived2(int a_x, int a_z) : Base(a_x), z_(a_z) {}
-  int z() const { return z_; }
- private:
-  int z_;
-};
-
-linked_ptr<Derived1> pointer1(new Derived1(1, 2));
-linked_ptr<Derived2> pointer2(new Derived2(3, 4));
-
 struct Dummy {};
 
-// Tests that we can copy from a linked_ptr and read it concurrently.
-void TestConcurrentCopyAndReadLinkedPtr(Dummy /* dummy */) {
-  // Reads pointer1 and pointer2 while they are being copied from in
-  // another thread.
-  EXPECT_EQ(1, pointer1->x());
-  EXPECT_EQ(2, pointer1->y());
-  EXPECT_EQ(3, pointer2->x());
-  EXPECT_EQ(4, pointer2->z());
-
-  // Copies from pointer1.
-  linked_ptr<Derived1> p1(pointer1);
-  EXPECT_EQ(1, p1->x());
-  EXPECT_EQ(2, p1->y());
-
-  // Assigns from pointer2 where the LHS was empty.
-  linked_ptr<Base> p2;
-  p2 = pointer1;
-  EXPECT_EQ(1, p2->x());
-
-  // Assigns from pointer2 where the LHS was not empty.
-  p2 = pointer2;
-  EXPECT_EQ(3, p2->x());
-}
-
-const linked_ptr<Derived1> p0(new Derived1(1, 2));
-
-// Tests that we can concurrently modify two linked_ptrs that point to
-// the same object.
-void TestConcurrentWriteToEqualLinkedPtr(Dummy /* dummy */) {
-  // p1 and p2 point to the same, shared thing.  One thread resets p1.
-  // Another thread assigns to p2.  This will cause the same
-  // underlying "ring" to be updated concurrently.
-  linked_ptr<Derived1> p1(p0);
-  linked_ptr<Derived1> p2(p0);
-
-  EXPECT_EQ(1, p1->x());
-  EXPECT_EQ(2, p1->y());
-
-  EXPECT_EQ(1, p2->x());
-  EXPECT_EQ(2, p2->y());
-
-  p1.reset();
-  p2 = p0;
-
-  EXPECT_EQ(1, p2->x());
-  EXPECT_EQ(2, p2->y());
-}
 
 // Tests that different mock objects can be used in their respective
 // threads.  This should generate no Google Test failure.
@@ -275,8 +196,6 @@ void TestPartiallyOrderedExpectationsWithThreads(Dummy /* dummy */) {
 // Tests using Google Mock constructs in many threads concurrently.
 TEST(StressTest, CanUseGMockWithThreads) {
   void (*test_routines[])(Dummy dummy) = {
-    &TestConcurrentCopyAndReadLinkedPtr,
-    &TestConcurrentWriteToEqualLinkedPtr,
     &TestConcurrentMockObjects,
     &TestConcurrentCallsOnSameObject,
     &TestPartiallyOrderedExpectationsWithThreads,
