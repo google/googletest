@@ -195,7 +195,6 @@ $env:Path = \"$project_bin;$env:Path\"
   cxx_test(googletest-death-test-test gtest_main)
   cxx_test(gtest_environment_test gtest)
   cxx_test(googletest-filepath-test gtest_main)
-  cxx_test(googletest-linked-ptr-test gtest_main)
   cxx_test(googletest-listener-test gtest_main)
   cxx_test(gtest_main_unittest gtest_main)
   cxx_test(googletest-message-test gtest_main)

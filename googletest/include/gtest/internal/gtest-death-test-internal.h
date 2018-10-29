@@ -186,38 +186,38 @@ GTEST_API_ bool ExitedUnsuccessfully(int exit_status);
 
 // This macro is for implementing ASSERT_DEATH*, EXPECT_DEATH*,
 // ASSERT_EXIT*, and EXPECT_EXIT*.
-# define GTEST_DEATH_TEST_(statement, predicate, regex, fail) \
-  GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-  if (::testing::internal::AlwaysTrue()) { \
-    const ::testing::internal::RE& gtest_regex = (regex); \
-    ::testing::internal::DeathTest* gtest_dt; \
-    if (!::testing::internal::DeathTest::Create(#statement, &gtest_regex, \
-        __FILE__, __LINE__, &gtest_dt)) { \
-      goto GTEST_CONCAT_TOKEN_(gtest_label_, __LINE__); \
-    } \
-    if (gtest_dt != NULL) { \
-      ::testing::internal::scoped_ptr< ::testing::internal::DeathTest> \
-          gtest_dt_ptr(gtest_dt); \
-      switch (gtest_dt->AssumeRole()) { \
-        case ::testing::internal::DeathTest::OVERSEE_TEST: \
-          if (!gtest_dt->Passed(predicate(gtest_dt->Wait()))) { \
-            goto GTEST_CONCAT_TOKEN_(gtest_label_, __LINE__); \
-          } \
-          break; \
-        case ::testing::internal::DeathTest::EXECUTE_TEST: { \
-          ::testing::internal::DeathTest::ReturnSentinel \
-              gtest_sentinel(gtest_dt); \
-          GTEST_EXECUTE_DEATH_TEST_STATEMENT_(statement, gtest_dt); \
+#define GTEST_DEATH_TEST_(statement, predicate, regex, fail)                 \
+  GTEST_AMBIGUOUS_ELSE_BLOCKER_                                              \
+  if (::testing::internal::AlwaysTrue()) {                                   \
+    const ::testing::internal::RE& gtest_regex = (regex);                    \
+    ::testing::internal::DeathTest* gtest_dt;                                \
+    if (!::testing::internal::DeathTest::Create(                             \
+            #statement, &gtest_regex, __FILE__, __LINE__, &gtest_dt)) {      \
+      goto GTEST_CONCAT_TOKEN_(gtest_label_, __LINE__);                      \
+    }                                                                        \
+    if (gtest_dt != nullptr) {                                               \
+      ::testing::internal::scoped_ptr< ::testing::internal::DeathTest>       \
+          gtest_dt_ptr(gtest_dt);                                            \
+      switch (gtest_dt->AssumeRole()) {                                      \
+        case ::testing::internal::DeathTest::OVERSEE_TEST:                   \
+          if (!gtest_dt->Passed(predicate(gtest_dt->Wait()))) {              \
+            goto GTEST_CONCAT_TOKEN_(gtest_label_, __LINE__);                \
+          }                                                                  \
+          break;                                                             \
+        case ::testing::internal::DeathTest::EXECUTE_TEST: {                 \
+          ::testing::internal::DeathTest::ReturnSentinel gtest_sentinel(     \
+              gtest_dt);                                                     \
+          GTEST_EXECUTE_DEATH_TEST_STATEMENT_(statement, gtest_dt);          \
           gtest_dt->Abort(::testing::internal::DeathTest::TEST_DID_NOT_DIE); \
-          break; \
-        } \
-        default: \
-          break; \
-      } \
-    } \
-  } else \
-    GTEST_CONCAT_TOKEN_(gtest_label_, __LINE__): \
-      fail(::testing::internal::DeathTest::LastMessage())
+          break;                                                             \
+        }                                                                    \
+        default:                                                             \
+          break;                                                             \
+      }                                                                      \
+    }                                                                        \
+  } else                                                                     \
+    GTEST_CONCAT_TOKEN_(gtest_label_, __LINE__)                              \
+        : fail(::testing::internal::DeathTest::LastMessage())
 // The symbol "fail" here expands to something into which a message
 // can be streamed.
 
