@@ -48,7 +48,6 @@ EXTRA_DIST += \
   test/gtest-death-test_ex_test.cc \
   test/gtest-death-test_test.cc \
   test/gtest-filepath_test.cc \
-  test/gtest-linked_ptr_test.cc \
   test/gtest-listener_test.cc \
   test/gtest-message_test.cc \
   test/gtest-options_test.cc \
@@ -200,7 +199,6 @@ pkginclude_internal_HEADERS = \
   include/gtest/internal/gtest-death-test-internal.h \
   include/gtest/internal/gtest-filepath.h \
   include/gtest/internal/gtest-internal.h \
-  include/gtest/internal/gtest-linked_ptr.h \
   include/gtest/internal/gtest-param-util-generated.h \
   include/gtest/internal/gtest-param-util.h \
   include/gtest/internal/gtest-port.h \
