@@ -41,7 +41,6 @@ using ::testing::Test;
 using ::testing::TestEventListeners;
 using ::testing::TestInfo;
 using ::testing::UnitTest;
-using ::testing::internal::scoped_ptr;
 
 // The test methods are empty, as the sole purpose of this program is
 // to print the test names before/after shuffling.
