@@ -38,17 +38,17 @@
 #include <ctype.h>
 
 #include <iterator>
+#include <memory>
 #include <set>
+#include <tuple>
 #include <utility>
 #include <vector>
 
 #include "gtest/internal/gtest-internal.h"
-#include "gtest/internal/gtest-linked_ptr.h"
 #include "gtest/internal/gtest-port.h"
 #include "gtest/gtest-printers.h"
 
 namespace testing {
-
 // Input to a parameterized test name generator, describing a test parameter.
 // Consists of the parameter value and the integer parameter index.
 template <class ParamType>
@@ -72,7 +72,8 @@ struct PrintToStringParamName {
 namespace internal {
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
-//
+// Utility Functions
+
 // Outputs a message explaining invalid registration of different
 // fixture class for the same test case. This may happen when
 // TEST_P macro is used to define two tests with the same name
@@ -192,7 +193,7 @@ class ParamGenerator {
   iterator end() const { return iterator(impl_->End()); }
 
  private:
-  linked_ptr<const ParamGeneratorInterface<T> > impl_;
+  std::shared_ptr<const ParamGeneratorInterface<T> > impl_;
 };
 
 // Generates values from a range of two comparable values. Can be used to
@@ -518,9 +519,8 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
   void AddTestPattern(const char* test_case_name,
                       const char* test_base_name,
                       TestMetaFactoryBase<ParamType>* meta_factory) {
-    tests_.push_back(linked_ptr<TestInfo>(new TestInfo(test_case_name,
-                                                       test_base_name,
-                                                       meta_factory)));
+    tests_.push_back(std::shared_ptr<TestInfo>(
+        new TestInfo(test_case_name, test_base_name, meta_factory)));
   }
   // INSTANTIATE_TEST_CASE_P macro uses AddGenerator() to record information
   // about a generator.
@@ -540,7 +540,7 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
   virtual void RegisterTests() {
     for (typename TestInfoContainer::iterator test_it = tests_.begin();
          test_it != tests_.end(); ++test_it) {
-      linked_ptr<TestInfo> test_info = *test_it;
+      std::shared_ptr<TestInfo> test_info = *test_it;
       for (typename InstantiationContainer::iterator gen_it =
                instantiations_.begin(); gen_it != instantiations_.end();
                ++gen_it) {
@@ -604,7 +604,7 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
     const std::string test_base_name;
     const scoped_ptr<TestMetaFactoryBase<ParamType> > test_meta_factory;
   };
-  typedef ::std::vector<linked_ptr<TestInfo> > TestInfoContainer;
+  using TestInfoContainer = ::std::vector<std::shared_ptr<TestInfo> >;
   // Records data received from INSTANTIATE_TEST_CASE_P macros:
   //  <Instantiation name, Sequence generator creation function,
   //     Name generator function, Source file, Source line>
@@ -712,6 +712,36 @@ class ParameterizedTestCaseRegistry {
   TestCaseInfoContainer test_case_infos_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ParameterizedTestCaseRegistry);
+};
+
+}  // namespace internal
+
+// Forward declarations of ValuesIn(), which is implemented in
+// include/gtest/gtest-param-test.h.
+template <class Container>
+internal::ParamGenerator<typename Container::value_type> ValuesIn(
+    const Container& container);
+
+namespace internal {
+// Used in the Values() function to provide polymorphic capabilities.
+
+template <typename... Ts>
+class ValueArray {
+ public:
+  ValueArray(Ts... v) : v_{std::move(v)...} {}
+
+  template <typename T>
+  operator ParamGenerator<T>() const {  // NOLINT
+    return ValuesIn(MakeVector<T>(MakeIndexSequence<sizeof...(Ts)>()));
+  }
+
+ private:
+  template <typename T, size_t... I>
+  std::vector<T> MakeVector(IndexSequence<I...>) const {
+    return std::vector<T>{static_cast<T>(v_.template Get<I>())...};
+  }
+
+  FlatTuple<Ts...> v_;
 };
 
 }  // namespace internal

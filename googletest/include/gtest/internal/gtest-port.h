@@ -129,6 +129,7 @@
 //   GTEST_OS_NACL     - Google Native Client (NaCl)
 //   GTEST_OS_NETBSD   - NetBSD
 //   GTEST_OS_OPENBSD  - OpenBSD
+//   GTEST_OS_OS2      - OS/2
 //   GTEST_OS_QNX      - QNX
 //   GTEST_OS_SOLARIS  - Sun Solaris
 //   GTEST_OS_SYMBIAN  - Symbian
@@ -201,11 +202,6 @@
 //                                        suppressed (constant conditional).
 //   GTEST_INTENTIONAL_CONST_COND_POP_  - finish code section where MSVC C4127
 //                                        is suppressed.
-//
-// C++11 feature wrappers:
-//
-//   testing::internal::forward - portability wrapper for std::forward.
-//   testing::internal::move  - portability wrapper for std::move.
 //
 // Synchronization:
 //   Mutex, MutexLock, ThreadLocal, GetThreadCount()
@@ -681,7 +677,8 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 // Determines whether the system compiler uses UTF-16 for encoding wide strings.
 #define GTEST_WIDE_STRING_USES_UTF16_ \
-    (GTEST_OS_WINDOWS || GTEST_OS_CYGWIN || GTEST_OS_SYMBIAN || GTEST_OS_AIX)
+    (GTEST_OS_WINDOWS || GTEST_OS_CYGWIN || GTEST_OS_SYMBIAN || \
+     GTEST_OS_AIX || GTEST_OS_OS2)
 
 // Determines whether test results can be streamed to a socket.
 #if GTEST_OS_LINUX
@@ -1255,28 +1252,6 @@ struct ConstRef<T&> { typedef T& type; };
 #define GTEST_REFERENCE_TO_CONST_(T) \
   typename ::testing::internal::ConstRef<T>::type
 
-#if GTEST_HAS_STD_MOVE_
-using std::forward;
-using std::move;
-
-template <typename T>
-struct RvalueRef {
-  typedef T&& type;
-};
-#else  // GTEST_HAS_STD_MOVE_
-template <typename T>
-const T& move(const T& t) {
-  return t;
-}
-template <typename T>
-GTEST_ADD_REFERENCE_(T) forward(GTEST_ADD_REFERENCE_(T) t) { return t; }
-
-template <typename T>
-struct RvalueRef {
-  typedef const T& type;
-};
-#endif  // GTEST_HAS_STD_MOVE_
-
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 //
 // Use ImplicitCast_ as a safe version of static_cast for upcasting in
@@ -1330,13 +1305,13 @@ inline To DownCast_(From* f) {  // so we only accept pointers
   GTEST_INTENTIONAL_CONST_COND_PUSH_()
   if (false) {
   GTEST_INTENTIONAL_CONST_COND_POP_()
-    const To to = NULL;
-    ::testing::internal::ImplicitCast_<From*>(to);
+  const To to = nullptr;
+  ::testing::internal::ImplicitCast_<From*>(to);
   }
 
 #if GTEST_HAS_RTTI
   // RTTI: debug mode only!
-  GTEST_CHECK_(f == nullptr || dynamic_cast<To>(f) != NULL);
+  GTEST_CHECK_(f == nullptr || dynamic_cast<To>(f) != nullptr);
 #endif
   return static_cast<To>(f);
 }
@@ -2359,12 +2334,12 @@ inline const char* GetEnv(const char* name) {
 #if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_RT
   // We are on Windows CE, which has no environment variables.
   static_cast<void>(name);  // To prevent 'unused argument' warning.
-  return NULL;
+  return nullptr;
 #elif defined(__BORLANDC__) || defined(__SunOS_5_8) || defined(__SunOS_5_9)
   // Environment variables which we programmatically clear will be set to the
   // empty string rather than unset (NULL).  Handle that case.
   const char* const env = getenv(name);
-  return (env != NULL && env[0] != '\0') ? env : NULL;
+  return (env != nullptr && env[0] != '\0') ? env : nullptr;
 #else
   return getenv(name);
 #endif

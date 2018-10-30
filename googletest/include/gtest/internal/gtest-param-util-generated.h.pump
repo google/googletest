@@ -43,6 +43,10 @@ $var maxtuple = 10  $$ Maximum number of Combine arguments we want to support.
 
 // GOOGLETEST_CM0001 DO NOT DELETE
 
+#include <assert.h>
+
+#include <memory>
+
 #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_GENERATED_H_
 #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_GENERATED_H_
 
@@ -51,53 +55,7 @@ $var maxtuple = 10  $$ Maximum number of Combine arguments we want to support.
 
 namespace testing {
 
-// Forward declarations of ValuesIn(), which is implemented in
-// include/gtest/gtest-param-test.h.
-template <typename ForwardIterator>
-internal::ParamGenerator<
-  typename ::testing::internal::IteratorTraits<ForwardIterator>::value_type>
-ValuesIn(ForwardIterator begin, ForwardIterator end);
-
-template <typename T, size_t N>
-internal::ParamGenerator<T> ValuesIn(const T (&array)[N]);
-
-template <class Container>
-internal::ParamGenerator<typename Container::value_type> ValuesIn(
-    const Container& container);
-
 namespace internal {
-
-// Used in the Values() function to provide polymorphic capabilities.
-$range i 1..n
-$for i [[
-$range j 1..i
-
-template <$for j, [[typename T$j]]>
-class ValueArray$i {
- public:
-  $if i==1 [[explicit ]]ValueArray$i($for j, [[T$j v$j]]) : $for j, [[v$(j)_(v$j)]] {}
-
-  template <typename T>
-  operator ParamGenerator<T>() const {
-    const T array[] = {$for j, [[static_cast<T>(v$(j)_)]]};
-    return ValuesIn(array);
-  }
-
-  ValueArray$i(const ValueArray$i& other) : $for j, [[v$(j)_(other.v$(j)_)]] {}
-
- private:
-  // No implementation - assignment is unsupported.
-  void operator=(const ValueArray$i& other);
-
-$for j [[
-
-  const T$j v$(j)_;
-]]
-
-};
-
-]]
-
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 //
 // Generates values from the Cartesian product of values produced
@@ -219,7 +177,7 @@ $for j [[
     typename ParamGenerator<T$j>::iterator current$(j)_;
 ]]
 
-    linked_ptr<ParamType> current_value_;
+    std::shared_ptr<ParamType> current_value_;
   };  // class CartesianProductGenerator$i::Iterator
 
   // No implementation - assignment is unsupported.

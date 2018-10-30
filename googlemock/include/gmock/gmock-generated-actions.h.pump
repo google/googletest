@@ -43,6 +43,9 @@ $$}} This meta comment fixes auto-indentation in editors.
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_ACTIONS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_ACTIONS_H_
 
+#include <memory>
+#include <utility>
+
 #include "gmock/gmock-actions.h"
 #include "gmock/internal/gmock-port.h"
 
@@ -116,7 +119,7 @@ class InvokeCallbackAction {
         callback_.get(), args);
   }
  private:
-  const linked_ptr<CallbackType> callback_;
+  const std::shared_ptr<CallbackType> callback_;
 };
 
 // An INTERNAL macro for extracting the type of a tuple field.  It's
@@ -525,7 +528,7 @@ _VALUE_PARAMS($for j, [[p$j]]) $for j [[, typename p$j##_type]]
 $for i [[
 $range j 0..i-1
 #define GMOCK_INTERNAL_INIT_AND_$i[[]]_VALUE_PARAMS($for j, [[p$j]])\
-    ($for j, [[p$j##_type gmock_p$j]])$if i>0 [[ : ]]$for j, [[p$j(::testing::internal::move(gmock_p$j))]]
+    ($for j, [[p$j##_type gmock_p$j]])$if i>0 [[ : ]]$for j, [[p$j(::std::move(gmock_p$j))]]
 
 
 ]]
@@ -658,7 +661,7 @@ $var class_name = [[name##Action[[$if i==0 [[]] $elif i==1 [[P]]
 $range j 0..i-1
 $var ctor_param_list = [[$for j, [[p$j##_type gmock_p$j]]]]
 $var param_types_and_names = [[$for j, [[p$j##_type p$j]]]]
-$var inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(::testing::internal::forward<p$j##_type>(gmock_p$j))]]]]]]
+$var inits = [[$if i==0 [[]] $else [[ : $for j, [[p$j(::std::forward<p$j##_type>(gmock_p$j))]]]]]]
 $var param_field_decls = [[$for j
 [[
 

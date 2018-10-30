@@ -6181,16 +6181,9 @@ TEST_F(FlagfileTest, Empty) {
   std::string flagfile_flag =
       std::string("--" GTEST_FLAG_PREFIX_ "flagfile=") + flagfile_path.c_str();
 
-  const char* argv[] = {
-    "foo.exe",
-    flagfile_flag.c_str(),
-    NULL
-  };
+  const char* argv[] = {"foo.exe", flagfile_flag.c_str(), nullptr};
 
-  const char* argv2[] = {
-    "foo.exe",
-    NULL
-  };
+  const char* argv2[] = {"foo.exe", nullptr};
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags(), false);
 }
@@ -6202,16 +6195,9 @@ TEST_F(FlagfileTest, FilterNonEmpty) {
   std::string flagfile_flag =
       std::string("--" GTEST_FLAG_PREFIX_ "flagfile=") + flagfile_path.c_str();
 
-  const char* argv[] = {
-    "foo.exe",
-    flagfile_flag.c_str(),
-    NULL
-  };
+  const char* argv[] = {"foo.exe", flagfile_flag.c_str(), nullptr};
 
-  const char* argv2[] = {
-    "foo.exe",
-    NULL
-  };
+  const char* argv2[] = {"foo.exe", nullptr};
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Filter("abc"), false);
 }
@@ -6225,16 +6211,9 @@ TEST_F(FlagfileTest, SeveralFlags) {
   std::string flagfile_flag =
       std::string("--" GTEST_FLAG_PREFIX_ "flagfile=") + flagfile_path.c_str();
 
-  const char* argv[] = {
-    "foo.exe",
-    flagfile_flag.c_str(),
-    NULL
-  };
+  const char* argv[] = {"foo.exe", flagfile_flag.c_str(), nullptr};
 
-  const char* argv2[] = {
-    "foo.exe",
-    NULL
-  };
+  const char* argv2[] = {"foo.exe", nullptr};
 
   Flags expected_flags;
   expected_flags.break_on_failure = true;
@@ -7448,6 +7427,84 @@ TEST(NativeArrayTest, WorksForTwoDimensionalArray) {
   NativeArray<char[3]> na(a, 2, RelationToSourceReference());
   ASSERT_EQ(2U, na.size());
   EXPECT_EQ(a, na.begin());
+}
+
+// IndexSequence
+TEST(IndexSequence, MakeIndexSequence) {
+  using testing::internal::IndexSequence;
+  using testing::internal::MakeIndexSequence;
+  EXPECT_TRUE(
+      (std::is_same<IndexSequence<>, MakeIndexSequence<0>::type>::value));
+  EXPECT_TRUE(
+      (std::is_same<IndexSequence<0>, MakeIndexSequence<1>::type>::value));
+  EXPECT_TRUE(
+      (std::is_same<IndexSequence<0, 1>, MakeIndexSequence<2>::type>::value));
+  EXPECT_TRUE((
+      std::is_same<IndexSequence<0, 1, 2>, MakeIndexSequence<3>::type>::value));
+  EXPECT_TRUE(
+      (std::is_base_of<IndexSequence<0, 1, 2>, MakeIndexSequence<3>>::value));
+}
+
+// ElemFromList
+TEST(ElemFromList, Basic) {
+  using testing::internal::ElemFromList;
+  using Idx = testing::internal::MakeIndexSequence<3>::type;
+  EXPECT_TRUE((
+      std::is_same<int, ElemFromList<0, Idx, int, double, char>::type>::value));
+  EXPECT_TRUE(
+      (std::is_same<double,
+                    ElemFromList<1, Idx, int, double, char>::type>::value));
+  EXPECT_TRUE(
+      (std::is_same<char,
+                    ElemFromList<2, Idx, int, double, char>::type>::value));
+  EXPECT_TRUE(
+      (std::is_same<
+          char, ElemFromList<7, testing::internal::MakeIndexSequence<12>::type,
+                             int, int, int, int, int, int, int, char, int, int,
+                             int, int>::type>::value));
+}
+
+// FlatTuple
+TEST(FlatTuple, Basic) {
+  using testing::internal::FlatTuple;
+
+  FlatTuple<int, double, const char*> tuple = {};
+  EXPECT_EQ(0, tuple.Get<0>());
+  EXPECT_EQ(0.0, tuple.Get<1>());
+  EXPECT_EQ(nullptr, tuple.Get<2>());
+
+  tuple = FlatTuple<int, double, const char*>(7, 3.2, "Foo");
+  EXPECT_EQ(7, tuple.Get<0>());
+  EXPECT_EQ(3.2, tuple.Get<1>());
+  EXPECT_EQ(std::string("Foo"), tuple.Get<2>());
+
+  tuple.Get<1>() = 5.1;
+  EXPECT_EQ(5.1, tuple.Get<1>());
+}
+
+TEST(FlatTuple, ManyTypes) {
+  using testing::internal::FlatTuple;
+
+  // Instantiate FlatTuple with 257 ints.
+  // Tests show that we can do it with thousands of elements, but very long
+  // compile times makes it unusuitable for this test.
+#define GTEST_FLAT_TUPLE_INT8 int, int, int, int, int, int, int, int,
+#define GTEST_FLAT_TUPLE_INT16 GTEST_FLAT_TUPLE_INT8 GTEST_FLAT_TUPLE_INT8
+#define GTEST_FLAT_TUPLE_INT32 GTEST_FLAT_TUPLE_INT16 GTEST_FLAT_TUPLE_INT16
+#define GTEST_FLAT_TUPLE_INT64 GTEST_FLAT_TUPLE_INT32 GTEST_FLAT_TUPLE_INT32
+#define GTEST_FLAT_TUPLE_INT128 GTEST_FLAT_TUPLE_INT64 GTEST_FLAT_TUPLE_INT64
+#define GTEST_FLAT_TUPLE_INT256 GTEST_FLAT_TUPLE_INT128 GTEST_FLAT_TUPLE_INT128
+
+  // Let's make sure that we can have a very long list of types without blowing
+  // up the template instantiation depth.
+  FlatTuple<GTEST_FLAT_TUPLE_INT256 int> tuple;
+
+  tuple.Get<0>() = 7;
+  tuple.Get<99>() = 17;
+  tuple.Get<256>() = 1000;
+  EXPECT_EQ(7, tuple.Get<0>());
+  EXPECT_EQ(17, tuple.Get<99>());
+  EXPECT_EQ(1000, tuple.Get<256>());
 }
 
 // Tests SkipPrefix().
