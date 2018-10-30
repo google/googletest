@@ -39,6 +39,7 @@
 #include "gtest/internal/gtest-internal.h"
 
 #include <stdio.h>
+#include <memory>
 
 namespace testing {
 namespace internal {
@@ -196,7 +197,7 @@ GTEST_API_ bool ExitedUnsuccessfully(int exit_status);
       goto GTEST_CONCAT_TOKEN_(gtest_label_, __LINE__);                      \
     }                                                                        \
     if (gtest_dt != nullptr) {                                               \
-      ::testing::internal::scoped_ptr< ::testing::internal::DeathTest>       \
+      std::unique_ptr< ::testing::internal::DeathTest>       \
           gtest_dt_ptr(gtest_dt);                                            \
       switch (gtest_dt->AssumeRole()) {                                      \
         case ::testing::internal::DeathTest::OVERSEE_TEST:                   \

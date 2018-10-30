@@ -1598,7 +1598,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
     // const_cast is required since in C++98 we still pass ArgumentTuple around
     // by const& instead of rvalue reference.
     void* untyped_args = const_cast<void*>(static_cast<const void*>(&args));
-    scoped_ptr<ResultHolder> holder(
+    std::unique_ptr<ResultHolder> holder(
         DownCast_<ResultHolder*>(this->UntypedInvokeWith(untyped_args)));
     return holder->Unwrap();
   }
