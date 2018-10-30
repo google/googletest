@@ -524,8 +524,7 @@ class DeathTestAndMultiThreadsTest : public testing::Test {
 
  private:
   SpawnThreadNotifications notifications_;
-  testing::internal::scoped_ptr<ThreadWithParam<SpawnThreadNotifications*> >
-      thread_;
+  std::unique_ptr<ThreadWithParam<SpawnThreadNotifications*> > thread_;
 };
 
 #endif  // GTEST_IS_THREADSAFE

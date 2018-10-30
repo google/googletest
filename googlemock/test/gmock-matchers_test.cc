@@ -145,10 +145,8 @@ using testing::internal::FormatMatcherDescription;
 using testing::internal::IsReadableTypeName;
 using testing::internal::MatchMatrix;
 using testing::internal::RE;
-using testing::internal::scoped_ptr;
 using testing::internal::StreamMatchResultListener;
 using testing::internal::Strings;
-using testing::internal::scoped_ptr;
 using testing::internal::string;
 
 // For testing ExplainMatchResultTo().

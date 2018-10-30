@@ -39,6 +39,7 @@
 #include "gtest/internal/gtest-internal.h"
 
 #include <stdio.h>
+#include <memory>
 
 namespace testing {
 namespace internal {
