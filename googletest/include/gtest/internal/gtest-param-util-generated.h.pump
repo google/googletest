@@ -43,6 +43,10 @@ $var maxtuple = 10  $$ Maximum number of Combine arguments we want to support.
 
 // GOOGLETEST_CM0001 DO NOT DELETE
 
+#include <assert.h>
+
+#include <memory>
+
 #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_GENERATED_H_
 #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_GENERATED_H_
 
@@ -173,7 +177,7 @@ $for j [[
     typename ParamGenerator<T$j>::iterator current$(j)_;
 ]]
 
-    linked_ptr<ParamType> current_value_;
+    std::shared_ptr<ParamType> current_value_;
   };  // class CartesianProductGenerator$i::Iterator
 
   // No implementation - assignment is unsupported.

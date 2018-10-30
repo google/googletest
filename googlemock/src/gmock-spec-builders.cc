@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include <iostream>  // NOLINT
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -848,7 +849,7 @@ void Mock::ClearDefaultActionsLocked(void* mock_obj)
 Expectation::Expectation() {}
 
 Expectation::Expectation(
-    const internal::linked_ptr<internal::ExpectationBase>& an_expectation_base)
+    const std::shared_ptr<internal::ExpectationBase>& an_expectation_base)
     : expectation_base_(an_expectation_base) {}
 
 Expectation::~Expectation() {}
@@ -866,7 +867,7 @@ void Sequence::AddExpectation(const Expectation& expectation) const {
 
 // Creates the implicit sequence if there isn't one.
 InSequence::InSequence() {
-  if (internal::g_gmock_implicit_sequence.get() == NULL) {
+  if (internal::g_gmock_implicit_sequence.get() == nullptr) {
     internal::g_gmock_implicit_sequence.set(new Sequence);
     sequence_created_ = true;
   } else {
@@ -879,7 +880,7 @@ InSequence::InSequence() {
 InSequence::~InSequence() {
   if (sequence_created_) {
     delete internal::g_gmock_implicit_sequence.get();
-    internal::g_gmock_implicit_sequence.set(NULL);
+    internal::g_gmock_implicit_sequence.set(nullptr);
   }
 }
 

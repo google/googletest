@@ -92,15 +92,6 @@ inline const typename Pointer::element_type* GetRawPointer(const Pointer& p) {
 template <typename Element>
 inline Element* GetRawPointer(Element* p) { return p; }
 
-// This comparator allows linked_ptr to be stored in sets.
-template <typename T>
-struct LinkedPtrLessThan {
-  bool operator()(const ::testing::internal::linked_ptr<T>& lhs,
-                  const ::testing::internal::linked_ptr<T>& rhs) const {
-    return lhs.get() < rhs.get();
-  }
-};
-
 // Symbian compilation can be done with wchar_t being either a native
 // type or a typedef.  Using Google Mock with OpenC without wchar_t
 // should require the definition of _STLP_NO_WCHAR_T.
