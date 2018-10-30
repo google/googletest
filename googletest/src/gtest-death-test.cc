@@ -70,6 +70,7 @@
 #  include <lib/zx/process.h>
 #  include <zircon/processargs.h>
 #  include <zircon/syscalls.h>
+#  include <zircon/syscalls/policy.h>
 #  include <zircon/syscalls/port.h>
 # endif  // GTEST_OS_FUCHSIA
 
@@ -1023,19 +1024,29 @@ DeathTest::TestRole FuchsiaDeathTest::AssumeRole() {
   add_stderr_action->fd.local_fd = stderr_producer_fd;
   add_stderr_action->fd.target_fd = STDERR_FILENO;
 
-  // Spawn the child process.
-  status = fdio_spawn_etc(
-      ZX_HANDLE_INVALID, FDIO_SPAWN_CLONE_ALL, args.Argv()[0], args.Argv(),
-      nullptr, 2, spawn_actions, child_process_.reset_and_get_address(),
-      nullptr);
+  // Create a child job.
+  zx_handle_t child_job = ZX_HANDLE_INVALID;
+  status = zx_job_create(zx_job_default(), 0, & child_job);
+  GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
+  zx_policy_basic_t policy;
+  policy.condition = ZX_POL_NEW_ANY;
+  policy.policy = ZX_POL_ACTION_ALLOW;
+  status = zx_job_set_policy(
+      child_job, ZX_JOB_POL_RELATIVE, ZX_JOB_POL_BASIC, &policy, 1);
   GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
 
-  // Create an exception port and attach it to the |child_process_|, to allow
+  // Create an exception port and attach it to the |child_job|, to allow
   // us to suppress the system default exception handler from firing.
   status = zx::port::create(0, &port_);
   GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
-  status = child_process_.bind_exception_port(
-      port_, 0 /* key */, 0 /*options */);
+  status = zx_task_bind_exception_port(
+      child_job, port_.get(), 0 /* key */, 0 /*options */);
+  GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
+
+  // Spawn the child process.
+  status = fdio_spawn_etc(
+      child_job, FDIO_SPAWN_CLONE_ALL, args.Argv()[0], args.Argv(), nullptr,
+      2, spawn_actions, child_process_.reset_and_get_address(), nullptr);
   GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
 
   set_spawned(true);
