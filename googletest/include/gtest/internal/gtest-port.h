@@ -212,8 +212,6 @@
 //   IteratorTraits - partial implementation of std::iterator_traits, which
 //                    is not available in libCstd when compiled with Sun C++.
 //
-// Smart pointers:
-//   scoped_ptr     - as in TR2.
 //
 // Regular expressions:
 //   RE             - a simple regular expression class using the POSIX
@@ -253,9 +251,11 @@
 
 #include <ctype.h>   // for isspace, etc
 #include <stddef.h>  // for ptrdiff_t
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <memory>
+
 #ifndef _WIN32_WCE
 # include <sys/types.h>
 # include <sys/stat.h>
@@ -1009,48 +1009,6 @@ typedef ::std::wstring wstring;
 // A helper for suppressing warnings on constant condition.  It just
 // returns 'condition'.
 GTEST_API_ bool IsTrue(bool condition);
-
-// Defines scoped_ptr.
-
-// This implementation of scoped_ptr is PARTIAL - it only contains
-// enough stuff to satisfy Google Test's need.
-template <typename T>
-class scoped_ptr {
- public:
-  typedef T element_type;
-
-  explicit scoped_ptr(T* p = nullptr) : ptr_(p) {}
-  ~scoped_ptr() { reset(); }
-
-  T& operator*() const { return *ptr_; }
-  T* operator->() const { return ptr_; }
-  T* get() const { return ptr_; }
-
-  T* release() {
-    T* const ptr = ptr_;
-    ptr_ = nullptr;
-    return ptr;
-  }
-
-  void reset(T* p = nullptr) {
-    if (p != ptr_) {
-      if (IsTrue(sizeof(T) > 0)) {  // Makes sure T is a complete type.
-        delete ptr_;
-      }
-      ptr_ = p;
-    }
-  }
-
-  friend void swap(scoped_ptr& a, scoped_ptr& b) {
-    using std::swap;
-    swap(a.ptr_, b.ptr_);
-  }
-
- private:
-  T* ptr_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(scoped_ptr);
-};
 
 // Defines RE.
 
@@ -1845,7 +1803,7 @@ class ThreadLocal : public ThreadLocalBase {
     GTEST_DISALLOW_COPY_AND_ASSIGN_(InstanceValueHolderFactory);
   };
 
-  scoped_ptr<ValueHolderFactory> default_factory_;
+  std::unique_ptr<ValueHolderFactory> default_factory_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadLocal);
 };
@@ -2056,7 +2014,7 @@ class GTEST_API_ ThreadLocal {
 
   // A key pthreads uses for looking up per-thread values.
   const pthread_key_t key_;
-  scoped_ptr<ValueHolderFactory> default_factory_;
+  std::unique_ptr<ValueHolderFactory> default_factory_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadLocal);
 };
