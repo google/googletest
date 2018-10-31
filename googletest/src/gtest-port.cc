@@ -410,14 +410,14 @@ class ThreadWithParamSupport : public ThreadWithParamBase {
         : runnable_(runnable),
           thread_can_start_(thread_can_start) {
     }
-    scoped_ptr<Runnable> runnable_;
+    std::unique_ptr<Runnable> runnable_;
     // Does not own.
     Notification* thread_can_start_;
   };
 
   static DWORD WINAPI ThreadMain(void* ptr) {
     // Transfers ownership.
-    scoped_ptr<ThreadMainParam> param(static_cast<ThreadMainParam*>(ptr));
+    std::unique_ptr<ThreadMainParam> param(static_cast<ThreadMainParam*>(ptr));
     if (param->thread_can_start_ != nullptr)
       param->thread_can_start_->WaitForNotification();
     param->runnable_->Run();
