@@ -1,8 +1,9 @@
-
-= The Problem
+= Pump Manual
 :toc: preamble
 
 **P**ump is **U**seful for **M**eta **P**rogramming.
+
+= The Problem
 
 Template and macro libraries often need to define many classes,
 functions, or macros that vary only (or almost only) in the number of

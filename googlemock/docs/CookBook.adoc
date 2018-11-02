@@ -1,4 +1,3 @@
-
 = Creating Mock Classes
 :toc: preamble
 

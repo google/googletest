@@ -1,6 +1,9 @@
+= For Dummies
+:toc: preamble
+
+&nbsp;
 
 = What Is Google C++ Mocking Framework?
-:toc: preamble
 
 (**Note:** If you get compiler errors that you don't understand, be sure to consult link:FrequentlyAskedQuestions.adoc#how-am-i-supposed-to-make-sense-of-these-horrible-template-errors[Google Mock Doctor].)
 

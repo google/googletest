@@ -1,6 +1,7 @@
-
 = Googletest Primer
 :toc: preamble
+
+&nbsp;
 
 == Introduction: Why googletest?
 

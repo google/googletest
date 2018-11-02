@@ -1,4 +1,3 @@
-
 = Macros for Defining Actions
 :toc: preamble
 

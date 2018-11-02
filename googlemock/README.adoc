@@ -1,5 +1,4 @@
-
-== Google Mock
+= Google Mock
 :toc: preamble
 
 The Google C++ mocking framework.

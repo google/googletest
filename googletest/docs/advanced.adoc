@@ -1,6 +1,7 @@
-
 = Advanced googletest Topics
 :toc: preamble
+
+&nbsp;
 
 == Introduction
 

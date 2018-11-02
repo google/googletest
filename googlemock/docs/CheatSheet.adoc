@@ -1,7 +1,7 @@
-
 = Defining a Mock Class
 :toc: preamble
 
+&nbsp;
 
 == Mocking a Normal Class
 

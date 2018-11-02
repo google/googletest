@@ -1,6 +1,7 @@
-
 = Googletest FAQ
 :toc: preamble
+
+&nbsp;
 
 == Why should test case names and test names not contain underscore?
 

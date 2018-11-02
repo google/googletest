@@ -1,6 +1,9 @@
+= Pkg-config
+:toc: preamble
+
+&nbsp;
 
 == Using GoogleTest from various build systems
-:toc: preamble
 
 GoogleTest comes with pkg-config files that can be used to determine all
 necessary flags for compiling and linking to GoogleTest (and GoogleMock).
