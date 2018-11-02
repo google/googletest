@@ -1,25 +1,27 @@
-## Using GoogleTest from various build systems ##
+
+== Using GoogleTest from various build systems
+:toc: preamble
 
 GoogleTest comes with pkg-config files that can be used to determine all
 necessary flags for compiling and linking to GoogleTest (and GoogleMock).
 Pkg-config is a standardised plain-text format containing
 
-  * the includedir (-I) path
-  * necessary macro (-D) definitions
-  * further required flags (-pthread)
-  * the library (-L) path
-  * the library (-l) to link to
+* the includedir (-I) path
+* necessary macro (-D) definitions
+* further required flags (-pthread)
+* the library (-L) path
+* the library (-l) to link to
 
 All current build systems support pkg-config in one way or another. For
 all examples here we assume you want to compile the sample
 `samples/sample3_unittest.cc`.
 
-
-### CMake ###
+=== CMake
 
 Using `pkg-config` in CMake is fairly easy:
 
-``` cmake
+[source,cmake]
+----
 cmake_minimum_required(VERSION 3.0)
 
 cmake_policy(SET CMP0048 NEW)
@@ -34,7 +36,8 @@ target_compile_options(testapp PUBLIC ${GTEST_CFLAGS})
 
 include(CTest)
 add_test(first_and_only_test testapp)
-```
+
+----
 
 It is generally recommended that you use `target_compile_options` + `_CFLAGS`
 over `target_include_directories` + `_INCLUDE_DIRS` as the former includes not
@@ -46,14 +49,13 @@ splitting the pkg-config `Cflags` variable into include dirs and macros for
 goes for using `_LDFLAGS` over the more commonplace `_LIBRARIES`, which
 happens to discard `-L` flags and `-pthread`.
 
-
-### Autotools ###
+=== Autotools
 
 Finding GoogleTest in Autoconf and using it from Automake is also fairly easy:
 
 In your `configure.ac`:
 
-```
+----
 AC_PREREQ([2.69])
 AC_INIT([my_gtest_pkgconfig], [0.0.1])
 AC_CONFIG_SRCDIR([samples/sample3_unittest.cc])
@@ -64,25 +66,24 @@ PKG_CHECK_MODULES([GTEST], [gtest_main])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
-```
+----
 
 and in your `Makefile.am`:
 
-```
+----
 check_PROGRAMS = testapp
 TESTS = $(check_PROGRAMS)
 
 testapp_SOURCES = samples/sample3_unittest.cc
 testapp_CXXFLAGS = $(GTEST_CFLAGS)
 testapp_LDADD = $(GTEST_LIBS)
-```
+----
 
-
-### Meson ###
+=== Meson
 
 Meson natively uses pkgconfig to query dependencies:
 
-```
+----
 project('my_gtest_pkgconfig', 'cpp', version : '0.0.1')
 
 gtest_dep = dependency('gtest_main')
@@ -94,15 +95,15 @@ testapp = executable(
   install : false)
 
 test('first_and_only_test', testapp)
-```
+----
 
-
-### Plain Makefiles ###
+=== Plain Makefiles
 
 Since `pkg-config` is a small Unix command-line utility, it can be used
 in handwritten `Makefile`s too:
 
-``` Makefile
+[source,Makefile]
+----
 GTEST_CFLAGS = `pkg-config --cflags gtest_main`
 GTEST_LIBS = `pkg-config --libs gtest_main`
 
@@ -118,20 +119,19 @@ testapp: testapp.o
 
 testapp.o: samples/sample3_unittest.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $< -c -o $@ $(GTEST_CFLAGS)
-```
+----
 
-
-### Help! pkg-config can't find GoogleTest! ###
+=== Help! pkg-config can't find GoogleTest!
 
 Let's say you have a `CMakeLists.txt` along the lines of the one in this
 tutorial and you try to run `cmake`. It is very possible that you get a
 failure along the lines of:
 
-```
+----
 -- Checking for one of the modules 'gtest_main'
 CMake Error at /usr/share/cmake/Modules/FindPkgConfig.cmake:640 (message):
   None of the required 'gtest_main' found
-```
+----
 
 These failures are common if you installed GoogleTest yourself and have not
 sourced it from a distro or other package manager. If so, you need to tell
@@ -139,8 +139,8 @@ pkg-config where it can find the `.pc` files containing the information.
 Say you installed GoogleTest to `/usr/local`, then it might be that the
 `.pc` files are installed under `/usr/local/lib64/pkgconfig`. If you set
 
-```
+----
 export PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig
-```
+----
 
 pkg-config will also try to look in `PKG_CONFIG_PATH` to find `gtest_main.pc`.
