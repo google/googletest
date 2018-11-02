@@ -80,7 +80,7 @@ build_script:
 
 skip_commits:
   files:
-    - '**/*.md'
+    - '**/*.adoc'
 
 test_script:
 - ps: |

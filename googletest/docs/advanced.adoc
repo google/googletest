@@ -1576,7 +1576,7 @@ returns the value of `testing::PrintToString(GetParam())`. It does not work for
 `std::string` or C strings.
 
 NOTE: test names must be non-empty, unique, and may only contain ASCII
-alphanumeric characters. In particular, they https://github.com/google/googletest/blob/master/googletest/docs/faq.md#why-should-test-case-names-and-test-names-not-contain-underscore[should not contain
+alphanumeric characters. In particular, they https://github.com/google/googletest/blob/master/googletest/docs/faq.adoc#why-should-test-case-names-and-test-names-not-contain-underscore[should not contain
 underscores].
 
 [source,c++]

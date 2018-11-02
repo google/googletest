@@ -5,7 +5,7 @@ AC_INIT([Google C++ Mocking and Testing Frameworks],
 
 # Provide various options to initialize the Autoconf and configure processes.
 AC_PREREQ([2.59])
-AC_CONFIG_SRCDIR([./README.md])
+AC_CONFIG_SRCDIR([./README.adoc])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_SUBDIRS([googletest googlemock])

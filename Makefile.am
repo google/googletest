@@ -10,5 +10,5 @@ SUBDIRS = googletest googlemock
 EXTRA_DIST = \
   BUILD.bazel \
   CMakeLists.txt \
-  README.md \
+  README.adoc \
   WORKSPACE
