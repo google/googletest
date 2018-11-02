@@ -37,6 +37,7 @@
 #endif  // GTEST_OS_MAC
 
 #include <list>
+#include <memory>
 #include <utility>  // For std::pair and std::make_pair.
 #include <vector>
 
@@ -217,14 +218,6 @@ TEST(IteratorTraitsTest, WorksForPointerToConst) {
   StaticAssertTypeEq<const void*,
       IteratorTraits<const void* const*>::value_type>();
 }
-
-// Tests that the element_type typedef is available in scoped_ptr and refers
-// to the parameter type.
-TEST(ScopedPtrTest, DefinesElementType) {
-  StaticAssertTypeEq<int, ::testing::internal::scoped_ptr<int>::element_type>();
-}
-
-// FIXME: Implement THE REST of scoped_ptr tests.
 
 TEST(GtestCheckSyntaxTest, BehavesLikeASingleStatement) {
   if (AlwaysFalse())
@@ -1095,7 +1088,7 @@ TEST(MutexTest, OnlyOneThreadCanLockAtATime) {
   typedef ThreadWithParam<pair<AtomicCounterWithMutex*, int> > ThreadType;
   const int kCycleCount = 20;
   const int kThreadCount = 7;
-  scoped_ptr<ThreadType> counting_threads[kThreadCount];
+  std::unique_ptr<ThreadType> counting_threads[kThreadCount];
   Notification threads_can_start;
   // Creates and runs kThreadCount threads that increment locked_counter
   // kCycleCount times each.

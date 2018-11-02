@@ -42,6 +42,7 @@
 #include <string.h>  // For memmove.
 
 #include <algorithm>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -916,8 +917,8 @@ class GTEST_API_ UnitTestImpl {
 #if GTEST_HAS_DEATH_TEST
   // The decomposed components of the gtest_internal_run_death_test flag,
   // parsed when RUN_ALL_TESTS is called.
-  internal::scoped_ptr<InternalRunDeathTestFlag> internal_run_death_test_flag_;
-  internal::scoped_ptr<internal::DeathTestFactory> death_test_factory_;
+  std::unique_ptr<InternalRunDeathTestFlag> internal_run_death_test_flag_;
+  std::unique_ptr<internal::DeathTestFactory> death_test_factory_;
 #endif  // GTEST_HAS_DEATH_TEST
 
   // A per-thread stack of traces created by the SCOPED_TRACE() macro.
@@ -1177,7 +1178,7 @@ class StreamingListener : public EmptyTestEventListener {
 
   std::string FormatBool(bool value) { return value ? "1" : "0"; }
 
-  const scoped_ptr<AbstractSocketWriter> socket_writer_;
+  const std::unique_ptr<AbstractSocketWriter> socket_writer_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(StreamingListener);
 };  // class StreamingListener
