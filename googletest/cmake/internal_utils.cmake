@@ -67,7 +67,7 @@ macro(config_compiler_and_linker)
   if (MSVC)
     # Newlines inside flags variables break CMake's NMake generator.
     # TODO(vladl@google.com): Add -RTCs and -RTCu to debug builds.
-    set(cxx_base_flags "-GS -W4 -WX -wd4251 -wd4275 -nologo -J -Zi")
+    set(cxx_base_flags "-GS -W4 -wd4251 -wd4275 -nologo -J -Zi")
     if (MSVC_VERSION LESS 1400)  # 1400 is Visual Studio 2005
       # Suppress spurious warnings MSVC 7.1 sometimes issues.
       # Forcing value to bool.
@@ -99,7 +99,7 @@ macro(config_compiler_and_linker)
     set(cxx_no_exception_flags "-EHs-c- -D_HAS_EXCEPTIONS=0")
     set(cxx_no_rtti_flags "-GR-")
   elseif (CMAKE_COMPILER_IS_GNUCXX)
-    set(cxx_base_flags "-Wall -Wshadow -Werror")
+    set(cxx_base_flags "-Wall -Wshadow")
     if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0.0)
       set(cxx_base_flags "${cxx_base_flags} -Wno-error=dangling-else")
     endif()

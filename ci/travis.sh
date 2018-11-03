@@ -37,7 +37,6 @@ cmake -Dgtest_build_samples=ON \
       -Dcxx_no_exception=$NO_EXCEPTION \
       -Dcxx_no_rtti=$NO_RTTI \
       -DCMAKE_COMPILER_IS_GNUCXX=$COMPILER_IS_GNUCXX \
-      -DCMAKE_CXX_FLAGS=$CXX_FLAGS \
       -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
       ..
 make
