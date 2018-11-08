@@ -690,6 +690,70 @@ TEST(StlContainerViewTest, WorksForDynamicNativeArray) {
   EXPECT_EQ(0, a3.begin()[0]);
 }
 
+// Tests the Function template struct.
+
+TEST(FunctionTest, Nullary) {
+  typedef Function<int()> F;  // NOLINT
+  EXPECT_EQ(0, F::ArgumentCount);
+  CompileAssertTypesEqual<int, F::Result>();
+  CompileAssertTypesEqual<std::tuple<>, F::ArgumentTuple>();
+  CompileAssertTypesEqual<std::tuple<>, F::ArgumentMatcherTuple>();
+  CompileAssertTypesEqual<void(), F::MakeResultVoid>();
+  CompileAssertTypesEqual<IgnoredValue(), F::MakeResultIgnoredValue>();
+}
+
+TEST(FunctionTest, Unary) {
+  typedef Function<int(bool)> F;  // NOLINT
+  EXPECT_EQ(1, F::ArgumentCount);
+  CompileAssertTypesEqual<int, F::Result>();
+  CompileAssertTypesEqual<bool, F::Arg<0>::type>();
+  CompileAssertTypesEqual<std::tuple<bool>, F::ArgumentTuple>();
+  CompileAssertTypesEqual<std::tuple<Matcher<bool> >,
+                          F::ArgumentMatcherTuple>();
+  CompileAssertTypesEqual<void(bool), F::MakeResultVoid>();  // NOLINT
+  CompileAssertTypesEqual<IgnoredValue(bool),  // NOLINT
+      F::MakeResultIgnoredValue>();
+}
+
+TEST(FunctionTest, Binary) {
+  typedef Function<int(bool, const long&)> F;  // NOLINT
+  EXPECT_EQ(2, F::ArgumentCount);
+  CompileAssertTypesEqual<int, F::Result>();
+  CompileAssertTypesEqual<bool, F::Arg<0>::type>();
+  CompileAssertTypesEqual<const long&, F::Arg<1>::type>();  // NOLINT
+  CompileAssertTypesEqual<std::tuple<bool, const long&>,  // NOLINT
+                          F::ArgumentTuple>();
+  CompileAssertTypesEqual<
+      std::tuple<Matcher<bool>, Matcher<const long&> >,  // NOLINT
+      F::ArgumentMatcherTuple>();
+  CompileAssertTypesEqual<void(bool, const long&), F::MakeResultVoid>();  // NOLINT
+  CompileAssertTypesEqual<IgnoredValue(bool, const long&),  // NOLINT
+      F::MakeResultIgnoredValue>();
+}
+
+TEST(FunctionTest, LongArgumentList) {
+  typedef Function<char(bool, int, char*, int&, const long&)> F;  // NOLINT
+  EXPECT_EQ(5, F::ArgumentCount);
+  CompileAssertTypesEqual<char, F::Result>();
+  CompileAssertTypesEqual<bool, F::Arg<0>::type>();
+  CompileAssertTypesEqual<int, F::Arg<1>::type>();
+  CompileAssertTypesEqual<char*, F::Arg<2>::type>();
+  CompileAssertTypesEqual<int&, F::Arg<3>::type>();
+  CompileAssertTypesEqual<const long&, F::Arg<4>::type>();  // NOLINT
+  CompileAssertTypesEqual<
+      std::tuple<bool, int, char*, int&, const long&>,  // NOLINT
+      F::ArgumentTuple>();
+  CompileAssertTypesEqual<
+      std::tuple<Matcher<bool>, Matcher<int>, Matcher<char*>, Matcher<int&>,
+                 Matcher<const long&> >,  // NOLINT
+      F::ArgumentMatcherTuple>();
+  CompileAssertTypesEqual<void(bool, int, char*, int&, const long&),  // NOLINT
+                          F::MakeResultVoid>();
+  CompileAssertTypesEqual<
+      IgnoredValue(bool, int, char*, int&, const long&),  // NOLINT
+      F::MakeResultIgnoredValue>();
+}
+
 }  // namespace
 }  // namespace internal
 }  // namespace testing

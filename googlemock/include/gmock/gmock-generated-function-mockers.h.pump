@@ -124,7 +124,7 @@ using internal::FunctionMocker;
 // The type of argument N of the given function type.
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
 #define GMOCK_ARG_(tn, N, ...) \
-    tn ::testing::internal::Function<__VA_ARGS__>::Argument##N
+    tn ::testing::internal::Function<__VA_ARGS__>::template Arg<N-1>::type
 
 // The matcher type for argument N of the given function type.
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
@@ -149,11 +149,9 @@ $var anything_matchers = [[$for j, \
                      [[::testing::A<GMOCK_ARG_(tn, $j, __VA_ARGS__)>()]]]]
 // INTERNAL IMPLEMENTATION - DON'T USE IN USER CODE!!!
 #define GMOCK_METHOD$i[[]]_(tn, constness, ct, Method, ...) \
+  static_assert($i == ::testing::internal::Function<__VA_ARGS__>::ArgumentCount, "MOCK_METHOD<N> must match argument count.");\
   GMOCK_RESULT_(tn, __VA_ARGS__) ct Method( \
       $arg_as) constness { \
-    GTEST_COMPILE_ASSERT_((::std::tuple_size<                          \
-        tn ::testing::internal::Function<__VA_ARGS__>::ArgumentTuple>::value == $i), \
-        this_method_does_not_take_$i[[]]_argument[[$if i != 1 [[s]]]]); \
     GMOCK_MOCKER_($i, constness, Method).SetOwnerAndName(this, #Method); \
     return GMOCK_MOCKER_($i, constness, Method).Invoke($as); \
   } \

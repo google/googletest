@@ -41,7 +41,6 @@ pkginclude_HEADERS = \
 
 pkginclude_internaldir = $(pkgincludedir)/internal
 pkginclude_internal_HEADERS = \
-  include/gmock/internal/gmock-generated-internal-utils.h \
   include/gmock/internal/gmock-internal-utils.h \
   include/gmock/internal/gmock-port.h \
   include/gmock/internal/gmock-pp.h \
@@ -141,7 +140,6 @@ EXTRA_DIST += \
   include/gmock/gmock-generated-actions.h.pump \
   include/gmock/gmock-generated-function-mockers.h.pump \
   include/gmock/gmock-generated-matchers.h.pump \
-  include/gmock/internal/gmock-generated-internal-utils.h.pump \
   include/gmock/internal/custom/gmock-generated-actions.h.pump
 
 # Script for fusing Google Mock and Google Test source files.

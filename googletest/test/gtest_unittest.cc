@@ -2357,16 +2357,6 @@ TEST(PredTest, SingleEvaluationOnFailure) {
   EXPECT_EQ(1, n4) << "Argument 4 is not evaluated exactly once.";
 }
 
-// Test predicate assertions for sets
-TEST(PredTest, ExpectPredEvalFailure) {
-  std::set<int> set_a = {2, 1, 3, 4, 5};
-  std::set<int> set_b = {0, 4, 8};
-  const auto compare_sets = [] (std::set<int>, std::set<int>) { return false; };
-  EXPECT_NONFATAL_FAILURE(
-      EXPECT_PRED2(compare_sets, set_a, set_b),
-      "compare_sets(set_a, set_b) evaluates to false, where\nset_a evaluates "
-      "to { 1, 2, 3, 4, 5 }\nset_b evaluates to { 0, 4, 8 }");
-}
 
 // Some helper functions for testing using overloaded/template
 // functions with ASSERT_PREDn and EXPECT_PREDn.
