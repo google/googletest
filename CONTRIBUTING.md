@@ -13,7 +13,7 @@
          * [Testing Google Test Itself](#testing-google-test-itself)
          * [Regenerating Source Files](#regenerating-source-files)
       * [Developing Google Mock](#developing-google-mock)
-            * [Testing Google Mock Itself](#testing-google-mock-itself)
+         * [Testing Google Mock Itself](#testing-google-mock-itself)
 
 <!-- Added by: charlesjwhite, at: 2018-11-09T23:44+0200 -->
 
