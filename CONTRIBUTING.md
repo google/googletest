@@ -1,5 +1,24 @@
 # How to become a contributor and submit your own code
 
+<!--ts-->
+   * [How to become a contributor and submit your own code](#how-to-become-a-contributor-and-submit-your-own-code)
+      * [Contributor License Agreements](#contributor-license-agreements)
+      * [Are you a Googler?](#are-you-a-googler)
+      * [Contributing A Patch](#contributing-a-patch)
+      * [The Google Test and Google Mock Communities](#the-google-test-and-google-mock-communities)
+         * [Please Be Friendly](#please-be-friendly)
+      * [Style](#style)
+      * [Requirements for Contributors](#requirements-for-contributors)
+      * [Developing Google Test](#developing-google-test)
+         * [Testing Google Test Itself](#testing-google-test-itself)
+         * [Regenerating Source Files](#regenerating-source-files)
+      * [Developing Google Mock](#developing-google-mock)
+            * [Testing Google Mock Itself](#testing-google-mock-itself)
+
+<!-- Added by: charlesjwhite, at: 2018-11-09T23:44+0200 -->
+
+<!--te-->
+
 ## Contributor License Agreements
 
 We'd love to accept your patches! Before we can take them, we
