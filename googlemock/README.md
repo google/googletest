@@ -1,33 +1,33 @@
-## Google Mock ##
+# Google Mock #
 
 The Google C++ mocking framework.
 
 <!--ts-->
-      * [Google Mock](#google-mock)
-         * [Overview](#overview)
-         * [Features](#features)
-      * [Getting Started](#getting-started)
-         * [Using Google Mock Without Google Test](#using-google-mock-without-google-test)
-         * [Requirements for End Users](#requirements-for-end-users)
-            * [Linux Requirements](#linux-requirements)
-            * [Windows Requirements](#windows-requirements)
-            * [Mac OS X Requirements](#mac-os-x-requirements)
-         * [Requirements for Contributors](#requirements-for-contributors)
-         * [Building Google Mock](#building-google-mock)
-            * [Using CMake](#using-cmake)
-            * [Preparing to Build (Unix only)](#preparing-to-build-unix-only)
-         * [Windows](#windows)
-         * [Tweaking Google Mock](#tweaking-google-mock)
-         * [As a Shared Library (DLL)](#as-a-shared-library-dll)
-         * [Tweaking Google Mock](#tweaking-google-mock-1)
-         * [Upgrading from an Earlier Version](#upgrading-from-an-earlier-version)
-            * [Upgrading from 1.1.0 or Earlier](#upgrading-from-110-or-earlier)
-            * [Upgrading from 1.4.0 or Earlier](#upgrading-from-140-or-earlier)
+   * [Google Mock](#google-mock)
+      * [Overview](#overview)
+      * [Features](#features)
+   * [Getting Started](#getting-started)
+      * [Using Google Mock Without Google Test](#using-google-mock-without-google-test)
+      * [Requirements for End Users](#requirements-for-end-users)
+         * [Linux Requirements](#linux-requirements)
+         * [Windows Requirements](#windows-requirements)
+         * [Mac OS X Requirements](#mac-os-x-requirements)
+      * [Requirements for Contributors](#requirements-for-contributors)
+      * [Building Google Mock](#building-google-mock)
+         * [Using CMake](#using-cmake)
+         * [Preparing to Build (Unix only)](#preparing-to-build-unix-only)
+      * [Windows](#windows)
+      * [Tweaking Google Mock](#tweaking-google-mock)
+      * [As a Shared Library (DLL)](#as-a-shared-library-dll)
+      * [Tweaking Google Mock](#tweaking-google-mock-1)
+      * [Upgrading from an Earlier Version](#upgrading-from-an-earlier-version)
+         * [Upgrading from 1.1.0 or Earlier](#upgrading-from-110-or-earlier)
+         * [Upgrading from 1.4.0 or Earlier](#upgrading-from-140-or-earlier)
 
 
 <!--te-->
 
-### Overview ###
+## Overview ##
 
 Google's framework for writing and using C++ mock classes.
 It can help you derive better designs of your system and write better tests.
@@ -49,7 +49,7 @@ Google mock:
 
 We hope you find it useful!
 
-### Features ###
+## Features ##
 
   * Provides a declarative syntax for defining mocks.
   * Can easily define partial (hybrid) mocks, which are a cross of real
@@ -73,7 +73,7 @@ Please note that code under [scripts/generator](scripts/generator/) is
 from [cppclean](http://code.google.com/p/cppclean/) and released under
 the Apache License, which is different from Google Mock's license.
 
-## Getting Started ##
+# Getting Started #
 
 If you are new to the project, we suggest that you read the user
 documentation in the following order:
@@ -99,14 +99,14 @@ posting a question on the
 [discussion group](http://groups.google.com/group/googlemock).
 
 
-### Using Google Mock Without Google Test ###
+## Using Google Mock Without Google Test ##
 
 Google Mock is not a testing framework itself.  Instead, it needs a
 testing framework for writing tests.  Google Mock works seamlessly
 with [Google Test](https://github.com/google/googletest), but
 you can also use it with [any C++ testing framework](../googlemock/docs/ForDummies.md#using-google-mock-with-any-testing-framework).
 
-### Requirements for End Users ###
+## Requirements for End Users ##
 
 Google Mock is implemented on top of [Google Test](
 http://github.com/google/googletest/), and depends on it.
@@ -121,23 +121,23 @@ for instructions.
 Google Mock depends on advanced C++ features and thus requires a more
 modern compiler. The following are needed to use Google Mock:
 
-#### Linux Requirements ####
+### Linux Requirements ###
 
   * GNU-compatible Make or "gmake"
   * POSIX-standard shell
   * POSIX(-2) Regular Expressions (regex.h)
   * C++98-standard-compliant compiler (e.g. GCC 3.4 or newer)
 
-#### Windows Requirements ####
+### Windows Requirements ###
 
   * Microsoft Visual C++ 8.0 SP1 or newer
 
-#### Mac OS X Requirements ####
+### Mac OS X Requirements ###
 
   * Mac OS X 10.4 Tiger or newer
   * Developer Tools Installed
 
-### Requirements for Contributors ###
+## Requirements for Contributors ##
 
 We welcome patches. If you plan to contribute a patch, you need to
 build Google Mock and its tests, which has further requirements:
@@ -148,9 +148,9 @@ build Google Mock and its tests, which has further requirements:
   * Python version 2.3 or newer (for running some of the tests and
     re-generating certain source files from templates)
 
-### Building Google Mock ###
+## Building Google Mock ##
 
-#### Using CMake ####
+### Using CMake ###
 
 If you have CMake available, it is recommended that you follow the
 [build instructions][gtest_cmakebuild]
@@ -170,7 +170,7 @@ to
 
 This works because `gmock_main` library is compiled with Google Test.
 
-#### Preparing to Build (Unix only) ####
+### Preparing to Build (Unix only) ###
 
 If you are using a Unix system and plan to use the GNU Autotools build
 system to build Google Mock (described below), you'll need to
@@ -241,7 +241,7 @@ following commands should succeed:
 If you see errors, try to tweak the contents of
 [make/Makefile](make/Makefile) to make them go away.
 
-### Windows ###
+## Windows ##
 
 The msvc/2005 directory contains VC++ 2005 projects and the msvc/2010
 directory contains VC++ 2010 projects for building Google Mock and
@@ -258,7 +258,7 @@ have to configure it to use the `gmock_config` propety sheet.  For that:
  * In Project Properties | Configuration Properties | General | Additional
    Include Directories, type <path to Google Mock>/include.
 
-### Tweaking Google Mock ###
+## Tweaking Google Mock ##
 
 Google Mock can be used in diverse environments.  The default
 configuration may not work (or may not work well) out of the box in
@@ -271,7 +271,7 @@ We list the most frequently used macros below.  For a complete list,
 see file [${GTEST\_DIR}/include/gtest/internal/gtest-port.h](
 ../googletest/include/gtest/internal/gtest-port.h).
 
-### As a Shared Library (DLL) ###
+## As a Shared Library (DLL) ##
 
 Google Mock is compact, so most users can build and link it as a static
 library for the simplicity.  Google Mock can be used as a DLL, but the
@@ -279,25 +279,25 @@ same DLL must contain Google Test as well.  See
 [Google Test's README][gtest_readme]
 for instructions on how to set up necessary compiler settings.
 
-### Tweaking Google Mock ###
+## Tweaking Google Mock ##
 
 Most of Google Test's control macros apply to Google Mock as well.
 Please see [Google Test's README][gtest_readme] for how to tweak them.
 
-### Upgrading from an Earlier Version ###
+## Upgrading from an Earlier Version ##
 
 We strive to keep Google Mock releases backward compatible.
 Sometimes, though, we have to make some breaking changes for the
 users' long-term benefits.  This section describes what you'll need to
 do if you are upgrading from an earlier version of Google Mock.
 
-#### Upgrading from 1.1.0 or Earlier ####
+### Upgrading from 1.1.0 or Earlier ###
 
 You may need to explicitly enable or disable Google Test's own TR1
 tuple library.  See the instructions in section "[Choosing a TR1 Tuple
 Library](#choosing-a-tr1-tuple-library)".
 
-#### Upgrading from 1.4.0 or Earlier ####
+### Upgrading from 1.4.0 or Earlier ###
 
 On platforms where the pthread library is available, Google Test and
 Google Mock use it in order to be thread-safe.  For this to work, you
