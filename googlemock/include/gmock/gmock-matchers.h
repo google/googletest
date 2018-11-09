@@ -47,6 +47,7 @@
 #include <ostream>  // NOLINT
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 #include "gmock/internal/gmock-internal-utils.h"
