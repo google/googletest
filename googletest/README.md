@@ -1,30 +1,30 @@
-### Generic Build Instructions
+# Generic Build Instructions
 
 <!--ts-->
-         * [Generic Build Instructions](#generic-build-instructions)
-            * [Setup](#setup)
-            * [Build](#build)
-         * [Using CMake](#using-cmake)
-            * [Standalone CMake Project](#standalone-cmake-project)
-            * [Incorporating Into An Existing CMake Project](#incorporating-into-an-existing-cmake-project)
-               * [Visual Studio Dynamic vs Static Runtimes](#visual-studio-dynamic-vs-static-runtimes)
-            * [C   Standard Version](#c-standard-version)
-         * [Legacy Build Scripts](#legacy-build-scripts)
-         * [Tweaking Google Test](#tweaking-google-test)
-         * [Multi-threaded Tests](#multi-threaded-tests)
-         * [As a Shared Library (DLL)](#as-a-shared-library-dll)
-         * [Avoiding Macro Name Clashes](#avoiding-macro-name-clashes)
+   * [Generic Build Instructions](#generic-build-instructions)
+      * [Setup](#setup)
+      * [Build](#build)
+   * [Using CMake](#using-cmake)
+      * [Standalone CMake Project](#standalone-cmake-project)
+      * [Incorporating Into An Existing CMake Project](#incorporating-into-an-existing-cmake-project)
+         * [Visual Studio Dynamic vs Static Runtimes](#visual-studio-dynamic-vs-static-runtimes)
+      * [C   Standard Version](#c-standard-version)
+   * [Legacy Build Scripts](#legacy-build-scripts)
+   * [Tweaking Google Test](#tweaking-google-test)
+   * [Multi-threaded Tests](#multi-threaded-tests)
+   * [As a Shared Library (DLL)](#as-a-shared-library-dll)
+   * [Avoiding Macro Name Clashes](#avoiding-macro-name-clashes)
 
 
 <!--te-->
 
-#### Setup
+## Setup
 
 To build Google Test and your tests that use it, you need to tell your build
 system where to find its headers and source files. The exact way to do it
 depends on which build system you use, and is usually straightforward.
 
-#### Build
+## Build
 
 Suppose you put Google Test in directory `${GTEST_DIR}`. To build it, create a
 library build target (or a project as called by Visual Studio and Xcode) to
@@ -65,7 +65,7 @@ should succeed:
 If you see errors, try to tweak the contents of `make/Makefile` to make them go
 away. There are instructions in `make/Makefile` on how to do it.
 
-### Using CMake
+# Using CMake
 
 Google Test comes with a CMake build script (
 [CMakeLists.txt](https://github.com/google/googletest/blob/master/CMakeLists.txt))
@@ -78,7 +78,7 @@ the compiler environment of your choice. You can either build Google Test as a
 standalone project or it can be incorporated into an existing CMake build for
 another project.
 
-#### Standalone CMake Project
+## Standalone CMake Project
 
 When building Google Test as a standalone project, the typical workflow starts
 with:
@@ -101,7 +101,7 @@ Studio.
 
 On Mac OS X with Xcode installed, a `.xcodeproj` file will be generated.
 
-#### Incorporating Into An Existing CMake Project
+## Incorporating Into An Existing CMake Project
 
 If you want to use gtest in a project which already uses CMake, then a more
 robust and flexible approach is to build gtest as part of that project directly.
@@ -197,7 +197,7 @@ Note that this approach requires CMake 2.8.2 or later due to its use of the
 in [this separate article](http://crascit.com/2015/07/25/cmake-gtest/) which
 also contains a link to a fully generalized implementation of the technique.
 
-##### Visual Studio Dynamic vs Static Runtimes
+### Visual Studio Dynamic vs Static Runtimes
 
 By default, new Visual Studio projects link the C runtimes dynamically but
 Google Test links them statically. This will generate an error that looks
@@ -210,7 +210,7 @@ Google Test already has a CMake option for this: `gtest_force_shared_crt`
 Enabling this option will make gtest link the runtimes dynamically too, and
 match the project in which it is included.
 
-#### C++ Standard Version
+## C++ Standard Version
 
 An environment that supports C++11 is required in order to successfully build
 Google Test. One way to ensure this is to specify the standard in the top-level
@@ -219,7 +219,7 @@ is not feasible, for example in a C project using Google Test for validation,
 then it can be specified by adding it to the options for cmake via the
 `DCMAKE_CXX_FLAGS` option.
 
-### Legacy Build Scripts
+# Legacy Build Scripts
 
 Before settling on CMake, we have been providing hand-maintained build
 projects/scripts for Visual Studio, Xcode, and Autotools. While we continue to
@@ -261,7 +261,7 @@ need to either:
     by Apple, but has been reported to work
     (http://stackoverflow.com/questions/5378518).
 
-### Tweaking Google Test
+# Tweaking Google Test
 
 Google Test can be used in diverse environments. The default configuration may
 not work (or may not work well) out of the box in some environments. However,
@@ -272,7 +272,7 @@ them to either 1 or 0 to enable or disable a certain feature.
 We list the most frequently used macros below. For a complete list, see file
 [include/gtest/internal/gtest-port.h](https://github.com/google/googletest/blob/master/include/gtest/internal/gtest-port.h).
 
-### Multi-threaded Tests
+# Multi-threaded Tests
 
 Google Test is thread-safe where the pthread library is available. After
 `#include "gtest/gtest.h"`, you can check the `GTEST_IS_THREADSAFE` macro to see
@@ -294,7 +294,7 @@ CMake script or the deprecated Autotools script, this is taken care of for you.
 If you use your own build script, you'll need to read your compiler and linker's
 manual to figure out what flags to add.
 
-### As a Shared Library (DLL)
+# As a Shared Library (DLL)
 
 Google Test is compact, so most users can build and link it as a static library
 for the simplicity. You can choose to use Google Test as a shared library (known
@@ -320,7 +320,7 @@ improve the speed of loading the library (see
 to always add the above flags when using Google Test as a shared library.
 Otherwise a future release of Google Test may break your build script.
 
-### Avoiding Macro Name Clashes
+# Avoiding Macro Name Clashes
 
 In C++, macros don't obey namespaces. Therefore two libraries that both define a
 macro of the same name will clash if you `#include` both definitions. In case a
