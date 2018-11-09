@@ -15,7 +15,6 @@
       * [Developing Google Mock](#developing-google-mock)
          * [Testing Google Mock Itself](#testing-google-mock-itself)
 
-<!-- Added by: charlesjwhite, at: 2018-11-09T23:44+0200 -->
 
 <!--te-->
 
