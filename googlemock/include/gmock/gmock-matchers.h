@@ -3551,6 +3551,76 @@ class AnyCastMatcher {
 };
 
 }  // namespace any_cast_matcher
+
+// Implements the Args() matcher.
+template <class ArgsTuple, size_t... k>
+class ArgsMatcherImpl : public MatcherInterface<ArgsTuple> {
+ public:
+  using RawArgsTuple = typename std::decay<ArgsTuple>::type;
+  using SelectedArgs =
+      std::tuple<typename std::tuple_element<k, RawArgsTuple>::type...>;
+  using MonomorphicInnerMatcher = Matcher<const SelectedArgs&>;
+
+  template <typename InnerMatcher>
+  explicit ArgsMatcherImpl(const InnerMatcher& inner_matcher)
+      : inner_matcher_(SafeMatcherCast<const SelectedArgs&>(inner_matcher)) {}
+
+  bool MatchAndExplain(ArgsTuple args,
+                       MatchResultListener* listener) const override {
+    const SelectedArgs& selected_args =
+        std::forward_as_tuple(std::get<k>(args)...);
+    if (!listener->IsInterested()) return inner_matcher_.Matches(selected_args);
+
+    PrintIndices(listener->stream());
+    *listener << "are " << PrintToString(selected_args);
+
+    StringMatchResultListener inner_listener;
+    const bool match =
+        inner_matcher_.MatchAndExplain(selected_args, &inner_listener);
+    PrintIfNotEmpty(inner_listener.str(), listener->stream());
+    return match;
+  }
+
+  void DescribeTo(::std::ostream* os) const override {
+    *os << "are a tuple ";
+    PrintIndices(os);
+    inner_matcher_.DescribeTo(os);
+  }
+
+  void DescribeNegationTo(::std::ostream* os) const override {
+    *os << "are a tuple ";
+    PrintIndices(os);
+    inner_matcher_.DescribeNegationTo(os);
+  }
+
+ private:
+  // Prints the indices of the selected fields.
+  static void PrintIndices(::std::ostream* os) {
+    *os << "whose fields (";
+    const char* sep = "";
+    const char* dummy[] = {"", (*os << sep << "#" << k, sep = ", ")...};
+    (void)dummy;
+    *os << ") ";
+  }
+
+  MonomorphicInnerMatcher inner_matcher_;
+};
+
+template <class InnerMatcher, size_t... k>
+class ArgsMatcher {
+ public:
+  explicit ArgsMatcher(InnerMatcher inner_matcher)
+      : inner_matcher_(std::move(inner_matcher)) {}
+
+  template <typename ArgsTuple>
+  operator Matcher<ArgsTuple>() const {  // NOLINT
+    return MakeMatcher(new ArgsMatcherImpl<ArgsTuple, k...>(inner_matcher_));
+  }
+
+ private:
+  InnerMatcher inner_matcher_;
+};
+
 }  // namespace internal
 
 // ElementsAreArray(iterator_first, iterator_last)
@@ -4518,6 +4588,16 @@ internal::AnyOfMatcher<typename std::decay<const Args&>::type...> AnyOf(
     const Args&... matchers) {
   return internal::AnyOfMatcher<typename std::decay<const Args&>::type...>(
       matchers...);
+}
+
+// Args<N1, N2, ..., Nk>(a_matcher) matches a tuple if the selected
+// fields of it matches a_matcher.  C++ doesn't support default
+// arguments for function templates, so we have to overload it.
+template <size_t... k, typename InnerMatcher>
+internal::ArgsMatcher<typename std::decay<InnerMatcher>::type, k...> Args(
+    InnerMatcher&& matcher) {
+  return internal::ArgsMatcher<typename std::decay<InnerMatcher>::type, k...>(
+      std::forward<InnerMatcher>(matcher));
 }
 
 // AllArgs(m) is a synonym of m.  This is useful in
