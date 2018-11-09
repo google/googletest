@@ -1,5 +1,23 @@
 # Googletest Primer
 
+<!--ts-->
+   * [Googletest Primer](#googletest-primer)
+      * [Introduction: Why googletest?](#introduction-why-googletest)
+      * [Beware of the nomenclature](#beware-of-the-nomenclature)
+      * [Basic Concepts](#basic-concepts)
+      * [Assertions](#assertions)
+         * [Basic Assertions](#basic-assertions)
+         * [Binary Comparison](#binary-comparison)
+         * [String Comparison](#string-comparison)
+      * [Simple Tests](#simple-tests)
+      * [Test Fixtures: Using the Same Data Configuration for Multiple Tests](#test-fixtures-using-the-same-data-configuration-for-multiple-tests)
+      * [Invoking the Tests](#invoking-the-tests)
+      * [Writing the main() Function](#writing-the-main-function)
+      * [Known Limitations](#known-limitations)
+
+
+<!--te-->
+
 
 ## Introduction: Why googletest?
 

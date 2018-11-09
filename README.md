@@ -1,6 +1,22 @@
 
 # Google Test #
 
+<!--ts-->
+   * [Google Test](#google-test)
+      * [Features](#features)
+      * [Platforms](#platforms)
+      * [Who Is Using Google Test?](#who-is-using-google-test)
+      * [Related Open Source Projects](#related-open-source-projects)
+      * [Requirements](#requirements)
+         * [Linux Requirements](#linux-requirements)
+         * [Windows Requirements](#windows-requirements)
+         * [Cygwin Requirements](#cygwin-requirements)
+         * [Mac OS X Requirements](#mac-os-x-requirements)
+      * [Contributing change](#contributing-change)
+
+
+<!--te-->
+
 [![Build Status](https://travis-ci.org/google/googletest.svg?branch=master)](https://travis-ci.org/google/googletest)
 [![Build status](https://ci.appveyor.com/api/projects/status/4o38plt0xbo1ubc8/branch/master?svg=true)](https://ci.appveyor.com/project/GoogleTestAppVeyor/googletest/branch/master)
 

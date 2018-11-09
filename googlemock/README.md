@@ -2,6 +2,31 @@
 
 The Google C++ mocking framework.
 
+<!--ts-->
+      * [Google Mock](#google-mock)
+         * [Overview](#overview)
+         * [Features](#features)
+      * [Getting Started](#getting-started)
+         * [Using Google Mock Without Google Test](#using-google-mock-without-google-test)
+         * [Requirements for End Users](#requirements-for-end-users)
+            * [Linux Requirements](#linux-requirements)
+            * [Windows Requirements](#windows-requirements)
+            * [Mac OS X Requirements](#mac-os-x-requirements)
+         * [Requirements for Contributors](#requirements-for-contributors)
+         * [Building Google Mock](#building-google-mock)
+            * [Using CMake](#using-cmake)
+            * [Preparing to Build (Unix only)](#preparing-to-build-unix-only)
+         * [Windows](#windows)
+         * [Tweaking Google Mock](#tweaking-google-mock)
+         * [As a Shared Library (DLL)](#as-a-shared-library-dll)
+         * [Tweaking Google Mock](#tweaking-google-mock-1)
+         * [Upgrading from an Earlier Version](#upgrading-from-an-earlier-version)
+            * [Upgrading from 1.1.0 or Earlier](#upgrading-from-110-or-earlier)
+            * [Upgrading from 1.4.0 or Earlier](#upgrading-from-140-or-earlier)
+
+
+<!--te-->
+
 ### Overview ###
 
 Google's framework for writing and using C++ mock classes.

@@ -1,5 +1,42 @@
 # Googletest FAQ
 
+<!--ts-->
+   * [Googletest FAQ](#googletest-faq)
+      * [Why should test case names and test names not contain underscore?](#why-should-test-case-names-and-test-names-not-contain-underscore)
+      * [Why does googletest support EXPECT_EQ(NULL, ptr) and <code>ASSERT_EQ(NULL, ptr)</code> but not <code>EXPECT_NE(NULL, ptr)</code> and <code>ASSERT_NE(NULL, ptr)</code>?](#why-does-googletest-support-expect_eqnull-ptr-and-assert_eqnull-ptr-but-not-expect_nenull-ptr-and-assert_nenull-ptr)
+      * [I need to test that different implementations of an interface satisfy some common requirements. Should I use typed tests or value-parameterized tests?](#i-need-to-test-that-different-implementations-of-an-interface-satisfy-some-common-requirements-should-i-use-typed-tests-or-value-parameterized-tests)
+      * [My death tests became very slow - what happened?](#my-death-tests-became-very-slow---what-happened)
+      * [I got some run-time errors about invalid proto descriptors when using ProtocolMessageEquals. Help!](#i-got-some-run-time-errors-about-invalid-proto-descriptors-when-using-protocolmessageequals-help)
+      * [My death test modifies some state, but the change seems lost after the death test finishes. Why?](#my-death-test-modifies-some-state-but-the-change-seems-lost-after-the-death-test-finishes-why)
+      * [EXPECT_EQ(htonl(blah), blah_blah) generates weird compiler errors in opt mode. Is this a googletest bug?](#expect_eqhtonlblah-blah_blah-generates-weird-compiler-errors-in-opt-mode-is-this-a-googletest-bug)
+      * [The compiler complains about "undefined references" to some static const member variables, but I did define them in the class body. What's wrong?](#the-compiler-complains-about-undefined-references-to-some-static-const-member-variables-but-i-did-define-them-in-the-class-body-whats-wrong)
+      * [Can I derive a test fixture from another?](#can-i-derive-a-test-fixture-from-another)
+      * [My compiler complains "void value not ignored as it ought to be." What does this mean?](#my-compiler-complains-void-value-not-ignored-as-it-ought-to-be-what-does-this-mean)
+      * [My death test hangs (or seg-faults). How do I fix it?](#my-death-test-hangs-or-seg-faults-how-do-i-fix-it)
+      * [Should I use the constructor/destructor of the test fixture or SetUp()/TearDown()?](#should-i-use-the-constructordestructor-of-the-test-fixture-or-setupteardown)
+      * [The compiler complains "no matching function to call" when I use ASSERT_PRED*. How do I fix it?](#the-compiler-complains-no-matching-function-to-call-when-i-use-assert_pred-how-do-i-fix-it)
+      * [My compiler complains about "ignoring return value" when I call RUN_ALL_TESTS(). Why?](#my-compiler-complains-about-ignoring-return-value-when-i-call-run_all_tests-why)
+      * [My compiler complains that a constructor (or destructor) cannot return a value. What's going on?](#my-compiler-complains-that-a-constructor-or-destructor-cannot-return-a-value-whats-going-on)
+      * [My SetUp() function is not called. Why?](#my-setup-function-is-not-called-why)
+      * [How do I jump to the line of a failure in Emacs directly?](#how-do-i-jump-to-the-line-of-a-failure-in-emacs-directly)
+      * [I have several test cases which share the same test fixture logic, do I have to define a new test fixture class for each of them? This seems pretty tedious.](#i-have-several-test-cases-which-share-the-same-test-fixture-logic-do-i-have-to-define-a-new-test-fixture-class-for-each-of-them-this-seems-pretty-tedious)
+      * [googletest output is buried in a whole bunch of LOG messages. What do I do?](#googletest-output-is-buried-in-a-whole-bunch-of-log-messages-what-do-i-do)
+      * [Why should I prefer test fixtures over global variables?](#why-should-i-prefer-test-fixtures-over-global-variables)
+      * [What can the statement argument in ASSERT_DEATH() be?](#what-can-the-statement-argument-in-assert_death-be)
+      * [I have a fixture class FooTest, but <code>TEST_F(FooTest, Bar)</code> gives me error <code>"no matching function for call to `FooTest::FooTest()'"</code>. Why?](#i-have-a-fixture-class-footest-but-test_ffootest-bar-gives-me-error-no-matching-function-for-call-to-footestfootest-why)
+      * [Why does ASSERT_DEATH complain about previous threads that were already joined?](#why-does-assert_death-complain-about-previous-threads-that-were-already-joined)
+      * [Why does googletest require the entire test case, instead of individual tests, to be named *DeathTest when it uses ASSERT_DEATH?](#why-does-googletest-require-the-entire-test-case-instead-of-individual-tests-to-be-named-deathtest-when-it-uses-assert_death)
+      * [But I don't like calling my entire test case *DeathTest when it contains both death tests and non-death tests. What do I do?](#but-i-dont-like-calling-my-entire-test-case-deathtest-when-it-contains-both-death-tests-and-non-death-tests-what-do-i-do)
+      * [googletest prints the LOG messages in a death test's child process only when the test fails. How can I see the LOG messages when the death test succeeds?](#googletest-prints-the-log-messages-in-a-death-tests-child-process-only-when-the-test-fails-how-can-i-see-the-log-messages-when-the-death-test-succeeds)
+      * [The compiler complains about "no match for 'operator&lt;&lt;'" when I use an assertion. What gives?](#the-compiler-complains-about-no-match-for-operator-when-i-use-an-assertion-what-gives)
+      * [How do I suppress the memory leak messages on Windows?](#how-do-i-suppress-the-memory-leak-messages-on-windows)
+      * [How can my code detect if it is running in a test?](#how-can-my-code-detect-if-it-is-running-in-a-test)
+      * [How do I temporarily disable a test?](#how-do-i-temporarily-disable-a-test)
+      * [Is it OK if I have two separate TEST(Foo, Bar) test methods defined in different namespaces?](#is-it-ok-if-i-have-two-separate-testfoo-bar-test-methods-defined-in-different-namespaces)
+
+
+<!--te-->
+
 
 ## Why should test case names and test names not contain underscore?
 

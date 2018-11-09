@@ -1,4 +1,26 @@
+<!--ts-->
+   * [What Is Google C   Mocking Framework?](#what-is-google-c-mocking-framework)
+   * [Why Google Mock?](#why-google-mock)
+   * [Getting Started](#getting-started)
+   * [A Case for Mock Turtles](#a-case-for-mock-turtles)
+   * [Writing the Mock Class](#writing-the-mock-class)
+      * [How to Define It](#how-to-define-it)
+      * [Where to Put It](#where-to-put-it)
+   * [Using Mocks in Tests](#using-mocks-in-tests)
+      * [Using Google Mock with Any Testing Framework](#using-google-mock-with-any-testing-framework)
+   * [Setting Expectations](#setting-expectations)
+      * [General Syntax](#general-syntax)
+      * [Matchers: What Arguments Do We Expect?](#matchers-what-arguments-do-we-expect)
+      * [Cardinalities: How Many Times Will It Be Called?](#cardinalities-how-many-times-will-it-be-called)
+      * [Actions: What Should It Do?](#actions-what-should-it-do)
+      * [Using Multiple Expectations](#using-multiple-expectations)
+      * [Ordered vs Unordered Calls](#ordered-vs-unordered-calls)
+      * [All Expectations Are Sticky (Unless Said Otherwise)](#all-expectations-are-sticky-unless-said-otherwise)
+      * [Uninteresting Calls](#uninteresting-calls)
+   * [What Now?](#what-now)
 
+
+<!--te-->
 
 (**Note:** If you get compiler errors that you don't understand, be sure to consult [Google Mock Doctor](FrequentlyAskedQuestions.md#how-am-i-supposed-to-make-sense-of-these-horrible-template-errors).)
 

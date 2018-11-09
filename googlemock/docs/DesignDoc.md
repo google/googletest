@@ -4,6 +4,23 @@ This page discusses the design of new Google Mock features.
 
 # Macros for Defining Actions #
 
+<!--ts-->
+   * [Macros for Defining Actions](#macros-for-defining-actions)
+      * [Problem](#problem)
+      * [Solution](#solution)
+      * [Parameterized actions](#parameterized-actions)
+      * [Advanced Usages](#advanced-usages)
+         * [Overloading Actions](#overloading-actions)
+         * [Restricting the Type of an Argument or Parameter](#restricting-the-type-of-an-argument-or-parameter)
+         * [Using the ACTION Object's Type](#using-the-action-objects-type)
+      * [When to Use](#when-to-use)
+      * [Related Work](#related-work)
+      * [Future Improvements](#future-improvements)
+   * [Macros for Defining Matchers](#macros-for-defining-matchers)
+
+
+<!--te-->
+
 ## Problem ##
 
 Due to the lack of closures in C++, it currently requires some

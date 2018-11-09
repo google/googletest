@@ -1,3 +1,17 @@
+# Pkg-config
+
+<!--ts-->
+   * [Pkg-config](#pkg-config)
+      * [Using GoogleTest from various build systems](#using-googletest-from-various-build-systems)
+         * [CMake](#cmake)
+         * [Autotools](#autotools)
+         * [Meson](#meson)
+         * [Plain Makefiles](#plain-makefiles)
+         * [Help! pkg-config can't find GoogleTest!](#help-pkg-config-cant-find-googletest)
+
+
+<!--te-->
+
 ## Using GoogleTest from various build systems ##
 
 GoogleTest comes with pkg-config files that can be used to determine all

@@ -1,5 +1,23 @@
 ### Generic Build Instructions
 
+<!--ts-->
+         * [Generic Build Instructions](#generic-build-instructions)
+            * [Setup](#setup)
+            * [Build](#build)
+         * [Using CMake](#using-cmake)
+            * [Standalone CMake Project](#standalone-cmake-project)
+            * [Incorporating Into An Existing CMake Project](#incorporating-into-an-existing-cmake-project)
+               * [Visual Studio Dynamic vs Static Runtimes](#visual-studio-dynamic-vs-static-runtimes)
+            * [C   Standard Version](#c-standard-version)
+         * [Legacy Build Scripts](#legacy-build-scripts)
+         * [Tweaking Google Test](#tweaking-google-test)
+         * [Multi-threaded Tests](#multi-threaded-tests)
+         * [As a Shared Library (DLL)](#as-a-shared-library-dll)
+         * [Avoiding Macro Name Clashes](#avoiding-macro-name-clashes)
+
+
+<!--te-->
+
 #### Setup
 
 To build Google Test and your tests that use it, you need to tell your build
