@@ -1,4 +1,7 @@
+# Frequently Asked Questions #
+
 <!--ts-->
+   * [Frequently Asked Questions](#frequently-asked-questions)
       * [When I call a method on my mock object, the method for the real object is invoked instead.  What's the problem?](#when-i-call-a-method-on-my-mock-object-the-method-for-the-real-object-is-invoked-instead--whats-the-problem)
       * [I wrote some matchers.  After I upgraded to a new version of Google Mock, they no longer compile.  What's going on?](#i-wrote-some-matchers--after-i-upgraded-to-a-new-version-of-google-mock-they-no-longer-compile--whats-going-on)
       * [When using Google Mock, do I have to use Google Test as the testing framework?  I have my favorite testing framework and don't want to switch.](#when-using-google-mock-do-i-have-to-use-google-test-as-the-testing-framework--i-have-my-favorite-testing-framework-and-dont-want-to-switch)
