@@ -598,15 +598,6 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # include <time.h>  // NOLINT
 #endif
 
-// Determines if hash_map/hash_set are available.
-// Only used for testing against those containers.
-#if !defined(GTEST_HAS_HASH_MAP_)
-# if defined(_MSC_VER) && (_MSC_VER < 1900)
-#  define GTEST_HAS_HASH_MAP_ 1  // Indicates that hash_map is available.
-#  define GTEST_HAS_HASH_SET_ 1  // Indicates that hash_set is available.
-# endif  // _MSC_VER
-#endif  // !defined(GTEST_HAS_HASH_MAP_)
-
 // Determines whether clone(2) is supported.
 // Usually it will only be available on Linux, excluding
 // Linux on the Itanium architecture.
