@@ -50,9 +50,9 @@
 #endif
 
 // Silence C4800 (C4800: 'int *const ': forcing value
-// to bool 'true' or 'false') for MSVC 14,15
+// to bool 'true' or 'false') for MSVC 15
 #ifdef _MSC_VER
-#if _MSC_VER <= 1900
+#if _MSC_VER == 1900
 #  pragma warning(push)
 #  pragma warning(disable:4800)
 #endif
@@ -887,7 +887,7 @@ InSequence::~InSequence() {
 }  // namespace testing
 
 #ifdef _MSC_VER
-#if _MSC_VER <= 1900
+#if _MSC_VER == 1900
 #  pragma warning(pop)
 #endif
 #endif

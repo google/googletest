@@ -46,12 +46,9 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-// There is a bug in MSVC (fixed in VS 2008) that prevents creating a
-// mock for a function with const arguments, so we don't test such
-// cases for MSVC versions older than 2008.
-#if !GTEST_OS_WINDOWS || (_MSC_VER >= 1500)
+#if !GTEST_OS_WINDOWS || defined(_MSC_VER)
 # define GMOCK_ALLOWS_CONST_PARAM_FUNCTIONS
-#endif  // !GTEST_OS_WINDOWS || (_MSC_VER >= 1500)
+#endif  // !GTEST_OS_WINDOWS || defined(_MSC_VER)
 
 namespace testing {
 namespace gmock_generated_function_mockers_test {
