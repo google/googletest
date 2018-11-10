@@ -310,6 +310,10 @@
     __pragma(warning(disable: warnings))
 # define GTEST_DISABLE_MSC_WARNINGS_POP_()          \
     __pragma(warning(pop))
+#else
+// Not all compilers are MSVC
+# define GTEST_DISABLE_MSC_WARNINGS_PUSH_(warnings)
+# define GTEST_DISABLE_MSC_WARNINGS_POP_()
 #endif
 
 // Clang on Windows does not understand MSVC's pragma warning.
