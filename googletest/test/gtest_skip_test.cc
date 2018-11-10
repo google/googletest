@@ -34,6 +34,13 @@
 
 using ::testing::Test;
 
+// This entire test is based on making code unreachable, so disabling
+// C4702: unreachable code is fine here.
+#ifdef _MSC_VER
+# pragma warning(push)
+# pragma warning(disable:4702)
+#endif
+
 TEST(SkipTest, DoesSkip) {
   GTEST_SKIP();
   EXPECT_EQ(0, 1);
@@ -53,3 +60,7 @@ TEST_F(Fixture, SkipsOneTest) {
 TEST_F(Fixture, SkipsAnotherTest) {
   EXPECT_EQ(99, 100);
 }
+
+#ifdef _MSC_VER
+# pragma warning(pop)
+#endif
