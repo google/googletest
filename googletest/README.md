@@ -18,7 +18,7 @@ with `${GTEST_DIR}/include` in the system header search path and `${GTEST_DIR}`
 in the normal header search path. Assuming a Linux-like system and gcc,
 something like the following will do:
 
-    g++ -isystem ${GTEST_DIR}/include -I${GTEST_DIR} \
+    g++ -std=c++11 -isystem ${GTEST_DIR}/include -I${GTEST_DIR} \
         -pthread -c ${GTEST_DIR}/src/gtest-all.cc
     ar -rv libgtest.a gtest-all.o
 
@@ -28,7 +28,7 @@ Next, you should compile your test source file with `${GTEST_DIR}/include` in
 the system header search path, and link it with gtest and any other necessary
 libraries:
 
-    g++ -isystem ${GTEST_DIR}/include -pthread path/to/your_test.cc libgtest.a \
+    g++ -std=c++11 -isystem ${GTEST_DIR}/include -pthread path/to/your_test.cc libgtest.a \
         -o your_test
 
 As an example, the make/ directory contains a Makefile that you can use to build
