@@ -7277,9 +7277,6 @@ TEST(IsHashTable, Basic) {
   EXPECT_FALSE(testing::internal::IsHashTable<NotReallyAHashTable>::value);
   EXPECT_FALSE(testing::internal::IsHashTable<std::vector<int>>::value);
   EXPECT_TRUE(testing::internal::IsHashTable<std::unordered_set<int>>::value);
-#if GTEST_HAS_HASH_SET_
-  EXPECT_TRUE(testing::internal::IsHashTable<__gnu_cxx::hash_set<int>>::value);
-#endif  // GTEST_HAS_HASH_SET_
 }
 
 // Tests ArrayEq().
