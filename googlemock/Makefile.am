@@ -28,6 +28,7 @@ lib_libgmock_la_SOURCES = src/gmock-all.cc
 pkginclude_HEADERS = \
   include/gmock/gmock-actions.h \
   include/gmock/gmock-cardinalities.h \
+  include/gmock/gmock-function-mocker.h \
   include/gmock/gmock-generated-actions.h \
   include/gmock/gmock-generated-function-mockers.h \
   include/gmock/gmock-generated-matchers.h \
@@ -43,6 +44,7 @@ pkginclude_internal_HEADERS = \
   include/gmock/internal/gmock-generated-internal-utils.h \
   include/gmock/internal/gmock-internal-utils.h \
   include/gmock/internal/gmock-port.h \
+  include/gmock/internal/gmock-pp.h \
   include/gmock/internal/custom/gmock-generated-actions.h \
   include/gmock/internal/custom/gmock-matchers.h \
   include/gmock/internal/custom/gmock-port.h
@@ -107,6 +109,7 @@ EXTRA_DIST += \
   test/gmock-cardinalities_test.cc \
   test/gmock_ex_test.cc \
   test/gmock-generated-actions_test.cc \
+  test/gmock-function-mocker_test.cc \
   test/gmock-generated-function-mockers_test.cc \
   test/gmock-generated-internal-utils_test.cc \
   test/gmock-generated-matchers_test.cc \
