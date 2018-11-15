@@ -1061,6 +1061,24 @@ class DoBothAction {
   GTEST_DISALLOW_ASSIGN_(DoBothAction);
 };
 
+template <typename InnerAction, size_t... I>
+struct WithArgsAction {
+  InnerAction action;
+
+  // The inner action could be anything convertible to Action<X>.
+  // We use the conversion operator to detect the signature of the inner Action.
+  template <typename R, typename... Args>
+  operator Action<R(Args...)>() const {  // NOLINT
+    Action<R(typename std::tuple_element<I, std::tuple<Args...>>::type...)>
+        converted(action);
+
+    return [converted](Args... args) -> R {
+      return converted.Perform(std::forward_as_tuple(
+        std::get<I>(std::forward_as_tuple(std::forward<Args>(args)...))...));
+    };
+  }
+};
+
 }  // namespace internal
 
 // An Unused object can be implicitly constructed from ANY value.
@@ -1109,6 +1127,37 @@ Action<To>::Action(const Action<From>& from)
       impl_(from.impl_ == nullptr
                 ? nullptr
                 : new internal::ActionAdaptor<To, From>(from)) {
+}
+
+// WithArg<k>(an_action) creates an action that passes the k-th
+// (0-based) argument of the mock function to an_action and performs
+// it.  It adapts an action accepting one argument to one that accepts
+// multiple arguments.  For convenience, we also provide
+// WithArgs<k>(an_action) (defined below) as a synonym.
+template <size_t k, typename InnerAction>
+internal::WithArgsAction<typename std::decay<InnerAction>::type, k>
+WithArg(InnerAction&& action) {
+  return {std::forward<InnerAction>(action)};
+}
+
+// WithArgs<N1, N2, ..., Nk>(an_action) creates an action that passes
+// the selected arguments of the mock function to an_action and
+// performs it.  It serves as an adaptor between actions with
+// different argument lists.
+template <size_t k, size_t... ks, typename InnerAction>
+internal::WithArgsAction<typename std::decay<InnerAction>::type, k, ks...>
+WithArgs(InnerAction&& action) {
+  return {std::forward<InnerAction>(action)};
+}
+
+// WithoutArgs(inner_action) can be used in a mock function with a
+// non-empty argument list to perform inner_action, which takes no
+// argument.  In other words, it adapts an action accepting no
+// argument to one that accepts (and ignores) arguments.
+template <typename InnerAction>
+internal::WithArgsAction<typename std::decay<InnerAction>::type>
+WithoutArgs(InnerAction&& action) {
+  return {std::forward<InnerAction>(action)};
 }
 
 // Creates an action that returns 'value'.  'value' is passed by value
