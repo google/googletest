@@ -127,27 +127,6 @@ PolymorphicAction<internal::InvokeMethodAction<Class, MethodPtr> > Invoke(
       internal::InvokeMethodAction<Class, MethodPtr>(obj_ptr, method_ptr));
 }
 
-// WithoutArgs(inner_action) can be used in a mock function with a
-// non-empty argument list to perform inner_action, which takes no
-// argument.  In other words, it adapts an action accepting no
-// argument to one that accepts (and ignores) arguments.
-template <typename InnerAction>
-inline internal::WithArgsAction<InnerAction>
-WithoutArgs(const InnerAction& action) {
-  return internal::WithArgsAction<InnerAction>(action);
-}
-
-// WithArg<k>(an_action) creates an action that passes the k-th
-// (0-based) argument of the mock function to an_action and performs
-// it.  It adapts an action accepting one argument to one that accepts
-// multiple arguments.  For convenience, we also provide
-// WithArgs<k>(an_action) (defined below) as a synonym.
-template <int k, typename InnerAction>
-inline internal::WithArgsAction<InnerAction, k>
-WithArg(const InnerAction& action) {
-  return internal::WithArgsAction<InnerAction, k>(action);
-}
-
 // The ACTION*() macros trigger warning C4100 (unreferenced formal
 // parameter) in MSVC with -W4.  Unfortunately they cannot be fixed in
 // the macro definition, as the warnings are generated when the macro

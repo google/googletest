@@ -57,7 +57,6 @@ using testing::ReturnNew;
 using testing::SetArgPointee;
 using testing::StaticAssertTypeEq;
 using testing::Unused;
-using testing::WithArgs;
 
 // For suppressing compiler warnings on conversion possibly losing precision.
 inline short Short(short n) { return n; }  // NOLINT
@@ -66,42 +65,18 @@ inline char Char(char ch) { return ch; }
 // Sample functions and functors for testing various actions.
 int Nullary() { return 1; }
 
-class NullaryFunctor {
- public:
-  int operator()() { return 2; }
-};
-
 bool g_done = false;
-
-bool Unary(int x) { return x < 0; }
-
-const char* Plus1(const char* s) { return s + 1; }
 
 bool ByConstRef(const std::string& s) { return s == "Hi"; }
 
 const double g_double = 0;
 bool ReferencesGlobalDouble(const double& x) { return &x == &g_double; }
 
-std::string ByNonConstRef(std::string& s) { return s += "+"; }  // NOLINT
-
 struct UnaryFunctor {
   int operator()(bool x) { return x ? 1 : -1; }
 };
 
 const char* Binary(const char* input, short n) { return input + n; }  // NOLINT
-
-void VoidBinary(int, char) { g_done = true; }
-
-int Ternary(int x, char y, short z) { return x + y + z; }  // NOLINT
-
-void VoidTernary(int, char, bool) { g_done = true; }
-
-int SumOf4(int a, int b, int c, int d) { return a + b + c + d; }
-
-std::string Concat4(const char* s1, const char* s2, const char* s3,
-                    const char* s4) {
-  return std::string(s1) + s2 + s3 + s4;
-}
 
 int SumOf5(int a, int b, int c, int d, int e) { return a + b + c + d + e; }
 
@@ -274,143 +249,6 @@ TEST(InvokeArgumentTest, ByExplicitConstReferenceFunction) {
   double x = 0;
   a = InvokeArgument<0>(ByRef(x));  // This calls ByRef() on a non-const.
   EXPECT_FALSE(a.Perform(std::make_tuple(&ReferencesGlobalDouble)));
-}
-
-// Tests using WithArgs and with an action that takes 1 argument.
-TEST(WithArgsTest, OneArg) {
-  Action<bool(double x, int n)> a = WithArgs<1>(Invoke(Unary));  // NOLINT
-  EXPECT_TRUE(a.Perform(std::make_tuple(1.5, -1)));
-  EXPECT_FALSE(a.Perform(std::make_tuple(1.5, 1)));
-}
-
-// Tests using WithArgs with an action that takes 2 arguments.
-TEST(WithArgsTest, TwoArgs) {
-  Action<const char*(const char* s, double x, short n)> a =
-      WithArgs<0, 2>(Invoke(Binary));
-  const char s[] = "Hello";
-  EXPECT_EQ(s + 2, a.Perform(std::make_tuple(CharPtr(s), 0.5, Short(2))));
-}
-
-// Tests using WithArgs with an action that takes 3 arguments.
-TEST(WithArgsTest, ThreeArgs) {
-  Action<int(int, double, char, short)> a =  // NOLINT
-      WithArgs<0, 2, 3>(Invoke(Ternary));
-  EXPECT_EQ(123, a.Perform(std::make_tuple(100, 6.5, Char(20), Short(3))));
-}
-
-// Tests using WithArgs with an action that takes 4 arguments.
-TEST(WithArgsTest, FourArgs) {
-  Action<std::string(const char*, const char*, double, const char*,
-                     const char*)>
-      a = WithArgs<4, 3, 1, 0>(Invoke(Concat4));
-  EXPECT_EQ("4310", a.Perform(std::make_tuple(CharPtr("0"), CharPtr("1"), 2.5,
-                                              CharPtr("3"), CharPtr("4"))));
-}
-
-// Tests using WithArgs with an action that takes 5 arguments.
-TEST(WithArgsTest, FiveArgs) {
-  Action<std::string(const char*, const char*, const char*, const char*,
-                     const char*)>
-      a = WithArgs<4, 3, 2, 1, 0>(Invoke(Concat5));
-  EXPECT_EQ("43210",
-            a.Perform(std::make_tuple(CharPtr("0"), CharPtr("1"), CharPtr("2"),
-                                      CharPtr("3"), CharPtr("4"))));
-}
-
-// Tests using WithArgs with an action that takes 6 arguments.
-TEST(WithArgsTest, SixArgs) {
-  Action<std::string(const char*, const char*, const char*)> a =
-      WithArgs<0, 1, 2, 2, 1, 0>(Invoke(Concat6));
-  EXPECT_EQ("012210", a.Perform(std::make_tuple(CharPtr("0"), CharPtr("1"),
-                                                CharPtr("2"))));
-}
-
-// Tests using WithArgs with an action that takes 7 arguments.
-TEST(WithArgsTest, SevenArgs) {
-  Action<std::string(const char*, const char*, const char*, const char*)> a =
-      WithArgs<0, 1, 2, 3, 2, 1, 0>(Invoke(Concat7));
-  EXPECT_EQ("0123210", a.Perform(std::make_tuple(CharPtr("0"), CharPtr("1"),
-                                                 CharPtr("2"), CharPtr("3"))));
-}
-
-// Tests using WithArgs with an action that takes 8 arguments.
-TEST(WithArgsTest, EightArgs) {
-  Action<std::string(const char*, const char*, const char*, const char*)> a =
-      WithArgs<0, 1, 2, 3, 0, 1, 2, 3>(Invoke(Concat8));
-  EXPECT_EQ("01230123", a.Perform(std::make_tuple(CharPtr("0"), CharPtr("1"),
-                                                  CharPtr("2"), CharPtr("3"))));
-}
-
-// Tests using WithArgs with an action that takes 9 arguments.
-TEST(WithArgsTest, NineArgs) {
-  Action<std::string(const char*, const char*, const char*, const char*)> a =
-      WithArgs<0, 1, 2, 3, 1, 2, 3, 2, 3>(Invoke(Concat9));
-  EXPECT_EQ("012312323",
-            a.Perform(std::make_tuple(CharPtr("0"), CharPtr("1"), CharPtr("2"),
-                                      CharPtr("3"))));
-}
-
-// Tests using WithArgs with an action that takes 10 arguments.
-TEST(WithArgsTest, TenArgs) {
-  Action<std::string(const char*, const char*, const char*, const char*)> a =
-      WithArgs<0, 1, 2, 3, 2, 1, 0, 1, 2, 3>(Invoke(Concat10));
-  EXPECT_EQ("0123210123",
-            a.Perform(std::make_tuple(CharPtr("0"), CharPtr("1"), CharPtr("2"),
-                                      CharPtr("3"))));
-}
-
-// Tests using WithArgs with an action that is not Invoke().
-class SubstractAction : public ActionInterface<int(int, int)> {  // NOLINT
- public:
-  virtual int Perform(const std::tuple<int, int>& args) {
-    return std::get<0>(args) - std::get<1>(args);
-  }
-};
-
-TEST(WithArgsTest, NonInvokeAction) {
-  Action<int(const std::string&, int, int)> a =  // NOLINT
-      WithArgs<2, 1>(MakeAction(new SubstractAction));
-  std::tuple<std::string, int, int> dummy =
-      std::make_tuple(std::string("hi"), 2, 10);
-  EXPECT_EQ(8, a.Perform(dummy));
-}
-
-// Tests using WithArgs to pass all original arguments in the original order.
-TEST(WithArgsTest, Identity) {
-  Action<int(int x, char y, short z)> a =  // NOLINT
-      WithArgs<0, 1, 2>(Invoke(Ternary));
-  EXPECT_EQ(123, a.Perform(std::make_tuple(100, Char(20), Short(3))));
-}
-
-// Tests using WithArgs with repeated arguments.
-TEST(WithArgsTest, RepeatedArguments) {
-  Action<int(bool, int m, int n)> a =  // NOLINT
-      WithArgs<1, 1, 1, 1>(Invoke(SumOf4));
-  EXPECT_EQ(4, a.Perform(std::make_tuple(false, 1, 10)));
-}
-
-// Tests using WithArgs with reversed argument order.
-TEST(WithArgsTest, ReversedArgumentOrder) {
-  Action<const char*(short n, const char* input)> a =  // NOLINT
-      WithArgs<1, 0>(Invoke(Binary));
-  const char s[] = "Hello";
-  EXPECT_EQ(s + 2, a.Perform(std::make_tuple(Short(2), CharPtr(s))));
-}
-
-// Tests using WithArgs with compatible, but not identical, argument types.
-TEST(WithArgsTest, ArgsOfCompatibleTypes) {
-  Action<long(short x, char y, double z, char c)> a =  // NOLINT
-      WithArgs<0, 1, 3>(Invoke(Ternary));
-  EXPECT_EQ(123,
-            a.Perform(std::make_tuple(Short(100), Char(20), 5.6, Char(3))));
-}
-
-// Tests using WithArgs with an action that returns void.
-TEST(WithArgsTest, VoidAction) {
-  Action<void(double x, char c, int n)> a = WithArgs<2, 1>(Invoke(VoidBinary));
-  g_done = false;
-  a.Perform(std::make_tuple(1.5, 'a', 3));
-  EXPECT_TRUE(g_done);
 }
 
 // Tests DoAll(a1, a2).

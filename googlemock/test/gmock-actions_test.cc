@@ -74,6 +74,7 @@ using testing::ReturnRefOfCopy;
 using testing::SetArgPointee;
 using testing::SetArgumentPointee;
 using testing::Unused;
+using testing::WithArgs;
 using testing::_;
 using testing::internal::BuiltInDefaultValue;
 using testing::internal::Int64;
@@ -926,6 +927,21 @@ class VoidNullaryFunctor {
   void operator()() { g_done = true; }
 };
 
+short Short(short n) { return n; }  // NOLINT
+char Char(char ch) { return ch; }
+
+const char* CharPtr(const char* s) { return s; }
+
+bool Unary(int x) { return x < 0; }
+
+const char* Binary(const char* input, short n) { return input + n; }  // NOLINT
+
+void VoidBinary(int, char) { g_done = true; }
+
+int Ternary(int x, char y, short z) { return x + y + z; }  // NOLINT
+
+int SumOf4(int a, int b, int c, int d) { return a + b + c + d; }
+
 class Foo {
  public:
   Foo() : value_(123) {}
@@ -1033,6 +1049,108 @@ TEST(AssignTest, CompatibleTypes) {
   Action<void(int)> a = Assign(&x, 5);
   a.Perform(std::make_tuple(0));
   EXPECT_DOUBLE_EQ(5, x);
+}
+
+
+// Tests using WithArgs and with an action that takes 1 argument.
+TEST(WithArgsTest, OneArg) {
+  Action<bool(double x, int n)> a = WithArgs<1>(Invoke(Unary));  // NOLINT
+  EXPECT_TRUE(a.Perform(std::make_tuple(1.5, -1)));
+  EXPECT_FALSE(a.Perform(std::make_tuple(1.5, 1)));
+}
+
+// Tests using WithArgs with an action that takes 2 arguments.
+TEST(WithArgsTest, TwoArgs) {
+  Action<const char*(const char* s, double x, short n)> a =  // NOLINT
+      WithArgs<0, 2>(Invoke(Binary));
+  const char s[] = "Hello";
+  EXPECT_EQ(s + 2, a.Perform(std::make_tuple(CharPtr(s), 0.5, Short(2))));
+}
+
+struct ConcatAll {
+  std::string operator()() const { return {}; }
+  template <typename... I>
+  std::string operator()(const char* a, I... i) const {
+    return a + ConcatAll()(i...);
+  }
+};
+
+// Tests using WithArgs with an action that takes 10 arguments.
+TEST(WithArgsTest, TenArgs) {
+  Action<std::string(const char*, const char*, const char*, const char*)> a =
+      WithArgs<0, 1, 2, 3, 2, 1, 0, 1, 2, 3>(Invoke(ConcatAll{}));
+  EXPECT_EQ("0123210123",
+            a.Perform(std::make_tuple(CharPtr("0"), CharPtr("1"), CharPtr("2"),
+                                      CharPtr("3"))));
+}
+
+// Tests using WithArgs with an action that is not Invoke().
+class SubtractAction : public ActionInterface<int(int, int)> {
+ public:
+  virtual int Perform(const std::tuple<int, int>& args) {
+    return std::get<0>(args) - std::get<1>(args);
+  }
+};
+
+TEST(WithArgsTest, NonInvokeAction) {
+  Action<int(const std::string&, int, int)> a =
+      WithArgs<2, 1>(MakeAction(new SubtractAction));
+  std::tuple<std::string, int, int> dummy =
+      std::make_tuple(std::string("hi"), 2, 10);
+  EXPECT_EQ(8, a.Perform(dummy));
+}
+
+// Tests using WithArgs to pass all original arguments in the original order.
+TEST(WithArgsTest, Identity) {
+  Action<int(int x, char y, short z)> a =  // NOLINT
+      WithArgs<0, 1, 2>(Invoke(Ternary));
+  EXPECT_EQ(123, a.Perform(std::make_tuple(100, Char(20), Short(3))));
+}
+
+// Tests using WithArgs with repeated arguments.
+TEST(WithArgsTest, RepeatedArguments) {
+  Action<int(bool, int m, int n)> a =  // NOLINT
+      WithArgs<1, 1, 1, 1>(Invoke(SumOf4));
+  EXPECT_EQ(4, a.Perform(std::make_tuple(false, 1, 10)));
+}
+
+// Tests using WithArgs with reversed argument order.
+TEST(WithArgsTest, ReversedArgumentOrder) {
+  Action<const char*(short n, const char* input)> a =  // NOLINT
+      WithArgs<1, 0>(Invoke(Binary));
+  const char s[] = "Hello";
+  EXPECT_EQ(s + 2, a.Perform(std::make_tuple(Short(2), CharPtr(s))));
+}
+
+// Tests using WithArgs with compatible, but not identical, argument types.
+TEST(WithArgsTest, ArgsOfCompatibleTypes) {
+  Action<long(short x, char y, double z, char c)> a =  // NOLINT
+      WithArgs<0, 1, 3>(Invoke(Ternary));
+  EXPECT_EQ(123,
+            a.Perform(std::make_tuple(Short(100), Char(20), 5.6, Char(3))));
+}
+
+// Tests using WithArgs with an action that returns void.
+TEST(WithArgsTest, VoidAction) {
+  Action<void(double x, char c, int n)> a = WithArgs<2, 1>(Invoke(VoidBinary));
+  g_done = false;
+  a.Perform(std::make_tuple(1.5, 'a', 3));
+  EXPECT_TRUE(g_done);
+}
+
+TEST(WithArgsTest, ReturnReference) {
+  Action<int&(int&, void*)> a = WithArgs<0>([](int& a) -> int& { return a; });
+  int i = 0;
+  const int& res = a.Perform(std::forward_as_tuple(i, nullptr));
+  EXPECT_EQ(&i, &res);
+}
+
+TEST(WithArgsTest, InnerActionWithConversion) {
+  struct Base {};
+  struct Derived : Base {};
+  Action<Derived*()> inner = [] { return nullptr; };
+  Action<Base*(double)> a = testing::WithoutArgs(inner);
+  EXPECT_EQ(nullptr, a.Perform(std::make_tuple(1.1)));
 }
 
 #if !GTEST_OS_WINDOWS_MOBILE
