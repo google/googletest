@@ -122,97 +122,6 @@ class InvokeCallbackAction {
   const std::shared_ptr<CallbackType> callback_;
 };
 
-// An INTERNAL macro for extracting the type of a tuple field.  It's
-// subject to change without notice - DO NOT USE IN USER CODE!
-#define GMOCK_FIELD_(Tuple, N) \
-    typename ::std::tuple_element<N, Tuple>::type
-
-$range i 1..n
-
-// SelectArgs<Result, ArgumentTuple, k1, k2, ..., k_n>::type is the
-// type of an n-ary function whose i-th (1-based) argument type is the
-// k{i}-th (0-based) field of ArgumentTuple, which must be a tuple
-// type, and whose return type is Result.  For example,
-//   SelectArgs<int, ::std::tuple<bool, char, double, long>, 0, 3>::type
-// is int(bool, long).
-//
-// SelectArgs<Result, ArgumentTuple, k1, k2, ..., k_n>::Select(args)
-// returns the selected fields (k1, k2, ..., k_n) of args as a tuple.
-// For example,
-//   SelectArgs<int, std::tuple<bool, char, double>, 2, 0>::Select(
-//       ::std::make_tuple(true, 'a', 2.5))
-// returns tuple (2.5, true).
-//
-// The numbers in list k1, k2, ..., k_n must be >= 0, where n can be
-// in the range [0, $n].  Duplicates are allowed and they don't have
-// to be in an ascending or descending order.
-
-template <typename Result, typename ArgumentTuple, $for i, [[int k$i]]>
-class SelectArgs {
- public:
-  typedef Result type($for i, [[GMOCK_FIELD_(ArgumentTuple, k$i)]]);
-  typedef typename Function<type>::ArgumentTuple SelectedArgs;
-  static SelectedArgs Select(const ArgumentTuple& args) {
-    return SelectedArgs($for i, [[std::get<k$i>(args)]]);
-  }
-};
-
-
-$for i [[
-$range j 1..n
-$range j1 1..i-1
-template <typename Result, typename ArgumentTuple$for j1[[, int k$j1]]>
-class SelectArgs<Result, ArgumentTuple,
-                 $for j, [[$if j <= i-1 [[k$j]] $else [[-1]]]]> {
- public:
-  typedef Result type($for j1, [[GMOCK_FIELD_(ArgumentTuple, k$j1)]]);
-  typedef typename Function<type>::ArgumentTuple SelectedArgs;
-  static SelectedArgs Select(const ArgumentTuple& [[]]
-$if i == 1 [[/* args */]] $else [[args]]) {
-    return SelectedArgs($for j1, [[std::get<k$j1>(args)]]);
-  }
-};
-
-
-]]
-#undef GMOCK_FIELD_
-
-$var ks = [[$for i, [[k$i]]]]
-
-// Implements the WithArgs action.
-template <typename InnerAction, $for i, [[int k$i = -1]]>
-class WithArgsAction {
- public:
-  explicit WithArgsAction(const InnerAction& action) : action_(action) {}
-
-  template <typename F>
-  operator Action<F>() const { return MakeAction(new Impl<F>(action_)); }
-
- private:
-  template <typename F>
-  class Impl : public ActionInterface<F> {
-   public:
-    typedef typename Function<F>::Result Result;
-    typedef typename Function<F>::ArgumentTuple ArgumentTuple;
-
-    explicit Impl(const InnerAction& action) : action_(action) {}
-
-    virtual Result Perform(const ArgumentTuple& args) {
-      return action_.Perform(SelectArgs<Result, ArgumentTuple, $ks>::Select(args));
-    }
-
-   private:
-    typedef typename SelectArgs<Result, ArgumentTuple,
-        $ks>::type InnerFunctionType;
-
-    Action<InnerFunctionType> action_;
-  };
-
-  const InnerAction action_;
-
-  GTEST_DISALLOW_ASSIGN_(WithArgsAction);
-};
-
 // A macro from the ACTION* family (defined later in this file)
 // defines an action that can be used in a mock function.  Typically,
 // these actions only care about a subset of the arguments of the mock
@@ -257,25 +166,6 @@ $template
 
 }  // namespace internal
 
-// Various overloads for Invoke().
-
-// WithArgs<N1, N2, ..., Nk>(an_action) creates an action that passes
-// the selected arguments of the mock function to an_action and
-// performs it.  It serves as an adaptor between actions with
-// different argument lists.  C++ doesn't support default arguments for
-// function templates, so we have to overload it.
-
-$range i 1..n
-$for i [[
-$range j 1..i
-template <$for j [[int k$j, ]]typename InnerAction>
-inline internal::WithArgsAction<InnerAction$for j [[, k$j]]>
-WithArgs(const InnerAction& action) {
-  return internal::WithArgsAction<InnerAction$for j [[, k$j]]>(action);
-}
-
-
-]]
 // Creates an action that does actions a1, a2, ..., sequentially in
 // each invocation.
 $range i 2..n
