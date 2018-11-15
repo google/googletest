@@ -164,8 +164,9 @@ static_assert(
 // Empty if _K = 0.
 // Requires: * |_Macro| can be called with 3 arguments.
 //           * |_K| literal between 0 and 15
-#define GMOCK_PP_REPEAT(_Macro, _Data, _N) \
-  GMOCK_PP_CAT(GMOCK_PP_INTERNAL_REPEAT_IMPL_, _N)(0, _Macro, _Data)
+#define GMOCK_PP_REPEAT(_Macro, _Data, _N)           \
+  GMOCK_PP_CAT(GMOCK_PP_INTERNAL_FOR_EACH_IMPL_, _N) \
+  (0, _Macro, _Data, GMOCK_PP_INTENRAL_EMPTY_TUPLE)
 
 // Increments the argument, requires the argument to be between 0 and 15.
 #define GMOCK_PP_INC(_i) GMOCK_PP_CAT(GMOCK_PP_INTERNAL_INC_, _i)
@@ -175,6 +176,7 @@ static_assert(
 
 // Internal details follow. Do not use any of these symbols outside of this
 // file or we will break your code.
+#define GMOCK_PP_INTENRAL_EMPTY_TUPLE (, , , , , , , , , , , , , , , )
 #define GMOCK_PP_INTERNAL_CAT(_1, _2) _1##_2
 #define GMOCK_PP_INTERNAL_STRINGIZE(_x) #_x
 #define GMOCK_PP_INTERNAL_INTERNAL_16TH(_1, _2, _3, _4, _5, _6, _7, _8, _9, \
@@ -311,50 +313,5 @@ static_assert(
   GMOCK_PP_INTERNAL_CALL_MACRO(_Macro, _i, _Data, GMOCK_PP_HEAD _Tuple) \
   GMOCK_PP_INTERNAL_FOR_EACH_IMPL_14(GMOCK_PP_INC(_i), _Macro, _Data,   \
                                      (GMOCK_PP_TAIL _Tuple))
-#define GMOCK_PP_INTERNAL_REPEAT_IMPL_0(_i, _Macro, _Data)
-#define GMOCK_PP_INTERNAL_REPEAT_IMPL_1(_i, _Macro, _Data) \
-  GMOCK_PP_INTERNAL_CALL_MACRO(_Macro, _i, _Data, )
-#define GMOCK_PP_INTERNAL_REPEAT_IMPL_2(_i, _Macro, _Data) \
-  GMOCK_PP_INTERNAL_CALL_MACRO(_Macro, _i, _Data, )        \
-  GMOCK_PP_INTERNAL_REPEAT_IMPL_1(GMOCK_PP_INC(_i), _Macro, _Data)
-#define GMOCK_PP_INTERNAL_REPEAT_IMPL_3(_i, _Macro, _Data) \
-  GMOCK_PP_INTERNAL_CALL_MACRO(_Macro, _i, _Data, )        \
-  GMOCK_PP_INTERNAL_REPEAT_IMPL_2(GMOCK_PP_INC(_i), _Macro, _Data)
-#define GMOCK_PP_INTERNAL_REPEAT_IMPL_4(_i, _Macro, _Data) \
-  GMOCK_PP_INTERNAL_CALL_MACRO(_Macro, _i, _Data, )        \
-  GMOCK_PP_INTERNAL_REPEAT_IMPL_3(GMOCK_PP_INC(_i), _Macro, _Data)
-#define GMOCK_PP_INTERNAL_REPEAT_IMPL_5(_i, _Macro, _Data) \
-  GMOCK_PP_INTERNAL_CALL_MACRO(_Macro, _i, _Data, )        \
-  GMOCK_PP_INTERNAL_REPEAT_IMPL_4(GMOCK_PP_INC(_i), _Macro, _Data)
-#define GMOCK_PP_INTERNAL_REPEAT_IMPL_6(_i, _Macro, _Data) \
-  GMOCK_PP_INTERNAL_CALL_MACRO(_Macro, _i, _Data, )        \
-  GMOCK_PP_INTERNAL_REPEAT_IMPL_5(GMOCK_PP_INC(_i), _Macro, _Data)
-#define GMOCK_PP_INTERNAL_REPEAT_IMPL_7(_i, _Macro, _Data) \
-  GMOCK_PP_INTERNAL_CALL_MACRO(_Macro, _i, _Data, )        \
-  GMOCK_PP_INTERNAL_REPEAT_IMPL_6(GMOCK_PP_INC(_i), _Macro, _Data)
-#define GMOCK_PP_INTERNAL_REPEAT_IMPL_8(_i, _Macro, _Data) \
-  GMOCK_PP_INTERNAL_CALL_MACRO(_Macro, _i, _Data, )        \
-  GMOCK_PP_INTERNAL_REPEAT_IMPL_7(GMOCK_PP_INC(_i), _Macro, _Data)
-#define GMOCK_PP_INTERNAL_REPEAT_IMPL_9(_i, _Macro, _Data) \
-  GMOCK_PP_INTERNAL_CALL_MACRO(_Macro, _i, _Data, )        \
-  GMOCK_PP_INTERNAL_REPEAT_IMPL_8(GMOCK_PP_INC(_i), _Macro, _Data)
-#define GMOCK_PP_INTERNAL_REPEAT_IMPL_10(_i, _Macro, _Data) \
-  GMOCK_PP_INTERNAL_CALL_MACRO(_Macro, _i, _Data, )         \
-  GMOCK_PP_INTERNAL_REPEAT_IMPL_9(GMOCK_PP_INC(_i), _Macro, _Data)
-#define GMOCK_PP_INTERNAL_REPEAT_IMPL_11(_i, _Macro, _Data) \
-  GMOCK_PP_INTERNAL_CALL_MACRO(_Macro, _i, _Data, )         \
-  GMOCK_PP_INTERNAL_REPEAT_IMPL_10(GMOCK_PP_INC(_i), _Macro, _Data)
-#define GMOCK_PP_INTERNAL_REPEAT_IMPL_12(_i, _Macro, _Data) \
-  GMOCK_PP_INTERNAL_CALL_MACRO(_Macro, _i, _Data, )         \
-  GMOCK_PP_INTERNAL_REPEAT_IMPL_11(GMOCK_PP_INC(_i), _Macro, _Data)
-#define GMOCK_PP_INTERNAL_REPEAT_IMPL_13(_i, _Macro, _Data) \
-  GMOCK_PP_INTERNAL_CALL_MACRO(_Macro, _i, _Data, )         \
-  GMOCK_PP_INTERNAL_REPEAT_IMPL_12(GMOCK_PP_INC(_i), _Macro, _Data)
-#define GMOCK_PP_INTERNAL_REPEAT_IMPL_14(_i, _Macro, _Data) \
-  GMOCK_PP_INTERNAL_CALL_MACRO(_Macro, _i, _Data, )         \
-  GMOCK_PP_INTERNAL_REPEAT_IMPL_13(GMOCK_PP_INC(_i), _Macro, _Data)
-#define GMOCK_PP_INTERNAL_REPEAT_IMPL_15(_i, _Macro, _Data) \
-  GMOCK_PP_INTERNAL_CALL_MACRO(_Macro, _i, _Data, )         \
-  GMOCK_PP_INTERNAL_REPEAT_IMPL_14(GMOCK_PP_INC(_i), _Macro, _Data)
 
 #endif  // THIRD_PARTY_GOOGLETEST_GOOGLEMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_PP_H_
