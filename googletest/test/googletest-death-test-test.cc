@@ -499,12 +499,20 @@ TEST_F(TestForDeathTest, AcceptsAnythingConvertibleToRE) {
   const ::string regex_str(regex_c_str);
   EXPECT_DEATH(GlobalFunction(), regex_str);
 
+  // This one is tricky; a temporary pointer into another temporary.  Reference
+  // lifetime extension of the pointer is not sufficient.
+  EXPECT_DEATH(GlobalFunction(), ::string(regex_c_str).c_str());
+
 # endif  // GTEST_HAS_GLOBAL_STRING
 
 # if !GTEST_USES_PCRE
 
   const ::std::string regex_std_str(regex_c_str);
   EXPECT_DEATH(GlobalFunction(), regex_std_str);
+
+  // This one is tricky; a temporary pointer into another temporary.  Reference
+  // lifetime extension of the pointer is not sufficient.
+  EXPECT_DEATH(GlobalFunction(), ::std::string(regex_c_str).c_str());
 
 # endif  // !GTEST_USES_PCRE
 }
