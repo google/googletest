@@ -18,7 +18,7 @@ static_assert(
 #define GMOCK_PP_CAT(_1, _2) GMOCK_PP_INTERNAL_CAT(_1, _2)
 
 // Expands and stringifies the only argument.
-#define GMOCK_PP_STRINGIZE(_x) GMOCK_PP_INTERNAL_STRINGIZE(_x)
+#define GMOCK_PP_STRINGIZE(...) GMOCK_PP_INTERNAL_STRINGIZE(__VA_ARGS__)
 
 // Returns empty. Given a variadic number of arguments.
 #define GMOCK_PP_EMPTY(...)
@@ -178,7 +178,7 @@ static_assert(
 // file or we will break your code.
 #define GMOCK_PP_INTENRAL_EMPTY_TUPLE (, , , , , , , , , , , , , , , )
 #define GMOCK_PP_INTERNAL_CAT(_1, _2) _1##_2
-#define GMOCK_PP_INTERNAL_STRINGIZE(_x) #_x
+#define GMOCK_PP_INTERNAL_STRINGIZE(...) #__VA_ARGS__
 #define GMOCK_PP_INTERNAL_INTERNAL_16TH(_1, _2, _3, _4, _5, _6, _7, _8, _9, \
                                         _10, _11, _12, _13, _14, _15, _16,  \
                                         ...)                                \

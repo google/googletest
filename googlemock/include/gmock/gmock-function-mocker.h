@@ -45,9 +45,10 @@
       "enclosed in parentheses. If _Ret is a type with unprotected commas, " \
       "it must also be enclosed in parentheses.")
 
-#define GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Tuple)    \
-  static_assert(GMOCK_PP_IS_ENCLOSED_PARENS(_Tuple), \
-                "_Tuple should be enclosed in parentheses")
+#define GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Tuple) \
+  static_assert(                                  \
+      GMOCK_PP_IS_ENCLOSED_PARENS(_Tuple),        \
+      GMOCK_PP_STRINGIZE(_Tuple) " should be enclosed in parentheses.")
 
 #define GMOCK_INTERNAL_ASSERT_VALID_SIGNATURE(_N, ...)                 \
   static_assert(                                                       \
@@ -60,8 +61,8 @@
       "This method does not take " GMOCK_PP_STRINGIZE(                 \
           _N) " arguments. Parenthesize all types with unproctected commas.")
 
-// TODO(iserna): Verify each element in spec is one of the allowed.
-#define GMOCK_INTERNAL_ASSERT_VALID_SPEC(_Spec) static_assert(true, "");
+#define GMOCK_INTERNAL_ASSERT_VALID_SPEC(_Spec) \
+  GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_ASSERT_VALID_SPEC_ELEMENT, ~, _Spec)
 
 #define GMOCK_INTERNAL_MOCK_METHOD_IMPL(_N, _MethodName, _Constness,           \
                                         _Override, _Final, _Noexcept,          \
@@ -100,6 +101,7 @@
 
 #define GMOCK_INTERNAL_EXPAND(...) __VA_ARGS__
 
+// Five Valid modifiers.
 #define GMOCK_INTERNAL_HAS_CONST(_Tuple) \
   GMOCK_PP_HAS_COMMA(GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_DETECT_CONST, ~, _Tuple))
 
@@ -117,6 +119,17 @@
 #define GMOCK_INTERNAL_GET_CALLTYPE(_Tuple) \
   GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_GET_CALLTYPE_IMPL, ~, _Tuple)
 
+#define GMOCK_INTERNAL_ASSERT_VALID_SPEC_ELEMENT(_i, _, _elem)            \
+  static_assert(                                                          \
+      (GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_CONST(_i, _, _elem)) +    \
+       GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_OVERRIDE(_i, _, _elem)) + \
+       GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_FINAL(_i, _, _elem)) +    \
+       GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_NOEXCEPT(_i, _, _elem)) + \
+       GMOCK_INTERNAL_IS_CALLTYPE(_elem)) == 1,                           \
+      GMOCK_PP_STRINGIZE(                                                 \
+          _elem) " cannot be recognized as a valid specification modifier.");
+
+// Modifiers implementation.
 #define GMOCK_INTERNAL_DETECT_CONST(_i, _, _elem) \
   GMOCK_PP_CAT(GMOCK_INTERNAL_DETECT_CONST_I_, _elem)
 
