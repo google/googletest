@@ -32,7 +32,7 @@
 // This file implements just enough of the matcher interface to allow
 // EXPECT_DEATH and friends to accept a matcher argument.
 
-// IWYU pragma: private, include "testing/base/public/gtest.h"
+// IWYU pragma: private, include "testing/base/public/gunit.h"
 // IWYU pragma: friend third_party/googletest/googlemock/.*
 // IWYU pragma: friend third_party/googletest/googletest/.*
 
