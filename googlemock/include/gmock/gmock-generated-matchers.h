@@ -598,7 +598,7 @@ Args(const InnerMatcher& matcher) {
 //
 // To learn more about using these macros, please search for 'MATCHER'
 // on
-// https://github.com/google/googletest/blob/master/googlemock/docs/CookBook.md
+// https://github.com/abseil/googletest/blob/master/googlemock/docs/CookBook.md
 
 #define MATCHER(name, description)\
   class name##Matcher {\
