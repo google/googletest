@@ -5,7 +5,7 @@ includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
 Name: gmock
 Description: GoogleMock (without main() function)
 Version: @PROJECT_VERSION@
-URL: https://github.com/google/googletest
+URL: https://github.com/abseil/googletest
 Requires: gtest
 Libs: -L${libdir} -lgmock @CMAKE_THREAD_LIBS_INIT@
 Cflags: -I${includedir} @GTEST_HAS_PTHREAD_MACRO@ @CMAKE_THREAD_LIBS_INIT@
