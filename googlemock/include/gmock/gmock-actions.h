@@ -54,6 +54,11 @@
 #include <type_traits>
 #endif  // GTEST_LANG_CXX11
 
+#ifdef _MSC_VER
+# pragma warning(push)
+# pragma warning(disable:4100)
+#endif
+
 namespace testing {
 
 // To implement an action Foo, define:
@@ -1307,5 +1312,10 @@ inline internal::ReferenceWrapper<T> ByRef(T& l_value) {  // NOLINT
 }
 
 }  // namespace testing
+
+#ifdef _MSC_VER
+# pragma warning(pop)
+#endif
+
 
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_ACTIONS_H_
