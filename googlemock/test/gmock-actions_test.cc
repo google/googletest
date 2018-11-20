@@ -1139,9 +1139,9 @@ TEST(WithArgsTest, VoidAction) {
 }
 
 TEST(WithArgsTest, ReturnReference) {
-  Action<int&(int&, void*)> a = WithArgs<0>([](int& a) -> int& { return a; });
+  Action<int&(int&, void*)> aa = WithArgs<0>([](int& a) -> int& { return a; });
   int i = 0;
-  const int& res = a.Perform(std::forward_as_tuple(i, nullptr));
+  const int& res = aa.Perform(std::forward_as_tuple(i, nullptr));
   EXPECT_EQ(&i, &res);
 }
 
