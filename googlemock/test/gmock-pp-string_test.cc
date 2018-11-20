@@ -32,8 +32,8 @@
 // This file tests the internal preprocessor macro library.
 #include "gmock/internal/gmock-pp.h"
 
-#include "absl/strings/str_join.h"
-#include "absl/strings/str_split.h"
+#include <string>
+
 #include "gmock/gmock.h"
 
 namespace testing {
@@ -41,9 +41,11 @@ namespace {
 
 // Matcher to verify that to strings are identical up to whitespace
 // Not 100% correct, because it treats "AB" as equal to "A B".
-::testing::Matcher<string> SameExceptSpaces(absl::string_view s) {
-  auto remove_spaces = [](const absl::string_view& to_split) {
-    return absl::StrJoin(absl::StrSplit(to_split, ' '), "");
+::testing::Matcher<const std::string&> SameExceptSpaces(const std::string& s) {
+  auto remove_spaces = [](std::string to_split) {
+    to_split.erase(std::remove(to_split.begin(), to_split.end(), ' '),
+                   to_split.end());
+    return to_split;
   };
   return ::testing::ResultOf(remove_spaces, remove_spaces(s));
 }
