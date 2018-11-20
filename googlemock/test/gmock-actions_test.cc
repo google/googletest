@@ -1146,8 +1146,6 @@ TEST(WithArgsTest, ReturnReference) {
 }
 
 TEST(WithArgsTest, InnerActionWithConversion) {
-  struct Base {};
-  struct Derived : Base {};
   Action<Derived*()> inner = [] { return nullptr; };
   Action<Base*(double)> a = testing::WithoutArgs(inner);
   EXPECT_EQ(nullptr, a.Perform(std::make_tuple(1.1)));
