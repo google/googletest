@@ -26,7 +26,6 @@ x64-Release/
 # Ignore autoconf / automake files
 Makefile.in
 aclocal.m4
-configure
 build-aux/
 autom4te.cache/
 googletest/m4/libtool.m4
@@ -54,3 +53,25 @@ googlemock/CTestTestfile.cmake
 googlemock/Makefile
 googlemock/cmake_install.cmake
 googlemock/gtest
+
+# Ignore EPICS build files
+O.*/
+/db
+/bin
+/dbd
+/include
+/lib
+/templates
+envPaths
+cdCommands
+dllPath.bat
+runIOC.bat
+runIOC.sh
+relPaths.sh
+*.tag
+/data/
+/doc/
+*_info_positions.req
+*_info_settings.req
+/test-reports
+**/.vs
