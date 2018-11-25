@@ -18,15 +18,11 @@ matrix:
     - os: linux
       compiler: gcc
       sudo : true
-      install: ./ci/install-linux.sh && ./ci/log-config.sh
-      script: ./ci/build-linux-bazel.sh
       env:
         - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
     - os: linux
       compiler: gcc
       sudo : true
-      install: ./ci/install-linux.sh && ./ci/log-config.sh
-      script: ./ci/build-linux-bazel.sh
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
     - os: linux
