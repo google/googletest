@@ -18,13 +18,15 @@ matrix:
     - os: linux
       compiler: gcc
       sudo : true
-      env:
-        - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
+      script:
+        - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-6 /usr/bin/gcc
+        - gcc --version  
     - os: linux
       compiler: gcc
       sudo : true
-      env:
-        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+      script:
+        - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-7 /usr/bin/gcc
+        - gcc --version  
     - os: linux
       compiler: clang
       sudo : true
