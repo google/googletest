@@ -11,26 +11,43 @@ language: cpp
 matrix:
   include:
     - os: linux
-      compiler: gcc-6
+      compiler: gcc
       sudo : true
       install: ./ci/install-linux.sh && ./ci/log-config.sh
       script: ./ci/build-linux-bazel.sh
-    - os: linux
-      compiler: gcc
-      sudo : true
-      script:
-        - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-6 /usr/bin/gcc
-        - gcc --version  
-        - ./ci/travis.sh
 
     - os: linux
+      name:  gcc-6
+      compiler: gcc-6
+      sudo : true
+      "addons": {
+        "apt": {
+          "sources": [
+            "ubuntu-toolchain-r-test",
+            "llvm-toolchain-precise-3.9"
+          ],
+        "packages": [
+          "g++-6"
+          ]
+        }
+      },
+
+    - os: linux
+      name: gcc-7
       compiler: gcc-7
       sudo : true
-      script:
-        - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-7 /usr/bin/gcc
-        - gcc --version  
-        - ./ci/travis.sh
-
+      "addons": {
+        "apt": {
+          "sources": [
+            "ubuntu-toolchain-r-test",
+            "llvm-toolchain-precise-3.9"
+          ],
+        "packages": [
+          "g++-7"
+          ]
+        }
+      },
+ 
     - os: linux
       compiler: clang
       sudo : true
@@ -82,8 +99,6 @@ addons:
     packages:
     - g++-4.9
     - clang-3.9
-    - g++-7
-    - g++-6
 
 notifications:
   email: false
