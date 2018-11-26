@@ -21,12 +21,16 @@ matrix:
       script:
         - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-6 /usr/bin/gcc
         - gcc --version  
+        - ./ci/travis.sh
+
     - os: linux
       compiler: gcc
       sudo : true
       script:
         - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-7 /usr/bin/gcc
         - gcc --version  
+        - ./ci/travis.sh
+
     - os: linux
       compiler: clang
       sudo : true
