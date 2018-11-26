@@ -10,36 +10,73 @@ language: cpp
 # It is more tedious, but grants us far more flexibility.
 matrix:
   include:
+
     - os: linux
       compiler: gcc
       sudo : true
       install: ./ci/install-linux.sh && ./ci/log-config.sh
       script: ./ci/build-linux-bazel.sh
+
     - os: linux
       compiler: clang
       sudo : true
       install: ./ci/install-linux.sh && ./ci/log-config.sh
       script: ./ci/build-linux-bazel.sh
+    
     - os: linux
-      group: deprecated-2017Q4
       compiler: gcc
       install: ./ci/install-linux.sh && ./ci/log-config.sh
       script: ./ci/build-linux-autotools.sh
       env: VERBOSE=1 CXXFLAGS=-std=c++11
+
     - os: linux
-      group: deprecated-2017Q4
+      name:  gcc-6
+      compiler: gcc-6
+      sudo : true
+      "addons": {
+        "apt": {
+          "sources": [
+            "ubuntu-toolchain-r-test",
+            "llvm-toolchain-precise-3.9"
+          ],
+        "packages": [
+          "g++-6"
+          ]
+        }
+      },
+
+    - os: linux
+      name:  gcc-7
+      compiler: gcc-7
+      sudo : true
+      "addons": {
+        "apt": {
+          "sources": [
+            "ubuntu-toolchain-r-test",
+            "llvm-toolchain-precise-3.9"
+          ],
+        "packages": [
+          "g++-7"
+          ]
+        }
+      },
+
+    - os: linux
       compiler: gcc
       env: BUILD_TYPE=Debug VERBOSE=1 CXX_FLAGS=-std=c++11
+
     - os: linux
-      group: deprecated-2017Q4
       compiler: clang
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
+    
     - os: linux
       compiler: clang
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11 NO_EXCEPTION=ON NO_RTTI=ON COMPILER_IS_GNUCXX=ON
+    
     - os: osx
       compiler: gcc
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
+    
     - os: osx
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
       if: type != pull_request
