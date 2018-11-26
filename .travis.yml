@@ -46,6 +46,7 @@ matrix:
       apt:
         sources:
         - ubuntu-toolchain-r-test
+        - llvm-toolchain-precise-3.9
         packages:
         - g++-6
 
@@ -58,6 +59,7 @@ matrix:
       apt:
         sources:
         - ubuntu-toolchain-r-test
+        - llvm-toolchain-precise-3.9
         packages:
         - g++-7
 
