@@ -23,18 +23,6 @@ matrix:
       script: ./ci/build-linux-bazel.sh
 
     - os: linux
-      compiler: gcc-6
-      sudo : true
-      script:
-        - ./ci/travis.sh
-
-    - os: linux
-      compiler: gcc-7
-      sudo : true
-      script:
-        - ./ci/travis.sh
-
-    - os: linux
       compiler: gcc
       install: ./ci/install-linux.sh && ./ci/log-config.sh
       script: ./ci/build-linux-autotools.sh
@@ -77,8 +65,6 @@ addons:
     packages:
     - g++-4.9
     - clang-3.9
-    - g++-7
-    - g++-6
 
 notifications:
   email: false
