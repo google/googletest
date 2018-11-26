@@ -22,7 +22,7 @@ matrix:
       sudo : true
       install: ./ci/install-linux.sh && ./ci/log-config.sh
       script: ./ci/build-linux-bazel.sh
-    
+      
     - os: linux
       compiler: gcc
       install: ./ci/install-linux.sh && ./ci/log-config.sh
@@ -80,6 +80,7 @@ matrix:
     - os: osx
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
       if: type != pull_request
+      
 
 # These are the install and build (script) phases for the most common entries in the matrix.  They could be included
 # in each entry in the matrix, but that is just repetitive.
