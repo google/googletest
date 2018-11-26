@@ -56,7 +56,6 @@ macro(config_compiler_and_linker)
   unset(GTEST_HAS_PTHREAD)
   if (NOT gtest_disable_pthreads AND NOT MINGW)
     # Defines CMAKE_USE_PTHREADS_INIT and CMAKE_THREAD_LIBS_INIT.
-    set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads)
     if (CMAKE_USE_PTHREADS_INIT)
       set(GTEST_HAS_PTHREAD ON)
