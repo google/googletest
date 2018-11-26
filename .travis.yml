@@ -37,6 +37,31 @@ matrix:
     - os: linux
       compiler: clang
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11 NO_EXCEPTION=ON NO_RTTI=ON COMPILER_IS_GNUCXX=ON
+    
+    - os: linux
+      sudo: true
+      compiler: gcc-6
+      env: BUILD_TYPE=Debug VERBOSE=1 CXX_FLAGS=-std=c++11
+      addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-6
+
+    
+    - os: linux
+      sudo: true
+      compiler: gcc-7
+      env: BUILD_TYPE=Debug VERBOSE=1 CXX_FLAGS=-std=c++11
+      addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-7
+
+
     - os: osx
       compiler: gcc
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
@@ -66,6 +91,7 @@ addons:
     packages:
     - g++-4.9
     - clang-3.9
+
 
 notifications:
   email: false
