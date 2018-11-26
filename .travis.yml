@@ -11,7 +11,7 @@ language: cpp
 matrix:
   include:
     - os: linux
-      compiler: gcc
+      compiler: gcc-6
       sudo : true
       install: ./ci/install-linux.sh && ./ci/log-config.sh
       script: ./ci/build-linux-bazel.sh
@@ -24,7 +24,7 @@ matrix:
         - ./ci/travis.sh
 
     - os: linux
-      compiler: gcc
+      compiler: gcc-7
       sudo : true
       script:
         - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-7 /usr/bin/gcc
