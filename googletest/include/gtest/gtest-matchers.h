@@ -43,9 +43,9 @@
 #include <ostream>
 #include <string>
 
+#include "gtest/gtest-printers.h"
 #include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-port.h"
-#include "gtest/gtest-printers.h"
 
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(
     4251 5046 /* class A needs to have dll-interface to be used by clients of
@@ -508,6 +508,63 @@ std::ostream& operator<<(std::ostream& os, const Matcher<T>& matcher) {
   return os;
 }
 
+// The PolymorphicMatcher class template makes it easy to implement a
+// polymorphic matcher (i.e. a matcher that can match values of more
+// than one type, e.g. Eq(n) and NotNull()).
+//
+// To define a polymorphic matcher, a user should provide an Impl
+// class that has a DescribeTo() method and a DescribeNegationTo()
+// method, and define a member function (or member function template)
+//
+//   bool MatchAndExplain(const Value& value,
+//                        MatchResultListener* listener) const;
+//
+// See the definition of NotNull() for a complete example.
+template <class Impl>
+class PolymorphicMatcher {
+ public:
+  explicit PolymorphicMatcher(const Impl& an_impl) : impl_(an_impl) {}
+
+  // Returns a mutable reference to the underlying matcher
+  // implementation object.
+  Impl& mutable_impl() { return impl_; }
+
+  // Returns an immutable reference to the underlying matcher
+  // implementation object.
+  const Impl& impl() const { return impl_; }
+
+  template <typename T>
+  operator Matcher<T>() const {
+    return Matcher<T>(new MonomorphicImpl<GTEST_REFERENCE_TO_CONST_(T)>(impl_));
+  }
+
+ private:
+  template <typename T>
+  class MonomorphicImpl : public MatcherInterface<T> {
+   public:
+    explicit MonomorphicImpl(const Impl& impl) : impl_(impl) {}
+
+    virtual void DescribeTo(::std::ostream* os) const { impl_.DescribeTo(os); }
+
+    virtual void DescribeNegationTo(::std::ostream* os) const {
+      impl_.DescribeNegationTo(os);
+    }
+
+    virtual bool MatchAndExplain(T x, MatchResultListener* listener) const {
+      return impl_.MatchAndExplain(x, listener);
+    }
+
+   private:
+    const Impl impl_;
+
+    GTEST_DISALLOW_ASSIGN_(MonomorphicImpl);
+  };
+
+  Impl impl_;
+
+  GTEST_DISALLOW_ASSIGN_(PolymorphicMatcher);
+};
+
 // Creates a matcher from its implementation.  This is easier to use
 // than the Matcher<T> constructor as it doesn't require you to
 // explicitly write the template argument, e.g.
@@ -518,6 +575,18 @@ std::ostream& operator<<(std::ostream& os, const Matcher<T>& matcher) {
 template <typename T>
 inline Matcher<T> MakeMatcher(const MatcherInterface<T>* impl) {
   return Matcher<T>(impl);
+}
+
+// Creates a polymorphic matcher from its implementation.  This is
+// easier to use than the PolymorphicMatcher<Impl> constructor as it
+// doesn't require you to explicitly write the template argument, e.g.
+//
+//   MakePolymorphicMatcher(foo);
+// vs
+//   PolymorphicMatcher<TypeOfFoo>(foo);
+template <class Impl>
+inline PolymorphicMatcher<Impl> MakePolymorphicMatcher(const Impl& impl) {
+  return PolymorphicMatcher<Impl>(impl);
 }
 
 namespace internal {
@@ -613,7 +682,84 @@ class GeMatcher : public ComparisonBase<GeMatcher<Rhs>, Rhs, AnyGe> {
   static const char* Desc() { return "is >="; }
   static const char* NegatedDesc() { return "isn't >="; }
 };
+
+// Implements polymorphic matchers MatchesRegex(regex) and
+// ContainsRegex(regex), which can be used as a Matcher<T> as long as
+// T can be converted to a string.
+class MatchesRegexMatcher {
+ public:
+  MatchesRegexMatcher(const RE* regex, bool full_match)
+      : regex_(regex), full_match_(full_match) {}
+
+#if GTEST_HAS_ABSL
+  bool MatchAndExplain(const absl::string_view& s,
+                       MatchResultListener* listener) const {
+    return MatchAndExplain(string(s), listener);
+  }
+#endif  // GTEST_HAS_ABSL
+
+  // Accepts pointer types, particularly:
+  //   const char*
+  //   char*
+  //   const wchar_t*
+  //   wchar_t*
+  template <typename CharType>
+  bool MatchAndExplain(CharType* s, MatchResultListener* listener) const {
+    return s != nullptr && MatchAndExplain(std::string(s), listener);
+  }
+
+  // Matches anything that can convert to std::string.
+  //
+  // This is a template, not just a plain function with const std::string&,
+  // because absl::string_view has some interfering non-explicit constructors.
+  template <class MatcheeStringType>
+  bool MatchAndExplain(const MatcheeStringType& s,
+                       MatchResultListener* /* listener */) const {
+    const std::string& s2(s);
+    return full_match_ ? RE::FullMatch(s2, *regex_)
+                       : RE::PartialMatch(s2, *regex_);
+  }
+
+  void DescribeTo(::std::ostream* os) const {
+    *os << (full_match_ ? "matches" : "contains") << " regular expression ";
+    UniversalPrinter<std::string>::Print(regex_->pattern(), os);
+  }
+
+  void DescribeNegationTo(::std::ostream* os) const {
+    *os << "doesn't " << (full_match_ ? "match" : "contain")
+        << " regular expression ";
+    UniversalPrinter<std::string>::Print(regex_->pattern(), os);
+  }
+
+ private:
+  const std::shared_ptr<const RE> regex_;
+  const bool full_match_;
+
+  GTEST_DISALLOW_ASSIGN_(MatchesRegexMatcher);
+};
 }  // namespace internal
+
+// Matches a string that fully matches regular expression 'regex'.
+// The matcher takes ownership of 'regex'.
+inline PolymorphicMatcher<internal::MatchesRegexMatcher> MatchesRegex(
+    const internal::RE* regex) {
+  return MakePolymorphicMatcher(internal::MatchesRegexMatcher(regex, true));
+}
+inline PolymorphicMatcher<internal::MatchesRegexMatcher> MatchesRegex(
+    const std::string& regex) {
+  return MatchesRegex(new internal::RE(regex));
+}
+
+// Matches a string that contains regular expression 'regex'.
+// The matcher takes ownership of 'regex'.
+inline PolymorphicMatcher<internal::MatchesRegexMatcher> ContainsRegex(
+    const internal::RE* regex) {
+  return MakePolymorphicMatcher(internal::MatchesRegexMatcher(regex, false));
+}
+inline PolymorphicMatcher<internal::MatchesRegexMatcher> ContainsRegex(
+    const std::string& regex) {
+  return ContainsRegex(new internal::RE(regex));
+}
 
 // Creates a polymorphic matcher that matches anything equal to x.
 // Note: if the parameter of Eq() were declared as const T&, Eq("foo")

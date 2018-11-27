@@ -36,6 +36,7 @@
 #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_DEATH_TEST_INTERNAL_H_
 #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_DEATH_TEST_INTERNAL_H_
 
+#include "gtest/gtest-matchers.h"
 #include "gtest/internal/gtest-internal.h"
 
 #include <stdio.h>
@@ -79,7 +80,7 @@ class GTEST_API_ DeathTest {
   // argument is set.  If the death test should be skipped, the pointer
   // is set to NULL; otherwise, it is set to the address of a new concrete
   // DeathTest object that controls the execution of the current test.
-  static bool Create(const char* statement, const RE* regex,
+  static bool Create(const char* statement, Matcher<const std::string&> matcher,
                      const char* file, int line, DeathTest** test);
   DeathTest();
   virtual ~DeathTest() { }
@@ -145,20 +146,50 @@ GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 class DeathTestFactory {
  public:
   virtual ~DeathTestFactory() { }
-  virtual bool Create(const char* statement, const RE* regex,
-                      const char* file, int line, DeathTest** test) = 0;
+  virtual bool Create(const char* statement,
+                      Matcher<const std::string&> matcher, const char* file,
+                      int line, DeathTest** test) = 0;
 };
 
 // A concrete DeathTestFactory implementation for normal use.
 class DefaultDeathTestFactory : public DeathTestFactory {
  public:
-  virtual bool Create(const char* statement, const RE* regex,
-                      const char* file, int line, DeathTest** test);
+  virtual bool Create(const char* statement,
+                      Matcher<const std::string&> matcher, const char* file,
+                      int line, DeathTest** test);
 };
 
 // Returns true if exit_status describes a process that was terminated
 // by a signal, or exited normally with a nonzero exit code.
 GTEST_API_ bool ExitedUnsuccessfully(int exit_status);
+
+// A string passed to EXPECT_DEATH (etc.) is caught by one of these overloads
+// and interpreted as a regex (rather than an Eq matcher) for legacy
+// compatibility.
+inline Matcher<const ::std::string&> MakeDeathTestMatcher(
+    ::testing::internal::RE regex) {
+  return ContainsRegex(regex.pattern());
+}
+inline Matcher<const ::std::string&> MakeDeathTestMatcher(const char* regex) {
+  return ContainsRegex(regex);
+}
+inline Matcher<const ::std::string&> MakeDeathTestMatcher(
+    const ::std::string& regex) {
+  return ContainsRegex(regex);
+}
+#if GTEST_HAS_GLOBAL_STRING
+inline Matcher<const ::std::string&> MakeDeathTestMatcher(
+    const ::string& regex) {
+  return ContainsRegex(regex);
+}
+#endif
+
+// If a Matcher<const ::std::string&> is passed to EXPECT_DEATH (etc.), it's
+// used directly.
+inline Matcher<const ::std::string&> MakeDeathTestMatcher(
+    Matcher<const ::std::string&> matcher) {
+  return matcher;
+}
 
 // Traps C++ exceptions escaping statement and reports them as test
 // failures. Note that trapping SEH exceptions is not implemented here.
@@ -227,14 +258,13 @@ GTEST_API_ bool ExitedUnsuccessfully(int exit_status);
 // must accept a streamed message even though the message is never printed.
 // The regex object is not evaluated, but it is used to prevent "unused"
 // warnings and to avoid an expression that doesn't compile in debug mode.
-#define GTEST_EXECUTE_STATEMENT_(statement, regex)             \
-  GTEST_AMBIGUOUS_ELSE_BLOCKER_                                \
-  if (::testing::internal::AlwaysTrue()) {                     \
-    GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
-  } else if (!::testing::internal::AlwaysTrue()) {             \
-    const ::testing::internal::RE& gtest_regex = (regex);      \
-    static_cast<void>(gtest_regex);                            \
-  } else                                                       \
+#define GTEST_EXECUTE_STATEMENT_(statement, regex_or_matcher)    \
+  GTEST_AMBIGUOUS_ELSE_BLOCKER_                                  \
+  if (::testing::internal::AlwaysTrue()) {                       \
+    GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement);   \
+  } else if (!::testing::internal::AlwaysTrue()) {               \
+    ::testing::internal::MakeDeathTestMatcher(regex_or_matcher); \
+  } else                                                         \
     ::testing::Message()
 
 // A class representing the parsed contents of the

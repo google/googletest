@@ -31,6 +31,8 @@
 // Tests for death tests.
 
 #include "gtest/gtest-death-test.h"
+
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-filepath.h"
 
@@ -59,6 +61,8 @@ using testing::internal::AlwaysTrue;
 
 namespace posix = ::testing::internal::posix;
 
+using testing::HasSubstr;
+using testing::Matcher;
 using testing::Message;
 using testing::internal::DeathTest;
 using testing::internal::DeathTestFactory;
@@ -96,6 +100,8 @@ class ReplaceDeathTestFactory {
 
 }  // namespace internal
 }  // namespace testing
+
+namespace {
 
 void DieWithMessage(const ::std::string& message) {
   fprintf(stderr, "%s", message.c_str());
@@ -452,15 +458,11 @@ TEST_F(TestForDeathTest, MixedStyles) {
 
 # if GTEST_HAS_CLONE && GTEST_HAS_PTHREAD
 
-namespace {
-
 bool pthread_flag;
 
 void SetPthreadFlag() {
   pthread_flag = true;
 }
-
-}  // namespace
 
 TEST_F(TestForDeathTest, DoesNotExecuteAtforkHooks) {
   if (!testing::GTEST_FLAG(death_test_use_fork)) {
@@ -885,7 +887,7 @@ class MockDeathTestFactory : public DeathTestFactory {
  public:
   MockDeathTestFactory();
   virtual bool Create(const char* statement,
-                      const ::testing::internal::RE* regex,
+                      testing::Matcher<const std::string&> matcher,
                       const char* file, int line, DeathTest** test);
 
   // Sets the parameters for subsequent calls to Create.
@@ -1000,11 +1002,9 @@ void MockDeathTestFactory::SetParameters(bool create,
 // Sets test to NULL (if create_ is false) or to the address of a new
 // MockDeathTest object with parameters taken from the last call
 // to SetParameters (if create_ is true).  Always returns true.
-bool MockDeathTestFactory::Create(const char* /*statement*/,
-                                  const ::testing::internal::RE* /*regex*/,
-                                  const char* /*file*/,
-                                  int /*line*/,
-                                  DeathTest** test) {
+bool MockDeathTestFactory::Create(
+    const char* /*statement*/, testing::Matcher<const std::string&> /*matcher*/,
+    const char* /*file*/, int /*line*/, DeathTest** test) {
   test_deleted_ = false;
   if (create_) {
     *test = new MockDeathTest(this, role_, status_, passed_);
@@ -1326,7 +1326,59 @@ TEST(InDeathTestChildDeathTest, ReportsDeathTestCorrectlyInThreadSafeStyle) {
   }, "Inside");
 }
 
+void DieWithMessage(const char* message) {
+  fputs(message, stderr);
+  fflush(stderr);  // Make sure the text is printed before the process exits.
+  _exit(1);
+}
+
+TEST(MatcherDeathTest, DoesNotBreakBareRegexMatching) {
+  // googletest tests this, of course; here we ensure that including googlemock
+  // has not broken it.
+  EXPECT_DEATH(DieWithMessage("O, I die, Horatio."), "I d[aeiou]e");
+}
+
+TEST(MatcherDeathTest, MonomorphicMatcherMatches) {
+  EXPECT_DEATH(DieWithMessage("Behind O, I am slain!"),
+               Matcher<const std::string&>(HasSubstr("I am slain")));
+}
+
+TEST(MatcherDeathTest, MonomorphicMatcherDoesNotMatch) {
+  EXPECT_NONFATAL_FAILURE(
+      EXPECT_DEATH(DieWithMessage("Behind O, I am slain!"),
+                   Matcher<const std::string&>(HasSubstr("Ow, I am slain"))),
+      "Expected: has substring \"Ow, I am slain\"");
+}
+
+TEST(MatcherDeathTest, PolymorphicMatcherMatches) {
+  EXPECT_DEATH(DieWithMessage("The rest is silence."),
+               HasSubstr("rest is silence"));
+}
+
+TEST(MatcherDeathTest, PolymorphicMatcherDoesNotMatch) {
+  EXPECT_NONFATAL_FAILURE(EXPECT_DEATH(DieWithMessage("The rest is silence."),
+                                       HasSubstr("rest is science")),
+                          "Expected: has substring \"rest is science\"");
+}
+
+TEST(MatcherDeathTest, CompositeMatcherMatches) {
+  EXPECT_DEATH(DieWithMessage("Et tu, Brute!  Then fall, Caesar."),
+               AllOf(HasSubstr("Et tu"), HasSubstr("fall, Caesar")));
+}
+
+TEST(MatcherDeathTest, CompositeMatcherDoesNotMatch) {
+  EXPECT_NONFATAL_FAILURE(
+      EXPECT_DEATH(DieWithMessage("The rest is silence."),
+                   AnyOf(HasSubstr("Eat two"), HasSubstr("lol Caesar"))),
+      "Expected: (has substring \"Eat two\") or "
+      "(has substring \"lol Caesar\")");
+}
+
+}  // namespace
+
 #else  // !GTEST_HAS_DEATH_TEST follows
+
+namespace {
 
 using testing::internal::CaptureStderr;
 using testing::internal::GetCapturedStderr;
@@ -1376,7 +1428,11 @@ TEST(ConditionalDeathMacrosTest, AssertDeatDoesNotReturnhIfUnsupported) {
   EXPECT_EQ(1, n);
 }
 
+}  // namespace
+
 #endif  // !GTEST_HAS_DEATH_TEST
+
+namespace {
 
 // Tests that the death test macros expand to code which may or may not
 // be followed by operator<<, and that in either case the complete text
@@ -1428,3 +1484,5 @@ TEST(ConditionalDeathMacrosSyntaxDeathTest, SwitchStatement) {
 TEST(NotADeathTest, Test) {
   SUCCEED();
 }
+
+}  // namespace
