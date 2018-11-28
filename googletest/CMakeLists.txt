@@ -192,7 +192,7 @@ $env:Path = \"$project_bin;$env:Path\"
   ############################################################
   # C++ tests built with standard compiler flags.
 
-  cxx_test(googletest-death-test-test gtest_main)
+  cxx_test(googletest-death-test-test gtest_main ../googlemock/gmock)
   cxx_test(gtest_environment_test gtest)
   cxx_test(googletest-filepath-test gtest_main)
   cxx_test(googletest-listener-test gtest_main)
