@@ -32,7 +32,6 @@
 
 #include "gtest/gtest-death-test.h"
 
-#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-filepath.h"
 
@@ -61,7 +60,7 @@ using testing::internal::AlwaysTrue;
 
 namespace posix = ::testing::internal::posix;
 
-using testing::HasSubstr;
+using testing::ContainsRegex;
 using testing::Matcher;
 using testing::Message;
 using testing::internal::DeathTest;
@@ -303,13 +302,13 @@ TEST_F(TestForDeathTest, SingleStatement) {
     EXPECT_DEATH(_exit(1), "") << 1 << 2 << 3;
 }
 
+# if GTEST_USES_PCRE
+
 void DieWithEmbeddedNul() {
   fprintf(stderr, "Hello%cmy null world.\n", '\0');
   fflush(stderr);
   _exit(1);
 }
-
-# if GTEST_USES_PCRE
 
 // Tests that EXPECT_DEATH and ASSERT_DEATH work when the error
 // message has a NUL character in it.
@@ -1340,38 +1339,27 @@ TEST(MatcherDeathTest, DoesNotBreakBareRegexMatching) {
 
 TEST(MatcherDeathTest, MonomorphicMatcherMatches) {
   EXPECT_DEATH(DieWithMessage("Behind O, I am slain!"),
-               Matcher<const std::string&>(HasSubstr("I am slain")));
+               Matcher<const std::string&>(ContainsRegex("I am slain")));
 }
 
 TEST(MatcherDeathTest, MonomorphicMatcherDoesNotMatch) {
   EXPECT_NONFATAL_FAILURE(
-      EXPECT_DEATH(DieWithMessage("Behind O, I am slain!"),
-                   Matcher<const std::string&>(HasSubstr("Ow, I am slain"))),
-      "Expected: has substring \"Ow, I am slain\"");
+      EXPECT_DEATH(
+          DieWithMessage("Behind O, I am slain!"),
+          Matcher<const std::string&>(ContainsRegex("Ow, I am slain"))),
+      "Expected: contains regular expression \"Ow, I am slain\"");
 }
 
 TEST(MatcherDeathTest, PolymorphicMatcherMatches) {
   EXPECT_DEATH(DieWithMessage("The rest is silence."),
-               HasSubstr("rest is silence"));
+               ContainsRegex("rest is silence"));
 }
 
 TEST(MatcherDeathTest, PolymorphicMatcherDoesNotMatch) {
-  EXPECT_NONFATAL_FAILURE(EXPECT_DEATH(DieWithMessage("The rest is silence."),
-                                       HasSubstr("rest is science")),
-                          "Expected: has substring \"rest is science\"");
-}
-
-TEST(MatcherDeathTest, CompositeMatcherMatches) {
-  EXPECT_DEATH(DieWithMessage("Et tu, Brute!  Then fall, Caesar."),
-               AllOf(HasSubstr("Et tu"), HasSubstr("fall, Caesar")));
-}
-
-TEST(MatcherDeathTest, CompositeMatcherDoesNotMatch) {
   EXPECT_NONFATAL_FAILURE(
       EXPECT_DEATH(DieWithMessage("The rest is silence."),
-                   AnyOf(HasSubstr("Eat two"), HasSubstr("lol Caesar"))),
-      "Expected: (has substring \"Eat two\") or "
-      "(has substring \"lol Caesar\")");
+                   ContainsRegex("rest is science")),
+      "Expected: contains regular expression \"rest is science\"");
 }
 
 }  // namespace
