@@ -2576,6 +2576,31 @@ and nothing should happen between the two check points. The explicit
 check points make it easy to tell which `Bar("a")` is called by which
 call to `Foo()`.
 
+## Verifying Asynchronous Side Effects ##
+
+Sometimes you want to verify that an asynchronous side effect has occured. You could sleep long enough that the effect will _probably_ occur, but this:
+1. Breaks thread sanitizers like TSan which (correctly) do not treat this sleep as a synchronization boundary.
+2. Makes tests slower since sleeps always take the maximum duration.
+
+Instead, you can use `Mock::WaitForAndClearExpectations(&mock_object, duration)`:
+
+```cpp
+using ::testing::MockFunction;
+
+TEST(FooTest, InvokesFunctionAsynchronously) {
+  MockFunction<void(string)> func;
+  EXPECT_CALL(func, Call("1"));
+
+  std::thread thread{[&](){
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    func.Call("1");
+  }};
+
+  Mock::WaitForAndClearExpectations(&func, std::chrono::seconds(1));
+  thread.join();
+}
+```
+
 ## Mocking Destructors ##
 
 Sometimes you want to make sure a mock object is destructed at the

@@ -99,6 +99,13 @@ py_test(
 )
 
 cc_test(
+    name = "gmock-spec-builders-test",
+    size = "small",
+    srcs = ["gmock-spec-builders_test.cc"],
+    deps = ["//:gtest_main"],
+)
+
+cc_test(
     name = "gmock_test",
     size = "small",
     srcs = ["gmock_test.cc"],

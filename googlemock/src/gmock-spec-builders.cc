@@ -41,6 +41,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <thread>
 #include <vector>
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -499,11 +500,12 @@ Expectation UntypedFunctionMockerBase::GetHandleOf(ExpectationBase* exp) {
 }
 
 // Verifies that all expectations on this mock function have been
-// satisfied.  Reports one or more Google Test non-fatal failures
-// and returns false if not.
-bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
+// satisfied and returns false if not. If expect_met is true, reports one or
+// more Google Test non-fatal failures.
+bool UntypedFunctionMockerBase::VerifyExpectationsLocked(bool expect_met)
     GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
   g_gmock_mutex.AssertHeld();
+
   bool expectations_met = true;
   for (UntypedExpectations::const_iterator it =
            untyped_expectations_.begin();
@@ -516,18 +518,27 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
       expectations_met = false;
     } else if (!untyped_expectation->IsSatisfied()) {
       expectations_met = false;
-      ::std::stringstream ss;
-      ss  << "Actual function call count doesn't match "
-          << untyped_expectation->source_text() << "...\n";
-      // No need to show the source file location of the expectation
-      // in the description, as the Expect() call that follows already
-      // takes care of it.
-      untyped_expectation->MaybeDescribeExtraMatcherTo(&ss);
-      untyped_expectation->DescribeCallCountTo(&ss);
-      Expect(false, untyped_expectation->file(),
-             untyped_expectation->line(), ss.str());
+      if (expect_met) {
+        ::std::stringstream ss;
+        ss  << "Actual function call count doesn't match "
+            << untyped_expectation->source_text() << "...\n";
+        // No need to show the source file location of the expectation
+        // in the description, as the Expect() call that follows already
+        // takes care of it.
+        untyped_expectation->MaybeDescribeExtraMatcherTo(&ss);
+        untyped_expectation->DescribeCallCountTo(&ss);
+        Expect(false, untyped_expectation->file(),
+               untyped_expectation->line(), ss.str());
+      }
     }
   }
+  return expectations_met;
+}
+
+// Clears all expectations on this mock function.
+void UntypedFunctionMockerBase::ClearExpectationsLocked()
+    GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
+  g_gmock_mutex.AssertHeld();
 
   // Deleting our expectations may trigger other mock objects to be deleted, for
   // example if an action contains a reference counted smart pointer to that
@@ -542,8 +553,6 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
   g_gmock_mutex.Unlock();
   expectations_to_delete.clear();
   g_gmock_mutex.Lock();
-
-  return expectations_met;
 }
 
 CallReaction intToCallReaction(int mock_behavior) {
@@ -717,7 +726,9 @@ void Mock::AllowLeak(const void* mock_obj)
 bool Mock::VerifyAndClearExpectations(void* mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   internal::MutexLock l(&internal::g_gmock_mutex);
-  return VerifyAndClearExpectationsLocked(mock_obj);
+  bool result = VerifyExpectationsLocked(mock_obj, /*expect_met=*/true);
+  ClearExpectationsLocked(mock_obj);
+  return result;
 }
 
 // Verifies all expectations on the given mock object and clears its
@@ -727,13 +738,15 @@ bool Mock::VerifyAndClear(void* mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   internal::MutexLock l(&internal::g_gmock_mutex);
   ClearDefaultActionsLocked(mock_obj);
-  return VerifyAndClearExpectationsLocked(mock_obj);
+  bool result = VerifyExpectationsLocked(mock_obj, /*expect_met=*/true);
+  ClearExpectationsLocked(mock_obj);
+  return result;
 }
 
-// Verifies and clears all expectations on the given mock object.  If
-// the expectations aren't satisfied, generates one or more Google
-// Test non-fatal failures and returns false.
-bool Mock::VerifyAndClearExpectationsLocked(void* mock_obj)
+// Verifies that all expectations on the given mock object have been satisfied
+// and returns false if not. If expect_met is true, reports Google Test
+// non-fatal failures for unmet expectations.
+bool Mock::VerifyExpectationsLocked(void* mock_obj, bool expect_met)
     GTEST_EXCLUSIVE_LOCK_REQUIRED_(internal::g_gmock_mutex) {
   internal::g_gmock_mutex.AssertHeld();
   if (g_mock_object_registry.states().count(mock_obj) == 0) {
@@ -741,21 +754,75 @@ bool Mock::VerifyAndClearExpectationsLocked(void* mock_obj)
     return true;
   }
 
-  // Verifies and clears the expectations on each mock method in the
-  // given mock object.
+  // Verifies the expectations on each mock method in the given mock object.
   bool expectations_met = true;
   FunctionMockers& mockers =
       g_mock_object_registry.states()[mock_obj].function_mockers;
   for (FunctionMockers::const_iterator it = mockers.begin();
        it != mockers.end(); ++it) {
-    if (!(*it)->VerifyAndClearExpectationsLocked()) {
+    if (!(*it)->VerifyExpectationsLocked(expect_met)) {
       expectations_met = false;
     }
+  }
+  return expectations_met;
+}
+
+// Clears all expectations on the given mock object.
+void Mock::ClearExpectationsLocked(void* mock_obj)
+    GTEST_EXCLUSIVE_LOCK_REQUIRED_(internal::g_gmock_mutex) {
+  internal::g_gmock_mutex.AssertHeld();
+  if (g_mock_object_registry.states().count(mock_obj) == 0) {
+    // No EXPECT_CALL() was set on the given mock object.
+    return;
+  }
+
+  // Clears the expectations on each mock method in the given mock object.
+  FunctionMockers& mockers =
+      g_mock_object_registry.states()[mock_obj].function_mockers;
+  for (FunctionMockers::const_iterator it = mockers.begin();
+       it != mockers.end(); ++it) {
+    (*it)->ClearExpectationsLocked();
   }
 
   // We don't clear the content of mockers, as they may still be
   // needed by ClearDefaultActionsLocked().
-  return expectations_met;
+}
+
+// Waits for all expectations to be met or timeout to pass, then clears all
+// expectations. Returns true iff all expectations were met before the timeout.
+bool Mock::WaitForAndClearExpectations(
+    void* mock_obj,
+    std::chrono::nanoseconds timeout)
+        GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
+  bool result = WaitForExpectations(mock_obj, timeout);
+  internal::MutexLock l(&internal::g_gmock_mutex);
+  ClearExpectationsLocked(mock_obj);
+  return result;
+}
+
+// Waits for all expectations to be met on the given mock object.  If
+// the expectations aren't satisfied, reports one or more Google
+// Test non-fatal failures and returns false.
+bool Mock::WaitForExpectations(
+    void* mock_obj,
+    std::chrono::nanoseconds timeout)
+        GTEST_EXCLUSIVE_LOCK_REQUIRED_(internal::g_gmock_mutex) {
+  std::chrono::system_clock::time_point deadline =
+    std::chrono::system_clock::now() + timeout;
+  while (std::chrono::system_clock::now() < deadline) {
+    {
+      internal::MutexLock l(&internal::g_gmock_mutex);
+      if (VerifyExpectationsLocked(mock_obj, /*expect_met=*/false)) {
+        break;
+      }
+    }
+
+    // TODO: Replace with Condition::Await() when available.
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  }
+
+  internal::MutexLock l(&internal::g_gmock_mutex);
+  return VerifyExpectationsLocked(mock_obj, /*expect_met=*/true);
 }
 
 bool Mock::IsNaggy(void* mock_obj)

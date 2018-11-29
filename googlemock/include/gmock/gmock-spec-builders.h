@@ -61,6 +61,7 @@
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_
 
+#include <chrono>
 #include <map>
 #include <memory>
 #include <set>
@@ -131,9 +132,13 @@ class GTEST_API_ UntypedFunctionMockerBase {
   virtual ~UntypedFunctionMockerBase();
 
   // Verifies that all expectations on this mock function have been
-  // satisfied.  Reports one or more Google Test non-fatal failures
-  // and returns false if not.
-  bool VerifyAndClearExpectationsLocked()
+  // satisfied and returns false if not. If expect_met is true, reports one or
+  // more Google Test non-fatal failures.
+  bool VerifyExpectationsLocked(bool expect_met)
+      GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex);
+
+  // Clears all expectations on this mock function.
+  void ClearExpectationsLocked()
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex);
 
   // Clears the ON_CALL()s set on this mock function.
@@ -396,6 +401,14 @@ class GTEST_API_ Mock {
   static bool VerifyAndClear(void* mock_obj)
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
 
+  // Waits for all expectations to be met or timeout to pass, then clears all
+  // expectations. Returns true iff all expectations were met before the
+  // timeout.
+  static bool WaitForAndClearExpectations(
+      void* mock_obj,
+      std::chrono::nanoseconds timeout)
+          GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
+
   // Returns whether the mock was created as a naggy mock (default)
   static bool IsNaggy(void* mock_obj)
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
@@ -449,11 +462,22 @@ class GTEST_API_ Mock {
       const void* mock_obj)
           GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
 
-  // Verifies that all expectations on the given mock object have been
-  // satisfied.  Reports one or more Google Test non-fatal failures
-  // and returns false if not.
-  static bool VerifyAndClearExpectationsLocked(void* mock_obj)
+  // Verifies that all expectations on the given mock object have been satisfied
+  // and returns false if not. If expect_met is true, reports Google Test
+  // non-fatal failures for unmet expectations.
+  static bool VerifyExpectationsLocked(void* mock_obj, bool expect_met)
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(internal::g_gmock_mutex);
+
+  // Clears all expectations on the given mock.
+  static void ClearExpectationsLocked(void* mock_obj)
+      GTEST_EXCLUSIVE_LOCK_REQUIRED_(internal::g_gmock_mutex);
+
+  // Waits for all expectations to be met, or timeout to pass.
+  // Returns true iff all expectations were met before the timeout.
+  static bool WaitForExpectations(
+      void* mock_obj,
+      std::chrono::nanoseconds timeout)
+          GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
 
   // Clears all ON_CALL()s set on the given mock object.
   static void ClearDefaultActionsLocked(void* mock_obj)
@@ -1493,7 +1517,8 @@ class FunctionMocker<R(Args...)> : public UntypedFunctionMockerBase {
   virtual ~FunctionMocker()
         GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
     MutexLock l(&g_gmock_mutex);
-    VerifyAndClearExpectationsLocked();
+    VerifyExpectationsLocked(/*expect_met=*/true);
+    ClearExpectationsLocked();
     Mock::UnregisterLocked(this);
     ClearDefaultActionsLocked();
   }

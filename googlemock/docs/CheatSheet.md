@@ -562,6 +562,11 @@ Mock::VerifyAndClearExpectations(&mock_obj);
 // also removes the default actions set by ON_CALL();
 // returns true iff successful.
 Mock::VerifyAndClear(&mock_obj);
+...
+// Waits up to 1s for all expectations to be satisfied on
+// mock_object; returns true iff successful.
+// Always removes all expectations regardless of success.
+Mock::WaitForAndClearExpectations(&mock_obj, std::chrono::seconds(1));
 ```
 
 You can also tell Google Mock that a mock object can be leaked and doesn't

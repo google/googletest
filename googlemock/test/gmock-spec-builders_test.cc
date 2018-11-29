@@ -38,6 +38,7 @@
 #include <ostream>  // NOLINT
 #include <sstream>
 #include <string>
+#include <thread>
 
 #include "gmock/gmock.h"
 #include "gmock/internal/gmock-port.h"
@@ -2655,6 +2656,76 @@ TEST(VerifyAndClearTest,
   // destructor to be called from inside the ReferenceHoldingMock destructor.
   // The state of all mocks is protected by a single global lock, but there
   // should be no deadlock.
+}
+
+// Tests that WaitForAndClearExpectations() works when no expectations are set.
+TEST(WaitForAndClearExpectationsTest, NoExpectations) {
+  MockB b;
+  ASSERT_TRUE(Mock::WaitForAndClearExpectations(&b, std::chrono::milliseconds(10)));
+}
+
+// Tests that WaitForAndClearExpectations() works when the verification succeeds.
+TEST(WaitForAndClearExpectationsTest, Success) {
+  MockB b;
+  EXPECT_CALL(b, DoB())
+      .WillOnce(Return(1));
+  EXPECT_CALL(b, DoB(1))
+      .WillOnce(Return(2));
+
+  // Fulfill expectations asynchronously to test waiting.
+  std::thread thread{[&](){
+    // Sleep for a bit so the test will fail if it's not truly waiting.
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+    EXPECT_EQ(1, b.DoB());
+    EXPECT_EQ(2, b.DoB(1));
+  }};
+
+  ASSERT_TRUE(Mock::WaitForAndClearExpectations(&b, std::chrono::seconds(1)));
+  thread.join();
+
+  // There should be no expectations on the methods now, so we can
+  // freely call them.
+  EXPECT_EQ(0, b.DoB());
+  EXPECT_EQ(0, b.DoB(1));
+}
+
+// Tests that WaitForAndClearExpectations() times out if an expectation is not
+// met.
+TEST(WaitForAndClearExpectationsTest, ExpectationNotMet) {
+  MockB b;
+  EXPECT_CALL(b, DoB())
+      .WillOnce(Return(1));
+
+  bool result = false;
+  EXPECT_NONFATAL_FAILURE(result = Mock::WaitForAndClearExpectations(&b, std::chrono::milliseconds(10)),
+                          "Actual: never called");
+  EXPECT_FALSE(result);
+
+  // Expectations should still be cleared.
+  EXPECT_EQ(0, b.DoB());
+}
+
+// Tests that WaitForAndClearExpectations() times out if only some expectations
+// are met.
+TEST(WaitForAndClearExpectationsTest, SomeExpectationsNotMet) {
+  MockB b;
+  EXPECT_CALL(b, DoB())
+      .WillRepeatedly(Return(1));
+  EXPECT_CALL(b, DoB(1))
+      .WillOnce(Return(2));
+
+  // Fulfill only one of the expectations.
+  EXPECT_EQ(1, b.DoB());
+
+  bool result = false;
+  EXPECT_NONFATAL_FAILURE(result = Mock::WaitForAndClearExpectations(&b, std::chrono::milliseconds(10)),
+                          "Actual: never called");
+  EXPECT_FALSE(result);
+
+  // Expectations should still be cleared.
+  EXPECT_EQ(0, b.DoB());
+  EXPECT_EQ(0, b.DoB(1));
 }
 
 // Tests that a mock function's action can call a mock function
