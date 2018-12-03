@@ -68,14 +68,14 @@ class CommonTest : public Test {
 
   CommonTest() : value_(1) {}
 
-  virtual ~CommonTest() { EXPECT_EQ(3, value_); }
+  ~CommonTest() override { EXPECT_EQ(3, value_); }
 
-  virtual void SetUp() {
+  void SetUp() override {
     EXPECT_EQ(1, value_);
     value_++;
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     EXPECT_EQ(2, value_);
     value_++;
   }
@@ -215,7 +215,7 @@ using testing::internal::TypedTestCasePState;
 
 class TypedTestCasePStateTest : public Test {
  protected:
-  virtual void SetUp() {
+  void SetUp() override {
     state_.AddTestName("foo.cc", 0, "FooTest", "A");
     state_.AddTestName("foo.cc", 0, "FooTest", "B");
     state_.AddTestName("foo.cc", 0, "FooTest", "C");

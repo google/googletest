@@ -364,15 +364,13 @@ class NonFatalFailureInFixtureConstructorTest : public testing::Test {
     ADD_FAILURE() << "Expected failure #1, in the test fixture c'tor.";
   }
 
-  ~NonFatalFailureInFixtureConstructorTest() {
+  ~NonFatalFailureInFixtureConstructorTest() override {
     ADD_FAILURE() << "Expected failure #5, in the test fixture d'tor.";
   }
 
-  virtual void SetUp() {
-    ADD_FAILURE() << "Expected failure #2, in SetUp().";
-  }
+  void SetUp() override { ADD_FAILURE() << "Expected failure #2, in SetUp()."; }
 
-  virtual void TearDown() {
+  void TearDown() override {
     ADD_FAILURE() << "Expected failure #4, in TearDown.";
   }
 };
@@ -389,17 +387,17 @@ class FatalFailureInFixtureConstructorTest : public testing::Test {
     Init();
   }
 
-  ~FatalFailureInFixtureConstructorTest() {
+  ~FatalFailureInFixtureConstructorTest() override {
     ADD_FAILURE() << "Expected failure #2, in the test fixture d'tor.";
   }
 
-  virtual void SetUp() {
+  void SetUp() override {
     ADD_FAILURE() << "UNEXPECTED failure in SetUp().  "
                   << "We should never get here, as the test fixture c'tor "
                   << "had a fatal failure.";
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     ADD_FAILURE() << "UNEXPECTED failure in TearDown().  "
                   << "We should never get here, as the test fixture c'tor "
                   << "had a fatal failure.";
@@ -420,18 +418,15 @@ TEST_F(FatalFailureInFixtureConstructorTest, FailureInConstructor) {
 // Tests non-fatal failures in SetUp().
 class NonFatalFailureInSetUpTest : public testing::Test {
  protected:
-  virtual ~NonFatalFailureInSetUpTest() {
-    Deinit();
-  }
+  ~NonFatalFailureInSetUpTest() override { Deinit(); }
 
-  virtual void SetUp() {
+  void SetUp() override {
     printf("(expecting 4 failures)\n");
     ADD_FAILURE() << "Expected failure #1, in SetUp().";
   }
 
-  virtual void TearDown() {
-    FAIL() << "Expected failure #3, in TearDown().";
-  }
+  void TearDown() override { FAIL() << "Expected failure #3, in TearDown()."; }
+
  private:
   void Deinit() {
     FAIL() << "Expected failure #4, in the test fixture d'tor.";
@@ -445,18 +440,15 @@ TEST_F(NonFatalFailureInSetUpTest, FailureInSetUp) {
 // Tests fatal failures in SetUp().
 class FatalFailureInSetUpTest : public testing::Test {
  protected:
-  virtual ~FatalFailureInSetUpTest() {
-    Deinit();
-  }
+  ~FatalFailureInSetUpTest() override { Deinit(); }
 
-  virtual void SetUp() {
+  void SetUp() override {
     printf("(expecting 3 failures)\n");
     FAIL() << "Expected failure #1, in SetUp().";
   }
 
-  virtual void TearDown() {
-    FAIL() << "Expected failure #2, in TearDown().";
-  }
+  void TearDown() override { FAIL() << "Expected failure #2, in TearDown()."; }
+
  private:
   void Deinit() {
     FAIL() << "Expected failure #3, in the test fixture d'tor.";
@@ -508,7 +500,7 @@ static void ThreadRoutine(SpawnThreadNotifications* notifications) {
 class DeathTestAndMultiThreadsTest : public testing::Test {
  protected:
   // Starts a thread and waits for it to begin.
-  virtual void SetUp() {
+  void SetUp() override {
     thread_.reset(new ThreadWithParam<SpawnThreadNotifications*>(
         &ThreadRoutine, &notifications_, nullptr));
     notifications_.spawn_thread_started.WaitForNotification();
@@ -518,7 +510,7 @@ class DeathTestAndMultiThreadsTest : public testing::Test {
   // a manager thread might still be left running that will interfere
   // with later death tests.  This is unfortunate, but this class
   // cleans up after itself as best it can.
-  virtual void TearDown() {
+  void TearDown() override {
     notifications_.spawn_thread_ok_to_terminate.Notify();
   }
 
@@ -1037,11 +1029,9 @@ TEST_F(ExpectFailureTest, ExpectNonFatalFailureOnAllThreads) {
 
 class FooEnvironment : public testing::Environment {
  public:
-  virtual void SetUp() {
-    printf("%s", "FooEnvironment::SetUp() called.\n");
-  }
+  void SetUp() override { printf("%s", "FooEnvironment::SetUp() called.\n"); }
 
-  virtual void TearDown() {
+  void TearDown() override {
     printf("%s", "FooEnvironment::TearDown() called.\n");
     FAIL() << "Expected fatal failure.";
   }
@@ -1049,11 +1039,9 @@ class FooEnvironment : public testing::Environment {
 
 class BarEnvironment : public testing::Environment {
  public:
-  virtual void SetUp() {
-    printf("%s", "BarEnvironment::SetUp() called.\n");
-  }
+  void SetUp() override { printf("%s", "BarEnvironment::SetUp() called.\n"); }
 
-  virtual void TearDown() {
+  void TearDown() override {
     printf("%s", "BarEnvironment::TearDown() called.\n");
     ADD_FAILURE() << "Expected non-fatal failure.";
   }

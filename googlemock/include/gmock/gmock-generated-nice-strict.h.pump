@@ -135,7 +135,7 @@ $range j 1..i
 ]]
 #endif  // GTEST_LANG_CXX11
 
-  ~$clazz() {
+  ~$clazz() {  // NOLINT
     ::testing::Mock::UnregisterCallReaction(
         internal::ImplicitCast_<MockClass*>(this));
   }

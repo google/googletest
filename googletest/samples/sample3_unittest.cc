@@ -71,7 +71,7 @@ class QueueTestSmpl3 : public testing::Test {
   // virtual void SetUp() will be called before each test is run.  You
   // should define it if you need to initialize the variables.
   // Otherwise, this can be skipped.
-  virtual void SetUp() {
+  void SetUp() override {
     q1_.Enqueue(1);
     q2_.Enqueue(2);
     q2_.Enqueue(3);

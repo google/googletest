@@ -479,7 +479,7 @@ TEST(AssignmentOperatorTest, ConstAssignedToNonConst) {
 
 class DirectoryCreationTest : public Test {
  protected:
-  virtual void SetUp() {
+  void SetUp() override {
     testdata_path_.Set(FilePath(
         TempDir() + GetCurrentExecutableName().string() +
         "_directory_creation" GTEST_PATH_SEP_ "test" GTEST_PATH_SEP_));
@@ -496,7 +496,7 @@ class DirectoryCreationTest : public Test {
     posix::RmDir(testdata_path_.c_str());
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     remove(testdata_file_.c_str());
     remove(unique_file0_.c_str());
     remove(unique_file1_.c_str());

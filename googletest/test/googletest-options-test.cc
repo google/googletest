@@ -126,7 +126,7 @@ TEST(OutputFileHelpersTest, GetCurrentExecutableName) {
 
 class XmlOutputChangeDirTest : public Test {
  protected:
-  virtual void SetUp() {
+  void SetUp() override {
     original_working_dir_ = FilePath::GetCurrentDir();
     posix::ChDir("..");
     // This will make the test fail if run from the root directory.
@@ -134,7 +134,7 @@ class XmlOutputChangeDirTest : public Test {
               FilePath::GetCurrentDir().string());
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     posix::ChDir(original_working_dir_.string().c_str());
   }
 

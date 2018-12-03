@@ -181,7 +181,7 @@ class NiceMock : public MockClass {
 
 #endif  // GTEST_LANG_CXX11
 
-  ~NiceMock() {
+  ~NiceMock() {  // NOLINT
     ::testing::Mock::UnregisterCallReaction(
         internal::ImplicitCast_<MockClass*>(this));
   }
@@ -299,7 +299,7 @@ class NaggyMock : public MockClass {
 
 #endif  // GTEST_LANG_CXX11
 
-  ~NaggyMock() {
+  ~NaggyMock() {  // NOLINT
     ::testing::Mock::UnregisterCallReaction(
         internal::ImplicitCast_<MockClass*>(this));
   }
@@ -417,7 +417,7 @@ class StrictMock : public MockClass {
 
 #endif  // GTEST_LANG_CXX11
 
-  ~StrictMock() {
+  ~StrictMock() {  // NOLINT
     ::testing::Mock::UnregisterCallReaction(
         internal::ImplicitCast_<MockClass*>(this));
   }

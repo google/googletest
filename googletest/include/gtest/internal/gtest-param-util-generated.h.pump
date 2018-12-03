@@ -74,12 +74,12 @@ class CartesianProductGenerator$i
 
   CartesianProductGenerator$i($for j, [[const ParamGenerator<T$j>& g$j]])
       : $for j, [[g$(j)_(g$j)]] {}
-  virtual ~CartesianProductGenerator$i() {}
+  ~CartesianProductGenerator$i() override {}
 
-  virtual ParamIteratorInterface<ParamType>* Begin() const {
+  ParamIteratorInterface<ParamType>* Begin() const override {
     return new Iterator(this, $for j, [[g$(j)_, g$(j)_.begin()]]);
   }
-  virtual ParamIteratorInterface<ParamType>* End() const {
+  ParamIteratorInterface<ParamType>* End() const override {
     return new Iterator(this, $for j, [[g$(j)_, g$(j)_.end()]]);
   }
 
@@ -97,14 +97,14 @@ $for j, [[
 ]]    {
       ComputeCurrentValue();
     }
-    virtual ~Iterator() {}
+    ~Iterator() override {}
 
-    virtual const ParamGeneratorInterface<ParamType>* BaseGenerator() const {
+    const ParamGeneratorInterface<ParamType>* BaseGenerator() const override {
       return base_;
     }
     // Advance should not be called on beyond-of-range iterators
     // so no component iterators must be beyond end of range, either.
-    virtual void Advance() {
+    void Advance() override {
       assert(!AtEnd());
       ++current$(i)_;
 
@@ -117,11 +117,11 @@ $for k [[
 ]]
       ComputeCurrentValue();
     }
-    virtual ParamIteratorInterface<ParamType>* Clone() const {
+    ParamIteratorInterface<ParamType>* Clone() const override {
       return new Iterator(*this);
     }
-    virtual const ParamType* Current() const { return current_value_.get(); }
-    virtual bool Equals(const ParamIteratorInterface<ParamType>& other) const {
+    const ParamType* Current() const override { return current_value_.get(); }
+    bool Equals(const ParamIteratorInterface<ParamType>& other) const override {
       // Having the same base generator guarantees that the other
       // iterator is of the same type and we can downcast.
       GTEST_CHECK_(BaseGenerator() == other.BaseGenerator())

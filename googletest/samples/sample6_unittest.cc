@@ -61,7 +61,7 @@ class PrimeTableTest : public testing::Test {
   // implemented by T.
   PrimeTableTest() : table_(CreatePrimeTable<T>()) {}
 
-  virtual ~PrimeTableTest() { delete table_; }
+  ~PrimeTableTest() override { delete table_; }
 
   // Note that we test an implementation via the base interface
   // instead of the actual implementation class.  This is important

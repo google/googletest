@@ -193,7 +193,7 @@ class MatcherCastImpl<T, Matcher<U> > {
         : source_matcher_(source_matcher) {}
 
     // We delegate the matching logic to the source matcher.
-    virtual bool MatchAndExplain(T x, MatchResultListener* listener) const {
+    bool MatchAndExplain(T x, MatchResultListener* listener) const override {
 #if GTEST_LANG_CXX11
       using FromType = typename std::remove_cv<typename std::remove_pointer<
           typename std::remove_reference<T>::type>::type>::type;
@@ -213,11 +213,11 @@ class MatcherCastImpl<T, Matcher<U> > {
       return source_matcher_.MatchAndExplain(static_cast<U>(x), listener);
     }
 
-    virtual void DescribeTo(::std::ostream* os) const {
+    void DescribeTo(::std::ostream* os) const override {
       source_matcher_.DescribeTo(os);
     }
 
-    virtual void DescribeNegationTo(::std::ostream* os) const {
+    void DescribeNegationTo(::std::ostream* os) const override {
       source_matcher_.DescribeNegationTo(os);
     }
 
@@ -494,12 +494,12 @@ OutIter TransformTupleValues(Func f, const Tuple& t, OutIter out) {
 template <typename T>
 class AnyMatcherImpl : public MatcherInterface<GTEST_REFERENCE_TO_CONST_(T)> {
  public:
-  virtual bool MatchAndExplain(GTEST_REFERENCE_TO_CONST_(T) /* x */,
-                               MatchResultListener* /* listener */) const {
+  bool MatchAndExplain(GTEST_REFERENCE_TO_CONST_(T) /* x */,
+                       MatchResultListener* /* listener */) const override {
     return true;
   }
-  virtual void DescribeTo(::std::ostream* os) const { *os << "is anything"; }
-  virtual void DescribeNegationTo(::std::ostream* os) const {
+  void DescribeTo(::std::ostream* os) const override { *os << "is anything"; }
+  void DescribeNegationTo(::std::ostream* os) const override {
     // This is mostly for completeness' safe, as it's not very useful
     // to write Not(A<bool>()).  However we cannot completely rule out
     // such a possibility, and it doesn't hurt to be prepared.
@@ -604,18 +604,18 @@ class RefMatcher<T&> {
 
     // MatchAndExplain() takes a Super& (as opposed to const Super&)
     // in order to match the interface MatcherInterface<Super&>.
-    virtual bool MatchAndExplain(
-        Super& x, MatchResultListener* listener) const {
+    bool MatchAndExplain(Super& x,
+                         MatchResultListener* listener) const override {
       *listener << "which is located @" << static_cast<const void*>(&x);
       return &x == &object_;
     }
 
-    virtual void DescribeTo(::std::ostream* os) const {
+    void DescribeTo(::std::ostream* os) const override {
       *os << "references the variable ";
       UniversalPrinter<Super&>::Print(object_, os);
     }
 
-    virtual void DescribeNegationTo(::std::ostream* os) const {
+    void DescribeNegationTo(::std::ostream* os) const override {
       *os << "does not reference the variable ";
       UniversalPrinter<Super&>::Print(object_, os);
     }
@@ -933,15 +933,14 @@ class PairMatchBase {
   template <typename Tuple>
   class Impl : public MatcherInterface<Tuple> {
    public:
-    virtual bool MatchAndExplain(
-        Tuple args,
-        MatchResultListener* /* listener */) const {
+    bool MatchAndExplain(Tuple args,
+                         MatchResultListener* /* listener */) const override {
       return Op()(::std::get<0>(args), ::std::get<1>(args));
     }
-    virtual void DescribeTo(::std::ostream* os) const {
+    void DescribeTo(::std::ostream* os) const override {
       *os << "are " << GetDesc;
     }
-    virtual void DescribeNegationTo(::std::ostream* os) const {
+    void DescribeNegationTo(::std::ostream* os) const override {
       *os << "aren't " << GetDesc;
     }
   };
@@ -982,16 +981,16 @@ class NotMatcherImpl : public MatcherInterface<GTEST_REFERENCE_TO_CONST_(T)> {
   explicit NotMatcherImpl(const Matcher<T>& matcher)
       : matcher_(matcher) {}
 
-  virtual bool MatchAndExplain(GTEST_REFERENCE_TO_CONST_(T) x,
-                               MatchResultListener* listener) const {
+  bool MatchAndExplain(GTEST_REFERENCE_TO_CONST_(T) x,
+                       MatchResultListener* listener) const override {
     return !matcher_.MatchAndExplain(x, listener);
   }
 
-  virtual void DescribeTo(::std::ostream* os) const {
+  void DescribeTo(::std::ostream* os) const override {
     matcher_.DescribeNegationTo(os);
   }
 
-  virtual void DescribeNegationTo(::std::ostream* os) const {
+  void DescribeNegationTo(::std::ostream* os) const override {
     matcher_.DescribeTo(os);
   }
 
@@ -1032,7 +1031,7 @@ class AllOfMatcherImpl
   explicit AllOfMatcherImpl(std::vector<Matcher<T> > matchers)
       : matchers_(std::move(matchers)) {}
 
-  virtual void DescribeTo(::std::ostream* os) const {
+  void DescribeTo(::std::ostream* os) const override {
     *os << "(";
     for (size_t i = 0; i < matchers_.size(); ++i) {
       if (i != 0) *os << ") and (";
@@ -1041,7 +1040,7 @@ class AllOfMatcherImpl
     *os << ")";
   }
 
-  virtual void DescribeNegationTo(::std::ostream* os) const {
+  void DescribeNegationTo(::std::ostream* os) const override {
     *os << "(";
     for (size_t i = 0; i < matchers_.size(); ++i) {
       if (i != 0) *os << ") or (";
@@ -1050,8 +1049,8 @@ class AllOfMatcherImpl
     *os << ")";
   }
 
-  virtual bool MatchAndExplain(GTEST_REFERENCE_TO_CONST_(T) x,
-                               MatchResultListener* listener) const {
+  bool MatchAndExplain(GTEST_REFERENCE_TO_CONST_(T) x,
+                       MatchResultListener* listener) const override {
     // If either matcher1_ or matcher2_ doesn't match x, we only need
     // to explain why one of them fails.
     std::string all_match_result;
@@ -1139,7 +1138,7 @@ class AnyOfMatcherImpl
   explicit AnyOfMatcherImpl(std::vector<Matcher<T> > matchers)
       : matchers_(std::move(matchers)) {}
 
-  virtual void DescribeTo(::std::ostream* os) const {
+  void DescribeTo(::std::ostream* os) const override {
     *os << "(";
     for (size_t i = 0; i < matchers_.size(); ++i) {
       if (i != 0) *os << ") or (";
@@ -1148,7 +1147,7 @@ class AnyOfMatcherImpl
     *os << ")";
   }
 
-  virtual void DescribeNegationTo(::std::ostream* os) const {
+  void DescribeNegationTo(::std::ostream* os) const override {
     *os << "(";
     for (size_t i = 0; i < matchers_.size(); ++i) {
       if (i != 0) *os << ") and (";
@@ -1157,8 +1156,8 @@ class AnyOfMatcherImpl
     *os << ")";
   }
 
-  virtual bool MatchAndExplain(GTEST_REFERENCE_TO_CONST_(T) x,
-                               MatchResultListener* listener) const {
+  bool MatchAndExplain(GTEST_REFERENCE_TO_CONST_(T) x,
+                       MatchResultListener* listener) const override {
     std::string no_match_result;
 
     // If either matcher1_ or matcher2_ matches x, we just need to
@@ -1363,8 +1362,8 @@ class FloatingEqMatcher {
           nan_eq_nan_(nan_eq_nan),
           max_abs_error_(max_abs_error) {}
 
-    virtual bool MatchAndExplain(T value,
-                                 MatchResultListener* listener) const {
+    bool MatchAndExplain(T value,
+                         MatchResultListener* listener) const override {
       const FloatingPoint<FloatType> actual(value), expected(expected_);
 
       // Compares NaNs first, if nan_eq_nan_ is true.
@@ -1398,7 +1397,7 @@ class FloatingEqMatcher {
       }
     }
 
-    virtual void DescribeTo(::std::ostream* os) const {
+    void DescribeTo(::std::ostream* os) const override {
       // os->precision() returns the previously set precision, which we
       // store to restore the ostream to its original configuration
       // after outputting.
@@ -1419,7 +1418,7 @@ class FloatingEqMatcher {
       os->precision(old_precision);
     }
 
-    virtual void DescribeNegationTo(::std::ostream* os) const {
+    void DescribeNegationTo(::std::ostream* os) const override {
       // As before, get original precision.
       const ::std::streamsize old_precision = os->precision(
           ::std::numeric_limits<FloatType>::digits10 + 2);
@@ -1525,8 +1524,8 @@ class FloatingEq2Matcher {
         max_abs_error_(max_abs_error),
         nan_eq_nan_(nan_eq_nan) {}
 
-    virtual bool MatchAndExplain(Tuple args,
-                                 MatchResultListener* listener) const {
+    bool MatchAndExplain(Tuple args,
+                         MatchResultListener* listener) const override {
       if (max_abs_error_ == -1) {
         FloatingEqMatcher<FloatType> fm(::std::get<0>(args), nan_eq_nan_);
         return static_cast<Matcher<FloatType>>(fm).MatchAndExplain(
@@ -1538,10 +1537,10 @@ class FloatingEq2Matcher {
             ::std::get<1>(args), listener);
       }
     }
-    virtual void DescribeTo(::std::ostream* os) const {
+    void DescribeTo(::std::ostream* os) const override {
       *os << "are " << GetDesc;
     }
-    virtual void DescribeNegationTo(::std::ostream* os) const {
+    void DescribeNegationTo(::std::ostream* os) const override {
       *os << "aren't " << GetDesc;
     }
 
@@ -1590,18 +1589,18 @@ class PointeeMatcher {
     explicit Impl(const InnerMatcher& matcher)
         : matcher_(MatcherCast<const Pointee&>(matcher)) {}
 
-    virtual void DescribeTo(::std::ostream* os) const {
+    void DescribeTo(::std::ostream* os) const override {
       *os << "points to a value that ";
       matcher_.DescribeTo(os);
     }
 
-    virtual void DescribeNegationTo(::std::ostream* os) const {
+    void DescribeNegationTo(::std::ostream* os) const override {
       *os << "does not point to a value that ";
       matcher_.DescribeTo(os);
     }
 
-    virtual bool MatchAndExplain(Pointer pointer,
-                                 MatchResultListener* listener) const {
+    bool MatchAndExplain(Pointer pointer,
+                         MatchResultListener* listener) const override {
       if (GetRawPointer(pointer) == nullptr) return false;
 
       *listener << "which points to ";
@@ -1901,17 +1900,17 @@ class ResultOfMatcher {
     Impl(const CallableStorageType& callable, const M& matcher)
         : callable_(callable), matcher_(MatcherCast<ResultType>(matcher)) {}
 
-    virtual void DescribeTo(::std::ostream* os) const {
+    void DescribeTo(::std::ostream* os) const override {
       *os << "is mapped by the given callable to a value that ";
       matcher_.DescribeTo(os);
     }
 
-    virtual void DescribeNegationTo(::std::ostream* os) const {
+    void DescribeNegationTo(::std::ostream* os) const override {
       *os << "is mapped by the given callable to a value that ";
       matcher_.DescribeNegationTo(os);
     }
 
-    virtual bool MatchAndExplain(T obj, MatchResultListener* listener) const {
+    bool MatchAndExplain(T obj, MatchResultListener* listener) const override {
       *listener << "which is mapped by the given callable to ";
       // Cannot pass the return value directly to MatchPrintAndExplain, which
       // takes a non-const reference as argument.
@@ -1962,17 +1961,17 @@ class SizeIsMatcher {
     explicit Impl(const SizeMatcher& size_matcher)
         : size_matcher_(MatcherCast<SizeType>(size_matcher)) {}
 
-    virtual void DescribeTo(::std::ostream* os) const {
+    void DescribeTo(::std::ostream* os) const override {
       *os << "size ";
       size_matcher_.DescribeTo(os);
     }
-    virtual void DescribeNegationTo(::std::ostream* os) const {
+    void DescribeNegationTo(::std::ostream* os) const override {
       *os << "size ";
       size_matcher_.DescribeNegationTo(os);
     }
 
-    virtual bool MatchAndExplain(Container container,
-                                 MatchResultListener* listener) const {
+    bool MatchAndExplain(Container container,
+                         MatchResultListener* listener) const override {
       SizeType size = container.size();
       StringMatchResultListener size_listener;
       const bool result = size_matcher_.MatchAndExplain(size, &size_listener);
@@ -2016,17 +2015,17 @@ class BeginEndDistanceIsMatcher {
     explicit Impl(const DistanceMatcher& distance_matcher)
         : distance_matcher_(MatcherCast<DistanceType>(distance_matcher)) {}
 
-    virtual void DescribeTo(::std::ostream* os) const {
+    void DescribeTo(::std::ostream* os) const override {
       *os << "distance between begin() and end() ";
       distance_matcher_.DescribeTo(os);
     }
-    virtual void DescribeNegationTo(::std::ostream* os) const {
+    void DescribeNegationTo(::std::ostream* os) const override {
       *os << "distance between begin() and end() ";
       distance_matcher_.DescribeNegationTo(os);
     }
 
-    virtual bool MatchAndExplain(Container container,
-                                 MatchResultListener* listener) const {
+    bool MatchAndExplain(Container container,
+                         MatchResultListener* listener) const override {
 #if GTEST_HAS_STD_BEGIN_AND_END_
       using std::begin;
       using std::end;
@@ -2182,18 +2181,18 @@ class WhenSortedByMatcher {
     Impl(const Comparator& comparator, const ContainerMatcher& matcher)
         : comparator_(comparator), matcher_(matcher) {}
 
-    virtual void DescribeTo(::std::ostream* os) const {
+    void DescribeTo(::std::ostream* os) const override {
       *os << "(when sorted) ";
       matcher_.DescribeTo(os);
     }
 
-    virtual void DescribeNegationTo(::std::ostream* os) const {
+    void DescribeNegationTo(::std::ostream* os) const override {
       *os << "(when sorted) ";
       matcher_.DescribeNegationTo(os);
     }
 
-    virtual bool MatchAndExplain(LhsContainer lhs,
-                                 MatchResultListener* listener) const {
+    bool MatchAndExplain(LhsContainer lhs,
+                         MatchResultListener* listener) const override {
       LhsStlContainerReference lhs_stl_container = LhsView::ConstReference(lhs);
       ::std::vector<LhsValue> sorted_container(lhs_stl_container.begin(),
                                                lhs_stl_container.end());
@@ -2284,14 +2283,14 @@ class PointwiseMatcher {
         : mono_tuple_matcher_(SafeMatcherCast<InnerMatcherArg>(tuple_matcher)),
           rhs_(rhs) {}
 
-    virtual void DescribeTo(::std::ostream* os) const {
+    void DescribeTo(::std::ostream* os) const override {
       *os << "contains " << rhs_.size()
           << " values, where each value and its corresponding value in ";
       UniversalPrinter<RhsStlContainer>::Print(rhs_, os);
       *os << " ";
       mono_tuple_matcher_.DescribeTo(os);
     }
-    virtual void DescribeNegationTo(::std::ostream* os) const {
+    void DescribeNegationTo(::std::ostream* os) const override {
       *os << "doesn't contain exactly " << rhs_.size()
           << " values, or contains a value x at some index i"
           << " where x and the i-th value of ";
@@ -2300,8 +2299,8 @@ class PointwiseMatcher {
       mono_tuple_matcher_.DescribeNegationTo(os);
     }
 
-    virtual bool MatchAndExplain(LhsContainer lhs,
-                                 MatchResultListener* listener) const {
+    bool MatchAndExplain(LhsContainer lhs,
+                         MatchResultListener* listener) const override {
       LhsStlContainerReference lhs_stl_container = LhsView::ConstReference(lhs);
       const size_t actual_size = lhs_stl_container.size();
       if (actual_size != rhs_.size()) {
@@ -2408,18 +2407,18 @@ class ContainsMatcherImpl : public QuantifierMatcherImpl<Container> {
       : QuantifierMatcherImpl<Container>(inner_matcher) {}
 
   // Describes what this matcher does.
-  virtual void DescribeTo(::std::ostream* os) const {
+  void DescribeTo(::std::ostream* os) const override {
     *os << "contains at least one element that ";
     this->inner_matcher_.DescribeTo(os);
   }
 
-  virtual void DescribeNegationTo(::std::ostream* os) const {
+  void DescribeNegationTo(::std::ostream* os) const override {
     *os << "doesn't contain any element that ";
     this->inner_matcher_.DescribeTo(os);
   }
 
-  virtual bool MatchAndExplain(Container container,
-                               MatchResultListener* listener) const {
+  bool MatchAndExplain(Container container,
+                       MatchResultListener* listener) const override {
     return this->MatchAndExplainImpl(false, container, listener);
   }
 
@@ -2437,18 +2436,18 @@ class EachMatcherImpl : public QuantifierMatcherImpl<Container> {
       : QuantifierMatcherImpl<Container>(inner_matcher) {}
 
   // Describes what this matcher does.
-  virtual void DescribeTo(::std::ostream* os) const {
+  void DescribeTo(::std::ostream* os) const override {
     *os << "only contains elements that ";
     this->inner_matcher_.DescribeTo(os);
   }
 
-  virtual void DescribeNegationTo(::std::ostream* os) const {
+  void DescribeNegationTo(::std::ostream* os) const override {
     *os << "contains some element that ";
     this->inner_matcher_.DescribeNegationTo(os);
   }
 
-  virtual bool MatchAndExplain(Container container,
-                               MatchResultListener* listener) const {
+  bool MatchAndExplain(Container container,
+                       MatchResultListener* listener) const override {
     return this->MatchAndExplainImpl(true, container, listener);
   }
 
@@ -2551,8 +2550,8 @@ class KeyMatcherImpl : public MatcherInterface<PairType> {
   }
 
   // Returns true iff 'key_value.first' (the key) matches the inner matcher.
-  virtual bool MatchAndExplain(PairType key_value,
-                               MatchResultListener* listener) const {
+  bool MatchAndExplain(PairType key_value,
+                       MatchResultListener* listener) const override {
     StringMatchResultListener inner_listener;
     const bool match = inner_matcher_.MatchAndExplain(
         pair_getters::First(key_value, Rank0()), &inner_listener);
@@ -2564,13 +2563,13 @@ class KeyMatcherImpl : public MatcherInterface<PairType> {
   }
 
   // Describes what this matcher does.
-  virtual void DescribeTo(::std::ostream* os) const {
+  void DescribeTo(::std::ostream* os) const override {
     *os << "has a key that ";
     inner_matcher_.DescribeTo(os);
   }
 
   // Describes what the negation of this matcher does.
-  virtual void DescribeNegationTo(::std::ostream* os) const {
+  void DescribeNegationTo(::std::ostream* os) const override {
     *os << "doesn't have a key that ";
     inner_matcher_.DescribeTo(os);
   }
@@ -2616,7 +2615,7 @@ class PairMatcherImpl : public MatcherInterface<PairType> {
   }
 
   // Describes what this matcher does.
-  virtual void DescribeTo(::std::ostream* os) const {
+  void DescribeTo(::std::ostream* os) const override {
     *os << "has a first field that ";
     first_matcher_.DescribeTo(os);
     *os << ", and has a second field that ";
@@ -2624,7 +2623,7 @@ class PairMatcherImpl : public MatcherInterface<PairType> {
   }
 
   // Describes what the negation of this matcher does.
-  virtual void DescribeNegationTo(::std::ostream* os) const {
+  void DescribeNegationTo(::std::ostream* os) const override {
     *os << "has a first field that ";
     first_matcher_.DescribeNegationTo(os);
     *os << ", or has a second field that ";
@@ -2633,8 +2632,8 @@ class PairMatcherImpl : public MatcherInterface<PairType> {
 
   // Returns true iff 'a_pair.first' matches first_matcher and 'a_pair.second'
   // matches second_matcher.
-  virtual bool MatchAndExplain(PairType a_pair,
-                               MatchResultListener* listener) const {
+  bool MatchAndExplain(PairType a_pair,
+                       MatchResultListener* listener) const override {
     if (!listener->IsInterested()) {
       // If the listener is not interested, we don't need to construct the
       // explanation.
@@ -2726,7 +2725,7 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
   }
 
   // Describes what this matcher does.
-  virtual void DescribeTo(::std::ostream* os) const {
+  void DescribeTo(::std::ostream* os) const override {
     if (count() == 0) {
       *os << "is empty";
     } else if (count() == 1) {
@@ -2745,7 +2744,7 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
   }
 
   // Describes what the negation of this matcher does.
-  virtual void DescribeNegationTo(::std::ostream* os) const {
+  void DescribeNegationTo(::std::ostream* os) const override {
     if (count() == 0) {
       *os << "isn't empty";
       return;
@@ -2761,8 +2760,8 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
     }
   }
 
-  virtual bool MatchAndExplain(Container container,
-                               MatchResultListener* listener) const {
+  bool MatchAndExplain(Container container,
+                       MatchResultListener* listener) const override {
     // To work with stream-like "containers", we must only walk
     // through the elements in one pass.
 
@@ -2982,17 +2981,17 @@ class UnorderedElementsAreMatcherImpl
   }
 
   // Describes what this matcher does.
-  virtual void DescribeTo(::std::ostream* os) const {
+  void DescribeTo(::std::ostream* os) const override {
     return UnorderedElementsAreMatcherImplBase::DescribeToImpl(os);
   }
 
   // Describes what the negation of this matcher does.
-  virtual void DescribeNegationTo(::std::ostream* os) const {
+  void DescribeNegationTo(::std::ostream* os) const override {
     return UnorderedElementsAreMatcherImplBase::DescribeNegationToImpl(os);
   }
 
-  virtual bool MatchAndExplain(Container container,
-                               MatchResultListener* listener) const {
+  bool MatchAndExplain(Container container,
+                       MatchResultListener* listener) const override {
     StlContainerReference stl_container = View::ConstReference(container);
     ::std::vector<std::string> element_printouts;
     MatchMatrix matrix =
@@ -3205,14 +3204,14 @@ class BoundSecondMatcher {
         : mono_tuple2_matcher_(SafeMatcherCast<const ArgTuple&>(tm)),
           second_value_(second) {}
 
-    virtual void DescribeTo(::std::ostream* os) const {
+    void DescribeTo(::std::ostream* os) const override {
       *os << "and ";
       UniversalPrint(second_value_, os);
       *os << " ";
       mono_tuple2_matcher_.DescribeTo(os);
     }
 
-    virtual bool MatchAndExplain(T x, MatchResultListener* listener) const {
+    bool MatchAndExplain(T x, MatchResultListener* listener) const override {
       return mono_tuple2_matcher_.MatchAndExplain(ArgTuple(x, second_value_),
                                                   listener);
     }
@@ -3267,18 +3266,18 @@ class OptionalMatcher {
     explicit Impl(const ValueMatcher& value_matcher)
         : value_matcher_(MatcherCast<ValueType>(value_matcher)) {}
 
-    virtual void DescribeTo(::std::ostream* os) const {
+    void DescribeTo(::std::ostream* os) const override {
       *os << "value ";
       value_matcher_.DescribeTo(os);
     }
 
-    virtual void DescribeNegationTo(::std::ostream* os) const {
+    void DescribeNegationTo(::std::ostream* os) const override {
       *os << "value ";
       value_matcher_.DescribeNegationTo(os);
     }
 
-    virtual bool MatchAndExplain(Optional optional,
-                                 MatchResultListener* listener) const {
+    bool MatchAndExplain(Optional optional,
+                         MatchResultListener* listener) const override {
       if (!optional) {
         *listener << "which is not engaged";
         return false;

@@ -154,9 +154,8 @@ class DeathTestFactory {
 // A concrete DeathTestFactory implementation for normal use.
 class DefaultDeathTestFactory : public DeathTestFactory {
  public:
-  virtual bool Create(const char* statement,
-                      Matcher<const std::string&> matcher, const char* file,
-                      int line, DeathTest** test);
+  bool Create(const char* statement, Matcher<const std::string&> matcher,
+              const char* file, int line, DeathTest** test) override;
 };
 
 // Returns true if exit_status describes a process that was terminated

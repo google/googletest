@@ -128,9 +128,7 @@ class TestForDeathTest : public testing::Test {
  protected:
   TestForDeathTest() : original_dir_(FilePath::GetCurrentDir()) {}
 
-  virtual ~TestForDeathTest() {
-    posix::ChDir(original_dir_.c_str());
-  }
+  ~TestForDeathTest() override { posix::ChDir(original_dir_.c_str()); }
 
   // A static member function that's expected to die.
   static void StaticMemberFunction() { DieInside("StaticMemberFunction"); }
@@ -885,9 +883,9 @@ TEST_F(TestForDeathTest, DeathTestMultiLineMatchPass) {
 class MockDeathTestFactory : public DeathTestFactory {
  public:
   MockDeathTestFactory();
-  virtual bool Create(const char* statement,
-                      testing::Matcher<const std::string&> matcher,
-                      const char* file, int line, DeathTest** test);
+  bool Create(const char* statement,
+              testing::Matcher<const std::string&> matcher, const char* file,
+              int line, DeathTest** test) override;
 
   // Sets the parameters for subsequent calls to Create.
   void SetParameters(bool create, DeathTest::TestRole role,
@@ -942,22 +940,20 @@ class MockDeathTest : public DeathTest {
                 TestRole role, int status, bool passed) :
       parent_(parent), role_(role), status_(status), passed_(passed) {
   }
-  virtual ~MockDeathTest() {
-    parent_->test_deleted_ = true;
-  }
-  virtual TestRole AssumeRole() {
+  ~MockDeathTest() override { parent_->test_deleted_ = true; }
+  TestRole AssumeRole() override {
     ++parent_->assume_role_calls_;
     return role_;
   }
-  virtual int Wait() {
+  int Wait() override {
     ++parent_->wait_calls_;
     return status_;
   }
-  virtual bool Passed(bool exit_status_ok) {
+  bool Passed(bool exit_status_ok) override {
     parent_->passed_args_.push_back(exit_status_ok);
     return passed_;
   }
-  virtual void Abort(AbortReason reason) {
+  void Abort(AbortReason reason) override {
     parent_->abort_args_.push_back(reason);
   }
 

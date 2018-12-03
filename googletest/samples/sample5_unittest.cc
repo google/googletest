@@ -63,11 +63,11 @@ class QuickTest : public testing::Test {
  protected:
   // Remember that SetUp() is run immediately before a test starts.
   // This is a good place to record the start time.
-  virtual void SetUp() { start_time_ = time(nullptr); }
+  void SetUp() override { start_time_ = time(nullptr); }
 
   // TearDown() is invoked immediately after a test finishes.  Here we
   // check if the test was too slow.
-  virtual void TearDown() {
+  void TearDown() override {
     // Gets the time when the test finishes
     const time_t end_time = time(nullptr);
 
@@ -140,7 +140,7 @@ TEST_F(IntegerFunctionTest, IsPrime) {
 // stuff inside the body of the test fixture, as usual.
 class QueueTest : public QuickTest {
  protected:
-  virtual void SetUp() {
+  void SetUp() override {
     // First, we need to set up the super fixture (QuickTest).
     QuickTest::SetUp();
 

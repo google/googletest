@@ -379,11 +379,9 @@ TEST(ExpectTest, FailsNonfatallyOnFalse) {
 
 class LogIsVisibleTest : public ::testing::Test {
  protected:
-  virtual void SetUp() {
-    original_verbose_ = GMOCK_FLAG(verbose);
-  }
+  void SetUp() override { original_verbose_ = GMOCK_FLAG(verbose); }
 
-  virtual void TearDown() { GMOCK_FLAG(verbose) = original_verbose_; }
+  void TearDown() override { GMOCK_FLAG(verbose) = original_verbose_; }
 
   std::string original_verbose_;
 };
@@ -442,11 +440,11 @@ TEST(LogTest, NoStackTraceWhenStackFramesToSkipIsNegative) {
 }
 
 struct MockStackTraceGetter : testing::internal::OsStackTraceGetterInterface {
-  virtual std::string CurrentStackTrace(int max_depth, int skip_count) {
+  std::string CurrentStackTrace(int max_depth, int skip_count) override {
     return (testing::Message() << max_depth << "::" << skip_count << "\n")
         .GetString();
   }
-  virtual void UponLeavingGTest() {}
+  void UponLeavingGTest() override {}
 };
 
 // Tests that in opt mode, a positive stack_frames_to_skip argument is

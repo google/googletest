@@ -93,8 +93,8 @@ GTEST_API_ std::string ConvertIdentifierNameToWords(const char* id_name) {
 // use Google Mock with a testing framework other than Google Test.
 class GoogleTestFailureReporter : public FailureReporterInterface {
  public:
-  virtual void ReportFailure(FailureType type, const char* file, int line,
-                             const std::string& message) {
+  void ReportFailure(FailureType type, const char* file, int line,
+                     const std::string& message) override {
     AssertHelper(type == kFatal ?
                  TestPartResult::kFatalFailure :
                  TestPartResult::kNonFatalFailure,

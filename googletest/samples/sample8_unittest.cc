@@ -53,19 +53,19 @@ class HybridPrimeTable : public PrimeTable {
                           ? nullptr
                           : new PreCalculatedPrimeTable(max_precalculated)),
         max_precalculated_(max_precalculated) {}
-  virtual ~HybridPrimeTable() {
+  ~HybridPrimeTable() override {
     delete on_the_fly_impl_;
     delete precalc_impl_;
   }
 
-  virtual bool IsPrime(int n) const {
+  bool IsPrime(int n) const override {
     if (precalc_impl_ != nullptr && n < max_precalculated_)
       return precalc_impl_->IsPrime(n);
     else
       return on_the_fly_impl_->IsPrime(n);
   }
 
-  virtual int GetNextPrime(int p) const {
+  int GetNextPrime(int p) const override {
     int next_prime = -1;
     if (precalc_impl_ != nullptr && p < max_precalculated_)
       next_prime = precalc_impl_->GetNextPrime(p);
@@ -91,13 +91,13 @@ using ::testing::Combine;
 // HybridPrimeTable instance.
 class PrimeTableTest : public TestWithParam< ::std::tuple<bool, int> > {
  protected:
-  virtual void SetUp() {
+  void SetUp() override {
     bool force_on_the_fly;
     int max_precalculated;
     std::tie(force_on_the_fly, max_precalculated) = GetParam();
     table_ = new HybridPrimeTable(force_on_the_fly, max_precalculated);
   }
-  virtual void TearDown() {
+  void TearDown() override {
     delete table_;
     table_ = nullptr;
   }

@@ -122,13 +122,13 @@ struct PredFormatFunctor1 {
 
 class Predicate1Test : public testing::Test {
  protected:
-  virtual void SetUp() {
+  void SetUp() override {
     expected_to_finish_ = true;
     finished_ = false;
     n1_ = 0;
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     // Verifies that each of the predicate's arguments was evaluated
     // exactly once.
     EXPECT_EQ(1, n1_) <<
@@ -514,13 +514,13 @@ struct PredFormatFunctor2 {
 
 class Predicate2Test : public testing::Test {
  protected:
-  virtual void SetUp() {
+  void SetUp() override {
     expected_to_finish_ = true;
     finished_ = false;
     n1_ = n2_ = 0;
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     // Verifies that each of the predicate's arguments was evaluated
     // exactly once.
     EXPECT_EQ(1, n1_) <<
@@ -948,13 +948,13 @@ struct PredFormatFunctor3 {
 
 class Predicate3Test : public testing::Test {
  protected:
-  virtual void SetUp() {
+  void SetUp() override {
     expected_to_finish_ = true;
     finished_ = false;
     n1_ = n2_ = n3_ = 0;
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     // Verifies that each of the predicate's arguments was evaluated
     // exactly once.
     EXPECT_EQ(1, n1_) <<
@@ -1424,13 +1424,13 @@ struct PredFormatFunctor4 {
 
 class Predicate4Test : public testing::Test {
  protected:
-  virtual void SetUp() {
+  void SetUp() override {
     expected_to_finish_ = true;
     finished_ = false;
     n1_ = n2_ = n3_ = n4_ = 0;
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     // Verifies that each of the predicate's arguments was evaluated
     // exactly once.
     EXPECT_EQ(1, n1_) <<
@@ -1942,13 +1942,13 @@ struct PredFormatFunctor5 {
 
 class Predicate5Test : public testing::Test {
  protected:
-  virtual void SetUp() {
+  void SetUp() override {
     expected_to_finish_ = true;
     finished_ = false;
     n1_ = n2_ = n3_ = n4_ = n5_ = 0;
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     // Verifies that each of the predicate's arguments was evaluated
     // exactly once.
     EXPECT_EQ(1, n1_) <<
