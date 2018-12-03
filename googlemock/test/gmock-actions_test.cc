@@ -379,7 +379,7 @@ typedef int MyGlobalFunction(bool, int);
 
 class MyActionImpl : public ActionInterface<MyGlobalFunction> {
  public:
-  virtual int Perform(const std::tuple<bool, int>& args) {
+  int Perform(const std::tuple<bool, int>& args) override {
     return std::get<0>(args) ? std::get<1>(args) : 0;
   }
 };
@@ -443,7 +443,7 @@ TEST(ActionTest, IsCopyable) {
 
 class IsNotZero : public ActionInterface<bool(int)> {  // NOLINT
  public:
-  virtual bool Perform(const std::tuple<int>& arg) {
+  bool Perform(const std::tuple<int>& arg) override {
     return std::get<0>(arg) != 0;
   }
 };
@@ -1087,7 +1087,7 @@ TEST(WithArgsTest, TenArgs) {
 // Tests using WithArgs with an action that is not Invoke().
 class SubtractAction : public ActionInterface<int(int, int)> {
  public:
-  virtual int Perform(const std::tuple<int, int>& args) {
+  int Perform(const std::tuple<int, int>& args) override {
     return std::get<0>(args) - std::get<1>(args);
   }
 };
@@ -1155,8 +1155,8 @@ TEST(WithArgsTest, InnerActionWithConversion) {
 
 class SetErrnoAndReturnTest : public testing::Test {
  protected:
-  virtual void SetUp() { errno = 0; }
-  virtual void TearDown() { errno = 0; }
+  void SetUp() override { errno = 0; }
+  void TearDown() override { errno = 0; }
 };
 
 TEST_F(SetErrnoAndReturnTest, Int) {

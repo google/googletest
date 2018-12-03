@@ -396,17 +396,17 @@ TEST(ExactlyTest, HasCorrectBounds) {
 class EvenCardinality : public CardinalityInterface {
  public:
   // Returns true iff call_count calls will satisfy this cardinality.
-  virtual bool IsSatisfiedByCallCount(int call_count) const {
+  bool IsSatisfiedByCallCount(int call_count) const override {
     return (call_count % 2 == 0);
   }
 
   // Returns true iff call_count calls will saturate this cardinality.
-  virtual bool IsSaturatedByCallCount(int /* call_count */) const {
+  bool IsSaturatedByCallCount(int /* call_count */) const override {
     return false;
   }
 
   // Describes self to an ostream.
-  virtual void DescribeTo(::std::ostream* ss) const {
+  void DescribeTo(::std::ostream* ss) const override {
     *ss << "called even number of times";
   }
 };

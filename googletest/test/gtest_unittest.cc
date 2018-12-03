@@ -78,7 +78,7 @@ class StreamingListenerTest : public Test {
   class FakeSocketWriter : public StreamingListener::AbstractSocketWriter {
    public:
     // Sends a string to the socket.
-    virtual void Send(const std::string& message) { output_ += message; }
+    void Send(const std::string& message) override { output_ += message; }
 
     std::string output_;
   };
@@ -438,7 +438,7 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
   static const TimeInMillis kMillisPerSec = 1000;
 
  private:
-  virtual void SetUp() {
+  void SetUp() override {
     saved_tz_ = nullptr;
 
     GTEST_DISABLE_MSC_DEPRECATED_PUSH_(/* getenv, strdup: deprecated */)
@@ -452,7 +452,7 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
     SetTimeZone("UTC+00");
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     SetTimeZone(saved_tz_);
     free(const_cast<char*>(saved_tz_));
     saved_tz_ = nullptr;
@@ -1361,7 +1361,7 @@ class TestResultTest : public Test {
   // ... and 3 TestResult objects.
   TestResult * r0, * r1, * r2;
 
-  virtual void SetUp() {
+  void SetUp() override {
     // pr1 is for success.
     pr1 = new TestPartResult(TestPartResult::kSuccess,
                              "foo/bar.cc",
@@ -1398,7 +1398,7 @@ class TestResultTest : public Test {
     results2->push_back(*pr2);
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     delete pr1;
     delete pr2;
 
@@ -1826,12 +1826,12 @@ TEST(ShouldRunTestOnShardTest, IsPartitionWhenThereIsOneShard) {
 
 class ShouldShardTest : public testing::Test {
  protected:
-  virtual void SetUp() {
+  void SetUp() override {
     index_var_ = GTEST_FLAG_PREFIX_UPPER_ "INDEX";
     total_var_ = GTEST_FLAG_PREFIX_UPPER_ "TOTAL";
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     SetEnv(index_var_, "");
     SetEnv(total_var_, "");
   }
@@ -2094,7 +2094,7 @@ TEST_F(UnitTestRecordPropertyTest,
 
 class UnitTestRecordPropertyTestEnvironment : public Environment {
  public:
-  virtual void TearDown() {
+  void TearDown() override {
     ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
         "tests");
     ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
@@ -2707,7 +2707,7 @@ class FloatingPointTest : public Test {
   typedef typename testing::internal::FloatingPoint<RawType> Floating;
   typedef typename Floating::Bits Bits;
 
-  virtual void SetUp() {
+  void SetUp() override {
     const size_t max_ulps = Floating::kMaxUlps;
 
     // The bits that represent 0.0.
@@ -5061,7 +5061,7 @@ class TestLifeCycleTest : public Test {
 
   // Destructor.  Decrements the number of test objects that uses this
   // fixture.
-  ~TestLifeCycleTest() { count_--; }
+  ~TestLifeCycleTest() override { count_--; }
 
   // Returns the number of live test objects that uses this fixture.
   int count() const { return count_; }
@@ -5448,7 +5448,7 @@ class SetUpTestCaseTest : public Test {
   }
 
   // This will be called before each test in this test case.
-  virtual void SetUp() {
+  void SetUp() override {
     // SetUpTestCase() should be called only once, so counter_ should
     // always be 1.
     EXPECT_EQ(1, counter_);
@@ -5628,7 +5628,7 @@ struct Flags {
 class ParseFlagsTest : public Test {
  protected:
   // Clears the flags before each test.
-  virtual void SetUp() {
+  void SetUp() override {
     GTEST_FLAG(also_run_disabled_tests) = false;
     GTEST_FLAG(break_on_failure) = false;
     GTEST_FLAG(catch_exceptions) = false;
@@ -6316,12 +6316,8 @@ TEST(NestedTestingNamespaceTest, Failure) {
 // successfully.
 class ProtectedFixtureMethodsTest : public Test {
  protected:
-  virtual void SetUp() {
-    Test::SetUp();
-  }
-  virtual void TearDown() {
-    Test::TearDown();
-  }
+  void SetUp() override { Test::SetUp(); }
+  void TearDown() override { Test::TearDown(); }
 };
 
 // StreamingAssertionsTest tests the streaming versions of a representative
@@ -6699,13 +6695,13 @@ class TestListener : public EmptyTestEventListener {
       : on_start_counter_(on_start_counter),
         is_destroyed_(is_destroyed) {}
 
-  virtual ~TestListener() {
+  ~TestListener() override {
     if (is_destroyed_)
       *is_destroyed_ = true;
   }
 
  protected:
-  virtual void OnTestProgramStart(const UnitTest& /*unit_test*/) {
+  void OnTestProgramStart(const UnitTest& /*unit_test*/) override {
     if (on_start_counter_ != nullptr) (*on_start_counter_)++;
   }
 
@@ -6774,21 +6770,21 @@ class SequenceTestingListener : public EmptyTestEventListener {
       : vector_(vector), id_(id) {}
 
  protected:
-  virtual void OnTestProgramStart(const UnitTest& /*unit_test*/) {
+  void OnTestProgramStart(const UnitTest& /*unit_test*/) override {
     vector_->push_back(GetEventDescription("OnTestProgramStart"));
   }
 
-  virtual void OnTestProgramEnd(const UnitTest& /*unit_test*/) {
+  void OnTestProgramEnd(const UnitTest& /*unit_test*/) override {
     vector_->push_back(GetEventDescription("OnTestProgramEnd"));
   }
 
-  virtual void OnTestIterationStart(const UnitTest& /*unit_test*/,
-                                    int /*iteration*/) {
+  void OnTestIterationStart(const UnitTest& /*unit_test*/,
+                            int /*iteration*/) override {
     vector_->push_back(GetEventDescription("OnTestIterationStart"));
   }
 
-  virtual void OnTestIterationEnd(const UnitTest& /*unit_test*/,
-                                  int /*iteration*/) {
+  void OnTestIterationEnd(const UnitTest& /*unit_test*/,
+                          int /*iteration*/) override {
     vector_->push_back(GetEventDescription("OnTestIterationEnd"));
   }
 

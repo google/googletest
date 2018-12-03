@@ -162,12 +162,9 @@ class GreaterThanMatcher : public MatcherInterface<int> {
  public:
   explicit GreaterThanMatcher(int rhs) : rhs_(rhs) {}
 
-  virtual void DescribeTo(ostream* os) const {
-    *os << "is > " << rhs_;
-  }
+  void DescribeTo(ostream* os) const override { *os << "is > " << rhs_; }
 
-  virtual bool MatchAndExplain(int lhs,
-                               MatchResultListener* listener) const {
+  bool MatchAndExplain(int lhs, MatchResultListener* listener) const override {
     const int diff = lhs - rhs_;
     if (diff > 0) {
       *listener << "which is " << diff << " more than " << rhs_;
@@ -257,14 +254,12 @@ TEST(MatchResultListenerTest, IsInterestedWorks) {
 // change.
 class EvenMatcherImpl : public MatcherInterface<int> {
  public:
-  virtual bool MatchAndExplain(int x,
-                               MatchResultListener* /* listener */) const {
+  bool MatchAndExplain(int x,
+                       MatchResultListener* /* listener */) const override {
     return x % 2 == 0;
   }
 
-  virtual void DescribeTo(ostream* os) const {
-    *os << "is an even number";
-  }
+  void DescribeTo(ostream* os) const override { *os << "is an even number"; }
 
   // We deliberately don't define DescribeNegationTo() and
   // ExplainMatchResultTo() here, to make sure the definition of these
@@ -280,7 +275,7 @@ TEST(MatcherInterfaceTest, CanBeImplementedUsingPublishedAPI) {
 
 class NewEvenMatcherImpl : public MatcherInterface<int> {
  public:
-  virtual bool MatchAndExplain(int x, MatchResultListener* listener) const {
+  bool MatchAndExplain(int x, MatchResultListener* listener) const override {
     const bool match = x % 2 == 0;
     // Verifies that we can stream to a listener directly.
     *listener << "value % " << 2;
@@ -292,9 +287,7 @@ class NewEvenMatcherImpl : public MatcherInterface<int> {
     return match;
   }
 
-  virtual void DescribeTo(ostream* os) const {
-    *os << "is an even number";
-  }
+  void DescribeTo(ostream* os) const override { *os << "is an even number"; }
 };
 
 TEST(MatcherInterfaceTest, CanBeImplementedUsingNewAPI) {
