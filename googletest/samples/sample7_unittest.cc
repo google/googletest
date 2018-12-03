@@ -65,9 +65,9 @@ PrimeTable* CreatePreCalculatedPrimeTable() {
 // create and store an instance of PrimeTable.
 class PrimeTableTestSmpl7 : public TestWithParam<CreatePrimeTableFunc*> {
  public:
-  virtual ~PrimeTableTestSmpl7() { delete table_; }
-  virtual void SetUp() { table_ = (*GetParam())(); }
-  virtual void TearDown() {
+  ~PrimeTableTestSmpl7() override { delete table_; }
+  void SetUp() override { table_ = (*GetParam())(); }
+  void TearDown() override {
     delete table_;
     table_ = nullptr;
   }

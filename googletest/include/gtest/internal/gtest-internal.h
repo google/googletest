@@ -469,7 +469,7 @@ class TestFactoryBase {
 template <class TestClass>
 class TestFactoryImpl : public TestFactoryBase {
  public:
-  virtual Test* CreateTest() { return new TestClass; }
+  Test* CreateTest() override { return new TestClass; }
 };
 
 #if GTEST_OS_WINDOWS

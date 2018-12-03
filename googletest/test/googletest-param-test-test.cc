@@ -562,7 +562,7 @@ class TestGenerationEnvironment : public ::testing::Environment {
   void TearDownExecuted() { tear_down_count_++; }
   void TestBodyExecuted() { test_body_count_++; }
 
-  virtual void TearDown() {
+  void TearDown() override {
     // If all MultipleTestGenerationTest tests have been de-selected
     // by the filter flag, the following checks make no sense.
     bool perform_check = false;
@@ -619,11 +619,11 @@ class TestGenerationTest : public TestWithParam<int> {
     Environment::Instance()->FixtureConstructorExecuted();
     current_parameter_ = GetParam();
   }
-  virtual void SetUp() {
+  void SetUp() override {
     Environment::Instance()->SetUpExecuted();
     EXPECT_EQ(current_parameter_, GetParam());
   }
-  virtual void TearDown() {
+  void TearDown() override {
     Environment::Instance()->TearDownExecuted();
     EXPECT_EQ(current_parameter_, GetParam());
   }

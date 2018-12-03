@@ -443,8 +443,8 @@ class OsStackTraceGetter : public OsStackTraceGetterInterface {
  public:
   OsStackTraceGetter() {}
 
-  virtual std::string CurrentStackTrace(int max_depth, int skip_count);
-  virtual void UponLeavingGTest();
+  std::string CurrentStackTrace(int max_depth, int skip_count) override;
+  void UponLeavingGTest() override;
 
  private:
 #if GTEST_HAS_ABSL
@@ -475,7 +475,7 @@ class DefaultGlobalTestPartResultReporter
   explicit DefaultGlobalTestPartResultReporter(UnitTestImpl* unit_test);
   // Implements the TestPartResultReporterInterface. Reports the test part
   // result in the current test.
-  virtual void ReportTestPartResult(const TestPartResult& result);
+  void ReportTestPartResult(const TestPartResult& result) override;
 
  private:
   UnitTestImpl* const unit_test_;
@@ -491,7 +491,7 @@ class DefaultPerThreadTestPartResultReporter
   explicit DefaultPerThreadTestPartResultReporter(UnitTestImpl* unit_test);
   // Implements the TestPartResultReporterInterface. The implementation just
   // delegates to the current global test part result reporter of *unit_test_.
-  virtual void ReportTestPartResult(const TestPartResult& result);
+  void ReportTestPartResult(const TestPartResult& result) override;
 
  private:
   UnitTestImpl* const unit_test_;
@@ -1063,13 +1063,13 @@ class StreamingListener : public EmptyTestEventListener {
       MakeConnection();
     }
 
-    virtual ~SocketWriter() {
+    ~SocketWriter() override {
       if (sockfd_ != -1)
         CloseConnection();
     }
 
     // Sends a string to the socket.
-    virtual void Send(const std::string& message) {
+    void Send(const std::string& message) override {
       GTEST_CHECK_(sockfd_ != -1)
           << "Send() can be called only when there is a connection.";
 
@@ -1086,7 +1086,7 @@ class StreamingListener : public EmptyTestEventListener {
     void MakeConnection();
 
     // Closes the socket.
-    void CloseConnection() {
+    void CloseConnection() override {
       GTEST_CHECK_(sockfd_ != -1)
           << "CloseConnection() can be called only when there is a connection.";
 
@@ -1112,11 +1112,11 @@ class StreamingListener : public EmptyTestEventListener {
   explicit StreamingListener(AbstractSocketWriter* socket_writer)
       : socket_writer_(socket_writer) { Start(); }
 
-  void OnTestProgramStart(const UnitTest& /* unit_test */) {
+  void OnTestProgramStart(const UnitTest& /* unit_test */) override {
     SendLn("event=TestProgramStart");
   }
 
-  void OnTestProgramEnd(const UnitTest& unit_test) {
+  void OnTestProgramEnd(const UnitTest& unit_test) override {
     // Note that Google Test current only report elapsed time for each
     // test iteration, not for the entire test program.
     SendLn("event=TestProgramEnd&passed=" + FormatBool(unit_test.Passed()));
@@ -1125,39 +1125,41 @@ class StreamingListener : public EmptyTestEventListener {
     socket_writer_->CloseConnection();
   }
 
-  void OnTestIterationStart(const UnitTest& /* unit_test */, int iteration) {
+  void OnTestIterationStart(const UnitTest& /* unit_test */,
+                            int iteration) override {
     SendLn("event=TestIterationStart&iteration=" +
            StreamableToString(iteration));
   }
 
-  void OnTestIterationEnd(const UnitTest& unit_test, int /* iteration */) {
+  void OnTestIterationEnd(const UnitTest& unit_test,
+                          int /* iteration */) override {
     SendLn("event=TestIterationEnd&passed=" +
            FormatBool(unit_test.Passed()) + "&elapsed_time=" +
            StreamableToString(unit_test.elapsed_time()) + "ms");
   }
 
-  void OnTestCaseStart(const TestCase& test_case) {
+  void OnTestCaseStart(const TestCase& test_case) override {
     SendLn(std::string("event=TestCaseStart&name=") + test_case.name());
   }
 
-  void OnTestCaseEnd(const TestCase& test_case) {
+  void OnTestCaseEnd(const TestCase& test_case) override {
     SendLn("event=TestCaseEnd&passed=" + FormatBool(test_case.Passed())
            + "&elapsed_time=" + StreamableToString(test_case.elapsed_time())
            + "ms");
   }
 
-  void OnTestStart(const TestInfo& test_info) {
+  void OnTestStart(const TestInfo& test_info) override {
     SendLn(std::string("event=TestStart&name=") + test_info.name());
   }
 
-  void OnTestEnd(const TestInfo& test_info) {
+  void OnTestEnd(const TestInfo& test_info) override {
     SendLn("event=TestEnd&passed=" +
            FormatBool((test_info.result())->Passed()) +
            "&elapsed_time=" +
            StreamableToString((test_info.result())->elapsed_time()) + "ms");
   }
 
-  void OnTestPartResult(const TestPartResult& test_part_result) {
+  void OnTestPartResult(const TestPartResult& test_part_result) override {
     const char* file_name = test_part_result.file_name();
     if (file_name == nullptr) file_name = "";
     SendLn("event=TestPartResult&file=" + UrlEncode(file_name) +

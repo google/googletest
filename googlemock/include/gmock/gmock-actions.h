@@ -257,7 +257,7 @@ class DefaultValue {
   class FixedValueProducer : public ValueProducer {
    public:
     explicit FixedValueProducer(T value) : value_(value) {}
-    virtual T Produce() { return value_; }
+    T Produce() override { return value_; }
 
    private:
     const T value_;
@@ -268,7 +268,7 @@ class DefaultValue {
    public:
     explicit FactoryValueProducer(FactoryFunction factory)
         : factory_(factory) {}
-    virtual T Produce() { return factory_(); }
+    T Produce() override { return factory_(); }
 
    private:
     const FactoryFunction factory_;
@@ -472,7 +472,7 @@ class PolymorphicAction {
 
     explicit MonomorphicImpl(const Impl& impl) : impl_(impl) {}
 
-    virtual Result Perform(const ArgumentTuple& args) {
+    Result Perform(const ArgumentTuple& args) override {
       return impl_.template Perform<Result>(args);
     }
 
@@ -518,7 +518,7 @@ class ActionAdaptor : public ActionInterface<F1> {
 
   explicit ActionAdaptor(const Action<F2>& from) : impl_(from.impl_) {}
 
-  virtual Result Perform(const ArgumentTuple& args) {
+  Result Perform(const ArgumentTuple& args) override {
     return impl_->Perform(args);
   }
 
@@ -609,7 +609,7 @@ class ReturnAction {
         : value_before_cast_(*value),
           value_(ImplicitCast_<Result>(value_before_cast_)) {}
 
-    virtual Result Perform(const ArgumentTuple&) { return value_; }
+    Result Perform(const ArgumentTuple&) override { return value_; }
 
    private:
     GTEST_COMPILE_ASSERT_(!is_reference<Result>::value,
@@ -633,7 +633,7 @@ class ReturnAction {
     explicit Impl(const std::shared_ptr<R>& wrapper)
         : performed_(false), wrapper_(wrapper) {}
 
-    virtual Result Perform(const ArgumentTuple&) {
+    Result Perform(const ArgumentTuple&) override {
       GTEST_CHECK_(!performed_)
           << "A ByMove() action should only be performed once.";
       performed_ = true;
@@ -712,9 +712,7 @@ class ReturnRefAction {
 
     explicit Impl(T& ref) : ref_(ref) {}  // NOLINT
 
-    virtual Result Perform(const ArgumentTuple&) {
-      return ref_;
-    }
+    Result Perform(const ArgumentTuple&) override { return ref_; }
 
    private:
     T& ref_;
@@ -761,9 +759,7 @@ class ReturnRefOfCopyAction {
 
     explicit Impl(const T& value) : value_(value) {}  // NOLINT
 
-    virtual Result Perform(const ArgumentTuple&) {
-      return value_;
-    }
+    Result Perform(const ArgumentTuple&) override { return value_; }
 
    private:
     T value_;
@@ -973,7 +969,7 @@ class IgnoreResultAction {
 
     explicit Impl(const A& action) : action_(action) {}
 
-    virtual void Perform(const ArgumentTuple& args) {
+    void Perform(const ArgumentTuple& args) override {
       // Performs the action and ignores its result.
       action_.Perform(args);
     }
@@ -1048,7 +1044,7 @@ class DoBothAction {
     Impl(const Action<VoidResult>& action1, const Action<F>& action2)
         : action1_(action1), action2_(action2) {}
 
-    virtual Result Perform(const ArgumentTuple& args) {
+    Result Perform(const ArgumentTuple& args) override {
       action1_.Perform(args);
       return action2_.Perform(args);
     }
