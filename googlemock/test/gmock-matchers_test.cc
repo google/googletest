@@ -4821,6 +4821,17 @@ TEST(SizeIsTest, WorksWithReferences) {
   EXPECT_THAT(container, m);
 }
 
+// SizeIs should work for any type that provides a size() member function.
+// For example, a size_type member type should not need to be provided.
+struct MinimalistCustomType {
+  int size() const { return 1; }
+};
+TEST(SizeIsTest, WorksWithMinimalistCustomType) {
+  MinimalistCustomType container;
+  EXPECT_THAT(container, SizeIs(1));
+  EXPECT_THAT(container, Not(SizeIs(0)));
+}
+
 TEST(SizeIsTest, CanDescribeSelf) {
   Matcher<vector<int> > m = SizeIs(2);
   EXPECT_EQ("size is equal to 2", Describe(m));
