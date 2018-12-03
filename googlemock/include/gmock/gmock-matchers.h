@@ -1955,9 +1955,7 @@ class SizeIsMatcher {
   template <typename Container>
   class Impl : public MatcherInterface<Container> {
    public:
-    typedef internal::StlContainerView<
-         GTEST_REMOVE_REFERENCE_AND_CONST_(Container)> ContainerView;
-    typedef typename ContainerView::type::size_type SizeType;
+    using SizeType = decltype(std::declval<Container>().size());
     explicit Impl(const SizeMatcher& size_matcher)
         : size_matcher_(MatcherCast<SizeType>(size_matcher)) {}
 
