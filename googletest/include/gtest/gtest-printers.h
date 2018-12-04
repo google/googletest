@@ -125,6 +125,22 @@
 
 namespace testing {
 
+// create an alias for string_view, wherever it comes from
+#if GTEST_HAS_ABSL
+
+using absl::string_view;
+#define GTEST_HAS_STRING_VIEW 1
+
+#elif GTEST_HAS_STD_STRINGVIEW
+using std::string_view;
+#define GTEST_HAS_STRING_VIEW 1
+
+#else
+
+#define GTEST_HAS_STRING_VIEW 0
+
+#endif
+
 // Definitions in the 'internal' and 'internal2' name spaces are
 // subject to change without notice.  DO NOT USE THEM IN USER CODE!
 namespace internal2 {
@@ -141,9 +157,9 @@ enum TypeKind {
   kProtobuf,              // a protobuf type
   kConvertibleToInteger,  // a type implicitly convertible to BiggestInt
                           // (e.g. a named or unnamed enum type)
-#if GTEST_HAS_ABSL
+#if GTEST_HAS_STRING_VIEW
   kConvertibleToStringView,  // a type implicitly convertible to
-                             // absl::string_view
+                             // string_view
 #endif
   kOtherType  // anything else
 };
@@ -196,12 +212,12 @@ class TypeWithoutFormatter<T, kConvertibleToInteger> {
   }
 };
 
-#if GTEST_HAS_ABSL
+#if GTEST_HAS_STRING_VIEW
 template <typename T>
 class TypeWithoutFormatter<T, kConvertibleToStringView> {
  public:
   // Since T has neither operator<< nor PrintTo() but can be implicitly
-  // converted to absl::string_view, we print it as a absl::string_view.
+  // converted to string_view, we print it as a string_view.
   //
   // Note: the implementation is further below, as it depends on
   // internal::PrintTo symbol which is defined later in the file.
@@ -242,9 +258,9 @@ template <typename Char, typename CharTraits, typename T>
                                      const T&, internal::BiggestInt>::value
                                      ? kConvertibleToInteger
                                      :
-#if GTEST_HAS_ABSL
+#if GTEST_HAS_STRING_VIEW
                                      internal::ImplicitlyConvertible<
-                                         const T&, absl::string_view>::value
+                                         const T&, string_view>::value
                                          ? kConvertibleToStringView
                                          :
 #endif
@@ -636,19 +652,12 @@ inline void PrintTo(const ::std::wstring& s, ::std::ostream* os) {
 }
 #endif  // GTEST_HAS_STD_WSTRING
 
-#if GTEST_HAS_ABSL
-// Overload for absl::string_view.
-inline void PrintTo(absl::string_view sp, ::std::ostream* os) {
+#if GTEST_HAS_STRING_VIEW
+// Overload for string_view.
+inline void PrintTo(string_view sp, ::std::ostream* os) {
   PrintTo(::std::string(sp), os);
 }
-#endif  // GTEST_HAS_ABSL
-
-#if GTEST_HAS_STD_STRINGVIEW
-// Overload for std::string_view.
-inline void PrintTo(::std::string_view sp, ::std::ostream* os) {
-  PrintTo(::std::string(sp), os);
-}
-#endif  // GTEST_HAS_STD_STRINGVIEW
+#endif  // GTEST_HAS_STRING_VIEW
 
 #if GTEST_LANG_CXX11
 
@@ -1100,12 +1109,12 @@ Strings UniversalTersePrintTupleFieldsToStrings(const Tuple& value) {
 
 }  // namespace internal
 
-#if GTEST_HAS_ABSL
+#if GTEST_HAS_STRING_VIEW
 namespace internal2 {
 template <typename T>
 void TypeWithoutFormatter<T, kConvertibleToStringView>::PrintValue(
     const T& value, ::std::ostream* os) {
-  internal::PrintTo(absl::string_view(value), os);
+  internal::PrintTo(string_view(value), os);
 }
 }  // namespace internal2
 #endif
