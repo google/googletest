@@ -785,12 +785,16 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #  define GTEST_HAS_SEH 0
 # endif
 
-#define GTEST_IS_THREADSAFE \
-    (GTEST_HAS_MUTEX_AND_THREAD_LOCAL_ \
-     || (GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT) \
-     || GTEST_HAS_PTHREAD)
-
 #endif  // GTEST_HAS_SEH
+
+#ifndef GTEST_IS_THREADSAFE
+
+# define GTEST_IS_THREADSAFE \
+    ( GTEST_HAS_MUTEX_AND_THREAD_LOCAL_ \
+      || (GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT) \
+      || GTEST_HAS_PTHREAD)
+
+#endif // GTEST_IS_THREADSAFE
 
 // GTEST_API_ qualifies all symbols that must be exported. The definitions below
 // are guarded by #ifndef to give embedders a chance to define GTEST_API_ in
