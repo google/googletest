@@ -101,52 +101,52 @@ Matcher<::string>::Matcher(const ::string& s) { *this = Eq(s); }
 Matcher<::string>::Matcher(const char* s) { *this = Eq(::string(s)); }
 #endif  // GTEST_HAS_GLOBAL_STRING
 
-#if GTEST_HAS_ABSL
-// Constructs a matcher that matches a const absl::string_view& whose value is
+#if GTEST_HAS_STRING_VIEW
+// Constructs a matcher that matches a const string_view& whose value is
 // equal to s.
-Matcher<const absl::string_view&>::Matcher(const std::string& s) {
+Matcher<const string_view&>::Matcher(const std::string& s) {
   *this = Eq(s);
 }
 
 #if GTEST_HAS_GLOBAL_STRING
-// Constructs a matcher that matches a const absl::string_view& whose value is
+// Constructs a matcher that matches a const string_view& whose value is
 // equal to s.
-Matcher<const absl::string_view&>::Matcher(const ::string& s) { *this = Eq(s); }
+Matcher<const string_view&>::Matcher(const ::string& s) { *this = Eq(s); }
 #endif  // GTEST_HAS_GLOBAL_STRING
 
-// Constructs a matcher that matches a const absl::string_view& whose value is
+// Constructs a matcher that matches a const string_view& whose value is
 // equal to s.
-Matcher<const absl::string_view&>::Matcher(const char* s) {
+Matcher<const string_view&>::Matcher(const char* s) {
   *this = Eq(std::string(s));
 }
 
-// Constructs a matcher that matches a const absl::string_view& whose value is
+// Constructs a matcher that matches a const string_view& whose value is
 // equal to s.
-Matcher<const absl::string_view&>::Matcher(absl::string_view s) {
+Matcher<const string_view&>::Matcher(string_view s) {
   *this = Eq(std::string(s));
 }
 
-// Constructs a matcher that matches a absl::string_view whose value is equal to
+// Constructs a matcher that matches a string_view whose value is equal to
 // s.
-Matcher<absl::string_view>::Matcher(const std::string& s) { *this = Eq(s); }
+Matcher<string_view>::Matcher(const std::string& s) { *this = Eq(s); }
 
 #if GTEST_HAS_GLOBAL_STRING
-// Constructs a matcher that matches a absl::string_view whose value is equal to
+// Constructs a matcher that matches a string_view whose value is equal to
 // s.
-Matcher<absl::string_view>::Matcher(const ::string& s) { *this = Eq(s); }
+Matcher<string_view>::Matcher(const ::string& s) { *this = Eq(s); }
 #endif  // GTEST_HAS_GLOBAL_STRING
 
-// Constructs a matcher that matches a absl::string_view whose value is equal to
+// Constructs a matcher that matches a string_view whose value is equal to
 // s.
-Matcher<absl::string_view>::Matcher(const char* s) {
+Matcher<string_view>::Matcher(const char* s) {
   *this = Eq(std::string(s));
 }
 
-// Constructs a matcher that matches a absl::string_view whose value is equal to
+// Constructs a matcher that matches a string_view whose value is equal to
 // s.
-Matcher<absl::string_view>::Matcher(absl::string_view s) {
+Matcher<string_view>::Matcher(string_view s) {
   *this = Eq(std::string(s));
 }
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_HAS_STRING_VIEW
 
 }  // namespace testing
