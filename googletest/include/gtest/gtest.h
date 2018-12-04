@@ -53,12 +53,14 @@
 #define GTEST_INCLUDE_GTEST_GTEST_H_
 
 #include <limits>
+#include <memory>
 #include <ostream>
 #include <vector>
 
 #include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-string.h"
 #include "gtest/gtest-death-test.h"
+#include "gtest/gtest-matchers.h"
 #include "gtest/gtest-message.h"
 #include "gtest/gtest-param-test.h"
 #include "gtest/gtest-printers.h"
@@ -300,7 +302,8 @@ class GTEST_API_ AssertionResult {
       const T& success,
       typename internal::EnableIf<
           !internal::ImplicitlyConvertible<T, AssertionResult>::value>::type*
-          /*enabler*/ = NULL)
+      /*enabler*/
+      = nullptr)
       : success_(success) {}
 
 #if defined(_MSC_VER) && _MSC_VER < 1910
@@ -324,7 +327,7 @@ class GTEST_API_ AssertionResult {
   // assertion's expectation). When nothing has been streamed into the
   // object, returns an empty string.
   const char* message() const {
-    return message_.get() != NULL ?  message_->c_str() : "";
+    return message_.get() != nullptr ? message_->c_str() : "";
   }
   // FIXME: Remove this after making sure no clients use it.
   // Deprecated; please use message() instead.
@@ -347,8 +350,7 @@ class GTEST_API_ AssertionResult {
  private:
   // Appends the contents of message to message_.
   void AppendMessage(const Message& a_message) {
-    if (message_.get() == NULL)
-      message_.reset(new ::std::string);
+    if (message_.get() == nullptr) message_.reset(new ::std::string);
     message_->append(a_message.GetString().c_str());
   }
 
@@ -361,7 +363,7 @@ class GTEST_API_ AssertionResult {
   // construct is not satisfied with the predicate's outcome.
   // Referenced via a pointer to avoid taking too much stack frame space
   // with test assertions.
-  internal::scoped_ptr< ::std::string> message_;
+  std::unique_ptr< ::std::string> message_;
 };
 
 // Makes a successful assertion result.
@@ -493,7 +495,7 @@ class GTEST_API_ Test {
   // internal method to avoid clashing with names used in user TESTs.
   void DeleteSelf_() { delete this; }
 
-  const internal::scoped_ptr< GTEST_FLAG_SAVER_ > gtest_flag_saver_;
+  const std::unique_ptr<GTEST_FLAG_SAVER_> gtest_flag_saver_;
 
   // Often a user misspells SetUp() as Setup() and spends a long time
   // wondering why it is never called by Google Test.  The declaration of
@@ -512,7 +514,7 @@ class GTEST_API_ Test {
   // If you see an error about overriding the following function or
   // about it being private, you have mis-spelled SetUp() as Setup().
   struct Setup_should_be_spelled_SetUp {};
-  virtual Setup_should_be_spelled_SetUp* Setup() { return NULL; }
+  virtual Setup_should_be_spelled_SetUp* Setup() { return nullptr; }
 
   // We disallow copying Tests.
   GTEST_DISALLOW_COPY_AND_ASSIGN_(Test);
@@ -700,17 +702,15 @@ class GTEST_API_ TestInfo {
   // Returns the name of the parameter type, or NULL if this is not a typed
   // or a type-parameterized test.
   const char* type_param() const {
-    if (type_param_.get() != NULL)
-      return type_param_->c_str();
-    return NULL;
+    if (type_param_.get() != nullptr) return type_param_->c_str();
+    return nullptr;
   }
 
   // Returns the text representation of the value parameter, or NULL if this
   // is not a value-parameterized test.
   const char* value_param() const {
-    if (value_param_.get() != NULL)
-      return value_param_->c_str();
-    return NULL;
+    if (value_param_.get() != nullptr) return value_param_->c_str();
+    return nullptr;
   }
 
   // Returns the file name where this test is defined.
@@ -798,10 +798,10 @@ class GTEST_API_ TestInfo {
   const std::string name_;               // Test name
   // Name of the parameter type, or NULL if this is not a typed or a
   // type-parameterized test.
-  const internal::scoped_ptr<const ::std::string> type_param_;
+  const std::unique_ptr<const ::std::string> type_param_;
   // Text representation of the value parameter, or NULL if this is not a
   // value-parameterized test.
-  const internal::scoped_ptr<const ::std::string> value_param_;
+  const std::unique_ptr<const ::std::string> value_param_;
   internal::CodeLocation location_;
   const internal::TypeId fixture_class_id_;   // ID of the test fixture class
   bool should_run_;                 // True iff this test should run
@@ -849,9 +849,8 @@ class GTEST_API_ TestCase {
   // Returns the name of the parameter type, or NULL if this is not a
   // type-parameterized test case.
   const char* type_param() const {
-    if (type_param_.get() != NULL)
-      return type_param_->c_str();
-    return NULL;
+    if (type_param_.get() != nullptr) return type_param_->c_str();
+    return nullptr;
   }
 
   // Returns true if any test in this test case should run.
@@ -986,7 +985,7 @@ class GTEST_API_ TestCase {
   std::string name_;
   // Name of the parameter type, or NULL if this is not a typed or a
   // type-parameterized test.
-  const internal::scoped_ptr<const ::std::string> type_param_;
+  const std::unique_ptr<const ::std::string> type_param_;
   // The vector of TestInfos in their original order.  It owns the
   // elements in the vector.
   std::vector<TestInfo*> test_info_list_;
@@ -1038,7 +1037,7 @@ class Environment {
   // If you see an error about overriding the following function or
   // about it being private, you have mis-spelled SetUp() as Setup().
   struct Setup_should_be_spelled_SetUp {};
-  virtual Setup_should_be_spelled_SetUp* Setup() { return NULL; }
+  virtual Setup_should_be_spelled_SetUp* Setup() { return nullptr; }
 };
 
 #if GTEST_HAS_EXCEPTIONS
@@ -1112,21 +1111,21 @@ class TestEventListener {
 // above.
 class EmptyTestEventListener : public TestEventListener {
  public:
-  virtual void OnTestProgramStart(const UnitTest& /*unit_test*/) {}
-  virtual void OnTestIterationStart(const UnitTest& /*unit_test*/,
-                                    int /*iteration*/) {}
-  virtual void OnEnvironmentsSetUpStart(const UnitTest& /*unit_test*/) {}
-  virtual void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) {}
-  virtual void OnTestCaseStart(const TestCase& /*test_case*/) {}
-  virtual void OnTestStart(const TestInfo& /*test_info*/) {}
-  virtual void OnTestPartResult(const TestPartResult& /*test_part_result*/) {}
-  virtual void OnTestEnd(const TestInfo& /*test_info*/) {}
-  virtual void OnTestCaseEnd(const TestCase& /*test_case*/) {}
-  virtual void OnEnvironmentsTearDownStart(const UnitTest& /*unit_test*/) {}
-  virtual void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) {}
-  virtual void OnTestIterationEnd(const UnitTest& /*unit_test*/,
-                                  int /*iteration*/) {}
-  virtual void OnTestProgramEnd(const UnitTest& /*unit_test*/) {}
+  void OnTestProgramStart(const UnitTest& /*unit_test*/) override {}
+  void OnTestIterationStart(const UnitTest& /*unit_test*/,
+                            int /*iteration*/) override {}
+  void OnEnvironmentsSetUpStart(const UnitTest& /*unit_test*/) override {}
+  void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) override {}
+  void OnTestCaseStart(const TestCase& /*test_case*/) override {}
+  void OnTestStart(const TestInfo& /*test_info*/) override {}
+  void OnTestPartResult(const TestPartResult& /*test_part_result*/) override {}
+  void OnTestEnd(const TestInfo& /*test_info*/) override {}
+  void OnTestCaseEnd(const TestCase& /*test_case*/) override {}
+  void OnEnvironmentsTearDownStart(const UnitTest& /*unit_test*/) override {}
+  void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) override {}
+  void OnTestIterationEnd(const UnitTest& /*unit_test*/,
+                          int /*iteration*/) override {}
+  void OnTestProgramEnd(const UnitTest& /*unit_test*/) override {}
 };
 
 // TestEventListeners lets users add listeners to track events in Google Test.
@@ -1452,6 +1451,13 @@ AssertionResult CmpHelperEQFailure(const char* lhs_expression,
                    false);
 }
 
+// This block of code defines operator==/!=
+// to block lexical scope lookup.
+// It prevents using invalid operator==/!= defined at namespace scope.
+struct faketype {};
+inline bool operator==(faketype, faketype) { return true; }
+inline bool operator!=(faketype, faketype) { return false; }
+
 // The helper function for {ASSERT|EXPECT}_EQ.
 template <typename T1, typename T2>
 AssertionResult CmpHelperEQ(const char* lhs_expression,
@@ -1514,16 +1520,14 @@ class EqHelper<true> {
   // EXPECT_EQ(false, a_bool).
   template <typename T1, typename T2>
   static AssertionResult Compare(
-      const char* lhs_expression,
-      const char* rhs_expression,
-      const T1& lhs,
+      const char* lhs_expression, const char* rhs_expression, const T1& lhs,
       const T2& rhs,
       // The following line prevents this overload from being considered if T2
       // is not a pointer type.  We need this because ASSERT_EQ(NULL, my_ptr)
       // expands to Compare("", "", NULL, my_ptr), which requires a conversion
       // to match the Secret* in the other overload, which would otherwise make
       // this template match better.
-      typename EnableIf<!is_pointer<T2>::value>::type* = 0) {
+      typename EnableIf<!is_pointer<T2>::value>::type* = nullptr) {
     return CmpHelperEQ(lhs_expression, rhs_expression, lhs, rhs);
   }
 
@@ -1542,8 +1546,8 @@ class EqHelper<true> {
       Secret* /* lhs (NULL) */,
       T* rhs) {
     // We already know that 'lhs' is a null pointer.
-    return CmpHelperEQ(lhs_expression, rhs_expression,
-                       static_cast<T*>(NULL), rhs);
+    return CmpHelperEQ(lhs_expression, rhs_expression, static_cast<T*>(nullptr),
+                       rhs);
   }
 };
 
@@ -1772,6 +1776,12 @@ class GTEST_API_ AssertHelper {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(AssertHelper);
 };
 
+enum GTestColor { COLOR_DEFAULT, COLOR_RED, COLOR_GREEN, COLOR_YELLOW };
+
+GTEST_API_ GTEST_ATTRIBUTE_PRINTF_(2, 3) void ColoredPrintf(GTestColor color,
+                                                            const char* fmt,
+                                                            ...);
+
 }  // namespace internal
 
 // The pure interface class that all value-parameterized tests inherit from.
@@ -1815,12 +1825,9 @@ class WithParamInterface {
   virtual ~WithParamInterface() {}
 
   // The current parameter value. Is also available in the test fixture's
-  // constructor. This member function is non-static, even though it only
-  // references static data, to reduce the opportunity for incorrect uses
-  // like writing 'WithParamInterface<bool>::GetParam()' for a test that
-  // uses a fixture whose parameter type is int.
-  const ParamType& GetParam() const {
-    GTEST_CHECK_(parameter_ != NULL)
+  // constructor.
+  static const ParamType& GetParam() {
+    GTEST_CHECK_(parameter_ != nullptr)
         << "GetParam() can only be called inside a value-parameterized test "
         << "-- did you intend to write TEST_P instead of TEST_F?";
     return *parameter_;
@@ -1841,7 +1848,7 @@ class WithParamInterface {
 };
 
 template <typename T>
-const T* WithParamInterface<T>::parameter_ = NULL;
+const T* WithParamInterface<T>::parameter_ = nullptr;
 
 // Most value-parameterized classes can ignore the existence of
 // WithParamInterface, and can just inherit from ::testing::TestWithParam.

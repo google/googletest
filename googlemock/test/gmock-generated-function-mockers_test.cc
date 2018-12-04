@@ -46,13 +46,6 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-// There is a bug in MSVC (fixed in VS 2008) that prevents creating a
-// mock for a function with const arguments, so we don't test such
-// cases for MSVC versions older than 2008.
-#if !GTEST_OS_WINDOWS || (_MSC_VER >= 1500)
-# define GMOCK_ALLOWS_CONST_PARAM_FUNCTIONS
-#endif  // !GTEST_OS_WINDOWS || (_MSC_VER >= 1500)
-
 namespace testing {
 namespace gmock_generated_function_mockers_test {
 
@@ -85,9 +78,7 @@ class FooInterface {
 
   virtual bool TakesNonConstReference(int& n) = 0;  // NOLINT
   virtual std::string TakesConstReference(const int& n) = 0;
-#ifdef GMOCK_ALLOWS_CONST_PARAM_FUNCTIONS
   virtual bool TakesConst(const int x) = 0;
-#endif  // GMOCK_ALLOWS_CONST_PARAM_FUNCTIONS
 
   virtual int OverloadedOnArgumentNumber() = 0;
   virtual int OverloadedOnArgumentNumber(int n) = 0;
@@ -136,10 +127,7 @@ class MockFoo : public FooInterface {
 
   MOCK_METHOD1(TakesNonConstReference, bool(int&));  // NOLINT
   MOCK_METHOD1(TakesConstReference, std::string(const int&));
-
-#ifdef GMOCK_ALLOWS_CONST_PARAM_FUNCTIONS
   MOCK_METHOD1(TakesConst, bool(const int));  // NOLINT
-#endif
 
   // Tests that the function return type can contain unprotected comma.
   MOCK_METHOD0(ReturnTypeWithComma, std::map<int, std::string>());
@@ -224,11 +212,11 @@ TEST_F(FunctionMockerTest, MocksBinaryFunction) {
 
 // Tests mocking a decimal function.
 TEST_F(FunctionMockerTest, MocksDecimalFunction) {
-  EXPECT_CALL(mock_foo_, Decimal(true, 'a', 0, 0, 1L, A<float>(),
-                                 Lt(100), 5U, NULL, "hi"))
+  EXPECT_CALL(mock_foo_, Decimal(true, 'a', 0, 0, 1L, A<float>(), Lt(100), 5U,
+                                 nullptr, "hi"))
       .WillOnce(Return(5));
 
-  EXPECT_EQ(5, foo_->Decimal(true, 'a', 0, 0, 1, 0, 0, 5, NULL, "hi"));
+  EXPECT_EQ(5, foo_->Decimal(true, 'a', 0, 0, 1, 0, 0, 5, nullptr, "hi"));
 }
 
 // Tests mocking a function that takes a non-const reference.
@@ -249,7 +237,6 @@ TEST_F(FunctionMockerTest, MocksFunctionWithConstReferenceArgument) {
   EXPECT_EQ("Hello", foo_->TakesConstReference(a));
 }
 
-#ifdef GMOCK_ALLOWS_CONST_PARAM_FUNCTIONS
 // Tests mocking a function that takes a const variable.
 TEST_F(FunctionMockerTest, MocksFunctionWithConstArgument) {
   EXPECT_CALL(mock_foo_, TakesConst(Lt(10)))
@@ -257,7 +244,6 @@ TEST_F(FunctionMockerTest, MocksFunctionWithConstArgument) {
 
   EXPECT_FALSE(foo_->TakesConst(5));
 }
-#endif  // GMOCK_ALLOWS_CONST_PARAM_FUNCTIONS
 
 // Tests mocking functions overloaded on the number of arguments.
 TEST_F(FunctionMockerTest, MocksFunctionsOverloadedOnArgumentNumber) {
@@ -326,11 +312,11 @@ TEST_F(FunctionMockerTest, MocksUnaryFunctionWithCallType) {
 
 // Tests mocking a decimal function with calltype.
 TEST_F(FunctionMockerTest, MocksDecimalFunctionWithCallType) {
-  EXPECT_CALL(mock_foo_, CTDecimal(true, 'a', 0, 0, 1L, A<float>(),
-                                   Lt(100), 5U, NULL, "hi"))
+  EXPECT_CALL(mock_foo_, CTDecimal(true, 'a', 0, 0, 1L, A<float>(), Lt(100), 5U,
+                                   nullptr, "hi"))
       .WillOnce(Return(10));
 
-  EXPECT_EQ(10, foo_->CTDecimal(true, 'a', 0, 0, 1, 0, 0, 5, NULL, "hi"));
+  EXPECT_EQ(10, foo_->CTDecimal(true, 'a', 0, 0, 1, 0, 0, 5, nullptr, "hi"));
 }
 
 // Tests mocking functions overloaded on the const-ness of this object.

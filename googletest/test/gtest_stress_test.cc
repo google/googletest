@@ -45,7 +45,6 @@ namespace {
 using internal::Notification;
 using internal::TestPropertyKeyIs;
 using internal::ThreadWithParam;
-using internal::scoped_ptr;
 
 // In order to run tests in this file, for platforms where Google Test is
 // thread safe, implement ThreadWithParam. See the description of its API
@@ -119,7 +118,7 @@ void CheckTestFailureCount(int expected_failures) {
 // concurrently.
 TEST(StressTest, CanUseScopedTraceAndAssertionsInManyThreads) {
   {
-    scoped_ptr<ThreadWithParam<int> > threads[kThreadCount];
+    std::unique_ptr<ThreadWithParam<int> > threads[kThreadCount];
     Notification threads_can_start;
     for (int i = 0; i != kThreadCount; i++)
       threads[i].reset(new ThreadWithParam<int>(&ManyAsserts,
@@ -163,7 +162,7 @@ void FailingThread(bool is_fatal) {
 }
 
 void GenerateFatalFailureInAnotherThread(bool is_fatal) {
-  ThreadWithParam<bool> thread(&FailingThread, is_fatal, NULL);
+  ThreadWithParam<bool> thread(&FailingThread, is_fatal, nullptr);
   thread.Join();
 }
 

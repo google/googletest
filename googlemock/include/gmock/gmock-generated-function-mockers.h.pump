@@ -42,6 +42,8 @@ $var n = 10  $$ The maximum arity we support.
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_FUNCTION_MOCKERS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_FUNCTION_MOCKERS_H_
 
+#include <utility>
+
 #include "gmock/gmock-spec-builders.h"
 #include "gmock/internal/gmock-internal-utils.h"
 
@@ -52,49 +54,7 @@ $var n = 10  $$ The maximum arity we support.
 namespace testing {
 namespace internal {
 
-template <typename F>
-class FunctionMockerBase;
-
-// Note: class FunctionMocker really belongs to the ::testing
-// namespace.  However if we define it in ::testing, MSVC will
-// complain when classes in ::testing::internal declare it as a
-// friend class template.  To workaround this compiler bug, we define
-// FunctionMocker in ::testing::internal and import it into ::testing.
-template <typename F>
-class FunctionMocker;
-
-
 $range i 0..n
-$for i [[
-$range j 1..i
-$var typename_As = [[$for j [[, typename A$j]]]]
-$var As = [[$for j, [[A$j]]]]
-$var as = [[$for j, [[internal::forward<A$j>(a$j)]]]]
-$var Aas = [[$for j, [[A$j a$j]]]]
-$var ms = [[$for j, [[m$j]]]]
-$var matchers = [[$for j, [[const Matcher<A$j>& m$j]]]]
-template <typename R$typename_As>
-class FunctionMocker<R($As)> : public
-    internal::FunctionMockerBase<R($As)> {
- public:
-  typedef R F($As);
-  typedef typename internal::Function<F>::ArgumentTuple ArgumentTuple;
-
-  MockSpec<F> With($matchers) {
-    return MockSpec<F>(this, ::testing::make_tuple($ms));
-  }
-
-  R Invoke($Aas) {
-    // Even though gcc and MSVC don't enforce it, 'this->' is required
-    // by the C++ standard [14.6.4] here, as the base class type is
-    // dependent on the template argument (and thus shouldn't be
-    // looked into when resolving InvokeWith).
-    return this->InvokeWith(ArgumentTuple($as));
-  }
-};
-
-
-]]
 // Removes the given pointer; this is a helper for the expectation setter method
 // for parameterless matchers.
 //
@@ -184,7 +144,7 @@ $for i [[
 $range j 1..i
 $var arg_as = [[$for j, [[GMOCK_ARG_(tn, $j, __VA_ARGS__) gmock_a$j]]]]
 $var as = [[$for j, \
-  [[::testing::internal::forward<GMOCK_ARG_(tn, $j, __VA_ARGS__)>(gmock_a$j)]]]]
+  [[::std::forward<GMOCK_ARG_(tn, $j, __VA_ARGS__)>(gmock_a$j)]]]]
 $var matcher_arg_as = [[$for j, \
                      [[GMOCK_MATCHER_(tn, $j, __VA_ARGS__) gmock_a$j]]]]
 $var matcher_as = [[$for j, [[gmock_a$j]]]]
@@ -194,7 +154,7 @@ $var anything_matchers = [[$for j, \
 #define GMOCK_METHOD$i[[]]_(tn, constness, ct, Method, ...) \
   GMOCK_RESULT_(tn, __VA_ARGS__) ct Method( \
       $arg_as) constness { \
-    GTEST_COMPILE_ASSERT_((::testing::tuple_size<                          \
+    GTEST_COMPILE_ASSERT_((::std::tuple_size<                          \
         tn ::testing::internal::Function<__VA_ARGS__>::ArgumentTuple>::value == $i), \
         this_method_does_not_take_$i[[]]_argument[[$if i != 1 [[s]]]]); \
     GMOCK_MOCKER_($i, constness, Method).SetOwnerAndName(this, #Method); \
@@ -267,82 +227,6 @@ $for i [[
 
 ]]
 
-// A MockFunction<F> class has one mock method whose type is F.  It is
-// useful when you just want your test code to emit some messages and
-// have Google Mock verify the right messages are sent (and perhaps at
-// the right times).  For example, if you are exercising code:
-//
-//   Foo(1);
-//   Foo(2);
-//   Foo(3);
-//
-// and want to verify that Foo(1) and Foo(3) both invoke
-// mock.Bar("a"), but Foo(2) doesn't invoke anything, you can write:
-//
-// TEST(FooTest, InvokesBarCorrectly) {
-//   MyMock mock;
-//   MockFunction<void(string check_point_name)> check;
-//   {
-//     InSequence s;
-//
-//     EXPECT_CALL(mock, Bar("a"));
-//     EXPECT_CALL(check, Call("1"));
-//     EXPECT_CALL(check, Call("2"));
-//     EXPECT_CALL(mock, Bar("a"));
-//   }
-//   Foo(1);
-//   check.Call("1");
-//   Foo(2);
-//   check.Call("2");
-//   Foo(3);
-// }
-//
-// The expectation spec says that the first Bar("a") must happen
-// before check point "1", the second Bar("a") must happen after check
-// point "2", and nothing should happen between the two check
-// points. The explicit check points make it easy to tell which
-// Bar("a") is called by which call to Foo().
-//
-// MockFunction<F> can also be used to exercise code that accepts
-// std::function<F> callbacks. To do so, use AsStdFunction() method
-// to create std::function proxy forwarding to original object's Call.
-// Example:
-//
-// TEST(FooTest, RunsCallbackWithBarArgument) {
-//   MockFunction<int(string)> callback;
-//   EXPECT_CALL(callback, Call("bar")).WillOnce(Return(1));
-//   Foo(callback.AsStdFunction());
-// }
-template <typename F>
-class MockFunction;
-
-
-$for i [[
-$range j 0..i-1
-$var ArgTypes = [[$for j, [[A$j]]]]
-$var ArgValues = [[$for j, [[::std::forward<A$j>(a$j)]]]]
-$var ArgDecls = [[$for j, [[A$j a$j]]]]
-template <typename R$for j [[, typename A$j]]>
-class MockFunction<R($ArgTypes)> {
- public:
-  MockFunction() {}
-
-  MOCK_METHOD$i[[]]_T(Call, R($ArgTypes));
-
-#if GTEST_HAS_STD_FUNCTION_
-  ::std::function<R($ArgTypes)> AsStdFunction() {
-    return [this]($ArgDecls) -> R {
-      return this->Call($ArgValues);
-    };
-  }
-#endif  // GTEST_HAS_STD_FUNCTION_
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFunction);
-};
-
-
-]]
 }  // namespace testing
 
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_FUNCTION_MOCKERS_H_

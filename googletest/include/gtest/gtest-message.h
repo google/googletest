@@ -48,6 +48,7 @@
 #define GTEST_INCLUDE_GTEST_GTEST_MESSAGE_H_
 
 #include <limits>
+#include <memory>
 
 #include "gtest/internal/gtest-port.h"
 
@@ -151,7 +152,7 @@ class GTEST_API_ Message {
   // as "(null)".
   template <typename T>
   inline Message& operator <<(T* const& pointer) {  // NOLINT
-    if (pointer == NULL) {
+    if (pointer == nullptr) {
       *ss_ << "(null)";
     } else {
       *ss_ << pointer;
@@ -207,7 +208,7 @@ class GTEST_API_ Message {
   // tr1::type_traits-like is_pointer works, and we can overload on that.
   template <typename T>
   inline void StreamHelper(internal::true_type /*is_pointer*/, T* pointer) {
-    if (pointer == NULL) {
+    if (pointer == nullptr) {
       *ss_ << "(null)";
     } else {
       *ss_ << pointer;
@@ -224,7 +225,7 @@ class GTEST_API_ Message {
 #endif  // GTEST_OS_SYMBIAN
 
   // We'll hold the text streamed to this object here.
-  const internal::scoped_ptr< ::std::stringstream> ss_;
+  const std::unique_ptr< ::std::stringstream> ss_;
 
   // We declare (but don't implement) this to prevent the compiler
   // from implementing the assignment operator.

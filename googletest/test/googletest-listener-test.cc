@@ -47,7 +47,7 @@ using ::testing::TestPartResult;
 using ::testing::UnitTest;
 
 // Used by tests to register their events.
-std::vector<std::string>* g_events = NULL;
+std::vector<std::string>* g_events = nullptr;
 
 namespace testing {
 namespace internal {
@@ -57,63 +57,63 @@ class EventRecordingListener : public TestEventListener {
   explicit EventRecordingListener(const char* name) : name_(name) {}
 
  protected:
-  virtual void OnTestProgramStart(const UnitTest& /*unit_test*/) {
+  void OnTestProgramStart(const UnitTest& /*unit_test*/) override {
     g_events->push_back(GetFullMethodName("OnTestProgramStart"));
   }
 
-  virtual void OnTestIterationStart(const UnitTest& /*unit_test*/,
-                                    int iteration) {
+  void OnTestIterationStart(const UnitTest& /*unit_test*/,
+                            int iteration) override {
     Message message;
     message << GetFullMethodName("OnTestIterationStart")
             << "(" << iteration << ")";
     g_events->push_back(message.GetString());
   }
 
-  virtual void OnEnvironmentsSetUpStart(const UnitTest& /*unit_test*/) {
+  void OnEnvironmentsSetUpStart(const UnitTest& /*unit_test*/) override {
     g_events->push_back(GetFullMethodName("OnEnvironmentsSetUpStart"));
   }
 
-  virtual void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) {
+  void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) override {
     g_events->push_back(GetFullMethodName("OnEnvironmentsSetUpEnd"));
   }
 
-  virtual void OnTestCaseStart(const TestCase& /*test_case*/) {
+  void OnTestCaseStart(const TestCase& /*test_case*/) override {
     g_events->push_back(GetFullMethodName("OnTestCaseStart"));
   }
 
-  virtual void OnTestStart(const TestInfo& /*test_info*/) {
+  void OnTestStart(const TestInfo& /*test_info*/) override {
     g_events->push_back(GetFullMethodName("OnTestStart"));
   }
 
-  virtual void OnTestPartResult(const TestPartResult& /*test_part_result*/) {
+  void OnTestPartResult(const TestPartResult& /*test_part_result*/) override {
     g_events->push_back(GetFullMethodName("OnTestPartResult"));
   }
 
-  virtual void OnTestEnd(const TestInfo& /*test_info*/) {
+  void OnTestEnd(const TestInfo& /*test_info*/) override {
     g_events->push_back(GetFullMethodName("OnTestEnd"));
   }
 
-  virtual void OnTestCaseEnd(const TestCase& /*test_case*/) {
+  void OnTestCaseEnd(const TestCase& /*test_case*/) override {
     g_events->push_back(GetFullMethodName("OnTestCaseEnd"));
   }
 
-  virtual void OnEnvironmentsTearDownStart(const UnitTest& /*unit_test*/) {
+  void OnEnvironmentsTearDownStart(const UnitTest& /*unit_test*/) override {
     g_events->push_back(GetFullMethodName("OnEnvironmentsTearDownStart"));
   }
 
-  virtual void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) {
+  void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) override {
     g_events->push_back(GetFullMethodName("OnEnvironmentsTearDownEnd"));
   }
 
-  virtual void OnTestIterationEnd(const UnitTest& /*unit_test*/,
-                                  int iteration) {
+  void OnTestIterationEnd(const UnitTest& /*unit_test*/,
+                          int iteration) override {
     Message message;
     message << GetFullMethodName("OnTestIterationEnd")
             << "("  << iteration << ")";
     g_events->push_back(message.GetString());
   }
 
-  virtual void OnTestProgramEnd(const UnitTest& /*unit_test*/) {
+  void OnTestProgramEnd(const UnitTest& /*unit_test*/) override {
     g_events->push_back(GetFullMethodName("OnTestProgramEnd"));
   }
 
@@ -127,13 +127,9 @@ class EventRecordingListener : public TestEventListener {
 
 class EnvironmentInvocationCatcher : public Environment {
  protected:
-  virtual void SetUp() {
-    g_events->push_back("Environment::SetUp");
-  }
+  void SetUp() override { g_events->push_back("Environment::SetUp"); }
 
-  virtual void TearDown() {
-    g_events->push_back("Environment::TearDown");
-  }
+  void TearDown() override { g_events->push_back("Environment::TearDown"); }
 };
 
 class ListenerTest : public Test {
@@ -146,13 +142,9 @@ class ListenerTest : public Test {
     g_events->push_back("ListenerTest::TearDownTestCase");
   }
 
-  virtual void SetUp() {
-    g_events->push_back("ListenerTest::SetUp");
-  }
+  void SetUp() override { g_events->push_back("ListenerTest::SetUp"); }
 
-  virtual void TearDown() {
-    g_events->push_back("ListenerTest::TearDown");
-  }
+  void TearDown() override { g_events->push_back("ListenerTest::TearDown"); }
 };
 
 TEST_F(ListenerTest, DoesFoo) {

@@ -55,7 +55,7 @@ class CommonTest : public Test {
 
   static void TearDownTestCase() {
     delete shared_;
-    shared_ = NULL;
+    shared_ = nullptr;
   }
 
   // This 'protected:' is optional.  There's no harm in making all
@@ -68,14 +68,14 @@ class CommonTest : public Test {
 
   CommonTest() : value_(1) {}
 
-  virtual ~CommonTest() { EXPECT_EQ(3, value_); }
+  ~CommonTest() override { EXPECT_EQ(3, value_); }
 
-  virtual void SetUp() {
+  void SetUp() override {
     EXPECT_EQ(1, value_);
     value_++;
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     EXPECT_EQ(2, value_);
     value_++;
   }
@@ -85,7 +85,7 @@ class CommonTest : public Test {
 };
 
 template <typename T>
-T* CommonTest<T>::shared_ = NULL;
+T* CommonTest<T>::shared_ = nullptr;
 
 // This #ifdef block tests typed tests.
 #if GTEST_HAS_TYPED_TEST
@@ -121,7 +121,7 @@ TYPED_TEST(CommonTest, ValuesAreCorrect) {
 TYPED_TEST(CommonTest, ValuesAreStillCorrect) {
   // Static members of the fixture class template can also be visited
   // via 'this'.
-  ASSERT_TRUE(this->shared_ != NULL);
+  ASSERT_TRUE(this->shared_ != nullptr);
   EXPECT_EQ(5, *this->shared_);
 
   // TypeParam can be used to refer to the type parameter.
@@ -215,7 +215,7 @@ using testing::internal::TypedTestCasePState;
 
 class TypedTestCasePStateTest : public Test {
  protected:
-  virtual void SetUp() {
+  void SetUp() override {
     state_.AddTestName("foo.cc", 0, "FooTest", "A");
     state_.AddTestName("foo.cc", 0, "FooTest", "B");
     state_.AddTestName("foo.cc", 0, "FooTest", "C");
@@ -292,7 +292,7 @@ TYPED_TEST_P(DerivedTest, ValuesAreCorrect) {
 TYPED_TEST_P(DerivedTest, ValuesAreStillCorrect) {
   // Static members of the fixture class template can also be visited
   // via 'this'.
-  ASSERT_TRUE(this->shared_ != NULL);
+  ASSERT_TRUE(this->shared_ != nullptr);
   EXPECT_EQ(5, *this->shared_);
   EXPECT_EQ(2, this->value_);
 }

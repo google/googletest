@@ -26,7 +26,7 @@ If you are a Googler, you can either create an internal change or work on GitHub
 ## Contributing A Patch
 
 1. Submit an issue describing your proposed change to the
-   [issue tracker](https://github.com/google/googletest).
+   [issue tracker](https://github.com/abseil/googletest).
 1. Please don't mix more than one logical change per submittal,
    because it makes the history hard to follow. If you want to make a
    change that doesn't have a corresponding issue in the issue
@@ -79,7 +79,7 @@ itself is a valuable contribution.
 To keep the source consistent, readable, diffable and easy to merge,
 we use a fairly rigid coding style, as defined by the [google-styleguide](https://github.com/google/styleguide) project.  All patches will be expected
 to conform to the style outlined [here](https://google.github.io/styleguide/cppguide.html). 
-Use [.clang-format](https://github.com/google/googletest/blob/master/.clang-format) to check your formatting
+Use [.clang-format](https://github.com/abseil/googletest/blob/master/.clang-format) to check your formatting
 
 ## Requirements for Contributors ###
 

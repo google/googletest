@@ -66,7 +66,7 @@ TEST(MyString, DefaultConstructor) {
   // we have to live with this fact.
   //
   // </TechnicalDetails>
-  EXPECT_STREQ(NULL, s.c_string());
+  EXPECT_STREQ(nullptr, s.c_string());
 
   EXPECT_EQ(0u, s.Length());
 }
@@ -101,7 +101,7 @@ TEST(MyString, Set) {
   EXPECT_EQ(0, strcmp(s.c_string(), kHelloString));
 
   // Can we set the MyString to NULL?
-  s.Set(NULL);
-  EXPECT_STREQ(NULL, s.c_string());
+  s.Set(nullptr);
+  EXPECT_STREQ(nullptr, s.c_string());
 }
 }  // namespace
