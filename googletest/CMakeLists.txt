@@ -187,6 +187,20 @@ if (gtest_build_tests)
   # 'make test' or ctest.
   enable_testing()
 
+  if (WIN32)
+    file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/RunTest.ps1"
+         CONTENT
+"$project_bin = \"${CMAKE_BINARY_DIR}/bin/$<CONFIG>\"
+$env:Path = \"$project_bin;$env:Path\"
+& $args")
+  elseif (MINGW)
+    file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/RunTest.ps1"
+         CONTENT
+"$project_bin = (cygpath --windows ${CMAKE_BINARY_DIR}/bin)
+$env:Path = \"$project_bin;$env:Path\"
+& $args")
+  endif()
+
   ############################################################
   # C++ tests built with standard compiler flags.
 
@@ -217,6 +231,7 @@ if (gtest_build_tests)
     test/gtest-typed-test2_test.cc)
   cxx_test(gtest_unittest gtest_main)
   cxx_test(gtest-unittest-api_test gtest)
+  cxx_test(gtest_skip_test gtest_main)
 
   ############################################################
   # C++ tests built with non-standard compiler flags.
