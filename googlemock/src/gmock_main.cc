@@ -32,6 +32,20 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#ifdef ARDUINO
+void setup() {
+  int argc = 0;
+  char** argv = nullptr;
+   // Since Google Mock depends on Google Test, InitGoogleMock() is
+  // also responsible for initializing Google Test.  Therefore there's
+  // no need for calling testing::InitGoogleTest() separately.
+  testing::InitGoogleMock(&argc, argv);
+}
+void loop() {
+  RUN_ALL_TESTS();
+}
+#else
+
 // MS C++ compiler/linker has a bug on Windows (not on Windows CE), which
 // causes a link error when _tmain is defined in a static library and UNICODE
 // is enabled. For this reason instead of _tmain, main function is used on
@@ -52,3 +66,5 @@ GTEST_API_ int main(int argc, char** argv) {
   testing::InitGoogleMock(&argc, argv);
   return RUN_ALL_TESTS();
 }
+#endif
+  
