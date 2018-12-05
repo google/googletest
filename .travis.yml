@@ -11,6 +11,12 @@ language: cpp
 matrix:
   include:
     - os: linux
+      dist: trusty
+      sudo: required
+      group: deprecated-2017Q3
+      install: ./ci/install-platformio.sh
+      script: ./ci/build-platformio.sh      
+    - os: linux
       compiler: gcc
       sudo : true
       install: ./ci/install-linux.sh && ./ci/log-config.sh
