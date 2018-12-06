@@ -14,6 +14,7 @@ matrix:
       dist: trusty
       sudo: required
       group: deprecated-2017Q3
+      before_install: chmod -R +x ./ci/*platformio.sh 
       install: ./ci/install-platformio.sh
       script: ./ci/build-platformio.sh      
     - os: linux
