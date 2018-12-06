@@ -14,6 +14,7 @@ matrix:
       dist: trusty
       sudo: required
       group: deprecated-2017Q3
+      before_install: chmod -R +x ./ci/*platformio.sh 
       install: ./ci/install-platformio.sh
       script: ./ci/build-platformio.sh      
     - os: linux
@@ -49,9 +50,6 @@ matrix:
     - os: osx
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
       if: type != pull_request
-
-before_install:
-    - chmod -R +x ./ci/*.sh 
 
 # These are the install and build (script) phases for the most common entries in the matrix.  They could be included
 # in each entry in the matrix, but that is just repetitive.
