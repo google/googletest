@@ -2127,6 +2127,32 @@ struct IteratorTraits<const T*> {
   typedef T value_type;
 };
 
+// remove const and reference qualifier
+template <typename T>
+struct remove_constref {
+  typedef T type;
+};
+template <typename T>
+struct remove_constref<T&> {
+  typedef T type;
+};
+template <typename T>
+struct remove_constref<T&&> {
+  typedef T type;
+};
+template <typename T>
+struct remove_constref<const T> {
+  typedef T type;
+};
+template <typename T>
+struct remove_constref<const T&> {
+  typedef T type;
+};
+template <typename T>
+struct remove_constref<const T&&> {
+  typedef T type;
+};
+
 #if GTEST_OS_WINDOWS
 # define GTEST_PATH_SEP_ "\\"
 # define GTEST_HAS_ALT_PATH_SEP_ 1
