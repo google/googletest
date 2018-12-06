@@ -967,45 +967,40 @@ struct IsHashTable {
 template <typename T>
 const bool IsHashTable<T>::value;
 
-template<typename T>
-struct VoidT {
-    typedef void value_type;
-};
-
-template <typename T, typename = void>
-struct HasValueType : false_type {};
-template <typename T>
-struct HasValueType<T, VoidT<typename T::value_type> > : true_type {
-};
-
 template <typename C,
-          bool = sizeof(IsContainerTest<C>(0)) == sizeof(IsContainer),
-          bool = HasValueType<C>::value>
+          bool = sizeof(IsContainerTest<C>(0)) == sizeof(IsContainer)>
 struct IsRecursiveContainerImpl;
 
-template <typename C, bool HV>
-struct IsRecursiveContainerImpl<C, false, HV> : public false_type {};
+template <typename C>
+struct IsRecursiveContainerImpl<C, false> : public false_type {};
 
 // Since the IsRecursiveContainerImpl depends on the IsContainerTest we need to
 // obey the same inconsistencies as the IsContainerTest, namely check if
 // something is a container is relying on only const_iterator in C++11 and
 // is relying on both const_iterator and iterator otherwise
 template <typename C>
-struct IsRecursiveContainerImpl<C, true, false> : public false_type {};
-
-template <typename C>
-struct IsRecursiveContainerImpl<C, true, true> {
-  typedef typename IteratorTraits<typename C::const_iterator>::value_type
+struct IsRecursiveContainerImpl<C, true> {
+  typedef decltype(*std::declval<typename C::const_iterator>())
       value_type;
-  typedef is_same<value_type, C> type;
+  typedef is_same<
+    typename remove_constref<value_type>::type,
+    C
+  > type;
 };
 
 // IsRecursiveContainer<Type> is a unary compile-time predicate that
 // evaluates whether C is a recursive container type. A recursive container
-// type is a container type whose value_type is equal to the container type
-// itself. An example for a recursive container type is
-// boost::filesystem::path, whose iterator has a value_type that is equal to
-// boost::filesystem::path.
+// type is a container type which satisfy the following condition.
+//
+//   is_same<
+//     remove_const_t<remove_reference_t<
+//       *(typename type::const_iterator)()
+//     >>,
+//     type,
+//   >::value == true
+//
+// An example for a recursive container type is boost::filesystem::path,
+// whose iterator has a value_type that is equal to boost::filesystem::path.
 template <typename C>
 struct IsRecursiveContainer : public IsRecursiveContainerImpl<C>::type {};
 
