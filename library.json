@@ -8,7 +8,7 @@
     "type": "git",
     "url": "https://github.com/abseil/googletest.git"
   },
-  "version": "0.0.1",
+  "version": "1.8.1",
   "exclude": [
     "ci",
     "googlemock/build-aux",
