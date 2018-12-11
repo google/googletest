@@ -85,6 +85,7 @@ using std::pair;
 using std::set;
 using std::stringstream;
 using std::vector;
+using testing::_;
 using testing::A;
 using testing::AllArgs;
 using testing::AllOf;
@@ -110,12 +111,12 @@ using testing::Le;
 using testing::Lt;
 using testing::MakeMatcher;
 using testing::MakePolymorphicMatcher;
-using testing::MatchResultListener;
 using testing::Matcher;
 using testing::MatcherCast;
 using testing::MatcherInterface;
 using testing::Matches;
 using testing::MatchesRegex;
+using testing::MatchResultListener;
 using testing::NanSensitiveDoubleEq;
 using testing::NanSensitiveDoubleNear;
 using testing::NanSensitiveFloatEq;
@@ -135,15 +136,14 @@ using testing::StartsWith;
 using testing::StrCaseEq;
 using testing::StrCaseNe;
 using testing::StrEq;
-using testing::StrNe;
 using testing::StringMatchResultListener;
+using testing::StrNe;
 using testing::Truly;
 using testing::TypedEq;
 using testing::UnorderedPointwise;
 using testing::Value;
 using testing::WhenSorted;
 using testing::WhenSortedBy;
-using testing::_;
 using testing::internal::DummyMatchResultListener;
 using testing::internal::ElementMatcherPair;
 using testing::internal::ElementMatcherPairs;
@@ -152,10 +152,11 @@ using testing::internal::FloatingEqMatcher;
 using testing::internal::FormatMatcherDescription;
 using testing::internal::IsReadableTypeName;
 using testing::internal::MatchMatrix;
+using testing::internal::PredicateFormatterFromMatcher;
 using testing::internal::RE;
 using testing::internal::StreamMatchResultListener;
-using testing::internal::Strings;
 using testing::internal::string;
+using testing::internal::Strings;
 
 // For testing ExplainMatchResultTo().
 class GreaterThanMatcher : public MatcherInterface<int> {
@@ -4932,7 +4933,7 @@ TYPED_TEST(ContainerEqTest, DuplicateDifference) {
 }
 #endif  // GTEST_HAS_TYPED_TEST
 
-// Tests that mutliple missing values are reported.
+// Tests that multiple missing values are reported.
 // Using just vector here, so order is predictable.
 TEST(ContainerEqExtraTest, MultipleValuesMissing) {
   static const int vals[] = {1, 1, 2, 3, 5, 8};
@@ -6908,6 +6909,88 @@ TEST(ArgsTest, ExplainsMatchResultWithInnerExplanation) {
       Explain(m, std::make_tuple('a', 42, 42)));
   EXPECT_EQ("whose fields (#0, #2) are ('\\0', 43)",
             Explain(m, std::make_tuple('\0', 42, 43)));
+}
+
+class PredicateFormatterFromMatcherTest : public ::testing::Test {
+ protected:
+  enum Behavior { kInitialSuccess, kAlwaysFail, kFlaky };
+
+  // A matcher that can return different results when used multiple times on the
+  // same input. No real matcher should do this; but this lets us test that we
+  // detect such behavior and fail appropriately.
+  class MockMatcher : public MatcherInterface<Behavior> {
+   public:
+    bool MatchAndExplain(Behavior behavior,
+                         MatchResultListener* listener) const override {
+      *listener << "[MatchAndExplain]";
+      switch (behavior) {
+        case kInitialSuccess:
+          // The first call to MatchAndExplain should use a "not interested"
+          // listener; so this is expected to return |true|. There should be no
+          // subsequent calls.
+          return !listener->IsInterested();
+
+        case kAlwaysFail:
+          return false;
+
+        case kFlaky:
+          // The first call to MatchAndExplain should use a "not interested"
+          // listener; so this will return |false|. Subsequent calls should have
+          // an "interested" listener; so this will return |true|, thus
+          // simulating a flaky matcher.
+          return listener->IsInterested();
+      }
+
+      GTEST_LOG_(FATAL) << "This should never be reached";
+      return false;
+    }
+
+    void DescribeTo(ostream* os) const override { *os << "[DescribeTo]"; }
+
+    void DescribeNegationTo(ostream* os) const override {
+      *os << "[DescribeNegationTo]";
+    }
+  };
+
+  AssertionResult RunPredicateFormatter(Behavior behavior) {
+    auto matcher = MakeMatcher(new MockMatcher);
+    PredicateFormatterFromMatcher<Matcher<Behavior>> predicate_formatter(
+        matcher);
+    return predicate_formatter("dummy-name", behavior);
+  }
+
+  const std::string kMatcherType =
+      "testing::gmock_matchers_test::PredicateFormatterFromMatcherTest::"
+      "Behavior";
+};
+
+TEST_F(PredicateFormatterFromMatcherTest, ShortCircuitOnSuccess) {
+  AssertionResult result = RunPredicateFormatter(kInitialSuccess);
+  EXPECT_TRUE(result);  // Implicit cast to bool.
+  std::string expect;
+  EXPECT_EQ(expect, result.message());
+}
+
+TEST_F(PredicateFormatterFromMatcherTest, NoShortCircuitOnFailure) {
+  AssertionResult result = RunPredicateFormatter(kAlwaysFail);
+  EXPECT_FALSE(result);  // Implicit cast to bool.
+  std::string expect =
+      "Value of: dummy-name\nExpected: [DescribeTo]\n"
+      "  Actual: 1" +
+      OfType(kMatcherType) + ", [MatchAndExplain]";
+  EXPECT_EQ(expect, result.message());
+}
+
+TEST_F(PredicateFormatterFromMatcherTest, DetectsFlakyShortCircuit) {
+  AssertionResult result = RunPredicateFormatter(kFlaky);
+  EXPECT_FALSE(result);  // Implicit cast to bool.
+  std::string expect =
+      "Value of: dummy-name\nExpected: [DescribeTo]\n"
+      "  The matcher failed on the initial attempt; but passed when rerun to "
+      "generate the explanation.\n"
+      "  Actual: 2" +
+      OfType(kMatcherType) + ", [MatchAndExplain]";
+  EXPECT_EQ(expect, result.message());
 }
 
 }  // namespace gmock_matchers_test
