@@ -278,13 +278,6 @@ cc_binary(
     deps = ["//:gtest"],
 )
 
-cc_test(
-    name = "gtest_skip_test",
-    size = "small",
-    srcs = ["gtest_skip_test.cc"],
-    deps = ["//:gtest_main"],
-)
-
 py_test(
     name = "googletest-list-tests-unittest",
     size = "small",
