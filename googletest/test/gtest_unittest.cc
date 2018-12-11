@@ -7547,3 +7547,30 @@ TEST_F(AdHocTestResultTest, AdHocTestResultTestForUnitTestDoesNotShowFailure) {
       testing::UnitTest::GetInstance()->ad_hoc_test_result();
   EXPECT_FALSE(test_result.Failed());
 }
+
+class DynamicUnitTestFixture : public testing::Test {};
+
+class DynamicTest : public DynamicUnitTestFixture {
+  void TestBody() override { EXPECT_TRUE(true); }
+};
+
+auto* dynamic_test = testing::RegisterTest(
+    "DynamicUnitTestFixture", "DynamicTest", "TYPE", "VALUE", __FILE__,
+    __LINE__, []() -> DynamicUnitTestFixture* { return new DynamicTest; });
+
+TEST(RegisterTest, WasRegistered) {
+  auto* unittest = testing::UnitTest::GetInstance();
+  for (size_t i = 0; i < unittest->total_test_case_count(); ++i) {
+    auto* tests = unittest->GetTestCase(i);
+    if (tests->name() != std::string("DynamicUnitTestFixture")) continue;
+    for (size_t j = 0; j < tests->total_test_count(); ++j) {
+      if (tests->GetTestInfo(j)->name() != std::string("DynamicTest")) continue;
+      // Found it.
+      EXPECT_STREQ(tests->GetTestInfo(j)->value_param(), "VALUE");
+      EXPECT_STREQ(tests->GetTestInfo(j)->type_param(), "TYPE");
+      return;
+    }
+  }
+
+  FAIL() << "Didn't find the test!";
+}
