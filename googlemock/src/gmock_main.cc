@@ -34,8 +34,12 @@
 
 #ifdef ARDUINO
 void setup() {
-  int argc = 0;
-  char** argv = nullptr;
+  // Since Arduino doesn't have a command line, fake out the argc/argv arguments
+  int argc = 1;
+  const auto arg0 = "PlatformIO";
+  char* argv0 = const_cast<char*>(arg0);
+  char** argv = &argv0;
+  
    // Since Google Mock depends on Google Test, InitGoogleMock() is
   // also responsible for initializing Google Test.  Therefore there's
   // no need for calling testing::InitGoogleTest() separately.
