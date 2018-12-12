@@ -46,15 +46,15 @@ matrix:
 
 before_install:
   - |
-    if [ ! -f ${TRAVIS_BUILD_DIR}/apt-cache/pkgcache.bin ]; then
+    if [ "$TRAVIS_OS_NAME" != "osx" ] && [ ! -f ${TRAVIS_BUILD_DIR}/apt-cache/pkgcache.bin ]; then
        mkdir -p ${TRAVIS_BUILD_DIR}/apt-cache/archives/partial
        mkdir -p ${TRAVIS_BUILD_DIR}/apt-cache/partial
        mkdir -p ${TRAVIS_BUILD_DIR}/apt-cache/lists
        sudo apt-get -y -o Dir::cache=${TRAVIS_BUILD_DIR}/apt-cache -o Dir::State::Lists=${TRAVIS_BUILD_DIR}/apt-cache/lists update
        sudo apt-get install --download-only -o Dir::cache=${TRAVIS_BUILD_DIR}/apt-cache -o Dir::State::Lists=${TRAVIS_BUILD_DIR}/apt-cache/lists g++-4.9 clang-3.9
     fi
-  - sudo apt-get install --no-download -o Dir::cache=${TRAVIS_BUILD_DIR}/apt-cache -o Dir::State::Lists=${TRAVIS_BUILD_DIR}/apt-cache/lists g++-4.9 clang-3.9
-  - sudo chown -R $USER ${TRAVIS_BUILD_DIR}/apt-cache
+  - [ "$TRAVIS_OS_NAME" != "osx" ] && sudo apt-get install --no-download -o Dir::cache=${TRAVIS_BUILD_DIR}/apt-cache -o Dir::State::Lists=${TRAVIS_BUILD_DIR}/apt-cache/lists g++-4.9 clang-3.9
+  - [ "$TRAVIS_OS_NAME" != "osx" ] && sudo chown -R $USER ${TRAVIS_BUILD_DIR}/apt-cache
 
 # These are the install and build (script) phases for the most common entries in the matrix.  They could be included
 # in each entry in the matrix, but that is just repetitive.
