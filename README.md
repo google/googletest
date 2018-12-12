@@ -9,7 +9,6 @@
 * Post 1.8.x - work to improve/cleanup/pay technical debt. When this work is completed there will be a 1.9.x tagged release
 * Post 1.9.x googletest will follow [Abseil Live at Head philosophy](https://abseil.io/about/philosophy)
 
-
 Welcome to **Google Test**, Google's C++ test framework!
 
 This repository is a merger of the formerly separate GoogleTest and
