@@ -291,7 +291,7 @@ void ReportUninterestingCall(CallReaction reaction, const std::string& msg) {
               "call should not happen.  Do not suppress it by blindly adding "
               "an EXPECT_CALL() if you don't mean to enforce the call.  "
               "See "
-              "https://github.com/abseil/googletest/blob/master/googlemock/"
+              "https://github.com/google/googletest/blob/master/googlemock/"
               "docs/CookBook.md#"
               "knowing-when-to-expect for details.\n",
           stack_frames_to_skip);
