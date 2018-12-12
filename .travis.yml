@@ -44,6 +44,18 @@ matrix:
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
       if: type != pull_request
 
+before_install:
+  - |
+    if [ "$TRAVIS_OS_NAME" != "osx" ] && [ ! -f ${TRAVIS_BUILD_DIR}/apt-cache/pkgcache.bin ]; then
+       mkdir -p ${TRAVIS_BUILD_DIR}/apt-cache/archives/partial
+       mkdir -p ${TRAVIS_BUILD_DIR}/apt-cache/partial
+       mkdir -p ${TRAVIS_BUILD_DIR}/apt-cache/lists
+       sudo apt-get -y -o Dir::cache=${TRAVIS_BUILD_DIR}/apt-cache -o Dir::State::Lists=${TRAVIS_BUILD_DIR}/apt-cache/lists update
+       sudo apt-get install --download-only -o Dir::cache=${TRAVIS_BUILD_DIR}/apt-cache -o Dir::State::Lists=${TRAVIS_BUILD_DIR}/apt-cache/lists g++-4.9 clang-3.9
+    fi
+  - if [ "$TRAVIS_OS_NAME" != "osx" ]; then sudo apt-get install --no-download -o Dir::cache=${TRAVIS_BUILD_DIR}/apt-cache -o Dir::State::Lists=${TRAVIS_BUILD_DIR}/apt-cache/lists g++-4.9 clang-3.9; fi
+  - if [ "$TRAVIS_OS_NAME" != "osx" ]; then sudo chown -R $USER ${TRAVIS_BUILD_DIR}/apt-cache; fi
+
 # These are the install and build (script) phases for the most common entries in the matrix.  They could be included
 # in each entry in the matrix, but that is just repetitive.
 install:
@@ -63,9 +75,10 @@ addons:
     sources:
     - ubuntu-toolchain-r-test
     - llvm-toolchain-precise-3.9
-    packages:
-    - g++-4.9
-    - clang-3.9
+
+cache:
+  directories:
+    - apt-cache
 
 notifications:
   email: false
