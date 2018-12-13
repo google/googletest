@@ -3761,7 +3761,8 @@ void XmlUnitTestResultPrinter::OutputXmlTestInfo(::std::ostream* stream,
   }
 
   OutputXmlAttribute(stream, kTestcase, "status",
-                     test_info.should_run() ? "run" : "notrun");
+                result.Skipped() ? "skipped" :
+                test_info.should_run() ? "run" : "notrun");
   OutputXmlAttribute(stream, kTestcase, "time",
                      FormatTimeInMillisAsSeconds(result.elapsed_time()));
   OutputXmlAttribute(stream, kTestcase, "classname", test_case_name);
@@ -4126,6 +4127,7 @@ void JsonUnitTestResultPrinter::OutputJsonTestInfo(::std::ostream* stream,
   }
 
   OutputJsonKey(stream, kTestcase, "status",
+                result.Skipped() ? "SKIPPED" :
                 test_info.should_run() ? "RUN" : "NOTRUN", kIndent);
   OutputJsonKey(stream, kTestcase, "time",
                 FormatTimeInMillisAsDuration(result.elapsed_time()), kIndent);
