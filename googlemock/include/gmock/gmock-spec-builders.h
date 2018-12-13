@@ -406,7 +406,7 @@ class GTEST_API_ Mock {
   // timeout.
   static bool WaitForAndClearExpectations(
       void* mock_obj,
-      std::chrono::nanoseconds timeout)
+      std::chrono::system_clock::duration timeout)
           GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
 
   // Returns whether the mock was created as a naggy mock (default)
@@ -476,7 +476,7 @@ class GTEST_API_ Mock {
   // Returns true iff all expectations were met before the timeout.
   static bool WaitForExpectations(
       void* mock_obj,
-      std::chrono::nanoseconds timeout)
+      std::chrono::system_clock::duration timeout)
           GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
 
   // Clears all ON_CALL()s set on the given mock object.

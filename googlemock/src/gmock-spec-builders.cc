@@ -792,7 +792,7 @@ void Mock::ClearExpectationsLocked(void* mock_obj)
 // expectations. Returns true iff all expectations were met before the timeout.
 bool Mock::WaitForAndClearExpectations(
     void* mock_obj,
-    std::chrono::nanoseconds timeout)
+    std::chrono::system_clock::duration timeout)
         GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   bool result = WaitForExpectations(mock_obj, timeout);
   internal::MutexLock l(&internal::g_gmock_mutex);
@@ -805,7 +805,7 @@ bool Mock::WaitForAndClearExpectations(
 // Test non-fatal failures and returns false.
 bool Mock::WaitForExpectations(
     void* mock_obj,
-    std::chrono::nanoseconds timeout)
+    std::chrono::system_clock::duration timeout)
         GTEST_EXCLUSIVE_LOCK_REQUIRED_(internal::g_gmock_mutex) {
   std::chrono::system_clock::time_point deadline =
     std::chrono::system_clock::now() + timeout;

@@ -2661,7 +2661,7 @@ TEST(VerifyAndClearTest,
 // Tests that WaitForAndClearExpectations() works when no expectations are set.
 TEST(WaitForAndClearExpectationsTest, NoExpectations) {
   MockB b;
-  ASSERT_TRUE(Mock::WaitForAndClearExpectations(&b, std::chrono::milliseconds(10)));
+  ASSERT_TRUE(Mock::WaitForAndClearExpectations(&b, std::chrono::milliseconds(100)));
 }
 
 // Tests that WaitForAndClearExpectations() works when the verification succeeds.
@@ -2675,13 +2675,13 @@ TEST(WaitForAndClearExpectationsTest, Success) {
   // Fulfill expectations asynchronously to test waiting.
   std::thread thread{[&](){
     // Sleep for a bit so the test will fail if it's not truly waiting.
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     EXPECT_EQ(1, b.DoB());
     EXPECT_EQ(2, b.DoB(1));
   }};
 
-  ASSERT_TRUE(Mock::WaitForAndClearExpectations(&b, std::chrono::seconds(1)));
+  ASSERT_TRUE(Mock::WaitForAndClearExpectations(&b, std::chrono::milliseconds(200)));
   thread.join();
 
   // There should be no expectations on the methods now, so we can
@@ -2698,7 +2698,7 @@ TEST(WaitForAndClearExpectationsTest, ExpectationNotMet) {
       .WillOnce(Return(1));
 
   bool result = false;
-  EXPECT_NONFATAL_FAILURE(result = Mock::WaitForAndClearExpectations(&b, std::chrono::milliseconds(10)),
+  EXPECT_NONFATAL_FAILURE(result = Mock::WaitForAndClearExpectations(&b, std::chrono::milliseconds(100)),
                           "Actual: never called");
   EXPECT_FALSE(result);
 
@@ -2719,7 +2719,7 @@ TEST(WaitForAndClearExpectationsTest, SomeExpectationsNotMet) {
   EXPECT_EQ(1, b.DoB());
 
   bool result = false;
-  EXPECT_NONFATAL_FAILURE(result = Mock::WaitForAndClearExpectations(&b, std::chrono::milliseconds(10)),
+  EXPECT_NONFATAL_FAILURE(result = Mock::WaitForAndClearExpectations(&b, std::chrono::milliseconds(100)),
                           "Actual: never called");
   EXPECT_FALSE(result);
 
