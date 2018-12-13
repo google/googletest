@@ -67,6 +67,13 @@ TEST_F(DisabledTest, DISABLED_test_not_run) {
   FAIL() << "Unexpected failure: Disabled test should not be run";
 }
 
+class SkippedTest : public Test {
+};
+
+TEST_F(SkippedTest, Skipped) {
+  GTEST_SKIP();
+}
+
 TEST(MixedResultTest, Succeeds) {
   EXPECT_EQ(1, 1);
   ASSERT_EQ(1, 1);
