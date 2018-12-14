@@ -3761,7 +3761,8 @@ void XmlUnitTestResultPrinter::OutputXmlTestInfo(::std::ostream* stream,
   }
 
   OutputXmlAttribute(stream, kTestcase, "status",
-                     test_info.should_run() ? "run" : "notrun");
+                result.Skipped() ? "skipped" :
+                test_info.should_run() ? "run" : "notrun");
   OutputXmlAttribute(stream, kTestcase, "time",
                      FormatTimeInMillisAsSeconds(result.elapsed_time()));
   OutputXmlAttribute(stream, kTestcase, "classname", test_case_name);
@@ -4126,6 +4127,7 @@ void JsonUnitTestResultPrinter::OutputJsonTestInfo(::std::ostream* stream,
   }
 
   OutputJsonKey(stream, kTestcase, "status",
+                result.Skipped() ? "SKIPPED" :
                 test_info.should_run() ? "RUN" : "NOTRUN", kIndent);
   OutputJsonKey(stream, kTestcase, "time",
                 FormatTimeInMillisAsDuration(result.elapsed_time()), kIndent);
@@ -5363,7 +5365,7 @@ bool ShouldRunTestOnShard(int total_shards, int shard_index, int test_id) {
 // each TestCase and TestInfo object.
 // If shard_tests == true, further filters tests based on sharding
 // variables in the environment - see
-// https://github.com/abseil/googletest/blob/master/googletest/docs/advanced.md
+// https://github.com/google/googletest/blob/master/googletest/docs/advanced.md
 // . Returns the number of tests that should run.
 int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
   const Int32 total_shards = shard_tests == HONOR_SHARDING_PROTOCOL ?

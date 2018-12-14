@@ -1296,14 +1296,24 @@ class PredicateFormatterFromMatcher {
     // We don't write MatcherCast<const T&> either, as that allows
     // potentially unsafe downcasting of the matcher argument.
     const Matcher<const T&> matcher = SafeMatcherCast<const T&>(matcher_);
-    StringMatchResultListener listener;
-    if (MatchPrintAndExplain(x, matcher, &listener))
+
+    // The expected path here is that the matcher should match (i.e. that most
+    // tests pass) so optimize for this case.
+    if (matcher.Matches(x)) {
       return AssertionSuccess();
+    }
 
     ::std::stringstream ss;
     ss << "Value of: " << value_text << "\n"
        << "Expected: ";
     matcher.DescribeTo(&ss);
+
+    // Rerun the matcher to "PrintAndExain" the failure.
+    StringMatchResultListener listener;
+    if (MatchPrintAndExplain(x, matcher, &listener)) {
+      ss << "\n  The matcher failed on the initial attempt; but passed when "
+            "rerun to generate the explanation.";
+    }
     ss << "\n  Actual: " << listener.str();
     return AssertionFailure() << ss.str();
   }
