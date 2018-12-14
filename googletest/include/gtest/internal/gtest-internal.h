@@ -983,7 +983,9 @@ struct IsRecursiveContainerImpl<C, true> {
   typedef decltype(*std::declval<typename C::const_iterator>())
       value_type;
   typedef is_same<
-    typename remove_constref<value_type>::type,
+    typename std::remove_const<
+      typename std::remove_reference<value_type>::type
+    >::type,
     C
   > type;
 };
