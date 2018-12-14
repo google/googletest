@@ -1,0 +1,51 @@
+{
+  "name": "googletest",
+  "keywords": "unittest, unit, test, gtest, gmock",
+  "description": "googletest is a testing framework developed by the Testing Technology team with Google's specific requirements and constraints in mind. No matter whether you work on Linux, Windows, or a Mac, if you write C++ code, googletest can help you. And it supports any kind of tests, not just unit tests.",
+   "license": "BSD-3-Clause",
+  "homepage": "https://github.com/abseil/googletest/blob/master/README.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abseil/googletest.git"
+  },
+  "version": "1.8.1",
+  "exclude": [
+    "ci",
+    "googlemock/build-aux",
+    "googlemock/cmake",
+    "googlemock/make",
+    "googlemock/msvc",
+    "googlemock/scripts",
+    "googlemock/test",
+    "googlemock/CMakeLists.txt",
+    "googlemock/Makefile.am",
+    "googlemock/configure.ac",
+    "googletest/cmake",
+    "googletest/codegear",
+    "googletest/m4",
+    "googletest/make",
+    "googletest/msvc",
+    "googletest/scripts",
+    "googletest/test",
+    "googletest/xcode",
+    "googletest/CMakeLists.txt",
+    "googletest/Makefile.am",
+    "googletest/configure.ac",
+  ],
+  "frameworks": "arduino",
+  "platforms": [
+        "espressif32"
+    ],
+    "export": {
+        "include": [
+            "googlemock/include/*",
+            "googletest/include/*"
+        ]
+    },
+    "build": {
+        "flags": [
+            "-I googlemock/include",
+            "-I googletest/include"
+        ]
+    }
+}
