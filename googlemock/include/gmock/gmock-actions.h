@@ -574,7 +574,7 @@ class ReturnAction {
   // This template type conversion operator allows Return(x) to be
   // used in ANY function that returns x's type.
   template <typename F>
-  operator Action<F>() const {
+  operator Action<F>() const {  // NOLINT
     // Assert statement belongs here because this is the best place to verify
     // conditions on F. It produces the clearest error messages
     // in most compilers.
@@ -587,6 +587,8 @@ class ReturnAction {
     GTEST_COMPILE_ASSERT_(
         !is_reference<Result>::value,
         use_ReturnRef_instead_of_Return_to_return_a_reference);
+    static_assert(!std::is_void<Result>::value,
+                  "Can't use Return() on an action expected to return `void`.");
     return Action<F>(new Impl<R, F>(value_));
   }
 
@@ -1017,51 +1019,6 @@ void PrintTo(const ReferenceWrapper<T>& ref, ::std::ostream* os) {
   UniversalPrinter<T&>::Print(value, os);
 }
 
-// Does two actions sequentially.  Used for implementing the DoAll(a1,
-// a2, ...) action.
-template <typename Action1, typename Action2>
-class DoBothAction {
- public:
-  DoBothAction(Action1 action1, Action2 action2)
-      : action1_(action1), action2_(action2) {}
-
-  // This template type conversion operator allows DoAll(a1, ..., a_n)
-  // to be used in ANY function of compatible type.
-  template <typename F>
-  operator Action<F>() const {
-    return Action<F>(new Impl<F>(action1_, action2_));
-  }
-
- private:
-  // Implements the DoAll(...) action for a particular function type F.
-  template <typename F>
-  class Impl : public ActionInterface<F> {
-   public:
-    typedef typename Function<F>::Result Result;
-    typedef typename Function<F>::ArgumentTuple ArgumentTuple;
-    typedef typename Function<F>::MakeResultVoid VoidResult;
-
-    Impl(const Action<VoidResult>& action1, const Action<F>& action2)
-        : action1_(action1), action2_(action2) {}
-
-    Result Perform(const ArgumentTuple& args) override {
-      action1_.Perform(args);
-      return action2_.Perform(args);
-    }
-
-   private:
-    const Action<VoidResult> action1_;
-    const Action<F> action2_;
-
-    GTEST_DISALLOW_ASSIGN_(Impl);
-  };
-
-  Action1 action1_;
-  Action2 action2_;
-
-  GTEST_DISALLOW_ASSIGN_(DoBothAction);
-};
-
 template <typename InnerAction, size_t... I>
 struct WithArgsAction {
   InnerAction action;
@@ -1077,6 +1034,35 @@ struct WithArgsAction {
       return converted.Perform(std::forward_as_tuple(
         std::get<I>(std::forward_as_tuple(std::forward<Args>(args)...))...));
     };
+  }
+};
+
+template <typename... Actions>
+struct DoAllAction {
+ private:
+  template <typename... Args, size_t... I>
+  std::vector<Action<void(Args...)>> Convert(IndexSequence<I...>) const {
+    return {std::get<I>(actions)...};
+  }
+
+ public:
+  std::tuple<Actions...> actions;
+
+  template <typename R, typename... Args>
+  operator Action<R(Args...)>() const {  // NOLINT
+    struct Op {
+      std::vector<Action<void(Args...)>> converted;
+      Action<R(Args...)> last;
+      R operator()(Args... args) const {
+        auto tuple_args = std::forward_as_tuple(std::forward<Args>(args)...);
+        for (auto& a : converted) {
+          a.Perform(tuple_args);
+        }
+        return last.Perform(tuple_args);
+      }
+    };
+    return Op{Convert<Args...>(MakeIndexSequence<sizeof...(Actions) - 1>()),
+              std::get<sizeof...(Actions) - 1>(actions)};
   }
 };
 
@@ -1128,6 +1114,14 @@ Action<To>::Action(const Action<From>& from)
       impl_(from.impl_ == nullptr
                 ? nullptr
                 : new internal::ActionAdaptor<To, From>(from)) {
+}
+
+// Creates an action that does actions a1, a2, ..., sequentially in
+// each invocation.
+template <typename... Action>
+internal::DoAllAction<typename std::decay<Action>::type...> DoAll(
+    Action&&... action) {
+  return {std::forward_as_tuple(std::forward<Action>(action)...)};
 }
 
 // WithArg<k>(an_action) creates an action that passes the k-th

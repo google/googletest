@@ -165,34 +165,6 @@ $template
 };
 
 }  // namespace internal
-
-// Creates an action that does actions a1, a2, ..., sequentially in
-// each invocation.
-$range i 2..n
-$for i [[
-$range j 2..i
-$var types = [[$for j, [[typename Action$j]]]]
-$var Aas = [[$for j [[, Action$j a$j]]]]
-
-template <typename Action1, $types>
-$range k 1..i-1
-
-inline $for k [[internal::DoBothAction<Action$k, ]]Action$i$for k  [[>]]
-
-DoAll(Action1 a1$Aas) {
-$if i==2 [[
-
-  return internal::DoBothAction<Action1, Action2>(a1, a2);
-]] $else [[
-$range j2 2..i
-
-  return DoAll(a1, DoAll($for j2, [[a$j2]]));
-]]
-
-}
-
-]]
-
 }  // namespace testing
 
 // The ACTION* family of macros can be used in a namespace scope to
