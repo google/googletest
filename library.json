@@ -30,7 +30,7 @@
     "googletest/xcode",
     "googletest/CMakeLists.txt",
     "googletest/Makefile.am",
-    "googletest/configure.ac",
+    "googletest/configure.ac"
   ],
   "frameworks": "arduino",
   "platforms": [
