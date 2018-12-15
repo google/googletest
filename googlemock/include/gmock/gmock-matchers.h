@@ -1959,7 +1959,7 @@ class SizeIsMatcher {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    return MakeMatcher(new Impl<Container>(size_matcher_));
+    return Matcher<Container>(new Impl<const Container&>(size_matcher_));
   }
 
   template <typename Container>
@@ -2009,7 +2009,7 @@ class BeginEndDistanceIsMatcher {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    return MakeMatcher(new Impl<Container>(distance_matcher_));
+    return Matcher<Container>(new Impl<const Container&>(distance_matcher_));
   }
 
   template <typename Container>
@@ -2269,7 +2269,8 @@ class PointwiseMatcher {
         !IsHashTable<GTEST_REMOVE_REFERENCE_AND_CONST_(LhsContainer)>::value,
         use_UnorderedPointwise_with_hash_tables);
 
-    return MakeMatcher(new Impl<LhsContainer>(tuple_matcher_, rhs_));
+    return Matcher<LhsContainer>(
+        new Impl<const LhsContainer&>(tuple_matcher_, rhs_));
   }
 
   template <typename LhsContainer>
@@ -2471,7 +2472,8 @@ class ContainsMatcher {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    return MakeMatcher(new ContainsMatcherImpl<Container>(inner_matcher_));
+    return Matcher<Container>(
+        new ContainsMatcherImpl<const Container&>(inner_matcher_));
   }
 
  private:
@@ -2488,7 +2490,8 @@ class EachMatcher {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    return MakeMatcher(new EachMatcherImpl<Container>(inner_matcher_));
+    return Matcher<Container>(
+        new EachMatcherImpl<const Container&>(inner_matcher_));
   }
 
  private:
@@ -3086,8 +3089,10 @@ class UnorderedElementsAreMatcher {
     matchers.reserve(::std::tuple_size<MatcherTuple>::value);
     TransformTupleValues(CastAndAppendTransform<const Element&>(), matchers_,
                          ::std::back_inserter(matchers));
-    return MakeMatcher(new UnorderedElementsAreMatcherImpl<Container>(
-        UnorderedMatcherRequire::ExactMatch, matchers.begin(), matchers.end()));
+    return Matcher<Container>(
+        new UnorderedElementsAreMatcherImpl<const Container&>(
+            UnorderedMatcherRequire::ExactMatch, matchers.begin(),
+            matchers.end()));
   }
 
  private:
@@ -3116,8 +3121,8 @@ class ElementsAreMatcher {
     matchers.reserve(::std::tuple_size<MatcherTuple>::value);
     TransformTupleValues(CastAndAppendTransform<const Element&>(), matchers_,
                          ::std::back_inserter(matchers));
-    return MakeMatcher(new ElementsAreMatcherImpl<Container>(
-                           matchers.begin(), matchers.end()));
+    return Matcher<Container>(new ElementsAreMatcherImpl<const Container&>(
+        matchers.begin(), matchers.end()));
   }
 
  private:
@@ -3136,8 +3141,9 @@ class UnorderedElementsAreArrayMatcher {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    return MakeMatcher(new UnorderedElementsAreMatcherImpl<Container>(
-        match_flags_, matchers_.begin(), matchers_.end()));
+    return Matcher<Container>(
+        new UnorderedElementsAreMatcherImpl<const Container&>(
+            match_flags_, matchers_.begin(), matchers_.end()));
   }
 
  private:
@@ -3160,7 +3166,7 @@ class ElementsAreArrayMatcher {
         !IsHashTable<GTEST_REMOVE_REFERENCE_AND_CONST_(Container)>::value,
         use_UnorderedElementsAreArray_with_hash_tables);
 
-    return MakeMatcher(new ElementsAreMatcherImpl<Container>(
+    return Matcher<Container>(new ElementsAreMatcherImpl<const Container&>(
         matchers_.begin(), matchers_.end()));
   }
 
