@@ -387,7 +387,7 @@ class TuplePrefix {
     typename std::tuple_element<N - 1, MatcherTuple>::type matcher =
         std::get<N - 1>(matchers);
     typedef typename std::tuple_element<N - 1, ValueTuple>::type Value;
-    GTEST_REFERENCE_TO_CONST_(Value) value = std::get<N - 1>(values);
+    const Value& value = std::get<N - 1>(values);
     StringMatchResultListener listener;
     if (!matcher.MatchAndExplain(value, &listener)) {
       // FIXME: include in the message the name of the parameter
@@ -492,9 +492,9 @@ OutIter TransformTupleValues(Func f, const Tuple& t, OutIter out) {
 
 // Implements A<T>().
 template <typename T>
-class AnyMatcherImpl : public MatcherInterface<GTEST_REFERENCE_TO_CONST_(T)> {
+class AnyMatcherImpl : public MatcherInterface<const T&> {
  public:
-  bool MatchAndExplain(GTEST_REFERENCE_TO_CONST_(T) /* x */,
+  bool MatchAndExplain(const T& /* x */,
                        MatchResultListener* /* listener */) const override {
     return true;
   }
@@ -976,12 +976,12 @@ class Ge2Matcher : public PairMatchBase<Ge2Matcher, AnyGe> {
 // will prevent different instantiations of NotMatcher from sharing
 // the same NotMatcherImpl<T> class.
 template <typename T>
-class NotMatcherImpl : public MatcherInterface<GTEST_REFERENCE_TO_CONST_(T)> {
+class NotMatcherImpl : public MatcherInterface<const T&> {
  public:
   explicit NotMatcherImpl(const Matcher<T>& matcher)
       : matcher_(matcher) {}
 
-  bool MatchAndExplain(GTEST_REFERENCE_TO_CONST_(T) x,
+  bool MatchAndExplain(const T& x,
                        MatchResultListener* listener) const override {
     return !matcher_.MatchAndExplain(x, listener);
   }
@@ -1025,8 +1025,7 @@ class NotMatcher {
 // that will prevent different instantiations of BothOfMatcher from
 // sharing the same BothOfMatcherImpl<T> class.
 template <typename T>
-class AllOfMatcherImpl
-    : public MatcherInterface<GTEST_REFERENCE_TO_CONST_(T)> {
+class AllOfMatcherImpl : public MatcherInterface<const T&> {
  public:
   explicit AllOfMatcherImpl(std::vector<Matcher<T> > matchers)
       : matchers_(std::move(matchers)) {}
@@ -1049,7 +1048,7 @@ class AllOfMatcherImpl
     *os << ")";
   }
 
-  bool MatchAndExplain(GTEST_REFERENCE_TO_CONST_(T) x,
+  bool MatchAndExplain(const T& x,
                        MatchResultListener* listener) const override {
     // If either matcher1_ or matcher2_ doesn't match x, we only need
     // to explain why one of them fails.
@@ -1132,8 +1131,7 @@ using AllOfMatcher = VariadicMatcher<AllOfMatcherImpl, Args...>;
 // that will prevent different instantiations of AnyOfMatcher from
 // sharing the same EitherOfMatcherImpl<T> class.
 template <typename T>
-class AnyOfMatcherImpl
-    : public MatcherInterface<GTEST_REFERENCE_TO_CONST_(T)> {
+class AnyOfMatcherImpl : public MatcherInterface<const T&> {
  public:
   explicit AnyOfMatcherImpl(std::vector<Matcher<T> > matchers)
       : matchers_(std::move(matchers)) {}
@@ -1156,7 +1154,7 @@ class AnyOfMatcherImpl
     *os << ")";
   }
 
-  bool MatchAndExplain(GTEST_REFERENCE_TO_CONST_(T) x,
+  bool MatchAndExplain(const T& x,
                        MatchResultListener* listener) const override {
     std::string no_match_result;
 
@@ -1584,8 +1582,7 @@ class PointeeMatcher {
   // enough for implementing the DescribeTo() method of Pointee().
   template <typename Pointer>
   operator Matcher<Pointer>() const {
-    return Matcher<Pointer>(
-        new Impl<GTEST_REFERENCE_TO_CONST_(Pointer)>(matcher_));
+    return Matcher<Pointer>(new Impl<const Pointer&>(matcher_));
   }
 
  private:
@@ -1775,11 +1772,7 @@ class FieldMatcher {
 template <typename Class, typename PropertyType, typename Property>
 class PropertyMatcher {
  public:
-  // The property may have a reference type, so 'const PropertyType&'
-  // may cause double references and fail to compile.  That's why we
-  // need GTEST_REFERENCE_TO_CONST, which works regardless of
-  // PropertyType being a reference or not.
-  typedef GTEST_REFERENCE_TO_CONST_(PropertyType) RefToConstProperty;
+  typedef const PropertyType& RefToConstProperty;
 
   PropertyMatcher(Property property, const Matcher<RefToConstProperty>& matcher)
       : property_(property),
@@ -3776,8 +3769,7 @@ Property(PropertyType (Class::*property)() const,
   return MakePolymorphicMatcher(
       internal::PropertyMatcher<Class, PropertyType,
                                 PropertyType (Class::*)() const>(
-          property,
-          MatcherCast<GTEST_REFERENCE_TO_CONST_(PropertyType)>(matcher)));
+          property, MatcherCast<const PropertyType&>(matcher)));
   // The call to MatcherCast() is required for supporting inner
   // matchers of compatible types.  For example, it allows
   //   Property(&Foo::bar, m)
@@ -3795,8 +3787,7 @@ Property(const std::string& property_name,
   return MakePolymorphicMatcher(
       internal::PropertyMatcher<Class, PropertyType,
                                 PropertyType (Class::*)() const>(
-          property_name, property,
-          MatcherCast<GTEST_REFERENCE_TO_CONST_(PropertyType)>(matcher)));
+          property_name, property, MatcherCast<const PropertyType&>(matcher)));
 }
 
 #if GTEST_LANG_CXX11
@@ -3808,9 +3799,8 @@ Property(PropertyType (Class::*property)() const &,
          const PropertyMatcher& matcher) {
   return MakePolymorphicMatcher(
       internal::PropertyMatcher<Class, PropertyType,
-                                PropertyType (Class::*)() const &>(
-          property,
-          MatcherCast<GTEST_REFERENCE_TO_CONST_(PropertyType)>(matcher)));
+                                PropertyType (Class::*)() const&>(
+          property, MatcherCast<const PropertyType&>(matcher)));
 }
 
 // Three-argument form for reference-qualified member functions.
@@ -3822,9 +3812,8 @@ Property(const std::string& property_name,
          const PropertyMatcher& matcher) {
   return MakePolymorphicMatcher(
       internal::PropertyMatcher<Class, PropertyType,
-                                PropertyType (Class::*)() const &>(
-          property_name, property,
-          MatcherCast<GTEST_REFERENCE_TO_CONST_(PropertyType)>(matcher)));
+                                PropertyType (Class::*)() const&>(
+          property_name, property, MatcherCast<const PropertyType&>(matcher)));
 }
 #endif
 
