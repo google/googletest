@@ -114,23 +114,22 @@ class MockBar {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockBar);
 };
 
-#if GTEST_GTEST_LANG_CXX11
 
 class MockBaz {
  public:
   class MoveOnly {
+   public:
     MoveOnly() = default;
 
     MoveOnly(const MoveOnly&) = delete;
-    operator=(const MoveOnly&) = delete;
+    MoveOnly& operator=(const MoveOnly&) = delete;
 
     MoveOnly(MoveOnly&&) = default;
-    operator=(MoveOnly&&) = default;
+    MoveOnly& operator=(MoveOnly&&) = default;
   };
 
   MockBaz(MoveOnly) {}
-}
-#endif  // GTEST_GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
+};
 
 #if GTEST_HAS_STREAM_REDIRECTION
 
@@ -292,13 +291,9 @@ TEST(NiceMockTest, AllowLeak) {
   leaked->DoThis();
 }
 
-#if GTEST_GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
-
 TEST(NiceMockTest, MoveOnlyConstructor) {
-  NiceMock<MockBaz> nice_baz(MockBaz::MoveOnly());
+  NiceMock<MockBaz> nice_baz(MockBaz::MoveOnly{});
 }
-
-#endif  // GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
 
 #if !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 // Tests that NiceMock<Mock> compiles where Mock is a user-defined
@@ -407,13 +402,9 @@ TEST(NaggyMockTest, AllowLeak) {
   leaked->DoThis();
 }
 
-#if GTEST_GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
-
 TEST(NaggyMockTest, MoveOnlyConstructor) {
-  NaggyMock<MockBaz> naggy_baz(MockBaz::MoveOnly());
+  NaggyMock<MockBaz> naggy_baz(MockBaz::MoveOnly{});
 }
-
-#endif  // GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
 
 #if !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 // Tests that NaggyMock<Mock> compiles where Mock is a user-defined
@@ -503,13 +494,9 @@ TEST(StrictMockTest, AllowLeak) {
   leaked->DoThis();
 }
 
-#if GTEST_GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
-
 TEST(StrictMockTest, MoveOnlyConstructor) {
-  StrictMock<MockBaz> strict_baz(MockBaz::MoveOnly());
+  StrictMock<MockBaz> strict_baz(MockBaz::MoveOnly{});
 }
-
-#endif  // GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
 
 #if !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 // Tests that StrictMock<Mock> compiles where Mock is a user-defined
