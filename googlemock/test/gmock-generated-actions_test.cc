@@ -428,9 +428,11 @@ TEST(DoAllTest, TenActions) {
 // the macro definition, as the warnings are generated when the macro
 // is expanded and macro expansion cannot contain #pragma.  Therefore
 // we suppress them here.
+// Also suppress C4503 decorated name length exceeded, name was truncated
 #ifdef _MSC_VER
 # pragma warning(push)
 # pragma warning(disable:4100)
+# pragma warning(disable:4503)
 #endif
 
 // Tests the ACTION*() macro family.
