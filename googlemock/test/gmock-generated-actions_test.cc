@@ -58,6 +58,20 @@ using testing::SetArgPointee;
 using testing::StaticAssertTypeEq;
 using testing::Unused;
 
+
+// The ACTION*() macros trigger warning C4100 (unreferenced formal
+// parameter) in MSVC with -W4.  Unfortunately they cannot be fixed in
+// the macro definition, as the warnings are generated when the macro
+// is expanded and macro expansion cannot contain #pragma.  Therefore
+// we suppress them here.
+// Also suppress C4503 decorated name length exceeded, name was truncated
+#ifdef _MSC_VER
+# pragma warning(push)
+# pragma warning(disable:4100)
+# pragma warning(disable:4503)
+#endif
+
+
 // For suppressing compiler warnings on conversion possibly losing precision.
 inline short Short(short n) { return n; }  // NOLINT
 inline char Char(char ch) { return ch; }
@@ -422,18 +436,6 @@ TEST(DoAllTest, TenActions) {
   EXPECT_EQ('f', f);
   EXPECT_EQ('g', g);
 }
-
-// The ACTION*() macros trigger warning C4100 (unreferenced formal
-// parameter) in MSVC with -W4.  Unfortunately they cannot be fixed in
-// the macro definition, as the warnings are generated when the macro
-// is expanded and macro expansion cannot contain #pragma.  Therefore
-// we suppress them here.
-// Also suppress C4503 decorated name length exceeded, name was truncated
-#ifdef _MSC_VER
-# pragma warning(push)
-# pragma warning(disable:4100)
-# pragma warning(disable:4503)
-#endif
 
 // Tests the ACTION*() macro family.
 
@@ -1060,9 +1062,6 @@ TEST(ActionTemplateTest, CanBeOverloadedOnNumberOfValueParameters) {
   EXPECT_EQ(12345, a4.Perform(std::make_tuple()));
 }
 
-#ifdef _MSC_VER
-# pragma warning(pop)
-#endif
 
 }  // namespace gmock_generated_actions_test
 }  // namespace testing
