@@ -598,7 +598,6 @@ TEST(MockMethodMockFunctionTest, WorksFor10Arguments) {
   EXPECT_EQ(2, foo.Call(true, 'a', 0, 0, 0, 0, 0, 'b', 1, false));
 }
 
-#if GTEST_HAS_STD_FUNCTION_
 TEST(MockMethodMockFunctionTest, AsStdFunction) {
   MockFunction<int(int)> foo;
   auto call = [](const std::function<int(int)> &f, int i) {
@@ -630,7 +629,6 @@ TEST(MockMethodMockFunctionTest, AsStdFunctionWithReferenceParameter) {
   EXPECT_EQ(-1, call(foo.AsStdFunction(), i));
 }
 
-#endif  // GTEST_HAS_STD_FUNCTION_
 
 struct MockMethodSizes0 {
   MOCK_METHOD(void, func, ());

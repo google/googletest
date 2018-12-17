@@ -42,17 +42,14 @@
 #endif
 
 #include <algorithm>
+#include <functional>
 #include <memory>
 #include <string>
+#include <type_traits>
 #include <utility>
 
 #include "gmock/internal/gmock-internal-utils.h"
 #include "gmock/internal/gmock-port.h"
-
-#if GTEST_LANG_CXX11  // Defined by gtest-port.h via gmock-port.h.
-#include <functional>
-#include <type_traits>
-#endif  // GTEST_LANG_CXX11
 
 #ifdef _MSC_VER
 # pragma warning(push)
@@ -105,7 +102,6 @@ struct BuiltInDefaultValueGetter<T, false> {
 template <typename T>
 class BuiltInDefaultValue {
  public:
-#if GTEST_LANG_CXX11
   // This function returns true iff type T has a built-in default value.
   static bool Exists() {
     return ::std::is_default_constructible<T>::value;
@@ -115,18 +111,6 @@ class BuiltInDefaultValue {
     return BuiltInDefaultValueGetter<
         T, ::std::is_default_constructible<T>::value>::Get();
   }
-
-#else  // GTEST_LANG_CXX11
-  // This function returns true iff type T has a built-in default value.
-  static bool Exists() {
-    return false;
-  }
-
-  static T Get() {
-    return BuiltInDefaultValueGetter<T, false>::Get();
-  }
-
-#endif  // GTEST_LANG_CXX11
 };
 
 // This partial specialization says that we use the same built-in
@@ -366,7 +350,6 @@ class Action {
   // STL containers.
   Action() {}
 
-#if GTEST_LANG_CXX11
   // Construct an Action from a specified callable.
   // This cannot take std::function directly, because then Action would not be
   // directly constructible from lambda (it would require two conversions).
@@ -374,7 +357,6 @@ class Action {
             typename = typename ::std::enable_if<
                 ::std::is_constructible<::std::function<F>, G>::value>::type>
   Action(G&& fun) : fun_(::std::forward<G>(fun)) {}  // NOLINT
-#endif
 
   // Constructs an Action from its implementation.
   explicit Action(ActionInterface<F>* impl) : impl_(impl) {}
@@ -388,11 +370,7 @@ class Action {
 
   // Returns true iff this is the DoDefault() action.
   bool IsDoDefault() const {
-#if GTEST_LANG_CXX11
     return impl_ == nullptr && fun_ == nullptr;
-#else
-    return impl_ == NULL;
-#endif
   }
 
   // Performs the action.  Note that this method is const even though
@@ -405,11 +383,9 @@ class Action {
     if (IsDoDefault()) {
       internal::IllegalDoDefault(__FILE__, __LINE__);
     }
-#if GTEST_LANG_CXX11
     if (fun_ != nullptr) {
       return internal::Apply(fun_, ::std::move(args));
     }
-#endif
     return impl_->Perform(args);
   }
 
@@ -420,16 +396,12 @@ class Action {
   template <typename G>
   friend class Action;
 
-  // In C++11, Action can be implemented either as a generic functor (through
-  // std::function), or legacy ActionInterface. In C++98, only ActionInterface
-  // is available. The invariants are as follows:
-  // * in C++98, impl_ is null iff this is the default action
-  // * in C++11, at most one of fun_ & impl_ may be nonnull; both are null iff
-  //   this is the default action
-#if GTEST_LANG_CXX11
+  // Action can be implemented either as a generic functor (via std::function),
+  // or legacy ActionInterface. The invariant is that at most one of fun_ and
+  // impl_ may be nonnull; both are null iff this is the default action.
+  // FIXME: Fold the ActionInterface into std::function.
   ::std::function<F> fun_;
-#endif
-  std::shared_ptr<ActionInterface<F>> impl_;
+  ::std::shared_ptr<ActionInterface<F>> impl_;
 };
 
 // The PolymorphicAction class template makes it easy to implement a
@@ -662,13 +634,7 @@ class ReturnNullAction {
   // pointer type on compile time.
   template <typename Result, typename ArgumentTuple>
   static Result Perform(const ArgumentTuple&) {
-#if GTEST_LANG_CXX11
     return nullptr;
-#else
-    GTEST_COMPILE_ASSERT_(internal::is_pointer<Result>::value,
-                          ReturnNull_can_be_used_to_return_a_pointer_only);
-    return NULL;
-#endif  // GTEST_LANG_CXX11
   }
 };
 
@@ -1108,9 +1074,7 @@ template <typename To>
 template <typename From>
 Action<To>::Action(const Action<From>& from)
     :
-#if GTEST_LANG_CXX11
       fun_(from.fun_),
-#endif
       impl_(from.impl_ == nullptr
                 ? nullptr
                 : new internal::ActionAdaptor<To, From>(from)) {
