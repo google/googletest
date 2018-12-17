@@ -434,7 +434,6 @@ TEST(DoAllTest, TenActions) {
 # pragma warning(disable:4100)
 # pragma warning(disable:4503)
 #endif
-
 // Tests the ACTION*() macro family.
 
 // Tests that ACTION() can define an action that doesn't reference the
@@ -1060,9 +1059,6 @@ TEST(ActionTemplateTest, CanBeOverloadedOnNumberOfValueParameters) {
   EXPECT_EQ(12345, a4.Perform(std::make_tuple()));
 }
 
-#ifdef _MSC_VER
-# pragma warning(pop)
-#endif
 
 }  // namespace gmock_generated_actions_test
 }  // namespace testing
