@@ -501,6 +501,13 @@ py_test(
     deps = [":gtest_test_utils"],
 )
 
+cc_binary(
+    name = "googletest-snapshot-test_",
+    testonly = 1,
+    srcs = ["googletest-snapshot-test_.cc"],
+    deps = ["//:gtest"],
+)
+
 py_test(
     name = "googletest-snapshot-test",
     size = "small",
