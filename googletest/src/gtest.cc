@@ -338,6 +338,12 @@ GTEST_DEFINE_bool_(
     "if exceptions are enabled or exit the program with a non-zero code "
     "otherwise. For use with an external test framework.");
 
+GTEST_DEFINE_bool_(
+    update_snapshot,
+    internal::BoolFromGTestEnv("update_snapshot", false),
+    "True iff " GTEST_NAME_
+    " should update the snapshot, instead of checking for equality.");
+
 #if GTEST_USE_OWN_FLAGFILE_FLAG_
 GTEST_DEFINE_string_(
     flagfile,
@@ -5851,7 +5857,9 @@ static bool ParseGoogleTestFlag(const char* const arg) {
       ParseStringFlag(arg, kStreamResultToFlag,
                       &GTEST_FLAG(stream_result_to)) ||
       ParseBoolFlag(arg, kThrowOnFailureFlag,
-                    &GTEST_FLAG(throw_on_failure));
+                    &GTEST_FLAG(throw_on_failure)) ||
+      ParseBoolFlag(arg, kUpdateSnapshotFlag,
+                    &GTEST_FLAG(print_time));
 }
 
 #if GTEST_USE_OWN_FLAGFILE_FLAG_
