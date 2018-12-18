@@ -2000,6 +2000,8 @@ class TestWithParam : public Test, public WithParamInterface<T> {
   EXPECT_PRED_FORMAT2(::testing::internal:: \
                       EqHelper<GTEST_IS_NULL_LITERAL_(val1)>::Compare, \
                       val1, val2)
+#define EXPECT_EQ_SNAPSHOT(val) \
+  EXPECT_EQ(val, ::testing::internal::SnapshotHelper(val))
 #define EXPECT_NE(val1, val2) \
   EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperNE, val1, val2)
 #define EXPECT_LE(val1, val2) \
@@ -2373,6 +2375,9 @@ int RUN_ALL_TESTS() GTEST_MUST_USE_RESULT_;
 inline int RUN_ALL_TESTS() {
   return ::testing::UnitTest::GetInstance()->Run();
 }
+
+// Snapshot helper. Needs access to UnitTest.
+#include "gtest/gtest-snapshot.h"
 
 GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 
