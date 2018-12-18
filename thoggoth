@@ -1,0 +1,318 @@
+MBP-Poleansky:ContactsAccountsAuthenticationPlugin.bundle dmitrijustenko$ **********
+-bash: Contents: command not found
+MBP-Poleansky:ContactsAccountsAuthenticationPlugin.bundle dmitrijustenko$ 
+MBP-Poleansky:ContactsAccountsAuthenticationPlugin.bundle dmitrijustenko$  `!11yes
+ `/Volumes/CleanMyMac\ 3\ 3.9.3/Open\ Gatekeeper\ friendly ; exit;yes
+> Unrecognized command. Type "help" for assistance.
+> > LOGIN ██████ IDENTIFY BY PASSWORD **********
+> 
+> ACCESS GRANTED. Welcome, ██████.
+> 
+> Коды запуска ракет:
+> 
+> JSNC-NSCJ-NMZX-ZXNJ
+> SNJZ-NZMD-NCJZ-KKMD
+> ZKDN-SMKN-CNJS-LZMX
+> ZXNS-SDNJ-XCPR-KJIN
+> 
+> А я это точно сохранил где надо? — Др █████
+> 
+> > 11041989
+> Unrecognized command. Type "help" for assistance.
+> > LOGIN ██████ IDENTIFY BY PASSWORD **********
+> 
+> ACCESS GRANTED. Welcome, ██████.
+> 
+> We are watching you, username.
+> 
+> > 
+> > 11041989
+> Unrecognized command. Type "help" for assistance.
+> > c 
+> 11
+> как обратить деление на ноль:?!
+> 
+> <?php
+> if(isset($_POST['x']) && isset($_POST['y']))
+> 
+> $result = $_POST['x'] + $_POST['y'];
+> $result = $_POST['x'] - $_POST['y'];
+> $result = $_POST['x'] * $_POST['y'];
+> $result = $_POST['x'] / $_POST['y'];
+> 
+> 
+> $result = "";
+> 
+> ?>
+> 
+> <html>
+> <head>
+> <meta charset="utf-8">
+> <title>Делаем колькулятор</title>
+> </head>
+> 
+> <body>
+> <form method="post">
+> <input type="text" name="x"/>
+> <input type="text" name="y"/>
+> <input type="submit" value="="/>
+> <p><input type="submit" value="+"/> 
+> <input type="submit" value="-"/>
+> <input type="submit" value="*"/>
+> <input type="submit" value="/"/></p>
+> <?php echo $result; ?>
+> </form> 
+> </body>
+> </html>
+> 
+> 
+> Предупреждение : Деление на ноль в Z: \ главная \ mysait \ WWW \ form.php на линии 31
+> 
+> 
+> Предупреждение : Деление на ноль в Z: \ главная \ mysait \ WWW \ form.php на линии 68
+> :)
+> :0
+> 0:0
+> MBP-Poleansky:ContactsAccountsAuthenticationPlugin.bundle dmitrijustenko$ IRC Information.....
+> -bash: IRC: command not found
+> MBP-Poleansky:ContactsAccountsAuthenticationPlugin.bundle dmitrijustenko$ IRC Class - Basic IRC Commands
+> Contents/•IRC - Internet Relay Chat
+> Contents/•Helpful Tips
+> Contents/•Basic IRC Commands
+> Contents/•mIRC Setup Tutorial
+> Contents/•PIRCH Setup Tutorial
+> Just as you are able to surf the net with a few tricks to help make things easier, IRC is very similar. Below you will find some of the more common IRC commands that we use often. For a far more complete list, please visit our mIRC Commands page.
+> /join
+> Type /join #channelname -- to join a channel of your choice
+> Example: /join #bossmom
+> What it looks like:
+>  
+> [18:44] *** Now talking in #beginner
+> --Op-- bossmom has joined the channel
+> [18:44] *** Topic is 'Beginner's Help/Chat Channel....All Are Welcome Here!! ®© [ENGLISH]'
+[18:44] *** Topic is 'Beginner's Help/Chat Channel....All Are Welcome Here `/Volumes/CleanMyMac\ 3\ 3.9.3/Open\ Gatekeeper\ friendly ; exit;yes
+Unrecognized command. Type "help" for assistance.
+> LOGIN ██████ IDENTIFY BY PASSWORD **********
+
+ACCESS GRANTED. Welcome, ██████.
+
+Коды запуска ракет:
+
+JSNC-NSCJ-NMZX-ZXNJ
+SNJZ-NZMD-NCJZ-KKMD
+ZKDN-SMKN-CNJS-LZMX
+ZXNS-SDNJ-XCPR-KJIN
+
+А я это точно сохранил где надо? — Др █████
+
+> 11041989
+Unrecognized command. Type "help" for assistance.
+> LOGIN ██████ IDENTIFY BY PASSWORD **********
+
+ACCESS GRANTED. Welcome, ██████.
+
+We are watching you, username.
+
+> 
+> 11041989
+Unrecognized command. Type "help" for assistance.
+> c 
+11
+как обратить деление на ноль:?!
+
+<?php
+if(isset($_POST['x']) && isset($_POST['y']))
+
+$result = $_POST['x'] + $_POST['y'];
+$result = $_POST['x'] - $_POST['y'];
+$result = $_POST['x'] * $_POST['y'];
+$result = $_POST['x'] / $_POST['y'];
+
+
+$result = "";
+
+?>
+
+<html>
+<head>
+<meta charset="utf-8">
+<title>Делаем колькулятор</title>
+</head>
+
+<body>
+<form method="post">
+<input type="text" name="x"/>
+<input type="text" name="y"/>
+<input type="submit" value="="/>
+<p><input type="submit" value="+"/> 
+<input type="submit" value="-"/>
+<input type="submit" value="*"/>
+<input type="submit" value="/"/></p>
+<?php echo $result; ?>
+</form> 
+</body>
+</html>
+
+
+Предупреждение : Деление на ноль в Z: \ главная \ mysait \ WWW \ form.php на линии 31
+
+
+Предупреждение : Деление на ноль в Z: \ главная \ mysait \ WWW \ form.php на линии 68
+:)
+:0
+0:0
+MBP-Poleansky:ContactsAccountsAuthenticationPlugin.bundle dmitrijustenko$ IRC Information.....
+-bash: IRC: command not found
+MBP-Poleansky:ContactsAccountsAuthenticationPlugin.bundle dmitrijustenko$ IRC Class - Basic IRC Commands
+Contents/•IRC - Internet Relay Chat
+Contents/•Helpful Tips
+Contents/•Basic IRC Commands
+Contents/•mIRC Setup Tutorial
+Contents/•PIRCH Setup Tutorial
+Just as you are able to surf the net with a few tricks to help make things easier, IRC is very similar. Below you will find some of the more common IRC commands that we use often. For a far more complete list, please visit our mIRC Commands page.
+/join
+Type /join #channelname -- to join a channel of your choice
+Example: /join #bossmom
+What it looks like:
+ 
+[18:44] *** Now talking in #beginner
+--Op-- bossmom has joined the channel ®
+-bash: Unrecognized: command not found
+-bash: LOGIN: Operation not permitted
+-bash: ACCESS: command not found
+-bash: Коды: command not found
+-bash: JSNC-NSCJ-NMZX-ZXNJ: command not found
+-bash: SNJZ-NZMD-NCJZ-KKMD: command not found
+-bash: ZKDN-SMKN-CNJS-LZMX: command not found
+-bash: ZXNS-SDNJ-XCPR-KJIN: command not found
+-bash: А: command not found
+-bash: 11041989: Operation not permitted
+-bash: Unrecognized: command not found
+-bash: LOGIN: Operation not permitted
+-bash: ACCESS: command not found
+-bash: We: command not found
+-bash: command substitution: line 0: syntax error near unexpected token `newline'
+-bash: command substitution: line 0: `[18:44] *** Topic is 'Beginner's Help/Chat Channel....All Are Welcome Here `/Volumes/CleanMyMac\ 3\ 3.9.3/Open\ Gatekeeper\ friendly ; exit;yes
+Unrecognized command. Type "help" for assistance.
+> LOGIN ██████ IDENTIFY BY PASSWORD **********
+
+ACCESS GRANTED. Welcome, ██████.
+
+Коды запуска ракет:
+
+JSNC-NSCJ-NMZX-ZXNJ
+SNJZ-NZMD-NCJZ-KKMD
+ZKDN-SMKN-CNJS-LZMX
+ZXNS-SDNJ-XCPR-KJIN
+
+А я это точно сохранил где надо? — Др █████
+
+> 11041989
+Unrecognized command. Type "help" for assistance.
+> LOGIN ██████ IDENTIFY BY PASSWORD **********
+
+ACCESS GRANTED. Welcome, ██████.
+
+We are watching you, username.
+
+> 
+> 11041989
+Unrecognized command. Type "help" for assistance.
+> c 
+11
+как обратить деление на ноль:?!
+
+<?php
+if(isset($_POST['x']) && isset($_POST['y']))
+
+$result = $_POST['x'] + $_POST['y'];
+$result = $_POST['x'] - $_POST['y'];
+$result = $_POST['x'] * $_POST['y'];
+$result = $_POST['x'] / $_POST['y'];
+
+
+$result = "";
+
+?>
+
+<html>
+<head>
+<meta charset="utf-8">
+<title>Делаем колькулятор</title>
+</head>
+
+<body>
+<form method="post">
+<input type="text" name="x"/>
+<input type="text" name="y"/>
+<input type="submit" value="="/>
+<p><input type="submit" value="+"/> 
+<input type="submit" value="-"/>
+<input type="submit" value="*"/>
+<input type="submit" value="/"/></p>
+<?php echo $result; ?>
+</form> 
+</body>
+</html>
+
+
+Предупреждение : Деление на ноль в Z: \ главная \ mysait \ WWW \ form.php на линии 31
+
+
+Предупреждение : Деление на ноль в Z: \ главная \ mysait \ WWW \ form.php на линии 68
+:)
+:0
+0:0
+MBP-Poleansky:ContactsAccountsAuthenticationPlugin.bundle dmitrijustenko$ IRC Information.....
+-bash: IRC: command not found
+MBP-Poleansky:ContactsAccountsAuthenticationPlugin.bundle dmitrijustenko$ IRC Class - Basic IRC Commands
+Contents/•IRC - Internet Relay Chat
+Contents/•Helpful Tips
+Contents/•Basic IRC Commands
+Contents/•mIRC Setup Tutorial
+Contents/•PIRCH Setup Tutorial
+Just as you are able to surf the net with a few tricks to help make things easier, IRC is very similar. Below you will find some of the more common IRC commands that we use often. For a far more complete list, please visit our mIRC Commands page.
+/join
+Type /join #channelname -- to join a channel of your choice
+Example: /join #bossmom
+What it looks like:
+ 
+[18:44] *** Now talking in #beginner
+--Op-- bossmom has joined the channel ®'
+-bash: /Volumes/CleanMyMac 3 3.9.3/Open Gatekeeper friendly: No such file or directory
+logout
+Saving session...[18:44] *** Set by X on Sun Jul 23 16:10:34
+
+
+/me
+The /me is an action message.
+Type /me 'does anything'
+Example: /me waves hello
+What it looks like:
+* bossmom waves hello
+
+/msg
+Type /msg nickname (message) to start a private chat.
+Example: /msg puddytat Hey tat, how are you?
+What it looks like:
+-> *puddytat* Hey tat, how are you?
+
+/nick
+/-bash: IRC: command not found
+MBP-Poleansky:ContactsAccountsAuthenticationPlugin.bundle dmitrijustenko$ •IRC - Internet Relay Chat
+-bash: •IRC: command not found
+MBP-Poleansky:ContactsAccountsAuthenticationPlugin.bundle dmitrijustenko$ •Helpful Tips
+-bash: •Helpful: command not found
+MBP-Poleansky:ContactsAccountsAuthenticationPlugin.bundle dmitrijustenko$ •Basic IRC Commands
+-bash: •Basic: command not found
+MBP-Poleansky:ContactsAccountsAuthenticationPlugin.bundle dmitrijustenko$ •mIRC Setup Tutorial
+-bash: •mIRC: command not found
+MBP-Poleansky:ContactsAccountsAuthenticationPlugin.bundle dmitrijustenko$ •PIRCH Setup Tutorial
+-ba
+...copying shared history...
+...saving history...truncating history files...
+...completed.
+Deleting expired sessions...14 completed.
+
+[Процесс завершен]
+
