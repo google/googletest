@@ -549,6 +549,27 @@ leaving your object in a partially-constructed state. Likewise, a fatal
 assertion failure in a destructor may leave your object in a
 partially-destructed state. Use assertions carefully in these situations!
 
+### Snapshot Testing
+
+Often writing equality assertions is tedious, but checking that the output of
+your code is correct "by hand" is rather quick. For example, your code might
+generate images, HTML, SQL statements, etc. If such output changes rather rarely,
+e.g., you do a lot of refactoring, but the output must not be affected, then
+snapshot testing might work for you.
+
+To use snapshot testing, write something like `EXPECT_EQ_SNAPSHOT(val)`. `val`
+is then compared to a snapshot stored in a file. The name of said file is
+generated using the name of the test file and the test parameter, plus the `.snap`
+extension. Snapshot files should be checked in with your source code.
+
+To generated a snapshot, as needed the first time, or to update a snapshot
+call your test executable with `GTEST_UPDATE_SNAPSHOT=1` in the environment.
+*It is your responsibility to check manually that the snapshot conforms to what
+your code should do*. Do not simply updating your snapshot every time your test
+fails. If you need to update snapshots often, consider making the output of your
+code more stable: e.g., remove timestamps, remove platform-specific output,
+sort dictionary keys.
+
 ## Teaching googletest How to Print Your Values
 
 When a test assertion such as `EXPECT_EQ` fails, googletest prints the argument
