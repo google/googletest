@@ -315,4 +315,7 @@ $env:Path = \"$project_bin;$env:Path\"
   cxx_executable(gtest_xml_output_unittest_ test gtest)
   py_test(gtest_xml_output_unittest --no_stacktrace_support)
   py_test(googletest-json-output-unittest --no_stacktrace_support)
+
+  cxx_executable(googletest-snapshot-test_ test gtest)
+  py_test(googletest-snapshot-test --sourcedir=${CMAKE_CURRENT_SOURCE_DIR})
 endif()

@@ -68,6 +68,7 @@ cc_test(
             "googletest-throw-on-failure-test_.cc",
             "googletest-param-test-invalid-name1-test_.cc",
             "googletest-param-test-invalid-name2-test_.cc",
+            "googletest-snapshot-test_.cc",
         ],
     ) + select({
         "//:windows": [],
@@ -497,5 +498,13 @@ py_test(
     size = "small",
     srcs = ["googletest-param-test-invalid-name2-test.py"],
     data = [":googletest-param-test-invalid-name2-test_"],
+    deps = [":gtest_test_utils"],
+)
+
+py_test(
+    name = "googletest-snapshot-test",
+    size = "small",
+    srcs = ["googletest-snapshot-test.py"],
+    data = [":googletest-snapshot-test_"],
     deps = [":gtest_test_utils"],
 )
