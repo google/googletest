@@ -69,9 +69,6 @@ namespace testing {
 
 namespace internal {
 
-template <typename F1, typename F2>
-class ActionAdaptor;
-
 // BuiltInDefaultValueGetter<T, true>::Get() returns a
 // default-constructed T value.  BuiltInDefaultValueGetter<T,
 // false>::Get() crashes with an error.
@@ -342,6 +339,19 @@ class ActionInterface {
 // object as a handle to it.
 template <typename F>
 class Action {
+  // Adapter class to allow constructing Action from a legacy ActionInterface.
+  // New code should create Actions from functors instead.
+  struct ActionAdapter {
+    // Adapter must be copyable to satisfy std::function requirements.
+    ::std::shared_ptr<ActionInterface<F>> impl_;
+
+    template <typename... Args>
+    typename internal::Function<F>::Result operator()(Args&&... args) {
+      return impl_->Perform(
+          ::std::forward_as_tuple(::std::forward<Args>(args)...));
+    }
+  };
+
  public:
   typedef typename internal::Function<F>::Result Result;
   typedef typename internal::Function<F>::ArgumentTuple ArgumentTuple;
@@ -359,19 +369,17 @@ class Action {
   Action(G&& fun) : fun_(::std::forward<G>(fun)) {}  // NOLINT
 
   // Constructs an Action from its implementation.
-  explicit Action(ActionInterface<F>* impl) : impl_(impl) {}
+  explicit Action(ActionInterface<F>* impl)
+      : fun_(ActionAdapter{::std::shared_ptr<ActionInterface<F>>(impl)}) {}
 
   // This constructor allows us to turn an Action<Func> object into an
   // Action<F>, as long as F's arguments can be implicitly converted
-  // to Func's and Func's return type can be implicitly converted to
-  // F's.
+  // to Func's and Func's return type can be implicitly converted to F's.
   template <typename Func>
-  explicit Action(const Action<Func>& action);
+  explicit Action(const Action<Func>& action) : fun_(action.fun_) {}
 
   // Returns true iff this is the DoDefault() action.
-  bool IsDoDefault() const {
-    return impl_ == nullptr && fun_ == nullptr;
-  }
+  bool IsDoDefault() const { return fun_ == nullptr; }
 
   // Performs the action.  Note that this method is const even though
   // the corresponding method in ActionInterface is not.  The reason
@@ -383,25 +391,15 @@ class Action {
     if (IsDoDefault()) {
       internal::IllegalDoDefault(__FILE__, __LINE__);
     }
-    if (fun_ != nullptr) {
-      return internal::Apply(fun_, ::std::move(args));
-    }
-    return impl_->Perform(args);
+    return internal::Apply(fun_, ::std::move(args));
   }
 
  private:
-  template <typename F1, typename F2>
-  friend class internal::ActionAdaptor;
-
   template <typename G>
   friend class Action;
 
-  // Action can be implemented either as a generic functor (via std::function),
-  // or legacy ActionInterface. The invariant is that at most one of fun_ and
-  // impl_ may be nonnull; both are null iff this is the default action.
-  // FIXME: Fold the ActionInterface into std::function.
+  // fun_ is an empty function iff this is the DoDefault() action.
   ::std::function<F> fun_;
-  ::std::shared_ptr<ActionInterface<F>> impl_;
 };
 
 // The PolymorphicAction class template makes it easy to implement a
@@ -479,26 +477,6 @@ inline PolymorphicAction<Impl> MakePolymorphicAction(const Impl& impl) {
 }
 
 namespace internal {
-
-// Allows an Action<F2> object to pose as an Action<F1>, as long as F2
-// and F1 are compatible.
-template <typename F1, typename F2>
-class ActionAdaptor : public ActionInterface<F1> {
- public:
-  typedef typename internal::Function<F1>::Result Result;
-  typedef typename internal::Function<F1>::ArgumentTuple ArgumentTuple;
-
-  explicit ActionAdaptor(const Action<F2>& from) : impl_(from.impl_) {}
-
-  Result Perform(const ArgumentTuple& args) override {
-    return impl_->Perform(args);
-  }
-
- private:
-  const std::shared_ptr<ActionInterface<F2>> impl_;
-
-  GTEST_DISALLOW_ASSIGN_(ActionAdaptor);
-};
 
 // Helper struct to specialize ReturnAction to execute a move instead of a copy
 // on return. Useful for move-only types, but could be used on any type.
@@ -1065,20 +1043,6 @@ struct DoAllAction {
 //   EXPECT_CALL(mock, Foo("abc", _, _)).WillOnce(Invoke(DistanceToOrigin));
 //   EXPECT_CALL(mock, Bar(5, _, _)).WillOnce(Invoke(DistanceToOrigin));
 typedef internal::IgnoredValue Unused;
-
-// This constructor allows us to turn an Action<From> object into an
-// Action<To>, as long as To's arguments can be implicitly converted
-// to From's and From's return type cann be implicitly converted to
-// To's.
-template <typename To>
-template <typename From>
-Action<To>::Action(const Action<From>& from)
-    :
-      fun_(from.fun_),
-      impl_(from.impl_ == nullptr
-                ? nullptr
-                : new internal::ActionAdaptor<To, From>(from)) {
-}
 
 // Creates an action that does actions a1, a2, ..., sequentially in
 // each invocation.
