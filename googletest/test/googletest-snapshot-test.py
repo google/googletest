@@ -43,7 +43,7 @@ import gtest_test_utils
 # Constants.
 
 # The environment variable where we store the source directory
-CMAKE_CURRENT_SOURCE_DIR = 'CMAKE_CURRENT_SOURCE_DIR'
+TEST_SRCDIR = 'TEST_SRCDIR'
 
 # The command line flag for updating snapshots
 UPDATE_SNAPSHOT = 'gtest_update_snapshot'
@@ -78,7 +78,7 @@ def Run(command):
 
 def RemoveSnapshot():
   for param in [ 'Alice', 'Bob' ]:
-    snapshotFile = os.environ[CMAKE_CURRENT_SOURCE_DIR] + \
+    snapshotFile = os.environ[TEST_SRCDIR] + \
       '/test/googletest-snapshot-test_.cc_{0}.snap'.format(param)
     try:
       os.remove(snapshotFile)
@@ -151,7 +151,7 @@ if __name__ == '__main__':
   # Get source dir (using a poor man's argparse)
   for arg in sys.argv:
     if '--sourcedir=' in arg:
-      os.environ[CMAKE_CURRENT_SOURCE_DIR] = arg.split('=')[1]
+      os.environ[TEST_SRCDIR] = arg.split('=')[1]
       sys.argv.remove(arg)
       break
 
