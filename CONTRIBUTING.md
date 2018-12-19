@@ -123,6 +123,12 @@ this is usually done by 'make'.  To run the tests, do
 
 All tests should pass.
 
+Please make sure your tests also run with [Bazel](https://bazel.build/):
+
+    ./ci/build-linux-basel.sh
+
+Otherwise, the CI will fail your pull request.
+
 ### Regenerating Source Files ##
 
 Some of Google Test's source files are generated from templates (not
