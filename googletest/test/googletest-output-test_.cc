@@ -1024,6 +1024,56 @@ TEST_F(ExpectFailureTest, ExpectNonFatalFailureOnAllThreads) {
                                          "Some other non-fatal failure.");
 }
 
+class DynamicFixture : public testing::Test {
+ protected:
+  DynamicFixture() { printf("DynamicFixture()\n"); }
+  ~DynamicFixture() override { printf("~DynamicFixture()\n"); }
+  void SetUp() override { printf("DynamicFixture::SetUp\n"); }
+  void TearDown() override { printf("DynamicFixture::TearDown\n"); }
+
+  static void SetUpTestCase() { printf("DynamicFixture::SetUpTestCase\n"); }
+  static void TearDownTestCase() {
+    printf("DynamicFixture::TearDownTestCase\n");
+  }
+};
+
+template <bool Pass>
+class DynamicTest : public DynamicFixture {
+ public:
+  void TestBody() override { EXPECT_TRUE(Pass); }
+};
+
+auto dynamic_test = (
+    // Register two tests with the same fixture correctly.
+    testing::RegisterTest(
+        "DynamicFixture", "DynamicTestPass", nullptr, nullptr, __FILE__,
+        __LINE__, []() -> DynamicFixture* { return new DynamicTest<true>; }),
+    testing::RegisterTest(
+        "DynamicFixture", "DynamicTestFail", nullptr, nullptr, __FILE__,
+        __LINE__, []() -> DynamicFixture* { return new DynamicTest<false>; }),
+
+    // Register the same fixture with another name. That's fine.
+    testing::RegisterTest(
+        "DynamicFixtureAnotherName", "DynamicTestPass", nullptr, nullptr,
+        __FILE__, __LINE__,
+        []() -> DynamicFixture* { return new DynamicTest<true>; }),
+
+    // Register two tests with the same fixture incorrectly.
+    testing::RegisterTest(
+        "BadDynamicFixture1", "FixtureBase", nullptr, nullptr, __FILE__,
+        __LINE__, []() -> DynamicFixture* { return new DynamicTest<true>; }),
+    testing::RegisterTest(
+        "BadDynamicFixture1", "TestBase", nullptr, nullptr, __FILE__, __LINE__,
+        []() -> testing::Test* { return new DynamicTest<true>; }),
+
+    // Register two tests with the same fixture incorrectly by ommiting the
+    // return type.
+    testing::RegisterTest(
+        "BadDynamicFixture2", "FixtureBase", nullptr, nullptr, __FILE__,
+        __LINE__, []() -> DynamicFixture* { return new DynamicTest<true>; }),
+    testing::RegisterTest("BadDynamicFixture2", "Derived", nullptr, nullptr,
+                          __FILE__, __LINE__,
+                          []() { return new DynamicTest<true>; }));
 
 // Two test environments for testing testing::AddGlobalTestEnvironment().
 
