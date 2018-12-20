@@ -2354,6 +2354,92 @@ GTEST_API_ std::string TempDir();
 #  pragma warning(pop)
 #endif
 
+// Dynamically registers a test with the framework.
+//
+// This is an advanced API only to be used when the `TEST` macros are
+// insufficient. The macros should be preferred when possible, as they avoid
+// most of the complexity of calling this function.
+//
+// The `factory` argument is a factory callable (move-constructible) object or
+// function pointer that creates a new instance of the Test object. It
+// handles ownership to the caller. The signature of the callable is
+// `Fixture*()`, where `Fixture` is the test fixture class for the test. All
+// tests registered with the same `test_case_name` must return the same
+// fixture type. This is checked at runtime.
+//
+// The framework will infer the fixture class from the factory and will call
+// the `SetUpTestCase` and `TearDownTestCase` for it.
+//
+// Must be called before `RUN_ALL_TESTS()` is invoked, otherwise behavior is
+// undefined.
+//
+// Use case example:
+//
+// class MyFixture : public ::testing::Test {
+//  public:
+//   // All of these optional, just like in regular macro usage.
+//   static void SetUpTestCase() { ... }
+//   static void TearDownTestCase() { ... }
+//   void SetUp() override { ... }
+//   void TearDown() override { ... }
+// };
+//
+// class MyTest : public MyFixture {
+//  public:
+//   explicit MyTest(int data) : data_(data) {}
+//   void TestBody() override { ... }
+//
+//  private:
+//   int data_;
+// };
+//
+// void RegisterMyTests(const std::vector<int>& values) {
+//   for (int v : values) {
+//     ::testing::RegisterTest(
+//         "MyFixture", ("Test" + std::to_string(v)).c_str(), nullptr,
+//         std::to_string(v).c_str(),
+//         __FILE__, __LINE__,
+//         // Important to use the fixture type as the return type here.
+//         [=]() -> MyFixture* { return new MyTest(v); });
+//   }
+// }
+// ...
+// int main(int argc, char** argv) {
+//   std::vector<int> values_to_test = LoadValuesFromConfig();
+//   RegisterMyTests(values_to_test);
+//   ...
+//   return RUN_ALL_TESTS();
+// }
+//
+template <int&... ExplicitParameterBarrier, typename Factory>
+TestInfo* RegisterTest(const char* test_case_name, const char* test_name,
+                       const char* type_param, const char* value_param,
+                       const char* file, int line, Factory factory) {
+  using TestT = typename std::remove_pointer<decltype(factory())>::type;
+
+  // Helper class to get SetUpTestCase and TearDownTestCase when they are in a
+  // protected scope.
+  struct Helper : TestT {
+    using TestT::SetUpTestCase;
+    using TestT::TearDownTestCase;
+  };
+
+  class FactoryImpl : public internal::TestFactoryBase {
+   public:
+    explicit FactoryImpl(Factory f) : factory_(std::move(f)) {}
+    Test* CreateTest() override { return factory_(); }
+
+   private:
+    Factory factory_;
+  };
+
+  return internal::MakeAndRegisterTestInfo(
+      test_case_name, test_name, type_param, value_param,
+      internal::CodeLocation(file, line), internal::GetTypeId<TestT>(),
+      &Helper::SetUpTestCase, &Helper::TearDownTestCase,
+      new FactoryImpl{std::move(factory)});
+}
+
 }  // namespace testing
 
 // Use this function in main() to run all tests.  It returns 0 if all
