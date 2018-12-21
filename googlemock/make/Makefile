@@ -19,6 +19,9 @@
 # a copy of Google Test at a different location.
 GTEST_DIR = ../../googletest
 
+# Points to the location of the Google Test libraries
+GTEST_LIB_DIR = .
+
 # Points to the root of Google Mock, relative to where this file is.
 # Remember to tweak this if you move this file.
 GMOCK_DIR = ..
@@ -33,7 +36,10 @@ USER_DIR = ../test
 CPPFLAGS += -isystem $(GTEST_DIR)/include -isystem $(GMOCK_DIR)/include
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -g -Wall -Wextra -pthread
+CXXFLAGS += -g -Wall -Wextra -pthread -std=c++11
+
+# Google Test libraries
+GTEST_LIBS = libgtest.a libgtest_main.a libgmock.a libgmock_main.a
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
@@ -53,10 +59,10 @@ GMOCK_HEADERS = $(GMOCK_DIR)/include/gmock/*.h \
 
 # House-keeping build targets.
 
-all : $(TESTS)
+all : $(GTEST_LIBS) $(TESTS)
 
 clean :
-	rm -f $(TESTS) gmock.a gmock_main.a *.o
+	rm -f $(GTEST_LIBS) $(TESTS) *.o
 
 # Builds gmock.a and gmock_main.a.  These libraries contain both
 # Google Mock and Google Test.  A test should link with either gmock.a
@@ -78,6 +84,10 @@ gtest-all.o : $(GTEST_SRCS_)
 	$(CXX) $(CPPFLAGS) -I$(GTEST_DIR) -I$(GMOCK_DIR) $(CXXFLAGS) \
             -c $(GTEST_DIR)/src/gtest-all.cc
 
+gtest_main.o : $(GTEST_SRCS_)
+	$(CXX) $(CPPFLAGS) -I$(GTEST_DIR) -I$(GMOCK_DIR) $(CXXFLAGS) \
+            -c $(GTEST_DIR)/src/gtest_main.cc
+
 gmock-all.o : $(GMOCK_SRCS_)
 	$(CXX) $(CPPFLAGS) -I$(GTEST_DIR) -I$(GMOCK_DIR) $(CXXFLAGS) \
             -c $(GMOCK_DIR)/src/gmock-all.cc
@@ -86,10 +96,16 @@ gmock_main.o : $(GMOCK_SRCS_)
 	$(CXX) $(CPPFLAGS) -I$(GTEST_DIR) -I$(GMOCK_DIR) $(CXXFLAGS) \
             -c $(GMOCK_DIR)/src/gmock_main.cc
 
-gmock.a : gmock-all.o gtest-all.o
+libgtest.a : gtest-all.o
 	$(AR) $(ARFLAGS) $@ $^
 
-gmock_main.a : gmock-all.o gtest-all.o gmock_main.o
+libgtest_main.a : gtest_main.o
+	$(AR) $(ARFLAGS) $@ $^
+
+libgmock.a : gmock-all.o
+	$(AR) $(ARFLAGS) $@ $^
+
+libgmock_main.a : gmock_main.o
 	$(AR) $(ARFLAGS) $@ $^
 
 # Builds a sample test.
@@ -97,5 +113,5 @@ gmock_main.a : gmock-all.o gtest-all.o gmock_main.o
 gmock_test.o : $(USER_DIR)/gmock_test.cc $(GMOCK_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/gmock_test.cc
 
-gmock_test : gmock_test.o gmock_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+gmock_test : gmock_test.o $(GTEST_LIBS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -L$(GTEST_LIB_DIR) -lgmock -lpthread $^ -o $@
