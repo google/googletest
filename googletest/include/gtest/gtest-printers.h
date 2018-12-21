@@ -514,7 +514,7 @@ void PrintTo(const T& value, ::std::ostream* os) {
                   (sizeof(IsContainerTest<T>(0)) == sizeof(IsContainer)) &&
               !IsRecursiveContainer<T>::value
           ? kPrintContainer
-          : !is_pointer<T>::value
+          : !std::is_pointer<T>::value
                 ? kPrintOther
                 : std::is_function<typename std::remove_pointer<T>::type>::value
                       ? kPrintFunctionPointer
