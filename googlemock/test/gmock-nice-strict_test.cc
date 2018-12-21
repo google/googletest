@@ -27,8 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
-#include "gmock/gmock-generated-nice-strict.h"
+#include "gmock/gmock-nice-strict.h"
 
 #include <string>
 #include <utility>
