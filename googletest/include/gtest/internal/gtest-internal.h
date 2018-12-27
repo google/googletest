@@ -967,37 +967,24 @@ struct IsHashTable {
 template <typename T>
 const bool IsHashTable<T>::value;
 
-template<typename T>
-struct VoidT {
-    typedef void value_type;
-};
-
-template <typename T, typename = void>
-struct HasValueType : false_type {};
-template <typename T>
-struct HasValueType<T, VoidT<typename T::value_type> > : true_type {
-};
-
 template <typename C,
-          bool = sizeof(IsContainerTest<C>(0)) == sizeof(IsContainer),
-          bool = HasValueType<C>::value>
+          bool = sizeof(IsContainerTest<C>(0)) == sizeof(IsContainer)>
 struct IsRecursiveContainerImpl;
 
-template <typename C, bool HV>
-struct IsRecursiveContainerImpl<C, false, HV> : public false_type {};
+template <typename C>
+struct IsRecursiveContainerImpl<C, false> : public false_type {};
 
 // Since the IsRecursiveContainerImpl depends on the IsContainerTest we need to
 // obey the same inconsistencies as the IsContainerTest, namely check if
 // something is a container is relying on only const_iterator in C++11 and
 // is relying on both const_iterator and iterator otherwise
 template <typename C>
-struct IsRecursiveContainerImpl<C, true, false> : public false_type {};
-
-template <typename C>
-struct IsRecursiveContainerImpl<C, true, true> {
-  typedef typename IteratorTraits<typename C::const_iterator>::value_type
-      value_type;
-  typedef is_same<value_type, C> type;
+struct IsRecursiveContainerImpl<C, true> {
+  using value_type = decltype(*std::declval<typename C::const_iterator>());
+  using type =
+      is_same<typename std::remove_const<
+                  typename std::remove_reference<value_type>::type>::type,
+              C>;
 };
 
 // IsRecursiveContainer<Type> is a unary compile-time predicate that
