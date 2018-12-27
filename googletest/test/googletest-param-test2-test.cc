@@ -37,6 +37,8 @@
 using ::testing::Values;
 using ::testing::internal::ParamGenerator;
 
+extern ParamGenerator<int> extern_gen;
+
 // Tests that generators defined in a different translation unit
 // are functional. The test using extern_gen is defined
 // in googletest-param-test-test.cc.

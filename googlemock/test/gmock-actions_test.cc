@@ -902,7 +902,7 @@ class NullaryFunctor {
   int operator()() { return 2; }
 };
 
-bool g_done = false;
+static bool g_done = false;
 void VoidNullary() { g_done = true; }
 
 class VoidNullaryFunctor {

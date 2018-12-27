@@ -377,10 +377,12 @@ TYPED_TEST_P(TypedTestP2, A) {}
 
 REGISTER_TYPED_TEST_SUITE_P(TypedTestP2, A);
 
-// Verifies that the code between TYPED_TEST_SUITE_P() and
-// REGISTER_TYPED_TEST_SUITE_P() is not enclosed in a namespace.
-IntAfterTypedTestSuiteP after = 0;
-IntBeforeRegisterTypedTestSuiteP before = 0;
+// Verifies that the code between TYPED_TEST_CASE_P() and
+// REGISTER_TYPED_TEST_CASE_P() is not enclosed in a namespace.
+namespace {
+IntAfterTypedTestSuiteP after GTEST_ATTRIBUTE_UNUSED_ = 0;
+IntBeforeRegisterTypedTestSuiteP before GTEST_ATTRIBUTE_UNUSED_ = 0;
+}
 
 // Verifies that the last argument of INSTANTIATE_TYPED_TEST_SUITE_P()
 // can be either a single type or a Types<...> type list.

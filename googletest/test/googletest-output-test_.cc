@@ -39,6 +39,8 @@
 
 #include <stdlib.h>
 
+namespace {
+
 #if _MSC_VER
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4127 /* conditional expression is constant */)
 #endif  //  _MSC_VER
@@ -465,12 +467,6 @@ TEST(AddFailureAtTest, MessageContainsSpecifiedFileAndLineNumber) {
 }
 
 #if GTEST_IS_THREADSAFE
-
-// A unary function that may die.
-void DieIf(bool should_die) {
-  GTEST_CHECK_(!should_die) << " - death inside DieIf().";
-}
-
 // Tests running death tests in a multi-threaded context.
 
 // Used for coordination between the main and the spawn thread.
@@ -1043,7 +1039,7 @@ class DynamicTest : public DynamicFixture {
   void TestBody() override { EXPECT_TRUE(Pass); }
 };
 
-auto dynamic_test = (
+static auto dynamic_test = (
     // Register two tests with the same fixture correctly.
     testing::RegisterTest(
         "DynamicFixture", "DynamicTestPass", nullptr, nullptr, __FILE__,
@@ -1096,6 +1092,15 @@ class BarEnvironment : public testing::Environment {
     ADD_FAILURE() << "Expected non-fatal failure.";
   }
 };
+
+}
+
+#if GTEST_IS_THREADSAFE
+// A unary function that may die.
+void DieIf(bool should_die) {
+  GTEST_CHECK_(!should_die) << " - death inside DieIf().";
+}
+#endif  // GTEST_IS_THREADSAFE
 
 // The main function.
 //

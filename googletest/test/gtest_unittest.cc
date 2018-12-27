@@ -7576,9 +7576,11 @@ class DynamicTest : public DynamicUnitTestFixture {
   void TestBody() override { EXPECT_TRUE(true); }
 };
 
+namespace {
 auto* dynamic_test = testing::RegisterTest(
     "DynamicUnitTestFixture", "DynamicTest", "TYPE", "VALUE", __FILE__,
     __LINE__, []() -> DynamicUnitTestFixture* { return new DynamicTest; });
+}
 
 TEST(RegisterTest, WasRegistered) {
   auto* unittest = testing::UnitTest::GetInstance();

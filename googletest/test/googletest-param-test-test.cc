@@ -965,6 +965,9 @@ class Unstreamable {
  public:
   explicit Unstreamable(int value) : value_(value) {}
 
+  // -Wunused: dummy accessor for `value_`.
+  const int& dummy_value() const { return value_; }
+
  private:
   int value_;
 };

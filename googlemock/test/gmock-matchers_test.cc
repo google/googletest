@@ -968,6 +968,8 @@ class Unprintable {
   Unprintable() : c_('a') {}
 
   bool operator==(const Unprintable& /* rhs */) const { return true; }
+  // -Wunused: dummy accessor for `c_`.
+  char dummy_c() { return c_; }
  private:
   char c_;
 };
@@ -6927,7 +6929,7 @@ TEST(ArgsTest, ExplainsMatchResultWithoutInnerExplanation) {
 // For testing Args<>'s explanation.
 class LessThanMatcher : public MatcherInterface<std::tuple<char, int> > {
  public:
-  virtual void DescribeTo(::std::ostream* os) const {}
+  void DescribeTo(::std::ostream* /*os*/) const override {}
 
   virtual bool MatchAndExplain(std::tuple<char, int> value,
                                MatchResultListener* listener) const {

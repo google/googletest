@@ -65,8 +65,6 @@ inline char Char(char ch) { return ch; }
 // Sample functions and functors for testing various actions.
 int Nullary() { return 1; }
 
-bool g_done = false;
-
 bool ByConstRef(const std::string& s) { return s == "Hi"; }
 
 const double g_double = 0;
