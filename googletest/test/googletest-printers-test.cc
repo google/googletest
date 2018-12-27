@@ -183,7 +183,13 @@ class PathLike {
  public:
   struct iterator {
     typedef PathLike value_type;
+
+    iterator& operator++();
+    PathLike& operator*();
   };
+
+  using value_type = char;
+  using const_iterator = iterator;
 
   PathLike() {}
 
