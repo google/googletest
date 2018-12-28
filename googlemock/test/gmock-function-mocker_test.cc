@@ -45,13 +45,6 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-// There is a bug in MSVC (fixed in VS 2008) that prevents creating a
-// mock for a function with const arguments, so we don't test such
-// cases for MSVC versions older than 2008.
-#if !GTEST_OS_WINDOWS || (_MSC_VER >= 1500)
-# define GMOCK_ALLOWS_CONST_PARAM_FUNCTIONS
-#endif  // !GTEST_OS_WINDOWS || (_MSC_VER >= 1500)
-
 namespace testing {
 namespace gmock_function_mocker_test {
 
@@ -84,9 +77,7 @@ class FooInterface {
 
   virtual bool TakesNonConstReference(int& n) = 0;  // NOLINT
   virtual std::string TakesConstReference(const int& n) = 0;
-#ifdef GMOCK_ALLOWS_CONST_PARAM_FUNCTIONS
   virtual bool TakesConst(const int x) = 0;
-#endif  // GMOCK_ALLOWS_CONST_PARAM_FUNCTIONS
 
   virtual int OverloadedOnArgumentNumber() = 0;
   virtual int OverloadedOnArgumentNumber(int n) = 0;
@@ -137,10 +128,7 @@ class MockFoo : public FooInterface {
 
   MOCK_METHOD(bool, TakesNonConstReference, (int&));  // NOLINT
   MOCK_METHOD(std::string, TakesConstReference, (const int&));
-
-#ifdef GMOCK_ALLOWS_CONST_PARAM_FUNCTIONS
   MOCK_METHOD(bool, TakesConst, (const int));  // NOLINT
-#endif
 
   // Tests that the function return type can contain unprotected comma.
   MOCK_METHOD((std::map<int, std::string>), ReturnTypeWithComma, (), ());
@@ -248,7 +236,6 @@ TEST_F(MockMethodFunctionMockerTest, MocksFunctionWithConstReferenceArgument) {
   EXPECT_EQ("Hello", foo_->TakesConstReference(a));
 }
 
-#ifdef GMOCK_ALLOWS_CONST_PARAM_FUNCTIONS
 // Tests mocking a function that takes a const variable.
 TEST_F(MockMethodFunctionMockerTest, MocksFunctionWithConstArgument) {
   EXPECT_CALL(mock_foo_, TakesConst(Lt(10)))
@@ -256,7 +243,6 @@ TEST_F(MockMethodFunctionMockerTest, MocksFunctionWithConstArgument) {
 
   EXPECT_FALSE(foo_->TakesConst(5));
 }
-#endif  // GMOCK_ALLOWS_CONST_PARAM_FUNCTIONS
 
 // Tests mocking functions overloaded on the number of arguments.
 TEST_F(MockMethodFunctionMockerTest, MocksFunctionsOverloadedOnArgumentNumber) {
