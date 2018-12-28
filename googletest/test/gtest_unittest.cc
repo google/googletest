@@ -511,8 +511,6 @@ TEST_F(FormatEpochTimeInMillisAsIso8601Test, PrintsEpochStart) {
   EXPECT_EQ("1970-01-01T00:00:00", FormatEpochTimeInMillisAsIso8601(0));
 }
 
-#if GTEST_CAN_COMPARE_NULL
-
 # ifdef __BORLANDC__
 // Silences warnings: "Condition is always true", "Unreachable code"
 #  pragma option push -w-ccc -w-rch
@@ -541,7 +539,6 @@ TEST(NullLiteralTest, IsFalseForNonNullLiterals) {
 #  pragma option pop
 # endif
 
-#endif  // GTEST_CAN_COMPARE_NULL
 //
 // Tests CodePointToUtf8().
 
@@ -586,7 +583,7 @@ TEST(CodePointToUtf8Test, CanEncode12To16Bits) {
 
 #if !GTEST_WIDE_STRING_USES_UTF16_
 // Tests in this group require a wchar_t to hold > 16 bits, and thus
-// are skipped on Windows, Cygwin, and Symbian, where a wchar_t is
+// are skipped on Windows, and Cygwin, where a wchar_t is
 // 16-bit wide. This code may not compile on those systems.
 
 // Tests that Unicode code-points that have 17 to 21 bits are encoded
@@ -2822,8 +2819,6 @@ TEST_F(FloatTest, LargeDiff) {
 TEST_F(FloatTest, Infinity) {
   EXPECT_FLOAT_EQ(values_.infinity, values_.close_to_infinity);
   EXPECT_FLOAT_EQ(-values_.infinity, -values_.close_to_infinity);
-#if !GTEST_OS_SYMBIAN
-  // Nokia's STLport crashes if we try to output infinity or NaN.
   EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(values_.infinity, -values_.infinity),
                           "-values_.infinity");
 
@@ -2831,14 +2826,10 @@ TEST_F(FloatTest, Infinity) {
   // are only 1 DLP apart.
   EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(values_.infinity, values_.nan1),
                           "values_.nan1");
-#endif  // !GTEST_OS_SYMBIAN
 }
 
 // Tests that comparing with NAN always returns false.
 TEST_F(FloatTest, NaN) {
-#if !GTEST_OS_SYMBIAN
-// Nokia's STLport crashes if we try to output infinity or NaN.
-
   // In C++Builder, names within local classes (such as used by
   // EXPECT_FATAL_FAILURE) cannot be resolved against static members of the
   // scoping class.  Use a static local alias as a workaround.
@@ -2856,7 +2847,6 @@ TEST_F(FloatTest, NaN) {
 
   EXPECT_FATAL_FAILURE(ASSERT_FLOAT_EQ(v.nan1, v.infinity),
                        "v.infinity");
-#endif  // !GTEST_OS_SYMBIAN
 }
 
 // Tests that *_FLOAT_EQ are reflexive.
@@ -2918,10 +2908,6 @@ TEST_F(FloatTest, FloatLEFails) {
     EXPECT_PRED_FORMAT2(FloatLE, values_.further_from_one, 1.0f);
   }, "(values_.further_from_one) <= (1.0f)");
 
-#if !GTEST_OS_SYMBIAN && !defined(__BORLANDC__)
-  // Nokia's STLport crashes if we try to output infinity or NaN.
-  // C++Builder gives bad results for ordered comparisons involving NaNs
-  // due to compiler bugs.
   EXPECT_NONFATAL_FAILURE({  // NOLINT
     EXPECT_PRED_FORMAT2(FloatLE, values_.nan1, values_.infinity);
   }, "(values_.nan1) <= (values_.infinity)");
@@ -2931,7 +2917,6 @@ TEST_F(FloatTest, FloatLEFails) {
   EXPECT_FATAL_FAILURE({  // NOLINT
     ASSERT_PRED_FORMAT2(FloatLE, values_.nan1, values_.nan1);
   }, "(values_.nan1) <= (values_.nan1)");
-#endif  // !GTEST_OS_SYMBIAN && !defined(__BORLANDC__)
 }
 
 // Instantiates FloatingPointTest for testing *_DOUBLE_EQ.
@@ -2995,8 +2980,6 @@ TEST_F(DoubleTest, LargeDiff) {
 TEST_F(DoubleTest, Infinity) {
   EXPECT_DOUBLE_EQ(values_.infinity, values_.close_to_infinity);
   EXPECT_DOUBLE_EQ(-values_.infinity, -values_.close_to_infinity);
-#if !GTEST_OS_SYMBIAN
-  // Nokia's STLport crashes if we try to output infinity or NaN.
   EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(values_.infinity, -values_.infinity),
                           "-values_.infinity");
 
@@ -3004,18 +2987,10 @@ TEST_F(DoubleTest, Infinity) {
   // are only 1 DLP apart.
   EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(values_.infinity, values_.nan1),
                           "values_.nan1");
-#endif  // !GTEST_OS_SYMBIAN
 }
 
 // Tests that comparing with NAN always returns false.
 TEST_F(DoubleTest, NaN) {
-#if !GTEST_OS_SYMBIAN
-  // In C++Builder, names within local classes (such as used by
-  // EXPECT_FATAL_FAILURE) cannot be resolved against static members of the
-  // scoping class.  Use a static local alias as a workaround.
-  // We use the assignment syntax since some compilers, like Sun Studio,
-  // don't allow initializing references using construction syntax
-  // (parentheses).
   static const DoubleTest::TestValues& v = this->values_;
 
   // Nokia's STLport crashes if we try to output infinity or NaN.
@@ -3025,17 +3000,13 @@ TEST_F(DoubleTest, NaN) {
   EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(1.0, v.nan1), "v.nan1");
   EXPECT_FATAL_FAILURE(ASSERT_DOUBLE_EQ(v.nan1, v.infinity),
                        "v.infinity");
-#endif  // !GTEST_OS_SYMBIAN
 }
 
 // Tests that *_DOUBLE_EQ are reflexive.
 TEST_F(DoubleTest, Reflexive) {
   EXPECT_DOUBLE_EQ(0.0, 0.0);
   EXPECT_DOUBLE_EQ(1.0, 1.0);
-#if !GTEST_OS_SYMBIAN
-  // Nokia's STLport crashes if we try to output infinity or NaN.
   ASSERT_DOUBLE_EQ(values_.infinity, values_.infinity);
-#endif  // !GTEST_OS_SYMBIAN
 }
 
 // Tests that *_DOUBLE_EQ are commutative.
@@ -3090,10 +3061,6 @@ TEST_F(DoubleTest, DoubleLEFails) {
     EXPECT_PRED_FORMAT2(DoubleLE, values_.further_from_one, 1.0);
   }, "(values_.further_from_one) <= (1.0)");
 
-#if !GTEST_OS_SYMBIAN && !defined(__BORLANDC__)
-  // Nokia's STLport crashes if we try to output infinity or NaN.
-  // C++Builder gives bad results for ordered comparisons involving NaNs
-  // due to compiler bugs.
   EXPECT_NONFATAL_FAILURE({  // NOLINT
     EXPECT_PRED_FORMAT2(DoubleLE, values_.nan1, values_.infinity);
   }, "(values_.nan1) <= (values_.infinity)");
@@ -3103,7 +3070,6 @@ TEST_F(DoubleTest, DoubleLEFails) {
   EXPECT_FATAL_FAILURE({  // NOLINT
     ASSERT_PRED_FORMAT2(DoubleLE, values_.nan1, values_.nan1);
   }, "(values_.nan1) <= (values_.nan1)");
-#endif  // !GTEST_OS_SYMBIAN && !defined(__BORLANDC__)
 }
 
 
@@ -3711,7 +3677,6 @@ TEST(AssertionTest, ASSERT_EQ) {
 }
 
 // Tests ASSERT_EQ(NULL, pointer).
-#if GTEST_CAN_COMPARE_NULL
 TEST(AssertionTest, ASSERT_EQ_NULL) {
   // A success.
   const char* p = nullptr;
@@ -3725,7 +3690,6 @@ TEST(AssertionTest, ASSERT_EQ_NULL) {
   static int n = 0;
   EXPECT_FATAL_FAILURE(ASSERT_EQ(nullptr, &n), "  &n\n    Which is:");
 }
-#endif  // GTEST_CAN_COMPARE_NULL
 
 // Tests ASSERT_EQ(0, non_pointer).  Since the literal 0 can be
 // treated as a null pointer by the compiler, we need to make sure
@@ -3916,11 +3880,8 @@ TEST(AssertionTest, NamedEnum) {
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(kE1, kE2), "Which is: 1");
 }
 
-// The version of gcc used in XCode 2.2 has a bug and doesn't allow
-// anonymous enums in assertions.  Therefore the following test is not
-// done on Mac.
-// Sun Studio and HP aCC also reject this code.
-#if !GTEST_OS_MAC && !defined(__SUNPRO_CC) && !defined(__HP_aCC)
+// Sun Studio and HP aCC2reject this code.
+#if !defined(__SUNPRO_CC) && !defined(__HP_aCC)
 
 // Tests using assertions with anonymous enums.
 enum {
@@ -4439,7 +4400,6 @@ TEST(ExpectTest, EXPECT_EQ_Double) {
                           "5.1");
 }
 
-#if GTEST_CAN_COMPARE_NULL
 // Tests EXPECT_EQ(NULL, pointer).
 TEST(ExpectTest, EXPECT_EQ_NULL) {
   // A success.
@@ -4454,7 +4414,6 @@ TEST(ExpectTest, EXPECT_EQ_NULL) {
   int n = 0;
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(nullptr, &n), "  &n\n    Which is:");
 }
-#endif  // GTEST_CAN_COMPARE_NULL
 
 // Tests EXPECT_EQ(0, non_pointer).  Since the literal 0 can be
 // treated as a null pointer by the compiler, we need to make sure

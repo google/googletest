@@ -1167,20 +1167,10 @@ TEST(IsNullTest, MatchesNullPointer) {
   EXPECT_TRUE(m2.Matches(p2));
   EXPECT_FALSE(m2.Matches("hi"));
 
-#if !GTEST_OS_SYMBIAN
-  // Nokia's Symbian compiler generates:
-  // gmock-matchers.h: ambiguous access to overloaded function
-  // gmock-matchers.h: 'testing::Matcher<void *>::Matcher(void *)'
-  // gmock-matchers.h: 'testing::Matcher<void *>::Matcher(const testing::
-  //     MatcherInterface<void *> *)'
-  // gmock-matchers.h:  (point of instantiation: 'testing::
-  //     gmock_matchers_test::IsNullTest_MatchesNullPointer_Test::TestBody()')
-  // gmock-matchers.h:   (instantiating: 'testing::PolymorphicMatc
   Matcher<void*> m3 = IsNull();
   void* p3 = nullptr;
   EXPECT_TRUE(m3.Matches(p3));
   EXPECT_FALSE(m3.Matches(reinterpret_cast<void*>(0xbeef)));
-#endif
 }
 
 TEST(IsNullTest, StdFunction) {
@@ -3168,20 +3158,8 @@ TEST(MatcherAssertionTest, WorksForByRefArguments) {
                        "Actual: 0" + OfType("int") + ", which is located @");
 }
 
-#if !GTEST_OS_SYMBIAN
 // Tests that ASSERT_THAT() and EXPECT_THAT() work when the matcher is
 // monomorphic.
-
-// ASSERT_THAT("hello", starts_with_he) fails to compile with Nokia's
-// Symbian compiler: it tries to compile
-// template<T, U> class MatcherCastImpl { ...
-//   virtual bool MatchAndExplain(T x, ...) const {
-//     return source_matcher_.MatchAndExplain(static_cast<U>(x), ...);
-// with U == string and T == const char*
-// With ASSERT_THAT("hello"...) changed to ASSERT_THAT(string("hello") ... )
-// the compiler silently crashes with no output.
-// If MatcherCastImpl is changed to use U(x) instead of static_cast<U>(x)
-// the code compiles but the converted string is bogus.
 TEST(MatcherAssertionTest, WorksForMonomorphicMatcher) {
   Matcher<const char*> starts_with_he = StartsWith("he");
   ASSERT_THAT("hello", starts_with_he);
@@ -3199,7 +3177,6 @@ TEST(MatcherAssertionTest, WorksForMonomorphicMatcher) {
                           "Expected: is > 5\n"
                           "  Actual: 5" + OfType("int"));
 }
-#endif  // !GTEST_OS_SYMBIAN
 
 // Tests floating-point matchers.
 template <typename RawType>

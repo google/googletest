@@ -106,12 +106,22 @@ class UnitTestImpl;                    // Opaque implementation of UnitTest
 // stack trace.
 GTEST_API_ extern const char kStackTraceMarker[];
 
+// An IgnoredValue object can be implicitly constructed from ANY value.
+class IgnoredValue {
+ public:
+  // This constructor template allows any value to be implicitly
+  // converted to IgnoredValue.  The object has no data member and
+  // doesn't try to remember anything about the argument.  We
+  // deliberately omit the 'explicit' keyword in order to allow the
+  // conversion to be implicit.
+  template <typename T>
+  IgnoredValue(const T& /* ignored */) {}  // NOLINT(runtime/explicit)
+};
+
 // Two overloaded helpers for checking at compile time whether an
 // expression is a null pointer literal (i.e. NULL or any 0-valued
-// compile-time integral constant).  Their return values have
-// different sizes, so we can use sizeof() to test which version is
-// picked by the compiler.  These helpers have no implementations, as
-// we only need their signatures.
+// compile-time integral constant).  These helpers have no
+// implementations, as we only need their signatures.
 //
 // Given IsNullLiteralHelper(x), the compiler will pick the first
 // version if x can be implicitly converted to Secret*, and pick the
@@ -120,20 +130,13 @@ GTEST_API_ extern const char kStackTraceMarker[];
 // a null pointer literal.  Therefore, we know that x is a null
 // pointer literal if and only if the first version is picked by the
 // compiler.
-char IsNullLiteralHelper(Secret* p);
-char (&IsNullLiteralHelper(...))[2];  // NOLINT
+std::true_type IsNullLiteralHelper(Secret*);
+std::false_type IsNullLiteralHelper(IgnoredValue);
 
-// A compile-time bool constant that is true if and only if x is a
-// null pointer literal (i.e. NULL or any 0-valued compile-time
-// integral constant).
-#ifdef GTEST_ELLIPSIS_NEEDS_POD_
-// We lose support for NULL detection where the compiler doesn't like
-// passing non-POD classes through ellipsis (...).
-# define GTEST_IS_NULL_LITERAL_(x) false
-#else
-# define GTEST_IS_NULL_LITERAL_(x) \
-    (sizeof(::testing::internal::IsNullLiteralHelper(x)) == 1)
-#endif  // GTEST_ELLIPSIS_NEEDS_POD_
+// A compile-time bool constant that is true if and only if x is a null pointer
+// literal (i.e. nullptr, NULL or any 0-valued compile-time integral constant).
+#define GTEST_IS_NULL_LITERAL_(x) \
+  decltype(::testing::internal::IsNullLiteralHelper(x))::value
 
 // Appends the user-supplied message to the Google-Test-generated message.
 GTEST_API_ std::string AppendUserMessage(

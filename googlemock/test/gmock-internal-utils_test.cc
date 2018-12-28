@@ -145,7 +145,6 @@ TEST(GetRawPointerTest, WorksForSmartPointers) {
 
 TEST(GetRawPointerTest, WorksForRawPointers) {
   int* p = nullptr;
-  // Don't use EXPECT_EQ as no NULL-testing magic on Symbian.
   EXPECT_TRUE(nullptr == GetRawPointer(p));
   int n = 1;
   EXPECT_EQ(&n, GetRawPointer(&n));
@@ -519,12 +518,6 @@ TEST(TypeTraitsTest, is_reference) {
   EXPECT_FALSE(is_reference<int>::value);
   EXPECT_FALSE(is_reference<char*>::value);
   EXPECT_TRUE(is_reference<const int&>::value);
-}
-
-TEST(TypeTraitsTest, is_pointer) {
-  EXPECT_FALSE(is_pointer<int>::value);
-  EXPECT_FALSE(is_pointer<char&>::value);
-  EXPECT_TRUE(is_pointer<const int*>::value);
 }
 
 TEST(TypeTraitsTest, type_equals) {
