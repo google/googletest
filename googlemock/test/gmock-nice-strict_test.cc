@@ -294,21 +294,13 @@ TEST(NiceMockTest, MoveOnlyConstructor) {
   NiceMock<MockBaz> nice_baz(MockBaz::MoveOnly{});
 }
 
-#if !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 // Tests that NiceMock<Mock> compiles where Mock is a user-defined
-// class (as opposed to ::testing::Mock).  We had to work around an
-// MSVC 8.0 bug that caused the symbol Mock used in the definition of
-// NiceMock to be looked up in the wrong context, and this test
-// ensures that our fix works.
-//
-// We have to skip this test on Symbian and Windows Mobile, as it
-// causes the program to crash there, for reasons unclear to us yet.
+// class (as opposed to ::testing::Mock).
 TEST(NiceMockTest, AcceptsClassNamedMock) {
   NiceMock< ::Mock> nice;
   EXPECT_CALL(nice, DoThis());
   nice.DoThis();
 }
-#endif  // !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 
 TEST(NiceMockTest, IsNaggy_IsNice_IsStrict) {
   NiceMock<MockFoo> nice_foo;
@@ -405,21 +397,13 @@ TEST(NaggyMockTest, MoveOnlyConstructor) {
   NaggyMock<MockBaz> naggy_baz(MockBaz::MoveOnly{});
 }
 
-#if !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 // Tests that NaggyMock<Mock> compiles where Mock is a user-defined
-// class (as opposed to ::testing::Mock).  We had to work around an
-// MSVC 8.0 bug that caused the symbol Mock used in the definition of
-// NaggyMock to be looked up in the wrong context, and this test
-// ensures that our fix works.
-//
-// We have to skip this test on Symbian and Windows Mobile, as it
-// causes the program to crash there, for reasons unclear to us yet.
+// class (as opposed to ::testing::Mock).
 TEST(NaggyMockTest, AcceptsClassNamedMock) {
   NaggyMock< ::Mock> naggy;
   EXPECT_CALL(naggy, DoThis());
   naggy.DoThis();
 }
-#endif  // !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 
 TEST(NaggyMockTest, IsNaggy_IsNice_IsStrict) {
   NaggyMock<MockFoo> naggy_foo;
@@ -497,21 +481,13 @@ TEST(StrictMockTest, MoveOnlyConstructor) {
   StrictMock<MockBaz> strict_baz(MockBaz::MoveOnly{});
 }
 
-#if !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 // Tests that StrictMock<Mock> compiles where Mock is a user-defined
-// class (as opposed to ::testing::Mock).  We had to work around an
-// MSVC 8.0 bug that caused the symbol Mock used in the definition of
-// StrictMock to be looked up in the wrong context, and this test
-// ensures that our fix works.
-//
-// We have to skip this test on Symbian and Windows Mobile, as it
-// causes the program to crash there, for reasons unclear to us yet.
+// class (as opposed to ::testing::Mock).
 TEST(StrictMockTest, AcceptsClassNamedMock) {
   StrictMock< ::Mock> strict;
   EXPECT_CALL(strict, DoThis());
   strict.DoThis();
 }
-#endif  // !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 
 TEST(StrictMockTest, IsNaggy_IsNice_IsStrict) {
   StrictMock<MockFoo> strict_foo;

@@ -44,6 +44,7 @@ $var n = 10  $$ The maximum arity we support.
 #define GMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_GENERATED_INTERNAL_UTILS_H_
 
 #include "gmock/internal/gmock-port.h"
+#include "gtest/gtest.h"
 
 namespace testing {
 
@@ -51,19 +52,6 @@ template <typename T>
 class Matcher;
 
 namespace internal {
-
-// An IgnoredValue object can be implicitly constructed from ANY value.
-// This is used in implementing the IgnoreResult(a) action.
-class IgnoredValue {
- public:
-  // This constructor template allows any value to be implicitly
-  // converted to IgnoredValue.  The object has no data member and
-  // doesn't try to remember anything about the argument.  We
-  // deliberately omit the 'explicit' keyword in order to allow the
-  // conversion to be implicit.
-  template <typename T>
-  IgnoredValue(const T& /* ignored */) {}  // NOLINT(runtime/explicit)
-};
 
 // MatcherTuple<T>::type is a tuple type where each field is a Matcher
 // for the corresponding field in tuple type T.

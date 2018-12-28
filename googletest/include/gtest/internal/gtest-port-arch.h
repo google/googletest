@@ -41,8 +41,6 @@
 # elif defined(__MINGW__) || defined(__MINGW32__) || defined(__MINGW64__)
 #  define GTEST_OS_WINDOWS_MINGW 1
 #  define GTEST_OS_WINDOWS 1
-#elif defined __SYMBIAN32__
-# define GTEST_OS_SYMBIAN 1
 #elif defined _WIN32
 # define GTEST_OS_WINDOWS 1
 # ifdef _WIN32_WCE

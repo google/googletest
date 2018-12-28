@@ -1527,7 +1527,7 @@ class EqHelper<true> {
       // expands to Compare("", "", NULL, my_ptr), which requires a conversion
       // to match the Secret* in the other overload, which would otherwise make
       // this template match better.
-      typename EnableIf<!is_pointer<T2>::value>::type* = nullptr) {
+      typename EnableIf<!std::is_pointer<T2>::value>::type* = nullptr) {
     return CmpHelperEQ(lhs_expression, rhs_expression, lhs, rhs);
   }
 

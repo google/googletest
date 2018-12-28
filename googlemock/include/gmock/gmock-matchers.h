@@ -244,11 +244,8 @@ inline Matcher<T> MatcherCast(const M& matcher) {
 
 // Implements SafeMatcherCast().
 //
-// We use an intermediate class to do the actual safe casting as Nokia's
-// Symbian compiler cannot decide between
-// template <T, M> ... (M) and
-// template <T, U> ... (const Matcher<U>&)
-// for function templates but can for member function templates.
+// FIXME: The intermediate SafeMatcherCastImpl class was introduced as a
+// workaround for a compiler bug, and can now be removed.
 template <typename T>
 class SafeMatcherCastImpl {
  public:
@@ -1714,23 +1711,22 @@ class FieldMatcher {
 
   template <typename T>
   bool MatchAndExplain(const T& value, MatchResultListener* listener) const {
+    // FIXME: The dispatch on std::is_pointer was introduced as a workaround for
+    // a compiler bug, and can now be removed.
     return MatchAndExplainImpl(
-        typename ::testing::internal::
-            is_pointer<GTEST_REMOVE_CONST_(T)>::type(),
-        value, listener);
+        typename std::is_pointer<GTEST_REMOVE_CONST_(T)>::type(), value,
+        listener);
   }
 
  private:
-  // The first argument of MatchAndExplainImpl() is needed to help
-  // Symbian's C++ compiler choose which overload to use.  Its type is
-  // true_type iff the Field() matcher is used to match a pointer.
-  bool MatchAndExplainImpl(false_type /* is_not_pointer */, const Class& obj,
+  bool MatchAndExplainImpl(std::false_type /* is_not_pointer */,
+                           const Class& obj,
                            MatchResultListener* listener) const {
     *listener << whose_field_ << "is ";
     return MatchPrintAndExplain(obj.*field_, matcher_, listener);
   }
 
-  bool MatchAndExplainImpl(true_type /* is_pointer */, const Class* p,
+  bool MatchAndExplainImpl(std::true_type /* is_pointer */, const Class* p,
                            MatchResultListener* listener) const {
     if (p == nullptr) return false;
 
@@ -1738,7 +1734,7 @@ class FieldMatcher {
     // Since *p has a field, it must be a class/struct/union type and
     // thus cannot be a pointer.  Therefore we pass false_type() as
     // the first argument.
-    return MatchAndExplainImpl(false_type(), *p, listener);
+    return MatchAndExplainImpl(std::false_type(), *p, listener);
   }
 
   const FieldType Class::*field_;
@@ -1785,16 +1781,13 @@ class PropertyMatcher {
   template <typename T>
   bool MatchAndExplain(const T&value, MatchResultListener* listener) const {
     return MatchAndExplainImpl(
-        typename ::testing::internal::
-            is_pointer<GTEST_REMOVE_CONST_(T)>::type(),
-        value, listener);
+        typename std::is_pointer<GTEST_REMOVE_CONST_(T)>::type(), value,
+        listener);
   }
 
  private:
-  // The first argument of MatchAndExplainImpl() is needed to help
-  // Symbian's C++ compiler choose which overload to use.  Its type is
-  // true_type iff the Property() matcher is used to match a pointer.
-  bool MatchAndExplainImpl(false_type /* is_not_pointer */, const Class& obj,
+  bool MatchAndExplainImpl(std::false_type /* is_not_pointer */,
+                           const Class& obj,
                            MatchResultListener* listener) const {
     *listener << whose_property_ << "is ";
     // Cannot pass the return value (for example, int) to MatchPrintAndExplain,
@@ -1803,7 +1796,7 @@ class PropertyMatcher {
     return MatchPrintAndExplain(result, matcher_, listener);
   }
 
-  bool MatchAndExplainImpl(true_type /* is_pointer */, const Class* p,
+  bool MatchAndExplainImpl(std::true_type /* is_pointer */, const Class* p,
                            MatchResultListener* listener) const {
     if (p == nullptr) return false;
 
@@ -1811,7 +1804,7 @@ class PropertyMatcher {
     // Since *p has a property method, it must be a class/struct/union
     // type and thus cannot be a pointer.  Therefore we pass
     // false_type() as the first argument.
-    return MatchAndExplainImpl(false_type(), *p, listener);
+    return MatchAndExplainImpl(std::false_type(), *p, listener);
   }
 
   Property property_;

@@ -154,9 +154,6 @@ GTEST_API_ void Log(LogSeverity severity, const std::string& message,
   // Ensures that logs from different threads don't interleave.
   MutexLock l(&g_log_mutex);
 
-  // "using ::std::cout;" doesn't work with Symbian's STLport, where cout is a
-  // macro.
-
   if (severity == kWarning) {
     // Prints a GMOCK WARNING marker to make the warnings easily searchable.
     std::cout << "\nGMOCK WARNING:";
