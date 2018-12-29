@@ -559,8 +559,8 @@ class MockNoexcept {
  public:
   MockNoexcept() {}
 
-  MOCK_NOEXCEPT_METHOD1(foo, int());
-  MOCK_CONST_NOEXCEPT_METHOD1(bar, int());
+  MOCK_NOEXCEPT_METHOD1(foo, int(int));
+  MOCK_CONST_NOEXCEPT_METHOD1(bar, int(int));
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockNoexcept);
