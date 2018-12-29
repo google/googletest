@@ -555,6 +555,26 @@ TEST(MockMethodOverloadedMockMethodTest, CanOverloadOnConstnessInMacroBody) {
   EXPECT_EQ(3, const_mock->Overloaded(1));
 }
 
+class MockNoexcept {
+ public:
+  MockNoexcept() {}
+
+  MOCK_NOEXCEPT_METHOD1(foo, int());
+  MOCK_CONST_NOEXCEPT_METHOD1(bar, int());
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockNoexcept);
+};
+
+TEST(MockMethodNoexceptMockMethodTest, WorksForNoexcept) {
+  MockNoexcept mock;
+  EXPECT_CALL(mock, foo(1)).WillOnce(Return(2));
+  EXPECT_CALL(mock, bar(1)).WillOnce(Return(3));
+
+  EXPECT_EQ(2, mock.foo(1));
+  EXPECT_EQ(3, mock.bar(1));
+}
+
 TEST(MockMethodMockFunctionTest, WorksForVoidNullary) {
   MockFunction<void()> foo;
   EXPECT_CALL(foo, Call());
