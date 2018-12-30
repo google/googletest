@@ -50,7 +50,7 @@ matrix:
     - os: osx
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
       if: type != pull_request
-    - language: python  # stop the build on Python 3 syntax errors or undefined names
+    - language: python  # stop the build on Python3 syntax errors or undefined names
       python: 3.7
       addons: true
       dist: xenial  # required for Python >= 3.7 (travis-ci/travis-ci#9069)
