@@ -136,11 +136,6 @@ class GTestJsonOutFilesTest(gtest_test_utils.TestCase):
     self.assert_(p.exited)
     self.assertEquals(0, p.exit_code)
 
-    # FIXME: libtool causes the built test binary to be
-    #   named lt-gtest_xml_outfiles_test_ instead of
-    #   gtest_xml_outfiles_test_.  To account for this possibility, we
-    #   allow both names in the following code.  We should remove this
-    #   when libtool replacement tool is ready.
     output_file_name1 = test_name + '.json'
     output_file1 = os.path.join(self.output_dir_, output_file_name1)
     output_file_name2 = 'lt-' + output_file_name1

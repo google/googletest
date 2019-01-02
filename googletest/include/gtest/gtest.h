@@ -329,7 +329,6 @@ class GTEST_API_ AssertionResult {
   const char* message() const {
     return message_.get() != nullptr ? message_->c_str() : "";
   }
-  // FIXME: Remove this after making sure no clients use it.
   // Deprecated; please use message() instead.
   const char* failure_message() const { return message(); }
 
