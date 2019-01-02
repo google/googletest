@@ -34,28 +34,19 @@
 
 licenses(["notice"])
 
-""" gmock own tests """
-
+# Tests for GMock itself
 cc_test(
     name = "gmock_all_test",
     size = "small",
-    srcs = glob(
-        include = [
-            "gmock-*.cc",
-        ],
-    ),
+    srcs = glob(include = ["gmock-*.cc"]),
     linkopts = select({
         "//:windows": [],
-        "//:windows_msvc": [],
-        "//conditions:default": [
-            "-pthread",
-        ],
+        "//conditions:default": ["-pthread"],
     }),
     deps = ["//:gtest"],
 )
 
-#  Py tests
-
+# Python tests
 py_library(
     name = "gmock_test_utils",
     testonly = 1,
@@ -66,9 +57,7 @@ cc_binary(
     name = "gmock_leak_test_",
     testonly = 1,
     srcs = ["gmock_leak_test_.cc"],
-    deps = [
-        "//:gtest_main",
-    ],
+    deps = ["//:gtest_main"],
 )
 
 py_test(
@@ -89,17 +78,13 @@ cc_test(
         "gmock_link_test.cc",
         "gmock_link_test.h",
     ],
-    deps = [
-        "//:gtest_main",
-    ],
+    deps = ["//:gtest_main"],
 )
 
 cc_binary(
     name = "gmock_output_test_",
     srcs = ["gmock_output_test_.cc"],
-    deps = [
-        "//:gtest",
-    ],
+    deps = ["//:gtest"],
 )
 
 py_test(
@@ -117,7 +102,5 @@ cc_test(
     name = "gmock_test",
     size = "small",
     srcs = ["gmock_test.cc"],
-    deps = [
-        "//:gtest_main",
-    ],
+    deps = ["//:gtest_main"],
 )

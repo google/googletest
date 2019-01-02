@@ -12,6 +12,7 @@ bazel-testlogs
 *.pyc
 
 # Visual Studio files
+.vs
 *.sdf
 *.opensdf
 *.VC.opendb
@@ -41,6 +42,8 @@ googletest/fused-src/
 
 # macOS files
 .DS_Store
+googletest/.DS_Store
+googletest/xcode/.DS_Store
 
 # Ignore cmake generated directories and files.
 CMakeFiles

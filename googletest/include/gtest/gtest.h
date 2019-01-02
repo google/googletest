@@ -53,12 +53,14 @@
 #define GTEST_INCLUDE_GTEST_GTEST_H_
 
 #include <limits>
+#include <memory>
 #include <ostream>
 #include <vector>
 
 #include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-string.h"
 #include "gtest/gtest-death-test.h"
+#include "gtest/gtest-matchers.h"
 #include "gtest/gtest-message.h"
 #include "gtest/gtest-param-test.h"
 #include "gtest/gtest-printers.h"
@@ -361,7 +363,7 @@ class GTEST_API_ AssertionResult {
   // construct is not satisfied with the predicate's outcome.
   // Referenced via a pointer to avoid taking too much stack frame space
   // with test assertions.
-  internal::scoped_ptr< ::std::string> message_;
+  std::unique_ptr< ::std::string> message_;
 };
 
 // Makes a successful assertion result.
@@ -493,7 +495,7 @@ class GTEST_API_ Test {
   // internal method to avoid clashing with names used in user TESTs.
   void DeleteSelf_() { delete this; }
 
-  const internal::scoped_ptr< GTEST_FLAG_SAVER_ > gtest_flag_saver_;
+  const std::unique_ptr<GTEST_FLAG_SAVER_> gtest_flag_saver_;
 
   // Often a user misspells SetUp() as Setup() and spends a long time
   // wondering why it is never called by Google Test.  The declaration of
@@ -796,10 +798,10 @@ class GTEST_API_ TestInfo {
   const std::string name_;               // Test name
   // Name of the parameter type, or NULL if this is not a typed or a
   // type-parameterized test.
-  const internal::scoped_ptr<const ::std::string> type_param_;
+  const std::unique_ptr<const ::std::string> type_param_;
   // Text representation of the value parameter, or NULL if this is not a
   // value-parameterized test.
-  const internal::scoped_ptr<const ::std::string> value_param_;
+  const std::unique_ptr<const ::std::string> value_param_;
   internal::CodeLocation location_;
   const internal::TypeId fixture_class_id_;   // ID of the test fixture class
   bool should_run_;                 // True iff this test should run
@@ -983,7 +985,7 @@ class GTEST_API_ TestCase {
   std::string name_;
   // Name of the parameter type, or NULL if this is not a typed or a
   // type-parameterized test.
-  const internal::scoped_ptr<const ::std::string> type_param_;
+  const std::unique_ptr<const ::std::string> type_param_;
   // The vector of TestInfos in their original order.  It owns the
   // elements in the vector.
   std::vector<TestInfo*> test_info_list_;
@@ -1109,21 +1111,21 @@ class TestEventListener {
 // above.
 class EmptyTestEventListener : public TestEventListener {
  public:
-  virtual void OnTestProgramStart(const UnitTest& /*unit_test*/) {}
-  virtual void OnTestIterationStart(const UnitTest& /*unit_test*/,
-                                    int /*iteration*/) {}
-  virtual void OnEnvironmentsSetUpStart(const UnitTest& /*unit_test*/) {}
-  virtual void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) {}
-  virtual void OnTestCaseStart(const TestCase& /*test_case*/) {}
-  virtual void OnTestStart(const TestInfo& /*test_info*/) {}
-  virtual void OnTestPartResult(const TestPartResult& /*test_part_result*/) {}
-  virtual void OnTestEnd(const TestInfo& /*test_info*/) {}
-  virtual void OnTestCaseEnd(const TestCase& /*test_case*/) {}
-  virtual void OnEnvironmentsTearDownStart(const UnitTest& /*unit_test*/) {}
-  virtual void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) {}
-  virtual void OnTestIterationEnd(const UnitTest& /*unit_test*/,
-                                  int /*iteration*/) {}
-  virtual void OnTestProgramEnd(const UnitTest& /*unit_test*/) {}
+  void OnTestProgramStart(const UnitTest& /*unit_test*/) override {}
+  void OnTestIterationStart(const UnitTest& /*unit_test*/,
+                            int /*iteration*/) override {}
+  void OnEnvironmentsSetUpStart(const UnitTest& /*unit_test*/) override {}
+  void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) override {}
+  void OnTestCaseStart(const TestCase& /*test_case*/) override {}
+  void OnTestStart(const TestInfo& /*test_info*/) override {}
+  void OnTestPartResult(const TestPartResult& /*test_part_result*/) override {}
+  void OnTestEnd(const TestInfo& /*test_info*/) override {}
+  void OnTestCaseEnd(const TestCase& /*test_case*/) override {}
+  void OnEnvironmentsTearDownStart(const UnitTest& /*unit_test*/) override {}
+  void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) override {}
+  void OnTestIterationEnd(const UnitTest& /*unit_test*/,
+                          int /*iteration*/) override {}
+  void OnTestProgramEnd(const UnitTest& /*unit_test*/) override {}
 };
 
 // TestEventListeners lets users add listeners to track events in Google Test.
@@ -1448,6 +1450,13 @@ AssertionResult CmpHelperEQFailure(const char* lhs_expression,
                    FormatForComparisonFailureMessage(rhs, lhs),
                    false);
 }
+
+// This block of code defines operator==/!=
+// to block lexical scope lookup.
+// It prevents using invalid operator==/!= defined at namespace scope.
+struct faketype {};
+inline bool operator==(faketype, faketype) { return true; }
+inline bool operator!=(faketype, faketype) { return false; }
 
 // The helper function for {ASSERT|EXPECT}_EQ.
 template <typename T1, typename T2>
@@ -2344,6 +2353,92 @@ GTEST_API_ std::string TempDir();
 #ifdef _MSC_VER
 #  pragma warning(pop)
 #endif
+
+// Dynamically registers a test with the framework.
+//
+// This is an advanced API only to be used when the `TEST` macros are
+// insufficient. The macros should be preferred when possible, as they avoid
+// most of the complexity of calling this function.
+//
+// The `factory` argument is a factory callable (move-constructible) object or
+// function pointer that creates a new instance of the Test object. It
+// handles ownership to the caller. The signature of the callable is
+// `Fixture*()`, where `Fixture` is the test fixture class for the test. All
+// tests registered with the same `test_case_name` must return the same
+// fixture type. This is checked at runtime.
+//
+// The framework will infer the fixture class from the factory and will call
+// the `SetUpTestCase` and `TearDownTestCase` for it.
+//
+// Must be called before `RUN_ALL_TESTS()` is invoked, otherwise behavior is
+// undefined.
+//
+// Use case example:
+//
+// class MyFixture : public ::testing::Test {
+//  public:
+//   // All of these optional, just like in regular macro usage.
+//   static void SetUpTestCase() { ... }
+//   static void TearDownTestCase() { ... }
+//   void SetUp() override { ... }
+//   void TearDown() override { ... }
+// };
+//
+// class MyTest : public MyFixture {
+//  public:
+//   explicit MyTest(int data) : data_(data) {}
+//   void TestBody() override { ... }
+//
+//  private:
+//   int data_;
+// };
+//
+// void RegisterMyTests(const std::vector<int>& values) {
+//   for (int v : values) {
+//     ::testing::RegisterTest(
+//         "MyFixture", ("Test" + std::to_string(v)).c_str(), nullptr,
+//         std::to_string(v).c_str(),
+//         __FILE__, __LINE__,
+//         // Important to use the fixture type as the return type here.
+//         [=]() -> MyFixture* { return new MyTest(v); });
+//   }
+// }
+// ...
+// int main(int argc, char** argv) {
+//   std::vector<int> values_to_test = LoadValuesFromConfig();
+//   RegisterMyTests(values_to_test);
+//   ...
+//   return RUN_ALL_TESTS();
+// }
+//
+template <int&... ExplicitParameterBarrier, typename Factory>
+TestInfo* RegisterTest(const char* test_case_name, const char* test_name,
+                       const char* type_param, const char* value_param,
+                       const char* file, int line, Factory factory) {
+  using TestT = typename std::remove_pointer<decltype(factory())>::type;
+
+  // Helper class to get SetUpTestCase and TearDownTestCase when they are in a
+  // protected scope.
+  struct Helper : TestT {
+    using TestT::SetUpTestCase;
+    using TestT::TearDownTestCase;
+  };
+
+  class FactoryImpl : public internal::TestFactoryBase {
+   public:
+    explicit FactoryImpl(Factory f) : factory_(std::move(f)) {}
+    Test* CreateTest() override { return factory_(); }
+
+   private:
+    Factory factory_;
+  };
+
+  return internal::MakeAndRegisterTestInfo(
+      test_case_name, test_name, type_param, value_param,
+      internal::CodeLocation(file, line), internal::GetTypeId<TestT>(),
+      &Helper::SetUpTestCase, &Helper::TearDownTestCase,
+      new FactoryImpl{std::move(factory)});
+}
 
 }  // namespace testing
 

@@ -232,7 +232,7 @@ TEST(DISABLED_Test, Dummy2) {}
 
 class FinalSuccessChecker : public Environment {
  protected:
-  virtual void TearDown() {
+  void TearDown() override {
     UnitTest* unit_test = UnitTest::GetInstance();
 
     EXPECT_EQ(1 + kTypedTestCases, unit_test->successful_test_case_count());

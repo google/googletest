@@ -423,9 +423,6 @@ void AssertHelper::operator=(const Message& message) const {
                       );  // NOLINT
 }
 
-// Mutex for linked pointers.
-GTEST_API_ GTEST_DEFINE_STATIC_MUTEX_(g_linked_ptr_mutex);
-
 // A copy of all command line arguments.  Set by InitGoogleTest().
 static ::std::vector<std::string> g_argvs;
 
@@ -445,7 +442,7 @@ static ::std::vector<std::string> g_argvs;
 FilePath GetCurrentExecutableName() {
   FilePath result;
 
-#if GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS || GTEST_OS_OS2
   result.Set(FilePath(GetArgvs()[0]).RemoveExtension("exe"));
 #else
   result.Set(FilePath(GetArgvs()[0]));
@@ -905,11 +902,10 @@ TimeInMillis GetTimeInMillis() {
 // value using delete[]. Returns the wide string, or NULL if the
 // input is NULL.
 LPCWSTR String::AnsiToUtf16(const char* ansi) {
-  if (!ansi) return NULL;
+  if (!ansi) return nullptr;
   const int length = strlen(ansi);
   const int unicode_length =
-      MultiByteToWideChar(CP_ACP, 0, ansi, length,
-                          NULL, 0);
+      MultiByteToWideChar(CP_ACP, 0, ansi, length, nullptr, 0);
   WCHAR* unicode = new WCHAR[unicode_length + 1];
   MultiByteToWideChar(CP_ACP, 0, ansi, length,
                       unicode, unicode_length);
@@ -922,13 +918,12 @@ LPCWSTR String::AnsiToUtf16(const char* ansi) {
 // value using delete[]. Returns the ANSI string, or NULL if the
 // input is NULL.
 const char* String::Utf16ToAnsi(LPCWSTR utf16_str)  {
-  if (!utf16_str) return NULL;
-  const int ansi_length =
-      WideCharToMultiByte(CP_ACP, 0, utf16_str, -1,
-                          NULL, 0, NULL, NULL);
+  if (!utf16_str) return nullptr;
+  const int ansi_length = WideCharToMultiByte(CP_ACP, 0, utf16_str, -1, nullptr,
+                                              0, nullptr, nullptr);
   char* ansi = new char[ansi_length + 1];
-  WideCharToMultiByte(CP_ACP, 0, utf16_str, -1,
-                      ansi, ansi_length, NULL, NULL);
+  WideCharToMultiByte(CP_ACP, 0, utf16_str, -1, ansi, ansi_length, nullptr,
+                      nullptr);
   ansi[ansi_length] = 0;
   return ansi;
 }
@@ -1725,12 +1720,12 @@ AssertionResult HRESULTFailureHelper(const char* expr,
   // Gets the system's human readable message string for this HRESULT.
   char error_text[kBufSize] = { '\0' };
   DWORD message_length = ::FormatMessageA(kFlags,
-                                          0,  // no source, we're asking system
+                                          0,   // no source, we're asking system
                                           hr,  // the error
-                                          0,  // no line width restrictions
+                                          0,   // no line width restrictions
                                           error_text,  // output buffer
-                                          kBufSize,  // buf size
-                                          NULL);  // no arguments for inserts
+                                          kBufSize,    // buf size
+                                          nullptr);  // no arguments for inserts
   // Trims tailing white space (FormatMessage leaves a trailing CR-LF)
   for (; message_length && IsSpace(error_text[message_length - 1]);
           --message_length) {
@@ -2402,7 +2397,7 @@ namespace internal {
 static std::string FormatCxxExceptionMessage(const char* description,
                                              const char* location) {
   Message message;
-  if (description != NULL) {
+  if (description != nullptr) {
     message << "C++ exception with description \"" << description << "\"";
   } else {
     message << "Unknown C++ exception";
@@ -2500,7 +2495,7 @@ Result HandleExceptionsInMethodIfSupported(
     } catch (...) {  // NOLINT
       internal::ReportFailureInUnknownLocation(
           TestPartResult::kFatalFailure,
-          FormatCxxExceptionMessage(NULL, location));
+          FormatCxxExceptionMessage(nullptr, location));
     }
     return static_cast<Result>(0);
 #else
@@ -2520,8 +2515,9 @@ void Test::Run() {
   internal::UnitTestImpl* const impl = internal::GetUnitTestImpl();
   impl->os_stack_trace_getter()->UponLeavingGTest();
   internal::HandleExceptionsInMethodIfSupported(this, &Test::SetUp, "SetUp()");
-  // We will run the test only if SetUp() was successful.
-  if (!HasFatalFailure()) {
+  // We will run the test only if SetUp() was successful and didn't call
+  // GTEST_SKIP().
+  if (!HasFatalFailure() && !IsSkipped()) {
     impl->os_stack_trace_getter()->UponLeavingGTest();
     internal::HandleExceptionsInMethodIfSupported(
         this, &Test::TestBody, "the test body");
@@ -2698,9 +2694,10 @@ void TestInfo::Run() {
       factory_, &internal::TestFactoryBase::CreateTest,
       "the test fixture's constructor");
 
-  // Runs the test if the constructor didn't generate a fatal failure.
+  // Runs the test if the constructor didn't generate a fatal failure or invoke
+  // GTEST_SKIP().
   // Note that the object will not be null
-  if (!Test::HasFatalFailure()) {
+  if (!Test::HasFatalFailure() && !Test::IsSkipped()) {
     // This doesn't throw as all user code that can throw are wrapped into
     // exception handling code.
     test->Run();
@@ -3114,19 +3111,19 @@ class PrettyUnitTestResultPrinter : public TestEventListener {
   }
 
   // The following methods override what's in the TestEventListener class.
-  virtual void OnTestProgramStart(const UnitTest& /*unit_test*/) {}
-  virtual void OnTestIterationStart(const UnitTest& unit_test, int iteration);
-  virtual void OnEnvironmentsSetUpStart(const UnitTest& unit_test);
-  virtual void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) {}
-  virtual void OnTestCaseStart(const TestCase& test_case);
-  virtual void OnTestStart(const TestInfo& test_info);
-  virtual void OnTestPartResult(const TestPartResult& result);
-  virtual void OnTestEnd(const TestInfo& test_info);
-  virtual void OnTestCaseEnd(const TestCase& test_case);
-  virtual void OnEnvironmentsTearDownStart(const UnitTest& unit_test);
-  virtual void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) {}
-  virtual void OnTestIterationEnd(const UnitTest& unit_test, int iteration);
-  virtual void OnTestProgramEnd(const UnitTest& /*unit_test*/) {}
+  void OnTestProgramStart(const UnitTest& /*unit_test*/) override {}
+  void OnTestIterationStart(const UnitTest& unit_test, int iteration) override;
+  void OnEnvironmentsSetUpStart(const UnitTest& unit_test) override;
+  void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) override {}
+  void OnTestCaseStart(const TestCase& test_case) override;
+  void OnTestStart(const TestInfo& test_info) override;
+  void OnTestPartResult(const TestPartResult& result) override;
+  void OnTestEnd(const TestInfo& test_info) override;
+  void OnTestCaseEnd(const TestCase& test_case) override;
+  void OnEnvironmentsTearDownStart(const UnitTest& unit_test) override;
+  void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) override {}
+  void OnTestIterationEnd(const UnitTest& unit_test, int iteration) override;
+  void OnTestProgramEnd(const UnitTest& /*unit_test*/) override {}
 
  private:
   static void PrintFailedTests(const UnitTest& unit_test);
@@ -3355,7 +3352,7 @@ void PrettyUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
 class TestEventRepeater : public TestEventListener {
  public:
   TestEventRepeater() : forwarding_enabled_(true) {}
-  virtual ~TestEventRepeater();
+  ~TestEventRepeater() override;
   void Append(TestEventListener *listener);
   TestEventListener* Release(TestEventListener* listener);
 
@@ -3364,19 +3361,19 @@ class TestEventRepeater : public TestEventListener {
   bool forwarding_enabled() const { return forwarding_enabled_; }
   void set_forwarding_enabled(bool enable) { forwarding_enabled_ = enable; }
 
-  virtual void OnTestProgramStart(const UnitTest& unit_test);
-  virtual void OnTestIterationStart(const UnitTest& unit_test, int iteration);
-  virtual void OnEnvironmentsSetUpStart(const UnitTest& unit_test);
-  virtual void OnEnvironmentsSetUpEnd(const UnitTest& unit_test);
-  virtual void OnTestCaseStart(const TestCase& test_case);
-  virtual void OnTestStart(const TestInfo& test_info);
-  virtual void OnTestPartResult(const TestPartResult& result);
-  virtual void OnTestEnd(const TestInfo& test_info);
-  virtual void OnTestCaseEnd(const TestCase& test_case);
-  virtual void OnEnvironmentsTearDownStart(const UnitTest& unit_test);
-  virtual void OnEnvironmentsTearDownEnd(const UnitTest& unit_test);
-  virtual void OnTestIterationEnd(const UnitTest& unit_test, int iteration);
-  virtual void OnTestProgramEnd(const UnitTest& unit_test);
+  void OnTestProgramStart(const UnitTest& unit_test) override;
+  void OnTestIterationStart(const UnitTest& unit_test, int iteration) override;
+  void OnEnvironmentsSetUpStart(const UnitTest& unit_test) override;
+  void OnEnvironmentsSetUpEnd(const UnitTest& unit_test) override;
+  void OnTestCaseStart(const TestCase& test_case) override;
+  void OnTestStart(const TestInfo& test_info) override;
+  void OnTestPartResult(const TestPartResult& result) override;
+  void OnTestEnd(const TestInfo& test_info) override;
+  void OnTestCaseEnd(const TestCase& test_case) override;
+  void OnEnvironmentsTearDownStart(const UnitTest& unit_test) override;
+  void OnEnvironmentsTearDownEnd(const UnitTest& unit_test) override;
+  void OnTestIterationEnd(const UnitTest& unit_test, int iteration) override;
+  void OnTestProgramEnd(const UnitTest& unit_test) override;
 
  private:
   // Controls whether events will be forwarded to listeners_. Set to false
@@ -3469,7 +3466,7 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
  public:
   explicit XmlUnitTestResultPrinter(const char* output_file);
 
-  virtual void OnTestIterationEnd(const UnitTest& unit_test, int iteration);
+  void OnTestIterationEnd(const UnitTest& unit_test, int iteration) override;
   void ListTestsMatchingFilter(const std::vector<TestCase*>& test_cases);
 
   // Prints an XML summary of all unit tests.
@@ -3674,8 +3671,7 @@ static bool PortableLocaltime(time_t seconds, struct tm* out) {
   // MINGW <time.h> provides neither localtime_r nor localtime_s, but uses
   // Windows' localtime(), which has a thread-local tm buffer.
   struct tm* tm_ptr = localtime(&seconds);  // NOLINT
-  if (tm_ptr == NULL)
-    return false;
+  if (tm_ptr == nullptr) return false;
   *out = *tm_ptr;
   return true;
 #else
@@ -3765,7 +3761,8 @@ void XmlUnitTestResultPrinter::OutputXmlTestInfo(::std::ostream* stream,
   }
 
   OutputXmlAttribute(stream, kTestcase, "status",
-                     test_info.should_run() ? "run" : "notrun");
+                result.Skipped() ? "skipped" :
+                test_info.should_run() ? "run" : "notrun");
   OutputXmlAttribute(stream, kTestcase, "time",
                      FormatTimeInMillisAsSeconds(result.elapsed_time()));
   OutputXmlAttribute(stream, kTestcase, "classname", test_case_name);
@@ -3928,7 +3925,7 @@ class JsonUnitTestResultPrinter : public EmptyTestEventListener {
  public:
   explicit JsonUnitTestResultPrinter(const char* output_file);
 
-  virtual void OnTestIterationEnd(const UnitTest& unit_test, int iteration);
+  void OnTestIterationEnd(const UnitTest& unit_test, int iteration) override;
 
   // Prints an JSON summary of all unit tests.
   static void PrintJsonTestList(::std::ostream* stream,
@@ -4130,6 +4127,7 @@ void JsonUnitTestResultPrinter::OutputJsonTestInfo(::std::ostream* stream,
   }
 
   OutputJsonKey(stream, kTestcase, "status",
+                result.Skipped() ? "SKIPPED" :
                 test_info.should_run() ? "RUN" : "NOTRUN", kIndent);
   OutputJsonKey(stream, kTestcase, "time",
                 FormatTimeInMillisAsDuration(result.elapsed_time()), kIndent);
@@ -4541,24 +4539,17 @@ void TestEventListeners::SuppressEventForwarding() {
 // call this before main() starts, from which point on the return
 // value will never change.
 UnitTest* UnitTest::GetInstance() {
-  // When compiled with MSVC 7.1 in optimized mode, destroying the
-  // UnitTest object upon exiting the program messes up the exit code,
-  // causing successful tests to appear failed.  We have to use a
-  // different implementation in this case to bypass the compiler bug.
-  // This implementation makes the compiler happy, at the cost of
-  // leaking the UnitTest object.
-
   // CodeGear C++Builder insists on a public destructor for the
   // default implementation.  Use this implementation to keep good OO
   // design with private destructor.
 
-#if (_MSC_VER == 1310 && !defined(_DEBUG)) || defined(__BORLANDC__)
+#if defined(__BORLANDC__)
   static UnitTest* const instance = new UnitTest;
   return instance;
 #else
   static UnitTest instance;
   return &instance;
-#endif  // (_MSC_VER == 1310 && !defined(_DEBUG)) || defined(__BORLANDC__)
+#endif  // defined(__BORLANDC__)
 }
 
 // Gets the number of successful test cases.
@@ -4730,11 +4721,11 @@ void UnitTest::AddTestPartResult(
       // with clang/gcc we can achieve the same effect on x86 by invoking int3
       asm("int3");
 #else
-      // Dereference NULL through a volatile pointer to prevent the compiler
+      // Dereference nullptr through a volatile pointer to prevent the compiler
       // from removing. We use this rather than abort() or __builtin_trap() for
       // portability: Symbian doesn't implement abort() well, and some debuggers
       // don't correctly trap abort().
-      *static_cast<volatile int*>(NULL) = 1;
+      *static_cast<volatile int*>(nullptr) = 1;
 #endif  // GTEST_OS_WINDOWS
     } else if (GTEST_FLAG(throw_on_failure)) {
 #if GTEST_HAS_EXCEPTIONS
@@ -4816,18 +4807,12 @@ int UnitTest::Run() {
     _set_error_mode(_OUT_TO_STDERR);
 # endif
 
-# if _MSC_VER >= 1400 && !GTEST_OS_WINDOWS_MOBILE
+# if defined(_MSC_VER) && !GTEST_OS_WINDOWS_MOBILE
     // In the debug version, Visual Studio pops up a separate dialog
     // offering a choice to debug the aborted program. We need to suppress
     // this dialog or it will pop up for every EXPECT/ASSERT_DEATH statement
     // executed. Google Test will notify the user of any unexpected
     // failure via stderr.
-    //
-    // VC++ doesn't define _set_abort_behavior() prior to the version 8.0.
-    // Users of prior VC versions shall suffer the agony and pain of
-    // clicking through the countless debug dialogs.
-    // FIXME: find a way to suppress the abort dialog() in the
-    // debug mode when compiled with VC 7.1 or lower.
     if (!GTEST_FLAG(break_on_failure))
       _set_abort_behavior(
           0x0,                                    // Clear the following flags:
@@ -5807,7 +5792,7 @@ static const char kColorEncodedHelpMessage[] =
 "  @G--" GTEST_FLAG_PREFIX_ "output=@Y(@Gjson@Y|@Gxml@Y)[@G:@YDIRECTORY_PATH@G"
     GTEST_PATH_SEP_ "@Y|@G:@YFILE_PATH]@D\n"
 "      Generate a JSON or XML report in the given directory or with the given\n"
-"      file name. @YFILE_PATH@D defaults to @Gtest_details.xml@D.\n"
+"      file name. @YFILE_PATH@D defaults to @Gtest_detail.xml@D.\n"
 # if GTEST_CAN_STREAM_RESULTS_
 "  @G--" GTEST_FLAG_PREFIX_ "stream_result_to=@YHOST@G:@YPORT@D\n"
 "      Stream test results to the given server.\n"
@@ -6026,7 +6011,7 @@ std::string TempDir() {
   return "\\temp\\";
 #elif GTEST_OS_WINDOWS
   const char* temp_dir = internal::posix::GetEnv("TEMP");
-  if (temp_dir == NULL || temp_dir[0] == '\0')
+  if (temp_dir == nullptr || temp_dir[0] == '\0')
     return "\\temp\\";
   else if (temp_dir[strlen(temp_dir) - 1] == '\\')
     return temp_dir;

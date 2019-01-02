@@ -34,22 +34,7 @@
 
 licenses(["notice"])
 
-config_setting(
-    name = "windows",
-    values = {"cpu": "x64_windows"},
-)
-
-config_setting(
-    name = "windows_msvc",
-    values = {"cpu": "x64_windows_msvc"},
-)
-
-config_setting(
-    name = "has_absl",
-    values = {"define": "absl=1"},
-)
-
-#on windows exclude gtest-tuple.h and googletest-tuple-test.cc
+#on windows exclude gtest-tuple.h
 cc_test(
     name = "gtest_all_test",
     size = "small",
@@ -62,7 +47,6 @@ cc_test(
         ],
         exclude = [
             "gtest-unittest-api_test.cc",
-            "googletest-tuple-test.cc",
             "googletest/src/gtest-all.cc",
             "gtest_all_test.cc",
             "gtest-death-test_ex_test.cc",
@@ -74,28 +58,23 @@ cc_test(
             "googletest-env-var-test_.cc",
             "googletest-filter-unittest_.cc",
             "googletest-break-on-failure-unittest_.cc",
-             "googletest-listener-test.cc",
-             "googletest-output-test_.cc",
-             "googletest-list-tests-unittest_.cc",
-             "googletest-shuffle-test_.cc",
-             "googletest-uninitialized-test_.cc",
-             "googletest-death-test_ex_test.cc",
-             "googletest-param-test-test",
-             "googletest-throw-on-failure-test_.cc",
-             "googletest-param-test-invalid-name1-test_.cc",
-             "googletest-param-test-invalid-name2-test_.cc",
-
+            "googletest-listener-test.cc",
+            "googletest-output-test_.cc",
+            "googletest-list-tests-unittest_.cc",
+            "googletest-shuffle-test_.cc",
+            "googletest-uninitialized-test_.cc",
+            "googletest-death-test_ex_test.cc",
+            "googletest-param-test-test",
+            "googletest-throw-on-failure-test_.cc",
+            "googletest-param-test-invalid-name1-test_.cc",
+            "googletest-param-test-invalid-name2-test_.cc",
         ],
     ) + select({
         "//:windows": [],
-        "//:windows_msvc": [],
-        "//conditions:default": [
-            "googletest-tuple-test.cc",
-        ],
+        "//conditions:default": [],
     }),
     copts = select({
         "//:windows": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
-        "//:windows_msvc": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
         "//conditions:default": ["-DGTEST_USE_OWN_TR1_TUPLE=1"],
     }),
     includes = [
@@ -106,14 +85,10 @@ cc_test(
     ],
     linkopts = select({
         "//:windows": [],
-        "//:windows_msvc": [],
-        "//conditions:default": [
-            "-pthread",
-        ],
+        "//conditions:default": ["-pthread"],
     }),
     deps = ["//:gtest_main"],
 )
-
 
 # Tests death tests.
 cc_test(
@@ -199,13 +174,12 @@ cc_binary(
     deps = ["//:gtest"],
 )
 
-
 py_test(
     name = "googletest-output-test",
     size = "small",
     srcs = ["googletest-output-test.py"],
     args = select({
-        ":has_absl": [],
+        "//:has_absl": [],
         "//conditions:default": ["--no_stacktrace_support"],
     }),
     data = [
@@ -260,15 +234,12 @@ py_test(
     deps = [":gtest_test_utils"],
 )
 
-
 cc_binary(
     name = "googletest-break-on-failure-unittest_",
     testonly = 1,
     srcs = ["googletest-break-on-failure-unittest_.cc"],
     deps = ["//:gtest"],
 )
-
-
 
 py_test(
     name = "googletest-break-on-failure-unittest",
@@ -278,15 +249,12 @@ py_test(
     deps = [":gtest_test_utils"],
 )
 
-
 cc_test(
     name = "gtest_assert_by_exception_test",
     size = "small",
     srcs = ["gtest_assert_by_exception_test.cc"],
     deps = ["//:gtest"],
 )
-
-
 
 cc_binary(
     name = "googletest-throw-on-failure-test_",
@@ -303,12 +271,18 @@ py_test(
     deps = [":gtest_test_utils"],
 )
 
-
 cc_binary(
     name = "googletest-list-tests-unittest_",
     testonly = 1,
     srcs = ["googletest-list-tests-unittest_.cc"],
     deps = ["//:gtest"],
+)
+
+cc_test(
+    name = "gtest_skip_test",
+    size = "small",
+    srcs = ["gtest_skip_test.cc"],
+    deps = ["//:gtest_main"],
 )
 
 py_test(
@@ -381,7 +355,7 @@ py_test(
         "gtest_xml_test_utils.py",
     ],
     args = select({
-        ":has_absl": [],
+        "//:has_absl": [],
         "//conditions:default": ["--no_stacktrace_support"],
     }),
     data = [
@@ -452,7 +426,6 @@ py_test(
     deps = [":gtest_test_utils"],
 )
 
-
 py_test(
     name = "googletest-json-outfiles-test",
     size = "small",
@@ -474,18 +447,19 @@ py_test(
         "googletest-json-output-unittest.py",
         "gtest_json_test_utils.py",
     ],
+    args = select({
+        "//:has_absl": [],
+        "//conditions:default": ["--no_stacktrace_support"],
+    }),
     data = [
         # We invoke gtest_no_test_unittest to verify the JSON output
         # when the test program contains no test definition.
         ":gtest_no_test_unittest",
         ":gtest_xml_output_unittest_",
     ],
-    args = select({
-        ":has_absl": [],
-        "//conditions:default": ["--no_stacktrace_support"],
-    }),
     deps = [":gtest_test_utils"],
 )
+
 # Verifies interaction of death tests and exceptions.
 cc_test(
     name = "googletest-death-test_ex_catch_test",

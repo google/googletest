@@ -12,7 +12,7 @@ Expected equality of these values:
   3
 Stack trace: (omitted)
 
-[0;32m[==========] [mRunning 76 tests from 34 test cases.
+[0;32m[==========] [mRunning 83 tests from 38 test cases.
 [0;32m[----------] [mGlobal test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -870,6 +870,84 @@ Expected non-fatal failure.
 Stack trace: (omitted)
 
 [0;31m[  FAILED  ] [mScopedFakeTestPartResultReporterTest.InterceptOnlyCurrentThread
+[0;32m[----------] [m2 tests from DynamicFixture
+DynamicFixture::SetUpTestCase
+[0;32m[ RUN      ] [mDynamicFixture.DynamicTestPass
+DynamicFixture()
+DynamicFixture::SetUp
+DynamicFixture::TearDown
+~DynamicFixture()
+[0;32m[       OK ] [mDynamicFixture.DynamicTestPass
+[0;32m[ RUN      ] [mDynamicFixture.DynamicTestFail
+DynamicFixture()
+DynamicFixture::SetUp
+googletest-output-test_.cc:#: Failure
+Value of: Pass
+  Actual: false
+Expected: true
+Stack trace: (omitted)
+
+DynamicFixture::TearDown
+~DynamicFixture()
+[0;31m[  FAILED  ] [mDynamicFixture.DynamicTestFail
+DynamicFixture::TearDownTestCase
+[0;32m[----------] [m1 test from DynamicFixtureAnotherName
+DynamicFixture::SetUpTestCase
+[0;32m[ RUN      ] [mDynamicFixtureAnotherName.DynamicTestPass
+DynamicFixture()
+DynamicFixture::SetUp
+DynamicFixture::TearDown
+~DynamicFixture()
+[0;32m[       OK ] [mDynamicFixtureAnotherName.DynamicTestPass
+DynamicFixture::TearDownTestCase
+[0;32m[----------] [m2 tests from BadDynamicFixture1
+DynamicFixture::SetUpTestCase
+[0;32m[ RUN      ] [mBadDynamicFixture1.FixtureBase
+DynamicFixture()
+DynamicFixture::SetUp
+DynamicFixture::TearDown
+~DynamicFixture()
+[0;32m[       OK ] [mBadDynamicFixture1.FixtureBase
+[0;32m[ RUN      ] [mBadDynamicFixture1.TestBase
+DynamicFixture()
+gtest.cc:#: Failure
+Failed
+All tests in the same test case must use the same test fixture
+class, so mixing TEST_F and TEST in the same test case is
+illegal.  In test case BadDynamicFixture1,
+test FixtureBase is defined using TEST_F but
+test TestBase is defined using TEST.  You probably
+want to change the TEST to TEST_F or move it to another test
+case.
+Stack trace: (omitted)
+
+~DynamicFixture()
+[0;31m[  FAILED  ] [mBadDynamicFixture1.TestBase
+DynamicFixture::TearDownTestCase
+[0;32m[----------] [m2 tests from BadDynamicFixture2
+DynamicFixture::SetUpTestCase
+[0;32m[ RUN      ] [mBadDynamicFixture2.FixtureBase
+DynamicFixture()
+DynamicFixture::SetUp
+DynamicFixture::TearDown
+~DynamicFixture()
+[0;32m[       OK ] [mBadDynamicFixture2.FixtureBase
+[0;32m[ RUN      ] [mBadDynamicFixture2.Derived
+DynamicFixture()
+gtest.cc:#: Failure
+Failed
+All tests in the same test case must use the same test fixture
+class.  However, in test case BadDynamicFixture2,
+you defined test FixtureBase and test Derived
+using two different test fixture classes.  This can happen if
+the two classes are from different namespaces or translation
+units and have the same name.  You should probably rename one
+of the classes to put the tests into different test cases.
+Stack trace: (omitted)
+
+~DynamicFixture()
+[0;31m[  FAILED  ] [mBadDynamicFixture2.Derived
+DynamicFixture::TearDownTestCase
 [0;32m[----------] [m1 test from PrintingFailingParams/FailingParamTest
 [0;32m[ RUN      ] [mPrintingFailingParams/FailingParamTest.Fails/0
 googletest-output-test_.cc:#: Failure
@@ -906,9 +984,9 @@ Failed
 Expected fatal failure.
 Stack trace: (omitted)
 
-[0;32m[==========] [m76 tests from 34 test cases ran.
-[0;32m[  PASSED  ] [m26 tests.
-[0;31m[  FAILED  ] [m50 tests, listed below:
+[0;32m[==========] [m83 tests from 38 test cases ran.
+[0;32m[  PASSED  ] [m30 tests.
+[0;31m[  FAILED  ] [m53 tests, listed below:
 [0;31m[  FAILED  ] [mNonfatalFailureTest.EscapesStringOperands
 [0;31m[  FAILED  ] [mNonfatalFailureTest.DiffForLongStrings
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInSubroutine
@@ -957,10 +1035,13 @@ Stack trace: (omitted)
 [0;31m[  FAILED  ] [mExpectFailureWithThreadsTest.ExpectFatalFailure
 [0;31m[  FAILED  ] [mExpectFailureWithThreadsTest.ExpectNonFatalFailure
 [0;31m[  FAILED  ] [mScopedFakeTestPartResultReporterTest.InterceptOnlyCurrentThread
+[0;31m[  FAILED  ] [mDynamicFixture.DynamicTestFail
+[0;31m[  FAILED  ] [mBadDynamicFixture1.TestBase
+[0;31m[  FAILED  ] [mBadDynamicFixture2.Derived
 [0;31m[  FAILED  ] [mPrintingFailingParams/FailingParamTest.Fails/0, where GetParam() = 2
 [0;31m[  FAILED  ] [mPrintingStrings/ParamTest.Failure/a, where GetParam() = "a"
 
-50 FAILED TESTS
+53 FAILED TESTS
 [0;33m  YOU HAVE 1 DISABLED TEST
 
 [mNote: Google Test filter = FatalFailureTest.*:LoggingTest.*

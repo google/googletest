@@ -116,17 +116,17 @@ class CxxExceptionInConstructorTest : public Test {
   }
 
  protected:
-  ~CxxExceptionInConstructorTest() {
+  ~CxxExceptionInConstructorTest() override {
     ADD_FAILURE() << "CxxExceptionInConstructorTest destructor "
                   << "called unexpectedly.";
   }
 
-  virtual void SetUp() {
+  void SetUp() override {
     ADD_FAILURE() << "CxxExceptionInConstructorTest::SetUp() "
                   << "called unexpectedly.";
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     ADD_FAILURE() << "CxxExceptionInConstructorTest::TearDown() "
                   << "called unexpectedly.";
   }
@@ -157,19 +157,19 @@ class CxxExceptionInSetUpTestCaseTest : public Test {
   }
 
  protected:
-  ~CxxExceptionInSetUpTestCaseTest() {
+  ~CxxExceptionInSetUpTestCaseTest() override {
     printf("%s",
            "CxxExceptionInSetUpTestCaseTest destructor "
            "called as expected.\n");
   }
 
-  virtual void SetUp() {
+  void SetUp() override {
     printf("%s",
            "CxxExceptionInSetUpTestCaseTest::SetUp() "
            "called as expected.\n");
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     printf("%s",
            "CxxExceptionInSetUpTestCaseTest::TearDown() "
            "called as expected.\n");
@@ -200,15 +200,15 @@ class CxxExceptionInSetUpTest : public Test {
   }
 
  protected:
-  ~CxxExceptionInSetUpTest() {
+  ~CxxExceptionInSetUpTest() override {
     printf("%s",
            "CxxExceptionInSetUpTest destructor "
            "called as expected.\n");
   }
 
-  virtual void SetUp() { throw std::runtime_error("Standard C++ exception"); }
+  void SetUp() override { throw std::runtime_error("Standard C++ exception"); }
 
-  virtual void TearDown() {
+  void TearDown() override {
     printf("%s",
            "CxxExceptionInSetUpTest::TearDown() "
            "called as expected.\n");
@@ -229,13 +229,13 @@ class CxxExceptionInTearDownTest : public Test {
   }
 
  protected:
-  ~CxxExceptionInTearDownTest() {
+  ~CxxExceptionInTearDownTest() override {
     printf("%s",
            "CxxExceptionInTearDownTest destructor "
            "called as expected.\n");
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     throw std::runtime_error("Standard C++ exception");
   }
 };
@@ -251,13 +251,13 @@ class CxxExceptionInTestBodyTest : public Test {
   }
 
  protected:
-  ~CxxExceptionInTestBodyTest() {
+  ~CxxExceptionInTestBodyTest() override {
     printf("%s",
            "CxxExceptionInTestBodyTest destructor "
            "called as expected.\n");
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     printf("%s",
            "CxxExceptionInTestBodyTest::TearDown() "
            "called as expected.\n");

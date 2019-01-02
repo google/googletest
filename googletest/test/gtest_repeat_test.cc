@@ -74,8 +74,8 @@ int g_environment_tear_down_count = 0;
 class MyEnvironment : public testing::Environment {
  public:
   MyEnvironment() {}
-  virtual void SetUp() { g_environment_set_up_count++; }
-  virtual void TearDown() { g_environment_tear_down_count++; }
+  void SetUp() override { g_environment_set_up_count++; }
+  void TearDown() override { g_environment_tear_down_count++; }
 };
 
 // A test that should fail.

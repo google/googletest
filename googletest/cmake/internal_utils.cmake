@@ -56,7 +56,6 @@ macro(config_compiler_and_linker)
   unset(GTEST_HAS_PTHREAD)
   if (NOT gtest_disable_pthreads AND NOT MINGW)
     # Defines CMAKE_USE_PTHREADS_INIT and CMAKE_THREAD_LIBS_INIT.
-    set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads)
     if (CMAKE_USE_PTHREADS_INIT)
       set(GTEST_HAS_PTHREAD ON)
@@ -68,36 +67,14 @@ macro(config_compiler_and_linker)
     # Newlines inside flags variables break CMake's NMake generator.
     # TODO(vladl@google.com): Add -RTCs and -RTCu to debug builds.
     set(cxx_base_flags "-GS -W4 -WX -wd4251 -wd4275 -nologo -J -Zi")
-    if (MSVC_VERSION LESS 1400)  # 1400 is Visual Studio 2005
-      # Suppress spurious warnings MSVC 7.1 sometimes issues.
-      # Forcing value to bool.
-      set(cxx_base_flags "${cxx_base_flags} -wd4800")
-      # Copy constructor and assignment operator could not be generated.
-      set(cxx_base_flags "${cxx_base_flags} -wd4511 -wd4512")
-      # Compatibility warnings not applicable to Google Test.
-      # Resolved overload was found by argument-dependent lookup.
-      set(cxx_base_flags "${cxx_base_flags} -wd4675")
-    endif()
-    if (MSVC_VERSION LESS 1500)  # 1500 is Visual Studio 2008
-      # Conditional expression is constant.
-      # When compiling with /W4, we get several instances of C4127
-      # (Conditional expression is constant). In our code, we disable that
-      # warning on a case-by-case basis. However, on Visual Studio 2005,
-      # the warning fires on std::list. Therefore on that compiler and earlier,
-      # we disable the warning project-wide.
-      set(cxx_base_flags "${cxx_base_flags} -wd4127")
-    endif()
-    if (NOT (MSVC_VERSION LESS 1700))  # 1700 is Visual Studio 2012.
-      # Suppress "unreachable code" warning on VS 2012 and later.
-      # http://stackoverflow.com/questions/3232669 explains the issue.
-      set(cxx_base_flags "${cxx_base_flags} -wd4702")
-    endif()
-
     set(cxx_base_flags "${cxx_base_flags} -D_UNICODE -DUNICODE -DWIN32 -D_WIN32")
     set(cxx_base_flags "${cxx_base_flags} -DSTRICT -DWIN32_LEAN_AND_MEAN")
     set(cxx_exception_flags "-EHsc -D_HAS_EXCEPTIONS=1")
     set(cxx_no_exception_flags "-EHs-c- -D_HAS_EXCEPTIONS=0")
     set(cxx_no_rtti_flags "-GR-")
+    # Suppress "unreachable code" warning
+    # http://stackoverflow.com/questions/3232669 explains the issue.
+    set(cxx_base_flags "${cxx_base_flags} -wd4702")
   elseif (CMAKE_COMPILER_IS_GNUCXX)
     set(cxx_base_flags "-Wall -Wshadow -Werror")
     if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0.0)
@@ -148,7 +125,6 @@ macro(config_compiler_and_linker)
     "${CMAKE_CXX_FLAGS} ${cxx_base_flags} ${cxx_no_exception_flags}")
   set(cxx_default "${cxx_exception}")
   set(cxx_no_rtti "${cxx_default} ${cxx_no_rtti_flags}")
-  set(cxx_use_own_tuple "${cxx_default} -DGTEST_USE_OWN_TR1_TUPLE=1")
 
   # For building the gtest libraries.
   set(cxx_strict "${cxx_default} ${cxx_strict_flags}")
@@ -220,7 +196,7 @@ endfunction()
 # is built from the given source files with the given compiler flags.
 function(cxx_executable_with_flags name cxx_flags libs)
   add_executable(${name} ${ARGN})
-  if (MSVC AND (NOT (MSVC_VERSION LESS 1700)))  # 1700 is Visual Studio 2012.
+  if (MSVC)
     # BigObj required for tests.
     set(cxx_flags "${cxx_flags} -bigobj")
   endif()
@@ -353,7 +329,7 @@ function(install_project)
         get_target_property(t_pdb_name_debug ${t} COMPILE_PDB_NAME_DEBUG)
         get_target_property(t_pdb_output_directory ${t} PDB_OUTPUT_DIRECTORY)
         install(FILES
-          "${t_pdb_output_directory}/\${CMAKE_INSTALL_CONFIG_NAME}/$<IF:$<CONFIG:Debug>,${t_pdb_name_debug},${t_pdb_name}>.pdb"
+          "${t_pdb_output_directory}/\${CMAKE_INSTALL_CONFIG_NAME}/$<$<CONFIG:Debug>:${t_pdb_name_debug}>$<$<NOT:$<CONFIG:Debug>>:${t_pdb_name}>.pdb"
           DESTINATION ${CMAKE_INSTALL_LIBDIR}
           OPTIONAL)
       endforeach()
