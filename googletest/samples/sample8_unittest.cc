@@ -37,7 +37,6 @@
 
 #include "gtest/gtest.h"
 namespace {
-#if GTEST_HAS_COMBINE
 
 // Suppose we want to introduce a new, improved implementation of PrimeTable
 // which combines speed of PrecalcPrimeTable and versatility of
@@ -54,19 +53,19 @@ class HybridPrimeTable : public PrimeTable {
                           ? nullptr
                           : new PreCalculatedPrimeTable(max_precalculated)),
         max_precalculated_(max_precalculated) {}
-  virtual ~HybridPrimeTable() {
+  ~HybridPrimeTable() override {
     delete on_the_fly_impl_;
     delete precalc_impl_;
   }
 
-  virtual bool IsPrime(int n) const {
+  bool IsPrime(int n) const override {
     if (precalc_impl_ != nullptr && n < max_precalculated_)
       return precalc_impl_->IsPrime(n);
     else
       return on_the_fly_impl_->IsPrime(n);
   }
 
-  virtual int GetNextPrime(int p) const {
+  int GetNextPrime(int p) const override {
     int next_prime = -1;
     if (precalc_impl_ != nullptr && p < max_precalculated_)
       next_prime = precalc_impl_->GetNextPrime(p);
@@ -90,22 +89,15 @@ using ::testing::Combine;
 // PreCalculatedPrimeTable disabled. We do this by defining fixture which will
 // accept different combinations of parameters for instantiating a
 // HybridPrimeTable instance.
-class PrimeTableTest : public TestWithParam< ::testing::tuple<bool, int> > {
+class PrimeTableTest : public TestWithParam< ::std::tuple<bool, int> > {
  protected:
-  virtual void SetUp() {
-    // This can be written as
-    //
-    // bool force_on_the_fly;
-    // int max_precalculated;
-    // tie(force_on_the_fly, max_precalculated) = GetParam();
-    //
-    // once the Google C++ Style Guide allows use of ::std::tr1::tie.
-    //
-    bool force_on_the_fly = ::testing::get<0>(GetParam());
-    int max_precalculated = ::testing::get<1>(GetParam());
+  void SetUp() override {
+    bool force_on_the_fly;
+    int max_precalculated;
+    std::tie(force_on_the_fly, max_precalculated) = GetParam();
     table_ = new HybridPrimeTable(force_on_the_fly, max_precalculated);
   }
-  virtual void TearDown() {
+  void TearDown() override {
     delete table_;
     table_ = nullptr;
   }
@@ -160,15 +152,4 @@ INSTANTIATE_TEST_CASE_P(MeaningfulTestParameters,
                         PrimeTableTest,
                         Combine(Bool(), Values(1, 10)));
 
-#else
-
-// Google Test may not support Combine() with some compilers. If we
-// use conditional compilation to compile out all code referring to
-// the gtest_main library, MSVC linker will not link that library at
-// all and consequently complain about missing entry point defined in
-// that library (fatal error LNK1561: entry point must be
-// defined). This dummy test keeps gtest_main linked in.
-TEST(DummyTest, CombineIsNotSupportedOnThisPlatform) {}
-
-#endif  // GTEST_HAS_COMBINE
 }  // namespace

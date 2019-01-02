@@ -27,8 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
-#include "gmock/gmock-generated-nice-strict.h"
+#include "gmock/gmock-nice-strict.h"
 
 #include <string>
 #include <utility>
@@ -114,23 +113,22 @@ class MockBar {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockBar);
 };
 
-#if GTEST_GTEST_LANG_CXX11
 
 class MockBaz {
  public:
   class MoveOnly {
+   public:
     MoveOnly() = default;
 
     MoveOnly(const MoveOnly&) = delete;
-    operator=(const MoveOnly&) = delete;
+    MoveOnly& operator=(const MoveOnly&) = delete;
 
     MoveOnly(MoveOnly&&) = default;
-    operator=(MoveOnly&&) = default;
+    MoveOnly& operator=(MoveOnly&&) = default;
   };
 
   MockBaz(MoveOnly) {}
-}
-#endif  // GTEST_GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
+};
 
 #if GTEST_HAS_STREAM_REDIRECTION
 
@@ -182,6 +180,13 @@ TEST(RawMockTest, InfoForUninterestingCall) {
               HasSubstr("Uninteresting mock function call"));
 
   GMOCK_FLAG(verbose) = saved_flag;
+}
+
+TEST(RawMockTest, IsNaggy_IsNice_IsStrict) {
+  MockFoo raw_foo;
+  EXPECT_TRUE(Mock::IsNaggy(&raw_foo));
+  EXPECT_FALSE(Mock::IsNice(&raw_foo));
+  EXPECT_FALSE(Mock::IsStrict(&raw_foo));
 }
 
 // Tests that a nice mock generates no warning for uninteresting calls.
@@ -285,13 +290,9 @@ TEST(NiceMockTest, AllowLeak) {
   leaked->DoThis();
 }
 
-#if GTEST_GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
-
 TEST(NiceMockTest, MoveOnlyConstructor) {
-  NiceMock<MockBaz> nice_baz(MockBaz::MoveOnly());
+  NiceMock<MockBaz> nice_baz(MockBaz::MoveOnly{});
 }
-
-#endif  // GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
 
 #if !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 // Tests that NiceMock<Mock> compiles where Mock is a user-defined
@@ -308,6 +309,13 @@ TEST(NiceMockTest, AcceptsClassNamedMock) {
   nice.DoThis();
 }
 #endif  // !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
+
+TEST(NiceMockTest, IsNaggy_IsNice_IsStrict) {
+  NiceMock<MockFoo> nice_foo;
+  EXPECT_FALSE(Mock::IsNaggy(&nice_foo));
+  EXPECT_TRUE(Mock::IsNice(&nice_foo));
+  EXPECT_FALSE(Mock::IsStrict(&nice_foo));
+}
 
 #if GTEST_HAS_STREAM_REDIRECTION
 
@@ -393,13 +401,9 @@ TEST(NaggyMockTest, AllowLeak) {
   leaked->DoThis();
 }
 
-#if GTEST_GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
-
 TEST(NaggyMockTest, MoveOnlyConstructor) {
-  NaggyMock<MockBaz> naggy_baz(MockBaz::MoveOnly());
+  NaggyMock<MockBaz> naggy_baz(MockBaz::MoveOnly{});
 }
-
-#endif  // GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
 
 #if !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 // Tests that NaggyMock<Mock> compiles where Mock is a user-defined
@@ -416,6 +420,13 @@ TEST(NaggyMockTest, AcceptsClassNamedMock) {
   naggy.DoThis();
 }
 #endif  // !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
+
+TEST(NaggyMockTest, IsNaggy_IsNice_IsStrict) {
+  NaggyMock<MockFoo> naggy_foo;
+  EXPECT_TRUE(Mock::IsNaggy(&naggy_foo));
+  EXPECT_FALSE(Mock::IsNice(&naggy_foo));
+  EXPECT_FALSE(Mock::IsStrict(&naggy_foo));
+}
 
 // Tests that a strict mock allows expected calls.
 TEST(StrictMockTest, AllowsExpectedCall) {
@@ -482,13 +493,9 @@ TEST(StrictMockTest, AllowLeak) {
   leaked->DoThis();
 }
 
-#if GTEST_GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
-
 TEST(StrictMockTest, MoveOnlyConstructor) {
-  StrictMock<MockBaz> strict_baz(MockBaz::MoveOnly());
+  StrictMock<MockBaz> strict_baz(MockBaz::MoveOnly{});
 }
-
-#endif  // GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
 
 #if !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 // Tests that StrictMock<Mock> compiles where Mock is a user-defined
@@ -505,6 +512,13 @@ TEST(StrictMockTest, AcceptsClassNamedMock) {
   strict.DoThis();
 }
 #endif  // !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
+
+TEST(StrictMockTest, IsNaggy_IsNice_IsStrict) {
+  StrictMock<MockFoo> strict_foo;
+  EXPECT_FALSE(Mock::IsNaggy(&strict_foo));
+  EXPECT_FALSE(Mock::IsNice(&strict_foo));
+  EXPECT_TRUE(Mock::IsStrict(&strict_foo));
+}
 
 }  // namespace gmock_nice_strict_test
 }  // namespace testing

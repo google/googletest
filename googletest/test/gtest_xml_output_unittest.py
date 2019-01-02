@@ -65,7 +65,7 @@ else:
   sys.argv.remove(NO_STACKTRACE_SUPPORT_FLAG)
 
 EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
-<testsuites tests="23" failures="4" disabled="2" errors="0" time="*" timestamp="*" name="AllTests" ad_hoc_property="42">
+<testsuites tests="24" failures="4" disabled="2" errors="0" time="*" timestamp="*" name="AllTests" ad_hoc_property="42">
   <testsuite name="SuccessfulTest" tests="1" failures="0" disabled="0" errors="0" time="*">
     <testcase name="Succeeds" status="run" time="*" classname="SuccessfulTest"/>
   </testsuite>
@@ -107,6 +107,9 @@ Invalid characters in brackets []%(stack)s]]></failure>
   </testsuite>
   <testsuite name="DisabledTest" tests="1" failures="0" disabled="1" errors="0" time="*">
     <testcase name="DISABLED_test_not_run" status="notrun" time="*" classname="DisabledTest"/>
+  </testsuite>
+  <testsuite name="SkippedTest" tests="1" failures="0" disabled="0" errors="0" time="*">
+    <testcase name="Skipped" status="skipped" time="*" classname="SkippedTest"/>
   </testsuite>
   <testsuite name="PropertyRecordingTest" tests="4" failures="0" disabled="0" errors="0" time="*" SetUpTestCase="yes" TearDownTestCase="aye">
     <testcase name="OneProperty" status="run" time="*" classname="PropertyRecordingTest">
@@ -183,15 +186,15 @@ EXPECTED_SHARDED_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
   <testsuite name="SuccessfulTest" tests="1" failures="0" disabled="0" errors="0" time="*">
     <testcase name="Succeeds" status="run" time="*" classname="SuccessfulTest"/>
   </testsuite>
-  <testsuite name="NoFixtureTest" tests="1" failures="0" disabled="0" errors="0" time="*">
-     <testcase name="RecordProperty" status="run" time="*" classname="NoFixtureTest">
-       <properties>
-         <property name="key" value="1"/>
-       </properties>
-     </testcase>
+  <testsuite name="PropertyRecordingTest" tests="1" failures="0" disabled="0" errors="0" time="*" SetUpTestCase="yes" TearDownTestCase="aye">
+    <testcase name="TwoValuesForOneKeyUsesLastValue" status="run" time="*" classname="PropertyRecordingTest">
+      <properties>
+        <property name="key_1" value="2"/>
+      </properties>
+    </testcase>
   </testsuite>
   <testsuite name="Single/ValueParamTest" tests="1" failures="0" disabled="0" errors="0" time="*">
-    <testcase name="AnotherTestThatHasValueParamAttribute/1" value_param="42" status="run" time="*" classname="Single/ValueParamTest" />
+    <testcase name="AnotherTestThatHasValueParamAttribute/0" value_param="33" status="run" time="*" classname="Single/ValueParamTest" />
   </testsuite>
 </testsuites>"""
 
@@ -266,7 +269,8 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
         'gtest_no_test_unittest')
     try:
       os.remove(output_file)
-    except OSError, e:
+    except OSError:
+      e = sys.exc_info()[1]
       if e.errno != errno.ENOENT:
         raise
 

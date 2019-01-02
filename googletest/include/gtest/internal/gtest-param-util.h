@@ -38,17 +38,17 @@
 #include <ctype.h>
 
 #include <iterator>
+#include <memory>
 #include <set>
+#include <tuple>
 #include <utility>
 #include <vector>
 
 #include "gtest/internal/gtest-internal.h"
-#include "gtest/internal/gtest-linked_ptr.h"
 #include "gtest/internal/gtest-port.h"
 #include "gtest/gtest-printers.h"
 
 namespace testing {
-
 // Input to a parameterized test name generator, describing a test parameter.
 // Consists of the parameter value and the integer parameter index.
 template <class ParamType>
@@ -72,7 +72,8 @@ struct PrintToStringParamName {
 namespace internal {
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
-//
+// Utility Functions
+
 // Outputs a message explaining invalid registration of different
 // fixture class for the same test case. This may happen when
 // TEST_P macro is used to define two tests with the same name
@@ -153,7 +154,7 @@ class ParamIterator {
  private:
   friend class ParamGenerator<T>;
   explicit ParamIterator(ParamIteratorInterface<T>* impl) : impl_(impl) {}
-  scoped_ptr<ParamIteratorInterface<T> > impl_;
+  std::unique_ptr<ParamIteratorInterface<T> > impl_;
 };
 
 // ParamGeneratorInterface<T> is the binary interface to access generators
@@ -192,7 +193,7 @@ class ParamGenerator {
   iterator end() const { return iterator(impl_->End()); }
 
  private:
-  linked_ptr<const ParamGeneratorInterface<T> > impl_;
+  std::shared_ptr<const ParamGeneratorInterface<T> > impl_;
 };
 
 // Generates values from a range of two comparable values. Can be used to
@@ -205,12 +206,12 @@ class RangeGenerator : public ParamGeneratorInterface<T> {
   RangeGenerator(T begin, T end, IncrementT step)
       : begin_(begin), end_(end),
         step_(step), end_index_(CalculateEndIndex(begin, end, step)) {}
-  virtual ~RangeGenerator() {}
+  ~RangeGenerator() override {}
 
-  virtual ParamIteratorInterface<T>* Begin() const {
+  ParamIteratorInterface<T>* Begin() const override {
     return new Iterator(this, begin_, 0, step_);
   }
-  virtual ParamIteratorInterface<T>* End() const {
+  ParamIteratorInterface<T>* End() const override {
     return new Iterator(this, end_, end_index_, step_);
   }
 
@@ -220,20 +221,20 @@ class RangeGenerator : public ParamGeneratorInterface<T> {
     Iterator(const ParamGeneratorInterface<T>* base, T value, int index,
              IncrementT step)
         : base_(base), value_(value), index_(index), step_(step) {}
-    virtual ~Iterator() {}
+    ~Iterator() override {}
 
-    virtual const ParamGeneratorInterface<T>* BaseGenerator() const {
+    const ParamGeneratorInterface<T>* BaseGenerator() const override {
       return base_;
     }
-    virtual void Advance() {
+    void Advance() override {
       value_ = static_cast<T>(value_ + step_);
       index_++;
     }
-    virtual ParamIteratorInterface<T>* Clone() const {
+    ParamIteratorInterface<T>* Clone() const override {
       return new Iterator(*this);
     }
-    virtual const T* Current() const { return &value_; }
-    virtual bool Equals(const ParamIteratorInterface<T>& other) const {
+    const T* Current() const override { return &value_; }
+    bool Equals(const ParamIteratorInterface<T>& other) const override {
       // Having the same base generator guarantees that the other
       // iterator is of the same type and we can downcast.
       GTEST_CHECK_(BaseGenerator() == other.BaseGenerator())
@@ -290,12 +291,12 @@ class ValuesInIteratorRangeGenerator : public ParamGeneratorInterface<T> {
   template <typename ForwardIterator>
   ValuesInIteratorRangeGenerator(ForwardIterator begin, ForwardIterator end)
       : container_(begin, end) {}
-  virtual ~ValuesInIteratorRangeGenerator() {}
+  ~ValuesInIteratorRangeGenerator() override {}
 
-  virtual ParamIteratorInterface<T>* Begin() const {
+  ParamIteratorInterface<T>* Begin() const override {
     return new Iterator(this, container_.begin());
   }
-  virtual ParamIteratorInterface<T>* End() const {
+  ParamIteratorInterface<T>* End() const override {
     return new Iterator(this, container_.end());
   }
 
@@ -307,16 +308,16 @@ class ValuesInIteratorRangeGenerator : public ParamGeneratorInterface<T> {
     Iterator(const ParamGeneratorInterface<T>* base,
              typename ContainerType::const_iterator iterator)
         : base_(base), iterator_(iterator) {}
-    virtual ~Iterator() {}
+    ~Iterator() override {}
 
-    virtual const ParamGeneratorInterface<T>* BaseGenerator() const {
+    const ParamGeneratorInterface<T>* BaseGenerator() const override {
       return base_;
     }
-    virtual void Advance() {
+    void Advance() override {
       ++iterator_;
       value_.reset();
     }
-    virtual ParamIteratorInterface<T>* Clone() const {
+    ParamIteratorInterface<T>* Clone() const override {
       return new Iterator(*this);
     }
     // We need to use cached value referenced by iterator_ because *iterator_
@@ -326,11 +327,11 @@ class ValuesInIteratorRangeGenerator : public ParamGeneratorInterface<T> {
     // can advance iterator_ beyond the end of the range, and we cannot
     // detect that fact. The client code, on the other hand, is
     // responsible for not calling Current() on an out-of-range iterator.
-    virtual const T* Current() const {
+    const T* Current() const override {
       if (value_.get() == nullptr) value_.reset(new T(*iterator_));
       return value_.get();
     }
-    virtual bool Equals(const ParamIteratorInterface<T>& other) const {
+    bool Equals(const ParamIteratorInterface<T>& other) const override {
       // Having the same base generator guarantees that the other
       // iterator is of the same type and we can downcast.
       GTEST_CHECK_(BaseGenerator() == other.BaseGenerator())
@@ -353,9 +354,9 @@ class ValuesInIteratorRangeGenerator : public ParamGeneratorInterface<T> {
     // A cached value of *iterator_. We keep it here to allow access by
     // pointer in the wrapping iterator's operator->().
     // value_ needs to be mutable to be accessed in Current().
-    // Use of scoped_ptr helps manage cached value's lifetime,
+    // Use of std::unique_ptr helps manage cached value's lifetime,
     // which is bound by the lifespan of the iterator itself.
-    mutable scoped_ptr<const T> value_;
+    mutable std::unique_ptr<const T> value_;
   };  // class ValuesInIteratorRangeGenerator::Iterator
 
   // No implementation - assignment is unsupported.
@@ -405,7 +406,7 @@ class ParameterizedTestFactory : public TestFactoryBase {
   typedef typename TestClass::ParamType ParamType;
   explicit ParameterizedTestFactory(ParamType parameter) :
       parameter_(parameter) {}
-  virtual Test* CreateTest() {
+  Test* CreateTest() override {
     TestClass::SetParam(&parameter_);
     return new TestClass();
   }
@@ -444,7 +445,7 @@ class TestMetaFactory
 
   TestMetaFactory() {}
 
-  virtual TestFactoryBase* CreateTestFactory(ParamType parameter) {
+  TestFactoryBase* CreateTestFactory(ParamType parameter) override {
     return new ParameterizedTestFactory<TestCase>(parameter);
   }
 
@@ -506,9 +507,11 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
       : test_case_name_(name), code_location_(code_location) {}
 
   // Test case base name for display purposes.
-  virtual const std::string& GetTestCaseName() const { return test_case_name_; }
+  const std::string& GetTestCaseName() const override {
+    return test_case_name_;
+  }
   // Test case id to verify identity.
-  virtual TypeId GetTestCaseTypeId() const { return GetTypeId<TestCase>(); }
+  TypeId GetTestCaseTypeId() const override { return GetTypeId<TestCase>(); }
   // TEST_P macro uses AddTestPattern() to record information
   // about a single test in a LocalTestInfo structure.
   // test_case_name is the base name of the test case (without invocation
@@ -518,9 +521,8 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
   void AddTestPattern(const char* test_case_name,
                       const char* test_base_name,
                       TestMetaFactoryBase<ParamType>* meta_factory) {
-    tests_.push_back(linked_ptr<TestInfo>(new TestInfo(test_case_name,
-                                                       test_base_name,
-                                                       meta_factory)));
+    tests_.push_back(std::shared_ptr<TestInfo>(
+        new TestInfo(test_case_name, test_base_name, meta_factory)));
   }
   // INSTANTIATE_TEST_CASE_P macro uses AddGenerator() to record information
   // about a generator.
@@ -537,10 +539,10 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
   // This method should not be called more then once on any single
   // instance of a ParameterizedTestCaseInfoBase derived class.
   // UnitTest has a guard to prevent from calling this method more then once.
-  virtual void RegisterTests() {
+  void RegisterTests() override {
     for (typename TestInfoContainer::iterator test_it = tests_.begin();
          test_it != tests_.end(); ++test_it) {
-      linked_ptr<TestInfo> test_info = *test_it;
+      std::shared_ptr<TestInfo> test_info = *test_it;
       for (typename InstantiationContainer::iterator gen_it =
                instantiations_.begin(); gen_it != instantiations_.end();
                ++gen_it) {
@@ -587,7 +589,7 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
         }  // for param_it
       }  // for gen_it
     }  // for test_it
-  }  // RegisterTests
+  }    // RegisterTests
 
  private:
   // LocalTestInfo structure keeps information about a single test registered
@@ -602,9 +604,9 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
 
     const std::string test_case_base_name;
     const std::string test_base_name;
-    const scoped_ptr<TestMetaFactoryBase<ParamType> > test_meta_factory;
+    const std::unique_ptr<TestMetaFactoryBase<ParamType> > test_meta_factory;
   };
-  typedef ::std::vector<linked_ptr<TestInfo> > TestInfoContainer;
+  using TestInfoContainer = ::std::vector<std::shared_ptr<TestInfo> >;
   // Records data received from INSTANTIATE_TEST_CASE_P macros:
   //  <Instantiation name, Sequence generator creation function,
   //     Name generator function, Source file, Source line>
@@ -712,6 +714,36 @@ class ParameterizedTestCaseRegistry {
   TestCaseInfoContainer test_case_infos_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ParameterizedTestCaseRegistry);
+};
+
+}  // namespace internal
+
+// Forward declarations of ValuesIn(), which is implemented in
+// include/gtest/gtest-param-test.h.
+template <class Container>
+internal::ParamGenerator<typename Container::value_type> ValuesIn(
+    const Container& container);
+
+namespace internal {
+// Used in the Values() function to provide polymorphic capabilities.
+
+template <typename... Ts>
+class ValueArray {
+ public:
+  ValueArray(Ts... v) : v_{std::move(v)...} {}
+
+  template <typename T>
+  operator ParamGenerator<T>() const {  // NOLINT
+    return ValuesIn(MakeVector<T>(MakeIndexSequence<sizeof...(Ts)>()));
+  }
+
+ private:
+  template <typename T, size_t... I>
+  std::vector<T> MakeVector(IndexSequence<I...>) const {
+    return std::vector<T>{static_cast<T>(v_.template Get<I>())...};
+  }
+
+  FlatTuple<Ts...> v_;
 };
 
 }  // namespace internal

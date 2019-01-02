@@ -85,8 +85,6 @@
 //   GTEST_HAS_STD_WSTRING    - Define it to 1/0 to indicate that
 //                              std::wstring does/doesn't work (Google Test can
 //                              be used where std::wstring is unavailable).
-//   GTEST_HAS_TR1_TUPLE      - Define it to 1/0 to indicate tr1::tuple
-//                              is/isn't available.
 //   GTEST_HAS_SEH            - Define it to 1/0 to indicate whether the
 //                              compiler supports Microsoft's "Structured
 //                              Exception Handling".
@@ -94,12 +92,6 @@
 //                            - Define it to 1/0 to indicate whether the
 //                              platform supports I/O stream redirection using
 //                              dup() and dup2().
-//   GTEST_USE_OWN_TR1_TUPLE  - Define it to 1/0 to indicate whether Google
-//                              Test's own tr1 tuple implementation should be
-//                              used.  Unused when the user sets
-//                              GTEST_HAS_TR1_TUPLE to 0.
-//   GTEST_LANG_CXX11         - Define it to 1/0 to indicate that Google Test
-//                              is building in C++11/C++98 mode.
 //   GTEST_LINKED_AS_SHARED_LIBRARY
 //                            - Define to 1 when compiling tests that use
 //                              Google Test as a shared library (known as
@@ -135,6 +127,7 @@
 //   GTEST_OS_NACL     - Google Native Client (NaCl)
 //   GTEST_OS_NETBSD   - NetBSD
 //   GTEST_OS_OPENBSD  - OpenBSD
+//   GTEST_OS_OS2      - OS/2
 //   GTEST_OS_QNX      - QNX
 //   GTEST_OS_SOLARIS  - Sun Solaris
 //   GTEST_OS_SYMBIAN  - Symbian
@@ -172,8 +165,6 @@
 //   EXPECT_DEATH(DoSomethingDeadly());
 // #endif
 //
-//   GTEST_HAS_COMBINE      - the Combine() function (for value-parameterized
-//                            tests)
 //   GTEST_HAS_DEATH_TEST   - death tests
 //   GTEST_HAS_TYPED_TEST   - typed tests
 //   GTEST_HAS_TYPED_TEST_P - type-parameterized tests
@@ -210,11 +201,6 @@
 //   GTEST_INTENTIONAL_CONST_COND_POP_  - finish code section where MSVC C4127
 //                                        is suppressed.
 //
-// C++11 feature wrappers:
-//
-//   testing::internal::forward - portability wrapper for std::forward.
-//   testing::internal::move  - portability wrapper for std::move.
-//
 // Synchronization:
 //   Mutex, MutexLock, ThreadLocal, GetThreadCount()
 //                            - synchronization primitives.
@@ -224,8 +210,6 @@
 //   IteratorTraits - partial implementation of std::iterator_traits, which
 //                    is not available in libCstd when compiled with Sun C++.
 //
-// Smart pointers:
-//   scoped_ptr     - as in TR2.
 //
 // Regular expressions:
 //   RE             - a simple regular expression class using the POSIX
@@ -265,9 +249,11 @@
 
 #include <ctype.h>   // for isspace, etc
 #include <stddef.h>  // for ptrdiff_t
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <memory>
+
 #ifndef _WIN32_WCE
 # include <sys/types.h>
 # include <sys/stat.h>
@@ -280,10 +266,11 @@
 
 // Brings in the definition of HAS_GLOBAL_STRING.  This must be done
 // BEFORE we test HAS_GLOBAL_STRING.
-#include <string>  // NOLINT
+#include <string>     // NOLINT
 #include <algorithm>  // NOLINT
-#include <iostream>  // NOLINT
-#include <sstream>  // NOLINT
+#include <iostream>   // NOLINT
+#include <sstream>    // NOLINT
+#include <tuple>
 #include <utility>
 #include <vector>  // NOLINT
 
@@ -315,14 +302,14 @@
 //   GTEST_DISABLE_MSC_WARNINGS_PUSH_(4800 4385)
 //   /* code that triggers warnings C4800 and C4385 */
 //   GTEST_DISABLE_MSC_WARNINGS_POP_()
-#if _MSC_VER >= 1400
+#if defined(_MSC_VER)
 # define GTEST_DISABLE_MSC_WARNINGS_PUSH_(warnings) \
     __pragma(warning(push))                        \
     __pragma(warning(disable: warnings))
 # define GTEST_DISABLE_MSC_WARNINGS_POP_()          \
     __pragma(warning(pop))
 #else
-// Older versions of MSVC don't have __pragma.
+// Not all compilers are MSVC
 # define GTEST_DISABLE_MSC_WARNINGS_PUSH_(warnings)
 # define GTEST_DISABLE_MSC_WARNINGS_POP_()
 #endif
@@ -341,69 +328,6 @@
     GTEST_DISABLE_MSC_WARNINGS_PUSH_(4996)
 # define GTEST_DISABLE_MSC_DEPRECATED_POP_() \
     GTEST_DISABLE_MSC_WARNINGS_POP_()
-#endif
-
-#define GTEST_LANG_CXX11 1
-
-// Distinct from C++11 language support, some environments don't provide
-// proper C++11 library support. Notably, it's possible to build in
-// C++11 mode when targeting Mac OS X 10.6, which has an old libstdc++
-// with no C++11 support.
-//
-// libstdc++ has sufficient C++11 support as of GCC 4.6.0, __GLIBCXX__
-// 20110325, but maintenance releases in the 4.4 and 4.5 series followed
-// this date, so check for those versions by their date stamps.
-// https://gcc.gnu.org/onlinedocs/libstdc++/manual/abi.html#abi.versioning
-#if GTEST_LANG_CXX11 && \
-    (!defined(__GLIBCXX__) || ( \
-        __GLIBCXX__ >= 20110325ul &&  /* GCC >= 4.6.0 */ \
-        /* Blacklist of patch releases of older branches: */ \
-        __GLIBCXX__ != 20110416ul &&  /* GCC 4.4.6 */ \
-        __GLIBCXX__ != 20120313ul &&  /* GCC 4.4.7 */ \
-        __GLIBCXX__ != 20110428ul &&  /* GCC 4.5.3 */ \
-        __GLIBCXX__ != 20120702ul))   /* GCC 4.5.4 */
-# define GTEST_STDLIB_CXX11 1
-#endif
-
-// Only use C++11 library features if the library provides them.
-#if GTEST_STDLIB_CXX11
-# define GTEST_HAS_STD_BEGIN_AND_END_ 1
-# define GTEST_HAS_STD_FORWARD_LIST_ 1
-# if !defined(_MSC_VER) || (_MSC_FULL_VER >= 190023824)
-// works only with VS2015U2 and better
-#   define GTEST_HAS_STD_FUNCTION_ 1
-# endif
-# define GTEST_HAS_STD_INITIALIZER_LIST_ 1
-# define GTEST_HAS_STD_MOVE_ 1
-# define GTEST_HAS_STD_UNIQUE_PTR_ 1
-# define GTEST_HAS_STD_SHARED_PTR_ 1
-# define GTEST_HAS_UNORDERED_MAP_ 1
-# define GTEST_HAS_UNORDERED_SET_ 1
-#endif
-
-// C++11 specifies that <tuple> provides std::tuple.
-// Some platforms still might not have it, however.
-#if GTEST_LANG_CXX11
-# define GTEST_HAS_STD_TUPLE_ 1
-# if defined(__clang__)
-// Inspired by
-// https://clang.llvm.org/docs/LanguageExtensions.html#include-file-checking-macros
-#  if defined(__has_include) && !__has_include(<tuple>)
-#   undef GTEST_HAS_STD_TUPLE_
-#  endif
-# elif defined(_MSC_VER)
-// Inspired by boost/config/stdlib/dinkumware.hpp
-#  if defined(_CPPLIB_VER) && _CPPLIB_VER < 520
-#   undef GTEST_HAS_STD_TUPLE_
-#  endif
-# elif defined(__GLIBCXX__)
-// Inspired by boost/config/stdlib/libstdcpp3.hpp,
-// http://gcc.gnu.org/gcc-4.2/changes.html and
-// https://web.archive.org/web/20140227044429/gcc.gnu.org/onlinedocs/libstdc++/manual/bk01pt01ch01.html#manual.intro.status.standard.200x
-#  if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)
-#   undef GTEST_HAS_STD_TUPLE_
-#  endif
-# endif
 #endif
 
 // Brings in definitions for functions used in the testing::internal::posix
@@ -638,136 +562,6 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # include <time.h>  // NOLINT
 #endif
 
-// Determines if hash_map/hash_set are available.
-// Only used for testing against those containers.
-#if !defined(GTEST_HAS_HASH_MAP_)
-# if defined(_MSC_VER) && (_MSC_VER < 1900)
-#  define GTEST_HAS_HASH_MAP_ 1  // Indicates that hash_map is available.
-#  define GTEST_HAS_HASH_SET_ 1  // Indicates that hash_set is available.
-# endif  // _MSC_VER
-#endif  // !defined(GTEST_HAS_HASH_MAP_)
-
-// Determines whether Google Test can use tr1/tuple.  You can define
-// this macro to 0 to prevent Google Test from using tuple (any
-// feature depending on tuple with be disabled in this mode).
-#ifndef GTEST_HAS_TR1_TUPLE
-# if GTEST_OS_LINUX_ANDROID && defined(_STLPORT_MAJOR)
-// STLport, provided with the Android NDK, has neither <tr1/tuple> or <tuple>.
-#  define GTEST_HAS_TR1_TUPLE 0
-# elif defined(_MSC_VER) && (_MSC_VER >= 1910)
-// Prevent `warning C4996: 'std::tr1': warning STL4002:
-// The non-Standard std::tr1 namespace and TR1-only machinery
-// are deprecated and will be REMOVED.`
-#  define GTEST_HAS_TR1_TUPLE 0
-# elif GTEST_LANG_CXX11 && defined(_LIBCPP_VERSION)
-// libc++ doesn't support TR1.
-#  define GTEST_HAS_TR1_TUPLE 0
-# else
-// The user didn't tell us not to do it, so we assume it's OK.
-#  define GTEST_HAS_TR1_TUPLE 1
-# endif
-#endif  // GTEST_HAS_TR1_TUPLE
-
-// Determines whether Google Test's own tr1 tuple implementation
-// should be used.
-#ifndef GTEST_USE_OWN_TR1_TUPLE
-// We use our own tuple implementation on Symbian.
-# if GTEST_OS_SYMBIAN
-#  define GTEST_USE_OWN_TR1_TUPLE 1
-# else
-// The user didn't tell us, so we need to figure it out.
-
-// We use our own TR1 tuple if we aren't sure the user has an
-// implementation of it already.  At this time, libstdc++ 4.0.0+ and
-// MSVC 2010 are the only mainstream standard libraries that come
-// with a TR1 tuple implementation.  NVIDIA's CUDA NVCC compiler
-// pretends to be GCC by defining __GNUC__ and friends, but cannot
-// compile GCC's tuple implementation.  MSVC 2008 (9.0) provides TR1
-// tuple in a 323 MB Feature Pack download, which we cannot assume the
-// user has.  QNX's QCC compiler is a modified GCC but it doesn't
-// support TR1 tuple.  libc++ only provides std::tuple, in C++11 mode,
-// and it can be used with some compilers that define __GNUC__.
-# if (defined(__GNUC__) && !defined(__CUDACC__) && (GTEST_GCC_VER_ >= 40000) \
-      && !GTEST_OS_QNX && !defined(_LIBCPP_VERSION)) \
-      || (_MSC_VER >= 1600 && _MSC_VER < 1900)
-#  define GTEST_ENV_HAS_TR1_TUPLE_ 1
-# endif
-
-// C++11 specifies that <tuple> provides std::tuple. Use that if gtest is used
-// in C++11 mode and libstdc++ isn't very old (binaries targeting OS X 10.6
-// can build with clang but need to use gcc4.2's libstdc++).
-# if GTEST_LANG_CXX11 && (!defined(__GLIBCXX__) || __GLIBCXX__ > 20110325)
-#  define GTEST_ENV_HAS_STD_TUPLE_ 1
-# endif
-
-# if GTEST_ENV_HAS_TR1_TUPLE_ || GTEST_ENV_HAS_STD_TUPLE_
-#  define GTEST_USE_OWN_TR1_TUPLE 0
-# else
-#  define GTEST_USE_OWN_TR1_TUPLE 1
-# endif
-# endif  // GTEST_OS_SYMBIAN
-#endif  // GTEST_USE_OWN_TR1_TUPLE
-
-// To avoid conditional compilation we make it gtest-port.h's responsibility
-// to #include the header implementing tuple.
-#if GTEST_HAS_STD_TUPLE_
-# include <tuple>  // IWYU pragma: export
-# define GTEST_TUPLE_NAMESPACE_ ::std
-#endif  // GTEST_HAS_STD_TUPLE_
-
-// We include tr1::tuple even if std::tuple is available to define printers for
-// them.
-#if GTEST_HAS_TR1_TUPLE
-# ifndef GTEST_TUPLE_NAMESPACE_
-#  define GTEST_TUPLE_NAMESPACE_ ::std::tr1
-# endif  // GTEST_TUPLE_NAMESPACE_
-
-# if GTEST_USE_OWN_TR1_TUPLE
-#  include "gtest/internal/gtest-tuple.h"  // IWYU pragma: export  // NOLINT
-# elif GTEST_OS_SYMBIAN
-
-// On Symbian, BOOST_HAS_TR1_TUPLE causes Boost's TR1 tuple library to
-// use STLport's tuple implementation, which unfortunately doesn't
-// work as the copy of STLport distributed with Symbian is incomplete.
-// By making sure BOOST_HAS_TR1_TUPLE is undefined, we force Boost to
-// use its own tuple implementation.
-#  ifdef BOOST_HAS_TR1_TUPLE
-#   undef BOOST_HAS_TR1_TUPLE
-#  endif  // BOOST_HAS_TR1_TUPLE
-
-// This prevents <boost/tr1/detail/config.hpp>, which defines
-// BOOST_HAS_TR1_TUPLE, from being #included by Boost's <tuple>.
-#  define BOOST_TR1_DETAIL_CONFIG_HPP_INCLUDED
-#  include <tuple>  // IWYU pragma: export  // NOLINT
-
-# elif defined(__GNUC__) && (GTEST_GCC_VER_ >= 40000)
-// GCC 4.0+ implements tr1/tuple in the <tr1/tuple> header.  This does
-// not conform to the TR1 spec, which requires the header to be <tuple>.
-
-#  if !GTEST_HAS_RTTI && GTEST_GCC_VER_ < 40302
-// Until version 4.3.2, gcc has a bug that causes <tr1/functional>,
-// which is #included by <tr1/tuple>, to not compile when RTTI is
-// disabled.  _TR1_FUNCTIONAL is the header guard for
-// <tr1/functional>.  Hence the following #define is used to prevent
-// <tr1/functional> from being included.
-#   define _TR1_FUNCTIONAL 1
-#   include <tr1/tuple>
-#   undef _TR1_FUNCTIONAL  // Allows the user to #include
-                        // <tr1/functional> if they choose to.
-#  else
-#   include <tr1/tuple>  // NOLINT
-#  endif  // !GTEST_HAS_RTTI && GTEST_GCC_VER_ < 40302
-
-// VS 2010 now has tr1 support.
-# elif _MSC_VER >= 1600
-#  include <tuple>  // IWYU pragma: export  // NOLINT
-
-# else  // GTEST_USE_OWN_TR1_TUPLE
-#  include <tr1/tuple>  // IWYU pragma: export  // NOLINT
-# endif  // GTEST_USE_OWN_TR1_TUPLE
-
-#endif  // GTEST_HAS_TR1_TUPLE
-
 // Determines whether clone(2) is supported.
 // Usually it will only be available on Linux, excluding
 // Linux on the Itanium architecture.
@@ -810,12 +604,10 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #endif  // GTEST_HAS_STREAM_REDIRECTION
 
 // Determines whether to support death tests.
-// Google Test does not support death tests for VC 7.1 and earlier as
-// abort() in a VC 7.1 application compiled as GUI in debug config
 // pops up a dialog window that cannot be suppressed programmatically.
 #if (GTEST_OS_LINUX || GTEST_OS_CYGWIN || GTEST_OS_SOLARIS ||   \
      (GTEST_OS_MAC && !GTEST_OS_IOS) ||                         \
-     (GTEST_OS_WINDOWS_DESKTOP && _MSC_VER >= 1400) ||          \
+     (GTEST_OS_WINDOWS_DESKTOP && _MSC_VER) ||                  \
      GTEST_OS_WINDOWS_MINGW || GTEST_OS_AIX || GTEST_OS_HPUX || \
      GTEST_OS_OPENBSD || GTEST_OS_QNX || GTEST_OS_FREEBSD || \
      GTEST_OS_NETBSD || GTEST_OS_FUCHSIA)
@@ -826,23 +618,16 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 // Typed tests need <typeinfo> and variadic macros, which GCC, VC++ 8.0,
 // Sun Pro CC, IBM Visual Age, and HP aCC support.
-#if defined(__GNUC__) || (_MSC_VER >= 1400) || defined(__SUNPRO_CC) || \
+#if defined(__GNUC__) || defined(_MSC_VER) || defined(__SUNPRO_CC) || \
     defined(__IBMCPP__) || defined(__HP_aCC)
 # define GTEST_HAS_TYPED_TEST 1
 # define GTEST_HAS_TYPED_TEST_P 1
 #endif
 
-// Determines whether to support Combine(). This only makes sense when
-// value-parameterized tests are enabled.  The implementation doesn't
-// work on Sun Studio since it doesn't understand templated conversion
-// operators.
-#if (GTEST_HAS_TR1_TUPLE || GTEST_HAS_STD_TUPLE_) && !defined(__SUNPRO_CC)
-# define GTEST_HAS_COMBINE 1
-#endif
-
 // Determines whether the system compiler uses UTF-16 for encoding wide strings.
 #define GTEST_WIDE_STRING_USES_UTF16_ \
-    (GTEST_OS_WINDOWS || GTEST_OS_CYGWIN || GTEST_OS_SYMBIAN || GTEST_OS_AIX)
+    (GTEST_OS_WINDOWS || GTEST_OS_CYGWIN || GTEST_OS_SYMBIAN || \
+     GTEST_OS_AIX || GTEST_OS_OS2)
 
 // Determines whether test results can be streamed to a socket.
 #if GTEST_OS_LINUX
@@ -887,12 +672,6 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # define GTEST_ATTRIBUTE_UNUSED_
 #endif
 
-#if GTEST_LANG_CXX11
-# define GTEST_CXX11_EQUALS_DELETE_ = delete
-#else  // GTEST_LANG_CXX11
-# define GTEST_CXX11_EQUALS_DELETE_
-#endif  // GTEST_LANG_CXX11
-
 // Use this annotation before a function that takes a printf format string.
 #if (defined(__GNUC__) || defined(__clang__)) && !defined(COMPILER_ICC)
 # if defined(__MINGW_PRINTF_FORMAT)
@@ -914,12 +693,12 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // A macro to disallow operator=
 // This should be used in the private: declarations for a class.
 #define GTEST_DISALLOW_ASSIGN_(type) \
-  void operator=(type const &) GTEST_CXX11_EQUALS_DELETE_
+  void operator=(type const &) = delete
 
 // A macro to disallow copy constructor and operator=
 // This should be used in the private: declarations for a class.
 #define GTEST_DISALLOW_COPY_AND_ASSIGN_(type) \
-  type(type const &) GTEST_CXX11_EQUALS_DELETE_; \
+  type(type const &) = delete; \
   GTEST_DISALLOW_ASSIGN_(type)
 
 // Tell the compiler to warn about unused return values for functions declared
@@ -960,12 +739,16 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #  define GTEST_HAS_SEH 0
 # endif
 
-#define GTEST_IS_THREADSAFE \
-    (GTEST_HAS_MUTEX_AND_THREAD_LOCAL_ \
-     || (GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT) \
-     || GTEST_HAS_PTHREAD)
-
 #endif  // GTEST_HAS_SEH
+
+#ifndef GTEST_IS_THREADSAFE
+
+#define GTEST_IS_THREADSAFE                                                 \
+  (GTEST_HAS_MUTEX_AND_THREAD_LOCAL_ ||                                     \
+   (GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT) || \
+   GTEST_HAS_PTHREAD)
+
+#endif  // GTEST_IS_THREADSAFE
 
 // GTEST_API_ qualifies all symbols that must be exported. The definitions below
 // are guarded by #ifndef to give embedders a chance to define GTEST_API_ in
@@ -1049,16 +832,13 @@ namespace testing {
 
 class Message;
 
-#if defined(GTEST_TUPLE_NAMESPACE_)
-// Import tuple and friends into the ::testing namespace.
-// It is part of our interface, having them in ::testing allows us to change
-// their types as needed.
-using GTEST_TUPLE_NAMESPACE_::get;
-using GTEST_TUPLE_NAMESPACE_::make_tuple;
-using GTEST_TUPLE_NAMESPACE_::tuple;
-using GTEST_TUPLE_NAMESPACE_::tuple_size;
-using GTEST_TUPLE_NAMESPACE_::tuple_element;
-#endif  // defined(GTEST_TUPLE_NAMESPACE_)
+// Legacy imports for backwards compatibility.
+// New code should use std:: names directly.
+using std::get;
+using std::make_tuple;
+using std::tuple;
+using std::tuple_element;
+using std::tuple_size;
 
 namespace internal {
 
@@ -1067,75 +847,16 @@ namespace internal {
 // Secret object, which is what we want.
 class Secret;
 
-// The GTEST_COMPILE_ASSERT_ macro can be used to verify that a compile time
-// expression is true. For example, you could use it to verify the
-// size of a static array:
+// The GTEST_COMPILE_ASSERT_ is a legacy macro used to verify that a compile
+// time expression is true (in new code, use static_assert instead). For
+// example, you could use it to verify the size of a static array:
 //
 //   GTEST_COMPILE_ASSERT_(GTEST_ARRAY_SIZE_(names) == NUM_NAMES,
 //                         names_incorrect_size);
 //
-// or to make sure a struct is smaller than a certain size:
-//
-//   GTEST_COMPILE_ASSERT_(sizeof(foo) < 128, foo_too_large);
-//
-// The second argument to the macro is the name of the variable. If
-// the expression is false, most compilers will issue a warning/error
-// containing the name of the variable.
-
-#if GTEST_LANG_CXX11
-# define GTEST_COMPILE_ASSERT_(expr, msg) static_assert(expr, #msg)
-#else  // !GTEST_LANG_CXX11
-template <bool>
-  struct CompileAssert {
-};
-
-# define GTEST_COMPILE_ASSERT_(expr, msg) \
-  typedef ::testing::internal::CompileAssert<(static_cast<bool>(expr))> \
-      msg[static_cast<bool>(expr) ? 1 : -1] GTEST_ATTRIBUTE_UNUSED_
-#endif  // !GTEST_LANG_CXX11
-
-// Implementation details of GTEST_COMPILE_ASSERT_:
-//
-// (In C++11, we simply use static_assert instead of the following)
-//
-// - GTEST_COMPILE_ASSERT_ works by defining an array type that has -1
-//   elements (and thus is invalid) when the expression is false.
-//
-// - The simpler definition
-//
-//    #define GTEST_COMPILE_ASSERT_(expr, msg) typedef char msg[(expr) ? 1 : -1]
-//
-//   does not work, as gcc supports variable-length arrays whose sizes
-//   are determined at run-time (this is gcc's extension and not part
-//   of the C++ standard).  As a result, gcc fails to reject the
-//   following code with the simple definition:
-//
-//     int foo;
-//     GTEST_COMPILE_ASSERT_(foo, msg); // not supposed to compile as foo is
-//                                      // not a compile-time constant.
-//
-// - By using the type CompileAssert<(bool(expr))>, we ensures that
-//   expr is a compile-time constant.  (Template arguments must be
-//   determined at compile-time.)
-//
-// - The outter parentheses in CompileAssert<(bool(expr))> are necessary
-//   to work around a bug in gcc 3.4.4 and 4.0.1.  If we had written
-//
-//     CompileAssert<bool(expr)>
-//
-//   instead, these compilers will refuse to compile
-//
-//     GTEST_COMPILE_ASSERT_(5 > 0, some_message);
-//
-//   (They seem to think the ">" in "5 > 0" marks the end of the
-//   template argument list.)
-//
-// - The array size is (bool(expr) ? 1 : -1), instead of simply
-//
-//     ((expr) ? 1 : -1).
-//
-//   This is to avoid running into a bug in MS VC 7.1, which
-//   causes ((0.0) ? 1 : -1) to incorrectly evaluate to 1.
+// The second argument to the macro must be a valid C++ identifier. If the
+// expression is false, compiler will issue an error containing this identifier.
+#define GTEST_COMPILE_ASSERT_(expr, msg) static_assert(expr, #msg)
 
 // StaticAssertTypeEqHelper is used by StaticAssertTypeEq defined in gtest.h.
 //
@@ -1176,48 +897,6 @@ typedef ::std::wstring wstring;
 // A helper for suppressing warnings on constant condition.  It just
 // returns 'condition'.
 GTEST_API_ bool IsTrue(bool condition);
-
-// Defines scoped_ptr.
-
-// This implementation of scoped_ptr is PARTIAL - it only contains
-// enough stuff to satisfy Google Test's need.
-template <typename T>
-class scoped_ptr {
- public:
-  typedef T element_type;
-
-  explicit scoped_ptr(T* p = nullptr) : ptr_(p) {}
-  ~scoped_ptr() { reset(); }
-
-  T& operator*() const { return *ptr_; }
-  T* operator->() const { return ptr_; }
-  T* get() const { return ptr_; }
-
-  T* release() {
-    T* const ptr = ptr_;
-    ptr_ = nullptr;
-    return ptr;
-  }
-
-  void reset(T* p = nullptr) {
-    if (p != ptr_) {
-      if (IsTrue(sizeof(T) > 0)) {  // Makes sure T is a complete type.
-        delete ptr_;
-      }
-      ptr_ = p;
-    }
-  }
-
-  friend void swap(scoped_ptr& a, scoped_ptr& b) {
-    using std::swap;
-    swap(a.ptr_, b.ptr_);
-  }
-
- private:
-  T* ptr_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(scoped_ptr);
-};
 
 // Defines RE.
 
@@ -1419,28 +1098,6 @@ struct ConstRef<T&> { typedef T& type; };
 #define GTEST_REFERENCE_TO_CONST_(T) \
   typename ::testing::internal::ConstRef<T>::type
 
-#if GTEST_HAS_STD_MOVE_
-using std::forward;
-using std::move;
-
-template <typename T>
-struct RvalueRef {
-  typedef T&& type;
-};
-#else  // GTEST_HAS_STD_MOVE_
-template <typename T>
-const T& move(const T& t) {
-  return t;
-}
-template <typename T>
-GTEST_ADD_REFERENCE_(T) forward(GTEST_ADD_REFERENCE_(T) t) { return t; }
-
-template <typename T>
-struct RvalueRef {
-  typedef const T& type;
-};
-#endif  // GTEST_HAS_STD_MOVE_
-
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 //
 // Use ImplicitCast_ as a safe version of static_cast for upcasting in
@@ -1494,13 +1151,13 @@ inline To DownCast_(From* f) {  // so we only accept pointers
   GTEST_INTENTIONAL_CONST_COND_PUSH_()
   if (false) {
   GTEST_INTENTIONAL_CONST_COND_POP_()
-    const To to = NULL;
-    ::testing::internal::ImplicitCast_<From*>(to);
+  const To to = nullptr;
+  ::testing::internal::ImplicitCast_<From*>(to);
   }
 
 #if GTEST_HAS_RTTI
   // RTTI: debug mode only!
-  GTEST_CHECK_(f == nullptr || dynamic_cast<To>(f) != NULL);
+  GTEST_CHECK_(f == nullptr || dynamic_cast<To>(f) != nullptr);
 #endif
   return static_cast<To>(f);
 }
@@ -1730,7 +1387,7 @@ class ThreadWithParam : public ThreadWithParamBase {
     GTEST_CHECK_POSIX_SUCCESS_(
         pthread_create(&thread_, nullptr, &ThreadFuncWithCLinkage, base));
   }
-  ~ThreadWithParam() { Join(); }
+  ~ThreadWithParam() override { Join(); }
 
   void Join() {
     if (!finished_) {
@@ -1739,7 +1396,7 @@ class ThreadWithParam : public ThreadWithParamBase {
     }
   }
 
-  virtual void Run() {
+  void Run() override {
     if (thread_can_start_ != nullptr) thread_can_start_->WaitForNotification();
     func_(param_);
   }
@@ -2034,7 +1691,7 @@ class ThreadLocal : public ThreadLocalBase {
     GTEST_DISALLOW_COPY_AND_ASSIGN_(InstanceValueHolderFactory);
   };
 
-  scoped_ptr<ValueHolderFactory> default_factory_;
+  std::unique_ptr<ValueHolderFactory> default_factory_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadLocal);
 };
@@ -2245,7 +1902,7 @@ class GTEST_API_ ThreadLocal {
 
   // A key pthreads uses for looking up per-thread values.
   const pthread_key_t key_;
-  scoped_ptr<ValueHolderFactory> default_factory_;
+  std::unique_ptr<ValueHolderFactory> default_factory_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadLocal);
 };
@@ -2523,12 +2180,12 @@ inline const char* GetEnv(const char* name) {
 #if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_RT
   // We are on Windows CE, which has no environment variables.
   static_cast<void>(name);  // To prevent 'unused argument' warning.
-  return NULL;
+  return nullptr;
 #elif defined(__BORLANDC__) || defined(__SunOS_5_8) || defined(__SunOS_5_9)
   // Environment variables which we programmatically clear will be set to the
   // empty string rather than unset (NULL).  Handle that case.
   const char* const env = getenv(name);
-  return (env != NULL && env[0] != '\0') ? env : NULL;
+  return (env != nullptr && env[0] != '\0') ? env : nullptr;
 #else
   return getenv(name);
 #endif
@@ -2540,9 +2197,9 @@ GTEST_DISABLE_MSC_DEPRECATED_POP_()
 // Windows CE has no C library. The abort() function is used in
 // several places in Google Test. This implementation provides a reasonable
 // imitation of standard behaviour.
-void Abort();
+[[noreturn]] void Abort();
 #else
-inline void Abort() { abort(); }
+[[noreturn]] inline void Abort() { abort(); }
 #endif  // GTEST_OS_WINDOWS_MOBILE
 
 }  // namespace posix
@@ -2552,13 +2209,12 @@ inline void Abort() { abort(); }
 // MSVC-based platforms.  We map the GTEST_SNPRINTF_ macro to the appropriate
 // function in order to achieve that.  We use macro definition here because
 // snprintf is a variadic function.
-#if _MSC_VER >= 1400 && !GTEST_OS_WINDOWS_MOBILE
+#if _MSC_VER && !GTEST_OS_WINDOWS_MOBILE
 // MSVC 2005 and above support variadic macros.
 # define GTEST_SNPRINTF_(buffer, size, format, ...) \
      _snprintf_s(buffer, size, size, format, __VA_ARGS__)
 #elif defined(_MSC_VER)
-// Windows CE does not define _snprintf_s and MSVC prior to 2005 doesn't
-// complain about _snprintf.
+// Windows CE does not define _snprintf_s
 # define GTEST_SNPRINTF_ _snprintf
 #else
 # define GTEST_SNPRINTF_ snprintf

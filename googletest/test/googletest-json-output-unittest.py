@@ -57,7 +57,7 @@ else:
   STACK_TRACE_TEMPLATE = ''
 
 EXPECTED_NON_EMPTY = {
-    u'tests': 23,
+    u'tests': 24,
     u'failures': 4,
     u'disabled': 2,
     u'errors': 0,
@@ -120,6 +120,22 @@ EXPECTED_NON_EMPTY = {
                     u'status': u'NOTRUN',
                     u'time': u'*',
                     u'classname': u'DisabledTest'
+                }
+            ]
+        },
+        {
+            u'name': u'SkippedTest',
+            u'tests': 1,
+            u'failures': 0,
+            u'disabled': 0,
+            u'errors': 0,
+            u'time': u'*',
+            u'testsuite': [
+                {
+                    u'name': u'Skipped',
+                    u'status': u'SKIPPED',
+                    u'time': u'*',
+                    u'classname': u'SkippedTest'
                 }
             ]
         },

@@ -9,7 +9,6 @@ EXTRA_DIST = \
   LICENSE \
   include/gtest/gtest-param-test.h.pump \
   include/gtest/internal/gtest-param-util-generated.h.pump \
-  include/gtest/internal/gtest-tuple.h.pump \
   include/gtest/internal/gtest-type-util.h.pump \
   make/Makefile \
   scripts/fuse_gtest_files.py \
@@ -49,7 +48,6 @@ EXTRA_DIST += \
   test/gtest-death-test_ex_test.cc \
   test/gtest-death-test_test.cc \
   test/gtest-filepath_test.cc \
-  test/gtest-linked_ptr_test.cc \
   test/gtest-listener_test.cc \
   test/gtest-message_test.cc \
   test/gtest-options_test.cc \
@@ -62,7 +60,6 @@ EXTRA_DIST += \
   test/gtest_premature_exit_test.cc \
   test/gtest-printers_test.cc \
   test/gtest-test-part_test.cc \
-  test/googletest-tuple-test.cc \
   test/gtest-typed-test2_test.cc \
   test/gtest-typed-test_test.cc \
   test/gtest-typed-test_test.h \
@@ -202,13 +199,11 @@ pkginclude_internal_HEADERS = \
   include/gtest/internal/gtest-death-test-internal.h \
   include/gtest/internal/gtest-filepath.h \
   include/gtest/internal/gtest-internal.h \
-  include/gtest/internal/gtest-linked_ptr.h \
   include/gtest/internal/gtest-param-util-generated.h \
   include/gtest/internal/gtest-param-util.h \
   include/gtest/internal/gtest-port.h \
   include/gtest/internal/gtest-port-arch.h \
   include/gtest/internal/gtest-string.h \
-  include/gtest/internal/gtest-tuple.h \
   include/gtest/internal/gtest-type-util.h \
   include/gtest/internal/custom/gtest.h \
   include/gtest/internal/custom/gtest-port.h \

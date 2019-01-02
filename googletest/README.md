@@ -18,7 +18,7 @@ with `${GTEST_DIR}/include` in the system header search path and `${GTEST_DIR}`
 in the normal header search path. Assuming a Linux-like system and gcc,
 something like the following will do:
 
-    g++ -isystem ${GTEST_DIR}/include -I${GTEST_DIR} \
+    g++ -std=c++11 -isystem ${GTEST_DIR}/include -I${GTEST_DIR} \
         -pthread -c ${GTEST_DIR}/src/gtest-all.cc
     ar -rv libgtest.a gtest-all.o
 
@@ -28,7 +28,7 @@ Next, you should compile your test source file with `${GTEST_DIR}/include` in
 the system header search path, and link it with gtest and any other necessary
 libraries:
 
-    g++ -isystem ${GTEST_DIR}/include -pthread path/to/your_test.cc libgtest.a \
+    g++ -std=c++11 -isystem ${GTEST_DIR}/include -pthread path/to/your_test.cc libgtest.a \
         -o your_test
 
 As an example, the make/ directory contains a Makefile that you can use to build
@@ -124,8 +124,8 @@ include(ExternalProject)
 ExternalProject_Add(googletest
   GIT_REPOSITORY    https://github.com/google/googletest.git
   GIT_TAG           master
-  SOURCE_DIR        "${CMAKE_BINARY_DIR}/googletest-src"
-  BINARY_DIR        "${CMAKE_BINARY_DIR}/googletest-build"
+  SOURCE_DIR        "${CMAKE_CURRENT_BINARY_DIR}/googletest-src"
+  BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/googletest-build"
   CONFIGURE_COMMAND ""
   BUILD_COMMAND     ""
   INSTALL_COMMAND   ""
@@ -140,13 +140,13 @@ Existing build's `CMakeLists.txt`:
 configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
   RESULT_VARIABLE result
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
 if(result)
   message(FATAL_ERROR "CMake step for googletest failed: ${result}")
 endif()
 execute_process(COMMAND ${CMAKE_COMMAND} --build .
   RESULT_VARIABLE result
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
 if(result)
   message(FATAL_ERROR "Build step for googletest failed: ${result}")
 endif()
@@ -157,8 +157,8 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
 # Add googletest directly to our build. This defines
 # the gtest and gtest_main targets.
-add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
-                 ${CMAKE_BINARY_DIR}/googletest-build
+add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
+                 ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
                  EXCLUDE_FROM_ALL)
 
 # The gtest/gtest_main targets carry header search path
@@ -191,6 +191,15 @@ Google Test already has a CMake option for this: `gtest_force_shared_crt`
 
 Enabling this option will make gtest link the runtimes dynamically too, and
 match the project in which it is included.
+
+#### C++ Standard Version
+
+An environment that supports C++11 is required in order to successfully build
+Google Test. One way to ensure this is to specify the standard in the top-level
+project, for example by using the `set(CMAKE_CXX_STANDARD 11)` command. If this
+is not feasible, for example in a C project using Google Test for validation,
+then it can be specified by adding it to the options for cmake via the
+`DCMAKE_CXX_FLAGS` option.
 
 ### Legacy Build Scripts
 

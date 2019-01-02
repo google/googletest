@@ -31,6 +31,7 @@
 // Tests for death tests.
 
 #include "gtest/gtest-death-test.h"
+
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-filepath.h"
 
@@ -59,6 +60,8 @@ using testing::internal::AlwaysTrue;
 
 namespace posix = ::testing::internal::posix;
 
+using testing::ContainsRegex;
+using testing::Matcher;
 using testing::Message;
 using testing::internal::DeathTest;
 using testing::internal::DeathTestFactory;
@@ -97,6 +100,8 @@ class ReplaceDeathTestFactory {
 }  // namespace internal
 }  // namespace testing
 
+namespace {
+
 void DieWithMessage(const ::std::string& message) {
   fprintf(stderr, "%s", message.c_str());
   fflush(stderr);  // Make sure the text is printed before the process exits.
@@ -123,9 +128,7 @@ class TestForDeathTest : public testing::Test {
  protected:
   TestForDeathTest() : original_dir_(FilePath::GetCurrentDir()) {}
 
-  virtual ~TestForDeathTest() {
-    posix::ChDir(original_dir_.c_str());
-  }
+  ~TestForDeathTest() override { posix::ChDir(original_dir_.c_str()); }
 
   // A static member function that's expected to die.
   static void StaticMemberFunction() { DieInside("StaticMemberFunction"); }
@@ -297,13 +300,13 @@ TEST_F(TestForDeathTest, SingleStatement) {
     EXPECT_DEATH(_exit(1), "") << 1 << 2 << 3;
 }
 
+# if GTEST_USES_PCRE
+
 void DieWithEmbeddedNul() {
   fprintf(stderr, "Hello%cmy null world.\n", '\0');
   fflush(stderr);
   _exit(1);
 }
-
-# if GTEST_USES_PCRE
 
 // Tests that EXPECT_DEATH and ASSERT_DEATH work when the error
 // message has a NUL character in it.
@@ -452,15 +455,11 @@ TEST_F(TestForDeathTest, MixedStyles) {
 
 # if GTEST_HAS_CLONE && GTEST_HAS_PTHREAD
 
-namespace {
-
 bool pthread_flag;
 
 void SetPthreadFlag() {
   pthread_flag = true;
 }
-
-}  // namespace
 
 TEST_F(TestForDeathTest, DoesNotExecuteAtforkHooks) {
   if (!testing::GTEST_FLAG(death_test_use_fork)) {
@@ -499,12 +498,20 @@ TEST_F(TestForDeathTest, AcceptsAnythingConvertibleToRE) {
   const ::string regex_str(regex_c_str);
   EXPECT_DEATH(GlobalFunction(), regex_str);
 
+  // This one is tricky; a temporary pointer into another temporary.  Reference
+  // lifetime extension of the pointer is not sufficient.
+  EXPECT_DEATH(GlobalFunction(), ::string(regex_c_str).c_str());
+
 # endif  // GTEST_HAS_GLOBAL_STRING
 
 # if !GTEST_USES_PCRE
 
   const ::std::string regex_std_str(regex_c_str);
   EXPECT_DEATH(GlobalFunction(), regex_std_str);
+
+  // This one is tricky; a temporary pointer into another temporary.  Reference
+  // lifetime extension of the pointer is not sufficient.
+  EXPECT_DEATH(GlobalFunction(), ::std::string(regex_c_str).c_str());
 
 # endif  // !GTEST_USES_PCRE
 }
@@ -876,9 +883,9 @@ TEST_F(TestForDeathTest, DeathTestMultiLineMatchPass) {
 class MockDeathTestFactory : public DeathTestFactory {
  public:
   MockDeathTestFactory();
-  virtual bool Create(const char* statement,
-                      const ::testing::internal::RE* regex,
-                      const char* file, int line, DeathTest** test);
+  bool Create(const char* statement,
+              testing::Matcher<const std::string&> matcher, const char* file,
+              int line, DeathTest** test) override;
 
   // Sets the parameters for subsequent calls to Create.
   void SetParameters(bool create, DeathTest::TestRole role,
@@ -933,22 +940,20 @@ class MockDeathTest : public DeathTest {
                 TestRole role, int status, bool passed) :
       parent_(parent), role_(role), status_(status), passed_(passed) {
   }
-  virtual ~MockDeathTest() {
-    parent_->test_deleted_ = true;
-  }
-  virtual TestRole AssumeRole() {
+  ~MockDeathTest() override { parent_->test_deleted_ = true; }
+  TestRole AssumeRole() override {
     ++parent_->assume_role_calls_;
     return role_;
   }
-  virtual int Wait() {
+  int Wait() override {
     ++parent_->wait_calls_;
     return status_;
   }
-  virtual bool Passed(bool exit_status_ok) {
+  bool Passed(bool exit_status_ok) override {
     parent_->passed_args_.push_back(exit_status_ok);
     return passed_;
   }
-  virtual void Abort(AbortReason reason) {
+  void Abort(AbortReason reason) override {
     parent_->abort_args_.push_back(reason);
   }
 
@@ -992,11 +997,9 @@ void MockDeathTestFactory::SetParameters(bool create,
 // Sets test to NULL (if create_ is false) or to the address of a new
 // MockDeathTest object with parameters taken from the last call
 // to SetParameters (if create_ is true).  Always returns true.
-bool MockDeathTestFactory::Create(const char* /*statement*/,
-                                  const ::testing::internal::RE* /*regex*/,
-                                  const char* /*file*/,
-                                  int /*line*/,
-                                  DeathTest** test) {
+bool MockDeathTestFactory::Create(
+    const char* /*statement*/, testing::Matcher<const std::string&> /*matcher*/,
+    const char* /*file*/, int /*line*/, DeathTest** test) {
   test_deleted_ = false;
   if (create_) {
     *test = new MockDeathTest(this, role_, status_, passed_);
@@ -1318,7 +1321,48 @@ TEST(InDeathTestChildDeathTest, ReportsDeathTestCorrectlyInThreadSafeStyle) {
   }, "Inside");
 }
 
+void DieWithMessage(const char* message) {
+  fputs(message, stderr);
+  fflush(stderr);  // Make sure the text is printed before the process exits.
+  _exit(1);
+}
+
+TEST(MatcherDeathTest, DoesNotBreakBareRegexMatching) {
+  // googletest tests this, of course; here we ensure that including googlemock
+  // has not broken it.
+  EXPECT_DEATH(DieWithMessage("O, I die, Horatio."), "I d[aeiou]e");
+}
+
+TEST(MatcherDeathTest, MonomorphicMatcherMatches) {
+  EXPECT_DEATH(DieWithMessage("Behind O, I am slain!"),
+               Matcher<const std::string&>(ContainsRegex("I am slain")));
+}
+
+TEST(MatcherDeathTest, MonomorphicMatcherDoesNotMatch) {
+  EXPECT_NONFATAL_FAILURE(
+      EXPECT_DEATH(
+          DieWithMessage("Behind O, I am slain!"),
+          Matcher<const std::string&>(ContainsRegex("Ow, I am slain"))),
+      "Expected: contains regular expression \"Ow, I am slain\"");
+}
+
+TEST(MatcherDeathTest, PolymorphicMatcherMatches) {
+  EXPECT_DEATH(DieWithMessage("The rest is silence."),
+               ContainsRegex("rest is silence"));
+}
+
+TEST(MatcherDeathTest, PolymorphicMatcherDoesNotMatch) {
+  EXPECT_NONFATAL_FAILURE(
+      EXPECT_DEATH(DieWithMessage("The rest is silence."),
+                   ContainsRegex("rest is science")),
+      "Expected: contains regular expression \"rest is science\"");
+}
+
+}  // namespace
+
 #else  // !GTEST_HAS_DEATH_TEST follows
+
+namespace {
 
 using testing::internal::CaptureStderr;
 using testing::internal::GetCapturedStderr;
@@ -1368,7 +1412,11 @@ TEST(ConditionalDeathMacrosTest, AssertDeatDoesNotReturnhIfUnsupported) {
   EXPECT_EQ(1, n);
 }
 
+}  // namespace
+
 #endif  // !GTEST_HAS_DEATH_TEST
+
+namespace {
 
 // Tests that the death test macros expand to code which may or may not
 // be followed by operator<<, and that in either case the complete text
@@ -1420,3 +1468,5 @@ TEST(ConditionalDeathMacrosSyntaxDeathTest, SwitchStatement) {
 TEST(NotADeathTest, Test) {
   SUCCEED();
 }
+
+}  // namespace

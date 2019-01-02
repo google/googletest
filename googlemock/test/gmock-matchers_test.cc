@@ -32,12 +32,21 @@
 //
 // This file tests some commonly used argument matchers.
 
+// Silence warning C4244: 'initializing': conversion from 'int' to 'short',
+// possible loss of data and C4100, unreferenced local parameter
+#ifdef _MSC_VER
+# pragma warning(push)
+# pragma warning(disable:4244)
+# pragma warning(disable:4100)
+#endif
+
 #include "gmock/gmock-matchers.h"
 #include "gmock/gmock-more-matchers.h"
 
 #include <string.h>
 #include <time.h>
 #include <deque>
+#include <forward_list>
 #include <functional>
 #include <iostream>
 #include <iterator>
@@ -48,22 +57,16 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "gtest/gtest-spi.h"
 
-#if GTEST_HAS_STD_FORWARD_LIST_
-# include <forward_list>  // NOLINT
-#endif
-
-#if GTEST_LANG_CXX11
-# include <type_traits>
-#endif
-
 namespace testing {
 namespace gmock_matchers_test {
+namespace {
 
 using std::greater;
 using std::less;
@@ -77,6 +80,7 @@ using std::pair;
 using std::set;
 using std::stringstream;
 using std::vector;
+using testing::_;
 using testing::A;
 using testing::AllArgs;
 using testing::AllOf;
@@ -102,12 +106,12 @@ using testing::Le;
 using testing::Lt;
 using testing::MakeMatcher;
 using testing::MakePolymorphicMatcher;
-using testing::MatchResultListener;
 using testing::Matcher;
 using testing::MatcherCast;
 using testing::MatcherInterface;
 using testing::Matches;
 using testing::MatchesRegex;
+using testing::MatchResultListener;
 using testing::NanSensitiveDoubleEq;
 using testing::NanSensitiveDoubleNear;
 using testing::NanSensitiveFloatEq;
@@ -127,16 +131,14 @@ using testing::StartsWith;
 using testing::StrCaseEq;
 using testing::StrCaseNe;
 using testing::StrEq;
-using testing::StrNe;
 using testing::StringMatchResultListener;
+using testing::StrNe;
 using testing::Truly;
 using testing::TypedEq;
 using testing::UnorderedPointwise;
 using testing::Value;
 using testing::WhenSorted;
 using testing::WhenSortedBy;
-using testing::_;
-using testing::get;
 using testing::internal::DummyMatchResultListener;
 using testing::internal::ElementMatcherPair;
 using testing::internal::ElementMatcherPairs;
@@ -144,29 +146,34 @@ using testing::internal::ExplainMatchFailureTupleTo;
 using testing::internal::FloatingEqMatcher;
 using testing::internal::FormatMatcherDescription;
 using testing::internal::IsReadableTypeName;
-using testing::internal::linked_ptr;
 using testing::internal::MatchMatrix;
+using testing::internal::PredicateFormatterFromMatcher;
 using testing::internal::RE;
-using testing::internal::scoped_ptr;
 using testing::internal::StreamMatchResultListener;
-using testing::internal::Strings;
-using testing::internal::linked_ptr;
-using testing::internal::scoped_ptr;
 using testing::internal::string;
-using testing::make_tuple;
-using testing::tuple;
+using testing::internal::Strings;
+
+// Helper for testing container-valued matchers in mock method context. It is
+// important to test matchers in this context, since it requires additional type
+// deduction beyond what EXPECT_THAT does, thus making it more restrictive.
+struct ContainerHelper {
+  MOCK_METHOD1(Call, void(std::vector<std::unique_ptr<int>>));
+};
+
+std::vector<std::unique_ptr<int>> MakeUniquePtrs(const std::vector<int>& ints) {
+  std::vector<std::unique_ptr<int>> pointers;
+  for (int i : ints) pointers.emplace_back(new int(i));
+  return pointers;
+}
 
 // For testing ExplainMatchResultTo().
 class GreaterThanMatcher : public MatcherInterface<int> {
  public:
   explicit GreaterThanMatcher(int rhs) : rhs_(rhs) {}
 
-  virtual void DescribeTo(ostream* os) const {
-    *os << "is > " << rhs_;
-  }
+  void DescribeTo(ostream* os) const override { *os << "is > " << rhs_; }
 
-  virtual bool MatchAndExplain(int lhs,
-                               MatchResultListener* listener) const {
+  bool MatchAndExplain(int lhs, MatchResultListener* listener) const override {
     const int diff = lhs - rhs_;
     if (diff > 0) {
       *listener << "which is " << diff << " more than " << rhs_;
@@ -256,14 +263,12 @@ TEST(MatchResultListenerTest, IsInterestedWorks) {
 // change.
 class EvenMatcherImpl : public MatcherInterface<int> {
  public:
-  virtual bool MatchAndExplain(int x,
-                               MatchResultListener* /* listener */) const {
+  bool MatchAndExplain(int x,
+                       MatchResultListener* /* listener */) const override {
     return x % 2 == 0;
   }
 
-  virtual void DescribeTo(ostream* os) const {
-    *os << "is an even number";
-  }
+  void DescribeTo(ostream* os) const override { *os << "is an even number"; }
 
   // We deliberately don't define DescribeNegationTo() and
   // ExplainMatchResultTo() here, to make sure the definition of these
@@ -279,7 +284,7 @@ TEST(MatcherInterfaceTest, CanBeImplementedUsingPublishedAPI) {
 
 class NewEvenMatcherImpl : public MatcherInterface<int> {
  public:
-  virtual bool MatchAndExplain(int x, MatchResultListener* listener) const {
+  bool MatchAndExplain(int x, MatchResultListener* listener) const override {
     const bool match = x % 2 == 0;
     // Verifies that we can stream to a listener directly.
     *listener << "value % " << 2;
@@ -291,9 +296,7 @@ class NewEvenMatcherImpl : public MatcherInterface<int> {
     return match;
   }
 
-  virtual void DescribeTo(ostream* os) const {
-    *os << "is an even number";
-  }
+  void DescribeTo(ostream* os) const override { *os << "is an even number"; }
 };
 
 TEST(MatcherInterfaceTest, CanBeImplementedUsingNewAPI) {
@@ -326,7 +329,7 @@ TEST(MatcherTest, CanBeImplicitlyConstructedFromValue) {
 
 // Tests that NULL can be used in place of Eq(NULL).
 TEST(MatcherTest, CanBeImplicitlyConstructedFromNULL) {
-  Matcher<int*> m1 = NULL;
+  Matcher<int*> m1 = nullptr;
   EXPECT_TRUE(m1.Matches(nullptr));
   int n = 0;
   EXPECT_FALSE(m1.Matches(&n));
@@ -1180,32 +1183,12 @@ TEST(IsNullTest, MatchesNullPointer) {
 #endif
 }
 
-TEST(IsNullTest, LinkedPtr) {
-  const Matcher<linked_ptr<int> > m = IsNull();
-  const linked_ptr<int> null_p;
-  const linked_ptr<int> non_null_p(new int);
-
-  EXPECT_TRUE(m.Matches(null_p));
-  EXPECT_FALSE(m.Matches(non_null_p));
-}
-
-TEST(IsNullTest, ReferenceToConstLinkedPtr) {
-  const Matcher<const linked_ptr<double>&> m = IsNull();
-  const linked_ptr<double> null_p;
-  const linked_ptr<double> non_null_p(new double);
-
-  EXPECT_TRUE(m.Matches(null_p));
-  EXPECT_FALSE(m.Matches(non_null_p));
-}
-
-#if GTEST_LANG_CXX11
 TEST(IsNullTest, StdFunction) {
   const Matcher<std::function<void()>> m = IsNull();
 
   EXPECT_TRUE(m.Matches(std::function<void()>()));
   EXPECT_FALSE(m.Matches([]{}));
 }
-#endif  // GTEST_LANG_CXX11
 
 // Tests that IsNull() describes itself properly.
 TEST(IsNullTest, CanDescribeSelf) {
@@ -1229,31 +1212,29 @@ TEST(NotNullTest, MatchesNonNullPointer) {
 }
 
 TEST(NotNullTest, LinkedPtr) {
-  const Matcher<linked_ptr<int> > m = NotNull();
-  const linked_ptr<int> null_p;
-  const linked_ptr<int> non_null_p(new int);
+  const Matcher<std::shared_ptr<int>> m = NotNull();
+  const std::shared_ptr<int> null_p;
+  const std::shared_ptr<int> non_null_p(new int);
 
   EXPECT_FALSE(m.Matches(null_p));
   EXPECT_TRUE(m.Matches(non_null_p));
 }
 
 TEST(NotNullTest, ReferenceToConstLinkedPtr) {
-  const Matcher<const linked_ptr<double>&> m = NotNull();
-  const linked_ptr<double> null_p;
-  const linked_ptr<double> non_null_p(new double);
+  const Matcher<const std::shared_ptr<double>&> m = NotNull();
+  const std::shared_ptr<double> null_p;
+  const std::shared_ptr<double> non_null_p(new double);
 
   EXPECT_FALSE(m.Matches(null_p));
   EXPECT_TRUE(m.Matches(non_null_p));
 }
 
-#if GTEST_LANG_CXX11
 TEST(NotNullTest, StdFunction) {
   const Matcher<std::function<void()>> m = NotNull();
 
   EXPECT_TRUE(m.Matches([]{}));
   EXPECT_FALSE(m.Matches(std::function<void()>()));
 }
-#endif  // GTEST_LANG_CXX11
 
 // Tests that NotNull() describes itself properly.
 TEST(NotNullTest, CanDescribeSelf) {
@@ -1536,7 +1517,6 @@ TEST(KeyTest, MatchesCorrectly) {
   EXPECT_THAT(p, Not(Key(Lt(25))));
 }
 
-#if GTEST_LANG_CXX11
 template <size_t I>
 struct Tag {};
 
@@ -1563,7 +1543,6 @@ TEST(PairTest, MatchesPairWithGetCorrectly) {
   std::vector<PairWithGet> v = {{11, "Foo"}, {29, "gMockIsBestMock"}};
   EXPECT_THAT(v, Contains(Key(29)));
 }
-#endif  // GTEST_LANG_CXX11
 
 TEST(KeyTest, SafelyCastsInnerMatcher) {
   Matcher<int> is_positive = Gt(0);
@@ -1702,7 +1681,12 @@ TEST(PairTest, InsideContainsUsingMap) {
   EXPECT_THAT(container, Not(Contains(Pair(3, _))));
 }
 
-#if GTEST_LANG_CXX11
+TEST(ContainsTest, WorksWithMoveOnly) {
+  ContainerHelper helper;
+  EXPECT_CALL(helper, Call(Contains(Pointee(2))));
+  helper.Call(MakeUniquePtrs({1, 2}));
+}
+
 TEST(PairTest, UseGetInsteadOfMembers) {
   PairWithGet pair{7, "ABC"};
   EXPECT_THAT(pair, Pair(7, "ABC"));
@@ -1712,7 +1696,6 @@ TEST(PairTest, UseGetInsteadOfMembers) {
   std::vector<PairWithGet> v = {{11, "Foo"}, {29, "gMockIsBestMock"}};
   EXPECT_THAT(v, ElementsAre(Pair(11, string("Foo")), Pair(Ge(10), Not(""))));
 }
-#endif  // GTEST_LANG_CXX11
 
 // Tests StartsWith(s).
 
@@ -2239,8 +2222,7 @@ TEST(GlobalWideEndsWithTest, CanDescribeSelf) {
 
 #endif  // GTEST_HAS_GLOBAL_WSTRING
 
-
-typedef ::testing::tuple<long, int> Tuple2;  // NOLINT
+typedef ::std::tuple<long, int> Tuple2;  // NOLINT
 
 // Tests that Eq() matches a 2-tuple where the first field == the
 // second field.
@@ -2334,7 +2316,7 @@ TEST(Ne2Test, CanDescribeSelf) {
 // Tests that FloatEq() matches a 2-tuple where
 // FloatEq(first field) matches the second field.
 TEST(FloatEq2Test, MatchesEqualArguments) {
-  typedef ::testing::tuple<float, float> Tpl;
+  typedef ::std::tuple<float, float> Tpl;
   Matcher<const Tpl&> m = FloatEq();
   EXPECT_TRUE(m.Matches(Tpl(1.0f, 1.0f)));
   EXPECT_TRUE(m.Matches(Tpl(0.3f, 0.1f + 0.1f + 0.1f)));
@@ -2343,14 +2325,14 @@ TEST(FloatEq2Test, MatchesEqualArguments) {
 
 // Tests that FloatEq() describes itself properly.
 TEST(FloatEq2Test, CanDescribeSelf) {
-  Matcher<const ::testing::tuple<float, float>&> m = FloatEq();
+  Matcher<const ::std::tuple<float, float>&> m = FloatEq();
   EXPECT_EQ("are an almost-equal pair", Describe(m));
 }
 
 // Tests that NanSensitiveFloatEq() matches a 2-tuple where
 // NanSensitiveFloatEq(first field) matches the second field.
 TEST(NanSensitiveFloatEqTest, MatchesEqualArgumentsWithNaN) {
-  typedef ::testing::tuple<float, float> Tpl;
+  typedef ::std::tuple<float, float> Tpl;
   Matcher<const Tpl&> m = NanSensitiveFloatEq();
   EXPECT_TRUE(m.Matches(Tpl(1.0f, 1.0f)));
   EXPECT_TRUE(m.Matches(Tpl(std::numeric_limits<float>::quiet_NaN(),
@@ -2362,14 +2344,14 @@ TEST(NanSensitiveFloatEqTest, MatchesEqualArgumentsWithNaN) {
 
 // Tests that NanSensitiveFloatEq() describes itself properly.
 TEST(NanSensitiveFloatEqTest, CanDescribeSelfWithNaNs) {
-  Matcher<const ::testing::tuple<float, float>&> m = NanSensitiveFloatEq();
+  Matcher<const ::std::tuple<float, float>&> m = NanSensitiveFloatEq();
   EXPECT_EQ("are an almost-equal pair", Describe(m));
 }
 
 // Tests that DoubleEq() matches a 2-tuple where
 // DoubleEq(first field) matches the second field.
 TEST(DoubleEq2Test, MatchesEqualArguments) {
-  typedef ::testing::tuple<double, double> Tpl;
+  typedef ::std::tuple<double, double> Tpl;
   Matcher<const Tpl&> m = DoubleEq();
   EXPECT_TRUE(m.Matches(Tpl(1.0, 1.0)));
   EXPECT_TRUE(m.Matches(Tpl(0.3, 0.1 + 0.1 + 0.1)));
@@ -2378,14 +2360,14 @@ TEST(DoubleEq2Test, MatchesEqualArguments) {
 
 // Tests that DoubleEq() describes itself properly.
 TEST(DoubleEq2Test, CanDescribeSelf) {
-  Matcher<const ::testing::tuple<double, double>&> m = DoubleEq();
+  Matcher<const ::std::tuple<double, double>&> m = DoubleEq();
   EXPECT_EQ("are an almost-equal pair", Describe(m));
 }
 
 // Tests that NanSensitiveDoubleEq() matches a 2-tuple where
 // NanSensitiveDoubleEq(first field) matches the second field.
 TEST(NanSensitiveDoubleEqTest, MatchesEqualArgumentsWithNaN) {
-  typedef ::testing::tuple<double, double> Tpl;
+  typedef ::std::tuple<double, double> Tpl;
   Matcher<const Tpl&> m = NanSensitiveDoubleEq();
   EXPECT_TRUE(m.Matches(Tpl(1.0f, 1.0f)));
   EXPECT_TRUE(m.Matches(Tpl(std::numeric_limits<double>::quiet_NaN(),
@@ -2397,14 +2379,14 @@ TEST(NanSensitiveDoubleEqTest, MatchesEqualArgumentsWithNaN) {
 
 // Tests that DoubleEq() describes itself properly.
 TEST(NanSensitiveDoubleEqTest, CanDescribeSelfWithNaNs) {
-  Matcher<const ::testing::tuple<double, double>&> m = NanSensitiveDoubleEq();
+  Matcher<const ::std::tuple<double, double>&> m = NanSensitiveDoubleEq();
   EXPECT_EQ("are an almost-equal pair", Describe(m));
 }
 
 // Tests that FloatEq() matches a 2-tuple where
 // FloatNear(first field, max_abs_error) matches the second field.
 TEST(FloatNear2Test, MatchesEqualArguments) {
-  typedef ::testing::tuple<float, float> Tpl;
+  typedef ::std::tuple<float, float> Tpl;
   Matcher<const Tpl&> m = FloatNear(0.5f);
   EXPECT_TRUE(m.Matches(Tpl(1.0f, 1.0f)));
   EXPECT_TRUE(m.Matches(Tpl(1.3f, 1.0f)));
@@ -2413,14 +2395,14 @@ TEST(FloatNear2Test, MatchesEqualArguments) {
 
 // Tests that FloatNear() describes itself properly.
 TEST(FloatNear2Test, CanDescribeSelf) {
-  Matcher<const ::testing::tuple<float, float>&> m = FloatNear(0.5f);
+  Matcher<const ::std::tuple<float, float>&> m = FloatNear(0.5f);
   EXPECT_EQ("are an almost-equal pair", Describe(m));
 }
 
 // Tests that NanSensitiveFloatNear() matches a 2-tuple where
 // NanSensitiveFloatNear(first field) matches the second field.
 TEST(NanSensitiveFloatNearTest, MatchesNearbyArgumentsWithNaN) {
-  typedef ::testing::tuple<float, float> Tpl;
+  typedef ::std::tuple<float, float> Tpl;
   Matcher<const Tpl&> m = NanSensitiveFloatNear(0.5f);
   EXPECT_TRUE(m.Matches(Tpl(1.0f, 1.0f)));
   EXPECT_TRUE(m.Matches(Tpl(1.1f, 1.0f)));
@@ -2433,15 +2415,14 @@ TEST(NanSensitiveFloatNearTest, MatchesNearbyArgumentsWithNaN) {
 
 // Tests that NanSensitiveFloatNear() describes itself properly.
 TEST(NanSensitiveFloatNearTest, CanDescribeSelfWithNaNs) {
-  Matcher<const ::testing::tuple<float, float>&> m =
-      NanSensitiveFloatNear(0.5f);
+  Matcher<const ::std::tuple<float, float>&> m = NanSensitiveFloatNear(0.5f);
   EXPECT_EQ("are an almost-equal pair", Describe(m));
 }
 
 // Tests that FloatEq() matches a 2-tuple where
 // DoubleNear(first field, max_abs_error) matches the second field.
 TEST(DoubleNear2Test, MatchesEqualArguments) {
-  typedef ::testing::tuple<double, double> Tpl;
+  typedef ::std::tuple<double, double> Tpl;
   Matcher<const Tpl&> m = DoubleNear(0.5);
   EXPECT_TRUE(m.Matches(Tpl(1.0, 1.0)));
   EXPECT_TRUE(m.Matches(Tpl(1.3, 1.0)));
@@ -2450,14 +2431,14 @@ TEST(DoubleNear2Test, MatchesEqualArguments) {
 
 // Tests that DoubleNear() describes itself properly.
 TEST(DoubleNear2Test, CanDescribeSelf) {
-  Matcher<const ::testing::tuple<double, double>&> m = DoubleNear(0.5);
+  Matcher<const ::std::tuple<double, double>&> m = DoubleNear(0.5);
   EXPECT_EQ("are an almost-equal pair", Describe(m));
 }
 
 // Tests that NanSensitiveDoubleNear() matches a 2-tuple where
 // NanSensitiveDoubleNear(first field) matches the second field.
 TEST(NanSensitiveDoubleNearTest, MatchesNearbyArgumentsWithNaN) {
-  typedef ::testing::tuple<double, double> Tpl;
+  typedef ::std::tuple<double, double> Tpl;
   Matcher<const Tpl&> m = NanSensitiveDoubleNear(0.5f);
   EXPECT_TRUE(m.Matches(Tpl(1.0f, 1.0f)));
   EXPECT_TRUE(m.Matches(Tpl(1.1f, 1.0f)));
@@ -2470,8 +2451,7 @@ TEST(NanSensitiveDoubleNearTest, MatchesNearbyArgumentsWithNaN) {
 
 // Tests that NanSensitiveDoubleNear() describes itself properly.
 TEST(NanSensitiveDoubleNearTest, CanDescribeSelfWithNaNs) {
-  Matcher<const ::testing::tuple<double, double>&> m =
-      NanSensitiveDoubleNear(0.5f);
+  Matcher<const ::std::tuple<double, double>&> m = NanSensitiveDoubleNear(0.5f);
   EXPECT_EQ("are an almost-equal pair", Describe(m));
 }
 
@@ -2686,7 +2666,6 @@ static void AnyOfMatches(int num, const Matcher<int>& m) {
   EXPECT_FALSE(m.Matches(num + 1));
 }
 
-#if GTEST_LANG_CXX11
 static void AnyOfStringMatches(int num, const Matcher<std::string>& m) {
   SCOPED_TRACE(Describe(m));
   EXPECT_FALSE(m.Matches(std::to_string(0)));
@@ -2696,7 +2675,6 @@ static void AnyOfStringMatches(int num, const Matcher<std::string>& m) {
   }
   EXPECT_FALSE(m.Matches(std::to_string(num + 1)));
 }
-#endif
 
 // Tests that AnyOf(m1, ..., mn) matches any value that matches at
 // least one of the given matchers.
@@ -2741,7 +2719,6 @@ TEST(AnyOfTest, MatchesWhenAnyMatches) {
   AnyOfMatches(10, AnyOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
 }
 
-#if GTEST_LANG_CXX11
 // Tests the variadic version of the AnyOfMatcher.
 TEST(AnyOfTest, VariadicMatchesWhenAnyMatches) {
   // Also make sure AnyOf is defined in the right namespace and does not depend
@@ -2790,34 +2767,27 @@ TEST(ElementsAreTest, HugeMatcherUnordered) {
                                Eq(3), Eq(9), Eq(12), Eq(11), Ne(122)));
 }
 
-#endif  // GTEST_LANG_CXX11
 
 // Tests that AnyOf(m1, ..., mn) describes itself properly.
 TEST(AnyOfTest, CanDescribeSelf) {
   Matcher<int> m;
   m = AnyOf(Le(1), Ge(3));
+
   EXPECT_EQ("(is <= 1) or (is >= 3)",
             Describe(m));
 
   m = AnyOf(Lt(0), Eq(1), Eq(2));
-  EXPECT_EQ("(is < 0) or "
-            "((is equal to 1) or (is equal to 2))",
-            Describe(m));
+  EXPECT_EQ("(is < 0) or (is equal to 1) or (is equal to 2)", Describe(m));
 
   m = AnyOf(Lt(0), Eq(1), Eq(2), Eq(3));
-  EXPECT_EQ("((is < 0) or "
-            "(is equal to 1)) or "
-            "((is equal to 2) or "
-            "(is equal to 3))",
+  EXPECT_EQ("(is < 0) or (is equal to 1) or (is equal to 2) or (is equal to 3)",
             Describe(m));
 
   m = AnyOf(Le(0), Gt(10), 3, 5, 7);
-  EXPECT_EQ("((is <= 0) or "
-            "(is > 10)) or "
-            "((is equal to 3) or "
-            "((is equal to 5) or "
-            "(is equal to 7)))",
-            Describe(m));
+  EXPECT_EQ(
+      "(is <= 0) or (is > 10) or (is equal to 3) or (is equal to 5) or (is "
+      "equal to 7)",
+      Describe(m));
 }
 
 // Tests that AnyOf(m1, ..., mn) describes its negation properly.
@@ -2828,24 +2798,20 @@ TEST(AnyOfTest, CanDescribeNegation) {
             DescribeNegation(m));
 
   m = AnyOf(Lt(0), Eq(1), Eq(2));
-  EXPECT_EQ("(isn't < 0) and "
-            "((isn't equal to 1) and (isn't equal to 2))",
+  EXPECT_EQ("(isn't < 0) and (isn't equal to 1) and (isn't equal to 2)",
             DescribeNegation(m));
 
   m = AnyOf(Lt(0), Eq(1), Eq(2), Eq(3));
-  EXPECT_EQ("((isn't < 0) and "
-            "(isn't equal to 1)) and "
-            "((isn't equal to 2) and "
-            "(isn't equal to 3))",
-            DescribeNegation(m));
+  EXPECT_EQ(
+      "(isn't < 0) and (isn't equal to 1) and (isn't equal to 2) and (isn't "
+      "equal to 3)",
+      DescribeNegation(m));
 
   m = AnyOf(Le(0), Gt(10), 3, 5, 7);
-  EXPECT_EQ("((isn't <= 0) and "
-            "(isn't > 10)) and "
-            "((isn't equal to 3) and "
-            "((isn't equal to 5) and "
-            "(isn't equal to 7)))",
-            DescribeNegation(m));
+  EXPECT_EQ(
+      "(isn't <= 0) and (isn't > 10) and (isn't equal to 3) and (isn't equal "
+      "to 5) and (isn't equal to 7)",
+      DescribeNegation(m));
 }
 
 // Tests that monomorphic matchers are safely cast by the AnyOf matcher.
@@ -3081,8 +3047,8 @@ TEST(DescribeMatcherTest, WorksWithPolymorphicMatcher) {
 }
 
 TEST(AllArgsTest, WorksForTuple) {
-  EXPECT_THAT(make_tuple(1, 2L), AllArgs(Lt()));
-  EXPECT_THAT(make_tuple(2L, 1), Not(AllArgs(Lt())));
+  EXPECT_THAT(std::make_tuple(1, 2L), AllArgs(Lt()));
+  EXPECT_THAT(std::make_tuple(2L, 1), Not(AllArgs(Lt())));
 }
 
 TEST(AllArgsTest, WorksForNonTuple) {
@@ -4171,9 +4137,7 @@ class AClass {
   // A getter that returns a reference to const.
   const std::string& s() const { return s_; }
 
-#if GTEST_LANG_CXX11
   const std::string& s_ref() const & { return s_; }
-#endif
 
   void set_s(const std::string& new_s) { s_ = new_s; }
 
@@ -4230,7 +4194,6 @@ TEST(PropertyTest, WorksForReferenceToConstProperty) {
   EXPECT_FALSE(m_with_name.Matches(a));
 }
 
-#if GTEST_LANG_CXX11
 // Tests that Property(&Foo::property, ...) works when property() is
 // ref-qualified.
 TEST(PropertyTest, WorksForRefQualifiedProperty) {
@@ -4247,7 +4210,6 @@ TEST(PropertyTest, WorksForRefQualifiedProperty) {
   EXPECT_FALSE(m.Matches(a));
   EXPECT_FALSE(m_with_name.Matches(a));
 }
-#endif
 
 // Tests that Property(&Foo::property, ...) works when property()
 // returns a reference to non-const.
@@ -4610,7 +4572,6 @@ TEST(ResultOfTest, WorksForPolymorphicFunctors) {
   EXPECT_FALSE(matcher_string.Matches("shrt"));
 }
 
-#if GTEST_LANG_CXX11
 TEST(ResultOfTest, WorksForPolymorphicFunctorsIgnoringResultType) {
   Matcher<int*> matcher = ResultOf(PolymorphicFunctor(), "good ptr");
 
@@ -4625,7 +4586,6 @@ TEST(ResultOfTest, WorksForLambdas) {
   EXPECT_TRUE(matcher.Matches(3));
   EXPECT_FALSE(matcher.Matches(1));
 }
-#endif
 
 const int* ReferencingFunction(const int& n) { return &n; }
 
@@ -4788,6 +4748,12 @@ TEST(IsEmptyTest, ExplainsResult) {
   EXPECT_EQ("whose size is 1", Explain(m, container));
 }
 
+TEST(IsEmptyTest, WorksWithMoveOnly) {
+  ContainerHelper helper;
+  EXPECT_CALL(helper, Call(IsEmpty()));
+  helper.Call({});
+}
+
 TEST(IsTrueTest, IsTrueIsFalse) {
   EXPECT_THAT(true, IsTrue());
   EXPECT_THAT(false, IsFalse());
@@ -4795,8 +4761,8 @@ TEST(IsTrueTest, IsTrueIsFalse) {
   EXPECT_THAT(false, Not(IsTrue()));
   EXPECT_THAT(0, Not(IsTrue()));
   EXPECT_THAT(0, IsFalse());
-  EXPECT_THAT(NULL, Not(IsTrue()));
-  EXPECT_THAT(NULL, IsFalse());
+  EXPECT_THAT(nullptr, Not(IsTrue()));
+  EXPECT_THAT(nullptr, IsFalse());
   EXPECT_THAT(-1, IsTrue());
   EXPECT_THAT(-1, Not(IsFalse()));
   EXPECT_THAT(1, IsTrue());
@@ -4810,7 +4776,6 @@ TEST(IsTrueTest, IsTrueIsFalse) {
   EXPECT_THAT(&a, Not(IsFalse()));
   EXPECT_THAT(false, Not(IsTrue()));
   EXPECT_THAT(true, Not(IsFalse()));
-#if GTEST_LANG_CXX11
   EXPECT_THAT(std::true_type(), IsTrue());
   EXPECT_THAT(std::true_type(), Not(IsFalse()));
   EXPECT_THAT(std::false_type(), IsFalse());
@@ -4823,7 +4788,6 @@ TEST(IsTrueTest, IsTrueIsFalse) {
   EXPECT_THAT(null_unique, IsFalse());
   EXPECT_THAT(nonnull_unique, IsTrue());
   EXPECT_THAT(nonnull_unique, Not(IsFalse()));
-#endif  // GTEST_LANG_CXX11
 }
 
 TEST(SizeIsTest, ImplementsSizeIs) {
@@ -4856,6 +4820,23 @@ TEST(SizeIsTest, WorksWithReferences) {
   EXPECT_THAT(container, Not(m));
   container.push_back(0);
   EXPECT_THAT(container, m);
+}
+
+TEST(SizeIsTest, WorksWithMoveOnly) {
+  ContainerHelper helper;
+  EXPECT_CALL(helper, Call(SizeIs(3)));
+  helper.Call(MakeUniquePtrs({1, 2, 3}));
+}
+
+// SizeIs should work for any type that provides a size() member function.
+// For example, a size_type member type should not need to be provided.
+struct MinimalistCustomType {
+  int size() const { return 1; }
+};
+TEST(SizeIsTest, WorksWithMinimalistCustomType) {
+  MinimalistCustomType container;
+  EXPECT_THAT(container, SizeIs(1));
+  EXPECT_THAT(container, Not(SizeIs(0)));
 }
 
 TEST(SizeIsTest, CanDescribeSelf) {
@@ -4958,7 +4939,7 @@ TYPED_TEST(ContainerEqTest, DuplicateDifference) {
 }
 #endif  // GTEST_HAS_TYPED_TEST
 
-// Tests that mutliple missing values are reported.
+// Tests that multiple missing values are reported.
 // Using just vector here, so order is predictable.
 TEST(ContainerEqExtraTest, MultipleValuesMissing) {
   static const int vals[] = {1, 1, 2, 3, 5, 8};
@@ -5060,11 +5041,11 @@ TEST(ContainerEqExtraTest, WorksForNativeArrayAsTuple) {
   const int b[] = {1, 2, 3, 4};
 
   const int* const p1 = a1;
-  EXPECT_THAT(make_tuple(p1, 3), ContainerEq(a2));
-  EXPECT_THAT(make_tuple(p1, 3), Not(ContainerEq(b)));
+  EXPECT_THAT(std::make_tuple(p1, 3), ContainerEq(a2));
+  EXPECT_THAT(std::make_tuple(p1, 3), Not(ContainerEq(b)));
 
   const int c[] = {1, 3, 2};
-  EXPECT_THAT(make_tuple(p1, 3), Not(ContainerEq(c)));
+  EXPECT_THAT(std::make_tuple(p1, 3), Not(ContainerEq(c)));
 }
 
 TEST(ContainerEqExtraTest, CopiesNativeArrayParameter) {
@@ -5306,7 +5287,6 @@ TEST(StreamlikeTest, Iteration) {
   }
 }
 
-#if GTEST_HAS_STD_FORWARD_LIST_
 TEST(BeginEndDistanceIsTest, WorksWithForwardList) {
   std::forward_list<int> container;
   EXPECT_THAT(container, BeginEndDistanceIs(0));
@@ -5318,7 +5298,6 @@ TEST(BeginEndDistanceIsTest, WorksWithForwardList) {
   EXPECT_THAT(container, Not(BeginEndDistanceIs(0)));
   EXPECT_THAT(container, BeginEndDistanceIs(2));
 }
-#endif  // GTEST_HAS_STD_FORWARD_LIST_
 
 TEST(BeginEndDistanceIsTest, WorksWithNonStdList) {
   const int a[5] = {1, 2, 3, 4, 5};
@@ -5331,6 +5310,12 @@ TEST(BeginEndDistanceIsTest, CanDescribeSelf) {
   EXPECT_EQ("distance between begin() and end() is equal to 2", Describe(m));
   EXPECT_EQ("distance between begin() and end() isn't equal to 2",
             DescribeNegation(m));
+}
+
+TEST(BeginEndDistanceIsTest, WorksWithMoveOnly) {
+  ContainerHelper helper;
+  EXPECT_CALL(helper, Call(BeginEndDistanceIs(2)));
+  helper.Call(MakeUniquePtrs({1, 2}));
 }
 
 TEST(BeginEndDistanceIsTest, ExplainsResult) {
@@ -5494,13 +5479,19 @@ TEST(IsSupersetOfTest, MatchAndExplain) {
                                  " - element #2 is matched by matcher #0"));
 }
 
-#if GTEST_HAS_STD_INITIALIZER_LIST_
 TEST(IsSupersetOfTest, WorksForRhsInitializerList) {
   const int numbers[] = {1, 3, 6, 2, 4, 5};
   EXPECT_THAT(numbers, IsSupersetOf({1, 2}));
   EXPECT_THAT(numbers, Not(IsSupersetOf({3, 0})));
 }
-#endif
+
+TEST(IsSupersetOfTest, WorksWithMoveOnly) {
+  ContainerHelper helper;
+  EXPECT_CALL(helper, Call(IsSupersetOf({Pointee(1)})));
+  helper.Call(MakeUniquePtrs({1, 2}));
+  EXPECT_CALL(helper, Call(Not(IsSupersetOf({Pointee(1), Pointee(2)}))));
+  helper.Call(MakeUniquePtrs({2}));
+}
 
 TEST(IsSubsetOfTest, WorksForNativeArray) {
   const int subset[] = {1, 4};
@@ -5616,13 +5607,19 @@ TEST(IsSubsetOfTest, MatchAndExplain) {
                                  " - element #1 is matched by matcher #2"));
 }
 
-#if GTEST_HAS_STD_INITIALIZER_LIST_
 TEST(IsSubsetOfTest, WorksForRhsInitializerList) {
   const int numbers[] = {1, 2, 3};
   EXPECT_THAT(numbers, IsSubsetOf({1, 2, 3, 4}));
   EXPECT_THAT(numbers, Not(IsSubsetOf({1, 2})));
 }
-#endif
+
+TEST(IsSubsetOfTest, WorksWithMoveOnly) {
+  ContainerHelper helper;
+  EXPECT_CALL(helper, Call(IsSubsetOf({Pointee(1), Pointee(2)})));
+  helper.Call(MakeUniquePtrs({1}));
+  EXPECT_CALL(helper, Call(Not(IsSubsetOf({Pointee(1)}))));
+  helper.Call(MakeUniquePtrs({2}));
+}
 
 // Tests using ElementsAre() and ElementsAreArray() with stream-like
 // "containers".
@@ -5655,6 +5652,15 @@ TEST(ElementsAreTest, WorksWithUncopyable) {
   objs[0].set_value(-3);
   objs[1].set_value(1);
   EXPECT_THAT(objs, ElementsAre(UncopyableIs(-3), Truly(ValueIsPositive)));
+}
+
+TEST(ElementsAreTest, WorksWithMoveOnly) {
+  ContainerHelper helper;
+  EXPECT_CALL(helper, Call(ElementsAre(Pointee(1), Pointee(2))));
+  helper.Call(MakeUniquePtrs({1, 2}));
+
+  EXPECT_CALL(helper, Call(ElementsAreArray({Pointee(3), Pointee(4)})));
+  helper.Call(MakeUniquePtrs({3, 4}));
 }
 
 TEST(ElementsAreTest, TakesStlContainer) {
@@ -5724,7 +5730,6 @@ TEST(UnorderedElementsAreArrayTest, TakesStlContainer) {
   EXPECT_THAT(actual, Not(UnorderedElementsAreArray(expected)));
 }
 
-#if GTEST_HAS_STD_INITIALIZER_LIST_
 
 TEST(UnorderedElementsAreArrayTest, TakesInitializerList) {
   const int a[5] = {2, 1, 4, 5, 3};
@@ -5758,7 +5763,13 @@ TEST(UnorderedElementsAreArrayTest,
       {Eq(1), Ne(-2), Ge(3), Le(4), Eq(6)})));
 }
 
-#endif  // GTEST_HAS_STD_INITIALIZER_LIST_
+
+TEST(UnorderedElementsAreArrayTest, WorksWithMoveOnly) {
+  ContainerHelper helper;
+  EXPECT_CALL(helper,
+              Call(UnorderedElementsAreArray({Pointee(1), Pointee(2)})));
+  helper.Call(MakeUniquePtrs({2, 1}));
+}
 
 class UnorderedElementsAreTest : public testing::Test {
  protected:
@@ -5805,6 +5816,12 @@ TEST_F(UnorderedElementsAreTest, WorksForStreamlike) {
 
   EXPECT_THAT(s, UnorderedElementsAre(1, 2, 3, 4, 5));
   EXPECT_THAT(s, Not(UnorderedElementsAre(2, 2, 3, 4, 5)));
+}
+
+TEST_F(UnorderedElementsAreTest, WorksWithMoveOnly) {
+  ContainerHelper helper;
+  EXPECT_CALL(helper, Call(UnorderedElementsAre(Pointee(1), Pointee(2))));
+  helper.Call(MakeUniquePtrs({2, 1}));
 }
 
 // One naive implementation of the matcher runs in O(N!) time, which is too
@@ -6246,13 +6263,15 @@ TEST(PolymorphicMatcherTest, CanAccessImpl) {
 
 TEST(MatcherTupleTest, ExplainsMatchFailure) {
   stringstream ss1;
-  ExplainMatchFailureTupleTo(make_tuple(Matcher<char>(Eq('a')), GreaterThan(5)),
-                             make_tuple('a', 10), &ss1);
+  ExplainMatchFailureTupleTo(
+      std::make_tuple(Matcher<char>(Eq('a')), GreaterThan(5)),
+      std::make_tuple('a', 10), &ss1);
   EXPECT_EQ("", ss1.str());  // Successful match.
 
   stringstream ss2;
-  ExplainMatchFailureTupleTo(make_tuple(GreaterThan(5), Matcher<char>(Eq('a'))),
-                             make_tuple(2, 'b'), &ss2);
+  ExplainMatchFailureTupleTo(
+      std::make_tuple(GreaterThan(5), Matcher<char>(Eq('a'))),
+      std::make_tuple(2, 'b'), &ss2);
   EXPECT_EQ("  Expected arg #0: is > 5\n"
             "           Actual: 2, which is 3 less than 5\n"
             "  Expected arg #1: is equal to 'a' (97, 0x61)\n"
@@ -6260,8 +6279,9 @@ TEST(MatcherTupleTest, ExplainsMatchFailure) {
             ss2.str());  // Failed match where both arguments need explanation.
 
   stringstream ss3;
-  ExplainMatchFailureTupleTo(make_tuple(GreaterThan(5), Matcher<char>(Eq('a'))),
-                             make_tuple(2, 'a'), &ss3);
+  ExplainMatchFailureTupleTo(
+      std::make_tuple(GreaterThan(5), Matcher<char>(Eq('a'))),
+      std::make_tuple(2, 'a'), &ss3);
   EXPECT_EQ("  Expected arg #0: is > 5\n"
             "           Actual: 2, which is 3 less than 5\n",
             ss3.str());  // Failed match where only one argument needs
@@ -6350,21 +6370,27 @@ TEST(EachTest, AcceptsMatcher) {
 TEST(EachTest, WorksForNativeArrayAsTuple) {
   const int a[] = {1, 2};
   const int* const pointer = a;
-  EXPECT_THAT(make_tuple(pointer, 2), Each(Gt(0)));
-  EXPECT_THAT(make_tuple(pointer, 2), Not(Each(Gt(1))));
+  EXPECT_THAT(std::make_tuple(pointer, 2), Each(Gt(0)));
+  EXPECT_THAT(std::make_tuple(pointer, 2), Not(Each(Gt(1))));
+}
+
+TEST(EachTest, WorksWithMoveOnly) {
+  ContainerHelper helper;
+  EXPECT_CALL(helper, Call(Each(Pointee(Gt(0)))));
+  helper.Call(MakeUniquePtrs({1, 2}));
 }
 
 // For testing Pointwise().
 class IsHalfOfMatcher {
  public:
   template <typename T1, typename T2>
-  bool MatchAndExplain(const tuple<T1, T2>& a_pair,
+  bool MatchAndExplain(const std::tuple<T1, T2>& a_pair,
                        MatchResultListener* listener) const {
-    if (get<0>(a_pair) == get<1>(a_pair)/2) {
-      *listener << "where the second is " << get<1>(a_pair);
+    if (std::get<0>(a_pair) == std::get<1>(a_pair) / 2) {
+      *listener << "where the second is " << std::get<1>(a_pair);
       return true;
     } else {
-      *listener << "where the second/2 is " << get<1>(a_pair)/2;
+      *listener << "where the second/2 is " << std::get<1>(a_pair) / 2;
       return false;
     }
   }
@@ -6441,7 +6467,6 @@ TEST(PointwiseTest, WorksForVectorOfBool) {
   EXPECT_THAT(lhs, Not(Pointwise(Eq(), rhs)));
 }
 
-#if GTEST_HAS_STD_INITIALIZER_LIST_
 
 TEST(PointwiseTest, WorksForRhsInitializerList) {
   const vector<int> lhs{2, 4, 6};
@@ -6449,7 +6474,6 @@ TEST(PointwiseTest, WorksForRhsInitializerList) {
   EXPECT_THAT(lhs, Not(Pointwise(Lt(), {3, 3, 7})));
 }
 
-#endif  // GTEST_HAS_STD_INITIALIZER_LIST_
 
 TEST(PointwiseTest, RejectsWrongSize) {
   const double lhs[2] = {1, 2};
@@ -6481,15 +6505,26 @@ TEST(PointwiseTest, AcceptsCorrectContent) {
 TEST(PointwiseTest, AllowsMonomorphicInnerMatcher) {
   const double lhs[3] = {1, 2, 3};
   const int rhs[3] = {2, 4, 6};
-  const Matcher<tuple<const double&, const int&> > m1 = IsHalfOf();
+  const Matcher<std::tuple<const double&, const int&>> m1 = IsHalfOf();
   EXPECT_THAT(lhs, Pointwise(m1, rhs));
   EXPECT_EQ("", Explain(Pointwise(m1, rhs), lhs));
 
-  // This type works as a tuple<const double&, const int&> can be
-  // implicitly cast to tuple<double, int>.
-  const Matcher<tuple<double, int> > m2 = IsHalfOf();
+  // This type works as a std::tuple<const double&, const int&> can be
+  // implicitly cast to std::tuple<double, int>.
+  const Matcher<std::tuple<double, int>> m2 = IsHalfOf();
   EXPECT_THAT(lhs, Pointwise(m2, rhs));
   EXPECT_EQ("", Explain(Pointwise(m2, rhs), lhs));
+}
+
+MATCHER(PointeeEquals, "Points to an equal value") {
+  return ExplainMatchResult(::testing::Pointee(::testing::get<1>(arg)),
+                            ::testing::get<0>(arg), result_listener);
+}
+
+TEST(PointwiseTest, WorksWithMoveOnly) {
+  ContainerHelper helper;
+  EXPECT_CALL(helper, Call(Pointwise(PointeeEquals(), std::vector<int>{1, 2})));
+  helper.Call(MakeUniquePtrs({1, 2}));
 }
 
 TEST(UnorderedPointwiseTest, DescribesSelf) {
@@ -6552,7 +6587,6 @@ TEST(UnorderedPointwiseTest, WorksForRhsNativeArray) {
   EXPECT_THAT(lhs, Not(UnorderedPointwise(Lt(), rhs)));
 }
 
-#if GTEST_HAS_STD_INITIALIZER_LIST_
 
 TEST(UnorderedPointwiseTest, WorksForRhsInitializerList) {
   const vector<int> lhs{2, 4, 6};
@@ -6560,7 +6594,6 @@ TEST(UnorderedPointwiseTest, WorksForRhsInitializerList) {
   EXPECT_THAT(lhs, Not(UnorderedPointwise(Lt(), {1, 1, 7})));
 }
 
-#endif  // GTEST_HAS_STD_INITIALIZER_LIST_
 
 TEST(UnorderedPointwiseTest, RejectsWrongSize) {
   const double lhs[2] = {1, 2};
@@ -6597,13 +6630,20 @@ TEST(UnorderedPointwiseTest, AcceptsCorrectContentInDifferentOrder) {
 TEST(UnorderedPointwiseTest, AllowsMonomorphicInnerMatcher) {
   const double lhs[3] = {1, 2, 3};
   const int rhs[3] = {4, 6, 2};
-  const Matcher<tuple<const double&, const int&> > m1 = IsHalfOf();
+  const Matcher<std::tuple<const double&, const int&>> m1 = IsHalfOf();
   EXPECT_THAT(lhs, UnorderedPointwise(m1, rhs));
 
-  // This type works as a tuple<const double&, const int&> can be
-  // implicitly cast to tuple<double, int>.
-  const Matcher<tuple<double, int> > m2 = IsHalfOf();
+  // This type works as a std::tuple<const double&, const int&> can be
+  // implicitly cast to std::tuple<double, int>.
+  const Matcher<std::tuple<double, int>> m2 = IsHalfOf();
   EXPECT_THAT(lhs, UnorderedPointwise(m2, rhs));
+}
+
+TEST(UnorderedPointwiseTest, WorksWithMoveOnly) {
+  ContainerHelper helper;
+  EXPECT_CALL(helper, Call(UnorderedPointwise(PointeeEquals(),
+                                              std::vector<int>{1, 2})));
+  helper.Call(MakeUniquePtrs({2, 1}));
 }
 
 // Sample optional type implementation with minimal requirements for use with
@@ -6746,7 +6786,6 @@ TEST(AnyWithTest, TestBadCastType) {
   EXPECT_FALSE(m.Matches(SampleAnyType(1)));
 }
 
-#if GTEST_LANG_CXX11
 TEST(AnyWithTest, TestUseInContainers) {
   std::vector<SampleAnyType> a;
   a.emplace_back(1);
@@ -6763,7 +6802,6 @@ TEST(AnyWithTest, TestUseInContainers) {
                                    AnyWith<std::string>("merhaba"),
                                    AnyWith<std::string>("salut")}));
 }
-#endif  //  GTEST_LANG_CXX11
 TEST(AnyWithTest, TestCompare) {
   EXPECT_THAT(SampleAnyType(1), AnyWith<int>(Gt(0)));
 }
@@ -6783,8 +6821,6 @@ TEST(AnyWithTest, ExplainsSelf) {
   EXPECT_THAT(Explain(m, SampleAnyType(2)), "whose value 2 doesn't match");
 }
 
-#if GTEST_LANG_CXX11
-
 TEST(PointeeTest, WorksOnMoveOnlyType) {
   std::unique_ptr<int> p(new int(3));
   EXPECT_THAT(p, Pointee(Eq(3)));
@@ -6797,7 +6833,228 @@ TEST(NotTest, WorksOnMoveOnlyType) {
   EXPECT_THAT(p, Not(Pointee(Eq(2))));
 }
 
-#endif  // GTEST_LANG_CXX11
+// Tests Args<k0, ..., kn>(m).
 
+TEST(ArgsTest, AcceptsZeroTemplateArg) {
+  const std::tuple<int, bool> t(5, true);
+  EXPECT_THAT(t, Args<>(Eq(std::tuple<>())));
+  EXPECT_THAT(t, Not(Args<>(Ne(std::tuple<>()))));
+}
+
+TEST(ArgsTest, AcceptsOneTemplateArg) {
+  const std::tuple<int, bool> t(5, true);
+  EXPECT_THAT(t, Args<0>(Eq(std::make_tuple(5))));
+  EXPECT_THAT(t, Args<1>(Eq(std::make_tuple(true))));
+  EXPECT_THAT(t, Not(Args<1>(Eq(std::make_tuple(false)))));
+}
+
+TEST(ArgsTest, AcceptsTwoTemplateArgs) {
+  const std::tuple<short, int, long> t(4, 5, 6L);  // NOLINT
+
+  EXPECT_THAT(t, (Args<0, 1>(Lt())));
+  EXPECT_THAT(t, (Args<1, 2>(Lt())));
+  EXPECT_THAT(t, Not(Args<0, 2>(Gt())));
+}
+
+TEST(ArgsTest, AcceptsRepeatedTemplateArgs) {
+  const std::tuple<short, int, long> t(4, 5, 6L);  // NOLINT
+  EXPECT_THAT(t, (Args<0, 0>(Eq())));
+  EXPECT_THAT(t, Not(Args<1, 1>(Ne())));
+}
+
+TEST(ArgsTest, AcceptsDecreasingTemplateArgs) {
+  const std::tuple<short, int, long> t(4, 5, 6L);  // NOLINT
+  EXPECT_THAT(t, (Args<2, 0>(Gt())));
+  EXPECT_THAT(t, Not(Args<2, 1>(Lt())));
+}
+
+MATCHER(SumIsZero, "") {
+  return std::get<0>(arg) + std::get<1>(arg) + std::get<2>(arg) == 0;
+}
+
+TEST(ArgsTest, AcceptsMoreTemplateArgsThanArityOfOriginalTuple) {
+  EXPECT_THAT(std::make_tuple(-1, 2), (Args<0, 0, 1>(SumIsZero())));
+  EXPECT_THAT(std::make_tuple(1, 2), Not(Args<0, 0, 1>(SumIsZero())));
+}
+
+TEST(ArgsTest, CanBeNested) {
+  const std::tuple<short, int, long, int> t(4, 5, 6L, 6);  // NOLINT
+  EXPECT_THAT(t, (Args<1, 2, 3>(Args<1, 2>(Eq()))));
+  EXPECT_THAT(t, (Args<0, 1, 3>(Args<0, 2>(Lt()))));
+}
+
+TEST(ArgsTest, CanMatchTupleByValue) {
+  typedef std::tuple<char, int, int> Tuple3;
+  const Matcher<Tuple3> m = Args<1, 2>(Lt());
+  EXPECT_TRUE(m.Matches(Tuple3('a', 1, 2)));
+  EXPECT_FALSE(m.Matches(Tuple3('b', 2, 2)));
+}
+
+TEST(ArgsTest, CanMatchTupleByReference) {
+  typedef std::tuple<char, char, int> Tuple3;
+  const Matcher<const Tuple3&> m = Args<0, 1>(Lt());
+  EXPECT_TRUE(m.Matches(Tuple3('a', 'b', 2)));
+  EXPECT_FALSE(m.Matches(Tuple3('b', 'b', 2)));
+}
+
+// Validates that arg is printed as str.
+MATCHER_P(PrintsAs, str, "") {
+  return testing::PrintToString(arg) == str;
+}
+
+TEST(ArgsTest, AcceptsTenTemplateArgs) {
+  EXPECT_THAT(std::make_tuple(0, 1L, 2, 3L, 4, 5, 6, 7, 8, 9),
+              (Args<9, 8, 7, 6, 5, 4, 3, 2, 1, 0>(
+                  PrintsAs("(9, 8, 7, 6, 5, 4, 3, 2, 1, 0)"))));
+  EXPECT_THAT(std::make_tuple(0, 1L, 2, 3L, 4, 5, 6, 7, 8, 9),
+              Not(Args<9, 8, 7, 6, 5, 4, 3, 2, 1, 0>(
+                  PrintsAs("(0, 8, 7, 6, 5, 4, 3, 2, 1, 0)"))));
+}
+
+TEST(ArgsTest, DescirbesSelfCorrectly) {
+  const Matcher<std::tuple<int, bool, char> > m = Args<2, 0>(Lt());
+  EXPECT_EQ("are a tuple whose fields (#2, #0) are a pair where "
+            "the first < the second",
+            Describe(m));
+}
+
+TEST(ArgsTest, DescirbesNestedArgsCorrectly) {
+  const Matcher<const std::tuple<int, bool, char, int>&> m =
+      Args<0, 2, 3>(Args<2, 0>(Lt()));
+  EXPECT_EQ("are a tuple whose fields (#0, #2, #3) are a tuple "
+            "whose fields (#2, #0) are a pair where the first < the second",
+            Describe(m));
+}
+
+TEST(ArgsTest, DescribesNegationCorrectly) {
+  const Matcher<std::tuple<int, char> > m = Args<1, 0>(Gt());
+  EXPECT_EQ("are a tuple whose fields (#1, #0) aren't a pair "
+            "where the first > the second",
+            DescribeNegation(m));
+}
+
+TEST(ArgsTest, ExplainsMatchResultWithoutInnerExplanation) {
+  const Matcher<std::tuple<bool, int, int> > m = Args<1, 2>(Eq());
+  EXPECT_EQ("whose fields (#1, #2) are (42, 42)",
+            Explain(m, std::make_tuple(false, 42, 42)));
+  EXPECT_EQ("whose fields (#1, #2) are (42, 43)",
+            Explain(m, std::make_tuple(false, 42, 43)));
+}
+
+// For testing Args<>'s explanation.
+class LessThanMatcher : public MatcherInterface<std::tuple<char, int> > {
+ public:
+  virtual void DescribeTo(::std::ostream* os) const {}
+
+  virtual bool MatchAndExplain(std::tuple<char, int> value,
+                               MatchResultListener* listener) const {
+    const int diff = std::get<0>(value) - std::get<1>(value);
+    if (diff > 0) {
+      *listener << "where the first value is " << diff
+                << " more than the second";
+    }
+    return diff < 0;
+  }
+};
+
+Matcher<std::tuple<char, int> > LessThan() {
+  return MakeMatcher(new LessThanMatcher);
+}
+
+TEST(ArgsTest, ExplainsMatchResultWithInnerExplanation) {
+  const Matcher<std::tuple<char, int, int> > m = Args<0, 2>(LessThan());
+  EXPECT_EQ(
+      "whose fields (#0, #2) are ('a' (97, 0x61), 42), "
+      "where the first value is 55 more than the second",
+      Explain(m, std::make_tuple('a', 42, 42)));
+  EXPECT_EQ("whose fields (#0, #2) are ('\\0', 43)",
+            Explain(m, std::make_tuple('\0', 42, 43)));
+}
+
+class PredicateFormatterFromMatcherTest : public ::testing::Test {
+ protected:
+  enum Behavior { kInitialSuccess, kAlwaysFail, kFlaky };
+
+  // A matcher that can return different results when used multiple times on the
+  // same input. No real matcher should do this; but this lets us test that we
+  // detect such behavior and fail appropriately.
+  class MockMatcher : public MatcherInterface<Behavior> {
+   public:
+    bool MatchAndExplain(Behavior behavior,
+                         MatchResultListener* listener) const override {
+      *listener << "[MatchAndExplain]";
+      switch (behavior) {
+        case kInitialSuccess:
+          // The first call to MatchAndExplain should use a "not interested"
+          // listener; so this is expected to return |true|. There should be no
+          // subsequent calls.
+          return !listener->IsInterested();
+
+        case kAlwaysFail:
+          return false;
+
+        case kFlaky:
+          // The first call to MatchAndExplain should use a "not interested"
+          // listener; so this will return |false|. Subsequent calls should have
+          // an "interested" listener; so this will return |true|, thus
+          // simulating a flaky matcher.
+          return listener->IsInterested();
+      }
+
+      GTEST_LOG_(FATAL) << "This should never be reached";
+      return false;
+    }
+
+    void DescribeTo(ostream* os) const override { *os << "[DescribeTo]"; }
+
+    void DescribeNegationTo(ostream* os) const override {
+      *os << "[DescribeNegationTo]";
+    }
+  };
+
+  AssertionResult RunPredicateFormatter(Behavior behavior) {
+    auto matcher = MakeMatcher(new MockMatcher);
+    PredicateFormatterFromMatcher<Matcher<Behavior>> predicate_formatter(
+        matcher);
+    return predicate_formatter("dummy-name", behavior);
+  }
+
+  const std::string kMatcherType =
+      "testing::gmock_matchers_test::PredicateFormatterFromMatcherTest::"
+      "Behavior";
+};
+
+TEST_F(PredicateFormatterFromMatcherTest, ShortCircuitOnSuccess) {
+  AssertionResult result = RunPredicateFormatter(kInitialSuccess);
+  EXPECT_TRUE(result);  // Implicit cast to bool.
+  std::string expect;
+  EXPECT_EQ(expect, result.message());
+}
+
+TEST_F(PredicateFormatterFromMatcherTest, NoShortCircuitOnFailure) {
+  AssertionResult result = RunPredicateFormatter(kAlwaysFail);
+  EXPECT_FALSE(result);  // Implicit cast to bool.
+  std::string expect =
+      "Value of: dummy-name\nExpected: [DescribeTo]\n"
+      "  Actual: 1, [MatchAndExplain]";
+  EXPECT_EQ(expect, result.message());
+}
+
+TEST_F(PredicateFormatterFromMatcherTest, DetectsFlakyShortCircuit) {
+  AssertionResult result = RunPredicateFormatter(kFlaky);
+  EXPECT_FALSE(result);  // Implicit cast to bool.
+  std::string expect =
+      "Value of: dummy-name\nExpected: [DescribeTo]\n"
+      "  The matcher failed on the initial attempt; but passed when rerun to "
+      "generate the explanation.\n"
+      "  Actual: 2, [MatchAndExplain]";
+  EXPECT_EQ(expect, result.message());
+}
+
+}  // namespace
 }  // namespace gmock_matchers_test
 }  // namespace testing
+
+#ifdef _MSC_VER
+# pragma warning(pop)
+#endif

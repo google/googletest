@@ -1,8 +1,3 @@
-$$ -*- mode: c++; -*-
-$$ This is a Pump source file. Please use Pump to convert
-$$ it to gmock-generated-nice-strict.h.
-$$
-$var n = 10  $$ The maximum arity we support.
 // Copyright 2008, Google Inc.
 // All rights reserved.
 //
@@ -65,34 +60,22 @@ $var n = 10  $$ The maximum arity we support.
 
 // GOOGLETEST_CM0002 DO NOT DELETE
 
-#ifndef GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_NICE_STRICT_H_
-#define GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_NICE_STRICT_H_
+#ifndef GMOCK_INCLUDE_GMOCK_GMOCK_NICE_STRICT_H_
+#define GMOCK_INCLUDE_GMOCK_GMOCK_NICE_STRICT_H_
 
 #include "gmock/gmock-spec-builders.h"
 #include "gmock/internal/gmock-port.h"
 
 namespace testing {
 
-$range kind 0..2
-$for kind [[
-
-$var clazz=[[$if kind==0 [[NiceMock]]
-             $elif kind==1 [[NaggyMock]]
-             $else [[StrictMock]]]]
-
-$var method=[[$if kind==0 [[AllowUninterestingCalls]]
-             $elif kind==1 [[WarnUninterestingCalls]]
-             $else [[FailUninterestingCalls]]]]
-
 template <class MockClass>
-class $clazz : public MockClass {
+class NiceMock : public MockClass {
  public:
-  $clazz() : MockClass() {
-    ::testing::Mock::$method(
+  NiceMock() : MockClass() {
+    ::testing::Mock::AllowUninterestingCalls(
         internal::ImplicitCast_<MockClass*>(this));
   }
 
-#if GTEST_LANG_CXX11
   // Ideally, we would inherit base class's constructors through a using
   // declaration, which would preserve their visibility. However, many existing
   // tests rely on the fact that current implementation reexports protected
@@ -101,50 +84,103 @@ class $clazz : public MockClass {
   // Single argument constructor is special-cased so that it can be
   // made explicit.
   template <typename A>
-  explicit $clazz(A&& arg) : MockClass(std::forward<A>(arg)) {
-    ::testing::Mock::$method(
+  explicit NiceMock(A&& arg) : MockClass(std::forward<A>(arg)) {
+    ::testing::Mock::AllowUninterestingCalls(
         internal::ImplicitCast_<MockClass*>(this));
   }
 
   template <typename A1, typename A2, typename... An>
-  $clazz(A1&& arg1, A2&& arg2, An&&... args)
+  NiceMock(A1&& arg1, A2&& arg2, An&&... args)
       : MockClass(std::forward<A1>(arg1), std::forward<A2>(arg2),
                   std::forward<An>(args)...) {
-    ::testing::Mock::$method(
-        internal::ImplicitCast_<MockClass*>(this));
-  }
-#else
-  // C++98 doesn't have variadic templates, so we have to define one
-  // for each arity.
-  template <typename A1>
-  explicit $clazz(const A1& a1) : MockClass(a1) {
-    ::testing::Mock::$method(
+    ::testing::Mock::AllowUninterestingCalls(
         internal::ImplicitCast_<MockClass*>(this));
   }
 
-$range i 2..n
-$for i [[
-$range j 1..i
-  template <$for j, [[typename A$j]]>
-  $clazz($for j, [[const A$j& a$j]]) : MockClass($for j, [[a$j]]) {
-    ::testing::Mock::$method(
-        internal::ImplicitCast_<MockClass*>(this));
-  }
-
-
-]]
-#endif  // GTEST_LANG_CXX11
-
-  ~$clazz() {
+  ~NiceMock() {  // NOLINT
     ::testing::Mock::UnregisterCallReaction(
         internal::ImplicitCast_<MockClass*>(this));
   }
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_($clazz);
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(NiceMock);
 };
 
-]]
+template <class MockClass>
+class NaggyMock : public MockClass {
+ public:
+  NaggyMock() : MockClass() {
+    ::testing::Mock::WarnUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
+
+  // Ideally, we would inherit base class's constructors through a using
+  // declaration, which would preserve their visibility. However, many existing
+  // tests rely on the fact that current implementation reexports protected
+  // constructors as public. These tests would need to be cleaned up first.
+
+  // Single argument constructor is special-cased so that it can be
+  // made explicit.
+  template <typename A>
+  explicit NaggyMock(A&& arg) : MockClass(std::forward<A>(arg)) {
+    ::testing::Mock::WarnUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
+
+  template <typename A1, typename A2, typename... An>
+  NaggyMock(A1&& arg1, A2&& arg2, An&&... args)
+      : MockClass(std::forward<A1>(arg1), std::forward<A2>(arg2),
+                  std::forward<An>(args)...) {
+    ::testing::Mock::WarnUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
+
+  ~NaggyMock() {  // NOLINT
+    ::testing::Mock::UnregisterCallReaction(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(NaggyMock);
+};
+
+template <class MockClass>
+class StrictMock : public MockClass {
+ public:
+  StrictMock() : MockClass() {
+    ::testing::Mock::FailUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
+
+  // Ideally, we would inherit base class's constructors through a using
+  // declaration, which would preserve their visibility. However, many existing
+  // tests rely on the fact that current implementation reexports protected
+  // constructors as public. These tests would need to be cleaned up first.
+
+  // Single argument constructor is special-cased so that it can be
+  // made explicit.
+  template <typename A>
+  explicit StrictMock(A&& arg) : MockClass(std::forward<A>(arg)) {
+    ::testing::Mock::FailUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
+
+  template <typename A1, typename A2, typename... An>
+  StrictMock(A1&& arg1, A2&& arg2, An&&... args)
+      : MockClass(std::forward<A1>(arg1), std::forward<A2>(arg2),
+                  std::forward<An>(args)...) {
+    ::testing::Mock::FailUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
+
+  ~StrictMock() {  // NOLINT
+    ::testing::Mock::UnregisterCallReaction(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(StrictMock);
+};
 
 // The following specializations catch some (relatively more common)
 // user errors of nesting nice and strict mocks.  They do NOT catch
@@ -176,4 +212,4 @@ class StrictMock<StrictMock<MockClass> >;
 
 }  // namespace testing
 
-#endif  // GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_NICE_STRICT_H_
+#endif  // GMOCK_INCLUDE_GMOCK_GMOCK_NICE_STRICT_H_
