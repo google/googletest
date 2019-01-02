@@ -247,9 +247,6 @@ bool FilePath::DirectoryExists() const {
 // root directory per disk drive.)
 bool FilePath::IsRootDirectory() const {
 #if GTEST_OS_WINDOWS
-  // FIXME: on Windows a network share like
-  // \\server\share can be a root directory, although it cannot be the
-  // current directory.  Handle this properly.
   return pathname_.length() == 3 && IsAbsolutePath();
 #else
   return pathname_.length() == 1 && IsPathSeparator(pathname_.c_str()[0]);
@@ -347,7 +344,6 @@ FilePath FilePath::RemoveTrailingPathSeparator() const {
 // Removes any redundant separators that might be in the pathname.
 // For example, "bar///foo" becomes "bar/foo". Does not eliminate other
 // redundancies that might be in a pathname involving "." or "..".
-// FIXME: handle Windows network shares (e.g. \\server\share).
 void FilePath::Normalize() {
   if (pathname_.c_str() == nullptr) {
     pathname_ = "";

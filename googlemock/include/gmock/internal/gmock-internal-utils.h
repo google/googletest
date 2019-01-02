@@ -346,8 +346,6 @@ class WithoutMatchers {
 // Internal use only: access the singleton instance of WithoutMatchers.
 GTEST_API_ WithoutMatchers GetWithoutMatchers();
 
-// FIXME: group all type utilities together.
-
 // Type traits.
 
 // is_reference<T>::value is non-zero iff T is a reference type.

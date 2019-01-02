@@ -33,9 +33,6 @@
 
 namespace testing {
 
-// FIXME: support using environment variables to
-// control the flag values, like what Google Test does.
-
 GMOCK_DEFINE_bool_(catch_leaked_mocks, true,
                    "true iff Google Mock should report leaked mock objects "
                    "as failures.");

@@ -790,9 +790,6 @@ void Mock::RegisterUseByOnCallOrExpectCall(const void* mock_obj,
     const TestInfo* const test_info =
         UnitTest::GetInstance()->current_test_info();
     if (test_info != nullptr) {
-      // FIXME: record the test case name when the
-      // ON_CALL or EXPECT_CALL is invoked from SetUpTestCase() or
-      // TearDownTestCase().
       state.first_used_test_case = test_info->test_case_name();
       state.first_used_test = test_info->name();
     }

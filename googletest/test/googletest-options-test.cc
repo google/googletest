@@ -111,7 +111,6 @@ TEST(OutputFileHelpersTest, GetCurrentExecutableName) {
 #elif GTEST_OS_FUCHSIA
   const bool success = exe_str == "app";
 #else
-  // FIXME: remove the hard-coded "lt-" prefix when libtool replacement is ready
   const bool success =
       exe_str == "googletest-options-test" ||
       exe_str == "gtest_all_test" ||

@@ -227,6 +227,4 @@ TEST_F(TestPartResultArrayDeathTest, DiesWhenIndexIsOutOfBound) {
   EXPECT_DEATH_IF_SUPPORTED(results.GetTestPartResult(1), "");
 }
 
-// FIXME: Add a test for the class HasNewFatalFailureHelper.
-
 }  // namespace

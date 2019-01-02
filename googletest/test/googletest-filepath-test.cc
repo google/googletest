@@ -50,8 +50,6 @@ namespace internal {
 namespace {
 
 #if GTEST_OS_WINDOWS_MOBILE
-// FIXME: Move these to the POSIX adapter section in
-// gtest-port.h.
 
 // Windows CE doesn't have the remove C function.
 int remove(const char* path) {
