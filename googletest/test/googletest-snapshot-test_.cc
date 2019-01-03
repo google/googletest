@@ -51,7 +51,10 @@ std::string greeter(const std::string &whom) {
 
 // Parameters to test
 std::vector<std::string> GetParamsToTest() {
+  GTEST_DISABLE_MSC_DEPRECATED_PUSH_(/* getenv: deprecated */)
   const char *c_params = getenv("GREETERTEST_PARAMS");
+  GTEST_DISABLE_MSC_DEPRECATED_POP_()
+
   std::string params = c_params ? c_params : "";
   return split(params, std::regex("\\s+"));
 }
