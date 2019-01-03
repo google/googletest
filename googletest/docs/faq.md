@@ -1,7 +1,7 @@
 # Googletest FAQ
 
 
-## Why should test case names and test names not contain underscore?
+## Why should test suite names and test names not contain underscore?
 
 Underscore (`_`) is special, as C++ reserves the following to be used by the
 compiler and the standard library:
@@ -14,26 +14,26 @@ User code is *prohibited* from using such identifiers.
 
 Now let's look at what this means for `TEST` and `TEST_F`.
 
-Currently `TEST(TestCaseName, TestName)` generates a class named
-`TestCaseName_TestName_Test`. What happens if `TestCaseName` or `TestName`
+Currently `TEST(TestSuiteName, TestName)` generates a class named
+`TestSuiteName_TestName_Test`. What happens if `TestSuiteName` or `TestName`
 contains `_`?
 
-1.  If `TestCaseName` starts with an `_` followed by an upper-case letter (say,
+1.  If `TestSuiteName` starts with an `_` followed by an upper-case letter (say,
     `_Foo`), we end up with `_Foo_TestName_Test`, which is reserved and thus
     invalid.
-1.  If `TestCaseName` ends with an `_` (say, `Foo_`), we get
+1.  If `TestSuiteName` ends with an `_` (say, `Foo_`), we get
     `Foo__TestName_Test`, which is invalid.
 1.  If `TestName` starts with an `_` (say, `_Bar`), we get
-    `TestCaseName__Bar_Test`, which is invalid.
+    `TestSuiteName__Bar_Test`, which is invalid.
 1.  If `TestName` ends with an `_` (say, `Bar_`), we get
-    `TestCaseName_Bar__Test`, which is invalid.
+    `TestSuiteName_Bar__Test`, which is invalid.
 
-So clearly `TestCaseName` and `TestName` cannot start or end with `_` (Actually,
-`TestCaseName` can start with `_` -- as long as the `_` isn't followed by an
+So clearly `TestSuiteName` and `TestName` cannot start or end with `_` (Actually,
+`TestSuiteName` can start with `_` -- as long as the `_` isn't followed by an
 upper-case letter. But that's getting complicated. So for simplicity we just say
 that it cannot start with `_`.).
 
-It may seem fine for `TestCaseName` and `TestName` to contain `_` in the middle.
+It may seem fine for `TestSuiteName` and `TestName` to contain `_` in the middle.
 However, consider this:
 
 ```c++
@@ -44,7 +44,7 @@ TEST(Time_Flies, Like_An_Arrow) { ... }
 Now, the two `TEST`s will both generate the same class
 (`Time_Flies_Like_An_Arrow_Test`). That's not good.
 
-So for simplicity, we just ask the users to avoid `_` in `TestCaseName` and
+So for simplicity, we just ask the users to avoid `_` in `TestSuiteName` and
 `TestName`. The rule is more constraining than necessary, but it's simple and
 easy to remember. It also gives googletest some wiggle room in case its
 implementation needs to change in the future.
@@ -472,7 +472,7 @@ switch to `EXPECT_*()` if that works. This
 
 C++ is case-sensitive. Did you spell it as `Setup()`?
 
-Similarly, sometimes people spell `SetUpTestCase()` as `SetupTestCase()` and
+Similarly, sometimes people spell `SetUpTestSuite()` as `SetupTestSuite()` and
 wonder why it's never called.
 
 ## How do I jump to the line of a failure in Emacs directly?
