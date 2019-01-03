@@ -512,6 +512,12 @@ py_test(
     name = "googletest-snapshot-test",
     size = "small",
     srcs = ["googletest-snapshot-test.py"],
-    data = [":googletest-snapshot-test_"],
+    data = [
+        ":googletest-snapshot-test_",
+        "googletest-snapshot-test_.cc_Charlie.snap",
+        "googletest-snapshot-test_.cc_Delta.snap",
+        "googletest-snapshot-test_.cc_Echo.snap",
+        "googletest-snapshot-test_.cc_Foxtrot.snap",
+    ],
     deps = [":gtest_test_utils"],
 )
