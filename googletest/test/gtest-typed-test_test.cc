@@ -249,7 +249,7 @@ TEST_F(TypedTestCasePStateDeathTest, DetectsDuplicates) {
 TEST_F(TypedTestCasePStateDeathTest, DetectsExtraTest) {
   EXPECT_DEATH_IF_SUPPORTED(
       state_.VerifyRegisteredTestNames("foo.cc", 1, "A, B, C, D"),
-      "foo\\.cc.1.?: No test named D can be found in this test case\\.");
+      "foo\\.cc.1.?: No test named D can be found in this test suite\\.");
 }
 
 TEST_F(TypedTestCasePStateDeathTest, DetectsMissedTest) {
@@ -264,7 +264,7 @@ TEST_F(TypedTestCasePStateDeathTest, DetectsTestAfterRegistration) {
   state_.VerifyRegisteredTestNames("foo.cc", 1, "A, B, C");
   EXPECT_DEATH_IF_SUPPORTED(
       state_.AddTestName("foo.cc", 2, "FooTest", "D"),
-      "foo\\.cc.2.?: Test D must be defined before REGISTER_TYPED_TEST_CASE_P"
+      "foo\\.cc.2.?: Test D must be defined before REGISTER_TYPED_TEST_SUITE_P"
       "\\(FooTest, \\.\\.\\.\\)\\.");
 }
 

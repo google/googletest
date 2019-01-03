@@ -140,8 +140,7 @@ class CatchCxxExceptionsTest(gtest_test_utils.TestCase):
 
   def testCatchesCxxExceptionsInSetUpTestCase(self):
     self.assert_('C++ exception with description "Standard C++ exception"'
-                 ' thrown in SetUpTestCase()'
-                 in EX_BINARY_OUTPUT)
+                 ' thrown in SetUpTestSuite()' in EX_BINARY_OUTPUT)
     self.assert_('CxxExceptionInConstructorTest::TearDownTestCase() '
                  'called as expected.'
                  in EX_BINARY_OUTPUT)
@@ -163,8 +162,7 @@ class CatchCxxExceptionsTest(gtest_test_utils.TestCase):
 
   def testCatchesCxxExceptionsInTearDownTestCase(self):
     self.assert_('C++ exception with description "Standard C++ exception"'
-                 ' thrown in TearDownTestCase()'
-                 in EX_BINARY_OUTPUT)
+                 ' thrown in TearDownTestSuite()' in EX_BINARY_OUTPUT)
 
   def testCatchesCxxExceptionsInSetUp(self):
     self.assert_('C++ exception with description "Standard C++ exception"'

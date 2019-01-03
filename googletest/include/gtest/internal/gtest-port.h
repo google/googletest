@@ -250,6 +250,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <memory>
+#include <type_traits>
 
 #ifndef _WIN32_WCE
 # include <sys/types.h>

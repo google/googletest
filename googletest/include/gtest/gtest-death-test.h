@@ -169,7 +169,7 @@ GTEST_API_ bool InDeathTestChild();
     GTEST_DEATH_TEST_(statement, predicate, regex, GTEST_FATAL_FAILURE_)
 
 // Like ASSERT_EXIT, but continues on to successive tests in the
-// test case, if any:
+// test suite, if any:
 # define EXPECT_EXIT(statement, predicate, regex) \
     GTEST_DEATH_TEST_(statement, predicate, regex, GTEST_NONFATAL_FAILURE_)
 
@@ -180,7 +180,7 @@ GTEST_API_ bool InDeathTestChild();
     ASSERT_EXIT(statement, ::testing::internal::ExitedUnsuccessfully, regex)
 
 // Like ASSERT_DEATH, but continues on to successive tests in the
-// test case, if any:
+// test suite, if any:
 # define EXPECT_DEATH(statement, regex) \
     EXPECT_EXIT(statement, ::testing::internal::ExitedUnsuccessfully, regex)
 
@@ -227,7 +227,7 @@ class GTEST_API_ KilledBySignal {
 //   return 12;
 // }
 //
-// TEST(TestCase, TestDieOr12WorksInDgbAndOpt) {
+// TEST(TestSuite, TestDieOr12WorksInDgbAndOpt) {
 //   int sideeffect = 0;
 //   // Only asserts in dbg.
 //   EXPECT_DEBUG_DEATH(DieInDebugOr12(&sideeffect), "death");
