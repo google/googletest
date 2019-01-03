@@ -37,10 +37,6 @@
 #include <regex>
 #include <vector>
 
-std::regex operator ""_re (char const* const str, std::size_t) {
- return std::regex{str};
-}
-
 std::vector<std::string> split(const std::string& text, const std::regex& re) {
   const std::vector<std::string> parts(
     std::sregex_token_iterator(text.begin(), text.end(), re, -1),
@@ -57,7 +53,7 @@ std::string greeter(const std::string &whom) {
 std::vector<std::string> GetParamsToTest() {
   const char *c_params = getenv("GREETERTEST_PARAMS");
   std::string params = c_params ? c_params : "";
-  return split(params, "\\s+"_re);
+  return split(params, std::regex("\\s+"));
 }
 
 class GreeterTest : public ::testing::TestWithParam<std::string> {
