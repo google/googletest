@@ -31,7 +31,7 @@
             "googlemock/CMakeLists.txt",
             "googlemock/Makefile.am",
             "googlemock/configure.ac",
-            "googlemock/gmock_main.cc",
+            "googlemock/src/gmock_main.cc",
             "googletest/cmake",
             "googletest/codegear",
             "googletest/m4",
@@ -43,7 +43,7 @@
             "googletest/CMakeLists.txt",
             "googletest/Makefile.am",
             "googletest/configure.ac",
-            "googletest/gtest_main.cc"
+            "googletest/src/gtest_main.cc"
           ]
   },
   "build": {
