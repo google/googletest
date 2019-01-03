@@ -34,13 +34,13 @@
 
 #include "gtest/gtest.h"
 
-#include <regex>
+#include <sstream>
 #include <vector>
 
-std::vector<std::string> split(const std::string& text, const std::regex& re) {
-  const std::vector<std::string> parts(
-    std::sregex_token_iterator(text.begin(), text.end(), re, -1),
-    std::sregex_token_iterator());
+std::vector<std::string> split(const std::string& s) {
+  std::stringstream ss(s);
+  std::istream_iterator<std::string> begin(ss), end;
+  std::vector<std::string> parts(begin, end);
   return parts;
 }
 
@@ -56,7 +56,7 @@ std::vector<std::string> GetParamsToTest() {
   GTEST_DISABLE_MSC_DEPRECATED_POP_()
 
   std::string params = c_params ? c_params : "";
-  return split(params, std::regex("\\s+"));
+  return split(params);
 }
 
 class GreeterTest : public ::testing::TestWithParam<std::string> {
