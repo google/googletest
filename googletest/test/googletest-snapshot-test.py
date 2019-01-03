@@ -42,12 +42,6 @@ import gtest_test_utils
 
 # Constants.
 
-# The environment variable where we store the source directory
-TEST_SRCDIR = 'TEST_SRCDIR'
-
-# The command line flag for updating snapshots
-UPDATE_SNAPSHOT = 'gtest_update_snapshot'
-
 # Path to the googletest-snapshot-test_ program.
 EXE_PATH = gtest_test_utils.GetTestExecutablePath(
     'googletest-snapshot-test_')
@@ -55,58 +49,30 @@ EXE_PATH = gtest_test_utils.GetTestExecutablePath(
 
 # Utilities.
 
-
-def SetEnvVar(env_var, value):
-  """Sets an environment variable to a given value; unsets it when the
-  given value is None.
-  """
-
-  env_var = env_var.upper()
-  if value is not None:
-    os.environ[env_var] = value
-  elif env_var in os.environ:
-    del os.environ[env_var]
+def PrettyPrintDict(d):
+  return ','.join([ '%s=%s' % (k, v) for k,v in d.items()])
 
 
-def Run(command):
+def Run(command, env=None):
   """Runs a command; returns True/False if its exit code is/isn't 0."""
 
-  print('Running "%s". . .' % ' '.join(command))
-  p = gtest_test_utils.Subprocess(command)
+  print('Running "%s" with environment "%s"' % (' '.join(command),
+    PrettyPrintDict(env) ))
+  p = gtest_test_utils.Subprocess(command=command, env=env)
   return p.exited and p.exit_code == 0
-
-
-def RemoveSnapshot():
-  for param in [ 'Alice', 'Bob' ]:
-    snapshotFile = os.environ[TEST_SRCDIR] + \
-      '/test/googletest-snapshot-test_.cc_{0}.snap'.format(param)
-    try:
-      os.remove(snapshotFile)
-    except OSError:
-      print('Could not remove snapshot file: {0}'.format(snapshotFile))
-      # okey if snapshot file did not exist when test started
-      pass
 
 
 class SnapshotTest(gtest_test_utils.TestCase):
   """Tests EXPECT_EQ_SNAPSHOT. Test order matters."""
 
-  def RunAndVerify(self, env_var_value, should_fail):
+  def RunAndVerify(self, env, should_fail):
     """Runs googletest-snapshot-test_ and verifies that it does
     (or does not) exit with a non-zero code.
 
     Args:
-      env_var_value:    value of the GTEST_UPDATE_SNAPSHOT environment
-                        variable; None if the variable should be unset.
+      env:              map of environment variables
       should_fail:      True iff the program is expected to fail.
     """
-
-    SetEnvVar(UPDATE_SNAPSHOT, env_var_value)
-
-    if env_var_value is None:
-      env_var_value_msg = ' is not set'
-    else:
-      env_var_value_msg = '=' + env_var_value
 
     command = [EXE_PATH]
 
@@ -115,44 +81,31 @@ class SnapshotTest(gtest_test_utils.TestCase):
     else:
       should_or_not = 'should not'
 
-    failed = not Run(command)
+    failed = not Run(command, env)
 
-    SetEnvVar(UPDATE_SNAPSHOT, None)
-
-    msg = ('when %s%s, an assertion failure in "%s" %s cause a non-zero '
+    msg = ('with env %s, an assertion failure in "%s" %s cause a non-zero '
            'exit code.' %
-           (UPDATE_SNAPSHOT, env_var_value_msg, ' '.join(command),
+           (PrettyPrintDict(env), ' '.join(command),
             should_or_not))
     self.assert_(failed == should_fail, msg)
 
-  @classmethod
-  def setUpClass(cls):
-    """Start from scratch, make sure snapshots do not exists."""
-    RemoveSnapshot()
+  def testFailWithNoSnapshot(self):
+    """Fail if no snapshot exists"""
+    self.RunAndVerify(
+        env={ 'GREETERTEST_PARAMS': 'Alpha Bravo' },
+        should_fail=True)
 
-  @classmethod
-  def tearDownClass(cls):
-    """Leave a tidy source tree after us."""
-    RemoveSnapshot()
+  def testSucceedWithGoodSnapshots(self):
+    """Succeed if snapshot is correct"""
+    self.RunAndVerify(
+        env={ 'GREETERTEST_PARAMS': 'Charlie Delta' },
+        should_fail=False)
 
-  def test00FailWithNoSnapshot(self):
-    """Starting case, no snapshot exists"""
-    self.RunAndVerify(env_var_value=None, should_fail=True)
-
-  def test01SucceedWithSnapshotUpdate(self):
-    """Developer generates first snapshot"""
-    self.RunAndVerify(env_var_value="1", should_fail=False)
-
-  def test02SucceedWithExistingSnapshot(self):
-    """Developer uses snapshot in subsequent tests"""
-    self.RunAndVerify(env_var_value=None, should_fail=False)
+  def testFailWithBadSnapshots(self):
+    """Fail if snapshot is incorrect"""
+    self.RunAndVerify(
+        env={ 'GREETERTEST_PARAMS': 'Echo Foxtrot' },
+        should_fail=True)
 
 if __name__ == '__main__':
-  # Get source dir (using a poor man's argparse)
-  for arg in sys.argv:
-    if '--sourcedir=' in arg:
-      os.environ[TEST_SRCDIR] = arg.split('=')[1]
-      sys.argv.remove(arg)
-      break
-
   gtest_test_utils.Main()
