@@ -4,8 +4,8 @@
 [![Build Status](https://api.travis-ci.org/google/googletest.svg?branch=master)](https://travis-ci.org/google/googletest)
 [![Build status](https://ci.appveyor.com/api/projects/status/4o38plt0xbo1ubc8/branch/master?svg=true)](https://ci.appveyor.com/project/GoogleTestAppVeyor/googletest/branch/master)
 
-**Future Plans**:
-** PR FREEZE COMING SOON **
+**PR FREEZE COMING SOON**
+
 We are working on a large refactoring that would make it hard to accept external PRs. *Really Soon Now* we will not be accepting new PRs until the refactoring has been completed. 
 
 **Future Plans**:
