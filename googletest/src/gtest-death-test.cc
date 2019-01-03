@@ -753,9 +753,9 @@ DeathTest::TestRole WindowsDeathTest::AssumeRole() {
       FALSE,      // The initial state is non-signalled.
       nullptr));  // The even is unnamed.
   GTEST_DEATH_TEST_CHECK_(event_handle_.Get() != nullptr);
-  const std::string filter_flag =
-      std::string("--") + GTEST_FLAG_PREFIX_ + kFilterFlag + "=" +
-      info->test_case_name() + "." + info->name();
+  const std::string filter_flag = std::string("--") + GTEST_FLAG_PREFIX_ +
+                                  kFilterFlag + "=" + info->test_suite_name() +
+                                  "." + info->name();
   const std::string internal_flag =
       std::string("--") + GTEST_FLAG_PREFIX_ + kInternalRunDeathTestFlag +
       "=" + file_ + "|" + StreamableToString(line_) + "|" +
@@ -972,9 +972,9 @@ DeathTest::TestRole FuchsiaDeathTest::AssumeRole() {
   FlushInfoLog();
 
   // Build the child process command line.
-  const std::string filter_flag =
-      std::string("--") + GTEST_FLAG_PREFIX_ + kFilterFlag + "="
-      + info->test_case_name() + "." + info->name();
+  const std::string filter_flag = std::string("--") + GTEST_FLAG_PREFIX_ +
+                                  kFilterFlag + "=" + info->test_suite_name() +
+                                  "." + info->name();
   const std::string internal_flag =
       std::string("--") + GTEST_FLAG_PREFIX_ + kInternalRunDeathTestFlag + "="
       + file_ + "|"
@@ -1411,9 +1411,9 @@ DeathTest::TestRole ExecDeathTest::AssumeRole() {
   // it be closed when the child process does an exec:
   GTEST_DEATH_TEST_CHECK_(fcntl(pipe_fd[1], F_SETFD, 0) != -1);
 
-  const std::string filter_flag =
-      std::string("--") + GTEST_FLAG_PREFIX_ + kFilterFlag + "="
-      + info->test_case_name() + "." + info->name();
+  const std::string filter_flag = std::string("--") + GTEST_FLAG_PREFIX_ +
+                                  kFilterFlag + "=" + info->test_suite_name() +
+                                  "." + info->name();
   const std::string internal_flag =
       std::string("--") + GTEST_FLAG_PREFIX_ + kInternalRunDeathTestFlag + "="
       + file_ + "|" + StreamableToString(line_) + "|"
