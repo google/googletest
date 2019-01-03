@@ -2357,6 +2357,16 @@ TEST(PredTest, SingleEvaluationOnFailure) {
   EXPECT_EQ(1, n4) << "Argument 4 is not evaluated exactly once.";
 }
 
+// Test predicate assertions for sets
+TEST(PredTest, ExpectPredEvalFailure) {
+  std::set<int> set_a = {2, 1, 3, 4, 5};
+  std::set<int> set_b = {0, 4, 8};
+  const auto compare_sets = [] (std::set<int>, std::set<int>) { return false; };
+  EXPECT_NONFATAL_FAILURE(
+      EXPECT_PRED2(compare_sets, set_a, set_b),
+      "compare_sets(set_a, set_b) evaluates to false, where\nset_a evaluates "
+      "to { 1, 2, 3, 4, 5 }\nset_b evaluates to { 0, 4, 8 }");
+}
 
 // Some helper functions for testing using overloaded/template
 // functions with ASSERT_PREDn and EXPECT_PREDn.
@@ -5431,6 +5441,67 @@ TEST_F(SetUpTestCaseTest, Test2) {
   EXPECT_STREQ("123", shared_resource_);
 }
 
+// Tests SetupTestSuite/TearDown TestSuite API
+class SetUpTestSuiteTest : public Test {
+ protected:
+  // This will be called once before the first test in this test case
+  // is run.
+  static void SetUpTestSuite() {
+    printf("Setting up the test suite . . .\n");
+
+    // Initializes some shared resource.  In this simple example, we
+    // just create a C string.  More complex stuff can be done if
+    // desired.
+    shared_resource_ = "123";
+
+    // Increments the number of test cases that have been set up.
+    counter_++;
+
+    // SetUpTestSuite() should be called only once.
+    EXPECT_EQ(1, counter_);
+  }
+
+  // This will be called once after the last test in this test case is
+  // run.
+  static void TearDownTestSuite() {
+    printf("Tearing down the test suite . . .\n");
+
+    // Decrements the number of test suites that have been set up.
+    counter_--;
+
+    // TearDownTestSuite() should be called only once.
+    EXPECT_EQ(0, counter_);
+
+    // Cleans up the shared resource.
+    shared_resource_ = nullptr;
+  }
+
+  // This will be called before each test in this test case.
+  void SetUp() override {
+    // SetUpTestSuite() should be called only once, so counter_ should
+    // always be 1.
+    EXPECT_EQ(1, counter_);
+  }
+
+  // Number of test suites that have been set up.
+  static int counter_;
+
+  // Some resource to be shared by all tests in this test case.
+  static const char* shared_resource_;
+};
+
+int SetUpTestSuiteTest::counter_ = 0;
+const char* SetUpTestSuiteTest::shared_resource_ = nullptr;
+
+// A test that uses the shared resource.
+TEST_F(SetUpTestSuiteTest, TestSetupTestSuite1) {
+  EXPECT_STRNE(nullptr, shared_resource_);
+}
+
+// Another test that uses the shared resource.
+TEST_F(SetUpTestSuiteTest, TestSetupTestSuite2) {
+  EXPECT_STREQ("123", shared_resource_);
+}
 
 // The ParseFlagsTest test case tests ParseGoogleTestFlagsOnly.
 
