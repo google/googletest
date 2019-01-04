@@ -27,23 +27,23 @@
             "googlemock/make",
             "googlemock/msvc",
             "googlemock/scripts",
+            "googlemock/src/gmock_main.cc",
             "googlemock/test",
             "googlemock/CMakeLists.txt",
             "googlemock/Makefile.am",
             "googlemock/configure.ac",
-            "googlemock/src/gmock_main.cc",
             "googletest/cmake",
             "googletest/codegear",
             "googletest/m4",
             "googletest/make",
             "googletest/msvc",
             "googletest/scripts",
+            "googletest/src/gtest_main.cc",
             "googletest/test",
             "googletest/xcode",
             "googletest/CMakeLists.txt",
             "googletest/Makefile.am",
-            "googletest/configure.ac",
-            "googletest/src/gtest_main.cc"
+            "googletest/configure.ac"
           ]
   },
   "build": {
