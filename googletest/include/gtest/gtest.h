@@ -2499,6 +2499,20 @@ inline int RUN_ALL_TESTS() {
   return ::testing::UnitTest::GetInstance()->Run();
 }
 
+#ifdef ARDUINO
+inline void gtest_setup() {
+  // Since Arduino doesn't have a command line, fake out the argc/argv arguments
+  int argc = 1;
+  const auto arg0 = "PlatformIO";
+  char* argv0 = const_cast<char*>(arg0);
+  char** argv = &argv0;
+
+  testing::InitGoogleTest(&argc, argv);
+}
+
+inline void gtest_loop() { RUN_ALL_TESTS(); }
+#endif
+
 GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 
 #endif  // GTEST_INCLUDE_GTEST_GTEST_H_
