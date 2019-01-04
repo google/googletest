@@ -49,7 +49,7 @@
   "build": {
         "flags": [
             "-Igooglemock/include",
-            "-Igooglemock", 
+            "-Igooglemock",
             "-Igoogletest/include",
             "-Igoogletest"
         ]

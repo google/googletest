@@ -186,7 +186,6 @@ class GTEST_API_ UntypedFunctionMockerBase {
   // this information in the global mock registry.  Will be called
   // whenever an EXPECT_CALL() or ON_CALL() is executed on this mock
   // method.
-  // FIXME: rename to SetAndRegisterOwner().
   void RegisterOwner(const void* mock_obj)
       GTEST_LOCK_EXCLUDED_(g_gmock_mutex);
 
@@ -301,12 +300,7 @@ class OnCallSpec : public UntypedOnCallSpecBase {
              const ArgumentMatcherTuple& matchers)
       : UntypedOnCallSpecBase(a_file, a_line),
         matchers_(matchers),
-        // By default, extra_matcher_ should match anything.  However,
-        // we cannot initialize it with _ as that triggers a compiler
-        // bug in Symbian's C++ compiler (cannot decide between two
-        // overloaded constructors of Matcher<const ArgumentTuple&>).
-        extra_matcher_(A<const ArgumentTuple&>()) {
-  }
+        extra_matcher_(_) {}
 
   // Implements the .With() clause.
   OnCallSpec& With(const Matcher<const ArgumentTuple&>& m) {
@@ -896,11 +890,7 @@ class TypedExpectation : public ExpectationBase {
       : ExpectationBase(a_file, a_line, a_source_text),
         owner_(owner),
         matchers_(m),
-        // By default, extra_matcher_ should match anything.  However,
-        // we cannot initialize it with _ as that triggers a compiler
-        // bug in Symbian's C++ compiler (cannot decide between two
-        // overloaded constructors of Matcher<const ArgumentTuple&>).
-        extra_matcher_(A<const ArgumentTuple&>()),
+        extra_matcher_(_),
         repeated_action_(DoDefault()) {}
 
   ~TypedExpectation() override {
@@ -1206,9 +1196,6 @@ class TypedExpectation : public ExpectationBase {
       mocker->DescribeDefaultActionTo(args, what);
       DescribeCallCountTo(why);
 
-      // FIXME: allow the user to control whether
-      // unexpected calls should fail immediately or continue using a
-      // flag --gmock_unexpected_calls_are_fatal.
       return nullptr;
     }
 

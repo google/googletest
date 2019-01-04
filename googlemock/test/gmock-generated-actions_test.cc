@@ -428,11 +428,12 @@ TEST(DoAllTest, TenActions) {
 // the macro definition, as the warnings are generated when the macro
 // is expanded and macro expansion cannot contain #pragma.  Therefore
 // we suppress them here.
+// Also suppress C4503 decorated name length exceeded, name was truncated
 #ifdef _MSC_VER
 # pragma warning(push)
 # pragma warning(disable:4100)
+# pragma warning(disable:4503)
 #endif
-
 // Tests the ACTION*() macro family.
 
 // Tests that ACTION() can define an action that doesn't reference the
@@ -1058,9 +1059,6 @@ TEST(ActionTemplateTest, CanBeOverloadedOnNumberOfValueParameters) {
   EXPECT_EQ(12345, a4.Perform(std::make_tuple()));
 }
 
-#ifdef _MSC_VER
-# pragma warning(pop)
-#endif
 
 }  // namespace gmock_generated_actions_test
 }  // namespace testing
