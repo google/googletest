@@ -519,9 +519,9 @@ TEST_F(FormatEpochTimeInMillisAsIso8601Test, PrintsEpochStart) {
 // Tests that GTEST_IS_NULL_LITERAL_(x) is true when x is a null
 // pointer literal.
 TEST(NullLiteralTest, IsTrueForNullLiterals) {
-  EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(nullptr));
-  EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(nullptr));
-  EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(nullptr));
+  EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(NULL));  // NOLINT
+  EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(0));     // NOLINT
+  EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(0u));    // NOLINT
   EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(nullptr));
 }
 
@@ -532,6 +532,26 @@ TEST(NullLiteralTest, IsFalseForNonNullLiterals) {
   EXPECT_FALSE(GTEST_IS_NULL_LITERAL_(0.0));
   EXPECT_FALSE(GTEST_IS_NULL_LITERAL_('a'));
   EXPECT_FALSE(GTEST_IS_NULL_LITERAL_(static_cast<void*>(nullptr)));
+}
+
+struct ConvertToAll {
+  template <typename T>
+  operator T() const {  // NOLINT
+    return T();
+  }
+};
+
+struct ConvertToAllButNoPointers {
+  template <typename T,
+            typename std::enable_if<!std::is_pointer<T>::value, int>::type = 0>
+  operator T() const {  // NOLINT
+    return T();
+  }
+};
+
+TEST(NullLiteralTest, ImplicitConversion) {
+  EXPECT_FALSE(GTEST_IS_NULL_LITERAL_(ConvertToAll{}));
+  EXPECT_FALSE(GTEST_IS_NULL_LITERAL_(ConvertToAllButNoPointers{}));
 }
 
 # ifdef __BORLANDC__
