@@ -1380,7 +1380,7 @@ TEST_P(FooTest, HasBlahBlah) {
 }
 ```
 
-Finally, you can use `INSTANTIATE_TEST_SUITE_P` to instantiate the test suite with
+Finally, you can use `INSTANTIATE_TEST_CASE_P` to instantiate the test suite with
 any set of parameters you want. googletest defines a number of functions for
 generating test parameters. They return what we call (surprise!) *parameter
 generators*. Here is a summary of them, which are all in the `testing`
@@ -1400,7 +1400,7 @@ The following statement will instantiate tests from the `FooTest` test suite eac
 with parameter values `"meeny"`, `"miny"`, and `"moe"`.
 
 ```c++
-INSTANTIATE_TEST_SUITE_P(InstantiationName,
+INSTANTIATE_TEST_CASE_P(InstantiationName,
                         FooTest,
                         ::testing::Values("meeny", "miny", "moe"));
 ```
@@ -1412,7 +1412,7 @@ NOTE: Don't forget this step! If you do your test will silently pass, but none
 of its suites will ever run!
 
 To distinguish different instances of the pattern (yes, you can instantiate it
-more than once), the first argument to `INSTANTIATE_TEST_SUITE_P` is a prefix
+more than once), the first argument to `INSTANTIATE_TEST_CASE_P` is a prefix
 that will be added to the actual test suite name. Remember to pick unique
 prefixes for different instantiations. The tests from the instantiation above
 will have these names:
@@ -1431,7 +1431,7 @@ parameter values `"cat"` and `"dog"`:
 
 ```c++
 const char* pets[] = {"cat", "dog"};
-INSTANTIATE_TEST_SUITE_P(AnotherInstantiationName, FooTest,
+INSTANTIATE_TEST_CASE_P(AnotherInstantiationName, FooTest,
                         ::testing::ValuesIn(pets));
 ```
 
@@ -1442,9 +1442,9 @@ The tests from the instantiation above will have these names:
 *   `AnotherInstantiationName/FooTest.HasBlahBlah/0` for `"cat"`
 *   `AnotherInstantiationName/FooTest.HasBlahBlah/1` for `"dog"`
 
-Please note that `INSTANTIATE_TEST_SUITE_P` will instantiate *all* tests in the
+Please note that `INSTANTIATE_TEST_CASE_P` will instantiate *all* tests in the
 given test suite, whether their definitions come before or *after* the
-`INSTANTIATE_TEST_SUITE_P` statement.
+`INSTANTIATE_TEST_CASE_P` statement.
 
 You can see sample7_unittest.cc and sample8_unittest.cc for more examples.
 
@@ -1470,13 +1470,13 @@ To define abstract tests, you should organize your code like this:
     `foo_param_test.h`. Think of this as *implementing* your abstract tests.
 
 Once they are defined, you can instantiate them by including `foo_param_test.h`,
-invoking `INSTANTIATE_TEST_SUITE_P()`, and depending on the library target that
+invoking `INSTANTIATE_TEST_CASE_P()`, and depending on the library target that
 contains `foo_param_test.cc`. You can instantiate the same abstract test suite
 multiple times, possibly in different source files.
 
 ### Specifying Names for Value-Parameterized Test Parameters
 
-The optional last argument to `INSTANTIATE_TEST_SUITE_P()` allows the user to
+The optional last argument to `INSTANTIATE_TEST_CASE_P()` allows the user to
 specify a function or functor that generates custom test name suffixes based on
 the test parameters. The function should accept one argument of type
 `testing::TestParamInfo<class ParamType>`, and return `std::string`.
@@ -1497,7 +1497,7 @@ TEST_P(MyTestsuite, MyTest)
   std::cout << "Example Test Param: " << GetParam() << std::endl;
 }
 
-INSTANTIATE_TEST_SUITE_P(MyGroup, MyTestsuite, testing::Range(0, 10),
+INSTANTIATE_TEST_CASE_P(MyGroup, MyTestsuite, testing::Range(0, 10),
                         testing::PrintToStringParamName());
 ```
 
@@ -1537,10 +1537,10 @@ each type in the list:
 
 ```c++
 using MyTypes = ::testing::Types<char, int, unsigned int>;
-TYPED_TEST_SUITE(FooTest, MyTypes);
+TYPED_TEST_CASE(FooTest, MyTypes);
 ```
 
-The type alias (`using` or `typedef`) is necessary for the `TYPED_TEST_SUITE`
+The type alias (`using` or `typedef`) is necessary for the `TYPED_TEST_CASE`
 macro to parse correctly. Otherwise the compiler will think that each comma in
 the type list introduces a new macro argument.
 
@@ -1599,7 +1599,7 @@ class FooTest : public ::testing::Test {
 Next, declare that you will define a type-parameterized test suite:
 
 ```c++
-TYPED_TEST_SUITE_P(FooTest);
+TYPED_TEST_CASE_P(FooTest);
 ```
 
 Then, use `TYPED_TEST_P()` to define a type-parameterized test. You can repeat
@@ -1616,12 +1616,12 @@ TYPED_TEST_P(FooTest, HasPropertyA) { ... }
 ```
 
 Now the tricky part: you need to register all test patterns using the
-`REGISTER_TYPED_TEST_SUITE_P` macro before you can instantiate them. The first
+`REGISTER_TYPED_TEST_CASE_P` macro before you can instantiate them. The first
 argument of the macro is the test suite name; the rest are the names of the tests
 in this test suite:
 
 ```c++
-REGISTER_TYPED_TEST_SUITE_P(FooTest,
+REGISTER_TYPED_TEST_CASE_P(FooTest,
                            DoesBlah, HasPropertyA);
 ```
 
@@ -1631,18 +1631,18 @@ source files and instantiate it multiple times.
 
 ```c++
 typedef ::testing::Types<char, int, unsigned int> MyTypes;
-INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
+INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, MyTypes);
 ```
 
 To distinguish different instances of the pattern, the first argument to the
-`INSTANTIATE_TYPED_TEST_SUITE_P` macro is a prefix that will be added to the
+`INSTANTIATE_TYPED_TEST_CASE_P` macro is a prefix that will be added to the
 actual test suite name. Remember to pick unique prefixes for different instances.
 
 In the special case where the type list contains only one type, you can write
 that type directly without `::testing::Types<...>`, like this:
 
 ```c++
-INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, int);
+INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, int);
 ```
 
 You can see `sample6_unittest.cc` for a complete example.
