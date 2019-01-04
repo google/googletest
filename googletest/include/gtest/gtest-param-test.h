@@ -75,7 +75,7 @@ TEST_P(FooTest, HasBlahBlah) {
   ...
 }
 
-// Finally, you can use INSTANTIATE_TEST_CASE_P to instantiate the test
+// Finally, you can use INSTANTIATE_TEST_SUITE_P to instantiate the test
 // case with any set of parameters you want. Google Test defines a number
 // of functions for generating test parameters. They return what we call
 // (surprise!) parameter generators. Here is a summary of them, which
@@ -96,17 +96,17 @@ TEST_P(FooTest, HasBlahBlah) {
 // For more details, see comments at the definitions of these functions below
 // in this file.
 //
-// The following statement will instantiate tests from the FooTest test case
+// The following statement will instantiate tests from the FooTest test suite
 // each with parameter values "meeny", "miny", and "moe".
 
-INSTANTIATE_TEST_CASE_P(InstantiationName,
-                        FooTest,
-                        Values("meeny", "miny", "moe"));
+INSTANTIATE_TEST_SUITE_P(InstantiationName,
+                         FooTest,
+                         Values("meeny", "miny", "moe"));
 
 // To distinguish different instances of the pattern, (yes, you
 // can instantiate it more then once) the first argument to the
-// INSTANTIATE_TEST_CASE_P macro is a prefix that will be added to the
-// actual test case name. Remember to pick unique prefixes for different
+// INSTANTIATE_TEST_SUITE_P macro is a prefix that will be added to the
+// actual test suite name. Remember to pick unique prefixes for different
 // instantiations. The tests from the instantiation above will have
 // these names:
 //
@@ -123,7 +123,7 @@ INSTANTIATE_TEST_CASE_P(InstantiationName,
 // with parameter values "cat" and "dog":
 
 const char* pets[] = {"cat", "dog"};
-INSTANTIATE_TEST_CASE_P(AnotherInstantiationName, FooTest, ValuesIn(pets));
+INSTANTIATE_TEST_SUITE_P(AnotherInstantiationName, FooTest, ValuesIn(pets));
 
 // The tests from the instantiation above will have these names:
 //
@@ -132,9 +132,9 @@ INSTANTIATE_TEST_CASE_P(AnotherInstantiationName, FooTest, ValuesIn(pets));
 //    * AnotherInstantiationName/FooTest.HasBlahBlah/0 for "cat"
 //    * AnotherInstantiationName/FooTest.HasBlahBlah/1 for "dog"
 //
-// Please note that INSTANTIATE_TEST_CASE_P will instantiate all tests
-// in the given test case, whether their definitions come before or
-// AFTER the INSTANTIATE_TEST_CASE_P statement.
+// Please note that INSTANTIATE_TEST_SUITE_P will instantiate all tests
+// in the given test suite, whether their definitions come before or
+// AFTER the INSTANTIATE_TEST_SUITE_P statement.
 //
 // Please also note that generator expressions (including parameters to the
 // generators) are evaluated in InitGoogleTest(), after main() has started.
@@ -178,26 +178,23 @@ TEST_P(DerivedTest, DoesBlah) {
 
 #endif  // 0
 
-#include "gtest/internal/gtest-port.h"
-
-#if !GTEST_OS_SYMBIAN
-# include <utility>
-#endif
+#include <utility>
 
 #include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-param-util.h"
 #include "gtest/internal/gtest-param-util-generated.h"
+#include "gtest/internal/gtest-port.h"
 
 namespace testing {
 
 // Functions producing parameter generators.
 //
 // Google Test uses these generators to produce parameters for value-
-// parameterized tests. When a parameterized test case is instantiated
+// parameterized tests. When a parameterized test suite is instantiated
 // with a particular generator, Google Test creates and runs tests
 // for each element in the sequence produced by the generator.
 //
-// In the following sample, tests from test case FooTest are instantiated
+// In the following sample, tests from test suite FooTest are instantiated
 // each three times with parameter values 3, 5, and 8:
 //
 // class FooTest : public TestWithParam<int> { ... };
@@ -206,7 +203,7 @@ namespace testing {
 // }
 // TEST_P(FooTest, TestThat) {
 // }
-// INSTANTIATE_TEST_CASE_P(TestSequence, FooTest, Values(3, 5, 8));
+// INSTANTIATE_TEST_SUITE_P(TestSequence, FooTest, Values(3, 5, 8));
 //
 
 // Range() returns generators providing sequences of values in a range.
@@ -263,13 +260,13 @@ internal::ParamGenerator<T> Range(T start, T end) {
 //
 // Examples:
 //
-// This instantiates tests from test case StringTest
+// This instantiates tests from test suite StringTest
 // each with C-string values of "foo", "bar", and "baz":
 //
 // const char* strings[] = {"foo", "bar", "baz"};
-// INSTANTIATE_TEST_CASE_P(StringSequence, StringTest, ValuesIn(strings));
+// INSTANTIATE_TEST_SUITE_P(StringSequence, StringTest, ValuesIn(strings));
 //
-// This instantiates tests from test case StlStringTest
+// This instantiates tests from test suite StlStringTest
 // each with STL strings with values "a" and "b":
 //
 // ::std::vector< ::std::string> GetParameterStrings() {
@@ -279,9 +276,9 @@ internal::ParamGenerator<T> Range(T start, T end) {
 //   return v;
 // }
 //
-// INSTANTIATE_TEST_CASE_P(CharSequence,
-//                         StlStringTest,
-//                         ValuesIn(GetParameterStrings()));
+// INSTANTIATE_TEST_SUITE_P(CharSequence,
+//                          StlStringTest,
+//                          ValuesIn(GetParameterStrings()));
 //
 //
 // This will also instantiate tests from CharTest
@@ -294,9 +291,9 @@ internal::ParamGenerator<T> Range(T start, T end) {
 //   return list;
 // }
 // ::std::list<char> l = GetParameterChars();
-// INSTANTIATE_TEST_CASE_P(CharSequence2,
-//                         CharTest,
-//                         ValuesIn(l.begin(), l.end()));
+// INSTANTIATE_TEST_SUITE_P(CharSequence2,
+//                          CharTest,
+//                          ValuesIn(l.begin(), l.end()));
 //
 template <typename ForwardIterator>
 internal::ParamGenerator<
@@ -326,15 +323,17 @@ internal::ParamGenerator<typename Container::value_type> ValuesIn(
 // Values(T v1, T v2, ..., T vN)
 //   - returns a generator producing sequences with elements v1, v2, ..., vN.
 //
-// For example, this instantiates tests from test case BarTest each
+// For example, this instantiates tests from test suite BarTest each
 // with values "one", "two", and "three":
 //
-// INSTANTIATE_TEST_CASE_P(NumSequence, BarTest, Values("one", "two", "three"));
+// INSTANTIATE_TEST_SUITE_P(NumSequence,
+//                          BarTest,
+//                          Values("one", "two", "three"));
 //
-// This instantiates tests from test case BazTest each with values 1, 2, 3.5.
+// This instantiates tests from test suite BazTest each with values 1, 2, 3.5.
 // The exact type of values will depend on the type of parameter in BazTest.
 //
-// INSTANTIATE_TEST_CASE_P(FloatingNumbers, BazTest, Values(1, 2, 3.5));
+// INSTANTIATE_TEST_SUITE_P(FloatingNumbers, BazTest, Values(1, 2, 3.5));
 //
 //
 template <typename... T>
@@ -352,7 +351,7 @@ internal::ValueArray<T...> Values(T... v) {
 // of multiple flags can be tested when several Bool()'s are combined using
 // Combine() function.
 //
-// In the following example all tests in the test case FlagDependentTest
+// In the following example all tests in the test suite FlagDependentTest
 // will be instantiated twice with parameters false and true.
 //
 // class FlagDependentTest : public testing::TestWithParam<bool> {
@@ -360,7 +359,7 @@ internal::ValueArray<T...> Values(T... v) {
 //     external_flag = GetParam();
 //   }
 // }
-// INSTANTIATE_TEST_CASE_P(BoolSequence, FlagDependentTest, Bool());
+// INSTANTIATE_TEST_SUITE_P(BoolSequence, FlagDependentTest, Bool());
 //
 inline internal::ParamGenerator<bool> Bool() {
   return Values(false, true);
@@ -381,7 +380,7 @@ inline internal::ParamGenerator<bool> Bool() {
 //
 // Example:
 //
-// This will instantiate tests in test case AnimalTest each one with
+// This will instantiate tests in test suite AnimalTest each one with
 // the parameter values tuple("cat", BLACK), tuple("cat", WHITE),
 // tuple("dog", BLACK), and tuple("dog", WHITE):
 //
@@ -391,9 +390,9 @@ inline internal::ParamGenerator<bool> Bool() {
 //
 // TEST_P(AnimalTest, AnimalLooksNice) {...}
 //
-// INSTANTIATE_TEST_CASE_P(AnimalVariations, AnimalTest,
-//                         Combine(Values("cat", "dog"),
-//                                 Values(BLACK, WHITE)));
+// INSTANTIATE_TEST_SUITE_P(AnimalVariations, AnimalTest,
+//                          Combine(Values("cat", "dog"),
+//                                  Values(BLACK, WHITE)));
 //
 // This will instantiate tests in FlagDependentTest with all variations of two
 // Boolean flags:
@@ -409,8 +408,8 @@ inline internal::ParamGenerator<bool> Bool() {
 // TEST_P(FlagDependentTest, TestFeature1) {
 //   // Test your code using external_flag_1 and external_flag_2 here.
 // }
-// INSTANTIATE_TEST_CASE_P(TwoBoolSequence, FlagDependentTest,
-//                         Combine(Bool(), Bool()));
+// INSTANTIATE_TEST_SUITE_P(TwoBoolSequence, FlagDependentTest,
+//                          Combine(Bool(), Bool()));
 //
 template <typename Generator1, typename Generator2>
 internal::CartesianProductHolder2<Generator1, Generator2> Combine(
@@ -516,36 +515,36 @@ internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
       g1, g2, g3, g4, g5, g6, g7, g8, g9, g10);
 }
 
-# define TEST_P(test_case_name, test_name) \
-  class GTEST_TEST_CLASS_NAME_(test_case_name, test_name) \
-      : public test_case_name { \
-   public: \
-    GTEST_TEST_CLASS_NAME_(test_case_name, test_name)() {} \
-    virtual void TestBody(); \
-   private: \
-    static int AddToRegistry() { \
-      ::testing::UnitTest::GetInstance()->parameterized_test_registry(). \
-          GetTestCasePatternHolder<test_case_name>(\
-              #test_case_name, \
-              ::testing::internal::CodeLocation(\
-                  __FILE__, __LINE__))->AddTestPattern(\
-                      GTEST_STRINGIFY_(test_case_name), \
-                      GTEST_STRINGIFY_(test_name), \
-                      new ::testing::internal::TestMetaFactory< \
-                          GTEST_TEST_CLASS_NAME_(\
-                              test_case_name, test_name)>()); \
-      return 0; \
-    } \
-    static int gtest_registering_dummy_ GTEST_ATTRIBUTE_UNUSED_; \
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(\
-        GTEST_TEST_CLASS_NAME_(test_case_name, test_name)); \
-  }; \
-  int GTEST_TEST_CLASS_NAME_(test_case_name, \
-                             test_name)::gtest_registering_dummy_ = \
-      GTEST_TEST_CLASS_NAME_(test_case_name, test_name)::AddToRegistry(); \
-  void GTEST_TEST_CLASS_NAME_(test_case_name, test_name)::TestBody()
+#define TEST_P(test_suite_name, test_name)                                     \
+  class GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)                     \
+      : public test_suite_name {                                               \
+   public:                                                                     \
+    GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)() {}                    \
+    virtual void TestBody();                                                   \
+                                                                               \
+   private:                                                                    \
+    static int AddToRegistry() {                                               \
+      ::testing::UnitTest::GetInstance()                                       \
+          ->parameterized_test_registry()                                      \
+          .GetTestSuitePatternHolder<test_suite_name>(                         \
+              #test_suite_name,                                                \
+              ::testing::internal::CodeLocation(__FILE__, __LINE__))           \
+          ->AddTestPattern(                                                    \
+              GTEST_STRINGIFY_(test_suite_name), GTEST_STRINGIFY_(test_name),  \
+              new ::testing::internal::TestMetaFactory<GTEST_TEST_CLASS_NAME_( \
+                  test_suite_name, test_name)>());                             \
+      return 0;                                                                \
+    }                                                                          \
+    static int gtest_registering_dummy_ GTEST_ATTRIBUTE_UNUSED_;               \
+    GTEST_DISALLOW_COPY_AND_ASSIGN_(GTEST_TEST_CLASS_NAME_(test_suite_name,    \
+                                                           test_name));        \
+  };                                                                           \
+  int GTEST_TEST_CLASS_NAME_(test_suite_name,                                  \
+                             test_name)::gtest_registering_dummy_ =            \
+      GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::AddToRegistry();     \
+  void GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::TestBody()
 
-// The optional last argument to INSTANTIATE_TEST_CASE_P allows the user
+// The optional last argument to INSTANTIATE_TEST_SUITE_P allows the user
 // to specify a function or functor that generates custom test name suffixes
 // based on the test parameters. The function should accept one argument of
 // type testing::TestParamInfo<class ParamType>, and return std::string.
@@ -557,24 +556,32 @@ internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
 // alphanumeric characters or underscore. Because PrintToString adds quotes
 // to std::string and C strings, it won't work for these types.
 
-# define INSTANTIATE_TEST_CASE_P(prefix, test_case_name, generator, ...) \
-  static ::testing::internal::ParamGenerator<test_case_name::ParamType> \
-      gtest_##prefix##test_case_name##_EvalGenerator_() { return generator; } \
-  static ::std::string gtest_##prefix##test_case_name##_EvalGenerateName_( \
-      const ::testing::TestParamInfo<test_case_name::ParamType>& info) { \
-    return ::testing::internal::GetParamNameGen<test_case_name::ParamType> \
-        (__VA_ARGS__)(info); \
-  } \
-  static int gtest_##prefix##test_case_name##_dummy_ GTEST_ATTRIBUTE_UNUSED_ = \
-      ::testing::UnitTest::GetInstance()->parameterized_test_registry(). \
-          GetTestCasePatternHolder<test_case_name>(\
-              #test_case_name, \
-              ::testing::internal::CodeLocation(\
-                  __FILE__, __LINE__))->AddTestCaseInstantiation(\
-                      #prefix, \
-                      &gtest_##prefix##test_case_name##_EvalGenerator_, \
-                      &gtest_##prefix##test_case_name##_EvalGenerateName_, \
-                      __FILE__, __LINE__)
+#define INSTANTIATE_TEST_SUITE_P(prefix, test_suite_name, generator, ...)     \
+  static ::testing::internal::ParamGenerator<test_suite_name::ParamType>      \
+      gtest_##prefix##test_suite_name##_EvalGenerator_() {                    \
+    return generator;                                                         \
+  }                                                                           \
+  static ::std::string gtest_##prefix##test_suite_name##_EvalGenerateName_(   \
+      const ::testing::TestParamInfo<test_suite_name::ParamType>& info) {     \
+    return ::testing::internal::GetParamNameGen<test_suite_name::ParamType>(  \
+        __VA_ARGS__)(info);                                                   \
+  }                                                                           \
+  static int gtest_##prefix##test_suite_name##_dummy_                         \
+      GTEST_ATTRIBUTE_UNUSED_ =                                               \
+          ::testing::UnitTest::GetInstance()                                  \
+              ->parameterized_test_registry()                                 \
+              .GetTestSuitePatternHolder<test_suite_name>(                    \
+                  #test_suite_name,                                           \
+                  ::testing::internal::CodeLocation(__FILE__, __LINE__))      \
+              ->AddTestSuiteInstantiation(                                    \
+                  #prefix, &gtest_##prefix##test_suite_name##_EvalGenerator_, \
+                  &gtest_##prefix##test_suite_name##_EvalGenerateName_,       \
+                  __FILE__, __LINE__)
+
+// Legacy API is deprecated but still available
+#ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
+#define INSTANTIATE_TEST_CASE_P INSTANTIATE_TEST_SUITE_P
+#endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
 }  // namespace testing
 
