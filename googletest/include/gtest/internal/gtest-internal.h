@@ -58,6 +58,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include "gtest/gtest-message.h"
@@ -108,15 +109,28 @@ GTEST_API_ extern const char kStackTraceMarker[];
 
 // An IgnoredValue object can be implicitly constructed from ANY value.
 class IgnoredValue {
+  struct Sink {};
  public:
   // This constructor template allows any value to be implicitly
   // converted to IgnoredValue.  The object has no data member and
   // doesn't try to remember anything about the argument.  We
   // deliberately omit the 'explicit' keyword in order to allow the
   // conversion to be implicit.
-  template <typename T>
+  // Disable the conversion if T already has a magical conversion operator.
+  // Otherwise we get ambiguity.
+  template <typename T,
+            typename std::enable_if<!std::is_convertible<T, Sink>::value,
+                                    int>::type = 0>
   IgnoredValue(const T& /* ignored */) {}  // NOLINT(runtime/explicit)
 };
+
+// The only type that should be convertible to Secret* is nullptr.
+// The other null pointer constants are not of a type that is convertible to
+// Secret*. Only the literal with the right value is.
+template <typename T>
+using TypeIsValidNullptrConstant = std::integral_constant<
+    bool, std::is_same<typename std::decay<T>::type, std::nullptr_t>::value ||
+              !std::is_convertible<T, Secret*>::value>;
 
 // Two overloaded helpers for checking at compile time whether an
 // expression is a null pointer literal (i.e. NULL or any 0-valued
@@ -130,13 +144,16 @@ class IgnoredValue {
 // a null pointer literal.  Therefore, we know that x is a null
 // pointer literal if and only if the first version is picked by the
 // compiler.
-std::true_type IsNullLiteralHelper(Secret*);
-std::false_type IsNullLiteralHelper(IgnoredValue);
+std::true_type IsNullLiteralHelper(Secret*, std::true_type);
+std::false_type IsNullLiteralHelper(IgnoredValue, std::false_type);
+std::false_type IsNullLiteralHelper(IgnoredValue, std::true_type);
 
 // A compile-time bool constant that is true if and only if x is a null pointer
 // literal (i.e. nullptr, NULL or any 0-valued compile-time integral constant).
-#define GTEST_IS_NULL_LITERAL_(x) \
-  decltype(::testing::internal::IsNullLiteralHelper(x))::value
+#define GTEST_IS_NULL_LITERAL_(x)                    \
+  decltype(::testing::internal::IsNullLiteralHelper( \
+      x,                                             \
+      ::testing::internal::TypeIsValidNullptrConstant<decltype(x)>()))::value
 
 // Appends the user-supplied message to the Google-Test-generated message.
 GTEST_API_ std::string AppendUserMessage(
