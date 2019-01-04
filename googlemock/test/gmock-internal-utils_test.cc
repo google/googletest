@@ -123,13 +123,9 @@ TEST(ConvertIdentifierNameToWordsTest, WorksWhenNameIsMixture) {
 }
 
 TEST(PointeeOfTest, WorksForSmartPointers) {
-#if GTEST_HAS_STD_UNIQUE_PTR_
   CompileAssertTypesEqual<int, PointeeOf<std::unique_ptr<int> >::type>();
-#endif  // GTEST_HAS_STD_UNIQUE_PTR_
-#if GTEST_HAS_STD_SHARED_PTR_
   CompileAssertTypesEqual<std::string,
                           PointeeOf<std::shared_ptr<std::string> >::type>();
-#endif  // GTEST_HAS_STD_SHARED_PTR_
 }
 
 TEST(PointeeOfTest, WorksForRawPointers) {
@@ -139,21 +135,16 @@ TEST(PointeeOfTest, WorksForRawPointers) {
 }
 
 TEST(GetRawPointerTest, WorksForSmartPointers) {
-#if GTEST_HAS_STD_UNIQUE_PTR_
   const char* const raw_p1 = new const char('a');  // NOLINT
   const std::unique_ptr<const char> p1(raw_p1);
   EXPECT_EQ(raw_p1, GetRawPointer(p1));
-#endif  // GTEST_HAS_STD_UNIQUE_PTR_
-#if GTEST_HAS_STD_SHARED_PTR_
   double* const raw_p2 = new double(2.5);  // NOLINT
   const std::shared_ptr<double> p2(raw_p2);
   EXPECT_EQ(raw_p2, GetRawPointer(p2));
-#endif  // GTEST_HAS_STD_SHARED_PTR_
 }
 
 TEST(GetRawPointerTest, WorksForRawPointers) {
   int* p = nullptr;
-  // Don't use EXPECT_EQ as no NULL-testing magic on Symbian.
   EXPECT_TRUE(nullptr == GetRawPointer(p));
   int n = 1;
   EXPECT_EQ(&n, GetRawPointer(&n));
@@ -527,12 +518,6 @@ TEST(TypeTraitsTest, is_reference) {
   EXPECT_FALSE(is_reference<int>::value);
   EXPECT_FALSE(is_reference<char*>::value);
   EXPECT_TRUE(is_reference<const int&>::value);
-}
-
-TEST(TypeTraitsTest, is_pointer) {
-  EXPECT_FALSE(is_pointer<int>::value);
-  EXPECT_FALSE(is_pointer<char&>::value);
-  EXPECT_TRUE(is_pointer<const int*>::value);
 }
 
 TEST(TypeTraitsTest, type_equals) {

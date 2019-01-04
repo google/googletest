@@ -61,21 +61,19 @@ The related term _Test_, as it is used in the googletest, is corresponding to
 the term _[Test Case](http://glossary.istqb.org/search/test%20case)_ of ISTQB
 and others.
 
-The term _Test_ is commonly of broad enough sense, including ISTQB's
-definition of _Test Case_, so it's not much of a problem here. But the
-term _Test Case_ as used in Google Test is of contradictory sense and thus confusing.
+The term _Test_ is commonly of broad enough sense, including ISTQB's definition
+of _Test Case_, so it's not much of a problem here. But the term _Test Case_ as
+was used in Google Test is of contradictory sense and thus confusing.
 
-Unfortunately replacing the term _Test Case_ by _Test Suite_ throughout the
-googletest is not easy without breaking dependent projects, as `TestCase` is
-part of the public API at various places.
+googletest recently started replacing the term _Test Case_ by _Test Suite_ The
+preferred API is TestSuite*. The older TestCase* API is being slowly deprecated
+and refactored away
 
-So for the time being, please be aware of the different definitions of
-the terms:
+So please be aware of the different definitions of the terms:
 
 Meaning                                                                              | googletest Term                                                                                            | [ISTQB](http://www.istqb.org/) Term
 :----------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------- | :----------------------------------
 Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests)                                                                                    | [Test Case](http://glossary.istqb.org/search/test%20case)
-A set of several tests related to one component                                      | [TestCase](#basic-concepts) | [TestSuite](http://glossary.istqb.org/search/test%20suite)
 
 ## Basic Concepts
 
@@ -252,7 +250,7 @@ To create a test:
     entire test fails. Otherwise, it succeeds.
 
 ```c++
-TEST(TestCaseName, TestName) {
+TEST(TestSuiteName, TestName) {
   ... test body ...
 }
 ```
@@ -324,7 +322,7 @@ When using a fixture, use `TEST_F()` instead of `TEST()` as it allows you to
 access objects and subroutines in the test fixture:
 
 ```c++
-TEST_F(TestCaseName, TestName) {
+TEST_F(TestSuiteName, TestName) {
   ... test body ...
 }
 ```

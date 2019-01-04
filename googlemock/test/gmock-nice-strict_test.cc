@@ -27,8 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
-#include "gmock/gmock-generated-nice-strict.h"
+#include "gmock/gmock-nice-strict.h"
 
 #include <string>
 #include <utility>
@@ -114,23 +113,22 @@ class MockBar {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockBar);
 };
 
-#if GTEST_GTEST_LANG_CXX11
 
 class MockBaz {
  public:
   class MoveOnly {
+   public:
     MoveOnly() = default;
 
     MoveOnly(const MoveOnly&) = delete;
-    operator=(const MoveOnly&) = delete;
+    MoveOnly& operator=(const MoveOnly&) = delete;
 
     MoveOnly(MoveOnly&&) = default;
-    operator=(MoveOnly&&) = default;
+    MoveOnly& operator=(MoveOnly&&) = default;
   };
 
   MockBaz(MoveOnly) {}
-}
-#endif  // GTEST_GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
+};
 
 #if GTEST_HAS_STREAM_REDIRECTION
 
@@ -292,29 +290,17 @@ TEST(NiceMockTest, AllowLeak) {
   leaked->DoThis();
 }
 
-#if GTEST_GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
-
 TEST(NiceMockTest, MoveOnlyConstructor) {
-  NiceMock<MockBaz> nice_baz(MockBaz::MoveOnly());
+  NiceMock<MockBaz> nice_baz(MockBaz::MoveOnly{});
 }
 
-#endif  // GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
-
-#if !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 // Tests that NiceMock<Mock> compiles where Mock is a user-defined
-// class (as opposed to ::testing::Mock).  We had to work around an
-// MSVC 8.0 bug that caused the symbol Mock used in the definition of
-// NiceMock to be looked up in the wrong context, and this test
-// ensures that our fix works.
-//
-// We have to skip this test on Symbian and Windows Mobile, as it
-// causes the program to crash there, for reasons unclear to us yet.
+// class (as opposed to ::testing::Mock).
 TEST(NiceMockTest, AcceptsClassNamedMock) {
   NiceMock< ::Mock> nice;
   EXPECT_CALL(nice, DoThis());
   nice.DoThis();
 }
-#endif  // !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 
 TEST(NiceMockTest, IsNaggy_IsNice_IsStrict) {
   NiceMock<MockFoo> nice_foo;
@@ -407,29 +393,17 @@ TEST(NaggyMockTest, AllowLeak) {
   leaked->DoThis();
 }
 
-#if GTEST_GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
-
 TEST(NaggyMockTest, MoveOnlyConstructor) {
-  NaggyMock<MockBaz> naggy_baz(MockBaz::MoveOnly());
+  NaggyMock<MockBaz> naggy_baz(MockBaz::MoveOnly{});
 }
 
-#endif  // GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
-
-#if !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 // Tests that NaggyMock<Mock> compiles where Mock is a user-defined
-// class (as opposed to ::testing::Mock).  We had to work around an
-// MSVC 8.0 bug that caused the symbol Mock used in the definition of
-// NaggyMock to be looked up in the wrong context, and this test
-// ensures that our fix works.
-//
-// We have to skip this test on Symbian and Windows Mobile, as it
-// causes the program to crash there, for reasons unclear to us yet.
+// class (as opposed to ::testing::Mock).
 TEST(NaggyMockTest, AcceptsClassNamedMock) {
   NaggyMock< ::Mock> naggy;
   EXPECT_CALL(naggy, DoThis());
   naggy.DoThis();
 }
-#endif  // !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 
 TEST(NaggyMockTest, IsNaggy_IsNice_IsStrict) {
   NaggyMock<MockFoo> naggy_foo;
@@ -503,29 +477,17 @@ TEST(StrictMockTest, AllowLeak) {
   leaked->DoThis();
 }
 
-#if GTEST_GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
-
 TEST(StrictMockTest, MoveOnlyConstructor) {
-  StrictMock<MockBaz> strict_baz(MockBaz::MoveOnly());
+  StrictMock<MockBaz> strict_baz(MockBaz::MoveOnly{});
 }
 
-#endif  // GTEST_LANG_CXX11 && GTEST_HAS_STD_MOVE_
-
-#if !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 // Tests that StrictMock<Mock> compiles where Mock is a user-defined
-// class (as opposed to ::testing::Mock).  We had to work around an
-// MSVC 8.0 bug that caused the symbol Mock used in the definition of
-// StrictMock to be looked up in the wrong context, and this test
-// ensures that our fix works.
-//
-// We have to skip this test on Symbian and Windows Mobile, as it
-// causes the program to crash there, for reasons unclear to us yet.
+// class (as opposed to ::testing::Mock).
 TEST(StrictMockTest, AcceptsClassNamedMock) {
   StrictMock< ::Mock> strict;
   EXPECT_CALL(strict, DoThis());
   strict.DoThis();
 }
-#endif  // !GTEST_OS_SYMBIAN && !GTEST_OS_WINDOWS_MOBILE
 
 TEST(StrictMockTest, IsNaggy_IsNice_IsStrict) {
   StrictMock<MockFoo> strict_foo;

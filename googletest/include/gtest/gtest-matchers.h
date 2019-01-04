@@ -69,10 +69,6 @@ namespace testing {
 // MatchResultListener is an abstract class.  Its << operator can be
 // used by a matcher to explain why a value matches or doesn't match.
 //
-// FIXME: add method
-//   bool InterestedInWhy(bool result) const;
-// to indicate whether the listener is interested in why the match
-// result is 'result'.
 class MatchResultListener {
  public:
   // Creates a listener object with the given underlying ostream.  The
@@ -256,13 +252,12 @@ class MatcherBase {
  public:
   // Returns true iff the matcher matches x; also explains the match
   // result to 'listener'.
-  bool MatchAndExplain(GTEST_REFERENCE_TO_CONST_(T) x,
-                       MatchResultListener* listener) const {
+  bool MatchAndExplain(const T& x, MatchResultListener* listener) const {
     return impl_->MatchAndExplain(x, listener);
   }
 
   // Returns true iff this matcher matches x.
-  bool Matches(GTEST_REFERENCE_TO_CONST_(T) x) const {
+  bool Matches(const T& x) const {
     DummyMatchResultListener dummy;
     return MatchAndExplain(x, &dummy);
   }
@@ -276,8 +271,7 @@ class MatcherBase {
   }
 
   // Explains why x matches, or doesn't match, the matcher.
-  void ExplainMatchResultTo(GTEST_REFERENCE_TO_CONST_(T) x,
-                            ::std::ostream* os) const {
+  void ExplainMatchResultTo(const T& x, ::std::ostream* os) const {
     StreamMatchResultListener listener(os);
     MatchAndExplain(x, &listener);
   }
@@ -293,22 +287,19 @@ class MatcherBase {
   MatcherBase() {}
 
   // Constructs a matcher from its implementation.
-  explicit MatcherBase(
-      const MatcherInterface<GTEST_REFERENCE_TO_CONST_(T)>* impl)
-      : impl_(impl) {}
+  explicit MatcherBase(const MatcherInterface<const T&>* impl) : impl_(impl) {}
 
   template <typename U>
   explicit MatcherBase(
       const MatcherInterface<U>* impl,
       typename internal::EnableIf<
-          !internal::IsSame<U, GTEST_REFERENCE_TO_CONST_(U)>::value>::type* =
-          nullptr)
+          !internal::IsSame<U, const U&>::value>::type* = nullptr)
       : impl_(new internal::MatcherInterfaceAdapter<U>(impl)) {}
 
   virtual ~MatcherBase() {}
 
  private:
-  std::shared_ptr<const MatcherInterface<GTEST_REFERENCE_TO_CONST_(T)>> impl_;
+  std::shared_ptr<const MatcherInterface<const T&>> impl_;
 };
 
 }  // namespace internal
@@ -326,15 +317,13 @@ class Matcher : public internal::MatcherBase<T> {
   explicit Matcher() {}  // NOLINT
 
   // Constructs a matcher from its implementation.
-  explicit Matcher(const MatcherInterface<GTEST_REFERENCE_TO_CONST_(T)>* impl)
+  explicit Matcher(const MatcherInterface<const T&>* impl)
       : internal::MatcherBase<T>(impl) {}
 
   template <typename U>
-  explicit Matcher(
-      const MatcherInterface<U>* impl,
-      typename internal::EnableIf<
-          !internal::IsSame<U, GTEST_REFERENCE_TO_CONST_(U)>::value>::type* =
-          nullptr)
+  explicit Matcher(const MatcherInterface<U>* impl,
+                   typename internal::EnableIf<
+                       !internal::IsSame<U, const U&>::value>::type* = nullptr)
       : internal::MatcherBase<T>(impl) {}
 
   // Implicit constructor here allows people to write
@@ -535,7 +524,7 @@ class PolymorphicMatcher {
 
   template <typename T>
   operator Matcher<T>() const {
-    return Matcher<T>(new MonomorphicImpl<GTEST_REFERENCE_TO_CONST_(T)>(impl_));
+    return Matcher<T>(new MonomorphicImpl<const T&>(impl_));
   }
 
  private:
