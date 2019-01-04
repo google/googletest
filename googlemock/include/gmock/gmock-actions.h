@@ -42,17 +42,14 @@
 #endif
 
 #include <algorithm>
+#include <functional>
 #include <memory>
 #include <string>
+#include <type_traits>
 #include <utility>
 
 #include "gmock/internal/gmock-internal-utils.h"
 #include "gmock/internal/gmock-port.h"
-
-#if GTEST_LANG_CXX11  // Defined by gtest-port.h via gmock-port.h.
-#include <functional>
-#include <type_traits>
-#endif  // GTEST_LANG_CXX11
 
 #ifdef _MSC_VER
 # pragma warning(push)
@@ -71,9 +68,6 @@ namespace testing {
 // management as Action objects can now be copied like plain values.
 
 namespace internal {
-
-template <typename F1, typename F2>
-class ActionAdaptor;
 
 // BuiltInDefaultValueGetter<T, true>::Get() returns a
 // default-constructed T value.  BuiltInDefaultValueGetter<T,
@@ -105,7 +99,6 @@ struct BuiltInDefaultValueGetter<T, false> {
 template <typename T>
 class BuiltInDefaultValue {
  public:
-#if GTEST_LANG_CXX11
   // This function returns true iff type T has a built-in default value.
   static bool Exists() {
     return ::std::is_default_constructible<T>::value;
@@ -115,18 +108,6 @@ class BuiltInDefaultValue {
     return BuiltInDefaultValueGetter<
         T, ::std::is_default_constructible<T>::value>::Get();
   }
-
-#else  // GTEST_LANG_CXX11
-  // This function returns true iff type T has a built-in default value.
-  static bool Exists() {
-    return false;
-  }
-
-  static T Get() {
-    return BuiltInDefaultValueGetter<T, false>::Get();
-  }
-
-#endif  // GTEST_LANG_CXX11
 };
 
 // This partial specialization says that we use the same built-in
@@ -358,6 +339,19 @@ class ActionInterface {
 // object as a handle to it.
 template <typename F>
 class Action {
+  // Adapter class to allow constructing Action from a legacy ActionInterface.
+  // New code should create Actions from functors instead.
+  struct ActionAdapter {
+    // Adapter must be copyable to satisfy std::function requirements.
+    ::std::shared_ptr<ActionInterface<F>> impl_;
+
+    template <typename... Args>
+    typename internal::Function<F>::Result operator()(Args&&... args) {
+      return impl_->Perform(
+          ::std::forward_as_tuple(::std::forward<Args>(args)...));
+    }
+  };
+
  public:
   typedef typename internal::Function<F>::Result Result;
   typedef typename internal::Function<F>::ArgumentTuple ArgumentTuple;
@@ -366,7 +360,6 @@ class Action {
   // STL containers.
   Action() {}
 
-#if GTEST_LANG_CXX11
   // Construct an Action from a specified callable.
   // This cannot take std::function directly, because then Action would not be
   // directly constructible from lambda (it would require two conversions).
@@ -374,26 +367,19 @@ class Action {
             typename = typename ::std::enable_if<
                 ::std::is_constructible<::std::function<F>, G>::value>::type>
   Action(G&& fun) : fun_(::std::forward<G>(fun)) {}  // NOLINT
-#endif
 
   // Constructs an Action from its implementation.
-  explicit Action(ActionInterface<F>* impl) : impl_(impl) {}
+  explicit Action(ActionInterface<F>* impl)
+      : fun_(ActionAdapter{::std::shared_ptr<ActionInterface<F>>(impl)}) {}
 
   // This constructor allows us to turn an Action<Func> object into an
   // Action<F>, as long as F's arguments can be implicitly converted
-  // to Func's and Func's return type can be implicitly converted to
-  // F's.
+  // to Func's and Func's return type can be implicitly converted to F's.
   template <typename Func>
-  explicit Action(const Action<Func>& action);
+  explicit Action(const Action<Func>& action) : fun_(action.fun_) {}
 
   // Returns true iff this is the DoDefault() action.
-  bool IsDoDefault() const {
-#if GTEST_LANG_CXX11
-    return impl_ == nullptr && fun_ == nullptr;
-#else
-    return impl_ == NULL;
-#endif
-  }
+  bool IsDoDefault() const { return fun_ == nullptr; }
 
   // Performs the action.  Note that this method is const even though
   // the corresponding method in ActionInterface is not.  The reason
@@ -405,31 +391,15 @@ class Action {
     if (IsDoDefault()) {
       internal::IllegalDoDefault(__FILE__, __LINE__);
     }
-#if GTEST_LANG_CXX11
-    if (fun_ != nullptr) {
-      return internal::Apply(fun_, ::std::move(args));
-    }
-#endif
-    return impl_->Perform(args);
+    return internal::Apply(fun_, ::std::move(args));
   }
 
  private:
-  template <typename F1, typename F2>
-  friend class internal::ActionAdaptor;
-
   template <typename G>
   friend class Action;
 
-  // In C++11, Action can be implemented either as a generic functor (through
-  // std::function), or legacy ActionInterface. In C++98, only ActionInterface
-  // is available. The invariants are as follows:
-  // * in C++98, impl_ is null iff this is the default action
-  // * in C++11, at most one of fun_ & impl_ may be nonnull; both are null iff
-  //   this is the default action
-#if GTEST_LANG_CXX11
+  // fun_ is an empty function iff this is the DoDefault() action.
   ::std::function<F> fun_;
-#endif
-  std::shared_ptr<ActionInterface<F>> impl_;
 };
 
 // The PolymorphicAction class template makes it easy to implement a
@@ -508,26 +478,6 @@ inline PolymorphicAction<Impl> MakePolymorphicAction(const Impl& impl) {
 
 namespace internal {
 
-// Allows an Action<F2> object to pose as an Action<F1>, as long as F2
-// and F1 are compatible.
-template <typename F1, typename F2>
-class ActionAdaptor : public ActionInterface<F1> {
- public:
-  typedef typename internal::Function<F1>::Result Result;
-  typedef typename internal::Function<F1>::ArgumentTuple ArgumentTuple;
-
-  explicit ActionAdaptor(const Action<F2>& from) : impl_(from.impl_) {}
-
-  Result Perform(const ArgumentTuple& args) override {
-    return impl_->Perform(args);
-  }
-
- private:
-  const std::shared_ptr<ActionInterface<F2>> impl_;
-
-  GTEST_DISALLOW_ASSIGN_(ActionAdaptor);
-};
-
 // Helper struct to specialize ReturnAction to execute a move instead of a copy
 // on return. Useful for move-only types, but could be used on any type.
 template <typename T>
@@ -574,7 +524,7 @@ class ReturnAction {
   // This template type conversion operator allows Return(x) to be
   // used in ANY function that returns x's type.
   template <typename F>
-  operator Action<F>() const {
+  operator Action<F>() const {  // NOLINT
     // Assert statement belongs here because this is the best place to verify
     // conditions on F. It produces the clearest error messages
     // in most compilers.
@@ -587,6 +537,8 @@ class ReturnAction {
     GTEST_COMPILE_ASSERT_(
         !is_reference<Result>::value,
         use_ReturnRef_instead_of_Return_to_return_a_reference);
+    static_assert(!std::is_void<Result>::value,
+                  "Can't use Return() on an action expected to return `void`.");
     return Action<F>(new Impl<R, F>(value_));
   }
 
@@ -660,13 +612,7 @@ class ReturnNullAction {
   // pointer type on compile time.
   template <typename Result, typename ArgumentTuple>
   static Result Perform(const ArgumentTuple&) {
-#if GTEST_LANG_CXX11
     return nullptr;
-#else
-    GTEST_COMPILE_ASSERT_(internal::is_pointer<Result>::value,
-                          ReturnNull_can_be_used_to_return_a_pointer_only);
-    return NULL;
-#endif  // GTEST_LANG_CXX11
   }
 };
 
@@ -1017,51 +963,6 @@ void PrintTo(const ReferenceWrapper<T>& ref, ::std::ostream* os) {
   UniversalPrinter<T&>::Print(value, os);
 }
 
-// Does two actions sequentially.  Used for implementing the DoAll(a1,
-// a2, ...) action.
-template <typename Action1, typename Action2>
-class DoBothAction {
- public:
-  DoBothAction(Action1 action1, Action2 action2)
-      : action1_(action1), action2_(action2) {}
-
-  // This template type conversion operator allows DoAll(a1, ..., a_n)
-  // to be used in ANY function of compatible type.
-  template <typename F>
-  operator Action<F>() const {
-    return Action<F>(new Impl<F>(action1_, action2_));
-  }
-
- private:
-  // Implements the DoAll(...) action for a particular function type F.
-  template <typename F>
-  class Impl : public ActionInterface<F> {
-   public:
-    typedef typename Function<F>::Result Result;
-    typedef typename Function<F>::ArgumentTuple ArgumentTuple;
-    typedef typename Function<F>::MakeResultVoid VoidResult;
-
-    Impl(const Action<VoidResult>& action1, const Action<F>& action2)
-        : action1_(action1), action2_(action2) {}
-
-    Result Perform(const ArgumentTuple& args) override {
-      action1_.Perform(args);
-      return action2_.Perform(args);
-    }
-
-   private:
-    const Action<VoidResult> action1_;
-    const Action<F> action2_;
-
-    GTEST_DISALLOW_ASSIGN_(Impl);
-  };
-
-  Action1 action1_;
-  Action2 action2_;
-
-  GTEST_DISALLOW_ASSIGN_(DoBothAction);
-};
-
 template <typename InnerAction, size_t... I>
 struct WithArgsAction {
   InnerAction action;
@@ -1077,6 +978,35 @@ struct WithArgsAction {
       return converted.Perform(std::forward_as_tuple(
         std::get<I>(std::forward_as_tuple(std::forward<Args>(args)...))...));
     };
+  }
+};
+
+template <typename... Actions>
+struct DoAllAction {
+ private:
+  template <typename... Args, size_t... I>
+  std::vector<Action<void(Args...)>> Convert(IndexSequence<I...>) const {
+    return {std::get<I>(actions)...};
+  }
+
+ public:
+  std::tuple<Actions...> actions;
+
+  template <typename R, typename... Args>
+  operator Action<R(Args...)>() const {  // NOLINT
+    struct Op {
+      std::vector<Action<void(Args...)>> converted;
+      Action<R(Args...)> last;
+      R operator()(Args... args) const {
+        auto tuple_args = std::forward_as_tuple(std::forward<Args>(args)...);
+        for (auto& a : converted) {
+          a.Perform(tuple_args);
+        }
+        return last.Perform(tuple_args);
+      }
+    };
+    return Op{Convert<Args...>(MakeIndexSequence<sizeof...(Actions) - 1>()),
+              std::get<sizeof...(Actions) - 1>(actions)};
   }
 };
 
@@ -1114,20 +1044,12 @@ struct WithArgsAction {
 //   EXPECT_CALL(mock, Bar(5, _, _)).WillOnce(Invoke(DistanceToOrigin));
 typedef internal::IgnoredValue Unused;
 
-// This constructor allows us to turn an Action<From> object into an
-// Action<To>, as long as To's arguments can be implicitly converted
-// to From's and From's return type cann be implicitly converted to
-// To's.
-template <typename To>
-template <typename From>
-Action<To>::Action(const Action<From>& from)
-    :
-#if GTEST_LANG_CXX11
-      fun_(from.fun_),
-#endif
-      impl_(from.impl_ == nullptr
-                ? nullptr
-                : new internal::ActionAdaptor<To, From>(from)) {
+// Creates an action that does actions a1, a2, ..., sequentially in
+// each invocation.
+template <typename... Action>
+internal::DoAllAction<typename std::decay<Action>::type...> DoAll(
+    Action&&... action) {
+  return {std::forward_as_tuple(std::forward<Action>(action)...)};
 }
 
 // WithArg<k>(an_action) creates an action that passes the k-th
@@ -1218,10 +1140,6 @@ SetArgPointee(const T& x) {
       N, T, internal::IsAProtocolMessage<T>::value>(x));
 }
 
-#if !((GTEST_GCC_VER_ && GTEST_GCC_VER_ < 40000) || GTEST_OS_SYMBIAN)
-// This overload allows SetArgPointee() to accept a string literal.
-// GCC prior to the version 4.0 and Symbian C++ compiler cannot distinguish
-// this overload from the templated version and emit a compile error.
 template <size_t N>
 PolymorphicAction<
   internal::SetArgumentPointeeAction<N, const char*, false> >
@@ -1237,7 +1155,6 @@ SetArgPointee(const wchar_t* p) {
   return MakePolymorphicAction(internal::SetArgumentPointeeAction<
       N, const wchar_t*, false>(p));
 }
-#endif
 
 // The following version is DEPRECATED.
 template <size_t N, typename T>
