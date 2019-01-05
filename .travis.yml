@@ -14,9 +14,9 @@ matrix:
       dist: trusty
       sudo: required
       group: deprecated-2017Q3
-      before_install: chmod -R +x ./ci/*platformio.sh 
+      before_install: chmod -R +x ./ci/*platformio.sh
       install: ./ci/install-platformio.sh
-      script: ./ci/build-platformio.sh      
+      script: ./ci/build-platformio.sh
     - os: linux
       compiler: gcc
       sudo : true
@@ -36,19 +36,19 @@ matrix:
     - os: linux
       group: deprecated-2017Q4
       compiler: gcc
-      env: BUILD_TYPE=Debug VERBOSE=1 CXX_FLAGS=-std=c++11
+      env: BUILD_TYPE=Debug VERBOSE=1 CXX_FLAGS="-std=c++11 -Werror"
     - os: linux
       group: deprecated-2017Q4
       compiler: clang
-      env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
+      env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS="-std=c++11 -Werror"
     - os: linux
       compiler: clang
-      env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11 NO_EXCEPTION=ON NO_RTTI=ON COMPILER_IS_GNUCXX=ON
+      env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS="-std=c++11 -Werror" NO_EXCEPTION=ON NO_RTTI=ON COMPILER_IS_GNUCXX=ON
     - os: osx
       compiler: gcc
-      env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
+      env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS="-std=c++11 -Werror"
     - os: osx
-      env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11
+      env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS="-std=c++11 -Werror"
       if: type != pull_request
 
 # These are the install and build (script) phases for the most common entries in the matrix.  They could be included
