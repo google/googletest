@@ -77,6 +77,19 @@ macro(config_compiler_and_linker)
     # Suppress "unreachable code" warning
     # http://stackoverflow.com/questions/3232669 explains the issue.
     set(cxx_base_flags "${cxx_base_flags} -wd4702")
+  elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(cxx_base_flags "-Wall -Wshadow -Werror")
+    set(cxx_strict_flags "-Wno-format-y2k -W -Wno-unused-parameter -Wpointer-arith -Wreturn-type -Wcast-qual -Wwrite-strings -Wswitch -Wunused-parameter -Wcast-align -Wchar-subscripts -Winline -Wredundant-decls")
+    if (APPLE)
+      # Some of the OSX headers fail to compile due to issues with
+      # -Wnullability-completeness and -Wexpansion-to-defined on High Sierra.
+      #
+      # TODO(yaneurabeya@gmail.com): determine if the same problem occurs on
+      # Mojave.
+      set(cxx_strict_flags "-Wno-nullability-completeness -Wno-expansion-to-defined")
+    endif()
+    set(cxx_exception_flags "-fexceptions")
+    set(cxx_no_exception_flags "-fno-exceptions")
   elseif (CMAKE_COMPILER_IS_GNUCXX)
     set(cxx_base_flags "-Wall -Wshadow -Werror")
     if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0.0)
