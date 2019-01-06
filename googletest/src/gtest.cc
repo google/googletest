@@ -411,7 +411,10 @@ void AssertHelper::operator=(const Message& message) const {
 }
 
 // A copy of all command line arguments.  Set by InitGoogleTest().
-static ::std::vector<std::string> g_argvs;
+static ::std::vector<std::string>& g_argvs() {
+  static auto& g_argvs = *new ::std::vector<std::string>;
+  return g_argvs;
+}
 
 ::std::vector<std::string> GetArgvs() {
 #if defined(GTEST_CUSTOM_GET_ARGVS_)
@@ -420,7 +423,7 @@ static ::std::vector<std::string> g_argvs;
   const auto& custom = GTEST_CUSTOM_GET_ARGVS_();
   return ::std::vector<std::string>(custom.begin(), custom.end());
 #else   // defined(GTEST_CUSTOM_GET_ARGVS_)
-  return g_argvs;
+  return g_argvs();
 #endif  // defined(GTEST_CUSTOM_GET_ARGVS_)
 }
 
@@ -5978,13 +5981,13 @@ void InitGoogleTestImpl(int* argc, CharType** argv) {
 
   if (*argc <= 0) return;
 
-  g_argvs.clear();
+  g_argvs().clear();
   for (int i = 0; i != *argc; i++) {
-    g_argvs.push_back(StreamableToString(argv[i]));
+    g_argvs().push_back(StreamableToString(argv[i]));
   }
 
 #if GTEST_HAS_ABSL
-  absl::InitializeSymbolizer(g_argvs[0].c_str());
+  absl::InitializeSymbolizer(g_argvs()[0].c_str());
 #endif  // GTEST_HAS_ABSL
 
   ParseGoogleTestFlagsOnly(argc, argv);
