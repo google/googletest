@@ -1087,11 +1087,11 @@ class TestEventListener {
   virtual void OnEnvironmentsSetUpEnd(const UnitTest& unit_test) = 0;
 
   // Fired before the test suite starts.
-  virtual void OnTestSuiteStart(const TestSuite& test_suite) {}
+  virtual void OnTestSuiteStart(const TestSuite& /*test_suite*/) {}
 
   //  Legacy API is deprecated but still available
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
-  virtual void OnTestCaseStart(const TestCase& test_case) {}
+  virtual void OnTestCaseStart(const TestCase& /*test_case*/) {}
 #endif  //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
   // Fired before the test starts.
@@ -1106,11 +1106,11 @@ class TestEventListener {
   virtual void OnTestEnd(const TestInfo& test_info) = 0;
 
   // Fired after the test suite ends.
-  virtual void OnTestSuiteEnd(const TestSuite& test_suite) {}
+  virtual void OnTestSuiteEnd(const TestSuite& /*test_suite*/) {}
 
 //  Legacy API is deprecated but still available
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
-  virtual void OnTestCaseEnd(const TestCase& test_case) {}
+  virtual void OnTestCaseEnd(const TestCase& /*test_case*/) {}
 #endif  //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
   // Fired before environment tear-down for each iteration of tests starts.
@@ -1142,7 +1142,7 @@ class EmptyTestEventListener : public TestEventListener {
   void OnTestSuiteStart(const TestSuite& /*test_suite*/) override {}
 //  Legacy API is deprecated but still available
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
-  void OnTestCaseStart(const TestCase& tc /*test_suite*/) override {}
+  void OnTestCaseStart(const TestCase& /*test_case*/) override {}
 #endif  //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
   void OnTestStart(const TestInfo& /*test_info*/) override {}
@@ -1150,7 +1150,7 @@ class EmptyTestEventListener : public TestEventListener {
   void OnTestEnd(const TestInfo& /*test_info*/) override {}
   void OnTestSuiteEnd(const TestSuite& /*test_suite*/) override {}
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
-  void OnTestCaseEnd(const TestCase& tc /*test_suite*/) override {}
+  void OnTestCaseEnd(const TestCase& /*test_case*/) override {}
 #endif  //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
   void OnEnvironmentsTearDownStart(const UnitTest& /*unit_test*/) override {}
