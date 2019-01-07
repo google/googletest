@@ -3033,7 +3033,7 @@ class PointwiseMatcher {
   operator Matcher<LhsContainer>() const {
     GTEST_COMPILE_ASSERT_(
         !IsHashTable<GTEST_REMOVE_REFERENCE_AND_CONST_(LhsContainer)>::value,
-        use_UnorderedPointwise_with_hash_tables);
+        use_UnorderedPointwise_with_hash_tables_);
 
     return MakeMatcher(new Impl<LhsContainer>(tuple_matcher_, rhs_));
   }
