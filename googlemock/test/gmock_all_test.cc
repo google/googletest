@@ -39,7 +39,6 @@
 #include "test/gmock-cardinalities_test.cc"
 #include "test/gmock-generated-actions_test.cc"
 #include "test/gmock-generated-function-mockers_test.cc"
-#include "test/gmock-generated-internal-utils_test.cc"
 #include "test/gmock-generated-matchers_test.cc"
 #include "test/gmock-internal-utils_test.cc"
 #include "test/gmock-matchers_test.cc"

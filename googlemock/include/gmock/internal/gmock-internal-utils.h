@@ -42,11 +42,14 @@
 #include <stdio.h>
 #include <ostream>  // NOLINT
 #include <string>
-#include "gmock/internal/gmock-generated-internal-utils.h"
 #include "gmock/internal/gmock-port.h"
 #include "gtest/gtest.h"
 
 namespace testing {
+
+template <typename>
+class Matcher;
+
 namespace internal {
 
 // Silence MSVC C4100 (unreferenced formal parameter) and
@@ -525,6 +528,37 @@ auto Apply(F&& f, Tuple&& args)
                    make_int_pack<std::tuple_size<Tuple>::value>());
 }
 
+// Template struct Function<F>, where F must be a function type, contains
+// the following typedefs:
+//
+//   Result:               the function's return type.
+//   Arg<N>:               the type of the N-th argument, where N starts with 0.
+//   ArgumentTuple:        the tuple type consisting of all parameters of F.
+//   ArgumentMatcherTuple: the tuple type consisting of Matchers for all
+//                         parameters of F.
+//   MakeResultVoid:       the function type obtained by substituting void
+//                         for the return type of F.
+//   MakeResultIgnoredValue:
+//                         the function type obtained by substituting Something
+//                         for the return type of F.
+template <typename T>
+struct Function;
+
+template <typename R, typename... Args>
+struct Function<R(Args...)> {
+  using Result = R;
+  static constexpr size_t ArgumentCount = sizeof...(Args);
+  template <size_t I>
+  using Arg = ElemFromList<I, typename MakeIndexSequence<sizeof...(Args)>::type,
+                           Args...>;
+  using ArgumentTuple = std::tuple<Args...>;
+  using ArgumentMatcherTuple = std::tuple<Matcher<Args>...>;
+  using MakeResultVoid = void(Args...);
+  using MakeResultIgnoredValue = IgnoredValue(Args...);
+};
+
+template <typename R, typename... Args>
+constexpr size_t Function<R(Args...)>::ArgumentCount;
 
 #ifdef _MSC_VER
 # pragma warning(pop)
