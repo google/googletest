@@ -107,5 +107,35 @@ class SnapshotTest(gtest_test_utils.TestCase):
         env={ 'GREETERTEST_PARAMS': 'Echo Foxtrot' },
         should_fail=True)
 
+  def testWriteSnapshots(self):
+    """
+    Fail if snapshot is not written correctly
+
+    NOTE: This test writes files to the source folder. This is fundamental to
+    snapshot testing. It is strongly advised to run this test only with Bazel
+    sandboxing.
+    """
+    if 'TEST_SRCDIR' not in os.environ:
+        raise gtest_test_utils.SkipTest(
+            '''This test MUST write to the source folder and should only be
+            executed with Bazel.''')
+
+    self.RunAndVerify(
+        env={
+          'GREETERTEST_PARAMS': 'Golf Hotel',
+        },
+        should_fail=True)
+    self.RunAndVerify(
+        env={
+          'GREETERTEST_PARAMS': 'Golf Hotel',
+          'GTEST_UPDATE_SNAPSHOT': '1',
+        },
+        should_fail=False)
+    self.RunAndVerify(
+        env={
+          'GREETERTEST_PARAMS': 'Golf Hotel',
+        },
+        should_fail=False)
+
 if __name__ == '__main__':
   gtest_test_utils.Main()
