@@ -250,7 +250,6 @@ using testing::internal::GetTestTypeId;
 using testing::internal::GetTimeInMillis;
 using testing::internal::GetTypeId;
 using testing::internal::GetUnitTestImpl;
-using testing::internal::ImplicitlyConvertible;
 using testing::internal::Int32;
 using testing::internal::Int32FromEnvOrDie;
 using testing::internal::IsAProtocolMessage;
@@ -7240,35 +7239,6 @@ TEST(GTestReferenceToConstTest, Works) {
   TestGTestReferenceToConst<const std::string&, const std::string&>();
 }
 
-// Tests that ImplicitlyConvertible<T1, T2>::value is a compile-time constant.
-TEST(ImplicitlyConvertibleTest, ValueIsCompileTimeConstant) {
-  GTEST_COMPILE_ASSERT_((ImplicitlyConvertible<int, int>::value), const_true);
-  GTEST_COMPILE_ASSERT_((!ImplicitlyConvertible<void*, int*>::value),
-                        const_false);
-}
-
-// Tests that ImplicitlyConvertible<T1, T2>::value is true when T1 can
-// be implicitly converted to T2.
-TEST(ImplicitlyConvertibleTest, ValueIsTrueWhenConvertible) {
-  EXPECT_TRUE((ImplicitlyConvertible<int, double>::value));
-  EXPECT_TRUE((ImplicitlyConvertible<double, int>::value));
-  EXPECT_TRUE((ImplicitlyConvertible<int*, void*>::value));
-  EXPECT_TRUE((ImplicitlyConvertible<int*, const int*>::value));
-  EXPECT_TRUE((ImplicitlyConvertible<ConversionHelperDerived&,
-                                     const ConversionHelperBase&>::value));
-  EXPECT_TRUE((ImplicitlyConvertible<const ConversionHelperBase,
-                                     ConversionHelperBase>::value));
-}
-
-// Tests that ImplicitlyConvertible<T1, T2>::value is false when T1
-// cannot be implicitly converted to T2.
-TEST(ImplicitlyConvertibleTest, ValueIsFalseWhenNotConvertible) {
-  EXPECT_FALSE((ImplicitlyConvertible<double, int*>::value));
-  EXPECT_FALSE((ImplicitlyConvertible<void*, int*>::value));
-  EXPECT_FALSE((ImplicitlyConvertible<const int*, int*>::value));
-  EXPECT_FALSE((ImplicitlyConvertible<ConversionHelperBase&,
-                                      ConversionHelperDerived&>::value));
-}
 
 // Tests IsContainerTest.
 

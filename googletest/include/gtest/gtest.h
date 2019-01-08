@@ -306,7 +306,7 @@ class GTEST_API_ AssertionResult {
   explicit AssertionResult(
       const T& success,
       typename internal::EnableIf<
-          !internal::ImplicitlyConvertible<T, AssertionResult>::value>::type*
+          !std::is_convertible<T, AssertionResult>::value>::type*
       /*enabler*/
       = nullptr)
       : success_(success) {}
