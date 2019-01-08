@@ -121,8 +121,7 @@ macro(config_compiler_and_linker)
 
   # For building gtest's own tests and samples.
   set(cxx_exception "${cxx_base_flags} ${cxx_exception_flags}")
-  set(cxx_no_exception
-    "${CMAKE_CXX_FLAGS} ${cxx_base_flags} ${cxx_no_exception_flags}")
+  set(cxx_no_exception "${cxx_base_flags} ${cxx_no_exception_flags}")
   set(cxx_default "${cxx_exception}")
   set(cxx_no_rtti "${cxx_default} ${cxx_no_rtti_flags}")
 
