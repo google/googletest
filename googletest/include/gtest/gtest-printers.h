@@ -232,12 +232,12 @@ template <typename Char, typename CharTraits, typename T>
     ::std::basic_ostream<Char, CharTraits>& os, const T& x) {
   TypeWithoutFormatter<T, (internal::IsAProtocolMessage<T>::value
                                ? kProtobuf
-                               : internal::ImplicitlyConvertible<
+                               : std::is_convertible<
                                      const T&, internal::BiggestInt>::value
                                      ? kConvertibleToInteger
                                      :
 #if GTEST_HAS_ABSL
-                                     internal::ImplicitlyConvertible<
+                                     std::is_convertible<
                                          const T&, absl::string_view>::value
                                          ? kConvertibleToStringView
                                          :

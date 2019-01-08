@@ -128,9 +128,9 @@ class MatcherCastImpl {
     return CastImpl(
         polymorphic_matcher_or_value,
         BooleanConstant<
-            internal::ImplicitlyConvertible<M, Matcher<T> >::value>(),
+            std::is_convertible<M, Matcher<T> >::value>(),
         BooleanConstant<
-            internal::ImplicitlyConvertible<M, T>::value>());
+            std::is_convertible<M, T>::value>());
   }
 
  private:
@@ -268,8 +268,8 @@ class SafeMatcherCastImpl {
   template <typename U>
   static inline Matcher<T> Cast(const Matcher<U>& matcher) {
     // Enforce that T can be implicitly converted to U.
-    GTEST_COMPILE_ASSERT_((internal::ImplicitlyConvertible<T, U>::value),
-                          T_must_be_implicitly_convertible_to_U);
+    GTEST_COMPILE_ASSERT_((std::is_convertible<T, U>::value),
+                          "T must be implicitly convertible to U");
     // Enforce that we are not converting a non-reference type T to a reference
     // type U.
     GTEST_COMPILE_ASSERT_(
