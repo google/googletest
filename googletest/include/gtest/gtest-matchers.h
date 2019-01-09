@@ -296,6 +296,11 @@ class MatcherBase {
           !internal::IsSame<U, const U&>::value>::type* = nullptr)
       : impl_(new internal::MatcherInterfaceAdapter<U>(impl)) {}
 
+  MatcherBase(const MatcherBase&) = default;
+  MatcherBase& operator=(const MatcherBase&) = default;
+  MatcherBase(MatcherBase&&) = default;
+  MatcherBase& operator=(MatcherBase&&) = default;
+
   virtual ~MatcherBase() {}
 
  private:
@@ -545,13 +550,9 @@ class PolymorphicMatcher {
 
    private:
     const Impl impl_;
-
-    GTEST_DISALLOW_ASSIGN_(MonomorphicImpl);
   };
 
   Impl impl_;
-
-  GTEST_DISALLOW_ASSIGN_(PolymorphicMatcher);
 };
 
 // Creates a matcher from its implementation.  This is easier to use
@@ -618,10 +619,8 @@ class ComparisonBase {
 
    private:
     Rhs rhs_;
-    GTEST_DISALLOW_ASSIGN_(Impl);
   };
   Rhs rhs_;
-  GTEST_DISALLOW_ASSIGN_(ComparisonBase);
 };
 
 template <typename Rhs>
@@ -724,8 +723,6 @@ class MatchesRegexMatcher {
  private:
   const std::shared_ptr<const RE> regex_;
   const bool full_match_;
-
-  GTEST_DISALLOW_ASSIGN_(MatchesRegexMatcher);
 };
 }  // namespace internal
 
