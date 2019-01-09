@@ -1,0 +1,6 @@
+# RULES
+
+include $(CONFIG)/RULES
+
+# Library should be rebuilt because LIBOBJS may have changed.
+$(LIBNAME): ../Makefile

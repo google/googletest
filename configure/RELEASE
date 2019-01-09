@@ -1,0 +1,10 @@
+# optional extra local definitions here
+
+# START OF AUTO GENERATED DEPENDENCIES
+GTEST=$(SUPPORT)/googletest/master/
+# END OF AUTO GENERATED DEPENDENCIES
+
+-include $(TOP)/configure/RELEASE.private
+
+include $(TOP)/../../../ISIS_CONFIG
+-include $(TOP)/../../../ISIS_CONFIG.$(EPICS_HOST_ARCH)
