@@ -7121,6 +7121,7 @@ TEST(IsAProtocolMessageTest, ValueIsCompileTimeConstant) {
 // proto2::Message or a sub-class of it.
 TEST(IsAProtocolMessageTest, ValueIsTrueWhenTypeIsAProtocolMessage) {
   EXPECT_TRUE(IsAProtocolMessage< ::proto2::Message>::value);
+  EXPECT_TRUE(IsAProtocolMessage< ::google::protobuf::Message>::value);
   EXPECT_TRUE(IsAProtocolMessage<ProtocolMessage>::value);
 }
 
