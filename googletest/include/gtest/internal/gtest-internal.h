@@ -82,6 +82,7 @@
 
 class ProtocolMessage;
 namespace proto2 { class Message; }
+namespace google { namespace protobuf { class Message; }}
 
 namespace testing {
 
@@ -927,7 +928,8 @@ template <typename T>
 struct IsAProtocolMessage
     : public bool_constant<
   std::is_convertible<const T*, const ::ProtocolMessage*>::value ||
-  std::is_convertible<const T*, const ::proto2::Message*>::value> {
+  std::is_convertible<const T*, const ::proto2::Message*>::value ||
+  std::is_convertible<const T*, const ::google::protobuf::Message*>::value> {
 };
 
 // When the compiler sees expression IsContainerTest<C>(0), if C is an
