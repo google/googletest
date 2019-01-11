@@ -1570,7 +1570,7 @@ class GTestFlagSaverTest : public Test {
   // Saves the Google Test flags such that we can restore them later, and
   // then sets them to their default values.  This will be called
   // before the first test in this test case is run.
-  static void SetUpTestCase() {
+  static void SetUpTestSuite() {
     saver_ = new GTestFlagSaver;
 
     GTEST_FLAG(also_run_disabled_tests) = false;
@@ -1592,7 +1592,7 @@ class GTestFlagSaverTest : public Test {
 
   // Restores the Google Test flags that the tests have modified.  This will
   // be called after the last test in this test case is run.
-  static void TearDownTestCase() {
+  static void TearDownTestSuite() {
     delete saver_;
     saver_ = nullptr;
   }
@@ -1956,7 +1956,7 @@ TEST(ShouldRunTestOnShardTest, IsPartitionWhenThereAreFiveShards) {
 // Test class, there are no separate tests for the following classes
 // (except for some trivial cases):
 //
-//   TestCase, UnitTest, UnitTestResultPrinter.
+//   TestSuite, UnitTest, UnitTestResultPrinter.
 //
 // Similarly, there are no separate tests for the following macros:
 //
@@ -1990,7 +1990,7 @@ void ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTest(
                                                         key);
 }
 
-void ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestCase(
+void ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestSuite(
     const char* key) {
   const TestCase* test_case = UnitTest::GetInstance()->current_test_case();
   ASSERT_TRUE(test_case != nullptr);
@@ -1998,7 +1998,7 @@ void ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestCase(
       test_case->ad_hoc_test_result(), key);
 }
 
-void ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
+void ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestSuite(
     const char* key) {
   ExpectNonFatalFailureRecordingPropertyWithReservedKey(
       UnitTest::GetInstance()->ad_hoc_test_result(), key);
@@ -2010,29 +2010,30 @@ void ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
 class UnitTestRecordPropertyTest :
     public testing::internal::UnitTestRecordPropertyTestHelper {
  public:
-  static void SetUpTestCase() {
-    ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestCase(
+  static void SetUpTestSuite() {
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestSuite(
         "disabled");
-    ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestCase(
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestSuite(
         "errors");
-    ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestCase(
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestSuite(
         "failures");
-    ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestCase(
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestSuite(
         "name");
-    ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestCase(
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestSuite(
         "tests");
-    ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestCase(
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestSuite(
         "time");
 
     Test::RecordProperty("test_case_key_1", "1");
-    const TestCase* test_case = UnitTest::GetInstance()->current_test_case();
-    ASSERT_TRUE(test_case != nullptr);
+    const testing::TestSuite* test_suite =
+        UnitTest::GetInstance()->current_test_case();
+    ASSERT_TRUE(test_suite != nullptr);
 
-    ASSERT_EQ(1, test_case->ad_hoc_test_result().test_property_count());
+    ASSERT_EQ(1, test_suite->ad_hoc_test_result().test_property_count());
     EXPECT_STREQ("test_case_key_1",
-                 test_case->ad_hoc_test_result().GetTestProperty(0).key());
+                 test_suite->ad_hoc_test_result().GetTestProperty(0).key());
     EXPECT_STREQ("1",
-                 test_case->ad_hoc_test_result().GetTestProperty(0).value());
+                 test_suite->ad_hoc_test_result().GetTestProperty(0).value());
   }
 };
 
@@ -2085,7 +2086,7 @@ TEST_F(UnitTestRecordPropertyTest, OverridesValuesForDuplicateKeys) {
 }
 
 TEST_F(UnitTestRecordPropertyTest,
-       AddFailureInsideTestsWhenUsingTestCaseReservedKeys) {
+       AddFailureInsideTestsWhenUsingTestSuiteReservedKeys) {
   ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTest(
       "name");
   ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTest(
@@ -2111,21 +2112,21 @@ TEST_F(UnitTestRecordPropertyTest,
 class UnitTestRecordPropertyTestEnvironment : public Environment {
  public:
   void TearDown() override {
-    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestSuite(
         "tests");
-    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestSuite(
         "failures");
-    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestSuite(
         "disabled");
-    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestSuite(
         "errors");
-    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestSuite(
         "name");
-    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestSuite(
         "timestamp");
-    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestSuite(
         "time");
-    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestCase(
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestSuite(
         "random_seed");
   }
 };
@@ -3119,28 +3120,28 @@ TEST(DisabledTest, NotDISABLED_TestShouldRun) {
 
 // A test case whose name starts with DISABLED_.
 // Should not run.
-TEST(DISABLED_TestCase, TestShouldNotRun) {
+TEST(DISABLED_TestSuite, TestShouldNotRun) {
   FAIL() << "Unexpected failure: Test in disabled test case should not be run.";
 }
 
 // A test case and test whose names start with DISABLED_.
 // Should not run.
-TEST(DISABLED_TestCase, DISABLED_TestShouldNotRun) {
+TEST(DISABLED_TestSuite, DISABLED_TestShouldNotRun) {
   FAIL() << "Unexpected failure: Test in disabled test case should not be run.";
 }
 
-// Check that when all tests in a test case are disabled, SetUpTestCase() and
-// TearDownTestCase() are not called.
+// Check that when all tests in a test case are disabled, SetUpTestSuite() and
+// TearDownTestSuite() are not called.
 class DisabledTestsTest : public Test {
  protected:
-  static void SetUpTestCase() {
+  static void SetUpTestSuite() {
     FAIL() << "Unexpected failure: All tests disabled in test case. "
-              "SetUpTestCase() should not be called.";
+              "SetUpTestSuite() should not be called.";
   }
 
-  static void TearDownTestCase() {
+  static void TearDownTestSuite() {
     FAIL() << "Unexpected failure: All tests disabled in test case. "
-              "TearDownTestCase() should not be called.";
+              "TearDownTestSuite() should not be called.";
   }
 };
 
@@ -3161,7 +3162,7 @@ class TypedTest : public Test {
 };
 
 typedef testing::Types<int, double> NumericTypes;
-TYPED_TEST_CASE(TypedTest, NumericTypes);
+TYPED_TEST_SUITE(TypedTest, NumericTypes);
 
 TYPED_TEST(TypedTest, DISABLED_ShouldNotRun) {
   FAIL() << "Unexpected failure: Disabled typed test should not run.";
@@ -3171,7 +3172,7 @@ template <typename T>
 class DISABLED_TypedTest : public Test {
 };
 
-TYPED_TEST_CASE(DISABLED_TypedTest, NumericTypes);
+TYPED_TEST_SUITE(DISABLED_TypedTest, NumericTypes);
 
 TYPED_TEST(DISABLED_TypedTest, ShouldNotRun) {
   FAIL() << "Unexpected failure: Disabled typed test should not run.";
@@ -3187,31 +3188,31 @@ template <typename T>
 class TypedTestP : public Test {
 };
 
-TYPED_TEST_CASE_P(TypedTestP);
+TYPED_TEST_SUITE_P(TypedTestP);
 
 TYPED_TEST_P(TypedTestP, DISABLED_ShouldNotRun) {
   FAIL() << "Unexpected failure: "
          << "Disabled type-parameterized test should not run.";
 }
 
-REGISTER_TYPED_TEST_CASE_P(TypedTestP, DISABLED_ShouldNotRun);
+REGISTER_TYPED_TEST_SUITE_P(TypedTestP, DISABLED_ShouldNotRun);
 
-INSTANTIATE_TYPED_TEST_CASE_P(My, TypedTestP, NumericTypes);
+INSTANTIATE_TYPED_TEST_SUITE_P(My, TypedTestP, NumericTypes);
 
 template <typename T>
 class DISABLED_TypedTestP : public Test {
 };
 
-TYPED_TEST_CASE_P(DISABLED_TypedTestP);
+TYPED_TEST_SUITE_P(DISABLED_TypedTestP);
 
 TYPED_TEST_P(DISABLED_TypedTestP, ShouldNotRun) {
   FAIL() << "Unexpected failure: "
          << "Disabled type-parameterized test should not run.";
 }
 
-REGISTER_TYPED_TEST_CASE_P(DISABLED_TypedTestP, ShouldNotRun);
+REGISTER_TYPED_TEST_SUITE_P(DISABLED_TypedTestP, ShouldNotRun);
 
-INSTANTIATE_TYPED_TEST_CASE_P(My, DISABLED_TypedTestP, NumericTypes);
+INSTANTIATE_TYPED_TEST_SUITE_P(My, DISABLED_TypedTestP, NumericTypes);
 
 #endif  // GTEST_HAS_TYPED_TEST_P
 
@@ -3487,7 +3488,7 @@ std::vector<std::string> CharsToLines(const std::string& str) {
   return out;
 }
 
-TEST(EditDistance, TestCases) {
+TEST(EditDistance, TestSuites) {
   struct Case {
     int line;
     const char* left;
@@ -5310,11 +5311,11 @@ namespace testing {
 class TestInfoTest : public Test {
  protected:
   static const TestInfo* GetTestInfo(const char* test_name) {
-    const TestCase* const test_case =
-        GetUnitTestImpl()->GetTestCase("TestInfoTest", "", nullptr, nullptr);
+    const TestSuite* const test_suite =
+        GetUnitTestImpl()->GetTestSuite("TestInfoTest", "", nullptr, nullptr);
 
-    for (int i = 0; i < test_case->total_test_count(); ++i) {
-      const TestInfo* const test_info = test_case->GetTestInfo(i);
+    for (int i = 0; i < test_suite->total_test_count(); ++i) {
+      const TestInfo* const test_info = test_suite->GetTestInfo(i);
       if (strcmp(test_name, test_info->name()) == 0)
         return test_info;
     }
@@ -5371,13 +5372,13 @@ TEST_P(CodeLocationForTESTP, Verify) {
   VERIFY_CODE_LOCATION;
 }
 
-INSTANTIATE_TEST_CASE_P(, CodeLocationForTESTP, Values(0));
+INSTANTIATE_TEST_SUITE_P(, CodeLocationForTESTP, Values(0));
 
 template <typename T>
 class CodeLocationForTYPEDTEST : public Test {
 };
 
-TYPED_TEST_CASE(CodeLocationForTYPEDTEST, int);
+TYPED_TEST_SUITE(CodeLocationForTYPEDTEST, int);
 
 TYPED_TEST(CodeLocationForTYPEDTEST, Verify) {
   VERIFY_CODE_LOCATION;
@@ -5387,20 +5388,21 @@ template <typename T>
 class CodeLocationForTYPEDTESTP : public Test {
 };
 
-TYPED_TEST_CASE_P(CodeLocationForTYPEDTESTP);
+TYPED_TEST_SUITE_P(CodeLocationForTYPEDTESTP);
 
 TYPED_TEST_P(CodeLocationForTYPEDTESTP, Verify) {
   VERIFY_CODE_LOCATION;
 }
 
-REGISTER_TYPED_TEST_CASE_P(CodeLocationForTYPEDTESTP, Verify);
+REGISTER_TYPED_TEST_SUITE_P(CodeLocationForTYPEDTESTP, Verify);
 
-INSTANTIATE_TYPED_TEST_CASE_P(My, CodeLocationForTYPEDTESTP, int);
+INSTANTIATE_TYPED_TEST_SUITE_P(My, CodeLocationForTYPEDTESTP, int);
 
 #undef VERIFY_CODE_LOCATION
 
 // Tests setting up and tearing down a test case.
-
+// Legacy API is deprecated but still available
+#ifndef REMOVE_LEGACY_TEST_CASEAPI
 class SetUpTestCaseTest : public Test {
  protected:
   // This will be called once before the first test in this test case
@@ -5459,8 +5461,9 @@ TEST_F(SetUpTestCaseTest, Test1) { EXPECT_STRNE(nullptr, shared_resource_); }
 TEST_F(SetUpTestCaseTest, Test2) {
   EXPECT_STREQ("123", shared_resource_);
 }
+#endif  //  REMOVE_LEGACY_TEST_CASEAPI
 
-// Tests SetupTestSuite/TearDown TestSuite API
+// Tests SetupTestSuite/TearDown TestSuite
 class SetUpTestSuiteTest : public Test {
  protected:
   // This will be called once before the first test in this test case
@@ -6278,7 +6281,7 @@ class CurrentTestInfoTest : public Test {
  protected:
   // Tests that current_test_info() returns NULL before the first test in
   // the test case is run.
-  static void SetUpTestCase() {
+  static void SetUpTestSuite() {
     // There should be no tests running at this point.
     const TestInfo* test_info =
       UnitTest::GetInstance()->current_test_info();
@@ -6288,7 +6291,7 @@ class CurrentTestInfoTest : public Test {
 
   // Tests that current_test_info() returns NULL after the last test in
   // the test case has run.
-  static void TearDownTestCase() {
+  static void TearDownTestSuite() {
     const TestInfo* test_info =
       UnitTest::GetInstance()->current_test_info();
     EXPECT_TRUE(test_info == nullptr)
@@ -6298,14 +6301,14 @@ class CurrentTestInfoTest : public Test {
 
 // Tests that current_test_info() returns TestInfo for currently running
 // test by checking the expected test name against the actual one.
-TEST_F(CurrentTestInfoTest, WorksForFirstTestInATestCase) {
+TEST_F(CurrentTestInfoTest, WorksForFirstTestInATestSuite) {
   const TestInfo* test_info =
     UnitTest::GetInstance()->current_test_info();
   ASSERT_TRUE(nullptr != test_info)
       << "There is a test running so we should have a valid TestInfo.";
   EXPECT_STREQ("CurrentTestInfoTest", test_info->test_case_name())
       << "Expected the name of the currently running test case.";
-  EXPECT_STREQ("WorksForFirstTestInATestCase", test_info->name())
+  EXPECT_STREQ("WorksForFirstTestInATestSuite", test_info->name())
       << "Expected the name of the currently running test.";
 }
 
@@ -6313,14 +6316,14 @@ TEST_F(CurrentTestInfoTest, WorksForFirstTestInATestCase) {
 // test by checking the expected test name against the actual one.  We
 // use this test to see that the TestInfo object actually changed from
 // the previous invocation.
-TEST_F(CurrentTestInfoTest, WorksForSecondTestInATestCase) {
+TEST_F(CurrentTestInfoTest, WorksForSecondTestInATestSuite) {
   const TestInfo* test_info =
     UnitTest::GetInstance()->current_test_info();
   ASSERT_TRUE(nullptr != test_info)
       << "There is a test running so we should have a valid TestInfo.";
   EXPECT_STREQ("CurrentTestInfoTest", test_info->test_case_name())
       << "Expected the name of the currently running test case.";
-  EXPECT_STREQ("WorksForSecondTestInATestCase", test_info->name())
+  EXPECT_STREQ("WorksForSecondTestInATestSuite", test_info->name())
       << "Expected the name of the currently running test.";
 }
 
@@ -7549,14 +7552,14 @@ TEST(SkipPrefixTest, DoesNotSkipWhenPrefixDoesNotMatch) {
 
 class AdHocTestResultTest : public testing::Test {
  protected:
-  static void SetUpTestCase() {
-    FAIL() << "A failure happened inside SetUpTestCase().";
+  static void SetUpTestSuite() {
+    FAIL() << "A failure happened inside SetUpTestSuite().";
   }
 };
 
-TEST_F(AdHocTestResultTest, AdHocTestResultForTestCaseShowsFailure) {
+TEST_F(AdHocTestResultTest, AdHocTestResultForTestSuiteShowsFailure) {
   const testing::TestResult& test_result = testing::UnitTest::GetInstance()
-                                               ->current_test_case()
+                                               ->current_test_suite()
                                                ->ad_hoc_test_result();
   EXPECT_TRUE(test_result.Failed());
 }
@@ -7579,8 +7582,8 @@ auto* dynamic_test = testing::RegisterTest(
 
 TEST(RegisterTest, WasRegistered) {
   auto* unittest = testing::UnitTest::GetInstance();
-  for (int i = 0; i < unittest->total_test_case_count(); ++i) {
-    auto* tests = unittest->GetTestCase(i);
+  for (int i = 0; i < unittest->total_test_suite_count(); ++i) {
+    auto* tests = unittest->GetTestSuite(i);
     if (tests->name() != std::string("DynamicUnitTestFixture")) continue;
     for (int j = 0; j < tests->total_test_count(); ++j) {
       if (tests->GetTestInfo(j)->name() != std::string("DynamicTest")) continue;

@@ -384,16 +384,16 @@ Expected failure in foo.cc
 Stack trace: (omitted)
 
 [0;31m[  FAILED  ] [mAddFailureAtTest.MessageContainsSpecifiedFileAndLineNumber
-[0;32m[----------] [m4 tests from MixedUpTestCaseTest
-[0;32m[ RUN      ] [mMixedUpTestCaseTest.FirstTestFromNamespaceFoo
-[0;32m[       OK ] [mMixedUpTestCaseTest.FirstTestFromNamespaceFoo
-[0;32m[ RUN      ] [mMixedUpTestCaseTest.SecondTestFromNamespaceFoo
-[0;32m[       OK ] [mMixedUpTestCaseTest.SecondTestFromNamespaceFoo
-[0;32m[ RUN      ] [mMixedUpTestCaseTest.ThisShouldFail
+[0;32m[----------] [m4 tests from MixedUpTestSuiteTest
+[0;32m[ RUN      ] [mMixedUpTestSuiteTest.FirstTestFromNamespaceFoo
+[0;32m[       OK ] [mMixedUpTestSuiteTest.FirstTestFromNamespaceFoo
+[0;32m[ RUN      ] [mMixedUpTestSuiteTest.SecondTestFromNamespaceFoo
+[0;32m[       OK ] [mMixedUpTestSuiteTest.SecondTestFromNamespaceFoo
+[0;32m[ RUN      ] [mMixedUpTestSuiteTest.ThisShouldFail
 gtest.cc:#: Failure
 Failed
 All tests in the same test suite must use the same test fixture
-class.  However, in test suite MixedUpTestCaseTest,
+class.  However, in test suite MixedUpTestSuiteTest,
 you defined test FirstTestFromNamespaceFoo and test ThisShouldFail
 using two different test fixture classes.  This can happen if
 the two classes are from different namespaces or translation
@@ -401,12 +401,12 @@ units and have the same name.  You should probably rename one
 of the classes to put the tests into different test suites.
 Stack trace: (omitted)
 
-[0;31m[  FAILED  ] [mMixedUpTestCaseTest.ThisShouldFail
-[0;32m[ RUN      ] [mMixedUpTestCaseTest.ThisShouldFailToo
+[0;31m[  FAILED  ] [mMixedUpTestSuiteTest.ThisShouldFail
+[0;32m[ RUN      ] [mMixedUpTestSuiteTest.ThisShouldFailToo
 gtest.cc:#: Failure
 Failed
 All tests in the same test suite must use the same test fixture
-class.  However, in test suite MixedUpTestCaseTest,
+class.  However, in test suite MixedUpTestSuiteTest,
 you defined test FirstTestFromNamespaceFoo and test ThisShouldFailToo
 using two different test fixture classes.  This can happen if
 the two classes are from different namespaces or translation
@@ -414,15 +414,15 @@ units and have the same name.  You should probably rename one
 of the classes to put the tests into different test suites.
 Stack trace: (omitted)
 
-[0;31m[  FAILED  ] [mMixedUpTestCaseTest.ThisShouldFailToo
-[0;32m[----------] [m2 tests from MixedUpTestCaseWithSameTestNameTest
-[0;32m[ RUN      ] [mMixedUpTestCaseWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
-[0;32m[       OK ] [mMixedUpTestCaseWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
-[0;32m[ RUN      ] [mMixedUpTestCaseWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
+[0;31m[  FAILED  ] [mMixedUpTestSuiteTest.ThisShouldFailToo
+[0;32m[----------] [m2 tests from MixedUpTestSuiteWithSameTestNameTest
+[0;32m[ RUN      ] [mMixedUpTestSuiteWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
+[0;32m[       OK ] [mMixedUpTestSuiteWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
+[0;32m[ RUN      ] [mMixedUpTestSuiteWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
 gtest.cc:#: Failure
 Failed
 All tests in the same test suite must use the same test fixture
-class.  However, in test suite MixedUpTestCaseWithSameTestNameTest,
+class.  However, in test suite MixedUpTestSuiteWithSameTestNameTest,
 you defined test TheSecondTestWithThisNameShouldFail and test TheSecondTestWithThisNameShouldFail
 using two different test fixture classes.  This can happen if
 the two classes are from different namespaces or translation
@@ -430,7 +430,7 @@ units and have the same name.  You should probably rename one
 of the classes to put the tests into different test suites.
 Stack trace: (omitted)
 
-[0;31m[  FAILED  ] [mMixedUpTestCaseWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
+[0;31m[  FAILED  ] [mMixedUpTestSuiteWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
 [0;32m[----------] [m2 tests from TEST_F_before_TEST_in_same_test_case
 [0;32m[ RUN      ] [mTEST_F_before_TEST_in_same_test_case.DefinedUsingTEST_F
 [0;32m[       OK ] [mTEST_F_before_TEST_in_same_test_case.DefinedUsingTEST_F
@@ -871,7 +871,7 @@ Stack trace: (omitted)
 
 [0;31m[  FAILED  ] [mScopedFakeTestPartResultReporterTest.InterceptOnlyCurrentThread
 [0;32m[----------] [m2 tests from DynamicFixture
-DynamicFixture::SetUpTestCase
+DynamicFixture::SetUpTestSuite
 [0;32m[ RUN      ] [mDynamicFixture.DynamicTestPass
 DynamicFixture()
 DynamicFixture::SetUp
@@ -890,18 +890,18 @@ Stack trace: (omitted)
 DynamicFixture::TearDown
 ~DynamicFixture()
 [0;31m[  FAILED  ] [mDynamicFixture.DynamicTestFail
-DynamicFixture::TearDownTestCase
+DynamicFixture::TearDownTestSuite
 [0;32m[----------] [m1 test from DynamicFixtureAnotherName
-DynamicFixture::SetUpTestCase
+DynamicFixture::SetUpTestSuite
 [0;32m[ RUN      ] [mDynamicFixtureAnotherName.DynamicTestPass
 DynamicFixture()
 DynamicFixture::SetUp
 DynamicFixture::TearDown
 ~DynamicFixture()
 [0;32m[       OK ] [mDynamicFixtureAnotherName.DynamicTestPass
-DynamicFixture::TearDownTestCase
+DynamicFixture::TearDownTestSuite
 [0;32m[----------] [m2 tests from BadDynamicFixture1
-DynamicFixture::SetUpTestCase
+DynamicFixture::SetUpTestSuite
 [0;32m[ RUN      ] [mBadDynamicFixture1.FixtureBase
 DynamicFixture()
 DynamicFixture::SetUp
@@ -923,9 +923,9 @@ Stack trace: (omitted)
 
 ~DynamicFixture()
 [0;31m[  FAILED  ] [mBadDynamicFixture1.TestBase
-DynamicFixture::TearDownTestCase
+DynamicFixture::TearDownTestSuite
 [0;32m[----------] [m2 tests from BadDynamicFixture2
-DynamicFixture::SetUpTestCase
+DynamicFixture::SetUpTestSuite
 [0;32m[ RUN      ] [mBadDynamicFixture2.FixtureBase
 DynamicFixture()
 DynamicFixture::SetUp
@@ -947,7 +947,7 @@ Stack trace: (omitted)
 
 ~DynamicFixture()
 [0;31m[  FAILED  ] [mBadDynamicFixture2.Derived
-DynamicFixture::TearDownTestCase
+DynamicFixture::TearDownTestSuite
 [0;32m[----------] [m1 test from PrintingFailingParams/FailingParamTest
 [0;32m[ RUN      ] [mPrintingFailingParams/FailingParamTest.Fails/0
 googletest-output-test_.cc:#: Failure
@@ -1006,9 +1006,9 @@ Stack trace: (omitted)
 [0;31m[  FAILED  ] [mNonFatalFailureInSetUpTest.FailureInSetUp
 [0;31m[  FAILED  ] [mFatalFailureInSetUpTest.FailureInSetUp
 [0;31m[  FAILED  ] [mAddFailureAtTest.MessageContainsSpecifiedFileAndLineNumber
-[0;31m[  FAILED  ] [mMixedUpTestCaseTest.ThisShouldFail
-[0;31m[  FAILED  ] [mMixedUpTestCaseTest.ThisShouldFailToo
-[0;31m[  FAILED  ] [mMixedUpTestCaseWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
+[0;31m[  FAILED  ] [mMixedUpTestSuiteTest.ThisShouldFail
+[0;31m[  FAILED  ] [mMixedUpTestSuiteTest.ThisShouldFailToo
+[0;31m[  FAILED  ] [mMixedUpTestSuiteWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
 [0;31m[  FAILED  ] [mTEST_F_before_TEST_in_same_test_case.DefinedUsingTESTAndShouldFail
 [0;31m[  FAILED  ] [mTEST_before_TEST_F_in_same_test_case.DefinedUsingTEST_FAndShouldFail
 [0;31m[  FAILED  ] [mExpectNonfatalFailureTest.FailsWhenThereIsNoNonfatalFailure

@@ -92,9 +92,9 @@ TEST_P(FailingParamTest, Fails) {
 
 // This generates a test which will fail. Google Test is expected to print
 // its parameter when it outputs the list of all failed tests.
-INSTANTIATE_TEST_CASE_P(PrintingFailingParams,
-                        FailingParamTest,
-                        testing::Values(2));
+INSTANTIATE_TEST_SUITE_P(PrintingFailingParams,
+                         FailingParamTest,
+                         testing::Values(2));
 
 static const char kGoldenString[] = "\"Line\0 1\"\nLine 2";
 
@@ -521,48 +521,48 @@ class DeathTestAndMultiThreadsTest : public testing::Test {
 
 #endif  // GTEST_IS_THREADSAFE
 
-// The MixedUpTestCaseTest test case verifies that Google Test will fail a
+// The MixedUpTestSuiteTest test case verifies that Google Test will fail a
 // test if it uses a different fixture class than what other tests in
 // the same test case use.  It deliberately contains two fixture
 // classes with the same name but defined in different namespaces.
 
-// The MixedUpTestCaseWithSameTestNameTest test case verifies that
+// The MixedUpTestSuiteWithSameTestNameTest test case verifies that
 // when the user defines two tests with the same test case name AND
 // same test name (but in different namespaces), the second test will
 // fail.
 
 namespace foo {
 
-class MixedUpTestCaseTest : public testing::Test {
+class MixedUpTestSuiteTest : public testing::Test {
 };
 
-TEST_F(MixedUpTestCaseTest, FirstTestFromNamespaceFoo) {}
-TEST_F(MixedUpTestCaseTest, SecondTestFromNamespaceFoo) {}
+TEST_F(MixedUpTestSuiteTest, FirstTestFromNamespaceFoo) {}
+TEST_F(MixedUpTestSuiteTest, SecondTestFromNamespaceFoo) {}
 
-class MixedUpTestCaseWithSameTestNameTest : public testing::Test {
+class MixedUpTestSuiteWithSameTestNameTest : public testing::Test {
 };
 
-TEST_F(MixedUpTestCaseWithSameTestNameTest,
+TEST_F(MixedUpTestSuiteWithSameTestNameTest,
        TheSecondTestWithThisNameShouldFail) {}
 
 }  // namespace foo
 
 namespace bar {
 
-class MixedUpTestCaseTest : public testing::Test {
+class MixedUpTestSuiteTest : public testing::Test {
 };
 
 // The following two tests are expected to fail.  We rely on the
 // golden file to check that Google Test generates the right error message.
-TEST_F(MixedUpTestCaseTest, ThisShouldFail) {}
-TEST_F(MixedUpTestCaseTest, ThisShouldFailToo) {}
+TEST_F(MixedUpTestSuiteTest, ThisShouldFail) {}
+TEST_F(MixedUpTestSuiteTest, ThisShouldFailToo) {}
 
-class MixedUpTestCaseWithSameTestNameTest : public testing::Test {
+class MixedUpTestSuiteWithSameTestNameTest : public testing::Test {
 };
 
 // Expected to fail.  We rely on the golden file to check that Google Test
 // generates the right error message.
-TEST_F(MixedUpTestCaseWithSameTestNameTest,
+TEST_F(MixedUpTestSuiteWithSameTestNameTest,
        TheSecondTestWithThisNameShouldFail) {}
 
 }  // namespace bar
@@ -773,10 +773,10 @@ TEST_P(ParamTest, Failure) {
   EXPECT_EQ("b", GetParam()) << "Expected failure";
 }
 
-INSTANTIATE_TEST_CASE_P(PrintingStrings,
-                        ParamTest,
-                        testing::Values(std::string("a")),
-                        ParamNameFunc);
+INSTANTIATE_TEST_SUITE_P(PrintingStrings,
+                         ParamTest,
+                         testing::Values(std::string("a")),
+                         ParamNameFunc);
 
 // This #ifdef block tests the output of typed tests.
 #if GTEST_HAS_TYPED_TEST
@@ -785,7 +785,7 @@ template <typename T>
 class TypedTest : public testing::Test {
 };
 
-TYPED_TEST_CASE(TypedTest, testing::Types<int>);
+TYPED_TEST_SUITE(TypedTest, testing::Types<int>);
 
 TYPED_TEST(TypedTest, Success) {
   EXPECT_EQ(0, TypeParam());
@@ -811,7 +811,7 @@ class TypedTestNames {
   }
 };
 
-TYPED_TEST_CASE(TypedTestWithNames, TypesForTestWithNames, TypedTestNames);
+TYPED_TEST_SUITE(TypedTestWithNames, TypesForTestWithNames, TypedTestNames);
 
 TYPED_TEST(TypedTestWithNames, Success) {}
 
@@ -826,7 +826,7 @@ template <typename T>
 class TypedTestP : public testing::Test {
 };
 
-TYPED_TEST_CASE_P(TypedTestP);
+TYPED_TEST_SUITE_P(TypedTestP);
 
 TYPED_TEST_P(TypedTestP, Success) {
   EXPECT_EQ(0U, TypeParam());
@@ -836,10 +836,10 @@ TYPED_TEST_P(TypedTestP, Failure) {
   EXPECT_EQ(1U, TypeParam()) << "Expected failure";
 }
 
-REGISTER_TYPED_TEST_CASE_P(TypedTestP, Success, Failure);
+REGISTER_TYPED_TEST_SUITE_P(TypedTestP, Success, Failure);
 
 typedef testing::Types<unsigned char, unsigned int> UnsignedTypes;
-INSTANTIATE_TYPED_TEST_CASE_P(Unsigned, TypedTestP, UnsignedTypes);
+INSTANTIATE_TYPED_TEST_SUITE_P(Unsigned, TypedTestP, UnsignedTypes);
 
 class TypedTestPNames {
  public:
@@ -854,7 +854,7 @@ class TypedTestPNames {
   }
 };
 
-INSTANTIATE_TYPED_TEST_CASE_P(UnsignedCustomName, TypedTestP, UnsignedTypes,
+INSTANTIATE_TYPED_TEST_SUITE_P(UnsignedCustomName, TypedTestP, UnsignedTypes,
                               TypedTestPNames);
 
 #endif  // GTEST_HAS_TYPED_TEST_P
@@ -877,7 +877,7 @@ class ATypedDeathTest : public testing::Test {
 };
 
 typedef testing::Types<int, double> NumericTypes;
-TYPED_TEST_CASE(ATypedDeathTest, NumericTypes);
+TYPED_TEST_SUITE(ATypedDeathTest, NumericTypes);
 
 TYPED_TEST(ATypedDeathTest, ShouldRunFirst) {
 }
@@ -894,14 +894,14 @@ template <typename T>
 class ATypeParamDeathTest : public testing::Test {
 };
 
-TYPED_TEST_CASE_P(ATypeParamDeathTest);
+TYPED_TEST_SUITE_P(ATypeParamDeathTest);
 
 TYPED_TEST_P(ATypeParamDeathTest, ShouldRunFirst) {
 }
 
-REGISTER_TYPED_TEST_CASE_P(ATypeParamDeathTest, ShouldRunFirst);
+REGISTER_TYPED_TEST_SUITE_P(ATypeParamDeathTest, ShouldRunFirst);
 
-INSTANTIATE_TYPED_TEST_CASE_P(My, ATypeParamDeathTest, NumericTypes);
+INSTANTIATE_TYPED_TEST_SUITE_P(My, ATypeParamDeathTest, NumericTypes);
 
 # endif  // GTEST_HAS_TYPED_TEST_P
 
@@ -1031,9 +1031,9 @@ class DynamicFixture : public testing::Test {
   void SetUp() override { printf("DynamicFixture::SetUp\n"); }
   void TearDown() override { printf("DynamicFixture::TearDown\n"); }
 
-  static void SetUpTestCase() { printf("DynamicFixture::SetUpTestCase\n"); }
-  static void TearDownTestCase() {
-    printf("DynamicFixture::TearDownTestCase\n");
+  static void SetUpTestSuite() { printf("DynamicFixture::SetUpTestSuite\n"); }
+  static void TearDownTestSuite() {
+    printf("DynamicFixture::TearDownTestSuite\n");
   }
 };
 
