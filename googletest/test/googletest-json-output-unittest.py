@@ -241,8 +241,8 @@ EXPECTED_NON_EMPTY = {
             u'disabled': 0,
             u'errors': 0,
             u'time': u'*',
-            u'SetUpTestCase': u'yes',
-            u'TearDownTestCase': u'aye',
+            u'SetUpTestSuite': u'yes',
+            u'TearDownTestSuite': u'aye',
             u'testsuite': [
                 {
                     u'name': u'OneProperty',
@@ -343,7 +343,7 @@ EXPECTED_NON_EMPTY = {
             ]
         },
         {
-            u'name': u'Single/TypeParameterizedTestCase/0',
+            u'name': u'Single/TypeParameterizedTestSuite/0',
             u'tests': 1,
             u'failures': 0,
             u'disabled': 0,
@@ -355,12 +355,12 @@ EXPECTED_NON_EMPTY = {
                     u'type_param': u'int',
                     u'status': u'RUN',
                     u'time': u'*',
-                    u'classname': u'Single/TypeParameterizedTestCase/0'
+                    u'classname': u'Single/TypeParameterizedTestSuite/0'
                 }
             ]
         },
         {
-            u'name': u'Single/TypeParameterizedTestCase/1',
+            u'name': u'Single/TypeParameterizedTestSuite/1',
             u'tests': 1,
             u'failures': 0,
             u'disabled': 0,
@@ -372,7 +372,7 @@ EXPECTED_NON_EMPTY = {
                     u'type_param': u'long',
                     u'status': u'RUN',
                     u'time': u'*',
-                    u'classname': u'Single/TypeParameterizedTestCase/1'
+                    u'classname': u'Single/TypeParameterizedTestSuite/1'
                 }
             ]
         },
