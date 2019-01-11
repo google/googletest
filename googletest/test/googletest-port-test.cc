@@ -393,7 +393,7 @@ typedef testing::Types<
 #  endif  // GTEST_HAS_GLOBAL_STRING
     const char*> StringTypes;
 
-TYPED_TEST_CASE(RETest, StringTypes);
+TYPED_TEST_SUITE(RETest, StringTypes);
 
 // Tests RE's implicit constructors.
 TYPED_TEST(RETest, ImplicitConstructorWorks) {

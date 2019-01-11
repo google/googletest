@@ -111,7 +111,7 @@ Invalid characters in brackets []%(stack)s]]></failure>
   <testsuite name="SkippedTest" tests="1" failures="0" disabled="0" errors="0" time="*">
     <testcase name="Skipped" status="skipped" time="*" classname="SkippedTest"/>
   </testsuite>
-  <testsuite name="PropertyRecordingTest" tests="4" failures="0" disabled="0" errors="0" time="*" SetUpTestCase="yes" TearDownTestCase="aye">
+  <testsuite name="PropertyRecordingTest" tests="4" failures="0" disabled="0" errors="0" time="*" SetUpTestSuite="yes" TearDownTestSuite="aye">
     <testcase name="OneProperty" status="run" time="*" classname="PropertyRecordingTest">
       <properties>
         <property name="key_1" value="1"/>
@@ -164,11 +164,11 @@ Invalid characters in brackets []%(stack)s]]></failure>
   <testsuite name="TypedTest/1" tests="1" failures="0" disabled="0" errors="0" time="*">
     <testcase name="HasTypeParamAttribute" type_param="*" status="run" time="*" classname="TypedTest/1" />
   </testsuite>
-  <testsuite name="Single/TypeParameterizedTestCase/0" tests="1" failures="0" disabled="0" errors="0" time="*">
-    <testcase name="HasTypeParamAttribute" type_param="*" status="run" time="*" classname="Single/TypeParameterizedTestCase/0" />
+  <testsuite name="Single/TypeParameterizedTestSuite/0" tests="1" failures="0" disabled="0" errors="0" time="*">
+    <testcase name="HasTypeParamAttribute" type_param="*" status="run" time="*" classname="Single/TypeParameterizedTestSuite/0" />
   </testsuite>
-  <testsuite name="Single/TypeParameterizedTestCase/1" tests="1" failures="0" disabled="0" errors="0" time="*">
-    <testcase name="HasTypeParamAttribute" type_param="*" status="run" time="*" classname="Single/TypeParameterizedTestCase/1" />
+  <testsuite name="Single/TypeParameterizedTestSuite/1" tests="1" failures="0" disabled="0" errors="0" time="*">
+    <testcase name="HasTypeParamAttribute" type_param="*" status="run" time="*" classname="Single/TypeParameterizedTestSuite/1" />
   </testsuite>
 </testsuites>""" % {'stack': STACK_TRACE_TEMPLATE}
 
@@ -186,7 +186,7 @@ EXPECTED_SHARDED_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
   <testsuite name="SuccessfulTest" tests="1" failures="0" disabled="0" errors="0" time="*">
     <testcase name="Succeeds" status="run" time="*" classname="SuccessfulTest"/>
   </testsuite>
-  <testsuite name="PropertyRecordingTest" tests="1" failures="0" disabled="0" errors="0" time="*" SetUpTestCase="yes" TearDownTestCase="aye">
+  <testsuite name="PropertyRecordingTest" tests="1" failures="0" disabled="0" errors="0" time="*" SetUpTestSuite="yes" TearDownTestSuite="aye">
     <testcase name="TwoValuesForOneKeyUsesLastValue" status="run" time="*" classname="PropertyRecordingTest">
       <properties>
         <property name="key_1" value="2"/>

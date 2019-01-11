@@ -44,7 +44,7 @@ class ExternalInstantiationTest : public ::testing::TestWithParam<int> {
 
 // Test fixture for testing instantiation of a test in multiple
 // translation units.
-class InstantiationInMultipleTranslaionUnitsTest
+class InstantiationInMultipleTranslationUnitsTest
     : public ::testing::TestWithParam<int> {
 };
 

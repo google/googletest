@@ -120,9 +120,9 @@ TEST_P(MyParamTest, ShouldPass) {
   GTEST_CHECK_INT_EQ_(g_param_test_count % kNumberOfParamTests, GetParam());
   g_param_test_count++;
 }
-INSTANTIATE_TEST_CASE_P(MyParamSequence,
-                        MyParamTest,
-                        testing::Range(0, kNumberOfParamTests));
+INSTANTIATE_TEST_SUITE_P(MyParamSequence,
+                         MyParamTest,
+                         testing::Range(0, kNumberOfParamTests));
 
 // Resets the count for each test.
 void ResetCounts() {

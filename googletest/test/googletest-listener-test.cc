@@ -40,7 +40,7 @@ using ::testing::AddGlobalTestEnvironment;
 using ::testing::Environment;
 using ::testing::InitGoogleTest;
 using ::testing::Test;
-using ::testing::TestCase;
+using ::testing::TestSuite;
 using ::testing::TestEventListener;
 using ::testing::TestInfo;
 using ::testing::TestPartResult;
@@ -206,12 +206,12 @@ class EnvironmentInvocationCatcher : public Environment {
 
 class ListenerTest : public Test {
  protected:
-  static void SetUpTestCase() {
-    g_events->push_back("ListenerTest::SetUpTestCase");
+  static void SetUpTestSuite() {
+    g_events->push_back("ListenerTest::SetUpTestSuite");
   }
 
-  static void TearDownTestCase() {
-    g_events->push_back("ListenerTest::TearDownTestCase");
+  static void TearDownTestSuite() {
+    g_events->push_back("ListenerTest::TearDownTestSuite");
   }
 
   void SetUp() override { g_events->push_back("ListenerTest::SetUp"); }
@@ -299,7 +299,7 @@ int main(int argc, char **argv) {
                                          "3rd.OnTestSuiteStart",
                                          "1st.OnTestCaseStart",
                                          "2nd.OnTestCaseStart",
-                                         "ListenerTest::SetUpTestCase",
+                                         "ListenerTest::SetUpTestSuite",
                                          "1st.OnTestStart",
                                          "2nd.OnTestStart",
                                          "3rd.OnTestStart",
@@ -324,7 +324,7 @@ int main(int argc, char **argv) {
                                          "3rd.OnTestEnd",
                                          "2nd.OnTestEnd",
                                          "1st.OnTestEnd",
-                                         "ListenerTest::TearDownTestCase",
+                                         "ListenerTest::TearDownTestSuite",
                                          "3rd.OnTestSuiteEnd",
                                          "2nd.OnTestCaseEnd",
                                          "1st.OnTestCaseEnd",
@@ -351,7 +351,7 @@ int main(int argc, char **argv) {
                                          "3rd.OnTestSuiteStart",
                                          "1st.OnTestCaseStart",
                                          "2nd.OnTestCaseStart",
-                                         "ListenerTest::SetUpTestCase",
+                                         "ListenerTest::SetUpTestSuite",
                                          "1st.OnTestStart",
                                          "2nd.OnTestStart",
                                          "3rd.OnTestStart",
@@ -376,7 +376,7 @@ int main(int argc, char **argv) {
                                          "3rd.OnTestEnd",
                                          "2nd.OnTestEnd",
                                          "1st.OnTestEnd",
-                                         "ListenerTest::TearDownTestCase",
+                                         "ListenerTest::TearDownTestSuite",
                                          "3rd.OnTestSuiteEnd",
                                          "2nd.OnTestCaseEnd",
                                          "1st.OnTestCaseEnd",

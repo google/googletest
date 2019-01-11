@@ -99,7 +99,7 @@ TEST_P(ValueParamTest, TestA) {
 TEST_P(ValueParamTest, TestB) {
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     MyInstantiation, ValueParamTest,
     testing::Values(MyType("one line"),
                     MyType("two\nlines"),
@@ -123,7 +123,7 @@ class MyArray {
 typedef testing::Types<VeryLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogName,  // NOLINT
                        int*, MyArray<bool, 42> > MyTypes;
 
-TYPED_TEST_CASE(TypedTest, MyTypes);
+TYPED_TEST_SUITE(TypedTest, MyTypes);
 
 TYPED_TEST(TypedTest, TestA) {
 }
@@ -137,7 +137,7 @@ template <typename T>
 class TypeParamTest : public testing::Test {
 };
 
-TYPED_TEST_CASE_P(TypeParamTest);
+TYPED_TEST_SUITE_P(TypeParamTest);
 
 TYPED_TEST_P(TypeParamTest, TestA) {
 }
@@ -145,9 +145,9 @@ TYPED_TEST_P(TypeParamTest, TestA) {
 TYPED_TEST_P(TypeParamTest, TestB) {
 }
 
-REGISTER_TYPED_TEST_CASE_P(TypeParamTest, TestA, TestB);
+REGISTER_TYPED_TEST_SUITE_P(TypeParamTest, TestA, TestB);
 
-INSTANTIATE_TYPED_TEST_CASE_P(My, TypeParamTest, MyTypes);
+INSTANTIATE_TYPED_TEST_SUITE_P(My, TypeParamTest, MyTypes);
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
