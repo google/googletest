@@ -555,13 +555,12 @@ class PolymorphicMatcher {
   Impl impl_;
 };
 
-// Creates a matcher from its implementation.  This is easier to use
-// than the Matcher<T> constructor as it doesn't require you to
-// explicitly write the template argument, e.g.
+// Creates a matcher from its implementation.
+// DEPRECATED: Especially in the generic code, prefer:
+//   Matcher<T>(new MyMatcherImpl<const T&>(...));
 //
-//   MakeMatcher(foo);
-// vs
-//   Matcher<const string&>(foo);
+// MakeMatcher may create a Matcher that accepts its argument by value, which
+// leads to unnecessary copies & lack of support for non-copyable types.
 template <typename T>
 inline Matcher<T> MakeMatcher(const MatcherInterface<T>* impl) {
   return Matcher<T>(impl);
@@ -596,7 +595,7 @@ class ComparisonBase {
   explicit ComparisonBase(const Rhs& rhs) : rhs_(rhs) {}
   template <typename Lhs>
   operator Matcher<Lhs>() const {
-    return MakeMatcher(new Impl<Lhs>(rhs_));
+    return Matcher<Lhs>(new Impl<const Lhs&>(rhs_));
   }
 
  private:

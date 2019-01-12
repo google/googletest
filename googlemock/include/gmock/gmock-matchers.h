@@ -900,7 +900,7 @@ class PairMatchBase {
  public:
   template <typename T1, typename T2>
   operator Matcher<::std::tuple<T1, T2>>() const {
-    return MakeMatcher(new Impl<::std::tuple<T1, T2>>);
+    return Matcher<::std::tuple<T1, T2>>(new Impl<const ::std::tuple<T1, T2>&>);
   }
   template <typename T1, typename T2>
   operator Matcher<const ::std::tuple<T1, T2>&>() const {
@@ -2535,7 +2535,8 @@ class KeyMatcher {
 
   template <typename PairType>
   operator Matcher<PairType>() const {
-    return MakeMatcher(new KeyMatcherImpl<PairType>(matcher_for_key_));
+    return Matcher<PairType>(
+        new KeyMatcherImpl<const PairType&>(matcher_for_key_));
   }
 
  private:
@@ -2640,9 +2641,8 @@ class PairMatcher {
 
   template <typename PairType>
   operator Matcher<PairType> () const {
-    return MakeMatcher(
-        new PairMatcherImpl<PairType>(
-            first_matcher_, second_matcher_));
+    return Matcher<PairType>(
+        new PairMatcherImpl<const PairType&>(first_matcher_, second_matcher_));
   }
 
  private:
@@ -3205,7 +3205,7 @@ class OptionalMatcher {
 
   template <typename Optional>
   operator Matcher<Optional>() const {
-    return MakeMatcher(new Impl<Optional>(value_matcher_));
+    return Matcher<Optional>(new Impl<const Optional&>(value_matcher_));
   }
 
   template <typename Optional>
