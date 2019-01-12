@@ -1164,13 +1164,12 @@ TEST_F(SetErrnoAndReturnTest, CompatibleTypes) {
 
 // Tests ByRef().
 
-// Tests that ReferenceWrapper<T> is copyable.
+// Tests that the result of ByRef() is copyable.
 TEST(ByRefTest, IsCopyable) {
   const std::string s1 = "Hi";
   const std::string s2 = "Hello";
 
-  ::testing::internal::ReferenceWrapper<const std::string> ref_wrapper =
-      ByRef(s1);
+  auto ref_wrapper = ByRef(s1);
   const std::string& r1 = ref_wrapper;
   EXPECT_EQ(&s1, &r1);
 
@@ -1179,8 +1178,7 @@ TEST(ByRefTest, IsCopyable) {
   const std::string& r2 = ref_wrapper;
   EXPECT_EQ(&s2, &r2);
 
-  ::testing::internal::ReferenceWrapper<const std::string> ref_wrapper1 =
-      ByRef(s1);
+  auto ref_wrapper1 = ByRef(s1);
   // Copies ref_wrapper1 to ref_wrapper.
   ref_wrapper = ref_wrapper1;
   const std::string& r3 = ref_wrapper;
