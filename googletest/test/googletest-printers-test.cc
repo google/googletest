@@ -1023,16 +1023,20 @@ TEST(PrintNullptrT, Basic) {
 
 TEST(PrintReferenceWrapper, Printable) {
   int x = 5;
-  EXPECT_EQ("5", Print(std::ref(x)));
-  EXPECT_EQ("5", Print(std::cref(x)));
+  EXPECT_EQ("@" + PrintPointer(&x) + " 5", Print(std::ref(x)));
+  EXPECT_EQ("@" + PrintPointer(&x) + " 5", Print(std::cref(x)));
 }
 
 TEST(PrintReferenceWrapper, Unprintable) {
   ::foo::UnprintableInFoo up;
-  EXPECT_EQ("16-byte object <EF-12 00-00 34-AB 00-00 00-00 00-00 00-00 00-00>",
-            Print(std::ref(up)));
-  EXPECT_EQ("16-byte object <EF-12 00-00 34-AB 00-00 00-00 00-00 00-00 00-00>",
-            Print(std::cref(up)));
+  EXPECT_EQ(
+      "@" + PrintPointer(&up) +
+          " 16-byte object <EF-12 00-00 34-AB 00-00 00-00 00-00 00-00 00-00>",
+      Print(std::ref(up)));
+  EXPECT_EQ(
+      "@" + PrintPointer(&up) +
+          " 16-byte object <EF-12 00-00 34-AB 00-00 00-00 00-00 00-00 00-00>",
+      Print(std::cref(up)));
 }
 
 // Tests printing user-defined unprintable types.
