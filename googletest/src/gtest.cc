@@ -6022,7 +6022,7 @@ void InitGoogleTest(int* argc, wchar_t** argv) {
 
 // This overloaded version can be used on Arduino/embedded platforms where
 // there is no argc/argv.
-GTEST_API_ void InitGoogleMock() {
+void InitGoogleTest() {
   // Since Arduino doesn't have a command line, fake out the argc/argv arguments
   int argc = 1;
   const auto arg0 = "dummy";
