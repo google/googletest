@@ -6020,6 +6020,22 @@ void InitGoogleTest(int* argc, wchar_t** argv) {
 #endif  // defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
 }
 
+// This overloaded version can be used on Arduino/embedded platforms where
+// there is no argc/argv.
+GTEST_API_ void InitGoogleMock() {
+  // Since Arduino doesn't have a command line, fake out the argc/argv arguments
+  int argc = 1;
+  const auto arg0 = "dummy";
+  char* argv0 = const_cast<char*>(arg0);
+  char** argv = &argv0;
+
+#if defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
+  GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_(&argc, argv);
+#else  // defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
+  internal::InitGoogleTestImpl(&argc, argv);
+#endif  // defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
+}
+
 std::string TempDir() {
 #if defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_)
   return GTEST_CUSTOM_TEMPDIR_FUNCTION_();

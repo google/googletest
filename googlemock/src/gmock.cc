@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 #include "gmock/gmock.h"
 #include "gmock/internal/gmock-port.h"
 
@@ -58,8 +57,7 @@ namespace internal {
 // "=value" part can be omitted.
 //
 // Returns the value of the flag, or NULL if the parsing failed.
-static const char* ParseGoogleMockFlagValue(const char* str,
-                                            const char* flag,
+static const char* ParseGoogleMockFlagValue(const char* str, const char* flag,
                                             bool def_optional) {
   // str and flag must not be NULL.
   if (str == nullptr || flag == nullptr) return nullptr;
@@ -132,8 +130,8 @@ static bool ParseGoogleMockIntFlag(const char* str, const char* flag,
   if (value_str == nullptr) return false;
 
   // Sets *value to the value of the flag.
-  return ParseInt32(Message() << "The value of flag --" << flag,
-                    value_str, value);
+  return ParseInt32(Message() << "The value of flag --" << flag, value_str,
+                    value);
 }
 
 // The internal implementation of InitGoogleMock().
@@ -196,6 +194,18 @@ GTEST_API_ void InitGoogleMock(int* argc, char** argv) {
 // UNICODE mode.
 GTEST_API_ void InitGoogleMock(int* argc, wchar_t** argv) {
   internal::InitGoogleMockImpl(argc, argv);
+}
+
+// This overloaded version can be used on Arduino/embedded platforms where
+// there is no argc/argv.
+GTEST_API_ void InitGoogleMock() {
+  // Since Arduino doesn't have a command line, fake out the argc/argv arguments
+  int argc = 1;
+  const auto arg0 = "dummy";
+  char* argv0 = const_cast<char*>(arg0);
+  char** argv = &argv0;
+
+  internal::InitGoogleMockImpl(&argc, argv);
 }
 
 }  // namespace testing

@@ -1484,6 +1484,10 @@ GTEST_API_ void InitGoogleTest(int* argc, char** argv);
 // UNICODE mode.
 GTEST_API_ void InitGoogleTest(int* argc, wchar_t** argv);
 
+// This overloaded version can be used on Arduino/embedded platforms where
+// there is no argc/argv.
+GTEST_API_ void InitGoogleTest();
+
 namespace internal {
 
 // Separate the error generating code from the code path to reduce the stack
@@ -2498,20 +2502,6 @@ int RUN_ALL_TESTS() GTEST_MUST_USE_RESULT_;
 inline int RUN_ALL_TESTS() {
   return ::testing::UnitTest::GetInstance()->Run();
 }
-
-#ifdef ARDUINO
-inline void gtest_setup() {
-  // Since Arduino doesn't have a command line, fake out the argc/argv arguments
-  int argc = 1;
-  const auto arg0 = "PlatformIO";
-  char* argv0 = const_cast<char*>(arg0);
-  char** argv = &argv0;
-
-  testing::InitGoogleTest(&argc, argv);
-}
-
-inline void gtest_loop() { RUN_ALL_TESTS(); }
-#endif
 
 GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 

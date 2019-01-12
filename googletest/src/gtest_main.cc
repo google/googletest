@@ -32,9 +32,7 @@
 
 #ifdef ARDUINO
 void setup() {
-  int argc = 0;
-  char** argv = nullptr;
-  testing::InitGoogleTest(&argc, argv);
+  testing::InitGoogleTest();
 }
 
 void loop() { RUN_ALL_TESTS(); }

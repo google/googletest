@@ -92,21 +92,9 @@ GTEST_API_ void InitGoogleMock(int* argc, char** argv);
 // UNICODE mode.
 GTEST_API_ void InitGoogleMock(int* argc, wchar_t** argv);
 
-#ifdef ARDUINO
-inline void gmock_setup() {
-  // Since Arduino doesn't have a command line, fake out the argc/argv arguments
-  int argc = 1;
-  const auto arg0 = "PlatformIO";
-  char* argv0 = const_cast<char*>(arg0);
-  char** argv = &argv0;
-
-  // Since Google Mock depends on Google Test, InitGoogleMock() is
-  // also responsible for initializing Google Test.  Therefore there's
-  // no need for calling testing::InitGoogleTest() separately.
-  testing::InitGoogleMock(&argc, argv);
-}
-inline void gmock_loop() { RUN_ALL_TESTS(); }
-#endif
+// This overloaded version can be used on Arduino/embedded platforms where
+// there is no argc/argv.
+GTEST_API_ void InitGoogleMock();
 
 }  // namespace testing
 
