@@ -80,65 +80,6 @@ using std::pair;
 using std::set;
 using std::stringstream;
 using std::vector;
-using testing::_;
-using testing::A;
-using testing::AllArgs;
-using testing::AllOf;
-using testing::An;
-using testing::AnyOf;
-using testing::ByRef;
-using testing::ContainsRegex;
-using testing::DoubleEq;
-using testing::DoubleNear;
-using testing::EndsWith;
-using testing::Eq;
-using testing::ExplainMatchResult;
-using testing::Field;
-using testing::FloatEq;
-using testing::FloatNear;
-using testing::Ge;
-using testing::Gt;
-using testing::HasSubstr;
-using testing::IsEmpty;
-using testing::IsNull;
-using testing::Key;
-using testing::Le;
-using testing::Lt;
-using testing::MakeMatcher;
-using testing::MakePolymorphicMatcher;
-using testing::Matcher;
-using testing::MatcherCast;
-using testing::MatcherInterface;
-using testing::Matches;
-using testing::MatchesRegex;
-using testing::MatchResultListener;
-using testing::NanSensitiveDoubleEq;
-using testing::NanSensitiveDoubleNear;
-using testing::NanSensitiveFloatEq;
-using testing::NanSensitiveFloatNear;
-using testing::Ne;
-using testing::Not;
-using testing::NotNull;
-using testing::Pair;
-using testing::Pointee;
-using testing::Pointwise;
-using testing::PolymorphicMatcher;
-using testing::Property;
-using testing::Ref;
-using testing::ResultOf;
-using testing::SizeIs;
-using testing::StartsWith;
-using testing::StrCaseEq;
-using testing::StrCaseNe;
-using testing::StrEq;
-using testing::StringMatchResultListener;
-using testing::StrNe;
-using testing::Truly;
-using testing::TypedEq;
-using testing::UnorderedPointwise;
-using testing::Value;
-using testing::WhenSorted;
-using testing::WhenSortedBy;
 using testing::internal::DummyMatchResultListener;
 using testing::internal::ElementMatcherPair;
 using testing::internal::ElementMatcherPairs;
@@ -6995,10 +6936,6 @@ class PredicateFormatterFromMatcherTest : public ::testing::Test {
         matcher);
     return predicate_formatter("dummy-name", behavior);
   }
-
-  const std::string kMatcherType =
-      "testing::gmock_matchers_test::PredicateFormatterFromMatcherTest::"
-      "Behavior";
 };
 
 TEST_F(PredicateFormatterFromMatcherTest, ShortCircuitOnSuccess) {

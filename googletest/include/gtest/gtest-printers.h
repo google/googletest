@@ -637,8 +637,7 @@ inline void PrintTo(std::nullptr_t, ::std::ostream* os) { *os << "(nullptr)"; }
 
 template <typename T>
 void PrintTo(std::reference_wrapper<T> ref, ::std::ostream* os) {
-  // Delegate to wrapped value.
-  PrintTo(ref.get(), os);
+  UniversalPrinter<T&>::Print(ref.get(), os);
 }
 
 // Helper function for printing a tuple.  T must be instantiated with

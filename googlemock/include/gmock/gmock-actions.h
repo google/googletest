@@ -936,33 +936,6 @@ class IgnoreResultAction {
   GTEST_DISALLOW_ASSIGN_(IgnoreResultAction);
 };
 
-// A ReferenceWrapper<T> object represents a reference to type T,
-// which can be either const or not.  It can be explicitly converted
-// from, and implicitly converted to, a T&.  Unlike a reference,
-// ReferenceWrapper<T> can be copied and can survive template type
-// inference.  This is used to support by-reference arguments in the
-// InvokeArgument<N>(...) action.  The idea was from "reference
-// wrappers" in tr1, which we don't have in our source tree yet.
-template <typename T>
-class ReferenceWrapper {
- public:
-  // Constructs a ReferenceWrapper<T> object from a T&.
-  explicit ReferenceWrapper(T& l_value) : pointer_(&l_value) {}  // NOLINT
-
-  // Allows a ReferenceWrapper<T> object to be implicitly converted to
-  // a T&.
-  operator T&() const { return *pointer_; }
- private:
-  T* pointer_;
-};
-
-// Allows the expression ByRef(x) to be printed as a reference to x.
-template <typename T>
-void PrintTo(const ReferenceWrapper<T>& ref, ::std::ostream* os) {
-  T& value = ref;
-  UniversalPrinter<T&>::Print(value, os);
-}
-
 template <typename InnerAction, size_t... I>
 struct WithArgsAction {
   InnerAction action;
@@ -1219,9 +1192,12 @@ inline internal::IgnoreResultAction<A> IgnoreResult(const A& an_action) {
 // where Base is a base class of Derived, just write:
 //
 //   ByRef<const Base>(derived)
+//
+// N.B. ByRef is redundant with std::ref, std::cref and std::reference_wrapper.
+// However, it may still be used for consistency with ByMove().
 template <typename T>
-inline internal::ReferenceWrapper<T> ByRef(T& l_value) {  // NOLINT
-  return internal::ReferenceWrapper<T>(l_value);
+inline ::std::reference_wrapper<T> ByRef(T& l_value) {  // NOLINT
+  return ::std::reference_wrapper<T>(l_value);
 }
 
 }  // namespace testing
