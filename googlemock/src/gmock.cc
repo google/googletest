@@ -27,6 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+
 #include "gmock/gmock.h"
 #include "gmock/internal/gmock-port.h"
 
@@ -57,7 +58,8 @@ namespace internal {
 // "=value" part can be omitted.
 //
 // Returns the value of the flag, or NULL if the parsing failed.
-static const char* ParseGoogleMockFlagValue(const char* str, const char* flag,
+static const char* ParseGoogleMockFlagValue(const char* str, 
+                                            const char* flag,
                                             bool def_optional) {
   // str and flag must not be NULL.
   if (str == nullptr || flag == nullptr) return nullptr;
@@ -130,8 +132,8 @@ static bool ParseGoogleMockIntFlag(const char* str, const char* flag,
   if (value_str == nullptr) return false;
 
   // Sets *value to the value of the flag.
-  return ParseInt32(Message() << "The value of flag --" << flag, value_str,
-                    value);
+  return ParseInt32(Message() << "The value of flag --" << flag, 
+                    value_str, value);
 }
 
 // The internal implementation of InitGoogleMock().
