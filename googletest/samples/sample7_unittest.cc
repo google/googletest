@@ -110,8 +110,8 @@ TEST_P(PrimeTableTestSmpl7, CanGetNextPrime) {
 //
 // Here, we instantiate our tests with a list of two PrimeTable object
 // factory functions:
-INSTANTIATE_TEST_CASE_P(OnTheFlyAndPreCalculated, PrimeTableTestSmpl7,
-                        Values(&CreateOnTheFlyPrimeTable,
-                               &CreatePreCalculatedPrimeTable<1000>));
+INSTANTIATE_TEST_SUITE_P(OnTheFlyAndPreCalculated, PrimeTableTestSmpl7,
+                         Values(&CreateOnTheFlyPrimeTable,
+                                &CreatePreCalculatedPrimeTable<1000>));
 
 }  // namespace
