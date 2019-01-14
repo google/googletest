@@ -39,7 +39,6 @@ void setup() {
   // no need for calling testing::InitGoogleTest() separately.
   testing::InitGoogleMock();
 }
-
 void loop() { RUN_ALL_TESTS(); }
 #else
 
@@ -63,5 +62,4 @@ GTEST_API_ int main(int argc, char** argv) {
   testing::InitGoogleMock(&argc, argv);
   return RUN_ALL_TESTS();
 }
-
 #endif
