@@ -42,6 +42,7 @@
 #include <stdio.h>
 #include <ostream>  // NOLINT
 #include <string>
+#include <type_traits>
 #include "gmock/internal/gmock-port.h"
 #include "gtest/gtest.h"
 

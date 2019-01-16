@@ -78,6 +78,7 @@ using testing::Expectation;
 using testing::ExpectationSet;
 using testing::GMOCK_FLAG(verbose);
 using testing::Gt;
+using testing::IgnoreResult;
 using testing::InSequence;
 using testing::Invoke;
 using testing::InvokeWithoutArgs;

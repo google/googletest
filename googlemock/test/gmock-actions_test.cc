@@ -54,12 +54,14 @@
 namespace {
 
 // This list should be kept sorted.
+using testing::_;
 using testing::Action;
 using testing::ActionInterface;
 using testing::Assign;
 using testing::ByMove;
 using testing::ByRef;
 using testing::DefaultValue;
+using testing::DoAll;
 using testing::DoDefault;
 using testing::IgnoreResult;
 using testing::Invoke;
@@ -75,7 +77,6 @@ using testing::SetArgPointee;
 using testing::SetArgumentPointee;
 using testing::Unused;
 using testing::WithArgs;
-using testing::_;
 using testing::internal::BuiltInDefaultValue;
 using testing::internal::Int64;
 using testing::internal::UInt64;
