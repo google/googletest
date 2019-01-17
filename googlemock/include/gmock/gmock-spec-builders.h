@@ -300,7 +300,10 @@ class OnCallSpec : public UntypedOnCallSpecBase {
              const ArgumentMatcherTuple& matchers)
       : UntypedOnCallSpecBase(a_file, a_line),
         matchers_(matchers),
-        extra_matcher_(_) {}
+        // By default, extra_matcher_ should match anything.  However,
+        // we cannot initialize it with _ as that causes ambiguity between
+        // Matcher's copy and move constructor for some argument types.
+        extra_matcher_(A<const ArgumentTuple&>()) {}
 
   // Implements the .With() clause.
   OnCallSpec& With(const Matcher<const ArgumentTuple&>& m) {
@@ -890,7 +893,10 @@ class TypedExpectation : public ExpectationBase {
       : ExpectationBase(a_file, a_line, a_source_text),
         owner_(owner),
         matchers_(m),
-        extra_matcher_(_),
+        // By default, extra_matcher_ should match anything.  However,
+        // we cannot initialize it with _ as that causes ambiguity between
+        // Matcher's copy and move constructor for some argument types.
+        extra_matcher_(A<const ArgumentTuple&>()),
         repeated_action_(DoDefault()) {}
 
   ~TypedExpectation() override {
