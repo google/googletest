@@ -544,9 +544,9 @@ internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
       GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::AddToRegistry();     \
   void GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::TestBody()
 
-// The optional last argument to INSTANTIATE_TEST_SUITE_P allows the user
-// to specify a function or functor that generates custom test name suffixes
-// based on the test parameters. The function should accept one argument of
+// The last argument to INSTANTIATE_TEST_SUITE_P allows the user to specify generator
+// and an optional function or functor that generates custom test name suffixes
+// based on the test parameters. Such a function or functor should accept one argument of
 // type testing::TestParamInfo<class ParamType>, and return std::string.
 //
 // testing::PrintToStringParamName is a builtin test suffix generator that
@@ -556,15 +556,15 @@ internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
 // alphanumeric characters or underscore. Because PrintToString adds quotes
 // to std::string and C strings, it won't work for these types.
 
-#define INSTANTIATE_TEST_SUITE_P(prefix, test_suite_name, generator, ...)     \
+#define INSTANTIATE_TEST_SUITE_P(prefix, test_suite_name, ...)                \
   static ::testing::internal::ParamGenerator<test_suite_name::ParamType>      \
       gtest_##prefix##test_suite_name##_EvalGenerator_() {                    \
-    return generator;                                                         \
+    return VA_GETFIRST(__VA_ARGS__);                                          \
   }                                                                           \
   static ::std::string gtest_##prefix##test_suite_name##_EvalGenerateName_(   \
       const ::testing::TestParamInfo<test_suite_name::ParamType>& info) {     \
-    return ::testing::internal::GetParamNameGen<test_suite_name::ParamType>(  \
-        __VA_ARGS__)(info);                                                   \
+    return ::testing::internal::CreateParamGenerator<                         \
+        test_suite_name::ParamType>(VA_GETREST(__VA_ARGS__, 0))(info);        \
   }                                                                           \
   static int gtest_##prefix##test_suite_name##_dummy_                         \
       GTEST_ATTRIBUTE_UNUSED_ =                                               \

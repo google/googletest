@@ -41,6 +41,7 @@
 #include <memory>
 #include <set>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -394,6 +395,30 @@ struct ParamNameGenFunc {
 template <class ParamType>
 typename ParamNameGenFunc<ParamType>::Type *GetParamNameGen() {
   return DefaultParamName;
+}
+
+// INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
+//
+// Macroses allow to address an issue with zero element variadic macro
+
+#define EXPAND(X) X
+#define VA__GETFIRST(X, ...) X
+#define VA_GETFIRST(...) EXPAND(VA__GETFIRST(__VA_ARGS__, 0))
+#define VA_GETREST(X, ...) __VA_ARGS__
+
+// INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
+//
+// Function is intended to swallow 0 as last argument and call GetParamNameGen
+
+template <class ParamType>
+auto CreateParamGenerator(int) -> decltype(GetParamNameGen<ParamType>()) {
+  return GetParamNameGen<ParamType>();
+}
+
+template <class ParamType, class Arg>
+auto CreateParamGenerator(Arg&& arg, int) -> decltype(
+    GetParamNameGen<ParamType>(std::forward<Arg>(arg))) {
+  return GetParamNameGen<ParamType>(std::forward<Arg>(arg));
 }
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
