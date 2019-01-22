@@ -135,6 +135,10 @@ cc_library(
         "googletest/samples/sample3-inl.h",
         "googletest/samples/sample4.h",
     ],
+    features = select({
+        ":windows": ["windows_export_all_symbols"],
+        "//conditions:default": [],
+    })
 )
 
 cc_test(
@@ -157,6 +161,7 @@ cc_test(
         "gtest_sample_lib",
         ":gtest_main",
     ],
+    linkstatic = 0,
 )
 
 cc_test(
