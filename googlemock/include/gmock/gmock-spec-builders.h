@@ -1453,7 +1453,7 @@ template <typename F>
 class FunctionMocker;
 
 template <typename R, typename... Args>
-class FunctionMocker<R(Args...)> : public UntypedFunctionMockerBase {
+class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
   using F = R(Args...);
 
  public:
