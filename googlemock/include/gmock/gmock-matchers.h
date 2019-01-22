@@ -1175,6 +1175,37 @@ class AnyOfMatcherImpl : public MatcherInterface<const T&> {
 template <typename... Args>
 using AnyOfMatcher = VariadicMatcher<AnyOfMatcherImpl, Args...>;
 
+// Wrapper for implementation of Any/AllOfArray().
+template <template <class> class MatcherImpl, typename T>
+class SomeOfArrayMatcher {
+ public:
+  // Constructs the matcher from a sequence of element values or
+  // element matchers.
+  template <typename Iter>
+  SomeOfArrayMatcher(Iter first, Iter last) : matchers_(first, last) {}
+
+  template <typename U>
+  operator Matcher<U>() const {  // NOLINT
+    using RawU = typename std::decay<U>::type;
+    std::vector<Matcher<RawU>> matchers;
+    for (const auto& matcher : matchers_) {
+      matchers.push_back(MatcherCast<RawU>(matcher));
+    }
+    return Matcher<U>(new MatcherImpl<RawU>(std::move(matchers)));
+  }
+
+ private:
+  const ::std::vector<T> matchers_;
+
+  GTEST_DISALLOW_ASSIGN_(SomeOfArrayMatcher);
+};
+
+template <typename T>
+using AllOfArrayMatcher = SomeOfArrayMatcher<AllOfMatcherImpl, T>;
+
+template <typename T>
+using AnyOfArrayMatcher = SomeOfArrayMatcher<AnyOfMatcherImpl, T>;
+
 // Used for implementing Truly(pred), which turns a predicate into a
 // matcher.
 template <typename Predicate>
@@ -4374,6 +4405,88 @@ internal::AnyOfMatcher<typename std::decay<const Args&>::type...> AnyOf(
     const Args&... matchers) {
   return internal::AnyOfMatcher<typename std::decay<const Args&>::type...>(
       matchers...);
+}
+
+// AnyOfArray(array)
+// AnyOfArray(pointer, count)
+// AnyOfArray(container)
+// AnyOfArray({ e1, e2, ..., en })
+// AnyOfArray(iterator_first, iterator_last)
+//
+// AnyOfArray() verifies whether a given value matches any member of a
+// collection of matchers.
+//
+// AllOfArray(array)
+// AllOfArray(pointer, count)
+// AllOfArray(container)
+// AllOfArray({ e1, e2, ..., en })
+// AllOfArray(iterator_first, iterator_last)
+//
+// AllOfArray() verifies whether a given value matches all members of a
+// collection of matchers.
+//
+// The matchers can be specified as an array, a pointer and count, a container,
+// an initializer list, or an STL iterator range. In each of these cases, the
+// underlying matchers can be either values or matchers.
+
+template <typename Iter>
+inline internal::AnyOfArrayMatcher<
+    typename ::std::iterator_traits<Iter>::value_type>
+AnyOfArray(Iter first, Iter last) {
+  return internal::AnyOfArrayMatcher<
+      typename ::std::iterator_traits<Iter>::value_type>(first, last);
+}
+
+template <typename Iter>
+inline internal::AllOfArrayMatcher<
+    typename ::std::iterator_traits<Iter>::value_type>
+AllOfArray(Iter first, Iter last) {
+  return internal::AllOfArrayMatcher<
+      typename ::std::iterator_traits<Iter>::value_type>(first, last);
+}
+
+template <typename T>
+inline internal::AnyOfArrayMatcher<T> AnyOfArray(const T* ptr, size_t count) {
+  return AnyOfArray(ptr, ptr + count);
+}
+
+template <typename T>
+inline internal::AllOfArrayMatcher<T> AllOfArray(const T* ptr, size_t count) {
+  return AllOfArray(ptr, ptr + count);
+}
+
+template <typename T, size_t N>
+inline internal::AnyOfArrayMatcher<T> AnyOfArray(const T (&array)[N]) {
+  return AnyOfArray(array, N);
+}
+
+template <typename T, size_t N>
+inline internal::AllOfArrayMatcher<T> AllOfArray(const T (&array)[N]) {
+  return AllOfArray(array, N);
+}
+
+template <typename Container>
+inline internal::AnyOfArrayMatcher<typename Container::value_type> AnyOfArray(
+    const Container& container) {
+  return AnyOfArray(container.begin(), container.end());
+}
+
+template <typename Container>
+inline internal::AllOfArrayMatcher<typename Container::value_type> AllOfArray(
+    const Container& container) {
+  return AllOfArray(container.begin(), container.end());
+}
+
+template <typename T>
+inline internal::AnyOfArrayMatcher<T> AnyOfArray(
+    ::std::initializer_list<T> xs) {
+  return AnyOfArray(xs.begin(), xs.end());
+}
+
+template <typename T>
+inline internal::AllOfArrayMatcher<T> AllOfArray(
+    ::std::initializer_list<T> xs) {
+  return AllOfArray(xs.begin(), xs.end());
 }
 
 // Args<N1, N2, ..., Nk>(a_matcher) matches a tuple if the selected
