@@ -92,6 +92,10 @@ GTEST_API_ void InitGoogleMock(int* argc, char** argv);
 // UNICODE mode.
 GTEST_API_ void InitGoogleMock(int* argc, wchar_t** argv);
 
+// This overloaded version can be used on Arduino/embedded platforms where
+// there is no argc/argv.
+GTEST_API_ void InitGoogleMock();
+
 }  // namespace testing
 
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_H_

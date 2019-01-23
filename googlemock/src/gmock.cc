@@ -198,4 +198,16 @@ GTEST_API_ void InitGoogleMock(int* argc, wchar_t** argv) {
   internal::InitGoogleMockImpl(argc, argv);
 }
 
+// This overloaded version can be used on Arduino/embedded platforms where
+// there is no argc/argv.
+GTEST_API_ void InitGoogleMock() {
+  // Since Arduino doesn't have a command line, fake out the argc/argv arguments
+  int argc = 1;
+  const auto arg0 = "dummy";
+  char* argv0 = const_cast<char*>(arg0);
+  char** argv = &argv0;
+
+  internal::InitGoogleMockImpl(&argc, argv);
+}
+
 }  // namespace testing

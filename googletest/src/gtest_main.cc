@@ -32,13 +32,7 @@
 
 #ifdef ARDUINO
 void setup() {
-  // Since Arduino doesn't have a command line, fake out the argc/argv arguments
-  int argc = 1;
-  const auto arg0 = "PlatformIO";
-  char* argv0 = const_cast<char*>(arg0);
-  char** argv = &argv0;
-
-  testing::InitGoogleTest(&argc, argv);
+  testing::InitGoogleTest();
 }
 
 void loop() { RUN_ALL_TESTS(); }
