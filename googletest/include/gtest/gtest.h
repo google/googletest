@@ -1784,11 +1784,9 @@ AssertionResult CmpHelperFloatingPointEQ(const char* lhs_expression,
 //
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
 template <class R1, class R2, class T>
-GTEST_API_ AssertionResult FPNearPredFormat(const char* expr1,
-                                            const char* expr2,
-                                            const char* abs_error_expr,
-                                            const R1& val1, const R2& val2,
-                                            const T& abs_error) {
+AssertionResult FPNearPredFormat(const char* expr1, const char* expr2,
+                                 const char* abs_error_expr, const R1& val1,
+                                 const R2& val2, const T& abs_error) {
   using namespace std;
   auto diff = fabs(val1 - val2);
   if (diff <= abs_error) {
