@@ -1380,25 +1380,6 @@ std::string GetBoolAssertionFailureMessage(
   return msg.GetString();
 }
 
-// Helper function for implementing ASSERT_NEAR.
-AssertionResult DoubleNearPredFormat(const char* expr1,
-                                     const char* expr2,
-                                     const char* abs_error_expr,
-                                     double val1,
-                                     double val2,
-                                     double abs_error) {
-  const double diff = fabs(val1 - val2);
-  if (diff <= abs_error) return AssertionSuccess();
-
-  return AssertionFailure()
-      << "The difference between " << expr1 << " and " << expr2
-      << " is " << diff << ", which exceeds " << abs_error_expr << ", where\n"
-      << expr1 << " evaluates to " << val1 << ",\n"
-      << expr2 << " evaluates to " << val2 << ", and\n"
-      << abs_error_expr << " evaluates to " << abs_error << ".";
-}
-
-
 // Helper template for implementing FloatLE() and DoubleLE().
 template <typename RawType>
 AssertionResult FloatingPointLE(const char* expr1,

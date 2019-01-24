@@ -56,6 +56,8 @@
 #include <memory>
 #include <ostream>
 #include <vector>
+#include <iomanip>
+#include <cmath>
 
 #include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-string.h"
@@ -1781,12 +1783,26 @@ AssertionResult CmpHelperFloatingPointEQ(const char* lhs_expression,
 // Helper function for implementing ASSERT_NEAR.
 //
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
-GTEST_API_ AssertionResult DoubleNearPredFormat(const char* expr1,
-                                                const char* expr2,
-                                                const char* abs_error_expr,
-                                                double val1,
-                                                double val2,
-                                                double abs_error);
+template <class R1, class R2, class T>
+GTEST_API_ AssertionResult FPNearPredFormat(const char* expr1,
+                                            const char* expr2,
+                                            const char* abs_error_expr,
+                                            const R1& val1, const R2& val2,
+                                            const T& abs_error) {
+  using namespace std;
+  auto diff = fabs(val1 - val2);
+  if (diff <= abs_error) {
+    return AssertionSuccess();
+  }
+  return AssertionFailure()
+         << std::setprecision(
+                std::numeric_limits<typename std::decay<R1>::type>::max_digits10)
+         << "The difference between " << expr1 << " and " << expr2 << " is "
+         << diff << ", which exceeds " << abs_error_expr << ", where\n"
+         << expr1 << " evaluates to " << val1 << ",\n"
+         << expr2 << " evaluates to " << val2 << ", and\n"
+         << abs_error_expr << " evaluates to " << abs_error << ".";
+}
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 // A class that enables one to stream messages to assertion macros
@@ -2167,11 +2183,11 @@ class TestWithParam : public Test, public WithParamInterface<T> {
                       val1, val2)
 
 #define EXPECT_NEAR(val1, val2, abs_error)\
-  EXPECT_PRED_FORMAT3(::testing::internal::DoubleNearPredFormat, \
+  EXPECT_PRED_FORMAT3(::testing::internal::FPNearPredFormat, \
                       val1, val2, abs_error)
 
 #define ASSERT_NEAR(val1, val2, abs_error)\
-  ASSERT_PRED_FORMAT3(::testing::internal::DoubleNearPredFormat, \
+  ASSERT_PRED_FORMAT3(::testing::internal::FPNearPredFormat, \
                       val1, val2, abs_error)
 
 // These predicate format functions work on floating-point values, and
