@@ -129,7 +129,6 @@ EXTRA_DIST += \
 
 # Nonstandard package files for distribution.
 EXTRA_DIST += \
-  CHANGES \
   CONTRIBUTORS \
   make/Makefile
 
