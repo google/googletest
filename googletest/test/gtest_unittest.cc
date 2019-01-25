@@ -3160,9 +3160,9 @@ class custom_real {
   friend std::ostream& operator<<(std::ostream& out, const custom_real& v);
 };
 
-static custom_real fabs(const custom_real& v) { return std::fabs(v.value_); }
+custom_real fabs(const custom_real& v) { return std::fabs(v.value_); }
 
-static std::ostream& operator<<(std::ostream& out, const custom_real& v) {
+std::ostream& operator<<(std::ostream& out, const custom_real& v) {
   out << v.value_;
   return out;
 }
