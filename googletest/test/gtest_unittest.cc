@@ -3134,6 +3134,7 @@ TEST(LongDoubleTest, ASSERT_NEAR) {
   }
 }
 
+namespace {
 // a custom floating-point like type which implements the minimal interface
 // required to test EXPECT_NEAR on a custom type
 class custom_real {
@@ -3197,6 +3198,7 @@ TEST(CustomRealTest, ASSERT_NEAR) {
                          "evaluates to -1.5, and\n0.25 evaluates to 0.25.");
   }
 }
+}  // namespace
 
 // Verifies that a test or test case whose name starts with DISABLED_ is
 // not run.
