@@ -271,7 +271,14 @@
 #ifndef _WIN32_WCE
 # include <sys/types.h>
 # include <sys/stat.h>
-#endif  // !_WIN32_WCE
+#elif _WIN32_WCE >= 0x800 // Windows Embedded Compact 2013
+// Forward declare instead of including <windows.h> / <windef.h> / <winnt.h>
+typedef wchar_t WCHAR;
+typedef WCHAR *PWCHAR, *LPWCH, *PWCH;
+typedef const WCHAR *LPCWCH, *PCWCH;
+typedef __readableTo(sentinel(0)) const WCHAR *LPCWSTR, *PCWSTR;
+typedef const WCHAR *LPCWCHAR, *PCWCHAR;
+#endif
 
 #if defined __APPLE__
 # include <AvailabilityMacros.h>
@@ -430,6 +437,8 @@
 // MinGW defined _CRITICAL_SECTION and _RTL_CRITICAL_SECTION as two
 // separate (equivalent) structs, instead of using typedef
 typedef struct _CRITICAL_SECTION GTEST_CRITICAL_SECTION;
+#elif _WIN32_WCE >= 0x800
+typedef struct CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #else
 // Assume CRITICAL_SECTION is a typedef of _RTL_CRITICAL_SECTION.
 // This assumption is verified by
@@ -2468,7 +2477,7 @@ inline char* StrDup(const char* src) { return _strdup(src); }
 # endif  // __BORLANDC__
 
 # if GTEST_OS_WINDOWS_MOBILE
-inline int FileNo(FILE* file) { return reinterpret_cast<int>(_fileno(file)); }
+inline int FileNo(FILE* file) { return static_cast<int>(_fileno(file)); }
 // Stat(), RmDir(), and IsDir() are not needed on Windows CE at this
 // time and thus not defined there.
 # else
