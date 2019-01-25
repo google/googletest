@@ -52,12 +52,12 @@
 #ifndef GTEST_INCLUDE_GTEST_GTEST_H_
 #define GTEST_INCLUDE_GTEST_GTEST_H_
 
+#include <cmath>
+#include <iomanip>
 #include <limits>
 #include <memory>
 #include <ostream>
 #include <vector>
-#include <iomanip>
-#include <cmath>
 
 #include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-string.h"
@@ -1787,14 +1787,15 @@ template <class R1, class R2, class T>
 AssertionResult FPNearPredFormat(const char* expr1, const char* expr2,
                                  const char* abs_error_expr, const R1& val1,
                                  const R2& val2, const T& abs_error) {
-  using namespace std;
+  using std::fabs;
   auto diff = fabs(val1 - val2);
   if (diff <= abs_error) {
     return AssertionSuccess();
   }
   return AssertionFailure()
-         << std::setprecision(
-                std::numeric_limits<typename std::decay<R1>::type>::max_digits10)
+         << std::setprecision(std::numeric_limits<
+                                  typename std::decay<R1>::type>::max_digits10 +
+                              2)
          << "The difference between " << expr1 << " and " << expr2 << " is "
          << diff << ", which exceeds " << abs_error_expr << ", where\n"
          << expr1 << " evaluates to " << val1 << ",\n"

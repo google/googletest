@@ -3103,6 +3103,101 @@ TEST_F(DoubleTest, DoubleLEFails) {
 }
 
 
+TEST(LongDoubleTest, EXPECT_NEAR) {
+  {
+    long double a = -1.0;
+    long double b = -1.1;
+    EXPECT_NEAR(a, b, 0.2);
+  }
+  {
+    long double a = -1.0;
+    long double b = -1.5;
+    EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(a, b, 0.25),  // NOLINT
+                            "The difference between a and b is 0.5, "
+                            "which exceeds 0.25, where\na evaluates to -1,\nb "
+                            "evaluates to -1.5, and\n0.25 evaluates to 0.25.");
+  }
+}
+
+TEST(LongDoubleTest, ASSERT_NEAR) {
+  {
+    long double a = -1.0;
+    long double b = -1.1;
+    ASSERT_NEAR(a, b, 0.2);
+  }
+  {
+    EXPECT_FATAL_FAILURE(long double a = -1.0; long double b = -1.5;
+                         ASSERT_NEAR(a, b, 0.25),  // NOLINT
+                         "The difference between a and b is 0.5, "
+                         "which exceeds 0.25, where\na evaluates to -1,\nb "
+                         "evaluates to -1.5, and\n0.25 evaluates to 0.25.");
+  }
+}
+
+// a custom floating-point like type which implements the minimal interface
+// required to test EXPECT_NEAR on a custom type
+class custom_real {
+  // internally stores as a double to prevent having to implement an actual
+  // custom real-like type
+  double value_;
+
+ public:
+  custom_real(double value) : value_(value) {}
+  custom_real(const custom_real& o) : value_(o.value_) {}
+
+  custom_real operator-(const custom_real& o) const {
+    return value_ - o.value_;
+  }
+  custom_real& operator-=(const custom_real& o) {
+    value_ -= o.value_;
+    return *this;
+  }
+
+  bool operator<(const custom_real& o) { return value_ < o.value_; }
+  bool operator<=(const custom_real& o) { return value_ <= o.value_; }
+
+  friend custom_real fabs(const custom_real& v);
+  friend std::ostream& operator<<(std::ostream& out, const custom_real& v);
+};
+
+static custom_real fabs(const custom_real& v) { return std::fabs(v.value_); }
+
+static std::ostream& operator<<(std::ostream& out, const custom_real& v) {
+  out << v.value_;
+  return out;
+}
+
+TEST(CustomRealTest, EXPECT_NEAR) {
+  {
+    custom_real a(-1.0);
+    custom_real b(-1.1);
+    EXPECT_NEAR(a, b, 0.2);
+  }
+  {
+    custom_real a(-1.0);
+    custom_real b(-1.5);
+    EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(a, b, 0.25),  // NOLINT
+                            "The difference between a and b is 0.5, "
+                            "which exceeds 0.25, where\na evaluates to -1,\nb "
+                            "evaluates to -1.5, and\n0.25 evaluates to 0.25.");
+  }
+}
+
+TEST(CustomRealTest, ASSERT_NEAR) {
+  {
+    custom_real a(-1.0);
+    custom_real b(-1.1);
+    ASSERT_NEAR(a, b, 0.2);
+  }
+  {
+    EXPECT_FATAL_FAILURE(custom_real a(-1.0); custom_real b(-1.5);
+                         ASSERT_NEAR(a, b, 0.25),  // NOLINT
+                         "The difference between a and b is 0.5, "
+                         "which exceeds 0.25, where\na evaluates to -1,\nb "
+                         "evaluates to -1.5, and\n0.25 evaluates to 0.25.");
+  }
+}
+
 // Verifies that a test or test case whose name starts with DISABLED_ is
 // not run.
 
