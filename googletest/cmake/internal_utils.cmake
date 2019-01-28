@@ -22,6 +22,8 @@ macro(fix_default_compiler_settings_)
     # This replacement code is taken from sample in the CMake Wiki at
     # https://gitlab.kitware.com/cmake/community/wikis/FAQ#dynamic-replace.
     foreach (flag_var
+             CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
+             CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
              CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
              CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
       if (NOT BUILD_SHARED_LIBS AND NOT gtest_force_shared_crt)
