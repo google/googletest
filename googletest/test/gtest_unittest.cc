@@ -3134,7 +3134,7 @@ TEST(LongDoubleTest, ASSERT_NEAR) {
   }
 }
 
-namespace {
+namespace custom_real_ns {
 // a custom floating-point like type which implements the minimal interface
 // required to test EXPECT_NEAR on a custom type
 class custom_real {
@@ -3143,62 +3143,71 @@ class custom_real {
   double value_;
 
  public:
-  custom_real(double value) : value_(value) {}
-  custom_real(const custom_real& o) : value_(o.value_) {}
-
-  custom_real operator-(const custom_real& o) const {
-    return value_ - o.value_;
+  explicit custom_real(double value) : value_(value) {}
+  friend custom_real operator-(custom_real l, custom_real r) {
+    return custom_real(l.value_ - r.value_);
   }
-  custom_real& operator-=(const custom_real& o) {
-    value_ -= o.value_;
-    return *this;
+  friend bool operator<(custom_real l, custom_real r) {
+    return l.value_ < r.value_;
   }
-
-  bool operator<(const custom_real& o) { return value_ < o.value_; }
-  bool operator<=(const custom_real& o) { return value_ <= o.value_; }
-
-  friend custom_real fabs(const custom_real& v);
-  friend std::ostream& operator<<(std::ostream& out, const custom_real& v);
+  friend bool operator>(custom_real l, custom_real r) {
+    return l.value_ > r.value_;
+  }
+  friend bool operator<=(custom_real l, custom_real r) {
+    return l.value_ <= r.value_;
+  }
+  friend bool operator>=(custom_real l, custom_real r) {
+    return l.value_ >= r.value_;
+  }
+  friend bool operator==(custom_real l, custom_real r) {
+    return l.value_ == r.value_;
+  }
+  friend bool operator!=(custom_real l, custom_real r) {
+    return l.value_ != r.value_;
+  }
+  friend std::ostream& operator<<(std::ostream& out, custom_real v) {
+    out << v.value_;
+    return out;
+  }
 };
-
-custom_real fabs(const custom_real& v) { return std::fabs(v.value_); }
-
-std::ostream& operator<<(std::ostream& out, const custom_real& v) {
-  out << v.value_;
-  return out;
-}
+}  // namespace custom_real_ns
 
 TEST(CustomRealTest, EXPECT_NEAR) {
   {
-    custom_real a(-1.0);
-    custom_real b(-1.1);
-    EXPECT_NEAR(a, b, 0.2);
+    custom_real_ns::custom_real a(-1.0);
+    custom_real_ns::custom_real b(-1.1);
+    EXPECT_NEAR(a, b, custom_real_ns::custom_real(0.2));
   }
   {
-    custom_real a(-1.0);
-    custom_real b(-1.5);
-    EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(a, b, 0.25),  // NOLINT
-                            "The difference between a and b is 0.5, "
-                            "which exceeds 0.25, where\na evaluates to -1,\nb "
-                            "evaluates to -1.5, and\n0.25 evaluates to 0.25.");
+    custom_real_ns::custom_real a(-1.0);
+    custom_real_ns::custom_real b(-1.5);
+    EXPECT_NONFATAL_FAILURE(
+        EXPECT_NEAR(a, b, custom_real_ns::custom_real(0.25)),  // NOLINT
+        "The difference between a and b is 0.5, "
+        "which exceeds custom_real_ns::custom_real(0.25), where\na evaluates "
+        "to -1,\nb "
+        "evaluates to -1.5, and\ncustom_real_ns::custom_real(0.25) evaluates "
+        "to 0.25.");
   }
 }
-
 TEST(CustomRealTest, ASSERT_NEAR) {
   {
-    custom_real a(-1.0);
-    custom_real b(-1.1);
-    ASSERT_NEAR(a, b, 0.2);
+    custom_real_ns::custom_real a(-1.0);
+    custom_real_ns::custom_real b(-1.1);
+    ASSERT_NEAR(a, b, custom_real_ns::custom_real(0.2));
   }
   {
-    EXPECT_FATAL_FAILURE(custom_real a(-1.0); custom_real b(-1.5);
-                         ASSERT_NEAR(a, b, 0.25),  // NOLINT
-                         "The difference between a and b is 0.5, "
-                         "which exceeds 0.25, where\na evaluates to -1,\nb "
-                         "evaluates to -1.5, and\n0.25 evaluates to 0.25.");
+    EXPECT_FATAL_FAILURE(
+        custom_real_ns::custom_real a(-1.0);
+        custom_real_ns::custom_real b(-1.5);
+        ASSERT_NEAR(a, b, custom_real_ns::custom_real(0.25)),  // NOLINT
+        "The difference between a and b is 0.5, "
+        "which exceeds custom_real_ns::custom_real(0.25), where\na evaluates "
+        "to -1,\nb "
+        "evaluates to -1.5, and\ncustom_real_ns::custom_real(0.25) evaluates "
+        "to 0.25.");
   }
 }
-}  // namespace
 
 // Verifies that a test or test case whose name starts with DISABLED_ is
 // not run.
