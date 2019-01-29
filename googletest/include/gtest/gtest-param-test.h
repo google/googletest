@@ -568,10 +568,10 @@ internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
   }                                                                           \
   static ::std::string gtest_##prefix##test_suite_name##_EvalGenerateName_(   \
       const ::testing::TestParamInfo<test_suite_name::ParamType>& info) {     \
-    return GTEST_EXPAND_(GTEST_GET_SECOND_(                                   \
+    return ((GTEST_EXPAND_(GTEST_GET_SECOND_(                                 \
         __VA_ARGS__,                                                          \
         ::testing::internal::DefaultParamName<test_suite_name::ParamType>,    \
-        DUMMY_PARAM_))(info);                                                 \
+        DUMMY_PARAM_))))(info);                                               \
   }                                                                           \
   static int gtest_##prefix##test_suite_name##_dummy_                         \
       GTEST_ATTRIBUTE_UNUSED_ =                                               \
