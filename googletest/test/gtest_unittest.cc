@@ -3147,23 +3147,11 @@ class custom_real {
   friend custom_real operator-(custom_real l, custom_real r) {
     return custom_real(l.value_ - r.value_);
   }
-  friend bool operator<(custom_real l, custom_real r) {
-    return l.value_ < r.value_;
-  }
   friend bool operator>(custom_real l, custom_real r) {
     return l.value_ > r.value_;
   }
   friend bool operator<=(custom_real l, custom_real r) {
     return l.value_ <= r.value_;
-  }
-  friend bool operator>=(custom_real l, custom_real r) {
-    return l.value_ >= r.value_;
-  }
-  friend bool operator==(custom_real l, custom_real r) {
-    return l.value_ == r.value_;
-  }
-  friend bool operator!=(custom_real l, custom_real r) {
-    return l.value_ != r.value_;
   }
   friend std::ostream& operator<<(std::ostream& out, custom_real v) {
     out << v.value_;
