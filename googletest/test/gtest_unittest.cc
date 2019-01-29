@@ -2140,7 +2140,7 @@ TEST_F(UnitTestRecordPropertyTest,
   EXPECT_NONFATAL_FAILURE(
       Test::RecordProperty("name", "1"),
       "'classname', 'name', 'status', 'time', 'type_param', 'value_param',"
-      " 'file', and 'line' are reserved");
+      " 'file', 'line', and 'result' are reserved");
 }
 
 class UnitTestRecordPropertyTestEnvironment : public Environment {
