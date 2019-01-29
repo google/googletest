@@ -52,7 +52,6 @@
 #ifndef GTEST_INCLUDE_GTEST_GTEST_H_
 #define GTEST_INCLUDE_GTEST_GTEST_H_
 
-#include <iomanip>
 #include <limits>
 #include <memory>
 #include <ostream>
