@@ -379,50 +379,6 @@ std::string DefaultParamName(const TestParamInfo<ParamType>& info) {
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 //
-// Parameterized test name overload helpers, which help the
-// INSTANTIATE_TEST_SUITE_P macro choose between the default parameterized
-// test name generator and user param name generator.
-template <class ParamType, class ParamNameGenFunctor>
-ParamNameGenFunctor GetParamNameGen(ParamNameGenFunctor func) {
-  return func;
-}
-
-template <class ParamType>
-struct ParamNameGenFunc {
-  typedef std::string Type(const TestParamInfo<ParamType>&);
-};
-
-template <class ParamType>
-typename ParamNameGenFunc<ParamType>::Type *GetParamNameGen() {
-  return DefaultParamName;
-}
-
-// INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
-//
-// Macroses allow to address an issue with zero element variadic macro
-
-#define EXPAND(X) X
-#define VA__GETFIRST(X, ...) X
-#define VA_GETFIRST(...) EXPAND(VA__GETFIRST(__VA_ARGS__, 0))
-#define VA_GETREST(X, ...) __VA_ARGS__
-
-// INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
-//
-// Function is intended to swallow 0 as last argument and call GetParamNameGen
-
-template <class ParamType>
-auto CreateParamGenerator(int) -> decltype(GetParamNameGen<ParamType>()) {
-  return GetParamNameGen<ParamType>();
-}
-
-template <class ParamType, class Arg>
-auto CreateParamGenerator(Arg&& arg, int) -> decltype(
-    GetParamNameGen<ParamType>(std::forward<Arg>(arg))) {
-  return GetParamNameGen<ParamType>(std::forward<Arg>(arg));
-}
-
-// INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
-//
 // Stores a parameter value and later creates tests parameterized with that
 // value.
 template <class TestClass>
@@ -525,7 +481,7 @@ class ParameterizedTestSuiteInfo : public ParameterizedTestSuiteInfoBase {
   using ParamType = typename TestSuite::ParamType;
   // A function that returns an instance of appropriate generator type.
   typedef ParamGenerator<ParamType>(GeneratorCreationFunc)();
-  typedef typename ParamNameGenFunc<ParamType>::Type ParamNameGeneratorFunc;
+  typedef std::string ParamNameGeneratorFunc(const TestParamInfo<ParamType>&);
 
   explicit ParameterizedTestSuiteInfo(const char* name,
                                       CodeLocation code_location)

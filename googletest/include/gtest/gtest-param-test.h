@@ -556,15 +556,20 @@ internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
 // alphanumeric characters or underscore. Because PrintToString adds quotes
 // to std::string and C strings, it won't work for these types.
 
+#define GTEST_GET_FIRST_(first, ...) first
+#define GTEST_GET_SECOND_(first, second, ...) second
+
 #define INSTANTIATE_TEST_SUITE_P(prefix, test_suite_name, ...)                \
   static ::testing::internal::ParamGenerator<test_suite_name::ParamType>      \
       gtest_##prefix##test_suite_name##_EvalGenerator_() {                    \
-    return VA_GETFIRST(__VA_ARGS__);                                          \
+    return GTEST_GET_FIRST_(__VA_ARGS__, DUMMY_PARAM_);                       \
   }                                                                           \
   static ::std::string gtest_##prefix##test_suite_name##_EvalGenerateName_(   \
       const ::testing::TestParamInfo<test_suite_name::ParamType>& info) {     \
-    return ::testing::internal::CreateParamGenerator<                         \
-        test_suite_name::ParamType>(VA_GETREST(__VA_ARGS__, 0))(info);        \
+    return GTEST_GET_SECOND_(                                                 \
+        __VA_ARGS__,                                                          \
+        ::testing::internal::DefaultParamName<test_suite_name::ParamType>,    \
+        DUMMY_PARAM_)(info);                                                  \
   }                                                                           \
   static int gtest_##prefix##test_suite_name##_dummy_                         \
       GTEST_ATTRIBUTE_UNUSED_ =                                               \
