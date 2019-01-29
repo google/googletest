@@ -378,26 +378,6 @@ std::string DefaultParamName(const TestParamInfo<ParamType>& info) {
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 //
-// Parameterized test name overload helpers, which help the
-// INSTANTIATE_TEST_SUITE_P macro choose between the default parameterized
-// test name generator and user param name generator.
-template <class ParamType, class ParamNameGenFunctor>
-ParamNameGenFunctor GetParamNameGen(ParamNameGenFunctor func) {
-  return func;
-}
-
-template <class ParamType>
-struct ParamNameGenFunc {
-  typedef std::string Type(const TestParamInfo<ParamType>&);
-};
-
-template <class ParamType>
-typename ParamNameGenFunc<ParamType>::Type *GetParamNameGen() {
-  return DefaultParamName;
-}
-
-// INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
-//
 // Stores a parameter value and later creates tests parameterized with that
 // value.
 template <class TestClass>
@@ -500,7 +480,7 @@ class ParameterizedTestSuiteInfo : public ParameterizedTestSuiteInfoBase {
   using ParamType = typename TestSuite::ParamType;
   // A function that returns an instance of appropriate generator type.
   typedef ParamGenerator<ParamType>(GeneratorCreationFunc)();
-  typedef typename ParamNameGenFunc<ParamType>::Type ParamNameGeneratorFunc;
+  typedef std::string ParamNameGeneratorFunc(const TestParamInfo<ParamType>&);
 
   explicit ParameterizedTestSuiteInfo(const char* name,
                                       CodeLocation code_location)
