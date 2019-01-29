@@ -1787,7 +1787,7 @@ template <class R1, class R2, class T>
 AssertionResult FPNearPredFormat(const char* expr1, const char* expr2,
                                  const char* abs_error_expr, const R1& val1,
                                  const R2& val2, const T& abs_error) {
-  using std::fabs;
+  auto diff = val1 > val2 ? val1 - val2 : val2 - val1;
   auto diff = fabs(val1 - val2);
   if (diff <= abs_error) {
     return AssertionSuccess();
