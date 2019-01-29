@@ -556,8 +556,9 @@ internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
 // alphanumeric characters or underscore. Because PrintToString adds quotes
 // to std::string and C strings, it won't work for these types.
 
-#define GTEST_GET_FIRST_(first, ...) first
-#define GTEST_GET_SECOND_(first, second, ...) second
+#define GTEST_EXPAND_(arg) arg
+#define GTEST_GET_FIRST_(first, ...) GTEST_EXPAND_(first)
+#define GTEST_GET_SECOND_(first, second, ...) GTEST_EXPAND_(second)
 
 #define INSTANTIATE_TEST_SUITE_P(prefix, test_suite_name, ...)                \
   static ::testing::internal::ParamGenerator<test_suite_name::ParamType>      \
