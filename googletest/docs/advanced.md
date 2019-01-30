@@ -1198,7 +1198,7 @@ also supports per-test-suite set-up/tear-down. To use it:
 1.  Outside your test fixture class (typically just below it), define those
     member variables, optionally giving them initial values.
 1.  In the same test fixture class, define a `static void SetUpTestSuite()`
-    function (remember not to spell it as **`SetupTestSuite`** with a small `u`!)
+    function (remember not to spell it as **`SetUpTestSuite`** with a small `u`!)
     to set up the shared resources and a `static void TearDownTestSuite()`
     function to tear them down.
 
