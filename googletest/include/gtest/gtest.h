@@ -2187,6 +2187,49 @@ GTEST_API_ AssertionResult DoubleLE(const char* expr1, const char* expr2,
                                     double val1, double val2);
 
 
+// Macros for testing exact exception type thrown with the exact e.what().
+//
+//    * {ASSERT|EXPECT}_WHAT_THROW(thrower_statement,
+//                                 expected_exception_type,
+//                                 what_expected):
+//    Helps {ASSERT|EXPECT}_EQ the "what()" of exception that is thrown.
+//    Example: {ASSERT|EXPECT}_WHAT_THROW({ThrowsForNegative(-1);},
+//                                        std::out_of_range,
+//                                        "Err: because negative");
+
+#define EXPECT_WHAT_THROW(thrower_statement, expected_exception_type, \
+                          what_expected)                              \
+  do {                                                                \
+    try {                                                             \
+      thrower_statement                                               \
+      GTEST_FAIL() << "No exception was thrown.";                     \
+    }                                                                 \
+    catch (const expected_exception_type& error) {                    \
+      EXPECT_EQ(error.what(), std::string(what_expected));            \
+    }                                                                 \
+    catch (...) {                                                     \
+      GTEST_FAIL() << "Different exception than '"                    \
+                   << what_expected << "' was thrown.";               \
+    }                                                                 \
+  } while (0)
+
+#define ASSERT_WHAT_THROW(thrower_statement, expected_exception_type, \
+                          what_expected)                              \
+  do {                                                                \
+    try {                                                             \
+      thrower_statement                                               \
+      GTEST_FAIL() << "No exception was thrown.";                     \
+    }                                                                 \
+    catch (const expected_exception_type& error) {                    \
+      ASSERT_EQ(error.what(), std::string(what_expected));            \
+    }                                                                 \
+    catch (...) {                                                     \
+      GTEST_FAIL() << "Different exception than '"                    \
+                   << what_expected << "' was thrown.";               \
+    }                                                                 \
+  } while (0)
+
+
 #if GTEST_OS_WINDOWS
 
 // Macros that test for HRESULT failure and success, these are only useful
