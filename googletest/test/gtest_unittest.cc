@@ -3807,7 +3807,7 @@ TEST(AssertionTest, ASSERT_NO_THROW) {
   EXPECT_FATAL_FAILURE(ASSERT_NO_THROW(ThrowAnException("blablubb")),
                        "Expected: ThrowAnException(\"blablubb\") "
                        "doesn't throw an exception.\n  "
-                       "Actual: it throws: blablubb");
+                       "Actual: it throws.: blablubb");
 }
 
 // Tests ASSERT_ANY_THROW.
@@ -4548,7 +4548,7 @@ TEST(ExpectTest, EXPECT_NO_THROW) {
   EXPECT_NONFATAL_FAILURE(EXPECT_NO_THROW(ThrowAnException("blablubb")),
                           "Expected: ThrowAnException(\"blablubb\") "
                           "doesn't throw an exception.\n  "
-                          "Actual: it throws: blablubb");
+                          "Actual: it throws.: blablubb");
 }
 
 // Tests EXPECT_ANY_THROW.

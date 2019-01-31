@@ -1367,7 +1367,7 @@ class AdditionalMessage {
   } else \
     GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__): \
       fail(("Expected: " #statement " doesn't throw an exception.\n" \
-           "  Actual: it throws" + message.get()).c_str())
+           "  Actual: it throws." + message.get()).c_str())
 
 #define GTEST_TEST_ANY_THROW_(statement, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
