@@ -1164,8 +1164,8 @@ TEST(AnyOfArrayTest, BasicForms) {
   EXPECT_THAT(0, Not(AnyOfArray(ar, 0)));
   EXPECT_THAT(1, AnyOfArray(ar, 1));
   EXPECT_THAT(2, Not(AnyOfArray(ar, 1)));
-  EXPECT_THAT(3, AnyOfArray(ar + 1, 3));
-  EXPECT_THAT(4, Not(AnyOfArray(ar + 1, 3)));
+  EXPECT_THAT(3, AnyOfArray(ar + 1, 2));
+  EXPECT_THAT(4, Not(AnyOfArray(ar + 1, 2)));
   // Array
   // int ar0[0];  Not usable
   int ar1[1] = {1};
