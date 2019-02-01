@@ -56,6 +56,7 @@ Google test has been used on a variety of platforms:
   * MinGW
   * Windows Mobile
   * Symbian
+  * PlatformIO
 
 ## Who Is Using Google Test? ##
 
