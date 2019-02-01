@@ -55,7 +55,7 @@ std::vector<std::string> GetParamsToTest() {
   const char *c_params = getenv("GREETERTEST_PARAMS");
   GTEST_DISABLE_MSC_DEPRECATED_POP_()
 
-  std::string params = c_params ? c_params : "";
+  const std::string params = c_params ? c_params : "";
   return split(params);
 }
 
