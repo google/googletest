@@ -58,6 +58,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include "gtest/gtest-message.h"
@@ -91,7 +92,7 @@ class Message;                         // Represents a failure message.
 class Test;                            // Represents a test.
 class TestInfo;                        // Information about a test.
 class TestPartResult;                  // Result of a test part.
-class UnitTest;                        // A collection of test cases.
+class UnitTest;                        // A collection of test suites.
 
 template <typename T>
 ::std::string PrintToString(const T& value);
@@ -106,12 +107,35 @@ class UnitTestImpl;                    // Opaque implementation of UnitTest
 // stack trace.
 GTEST_API_ extern const char kStackTraceMarker[];
 
+// An IgnoredValue object can be implicitly constructed from ANY value.
+class IgnoredValue {
+  struct Sink {};
+ public:
+  // This constructor template allows any value to be implicitly
+  // converted to IgnoredValue.  The object has no data member and
+  // doesn't try to remember anything about the argument.  We
+  // deliberately omit the 'explicit' keyword in order to allow the
+  // conversion to be implicit.
+  // Disable the conversion if T already has a magical conversion operator.
+  // Otherwise we get ambiguity.
+  template <typename T,
+            typename std::enable_if<!std::is_convertible<T, Sink>::value,
+                                    int>::type = 0>
+  IgnoredValue(const T& /* ignored */) {}  // NOLINT(runtime/explicit)
+};
+
+// The only type that should be convertible to Secret* is nullptr.
+// The other null pointer constants are not of a type that is convertible to
+// Secret*. Only the literal with the right value is.
+template <typename T>
+using TypeIsValidNullptrConstant = std::integral_constant<
+    bool, std::is_same<typename std::decay<T>::type, std::nullptr_t>::value ||
+              !std::is_convertible<T, Secret*>::value>;
+
 // Two overloaded helpers for checking at compile time whether an
 // expression is a null pointer literal (i.e. NULL or any 0-valued
-// compile-time integral constant).  Their return values have
-// different sizes, so we can use sizeof() to test which version is
-// picked by the compiler.  These helpers have no implementations, as
-// we only need their signatures.
+// compile-time integral constant).  These helpers have no
+// implementations, as we only need their signatures.
 //
 // Given IsNullLiteralHelper(x), the compiler will pick the first
 // version if x can be implicitly converted to Secret*, and pick the
@@ -120,20 +144,16 @@ GTEST_API_ extern const char kStackTraceMarker[];
 // a null pointer literal.  Therefore, we know that x is a null
 // pointer literal if and only if the first version is picked by the
 // compiler.
-char IsNullLiteralHelper(Secret* p);
-char (&IsNullLiteralHelper(...))[2];  // NOLINT
+std::true_type IsNullLiteralHelper(Secret*, std::true_type);
+std::false_type IsNullLiteralHelper(IgnoredValue, std::false_type);
+std::false_type IsNullLiteralHelper(IgnoredValue, std::true_type);
 
-// A compile-time bool constant that is true if and only if x is a
-// null pointer literal (i.e. NULL or any 0-valued compile-time
-// integral constant).
-#ifdef GTEST_ELLIPSIS_NEEDS_POD_
-// We lose support for NULL detection where the compiler doesn't like
-// passing non-POD classes through ellipsis (...).
-# define GTEST_IS_NULL_LITERAL_(x) false
-#else
-# define GTEST_IS_NULL_LITERAL_(x) \
-    (sizeof(::testing::internal::IsNullLiteralHelper(x)) == 1)
-#endif  // GTEST_ELLIPSIS_NEEDS_POD_
+// A compile-time bool constant that is true if and only if x is a null pointer
+// literal (i.e. nullptr, NULL or any 0-valued compile-time integral constant).
+#define GTEST_IS_NULL_LITERAL_(x)                    \
+  decltype(::testing::internal::IsNullLiteralHelper( \
+      x,                                             \
+      ::testing::internal::TypeIsValidNullptrConstant<decltype(x)>()))::value
 
 // Appends the user-supplied message to the Google-Test-generated message.
 GTEST_API_ std::string AppendUserMessage(
@@ -409,7 +429,7 @@ typedef FloatingPoint<float> Float;
 typedef FloatingPoint<double> Double;
 
 // In order to catch the mistake of putting tests that use different
-// test fixture classes in the same test case, we need to assign
+// test fixture classes in the same test suite, we need to assign
 // unique IDs to fixture classes and compare them.  The TypeId type is
 // used to hold such IDs.  The user should treat TypeId as an opaque
 // type: the only operation allowed on TypeId values is to compare
@@ -485,9 +505,9 @@ GTEST_API_ AssertionResult IsHRESULTFailure(const char* expr,
 
 #endif  // GTEST_OS_WINDOWS
 
-// Types of SetUpTestCase() and TearDownTestCase() functions.
-typedef void (*SetUpTestCaseFunc)();
-typedef void (*TearDownTestCaseFunc)();
+// Types of SetUpTestSuite() and TearDownTestSuite() functions.
+using SetUpTestSuiteFunc = void (*)();
+using TearDownTestSuiteFunc = void (*)();
 
 struct CodeLocation {
   CodeLocation(const std::string& a_file, int a_line)
@@ -497,12 +517,60 @@ struct CodeLocation {
   int line;
 };
 
+//  Helper to identify which setup function for TestCase / TestSuite to call.
+//  Only one function is allowed, either TestCase or TestSute but not both.
+
+// Utility functions to help SuiteApiResolver
+using SetUpTearDownSuiteFuncType = void (*)();
+
+inline SetUpTearDownSuiteFuncType GetNotDefaultOrNull(
+    SetUpTearDownSuiteFuncType a, SetUpTearDownSuiteFuncType def) {
+  return a == def ? nullptr : a;
+}
+
+template <typename T>
+//  Note that SuiteApiResolver inherits from T because
+//  SetUpTestSuite()/TearDownTestSuite() could be protected. Ths way
+//  SuiteApiResolver can access them.
+struct SuiteApiResolver : T {
+  // testing::Test is only forward declared at this point. So we make it a
+  // dependend class for the compiler to be OK with it.
+  using Test =
+      typename std::conditional<sizeof(T) != 0, ::testing::Test, void>::type;
+
+  static SetUpTearDownSuiteFuncType GetSetUpCaseOrSuite() {
+    SetUpTearDownSuiteFuncType test_case_fp =
+        GetNotDefaultOrNull(&T::SetUpTestCase, &Test::SetUpTestCase);
+    SetUpTearDownSuiteFuncType test_suite_fp =
+        GetNotDefaultOrNull(&T::SetUpTestSuite, &Test::SetUpTestSuite);
+
+    GTEST_CHECK_(!test_case_fp || !test_suite_fp)
+        << "Test can not provide both SetUpTestSuite and SetUpTestCase, please "
+           "make sure there is only one present ";
+
+    return test_case_fp != nullptr ? test_case_fp : test_suite_fp;
+  }
+
+  static SetUpTearDownSuiteFuncType GetTearDownCaseOrSuite() {
+    SetUpTearDownSuiteFuncType test_case_fp =
+        GetNotDefaultOrNull(&T::TearDownTestCase, &Test::TearDownTestCase);
+    SetUpTearDownSuiteFuncType test_suite_fp =
+        GetNotDefaultOrNull(&T::TearDownTestSuite, &Test::TearDownTestSuite);
+
+    GTEST_CHECK_(!test_case_fp || !test_suite_fp)
+        << "Test can not provide both TearDownTestSuite and TearDownTestCase,"
+           " please make sure there is only one present ";
+
+    return test_case_fp != nullptr ? test_case_fp : test_suite_fp;
+  }
+};
+
 // Creates a new TestInfo object and registers it with Google Test;
 // returns the created object.
 //
 // Arguments:
 //
-//   test_case_name:   name of the test case
+//   test_suite_name:   name of the test suite
 //   name:             name of the test
 //   type_param        the name of the test's type parameter, or NULL if
 //                     this is not a typed or a type-parameterized test.
@@ -510,21 +578,16 @@ struct CodeLocation {
 //                     or NULL if this is not a type-parameterized test.
 //   code_location:    code location where the test is defined
 //   fixture_class_id: ID of the test fixture class
-//   set_up_tc:        pointer to the function that sets up the test case
-//   tear_down_tc:     pointer to the function that tears down the test case
+//   set_up_tc:        pointer to the function that sets up the test suite
+//   tear_down_tc:     pointer to the function that tears down the test suite
 //   factory:          pointer to the factory that creates a test object.
 //                     The newly created TestInfo instance will assume
 //                     ownership of the factory object.
 GTEST_API_ TestInfo* MakeAndRegisterTestInfo(
-    const char* test_case_name,
-    const char* name,
-    const char* type_param,
-    const char* value_param,
-    CodeLocation code_location,
-    TypeId fixture_class_id,
-    SetUpTestCaseFunc set_up_tc,
-    TearDownTestCaseFunc tear_down_tc,
-    TestFactoryBase* factory);
+    const char* test_suite_name, const char* name, const char* type_param,
+    const char* value_param, CodeLocation code_location,
+    TypeId fixture_class_id, SetUpTestSuiteFunc set_up_tc,
+    TearDownTestSuiteFunc tear_down_tc, TestFactoryBase* factory);
 
 // If *pstr starts with the given prefix, modifies *pstr to be right
 // past the prefix and returns true; otherwise leaves *pstr unchanged
@@ -536,19 +599,20 @@ GTEST_API_ bool SkipPrefix(const char* prefix, const char** pstr);
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
 /* class A needs to have dll-interface to be used by clients of class B */)
 
-// State of the definition of a type-parameterized test case.
-class GTEST_API_ TypedTestCasePState {
+// State of the definition of a type-parameterized test suite.
+class GTEST_API_ TypedTestSuitePState {
  public:
-  TypedTestCasePState() : registered_(false) {}
+  TypedTestSuitePState() : registered_(false) {}
 
   // Adds the given test name to defined_test_names_ and return true
-  // if the test case hasn't been registered; otherwise aborts the
+  // if the test suite hasn't been registered; otherwise aborts the
   // program.
   bool AddTestName(const char* file, int line, const char* case_name,
                    const char* test_name) {
     if (registered_) {
-      fprintf(stderr, "%s Test %s must be defined before "
-              "REGISTER_TYPED_TEST_CASE_P(%s, ...).\n",
+      fprintf(stderr,
+              "%s Test %s must be defined before "
+              "REGISTER_TYPED_TEST_SUITE_P(%s, ...).\n",
               FormatFileLocation(file, line).c_str(), test_name, case_name);
       fflush(stderr);
       posix::Abort();
@@ -580,6 +644,11 @@ class GTEST_API_ TypedTestCasePState {
   bool registered_;
   RegisteredTestsMap registered_tests_;
 };
+
+//  Legacy API is deprecated but still available
+#ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
+using TypedTestCasePState = TypedTestSuitePState;
+#endif  //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
 GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 
@@ -648,7 +717,7 @@ template <GTEST_TEMPLATE_ Fixture, class TestSel, typename Types>
 class TypeParameterizedTest {
  public:
   // 'index' is the index of the test in the type list 'Types'
-  // specified in INSTANTIATE_TYPED_TEST_CASE_P(Prefix, TestCase,
+  // specified in INSTANTIATE_TYPED_TEST_SUITE_P(Prefix, TestSuite,
   // Types).  Valid values for 'index' are [0, N - 1] where N is the
   // length of Types.
   static bool Register(const char* prefix, const CodeLocation& code_location,
@@ -668,8 +737,10 @@ class TypeParameterizedTest {
         StripTrailingSpaces(GetPrefixUntilComma(test_names)).c_str(),
         GetTypeName<Type>().c_str(),
         nullptr,  // No value parameter.
-        code_location, GetTypeId<FixtureClass>(), TestClass::SetUpTestCase,
-        TestClass::TearDownTestCase, new TestFactoryImpl<TestClass>);
+        code_location, GetTypeId<FixtureClass>(),
+        SuiteApiResolver<TestClass>::GetSetUpCaseOrSuite(),
+        SuiteApiResolver<TestClass>::GetTearDownCaseOrSuite(),
+        new TestFactoryImpl<TestClass>);
 
     // Next, recurses (at compile time) with the tail of the type list.
     return TypeParameterizedTest<Fixture, TestSel,
@@ -695,15 +766,15 @@ class TypeParameterizedTest<Fixture, TestSel, Types0> {
   }
 };
 
-// TypeParameterizedTestCase<Fixture, Tests, Types>::Register()
+// TypeParameterizedTestSuite<Fixture, Tests, Types>::Register()
 // registers *all combinations* of 'Tests' and 'Types' with Google
 // Test.  The return value is insignificant - we just need to return
 // something such that we can call this function in a namespace scope.
 template <GTEST_TEMPLATE_ Fixture, typename Tests, typename Types>
-class TypeParameterizedTestCase {
+class TypeParameterizedTestSuite {
  public:
   static bool Register(const char* prefix, CodeLocation code_location,
-                       const TypedTestCasePState* state, const char* case_name,
+                       const TypedTestSuitePState* state, const char* case_name,
                        const char* test_names,
                        const std::vector<std::string>& type_names =
                            GenerateNames<DefaultNameGenerator, Types>()) {
@@ -726,20 +797,20 @@ class TypeParameterizedTestCase {
         prefix, test_location, case_name, test_names, 0, type_names);
 
     // Next, recurses (at compile time) with the tail of the test list.
-    return TypeParameterizedTestCase<Fixture, typename Tests::Tail,
-                                     Types>::Register(prefix, code_location,
-                                                      state, case_name,
-                                                      SkipComma(test_names),
-                                                      type_names);
+    return TypeParameterizedTestSuite<Fixture, typename Tests::Tail,
+                                      Types>::Register(prefix, code_location,
+                                                       state, case_name,
+                                                       SkipComma(test_names),
+                                                       type_names);
   }
 };
 
 // The base case for the compile time recursion.
 template <GTEST_TEMPLATE_ Fixture, typename Types>
-class TypeParameterizedTestCase<Fixture, Templates0, Types> {
+class TypeParameterizedTestSuite<Fixture, Templates0, Types> {
  public:
   static bool Register(const char* /*prefix*/, const CodeLocation&,
-                       const TypedTestCasePState* /*state*/,
+                       const TypedTestSuitePState* /*state*/,
                        const char* /*case_name*/, const char* /*test_names*/,
                        const std::vector<std::string>& =
                            std::vector<std::string>() /*type_names*/) {
@@ -849,62 +920,14 @@ struct RemoveConst<const T[N]> {
 #define GTEST_REMOVE_REFERENCE_AND_CONST_(T) \
     GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(T))
 
-// ImplicitlyConvertible<From, To>::value is a compile-time bool
-// constant that's true iff type From can be implicitly converted to
-// type To.
-template <typename From, typename To>
-class ImplicitlyConvertible {
- private:
-  // We need the following helper functions only for their types.
-  // They have no implementations.
-
-  // MakeFrom() is an expression whose type is From.  We cannot simply
-  // use From(), as the type From may not have a public default
-  // constructor.
-  static typename AddReference<From>::type MakeFrom();
-
-  // These two functions are overloaded.  Given an expression
-  // Helper(x), the compiler will pick the first version if x can be
-  // implicitly converted to type To; otherwise it will pick the
-  // second version.
-  //
-  // The first version returns a value of size 1, and the second
-  // version returns a value of size 2.  Therefore, by checking the
-  // size of Helper(x), which can be done at compile time, we can tell
-  // which version of Helper() is used, and hence whether x can be
-  // implicitly converted to type To.
-  static char Helper(To);
-  static char (&Helper(...))[2];  // NOLINT
-
-  // We have to put the 'public' section after the 'private' section,
-  // or MSVC refuses to compile the code.
- public:
-#if defined(__BORLANDC__)
-  // C++Builder cannot use member overload resolution during template
-  // instantiation.  The simplest workaround is to use its C++0x type traits
-  // functions (C++Builder 2009 and above only).
-  static const bool value = __is_convertible(From, To);
-#else
-  // MSVC warns about implicitly converting from double to int for
-  // possible loss of data, so we need to temporarily disable the
-  // warning.
-  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4244)
-  static const bool value =
-      sizeof(Helper(ImplicitlyConvertible::MakeFrom())) == 1;
-  GTEST_DISABLE_MSC_WARNINGS_POP_()
-#endif  // __BORLANDC__
-};
-template <typename From, typename To>
-const bool ImplicitlyConvertible<From, To>::value;
-
 // IsAProtocolMessage<T>::value is a compile-time bool constant that's
 // true iff T is type ProtocolMessage, proto2::Message, or a subclass
 // of those.
 template <typename T>
 struct IsAProtocolMessage
     : public bool_constant<
-  ImplicitlyConvertible<const T*, const ::ProtocolMessage*>::value ||
-  ImplicitlyConvertible<const T*, const ::proto2::Message*>::value> {
+  std::is_convertible<const T*, const ::ProtocolMessage*>::value ||
+  std::is_convertible<const T*, const ::proto2::Message*>::value> {
 };
 
 // When the compiler sees expression IsContainerTest<C>(0), if C is an
@@ -967,37 +990,24 @@ struct IsHashTable {
 template <typename T>
 const bool IsHashTable<T>::value;
 
-template<typename T>
-struct VoidT {
-    typedef void value_type;
-};
-
-template <typename T, typename = void>
-struct HasValueType : false_type {};
-template <typename T>
-struct HasValueType<T, VoidT<typename T::value_type> > : true_type {
-};
-
 template <typename C,
-          bool = sizeof(IsContainerTest<C>(0)) == sizeof(IsContainer),
-          bool = HasValueType<C>::value>
+          bool = sizeof(IsContainerTest<C>(0)) == sizeof(IsContainer)>
 struct IsRecursiveContainerImpl;
 
-template <typename C, bool HV>
-struct IsRecursiveContainerImpl<C, false, HV> : public false_type {};
+template <typename C>
+struct IsRecursiveContainerImpl<C, false> : public false_type {};
 
 // Since the IsRecursiveContainerImpl depends on the IsContainerTest we need to
 // obey the same inconsistencies as the IsContainerTest, namely check if
 // something is a container is relying on only const_iterator in C++11 and
 // is relying on both const_iterator and iterator otherwise
 template <typename C>
-struct IsRecursiveContainerImpl<C, true, false> : public false_type {};
-
-template <typename C>
-struct IsRecursiveContainerImpl<C, true, true> {
-  typedef typename IteratorTraits<typename C::const_iterator>::value_type
-      value_type;
-  typedef is_same<value_type, C> type;
+struct IsRecursiveContainerImpl<C, true> {
+  using value_type = decltype(*std::declval<typename C::const_iterator>());
+  using type =
+      is_same<typename std::remove_const<
+                  typename std::remove_reference<value_type>::type>::type,
+              C>;
 };
 
 // IsRecursiveContainer<Type> is a unary compile-time predicate that
@@ -1386,32 +1396,35 @@ class FlatTuple
            "  Actual: it does.")
 
 // Expands to the name of the class that implements the given test.
-#define GTEST_TEST_CLASS_NAME_(test_case_name, test_name) \
-  test_case_name##_##test_name##_Test
+#define GTEST_TEST_CLASS_NAME_(test_suite_name, test_name) \
+  test_suite_name##_##test_name##_Test
 
 // Helper macro for defining tests.
-#define GTEST_TEST_(test_case_name, test_name, parent_class, parent_id)       \
-  class GTEST_TEST_CLASS_NAME_(test_case_name, test_name)                     \
+#define GTEST_TEST_(test_suite_name, test_name, parent_class, parent_id)      \
+  class GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)                    \
       : public parent_class {                                                 \
    public:                                                                    \
-    GTEST_TEST_CLASS_NAME_(test_case_name, test_name)() {}                    \
+    GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)() {}                   \
                                                                               \
    private:                                                                   \
     virtual void TestBody();                                                  \
     static ::testing::TestInfo* const test_info_ GTEST_ATTRIBUTE_UNUSED_;     \
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(GTEST_TEST_CLASS_NAME_(test_case_name,    \
+    GTEST_DISALLOW_COPY_AND_ASSIGN_(GTEST_TEST_CLASS_NAME_(test_suite_name,   \
                                                            test_name));       \
   };                                                                          \
                                                                               \
-  ::testing::TestInfo* const GTEST_TEST_CLASS_NAME_(test_case_name,           \
+  ::testing::TestInfo* const GTEST_TEST_CLASS_NAME_(test_suite_name,          \
                                                     test_name)::test_info_ =  \
       ::testing::internal::MakeAndRegisterTestInfo(                           \
-          #test_case_name, #test_name, nullptr, nullptr,                      \
+          #test_suite_name, #test_name, nullptr, nullptr,                     \
           ::testing::internal::CodeLocation(__FILE__, __LINE__), (parent_id), \
-          parent_class::SetUpTestCase, parent_class::TearDownTestCase,        \
+          ::testing::internal::SuiteApiResolver<                              \
+              parent_class>::GetSetUpCaseOrSuite(),                           \
+          ::testing::internal::SuiteApiResolver<                              \
+              parent_class>::GetTearDownCaseOrSuite(),                        \
           new ::testing::internal::TestFactoryImpl<GTEST_TEST_CLASS_NAME_(    \
-              test_case_name, test_name)>);                                   \
-  void GTEST_TEST_CLASS_NAME_(test_case_name, test_name)::TestBody()
+              test_suite_name, test_name)>);                                  \
+  void GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::TestBody()
 
 // Internal Macro to mark an API deprecated, for googletest usage only
 // Usage: class GTEST_INTERNAL_DEPRECATED(message) MyClass or

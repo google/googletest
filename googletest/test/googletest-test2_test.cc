@@ -46,16 +46,16 @@ ParamGenerator<int> extern_gen_2 = Values(33);
 // and instantiated in another. The test is defined in
 // googletest-param-test-test.cc and ExternalInstantiationTest fixture class is
 // defined in gtest-param-test_test.h.
-INSTANTIATE_TEST_CASE_P(MultiplesOf33,
-                        ExternalInstantiationTest,
-                        Values(33, 66));
+INSTANTIATE_TEST_SUITE_P(MultiplesOf33,
+                         ExternalInstantiationTest,
+                         Values(33, 66));
 
 // Tests that a parameterized test case can be instantiated
 // in multiple translation units. Another instantiation is defined
 // in googletest-param-test-test.cc and
-// InstantiationInMultipleTranslaionUnitsTest fixture is defined in
+// InstantiationInMultipleTranslationUnitsTest fixture is defined in
 // gtest-param-test_test.h
-INSTANTIATE_TEST_CASE_P(Sequence2,
-                        InstantiationInMultipleTranslaionUnitsTest,
-                        Values(42*3, 42*4, 42*5));
+INSTANTIATE_TEST_SUITE_P(Sequence2,
+                         InstantiationInMultipleTranslationUnitsTest,
+                         Values(42*3, 42*4, 42*5));
 

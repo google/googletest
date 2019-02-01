@@ -89,9 +89,9 @@ if SUPPORTS_SEH_EXCEPTIONS:
       self.assert_('SEH exception with code 0x2a thrown '
                    'in the test fixture\'s destructor'
                    in test_output)
-      self.assert_('SEH exception with code 0x2a thrown in SetUpTestCase()'
+      self.assert_('SEH exception with code 0x2a thrown in SetUpTestSuite()'
                    in test_output)
-      self.assert_('SEH exception with code 0x2a thrown in TearDownTestCase()'
+      self.assert_('SEH exception with code 0x2a thrown in TearDownTestSuite()'
                    in test_output)
       self.assert_('SEH exception with code 0x2a thrown in SetUp()'
                    in test_output)
@@ -134,43 +134,41 @@ class CatchCxxExceptionsTest(gtest_test_utils.TestCase):
                    '"Standard C++ exception" thrown '
                    'in the test fixture\'s destructor'
                    in EX_BINARY_OUTPUT)
-      self.assert_('CxxExceptionInDestructorTest::TearDownTestCase() '
+      self.assert_('CxxExceptionInDestructorTest::TearDownTestSuite() '
                    'called as expected.'
                    in EX_BINARY_OUTPUT)
 
   def testCatchesCxxExceptionsInSetUpTestCase(self):
     self.assert_('C++ exception with description "Standard C++ exception"'
-                 ' thrown in SetUpTestCase()'
-                 in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInConstructorTest::TearDownTestCase() '
+                 ' thrown in SetUpTestSuite()' in EX_BINARY_OUTPUT)
+    self.assert_('CxxExceptionInConstructorTest::TearDownTestSuite() '
                  'called as expected.'
                  in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInSetUpTestCaseTest constructor '
+    self.assert_('CxxExceptionInSetUpTestSuiteTest constructor '
                  'called as expected.'
                  in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInSetUpTestCaseTest destructor '
+    self.assert_('CxxExceptionInSetUpTestSuiteTest destructor '
                  'called as expected.'
                  in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInSetUpTestCaseTest::SetUp() '
+    self.assert_('CxxExceptionInSetUpTestSuiteTest::SetUp() '
                  'called as expected.'
                  in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInSetUpTestCaseTest::TearDown() '
+    self.assert_('CxxExceptionInSetUpTestSuiteTest::TearDown() '
                  'called as expected.'
                  in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInSetUpTestCaseTest test body '
+    self.assert_('CxxExceptionInSetUpTestSuiteTest test body '
                  'called as expected.'
                  in EX_BINARY_OUTPUT)
 
   def testCatchesCxxExceptionsInTearDownTestCase(self):
     self.assert_('C++ exception with description "Standard C++ exception"'
-                 ' thrown in TearDownTestCase()'
-                 in EX_BINARY_OUTPUT)
+                 ' thrown in TearDownTestSuite()' in EX_BINARY_OUTPUT)
 
   def testCatchesCxxExceptionsInSetUp(self):
     self.assert_('C++ exception with description "Standard C++ exception"'
                  ' thrown in SetUp()'
                  in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInSetUpTest::TearDownTestCase() '
+    self.assert_('CxxExceptionInSetUpTest::TearDownTestSuite() '
                  'called as expected.'
                  in EX_BINARY_OUTPUT)
     self.assert_('CxxExceptionInSetUpTest destructor '
@@ -188,7 +186,7 @@ class CatchCxxExceptionsTest(gtest_test_utils.TestCase):
     self.assert_('C++ exception with description "Standard C++ exception"'
                  ' thrown in TearDown()'
                  in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInTearDownTest::TearDownTestCase() '
+    self.assert_('CxxExceptionInTearDownTest::TearDownTestSuite() '
                  'called as expected.'
                  in EX_BINARY_OUTPUT)
     self.assert_('CxxExceptionInTearDownTest destructor '
@@ -199,7 +197,7 @@ class CatchCxxExceptionsTest(gtest_test_utils.TestCase):
     self.assert_('C++ exception with description "Standard C++ exception"'
                  ' thrown in the test body'
                  in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInTestBodyTest::TearDownTestCase() '
+    self.assert_('CxxExceptionInTestBodyTest::TearDownTestSuite() '
                  'called as expected.'
                  in EX_BINARY_OUTPUT)
     self.assert_('CxxExceptionInTestBodyTest destructor '

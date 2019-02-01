@@ -37,28 +37,19 @@
 #include <string.h>
 #include <algorithm>
 #include <deque>
+#include <forward_list>
 #include <list>
 #include <map>
 #include <set>
 #include <sstream>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
 #include "gtest/gtest-printers.h"
 #include "gtest/gtest.h"
-
-#if GTEST_HAS_UNORDERED_MAP_
-# include <unordered_map>  // NOLINT
-#endif  // GTEST_HAS_UNORDERED_MAP_
-
-#if GTEST_HAS_UNORDERED_SET_
-# include <unordered_set>  // NOLINT
-#endif  // GTEST_HAS_UNORDERED_SET_
-
-#if GTEST_HAS_STD_FORWARD_LIST_
-# include <forward_list> // NOLINT
-#endif  // GTEST_HAS_STD_FORWARD_LIST_
 
 // Some user-defined types for testing the universal value printer.
 
@@ -192,7 +183,13 @@ class PathLike {
  public:
   struct iterator {
     typedef PathLike value_type;
+
+    iterator& operator++();
+    PathLike& operator*();
   };
+
+  using value_type = char;
+  using const_iterator = iterator;
 
   PathLike() {}
 
@@ -814,7 +811,6 @@ TEST(PrintStlContainerTest, NonEmptyDeque) {
   EXPECT_EQ("{ 1, 3 }", Print(non_empty));
 }
 
-#if GTEST_HAS_UNORDERED_MAP_
 
 TEST(PrintStlContainerTest, OneElementHashMap) {
   ::std::unordered_map<int, char> map1;
@@ -834,9 +830,7 @@ TEST(PrintStlContainerTest, HashMultiMap) {
                   << " where Print(map1) returns \"" << result << "\".";
 }
 
-#endif  // GTEST_HAS_UNORDERED_MAP_
 
-#if GTEST_HAS_UNORDERED_SET_
 
 TEST(PrintStlContainerTest, HashSet) {
   ::std::unordered_set<int> set1;
@@ -873,7 +867,6 @@ TEST(PrintStlContainerTest, HashMultiSet) {
   EXPECT_TRUE(std::equal(a, a + kSize, numbers.begin()));
 }
 
-#endif  //  GTEST_HAS_UNORDERED_SET_
 
 TEST(PrintStlContainerTest, List) {
   const std::string a[] = {"hello", "world"};
@@ -915,14 +908,12 @@ TEST(PrintStlContainerTest, MultiSet) {
   EXPECT_EQ("{ 1, 1, 1, 2, 5 }", Print(set1));
 }
 
-#if GTEST_HAS_STD_FORWARD_LIST_
 
 TEST(PrintStlContainerTest, SinglyLinkedList) {
   int a[] = { 9, 2, 8 };
   const std::forward_list<int> ints(a, a + 3);
   EXPECT_EQ("{ 9, 2, 8 }", Print(ints));
 }
-#endif  // GTEST_HAS_STD_FORWARD_LIST_
 
 TEST(PrintStlContainerTest, Pair) {
   pair<const bool, int> p(true, 5);
@@ -1032,16 +1023,20 @@ TEST(PrintNullptrT, Basic) {
 
 TEST(PrintReferenceWrapper, Printable) {
   int x = 5;
-  EXPECT_EQ("5", Print(std::ref(x)));
-  EXPECT_EQ("5", Print(std::cref(x)));
+  EXPECT_EQ("@" + PrintPointer(&x) + " 5", Print(std::ref(x)));
+  EXPECT_EQ("@" + PrintPointer(&x) + " 5", Print(std::cref(x)));
 }
 
 TEST(PrintReferenceWrapper, Unprintable) {
   ::foo::UnprintableInFoo up;
-  EXPECT_EQ("16-byte object <EF-12 00-00 34-AB 00-00 00-00 00-00 00-00 00-00>",
-            Print(std::ref(up)));
-  EXPECT_EQ("16-byte object <EF-12 00-00 34-AB 00-00 00-00 00-00 00-00 00-00>",
-            Print(std::cref(up)));
+  EXPECT_EQ(
+      "@" + PrintPointer(&up) +
+          " 16-byte object <EF-12 00-00 34-AB 00-00 00-00 00-00 00-00 00-00>",
+      Print(std::ref(up)));
+  EXPECT_EQ(
+      "@" + PrintPointer(&up) +
+          " 16-byte object <EF-12 00-00 34-AB 00-00 00-00 00-00 00-00 00-00>",
+      Print(std::cref(up)));
 }
 
 // Tests printing user-defined unprintable types.
