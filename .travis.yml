@@ -36,7 +36,7 @@ matrix:
     - os: linux
       group: deprecated-2017Q4
       compiler: gcc
-      env: BUILD_TYPE=Debug VERBOSE=1 CXX_FLAGS=-std=c++11
+      env: BUILD_TYPE=Debug VERBOSE=1 CXX_FLAGS=-std=c++11 -Wgnu-zero-variadic-macro-arguments
     - os: linux
       group: deprecated-2017Q4
       compiler: clang
