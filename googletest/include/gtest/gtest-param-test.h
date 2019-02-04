@@ -580,7 +580,10 @@ internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
 
 // Legacy API is deprecated but still available
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
-#define INSTANTIATE_TEST_CASE_P INSTANTIATE_TEST_SUITE_P
+#define INSTANTIATE_TEST_CASE_P                                            \
+  static_assert(::testing::internal::InstantiateTestCase_P_IsDeprecated(), \
+                "");                                                       \
+  INSTANTIATE_TEST_SUITE_P
 #endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
 }  // namespace testing
