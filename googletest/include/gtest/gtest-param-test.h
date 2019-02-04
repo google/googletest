@@ -544,10 +544,11 @@ internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
       GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::AddToRegistry();     \
   void GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::TestBody()
 
-// The optional last argument to INSTANTIATE_TEST_SUITE_P allows the user
-// to specify a function or functor that generates custom test name suffixes
-// based on the test parameters. The function should accept one argument of
-// type testing::TestParamInfo<class ParamType>, and return std::string.
+// The last argument to INSTANTIATE_TEST_SUITE_P allows the user to specify
+// generator and an optional function or functor that generates custom test name
+// suffixes based on the test parameters. Such a function or functor should
+// accept one argument of type testing::TestParamInfo<class ParamType>, and
+// return std::string.
 //
 // testing::PrintToStringParamName is a builtin test suffix generator that
 // returns the value of testing::PrintToString(GetParam()).
@@ -556,15 +557,30 @@ internal::CartesianProductHolder10<Generator1, Generator2, Generator3,
 // alphanumeric characters or underscore. Because PrintToString adds quotes
 // to std::string and C strings, it won't work for these types.
 
-#define INSTANTIATE_TEST_SUITE_P(prefix, test_suite_name, generator, ...)     \
+#define GTEST_EXPAND_(arg) arg
+#define GTEST_GET_FIRST_(first, ...) first
+#define GTEST_GET_SECOND_(first, second, ...) second
+
+#define INSTANTIATE_TEST_SUITE_P(prefix, test_suite_name, ...)                \
   static ::testing::internal::ParamGenerator<test_suite_name::ParamType>      \
       gtest_##prefix##test_suite_name##_EvalGenerator_() {                    \
-    return generator;                                                         \
+    return GTEST_EXPAND_(GTEST_GET_FIRST_(__VA_ARGS__, DUMMY_PARAM_));        \
   }                                                                           \
   static ::std::string gtest_##prefix##test_suite_name##_EvalGenerateName_(   \
       const ::testing::TestParamInfo<test_suite_name::ParamType>& info) {     \
-    return ::testing::internal::GetParamNameGen<test_suite_name::ParamType>(  \
-        __VA_ARGS__)(info);                                                   \
+    if (::testing::internal::AlwaysFalse()) {                                 \
+      ::testing::internal::TestNotEmpty(GTEST_EXPAND_(GTEST_GET_SECOND_(      \
+          __VA_ARGS__,                                                        \
+          ::testing::internal::DefaultParamName<test_suite_name::ParamType>,  \
+          DUMMY_PARAM_)));                                                    \
+      auto t = std::make_tuple(__VA_ARGS__);                                  \
+      static_assert(std::tuple_size<decltype(t)>::value <= 2,                 \
+                    "Too Many Args!");                                        \
+    }                                                                         \
+    return ((GTEST_EXPAND_(GTEST_GET_SECOND_(                                 \
+        __VA_ARGS__,                                                          \
+        ::testing::internal::DefaultParamName<test_suite_name::ParamType>,    \
+        DUMMY_PARAM_))))(info);                                               \
   }                                                                           \
   static int gtest_##prefix##test_suite_name##_dummy_                         \
       GTEST_ATTRIBUTE_UNUSED_ =                                               \

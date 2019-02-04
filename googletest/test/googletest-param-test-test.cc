@@ -853,6 +853,10 @@ INSTANTIATE_TEST_SUITE_P(CustomParamNameFunction, CustomFunctionNamingTest,
                          Values(std::string("FunctionName")),
                          CustomParamNameFunction);
 
+INSTANTIATE_TEST_SUITE_P(CustomParamNameFunctionP, CustomFunctionNamingTest,
+                         Values(std::string("FunctionNameP")),
+                         &CustomParamNameFunction);
+
 // Test custom naming with a lambda
 
 class CustomLambdaNamingTest : public TestWithParam<std::string> {};
@@ -878,6 +882,7 @@ TEST(CustomNamingTest, CheckNameRegistry) {
   }
   EXPECT_EQ(1u, test_names.count("CustomTestNames/FunctorName"));
   EXPECT_EQ(1u, test_names.count("CustomTestNames/FunctionName"));
+  EXPECT_EQ(1u, test_names.count("CustomTestNames/FunctionNameP"));
   EXPECT_EQ(1u, test_names.count("CustomTestNames/LambdaName"));
 }
 
