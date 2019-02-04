@@ -1378,6 +1378,10 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
     GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__): \
       fail(gtest_msg.value)
 
+// We need to declare the AdditionalMessage object in the scope of the if. It
+// can't go into the body of the if because then we cannot access it in the
+// else. It also can't go before the if block because than we have to make up
+// some very unique name (line number is not enough).
 #define GTEST_TEST_NO_THROW_(statement, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (::testing::internal::AdditionalMessage message = ".") { \
