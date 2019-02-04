@@ -84,7 +84,7 @@ using testing::Types;
 
 // To write a typed test case, first use
 //
-//   TYPED_TEST_CASE(TestCaseName, TypeList);
+//   TYPED_TEST_SUITE(TestCaseName, TypeList);
 //
 // to declare it and specify the type parameters.  As with TEST_F,
 // TestCaseName must match the test fixture name.
@@ -131,7 +131,7 @@ TYPED_TEST(PrimeTableTest, CanGetNextPrime) {
 }
 
 // That's it!  Google Test will repeat each TYPED_TEST for each type
-// in the type list specified in TYPED_TEST_CASE.  Sit back and be
+// in the type list specified in TYPED_TEST_SUITE.  Sit back and be
 // happy that you don't have to define them multiple times.
 
 #endif  // GTEST_HAS_TYPED_TEST
