@@ -452,6 +452,20 @@ TEST(StringViewMatcherTest, CanBeImplicitlyConstructedFromStringView) {
 }
 #endif  // GTEST_HAS_ABSL
 
+// Tests that a std::reference_wrapper<std::string> object can be implicitly
+// converted to a Matcher<std::string> or Matcher<const std::string&> via Eq().
+TEST(StringMatcherTest,
+     CanBeImplicitlyConstructedFromEqReferenceWrapperString) {
+  std::string value = "cats";
+  Matcher<std::string> m1 = Eq(std::ref(value));
+  EXPECT_TRUE(m1.Matches("cats"));
+  EXPECT_FALSE(m1.Matches("dogs"));
+
+  Matcher<const std::string&> m2 = Eq(std::ref(value));
+  EXPECT_TRUE(m2.Matches("cats"));
+  EXPECT_FALSE(m2.Matches("dogs"));
+}
+
 // Tests that MakeMatcher() constructs a Matcher<T> from a
 // MatcherInterface* without requiring the user to explicitly
 // write the type.
