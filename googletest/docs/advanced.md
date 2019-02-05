@@ -2429,7 +2429,7 @@ could generate this report:
   "failures": 1,
   "errors": 0,
   "time": "0.035s",
-  "timestamp": "2011-10-31T18:52:42Z"
+  "timestamp": "2011-10-31T18:52:42Z",
   "name": "AllTests",
   "testsuites": [
     {
@@ -2446,11 +2446,11 @@ could generate this report:
           "classname": "",
           "failures": [
             {
-              "message": "Value of: add(1, 1)\x0A  Actual: 3\x0AExpected: 2",
+              "message": "Value of: add(1, 1)\n  Actual: 3\nExpected: 2",
               "type": ""
             },
             {
-              "message": "Value of: add(1, -1)\x0A  Actual: 1\x0AExpected: 0",
+              "message": "Value of: add(1, -1)\n  Actual: 1\nExpected: 0",
               "type": ""
             }
           ]
@@ -2462,7 +2462,7 @@ could generate this report:
           "classname": ""
         }
       ]
-    }
+    },
     {
       "name": "LogicTest",
       "tests": 1,
@@ -2516,4 +2516,3 @@ environment variable to `0`, or use the `--gtest_catch_exceptions=0` flag when
 running the tests.
 
 **Availability**: Linux, Windows, Mac.
-
