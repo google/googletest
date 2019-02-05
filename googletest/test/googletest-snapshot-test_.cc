@@ -68,7 +68,7 @@ TEST_P(GreeterTest, GreeterTest) {
   EXPECT_EQ_SNAPSHOT(greeter(p));
 }
 
-INSTANTIATE_TEST_CASE_P(GreeterTestWithParams,
+INSTANTIATE_TEST_SUITE_P(GreeterTestWithParams,
     GreeterTest,
     ::testing::ValuesIn(GetParamsToTest()));
 
