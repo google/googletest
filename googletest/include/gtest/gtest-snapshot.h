@@ -59,8 +59,9 @@ std::string GetSnapshotFile() {
   snapshot_file.push_back('_');
 
   for (char c : value_param) {
-    if (isalnum(c))
+    if (isalnum(c)) {
       snapshot_file.push_back(c);
+    }
   }
 
   snapshot_file += ".snap";
@@ -78,8 +79,9 @@ std::string SnapshotHelper(const T& val) {
     GTEST_LOG_(INFO) << "Updating snapshot " << snapshot_file;
     std::ofstream snapshot(snapshot_file);
 
-    if (!snapshot.is_open())
+    if (!snapshot.is_open()) {
       return "Could not open snapshot for update: " + snapshot_file;
+    }
 
     snapshot << val;
 
@@ -87,8 +89,9 @@ std::string SnapshotHelper(const T& val) {
   }
 
   std::ifstream snapshot(snapshot_file);
-  if (!snapshot.is_open())
+  if (!snapshot.is_open()) {
     return "Could not open snapshot: " + snapshot_file;
+  }
 
   std::stringstream expected;
   expected << snapshot.rdbuf();
