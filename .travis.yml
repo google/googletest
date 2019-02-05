@@ -73,7 +73,10 @@ addons:
     packages:
     - g++-4.9
     - clang-3.9
-    update: true
+    # Updating the pkg repository caused Travis CI failures when trying to
+    # fetch GPG keys to check whether or not the repo was signed. Thus, updating
+    # is explicitly disabled.
+    #update: true
   homebrew:
     packages:
     - ccache
