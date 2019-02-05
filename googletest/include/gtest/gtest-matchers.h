@@ -599,21 +599,26 @@ class ComparisonBase {
   }
 
  private:
-  template <typename Lhs>
+  template <typename T>
+  static const T& Unwrap(const T& v) { return v; }
+  template <typename T>
+  static const T& Unwrap(std::reference_wrapper<T> v) { return v; }
+
+  template <typename Lhs, typename = Rhs>
   class Impl : public MatcherInterface<Lhs> {
    public:
     explicit Impl(const Rhs& rhs) : rhs_(rhs) {}
     bool MatchAndExplain(Lhs lhs,
                          MatchResultListener* /* listener */) const override {
-      return Op()(lhs, rhs_);
+      return Op()(lhs, Unwrap(rhs_));
     }
     void DescribeTo(::std::ostream* os) const override {
       *os << D::Desc() << " ";
-      UniversalPrint(rhs_, os);
+      UniversalPrint(Unwrap(rhs_), os);
     }
     void DescribeNegationTo(::std::ostream* os) const override {
       *os << D::NegatedDesc() <<  " ";
-      UniversalPrint(rhs_, os);
+      UniversalPrint(Unwrap(rhs_), os);
     }
 
    private:
