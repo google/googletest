@@ -42,11 +42,15 @@
 #include <stdio.h>
 #include <ostream>  // NOLINT
 #include <string>
-#include "gmock/internal/gmock-generated-internal-utils.h"
+#include <type_traits>
 #include "gmock/internal/gmock-port.h"
 #include "gtest/gtest.h"
 
 namespace testing {
+
+template <typename>
+class Matcher;
+
 namespace internal {
 
 // Silence MSVC C4100 (unreferenced formal parameter) and
@@ -92,16 +96,11 @@ inline const typename Pointer::element_type* GetRawPointer(const Pointer& p) {
 template <typename Element>
 inline Element* GetRawPointer(Element* p) { return p; }
 
-// Symbian compilation can be done with wchar_t being either a native
-// type or a typedef.  Using Google Mock with OpenC without wchar_t
-// should require the definition of _STLP_NO_WCHAR_T.
-//
 // MSVC treats wchar_t as a native type usually, but treats it as the
 // same as unsigned short when the compiler option /Zc:wchar_t- is
 // specified.  It defines _NATIVE_WCHAR_T_DEFINED symbol when wchar_t
 // is a native type.
-#if (GTEST_OS_SYMBIAN && defined(_STLP_NO_WCHAR_T)) || \
-    (defined(_MSC_VER) && !defined(_NATIVE_WCHAR_T_DEFINED))
+#if defined(_MSC_VER) && !defined(_NATIVE_WCHAR_T_DEFINED)
 // wchar_t is a typedef.
 #else
 # define GMOCK_WCHAR_T_IS_NATIVE_ 1
@@ -351,8 +350,6 @@ class WithoutMatchers {
 // Internal use only: access the singleton instance of WithoutMatchers.
 GTEST_API_ WithoutMatchers GetWithoutMatchers();
 
-// FIXME: group all type utilities together.
-
 // Type traits.
 
 // is_reference<T>::value is non-zero iff T is a reference type.
@@ -452,32 +449,10 @@ class StlContainerView<Element[N]> {
   static const_reference ConstReference(const Element (&array)[N]) {
     // Ensures that Element is not a const type.
     testing::StaticAssertTypeEq<Element, RawElement>();
-#if GTEST_OS_SYMBIAN
-    // The Nokia Symbian compiler confuses itself in template instantiation
-    // for this call without the cast to Element*:
-    // function call '[testing::internal::NativeArray<char *>].NativeArray(
-    //     {lval} const char *[4], long, testing::internal::RelationToSource)'
-    //     does not match
-    // 'testing::internal::NativeArray<char *>::NativeArray(
-    //     char *const *, unsigned int, testing::internal::RelationToSource)'
-    // (instantiating: 'testing::internal::ContainsMatcherImpl
-    //     <const char * (&)[4]>::Matches(const char * (&)[4]) const')
-    // (instantiating: 'testing::internal::StlContainerView<char *[4]>::
-    //     ConstReference(const char * (&)[4])')
-    // (and though the N parameter type is mismatched in the above explicit
-    // conversion of it doesn't help - only the conversion of the array).
-    return type(const_cast<Element*>(&array[0]), N,
-                RelationToSourceReference());
-#else
     return type(array, N, RelationToSourceReference());
-#endif  // GTEST_OS_SYMBIAN
   }
   static type Copy(const Element (&array)[N]) {
-#if GTEST_OS_SYMBIAN
-    return type(const_cast<Element*>(&array[0]), N, RelationToSourceCopy());
-#else
     return type(array, N, RelationToSourceCopy());
-#endif  // GTEST_OS_SYMBIAN
   }
 };
 
@@ -528,7 +503,6 @@ struct BooleanConstant {};
 // reduce code size.
 GTEST_API_ void IllegalDoDefault(const char* file, int line);
 
-#if GTEST_LANG_CXX11
 // Helper types for Apply() below.
 template <size_t... Is> struct int_pack { typedef int_pack type; };
 
@@ -554,8 +528,38 @@ auto Apply(F&& f, Tuple&& args)
   return ApplyImpl(std::forward<F>(f), std::forward<Tuple>(args),
                    make_int_pack<std::tuple_size<Tuple>::value>());
 }
-#endif
 
+// Template struct Function<F>, where F must be a function type, contains
+// the following typedefs:
+//
+//   Result:               the function's return type.
+//   Arg<N>:               the type of the N-th argument, where N starts with 0.
+//   ArgumentTuple:        the tuple type consisting of all parameters of F.
+//   ArgumentMatcherTuple: the tuple type consisting of Matchers for all
+//                         parameters of F.
+//   MakeResultVoid:       the function type obtained by substituting void
+//                         for the return type of F.
+//   MakeResultIgnoredValue:
+//                         the function type obtained by substituting Something
+//                         for the return type of F.
+template <typename T>
+struct Function;
+
+template <typename R, typename... Args>
+struct Function<R(Args...)> {
+  using Result = R;
+  static constexpr size_t ArgumentCount = sizeof...(Args);
+  template <size_t I>
+  using Arg = ElemFromList<I, typename MakeIndexSequence<sizeof...(Args)>::type,
+                           Args...>;
+  using ArgumentTuple = std::tuple<Args...>;
+  using ArgumentMatcherTuple = std::tuple<Matcher<Args>...>;
+  using MakeResultVoid = void(Args...);
+  using MakeResultIgnoredValue = IgnoredValue(Args...);
+};
+
+template <typename R, typename... Args>
+constexpr size_t Function<R(Args...)>::ArgumentCount;
 
 #ifdef _MSC_VER
 # pragma warning(pop)

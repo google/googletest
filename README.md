@@ -1,8 +1,12 @@
 
 # Google Test #
 
-[![Build Status](https://api.travis-ci.org/abseil/googletest.svg?branch=master)](https://travis-ci.org/abseil/googletest)
+[![Build Status](https://api.travis-ci.org/google/googletest.svg?branch=master)](https://travis-ci.org/google/googletest)
 [![Build status](https://ci.appveyor.com/api/projects/status/4o38plt0xbo1ubc8/branch/master?svg=true)](https://ci.appveyor.com/project/GoogleTestAppVeyor/googletest/branch/master)
+
+**PR FREEZE COMING SOON**
+
+We are working on a large refactoring that would make it hard to accept external PRs. *Really Soon Now* we will not be accepting new PRs until the refactoring has been completed. 
 
 **Future Plans**:
 * 1.8.x Release - [the 1.8.x](https://github.com/google/googletest/releases/tag/release-1.8.1) is the last release that works with pre-C++11 compilers. The 1.8.x will not accept any requests for any new features and any bugfix requests will only be accepted if proven "critical"
@@ -52,6 +56,7 @@ Google test has been used on a variety of platforms:
   * MinGW
   * Windows Mobile
   * Symbian
+  * PlatformIO
 
 ## Who Is Using Google Test? ##
 

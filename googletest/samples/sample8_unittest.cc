@@ -148,8 +148,7 @@ TEST_P(PrimeTableTest, CanGetNextPrime) {
 // will put some of the tested numbers beyond the capability of the
 // PrecalcPrimeTable instance and some inside it (10). Combine will produce all
 // possible combinations.
-INSTANTIATE_TEST_CASE_P(MeaningfulTestParameters,
-                        PrimeTableTest,
-                        Combine(Bool(), Values(1, 10)));
+INSTANTIATE_TEST_SUITE_P(MeaningfulTestParameters, PrimeTableTest,
+                         Combine(Bool(), Values(1, 10)));
 
 }  // namespace

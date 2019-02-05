@@ -252,12 +252,12 @@ template <typename Char, typename CharTraits, typename T>
     ::std::basic_ostream<Char, CharTraits>& os, const T& x) {
   TypeWithoutFormatter<T, (internal::IsAProtocolMessage<T>::value
                                ? kProtobuf
-                               : internal::ImplicitlyConvertible<
+                               : std::is_convertible<
                                      const T&, internal::BiggestInt>::value
                                      ? kConvertibleToInteger
                                      :
 #if GTEST_HAS_STRING_VIEW
-                                     internal::ImplicitlyConvertible<
+                                     std::is_convertible<
                                          const T&, string_view>::value
                                          ? kConvertibleToStringView
                                          :
@@ -534,7 +534,7 @@ void PrintTo(const T& value, ::std::ostream* os) {
                   (sizeof(IsContainerTest<T>(0)) == sizeof(IsContainer)) &&
               !IsRecursiveContainer<T>::value
           ? kPrintContainer
-          : !is_pointer<T>::value
+          : !std::is_pointer<T>::value
                 ? kPrintOther
                 : std::is_function<typename std::remove_pointer<T>::type>::value
                       ? kPrintFunctionPointer
@@ -657,8 +657,7 @@ inline void PrintTo(std::nullptr_t, ::std::ostream* os) { *os << "(nullptr)"; }
 
 template <typename T>
 void PrintTo(std::reference_wrapper<T> ref, ::std::ostream* os) {
-  // Delegate to wrapped value.
-  PrintTo(ref.get(), os);
+  UniversalPrinter<T&>::Print(ref.get(), os);
 }
 
 // Helper function for printing a tuple.  T must be instantiated with
@@ -781,7 +780,6 @@ void UniversalPrintArray(const T* begin, size_t len, ::std::ostream* os) {
     // If the array has more than kThreshold elements, we'll have to
     // omit some details by printing only the first and the last
     // kChunkSize elements.
-    // FIXME: let the user control the threshold using a flag.
     if (len <= kThreshold) {
       PrintRawArrayTo(begin, len, os);
     } else {
