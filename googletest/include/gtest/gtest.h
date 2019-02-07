@@ -2394,7 +2394,8 @@ bool StaticAssertTypeEq() {
 //     EXPECT_EQ(a_.size(), 0);
 //     EXPECT_EQ(b_.size(), 1);
 //   }
-
+//
+// GOOGLETEST_CM0011 DO NOT DELETE
 #define TEST_F(test_fixture, test_name)\
   GTEST_TEST_(test_fixture, test_name, test_fixture, \
               ::testing::internal::GetTypeId<test_fixture>())
