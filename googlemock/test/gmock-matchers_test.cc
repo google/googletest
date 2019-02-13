@@ -6943,7 +6943,7 @@ TEST(ArgsTest, ExplainsMatchResultWithoutInnerExplanation) {
 // For testing Args<>'s explanation.
 class LessThanMatcher : public MatcherInterface<std::tuple<char, int> > {
  public:
-  void DescribeTo(::std::ostream* os) const override {}
+  void DescribeTo(::std::ostream* /*os*/) const override {}
 
   bool MatchAndExplain(std::tuple<char, int> value,
                        MatchResultListener* listener) const override {
