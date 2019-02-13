@@ -1789,7 +1789,33 @@ current thread whose message contains the given `substring`, or use
   EXPECT_NONFATAL_FAILURE(statement, substring);
 ```
 
-if you are expecting a non-fatal (e.g. `EXPECT_*`) failure.
+if you are expecting a non-fatal (e.g. `EXPECT_*`) failure. A full example is
+as follows:
+
+```c++
+  #include <gtest/gtest.h>
+  #include <gtest/gtest-spi.h>
+
+  class TestClass {
+  public:
+    bool always_false() const {
+      return false;
+    }
+  };
+  void call_that_fails() {
+    TestClass test_obj;
+    EXPECT_EQ(test_obj.always_false(), true);
+  }
+  class FailingTest : public ::testing::Test { };
+  TEST_F(FailingTest, AlwaysFails) {
+    EXPECT_NONFATAL_FAILURE(call_that_fails(), "");
+    EXPECT_NONFATAL_FAILURE({ call_that_fails(); }, "");
+  }
+  int main(int argc, char** argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+  }
+```
 
 Only failures in the current thread are checked to determine the result of this
 type of expectations. If `statement` creates new threads, failures in these
