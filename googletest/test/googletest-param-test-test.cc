@@ -964,6 +964,8 @@ INSTANTIATE_TEST_SUITE_P(StatefulNamingFunctor, StatefulNamingTest, Range(0, 5),
 class Unstreamable {
  public:
   explicit Unstreamable(int value) : value_(value) {}
+  // -Wunused-private-field: dummy accessor for `value_`.
+  const int& dummy_value() const { return value_; }
 
  private:
   int value_;
