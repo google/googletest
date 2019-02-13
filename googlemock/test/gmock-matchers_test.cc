@@ -982,6 +982,8 @@ class Unprintable {
   Unprintable() : c_('a') {}
 
   bool operator==(const Unprintable& /* rhs */) const { return true; }
+  // -Wunused-private-field: dummy accessor for `c_`.
+  char dummy_c() { return c_; }
  private:
   char c_;
 };
