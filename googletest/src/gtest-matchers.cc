@@ -104,47 +104,47 @@ Matcher<::string>::Matcher(const char* s) { *this = Eq(::string(s)); }
 #if GTEST_HAS_STRING_VIEW
 // Constructs a matcher that matches a const string_view& whose value is
 // equal to s.
-Matcher<const string_view&>::Matcher(const std::string& s) {
+Matcher<const StringView&>::Matcher(const std::string& s) {
   *this = Eq(s);
 }
 
 #if GTEST_HAS_GLOBAL_STRING
 // Constructs a matcher that matches a const string_view& whose value is
 // equal to s.
-Matcher<const string_view&>::Matcher(const ::string& s) { *this = Eq(s); }
+Matcher<const StringView&>::Matcher(const ::string& s) { *this = Eq(s); }
 #endif  // GTEST_HAS_GLOBAL_STRING
 
 // Constructs a matcher that matches a const string_view& whose value is
 // equal to s.
-Matcher<const string_view&>::Matcher(const char* s) {
+Matcher<const StringView&>::Matcher(const char* s) {
   *this = Eq(std::string(s));
 }
 
 // Constructs a matcher that matches a const string_view& whose value is
 // equal to s.
-Matcher<const string_view&>::Matcher(string_view s) {
+Matcher<const StringView&>::Matcher(StringView s) {
   *this = Eq(std::string(s));
 }
 
 // Constructs a matcher that matches a string_view whose value is equal to
 // s.
-Matcher<string_view>::Matcher(const std::string& s) { *this = Eq(s); }
+Matcher<StringView>::Matcher(const std::string& s) { *this = Eq(s); }
 
 #if GTEST_HAS_GLOBAL_STRING
 // Constructs a matcher that matches a string_view whose value is equal to
 // s.
-Matcher<string_view>::Matcher(const ::string& s) { *this = Eq(s); }
+Matcher<StringView>::Matcher(const ::string& s) { *this = Eq(s); }
 #endif  // GTEST_HAS_GLOBAL_STRING
 
 // Constructs a matcher that matches a string_view whose value is equal to
 // s.
-Matcher<string_view>::Matcher(const char* s) {
+Matcher<StringView>::Matcher(const char* s) {
   *this = Eq(std::string(s));
 }
 
 // Constructs a matcher that matches a string_view whose value is equal to
 // s.
-Matcher<string_view>::Matcher(string_view s) {
+Matcher<StringView>::Matcher(StringView s) {
   *this = Eq(std::string(s));
 }
 #endif  // GTEST_HAS_STRING_VIEW

@@ -441,13 +441,13 @@ class GTEST_API_ Matcher< ::string>
 // instead of Eq(str) and "foo" instead of Eq("foo") when a string_view
 // matcher is expected.
 template <>
-class GTEST_API_ Matcher<const string_view&>
-    : public internal::MatcherBase<const string_view&> {
+class GTEST_API_ Matcher<const StringView&>
+    : public internal::MatcherBase<const StringView&> {
  public:
   Matcher() {}
 
-  explicit Matcher(const MatcherInterface<const string_view&>* impl)
-      : internal::MatcherBase<const string_view&>(impl) {}
+  explicit Matcher(const MatcherInterface<const StringView&>* impl)
+      : internal::MatcherBase<const StringView&>(impl) {}
 
   // Allows the user to write str instead of Eq(str) sometimes, where
   // str is a std::string object.
@@ -463,19 +463,19 @@ class GTEST_API_ Matcher<const string_view&>
   Matcher(const char* s);  // NOLINT
 
   // Allows the user to pass string_views directly.
-  Matcher(string_view s);  // NOLINT
+  Matcher(StringView s);  // NOLINT
 };
 
 template <>
-class GTEST_API_ Matcher<string_view>
-    : public internal::MatcherBase<string_view> {
+class GTEST_API_ Matcher<StringView>
+    : public internal::MatcherBase<StringView> {
  public:
   Matcher() {}
 
-  explicit Matcher(const MatcherInterface<const string_view&>* impl)
-      : internal::MatcherBase<string_view>(impl) {}
-  explicit Matcher(const MatcherInterface<string_view>* impl)
-      : internal::MatcherBase<string_view>(impl) {}
+  explicit Matcher(const MatcherInterface<const StringView&>* impl)
+      : internal::MatcherBase<StringView>(impl) {}
+  explicit Matcher(const MatcherInterface<StringView>* impl)
+      : internal::MatcherBase<StringView>(impl) {}
 
   // Allows the user to write str instead of Eq(str) sometimes, where
   // str is a std::string object.
@@ -491,7 +491,7 @@ class GTEST_API_ Matcher<string_view>
   Matcher(const char* s);  // NOLINT
 
   // Allows the user to pass string_views directly.
-  Matcher(string_view s);  // NOLINT
+  Matcher(StringView s);  // NOLINT
 };
 #endif  // GTEST_HAS_STRING_VIEW
 
@@ -685,7 +685,7 @@ class MatchesRegexMatcher {
       : regex_(regex), full_match_(full_match) {}
 
 #if GTEST_HAS_STRING_VIEW
-  bool MatchAndExplain(const string_view& s,
+  bool MatchAndExplain(const StringView& s,
                        MatchResultListener* listener) const {
     return MatchAndExplain(string(s), listener);
   }

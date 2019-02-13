@@ -126,11 +126,12 @@ namespace testing {
 // create an alias for string_view, wherever it comes from
 #if GTEST_HAS_ABSL
 
-using absl::string_view;
+using StringView = absl::string_view;
 #define GTEST_HAS_STRING_VIEW 1
 
 #elif GTEST_HAS_STD_STRINGVIEW
-using std::string_view;
+
+using StringView = std::string_view;
 #define GTEST_HAS_STRING_VIEW 1
 
 #else
@@ -258,7 +259,7 @@ template <typename Char, typename CharTraits, typename T>
                                      :
 #if GTEST_HAS_STRING_VIEW
                                      std::is_convertible<
-                                         const T&, string_view>::value
+                                         const T&, StringView>::value
                                          ? kConvertibleToStringView
                                          :
 #endif
@@ -648,7 +649,7 @@ inline void PrintTo(const ::std::wstring& s, ::std::ostream* os) {
 
 #if GTEST_HAS_STRING_VIEW
 // Overload for string_view.
-inline void PrintTo(string_view sp, ::std::ostream* os) {
+inline void PrintTo(StringView sp, ::std::ostream* os) {
   PrintTo(::std::string(sp), os);
 }
 #endif  // GTEST_HAS_STRING_VIEW
@@ -949,7 +950,7 @@ namespace internal2 {
 template <typename T>
 void TypeWithoutFormatter<T, kConvertibleToStringView>::PrintValue(
     const T& value, ::std::ostream* os) {
-  internal::PrintTo(string_view(value), os);
+  internal::PrintTo(StringView(value), os);
 }
 }  // namespace internal2
 #endif
