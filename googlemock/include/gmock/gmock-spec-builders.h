@@ -420,6 +420,9 @@ class GTEST_API_ Mock {
   template <typename M>
   friend class StrictMock;
 
+  template <typename M>
+  friend class FickleMock;
+
   // Tells Google Mock to allow uninteresting calls on the given mock
   // object.
   static void AllowUninterestingCalls(const void* mock_obj)

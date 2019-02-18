@@ -182,6 +182,61 @@ class StrictMock : public MockClass {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(StrictMock);
 };
 
+template <class MockClass>
+class FickleMock : public MockClass {
+ public:
+  FickleMock() : MockClass() {
+    ::testing::Mock::WarnUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
+
+  // Ideally, we would inherit base class's constructors through a using
+  // declaration, which would preserve their visibility. However, many existing
+  // tests rely on the fact that current implementation reexports protected
+  // constructors as public. These tests would need to be cleaned up first.
+
+  // Single argument constructor is special-cased so that it can be
+  // made explicit.
+  template <typename A>
+  explicit FickleMock(A&& arg) : MockClass(std::forward<A>(arg)) {
+    ::testing::Mock::WarnUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
+
+  template <typename A1, typename A2, typename... An>
+  FickleMock(A1&& arg1, A2&& arg2, An&&... args)
+      : MockClass(std::forward<A1>(arg1), std::forward<A2>(arg2),
+                  std::forward<An>(args)...) {
+    ::testing::Mock::WarnUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
+
+  ~FickleMock() {  // NOLINT
+    ::testing::Mock::UnregisterCallReaction(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
+
+  void Nice() {
+    ::testing::Mock::AllowUninterestingCalls(
+      internal::ImplicitCast_<MockClass*>(this));
+  }
+
+  void Naggy() {
+    ::testing::Mock::WarnUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
+
+  void Strict() {
+    ::testing::Mock::FailUninterestingCalls(
+        internal::ImplicitCast_<MockClass*>(this));
+  }
+
+ private:
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(FickleMock);
+};
+
+
+
 // The following specializations catch some (relatively more common)
 // user errors of nesting nice and strict mocks.  They do NOT catch
 // all possible errors.
