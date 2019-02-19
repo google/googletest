@@ -535,7 +535,7 @@ TEST(OverloadedMockMethodTest, CanOverloadOnArgNumberInMacroBody) {
 
 #define MY_MOCK_METHODS2_ \
     MOCK_CONST_METHOD1(Overloaded, int(int n)); \
-    MOCK_METHOD1(Overloaded, int(int n));
+    MOCK_METHOD1(Overloaded, int(int n))
 
 class MockOverloadedOnConstness {
  public:
