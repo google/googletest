@@ -21,7 +21,7 @@
   GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Spec);                                   \
   GMOCK_INTERNAL_ASSERT_VALID_SIGNATURE(                                      \
       GMOCK_PP_NARG0 _Args, GMOCK_INTERNAL_SIGNATURE(_Ret, _Args));           \
-  GMOCK_INTERNAL_ASSERT_VALID_SPEC(_Spec)                                     \
+  GMOCK_INTERNAL_ASSERT_VALID_SPEC(_Spec);                                    \
   GMOCK_INTERNAL_MOCK_METHOD_IMPL(                                            \
       GMOCK_PP_NARG0 _Args, _MethodName, GMOCK_INTERNAL_HAS_CONST(_Spec),     \
       GMOCK_INTERNAL_HAS_OVERRIDE(_Spec), GMOCK_INTERNAL_HAS_FINAL(_Spec),    \
@@ -62,7 +62,7 @@
           _N) " arguments. Parenthesize all types with unproctected commas.")
 
 #define GMOCK_INTERNAL_ASSERT_VALID_SPEC(_Spec) \
-  GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_ASSERT_VALID_SPEC_ELEMENT, ~, _Spec)
+  GMOCK_PP_FOR_EACH_IN_CLASS(GMOCK_INTERNAL_ASSERT_VALID_SPEC_ELEMENT, ~, _Spec)
 
 #define GMOCK_INTERNAL_MOCK_METHOD_IMPL(_N, _MethodName, _Constness,           \
                                         _Override, _Final, _Noexcept,          \
@@ -127,7 +127,7 @@
        GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_NOEXCEPT(_i, _, _elem)) + \
        GMOCK_INTERNAL_IS_CALLTYPE(_elem)) == 1,                           \
       GMOCK_PP_STRINGIZE(                                                 \
-          _elem) " cannot be recognized as a valid specification modifier.");
+          _elem) " cannot be recognized as a valid specification modifier.")
 
 // Modifiers implementation.
 #define GMOCK_INTERNAL_DETECT_CONST(_i, _, _elem) \
