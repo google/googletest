@@ -24,18 +24,11 @@ AC_PROG_CXX
 AC_LANG([C++])
 AC_PROG_LIBTOOL
 
-# TODO(chandlerc@google.com): Currently we aren't running the Python tests
-# against the interpreter detected by AM_PATH_PYTHON, and so we condition
-# HAVE_PYTHON by requiring "python" to be in the PATH, and that interpreter's
-# version to be >= 2.3. This will allow the scripts to use a "/usr/bin/env"
-# hashbang.
 PYTHON=  # We *do not* allow the user to specify a python interpreter
 AC_PATH_PROG([PYTHON],[python],[:])
 AS_IF([test "$PYTHON" != ":"],
       [AM_PYTHON_CHECK_VERSION([$PYTHON],[2.3],[:],[PYTHON=":"])])
 AM_CONDITIONAL([HAVE_PYTHON],[test "$PYTHON" != ":"])
-
-# TODO(chandlerc@google.com) Check for the necessary system headers.
 
 # Configure pthreads.
 AC_ARG_WITH([pthreads],
@@ -83,10 +76,7 @@ dependency upon GoogleTest to build, please provide a version, or allow
 GoogleMock to use any installed version and fall back upon its internal
 version.])])
 
-# Setup various GTEST variables. TODO(chandlerc@google.com): When these are
-# used below, they should be used such that any pre-existing values always
-# trump values we set them to, so that they can be used to selectively override
-# details of the detection process.
+# Setup various GTEST variables.
 AC_ARG_VAR([GTEST_CONFIG],
            [The exact path of Google Test's 'gtest-config' script.])
 AC_ARG_VAR([GTEST_CPPFLAGS],
@@ -138,9 +128,6 @@ AS_IF([test "x${HAVE_BUILT_GTEST}" = "xyes"],
       GTEST_LDFLAGS=''
       GTEST_LIBS='$(top_builddir)/../googletest/lib/libgtest.la'
       GTEST_VERSION="${GTEST_MIN_VERSION}"])
-
-# TODO(chandlerc@google.com) Check the types, structures, and other compiler
-# and architecture characteristics.
 
 # Output the generated files. No further autoconf macros may be used.
 AC_OUTPUT
