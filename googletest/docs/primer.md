@@ -122,7 +122,7 @@ To provide a custom failure message, simply stream it into the macro using the
 ```c++
 ASSERT_EQ(x.size(), y.size()) << "Vectors x and y are of unequal length";
 
-for (int i = 0; i < std::min(x.size(), y.size()); ++i) {
+for (int i = 0; i < x.size(); ++i) {
   EXPECT_EQ(x[i], y[i]) << "Vectors x and y differ at index " << i;
 }
 ```
