@@ -104,12 +104,20 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
+    features = select({
+        ":windows": ["windows_export_all_symbols"],
+        "//conditions:default": [],
+    })
 )
 
 cc_library(
     name = "gtest_main",
     srcs = ["googlemock/src/gmock_main.cc"],
     deps = [":gtest"],
+    features = select({
+        ":windows": ["windows_export_all_symbols"],
+        "//conditions:default": [],
+    })
 )
 
 # The following rules build samples of how to use gTest.
@@ -127,6 +135,10 @@ cc_library(
         "googletest/samples/sample3-inl.h",
         "googletest/samples/sample4.h",
     ],
+    features = select({
+        ":windows": ["windows_export_all_symbols"],
+        "//conditions:default": [],
+    })
 )
 
 cc_test(
@@ -149,6 +161,7 @@ cc_test(
         "gtest_sample_lib",
         ":gtest_main",
     ],
+    linkstatic = 0,
 )
 
 cc_test(

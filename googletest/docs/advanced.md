@@ -1198,7 +1198,7 @@ also supports per-test-suite set-up/tear-down. To use it:
 1.  Outside your test fixture class (typically just below it), define those
     member variables, optionally giving them initial values.
 1.  In the same test fixture class, define a `static void SetUpTestSuite()`
-    function (remember not to spell it as **`SetupTestSuite`** with a small `u`!)
+    function (remember not to spell it as **`SetUpTestSuite`** with a small `u`!)
     to set up the shared resources and a `static void TearDownTestSuite()`
     function to tear them down.
 
@@ -2430,7 +2430,7 @@ could generate this report:
   "failures": 1,
   "errors": 0,
   "time": "0.035s",
-  "timestamp": "2011-10-31T18:52:42Z",
+  "timestamp": "2011-10-31T18:52:42Z"
   "name": "AllTests",
   "testsuites": [
     {
@@ -2447,11 +2447,11 @@ could generate this report:
           "classname": "",
           "failures": [
             {
-              "message": "Value of: add(1, 1)\n  Actual: 3\nExpected: 2",
+              "message": "Value of: add(1, 1)\x0A  Actual: 3\x0AExpected: 2",
               "type": ""
             },
             {
-              "message": "Value of: add(1, -1)\n  Actual: 1\nExpected: 0",
+              "message": "Value of: add(1, -1)\x0A  Actual: 1\x0AExpected: 0",
               "type": ""
             }
           ]
@@ -2463,7 +2463,7 @@ could generate this report:
           "classname": ""
         }
       ]
-    },
+    }
     {
       "name": "LogicTest",
       "tests": 1,
@@ -2517,3 +2517,4 @@ environment variable to `0`, or use the `--gtest_catch_exceptions=0` flag when
 running the tests.
 
 **Availability**: Linux, Windows, Mac.
+
