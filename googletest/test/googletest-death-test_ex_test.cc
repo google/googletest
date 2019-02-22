@@ -68,7 +68,7 @@ TEST(CxxExceptionDeathTest, PrintsMessageForStdExceptions) {
                           "exceptional message");
   // Verifies that the location is mentioned in the failure text.
   EXPECT_NONFATAL_FAILURE(EXPECT_DEATH(throw TestException(), ""),
-                          "googletest-death-test_ex_test.cc");
+                          __FILE__);
 }
 # endif  // GTEST_HAS_EXCEPTIONS
 
