@@ -190,7 +190,7 @@ evaluation order.
 tests if they are in the same memory location, not if they have the same value.
 Therefore, if you want to compare C strings (e.g. `const char*`) by value, use
 `ASSERT_STREQ()`, which will be described later on. In particular, to assert
-that a C string is `NULL`, use `ASSERT_STREQ(c_string, NULL)`. Consider use
+that a C string is `NULL`, use `ASSERT_STREQ(c_string, NULL)`. Consider using
 `ASSERT_EQ(c_string, nullptr)` if c++11 is supported. To compare two `string`
 objects, you should use `ASSERT_EQ`.
 
