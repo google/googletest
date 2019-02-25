@@ -6,8 +6,6 @@ ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = \
   CONTRIBUTORS \
   LICENSE \
-  include/gtest/gtest-param-test.h.pump \
-  include/gtest/internal/gtest-param-util-generated.h.pump \
   include/gtest/internal/gtest-type-util.h.pump \
   make/Makefile \
   scripts/fuse_gtest_files.py \
@@ -200,7 +198,6 @@ pkginclude_internal_HEADERS = \
   include/gtest/internal/gtest-death-test-internal.h \
   include/gtest/internal/gtest-filepath.h \
   include/gtest/internal/gtest-internal.h \
-  include/gtest/internal/gtest-param-util-generated.h \
   include/gtest/internal/gtest-param-util.h \
   include/gtest/internal/gtest-port.h \
   include/gtest/internal/gtest-port-arch.h \
