@@ -21,7 +21,7 @@
   GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Spec);                                   \
   GMOCK_INTERNAL_ASSERT_VALID_SIGNATURE(                                      \
       GMOCK_PP_NARG0 _Args, GMOCK_INTERNAL_SIGNATURE(_Ret, _Args));           \
-  GMOCK_INTERNAL_ASSERT_VALID_SPEC(_Spec);                                    \
+  GMOCK_INTERNAL_ASSERT_VALID_SPEC(_Spec)                                     \
   GMOCK_INTERNAL_MOCK_METHOD_IMPL(                                            \
       GMOCK_PP_NARG0 _Args, _MethodName, GMOCK_INTERNAL_HAS_CONST(_Spec),     \
       GMOCK_INTERNAL_HAS_OVERRIDE(_Spec), GMOCK_INTERNAL_HAS_FINAL(_Spec),    \
