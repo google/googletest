@@ -847,6 +847,10 @@ inline bool AlwaysFalse() { return !AlwaysTrue(); }
 // the else branch.
 struct GTEST_API_ ConstCharPtr {
   ConstCharPtr(const char* str) : value(str) {}
+  ConstCharPtr& operator=(const std::string& message) {
+    value = message.c_str();
+    return *this;
+  }
   operator bool() const { return true; }
   const char* value;
 };
@@ -1282,21 +1286,6 @@ class FlatTuple
   }
 };
 
-class AdditionalMessage {
- public:
-  AdditionalMessage(const char* message) : value(message) {}
-  AdditionalMessage& operator=(const std::string& message) {
-    value = message;
-    return *this;
-  }
-  operator bool() const { return ::testing::internal::AlwaysTrue(); }
-
-  const std::string& get() const { return value; }
-
- private:
-  std::string value;
-};
-
 // Utility functions to be called with static_assert to induce deprecation
 // warinings
 GTEST_INTERNAL_DEPRECATED(
@@ -1378,18 +1367,18 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
     GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__): \
       fail(gtest_msg.value)
 
-// We need to declare the AdditionalMessage object in the scope of the if. It
+// We need to declare the ConstCharPtr object in the scope of the if. It
 // can't go into the body of the if because then we cannot access it in the
 // else. It also can't go before the if block because than we have to make up
 // some very unique name (line number is not enough).
 #define GTEST_TEST_NO_THROW_(statement, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-  if (::testing::internal::AdditionalMessage message = ".") { \
+  if (::testing::internal::ConstCharPtr gtest_msg = ".") { \
     try { \
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
     } \
     catch (const std::exception& e) { \
-      message = std::string(": ") + e.what(); \
+      gtest_msg = std::string(": ") + e.what(); \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__); \
     } \
     catch (...) { \
@@ -1398,7 +1387,7 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
   } else \
     GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__): \
       fail(("Expected: " #statement " doesn't throw an exception.\n" \
-           "  Actual: it throws." + message.get()).c_str())
+           "  Actual: it throws." + std::string(gtest_msg.value)).c_str())
 
 #define GTEST_TEST_ANY_THROW_(statement, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
