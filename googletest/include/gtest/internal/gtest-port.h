@@ -245,6 +245,11 @@
 //   BoolFromGTestEnv()   - parses a bool environment variable.
 //   Int32FromGTestEnv()  - parses an Int32 environment variable.
 //   StringFromGTestEnv() - parses a string environment variable.
+//
+// Deprecation warnings:
+//   GTEST_INTERNAL_DEPRECATED(message) - attribute marking a function as
+//                                        deprecated; calling a marked function
+//                                        should generate a compiler warning
 
 #include <ctype.h>   // for isspace, etc
 #include <stddef.h>  // for ptrdiff_t
@@ -2301,6 +2306,8 @@ const char* StringFromGTestEnv(const char* flag, const char* default_val);
 }  // namespace internal
 }  // namespace testing
 
+#if !defined(GTEST_INTERNAL_DEPRECATED)
+
 // Internal Macro to mark an API deprecated, for googletest usage only
 // Usage: class GTEST_INTERNAL_DEPRECATED(message) MyClass or
 // GTEST_INTERNAL_DEPRECATED(message) <return_type> myFunction(); Every usage of
@@ -2316,5 +2323,7 @@ const char* StringFromGTestEnv(const char* flag, const char* default_val);
 #else
 #define GTEST_INTERNAL_DEPRECATED(message)
 #endif
+
+#endif  // !defined(GTEST_INTERNAL_DEPRECATED)
 
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_

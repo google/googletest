@@ -1283,7 +1283,7 @@ class FlatTuple
 };
 
 // Utility functions to be called with static_assert to induce deprecation
-// warinings
+// warnings.
 GTEST_INTERNAL_DEPRECATED(
     "INSTANTIATE_TEST_CASE_P is deprecated, please use "
     "INSTANTIATE_TEST_SUITE_P")
