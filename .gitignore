@@ -35,6 +35,7 @@ googletest/m4/ltoptions.m4
 googletest/m4/ltsugar.m4
 googletest/m4/ltversion.m4
 googletest/m4/lt~obsolete.m4
+googlemock/m4
 
 # Ignore generated directories.
 googlemock/fused-src/
