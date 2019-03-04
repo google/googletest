@@ -170,6 +170,9 @@ function(cxx_library_with_type name type cxx_flags)
     set_target_properties(${name}
       PROPERTIES
       COMPILE_DEFINITIONS "GTEST_CREATE_SHARED_LIBRARY=1")
+    set_target_properties(${name}
+      PROPERTIES
+      SOVERSION "0")
     if (NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
       target_compile_definitions(${name} INTERFACE
         $<INSTALL_INTERFACE:GTEST_LINKED_AS_SHARED_LIBRARY=1>)
