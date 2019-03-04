@@ -2970,7 +2970,7 @@ static const char* GetAnsiColorCode(GTestColor color) {
     case COLOR_YELLOW:  return "3";
     default:
       return nullptr;
-  };
+  }
 }
 
 #endif  // GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE
