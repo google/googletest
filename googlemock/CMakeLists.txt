@@ -49,7 +49,7 @@ endif()
 # targets to the current scope.  We are placing Google Test's binary
 # directory in a subdirectory of our own as VC compilation may break
 # if they are the same (the default).
-add_subdirectory("${gtest_dir}" "${gmock_BINARY_DIR}/gtest")
+add_subdirectory("${gtest_dir}" "${gmock_BINARY_DIR}/${gtest_dir}")
 
 
 # These commands only run if this is the main project
