@@ -124,37 +124,6 @@ class IgnoredValue {
   IgnoredValue(const T& /* ignored */) {}  // NOLINT(runtime/explicit)
 };
 
-// The only type that should be convertible to Secret* is nullptr.
-// The other null pointer constants are not of a type that is convertible to
-// Secret*. Only the literal with the right value is.
-template <typename T>
-using TypeIsValidNullptrConstant = std::integral_constant<
-    bool, std::is_same<typename std::decay<T>::type, std::nullptr_t>::value ||
-              !std::is_convertible<T, Secret*>::value>;
-
-// Two overloaded helpers for checking at compile time whether an
-// expression is a null pointer literal (i.e. NULL or any 0-valued
-// compile-time integral constant).  These helpers have no
-// implementations, as we only need their signatures.
-//
-// Given IsNullLiteralHelper(x), the compiler will pick the first
-// version if x can be implicitly converted to Secret*, and pick the
-// second version otherwise.  Since Secret is a secret and incomplete
-// type, the only expression a user can write that has type Secret* is
-// a null pointer literal.  Therefore, we know that x is a null
-// pointer literal if and only if the first version is picked by the
-// compiler.
-std::true_type IsNullLiteralHelper(Secret*, std::true_type);
-std::false_type IsNullLiteralHelper(IgnoredValue, std::false_type);
-std::false_type IsNullLiteralHelper(IgnoredValue, std::true_type);
-
-// A compile-time bool constant that is true if and only if x is a null pointer
-// literal (i.e. nullptr, NULL or any 0-valued compile-time integral constant).
-#define GTEST_IS_NULL_LITERAL_(x)                    \
-  decltype(::testing::internal::IsNullLiteralHelper( \
-      x,                                             \
-      ::testing::internal::TypeIsValidNullptrConstant<decltype(x)>()))::value
-
 // Appends the user-supplied message to the Google-Test-generated message.
 GTEST_API_ std::string AppendUserMessage(
     const std::string& gtest_msg, const Message& user_msg);
