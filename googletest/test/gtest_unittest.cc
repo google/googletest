@@ -515,28 +515,36 @@ TEST_F(FormatEpochTimeInMillisAsIso8601Test, PrintsEpochStart) {
 #  pragma option push -w-ccc -w-rch
 # endif
 
-// Tests that GTEST_IS_NULL_LITERAL_(x) is true when x is a null
-// pointer literal.
-TEST(NullLiteralTest, IsTrueForNullLiterals) {
-  EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(NULL));  // NOLINT
-  EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(0));     // NOLINT
-  EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(0u));    // NOLINT
-  EXPECT_TRUE(GTEST_IS_NULL_LITERAL_(nullptr));
-}
+// Tests that the LHS of EXPECT_EQ or ASSERT_EQ can be used as a null literal
+// when the RHS is a pointer type.
+TEST(NullLiteralTest, LHSAllowsNullLiterals) {
+  EXPECT_EQ(0, static_cast<void*>(nullptr));     // NOLINT
+  ASSERT_EQ(0, static_cast<void*>(nullptr));     // NOLINT
+  EXPECT_EQ(NULL, static_cast<void*>(nullptr));  // NOLINT
+  ASSERT_EQ(NULL, static_cast<void*>(nullptr));  // NOLINT
+  EXPECT_EQ(nullptr, static_cast<void*>(nullptr));
+  ASSERT_EQ(nullptr, static_cast<void*>(nullptr));
 
-// Tests that GTEST_IS_NULL_LITERAL_(x) is false when x is not a null
-// pointer literal.
-TEST(NullLiteralTest, IsFalseForNonNullLiterals) {
-  EXPECT_FALSE(GTEST_IS_NULL_LITERAL_(1));
-  EXPECT_FALSE(GTEST_IS_NULL_LITERAL_(0.0));
-  EXPECT_FALSE(GTEST_IS_NULL_LITERAL_('a'));
-  EXPECT_FALSE(GTEST_IS_NULL_LITERAL_(static_cast<void*>(nullptr)));
+  const int* const p = nullptr;
+  EXPECT_EQ(0, p);     // NOLINT
+  ASSERT_EQ(0, p);     // NOLINT
+  EXPECT_EQ(NULL, p);  // NOLINT
+  ASSERT_EQ(NULL, p);  // NOLINT
+  EXPECT_EQ(nullptr, p);
+  ASSERT_EQ(nullptr, p);
 }
 
 struct ConvertToAll {
   template <typename T>
   operator T() const {  // NOLINT
     return T();
+  }
+};
+
+struct ConvertToPointer {
+  template <class T>
+  operator T*() const {  // NOLINT
+    return nullptr;
   }
 };
 
@@ -548,10 +556,36 @@ struct ConvertToAllButNoPointers {
   }
 };
 
+struct MyType {};
+inline bool operator==(MyType const&, MyType const&) { return true; }
+
 TEST(NullLiteralTest, ImplicitConversion) {
-  EXPECT_FALSE(GTEST_IS_NULL_LITERAL_(ConvertToAll{}));
-  EXPECT_FALSE(GTEST_IS_NULL_LITERAL_(ConvertToAllButNoPointers{}));
+  EXPECT_EQ(ConvertToPointer{}, static_cast<void*>(nullptr));
+#if !defined(__GNUC__) || defined(__clang__)
+  // Disabled due to GCC bug gcc.gnu.org/PR89580
+  EXPECT_EQ(ConvertToAll{}, static_cast<void*>(nullptr));
+#endif
+  EXPECT_EQ(ConvertToAll{}, MyType{});
+  EXPECT_EQ(ConvertToAllButNoPointers{}, MyType{});
 }
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#if __has_warning("-Wzero-as-null-pointer-constant")
+#pragma clang diagnostic error "-Wzero-as-null-pointer-constant"
+#endif
+#endif
+
+TEST(NullLiteralTest, NoConversionNoWarning) {
+  // Test that gtests detection and handling of null pointer constants
+  // doesn't trigger a warning when '0' isn't actually used as null.
+  EXPECT_EQ(0, 0);
+  ASSERT_EQ(0, 0);
+}
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 # ifdef __BORLANDC__
 // Restores warnings after previous "#pragma option push" suppressed them.
