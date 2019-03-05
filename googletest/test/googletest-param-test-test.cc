@@ -871,12 +871,14 @@ INSTANTIATE_TEST_SUITE_P(CustomParamNameLambda, CustomLambdaNamingTest,
 TEST(CustomNamingTest, CheckNameRegistry) {
   ::testing::UnitTest* unit_test = ::testing::UnitTest::GetInstance();
   std::set<std::string> test_names;
-  for (int suite_num = 0; suite_num < unit_test->total_test_suite_count();
+  for (size_t suite_num = 0; suite_num < unit_test->total_test_suite_count();
        ++suite_num) {
-    const ::testing::TestSuite* test_suite = unit_test->GetTestSuite(suite_num);
-    for (int test_num = 0; test_num < test_suite->total_test_count();
+    const ::testing::TestSuite* test_suite =
+      unit_test->GetTestSuite(static_cast<int>(suite_num));
+    for (size_t test_num = 0; test_num < test_suite->total_test_count();
          ++test_num) {
-      const ::testing::TestInfo* test_info = test_suite->GetTestInfo(test_num);
+      const ::testing::TestInfo* test_info =
+        test_suite->GetTestInfo(static_cast<int>(test_num));
       test_names.insert(std::string(test_info->name()));
     }
   }

@@ -58,8 +58,8 @@ class UnitTestHelper {
     auto const** const test_suites =
         new const TestSuite*[unit_test.total_test_suite_count()];
 
-    for (int i = 0; i < unit_test.total_test_suite_count(); ++i)
-      test_suites[i] = unit_test.GetTestSuite(i);
+    for (size_t i = 0; i < unit_test.total_test_suite_count(); ++i)
+      test_suites[i] = unit_test.GetTestSuite(static_cast<int>(i));
 
     std::sort(test_suites,
               test_suites + unit_test.total_test_suite_count(),
@@ -71,8 +71,8 @@ class UnitTestHelper {
   // pointer.
   static const TestSuite* FindTestSuite(const char* name) {
     UnitTest& unit_test = *UnitTest::GetInstance();
-    for (int i = 0; i < unit_test.total_test_suite_count(); ++i) {
-      const TestSuite* test_suite = unit_test.GetTestSuite(i);
+    for (size_t i = 0; i < unit_test.total_test_suite_count(); ++i) {
+      const TestSuite* test_suite = unit_test.GetTestSuite(static_cast<int>(i));
       if (0 == strcmp(test_suite->name(), name))
         return test_suite;
     }
@@ -86,8 +86,8 @@ class UnitTestHelper {
     TestInfo const** const tests =
         new const TestInfo*[test_suite->total_test_count()];
 
-    for (int i = 0; i < test_suite->total_test_count(); ++i)
-      tests[i] = test_suite->GetTestInfo(i);
+    for (size_t i = 0; i < test_suite->total_test_count(); ++i)
+      tests[i] = test_suite->GetTestInfo(static_cast<int>(i));
 
     std::sort(tests, tests + test_suite->total_test_count(),
               LessByName<TestInfo>());

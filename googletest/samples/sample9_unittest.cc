@@ -134,11 +134,11 @@ int main(int argc, char **argv) {
 
   // This is an example of using the UnitTest reflection API to inspect test
   // results. Here we discount failures from the tests we expected to fail.
-  int unexpectedly_failed_tests = 0;
-  for (int i = 0; i < unit_test.total_test_case_count(); ++i) {
-    const TestCase& test_case = *unit_test.GetTestCase(i);
-    for (int j = 0; j < test_case.total_test_count(); ++j) {
-      const TestInfo& test_info = *test_case.GetTestInfo(j);
+  size_t unexpectedly_failed_tests = 0;
+  for (size_t i = 0; i < unit_test.total_test_case_count(); ++i) {
+    const TestCase& test_case = *unit_test.GetTestCase(static_cast<int>(i));
+    for (size_t j = 0; j < test_case.total_test_count(); ++j) {
+      const TestInfo& test_info = *test_case.GetTestInfo(static_cast<int>(j));
       // Counts failed tests that were not meant to fail (those without
       // 'Fails' in the name).
       if (test_info.result()->Failed() &&

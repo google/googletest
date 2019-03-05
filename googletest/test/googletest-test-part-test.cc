@@ -192,7 +192,7 @@ class TestPartResultArrayTest : public Test {
 // Tests that TestPartResultArray initially has size 0.
 TEST_F(TestPartResultArrayTest, InitialSizeIsZero) {
   TestPartResultArray results;
-  EXPECT_EQ(0, results.size());
+  EXPECT_EQ(0U, results.size());
 }
 
 // Tests that TestPartResultArray contains the given TestPartResult
@@ -200,7 +200,7 @@ TEST_F(TestPartResultArrayTest, InitialSizeIsZero) {
 TEST_F(TestPartResultArrayTest, ContainsGivenResultAfterAppend) {
   TestPartResultArray results;
   results.Append(r1_);
-  EXPECT_EQ(1, results.size());
+  EXPECT_EQ(1U, results.size());
   EXPECT_STREQ("Failure 1", results.GetTestPartResult(0).message());
 }
 
@@ -210,7 +210,7 @@ TEST_F(TestPartResultArrayTest, ContainsGivenResultsAfterTwoAppends) {
   TestPartResultArray results;
   results.Append(r1_);
   results.Append(r2_);
-  EXPECT_EQ(2, results.size());
+  EXPECT_EQ(2U, results.size());
   EXPECT_STREQ("Failure 1", results.GetTestPartResult(0).message());
   EXPECT_STREQ("Failure 2", results.GetTestPartResult(1).message());
 }

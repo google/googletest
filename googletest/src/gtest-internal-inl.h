@@ -277,7 +277,7 @@ GTEST_API_ bool ShouldRunTestOnShard(
 // Returns the number of elements in the given container that satisfy
 // the given predicate.
 template <class Container, typename Predicate>
-inline int CountIf(const Container& c, Predicate predicate) {
+inline size_t CountIf(const Container& c, Predicate predicate) {
   // Implemented as an explicit loop since std::count_if() in libCstd on
   // Solaris has a non-standard signature.
   int count = 0;
@@ -530,41 +530,41 @@ class GTEST_API_ UnitTestImpl {
       TestPartResultReporterInterface* reporter);
 
   // Gets the number of successful test suites.
-  int successful_test_suite_count() const;
+  size_t successful_test_suite_count() const;
 
   // Gets the number of failed test suites.
-  int failed_test_suite_count() const;
+  size_t failed_test_suite_count() const;
 
   // Gets the number of all test suites.
-  int total_test_suite_count() const;
+  size_t total_test_suite_count() const;
 
   // Gets the number of all test suites that contain at least one test
   // that should run.
-  int test_suite_to_run_count() const;
+  size_t test_suite_to_run_count() const;
 
   // Gets the number of successful tests.
-  int successful_test_count() const;
+  size_t successful_test_count() const;
 
   // Gets the number of skipped tests.
-  int skipped_test_count() const;
+  size_t skipped_test_count() const;
 
   // Gets the number of failed tests.
-  int failed_test_count() const;
+  size_t failed_test_count() const;
 
   // Gets the number of disabled tests that will be reported in the XML report.
-  int reportable_disabled_test_count() const;
+  size_t reportable_disabled_test_count() const;
 
   // Gets the number of disabled tests.
-  int disabled_test_count() const;
+  size_t disabled_test_count() const;
 
   // Gets the number of tests to be printed in the XML report.
-  int reportable_test_count() const;
+  size_t reportable_test_count() const;
 
   // Gets the number of all tests.
-  int total_test_count() const;
+  size_t total_test_count() const;
 
   // Gets the number of tests that should run.
-  int test_to_run_count() const;
+  size_t test_to_run_count() const;
 
   // Gets the time of the test program start, in ms from the start of the
   // UNIX epoch.

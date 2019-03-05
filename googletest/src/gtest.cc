@@ -362,9 +362,9 @@ static bool GTestIsInitialized() { return GetArgvs().size() > 0; }
 // Iterates over a vector of TestSuites, keeping a running sum of the
 // results of calling a given int-returning method on each.
 // Returns the sum.
-static int SumOverTestSuiteList(const std::vector<TestSuite*>& case_list,
-                                int (TestSuite::*method)() const) {
-  int sum = 0;
+static size_t SumOverTestSuiteList(const std::vector<TestSuite*>& case_list,
+                                   size_t (TestSuite::*method)() const) {
+  size_t sum = 0;
   for (size_t i = 0; i < case_list.size(); i++) {
     sum += (case_list[i]->*method)();
   }
@@ -668,8 +668,8 @@ static AssertionResult HasOneFailure(const char* /* results_expr */,
   if (results.size() != 1) {
     msg << "Expected: " << expected << "\n"
         << "  Actual: " << results.size() << " failures";
-    for (int i = 0; i < results.size(); i++) {
-      msg << "\n" << results.GetTestPartResult(i);
+    for (size_t i = 0; i < results.size(); i++) {
+      msg << "\n" << results.GetTestPartResult(static_cast<int>(i));
     }
     return AssertionFailure() << msg;
   }
@@ -751,64 +751,64 @@ void UnitTestImpl::SetTestPartResultReporterForCurrentThread(
 }
 
 // Gets the number of successful test suites.
-int UnitTestImpl::successful_test_suite_count() const {
+size_t UnitTestImpl::successful_test_suite_count() const {
   return CountIf(test_suites_, TestSuitePassed);
 }
 
 // Gets the number of failed test suites.
-int UnitTestImpl::failed_test_suite_count() const {
+size_t UnitTestImpl::failed_test_suite_count() const {
   return CountIf(test_suites_, TestSuiteFailed);
 }
 
 // Gets the number of all test suites.
-int UnitTestImpl::total_test_suite_count() const {
-  return static_cast<int>(test_suites_.size());
+size_t UnitTestImpl::total_test_suite_count() const {
+  return test_suites_.size();
 }
 
 // Gets the number of all test suites that contain at least one test
 // that should run.
-int UnitTestImpl::test_suite_to_run_count() const {
+size_t UnitTestImpl::test_suite_to_run_count() const {
   return CountIf(test_suites_, ShouldRunTestSuite);
 }
 
 // Gets the number of successful tests.
-int UnitTestImpl::successful_test_count() const {
+size_t UnitTestImpl::successful_test_count() const {
   return SumOverTestSuiteList(test_suites_, &TestSuite::successful_test_count);
 }
 
 // Gets the number of skipped tests.
-int UnitTestImpl::skipped_test_count() const {
+size_t UnitTestImpl::skipped_test_count() const {
   return SumOverTestSuiteList(test_suites_, &TestSuite::skipped_test_count);
 }
 
 // Gets the number of failed tests.
-int UnitTestImpl::failed_test_count() const {
+size_t UnitTestImpl::failed_test_count() const {
   return SumOverTestSuiteList(test_suites_, &TestSuite::failed_test_count);
 }
 
 // Gets the number of disabled tests that will be reported in the XML report.
-int UnitTestImpl::reportable_disabled_test_count() const {
+size_t UnitTestImpl::reportable_disabled_test_count() const {
   return SumOverTestSuiteList(test_suites_,
                               &TestSuite::reportable_disabled_test_count);
 }
 
 // Gets the number of disabled tests.
-int UnitTestImpl::disabled_test_count() const {
+size_t UnitTestImpl::disabled_test_count() const {
   return SumOverTestSuiteList(test_suites_, &TestSuite::disabled_test_count);
 }
 
 // Gets the number of tests to be printed in the XML report.
-int UnitTestImpl::reportable_test_count() const {
+size_t UnitTestImpl::reportable_test_count() const {
   return SumOverTestSuiteList(test_suites_, &TestSuite::reportable_test_count);
 }
 
 // Gets the number of all tests.
-int UnitTestImpl::total_test_count() const {
+size_t UnitTestImpl::total_test_count() const {
   return SumOverTestSuiteList(test_suites_, &TestSuite::total_test_count);
 }
 
 // Gets the number of tests that should run.
-int UnitTestImpl::test_to_run_count() const {
+size_t UnitTestImpl::test_to_run_count() const {
   return SumOverTestSuiteList(test_suites_, &TestSuite::test_to_run_count);
 }
 
@@ -2695,43 +2695,43 @@ void TestInfo::Run() {
 // class TestSuite
 
 // Gets the number of successful tests in this test suite.
-int TestSuite::successful_test_count() const {
+size_t TestSuite::successful_test_count() const {
   return CountIf(test_info_list_, TestPassed);
 }
 
 // Gets the number of successful tests in this test suite.
-int TestSuite::skipped_test_count() const {
+size_t TestSuite::skipped_test_count() const {
   return CountIf(test_info_list_, TestSkipped);
 }
 
 // Gets the number of failed tests in this test suite.
-int TestSuite::failed_test_count() const {
+size_t TestSuite::failed_test_count() const {
   return CountIf(test_info_list_, TestFailed);
 }
 
 // Gets the number of disabled tests that will be reported in the XML report.
-int TestSuite::reportable_disabled_test_count() const {
+size_t TestSuite::reportable_disabled_test_count() const {
   return CountIf(test_info_list_, TestReportableDisabled);
 }
 
 // Gets the number of disabled tests in this test suite.
-int TestSuite::disabled_test_count() const {
+size_t TestSuite::disabled_test_count() const {
   return CountIf(test_info_list_, TestDisabled);
 }
 
 // Gets the number of tests to be printed in the XML report.
-int TestSuite::reportable_test_count() const {
+size_t TestSuite::reportable_test_count() const {
   return CountIf(test_info_list_, TestReportable);
 }
 
 // Get the number of tests in this test suite that should run.
-int TestSuite::test_to_run_count() const {
+size_t TestSuite::test_to_run_count() const {
   return CountIf(test_info_list_, ShouldRunTest);
 }
 
 // Gets the number of all tests.
-int TestSuite::total_test_count() const {
-  return static_cast<int>(test_info_list_.size());
+size_t TestSuite::total_test_count() const {
+  return test_info_list_.size();
 }
 
 // Creates a TestSuite with the given name.
@@ -2801,8 +2801,8 @@ void TestSuite::Run() {
       this, &TestSuite::RunSetUpTestSuite, "SetUpTestSuite()");
 
   const internal::TimeInMillis start = internal::GetTimeInMillis();
-  for (int i = 0; i < total_test_count(); i++) {
-    GetMutableTestInfo(i)->Run();
+  for (size_t i = 0; i < total_test_count(); i++) {
+    GetMutableTestInfo(static_cast<int>(i))->Run();
   }
   elapsed_time_ = internal::GetTimeInMillis() - start;
 
@@ -2843,7 +2843,7 @@ void TestSuite::UnshuffleTests() {
 //
 // FormatCountableNoun(1, "formula", "formuli") returns "1 formula".
 // FormatCountableNoun(5, "book", "books") returns "5 books".
-static std::string FormatCountableNoun(int count,
+static std::string FormatCountableNoun(size_t count,
                                        const char * singular_form,
                                        const char * plural_form) {
   return internal::StreamableToString(count) + " " +
@@ -2851,12 +2851,12 @@ static std::string FormatCountableNoun(int count,
 }
 
 // Formats the count of tests.
-static std::string FormatTestCount(int test_count) {
+static std::string FormatTestCount(size_t test_count) {
   return FormatCountableNoun(test_count, "test", "tests");
 }
 
 // Formats the count of test suites.
-static std::string FormatTestSuiteCount(int test_suite_count) {
+static std::string FormatTestSuiteCount(size_t test_suite_count) {
   return FormatCountableNoun(test_suite_count, "test suite", "test suites");
 }
 
@@ -3236,18 +3236,18 @@ void PrettyUnitTestResultPrinter::OnEnvironmentsTearDownStart(
 
 // Internal helper for printing the list of failed tests.
 void PrettyUnitTestResultPrinter::PrintFailedTests(const UnitTest& unit_test) {
-  const int failed_test_count = unit_test.failed_test_count();
+  const size_t failed_test_count = unit_test.failed_test_count();
   if (failed_test_count == 0) {
     return;
   }
 
-  for (int i = 0; i < unit_test.total_test_suite_count(); ++i) {
-    const TestSuite& test_suite = *unit_test.GetTestSuite(i);
+  for (size_t i = 0; i < unit_test.total_test_suite_count(); ++i) {
+    const TestSuite& test_suite = *unit_test.GetTestSuite(static_cast<int>(i));
     if (!test_suite.should_run() || (test_suite.failed_test_count() == 0)) {
       continue;
     }
-    for (int j = 0; j < test_suite.total_test_count(); ++j) {
-      const TestInfo& test_info = *test_suite.GetTestInfo(j);
+    for (size_t j = 0; j < test_suite.total_test_count(); ++j) {
+      const TestInfo& test_info = *test_suite.GetTestInfo(static_cast<int>(j));
       if (!test_info.should_run() || !test_info.result()->Failed()) {
         continue;
       }
@@ -3261,18 +3261,18 @@ void PrettyUnitTestResultPrinter::PrintFailedTests(const UnitTest& unit_test) {
 
 // Internal helper for printing the list of skipped tests.
 void PrettyUnitTestResultPrinter::PrintSkippedTests(const UnitTest& unit_test) {
-  const int skipped_test_count = unit_test.skipped_test_count();
+  const size_t skipped_test_count = unit_test.skipped_test_count();
   if (skipped_test_count == 0) {
     return;
   }
 
-  for (int i = 0; i < unit_test.total_test_suite_count(); ++i) {
-    const TestSuite& test_suite = *unit_test.GetTestSuite(i);
+  for (size_t i = 0; i < unit_test.total_test_suite_count(); ++i) {
+    const TestSuite& test_suite = *unit_test.GetTestSuite(static_cast<int>(i));
     if (!test_suite.should_run() || (test_suite.skipped_test_count() == 0)) {
       continue;
     }
-    for (int j = 0; j < test_suite.total_test_count(); ++j) {
-      const TestInfo& test_info = *test_suite.GetTestInfo(j);
+    for (size_t j = 0; j < test_suite.total_test_count(); ++j) {
+      const TestInfo& test_info = *test_suite.GetTestInfo(static_cast<int>(j));
       if (!test_info.should_run() || !test_info.result()->Skipped()) {
         continue;
       }
@@ -3297,7 +3297,7 @@ void PrettyUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
   ColoredPrintf(COLOR_GREEN,  "[  PASSED  ] ");
   printf("%s.\n", FormatTestCount(unit_test.successful_test_count()).c_str());
 
-  const int skipped_test_count = unit_test.skipped_test_count();
+  const size_t skipped_test_count = unit_test.skipped_test_count();
   if (skipped_test_count > 0) {
     ColoredPrintf(COLOR_GREEN, "[  SKIPPED ] ");
     printf("%s, listed below:\n", FormatTestCount(skipped_test_count).c_str());
@@ -3815,9 +3815,10 @@ void XmlUnitTestResultPrinter::PrintXmlTestSuite(std::ostream* stream,
     *stream << TestPropertiesAsXmlAttributes(test_suite.ad_hoc_test_result());
   }
   *stream << ">\n";
-  for (int i = 0; i < test_suite.total_test_count(); ++i) {
-    if (test_suite.GetTestInfo(i)->is_reportable())
-      OutputXmlTestInfo(stream, test_suite.name(), *test_suite.GetTestInfo(i));
+  for (size_t i = 0; i < test_suite.total_test_count(); ++i) {
+    auto testSuiteInfo = test_suite.GetTestInfo(i);
+    if (testSuiteInfo->is_reportable())
+      OutputXmlTestInfo(stream, test_suite.name(), *testSuiteInfo);
   }
   *stream << "  </" << kTestsuite << ">\n";
 }
@@ -3853,7 +3854,8 @@ void XmlUnitTestResultPrinter::PrintXmlUnitTest(std::ostream* stream,
   OutputXmlAttribute(stream, kTestsuites, "name", "AllTests");
   *stream << ">\n";
 
-  for (int i = 0; i < unit_test.total_test_suite_count(); ++i) {
+  for (int i = 0; i < static_cast<int>(unit_test.total_test_suite_count());
+       ++i) {
     if (unit_test.GetTestSuite(i)->reportable_test_count() > 0)
       PrintXmlTestSuite(stream, *unit_test.GetTestSuite(i));
   }
@@ -3867,7 +3869,7 @@ void XmlUnitTestResultPrinter::PrintXmlTestsList(
   *stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
   *stream << "<" << kTestsuites;
 
-  int total_tests = 0;
+  size_t total_tests = 0;
   for (auto test_suite : test_suites) {
     total_tests += test_suite->total_test_count();
   }
@@ -4183,14 +4185,15 @@ void JsonUnitTestResultPrinter::PrintJsonTestSuite(
   *stream << kIndent << "\"" << kTestsuite << "\": [\n";
 
   bool comma = false;
-  for (int i = 0; i < test_suite.total_test_count(); ++i) {
-    if (test_suite.GetTestInfo(i)->is_reportable()) {
+  for (size_t i = 0; i < test_suite.total_test_count(); ++i) {
+    auto testSuiteInfo = test_suite.GetTestInfo(static_cast<int>(i));
+    if (testSuiteInfo->is_reportable()) {
       if (comma) {
         *stream << ",\n";
       } else {
         comma = true;
       }
-      OutputJsonTestInfo(stream, test_suite.name(), *test_suite.GetTestInfo(i));
+      OutputJsonTestInfo(stream, test_suite.name(), *testSuiteInfo);
     }
   }
   *stream << "\n" << kIndent << "]\n" << Indent(4) << "}";
@@ -4228,7 +4231,8 @@ void JsonUnitTestResultPrinter::PrintJsonUnitTest(std::ostream* stream,
   *stream << kIndent << "\"" << kTestsuites << "\": [\n";
 
   bool comma = false;
-  for (int i = 0; i < unit_test.total_test_suite_count(); ++i) {
+  for (int i = 0; i < static_cast<int>(unit_test.total_test_suite_count());
+        ++i) {
     if (unit_test.GetTestSuite(i)->reportable_test_count() > 0) {
       if (comma) {
         *stream << ",\n";
@@ -4247,7 +4251,7 @@ void JsonUnitTestResultPrinter::PrintJsonTestList(
   const std::string kTestsuites = "testsuites";
   const std::string kIndent = Indent(2);
   *stream << "{\n";
-  int total_tests = 0;
+  size_t total_tests = 0;
   for (auto test_suite : test_suites) {
     total_tests += test_suite->total_test_count();
   }
@@ -4552,75 +4556,75 @@ UnitTest* UnitTest::GetInstance() {
 }
 
 // Gets the number of successful test suites.
-int UnitTest::successful_test_suite_count() const {
+size_t UnitTest::successful_test_suite_count() const {
   return impl()->successful_test_suite_count();
 }
 
 // Gets the number of failed test suites.
-int UnitTest::failed_test_suite_count() const {
+size_t UnitTest::failed_test_suite_count() const {
   return impl()->failed_test_suite_count();
 }
 
 // Gets the number of all test suites.
-int UnitTest::total_test_suite_count() const {
+size_t UnitTest::total_test_suite_count() const {
   return impl()->total_test_suite_count();
 }
 
 // Gets the number of all test suites that contain at least one test
 // that should run.
-int UnitTest::test_suite_to_run_count() const {
+size_t UnitTest::test_suite_to_run_count() const {
   return impl()->test_suite_to_run_count();
 }
 
 //  Legacy API is deprecated but still available
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
-int UnitTest::successful_test_case_count() const {
+size_t UnitTest::successful_test_case_count() const {
   return impl()->successful_test_suite_count();
 }
-int UnitTest::failed_test_case_count() const {
+size_t UnitTest::failed_test_case_count() const {
   return impl()->failed_test_suite_count();
 }
-int UnitTest::total_test_case_count() const {
+size_t UnitTest::total_test_case_count() const {
   return impl()->total_test_suite_count();
 }
-int UnitTest::test_case_to_run_count() const {
+size_t UnitTest::test_case_to_run_count() const {
   return impl()->test_suite_to_run_count();
 }
 #endif  //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
 // Gets the number of successful tests.
-int UnitTest::successful_test_count() const {
+size_t UnitTest::successful_test_count() const {
   return impl()->successful_test_count();
 }
 
 // Gets the number of skipped tests.
-int UnitTest::skipped_test_count() const {
+size_t UnitTest::skipped_test_count() const {
   return impl()->skipped_test_count();
 }
 
 // Gets the number of failed tests.
-int UnitTest::failed_test_count() const { return impl()->failed_test_count(); }
+size_t UnitTest::failed_test_count() const { return impl()->failed_test_count(); }
 
 // Gets the number of disabled tests that will be reported in the XML report.
-int UnitTest::reportable_disabled_test_count() const {
+size_t UnitTest::reportable_disabled_test_count() const {
   return impl()->reportable_disabled_test_count();
 }
 
 // Gets the number of disabled tests.
-int UnitTest::disabled_test_count() const {
+size_t UnitTest::disabled_test_count() const {
   return impl()->disabled_test_count();
 }
 
 // Gets the number of tests to be printed in the XML report.
-int UnitTest::reportable_test_count() const {
+size_t UnitTest::reportable_test_count() const {
   return impl()->reportable_test_count();
 }
 
 // Gets the number of all tests.
-int UnitTest::total_test_count() const { return impl()->total_test_count(); }
+size_t UnitTest::total_test_count() const { return impl()->total_test_count(); }
 
 // Gets the number of tests that should run.
-int UnitTest::test_to_run_count() const { return impl()->test_to_run_count(); }
+size_t UnitTest::test_to_run_count() const { return impl()->test_to_run_count(); }
 
 // Gets the time of the test program start, in ms from the start of the
 // UNIX epoch.
@@ -5238,7 +5242,8 @@ bool UnitTestImpl::RunAllTests() {
       // Runs the tests only if there was no fatal failure during global
       // set-up.
       if (!Test::HasFatalFailure()) {
-        for (int test_index = 0; test_index < total_test_suite_count();
+        for (int test_index = 0;
+             test_index < static_cast<int>(total_test_suite_count());
              test_index++) {
           GetMutableSuiteCase(test_index)->Run();
         }

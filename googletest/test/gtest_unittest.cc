@@ -794,16 +794,16 @@ static bool IsPositive(int n) { return n > 0; }
 
 TEST(ContainerUtilityTest, CountIf) {
   std::vector<int> v;
-  EXPECT_EQ(0, CountIf(v, IsPositive));  // Works for an empty container.
+  EXPECT_EQ(0U, CountIf(v, IsPositive));  // Works for an empty container.
 
   v.push_back(-1);
   v.push_back(0);
-  EXPECT_EQ(0, CountIf(v, IsPositive));  // Works when no value satisfies.
+  EXPECT_EQ(0U, CountIf(v, IsPositive));  // Works when no value satisfies.
 
   v.push_back(2);
   v.push_back(-10);
   v.push_back(10);
-  EXPECT_EQ(2, CountIf(v, IsPositive));
+  EXPECT_EQ(2U, CountIf(v, IsPositive));
 }
 
 // Tests ForEach().
@@ -1152,7 +1152,7 @@ TEST_F(ScopedFakeTestPartResultReporterTest, InterceptsTestFailures) {
     AddFailure(FATAL_FAILURE);
   }
 
-  EXPECT_EQ(2, results.size());
+  EXPECT_EQ(2U, results.size());
   EXPECT_TRUE(results.GetTestPartResult(0).nonfatally_failed());
   EXPECT_TRUE(results.GetTestPartResult(1).fatally_failed());
 }
@@ -1164,7 +1164,7 @@ TEST_F(ScopedFakeTestPartResultReporterTest, DeprecatedConstructor) {
     ScopedFakeTestPartResultReporter reporter(&results);
     AddFailure(NONFATAL_FAILURE);
   }
-  EXPECT_EQ(1, results.size());
+  EXPECT_EQ(1U, results.size());
 }
 
 #if GTEST_IS_THREADSAFE
@@ -1190,7 +1190,7 @@ TEST_F(ScopedFakeTestPartResultReporterWithThreadsTest,
     AddFailureInOtherThread(FATAL_FAILURE);
   }
 
-  EXPECT_EQ(4, results.size());
+  EXPECT_EQ(4U, results.size());
   EXPECT_TRUE(results.GetTestPartResult(0).nonfatally_failed());
   EXPECT_TRUE(results.GetTestPartResult(1).fatally_failed());
   EXPECT_TRUE(results.GetTestPartResult(2).nonfatally_failed());
@@ -3412,7 +3412,7 @@ TEST_F(NoFatalFailureTest, AssertNoFatalFailureOnFatalFailure) {
     ScopedFakeTestPartResultReporter gtest_reporter(&gtest_failures);
     DoAssertNoFatalFailureOnFails();
   }
-  ASSERT_EQ(2, gtest_failures.size());
+  ASSERT_EQ(2U, gtest_failures.size());
   EXPECT_EQ(TestPartResult::kFatalFailure,
             gtest_failures.GetTestPartResult(0).type());
   EXPECT_EQ(TestPartResult::kFatalFailure,
@@ -3429,7 +3429,7 @@ TEST_F(NoFatalFailureTest, ExpectNoFatalFailureOnFatalFailure) {
     ScopedFakeTestPartResultReporter gtest_reporter(&gtest_failures);
     DoExpectNoFatalFailureOnFails();
   }
-  ASSERT_EQ(3, gtest_failures.size());
+  ASSERT_EQ(3U, gtest_failures.size());
   EXPECT_EQ(TestPartResult::kFatalFailure,
             gtest_failures.GetTestPartResult(0).type());
   EXPECT_EQ(TestPartResult::kNonFatalFailure,
@@ -3450,7 +3450,7 @@ TEST_F(NoFatalFailureTest, MessageIsStreamable) {
     ScopedFakeTestPartResultReporter gtest_reporter(&gtest_failures);
     EXPECT_NO_FATAL_FAILURE(FAIL() << "foo") << "my message";
   }
-  ASSERT_EQ(2, gtest_failures.size());
+  ASSERT_EQ(2U, gtest_failures.size());
   EXPECT_EQ(TestPartResult::kNonFatalFailure,
             gtest_failures.GetTestPartResult(0).type());
   EXPECT_EQ(TestPartResult::kNonFatalFailure,
@@ -5314,8 +5314,9 @@ class TestInfoTest : public Test {
     const TestSuite* const test_suite =
         GetUnitTestImpl()->GetTestSuite("TestInfoTest", "", nullptr, nullptr);
 
-    for (int i = 0; i < test_suite->total_test_count(); ++i) {
-      const TestInfo* const test_info = test_suite->GetTestInfo(i);
+    for (size_t i = 0; i < test_suite->total_test_count(); ++i) {
+      const TestInfo* const test_info =
+        test_suite->GetTestInfo(static_cast<int>(i));
       if (strcmp(test_name, test_info->name()) == 0)
         return test_info;
     }
@@ -7582,14 +7583,15 @@ auto* dynamic_test = testing::RegisterTest(
 
 TEST(RegisterTest, WasRegistered) {
   auto* unittest = testing::UnitTest::GetInstance();
-  for (int i = 0; i < unittest->total_test_suite_count(); ++i) {
-    auto* tests = unittest->GetTestSuite(i);
+  for (size_t i = 0; i < unittest->total_test_suite_count(); ++i) {
+    auto* tests = unittest->GetTestSuite(static_cast<int>(i));
     if (tests->name() != std::string("DynamicUnitTestFixture")) continue;
-    for (int j = 0; j < tests->total_test_count(); ++j) {
-      if (tests->GetTestInfo(j)->name() != std::string("DynamicTest")) continue;
+    for (size_t j = 0; j < tests->total_test_count(); ++j) {
+      auto testInfo = tests->GetTestInfo(j);
+      if (testInfo->name() != std::string("DynamicTest")) continue;
       // Found it.
-      EXPECT_STREQ(tests->GetTestInfo(j)->value_param(), "VALUE");
-      EXPECT_STREQ(tests->GetTestInfo(j)->type_param(), "TYPE");
+      EXPECT_STREQ(testInfo->value_param(), "VALUE");
+      EXPECT_STREQ(testInfo->type_param(), "TYPE");
       return;
     }
   }

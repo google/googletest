@@ -137,7 +137,7 @@ class GTEST_API_ TestPartResultArray {
   const TestPartResult& GetTestPartResult(int index) const;
 
   // Returns the number of TestPartResult objects in the array.
-  int size() const;
+  size_t size() const;
 
  private:
   std::vector<TestPartResult> array_;

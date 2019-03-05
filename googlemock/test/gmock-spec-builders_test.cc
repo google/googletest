@@ -1140,7 +1140,7 @@ TEST(UnexpectedCallTest, UnsatisifiedPrerequisites) {
   }
 
   // There should be one non-fatal failure.
-  ASSERT_EQ(1, failures.size());
+  ASSERT_EQ(1U, failures.size());
   const ::testing::TestPartResult& r = failures.GetTestPartResult(0);
   EXPECT_EQ(::testing::TestPartResult::kNonFatalFailure, r.type());
 

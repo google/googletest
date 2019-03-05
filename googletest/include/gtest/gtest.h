@@ -862,28 +862,28 @@ class GTEST_API_ TestSuite {
   bool should_run() const { return should_run_; }
 
   // Gets the number of successful tests in this test suite.
-  int successful_test_count() const;
+  size_t successful_test_count() const;
 
   // Gets the number of skipped tests in this test suite.
-  int skipped_test_count() const;
+  size_t skipped_test_count() const;
 
   // Gets the number of failed tests in this test suite.
-  int failed_test_count() const;
+  size_t failed_test_count() const;
 
   // Gets the number of disabled tests that will be reported in the XML report.
-  int reportable_disabled_test_count() const;
+  size_t reportable_disabled_test_count() const;
 
   // Gets the number of disabled tests in this test suite.
-  int disabled_test_count() const;
+  size_t disabled_test_count() const;
 
   // Gets the number of tests to be printed in the XML report.
-  int reportable_test_count() const;
+  size_t reportable_test_count() const;
 
   // Get the number of tests in this test suite that should run.
-  int test_to_run_count() const;
+  size_t test_to_run_count() const;
 
   // Gets the number of all tests in this test suite.
-  int total_test_count() const;
+  size_t total_test_count() const;
 
   // Returns true iff the test suite passed.
   bool Passed() const { return !Failed(); }
@@ -1292,49 +1292,49 @@ class GTEST_API_ UnitTest {
       GTEST_LOCK_EXCLUDED_(mutex_);
 
   // Gets the number of successful test suites.
-  int successful_test_suite_count() const;
+  size_t successful_test_suite_count() const;
 
   // Gets the number of failed test suites.
-  int failed_test_suite_count() const;
+  size_t failed_test_suite_count() const;
 
   // Gets the number of all test suites.
-  int total_test_suite_count() const;
+  size_t total_test_suite_count() const;
 
   // Gets the number of all test suites that contain at least one test
   // that should run.
-  int test_suite_to_run_count() const;
+  size_t test_suite_to_run_count() const;
 
   //  Legacy API is deprecated but still available
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
-  int successful_test_case_count() const;
-  int failed_test_case_count() const;
-  int total_test_case_count() const;
-  int test_case_to_run_count() const;
+  size_t successful_test_case_count() const;
+  size_t failed_test_case_count() const;
+  size_t total_test_case_count() const;
+  size_t test_case_to_run_count() const;
 #endif  //  EMOVE_LEGACY_TEST_CASEAPI
 
   // Gets the number of successful tests.
-  int successful_test_count() const;
+  size_t successful_test_count() const;
 
   // Gets the number of skipped tests.
-  int skipped_test_count() const;
+  size_t skipped_test_count() const;
 
   // Gets the number of failed tests.
-  int failed_test_count() const;
+  size_t failed_test_count() const;
 
   // Gets the number of disabled tests that will be reported in the XML report.
-  int reportable_disabled_test_count() const;
+  size_t reportable_disabled_test_count() const;
 
   // Gets the number of disabled tests.
-  int disabled_test_count() const;
+  size_t disabled_test_count() const;
 
   // Gets the number of tests to be printed in the XML report.
-  int reportable_test_count() const;
+  size_t reportable_test_count() const;
 
   // Gets the number of all tests.
-  int total_test_count() const;
+  size_t total_test_count() const;
 
   // Gets the number of tests that should run.
-  int test_to_run_count() const;
+  size_t test_to_run_count() const;
 
   // Gets the time of the test program start, in ms from the start of the
   // UNIX epoch.

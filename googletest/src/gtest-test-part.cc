@@ -65,7 +65,7 @@ void TestPartResultArray::Append(const TestPartResult& result) {
 
 // Returns the TestPartResult at the given index (0-based).
 const TestPartResult& TestPartResultArray::GetTestPartResult(int index) const {
-  if (index < 0 || index >= size()) {
+  if (index < 0 || static_cast<size_t>(index) >= size()) {
     printf("\nInvalid index (%d) into TestPartResultArray.\n", index);
     internal::posix::Abort();
   }
@@ -74,8 +74,8 @@ const TestPartResult& TestPartResultArray::GetTestPartResult(int index) const {
 }
 
 // Returns the number of TestPartResult objects in the array.
-int TestPartResultArray::size() const {
-  return static_cast<int>(array_.size());
+size_t TestPartResultArray::size() const {
+  return array_.size();
 }
 
 namespace internal {
