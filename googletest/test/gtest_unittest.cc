@@ -4079,22 +4079,23 @@ TEST(HRESULTAssertionTest, Streaming) {
 
 // Tests that the assertion macros behave like single statements.
 TEST(AssertionSyntaxTest, BasicAssertionsBehavesLikeSingleStatement) {
-  if (AlwaysFalse())
+  if (AlwaysFalse()) {
     ASSERT_TRUE(false) << "This should never be executed; "
                           "It's a compilation test only.";
-
-  if (AlwaysTrue())
+  }
+  if (AlwaysTrue()) {
     EXPECT_FALSE(false);
-  else
+  } else {
     ;  // NOLINT
-
-  if (AlwaysFalse())
+  }
+  if (AlwaysFalse()) {
     ASSERT_LT(1, 3);
-
-  if (AlwaysFalse())
+  }
+  if (AlwaysFalse()) {
     ;  // NOLINT
-  else
+  } else {
     EXPECT_GT(3, 2) << "";
+  }
 }
 
 #if GTEST_HAS_EXCEPTIONS
@@ -4113,53 +4114,56 @@ TEST(ExpectThrowTest, DoesNotGenerateUnreachableCodeWarning) {
 }
 
 TEST(AssertionSyntaxTest, ExceptionAssertionsBehavesLikeSingleStatement) {
-  if (AlwaysFalse())
+  if (AlwaysFalse()) {
     EXPECT_THROW(ThrowNothing(), bool);
-
-  if (AlwaysTrue())
+  }
+  if (AlwaysTrue()) {
     EXPECT_THROW(ThrowAnInteger(), int);
-  else
+  } else {
     ;  // NOLINT
-
-  if (AlwaysFalse())
+  }
+  if (AlwaysFalse()) {
     EXPECT_NO_THROW(ThrowAnInteger());
-
-  if (AlwaysTrue())
+  }
+  if (AlwaysTrue()) {
     EXPECT_NO_THROW(ThrowNothing());
-  else
+  } else {
     ;  // NOLINT
-
-  if (AlwaysFalse())
+  }
+  if (AlwaysFalse()) {
     EXPECT_ANY_THROW(ThrowNothing());
-
-  if (AlwaysTrue())
+  }
+  if (AlwaysTrue()) {
     EXPECT_ANY_THROW(ThrowAnInteger());
-  else
+  } else {
     ;  // NOLINT
+  }
 }
 #endif  // GTEST_HAS_EXCEPTIONS
 
 TEST(AssertionSyntaxTest, NoFatalFailureAssertionsBehavesLikeSingleStatement) {
-  if (AlwaysFalse())
+  if (AlwaysFalse()) {
     EXPECT_NO_FATAL_FAILURE(FAIL()) << "This should never be executed. "
                                     << "It's a compilation test only.";
-  else
+  } else {
     ;  // NOLINT
+  }
 
-  if (AlwaysFalse())
+  if (AlwaysFalse()) {
     ASSERT_NO_FATAL_FAILURE(FAIL()) << "";
-  else
+  } else {
     ;  // NOLINT
-
-  if (AlwaysTrue())
+  }
+  if (AlwaysTrue()) {
     EXPECT_NO_FATAL_FAILURE(SUCCEED());
-  else
+  } else {
     ;  // NOLINT
-
-  if (AlwaysFalse())
+  }
+  if (AlwaysFalse()) {
     ;  // NOLINT
-  else
+  } else {
     ASSERT_NO_FATAL_FAILURE(SUCCEED());
+  }
 }
 
 // Tests that the assertion macros work well with switch statements.

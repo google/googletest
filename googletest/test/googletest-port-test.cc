@@ -220,19 +220,20 @@ TEST(IteratorTraitsTest, WorksForPointerToConst) {
 }
 
 TEST(GtestCheckSyntaxTest, BehavesLikeASingleStatement) {
-  if (AlwaysFalse())
+  if (AlwaysFalse()) {
     GTEST_CHECK_(false) << "This should never be executed; "
                            "It's a compilation test only.";
-
-  if (AlwaysTrue())
+  }
+  if (AlwaysTrue()) {
     GTEST_CHECK_(true);
-  else
+  } else {
     ;  // NOLINT
-
-  if (AlwaysFalse())
+  }
+  if (AlwaysFalse()) {
     ;  // NOLINT
-  else
+  } else {
     GTEST_CHECK_(true) << "";
+  }
 }
 
 TEST(GtestCheckSyntaxTest, WorksWithSwitch) {

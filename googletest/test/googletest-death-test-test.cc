@@ -280,24 +280,26 @@ TEST(ExitStatusPredicateTest, KilledBySignal) {
 // be followed by operator<<, and that in either case the complete text
 // comprises only a single C++ statement.
 TEST_F(TestForDeathTest, SingleStatement) {
-  if (AlwaysFalse())
+  if (AlwaysFalse()) {
     // This would fail if executed; this is a compilation test only
     ASSERT_DEATH(return, "");
-
-  if (AlwaysTrue())
+  }
+  if (AlwaysTrue()) {
     EXPECT_DEATH(_exit(1), "");
-  else
+  } else {
     // This empty "else" branch is meant to ensure that EXPECT_DEATH
     // doesn't expand into an "if" statement without an "else"
     ;
+  }
 
-  if (AlwaysFalse())
+  if (AlwaysFalse()) {
     ASSERT_DEATH(return, "") << "did not die";
-
-  if (AlwaysFalse())
+  }
+  if (AlwaysFalse()) {
     ;
-  else
+  } else {
     EXPECT_DEATH(_exit(1), "") << 1 << 2 << 3;
+  }
 }
 
 # if GTEST_USES_PCRE
@@ -1421,24 +1423,25 @@ namespace {
 //
 // The syntax should work whether death tests are available or not.
 TEST(ConditionalDeathMacrosSyntaxDeathTest, SingleStatement) {
-  if (AlwaysFalse())
+  if (AlwaysFalse()) {
     // This would fail if executed; this is a compilation test only
     ASSERT_DEATH_IF_SUPPORTED(return, "");
-
-  if (AlwaysTrue())
+  }
+  if (AlwaysTrue()) {
     EXPECT_DEATH_IF_SUPPORTED(_exit(1), "");
-  else
+  } else {
     // This empty "else" branch is meant to ensure that EXPECT_DEATH
     // doesn't expand into an "if" statement without an "else"
     ;  // NOLINT
-
-  if (AlwaysFalse())
+  }
+  if (AlwaysFalse()) {
     ASSERT_DEATH_IF_SUPPORTED(return, "") << "did not die";
-
-  if (AlwaysFalse())
+  }
+  if (AlwaysFalse()) {
     ;  // NOLINT
-  else
+  } else {
     EXPECT_DEATH_IF_SUPPORTED(_exit(1), "") << 1 << 2 << 3;
+  }
 }
 
 // Tests that conditional death test macros expand to code which interacts
