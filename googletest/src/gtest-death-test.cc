@@ -1354,7 +1354,7 @@ static pid_t ExecDeathTestSpawnChild(char* const* argv, int close_fd) {
 
   if (!use_fork) {
     static const bool stack_grows_down = StackGrowsDown();
-    const size_t stack_size = getpagesize();
+    const size_t stack_size = static_cast<size_t>(getpagesize());
     // MMAP_ANONYMOUS is not defined on Mac, so we use MAP_ANON instead.
     void* const stack = mmap(nullptr, stack_size, PROT_READ | PROT_WRITE,
                              MAP_ANON | MAP_PRIVATE, -1, 0);
@@ -1371,7 +1371,7 @@ static pid_t ExecDeathTestSpawnChild(char* const* argv, int close_fd) {
         static_cast<char*>(stack) +
             (stack_grows_down ? stack_size - kMaxStackAlignment : 0);
     GTEST_DEATH_TEST_CHECK_(stack_size > kMaxStackAlignment &&
-        reinterpret_cast<intptr_t>(stack_top) % kMaxStackAlignment == 0);
+        reinterpret_cast<uintptr_t>(stack_top) % kMaxStackAlignment == 0);
 
     child_pid = clone(&ExecDeathTestChildMain, stack_top, SIGCHLD, &args);
 
