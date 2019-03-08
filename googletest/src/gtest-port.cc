@@ -117,7 +117,7 @@ T ReadProcFileField(const std::string& filename, int field) {
 size_t GetThreadCount() {
   const std::string filename =
       (Message() << "/proc/" << getpid() << "/stat").GetString();
-  return ReadProcFileField<int>(filename, 19);
+  return ReadProcFileField<size_t>(filename, 19);
 }
 
 #elif GTEST_OS_MAC
@@ -175,7 +175,7 @@ size_t GetThreadCount() {
   if (sysctl(mib, miblen, &info, &size, NULL, 0)) {
     return 0;
   }
-  return KP_NLWP(info);
+  return static_cast<size_t>(KP_NLWP(info));
 }
 #elif GTEST_OS_OPENBSD
 

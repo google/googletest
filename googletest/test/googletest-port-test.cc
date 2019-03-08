@@ -1048,7 +1048,7 @@ class AtomicCounterWithMutex {
           pthread_mutex_init(&memory_barrier_mutex, nullptr));
       GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_lock(&memory_barrier_mutex));
 
-      SleepMilliseconds(random_.Generate(30));
+      SleepMilliseconds(static_cast<int>(random_.Generate(30)));
 
       GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_unlock(&memory_barrier_mutex));
       GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_destroy(&memory_barrier_mutex));
@@ -1056,7 +1056,7 @@ class AtomicCounterWithMutex {
       // On Windows, performing an interlocked access puts up a memory barrier.
       volatile LONG dummy = 0;
       ::InterlockedIncrement(&dummy);
-      SleepMilliseconds(random_.Generate(30));
+      SleepMilliseconds(static_cast<int>(random_.Generate(30)));
       ::InterlockedIncrement(&dummy);
 #else
 # error "Memory barrier not implemented on this platform."
