@@ -78,10 +78,10 @@ $for i
 [[
 $var template = [[$if i==0 [[]] $else [[
 $range j 0..i-1
-  template <$for j, [[typename A$j]]>
+  template <$for j, [[typename TArg$j]]>
 ]]]]
 $range j 0..i-1
-$var As = [[$for j, [[A$j]]]]
+$var As = [[$for j, [[TArg$j]]]]
 $var as = [[$for j, [[std::get<$j>(args)]]]]
 $range k 1..n-i
 $var eas = [[$for k, [[ExcessiveArg()]]]]
@@ -572,8 +572,8 @@ $for i
 [[
 $range j 1..i
 
-template <typename R, typename F[[$for j [[, typename A$j]]]]>
-R InvokeArgumentAdl(AdlTag, F f[[$for j [[, A$j a$j]]]]) {
+template <typename R, typename F[[$for j [[, typename TArg$j]]]]>
+R InvokeArgumentAdl(AdlTag, F f[[$for j [[, TArg$j a$j]]]]) {
   return f([[$for j, [[a$j]]]]);
 }
 ]]
