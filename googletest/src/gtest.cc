@@ -2454,7 +2454,7 @@ Result HandleExceptionsInMethodIfSupported(
   // throw statement in the code under test.  For this reason, we perform
   // the check early, sacrificing the ability to affect Google Test's
   // exception handling in the method where the exception is thrown.
-  if (internal::GetUnitTestImpl()->catch_exceptions()) {
+  if (internal::GetUnitTestImpl()->catch_exceptions() && strcmp(location,"SetUpTestCase()")!=0) {
 #if GTEST_HAS_EXCEPTIONS
     try {
       return HandleSehExceptionsInMethodIfSupported(object, method, location);
