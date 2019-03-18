@@ -200,7 +200,7 @@ $range k 0..n-1
 #define GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_\
     const args_type& args GTEST_ATTRIBUTE_UNUSED_
 $for k [[, \
-    arg$k[[]]_type arg$k GTEST_ATTRIBUTE_UNUSED_]]
+    const arg$k[[]]_type& arg$k GTEST_ATTRIBUTE_UNUSED_]]
 
 
 // Sometimes you want to give an action explicit template parameters
@@ -402,7 +402,7 @@ $range k 0..n-1
       }\
       template <$for k, [[typename arg$k[[]]_type]]>\
       return_type gmock_PerformImpl(const args_type& args[[]]
-$for k [[, arg$k[[]]_type arg$k]]) const;\
+$for k [[, const arg$k[[]]_type& arg$k]]) const;\
       GMOCK_INTERNAL_DEFN_##value_params\
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
@@ -467,7 +467,7 @@ $var param_field_decls2 = [[$for j
 $var params = [[$for j, [[p$j]]]]
 $var param_types = [[$if i==0 [[]] $else [[<$for j, [[p$j##_type]]>]]]]
 $var typename_arg_types = [[$for k, [[typename arg$k[[]]_type]]]]
-$var arg_types_and_names = [[$for k, [[arg$k[[]]_type arg$k]]]]
+$var arg_types_and_names = [[$for k, [[const arg$k[[]]_type& arg$k]]]]
 $var macro_name = [[$if i==0 [[ACTION]] $elif i==1 [[ACTION_P]]
                                         $else [[ACTION_P$i]]]]
 
