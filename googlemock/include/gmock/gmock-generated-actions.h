@@ -273,16 +273,16 @@ class ActionHelper {
 // An internal macro needed for implementing ACTION*().
 #define GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_\
     const args_type& args GTEST_ATTRIBUTE_UNUSED_, \
-    arg0_type arg0 GTEST_ATTRIBUTE_UNUSED_, \
-    arg1_type arg1 GTEST_ATTRIBUTE_UNUSED_, \
-    arg2_type arg2 GTEST_ATTRIBUTE_UNUSED_, \
-    arg3_type arg3 GTEST_ATTRIBUTE_UNUSED_, \
-    arg4_type arg4 GTEST_ATTRIBUTE_UNUSED_, \
-    arg5_type arg5 GTEST_ATTRIBUTE_UNUSED_, \
-    arg6_type arg6 GTEST_ATTRIBUTE_UNUSED_, \
-    arg7_type arg7 GTEST_ATTRIBUTE_UNUSED_, \
-    arg8_type arg8 GTEST_ATTRIBUTE_UNUSED_, \
-    arg9_type arg9 GTEST_ATTRIBUTE_UNUSED_
+    const arg0_type& arg0 GTEST_ATTRIBUTE_UNUSED_, \
+    const arg1_type& arg1 GTEST_ATTRIBUTE_UNUSED_, \
+    const arg2_type& arg2 GTEST_ATTRIBUTE_UNUSED_, \
+    const arg3_type& arg3 GTEST_ATTRIBUTE_UNUSED_, \
+    const arg4_type& arg4 GTEST_ATTRIBUTE_UNUSED_, \
+    const arg5_type& arg5 GTEST_ATTRIBUTE_UNUSED_, \
+    const arg6_type& arg6 GTEST_ATTRIBUTE_UNUSED_, \
+    const arg7_type& arg7 GTEST_ATTRIBUTE_UNUSED_, \
+    const arg8_type& arg8 GTEST_ATTRIBUTE_UNUSED_, \
+    const arg9_type& arg9 GTEST_ATTRIBUTE_UNUSED_
 
 // Sometimes you want to give an action explicit template parameters
 // that cannot be inferred from its value parameters.  ACTION() and
@@ -672,10 +672,12 @@ class ActionHelper {
           typename arg3_type, typename arg4_type, typename arg5_type, \
           typename arg6_type, typename arg7_type, typename arg8_type, \
           typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
-          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
-          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
-          arg9_type arg9) const;\
+      return_type gmock_PerformImpl(const args_type& args, \
+          const arg0_type& arg0, const arg1_type& arg1, \
+          const arg2_type& arg2, const arg3_type& arg3, \
+          const arg4_type& arg4, const arg5_type& arg5, \
+          const arg6_type& arg6, const arg7_type& arg7, \
+          const arg8_type& arg8, const arg9_type& arg9) const;\
       GMOCK_INTERNAL_DEFN_##value_params\
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
@@ -733,10 +735,12 @@ class ActionHelper {
           typename arg3_type, typename arg4_type, typename arg5_type, \
           typename arg6_type, typename arg7_type, typename arg8_type, \
           typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
-          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
-          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
-          arg9_type arg9) const;\
+      return_type gmock_PerformImpl(const args_type& args, \
+          const arg0_type& arg0, const arg1_type& arg1, \
+          const arg2_type& arg2, const arg3_type& arg3, \
+          const arg4_type& arg4, const arg5_type& arg5, \
+          const arg6_type& arg6, const arg7_type& arg7, \
+          const arg8_type& arg8, const arg9_type& arg9) const;\
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
@@ -781,10 +785,12 @@ class ActionHelper {
           typename arg3_type, typename arg4_type, typename arg5_type, \
           typename arg6_type, typename arg7_type, typename arg8_type, \
           typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
-          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
-          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
-          arg9_type arg9) const;\
+      return_type gmock_PerformImpl(const args_type& args, \
+          const arg0_type& arg0, const arg1_type& arg1, \
+          const arg2_type& arg2, const arg3_type& arg3, \
+          const arg4_type& arg4, const arg5_type& arg5, \
+          const arg6_type& arg6, const arg7_type& arg7, \
+          const arg8_type& arg8, const arg9_type& arg9) const;\
       p0##_type p0;\
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
@@ -835,10 +841,12 @@ class ActionHelper {
           typename arg3_type, typename arg4_type, typename arg5_type, \
           typename arg6_type, typename arg7_type, typename arg8_type, \
           typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
-          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
-          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
-          arg9_type arg9) const;\
+      return_type gmock_PerformImpl(const args_type& args, \
+          const arg0_type& arg0, const arg1_type& arg1, \
+          const arg2_type& arg2, const arg3_type& arg3, \
+          const arg4_type& arg4, const arg5_type& arg5, \
+          const arg6_type& arg6, const arg7_type& arg7, \
+          const arg8_type& arg8, const arg9_type& arg9) const;\
       p0##_type p0;\
       p1##_type p1;\
      private:\
@@ -894,10 +902,12 @@ class ActionHelper {
           typename arg3_type, typename arg4_type, typename arg5_type, \
           typename arg6_type, typename arg7_type, typename arg8_type, \
           typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
-          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
-          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
-          arg9_type arg9) const;\
+      return_type gmock_PerformImpl(const args_type& args, \
+          const arg0_type& arg0, const arg1_type& arg1, \
+          const arg2_type& arg2, const arg3_type& arg3, \
+          const arg4_type& arg4, const arg5_type& arg5, \
+          const arg6_type& arg6, const arg7_type& arg7, \
+          const arg8_type& arg8, const arg9_type& arg9) const;\
       p0##_type p0;\
       p1##_type p1;\
       p2##_type p2;\
@@ -960,10 +970,12 @@ class ActionHelper {
           typename arg3_type, typename arg4_type, typename arg5_type, \
           typename arg6_type, typename arg7_type, typename arg8_type, \
           typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
-          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
-          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
-          arg9_type arg9) const;\
+      return_type gmock_PerformImpl(const args_type& args, \
+          const arg0_type& arg0, const arg1_type& arg1, \
+          const arg2_type& arg2, const arg3_type& arg3, \
+          const arg4_type& arg4, const arg5_type& arg5, \
+          const arg6_type& arg6, const arg7_type& arg7, \
+          const arg8_type& arg8, const arg9_type& arg9) const;\
       p0##_type p0;\
       p1##_type p1;\
       p2##_type p2;\
@@ -1035,10 +1047,12 @@ class ActionHelper {
           typename arg3_type, typename arg4_type, typename arg5_type, \
           typename arg6_type, typename arg7_type, typename arg8_type, \
           typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
-          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
-          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
-          arg9_type arg9) const;\
+      return_type gmock_PerformImpl(const args_type& args, \
+          const arg0_type& arg0, const arg1_type& arg1, \
+          const arg2_type& arg2, const arg3_type& arg3, \
+          const arg4_type& arg4, const arg5_type& arg5, \
+          const arg6_type& arg6, const arg7_type& arg7, \
+          const arg8_type& arg8, const arg9_type& arg9) const;\
       p0##_type p0;\
       p1##_type p1;\
       p2##_type p2;\
@@ -1114,10 +1128,12 @@ class ActionHelper {
           typename arg3_type, typename arg4_type, typename arg5_type, \
           typename arg6_type, typename arg7_type, typename arg8_type, \
           typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
-          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
-          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
-          arg9_type arg9) const;\
+      return_type gmock_PerformImpl(const args_type& args, \
+          const arg0_type& arg0, const arg1_type& arg1, \
+          const arg2_type& arg2, const arg3_type& arg3, \
+          const arg4_type& arg4, const arg5_type& arg5, \
+          const arg6_type& arg6, const arg7_type& arg7, \
+          const arg8_type& arg8, const arg9_type& arg9) const;\
       p0##_type p0;\
       p1##_type p1;\
       p2##_type p2;\
@@ -1199,10 +1215,12 @@ class ActionHelper {
           typename arg3_type, typename arg4_type, typename arg5_type, \
           typename arg6_type, typename arg7_type, typename arg8_type, \
           typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
-          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
-          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
-          arg9_type arg9) const;\
+      return_type gmock_PerformImpl(const args_type& args, \
+          const arg0_type& arg0, const arg1_type& arg1, \
+          const arg2_type& arg2, const arg3_type& arg3, \
+          const arg4_type& arg4, const arg5_type& arg5, \
+          const arg6_type& arg6, const arg7_type& arg7, \
+          const arg8_type& arg8, const arg9_type& arg9) const;\
       p0##_type p0;\
       p1##_type p1;\
       p2##_type p2;\
@@ -1293,10 +1311,12 @@ class ActionHelper {
           typename arg3_type, typename arg4_type, typename arg5_type, \
           typename arg6_type, typename arg7_type, typename arg8_type, \
           typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
-          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
-          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
-          arg9_type arg9) const;\
+      return_type gmock_PerformImpl(const args_type& args, \
+          const arg0_type& arg0, const arg1_type& arg1, \
+          const arg2_type& arg2, const arg3_type& arg3, \
+          const arg4_type& arg4, const arg5_type& arg5, \
+          const arg6_type& arg6, const arg7_type& arg7, \
+          const arg8_type& arg8, const arg9_type& arg9) const;\
       p0##_type p0;\
       p1##_type p1;\
       p2##_type p2;\
@@ -1393,10 +1413,12 @@ class ActionHelper {
           typename arg3_type, typename arg4_type, typename arg5_type, \
           typename arg6_type, typename arg7_type, typename arg8_type, \
           typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
-          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
-          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
-          arg9_type arg9) const;\
+      return_type gmock_PerformImpl(const args_type& args, \
+          const arg0_type& arg0, const arg1_type& arg1, \
+          const arg2_type& arg2, const arg3_type& arg3, \
+          const arg4_type& arg4, const arg5_type& arg5, \
+          const arg6_type& arg6, const arg7_type& arg7, \
+          const arg8_type& arg8, const arg9_type& arg9) const;\
       p0##_type p0;\
       p1##_type p1;\
       p2##_type p2;\
@@ -1500,10 +1522,12 @@ class ActionHelper {
           typename arg3_type, typename arg4_type, typename arg5_type, \
           typename arg6_type, typename arg7_type, typename arg8_type, \
           typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, arg0_type arg0, \
-          arg1_type arg1, arg2_type arg2, arg3_type arg3, arg4_type arg4, \
-          arg5_type arg5, arg6_type arg6, arg7_type arg7, arg8_type arg8, \
-          arg9_type arg9) const;\
+      return_type gmock_PerformImpl(const args_type& args, \
+          const arg0_type& arg0, const arg1_type& arg1, \
+          const arg2_type& arg2, const arg3_type& arg3, \
+          const arg4_type& arg4, const arg5_type& arg5, \
+          const arg6_type& arg6, const arg7_type& arg7, \
+          const arg8_type& arg8, const arg9_type& arg9) const;\
       p0##_type p0;\
       p1##_type p1;\
       p2##_type p2;\
