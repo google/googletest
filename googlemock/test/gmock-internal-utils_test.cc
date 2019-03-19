@@ -57,8 +57,6 @@
 # include <sys/types.h>  // For ssize_t. NOLINT
 #endif
 
-class ProtocolMessage;
-
 namespace proto2 {
 class Message;
 }  // namespace proto2

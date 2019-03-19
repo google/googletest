@@ -773,8 +773,8 @@ class SetErrnoAndReturnAction {
 
 // Implements the SetArgumentPointee<N>(x) action for any function
 // whose N-th argument (0-based) is a pointer to x's type.  The
-// template parameter kIsProto is true iff type A is ProtocolMessage,
-// proto2::Message, or a sub-class of those.
+// template parameter kIsProto is true iff type A is
+// proto2::Message or a sub-class of it.
 template <size_t N, typename A, bool kIsProto>
 class SetArgumentPointeeAction {
  public:
@@ -798,9 +798,7 @@ template <size_t N, typename Proto>
 class SetArgumentPointeeAction<N, Proto, true> {
  public:
   // Constructs an action that sets the variable pointed to by the
-  // N-th function argument to 'proto'.  Both ProtocolMessage and
-  // proto2::Message have the CopyFrom() method, so the same
-  // implementation works for both.
+  // N-th function argument to 'proto'.
   explicit SetArgumentPointeeAction(const Proto& proto) : proto_(new Proto) {
     proto_->CopyFrom(proto);
   }
