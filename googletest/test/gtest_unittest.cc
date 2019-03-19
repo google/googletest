@@ -7146,7 +7146,7 @@ class ConversionHelperDerived : public ConversionHelperBase {};
 
 // Tests that IsAProtocolMessage<T>::value is a compile-time constant.
 TEST(IsAProtocolMessageTest, ValueIsCompileTimeConstant) {
-  GTEST_COMPILE_ASSERT_(IsAProtocolMessage<ProtocolMessage>::value,
+  GTEST_COMPILE_ASSERT_(IsAProtocolMessage<::proto2::Message>::value,
                         const_true);
   GTEST_COMPILE_ASSERT_(!IsAProtocolMessage<int>::value, const_false);
 }
@@ -7155,11 +7155,10 @@ TEST(IsAProtocolMessageTest, ValueIsCompileTimeConstant) {
 // proto2::Message or a sub-class of it.
 TEST(IsAProtocolMessageTest, ValueIsTrueWhenTypeIsAProtocolMessage) {
   EXPECT_TRUE(IsAProtocolMessage< ::proto2::Message>::value);
-  EXPECT_TRUE(IsAProtocolMessage<ProtocolMessage>::value);
 }
 
 // Tests that IsAProtocolMessage<T>::value is false when T is neither
-// ProtocolMessage nor a sub-class of it.
+// ::proto2::Message nor a sub-class of it.
 TEST(IsAProtocolMessageTest, ValueIsFalseWhenTypeIsNotAProtocolMessage) {
   EXPECT_FALSE(IsAProtocolMessage<int>::value);
   EXPECT_FALSE(IsAProtocolMessage<const ConversionHelperBase>::value);
