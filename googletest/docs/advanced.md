@@ -1396,6 +1396,8 @@ namespace:
 
 For more details, see the comments at the definitions of these functions.
 
+NOTE: The `INSTANTIATE_TEST_SUITE_P` keyword is recommended (addressing http://go/gh/google/googletest/issues/1085)  For 1.8.1 and previous releases the keyword is `INSTANTIATE_TEST_CASE_P`. which has been deprecated in favor of INSTANTIATE_TEST_SUITE_P.
+
 The following statement will instantiate tests from the `FooTest` test suite each
 with parameter values `"meeny"`, `"miny"`, and `"moe"`.
 
