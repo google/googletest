@@ -1396,6 +1396,8 @@ namespace:
 
 For more details, see the comments at the definitions of these functions.
 
+NOTE: The `INSTANTIATE_TEST_SUITE_P` keyword is only valid since 1.8.1. For previous releases the keyword is `INSTANTIATE_TEST_CASE_P`. More generally, please refer to the documentation matching your release version.
+
 The following statement will instantiate tests from the `FooTest` test suite each
 with parameter values `"meeny"`, `"miny"`, and `"moe"`.
 
