@@ -380,6 +380,7 @@ void Mutex::AssertHeld() {
 
 namespace {
 
+#ifdef _MSC_VER
 // Use the RAII idiom to flag mem allocs that are intentionally never
 // deallocated. The motivation is to silence the false positive mem leaks
 // that are reported by the debug version of MS's CRT which can only detect
@@ -392,19 +393,15 @@ class MemoryIsNotDeallocated
 {
  public:
   MemoryIsNotDeallocated() : old_crtdbg_flag_(0) {
-#ifdef _MSC_VER
     old_crtdbg_flag_ = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
     // Set heap allocation block type to _IGNORE_BLOCK so that MS debug CRT
     // doesn't report mem leak if there's no matching deallocation.
     _CrtSetDbgFlag(old_crtdbg_flag_ & ~_CRTDBG_ALLOC_MEM_DF);
-#endif  //  _MSC_VER
   }
 
   ~MemoryIsNotDeallocated() {
-#ifdef _MSC_VER
     // Restore the original _CRTDBG_ALLOC_MEM_DF flag
     _CrtSetDbgFlag(old_crtdbg_flag_);
-#endif  //  _MSC_VER
   }
 
  private:
@@ -412,6 +409,7 @@ class MemoryIsNotDeallocated
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MemoryIsNotDeallocated);
 };
+#endif  // _MSC_VER
 
 }  // namespace
 
@@ -427,7 +425,9 @@ void Mutex::ThreadSafeLazyInit() {
         owner_thread_id_ = 0;
         {
           // Use RAII to flag that following mem alloc is never deallocated.
+#ifdef _MSC_VER
           MemoryIsNotDeallocated memory_is_not_deallocated;
+#endif  // _MSC_VER
           critical_section_ = new CRITICAL_SECTION;
         }
         ::InitializeCriticalSection(critical_section_);
@@ -670,7 +670,9 @@ class ThreadLocalRegistryImpl {
   // Returns map of thread local instances.
   static ThreadIdToThreadLocals* GetThreadLocalsMapLocked() {
     mutex_.AssertHeld();
+#ifdef _MSC_VER
     MemoryIsNotDeallocated memory_is_not_deallocated;
+#endif  // _MSC_VER
     static ThreadIdToThreadLocals* map = new ThreadIdToThreadLocals();
     return map;
   }
