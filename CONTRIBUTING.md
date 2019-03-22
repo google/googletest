@@ -20,7 +20,7 @@ instructions for how to sign and return it. Once we receive it, we'll be able to
 accept your pull requests.
 
 ## Are you a Googler?
-If you are a Googler, it is preferrable to create an internal change and send it for review.
+If you are a Googler, you can either create an internal change or work on GitHub directly.
 
 
 ## Contributing A Patch

@@ -2108,8 +2108,14 @@ static const char* const kReservedTestSuiteAttributes[] = {
 
 // The list of reserved attributes used in the <testcase> element of XML output.
 static const char* const kReservedTestCaseAttributes[] = {
-    "classname",  "name",        "status", "time",
-    "type_param", "value_param", "file",   "line"};
+    "classname",   "name", "status", "time",  "type_param",
+    "value_param", "file", "line"};
+
+// Use a slightly different set for allowed output to ensure existing tests can
+// still RecordProperty("result")
+static const char* const kReservedOutputTestCaseAttributes[] = {
+    "classname",   "name", "status", "time",  "type_param",
+    "value_param", "file", "line", "result"};
 
 template <int kSize>
 std::vector<std::string> ArrayAsVector(const char* const (&array)[kSize]) {
@@ -2124,6 +2130,22 @@ static std::vector<std::string> GetReservedAttributesForElement(
     return ArrayAsVector(kReservedTestSuiteAttributes);
   } else if (xml_element == "testcase") {
     return ArrayAsVector(kReservedTestCaseAttributes);
+  } else {
+    GTEST_CHECK_(false) << "Unrecognized xml_element provided: " << xml_element;
+  }
+  // This code is unreachable but some compilers may not realizes that.
+  return std::vector<std::string>();
+}
+
+// TODO(jdesprez): Merge the two getReserved attributes once skip is improved
+static std::vector<std::string> GetReservedOutputAttributesForElement(
+    const std::string& xml_element) {
+  if (xml_element == "testsuites") {
+    return ArrayAsVector(kReservedTestSuitesAttributes);
+  } else if (xml_element == "testsuite") {
+    return ArrayAsVector(kReservedTestSuiteAttributes);
+  } else if (xml_element == "testcase") {
+    return ArrayAsVector(kReservedOutputTestCaseAttributes);
   } else {
     GTEST_CHECK_(false) << "Unrecognized xml_element provided: " << xml_element;
   }
@@ -3714,7 +3736,7 @@ void XmlUnitTestResultPrinter::OutputXmlAttribute(
     const std::string& name,
     const std::string& value) {
   const std::vector<std::string>& allowed_names =
-      GetReservedAttributesForElement(element_name);
+      GetReservedOutputAttributesForElement(element_name);
 
   GTEST_CHECK_(std::find(allowed_names.begin(), allowed_names.end(), name) !=
                    allowed_names.end())
@@ -3754,9 +3776,12 @@ void XmlUnitTestResultPrinter::OutputXmlTestInfo(::std::ostream* stream,
     return;
   }
 
-  OutputXmlAttribute(
-      stream, kTestsuite, "status",
-      result.Skipped() ? "skipped" : test_info.should_run() ? "run" : "notrun");
+  OutputXmlAttribute(stream, kTestsuite, "status",
+                     test_info.should_run() ? "run" : "notrun");
+  OutputXmlAttribute(stream, kTestsuite, "result",
+                     test_info.should_run()
+                         ? (result.Skipped() ? "skipped" : "completed")
+                         : "suppressed");
   OutputXmlAttribute(stream, kTestsuite, "time",
                      FormatTimeInMillisAsSeconds(result.elapsed_time()));
   OutputXmlAttribute(stream, kTestsuite, "classname", test_suite_name);
@@ -4062,7 +4087,7 @@ void JsonUnitTestResultPrinter::OutputJsonKey(
     const std::string& indent,
     bool comma) {
   const std::vector<std::string>& allowed_names =
-      GetReservedAttributesForElement(element_name);
+      GetReservedOutputAttributesForElement(element_name);
 
   GTEST_CHECK_(std::find(allowed_names.begin(), allowed_names.end(), name) !=
                    allowed_names.end())
@@ -4082,7 +4107,7 @@ void JsonUnitTestResultPrinter::OutputJsonKey(
     const std::string& indent,
     bool comma) {
   const std::vector<std::string>& allowed_names =
-      GetReservedAttributesForElement(element_name);
+      GetReservedOutputAttributesForElement(element_name);
 
   GTEST_CHECK_(std::find(allowed_names.begin(), allowed_names.end(), name) !=
                    allowed_names.end())
@@ -4120,10 +4145,13 @@ void JsonUnitTestResultPrinter::OutputJsonTestInfo(::std::ostream* stream,
     return;
   }
 
-  OutputJsonKey(
-      stream, kTestsuite, "status",
-      result.Skipped() ? "SKIPPED" : test_info.should_run() ? "RUN" : "NOTRUN",
-      kIndent);
+  OutputJsonKey(stream, kTestsuite, "status",
+                test_info.should_run() ? "RUN" : "NOTRUN", kIndent);
+  OutputJsonKey(stream, kTestsuite, "result",
+                test_info.should_run()
+                    ? (result.Skipped() ? "SKIPPED" : "COMPLETED")
+                    : "SUPPRESSED",
+                kIndent);
   OutputJsonKey(stream, kTestsuite, "time",
                 FormatTimeInMillisAsDuration(result.elapsed_time()), kIndent);
   OutputJsonKey(stream, kTestsuite, "classname", test_suite_name, kIndent,
