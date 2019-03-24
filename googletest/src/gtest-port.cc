@@ -1109,10 +1109,19 @@ class CapturedStream {
     // other OEM-customized locations. Never rely on these, and always
     // use /sdcard.
     char name_template[] = "/sdcard/gtest_captured_stream.XXXXXX";
+#  elif GTEST_OS_MAC
+    const char* tmpdir = ::getenv("TMPDIR");
+    GTEST_CHECK_(tmpdir != nullptr) << "Unable to read TMPDIR";
+
+    char name_template[PATH_MAX + 1] = { '\0' };  // NOLINT
+    ::strcpy(name_template, tmpdir);
+    ::strcat(name_template, "captured_stream.XXXXXX");
 #  else
     char name_template[] = "/tmp/captured_stream.XXXXXX";
 #  endif  // GTEST_OS_LINUX_ANDROID
     const int captured_fd = mkstemp(name_template);
+    GTEST_CHECK_(captured_fd != -1) << "Unable to create temporary file "
+                                    << name_template;
     filename_ = name_template;
 # endif  // GTEST_OS_WINDOWS
     fflush(nullptr);
