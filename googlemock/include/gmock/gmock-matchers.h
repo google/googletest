@@ -661,7 +661,7 @@ class StrEqualityMatcher {
                        MatchResultListener* listener) const {
     // This should fail to compile if absl::string_view is used with wide
     // strings.
-    const StringType& str = string(s);
+    const StringType& str = std::string(s);
     return MatchAndExplain(str, listener);
   }
 #endif  // GTEST_HAS_ABSL
@@ -731,7 +731,7 @@ class HasSubstrMatcher {
                        MatchResultListener* listener) const {
     // This should fail to compile if absl::string_view is used with wide
     // strings.
-    const StringType& str = string(s);
+    const StringType& str = std::string(s);
     return MatchAndExplain(str, listener);
   }
 #endif  // GTEST_HAS_ABSL
@@ -788,7 +788,7 @@ class StartsWithMatcher {
                        MatchResultListener* listener) const {
     // This should fail to compile if absl::string_view is used with wide
     // strings.
-    const StringType& str = string(s);
+    const StringType& str = std::string(s);
     return MatchAndExplain(str, listener);
   }
 #endif  // GTEST_HAS_ABSL
@@ -844,7 +844,7 @@ class EndsWithMatcher {
                        MatchResultListener* listener) const {
     // This should fail to compile if absl::string_view is used with wide
     // strings.
-    const StringType& str = string(s);
+    const StringType& str = std::string(s);
     return MatchAndExplain(str, listener);
   }
 #endif  // GTEST_HAS_ABSL
@@ -3852,7 +3852,7 @@ inline PolymorphicMatcher<internal::EndsWithMatcher<std::string> > EndsWith(
   return MakePolymorphicMatcher(internal::EndsWithMatcher<std::string>(suffix));
 }
 
-#if GTEST_HAS_GLOBAL_WSTRING || GTEST_HAS_STD_WSTRING
+#if GTEST_HAS_STD_WSTRING
 // Wide string matchers.
 
 // Matches a string equal to str.
@@ -3905,7 +3905,7 @@ inline PolymorphicMatcher<internal::EndsWithMatcher<std::wstring> > EndsWith(
       internal::EndsWithMatcher<std::wstring>(suffix));
 }
 
-#endif  // GTEST_HAS_GLOBAL_WSTRING || GTEST_HAS_STD_WSTRING
+#endif  // GTEST_HAS_STD_WSTRING
 
 // Creates a polymorphic matcher that matches a 2-tuple where the
 // first field == the second field.
