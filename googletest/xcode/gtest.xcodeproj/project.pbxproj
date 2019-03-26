@@ -52,11 +52,9 @@
 		404884A20E2F7BE600CF7658 /* gtest-internal.h in Copy Headers Internal */ = {isa = PBXBuildFile; fileRef = 404883E40E2F799B00CF7658 /* gtest-internal.h */; };
 		404884A30E2F7BE600CF7658 /* gtest-port.h in Copy Headers Internal */ = {isa = PBXBuildFile; fileRef = 404883E50E2F799B00CF7658 /* gtest-port.h */; };
 		404884A40E2F7BE600CF7658 /* gtest-string.h in Copy Headers Internal */ = {isa = PBXBuildFile; fileRef = 404883E60E2F799B00CF7658 /* gtest-string.h */; };
-		404884AC0E2F7CD900CF7658 /* CHANGES in Resources */ = {isa = PBXBuildFile; fileRef = 404884A90E2F7CD900CF7658 /* CHANGES */; };
 		404884AD0E2F7CD900CF7658 /* CONTRIBUTORS in Resources */ = {isa = PBXBuildFile; fileRef = 404884AA0E2F7CD900CF7658 /* CONTRIBUTORS */; };
 		404884AE0E2F7CD900CF7658 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 404884AB0E2F7CD900CF7658 /* LICENSE */; };
 		40899F3A0FFA70D4000B29AE /* gtest-all.cc in Sources */ = {isa = PBXBuildFile; fileRef = 224A12A10E9EADA700BD17FD /* gtest-all.cc */; };
-		40899F500FFA7281000B29AE /* gtest-tuple.h in Copy Headers Internal */ = {isa = PBXBuildFile; fileRef = 40899F4D0FFA7271000B29AE /* gtest-tuple.h */; };
 		40899F530FFA72A0000B29AE /* gtest_unittest.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3B238C120E7FE13C00846E11 /* gtest_unittest.cc */; };
 		4089A0440FFAD1BE000B29AE /* sample1.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4089A02C0FFACF7F000B29AE /* sample1.cc */; };
 		4089A0460FFAD1BE000B29AE /* sample1_unittest.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4089A02E0FFACF7F000B29AE /* sample1_unittest.cc */; };
@@ -75,10 +73,9 @@
 		40C849A2101A37050083642A /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
 		40C849A4101A37150083642A /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4539C8FF0EC27F6400A70F4C /* gtest.framework */; };
 		4539C9340EC280AE00A70F4C /* gtest-param-test.h in Headers */ = {isa = PBXBuildFile; fileRef = 4539C9330EC280AE00A70F4C /* gtest-param-test.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		4539C9380EC280E200A70F4C /* gtest-linked_ptr.h in Copy Headers Internal */ = {isa = PBXBuildFile; fileRef = 4539C9350EC280E200A70F4C /* gtest-linked_ptr.h */; };
-		4539C9390EC280E200A70F4C /* gtest-param-util-generated.h in Copy Headers Internal */ = {isa = PBXBuildFile; fileRef = 4539C9360EC280E200A70F4C /* gtest-param-util-generated.h */; };
 		4539C93A0EC280E200A70F4C /* gtest-param-util.h in Copy Headers Internal */ = {isa = PBXBuildFile; fileRef = 4539C9370EC280E200A70F4C /* gtest-param-util.h */; };
 		4567C8181264FF71007740BE /* gtest-printers.h in Headers */ = {isa = PBXBuildFile; fileRef = 4567C8171264FF71007740BE /* gtest-printers.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		7A8D8B5A224A0C19005E9D1C /* gtest-matchers.h in Headers */ = {isa = PBXBuildFile; fileRef = 7A8D8B59224A0C18005E9D1C /* gtest-matchers.h */; };
 		F67D4F3E1C7F5D8B0017C729 /* gtest-port-arch.h in Headers */ = {isa = PBXBuildFile; fileRef = F67D4F3D1C7F5D8B0017C729 /* gtest-port-arch.h */; };
 		F67D4F3F1C7F5DA70017C729 /* gtest-port-arch.h in Copy Headers Internal */ = {isa = PBXBuildFile; fileRef = F67D4F3D1C7F5D8B0017C729 /* gtest-port-arch.h */; };
 		F67D4F441C7F5DD00017C729 /* gtest-port.h in Headers */ = {isa = PBXBuildFile; fileRef = F67D4F411C7F5DD00017C729 /* gtest-port.h */; };
@@ -193,12 +190,9 @@
 				404884A00E2F7BE600CF7658 /* gtest-death-test-internal.h in Copy Headers Internal */,
 				404884A10E2F7BE600CF7658 /* gtest-filepath.h in Copy Headers Internal */,
 				404884A20E2F7BE600CF7658 /* gtest-internal.h in Copy Headers Internal */,
-				4539C9380EC280E200A70F4C /* gtest-linked_ptr.h in Copy Headers Internal */,
-				4539C9390EC280E200A70F4C /* gtest-param-util-generated.h in Copy Headers Internal */,
 				4539C93A0EC280E200A70F4C /* gtest-param-util.h in Copy Headers Internal */,
 				404884A30E2F7BE600CF7658 /* gtest-port.h in Copy Headers Internal */,
 				404884A40E2F7BE600CF7658 /* gtest-string.h in Copy Headers Internal */,
-				40899F500FFA7281000B29AE /* gtest-tuple.h in Copy Headers Internal */,
 				3BF6F2A00E79B5AD000F2EEE /* gtest-type-util.h in Copy Headers Internal */,
 			);
 			name = "Copy Headers Internal";
@@ -239,11 +233,9 @@
 		404883E60E2F799B00CF7658 /* gtest-string.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-string.h"; sourceTree = "<group>"; };
 		404883F60E2F799B00CF7658 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = README.md; path = ../README.md; sourceTree = SOURCE_ROOT; };
 		4048840D0E2F799B00CF7658 /* gtest_main.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gtest_main.cc; sourceTree = "<group>"; };
-		404884A90E2F7CD900CF7658 /* CHANGES */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = CHANGES; path = ../CHANGES; sourceTree = SOURCE_ROOT; };
 		404884AA0E2F7CD900CF7658 /* CONTRIBUTORS */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = CONTRIBUTORS; path = ../CONTRIBUTORS; sourceTree = SOURCE_ROOT; };
 		404884AB0E2F7CD900CF7658 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = SOURCE_ROOT; };
 		40899F430FFA7184000B29AE /* gtest_unittest-framework */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "gtest_unittest-framework"; sourceTree = BUILT_PRODUCTS_DIR; };
-		40899F4D0FFA7271000B29AE /* gtest-tuple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-tuple.h"; sourceTree = "<group>"; };
 		40899FB30FFA7567000B29AE /* StaticLibraryTarget.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = StaticLibraryTarget.xcconfig; sourceTree = "<group>"; };
 		4089A0130FFACEFC000B29AE /* sample1_unittest-framework */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "sample1_unittest-framework"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4089A02C0FFACF7F000B29AE /* sample1.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sample1.cc; sourceTree = "<group>"; };
@@ -260,10 +252,9 @@
 		40D4CF510E30F5E200294801 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4539C8FF0EC27F6400A70F4C /* gtest.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = gtest.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4539C9330EC280AE00A70F4C /* gtest-param-test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-param-test.h"; sourceTree = "<group>"; };
-		4539C9350EC280E200A70F4C /* gtest-linked_ptr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-linked_ptr.h"; sourceTree = "<group>"; };
-		4539C9360EC280E200A70F4C /* gtest-param-util-generated.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-param-util-generated.h"; sourceTree = "<group>"; };
 		4539C9370EC280E200A70F4C /* gtest-param-util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-param-util.h"; sourceTree = "<group>"; };
 		4567C8171264FF71007740BE /* gtest-printers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-printers.h"; sourceTree = "<group>"; };
+		7A8D8B59224A0C18005E9D1C /* gtest-matchers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-matchers.h"; sourceTree = "<group>"; };
 		F67D4F3D1C7F5D8B0017C729 /* gtest-port-arch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-port-arch.h"; sourceTree = "<group>"; };
 		F67D4F411C7F5DD00017C729 /* gtest-port.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-port.h"; sourceTree = "<group>"; };
 		F67D4F421C7F5DD00017C729 /* gtest-printers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-printers.h"; sourceTree = "<group>"; };
@@ -339,7 +330,6 @@
 		08FB77ACFE841707C02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				404884A90E2F7CD900CF7658 /* CHANGES */,
 				404884AA0E2F7CD900CF7658 /* CONTRIBUTORS */,
 				404884AB0E2F7CD900CF7658 /* LICENSE */,
 				404883F60E2F799B00CF7658 /* README.md */,
@@ -392,6 +382,7 @@
 				404883DF0E2F799B00CF7658 /* gtest_pred_impl.h */,
 				404883E00E2F799B00CF7658 /* gtest_prod.h */,
 				3BF6F2A40E79B616000F2EEE /* gtest-typed-test.h */,
+				7A8D8B59224A0C18005E9D1C /* gtest-matchers.h */,
 			);
 			path = gtest;
 			sourceTree = "<group>";
@@ -403,13 +394,10 @@
 				404883E20E2F799B00CF7658 /* gtest-death-test-internal.h */,
 				404883E30E2F799B00CF7658 /* gtest-filepath.h */,
 				404883E40E2F799B00CF7658 /* gtest-internal.h */,
-				4539C9350EC280E200A70F4C /* gtest-linked_ptr.h */,
-				4539C9360EC280E200A70F4C /* gtest-param-util-generated.h */,
 				4539C9370EC280E200A70F4C /* gtest-param-util.h */,
 				404883E50E2F799B00CF7658 /* gtest-port.h */,
 				F67D4F3D1C7F5D8B0017C729 /* gtest-port-arch.h */,
 				404883E60E2F799B00CF7658 /* gtest-string.h */,
-				40899F4D0FFA7271000B29AE /* gtest-tuple.h */,
 				3BF6F29F0E79B5AD000F2EEE /* gtest-type-util.h */,
 			);
 			path = internal;
@@ -486,6 +474,7 @@
 				4048843B0E2F799B00CF7658 /* gtest.h in Headers */,
 				4048843C0E2F799B00CF7658 /* gtest_pred_impl.h in Headers */,
 				4048843D0E2F799B00CF7658 /* gtest_prod.h in Headers */,
+				7A8D8B5A224A0C19005E9D1C /* gtest-matchers.h in Headers */,
 				224A12A30E9EADCC00BD17FD /* gtest-test-part.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -659,7 +648,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				404884500E2F799B00CF7658 /* README.md in Resources */,
-				404884AC0E2F7CD900CF7658 /* CHANGES in Resources */,
 				404884AD0E2F7CD900CF7658 /* CONTRIBUTORS in Resources */,
 				404884AE0E2F7CD900CF7658 /* LICENSE in Resources */,
 				40C84978101A36540083642A /* libgtest_main.a in Resources */,
