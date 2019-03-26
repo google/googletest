@@ -34,10 +34,20 @@
 
 using ::testing::Test;
 
+#if defined(_MSC_VER)
+  #pragma warning(push)
+  // warning C4702: unreachable code
+  #pragma warning(disable:4702)
+#endif
+
 TEST(SkipTest, DoesSkip) {
   GTEST_SKIP();
   EXPECT_EQ(0, 1);
 }
+
+#if defined(_MSC_VER)
+  #pragma warning(pop)
+#endif
 
 class Fixture : public Test {
  protected:
