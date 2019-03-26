@@ -38,6 +38,9 @@
 
 #include "gtest/gtest.h"
 
+#include <string>
+#include <regex>
+
 #if GTEST_OS_WINDOWS_MOBILE
 # include <windows.h>
 #elif GTEST_OS_WINDOWS
@@ -94,28 +97,23 @@ TEST(XmlOutputTest, GetOutputFileFromDirectoryPath) {
 #endif
 }
 
+template<class String>
+inline bool CheckFilenameByMask(const String& value)
+{
+    const static std::regex validator("^(.*)(-|_)(test)$");
+    return std::regex_match(value, validator); 
+}
+
 TEST(OutputFileHelpersTest, GetCurrentExecutableName) {
   const std::string exe_str = GetCurrentExecutableName().string();
 #if GTEST_OS_WINDOWS
-  const bool success =
-      _strcmpi("googletest-options-test", exe_str.c_str()) == 0 ||
-      _strcmpi("gtest-options-ex_test", exe_str.c_str()) == 0 ||
-      _strcmpi("gtest_all_test", exe_str.c_str()) == 0 ||
-      _strcmpi("gtest_dll_test", exe_str.c_str()) == 0;
+  const bool success = exe_str == "test" || CheckFilenameByMask(exe_str);
 #elif GTEST_OS_OS2
-  const bool success =
-      strcasecmp("googletest-options-test", exe_str.c_str()) == 0 ||
-      strcasecmp("gtest-options-ex_test", exe_str.c_str()) == 0 ||
-      strcasecmp("gtest_all_test", exe_str.c_str()) == 0 ||
-      strcasecmp("gtest_dll_test", exe_str.c_str()) == 0;
+  const bool success = exe_str == "test" || CheckFilenameByMask(exe_str);
 #elif GTEST_OS_FUCHSIA
   const bool success = exe_str == "app";
 #else
-  const bool success =
-      exe_str == "googletest-options-test" ||
-      exe_str == "gtest_all_test" ||
-      exe_str == "lt-gtest_all_test" ||
-      exe_str == "gtest_dll_test";
+  const bool success = exe_str == "test" || CheckFilenameByMask(exe_str);
 #endif  // GTEST_OS_WINDOWS
   if (!success)
     FAIL() << "GetCurrentExecutableName() returns " << exe_str;
