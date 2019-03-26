@@ -7531,6 +7531,7 @@ TEST(FlatTuple, Basic) {
   EXPECT_EQ(5.1, tuple.Get<1>());
 }
 
+#ifndef RELEASE_STABLE
 TEST(FlatTuple, ManyTypes) {
   using testing::internal::FlatTuple;
 
@@ -7555,6 +7556,7 @@ TEST(FlatTuple, ManyTypes) {
   EXPECT_EQ(17, tuple.Get<99>());
   EXPECT_EQ(1000, tuple.Get<256>());
 }
+#endif
 
 // Tests SkipPrefix().
 
