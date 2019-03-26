@@ -932,6 +932,22 @@ struct WithArgsAction {
   }
 };
 
+template <typename F>
+struct OpPrivate;
+
+template <typename R, typename... Args>
+struct OpPrivate<R(Args...)> {
+    std::vector<Action<void(Args...)>> converted;
+    Action<R(Args...)> last;
+    R operator()(Args... args) const {
+      auto tuple_args = std::forward_as_tuple(std::forward<Args>(args)...);
+      for (auto& a : converted) {
+        a.Perform(tuple_args);
+      }
+      return last.Perform(tuple_args);
+    }
+};
+
 template <typename... Actions>
 struct DoAllAction {
  private:
@@ -945,17 +961,7 @@ struct DoAllAction {
 
   template <typename R, typename... Args>
   operator Action<R(Args...)>() const {  // NOLINT
-    struct Op {
-      std::vector<Action<void(Args...)>> converted;
-      Action<R(Args...)> last;
-      R operator()(Args... args) const {
-        auto tuple_args = std::forward_as_tuple(std::forward<Args>(args)...);
-        for (auto& a : converted) {
-          a.Perform(tuple_args);
-        }
-        return last.Perform(tuple_args);
-      }
-    };
+    using Op = OpPrivate<R(Args...)>;
     return Op{Convert<Args...>(MakeIndexSequence<sizeof...(Actions) - 1>()),
               std::get<sizeof...(Actions) - 1>(actions)};
   }
