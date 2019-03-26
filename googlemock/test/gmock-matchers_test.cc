@@ -7029,21 +7029,67 @@ TEST_F(PredicateFormatterFromMatcherTest, ShortCircuitOnSuccess) {
 TEST_F(PredicateFormatterFromMatcherTest, NoShortCircuitOnFailure) {
   AssertionResult result = RunPredicateFormatter(kAlwaysFail);
   EXPECT_FALSE(result);  // Implicit cast to bool.
+
+#ifdef GTEST_HAS_RTTI
+  const std::string first =
+    "Value of: dummy-name\nExpected: [DescribeTo]\n"
+    "  Actual: 1";
+
+  const std::string second 
+    = ", [MatchAndExplain]";
+
+  const std::string fact 
+    = result.message();
+
+  ASSERT_TRUE(fact.find(first) == 0);
+
+  const auto pos 
+    = fact.find(second);
+
+  ASSERT_TRUE(pos != std::string::npos);
+  ASSERT_TRUE(fact.size() > second.size());
+  ASSERT_TRUE(fact.size() - second.size() == pos);
+#else
   std::string expect =
-      "Value of: dummy-name\nExpected: [DescribeTo]\n"
-      "  Actual: 1, [MatchAndExplain]";
+    "Value of: dummy-name\nExpected: [DescribeTo]\n"
+    "  Actual: 1, [MatchAndExplain]";
   EXPECT_EQ(expect, result.message());
+#endif
 }
 
 TEST_F(PredicateFormatterFromMatcherTest, DetectsFlakyShortCircuit) {
   AssertionResult result = RunPredicateFormatter(kFlaky);
   EXPECT_FALSE(result);  // Implicit cast to bool.
+
+#ifdef GTEST_HAS_RTTI
+  const std::string first =
+    "Value of: dummy-name\nExpected: [DescribeTo]\n"
+    "  The matcher failed on the initial attempt; but passed when rerun to "
+    "generate the explanation.\n"
+    "  Actual: 2";
+
+  const std::string second 
+    = ", [MatchAndExplain]";
+
+  const std::string fact 
+    = result.message();
+
+  ASSERT_TRUE(fact.find(first) == 0);
+
+  const auto pos 
+    = fact.find(second);
+
+  ASSERT_TRUE(pos != std::string::npos);
+  ASSERT_TRUE(fact.size() > second.size());
+  ASSERT_TRUE(fact.size() - second.size() == pos);
+#else
   std::string expect =
-      "Value of: dummy-name\nExpected: [DescribeTo]\n"
-      "  The matcher failed on the initial attempt; but passed when rerun to "
-      "generate the explanation.\n"
-      "  Actual: 2, [MatchAndExplain]";
+    "Value of: dummy-name\nExpected: [DescribeTo]\n"
+    "  The matcher failed on the initial attempt; but passed when rerun to "
+    "generate the explanation.\n"
+    "  Actual: 2, [MatchAndExplain]";
   EXPECT_EQ(expect, result.message());
+#endif
 }
 
 }  // namespace
