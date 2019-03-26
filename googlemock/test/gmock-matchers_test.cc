@@ -3391,17 +3391,17 @@ class FloatingPointNearTest : public FloatingPointTest<RawType> {
 };
 
 // Instantiate FloatingPointTest for testing floats.
-typedef FloatingPointTest<float> FloatTest;
+typedef FloatingPointTest<float> GMockFloatTest;
 
-TEST_F(FloatTest, FloatEqApproximatelyMatchesFloats) {
+TEST_F(GMockFloatTest, FloatEqApproximatelyMatchesFloats) {
   TestMatches(&FloatEq);
 }
 
-TEST_F(FloatTest, NanSensitiveFloatEqApproximatelyMatchesFloats) {
+TEST_F(GMockFloatTest, NanSensitiveFloatEqApproximatelyMatchesFloats) {
   TestMatches(&NanSensitiveFloatEq);
 }
 
-TEST_F(FloatTest, FloatEqCannotMatchNaN) {
+TEST_F(GMockFloatTest, FloatEqCannotMatchNaN) {
   // FloatEq never matches NaN.
   Matcher<float> m = FloatEq(nan1_);
   EXPECT_FALSE(m.Matches(nan1_));
@@ -3409,7 +3409,7 @@ TEST_F(FloatTest, FloatEqCannotMatchNaN) {
   EXPECT_FALSE(m.Matches(1.0));
 }
 
-TEST_F(FloatTest, NanSensitiveFloatEqCanMatchNaN) {
+TEST_F(GMockFloatTest, NanSensitiveFloatEqCanMatchNaN) {
   // NanSensitiveFloatEq will match NaN.
   Matcher<float> m = NanSensitiveFloatEq(nan1_);
   EXPECT_TRUE(m.Matches(nan1_));
@@ -3417,7 +3417,7 @@ TEST_F(FloatTest, NanSensitiveFloatEqCanMatchNaN) {
   EXPECT_FALSE(m.Matches(1.0));
 }
 
-TEST_F(FloatTest, FloatEqCanDescribeSelf) {
+TEST_F(GMockFloatTest, FloatEqCanDescribeSelf) {
   Matcher<float> m1 = FloatEq(2.0f);
   EXPECT_EQ("is approximately 2", Describe(m1));
   EXPECT_EQ("isn't approximately 2", DescribeNegation(m1));
@@ -3431,7 +3431,7 @@ TEST_F(FloatTest, FloatEqCanDescribeSelf) {
   EXPECT_EQ("is anything", DescribeNegation(m3));
 }
 
-TEST_F(FloatTest, NanSensitiveFloatEqCanDescribeSelf) {
+TEST_F(GMockFloatTest, NanSensitiveFloatEqCanDescribeSelf) {
   Matcher<float> m1 = NanSensitiveFloatEq(2.0f);
   EXPECT_EQ("is approximately 2", Describe(m1));
   EXPECT_EQ("isn't approximately 2", DescribeNegation(m1));
