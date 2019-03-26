@@ -3506,17 +3506,17 @@ TEST_F(FloatNearTest, NanSensitiveFloatNearCanMatchNaN) {
 }
 
 // Instantiate FloatingPointTest for testing doubles.
-typedef FloatingPointTest<double> DoubleTest;
+typedef FloatingPointTest<double> GMockDoubleTest;
 
-TEST_F(DoubleTest, DoubleEqApproximatelyMatchesDoubles) {
+TEST_F(GMockDoubleTest, DoubleEqApproximatelyMatchesDoubles) {
   TestMatches(&DoubleEq);
 }
 
-TEST_F(DoubleTest, NanSensitiveDoubleEqApproximatelyMatchesDoubles) {
+TEST_F(GMockDoubleTest, NanSensitiveDoubleEqApproximatelyMatchesDoubles) {
   TestMatches(&NanSensitiveDoubleEq);
 }
 
-TEST_F(DoubleTest, DoubleEqCannotMatchNaN) {
+TEST_F(GMockDoubleTest, DoubleEqCannotMatchNaN) {
   // DoubleEq never matches NaN.
   Matcher<double> m = DoubleEq(nan1_);
   EXPECT_FALSE(m.Matches(nan1_));
@@ -3524,7 +3524,7 @@ TEST_F(DoubleTest, DoubleEqCannotMatchNaN) {
   EXPECT_FALSE(m.Matches(1.0));
 }
 
-TEST_F(DoubleTest, NanSensitiveDoubleEqCanMatchNaN) {
+TEST_F(GMockDoubleTest, NanSensitiveDoubleEqCanMatchNaN) {
   // NanSensitiveDoubleEq will match NaN.
   Matcher<double> m = NanSensitiveDoubleEq(nan1_);
   EXPECT_TRUE(m.Matches(nan1_));
@@ -3532,7 +3532,7 @@ TEST_F(DoubleTest, NanSensitiveDoubleEqCanMatchNaN) {
   EXPECT_FALSE(m.Matches(1.0));
 }
 
-TEST_F(DoubleTest, DoubleEqCanDescribeSelf) {
+TEST_F(GMockDoubleTest, DoubleEqCanDescribeSelf) {
   Matcher<double> m1 = DoubleEq(2.0);
   EXPECT_EQ("is approximately 2", Describe(m1));
   EXPECT_EQ("isn't approximately 2", DescribeNegation(m1));
@@ -3546,7 +3546,7 @@ TEST_F(DoubleTest, DoubleEqCanDescribeSelf) {
   EXPECT_EQ("is anything", DescribeNegation(m3));
 }
 
-TEST_F(DoubleTest, NanSensitiveDoubleEqCanDescribeSelf) {
+TEST_F(GMockDoubleTest, NanSensitiveDoubleEqCanDescribeSelf) {
   Matcher<double> m1 = NanSensitiveDoubleEq(2.0);
   EXPECT_EQ("is approximately 2", Describe(m1));
   EXPECT_EQ("isn't approximately 2", DescribeNegation(m1));
