@@ -1113,11 +1113,21 @@ TEST(NeTest, CanDescribeSelf) {
 
 class MoveOnly {
  public:
-  explicit MoveOnly(int i) : i_(i) {}
-  MoveOnly(const MoveOnly&) = delete;
-  MoveOnly(MoveOnly&&) = default;
+  explicit MoveOnly(int i) 
+    :i_(i) 
+  {}
+
+  MoveOnly(MoveOnly&& rhs)
+    :i_(std::move(rhs.i_))
+  {}
+
+  MoveOnly(const MoveOnly&)            = delete;
   MoveOnly& operator=(const MoveOnly&) = delete;
-  MoveOnly& operator=(MoveOnly&&) = default;
+
+  MoveOnly& operator=(MoveOnly&& rhs) 
+  {
+    i_ = std::move(rhs.i_);
+  }
 
   bool operator==(const MoveOnly& other) const { return i_ == other.i_; }
   bool operator!=(const MoveOnly& other) const { return i_ != other.i_; }
