@@ -283,6 +283,12 @@ test_gtest_all_test_SOURCES = test/gtest_all_test.cc
 test_gtest_all_test_LDADD = lib/libgtest_main.la \
                             lib/libgtest.la
 
+TESTS += test/gtest_skip_in_environment_setup_test
+check_PROGRAMS += test/gtest_skip_in_environment_setup_test
+test_gtest_skip_in_environment_setup_test_SOURCES = test/gtest_skip_in_environment_setup_test.cc
+test_gtest_skip_in_environment_setup_test_LDADD= lib/libgtest_main.la \
+                                                 lib/libgtest.la
+
 # Tests that fused gtest files compile and work.
 FUSED_GTEST_SRC = \
   fused-src/gtest/gtest-all.cc \
