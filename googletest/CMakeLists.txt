@@ -222,6 +222,7 @@ $env:Path = \"$project_bin;$env:Path\"
     test/gtest-typed-test2_test.cc)
   cxx_test(gtest_unittest gtest_main)
   cxx_test(gtest-unittest-api_test gtest)
+  cxx_test(gtest_skip_in_environment_setup_test gtest_main)
   cxx_test(gtest_skip_test gtest_main)
 
   ############################################################
