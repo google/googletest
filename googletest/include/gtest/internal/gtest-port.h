@@ -619,10 +619,10 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 // Determines whether to support type-driven tests.
 
-// Typed tests need <typeinfo> and variadic macros, which GCC, VC++ 8.0,
+// Typed tests need <typeinfo> and variadic macros, which clang, GCC, VC++ 8.0,
 // Sun Pro CC, IBM Visual Age, and HP aCC support.
-#if defined(__GNUC__) || defined(_MSC_VER) || defined(__SUNPRO_CC) || \
-    defined(__IBMCPP__) || defined(__HP_aCC)
+#if defined(__clang__) || defined(__GNUC__) || defined(_MSC_VER) || \
+    defined(__SUNPRO_CC) || defined(__IBMCPP__) || defined(__HP_aCC)
 # define GTEST_HAS_TYPED_TEST 1
 # define GTEST_HAS_TYPED_TEST_P 1
 #endif
