@@ -1247,13 +1247,6 @@ void SetInjectableArgvs(const std::vector<std::string>& new_argvs) {
       new std::vector<std::string>(new_argvs.begin(), new_argvs.end()));
 }
 
-#if GTEST_HAS_GLOBAL_STRING
-void SetInjectableArgvs(const std::vector< ::string>& new_argvs) {
-  SetInjectableArgvs(
-      new std::vector<std::string>(new_argvs.begin(), new_argvs.end()));
-}
-#endif  // GTEST_HAS_GLOBAL_STRING
-
 void ClearInjectableArgvs() {
   delete g_injected_test_argvs;
   g_injected_test_argvs = nullptr;
