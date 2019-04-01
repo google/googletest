@@ -656,16 +656,6 @@ TEST(PrintArrayTest, BigArray) {
 
 // Tests printing ::string and ::std::string.
 
-#if GTEST_HAS_GLOBAL_STRING
-// ::string.
-TEST(PrintStringTest, StringInGlobalNamespace) {
-  const char s[] = "'\"?\\\a\b\f\n\0\r\t\v\x7F\xFF a";
-  const ::string str(s, sizeof(s));
-  EXPECT_EQ("\"'\\\"?\\\\\\a\\b\\f\\n\\0\\r\\t\\v\\x7F\\xFF a\\0\"",
-            Print(str));
-}
-#endif  // GTEST_HAS_GLOBAL_STRING
-
 // ::std::string.
 TEST(PrintStringTest, StringInStdNamespace) {
   const char s[] = "'\"?\\\a\b\f\n\0\r\t\v\x7F\xFF a";
@@ -688,19 +678,7 @@ TEST(PrintStringTest, StringAmbiguousHex) {
   EXPECT_EQ("\"!\\x5-!\"", Print(::std::string("!\x5-!")));
 }
 
-// Tests printing ::wstring and ::std::wstring.
-
-#if GTEST_HAS_GLOBAL_WSTRING
-// ::wstring.
-TEST(PrintWideStringTest, StringInGlobalNamespace) {
-  const wchar_t s[] = L"'\"?\\\a\b\f\n\0\r\t\v\xD3\x576\x8D3\xC74D a";
-  const ::wstring str(s, sizeof(s)/sizeof(wchar_t));
-  EXPECT_EQ("L\"'\\\"?\\\\\\a\\b\\f\\n\\0\\r\\t\\v"
-            "\\xD3\\x576\\x8D3\\xC74D a\\0\"",
-            Print(str));
-}
-#endif  // GTEST_HAS_GLOBAL_WSTRING
-
+// Tests printing ::std::wstring.
 #if GTEST_HAS_STD_WSTRING
 // ::std::wstring.
 TEST(PrintWideStringTest, StringInStdNamespace) {
@@ -1243,21 +1221,6 @@ TEST(FormatForComparisonFailureMessageTest, WorksForWCharPointerVsPointer) {
 // Tests formatting a char pointer when it's compared to a string object.
 // In this case we want to print the char pointer as a C string.
 
-#if GTEST_HAS_GLOBAL_STRING
-// char pointer vs ::string
-TEST(FormatForComparisonFailureMessageTest, WorksForCharPointerVsString) {
-  const char* s = "hello \"world";
-  EXPECT_STREQ("\"hello \\\"world\"",  // The string content should be escaped.
-               FormatForComparisonFailureMessage(s, ::string()).c_str());
-
-  // char*
-  char str[] = "hi\1";
-  char* p = str;
-  EXPECT_STREQ("\"hi\\x1\"",  // The string content should be escaped.
-               FormatForComparisonFailureMessage(p, ::string()).c_str());
-}
-#endif
-
 // char pointer vs std::string
 TEST(FormatForComparisonFailureMessageTest, WorksForCharPointerVsStdString) {
   const char* s = "hello \"world";
@@ -1270,21 +1233,6 @@ TEST(FormatForComparisonFailureMessageTest, WorksForCharPointerVsStdString) {
   EXPECT_STREQ("\"hi\\x1\"",  // The string content should be escaped.
                FormatForComparisonFailureMessage(p, ::std::string()).c_str());
 }
-
-#if GTEST_HAS_GLOBAL_WSTRING
-// wchar_t pointer vs ::wstring
-TEST(FormatForComparisonFailureMessageTest, WorksForWCharPointerVsWString) {
-  const wchar_t* s = L"hi \"world";
-  EXPECT_STREQ("L\"hi \\\"world\"",  // The string content should be escaped.
-               FormatForComparisonFailureMessage(s, ::wstring()).c_str());
-
-  // wchar_t*
-  wchar_t str[] = L"hi\1";
-  wchar_t* p = str;
-  EXPECT_STREQ("L\"hi\\x1\"",  // The string content should be escaped.
-               FormatForComparisonFailureMessage(p, ::wstring()).c_str());
-}
-#endif
 
 #if GTEST_HAS_STD_WSTRING
 // wchar_t pointer vs std::wstring
@@ -1338,31 +1286,12 @@ TEST(FormatForComparisonFailureMessageTest, WorksForWCharArrayVsWCharArray) {
 // Tests formatting a char array when it's compared with a string object.
 // In this case we want to print the array as a C string.
 
-#if GTEST_HAS_GLOBAL_STRING
-// char array vs string
-TEST(FormatForComparisonFailureMessageTest, WorksForCharArrayVsString) {
-  const char str[] = "hi \"w\0rld\"";
-  EXPECT_STREQ("\"hi \\\"w\"",  // The content should be escaped.
-                                // Embedded NUL terminates the string.
-               FormatForComparisonFailureMessage(str, ::string()).c_str());
-}
-#endif
-
 // char array vs std::string
 TEST(FormatForComparisonFailureMessageTest, WorksForCharArrayVsStdString) {
   const char str[] = "hi \"world\"";
   EXPECT_STREQ("\"hi \\\"world\\\"\"",  // The content should be escaped.
                FormatForComparisonFailureMessage(str, ::std::string()).c_str());
 }
-
-#if GTEST_HAS_GLOBAL_WSTRING
-// wchar_t array vs wstring
-TEST(FormatForComparisonFailureMessageTest, WorksForWCharArrayVsWString) {
-  const wchar_t str[] = L"hi \"world\"";
-  EXPECT_STREQ("L\"hi \\\"world\\\"\"",  // The content should be escaped.
-               FormatForComparisonFailureMessage(str, ::wstring()).c_str());
-}
-#endif
 
 #if GTEST_HAS_STD_WSTRING
 // wchar_t array vs std::wstring

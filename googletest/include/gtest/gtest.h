@@ -73,21 +73,6 @@
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
 /* class A needs to have dll-interface to be used by clients of class B */)
 
-// Depending on the platform, different string classes are available.
-// On Linux, in addition to ::std::string, Google also makes use of
-// class ::string, which has the same interface as ::std::string, but
-// has a different implementation.
-//
-// You can define GTEST_HAS_GLOBAL_STRING to 1 to indicate that
-// ::string is available AND is a distinct type to ::std::string, or
-// define it to 0 to indicate otherwise.
-//
-// If ::std::string and ::string are the same class on your platform
-// due to aliasing, you should define GTEST_HAS_GLOBAL_STRING to 0.
-//
-// If you do not define GTEST_HAS_GLOBAL_STRING, it is defined
-// heuristically.
-
 namespace testing {
 
 // Silence C4100 (unreferenced formal parameter) and 4805
@@ -2218,12 +2203,6 @@ class GTEST_API_ ScopedTrace {
   ScopedTrace(const char* file, int line, const char* message) {
     PushTrace(file, line, message ? message : "(null)");
   }
-
-#if GTEST_HAS_GLOBAL_STRING
-  ScopedTrace(const char* file, int line, const ::string& message) {
-    PushTrace(file, line, message);
-  }
-#endif
 
   ScopedTrace(const char* file, int line, const std::string& message) {
     PushTrace(file, line, message);
