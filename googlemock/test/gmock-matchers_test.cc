@@ -91,7 +91,6 @@ using testing::internal::MatchMatrix;
 using testing::internal::PredicateFormatterFromMatcher;
 using testing::internal::RE;
 using testing::internal::StreamMatchResultListener;
-using testing::internal::string;
 using testing::internal::Strings;
 
 // Helper for testing container-valued matchers in mock method context. It is
@@ -348,58 +347,6 @@ TEST(StringMatcherTest, CanBeImplicitlyConstructedFromString) {
   EXPECT_FALSE(m2.Matches("hello"));
 }
 
-#if GTEST_HAS_GLOBAL_STRING
-// Tests that a ::string object can be implicitly converted to a
-// Matcher<std::string> or Matcher<const std::string&>.
-TEST(StringMatcherTest, CanBeImplicitlyConstructedFromGlobalString) {
-  Matcher<std::string> m1 = ::string("hi");
-  EXPECT_TRUE(m1.Matches("hi"));
-  EXPECT_FALSE(m1.Matches("hello"));
-
-  Matcher<const std::string&> m2 = ::string("hi");
-  EXPECT_TRUE(m2.Matches("hi"));
-  EXPECT_FALSE(m2.Matches("hello"));
-}
-#endif  // GTEST_HAS_GLOBAL_STRING
-
-#if GTEST_HAS_GLOBAL_STRING
-// Tests that a C-string literal can be implicitly converted to a
-// Matcher<::string> or Matcher<const ::string&>.
-TEST(GlobalStringMatcherTest, CanBeImplicitlyConstructedFromCStringLiteral) {
-  Matcher< ::string> m1 = "hi";
-  EXPECT_TRUE(m1.Matches("hi"));
-  EXPECT_FALSE(m1.Matches("hello"));
-
-  Matcher<const ::string&> m2 = "hi";
-  EXPECT_TRUE(m2.Matches("hi"));
-  EXPECT_FALSE(m2.Matches("hello"));
-}
-
-// Tests that a std::string object can be implicitly converted to a
-// Matcher<::string> or Matcher<const ::string&>.
-TEST(GlobalStringMatcherTest, CanBeImplicitlyConstructedFromString) {
-  Matcher< ::string> m1 = std::string("hi");
-  EXPECT_TRUE(m1.Matches("hi"));
-  EXPECT_FALSE(m1.Matches("hello"));
-
-  Matcher<const ::string&> m2 = std::string("hi");
-  EXPECT_TRUE(m2.Matches("hi"));
-  EXPECT_FALSE(m2.Matches("hello"));
-}
-
-// Tests that a ::string object can be implicitly converted to a
-// Matcher<::string> or Matcher<const ::string&>.
-TEST(GlobalStringMatcherTest, CanBeImplicitlyConstructedFromGlobalString) {
-  Matcher< ::string> m1 = ::string("hi");
-  EXPECT_TRUE(m1.Matches("hi"));
-  EXPECT_FALSE(m1.Matches("hello"));
-
-  Matcher<const ::string&> m2 = ::string("hi");
-  EXPECT_TRUE(m2.Matches("hi"));
-  EXPECT_FALSE(m2.Matches("hello"));
-}
-#endif  // GTEST_HAS_GLOBAL_STRING
-
 #if GTEST_HAS_ABSL
 // Tests that a C-string literal can be implicitly converted to a
 // Matcher<absl::string_view> or Matcher<const absl::string_view&>.
@@ -424,20 +371,6 @@ TEST(StringViewMatcherTest, CanBeImplicitlyConstructedFromString) {
   EXPECT_TRUE(m2.Matches("cats"));
   EXPECT_FALSE(m2.Matches("dogs"));
 }
-
-#if GTEST_HAS_GLOBAL_STRING
-// Tests that a ::string object can be implicitly converted to a
-// Matcher<absl::string_view> or Matcher<const absl::string_view&>.
-TEST(StringViewMatcherTest, CanBeImplicitlyConstructedFromGlobalString) {
-  Matcher<absl::string_view> m1 = ::string("cats");
-  EXPECT_TRUE(m1.Matches("cats"));
-  EXPECT_FALSE(m1.Matches("dogs"));
-
-  Matcher<const absl::string_view&> m2 = ::string("cats");
-  EXPECT_TRUE(m2.Matches("cats"));
-  EXPECT_FALSE(m2.Matches("dogs"));
-}
-#endif  // GTEST_HAS_GLOBAL_STRING
 
 // Tests that a absl::string_view object can be implicitly converted to a
 // Matcher<absl::string_view> or Matcher<const absl::string_view&>.
@@ -1515,12 +1448,12 @@ struct Tag {};
 
 struct PairWithGet {
   int member_1;
-  string member_2;
+  std::string member_2;
   using first_type = int;
-  using second_type = string;
+  using second_type = std::string;
 
   const int& GetImpl(Tag<0>) const { return member_1; }
-  const string& GetImpl(Tag<1>) const { return member_2; }
+  const std::string& GetImpl(Tag<1>) const { return member_2; }
 };
 template <size_t I>
 auto get(const PairWithGet& value) -> decltype(value.GetImpl(Tag<I>())) {
@@ -1693,7 +1626,8 @@ TEST(PairTest, UseGetInsteadOfMembers) {
   EXPECT_THAT(pair, Not(Pair(Lt(7), "ABC")));
 
   std::vector<PairWithGet> v = {{11, "Foo"}, {29, "gMockIsBestMock"}};
-  EXPECT_THAT(v, ElementsAre(Pair(11, string("Foo")), Pair(Ge(10), Not(""))));
+  EXPECT_THAT(v,
+              ElementsAre(Pair(11, std::string("Foo")), Pair(Ge(10), Not(""))));
 }
 
 // Tests StartsWith(s).
@@ -1738,15 +1672,6 @@ TEST(EndsWithTest, MatchesStringWithGivenSuffix) {
   EXPECT_TRUE(m2.Matches("Super Hi"));
   EXPECT_FALSE(m2.Matches("i"));
   EXPECT_FALSE(m2.Matches("Hi "));
-
-#if GTEST_HAS_GLOBAL_STRING
-  const Matcher<const ::string&> m3 = EndsWith(::string("Hi"));
-  EXPECT_TRUE(m3.Matches("Hi"));
-  EXPECT_TRUE(m3.Matches("Wow Hi Hi"));
-  EXPECT_TRUE(m3.Matches("Super Hi"));
-  EXPECT_FALSE(m3.Matches("i"));
-  EXPECT_FALSE(m3.Matches("Hi "));
-#endif  // GTEST_HAS_GLOBAL_STRING
 
 #if GTEST_HAS_ABSL
   const Matcher<const absl::string_view&> m4 = EndsWith("");
@@ -2029,197 +1954,6 @@ TEST(StdWideEndsWithTest, CanDescribeSelf) {
 }
 
 #endif  // GTEST_HAS_STD_WSTRING
-
-#if GTEST_HAS_GLOBAL_WSTRING
-TEST(GlobalWideStrEqTest, MatchesEqual) {
-  Matcher<const wchar_t*> m = StrEq(::wstring(L"Hello"));
-  EXPECT_TRUE(m.Matches(L"Hello"));
-  EXPECT_FALSE(m.Matches(L"hello"));
-  EXPECT_FALSE(m.Matches(nullptr));
-
-  Matcher<const ::wstring&> m2 = StrEq(L"Hello");
-  EXPECT_TRUE(m2.Matches(L"Hello"));
-  EXPECT_FALSE(m2.Matches(L"Hi"));
-
-  Matcher<const ::wstring&> m3 = StrEq(L"\xD3\x576\x8D3\xC74D");
-  EXPECT_TRUE(m3.Matches(L"\xD3\x576\x8D3\xC74D"));
-  EXPECT_FALSE(m3.Matches(L"\xD3\x576\x8D3\xC74E"));
-
-  ::wstring str(L"01204500800");
-  str[3] = L'\0';
-  Matcher<const ::wstring&> m4 = StrEq(str);
-  EXPECT_TRUE(m4.Matches(str));
-  str[0] = str[6] = str[7] = str[9] = str[10] = L'\0';
-  Matcher<const ::wstring&> m5 = StrEq(str);
-  EXPECT_TRUE(m5.Matches(str));
-}
-
-TEST(GlobalWideStrEqTest, CanDescribeSelf) {
-  Matcher< ::wstring> m = StrEq(L"Hi-\'\"?\\\a\b\f\n\r\t\v");
-  EXPECT_EQ("is equal to L\"Hi-\'\\\"?\\\\\\a\\b\\f\\n\\r\\t\\v\"",
-    Describe(m));
-
-  Matcher< ::wstring> m2 = StrEq(L"\xD3\x576\x8D3\xC74D");
-  EXPECT_EQ("is equal to L\"\\xD3\\x576\\x8D3\\xC74D\"",
-    Describe(m2));
-
-  ::wstring str(L"01204500800");
-  str[3] = L'\0';
-  Matcher<const ::wstring&> m4 = StrEq(str);
-  EXPECT_EQ("is equal to L\"012\\04500800\"", Describe(m4));
-  str[0] = str[6] = str[7] = str[9] = str[10] = L'\0';
-  Matcher<const ::wstring&> m5 = StrEq(str);
-  EXPECT_EQ("is equal to L\"\\012\\045\\0\\08\\0\\0\"", Describe(m5));
-}
-
-TEST(GlobalWideStrNeTest, MatchesUnequalString) {
-  Matcher<const wchar_t*> m = StrNe(L"Hello");
-  EXPECT_TRUE(m.Matches(L""));
-  EXPECT_TRUE(m.Matches(nullptr));
-  EXPECT_FALSE(m.Matches(L"Hello"));
-
-  Matcher< ::wstring> m2 = StrNe(::wstring(L"Hello"));
-  EXPECT_TRUE(m2.Matches(L"hello"));
-  EXPECT_FALSE(m2.Matches(L"Hello"));
-}
-
-TEST(GlobalWideStrNeTest, CanDescribeSelf) {
-  Matcher<const wchar_t*> m = StrNe(L"Hi");
-  EXPECT_EQ("isn't equal to L\"Hi\"", Describe(m));
-}
-
-TEST(GlobalWideStrCaseEqTest, MatchesEqualStringIgnoringCase) {
-  Matcher<const wchar_t*> m = StrCaseEq(::wstring(L"Hello"));
-  EXPECT_TRUE(m.Matches(L"Hello"));
-  EXPECT_TRUE(m.Matches(L"hello"));
-  EXPECT_FALSE(m.Matches(L"Hi"));
-  EXPECT_FALSE(m.Matches(nullptr));
-
-  Matcher<const ::wstring&> m2 = StrCaseEq(L"Hello");
-  EXPECT_TRUE(m2.Matches(L"hello"));
-  EXPECT_FALSE(m2.Matches(L"Hi"));
-}
-
-TEST(GlobalWideStrCaseEqTest, MatchesEqualStringWith0IgnoringCase) {
-  ::wstring str1(L"oabocdooeoo");
-  ::wstring str2(L"OABOCDOOEOO");
-  Matcher<const ::wstring&> m0 = StrCaseEq(str1);
-  EXPECT_FALSE(m0.Matches(str2 + ::wstring(1, L'\0')));
-
-  str1[3] = str2[3] = L'\0';
-  Matcher<const ::wstring&> m1 = StrCaseEq(str1);
-  EXPECT_TRUE(m1.Matches(str2));
-
-  str1[0] = str1[6] = str1[7] = str1[10] = L'\0';
-  str2[0] = str2[6] = str2[7] = str2[10] = L'\0';
-  Matcher<const ::wstring&> m2 = StrCaseEq(str1);
-  str1[9] = str2[9] = L'\0';
-  EXPECT_FALSE(m2.Matches(str2));
-
-  Matcher<const ::wstring&> m3 = StrCaseEq(str1);
-  EXPECT_TRUE(m3.Matches(str2));
-
-  EXPECT_FALSE(m3.Matches(str2 + L"x"));
-  str2.append(1, L'\0');
-  EXPECT_FALSE(m3.Matches(str2));
-  EXPECT_FALSE(m3.Matches(::wstring(str2, 0, 9)));
-}
-
-TEST(GlobalWideStrCaseEqTest, CanDescribeSelf) {
-  Matcher< ::wstring> m = StrCaseEq(L"Hi");
-  EXPECT_EQ("is equal to (ignoring case) L\"Hi\"", Describe(m));
-}
-
-TEST(GlobalWideStrCaseNeTest, MatchesUnequalStringIgnoringCase) {
-  Matcher<const wchar_t*> m = StrCaseNe(L"Hello");
-  EXPECT_TRUE(m.Matches(L"Hi"));
-  EXPECT_TRUE(m.Matches(nullptr));
-  EXPECT_FALSE(m.Matches(L"Hello"));
-  EXPECT_FALSE(m.Matches(L"hello"));
-
-  Matcher< ::wstring> m2 = StrCaseNe(::wstring(L"Hello"));
-  EXPECT_TRUE(m2.Matches(L""));
-  EXPECT_FALSE(m2.Matches(L"Hello"));
-}
-
-TEST(GlobalWideStrCaseNeTest, CanDescribeSelf) {
-  Matcher<const wchar_t*> m = StrCaseNe(L"Hi");
-  EXPECT_EQ("isn't equal to (ignoring case) L\"Hi\"", Describe(m));
-}
-
-// Tests that HasSubstr() works for matching wstring-typed values.
-TEST(GlobalWideHasSubstrTest, WorksForStringClasses) {
-  const Matcher< ::wstring> m1 = HasSubstr(L"foo");
-  EXPECT_TRUE(m1.Matches(::wstring(L"I love food.")));
-  EXPECT_FALSE(m1.Matches(::wstring(L"tofo")));
-
-  const Matcher<const ::wstring&> m2 = HasSubstr(L"foo");
-  EXPECT_TRUE(m2.Matches(::wstring(L"I love food.")));
-  EXPECT_FALSE(m2.Matches(::wstring(L"tofo")));
-}
-
-// Tests that HasSubstr() works for matching C-wide-string-typed values.
-TEST(GlobalWideHasSubstrTest, WorksForCStrings) {
-  const Matcher<wchar_t*> m1 = HasSubstr(L"foo");
-  EXPECT_TRUE(m1.Matches(const_cast<wchar_t*>(L"I love food.")));
-  EXPECT_FALSE(m1.Matches(const_cast<wchar_t*>(L"tofo")));
-  EXPECT_FALSE(m1.Matches(nullptr));
-
-  const Matcher<const wchar_t*> m2 = HasSubstr(L"foo");
-  EXPECT_TRUE(m2.Matches(L"I love food."));
-  EXPECT_FALSE(m2.Matches(L"tofo"));
-  EXPECT_FALSE(m2.Matches(nullptr));
-}
-
-// Tests that HasSubstr(s) describes itself properly.
-TEST(GlobalWideHasSubstrTest, CanDescribeSelf) {
-  Matcher< ::wstring> m = HasSubstr(L"foo\n\"");
-  EXPECT_EQ("has substring L\"foo\\n\\\"\"", Describe(m));
-}
-
-// Tests StartsWith(s).
-
-TEST(GlobalWideStartsWithTest, MatchesStringWithGivenPrefix) {
-  const Matcher<const wchar_t*> m1 = StartsWith(::wstring(L""));
-  EXPECT_TRUE(m1.Matches(L"Hi"));
-  EXPECT_TRUE(m1.Matches(L""));
-  EXPECT_FALSE(m1.Matches(nullptr));
-
-  const Matcher<const ::wstring&> m2 = StartsWith(L"Hi");
-  EXPECT_TRUE(m2.Matches(L"Hi"));
-  EXPECT_TRUE(m2.Matches(L"Hi Hi!"));
-  EXPECT_TRUE(m2.Matches(L"High"));
-  EXPECT_FALSE(m2.Matches(L"H"));
-  EXPECT_FALSE(m2.Matches(L" Hi"));
-}
-
-TEST(GlobalWideStartsWithTest, CanDescribeSelf) {
-  Matcher<const ::wstring> m = StartsWith(L"Hi");
-  EXPECT_EQ("starts with L\"Hi\"", Describe(m));
-}
-
-// Tests EndsWith(s).
-
-TEST(GlobalWideEndsWithTest, MatchesStringWithGivenSuffix) {
-  const Matcher<const wchar_t*> m1 = EndsWith(L"");
-  EXPECT_TRUE(m1.Matches(L"Hi"));
-  EXPECT_TRUE(m1.Matches(L""));
-  EXPECT_FALSE(m1.Matches(nullptr));
-
-  const Matcher<const ::wstring&> m2 = EndsWith(::wstring(L"Hi"));
-  EXPECT_TRUE(m2.Matches(L"Hi"));
-  EXPECT_TRUE(m2.Matches(L"Wow Hi Hi"));
-  EXPECT_TRUE(m2.Matches(L"Super Hi"));
-  EXPECT_FALSE(m2.Matches(L"i"));
-  EXPECT_FALSE(m2.Matches(L"Hi "));
-}
-
-TEST(GlobalWideEndsWithTest, CanDescribeSelf) {
-  Matcher<const ::wstring> m = EndsWith(L"Hi");
-  EXPECT_EQ("ends with L\"Hi\"", Describe(m));
-}
-
-#endif  // GTEST_HAS_GLOBAL_WSTRING
 
 typedef ::std::tuple<long, int> Tuple2;  // NOLINT
 
@@ -2759,7 +2493,7 @@ TEST(ElementsAreTest, HugeMatcher) {
 
 // Tests the variadic version of the UnorderedElementsAreMatcher
 TEST(ElementsAreTest, HugeMatcherStr) {
-  vector<string> test_vector{
+  vector<std::string> test_vector{
       "literal_string", "", "", "", "", "", "", "", "", "", "", ""};
 
   EXPECT_THAT(test_vector, UnorderedElementsAre("literal_string", _, _, _, _, _,

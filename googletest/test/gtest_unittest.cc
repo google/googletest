@@ -1243,12 +1243,6 @@ TEST_F(ExpectFatalFailureTest, CatchesFatalFaliure) {
   EXPECT_FATAL_FAILURE(AddFatalFailure(), "Expected fatal failure.");
 }
 
-#if GTEST_HAS_GLOBAL_STRING
-TEST_F(ExpectFatalFailureTest, AcceptsStringObject) {
-  EXPECT_FATAL_FAILURE(AddFatalFailure(), ::string("Expected fatal failure."));
-}
-#endif
-
 TEST_F(ExpectFatalFailureTest, AcceptsStdStringObject) {
   EXPECT_FATAL_FAILURE(AddFatalFailure(),
                        ::std::string("Expected fatal failure."));
@@ -1330,13 +1324,6 @@ TEST_F(ExpectNonfatalFailureTest, CatchesNonfatalFailure) {
   EXPECT_NONFATAL_FAILURE(AddNonfatalFailure(),
                           "Expected non-fatal failure.");
 }
-
-#if GTEST_HAS_GLOBAL_STRING
-TEST_F(ExpectNonfatalFailureTest, AcceptsStringObject) {
-  EXPECT_NONFATAL_FAILURE(AddNonfatalFailure(),
-                          ::string("Expected non-fatal failure."));
-}
-#endif
 
 TEST_F(ExpectNonfatalFailureTest, AcceptsStdStringObject) {
   EXPECT_NONFATAL_FAILURE(AddNonfatalFailure(),
@@ -4851,72 +4838,6 @@ TEST(EqAssertionTest, StdWideString) {
 }
 
 #endif  // GTEST_HAS_STD_WSTRING
-
-#if GTEST_HAS_GLOBAL_STRING
-// Tests using ::string values in {EXPECT|ASSERT}_EQ.
-TEST(EqAssertionTest, GlobalString) {
-  // Compares a const char* to a ::string that has identical content.
-  EXPECT_EQ("Test", ::string("Test"));
-
-  // Compares two identical ::strings.
-  const ::string str1("A * in the middle");
-  const ::string str2(str1);
-  ASSERT_EQ(str1, str2);
-
-  // Compares a ::string to a const char* that has different content.
-  EXPECT_NONFATAL_FAILURE(EXPECT_EQ(::string("Test"), "test"),
-                          "test");
-
-  // Compares two ::strings that have different contents, one of which
-  // having a NUL character in the middle.
-  ::string str3(str1);
-  str3.at(2) = '\0';
-  EXPECT_NONFATAL_FAILURE(EXPECT_EQ(str1, str3),
-                          "str3");
-
-  // Compares a ::string to a char* that has different content.
-  EXPECT_FATAL_FAILURE({  // NOLINT
-    ASSERT_EQ(::string("bar"), const_cast<char*>("foo"));
-  }, "");
-}
-
-#endif  // GTEST_HAS_GLOBAL_STRING
-
-#if GTEST_HAS_GLOBAL_WSTRING
-
-// Tests using ::wstring values in {EXPECT|ASSERT}_EQ.
-TEST(EqAssertionTest, GlobalWideString) {
-  // Compares two identical ::wstrings.
-  static const ::wstring wstr1(L"A * in the middle");
-  static const ::wstring wstr2(wstr1);
-  EXPECT_EQ(wstr1, wstr2);
-
-  // Compares a const wchar_t* to a ::wstring that has identical content.
-  const wchar_t kTestX8119[] = { 'T', 'e', 's', 't', 0x8119, '\0' };
-  ASSERT_EQ(kTestX8119, ::wstring(kTestX8119));
-
-  // Compares a const wchar_t* to a ::wstring that has different
-  // content.
-  const wchar_t kTestX8120[] = { 'T', 'e', 's', 't', 0x8120, '\0' };
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_EQ(kTestX8120, ::wstring(kTestX8119));
-  }, "Test\\x8119");
-
-  // Compares a wchar_t* to a ::wstring that has different content.
-  wchar_t* const p1 = const_cast<wchar_t*>(L"foo");
-  EXPECT_NONFATAL_FAILURE(EXPECT_EQ(p1, ::wstring(L"bar")),
-                          "bar");
-
-  // Compares two ::wstrings that have different contents, one of which
-  // having a NUL character in the middle.
-  static ::wstring wstr3;
-  wstr3 = wstr1;
-  wstr3.at(2) = L'\0';
-  EXPECT_FATAL_FAILURE(ASSERT_EQ(wstr1, wstr3),
-                       "wstr3");
-}
-
-#endif  // GTEST_HAS_GLOBAL_WSTRING
 
 // Tests using char pointers in {EXPECT|ASSERT}_EQ.
 TEST(EqAssertionTest, CharPointer) {

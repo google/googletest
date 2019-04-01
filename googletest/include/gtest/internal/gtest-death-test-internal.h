@@ -176,12 +176,6 @@ inline Matcher<const ::std::string&> MakeDeathTestMatcher(
     const ::std::string& regex) {
   return ContainsRegex(regex);
 }
-#if GTEST_HAS_GLOBAL_STRING
-inline Matcher<const ::std::string&> MakeDeathTestMatcher(
-    const ::string& regex) {
-  return ContainsRegex(regex);
-}
-#endif
 
 // If a Matcher<const ::std::string&> is passed to EXPECT_DEATH (etc.), it's
 // used directly.

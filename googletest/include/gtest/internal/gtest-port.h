@@ -72,10 +72,6 @@
 //                              is/isn't available.
 //   GTEST_HAS_EXCEPTIONS     - Define it to 1/0 to indicate that exceptions
 //                              are enabled.
-//   GTEST_HAS_GLOBAL_STRING  - Define it to 1/0 to indicate that ::string
-//                              is/isn't available
-//   GTEST_HAS_GLOBAL_WSTRING - Define it to 1/0 to indicate that ::wstring
-//                              is/isn't available
 //   GTEST_HAS_POSIX_RE       - Define it to 1/0 to indicate that POSIX regular
 //                              expressions are/aren't available.
 //   GTEST_HAS_PTHREAD        - Define it to 1/0 to indicate that <pthread.h>
@@ -269,12 +265,10 @@
 # include <TargetConditionals.h>
 #endif
 
-// Brings in the definition of HAS_GLOBAL_STRING.  This must be done
-// BEFORE we test HAS_GLOBAL_STRING.
-#include <string>     // NOLINT
 #include <algorithm>  // NOLINT
 #include <iostream>   // NOLINT
 #include <sstream>    // NOLINT
+#include <string>     // NOLINT
 #include <tuple>
 #include <utility>
 #include <vector>  // NOLINT
@@ -458,10 +452,6 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # error "::std::string isn't available."
 #endif  // !defined(GTEST_HAS_STD_STRING)
 
-#ifndef GTEST_HAS_GLOBAL_STRING
-# define GTEST_HAS_GLOBAL_STRING 0
-#endif  // GTEST_HAS_GLOBAL_STRING
-
 #ifndef GTEST_HAS_STD_WSTRING
 // The user didn't tell us whether ::std::wstring is available, so we need
 // to figure it out.
@@ -472,13 +462,6 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
     (!(GTEST_OS_LINUX_ANDROID || GTEST_OS_CYGWIN || GTEST_OS_SOLARIS))
 
 #endif  // GTEST_HAS_STD_WSTRING
-
-#ifndef GTEST_HAS_GLOBAL_WSTRING
-// The user didn't tell us whether ::wstring is available, so we need
-// to figure it out.
-# define GTEST_HAS_GLOBAL_WSTRING \
-    (GTEST_HAS_STD_WSTRING && GTEST_HAS_GLOBAL_STRING)
-#endif  // GTEST_HAS_GLOBAL_WSTRING
 
 // Determines whether RTTI is available.
 #ifndef GTEST_HAS_RTTI
@@ -885,18 +868,6 @@ struct IsSame<T, T> {
 // Evaluates to the number of elements in 'array'.
 #define GTEST_ARRAY_SIZE_(array) (sizeof(array) / sizeof(array[0]))
 
-#if GTEST_HAS_GLOBAL_STRING
-typedef ::string string;
-#else
-typedef ::std::string string;
-#endif  // GTEST_HAS_GLOBAL_STRING
-
-#if GTEST_HAS_GLOBAL_WSTRING
-typedef ::wstring wstring;
-#elif GTEST_HAS_STD_WSTRING
-typedef ::std::wstring wstring;
-#endif  // GTEST_HAS_GLOBAL_WSTRING
-
 // A helper for suppressing warnings on constant condition.  It just
 // returns 'condition'.
 GTEST_API_ bool IsTrue(bool condition);
@@ -918,12 +889,6 @@ class GTEST_API_ RE {
   // Constructs an RE from a string.
   RE(const ::std::string& regex) { Init(regex.c_str()); }  // NOLINT
 
-# if GTEST_HAS_GLOBAL_STRING
-
-  RE(const ::string& regex) { Init(regex.c_str()); }  // NOLINT
-
-# endif  // GTEST_HAS_GLOBAL_STRING
-
   RE(const char* regex) { Init(regex); }  // NOLINT
   ~RE();
 
@@ -940,17 +905,6 @@ class GTEST_API_ RE {
   static bool PartialMatch(const ::std::string& str, const RE& re) {
     return PartialMatch(str.c_str(), re);
   }
-
-# if GTEST_HAS_GLOBAL_STRING
-
-  static bool FullMatch(const ::string& str, const RE& re) {
-    return FullMatch(str.c_str(), re);
-  }
-  static bool PartialMatch(const ::string& str, const RE& re) {
-    return PartialMatch(str.c_str(), re);
-  }
-
-# endif  // GTEST_HAS_GLOBAL_STRING
 
   static bool FullMatch(const char* str, const RE& re);
   static bool PartialMatch(const char* str, const RE& re);
@@ -1207,9 +1161,6 @@ std::vector<std::string> GetInjectableArgvs();
 // Deprecated: pass the args vector by value instead.
 void SetInjectableArgvs(const std::vector<std::string>* new_argvs);
 void SetInjectableArgvs(const std::vector<std::string>& new_argvs);
-#if GTEST_HAS_GLOBAL_STRING
-void SetInjectableArgvs(const std::vector< ::string>& new_argvs);
-#endif  // GTEST_HAS_GLOBAL_STRING
 void ClearInjectableArgvs();
 
 #endif  // GTEST_HAS_DEATH_TEST
