@@ -100,7 +100,7 @@ INSTANTIATE_TEST_SUITE_P(InstantiationName,
                          Values("meeny", "miny", "moe"));
 
 // To distinguish different instances of the pattern, (yes, you
-// can instantiate it more then once) the first argument to the
+// can instantiate it more than once) the first argument to the
 // INSTANTIATE_TEST_SUITE_P macro is a prefix that will be added to the
 // actual test suite name. Remember to pick unique prefixes for different
 // instantiations. The tests from the instantiation above will have
