@@ -25,7 +25,7 @@ include $(TOP)/configure/RULES
 
 ifeq ($(STATIC_BUILD),NO)
 $(LIB_PREFIX)gtest$(LIB_SUFFIX) : $(LIB_PREFIX)%$(LIB_SUFFIX):
-	@$(RM)$@
+	@$(RM) $@
 	$(ARCMD)
 ifneq ($(strip $(RANLIB)),)
 	$(RANLIB) $@
