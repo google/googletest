@@ -285,6 +285,23 @@ cc_test(
     deps = ["//:gtest_main"],
 )
 
+cc_test(
+    name = "gtest_skip_in_environment_setup_test",
+    size = "small",
+    srcs = ["gtest_skip_in_environment_setup_test.cc"],
+    deps = ["//:gtest_main"],
+)
+
+py_test(
+    name = "gtest_skip_environment_check_output_test",
+    size = "small",
+    srcs = ["gtest_skip_environment_check_output_test.py"],
+    data = [
+        ":gtest_skip_in_environment_setup_test",
+    ],
+    deps = [":gtest_test_utils"],
+)
+
 py_test(
     name = "googletest-list-tests-unittest",
     size = "small",
