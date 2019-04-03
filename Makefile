@@ -11,5 +11,5 @@ $(foreach dir, $(filter-out configure, $(DIRS)), \
 $(foreach dir, $(filter %Top, $(DIRS)), \
     $(eval $(dir)_DEPEND_DIRS += $(filter %googletest, $(DIRS))))
 	
-include $(TOP)/configure/RULES_DIRS
+include $(TOP)/configure/RULES_TOP
 
