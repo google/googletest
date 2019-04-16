@@ -994,7 +994,7 @@ DeathTest::TestRole FuchsiaDeathTest::AssumeRole() {
   zx_handle_t child_pipe_handle;
   int child_pipe_fd;
   status = fdio_pipe_half2(&child_pipe_fd, &child_pipe_handle);
-  GTEST_DEATH_TEST_CHECK_(status != ZX_OK);
+  GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
   set_read_fd(child_pipe_fd);
 
   // Set the pipe handle for the child.
