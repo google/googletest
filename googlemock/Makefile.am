@@ -157,10 +157,6 @@ EXTRA_DIST += \
   scripts/generator/cpp/utils.py \
   scripts/generator/gmock_gen.py
 
-# Script for diagnosing compiler errors in programs that use Google
-# Mock.
-EXTRA_DIST += scripts/gmock_doctor.py
-
 # CMake scripts.
 EXTRA_DIST += \
   CMakeLists.txt
