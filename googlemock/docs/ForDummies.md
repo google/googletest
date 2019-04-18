@@ -17,7 +17,7 @@ If all this seems too abstract for you, don't worry - the most important thing t
 Using Google Mock involves three basic steps:
 
   1. Use some simple macros to describe the interface you want to mock, and they will expand to the implementation of your mock class;
-  1. Create some mock objects and specify their expectations and behavior using an intuitive syntax;
+  1. Create some mock objects and specify its expectations and behavior using an intuitive syntax;
   1. Exercise code that uses the mock objects. Google Mock will catch any violation of the expectations as soon as it arises.
 
 # Why Google Mock? #
