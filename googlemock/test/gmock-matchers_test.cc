@@ -4310,8 +4310,11 @@ TEST(ResultOfTest, WorksForPolymorphicFunctorsIgnoringResultType) {
 }
 
 TEST(ResultOfTest, WorksForLambdas) {
-  Matcher<int> matcher =
-      ResultOf([](int str_len) { return std::string(str_len, 'x'); }, "xxx");
+  Matcher<int> matcher = ResultOf(
+      [](int str_len) {
+        return std::string(static_cast<size_t>(str_len), 'x');
+      },
+      "xxx");
   EXPECT_TRUE(matcher.Matches(3));
   EXPECT_FALSE(matcher.Matches(1));
 }
@@ -5812,11 +5815,11 @@ class BacktrackingBPMTest : public ::testing::Test { };
 
 // Tests the MaxBipartiteMatching algorithm with square matrices.
 // The single int param is the # of nodes on each of the left and right sides.
-class BipartiteTest : public ::testing::TestWithParam<int> { };
+class BipartiteTest : public ::testing::TestWithParam<size_t> {};
 
 // Verify all match graphs up to some moderate number of edges.
 TEST_P(BipartiteTest, Exhaustive) {
-  int nodes = GetParam();
+  size_t nodes = GetParam();
   MatchMatrix graph(nodes, nodes);
   do {
     ElementMatcherPairs matches =
@@ -5841,7 +5844,7 @@ TEST_P(BipartiteTest, Exhaustive) {
 }
 
 INSTANTIATE_TEST_SUITE_P(AllGraphs, BipartiteTest,
-                        ::testing::Range(0, 5));
+                         ::testing::Range(size_t{0}, size_t{5}));
 
 // Parameterized by a pair interpreted as (LhsSize, RhsSize).
 class BipartiteNonSquareTest
@@ -5857,7 +5860,7 @@ TEST_F(BipartiteNonSquareTest, SimpleBacktracking) {
   //  :.......:
   //    0 1 2
   MatchMatrix g(4, 3);
-  static const int kEdges[][2] = {{0, 2}, {1, 1}, {2, 1}, {3, 0}};
+  static const size_t kEdges[][2] = {{0, 2}, {1, 1}, {2, 1}, {3, 0}};
   for (size_t i = 0; i < GTEST_ARRAY_SIZE_(kEdges); ++i) {
     g.SetEdge(kEdges[i][0], kEdges[i][1], true);
   }
@@ -5902,15 +5905,15 @@ class BipartiteRandomTest
 TEST_P(BipartiteRandomTest, LargerNets) {
   int nodes = GetParam().first;
   int iters = GetParam().second;
-  MatchMatrix graph(nodes, nodes);
+  MatchMatrix graph(static_cast<size_t>(nodes), static_cast<size_t>(nodes));
 
-  testing::internal::Int32 seed = GTEST_FLAG(random_seed);
+  auto seed = static_cast<testing::internal::UInt32>(GTEST_FLAG(random_seed));
   if (seed == 0) {
-    seed = static_cast<testing::internal::Int32>(time(nullptr));
+    seed = static_cast<testing::internal::UInt32>(time(nullptr));
   }
 
   for (; iters > 0; --iters, ++seed) {
-    srand(static_cast<int>(seed));
+    srand(static_cast<unsigned int>(seed));
     graph.Randomize();
     EXPECT_EQ(FindBacktrackingMaxBPM(graph).size(),
               internal::FindMaxBipartiteMatching(graph).size())
