@@ -4708,6 +4708,19 @@ TEST(MacroTest, FAIL) {
                        "Intentional failure.");
 }
 
+// Tests GTEST_FAIL_AT.
+TEST(MacroTest, GTEST_FAIL_AT) {
+  // Verifies that GTEST_FAIL_AT does generate a fatal failure and
+  // the failure message contains the user-streamed part.
+  EXPECT_FATAL_FAILURE(GTEST_FAIL_AT("foo.cc", 42) << "Wrong!", "Wrong!");
+
+  // Verifies that the user-streamed part is optional.
+  EXPECT_FATAL_FAILURE(GTEST_FAIL_AT("foo.cc", 42), "Failed");
+
+  // See the ADD_FAIL_AT test above to see how we test that the failure message
+  // contains the right filename and line number -- the same applies here.
+}
+
 // Tests SUCCEED
 TEST(MacroTest, SUCCEED) {
   SUCCEED();
