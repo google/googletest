@@ -461,7 +461,11 @@ TEST_F(FatalFailureInSetUpTest, FailureInSetUp) {
 }
 
 TEST(AddFailureAtTest, MessageContainsSpecifiedFileAndLineNumber) {
-  ADD_FAILURE_AT("foo.cc", 42) << "Expected failure in foo.cc";
+  ADD_FAILURE_AT("foo.cc", 42) << "Expected nonfatal failure in foo.cc";
+}
+
+TEST(GtestFailAtTest, MessageContainsSpecifiedFileAndLineNumber) {
+  GTEST_FAIL_AT("foo.cc", 42) << "Expected fatal failure in foo.cc";
 }
 
 #if GTEST_IS_THREADSAFE

@@ -12,7 +12,7 @@ Expected equality of these values:
   3
 Stack trace: (omitted)
 
-[0;32m[==========] [mRunning 83 tests from 38 test suites.
+[0;32m[==========] [mRunning 84 tests from 39 test suites.
 [0;32m[----------] [mGlobal test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -380,10 +380,18 @@ Stack trace: (omitted)
 [0;32m[ RUN      ] [mAddFailureAtTest.MessageContainsSpecifiedFileAndLineNumber
 foo.cc:42: Failure
 Failed
-Expected failure in foo.cc
+Expected nonfatal failure in foo.cc
 Stack trace: (omitted)
 
 [0;31m[  FAILED  ] [mAddFailureAtTest.MessageContainsSpecifiedFileAndLineNumber
+[0;32m[----------] [m1 test from GtestFailAtTest
+[0;32m[ RUN      ] [mGtestFailAtTest.MessageContainsSpecifiedFileAndLineNumber
+foo.cc:42: Failure
+Failed
+Expected fatal failure in foo.cc
+Stack trace: (omitted)
+
+[0;31m[  FAILED  ] [mGtestFailAtTest.MessageContainsSpecifiedFileAndLineNumber
 [0;32m[----------] [m4 tests from MixedUpTestSuiteTest
 [0;32m[ RUN      ] [mMixedUpTestSuiteTest.FirstTestFromNamespaceFoo
 [0;32m[       OK ] [mMixedUpTestSuiteTest.FirstTestFromNamespaceFoo
@@ -984,9 +992,9 @@ Failed
 Expected fatal failure.
 Stack trace: (omitted)
 
-[0;32m[==========] [m83 tests from 38 test suites ran.
+[0;32m[==========] [m84 tests from 39 test suites ran.
 [0;32m[  PASSED  ] [m30 tests.
-[0;31m[  FAILED  ] [m53 tests, listed below:
+[0;31m[  FAILED  ] [m54 tests, listed below:
 [0;31m[  FAILED  ] [mNonfatalFailureTest.EscapesStringOperands
 [0;31m[  FAILED  ] [mNonfatalFailureTest.DiffForLongStrings
 [0;31m[  FAILED  ] [mFatalFailureTest.FatalFailureInSubroutine
@@ -1006,6 +1014,7 @@ Stack trace: (omitted)
 [0;31m[  FAILED  ] [mNonFatalFailureInSetUpTest.FailureInSetUp
 [0;31m[  FAILED  ] [mFatalFailureInSetUpTest.FailureInSetUp
 [0;31m[  FAILED  ] [mAddFailureAtTest.MessageContainsSpecifiedFileAndLineNumber
+[0;31m[  FAILED  ] [mGtestFailAtTest.MessageContainsSpecifiedFileAndLineNumber
 [0;31m[  FAILED  ] [mMixedUpTestSuiteTest.ThisShouldFail
 [0;31m[  FAILED  ] [mMixedUpTestSuiteTest.ThisShouldFailToo
 [0;31m[  FAILED  ] [mMixedUpTestSuiteWithSameTestNameTest.TheSecondTestWithThisNameShouldFail
@@ -1041,7 +1050,7 @@ Stack trace: (omitted)
 [0;31m[  FAILED  ] [mPrintingFailingParams/FailingParamTest.Fails/0, where GetParam() = 2
 [0;31m[  FAILED  ] [mPrintingStrings/ParamTest.Failure/a, where GetParam() = "a"
 
-53 FAILED TESTS
+54 FAILED TESTS
 [0;33m  YOU HAVE 1 DISABLED TEST
 
 [mNote: Google Test filter = FatalFailureTest.*:LoggingTest.*
