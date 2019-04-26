@@ -144,7 +144,8 @@ inline bool IsPrintableAscii(wchar_t c) {
 // which is the type of c.
 template <typename UnsignedChar, typename Char>
 static CharFormat PrintAsCharLiteralTo(Char c, ostream* os) {
-  switch (static_cast<wchar_t>(c)) {
+  wchar_t w_c = static_cast<wchar_t>(c);
+  switch (w_c) {
     case L'\0':
       *os << "\\0";
       break;
@@ -176,7 +177,7 @@ static CharFormat PrintAsCharLiteralTo(Char c, ostream* os) {
       *os << "\\v";
       break;
     default:
-      if (IsPrintableAscii(c)) {
+      if (IsPrintableAscii(w_c)) {
         *os << static_cast<char>(c);
         return kAsIs;
       } else {
