@@ -1,3 +1,6 @@
+# Note: automake support is community-based. The maintaners do not use automake
+# internally.
+
 m4_include(../googletest/m4/acx_pthread.m4)
 
 AC_INIT([Google C++ Mocking Framework],
