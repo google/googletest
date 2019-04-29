@@ -1,4 +1,7 @@
 ########################################################################
+# Note: CMake support is community-based. The maintaners do not use CMake
+# internally.
+#
 # CMake build script for Google Test.
 #
 # To run the tests for Google Test itself on Linux, use 'make test' or

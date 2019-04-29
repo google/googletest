@@ -1,3 +1,6 @@
+# Note: CMake support is community-based. The maintaners do not use CMake
+# internally.
+
 cmake_minimum_required(VERSION 2.8.8)
 
 project(googletest-distribution)

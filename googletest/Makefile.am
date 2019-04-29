@@ -1,3 +1,6 @@
+# Note: automake support is community-based. The maintaners do not use automake
+# internally.
+
 # Automake file
 
 ACLOCAL_AMFLAGS = -I m4
