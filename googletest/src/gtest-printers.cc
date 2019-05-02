@@ -237,7 +237,7 @@ void PrintCharAndCodeTo(Char c, ostream* os) {
   if (format == kHexEscape || (1 <= c && c <= 9)) {
     // Do nothing.
   } else {
-    *os << ", 0x" << String::FormatHexInt(static_cast<UnsignedChar>(c));
+    *os << ", 0x" << String::FormatHexInt(static_cast<int>(c));
   }
   *os << ")";
 }
