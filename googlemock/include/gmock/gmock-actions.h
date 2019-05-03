@@ -769,47 +769,15 @@ class SetErrnoAndReturnAction {
 #endif  // !GTEST_OS_WINDOWS_MOBILE
 
 // Implements the SetArgumentPointee<N>(x) action for any function
-// whose N-th argument (0-based) is a pointer to x's type.  The
-// template parameter kIsProto is true iff type A is
-// proto2::Message or a sub-class of it.
-template <size_t N, typename A, bool kIsProto>
-class SetArgumentPointeeAction {
- public:
-  // Constructs an action that sets the variable pointed to by the
-  // N-th function argument to 'value'.
-  explicit SetArgumentPointeeAction(const A& value) : value_(value) {}
+// whose N-th argument (0-based) is a pointer to x's type.
+template <size_t N, typename A, typename = void>
+struct SetArgumentPointeeAction {
+  A value;
 
-  template <typename Result, typename ArgumentTuple>
-  void Perform(const ArgumentTuple& args) const {
-    CompileAssertTypesEqual<void, Result>();
-    *::std::get<N>(args) = value_;
+  template <typename... Args>
+  void operator()(const Args&... args) const {
+    *::std::get<N>(std::tie(args...)) = value;
   }
-
- private:
-  const A value_;
-
-  GTEST_DISALLOW_ASSIGN_(SetArgumentPointeeAction);
-};
-
-template <size_t N, typename Proto>
-class SetArgumentPointeeAction<N, Proto, true> {
- public:
-  // Constructs an action that sets the variable pointed to by the
-  // N-th function argument to 'proto'.
-  explicit SetArgumentPointeeAction(const Proto& proto) : proto_(new Proto) {
-    proto_->CopyFrom(proto);
-  }
-
-  template <typename Result, typename ArgumentTuple>
-  void Perform(const ArgumentTuple& args) const {
-    CompileAssertTypesEqual<void, Result>();
-    ::std::get<N>(args)->CopyFrom(*proto_);
-  }
-
- private:
-  const std::shared_ptr<Proto> proto_;
-
-  GTEST_DISALLOW_ASSIGN_(SetArgumentPointeeAction);
 };
 
 // Implements the Invoke(object_ptr, &Class::Method) action.
@@ -1078,38 +1046,14 @@ inline internal::DoDefaultAction DoDefault() {
 // Creates an action that sets the variable pointed by the N-th
 // (0-based) function argument to 'value'.
 template <size_t N, typename T>
-PolymorphicAction<
-  internal::SetArgumentPointeeAction<
-    N, T, internal::IsAProtocolMessage<T>::value> >
-SetArgPointee(const T& x) {
-  return MakePolymorphicAction(internal::SetArgumentPointeeAction<
-      N, T, internal::IsAProtocolMessage<T>::value>(x));
-}
-
-template <size_t N>
-PolymorphicAction<
-  internal::SetArgumentPointeeAction<N, const char*, false> >
-SetArgPointee(const char* p) {
-  return MakePolymorphicAction(internal::SetArgumentPointeeAction<
-      N, const char*, false>(p));
-}
-
-template <size_t N>
-PolymorphicAction<
-  internal::SetArgumentPointeeAction<N, const wchar_t*, false> >
-SetArgPointee(const wchar_t* p) {
-  return MakePolymorphicAction(internal::SetArgumentPointeeAction<
-      N, const wchar_t*, false>(p));
+internal::SetArgumentPointeeAction<N, T> SetArgPointee(T x) {
+  return {std::move(x)};
 }
 
 // The following version is DEPRECATED.
 template <size_t N, typename T>
-PolymorphicAction<
-  internal::SetArgumentPointeeAction<
-    N, T, internal::IsAProtocolMessage<T>::value> >
-SetArgumentPointee(const T& x) {
-  return MakePolymorphicAction(internal::SetArgumentPointeeAction<
-      N, T, internal::IsAProtocolMessage<T>::value>(x));
+internal::SetArgumentPointeeAction<N, T> SetArgumentPointee(T x) {
+  return {std::move(x)};
 }
 
 // Creates an action that sets a pointer referent to a given value.
