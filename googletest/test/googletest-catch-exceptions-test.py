@@ -117,10 +117,11 @@ class CatchCxxExceptionsTest(gtest_test_utils.TestCase):
   """
 
   def testCatchesCxxExceptionsInFixtureConstructor(self):
-    self.assert_('C++ exception with description '
-                 '"Standard C++ exception" thrown '
-                 'in the test fixture\'s constructor'
-                 in EX_BINARY_OUTPUT)
+    self.assertTrue(
+        'C++ exception with description '
+        '"Standard C++ exception" thrown '
+        'in the test fixture\'s constructor' in EX_BINARY_OUTPUT,
+        EX_BINARY_OUTPUT)
     self.assert_('unexpected' not in EX_BINARY_OUTPUT,
                  'This failure belongs in this test only if '
                  '"CxxExceptionInConstructorTest" (no quotes) '
@@ -130,86 +131,90 @@ class CatchCxxExceptionsTest(gtest_test_utils.TestCase):
       EX_BINARY_OUTPUT):
 
     def testCatchesCxxExceptionsInFixtureDestructor(self):
-      self.assert_('C++ exception with description '
-                   '"Standard C++ exception" thrown '
-                   'in the test fixture\'s destructor'
-                   in EX_BINARY_OUTPUT)
-      self.assert_('CxxExceptionInDestructorTest::TearDownTestSuite() '
-                   'called as expected.'
-                   in EX_BINARY_OUTPUT)
+      self.assertTrue(
+          'C++ exception with description '
+          '"Standard C++ exception" thrown '
+          'in the test fixture\'s destructor' in EX_BINARY_OUTPUT,
+          EX_BINARY_OUTPUT)
+      self.assertTrue(
+          'CxxExceptionInDestructorTest::TearDownTestSuite() '
+          'called as expected.' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
 
   def testCatchesCxxExceptionsInSetUpTestCase(self):
-    self.assert_('C++ exception with description "Standard C++ exception"'
-                 ' thrown in SetUpTestSuite()' in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInConstructorTest::TearDownTestSuite() '
-                 'called as expected.'
-                 in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInSetUpTestSuiteTest constructor '
-                 'called as expected.'
-                 in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInSetUpTestSuiteTest destructor '
-                 'called as expected.'
-                 in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInSetUpTestSuiteTest::SetUp() '
-                 'called as expected.'
-                 in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInSetUpTestSuiteTest::TearDown() '
-                 'called as expected.'
-                 in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInSetUpTestSuiteTest test body '
-                 'called as expected.'
-                 in EX_BINARY_OUTPUT)
+    self.assertTrue(
+        'C++ exception with description "Standard C++ exception"'
+        ' thrown in SetUpTestSuite()' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
+    self.assertTrue(
+        'CxxExceptionInConstructorTest::TearDownTestSuite() '
+        'called as expected.' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
+    self.assertTrue(
+        'CxxExceptionInSetUpTestSuiteTest constructor '
+        'called as expected.' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
+    self.assertTrue(
+        'CxxExceptionInSetUpTestSuiteTest destructor '
+        'called as expected.' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
+    self.assertTrue(
+        'CxxExceptionInSetUpTestSuiteTest::SetUp() '
+        'called as expected.' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
+    self.assertTrue(
+        'CxxExceptionInSetUpTestSuiteTest::TearDown() '
+        'called as expected.' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
+    self.assertTrue(
+        'CxxExceptionInSetUpTestSuiteTest test body '
+        'called as expected.' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
 
   def testCatchesCxxExceptionsInTearDownTestCase(self):
-    self.assert_('C++ exception with description "Standard C++ exception"'
-                 ' thrown in TearDownTestSuite()' in EX_BINARY_OUTPUT)
+    self.assertTrue(
+        'C++ exception with description "Standard C++ exception"'
+        ' thrown in TearDownTestSuite()' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
 
   def testCatchesCxxExceptionsInSetUp(self):
-    self.assert_('C++ exception with description "Standard C++ exception"'
-                 ' thrown in SetUp()'
-                 in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInSetUpTest::TearDownTestSuite() '
-                 'called as expected.'
-                 in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInSetUpTest destructor '
-                 'called as expected.'
-                 in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInSetUpTest::TearDown() '
-                 'called as expected.'
-                 in EX_BINARY_OUTPUT)
+    self.assertTrue(
+        'C++ exception with description "Standard C++ exception"'
+        ' thrown in SetUp()' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
+    self.assertTrue(
+        'CxxExceptionInSetUpTest::TearDownTestSuite() '
+        'called as expected.' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
+    self.assertTrue(
+        'CxxExceptionInSetUpTest destructor '
+        'called as expected.' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
+    self.assertTrue(
+        'CxxExceptionInSetUpTest::TearDown() '
+        'called as expected.' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
     self.assert_('unexpected' not in EX_BINARY_OUTPUT,
                  'This failure belongs in this test only if '
                  '"CxxExceptionInSetUpTest" (no quotes) '
                  'appears on the same line as words "called unexpectedly"')
 
   def testCatchesCxxExceptionsInTearDown(self):
-    self.assert_('C++ exception with description "Standard C++ exception"'
-                 ' thrown in TearDown()'
-                 in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInTearDownTest::TearDownTestSuite() '
-                 'called as expected.'
-                 in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInTearDownTest destructor '
-                 'called as expected.'
-                 in EX_BINARY_OUTPUT)
+    self.assertTrue(
+        'C++ exception with description "Standard C++ exception"'
+        ' thrown in TearDown()' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
+    self.assertTrue(
+        'CxxExceptionInTearDownTest::TearDownTestSuite() '
+        'called as expected.' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
+    self.assertTrue(
+        'CxxExceptionInTearDownTest destructor '
+        'called as expected.' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
 
   def testCatchesCxxExceptionsInTestBody(self):
-    self.assert_('C++ exception with description "Standard C++ exception"'
-                 ' thrown in the test body'
-                 in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInTestBodyTest::TearDownTestSuite() '
-                 'called as expected.'
-                 in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInTestBodyTest destructor '
-                 'called as expected.'
-                 in EX_BINARY_OUTPUT)
-    self.assert_('CxxExceptionInTestBodyTest::TearDown() '
-                 'called as expected.'
-                 in EX_BINARY_OUTPUT)
+    self.assertTrue(
+        'C++ exception with description "Standard C++ exception"'
+        ' thrown in the test body' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
+    self.assertTrue(
+        'CxxExceptionInTestBodyTest::TearDownTestSuite() '
+        'called as expected.' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
+    self.assertTrue(
+        'CxxExceptionInTestBodyTest destructor '
+        'called as expected.' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
+    self.assertTrue(
+        'CxxExceptionInTestBodyTest::TearDown() '
+        'called as expected.' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
 
   def testCatchesNonStdCxxExceptions(self):
-    self.assert_('Unknown C++ exception thrown in the test body'
-                 in EX_BINARY_OUTPUT)
+    self.assertTrue(
+        'Unknown C++ exception thrown in the test body' in EX_BINARY_OUTPUT,
+        EX_BINARY_OUTPUT)
 
   def testUnhandledCxxExceptionsAbortTheProgram(self):
     # Filters out SEH exception tests on Windows. Unhandled SEH exceptions
