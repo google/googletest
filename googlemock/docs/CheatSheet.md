@@ -76,7 +76,7 @@ The typical flow is:
   1. Import the Google Mock names you need to use. All Google Mock names are in the `testing` namespace unless they are macros or otherwise noted.
   1. Create the mock objects.
   1. Optionally, set the default actions of the mock objects.
-  1. Set your expectations on the mock objects (How will they be called? What wil they do?).
+  1. Set your expectations on the mock objects (How will they be called? What will they do?).
   1. Exercise code that uses the mock objects; if necessary, check the result using [Google Test](../../googletest/) assertions.
   1. When a mock objects is destructed, Google Mock automatically verifies that all expectations on it have been satisfied.
 
