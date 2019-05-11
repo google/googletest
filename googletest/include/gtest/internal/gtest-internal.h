@@ -437,7 +437,7 @@ GTEST_API_ TypeId GetTestTypeId();
 
 // Defines the abstract factory interface that creates instances
 // of a Test object.
-class TestFactoryBase {
+class GTEST_API_ TestFactoryBase {
  public:
   virtual ~TestFactoryBase() {}
 

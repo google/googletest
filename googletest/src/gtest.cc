@@ -2567,10 +2567,31 @@ TestInfo::TestInfo(const std::string& a_test_suite_name,
       is_disabled_(false),
       matches_filter_(false),
       factory_(factory),
+      ownFactory_(true),
       result_() {}
 
+
+DynamicTestInfo::DynamicTestInfo(
+    const std::string& suite, const std::string& testName, 
+    functionTestBody _testBody,
+    const char* file, int line ) :
+    TestInfo(suite, testName, nullptr, nullptr, internal::CodeLocation(file, line), nullptr, this),
+    testBody(_testBody)
+{
+    ownFactory_ = false;
+}
+
+void DynamicTestInfo::TestBody()
+{
+    testBody(*this);
+}
+
 // Destructs a TestInfo object.
-TestInfo::~TestInfo() { delete factory_; }
+TestInfo::~TestInfo()
+{ 
+    if(ownFactory_) 
+        delete factory_;
+}
 
 namespace internal {
 
@@ -5531,6 +5552,16 @@ void UnitTestImpl::ListTestsMatchingFilter() {
           }
           printf("\n");
         }
+
+        int line = test_info->location_.line;
+
+        if (dynamic_cast<const DynamicTestInfo*>(test_info) == nullptr)
+            // +1 => Here we just pick up next line after where test was declared - GTA is extracting
+            // line information in same manner. Not necessarily correct, but best guess
+            line++;
+
+        printf("  <loc>%s(%d)\n", test_info->location_.file.c_str(), line);
+
         printf("  %s", test_info->name());
         if (test_info->value_param() != nullptr) {
           printf("  # %s = ", kValueParamLabel);
@@ -6120,5 +6151,11 @@ ScopedTrace::~ScopedTrace()
     GTEST_LOCK_EXCLUDED_(&UnitTest::mutex_) {
   UnitTest::GetInstance()->PopGTestTrace();
 }
+
+void RegisterDynamicTest(DynamicTestInfo* test)
+{
+    internal::GetUnitTestImpl()->AddTestInfo(nullptr, nullptr, test);
+}
+
 
 }  // namespace testing

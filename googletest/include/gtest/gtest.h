@@ -485,7 +485,7 @@ class GTEST_API_ Test {
 
   // Deletes self.  We deliberately pick an unusual name for this
   // internal method to avoid clashing with names used in user TESTs.
-  void DeleteSelf_() { delete this; }
+  virtual void DeleteSelf_() { delete this; }
 
   const std::unique_ptr<GTEST_FLAG_SAVER_> gtest_flag_saver_;
 
@@ -683,7 +683,7 @@ class GTEST_API_ TestInfo {
  public:
   // Destructs a TestInfo object.  This function is not virtual, so
   // don't inherit from TestInfo.
-  ~TestInfo();
+  virtual ~TestInfo();
 
   // Returns the test suite name.
   const char* test_suite_name() const { return test_suite_name_.c_str(); }
@@ -747,7 +747,7 @@ class GTEST_API_ TestInfo {
   // Returns the result of the test.
   const TestResult* result() const { return &result_; }
 
- private:
+ protected:
 #if GTEST_HAS_DEATH_TEST
   friend class internal::DefaultDeathTestFactory;
 #endif  // GTEST_HAS_DEATH_TEST
@@ -801,8 +801,9 @@ class GTEST_API_ TestInfo {
   bool matches_filter_;             // True if this test matches the
                                     // user-specified filter.
   bool is_in_another_shard_;        // Will be run in another shard.
-  internal::TestFactoryBase* const factory_;  // The factory that creates
+  internal::TestFactoryBase* factory_;        // The factory that creates
                                               // the test object
+  bool ownFactory_;                 // delete factory_ on class termination
 
   // This field is mutable and needs to be reset before running the
   // test for the second time.
@@ -810,6 +811,41 @@ class GTEST_API_ TestInfo {
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(TestInfo);
 };
+
+//
+//  Test created dynamically at run-time
+//
+class GTEST_API_ DynamicTestInfo : public TestInfo, public internal::TestFactoryBase, public Test
+{
+public:
+    typedef std::function<void(DynamicTestInfo&)> functionTestBody;
+
+
+    DynamicTestInfo( 
+        const std::string& suite, const std::string& testName,
+        functionTestBody _testBody,
+        // where test is declared / resides
+        const char* file, int line 
+    );
+
+    virtual ~DynamicTestInfo()
+    {
+    }
+
+    virtual Test* CreateTest()
+    {
+        return this;
+    }
+
+    virtual void DeleteSelf_()
+    {
+    }
+
+    virtual void TestBody();
+    functionTestBody testBody;
+};
+
+
 
 // A test suite, which consists of a vector of TestInfos.
 //
@@ -2436,6 +2472,12 @@ TestInfo* RegisterTest(const char* test_suite_name, const char* test_name,
       internal::SuiteApiResolver<TestT>::GetTearDownCaseOrSuite(file, line),
       new FactoryImpl{std::move(factory)});
 }
+
+//
+//  Registers new dynamic test, must be created via new, class will be deleted by google test framework.
+//
+GTEST_API_ void RegisterDynamicTest(DynamicTestInfo* test);
+
 
 }  // namespace testing
 
