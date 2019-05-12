@@ -152,8 +152,8 @@ class TypeWithoutFormatter {
   // This default version is called when kTypeKind is kOtherType.
   static void PrintValue(const T& value, ::std::ostream* os) {
     PrintBytesInObjectTo(static_cast<const unsigned char*>(
-                             reinterpret_cast<const void*>(&value)),
-                         sizeof(value), os);
+                             reinterpret_cast<const void*>(
+                                 std::addressof(value))), sizeof(value), os);
   }
 };
 
