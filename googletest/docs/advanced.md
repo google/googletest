@@ -1817,6 +1817,7 @@ For technical reasons, there are some caveats:
 1.  `statement` in `EXPECT_FATAL_FAILURE{_ON_ALL_THREADS}()()` cannot return a
     value.
 
+<<<<<<< HEAD
 ## Registering tests programmatically
 
 The `TEST` macros handle the vast majority of all use cases, but there are few
