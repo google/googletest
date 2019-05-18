@@ -5555,10 +5555,12 @@ void UnitTestImpl::ListTestsMatchingFilter() {
 
         int line = test_info->location_.line;
 
+#ifdef _CPPRTTI
         if (dynamic_cast<const DynamicTestInfo*>(test_info) == nullptr)
             // +1 => Here we just pick up next line after where test was declared - GTA is extracting
             // line information in same manner. Not necessarily correct, but best guess
             line++;
+#endif
 
         printf("  <loc>%s(%d)\n", test_info->location_.file.c_str(), line);
 
