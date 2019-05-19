@@ -2574,8 +2574,8 @@ TestInfo::TestInfo(const std::string& a_test_suite_name,
 DynamicTestInfo::DynamicTestInfo(
     const std::string& suite, const std::string& testName, 
     functionTestBody _testBody,
-    const char* file, int line ) :
-    TestInfo(suite, testName, nullptr, nullptr, internal::CodeLocation(file, line), nullptr, this),
+    const char* _file, int _line ) :
+    TestInfo(suite, testName, nullptr, nullptr, internal::CodeLocation(_file, _line), nullptr, this),
     testBody(_testBody)
 {
     ownFactory_ = false;
