@@ -51,60 +51,96 @@ EXE_PATH = gtest_test_utils.GetTestExecutablePath('googletest-list-tests-unittes
 # The expected output when running googletest-list-tests-unittest_ with
 # --gtest_list_tests
 EXPECTED_OUTPUT_NO_FILTER_RE = re.compile(r"""FooDeathTest\.
+  <loc>.*googletest-list-tests-unittest.*
   Test1
 Foo\.
+  <loc>.*googletest-list-tests-unittest.*
   Bar1
+  <loc>.*googletest-list-tests-unittest.*
   Bar2
+  <loc>.*googletest-list-tests-unittest.*
   DISABLED_Bar3
 Abc\.
+  <loc>.*googletest-list-tests-unittest.*
   Xyz
+  <loc>.*googletest-list-tests-unittest.*
   Def
 FooBar\.
+  <loc>.*googletest-list-tests-unittest.*
   Baz
 FooTest\.
+  <loc>.*googletest-list-tests-unittest.*
   Test1
+  <loc>.*googletest-list-tests-unittest.*
   DISABLED_Test2
+  <loc>.*googletest-list-tests-unittest.*
   Test3
 TypedTest/0\.  # TypeParam = (VeryLo{245}|class VeryLo{239})\.\.\.
+  <loc>.*googletest-list-tests-unittest.*
   TestA
+  <loc>.*googletest-list-tests-unittest.*
   TestB
 TypedTest/1\.  # TypeParam = int\s*\*( __ptr64)?
+  <loc>.*googletest-list-tests-unittest.*
   TestA
+  <loc>.*googletest-list-tests-unittest.*
   TestB
 TypedTest/2\.  # TypeParam = .*MyArray<bool,\s*42>
+  <loc>.*googletest-list-tests-unittest.*
   TestA
+  <loc>.*googletest-list-tests-unittest.*
   TestB
 My/TypeParamTest/0\.  # TypeParam = (VeryLo{245}|class VeryLo{239})\.\.\.
+  <loc>.*googletest-list-tests-unittest.*
   TestA
+  <loc>.*googletest-list-tests-unittest.*
   TestB
 My/TypeParamTest/1\.  # TypeParam = int\s*\*( __ptr64)?
+  <loc>.*googletest-list-tests-unittest.*
   TestA
+  <loc>.*googletest-list-tests-unittest.*
   TestB
 My/TypeParamTest/2\.  # TypeParam = .*MyArray<bool,\s*42>
+  <loc>.*googletest-list-tests-unittest.*
   TestA
+  <loc>.*googletest-list-tests-unittest.*
   TestB
 MyInstantiation/ValueParamTest\.
+  <loc>.*googletest-list-tests-unittest.*
   TestA/0  # GetParam\(\) = one line
+  <loc>.*googletest-list-tests-unittest.*
   TestA/1  # GetParam\(\) = two\\nlines
+  <loc>.*googletest-list-tests-unittest.*
   TestA/2  # GetParam\(\) = a very\\nlo{241}\.\.\.
+  <loc>.*googletest-list-tests-unittest.*
   TestB/0  # GetParam\(\) = one line
+  <loc>.*googletest-list-tests-unittest.*
   TestB/1  # GetParam\(\) = two\\nlines
+  <loc>.*googletest-list-tests-unittest.*
   TestB/2  # GetParam\(\) = a very\\nlo{241}\.\.\.
 """)
 
 # The expected output when running googletest-list-tests-unittest_ with
 # --gtest_list_tests and --gtest_filter=Foo*.
 EXPECTED_OUTPUT_FILTER_FOO_RE = re.compile(r"""FooDeathTest\.
+  <loc>.*googletest-list-tests-unittest.*
   Test1
 Foo\.
+  <loc>.*googletest-list-tests-unittest.*
   Bar1
+  <loc>.*googletest-list-tests-unittest.*
   Bar2
+  <loc>.*googletest-list-tests-unittest.*
   DISABLED_Bar3
 FooBar\.
+  <loc>.*googletest-list-tests-unittest.*
   Baz
 FooTest\.
+  <loc>.*googletest-list-tests-unittest.*
   Test1
+  <loc>.*googletest-list-tests-unittest.*
   DISABLED_Test2
+  <loc>.*googletest-list-tests-unittest.*
   Test3
 """)
 
