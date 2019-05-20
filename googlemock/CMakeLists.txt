@@ -1,5 +1,5 @@
 ########################################################################
-# Note: CMake support is community-based. The maintaners do not use CMake
+# Note: CMake support is community-based. The maintainers do not use CMake
 # internally.
 #
 # CMake build script for Google Mock.
