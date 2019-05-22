@@ -1,4 +1,4 @@
-# Note: automake support is community-based. The maintaners do not use automake
+# Note: automake support is community-based. The maintainers do not use automake
 # internally.
 
 m4_include(m4/acx_pthread.m4)
