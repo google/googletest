@@ -201,48 +201,6 @@ is not feasible, for example in a C project using Google Test for validation,
 then it can be specified by adding it to the options for cmake via the
 `DCMAKE_CXX_FLAGS` option.
 
-### Legacy Build Scripts
-
-Before settling on CMake, we have been providing hand-maintained build
-projects/scripts for Visual Studio, Xcode, and Autotools. While we continue to
-provide them for convenience, they are not actively maintained any more. We
-highly recommend that you follow the instructions in the above sections to
-integrate Google Test with your existing build system.
-
-If you still need to use the legacy build scripts, here's how:
-
-The msvc\ folder contains two solutions with Visual C++ projects. Open the
-`gtest.sln` or `gtest-md.sln` file using Visual Studio, and you are ready to
-build Google Test the same way you build any Visual Studio project. Files that
-have names ending with -md use DLL versions of Microsoft runtime libraries (the
-/MD or the /MDd compiler option). Files without that suffix use static versions
-of the runtime libraries (the /MT or the /MTd option). Please note that one must
-use the same option to compile both gtest and the test code. If you use Visual
-Studio 2005 or above, we recommend the -md version as /MD is the default for new
-projects in these versions of Visual Studio.
-
-On Mac OS X, open the `gtest.xcodeproj` in the `xcode/` folder using Xcode.
-Build the "gtest" target. The universal binary framework will end up in your
-selected build directory (selected in the Xcode "Preferences..." -> "Building"
-pane and defaults to xcode/build). Alternatively, at the command line, enter:
-
-    xcodebuild
-
-This will build the "Release" configuration of gtest.framework in your default
-build location. See the "xcodebuild" man page for more information about
-building different configurations and building in different locations.
-
-If you wish to use the Google Test Xcode project with Xcode 4.x and above, you
-need to either:
-
-*   update the SDK configuration options in xcode/Config/General.xconfig.
-    Comment options `SDKROOT`, `MACOS_DEPLOYMENT_TARGET`, and `GCC_VERSION`. If
-    you choose this route you lose the ability to target earlier versions of
-    MacOS X.
-*   Install an SDK for an earlier version. This doesn't appear to be supported
-    by Apple, but has been reported to work
-    (http://stackoverflow.com/questions/5378518).
-
 ### Tweaking Google Test
 
 Google Test can be used in diverse environments. The default configuration may
