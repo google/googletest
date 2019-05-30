@@ -172,6 +172,7 @@ def FuseGTestH(gtest_root, output_dir):
         output_file.write(line)
 
   ProcessFile(GTEST_H_SEED)
+  ProcessFile(GTEST_SPI_H_SEED)
   output_file.close()
 
 
@@ -193,20 +194,15 @@ def FuseGTestAllCcToFile(gtest_root, output_file):
     for line in open(os.path.join(gtest_root, gtest_source_file), 'r'):
       m = INCLUDE_GTEST_FILE_REGEX.match(line)
       if m:
-        if 'include/' + m.group(1) == GTEST_SPI_H_SEED:
-          # It's '#include "gtest/gtest-spi.h"'.  This file is not
-          # #included by "gtest/gtest.h", so we need to process it.
-          ProcessFile(GTEST_SPI_H_SEED)
-        else:
-          # It's '#include "gtest/foo.h"' where foo is not gtest-spi.
-          # We treat it as '#include "gtest/gtest.h"', as all other
-          # gtest headers are being fused into gtest.h and cannot be
-          # #included directly.
+        # It's '#include "gtest/foo.h"'.
+        # We treat it as '#include "gtest/gtest.h"', as all other
+        # gtest headers are being fused into gtest.h and cannot be
+        # #included directly.
 
-          # There is no need to #include "gtest/gtest.h" more than once.
-          if not GTEST_H_SEED in processed_files:
-            processed_files.add(GTEST_H_SEED)
-            output_file.write('#include "%s"\n' % (GTEST_H_OUTPUT,))
+        # There is no need to #include "gtest/gtest.h" more than once.
+        if not GTEST_H_SEED in processed_files:
+          processed_files.add(GTEST_H_SEED)
+          output_file.write('#include "%s"\n' % (GTEST_H_OUTPUT,))
       else:
         m = INCLUDE_SRC_FILE_REGEX.match(line)
         if m:
