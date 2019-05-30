@@ -112,6 +112,7 @@ cc_library(
     name = "gtest_main",
     srcs = ["googlemock/src/gmock_main.cc"],
     deps = [":gtest"],
+    testonly = True,
     features = select({
         ":windows": ["windows_export_all_symbols"],
         "//conditions:default": [],
