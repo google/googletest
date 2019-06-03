@@ -414,7 +414,7 @@ class GTEST_API_ Test {
   // class.
   static void SetUpTestSuite() {}
 
-  // Tears down the stuff shared by all tests in this test case.
+  // Tears down the stuff shared by all tests in this test suite.
   //
   // Google Test will call Foo::TearDownTestSuite() after running the last
   // test in test case Foo.  Hence a sub-class can define its own
