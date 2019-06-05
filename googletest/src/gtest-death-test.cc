@@ -993,7 +993,7 @@ DeathTest::TestRole FuchsiaDeathTest::AssumeRole() {
   zx_status_t status;
   zx_handle_t child_pipe_handle;
   int child_pipe_fd;
-  status = fdio_pipe_half2(&child_pipe_fd, &child_pipe_handle);
+  status = fdio_pipe_half(&child_pipe_fd, &child_pipe_handle);
   GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
   set_read_fd(child_pipe_fd);
 
