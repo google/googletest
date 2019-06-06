@@ -70,7 +70,7 @@ class Foo {
 class MockFoo : public Foo {
   ...
   MOCK_METHOD1(Add, int(Element x));
-  MOCK_METHOD2(Add, int(int times, Element x);
+  MOCK_METHOD2(Add, int(int times, Element x));
 
   MOCK_METHOD0(GetBar, Bar&());
   MOCK_CONST_METHOD0(GetBar, const Bar&());
