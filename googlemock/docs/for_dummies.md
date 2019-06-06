@@ -695,4 +695,4 @@ For example, in some tests we may not care about how many times `GetX()` and
 In gMock, if you are not interested in a method, just don't say anything about
 it. If a call to this method occurs, you'll see a warning in the test output,
 but it won't be a failure. This is called "naggy" behavior; to change, see
-[The Nice, the Strict, and the Naggy](#NiceStrictNaggy).
+[The Nice, the Strict, and the Naggy](cook_book.md#NiceStrictNaggy).

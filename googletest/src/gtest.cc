@@ -1949,8 +1949,8 @@ bool String::CaseInsensitiveWideCStringEquals(const wchar_t* lhs,
   // Other unknown OSes may not define it either.
   wint_t left, right;
   do {
-    left = towlower(*lhs++);
-    right = towlower(*rhs++);
+    left = towlower(static_cast<wint_t>(*lhs++));
+    right = towlower(static_cast<wint_t>(*rhs++));
   } while (left && left == right);
   return left == right;
 #endif  // OS selector
@@ -3117,11 +3117,22 @@ class PrettyUnitTestResultPrinter : public TestEventListener {
   void OnTestIterationStart(const UnitTest& unit_test, int iteration) override;
   void OnEnvironmentsSetUpStart(const UnitTest& unit_test) override;
   void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) override {}
-  void OnTestCaseStart(const TestSuite& test_suite) override;
+#ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
+  void OnTestCaseStart(const TestCase& test_case) override;
+#else
+  void OnTestSuiteStart(const TestSuite& test_suite) override;
+#endif  // OnTestCaseStart
+
   void OnTestStart(const TestInfo& test_info) override;
+
   void OnTestPartResult(const TestPartResult& result) override;
   void OnTestEnd(const TestInfo& test_info) override;
-  void OnTestCaseEnd(const TestSuite& test_suite) override;
+#ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
+  void OnTestCaseEnd(const TestCase& test_case) override;
+#else
+  void OnTestSuiteEnd(const TestSuite& test_suite) override;
+#endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
+
   void OnEnvironmentsTearDownStart(const UnitTest& unit_test) override;
   void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) override {}
   void OnTestIterationEnd(const UnitTest& unit_test, int iteration) override;
@@ -3175,7 +3186,22 @@ void PrettyUnitTestResultPrinter::OnEnvironmentsSetUpStart(
   fflush(stdout);
 }
 
-void PrettyUnitTestResultPrinter::OnTestCaseStart(const TestSuite& test_suite) {
+#ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
+void PrettyUnitTestResultPrinter::OnTestCaseStart(const TestCase& test_case) {
+  const std::string counts =
+      FormatCountableNoun(test_case.test_to_run_count(), "test", "tests");
+  ColoredPrintf(COLOR_GREEN, "[----------] ");
+  printf("%s from %s", counts.c_str(), test_case.name());
+  if (test_case.type_param() == nullptr) {
+    printf("\n");
+  } else {
+    printf(", where %s = %s\n", kTypeParamLabel, test_case.type_param());
+  }
+  fflush(stdout);
+}
+#else
+void PrettyUnitTestResultPrinter::OnTestSuiteStart(
+    const TestSuite& test_suite) {
   const std::string counts =
       FormatCountableNoun(test_suite.test_to_run_count(), "test", "tests");
   ColoredPrintf(COLOR_GREEN, "[----------] ");
@@ -3187,6 +3213,7 @@ void PrettyUnitTestResultPrinter::OnTestCaseStart(const TestSuite& test_suite) {
   }
   fflush(stdout);
 }
+#endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
 void PrettyUnitTestResultPrinter::OnTestStart(const TestInfo& test_info) {
   ColoredPrintf(COLOR_GREEN,  "[ RUN      ] ");
@@ -3233,7 +3260,19 @@ void PrettyUnitTestResultPrinter::OnTestEnd(const TestInfo& test_info) {
   fflush(stdout);
 }
 
-void PrettyUnitTestResultPrinter::OnTestCaseEnd(const TestSuite& test_suite) {
+#ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
+void PrettyUnitTestResultPrinter::OnTestCaseEnd(const TestCase& test_case) {
+  if (!GTEST_FLAG(print_time)) return;
+
+  const std::string counts =
+      FormatCountableNoun(test_case.test_to_run_count(), "test", "tests");
+  ColoredPrintf(COLOR_GREEN, "[----------] ");
+  printf("%s from %s (%s ms total)\n\n", counts.c_str(), test_case.name(),
+         internal::StreamableToString(test_case.elapsed_time()).c_str());
+  fflush(stdout);
+}
+#else
+void PrettyUnitTestResultPrinter::OnTestSuiteEnd(const TestSuite& test_suite) {
   if (!GTEST_FLAG(print_time)) return;
 
   const std::string counts =
@@ -3243,6 +3282,7 @@ void PrettyUnitTestResultPrinter::OnTestCaseEnd(const TestSuite& test_suite) {
          internal::StreamableToString(test_suite.elapsed_time()).c_str());
   fflush(stdout);
 }
+#endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
 void PrettyUnitTestResultPrinter::OnEnvironmentsTearDownStart(
     const UnitTest& /*unit_test*/) {
@@ -3367,17 +3407,17 @@ class TestEventRepeater : public TestEventListener {
   void OnEnvironmentsSetUpStart(const UnitTest& unit_test) override;
   void OnEnvironmentsSetUpEnd(const UnitTest& unit_test) override;
 //  Legacy API is deprecated but still available
-#ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI
+#ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
   void OnTestCaseStart(const TestSuite& parameter) override;
-#endif  //  GTEST_REMOVE_LEGACY_TEST_CASEAPI
+#endif  //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
   void OnTestSuiteStart(const TestSuite& parameter) override;
   void OnTestStart(const TestInfo& test_info) override;
   void OnTestPartResult(const TestPartResult& result) override;
   void OnTestEnd(const TestInfo& test_info) override;
 //  Legacy API is deprecated but still available
-#ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI
-  void OnTestCaseEnd(const TestSuite& parameter) override;
-#endif  //  GTEST_REMOVE_LEGACY_TEST_CASEAPI
+#ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
+  void OnTestCaseEnd(const TestCase& parameter) override;
+#endif  //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
   void OnTestSuiteEnd(const TestSuite& parameter) override;
   void OnEnvironmentsTearDownStart(const UnitTest& unit_test) override;
   void OnEnvironmentsTearDownEnd(const UnitTest& unit_test) override;

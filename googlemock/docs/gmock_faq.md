@@ -91,7 +91,7 @@ trace, you'll gain insights on why the expectations you set are not met.
 
 If you see the message "The mock function has no default action set, and its
 return type has no default value set.", then try
-[adding a default action](http://go/gmockguide#DefaultValue). Due to a known
+[adding a default action](for_dummies.md#DefaultValue). Due to a known
 issue, unexpected calls on mocks without default actions don't print out a
 detailed comparison between the actual arguments and the expected arguments.
 
