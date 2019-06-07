@@ -115,8 +115,11 @@ inline Element* GetRawPointer(Element* p) { return p; }
 //
 // To gcc,
 //   wchar_t == signed wchar_t != unsigned wchar_t == unsigned int
+//
+// gcc-9 appears to treat signed/unsigned wchar_t as ill-formed
+// regardless of the signage of its underlying type.
 #ifdef __GNUC__
-#if !defined(__WCHAR_UNSIGNED__)
+#if !defined(__WCHAR_UNSIGNED__) && (__GNUC__ < 9)
 // signed/unsigned wchar_t are valid types.
 # define GMOCK_HAS_SIGNED_WCHAR_T_ 1
 #endif
