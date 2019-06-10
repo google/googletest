@@ -773,7 +773,7 @@ TEST_F(FooDeathTest, DoesThat) {
 }
 ```
 
-**Availability**: Linux, Windows (requires MSVC 8.0 or above), Cygwin, and Mac
+**Availability**: Linux, Windows, Cygwin, and Mac
 
 ### Regular Expression Syntax
 
@@ -1452,7 +1452,7 @@ given test suite, whether their definitions come before or *after* the
 
 You can see sample7_unittest.cc and sample8_unittest.cc for more examples.
 
-**Availability**: Linux, Windows (requires MSVC 8.0 or above), Mac
+**Availability**: Linux, Windows, Mac
 
 ### Creating Value-Parameterized Abstract Tests
 
@@ -1575,7 +1575,7 @@ TYPED_TEST(FooTest, HasPropertyA) { ... }
 
 You can see sample6_unittest.cc
 
-**Availability**: Linux, Windows (requires MSVC 8.0 or above), Mac
+**Availability**: Linux, Windows, Mac
 
 ## Type-Parameterized Tests
 
@@ -1651,7 +1651,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, int);
 
 You can see `sample6_unittest.cc` for a complete example.
 
-**Availability**: Linux, Windows (requires MSVC 8.0 or above), Mac
+**Availability**: Linux, Windows, Mac
 
 ## Testing Private Code
 
@@ -1817,66 +1817,66 @@ For technical reasons, there are some caveats:
 1.  `statement` in `EXPECT_FATAL_FAILURE{_ON_ALL_THREADS}()()` cannot return a
     value.
 
-## Registering tests programmatically	
+## Registering tests programmatically
 
- The `TEST` macros handle the vast majority of all use cases, but there are few	
-were runtime registration logic is required. For those cases, the framework	
-provides the `::testing::RegisterTest` that allows callers to register arbitrary	
-tests dynamically.	
- This is an advanced API only to be used when the `TEST` macros are insufficient.	
-The macros should be preferred when possible, as they avoid most of the	
-complexity of calling this function.	
- It provides the following signature:	
- ```c++	
-template <typename Factory>	
-TestInfo* RegisterTest(const char* test_case_name, const char* test_name,	
-                       const char* type_param, const char* value_param,	
-                       const char* file, int line, Factory factory);	
-```	
- The `factory` argument is a factory callable (move-constructible) object or	
-function pointer that creates a new instance of the Test object. It handles	
-ownership to the caller. The signature of the callable is `Fixture*()`, where	
-`Fixture` is the test fixture class for the test. All tests registered with the	
-same `test_case_name` must return the same fixture type. This is checked at	
-runtime.	
- The framework will infer the fixture class from the factory and will call the	
-`SetUpTestCase` and `TearDownTestCase` for it.	
- Must be called before `RUN_ALL_TESTS()` is invoked, otherwise behavior is	
-undefined.	
- Use case example:	
- ```c++	
-class MyFixture : public ::testing::Test {	
- public:	
-  // All of these optional, just like in regular macro usage.	
-  static void SetUpTestCase() { ... }	
-  static void TearDownTestCase() { ... }	
-  void SetUp() override { ... }	
-  void TearDown() override { ... }	
-};	
- class MyTest : public MyFixture {	
- public:	
-  explicit MyTest(int data) : data_(data) {}	
-  void TestBody() override { ... }	
-  private:	
-  int data_;	
-};	
- void RegisterMyTests(const std::vector<int>& values) {	
-  for (int v : values) {	
-    ::testing::RegisterTest(	
-        "MyFixture", ("Test" + std::to_string(v)).c_str(), nullptr,	
-        std::to_string(v).c_str(),	
-        __FILE__, __LINE__,	
-        // Important to use the fixture type as the return type here.	
-        [=]() -> MyFixture* { return new MyTest(v); });	
-  }	
-}	
-...	
-int main(int argc, char** argv) {	
-  std::vector<int> values_to_test = LoadValuesFromConfig();	
-  RegisterMyTests(values_to_test);	
-  ...	
-  return RUN_ALL_TESTS();	
-}	
+ The `TEST` macros handle the vast majority of all use cases, but there are few
+were runtime registration logic is required. For those cases, the framework
+provides the `::testing::RegisterTest` that allows callers to register arbitrary
+tests dynamically.
+ This is an advanced API only to be used when the `TEST` macros are insufficient.
+The macros should be preferred when possible, as they avoid most of the
+complexity of calling this function.
+ It provides the following signature:
+ ```c++
+template <typename Factory>
+TestInfo* RegisterTest(const char* test_case_name, const char* test_name,
+                       const char* type_param, const char* value_param,
+                       const char* file, int line, Factory factory);
+```
+ The `factory` argument is a factory callable (move-constructible) object or
+function pointer that creates a new instance of the Test object. It handles
+ownership to the caller. The signature of the callable is `Fixture*()`, where
+`Fixture` is the test fixture class for the test. All tests registered with the
+same `test_case_name` must return the same fixture type. This is checked at
+runtime.
+ The framework will infer the fixture class from the factory and will call the
+`SetUpTestCase` and `TearDownTestCase` for it.
+ Must be called before `RUN_ALL_TESTS()` is invoked, otherwise behavior is
+undefined.
+ Use case example:
+ ```c++
+class MyFixture : public ::testing::Test {
+ public:
+  // All of these optional, just like in regular macro usage.
+  static void SetUpTestCase() { ... }
+  static void TearDownTestCase() { ... }
+  void SetUp() override { ... }
+  void TearDown() override { ... }
+};
+ class MyTest : public MyFixture {
+ public:
+  explicit MyTest(int data) : data_(data) {}
+  void TestBody() override { ... }
+  private:
+  int data_;
+};
+ void RegisterMyTests(const std::vector<int>& values) {
+  for (int v : values) {
+    ::testing::RegisterTest(
+        "MyFixture", ("Test" + std::to_string(v)).c_str(), nullptr,
+        std::to_string(v).c_str(),
+        __FILE__, __LINE__,
+        // Important to use the fixture type as the return type here.
+        [=]() -> MyFixture* { return new MyTest(v); });
+  }
+}
+...
+int main(int argc, char** argv) {
+  std::vector<int> values_to_test = LoadValuesFromConfig();
+  RegisterMyTests(values_to_test);
+  ...
+  return RUN_ALL_TESTS();
+}
 ```
 
 ## Getting the Current Test's Name
