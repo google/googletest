@@ -16,8 +16,8 @@ This repository is a merger of the formerly separate GoogleTest and
 GoogleMock projects. These were so closely related that it makes sense to
 maintain and release them together.
 
-Please subscribe to the mailing list at googletestframework@googlegroups.com for questions, discussions, and development.  
-There is also an IRC channel on [OFTC](https://webchat.oftc.net/) (irc.oftc.net) #gtest available.  
+Please subscribe to the mailing list at googletestframework@googlegroups.com for questions, discussions, and development.
+There is also an IRC channel on [OFTC](https://webchat.oftc.net/) (irc.oftc.net) #gtest available.
 
 Getting started information for **Google Test** is available in the
 [Google Test Primer](googletest/docs/primer.md) documentation.
@@ -88,38 +88,22 @@ runs tests from your binary in parallel to provide significant speed-up.
 
 ## Requirements ##
 
-Google Test is designed to have fairly minimal requirements to build
-and use with your projects, but there are some.  Currently, we support
-Linux, Windows, Mac OS X, and Cygwin.  We will also make our best
-effort to support other platforms (e.g. Solaris, AIX, and z/OS).
-However, since core members of the Google Test project have no access
-to these platforms, Google Test may have outstanding issues there.  If
-you notice any problems on your platform, please notify
-[googletestframework@googlegroups.com](https://groups.google.com/forum/#!forum/googletestframework). Patches for fixing them are
-even more welcome!
+Google Test is designed to have fairly minimal requirements to build and use
+with your projects, but there are some. If you notice any problems on your
+platform, please notify
+[googletestframework@googlegroups.com](https://groups.google.com/forum/#!forum/googletestframework).
+Patches for fixing them are welcome!
 
-### Linux Requirements ###
+### Build Requirements
 
 These are the base requirements to build and use Google Test from a source
-package (as described below):
+package:
 
-  * GNU-compatible Make or gmake
-  * POSIX-standard shell
-  * POSIX(-2) Regular Expressions (regex.h)
-  * A C++11-standard-compliant compiler
+*   [Bazel](https://bazel.build/) or [CMake](https://cmake.org/). NOTE: Bazel is
+    the build system that googletest is using internally and tests against.
+    CMake is community-supported.
 
-### Windows Requirements ###
-
-  * Microsoft Visual C++ 2015 or newer
-
-### Cygwin Requirements ###
-
-  * Cygwin v1.5.25-14 or newer
-
-### Mac OS X Requirements ###
-
-  * Mac OS X v10.4 Tiger or newer
-  * Xcode Developer Tools
+*   a C++11-standard-compliant compiler
 
 ## Contributing change
 

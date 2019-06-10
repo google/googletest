@@ -24,8 +24,8 @@ So what makes a good test, and how does googletest fit in? We believe:
     projects and start to work on a new code base.
 1.  Tests should be *portable* and *reusable*. Google has a lot of code that is
     platform-neutral, its tests should also be platform-neutral. googletest
-    works on different OSes, with different compilers (gcc, icc, and MSVC), with
-    or without exceptions, so googletest tests can easily work with a variety of
+    works on different OSes, with different compilers, with
+    or without exceptions, so googletest tests can work with a variety of
     configurations.
 1.  When tests fail, they should provide as much *information* about the problem
     as possible. googletest doesn't stop at the first test failure. Instead, it

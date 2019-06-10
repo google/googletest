@@ -773,7 +773,7 @@ TEST_F(FooDeathTest, DoesThat) {
 }
 ```
 
-**Availability**: Linux, Windows (requires MSVC 8.0 or above), Cygwin, and Mac
+**Availability**: Linux, Windows, Cygwin, and Mac
 
 ### Regular Expression Syntax
 
@@ -1452,7 +1452,7 @@ given test suite, whether their definitions come before or *after* the
 
 You can see sample7_unittest.cc and sample8_unittest.cc for more examples.
 
-**Availability**: Linux, Windows (requires MSVC 8.0 or above), Mac
+**Availability**: Linux, Windows, Mac
 
 ### Creating Value-Parameterized Abstract Tests
 
@@ -1575,7 +1575,7 @@ TYPED_TEST(FooTest, HasPropertyA) { ... }
 
 You can see sample6_unittest.cc
 
-**Availability**: Linux, Windows (requires MSVC 8.0 or above), Mac
+**Availability**: Linux, Windows, Mac
 
 ## Type-Parameterized Tests
 
@@ -1651,7 +1651,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, int);
 
 You can see `sample6_unittest.cc` for a complete example.
 
-**Availability**: Linux, Windows (requires MSVC 8.0 or above), Mac
+**Availability**: Linux, Windows, Mac
 
 ## Testing Private Code
 
@@ -1817,6 +1817,7 @@ For technical reasons, there are some caveats:
 1.  `statement` in `EXPECT_FATAL_FAILURE{_ON_ALL_THREADS}()()` cannot return a
     value.
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 ## Registering tests programmatically
 
