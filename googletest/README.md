@@ -115,7 +115,7 @@ pulled into the main build with `add_subdirectory()`. For example:
 
 New file `CMakeLists.txt.in`:
 
-``` cmake
+```cmake
 cmake_minimum_required(VERSION 2.8.2)
 
 project(googletest-download NONE)
@@ -135,7 +135,7 @@ ExternalProject_Add(googletest
 
 Existing build's `CMakeLists.txt`:
 
-``` cmake
+```cmake
 # Download and unpack googletest at configure time
 configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
