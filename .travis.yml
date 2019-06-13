@@ -30,12 +30,6 @@ matrix:
     - os: linux
       group: deprecated-2017Q4
       compiler: gcc
-      install: ./ci/install-linux.sh && ./ci/log-config.sh
-      script: ./ci/build-linux-autotools.sh
-      env: VERBOSE=1 CXXFLAGS=-std=c++11
-    - os: linux
-      group: deprecated-2017Q4
-      compiler: gcc
       env: BUILD_TYPE=Debug VERBOSE=1 CXX_FLAGS=-std=c++11 
     - os: linux
       group: deprecated-2017Q4
