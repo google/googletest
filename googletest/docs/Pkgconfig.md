@@ -47,55 +47,6 @@ goes for using `_LDFLAGS` over the more commonplace `_LIBRARIES`, which
 happens to discard `-L` flags and `-pthread`.
 
 
-### Autotools ###
-
-Finding GoogleTest in Autoconf and using it from Automake is also fairly easy:
-
-In your `configure.ac`:
-
-```
-AC_PREREQ([2.69])
-AC_INIT([my_gtest_pkgconfig], [0.0.1])
-AC_CONFIG_SRCDIR([samples/sample3_unittest.cc])
-AC_PROG_CXX
-
-PKG_CHECK_MODULES([GTEST], [gtest_main])
-
-AM_INIT_AUTOMAKE([foreign subdir-objects])
-AC_CONFIG_FILES([Makefile])
-AC_OUTPUT
-```
-
-and in your `Makefile.am`:
-
-```
-check_PROGRAMS = testapp
-TESTS = $(check_PROGRAMS)
-
-testapp_SOURCES = samples/sample3_unittest.cc
-testapp_CXXFLAGS = $(GTEST_CFLAGS)
-testapp_LDADD = $(GTEST_LIBS)
-```
-
-
-### Meson ###
-
-Meson natively uses pkgconfig to query dependencies:
-
-```
-project('my_gtest_pkgconfig', 'cpp', version : '0.0.1')
-
-gtest_dep = dependency('gtest_main')
-
-testapp = executable(
-  'testapp',
-  files(['samples/sample3_unittest.cc']),
-  dependencies : gtest_dep,
-  install : false)
-
-test('first_and_only_test', testapp)
-```
-
 
 ### Plain Makefiles ###
 

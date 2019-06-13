@@ -6,48 +6,7 @@ To build Google Test and your tests that use it, you need to tell your build
 system where to find its headers and source files. The exact way to do it
 depends on which build system you use, and is usually straightforward.
 
-#### Build
-
-Suppose you put Google Test in directory `${GTEST_DIR}`. To build it, create a
-library build target (or a project as called by Visual Studio and Xcode) to
-compile
-
-    ${GTEST_DIR}/src/gtest-all.cc
-
-with `${GTEST_DIR}/include` in the system header search path and `${GTEST_DIR}`
-in the normal header search path. Assuming a Linux-like system and gcc,
-something like the following will do:
-
-    g++ -std=c++11 -isystem ${GTEST_DIR}/include -I${GTEST_DIR} \
-        -pthread -c ${GTEST_DIR}/src/gtest-all.cc
-    ar -rv libgtest.a gtest-all.o
-
-(We need `-pthread` as Google Test uses threads.)
-
-Next, you should compile your test source file with `${GTEST_DIR}/include` in
-the system header search path, and link it with gtest and any other necessary
-libraries:
-
-    g++ -std=c++11 -isystem ${GTEST_DIR}/include -pthread path/to/your_test.cc libgtest.a \
-        -o your_test
-
-As an example, the make/ directory contains a Makefile that you can use to build
-Google Test on systems where GNU make is available (e.g. Linux, Mac OS X, and
-Cygwin). It doesn't try to build Google Test's own tests. Instead, it just
-builds the Google Test library and a sample test. You can use it as a starting
-point for your own build script.
-
-If the default settings are correct for your environment, the following commands
-should succeed:
-
-    cd ${GTEST_DIR}/make
-    make
-    ./sample1_unittest
-
-If you see errors, try to tweak the contents of `make/Makefile` to make them go
-away. There are instructions in `make/Makefile` on how to do it.
-
-### Using CMake
+### Build with CMake
 
 Google Test comes with a CMake build script (
 [CMakeLists.txt](https://github.com/google/googletest/blob/master/CMakeLists.txt))
