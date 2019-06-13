@@ -44,7 +44,16 @@ GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
 
 # House-keeping build targets.
 
-all : $(GTEST_LIBS) $(TESTS)
+ifndef GOOGLETEST_UNSUPPORTED_MAKEFILE_BUILD_SYSTEM_WORKAROUND
+.PHONY all:
+	$(info "The Make buildsystem is no longer supported")
+	$(info "You can temporarily set GOOGLETEST_UNSUPPORTED_MAKEFILE_BUILD_SYSTEM_WORKAROUND=1")
+	$(info "i.e make GOOGLETEST_UNSUPPORTED_MAKEFILE_BUILD_SYSTEM_WORKAROUND=1 all")
+	$(info "But this is going away very soon. ")
+	$(exit 1)
+else
+all: $(GTEST_LIBS) $(TESTS)
+endif
 
 clean :
 	rm -f $(GTEST_LIBS) $(TESTS) *.o
