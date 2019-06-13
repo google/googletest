@@ -4266,8 +4266,8 @@ TEST(ResultOfTest, WorksForFunctionReferences) {
 
 // Tests that ResultOf(f, ...) compiles and works as expected when f is a
 // function object.
-struct Functor : public ::std::unary_function<int, std::string> {
-  result_type operator()(argument_type input) const {
+struct Functor {
+  std::string operator()(int input) const {
     return IntToStringFunction(input);
   }
 };
