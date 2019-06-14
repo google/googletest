@@ -1,15 +1,13 @@
 # Googletest Primer
 
-
 ## Introduction: Why googletest?
 
 *googletest* helps you write better C++ tests.
 
-googletest is a testing framework developed by the Testing
-Technology team with Google's specific
-requirements and constraints in mind. No matter whether you work on Linux,
-Windows, or a Mac, if you write C++ code, googletest can help you. And it
-supports *any* kind of tests, not just unit tests.
+googletest is a testing framework developed by the Testing Technology team with
+Google's specific requirements and constraints in mind. No matter whether you
+work on Linux, Windows, or a Mac, if you write C++ code, googletest can help
+you. And it supports *any* kind of tests, not just unit tests.
 
 So what makes a good test, and how does googletest fit in? We believe:
 
@@ -24,9 +22,8 @@ So what makes a good test, and how does googletest fit in? We believe:
     projects and start to work on a new code base.
 1.  Tests should be *portable* and *reusable*. Google has a lot of code that is
     platform-neutral, its tests should also be platform-neutral. googletest
-    works on different OSes, with different compilers, with
-    or without exceptions, so googletest tests can work with a variety of
-    configurations.
+    works on different OSes, with different compilers, with or without
+    exceptions, so googletest tests can work with a variety of configurations.
 1.  When tests fail, they should provide as much *information* about the problem
     as possible. googletest doesn't stop at the first test failure. Instead, it
     only stops the current test and continues with the next. You can also set up
@@ -71,9 +68,9 @@ and refactored away
 
 So please be aware of the different definitions of the terms:
 
-Meaning                                                                              | googletest Term                                                                                            | [ISTQB](http://www.istqb.org/) Term
-:----------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------- | :----------------------------------
-Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests)                                                                                    | [Test Case](http://glossary.istqb.org/search/test%20case)
+Meaning                                                                              | googletest Term         | [ISTQB](http://www.istqb.org/) Term
+:----------------------------------------------------------------------------------- | :---------------------- | :----------------------------------
+Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests) | [Test Case](http://glossary.istqb.org/search/test%20case)
 
 ## Basic Concepts
 
