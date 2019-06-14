@@ -1,4 +1,6 @@
+## Google Mock Cookbook
 
+<!-- GOOGLETEST_CM0011 DO NOT DELETE -->
 
 You can find recipes for using Google Mock here. If you haven't yet,
 please read the [ForDummies](ForDummies.md) document first to make sure you understand
