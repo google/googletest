@@ -1,15 +1,13 @@
 # Googletest Primer
 
-
 ## Introduction: Why googletest?
 
 *googletest* helps you write better C++ tests.
 
-googletest is a testing framework developed by the Testing
-Technology team with Google's specific
-requirements and constraints in mind. No matter whether you work on Linux,
-Windows, or a Mac, if you write C++ code, googletest can help you. And it
-supports *any* kind of tests, not just unit tests.
+googletest is a testing framework developed by the Testing Technology team with
+Google's specific requirements and constraints in mind. No matter whether you
+work on Linux, Windows, or a Mac, if you write C++ code, googletest can help
+you. And it supports *any* kind of tests, not just unit tests.
 
 So what makes a good test, and how does googletest fit in? We believe:
 
@@ -18,15 +16,14 @@ So what makes a good test, and how does googletest fit in? We believe:
     tests by running each of them on a different object. When a test fails,
     googletest allows you to run it in isolation for quick debugging.
 1.  Tests should be well *organized* and reflect the structure of the tested
-    code. googletest groups related tests into test cases that can share data
+    code. googletest groups related tests into test suites that can share data
     and subroutines. This common pattern is easy to recognize and makes tests
     easy to maintain. Such consistency is especially helpful when people switch
     projects and start to work on a new code base.
 1.  Tests should be *portable* and *reusable*. Google has a lot of code that is
     platform-neutral, its tests should also be platform-neutral. googletest
-    works on different OSes, with different compilers, with
-    or without exceptions, so googletest tests can work with a variety of
-    configurations.
+    works on different OSes, with different compilers, with or without
+    exceptions, so googletest tests can work with a variety of configurations.
 1.  When tests fail, they should provide as much *information* about the problem
     as possible. googletest doesn't stop at the first test failure. Instead, it
     only stops the current test and continues with the next. You can also set up
@@ -71,9 +68,9 @@ and refactored away
 
 So please be aware of the different definitions of the terms:
 
-Meaning                                                                              | googletest Term                                                                                            | [ISTQB](http://www.istqb.org/) Term
-:----------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------- | :----------------------------------
-Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests)                                                                                    | [Test Case](http://glossary.istqb.org/search/test%20case)
+Meaning                                                                              | googletest Term         | [ISTQB](http://www.istqb.org/) Term
+:----------------------------------------------------------------------------------- | :---------------------- | :----------------------------------
+Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests) | [Test Case](http://glossary.istqb.org/search/test%20case)
 
 ## Basic Concepts
 
@@ -85,15 +82,15 @@ current function; otherwise the program continues normally.
 *Tests* use assertions to verify the tested code's behavior. If a test crashes
 or has a failed assertion, then it *fails*; otherwise it *succeeds*.
 
-A *test case* contains one or many tests. You should group your tests into test
-cases that reflect the structure of the tested code. When multiple tests in a
-test case need to share common objects and subroutines, you can put them into a
+A *test suite* contains one or many tests. You should group your tests into test
+suites that reflect the structure of the tested code. When multiple tests in a
+test suite need to share common objects and subroutines, you can put them into a
 *test fixture* class.
 
-A *test program* can contain multiple test cases.
+A *test program* can contain multiple test suites.
 
 We'll now explain how to write a test program, starting at the individual
-assertion level and building up to tests and test cases.
+assertion level and building up to tests and test suites.
 
 ## Assertions
 
