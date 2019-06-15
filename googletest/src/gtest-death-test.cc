@@ -1357,6 +1357,10 @@ static pid_t ExecDeathTestSpawnChild(char* const* argv, int close_fd) {
     const auto stack_size = static_cast<size_t>(getpagesize());
     // MMAP_ANONYMOUS is not defined on Mac, so we use MAP_ANON instead.
     void* const stack = mmap(nullptr, stack_size, PROT_READ | PROT_WRITE,
+    // Include the MAP_GROWSDOWN flag in linux for stack auto-resizing
+#    if GTEST_OS_LINUX
+                             (stack_grows_down ? MAP_GROWSDOWN : 0) |
+#    endif
                              MAP_ANON | MAP_PRIVATE, -1, 0);
     GTEST_DEATH_TEST_CHECK_(stack != MAP_FAILED);
 
