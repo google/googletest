@@ -2822,9 +2822,7 @@ and you should see an `OUTPUT_DIR` directory being created with files
 `gtest/gtest.h`, `gmock/gmock.h`, and `gmock-gtest-all.cc` in it.
 These three files contain everything you need to use Google Mock (and
 Google Test).  Just copy them to anywhere you want and you are ready
-to write tests and use mocks.  You can use the
-[make/Makefile](../make/Makefile) file as an example on how to compile your tests
-against them.
+to write tests and use mocks.
 
 # Extending Google Mock #
 
