@@ -42,9 +42,9 @@ if [ "${TRAVIS_SUDO}" = "true" ]; then
         sudo tee /etc/apt/sources.list.d/bazel.list
     curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
     sudo apt-get update && sudo apt-get install -y gcc-4.9 g++-4.9 clang-3.9
-    wget https://github.com/bazelbuild/bazel/releases/download/0.26.1/bazel-0.26.1-installer-linux-x86_64.sh
-    chmod +x bazel-0.26.1-installer-linux-x86_64.sh
-    ./bazel-0.26.1-installer-linux-x86_64.sh 
+    sudo wget https://github.com/bazelbuild/bazel/releases/download/0.26.1/bazel-0.26.1-installer-linux-x86_64.sh
+    sudo chmod +x bazel-0.26.1-installer-linux-x86_64.sh
+    sudo ./bazel-0.26.1-installer-linux-x86_64.sh 
 
   elif [ "${CXX}" = "clang++" ]; then
     # Use ccache, assuming $HOME/bin is in the path, which is true in the Travis build environment.
