@@ -509,9 +509,9 @@ GTEST_API_ void IllegalDoDefault(const char* file, int line);
 // Helper types for Apply() below.
 template <size_t... Is> struct int_pack { typedef int_pack type; };
 
-template <class Pack, size_t I> struct append;
-template <size_t... Is, size_t I>
-struct append<int_pack<Is...>, I> : int_pack<Is..., I> {};
+template <class Pack, size_t N> struct append;
+template <size_t... Is, size_t N>
+struct append<int_pack<Is...>, N> : int_pack<Is..., N> {};
 
 template <size_t C>
 struct make_int_pack : append<typename make_int_pack<C - 1>::type, C - 1> {};
@@ -552,8 +552,8 @@ template <typename R, typename... Args>
 struct Function<R(Args...)> {
   using Result = R;
   static constexpr size_t ArgumentCount = sizeof...(Args);
-  template <size_t I>
-  using Arg = ElemFromList<I, typename MakeIndexSequence<sizeof...(Args)>::type,
+  template <size_t N>
+  using Arg = ElemFromList<N, typename MakeIndexSequence<sizeof...(Args)>::type,
                            Args...>;
   using ArgumentTuple = std::tuple<Args...>;
   using ArgumentMatcherTuple = std::tuple<Matcher<Args>...>;

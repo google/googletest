@@ -623,17 +623,17 @@ template <typename T>
 void PrintTupleTo(const T&, std::integral_constant<size_t, 0>,
                   ::std::ostream*) {}
 
-template <typename T, size_t I>
-void PrintTupleTo(const T& t, std::integral_constant<size_t, I>,
+template <typename T, size_t N>
+void PrintTupleTo(const T& t, std::integral_constant<size_t, N>,
                   ::std::ostream* os) {
-  PrintTupleTo(t, std::integral_constant<size_t, I - 1>(), os);
+  PrintTupleTo(t, std::integral_constant<size_t, N - 1>(), os);
   GTEST_INTENTIONAL_CONST_COND_PUSH_()
-  if (I > 1) {
+  if (N > 1) {
     GTEST_INTENTIONAL_CONST_COND_POP_()
     *os << ", ";
   }
-  UniversalPrinter<typename std::tuple_element<I - 1, T>::type>::Print(
-      std::get<I - 1>(t), os);
+  UniversalPrinter<typename std::tuple_element<N - 1, T>::type>::Print(
+      std::get<N - 1>(t), os);
 }
 
 template <typename... Types>
@@ -876,14 +876,14 @@ typedef ::std::vector< ::std::string> Strings;
 template <typename Tuple>
 void TersePrintPrefixToStrings(const Tuple&, std::integral_constant<size_t, 0>,
                                Strings*) {}
-template <typename Tuple, size_t I>
+template <typename Tuple, size_t N>
 void TersePrintPrefixToStrings(const Tuple& t,
-                               std::integral_constant<size_t, I>,
+                               std::integral_constant<size_t, N>,
                                Strings* strings) {
-  TersePrintPrefixToStrings(t, std::integral_constant<size_t, I - 1>(),
+  TersePrintPrefixToStrings(t, std::integral_constant<size_t, N - 1>(),
                             strings);
   ::std::stringstream ss;
-  UniversalTersePrint(std::get<I - 1>(t), &ss);
+  UniversalTersePrint(std::get<N - 1>(t), &ss);
   strings->push_back(ss.str());
 }
 

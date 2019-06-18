@@ -1157,13 +1157,13 @@ struct IndexSequence {
 // Double the IndexSequence, and one if plus_one is true.
 template <bool plus_one, typename T, size_t sizeofT>
 struct DoubleSequence;
-template <size_t... I, size_t sizeofT>
-struct DoubleSequence<true, IndexSequence<I...>, sizeofT> {
-  using type = IndexSequence<I..., (sizeofT + I)..., 2 * sizeofT>;
+template <size_t... N, size_t sizeofT>
+struct DoubleSequence<true, IndexSequence<N...>, sizeofT> {
+  using type = IndexSequence<N..., (sizeofT + N)..., 2 * sizeofT>;
 };
-template <size_t... I, size_t sizeofT>
-struct DoubleSequence<false, IndexSequence<I...>, sizeofT> {
-  using type = IndexSequence<I..., (sizeofT + I)...>;
+template <size_t... N, size_t sizeofT>
+struct DoubleSequence<false, IndexSequence<N...>, sizeofT> {
+  using type = IndexSequence<N..., (sizeofT + N)...>;
 };
 
 // Backport of std::make_index_sequence.
@@ -1182,30 +1182,30 @@ struct MakeIndexSequence<0> : IndexSequence<> {};
 template <typename T, size_t, size_t>
 struct ElemFromListImpl {};
 
-template <typename T, size_t I>
-struct ElemFromListImpl<T, I, I> {
+template <typename T, size_t N>
+struct ElemFromListImpl<T, N, N> {
   using type = T;
 };
 
 // Get the Nth element from T...
 // It uses O(1) instantiation depth.
-template <size_t N, typename I, typename... T>
+template <size_t N, typename M, typename... T>
 struct ElemFromList;
 
-template <size_t N, size_t... I, typename... T>
-struct ElemFromList<N, IndexSequence<I...>, T...>
-    : ElemFromListImpl<T, N, I>... {};
+template <size_t N, size_t... M, typename... T>
+struct ElemFromList<N, IndexSequence<M...>, T...>
+    : ElemFromListImpl<T, N, M>... {};
 
 template <typename... T>
 class FlatTuple;
 
-template <typename Derived, size_t I>
+template <typename Derived, size_t N>
 struct FlatTupleElemBase;
 
-template <typename... T, size_t I>
-struct FlatTupleElemBase<FlatTuple<T...>, I> {
+template <typename... T, size_t N>
+struct FlatTupleElemBase<FlatTuple<T...>, N> {
   using value_type =
-      typename ElemFromList<I, typename MakeIndexSequence<sizeof...(T)>::type,
+      typename ElemFromList<N, typename MakeIndexSequence<sizeof...(T)>::type,
                             T...>::type;
   FlatTupleElemBase() = default;
   explicit FlatTupleElemBase(value_type t) : value(std::move(t)) {}
@@ -1243,14 +1243,14 @@ class FlatTuple
   FlatTuple() = default;
   explicit FlatTuple(T... t) : FlatTuple::FlatTupleBase(std::move(t)...) {}
 
-  template <size_t I>
-  const typename ElemFromList<I, Indices, T...>::type& Get() const {
-    return static_cast<const FlatTupleElemBase<FlatTuple, I>*>(this)->value;
+  template <size_t N>
+  const typename ElemFromList<N, Indices, T...>::type& Get() const {
+    return static_cast<const FlatTupleElemBase<FlatTuple, N>*>(this)->value;
   }
 
-  template <size_t I>
-  typename ElemFromList<I, Indices, T...>::type& Get() {
-    return static_cast<FlatTupleElemBase<FlatTuple, I>*>(this)->value;
+  template <size_t N>
+  typename ElemFromList<N, Indices, T...>::type& Get() {
+    return static_cast<FlatTupleElemBase<FlatTuple, N>*>(this)->value;
   }
 };
 

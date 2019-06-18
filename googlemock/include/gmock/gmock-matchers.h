@@ -1095,11 +1095,11 @@ class VariadicMatcher {
   }
 
  private:
-  template <typename T, size_t I>
+  template <typename T, size_t N>
   void CreateVariadicMatcher(std::vector<Matcher<T> >* values,
-                             std::integral_constant<size_t, I>) const {
-    values->push_back(SafeMatcherCast<T>(std::get<I>(matchers_)));
-    CreateVariadicMatcher<T>(values, std::integral_constant<size_t, I + 1>());
+                             std::integral_constant<size_t, N>) const {
+    values->push_back(SafeMatcherCast<T>(std::get<N>(matchers_)));
+    CreateVariadicMatcher<T>(values, std::integral_constant<size_t, N + 1>());
   }
 
   template <typename T>

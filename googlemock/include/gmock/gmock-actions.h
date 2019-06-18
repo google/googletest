@@ -877,7 +877,7 @@ class IgnoreResultAction {
   GTEST_DISALLOW_ASSIGN_(IgnoreResultAction);
 };
 
-template <typename InnerAction, size_t... I>
+template <typename InnerAction, size_t... N>
 struct WithArgsAction {
   InnerAction action;
 
@@ -885,12 +885,12 @@ struct WithArgsAction {
   // We use the conversion operator to detect the signature of the inner Action.
   template <typename R, typename... Args>
   operator Action<R(Args...)>() const {  // NOLINT
-    Action<R(typename std::tuple_element<I, std::tuple<Args...>>::type...)>
+    Action<R(typename std::tuple_element<N, std::tuple<Args...>>::type...)>
         converted(action);
 
     return [converted](Args... args) -> R {
       return converted.Perform(std::forward_as_tuple(
-        std::get<I>(std::forward_as_tuple(std::forward<Args>(args)...))...));
+        std::get<N>(std::forward_as_tuple(std::forward<Args>(args)...))...));
     };
   }
 };
@@ -898,9 +898,9 @@ struct WithArgsAction {
 template <typename... Actions>
 struct DoAllAction {
  private:
-  template <typename... Args, size_t... I>
-  std::vector<Action<void(Args...)>> Convert(IndexSequence<I...>) const {
-    return {std::get<I>(actions)...};
+  template <typename... Args, size_t... N>
+  std::vector<Action<void(Args...)>> Convert(IndexSequence<N...>) const {
+    return {std::get<N>(actions)...};
   }
 
  public:
