@@ -95,6 +95,7 @@ py_test(
         ":gmock_output_test_",
         ":gmock_output_test_golden.txt",
     ],
+    python_version = "PY2",
     deps = [":gmock_test_utils"],
 )
 
