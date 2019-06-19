@@ -1,15 +1,13 @@
 # Googletest Primer
 
-
 ## Introduction: Why googletest?
 
 *googletest* helps you write better C++ tests.
 
-googletest is a testing framework developed by the Testing
-Technology team with Google's specific
-requirements and constraints in mind. No matter whether you work on Linux,
-Windows, or a Mac, if you write C++ code, googletest can help you. And it
-supports *any* kind of tests, not just unit tests.
+googletest is a testing framework developed by the Testing Technology team with
+Google's specific requirements and constraints in mind. No matter whether you
+work on Linux, Windows, or a Mac, if you write C++ code, googletest can help
+you. And it supports *any* kind of tests, not just unit tests.
 
 So what makes a good test, and how does googletest fit in? We believe:
 
@@ -18,15 +16,14 @@ So what makes a good test, and how does googletest fit in? We believe:
     tests by running each of them on a different object. When a test fails,
     googletest allows you to run it in isolation for quick debugging.
 1.  Tests should be well *organized* and reflect the structure of the tested
-    code. googletest groups related tests into test cases that can share data
+    code. googletest groups related tests into test suites that can share data
     and subroutines. This common pattern is easy to recognize and makes tests
     easy to maintain. Such consistency is especially helpful when people switch
     projects and start to work on a new code base.
 1.  Tests should be *portable* and *reusable*. Google has a lot of code that is
     platform-neutral, its tests should also be platform-neutral. googletest
-    works on different OSes, with different compilers, with
-    or without exceptions, so googletest tests can work with a variety of
-    configurations.
+    works on different OSes, with different compilers, with or without
+    exceptions, so googletest tests can work with a variety of configurations.
 1.  When tests fail, they should provide as much *information* about the problem
     as possible. googletest doesn't stop at the first test failure. Instead, it
     only stops the current test and continues with the next. You can also set up
@@ -71,9 +68,9 @@ and refactored away
 
 So please be aware of the different definitions of the terms:
 
-Meaning                                                                              | googletest Term                                                                                            | [ISTQB](http://www.istqb.org/) Term
-:----------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------- | :----------------------------------
-Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests)                                                                                    | [Test Case](http://glossary.istqb.org/search/test%20case)
+Meaning                                                                              | googletest Term         | [ISTQB](http://www.istqb.org/) Term
+:----------------------------------------------------------------------------------- | :---------------------- | :----------------------------------
+Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests) | [Test Case](http://glossary.istqb.org/search/test%20case)
 
 ## Basic Concepts
 
@@ -85,15 +82,15 @@ current function; otherwise the program continues normally.
 *Tests* use assertions to verify the tested code's behavior. If a test crashes
 or has a failed assertion, then it *fails*; otherwise it *succeeds*.
 
-A *test case* contains one or many tests. You should group your tests into test
-cases that reflect the structure of the tested code. When multiple tests in a
-test case need to share common objects and subroutines, you can put them into a
+A *test suite* contains one or many tests. You should group your tests into test
+suites that reflect the structure of the tested code. When multiple tests in a
+test suite need to share common objects and subroutines, you can put them into a
 *test fixture* class.
 
-A *test program* can contain multiple test cases.
+A *test program* can contain multiple test suites.
 
 We'll now explain how to write a test program, starting at the individual
-assertion level and building up to tests and test cases.
+assertion level and building up to tests and test suites.
 
 ## Assertions
 
@@ -256,10 +253,10 @@ TEST(TestSuiteName, TestName) {
 ```
 
 `TEST()` arguments go from general to specific. The *first* argument is the name
-of the test case, and the *second* argument is the test's name within the test
+of the test suite, and the *second* argument is the test's name within the test
 case. Both names must be valid C++ identifiers, and they should not contain
-underscore (`_`). A test's *full name* consists of its containing test case and
-its individual name. Tests from different test cases can have the same
+underscore (`_`). A test's *full name* consists of its containing test suite and
+its individual name. Tests from different test suites can have the same
 individual name.
 
 For example, let's take a simple integer function:
@@ -285,13 +282,13 @@ TEST(FactorialTest, HandlesPositiveInput) {
 }
 ```
 
-googletest groups the test results by test cases, so logically-related tests
-should be in the same test case; in other words, the first argument to their
+googletest groups the test results by test suites, so logically-related tests
+should be in the same test suite; in other words, the first argument to their
 `TEST()` should be the same. In the above example, we have two tests,
-`HandlesZeroInput` and `HandlesPositiveInput`, that belong to the same test case
+`HandlesZeroInput` and `HandlesPositiveInput`, that belong to the same test suite
 `FactorialTest`.
 
-When naming your test cases and tests, you should follow the same convention as
+When naming your test suites and tests, you should follow the same convention as
 for [naming functions and
 classes](https://google.github.io/styleguide/cppguide.html#Function_Names).
 
@@ -327,7 +324,7 @@ TEST_F(TestSuiteName, TestName) {
 }
 ```
 
-Like `TEST()`, the first argument is the test case name, but for `TEST_F()` this
+Like `TEST()`, the first argument is the test suite name, but for `TEST_F()` this
 must be the name of the test fixture class. You've probably guessed: `_F` is for
 fixture.
 
@@ -342,7 +339,7 @@ declaration`".
 For each test defined with `TEST_F()` , googletest will create a *fresh* test
 fixture at runtime, immediately initialize it via `SetUp()` , run the test,
 clean up by calling `TearDown()` , and then delete the test fixture. Note that
-different tests in the same test case have different test fixture objects, and
+different tests in the same test suite have different test fixture objects, and
 googletest always deletes a test fixture before it creates the next one.
 googletest does **not** reuse the same test fixture for multiple tests. Any
 changes one test makes to the fixture do not affect other tests.
@@ -439,7 +436,7 @@ your defined tests in order to run them.
 After defining your tests, you can run them with `RUN_ALL_TESTS()` , which
 returns `0` if all the tests are successful, or `1` otherwise. Note that
 `RUN_ALL_TESTS()` runs *all tests* in your link unit -- they can be from
-different test cases, or even different source files.
+different test suites, or even different source files.
 
 When invoked, the `RUN_ALL_TESTS()` macro:
 
@@ -511,7 +508,7 @@ class FooTest : public ::testing::Test {
      // before the destructor).
   }
 
-  // Objects declared here can be used by all tests in the test case for Foo.
+  // Objects declared here can be used by all tests in the test suite for Foo.
 };
 
 // Tests that the Foo::Bar() method does Abc.
