@@ -76,7 +76,7 @@ If you are lucky, the mocks you need to use have already been implemented by som
 Using the `Turtle` interface as example, here are the simple steps you need to follow:
 
   1. Derive a class `MockTurtle` from `Turtle`.
-  1. Take a _virtual_ function of `Turtle` (while it's possible to [mock non-virtual methods using templates](CookBook.md#mocking-nonvirtual-methods), it's much more involved). Count how many arguments it has.
+  1. Take a _virtual_ function of `Turtle` (while it's possible to [mock non-virtual methods using templates](cook_book.md#mocking-nonvirtual-methods), it's much more involved). Count how many arguments it has.
   1. In the `public:` section of the child class, write `MOCK_METHODn();` (or `MOCK_CONST_METHODn();` if you are mocking a `const` method), where `n` is the number of the arguments; if you counted wrong, shame on you, and a compiler error will tell you so.
   1. Now comes the fun part: you take the function signature, cut-and-paste the _function name_ as the _first_ argument to the macro, and leave what's left as the _second_ argument (in case you're curious, this is the _type of the function_).
   1. Repeat until all virtual functions you want to mock are done.
@@ -316,7 +316,7 @@ EXPECT_CALL(turtle, GetX())
 .WillRepeatedly(Return(n++));
 ```
 
-Instead of returning 100, 101, 102, ..., consecutively, this mock function will always return 100 as `n++` is only evaluated once. Similarly, `Return(new Foo)` will create a new `Foo` object when the `EXPECT_CALL()` is executed, and will return the same pointer every time. If you want the side effect to happen every time, you need to define a custom action, which we'll teach in the [CookBook](CookBook.md).
+Instead of returning 100, 101, 102, ..., consecutively, this mock function will always return 100 as `n++` is only evaluated once. Similarly, `Return(new Foo)` will create a new `Foo` object when the `EXPECT_CALL()` is executed, and will return the same pointer every time. If you want the side effect to happen every time, you need to define a custom action, which we'll teach in the [CookBook](cook_book.md).
 
 Time for another quiz! What do you think the following means?
 
@@ -372,7 +372,7 @@ By creating an object of type `InSequence`, all expectations in its scope are pu
 
 In this example, we test that `Foo()` calls the three expected functions in the order as written. If a call is made out-of-order, it will be an error.
 
-(What if you care about the relative order of some of the calls, but not all of them? Can you specify an arbitrary partial order? The answer is ... yes! If you are impatient, the details can be found in the [CookBook](CookBook.md#expecting-partially-ordered-calls).)
+(What if you care about the relative order of some of the calls, but not all of them? Can you specify an arbitrary partial order? The answer is ... yes! If you are impatient, the details can be found in the [CookBook](cook_book.md#expecting-partially-ordered-calls).)
 
 ## All Expectations Are Sticky (Unless Said Otherwise) ##
 Now let's do a quick quiz to see how well you can use this mock stuff already. How would you test that the turtle is asked to go to the origin _exactly twice_ (you want to ignore any other instructions it receives)?
@@ -444,4 +444,4 @@ In Google Mock, if you are not interested in a method, just don't say anything a
 # What Now? #
 Congratulations! You've learned enough about Google Mock to start using it. Now, you might want to join the [googlemock](http://groups.google.com/group/googlemock) discussion group and actually write some tests using Google Mock - it will be fun. Hey, it may even be addictive - you've been warned.
 
-Then, if you feel like increasing your mock quotient, you should move on to the [CookBook](CookBook.md). You can learn many advanced features of Google Mock there -- and advance your level of enjoyment and testing bliss.
+Then, if you feel like increasing your mock quotient, you should move on to the [CookBook](cook_book.md). You can learn many advanced features of Google Mock there -- and advance your level of enjoyment and testing bliss.

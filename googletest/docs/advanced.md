@@ -394,14 +394,14 @@ using ::testing::StartsWith;
     EXPECT_THAT(Foo(), StartsWith("Hello"));
 ```
 
-Read this [recipe](../../googlemock/docs/CookBook.md#using-matchers-in-google-test-assertions) in
+Read this [recipe](../../googlemock/docs/cook_book.md#using-matchers-in-google-test-assertions) in
 the gMock Cookbook for more details.
 
 gMock has a rich set of matchers. You can do many things googletest cannot do
 alone with them. For a list of matchers gMock provides, read
-[this](../../googlemock/docs/CookBook.md#using-matchers). Especially useful among them are
+[this](../../googlemock/docs/cook_book.md#using-matchers). Especially useful among them are
 some [protocol buffer matchers](https://github.com/google/nucleus/blob/master/nucleus/testing/protocol-buffer-matchers.h). It's easy to write
-your [own matchers](../../googlemock/docs/CookBook.md#writing-new-matchers-quickly) too.
+your [own matchers](../../googlemock/docs/cook_book.md#writing-new-matchers-quickly) too.
 
 For example, you can use gMock's
 [EqualsProto](https://github.com/google/nucleus/blob/master/nucleus/testing/protocol-buffer-matchers.h)

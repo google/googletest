@@ -75,14 +75,14 @@ GMOCK WARNING:
 Uninteresting mock function call - returning default value.
     Function call: Bar2(0, 1)
           Returns: false
-NOTE: You can safely ignore the above warning unless this call should not happen.  Do not suppress it by blindly adding an EXPECT_CALL() if you don't mean to enforce the call.  See https://github.com/google/googletest/blob/master/googlemock/docs/CookBook.md#knowing-when-to-expect for details.
+NOTE: You can safely ignore the above warning unless this call should not happen.  Do not suppress it by blindly adding an EXPECT_CALL() if you don't mean to enforce the call.  See https://github.com/google/googletest/blob/master/googlemock/docs/cook_book.md#knowing-when-to-expect for details.
 [       OK ] GMockOutputTest.UninterestingCall
 [ RUN      ] GMockOutputTest.UninterestingCallToVoidFunction
 
 GMOCK WARNING:
 Uninteresting mock function call - returning directly.
     Function call: Bar3(0, 1)
-NOTE: You can safely ignore the above warning unless this call should not happen.  Do not suppress it by blindly adding an EXPECT_CALL() if you don't mean to enforce the call.  See https://github.com/google/googletest/blob/master/googlemock/docs/CookBook.md#knowing-when-to-expect for details.
+NOTE: You can safely ignore the above warning unless this call should not happen.  Do not suppress it by blindly adding an EXPECT_CALL() if you don't mean to enforce the call.  See https://github.com/google/googletest/blob/master/googlemock/docs/cook_book.md#knowing-when-to-expect for details.
 [       OK ] GMockOutputTest.UninterestingCallToVoidFunction
 [ RUN      ] GMockOutputTest.RetiredExpectation
 unknown file: Failure
@@ -266,14 +266,14 @@ Uninteresting mock function call - taking default action specified at:
 FILE:#:
     Function call: Bar2(2, 2)
           Returns: true
-NOTE: You can safely ignore the above warning unless this call should not happen.  Do not suppress it by blindly adding an EXPECT_CALL() if you don't mean to enforce the call.  See https://github.com/google/googletest/blob/master/googlemock/docs/CookBook.md#knowing-when-to-expect for details.
+NOTE: You can safely ignore the above warning unless this call should not happen.  Do not suppress it by blindly adding an EXPECT_CALL() if you don't mean to enforce the call.  See https://github.com/google/googletest/blob/master/googlemock/docs/cook_book.md#knowing-when-to-expect for details.
 
 GMOCK WARNING:
 Uninteresting mock function call - taking default action specified at:
 FILE:#:
     Function call: Bar2(1, 1)
           Returns: false
-NOTE: You can safely ignore the above warning unless this call should not happen.  Do not suppress it by blindly adding an EXPECT_CALL() if you don't mean to enforce the call.  See https://github.com/google/googletest/blob/master/googlemock/docs/CookBook.md#knowing-when-to-expect for details.
+NOTE: You can safely ignore the above warning unless this call should not happen.  Do not suppress it by blindly adding an EXPECT_CALL() if you don't mean to enforce the call.  See https://github.com/google/googletest/blob/master/googlemock/docs/cook_book.md#knowing-when-to-expect for details.
 [       OK ] GMockOutputTest.UninterestingCallWithDefaultAction
 [ RUN      ] GMockOutputTest.ExplicitActionsRunOutWithDefaultAction
 
