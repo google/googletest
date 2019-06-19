@@ -164,7 +164,7 @@ you'll get a compiler error. We used to require the arguments to support the
 `<<` is supported, it will be called to print the arguments when the assertion
 fails; otherwise googletest will attempt to print them in the best way it can.
 For more details and how to customize the printing of the arguments, see
-gMock [recipe](../../googlemock/docs/cook_book.md#teaching-google-mock-how-to-print-your-values).).
+[documentation](https://github.com/google/googletest/blob/master/googlemock/docs/cook_book.md#teaching-gmock-how-to-print-your-values)
 
 These assertions can work with a user-defined type, but only if you define the
 corresponding comparison operator (e.g. `==`, `<`, etc). Since this is
@@ -214,12 +214,18 @@ as `ASSERT_EQ(expected, actual)`, so lots of existing code uses this order. Now
 The assertions in this group compare two **C strings**. If you want to compare
 two `string` objects, use `EXPECT_EQ`, `EXPECT_NE`, and etc instead.
 
-| Fatal assertion                 | Nonfatal assertion              | Verifies                                                 |
-| ------------------------------- | ------------------------------- | -------------------------------------------------------- |
-| `ASSERT_STREQ(str1, str2);`     | `EXPECT_STREQ(str1, str2);`     | the two C strings have the same content                  |
-| `ASSERT_STRNE(str1, str2);`     | `EXPECT_STRNE(str1, str2);`     | the two C strings have different contents                |
-| `ASSERT_STRCASEEQ(str1, str2);` | `EXPECT_STRCASEEQ(str1, str2);` | the two C strings have the same content, ignoring case   |
-| `ASSERT_STRCASENE(str1, str2);` | `EXPECT_STRCASENE(str1, str2);` | the two C strings have different contents, ignoring case |
+| Fatal assertion         | Nonfatal assertion      | Verifies               |
+| ----------------------- | ----------------------- | ---------------------- |
+| `ASSERT_STREQ(str1,     | `EXPECT_STREQ(str1,     | the two C strings have |
+: str2);`                 : str2);`                 : the same content       :
+| `ASSERT_STRNE(str1,     | `EXPECT_STRNE(str1,     | the two C strings have |
+: str2);`                 : str2);`                 : different contents     :
+| `ASSERT_STRCASEEQ(str1, | `EXPECT_STRCASEEQ(str1, | the two C strings have |
+: str2);`                 : str2);`                 : the same content,      :
+:                         :                         : ignoring case          :
+| `ASSERT_STRCASENE(str1, | `EXPECT_STRCASENE(str1, | the two C strings have |
+: str2);`                 : str2);`                 : different contents,    :
+:                         :                         : ignoring case          :
 
 Note that "CASE" in an assertion name means that case is ignored. A `NULL`
 pointer and an empty string are considered *different*.
@@ -265,7 +271,7 @@ For example, let's take a simple integer function:
 int Factorial(int n);  // Returns the factorial of n
 ```
 
-A test case for this function might look like:
+A test suite for this function might look like:
 
 ```c++
 // Tests factorial of 0.
@@ -285,8 +291,8 @@ TEST(FactorialTest, HandlesPositiveInput) {
 googletest groups the test results by test suites, so logically-related tests
 should be in the same test suite; in other words, the first argument to their
 `TEST()` should be the same. In the above example, we have two tests,
-`HandlesZeroInput` and `HandlesPositiveInput`, that belong to the same test suite
-`FactorialTest`.
+`HandlesZeroInput` and `HandlesPositiveInput`, that belong to the same test
+suite `FactorialTest`.
 
 When naming your test suites and tests, you should follow the same convention as
 for [naming functions and
@@ -319,14 +325,14 @@ When using a fixture, use `TEST_F()` instead of `TEST()` as it allows you to
 access objects and subroutines in the test fixture:
 
 ```c++
-TEST_F(TestSuiteName, TestName) {
+TEST_F(TestFixtureName, TestName) {
   ... test body ...
 }
 ```
 
-Like `TEST()`, the first argument is the test suite name, but for `TEST_F()` this
-must be the name of the test fixture class. You've probably guessed: `_F` is for
-fixture.
+Like `TEST()`, the first argument is the test suite name, but for `TEST_F()`
+this must be the name of the test fixture class. You've probably guessed: `_F`
+is for fixture.
 
 Unfortunately, the C++ macro system does not allow us to create a single macro
 that can handle both types of tests. Using the wrong macro causes a compiler
@@ -411,7 +417,7 @@ The above uses both `ASSERT_*` and `EXPECT_*` assertions. The rule of thumb is
 to use `EXPECT_*` when you want the test to continue to reveal more errors after
 the assertion failure, and use `ASSERT_*` when continuing after failure doesn't
 make sense. For example, the second assertion in the `Dequeue` test is
-=ASSERT_NE(nullptr, n)=, as we need to dereference the pointer `n` later, which
+`ASSERT_NE(nullptr, n)`, as we need to dereference the pointer `n` later, which
 would lead to a segfault when `n` is `NULL`.
 
 When these tests run, the following happens:
