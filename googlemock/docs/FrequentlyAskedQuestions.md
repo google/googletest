@@ -7,7 +7,7 @@ tried [Google Mock Doctor](#how-am-i-supposed-to-make-sense-of-these-horrible-te
 
 ## When I call a method on my mock object, the method for the real object is invoked instead.  What's the problem? ##
 
-In order for a method to be mocked, it must be _virtual_, unless you use the [high-perf dependency injection technique](CookBook.md#mocking-nonvirtual-methods).
+In order for a method to be mocked, it must be _virtual_, unless you use the [high-perf dependency injection technique](cook_book.md#mocking-nonvirtual-methods).
 
 ## I wrote some matchers.  After I upgraded to a new version of Google Mock, they no longer compile.  What's going on? ##
 
@@ -196,8 +196,8 @@ class MyGreatMatcher {
 ```
 
 For more information, you can read these
-[two](CookBook.md#writing-new-monomorphic-matchers)
-[recipes](CookBook.md#writing-new-polymorphic-matchers)
+[two](cook_book.md#writing-new-monomorphic-matchers)
+[recipes](cook_book.md#writing-new-polymorphic-matchers)
 from the cookbook.  As always, you
 are welcome to post questions on `googlemock@googlegroups.com` if you
 need any help.
@@ -403,10 +403,10 @@ verbose level.
 If you find yourself needing to perform some action that's not
 supported by Google Mock directly, remember that you can define your own
 actions using
-[MakeAction()](CookBook.md#writing-new-actions-quickly) or
-[MakePolymorphicAction()](CookBook.md#writing-new-polymorphic-actions),
+[MakeAction()](cook_book.md#writing-new-actions-quickly) or
+[MakePolymorphicAction()](cook_book.md#writing-new-polymorphic-actions),
 or you can write a stub function and invoke it using
-[Invoke()](CookBook.md#using-functionsmethodsfunctors-as-actions).
+[Invoke()](cook_book.md#using-functionsmethodsfunctors-as-actions).
 
 ## MOCK\_METHODn()'s second argument looks funny.  Why don't you use the MOCK\_METHODn(Method, return\_type, arg\_1, ..., arg\_n) syntax? ##
 
@@ -528,7 +528,7 @@ when the mock method is called.  `SetArgPointee()` says what the
 side effect is, but doesn't say what the return value should be.  You
 need `DoAll()` to chain a `SetArgPointee()` with a `Return()`.
 
-See this [recipe](CookBook.md#mocking-side-effects) for more details and an example.
+See this [recipe](cook_book.md#mocking-side-effects) for more details and an example.
 
 
 ## My question is not in your FAQ! ##

@@ -64,7 +64,7 @@ Once you understand the basics, check out the rest of the docs:
 
   * [CheatSheet](../googlemock/docs/CheatSheet.md) - all the commonly used stuff
     at a glance.
-  * [CookBook](../googlemock/docs/CookBook.md) - recipes for getting things done,
+  * [CookBook](../googlemock/docs/cook_book.md) - recipes for getting things done,
     including advanced techniques.
 
 If you need help, please check the
@@ -195,8 +195,8 @@ may need to tweak your compiler and/or linker flags.  Please see the
 If you have custom matchers defined using `MatcherInterface` or
 `MakePolymorphicMatcher()`, you'll need to update their definitions to
 use the new matcher API (
-[monomorphic](./docs/CookBook.md#writing-new-monomorphic-matchers),
-[polymorphic](./docs/CookBook.md#writing-new-polymorphic-matchers)).
+[monomorphic](./docs/cook_book.md#writing-new-monomorphic-matchers),
+[polymorphic](./docs/cook_book.md#writing-new-polymorphic-matchers)).
 Matchers defined using `MATCHER()` or `MATCHER_P*()` aren't affected.
 
 Happy testing!
