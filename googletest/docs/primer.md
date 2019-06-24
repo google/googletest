@@ -193,8 +193,7 @@ objects, you should use `ASSERT_EQ`.
 
 When doing pointer comparisons use `*_EQ(ptr, nullptr)` and `*_NE(ptr, nullptr)`
 instead of `*_EQ(ptr, NULL)` and `*_NE(ptr, NULL)`. This is because `nullptr` is
-typed while `NULL` is not. See [FAQ](faq.md#why-does-googletest-support-expect_eqnull-ptr-and-assert_eqnull-ptr-but-not-expect_nenull-ptr-and-assert_nenull-ptr)
-for more details.
+typed while `NULL` is not. See [FAQ](faq.md)for more details.
 
 If you're working with floating point numbers, you may want to use the floating
 point variations of some of these macros in order to avoid problems caused by
@@ -295,8 +294,8 @@ should be in the same test suite; in other words, the first argument to their
 suite `FactorialTest`.
 
 When naming your test suites and tests, you should follow the same convention as
-for [naming functions and
-classes](https://google.github.io/styleguide/cppguide.html#Function_Names).
+for
+[naming functions and classes](https://google.github.io/styleguide/cppguide.html#Function_Names).
 
 **Availability**: Linux, Windows, Mac.
 
@@ -318,7 +317,7 @@ To create a fixture:
 1.  If necessary, write a destructor or `TearDown()` function to release any
     resources you allocated in `SetUp()` . To learn when you should use the
     constructor/destructor and when you should use `SetUp()/TearDown()`, read
-    this [FAQ](faq.md#should-i-use-the-constructordestructor-of-the-test-fixture-or-setupteardown) entry.
+    the [FAQ](faq.md).
 1.  If needed, define subroutines for your tests to share.
 
 When using a fixture, use `TEST_F()` instead of `TEST()` as it allows you to
@@ -432,7 +431,6 @@ When these tests run, the following happens:
 
 **Availability**: Linux, Windows, Mac.
 
-
 ## Invoking the Tests
 
 `TEST()` and `TEST_F()` implicitly register their tests with googletest. So,
@@ -446,7 +444,7 @@ different test suites, or even different source files.
 
 When invoked, the `RUN_ALL_TESTS()` macro:
 
-1. Saves the state of all googletest flags
+*   Saves the state of all googletest flags
 
 *   Creates a test fixture object for the first test.
 
@@ -458,7 +456,7 @@ When invoked, the `RUN_ALL_TESTS()` macro:
 
 *   Deletes the fixture.
 
-* Restores the state of all googletest flags
+*   Restores the state of all all googletest flags
 
 *   Repeats the above steps for the next test, until all tests have run.
 
@@ -471,15 +469,17 @@ If a fatal failure happens the subsequent steps will be skipped.
 > return the value of `RUN_ALL_TESTS()`.
 >
 > Also, you should call `RUN_ALL_TESTS()` only **once**. Calling it more than
-> once conflicts with some advanced googletest features (e.g. thread-safe [death
-> tests](advanced.md#death-tests)) and thus is not supported.
+> once conflicts with some advanced googletest features (e.g. thread-safe
+> [death tests](advanced.md#death-tests)) and thus is not supported.
 
 **Availability**: Linux, Windows, Mac.
 
 ## Writing the main() Function
 
-Write your own main() function, which should
-return the value of `RUN_ALL_TESTS()`
+Write your own main() function, which should return the value of
+`RUN_ALL_TESTS()`
+
+You can start from this boilerplate:
 
 ```c++
 #include "this/package/foo.h"
@@ -538,7 +538,6 @@ int main(int argc, char **argv) {
 }
 ```
 
-
 The `::testing::InitGoogleTest()` function parses the command line for
 googletest flags, and removes all recognized flags. This allows the user to
 control a test program's behavior via various flags, which we'll cover in
@@ -554,7 +553,6 @@ implementation of main(). If it fits your needs, then just link your test with
 gtest\_main library and you are good to go.
 
 NOTE: `ParseGUnitFlags()` is deprecated in favor of `InitGoogleTest()`.
-
 
 ## Known Limitations
 
