@@ -682,7 +682,7 @@ there is an `std::ostream& operator<<(std::ostream&, const FooType&)` function
 defined such that we can print a value of `FooType`.
 
 In addition, if `FooType` is declared in a name space, the `<<` operator also
-needs to be defined in the *same* name space. See go/totw/49 for details.
+needs to be defined in the *same* name space. See  https://abseil.io/tips/49 for details.
 
 ## How do I suppress the memory leak messages on Windows?
 
