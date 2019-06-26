@@ -261,7 +261,7 @@
 //
 // To learn more about using these macros, please search for 'MATCHER'
 // on
-// https://github.com/google/googletest/blob/master/googlemock/docs/cook_book.md
+// https://github.com/google/googletest/blob/master/googlemock/docs/CookBook.md
 
 #define MATCHER(name, description)\
   class name##Matcher {\
