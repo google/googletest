@@ -4,6 +4,9 @@
 # http://lint.travis-ci.org/
 
 sudo: false
+os:
+  - linux
+  - linux-ppc64le
 language: cpp
 
 # Define the matrix explicitly, manually expanding the combinations of (os, compiler, env).
