@@ -815,7 +815,8 @@ class TypedTestNames {
   }
 };
 
-TYPED_TEST_SUITE(TypedTestWithNames, TypesForTestWithNames, TypedTestNames);
+TYPED_TEST_SUITE_CUSTOM_NAME_GENERATOR(TypedTestWithNames,
+                                       TypesForTestWithNames, TypedTestNames);
 
 TYPED_TEST(TypedTestWithNames, Success) {}
 
@@ -858,8 +859,9 @@ class TypedTestPNames {
   }
 };
 
-INSTANTIATE_TYPED_TEST_SUITE_P(UnsignedCustomName, TypedTestP, UnsignedTypes,
-                              TypedTestPNames);
+INSTANTIATE_TYPED_TEST_SUITE_CUSTOM_NAME_GENERATOR_P(UnsignedCustomName,
+                                                     TypedTestP, UnsignedTypes,
+                                                     TypedTestPNames);
 
 #endif  // GTEST_HAS_TYPED_TEST_P
 

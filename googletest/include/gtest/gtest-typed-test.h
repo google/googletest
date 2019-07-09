@@ -83,10 +83,10 @@ TYPED_TEST(FooTest, DoesBlah) {
 
 TYPED_TEST(FooTest, HasPropertyA) { ... }
 
-// TYPED_TEST_SUITE takes an optional third argument which allows to specify a
-// class that generates custom test name suffixes based on the type. This should
-// be a class which has a static template function GetName(int index) returning
-// a string for each type. The provided integer index equals the index of the
+// TYPED_TEST_SUITE_CUSTOM_NAME_GENERATOR takes an additional, third argument which
+// allows to specify a class that generates custom test name suffixes based on the type.
+// This should be a class which has a static template function GetName(int index)
+// returning a string for each type. The provided integer index equals the index of the
 // type in the provided type list. In many cases the index can be ignored.
 //
 // For example:
@@ -99,7 +99,7 @@ TYPED_TEST(FooTest, HasPropertyA) { ... }
 //       if (std::is_same<T, unsigned int>()) return "unsignedInt";
 //     }
 //   };
-//   TYPED_TEST_SUITE(FooTest, MyTypes, MyTypeNames);
+//   TYPED_TEST_SUITE_CUSTOM_NAME_GENERATOR(FooTest, MyTypes, MyTypeNames);
 
 #endif  // 0
 
@@ -163,10 +163,10 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
 // directly without Types<...>:
 //   INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, int);
 //
-// Similar to the optional argument of TYPED_TEST_SUITE above,
-// INSTANTIATE_TEST_SUITE_P takes an optional fourth argument which allows to
-// generate custom names.
-//   INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes, MyTypeNames);
+// Similar to the additional argument of TYPED_TEST_SUITE_CUSTOM_NAME_GENERATOR above,
+// INSTANTIATE_TYPED_TEST_SUITE_CUSTOM_NAME_GENERATOR_P takes an additional, fourth argument
+// which allows to generate custom names.
+//   INSTANTIATE_TYPED_TEST_SUITE_CUSTOM_NAME_GENERATOR_P(My, FooTest, MyTypes, MyTypeNames);
 
 #endif  // 0
 
@@ -191,11 +191,15 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
 // The 'Types' template argument below must have spaces around it
 // since some compilers may choke on '>>' when passing a template
 // instance (e.g. Types<int>)
-#define TYPED_TEST_SUITE(CaseName, Types, ...)                           \
-  typedef ::testing::internal::TypeList<Types>::type GTEST_TYPE_PARAMS_( \
-      CaseName);                                                         \
-  typedef ::testing::internal::NameGeneratorSelector<__VA_ARGS__>::type  \
+#define TYPED_TEST_SUITE_CUSTOM_NAME_GENERATOR(CaseName, Types, NameGenerator) \
+  typedef ::testing::internal::TypeList<Types>::type GTEST_TYPE_PARAMS_(       \
+      CaseName);                                                               \
+  typedef ::testing::internal::NameGeneratorSelector<NameGenerator>::type      \
       GTEST_NAME_GENERATOR_(CaseName)
+
+#define TYPED_TEST_SUITE(CaseName, Types) \
+  TYPED_TEST_SUITE_CUSTOM_NAME_GENERATOR( \
+      CaseName, Types, testing::internal::DefaultNameGenerator)
 
 # define TYPED_TEST(CaseName, TestName)                                       \
   template <typename gtest_TypeParam_>                                        \
@@ -309,7 +313,8 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
 // The 'Types' template argument below must have spaces around it
 // since some compilers may choke on '>>' when passing a template
 // instance (e.g. Types<int>)
-#define INSTANTIATE_TYPED_TEST_SUITE_P(Prefix, SuiteName, Types, ...)       \
+#define INSTANTIATE_TYPED_TEST_SUITE_CUSTOM_NAME_GENERATOR_P(               \
+    Prefix, SuiteName, Types, NameGenerator)                                \
   static bool gtest_##Prefix##_##SuiteName GTEST_ATTRIBUTE_UNUSED_ =        \
       ::testing::internal::TypeParameterizedTestSuite<                      \
           SuiteName, GTEST_SUITE_NAMESPACE_(SuiteName)::gtest_AllTests_,    \
@@ -320,8 +325,12 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
                    GTEST_REGISTERED_TEST_NAMES_(SuiteName),                 \
                    ::testing::internal::GenerateNames<                      \
                        ::testing::internal::NameGeneratorSelector<          \
-                           __VA_ARGS__>::type,                              \
+                           NameGenerator>::type,                            \
                        ::testing::internal::TypeList<Types>::type>())
+
+#define INSTANTIATE_TYPED_TEST_SUITE_P(Prefix, SuiteName, Types) \
+  INSTANTIATE_TYPED_TEST_SUITE_CUSTOM_NAME_GENERATOR_P(          \
+      Prefix, SuiteName, Types, testing::internal::DefaultNameGenerator)
 
 // Legacy API is deprecated but still available
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_

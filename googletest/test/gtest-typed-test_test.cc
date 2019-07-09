@@ -186,7 +186,8 @@ class TypedTestNames {
   }
 };
 
-TYPED_TEST_SUITE(TypedTestWithNames, TwoTypes, TypedTestNames);
+TYPED_TEST_SUITE_CUSTOM_NAME_GENERATOR(TypedTestWithNames, TwoTypes,
+                                       TypedTestNames);
 
 TYPED_TEST(TypedTestWithNames, TestSuiteName) {
   if (testing::internal::IsSame<TypeParam, char>::value) {
@@ -340,8 +341,9 @@ class TypeParametrizedTestNames {
   }
 };
 
-INSTANTIATE_TYPED_TEST_SUITE_P(CustomName, TypeParametrizedTestWithNames,
-                              TwoTypes, TypeParametrizedTestNames);
+INSTANTIATE_TYPED_TEST_SUITE_CUSTOM_NAME_GENERATOR_P(
+    CustomName, TypeParametrizedTestWithNames, TwoTypes,
+    TypeParametrizedTestNames);
 
 // Tests that multiple TYPED_TEST_SUITE_P's can be defined in the same
 // translation unit.
