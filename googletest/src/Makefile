@@ -11,8 +11,10 @@ include $(TOP)/configure/CONFIG
 
 USR_CPPFLAGS += -I$(GTEST)/googletest/include -I$(GTEST)/googletest
 
-LIBRARY = gtest
+LIBRARY = gtest gtest_main
 gtest_SRCS =  gtest-all.cc
+gtest_main_SRCS =  gtest_main.cc
+gtest_main_LIBS += gtest
 LIBTYPE:=SHARED
 
 #----------------------------------------------------
@@ -25,6 +27,12 @@ include $(TOP)/configure/RULES
 
 ifeq ($(STATIC_BUILD),NO)
 $(LIB_PREFIX)gtest$(LIB_SUFFIX) : $(LIB_PREFIX)%$(LIB_SUFFIX):
+	@$(RM) $@
+	$(ARCMD)
+ifneq ($(strip $(RANLIB)),)
+	$(RANLIB) $@
+endif
+$(LIB_PREFIX)gtest_main$(LIB_SUFFIX) : $(LIB_PREFIX)%$(LIB_SUFFIX):
 	@$(RM) $@
 	$(ARCMD)
 ifneq ($(strip $(RANLIB)),)
