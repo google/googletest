@@ -577,9 +577,29 @@ Google Mock defines a convenient mock class template
 class MockFunction<R(A1, ..., An)> {
  public:
   MOCK_METHODn(Call, R(A1, ..., An));
+  std::function<R(A1, ..., An)> AsStdFunction();
 };
 ```
 See this [recipe](cook_book.md#using-check-points) for one application of it.
+
+## Callback Mock ##
+
+Another application of the `MockFunction<F>` is to exercise code that accepts `std::function<F>` callbacks.
+
+The `AsStdFunction()` method returns an `std::function<F>` which calls the `Call` method of the `MockFunction<F>` correctly forwarding any arguments and returning the result. This allows using the `MockFunction<F>` as a mock for callbacks provided to the tested code:
+```cpp
+using predicate_signature = bool(int);
+using predicate = std::function<predicate_signature>;
+…
+void MyFilterAlgorithm(predicate pred);
+…
+TEST(MyFilterAlgorithmTest, PredicateAlwaysAccepts) {
+  StrictMock<MockFunction<predicate_signature>> pred_mock;
+  EXPECT_CALL(pred_mock, Call(_)).WillRepeatedly(Return(true));
+  MyFilterAlgorithm(pred_mock.AsStdFunction());
+  …
+}
+```
 
 # Flags #
 
