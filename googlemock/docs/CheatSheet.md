@@ -601,6 +601,20 @@ TEST(MyFilterAlgorithmTest, PredicateAlwaysAccepts) {
 }
 ```
 
+## Callback Signature ##
+
+When using `MockFunction<T>` as a mock for a callback the signature often becomes an issue. When the callback type is provided like this:
+```cpp
+using my_callback = std::function<bool(int)>;
+```
+there is no easy way to obtain the function signature (`bool(int)`) from the `my_callback` type.
+
+`MockFunction` avoids this problem by using indirection of `SignatureOf` meta-function. The `MockFunction` retrieves function signature type by providing its `F` argument to the `SignatureOf` meta-function. While the `SignatureOf` recognizes `std::function<T>` and returns the `T` as the proper function signature. (Obviously, the `SignatureOf` is an identity function for the function signature itself!)
+
+Thanks to this approach, with the example above, `MockFunction<my_callback>` can be used directly instead of having to write `MockFunction<bool(int)>`.
+
+Note that `SignatureOf` is an extension point. It can be specialized for user types (for example `boost::function`) to have them supported by `MockFunction` as well.
+
 # Flags #
 
 | Flag | Description |

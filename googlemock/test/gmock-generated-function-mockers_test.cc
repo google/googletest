@@ -41,8 +41,10 @@
 # include <objbase.h>
 #endif  // GTEST_OS_WINDOWS
 
+#include <functional>
 #include <map>
 #include <string>
+#include <type_traits>
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -555,6 +557,43 @@ TEST(OverloadedMockMethodTest, CanOverloadOnConstnessInMacroBody) {
 
   EXPECT_EQ(2, mock.Overloaded(1));
   EXPECT_EQ(3, const_mock->Overloaded(1));
+}
+
+template <typename Signature>
+class MockFunctionSignatureTest : public ::testing::Test {
+};
+
+using SignatureTypes = ::testing::Types<
+	void(),
+	int(),
+	void(int),
+	int(bool, int),
+	int(bool, char, int, int, int, int, int, char, int, bool)
+>;
+TYPED_TEST_SUITE(MockFunctionSignatureTest, SignatureTypes);
+
+TYPED_TEST(MockFunctionSignatureTest, SignatureOfTIsIdentityForSignature) {
+  using signature = TypeParam;
+  using expected = signature;
+  using actual = SignatureOfT<signature>;
+  constexpr auto is_same = std::is_same<actual, expected>::value;
+  EXPECT_TRUE(is_same);
+}
+
+TYPED_TEST(MockFunctionSignatureTest, SignatureOfTReturnsSignatureForStdFunction) {
+  using signature = TypeParam;
+  using expected = signature;
+  using actual = SignatureOfT<std::function<signature>>;
+  constexpr auto is_same = std::is_same<actual, expected>::value;
+  EXPECT_TRUE(is_same);
+}
+
+TYPED_TEST(MockFunctionSignatureTest, MockFunctionOfSignatureIsTheSameTypeAsMockFunctionOfStdFunction) {
+  using signature = TypeParam;
+  using expected = MockFunction<signature>;
+  using actual = MockFunction<std::function<signature>>;
+  constexpr auto is_same = std::is_same<actual, expected>::value;
+  EXPECT_TRUE(is_same);
 }
 
 TEST(MockFunctionTest, WorksForVoidNullary) {

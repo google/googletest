@@ -1791,10 +1791,74 @@ void ReportUninterestingCall(CallReaction reaction, const std::string& msg);
 
 }  // namespace internal
 
-// A MockFunction<F> class has one mock method whose type is F.  It is
-// useful when you just want your test code to emit some messages and
-// have Google Mock verify the right messages are sent (and perhaps at
-// the right times).  For example, if you are exercising code:
+// The SignatureOf<F> struct is a meta-function returning function
+// signature corresponding to the provided F argument. It makes use of
+// MockFunction easier by allowing it to accept more F arguments than
+// just function signatures.  Specializations provided here cover only
+// a signature type itself and std::function. If a user wishes to use
+// SignatureOf with other types (like for example boost::function)
+// a corresponding specialization must be provided.
+template <typename F>
+struct SignatureOf;
+
+template <typename R, typename... Args>
+struct SignatureOf<R(Args...)> {
+  using type = R(Args...);
+};
+
+template <typename R, typename... Args>
+struct SignatureOf<std::function<R(Args...)>> {
+  using type = R(Args...);
+};
+
+template <typename F>
+using SignatureOfT = typename SignatureOf<F>::type;
+
+namespace internal {
+
+template <typename F>
+class MockFunction;
+
+template <typename R, typename... Args>
+class MockFunction<R(Args...)> {
+ public:
+  MockFunction() {};
+  MockFunction(const MockFunction&) = delete;
+  MockFunction& operator=(const MockFunction&) = delete;
+
+  std::function<R(Args...)> AsStdFunction() {
+    return [this](Args... args) -> R {
+      return this->Call(std::forward<Args>(args)...);
+    };
+  }
+
+  // Implementation detail: the expansion of the MOCK_METHOD macro.
+  R Call(Args... args) {
+    mock_.SetOwnerAndName(this, "Call");
+    return mock_.Invoke(std::forward<Args>(args)...);
+  }
+
+  MockSpec<R(Args...)> gmock_Call(Matcher<Args>... m) {
+    mock_.RegisterOwner(this);
+    return mock_.With(std::move(m)...);
+  }
+
+  MockSpec<R(Args...)> gmock_Call(const WithoutMatchers&,
+                                  R (*)(Args...)) {
+    return this->gmock_Call(::testing::A<Args>()...);
+  }
+
+ private:
+  mutable FunctionMocker<R(Args...)> mock_;
+};
+
+}  // namespace internal
+
+// A MockFunction<F> class has one mock method whose type is
+// SignatureOfT<F>.  It is useful when you just want your test code to
+// emit some messages and have Google Mock verify the right messages
+// are sent (and perhaps at the right times).  For example, if you are
+// exercising code:
 //
 //   Foo(1);
 //   Foo(2);
@@ -1828,50 +1892,30 @@ void ReportUninterestingCall(CallReaction reaction, const std::string& msg);
 // Bar("a") is called by which call to Foo().
 //
 // MockFunction<F> can also be used to exercise code that accepts
-// std::function<F> callbacks. To do so, use AsStdFunction() method
-// to create std::function proxy forwarding to original object's Call.
-// Example:
+// std::function<SignatureOfT<F>> callbacks. To do so, use
+// AsStdFunction() method to create std::function proxy forwarding to
+// original object's Call. Example:
 //
 // TEST(FooTest, RunsCallbackWithBarArgument) {
 //   MockFunction<int(string)> callback;
 //   EXPECT_CALL(callback, Call("bar")).WillOnce(Return(1));
 //   Foo(callback.AsStdFunction());
 // }
+//
+// The SignatureOfT<F> indirection allows to use other types than just
+// function signature type. This is typically useful when providing
+// a mock for a predefined std::function type. Example:
+//
+// using predicate = std::function<bool(string)>;
+// void MyFilterAlgorithm(predicate pred);
+//
+// TEST(FooTest, PredicateAlwaysAccepts) {
+//   MockFunction<predicate> pred_mock;
+//   EXPECT_CALL(pred_mock, Call(_)).WillRepeatedly(Return(true));
+//   MyFilterAlgorithm(pred_mock.AsStdFunction());
+// }
 template <typename F>
-class MockFunction;
-
-template <typename R, typename... Args>
-class MockFunction<R(Args...)> {
- public:
-  MockFunction() {}
-  MockFunction(const MockFunction&) = delete;
-  MockFunction& operator=(const MockFunction&) = delete;
-
-  std::function<R(Args...)> AsStdFunction() {
-    return [this](Args... args) -> R {
-      return this->Call(std::forward<Args>(args)...);
-    };
-  }
-
-  // Implementation detail: the expansion of the MOCK_METHOD macro.
-  R Call(Args... args) {
-    mock_.SetOwnerAndName(this, "Call");
-    return mock_.Invoke(std::forward<Args>(args)...);
-  }
-
-  internal::MockSpec<R(Args...)> gmock_Call(Matcher<Args>... m) {
-    mock_.RegisterOwner(this);
-    return mock_.With(std::move(m)...);
-  }
-
-  internal::MockSpec<R(Args...)> gmock_Call(const internal::WithoutMatchers&,
-                                            R (*)(Args...)) {
-    return this->gmock_Call(::testing::A<Args>()...);
-  }
-
- private:
-  mutable internal::FunctionMocker<R(Args...)> mock_;
-};
+using MockFunction = internal::MockFunction<SignatureOfT<F>>;
 
 // The style guide prohibits "using" statements in a namespace scope
 // inside a header file.  However, the MockSpec class template is
