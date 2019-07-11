@@ -40,6 +40,7 @@
 # include <objbase.h>
 #endif  // GTEST_OS_WINDOWS
 
+#include <functional>
 #include <map>
 #include <string>
 #include <type_traits>
@@ -802,10 +803,28 @@ using MockMethodMockFunctionSignatureTypes = Types<
 >;
 TYPED_TEST_SUITE(MockMethodMockFunctionSignatureTest, MockMethodMockFunctionSignatureTypes);
 
-TYPED_TEST(MockMethodMockFunctionSignatureTest, IsMockFunctionTemplateArgumentDeduced) {
+TYPED_TEST(MockMethodMockFunctionSignatureTest, IsMockFunctionTemplateArgumentDeducedForRawSignature) {
   using Argument = TypeParam;
   MockFunction<Argument> foo;
   EXPECT_TRUE(IsMockFunctionTemplateArgumentDeducedTo<Argument>(foo));
+}
+
+TYPED_TEST(MockMethodMockFunctionSignatureTest, IsMockFunctionTemplateArgumentDeducedForStdFunction) {
+  using Argument = std::function<TypeParam>;
+  MockFunction<Argument> foo;
+  EXPECT_TRUE(IsMockFunctionTemplateArgumentDeducedTo<Argument>(foo));
+}
+
+TYPED_TEST(MockMethodMockFunctionSignatureTest, IsMockFunctionCallMethodSignatureTheSameForRawSignatureAndStdFunction) {
+  using ForRawSignature = decltype(&MockFunction<TypeParam>::Call);
+  using ForStdFunction = decltype(&MockFunction<std::function<TypeParam>>::Call);
+  EXPECT_TRUE((std::is_same<ForRawSignature, ForStdFunction>::value));
+}
+
+TYPED_TEST(MockMethodMockFunctionSignatureTest, IsMockFunctionAsStdFunctionMethodSignatureTheSameForRawSignatureAndStdFunction) {
+  using ForRawSignature = decltype(&MockFunction<TypeParam>::AsStdFunction);
+  using ForStdFunction = decltype(&MockFunction<std::function<TypeParam>>::AsStdFunction);
+  EXPECT_TRUE((std::is_same<ForRawSignature, ForStdFunction>::value));
 }
 
 
