@@ -1822,7 +1822,7 @@ class MockFunction;
 template <typename R, typename... Args>
 class MockFunction<R(Args...)> {
  public:
-  MockFunction() {};
+  MockFunction() = default;
   MockFunction(const MockFunction&) = delete;
   MockFunction& operator=(const MockFunction&) = delete;
 
