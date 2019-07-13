@@ -62,7 +62,7 @@ You can also watch Zhanyong's [talk](http://www.youtube.com/watch?v=sYpCyLI47rM)
 
 Once you understand the basics, check out the rest of the docs:
 
-  * [CheatSheet](../googlemock/docs/CheatSheet.md) - all the commonly used stuff
+  * [CheatSheet](../googlemock/docs/cheat_sheet.md) - all the commonly used stuff
     at a glance.
   * [CookBook](../googlemock/docs/cook_book.md) - recipes for getting things done,
     including advanced techniques.

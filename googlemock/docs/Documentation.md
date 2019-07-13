@@ -5,7 +5,7 @@ documentation for that specific version instead (e.g. by checking out
 the respective git branch/tag).**
 
   * [ForDummies](ForDummies.md) -- start here if you are new to Google Mock.
-  * [CheatSheet](CheatSheet.md) -- a quick reference.
+  * [CheatSheet](cheat_sheet.md) -- a quick reference.
   * [CookBook](cook_book.md) -- recipes for doing various tasks using Google Mock.
   * [FrequentlyAskedQuestions](FrequentlyAskedQuestions.md) -- check here before asking a question on the mailing list.
 

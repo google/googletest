@@ -429,7 +429,7 @@ and you're ready to go.
 
 (Please read the [previous](#asserting-using-gmock-matchers) section first if you haven't.)
 
-You can use the gMock [string matchers](../../googlemock/docs/CheatSheet.md#string-matchers)
+You can use the gMock [string matchers](../../googlemock/docs/cheat_sheet.md#string-matchers)
 with `EXPECT_THAT()` or `ASSERT_THAT()` to do more string comparison tricks
 (sub-string, prefix, suffix, regular expression, and etc). For example,
 
