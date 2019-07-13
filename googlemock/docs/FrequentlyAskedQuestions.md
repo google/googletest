@@ -206,7 +206,7 @@ need any help.
 
 Google Mock works out of the box with Google Test.  However, it's easy
 to configure it to work with any testing framework of your choice.
-[Here](ForDummies.md#using-google-mock-with-any-testing-framework) is how.
+[Here](for_dummies.md#using-google-mock-with-any-testing-framework) is how.
 
 ## How am I supposed to make sense of these horrible template errors? ##
 
