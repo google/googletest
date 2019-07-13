@@ -1,6 +1,6 @@
 
 
-(**Note:** If you get compiler errors that you don't understand, be sure to consult [Google Mock Doctor](FrequentlyAskedQuestions.md#how-am-i-supposed-to-make-sense-of-these-horrible-template-errors).)
+(**Note:** If you get compiler errors that you don't understand, be sure to consult [Google Mock Doctor](frequently_asked_questions.md#how-am-i-supposed-to-make-sense-of-these-horrible-template-errors).)
 
 # What Is Google C++ Mocking Framework? #
 When you write a prototype or test, often it's not feasible or wise to rely on real objects entirely. A **mock object** implements the same interface as a real object (so it can be used as one), but lets you specify at run time how it will be used and what it should do (which methods will be called? in which order? how many times? with what arguments? what will they return? etc).
