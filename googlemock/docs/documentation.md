@@ -7,7 +7,8 @@ the respective git branch/tag).**
   * [ForDummies](for_dummies.md) -- start here if you are new to Google Mock.
   * [CheatSheet](cheat_sheet.md) -- a quick reference.
   * [CookBook](cook_book.md) -- recipes for doing various tasks using Google Mock.
-  * [FrequentlyAskedQuestions](frequently_asked_questions.md) -- check here before asking a question on the mailing list.
+  * [DesignDoc](design_doc.md) -- design of and rationale behind some Google Mock features.
+  * [FrequentlyAskedQuestions](frequently_asked_questions.md) and [KnownIssues](known_issues.md) -- check here before asking a question on the mailing list.
 
 To contribute code to Google Mock, read:
 
