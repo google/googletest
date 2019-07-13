@@ -68,7 +68,7 @@ Once you understand the basics, check out the rest of the docs:
     including advanced techniques.
 
 If you need help, please check the
-[KnownIssues](docs/KnownIssues.md) and
+[KnownIssues](docs/known_issues.md) and
 [FrequentlyAskedQuestions](docs/frequently_asked_questions.md) before
 posting a question on the
 [discussion group](http://groups.google.com/group/googlemock).
