@@ -1,6 +1,6 @@
 
 
-(**Note:** If you get compiler errors that you don't understand, be sure to consult [Google Mock Doctor](FrequentlyAskedQuestions.md#how-am-i-supposed-to-make-sense-of-these-horrible-template-errors).)
+(**Note:** If you get compiler errors that you don't understand, be sure to consult [Google Mock Doctor](frequently_asked_questions.md#how-am-i-supposed-to-make-sense-of-these-horrible-template-errors).)
 
 # What Is Google C++ Mocking Framework? #
 When you write a prototype or test, often it's not feasible or wise to rely on real objects entirely. A **mock object** implements the same interface as a real object (so it can be used as one), but lets you specify at run time how it will be used and what it should do (which methods will be called? in which order? how many times? with what arguments? what will they return? etc).
@@ -249,7 +249,7 @@ EXPECT_CALL(turtle, Forward(_));
 
 `_` is an instance of what we call **matchers**. A matcher is like a predicate and can test whether an argument is what we'd expect. You can use a matcher inside `EXPECT_CALL()` wherever a function argument is expected.
 
-A list of built-in matchers can be found in the [CheatSheet](CheatSheet.md). For example, here's the `Ge` (greater than or equal) matcher:
+A list of built-in matchers can be found in the [CheatSheet](cheat_sheet.md). For example, here's the `Ge` (greater than or equal) matcher:
 
 ```cpp
 using ::testing::Ge;
@@ -264,7 +264,7 @@ The first clause we can specify following an `EXPECT_CALL()` is `Times()`. We ca
 
 An interesting special case is when we say `Times(0)`. You may have guessed - it means that the function shouldn't be called with the given arguments at all, and Google Mock will report a Google Test failure whenever the function is (wrongfully) called.
 
-We've seen `AtLeast(n)` as an example of fuzzy cardinalities earlier. For the list of built-in cardinalities you can use, see the [CheatSheet](CheatSheet.md).
+We've seen `AtLeast(n)` as an example of fuzzy cardinalities earlier. For the list of built-in cardinalities you can use, see the [CheatSheet](cheat_sheet.md).
 
 The `Times()` clause can be omitted. **If you omit `Times()`, Google Mock will infer the cardinality for you.** The rules are easy to remember:
 
@@ -305,7 +305,7 @@ says that `turtle.GetY()` will be called _at least twice_ (Google Mock knows thi
 
 Of course, if you explicitly write a `Times()`, Google Mock will not try to infer the cardinality itself. What if the number you specified is larger than there are `WillOnce()` clauses? Well, after all `WillOnce()`s are used up, Google Mock will do the _default_ action for the function every time (unless, of course, you have a `WillRepeatedly()`.).
 
-What can we do inside `WillOnce()` besides `Return()`? You can return a reference using `ReturnRef(variable)`, or invoke a pre-defined function, among [others](CheatSheet.md#actions).
+What can we do inside `WillOnce()` besides `Return()`? You can return a reference using `ReturnRef(variable)`, or invoke a pre-defined function, among [others](cheat_sheet.md#actions).
 
 **Important note:** The `EXPECT_CALL()` statement evaluates the action clause only once, even though the action may be performed many times. Therefore you must be careful about side effects. The following may not do what you want:
 
