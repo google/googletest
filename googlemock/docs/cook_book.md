@@ -1138,29 +1138,6 @@ Note that the predicate function / functor doesn't have to return `bool`. It
 works as long as the return value can be used as the condition in in statement
 `if (condition) ...`.
 
-#### Using Callbacks as Matchers
-
-Callbacks are widely used in `google3`. Conceptually, a `ResultCallback1<bool,
-T>` is just a predicate on argument of type `T`. Naturally, we sometimes would
-want to use such a callback as a matcher.
-
-gMock gives you two function templates in namespace `testing` to turn callbacks
-into matchers.
-
-The first is `Truly(callback)`. It matches `argument` iff
-`callback->Run(argument)` returns `true`.
-
-The second is `AddressSatisfies(callback)`, which matches `argument` whenever
-`callback->Run(&argument)` returns `true`.
-
-The callbacks used in `Truly()` and `AddressSatisfies()` must be permanent (e.g.
-those returned by `NewPermanentCallback()`), or you'll get a run-time error. The
-matcher takes ownership of the callback, so you don't need to worry about
-deleting it.
-
-For examples, see
-google3/testing/base/internal/gmock_utils/callback-matchers_test.cc.
-
 #### Matching Arguments that Are Not Copyable
 
 When you do an `EXPECT_CALL(mock_obj, Foo(bar))`, gMock saves away a copy of
@@ -2167,16 +2144,11 @@ Note that both `ON_CALL` and `EXPECT_CALL` have the same "later statements take
 precedence" rule, but they don't interact. That is, `EXPECT_CALL`s have their
 own precedence order distinct from the `ON_CALL` precedence order.
 
-#### Using Functions/Methods/Functors/Lambdas/Callbacks as Actions {#FunctionsAsActions}
+#### Using Functions/Methods/Functors/Lambdas as Actions {#FunctionsAsActions}
 
-If the built-in actions don't suit you, you can easily use an existing callable
-(function, `std::function`, method, functor, lambda, or `google3` permanent
-callback) as an action. Note that `Callback` or member function must be wrapped
-with `Invoke()`, whereas lambdas and functors will work by themselves.
-
-```cpp
-using ::testing::_;
-using ::testing::Invoke;
+If the built-in actions don't suit you, you can use an existing callable
+(function, `std::function`, method, functor, lambda as an action. ```cpp
+using ::testing::_; using ::testing::Invoke;
 
 class MockFoo : public Foo {
  public:
