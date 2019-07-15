@@ -467,7 +467,7 @@ class ScopedMockLog : public LogSink {
 ```
 
 By defining a new mock method with a trimmed argument list, we make the mock
-class more user-friendly. <!-- GOOGLETEST_CM0017 DO NOT DELETE -->
+class more user-friendly.
 
 This technique may also be applied to make overloaded methods more amenable to
 mocking. For example, when overloads have been used to implement default
@@ -1455,7 +1455,7 @@ mock object and gMock.
 
 #### Knowing When to Expect {#UseOnCall}
 
-<!-- GOOGLETEST_CM0018 DO NOT DELETE -->
+<!-- GOOGLETEST_CM0017 DO NOT DELETE -->
 
 **`ON_CALL`** is likely the *single most under-utilized construct* in gMock.
 
