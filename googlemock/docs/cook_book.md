@@ -2292,8 +2292,8 @@ bool Job2(int n, char c) { ... }
 
 #### Invoking an Argument of the Mock Function
 
-Sometimes a mock function will receive a function pointer, a functor, or a
-`google3`-style callback (in other words, a "callable") as an argument, e.g.
+Sometimes a mock function will receive a function pointer, a functor (in other
+words, a "callable") as an argument, e.g.
 
 ```cpp
 class MockFoo : public Foo {
