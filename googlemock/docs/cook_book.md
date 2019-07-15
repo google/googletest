@@ -3,7 +3,7 @@
 <!-- GOOGLETEST_CM0011 DO NOT DELETE -->
 
 You can find recipes for using Google Mock here. If you haven't yet,
-please read the [ForDummies](ForDummies.md) document first to make sure you understand
+please read the [ForDummies](for_dummies.md) document first to make sure you understand
 the basics.
 
 **Note:** Google Mock lives in the `testing` name space. For
@@ -866,7 +866,7 @@ says that `Blah()` will be called with arguments `x`, `y`, and `z` where
 `x < y < z`.
 
 As a convenience and example, Google Mock provides some matchers for
-2-tuples, including the `Lt()` matcher above. See the [CheatSheet](CheatSheet.md) for
+2-tuples, including the `Lt()` matcher above. See the [CheatSheet](cheat_sheet.md) for
 the complete list.
 
 Note that if you want to pass the arguments to a predicate of your own
@@ -1391,7 +1391,7 @@ instead of being overly constraining.
 
 Google Mock allows you to impose an arbitrary DAG (directed acyclic
 graph) on the calls. One way to express the DAG is to use the
-[After](CheatSheet.md#the-after-clause) clause of `EXPECT_CALL`.
+[After](cheat_sheet.md#the-after-clause) clause of `EXPECT_CALL`.
 
 Another way is via the `InSequence()` clause (not the same as the
 `InSequence` class), which we borrowed from jMock 2. It's less
