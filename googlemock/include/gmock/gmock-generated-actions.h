@@ -268,7 +268,7 @@ class ActionHelper {
 // MORE INFORMATION:
 //
 // To learn more about using these macros, please search for 'ACTION' on
-// https://github.com/google/googletest/blob/master/googlemock/docs/CookBook.md
+// https://github.com/google/googletest/blob/master/googlemock/docs/cook_book.md
 
 // An internal macro needed for implementing ACTION*().
 #define GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_\
