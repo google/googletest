@@ -261,7 +261,7 @@ line number to jump right to the failed expectation.
 **Tip 2:** If your mock objects are never deleted, the final verification won't
 happen. Therefore it's a good idea to turn on the heap checker in your tests
 when you allocate mocks on the heap. You get that automatically if you use the
-`gunit_main` library already.
+`gtest_main` library already.
 
 **Important note:** gMock requires expectations to be set **before** the mock
 functions are called, otherwise the behavior is **undefined**. In particular,
