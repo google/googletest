@@ -1,7 +1,7 @@
-# Googletest Samples
+# Googletest Samples {#samples}
 
-If you're like us, you'd like to look at [googletest
-samples.](https://github.com/google/googletest/tree/master/googletest/samples)
+If you're like us, you'd like to look at
+[googletest samples.](https://github.com/google/googletest/tree/master/googletest/samples)
 The sample directory has a number of well-commented samples showing how to use a
 variety of googletest features.
 
