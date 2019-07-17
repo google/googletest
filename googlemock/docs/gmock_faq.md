@@ -2,6 +2,9 @@
 
 <!-- GOOGLETEST_CM0020 DO NOT DELETE -->
 
+Please send your question to [gmock-users](mailto:gmock-users@google.com)
+([subscribe](https://groups.google.com/a/google.com/group/gmock-users/subscribe)).
+
 ### When I call a method on my mock object, the method for the real object is invoked instead. What's the problem?
 
 In order for a method to be mocked, it must be *virtual*, unless you use the
@@ -124,6 +127,44 @@ using ::testing::_;
       .Times(0);
 ```
 
+### I need to mock a Stubby server. Should I use gMock or the service mocker? {#GMockVsServiceMocker}
+
+To quote PiotrKaminski, the author of the service mocker:
+
+You can find an introduction to the service mocker
+[here](http://go/stubby-codelab#test-client), and detailed documentation in
+net/rpc/testing/public/servicemocker.h. As I'm the author of the framework my
+opinion on it can hardly be objective, but here are the main advantages it has
+over gMock when it comes to mocking Stubby services:
+
+*   Services are mocked dynamically so there's no need to manually write mock
+    service implementations.
+*   The client's calls go through a real Stubby channel, which will catch some
+    errors that calling a service implementation directly would miss.
+*   The service mocker is aware of sync/async client distinctions and common
+    Stubby threading strategies, and in general allows you to exert more control
+    over when the callback is made.
+*   The base syntax and semantics are very similar to gMock, but Stubby-specific
+    matchers and actions make the testing code more compact.
+*   A powerful expectation grouping mechanism allows expressing complicated
+    async call ordering constraints in a readable fashion.
+*   By the end of the week, there'll be built-in support for testing call
+    cancellation.
+
+Some disadvantages:
+
+*   The service mocker documentation is not as good as gMock's.
+*   The error messages are probably not as good as gMock's either.
+*   You can only mock services, not arbitrary classes. Expectations do not
+    interact with gMock's.
+*   Slightly different expectation matching semantics in corner cases, which
+    could get confusing if you're using gMock as well.
+
+In my biased opinion, if you only need to mock out Stubby services, you should
+look at the service mocker first. If you need to mock out other classes too, and
+especially if you need to express relationships between service and other
+expectations, you're probably better off with gMock.
+
 ### I have a failed test where gMock tells me TWICE that a particular expectation is not satisfied. Isn't this redundant?
 
 When gMock detects a failure, it prints relevant information (the mock function
@@ -156,7 +197,7 @@ class Derived : public Base {
  public:
   ...
  private:
-  std::string value_;
+  string value_;
 };
 
 ...
@@ -314,9 +355,7 @@ less testable, etc). You are probably better off defining a small interface and
 call the function through that interface, which then can be easily mocked. It's
 a bit of work initially, but usually pays for itself quickly.
 
-This Google Testing Blog
-[post](https://testing.googleblog.com/2008/06/defeat-static-cling.html) says it
-excellently. Check it out.
+This tott [episode](http://go/tott/63) says it excellently. Check it out.
 
 ### My mock object needs to do complex stuff. It's a lot of pain to specify the actions. gMock sucks!
 
@@ -382,8 +421,7 @@ doesn't say what the return value should be. You need `DoAll()` to chain a
 `SetArgPointee()` with a `Return()` that provides a value appropriate to the API
 being mocked.
 
-See this [recipe](cook_book.md#mocking-side-effects) for more details and an
-example.
+See this [recipe](#MockingSideEffects) for more details and an example.
 
 ### I have a huge mock class, and Microsoft Visual C++ runs out of memory when compiling it. What can I do?
 
