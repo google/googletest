@@ -61,6 +61,7 @@
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <set>
