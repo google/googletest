@@ -1,6 +1,6 @@
 # Googletest FAQ
 
-<!-- GOOGLETEST_CM0013 DO NOT DELETE -->
+<!-- GOOGLETEST_CM0014 DO NOT DELETE -->
 
 ## Why should test suite names and test names not contain underscore?
 
