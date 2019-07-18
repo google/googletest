@@ -1,6 +1,6 @@
 # Advanced googletest Topics
 
-<!-- GOOGLETEST_CM0015 DO NOT DELETE -->
+<!-- GOOGLETEST_CM0016 DO NOT DELETE -->
 
 ## Introduction
 

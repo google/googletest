@@ -1,6 +1,6 @@
 ## gMock Cheat Sheet
 
-<!-- GOOGLETEST_CM0018 DO NOT DELETE -->
+<!-- GOOGLETEST_CM0019 DO NOT DELETE -->
 
 ### Defining a Mock Class
 
