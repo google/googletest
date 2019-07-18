@@ -1222,7 +1222,7 @@ First, you subclass the `::testing::Environment` class to define a test
 environment, which knows how to set-up and tear-down:
 
 ```c++
-class Environment {
+class Environment : public ::testing::Environment {
  public:
   virtual ~Environment() {}
 
