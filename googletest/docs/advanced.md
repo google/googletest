@@ -385,7 +385,7 @@ using ::testing::StartsWith;
 ```
 
 Read this
-[recipe](https://github.com/google/googletest/blob/master/googlemock/docs/cook_book.md#using-matchers-in-googletest-assertions)
+[recipe](../../googlemock/docs/cook_book.md#using-matchers-in-googletest-assertions)
 in the gMock Cookbook for more details.
 
 gMock has a rich set of matchers. You can do many things googletest cannot do
