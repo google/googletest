@@ -1,6 +1,6 @@
 ## Googletest Mocking (gMock) for Dummies {#GMockForDummies}
 
-<!-- GOOGLETEST_CM0012 DO NOT DELETE -->
+<!-- GOOGLETEST_CM0013 DO NOT DELETE -->
 
 ### What Is gMock?
 

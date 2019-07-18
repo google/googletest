@@ -1,6 +1,6 @@
 ## Googletest Mocking (gMock) Cookbook
 
-<!-- GOOGLETEST_CM0011 DO NOT DELETE -->
+<!-- GOOGLETEST_CM0012 DO NOT DELETE -->
 
 You can find recipes for using gMock here. If you haven't yet, please read
 [this](for_dummies.md) first to make sure you understand the basics.
