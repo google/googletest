@@ -1227,10 +1227,10 @@ class Environment : public ::testing::Environment {
   virtual ~Environment() {}
 
   // Override this to define how to set up the environment.
-  virtual void SetUp() {}
+  void SetUp() override {}
 
   // Override this to define how to tear down the environment.
-  virtual void TearDown() {}
+  void TearDown() override {}
 };
 ```
 
