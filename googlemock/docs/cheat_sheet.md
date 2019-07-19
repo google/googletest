@@ -1,6 +1,6 @@
 ## gMock Cheat Sheet
 
-<!-- GOOGLETEST_CM0018 DO NOT DELETE -->
+<!-- GOOGLETEST_CM0019 DO NOT DELETE -->
 
 ### Defining a Mock Class
 
@@ -215,7 +215,7 @@ and the default action will be taken each time.
 
 ### Matchers {#MatcherList}
 
-<!-- GOOGLETEST_CM0019 DO NOT DELETE -->
+<!-- GOOGLETEST_CM0020 DO NOT DELETE -->
 
 A **matcher** matches a *single* argument. You can use it inside `ON_CALL()` or
 `EXPECT_CALL()`, or use it to validate a value directly:
@@ -340,67 +340,99 @@ or simply `expected_container` to match a container exactly. If you want to
 write the elements in-line, match them more flexibly, or get more informative
 messages, you can use:
 
-| Matcher                              | Description                          |
-| :----------------------------------- | :----------------------------------- |
-| `ContainerEq(container)`             | The same as `Eq(container)` except   |
-:                                      : that the failure message also        :
-:                                      : includes which elements are in one   :
-:                                      : container but not the other.         :
-| `Contains(e)`                        | `argument` contains an element that  |
-:                                      : matches `e`, which can be either a   :
-:                                      : value or a matcher.                  :
-| `Each(e)`                            | `argument` is a container where      |
-:                                      : _every_ element matches `e`, which   :
-:                                      : can be either a value or a matcher.  :
-| `ElementsAre(e0, e1, ..., en)`       | `argument` has `n + 1` elements,     |
-:                                      : where the i-th element matches `ei`, :
-:                                      : which can be a value or a matcher. 0 :
-:                                      : to 10 arguments are allowed.         :
-| `ElementsAreArray({ e0, e1, ..., en  | The same as `ElementsAre()` except   |
-: })`, `ElementsAreArray(array)`, or   : that the expected element            :
-: `ElementsAreArray(array, count)`     : values/matchers come from an         :
-:                                      : initializer list, STL-style          :
-:                                      : container, or C-style array.         :
-| `IsEmpty()`                          | `argument` is an empty container     |
-:                                      : (`container.empty()`).               :
-| `Pointwise(m, container)`            | `argument` contains the same number  |
-:                                      : of elements as in `container`, and   :
-:                                      : for all i, (the i-th element in      :
-:                                      : `argument`, the i-th element in      :
-:                                      : `container`) match `m`, which is a   :
-:                                      : matcher on 2-tuples. E.g.            :
-:                                      : `Pointwise(Le(), upper_bounds)`      :
-:                                      : verifies that each element in        :
-:                                      : `argument` doesn't exceed the        :
-:                                      : corresponding element in             :
-:                                      : `upper_bounds`. See more detail      :
-:                                      : below.                               :
-| `SizeIs(m)`                          | `argument` is a container whose size |
-:                                      : matches `m`. E.g. `SizeIs(2)` or     :
-:                                      : `SizeIs(Lt(2))`.                     :
-| `UnorderedElementsAre(e0, e1, ...,   | `argument` has `n + 1` elements, and |
-: en)`                                 : under some permutation each element  :
-:                                      : matches an `ei` (for a different     :
-:                                      : `i`), which can be a value or a      :
-:                                      : matcher. 0 to 10 arguments are       :
-:                                      : allowed.                             :
-| `UnorderedElementsAreArray({ e0, e1, | The same as `UnorderedElementsAre()` |
-: ..., en })`,                         : except that the expected element     :
-: `UnorderedElementsAreArray(array)`,  : values/matchers come from an         :
-: or `UnorderedElementsAreArray(array, : initializer list, STL-style          :
-: count)`                              : container, or C-style array.         :
-| `WhenSorted(m)`                      | When `argument` is sorted using the  |
-:                                      : `<` operator, it matches container   :
-:                                      : matcher `m`. E.g.                    :
-:                                      : `WhenSorted(ElementsAre(1, 2, 3))`   :
-:                                      : verifies that `argument` contains    :
-:                                      : elements `1`, `2`, and `3`, ignoring :
-:                                      : order.                               :
-| `WhenSortedBy(comparator, m)`        | The same as `WhenSorted(m)`, except  |
-:                                      : that the given comparator instead of :
-:                                      : `<` is used to sort `argument`. E.g. :
-:                                      : `WhenSortedBy(std\:\:greater<int>(), :
-:                                      : ElementsAre(3, 2, 1))`.              :
+| Matcher                                   | Description                      |
+| :---------------------------------------- | :------------------------------- |
+| `BeginEndDistanceIs(m)`                   | `argument` is a container whose  |
+:                                           : `begin()` and `end()` iterators  :
+:                                           : are separated by a number of     :
+:                                           : increments matching `m`. E.g.    :
+:                                           : `BeginEndDistanceIs(2)` or       :
+:                                           : `BeginEndDistanceIs(Lt(2))`. For :
+:                                           : containers that define a         :
+:                                           : `size()` method, `SizeIs(m)` may :
+:                                           : be more efficient.               :
+| `ContainerEq(container)`                  | The same as `Eq(container)`      |
+:                                           : except that the failure message  :
+:                                           : also includes which elements are :
+:                                           : in one container but not the     :
+:                                           : other.                           :
+| `Contains(e)`                             | `argument` contains an element   |
+:                                           : that matches `e`, which can be   :
+:                                           : either a value or a matcher.     :
+| `Each(e)`                                 | `argument` is a container where  |
+:                                           : *every* element matches `e`,     :
+:                                           : which can be either a value or a :
+:                                           : matcher.                         :
+| `ElementsAre(e0, e1, ..., en)`            | `argument` has `n + 1` elements, |
+:                                           : where the *i*-th element matches :
+:                                           : `ei`, which can be a value or a  :
+:                                           : matcher.                         :
+| `ElementsAreArray({e0, e1, ..., en})`,    | The same as `ElementsAre()`      |
+: `ElementsAreArray(a_container)`,          : except that the expected element :
+: `ElementsAreArray(begin, end)`,           : values/matchers come from an     :
+: `ElementsAreArray(array)`, or             : initializer list, STL-style      :
+: `ElementsAreArray(array, count)`          : container, iterator range, or    :
+:                                           : C-style array.                   :
+| `IsEmpty()`                               | `argument` is an empty container |
+:                                           : (`container.empty()`).           :
+| `IsFalse()`                               | `argument` evaluates to `false`  |
+:                                           : in a Boolean context.            :
+| `IsSubsetOf({e0, e1, ..., en})`,          | `argument` matches               |
+: `IsSubsetOf(a_container)`,                : `UnorderedElementsAre(x0, x1,    :
+: `IsSubsetOf(begin, end)`,                 : ..., xk)` for some subset `{x0,  :
+: `IsSubsetOf(array)`, or                   : x1, ..., xk}` of the expected    :
+: `IsSubsetOf(array, count)`                : matchers.                        :
+| `IsSupersetOf({e0, e1, ..., en})`,        | Some subset of `argument`        |
+: `IsSupersetOf(a_container)`,              : matches                          :
+: `IsSupersetOf(begin, end)`,               : `UnorderedElementsAre(`expected  :
+: `IsSupersetOf(array)`, or                 : matchers`)`.                     :
+: `IsSupersetOf(array, count)`              :                                  :
+| `IsTrue()`                                | `argument` evaluates to `true`   |
+:                                           : in a Boolean context.            :
+| `Pointwise(m, container)`, `Pointwise(m,  | `argument` contains the same     |
+: {e0, e1, ..., en})`                       : number of elements as in         :
+:                                           : `container`, and for all i, (the :
+:                                           : i-th element in `argument`, the  :
+:                                           : i-th element in `container`)     :
+:                                           : match `m`, which is a matcher on :
+:                                           : 2-tuples. E.g. `Pointwise(Le(),  :
+:                                           : upper_bounds)` verifies that     :
+:                                           : each element in `argument`       :
+:                                           : doesn't exceed the corresponding :
+:                                           : element in `upper_bounds`. See   :
+:                                           : more detail below.               :
+| `SizeIs(m)`                               | `argument` is a container whose  |
+:                                           : size matches `m`. E.g.           :
+:                                           : `SizeIs(2)` or `SizeIs(Lt(2))`.  :
+| `UnorderedElementsAre(e0, e1, ..., en)`   | `argument` has `n + 1` elements, |
+:                                           : and under *some* permutation of  :
+:                                           : the elements, each element       :
+:                                           : matches an `ei` (for a different :
+:                                           : `i`), which can be a value or a  :
+:                                           : matcher.                         :
+| `UnorderedElementsAreArray({e0, e1, ...,  | The same as                      |
+: en})`,                                    : `UnorderedElementsAre()` except  :
+: `UnorderedElementsAreArray(a_container)`, : that the expected element        :
+: `UnorderedElementsAreArray(begin, end)`,  : values/matchers come from an     :
+: `UnorderedElementsAreArray(array)`, or    : initializer list, STL-style      :
+: `UnorderedElementsAreArray(array, count)` : container, iterator range, or    :
+:                                           : C-style array.                   :
+| `UnorderedPointwise(m, container)`,       | Like `Pointwise(m, container)`,  |
+: `UnorderedPointwise(m, {e0, e1, ...,      : but ignores the order of         :
+: en})`                                     : elements.                        :
+| `WhenSorted(m)`                           | When `argument` is sorted using  |
+:                                           : the `<` operator, it matches     :
+:                                           : container matcher `m`. E.g.      :
+:                                           : `WhenSorted(ElementsAre(1, 2,    :
+:                                           : 3))` verifies that `argument`    :
+:                                           : contains elements 1, 2, and 3,   :
+:                                           : ignoring order.                  :
+| `WhenSortedBy(comparator, m)`             | The same as `WhenSorted(m)`,     |
+:                                           : except that the given comparator :
+:                                           : instead of `<` is used to sort   :
+:                                           : `argument`. E.g.                 :
+:                                           : `WhenSortedBy(std\:\:greater(),  :
+:                                           : ElementsAre(3, 2, 1))`.          :
 
 **Notes:**
 
