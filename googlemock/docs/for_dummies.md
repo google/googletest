@@ -1,6 +1,6 @@
 ## Googletest Mocking (gMock) for Dummies {#GMockForDummies}
 
-<!-- GOOGLETEST_CM0012 DO NOT DELETE -->
+<!-- GOOGLETEST_CM0013 DO NOT DELETE -->
 
 ### What Is gMock?
 
@@ -499,7 +499,7 @@ always return 100 as `n++` is only evaluated once. Similarly, `Return(new Foo)`
 will create a new `Foo` object when the `EXPECT_CALL()` is executed, and will
 return the same pointer every time. If you want the side effect to happen every
 time, you need to define a custom action, which we'll teach in the
-[cook book](http://<!-- GOOGLETEST_CM0011 DO NOT DELETE -->).
+[cook book](http://<!-- GOOGLETEST_CM0012 DO NOT DELETE -->).
 
 Time for another quiz! What do you think the following means?
 

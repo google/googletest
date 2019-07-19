@@ -1,6 +1,6 @@
 ## Googletest Mocking (gMock) Cookbook
 
-<!-- GOOGLETEST_CM0011 DO NOT DELETE -->
+<!-- GOOGLETEST_CM0012 DO NOT DELETE -->
 
 You can find recipes for using gMock here. If you haven't yet, please read
 [this](for_dummies.md) first to make sure you understand the basics.
@@ -154,7 +154,7 @@ class MockStack : public StackInterface<Elem> {
 #### Mocking Non-virtual Methods {#MockingNonVirtualMethods}
 
 gMock can mock non-virtual functions to be used in Hi-perf dependency
-injection.<!-- GOOGLETEST_CM0016 DO NOT DELETE -->.
+injection.<!-- GOOGLETEST_CM0017 DO NOT DELETE -->.
 
 In this case, instead of sharing a common base class with the real class, your
 mock class will be *unrelated* to the real class, but contain methods with the
@@ -1455,7 +1455,7 @@ mock object and gMock.
 
 #### Knowing When to Expect {#UseOnCall}
 
-<!-- GOOGLETEST_CM0017 DO NOT DELETE -->
+<!-- GOOGLETEST_CM0018 DO NOT DELETE -->
 
 **`ON_CALL`** is likely the *single most under-utilized construct* in gMock.
 
