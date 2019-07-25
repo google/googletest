@@ -12,9 +12,9 @@ matrix:
   include:
     - os: linux
       sudo: required
-      before_install: chmod -R +x ./ci/*platformio.sh 
+      before_install: chmod -R +x ./ci/*platformio.sh
       install: ./ci/install-platformio.sh
-      script: ./ci/build-platformio.sh      
+      script: ./ci/build-platformio.sh
     - os: linux
       dist: xenial
       compiler: gcc
@@ -29,7 +29,7 @@ matrix:
       script: ./ci/build-linux-bazel.sh
     - os: linux
       compiler: gcc
-      env: BUILD_TYPE=Debug VERBOSE=1 CXX_FLAGS=-std=c++11 
+      env: BUILD_TYPE=Debug VERBOSE=1 CXX_FLAGS=-std=c++11
     - os: linux
       compiler: clang
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11 -Wgnu-zero-variadic-macro-arguments
