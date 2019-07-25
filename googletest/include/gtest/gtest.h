@@ -588,6 +588,10 @@ class GTEST_API_ TestResult {
   // Returns the elapsed time, in milliseconds.
   TimeInMillis elapsed_time() const { return elapsed_time_; }
 
+  // Gets the time of the test case start, in ms from the start of the
+  // UNIX epoch.
+  TimeInMillis start_timestamp() const { return start_timestamp_; }
+
   // Returns the i-th test part result among all the results. i can range from 0
   // to total_part_count() - 1. If i is not in that range, aborts the program.
   const TestPartResult& GetTestPartResult(int i) const;
@@ -617,6 +621,9 @@ class GTEST_API_ TestResult {
   const std::vector<TestProperty>& test_properties() const {
     return test_properties_;
   }
+
+  // Sets the start time.
+  void set_start_timestamp(TimeInMillis start) { start_timestamp_ = start; }
 
   // Sets the elapsed time.
   void set_elapsed_time(TimeInMillis elapsed) { elapsed_time_ = elapsed; }
@@ -661,6 +668,8 @@ class GTEST_API_ TestResult {
   std::vector<TestProperty> test_properties_;
   // Running count of death tests.
   int death_test_count_;
+  // The start time, in milliseconds since UNIX Epoch.
+  TimeInMillis start_timestamp_;
   // The elapsed time, in milliseconds.
   TimeInMillis elapsed_time_;
 
@@ -881,6 +890,10 @@ class GTEST_API_ TestSuite {
   // Returns the elapsed time, in milliseconds.
   TimeInMillis elapsed_time() const { return elapsed_time_; }
 
+  // Gets the time of the test suite start, in ms from the start of the
+  // UNIX epoch.
+  TimeInMillis start_timestamp() const { return start_timestamp_; }
+
   // Returns the i-th test among all the tests. i can range from 0 to
   // total_test_count() - 1. If i is not in that range, returns NULL.
   const TestInfo* GetTestInfo(int i) const;
@@ -999,6 +1012,8 @@ class GTEST_API_ TestSuite {
   internal::TearDownTestSuiteFunc tear_down_tc_;
   // True iff any test in this test suite should run.
   bool should_run_;
+  // The start time, in milliseconds since UNIX Epoch.
+  TimeInMillis start_timestamp_;
   // Elapsed time, in milliseconds.
   TimeInMillis elapsed_time_;
   // Holds test properties recorded during execution of SetUpTestSuite and

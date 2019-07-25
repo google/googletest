@@ -73,457 +73,474 @@ EXPECTED_NON_EMPTY = {
         u'42',
     u'name':
         u'AllTests',
-    u'testsuites': [
-        {
+    u'testsuites': [{
+        u'name':
+            u'SuccessfulTest',
+        u'tests':
+            1,
+        u'failures':
+            0,
+        u'disabled':
+            0,
+        u'errors':
+            0,
+        u'time':
+            u'*',
+        u'timestamp':
+            u'*',
+        u'testsuite': [{
+            u'name': u'Succeeds',
+            u'status': u'RUN',
+            u'result': u'COMPLETED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'SuccessfulTest'
+        }]
+    }, {
+        u'name':
+            u'FailedTest',
+        u'tests':
+            1,
+        u'failures':
+            1,
+        u'disabled':
+            0,
+        u'errors':
+            0,
+        u'time':
+            u'*',
+        u'timestamp':
+            u'*',
+        u'testsuite': [{
             u'name':
-                u'SuccessfulTest',
-            u'tests':
-                1,
-            u'failures':
-                0,
-            u'disabled':
-                0,
-            u'errors':
-                0,
+                u'Fails',
+            u'status':
+                u'RUN',
+            u'result':
+                u'COMPLETED',
             u'time':
                 u'*',
-            u'testsuite': [{
-                u'name': u'Succeeds',
-                u'status': u'RUN',
-                u'result': u'COMPLETED',
-                u'time': u'*',
-                u'classname': u'SuccessfulTest'
-            }]
-        },
-        {
-            u'name':
+            u'timestamp':
+                u'*',
+            u'classname':
                 u'FailedTest',
-            u'tests':
-                1,
-            u'failures':
-                1,
-            u'disabled':
-                0,
-            u'errors':
-                0,
+            u'failures': [{
+                u'failure': u'gtest_xml_output_unittest_.cc:*\n'
+                            u'Expected equality of these values:\n'
+                            u'  1\n  2' + STACK_TRACE_TEMPLATE,
+                u'type': u''
+            }]
+        }]
+    }, {
+        u'name':
+            u'DisabledTest',
+        u'tests':
+            1,
+        u'failures':
+            0,
+        u'disabled':
+            1,
+        u'errors':
+            0,
+        u'time':
+            u'*',
+        u'timestamp':
+            u'*',
+        u'testsuite': [{
+            u'name': u'DISABLED_test_not_run',
+            u'status': u'NOTRUN',
+            u'result': u'SUPPRESSED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'DisabledTest'
+        }]
+    }, {
+        u'name':
+            u'SkippedTest',
+        u'tests':
+            1,
+        u'failures':
+            0,
+        u'disabled':
+            0,
+        u'errors':
+            0,
+        u'time':
+            u'*',
+        u'timestamp':
+            u'*',
+        u'testsuite': [{
+            u'name': u'Skipped',
+            u'status': u'RUN',
+            u'result': u'SKIPPED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'SkippedTest'
+        }]
+    }, {
+        u'name':
+            u'MixedResultTest',
+        u'tests':
+            3,
+        u'failures':
+            1,
+        u'disabled':
+            1,
+        u'errors':
+            0,
+        u'time':
+            u'*',
+        u'timestamp':
+            u'*',
+        u'testsuite': [{
+            u'name': u'Succeeds',
+            u'status': u'RUN',
+            u'result': u'COMPLETED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'MixedResultTest'
+        }, {
+            u'name':
+                u'Fails',
+            u'status':
+                u'RUN',
+            u'result':
+                u'COMPLETED',
             u'time':
                 u'*',
-            u'testsuite': [{
-                u'name':
-                    u'Fails',
-                u'status':
-                    u'RUN',
-                u'result':
-                    u'COMPLETED',
-                u'time':
-                    u'*',
-                u'classname':
-                    u'FailedTest',
-                u'failures': [{
-                    u'failure': u'gtest_xml_output_unittest_.cc:*\n'
-                                u'Expected equality of these values:\n'
-                                u'  1\n  2' + STACK_TRACE_TEMPLATE,
-                    u'type': u''
-                }]
-            }]
-        },
-        {
-            u'name':
-                u'DisabledTest',
-            u'tests':
-                1,
-            u'failures':
-                0,
-            u'disabled':
-                1,
-            u'errors':
-                0,
-            u'time':
+            u'timestamp':
                 u'*',
-            u'testsuite': [{
-                u'name': u'DISABLED_test_not_run',
-                u'status': u'NOTRUN',
-                u'result': u'SUPPRESSED',
-                u'time': u'*',
-                u'classname': u'DisabledTest'
-            }]
-        },
-        {
-            u'name':
-                u'SkippedTest',
-            u'tests':
-                1,
-            u'failures':
-                0,
-            u'disabled':
-                0,
-            u'errors':
-                0,
-            u'time':
-                u'*',
-            u'testsuite': [{
-                u'name': u'Skipped',
-                u'status': u'RUN',
-                u'result': u'SKIPPED',
-                u'time': u'*',
-                u'classname': u'SkippedTest'
-            }]
-        },
-        {
-            u'name':
+            u'classname':
                 u'MixedResultTest',
-            u'tests':
-                3,
-            u'failures':
-                1,
-            u'disabled':
-                1,
-            u'errors':
-                0,
+            u'failures': [{
+                u'failure': u'gtest_xml_output_unittest_.cc:*\n'
+                            u'Expected equality of these values:\n'
+                            u'  1\n  2' + STACK_TRACE_TEMPLATE,
+                u'type': u''
+            }, {
+                u'failure': u'gtest_xml_output_unittest_.cc:*\n'
+                            u'Expected equality of these values:\n'
+                            u'  2\n  3' + STACK_TRACE_TEMPLATE,
+                u'type': u''
+            }]
+        }, {
+            u'name': u'DISABLED_test',
+            u'status': u'NOTRUN',
+            u'result': u'SUPPRESSED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'MixedResultTest'
+        }]
+    }, {
+        u'name':
+            u'XmlQuotingTest',
+        u'tests':
+            1,
+        u'failures':
+            1,
+        u'disabled':
+            0,
+        u'errors':
+            0,
+        u'time':
+            u'*',
+        u'timestamp':
+            u'*',
+        u'testsuite': [{
+            u'name':
+                u'OutputsCData',
+            u'status':
+                u'RUN',
+            u'result':
+                u'COMPLETED',
             u'time':
                 u'*',
-            u'testsuite': [
-                {
-                    u'name': u'Succeeds',
-                    u'status': u'RUN',
-                    u'result': u'COMPLETED',
-                    u'time': u'*',
-                    u'classname': u'MixedResultTest'
-                },
-                {
-                    u'name':
-                        u'Fails',
-                    u'status':
-                        u'RUN',
-                    u'result':
-                        u'COMPLETED',
-                    u'time':
-                        u'*',
-                    u'classname':
-                        u'MixedResultTest',
-                    u'failures':
-                        [{
-                            u'failure': u'gtest_xml_output_unittest_.cc:*\n'
-                                        u'Expected equality of these values:\n'
-                                        u'  1\n  2' + STACK_TRACE_TEMPLATE,
-                            u'type': u''
-                        },
-                         {
-                             u'failure': u'gtest_xml_output_unittest_.cc:*\n'
-                                         u'Expected equality of these values:\n'
-                                         u'  2\n  3' + STACK_TRACE_TEMPLATE,
-                             u'type': u''
-                         }]
-                },
-                {
-                    u'name': u'DISABLED_test',
-                    u'status': u'NOTRUN',
-                    u'result': u'SUPPRESSED',
-                    u'time': u'*',
-                    u'classname': u'MixedResultTest'
-                }
-            ]
-        },
-        {
-            u'name':
+            u'timestamp':
+                u'*',
+            u'classname':
                 u'XmlQuotingTest',
-            u'tests':
-                1,
-            u'failures':
-                1,
-            u'disabled':
-                0,
-            u'errors':
-                0,
+            u'failures': [{
+                u'failure': u'gtest_xml_output_unittest_.cc:*\n'
+                            u'Failed\nXML output: <?xml encoding="utf-8">'
+                            u'<top><![CDATA[cdata text]]></top>' +
+                            STACK_TRACE_TEMPLATE,
+                u'type': u''
+            }]
+        }]
+    }, {
+        u'name':
+            u'InvalidCharactersTest',
+        u'tests':
+            1,
+        u'failures':
+            1,
+        u'disabled':
+            0,
+        u'errors':
+            0,
+        u'time':
+            u'*',
+        u'timestamp':
+            u'*',
+        u'testsuite': [{
+            u'name':
+                u'InvalidCharactersInMessage',
+            u'status':
+                u'RUN',
+            u'result':
+                u'COMPLETED',
             u'time':
                 u'*',
-            u'testsuite': [{
-                u'name':
-                    u'OutputsCData',
-                u'status':
-                    u'RUN',
-                u'result':
-                    u'COMPLETED',
-                u'time':
-                    u'*',
-                u'classname':
-                    u'XmlQuotingTest',
-                u'failures': [{
-                    u'failure': u'gtest_xml_output_unittest_.cc:*\n'
-                                u'Failed\nXML output: <?xml encoding="utf-8">'
-                                u'<top><![CDATA[cdata text]]></top>' +
-                                STACK_TRACE_TEMPLATE,
-                    u'type': u''
-                }]
-            }]
-        },
-        {
-            u'name':
+            u'timestamp':
+                u'*',
+            u'classname':
                 u'InvalidCharactersTest',
-            u'tests':
-                1,
-            u'failures':
-                1,
-            u'disabled':
-                0,
-            u'errors':
-                0,
-            u'time':
-                u'*',
-            u'testsuite': [{
-                u'name':
-                    u'InvalidCharactersInMessage',
-                u'status':
-                    u'RUN',
-                u'result':
-                    u'COMPLETED',
-                u'time':
-                    u'*',
-                u'classname':
-                    u'InvalidCharactersTest',
-                u'failures': [{
-                    u'failure': u'gtest_xml_output_unittest_.cc:*\n'
-                                u'Failed\nInvalid characters in brackets'
-                                u' [\x01\x02]' + STACK_TRACE_TEMPLATE,
-                    u'type': u''
-                }]
+            u'failures': [{
+                u'failure': u'gtest_xml_output_unittest_.cc:*\n'
+                            u'Failed\nInvalid characters in brackets'
+                            u' [\x01\x02]' + STACK_TRACE_TEMPLATE,
+                u'type': u''
             }]
-        },
-        {
-            u'name':
-                u'PropertyRecordingTest',
-            u'tests':
-                4,
-            u'failures':
-                0,
-            u'disabled':
-                0,
-            u'errors':
-                0,
-            u'time':
-                u'*',
-            u'SetUpTestSuite':
-                u'yes',
-            u'TearDownTestSuite':
-                u'aye',
-            u'testsuite': [{
-                u'name': u'OneProperty',
-                u'status': u'RUN',
-                u'result': u'COMPLETED',
-                u'time': u'*',
-                u'classname': u'PropertyRecordingTest',
-                u'key_1': u'1'
-            },
-                           {
-                               u'name': u'IntValuedProperty',
-                               u'status': u'RUN',
-                               u'result': u'COMPLETED',
-                               u'time': u'*',
-                               u'classname': u'PropertyRecordingTest',
-                               u'key_int': u'1'
-                           },
-                           {
-                               u'name': u'ThreeProperties',
-                               u'status': u'RUN',
-                               u'result': u'COMPLETED',
-                               u'time': u'*',
-                               u'classname': u'PropertyRecordingTest',
-                               u'key_1': u'1',
-                               u'key_2': u'2',
-                               u'key_3': u'3'
-                           },
-                           {
-                               u'name': u'TwoValuesForOneKeyUsesLastValue',
-                               u'status': u'RUN',
-                               u'result': u'COMPLETED',
-                               u'time': u'*',
-                               u'classname': u'PropertyRecordingTest',
-                               u'key_1': u'2'
-                           }]
-        },
-        {
-            u'name':
-                u'NoFixtureTest',
-            u'tests':
-                3,
-            u'failures':
-                0,
-            u'disabled':
-                0,
-            u'errors':
-                0,
-            u'time':
-                u'*',
-            u'testsuite': [
-                {
-                    u'name': u'RecordProperty',
-                    u'status': u'RUN',
-                    u'result': u'COMPLETED',
-                    u'time': u'*',
-                    u'classname': u'NoFixtureTest',
-                    u'key': u'1'
-                },
-                {
-                    u'name': u'ExternalUtilityThatCallsRecordIntValuedProperty',
-                    u'status': u'RUN',
-                    u'result': u'COMPLETED',
-                    u'time': u'*',
-                    u'classname': u'NoFixtureTest',
-                    u'key_for_utility_int': u'1'
-                },
-                {
-                    u'name':
-                        u'ExternalUtilityThatCallsRecordStringValuedProperty',
-                    u'status':
-                        u'RUN',
-                    u'result':
-                        u'COMPLETED',
-                    u'time':
-                        u'*',
-                    u'classname':
-                        u'NoFixtureTest',
-                    u'key_for_utility_string':
-                        u'1'
-                }
-            ]
-        },
-        {
-            u'name':
-                u'TypedTest/0',
-            u'tests':
-                1,
-            u'failures':
-                0,
-            u'disabled':
-                0,
-            u'errors':
-                0,
-            u'time':
-                u'*',
-            u'testsuite': [{
-                u'name': u'HasTypeParamAttribute',
-                u'type_param': u'int',
-                u'status': u'RUN',
-                u'result': u'COMPLETED',
-                u'time': u'*',
-                u'classname': u'TypedTest/0'
-            }]
-        },
-        {
-            u'name':
-                u'TypedTest/1',
-            u'tests':
-                1,
-            u'failures':
-                0,
-            u'disabled':
-                0,
-            u'errors':
-                0,
-            u'time':
-                u'*',
-            u'testsuite': [{
-                u'name': u'HasTypeParamAttribute',
-                u'type_param': u'long',
-                u'status': u'RUN',
-                u'result': u'COMPLETED',
-                u'time': u'*',
-                u'classname': u'TypedTest/1'
-            }]
-        },
-        {
-            u'name':
-                u'Single/TypeParameterizedTestSuite/0',
-            u'tests':
-                1,
-            u'failures':
-                0,
-            u'disabled':
-                0,
-            u'errors':
-                0,
-            u'time':
-                u'*',
-            u'testsuite': [{
-                u'name': u'HasTypeParamAttribute',
-                u'type_param': u'int',
-                u'status': u'RUN',
-                u'result': u'COMPLETED',
-                u'time': u'*',
-                u'classname': u'Single/TypeParameterizedTestSuite/0'
-            }]
-        },
-        {
-            u'name':
-                u'Single/TypeParameterizedTestSuite/1',
-            u'tests':
-                1,
-            u'failures':
-                0,
-            u'disabled':
-                0,
-            u'errors':
-                0,
-            u'time':
-                u'*',
-            u'testsuite': [{
-                u'name': u'HasTypeParamAttribute',
-                u'type_param': u'long',
-                u'status': u'RUN',
-                u'result': u'COMPLETED',
-                u'time': u'*',
-                u'classname': u'Single/TypeParameterizedTestSuite/1'
-            }]
-        },
-        {
-            u'name':
-                u'Single/ValueParamTest',
-            u'tests':
-                4,
-            u'failures':
-                0,
-            u'disabled':
-                0,
-            u'errors':
-                0,
-            u'time':
-                u'*',
-            u'testsuite': [
-                {
-                    u'name': u'HasValueParamAttribute/0',
-                    u'value_param': u'33',
-                    u'status': u'RUN',
-                    u'result': u'COMPLETED',
-                    u'time': u'*',
-                    u'classname': u'Single/ValueParamTest'
-                },
-                {
-                    u'name': u'HasValueParamAttribute/1',
-                    u'value_param': u'42',
-                    u'status': u'RUN',
-                    u'result': u'COMPLETED',
-                    u'time': u'*',
-                    u'classname': u'Single/ValueParamTest'
-                },
-                {
-                    u'name': u'AnotherTestThatHasValueParamAttribute/0',
-                    u'value_param': u'33',
-                    u'status': u'RUN',
-                    u'result': u'COMPLETED',
-                    u'time': u'*',
-                    u'classname': u'Single/ValueParamTest'
-                },
-                {
-                    u'name': u'AnotherTestThatHasValueParamAttribute/1',
-                    u'value_param': u'42',
-                    u'status': u'RUN',
-                    u'result': u'COMPLETED',
-                    u'time': u'*',
-                    u'classname': u'Single/ValueParamTest'
-                }
-            ]
-        }
-    ]
+        }]
+    }, {
+        u'name':
+            u'PropertyRecordingTest',
+        u'tests':
+            4,
+        u'failures':
+            0,
+        u'disabled':
+            0,
+        u'errors':
+            0,
+        u'time':
+            u'*',
+        u'timestamp':
+            u'*',
+        u'SetUpTestSuite':
+            u'yes',
+        u'TearDownTestSuite':
+            u'aye',
+        u'testsuite': [{
+            u'name': u'OneProperty',
+            u'status': u'RUN',
+            u'result': u'COMPLETED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'PropertyRecordingTest',
+            u'key_1': u'1'
+        }, {
+            u'name': u'IntValuedProperty',
+            u'status': u'RUN',
+            u'result': u'COMPLETED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'PropertyRecordingTest',
+            u'key_int': u'1'
+        }, {
+            u'name': u'ThreeProperties',
+            u'status': u'RUN',
+            u'result': u'COMPLETED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'PropertyRecordingTest',
+            u'key_1': u'1',
+            u'key_2': u'2',
+            u'key_3': u'3'
+        }, {
+            u'name': u'TwoValuesForOneKeyUsesLastValue',
+            u'status': u'RUN',
+            u'result': u'COMPLETED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'PropertyRecordingTest',
+            u'key_1': u'2'
+        }]
+    }, {
+        u'name':
+            u'NoFixtureTest',
+        u'tests':
+            3,
+        u'failures':
+            0,
+        u'disabled':
+            0,
+        u'errors':
+            0,
+        u'time':
+            u'*',
+        u'timestamp':
+            u'*',
+        u'testsuite': [{
+            u'name': u'RecordProperty',
+            u'status': u'RUN',
+            u'result': u'COMPLETED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'NoFixtureTest',
+            u'key': u'1'
+        }, {
+            u'name': u'ExternalUtilityThatCallsRecordIntValuedProperty',
+            u'status': u'RUN',
+            u'result': u'COMPLETED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'NoFixtureTest',
+            u'key_for_utility_int': u'1'
+        }, {
+            u'name': u'ExternalUtilityThatCallsRecordStringValuedProperty',
+            u'status': u'RUN',
+            u'result': u'COMPLETED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'NoFixtureTest',
+            u'key_for_utility_string': u'1'
+        }]
+    }, {
+        u'name':
+            u'TypedTest/0',
+        u'tests':
+            1,
+        u'failures':
+            0,
+        u'disabled':
+            0,
+        u'errors':
+            0,
+        u'time':
+            u'*',
+        u'timestamp':
+            u'*',
+        u'testsuite': [{
+            u'name': u'HasTypeParamAttribute',
+            u'type_param': u'int',
+            u'status': u'RUN',
+            u'result': u'COMPLETED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'TypedTest/0'
+        }]
+    }, {
+        u'name':
+            u'TypedTest/1',
+        u'tests':
+            1,
+        u'failures':
+            0,
+        u'disabled':
+            0,
+        u'errors':
+            0,
+        u'time':
+            u'*',
+        u'timestamp':
+            u'*',
+        u'testsuite': [{
+            u'name': u'HasTypeParamAttribute',
+            u'type_param': u'long',
+            u'status': u'RUN',
+            u'result': u'COMPLETED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'TypedTest/1'
+        }]
+    }, {
+        u'name':
+            u'Single/TypeParameterizedTestSuite/0',
+        u'tests':
+            1,
+        u'failures':
+            0,
+        u'disabled':
+            0,
+        u'errors':
+            0,
+        u'time':
+            u'*',
+        u'timestamp':
+            u'*',
+        u'testsuite': [{
+            u'name': u'HasTypeParamAttribute',
+            u'type_param': u'int',
+            u'status': u'RUN',
+            u'result': u'COMPLETED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'Single/TypeParameterizedTestSuite/0'
+        }]
+    }, {
+        u'name':
+            u'Single/TypeParameterizedTestSuite/1',
+        u'tests':
+            1,
+        u'failures':
+            0,
+        u'disabled':
+            0,
+        u'errors':
+            0,
+        u'time':
+            u'*',
+        u'timestamp':
+            u'*',
+        u'testsuite': [{
+            u'name': u'HasTypeParamAttribute',
+            u'type_param': u'long',
+            u'status': u'RUN',
+            u'result': u'COMPLETED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'Single/TypeParameterizedTestSuite/1'
+        }]
+    }, {
+        u'name':
+            u'Single/ValueParamTest',
+        u'tests':
+            4,
+        u'failures':
+            0,
+        u'disabled':
+            0,
+        u'errors':
+            0,
+        u'time':
+            u'*',
+        u'timestamp':
+            u'*',
+        u'testsuite': [{
+            u'name': u'HasValueParamAttribute/0',
+            u'value_param': u'33',
+            u'status': u'RUN',
+            u'result': u'COMPLETED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'Single/ValueParamTest'
+        }, {
+            u'name': u'HasValueParamAttribute/1',
+            u'value_param': u'42',
+            u'status': u'RUN',
+            u'result': u'COMPLETED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'Single/ValueParamTest'
+        }, {
+            u'name': u'AnotherTestThatHasValueParamAttribute/0',
+            u'value_param': u'33',
+            u'status': u'RUN',
+            u'result': u'COMPLETED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'Single/ValueParamTest'
+        }, {
+            u'name': u'AnotherTestThatHasValueParamAttribute/1',
+            u'value_param': u'42',
+            u'status': u'RUN',
+            u'result': u'COMPLETED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'Single/ValueParamTest'
+        }]
+    }]
 }
 
 EXPECTED_FILTERED = {
@@ -556,11 +573,14 @@ EXPECTED_FILTERED = {
             0,
         u'time':
             u'*',
+        u'timestamp':
+            u'*',
         u'testsuite': [{
             u'name': u'Succeeds',
             u'status': u'RUN',
             u'result': u'COMPLETED',
             u'time': u'*',
+            u'timestamp': u'*',
             u'classname': u'SuccessfulTest',
         }]
     }],
