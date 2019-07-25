@@ -2032,9 +2032,7 @@ std::string AppendUserMessage(const std::string& gtest_msg,
 
 // Creates an empty TestResult.
 TestResult::TestResult()
-    : death_test_count_(0),
-      elapsed_time_(0) {
-}
+    : death_test_count_(0), start_timestamp_(0), elapsed_time_(0) {}
 
 // D'tor.
 TestResult::~TestResult() {
@@ -2103,13 +2101,7 @@ static const char* const kReservedTestSuitesAttributes[] = {
 // The list of reserved attributes used in the <testsuite> element of XML
 // output.
 static const char* const kReservedTestSuiteAttributes[] = {
-  "disabled",
-  "errors",
-  "failures",
-  "name",
-  "tests",
-  "time"
-};
+    "disabled", "errors", "failures", "name", "tests", "time", "timestamp"};
 
 // The list of reserved attributes used in the <testcase> element of XML output.
 static const char* const kReservedTestCaseAttributes[] = {
@@ -2117,10 +2109,10 @@ static const char* const kReservedTestCaseAttributes[] = {
     "value_param", "file", "line"};
 
 // Use a slightly different set for allowed output to ensure existing tests can
-// still RecordProperty("result")
+// still RecordProperty("result") or "RecordProperty(timestamp")
 static const char* const kReservedOutputTestCaseAttributes[] = {
-    "classname",   "name", "status", "time",  "type_param",
-    "value_param", "file", "line", "result"};
+    "classname",   "name", "status", "time",   "type_param",
+    "value_param", "file", "line",   "result", "timestamp"};
 
 template <int kSize>
 std::vector<std::string> ArrayAsVector(const char* const (&array)[kSize]) {
@@ -2705,6 +2697,7 @@ void TestInfo::Run() {
         test, &Test::DeleteSelf_, "the test fixture's destructor");
   }
 
+  result_.set_start_timestamp(start);
   result_.set_elapsed_time(internal::GetTimeInMillis() - start);
 
   // Notifies the unit test event listener that a test has just finished.
@@ -2774,6 +2767,7 @@ TestSuite::TestSuite(const char* a_name, const char* a_type_param,
       set_up_tc_(set_up_tc),
       tear_down_tc_(tear_down_tc),
       should_run_(false),
+      start_timestamp_(0),
       elapsed_time_(0) {}
 
 // Destructor of TestSuite.
@@ -2823,11 +2817,11 @@ void TestSuite::Run() {
   internal::HandleExceptionsInMethodIfSupported(
       this, &TestSuite::RunSetUpTestSuite, "SetUpTestSuite()");
 
-  const internal::TimeInMillis start = internal::GetTimeInMillis();
+  start_timestamp_ = internal::GetTimeInMillis();
   for (int i = 0; i < total_test_count(); i++) {
     GetMutableTestInfo(i)->Run();
   }
-  elapsed_time_ = internal::GetTimeInMillis() - start;
+  elapsed_time_ = internal::GetTimeInMillis() - start_timestamp_;
 
   impl->os_stack_trace_getter()->UponLeavingGTest();
   internal::HandleExceptionsInMethodIfSupported(
@@ -3788,6 +3782,9 @@ void XmlUnitTestResultPrinter::OutputXmlTestInfo(::std::ostream* stream,
                          : "suppressed");
   OutputXmlAttribute(stream, kTestsuite, "time",
                      FormatTimeInMillisAsSeconds(result.elapsed_time()));
+  OutputXmlAttribute(
+      stream, kTestsuite, "timestamp",
+      FormatEpochTimeInMillisAsIso8601(result.start_timestamp()));
   OutputXmlAttribute(stream, kTestsuite, "classname", test_suite_name);
 
   int failures = 0;
@@ -3838,6 +3835,9 @@ void XmlUnitTestResultPrinter::PrintXmlTestSuite(std::ostream* stream,
     OutputXmlAttribute(stream, kTestsuite, "errors", "0");
     OutputXmlAttribute(stream, kTestsuite, "time",
                        FormatTimeInMillisAsSeconds(test_suite.elapsed_time()));
+    OutputXmlAttribute(
+        stream, kTestsuite, "timestamp",
+        FormatEpochTimeInMillisAsIso8601(test_suite.start_timestamp()));
     *stream << TestPropertiesAsXmlAttributes(test_suite.ad_hoc_test_result());
   }
   *stream << ">\n";
@@ -3864,11 +3864,11 @@ void XmlUnitTestResultPrinter::PrintXmlUnitTest(std::ostream* stream,
       stream, kTestsuites, "disabled",
       StreamableToString(unit_test.reportable_disabled_test_count()));
   OutputXmlAttribute(stream, kTestsuites, "errors", "0");
+  OutputXmlAttribute(stream, kTestsuites, "time",
+                     FormatTimeInMillisAsSeconds(unit_test.elapsed_time()));
   OutputXmlAttribute(
       stream, kTestsuites, "timestamp",
       FormatEpochTimeInMillisAsIso8601(unit_test.start_timestamp()));
-  OutputXmlAttribute(stream, kTestsuites, "time",
-                     FormatTimeInMillisAsSeconds(unit_test.elapsed_time()));
 
   if (GTEST_FLAG(shuffle)) {
     OutputXmlAttribute(stream, kTestsuites, "random_seed",
@@ -4156,6 +4156,9 @@ void JsonUnitTestResultPrinter::OutputJsonTestInfo(::std::ostream* stream,
                     ? (result.Skipped() ? "SKIPPED" : "COMPLETED")
                     : "SUPPRESSED",
                 kIndent);
+  OutputJsonKey(stream, kTestsuite, "timestamp",
+                FormatEpochTimeInMillisAsRFC3339(result.start_timestamp()),
+                kIndent);
   OutputJsonKey(stream, kTestsuite, "time",
                 FormatTimeInMillisAsDuration(result.elapsed_time()), kIndent);
   OutputJsonKey(stream, kTestsuite, "classname", test_suite_name, kIndent,
@@ -4202,6 +4205,10 @@ void JsonUnitTestResultPrinter::PrintJsonTestSuite(
     OutputJsonKey(stream, kTestsuite, "disabled",
                   test_suite.reportable_disabled_test_count(), kIndent);
     OutputJsonKey(stream, kTestsuite, "errors", 0, kIndent);
+    OutputJsonKey(
+        stream, kTestsuite, "timestamp",
+        FormatEpochTimeInMillisAsRFC3339(test_suite.start_timestamp()),
+        kIndent);
     OutputJsonKey(stream, kTestsuite, "time",
                   FormatTimeInMillisAsDuration(test_suite.elapsed_time()),
                   kIndent, false);

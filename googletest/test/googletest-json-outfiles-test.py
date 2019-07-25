@@ -67,11 +67,14 @@ EXPECTED_1 = {
             0,
         u'time':
             u'*',
+        u'timestamp':
+            u'*',
         u'testsuite': [{
             u'name': u'TestSomeProperties',
             u'status': u'RUN',
             u'result': u'COMPLETED',
             u'time': u'*',
+            u'timestamp': u'*',
             u'classname': u'PropertyOne',
             u'SetUpProp': u'1',
             u'TestSomeProperty': u'1',
@@ -108,10 +111,13 @@ EXPECTED_2 = {
             0,
         u'time':
             u'*',
+        u'timestamp':
+            u'*',
         u'testsuite': [{
             u'name': u'TestSomeProperties',
             u'status': u'RUN',
             u'result': u'COMPLETED',
+            u'timestamp': u'*',
             u'time': u'*',
             u'classname': u'PropertyTwo',
             u'SetUpProp': u'2',
