@@ -29,19 +29,19 @@ PR is acceptable as an alternative.
 
 1.  Submit an issue describing your proposed change to the
     [issue tracker](https://github.com/google/googletest).
-1.  Please don't mix more than one logical change per submittal, because it
+2.  Please don't mix more than one logical change per submittal, because it
     makes the history hard to follow. If you want to make a change that doesn't
     have a corresponding issue in the issue tracker, please create one.
-1.  Also, coordinate with team members that are listed on the issue in question.
+3.  Also, coordinate with team members that are listed on the issue in question.
     This ensures that work isn't being duplicated and communicating your plan
     early also generally leads to better patches.
-1.  If your proposed change is accepted, and you haven't already done so, sign a
+4.  If your proposed change is accepted, and you haven't already done so, sign a
     Contributor License Agreement (see details above).
-1.  Fork the desired repo, develop and test your code changes.
-1.  Ensure that your code adheres to the existing style in the sample to which
+5.  Fork the desired repo, develop and test your code changes.
+6.  Ensure that your code adheres to the existing style in the sample to which
     you are contributing.
-1.  Ensure that your code has an appropriate set of unit tests which all pass.
-1.  Submit a pull request.
+7.  Ensure that your code has an appropriate set of unit tests which all pass.
+8.  Submit a pull request.
 
 ## The Google Test and Google Mock Communities
 
