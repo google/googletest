@@ -563,7 +563,7 @@ static ::std::string FormatDeathTestOutput(const ::std::string& output) {
 //   status_ok: true if exit_status is acceptable in the context of
 //              this particular death test, which fails if it is false
 //
-// Returns true iff all of the above conditions are met.  Otherwise, the
+// Returns true if all of the above conditions are met.  Otherwise, the
 // first failing condition, in the order given above, is the one that is
 // reported. Also sets the last death test message string.
 bool DeathTestImpl::Passed(bool status_ok) {

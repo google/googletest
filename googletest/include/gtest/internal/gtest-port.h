@@ -362,7 +362,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #  include <android/api-level.h>  // NOLINT
 #endif
 
-// Defines this to true iff Google Test can use POSIX regular expressions.
+// Defines this to true if Google Test can use POSIX regular expressions.
 #ifndef GTEST_HAS_POSIX_RE
 # if GTEST_OS_LINUX_ANDROID
 // On Android, <regex.h> is only available starting with Gingerbread.
@@ -403,7 +403,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // The user didn't tell us whether exceptions are enabled, so we need
 // to figure it out.
 # if defined(_MSC_VER) && defined(_CPPUNWIND)
-// MSVC defines _CPPUNWIND to 1 iff exceptions are enabled.
+// MSVC defines _CPPUNWIND to 1 if exceptions are enabled.
 #  define GTEST_HAS_EXCEPTIONS 1
 # elif defined(__BORLANDC__)
 // C++Builder's implementation of the STL uses the _HAS_EXCEPTIONS
@@ -414,8 +414,8 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #  endif  // _HAS_EXCEPTIONS
 #  define GTEST_HAS_EXCEPTIONS _HAS_EXCEPTIONS
 # elif defined(__clang__)
-// clang defines __EXCEPTIONS iff exceptions are enabled before clang 220714,
-// but iff cleanups are enabled after that. In Obj-C++ files, there can be
+// clang defines __EXCEPTIONS if exceptions are enabled before clang 220714,
+// but if cleanups are enabled after that. In Obj-C++ files, there can be
 // cleanups for ObjC exceptions which also need cleanups, even if C++ exceptions
 // are disabled. clang has __has_feature(cxx_exceptions) which checks for C++
 // exceptions starting at clang r206352, but which checked for cleanups prior to
@@ -423,7 +423,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // __EXCEPTIONS && __has_feature(cxx_exceptions).
 #  define GTEST_HAS_EXCEPTIONS (__EXCEPTIONS && __has_feature(cxx_exceptions))
 # elif defined(__GNUC__) && __EXCEPTIONS
-// gcc defines __EXCEPTIONS to 1 iff exceptions are enabled.
+// gcc defines __EXCEPTIONS to 1 if exceptions are enabled.
 #  define GTEST_HAS_EXCEPTIONS 1
 # elif defined(__SUNPRO_CC)
 // Sun Pro CC supports exceptions.  However, there is no compile-time way of
@@ -431,7 +431,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // they are enabled unless the user tells us otherwise.
 #  define GTEST_HAS_EXCEPTIONS 1
 # elif defined(__IBMCPP__) && __EXCEPTIONS
-// xlC defines __EXCEPTIONS to 1 iff exceptions are enabled.
+// xlC defines __EXCEPTIONS to 1 if exceptions are enabled.
 #  define GTEST_HAS_EXCEPTIONS 1
 # elif defined(__HP_aCC)
 // Exception handling is in effect by default in HP aCC compiler. It has to
@@ -472,13 +472,13 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 # ifdef _MSC_VER
 
-#  ifdef _CPPRTTI  // MSVC defines this macro iff RTTI is enabled.
+#  ifdef _CPPRTTI  // MSVC defines this macro if RTTI is enabled.
 #   define GTEST_HAS_RTTI 1
 #  else
 #   define GTEST_HAS_RTTI 0
 #  endif
 
-// Starting with version 4.3.2, gcc defines __GXX_RTTI iff RTTI is enabled.
+// Starting with version 4.3.2, gcc defines __GXX_RTTI if RTTI is enabled.
 # elif defined(__GNUC__)
 
 #  ifdef __GXX_RTTI
@@ -909,9 +909,9 @@ class GTEST_API_ RE {
   // Returns the string representation of the regex.
   const char* pattern() const { return pattern_; }
 
-  // FullMatch(str, re) returns true iff regular expression re matches
+  // FullMatch(str, re) returns true if regular expression re matches
   // the entire str.
-  // PartialMatch(str, re) returns true iff regular expression re
+  // PartialMatch(str, re) returns true if regular expression re
   // matches a substring of str (including str itself).
   static bool FullMatch(const ::std::string& str, const RE& re) {
     return FullMatch(str.c_str(), re);
@@ -1266,7 +1266,7 @@ class GTEST_API_ AutoHandle {
   void Reset(Handle handle);
 
  private:
-  // Returns true iff the handle is a valid handle object that can be closed.
+  // Returns true if the handle is a valid handle object that can be closed.
   bool IsCloseable() const;
 
   Handle handle_;
@@ -1368,7 +1368,7 @@ class ThreadWithParam : public ThreadWithParamBase {
   // When non-NULL, used to block execution until the controller thread
   // notifies.
   Notification* const thread_can_start_;
-  bool finished_;  // true iff we know that the thread function has finished.
+  bool finished_;  // true if we know that the thread function has finished.
   pthread_t thread_;  // The native thread object.
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadWithParam);

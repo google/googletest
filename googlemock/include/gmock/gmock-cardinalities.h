@@ -70,10 +70,10 @@ class CardinalityInterface {
   virtual int ConservativeLowerBound() const { return 0; }
   virtual int ConservativeUpperBound() const { return INT_MAX; }
 
-  // Returns true iff call_count calls will satisfy this cardinality.
+  // Returns true if call_count calls will satisfy this cardinality.
   virtual bool IsSatisfiedByCallCount(int call_count) const = 0;
 
-  // Returns true iff call_count calls will saturate this cardinality.
+  // Returns true if call_count calls will saturate this cardinality.
   virtual bool IsSaturatedByCallCount(int call_count) const = 0;
 
   // Describes self to an ostream.
@@ -98,17 +98,17 @@ class GTEST_API_ Cardinality {
   int ConservativeLowerBound() const { return impl_->ConservativeLowerBound(); }
   int ConservativeUpperBound() const { return impl_->ConservativeUpperBound(); }
 
-  // Returns true iff call_count calls will satisfy this cardinality.
+  // Returns true if call_count calls will satisfy this cardinality.
   bool IsSatisfiedByCallCount(int call_count) const {
     return impl_->IsSatisfiedByCallCount(call_count);
   }
 
-  // Returns true iff call_count calls will saturate this cardinality.
+  // Returns true if call_count calls will saturate this cardinality.
   bool IsSaturatedByCallCount(int call_count) const {
     return impl_->IsSaturatedByCallCount(call_count);
   }
 
-  // Returns true iff call_count calls will over-saturate this
+  // Returns true if call_count calls will over-saturate this
   // cardinality, i.e. exceed the maximum number of allowed calls.
   bool IsOverSaturatedByCallCount(int call_count) const {
     return impl_->IsSaturatedByCallCount(call_count) &&
