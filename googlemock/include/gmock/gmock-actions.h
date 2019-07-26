@@ -99,7 +99,7 @@ struct BuiltInDefaultValueGetter<T, false> {
 template <typename T>
 class BuiltInDefaultValue {
  public:
-  // This function returns true iff type T has a built-in default value.
+  // This function returns true if type T has a built-in default value.
   static bool Exists() {
     return ::std::is_default_constructible<T>::value;
   }
@@ -208,7 +208,7 @@ class DefaultValue {
     producer_ = nullptr;
   }
 
-  // Returns true iff the user has set the default value for type T.
+  // Returns true if the user has set the default value for type T.
   static bool IsSet() { return producer_ != nullptr; }
 
   // Returns true if T has a default return value set by the user or there
@@ -269,7 +269,7 @@ class DefaultValue<T&> {
   // Unsets the default value for type T&.
   static void Clear() { address_ = nullptr; }
 
-  // Returns true iff the user has set the default value for type T&.
+  // Returns true if the user has set the default value for type T&.
   static bool IsSet() { return address_ != nullptr; }
 
   // Returns true if T has a default return value set by the user or there
@@ -375,7 +375,7 @@ class Action {
   template <typename Func>
   explicit Action(const Action<Func>& action) : fun_(action.fun_) {}
 
-  // Returns true iff this is the DoDefault() action.
+  // Returns true if this is the DoDefault() action.
   bool IsDoDefault() const { return fun_ == nullptr; }
 
   // Performs the action.  Note that this method is const even though
@@ -395,7 +395,7 @@ class Action {
   template <typename G>
   friend class Action;
 
-  // fun_ is an empty function iff this is the DoDefault() action.
+  // fun_ is an empty function if this is the DoDefault() action.
   ::std::function<F> fun_;
 };
 
