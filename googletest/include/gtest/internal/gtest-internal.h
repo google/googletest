@@ -189,7 +189,7 @@ GTEST_API_ std::string DiffStrings(const std::string& left,
 //   expected_value:      "5"
 //   actual_value:        "6"
 //
-// The ignoring_case parameter is true iff the assertion is a
+// The ignoring_case parameter is true if the assertion is a
 // *_STRCASEEQ*.  When it's true, the string " (ignoring case)" will
 // be inserted into the message.
 GTEST_API_ AssertionResult EqFailure(const char* expected_expression,
@@ -318,14 +318,14 @@ class FloatingPoint {
   // Returns the sign bit of this number.
   Bits sign_bit() const { return kSignBitMask & u_.bits_; }
 
-  // Returns true iff this is NAN (not a number).
+  // Returns true if this is NAN (not a number).
   bool is_nan() const {
     // It's a NAN if the exponent bits are all ones and the fraction
     // bits are not entirely zeros.
     return (exponent_bits() == kExponentBitMask) && (fraction_bits() != 0);
   }
 
-  // Returns true iff this number is at most kMaxUlps ULP's away from
+  // Returns true if this number is at most kMaxUlps ULP's away from
   // rhs.  In particular, this function:
   //
   //   - returns false if either number is (or both are) NAN.
@@ -848,7 +848,7 @@ class GTEST_API_ Random {
 };
 
 // Defining a variable of type CompileAssertTypesEqual<T1, T2> will cause a
-// compiler error iff T1 and T2 are different types.
+// compiler error if T1 and T2 are different types.
 template <typename T1, typename T2>
 struct CompileAssertTypesEqual;
 
@@ -895,7 +895,7 @@ struct RemoveConst<const T[N]> {
     GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(T))
 
 // IsAProtocolMessage<T>::value is a compile-time bool constant that's
-// true iff T is type proto2::Message or a subclass of it.
+// true if T is type proto2::Message or a subclass of it.
 template <typename T>
 struct IsAProtocolMessage
     : public bool_constant<

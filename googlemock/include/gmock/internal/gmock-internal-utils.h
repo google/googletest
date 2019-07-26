@@ -176,11 +176,11 @@ GMOCK_DECLARE_KIND_(long double, kFloatingPoint);
   static_cast< ::testing::internal::TypeKind>( \
       ::testing::internal::KindOf<type>::value)
 
-// Evaluates to true iff integer type T is signed.
+// Evaluates to true if integer type T is signed.
 #define GMOCK_IS_SIGNED_(T) (static_cast<T>(-1) < 0)
 
 // LosslessArithmeticConvertibleImpl<kFromKind, From, kToKind, To>::value
-// is true iff arithmetic type From can be losslessly converted to
+// is true if arithmetic type From can be losslessly converted to
 // arithmetic type To.
 //
 // It's the user's responsibility to ensure that both From and To are
@@ -211,7 +211,7 @@ template <typename From>
 struct LosslessArithmeticConvertibleImpl<kInteger, From, kBool, bool>
     : public false_type {};  // NOLINT
 
-// Converting an integer to another non-bool integer is lossless iff
+// Converting an integer to another non-bool integer is lossless if
 // the target type's range encloses the source type's range.
 template <typename From, typename To>
 struct LosslessArithmeticConvertibleImpl<kInteger, From, kInteger, To>
@@ -243,13 +243,13 @@ struct LosslessArithmeticConvertibleImpl<kFloatingPoint, From, kInteger, To>
     : public false_type {};  // NOLINT
 
 // Converting a floating-point to another floating-point is lossless
-// iff the target type is at least as big as the source type.
+// if the target type is at least as big as the source type.
 template <typename From, typename To>
 struct LosslessArithmeticConvertibleImpl<
   kFloatingPoint, From, kFloatingPoint, To>
     : public bool_constant<sizeof(From) <= sizeof(To)> {};  // NOLINT
 
-// LosslessArithmeticConvertible<From, To>::value is true iff arithmetic
+// LosslessArithmeticConvertible<From, To>::value is true if arithmetic
 // type From can be losslessly converted to arithmetic type To.
 //
 // It's the user's responsibility to ensure that both From and To are
@@ -324,11 +324,11 @@ const char kWarningVerbosity[] = "warning";
 // No logs are printed.
 const char kErrorVerbosity[] = "error";
 
-// Returns true iff a log with the given severity is visible according
+// Returns true if a log with the given severity is visible according
 // to the --gmock_verbose flag.
 GTEST_API_ bool LogIsVisible(LogSeverity severity);
 
-// Prints the given message to stdout iff 'severity' >= the level
+// Prints the given message to stdout if 'severity' >= the level
 // specified by the --gmock_verbose flag.  If stack_frames_to_skip >=
 // 0, also prints the stack trace excluding the top
 // stack_frames_to_skip frames.  In opt mode, any positive
@@ -355,11 +355,11 @@ GTEST_API_ WithoutMatchers GetWithoutMatchers();
 
 // Type traits.
 
-// is_reference<T>::value is non-zero iff T is a reference type.
+// is_reference<T>::value is non-zero if T is a reference type.
 template <typename T> struct is_reference : public false_type {};
 template <typename T> struct is_reference<T&> : public true_type {};
 
-// type_equals<T1, T2>::value is non-zero iff T1 and T2 are the same type.
+// type_equals<T1, T2>::value is non-zero if T1 and T2 are the same type.
 template <typename T1, typename T2> struct type_equals : public false_type {};
 template <typename T> struct type_equals<T, T> : public true_type {};
 

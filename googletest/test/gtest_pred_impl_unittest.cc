@@ -144,10 +144,10 @@ class Predicate1Test : public testing::Test {
     }
   }
 
-  // true iff the test function is expected to run to finish.
+  // true if the test function is expected to run to finish.
   static bool expected_to_finish_;
 
-  // true iff the test function did run to finish.
+  // true if the test function did run to finish.
   static bool finished_;
 
   static int n1_;
@@ -539,10 +539,10 @@ class Predicate2Test : public testing::Test {
     }
   }
 
-  // true iff the test function is expected to run to finish.
+  // true if the test function is expected to run to finish.
   static bool expected_to_finish_;
 
-  // true iff the test function did run to finish.
+  // true if the test function did run to finish.
   static bool finished_;
 
   static int n1_;
@@ -976,10 +976,10 @@ class Predicate3Test : public testing::Test {
     }
   }
 
-  // true iff the test function is expected to run to finish.
+  // true if the test function is expected to run to finish.
   static bool expected_to_finish_;
 
-  // true iff the test function did run to finish.
+  // true if the test function did run to finish.
   static bool finished_;
 
   static int n1_;
@@ -1455,10 +1455,10 @@ class Predicate4Test : public testing::Test {
     }
   }
 
-  // true iff the test function is expected to run to finish.
+  // true if the test function is expected to run to finish.
   static bool expected_to_finish_;
 
-  // true iff the test function did run to finish.
+  // true if the test function did run to finish.
   static bool finished_;
 
   static int n1_;
@@ -1976,10 +1976,10 @@ class Predicate5Test : public testing::Test {
     }
   }
 
-  // true iff the test function is expected to run to finish.
+  // true if the test function is expected to run to finish.
   static bool expected_to_finish_;
 
-  // true iff the test function did run to finish.
+  // true if the test function did run to finish.
   static bool finished_;
 
   static int n1_;

@@ -34,7 +34,7 @@
 namespace testing {
 
 GMOCK_DEFINE_bool_(catch_leaked_mocks, true,
-                   "true iff Google Mock should report leaked mock objects "
+                   "true if Google Mock should report leaked mock objects "
                    "as failures.");
 
 GMOCK_DEFINE_string_(verbose, internal::kWarningVerbosity,

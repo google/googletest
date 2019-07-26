@@ -956,7 +956,7 @@ TEST(TypedEqTest, CanDescribeSelf) {
 
 // Tests that TypedEq<T>(v) has type Matcher<T>.
 
-// Type<T>::IsTypeOf(v) compiles iff the type of value v is T, where T
+// Type<T>::IsTypeOf(v) compiles if the type of value v is T, where T
 // is a "bare" type (i.e. not in the form of const U or U&).  If v's
 // type is not T, the compiler will generate a message about
 // "undefined reference".
@@ -2640,7 +2640,7 @@ class IsGreaterThan {
 // For testing Truly().
 const int foo = 0;
 
-// This predicate returns true iff the argument references foo and has
+// This predicate returns true if the argument references foo and has
 // a zero value.
 bool ReferencesFooAndIsZero(const int& n) {
   return (&n == &foo) && (n == 0);
@@ -3594,7 +3594,7 @@ class Uncopyable {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(Uncopyable);
 };
 
-// Returns true iff x.value() is positive.
+// Returns true if x.value() is positive.
 bool ValueIsPositive(const Uncopyable& x) { return x.value() > 0; }
 
 MATCHER_P(UncopyableIs, inner_matcher, "") {

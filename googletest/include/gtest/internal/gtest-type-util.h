@@ -105,7 +105,7 @@ std::string GetTypeName() {
 
 #if GTEST_HAS_TYPED_TEST || GTEST_HAS_TYPED_TEST_P
 
-// AssertyTypeEq<T1, T2>::type is defined iff T1 and T2 are the same
+// AssertyTypeEq<T1, T2>::type is defined if T1 and T2 are the same
 // type.  This can be used as a compile-time assertion to ensure that
 // two types are equal.
 

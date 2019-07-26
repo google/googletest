@@ -139,7 +139,7 @@ class TestForDeathTest : public testing::Test {
       DieInside("MemberFunction");
   }
 
-  // True iff MemberFunction() should die.
+  // True if MemberFunction() should die.
   bool should_die_;
   const FilePath original_dir_;
 };
@@ -156,7 +156,7 @@ class MayDie {
   }
 
  private:
-  // True iff MemberFunction() should die.
+  // True if MemberFunction() should die.
   bool should_die_;
 };
 
@@ -551,7 +551,7 @@ TEST_F(TestForDeathTest, ErrorMessageMismatch) {
   }, "died but not with expected error");
 }
 
-// On exit, *aborted will be true iff the EXPECT_DEATH() statement
+// On exit, *aborted will be true if the EXPECT_DEATH() statement
 // aborted the function.
 void ExpectDeathTestHelper(bool* aborted) {
   *aborted = true;
