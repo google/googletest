@@ -15,26 +15,26 @@ So what makes a good test, and how does googletest fit in? We believe:
     that succeeds or fails as a result of other tests. googletest isolates the
     tests by running each of them on a different object. When a test fails,
     googletest allows you to run it in isolation for quick debugging.
-1.  Tests should be well *organized* and reflect the structure of the tested
+2.  Tests should be well *organized* and reflect the structure of the tested
     code. googletest groups related tests into test suites that can share data
     and subroutines. This common pattern is easy to recognize and makes tests
     easy to maintain. Such consistency is especially helpful when people switch
     projects and start to work on a new code base.
-1.  Tests should be *portable* and *reusable*. Google has a lot of code that is
+3.  Tests should be *portable* and *reusable*. Google has a lot of code that is
     platform-neutral, its tests should also be platform-neutral. googletest
     works on different OSes, with different compilers, with or without
     exceptions, so googletest tests can work with a variety of configurations.
-1.  When tests fail, they should provide as much *information* about the problem
+4.  When tests fail, they should provide as much *information* about the problem
     as possible. googletest doesn't stop at the first test failure. Instead, it
     only stops the current test and continues with the next. You can also set up
     tests that report non-fatal failures after which the current test continues.
     Thus, you can detect and fix multiple bugs in a single run-edit-compile
     cycle.
-1.  The testing framework should liberate test writers from housekeeping chores
+5.  The testing framework should liberate test writers from housekeeping chores
     and let them focus on the test *content*. googletest automatically keeps
     track of all tests defined, and doesn't require the user to enumerate them
     in order to run them.
-1.  Tests should be *fast*. With googletest, you can reuse shared resources
+6.  Tests should be *fast*. With googletest, you can reuse shared resources
     across tests and pay for the set-up/tear-down only once, without making
     tests depend on each other.
 
@@ -245,9 +245,9 @@ To create a test:
 
 1.  Use the `TEST()` macro to define and name a test function, These are
     ordinary C++ functions that don't return a value.
-1.  In this function, along with any valid C++ statements you want to include,
+2.  In this function, along with any valid C++ statements you want to include,
     use the various googletest assertions to check values.
-1.  The test's result is determined by the assertions; if any assertion in the
+3.  The test's result is determined by the assertions; if any assertion in the
     test fails (either fatally or non-fatally), or if the test crashes, the
     entire test fails. Otherwise, it succeeds.
 
@@ -309,16 +309,16 @@ To create a fixture:
 
 1.  Derive a class from `::testing::Test` . Start its body with `protected:` as
     we'll want to access fixture members from sub-classes.
-1.  Inside the class, declare any objects you plan to use.
-1.  If necessary, write a default constructor or `SetUp()` function to prepare
+2.  Inside the class, declare any objects you plan to use.
+3.  If necessary, write a default constructor or `SetUp()` function to prepare
     the objects for each test. A common mistake is to spell `SetUp()` as
     **`Setup()`** with a small `u` - Use `override` in C++11 to make sure you
     spelled it correctly
-1.  If necessary, write a destructor or `TearDown()` function to release any
+4.  If necessary, write a destructor or `TearDown()` function to release any
     resources you allocated in `SetUp()` . To learn when you should use the
     constructor/destructor and when you should use `SetUp()/TearDown()`, read
     the [FAQ](faq.md).
-1.  If needed, define subroutines for your tests to share.
+5.  If needed, define subroutines for your tests to share.
 
 When using a fixture, use `TEST_F()` instead of `TEST()` as it allows you to
 access objects and subroutines in the test fixture:
@@ -422,11 +422,11 @@ would lead to a segfault when `n` is `NULL`.
 When these tests run, the following happens:
 
 1.  googletest constructs a `QueueTest` object (let's call it `t1` ).
-1.  `t1.SetUp()` initializes `t1` .
-1.  The first test ( `IsEmptyInitially` ) runs on `t1` .
-1.  `t1.TearDown()` cleans up after the test finishes.
-1.  `t1` is destructed.
-1.  The above steps are repeated on another `QueueTest` object, this time
+2.  `t1.SetUp()` initializes `t1` .
+3.  The first test ( `IsEmptyInitially` ) runs on `t1` .
+4.  `t1.TearDown()` cleans up after the test finishes.
+5.  `t1` is destructed.
+6.  The above steps are repeated on another `QueueTest` object, this time
     running the `DequeueWorks` test.
 
 **Availability**: Linux, Windows, Mac.
