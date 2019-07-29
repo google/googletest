@@ -5,11 +5,6 @@
 [![Build Status](https://api.travis-ci.org/google/googletest.svg?branch=master)](https://travis-ci.org/google/googletest)
 [![Build status](https://ci.appveyor.com/api/projects/status/4o38plt0xbo1ubc8/branch/master?svg=true)](https://ci.appveyor.com/project/GoogleTestAppVeyor/googletest/branch/master)
 
-### Summer Vacation
-
-June 26, 2019 - July 20 2019 due to summer vacations there will be much reduced
-activity on Pull Requests and issues from the maintainers.
-
 ### Future Plans
 
 #### 1.8.x Release:
