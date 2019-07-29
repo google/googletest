@@ -2,6 +2,8 @@
 
 <!-- GOOGLETEST_CM0019 DO NOT DELETE -->
 
+<!-- GOOGLETEST_CM0033 DO NOT DELETE -->
+
 ### Defining a Mock Class
 
 #### Mocking a Normal Class {#MockClass}
@@ -232,7 +234,7 @@ A **matcher** matches a *single* argument. You can use it inside `ON_CALL()` or
 Built-in matchers (where `argument` is the function argument) are divided into
 several categories:
 
-## Wildcard
+#### Wildcard
 
 Matcher                     | Description
 :-------------------------- | :-----------------------------------------------
@@ -495,6 +497,10 @@ messages, you can use:
 | `WhenDynamicCastTo<T>(m)` | when `argument` is passed through               |
 :                           : `dynamic_cast<T>()`, it matches matcher `m`.    :
 
+<!-- GOOGLETEST_CM0026 DO NOT DELETE -->
+
+<!-- GOOGLETEST_CM0027 DO NOT DELETE -->
+
 #### Multi-argument Matchers {#MultiArgMatchers}
 
 Technically, all matchers match a *single* value. A "multi-argument" matcher is
@@ -525,13 +531,25 @@ reorder them) to participate in the matching:
 
 You can make a matcher from one or more other matchers:
 
-| Matcher                  | Description                                     |
-| :----------------------- | :---------------------------------------------- |
-| `AllOf(m1, m2, ..., mn)` | `argument` matches all of the matchers `m1` to  |
-:                          : `mn`.                                           :
-| `AnyOf(m1, m2, ..., mn)` | `argument` matches at least one of the matchers |
-:                          : `m1` to `mn`.                                   :
-| `Not(m)`                 | `argument` doesn't match matcher `m`.           |
+| Matcher                          | Description                             |
+| :------------------------------- | :-------------------------------------- |
+| `AllOf(m1, m2, ..., mn)`         | `argument` matches all of the matchers  |
+:                                  : `m1` to `mn`.                           :
+| `AllOfArray({m0, m1, ..., mn})`, | The same as `AllOf()` except that the   |
+: `AllOfArray(a_container)`,       : matchers come from an initializer list, :
+: `AllOfArray(begin, end)`,        : STL-style container, iterator range, or :
+: `AllOfArray(array)`, or          : C-style array.                          :
+: `AllOfArray(array, count)`       :                                         :
+| `AnyOf(m1, m2, ..., mn)`         | `argument` matches at least one of the  |
+:                                  : matchers `m1` to `mn`.                  :
+| `AnyOfArray({m0, m1, ..., mn})`, | The same as `AnyOf()` except that the   |
+: `AnyOfArray(a_container)`,       : matchers come from an initializer list, :
+: `AnyOfArray(begin, end)`,        : STL-style container, iterator range, or :
+: `AnyOfArray(array)`, or          : C-style array.                          :
+: `AnyOfArray(array, count)`       :                                         :
+| `Not(m)`                         | `argument` doesn't match matcher `m`.   |
+
+<!-- GOOGLETEST_CM0028 DO NOT DELETE -->
 
 #### Adapters for Matchers
 
@@ -550,7 +568,7 @@ You can make a matcher from one or more other matchers:
 `AddressSatisfies(callback)` and `Truly(callback)` take ownership of `callback`,
 which must be a permanent callback.
 
-#### Matchers as Predicates {#MatchersAsPredicatesCheat}
+#### Using Matchers as Predicates {#MatchersAsPredicatesCheat}
 
 | Matcher                       | Description                                 |
 | :---------------------------- | :------------------------------------------ |
@@ -587,20 +605,13 @@ which must be a permanent callback.
 1.  You can use `PrintToString(x)` to convert a value `x` of any type to a
     string.
 
-## Matchers as Test Assertions
-
-Matcher                      | Description
-:--------------------------- | :----------
-`ASSERT_THAT(expression, m)` | Generates a [fatal failure](../../googletest/docs/primer.md#assertions) if the value of `expression` doesn't match matcher `m`.
-`EXPECT_THAT(expression, m)` | Generates a non-fatal failure if the value of `expression` doesn't match matcher `m`.
-
 ### Actions {#ActionList}
 
 **Actions** specify what a mock function should do when invoked.
 
 #### Returning a Value
 
-| Matcher                     | Description                                   |
+|                             |                                               |
 | :-------------------------- | :-------------------------------------------- |
 | `Return()`                  | Return from a `void` mock function.           |
 | `Return(value)`             | Return `value`. If the type of `value` is     |
@@ -619,7 +630,7 @@ Matcher                      | Description
 
 #### Side Effects
 
-| Matcher                            | Description                             |
+|                                    |                                         |
 | :--------------------------------- | :-------------------------------------- |
 | `Assign(&variable, value)`         | Assign `value` to variable.             |
 | `DeleteArg<N>()`                   | Delete the `N`-th (0-based) argument,   |
@@ -652,8 +663,11 @@ Matcher                      | Description
 In the following, by "callable" we mean a free function, `std::function`,
 functor, lambda, or `google3`-style permanent callback.
 
-| Matcher                             | Description                            |
+|                                     |                                        |
 | :---------------------------------- | :------------------------------------- |
+| `f`                                 | Invoke f with the arguments passed to  |
+:                                     : the mock function, where f is a        :
+:                                     : callable (except of google3 callback). :
 | `Invoke(f)`                         | Invoke `f` with the arguments passed   |
 :                                     : to the mock function, where `f` can be :
 :                                     : a global/static function or a functor. :
@@ -708,7 +722,7 @@ InvokeArgument<2>(5, string("Hi"), ByRef(foo))
 calls the mock function's #2 argument, passing to it `5` and `string("Hi")` by
 value, and `foo` by reference.
 
-## Default Action
+#### Default Action
 
 | Matcher       | Description                                            |
 | :------------ | :----------------------------------------------------- |
@@ -718,9 +732,11 @@ value, and `foo` by reference.
 **Note:** due to technical reasons, `DoDefault()` cannot be used inside a
 composite action - trying to do so will result in a run-time error.
 
-## Composite Actions
+<!-- GOOGLETEST_CM0032 DO NOT DELETE -->
 
-| Matcher                        | Description                                 |
+#### Composite Actions
+
+|                                |                                             |
 | :----------------------------- | :------------------------------------------ |
 | `DoAll(a1, a2, ..., an)`       | Do all actions `a1` to `an` and return the  |
 :                                : result of `an` in each invocation. The      :
@@ -734,9 +750,22 @@ composite action - trying to do so will result in a run-time error.
 :                                : it.                                         :
 | `WithoutArgs(a)`               | Perform action `a` without any arguments.   |
 
-## Defining Actions
+#### Defining Actions
 
-| Matcher                            | Description                             |
+<table border="1" cellspacing="0" cellpadding="1">
+  <tr>
+    <td>`struct SumAction {` <br>
+        &emsp;`template <typename T>` <br>
+        &emsp;`T operator()(T x, Ty) { return x + y; }` <br>
+        `};`
+    </td>
+    <td> Defines a generic functor that can be used as an action summing its
+    arguments. </td> </tr>
+  <tr>
+  </tr>
+</table>
+
+|                                    |                                         |
 | :--------------------------------- | :-------------------------------------- |
 | `ACTION(Sum) { return arg0 + arg1; | Defines an action `Sum()` to return the |
 : }`                                 : sum of the mock function's argument #0  :
@@ -755,7 +784,7 @@ The `ACTION*` macros cannot be used inside a function or class.
 These are used in `Times()` to specify how many times a mock function will be
 called:
 
-| Matcher           | Description                                            |
+|                   |                                                        |
 | :---------------- | :----------------------------------------------------- |
 | `AnyNumber()`     | The function can be called any number of times.        |
 | `AtLeast(n)`      | The call is expected at least `n` times.               |

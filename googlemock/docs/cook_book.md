@@ -1,4 +1,4 @@
-## Googletest Mocking (gMock) Cookbook
+## gMock Cookbook
 
 <!-- GOOGLETEST_CM0012 DO NOT DELETE -->
 
@@ -824,6 +824,7 @@ A frequently used matcher is `_`, which matches anything:
 ```cpp
   EXPECT_CALL(foo, DoThat(_, NotNull()));
 ```
+<!-- GOOGLETEST_CM0022 DO NOT DELETE -->
 
 #### Combining Matchers {#CombiningMatchers}
 
@@ -1137,6 +1138,8 @@ int IsEven(int n) { return (n % 2) == 0 ? 1 : 0; }
 Note that the predicate function / functor doesn't have to return `bool`. It
 works as long as the return value can be used as the condition in in statement
 `if (condition) ...`.
+
+<!-- GOOGLETEST_CM0023 DO NOT DELETE -->
 
 #### Matching Arguments that Are Not Copyable
 
@@ -2147,7 +2150,11 @@ own precedence order distinct from the `ON_CALL` precedence order.
 #### Using Functions/Methods/Functors/Lambdas as Actions {#FunctionsAsActions}
 
 If the built-in actions don't suit you, you can use an existing callable
-(function, `std::function`, method, functor, lambda as an action. ```cpp
+(function, `std::function`, method, functor, lambda as an action.
+
+<!-- GOOGLETEST_CM0024 DO NOT DELETE -->
+
+```cpp
 using ::testing::_; using ::testing::Invoke;
 
 class MockFoo : public Foo {
@@ -3239,6 +3246,8 @@ If you are interested in the mock call trace but not the stack traces, you can
 combine `--gmock_verbose=info` with `--gtest_stack_trace_depth=0` on the test
 command line.
 
+<!-- GOOGLETEST_CM0025 DO NOT DELETE -->
+
 #### Running Tests in Emacs
 
 If you build and run your tests in Emacs using the `M-x google-compile` command
@@ -4175,3 +4184,61 @@ prints the raw bytes in the value and hopes that you the user can figure it out.
 [googletest's advanced guide](../../googletest/docs/advanced.md#teaching-googletest-how-to-print-your-values)
 explains how to extend the printer to do a better job at printing your
 particular type than to dump the bytes.
+
+### Useful Mocks Created Using gMock
+
+<!--#include file="includes/g3_testing_LOGs.md"-->
+<!--#include file="includes/g3_mock_callbacks.md"-->
+
+#### Mock std::function {#MockFunction}
+
+`std::function` is a general function type introduced in C++11. It is a
+preferred way of passing callbacks to new interfaces. Functions are copiable,
+and are not usually passed around by pointer, which makes them tricky to mock.
+But fear not - `MockFunction` can help you with that.
+
+`MockFunction<R(T1, ..., Tn)>` has a mock method `Call()` with the signature:
+
+```cpp
+  R Call(T1, ..., Tn);
+```
+
+It also has a `AsStdFunction()` method, which creates a `std::function` proxy
+forwarding to Call:
+
+```cpp
+  std::function<R(T1, ..., Tn)> AsStdFunction();
+```
+
+To use `MockFunction`, first create `MockFunction` object and set up
+expectations on its `Call` method. Then pass proxy obtained from
+`AsStdFunction()` to the code you are testing. For example:
+
+```cpp
+TEST(FooTest, RunsCallbackWithBarArgument) {
+  // 1. Create a mock object.
+  MockFunction<int(string)> mock_function;
+
+  // 2. Set expectations on Call() method.
+  EXPECT_CALL(mock_function, Call("bar")).WillOnce(Return(1));
+
+  // 3. Exercise code that uses std::function.
+  Foo(mock_function.AsStdFunction());
+  // Foo's signature can be either of:
+  // void Foo(const std::function<int(string)>& fun);
+  // void Foo(std::function<int(string)> fun);
+
+  // 4. All expectations will be verified when mock_function
+  //     goes out of scope and is destroyed.
+}
+```
+
+Remember that function objects created with `AsStdFunction()` are just
+forwarders. If you create multiple of them, they will share the same set of
+expectations.
+
+Although `std::function` supports unlimited number of arguments, `MockFunction`
+implementation is limited to ten. If you ever hit that limit... well, your
+callback has bigger problems than being mockable. :-)
+
+<!-- GOOGLETEST_CM0034 DO NOT DELETE -->
