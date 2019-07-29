@@ -81,6 +81,8 @@ void Bar(int* p);         // Neither p nor *p is const.
 void Bar(const int* p);  // p is not const, but *p is.
 ```
 
+<<!-- GOOGLETEST_CM0030 DO NOT DELETE -->
+
 ### I can't figure out why gMock thinks my expectations are not satisfied. What should I do?
 
 You might want to run your test with `--gmock_verbose=info`. This flag lets
@@ -123,6 +125,8 @@ using ::testing::_;
   EXPECT_CALL(foo, Bar(_))
       .Times(0);
 ```
+
+<!-- GOOGLETEST_CM0031 DO NOT DELETE -->
 
 ### I have a failed test where gMock tells me TWICE that a particular expectation is not satisfied. Isn't this redundant?
 

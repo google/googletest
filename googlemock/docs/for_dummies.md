@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-
 
 (**Note:** If you get compiler errors that you don't understand, be sure to consult [Google Mock Doctor](frequently_asked_questions.md#how-am-i-supposed-to-make-sense-of-these-horrible-template-errors).)
 
@@ -152,6 +150,8 @@ changes in `Foo` much more easily. While this is more work initially, carefully
 choosing the adaptor interface can make your code easier to write and more
 readable (a net win in the long run), as you can choose `FooAdaptor` to fit your
 specific domain much better than `Foo` does.
+
+<!-- GOOGLETEST_CM0029 DO NOT DELETE -->
 
 ### Using Mocks in Tests
 
