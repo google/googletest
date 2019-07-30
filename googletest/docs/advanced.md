@@ -1150,9 +1150,9 @@ also supports per-test-suite set-up/tear-down. To use it:
 
 1.  In your test fixture class (say `FooTest` ), declare as `static` some member
     variables to hold the shared resources.
-1.  Outside your test fixture class (typically just below it), define those
+2.  Outside your test fixture class (typically just below it), define those
     member variables, optionally giving them initial values.
-1.  In the same test fixture class, define a `static void SetUpTestSuite()`
+3.  In the same test fixture class, define a `static void SetUpTestSuite()`
     function (remember not to spell it as **`SetupTestSuite`** with a small
     `u`!) to set up the shared resources and a `static void TearDownTestSuite()`
     function to tear them down.
@@ -1425,7 +1425,7 @@ To define abstract tests, you should organize your code like this:
 1.  Put the definition of the parameterized test fixture class (e.g. `FooTest`)
     in a header file, say `foo_param_test.h`. Think of this as *declaring* your
     abstract tests.
-1.  Put the `TEST_P` definitions in `foo_param_test.cc`, which includes
+2.  Put the `TEST_P` definitions in `foo_param_test.cc`, which includes
     `foo_param_test.h`. Think of this as *implementing* your abstract tests.
 
 Once they are defined, you can instantiate them by including `foo_param_test.h`,
@@ -1786,10 +1786,10 @@ For technical reasons, there are some caveats:
 
 1.  You cannot stream a failure message to either macro.
 
-1.  `statement` in `EXPECT_FATAL_FAILURE{_ON_ALL_THREADS}()` cannot reference
+2.  `statement` in `EXPECT_FATAL_FAILURE{_ON_ALL_THREADS}()` cannot reference
     local non-static variables or non-static members of `this` object.
 
-1.  `statement` in `EXPECT_FATAL_FAILURE{_ON_ALL_THREADS}()` cannot return a
+3.  `statement` in `EXPECT_FATAL_FAILURE{_ON_ALL_THREADS}()` cannot return a
     value.
 
 ## Registering tests programmatically
@@ -2015,7 +2015,7 @@ when processing an event. There are some restrictions:
 
 1.  You cannot generate any failure in `OnTestPartResult()` (otherwise it will
     cause `OnTestPartResult()` to be called recursively).
-1.  A listener that handles `OnTestPartResult()` is not allowed to generate any
+2.  A listener that handles `OnTestPartResult()` is not allowed to generate any
     failure.
 
 When you add listeners to the listener list, you should put listeners that
