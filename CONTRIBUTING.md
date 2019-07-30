@@ -21,7 +21,7 @@ accept your pull requests.
 
 ## Are you a Googler?
 
-If you are a Googler, plese make an attempt to submit an internal change rather
+If you are a Googler, please make an attempt to submit an internal change rather
 than a GitHub Pull Request. If you are not able to submit an internal change a
 PR is acceptable as an alternative.
 
