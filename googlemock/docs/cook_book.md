@@ -1038,7 +1038,7 @@ arguments as *one* single tuple to the predicate.
 Have you noticed that a matcher is just a fancy predicate that also knows how to
 describe itself? Many existing algorithms take predicates as arguments (e.g.
 those defined in STL's `<algorithm>` header), and it would be a shame if gMock
-matchers are not allowed to participate.
+matchers were not allowed to participate.
 
 Luckily, you can use a matcher where a unary predicate functor is expected by
 wrapping it inside the `Matches()` function. For example,
@@ -1245,7 +1245,7 @@ what if you want to make sure the value *pointed to* by the pointer, instead of
 the pointer itself, has a certain property? Well, you can use the `Pointee(m)`
 matcher.
 
-`Pointee(m)` matches a pointer iff `m` matches the value the pointer points to.
+`Pointee(m)` matches a pointer if `m` matches the value the pointer points to.
 For example:
 
 ```cpp
@@ -2603,7 +2603,7 @@ However, if the action has its own state, you may be surprised if you share the
 action object. Suppose you have an action factory `IncrementCounter(init)` which
 creates an action that increments and returns a counter whose initial value is
 `init`, using two actions created from the same expression and using a shared
-action will exihibit different behaviors. Example:
+action will exhibit different behaviors. Example:
 
 ```cpp
   EXPECT_CALL(foo, DoThis())
@@ -3548,7 +3548,7 @@ class MatcherInterface {
  public:
   virtual ~MatcherInterface();
 
-  // Returns true iff the matcher matches x; also explains the match
+  // Returns true if the matcher matches x; also explains the match
   // result to 'listener'.
   virtual bool MatchAndExplain(T x, MatchResultListener* listener) const = 0;
 
@@ -3702,10 +3702,10 @@ class CardinalityInterface {
  public:
   virtual ~CardinalityInterface();
 
-  // Returns true iff call_count calls will satisfy this cardinality.
+  // Returns true if call_count calls will satisfy this cardinality.
   virtual bool IsSatisfiedByCallCount(int call_count) const = 0;
 
-  // Returns true iff call_count calls will saturate this cardinality.
+  // Returns true if call_count calls will saturate this cardinality.
   virtual bool IsSaturatedByCallCount(int call_count) const = 0;
 
   // Describes self to an ostream.

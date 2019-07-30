@@ -1952,12 +1952,12 @@ TEST(DeletingMockEarlyTest, Failure2) {
 
 class EvenNumberCardinality : public CardinalityInterface {
  public:
-  // Returns true iff call_count calls will satisfy this cardinality.
+  // Returns true if call_count calls will satisfy this cardinality.
   bool IsSatisfiedByCallCount(int call_count) const override {
     return call_count % 2 == 0;
   }
 
-  // Returns true iff call_count calls will saturate this cardinality.
+  // Returns true if call_count calls will saturate this cardinality.
   bool IsSaturatedByCallCount(int /* call_count */) const override {
     return false;
   }
