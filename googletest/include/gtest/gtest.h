@@ -412,6 +412,8 @@ class GTEST_API_ Test {
   // test in test case Foo.  Hence a sub-class can define its own
   // SetUpTestSuite() method to shadow the one defined in the super
   // class.
+  // Failures that happen during SetUpTestSuite are logged but otherwise
+  // ignored.
   static void SetUpTestSuite() {}
 
   // Tears down the stuff shared by all tests in this test suite.
@@ -420,6 +422,8 @@ class GTEST_API_ Test {
   // test in test case Foo.  Hence a sub-class can define its own
   // TearDownTestSuite() method to shadow the one defined in the super
   // class.
+  // Failures that happen during TearDownTestSuite are logged but otherwise
+  // ignored.
   static void TearDownTestSuite() {}
 
   // Legacy API is deprecated but still available
