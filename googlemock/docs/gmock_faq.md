@@ -81,7 +81,7 @@ void Bar(int* p);         // Neither p nor *p is const.
 void Bar(const int* p);  // p is not const, but *p is.
 ```
 
-<<!-- GOOGLETEST_CM0030 DO NOT DELETE -->
+<!-- GOOGLETEST_CM0030 DO NOT DELETE -->
 
 ### I can't figure out why gMock thinks my expectations are not satisfied. What should I do?
 
