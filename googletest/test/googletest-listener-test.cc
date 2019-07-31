@@ -35,6 +35,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "gtest/internal/custom/gtest.h"
 
 using ::testing::AddGlobalTestEnvironment;
 using ::testing::Environment;
@@ -76,10 +77,11 @@ class EventRecordingListener : public TestEventListener {
   void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) override {
     g_events->push_back(GetFullMethodName("OnEnvironmentsSetUpEnd"));
   }
-
+#ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
   void OnTestCaseStart(const TestCase& /*test_case*/) override {
     g_events->push_back(GetFullMethodName("OnTestCaseStart"));
   }
+#endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
   void OnTestStart(const TestInfo& /*test_info*/) override {
     g_events->push_back(GetFullMethodName("OnTestStart"));
@@ -93,9 +95,11 @@ class EventRecordingListener : public TestEventListener {
     g_events->push_back(GetFullMethodName("OnTestEnd"));
   }
 
+#ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
   void OnTestCaseEnd(const TestCase& /*test_case*/) override {
     g_events->push_back(GetFullMethodName("OnTestCaseEnd"));
   }
+#endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
   void OnEnvironmentsTearDownStart(const UnitTest& /*unit_test*/) override {
     g_events->push_back(GetFullMethodName("OnEnvironmentsTearDownStart"));
@@ -283,6 +287,9 @@ int main(int argc, char **argv) {
   ::testing::GTEST_FLAG(repeat) = 2;
   int ret_val = RUN_ALL_TESTS();
 
+#ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
+
+  // The deprecated OnTestSuiteStart/OnTestCaseStart events are included
   const char* const expected_events[] = {"1st.OnTestProgramStart",
                                          "2nd.OnTestProgramStart",
                                          "3rd.OnTestProgramStart",
@@ -393,6 +400,110 @@ int main(int argc, char **argv) {
                                          "3rd.OnTestProgramEnd",
                                          "2nd.OnTestProgramEnd",
                                          "1st.OnTestProgramEnd"};
+#else
+  const char* const expected_events[] = {"1st.OnTestProgramStart",
+                                         "2nd.OnTestProgramStart",
+                                         "3rd.OnTestProgramStart",
+                                         "1st.OnTestIterationStart(0)",
+                                         "2nd.OnTestIterationStart(0)",
+                                         "3rd.OnTestIterationStart(0)",
+                                         "1st.OnEnvironmentsSetUpStart",
+                                         "2nd.OnEnvironmentsSetUpStart",
+                                         "3rd.OnEnvironmentsSetUpStart",
+                                         "Environment::SetUp",
+                                         "3rd.OnEnvironmentsSetUpEnd",
+                                         "2nd.OnEnvironmentsSetUpEnd",
+                                         "1st.OnEnvironmentsSetUpEnd",
+                                         "3rd.OnTestSuiteStart",
+                                         "ListenerTest::SetUpTestSuite",
+                                         "1st.OnTestStart",
+                                         "2nd.OnTestStart",
+                                         "3rd.OnTestStart",
+                                         "ListenerTest::SetUp",
+                                         "ListenerTest::* Test Body",
+                                         "1st.OnTestPartResult",
+                                         "2nd.OnTestPartResult",
+                                         "3rd.OnTestPartResult",
+                                         "ListenerTest::TearDown",
+                                         "3rd.OnTestEnd",
+                                         "2nd.OnTestEnd",
+                                         "1st.OnTestEnd",
+                                         "1st.OnTestStart",
+                                         "2nd.OnTestStart",
+                                         "3rd.OnTestStart",
+                                         "ListenerTest::SetUp",
+                                         "ListenerTest::* Test Body",
+                                         "1st.OnTestPartResult",
+                                         "2nd.OnTestPartResult",
+                                         "3rd.OnTestPartResult",
+                                         "ListenerTest::TearDown",
+                                         "3rd.OnTestEnd",
+                                         "2nd.OnTestEnd",
+                                         "1st.OnTestEnd",
+                                         "ListenerTest::TearDownTestSuite",
+                                         "3rd.OnTestSuiteEnd",
+                                         "1st.OnEnvironmentsTearDownStart",
+                                         "2nd.OnEnvironmentsTearDownStart",
+                                         "3rd.OnEnvironmentsTearDownStart",
+                                         "Environment::TearDown",
+                                         "3rd.OnEnvironmentsTearDownEnd",
+                                         "2nd.OnEnvironmentsTearDownEnd",
+                                         "1st.OnEnvironmentsTearDownEnd",
+                                         "3rd.OnTestIterationEnd(0)",
+                                         "2nd.OnTestIterationEnd(0)",
+                                         "1st.OnTestIterationEnd(0)",
+                                         "1st.OnTestIterationStart(1)",
+                                         "2nd.OnTestIterationStart(1)",
+                                         "3rd.OnTestIterationStart(1)",
+                                         "1st.OnEnvironmentsSetUpStart",
+                                         "2nd.OnEnvironmentsSetUpStart",
+                                         "3rd.OnEnvironmentsSetUpStart",
+                                         "Environment::SetUp",
+                                         "3rd.OnEnvironmentsSetUpEnd",
+                                         "2nd.OnEnvironmentsSetUpEnd",
+                                         "1st.OnEnvironmentsSetUpEnd",
+                                         "3rd.OnTestSuiteStart",
+                                         "ListenerTest::SetUpTestSuite",
+                                         "1st.OnTestStart",
+                                         "2nd.OnTestStart",
+                                         "3rd.OnTestStart",
+                                         "ListenerTest::SetUp",
+                                         "ListenerTest::* Test Body",
+                                         "1st.OnTestPartResult",
+                                         "2nd.OnTestPartResult",
+                                         "3rd.OnTestPartResult",
+                                         "ListenerTest::TearDown",
+                                         "3rd.OnTestEnd",
+                                         "2nd.OnTestEnd",
+                                         "1st.OnTestEnd",
+                                         "1st.OnTestStart",
+                                         "2nd.OnTestStart",
+                                         "3rd.OnTestStart",
+                                         "ListenerTest::SetUp",
+                                         "ListenerTest::* Test Body",
+                                         "1st.OnTestPartResult",
+                                         "2nd.OnTestPartResult",
+                                         "3rd.OnTestPartResult",
+                                         "ListenerTest::TearDown",
+                                         "3rd.OnTestEnd",
+                                         "2nd.OnTestEnd",
+                                         "1st.OnTestEnd",
+                                         "ListenerTest::TearDownTestSuite",
+                                         "3rd.OnTestSuiteEnd",
+                                         "1st.OnEnvironmentsTearDownStart",
+                                         "2nd.OnEnvironmentsTearDownStart",
+                                         "3rd.OnEnvironmentsTearDownStart",
+                                         "Environment::TearDown",
+                                         "3rd.OnEnvironmentsTearDownEnd",
+                                         "2nd.OnEnvironmentsTearDownEnd",
+                                         "1st.OnEnvironmentsTearDownEnd",
+                                         "3rd.OnTestIterationEnd(1)",
+                                         "2nd.OnTestIterationEnd(1)",
+                                         "1st.OnTestIterationEnd(1)",
+                                         "3rd.OnTestProgramEnd",
+                                         "2nd.OnTestProgramEnd",
+                                         "1st.OnTestProgramEnd"};
+#endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
   VerifyResults(events,
                 expected_events,

@@ -2013,10 +2013,11 @@ void ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTest(
 
 void ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestSuite(
     const char* key) {
-  const TestCase* test_case = UnitTest::GetInstance()->current_test_case();
-  ASSERT_TRUE(test_case != nullptr);
+  const testing::TestSuite* test_suite =
+      UnitTest::GetInstance()->current_test_suite();
+  ASSERT_TRUE(test_suite != nullptr);
   ExpectNonFatalFailureRecordingPropertyWithReservedKey(
-      test_case->ad_hoc_test_result(), key);
+      test_suite->ad_hoc_test_result(), key);
 }
 
 void ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestSuite(
@@ -2046,8 +2047,10 @@ class UnitTestRecordPropertyTest :
         "time");
 
     Test::RecordProperty("test_case_key_1", "1");
+
     const testing::TestSuite* test_suite =
-        UnitTest::GetInstance()->current_test_case();
+        UnitTest::GetInstance()->current_test_suite();
+
     ASSERT_TRUE(test_suite != nullptr);
 
     ASSERT_EQ(1, test_suite->ad_hoc_test_result().test_property_count());
