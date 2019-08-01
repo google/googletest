@@ -1869,7 +1869,7 @@ class MockFunction<R(Args...)> {
   }
 
  private:
-  mutable internal::FunctionMocker<R(Args...)> mock_;
+  internal::FunctionMocker<R(Args...)> mock_;
 };
 
 // The style guide prohibits "using" statements in a namespace scope
