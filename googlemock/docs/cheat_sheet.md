@@ -177,7 +177,8 @@ Example usage:
 To customize the default action for a particular method of a specific mock
 object, use `ON_CALL()`. `ON_CALL()` has a similar syntax to `EXPECT_CALL()`,
 but it is used for setting default behaviors (when you do not require that the
-mock method is called). See go/prefer-on-call for a more detailed discussion.
+mock method is called). See [here](cook_book.md#UseOnCall) for a more detailed
+discussion.
 
 ```cpp
 ON_CALL(mock-object, method(matchers))
@@ -332,8 +333,8 @@ The `argument` can be either a C string or a C++ string object:
 
 `ContainsRegex()` and `MatchesRegex()` take ownership of the `RE` object. They
 use the regular expression syntax defined
-[here](http://go/gunit-advanced-regex). `StrCaseEq()`, `StrCaseNe()`, `StrEq()`,
-and `StrNe()` work for wide strings as well.
+[here](advanced.md#regular-expression-syntax). `StrCaseEq()`, `StrCaseNe()`,
+`StrEq()`, and `StrNe()` work for wide strings as well.
 
 #### Container Matchers
 
@@ -658,20 +659,20 @@ which must be a permanent callback.
 :                                    : be any copyable value. Available since  :
 :                                    : v1.1.0.                                 :
 
-#### Using a Function, Functor, Lambda, or Callback as an Action
+#### Using a Function, Functor, or Lambda as an Action
 
 In the following, by "callable" we mean a free function, `std::function`,
-functor, lambda, or `google3`-style permanent callback.
+functor, or lambda.
 
 |                                     |                                        |
 | :---------------------------------- | :------------------------------------- |
 | `f`                                 | Invoke f with the arguments passed to  |
 :                                     : the mock function, where f is a        :
-:                                     : callable (except of google3 callback). :
+:                                     : callable.                              :
 | `Invoke(f)`                         | Invoke `f` with the arguments passed   |
 :                                     : to the mock function, where `f` can be :
 :                                     : a global/static function or a functor. :
-| `Invoke(object_pointer,             | Invoke the {method on the object with  |
+| `Invoke(object_pointer,             | Invoke the method on the object with   |
 : &class\:\:method)`                  : the arguments passed to the mock       :
 :                                     : function.                              :
 | `InvokeWithoutArgs(f)`              | Invoke `f`, which can be a             |

@@ -51,26 +51,34 @@ of misunderstanding these.
 Historically, googletest started to use the term _Test Case_ for grouping
 related tests, whereas current publications including the International Software
 Testing Qualifications Board ([ISTQB](http://www.istqb.org/)) and various
-textbooks on Software Quality use the term _[Test
-Suite](http://glossary.istqb.org/search/test%20suite)_ for this.
+textbooks on Software Quality use the term _[Test Suite][istqb test suite]_ for
+this.
 
 The related term _Test_, as it is used in the googletest, is corresponding to
-the term _[Test Case](http://glossary.istqb.org/search/test%20case)_ of ISTQB
-and others.
+the term _[Test Case][istqb test case]_ of ISTQB and others.
 
 The term _Test_ is commonly of broad enough sense, including ISTQB's definition
 of _Test Case_, so it's not much of a problem here. But the term _Test Case_ as
 was used in Google Test is of contradictory sense and thus confusing.
 
-googletest recently started replacing the term _Test Case_ by _Test Suite_ The
-preferred API is TestSuite*. The older TestCase* API is being slowly deprecated
-and refactored away
+googletest recently started replacing the term _Test Case_ with _Test Suite_.
+The preferred API is *TestSuite*. The older TestCase API is being slowly
+deprecated and refactored away.
 
 So please be aware of the different definitions of the terms:
 
-Meaning                                                                              | googletest Term         | [ISTQB](http://www.istqb.org/) Term
-:----------------------------------------------------------------------------------- | :---------------------- | :----------------------------------
-Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests) | [Test Case](http://glossary.istqb.org/search/test%20case)
+| Meaning           | googletest Term         | [ISTQB](http://www.istqb.org/) |
+:                   :                         : Term                           :
+| :---------------- | :---------------------- | :----------------------------- |
+| Exercise a        | [TEST()](#simple-tests) | [Test Case][istqb test case]   |
+: particular        :                         :                                :
+: program path with :                         :                                :
+: specific input    :                         :                                :
+: values and verify :                         :                                :
+: the results       :                         :                                :
+
+[istqb test case]: http://glossary.istqb.org/en/search/test%20case
+[istqb test suite]: http://glossary.istqb.org/en/search/test%20suite
 
 ## Basic Concepts
 
@@ -235,9 +243,8 @@ of two wide strings fails, their values will be printed as UTF-8 narrow strings.
 **Availability**: Linux, Windows, Mac.
 
 **See also**: For more string comparison tricks (substring, prefix, suffix, and
-regular expression matching, for example), see
-[this](https://github.com/google/googletest/blob/master/googletest/docs/advanced.md)
-in the Advanced googletest Guide.
+regular expression matching, for example), see [this](advanced.md) in the
+Advanced googletest Guide.
 
 ## Simple Tests
 
