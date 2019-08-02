@@ -161,7 +161,7 @@ class Token:
 
 
 def StartsWith(lines, pos, string):
-  """Returns True if the given position in lines starts with 'string'."""
+  """Returns True iff the given position in lines starts with 'string'."""
 
   return lines[pos.line][pos.column:].startswith(string)
 
