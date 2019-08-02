@@ -101,14 +101,15 @@ If you already have a function or functor that returns `bool` (or a type that
 can be implicitly converted to `bool`), you can use it in a *predicate
 assertion* to get the function arguments printed for free:
 
-| Fatal assertion      | Nonfatal assertion   | Verifies                    |
-| -------------------- | -------------------- | --------------------------- |
-| `ASSERT_PRED1(pred1, | `EXPECT_PRED1(pred1, | `pred1(val1)` is true       |
-: val1);`              : val1);`              :                             :
-| `ASSERT_PRED2(pred2, | `EXPECT_PRED2(pred2, | `pred2(val1, val2)` is true |
-: val1, val2);`        : val1, val2);`        :                             :
-| `...`                | `...`                | ...                         |
+<!-- mdformat off(github rendering does not support multiline tables) -->
 
+| Fatal assertion                   | Nonfatal assertion                | Verifies                    |
+| --------------------------------- | --------------------------------- | --------------------------- |
+| `ASSERT_PRED1(pred1, val1)`       | `EXPECT_PRED1(pred1, val1)`       | `pred1(val1)` is true       |
+| `ASSERT_PRED2(pred2, val1, val2)` | `EXPECT_PRED2(pred2, val1, val2)` | `pred1(val1, val2)` is true |
+| `...`                             | `...`                             | `...`                       |
+
+<!-- mdformat on-->
 In the above, `predn` is an `n`-ary predicate function or functor, where `val1`,
 `val2`, ..., and `valn` are its arguments. The assertion succeeds if the
 predicate returns `true` when applied to the given arguments, and fails
@@ -330,23 +331,26 @@ want to learn more, see
 
 #### Floating-Point Macros
 
-| Fatal assertion         | Nonfatal assertion      | Verifies                |
-| ----------------------- | ----------------------- | ----------------------- |
-| `ASSERT_FLOAT_EQ(val1,  | `EXPECT_FLOAT_EQ(val1,  | the two `float` values  |
-: val2);`                 : val2);`                 : are almost equal        :
-| `ASSERT_DOUBLE_EQ(val1, | `EXPECT_DOUBLE_EQ(val1, | the two `double` values |
-: val2);`                 : val2);`                 : are almost equal        :
+<!-- mdformat off(github rendering does not support multiline tables) -->
+
+| Fatal assertion                 | Nonfatal assertion              | Verifies                                 |
+| ------------------------------- | ------------------------------- | ---------------------------------------- |
+| `ASSERT_FLOAT_EQ(val1, val2);`  | `EXPECT_FLOAT_EQ(val1, val2);`  | the two `float` values are almost equal  |
+| `ASSERT_DOUBLE_EQ(val1, val2);` | `EXPECT_DOUBLE_EQ(val1, val2);` | the two `double` values are almost equal |
+
+<!-- mdformat on-->
 
 By "almost equal" we mean the values are within 4 ULP's from each other.
 
 The following assertions allow you to choose the acceptable error bound:
 
-| Fatal assertion    | Nonfatal assertion       | Verifies                  |
-| ------------------ | ------------------------ | ------------------------- |
-| `ASSERT_NEAR(val1, | `EXPECT_NEAR(val1, val2, | the difference between    |
-: val2, abs_error);` : abs_error);`             : `val1` and `val2` doesn't :
-:                    :                          : exceed the given absolute :
-:                    :                          : error                     :
+<!-- mdformat off(github rendering does not support multiline tables) -->
+
+| Fatal assertion                       | Nonfatal assertion                    | Verifies                                                                         |
+| ------------------------------------- | ------------------------------------- | -------------------------------------------------------------------------------- |
+| `ASSERT_NEAR(val1, val2, abs_error);` | `EXPECT_NEAR(val1, val2, abs_error);` | the difference between `val1` and `val2` doesn't exceed the given absolute error |
+
+<!-- mdformat on-->
 
 #### Floating-Point Predicate-Format Functions
 
@@ -369,10 +373,13 @@ Verifies that `val1` is less than, or almost equal to, `val2`. You can replace
 arguments passed to mock objects. A gMock *matcher* is basically a predicate
 that knows how to describe itself. It can be used in these assertion macros:
 
-| Fatal assertion     | Nonfatal assertion             | Verifies              |
-| ------------------- | ------------------------------ | --------------------- |
-| `ASSERT_THAT(value, | `EXPECT_THAT(value, matcher);` | value matches matcher |
-: matcher);`          :                                :                       :
+<!-- mdformat off(github rendering does not support multiline tables) -->
+
+| Fatal assertion                | Nonfatal assertion             | Verifies              |
+| ------------------------------ | ------------------------------ | --------------------- |
+| `ASSERT_THAT(value, matcher);` | `EXPECT_THAT(value, matcher);` | value matches matcher |
+
+<!-- mdformat on-->
 
 For example, `StartsWith(prefix)` is a matcher that matches a string starting
 with `prefix`, and you can write:
@@ -1342,19 +1349,17 @@ for generating test parameters. They return what we call (surprise!) *parameter
 generators*. Here is a summary of them, which are all in the `testing`
 namespace:
 
-| Parameter Generator          | Behavior                                    |
-| ---------------------------- | ------------------------------------------- |
-| `Range(begin, end [, step])` | Yields values `{begin, begin+step,          |
-:                              : begin+step+step, ...}`. The values do not   :
-:                              : include `end`. `step` defaults to 1.        :
-| `Values(v1, v2, ..., vN)`    | Yields values `{v1, v2, ..., vN}`.          |
-| `ValuesIn(container)` and    | Yields values from a C-style array, an      |
-: `ValuesIn(begin,end)`        : STL-style container, or an iterator range   :
-:                              : `[begin, end)`.                             :
-| `Bool()`                     | Yields sequence `{false, true}`.            |
-| `Combine(g1, g2, ..., gN)`   | Yields all combinations (Cartesian product) |
-:                              : as std\:\:tuples of the values generated by :
-:                              : the `N` generators.                         :
+<!-- mdformat off(github rendering does not support multiline tables) -->
+
+| Parameter Generator                                                                       | Behavior                                                                                                          |
+| ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `Range(begin, end [, step])`                                                              | Yields values `{begin, begin+step, begin+step+step, ...}`. The values do not include `end`. `step` defaults to 1. |
+| `Values(v1, v2, ..., vN)`                                                                 | Yields values `{v1, v2, ..., vN}`.                                                                                |
+| `ValuesIn(container)` and  `ValuesIn(begin,end)`                                          | Yields values from a C-style array, an  STL-style container, or an iterator range `[begin, end)`                  |
+| `Bool()`                                                                                  | Yields sequence `{false, true}`.                                                                                  |
+| `Combine(g1, g2, ..., gN)`                                                                | Yields all combinations (Cartesian product) as std\:\:tuples of the values generated by the `N` generators.       |
+
+<!-- mdformat on-->
 
 For more details, see the comments at the definitions of these functions.
 
