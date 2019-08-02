@@ -1195,11 +1195,12 @@ that satisfies matcher `m`.
 
 For example:
 
+<!-- mdformat off(github rendering does not support multiline tables) -->
 | Expression                   | Description                              |
 | :--------------------------- | :--------------------------------------- |
 | `Field(&Foo::number, Ge(3))` | Matches `x` where `x.number >= 3`.       |
-| `Property(&Foo::name,        | Matches `x` where `x.name()` starts with |
-: StartsWith("John "))`        : `"John "`.                               :
+| `Property(&Foo::name,  StartsWith("John "))` | Matches `x` where `x.name()` starts with  `"John "`. |
+<!-- mdformat on -->
 
 Note that in `Property(&Foo::baz, ...)`, method `baz()` must take no argument
 and be declared as `const`.
