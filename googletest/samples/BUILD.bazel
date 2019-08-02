@@ -1,0 +1,70 @@
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+
+# The following rules build samples of how to use gTest.
+cc_library(
+    name = "gtest_sample_lib",
+    srcs = [
+        "sample1.cc",
+        "sample2.cc",
+        "sample4.cc",
+    ],
+    hdrs = [
+        "prime_tables.h",
+        "sample1.h",
+        "sample2.h",
+        "sample3-inl.h",
+        "sample4.h",
+    ],
+    features = select({
+        "//:windows": ["windows_export_all_symbols"],
+        "//conditions:default": [],
+    }),
+    visibility = [
+        "//:__pkg__",
+    ],
+)
+
+cc_test(
+    name = "gtest_samples",
+    size = "small",
+    # All Samples except:
+    #   sample9 (main)
+    #   sample10 (main and takes a command line option and needs to be separate)
+    srcs = [
+        "sample1_unittest.cc",
+        "sample2_unittest.cc",
+        "sample3_unittest.cc",
+        "sample4_unittest.cc",
+        "sample5_unittest.cc",
+        "sample6_unittest.cc",
+        "sample7_unittest.cc",
+        "sample8_unittest.cc",
+    ],
+    visibility = [
+        "//:__pkg__",
+    ],
+    deps = [
+        ":gtest_sample_lib",
+        "//googletest:main",
+    ],
+)
+
+cc_test(
+    name = "sample9_unittest",
+    size = "small",
+    srcs = ["sample9_unittest.cc"],
+    visibility = [
+        "//:__pkg__",
+    ],
+    deps = ["//googletest"],
+)
+
+cc_test(
+    name = "sample10_unittest",
+    size = "small",
+    srcs = ["sample10_unittest.cc"],
+    visibility = [
+        "//:__pkg__",
+    ],
+    deps = ["//googletest"],
+)

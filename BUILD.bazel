@@ -28,150 +28,81 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-#   Bazel Build for Google C++ Testing Framework(Google Test)
+# Bazel Build for Google C++ Testing Framework (Google Test)
 
-package(default_visibility = ["//visibility:public"])
-
-licenses(["notice"])
+load("@rules_cc//cc:defs.bzl", "cc_library")
 
 config_setting(
     name = "windows",
     constraint_values = ["@bazel_tools//platforms:windows"],
+    # This shouldn't be public, but we can't remove it
+    # because has been for some time.
+    visibility = ["//visibility:public"],
 )
 
 config_setting(
     name = "has_absl",
     values = {"define": "absl=1"},
+    # This shouldn't be public, but we can't remove it
+    # because has been for some time.
+    visibility = ["//visibility:public"],
 )
 
 # Library that defines the FRIEND_TEST macro.
-cc_library(
+#
+# Deprecated. Use "//googletest:prod" instead.
+# TODO: Add deprecation message.
+alias(
     name = "gtest_prod",
-    hdrs = ["googletest/include/gtest/gtest_prod.h"],
-    includes = ["googletest/include"],
+    actual = "//googletest:prod",
+    visibility = ["//visibility:public"],
 )
 
-# Google Test including Google Mock
+# Google Test including Google Mock.
+#
+# Deprecated. Use "//googletest" or "//googlemock" instead.
+# TODO: Add deprecation message.
 cc_library(
     name = "gtest",
-    srcs = glob(
-        include = [
-            "googletest/src/*.cc",
-            "googletest/src/*.h",
-            "googletest/include/gtest/**/*.h",
-            "googlemock/src/*.cc",
-            "googlemock/include/gmock/**/*.h",
-        ],
-        exclude = [
-            "googletest/src/gtest-all.cc",
-            "googletest/src/gtest_main.cc",
-            "googlemock/src/gmock-all.cc",
-            "googlemock/src/gmock_main.cc",
-        ],
-    ),
-    hdrs = glob([
-        "googletest/include/gtest/*.h",
-        "googlemock/include/gmock/*.h",
-    ]),
-    copts = select({
-        ":windows": [],
-        "//conditions:default": ["-pthread"],
-    }),
-    defines = select({
-        ":has_absl": ["GTEST_HAS_ABSL=1"],
-        "//conditions:default": [],
-    }),
-    includes = [
-        "googlemock",
-        "googlemock/include",
-        "googletest",
-        "googletest/include",
-    ],
-    linkopts = select({
-        ":windows": [],
-        "//conditions:default": ["-pthread"],
-    }),
-    deps = select({
-        ":has_absl": [
-            "@com_google_absl//absl/debugging:failure_signal_handler",
-            "@com_google_absl//absl/debugging:stacktrace",
-            "@com_google_absl//absl/debugging:symbolize",
-            "@com_google_absl//absl/strings",
-            "@com_google_absl//absl/types:optional",
-            "@com_google_absl//absl/types:variant",
-        ],
-        "//conditions:default": [],
-    }),
-    features = select({
-        ":windows": ["windows_export_all_symbols"],
-        "//conditions:default": [],
-    })
-)
-
-cc_library(
-    name = "gtest_main",
-    srcs = ["googlemock/src/gmock_main.cc"],
-    deps = [":gtest"],
-    features = select({
-        ":windows": ["windows_export_all_symbols"],
-        "//conditions:default": [],
-    })
-)
-
-# The following rules build samples of how to use gTest.
-cc_library(
-    name = "gtest_sample_lib",
-    srcs = [
-        "googletest/samples/sample1.cc",
-        "googletest/samples/sample2.cc",
-        "googletest/samples/sample4.cc",
-    ],
-    hdrs = [
-        "googletest/samples/prime_tables.h",
-        "googletest/samples/sample1.h",
-        "googletest/samples/sample2.h",
-        "googletest/samples/sample3-inl.h",
-        "googletest/samples/sample4.h",
-    ],
-    features = select({
-        ":windows": ["windows_export_all_symbols"],
-        "//conditions:default": [],
-    })
-)
-
-cc_test(
-    name = "gtest_samples",
-    size = "small",
-    # All Samples except:
-    #   sample9 (main)
-    #   sample10 (main and takes a command line option and needs to be separate)
-    srcs = [
-        "googletest/samples/sample1_unittest.cc",
-        "googletest/samples/sample2_unittest.cc",
-        "googletest/samples/sample3_unittest.cc",
-        "googletest/samples/sample4_unittest.cc",
-        "googletest/samples/sample5_unittest.cc",
-        "googletest/samples/sample6_unittest.cc",
-        "googletest/samples/sample7_unittest.cc",
-        "googletest/samples/sample8_unittest.cc",
-    ],
+    visibility = ["//visibility:public"],
     deps = [
-        "gtest_sample_lib",
-        ":gtest_main",
+        "//googlemock",
+        "//googletest",
     ],
-    linkstatic = 0,
 )
 
-cc_test(
+# Deprecated. Use "//googlemock:main" instead.
+# TODO: Add deprecation message.
+alias(
+    name = "gtest_main",
+    actual = "//googlemock:main",
+    visibility = ["//visibility:public"],
+)
+
+# Deprecated.
+# These are only here because the previous BUILD file made everything public.
+# TODO: Add deprecation message.
+
+alias(
+    name = "gtest_sample_lib",
+    actual = "//googletest/samples:gtest_sample_lib",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "gtest_samples",
+    actual = "//googletest/samples:gtest_samples",
+    visibility = ["//visibility:public"],
+)
+
+alias(
     name = "sample9_unittest",
-    size = "small",
-    srcs = ["googletest/samples/sample9_unittest.cc"],
-    deps = [":gtest"],
+    actual = "//googletest/samples:sample9_unittest",
+    visibility = ["//visibility:public"],
 )
 
-cc_test(
+alias(
     name = "sample10_unittest",
-    size = "small",
-    srcs = ["googletest/samples/sample10_unittest.cc"],
-    deps = [":gtest"],
+    actual = "//googletest/samples:sample10_unittest",
+    visibility = ["//visibility:public"],
 )

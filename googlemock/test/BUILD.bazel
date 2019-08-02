@@ -32,19 +32,70 @@
 #
 #   Bazel Build for Google C++ Testing Framework(Google Test)-googlemock
 
-licenses(["notice"])
+load("@rules_python//python:defs.bzl", "py_library", "py_test")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 
-# Tests for GMock itself
-cc_test(
-    name = "gmock_all_test",
-    size = "small",
-    srcs = glob(include = ["gmock-*.cc"]),
-    linkopts = select({
-        "//:windows": [],
-        "//conditions:default": ["-pthread"],
-    }),
-    deps = ["//:gtest"],
+custom_main_tests = [
+    "gmock_stress_test.cc",
+]
+
+tests = glob(
+    include = [
+        "gmock*.cc",
+    ],
+    exclude = custom_main_tests + [
+        "*_.cc",
+        "gmock_test.cc",
+        "gmock_link_test.cc",
+        "gmock_link2_test.cc",
+        "gmock_all_test.cc",
+    ],
 )
+
+cc_library(
+    name = "test_headers",
+    testonly = True,
+    hdrs = glob(["*.h"]),
+    include_prefix = "test",
+)
+
+[
+    cc_test(
+        name = test[:-3],
+        size = "small",
+        srcs = [
+            test,
+        ],
+        linkopts = select({
+            "//:windows": [],
+            "//conditions:default": ["-pthread"],
+        }),
+        deps = [
+            "//googlemock",
+            "//googletest:internal_inl_h",
+        ],
+    )
+    for test in custom_main_tests
+]
+
+[
+    cc_test(
+        name = test[:-3],
+        size = "small",
+        srcs = [
+            test,
+        ],
+        linkopts = select({
+            "//:windows": [],
+            "//conditions:default": ["-pthread"],
+        }),
+        deps = [
+            "//googlemock:main",
+            "//googletest:internal_inl_h",
+        ],
+    )
+    for test in tests
+]
 
 # Python tests
 py_library(
@@ -57,7 +108,7 @@ cc_binary(
     name = "gmock_leak_test_",
     testonly = 1,
     srcs = ["gmock_leak_test_.cc"],
-    deps = ["//:gtest_main"],
+    deps = ["//googlemock:main"],
 )
 
 py_test(
@@ -78,13 +129,16 @@ cc_test(
         "gmock_link_test.cc",
         "gmock_link_test.h",
     ],
-    deps = ["//:gtest_main"],
+    deps = [
+        ":test_headers",
+        "//googlemock:main",
+    ],
 )
 
 cc_binary(
     name = "gmock_output_test_",
     srcs = ["gmock_output_test_.cc"],
-    deps = ["//:gtest"],
+    deps = ["//googlemock"],
 )
 
 py_test(
@@ -103,5 +157,5 @@ cc_test(
     name = "gmock_test",
     size = "small",
     srcs = ["gmock_test.cc"],
-    deps = ["//:gtest_main"],
+    deps = ["//googlemock:main"],
 )

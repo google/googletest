@@ -58,7 +58,7 @@ install:
 
     # install Bazel
     if ($env:build_system -eq "bazel") {
-        appveyor DownloadFile https://github.com/bazelbuild/bazel/releases/download/0.21.0/bazel-0.21.0-windows-x86_64.exe -FileName bazel.exe
+        appveyor DownloadFile https://github.com/bazelbuild/bazel/releases/download/0.28.1/bazel-0.28.1-windows-x86_64.exe -FileName bazel.exe
     }
 
     if ($env:build_system -eq "cmake") {
@@ -84,7 +84,7 @@ build_script:
     } else {
         # special case - build with Bazel
         if ($env:build_system -eq "bazel") {
-            & $env:root\bazel.exe build -c opt //:gtest_samples
+            & $env:root\bazel.exe build -c opt //googletest/samples/...
             if ($LastExitCode -eq 0) { # bazel writes to StdErr and PowerShell interprets it as an error
                 $host.SetShouldExit(0)
             } else { # a real error
@@ -124,7 +124,7 @@ test_script:
     }
     if ($env:build_system -eq "bazel") {
         # special case - testing with Bazel
-        & $env:root\bazel.exe test //:gtest_samples
+        & $env:root\bazel.exe test //googletest/samples/...
         if ($LastExitCode -eq 0) { # bazel writes to StdErr and PowerShell interprets it as an error
             $host.SetShouldExit(0)
         } else { # a real error

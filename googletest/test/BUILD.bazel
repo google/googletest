@@ -32,116 +32,120 @@
 #
 # Bazel BUILD for The Google C++ Testing Framework (Google Test)
 
-licenses(["notice"])
+load("@rules_python//python:defs.bzl", "py_library", "py_test")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 
-#on windows exclude gtest-tuple.h
-cc_test(
-    name = "gtest_all_test",
-    size = "small",
-    srcs = glob(
-        include = [
-            "gtest-*.cc",
-            "googletest-*.cc",
-            "*.h",
-            "googletest/include/gtest/**/*.h",
-        ],
-        exclude = [
-            "gtest-unittest-api_test.cc",
-            "googletest/src/gtest-all.cc",
-            "gtest_all_test.cc",
-            "gtest-death-test_ex_test.cc",
-            "gtest-listener_test.cc",
-            "gtest-unittest-api_test.cc",
-            "googletest-param-test-test.cc",
-            "googletest-catch-exceptions-test_.cc",
-            "googletest-color-test_.cc",
-            "googletest-env-var-test_.cc",
-            "googletest-filter-unittest_.cc",
-            "googletest-break-on-failure-unittest_.cc",
-            "googletest-listener-test.cc",
-            "googletest-output-test_.cc",
-            "googletest-list-tests-unittest_.cc",
-            "googletest-shuffle-test_.cc",
-            "googletest-uninitialized-test_.cc",
-            "googletest-death-test_ex_test.cc",
-            "googletest-param-test-test",
-            "googletest-throw-on-failure-test_.cc",
-            "googletest-param-test-invalid-name1-test_.cc",
-            "googletest-param-test-invalid-name2-test_.cc",
-        ],
-    ) + select({
-        "//:windows": [],
-        "//conditions:default": [],
-    }),
-    copts = select({
-        "//:windows": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
-        "//conditions:default": ["-DGTEST_USE_OWN_TR1_TUPLE=1"],
-    }),
-    includes = [
-        "googletest",
-        "googletest/include",
-        "googletest/include/internal",
-        "googletest/test",
+exception_tests = [
+    "googletest-death-test_ex_test.cc",
+    "gtest_assert_by_exception_test.cc",
+    "gtest_throw_on_failure_ex_test.cc",
+]
+
+custom_main_tests = [
+    "googletest-listener-test.cc",
+    "gtest-unittest-api_test.cc",
+    "gtest_environment_test.cc",
+    "gtest_no_test_unittest.cc",
+    "gtest_premature_exit_test.cc",
+    "gtest_repeat_test.cc",
+    "gtest_stress_test.cc",
+    "gtest_test_macro_stack_footprint_test.cc",
+]
+
+tests = glob(
+    include = [
+        "googletest*.cc",
+        "gtest*.cc",
     ],
-    linkopts = select({
-        "//:windows": [],
-        "//conditions:default": ["-pthread"],
-    }),
-    deps = ["//:gtest_main"],
+    exclude = exception_tests + custom_main_tests + [
+        "*_.cc",
+        "googletest-param-test-test.cc",
+        "googletest-param-test2-test.cc",
+        "gtest_all_test.cc",
+    ],
 )
 
-# Tests death tests.
-cc_test(
-    name = "googletest-death-test-test",
-    size = "medium",
-    srcs = ["googletest-death-test-test.cc"],
-    deps = ["//:gtest_main"],
-)
-
-cc_test(
-    name = "gtest_test_macro_stack_footprint_test",
-    size = "small",
-    srcs = ["gtest_test_macro_stack_footprint_test.cc"],
-    deps = ["//:gtest"],
-)
-
-#These googletest tests have their own main()
-cc_test(
-    name = "googletest-listener-test",
-    size = "small",
-    srcs = ["googletest-listener-test.cc"],
-    deps = ["//:gtest_main"],
-)
-
-cc_test(
-    name = "gtest-unittest-api_test",
-    size = "small",
+cc_library(
+    name = "test_utils",
+    testonly = True,
     srcs = [
-        "gtest-unittest-api_test.cc",
+        "production.cc",
     ],
+    hdrs = glob(["*.h"]),
+    include_prefix = "test",
     deps = [
-        "//:gtest",
+        "//googletest:prod",
     ],
 )
+
+[
+    cc_test(
+        name = test[:-3],
+        size = "medium",
+        srcs = [
+            test,
+        ],
+        copts = ["-fexceptions"],
+        defines = ["GTEST_ENABLE_CATCH_EXCEPTIONS_=1"],
+        deps = ["//googletest"],
+    )
+    for test in exception_tests
+]
+
+[
+    cc_test(
+        name = test[:-3],
+        size = "small",
+        srcs = [
+            test,
+        ],
+        args = ["--heap_check=strict"],
+        linkopts = select({
+            "//:windows": [],
+            "//conditions:default": ["-pthread"],
+        }),
+        deps = [
+            ":test_utils",
+            "//googletest",
+            "//googletest:internal_inl_h",
+        ],
+    )
+    for test in custom_main_tests
+]
+
+[
+    cc_test(
+        name = test[:-3],
+        size = "small",
+        srcs = [
+            test,
+        ],
+        args = ["--heap_check=strict"],
+        linkopts = select({
+            "//:windows": [],
+            "//conditions:default": ["-pthread"],
+        }),
+        deps = [
+            ":test_utils",
+            "//googletest:internal_inl_h",
+            "//googletest:main",
+        ],
+    )
+    for test in tests
+]
 
 cc_test(
     name = "googletest-param-test-test",
     size = "small",
     srcs = [
         "googletest-param-test-test.cc",
-        "googletest-param-test-test.h",
         "googletest-param-test2-test.cc",
     ],
-    deps = ["//:gtest"],
-)
-
-cc_test(
-    name = "gtest_unittest",
-    size = "small",
-    srcs = ["gtest_unittest.cc"],
-    args = ["--heap_check=strict"],
-    shard_count = 2,
-    deps = ["//:gtest_main"],
+    deps = [
+        ":test_utils",
+        "//googletest",
+        "//googletest:internal_inl_h",
+    ],
 )
 
 #  Py tests
@@ -156,7 +160,7 @@ cc_binary(
     name = "gtest_help_test_",
     testonly = 1,
     srcs = ["gtest_help_test_.cc"],
-    deps = ["//:gtest_main"],
+    deps = ["//googletest:main"],
 )
 
 py_test(
@@ -171,7 +175,10 @@ cc_binary(
     name = "googletest-output-test_",
     testonly = 1,
     srcs = ["googletest-output-test_.cc"],
-    deps = ["//:gtest"],
+    deps = [
+        "//googletest",
+        "//googletest:internal_inl_h",
+    ],
 )
 
 py_test(
@@ -193,7 +200,10 @@ cc_binary(
     name = "googletest-color-test_",
     testonly = 1,
     srcs = ["googletest-color-test_.cc"],
-    deps = ["//:gtest"],
+    deps = [
+        "//googletest",
+        "//googletest:internal_inl_h",
+    ],
 )
 
 py_test(
@@ -208,7 +218,10 @@ cc_binary(
     name = "googletest-env-var-test_",
     testonly = 1,
     srcs = ["googletest-env-var-test_.cc"],
-    deps = ["//:gtest"],
+    deps = [
+        "//googletest",
+        "//googletest:internal_inl_h",
+    ],
 )
 
 py_test(
@@ -223,7 +236,7 @@ cc_binary(
     name = "googletest-filter-unittest_",
     testonly = 1,
     srcs = ["googletest-filter-unittest_.cc"],
-    deps = ["//:gtest"],
+    deps = ["//googletest"],
 )
 
 py_test(
@@ -238,7 +251,7 @@ cc_binary(
     name = "googletest-break-on-failure-unittest_",
     testonly = 1,
     srcs = ["googletest-break-on-failure-unittest_.cc"],
-    deps = ["//:gtest"],
+    deps = ["//googletest"],
 )
 
 py_test(
@@ -249,18 +262,11 @@ py_test(
     deps = [":gtest_test_utils"],
 )
 
-cc_test(
-    name = "gtest_assert_by_exception_test",
-    size = "small",
-    srcs = ["gtest_assert_by_exception_test.cc"],
-    deps = ["//:gtest"],
-)
-
 cc_binary(
     name = "googletest-throw-on-failure-test_",
     testonly = 1,
     srcs = ["googletest-throw-on-failure-test_.cc"],
-    deps = ["//:gtest"],
+    deps = ["//googletest"],
 )
 
 py_test(
@@ -275,21 +281,7 @@ cc_binary(
     name = "googletest-list-tests-unittest_",
     testonly = 1,
     srcs = ["googletest-list-tests-unittest_.cc"],
-    deps = ["//:gtest"],
-)
-
-cc_test(
-    name = "gtest_skip_test",
-    size = "small",
-    srcs = ["gtest_skip_test.cc"],
-    deps = ["//:gtest_main"],
-)
-
-cc_test(
-    name = "gtest_skip_in_environment_setup_test",
-    size = "small",
-    srcs = ["gtest_skip_in_environment_setup_test.cc"],
-    deps = ["//:gtest_main"],
+    deps = ["//googletest"],
 )
 
 py_test(
@@ -313,7 +305,7 @@ py_test(
 cc_binary(
     name = "googletest-shuffle-test_",
     srcs = ["googletest-shuffle-test_.cc"],
-    deps = ["//:gtest"],
+    deps = ["//googletest"],
 )
 
 py_test(
@@ -328,7 +320,7 @@ cc_binary(
     name = "googletest-catch-exceptions-no-ex-test_",
     testonly = 1,
     srcs = ["googletest-catch-exceptions-test_.cc"],
-    deps = ["//:gtest_main"],
+    deps = ["//googletest:main"],
 )
 
 cc_binary(
@@ -336,7 +328,7 @@ cc_binary(
     testonly = 1,
     srcs = ["googletest-catch-exceptions-test_.cc"],
     copts = ["-fexceptions"],
-    deps = ["//:gtest_main"],
+    deps = ["//googletest:main"],
 )
 
 py_test(
@@ -354,14 +346,7 @@ cc_binary(
     name = "gtest_xml_output_unittest_",
     testonly = 1,
     srcs = ["gtest_xml_output_unittest_.cc"],
-    deps = ["//:gtest"],
-)
-
-cc_test(
-    name = "gtest_no_test_unittest",
-    size = "small",
-    srcs = ["gtest_no_test_unittest.cc"],
-    deps = ["//:gtest"],
+    deps = ["//googletest"],
 )
 
 py_test(
@@ -388,14 +373,14 @@ cc_binary(
     name = "gtest_xml_outfile1_test_",
     testonly = 1,
     srcs = ["gtest_xml_outfile1_test_.cc"],
-    deps = ["//:gtest_main"],
+    deps = ["//googletest:main"],
 )
 
 cc_binary(
     name = "gtest_xml_outfile2_test_",
     testonly = 1,
     srcs = ["gtest_xml_outfile2_test_.cc"],
-    deps = ["//:gtest_main"],
+    deps = ["//googletest:main"],
 )
 
 py_test(
@@ -416,7 +401,7 @@ cc_binary(
     name = "googletest-uninitialized-test_",
     testonly = 1,
     srcs = ["googletest-uninitialized-test_.cc"],
-    deps = ["//:gtest"],
+    deps = ["//googletest"],
 )
 
 py_test(
@@ -431,7 +416,7 @@ cc_binary(
     name = "gtest_testbridge_test_",
     testonly = 1,
     srcs = ["gtest_testbridge_test_.cc"],
-    deps = ["//:gtest_main"],
+    deps = ["//googletest:main"],
 )
 
 # Tests that filtering via testbridge works
@@ -477,28 +462,18 @@ py_test(
     deps = [":gtest_test_utils"],
 )
 
-# Verifies interaction of death tests and exceptions.
-cc_test(
-    name = "googletest-death-test_ex_catch_test",
-    size = "medium",
-    srcs = ["googletest-death-test_ex_test.cc"],
-    copts = ["-fexceptions"],
-    defines = ["GTEST_ENABLE_CATCH_EXCEPTIONS_=1"],
-    deps = ["//:gtest"],
-)
-
 cc_binary(
     name = "googletest-param-test-invalid-name1-test_",
     testonly = 1,
     srcs = ["googletest-param-test-invalid-name1-test_.cc"],
-    deps = ["//:gtest"],
+    deps = ["//googletest"],
 )
 
 cc_binary(
     name = "googletest-param-test-invalid-name2-test_",
     testonly = 1,
     srcs = ["googletest-param-test-invalid-name2-test_.cc"],
-    deps = ["//:gtest"],
+    deps = ["//googletest"],
 )
 
 py_test(
