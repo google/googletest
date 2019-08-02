@@ -182,11 +182,10 @@ $template
 //
 // CAVEAT:
 //
-// ACTION*() can only be used in a namespace scope.  The reason is
-// that C++ doesn't yet allow function-local types to be used to
-// instantiate templates.  The up-coming C++0x standard will fix this.
-// Once that's done, we'll consider supporting using ACTION*() inside
-// a function.
+// ACTION*() can only be used in a namespace scope as templates cannot be
+// declared inside of a local class.
+// Users can, however, define any local functors (e.g. a lambda) that
+// can be used as actions.
 //
 // MORE INFORMATION:
 //
