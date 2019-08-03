@@ -1148,30 +1148,39 @@ struct ElemFromList {
           static_cast<T (*)()>(nullptr)...));
 };
 
-template <typename... T>
-class FlatTuple;
+template <typename T, std::size_t I>
+struct FlatTupleElem {
+  T value;
+  FlatTupleElem() : value() {}
 
-template <typename Derived, size_t I>
-struct FlatTupleElemBase;
-
-template <typename... T, size_t I>
-struct FlatTupleElemBase<FlatTuple<T...>, I> {
-  using value_type = typename ElemFromList<I, T...>::type;
-  FlatTupleElemBase() = default;
-  explicit FlatTupleElemBase(value_type t) : value(std::move(t)) {}
-  value_type value;
+  template <typename Arg>
+  explicit FlatTupleElem(Arg &&arg) : value(std::forward<Arg>(arg)) {}
 };
 
-template <typename Derived, typename Idx>
-struct FlatTupleBase;
+template <typename IndexSeq, typename... Ts>
+class FlatTupleBase;
 
-template <size_t... Idx, typename... T>
-struct FlatTupleBase<FlatTuple<T...>, IndexSequence<Idx...>>
-    : FlatTupleElemBase<FlatTuple<T...>, Idx>... {
-  using Indices = IndexSequence<Idx...>;
-  FlatTupleBase() = default;
-  explicit FlatTupleBase(T... t)
-      : FlatTupleElemBase<FlatTuple<T...>, Idx>(std::move(t))... {}
+template <std::size_t... Is, typename... Ts>
+class FlatTupleBase<IndexSequence<Is...>, Ts...>
+    : FlatTupleElem<Ts, Is>... {
+ public:
+  FlatTupleBase() {}
+
+  template <typename... Args>
+  explicit FlatTupleBase(Args&&... args)
+      : FlatTupleElem<Ts, Is>(std::forward<Args>(args))... {}
+
+  template <std::size_t I>
+  const typename ElemFromList<I, Ts...>::type& Get() const {
+    return static_cast<const FlatTupleElem<
+        typename ElemFromList<I, Ts...>::type, I>*>(this)->value;
+  }
+
+  template <std::size_t I>
+  typename ElemFromList<I, Ts...>::type& Get() {
+    return static_cast<FlatTupleElem<typename ElemFromList<I, Ts...>::type,
+									 I>*>(this)->value;
+  }
 };
 
 // Analog to std::tuple but with different tradeoffs.
@@ -1183,25 +1192,16 @@ struct FlatTupleBase<FlatTuple<T...>, IndexSequence<Idx...>>
 // regardless of T...
 // MakeIndexSequence, on the other hand, it is recursive but with an
 // instantiation depth of O(ln(N)).
-template <typename... T>
-class FlatTuple
-    : private FlatTupleBase<FlatTuple<T...>,
-                            typename MakeIndexSequence<sizeof...(T)>::type> {
-  using Indices = typename FlatTuple::FlatTupleBase::Indices;
 
- public:
-  FlatTuple() = default;
-  explicit FlatTuple(T... t) : FlatTuple::FlatTupleBase(std::move(t)...) {}
+template <typename... Ts>
+struct FlatTuple
+    : FlatTupleBase<typename MakeIndexSequence<sizeof...(Ts)>::type, Ts...> {
+  FlatTuple() {}
 
-  template <size_t I>
-  const typename ElemFromList<I, T...>::type& Get() const {
-    return static_cast<const FlatTupleElemBase<FlatTuple, I>*>(this)->value;
-  }
-
-  template <size_t I>
-  typename ElemFromList<I, T...>::type& Get() {
-    return static_cast<FlatTupleElemBase<FlatTuple, I>*>(this)->value;
-  }
+  template <typename... Args>
+  explicit FlatTuple(Args&&... args)
+      : FlatTupleBase<typename MakeIndexSequence<sizeof...(Ts)>::type, Ts...>(
+            std::forward<Args>(args)...){}
 };
 
 // Utility functions to be called with static_assert to induce deprecation
