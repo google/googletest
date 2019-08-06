@@ -333,10 +333,10 @@ want to learn more, see
 
 <!-- mdformat off(github rendering does not support multiline tables) -->
 
-| Fatal assertion                 | Nonfatal assertion              | Verifies                                 |
-| ------------------------------- | ------------------------------- | ---------------------------------------- |
-| `ASSERT_FLOAT_EQ(val1, val2);`  | `EXPECT_FLOAT_EQ(val1, val2);`  | the two `float` values are almost equal  |
-| `ASSERT_DOUBLE_EQ(val1, val2);` | `EXPECT_DOUBLE_EQ(val1, val2);` | the two `double` values are almost equal |
+| Fatal assertion                       | Nonfatal assertion                    | Verifies                                 |
+| ------------------------------------- | ------------------------------------- | ---------------------------------------- |
+| `ASSERT_FLOAT_EQ(expected, actual);`  | `EXPECT_FLOAT_EQ(expected, actual);`  | the two `float` values are almost equal  |
+| `ASSERT_DOUBLE_EQ(expected, actual);` | `EXPECT_DOUBLE_EQ(expected, actual);` | the two `double` values are almost equal |
 
 <!-- mdformat on-->
 
@@ -934,8 +934,8 @@ For example,
 
 ```c++
 10: void Sub1(int n) {
-11:   EXPECT_EQ(Bar(n), 1);
-12:   EXPECT_EQ(Bar(n + 1), 2);
+11:   EXPECT_EQ(1, Bar(n));
+12:   EXPECT_EQ(2, Bar(n + 1));
 13: }
 14:
 15: TEST(FooTest, Bar) {
@@ -1717,7 +1717,7 @@ To test them, we use the following special techniques:
     ...
     TEST(FooTest, BarReturnsZeroOnNull) {
       Foo foo;
-      EXPECT_EQ(foo.Bar(NULL), 0);  // Uses Foo's private member Bar().
+      EXPECT_EQ(0, foo.Bar(NULL));  // Uses Foo's private member Bar().
     }
     ```
 
