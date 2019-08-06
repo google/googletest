@@ -131,7 +131,7 @@ gtest-type-util.h in the same directory.
 You don't need to worry about regenerating the source files unless you need to
 modify them. You would then modify the corresponding `.pump` files and run the
 '[pump.py](googletest/scripts/pump.py)' generator script. See the
-[Pump Manual](googletest/docs/PumpManual.md).
+[Pump Manual](googletest/docs/pump_manual.md).
 
 ## Developing Google Mock
 
