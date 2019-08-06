@@ -41,7 +41,9 @@ using testing::internal::AlwaysTrue;
 #if GTEST_HAS_DEATH_TEST
 
 # if GTEST_OS_WINDOWS
+#  include <fcntl.h>           // For O_BINARY
 #  include <direct.h>          // For chdir().
+#  include <io.h>
 # else
 #  include <unistd.h>
 #  include <sys/wait.h>        // For waitpid.
@@ -201,6 +203,26 @@ int DieInDebugElse12(int* sideeffect) {
 
   return 12;
 }
+
+# if GTEST_OS_WINDOWS
+
+// Death in dbg due to Windows CRT assertion failure, not opt.
+int DieInCRTDebugElse12(int* sideeffect) {
+  if (sideeffect) *sideeffect = 12;
+
+  // Create an invalid fd by closing a valid one
+  int fdpipe[2];
+  EXPECT_EQ(_pipe(fdpipe, 256, O_BINARY), 0);
+  EXPECT_EQ(_close(fdpipe[0]), 0);
+  EXPECT_EQ(_close(fdpipe[1]), 0);
+
+  // _dup() should crash in debug mode
+  EXPECT_EQ(_dup(fdpipe[0]), -1);
+
+  return 12;
+}
+
+#endif  // GTEST_OS_WINDOWS
 
 # if GTEST_OS_WINDOWS || GTEST_OS_FUCHSIA
 
@@ -631,6 +653,40 @@ TEST_F(TestForDeathTest, TestExpectDebugDeath) {
 
 # endif
 }
+
+# if GTEST_OS_WINDOWS
+
+// Tests that EXPECT_DEBUG_DEATH works as expected when in debug mode
+// the Windows CRT crashes the process with an assertion failure.
+// 1. Asserts on death.
+// 2. Has no side effect (doesn't pop up a window or wait for user input).
+//
+// And in opt mode, it:
+// 1.  Has side effects but does not assert.
+TEST_F(TestForDeathTest, CRTDebugDeath) {
+  int sideeffect = 0;
+
+  // Put the regex in a local variable to make sure we don't get an "unused"
+  // warning in opt mode.
+  const char* regex = "dup.* : Assertion failed";
+
+  EXPECT_DEBUG_DEATH(DieInCRTDebugElse12(&sideeffect), regex)
+      << "Must accept a streamed message";
+
+# ifdef NDEBUG
+
+  // Checks that the assignment occurs in opt mode (sideeffect).
+  EXPECT_EQ(12, sideeffect);
+
+# else
+
+  // Checks that the assignment does not occur in dbg mode (no sideeffect).
+  EXPECT_EQ(0, sideeffect);
+
+# endif
+}
+
+# endif  // GTEST_OS_WINDOWS
 
 // Tests that ASSERT_DEBUG_DEATH works as expected, that is, you can stream a
 // message to it, and in debug mode it:
