@@ -631,7 +631,7 @@ class VersionControlSystem(object):
         new_content: For text files, this is empty.  For binary files, this is
           the contents of the new file, since the diff output won't contain
           information to reconstruct the current file.
-        is_binary: True if the file is binary.
+        is_binary: True iff the file is binary.
         status: The status of the file.
     """
 
