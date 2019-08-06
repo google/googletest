@@ -1979,7 +1979,7 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 
 // Macros for testing equalities and inequalities.
 //
-//    * {ASSERT|EXPECT}_EQ(v1, v2): Tests that v1 == v2
+//    * {ASSERT|EXPECT}_EQ(expected, actual): Tests that actual == expected
 //    * {ASSERT|EXPECT}_NE(v1, v2): Tests that v1 != v2
 //    * {ASSERT|EXPECT}_LT(v1, v2): Tests that v1 < v2
 //    * {ASSERT|EXPECT}_LE(v1, v2): Tests that v1 <= v2
@@ -2006,8 +2006,8 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 //   are related, not how their content is related.  To compare two C
 //   strings by content, use {ASSERT|EXPECT}_STR*().
 //
-//   3. {ASSERT|EXPECT}_EQ(v1, v2) is preferred to
-//   {ASSERT|EXPECT}_TRUE(v1 == v2), as the former tells you
+//   3. {ASSERT|EXPECT}_EQ(expected, actual) is preferred to
+//   {ASSERT|EXPECT}_TRUE(actual == expected), as the former tells you
 //   what the actual value is when it fails, and similarly for the
 //   other comparisons.
 //
@@ -2019,12 +2019,12 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 // Examples:
 //
 //   EXPECT_NE(Foo(), 5);
-//   EXPECT_EQ(a_pointer, NULL);
+//   EXPECT_EQ(NULL, a_pointer);
 //   ASSERT_LT(i, array_size);
 //   ASSERT_GT(records.size(), 0) << "There is no record left.";
 
-#define EXPECT_EQ(val1, val2) \
-  EXPECT_PRED_FORMAT2(::testing::internal::EqHelper::Compare, val1, val2)
+#define EXPECT_EQ(expected, actual) \
+  EXPECT_PRED_FORMAT2(::testing::internal::EqHelper::Compare, expected, actual)
 #define EXPECT_NE(val1, val2) \
   EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperNE, val1, val2)
 #define EXPECT_LE(val1, val2) \
@@ -2036,8 +2036,8 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 #define EXPECT_GT(val1, val2) \
   EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperGT, val1, val2)
 
-#define GTEST_ASSERT_EQ(val1, val2) \
-  ASSERT_PRED_FORMAT2(::testing::internal::EqHelper::Compare, val1, val2)
+#define GTEST_ASSERT_EQ(expected, actual) \
+  ASSERT_PRED_FORMAT2(::testing::internal::EqHelper::Compare, expected, actual)
 #define GTEST_ASSERT_NE(val1, val2) \
   ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperNE, val1, val2)
 #define GTEST_ASSERT_LE(val1, val2) \
@@ -2053,7 +2053,7 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 // ASSERT_XY(), which clashes with some users' own code.
 
 #if !GTEST_DONT_DEFINE_ASSERT_EQ
-# define ASSERT_EQ(val1, val2) GTEST_ASSERT_EQ(val1, val2)
+# define ASSERT_EQ(expected, actual) GTEST_ASSERT_EQ(expected, actual)
 #endif
 
 #if !GTEST_DONT_DEFINE_ASSERT_NE
@@ -2079,10 +2079,10 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 // C-string Comparisons.  All tests treat NULL and any non-NULL string
 // as different.  Two NULLs are equal.
 //
-//    * {ASSERT|EXPECT}_STREQ(s1, s2):     Tests that s1 == s2
-//    * {ASSERT|EXPECT}_STRNE(s1, s2):     Tests that s1 != s2
-//    * {ASSERT|EXPECT}_STRCASEEQ(s1, s2): Tests that s1 == s2, ignoring case
-//    * {ASSERT|EXPECT}_STRCASENE(s1, s2): Tests that s1 != s2, ignoring case
+//    * {ASSERT|EXPECT}_STREQ(expected, actual): Tests that actual == expected
+//    * {ASSERT|EXPECT}_STRNE(s1, s2):           Tests that s1 != s2
+//    * {ASSERT|EXPECT}_STRCASEEQ(s1, s2):       Tests that s1 == s2, ignoring case
+//    * {ASSERT|EXPECT}_STRCASENE(s1, s2):       Tests that s1 != s2, ignoring case
 //
 // For wide or narrow string objects, you can use the
 // {ASSERT|EXPECT}_??() macros.
@@ -2092,8 +2092,8 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 //
 // These macros evaluate their arguments exactly once.
 
-#define EXPECT_STREQ(s1, s2) \
-  EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperSTREQ, s1, s2)
+#define EXPECT_STREQ(expected, actual) \
+  EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperSTREQ, expected, actual)
 #define EXPECT_STRNE(s1, s2) \
   EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperSTRNE, s1, s2)
 #define EXPECT_STRCASEEQ(s1, s2) \
@@ -2101,8 +2101,8 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 #define EXPECT_STRCASENE(s1, s2)\
   EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperSTRCASENE, s1, s2)
 
-#define ASSERT_STREQ(s1, s2) \
-  ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperSTREQ, s1, s2)
+#define ASSERT_STREQ(expected, actual) \
+  ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperSTREQ, expected, actual)
 #define ASSERT_STRNE(s1, s2) \
   ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperSTRNE, s1, s2)
 #define ASSERT_STRCASEEQ(s1, s2) \
@@ -2112,9 +2112,9 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 
 // Macros for comparing floating-point numbers.
 //
-//    * {ASSERT|EXPECT}_FLOAT_EQ(val1, val2):
+//    * {ASSERT|EXPECT}_FLOAT_EQ(expected, actual):
 //         Tests that two float values are almost equal.
-//    * {ASSERT|EXPECT}_DOUBLE_EQ(val1, val2):
+//    * {ASSERT|EXPECT}_DOUBLE_EQ(expected, actual):
 //         Tests that two double values are almost equal.
 //    * {ASSERT|EXPECT}_NEAR(v1, v2, abs_error):
 //         Tests that v1 and v2 are within the given distance to each other.
@@ -2124,19 +2124,19 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 // FloatingPoint template class in gtest-internal.h if you are
 // interested in the implementation details.
 
-#define EXPECT_FLOAT_EQ(val1, val2)\
+#define EXPECT_FLOAT_EQ(expected, actual)\
   EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperFloatingPointEQ<float>, \
                       val1, val2)
 
-#define EXPECT_DOUBLE_EQ(val1, val2)\
+#define EXPECT_DOUBLE_EQ(expected, actual)\
   EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperFloatingPointEQ<double>, \
                       val1, val2)
 
-#define ASSERT_FLOAT_EQ(val1, val2)\
+#define ASSERT_FLOAT_EQ(expected, actual)\
   ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperFloatingPointEQ<float>, \
                       val1, val2)
 
-#define ASSERT_DOUBLE_EQ(val1, val2)\
+#define ASSERT_DOUBLE_EQ(expected, actual)\
   ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperFloatingPointEQ<double>, \
                       val1, val2)
 
@@ -2359,8 +2359,8 @@ bool StaticAssertTypeEq() {
 //   }
 //
 //   TEST_F(FooTest, ReturnsElementCountCorrectly) {
-//     EXPECT_EQ(a_.size(), 0);
-//     EXPECT_EQ(b_.size(), 1);
+//     EXPECT_EQ(0, a_.size());
+//     EXPECT_EQ(1, b_.size());
 //   }
 //
 // GOOGLETEST_CM0011 DO NOT DELETE
