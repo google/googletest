@@ -148,8 +148,8 @@ follow:
 
 *   Derive a class `MockTurtle` from `Turtle`.
 *   Take a *virtual* function of `Turtle` (while it's possible to
-    [mock non-virtual methods using templates](#MockingNonVirtualMethods), it's
-    much more involved).
+    [mock non-virtual methods using templates](cook_book.md#MockingNonVirtualMethods),
+    it's much more involved).
 *   In the `public:` section of the child class, write `MOCK_METHOD();`
 *   Now comes the fun part: you take the function signature, cut-and-paste it
     into the macro, and add two commas - one between the return type and the
