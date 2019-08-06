@@ -119,7 +119,7 @@
 # include <sys/types.h>  // NOLINT
 #endif
 
-#include "gtest-internal-inl.h"
+#include "src/gtest-internal-inl.h"
 
 #if GTEST_OS_WINDOWS
 # define vsnprintf _vsnprintf

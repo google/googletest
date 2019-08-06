@@ -31,7 +31,7 @@
 // The Google C++ Testing and Mocking Framework (Google Test)
 
 #include "gtest/gtest-test-part.h"
-#include "gtest-internal-inl.h"
+#include "src/gtest-internal-inl.h"
 
 namespace testing {
 

@@ -30,6 +30,6 @@
 //
 // This is part of the unit test for gtest_prod.h.
 
-#include "test/production.h"
+#include "production.h"
 
 PrivateCode::PrivateCode() : x_(0) {}

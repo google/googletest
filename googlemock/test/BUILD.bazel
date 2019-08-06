@@ -32,8 +32,8 @@
 #
 #   Bazel Build for Google C++ Testing Framework(Google Test)-googlemock
 
-load("@rules_python//python:defs.bzl", "py_library", "py_test")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
+load("@rules_python//python:defs.bzl", "py_library", "py_test")
 
 custom_main_tests = [
     "gmock_stress_test.cc",

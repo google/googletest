@@ -32,8 +32,8 @@
 #
 # Bazel BUILD for The Google C++ Testing Framework (Google Test)
 
-load("@rules_python//python:defs.bzl", "py_library", "py_test")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
+load("@rules_python//python:defs.bzl", "py_library", "py_test")
 
 exception_tests = [
     "googletest-death-test_ex_test.cc",
@@ -62,16 +62,17 @@ tests = glob(
         "googletest-param-test-test.cc",
         "googletest-param-test2-test.cc",
         "gtest_all_test.cc",
+        "gtest_prod_test.cc",
     ],
 )
 
 cc_library(
     name = "test_utils",
     testonly = True,
-    srcs = [
-        "production.cc",
-    ],
-    hdrs = glob(["*.h"]),
+    hdrs = glob(
+        ["*.h"],
+        exclude = ["production.h"],
+    ),
     include_prefix = "test",
     deps = [
         "//googletest:prod",
@@ -145,6 +146,19 @@ cc_test(
         ":test_utils",
         "//googletest",
         "//googletest:internal_inl_h",
+    ],
+)
+
+cc_test(
+    name = "gtest_prod_test",
+    srcs = [
+        "gtest_prod_test.cc",
+        "production.cc",
+        "production.h",
+    ],
+    deps = [
+        "//googletest",
+        "//googletest:prod",
     ],
 )
 
