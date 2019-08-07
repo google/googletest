@@ -32,6 +32,9 @@
 #
 # Bazel BUILD for The Google C++ Testing Framework (Google Test)
 
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_test")
+load("@rules_python//python:defs.bzl", "py_library", "py_test")
+
 licenses(["notice"])
 
 #on windows exclude gtest-tuple.h

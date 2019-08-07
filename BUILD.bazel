@@ -30,6 +30,8 @@
 #
 #   Bazel Build for Google C++ Testing Framework(Google Test)
 
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+
 package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
@@ -81,6 +83,10 @@ cc_library(
         ":has_absl": ["GTEST_HAS_ABSL=1"],
         "//conditions:default": [],
     }),
+    features = select({
+        ":windows": ["windows_export_all_symbols"],
+        "//conditions:default": [],
+    }),
     includes = [
         "googlemock",
         "googlemock/include",
@@ -102,20 +108,16 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
-    features = select({
-        ":windows": ["windows_export_all_symbols"],
-        "//conditions:default": [],
-    })
 )
 
 cc_library(
     name = "gtest_main",
     srcs = ["googlemock/src/gmock_main.cc"],
-    deps = [":gtest"],
     features = select({
         ":windows": ["windows_export_all_symbols"],
         "//conditions:default": [],
-    })
+    }),
+    deps = [":gtest"],
 )
 
 # The following rules build samples of how to use gTest.
@@ -136,7 +138,7 @@ cc_library(
     features = select({
         ":windows": ["windows_export_all_symbols"],
         "//conditions:default": [],
-    })
+    }),
 )
 
 cc_test(
@@ -155,11 +157,11 @@ cc_test(
         "googletest/samples/sample7_unittest.cc",
         "googletest/samples/sample8_unittest.cc",
     ],
+    linkstatic = 0,
     deps = [
         "gtest_sample_lib",
         ":gtest_main",
     ],
-    linkstatic = 0,
 )
 
 cc_test(
