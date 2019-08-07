@@ -58,7 +58,7 @@ install:
 
     # install Bazel
     if ($env:build_system -eq "bazel") {
-        appveyor DownloadFile https://github.com/bazelbuild/bazel/releases/download/0.21.0/bazel-0.21.0-windows-x86_64.exe -FileName bazel.exe
+        appveyor DownloadFile https://github.com/bazelbuild/bazel/releases/download/0.28.1/bazel-0.28.1-windows-x86_64.exe -FileName bazel.exe
     }
 
     if ($env:build_system -eq "cmake") {
