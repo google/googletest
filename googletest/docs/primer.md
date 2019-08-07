@@ -67,15 +67,13 @@ deprecated and refactored away.
 
 So please be aware of the different definitions of the terms:
 
-| Meaning           | googletest Term         | [ISTQB](http://www.istqb.org/) |
-:                   :                         : Term                           :
-| :---------------- | :---------------------- | :----------------------------- |
-| Exercise a        | [TEST()](#simple-tests) | [Test Case][istqb test case]   |
-: particular        :                         :                                :
-: program path with :                         :                                :
-: specific input    :                         :                                :
-: values and verify :                         :                                :
-: the results       :                         :                                :
+<!-- mdformat off(github rendering does not support multiline tables) -->
+
+Meaning                                                                              | googletest Term         | [ISTQB](http://www.istqb.org/) Term
+:----------------------------------------------------------------------------------- | :---------------------- | :----------------------------------
+Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests) | [Test Case][istqb test case]
+
+<!-- mdformat on -->
 
 [istqb test case]: http://glossary.istqb.org/en/search/test%20case
 [istqb test suite]: http://glossary.istqb.org/en/search/test%20suite
