@@ -412,7 +412,8 @@ gMock will report a googletest failure whenever the function is (wrongfully)
 called.
 
 We've seen `AtLeast(n)` as an example of fuzzy cardinalities earlier. For the
-list of built-in cardinalities you can use, see [here](#CardinalityList).
+list of built-in cardinalities you can use, see
+[here](cheat_sheet.md#CardinalityList).
 
 The `Times()` clause can be omitted. **If you omit `Times()`, gMock will infer
 the cardinality for you.** The rules are easy to remember:
