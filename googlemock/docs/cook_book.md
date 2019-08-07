@@ -3718,9 +3718,9 @@ A cardinality is used in `Times()` to tell gMock how many times you expect a
 call to occur. It doesn't have to be exact. For example, you can say
 `AtLeast(5)` or `Between(2, 4)`.
 
-If the [built-in set](#CardinalityList) of cardinalities doesn't suit you, you
-are free to define your own by implementing the following interface (in
-namespace `testing`):
+If the [built-in set](cheat_sheet.md#CardinalityList) of cardinalities doesn't
+suit you, you are free to define your own by implementing the following
+interface (in namespace `testing`):
 
 ```cpp
 class CardinalityInterface {
