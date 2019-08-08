@@ -781,7 +781,7 @@ class TypeParameterizedTestSuite {
 
 // The base case for the compile time recursion.
 template <GTEST_TEMPLATE_ Fixture, typename Types>
-class TypeParameterizedTestSuite<Fixture, Templates0, Types> {
+class TypeParameterizedTestSuite<Fixture, internal::None, Types> {
  public:
   static bool Register(const char* /*prefix*/, const CodeLocation&,
                        const TypedTestSuitePState* /*state*/,

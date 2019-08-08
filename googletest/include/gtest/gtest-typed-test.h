@@ -284,13 +284,13 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
   void GTEST_SUITE_NAMESPACE_(                                        \
       SuiteName)::TestName<gtest_TypeParam_>::TestBody()
 
-#define REGISTER_TYPED_TEST_SUITE_P(SuiteName, ...)                            \
-  namespace GTEST_SUITE_NAMESPACE_(SuiteName) {                                \
-    typedef ::testing::internal::Templates<__VA_ARGS__>::type gtest_AllTests_; \
-  }                                                                            \
-  static const char* const GTEST_REGISTERED_TEST_NAMES_(                       \
-      SuiteName) GTEST_ATTRIBUTE_UNUSED_ =                                     \
-      GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName).VerifyRegisteredTestNames(    \
+#define REGISTER_TYPED_TEST_SUITE_P(SuiteName, ...)                         \
+  namespace GTEST_SUITE_NAMESPACE_(SuiteName) {                             \
+    typedef ::testing::internal::Templates<__VA_ARGS__> gtest_AllTests_;    \
+  }                                                                         \
+  static const char* const GTEST_REGISTERED_TEST_NAMES_(                    \
+      SuiteName) GTEST_ATTRIBUTE_UNUSED_ =                                  \
+      GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName).VerifyRegisteredTestNames( \
           __FILE__, __LINE__, #__VA_ARGS__)
 
 // Legacy API is deprecated but still available
