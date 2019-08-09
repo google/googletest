@@ -528,8 +528,6 @@ to do a better job at printing your particular type than to dump the bytes. To
 do that, define `<<` for your type:
 
 ```c++
-// Streams are allowed only for logging.  Don't include this for
-// any other purpose.
 #include <ostream>
 
 namespace foo {
@@ -558,8 +556,6 @@ doesn't do what you want (and you cannot change it). If so, you can instead
 define a `PrintTo()` function like this:
 
 ```c++
-// Streams are allowed only for logging.  Don't include this for
-// any other purpose.
 #include <ostream>
 
 namespace foo {
