@@ -150,6 +150,14 @@ $env:Path = \"$project_bin;$env:Path\"
 & $args")
   endif()
 
+  if (MINGW OR CYGWIN)
+    if (CMAKE_VERSION VERSION_LESS "2.8.12")
+      add_compile_options("-Wa,-mbig-obj")
+    else()
+      add_definitions("-Wa,-mbig-obj")
+    endif()
+  endif()
+
   ############################################################
   # C++ tests built with standard compiler flags.
 
@@ -162,9 +170,6 @@ $env:Path = \"$project_bin;$env:Path\"
   cxx_test(gmock-generated-matchers_test gmock_main)
   cxx_test(gmock-internal-utils_test gmock_main)
   cxx_test(gmock-matchers_test gmock_main)
-  if (MINGW OR CYGWIN)
-    target_compile_options(gmock-matchers_test PRIVATE "-Wa,-mbig-obj")
-  endif()
   cxx_test(gmock-more-actions_test gmock_main)
   cxx_test(gmock-nice-strict_test gmock_main)
   cxx_test(gmock-port_test gmock_main)
