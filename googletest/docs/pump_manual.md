@@ -119,24 +119,20 @@ Func(a1 + a2 + a3);  // If n is 3.
 
 We support the following meta programming constructs:
 
-| `$var id = exp`                  | Defines a named constant value. `$id` is |
-:                                  : valid util the end of the current meta   :
-:                                  : lexical block.                           :
-| :------------------------------- | :--------------------------------------- |
-| `$range id exp..exp`             | Sets the range of an iteration variable, |
-:                                  : which can be reused in multiple loops    :
-:                                  : later.                                   :
-| `$for id sep [[ code ]]`         | Iteration. The range of `id` must have   |
-:                                  : been defined earlier. `$id` is valid in  :
-:                                  : `code`.                                  :
-| `$($)`                           | Generates a single `$` character.        |
-| `$id`                            | Value of the named constant or iteration |
-:                                  : variable.                                :
-| `$(exp)`                         | Value of the expression.                 |
-| `$if exp [[ code ]] else_branch` | Conditional.                             |
-| `[[ code ]]`                     | Meta lexical block.                      |
-| `cpp_code`                       | Raw C++ code.                            |
-| `$$ comment`                     | Meta comment.                            |
+<!-- mdformat off(github rendering does not support multiline tables) -->
+| Construct                        | Description                                                                                    |
+| :------------------------------- | :--------------------------------------------------------------------------------------------- |
+| `$var id = exp`                  | Defines a named constant value. `$id` is valid util the end of the current meta lexical block. |
+| `$range id exp..exp`             | Sets the range of an iteration variable, which can be reused in multiple loops later.          |
+| `$for id sep [[ code ]]`         | Iteration. The range of `id` must have been defined earlier. `$id` is valid in `code`.         |
+| `$($)`                           | Generates a single `$` character.                                                              |
+| `$id`                            | Value of the named constant or iteration variable.                                             |
+| `$(exp)`                         | Value of the expression.                                                                       |
+| `$if exp [[ code ]] else_branch` | Conditional.                                                                                   |
+| `[[ code ]]`                     | Meta lexical block.                                                                            |
+| `cpp_code`                       | Raw C++ code.                                                                                  |
+| `$$ comment`                     | Meta comment.                                                                                  |
+<!-- mdformat on -->
 
 **Note:** To give the user some freedom in formatting the Pump source code, Pump
 ignores a new-line character if it's right after `$for foo` or next to `[[` or

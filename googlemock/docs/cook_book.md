@@ -3852,12 +3852,14 @@ returns argument #0.
 For more convenience and flexibility, you can also use the following pre-defined
 symbols in the body of `ACTION`:
 
-`argK_type`     | The type of the K-th (0-based) argument of the mock function
-:-------------- | :-----------------------------------------------------------
-`args`          | All arguments of the mock function as a tuple
-`args_type`     | The type of all arguments of the mock function as a tuple
-`return_type`   | The return type of the mock function
-`function_type` | The type of the mock function
+| Pre-defined Symbol | Description                                                   |
+| :----------------- | :------------------------------------------------------------ |
+| `argK`             | The value of the K-th (0-based) argument of the mock function |
+| `argK_type`        | The type of the K-th (0-based) argument of the mock function  |
+| `args`             | The value of all arguments of the mock function as a tuple    |
+| `args_type`        | The type of all arguments of the mock function as a tuple     |
+| `return_type`      | The return type of the mock function                          |
+| `function_type`    | The type of the mock function                                 |
 
 For example, when using an `ACTION` as a stub action for mock function:
 
@@ -3867,16 +3869,16 @@ int DoSomething(bool flag, int* ptr);
 
 we have:
 
-Pre-defined Symbol | Is Bound To
------------------- | ---------------------------------
-`arg0`             | the value of `flag`
-`arg0_type`        | the type `bool`
-`arg1`             | the value of `ptr`
-`arg1_type`        | the type `int*`
-`args`             | the tuple `(flag, ptr)`
-`args_type`        | the type `std::tuple<bool, int*>`
-`return_type`      | the type `int`
-`function_type`    | the type `int(bool, int*)`
+| Pre-defined Symbol | Is Bound To                       |
+| :----------------- | :-------------------------------- |
+| `arg0`             | the value of `flag`               |
+| `arg0_type`        | the type `bool`                   |
+| `arg1`             | the value of `ptr`                |
+| `arg1_type`        | the type `int*`                   |
+| `args`             | the tuple `(flag, ptr)`           |
+| `args_type`        | the type `std::tuple<bool, int*>` |
+| `return_type`      | the type `int`                    |
+| `function_type`    | the type `int(bool, int*)`        |
 
 ##### Legacy macro-based parameterized Actions
 
@@ -4041,22 +4043,17 @@ If you are writing a function that returns an `ACTION` object, you'll need to
 know its type. The type depends on the macro used to define the action and the
 parameter types. The rule is relatively simple:
 
-| Given Definition              | Expression          | Has Type              |
-| ----------------------------- | ------------------- | --------------------- |
-| `ACTION(Foo)`                 | `Foo()`             | `FooAction`           |
-| `ACTION_TEMPLATE(Foo,`        | `Foo<t1, ...,       | `FooAction<t1, ...,   |
-: `HAS_m_TEMPLATE_PARAMS(...),` : t_m>()`             : t_m>`                 :
-: `AND_0_VALUE_PARAMS())`       :                     :                       :
-| `ACTION_P(Bar, param)`        | `Bar(int_value)`    | `BarActionP<int>`     |
-| `ACTION_TEMPLATE(Bar,`        | `Bar<t1, ..., t_m>` | `FooActionP<t1, ...,  |
-: `HAS_m_TEMPLATE_PARAMS(...),` : `(int_value)`       : t_m, int>`            :
-: `AND_1_VALUE_PARAMS(p1))`     :                     :                       :
-| `ACTION_P2(Baz, p1, p2)`      | `Baz(bool_value,`   | `BazActionP2<bool,    |
-:                               : `int_value)`        : int>`                 :
-| `ACTION_TEMPLATE(Baz,`        | `Baz<t1, ..., t_m>` | `FooActionP2<t1, ..., |
-: `HAS_m_TEMPLATE_PARAMS(...),` : `(bool_value,`      : t_m,` `bool, int>`    :
-: `AND_2_VALUE_PARAMS(p1, p2))` : `int_value)`        :                       :
-| ...                           | ...                 | ...                   |
+<!-- mdformat off(github rendering does not support multiline tables) -->
+| Given Definition                                                               | Expression                                 | Has Type                               |
+| :----------------------------------------------------------------------------- |------------------------------------------- | :------------------------------------- |
+| `ACTION(Foo)`                                                                  | `Foo()`                                    | `FooAction`                            |
+| `ACTION_TEMPLATE(Foo, HAS_m_TEMPLATE_PARAMS(...), AND_0_VALUE_PARAMS())`       | `Foo<t1, ..., t_m>()`                      | `FooAction<t1, ..., t_m>`              |
+| `ACTION_P(Bar, param)`                                                         | `Bar(int_value)`                           | `BarActionP<int>`                      |
+| `ACTION_TEMPLATE(Bar, HAS_m_TEMPLATE_PARAMS(...), AND_1_VALUE_PARAMS(p1))`     | `Bar<t1, ..., t_m>(int_value)`             | `FooActionP<t1, ..., t_m, int>`        |
+| `ACTION_P2(Baz, p1, p2)`                                                       | `Baz(bool_value, int_value)`               | `BazActionP2<bool, int>`               |
+| `ACTION_TEMPLATE(Baz, HAS_m_TEMPLATE_PARAMS(...), AND_2_VALUE_PARAMS(p1, p2))` | `Baz<t1, ..., t_m>(bool_value, int_value)` | `FooActionP2<t1, ..., t_m, bool, int>` |
+| `...`                                                                          | `...`                                      | `...`                                  |
+<!-- mdformat on -->
 
 Note that we have to pick different suffixes (`Action`, `ActionP`, `ActionP2`,
 and etc) for actions with different numbers of value parameters, or the action
