@@ -2170,12 +2170,12 @@ static Environment* record_property_env GTEST_ATTRIBUTE_UNUSED_ =
 
 // First, some predicates and predicate-formatters needed by the tests.
 
-// Returns true if the argument is an even number.
+// Returns true if and only if the argument is an even number.
 bool IsEven(int n) {
   return (n % 2) == 0;
 }
 
-// A functor that returns true if the argument is an even number.
+// A functor that returns true if and only if the argument is an even number.
 struct IsEvenFunctor {
   bool operator()(int n) { return IsEven(n); }
 };
@@ -2219,13 +2219,13 @@ struct AssertIsEvenFunctor {
   }
 };
 
-// Returns true if the sum of the arguments is an even number.
+// Returns true if and only if the sum of the arguments is an even number.
 bool SumIsEven2(int n1, int n2) {
   return IsEven(n1 + n2);
 }
 
-// A functor that returns true if the sum of the arguments is an even
-// number.
+// A functor that returns true if and only if the sum of the arguments is an
+// even number.
 struct SumIsEven3Functor {
   bool operator()(int n1, int n2, int n3) {
     return IsEven(n1 + n2 + n3);
