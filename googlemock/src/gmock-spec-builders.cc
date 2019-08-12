@@ -126,8 +126,8 @@ void ExpectationBase::RetireAllPreRequisites()
   }
 }
 
-// Returns true if all pre-requisites of this expectation have been
-// satisfied.
+// Returns true if and only if all pre-requisites of this expectation
+// have been satisfied.
 bool ExpectationBase::AllPrerequisitesAreSatisfied() const
     GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
   g_gmock_mutex.AssertHeld();
@@ -384,7 +384,7 @@ UntypedActionResultHolderBase* UntypedFunctionMockerBase::UntypedInvokeWith(
     const CallReaction reaction =
         Mock::GetReactionOnUninterestingCalls(MockObject());
 
-    // True if we need to print this call's arguments and return
+    // True if and only if we need to print this call's arguments and return
     // value.  This definition must be kept in sync with
     // the behavior of ReportUninterestingCall().
     const bool need_to_report_uninteresting_call =
@@ -435,7 +435,8 @@ UntypedActionResultHolderBase* UntypedFunctionMockerBase::UntypedInvokeWith(
           &ss, &why);
   const bool found = untyped_expectation != nullptr;
 
-  // True if we need to print the call's arguments and return value.
+  // True if and only if we need to print the call's arguments
+  // and return value.
   // This definition must be kept in sync with the uses of Expect()
   // and Log() in this function.
   const bool need_to_report_call =
@@ -574,7 +575,7 @@ struct MockObjectState {
   int first_used_line;
   ::std::string first_used_test_suite;
   ::std::string first_used_test;
-  bool leakable;  // true if it's OK to leak the object.
+  bool leakable;  // true if and only if it's OK to leak the object.
   FunctionMockers function_mockers;  // All registered methods of the object.
 };
 
@@ -718,7 +719,7 @@ bool Mock::VerifyAndClearExpectations(void* mock_obj)
 }
 
 // Verifies all expectations on the given mock object and clears its
-// default actions and expectations.  Returns true if the
+// default actions and expectations.  Returns true if and only if the
 // verification was successful.
 bool Mock::VerifyAndClear(void* mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {

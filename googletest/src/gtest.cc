@@ -171,8 +171,8 @@ namespace internal {
 // stack trace.
 const char kStackTraceMarker[] = "\nStack trace:\n";
 
-// g_help_flag is true if the --help flag or an equivalent form is
-// specified on the command line.
+// g_help_flag is true if and only if the --help flag or an equivalent form
+// is specified on the command line.
 bool g_help_flag = false;
 
 // Utilty function to Open File for Writing
@@ -211,12 +211,13 @@ GTEST_DEFINE_bool_(
 GTEST_DEFINE_bool_(
     break_on_failure,
     internal::BoolFromGTestEnv("break_on_failure", false),
-    "True if a failed assertion should be a debugger break-point.");
+    "True if and only if a failed assertion should be a debugger "
+    "break-point.");
 
 GTEST_DEFINE_bool_(
     catch_exceptions,
     internal::BoolFromGTestEnv("catch_exceptions", true),
-    "True if " GTEST_NAME_
+    "True if and only if " GTEST_NAME_
     " should catch exceptions and treat them as test failures.");
 
 GTEST_DEFINE_string_(
@@ -267,13 +268,13 @@ GTEST_DEFINE_string_(
 GTEST_DEFINE_bool_(
     print_time,
     internal::BoolFromGTestEnv("print_time", true),
-    "True if " GTEST_NAME_
+    "True if and only if " GTEST_NAME_
     " should display elapsed time in text output.");
 
 GTEST_DEFINE_bool_(
     print_utf8,
     internal::BoolFromGTestEnv("print_utf8", true),
-    "True if " GTEST_NAME_
+    "True if and only if " GTEST_NAME_
     " prints UTF8 characters as text.");
 
 GTEST_DEFINE_int32_(
@@ -290,13 +291,13 @@ GTEST_DEFINE_int32_(
 
 GTEST_DEFINE_bool_(
     show_internal_stack_frames, false,
-    "True if " GTEST_NAME_ " should include internal stack frames when "
+    "True if and only if " GTEST_NAME_ " should include internal stack frames when "
     "printing test failure stack traces.");
 
 GTEST_DEFINE_bool_(
     shuffle,
     internal::BoolFromGTestEnv("shuffle", false),
-    "True if " GTEST_NAME_
+    "True if and only if " GTEST_NAME_
     " should randomize tests' order on every run.");
 
 GTEST_DEFINE_int32_(
@@ -348,7 +349,7 @@ UInt32 Random::Generate(UInt32 range) {
   return state_ % range;
 }
 
-// GTestIsInitialized() returns true if the user has initialized
+// GTestIsInitialized() returns true if and only if the user has initialized
 // Google Test.  Useful for catching the user mistake of not initializing
 // Google Test before calling RUN_ALL_TESTS().
 static bool GTestIsInitialized() { return GetArgvs().size() > 0; }
@@ -365,18 +366,18 @@ static int SumOverTestSuiteList(const std::vector<TestSuite*>& case_list,
   return sum;
 }
 
-// Returns true if the test suite passed.
+// Returns true if and only if the test suite passed.
 static bool TestSuitePassed(const TestSuite* test_suite) {
   return test_suite->should_run() && test_suite->Passed();
 }
 
-// Returns true if the test suite failed.
+// Returns true if and only if the test suite failed.
 static bool TestSuiteFailed(const TestSuite* test_suite) {
   return test_suite->should_run() && test_suite->Failed();
 }
 
-// Returns true if test_suite contains at least one test that should
-// run.
+// Returns true if and only if test_suite contains at least one test that
+// should run.
 static bool ShouldRunTestSuite(const TestSuite* test_suite) {
   return test_suite->should_run();
 }
@@ -476,8 +477,8 @@ std::string UnitTestOptions::GetAbsolutePathToOutputFile() {
   return result.string();
 }
 
-// Returns true if the wildcard pattern matches the string.  The
-// first ':' or '\0' character in pattern marks the end of it.
+// Returns true if and only if the wildcard pattern matches the string.
+// The first ':' or '\0' character in pattern marks the end of it.
 //
 // This recursive algorithm isn't very efficient, but is clear and
 // works well enough for matching test names, which are short.
@@ -519,8 +520,8 @@ bool UnitTestOptions::MatchesFilter(
   }
 }
 
-// Returns true if the user-specified filter matches the test suite
-// name and the test name.
+// Returns true if and only if the user-specified filter matches the test
+// suite name and the test name.
 bool UnitTestOptions::FilterMatchesTest(const std::string& test_suite_name,
                                         const std::string& test_name) {
   const std::string& full_name = test_suite_name + "." + test_name.c_str();
@@ -906,7 +907,8 @@ const char* String::Utf16ToAnsi(LPCWSTR utf16_str)  {
 
 #endif  // GTEST_OS_WINDOWS_MOBILE
 
-// Compares two C strings.  Returns true if they have the same content.
+// Compares two C strings.  Returns true if and only if they have the same
+// content.
 //
 // Unlike strcmp(), this function can handle NULL argument(s).  A NULL
 // C string is considered different to any non-NULL C string,
@@ -1317,7 +1319,7 @@ std::vector<std::string> SplitEscapedString(const std::string& str) {
 //   lhs_value:      "5"
 //   rhs_value:      "6"
 //
-// The ignoring_case parameter is true if the assertion is a
+// The ignoring_case parameter is true if and only if the assertion is a
 // *_STRCASEEQ*.  When it's true, the string "Ignoring case" will
 // be inserted into the message.
 AssertionResult EqFailure(const char* lhs_expression,
@@ -1560,9 +1562,9 @@ namespace {
 
 // Helper functions for implementing IsSubString() and IsNotSubstring().
 
-// This group of overloaded functions return true if needle is a
-// substring of haystack.  NULL is considered a substring of itself
-// only.
+// This group of overloaded functions return true if and only if needle
+// is a substring of haystack.  NULL is considered a substring of
+// itself only.
 
 bool IsSubstringPred(const char* needle, const char* haystack) {
   if (needle == nullptr || haystack == nullptr) return needle == haystack;
@@ -1861,8 +1863,8 @@ std::string String::ShowWideCString(const wchar_t * wide_c_str) {
   return internal::WideStringToUtf8(wide_c_str, -1);
 }
 
-// Compares two wide C strings.  Returns true if they have the same
-// content.
+// Compares two wide C strings.  Returns true if and only if they have the
+// same content.
 //
 // Unlike wcscmp(), this function can handle NULL argument(s).  A NULL
 // C string is considered different to any non-NULL C string,
@@ -1906,7 +1908,7 @@ AssertionResult CmpHelperSTRNE(const char* s1_expression,
                             << " vs " << PrintToString(s2);
 }
 
-// Compares two C strings, ignoring case.  Returns true if they have
+// Compares two C strings, ignoring case.  Returns true if and only if they have
 // the same content.
 //
 // Unlike strcasecmp(), this function can handle NULL argument(s).  A
@@ -1918,18 +1920,18 @@ bool String::CaseInsensitiveCStringEquals(const char * lhs, const char * rhs) {
   return posix::StrCaseCmp(lhs, rhs) == 0;
 }
 
-  // Compares two wide C strings, ignoring case.  Returns true if they
-  // have the same content.
-  //
-  // Unlike wcscasecmp(), this function can handle NULL argument(s).
-  // A NULL C string is considered different to any non-NULL wide C string,
-  // including the empty string.
-  // NB: The implementations on different platforms slightly differ.
-  // On windows, this method uses _wcsicmp which compares according to LC_CTYPE
-  // environment variable. On GNU platform this method uses wcscasecmp
-  // which compares according to LC_CTYPE category of the current locale.
-  // On MacOS X, it uses towlower, which also uses LC_CTYPE category of the
-  // current locale.
+// Compares two wide C strings, ignoring case.  Returns true if and only if they
+// have the same content.
+//
+// Unlike wcscasecmp(), this function can handle NULL argument(s).
+// A NULL C string is considered different to any non-NULL wide C string,
+// including the empty string.
+// NB: The implementations on different platforms slightly differ.
+// On windows, this method uses _wcsicmp which compares according to LC_CTYPE
+// environment variable. On GNU platform this method uses wcscasecmp
+// which compares according to LC_CTYPE category of the current locale.
+// On MacOS X, it uses towlower, which also uses LC_CTYPE category of the
+// current locale.
 bool String::CaseInsensitiveWideCStringEquals(const wchar_t* lhs,
                                               const wchar_t* rhs) {
   if (lhs == nullptr) return rhs == nullptr;
@@ -1952,7 +1954,7 @@ bool String::CaseInsensitiveWideCStringEquals(const wchar_t* lhs,
 #endif  // OS selector
 }
 
-// Returns true if str ends with the given suffix, ignoring case.
+// Returns true if and only if str ends with the given suffix, ignoring case.
 // Any string is considered to end with an empty suffix.
 bool String::EndsWithCaseInsensitive(
     const std::string& str, const std::string& suffix) {
@@ -2194,12 +2196,12 @@ static bool TestPartSkipped(const TestPartResult& result) {
   return result.skipped();
 }
 
-// Returns true if the test was skipped.
+// Returns true if and only if the test was skipped.
 bool TestResult::Skipped() const {
   return !Failed() && CountIf(test_part_results_, TestPartSkipped) > 0;
 }
 
-// Returns true if the test failed.
+// Returns true if and only if the test failed.
 bool TestResult::Failed() const {
   for (int i = 0; i < total_part_count(); ++i) {
     if (GetTestPartResult(i).failed())
@@ -2208,22 +2210,22 @@ bool TestResult::Failed() const {
   return false;
 }
 
-// Returns true if the test part fatally failed.
+// Returns true if and only if the test part fatally failed.
 static bool TestPartFatallyFailed(const TestPartResult& result) {
   return result.fatally_failed();
 }
 
-// Returns true if the test fatally failed.
+// Returns true if and only if the test fatally failed.
 bool TestResult::HasFatalFailure() const {
   return CountIf(test_part_results_, TestPartFatallyFailed) > 0;
 }
 
-// Returns true if the test part non-fatally failed.
+// Returns true if and only if the test part non-fatally failed.
 static bool TestPartNonfatallyFailed(const TestPartResult& result) {
   return result.nonfatally_failed();
 }
 
-// Returns true if the test has a non-fatal failure.
+// Returns true if and only if the test has a non-fatal failure.
 bool TestResult::HasNonfatalFailure() const {
   return CountIf(test_part_results_, TestPartNonfatallyFailed) > 0;
 }
@@ -2519,18 +2521,18 @@ void Test::Run() {
       this, &Test::TearDown, "TearDown()");
 }
 
-// Returns true if the current test has a fatal failure.
+// Returns true if and only if the current test has a fatal failure.
 bool Test::HasFatalFailure() {
   return internal::GetUnitTestImpl()->current_test_result()->HasFatalFailure();
 }
 
-// Returns true if the current test has a non-fatal failure.
+// Returns true if and only if the current test has a non-fatal failure.
 bool Test::HasNonfatalFailure() {
   return internal::GetUnitTestImpl()->current_test_result()->
       HasNonfatalFailure();
 }
 
-// Returns true if the current test was skipped.
+// Returns true if and only if the current test was skipped.
 bool Test::IsSkipped() {
   return internal::GetUnitTestImpl()->current_test_result()->Skipped();
 }
@@ -2629,7 +2631,7 @@ class TestNameIs {
   explicit TestNameIs(const char* name)
       : name_(name) {}
 
-  // Returns true if the test name of test_info matches name_.
+  // Returns true if and only if the test name of test_info matches name_.
   bool operator()(const TestInfo * test_info) const {
     return test_info && test_info->name() == name_;
   }
@@ -2988,7 +2990,7 @@ static const char* GetAnsiColorCode(GTestColor color) {
 
 #endif  // GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE
 
-// Returns true if Google Test should use colors in the output.
+// Returns true if and only if Google Test should use colors in the output.
 bool ShouldUseColor(bool stdout_is_tty) {
   const char* const gtest_color = GTEST_FLAG(color).c_str();
 
@@ -4706,11 +4708,12 @@ internal::TimeInMillis UnitTest::elapsed_time() const {
   return impl()->elapsed_time();
 }
 
-// Returns true if the unit test passed (i.e. all test suites passed).
+// Returns true if and only if the unit test passed (i.e. all test suites
+// passed).
 bool UnitTest::Passed() const { return impl()->Passed(); }
 
-// Returns true if the unit test failed (i.e. some test suite failed
-// or something outside of all tests failed).
+// Returns true if and only if the unit test failed (i.e. some test suite
+// failed or something outside of all tests failed).
 bool UnitTest::Failed() const { return impl()->Failed(); }
 
 // Gets the i-th test suite among all the test suites. i can range from 0 to
@@ -5158,7 +5161,7 @@ class TestSuiteNameIs {
   // Constructor.
   explicit TestSuiteNameIs(const std::string& name) : name_(name) {}
 
-  // Returns true if the name of test_suite matches name_.
+  // Returns true if and only if the name of test_suite matches name_.
   bool operator()(const TestSuite* test_suite) const {
     return test_suite != nullptr &&
            strcmp(test_suite->name(), name_.c_str()) == 0;
@@ -5229,7 +5232,8 @@ static void TearDownEnvironment(Environment* env) { env->TearDown(); }
 // All other functions called from RunAllTests() may safely assume that
 // parameterized tests are ready to be counted and run.
 bool UnitTestImpl::RunAllTests() {
-  // True if Google Test is initialized before RUN_ALL_TESTS() is called.
+  // True if and only if Google Test is initialized before RUN_ALL_TESTS() is
+  // called.
   const bool gtest_is_initialized_before_run_all_tests = GTestIsInitialized();
 
   // Do not run any test if the --help flag was specified.
@@ -5245,7 +5249,7 @@ bool UnitTestImpl::RunAllTests() {
   // protocol.
   internal::WriteToShardStatusFileIfNeeded();
 
-  // True if we are in a subprocess for running a thread-safe-style
+  // True if and only if we are in a subprocess for running a thread-safe-style
   // death test.
   bool in_subprocess_for_death_test = false;
 
@@ -5278,7 +5282,7 @@ bool UnitTestImpl::RunAllTests() {
   random_seed_ = GTEST_FLAG(shuffle) ?
       GetRandomSeedFromFlag(GTEST_FLAG(random_seed)) : 0;
 
-  // True if at least one test has failed.
+  // True if and only if at least one test has failed.
   bool failed = false;
 
   TestEventListener* repeater = listeners()->repeater();
@@ -5476,8 +5480,8 @@ Int32 Int32FromEnvOrDie(const char* var, Int32 default_val) {
 }
 
 // Given the total number of shards, the shard index, and the test id,
-// returns true if the test should be run on this shard. The test id is
-// some arbitrary but unique non-negative integer assigned to each test
+// returns true if and only if the test should be run on this shard. The test id
+// is some arbitrary but unique non-negative integer assigned to each test
 // method. Assumes that 0 <= shard_index < total_shards.
 bool ShouldRunTestOnShard(int total_shards, int shard_index, int test_id) {
   return (test_id % total_shards) == shard_index;
@@ -6050,7 +6054,7 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
 void ParseGoogleTestFlagsOnly(int* argc, char** argv) {
   ParseGoogleTestFlagsOnlyImpl(argc, argv);
 
-  // Fix the value of *_NSGetArgc() on macOS, but if
+  // Fix the value of *_NSGetArgc() on macOS, but if and only if
   // *_NSGetArgv() == argv
   // Only applicable to char** version of argv
 #if GTEST_OS_MAC

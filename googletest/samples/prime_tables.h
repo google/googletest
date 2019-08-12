@@ -43,7 +43,7 @@ class PrimeTable {
  public:
   virtual ~PrimeTable() {}
 
-  // Returns true if n is a prime number.
+  // Returns true if and only if n is a prime number.
   virtual bool IsPrime(int n) const = 0;
 
   // Returns the smallest prime number greater than p; or returns -1
