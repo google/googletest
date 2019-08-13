@@ -757,7 +757,7 @@ class MockFunction<R(A1, ..., An)> {
 };
 ```
 
-See this [recipe](cook_book.md#using-check-points) for one application of it.
+See this [recipe](cook_book.md#useful-mocks-created-using-gmock) for one application of it.
 
 ### Flags
 
