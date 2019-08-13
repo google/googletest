@@ -154,15 +154,15 @@ TEST_F(FooTest, Baz) { ... }
 
 필요하다면, base test fixture를 상속받은 test fixture를 또 다시 상속하는 것도 가능합니다. 상속의 깊이에 특별한 제한은 없습니다.
 
-보다 상세한 예제들은 [sample5_unittest.cc](https://github.com/google/googletest/blob/master/googletest/samples/sample5_unittest.cc)에서 확인하기 바랍니다.
+보다 상세한 예제들은 [sample5_unittest.cc](../../samples/sample5_unittest.cc)에서 확인하기 바랍니다.
 
 ## "void value not ignored as it ought to be"라는 compile error가 발생합니다. 이게 무슨 뜻인가요?
 
-아마도 `ASSERT_*()`에 return type이 `void`가 아닌 function을 사용했을 확률이 큽니다. `ASSERT_*()`는 `void`를 반환하는 function에만 사용할 수 있으며 그 이유는 googletest가 expception disabled이기 때문입니다. [여기](advanced.md#assertion-placement)에서 보다 자세한 내용을 확인할 수 있습니다.
+아마도 `ASSERT_*()`에 return type이 `void`가 아닌 function을 사용했을 확률이 큽니다. `ASSERT_*()`는 `void`를 반환하는 function에만 사용할 수 있으며 그 이유는 googletest가 expception disabled이기 때문입니다. [여기](advanced.md#assertion을-사용가능한-곳)에서 보다 자세한 내용을 확인할 수 있습니다.
 
 ## Hang, seg-fault 등이 발생하면서 death test가 잘 동작하지 않습니다. 어떻게 해야할까요?
 
-Googletest에서 death test는 기본적으로 child process에서 동작합니다. 그렇기 때문에 구현 시에도 세심한 주의가 필요합니다. Death test를 사용하려면 먼저 death test가 어떻게 동작하는지 정확히 이해해야 합니다. [이 부분](advanced.md#how-it-works)을 꼭 읽어주세요.
+Googletest에서 death test는 기본적으로 child process에서 동작합니다. 그렇기 때문에 구현 시에도 세심한 주의가 필요합니다. Death test를 사용하려면 먼저 death test가 어떻게 동작하는지 정확히 이해해야 합니다. [이 부분](advanced.md#death-test-의-동작방식)을 꼭 읽어주세요.
 
 Death test를 사용할 때 parent process에 여러개의 thread가 있는 경우에는 문제가 발생하기도 합니다. 혹시 `EXPECT_DEATH()`를 수행하기 전에 이미 여러개의 thread를 생성하고 있다면 이러한 부분을 한 번 제거해 보시기 바랍니다. 예를 들어 thread를 생성하는 real object를 mock이나 fake로 바꿔서 thread를 생성하지 않도록 해볼 수 있습니다.
 
@@ -277,7 +277,7 @@ Googletest에서는 assertion과 함께 streaming message를 바로 출력하는
   ASSERT_EQ(1, Foo()) << "blah blah" << foo;
 ```
 
-바로 이와 같은 기능을 지원하기 위해서 constructor/destructor에서는 `ASSERT*`, `FAIL*`를 사용할 수 없도록 했습니다. (`EXPECT*`, `ADD_FAILURE*`는 아닙니다) 이를 위한 해결방법은 constructor/destructor 대신에 private void method를 사용해서 원하는 내용을 구현하는 것입니다. 또는 `ASSERT_*()`를 `EXPECT_*()` 로 바꾸는 것도 방법입니다. 이와 관련한 자세한 내용은 [여기](advanced.md#assertion-placement)를 확인하기 바랍니다.
+바로 이와 같은 기능을 지원하기 위해서 constructor/destructor에서는 `ASSERT*`, `FAIL*`를 사용할 수 없도록 했습니다. (`EXPECT*`, `ADD_FAILURE*`는 아닙니다) 이를 위한 해결방법은 constructor/destructor 대신에 private void method를 사용해서 원하는 내용을 구현하는 것입니다. 또는 `ASSERT_*()`를 `EXPECT_*()` 로 바꾸는 것도 방법입니다. 이와 관련한 자세한 내용은 [여기](advanced.md#assertion을-사용가능한-곳)를 확인하기 바랍니다.
 
 ## `SetUp()`이 호출되지 않습니다. 왜 그럴까요?
 
