@@ -21,7 +21,7 @@ Googletest가 xUnit architecture를 기반으로 설계되었기 때문에 JUnit
 
 *Note:* *Test*, *Test Case*, *Test Suite*과 같은 용어를 사용함에 있어서 googletest와 [ISTQB](http://www.istqb.org/) 간에 정의가 다르기 때문에 주의가 필요합니다.
 
-Googletest는 개별 테스트를 가리키는 용어로서 Test를 사용해왔고 여러 Test의 묶음을 의미하는 용어로 Test Case를 사용해왔습니다. 그러나 [ISTQB](http://www.istqb.org/)를 비롯한 표준기관에서는 여러 Test의 묶음을 의미하는 용어로 [*Test Suite*](https://glossary.istqb.org/en/search/test%20suite)를 채택하고 있어서 혼란이 발생하곤 했습니다.
+Googletest는 개별 테스트를 가리키는 용어로서 Test를 사용해왔고 여러 Test의 묶음을 의미하는 용어로 Test Case를 사용해왔습니다. 그러나 ISTQB를 비롯한 표준기관에서는 여러 Test의 묶음을 의미하는 용어로 [*Test Suite*](https://glossary.istqb.org/en/search/test%20suite)를 채택하고 있어서 혼란이 발생하곤 했습니다.
 
 즉, googletest의 Test라는 용어를 ISTQB의 [*Test Case*](https://glossary.istqb.org/en/search/test%20case)와 동일한 의미로 사용하려고 해도 원래 googletest에서 Test 묶음을 의미하는 용어였던 Test Case와 충돌이 발생해서 문제가 되었던 것입니다. 결국 googletest는 *Test Case*라는 용어를 *Test Suite*으로 바꾸기로 결정했으며 *TestCase*로 시작하는 API들을 *TestSuite*으로 변경하는 과정에 있습니다.
 
@@ -127,7 +127,7 @@ Argument가 변수형태라면 assertion코드가 수행되는 시점에 저장�
 
 **Availability**: Linux, Windows, Mac.
 
-**See also**: 기본적인 문자열 비교 외에 추가로 제공되는 기능(substring, prefix, suffix, regular expression 비교하기 등)이 궁금하다면  [여기](../../../cheat_sheet.md#string-matchers)를 참조하세요.
+**See also**: 기본적인 문자열 비교 외에 추가로 제공되는 기능(substring, prefix, suffix, regular expression 비교하기 등)이 궁금하다면  [여기](../../../googlemock/docs/kr/cheat_sheet.md#string-matchers)를 참조하세요.
 
 ## 간단한 테스트
 
