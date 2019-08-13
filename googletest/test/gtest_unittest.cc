@@ -61,9 +61,10 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 #include <time.h>
 
 #include <map>
-#include <vector>
 #include <ostream>
+#include <type_traits>
 #include <unordered_set>
+#include <vector>
 
 #include "gtest/gtest-spi.h"
 #include "src/gtest-internal-inl.h"
@@ -262,7 +263,6 @@ using testing::internal::OsStackTraceGetterInterface;
 using testing::internal::ParseInt32Flag;
 using testing::internal::RelationToSourceCopy;
 using testing::internal::RelationToSourceReference;
-using testing::internal::RemoveConst;
 using testing::internal::RemoveReference;
 using testing::internal::ShouldRunTestOnShard;
 using testing::internal::ShouldShard;
@@ -7133,33 +7133,6 @@ void TestGTestRemoveReference() {
 TEST(RemoveReferenceTest, MacroVersion) {
   TestGTestRemoveReference<int, int>();
   TestGTestRemoveReference<const char, const char&>();
-}
-
-
-// Tests that RemoveConst does not affect non-const types.
-TEST(RemoveConstTest, DoesNotAffectNonConstType) {
-  CompileAssertTypesEqual<int, RemoveConst<int>::type>();
-  CompileAssertTypesEqual<char&, RemoveConst<char&>::type>();
-}
-
-// Tests that RemoveConst removes const from const types.
-TEST(RemoveConstTest, RemovesConst) {
-  CompileAssertTypesEqual<int, RemoveConst<const int>::type>();
-  CompileAssertTypesEqual<char[2], RemoveConst<const char[2]>::type>();
-  CompileAssertTypesEqual<char[2][3], RemoveConst<const char[2][3]>::type>();
-}
-
-// Tests GTEST_REMOVE_CONST_.
-
-template <typename T1, typename T2>
-void TestGTestRemoveConst() {
-  CompileAssertTypesEqual<T1, GTEST_REMOVE_CONST_(T2)>();
-}
-
-TEST(RemoveConstTest, MacroVersion) {
-  TestGTestRemoveConst<int, int>();
-  TestGTestRemoveConst<double&, double&>();
-  TestGTestRemoveConst<char, const char>();
 }
 
 // Tests GTEST_REMOVE_REFERENCE_AND_CONST_.
