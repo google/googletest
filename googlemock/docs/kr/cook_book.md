@@ -1,6 +1,6 @@
 ## gMock Cookbook
 
-이 문서에서는 gMock의 심화된 사용방법을 확인할 수 있습니다. 아직 gMock 사용경험이 없는 분은 [ForDummies](ForDummies.md) 문서를 먼저 보는 것이 좋습니다.
+이 문서에서는 gMock의 심화된 사용방법을 확인할 수 있습니다. 아직 gMock 사용경험이 없는 분은 [ForDummies](for_dummies.md) 문서를 먼저 보는 것이 좋습니다.
 
 **Note:** gMock은 소스코드상에 `testing` 이라는 namespace에 구현되어 있습니다. 따라서 gMock에 구현된 `foo`라는 기능을 사용하고자 한다면 `using testing:Foo` 와 같이 namespace를 명시해서 사용해야 합니다. 이 문서에서는 예제코드를 간단하게 하기위한 목적으로 `using`을 사용하지 않기도 했지만 실제로 사용할 때에는 `using`을 꼭 사용하기 바랍니다.
 
@@ -218,7 +218,7 @@ class File : public FileInterface {
 
 이러한 작업이 귀찮게 느껴질 수도 있지만, 처음에 한번만 추상화 계층을 잘 설계해 놓으면 연관된 free function들을 같은 interface로 묶을 수 있습니다. 해야할 일이 거의 없을 뿐더러 소스코드는 깔끔해지고 mocking은 간편해집니다.
 
-혹시나 virtual function을 호출하기 때문에 발생하는 성능저하가 우려된다면 [mocking non-virtual methods](#mocking-nonvirtual-methods)와 같이 사용하면 성능저하도 크게 문제가 되지 않습니다.
+혹시나 virtual function을 호출하기 때문에 발생하는 성능저하가 우려된다면 [mocking non-virtual methods](cook_book.md#nonvirtual-method-mocking-하기)와 같이 사용하면 성능저하도 크게 문제가 되지 않습니다.
 
 #### 이전방식의 macro인 `MOCK_METHODn` 간단소개
 
@@ -313,7 +313,7 @@ TEST(...) {
 }
 ```
 
-NOTE: `NiceMock`과 `StrictMock`의 대상은 *uninteresting call*이며 *unexpected call*은 대상이 아니라는 것을 기억하세요. 이에 대한 자세한 내용은 [Understanding Uninteresting vs Unexpected Calls](https://github.com/google/googletest/blob/master/googlemock/docs/cook_book.md#uninteresting-vs-unexpected)를 참조하세요.
+NOTE: `NiceMock`과 `StrictMock`의 대상은 *uninteresting call*이며 *unexpected call*은 대상이 아니라는 것을 기억하세요. 이에 대한 자세한 내용은 [Understanding Uninteresting vs Unexpected Calls](cook_book.md#uninteresting-vs-unexpected-를-구분하자)를 참조하세요.
 
 지금까지 설명한 기능들을 사용하기 위해서 지켜야 할 규칙이 몇 가지 있습니다. (주로 C++ 언어의 특성으로 인해 만들어진 것들입니다.)
 
@@ -497,7 +497,7 @@ TEST(AbcTest, Xyz) {
 
   * 원한다면 얼마든지 mock function의 동작을 다시 변경할 수 있습니다. 즉, 시작부분에서 `DelegateToFake()` 함수를 통해서 default action을 지정했지만 개별 `TEST()`에서 `ON_CALL()` 또는 `EXPECT_CALL()`를 사용하면 자유롭게 변경할 수 있습니다.
   * `DelegateToFake()` 함수에서 굳이 모든 fake 함수를 지정할 필요는 없고 원하는 것만 선택적으로 지정하면 됩니다.
-  * 여기서 논의된 방법들은 overloaded method에도 적용될 수 있습니다. 물론 compiler에 어떤 것을 사용할지는 알려줘야 합니다. 먼저, mock function에 대한 모호성 해결방법은 이 문서의 [Selecting Between Overloaded Functions]() 부분을 참고하세요. 다음으로 fake function에 대한 모호성 해결방법은 `static_cast`를 사용하면 됩니다. 예를 들어 `Foo` class에 `char DoThis(int n)`, `bool DoThis(double x) const` 라는 2개의 overloaded function이 있다고 합시다. 이 상황에서 후자인 `bool DoThis(double x) const`를 invoke 대상으로 지정하고 싶다면 `Invoke(&fake_, static_cast<bool (FakeFoo::*)(double) const>(&FakeFoo::DoThis)`와 같이 사용하면 됩니다. `static_cast` 를 사용해 fuction pointer type을 명확하게 지정한 것입니다.
+  * 여기서 논의된 방법들은 overloaded method에도 적용될 수 있습니다. 물론 compiler에 어떤 것을 사용할지는 알려줘야 합니다. 먼저, mock function에 대한 모호성 해결방법은 이 문서의 [Selecting Between Overloaded Functions](cook_book.md#여러개의-overloaded-function-중에서-선택하기) 부분을 참고하세요. 다음으로 fake function에 대한 모호성 해결방법은 `static_cast`를 사용하면 됩니다. 예를 들어 `Foo` class에 `char DoThis(int n)`, `bool DoThis(double x) const` 라는 2개의 overloaded function이 있다고 합시다. 이 상황에서 후자인 `bool DoThis(double x) const`를 invoke 대상으로 지정하고 싶다면 `Invoke(&fake_, static_cast<bool (FakeFoo::*)(double) const>(&FakeFoo::DoThis)`와 같이 사용하면 됩니다. `static_cast` 를 사용해 fuction pointer type을 명확하게 지정한 것입니다.
   * 지금까지 mock, fake를 함께 사용하기 위한 방법을 설명했습니다. 그러나 사실 mock, fake를 함께 사용하는 경우가 발생했다면 해당 소프트웨어의 설계가 뭔가 잘못되었음을 의미하는 것이기도 합니다. 아마도 사용자가 interaction-based testing 방법론에 아직 익숙하지 않은 경우일 수 있습니다. 또는 대상 interface가 너무 많은 역할을 수행하고 있기 때문에 분리될 필요가 있을 수도 있습니다. 다시 말하면, **이 방법을 남용하지 않기를 바랍니다**. 어디까지나 refactoring에 필요한 하나의 과정 정도로 생각하면 좋을 것 같습니다.
 
 Mock, fake가 함께 나타날 때, bad sign을 찾아내는 예제를 하나 공유하겠습니다. 예를 들어 `System` class라는 low-level system operation을 수행하는 class가 하나 있다고 합시다. 이 class는 파일처리와 I/O라는 2가지 기능에 특화되었다고 하겠습니다. 이 때, `System` class의 I/O기능만 테스트하고자 한다면 파일처리는 문제 없이 기본적인 동작만 해주면 될 것입니다. 그런데 I/O기능을 테스트하기 위해서 `System` class를 mock class로 만들게 되면 파일처리 기능까지 mocking이 되어 버립니다. 이렇게 되면 개발자가 fake class를 제공하던지 해서 파일처리 기능과 동일한 역할을 구현해줘야 하는 어려움이 발생합니다.
@@ -508,7 +508,7 @@ Mock, fake가 함께 나타날 때, bad sign을 찾아내는 예제를 하나 �
 
 테스트를 위해 testing double(mock, fake, stub, spy 등)을 사용할 떄의 문제는 동작이 real object와 달라질 수 있다는 것입니다. 물론 negative test를 위해서 일부러 다르게 만들기도 하지만, 때로는 실수로 인해 동작이 달라지기도 합니다. 후자의 경우라면 bug를 잡아내지 못하고 제품을 출시하는 것과 같은 문제가 발생하기도 합니다.
 
-이런 경우를 위해 *delegating-to-real* 이라고 불리는 기술을 사용할 수 있습니다. 즉, mock object가 real object와 동일하게 동작하게 만들어 주는 방법입니다. 사용법 자체는 바로 위에서 다룬 [delegating-to-fake]() 와 매우 유사합니다. 다른 점이라면 fake object 대신 real object로 변경된 것 뿐입니다. 아래 예제를 확인하세요.
+이런 경우를 위해 *delegating-to-real* 이라고 불리는 기술을 사용할 수 있습니다. 즉, mock object가 real object와 동일하게 동작하게 만들어 주는 방법입니다. 사용법 자체는 바로 위에서 다룬 [delegating-to-fake](cook_book.md#fake-class에-위임하기) 와 매우 유사합니다. 다른 점이라면 fake object 대신 real object로 변경된 것 뿐입니다. 아래 예제를 확인하세요.
 
 ```cpp
 using ::testing::AtLeast;
@@ -748,7 +748,7 @@ TEST(PrinterTest, Print) {
 
 #### Argument에 따라 다른 Action을 실행하기 ####
 
-Mock method가 호출되면, 소스코드 상에서 제일 *밑에 있는* expectation부터 탐색합니다. (물론 해당 expectation은 active 상태여야 합니다.) 이러한 동작방식은 [newer overrides older]() 에서 설명된 적이 있습니다. 이러한 규칙을 이용하면 argument로 전달되는 값에 따라 다른 action이 수행되도록 지정하는 것도 가능합니다.
+Mock method가 호출되면, 소스코드 상에서 제일 *밑에 있는* expectation부터 탐색합니다. (물론 해당 expectation은 active 상태여야 합니다.) 이러한 동작방식은 [여기](for_dummies.md#여러개의-expectations-사용하기) 에서 설명된 적이 있습니다. 이러한 규칙을 이용하면 argument로 전달되는 값에 따라 다른 action이 수행되도록 지정하는 것도 가능합니다.
 
 ```cpp
 using ::testing::_;
@@ -798,7 +798,7 @@ using ::testing::Lt;
 
 위 코드는 `Blah()`가 argument 3개(`x`, `y`, `z`)를 전달받았을 때, `x < y < z` 를 만족해야 함을 의미합니다.
 
-`With`를 쉽게 사용하기 위해서 gMock의 일부 matcher들은 2-tuples 타입을 지원하고 있습니다. 위 예제의 `Lt()`도 그 중 하나입니다. 2-tuples를 지원하는 matcher의 전체목록은 [여기]()를 참조하시기 바랍니다.
+`With`를 쉽게 사용하기 위해서 gMock의 일부 matcher들은 2-tuples 타입을 지원하고 있습니다. 위 예제의 `Lt()`도 그 중 하나입니다. 2-tuples를 지원하는 matcher의 전체목록은 [여기](cheat_sheet.md#multi-argument-matchers)를 참조하시기 바랍니다.
 
 만약 `.With(Args<0, 1>(Truly(&MyPredicate)))`와 같이 직접 만든 predicate를 사용하고 싶은 경우에는 해당 predicate의 argument가 `::testing::tuple` 타입으로 선언되어 있어야만 합니다. 왜냐하면 gMock이 `Args<>`를 통해 선택된 argument들을 1개의 tuple형태로 변환해서 predicate으로 전달하기 때문입니다.
 
@@ -1205,7 +1205,7 @@ TEST(...) {
 
 한가지 주의할 점은 이렇게 동일한 mock function에 대해 여러개의 `EXPECT_CALL`을 사용하면 소스코드 상에서 나중에 오는 것과 먼저 비교한다는 것입니다. 즉, 위의 코드에서는 `GetDomainOwner()`에 대한 호출이 발생하면 `GetDomainOwner("google.com")`와 먼저 비교해보고 이것을 만족하지 않으면 다음으로 `GetDomainOwner(_)`와의 비교를 수행하게 됩니다.
 
-Uninteresting call, nice mock, strict mock 에 대한 더 자세한 내용은 ["The Nice, the Strict, and the Naggy"](#the-nice-the-strict-and-the-naggy)를 참조하세요.
+Uninteresting call, nice mock, strict mock 에 대한 더 자세한 내용은 ["The Nice, the Strict, and the Naggy"](cook_book.md#nice-모드-strict-모드-naggy-모드-naggy-잔소리가-심한)를 참조하세요.
 
 #### 함수의 호출순서 지정하기 ####
 
@@ -1233,7 +1233,7 @@ using ::testing::InSequence;
 
 `InSequence`는 function들의 호출순서를 일렬로 지정합니다. 이에 더해서 function에 부분적인 순서를 지정하는 것도 가능합니다. 예를 들어 `A`가 `B`와`C`보다 먼저 호출되기를 바라는 것과 동시에 `B`와 `C`간에는 호출순서를 지정하고 싶지 않을 수도 있습니다. 이러한 상황에서 `InSequence`를 사용하면 원하는 것에 비해 많은 제약을 지정하기 때문에 적합하지 않습니다.
 
-gMock은 부분적인 호출순서를 지원하기 위해서 DAG(directed acyclic graph)를 적용했습니다. 이를 사용하기 위한 몇 가지 방법이 있는데 먼저 `EXPECT_CALL`에 [After](CheatSheet.md#the-after-clause)를 붙여서 사용하는 것이 한가지 방법입니다.
+gMock은 부분적인 호출순서를 지원하기 위해서 DAG(directed acyclic graph)를 적용했습니다. 이를 사용하기 위한 몇 가지 방법이 있는데 먼저 `EXPECT_CALL`에 [After](cheat_sheet.md#the-after-clause)를 붙여서 사용하는 것이 한가지 방법입니다.
 
 또 다른 방법은 `InSequence()`를 사용하는 것입니다. (위에서 설명한 `InSequence` class가 아닙니다.) 이 개념은 jMock 2에서 가져왔습니다. `After()`보다는 유연성이 떨어지긴 하지만 길고 연속된 함수호출을 지정할 때 편리합니다. 왜냐하면 하나의 호출흐름 안에 있는 `EXPECT_CALL`들은 별도의 이름을 가질 필요가 없기 때문입니다. 아래에 계속해서 `InSequence()`의 동작방식을 설명하겠습니다.
 
@@ -1917,7 +1917,7 @@ using ::testing::WithArgs;
 
 #### 관심없는 Argument 무시하기 ####
 
-[Action의 Argument를 선택하기]()에서 mock function이 action으로 argument를 전달하게 하는 방법을 배웠습니다. 이 때, `WithArgs<...>()`를 사용함에 있어서 한가지 단점은 테스트를 구현하는 사람이 조금 귀찮을 수 있다는 것입니다.
+[Action의 Argument를 선택하기](cook_book.md#action의-argument를-선택하기)에서 mock function이 action으로 argument를 전달하게 하는 방법을 배웠습니다. 이 때, `WithArgs<...>()`를 사용함에 있어서 한가지 단점은 테스트를 구현하는 사람이 조금 귀찮을 수 있다는 것입니다.
 
 만약, `Invoke*()`에 사용할 function, functor, lambda를 구현하고 있는 중이라면 `Unused`를 사용해서 `WithArgs`를 대체하는 것도 괜찮습니다. `Unused`는 해당 argument는 사용하지 않을 것이라고 명시적으로 표현하는 것이기 때문에 굳이 `WithArgs`를 사용하지 않아도 mock function과 내부 action을 연결할 수 있습니다. 이것의 장점은 소스코드가 깔끔해지고 argument가 변경에 대해서도 쉽고 빠르게 대응할 수 있습니다. 마지막으로 action의 재사용성도 증대됩니다. 그럼 예제코드를 보겠습니다.
 
@@ -2050,7 +2050,7 @@ Note: 이 예제의 단점도 있습니다. 만약 expectation이 만족하지 �
 
 C++11 에서 _move-only-type_ 이 소개되었습니다. Move-only-type이란 이동은 가능하지만 복사는 불가능한 객체를 의미합니다. C++ 의 `std::unique_ptr<T>`가 대표적인 예입니다.
 
-이러한 move-only-type 을 반환하는 함수를 mocking하는 것은 사실 좀 어렵습니다. 그러나 역시 불가능한 것은 아닙니다. 다만, 이에대한 해결방법이 2017년 4월에 gMock에 추가되었으므로 예전버전을 사용하고 있다면 [Legacy workarounds for move-only types]()를 참조하기를 바랍니다.
+이러한 move-only-type 을 반환하는 함수를 mocking하는 것은 사실 좀 어렵습니다. 그러나 역시 불가능한 것은 아닙니다. 다만, 이에대한 해결방법이 2017년 4월에 gMock에 추가되었으므로 예전버전을 사용하고 있다면 [Legacy workarounds for move-only types](cook_book.md#legacy--move-only-type-해결방법)를 참조하기를 바랍니다.
 
 가상의 프로젝트를 진행하고 있다고 해봅시다. 그 프로젝트는 누군가 "buzzes"라고 불리는 짦은글을 작성하고 공유할 수 있게 해주는 프로젝트입니다. 프로젝트에서는 아래와 같은 타입들을 정의하고 사용하고 있습니다.
 
@@ -2103,7 +2103,7 @@ class MockBuzzer : public Buzzer {
   EXPECT_EQ(nullptr, mock_buzzer_.MakeBuzz("hello"));
 ```
 
-만약, default action을 변경하고 싶다면 [Setting Default Actions](#setting-the-default-actions-for-a-mock-method)를 참조하세요.
+만약, default action을 변경하고 싶다면 [Setting Default Actions](cheat_sheet.md#default-action-설정하기)를 참조하세요.
 
 `Return(ByMove(...))`를 사용하면 특정한 move-only-type 값을 반환하도록 지정할 수도 있습니다.
 
@@ -2134,7 +2134,7 @@ class MockBuzzer : public Buzzer {
 
 `Return(ByMove(...))`로는 불가능한 일이 가능해졌습니다. 이제 `mock_buzzer`가 호출될 때마다 새로운 `unique_ptr<Buzz>`가 생성되고 반환될 것입니다.
 
-지금까지 move-only-type을 반환하는 방법에 대해서 배웠습니다. 그럼 move-only argument를 전달 받으려면 어떻게 해야할까요? 정답은 대부분의 경우에 별도의 조치를 취하지 않아도 잘 동작한다는 것입니다. 혹시나 문제가 되는 부분이 있다고 해도 compile error를 통해 미리 확인할 수 있을 것입니다. `Return`, [lambda, functor](#using-functionsmethodsfunctors-as-actions)도 언제든 사용할 수 있습니다.
+지금까지 move-only-type을 반환하는 방법에 대해서 배웠습니다. 그럼 move-only argument를 전달 받으려면 어떻게 해야할까요? 정답은 대부분의 경우에 별도의 조치를 취하지 않아도 잘 동작한다는 것입니다. 혹시나 문제가 되는 부분이 있다고 해도 compile error를 통해 미리 확인할 수 있을 것입니다. `Return`, [lambda, functor](cook_book.md#functionsfunctorslambda를-action으로-사용하기)도 언제든 사용할 수 있습니다.
 
 ```cpp
   using ::testing::Unused;
@@ -2484,7 +2484,7 @@ Emacs에서 `M-x google-complie` 명령을 통해 테스트를 구현하고 실�
 
 #### 새로운 Matcher를 빠르게 구현하기 ####
 
-WARNING: gMock은 matcher가 언제 몇 번 호출될지를 보장하지 않습니다. 따라서 모든 matcher는 순수하게 기능적인 동작만 수행하도록 구현해야 합니다. 즉, 프로그램 내의 다른 정보에 대한 side effect나 의존성을 가지면 안된다는 것입니다. 자세한 내용은 [여기]()를 참조하세요.
+WARNING: gMock은 matcher가 언제 몇 번 호출될지를 보장하지 않습니다. 따라서 모든 matcher는 순수하게 기능적인 동작만 수행하도록 구현해야 합니다. 즉, 프로그램 내의 다른 정보에 대한 side effect나 의존성을 가지면 안된다는 것입니다. 자세한 내용은 [여기](cook_book.md#matcher는-부수효과side-effect를-가지면-안됩니다)를 참조하세요.
 
 gMock이 제공하는 `MATCHER*` macro는 사용자가 새로운 matcher를 만들 수 있도록 도와줍니다. 기본적인 문법은 아래와 같습니다.
 
@@ -3192,7 +3192,7 @@ class MockFoo : public Foo {
 
 gMock은 uninteresting call이나 unexpected call이 발생하면 해당 mock function으로 전달된 argument와 stack trace 정보를 출력해 줍니다. 마찬가지로 `EXPECT_THAT`, `EXPECT_EQ`과 같은 macro도 assertion 실패 시에 관련 정보를 출력해 줍니다. googletest와 gMock은 user-extensible value printer를 통해 이러한 동작을 구현하고 있습니다.
 
-다만, 위의 printer가 출력할 수 있는 대상은 built-in C++ type, array,  STL container, 그리고 `<<` 연산자를 정의한 타입들만 해당됩니다. 다시말하면 그 외의 사용자정의 타입들은 관련정보를 출력할 수 없으며 단순히 byte dump만 출력하도록 구현되어 있습니다. 이러한 문제를 개선하려면 [googletests`s advanced guide](../../googletest/docs/advanced.md#teaching-googletest-how-to-print-your-values)를 참고하여 더 많은 정보를 출력할 수 있도록 변경할 수 있습니다.
+다만, 위의 printer가 출력할 수 있는 대상은 built-in C++ type, array,  STL container, 그리고 `<<` 연산자를 정의한 타입들만 해당됩니다. 다시말하면 그 외의 사용자정의 타입들은 관련정보를 출력할 수 없으며 단순히 byte dump만 출력하도록 구현되어 있습니다. 이러한 문제를 개선하려면 [googletests`s advanced guide](../../../googletest/docs/kr/advanced.md#googletest의-디버깅정보-출력방식-변경하기)를 참고하여 더 많은 정보를 출력할 수 있도록 변경할 수 있습니다.
 
 ### Useful Mocks Created Using gMock
 
