@@ -39,7 +39,7 @@ switch(expression) {
 }
 ```
 
-NOTE: `FAIL()`은  return type이 `void`인 function에만 사용할 수 있습니다. 이와 관련한 자세한 내용은 [Assertion Placement section](#assertion-placement)를 참조하세요.
+NOTE: `FAIL()`은  return type이 `void`인 function에만 사용할 수 있습니다. 이와 관련한 자세한 내용은 [Assertion Placement section](advanced.md#assertion을-사용가능한-곳)를 참조하세요.
 
 ### Exception Assertions
 
@@ -117,7 +117,7 @@ c is 10
 
 > NOTE:
 >
-> 1.  `ASSERT_PRED*` 또는 `EXPECT_PRED*`를 사용할 때, "no matching function to call"와 같은 컴파일 에러가 발생하면 [여기](faq.md#the-compiler-complains-no-matching-function-to-call-when-i-use-assert_pred-how-do-i-fix-it)를 참조하세요.
+> 1.  `ASSERT_PRED*` 또는 `EXPECT_PRED*`를 사용할 때, "no matching function to call"와 같은 컴파일 에러가 발생하면 [여기](faq.md#assert_pred를-사용할-때-no-matching-function-to-call-이라는-compile-error가-발생했습니다-어떻게-해야-하나요)를 참조하세요.
 
 #### AssertionResult를 반환하는 function을 사용하기
 
@@ -289,7 +289,7 @@ EXPECT_PRED_FORMAT2(::testing::DoubleLE, val1, val2);
 
 ### gMock Matchers를 이용한 Asserting
 
-C++ mocking framework인 [gMock](../../googlemock)을 개발하면서 mock object로 전달되는 argument를 확인하기 위한 방법으로 matcher라는 것을 만들었습니다. 이러한 gMock *matcher*는 사실상 predicate랑 원리가 같습니다. 더불어 지원하는 기능도 풍부하기 때문에 matcher를 이용하면 좀 더 간단하게 predicate assertion을 구현할 수 있습니다.
+C++ mocking framework인 [gMock](../../../googlemock)을 개발하면서 mock object로 전달되는 argument를 확인하기 위한 방법으로 matcher라는 것을 만들었습니다. 이러한 gMock *matcher*는 사실상 predicate랑 원리가 같습니다. 더불어 지원하는 기능도 풍부하기 때문에 matcher를 이용하면 좀 더 간단하게 predicate assertion을 구현할 수 있습니다.
 
 아래는 matcher를 이용한 assertion macro들입니다.
 
@@ -306,9 +306,9 @@ using ::testing::StartsWith;
     EXPECT_THAT(Foo(), StartsWith("Hello"));
 ```
 
-이렇듯 matcher의 사용법도 어렵지 않습니다. 보다 자세한 사용방법은 [여기](../../googlemock/docs/cook_book.md#using-matchers-in-google-test-assertions)을 참조하세요. 
+이렇듯 matcher의 사용법도 어렵지 않습니다. 보다 자세한 사용방법은 [여기](../../../googlemock/docs/kr/cook_book.md#matcher를-googletest-assertion처럼-사용하기)을 참조하세요. 
 
-gMock은 `StartsWith()` 외에도 다양한 matcher들을 제공합니다. 이를 통해 googletest에서는 불가능했던 것들도 가능하므로 관련 [문서](../../googlemock/docs/cook_book.md#using-matchers)을 한 번 읽어보시길 추천합니다. 게다가 필요한 matcher를 직접 만드는 것도 가능하기 때문에 상당히 유용하며 이렇게 matcher를 직접 만드는 방법에 대한 정보는 [여기]()를 참조하시기 바랍니다.
+gMock은 `StartsWith()` 외에도 다양한 matcher들을 제공합니다. 이를 통해 googletest에서는 불가능했던 것들도 가능하므로 관련 [문서](../../../googlemock/docs/kr/cook_book.md#matcher-사용하기)을 한 번 읽어보시길 추천합니다. 게다가 필요한 matcher를 직접 만드는 것도 가능하기 때문에 상당히 유용하며 이렇게 matcher를 직접 만드는 방법에 대한 정보는 [여기](../../../googlemock/docs/kr/cook_book.md#새로운-matcher를-빠르게-구현하기)를 참조하시기 바랍니다.
 
 마지막으로 matcher를 사용하기 위해서 추가적으로 필요한 환경설정은 없습니다. gMock 자체가 googletest와 함께 제공되는 번들 소프트웨어이므로 헤더파일만 포함( `#include "testing/base/public/gmock.h"`)하면 바로 사용할 수 있습니다.
 
@@ -316,7 +316,7 @@ gMock은 `StartsWith()` 외에도 다양한 matcher들을 제공합니다. 이�
 
 ([이전](#asserting-using-gmock-matchers) 섹션을 먼저 읽으세요)
 
-gMock은 문자열과 관련된 [string matchers](../../googlemock/docs/CheatSheet.md#string-matchers)도 풍부하게 제공합니다. 이렇게 제공되는 built-in matcher들을 `EXPECT_THAT()` 또는 `ASSERT_THAT()`과 함께 사용하기만 하면 됩니다. 이를 통해 sub-string, prefix, suffix, regular expression과 같이 다양한 방법으로 string assertion을 수행할 수 있습니다. 사용방밥은 아래 예제코드와 같습니다.
+gMock은 문자열과 관련된 [string matchers](../../../googlemock/docs/kr/cheat_sheet.md#string-matchers)도 풍부하게 제공합니다. 이렇게 제공되는 built-in matcher들을 `EXPECT_THAT()` 또는 `ASSERT_THAT()`과 함께 사용하기만 하면 됩니다. 이를 통해 sub-string, prefix, suffix, regular expression과 같이 다양한 방법으로 string assertion을 수행할 수 있습니다. 사용방밥은 아래 예제코드와 같습니다.
 
 ```c++
 using ::testing::HasSubstr;
@@ -404,7 +404,7 @@ error: no viable conversion from 'void' to 'string'.
 
 만약, 이처럼 return type을 변경할 수 없는 상황이라면 어쩔 수 없이 `ADD_FAILURE*` 또는 `EXPECT_*`와 같은 non-fatal failure를 사용하기를 바랍니다.
 
-NOTE: class의 constructor나 destructor는 return type이 따로 없기 때문에 fatal assertion도 사용할 수 없습니다. 사용하더라도 compile error가 발생할 것입니다. 이를 위한 첫 번째 대안으로 `abort`를 사용할 수 있는데 `abort`는 test program을 아예 종료하기 때문에 원하는 동작이 맞는지는 확인해봐야 합니다. 두 번째 대안은 `SetUp`/ `TearDown`을 사용하는 것이며 이와 관련 내용은 [constructor/destructor vs. `SetUp`/`TearDown`](https://github.com/google/googletest/blob/master/googletest/docs/faq.md#CtorVsSetUp)에서 자세하게 확인할 수 있습니다.
+NOTE: class의 constructor나 destructor는 return type이 따로 없기 때문에 fatal assertion도 사용할 수 없습니다. 사용하더라도 compile error가 발생할 것입니다. 이를 위한 첫 번째 대안으로 `abort`를 사용할 수 있는데 `abort`는 test program을 아예 종료하기 때문에 원하는 동작이 맞는지는 확인해봐야 합니다. 두 번째 대안은 `SetUp`/ `TearDown`을 사용하는 것이며 이와 관련 내용은 [constructor/destructor vs. `SetUp`/`TearDown`](faq.md#test-fixture에서-constructordestructor-와-setupteardown중-어느것을-써야하나요)에서 자세하게 확인할 수 있습니다.
 
 WARNING: constructor, desturctor에서 fatal assertion을 사용하는 또 다른 방법은 assertion을 수행 할 function을 별도로 만들고(private 영역에) constructor나 destructor가 해당 function을 호출하도록 하는 것입니다. 여기서 주의할 점은 constructor나 destructor에서 발생한 fatal assertion은 진행중인 테스트를 중단시키지는 못하고 자기자신만 중단한다는 것입니다. 만약 constructor나 destructor가 수행도중에 중단되어 버리면 상황에 따라 object의 생성이나 소멸이 완료되지 못하는 문제가 발생할 수도 있습니다. 따라서 constructor나 destructor에서 fatal assertion을 사용하려는 사용자는 그에 따른 문제가 없는지를 철저히 확인해야 하며 그러한 부분이 부담된다면 `SetUp/TearDown`을 사용하거나 아니면 `abort`를 사용하는 것이 더 편할 것입니다.
 
@@ -560,7 +560,7 @@ TEST(MyDeathTest, KillMyself) {
 
 ### Death Test 이름짓기
 
-IMPORTANT: death test를 구현할 때는 **test suite**(not test case)에 `*DeathTest`라는 이름으로 작성하여 사용하기 바랍니다. 그 이유는 [Death Tests And Threads](#death-tests-and-threads)에 상세하게 설명되어 있습니다.
+IMPORTANT: death test를 구현할 때는 **test suite**(not test case)에 `*DeathTest`라는 이름으로 작성하여 사용하기 바랍니다. 그 이유는 [Death Tests And Threads](advanced.md#death-tests-그리고-threads)에 상세하게 설명되어 있습니다.
 
 만약 사용자의 test fixture class가 normal test case와 death test case를 모두 포함한다면 `using` 혹은 `typedef`를 사용하여 별칭을 만드는 것이 좋습니다. 아래 예제를 참고하세요.
 
@@ -850,7 +850,7 @@ if (::testing::Test::HasFatalFailure()) return;
 
 ## 추가정보 기록하기
 
-이 문서의 앞 부분에서는 message 혹은 failure message를 변경하는 법에 대해서 배운 적이 있습니다. 이에 더해서 조금 다른 방법으로 추가정보를 기록하는 것도 가능합니다. 예를 들면 test program을 실행할 때 `--gtest_output="xml"`과 같은 cmd line flag를 전달해서 [XML output](#generating-an-xml-report)으로 출력하는 것도 가능합니다. 이런 경우를 위해서 제공되는 function은 `RecordProperty("key", value)`입니다. `value`에는 `string` 이나 `int` 타입을 사용할 수 있습니다. `key`는 말 그대로 `value`를 구분하는 key(구분자)로 사용됩니다. 아래에 사용예제가 있습니다.
+이 문서의 앞 부분에서는 message 혹은 failure message를 변경하는 법에 대해서 배운 적이 있습니다. 이에 더해서 조금 다른 방법으로 추가정보를 기록하는 것도 가능합니다. 예를 들면 test program을 실행할 때 `--gtest_output="xml"`과 같은 cmd line flag를 전달해서 [XML output](#xml-report-출력하기)으로 출력하는 것도 가능합니다. 이런 경우를 위해서 제공되는 function은 `RecordProperty("key", value)`입니다. `value`에는 `string` 이나 `int` 타입을 사용할 수 있습니다. `key`는 말 그대로 `value`를 구분하는 key(구분자)로 사용됩니다. 아래에 사용예제가 있습니다.
 
 ```c++
 TEST_F(WidgetUsageTest, MinAndMaxWidgets) {
@@ -1050,7 +1050,7 @@ NOTE: Don't forget this step! If you do your test will silently pass, but none o
 *   `InstantiationName/FooTest.HasBlahBlah/1` for `"miny"`
 *   `InstantiationName/FooTest.HasBlahBlah/2` for `"moe"`
 
-위의 test function들에 대해서도 [`--gtest_filter`](#running-a-subset-of-the-tests)를 사용해서 원하는 테스트만 수행할 수 있습니다.
+위의 test function들에 대해서도 [`--gtest_filter`](#전체-test-중에서-일부만-수행하기)를 사용해서 원하는 테스트만 수행할 수 있습니다.
 
 아래 예제는 test suite(`FooTest`)을 테스트하기 위한 데이터(parameter)를 추가하고 있습니다. 이 때 기존에 생성된 test function들과의 구분을 위해 `INSTANTIATE_TEST_SUITE_P`의 첫 번째 파라미터를 다르게 했음을 확인할 수 있습니다.
 
@@ -1069,7 +1069,7 @@ The tests from the instantiation above will have these names:
 
 지금까지 본 것처럼 `INSTANTIATE_TEST_SUITE_P`는 `TEST_P` macro를 통해 정의한 *모든* test case에 대해 각 parameter마다 별도의 test function들을 생성해줍니다. 즉 `TEST_P` x parameter 개수 만큼의 test function이 생성됩니다. 이 때, `INSTANTIATE_TEST_SUITE_P`와 `TEST_P`의 구현순서는 중요하지 않으며 어떤 순서이든 관계 없이 test function들을 생성해 줍니다.
 
-좀 더 자세한 예제는 [sample7_unittest.cc](), [sample8_unittest.cc]()에서 확인이 가능합니다.
+좀 더 자세한 예제는 [sample7_unittest.cc](../../samples/sample7_unittest.cc), [sample8_unittest.cc](../../samples/sample8_unittest.cc)에서 확인이 가능합니다.
 
 ### Value-Parameterized Abstract Tests 생성하기
 
@@ -1088,7 +1088,7 @@ Abstract test를 정의하기 위해서는 아래와 같이 코드를 구성하�
 
 Googletest는 이러한 4번째 argument를 쉽게 사용할 수 있도록 `testing::PrintToStringParamName`라는 builtin test suffix generator를  제공하고 있습니다. 단, builtin test suffix generator는 `std:string`이나 C string은 지원하지 않으며 `test::PrintToString(GetParam())`이라는 return type을 통해서 `std::string`으로 변환하여 반환하게 됩니다.
 
-NOTE: 모든 test case(혹은 test function)의 이름은 유일해야 하고 ASCII 문자나 숫자만 포함할 수 있으며 값이 없어도 안 됩니다. 마지막으로 [should not contain underscores](https://github.com/google/googletest/blob/master/googletest/docs/faq.md#why-should-test-suite-names-and-test-names-not-contain-underscore)에 명시된 것처럼 밑줄(`_`)은 사용할 수는 있지만 최대한 지양해야 합니다. 
+NOTE: 모든 test case(혹은 test function)의 이름은 유일해야 하고 ASCII 문자나 숫자만 포함할 수 있으며 값이 없어도 안 됩니다. 마지막으로 [should not contain underscores](faq.md#test-case-또는-test-suite의-이름을-정할-때-밑줄을-사용하면-안되는-이유가-뭔가요)에 명시된 것처럼 밑줄(`_`)은 사용할 수는 있지만 최대한 지양해야 합니다. 
 
 아래는 4번재 argument에 builtin test suffix generator를 사용한 예제입니다.
 
@@ -1180,7 +1180,7 @@ TYPED_TEST(FooTest, DoesBlah) {
 TYPED_TEST(FooTest, HasPropertyA) { ... }
 ```
 
-전체 예제코드는 [sample6_unittest.cc]()에서 확인할 수 있습니다.
+전체 예제코드는 [sample6_unittest.cc](../../samples/sample6_unittest.cc)에서 확인할 수 있습니다.
 
 ## Type-Parameterized Tests
 
@@ -1237,7 +1237,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
 INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, int);
 ```
 
-전체 예제코드는 [sample6_unittest.cc]()에서 확인할 수 있습니다.
+전체 예제코드는 [sample6_unittest.cc](../../samples/sample6_unittest.cc)에서 확인할 수 있습니다.
 
 ## Private Code 테스트하기
 
@@ -1514,7 +1514,7 @@ int main(int argc, char** argv) {
   return RUN_ALL_TESTS();
 ```
 
-이제 다 끝났습니다. 의도한 대로 결과가 출력되는지 확인하시기 바랍니다. 이에 대한 보다 자세한 내용은 [sample9_unittest.cc]()에서 확인하시기 바랍니다.
+이제 다 끝났습니다. 의도한 대로 결과가 출력되는지 확인하시기 바랍니다. 이에 대한 보다 자세한 내용은 [sample9_unittest.cc](../../samples/sample9_unittest.cc)에서 확인하시기 바랍니다.
 
 앞에서 얘기한 것처럼 1개 이상의 listener를 사용하는 것도 가능합니다. 따라서 동일한 event에 대해서 listenere의 호출순서가 어떻게 되는지는 알아두는게 좋습니다. 주의할 점은 handler function의 종류에 따라서 순서가 다르다는 점입니다. 예를 들어 `On*Start()` 또는 `OnTestPartResult()`라는 event가 발생하면 list에 등록된 listener의 순서대로 호출해 줍니다. 간단히 말하면 새로 등록한 listener일수록 나중에 호출된다는 의미입니다. 반대로 `On*End()`와 같은 event는 등록순서의 *역방향*으로 listener handler를 호출해줍니다. 따라서 사용자가 결과물을 보게 되면 먼저 등록된 listener handler의 출력물이 늦게 등록된 listener handler의 출력물을 감싸는 (프레임) 형태가 됩니다.
 
@@ -1527,7 +1527,7 @@ Event를 처리할 때에도 `EXPECT_*()`, `ASSERT_*()`, `FAIL()`와 같은 asse
 
 만약 `OnTestPartResult()`를 처리하는 listener가 있다면 listener list에 먼저 등록해야 합니다. 그런 후에 failure가 발생할 수 있는 listener들은 등록하기 바랍니다. 그렇게 해야만 failure정보가 정상적으로 기록될 수 있습니다.
 
-Failure-raising listener에 대한 예제코드는  [sapmle10_unittest.cc]()를 참고하세요.
+Failure-raising listener에 대한 예제코드는  [sapmle10_unittest.cc](../../samples/sample10_unittest.cc)를 참고하세요.
 
 ## Test program을 실행하는 다양한 방법
 
@@ -1622,7 +1622,7 @@ $ foo_test --gtest_repeat=1000 --gtest_filter=FooBar.*
 Repeat the tests whose name matches the filter 1000 times.
 ```
 
-만약 test program이 [global set-up/tear-down](#global-set-up-and-tear-down)을 포함하고 있다면 그것도 역시 반복적으로 수행 될 것입니다. 왜냐하면 문제가 전역코드에 있을 수도 있기 때문에 이 부분도 필요합니다. 마지막으로 `GTEST_REPEAT` environment variable를 사용해서 반복횟수를 지정하는 것도 가능합니다.
+만약 test program이 [global set-up/tear-down](#global-set-up-tear-down)을 포함하고 있다면 그것도 역시 반복적으로 수행 될 것입니다. 왜냐하면 문제가 전역코드에 있을 수도 있기 때문에 이 부분도 필요합니다. 마지막으로 `GTEST_REPEAT` environment variable를 사용해서 반복횟수를 지정하는 것도 가능합니다.
 
 ### Test 수행 순서를 섞기
 
