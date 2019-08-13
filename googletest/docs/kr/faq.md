@@ -435,7 +435,7 @@ TEST_F(FooDeathTest, Xyz) { ... ASSERT_DEATH(...) ... }
 
 만약 사용자정의 타입(예: `FooType`)을 assertion에 사용했다면, `std::ostream& operator<<(std::ostream&, const FooType&)`도 제공해야만 합니다. 그래야 googletest에서 해당 타입의 정보를 출력해줄 수 있습니다.
 
-추가적으로 `FooType`이 특정 namespace에 선언되어 있다면 `operator<<`도 *같은* namespace에 정의해야 합니다. 이와 관련한 자세한 정보는 https://abseil.io/tips/49를 참조하세요.
+추가적으로 `FooType`이 특정 namespace에 선언되어 있다면 `operator<<`도 *같은* namespace에 정의해야 합니다. 이와 관련한 자세한 정보는 [여기](https://abseil.io/tips/49)를 참조하세요.
 
 ## Windows에서 memory leak message들을 안 보이게 하려면 어떻게 하면 될까요?
 
