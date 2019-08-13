@@ -131,7 +131,7 @@ Argument가 변수형태라면 assertion코드가 수행되는 시점에 저장�
 
 ## 간단한 테스트
 
-Test를 생성할 때에는 아래와 같은 순서로 진행합니다.
+개별 Test(Test Case)를 생성할 때에는 아래와 같은 순서로 진행합니다.
 
 * `TEST()` macro를 사용하여 Test의 이름을 정하고 구현합니다. `TEST()` macro는 return type이 `void`인 C++ function을 생성해줍니다.
 * `TEST()` macro의 body에는 테스트에 필요한 C++ 소스코드를 구현하면 됩니다. 이 때 바로 assertion을 사용하게 되며 사용자가 확인하고 싶은 내용들을 직접 구현하면 됩니다.
@@ -143,9 +143,9 @@ TEST(TestSuiteName, TestName) {
 }
 ```
 
-`TEST()`로 전달되는 2개의 argument 중에서 *첫 번째는* 상위 Test Suite의 이름이고 *두 번째가* Test 자신의 이름입니다. 두 이름 모두 C++ 언어에서도 유효한 식별자여야 하며 밑줄(`_`)을 포함하면 안됩니다. 이렇게 Test의 *full name*이 Test Suite의 이름과 개별 Test의 이름으로 구성된다는 것도 알게 되었습니다. (Test Suite이 서로 다르다면 Test 이름은 같아도 됩니다.)
+`TEST()`로 전달되는 2개의 argument 중에서 *첫 번째는* 상위 Test Suite의 이름이고 *두 번째는* 개별 Test(Test Case)의 이름입니다. 두 이름 모두 C++ 언어에서도 유효한 식별자여야 하며 밑줄(`_`)을 포함하면 안됩니다. 유효한 이름들이 전달되었다면 `TestSuiteName`과 `TestName`을 합쳐서 Test Case의 *full name*이 만들어집니다. 따라서 `TestSuiteName`이 서로 다르다면 `TestName`은 같아도 됩니다. 더불어 `TEST()`를 사용하면 googletest가 `TestSuiteName`을 통해 Test Suite(Test Fixture)를 직접 생성해 줍니다. 반면에 `TEST_F()` 등을 사용하면 사용자가 직접 구현한 Test Suite(Test Fixture)를 적용하는 것도 가능합니다. 이 부분은 바로 다음 섹션에서 설명합니다.
 
-이제 `Factorial()`이라는 function을 테스트하는 간단한 예제를 보겠습니다.
+그럼 `Factorial()`이라는 function을 테스트하는 간단한 예제를 보겠습니다.
 
 ```c++
 int Factorial(int n);  // Returns the factorial of n
@@ -168,7 +168,7 @@ TEST(FactorialTest, HandlesPositiveInput) {
 }
 ```
 
-Googletest가 Test Suite별로 테스트결과를 취합해 주기 때문에 Test Suite에는 논리적으로 관련이 있는 Test들을 모아두는 것이 좋습니다. 위 소스코드도 마찬가지로 `FactorialTest` 라는 Test Suite은 `Factorial()`을 테스트하기 위한 Input을 종류별로 구분해서 여러개의 Test로 나누어 놓았습니다. 좀 더 자세히 보면 `HandlesZeroInput`은 argument로 0을 전달하는 Test이고, `HandlesPositiveInput`는 argument로 0보다 큰 양수들을 전달합니다. 크게 보면 2개의 Test 모두 숫자를 전달해서 `Factorial()`을 검증한다는 공통적인 주제로 묶을 수 있는 것입니다.
+Googletest가 Test Suite 별로 테스트결과를 취합해 주기 때문에 Test Suite에는 논리적으로 관련이 있는 Test들을 모아두는 것이 좋습니다. 위 소스코드도 마찬가지로 `FactorialTest` 라는 Test Suite은 `Factorial()`을 테스트하기 위한 Input을 종류별로 구분해서 여러개의 Test로 나누어 놓았습니다. 좀 더 자세히 보면 `HandlesZeroInput`은 argument로 0을 전달하는 Test이고, `HandlesPositiveInput`는 argument로 0보다 큰 양수들을 전달합니다. 크게 보면 2개의 Test 모두 숫자를 전달해서 `Factorial()`을 검증한다는 공통적인 주제로 묶을 수 있는 것입니다.
 
 Test Suite과 Test의 이름을 만들때는 관련 규범인 [naming functions and classes](https://google.github.io/styleguide/cppguide.html#Function_Names)를 준수해야 합니다.
 
