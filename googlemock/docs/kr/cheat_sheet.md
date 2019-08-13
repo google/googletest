@@ -148,7 +148,7 @@ DefaultValue<T>::Clear();
   DefaultValue<std::unique_ptr<Buzz>>::Clear();
 ```
 
-특정 method에 대해서만 default action을 변경하려면 `ON_CALL()`을 사용하면 됩니다. `ON_CALL()`은`EXPECT_CALL()`과 사용방법이 비슷하며 default behavior를 변경하기 위한 목적으로 사용합니다. 더 자세한 정보는 [여기](cook_book.md#default-action을-상황에-따라-변화시키기)를 참조하세요.
+특정 method의 default action만 변경하려면 `ON_CALL()`을 사용하면 됩니다. `ON_CALL()`은`EXPECT_CALL()`과 사용방법이 비슷하며 default behavior를 변경하기 위한 목적으로 사용합니다. 더 자세한 정보는 [여기](cook_book.md#default-action을-상황에-따라-변화시키기)를 참조하세요.
 
 ```cpp
 ON_CALL(mock-object, method(matchers))
@@ -183,7 +183,7 @@ EXPECT_CALL(mock-object, method (matchers)?)
 
 ### Matchers
 
-하나의 **Matcher**는 *하나의* argument를 비교하기 위한 목적으로 사용합니다. 주로 `ON_CALL()`이나 `EXPECT_CALL()`과 함께 사용하며, `EXPECT_THAT`을 통해 값을 직접 검증하는 것도 가능합니다.
+하나의 **Matcher**는 *하나의* argument를 비교하기 위한 목적으로 사용합니다. 주로 `ON_CALL()`이나 `EXPECT_CALL()`과 함께 사용하며, `EXPECT_THAT()`을 통해 값을 직접 검증하는 것도 가능합니다.
 
 | Matcher | Description |
 |:--------|:------------|
@@ -320,7 +320,7 @@ EXPECT_THAT(actual_foos, Pointwise(FooEq(), expected_foos));
 
 #### Multi-argument Matchers
 
-기본적으로 하나의 matcher는 *하나의 값만 비교합니다.* 제목인 "multi-argument"라는 것도 사실은 *tuple*을 통해서 가능한 것이기 때문에 여전히 하나의 값을 비교한다고 주장해도 틀린말은 아닙니다. 어찌 됐든 아래 표에 있는 matcher들은 `(x, y)`형태의 tuple을 비교하는데에 사용할 수 있습니다. 물론 사용자가 tuple을 사용할 수 있는 matcher를 직접 구현해도 됩니다.
+기본적으로 하나의 matcher는 *하나의 값만 비교합니다.* 제목인 "multi-argument"라는 것도 사실은 *tuple*을 통해서 가능한 것이기 때문에 여전히 하나의 값을 비교한다고 주장해도 틀린말은 아닙니다. 어찌 됐든 아래 표에 있는 matcher들은 `(x, y)`형태의 tuple을 비교할 때 사용할 수 있습니다. 물론 사용자가 tuple을 사용할 수 있는 matcher를 직접 구현해도 됩니다.
 
 | Matcher | Description |
 |:--------|:------------|
@@ -331,7 +331,7 @@ EXPECT_THAT(actual_foos, Pointwise(FooEq(), expected_foos));
 |`Lt()`|`x < y` |
 |`Ne()`|`x != y`|
 
-아래표에 selector라고 불리는 기능들인데, tuple을 비교하는 matcher와 함께 사용하면 유용합니다.
+아래 표는 selector라고 불리는 기능들인데, tuple을 비교하는 matcher와 함께 사용하면 유용합니다.
 
 | Matcher | Description |
 |:--------|:------------|
@@ -374,7 +374,7 @@ EXPECT_THAT(actual_foos, Pointwise(FooEq(), expected_foos));
 
 **Notes:**
 
-  1. `MATCHER*`macro는 function이나 class 내부에서는 사용하면 안 됩니다.
+  1. `MATCHER*` macro는 function이나 class 내부에서는 사용하면 안 됩니다.
   1. Matcher의 body`{}`를 구현할때는 *purely functional*하게 구현해야 합니다. 어떤 side-effect도 가지면 안됩니다. 즉, 순수하게 matcher로 전달되는 argument와 parameter의 값을 읽고 비교해서 그 결과를 알려주는 동작만 수행해야 합니다. 또한, 프로그램의 다른 부분을 수정해서는 안 되며 argument, parameter를 제외한 외부의 다른 정보에 영향을 받아서도 안됩니다. 자신의 기능을 독립적으로 수행해야 합니다.
   1. `PrintToString(x)`를 사용하면 `x`가 어떤 타입이라도 string으로 변환시킬 수 있습니다.
 
@@ -484,7 +484,7 @@ InvokeArgument<2>(5, string("Hi"), ByRef(foo))
 | `ACTION_P(Plus, n) { return arg0 + n; }`      | mock function의 첫번째 argument에 `n`만큼 더한 값을 반환하는 `Plus(n)`이라는 action을 정의한 것입니다. |
 | `ACTION_Pk(Foo, p1, ..., pk) { statements; }` | `statements` 코드를 수행하는 `Foo(p1, ... pk)`라는 parameterized action을 정의한 것입니다. |
 
-`ACTION*`macro를 function이나 class 내부에서 사용하면 안 됩니다.
+`ACTION*` macro를 function이나 class 내부에서 사용하면 안 됩니다.
 
 ### Cardinalities
 
@@ -532,7 +532,7 @@ EXPECT_CALL(foo, Bar())
 
 #### Sequences
 
-Expectation들이 많다면 **sequences**를 사용하는 것도 좋습니다. 각 expectation들이 별도의 이름을 가질 필요는 없으며 같은 이름의 sequence를 사용하기만 하면 됩니다. 그렇게 동일한 sequence에 포함된 expectation들은 순서대로 호출되어야 합니다.
+Expectation들이 많다면 **sequence**를 사용하는 것도 좋습니다. 각 expectation들이 별도의 이름을 가질 필요는 없으며 같은 이름의 sequence를 사용하기만 하면 됩니다. 그렇게 동일한 sequence에 포함된 expectation들은 순서대로 호출되어야 합니다.
 
 ```cpp
 using ::testing::Return;
