@@ -202,11 +202,6 @@
 //   Mutex, MutexLock, ThreadLocal, GetThreadCount()
 //                            - synchronization primitives.
 //
-// Template meta programming:
-//   IteratorTraits - partial implementation of std::iterator_traits, which
-//                    is not available in libCstd when compiled with Sun C++.
-//
-//
 // Regular expressions:
 //   RE             - a simple regular expression class using the POSIX
 //                    Extended Regular Expression syntax on UNIX-like platforms
@@ -1900,22 +1895,6 @@ GTEST_API_ size_t GetThreadCount();
 
 template <bool B>
 using bool_constant = std::integral_constant<bool, B>;
-
-template <typename Iterator>
-struct IteratorTraits {
-  typedef typename Iterator::value_type value_type;
-};
-
-
-template <typename T>
-struct IteratorTraits<T*> {
-  typedef T value_type;
-};
-
-template <typename T>
-struct IteratorTraits<const T*> {
-  typedef T value_type;
-};
 
 #if GTEST_OS_WINDOWS
 # define GTEST_PATH_SEP_ "\\"
