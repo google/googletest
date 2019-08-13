@@ -80,7 +80,7 @@ class Turtle {
 `Turtle` interface를 계속 사용해 보겠습니다. 기본적으로 아래와 같은 단계를 거칩니다.
 
 - `Turtle` interface를 상속받는 `MockTurtle` class를 생성합니다.
-- `Turtle` interface에 정의한 *virtual* function의 이름과 해당 function이 몇 개의 argument를 가지고 있는지 확인합니다. (상속 대신 템플릿을 이용하는 것도 가능하지만 상속보다는 약간 어렵습니다, 관련내용은 [여기](cook_book.md#mocking-nonvirtual-methods)를 참조하세요.)
+- `Turtle` interface에 정의한 *virtual* function의 이름과 해당 function이 몇 개의 argument를 가지고 있는지 확인합니다. (상속 대신 템플릿을 이용하는 것도 가능하지만 상속보다는 약간 어렵습니다, 관련내용은 [여기](cook_book.md#nonvirtual-method-mocking-하기)를 참조하세요.)
 - Derived class의 `public:` 영역에 `MOCK_METHOD();` macro를 사용합니다.
 - 다음으로는 `Turtle` interface의 function signature에서 *function name*, *return type*, *argument*들을 복사해서 `MOCK_METHOD();` 에 그대로 붙여 넣으세요 (아래 예제코드 참조)
 - 만약, const method를 mocking하고 있다면 4번째 parameter에 `(const)`를 추가해주세요.
@@ -234,7 +234,7 @@ EXPECT_CALL(turtle, GoTo(50, _));
 
 위 코드는 "`GoTo()`라는 mock function의 첫번째 argument에는 정확히 `50`이 전달되어야 하고, 두번째 argument에는 어떤 값이라도 올 수 있다"를 의미합니다. 여기서 두번째 argument에 사용한 `_`이 바로 **matcher**의 한 종류입니다. 이렇듯 matcher는 어떤 값이 전달되기를 기대하는지에 대해 좀 더 세밀한 조작이 가능하도록 도와주는 기능이며 `EXPECT_CALL()`과 함께 사용하면 매우 유용합니다. (꼭 `EXPECT_CALL()`이 아니더라도 사용할 수는 있습니다.)
 
-사실 `50`, `100`처럼 값으로 구현한 코드들도 내부적으로는 `Eq(50)`, `Eq(100)`과 같이 matcher를 사용하는 코드로 변환됩니다. (`Eq()`는 값이 같은지 확인하는 matcher입니다.) 한 가지 중요한 점은 `Eq()`를 사용하든 값을 사용하든 해당 타입은 `operator==`를 지원해야 한다는 점입니다. 그래야만 gMock이 비교를 수행할 수 있기 때문에 `operator==`를 지원하지 않는 타입에 `Eq()`를 사용하려면 해당 연산자를 직접 구현해서 제공해야 합니다. 마지막으로 gMock은 `_`나 `Eq()` 외에도 다양한 built-in matcher들을 제공하고 있으며 이들을 확인하려면 [built-in matcher]()를 참고하시기 바랍니다. 더불어 새로운 matcher를 직접 구현하고자 한다면 [custom matcher]()를 참조하시기 바랍니다.
+사실 `50`, `100`처럼 값으로 구현한 코드들도 내부적으로는 `Eq(50)`, `Eq(100)`과 같이 matcher를 사용하는 코드로 변환됩니다. (`Eq()`는 값이 같은지 확인하는 matcher입니다.) 한 가지 중요한 점은 `Eq()`를 사용하든 값을 사용하든 해당 타입은 `operator==`를 지원해야 한다는 점입니다. 그래야만 gMock이 비교를 수행할 수 있기 때문에 `operator==`를 지원하지 않는 타입에 `Eq()`를 사용하려면 해당 연산자를 직접 구현해서 제공해야 합니다. 마지막으로 gMock은 `_`나 `Eq()` 외에도 다양한 built-in matcher들을 제공하고 있으며 이들을 확인하려면 [built-in matcher](cheat_sheet.md#matchers)를 참고하시기 바랍니다. 더불어 새로운 matcher를 직접 구현하고자 한다면 [custom matcher](cook_book.md#새로운-matcher를-빠르게-구현하기)를 참조하시기 바랍니다.
 
 아래 코드는 `Ge()`라는 또 다른 built-in matcher를 사용한 예제이며 그 의미는 "`turtle.Foward()`로 전달되는 argument가 100보다 크거나 같아야 한다"를 의미입니다.
 
@@ -260,7 +260,7 @@ EXPECT_CALL(turtle, GoTo);
 
 `Times(0)`은 좀 특이한 형태입니다. 코드를 보고 예측하셨다시피 이것은 "mock method가 지정된 argument와 함께 호출되서는 안된다"를 의미합니다. 따라서 gMock은 `Times(0)`으로 지정된 mock method가 호출되면 테스트실패로 판단합니다.
 
-`AtLeast(n)`도 본 적이 있을 것입니다. `AtLeast(n)`은 fuzzy cardinalities 중 하나이며 "최소한 `n`번 이상 호출되기를 기대한다"라는 의미로 사용됩니다. gMock이 제공하는 다양한 built-in cardinalities는 [cheat_sheet]()을 계속해서 확인할 수 있습니다.
+`AtLeast(n)`도 본 적이 있을 것입니다. `AtLeast(n)`은 fuzzy cardinalities 중 하나이며 "최소한 `n`번 이상 호출되기를 기대한다"라는 의미로 사용됩니다. gMock이 제공하는 다양한 built-in cardinalities는 [cheat_sheet](cheat_sheet.md#cardinalities)에서 확인할 수 있습니다.
 
 마지막으로 사용자가 `Times()`를 사용하지 않은 경우에는 **gMock이 cardiniality를 추론**하게 되는데, 이 때 적용되는 추론규칙은 아래와 같습니다.
 
@@ -302,7 +302,7 @@ EXPECT_CALL(turtle, GetY())
 
 물론, `Times()`를 통해서 호출횟수를 명시적으로 지정해도 됩니다. 그렇게 되면 gMock은 `WillOnce()`로부터 호출횟수를 추론하지 않습니다. `Time()`에 지정된 값이 `WillOnce()`보다 많으면 어떻게 될까요? 그런 경우에는 default action이 수행됩니다. 만약, 지정된 횟수를 초과했을 때 default action이 사용되는게 싫다면 `WillRepeatedly()`를 사용해서 default action을 대체하면 됩니다.
 
-`Return()`말고도 다양한 action이 존재합니다. 예를 들면, `ReturnRef(variable)`을 사용해서 참조타입을 반환할 수도 있고 미리 구현해놓은 다른 함수를 연계적으로 호출할 수도 있습니다. 더 자세한 내용은 [여기](CheatSheet.md#actions)를 참고하세요.
+`Return()`말고도 다양한 action이 존재합니다. 예를 들면, `ReturnRef(variable)`을 사용해서 참조타입을 반환할 수도 있고 미리 구현해놓은 다른 함수를 연계적으로 호출할 수도 있습니다. 더 자세한 내용은 [여기](cheat_sheet.md#actions)를 참고하세요.
 
 **Important note**: `EXPECT_CALL()`에 action을 지정할 때, 값이 아니라 변수(또는 참조, 포인터)를 사용하면 어떻게 될까요? 과연 사용자가 원하는 대로 잘 동작할까요? 아래 예제와 함께 설명하겠습니다.
 
@@ -315,7 +315,7 @@ EXPECT_CALL(turtle, GetX())
     .WillRepeatedly(Return(n++));
 ```
 
-위의 mock function이 100, 101, 102... 를 순서대로 반환할까요? 그렇지 않습니다. 결과만 놓고 보면 항상 100을 반환합니다. 왜냐하면 `n++`이라는 코드가 수행되는 시점의 값인 `100`이 gMock 내부에 저장되고 또 사용되기 때문입니다. 다시 말해서 `GetX()`가 실제로 호출되는 시점의 `n` 값을 사용하는 것이 아니라 `EXPECT_CALL()` 코드가 수행되는 시점의 `n` 값을 저장해 놨다가 `GetX()`가 호출될 때에는 그걸 그대로 반환해주는 것입니다. 이와 유사하게 `EXPECT_CALL()`에 `Return(new Foo)` 라는 expectation을 지정하면 호출될때마다 새로운 객체를 반환하는 것이 아니라 항상 같은 주소값(pointer 값)을 반환하게 됩니다. 만약, 사용자가 원했던 동작이 이렇게 고정된 값을 반환하는 것이 아니라 `n`에 저장된 값을 동적으로 반환하고 싶었던 것이라면 [CookBook](cook_book.md)에서 이에 대한 해결방법을 확인하시기 바랍니다.
+위의 mock function이 100, 101, 102... 를 순서대로 반환할까요? 그렇지 않습니다. 결과만 놓고 보면 항상 100을 반환합니다. 왜냐하면 `n++`이라는 코드가 수행되는 시점의 값인 `100`이 gMock 내부에 저장되고 또 사용되기 때문입니다. 다시 말해서 `GetX()`가 실제로 호출되는 시점의 `n` 값을 사용하는 것이 아니라 `EXPECT_CALL()` 코드가 수행되는 시점의 `n` 값을 저장해 놨다가 `GetX()`가 호출될 때에는 그걸 그대로 반환해주는 것입니다. 이와 유사하게 `EXPECT_CALL()`에 `Return(new Foo)` 라는 expectation을 지정하면 호출될때마다 새로운 객체를 반환하는 것이 아니라 항상 같은 주소값(pointer 값)을 반환하게 됩니다. 만약, 사용자가 원했던 동작이 이렇게 고정된 값을 반환하는 것이 아니라 `n`에 저장된 값을 동적으로 반환하고 싶었던 것이라면 [CookBook](cook_book.md#mock-method에서-live-value-반환하기)에서 이에 대한 해결방법을 확인하시기 바랍니다.
 
 이제 또 퀴즈를 풀어 볼 시간입니다. 아래코드는 무엇을 의미할까요?
 
@@ -347,7 +347,7 @@ EXPECT_CALL(turtle, Forward(10))  // #2
 
 **Note**: gMock은 왜 reverse order로 expectation을 탐색할까요? 먼저, test fixture를 떠올려보기 바랍니다. 우리가 test fixture를 사용하는 목적은 test fixture 레벨에서 공통적으로 적용해야 할 내용들을 `SetUp()` 또는 constructor에 구현해서 중복된 코드를 없애기 위함이었습니다. 그런 후에 개별 test case에는 좀 더 특화된 내용을 구현했습니다. 이 개념을 그대로 가져오면 `SetUp()` 또는 constructor에는 default expectation과 같은 일반적인 expectation을 먼저 구현하고 각각의 test case에는 특화된 expectation들을 구현하는 구조가 됩니다. 즉, 소스코드 측면에서 보면 나중에 수행되는 expectation일수록 더 특화된 expectation이라는 규칙이 만들어집니다. 이러한 규칙은 개별 test case 내부에서도 그대로 적용되어야 하기 때문에 어떤 method에 여러개의 expectation들이 존재한다면 아래쪽에 있는 expectation부터 탐색하게 되는 것입니다.
 
-**Tip:** 테스트코드 구현을 처음 시작하는 시점에는 expectation을 최대한 느슨하게 설정하는 것이 좋습니다. 쉽게 말해서 cardinality는 `Times(AnyNumber())`으로 하고 matcher는 `_`로 해놓고 시작하는 것입니다. 그런 후에 개발을 진행하면서 점점 특화된 경우를 늘려가는 것이 유연성 측면에서 좋은 방법입니다. 물론, "uninteresting call" 에 대해서는 굳이 이렇게 할 필요가 없겠지만, 관심대상이 되는 mock method에 대해서는 상당히 유용할 것입니다. "uninteresting call"이 궁금한 분들은 [Understanding Uninteresting vs Unexpected Calls](https://github.com/google/googletest/blob/master/googlemock/docs/for_dummies.md#uninteresting-vs-unexpected)를 참조하세요.
+**Tip:** 테스트코드 구현을 처음 시작하는 시점에는 expectation을 최대한 느슨하게 설정하는 것이 좋습니다. 쉽게 말해서 cardinality는 `Times(AnyNumber())`으로 하고 matcher는 `_`로 해놓고 시작하는 것입니다. 그런 후에 개발을 진행하면서 점점 특화된 경우를 늘려가는 것이 유연성 측면에서 좋은 방법입니다. 물론, "uninteresting call" 에 대해서는 굳이 이렇게 할 필요가 없겠지만, 관심대상이 되는 mock method에 대해서는 상당히 유용할 것입니다. "uninteresting call"이 궁금한 분들은 [Understanding Uninteresting vs Unexpected Calls](cook_book.md#uninteresting-vs-unexpected-를-구분하자)를 참조하세요.
 
 #### Ordered vs Unordered Calls
 
@@ -375,7 +375,7 @@ TEST(FooTest, DrawsLineSegment) {
 
 결과적으로 위 코드는 `Foo()`라는 function이 내부에서 `turtle` object의 mock method 3개(`PenDown()`, `Forward(100)`, `PenUp()`)를 순서대로 호출하기를 기대한다고 해석할 수 있습니다. 따라서 3개 function이 모두 호출되었다고 하더라도 `PenDown()` -> `Forward(100)` -> `PenUp()`이라는 순서를 지키지 않았다면 테스트는 실패하게 됩니다.
 
-만약, 관심대상인 function들을 단 하나의 흐름으로 묶는것이 아니라 여러 흐름으로 나눠서 호출순서를 지정하고 싶다면 어떻게 해야할까요? gMock은 그러한 방법도 제공하고 있습니다. 자세한 내용은 [여기](cook_book.md#expecting-partially-ordered-calls)에서 확인하세요.
+만약, 관심대상인 function들을 단 하나의 흐름으로 묶는것이 아니라 여러 흐름으로 나눠서 호출순서를 지정하고 싶다면 어떻게 해야할까요? gMock은 그러한 방법도 제공하고 있습니다. 자세한 내용은 [여기](cook_book.md#함수의-호출순서를-부분부분-지정하기)에서 확인하세요.
 
 #### 모든 Expectation은 연결되어 있습니다. (Sticky Expectations)
 
@@ -393,7 +393,7 @@ EXPECT_CALL(turtle, GoTo(0, 0))  // #2
      .Times(2);
 ```
 
-위 코드와 같이 expectation을 설정한 다음에 원점으로 이동하라는 명령인 `GoTo(0, 0)`를 3번 호출하면 어떻게 될까요? 일단, gMock은 reverse order로 expectation을 탐색하기 때문에 #2번 expectation을 먼저 확인합니다. 그런데 #2번에서는 `GoTo()`가 정확히 2번 호출될 것이라고 기대하고 있기 때문에 3번째로 호출되면 테스트는 실패하게 될 것입니다. (여기서 실패하는 이유는 [Using Multiple Expectation]()을 참고하세요.)
+위 코드와 같이 expectation을 설정한 다음에 원점으로 이동하라는 명령인 `GoTo(0, 0)`를 3번 호출하면 어떻게 될까요? 일단, gMock은 reverse order로 expectation을 탐색하기 때문에 #2번 expectation을 먼저 확인합니다. 그런데 #2번에서는 `GoTo()`가 정확히 2번 호출될 것이라고 기대하고 있기 때문에 3번째로 호출되면 테스트는 실패하게 될 것입니다. (여기서 실패하는 이유는 [Using Multiple Expectation](#여러개의-expectations-사용하기)을 참고하세요.)
 
 이 예제는 사실 gMock의 **expectation들이 "sticky" 모드로 설정되어 있음**을 보여주고 있습니다. "sticky" 모드는 호출횟수가 초과된 expectation들도 active 상태로 남아있는 모드를 의미합니다. 이것은 매우 중요한 규칙입니다. 왜냐하면 다른 mocking framework들과 **구별되는** gMock의 특징이기 때문입니다. 그럼 gMock에서는 왜 그렇게 했을까요? 그 이유는 우리의 방식이 테스트를 구현하고 이해하는데 있어 더 유리하다고 판단했기 때문입니다.
 
@@ -449,4 +449,4 @@ using ::testing::Return;
 
 Mock class에 여러개의 mock method가 있을 때, 사용자가 모든 mock method를 사용하진 않을 수도 있습니다. 만약에 `GetX()`, `GetY()`라는 mock method가 얼마나 호출되든 관심이 없다면 어떻게 해야 할까요?
 
-이렇게 관심대상이 아닌 mock method에 대해서는 그냥 아무런 조치도 안 하면 됩니다. 물론 gMock이 아무런 조치도 안 한(expectation이 없는) mock method를 확인해서 warning을 출력하긴 하지만 이것이 테스트의 성공이나 실패에는 영향을 주지 않습니다. 이렇게 관심대상이 아닌 mock method에 대해서 warning을 출력해주는 동작방식을 "naggy"라고 하는데 이러한 방식도 변경이 가능합니다. 보다 자세한 내용은 [The Nice, the Strict, and the Naggy]()를 참조하세요.
+이렇게 관심대상이 아닌 mock method에 대해서는 그냥 아무런 조치도 안 하면 됩니다. 물론 gMock이 아무런 조치도 안 한(expectation이 없는) mock method를 확인해서 warning을 출력하긴 하지만 이것이 테스트의 성공이나 실패에는 영향을 주지 않습니다. 이렇게 관심대상이 아닌 mock method에 대해서 warning을 출력해주는 동작방식을 "naggy"라고 하는데 이러한 방식도 변경이 가능합니다. 보다 자세한 내용은 [The Nice, the Strict, and the Naggy](cook_book.md#nice-모드-strict-모드-naggy-모드-naggy-잔소리가-심한)를 참조하세요.
