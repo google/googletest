@@ -186,7 +186,7 @@ Fixture를 생성하는 방법
 4. 필요하다면 `TearDown()`이나 destructor를 정의함으로서 개별 Test가 끝날때마다 공통적으로 수행할 일들(공유자원 자원해제 등)을 구현한 수 있습니다. `SetUp()/TearDown()`과 constructor/destructor를 어떻게 구분해서 사용해야 하는지 궁금하다면 [FAQ](faq.md#test-fixture에서-constructordestructor-와-setupteardown중-어느것을-써야하나요)을 참조하기 바랍니다.
 5. 필요하다면 각 Test가 공통적으로 수행하게 될 함수(subroutine)를 정의하는 것도 좋습니다.
 
-Test fixture를 사용하기 위해서는 개별 Test를 구현할 때, `TEST()` 대신에 `TEST_F()`를 사용해야 합니다. 이러한 `TEST_F`의 첫 번째 argument로는 위에서  `::testing::Test`를 상속받아 생성한 test fixture class의 이름을 전달합니다.
+Test fixture를 사용하기 위해서는 개별 Test를 구현할 때, `TEST()` 대신에 `TEST_F()`를 사용해야 합니다. 이러한 `TEST_F()`의 첫 번째 argument로는 위에서  `::testing::Test`를 상속받아 생성한 test fixture class의 이름을 전달합니다.
 
 ```c++
 TEST_F(TestFixtureName, TestName) {
@@ -196,9 +196,9 @@ TEST_F(TestFixtureName, TestName) {
 
 `TEST()`와 마찬가지로 `TEST_F()`의 첫 번째 argument가 Test Suite의 이름인 것은 맞지만, 이름을 새로 만드는 것은 아니고 test fixture class 이름을 그대로 사용해야 합니다. `TEST_F()`에서 `_F`는 **f**ixture를 뜻합니다.
 
-`TEST`, `TEST_F`를 통합하면 좋겠지만 안타깝게도 C++에서 단일 macro를 가지고 2가지 타입을 동시에 조작하는 것은 불가능합니다. Macro를 상호간에 잘못 사용하면 compile error가 발생하니 유의하시기 바랍니다.
+`TEST()`, `TEST_F()`를 통합하면 좋겠지만 안타깝게도 C++에서 단일 macro를 가지고 2가지 타입을 동시에 조작하는 것은 불가능합니다. Macro를 상호간에 잘못 사용하면 compile error가 발생하니 유의하시기 바랍니다.
 
-또한, `TEST_F()` 를 사용하기 전에 fixture 클래스를 먼저 정의해야 하는 것은 당연합니다. 그렇지 않으면  "`virtual outside class declaration`" 과 같은 컴파일 에러가 발생합니다.
+또한, `TEST_F()`를 사용하기 전에 fixture 클래스를 먼저 정의해야 하는 것은 당연합니다. 그렇지 않으면  "`virtual outside class declaration`"과 같은 compile error가 발생합니다.
 
 Googletest는 `TEST_F()`로 정의된 각 Test가 실행될 때마다 해당 test fixture class의 object를 새롭게 생성합니다. 그런 후에 `SetUp()`을 통해 실행을 위한 준비작업을 하고 Test를 실행합니다. 이제 실행이 끝나면 `TearDown()`을 통해 정리작업을 하며 마지막으로 test fixture object를 삭제합니다. 이렇게 여러 Test들이 같은 Test Suite에 에 속해있다고 하더라도 별도의 test fixture object를 통해 독립적으로 수행됩니다. Googletest는 새로운 test fixture object를 생성하기 전에 항상 이전에 사용하던 object를 삭제하기 때문에 이전 Test에서 fixture를 변경시켰다고 해서 다음 fixture에 영향을 주지 않습니다.
 
@@ -262,7 +262,7 @@ TEST_F(QueueTest, DequeueWorks) {
 }
 ```
 
-위 코드를 보면 `ASSERT_*`와 `EXPECT_*`를 모두 사용하고 있습니다. `EXPECT_*`는 failure가 발생해도 계속 진행하기 때문에 Test를 1번 실행하면서 최대한 많은 문제를 찾아내고 싶을 때 주로 사용합니다. 반면에 failure가 발생했을 때에 Test를 계속 진행하는 것이 아무런 의미가 없는 경우에는 `ASSERT_*`를 사용해서 바로 종료시키는 것이 좋습니다. 예를 들어, `DequeueWorks`의 `ASSERT_NE(n, nullptr)` 부분을 보면 `n`이 `nullptr`이라면 그 다음에 나오는 `EXPECT_EQ(*n, 1);`에서 segfault가 발생할 것이 자명하기 때문에 테스트를 진행하는 것은 의미가 없어집니다. 바로 이런 경우에는 Test를 중단시키는 것이 논리적으로 맞습니다. 
+위 코드를 보면 `ASSERT_*`와 `EXPECT_*`를 모두 사용하고 있습니다. `EXPECT_*`는 failure가 발생해도 계속 진행하기 때문에 Test를 한 번 실행하면서 최대한 많은 문제를 찾아내고 싶을 때 주로 사용합니다. 반면에 failure가 발생했을 때에 Test를 계속 진행하는 것이 아무런 의미가 없는 경우에는 `ASSERT_*`를 사용해서 바로 종료시키는 것이 좋습니다. 예를 들어, `DequeueWorks`의 `ASSERT_NE(n, nullptr)` 부분을 보면 `n`이 `nullptr`이라면 그 다음에 나오는 `EXPECT_EQ(*n, 1);`에서 segfault가 발생할 것이 자명하기 때문에 테스트를 진행하는 것은 의미가 없어집니다. 바로 이런 경우에는 Test를 중단시키는 것이 논리적으로 맞습니다. 
 
 정리해보면 위의 test program을 실행하면 아래와 같은 일들이 일어나게 됩니다.
 
