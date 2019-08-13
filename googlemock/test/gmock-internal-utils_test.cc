@@ -38,6 +38,7 @@
 #include <memory>
 #include <string>
 #include <sstream>
+#include <type_traits>
 #include <vector>
 #include "gmock/gmock.h"
 #include "gmock/internal/gmock-port.h"
@@ -518,19 +519,12 @@ TEST(TypeTraitsTest, is_reference) {
   EXPECT_TRUE(is_reference<const int&>::value);
 }
 
-TEST(TypeTraitsTest, type_equals) {
-  EXPECT_FALSE((type_equals<int, const int>::value));
-  EXPECT_FALSE((type_equals<int, int&>::value));
-  EXPECT_FALSE((type_equals<int, double>::value));
-  EXPECT_TRUE((type_equals<char, char>::value));
-}
-
 TEST(TypeTraitsTest, remove_reference) {
-  EXPECT_TRUE((type_equals<char, remove_reference<char&>::type>::value));
-  EXPECT_TRUE((type_equals<const int,
-               remove_reference<const int&>::type>::value));
-  EXPECT_TRUE((type_equals<int, remove_reference<int>::type>::value));
-  EXPECT_TRUE((type_equals<double*, remove_reference<double*>::type>::value));
+  EXPECT_TRUE((std::is_same<char, remove_reference<char&>::type>::value));
+  EXPECT_TRUE(
+      (std::is_same<const int, remove_reference<const int&>::type>::value));
+  EXPECT_TRUE((std::is_same<int, remove_reference<int>::type>::value));
+  EXPECT_TRUE((std::is_same<double*, remove_reference<double*>::type>::value));
 }
 
 #if GTEST_HAS_STREAM_REDIRECTION
