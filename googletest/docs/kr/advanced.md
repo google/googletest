@@ -314,7 +314,7 @@ gMock은 `StartsWith()` 외에도 다양한 matcher들을 제공합니다. 이�
 
 ### More String Assertions
 
-([이전](#asserting-using-gmock-matchers) 섹션을 먼저 읽으세요)
+([이전](#gmock-matchers를-이용한-asserting) 섹션을 먼저 읽으세요)
 
 gMock은 문자열과 관련된 [string matchers](../../../googlemock/docs/kr/cheat_sheet.md#string-matchers)도 풍부하게 제공합니다. 이렇게 제공되는 built-in matcher들을 `EXPECT_THAT()` 또는 `ASSERT_THAT()`과 함께 사용하기만 하면 됩니다. 이를 통해 sub-string, prefix, suffix, regular expression과 같이 다양한 방법으로 string assertion을 수행할 수 있습니다. 사용방밥은 아래 예제코드와 같습니다.
 
