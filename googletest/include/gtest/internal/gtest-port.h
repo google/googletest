@@ -1921,21 +1921,14 @@ class GTEST_API_ ThreadLocal {
 // we cannot detect it.
 GTEST_API_ size_t GetThreadCount();
 
-template <bool bool_value>
-struct bool_constant {
-  typedef bool_constant<bool_value> type;
-  static const bool value = bool_value;
-};
-template <bool bool_value> const bool bool_constant<bool_value>::value;
-
-typedef bool_constant<false> false_type;
-typedef bool_constant<true> true_type;
+template <bool B>
+using bool_constant = std::integral_constant<bool, B>;
 
 template <typename T, typename U>
-struct is_same : public false_type {};
+struct is_same : public std::false_type {};
 
 template <typename T>
-struct is_same<T, T> : public true_type {};
+struct is_same<T, T> : public std::true_type {};
 
 template <typename Iterator>
 struct IteratorTraits {

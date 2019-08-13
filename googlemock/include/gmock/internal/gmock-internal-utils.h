@@ -189,27 +189,27 @@ GMOCK_DECLARE_KIND_(long double, kFloatingPoint);
 // From, and kToKind is the kind of To; the value is
 // implementation-defined when the above pre-condition is violated.
 template <TypeKind kFromKind, typename From, TypeKind kToKind, typename To>
-struct LosslessArithmeticConvertibleImpl : public false_type {};
+struct LosslessArithmeticConvertibleImpl : public std::false_type {};
 
 // Converting bool to bool is lossless.
 template <>
 struct LosslessArithmeticConvertibleImpl<kBool, bool, kBool, bool>
-    : public true_type {};  // NOLINT
+    : public std::true_type {};
 
 // Converting bool to any integer type is lossless.
 template <typename To>
 struct LosslessArithmeticConvertibleImpl<kBool, bool, kInteger, To>
-    : public true_type {};  // NOLINT
+    : public std::true_type {};
 
 // Converting bool to any floating-point type is lossless.
 template <typename To>
 struct LosslessArithmeticConvertibleImpl<kBool, bool, kFloatingPoint, To>
-    : public true_type {};  // NOLINT
+    : public std::true_type {};
 
 // Converting an integer to bool is lossy.
 template <typename From>
 struct LosslessArithmeticConvertibleImpl<kInteger, From, kBool, bool>
-    : public false_type {};  // NOLINT
+    : public std::false_type {};
 
 // Converting an integer to another non-bool integer is lossless if
 // the target type's range encloses the source type's range.
@@ -230,17 +230,17 @@ struct LosslessArithmeticConvertibleImpl<kInteger, From, kInteger, To>
 // the format of a floating-point number is implementation-defined.
 template <typename From, typename To>
 struct LosslessArithmeticConvertibleImpl<kInteger, From, kFloatingPoint, To>
-    : public false_type {};  // NOLINT
+    : public std::false_type {};
 
 // Converting a floating-point to bool is lossy.
 template <typename From>
 struct LosslessArithmeticConvertibleImpl<kFloatingPoint, From, kBool, bool>
-    : public false_type {};  // NOLINT
+    : public std::false_type {};
 
 // Converting a floating-point to an integer is lossy.
 template <typename From, typename To>
 struct LosslessArithmeticConvertibleImpl<kFloatingPoint, From, kInteger, To>
-    : public false_type {};  // NOLINT
+    : public std::false_type {};
 
 // Converting a floating-point to another floating-point is lossless
 // if the target type is at least as big as the source type.
@@ -356,12 +356,16 @@ GTEST_API_ WithoutMatchers GetWithoutMatchers();
 // Type traits.
 
 // is_reference<T>::value is non-zero if T is a reference type.
-template <typename T> struct is_reference : public false_type {};
-template <typename T> struct is_reference<T&> : public true_type {};
+template <typename T>
+struct is_reference : public std::false_type {};
+template <typename T>
+struct is_reference<T&> : public std::true_type {};
 
 // type_equals<T1, T2>::value is non-zero if T1 and T2 are the same type.
-template <typename T1, typename T2> struct type_equals : public false_type {};
-template <typename T> struct type_equals<T, T> : public true_type {};
+template <typename T1, typename T2>
+struct type_equals : public std::false_type {};
+template <typename T>
+struct type_equals<T, T> : public std::true_type {};
 
 // remove_reference<T>::type removes the reference from type T, if any.
 template <typename T> struct remove_reference { typedef T type; };  // NOLINT

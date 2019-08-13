@@ -36,8 +36,8 @@
 #include <stdlib.h>
 #include <map>
 #include <memory>
-#include <string>
 #include <sstream>
+#include <string>
 #include <vector>
 #include "gmock/gmock.h"
 #include "gmock/internal/gmock-port.h"
@@ -503,14 +503,6 @@ TEST(LogTest, OnlyWarningsArePrintedWhenVerbosityIsInvalid) {
 }
 
 #endif  // GTEST_HAS_STREAM_REDIRECTION
-
-TEST(TypeTraitsTest, true_type) {
-  EXPECT_TRUE(true_type::value);
-}
-
-TEST(TypeTraitsTest, false_type) {
-  EXPECT_FALSE(false_type::value);
-}
 
 TEST(TypeTraitsTest, is_reference) {
   EXPECT_FALSE(is_reference<int>::value);
