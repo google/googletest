@@ -64,7 +64,7 @@ void Bar(const int* p);  // p is not const, but *p is.
 
 `--gmock_verbose=info`라는 flag와 함께 테스트를 수행하면, mock function의 trace까지 포함해서 최대한 많은 정보를 출력해 줍니다. 이러한 trace를 확인해보면 expectation이 만족되지 않은 이유를 밝히는데 도움이 될 것입니다.
 
-혹시, "The mock function has no default action set, and its return type has no default value set." 이라는 message가 출력되었다면 [adding a default action](cook_book.md#return-type의-default-value-변경하기)을 적용해보기 바랍니다. 내부적인 이슈로 인해서 default action이 없는 상태에서 발생한 unexpected call에 대해서는 자세한 정보(actual argument와 expected argument 비교 등)는 출력하지 않고 있으며 위와 같은 message만 출력하고 있습니다.
+혹시, "The mock function has no default action set, and its return type has no default value set." 이라는 message가 출력되었다면 [adding a default action](cheat_sheet.md#default-action-설정하기)을 적용해보기 바랍니다. 내부적인 이슈로 인해서 default action이 없는 상태에서 발생한 unexpected call에 대해서는 자세한 정보(actual argument와 expected argument 비교 등)는 출력하지 않고 있으며 위와 같은 message만 출력하고 있습니다.
 
 ### Program이 crash가 발생한 후에, `ScopedMockLog`가 너무 많은 내용을 출력합니다. 혹시 gMock의 bug가 아닌가요?
 
