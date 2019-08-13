@@ -1611,7 +1611,7 @@ class PointeeMatcher {
   class Impl : public MatcherInterface<Pointer> {
    public:
     typedef typename PointeeOf<GTEST_REMOVE_CONST_(  // NOLINT
-        GTEST_REMOVE_REFERENCE_(Pointer))>::type Pointee;
+        typename std::remove_reference<Pointer>::type)>::type Pointee;
 
     explicit Impl(const InnerMatcher& matcher)
         : matcher_(MatcherCast<const Pointee&>(matcher)) {}

@@ -61,9 +61,10 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 #include <time.h>
 
 #include <map>
-#include <vector>
 #include <ostream>
+#include <type_traits>
 #include <unordered_set>
+#include <vector>
 
 #include "gtest/gtest-spi.h"
 #include "src/gtest-internal-inl.h"
@@ -263,7 +264,6 @@ using testing::internal::ParseInt32Flag;
 using testing::internal::RelationToSourceCopy;
 using testing::internal::RelationToSourceReference;
 using testing::internal::RemoveConst;
-using testing::internal::RemoveReference;
 using testing::internal::ShouldRunTestOnShard;
 using testing::internal::ShouldShard;
 using testing::internal::ShouldUseColor;
@@ -7110,31 +7110,6 @@ TEST(CompileAssertTypesEqual, CompilesWhenTypesAreEqual) {
   CompileAssertTypesEqual<void, void>();
   CompileAssertTypesEqual<int*, int*>();
 }
-
-// Tests that RemoveReference does not affect non-reference types.
-TEST(RemoveReferenceTest, DoesNotAffectNonReferenceType) {
-  CompileAssertTypesEqual<int, RemoveReference<int>::type>();
-  CompileAssertTypesEqual<const char, RemoveReference<const char>::type>();
-}
-
-// Tests that RemoveReference removes reference from reference types.
-TEST(RemoveReferenceTest, RemovesReference) {
-  CompileAssertTypesEqual<int, RemoveReference<int&>::type>();
-  CompileAssertTypesEqual<const char, RemoveReference<const char&>::type>();
-}
-
-// Tests GTEST_REMOVE_REFERENCE_.
-
-template <typename T1, typename T2>
-void TestGTestRemoveReference() {
-  CompileAssertTypesEqual<T1, GTEST_REMOVE_REFERENCE_(T2)>();
-}
-
-TEST(RemoveReferenceTest, MacroVersion) {
-  TestGTestRemoveReference<int, int>();
-  TestGTestRemoveReference<const char, const char&>();
-}
-
 
 // Tests that RemoveConst does not affect non-const types.
 TEST(RemoveConstTest, DoesNotAffectNonConstType) {

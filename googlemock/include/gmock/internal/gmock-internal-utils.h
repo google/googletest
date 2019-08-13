@@ -363,10 +363,6 @@ template <typename T> struct is_reference<T&> : public true_type {};
 template <typename T1, typename T2> struct type_equals : public false_type {};
 template <typename T> struct type_equals<T, T> : public true_type {};
 
-// remove_reference<T>::type removes the reference from type T, if any.
-template <typename T> struct remove_reference { typedef T type; };  // NOLINT
-template <typename T> struct remove_reference<T&> { typedef T type; }; // NOLINT
-
 // DecayArray<T>::type turns an array type U[N] to const U* and preserves
 // other types.  Useful for saving a copy of a function argument.
 template <typename T> struct DecayArray { typedef T type; };  // NOLINT

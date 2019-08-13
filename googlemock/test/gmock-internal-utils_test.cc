@@ -525,14 +525,6 @@ TEST(TypeTraitsTest, type_equals) {
   EXPECT_TRUE((type_equals<char, char>::value));
 }
 
-TEST(TypeTraitsTest, remove_reference) {
-  EXPECT_TRUE((type_equals<char, remove_reference<char&>::type>::value));
-  EXPECT_TRUE((type_equals<const int,
-               remove_reference<const int&>::type>::value));
-  EXPECT_TRUE((type_equals<int, remove_reference<int>::type>::value));
-  EXPECT_TRUE((type_equals<double*, remove_reference<double*>::type>::value));
-}
-
 #if GTEST_HAS_STREAM_REDIRECTION
 
 // Verifies that Log() behaves correctly for the given verbosity level

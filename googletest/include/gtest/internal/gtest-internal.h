@@ -856,19 +856,6 @@ template <typename T>
 struct CompileAssertTypesEqual<T, T> {
 };
 
-// Removes the reference from a type if it is a reference type,
-// otherwise leaves it unchanged.  This is the same as
-// tr1::remove_reference, which is not widely available yet.
-template <typename T>
-struct RemoveReference { typedef T type; };  // NOLINT
-template <typename T>
-struct RemoveReference<T&> { typedef T type; };  // NOLINT
-
-// A handy wrapper around RemoveReference that works when the argument
-// T depends on template parameters.
-#define GTEST_REMOVE_REFERENCE_(T) \
-    typename ::testing::internal::RemoveReference<T>::type
-
 // Removes const from a type if it is a const type, otherwise leaves
 // it unchanged.  This is the same as tr1::remove_const, which is not
 // widely available yet.
@@ -892,7 +879,7 @@ struct RemoveConst<const T[N]> {
 
 // Turns const U&, U&, const U, and U all into U.
 #define GTEST_REMOVE_REFERENCE_AND_CONST_(T) \
-    GTEST_REMOVE_CONST_(GTEST_REMOVE_REFERENCE_(T))
+    GTEST_REMOVE_CONST_(typename std::remove_reference<T>::type)
 
 // IsAProtocolMessage<T>::value is a compile-time bool constant that's
 // true if T is type proto2::Message or a subclass of it.
