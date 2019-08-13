@@ -148,7 +148,7 @@ DefaultValue<T>::Clear();
   DefaultValue<std::unique_ptr<Buzz>>::Clear();
 ```
 
-특정 method에 대해서만 default action을 변경하려면 `ON_CALL()`을 사용하면 됩니다. `ON_CALL()`은`EXPECT_CALL()`과 사용방법이 비슷하며 default behavior를 변경하기 위한 목적으로 사용합니다. 더 자세한 정보는 [여기]()를 참조하세요.
+특정 method에 대해서만 default action을 변경하려면 `ON_CALL()`을 사용하면 됩니다. `ON_CALL()`은`EXPECT_CALL()`과 사용방법이 비슷하며 default behavior를 변경하기 위한 목적으로 사용합니다. 더 자세한 정보는 [여기](cook_book.md#default-action을-상황에-따라-변화시키기)를 참조하세요.
 
 ```cpp
 ON_CALL(mock-object, method(matchers))
@@ -251,7 +251,7 @@ String matcher로 전달가능한 `argument`는 C string이나 C++ string object
 | `StrEq(string)`         | `argument`가 `string`과 같은지 확인합니다.                   |
 | `StrNe(string)`         | `argument`가 `string`과 다른지 확인합니다.                   |
 
-`ContainsRegex()`, `MatchesRegex()`에 사용되는 정규식 문법은 [이곳](../../googletest/docs/advanced.md#regular-expression-syntax)에 정의되어 있으며 `StrCaseEq()`, `StrCaseNe()`, `StrEq()`, `StrNe()`은 wide string 타입을 사용해도 잘 동작합니다.
+`ContainsRegex()`, `MatchesRegex()`에 사용되는 정규식 문법은 [이곳](../../../googletest/docs/kr/advanced.md#정규식-문법)에 정의되어 있으며 `StrCaseEq()`, `StrCaseNe()`, `StrEq()`, `StrNe()`은 wide string 타입을 사용해도 잘 동작합니다.
 
 #### Container Matchers
 
@@ -283,7 +283,7 @@ STL-style container들은 대부분 `==` 연산자를 제공하고 있습니다.
 
 - Matcher들은 아래와 같은 상황에서도 사용 가능합니다.
   1. 참조형식으로 전달되는 native array (예: `Foo(const int (&a)[5])`)
-  2. pointer + array size 형태로 array를 사용할 때 (예: `Bar(const T* buffer, int len)` -- 자세한 사용방법은 [multi-argument matchers](#multiargument-matchers)에서 참조하세요.)
+  2. pointer + array size 형태로 array를 사용할 때 (예: `Bar(const T* buffer, int len)` -- 자세한 사용방법은 [multi-argument matchers](#multi-argument-matchers)에서 참조하세요.)
 - Multi-dimensional array에도 사용 가능합니다.  (예: container의 element 각각이 array인 경우)
 - `Pointwise(m, ...)`에 사용하기 위한 `m`을 구현할 때는 `::testing::tuple<T, U>`라는 tuple을 전달받아서 `T`, `U`를 비교하는 형태가 되어야 합니다. 여기서 `T`와 `U`는 각각 actual container(argument)의 element type과 expected container(parameter)의 element type을 의미합니다. 예를 들어, `Foo`라는 타입이 `operator==` 없이 `Equals()`이라는 method만 제공한다면 해당 타입 2개를 비교하는 matcher는 아래처럼 구현하면 됩니다.
 
@@ -382,7 +382,7 @@ EXPECT_THAT(actual_foos, Pointwise(FooEq(), expected_foos));
 
 | Matcher | Description |
 |:--------|:------------|
-|`ASSERT_THAT(expression, m)`|`expression`의 값이 matcher `m`을 만족하지 않는다면 [fatal failure](../../googletest/docs/primer.md#assertions)를 발생시킵니다.|
+|`ASSERT_THAT(expression, m)`|`expression`의 값이 matcher `m`을 만족하지 않는다면 [fatal failure](../../../googletest/docs/kr/primer.md#basic-assertions)를 발생시킵니다.|
 |`EXPECT_THAT(expression, m)`|`expression`의 값이 matcher `m`을 만족하지 않는다면 non-fatal failure를 발생시킵니다.|
 
 ### Actions
@@ -597,7 +597,7 @@ class MockFunction<R(A1, ..., An)> {
   MOCK_METHOD(R, Call, (A1, ..., An));
 };
 ```
-이에 대한 예제코드는 [여기](cook_book.md#using-check-points)를 참조하세요.
+이에 대한 예제코드는 [여기](cook_book.md#check-point-사용하기)를 참조하세요.
 
 ### Flags
 
