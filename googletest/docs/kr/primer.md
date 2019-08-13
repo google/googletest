@@ -11,7 +11,7 @@ Googletest는 Google Testing Technology Team 주도로 개발이 시작되었습
 1. 테스트는 *독립적이고 반복적으로* 수행될 수 있어야 합니다. 테스트들이 서로 영향을 받는 다면 디버깅이 어려워질 것입니다. Googletest는 각각의 테스트가 서로 다른 object에서 수행될 수 있도록 도와줍니다. 따라서 테스트가 실패했을 때도 빠르게 디버깅이 가능합니다.
 2. 테스트는 테스트 대상코드의 변화에 유연하게 대응할 수 있도록 구조화되어야 합니다. Googletest에서는 동일한 환경에서 실행되는 여러개의 Test를 Test Suite으로 묶어서 관리할 수 있으며(Test Suite도 여러개가 가능) 이를 통해 공통적으로 사용되는 데이터와 subroutine을 공유할 수 있습니다. 이러한 구조는 테스트의 가독성과 유지보수성을 증가시키며 테스트코드를 새로운 프로젝트에 적용할 때도 유용합니다.
 3. 테스트는 *이식성 및 재사용성이 있어야 합니다.* Google에는 플랫폼 종속성이 없는 코드가 많이 존재하기 때문에 테스트코드 또한 플랫폼 종속성이 없어야 했습니다. 이를 위해 googletest는 특정 운영체제 및 컴파일러에 국한되지 않고 예외도 발생시키지 않는 방향으로 설계되었습니다.
-4. 테스트는 실패했을 때, 그 문제에 대해 가능한 많은 *정보를 제공해야 합니다.* Googletest가 여러개의 Test를 수행하는 동안에는 1개의 Test가 실패하더라도 나머지 Test들은 계속해서 수행합니다. 또한, 실패한 Test가 non-fatal failure로 지정되었다면 해당 Test 자체도 중단하지 않습니다. 이러한 설계의 장점은 1번의 수행으로도 여러개의 bug를 찾아내고 개선할 수 있다는 것입니다.
+4. 테스트는 실패했을 때, 그 문제에 대해 가능한 많은 *정보를 제공해야 합니다.* Googletest가 여러개의 Test를 수행하는 동안에는 1개의 Test가 실패하더라도 나머지 Test들은 계속해서 수행합니다. 또한, 실패한 Test가 non-fatal failure로 지정되었다면 해당 Test 자체도 중단하지 않습니다. 이러한 설계의 장점은 한 번의 수행으로도 여러개의 bug를 찾아내고 개선할 수 있다는 것입니다.
 5. 테스트 프레임워크는 테스트를 구현하는 사람이 실제 구현에만 집중할 수 있도록 도와줘야 합니다. Googletest는 정의된 모든 Test를 자동으로 찾아서 실행해주기 때문에 사용자가 하나하나 찾아서 실행할 필요가 없습니다.
 6. 테스트는 *빨라야 합니다.* Googletest는 set-up/tear-down을 제공함으로서 여러 Test가 공유해야할 내용을 한번의 구현만으로도 재사용될 수 있도록 했습니다.
 
@@ -38,7 +38,7 @@ Googletest를 사용한다고 하면 *assertion*을 쓰는 것부터 시작하�
 
 각 Test에는 이러한 assertion을 사용해서 테스트 대상코드가 잘 동작하는지 구현하게 되며 assertion의 수행결과에 따라 Test의 *성공이나 실패도 결정됩니다.*
 
-Test Suite은 하나 이상의 Test를 포함합니다. Test들은 테스트 대상코드의 구조에 맞춰 여러개의 Test Suite으로 그룹화 될 수 있습니다. 또한, Test Suite에 속한 Test 간에 공유해야 할 자원이 있는 경우에는(object, function 등) *test fixture*를 사용하면 자원을 편리하게 공유할 수 있습니다.
+Test Suite은 하나 이상의 Test를 포함합니다. Test들은 테스트 대상코드의 구조에 맞춰 여러개의 Test Suite으로 그룹화 될 수 있습니다. 또한, Test Suite에 속한 Test 간에 공유해야 할 자원이 있는 경우에는 *test fixture*를 사용하면 자원을 편리하게 공유할 수 있습니다.
 
 Test Program은 더 큰 개념으로서 여러개의 Test Suite을 포함합니다.
 
@@ -62,7 +62,7 @@ for (int i = 0; i < x.size(); ++i) {
 }
 ```
 
-Assertion에서 `ostream`을 통해 출력가능한 오류메시지는 C언어 문자열 또는 C++의 `string`입니다.혹시나 `std::wstring` 혹은 윈도우의 `UNICODE` 타입인 `wchar_t*`, `TCHAR*` 과 같은 wide string을 사용하면 UTF-8로 변환되어 출력됩니다.
+Assertion에서 `ostream`을 통해 출력가능한 오류메시지는 C언어 문자열 또는 C++의 `string`입니다. 혹시나 `std::wstring` 혹은 윈도우의 `UNICODE` 타입인 `wchar_t*`, `TCHAR*` 과 같은 wide string을 사용하면 UTF-8로 변환되어 출력됩니다.
 
 ### Basic Assertions
 
