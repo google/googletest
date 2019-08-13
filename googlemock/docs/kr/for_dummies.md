@@ -449,4 +449,4 @@ using ::testing::Return;
 
 Mock class에 여러개의 mock method가 있을 때, 사용자가 모든 mock method를 사용하진 않을 수도 있습니다. 만약에 `GetX()`, `GetY()`라는 mock method가 얼마나 호출되든 관심이 없다면 어떻게 해야 할까요?
 
-이렇게 관심대상이 아닌 mock method에 대해서는 그냥 아무런 조치도 안 하면 됩니다. 물론 gMock이 아무런 조치도 안 한(expectation이 없는) mock method를 확인해서 warning을 출력하긴 하지만 이것이 테스트의 성공이나 실패에는 영향을 주지 않습니다. 이렇게 관심대상이 아닌 mock method에 대해서 warning을 출력해주는 동작방식을 "naggy"라고 하는데 이러한 방식도 변경이 가능합니다. 보다 자세한 내용은 [The Nice, the Strict, and the Naggy](cook_book.md#nice-모드-strict-모드-naggy-모드-naggy-잔소리가-심한)를 참조하세요.
+이렇게 관심대상이 아닌 mock method에 대해서는 그냥 아무런 조치도 안 하면 됩니다. 물론 gMock이 아무런 조치도 안 한(expectation이 없는) mock method를 확인해서 warning을 출력하긴 하지만 이것이 테스트의 성공이나 실패에 영향을 주지는 않습니다. 이렇게 관심대상이 아닌 mock method에 대해서 warning을 출력해주는 동작방식을 "naggy"라고 하는데 이러한 방식도 변경이 가능합니다. 보다 자세한 내용은 [The Nice, the Strict, and the Naggy](cook_book.md#nice-모드-strict-모드-naggy-모드-naggy-잔소리가-심한)를 참조하세요.
