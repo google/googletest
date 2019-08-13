@@ -228,7 +228,7 @@ using ::testing::_;
 
 ### 새로운 action을 만들 수 있나요?
 
-gMock에서 지원하지 않는 새로운 action을 구현하고 싶다면 [MakeAction()](cook_book.md#새로운-action을-빠르게-구현하기), [MakePolymorphicAction() ](https://github.com/ant35rookie/googletest_docs/blob/master/cook_book.md#writing-new-polymorphic-actions)를 사용하면 됩니다. 또한 stub function을 구현하고 [Invoke()](https://github.com/ant35rookie/googletest_docs/blob/master/cook_book.md#using-functionsmethodsfunctors-as-actions)를 사용해서 호출하는 것도 가능합니다.
+gMock에서 지원하지 않는 새로운 action을 구현하고 싶다면 [MakeAction()](cook_book.md#새로운-monomorphic-action-구현하기), [MakePolymorphicAction()](cook_book.md#새로운-polymorphic-action-구현하기)를 사용하면 됩니다. 또한 stub function을 구현하고 [Invoke()](cook_book.md#functionsfunctorslambda를-action으로-사용하기)를 사용해서 호출하는 것도 가능합니다.
 
 ```c++
 using ::testing::_;
@@ -280,7 +280,7 @@ gMock은 warning을 통해서 잠재적인 문제에 대한 정보를 사용자�
 
 Mock method가 호출되었지만 어떤 값을 반환해야 할지 모를 때, 위와 같은 에러가 발생합니다. `SetArgPointee()`는 argument에 값을 저장하는 동작만 수행하는 action입니다. 이런 문제가 발생하는 이유는 mock method에 대한 `Return()`동작을 지정하지 않았기 때문입니다. `DoAll()`을 사용해서 `SetArgPointee()`와 `Return()`을 둘 다 수행할 수 있도록 연결해주시기 바랍니다.
 
-[여기](cook_book.md#mocking-side-effects)에 자세한 설명과 예제코드가 있습니다.
+[여기](cook_book.md#mocking에서-side-effects부수효과-사용하기)에 자세한 설명과 예제코드가 있습니다.
 
 ### Microsoft Visual C++에서 out out memory라고 하며 compile에 실패합니다.  어떻게 해야하나요? ###
 
