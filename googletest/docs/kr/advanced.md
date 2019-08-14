@@ -72,7 +72,7 @@ Googletest는 위와 같은 상황에서 유용하게 사용할 수 있는 몇 �
 
 #### 이미 정의해 놓은 Boolean Function 사용하기
 
-만약, `bool`을 반환하는 function나 functor가 이미 있다면 그대로 사용할 수 있습니다. 즉, 해당 function이나 functor가 *assertion*처럼 동작하게 만들고 원하는 failure message를 출력하도록 지정하면 됩니다. 이러한 기능을 *predicate assertion*이라고 합니다.
+사용자가 구현한 일반 C++ function(혹은 functor)을 assertion처럼 사용할 수 있습니다. (단, 해당 function의 return type이 `bool`이어야 합니다. *predicate assertion*이라고 부르는 이 기능은 function을 *assertion*처럼 동작하게 만들고 원하는 failure message를 출력하도록 도와줍니다. 그럼 아래 표에서 관련 macro를 확인하기 바랍니다.
 
 | Fatal assertion                    | Nonfatal assertion                 | Verifies                    |
 | ---------------------------------- | ---------------------------------- | --------------------------- |
@@ -80,9 +80,9 @@ Googletest는 위와 같은 상황에서 유용하게 사용할 수 있는 몇 �
 | `ASSERT_PRED2(pred2, val1, val2);` | `EXPECT_PRED2(pred2, val1, val2);` | `pred2(val1, val2)` is true |
 | `...`                              | `...`                              | `...`                       |
 
-위에서 `predn` 은 `n`개의 argument(`val1`, `val2`, ...)를 받는 function이나 functor를 의미합니다. 이렇게 정의된 predicate assertion도 다른 assertion과 동일하게 동작합니다. 즉, `true`가 반환되면 성공을 의미하고 `false`가 반환되면 실패를 의미합니다. 그리고 assertion이 실패할 때는 각 argument의 정보도 출력해줍니다.
+첫 번째 argument인 `predn`은 `bool`을 반환하는 function(혹은 functor)를 의미합니다. 이 때, 해당 function이 `ASSERT_PREDn` macro의 `n`과 동일한 개수의 argument를 전달받아야 하기때문에 `predn`이라고 표시한 것입니다. 두 번째 및 그 이후에 전달되는 argument들(`val1`, `val2`, `...`)은 `predn`에 전달하기 위한 argument입니다. 이렇게 정의된 predicate assertion도 다른 assertion과 동일하게 동작합니다. 즉, `true`가 반환되면 성공을 의미하고 `false`가 반환되면 실패를 의미합니다. 그리고 assertion이 실패할 때는 각 argument의 정보도 출력해줍니다.
 
-아래는 예제를 보겠습니다.
+그럼 예제를 보겠습니다.
 
 ```c++
 // Returns true if m and n have no common divisors except 1.
@@ -117,7 +117,7 @@ c is 10
 
 > NOTE:
 >
-> 1.  `ASSERT_PRED*` 또는 `EXPECT_PRED*`를 사용할 때, "no matching function to call"와 같은 컴파일 에러가 발생하면 [여기](faq.md#assert_pred를-사용할-때-no-matching-function-to-call-이라는-compile-error가-발생했습니다-어떻게-해야-하나요)를 참조하세요.
+> 1.  `ASSERT_PRED*` 또는 `EXPECT_PRED*`를 사용할 때, "no matching function to call"와 같은 compile error가 발생하면 [여기](faq.md#assert_pred를-사용할-때-no-matching-function-to-call-이라는-compile-error가-발생했습니다-어떻게-해야-하나요)를 참조하세요.
 
 #### AssertionResult를 반환하는 function을 사용하기
 
