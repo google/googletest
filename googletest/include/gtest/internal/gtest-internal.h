@@ -60,6 +60,7 @@
 #include <string>
 #include <type_traits>
 #include <vector>
+#include <algorithm>
 
 #include "gtest/gtest-message.h"
 #include "gtest/internal/gtest-filepath.h"
@@ -1040,33 +1041,6 @@ Iter ArrayAwareFind(Iter begin, Iter end, const Element& elem) {
   return end;
 }
 
-// CopyArray() copies a k-dimensional native array using the elements'
-// operator=, where k can be any integer >= 0.  When k is 0,
-// CopyArray() degenerates into copying a single value.
-
-template <typename T, typename U>
-void CopyArray(const T* from, size_t size, U* to);
-
-// This generic version is used when k is 0.
-template <typename T, typename U>
-inline void CopyArray(const T& from, U* to) { *to = from; }
-
-// This overload is used when k >= 1.
-template <typename T, typename U, size_t N>
-inline void CopyArray(const T(&from)[N], U(*to)[N]) {
-  internal::CopyArray(from, N, *to);
-}
-
-// This helper reduces code bloat.  If we instead put its logic inside
-// the previous CopyArray() function, arrays with different sizes
-// would lead to different copies of the template code.
-template <typename T, typename U>
-void CopyArray(const T* from, size_t size, U* to) {
-  for (size_t i = 0; i != size; i++) {
-    internal::CopyArray(from[i], to + i);
-  }
-}
-
 // The relation between an NativeArray object (see below) and the
 // native array it represents.
 // We use 2 different structs to allow non-copyable types to be used, as long
@@ -1128,7 +1102,7 @@ class NativeArray {
   // Initializes this object with a copy of the input.
   void InitCopy(const Element* array, size_t a_size) {
     Element* const copy = new Element[a_size];
-    CopyArray(array, a_size, copy);
+    std::copy_n(array, a_size, copy);
     array_ = copy;
     size_ = a_size;
     clone_ = &NativeArray::InitCopy;

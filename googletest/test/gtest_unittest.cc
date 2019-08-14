@@ -234,7 +234,6 @@ using testing::internal::ArrayAwareFind;
 using testing::internal::ArrayEq;
 using testing::internal::CodePointToUtf8;
 using testing::internal::CompileAssertTypesEqual;
-using testing::internal::CopyArray;
 using testing::internal::CountIf;
 using testing::internal::EqFailure;
 using testing::internal::FloatingPoint;
@@ -7316,40 +7315,6 @@ TEST(ArrayAwareFindTest, WorksForTwoDimensionalArray) {
 
   const int c[2] = { 6, 7 };
   EXPECT_EQ(a + 3, ArrayAwareFind(a, a + 3, c));
-}
-
-// Tests CopyArray().
-
-TEST(CopyArrayTest, WorksForDegeneratedArrays) {
-  int n = 0;
-  CopyArray('a', &n);
-  EXPECT_EQ('a', n);
-}
-
-TEST(CopyArrayTest, WorksForOneDimensionalArrays) {
-  const char a[3] = "hi";
-  int b[3];
-#ifndef __BORLANDC__  // C++Builder cannot compile some array size deductions.
-  CopyArray(a, &b);
-  EXPECT_TRUE(ArrayEq(a, b));
-#endif
-
-  int c[3];
-  CopyArray(a, 3, c);
-  EXPECT_TRUE(ArrayEq(a, c));
-}
-
-TEST(CopyArrayTest, WorksForTwoDimensionalArrays) {
-  const int a[2][3] = { { 0, 1, 2 }, { 3, 4, 5 } };
-  int b[2][3];
-#ifndef __BORLANDC__  // C++Builder cannot compile some array size deductions.
-  CopyArray(a, &b);
-  EXPECT_TRUE(ArrayEq(a, b));
-#endif
-
-  int c[2][3];
-  CopyArray(a, 2, c);
-  EXPECT_TRUE(ArrayEq(a, c));
 }
 
 // Tests NativeArray.
