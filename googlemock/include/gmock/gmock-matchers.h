@@ -280,7 +280,7 @@ class SafeMatcherCastImpl {
     // Enforce that we are not converting a non-reference type T to a reference
     // type U.
     GTEST_COMPILE_ASSERT_(
-        internal::is_reference<T>::value || !internal::is_reference<U>::value,
+        std::is_reference<T>::value || !std::is_reference<U>::value,
         cannot_convert_non_reference_arg_to_reference);
     // In case both T and U are arithmetic types, enforce that the
     // conversion is not lossy.
