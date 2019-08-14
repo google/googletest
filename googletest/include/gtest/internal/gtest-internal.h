@@ -1129,6 +1129,39 @@ struct Ignore {
   Ignore(...);  // NOLINT
 };
 
+template <typename T>
+struct TypeWrapper {
+  using type = T;
+};
+
+template <std::size_t, bool>
+struct IndexedConditionalRedundantType {};
+
+template <std::size_t I>
+struct IndexedConditionalRedundantType<I, false> {
+  using type = void;
+};
+
+template <typename T, typename IndxSeq, bool... Cs>
+struct EnableIfAllImpl;
+
+template <typename T, std::size_t... Is, bool... Cs>
+struct EnableIfAllImpl<T, IndexSequence<Is...>, Cs...>
+    : TypeWrapper<T>, IndexedConditionalRedundantType<Is, Cs>... {};
+
+template <typename T = void, bool... Cs>
+struct EnableIfAll
+    : EnableIfAllImpl<T, typename MakeIndexSequence<sizeof...(Cs)>::type,
+                      Cs...> {};
+
+template <std::size_t>
+struct EmptyListElem {};
+
+template <typename T>
+struct ListElem {
+  using type = T;
+};
+
 template <typename>
 struct ElemFromListImpl;
 template <size_t... I>
@@ -1151,35 +1184,57 @@ struct ElemFromList {
 template <typename T, std::size_t I>
 struct FlatTupleElem {
   T value;
-  FlatTupleElem() : value() {}
+  FlatTupleElem() noexcept(std::is_nothrow_constructible<T>::value) : value() {}
 
-  template <typename Arg>
-  explicit FlatTupleElem(Arg &&arg) : value(std::forward<Arg>(arg)) {}
+  template <typename Arg, typename = typename EnableIfAll<
+                              void, std::is_constructible<T, Arg>::value>::type>
+  explicit FlatTupleElem(Arg&& arg) : value(std::forward<Arg>(arg)) {}
 };
 
 template <typename IndexSeq, typename... Ts>
 class FlatTupleBase;
 
 template <std::size_t... Is, typename... Ts>
-class FlatTupleBase<IndexSequence<Is...>, Ts...>
-    : FlatTupleElem<Ts, Is>... {
+class FlatTupleBase<IndexSequence<Is...>, Ts...> : FlatTupleElem<Ts, Is>... {
  public:
   FlatTupleBase() {}
 
-  template <typename... Args>
+  template <typename... Args,
+            typename = typename EnableIfAll<
+                void, sizeof...(Args) == sizeof...(Ts),
+                std::is_constructible<Ts, Args&&>::value...>::type>
   explicit FlatTupleBase(Args&&... args)
       : FlatTupleElem<Ts, Is>(std::forward<Args>(args))... {}
 
+  template <typename... Args,
+            typename = typename EnableIfAll<
+                void, sizeof...(Args) == sizeof...(Ts),
+                std::is_constructible<Ts, Args>::value...>::type>
+  explicit FlatTupleBase(
+      const FlatTupleBase<IndexSequence<Is...>, Args...>& args_tuple)
+      : FlatTupleElem<Ts, Is>(args_tuple.template Get<Is>())... {}
+
+  template <typename... Args,
+            typename = typename EnableIfAll<
+                void, sizeof...(Args) == sizeof...(Ts),
+                std::is_constructible<Ts, Args>::value...>::type>
+  explicit FlatTupleBase(
+      FlatTupleBase<IndexSequence<Is...>, Args...>&& args_tuple)
+      : FlatTupleElem<Ts, Is>(args_tuple.template Get<Is>())... {}
+
   template <std::size_t I>
   const typename ElemFromList<I, Ts...>::type& Get() const {
-    return static_cast<const FlatTupleElem<
-        typename ElemFromList<I, Ts...>::type, I>*>(this)->value;
+    return static_cast<
+               const FlatTupleElem<typename ElemFromList<I, Ts...>::type, I>*>(
+               this)
+        ->value;
   }
 
   template <std::size_t I>
   typename ElemFromList<I, Ts...>::type& Get() {
-    return static_cast<FlatTupleElem<typename ElemFromList<I, Ts...>::type,
-									 I>*>(this)->value;
+    return static_cast<
+               FlatTupleElem<typename ElemFromList<I, Ts...>::type, I>*>(this)
+        ->value;
   }
 };
 
@@ -1198,10 +1253,16 @@ struct FlatTuple
     : FlatTupleBase<typename MakeIndexSequence<sizeof...(Ts)>::type, Ts...> {
   FlatTuple() {}
 
-  template <typename... Args>
+  template <
+      typename... Args,
+      typename = typename EnableIfAll<
+          void, std::is_constructible<
+                    FlatTupleBase<
+                        typename MakeIndexSequence<sizeof...(Ts)>::type, Ts...>,
+                    Args&&...>::value>::type>
   explicit FlatTuple(Args&&... args)
       : FlatTupleBase<typename MakeIndexSequence<sizeof...(Ts)>::type, Ts...>(
-            std::forward<Args>(args)...){}
+            std::forward<Args>(args)...) {}
 };
 
 // Utility functions to be called with static_assert to induce deprecation

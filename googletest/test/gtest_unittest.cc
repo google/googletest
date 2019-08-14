@@ -7368,6 +7368,9 @@ TEST(ElemFromList, Basic) {
 TEST(FlatTuple, Basic) {
   using testing::internal::FlatTuple;
 
+  EXPECT_TRUE(std::is_constructible<FlatTuple<>>::value);
+  EXPECT_TRUE((std::is_constructible<FlatTuple<>, FlatTuple<>>::value));
+
   FlatTuple<int, double, const char*> tuple = {};
   EXPECT_EQ(0, tuple.Get<0>());
   EXPECT_EQ(0.0, tuple.Get<1>());
@@ -7377,6 +7380,16 @@ TEST(FlatTuple, Basic) {
   EXPECT_EQ(7, tuple.Get<0>());
   EXPECT_EQ(3.2, tuple.Get<1>());
   EXPECT_EQ(std::string("Foo"), tuple.Get<2>());
+
+  const FlatTuple<int, double, const char*> copy_constructed_tuple(tuple);
+  EXPECT_EQ(7, copy_constructed_tuple.Get<0>());
+  EXPECT_EQ(3.2, copy_constructed_tuple.Get<1>());
+  EXPECT_EQ(std::string("Foo"), copy_constructed_tuple.Get<2>());
+
+  FlatTuple<int, double, std::string> tuple_constructed_tuple(tuple);
+  EXPECT_EQ(7, tuple_constructed_tuple.Get<0>());
+  EXPECT_EQ(3.2, tuple_constructed_tuple.Get<1>());
+  EXPECT_EQ(std::string("Foo"), tuple_constructed_tuple.Get<2>());
 
   tuple.Get<1>() = 5.1;
   EXPECT_EQ(5.1, tuple.Get<1>());
