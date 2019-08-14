@@ -123,7 +123,7 @@ c is 10
 
 `EXPECT_PRED*()`계열이 유용하지만 argument개수에 따라 macro가 달라지기 때문에 약간 불편한 부분도 있습니다. C++ 문법보다는 Lisp 문법에 가까워 보이기도 하네요. 또 다른 방법으로 `::testing::AssertionResult` class를 사용해 보겠습니다. 
 
-`AssertionResult`는 이름 그대로 assertion을 결과를 의미합니다. 사용법은 간단합니다. Googletest에서 제공하는 factory function을 사용하면 됩니다. Factory function 2개는 아래와 같습니다.
+`AssertionResult`는 이름 그대로 assertion의 결과를 의미합니다. 사용법은 간단합니다. Googletest에서 제공하는 factory function을 사용하면 됩니다. Factory function 2개는 아래와 같습니다.
 
 ```c++
 namespace testing {
@@ -149,7 +149,7 @@ bool IsEven(int n) {
 }
 ```
 
-`IsEven()`을 `AssertionResult`를 반환할 수 있도록 변경합니다.
+`IsEven()`이 `AssertionResult`를 반환할 수 있도록 변경합니다.
 
 ```c++
 ::testing::AssertionResult IsEven(int n) {
@@ -170,7 +170,7 @@ Value of: IsEven(Fib(4))
 Expected: true
 ```
 
-위의 failure message가 왜 좋을까요? 만약, 아래처럼 "3 is odd"라는 디버깅 정보가 없다면 문제점을 파악하는데 더 많은 시간이 걸리기 때문입니다.
+위의 failure message가 왜 좋을까요? 아래에 있는 기존 failure message와 비교해보면 "3 is odd"라는 디버깅 정보를 바로 확인할 수 있게 되었습니다. 테스트의 양이 많아질수록 이런 부분들이 도움이 될 것입니다.
 
 ```none
 Value of: IsEven(Fib(4))
@@ -178,7 +178,7 @@ Value of: IsEven(Fib(4))
 Expected: true
 ```
 
-지금까지도 유용하지만 `EXPECT_FALSE` 와 `ASSERT_FALSE`같은 negative assertion에도 사용할 수 있도록 조금 더 개선해 보겠습니다. 
+`IsEven`을 `EXPECT_FALSE` 또는 `ASSERT_FALSE`와 같은 negative assertion에도 사용할 수 있도록 조금 더 개선해 보겠습니다.
 
 ```c++
 ::testing::AssertionResult IsEven(int n) {
@@ -199,7 +199,7 @@ Expected: true
 
 #### Predicate-Formatter 사용하기
 
-지금까지 `(ASSERT|EXPECT)_PRED*` 와 `(ASSERT|EXPECT)_(TRUE|FALSE)`을 기존의 function 또는 functor와 함께 사용하는 방법들을 배웠습니다. 아직도 부족한가요? 네, 그럴 수 있습니다. 예를 들어 argument가 `ostream`을 사용하지 못하는 타입이라면 위의 2가지 방법도 적용할 수 없습니다. 그럴 때는 *predicate-formatter assertions*을 사용하면 됩니다. *predicate-formatter assertions*를 사용하면 아예 모든 message를 사용자가 정의할 수 있습니다.
+지금까지 `(ASSERT|EXPECT)_PRED*` 와 `(ASSERT|EXPECT)_(TRUE|FALSE)`을 일반 function(또는 functor)과 함께 사용하는 방법에 대해 배웠습니다. 아직도 부족한가요? 네, 그럴 수 있습니다. 예를 들어 argument가 `ostream`을 사용하지 못하는 타입이라면 위의 2가지 방법을 적용하기 어렵습니다. 그런 경우에는 *predicate-formatter assertions*을 사용하기 바랍니다. *predicate-formatter assertions*을 사용하면 아예 모든 message를 사용자가 정의할 수 있습니다.
 
 | Fatal assertion                                  | Nonfatal assertion                               | Verifies                                 |
 | ------------------------------------------------ | ------------------------------------------------ | ---------------------------------------- |
@@ -207,7 +207,7 @@ Expected: true
 | `ASSERT_PRED_FORMAT2(pred_format2, val1, val2);` | `EXPECT_PRED_FORMAT2(pred_format2, val1, val2);` | `pred_format2(val1, val2)` is successful |
 | `...`                                            | `...`                                            | `...`                                      |
 
-`(ASSERT|EXPECT)_PRED_FORMAT*`계열과 앞서 설명한 2가지 방법과의 다른 점은 predicate가 아니라 *predicate-formatter*(`pred_formatn`) 를 사용한다는 것입니다. 여기서 *predicate-formatter*란 것은 아래와 같은 형식으로 정의된 function이나 functor를 의미합니다.
+`(ASSERT|EXPECT)_PRED_FORMAT*`계열과 앞서 설명한 2가지 방법과의 다른 점은 predicate가 아니라 *predicate-formatter*(`pred_formatn`)를 사용한다는 점입니다. *predicate-formatter*란 아래와 같은 형식으로 정의된 function을 의미합니다.
 
 ```c++
 ::testing::AssertionResult PredicateFormattern(const char* expr1,
@@ -220,9 +220,9 @@ Expected: true
                                                Tn valn);
 ```
 
-`valn`는 실제로 assertion에 사용되는 argument를 의미합니다. `exprn`은 `valn`의 caller쪽 소스코드를 그대로 저장하고 있는 문자열입니다. 쉽게 말해서 `Foo(variable)`라는 호출이 있다면 `expr1`은 `"variable"`이라는 문자열이 됩니다. 마지막으로 `Tn`은 `valn`의 타입을 의미하는데 값타입, 참조타입 둘 다 가능합니다. 예를 들어 `int` 타입이라면 그대로 `int` 혹은 `const Foo&`등이 올 수 있습니다.
+`PredicateFormattern()`로 전달되는 `valn` argument들은 실제로 assertion에 사용되는 값들입니다. 그리고 `Tn`은 `valn`의 타입을 의미하는데 값, 참조 둘 다 가능합니다. 예를 들어 `int` 타입이라면 그대로 `int` 혹은 `const Foo&`등이 올 수 있습니다. 마지막으로 `exprn`은 `valn`을 전달하는 caller쪽 소스코드가 그대로 저장된 문자열입니다. 쉽게 말해서 caller쪽의 구현이 `Foo(variable)`라면 `expr1`은 `"variable"`이라는 문자열이 됩니다.
 
-이제 예제를 보겠습니다. `AssertMutuallyPrime()`은 `EXPECT_PRED2()`를 설명할 때 사용했던 `MutuallyPrime()`을 *predicate-formatter*로 변경한 코드입니다.
+이제 예제를 보겠습니다. 예제코드의 `AssertMutuallyPrime()`은 `EXPECT_PRED2()`를 설명할 때 사용했던 `MutuallyPrime()`을 *predicate-formatter*로 변경한 코드입니다.
 
 ```c++
 // Returns the smallest prime common divisor of m and n,
@@ -242,25 +242,25 @@ int SmallestPrimeCommonDivisor(int m, int n) { ... }
 }
 ```
 
-이렇게 구현된 `AssertMutuallyPrime()`는 아래처럼 사용하면 됩니다.
+이렇게 구현된 `AssertMutuallyPrime()`는 아래처럼 사용할 수 있습니다.
 
 ```c++
   EXPECT_PRED_FORMAT2(AssertMutuallyPrime, b, c);
 ```
 
-`b`, `c`의 값이 각각 `4`, `10`이었다면 최종적으로 아래와 같은 failure message가 출력됨을 확인할 수 있습니다.
+위 코드에서 `b`, `c`의 값이 각각 `4`, `10`이었다면 최종적으로 아래와 같은 failure message가 출력됨을 확인할 수 있습니다.
 
 ```none
 b and c (4 and 10) are not mutually prime, as they have a common divisor 2.
 ```
 
-이미 눈치챘을 수도 있지만 `(EXPECT|ASSERT)_PRED_FORMAT*`은 가장 기본적인 assertion 정의방법이며 상당수의 built-in assertion들이 이를 기반으로 만들어 졌습니다.
+이미 눈치챘을 수도 있지만 `(EXPECT|ASSERT)_PRED_FORMAT*`은 가장 기본적인 assertion 정의방법이며 대부분의 built-in assertion들도 이를 기반으로 만들어 졌습니다.
 
 ### Floating-Point 비교하기
 
-Floating-point를 비교하는 것은 까다로운 문제입니다. 반올림 문제가 있기 때문에 2개의 floating-point가 정확히 같다고 판정하기 어렵기 때문입니다. 따라서 `ASSERT_EQ`를 사용한 단순한 비교로는 정확한 답을 얻을 수 없습니다. 더군다나 floating-point 값의 범위가 커진다면 오차범위를 고정(single fixed error bound)하기 보다는 상대적인 오차범위(fixed relative error bound)를 사용하는 것이 정밀도 측면에서 더 좋습니다.
+Floating-point를 비교하는 것은 까다로운 문제입니다. 반올림 이슈가 있기 때문에 2개의 floating-point 값이 정확히 같다고 판정하는 것은 언제나 쉽지 않으며 기존의 `ASSERT_EQ`로는 정확한 답을 얻을 수 없습니다. 또한, floating-point 값의 범위가 크다면 오차범위를 고정(single fixed error bound)하기 보다는 상대적인 오차범위(fixed relative error bound)를 사용하는 것이 정밀도 측면에서 더 좋습니다.
 
-이렇듯 floating-point를 정확히 비교하기 위해서는 오차범위를 신중하게 선택해야 합니다. 만약, 사용자가 직접 오차범위를 직접 지정하기 싫다면 ULPs(Units in the Last Place)를 기본설정으로 사용하는 것도 좋은 방법입니다. 실제로 googletest도 ULPs를 사용하고 있습니다. ULPs에 대한 자세한 설명은 [여기](https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/)를 참조하기 바랍니다.
+이렇듯 floating-point를 정확히 비교하기 위해서는 오차범위를 신중하게 선택해야 합니다. 만약, 사용자가 직접 오차범위를 지정하기 싫다면 googletest의 기본설정인 ULPs(Units in the Last Place)를 그대로 사용하는 것을 추천합니다. ULPs에 대한 자세한 설명은 [여기](https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/)를 참조하기 바랍니다.
 
 #### Floating-Point Macros
 
@@ -276,9 +276,10 @@ Floating-point를 비교하는 것은 까다로운 문제입니다. 반올림 �
 | Fatal assertion                       | Nonfatal assertion                    | Verifies                                                     |
 | ------------------------------------- | ------------------------------------- | ------------------------------------------------------------ |
 | `ASSERT_NEAR(val1, val2, abs_error);` | `EXPECT_NEAR(val1, val2, abs_error);` | the difference between `val1` and `val2` doesn't exceed the given absolute error |
+
 #### Floating-Point Predicate-Format Functions
 
-Floating-point 연산자들을 더 다양하게 만들어서 제공할 수도 있지만 macro가 너무 많아지는 것도 좋지 않습니다. 따라서 googletest는 predicate-formatter assertion을 floating-piont에도 사용할 수 있도록 했습니다. 사용방법은 기존과 동일하며 첫번째 argument에 `FloatLE`, `DoubleLE`과 같이 floating-point 관련 function을 전달하는 부분만 다릅니다.
+Floating-point 연산자들을 더 다양하게 만들어서 제공할 수도 있지만 macro가 너무 많아지는 것도 좋지 않습니다. 따라서 googletest는 predicate-formatter assertion을 floating-piont에도 사용할 수 있도록 했습니다. 사용방법은 기존과 동일하며 첫번째 argument에 `FloatLE`, `DoubleLE`와 같은 floating-point 관련 function을 전달한다는 점만 다릅니다.
 
 ```c++
 EXPECT_PRED_FORMAT2(::testing::FloatLE, val1, val2);
