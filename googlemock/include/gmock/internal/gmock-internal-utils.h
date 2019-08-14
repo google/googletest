@@ -501,11 +501,6 @@ struct RemoveConstFromKey<std::pair<const K, V> > {
   typedef std::pair<K, V> type;
 };
 
-// Mapping from booleans to types. Similar to boost::bool_<kValue> and
-// std::integral_constant<bool, kValue>.
-template <bool kValue>
-struct BooleanConstant {};
-
 // Emit an assertion failure due to incorrect DoDefault() usage. Out-of-lined to
 // reduce code size.
 GTEST_API_ void IllegalDoDefault(const char* file, int line);
