@@ -105,10 +105,6 @@ TEST(BuiltInDefaultValueTest, IsZeroForNumericTypes) {
   EXPECT_EQ(0U, BuiltInDefaultValue<unsigned char>::Get());
   EXPECT_EQ(0, BuiltInDefaultValue<signed char>::Get());
   EXPECT_EQ(0, BuiltInDefaultValue<char>::Get());
-#if GMOCK_HAS_SIGNED_WCHAR_T_
-  EXPECT_EQ(0U, BuiltInDefaultValue<unsigned wchar_t>::Get());
-  EXPECT_EQ(0, BuiltInDefaultValue<signed wchar_t>::Get());
-#endif
 #if GMOCK_WCHAR_T_IS_NATIVE_
 #if !defined(__WCHAR_UNSIGNED__)
   EXPECT_EQ(0, BuiltInDefaultValue<wchar_t>::Get());
@@ -137,10 +133,6 @@ TEST(BuiltInDefaultValueTest, ExistsForNumericTypes) {
   EXPECT_TRUE(BuiltInDefaultValue<unsigned char>::Exists());
   EXPECT_TRUE(BuiltInDefaultValue<signed char>::Exists());
   EXPECT_TRUE(BuiltInDefaultValue<char>::Exists());
-#if GMOCK_HAS_SIGNED_WCHAR_T_
-  EXPECT_TRUE(BuiltInDefaultValue<unsigned wchar_t>::Exists());
-  EXPECT_TRUE(BuiltInDefaultValue<signed wchar_t>::Exists());
-#endif
 #if GMOCK_WCHAR_T_IS_NATIVE_
   EXPECT_TRUE(BuiltInDefaultValue<wchar_t>::Exists());
 #endif
