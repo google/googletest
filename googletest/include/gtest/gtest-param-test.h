@@ -416,7 +416,7 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
       : public test_suite_name {                                               \
    public:                                                                     \
     GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)() {}                    \
-    virtual void TestBody();                                                   \
+    void TestBody() override;                                                  \
                                                                                \
    private:                                                                    \
     static int AddToRegistry() {                                               \
