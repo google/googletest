@@ -106,25 +106,6 @@ inline Element* GetRawPointer(Element* p) { return p; }
 # define GMOCK_WCHAR_T_IS_NATIVE_ 1
 #endif
 
-// signed wchar_t and unsigned wchar_t are NOT in the C++ standard.
-// Using them is a bad practice and not portable.  So DON'T use them.
-//
-// Still, Google Mock is designed to work even if the user uses signed
-// wchar_t or unsigned wchar_t (obviously, assuming the compiler
-// supports them).
-//
-// To gcc,
-//   wchar_t == signed wchar_t != unsigned wchar_t == unsigned int
-//
-// gcc-9 appears to treat signed/unsigned wchar_t as ill-formed
-// regardless of the signage of its underlying type.
-#ifdef __GNUC__
-#if !defined(__WCHAR_UNSIGNED__) && (__GNUC__ < 9)
-// signed/unsigned wchar_t are valid types.
-# define GMOCK_HAS_SIGNED_WCHAR_T_ 1
-#endif
-#endif
-
 // In what follows, we use the term "kind" to indicate whether a type
 // is bool, an integer type (excluding bool), a floating-point type,
 // or none of them.  This categorization is useful for determining
@@ -358,10 +339,6 @@ GTEST_API_ WithoutMatchers GetWithoutMatchers();
 // is_reference<T>::value is non-zero if T is a reference type.
 template <typename T> struct is_reference : public false_type {};
 template <typename T> struct is_reference<T&> : public true_type {};
-
-// type_equals<T1, T2>::value is non-zero if T1 and T2 are the same type.
-template <typename T1, typename T2> struct type_equals : public false_type {};
-template <typename T> struct type_equals<T, T> : public true_type {};
 
 // remove_reference<T>::type removes the reference from type T, if any.
 template <typename T> struct remove_reference { typedef T type; };  // NOLINT

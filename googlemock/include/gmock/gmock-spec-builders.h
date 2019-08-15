@@ -67,6 +67,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 #include "gmock/gmock-actions.h"
@@ -1653,9 +1654,8 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
     const OnCallSpec<F>* const spec = FindOnCallSpec(args);
 
     if (spec == nullptr) {
-      *os << (internal::type_equals<Result, void>::value ?
-              "returning directly.\n" :
-              "returning default value.\n");
+      *os << (std::is_void<Result>::value ? "returning directly.\n"
+                                          : "returning default value.\n");
     } else {
       *os << "taking default action specified at:\n"
           << FormatFileLocation(spec->file(), spec->line()) << "\n";
