@@ -355,10 +355,6 @@ GTEST_API_ WithoutMatchers GetWithoutMatchers();
 
 // Type traits.
 
-// type_equals<T1, T2>::value is non-zero if T1 and T2 are the same type.
-template <typename T1, typename T2> struct type_equals : public false_type {};
-template <typename T> struct type_equals<T, T> : public true_type {};
-
 // remove_reference<T>::type removes the reference from type T, if any.
 template <typename T> struct remove_reference { typedef T type; };  // NOLINT
 template <typename T> struct remove_reference<T&> { typedef T type; }; // NOLINT

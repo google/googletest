@@ -42,6 +42,7 @@
 #include <memory>
 #include <ostream>
 #include <string>
+#include <type_traits>
 
 #include "gtest/gtest-printers.h"
 #include "gtest/internal/gtest-internal.h"
@@ -299,8 +300,8 @@ class MatcherBase {
   template <typename U>
   explicit MatcherBase(
       const MatcherInterface<U>* impl,
-      typename internal::EnableIf<
-          !internal::IsSame<U, const U&>::value>::type* = nullptr)
+      typename internal::EnableIf<!std::is_same<U, const U&>::value>::type* =
+          nullptr)
       : impl_(new internal::MatcherInterfaceAdapter<U>(impl)) {}
 
   MatcherBase(const MatcherBase&) = default;
@@ -333,9 +334,10 @@ class Matcher : public internal::MatcherBase<T> {
       : internal::MatcherBase<T>(impl) {}
 
   template <typename U>
-  explicit Matcher(const MatcherInterface<U>* impl,
-                   typename internal::EnableIf<
-                       !internal::IsSame<U, const U&>::value>::type* = nullptr)
+  explicit Matcher(
+      const MatcherInterface<U>* impl,
+      typename internal::EnableIf<!std::is_same<U, const U&>::value>::type* =
+          nullptr)
       : internal::MatcherBase<T>(impl) {}
 
   // Implicit constructor here allows people to write
