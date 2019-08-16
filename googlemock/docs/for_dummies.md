@@ -396,7 +396,8 @@ EXPECT_CALL(turtle, GoTo);
 
 This works for all non-overloaded methods; if a method is overloaded, you need
 to help gMock resolve which overload is expected by specifying the number of
-arguments and possibly also the [types of the arguments](#SelectOverload).
+arguments and possibly also the
+[types of the arguments](cook_book.md#SelectOverload).
 
 #### Cardinalities: How Many Times Will It Be Called?
 
