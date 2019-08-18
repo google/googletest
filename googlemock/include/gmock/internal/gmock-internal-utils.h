@@ -384,9 +384,8 @@ class StlContainerView {
   typedef const type& const_reference;
 
   static const_reference ConstReference(const RawContainer& container) {
-    // Ensures that RawContainer is not a const type.
-    testing::StaticAssertTypeEq<
-        RawContainer, typename std::remove_const<RawContainer>::type>();
+    static_assert(!std::is_const<RawContainer>::value,
+                  "RawContainer type must not be const");
     return container;
   }
   static type Copy(const RawContainer& container) { return container; }
@@ -406,8 +405,8 @@ class StlContainerView<Element[N]> {
   typedef const type const_reference;
 
   static const_reference ConstReference(const Element (&array)[N]) {
-    // Ensures that Element is not a const type.
-    testing::StaticAssertTypeEq<Element, RawElement>();
+    static_assert(std::is_same<Element, RawElement>::value,
+                  "Element type must not be const");
     return type(array, N, RelationToSourceReference());
   }
   static type Copy(const Element (&array)[N]) {
