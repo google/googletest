@@ -513,12 +513,6 @@ TEST(TypeTraitsTest, false_type) {
   EXPECT_FALSE(false_type::value);
 }
 
-TEST(TypeTraitsTest, is_reference) {
-  EXPECT_FALSE(is_reference<int>::value);
-  EXPECT_FALSE(is_reference<char*>::value);
-  EXPECT_TRUE(is_reference<const int&>::value);
-}
-
 TEST(TypeTraitsTest, remove_reference) {
   EXPECT_TRUE((std::is_same<char, remove_reference<char&>::type>::value));
   EXPECT_TRUE(

@@ -336,10 +336,6 @@ GTEST_API_ WithoutMatchers GetWithoutMatchers();
 
 // Type traits.
 
-// is_reference<T>::value is non-zero if T is a reference type.
-template <typename T> struct is_reference : public false_type {};
-template <typename T> struct is_reference<T&> : public true_type {};
-
 // remove_reference<T>::type removes the reference from type T, if any.
 template <typename T> struct remove_reference { typedef T type; };  // NOLINT
 template <typename T> struct remove_reference<T&> { typedef T type; }; // NOLINT

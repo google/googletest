@@ -532,7 +532,7 @@ class ReturnAction {
     // in the Impl class. But both definitions must be the same.
     typedef typename Function<F>::Result Result;
     GTEST_COMPILE_ASSERT_(
-        !is_reference<Result>::value,
+        !std::is_reference<Result>::value,
         use_ReturnRef_instead_of_Return_to_return_a_reference);
     static_assert(!std::is_void<Result>::value,
                   "Can't use Return() on an action expected to return `void`.");
@@ -561,7 +561,7 @@ class ReturnAction {
     Result Perform(const ArgumentTuple&) override { return value_; }
 
    private:
-    GTEST_COMPILE_ASSERT_(!is_reference<Result>::value,
+    GTEST_COMPILE_ASSERT_(!std::is_reference<Result>::value,
                           Result_cannot_be_a_reference_type);
     // We save the value before casting just in case it is being cast to a
     // wrapper type.
@@ -640,7 +640,7 @@ class ReturnRefAction {
     // Asserts that the function return type is a reference.  This
     // catches the user error of using ReturnRef(x) when Return(x)
     // should be used, and generates some helpful error message.
-    GTEST_COMPILE_ASSERT_(internal::is_reference<Result>::value,
+    GTEST_COMPILE_ASSERT_(std::is_reference<Result>::value,
                           use_Return_instead_of_ReturnRef_to_return_a_value);
     return Action<F>(new Impl<F>(ref_));
   }
@@ -687,7 +687,7 @@ class ReturnRefOfCopyAction {
     // catches the user error of using ReturnRefOfCopy(x) when Return(x)
     // should be used, and generates some helpful error message.
     GTEST_COMPILE_ASSERT_(
-        internal::is_reference<Result>::value,
+        std::is_reference<Result>::value,
         use_Return_instead_of_ReturnRefOfCopy_to_return_a_value);
     return Action<F>(new Impl<F>(value_));
   }
