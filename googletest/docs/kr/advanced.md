@@ -688,9 +688,9 @@ Death test를 "threadsafe"로 설정하는 것이 thread safety를 향상시키�
 
 ### Assertions 추적하기
 
-먼저, *sub-routine*은 기본적으로 C++의 일반적인 function을 뜻하며 test function 내부에서 호출하기 때문에 sub-routine이라고 표현하고 있습니다. 그럼 test function이 동일한 sub-routine을 여러번 호출한다고 가정해 봅시다. 그리고 테스트를 수행했더니 sub-routine에 구현된 assertion이 실패했다고 합시다. 그러면 어떤 호출에서 실패한건지 어떻게 구분하는게 좋을까요?
+먼저, *sub-routine*은 기본적으로 C++의 일반적인 function을 뜻하며 test function 내부에서 호출하기 때문에 sub-routine이라고 표현하고 있습니다. 그럼 test function이 동일한 sub-routine을 여러번 호출한다고 가정해 봅시다. 그리고 테스트를 수행했더니 sub-routine에 구현된 assertion이 실패했다고 합시다. 이런 상황에서는 어떤 호출에서 실패했는지 어떻게 구분할 수 있을까요?
 
-물론 단순하게 로그를 추가하거나 failure message를 변경함으로써 확인할 수 있지만, 그러한 방법은 테스트를 복잡하게 만들 수 있습니다. 이런 상황에서는 `SCOPED_TRACE`와 `ScopedTrace`를 사용하는 것이 괜찮습니다.
+물론 단순하게 로그를 추가하거나 failure message를 변경함으로써 확인해도 되지만 그러한 방법은 테스트를 복잡하게 만드는 원인이 되기도 합니다. 이런 상황에서는 `SCOPED_TRACE`와 `ScopedTrace`를 사용하는 것을 추천합니다.
 
 ```c++
 SCOPED_TRACE(message);
@@ -718,7 +718,7 @@ ScopedTrace trace("file_path", line_number, message);
 23: }
 ```
 
-위 예제는 아래와 같은 failure message를 만들어 냅니다. `SCOPED_TRACE`가 사용된 첫번째 실패에서 path/to/foo_test.cc:17: A 라는 출력문이 추가된 것을 확인할 수 있습니다.
+위 예제는 아래와 같은 failure message를 만들어 냅니다. `SCOPED_TRACE`가 사용된 첫번째 실패에서 `path/to/foo_test.cc:17: A`라는 출력문이 추가된 것을 확인할 수 있습니다.
 
 ```none
 path/to/foo_test.cc:11: Failure
@@ -740,7 +740,7 @@ Expected: 2
 
 1.  Sub-routine을 호출할 때마다 `SCOPE_TRACE`를 사용하는 것보다는 아예 sub-routine의 시작부분에 구현하는 편리할 수 있습니다.
 2.  반복문에서 sub-routine을 호출한다면 `message`에 iterator를 포함시켜서 어떤 호출에서 failure가 발생했는지 구분할 수 있도록 하세요.
-3.  추가적인 failure message 없이 file name, line number만 알아도 충분하다면 `message`에 빈 문자열`""`을 전달하면 됩니다.
+3.  추가적인 failure message 없이 file name, line number만 알아도 충분하다면 `message`에 빈 문자열(`""`)을 전달하면 됩니다.
 4.  여러 개의 scope가 중첩(nested)되어도 괜찮습니다. 이런 경우에는 중첩된 scope의 failure message를 모두 출력해 줍니다. 순서는 안쪽에 있는 scope부터 출력됩니다.
 5.  Emacs를 사용한다면 trace dump를 확인할 수 있습니다. 해당 line number에서 `return`키를 누르면 바로 소스파일로 이동합니다.
 
@@ -767,7 +767,7 @@ TEST(FooTest, Bar) {
 }
 ```
 
-위 코드는 `Subroutine()`에서 test case자체가 abort되기를 바라고 구현한 것이지만, 실제로는 `int *p = NULL`까지 진행하게 되어 segfault가 발생하게 됩니다. 이런 문제를 해결하기 위해서 googletest는 3가지 해결방법을 제공하고 있습니다. 첫 번째는 exception, 두 번째는 `ASSERT_NO_FATAL_FAILURE / EXPECT_NO_FATAL_FAILURE` 계열의 assertion,  세 번째는 `HasFatalFailure()`입니다. 이제 각각에 대해서 자세하게 설명하겠습니다.
+위의 `Subroutine()` function에 사용된 assertion은 해당 test case(`TEST(FooTest, Bar)가 종료되기를 바라고 구현한 것입니다. 그러나 실제로는 `int *p = NULL`까지를 모두 진행하게 되며 이는 곧 segfault를 유발하게 됩니다. 이런 문제를 해결하기 위해서 googletest는 3가지 해결방법을 제공하고 있습니다. 첫 번째는 exception, 두 번째는 `ASSERT_NO_FATAL_FAILURE / EXPECT_NO_FATAL_FAILURE` 계열의 assertion, 세 번째는 `HasFatalFailure()`입니다. 이제 각각에 대해서 자세하게 설명하겠습니다.
 
 #### Sub-routine의 Assertion을 Exception처럼 사용하기
 
@@ -792,15 +792,15 @@ int main(int argc, char** argv) {
 
 #### Sub-routine의 Asserting 알아내기
 
-위에서 확인했듯이 test function이 sub-routine을 호출하는 구조에서 sub-routine에서 발생한 fatal failure를 test function에서 알 수가 없습니다. `ASSERT_*`는 일반적으로 해당 test case(test function)를 종료시키기 위해서 사용하기 때문에 위와 같은 동작은 사용자들이 기대했던 동작과는 조금 달랐던것도 사실입니다.
+위에서 확인했듯이 test function(test case)이 sub-routine을 호출하는 구조에서 sub-routine에서 발생한 fatal failure를 test function에서는 알 수가 없고, 이로 인해서 sub-routine에서 fatal failure가 발생하더라도 test function 자체는 종료되지 않았습니다. 그러나 `ASSERT_*` 계열의 assertion은 해당 test function을 종료시키는 목적으로 사용하는 것이 맞기 때문에 뭔가 좀 어색했던 것도 사실입니다.
 
-이런 이유로 많은 사람들이 sub-routine에서 발생한 fatal failure를 마치 exception처럼 상위 function로 전달해주는 기능이 추가되기를 요청했고, googletest는 관련 macro를 제공하게 되었습니다.
+역시나 많은 사람들이 이러한 문제제기를 했습니다. 이에 googletest는 sub-routine에서 발생한 fatal failure를 마치 exception처럼 상위 function으로 전달해주는 기능을 추가하게 되었습니다.
 
 | Fatal assertion                       | Nonfatal assertion                    | Verifies                                                     |
 | ------------------------------------- | ------------------------------------- | ------------------------------------------------------------ |
 | `ASSERT_NO_FATAL_FAILURE(statement);` | `EXPECT_NO_FATAL_FAILURE(statement);` | `statement` doesn't generate any new fatal failures in the current thread. |
 
-다만, 위의 macro를 사용한다고 해도 현재 thread에서 발생하는 fatal failure만이 고려대상입니다. 예를 들어 `statement`가 새로운 thread를 생성하고 그 thread에서 fatal failure가 발생하는 경우에는 확인할 수 없습니다.
+만족하시나요? 다만, 위의 macro를 사용한다고 해도 현재 thread에서 발생하는 fatal failure에 대해서만 유효합니다. 예를 들어 `statement`가 새로운 thread를 생성하고 그 thread에서 fatal failure가 발생하는 경우에는 확인할 수 없습니다.
 
 아래는 예제코드입니다.
 
@@ -813,7 +813,7 @@ EXPECT_NO_FATAL_FAILURE({
 });
 ```
 
-참고사항으로 Windows 환경에서는 multiple threads에서의 assertion사용 자체를 현재는 지원하지 않고 있습니다.
+참고사항으로 Windows 환경에서는 multiple threads에서의 assertion사용 자체를 (현재는) 지원하지 않고 있습니다.
 
 #### 현재 테스트에서 발생한 Failures를 확인하기
 
@@ -869,19 +869,19 @@ TEST_F(WidgetUsageTest, MinAndMaxWidgets) {
 
 > NOTE:
 >
-> *   `RecordProperty()`은 `Test`라는 class의 static member function입니다. 따라서 `TEST`, `TEST_F`, 혹은 test fixture class에서 사용하는 것이 아니라면 `::testing:Test::`라는 prefix를 붙여줘야만 합니다.
-> *   `key`는 XML attribute로서 유효한 이름으로 지정해야 합니다. 또한, googletest에서 이미 사용중인 attribute도 사용해서는 안 됩니다. (이미 사용중인 attribute 이름: `name`, `status`, `time`, `classname`, `type_param`, `value_param`) 
+> *   `RecordProperty()`는 `Test`라는 class의 static member function입니다. 따라서 `TEST`, `TEST_F`, 혹은 test fixture class에서 사용하는 것이 아니라면 `::testing:Test::`라는 prefix를 붙여줘야만 합니다.
+> *   `key`는 XML attribute로서 유효한 이름으로 지정해야 합니다. 또한, googletest에서 이미 사용중인 attribute도 사용해서는 안 됩니다. (이미 사용중인 attribute : `name`, `status`, `time`, `classname`, `type_param`, `value_param`) 
 > *   `RecordProperty()`를 test case가 아니라 test suite에서 사용한다면 (즉, `SetUpTestSuite()`이 호출되고 `TearDownTestSuite()`호출되기까지의 구간) XML 결과물에도 test suite의 정보로 기록됩니다. 같은 맥락에서 test suite의 바깥에서 사용한다면 XML 결과물에도 top-level element 정보로 기록됩니다.
 
 ## Test Suite의 자원을 Test Case간에 공유하기
 
-Googletest는 개별 test case를 실행할 때마다 test fixure object를 새로 생성합니다. 그 이유는 각 test case를 독립된 환경에서 수행하면 안정성을 확보할 수 있고 동시에 문제가 발생했을 때 디버깅에도 도움이 되기 때문입니다. 이러한 방법을 one-copy-per-test model 이라고 합니다. 한 가지 단점은 자원이 많은 경우에 이를 매번 set-up 해야하는 부분이 부담이 될 수가 있습니다.
+Googletest는 개별 test case를 실행할 때마다 test fixure object를 새로 생성합니다. 그 이유는 각 test case를 독립된 환경에서 수행하면 안정성을 확보할 수 있고 동시에 문제가 발생했을 때 디버깅에도 도움이 되기 때문입니다. 이러한 방법을 one-copy-per-test model이라고 합니다. 이 model의 한 가지 단점은 자원이 많은 경우에는 이들을 매번 set-up 하는게 부담이 될 수도 있다는 것입니다.
 
 만약 test case들이 자원을 변경하거나 하지 않는다면 여러 test case들이 동일한 자원을 공유하게 해도 문제가 없을 것입니다. 이런 이유로 per-test set-up/tear-down에 더해 per-test-suite set-up/tear-down 기능도 제공하고 있습니다. 아래와 같이 사용하면 됩니다.
 
 1.  `FooTest`라는 test fixture class가 있다고 가정합시다. 공유해야 하는 자원(변수)을 `static`으로 선언하세요.
-2.  해당 `static`변수를 초기화합니다. (C++에서 `static` 멤버변수는 class 바깥에서도 초기화해야 합니다.)
-3.  이제 test fixture class에 `static void SetUpTestSuite()` 과 `static void TearDownTestSuite()` 을 구현하세요. 두 함수 내부에는 공유자원을 위한 초기화 작업, 정리 작업을 구현하면 됩니다.(`SetupTestSuite`이 아니라 대문자 `u`인 점을 유의하세요.)
+2.  해당 `static` 변수를 초기화합니다. (C++에서 `static` 멤버변수는 class 바깥에서도 초기화해야 합니다.)
+3.  이제 test fixture class에 `static void SetUpTestSuite()` 과 `static void TearDownTestSuite()`을 구현하세요. 두 함수 내부에는 공유자원을 위한 초기화 작업, 정리 작업을 구현하면 됩니다.(`SetupTestSuite`이 아니라 대문자 `*Up*`인 점을 유의하세요.)
 
 이제 필요한 것은 다 됐습니다. Googletest는 해당 test fixture(`FooTest`)의 첫번째 test case을 수행하기 전에 `SetUpTestSuite()`을 호출합니다. 그리고 마지막 test case를 수행한 후에는 `TearDownTestSuite()`을 호출할 것입니다. 이와 같은 방법을 통해 `FooTest`에 포함된 test case끼리 자원을 공유할 수 있게 됩니다.
 
@@ -928,7 +928,7 @@ TEST_F(FooTest, Test2) {
 }
 ```
 
-NOTE: 위의 코드는 `SetUpTestSuite()`을 protected로 선언했지만 public으로 선언해야 하는 경우도 있습니다. 예를 들면  `TEST_P`와 같은 macro를 사용하기 위해서는 public으로 선언하게 됩니다.
+NOTE: 위의 코드는 `SetUpTestSuite()`을 protected로 선언했지만 public으로 선언해야 하는 경우도 있습니다. 예를 들면 `TEST_P`와 같은 macro를 사용하기 위해서는 public으로 선언하게 됩니다.
 
 ## Global Set-Up, Tear-Down
 
@@ -949,13 +949,13 @@ class Environment : public ::testing::Environment {
 };
 ```
 
-다음으로 위에서 상속박은 class의 object를 생성하고 `::testing:AddGlobalTestEnvironment()`을 통해 등록합니다.
+다음으로 위에서 상속받은 class의 object를 생성하고 `::testing:AddGlobalTestEnvironment()`을 통해 등록합니다.
 
 ```c++
 Environment* AddGlobalTestEnvironment(Environment* env);
 ```
 
-이제 `RUN_ALL_TESTS()`를 호출되면 등록된 envrinonment object의 `SetUp()`이 호출 될 것입니다. `SetUp`이 호출되는 동안 fatal failure가 발생하지 않고 `GTEST_SKIP()`도 호출되지 않았다면 이제 모든 테스트들르 수행하게 됩니다. `RUN_ALL_TESTS()`가 호출되면 `TearDown()`도 무조건 호출해 줍니다. (테스트의 수행여부와 관계없이 무조건 호출됩니다.)
+이제 `RUN_ALL_TESTS()`를 호출하면 등록된 envrinonment object의 `SetUp()`이 호출 될 것입니다. `SetUp`이 호출되는 동안 fatal failure가 발생하지 않고 `GTEST_SKIP()`도 호출되지 않았다면 계속해서 모든 테스트들르 수행하게 됩니다. 그리고 `RUN_ALL_TESTS()`가 호출되면 `TearDown()`도 무조건 같이 호출해 줍니다. (테스트의 수행여부와 관계없이 호출됩니다.)
 
 Eenvironment object를 여러개 등록하는 것도 허용됩니다. 그런 경우에 `SetUp()`은 등록된 순서대로 호출되며 `TearDown()`은 그 반대 순서로 호출됩니다.
 
@@ -974,13 +974,13 @@ Environment object가 등록되었다면 그 소유권은 googletest로 옮겨�
 
 *Value-parameterized tests*를 적용하면 하나의 테스트 코드에 데이터(parameter)만 변경해가면서 다양한 테스트를 수행할 수 있습니다. 특히 아래와 같은 경우에 유용합니다.
 
-- cmd line flag에 따라 동작이 달라져야 하기 때문에 각 flag마다 검증해야 할 때
+- cmd line flag에 따라 동작이 달라져야 하기 때문에 각각 flag를 모두 검증해야 할 때
 - interface(abstract class)를 구현한 implementation class가 여러개 있을 때
 - 그 외 다양한 입력들에 대해서도 문제없이 잘 동작하는지 확인하고 싶을 때 (data-driven testing이라고도 불리우는 이 방법은 꼭 필요하지 않은데도 사용하는 경우가 자주 발생하기 때문에 남용하지 않도록 유의해야 합니다.)
 
 ### Value-Parameterized Tests를 구현하는 방법
 
-Value-parameterized tests를 구현하려면 먼저 fixture class를 만들어야 합니다. 이를 위해서 `::testting::Test`과 `::testing::WithParamInterface<T>`을 함께 상속받아야 합니다. 특히 `::testing::WithParamInterface<T>`는 abstract class이며 `T`는 parameter로 전달되는 값의 타입을 의미합니다. 좀 복잡한가요? 사실 위의 2가지를 상속받아서 구현해 놓은`::testing::TestWithParam<T>`도 이미 제공하고 있습니다. `T`는 복사만 가능하다면 어떤 타입이라도 괜찮습니다. 다만, raw pointer를 사용한다면 가리키는 대상의 관리도 사용자가 직접 해야하는 부분은 주의하시기 바랍니다.
+Value-parameterized tests를 구현하려면 먼저 fixture class를 만들어야 하며 이를 위해서는 `::testting::Test`과 `::testing::WithParamInterface<T>`를 함께 상속받아야 합니다. 특히 `::testing::WithParamInterface<T>`는 abstract class이며 `T`는 parameter로 전달되는 값의 타입을 의미합니다. 좀 복잡한가요? 사실 위의 2가지를 상속받아서 구현해 놓은 `::testing::TestWithParam<T>`도 이미 제공하고 있습니다. Template parameter `T`는 복사만 가능하다면 어떤 타입이라도 괜찮습니다. 다만, raw pointer를 사용한다면 가리키는 대상의 관리도 사용자가 직접 해야하는 부분은 주의하시기 바랍니다.
 
 NOTE: 만약 value-parameterized tests의 test fixture class에 `SetUpTestSuite()` 또는 `TearDownTestSuite()`을 사용하려면 **protected**가 아닌 **public** 영역에 선언해야 합니다. 그래야만 `TEST_P`를 사용할 수 있습니다.
 
@@ -1002,7 +1002,7 @@ class BarTest : public BaseTest,
 };
 ```
 
-위의 코드에서 `FooTest`는 `TestWithParam<T>`만 상속받아서 손쉽게 value-parameterized test를 위한 test fixture class를 구현했습니다. 다만, 이렇게 test fixture를 새로 만드는 것이 아니라 이미 사용중인 test fixture를 value-parameterized test로 확장하고 싶다면 `BaseTest`, `BarTest`처럼 구현하면 됩니다. 이렇게 test fixture가 준비되었다면 `TEST_P`를 사용해서 test function을 정의하면 됩니다. 여기서 `_P`는 "parameterized" 또는 "pattern"을 의미합니다. 의미만 통한다면 어느 쪽으로 생각하든 괜찮습니다.
+위의 코드에서 `FooTest`는 `TestWithParam<T>`만 상속받아서 손쉽게 value-parameterized test를 위한 test fixture class를 구현했습니다. 다만, 이렇게 test fixture를 새로 만드는 것이 아니라 이미 사용중인 test fixture를 value-parameterized test로 확장하고 싶다면 `BaseTest`, `BarTest`처럼 구현하면 됩니다. 여기까지 해서 test fixture가 준비되었다면 `TEST_P`를 사용해서 test function을 정의하면 됩니다. 여기서 `TEST_P`의 `_P`는 "parameterized" 또는 "pattern"을 의미합니다. 의미만 통한다면 어느 쪽으로 생각하든 괜찮습니다.
 
 ```c++
 TEST_P(FooTest, DoesBlah) {
@@ -1017,7 +1017,7 @@ TEST_P(FooTest, HasBlahBlah) {
 }
 ```
 
-이제 테스트를 위한 데이터(parameter)만 정의하면 끝입니다. 이 때에는 `INSTANTIATE_TEST_SUITE_P`를  사용합니다. Googletest는 `INSTANTIATE_TEST_SUITE_P`와 조합해서 parameter를 생성하는데 쓰이는 여러가지 function을 함께 제공합니다. 이러한 function을 *parameter generator*라고 부르며 아래는 관련 내용을 정리한 표입니다. 더불어 아래 function들은 모두 `testing` namespace에 정의되어 있습니다.
+거의 다 왔습니다. 이제 테스트를 위한 데이터(parameter)를 정의하겠습니다. 이를 위해서 `INSTANTIATE_TEST_SUITE_P`를 사용합니다. Googletest는 `INSTANTIATE_TEST_SUITE_P`와 함께 사용함으로써 parameter 생성을 도와주는 여러가지 function도 함께 제공합니다. 이러한 function을 *parameter generator*라고 부르며 아래는 관련 내용을 정리한 표입니다. (이들은 모두 `testing` namespace에 정의되어 있습니다.)
 
 | Parameter Generator                             | Behavior                                                     |
 | ----------------------------------------------- | ------------------------------------------------------------ |
@@ -1029,7 +1029,7 @@ TEST_P(FooTest, HasBlahBlah) {
 
 보다 자세한 내용은 해당 function의 주석을 확인해보기 바랍니다.
 
-아래 예제는 test suite(`FooTest`)을 위한 value-parameter 3개(`"meeny"`, `"miny"`, `"moe"`)를 초기화하고 있습니다. 이것은 곧 "`TEST_P`로 정의한 test case들이 3개의 입력데이터(parameter)에 대해서도 문제없이 동작하는지 검증하고 싶다"를 의미합니다. 결과적으로 총 6개의 서로 다른 test function이 생성됩니다. (`TEST_P` 개수 x parameter 개수)
+아래 예제는 test suite(`FooTest`)을 위한 value-parameter 3개(`"meeny"`, `"miny"`, `"moe"`)를 초기화하고 있습니다. 이제 총 6개의 서로 다른 test function이 자동으로 생성될 것입니다. (`TEST_P` 개수 x parameter 개수)
 
 ```c++
 INSTANTIATE_TEST_SUITE_P(InstantiationName,
@@ -1037,11 +1037,11 @@ INSTANTIATE_TEST_SUITE_P(InstantiationName,
                          testing::Values("meeny", "miny", "moe"));
 ```
 
-NOTE: 위의 코드는 전역범위나 특정 namespace에 포함되어야 합니다. Function 내부에서는 사용할 수 없습니다.
+NOTE: 위 코드는 전역범위나 특정 namespace에 포함되어야 합니다. Function 내부에서는 사용할 수 없습니다.
 
-NOTE: Don't forget this step! If you do your test will silently pass, but none of its suites will ever run!
+NOTE: 이전까지 아무리 잘 구현했어도 `INSTANTIATE_TEST_SUITE_P`를 안 했다면 말짱 도루묵입니다. 테스트가 실제로 수행되지도 않고 성공한 것처럼 보이기도 하니 주의하세요.
 
-동일한 test suite에 대해서 value parameter를 여러번 초기화할 수도 있기 때문에 이들을 구분 할 방법이 필요합니다. 이 때 사용되는 값이 `INSTANTIATE_TEST_SUITE_P`의 첫번째 argument입니다. 따라서 첫 번째 파라미터는 중복되면 안됩니다. 아래는 지금까지 만들어 본 6개의 test function을 보여줍니다.
+동일한 test suite에 대해서 `INSTANTIATE_TEST_SUITE_P`를 여러번 초기화하는 것도 가능하기 때문에 이들을 구분 할 방법이 필요한데요, 이 때 사용되는 값이 `INSTANTIATE_TEST_SUITE_P`의 첫번째 argument입니다. 따라서 첫 번째 파라미터는 중복되면 안됩니다. 아래는 지금까지 만들어 본 6개의 test function의 이름과 각각에 사용할 value parameter를 보여줍니다.
 
 *   `InstantiationName/FooTest.DoesBlah/0` for `"meeny"`
 *   `InstantiationName/FooTest.DoesBlah/1` for `"miny"`
@@ -1060,16 +1060,16 @@ INSTANTIATE_TEST_SUITE_P(AnotherInstantiationName, FooTest,
                          testing::ValuesIn(pets));
 ```
 
-The tests from the instantiation above will have these names:
+위의 코드를 통해 생성된 4개의 test function은 아래와 같습니다.
 
 *   `AnotherInstantiationName/FooTest.DoesBlah/0` for `"cat"`
 *   `AnotherInstantiationName/FooTest.DoesBlah/1` for `"dog"`
 *   `AnotherInstantiationName/FooTest.HasBlahBlah/0` for `"cat"`
 *   `AnotherInstantiationName/FooTest.HasBlahBlah/1` for `"dog"`
 
-지금까지 본 것처럼 `INSTANTIATE_TEST_SUITE_P`는 `TEST_P` macro를 통해 정의한 *모든* test case에 대해 각 parameter마다 별도의 test function들을 생성해줍니다. 즉 `TEST_P` x parameter 개수 만큼의 test function이 생성됩니다. 이 때, `INSTANTIATE_TEST_SUITE_P`와 `TEST_P`의 구현순서는 중요하지 않으며 어떤 순서이든 관계 없이 test function들을 생성해 줍니다.
+지금까지 본 것처럼 `INSTANTIATE_TEST_SUITE_P`는 `TEST_P` macro를 통해 정의한 *모든* test case에 대해 각 parameter마다 별도의 test function들을 생성해줍니다. 즉 `TEST_P` x parameter 개수 만큼의 test function이 생성됩니다. 이 때, `INSTANTIATE_TEST_SUITE_P`와 `TEST_P`의 구현순서는 중요하지 않습니다.
 
-좀 더 자세한 예제는 [sample7_unittest.cc](../../samples/sample7_unittest.cc), [sample8_unittest.cc](../../samples/sample8_unittest.cc)에서 확인이 가능합니다.
+좀 더 자세한 예제가 필요하다면 [sample7_unittest.cc](../../samples/sample7_unittest.cc), [sample8_unittest.cc](../../samples/sample8_unittest.cc)에서 확인이 가능합니다.
 
 ### Value-Parameterized Abstract Tests 생성하기
 
