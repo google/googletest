@@ -401,21 +401,21 @@ cannot initialize return object of type 'bool' with an rvalue of type 'void'
 error: no viable conversion from 'void' to 'string'.
 ```
 
-만약 return type이 `void`가 아닌 function에서 fatal assertion을 사용해야 한다면 조금 수정이 필요합니다. 먼저 해당 function의 return type을 `void`로 변경하고 원래 반환하려고 했던 값은 반환하는게 아니라 argument에 대입하도록 수정해야 합니다. 예를 들어 `T2 Foo(T1 x)`라는 function을 `void Foo(T1 x, T2* result)`로 변경하면 됩니다. 그러면 return type이 `void`로 변경되었으니 `Foo()` 내부에서도 fatal assertion을 사용할 수 있게 됩니다. 주의할 점은 이러한 변경이 `Foo()`의 caller와 `Foo()` 간의 관계도 변경하는 것이기 때문에 `Foo()`가 어떤 이유로 인해서든 `result`에 의미있는 값을 대입하지 못하고 비정상 종료되더라도 `Foo()`를 사용하는 쪽에서는 문제가 없도록 구현하고 해야 합니다.
+만약 return type이 `void`가 아닌 function에서 fatal assertion을 사용해야 한다면 조금 수정이 필요합니다. 먼저 해당 function의 return type을 `void`로 변경하고 원래 반환하려고 했던 값은 반환하는게 아니라 argument에 대입하도록 수정해야 합니다. 예를 들어 `T2 Foo(T1 x)`라는 function을 `void Foo(T1 x, T2* result)`로 변경하면 됩니다. 그러면 return type이 `void`로 변경되었으니 `Foo()` 내부에서도 fatal assertion을 사용할 수 있게 됩니다. 주의할 점은 이러한 변경이 `Foo()`의 caller와 `Foo()` 간의 관계도 변경하는 것이기 때문에 `Foo()`가 어떤 이유로 인해서든 `result`에 의미있는 값을 대입하지 못하고 비정상 종료되더라도 `Foo()`를 사용하는 쪽에서는 문제가 없도록 구현해야 합니다.
 
 만약, 이처럼 return type을 변경할 수 없는 상황이라면 어쩔 수 없이 `ADD_FAILURE*` 또는 `EXPECT_*`와 같은 non-fatal failure를 사용하기를 바랍니다.
 
-NOTE: class의 constructor나 destructor는 return type이 따로 없기 때문에 fatal assertion도 사용할 수 없습니다. 사용하더라도 compile error가 발생할 것입니다. 이를 위한 첫 번째 대안으로 `abort`를 사용할 수 있는데 `abort`는 test program을 아예 종료하기 때문에 원하는 동작이 맞는지는 확인해봐야 합니다. 두 번째 대안은 `SetUp`/ `TearDown`을 사용하는 것이며 이와 관련 내용은 [constructor/destructor vs. `SetUp`/`TearDown`](faq.md#test-fixture에서-constructordestructor-와-setupteardown중-어느것을-써야하나요)에서 자세하게 확인할 수 있습니다.
+NOTE: class의 constructor나 destructor는 return type이 따로 없기 때문에 fatal assertion도 사용할 수 없습니다. 사용하더라도 compile error가 발생할 것입니다. 이를 위한 첫 번째 대안으로 `abort`를 사용할 수 있는데 `abort`는 test program을 아예 종료하는 것이기 때문에 원하는 동작이 맞는지는 확인해봐야 합니다. 두 번째 대안은 `SetUp`/ `TearDown`을 사용하는 것이며 이와 관련 내용은 [constructor/destructor vs. `SetUp`/`TearDown`](faq.md#test-fixture에서-constructordestructor-와-setupteardown중-어느것을-써야하나요)에서 자세하게 확인할 수 있습니다.
 
-WARNING: constructor, desturctor에서 fatal assertion을 사용하는 또 다른 방법은 assertion을 수행 할 function을 별도로 만들고(private 영역에) constructor나 destructor가 해당 function을 호출하도록 하는 것입니다. 여기서 주의할 점은 constructor나 destructor에서 발생한 fatal assertion은 진행중인 테스트를 중단시키지는 못하고 자기자신만 중단한다는 것입니다. 만약 constructor나 destructor가 수행도중에 중단되어 버리면 상황에 따라 object의 생성이나 소멸이 완료되지 못하는 문제가 발생할 수도 있습니다. 따라서 constructor나 destructor에서 fatal assertion을 사용하려는 사용자는 그에 따른 문제가 없는지를 철저히 확인해야 하며 그러한 부분이 부담된다면 `SetUp/TearDown`을 사용하거나 아니면 `abort`를 사용하는 것이 더 편할 것입니다.
+WARNING: constructor, desturctor에서 fatal assertion을 사용하는 또 다른 방법은 assertion을 수행 할 function을 별도로 만들고(private 영역에) constructor나 destructor가 해당 function을 호출하도록 하는 것입니다. 여기서 주의할 점은 constructor나 destructor에서 발생한 fatal assertion은 진행중인 테스트를 중단시키지는 못하고 자기자신만 중단한다는 것입니다. 그렇게 되면 상황에 따라 object의 생성이나 소멸이 완료되지 못한 상태에서 테스트가 진행될 가능성이 있기 때문에 심각한 문제를 초래할 수도 있습니다. 이와 같은 이유로 constructor나 destructor에서 fatal assertion을 사용하려는 사용자는 그에 따른 문제가 없는지에 대해서 사전에 철저히 확인해야 하며 그러한 부분이 부담된다면 `SetUp/TearDown`을 사용하거나 아니면 `abort`를 사용하는 것이 더 편할 것입니다.
 
-## googletest의 디버깅정보 출력방식 변경하기
+## Googletest의 디버깅정보 출력방식 변경하기
 
 `EXPECT_EQ`같은 assertion이 실패하면, googletest는 argument로 전달된 값을 비롯해서 디버깅에 필요한 정보를 출력해줍니다. 이렇게 디버깅 정보를 출력해주는 기능을 printer라고 하는데 이 printer는 사용자가 원하는 방향으로 확장도 가능합니다.
 
-Googletest는 기본적으로 C++ built-in 타입, STL container, `<<`연산자를 정의한 타입에 대해서는 디버깅 정보를 출력해주지만 그 외의 타입들은 raw bytes 값만 출력해주기 때문에 출력되더라도 알아보기 힘들 수 있습니다.
+Googletest는 기본적으로 C++ built-in 타입, STL container, `<<` 연산자를 정의한 타입에 대해서는 디버깅 정보를 출력해주지만 그 외의 타입들은 raw bytes 값만 출력해주기 때문에 디버깅이 어려울 수 있습니다.
 
-이런 경우에는`<<`연산자를 재정의해서 printer는 확장하는 것이 좋습니다. 아래에 예제코드가 있습니다.
+이런 경우에는`<<` 연산자를 재정의해서 printer를 확장하는 것이 좋습니다. 아래에 예제코드가 있습니다.
 
 ```c++
 // Streams are allowed only for logging.  Don't include this for
@@ -442,7 +442,7 @@ std::ostream& operator<<(std::ostream& os, const Bar& bar) {
 }  // namespace foo
 ```
 
-다만, 경우에 따라서는 `<<`연산자를 재정의하는 것에 대해 동료들이 반대할 수도 있고 `<<`연산자가 이미 구현되어 있어서 바꿀 수 없을 수도 있습니다. 그런 경우에는 `PrintTo()`와 같은 디버깅정보 출력을 위한 별도의 function을 정의하는 것도 괜찮습니다. 아래 예제코드가 있습니다.
+다만, 경우에 따라서는 `<<` 연산자를 재정의하는 것에 대해 팀 동료들이 반대할 수도 있고 `<<` 연산자가 이미 구현되어 있어서 바꿀 수 없을 수도 있습니다. 그럴 때에는 `PrintTo()`와 같은 디버깅정보를 확인하기 위한 별도의 function을 정의하는 것도 좋은 방법입니다. 아래 예제코드가 있습니다.
 
 ```c++
 // Streams are allowed only for logging.  Don't include this for
@@ -470,7 +470,7 @@ void PrintTo(const Bar& bar, std::ostream* os) {
 
 만약, 사용자가 `<<`와 `PrintTo()`를 2개 모두 구현했다면 `PrintTo()`가 우선적으로 선택됩니다. 그 이유는 2개를 비교했을 때, `<<`연산자는 이미 구현해서 다른 용도로 사용하고 있을 확률이 더 높기 때문입니다.
 
-여기까지 해서 `Bar` class에 `<<` 혹은 `PrintTo()`를 정의했다면 한다면, 다음으로는 확인하고 싶은 값을 출력하기만 하면 됩니다. 예를 들어 `x`의 값을 출력하고 싶다면 `::testing::PrintToString(x)`라고 구현하면 됩니다. `::testing::PrintToString(x)`의 return type은 `std::string`입니다.  사용방법은 아래 예제코드를 확인하세요.
+`Bar` class에 `<<` 혹은 `PrintTo()`를 정의하는 것까지 완료했다면, 이제 확인하고 싶은 값을 출력하기만 하면 됩니다. 예를 들어 `x`의 값을 출력하고 싶다면 `::testing::PrintToString(x)`라고 구현하면 됩니다. 여기서 `::testing::PrintToString(x)`의 return type은 `std::string`입니다. 사용방법은 아래 예제코드를 확인하세요.
 
 ```c++
 vector<pair<Bar, int> > bar_ints = GetBarIntVector();
@@ -479,9 +479,9 @@ EXPECT_TRUE(IsCorrectBarIntVector(bar_ints))
     << "bar_ints = " << ::testing::PrintToString(bar_ints);
 ```
 
-## Death Tests
+## Death Test
 
-원하는 조건이 충족되지 않았을 때 스스로를 종료시키는 프로그램도 당연히 존재할 것입니다. 예를 들어 프로그램이 동작하다가 치명적인 문제를 일으킬 수도 있는 비정상상태로 진입했음을 알게되면 문제가 더 악화되기 전에 스스로를 종료시키는 상황이 있을 것입니다. (여기서 치명적인 문제라는 것은 memory corruption이나 security holes와 같은 문제들이 될 것입니다.)
+원하는 조건이 충족되지 않았을 때 스스로를 종료시키는 프로그램도 당연히 존재할 것입니다. 예를 들어 프로그램이 동작하다가 치명적인 문제를 일으킬 수도 있는 비정상상태로 진입했음을 알게되면 문제가 더 악화되기 전에 스스로를 종료시키는 상황이 있을 것입니다. (여기서 치명적인 문제라는 것은 memory corruption이나 security holes와 같은 문제들입니다.)
 
 Googletest는 이렇게 스스로 종료하도록 구현된 프로그램들이 실제로 원하는 상황에서 원하는 방향으로 잘 종료되는지를 확인하기 위한 방법을 제공하고 있으며 이를 *death test*라고 부릅니다. 쉽게 말해서 *death test*란 프로그램이 원하는 방향으로 종료되었는지 확인하는 것입니다.
 
@@ -497,14 +497,13 @@ Death test를 위해서 아래와 같은 macro를 제공하고 있습니다.
 | `ASSERT_DEATH_IF_SUPPORTED(statement, matcher);` | `EXPECT_DEATH_IF_SUPPORTED(statement, matcher);` | if death tests are supported, verifies that `statement` crashes with the given error; otherwise verifies nothing |
 | `ASSERT_EXIT(statement, predicate, matcher);`    | `EXPECT_EXIT(statement, predicate, matcher);`    | `statement` exits with the given error, and its exit code matches `predicate` |
 
-먼저 `statement`는 종료되기를 기대하는 대상 프로그램이나 코드를 의미합니다. 당연히 여러줄의 코드도 가능합니다. 다음으로 `predicate`는 `statement`의 exit status를 확인하는 function이나 function object입니다. 마지막으로 `matcher`에는 `const std::string&`을 전달받을 수 있는 gMock matcher 또는 (Perl) regular expression을 사용할 수 있습니다. 이러한 `matcher`는 `statement`가 stderr로 출력하는 error message를 확인하는데 사용됩니다. `statement`의 stderr 출력이 `matcher`를 만족하지 못하면 death test는 실패합니다. 만약에 `matcher`에 순수 문자열만 전달한다면 `ContainsRegex(str)`로 자동 변환됩니다. 그 이유는 이전 버전에서는 regular expression만 전달받을 수 있었다가 gMock matcher도 사용할 수 있게 변경되었기 때문에 하위호환을 위해 그렇게 구현되었습니다.
-
+먼저 `statement`는 종료되기를 기대하는 대상 프로그램이나 코드를 의미합니다. 당연히 여러줄의 코드도 가능합니다. 다음으로 `predicate`는 `statement`의 exit status를 확인하는 function이나 function object입니다. 마지막으로 `matcher`에는 `const std::string&`을 전달받을 수 있는 gMock matcher 또는 (Perl) regular expression을 사용할 수 있습니다. 이러한 `matcher`는 `statement`가 stderr로 출력하는 error message를 확인하는데 사용됩니다. `statement`의 stderr 출력이 `matcher`를 만족하지 못하면 death test는 실패합니다. 만약에 `matcher`에 순수 문자열만 전달한다면 `ContainsRegex(str)`로 자동 변환됩니다. 그 이유는 googletest의 이전 버전에서는 regular expression만 전달받을 수 있었다가 gMock matcher도 사용할 수 있게 변경되었기 때문에 하위호환을 위해 그렇게 구현되었습니다.
 
 Death test assertion도 `ASSERT`계열은 현재 실행중인 test function을 중단시키고 `EXPECT`계열은 계속해서 진행합니다.
 
 > NOTE: 위 표에서 사용된 "crash"라는 단어는 process가 종료될 때의 exit status가 `0`이 아님을 의미합니다. 2가지 가능성이 있습니다. 해당 process가 `exit()` 또는 `_exit()`를 호출하면서 `0`이 아닌 값을 전달했거나 혹은 signal을 수신해서 종료된 경우입니다.
 >
-> 반대로 `statement`의 exit status가 `0`이라면 이는 곧 crash가 아님을 의미하기 떄문에 `EXPECT_DEATH`를 사용할 수가 없게 됩니다. 만약,이처럼 crash가 아니거나 또는 exit status를 좀 더 세부적으로 조작하고 싶은 경우에는 `EXPECT_EXIT`를 사용하기 바랍니다.
+> 반대로 `statement`의 exit status가 `0`이라면 이는 곧 crash가 아님을 의미하기 떄문에 `EXPECT_DEATH`를 사용할 수가 없게 됩니다. 만약, 이처럼 crash가 아니거나 또는 exit status를 좀 더 세부적으로 조작하고 싶은 경우에는 `EXPECT_EXIT`를 사용하기 바랍니다.
 
 `predicate`는 return type이 `int` 또는 `bool`인 function만 사용 가능하며 그렇게 전달된 `predicate`가 `true`를 반환하면 death test도 성공하게 됩니다. 즉 `statement`가 원하는 exit code와 함께 종료된 것을 의미합니다. 더불어 googletest는 일반적인 상황에서 사용가능한 `predicate`들을 기본적으로 제공하고 있습니다.
 
@@ -512,7 +511,7 @@ Death test assertion도 `ASSERT`계열은 현재 실행중인 test function을 �
 ::testing::ExitedWithCode(exit_code)
 ```
 
-위의 `predicate`는 `statement`의 exit status가 `exit_code`와 동일하다면  `true`입니다.
+위의 `predicate`는 `statement`의 exit code가 `exit_code`와 동일하다면  `true`입니다.
 
 ```c++
 ::testing::KilledBySignal(signal_number)  // Not available on Windows.
@@ -520,12 +519,12 @@ Death test assertion도 `ASSERT`계열은 현재 실행중인 test function을 �
 
 위의 `predicate`는 `statement`가 signal을 수신했고, 해당 signal number가 `signal_number`과 동일하다면 `true` 입니다.
 
-`*_DEATH` macro는 사실 `*_EXIT`를 사용해서 확장한 wrapper macro이며 `statment`의 exit status가 0인지 아닌지를 확인합니다.
+`*_DEATH` macro는 사실 `*_EXIT`를 사용해서 확장한 wrapper macro이며 `statment`의 exit code가 0인지 아닌지를 확인합니다.
 
 정리해보면 death test assertion은 아래 3가지를 확인해서 성공,실패를 결정합니다.
 
 1.  `statement`가 `abort` 또는 `exit` 되었나?
-2.  `ASSERT_EXIT` 또는 `EXPECT_EXIT`는 exit status가 `predicate`를 만족하는지 확인하고, `ASSERT_DEATH` 또는 `EXPECT_DEATH`는 exit status != 0을 만족하는지 확인합니다.
+2.  `ASSERT_EXIT` 또는 `EXPECT_EXIT`는 exit status가 `predicate`를 만족하는지 확인하고, `ASSERT_DEATH` 또는 `EXPECT_DEATH`는 exit code != 0을 만족하는지 확인합니다.
 3.  `statment`의 stderr출력이 `matcher`를 만족하는지?
 
 한가지 주의할 점은 만약 `statement`내부에 `ASSERT_*` 또는 `EXPECT_*`를 사용했다고 하더라도 death test assertion의 결과에는 영향을 미치지 않는 다는 것입니다. 당연하게도 death test는 `statement`가 어떻게 종료되는지 확인하는 것이 목적이기 때문입니다. `ASSERT_*`, `EXPECT_*`은 프로그램을 종료시키거나 하는 macro가 아니기 때문에 `statement`내부에서 발생하는 작업일 뿐이며 death test의 관심대상은 아닙니다.
@@ -553,17 +552,17 @@ TEST(MyDeathTest, KillMyself) {
 
 위 코드는 아래 3가지를 검증합니다.
 
-*   `Foo(5)`를 호출하면 stderr로 `"Error on line .* of Foo()"`를 출력한 후에 "exit status != 0" 이 아닌 값으로 종료하는지 확인
-*   `NormalExit()`를 호출하면 sdterr로 `"Success"`를 출력한 후에 "exit status == 0" 인 값으로 종료하는지 확인
+*   `Foo(5)`를 호출하면 stderr로 `"Error on line .* of Foo()"`를 출력한 후에 "exit code != 0" 이 아닌 값으로 종료하는지 확인
+*   `NormalExit()`를 호출하면 sdterr로 `"Success"`를 출력한 후에 "exit code == 0" 인 값으로 종료하는지 확인
 *   `KillMyself()`를 호출하면 stderr로 `"Sending myself unblockable signal"`을 출력한 후에 `SIGKILL`시그널을 전달받아서 종료하는지 확인
 
-`TEST()`, `TEST_F()`를 구현할 때 death test assertion과 다른 assertion 혹은 코드를 함께 사용하는 것도 물론 가능합니다. 
+`TEST()`, `TEST_F()`를 구현할 때 death test assertion과 다른 assertion 혹은 코드를 함께 사용하는 것도 물론 가능합니다.
 
 ### Death Test 이름짓기
 
-IMPORTANT: death test를 구현할 때는 **test suite**(not test case)에 `*DeathTest`라는 이름으로 작성하여 사용하기 바랍니다. 그 이유는 [Death Tests And Threads](advanced.md#death-tests-그리고-threads)에 상세하게 설명되어 있습니다.
+IMPORTANT: death test를 구현할 때는 **test suite**(not test case)을 `*DeathTest`라는 이름으로 작성하여 사용하기 바랍니다. 그 이유는 [Death Tests And Threads](advanced.md#death-tests-그리고-threads)에 상세하게 설명되어 있습니다.
 
-만약 사용자의 test fixture class가 normal test case와 death test case를 모두 포함한다면 `using` 혹은 `typedef`를 사용하여 별칭을 만드는 것이 좋습니다. 아래 예제를 참고하세요.
+만약 사용자의 test fixture class가 normal test case와 death test case를 모두 포함한다면 `using` 혹은 `typedef`를 사용하여 alias를 만드는 것이 좋습니다. 아래 예제를 참고하세요.
 
 ```c++
 class FooTest : public ::testing::Test { ... };
@@ -614,9 +613,9 @@ Windows 환경에서는 googletest 자체적으로 간단한 문법을 구현하
 
 ### Death Test 의 동작방식
 
-`ASSERT_EXIT()`는 내부적으로 새로운 process를 생성하고 death test assertion으로 전달된 `statement`를 수행하도록 되어 있습니다. 다만, 그 과정에서 사용자의 시스템이 POSIX인지 Windows인지에 따라 동작이 조금씩 달라집니다. 또한, 환경변수 `::testing::GTEST_FLAG(death_test_style)`의 설정값에 따라서도 동작이 달라집니다. 이 환경변수는 test program을 실행할 때 cmd line을 통해서 설정할 수도 있습니다.(`--gtest_death_test_style`) 이 환경변수를 death test style이라고 부르는데 현재는 2가지(`fast`와 `threadsafe`) style을 지원하고 있습니다. 그럼 아래는 사용자의 시스템 환경과 death test style에 따라 death test의 동작이 어떻게 다른지에 대한 설명입니다.
+`ASSERT_EXIT()`는 내부적으로 새로운 process를 생성하고 death test assertion으로 전달된 `statement`를 수행하도록 되어 있습니다. 다만, 그 과정에서 사용자의 시스템이 POSIX인지 Windows인지에 따라 그 동작이 조금씩 달라집니다. 또한, 환경변수 `::testing::GTEST_FLAG(death_test_style)`의 설정값에 따라서도 동작이 달라집니다. 이 환경변수는 test program을 실행할 때 cmd line을 통해서 설정할 수 있습니다.(`--gtest_death_test_style`) 이렇게 설정된 환경변수를 death test style이라고 부르는데 현재는 2가지(`fast`와 `threadsafe`) style을 지원하고 있습니다. 그럼 아래는 사용자의 시스템 환경과 death test style에 따라 death test의 동작이 어떻게 다른지에 대한 설명입니다.
 
-*   POSIX 시스템에서는 child process를 만들기 위해 `fork()` (`clone()` on Linux) 를 사용합니다.
+*   POSIX 시스템에서는 child process를 만들기 위해 `fork()`(`clone()` on Linux)를 사용합니다.
     *   만약, death test style이 `"fast"`라면 death test의 `statement`는 즉시 수행됩니다.
     *   만약, death test style이 `"threadsafe"`라면 test program 자체를 1개 더 실행시킨 후에 필요한 해당 death test를 실행합니다.
 *   Windows 시스템에서는 child process를 만들기 위해 `"CreateProcess()"` API를 사용합니다. 그런 후에 해당 process를 실행시켜서 death test를 수행합니다. 따라서 POSIX의 `"threadsafe"`모드일 때와 유사하게 동작합니다.
@@ -628,9 +627,9 @@ Windows 환경에서는 googletest 자체적으로 간단한 문법을 구현하
 
 만약 death test의 `statement`가 문제없이 정상적으로 코드를 다 수행하고 종료되면 어떻게 될까요? 일단 child process는 문제없이 잘 종료될 것입니다. 즉, child process가 종료되는 건 보장됩니다. 단지 death test의 결과가 실패일 뿐입니다.
 
-### Death Tests 그리고 Threads
+### Death Test 그리고 Thread
 
-Death test를 위해서는 test program의 child thread를 생성하는 작업이 꼭 필요합니다. 따라서 death test는 thread safety가 보장되는 상황에서 제일 안정적으로 수행될 수 있습니다. 가장 중요한 하는 것은 death test를 single-threaded 환경에서 실행하는 것인데, 만약 애초에 single-threaded환경이 불가능하면 어떻게 될까요? 예를 들어서 main function이 실행되기 전에 생성되는 (정적으로 초기화하는) thread가 있다면 어떻게 해야 될까요? 사실 thread가 일단 하나라도 생성되면 parent process를 다시 처음 상태로 되돌리는 것은 매우 어렵습니다.
+Death test를 위해서는 test program의 child thread를 생성하는 작업이 꼭 필요합니다. 따라서 death test는 thread safety가 보장되는 상황에서 제일 안정적으로 수행될 수 있습니다. 기본적으로 death test를 single-threaded 환경에서 실행하는 것이 제일 중요합니다. 그러나 만약 애초에 single-threaded 환경이 불가능하면 어떻게 될까요? 예를 들어서 main function이 실행되기 전에 생성되는 (정적으로 초기화하는) thread가 있다면 어떻게 해야 될까요? 네, 원래대로 돌아가기란 정말 쉽지 않습니다. Thread가 일단 하나라도 생성되었다면 parent process를 다시 처음 상태로 되돌리는 것은 매우 어렵습니다.
 
 Googletest는 이런 상황을 대비해서 thread 관련 이슈를 사용자에게 최대한 전달하려고 노력합니다.
 
@@ -638,13 +637,13 @@ Googletest는 이런 상황을 대비해서 thread 관련 이슈를 사용자에
 2. "*DeathTest"라는 이름을 가진 test suite을 다른 테스트들보다 먼저 실행해 줍니다.
 3. Linux 환경에서는 `fork()` 대신 `clone()`을 사용해서 child process를 생성하도록 했습니다. 왜냐하면 multi-threaded 환경에서 `fork()`가 문제를 일으킬 확률이 더 크기 때문입니다. (Cygwin이나 Mac에서는 `clone()`을 지원하지 않 때문에 fork()를 그대로 사용합니다.)
 
-반대로 death test로 전달되는 `statement` 내부에서 child thread를 생성하는 것은 괜찮습니다. 아무런 문제가 되지 않습니다.
+위의 내용들과는 별개로 death test로 전달되는 `statement` 내부에서 child thread를 생성하는 것은 괜찮습니다. 아무런 문제가 되지 않습니다.
 
-### Death Test Styles
+### Death Test Style
 
-Multi threaded 환경에서 "threadsafe"모드를 사용하면 테스트에 문제가 발생할 확률을 줄여줍니다. 테스트 실행시간을 증가시킨다는 단점은 있지만 thread safety를 위해서는 좋은 선택입니다.
+Multi-threaded 환경에서 "threadsafe" 모드를 사용하면 테스트에 문제가 발생할 확률을 조금이나마 줄여줍니다. 테스트 실행시간을 증가시킨다는 단점은 있지만 thread safety를 위해서는 좋은 선택이라고 할 수 있습니다.
 
-만약, 사용자가 자동화된 테스트 환경을 사용 중이라서 cmd line으로 뭔가를 전달할 수 없다면, 아래와 같이 소스코드에서 설정하는 것도 가능합니다.
+만약, 사용자가 자동화된 테스트 환경을 사용 중이라서 cmd line flag를 전달할 수 없다면, 아래와 같이 소스코드에서 직접 설정하는 것도 가능합니다.
 
 ```c++
 testing::FLAGS_gtest_death_test_style="threadsafe"
@@ -673,9 +672,9 @@ TEST(MyDeathTest, TestTwo) {
 
 ### Caveats
 
-`ASSERT_EXIT()`로 전달되는 `statement`에는 어떤 C++ statement라도 구현할 수 있습니다. 다만, `statement`가 `return`으로 끝나거나 (`exit()`이 아니라) exception를 발생시키면 해당 death test는 실패로 간주됩니다. `ASSERT_TRUE()`와 같은 대다수의 googletest macro가 `return` 으로 끝나는 것과 비교하면 확연히 구분되는 다른 점입니다.
+`ASSERT_EXIT()`로 전달되는 `statement`에는 어떤 C++ statement라도 구현할 수 있습니다. 다만, `statement`가 `return`으로 끝나거나 (`exit()`이 아니라) exception을 발생시키면 해당 death test는 실패로 간주됩니다. `ASSERT_TRUE()`와 같은 대다수의 googletest macro가 `return` 으로 끝나는 것과 비교하면 확연히 구분되는 다른 점입니다.
 
-또한, `statement`는 child process(thread)에서 수행되기 때문에 메모리 관리에 있어서 주의가 필요합니다. 알다시피 child process에서의 잘못된 동작을 parent process에서 알 수가 없기 때문입니다. 만약 death test에서 메모리를 해제해버리면 parent process는 이를 알 수 없고, 따라서 heap checker가 이를 추적할 수 없기 때문에 테스트는 실패로 판정됩니다. 메모리관련해서는 아래처럼 하기를 권장합니다.
+또한, `statement`는 child process(thread)에서 수행되기 때문에 메모리 관리에 있어서 주의가 필요합니다. 알다시피 child process에서의 잘못된 동작을 parent process에서는 알 수 없기 때문입니다. 만약 death test에서 메모리를 해제해버리면 parent process는 이를 알 수 없고, 따라서 heap checker가 이를 추적할 수 없기 때문에 테스트는 실패로 판정됩니다. 이를 위해서 아래와 같이 구현하기를 권장합니다.
 
 1.  death test statment(child process)에서 메모리를 해제하지 마세요.
 2.  child process에서 해제한 메모리를 parent process에서 다시 해제하지 마세요.
@@ -683,7 +682,7 @@ TEST(MyDeathTest, TestTwo) {
 
 Death test 구현상의 특징으로 인해 소스코드 1줄에 여러개의 death test assertion을 사용할 수는 없습니다. 그렇게 구현하면 compile error가 발생합니다.
 
-Death test를 "threadsafe"로 설정하는 것이 thread safety를 향상시키도록 도와주긴 하지만, deadlock과 같은 thread 사용에 따른 기본적인 이슈들은 여전히 사용자가 꼼꼼하게 확인해야 합니다. 이런 이슈는`pthread_atfork(3) `핸들러가 등록되어 있다고 해도 여전히 발생할 수 있습니다.
+Death test를 "threadsafe"로 설정하는 것이 thread safety를 향상시키도록 도와주긴 하지만, deadlock과 같은 thread 사용에 따른 기본적인 이슈들은 여전히 사용자가 직접 꼼꼼하게 확인해야 합니다. 이런 이슈는 `pthread_atfork(3)`핸들러가 등록되어 있다고 해도 여전히 발생할 수 있습니다.
 
 ## Sub-routines에서 Assertion을 사용하는 방법
 
