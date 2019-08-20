@@ -290,15 +290,15 @@ EXPECT_PRED_FORMAT2(::testing::DoubleLE, val1, val2);
 
 ### gMock Matchers를 이용한 Asserting
 
-C++ mocking framework인 [gMock](../../../googlemock)을 개발하면서 mock object로 전달되는 argument를 확인하기 위한 방법으로 matcher라는 것을 만들었습니다. 이러한 gMock *matcher*는 사실상 predicate랑 원리가 같습니다. 더불어 지원하는 기능도 풍부하기 때문에 matcher를 이용하면 좀 더 간단하게 predicate assertion을 구현할 수 있습니다.
+C++ mocking framework인 [gMock](../../../googlemock)을 개발하면서 mock object로 전달되는 argument를 확인하기 위한 방법으로 matcher라는 것을 새로 도입하게 되었습니다. gMock *matcher*는 predicate와 그 원리가 같으면서도 이미 풍부한 built-in matcher들을 제공하고 있습니다.
 
-아래는 matcher를 이용한 assertion macro들입니다.
+이러한 matcher들을 `*_THAT`계열 assertion macro와 함께 사용하기만 하면 됩니다.
 
 | Fatal assertion                | Nonfatal assertion             | Verifies              |
 | ------------------------------ | ------------------------------ | --------------------- |
 | `ASSERT_THAT(value, matcher);` | `EXPECT_THAT(value, matcher);` | value matches matcher |
 
-예를 들어,  built-in matcher인 `StartsWith(prefix)`를 사용하면 어떠한 문자열이 `prefix`로 시작하는지는 검사해줍니다. 아래와 같이 구현하면 됩니다.
+아래는 `StartsWith(prefix)`라는 built-in matcher를 통해서 `Foo()`의 반환값(문자열)이 `"Hello"`로 시작하는지 검사해주는 assertion을 구현한 코드입니다.
 
 ```c++
 using ::testing::StartsWith;
@@ -307,11 +307,11 @@ using ::testing::StartsWith;
     EXPECT_THAT(Foo(), StartsWith("Hello"));
 ```
 
-이렇듯 matcher의 사용법도 어렵지 않습니다. 보다 자세한 사용방법은 [여기](../../../googlemock/docs/kr/cook_book.md#matcher를-googletest-assertion처럼-사용하기)을 참조하세요. 
+이렇듯 matcher를 사용하면 간단하게 새로운 assertion을 만들 수 있습니다. 좀 더 상세한 사용방법은 [여기](../../../googlemock/docs/kr/cook_book.md#matcher를-googletest-assertion처럼-사용하기)을 참조하시기 바랍니다.
 
-gMock은 `StartsWith()` 외에도 다양한 matcher들을 제공합니다. 이를 통해 googletest에서는 불가능했던 것들도 가능하므로 관련 [문서](../../../googlemock/docs/kr/cook_book.md#matcher-사용하기)을 한 번 읽어보시길 추천합니다. 게다가 필요한 matcher를 직접 만드는 것도 가능하기 때문에 상당히 유용하며 이렇게 matcher를 직접 만드는 방법에 대한 정보는 [여기](../../../googlemock/docs/kr/cook_book.md#새로운-matcher를-빠르게-구현하기)를 참조하시기 바랍니다.
+gMock은 `StartsWith()` 외에도 다양한 built-in matcher를 제공하고 있습니다. 이러한 built-in matcher를 알아보려면[여기](../../../googlemock/docs/kr/cook_book.md#matcher-사용하기)를 참조하세요. 만약, built-in matcher 중에 원하는 기능이 없다면 matcher를 직접 구현하는 것도 가능합니다. [여기](../../../googlemock/docs/kr/cook_book.md#새로운-matcher를-빠르게-구현하기)에서 그 방법을 확인해보세요.
 
-마지막으로 matcher를 사용하기 위해서 추가적으로 필요한 환경설정은 없습니다. gMock 자체가 googletest와 함께 제공되는 번들 소프트웨어이므로 헤더파일만 포함( `#include "testing/base/public/gmock.h"`)하면 바로 사용할 수 있습니다.
+마지막으로 gMock 자체가 googletest와 함께 제공되는 번들 소프트웨어이므로 matcher 사용을 위한 추가적인 환경설정은 따로 없습니다. 헤더파일만 포함(`#include "testing/base/public/gmock.h"`)하면 바로 사용할 수 있습니다.
 
 ### More String Assertions
 
