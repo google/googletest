@@ -1073,24 +1073,24 @@ INSTANTIATE_TEST_SUITE_P(AnotherInstantiationName, FooTest,
 
 ### Value-Parameterized Abstract Tests 생성하기
 
-위에서 하나의 test suite(`FooTest`)을 여러 데이터(parameter)를 통해 검증하는 방법에 대해 알아봤습니다. 이러한 value-parameterized tests를 라이브러리에 포함시켜서 다른 사람들이 사용할 수 있도록 공유하는 것도 좋은 방법입니다. 또 이러한 방법론을 *abstract test*라고 부릅니다. 어떤 interface를 설계하면서 그 interface를 테스트하기 위한 코드도 제공한다면 interface 사용자들에게 도움이 될 것입니다. Interface를 구현하게 될 다양한 사용자를 아우르려면 아무래도 일반적인 관점에서 구현되어야 하기 때문에 standard suite of abstract tests를 제공해서 interface의 implementation class들을 검증할 수 있도록 해야 합니다. Standard suite of abstract tests를 구현하는 방법의 하나로는 factory function(test parameter을 전달받으면 test case를 생성해주는)을 제공하는 것도 괜찮습니다. 결론을 말하면 상위 interface의 test suite(abstract tests)을 만들어서 하나의 test suite만 가지고도 해당 interface를 구현한 implementation class들을 검증하는데 공통적으로 사용하자는 것입니다. 이렇게 설계가 된다면  implementation class만을 위한 test suite을 만들 때도 abstract test를 상속받기만 하면 쉽게 만들 수 있습니다.
+위에서 하나의 test suite(`FooTest`)을 여러 데이터(parameter)를 통해 검증하는 방법에 대해 알아봤습니다. 이러한 value-parameterized tests를 라이브러리에 포함시켜서 다른 사람들이 사용할 수 있도록 공유하는 것도 좋은 방법입니다. 또 이러한 방법론을 *abstract test*라고 부릅니다. 어떤 interface를 설계하면서 그 interface를 테스트하기 위한 코드도 제공한다면 interface 사용자들에게 도움이 될 것입니다. Interface를 구현하게 될 다양한 사용자를 아우르려면 아무래도 일반적인 관점에서 구현되어야 하기 때문에 standard suite of abstract tests를 제공해서 interface의 implementation class들을 검증할 수 있도록 해야 합니다. Standard suite of abstract tests를 구현하는 방법의 하나로는 factory function(test parameter을 전달받으면 test case를 생성해주는)을 제공하는 것도 괜찮습니다. 결론적으로 상위 interface의 test suite(abstract tests)을 만들어서 하나의 test suite만 가지고도 해당 interface를 구현한 implementation class들을 검증하는데 공통적으로 사용하자는 것입니다. 이렇게 설계가 된다면 특정 implementation class를 위한 test suite을 만들 때 abstract test를 상속받기만 하면 쉽게 만들 수 있습니다.
 
 Abstract test를 정의하기 위해서는 아래와 같이 코드를 구성하면 됩니다.
 
 1.  Abstract test를 *선언합니다.* 예를들어 `FooTest`라는 test fixture class를 `foo_param_test.h`라는 헤더파일에 저장합니다.
 1.  Abstract test를 *구현합니다.* 이 때는 `foo_param_test.cc`와 같은 소스파일을 만들고 헤더파일(`foo_param_test.h`)을 포함시킵니다. 내부에는 `TEST_P`를 사용해서 test case를 구현합니다.
 
-이렇게 abstract test의 구현이 완료되면 라이브러리로 배포합니다. 그럼 사용자는 abstract test 라이브러리를 링크하고 코드에는 `#include foo_param_test.h` 를 포함시킵니다. 그러면 끝입니다. 이제 `INSTANTIATE_TEST_SUITE_P()`를 사용해서 원하는 데이터에 대한 test function들을 생성하면 됩니다. 이를 통해 abstract test suite 라이브러리만 포함하면 자신이 필요한 value parameter를 가지고 test case를 생성할 수 있게 됩니다. 위에서도 확인한 내용이지만 `INSTANTIATE_TEST_SUITE_P()`는 첫번째 argument만 다르다면 동일한 test suite에다가 여러번 사용하는 것도 가능합니다. (소스파일이 서로 다르면 더욱 좋습니다.)
+이렇게 abstract test의 구현이 완료되면 라이브러리로 배포합니다. 그럼 사용자는 abstract test 라이브러리를 링크하고 코드에는 `#include foo_param_test.h` 를 포함시킵니다. 그러면 끝입니다. 이제 `INSTANTIATE_TEST_SUITE_P()`를 사용해서 원하는 데이터를 가지고 test function을 생성할 수 있습니다. 이를 통해 abstract test suite 라이브러리만 포함하면 자신이 필요한 value parameter를 가지고 test case를 생성할 수 있게 됩니다. 위에서도 확인한 내용이지만 `INSTANTIATE_TEST_SUITE_P()`는 첫번째 argument만 다르다면 동일한 test suite에다가 여러번 사용하는 것도 가능합니다. (소스파일이 서로 다르면 더욱 좋습니다.)
 
 ### Value-Parameterized Test Parameters 이름짓기
 
-지금까지는 `INSTANTIATE_TEST_SUITE_P()`에 3개의 argument만 사용했지만 필요하다면 4번째 argument도 사용할 수 있습니다. 4번째 argument로는 function(또는 functor)을 전달할 수 있으며 그 목적은 test function의 이름을 만들 때 parameter를 사용하기 위함입니다. (3개의 argument만 사용하면 0,1,2와 같은 숫자로 test function의 이름이 정해졌습니다.) 그리고 전달되는 function(또는 functor)은 `testing::TestParamInfo<class ParamType>` 타입의 값을 전달받아서 `std::string`을 반환하는 타입의 function이어야 합니다.
+지금까지는 `INSTANTIATE_TEST_SUITE_P()`에 3개의 argument만 사용했지만 필요하다면 4번째 argument도 사용할 수 있습니다. 4번째 argument에는 function(또는 functor)을 전달할 수 있으며 그 목적은 test function의 이름을 만들 때 parameter를 사용하기 위함입니다. (3개의 argument만 사용하면 0,1,2와 같은 숫자로 test function의 이름이 정해졌습니다.) 그리고 전달되는 function(또는 functor)은 `testing::TestParamInfo<class ParamType>` 타입의 값을 전달받아서 `std::string` 타입을 반환하는 function이어야 합니다.
 
-Googletest는 이러한 4번째 argument를 쉽게 사용할 수 있도록 `testing::PrintToStringParamName`라는 builtin test suffix generator를  제공하고 있습니다. 단, builtin test suffix generator는 `std:string`이나 C string은 지원하지 않으며 `test::PrintToString(GetParam())`이라는 return type을 통해서 `std::string`으로 변환하여 반환하게 됩니다.
+Googletest는 이러한 4번째 argument를 쉽게 사용할 수 있도록 `testing::PrintToStringParamName`라는 built-in test suffix generator를  제공하고 있습니다. 단, built-in test suffix generator는 `std:string`이나 C string은 지원하지 않으며 `test::PrintToString(GetParam())`이라는 return type을 통해서 `std::string`으로 변환하고 그것을 반환합니다.
 
-NOTE: 모든 test case(혹은 test function)의 이름은 유일해야 하고 ASCII 문자나 숫자만 포함할 수 있으며 값이 없어도 안 됩니다. 마지막으로 [should not contain underscores](faq.md#test-case-또는-test-suite의-이름을-정할-때-밑줄을-사용하면-안되는-이유가-뭔가요)에 명시된 것처럼 밑줄(`_`)은 사용할 수는 있지만 최대한 지양해야 합니다. 
+NOTE: 모든 test case(혹은 test function)의 이름은 유일해야 하고 ASCII 문자나 숫자만 포함할 수 있습니다. 당연하지만 값이 없어도 안 됩니다. 마지막으로 [should not contain underscores](faq.md#test-case-또는-test-suite의-이름을-정할-때-밑줄을-사용하면-안되는-이유가-뭔가요)에 명시된 것처럼 밑줄(`_`)은 사용할 수는 있지만 최대한 지양해야 합니다. 
 
-아래는 4번재 argument에 builtin test suffix generator를 사용한 예제입니다.
+아래는 4번째 argument에 built-in test suffix generator를 사용한 예제입니다.
 
 ```c++
 class MyTestSuite : public testing::TestWithParam<int> {};
@@ -1104,7 +1104,7 @@ INSTANTIATE_TEST_SUITE_P(MyGroup, MyTestSuite, testing::Range(0, 10),
                          testing::PrintToStringParamName());
 ```
 
-이에 반해서 아래코드처럼 custom function(functor)을 직접 구현해서 사용하면 test parameter name을 보다 세밀하게 조작할 수도 있습니다. 물론, builtin test suffix generator가 나쁜 것은 아니지만 사용자가 입력한 parameter를 `std::string`으로 자동형변환하기 때문에 사용성이 떨어지는 경우가 발생하기도 합니다. 아래 예제는 parameter, enumeration type, string을 가지고 test parameter name을 사용자가 직접 생성하는 코드를 보여줍니다. (코드를 간결하게 하기 위해 labmda를 사용했습니다.)
+이에 반해서 아래코드처럼 custom function(functor)을 직접 구현해서 사용하면 test parameter name을 보다 세밀하게 조작할 수도 있습니다. 물론, built-in test suffix generator가 나쁜 것은 아니지만 사용자가 입력한 parameter를 `std::string`으로 형변환하기 때문에 사용성이 조금 떨어지는 경우가 발생하기도 합니다. 아래 예제는 parameter, enumeration type, string을 가지고 test parameter name을 사용자가 직접 생성하는 코드를 보여줍니다. (코드를 간결하게 하기 위해 labmda를 사용했습니다.)
 
 ```c++
 enum class MyType { MY_FOO = 0, MY_BAR = 1 };
@@ -1128,13 +1128,13 @@ INSTANTIATE_TEST_SUITE_P(
 
 ## Typed Tests
 
-동일한 요구사항을 수행하기 위한 interface가 있고 이를 위한 implementation class가 여러개 있다고 가정해 봅니다. 이 때, implementation class는 하나의 타입으로도 볼 수 있기 때문에 위의 상황은 결국 같은 동작을 여러가지 타입에 대해서 수행한다는 의미와 동일합니다. 특히, 이 경우에는 상위 interface가 동일하기 때문에 해당 interface에 대한 테스트가 다양한 타입(implementation class)을 커버할 수 있다면 좋을 것입니다. 이러한 테스트 방법을 *typed tests*라고 합니다. 위의  value-parameterized tests가 하나의 테스트를 가지고 여러가지 값(parameter)을 검증했다면, typed tests는 하나의 테스트를 가지고 여러가지 타입을 검증하게 됩니다.
+동일한 요구사항을 수행하기 위한 interface가 있고 이를 위한 implementation class가 여러개 있다고 가정해 봅니다. 이 때, implementation class는 하나의 타입으로도 볼 수 있기 때문에 위의 상황은 결국 같은 동작을 여러가지 타입에 대해서 수행한다는 의미와 동일합니다. 특히, 이 경우에는 상위 interface가 동일하기 때문에 해당 interface에 대한 테스트가 다양한 타입(implementation class)을 커버할 수 있다면 좋을 것입니다. 이러한 테스트 방법을 *typed tests*라고 합니다. 조금 헷갈릴 수 있는데요. 바로 위에서 설명한 value-parameterized tests가 하나의 테스트를 가지고 여러가지 값(parameter)을 검증했다면, typed tests는 하나의 테스트를 가지고 여러가지 타입(type)을 검증하는 것입니다.
 
 물론 `TEST` 또는 `TEST_F`를 템플릿으로 만들거나 여러가지 타입에 대해서 모두 동작하도록 여러개를 구현하는 것도 가능합니다. 단, 그렇게되면 `m`개의 test case를 `n`개의 타입에 대해서 수행하려 할 때 `m*n`개의 `TEST`를 구현하게 될 수도 있습니다. 이런 작업은 힘들고 또 유지보수하기도 힘들 것입니다.
 
 *Typed tests*는 이러한 내용을 보다 쉽게 구현할 수 있도록 도와줍니다. 검증할 대상타입이 무엇인지 미리 알고 있어야 한다는 단점은 있지만, 구현을 비롯한 다른 측면에서는 더 좋습니다.
 
-먼저, test fixture class를 구현합니다. 이 때, `::testing::Test`를 상속받는 부분은 일반적인 test fixture와 동일하지만 template class으로 선언해야 합니다.
+이를 위해서 먼저 test fixture class를 구현합니다. 이 때, `::testing::Test`를 상속받는 부분은 일반적인 test fixture와 동일하지만 template class으로 선언해야 합니다.
 
 ```c++
 template <typename T>
@@ -1147,16 +1147,16 @@ class FooTest : public ::testing::Test {
 };
 ```
 
-이제 위에서 정의한 test fixture class와 검증하고자 하는 타입들을 서로 연결합니다. 구현방법은 아래와 같습니다.
+이제 위에서 정의한 test fixture class에 검증하고자 하는 타입들을 연결합니다. 구현방법은 아래와 같습니다.
 
 ```c++
 using MyTypes = ::testing::Types<char, int, unsigned int>;
 TYPED_TEST_SUITE(FooTest, MyTypes);
 ```
 
-위 코드 `TYPED_TEST_SUITE`의 2번째 argument는 여러가지 타입을 전달받고 있습니다. 이렇게 타입을 전달 할 때는 `using`이나 `typedef`를 통해서 alias를 만든 다음에 그 alias를 전달해야 합니다. 그렇지 않으면 compiler가 comma(`,`)를 제대로 해석하지 못합니다.
+`TYPED_TEST_SUITE`의 2번째 argument에는 여러가지 타입을 묶어서 전달하고 있는데요. 이 때 주의해야 할 점은 `using`이나 `typedef`를 통해서 alias를 만들고 그 alias를 전달해야 한다는 것입니다. 그렇지 않으면 compiler가 comma(`,`)를 제대로 해석하지 못합니다.
 
-이제 test case를 정의할 시간입니다. Typed tests에서는 `TEST_F()` 대신에 `TYPED_TEST()`를 사용해서 구현해야 합니다. 관련 예제코드는 아래와 같습니다.
+이제 test case를 정의할 시간입니다. Typed tests에서는 `TEST_F()` 대신에 `TYPED_TEST()`를 사용해서 test case를 구현합니다. 관련 예제코드는 아래와 같습니다.
 
 ```c++
 TYPED_TEST(FooTest, DoesBlah) {
@@ -1180,13 +1180,13 @@ TYPED_TEST(FooTest, DoesBlah) {
 TYPED_TEST(FooTest, HasPropertyA) { ... }
 ```
 
-전체 예제코드는 [sample6_unittest.cc](../../samples/sample6_unittest.cc)에서 확인할 수 있습니다.
+도움이 되셨나요? 더 자세한 예제코드는 [sample6_unittest.cc](../../samples/sample6_unittest.cc)에서도 확인할 수 있습니다.
 
 ## Type-Parameterized Tests
 
-*Type-parameterized tests* 는 typed tests와 유사하지만 필요한 타입을 미리 지정할 필요가 없다는 점이 다릅니다. 테스트만 미리 구현해 놓은 상태에서 타입은 나중에 지정해도 괜찮습니다. 원한다면 여러번 지정할 수도 있습니다.
+*Type-parameterized tests* 는 typed tests와 유사하지만 필요한 타입을 미리 지정할 필요가 없다는 점이 다릅니다. 테스트만 미리 구현해 놓은 상태에서 타입은 나중에 지정해도 괜찮습니다. 또, 원한다면 여러번 지정하는 것도 가능합니다.
 
-Typed tests에서도 이야기했지만, interface를 설계하고 있다면 해당 interface를 상속받은 다양한 타입(implementation class)을 검증하는 방법도 준비하는 것이 좋습니다. 이 때, type-parameterized tests를 사용하면 각 타입에 대한 테스트를 중복해서 구현하지 않아도 됩니다.
+Typed tests에서도 이야기했지만, interface를 설계하고 있다면 해당 interface를 상속받게 될 다양한 타입(implementation class)을 검증하는 방법도 준비하는 것이 좋습니다. 왜냐하면 각 타입에 대한 테스트를 중복해서 구현하지 않아도 되기 때문입니다. 그럼 이제부터 type-parameterized tests를 사용하는 방법에 대해 알아보겠습니다.
 
 먼저 typed tests에서 했던 것처럼 test fixture class를 template class으로 정의합니다.
 
@@ -1203,7 +1203,7 @@ class FooTest : public ::testing::Test {
 TYPED_TEST_SUITE_P(FooTest);
 ```
 
-이제 test case를 구현합니다. 일반적인 과정은 기존과 동일합니다. 단, 이제까지 써왔던 macro(`TEST`, `TEST_F`, `TYPED_TEST`)가 아니라 `TYPED_TEST_P()`라는 macro를 사용해야 합니다.
+이제 test case를 구현합니다. 일반적인 과정은 기존과 동일합니다. 단, 이제까지 써왔던 macro(`TEST`, `TEST_F`, `TYPED_TEST`)가 아니라 `TYPED_TEST_P()`라는 또 다른 macro를 사용해야 합니다.
 
 ```c++
 TYPED_TEST_P(FooTest, DoesBlah) {
@@ -1215,21 +1215,21 @@ TYPED_TEST_P(FooTest, DoesBlah) {
 TYPED_TEST_P(FooTest, HasPropertyA) { ... }
 ```
 
-다음으로 위에서 구현한 test suite과 test case들을 `REGISTER_TYPED_TEST_SUITE_P`를 통해서 연결해줍니다. Macro의 첫 번째 argument는 test suite 이름이고, 그 다음부터는 각 test case들의 이름을 하나하나 작성합니다. 관련 코드는 아래와 같습니다.
+다음으로 위에서 구현한 test suite과 test case들을 `REGISTER_TYPED_TEST_SUITE_P`를 통해서 연결해줍니다. Macro의 첫 번째 argument는 test suite 이름이고, 그 다음부터는 각 test case들의 이름을 하나하나 적어줍니다. 관련 코드는 아래와 같습니다.
 
 ```c++
 REGISTER_TYPED_TEST_SUITE_P(FooTest,
                             DoesBlah, HasPropertyA);
 ```
 
-여기까지 했으면 모든 사용준비가 끝났으며 위의 내용들을 헤더파일에 넣어서 제공한다면 재사용성 측면에서도 좋을 것입니다. 사용할 떄는 테스트하려는 타입만 초기화하면 됩니다. 아래는 예제코드입니다.
+여기까지 했으면 모든 사용준비가 끝났습니다. 위의 내용들을 헤더파일에 넣어서 제공한다면 재사용성 측면에서도 좋을 것입니다. 사용할 때는 아래처럼 테스트하려는 타입을 초기화하기만 하면 됩니다.
 
 ```c++
 typedef ::testing::Types<char, int, unsigned int> MyTypes;
 INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
 ```
 
-타입 초기화를 위한 macro는 `INSTANTIATE_TYPED_TEST_SUITE_P`입니다. 여기서 macro의 첫 번째 argument는 test suite 이름을 만들 때의 prefix로 사용되기 때문에 중복해서 사용하면 안됩니다.
+타입 초기화를 위한 macro는 `INSTANTIATE_TYPED_TEST_SUITE_P`입니다. 여기서 macro의 첫 번째 argument가 test suite 이름의 prefix로 사용되기 때문에 중복해서 사용하면 안됩니다.
 
 마지막으로 타입이 1개뿐이라면 굳이 alias를 만들지 않고 해당 타입이름을 바로 사용해도 됩니다.
 
@@ -1237,30 +1237,30 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
 INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, int);
 ```
 
-전체 예제코드는 [sample6_unittest.cc](../../samples/sample6_unittest.cc)에서 확인할 수 있습니다.
+여기까지입니다. 이와 관련한 전체 예제코드는 [sample6_unittest.cc](../../samples/sample6_unittest.cc)에서도 확인할 수 있습니다.
 
 ## Private Code 테스트하기
 
-어떤 software의 interface가 아니라 내부구현만을 변경하고 있다면 interface에 대한 테스트는 변경작업에 관계없이 잘 동작해야 되는게 맞습니다. 이처럼 어떤 software를 외부사용자(client) 입장에서 테스트하는 접근방법을 **black-box testing**이라고 합니다. 예를 들어 해당 software가 class라면 public method에 대한 테스트를 주로 구현하게 될 것입니다.
+만약, 어떤 interface를 구현하는 것이 아니라 해당 interface의 내부구현만을 변경하고 있다면 interface에 대한 테스트는 그러한 변경작업에 관계없이 잘 동작해야 되는게 맞습니다. 이와 같이 어떤 software에 대해서 외부사용자(client) 입장에서 테스트하는 접근방법을 **black-box testing**이라고도 합니다. 여기서 외부사용자 입장이라는 것은 interface 혹은 class의 public method에 대한 테스트를 의미합니다.
 
-**Black-box testing** 관점에서 볼 때, public method가 아니라 내부 구현에 대한 테스트가 필요하다고 느꼈다면 **사실은 테스트에 앞서 class 설계에 문제가 없는지를 먼저 검토해야 합니다.** 예를 들어 대상 class가 너무 많은 일을 하는건 아닌지 점검하고 문제가 있다면 기존 class를 분리하는 등의 설계변경이 필요할 수도 있습니다. (구현을 담당하는 implemetation class를 새로 추가하는 것도 해결방법이 될 수가 있습니다.)
+**Black-box testing** 관점에서 볼 때, public method가 아니라 내부 구현에 대한 테스트가 필요하다고 느꼈다면 **사실은 테스트에 앞서 class 설계에 문제가 없는지를 먼저 검토해야 합니다.** 예를 들어 대상 class가 너무 많은 일을 하는건 아닌지 점검하고 문제가 있다면 기존 class를 분리하는 등의 설계변경이 필요할 수도 있습니다. (구현을 담당하는 implemetation class를 새로 추가하는 것도 해결방법 중에 하나입니다.)
 
 이유야 어찌 됐건, 외부로 노출되는 interface(public method)가 아니라 내부 구현에 대한 테스트를 하고 싶다고 가정해 봅시다. 아마도 아래와 같은 function들이 그러한 테스트의 대상이 될 것입니다.
 
 *   Static function(class의 static method를 의미하는 것이 아니라 c-style global function을 의미합니다.) 또는 unnamed namespace에 정의된 function
 *   Class의 private method 또는 protected method
 
-이들을 테스트하기 위해서, 아래와 같은 방법을 사용할 수 있습니다.
+이들을 테스트하기 위해서는 아래와 같은 방법을 사용할 수 있습니다.
 
-*   기본적으로 static function과 unnamed namespace function은 어디서든 사용이 가능합니다. 따라서 이들을 테스트하려면 해당 function이 구현된 `.cc` 파일만 `#include` 하면 됩니다. 다만, `.cc` 파일을 include하는 것이 좋은 구현이라고 볼 수는 없기 때문에 꼭 필요한 경우에 테스트코드에서만 사용해야 합니다.
+*   기본적으로 static function과 unnamed namespace function은 어디서든 사용이 가능합니다. 따라서 이들을 테스트하려면 해당 function이 구현된 `.cc` 파일만 `#include` 하면 됩니다. 다만, `.cc` 파일을 include하는 것이 좋은 구현이라고 볼 수는 없기 때문에 (꼭 필요한 경우에) 테스트코드에서만 사용해야 합니다.
     
-    더 좋은 방법은 이들을 특정한 namespace에 모아서 `private`하게 사용하는 것입니다. 예를 들어 진행중인 프로젝트에서 일반적인 사용하는 namespace가 `foo`라면 `foo::internal`이라는 namespace를 새로 만들고 거기에서 `private`한 function들을 모두 모아서 관리하는 것입니다. 그런 다음에 `-internal.h`와 같은 헤더파일을 통해 사용하면 됩니다. 다만, 이 과정에서 주의할 점은 `foo::internal`과 `-internal.h`는 해당 프로젝트의 개발자들만 접근할 수 있도록 제한해야한다는 점입니다. 이러한 방법을 이용하면 외부에 구현을 노출시키지 않고도 테스트가 가능해집니다.
+    더 좋은 방법은 이들을 특정한 namespace에 모아서 `private`하게 사용하는 것입니다. 예를 들어 진행중인 프로젝트에서 일반적으로 사용하는 namespace가 `foo`라면 `foo::internal`이라는 namespace를 새로 만들고 거기에 `private`한 function들을 모두 모아서 관리하는 것입니다. 그런 다음에는 `-internal.h`와 같은 헤더파일을 포함해서 사용하면 됩니다. 다만, 이 과정에서 주의할 점은 `foo::internal`과 `-internal.h`는 해당 프로젝트의 개발자들만 접근할 수 있도록 제한해야 한다는 점입니다. 이러한 방법을 이용하면 외부에 구현을 노출시키지 않고도 테스트가 가능해집니다.
     
-*   Class의 private method는 해당 class 혹은 friend 에서만 호출이 가능합니다. 따라서 테스트대상 class에서 test fixture class나 혹은 method를 friend로 선언하는 작업이 필요합니다. 그런데 아직도 문제가 있습니다. 왜냐하면 googletest의 test function들은 사실 내부적으로는 test fixture class를 상속받고 있기 때문에 test function에서 테스트대상의 private 영역에 바로 접근할 수가 없습니다. C++에서 base class끼리 friend라고 해도 그 관계가 dervied class로 전달되지는 않기 때문입니다.(아버지의 친구가 아들의 친구가 아니듯이) 이 문제를 해결하기 위해서 test fixture class에 테스트대상의 private 영역에 대한 accessor function도 구현해야 합니다. 그래야만 test function에서 해당 accessor를 통해 테스트대상의 private영역에 접근할 수 있습니다.
+*   Class의 private method는 해당 class 혹은 friend 에서만 호출이 가능합니다. 따라서 테스트대상 class에서 test fixture class나 혹은 method를 friend로 선언하는 작업이 필요합니다. 그런데 아직도 문제가 있습니다. 왜냐하면 googletest의 test function들은 사실 내부적으로는 test fixture class를 상속받고 있기 때문에 test function에서 테스트대상의 private 영역에 바로 접근할 수가 없습니다. C++에서 base class끼리 friend라고 해도 그 관계가 derived class로 전달되지는 않기 때문입니다.(아버지의 친구가 아들의 친구가 아니듯이) 이 문제를 해결하기 위해서 test fixture class에 테스트대상의 private 영역에 대한 accessor function도 구현해야 합니다. 그래야만 test function에서 해당 accessor를 통해 테스트대상의 private영역에 접근할 수 있습니다.
     
     위에서 설명했듯이 여기서도 전체적인 리팩토링을 하는 것이 하나의 방법이 될 수 있습니다. 방법은 테스트대상의 private function들을 implementation class로 분리하는 것입니다 그 다음에 `*-internal.h`와 같이 개발자만 사용할 수 있는 헤더파일을 만들고 사용하면 됩니다. 이 헤더파일을 외부에서는 사용할 수 없도록 제한하면 마치 private function인 것처럼 사용할 수 있습니다. 이러한 방법은 상당히 널리 사용되는 방법으로서 소위 [Pimpl](https://www.gamedev.net/articles/programming/general-and-gameplay-programming/the-c-pimpl-r1794/)(Private Implementation) idiom이라고도 부릅니다.
     
-    다시 friend 사용법으로 돌아와서 googletest는 friend관계를 간단히 사용하기 위한 기능도 제공하고 있습니다. 테스트대상 class에서 아래와 같이 사용하면 됩니다. 별도의 accessor function을 구현할 필요가 없다는 장점이 있으며 필요한 test function별로 지정해야 합니다.
+    다시 friend 사용법으로 돌아와서 googletest는 friend관계를 간단히 사용하기 위한 기능도 제공하고 있습니다. 테스트대상 class에서 아래와 같이 사용하면 별도의 accessor function을 구현할 필요가 없다는 장점이 있습니다. 필요한 test function별로 각각 지정해야 합니다.
 
     ```c++
         FRIEND_TEST(TestSuiteName, TestName);
@@ -1319,9 +1319,9 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, int);
 
 ## "Catching" Failures
 
-Googletest를 이용해서 테스트 도구를 만든다면, 테스트 도구가 잘 동작하는지도 확인이 필요합니다. 역설적이만 그런 경우에도 googletest를 사용할 수 있습니다.
+만약, Googletest를 기반으로 하는 새로운 테스트 도구를 만들고 있다면, 그러한 테스트 도구가 잘 동작하는지도 확인이 필요합니다. 역설적이만 그런 경우에도 googletest를 사용할 수 있습니다.
 
-테스트 도구의 목적은 failure를 잘 찾아내는 데에 있습니다. 따라서 그러한 테스트 도구를 검증하려면 원하는 상황에서 failure가 발생하는지 테스트하면 됩니다. 근데 만약, 테스트 도구가 failure를 알리기 위한 방법으로 exception을 던지도록 구현되어 있다면 어떻게 해야 할까요? 알다시피 googletest는 기본적으로 exception를 사용하지 않고 있습니다.
+테스트 도구의 목적은 failure를 잘 찾아내는 데에 있습니다. 따라서 그러한 테스트 도구를 검증하려면 원하는 상황에서 failure가 발생하는지 테스트하면 됩니다. 근데 만약, 테스트 도구가 failure를 알리기 위한 방법으로 exception을 던지도록 구현되어 있다면 어떻게 해야 할까요? (알다시피 googletest는 기본적으로 exception를 사용하지 않고 있습니다.)
 
 이를 위해서는 `gunit-spi.h`라는 파일을 사용해야 합니다. 이 파일에는 exception 확인이 가능한 macro들을 제공하고 있습니다. 아래 내용을 확인하세요.
 
@@ -1337,7 +1337,7 @@ Googletest를 이용해서 테스트 도구를 만든다면, 테스트 도구가
 
 위 macro도 동작은 동일하며 대신 non-fatal failure를 확인하는데 사용합니다.
 
-위의 2가지 macro는 current thread에서 발생한 failure들만 확인할 수 있습니다. 따라서 current thread가 아닌 thread에서 failure가 발생하면 검증이 불가능합니다. 그럼 `statement`에서 생성한 thread에서 failure가 발생했다면 어떻게 확인해야 할까요? 그런 경우에는 아래 macro를 사용하기 바랍니다.
+다만, 위의 2가지 macro는 current thread에서 발생한 failure들만 확인할 수 있습니다. 따라서 current thread가 아닌 thread에서 failure가 발생하면 검증이 불가능합니다. 그럼 `statement`에서 생성한 thread에서 failure가 발생했다면 어떻게 확인해야 할까요? 그런 경우에는 아래 macro를 사용하기 바랍니다.
 
 ```c++
   EXPECT_FATAL_FAILURE_ON_ALL_THREADS(statement, substring);
@@ -1346,7 +1346,7 @@ Googletest를 이용해서 테스트 도구를 만든다면, 테스트 도구가
 
 NOTE: Windows환경에서는 위와 같이 multiple thread에서 failure를 확인하는 방법을 사용할 수 없습니다.
 
-위의 macro를 사용함에 있어서 아래와 같은 제약사항은 주의하시기 바랍니다.
+마지막으로 위의 macro들을 사용함에 있어서 아래의 제약사항들은 주의하시기 바랍니다.
 
 1.  위의 macro들은 failure message를 출력할 수 없습니다.
 
@@ -1356,9 +1356,9 @@ NOTE: Windows환경에서는 위와 같이 multiple thread에서 failure를 확�
 
 ## 개별 Test를 런타임에 등록하기
 
-Googletest에서 test case를 정의할 때 `*TEST*`계열 macro를 사용하는 것이 일반적입니다. 실제로도 대다수의 개발자들이 `*TEST*`계열 macro를 사용하고 있으며 이는 곧 test case들이 compile time에 등록됨을 의미합니다. 그럼 혹시 test case를 runtime에 등록하고 싶은 사용자가 있으신가요? 그러한 예로는 별도의 설정파일(.config 등)에서 개별 test case의 정보를 관리하다가 test program이 실행된 후에 설정파일을 읽어서 test case를 등록하고 싶은 경우가 있을 것입니다. Googletest는 그러한 사용자를 위해서 `::testing::RegisterTest`를 제공합니다.
+Googletest에서 test case를 정의할 때 `*TEST*`계열 macro를 사용하는 것이 일반적입니다. 실제로도 대다수의 개발자들이 `*TEST*`계열 macro를 사용하고 있으며 이들은 내부적으로 test case들을 compile time에 등록합니다. 그럼 혹시 test case를 runtime에 등록하고 싶은 사용자가 있으신가요? 예를 들어 별도의 설정파일(.config 등)에서 test case의 정보를 관리하다가 test program이 실행된 후에 설정파일을 읽어서 test case를 등록하고 싶은 경우가 있을 것입니다. Googletest는 그러한 사용자를 위해서 `::testing::RegisterTest`를 제공하고 있습니다.
 
-단, `::testing::RegisterTest`는 복잡도가 상당히 높기 때문에 꼭 필요한 경우에만 사용하기 바랍니다. 되도록이면 `*TEST*`를 통해서 정적으로 등록하는 것이 좋습니다.
+다만, 이러한 기능을 제공하고 있기는 하지만 `::testing::RegisterTest`는 복잡도가 상당히 높기 때문에 꼭 필요한 경우에만 사용하기 바랍니다. 되도록이면 `*TEST*`를 통해서 정적으로 등록하는 것이 좋습니다.
 
 그럼 googletest에서 제공하는 `::testing::RegisterTest`의 정의는 아래와 같습니다.
 
@@ -1368,7 +1368,8 @@ TestInfo* RegisterTest(const char* test_suite_name, const char* test_name,
                        const char* type_param, const char* value_param,
                        const char* file, int line, Factory factory);
 ```
-마지막 argument인 `factory`는 test case(function)를 생성할 수 있는 factory function를 의미합니다. 이 때는 꼭 function pointer가 아니라더라도 factory역할을 할 수 있는 callable object라면 어느것이라도 괜찮습니다. 단, 어떤 걸 사용하든 그 return type은 `Factory`타입이 되어야 하며 여기서 `Factory`는 test suite class를 의미합니다. 위 내용들은 곧 첫 번째 argument이자 구분자인 `test_suite_name`에 속한 모든 test case들은 동일한 return type(test fixture class)을 가져야 함을 의미합니다. 이제 이러한 제약사항들이 모두 runtime에 점검될 것입니다.
+
+마지막 argument인 `factory`는 test case(function)를 생성할 수 있는 factory function를 의미합니다. 이 때는 꼭 function pointer가 아니더라도 factory역할을 할 수 있는 callable object라면 어느 것이라도 괜찮습니다. 단, 어떤 걸 사용하든 return type은 `Fixture`타입이 되어야 하며 여기서 `Fixture`는 test suite class를 의미합니다. 정리하면 첫 번째 argument이자 구분자인 `test_suite_name`에 속한 모든 test case들은 동일한 return type(test fixture class)을 가져야 함을 의미합니다. 이제 이러한 제약사항들이 모두 만족되면 runtime에 test case를 등록할 수 있을 것입니다.
 
 Googletest는 `factory`로부터 test fixture class를 추론할 수 있기 때문에 test suite class의 function(`SetUpTestSuite`, `TearDownTestSuite `등)들도 호출할 수 있게 됩니다.
 
