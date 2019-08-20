@@ -317,7 +317,7 @@ gMock은 `StartsWith()` 외에도 다양한 built-in matcher를 제공하고 있
 
 ([이전](#gmock-matchers를-이용한-asserting) 섹션을 먼저 읽으세요)
 
-gMock은 문자열과 관련된 [string matchers](../../../googlemock/docs/kr/cheat_sheet.md#string-matchers)도 풍부하게 제공합니다. 이렇게 제공되는 built-in matcher들을 `EXPECT_THAT()` 또는 `ASSERT_THAT()`과 함께 사용하기만 하면 됩니다. 이를 통해 sub-string, prefix, suffix, regular expression과 같이 다양한 방법으로 string assertion을 수행할 수 있습니다. 사용방밥은 아래 예제코드와 같습니다.
+바로 위에서도 확인했듯이 gMock은 문자열과 관련된 [string matchers](../../../googlemock/docs/kr/cheat_sheet.md#string-matchers)를 풍부하게 제공하고 있습니다. 이렇게 제공되는 built-in matcher들을 `EXPECT_THAT()` 또는 `ASSERT_THAT()`과 함께 사용하기만 하면 됩니다. 이를 통해 sub-string, prefix, suffix, regular expression과 같은 다양한 방법의 string assertion을 수행할 수 있습니다. 사용방법은 아래 예제코드와 같습니다.
 
 ```c++
 using ::testing::HasSubstr;
@@ -327,7 +327,7 @@ using ::testing::MatchesRegex;
   EXPECT_THAT(bar_string, MatchesRegex("\\w*\\d+"));
 ```
 
-또한, 문자열이 HTML이나 XML을 포함할때는 [XPath expression](http://www.w3.org/TR/xpath/#contents)를 통해서 DOM tree와의 비교를 수행할 수 있습니다.
+또한, 문자열이 HTML이나 XML을 포함할때는 [XPath expression](http://www.w3.org/TR/xpath/#contents)를 통해서 DOM tree와의 비교도 수행할 수 있습니다.
 
 ```c++
 // Currently still in //template/prototemplate/testing:xpath_matcher
@@ -345,7 +345,7 @@ Windows 환경의 `HRESULT`를 위한 assertion도 제공하고 있습니다.
 | `ASSERT_HRESULT_SUCCEEDED(expression)` | `EXPECT_HRESULT_SUCCEEDED(expression)` | `expression` is a success `HRESULT` |
 | `ASSERT_HRESULT_FAILED(expression)`    | `EXPECT_HRESULT_FAILED(expression)`    | `expression` is a failure `HRESULT` |
 
-위의 assertion을 사용하면 주어진 `expression`을 수행하고 그 결과인 `HRESULT`를 사람이 알아볼 수 있게 출력해 줍니다.
+위의 assertion을 사용하면 주어진 `expression`을 수행하고 그 결과인 `HRESULT`를 출력해 줍니다.
 
 사용방법은 아래와 같습니다.
 
@@ -364,9 +364,9 @@ ASSERT_HRESULT_SUCCEEDED(shell->ShellExecute(CComBSTR(url), empty, empty, empty,
 ::testing::StaticAssertTypeEq<T1, T2>();
 ```
 
-위의 assertion은 성공하면 별도의 동작없이 그대로 계속 진행하게 됩니다. 단, 실패하게 되면 compile error가 발생합니다. 즉, compiler에 의해서 assertion의 결과가 판정됩니다. 이에 대한 error message는 compiler마다 다르겠지만 보통 `T1`, `T2`의 실제 타입을 출력해 줍니다. 템플릿 코드를 구현할 때 유용하게 쓸 수 있을 것입니다.
+Type assertion의 특이한 점은 실패했을 때 compile error가 발생한다는 것입니다. 즉, compiler에 의해서 assertion의 결과가 판정됩니다. 출력되는 error message는 compiler마다 조금씩 다르겠지만 대개의 경우 `T1`, `T2`의 실제 타입을 출력해 줍니다. 템플릿 코드를 구현할 때 유용하게 쓸 수 있을 것입니다.
 
-**Caveat**: 한가지 주의할 점은 위의 assertion을 function template이나 class template에서 사용하게 되면 해당 타입에 대한 template 코드가 실제로 만들어 질 때만 동작한다는 것입니다. 왜냐하면 C++에서는 호출되지 않거나 사용되지 않는 template은 compile 대상에도 포함되지 않기 때문입니다. 예를 들어 아래와 같은 class template이 있다고 가정해보겠습니다.
+**Caveat**: 한가지 주의할 점은 위의 assertion을 function template이나 class template에서 사용하게 되면 해당 타입에 대한 template 코드가 실제로 만들어 질 때만 동작한다는 것입니다.(C++ 자체의 특징입니다.) 왜냐하면 C++에서는 호출되지 않거나 사용되지 않는 template은 compile 대상에도 포함되지 않기 때문입니다. 예를 들어 아래와 같은 class template이 있다고 가정해보겠습니다.
 
 ```c++
 template <typename T> class Foo {
@@ -375,13 +375,13 @@ template <typename T> class Foo {
 };
 ```
 
-이 때, 아래 코드는 `StaticAssertTypeEq`로 전달되는 2개 타입(`int`, `bool`)이 서로 다름에도 compile error가 발생하지 않습니다. 왜냐하면 `Bar()`는 자신을 호출하는 코드가 없기 때문에 compile 대상에서 제외되기 때문입니다.
+위에서 정의한 class template `Foo`를 사용하는 코드를 보겠습니다. 먼저 아래의 `Test1()`은 `StaticAssertTypeEq`로 전달되는 2개 타입(`int`, `bool`)이 서로 다름에도 compile error가 발생하지 않습니다. 왜냐하면 `Bar()`를 호출하는 코드가 없기 때문에 compile 대상에서도 제외되기 때문입니다.
 
 ```c++
 void Test1() { Foo<bool> foo; }
 ```
 
-반면에 아래 코드는 `Foo<bool>::Bar()`를 호출하는 코드가 존재하기 때문에 assertion이 동작하게 될 것입니다. 물론, 그 결과는 타입 불일치로 인한 compile error입니다.
+반면에 아래의 `Test2()`는 `Foo<bool>::Bar()`를 호출하는 코드가 존재하기 때문에 assertion이 동작하게 될 것입니다. 물론, 그 결과는 타입 불일치로 인한 compile error입니다.
 
 ```c++
 void Test2() { Foo<bool> foo; foo.Bar(); }
