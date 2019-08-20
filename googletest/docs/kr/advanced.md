@@ -1415,7 +1415,7 @@ int main(int argc, char** argv) {
 
 ## 현재 수행중인 Test의 이름 확인하기
 
-테스트코드를 구현하다 보면 현재 실행중인 test case의 이름을 확인하고 싶은 경우도 있을 것입니다. 예를 들어 test case의 이름에 따라 golden file을 바꿔가며 테스트를 수행할 수도 있습니다. (golden file: 테스트의 결과를 저장하거나 비교하기 위해 생성하는 파일) Googletest의 `::testing::TestInfo`  class는 이러한 정보를 가지고 있으며 사용자도 이러한 정보를 사용할 수 있습니다.
+테스트코드를 구현하다 보면 현재 실행중인 test case의 이름을 확인하고 싶은 경우도 있을 것입니다. 예를 들어 test case의 이름에 따라 golden file을 바꿔가며 테스트를 수행할 수도 있습니다. (golden file: 테스트의 결과를 저장하거나 비교하기 위해 생성하는 파일) Googletest의 `::testing::TestInfo` class는 이러한 정보를 가지고 있으며 사용자도 이것을 사용할 수 있습니다.
 
 ```c++
 namespace testing {
@@ -1433,7 +1433,7 @@ class TestInfo {
 }
 ```
 
-이런 `TestInfo ` class를 사용하고 싶다면 `UnitTest`(singleton object)의 member function인 `current_test_info()`를 사용하면 됩니다.
+`TestInfo` class를 사용하고 싶다면 `UnitTest`(singleton object)의 member function인 `current_test_info()`를 사용하면 됩니다.
 
 ```c++
   // Gets information about the currently running test.
@@ -1454,9 +1454,9 @@ Googletest는 test program의 진척상황이나 test failure를 알려주기 �
 
 ### Event Listeners 정의하기
 
-Event listener를 정의하려면 `testing::TestEventListener` 또는 `testing::EmptyTestEventListener`를 상속받는 class를 하나 만들어야 합니다. 먼저, `testing::TestEventListener`는 사용했다면 이는 interface(abstract class)이기 때문에 포함된 *pure virtual function을 모두 override 해야 합니다.* 다음으로 `testing::EmptyTestEventListener`의 member function들은 기본적인 구현(사실, 비어 있음)을 제공하기 때문에 필요한 것만 override해서 구현하면 됩니다. 
+Event listener를 정의하려면 `testing::TestEventListener` 또는 `testing::EmptyTestEventListener`를 상속받는 class를 하나 만들어야 합니다. 전자인 `testing::TestEventListener`는 interface(abstract class)이기 때문에 포함된 *pure virtual function을 모두 override 해야 합니다.* 다음으로 후자인 `testing::EmptyTestEventListener`은 member function의 기본적인 구현(사실, 비어 있음)을 제공하기 때문에 필요한 것만 override해서 구현하면 됩니다. 
 
-이제 상속이 끝났다면 event를 처리하기 위한 동작을 직접 구현하면 됩니다. 기본적인 동작은 event가 발생하면 handler function들이 자동으로 호출되게 됩니다. 이 때 handler function으로는 아래와 같은 타입의 argument들이 전달됩니다.
+둘 중 하나를 상속하기로 결정했다면 이제 event를 처리하기 위한 동작을 구현하면 됩니다. 기본적으로 event가 발생하면 handler function들이 자동으로 호출되게 됩니다. 이 때 handler function에는 아래와 같은 타입의 argument들이 전달됩니다.
 
 - UnitTest는 test program 전체의 상태를 가지고 있습니다.
 - TestSuite는 이름 그대로 test suite의 정보를 가지고 있습니다. Test suite은 1개 이상의 test case를 가지고 있습니다.
@@ -1492,7 +1492,7 @@ Event listener를 정의하려면 `testing::TestEventListener` 또는 `testing::
 
 ### Event Listeners 사용하기
 
-위에서 event listener를 정의하는 방법에 대해서 배웠습니다. 다음으로 정의된 event listener를 실제로 사용하기 위해서는 해당 event listener의 instance를 생성하고 이를 googletest event listener list에 추가하는 작업이 필요합니다. `main()` function을 구현할 때, `return RUN_ALL_TESTS()`를 필수적으로 호출해야 한다고 배웠습니다. 그보다 앞 부분에서 event listener를 추가해주면 됩니다. 이 때 사용하는 class를 `TestEventListeners`라고 부릅니다. 자세히 보면 class 이름에 `s`가 붙어 있는데요, 이는 googletest에 여러개의 event listener를 등록하는 것도 가능함을 의미합니다. 설명은 끝났습니다. 그럼 아래는 예제코드입니다.
+위에서 event listener를 정의하는 방법에 대해서 배웠습니다. 다음으로 정의된 event listener를 실제로 사용하기 위해서는 해당 event listener의 instance를 생성하고 이를 googletest event listener list에 추가하는 작업이 필요합니다. `main()` function을 구현할 때, 마지막 부분에서 `return RUN_ALL_TESTS()`를 필수적으로 호출해야 한다고 배웠습니다. 그보다 앞 부분에서 event listener를 추가해주면 됩니다. 이 때 사용하는 class를 `TestEventListeners`라고 부릅니다. 자세히 보면 class 이름에 `s`가 붙어 있는데요, 이는 googletest에 여러개의 event listener를 등록하는 것도 가능함을 의미합니다. 설명은 끝났습니다. 그럼 아래는 예제코드입니다.
 
 ```c++
 int main(int argc, char** argv) {
@@ -1515,9 +1515,9 @@ int main(int argc, char** argv) {
   return RUN_ALL_TESTS();
 ```
 
-이제 다 끝났습니다. 의도한 대로 결과가 출력되는지 확인하시기 바랍니다. 이에 대한 보다 자세한 내용은 [sample9_unittest.cc](../../samples/sample9_unittest.cc)에서 확인하시기 바랍니다.
+이제 다 끝났습니다. 의도한 대로 결과가 출력되는지 확인하시기 바랍니다. 보다 상세한 내용은 [sample9_unittest.cc](../../samples/sample9_unittest.cc)에서도 확인할 수 있습니다.
 
-앞에서 얘기한 것처럼 1개 이상의 listener를 사용하는 것도 가능합니다. 따라서 동일한 event에 대해서 listenere의 호출순서가 어떻게 되는지는 알아두는게 좋습니다. 주의할 점은 handler function의 종류에 따라서 순서가 다르다는 점입니다. 예를 들어 `On*Start()` 또는 `OnTestPartResult()`라는 event가 발생하면 list에 등록된 listener의 순서대로 호출해 줍니다. 간단히 말하면 새로 등록한 listener일수록 나중에 호출된다는 의미입니다. 반대로 `On*End()`와 같은 event는 등록순서의 *역방향*으로 listener handler를 호출해줍니다. 따라서 사용자가 결과물을 보게 되면 먼저 등록된 listener handler의 출력물이 늦게 등록된 listener handler의 출력물을 감싸는 (프레임) 형태가 됩니다.
+앞에서 얘기한 것처럼 1개 이상의 listener를 사용하는 것도 가능합니다. 따라서 동일한 event에 대해서 listener의 호출순서가 어떻게 되는지는 알아두는게 좋습니다. 주의할 점은 handler function의 종류에 따라서 순서가 다르다는 점입니다. 예를 들어 `On*Start()` 또는 `OnTestPartResult()`라는 event가 발생하면 list에 등록된 listener의 순서대로 호출해 줍니다. 간단히 말하면 새로 등록한 listener일수록 나중에 호출됩니다. 반대로 `On*End()`와 같은 event는 등록순서의 *역방향*으로 listener handler를 호출해줍니다. 따라서 사용자가 결과물을 보게 되면 먼저 등록된 listener handler의 출력물이 늦게 등록된 listener handler의 출력물을 감싸는 (프레임) 형태가 됩니다.
 
 ### Listeners에서 failure 발생시키기
 
@@ -1526,23 +1526,23 @@ Event를 처리할 때에도 `EXPECT_*()`, `ASSERT_*()`, `FAIL()`와 같은 asse
 1.  `OnTestPartResult()`안에서는 어떤 failure라도 발생시키면 안됩니다. 만약 `OnTestPartResult()`에서 failure가 발생하면 무한히 재귀호출하게 됩니다.
 1.  `OnTestPartResult()`를 처리하는 listener도 failure를 발생시키면 안 됩니다.
 
-만약 `OnTestPartResult()`를 처리하는 listener가 있다면 listener list에 먼저 등록해야 합니다. 그런 후에 failure가 발생할 수 있는 listener들은 등록하기 바랍니다. 그렇게 해야만 failure정보가 정상적으로 기록될 수 있습니다.
+만약 failure가 발생가능한 listener를 구현했다면, 등록할때는 `OnTestPartResult()`를 먼저 등록한 후에 failure 발생가능한 listener를 나중에 등록하기 바랍니다. 그렇게 해야만 failure정보가 정상적으로 기록될 수 있습니다.
 
-Failure-raising listener에 대한 예제코드는  [sapmle10_unittest.cc](../../samples/sample10_unittest.cc)를 참고하세요.
+Failure-raising listener에 대한 예제코드는 [sapmle10_unittest.cc](../../samples/sample10_unittest.cc)를 참고하세요.
 
 ## Test program을 실행하는 다양한 방법
 
-Googletest를 사용한 test program도 일반적인 실행파일과 다르지 않습니다. 빌드된 후에는 자유롭게 실행할 수 있고, 실행시에 cmd line을 통해 flag를 전달할 수도 있습니다. 그리고 test program에서 이렇게 cmd line을 통해 전달된 flag들을 적용하기 위해서는 `RUN_ALL_TESTS()`를 호출하기 전에 `::testing::InitGoogleTest()`를 먼저 호출하면 됩니다.
+Googletest를 사용한 test program도 일반적인 실행파일과 다르지 않습니다. 빌드된 후에는 자유롭게 실행할 수 있고, 실행시에 cmd line을 통해 flag를 전달할 수도 있습니다. 그리고 test program에서 cmd line flag를 적용하기 위해서는 `RUN_ALL_TESTS()`를 호출하기 전에 `::testing::InitGoogleTest()`를 먼저 호출하면 됩니다.
 
 지원하는 flag 목록을 확인하고 싶다면 test program을 실행할 때, `--help`를 입력하면 됩니다. `--help`외에 `-h`, `-?`, `/?` 등도 동일한 목적으로 사용할 수 있습니다.
 
-만약 동일한 옵션에 대해서 2가지 방법(코드에서 직접 environment variable 변경, cmd line flag 전달)을 사용했다면 cmd line flag를 우선적으로 적용합니다.
+만약 동일한 옵션에 대해서 2가지 방법(코드에서 직접 environment variable 변경, cmd line flag 전달)을 모두 사용했다면 cmd line flag를 우선적으로 적용합니다.
 
 ### 필요한 Test 선택하기
 
 #### Test 목록보기
 
-test program을 시작하기 전에 해당 프로그램에서 사용가능한 테스트 목록을 확인할 수 있습니다. 더불어 이렇게 목록을 확인한 후에는 filter기능을 사용해서 필요한 테스트만 선택해서 실행하는 것이 가능합니다.(밑에서 설명) 이를 위해서는 `--gtest_list_tests`라는 flag를 입력하면 됩니다.
+test program을 시작하기 전에 해당 프로그램에서 사용가능한 테스트 목록을 확인할 수 있습니다. 더불어 이렇게 목록을 확인한 후에는 filter기능을 사용해서 필요한 테스트만 선택해서 실행하는 것이 가능합니다.(밑에서 설명) 이를 위해서는 `--gtest_list_tests`라는 flag를 사용합니다.
 
 ```none
 TestSuite1.
@@ -1558,7 +1558,7 @@ TestSuite2.
 
 기본적으로 googletest는 test program에 정의된 모든 테스트를 수행합니다. 그러나 `GTEST_FILTER`라는 environment variable을 사용하면 디버깅 혹은 빠른 확인을 위해 테스트 중 일부만 수행할 수도 있습니다. 동일한 옵션을 `--gtest_filter`라는 cmd line flag를 통해서도 지정할 수 있습니다. 그러면 googletest는 테스트의 이름이 filter와 매칭되는 경우에만 수행하게 됩니다. (포맷 : `TestsuiteName.TestName`)
 
-Filter를 사용할 때, *positive pattern*(매칭되는 테스트 수행함)은 바로 이름을 적으면 되고 *negative pattern*(매칭되는 테스트 수행안함)는 이름 앞에 '`-`' 를 적어야 합니다. Positive, negative 각각에서도 여러개의 pattern을 지정할 수 있는데 그런 경우에는 seperator '`:`'를 사용하면 됩니다. 순서로 보면 *positive pattern*을 (1개 혹은 여러개) 적은 후에, *negative pattern*을 (1개 혹은 여러개) 적습니다. 이렇게 positive pattern과 매칭되면서 negative pattern과는 매칭되지 않는 테스트만 수행됩니다.
+Filter를 사용할 때, *positive pattern*(매칭되는 테스트 수행함)은 바로 이름을 적으면 되고 *negative pattern*(매칭되는 테스트 수행안함)는 이름 앞에 '`-`' 를 적어야 합니다. Positive, negative 각각에 대해서도 여러개의 pattern을 지정할 수 있는데 그런 경우에는 seperator '`:`'를 사용하면 됩니다. 순서로 보면 *positive pattern*을 (1개 혹은 여러개) 적은 후에, *negative pattern*을 (1개 혹은 여러개) 적습니다. 결과적으로 positive pattern과 매칭되면서 negative pattern과는 매칭되지 않는 테스트만 수행됩니다.
 
 Pattern을 만들때는 `'*'`, `'?'`와 같은 wildcard도 사용할 수 있습니다. 이를 이용하면 아래처럼 간단한 표현이 가능해집니다. 또한, 아래와 같은 경우에는 '`*`'를 생략하는 것도 가능합니다.
 
@@ -1627,9 +1627,9 @@ Repeat the tests whose name matches the filter 1000 times.
 
 ### Test 수행 순서를 섞기
 
-`--gtest_shuffle` flag  사용하거나 `GTEST_SHUFFLE` environment variable을 `1`로 설정하면 테스트들을 random 하게 수행할 수 있습니다. 이러한 수행의 장점은 테스트간의 의존성으로 인해 발생하는 문제를 확인할 수 있다는 것입니다.
+`--gtest_shuffle` flag  사용하거나 `GTEST_SHUFFLE` environment variable을 `1`로 설정하면 테스트들을 random하게 수행할 수 있습니다. 이러한 수행의 장점은 테스트 간의 의존성으로 인해 발생하는 문제를 확인할 수 있다는 것입니다.
 
-기본적으로 googletest는 현재시간(time)을 random seed로 사용하기 때문에 매 순간마다 random한 수행이 가능해집니다. 더불어 콘솔창에 random seed 값을 출력해주기 때문에 특정한 순서에서 발생하는 문제인지를 확인할 수 있습니다. 이러한 random seed를 변경하려면 `--gtest_random_seed=SEED` flag 를 사용하거나 `GTEST_RANDOM_SEED` environment variable을 변경하면 됩니다. 설정값의 범위는 0~99999 입니다. 만약, random seed = 0 이라면 googletest는 기본설정(현재시간)을 사용하게 됩니다.
+Googletest는 random seed로 현재시간(time)을 사용하기 때문에 매 순간마다 random한 수행이 가능해집니다. 더불어 콘솔창에 random seed 값을 출력해주기 때문에 특정한 순서에서 발생하는 문제인지를 확인할 수 있습니다. 이러한 random seed를 변경하려면 `--gtest_random_seed=SEED` flag를 사용하거나 `GTEST_RANDOM_SEED` environment variable을 변경하면 됩니다. 설정값의 범위는 0~99999 입니다. 만약, random seed = 0 이라면 googletest는 기본설정(현재시간)을 사용하게 됩니다.
 
 `--gtest_shuffle`과 `--gtest_repeat=N`을 함께 사용하면 반복할 때마다 새로운 random seed를 사용합니다.
 
@@ -1672,13 +1672,13 @@ Googletest는 기본적으로 각 테스트의 수행시간을 출력하고 있�
 
 #### XML Report 출력하기
 
-Googletest는 테스트결과를 XML 형식으로 출력하는 방법도 제공합니다. XML Report는 각 테스트의 수행시간도 포함하기 때문에 느리게 수행되는 테스트를 확인하는데에 도움이 될 것입니다. 이런 XML Report를 이용하면 dashboard를 구축하는데도 도움이 될 것입니다.
+Googletest는 테스트결과를 XML 형식으로 출력하는 방법도 제공합니다. XML Report는 각 테스트의 수행시간도 포함하기 때문에 느리게 수행되는 테스트를 확인하는데에 도움이 될 것입니다. 또한, XML Report를 이용하면 dashboard를 구축하는데도 도움이 될 것입니다.
 
 XML Rerpot를 생성하려면 `--gtest_output` flag 혹은 `GTEST_OUTPUT` environment variable에 `"xml:path_to_output_file"`을 대입하면 됩니다. 경로지정 없이 그냥 `"xml"`만 대입하면 현재 경로에 `test_detail.xml` 파일을 생성해 줍니다.
 
 경로를 지정할 때는 Linux에서는 `"xml:output/directory/"`와 같이 지정하고 Windows에서는 `"xml:output\directory\"`과 같이 지정하면 됩니다. 그러면 해당 경로에 XML 파일이 저장되며 파일의 이름은 test program 이름을 사용하게 됩니다. 예를 들어서 test program이 `foo_test` 혹은 `foo_test.exe` 라면 XML 파일은 `foo_test.xml` 이 됩니다. 만약 동일한 파일이 이미 존재한다면 `foo_test_1.xml`과 같은 이름으로 자동으로 변경하기 때문에 덮어쓰기는 걱정하지 않아도 됩니다.
 
-Googletest의 XML Rerpot 출력방식은 `junitreport` Ant task 를 모티브로 합니다. 다만, 대상 언어가 C++, Java로 서로 다르기 때문에 약간의 차이는 있습니다. 그럼 googletest의 XML Report 예시는 아래와 같습니다.
+Googletest의 XML Rerpot 출력방식은 `junitreport` Ant task를 모티브로 합니다. 다만, 대상 언어가 C++, Java로 서로 다르기 때문에 약간의 차이는 있습니다. 그럼 googletest의 XML Report 예시는 아래와 같습니다.
 
 ```xml
 <testsuites name="AllTests" ...>
@@ -1724,19 +1724,19 @@ XML Report는 아래와 같이 출력됩니다.
 </testsuites>
 ```
 
-몇가지 기억해야 할 점은 아래와 같습니다.
+몇 가지 기억해야 할 점은 아래와 같습니다.
 
 *   `<testsuites>`과 `<testsuite>`이 가지고 있는 `tests`라는 attribute은 해당 test suite에 몇 개의 test function이 있는지를 의미합니다. 반면에 `failure` attribute은 그 중에서 몇 개의 test function이 실패했는지를 보여줍니다.
     
-*   `time`은 test suites, test suite, test case가 모두 가지고 있는 attribute이며 각각의 수행시간이 얼마인지를 알려줍니다. 
+*   `time`은 test suites, test suite, test case들이 모두 가지고 있는 attribute이며 각각의 수행시간이 얼마인지를 알려줍니다. 
     
-*   `timestamp`은 test가 시작된 시각을 알려주는 attribute입니다.
+*   `timestamp`는 test가 시작된 시각을 알려주는 attribute입니다.
     
 *   `<failure>` element는 실패한 각각의 googletest assertion을 의미합니다. (`failures` attribute와는 다릅니다.)
 
 #### JSON Report 출력하기
 
-Googletest는 테스트결과를 JSON 형식으로 출력하는 방법도 제공합니다. JSON Report를 출력하기 위해서는 `GTEST_OUTPUT` environment variable을 설정하거나 `--gtest_output` flag를 사용하면 됩니다. 사용방법은 XML Report와 유사합니다. `GTEST_OUTPUT`이나 `--gtest_output` flag에 `"json:path_to_output_file"`을 대입하면 JSON Report가 저장될 위치를 지정할 수 있습니다. 간단하게 `"json"`만 지정하면 현재 위치에 `test_detail.json` 파일을 생성해 줍니다.
+Googletest는 테스트결과를 JSON 형식으로 출력하는 방법도 제공합니다. JSON Report를 출력하기 위해서는 `GTEST_OUTPUT` environment variable을 설정하거나 `--gtest_output` flag를 사용하면 됩니다. 사용방법은 XML Report와 유사합니다. `GTEST_OUTPUT`이나 `--gtest_output` flag에 `"json:path_to_output_file"`을 대입하면 JSON Report가 저장될 위치를 지정할 수도 있습니다. 간단하게 `"json"`만 지정하면 현재 위치에 `test_detail.json` 파일을 생성해 줍니다.
 
 그럼 googletest의 JSON Report 예시는 아래와 같습니다.
 
@@ -1931,11 +1931,11 @@ IMPORTANT: JSON Report 형식은 변경될 수도 있습니다.
 
 #### Assertion Failures를 Break-Points처럼 사용하기
 
-디버거에서 test program을 동작시켜서 assertion이 발생했을 때 바로 interactive mode로 전환되게 하면 디버깅할 때 도움이 될 것입니다. Googletest는 그런 사용자를 위해 *break-on-failure* mode를 제공합니다.
+디버거에서 test program을 동작시킨다면 assertion이 발생했을 때, 바로 interactive mode로 전환되게 하면 디버깅에 도움이 될 것입니다. Googletest는 그런 사용자를 위해 *break-on-failure* mode를 제공합니다.
 
 `GTEST_BREAK_ON_FAILURE` environment variable을 `0`이 아닌 값으로 설정하거나 `--gtest_break_on_failure` flag를 사용하면 이 기능을 활성화할 수 있습니다.
 
-#### Exception  Catching 비활성화하기
+#### Exception Catching 비활성화하기
 
 기본설정의 googletest는 테스트가 C++ exception를 던진 경우에 exception을 catch하고 해당 테스트를 실패로 판정합니다. 그리고는 다음 테스트를 계속해서 진행합니다. 이런 동작방식이 기본설정인 이유는 한 번의 실행으로도 최대한 많은 테스트를 수행하기 위함입니다. 더불어 Windows와 같은 환경에서 발생할 수 있는 문제도 예방하게 됩니다. 예를 들면 uncaught exception으로 인해 발생한 pop-up이 자동화 테스트를 멈추게 하는데, googletest가 exception을 catch하고 실패로 처리함으로써 자동으로 넘어갈 수 있게 됩니다.
 
