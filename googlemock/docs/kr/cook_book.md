@@ -2,14 +2,14 @@
 
 이 문서에서는 gMock의 심화된 사용방법을 확인할 수 있습니다. 아직 gMock 사용경험이 없는 분은 [ForDummies](for_dummies.md) 문서를 먼저 보는 것이 좋습니다.
 
-**Note:** gMock은 소스코드상에 `testing` 이라는 namespace에 구현되어 있습니다. 따라서 gMock에 구현된 `foo`라는 기능을 사용하고자 한다면 `using testing:Foo` 와 같이 namespace를 명시해서 사용해야 합니다. 이 문서에서는 예제코드를 간단하게 하기위한 목적으로 `using`을 사용하지 않기도 했지만 실제로 사용할 때에는 `using`을 꼭 사용하기 바랍니다.
+**Note:** gMock은 소스코드상에 `testing` 이라는 namespace에 구현되어 있습니다. 따라서 gMock에 구현된 `foo`라는 기능을 사용하고자 한다면 `using testing:Foo` 와 같이 namespace를 명시해서 사용해야 합니다. 이 문서에는 예제코드를 간단하게 작성하기 위해서 `using`을 사용하지 않은 코드도 종종 있긴 하지만 사용자가 구현할 때는 `using`을 꼭 사용해야 합니다.
 
 
 ### Mock Class 만들기 ###
 
 #### Comma(`,`)를 문제없이 사용하는 방법
 
-만약 Comma를 괄호없이 사용하게 되면 `MOCK_METHOD` macro를 파싱할 때 문제가 발생합니다.
+`MOCK_METHOD` macro를 사용할 때, comma의 사용은 주의가 필요합니다.
 
 ```c++
 class MockFoo {
@@ -19,7 +19,7 @@ class MockFoo {
 };
 ```
 
-위의 코드는 compile error가 발생할 것입니다. Return type, argument type의 구분이 모호하기 때문입니다.
+위 코드는 macro에 전달된 argument를 올바르게 파싱하지 못하기 때문에 compile error가 발생합니다. 이를 위한 해결방법은 아래와 같습니다.
 
 해결방법 1 - 괄호로 감싸기
 
@@ -31,7 +31,7 @@ class MockFoo {
 };
 ```
 
-이 해결방법은 return type, argument type을 구분하기 위해 괄호를 사용했습니다. 물론 C++에서 return type, argument type을 괄호로 감싸면 안되지만 `MOCK_METHOD` macro는 파싱을 위해서만 괄호를 사용한 후에 괄호를 제거하기 때문에 괜찮습니다.
+이 해결방법은 첫번째 argument, 세번째 arguemnt를 명확히 표현하기 위해 괄호를 사용했습니다. 각각은 mocking 대상(`GetPair()`, `CheckMap()`)의 return type과 argument type을 의미합니다. 물론 C++에서 return type, argument type을 괄호로 감싸는 것은 적법하지 않지만, `MOCK_METHOD` macro는 파싱하고 나서 괄호를 제거하기 때문에 문제가 없습니다.
 
 해결방법 2 - alias 사용하기
 
@@ -47,7 +47,7 @@ class MockFoo {
 
 #### Private, Protected 영역에 정의된 Method를 Mocking하기 ####
 
-Base class의 method가 `public`, `protected`, `private` 등 어느 영역에 정의되어 있는지에 관계없이 mock method를 정의할 때 사용하는 `MOCK_METHOD` macro는 항상 `public:` 영역에서 사용해야 합니다. (C++에서는 base class의 virtual function이 어느 영역에 선언되었는지에 관계없이 drived class에서는 원하는 영역에 자유롭게 overriding 할 수 있습니다.) 이렇게 해야만 `ON_CALL`, `EXPECT_CALL`과 같은 매크로가 mock class 또는 mock function에 접근할 수 있습니다. 아래 예제를 확인하세요.
+Base class의 method가 `public`, `protected`, `private` 등 어느 영역에 정의되어 있는지에 관계없이 mock method를 정의할 때 사용하는 `MOCK_METHOD` macro는 항상 `public` 영역에서 사용해야 합니다. (C++은 base class의 virtual function이 어느 영역에 선언되었는지에 관계없이 derived class에서는 원하는 영역에 자유롭게 overriding 할 수 있습니다.) 이렇게 해야만 `ON_CALL`, `EXPECT_CALL`과 같은 매크로가 mock class 또는 mock function에 접근할 수 있습니다. 아래 예제를 확인하세요.
 
 ```cpp
 class Foo {
@@ -104,7 +104,7 @@ class MockFoo : public Foo {
 };
 ```
 
-**Note:** 만약 overloaded method가 여러개 있음에도 그 중 일부만 mocking한다면 compiler가 warning message를 출력할 것입니다. 그 내용은 base class의 몇몇 함수가 숨겨져 있다고 알려주는 것입니다. 만약 이러한 warning message를 없애려면 `using`을 이용해서 해당함수를 drived class가 참조할 수 있게 하면 됩니다.
+**Note:** 어떤 method에 overloaded method가 여러개 있다고 가정하겠습니다. 이 때, 전체가 아니라 일부 method만 mocking한다면 compiler가 warning message를 출력할 것입니다. Warning message의 목적은 base class의 몇몇 method가 숨겨져 있음을 알려주는 것입니다. 만약 이러한 warning message가 신경쓰인다면 `using`을 이용해서 dervied class에서 사용할 수 있게 하면 됩니다.
 
 ```cpp
 class MockFoo : public Foo {
@@ -139,11 +139,11 @@ class MockStack : public StackInterface<Elem> {
 };
 ```
 
-#### Nonvirtual Method Mocking 하기 ####
+#### Non-virtual Method Mocking 하기 ####
 
-gMock을 통해서 non-virtual function도 간단하게 mocking 할 수 있습니다. 더불어 이러한 방법을 Hi-perf dependency injection라고 부르고 있습니다. Virtual function table을 사용하지 않기 때문에 속도가 빠르다는 의미입니다.
+gMock에서는 non-virtual function도 간단하게 mocking 할 수 있습니다. 이러한 방법을 hi-perf dependency injection이라고도 부르는데요. 왜냐하면 vtable과 같이 virtual function에 필수적으로 수반되는 자원을 사용하지 않아도 되기 때문입니다.
 
-또한, 이 경우에는 상속관계를 사용하지 않습니다. Dependency injection을 위한 방법으로 template을 이용하기 때문에 mock class가 interface 혹은 base class를 상속받을 필요가 없습니다. 대신 real class의 method 중에서 관심있는 method를 찾은 후에, mock class에 해당 method와 동일한 signature를 갖는 method를 정의하기만 하면 됩니다. 정의하는 방법은 *기존과 동일*하지만 `MOCK_METHOD` macro의 4번째 argument로 전달되던 `override`를 제거해야 합니다.
+Hi-perf dependency injection에서는 상속관계를 사용하지 않습니다. Dependency injection을 위한 방법으로 template을 이용하기 때문에 mock class가 interface 혹은 base class를 상속받을 필요가 없습니다. 대신 real class의 method 중에서 관심있는 method를 찾은 후에, mock class에 해당 method와 동일한 signature를 갖는 method를 정의하기만 하면 됩니다. 정의하는 방법은 *기존과 거의 유사하지만* `MOCK_METHOD` macro의 4번째 argument에 사용하던 `override` 키워드는 전달하지 않는다는 점만 다릅니다.
 
 ```cpp
 // A simple packet stream class.  None of its members is virtual.
@@ -165,11 +165,11 @@ class MockPacketStream {
 };
 ```
 
-코드에서 보이는 것처럼 mock class인 `MockPacketStream` 에서는 `AppendPacket()`을 정의하지 않았습니다. 이처럼 테스트에서 사용하지 않는 함수는 굳이 정의하지 않아도 문제가 없습니다.
+코드에서 보이는 것처럼 `MockPacketStream`에는 `GetPacket()`과 `NumberOfPackets()`만 정의하고 `AppendPacket()`는 정의하지 않았습니다. 이처럼 사용하지 않는 method는 굳이 정의하지 않아도 됩니다.
 
-이제 2개의 class를 상황에 따라 구분해서 선택하도록 구현하면 됩니다. `ConcretePacketStream`은 제품코드에 사용하고 `MockPacketStream`은 테스트코드에 사용할 것입니다. 단, 2개의 class간에는 상속관계가 없고 따라서 virtual function도 없기 때문에 이러한 다형성이 compile time에 이뤄질 수 있도록 구현해야 합니다.
+이제 2개의 class를 상황에 따라 구분해서 사용할 수 있도록 구현해야 합니다. `ConcretePacketStream`은 제품코드에 사용하고 `MockPacketStream`은 테스트코드에 사용할 것입니다. 이 때, 2개의 class간에는 상속관계가 없기 때문에 다형성이 compile time에 결정될 수 있도록 구현해야 합니다.
 
-몇 차례 언급한 것처럼 이런 경우에는 template을 사용하면 됩니다. 즉, 위에서 선언한 2개의 class를 사용하는 코드가 이들을 template type으로 취급하도록 구현하면 됩니다. 이를 통해 제품코드에 대해서는 `ConcretePacketStream` object가 사용되고 테스트코드에 대해서는 `MockPacketStream`  object가 사용될 것입니다. 이러한 내용이 구현된 예제입니다.
+몇 차례 언급한 것처럼 이 경우에는 template을 사용하게 됩니다. 즉, 2개의 class를 사용하는 곳에서 이들을 template type으로 취급하도록 구현하면 됩니다. 이를 통해 제품코드에 대해서는 `ConcretePacketStream` class가 사용되고 테스트코드에 대해서는 `MockPacketStream` class가 사용될 것입니다. 아래는 관련 예제입니다.
 
 ```cpp
 template <class PacketStream>
@@ -182,7 +182,7 @@ class PacketReader {
 };
 ```
 
-2개 class를 일반적으로 표현하기 위해서 template parameter의 이름을 `PacketStream`으로 지었습니다. 이제 사용하기만 하면됩니다. 즉, 제품코드에서는 `CreateConnection<ConcetePacketStream>()`, `PacketReader<ConcretePacketStream>` 과 같이 구현하면 되고 테스트코드에서는`CreateConnection<MockPacketStream>()`, `PacketReader<MockPacketStream>`으로 구현하면 됩니다. 아래 이렇게 구현된 테스트코드의 예제입니다.
+위 코드를 보면 template parameter의 이름을 `PacketStream`으로 해서 2개 class 모두를 일반적으로 가리킬 수 있도록 했습니다. 이제 사용하기만 하면됩니다. 즉, 제품코드에서는 `CreateConnection<ConcetePacketStream>()`, `PacketReader<ConcretePacketStream>`과 같이 사용하면 되고 테스트코드에서는 `CreateConnection<MockPacketStream>()`, `PacketReader<MockPacketStream>`과 같이 사용하면 됩니다. 아래는 이렇게 구현된 테스트코드의 예제입니다.
 
 ```cpp
   MockPacketStream mock_stream;
@@ -194,9 +194,9 @@ class PacketReader {
 
 #### Free Function Mocking 하기 ####
 
-gMock에서는 free function을 mocking하는것도 가능합니다. 여기서 free function이란 C-style function 또는 static method 등을 의미합니다. 잘 생각해보면 지금까지는 non-static class method 만 다뤘음을 알 수 있습니다. gMock에서는 free function을 mocking하기위해 interface(abstract class)를 사용합니다.
+gMock에서는 free function을 mocking하는 것도 가능합니다. 여기서 free function이란 C-style function 또는 static method를 의미합니다. 잘 생각해보면 지금까지는 non-static class method만 다뤘음을 알 수 있습니다. gMock에서 free function을 mocking하기 위해서는 interface(abstract class)를 새로 만들어야 합니다.
 
-즉, free function을 직접 호출하지 않고 wrapper class를 만드는 것입니다. 아래 코드를 보면 새로운 interface인 `FileInterface`를 만들고 `Open()`이라는 pure abstract method로 선언했습니다. 이제 dervied class를 생성하고 `Open()`을 정의합니다. Derived class `File`에서는 `Open`을 override 하면서 우리의 free function인 `OpenFile()`을 호출하도록 했습니다.
+쉽게 말해서 free function을 위한 wrapper class(interface)를 만들어야 합니다. 아래 코드를 보겠습니다. 먼저 mocking 대상은 `OpenFile()`이라는 free function입니다. 이를 mocking하기 위해서 `FileInterface`라는 interface를 새로 만들었으며 `Open()`이라는 pure abstract method도 선언했습니다. 다음으로 `FileInterface`를 상속받는 derived class(`File`)를 만들고 `Open()`이라는 method가 mocking대상인 `OpenFile()`을 호출하도록 overriding 했습니다.
 
 ```cpp
 class FileInterface {
@@ -214,22 +214,22 @@ class File : public FileInterface {
 };
 ```
 
-이제 `OpenFile`이라는 free function을 직접 호출하던 기존의 코드들을 `FileInterface`의 `Open()`을 호출하도록 변경합니다. 이렇게 free function들이 wrapper class를 갖게 되면 다음 순서는 non-static class method를 mocking하는 방법과 동일하게 진행하면 됩니다.
+다음으로 해야할 일은 `OpenFile()`이라는 free function을 직접 호출하던 기존의 코드들을 `FileInterface`의 `Open()`을 호출하도록 변경합니다. 그럼 끝입니다. 이렇게 free function들이 wrapper class를 갖게 되면 다음 순서는 non-static class method를 mocking하는 방법과 동일하게 진행하면 됩니다.
 
-이러한 작업이 귀찮게 느껴질 수도 있지만, 처음에 한번만 추상화 계층을 잘 설계해 놓으면 연관된 free function들을 같은 interface로 묶을 수 있습니다. 해야할 일이 거의 없을 뿐더러 소스코드는 깔끔해지고 mocking은 간편해집니다.
+물론, 이와 같은 과정이 귀찮게 느껴질 수도 있습니다. 하지만 추상화 계층을 한 번만 잘 설계해두면 연관된 free function들을 같은 interface로 묶을 수 있습니다. 해야할 일이 거의 없을 뿐더러 소스코드는 깔끔해지고 mocking도 간단해집니다.
 
 혹시나 virtual function을 호출하기 때문에 발생하는 성능저하가 우려된다면 [mocking non-virtual methods](cook_book.md#nonvirtual-method-mocking-하기)와 같이 사용하면 성능저하도 크게 문제가 되지 않습니다.
 
 #### 이전방식의 macro인 `MOCK_METHODn` 간단소개
 
-현재와 같은 `MOCK_METHOD` macro가 구현되기 전에는 `MOCK_METHODn`이라는 macro family를 통해 mock method를 정의했습니다. 이전방식 macro에서 `n`은 argument의 개수를 의미하기 때문에 argument 개수에 따라 여러개의 macro가 있었습니다. 물론, gMock은 `MOCK_METHODn`계열을 여전히 지원하고 있지만 점차 새로운 방식으로 변경하시길 추천합니다.
+현재와 같은 `MOCK_METHOD` macro가 구현되기 전에는 `MOCK_METHODn` 계열의 macro를 사용했습니다. 이전방식 macro에서 `n`은 argument의 개수를 의미하며 이로 인해 argument 개수에 따라 여러개의 macro가 존재하게 되므로 약간의 불편함이 있었습니다. 물론, `MOCK_METHODn`계열도 여전히 지원하고는 있지만 사용자 환경에서도 점차 새로운 방식으로 변경하시길 추천합니다.
 
 아래는 `MOCK_METHOD`와 `MOCK_METHODn`의 차이점을 보여줍니다.
 
 - 기본구조가 `MOCK_METHOD(ReturnType, MethodName, (Args))`에서 `MOCK_METHODn(MethodName, ReturnType(Args))`으로 변경되었습니다.
 - Argument의 개수를 의미하던 `n`이 제거되었습니다.
 - const method를 위해서 존재하던 `MOCK_CONST_METHODn`가 제거되고 const 정보를 argument로 전달하도록 변경되었습니다.
-- class tempalte을 위해서 존재하던 `T`라는 suffix가 제거되었습니다.
+- class template을 위해서 존재하던 `T`라는 suffix가 제거되었습니다.
 - 함수 호출방식을 알려주는 `_WITH_CALLTYPE`이라는 suffix가 제거되고 역시 argument로 전달하도록 변경되었습니다.
 
 아래 표에서 이전방식에서 사용하던 기능이 어떻게 대체되었는지 자세히 확인할 수 있습니다.
