@@ -2911,12 +2911,14 @@ ACTION(Foo) {
 
 `ACTION` macro를 좀 더 편리하게 사용하기 위해서 아래와 같은 pre-defined symbol을 알아두면 편리합니다. 이들은 action statement 안에서 자유롭게 사용할 수 있습니다.
 
-| `argK_type`     | The type of the K-th (0-based) argument of the mock function |
-| :-------------- | :----------------------------------------------------------- |
-| `args`          | All arguments of the mock function as a tuple                |
-| `args_type`     | The type of all arguments of the mock function as a tuple    |
-| `return_type`   | The return type of the mock function                         |
-| `function_type` | The type of the mock function                                |
+| Pre-defined Symbol | Description                                                   |
+| :----------------- | :------------------------------------------------------------ |
+| `argK`             | The value of the K-th (0-based) argument of the mock function |
+| `argK_type`        | The type of the K-th (0-based) argument of the mock function  |
+| `args`             | All arguments of the mock function as a tuple                 |
+| `args_type`        | The type of all arguments of the mock function as a tuple     |
+| `return_type`      | The return type of the mock function                          |
+| `function_type`    | The type of the mock function                                 |
 
 아래와 같은 mock function을 위한 action을 구현할 때
 
