@@ -510,7 +510,7 @@ Mock, fake가 함께 나타날 때, bad sign을 찾아내는 예제를 하나 �
 
 테스트를 위해 testing double(mock, fake, stub, spy 등)을 사용할 떄의 문제는 동작이 real object와 달라질 수 있다는 것입니다. 물론 negative test를 위해서 일부러 다르게 만들기도 하지만, 때로는 실수로 인해 동작이 달라지기도 합니다. 후자의 경우라면 bug를 잡아내지 못하고 제품을 출시하는 것과 같은 문제가 발생하기도 합니다.
 
-이런 경우를 위해 *delegating-to-real*이라고 불리는 기술을 사용할 수 있습니다. 이는 mock object가 real object와 동일하게 동작하게 만들어 주는 방법입니다. 사용법 자체는 바로 위에서 다룬 [delegating-to-fake](cook_book.md#fake-class에-위임하기) 와 매우 유사합니다. 다른 점이라면 fake object 대신 real object로 변경된 것 뿐입니다. 아래 예제를 확인하세요.
+이런 경우를 위해 *delegating-to-real*이라고 불리는 기술을 사용할 수 있습니다. 이는 mock object가 real object와 동일하게 동작하게 만들어 주는 방법입니다. 사용법 자체는 바로 위에서 다룬 [delegating-to-fake](cook_book.md#fake-class에-위임하기)와 매우 유사합니다. 다른 점이라면 fake object 대신 real object로 변경된 것 뿐입니다. 아래 예제를 확인하세요.
 
 ```cpp
 using ::testing::AtLeast;
