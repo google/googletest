@@ -257,10 +257,10 @@ class File : public FileInterface {
 
 `EXPECT_CALL` 없이 호출된 mock method가 있다면, gMock은 "uninteresting call"이라는 warning을 출력한 후에 default action을 수행합니다. 이 때, warning을 출력해주는 이유는 아래와 같습니다.
 
-- 테스트코드가 이미 작성된 상태라고 해도 시간이 지남에 따라 mocking 대상 interface(혹은 base class)에 새로운 method가 추가될 수 있습니다. 또 이렇게 새로 추가된 method를 위한 mock method를 추가하는 것도 자연스러운 과정입니다. 따라서 gMock에서는 이렇게 새로 추가된 mock method가 `EXPECT_CALL`없이 호출되었다고 해서 기존의 테스트를 실패 처리하지는 않습니다.
-- 다만, 이렇게 예측하지 못했던 mock method가 호출되는 상황은 추후에 문제가 될 수도 있기 때문에 테스트 실패까지는 아니더라도 warning을 통해 알려주는 것입니다. 따라서 이러한 warning이 발생하면 해당 mock method가 호출되어야 할 상황인지 아닌지 확인하기 바랍니다. 만약 호출되는 것이 맞다면 해당 mock method에 대해 `EXPECT_CALL()`만 추가하면 됩니다. 그럼 더 이상 warning은 발생하지 않을 것입니다.
+- 테스트코드가 이미 작성된 상태라고 해도 시간이 지남에 따라 mocking 대상 interface(혹은 base class)에 새로운 method가 추가될 수 있습니다. 또 이렇게 새로 추가된 method가 있다면 이를 위한 mock method를 추가하는 것도 자연스러운 과정입니다. 따라서 gMock에서는 새로 추가된 mock method가 있는데 `EXPECT_CALL` 없이 호출되었으니 한 번 확인해보라는 의미로 warning을 출력합니다.
+- 이렇게 예측하지 못했던 mock method가 호출되는 상황은 추후에 문제가 될 수도 있기 때문에 테스트 failure까지는 아니더라도 warning을 통해 알려주는 것입니다. 따라서 warning이 발생하면 해당 mock method가 호출되어야 할 상황인지 아닌지 확인해보기 바랍니다. 만약 호출되는 것이 맞다면 해당 mock method에 대해 `EXPECT_CALL()`만 추가하면 됩니다. 그럼 더 이상 warning도 발생하지 않을 것입니다.
 
-"uninteresting call"이라는 warning을 출력해주는 것은 말 그대로 경고의 의미입니다. 다만, 어떤 사용자는 이러한 warning을 보고 싶지 않은 사람도 있고 또는 모든 warning을 error로 처리하고 싶은 사람도 있을 것입니다. gMock에서는 이러한 처리방법을 사용자가 선택할 수 있게 했습니다. 또한, mock object별로 이러한 설정을 다르게 할 수도 있습니다.
+"uninteresting call"이라는 warning을 출력해주는 것은 말 그대로 경고의 의미입니다. 다만, 이러한 warning조차도 아예 출력되지 않기를 바라는 사람도 있을 수 있고 또는 모든 warning을 error로 처리하고 싶은 사람도 있을 것입니다. gMock에서는 이러한 처리방법을 사용자가 선택할 수 있게 했습니다. 더불어 mock object 별로 이러한 설정을 다르게 할 수도 있습니다.
 
 테스트코드에서 `MockFoo`라는 mock class를 사용하는 예제를 보겠습니다.
 
@@ -272,7 +272,7 @@ TEST(...) {
 }
 ```
 
-먼저, `MockFoo`에는 여러개의 mock method가 정의되어 있다고 가정하겠습니다. 이런 상황에서 위의 테스트코드를 실행했더니 `EXPECT_CALL`을 명시적으로 사용한 `DoThis()` 외에 다른 mock method의 호출도 발생했습니다. 그럼 gMock은 warning을 출력할텐데 만약 이러한 warning을 보고 싶지 않다면 mock object를 생성할 때 `NiceMock<MockFoo>`으로 사용하면 됩니다. 결론적으로 아래 코드는 더 이상warning을 출력하지 않습니다.
+먼저, `MockFoo`에는 여러개의 mock method가 정의되어 있다고 가정하겠습니다. 이런 상황에서 위의 테스트코드를 실행했더니 `EXPECT_CALL`을 명시적으로 사용한 `DoThis()` 외에 다른 mock method의 호출도 발생했습니다. 그럼 gMock은 warning을 출력할텐데 만약 이러한 warning을 보고 싶지 않다면 mock object를 생성할 때 `NiceMock<MockFoo>`으로 사용하면 됩니다. 즉, 아래와 같이 구현하면 더 이상 warning을 출력하지 않습니다.
 
 ```cpp
 using ::testing::NiceMock;
@@ -313,19 +313,19 @@ TEST(...) {
 }
 ```
 
-NOTE: `NiceMock`과 `StrictMock`의 대상은 *uninteresting call*이며 *unexpected call*은 대상이 아니라는 것을 기억하세요. 이에 대한 자세한 내용은 [Understanding Uninteresting vs Unexpected Calls](cook_book.md#uninteresting-vs-unexpected-를-구분하자)를 참조하세요.
+NOTE: `NiceMock`과 `StrictMock`의 대상은 *uninteresting call*이지 *unexpected call*이 아니라는 것을 기억하세요. 이에 대한 자세한 내용은 [Understanding Uninteresting vs Unexpected Calls](cook_book.md#uninteresting-vs-unexpected-를-구분하자)를 참조하세요.
 
 지금까지 설명한 기능들을 사용하기 위해서 지켜야 할 규칙이 몇 가지 있습니다. (주로 C++ 언어의 특성으로 인해 만들어진 것들입니다.)
 
 1. `NiceMock<MockFoo>`, `StrictMock<MockFoo>`는 `MockFoo` 내부에 **직접** 정의된(`MOCK_METHOD` 사용) mock method에만 적용됩니다. 만약, `MockFoo`의 **base class**에 mock method가 정의되어 있다면 동작하지 않을 확률이 높습니다. Compiler에 따라 다를 수는 있지만 대부분의 경우에 동작하지 않습니다. 더불어 `NiceMock<StrictMock<MockFoo>>`와 같이 `NiceMock`, `StrictMock`을 nesting하는 것은 **지원하지 않습니다**.
 2. `MockFoo`의 destructor가 virtual이 아니라면 `NiceMock<MockFoo>`, `StrictMock<MockFoo>`가 정상적으로 동작하지 않을 수 있습니다. 이 이슈는 내부적으로 확인 중에 있습니다.
-3. `MockkFoo`의 constructor나 destructor가 수행되는 동안에는 nice 모드, strict 모드가 적용되지 *않습니다*. 따라서 constructor나 destructor에서 `this`를 이용해 mock method를 호출하는 경우에는 의도한 것과 다르게 동작할 수 있습니다. 이러한 동작방식은 C++ 언어자체의 제약사항에 기반하며 constructor나 destructor에서 `this`를 이용해 virtual method를 호출하는 경우에는 해당 method를 non-virtual로 취급하게 됩니다. 다시 말해서 derived class의 constructor나 destructor가 호출되면 자연스럽게 base class의 constructor나 destructor도 호출될텐데 그런 경우에 base class의 constructor나 destructor에서 `this`를 사용했다면 이는 base class 자신을 가리킨다는 의미입니다. 이런 동작방식은 안정성을 보장하기 위한 C++언어 특징 중 하나입니다. 만약, 이렇게 동작하지 않는다면 base class의 constructor는 아직 초기화되지 않은 derived class의 정보를 사용하려고 시도할 것이며 마찬가지로 destructor도 이미 삭제된 derived class의 정보를 참조하게 되므로 심각한 문제를 초래할 수 있습니다.
+3. `MockFoo`의 constructor나 destructor가 수행되는 동안에는 nice 모드, strict 모드가 적용되지 *않습니다*. 따라서 constructor나 destructor에서 `this`를 이용해 mock method를 호출하는 경우에는 의도한 것과 다르게 동작할 수 있습니다. 이러한 동작방식은 C++ 언어자체의 제약사항에 기반하며 constructor나 destructor에서 `this`를 이용해 virtual method를 호출하는 경우에는 해당 method를 non-virtual로 취급하게 됩니다. 다시 말해서 derived class의 constructor나 destructor가 호출되면 자연스럽게 base class의 constructor나 destructor도 호출될텐데 그런 경우에 base class의 constructor나 destructor에서 `this`를 사용했다면 이는 base class 자신을 가리킨다는 의미입니다. 이런 동작방식은 안정성을 보장하기 위한 C++언어 특징 중 하나입니다. 만약, 이렇게 동작하지 않는다면 base class의 constructor는 아직 초기화되지 않은 derived class의 정보를 사용하려고 시도할 것이며 마찬가지로 destructor도 이미 삭제된 derived class의 정보를 참조하게 되므로 심각한 문제를 초래할 수 있습니다.
 
-마지막으로 naggy 모드, strict 모드는 테스트가 자주 실패하게 하고 유지보수를 어렵게 만들기도 하기 때문에 **주의**해서 사용해야 합니다. 예를 들어, 코드의 외부는 그대로 두고 내부적인 동작에 대해서만 refactoring하는 경우라면 테스트코드는 수정하지 않는 것이 이상적입니다. 그러나 naggy 모드로 설정되어 있다면 이러한 내부적인 수정에 대해서도 많은 warning들을 발생시킬 것입니다. 게다가 strict 모드라면 아예 테스트가 실패하기 때문에 테스트코드의 유지보수 비용이 증가될 것입니다. 이를 위해 추천드리는 방법은 일반적인 상황에서는 nice 모드을 주로 사용하고 테스트코드를 개발할 때는 naggy 모드를 사용하는 것입니다. (다만, 현재 gMock은 naggy모드가 기본설정이긴 합니다.) 그리고 strict 모드는 필요한 경우에 한번씩 점검용으로 사용하기 바랍니다.
+마지막으로 naggy 모드, strict 모드는 테스트가 자주 실패하게 하고 유지보수를 어렵게 만들기도 하기 때문에 **주의**해서 사용해야 합니다. 예를 들어, 코드의 외부는 그대로 두고 내부적인 동작에 대해서만 refactoring하는 경우라면 테스트코드는 수정하지 않는 것이 이상적입니다. 그러나 naggy 모드로 설정되어 있다면 이러한 내부적인 수정에 대해서도 많은 warning들이 발생 할 것입니다. 게다가 strict 모드라면 아예 테스트가 실패하기 때문에 테스트코드의 유지보수 비용이 증가될 것입니다. 이를 위해 추천드리는 방법은 일반적인 상황에서는 nice 모드을 주로 사용하고 테스트코드를 개발할 때는 naggy 모드를 사용하는 것입니다. (다만, 현재 gMock은 naggy모드가 기본설정이긴 합니다.) 그리고 strict 모드는 필요한 경우에 한번씩 점검용으로 사용하기 바랍니다.
 
 #### 기존코드에 영향을 주지 않고, interface를 단순하게 만들기 ####
 
-아래처럼 argument의 개수가 아주 많은 method를 mocking해야할 때가 있습니다. 이런 method는 테스트코드도 매우 복잡하게 구현될 것입니다. 이런 경우에는 테스트의 목적을 달성하는 과정에서 크게 중요하지 않은 argument들은 걸러냄으로써 interface를 보다 단순하게 만들 수 있습니다.
+아래처럼 argument의 개수가 아주 많은 method를 mocking한다면 테스트코드가 매우 복잡해 질 것입니다. 이런 경우에는 테스트의 목적을 달성하는 과정에서 크게 중요하지 않은 argument들은 걸러냄으로써 interface를 보다 단순하게 만들 수 있습니다.
 
 ```cpp
 class LogSink {
@@ -338,7 +338,7 @@ class LogSink {
 };
 ```
 
-이렇게 argument가 많아지면 사용하는데에 어려움을 겪게 됩니다. 위의 `send()`는 argument도 많고 게다가 `message`로 전달되는 문자열이 길어지면 소스코드 해석이 매우 어려워 질 것입니다. 이러한 method에는 mock을 적용하는 것도 어렵습니다. 어떻게 해야할까요?
+위의 `send()`는 argument도 많고 게다가 `message`라는 argument는 문자열이기 때문에 문자일이 길어지면 길어질수록 소스코드를 해석하기가 어려워질 것입니다. 이러한 method에는 mock을 적용하는 것도 어렵습니다. 그렇다면 어떻게 해야할까요?
 
 방법은 간단한 mock method를 하나 만들고 이것을 `send()`의 내부에서 호출하도록 구현하는 것입니다.
 
@@ -365,22 +365,22 @@ class ScopedMockLog : public LogSink {
 };
 ```
 
-위의 코드는 `send()`의 argument가 너무 많고 복잡하기 때문에 `Log()`라는 mock method를 만들어서 `send()`로부터 관심대상이 되는 3개의 argument만 전달받도록 구현한 것입니다. 물론, 어디까지나 `Log()`가 전달받는 3개의 argument를 제외한 나머지는 관심대상이 아니기에 가능한 일입니다. 마지막으로 `Log()`에 expectation을 설정하면 됩니다. `send()`를 mocking하는 것보다 간결하게 테스트코드를 구현할 수 있습니다.
+위의 코드는 `send()`의 argument가 너무 많고 복잡하기 때문에 `Log()`라는 mock method를 새로 만들어서 `send()`로부터 관심대상이 되는 3개의 argument만 전달받도록 구현한 것입니다. 물론, 어디까지나 `Log()`가 전달받는 3개의 argument를 제외한 나머지는 관심대상이 아니기에 가능한 일입니다. 마지막으로 `Log()`에 expectation을 설정하면 됩니다. 이런 방법을 통해 `send()`를 mocking하는 것보다 간결하게 테스트코드를 구현할 수 있습니다.
 
 동일한 방법을 overloaded function을 mocking할 때에도 적용할 수 있습니다.
 
 ```c++
 class MockTurtleFactory : public TurtleFactory {
  public:
-  Turtle* MakeTurtle(int length, int weight) override { ... }
-  Turtle* MakeTurtle(int length, int weight, int speed) override { ... }
+  Turtle* MakeTurtle(int length, int weight) override { DoMakeTurtle(); }
+  Turtle* MakeTurtle(int length, int weight, int speed) override { DoMakeTurtle(); }
 
   // the above methods delegate to this one:
   MOCK_METHOD(Turtle*, DoMakeTurtle, ());
 };
 ```
 
-위의 코드는 `MakeTurtle()` 중 어느것이 호출되더라도 내부에서 `DoMakeTurtle()`을 호출하도록 구현한 것입니다. (`MakrTurtle()`의 내부구현은 생략되어 있지만) 그런 후에는 `DoMakeTurtle()`을 mocking하면 됩니다. 즉, overloaded `MakeTurtle()` 중에서 어떤 것이 호출되더라도 사용자가 원하는 방식으로 `Turtle` class의 object를 생성하도록 지정할 수 있습니다. 아래는 `DoMakeTurtle()`이 원하는 action을 수행하도록 지정하는 코드입니다. `MakeMockTurtle()`의 구현부가 생략되어 있지만 이름에서 알 수 있듯이 `Turtle` class의 object를 생성해주는 action을 의미합니다.
+위의 코드는 `MakeTurtle()` 중 어느것이 호출되더라도 내부에서 `DoMakeTurtle()`을 호출하도록 구현한 것입니다. 그렇게 되면 `DoMakeTurtle()`만 mocking해도 원하는 목적을 달성할 수 있습니다. 즉, overloaded `MakeTurtle()` 중에서 어떤 것이 호출되더라도 `DomMakeTurtle()`을 호출하기 때문에 `DoMakeTurtle()`만 원하는 action을 수행하도록 지정하면 됩니다. `MakeMockTurtle()`의 구현부가 생략되어 있지만 이름에서 알 수 있듯이 `Turtle` class의 object를 생성해주는 action을 의미합니다.
 
 ```c++
 ON_CALL(factory, DoMakeTurtle)
