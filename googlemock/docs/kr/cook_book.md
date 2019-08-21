@@ -372,15 +372,17 @@ class ScopedMockLog : public LogSink {
 ```c++
 class MockTurtleFactory : public TurtleFactory {
  public:
-  Turtle* MakeTurtle(int length, int weight) override { DoMakeTurtle(); }
-  Turtle* MakeTurtle(int length, int weight, int speed) override { DoMakeTurtle(); }
+  Turtle* MakeTurtle(int length, int weight) override { return DoMakeTurtle(); }
+  Turtle* MakeTurtle(int length, int weight, int speed) override { return DoMakeTurtle(); }
 
   // the above methods delegate to this one:
   MOCK_METHOD(Turtle*, DoMakeTurtle, ());
 };
 ```
 
-위의 코드는 `MakeTurtle()` 중 어느것이 호출되더라도 내부에서 `DoMakeTurtle()`을 호출하도록 구현한 것입니다. 그렇게 되면 `DoMakeTurtle()`만 mocking해도 원하는 목적을 달성할 수 있습니다. 즉, overloaded `MakeTurtle()` 중에서 어떤 것이 호출되더라도 `DomMakeTurtle()`을 호출하기 때문에 `DoMakeTurtle()`만 원하는 action을 수행하도록 지정하면 됩니다. `MakeMockTurtle()`의 구현부가 생략되어 있지만 이름에서 알 수 있듯이 `Turtle` class의 object를 생성해주는 action을 의미합니다.
+위의 코드의 모든 `MakeTurtle()`(overloaded method)들은 최종적으로는 `DoMakeTurtle()`을 호출하고 있습니다. 따라서 `DoMakeTurtle()`라는 method만 mocking하면 모든 overloaded method들이 동일하게 동작하도록 만들 수 있습니다.
+
+이제 `DoMakeTurtle()`의 action만 아래와 같은 방법으로 지정하면 끝입니다. `MakeMockTurtle()`의 구현부는 생략되었지만 이름에서 알 수 있듯이 `Turtle` object를 생성해주는 action을 의미합니다.
 
 ```c++
 ON_CALL(factory, DoMakeTurtle)
@@ -389,36 +391,36 @@ ON_CALL(factory, DoMakeTurtle)
 
 #### Concrete Classe Mocking 하기, 그리고 대안 ####
 
-상위 interface가 없는 class를 바로 mocking 해야하는 상황도 당연히 발생할 수 있습니다. 이러한 class들을 `Concrete`라고 부르겠습니다. 이러한 `Concrete` class는 어떻게 mocking해야 할까요? 지금까지 공부한 내용을 기반으로 하면 먼저 `Concrete` class에 포함된 method를 virtual function으로 만들고 다음으로 `Concrete` class를 상속받는 mock class를 만들면 될 것 같습니다.
+상위 interface가 없는 class를 바로 mocking 해야하는 상황도 발생할 수 있습니다. 이러한 class들을 `Concrete`라고 부르겠습니다. 이러한 `Concrete` class는 어떻게 mocking해야 할까요? 지금까지 공부한 내용을 기반으로 하면 먼저 `Concrete` class에 포함된 method를 virtual function으로 만들고 다음으로 `Concrete` class를 상속받는 mock class를 만들면 될 것 같습니다.
 
 그러나 그렇게 하면 안됩니다.
 
 왜냐하면 non-virtual function을 virtual function으로 만드는 것은 설계상의 큰 변화이며 class의 동작도 달라지기 때문입니다. Class invariants를 제어하기가 힘들어질 것입니다. 단순히 mocking을 위한 목적으로 그렇게 수정하는 것은 좋지 않습니다. Non-virtual function을 virtual function으로 바꾸고 derived class에서 override하는 구조로 변경할 때에는 타당한 이유가 있어야 합니다.
 
-그럼 어떻게 할까요? `Concrete` class를 직접 mocking하는 것도 좋지 않습니다. 왜냐하면 제품코드와 테스트코드간의 coupling이 증가되기 때문입니다. 예를 들어 `Concrete` class에 작은 수정이 발생할 때마다 mock class가 제대로 동작하는지 확인해야 하기 때문에 유지보수 비용이 상당히 증가할 것입니다.
+그럼 어떻게 할까요? `Concrete` class를 직접 mocking하는 것도 좋지 않습니다. 왜냐하면 제품코드와 테스트코드 간의 coupling이 증가되기 때문입니다. 예를 들어 `Concrete` class에 작은 수정이 발생할 때마다 mock class가 제대로 동작하는지 확인해야 하기 때문에 유지보수 비용이 상당히 증가할 것입니다.
 
-사실 이러한 coupling 때문에 많은 개발자들이 interface를 선호합니다. 지금처럼 테스트코드를 구현하기 위한 경우가 아니더라도 `Concrete` class를 사용하는 것은 coupling 문제를 야기하곤 합니다. 이제 답을 드리면 `Concrete` class를 직접 사용하기보다는 interface를 하나 만들어서 `Concrete`의 adapter처럼 사용하기를 추천합니다. Interface는 항상 virtual function만 정의되어 있기 때문에 mocking 측면에서 유리하며 상술한 것처럼 꼭 테스트코드를 구현하기 위한 목적이 아니더라도 좋은 설계가 될 것입니다.
+사실 이러한 coupling 때문에 많은 개발자들이 interface를 선호합니다. 꼭 테스트코드를 위해서가 아니더라도 `Concrete` class를 사용하는 것은 coupling 문제를 야기하는 원인 중에 하나입니다. 이제 답을 드리면 `Concrete` class를 직접 사용하기보다는 interface를 하나 만들어서 `Concrete`의 adapter처럼 사용하기를 추천합니다. Interface는 항상 virtual function만 정의되어 있기 때문에 mocking 측면에서 유리하며 상술한 것처럼 꼭 테스트코드를 구현하기 위한 목적이 아니더라도 좋은 설계가 될 것입니다.
 
-물론, interface를 사용하는 것은 몇 가지 overhead를 발생시키긴 합니다.
+물론, interface를 사용하는 것이 몇 가지 overhead를 발생시키긴 합니다.
 
-- Virtual function call 에 대한 비용이 추가됩니다. (대부분의 경우에 문제가 안됩니다.)
+- Virtual function call 에 대한 비용이 추가됩니다. (그러나 대부분의 경우에는 미미합니다.)
 - 개발자들이 공부해야할 내용(추상화 계층)이 추가됩니다.
 
 그러나 그와 동시에 testability 관점에서는 많은 장점이 있습니다.
 
-- 먼저, `Concrete` class의 API들이 사용자가 원하는 방향과는 딱 맞지 않을수도 있습니다. 왜냐하면 대부분의 경우에 특정한 사용자만을 위해 API를 설계하지는 않기 때문입니다. 이런 경우에는 `Concrete` class를 위한 interface를 내부적으로 만들어서 사용하면 어떨까요? 단순히 조금 변경하는 것을 넘어 상위수준의 기능을 추가할 수도 있고, 아예 이름을 변경할 수도 있을 것입니다. 이렇듯  interface를 사용하게 되면 코드의 가독성, 유지보수성, 생산성이 향상됩니다.
-- `Concete` class의 내부구현을 수정할때 연관된 곳들을 수정할 필요가 없어집니다. Inteface만 그대로 유지한다면 기존의 코드들은 이러한 변화로부터 안전하게 보호될 것입니다.
+- 먼저, `Concrete` class의 API가 사용자가 원하는 방향과는 딱 맞지 않을수도 있습니다. 왜냐하면 `Concrete` class는 너무 구체화된 api들이 포함되어 있기 때문에 그것을 재사용하는 입장에서는 약간씩 수정해야 할 부분들이 생기기 때문입니다. 이런 경우에는 `Concrete` class를 위한 자신만의 interface를 만들어보면 어떨까요? 그렇게 되면 단순히 조금 변경하는 것을 넘어 상위수준의 기능을 추가할 수도 있고, 아예 이름을 변경할 수도 있을 것입니다. 계속해서 얘기하는 것처럼 interface를 사용하게 되면 코드의 가독성, 유지보수성, 생산성이 향상됩니다.
+- `Concete` class의 내부구현을 수정할 때 coupling에 의한 영향이 줄어듭니다. Inteface만 그대로 유지한다면 기존의 코드들은 이러한 변화로부터 안전하게 보호될 것입니다.
 
-누군가는 이러한 방법이 중복된 코드를 만드는 부분에 대해 우려하기도 합니다. 물론, 이러한 걱정도 충분히 이해가 갑니다. 다만, 아래 2가지 이유를 읽어보면 걱정은 사라질 것입니다.
+위와 같은 방법이 어느정도의 중복된 코드를 만들기 때문에 부정적인 시각도 존재합니다. 물론, 이러한 걱정도 충분히 이해가 갑니다. 다만, 아래 2가지 이유를 읽어보면 걱정은 사라질 것입니다.
 
-- 다양한 프로젝트에서 `Concrete` class를 가져다가 사용한다고 해봅시다. 각각의 프로젝트는 `Concrete` class를 사용하기 위해 기존 소스코드를 필연적으로 수정하게 됩니다. 이렇게 `Concrete` class를 사용하기 위해 원래 코드를 수정하는 것은 domain-specific한 interface를 정의하는 것과 다르지 않습니다.
+- 다양한 프로젝트에서 `Concrete` class를 가져다가 사용한다고 해봅시다. 각각의 프로젝트는 `Concrete` class를 사용하기 위해 기존 소스코드를 필연적으로 수정하게 됩니다. 이렇게 `Concrete` class를 사용하기 위해 원래 코드를 수정하는 것은 domain-specific한 interface를 정의하는 것과 사실상 다르지 않습니다. 오히려 수정량의 총합은 더 많을 수도 있습니다.
 - 여러개의 프로젝트가 동일한 interface를 사용하고자 할 때는 언제든 공유할 수 있습니다. `Concrete` class를 공유하는 것과 하나도 다르지 않습니다. Interface나 adatptor를 만들어서 `Concrete` class 근처에 저장하고 여러 프로젝트들이 사용하도록 하기만 하면 됩니다.
 
-어떤 방법이든 찬성과 반대의견을 잘 따져보는 것은 중요합니다. 다만, 여기서 설명한 interface를 사용하는 기술은 다양한 상황에서 적용가능하며 Java community에서 긴 시간에 걸쳐 효율성이 입증된 방법임을 말씀드립니다. 
+어떤 방법이든 찬성과 반대의견을 잘 따져보는 것은 중요합니다. 다만, 여기서 설명한 interface를 사용하는 기술은 다양한 상황에서 적용가능하며 Java community에서 긴 시간에 걸쳐 효율성이 입증된 방법임을 말씀드립니다.
 
 #### Fake class에 위임하기 ####
 
-어떤 interface를 위한 fake class를 구현해서 테스트를 비롯한 다양한 용도로 사용하는 개발자들이 많이 있습니다. 이렇게 이미 fake class를 잘 사용하고 있는 경우에 굳이 mock class가 필요할까요? 어디까지나 상황에 따라 사용자가 선택해야 합니다. 다만, gMock의 좋은 점은 mock class를 사용하더라도 기존에 사용하던 fake class 역시 그대로 사용할 수 있다는 것입니다. 즉, 양자간에 자유롭게 선택할 수 있습니다.
+어떤 interface를 위한 fake class를 구현해서 테스트를 비롯한 다양한 용도로 사용하는 개발자들이 많이 있습니다. 이렇게 이미 fake class를 잘 사용하고 있는 경우에 굳이 mock class를 새로 만들 필요가 있을까요? 사실 정답은 없으며 상황에 따라 사용자가 선택해야 합니다. 다만, gMock의 좋은 점은 mock class를 통해서 기존에 사용하던 fake class도 사용할 수 있다는 것입니다. 즉, mock class는 fake class를 포함할 수 있습니다.
 
 ```cpp
 class Foo {
@@ -470,7 +472,7 @@ class MockFoo : public Foo {
 
 위의 코드를 보면 `MockFoo` class를 만드는 방법은 일반적인 mock class 생성방법과 다르지 않습니다. 다만, `DoThis()`, `DoThat()` 함수의 기본동작을 `FakeFoo` object로 위임하는 부분이 추가되었습니다.
 
-`MockFoo` class를 실제로 사용하는 예제는 아래에 있습니다. `TEST()`의 시작 시점에 `DelegateToFake()`를 호출함으로서 `action`을 다시 지정하지 않는 한, `FooFake`에 정의된 function들이 실행되도록 했습니다.
+`MockFoo` class를 실제로 사용하는 예제는 아래에 있습니다. `TEST()`의 시작 시점에 `foo.DelegateToFake()`를 호출함으로서 `FooFake`에 정의된 fake function들을 기본 action으로 사용하게 됩니다.
 
 ```cpp
 using ::testing::_;
@@ -495,10 +497,10 @@ TEST(AbcTest, Xyz) {
 
 **팁 공유:**
 
-  * 원한다면 얼마든지 mock function의 동작을 다시 변경할 수 있습니다. 즉, 시작부분에서 `DelegateToFake()` 함수를 통해서 default action을 지정했지만 개별 `TEST()`에서 `ON_CALL()` 또는 `EXPECT_CALL()`를 사용하면 자유롭게 변경할 수 있습니다.
-  * `DelegateToFake()` 함수에서 굳이 모든 fake 함수를 지정할 필요는 없고 원하는 것만 선택적으로 지정하면 됩니다.
-  * 여기서 논의된 방법들은 overloaded method에도 적용될 수 있습니다. 물론 compiler에 어떤 것을 사용할지는 알려줘야 합니다. 먼저, mock function에 대한 모호성 해결방법은 이 문서의 [Selecting Between Overloaded Functions](cook_book.md#여러개의-overloaded-function-중에서-선택하기) 부분을 참고하세요. 다음으로 fake function에 대한 모호성 해결방법은 `static_cast`를 사용하면 됩니다. 예를 들어 `Foo` class에 `char DoThis(int n)`, `bool DoThis(double x) const` 라는 2개의 overloaded function이 있다고 합시다. 이 상황에서 후자인 `bool DoThis(double x) const`를 invoke 대상으로 지정하고 싶다면 `Invoke(&fake_, static_cast<bool (FakeFoo::*)(double) const>(&FakeFoo::DoThis)`와 같이 사용하면 됩니다. `static_cast` 를 사용해 fuction pointer type을 명확하게 지정한 것입니다.
-  * 지금까지 mock, fake를 함께 사용하기 위한 방법을 설명했습니다. 그러나 사실 mock, fake를 함께 사용하는 경우가 발생했다면 해당 소프트웨어의 설계가 뭔가 잘못되었음을 의미하는 것이기도 합니다. 아마도 사용자가 interaction-based testing 방법론에 아직 익숙하지 않은 경우일 수 있습니다. 또는 대상 interface가 너무 많은 역할을 수행하고 있기 때문에 분리될 필요가 있을 수도 있습니다. 다시 말하면, **이 방법을 남용하지 않기를 바랍니다**. 어디까지나 refactoring에 필요한 하나의 과정 정도로 생각하면 좋을 것 같습니다.
+  * 원한다면 얼마든지 mock function의 동작을 변경할 수 있습니다. 예제에서는 `TEST()`의 시작부분에서 `foo.DelegateToFake()`를 호출함으로써 fake function들을 default action으로 지정하긴 했지만, 굳이 fake function을 사용하지 않겠다면 `ON_CALL()` 또는 `EXPECT_CALL()`를 사용해서 자유롭게 변경하면 되는 것입니다.
+  * `DelegateToFake()` 함수에서 굳이 모든 fake 함수를 지정할 필요는 없고 원하는 것만 선택적으로 지정해도 됩니다.
+  * 여기서 논의된 방법들은 overloaded method에도 적용될 수 있습니다. 물론 compiler에 어떤 것을 사용할지는 알려줘야 합니다. 먼저, mock function에 대한 모호성 해결방법은 이 문서의 [Selecting Between Overloaded Functions](cook_book.md#여러개의-overloaded-function-중에서-선택하기) 부분을 참고하세요. 다음으로 fake function에 대한 모호성 해결방법은 `static_cast`를 사용하면 됩니다. 예를 들어 `Foo` class에 `char DoThis(int n)`, `bool DoThis(double x) const` 라는 2개의 overloaded function이 있다고 합시다. 이 상황에서 후자인 `bool DoThis(double x) const`를 invoke 대상으로 지정하고 싶다면 `Invoke(&fake_, static_cast<bool (FakeFoo::*)(double) const>(&FakeFoo::DoThis)`와 같이 사용하면 됩니다. `static_cast`를 사용해 fuction pointer type을 명확하게 지정한 것입니다.
+  * 지금까지 mock, fake를 함께 사용하기 위한 방법을 설명했습니다. 그러나 사실 mock, fake를 함께 사용하는 경우가 발생했다면 해당 소프트웨어의 설계가 뭔가 잘못되었음을 의미하는 것이기도 합니다. 아마도 사용자가 interaction-based testing 방법론에 아직 익숙하지 않은 경우일 수 있습니다. 또는 대상 interface가 너무 많은 역할을 수행하고 있기 때문에 분리될 필요가 있을 수도 있습니다. 다시 말해서 **이 방법을 남용하지 않기를 바랍니다**. Mock, fake가 혼용되어야 한다면 설계를 먼저 리뷰해보는 것이 좋고, 이 방법은 어디까지나 refactoring을 위한 하나의 과정으로 생각하면 좋을 것 같습니다.
 
 Mock, fake가 함께 나타날 때, bad sign을 찾아내는 예제를 하나 공유하겠습니다. 예를 들어 `System` class라는 low-level system operation을 수행하는 class가 하나 있다고 합시다. 이 class는 파일처리와 I/O라는 2가지 기능에 특화되었다고 하겠습니다. 이 때, `System` class의 I/O기능만 테스트하고자 한다면 파일처리는 문제 없이 기본적인 동작만 해주면 될 것입니다. 그런데 I/O기능을 테스트하기 위해서 `System` class를 mock class로 만들게 되면 파일처리 기능까지 mocking이 되어 버립니다. 이렇게 되면 개발자가 fake class를 제공하던지 해서 파일처리 기능과 동일한 역할을 구현해줘야 하는 어려움이 발생합니다.
 
@@ -508,7 +510,7 @@ Mock, fake가 함께 나타날 때, bad sign을 찾아내는 예제를 하나 �
 
 테스트를 위해 testing double(mock, fake, stub, spy 등)을 사용할 떄의 문제는 동작이 real object와 달라질 수 있다는 것입니다. 물론 negative test를 위해서 일부러 다르게 만들기도 하지만, 때로는 실수로 인해 동작이 달라지기도 합니다. 후자의 경우라면 bug를 잡아내지 못하고 제품을 출시하는 것과 같은 문제가 발생하기도 합니다.
 
-이런 경우를 위해 *delegating-to-real* 이라고 불리는 기술을 사용할 수 있습니다. 즉, mock object가 real object와 동일하게 동작하게 만들어 주는 방법입니다. 사용법 자체는 바로 위에서 다룬 [delegating-to-fake](cook_book.md#fake-class에-위임하기) 와 매우 유사합니다. 다른 점이라면 fake object 대신 real object로 변경된 것 뿐입니다. 아래 예제를 확인하세요.
+이런 경우를 위해 *delegating-to-real*이라고 불리는 기술을 사용할 수 있습니다. 이는 mock object가 real object와 동일하게 동작하게 만들어 주는 방법입니다. 사용법 자체는 바로 위에서 다룬 [delegating-to-fake](cook_book.md#fake-class에-위임하기) 와 매우 유사합니다. 다른 점이라면 fake object 대신 real object로 변경된 것 뿐입니다. 아래 예제를 확인하세요.
 
 ```cpp
 using ::testing::AtLeast;
@@ -541,11 +543,11 @@ class MockFoo : public Foo {
   ... use mock in test ...
 ```
 
-이제 gMock을 통해 테스트코드에서 real object를 사용한 검증도 가능하게 되었습니다. 이러한 방법을 사용하면 테스트코드를 구현하는 입장에서도 제품코드의 품질을 높이는 입장에서도 매우 도움이 됩니다.
+이제 gMock을 통해 real object를 사용한 검증도 가능하게 되었습니다. 사실 real object를 사용하는 것은 독립적이고 빨라야 된다는 단위테스트의 특성과는 조금 거리가 있기도 합니다. 그러나 테스트코드를 통해서 real object와의 interaction도 확인할 수 있다는 점은 상황에 따라 매우 유용하게 사용할 수 있는 옵션이 될 것입니다.
 
 #### Base Class에 위임하기 ####
 
-이상적인 경우 interface(base class)는 pure virtual method만 가지는 것이 좋습니다. 다만, C++에서는 interface의 method가 실제 구현체를 가지고 것도 적법합니다. 아래 예제를 보겠습니다.
+이상적인 경우 interface(base class)는 pure virtual method만 가지는 것이 좋습니다. 다만, C++에서 interface의 method가 구현부를 가지는 것도 문법상 문제가 없습니다. 아래 예제를 보겠습니다.
 
 ```cpp
 class Foo {
@@ -565,9 +567,9 @@ class MockFoo : public Foo {
 };
 ```
 
-사용자가 `MockFoo`라는 mock class를 만들기는 했지만, interface에 있는 구현을 그대로 사용하고 싶은 method가 있을 수도 있습니다. 또는, 원래부터 특정 method만 mocking하려고 했고 나머지 method는 관심대상이 아니었을 수도 있습니다. 예제를 보면 `Foo::Concrete()`가 실제 구현부를 가지고 있으며 mocking이 필요한 대상은 아니라고 가정하겠습니다. 다만, 원래대로 동작하게 하려고 interface의 구현을 `MockFoo::Concrete`로 복사/붙여넣기 하는 것은 중복코드를 만들게 되므로 좋은 방법이 아닙니다. 이런 경우에는 interface(base class)로 위임하는 것이 좋습니다.
+사용자가 `MockFoo`라는 mock class를 만들기는 했지만 `Foo` interface에 있는 구현을 그대로 사용하고 싶은 method가 있을 수도 있습니다. 또는, 원래부터 특정 method만 mocking하려고 했고 나머지 method는 관심대상이 아니었을 수도 있습니다. 예제를 보면 `Foo::Concrete()`가 실제 구현부를 가지고 있습니다. 우리는 이 `Foo::Concrete()`가 구현부도 있고 관심대상도 아니라고 가정하겠습니다. 새롭게 action을 지정하지 않고 원래대로 동작하게 하고 싶다면 어떻게 해야 할까요? Interface에 있는 `Foo:Concrete()`의 구현부를 `MockFoo::Concrete`에다가 그대로 복사/붙여넣기 해야 할까요? 네, 그렇게하면 중복코드를 만들게 되므로 좋지 않습니다. 이런 경우에도 역시 위임하는 것이 좋습니다.
 
-C++에서 dervied class가 base class에 접근하기 위한 방법은 `Foo::Concrete()`와 같이 범위지정 연산자( `::` )를 사용하는 것입니다. 전체 예제는 아래와 같습니다.
+C++에서 dervied class가 base class에 접근하기 위한 방법은 `Foo::Concrete()`와 같이 범위지정 연산자( `::` )를 사용하는 것입니다. 아래 예제를 보겠습니다.
 
 ```cpp
 class MockFoo : public Foo {
@@ -606,7 +608,7 @@ class MockFoo : public Foo {
 
 #### 전달된 argument가 기대한 값과 일치하는지 확인하기 ####
 
-Matcher를 사용하면 mock method로 전달되는 argument가 정확히 어떤 값이기를 기대한다고 명세할 수 있습니다. 예를 들면, 아래에서 `DoThis()`로는 `5`가 전달되어야 하고, `DoThat()`은 `"Hello", bar`가 전달되기를 기대합니다.
+Matcher를 통해서 mock method로 전달되는 argument가 정확히 어떤 값이기를 기대한다고 명세할 수 있습니다. 예를 들면, 아래에서 `DoThis()`로는 `5`가 전달되어야 하고, `DoThat()`은 `"Hello"`와 `bar`가 전달되기를 기대합니다.
 
 ```cpp
 using ::testing::Return;
@@ -618,7 +620,7 @@ using ::testing::Return;
 
 #### 간단한 Matcher 사용하기 ####
 
-Matcher를 이용해서 전달되는 argument가 어떤 범위에 포함되길 원하는지 명세하는 것도 가능합니다. 아래에서 `DoThis()`는 `5`보다 큰 값이 전달되기를 기대하고, `DoThat()`은 첫번째 argument로 `"Hello"`, 그리고 두번째 argument로는 `Null`이 아닌 값을 기대한다고 명세하고 있습니다.
+Matcher를 통해서 전달되는 argument가 특정한 범위에 포함되어야 한다고 명세하는 것도 가능합니다. 아래에서 `DoThis()`는 `5`보다 큰 값이 전달되기를 기대하고, `DoThat()`은 첫번째 argument로 `"Hello"`, 그리고 두번째 argument로는 `Null`이 아닌 값을 기대한다고 명세하고 있습니다.
 
 ```cpp
 using ::testing::Ge;
@@ -631,7 +633,7 @@ using ::testing::Return;
       // The second argument must not be NULL.
 ```
 
-또한, 어떤 값이라도 허용한다는 의미를 가지는 `_` 는 자주 사용하는 matcher 중에 하나 입니다.
+또한, 어떤 값이라도 허용한다는 의미를 가지는 `_`는 자주 사용하는 matcher 중에 하나 입니다.
 
 ```cpp
 EXPECT_CALL(foo, DoThat(_, NotNull()));
@@ -661,15 +663,15 @@ using ::testing::Not;
 
 gMock의 matcher는 정적으로 타입을 결정합니다. 즉, compile time에 타입을 검사해서 잘못된 부분을 알려준다는 의미입니다. 예를 들어 `Eq(5)`인 곳에 `string`을 전달하면 compile error가 발생하게 됩니다.
 
-단, 이러한 타입검사가 완벽하게 철저하다고는 할 수 없습니다. 만약에 `long`을 위한 matcher에 `int`가 전달되면 어떻게 될까요? 네, 잘 동작합니다. 왜냐하면 `int`가 `Matcher<long>`을 만나면 `int`가 `long`으로 먼저 변환된 후에 matcher에 전달되기 때문입니다. 즉, 암시적으로 타입변환이 일어납니다.
+단, 이러한 타입검사가 완벽하게 철저하다고는 할 수 없습니다. 만약에 `long`을 위한 matcher에 `int`가 전달되면 어떻게 될까요? 네, 잘 동작합니다. 왜냐하면 `int`가 `Matcher<long>`을 만나면 `long`으로 먼저 변환된 후에 matcher에 전달되기 때문입니다. 즉, 암시적으로 타입변환이 일어납니다.
 
-이러한 암시적 변환을 원하지 않는 경우에는, gMock의 `SafeMacherCast<T>(m)`을 사용할 수 있습니다. 이 기능은 `m`이라는 matcher를 받아서 `Matcher<T>` 타입으로 변환해 주는데, 이 때 안전한 타입변환을 보장하기 위해서 gMock은 아래 내용들을 검사합니다. (matcher가 전달받은 타입을 `U`라고 가정합니다)
+이러한 암시적 변환을 원하지 않는 경우에는, gMock의 `SafeMacherCast<T>(m)`를 사용할 수 있습니다. 이 기능은 `m`이라는 matcher를 받아서 `Matcher<T>` 타입으로 변환해 주는데 이 때 안전한 타입변환을 보장하기 위해서 gMock은 아래 내용들을 검사합니다.(matcher가 전달받은 타입을 `U`라고 가정합니다)
 
 1. 타입 `T`가 타입 `U`로 암시적으로 변환 가능한지
 2. `T`와 `U`가 모두 산술타입(`bool`, `int`, `float` 등)일 때, `T` 에서 `U`로 변하는 과정에 손실이 없는지
 3. `U`가 참조타입일 때, `T`도 참조타입인지
 
-위 조건들 중 하나라도 만족하지 않으면 compile error가 발생합니다.
+위 조건들 중 하나라도 만족하지 않으면 compile error가 발생할 것입니다.
 
 아래 예제를 확인하세요.
 
@@ -691,15 +693,15 @@ class MockFoo : public Foo {
   EXPECT_CALL(foo, DoThis(SafeMatcherCast<Derived*>(m)));
 ```
 
-`SafeMatcherCast<T>(m)`의 타입검사가 너무 엄격해서 사용하기 어려운 경우에는 이와 유사한 `MatcherCast<T>(m)`을 사용할 수도 있습니다. 차이점이라면 `MatcherCast`는 `T`에서 `U`로의 `static_cast`가 가능한 경우에 한해서 matcher의 타입변환을 허용해준다는 점입니다. 즉, 타입검사가 좀 더 느슨하다고 할 수 있습니다.
+`SafeMatcherCast<T>(m)`의 타입검사가 너무 엄격해서 사용하기 어려운 경우에는 이와 유사한 `MatcherCast<T>(m)`을 사용할 수도 있습니다. 차이점이라면 `MatcherCast`는 `T`에서 `U`로의 `static_cast`가 가능한 경우라면 matcher의 타입변환도 허용해준다는 점입니다. 즉, 타입검사가 약간 더 느슨하다고 할 수 있습니다.
 
-`MatcherCast`는 자동적으로 C++의 타입검사 기능(`static_cast` 등)를 사용하게 합니다. 다만, `static_cast` 과 같은 C++ 타입검사는 변환과정에서 정보를 없애버리기도 하기 때문에 남용/오용하지 않도록 주의해야 합니다.
+`MatcherCast`는 자동적으로 C++의 타입검사 기능(`static_cast` 등)를 사용하게 합니다. 다만, `static_cast`와 같은 C++ 타입검사는 변환과정에서 정보를 없애버리기도 하기 때문에 남용/오용하지 않도록 주의해야 합니다.
 
 #### 여러개의 Overloaded Function 중에서 선택하기 ####
 
 Overloaded function 중에서 하나를 선택하고 싶은 경우가 있을 것입니다. 이 때에는 모호성을 없애기 위해서 compiler에게 관련 내용을 알려줄 필요가 있습니다.
 
-먼저, const-ness overloading에 대한 모호성 제거방법은 `Const()` 를 사용하는 것입니다. gMock에서 `Const(x)`는 `x`의 `const`참조를 반환하게 되어 있습니다. 사용법은 아래 예제를 참조하십시오.
+먼저, const-ness overloading에 대한 모호성 제거방법은 `Const()`를 사용하는 것입니다. gMock에서 `Const(x)`는 `x`의 `const` 참조를 반환하게 되어 있습니다. 사용법은 아래 예제를 참조하십시오.
 
 ```cpp
 using ::testing::ReturnRef;
@@ -748,7 +750,7 @@ TEST(PrinterTest, Print) {
 
 #### Argument에 따라 다른 Action을 실행하기 ####
 
-Mock method가 호출되면, 소스코드 상에서 제일 *밑에 있는* expectation부터 탐색합니다. (물론 해당 expectation은 active 상태여야 합니다.) 이러한 동작방식은 [여기](for_dummies.md#여러개의-expectations-사용하기) 에서 설명된 적이 있습니다. 이러한 규칙을 이용하면 argument로 전달되는 값에 따라 다른 action이 수행되도록 지정하는 것도 가능합니다.
+Mock method가 호출되면, 소스코드 상에서 제일 *밑에 있는* expectation부터 탐색합니다.(물론 해당 expectation은 active 상태여야 합니다.) 이러한 동작방식은 [여기](for_dummies.md#여러개의-expectations-사용하기) 에서 설명된 적이 있습니다. 이러한 규칙을 이용하면 argument로 전달되는 값에 따라 다른 action이 수행되도록 지정하는 것도 가능합니다.
 
 ```cpp
 using ::testing::_;
@@ -767,7 +769,7 @@ using ::testing::Return;
 
 #### Argument 간의 관계 비교하기 ####
 
-지금까지는 argument 하나하나에 대한 matcher사용법을 다뤘습니다. 그러나 "첫번째 argument가 두번째 argument보다 작아야 된다." 와 같이 argument 간의 관계를 비교하고 싶은 경우도 있을 것입니다. 이런 경우에는 `With()` 를 사용하면 원하는 조건을 비교할 수 있습니다.
+지금까지는 argument 하나하나에 대한 matcher 사용법을 주로 다뤘습니다. 그럼 "첫번째 argument가 두번째 argument보다 작아야 된다." 와 같이 argument 간의 관계를 비교하고 싶은 경우에는 어떻게 해야할까요? 이런 경우에는 `With()` 를 사용하면 원하는 조건을 비교할 수 있습니다.
 
 ```cpp
 using ::testing::_;
@@ -800,11 +802,11 @@ using ::testing::Lt;
 
 `With`를 쉽게 사용하기 위해서 gMock의 일부 matcher들은 2-tuples 타입을 지원하고 있습니다. 위 예제의 `Lt()`도 그 중 하나입니다. 2-tuples를 지원하는 matcher의 전체목록은 [여기](cheat_sheet.md#multi-argument-matchers)를 참조하시기 바랍니다.
 
-만약 `.With(Args<0, 1>(Truly(&MyPredicate)))`와 같이 직접 만든 predicate를 사용하고 싶은 경우에는 해당 predicate의 argument가 `::testing::tuple` 타입으로 선언되어 있어야만 합니다. 왜냐하면 gMock이 `Args<>`를 통해 선택된 argument들을 1개의 tuple형태로 변환해서 predicate으로 전달하기 때문입니다.
+만약 `.With(Args<0, 1>(Truly(&MyPredicate)))`와 같이 직접 만든 predicate를 사용하고 싶은 경우에는 해당 predicate의 argument가 `::testing::tuple` 타입으로 선언되어 있어야만 합니다. 왜냐하면 gMock이 `Args<>`를 통해 선택된 argument들을 1개의 tuple 형태로 변환해서 predicate으로 전달하기 때문입니다.
 
 #### Matcher를 Predicate처럼 사용하기 ####
 
-이미 눈치챘겠지만 사실 matcher는 predicate의 확장판(출력문이 잘 정의된)이라고 볼 수 있습니다. 현재 C++ STL의 `<algorithm`> 을 포함해서 많은 algorithm들이 predicate를 argument로 받을 수 있게 구현되어 있습니다. 따라서 predicate의 확장판인 matcher도 그러한 내용을 지원하는 것이 맞을 것입니다.
+이미 눈치챘겠지만 사실 matcher는 predicate의 확장판(출력문이 잘 정의된)이라고 볼 수 있습니다. 현재 C++ STL의 `<algorithm>`을 포함해서 많은 algorithm들이 predicate를 argument로 받을 수 있게 구현되어 있습니다. 따라서 predicate의 확장판인 matcher도 그러한 내용을 지원하는 것이 맞을 것입니다.
 
 다행히도 matcher로 unary predicate functor를 대체할 수 있습니다. 아래 예제와 같이 `Matches()`를 이용해 matcher를 감싸주기만 하면 됩니다.
 
@@ -821,7 +823,7 @@ vector<int> v;
 const int count = count_if(v.begin(), v.end(), Matches(Ge(10)));
 ```
 
-gMock에서는 matcher들을 여러개 조합하는 것이 쉽게 가능했습니다. 이것은 여기서도 그대로 적용됩니다. 예를 들어 `x>=0, x<=100, x!=50`를 조합하는 방법도 아래와 같이 간단합니다. 동일한 작업을 C++ STL의 `<functional>`을 통해 구현하려면 상당히 어려운 작업이 될 것입니다.
+gMock에서는 matcher 여러개를 조합하는 것이 쉽게 가능합니다. 예를 들어 `x>=0, x<=100, x!=50`를 조합하는 방법도 아래처럼 간단합니다. 동일한 작업을 C++ STL의 `<functional>`을 통해 구현하려면 상당히 어려운 작업이 될 것입니다.
 
 ```cpp
 using testing::AllOf;
